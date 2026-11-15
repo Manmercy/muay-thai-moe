@@ -254,7 +254,7 @@ const MASTERY_AT=13,MK=2,CK=3.5;
 function mastery(f){if(f.camp!=="player")return 0;const v=styleVal(f,mainStyle(f));return v<MASTERY_AT?0:.3+.7*clamp((v-MASTERY_AT)/4,0,1);}
 function fightSide(f,plan,rng){const sk=skillMods(f);{const m=mastery(f)*MK,s=mainStyle(f);if(m){if(s==="defense"){sk.evade+=.04*m;sk.ctr+=.06*m;sk.ctrDmg+=.25*m;}else{const w=s;sk.hit[w]=(sk.hit[w]||0)+.05*m;sk.dmg[w]=(sk.dmg[w]||0)+.2*m;sk.pts[w]=(sk.pts[w]||0)+.1*m;}}}if(f.aura)sk.evade+=f.aura*.5;const gr=f.grit||0;if(gr)sk.evade+=gr*.4;
   return {f,id:f.id,name:f.name,plan,instr:"none",hp:100-(f.injury?15:0)+Math.round(gr*30),sta:clamp(100-f.fatigue*.4,40,100),pts:0,rpts:0,kd:0,cuts:0,
-    thrown:0,landed:0,dmgDealt:0,legs:0,tac:{focus:"auto",pace:"steady",target:"head"},sk,prep:(f.prepBonus?.04:0)+(f.counterPrep?.05:0)+sk.prep+(f.aura||0)+(f.grit||0)+(f.camp==="player"?(f.facPrep||0):0),counterPrep:!!f.counterPrep,mor:(f.morale-60)/400+sk.mor,wl:{punch:0,kick:0,knee:0,elbow:0}};
+    thrown:0,landed:0,dmgDealt:0,legs:0,tac:{focus:"auto",pace:"steady",target:"head"},sk,prep:(f.prepBonus?.04:0)+(f.counterPrep?.05:0)+sk.prep+(f.aura||0)+(f.grit||0)+(f.labPrep||0)+(f.camp==="player"?(f.facPrep||0):0),counterPrep:!!f.counterPrep,mor:(f.morale-60)/400+sk.mor,wl:{punch:0,kick:0,knee:0,elbow:0}};
 }
 function aiPlan(f,opp,rng){
   const a=f.a;const opts=[["balanced",1],["pressure",(a.punch+a.elbow+a.power)/30],["counter",(a.counter+a.iq)/22],["outside",(a.kick+a.foot)/22],["clinch",(a.knee+a.clinch)/22]];
@@ -386,7 +386,7 @@ function quickFight(fa,fb,seed,rounds,tacA){const F=newFight(fa,fb,{seed,rounds}
 // ---------- WORLD ----------
 const TIER={local:{name:"Subdistrict",win:4000,lose:2000,rep:1.5},district:{name:"District",win:9000,lose:4500,rep:3},
   semi:{name:"Provincial semi",win:18000,lose:8000,rep:4},final:{name:"Provincial final",win:50000,lose:20000,rep:8},exhibition:{name:"Temple fair fight",win:2500,lose:1500,rep:.5},pro:{name:"Opening-night temple fair bout",win:1500,lose:1000,rep:.5,off:1},evloy:{name:"Loy Krathong Riverside Brawl",win:0,lose:0,rep:.3,off:1},special:{name:"Special cross-division bout",win:8000,lose:4000,rep:2},
-  quest:{name:"Off-the-books fight",win:0,lose:0,rep:.4,off:1},dm:{name:"Death Match",win:0,lose:0,rep:.5,off:1},beast:{name:"Wild bout",win:7000,lose:2500,rep:1,off:1}};
+  quest:{name:"Off-the-books fight",win:0,lose:0,rep:.4,off:1},dm:{name:"Death Match",win:0,lose:0,rep:.5,off:1},beast:{name:"Wild bout",win:7000,lose:2500,rep:1,off:1},lab:{name:"Vector Gym Challenge",win:18000,lose:8000,rep:3}};
 function stageOf(w){return w<=20?"local":w<=40?"district":w<=50?"final":"off";}
 const STAGE_NAME={local:"Subdistrict round",district:"District round",final:"Provincial final",off:"Year end"};
 
@@ -454,7 +454,7 @@ function fireStaff(G,k){G.staff=(G.staff||[]).filter(x=>x!==k);G.fac.assistants=
 function fixSave(G){if(G&&G.flags&&G.flags.beat_ploy&&G.flags.beatS_ploy==null)G.flags.beatS_ploy=G.season||1; /* v1.59: old saves that already beat Ploy keep it */if(G&&G.coachAway&&G.coachAway-G.week>4)G.coachAway=null; /* v1.55.1: a leave from last year must not carry into the new year */
 if(G.F)for(const id in G.F){const f=G.F[id];if(f&&hasTree(id)&&!f.spv){f.sp=(f.sp||0)+2*Math.max(0,(f.lvl||1)-1);f.spv=2;}}G.fac=G.fac||{};for(const k of Object.keys(FACILITIES))G.fac[k]=G.fac[k]||0;G.fac.daeng=G.fac.daeng||1;
   if(!G.staff){G.staff=["nok","paeng"].slice(0,G.fac.assistants||0);}G.fac.assistants=G.staff.length;
-  if(G.stu==null)G.stu=Math.min(studentCap(G),studentDemand(G));G.mail=G.mail||[];G.cal=G.cal||[];return G;}
+  if(G.stu==null)G.stu=Math.min(studentCap(G),studentDemand(G));G.mail=G.mail||[];G.cal=G.cal||[];lateSeasonOpposition(G);return G;}
 const DAENG_COST=[0,15000,30000];
 function facTotal(G){return Object.keys(FACILITIES).reduce((s,k)=>s+(G.fac[k]||0),0)+(G.fac.daeng-1);}
 function campLevel(G){const t=facTotal(G);return t>=13?3:t>=5?2:1;}
@@ -592,6 +592,11 @@ function genOffers(G){
       if(o&&o.camp==="rival"&&!o.injury&&!isBooked(G,o.id,wk)&&!myB.some(x=>Math.abs(x-wk)<=1)&&!G.offers.some(x=>x.b===RV&&x.a===f.id)){const tier=eligible(G,f)&&eligible(G,o)&&wk<=40?"district":"special";
         G.offers.push({id:`o${G.week}_${f.id}_rv`,a:f.id,b:o.id,week:wk,tier,rv:1,win:Math.round(TIER[tier].win*1.6/100)*100,lose:Math.round(TIER[tier].lose*1.4/100)*100});}}
   }
+  // Bangkok's sports-science camp calls out our strongest available fighter in each division.
+  if((G.season||1)>=4&&[8,22,35].includes(G.week))for(const opId of (G.season>=5?["pailin","vector_A","vector_B"]:["pailin"])){const op=G.F[opId];if(!op||op.injury>0)continue;
+    const fighters=roster(G).filter(f=>f.div===op.div&&f.injury===0).sort((a,b)=>ovr(b.a)-ovr(a.a));
+    for(const f of fighters){const wk=[G.week+2,G.week+3,G.week+4].find(w=>w<=48&&!isBooked(G,op.id,w)&&!G.bookings.some(b=>b.a===f.id&&Math.abs(b.week-w)<=1));
+      if(wk&&!G.offers.some(o=>o.a===f.id&&o.b===op.id)){G.offers.push({id:`o${G.week}_${f.id}_${op.id}`,a:f.id,b:op.id,week:wk,tier:"lab",lab:1,win:TIER.lab.win,lose:TIER.lab.lose});break;}}}
   // v1.33: temple-fair bouts every other week: off the ranking, paid later by mail, now and then a cross-division star
   if(G.week>=4&&G.week<=46&&G.week%2===0){const R=roster(G).filter(f=>!f.injury);if(R.length){const f=R[Math.floor(rng()*R.length)];
     const myB=G.bookings.filter(b=>b.a===f.id).map(b=>b.week);const wk=[G.week+1,G.week+2,G.week+3].find(w=>!myB.some(x=>Math.abs(x-w)<=1)&&!G.offers.some(x=>x.a===f.id&&x.week===w));
@@ -621,7 +626,7 @@ function applyResult(G,F,booking){
     const pmods=passiveMods(me);if(G.romance===me.id)pmods.moraleLoss+=.3;if(me.camp==="player"&&me.trust>=60)pmods.moraleLoss+=.25;me.morale=clamp(me.morale+(res==="W"?10:res==="L"?-10*(1-Math.min(.9,pmods.moraleLoss)):2),0,100);
     // v1.21: beating someone stronger is worth more (ranking point, fame, EXP) — a reason to take the hard offers
     const upset=res==="W"&&ovr(op.a)-ovr(me.a)>.4;
-    if(!off&&booking.tier!=="exhibition"&&booking.tier!=="special"&&booking.tier!=="final"){const rk=G.rank[me.div][me.id];if(rk){rk.pts+=res==="W"?(ovr(op.a)-ovr(me.a)<-.6?2:3)+(upset?1:0):res==="D"?1:0;/* v1.47: farming weaker fighters earns fewer ranking points */rk[res==="W"?"w":res==="L"?"l":"d"]++;}}
+    if(!off&&booking.tier!=="exhibition"&&booking.tier!=="special"&&booking.tier!=="lab"&&booking.tier!=="final"){const rk=G.rank[me.div][me.id];if(rk){rk.pts+=res==="W"?(ovr(op.a)-ovr(me.a)<-.6?2:3)+(upset?1:0):res==="D"?1:0;/* v1.47: farming weaker fighters earns fewer ranking points */rk[res==="W"?"w":res==="L"?"l":"d"]++;}}
     if(me.camp==="player"){
       const W=booking.win||tier.win,Lo=booking.lose||tier.lose;const pay=res==="W"?W:res==="D"?(W+Lo)/2:Lo;if(booking.fair){G.fairPay=G.fairPay||[];G.fairPay.push({amt:pay,op:op.name,res});}else{G.cash+=pay;G.wkFight=(G.wkFight||0)+pay;}
       G.rep=Math.max(0,G.rep+(res==="W"?tier.rep*clamp(1+(ovr(op.a)-ovr(me.a))*.5,.35,1.6):res==="L"?0:.5)/(1+Math.max(0,G.rep-25)/25));
@@ -714,7 +719,7 @@ function weekTrain(G){
     // v1.15: rivals and NPCs level up too, so the opposition visibly gets stronger over the season
     if(f.camp==="rival"||f.camp==="npc"){f.xp=(f.xp||0)+(f.camp==="rival"?30:18)+Math.floor(rng()*10);
       while(f.lvl<10&&f.xp>=xpNeed(f.lvl)){f.xp-=xpNeed(f.lvl);f.lvl++;if(f.camp==="rival"){const ks=Object.keys(f.a).sort((x,y)=>f.a[y]-f.a[x]).slice(0,2);ks.forEach(k=>f.a[k]=Math.min(20,f.a[k]+.2));}
-        if(f.camp==="rival")G.lvNews=(G.lvNews||[]).concat([`${f.name} of Golden Tiger Camp leveled up to Lv.${f.lvl}`]).slice(-3);}}}
+        if(f.camp==="rival")G.lvNews=(G.lvNews||[]).concat([`${f.name} ${f.lab?"Vector Gym":"Golden Tiger Camp"} leveled up to Lv.${f.lvl}`]).slice(-3);}}}
 }
 // week phase 3: npc sim, economy, transitions, advance
 function rankSnapshot(G){const o={};for(const d of ["A","B"]){o[d]={};standings(G,d).forEach((r,i)=>o[d][r.id]=i+1);}return o;}
@@ -744,6 +749,35 @@ function weekFinish(G){if(G.rep>55)G.rep=55+(G.rep-55)*(.96+(G.fac.hall||0)*.01)
   if(G.week>52&&!G.ended)G.ended="season";
   genOffers(G);
 }
+// Late-game opponents catch up once per season. Existing saves receive the same
+// one-time adjustment on load, without touching the player's fighters.
+const VECTOR_SPEC={
+ pailin:{name:"Pailin",full:"Pailin Eksayam",div:"A",camp:"rival",color:"#392049",potential:20,
+   a:{punch:17,kick:15,knee:16,elbow:18,clinch:16,guard:16,foot:15,counter:17,power:18,speed:16,stamina:18,dur:17,iq:16,comp:17}},
+ A:{name:"Night",full:"Night of Vector Gym",div:"A",camp:"rival",color:"#542478",potential:19,
+   a:{punch:13,kick:12,knee:12,elbow:13,clinch:12,guard:15,foot:15,counter:16,power:12,speed:15,stamina:14,dur:13,iq:17,comp:16}},
+ B:{name:"Vega",full:"Vega of Vector Gym",div:"B",camp:"rival",color:"#47216b",potential:19,
+   a:{punch:14,kick:16,knee:12,elbow:14,clinch:11,guard:13,foot:16,counter:13,power:16,speed:17,stamina:15,dur:13,iq:14,comp:15}}
+};
+function ensureVector(G){if((G.season||1)<4)return false;G.rank=G.rank||{A:{},B:{}};let created=false;
+  for(const id of (G.season>=5?["pailin","vector_A","vector_B"]:["pailin"])){const div=id==="vector_B"?"B":"A",spec=id==="pailin"?VECTOR_SPEC.pailin:VECTOR_SPEC[div];G.rank[div]=G.rank[div]||{};
+    if(!G.F[id]){G.F[id]=baseFighter(id,spec);G.F[id].lvl=id==="pailin"?8:6;G.F[id].met=true;created=true;}
+    G.F[id].lab=true;G.F[id].gymName="Vector Gym, Bangkok";if(id==="pailin")G.F[id].sprite="pailin";
+    if(!G.rank[div][id])G.rank[div][id]={pts:0,w:0,l:0,d:0};}return created;}
+function liftOpponent(f,target,maxGain){const delta=Math.min(maxGain,Math.max(0,target-ovr(f.a)));if(delta<=0)return;
+  const goal=Math.min(19.7,ovr(f.a)+delta);for(let n=0;n<4;n++){const gap=goal-ovr(f.a),room=ATTRS.filter(([k])=>f.a[k]<19.95);if(gap<=.01||!room.length)break;
+    const each=gap*ATTRS.length/room.length;for(const [k] of room)f.a[k]=Math.min(20,f.a[k]+each);}
+  f.potential=Math.max(f.potential||14,Math.min(20,goal));}
+function lateSeasonOpposition(G){const year=G.season||1;if(year<4)return;G.flags=G.flags||{};const created=ensureVector(G);
+  if(G.flags.oppositionSeason===year&&!created)return;
+  const d=G.diff||"normal";
+  for(const div of ["A","B"]){const mine=roster(G).filter(f=>f.div===div);const best=Math.max(12+(year-4)*.6,...mine.map(f=>ovr(f.a)));
+    for(const f of Object.values(G.F)){if(f.div!==div||f.camp==="player"||f.camp==="free")continue;
+      const lab=!!f.lab,rival=f.camp==="rival",boss=f.id==="pailin",gap=lab?(d==="easy"?(boss?.5:.3):d==="hard"?(boss?1.3:1):(boss?1:.65)):rival?(d==="easy"?-1.4:d==="hard"?-.1:-.7):(d==="easy"?-3:d==="hard"?-1.4:-2.2);
+      const floor=lab?(boss?16.5+(year-4)*.3:15.5+(year-5)*.3):rival?11.5+(year-4)*.35:9.5+(year-4)*.4;
+      liftOpponent(f,Math.min(lab?19.7:rival?19.2:18.4,Math.max(floor,best+gap)),lab?20:rival?2.4:1.2);
+      if(lab)f.labPrep=Math.min(boss?.09:.07,(boss?.05:.035)+Math.max(0,year-4)*.005);}}
+  G.flags.oppositionSeason=year;}
 // v1.3: keep playing after the season — new season, same camp, fighters and bonds
 function newSeason(G){
   G.titles=G.titles||[];G.titles.push({season:G.season||1,champ:{...G.champ}});
@@ -756,7 +790,7 @@ function newSeason(G){
     // v1.50: the whole field trains through the off-season too, so year 2 is not a walkover
     if(f.camp!=="player"){f.potential=Math.min(20,(f.potential||14)+1.5);for(const k in f.a)f.a[k]=Math.min(20,f.a[k]+(f.canon?.4:.6+rng()*.5));}
     if(f.camp!=="free")G.rank[f.div][f.id]={pts:0,w:0,l:0,d:0};}
-  genOffers(G);return G;}
+  lateSeasonOpposition(G);genOffers(G);return G;}
 // v1.7 late-game money sinks
 const MASTERS={thasao:{name:"Tha Sao master",cost:18000,attrs:["speed","foot"]},chaiya:{name:"Chaiya master",cost:18000,attrs:["guard","counter"]},
   lopburi:{name:"Lopburi master",cost:18000,attrs:["iq","counter"]},korat:{name:"Korat master",cost:18000,attrs:["punch","power"]}};

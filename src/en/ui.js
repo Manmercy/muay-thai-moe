@@ -1,5 +1,5 @@
 // ================= MUAY THAI MOE v1.3 — UI =================
-const VERSION="1.80.13";
+const VERSION="1.80.14";
 const CUR_LANG=(typeof window!=="undefined"&&window.LANG)||"th";
 const TH_LABEL=String.fromCharCode(3652,3607,3618);
 function langSwitch(cls){return `<div class="langsw ${cls||""}" role="group" aria-label="Language">${[["th",TH_LABEL],["en","EN"]].map(([k,l])=>`<button class="lsb ${CUR_LANG===k?"on":""}" data-act="setlang" data-v="${k}" aria-pressed="${CUR_LANG===k}">${l}</button>`).join("")}</div>`;}
@@ -16,11 +16,11 @@ const SURPRISE=/^(…)?\s*(Who|Huh|What[!?]|Eh|Wait|Whoa|Eek|Really\?|ใคร�
 const moodFor=(mood,look,text)=>{if(mood==="surprised")return look==="casual"?"flustered":"surprised";
   if(look!=="casual"&&mood==="flustered")return SURPRISE.test(text||"")?"surprised":"happy";return mood;};
 const FMOOD=m=>m==="surprised"?"flustered":m==="pout"?"sad":["happy","sad","angry"].includes(m)?m:"happy";
-const stand=(id,look,mood)=>{if(id==="coach")return `${ASSET}coach.webp`;
+const stand=(id,look,mood)=>{if(id==="coach")return `${ASSET}coach.webp`;if(id==="pailin")return `${ASSET}pailin_fight_${mood==="surprised"||mood==="flustered"?"surprised":FMOOD(mood)}.webp`;
   if(look==="casual"){const v=mood==="flustered"?"_flustered":["pout","angry","sad"].includes(mood)?"_pout":"";return `${ASSET}${id}_casual${v}.webp`;}
   // v1.8: one main outfit — training scenes use the fight outfit too, so clothes never flip mid-scene
   return `${ASSET}${id}_fight_${FMOOD(mood)}.webp`;};
-const faceSrc=(id,mood,look)=>id==="coach"?`${ASSET}coach_face.webp`:look&&look!=="fight"?`${ASSET}${id}_${look}_face.webp`:`${ASSET}${id}_${["happy","sad","flustered"].includes(mood)?mood:"happy"}_face.webp`;
+const faceSrc=(id,mood,look)=>id==="coach"?`${ASSET}coach_face.webp`:id==="pailin"?`${ASSET}pailin_face.webp`:look&&look!=="fight"?`${ASSET}${id}_${look}_face.webp`:`${ASSET}${id}_${["happy","sad","flustered"].includes(mood)?mood:"happy"}_face.webp`;
 const BGIMG={camp:"bg_camp.webp",night:"bg_camp.webp",bus:"bg_bus_rain.webp",letter:"bg_grandpa_letter.webp",fair:"bg_fair.webp",local:"bg_local.webp",district:"bg_district.webp",ring:"bg_local.webp",final:"bg_final.webp",hall:"bg_hall.webp",gym:null,gymdusk:"gym1.webp",food:"bg_food.webp",temple:"bg_temple.webp",cafe:"bg_cafe.webp",river:"bg_river.webp",market:"bg_market.webp",rooster:"bg_rooster.webp",farm:"bg_farm.webp"};
 const cardFaceSrc=C=>{const scene=(C.steps||[]).find(s=>s.n===C.c)||{},mood=scene.f||"happy",look=scene.l||"casual";
   if(look==="train")return `${ASSET}${C.c}_train_face.webp`;
@@ -31,7 +31,7 @@ const cardArtHTML=(C,lazy=false)=>`<span class="card-art" style="--card-scene:ur
 // v1.34: portraits for the market and helmet-gang side characters (matched by speaker name, or st.img)
 const NPC_IMG=[[/แม่ค้า|ป้าศรี|Auntie Sri|vendor/,"vendor_green"],[/ป้าแต๋ว|เจ๊หมวย|ป้าขาย|Auntie Taew|Jae Muay/,"vendor_red"],[/เสี่ยหมวกทองคำ|Big Boss Golden Helmet/,"gang_boss"],[/หมวก|แจ็กเก็ต|Helmet|Jacket/,"gang_group"],[/ยาย|Grandma/,"grandma"]];
 const npcImg=st=>st.img||(st.who&&(NPC_IMG.find(([r])=>r.test(st.who))||[])[1])||null;
-const TIER_BG={evloy:"bg_river.webp",pro:"bg_fair.webp",semi:"bg_hall.webp",local:"bg_local.webp",district:"bg_district.webp",final:"bg_final.webp",exhibition:"bg_fair.webp",special:"bg_district.webp",quest:"bg_food.webp",beast:"bg_fair.webp",dm:"bg_hall.webp"};
+const TIER_BG={evloy:"bg_river.webp",pro:"bg_fair.webp",semi:"bg_hall.webp",local:"bg_local.webp",district:"bg_district.webp",final:"bg_final.webp",exhibition:"bg_fair.webp",special:"bg_district.webp",lab:"bg_hall.webp",quest:"bg_food.webp",beast:"bg_fair.webp",dm:"bg_hall.webp"};
 const gymBg=()=>`gym${G?campLevel(G):1}.webp`;
 // v1.13 pixel icons — no emoji in the fight UI
 function pxIcon(rows,pal){const h=rows.length,w=rows[0].length;let r="";rows.forEach((row,y)=>[...row].forEach((c,x)=>{if(c!=="."&&pal[c])r+=`<rect x="${x}" y="${y}" width="1.02" height="1.02" fill="${pal[c]}"/>`;}));
@@ -96,7 +96,7 @@ function slotsHTML(mode){const rows=[];for(let i=1;i<=SLOTS;i++){const s=loadSlo
   return `<h2>${mode==="load"?"Load game":"Choose a save slot for the new game"}</h2><div class="slots">${rows.join("")}</div>${del}${ow}${mode==="load"?`<div style="margin-top:14px;text-align:left"><a class="btn sm ghost" href="./rescue-save.html">Transfer save code</a></div>`:""}`;}
 
 // ---------- small components ----------
-function faceImg(f,cls=""){return f.canon?`<img class="face ${cls}" style="--c:${f.color}" src="${faceSrc(f.id,"happy")}" alt="${esc(f.name)}">`:
+function faceImg(f,cls=""){return f.canon||f.id==="pailin"?`<img class="face ${cls}" style="--c:${f.color}" src="${faceSrc(f.id,"happy")}" alt="${esc(f.name)}">`:
   `<canvas class="face npcface ${cls}" width="96" height="96" data-sprite="${f.id}" data-mode="guard" style="--c:${f.color}" aria-label="${esc(f.name)}"></canvas>`;}
 function hearts(b){const v=Math.max(0,Math.min(100,b||0));let h="";for(let k=0;k<10;k++){const p=Math.max(0,Math.min(1,(v-k*10)/10));h+=`<i class="hp" style="--p:${p}"></i>`;}
   const tier=v>=85?"Deeply bonded":v>=65?"Close":v>=45?"Friends":v>=25?"Getting familiar":"Acquaintance";return `<span class="hearts" title="Bond ${Math.round(v)}/100">${h}<small>${tier}</small></span>`;}
@@ -239,7 +239,8 @@ const FUNNY_NEWS=["Uncle Wang the motorbike taxi announces 'Cut the queue, meet 
 function funnyNews(n){const o=[];for(let i=0;i<n;i++)o.push(FUNNY_NEWS[(G.week*7+i*5+(G.seed%11))%FUNNY_NEWS.length]);return o;}
 function newsItems(){const N=[...(G.lvNews||[]).slice(0,1)],st=standings(G,"A").slice(0,3),R=roster(G);
   if(st[0])N.push(`Div A table: ${G.F[st[0].id].name} leads in 1st place`);
-  const rv=Object.values(G.F).filter(f=>f.camp==="rival");if(rv.length)N.push(`Golden Tiger enters ${rv.length} fighters. The boss declares "This year the title is ours"`);
+  const rv=Object.values(G.F).filter(f=>f.camp==="rival"&&!f.lab);if(rv.length)N.push(`Golden Tiger enters ${rv.length} fighters. The boss declares "This year the title is ours"`);
+  if((G.season||1)>=4&&G.F.pailin)N.push((G.season||1)>=5?"Pailin brings Vector Gym from Bangkok, along with Night and Vega, into the ring.":"Pailin Eksayam, Ploy's older sister, brings Vector Gym to challenge Sirichai.");
   for(const f of R){const h=f.rec||{w:0,l:0};if(h.w>=3)N.push(`${f.name} of Sirichai is on fire, already won ${h.w} fights`);}
   if(G.rep>=10)N.push(`Sirichai Muay Thai Camp is being talked about again after years of silence`);
   const nb=G.bookings.filter(b=>G.F[b.a].camp==="player").sort((a,b)=>a.week-b.week)[0];if(nb)N.push(`Week ${nb.week}: ${G.F[nb.a].name} vs ${G.F[nb.b].name}`);
@@ -314,7 +315,7 @@ function offerTipHTML(o){const me=G.F[o.a],op=G.F[o.b];const A=adviseCached(o.a,
   const pf=Math.round(projFatigue(me));if(me.injury)L.push(`${me.name} is still injured for ${me.injury} weeks, risk of re-injury`);else if(pf>55)L.push(`Fatigue is around ${pf}. If you accept, ease off training before fight day`);
   const near=G.bookings.find(b=>b.a===me.id&&Math.abs(b.week-o.week)<=2);if(near)L.push(`Already has a fight in wk ${near.week}. Fighting too often, the body won't recover`);
   if(!scouted(op.id)&&op.camp!=="quest")L.push(`Tape not scouted, weakness unknown ${op.name}`);
-  if(op.camp==="rival")L.push("Beating a Golden Tiger fighter brings big fame");
+  if(op.camp==="rival")L.push(op.lab?"Beat a Vector fighter for a big reputation boost.":"Beating a Golden Tiger fighter brings big fame");
   if(G.cash<8000)L.push(`Money is tight. The purse of ${fmt(o.lose)} is guaranteed, even in a loss`);
   const go=me.injury||near?"Coach says better to wait for the next fight":A.bestRate>=.6?"Take it, an easy win":A.bestRate>=.4?"Take it, if you counter-train first":"Too early, unless you want to gamble for a big purse";
   return `<h2>What Coach Daeng says</h2><div class="meta">${esc(me.name)} vs ${esc(op.name)} · <b class="${v.c}t">${v.t}</b></div>
@@ -485,7 +486,7 @@ function offersHTML(){const mine=G.bookings.filter(b=>G.F[b.a].camp==="player").
        const sp=o.rv?["rv","Grudge match · the whole province is watching"]:o.beast?["beast",QK[o.beast].grp==="rooster"?"Wild bout · Human vs fighting rooster":"Wild bout · Bull wrestling, Muay Thai edition"]:o.tier==="special"?["sp","Special cross-division bout"]:o.hard?["hard","Punch up · purse ×1.5"]:o.fair?["fair",o.cross?"Temple fair · cross-division star!":"Temple fair bout · not ranked"]:null;
        return `<div class="item offer ${v.c} ${sp?"spx "+sp[0]:""}">${sp?`<span class="ribbon">${sp[1]}</span>`:""}<button class="oxbtn" data-act="declo" data-v="${o.id}" aria-label="Decline this offer">✕</button><div class="l"><span class="vdot ${v.c}" aria-label="${v.t}"></span>${faceImg(op,"sm")}<div>
        <div class="t">${esc(me.name)} vs ${esc(op.name)}</div>
-       <div class="meta">Wk ${o.week} · ${TIER[o.tier].name}${o.beast?" · off the record":""}${o.fair?" · not ranked · purse paid by mail":""} · ${styleOf(op.a)}${op.camp==="rival"?" · Golden Tiger":""}${personaOf(op)?` · ${personaOf(op).tag}`:""}</div>${h2hText(op)?`<div class="meta goldt">${h2hText(op)}</div>`:""}
+       <div class="meta">Wk ${o.week} · ${TIER[o.tier].name}${o.beast?" · off the record":""}${o.fair?" · not ranked · purse paid by mail":""}${o.tier==="lab"?" · Unranked bout":""} · ${styleOf(op.a)}${op.camp==="rival"?op.lab?" · Vector Gym, Bangkok":" · Golden Tiger":""}${personaOf(op)?` · ${personaOf(op).tag}`:""}</div>${h2hText(op)?`<div class="meta goldt">${h2hText(op)}</div>`:""}
        <div class="meta">Purse ${fmt(o.lose)} · <b class="goldt">win +${fmt(o.win-o.lose)}</b> · <b class="${v.c}t">${v.t}</b>${ovr(op.a)-ovr(me.a)>.4?` · <b class="goldt">Win for bonus points/fame</b>`:ovr(op.a)-ovr(me.a)<-.6?` · <span class="mutt">Beating a weaker fighter earns little fame</span>`:""}</div>
        </div></div>
        <div class="obtns3"><button class="btn sm" data-act="consider" data-v="${o.id}">${scouted(o.b)?"Opponent info":"Scout"}</button>${coachOn()?`<button class="btn sm" data-act="otip" data-v="${o.id}">Coach's advice</button>`:""}<button class="btn sm gold" data-act="accept" data-v="${o.id}">Accept</button></div></div>`;}).join("")||`<p class="lead">${G.bookings.length?"Fight booked. New offers arrive next week":"No offers (injured, or season over)"}</p>`}</div></section>`;}
@@ -565,7 +566,7 @@ function recruitHTML(recs){if(!recs.length)return "";
 function fighterHTML(f){const mine=f.camp==="player";const P=PROFILES[f.id];
   const tabs=mine?[["rel","Profile"],["over","Stats"],["skill","Skills"]].concat(f.canon&&KIT_MASK[f.id]?[["look","Outfit"]]:[]):[["rel","Profile"],["over","Stats"]];
   let t=UI.ptab;if(!tabs.some(x=>x[0]===t))t="over";
-  const head=`<div class="fp-head">${faceImg(f)}<div><h2>${esc(f.full)}</h2><div class="meta">${P?P.age+" yrs · ":""}${f.camp==="player"?"Sirichai Camp":f.camp==="rival"?"Golden Tiger Camp":"Free agent"} · Div ${f.div} · ${styleOf(f.a)} · ${rec(f)}</div>${G.belt&&Object.values(G.belt).some(x=>x.id===f.id)?`<div class="beltb">🏆 Tha Phae Stadium champion</div>`:f.belts?`<div class="beltb old">Former Tha Phae Stadium champion</div>`:""}${xpBar(f)}</div></div>
+  const head=`<div class="fp-head">${faceImg(f)}<div><h2>${esc(f.full)}</h2><div class="meta">${P?P.age+" yrs · ":""}${f.camp==="player"?"Sirichai Camp":f.lab?"Vector Gym, Bangkok":f.camp==="rival"?"Golden Tiger Camp":"Free agent"} · Div ${f.div} · ${styleOf(f.a)} · ${rec(f)}</div>${G.belt&&Object.values(G.belt).some(x=>x.id===f.id)?`<div class="beltb">🏆 Tha Phae Stadium champion</div>`:f.belts?`<div class="beltb old">Former Tha Phae Stadium champion</div>`:""}${xpBar(f)}</div></div>
    <div class="seg ptabs">${tabs.map(([k,n])=>`<button data-act="ptab" data-v="${k}" aria-pressed="${t===k}">${n}${k==="skill"&&skReady(f)?'<i class="tdot2"></i>':""}</button>`).join("")}</div>`;
   let body="";
   if(t==="look"){const cur=f.outfit||"base";
@@ -747,7 +748,7 @@ function montageHTML(){const M=UI.montage;
 // ---------- VN scene ----------
 // v1.8: warm portraits before they are needed so scenes don't pop in late
 const WARMED={};function warm(src){if(!src||WARMED[src])return;const i=new Image();i.src=src;WARMED[src]=i;}
-function warmChar(id,look){if(id==="coach"){warm(`${ASSET}coach.webp`);return;}if(!CANON_IDS.includes(id))return;
+function warmChar(id,look){if(id==="coach"){warm(`${ASSET}coach.webp`);return;}if(!CANON_IDS.includes(id)&&id!=="pailin")return;
   (look==="casual"?["happy","flustered","pout"]:["happy","sad","surprised","angry"]).forEach(m=>warm(stand(id,look,m)));}
 function warmSteps(steps,look){const walk=list=>(list||[]).forEach(st=>{if(!st)return;const n=typeof st.n==="function"?null:st.n;if(n)warmChar(n,st.l==="casual"?"casual":look==="casual"&&!st.l?"casual":"fight");
   if(st.with)warmChar(st.with,look==="casual"?"casual":"fight");if(st.bg&&BGIMG[st.bg])warm(ASSET+BGIMG[st.bg]);if(st.choice)st.choice.forEach(c=>walk(c.then));});walk(steps);}
@@ -765,7 +766,7 @@ function sceneNext(){const S=UI.scene;if(!S)return;
     if(st.show)S.cast=st.show.map(x=>({id:x.id,f:x.f||"happy",look:S.lookOf[x.id]||x.l||look,back:!!x.back}));
     if(n==="npc"){const im=npcImg(st);if(im)S.cast=[{id:"npc:"+im,f:"happy",look}];}
     if(n==="coach"){S.cast=[{id:"coach",f:"happy",look}];}           // the coach always stands alone
-    else if(CANON_IDS.includes(n)){const w=st.with&&st.with!=="coach"?st.with:null;let cast=S.cast.filter(c=>c.id!==n&&c.id!=="coach");
+    else if(CANON_IDS.includes(n)||n==="pailin"){const w=st.with&&st.with!=="coach"?st.with:null;let cast=S.cast.filter(c=>c.id!==n&&c.id!=="coach");
       if(w){cast=cast.filter(c=>c.id===w);if(!cast.length)cast=[{id:w,f:"happy",look:S.lookOf[w]||look}];}
       else if(cast.length>1)cast=cast.slice(-1);
       cast.push({id:n,f:S.cur.f,look});S.cast=cast.slice(-2);}
@@ -919,6 +920,7 @@ function fightFaceoff(b){const me=G.F[b.a],op=G.F[b.b],key=`${b.a}_${b.b}`,h=G.h
     {n:op.id,f:"angry",l:"fight",t:opener},
     {n:me.id,f:"angry",l:"fight",with:op.id,t:reply}];}
 function openFight(b,done){const op=G.F[b.b],k=`taunt_${b.a}_${b.b}_${stageOf(G.week)}`;
+  const lab=vectorFightScene(G,b);if(lab){playScene(lab,()=>openFight2(b,done),{bg:"hall",look:"fight"});return;}
   const prod=prodigyFightScene(G,b);if(prod){playScene(prod,()=>openFight2(b,done),{bg:"ring",look:"fight"});return;}
   if(!op.canon){openFight2(b,done);return;}
   let sc=null;const key=`${b.a}_${b.b}`;
@@ -952,7 +954,7 @@ function preCompare(me,op,b){const sc=scouted(op.id)||op.camp==="player";const v
     return `<div class="pcr"><b class="num ${sc&&x>y+.4?"goldt":""}">${x.toFixed(1)}</b><i class="pb l" style="--v:${clamp(x/20*100,0,100)}%"></i><span>${n}</span><i class="pb r" style="--v:${sc?clamp(y/20*100,0,100):0}%"></i><b class="num ${sc&&y>x+.4?"redt":""}">${sc?y.toFixed(1):"?"}</b></div>`;}).join("")}</div>`;}
 function fightHTML(){const U=UI.fight,b=U.b,me=G.F[b.a],op=G.F[b.b],F=U.F;
   const last=U.shown.filter(x=>x.ha!=null).slice(-1)[0];const sv=(s,k)=>F?(last?last[k]:s):100;
-  const side=(f,cls,hp,sta)=>`<div class="fside ${cls}"><div class="fn">${f.canon?`<img class="face sm" src="${faceSrc(f.id,"happy")}" alt="">`:""}<b>${esc(f.name)}</b><span class="meta">Lv.${f.lvl}</span></div>
+  const side=(f,cls,hp,sta)=>`<div class="fside ${cls}"><div class="fn">${f.canon||f.id==="pailin"?`<img class="face sm" src="${faceSrc(f.id,"happy")}" alt="">`:""}<b>${esc(f.name)}</b><span class="meta">Lv.${f.lvl}</span></div>
     <div class="meter"><i style="--v:${clamp(hp,0,100)}%;--bc:${hp>50?"var(--green)":hp>25?"var(--warn)":"var(--red)"}"></i></div><div class="meter thin"><i style="--v:${clamp(sta,0,100)}%;--bc:var(--gold)"></i></div></div>`;
   const hpA=F?sv(F.A.hp,"ha"):100,hpB=F?sv(F.B.hp,"hb"):100,stA=F?sv(F.A.sta,"sa"):100,stB=F?sv(F.B.sta,"sb"):100;
   let mid="";
@@ -1157,7 +1159,7 @@ function fightEnd(){const U=UI.fight;U.stage="done";{const w=U.F.result.win;U.bu
   {const op=G.F[U.b.b];if(r.win!=="D"&&!TIER[U.b.tier].off&&(op.canon||U.b.tier==="semi"||U.b.tier==="final"||/KO/.test(r.type)))G.lastBig={a:me.id,b:op.id,win:r.win,wk:G.week,shown:false};}
   if(r.win==="B"){const F=U.F,st=s=>({landed:s.landed,thrown:s.thrown,wl:{...s.wl},sta:Math.round(s.sta),kd:s.kd,legs:Math.round(s.legs)});
     G.losses=(G.losses||[]).concat([{wk:G.week,a:me.id,b:U.b.b,type:r.type,round:r.round,cards:F.cards.map(c=>[...c]),A:st(F.A),B:st(F.B),sc:scouted(U.b.b),od:Math.round(ovr(G.F[U.b.b])-ovr(me)),plan:U.plan||"balanced",tg:(F.A.tac&&F.A.tac.target)||"",care:U.careOK||0}]).slice(-6);}
-  U.afterScene=prodigyResultScene(G,U.b,r.win);
+  U.afterScene=prodigyResultScene(G,U.b,r.win)||vectorResultScene(G,U.b,r.win);
   save();render();}
 
 // ---------- actions ----------

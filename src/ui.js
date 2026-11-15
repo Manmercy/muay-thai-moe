@@ -1,5 +1,5 @@
 // ================= MUAY THAI MOE v1.3 — UI =================
-const VERSION="1.80.13";
+const VERSION="1.80.14";
 const CUR_LANG=(typeof window!=="undefined"&&window.LANG)||"th";
 const TH_LABEL=String.fromCharCode(3652,3607,3618);
 function langSwitch(cls){return `<div class="langsw ${cls||""}" role="group" aria-label="Language">${[["th",TH_LABEL],["en","EN"]].map(([k,l])=>`<button class="lsb ${CUR_LANG===k?"on":""}" data-act="setlang" data-v="${k}" aria-pressed="${CUR_LANG===k}">${l}</button>`).join("")}</div>`;}
@@ -16,11 +16,11 @@ const SURPRISE=/^(…)?\s*(ใครน่ะ|ห้ะ|หา[!?]|เอ๊ะ|
 const moodFor=(mood,look,text)=>{if(mood==="surprised")return look==="casual"?"flustered":"surprised";
   if(look!=="casual"&&mood==="flustered")return SURPRISE.test(text||"")?"surprised":"happy";return mood;};
 const FMOOD=m=>m==="surprised"?"flustered":m==="pout"?"sad":["happy","sad","angry"].includes(m)?m:"happy";
-const stand=(id,look,mood)=>{if(id==="coach")return `${ASSET}coach.webp`;
+const stand=(id,look,mood)=>{if(id==="coach")return `${ASSET}coach.webp`;if(id==="pailin")return `${ASSET}pailin_fight_${mood==="surprised"||mood==="flustered"?"surprised":FMOOD(mood)}.webp`;
   if(look==="casual"){const v=mood==="flustered"?"_flustered":["pout","angry","sad"].includes(mood)?"_pout":"";return `${ASSET}${id}_casual${v}.webp`;}
   // v1.8: one main outfit — training scenes use the fight outfit too, so clothes never flip mid-scene
   return `${ASSET}${id}_fight_${FMOOD(mood)}.webp`;};
-const faceSrc=(id,mood,look)=>id==="coach"?`${ASSET}coach_face.webp`:look&&look!=="fight"?`${ASSET}${id}_${look}_face.webp`:`${ASSET}${id}_${["happy","sad","flustered"].includes(mood)?mood:"happy"}_face.webp`;
+const faceSrc=(id,mood,look)=>id==="coach"?`${ASSET}coach_face.webp`:id==="pailin"?`${ASSET}pailin_face.webp`:look&&look!=="fight"?`${ASSET}${id}_${look}_face.webp`:`${ASSET}${id}_${["happy","sad","flustered"].includes(mood)?mood:"happy"}_face.webp`;
 const BGIMG={camp:"bg_camp.webp",night:"bg_camp.webp",bus:"bg_bus_rain.webp",letter:"bg_grandpa_letter.webp",fair:"bg_fair.webp",local:"bg_local.webp",district:"bg_district.webp",ring:"bg_local.webp",final:"bg_final.webp",hall:"bg_hall.webp",gym:null,gymdusk:"gym1.webp",food:"bg_food.webp",temple:"bg_temple.webp",cafe:"bg_cafe.webp",river:"bg_river.webp",market:"bg_market.webp",rooster:"bg_rooster.webp",farm:"bg_farm.webp"};
 const cardFaceSrc=C=>{const scene=(C.steps||[]).find(s=>s.n===C.c)||{},mood=scene.f||"happy",look=scene.l||"casual";
   if(look==="train")return `${ASSET}${C.c}_train_face.webp`;
@@ -31,7 +31,7 @@ const cardArtHTML=(C,lazy=false)=>`<span class="card-art" style="--card-scene:ur
 // v1.34: portraits for the market and helmet-gang side characters (matched by speaker name, or st.img)
 const NPC_IMG=[[/แม่ค้า|ป้าศรี|Auntie Sri|vendor/,"vendor_green"],[/ป้าแต๋ว|เจ๊หมวย|ป้าขาย|Auntie Taew|Jae Muay/,"vendor_red"],[/เสี่ยหมวกทองคำ|Big Boss Golden Helmet/,"gang_boss"],[/หมวก|แจ็กเก็ต|Helmet|Jacket/,"gang_group"],[/ยาย|Grandma/,"grandma"]];
 const npcImg=st=>st.img||(st.who&&(NPC_IMG.find(([r])=>r.test(st.who))||[])[1])||null;
-const TIER_BG={evloy:"bg_river.webp",pro:"bg_fair.webp",semi:"bg_hall.webp",local:"bg_local.webp",district:"bg_district.webp",final:"bg_final.webp",exhibition:"bg_fair.webp",special:"bg_district.webp",quest:"bg_food.webp",beast:"bg_fair.webp",dm:"bg_hall.webp"};
+const TIER_BG={evloy:"bg_river.webp",pro:"bg_fair.webp",semi:"bg_hall.webp",local:"bg_local.webp",district:"bg_district.webp",final:"bg_final.webp",exhibition:"bg_fair.webp",special:"bg_district.webp",lab:"bg_hall.webp",quest:"bg_food.webp",beast:"bg_fair.webp",dm:"bg_hall.webp"};
 const gymBg=()=>`gym${G?campLevel(G):1}.webp`;
 // v1.13 pixel icons — no emoji in the fight UI
 function pxIcon(rows,pal){const h=rows.length,w=rows[0].length;let r="";rows.forEach((row,y)=>[...row].forEach((c,x)=>{if(c!=="."&&pal[c])r+=`<rect x="${x}" y="${y}" width="1.02" height="1.02" fill="${pal[c]}"/>`;}));
@@ -96,7 +96,7 @@ function slotsHTML(mode){const rows=[];for(let i=1;i<=SLOTS;i++){const s=loadSlo
   return `<h2>${mode==="load"?"โหลดเกม":"เลือกช่องเซฟสำหรับเกมใหม่"}</h2><div class="slots">${rows.join("")}</div>${del}${ow}${mode==="load"?`<div style="margin-top:14px;text-align:left"><a class="btn sm ghost" href="./rescue-save.html">ย้ายรหัสเซฟ</a></div>`:""}`;}
 
 // ---------- small components ----------
-function faceImg(f,cls=""){return f.canon?`<img class="face ${cls}" style="--c:${f.color}" src="${faceSrc(f.id,"happy")}" alt="${esc(f.name)}">`:
+function faceImg(f,cls=""){return f.canon||f.id==="pailin"?`<img class="face ${cls}" style="--c:${f.color}" src="${faceSrc(f.id,"happy")}" alt="${esc(f.name)}">`:
   `<canvas class="face npcface ${cls}" width="96" height="96" data-sprite="${f.id}" data-mode="guard" style="--c:${f.color}" aria-label="${esc(f.name)}"></canvas>`;}
 function hearts(b){const v=Math.max(0,Math.min(100,b||0));let h="";for(let k=0;k<10;k++){const p=Math.max(0,Math.min(1,(v-k*10)/10));h+=`<i class="hp" style="--p:${p}"></i>`;}
   const tier=v>=85?"ผูกพันลึก":v>=65?"ใกล้ชิด":v>=45?"สนิท":v>=25?"เริ่มคุ้น":"คนรู้จัก";return `<span class="hearts" title="ความสนิท ${Math.round(v)}/100">${h}<small>${tier}</small></span>`;}
@@ -239,7 +239,8 @@ const FUNNY_NEWS=["ลุงหวังวินมอไซค์ประก�
 function funnyNews(n){const o=[];for(let i=0;i<n;i++)o.push(FUNNY_NEWS[(G.week*7+i*5+(G.seed%11))%FUNNY_NEWS.length]);return o;}
 function newsItems(){const N=[...(G.lvNews||[]).slice(0,1)],st=standings(G,"A").slice(0,3),R=roster(G);
   if(st[0])N.push(`ตารางรุ่น A: ${G.F[st[0].id].name} นำเป็นอันดับ 1`);
-  const rv=Object.values(G.F).filter(f=>f.camp==="rival");if(rv.length)N.push(`ค่ายพยัคฆ์ทองส่งนักมวยลงแข่ง ${rv.length} คน เถ้าแก่ประกาศ "ปีนี้แชมป์ต้องเป็นของเรา"`);
+  const rv=Object.values(G.F).filter(f=>f.camp==="rival"&&!f.lab);if(rv.length)N.push(`ค่ายพยัคฆ์ทองส่งนักมวยลงแข่ง ${rv.length} คน เถ้าแก่ประกาศ "ปีนี้แชมป์ต้องเป็นของเรา"`);
+  if((G.season||1)>=4&&G.F.pailin)N.push((G.season||1)>=5?"ไพลินนำค่ายเวกเตอร์จากกรุงเทพฯ พร้อมไนท์และเวกาขึ้นเวที":"ไพลิน เอกสยาม พี่สาวพลอย นำค่ายเวกเตอร์มาท้าศิริชัย");
   for(const f of R){const h=f.rec||{w:0,l:0};if(h.w>=3)N.push(`${f.name} ค่ายศิริชัย ฟอร์มแรง ชนะแล้ว ${h.w} ไฟต์`);}
   if(G.rep>=10)N.push(`ค่ายมวยศิริชัยกลับมาเป็นที่พูดถึงอีกครั้ง หลังเงียบไปหลายปี`);
   const nb=G.bookings.filter(b=>G.F[b.a].camp==="player").sort((a,b)=>a.week-b.week)[0];if(nb)N.push(`โปรแกรมสัปดาห์ ${nb.week}: ${G.F[nb.a].name} ปะทะ ${G.F[nb.b].name}`);
@@ -314,7 +315,7 @@ function offerTipHTML(o){const me=G.F[o.a],op=G.F[o.b];const A=adviseCached(o.a,
   const pf=Math.round(projFatigue(me));if(me.injury)L.push(`${me.name}ยังเจ็บอยู่ ${me.injury} สัปดาห์ เสี่ยงเจ็บซ้ำ`);else if(pf>55)L.push(`ตอนนี้ล้าราว ${pf} ถ้ารับ ควรลดความหนักการฝึกก่อนวันชก`);
   const near=G.bookings.find(b=>b.a===me.id&&Math.abs(b.week-o.week)<=2);if(near)L.push(`มีไฟต์ สด.${near.week} อยู่แล้ว ชกถี่ไปร่างกายจะไม่ฟื้น`);
   if(!scouted(op.id)&&op.camp!=="quest")L.push(`ยังไม่ได้ดูเทป ไม่รู้จุดอ่อน${op.name}`);
-  if(op.camp==="rival")L.push("ชนะคนของพยัคฆ์ทอง ชื่อเสียงขึ้นมาก");
+  if(op.camp==="rival")L.push(op.lab?"ชนะนักมวยค่ายเวกเตอร์ ชื่อเสียงขึ้นมาก":"ชนะคนของพยัคฆ์ทอง ชื่อเสียงขึ้นมาก");
   if(G.cash<8000)L.push(`เงินตึงอยู่ ค่าตัว ${fmt(o.lose)} ได้แน่ แม้แพ้`);
   const go=me.injury||near?"ครูว่ารอไฟต์หน้าดีกว่า":A.bestRate>=.6?"รับได้ เก็บชัยง่าย ๆ":A.bestRate>=.4?"รับได้ ถ้าซ้อมแก้ทางก่อน":"ยังเร็วไป เว้นแต่อยากลุ้นค่าตัวสูง";
   return `<h2>ครูแดงว่าไง</h2><div class="meta">${esc(me.name)} vs ${esc(op.name)} · <b class="${v.c}t">${v.t}</b></div>
@@ -485,7 +486,7 @@ function offersHTML(){const mine=G.bookings.filter(b=>G.F[b.a].camp==="player").
        const sp=o.rv?["rv","ศึกล้างตา · ทั้งจังหวัดรอดู"]:o.beast?["beast",QK[o.beast].grp==="rooster"?"ศึกพิสดาร · คนปะทะไก่ชน":"ศึกพิสดาร · ล้มวัวฉบับมวยไทย"]:o.tier==="special"?["sp","ศึกพิเศษข้ามรุ่น"]:o.hard?["hard","ท้าชนคู่เหนือชั้น · ค่าตัว ×1.5"]:o.fair?["fair",o.cross?"งานวัด · ดาราข้ามรุ่น!":"ไฟต์งานวัด · ไม่นับอันดับ"]:null;
        return `<div class="item offer ${v.c} ${sp?"spx "+sp[0]:""}">${sp?`<span class="ribbon">${sp[1]}</span>`:""}<button class="oxbtn" data-act="declo" data-v="${o.id}" aria-label="ปฏิเสธข้อเสนอนี้">✕</button><div class="l"><span class="vdot ${v.c}" aria-label="${v.t}"></span>${faceImg(op,"sm")}<div>
        <div class="t">${esc(me.name)} vs ${esc(op.name)}</div>
-       <div class="meta">สด.${o.week} · ${TIER[o.tier].name}${o.beast?" · ไม่นับสถิติ":""}${o.fair?" · ไม่นับอันดับ · ค่าตัวส่งทางจดหมาย":""} · ${styleOf(op.a)}${op.camp==="rival"?" · พยัคฆ์ทอง":""}${personaOf(op)?` · ${personaOf(op).tag}`:""}</div>${h2hText(op)?`<div class="meta goldt">${h2hText(op)}</div>`:""}
+       <div class="meta">สด.${o.week} · ${TIER[o.tier].name}${o.beast?" · ไม่นับสถิติ":""}${o.fair?" · ไม่นับอันดับ · ค่าตัวส่งทางจดหมาย":""}${o.tier==="lab"?" · ไม่นับอันดับ":""} · ${styleOf(op.a)}${op.camp==="rival"?op.lab?" · เวกเตอร์ กรุงเทพฯ":" · พยัคฆ์ทอง":""}${personaOf(op)?` · ${personaOf(op).tag}`:""}</div>${h2hText(op)?`<div class="meta goldt">${h2hText(op)}</div>`:""}
        <div class="meta">ค่าตัว ${fmt(o.lose)} · <b class="goldt">ชนะ +${fmt(o.win-o.lose)}</b> · <b class="${v.c}t">${v.t}</b>${ovr(op.a)-ovr(me.a)>.4?` · <b class="goldt">ชนะได้โบนัสแต้ม/ชื่อเสียง</b>`:ovr(op.a)-ovr(me.a)<-.6?` · <span class="mutt">ชนะคู่อ่อนได้ชื่อเสียงน้อย</span>`:""}</div>
        </div></div>
        <div class="obtns3"><button class="btn sm" data-act="consider" data-v="${o.id}">${scouted(o.b)?"ข้อมูลคู่ชก":"ดูเทป"}</button>${coachOn()?`<button class="btn sm" data-act="otip" data-v="${o.id}">คำแนะนำครู</button>`:""}<button class="btn sm gold" data-act="accept" data-v="${o.id}">รับไฟต์</button></div></div>`;}).join("")||`<p class="lead">${G.bookings.length?"รับไฟต์แล้ว ข้อเสนอใหม่จะเข้ามาสัปดาห์หน้า":"ไม่มีข้อเสนอ (บาดเจ็บ หรือหมดฤดูกาล)"}</p>`}</div></section>`;}
@@ -565,7 +566,7 @@ function recruitHTML(recs){if(!recs.length)return "";
 function fighterHTML(f){const mine=f.camp==="player";const P=PROFILES[f.id];
   const tabs=mine?[["rel","ประวัติ"],["over","ค่าพลัง"],["skill","สกิล"]].concat(f.canon&&KIT_MASK[f.id]?[["look","ชุด"]]:[]):[["rel","ประวัติ"],["over","ค่าพลัง"]];
   let t=UI.ptab;if(!tabs.some(x=>x[0]===t))t="over";
-  const head=`<div class="fp-head">${faceImg(f)}<div><h2>${esc(f.full)}</h2><div class="meta">${P?P.age+" ปี · ":""}${f.camp==="player"?"ค่ายศิริชัย":f.camp==="rival"?"ค่ายพยัคฆ์ทอง":"นักมวยอิสระ"} · รุ่น ${f.div} · ${styleOf(f.a)} · ${rec(f)}</div>${G.belt&&Object.values(G.belt).some(x=>x.id===f.id)?`<div class="beltb">🏆 แชมป์เวทีท่าแพ</div>`:f.belts?`<div class="beltb old">อดีตแชมป์เวทีท่าแพ</div>`:""}${xpBar(f)}</div></div>
+  const head=`<div class="fp-head">${faceImg(f)}<div><h2>${esc(f.full)}</h2><div class="meta">${P?P.age+" ปี · ":""}${f.camp==="player"?"ค่ายศิริชัย":f.lab?"ค่ายเวกเตอร์ กรุงเทพฯ":f.camp==="rival"?"ค่ายพยัคฆ์ทอง":"นักมวยอิสระ"} · รุ่น ${f.div} · ${styleOf(f.a)} · ${rec(f)}</div>${G.belt&&Object.values(G.belt).some(x=>x.id===f.id)?`<div class="beltb">🏆 แชมป์เวทีท่าแพ</div>`:f.belts?`<div class="beltb old">อดีตแชมป์เวทีท่าแพ</div>`:""}${xpBar(f)}</div></div>
    <div class="seg ptabs">${tabs.map(([k,n])=>`<button data-act="ptab" data-v="${k}" aria-pressed="${t===k}">${n}${k==="skill"&&skReady(f)?'<i class="tdot2"></i>':""}</button>`).join("")}</div>`;
   let body="";
   if(t==="look"){const cur=f.outfit||"base";
@@ -747,7 +748,7 @@ function montageHTML(){const M=UI.montage;
 // ---------- VN scene ----------
 // v1.8: warm portraits before they are needed so scenes don't pop in late
 const WARMED={};function warm(src){if(!src||WARMED[src])return;const i=new Image();i.src=src;WARMED[src]=i;}
-function warmChar(id,look){if(id==="coach"){warm(`${ASSET}coach.webp`);return;}if(!CANON_IDS.includes(id))return;
+function warmChar(id,look){if(id==="coach"){warm(`${ASSET}coach.webp`);return;}if(!CANON_IDS.includes(id)&&id!=="pailin")return;
   (look==="casual"?["happy","flustered","pout"]:["happy","sad","surprised","angry"]).forEach(m=>warm(stand(id,look,m)));}
 function warmSteps(steps,look){const walk=list=>(list||[]).forEach(st=>{if(!st)return;const n=typeof st.n==="function"?null:st.n;if(n)warmChar(n,st.l==="casual"?"casual":look==="casual"&&!st.l?"casual":"fight");
   if(st.with)warmChar(st.with,look==="casual"?"casual":"fight");if(st.bg&&BGIMG[st.bg])warm(ASSET+BGIMG[st.bg]);if(st.choice)st.choice.forEach(c=>walk(c.then));});walk(steps);}
@@ -765,7 +766,7 @@ function sceneNext(){const S=UI.scene;if(!S)return;
     if(st.show)S.cast=st.show.map(x=>({id:x.id,f:x.f||"happy",look:S.lookOf[x.id]||x.l||look,back:!!x.back}));
     if(n==="npc"){const im=npcImg(st);if(im)S.cast=[{id:"npc:"+im,f:"happy",look}];}
     if(n==="coach"){S.cast=[{id:"coach",f:"happy",look}];}           // the coach always stands alone
-    else if(CANON_IDS.includes(n)){const w=st.with&&st.with!=="coach"?st.with:null;let cast=S.cast.filter(c=>c.id!==n&&c.id!=="coach");
+    else if(CANON_IDS.includes(n)||n==="pailin"){const w=st.with&&st.with!=="coach"?st.with:null;let cast=S.cast.filter(c=>c.id!==n&&c.id!=="coach");
       if(w){cast=cast.filter(c=>c.id===w);if(!cast.length)cast=[{id:w,f:"happy",look:S.lookOf[w]||look}];}
       else if(cast.length>1)cast=cast.slice(-1);
       cast.push({id:n,f:S.cur.f,look});S.cast=cast.slice(-2);}
@@ -919,6 +920,7 @@ function fightFaceoff(b){const me=G.F[b.a],op=G.F[b.b],key=`${b.a}_${b.b}`,h=G.h
     {n:op.id,f:"angry",l:"fight",t:opener},
     {n:me.id,f:"angry",l:"fight",with:op.id,t:reply}];}
 function openFight(b,done){const op=G.F[b.b],k=`taunt_${b.a}_${b.b}_${stageOf(G.week)}`;
+  const lab=vectorFightScene(G,b);if(lab){playScene(lab,()=>openFight2(b,done),{bg:"hall",look:"fight"});return;}
   const prod=prodigyFightScene(G,b);if(prod){playScene(prod,()=>openFight2(b,done),{bg:"ring",look:"fight"});return;}
   if(!op.canon){openFight2(b,done);return;}
   let sc=null;const key=`${b.a}_${b.b}`;
@@ -952,7 +954,7 @@ function preCompare(me,op,b){const sc=scouted(op.id)||op.camp==="player";const v
     return `<div class="pcr"><b class="num ${sc&&x>y+.4?"goldt":""}">${x.toFixed(1)}</b><i class="pb l" style="--v:${clamp(x/20*100,0,100)}%"></i><span>${n}</span><i class="pb r" style="--v:${sc?clamp(y/20*100,0,100):0}%"></i><b class="num ${sc&&y>x+.4?"redt":""}">${sc?y.toFixed(1):"?"}</b></div>`;}).join("")}</div>`;}
 function fightHTML(){const U=UI.fight,b=U.b,me=G.F[b.a],op=G.F[b.b],F=U.F;
   const last=U.shown.filter(x=>x.ha!=null).slice(-1)[0];const sv=(s,k)=>F?(last?last[k]:s):100;
-  const side=(f,cls,hp,sta)=>`<div class="fside ${cls}"><div class="fn">${f.canon?`<img class="face sm" src="${faceSrc(f.id,"happy")}" alt="">`:""}<b>${esc(f.name)}</b><span class="meta">Lv.${f.lvl}</span></div>
+  const side=(f,cls,hp,sta)=>`<div class="fside ${cls}"><div class="fn">${f.canon||f.id==="pailin"?`<img class="face sm" src="${faceSrc(f.id,"happy")}" alt="">`:""}<b>${esc(f.name)}</b><span class="meta">Lv.${f.lvl}</span></div>
     <div class="meter"><i style="--v:${clamp(hp,0,100)}%;--bc:${hp>50?"var(--green)":hp>25?"var(--warn)":"var(--red)"}"></i></div><div class="meter thin"><i style="--v:${clamp(sta,0,100)}%;--bc:var(--gold)"></i></div></div>`;
   const hpA=F?sv(F.A.hp,"ha"):100,hpB=F?sv(F.B.hp,"hb"):100,stA=F?sv(F.A.sta,"sa"):100,stB=F?sv(F.B.sta,"sb"):100;
   let mid="";
@@ -1157,7 +1159,7 @@ function fightEnd(){const U=UI.fight;U.stage="done";{const w=U.F.result.win;U.bu
   {const op=G.F[U.b.b];if(r.win!=="D"&&!TIER[U.b.tier].off&&(op.canon||U.b.tier==="semi"||U.b.tier==="final"||/KO/.test(r.type)))G.lastBig={a:me.id,b:op.id,win:r.win,wk:G.week,shown:false};}
   if(r.win==="B"){const F=U.F,st=s=>({landed:s.landed,thrown:s.thrown,wl:{...s.wl},sta:Math.round(s.sta),kd:s.kd,legs:Math.round(s.legs)});
     G.losses=(G.losses||[]).concat([{wk:G.week,a:me.id,b:U.b.b,type:r.type,round:r.round,cards:F.cards.map(c=>[...c]),A:st(F.A),B:st(F.B),sc:scouted(U.b.b),od:Math.round(ovr(G.F[U.b.b])-ovr(me)),plan:U.plan||"balanced",tg:(F.A.tac&&F.A.tac.target)||"",care:U.careOK||0}]).slice(-6);}
-  U.afterScene=prodigyResultScene(G,U.b,r.win);
+  U.afterScene=prodigyResultScene(G,U.b,r.win)||vectorResultScene(G,U.b,r.win);
   save();render();}
 
 // ---------- actions ----------

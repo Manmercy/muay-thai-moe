@@ -7,7 +7,7 @@ const ME=G=>G.player.name,
  MEM=(G,k)=>{G.mem=G.mem||{};G.mem[k]=G.week;}, HAS=(G,k,gap)=>G.mem&&G.mem[k]!==undefined&&G.week-G.mem[k]>=(gap||0),
  CALL=(G,id)=>{const f=G.F[id],b=f?f.bond||0:0;if(G.romance===id||b>=75)return G.player.name;if(b>=40&&Math.random()<.35)return G.player.name;return "Manager";}, PR=G=>G.player.gender==="m"?"":"", PA=G=>G.player.gender==="m"?"":"";
 const SPK={kati:{name:"Kati",color:"#e23b4e"},mali:{name:"Mali",color:"#4a7fe0"},rin:{name:"Rin",color:"#3fae6a"},
-  ploy:{name:"Ploy",color:"#9b62e0"},fah:{name:"Fah",color:"#e7b443"},coach:{name:"Coach Daeng",color:"#c98a5a"},nar:{name:""},me:{name:"(You)"}};
+  ploy:{name:"Ploy",color:"#9b62e0"},fah:{name:"Fah",color:"#e7b443"},pailin:{name:"Pailin",color:"#8e4ac3"},coach:{name:"Coach Daeng",color:"#c98a5a"},nar:{name:""},me:{name:"(You)"}};
 // v1.7: bonds deepen by chapter — the ceiling rises as the season's story moves on
 const bondCap=G=>100;
 // v1.44: bond grows a bit faster, and the girls who join later catch up while still distant
@@ -1571,6 +1571,92 @@ function prodigyResultScene(G,b,win){if(!prodigyMatch(G,b))return null;const key
   {n:"ploy",f:win==="A"?"happy":"sad",l:"fight",t:win==="A"?"I'm back, but you fought well. You don't have to be my shadow.":"I lost today, but my knee is no excuse. You won on your own skill."},
   {n:"npc",who:"Petcha",t:"I thought there would be no place for me when you came back... Now I know there is room for both of us."},
   {n:"ploy",f:"happy",l:"fight",t:"Remember, we're still rivals in the next match. We can talk after we leave the ring."}];}
+
+// Year 4: Pailin, Ploy's older sister, brings Vector Gym to the province.
+EVENTS.push(
+ {id:"y4_pailin_arrive",pri:3,look:"fight",bg:"hall",when:G=>G.season===4&&G.week>=3&&!!G.F.pailin,steps:[
+  {n:"nar",t:"A black-and-purple van from Bangkok stops outside the provincial arena. Pailin Eksayam steps out with black gloves and a team carrying fight-analysis cameras."},
+  {n:"pailin",f:"happy",t:"I'm Pailin, Ploy's older sister. My Vector Gym uses sports science, but data alone doesn't win fights. Someone has to dare to step into the ring."},
+  {inject:G=>G.F.ploy&&G.F.ploy.met?[{n:"ploy",f:"surprised",t:"Pailin... You said you'd never come back here."},{n:"pailin",f:"angry",t:"I came back to see how much you've grown, Ploy."}]:[{n:"kati",f:"angry",t:"Sirichai accepts your challenge. But our fighters aren't test equipment."}]},
+  {n:"nar",t:"Pailin's name appears in the Division A rankings, and she challenges Sirichai Gym."}]},
+ {id:"y4_pailin_sister",pri:2,look:"casual",bg:"river",when:G=>G.season===4&&G.week>=17&&G.seen.y4_pailin_arrive&&!!G.F.ploy?.met,steps:[
+  {n:"nar",t:"Ploy looks at an old photo on her phone: teenage Pailin wrapping her hands before moving to Bangkok."},
+  {n:"ploy",f:"sad",t:"She used to protect me in every fight. Once she had a big gym, she started talking about people as numbers... I don't know whether she changed or is just afraid to lose."},
+  {choice:[{t:"Let Ploy talk to her sister herself",fx:G=>add(G,"ploy","trust",4),then:[{n:"ploy",f:"happy",t:"Yes. I need to ask my sister myself, not let anyone decide for me."}]},{t:"Tell Ploy she doesn't have to be her sister's shadow in the ring",fx:G=>add(G,"ploy","bond",4),then:[{n:"ploy",f:"angry",t:"I'll fight my way and show her myself."}]}]}]},
+ {id:"y4_pailin_warning",pri:2,look:"casual",bg:"camp",when:G=>G.season===4&&G.week>=34&&G.seen.y4_pailin_arrive,steps:[
+  {n:"nar",t:"Vector announces its return next year with new fighters Pailin recruited from provincial gyms."},
+  {n:"pailin",f:"angry",t:"This year I only came to size you up. Next year Night and Vega will join me. Let's see if Sirichai can keep up."},
+  {n:"kati",f:"angry",t:"Our gym won't run. But if you invite anyone to Bangkok, make sure they know every condition."}]}
+);
+
+// Years 5–6: Vector Gym arrives from Bangkok. The technology is useful; the
+// conflict is the gym treating provincial fighters as disposable test subjects.
+EVENTS.push(
+ {id:"y5_vector_arrive",pri:3,look:"casual",bg:"camp",when:G=>G.season===5&&G.week>=3&&!!G.F.vector_A,steps:[
+  {n:"nar",t:"A black-and-purple van stops outside Sirichai. Vector staff from Bangkok unload motion cameras and heart-rate monitors."},
+  {inject:G=>G.seen.y4_pailin_arrive?[{n:"pailin",f:"happy",t:"I told you I'd be back. This year Vector brought fighters I chose myself."}]:[{n:"pailin",f:"happy",t:"I'm Pailin Eksayam, Ploy's older sister and head of Vector Gym in Bangkok. This year I've come to see what Sirichai can do."}]},
+  {n:"npc",who:"Mesa · Vector Scout",t:"We travel to find promising provincial fighters. Pailin wants them in our sports-science program. We cover travel and testing."},
+  {n:"kati",f:"pout",t:"Why does the form call us 'test participants' more often than fighters?"},
+  {n:"pailin",f:"angry",t:"Accurate data can make fighters safer, but I need volunteers to measure everything and learn who's ready to fight."},
+  {choice:[{t:"Ask to see the contract and fighters' rights first",fx:G=>{add(G,"kati","trust",4);G.flags.vectorContract=1;},then:[{n:"npc",who:"Mesa",t:"...All right. There are pages I want you to read too."}]},{t:"Tell them our gym decides for itself, not as test subjects",fx:G=>{add(G,"kati","bond",4);G.rep+=.5;},then:[{n:"kati",f:"happy",t:"I'll enter the ring under Sirichai's name."}]}]}]},
+ {id:"y5_vector_fighters",pri:2,look:"fight",bg:"hall",when:G=>G.season===5&&G.week>=9&&!!G.F.vector_B,steps:[
+  {n:"nar",t:"At the press conference, Vector introduces Night in Division A and Vega in Division B. Both wear black-and-purple robes as heart-rate charts run behind them."},
+  {n:"npc",who:"Night · Division A",t:"I grew up in a small gym in Ubon. With motion analysis, I saw mistakes my old coach had no time to point out."},
+  {n:"npc",who:"Vega · Division B",t:"I like data. But when the machine says to rest and the gym tells us to train, no one listens to the machine."},
+  {n:"nar",t:"Both names are on this year's fight schedule, and Vector starts sending challenges to Sirichai."}]},
+ {id:"y5_vector_contract",pri:3,look:"casual",bg:"night",when:G=>G.season===5&&G.week>=18&&G.seen.y5_vector_arrive,steps:[
+  {n:"nar",t:"Mesa returns with a revised contract. She circles the clause allowing the gym to keep a fighter's body data even after she leaves."},
+  {n:"npc",who:"Mesa",t:"I thought taking small-town fighters to Bangkok was helping them. Some were cut as soon as their test results slipped... I won't invite anyone without telling them that again."},
+  {n:"pailin",f:"angry",t:"I wrote those rules. If they hurt fighters, I have to change them. But I won't stop fighting to win."},
+  {inject:G=>inCamp(G,"rin")?[{n:"rin",f:"angry",t:"Data can help plan a fight, but the fighter owns it, not the gym."}]:[{n:"kati",f:"angry",t:"The fighter owns her body. No gym does."}]},
+  {choice:[{t:"Ask Mesa to revise the contract and let fighters decide",fx:G=>{G.flags.vectorEthics=1;add(G,"rin","trust",5);},then:[{n:"npc",who:"Mesa",t:"Thank you. I'll take that message to my boss."}]},{t:"Warn the province's fighters about the contract",fx:G=>{G.flags.vectorEthics=2;G.rep+=1;},then:[{n:"kati",f:"angry",t:"Anyone can choose to change gyms, but they should know what they're signing."}]}]}]},
+ {id:"y5_vector_challenge",pri:2,look:"casual",bg:"hall",when:G=>G.season===5&&G.week>=39&&G.seen.y5_vector_fighters,steps:[
+  {n:"nar",t:"Near year's end, Vector returns to the provincial arena with a thick report. Pailin says statistics predict nearly every bout."},
+  {n:"pailin",f:"happy",t:"The part the numbers can't predict is why I still step into the ring myself."},
+  {n:"kati",f:"happy",t:"So there is still something in the ring they can't predict, right?"},
+  {inject:G=>G.h2h&&((G.h2h.vector_A||{}).w||(G.h2h.vector_B||{}).w)?[{n:"npc",who:"Night",t:"I've lost once already. The numbers didn't predict how much you would change plans between rounds."}]:[{n:"npc",who:"Vega",t:"If we meet again, I want to fight without fearing that a post-fight test will remove me from the team."}]},
+  {n:"nar",t:"Vector has not gone back to Bangkok. They will challenge Sirichai again next season."}]},
+ {id:"y6_vector_return",pri:3,look:"casual",bg:"camp",when:G=>G.season===6&&G.week>=4&&!!G.F.vector_A,steps:[
+  {n:"nar",t:"The same black-and-purple van returns. This time Night and Vega step out before the staff, each carrying a training plan they revised themselves."},
+  {n:"pailin",f:"angry",t:"My fighters chose their own plans this year. And I'll prove the gym's boss can still fight."},
+  {n:"npc",who:"Night",t:"I stayed at Vector because analysis really helps me. This year, I decide when to stop."},
+  {n:"npc",who:"Vega",t:"Pailin lets us choose our own bouts now, after Mesa put the whole team's contracts on her desk."},
+  {n:"kati",f:"happy",t:"Good. Then we'll meet in the ring because we all want to fight."}]},
+ {id:"y6_vector_methods",pri:2,look:"casual",bg:"gym",when:G=>G.season===6&&G.week>=22&&G.seen.y6_vector_return,steps:[
+  {n:"nar",t:"Vector offers to share recovery data with Sirichai in exchange for anonymous data, with each fighter free to withdraw consent."},
+  {inject:G=>inCamp(G,"rin")?[{n:"rin",f:"happy",t:"We can audit this method. I'd like to try it, but let me explain it to every fighter first."}]:[{n:"kati",f:"happy",t:"If everyone gets to choose, I'd like to try a new recovery method."}]},
+  {choice:[{t:"Try it with each fighter's consent (trust +3 · fatigue −4)",fx:G=>{roster(G).forEach(f=>{add(G,f.id,"trust",3);f.fatigue=Math.max(0,f.fatigue-4);});G.flags.vectorMethod=1;},then:[{n:"npc",who:"Mesa",t:"There is no fine print hiding anyone's rights this time."}]},{t:"Ask Vector to publish its research first",fx:G=>{G.flags.vectorMethod=2;G.rep+=1;},then:[{n:"npc",who:"Dr. Wira",t:"Agreed. I'll remove personal details, then publish the full methods."}]}]}]},
+ {id:"y6_vector_resolve",pri:2,look:"casual",bg:"hall",when:G=>G.season===6&&G.week>=42&&G.seen.y6_vector_methods,steps:[
+  {n:"nar",t:"At the year-end event, Mesa posts a new sign by Vector's corner: 'Fighters may stop tests, stop training, and take their data home.'"},
+  {n:"pailin",f:"sad",t:"I thought winning made everything right. If fighters have no choice, even good data can be used badly."},
+  {n:"pailin",f:"angry",t:"But if we meet in the ring again, I won't hold back against anyone, including Ploy."},
+  {n:"npc",who:"Vega",t:"But we still won't go easy on Sirichai in the ring."},
+  {n:"kati",f:"happy",t:"Great! Come back and fight us again next year!"}]},
+ {id:"vector_annual_return",annual:true,pri:2,look:"casual",bg:"camp",when:G=>G.season>=7&&G.week>=5&&!!G.F.vector_A,steps:[
+  {n:"nar",t:G=>`Year ${G.season} Vector's black-and-purple van returns to Sirichai. Pailin, Night, and Vega bring a new challenge.`},
+  {n:"pailin",f:"happy",t:"I'm stronger again this year. You are too, aren't you? Prove it in the ring."},
+  {n:"npc",who:"Mesa",t:"This year we can compare training results openly. The data still belongs to the fighters."},
+  {n:"kati",f:"happy",t:"Challenge accepted. Just make sure everyone gets the rest they planned for."}]},
+ {id:"vector_annual_plan",annual:true,pri:2,look:"casual",bg:"hall",when:G=>G.season>=7&&G.week>=28&&!!G.F.vector_B,steps:[
+  {n:"nar",t:"Before the midyear bout, Vector sends tapes of Night and Vega and asks to exchange training plans."},
+  {choice:[{t:"Share training data after asking the fighters (trust +2)",fx:G=>roster(G).forEach(f=>add(G,f.id,"trust",2)),then:[{inject:G=>inCamp(G,"rin")?[{n:"rin",f:"happy",t:"Data works when everyone involved consents."}]:[{n:"kati",f:"happy",t:"Everyone chose for themselves. That feels right."}]}]},{t:"Keep our plan private and meet them in the ring (morale +4)",fx:G=>roster(G).forEach(f=>add(G,f.id,"morale",4)),then:[{n:"npc",who:"Night",t:"Good. I like a plan I have to read during the fight."}]}]}]}
+);
+function vectorFightScene(G,b){const op=G.F[b.b];if((G.season||1)<4||!op||!op.lab)return null;G.seenY=G.seenY||{};
+  const key="vector_face_"+op.id,first=G.seenY[key]!==G.season;G.seenY[key]=G.season;
+  if(op.id==="pailin")return [{n:"nar",t:first?"Pailin enters in black and purple, looking past the analysis screen straight at Sirichai's corner.":"Pailin challenges Sirichai again, wearing the same fierce grin."},
+    {n:"pailin",f:"angry",l:"fight",t:b.a==="ploy"?(first?"Ploy, don't hide behind your gym's name. Show me your own Muay Thai!":"Last time wasn't enough. I want to see you fight again."):(first?"The data says I'll win, but I want to see you fall with my own eyes.":"I trained harder this year. Come on!")},
+    {n:b.a,f:"angry",l:"fight",t:b.a==="ploy"?"I'll fight under my own name. Watch closely, sis.":"Sirichai Gym is ready."}];
+  return [{n:"nar",t:first?`A Vector fighter in black and purple enters the ring. A screen behind her charts the movements of ${G.F[b.a].name}`:`${op.name} meets Sirichai again. This time the analysis screen goes dark before the bell.`},
+    {n:"npc",who:op.name,t:op.id==="vector_A"?(first?"I've watched every round of your tape, but I'll make my own decisions in the ring.":"This time I'll read you with my own eyes, not just a graph."):(first?"The monitor told me to rest yesterday. I did, and I'm ready today.":"Data helps, but the final answer is in the gloves.")},
+    {n:b.a,f:"angry",l:"fight",t:"Then let's settle it in the ring."}];}
+function vectorResultScene(G,b,win){const op=G.F[b.b];if((G.season||1)<4||!op||!op.lab)return null;G.seenY=G.seenY||{};
+  const key="vector_result_"+op.id;if(G.seenY[key]===G.season)return null;G.seenY[key]=G.season;
+  if(op.id==="pailin")return [{n:"nar",t:"After the bell, Pailin takes off one glove and walks over to her opponent herself."},
+    {n:"pailin",f:win==="A"?"surprised":"happy",l:"fight",t:b.a==="ploy"?(win==="A"?"Ploy... You really beat me with your own style.":"Losing today isn't the end for you. Come fight your sister again."):(win==="A"?"Good! I lost today, but I'll be stronger next year.":"Don't stop training. I'll be back next year.")},
+    {inject:G=>b.a==="ploy"?[{n:"ploy",f:"happy",l:"fight",t:"See you next year, sis. Let's talk after we leave the ring this time."}]:[{n:b.a,f:"happy",l:"fight",t:"Challenge accepted. See you next year."}]}];
+  return [{n:"nar",t:"After the bout, the Vector fighter removes her own heart-rate strap before touching gloves with the Sirichai fighter."},
+    {n:"npc",who:op.name,t:win==="A"?"You read me today. My next dataset starts with this fight.":"I won today, but I don't expect you to fight the same way next time."},
+    {n:b.a,f:"happy",l:"fight",t:"See you next year. We'll fight just as hard."}];}
 
 // ===== v1.55: character cards (round 1) — earned in play, collected in an album, each one replays a side story =====
 const CARD_R={N:{s:1,c:"#9aa3b5"},R:{s:2,c:"#4a9be0"},SR:{s:3,c:"#c46be0"},SSR:{s:4,c:"#f2c94c"}};
