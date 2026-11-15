@@ -32,6 +32,7 @@ const AU={ctx:null,master:null,music:null,sfxBus:null,crowdG:null,timer:null,ste
     if(kind==="bell1"){[1,2.76,5.4].forEach((m,k)=>this.tone(t,{f:880*m,dur:1.4/(k+1),peak:.35/(k+1)}));}
     if(kind==="ui"){this.tone(t,{f:880,type:"square",dur:.035,peak:.16});this.tone(t+.035,{f:1320,type:"square",dur:.04,peak:.12});}
     if(kind==="win"){[523,659,784,1047].forEach((f,i)=>this.tone(t+i*.12,{f,type:"square",dur:i===3?.45:.12,peak:.18}));this.cheer(1);}
+    if(kind==="champ"){[392,523,659,784,1047].forEach((f,i)=>this.tone(t+i*.13,{f,type:"triangle",dur:i===4?1.1:.3,peak:.22}));this.noiseHit(t+.7,{f:3300,type:"highpass",dur:.7,peak:.25});this.cheer(1);}
     if(kind==="lose"){[392,349,311,262].forEach((f,i)=>this.tone(t+i*.22,{f,type:"triangle",dur:i===3?.6:.22,peak:.2}));}
     if(kind==="tick"){this.tone(t,{f:1500,type:"triangle",dur:.03,peak:.14});}
     if(kind==="choose"){this.tone(t,{f:660,type:"square",dur:.05,peak:.14});this.tone(t+.05,{f:990,type:"square",dur:.06,peak:.12});}
@@ -43,8 +44,8 @@ const AU={ctx:null,master:null,music:null,sfxBus:null,crowdG:null,timer:null,ste
   MEL:[69,0,71,69,67,0,64,67,69,0,0,67,64,62,64,0,67,69,71,74,71,69,67,0,64,67,69,67,64,62,0,0],
   mode:"fight",
   startMusic(mode="fight"){if(!this.init())return;this.resume();{const g=this.crowdG.gain,t=this.ctx.currentTime;g.cancelScheduledValues(t);g.setValueAtTime(g.value,t);g.setTargetAtTime(this.muted||mode!=="fight"?0:.03,t,.3);}if(!SETTINGS.music)return;
-    const prev=this.mode;this.mode=mode;this.tempo=mode==="hub"?84:mode==="title"?148:mode==="date"?70:mode==="waikhru"?62:Math.max(this.tempo,120);
-    if(this.music)this.music.gain.setTargetAtTime(mode==="hub"?.2:mode==="title"?.3:mode==="date"?.22:.32,this.ctx.currentTime,.4);
+    const prev=this.mode;this.mode=mode;this.tempo=mode==="hub"?84:mode==="title"?148:mode==="victory"?144:mode==="date"?70:mode==="waikhru"?62:Math.max(this.tempo,120);
+    if(this.music)this.music.gain.setTargetAtTime(mode==="hub"?.2:mode==="title"?.3:mode==="victory"?.36:mode==="date"?.22:.32,this.ctx.currentTime,.4);
     this.crowdG.gain.setTargetAtTime(this.muted||mode!=="fight"?0:.03,this.ctx.currentTime,.5);
     if(this.playing)return;this.playing=true;this.step=0;this.next=this.ctx.currentTime+.1;
     this.timer=setInterval(()=>this.sched(),25);},
@@ -53,7 +54,7 @@ const AU={ctx:null,master:null,music:null,sfxBus:null,crowdG:null,timer:null,ste
   setTempo(b){this.tempo=b;},
   sched(){const c=this.ctx;const spb=60/this.tempo/2;while(this.next<c.currentTime+.12){this.playStep(this.step,this.next,spb);this.next+=spb;this.step=(this.step+1)%32;}},
   HUB:[76,0,79,0,81,79,76,0,74,0,76,0,0,0,72,74,76,0,79,81,84,0,81,79,76,0,74,72,74,0,0,0],
-  playStep(s,t,spb){const m=this.music,st=s%16;if(this.mode==="hub"){this.hubStep(s,t,spb);return;}if(this.mode==="title"){this.titleStep(s,t,spb);return;}if(this.mode==="date"){this.dateStep(s,t,spb);return;}if(this.mode==="waikhru"){this.waiStep(s,t,spb);return;}
+  playStep(s,t,spb){const m=this.music,st=s%16;if(this.mode==="hub"){this.hubStep(s,t,spb);return;}if(this.mode==="title"){this.titleStep(s,t,spb);return;}if(this.mode==="victory"){this.victoryStep(s,t,spb);return;}if(this.mode==="date"){this.dateStep(s,t,spb);return;}if(this.mode==="waikhru"){this.waiStep(s,t,spb);return;}
     // ching (open on 0, closed "chap" on 8)
     if(st===0)[2600,3900,5200].forEach((f,k)=>this.tone(t,{f,dur:.5/(k+1),peak:.08/(k+1),bus:m}));
     if(st===8)this.tone(t,{f:3100,dur:.06,peak:.08,bus:m});
@@ -65,6 +66,14 @@ const AU={ctx:null,master:null,music:null,sfxBus:null,crowdG:null,timer:null,ste
       o.type="sawtooth";o2.type="square";o.frequency.value=f;o2.frequency.value=f*1.003;lfo.frequency.value=6;lg.gain.value=f*.012;lfo.connect(lg);lg.connect(o.frequency);lg.connect(o2.frequency);
       bp.type="bandpass";bp.frequency.value=1500;bp.Q.value=1.6;const dur=spb*1.9;g.gain.setValueAtTime(.0001,t);g.gain.exponentialRampToValueAtTime(.16,t+.03);g.gain.exponentialRampToValueAtTime(.0001,t+dur);
       o.connect(bp);o2.connect(bp);bp.connect(g);g.connect(m);[o,o2,lfo].forEach(x=>{x.start(t);x.stop(t+dur+.05);});}
+  },
+  // Championship fanfare: brass-like lead over a rising bass, ching and arena drums.
+  VICTORY:[72,0,76,79,84,0,79,76,77,0,81,84,89,0,84,81,79,0,83,86,91,0,86,83,84,0,79,76,72,0,72,84],
+  victoryStep(s,t,spb){const m=this.music,st=s%8,n=this.VICTORY[s],ch=[[48,52,55],[53,57,60],[55,59,62],[48,52,55]][Math.floor(s/8)];
+    if(st===0){ch.forEach((v,i)=>this.tone(t,{f:440*Math.pow(2,(v-69)/12),type:"sawtooth",dur:spb*7,peak:i===0?.09:.045,bus:m}));this.tone(t,{f:130,to:65,dur:.22,peak:.3,bus:m});}
+    if(st===4)this.tone(t,{f:420,to:250,dur:.08,peak:.17,bus:m});
+    if(st%2===0)this.tone(t,{f:2700,dur:.15,peak:.035,bus:m});
+    if(n){const f=440*Math.pow(2,(n-69)/12);this.tone(t,{f,type:"sawtooth",dur:spb*1.35,peak:.09,bus:m});this.tone(t,{f:f*2,type:"sine",dur:spb*.9,peak:.035,bus:m});}
   },
   // v1.12 wai khru: slow pi java over sparse klong khaek and ringing ching
   WAI:[64,0,0,0,67,0,69,0,67,0,64,0,62,0,0,0,64,0,67,0,69,0,72,0,69,0,67,0,64,0,0,0],

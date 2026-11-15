@@ -1,5 +1,5 @@
 // ================= MUAY THAI MOE v1.3 — UI =================
-const VERSION="1.80.15";
+const VERSION="1.80.16";
 const CUR_LANG=(typeof window!=="undefined"&&window.LANG)||"th";
 const TH_LABEL=String.fromCharCode(3652,3607,3618);
 function langSwitch(cls){return `<div class="langsw ${cls||""}" role="group" aria-label="Language">${[["th",TH_LABEL],["en","EN"]].map(([k,l])=>`<button class="lsb ${CUR_LANG===k?"on":""}" data-act="setlang" data-v="${k}" aria-pressed="${CUR_LANG===k}">${l}</button>`).join("")}</div>`;}
@@ -513,10 +513,11 @@ function campLvHTML(){const lv=campLevel(G),t=facTotal(G),need=[0,0,5,13];
     <ul><li>ค่าเรียน ${L>1?`+${(L-1)*20}%`:"ปกติ"}</li><li>คนอยากมาเรียน +${L*2}</li><li>จ้างครูผู้ช่วยได้ ${1+L} คน</li>${L>1?"<li>ห้องซ้อมเปลี่ยนโฉม</li>":""}${u.length?`<li class="goldt">ปลดล็อก: ${u.join(", ")}</li>`:""}</ul></div>`;}).join("")}</div>
    <button class="btn primary" data-act="gofac">ไปหน้าอัปเกรดค่าย</button>`;}
 // v1.50: the camp's hall of fame — one row per finished year, plus belts held now
-function hallHTML(){const T=(G.titles||[]).slice().reverse(),belts=Object.entries(G.belt||{}).filter(([d,b])=>G.F[b.id]&&G.F[b.id].camp==="player");
+function hallHTML(){const T=(G.titles||[]).slice().reverse(),H=(G.honors||[]).slice().reverse(),belts=Object.entries(G.belt||{}).filter(([d,b])=>G.F[b.id]&&G.F[b.id].camp==="player");
   const yr=t=>{const res=t.res||Object.entries(t.champ||{}).filter(([d,id])=>G.F[id]&&G.F[id].camp==="player").map(([d,id])=>({name:G.F[id].name,d,t:"แชมป์จังหวัด",c:"gold"}));
     return `<div class="hall-y"><b>ปีที่ ${t.season}</b>${res.length?res.map(r=>`<div class="kv-row"><span>${esc(r.name)} · รุ่น ${r.d}</span><span class="pill ${r.c||""}">${r.t}</span></div>`).join(""):'<p class="meta">ปีนั้นยังไม่ผ่านรอบตำบล แต่ค่ายยังอยู่ครบ</p>'}</div>`;};
-  return `${belts.length?`<div class="hall-y"><b>เข็มขัดที่ครองอยู่</b>${belts.map(([d,b])=>`<div class="kv-row"><span>${esc(G.F[b.id].name)} · รุ่น ${d}</span><span class="pill gold">🏆 แชมป์เวทีท่าแพ · ป้องกัน ${b.def} ครั้ง</span></div>`).join("")}</div>`:""}
+  return `${H.length?`<div class="hall-y"><b>ชัยชนะสำคัญ</b>${H.map(h=>`<div class="kv-row"><span>${esc(G.F[h.id]?.name||h.id)} · รุ่น ${h.div} · ${h.season?`ปี ${h.season} สัปดาห์ ${h.week}`:"ผลงานก่อนอัปเดต"}</span><span class="pill gold">🏆 ${honorLabel(h.kind)}</span></div>`).join("")}</div>`:""}
+   ${belts.length?`<div class="hall-y"><b>เข็มขัดที่ครองอยู่</b>${belts.map(([d,b])=>`<div class="kv-row"><span>${esc(G.F[b.id].name)} · รุ่น ${d}</span><span class="pill gold">🏆 แชมป์เวทีท่าแพ · ป้องกัน ${b.def} ครั้ง</span></div>`).join("")}</div>`:""}
    ${T.length?T.map(yr).join(""):`<p class="meta">ยังไม่ครบปีแรก · จบปีแล้วผลงานของทุกคนจะมาอยู่ที่นี่ ปีละหนึ่งแถว</p>`}`;}
 function campHTML(){const inc=classIncome(G),up=upkeep(G),wg=wages(G),lv=campLevel(G),cs=UI.csub||"money";
   const recs=[["mali",G.flags.maliRecruit],["rin",G.flags.rinRecruit]].filter(([id,ok])=>ok&&G.F[id].camp==="free");
@@ -752,7 +753,9 @@ function warmChar(id,look){if(id==="coach"){warm(`${ASSET}coach.webp`);return;}i
   (look==="casual"?["happy","flustered","pout"]:["happy","sad","surprised","angry"]).forEach(m=>warm(stand(id,look,m)));}
 function warmSteps(steps,look){const walk=list=>(list||[]).forEach(st=>{if(!st)return;const n=typeof st.n==="function"?null:st.n;if(n)warmChar(n,st.l==="casual"?"casual":look==="casual"&&!st.l?"casual":"fight");
   if(st.with)warmChar(st.with,look==="casual"?"casual":"fight");if(st.bg&&BGIMG[st.bg])warm(ASSET+BGIMG[st.bg]);if(st.choice)st.choice.forEach(c=>walk(c.then));});walk(steps);}
-function playScene(steps,done,opts={}){warmSteps(steps,opts.look||"fight");if(opts.bg&&BGIMG[opts.bg])warm(ASSET+BGIMG[opts.bg]);UI.scene={steps:[...steps],i:0,done,bg:opts.bg||"night",look:opts.look||"fight",cur:null,cast:[],coachOK:!!opts.coachOK};sceneNext();}
+function playScene(steps,done,opts={}){warmSteps(steps,opts.look||"fight");if(opts.bg&&BGIMG[opts.bg])warm(ASSET+BGIMG[opts.bg]);UI.scene={steps:[...steps],i:0,done,bg:opts.bg||"night",look:opts.look||"fight",cur:null,cast:[],coachOK:!!opts.coachOK,award:opts.award||null};sceneNext();}
+function playHonorQueue(done){const h=(G.awards||[])[0];if(!h){AU.startMusic("hub");if(done)done();return;}AU.startMusic("victory");AU.sfx("champ");
+  playScene(honorSteps(G,h),()=>{G.awards.shift();save();playHonorQueue(done);},{bg:"hall",look:"fight",award:h});}
 function sceneNext(){const S=UI.scene;if(!S)return;
   while(S.i<S.steps.length){const st=S.steps[S.i];
     if(st.inject){const more=st.inject(G)||[];S.steps.splice(S.i,1,...more);continue;}
@@ -784,6 +787,7 @@ function sceneHTML(){const S=UI.scene,c=S.cur||{};const sp=c.n==="coach"?{name:c
   const tag="";
   return `<div class="vn" role="dialog" aria-label="ฉากเนื้อเรื่อง"><div class="vbg bg-${S.bg==="camp"?"gym":S.bg}" ${bgKey?`style="background-image:url(${ASSET}${bgKey})"`:""}></div>${S.bg==="night"?'<div class="vnight"></div>':""}
    <div class="cast ${(S.cast||[]).length>1?"duo":""}">${cast}</div>
+   ${S.award?`<div class="awardfx" aria-hidden="true">${Array.from({length:24},(_,i)=>`<i style="--i:${i}"></i>`).join("")}<div class="awardbelt"><span class="strap"></span><span class="seal">★</span><span class="strap"></span></div><div class="awardname">${esc(honorLabel(S.award.kind))}</div></div>`:""}
    ${c.choice?"":`<button class="vtap" data-act="vnext" aria-label="ไปต่อ"></button>`}
    <div class="vbox px" data-act="${c.choice?"":"vnext"}" style="--c:${sp.color||"var(--gold)"}">
     ${c.choice?`<div class="choices">${(UI._ck!==c?(UI._ck=c,UI._ct=Date.now()):0,"")}${c.choice.map((o,i)=>{const t=val(o.t),m0=t.match(/^(.*?)\s*\(([^()]*)\)\s*$/),m=m0&&m0[1].trim()?m0:null,act=m0&&!m0[1].trim();return `<button data-act="vchoose" data-v="${i}" ${act?'class="cact"':""}>${esc(act?m0[2]:m?m[1]:t)}${m?`<small class="cfx">${esc(m[2])}</small>`:""}</button>`;}).join("")}</div>`:
@@ -835,7 +839,8 @@ function weeklyExtra(done){const rng=mulberry32(G.seed+G.week*313);if(typeof que
   const chats2=chats.filter(c=>!c.need2||c.need2(G)),haps2=haps.filter(h=>!h.need||h.need(G));
   let pick=null;if(chats2.length&&rng()<.6)pick=chats2[Math.floor(rng()*chats2.length)];else if(haps2.length&&rng()<.7)pick=haps2[Math.floor(rng()*haps2.length)];
   if(!pick){done();return;}G.seen[pick.id]=true;playScene(pick.steps,done,{bg:pick.bg==="camp"?"gym":pick.bg,look:pick.look||"train"});}
-function afterWeekFlow(){if(typeof cardCheck==="function"){const got=cardCheck(G);if(got.length){G.cardPend=(G.cardPend||[]).concat(got);}}if(typeof mailWeekly==="function"&&!G.ended)mailWeekly(G);if(typeof chatWeekly==="function"&&!G.ended)chatWeekly(G);runEvents(played=>{const fin=()=>{if(G.ended){startEnding();return;}
+function afterWeekFlow(){playHonorQueue(afterWeekFlowMain);}
+function afterWeekFlowMain(){if(typeof cardCheck==="function"){const got=cardCheck(G);if(got.length){G.cardPend=(G.cardPend||[]).concat(got);}}if(typeof mailWeekly==="function"&&!G.ended)mailWeekly(G);if(typeof chatWeekly==="function"&&!G.ended)chatWeekly(G);runEvents(played=>{const fin=()=>{if(G.ended){startEnding();return;}
     if(typeof cardCheck==="function"){const g2=cardCheck(G);if(g2.length)G.cardPend=(G.cardPend||[]).concat(g2);}relTierCheck();if(typeof OUTFITS!=="undefined"){G.outSeen=G.outSeen||{};const nu=Object.keys(OUTFITS).filter(k=>k!=="base"&&k!=="heart"&&!G.outSeen[k]&&outfitOk(G,null,k));nu.forEach(k=>G.outSeen[k]=1);if(nu.length)setTimeout(()=>toast(`ปลดล็อกชุดใหม่: ${nu.map(k=>OUTFITS[k].name).join(", ")} · เปลี่ยนได้ที่โปรไฟล์นักมวย แท็บ "ชุด"`),400);}if(UI.relUp&&UI.relUp.length){const m=UI.relUp.join(" / ");UI.relUp=[];setTimeout(()=>toast("♥ "+m),300);}
     if(G.levelUps&&G.levelUps.length){const ids=[...new Set(G.levelUps)];G.levelUps=[];AU.sfx("level");UI.modal={type:"levelup",ids};}else if((G.cardPend||[]).length){AU.sfx&&AU.sfx("level");UI.modal={type:"cardnew"};}render();};
     const go=()=>coachBackScene(()=>aftermathScene(()=>tiredScene(()=>rinScene(fin))));if(played)go();else weeklyExtra(go);});}
@@ -1318,7 +1323,7 @@ const ACT={
   towelyes:()=>{UI.confirmTowel=false;const U=UI.fight;throwTowel(U.F);U.shown.push({s:"x",t:`มุม${G.F[U.b.a].name}โยนผ้าขาวยอมแพ้`});fightEnd();},
   withdraw:()=>{const U=UI.fight;G.bookings=G.bookings.filter(x=>x!==U.b);G.rep=Math.max(0,G.rep-1);add(G,U.b.a,"trust",3);
     G.log.push(`${G.F[U.b.a].name} ถอนตัวเพราะบาดเจ็บ`);const done=U.done;UI.fight=null;render();done();},
-  fdone:()=>{const done=UI.fight.done,after=UI.fight.afterScene;AU.startMusic("hub");UI.fight=null;render();if(after)playScene(after,done,{bg:"ring",look:"fight"});else done();},
+  fdone:()=>{const done=UI.fight.done,after=UI.fight.afterScene;UI.fight=null;render();playHonorQueue(()=>{if(after)playScene(after,done,{bg:"ring",look:"fight"});else done();});},
   gatego:()=>{const v=((document.getElementById("gatecode")||{}).value||"").toUpperCase().replace(/\s+/g,"");let ok=false;try{ok=btoa(v)===GATE.code;}catch(e){}
     if(ok){G.unlocked=true;try{localStorage.setItem(GATE.key,"1");}catch(e){}UI.gateErr=false;save();AU.sfx("level");toast("ปลดล็อกแล้ว! เล่นต่อปีที่ 2 ได้เลย");}else{UI.gateErr=true;AU.sfx("miss");}render();},
   newseason:()=>{if(!gateOpen())return;const res=seasonResult().map(r=>({id:r.f.id,name:r.f.name,d:r.d,t:r.t,c:r.c}));newSeason(G);const T=G.titles[G.titles.length-1];if(T)T.res=res;UI.ending=null;UI.tab="home";UI.advCache={};save();AU.startMusic("hub");

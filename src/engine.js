@@ -401,7 +401,7 @@ function newGame(opts){
   const seed=(opts.seed??Math.floor(Math.random()*1e9))>>>0;const rng=mulberry32(seed);
   const G={v:1,seed,week:1,diff:opts.diff||"normal",player:{name:opts.name||"ต้น",gender:opts.gender||"m"},cash:60000,debt:120000,rep:5,
     fac:{gym:0,recovery:0,classroom:0,brand:0,dorm:0,kitchen:0,hill:0,video:0,ring:0,clinic:0,shrine:0,van:0,sauna:0,lights:0,hall:0,daeng:1,assistants:0},stu:1,staff:[],rankMove:{A:{},B:{}},camp:{beauty:0},campUsed:null,levelUps:[],avatar:opts.avatar||null,F:{},rank:{A:{},B:{}},qual:{A:[],B:[]},finalists:{A:[],B:[]},semis:{A:[],B:[]},champ:{},
-    bookings:[],offers:[],log:[],flags:{},seen:{},freeUsed:false,negWeeks:0,history:[],ended:null,lastReport:null,romance:null};
+    bookings:[],offers:[],log:[],flags:{},seen:{},freeUsed:false,negWeeks:0,history:[],honors:[],awards:[],ended:null,lastReport:null,romance:null};
   for(const [id,d] of Object.entries(CANON))G.F[id]=baseFighter(id,d);
   for(const div of ["A","B"])NPC_NAMES[div].forEach(([n,l],i)=>{const id=`n${div}${i}`;G.F[id]=baseFighter(id,mkNPC(id,n,div,l,rng,i));});
   for(const f of Object.values(G.F))startLv(f);
@@ -454,7 +454,16 @@ function fireStaff(G,k){G.staff=(G.staff||[]).filter(x=>x!==k);G.fac.assistants=
 function fixSave(G){if(G&&G.flags&&G.flags.beat_ploy&&G.flags.beatS_ploy==null)G.flags.beatS_ploy=G.season||1; /* v1.59: old saves that already beat Ploy keep it */if(G&&G.coachAway&&G.coachAway-G.week>4)G.coachAway=null; /* v1.55.1: a leave from last year must not carry into the new year */
 if(G.F)for(const id in G.F){const f=G.F[id];if(f&&hasTree(id)&&!f.spv){f.sp=(f.sp||0)+2*Math.max(0,(f.lvl||1)-1);f.spv=2;}}G.fac=G.fac||{};for(const k of Object.keys(FACILITIES))G.fac[k]=G.fac[k]||0;G.fac.daeng=G.fac.daeng||1;
   if(!G.staff){G.staff=["nok","paeng"].slice(0,G.fac.assistants||0);}G.fac.assistants=G.staff.length;
-  if(G.stu==null)G.stu=Math.min(studentCap(G),studentDemand(G));G.mail=G.mail||[];G.cal=G.cal||[];lateSeasonOpposition(G);return G;}
+  if(G.stu==null)G.stu=Math.min(studentCap(G),studentDemand(G));G.mail=G.mail||[];G.cal=G.cal||[];
+  if(!Array.isArray(G.honors)){G.honors=[];for(const t of G.titles||[])for(const [div,id] of Object.entries(t.champ||{}))if(G.F[id]?.camp==="player")G.honors.push({key:`${t.season}:province:${div}`,season:t.season,week:49,id,div,kind:"province"});
+    for(const [div,id] of Object.entries(G.champ||{}))if(G.F[id]?.camp==="player")G.honors.push({key:`${G.season||1}:province:${div}`,season:G.season||1,week:49,id,div,kind:"province"});
+    (G.dmLog||[]).forEach((x,i)=>{if(G.F[x.champ]?.camp==="player")G.honors.push({key:`legacy:dm:${i}`,season:null,week:x.wk,id:x.champ,div:G.F[x.champ].div,kind:"dm"});});
+    for(const [div,b] of Object.entries(G.belt||{}))if(G.F[b.id]?.camp==="player")G.honors.push({key:`legacy:belt:${div}`,season:null,week:b.since||0,id:b.id,div,kind:"belt"});
+    for(const f of Object.values(G.F))if(f.camp==="player"&&f.belts>0&&!G.honors.some(h=>h.kind==="belt"&&h.id===f.id))G.honors.push({key:`legacy:belt:${f.id}`,season:null,week:0,id:f.id,div:f.div,kind:"belt"});}
+  G.awards=Array.isArray(G.awards)?G.awards:[];lateSeasonOpposition(G);return G;}
+function recordHonor(G,kind,id,div,week=G.week){if(!G.F[id]||G.F[id].camp!=="player")return null;G.honors=G.honors||[];G.awards=G.awards||[];
+  const season=G.season||1,key=`${season}:${kind}:${div}:${kind==="dm"||kind==="belt"||kind==="defense"?week:id}`;
+  if(G.honors.some(h=>h.key===key))return null;const h={key,season,week,id,div,kind};G.honors.push(h);G.awards.push(h);return h;}
 const DAENG_COST=[0,15000,30000];
 function facTotal(G){return Object.keys(FACILITIES).reduce((s,k)=>s+(G.fac[k]||0),0)+(G.fac.daeng-1);}
 function campLevel(G){const t=facTotal(G);return t>=13?3:t>=5?2:1;}
@@ -659,12 +668,14 @@ function standings(G,div){
 function stageTransition(G){ // called after week's results, before week++
   const rng=mulberry32(G.seed+G.week*31);
   if(G.week===20){
+    for(const div of ["A","B"]){const lead=standings(G,div)[0];if(lead)recordHonor(G,"local",lead.id,div);}
     for(const div of ["A","B"]){G.qual[div]=storyTop4(G,div);}
     for(const div of ["A","B"]){NPC_DISTRICT[div].forEach(([n,l],i)=>{const id=`d${div}${i}`;G.F[id]=baseFighter(id,mkNPC(id,n,div,l,rng,i+3));startLv(G.F[id]);G.qual[div].push(id);});
       G.rank[div]={};G.qual[div].forEach((id,i)=>{G.rank[div][id]={pts:id.startsWith("d")?0:[4,3,2,1][i]||0,w:0,l:0,d:0};});}
     G.flags.qualDone=true;
   }
   if(G.week===40){
+    for(const div of ["A","B"]){const lead=standings(G,div)[0];if(lead)recordHonor(G,"district",lead.id,div);}
     // v1.4: top 4 of the district stage go to the provincial semi-finals (1v4, 2v3, week 44); winners meet in the final (week 49)
     G.semis=G.semis||{A:[],B:[]};
     for(const div of ["A","B"]){const t=storyTop4(G,div);G.semis[div]=t;G.finalists[div]=[];
@@ -703,7 +714,7 @@ function finishBracket(G,booking,F){
   if(booking.npc){const rv=leadRival(G,div);if((booking.a===rv||booking.b===rv)&&G.F[rv].camp==="rival"&&w!==rv){w=rv;F.result.win=rv===booking.a?"A":"B";F.result.type="ชนะคะแนน";}}
   if(!G.finalists[div].includes(w))G.finalists[div].push(w);
   if(G.finalists[div].length===2){const [a,b]=G.finalists[div];bookBracket(G,`final${div}`,a,b,49,"final",5);}}
-function finishFinal(G,booking,F){const div=G.F[booking.a].div;const w=F.result.win==="A"?booking.a:F.result.win==="B"?booking.b:(ovr(G.F[booking.a].a)>=ovr(G.F[booking.b].a)?booking.a:booking.b);G.champ[div]=w;}
+function finishFinal(G,booking,F){const div=G.F[booking.a].div;const w=F.result.win==="A"?booking.a:F.result.win==="B"?booking.b:(ovr(G.F[booking.a].a)>=ovr(G.F[booking.b].a)?booking.a:booking.b);G.champ[div]=w;recordHonor(G,"province",w,div);}
 
 // week phase 1: training & upkeep (before fights)
 function weekTrain(G){

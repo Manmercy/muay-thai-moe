@@ -161,8 +161,8 @@ function questAfter(b,done){const S=b.quest,res=(G.cal||[]).slice(-1)[0];const w
   if(win&&S.pay){addMail(G,{kind:"take",from:S.from||"ผู้ว่าจ้าง",title:"ค่าเหนื่อยตามสัญญา",body:S.q==="cow"?"ค่าเหนื่อยพร้อมนมสดหนึ่งถัง (นมถูกดื่มหมดภายในสิบนาทีโดยนักมวยในค่าย)":S.q==="rooster"?"ค่าจ้างพร้อมไข่สองแผง ไก่แจ้กลับบ้านไปนอนซึม เจ้าของบอกว่ามันไม่เคยแพ้ใครมาก่อน":"เดิมพันข้างเวทีที่คนดูลงขันกัน ทั้งตำบลพูดถึงไฟต์นี้",amt:S.pay});G.rep+=.6;}
   if(S.q==="challenge")op&&(win?G.rep+=1:0);
   if(S.q==="belt"){const B=G.belt[S.div];if(win&&!S.defend){G.belt[S.div]={id:me.id,def:0,since:G.week};G.rep+=3;me.belts=(me.belts||0)+1;
-      playScene([{n:"nar",t:`กรรมการคาดเข็มขัดแชมป์เวทีท่าแพให้${me.name} คนดูลุกขึ้นยืนทั้งเวที`},{n:me.id,f:"happy",l:"fight",t:"ผู้จัดการ! เข็มขัดจริง ๆ ด้วย! หนักกว่าที่คิดอีก!"},{n:"coach",t:"จำความรู้สึกนี้ไว้ ตั้งแต่วันนี้ทุกคนจะอยากล้มเธอ"}],fin,{bg:"district",look:"fight"});return;}
-    if(win&&S.defend){B.def++;G.rep+=1.5;}
+      recordHonor(G,"belt",me.id,S.div);playHonorQueue(fin);return;}
+    if(win&&S.defend){B.def++;G.rep+=1.5;recordHonor(G,"defense",me.id,S.div);playHonorQueue(fin);return;}
     if(!win&&S.defend){G.belt[S.div]={id:op.id,def:0,since:G.week};playScene([{n:"nar",t:`เข็มขัดเวทีท่าแพเปลี่ยนมือไปอยู่กับ${op.name}`},{n:me.id,f:"sad",l:"fight",t:"…ขอโทษนะคะ หนูจะเอาคืนมาให้ได้"}],fin,{bg:"district",look:"fight"});return;}
     if(!win&&!S.defend&&B)B.def++;}
   fin();}
@@ -337,7 +337,7 @@ function dmFight(meId,opId){const D=G.dm;const b={id:"dm"+G.week+"_"+D.r+"_"+meI
 function dmFinish(){const D=G.dm;const champ=D.w[2][0];D.champ=champ;
   let best=0;for(const id of D.mine){const lv=id===champ?4:(D.out[id]||1);best=Math.max(best,lv);}D.best=best;
   const prize=DM_PRIZE[best]||0;G.cash+=prize;G.wkFight=(G.wkFight||0)+prize;D.prize=prize;
-  if(best===4){G.rep+=4;roster(G).forEach(f=>f.morale=Math.min(100,f.morale+10));}else if(best===3)G.rep+=1.5;
+  if(best===4){G.rep+=4;roster(G).forEach(f=>f.morale=Math.min(100,f.morale+10));recordHonor(G,"dm",champ,G.F[champ].div,D.wk);}else if(best===3)G.rep+=1.5;
   G.dmLog=(G.dmLog||[]).concat([{wk:D.wk,champ,best,prize}]);save();}
 function dmBracketHTML(){const D=G.dm;if(!D)return "";const nm=id=>id&&G.F[id]?esc(G.F[id].name):"…";
   const cell=(id,r)=>{if(!id)return `<div class="dmc tbd">…</div>`;const won=(D.w[r]||[]).includes(id),lost=r<3&&D.w[r]&&D.w[r].length*2>((r===0?D.slots:D.w[r-1]).indexOf(id))&&!won;
@@ -370,7 +370,7 @@ Object.assign(ACT,{
       {n:sel[0],f:"angry",l:"fight",t:"ทุกคนเก่งหมดเลย… แต่ค่ายเรามาเพื่อชนะค่ะ!"}],()=>{dmAdvance();UI.modal={type:"dm"};render();},{bg:"hall",look:"fight"});},
   dmopen:()=>{UI.modal={type:"dm"};render();},
   dmgo:d=>dmFight(d.id,d.v),
-  dmclose:()=>{const D=G.dm;UI.modal=null;if(D&&D.best===4)playScene([{n:"nar",t:"กระดาษสีทองโปรยลงมาทั่วเวที เสียงคนดูดังจนพื้นสั่น"},{n:D.champ,f:"happy",l:"fight",t:G=>`${ME(G)}!! เราทำได้! ชนะรวดทุกคนเลย!`},{n:"coach",t:"ปู่ชัยเคยบอกว่าค่ายเราไม่มีวันได้แชมป์ Death Match …ปู่ผิดแล้วล่ะ"}],()=>render(),{bg:"hall",look:"fight"});else render();},
+  dmclose:()=>{UI.modal=null;playHonorQueue(()=>render());},
 });
 
 // ===== v1.64: MINIGAME — kick the heavy bag to the khong khaek drum (rhythm, taiko-style) =====

@@ -8,6 +8,14 @@ const ME=G=>G.player.name,
  CALL=(G,id)=>{const f=G.F[id],b=f?f.bond||0:0;if(G.romance===id||b>=75)return G.player.name;if(b>=40&&Math.random()<.35)return G.player.name;return "ผู้จัดการ";}, PR=G=>G.player.gender==="m"?"ผม":"ฉัน", PA=G=>G.player.gender==="m"?"ครับ":"ค่ะ";
 const SPK={kati:{name:"กะทิ",color:"#e23b4e"},mali:{name:"มะลิ",color:"#4a7fe0"},rin:{name:"ริน",color:"#3fae6a"},
   ploy:{name:"พลอย",color:"#9b62e0"},fah:{name:"ฟ้า",color:"#e7b443"},pailin:{name:"ไพลิน",color:"#8e4ac3"},coach:{name:"ครูแดง",color:"#c98a5a"},nar:{name:""},me:{name:"(คุณ)"}};
+const HONOR_LABEL={local:"แชมป์รอบตำบล",district:"แชมป์รอบอำเภอ",province:"แชมป์จังหวัด",belt:"แชมป์เวทีท่าแพ",defense:"ป้องกันแชมป์เวทีท่าแพ",dm:"แชมป์ Death Match"};
+function honorLabel(kind){return HONOR_LABEL[kind]||"แชมป์";}
+function honorSteps(G,h){const f=G.F[h.id],label=honorLabel(h.kind),ranked=h.kind==="local"||h.kind==="district";
+  return [{n:"nar",t:ranked?`คะแนนตลอดรอบ${h.kind==="local"?"ตำบล":"อำเภอ"}สรุปแล้ว ${f.name}ขึ้นอันดับหนึ่ง กรรมการเรียกเธอกลับมากลางเวที`:`เสียงระฆังจบ กรรมการชูแขน${f.name}ขึ้นกลางเวที เสียงเชียร์ดังกลบทุกอย่าง`},
+    {n:"npc",who:"โฆษกสนาม",t:`ท่านผู้ชมครับ! ${label} รุ่น ${h.div} ได้แก่… ${f.name} จากค่ายศิริชัย!`},
+    {n:"nar",t:`กรรมการส่งเข็มขัดให้ ${f.name} ชูขึ้นเหนือศีรษะใต้แสงไฟ กระดาษสีทองโปรยลงมารอบเวที`},
+    {n:h.id,f:"happy",l:"fight",t:h.kind==="defense"?"เข็มขัดยังอยู่กับค่ายเรา! ครั้งหน้าก็มาเจอกันได้เลยค่ะ!":"เราเอาเข็มขัดกลับค่ายแล้ว! ขอบคุณทุกคนที่เชียร์นะคะ!"},
+    {n:"coach",t:`จำคืนนี้ไว้ ${f.name} ชัยชนะครั้งนี้อยู่ในเกียรติประวัติค่ายศิริชัยแล้ว`}];}
 // v1.7: bonds deepen by chapter — the ceiling rises as the season's story moves on
 const bondCap=G=>100;
 // v1.44: bond grows a bit faster, and the girls who join later catch up while still distant

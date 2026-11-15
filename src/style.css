@@ -1495,3 +1495,13 @@ button.goal.ov{display:block;text-align:left;font:inherit;font-size:12px;color:v
 button.goal.ov .gx{float:right;margin-left:8px;opacity:.7}
 button.goal.ov.mini{right:auto;padding:3px 10px;opacity:.85}
 .goal.ov{top:6px;bottom:auto}
+.awardfx{position:absolute;inset:0;z-index:4;pointer-events:none;overflow:hidden}
+.awardfx>i{position:absolute;left:calc(var(--i)*4% + 2%);top:-20px;width:8px;height:17px;background:#f7ce57;box-shadow:1px 1px 0 #8a5215;opacity:.9;animation:awardFall 4.2s linear infinite;animation-delay:calc(var(--i)*-.17s)}
+.awardfx>i:nth-child(3n){background:#f9f2cf;width:5px}.awardfx>i:nth-child(4n){background:#c785e6;height:12px}
+.awardbelt{position:absolute;top:4%;left:50%;display:flex;align-items:center;justify-content:center;width:min(330px,72vw);height:72px;transform:translateX(-50%);filter:drop-shadow(0 8px 9px #120b19);animation:awardRaise 1.2s cubic-bezier(.2,.8,.2,1) both}
+.awardbelt .strap{flex:1;height:35px;background:linear-gradient(#302343,#12101a 55%,#3a2850);border:3px solid #dcae44;clip-path:polygon(0 25%,100% 0,100% 100%,0 75%)}
+.awardbelt .strap:last-child{transform:scaleX(-1)}.awardbelt .seal{display:grid;place-items:center;width:96px;height:67px;border:6px double #fff0ad;border-radius:48%;background:radial-gradient(circle,#ffed9d,#d99621 65%,#6c3c16);color:#fff5c0;font-size:35px;text-shadow:0 2px #875115;box-shadow:0 0 0 4px #37223b,0 0 24px #ffcc53}
+.awardname{position:absolute;top:calc(4% + 78px);left:50%;transform:translateX(-50%);padding:7px 14px;background:#1c1129dd;border:2px solid #e0b64c;color:#ffeb9d;font-weight:700;text-align:center;white-space:nowrap;text-shadow:0 2px #5a3311;animation:awardRaise 1.2s cubic-bezier(.2,.8,.2,1) both}
+@keyframes awardRaise{from{opacity:0;translate:0 130px;scale:.65}to{opacity:1;translate:0 0;scale:1}}
+@keyframes awardFall{to{transform:translateY(105dvh) rotate(600deg)}}
+@media(prefers-reduced-motion:reduce){.awardfx>i,.awardbelt,.awardname{animation:none}.awardfx>i{display:none}}
