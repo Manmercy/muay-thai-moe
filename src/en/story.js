@@ -1575,7 +1575,7 @@ function prodigyResultScene(G,b,win){if(!prodigyMatch(G,b))return null;const key
 // Year 4: Pailin, Ploy's older sister, brings Vector Gym to the province.
 EVENTS.push(
  {id:"y4_pailin_arrive",pri:3,look:"fight",bg:"hall",when:G=>G.season===4&&G.week>=3&&!!G.F.pailin,steps:[
-  {n:"nar",t:"A black-and-purple van from Bangkok stops outside the provincial arena. Pailin Eksayam steps out with black gloves and a team carrying fight-analysis cameras."},
+  {n:"nar",t:"A black-and-purple van from Bangkok stops outside the provincial arena. Pailin steps out with black gloves and a team carrying fight-analysis cameras."},
   {n:"pailin",f:"happy",t:"I'm Pailin, Ploy's older sister. My Vector Gym uses sports science, but data alone doesn't win fights. Someone has to dare to step into the ring."},
   {inject:G=>G.F.ploy&&G.F.ploy.met?[{n:"ploy",f:"surprised",t:"Pailin... You said you'd never come back here."},{n:"pailin",f:"angry",t:"I came back to see how much you've grown, Ploy."}]:[{n:"kati",f:"angry",t:"Sirichai accepts your challenge. But our fighters aren't test equipment."}]},
   {n:"nar",t:"Pailin's name appears in the Division A rankings, and she challenges Sirichai Gym."}]},
@@ -1594,7 +1594,7 @@ EVENTS.push(
 EVENTS.push(
  {id:"y5_vector_arrive",pri:3,look:"casual",bg:"camp",when:G=>G.season===5&&G.week>=3&&!!G.F.vector_A,steps:[
   {n:"nar",t:"A black-and-purple van stops outside Sirichai. Vector staff from Bangkok unload motion cameras and heart-rate monitors."},
-  {inject:G=>G.seen.y4_pailin_arrive?[{n:"pailin",f:"happy",t:"I told you I'd be back. This year Vector brought fighters I chose myself."}]:[{n:"pailin",f:"happy",t:"I'm Pailin Eksayam, Ploy's older sister and head of Vector Gym in Bangkok. This year I've come to see what Sirichai can do."}]},
+  {inject:G=>G.seen.y4_pailin_arrive?[{n:"pailin",f:"happy",t:"I told you I'd be back. This year Vector brought fighters I chose myself."}]:[{n:"pailin",f:"happy",t:"I'm Pailin, Ploy's older sister and head of Vector Gym in Bangkok. This year I've come to see what Sirichai can do."}]},
   {n:"npc",who:"Mesa · Vector Scout",t:"We travel to find promising provincial fighters. Pailin wants them in our sports-science program. We cover travel and testing."},
   {n:"kati",f:"pout",t:"Why does the form call us 'test participants' more often than fighters?"},
   {n:"pailin",f:"angry",t:"Accurate data can make fighters safer, but I need volunteers to measure everything and learn who's ready to fight."},

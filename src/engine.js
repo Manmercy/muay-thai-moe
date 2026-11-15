@@ -752,7 +752,7 @@ function weekFinish(G){if(G.rep>55)G.rep=55+(G.rep-55)*(.96+(G.fac.hall||0)*.01)
 // Late-game opponents catch up once per season. Existing saves receive the same
 // one-time adjustment on load, without touching the player's fighters.
 const VECTOR_SPEC={
- pailin:{name:"ไพลิน",full:"ไพลิน เอกสยาม",div:"A",camp:"rival",color:"#392049",potential:20,
+ pailin:{name:"ไพลิน",full:"ไพลิน",div:"A",camp:"rival",color:"#392049",potential:20,
    a:{punch:17,kick:15,knee:16,elbow:18,clinch:16,guard:16,foot:15,counter:17,power:18,speed:16,stamina:18,dur:17,iq:16,comp:17}},
  A:{name:"ไนท์",full:"ไนท์ ศิษย์เวกเตอร์",div:"A",camp:"rival",color:"#542478",potential:19,
    a:{punch:13,kick:12,knee:12,elbow:13,clinch:12,guard:15,foot:15,counter:16,power:12,speed:15,stamina:14,dur:13,iq:17,comp:16}},
@@ -762,7 +762,7 @@ const VECTOR_SPEC={
 function ensureVector(G){if((G.season||1)<4)return false;G.rank=G.rank||{A:{},B:{}};let created=false;
   for(const id of (G.season>=5?["pailin","vector_A","vector_B"]:["pailin"])){const div=id==="vector_B"?"B":"A",spec=id==="pailin"?VECTOR_SPEC.pailin:VECTOR_SPEC[div];G.rank[div]=G.rank[div]||{};
     if(!G.F[id]){G.F[id]=baseFighter(id,spec);G.F[id].lvl=id==="pailin"?8:6;G.F[id].met=true;created=true;}
-    G.F[id].lab=true;G.F[id].gymName="ค่ายเวกเตอร์ กรุงเทพฯ";if(id==="pailin")G.F[id].sprite="pailin";
+    G.F[id].lab=true;G.F[id].gymName="ค่ายเวกเตอร์ กรุงเทพฯ";if(id==="pailin"){G.F[id].name=spec.name;G.F[id].full=spec.full;G.F[id].sprite="pailin";}
     if(!G.rank[div][id])G.rank[div][id]={pts:0,w:0,l:0,d:0};}return created;}
 function liftOpponent(f,target,maxGain){const delta=Math.min(maxGain,Math.max(0,target-ovr(f.a)));if(delta<=0)return;
   const goal=Math.min(19.7,ovr(f.a)+delta);for(let n=0;n<4;n++){const gap=goal-ovr(f.a),room=ATTRS.filter(([k])=>f.a[k]<19.95);if(gap<=.01||!room.length)break;

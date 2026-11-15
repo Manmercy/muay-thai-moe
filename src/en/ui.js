@@ -1,5 +1,5 @@
 // ================= MUAY THAI MOE v1.3 — UI =================
-const VERSION="1.80.14";
+const VERSION="1.80.15";
 const CUR_LANG=(typeof window!=="undefined"&&window.LANG)||"th";
 const TH_LABEL=String.fromCharCode(3652,3607,3618);
 function langSwitch(cls){return `<div class="langsw ${cls||""}" role="group" aria-label="Language">${[["th",TH_LABEL],["en","EN"]].map(([k,l])=>`<button class="lsb ${CUR_LANG===k?"on":""}" data-act="setlang" data-v="${k}" aria-pressed="${CUR_LANG===k}">${l}</button>`).join("")}</div>`;}
@@ -240,7 +240,7 @@ function funnyNews(n){const o=[];for(let i=0;i<n;i++)o.push(FUNNY_NEWS[(G.week*7
 function newsItems(){const N=[...(G.lvNews||[]).slice(0,1)],st=standings(G,"A").slice(0,3),R=roster(G);
   if(st[0])N.push(`Div A table: ${G.F[st[0].id].name} leads in 1st place`);
   const rv=Object.values(G.F).filter(f=>f.camp==="rival"&&!f.lab);if(rv.length)N.push(`Golden Tiger enters ${rv.length} fighters. The boss declares "This year the title is ours"`);
-  if((G.season||1)>=4&&G.F.pailin)N.push((G.season||1)>=5?"Pailin brings Vector Gym from Bangkok, along with Night and Vega, into the ring.":"Pailin Eksayam, Ploy's older sister, brings Vector Gym to challenge Sirichai.");
+  if((G.season||1)>=4&&G.F.pailin)N.push((G.season||1)>=5?"Pailin brings Vector Gym from Bangkok, along with Night and Vega, into the ring.":"Pailin, Ploy's older sister, brings Vector Gym to challenge Sirichai.");
   for(const f of R){const h=f.rec||{w:0,l:0};if(h.w>=3)N.push(`${f.name} of Sirichai is on fire, already won ${h.w} fights`);}
   if(G.rep>=10)N.push(`Sirichai Muay Thai Camp is being talked about again after years of silence`);
   const nb=G.bookings.filter(b=>G.F[b.a].camp==="player").sort((a,b)=>a.week-b.week)[0];if(nb)N.push(`Week ${nb.week}: ${G.F[nb.a].name} vs ${G.F[nb.b].name}`);

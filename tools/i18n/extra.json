@@ -2739,7 +2739,6 @@
  " · ไม่นับอันดับ": " · Unranked bout",
  "ชนะนักมวยค่ายเวกเตอร์ ชื่อเสียงขึ้นมาก": "Beat a Vector fighter for a big reputation boost.",
  "ค่ายเวกเตอร์จากกรุงเทพฯ ส่งไนท์กับเวกาขึ้นเวทีในชุดดำม่วง": "Vector Gym sends Night and Vega into the ring in black and purple.",
- "ไพลิน เอกสยาม": "Pailin Eksayam",
  "ไพลิน": "Pailin",
  "รับคำท้า ปีหน้าเจอกัน": "Challenge accepted. See you next year.",
  "ปีหน้าเจอกันใหม่ค่ะพี่ คราวนี้คุยกันหลังลงเวทีด้วย": "See you next year, sis. Let's talk after we leave the ring this time.",
@@ -2767,7 +2766,6 @@
  "ฉันเป็นคนตั้งกฎเอง ถ้ากฎมันทำร้ายนักมวย ฉันก็ต้องเป็นคนแก้ แต่จะไม่เลิกชกให้ชนะ": "I wrote those rules. If they hurt fighters, I have to change them. But I won't stop fighting to win.",
  "ข้อมูลที่แม่นยำทำให้คนชกปลอดภัยขึ้น แต่ฉันต้องมีคนยอมให้วัดทุกอย่าง ถึงจะรู้ว่าใครพร้อมขึ้นเวที": "Accurate data can make fighters safer, but I need volunteers to measure everything and learn who's ready to fight.",
  "เราเดินทางหานักมวยต่างจังหวัดที่มีแววค่ะ ไพลินอยากให้เข้าร่วมโปรแกรมวิทยาศาสตร์การกีฬา ค่าเดินทางกับค่าตรวจเราจ่ายเอง": "We travel to find promising provincial fighters. Pailin wants them in our sports-science program. We cover travel and testing.",
- "ฉันไพลิน เอกสยาม พี่สาวพลอย และเป็นหัวหน้าค่ายเวกเตอร์จากกรุงเทพฯ ปีนี้ฉันมาดูว่าค่ายศิริชัยชกได้แค่ไหน": "I'm Pailin Eksayam, Ploy's older sister and head of Vector Gym in Bangkok. This year I've come to see what Sirichai can do.",
  "บอกแล้วว่าฉันจะกลับมา ปีนี้เวกเตอร์พานักมวยที่ฉันเลือกเองมาด้วย": "I told you I'd be back. This year Vector brought fighters I chose myself.",
  "ค่ายเราไม่หนีค่ะ แต่ถ้าพี่จะชวนใครไปกรุงเทพฯ ก็ให้เขารู้เงื่อนไขทั้งหมดด้วย": "Our gym won't run. But if you invite anyone to Bangkok, make sure they know every condition.",
  "ปีนี้ฉันแค่มาดูฝีมือ ปีหน้าไนท์กับเวกาจะมาด้วย แล้วค่อยดูว่าศิริชัยตามทันไหม": "This year I only came to size you up. Next year Night and Vega will join me. Let's see if Sirichai can keep up.",
@@ -2783,7 +2781,8 @@
  "ฉันกลับมาเพราะอยากเห็นว่าเธอโตขึ้นแค่ไหน พลอย": "I came back to see how much you've grown, Ploy.",
  "พี่ไพลิน… พี่บอกว่าจะไม่กลับมาที่นี่อีก": "Pailin... You said you'd never come back here.",
  "ฉันไพลิน พี่สาวของพลอย ค่ายเวกเตอร์ของฉันใช้วิทยาศาสตร์การกีฬา แต่ข้อมูลอย่างเดียวไม่ชนะไฟต์หรอก ต้องมีคนกล้าขึ้นชกด้วย": "I'm Pailin, Ploy's older sister. My Vector Gym uses sports science, but data alone doesn't win fights. Someone has to dare to step into the ring.",
- "รถตู้ดำม่วงจากกรุงเทพฯ จอดหน้าเวทีจังหวัด ไพลิน เอกสยาม ลงมาพร้อมนวมสีดำและทีมงานที่ขนกล้องวิเคราะห์การชก": "A black-and-purple van from Bangkok stops outside the provincial arena. Pailin Eksayam steps out with black gloves and a team carrying fight-analysis cameras.",
- "ไพลิน เอกสยาม พี่สาวพลอย นำค่ายเวกเตอร์มาท้าศิริชัย": "Pailin Eksayam, Ploy's older sister, brings Vector Gym to challenge Sirichai.",
- "ไพลินนำค่ายเวกเตอร์จากกรุงเทพฯ พร้อมไนท์และเวกาขึ้นเวที": "Pailin brings Vector Gym from Bangkok, along with Night and Vega, into the ring."
+ "ไพลินนำค่ายเวกเตอร์จากกรุงเทพฯ พร้อมไนท์และเวกาขึ้นเวที": "Pailin brings Vector Gym from Bangkok, along with Night and Vega, into the ring.",
+ "รถตู้ดำม่วงจากกรุงเทพฯ จอดหน้าเวทีจังหวัด ไพลินลงมาพร้อมนวมสีดำและทีมงานที่ขนกล้องวิเคราะห์การชก": "A black-and-purple van from Bangkok stops outside the provincial arena. Pailin steps out with black gloves and a team carrying fight-analysis cameras.",
+ "ฉันไพลิน พี่สาวพลอย และเป็นหัวหน้าค่ายเวกเตอร์จากกรุงเทพฯ ปีนี้ฉันมาดูว่าค่ายศิริชัยชกได้แค่ไหน": "I'm Pailin, Ploy's older sister and head of Vector Gym in Bangkok. This year I've come to see what Sirichai can do.",
+ "ไพลิน พี่สาวพลอย นำค่ายเวกเตอร์มาท้าศิริชัย": "Pailin, Ploy's older sister, brings Vector Gym to challenge Sirichai."
 }
