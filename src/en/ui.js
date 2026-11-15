@@ -93,7 +93,7 @@ function slotsHTML(mode){const rows=[];for(let i=1;i<=SLOTS;i++){const s=loadSlo
        `<button class="btn sm ${s?"":"primary"}" data-act="pickslot" data-v="${i}">${s?"Overwrite":"Select"}</button>`}</div>`);}
   const del=UI.delSlot?`<div class="confirm px"><b>Delete save slot ${UI.delSlot}?</b><p class="meta">This can't be undone</p><div class="mfoot"><button class="btn ghost" data-act="canceldel">Cancel</button><button class="btn primary" data-act="delslot">Delete</button></div></div>`:"";
   const ow=UI.owSlot?`<div class="confirm px"><b>Overwrite save slot ${UI.owSlot}?</b><p class="meta">The old game in this slot will be lost</p><div class="mfoot"><button class="btn ghost" data-act="cancelow">Cancel</button><button class="btn primary" data-act="confirmow">Start a new game here</button></div></div>`:"";
-  return `<h2>${mode==="load"?"Load game":"Choose a save slot for the new game"}</h2><div class="slots">${rows.join("")}</div>${del}${ow}`;}
+  return `<h2>${mode==="load"?"Load game":"Choose a save slot for the new game"}</h2><div class="slots">${rows.join("")}</div>${del}${ow}${mode==="load"?`<div style="margin-top:14px;text-align:left"><a class="btn sm ghost" href="./rescue-save.html">Transfer save code</a></div>`:""}`;}
 
 // ---------- small components ----------
 function faceImg(f,cls=""){return f.canon?`<img class="face ${cls}" style="--c:${f.color}" src="${faceSrc(f.id,"happy")}" alt="${esc(f.name)}">`:
@@ -195,6 +195,7 @@ function settingsHTML(){const t=(k,label,desc)=>`<label class="set"><span><b>${l
    ${G&&UI.slot&&bakInfo(UI.slot)?`<div class="set"><span><b>Pre-update save</b><small>Kept when the game updated · v${esc(String(bakInfo(UI.slot).ver))} week ${bakInfo(UI.slot).week}</small></span><button class="btn sm" data-act="bakrestore">Restore</button></div>`:""}
    <div class="set"><span><b>Enter code</b><small>Event or continue codes from the game page and Discord</small></span><span class="obtns redeem"><input id="redeemcode" maxlength="24" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="Code" aria-label="Code"><button class="btn sm primary" data-act="redeem">Redeem</button></span></div>
    <div class="set"><span><b>Back up save to file</b><small>Keep the file yourself; import it on another device or browser</small></span><span class="obtns"><button class="btn sm" data-act="exportsave">Export</button><label class="btn sm">Import<input type="file" accept=".json,application/json" data-act="importsave" hidden></label></span></div>`:`<div class="set"><span><b>Import a save file</b><small>A previously exported file goes into slot 1</small></span><label class="btn sm">Import<input type="file" accept=".json,application/json" data-act="importsave" hidden></label></div>`}
+   <div class="set"><span><b>Transfer save code</b><small>Move a save between Facebook and Safari</small></span><a class="btn sm" href="./rescue-save.html">Transfer save code</a></div>
    <details class="gloss"><summary><b>Game glossary</b></summary><dl>${GLOSS.map(([k,v])=>`<dt>${k}</dt><dd>${v}</dd>`).join("")}</dl></details>
    <p class="meta">Muay Thai Moe v${VERSION}</p>`;}
 const GLOSS=[["Readiness","Condition on fight day. The higher, the better she fights. Drops with fatigue or injury"],["Fatigue","Builds up from training. Over 65 risks injury. Reduce with recovery, the recovery room, the kitchen"],
@@ -1276,60 +1277,4 @@ const ACT={
   tac:d=>{UI.fight.tac[d.k]=d.v;render();},
   tpick:d=>{if(trLocked(G.F[d.id]))return;UI.modal={type:"tpick",id:d.id};render();},
   tlock:d=>{const f=G.F[d.id];if(!f)return;f.lockWeek=G.week;f.drillBonus=0;AU.sfx("level");save();
-    // v1.19.1: a short drill scene — tap to make her strike, then see how the session went
-    const pr=f.plan.preset;if(!f.injury&&pr!=="rest"&&pr!=="prep"){UI.drill={id:f.id,taps:0,need:f.plan.intensity==="light"?2:3,res:[],hitT:0};UI.modal={type:"drill",id:f.id};}else UI.modal=null;render();},
-  dtap:()=>{const D=UI.drill;if(!D||D.taps>=D.need)return;const r=srand(G,D.taps*31+D.need*7+(G.campUsed?3:0));const q=r<.3?"perfect":r<.85?"good":"ok";D.res.push(q);D.taps++;D.hitT=performance.now();D.q=q;
-    AU.sfx(DRILL_ROW[G.F[D.id].plan.preset]==="knee"?"kick":"punch");
-    if(D.taps>=D.need){const b=D.res.reduce((x,q)=>x+(q==="perfect"?4:q==="good"?2:0),0);G.F[D.id].drillBonus=b/100;D.bonus=b;save();setTimeout(()=>{if(UI.drill===D){D.done=true;AU.sfx(b>=8?"level":"ui");render();}},700);}
-    render();},
-  dskip:()=>{UI.drill=null;UI.modal=null;render();},
-  fplan:d=>{const b=G.bookings.find(x=>x.id===d.id);if(!b)return;UI.fpDraft={plan:b.plan||"balanced",target:(b.tac&&b.tac.target)||"body"};UI.modal={type:"fplan",id:d.id};render();},
-  fpd:d=>{UI.fpDraft[d.k]=d.v;render();},
-  fpok:d=>{const b=G.bookings.find(x=>x.id===d.id);if(b){b.plan=UI.fpDraft.plan;b.tac={...(b.tac||{}),target:UI.fpDraft.target};b.planSet=true;save();}UI.modal=null;render();},
-  bplanb:d=>{const b=G.bookings.find(x=>x.id===d.id);if(!b)return;b.plan=d.v;save();render();},
-  btgt:d=>{const b=G.bookings.find(x=>x.id===d.id);if(!b)return;b.tac={...(b.tac||{}),target:d.v};save();render();},ctac:d=>{UI.fight.F.A.tac[d.k]=d.v;render();},
-  scout:d=>{if(G.cash<scoutCost()||scouted(d.v))return;const free=rinFree();G.cash-=scoutCost();G.scout=G.scout||{};G.scout[d.v]=G.week;if(free)G.rinTapeWk=G.week;save();if(free){toast(`Rin scouted ${G.F[d.v].name} (next free tape: week ${G.week+RIN_GAP})`);render();return;}toast("Tape scouted, Coach has noted the weak spots");render();},
-  corner:d=>{AU.sfx("ui");UI.fight.F.A.instr=d.v;playRound();},
-  chint:()=>{UI.fight.hint=!UI.fight.hint;render();},
-  repinfo:()=>{UI.modal={type:"repinfo"};render();},
-  skdesc:d=>{UI.skOpen=UI.skOpen===d.v?null:d.v;render();},
-  cshow:()=>{UI.fight.cshow=!UI.fight.cshow;render();},
-  frev:()=>{UI.fight.rev=!UI.fight.rev;render();},
-  otip:d=>{UI.modal={type:"otip",id:d.v};render();},
-  losstape:d=>{const L=G.losses[+d.v];if(!L||L.watched)return;const me=G.F[L.a],op=G.F[L.b];const W={punch:"Punch",kick:"Kick",knee:"Knee",elbow:"Elbow"};const bt=Object.entries(L.B.wl||{}).sort((a,b)=>b[1]-a[1])[0];
-    L.watched=true;UI.modal=null;
-    playScene([{n:"nar",t:`That night the whole camp gathers around the old TV, replaying the fight where ${me.name} lost to ${op.name}, with sticky rice and moo ping in the middle of the circle`},
-      {n:"coach",t:`Stop here. Look closely: ${op.name} throws ${bt?W[bt[0]]:"Weapons"} every time we step back. ${G.player.name}, see it?`},
-      {n:L.a,f:"sad",l:"casual",t:TAPE_LINE[L.a]||"I see it now. Next time I won't slip up like that"},
-      {inject:G2=>{gainXP(G2,me,25);G2.fam=G2.fam||{};G2.fam[L.b]=Math.min(2,(G2.fam[L.b]||0)+1);save();return [{n:"nar",t:`${me.name} EXP +25 · reads ${op.name} better. Next time they meet, her strikes land a little more often`}];}}],()=>render(),{bg:"gym",look:"casual"});},
-  lossrev:()=>{UI.revIdx=0;UI.modal={type:"lossrev"};render();},
-  revpick:d=>{UI.revIdx=+d.v;render();},
-  cpick:d=>{UI.fight.pick=d.v;render();},
-  cgo:()=>{const U=UI.fight;if(!U.pick)return;const C=U.care;if(C&&!C.done){C.q=0;applyCare(U.F,0);}AU.sfx("bell1");U.F.A.instr=U.pick;U.pick=null;playRound();},
-  care:d=>{const U=UI.fight,C=U.care;if(!C||C.done)return;const i=C.got.length;C.got.push(d.v);const ok=C.need[i]===d.v;AU.sfx(ok?"ui":"miss");
-    if(C.got.length>=C.need.length){C.done=true;const n=C.got.filter((g,k)=>g===C.need[k]).length;C.q=n===3?1:n===2?.5:0;if(C.q>=1)U.careOK=(U.careOK||0)+1;applyCare(U.F,C.q);if(C.q>=1){AU.sfx("level");const me=G.F[U.b.a];popToast({kati:"So refreshing!",mali:"Not tired anymore! Let's go!",rin:"Body back to 90%",ploy:"Thank you, my heart's in it",fah:"Okay! Ready to go hard!"}[me.id]||"Refreshed!","good");}}render();},
-  towel:()=>{UI.confirmTowel=true;render();},
-  towelno:()=>{UI.confirmTowel=false;render();},
-  towelyes:()=>{UI.confirmTowel=false;const U=UI.fight;throwTowel(U.F);U.shown.push({s:"x",t:`${G.F[U.b.a].name}'s corner throws in the towel`});fightEnd();},
-  withdraw:()=>{const U=UI.fight;G.bookings=G.bookings.filter(x=>x!==U.b);G.rep=Math.max(0,G.rep-1);add(G,U.b.a,"trust",3);
-    G.log.push(`${G.F[U.b.a].name} withdraws due to injury`);const done=U.done;UI.fight=null;render();done();},
-  fdone:()=>{const done=UI.fight.done;AU.startMusic("hub");UI.fight=null;render();done();},
-  gatego:()=>{const v=((document.getElementById("gatecode")||{}).value||"").toUpperCase().replace(/\s+/g,"");let ok=false;try{ok=btoa(v)===GATE.code;}catch(e){}
-    if(ok){G.unlocked=true;try{localStorage.setItem(GATE.key,"1");}catch(e){}UI.gateErr=false;save();AU.sfx("level");toast("Unlocked! Year 2 is ready to play");}else{UI.gateErr=true;AU.sfx("miss");}render();},
-  newseason:()=>{if(!gateOpen())return;const res=seasonResult().map(r=>({id:r.f.id,name:r.f.name,d:r.d,t:r.t,c:r.c}));newSeason(G);const T=G.titles[G.titles.length-1];if(T)T.res=res;UI.ending=null;UI.tab="home";UI.advCache={};save();AU.startMusic("hub");
-    playScene([{n:"coach",bg:"gym",t:`A new season is here, ${G.player.name}. Rankings reset for everyone, but our camp isn't starting from zero anymore`},
-      {n:"kati",f:"happy",l:"train",with:"coach",t:"This year I won't let anyone pass me! Let's go!"}],()=>render(),{bg:"gym",look:"train"});},
-  replay:()=>{const i=UI.slot;ACT.restart();ACT.beginNew(i);},
-  restart:()=>{AU.startMusic("title");G=null;UI.ending=null;UI.creator=null;UI.tab="home";UI.title="menu";render();},
-};
-const QUIET_ACTS=new Set(["vnext","vchoose","corner","tapstart","fspeed","care","cgo"]);
-document.addEventListener("click",e=>{AU.resume();const el=e.target.closest("[data-act]");if(!el)return;const a=el.dataset.act;if(!a||!ACT[a])return;if(el.disabled)return;
-  if(el.classList.contains("title")&&e.target.closest("button"))return;if(a==="vnext")AU.sfx("tick");else if(a==="vchoose")AU.sfx("choose");else if(!QUIET_ACTS.has(a))AU.sfx("ui");ACT[a](el.dataset,e);});
-["pointerdown","touchend","keydown"].forEach(t=>document.addEventListener(t,()=>AU.resume(),{passive:true}));
-document.addEventListener("visibilitychange",()=>{if(!document.hidden)AU.resume();});
-document.addEventListener("change",e=>{const el=e.target;if(el.dataset&&el.dataset.act==="importsave"&&el.files&&el.files[0]){if(!G)UI.slot=1;importSave(el.files[0]);return;}if(el.dataset&&el.dataset.act==="bplan"){const b=G.bookings.find(x=>x.id===el.dataset.id);if(b){b.plan=el.value;save();AU.sfx("ui");render();}}});
-document.addEventListener("keydown",e=>{
-  if(!G&&UI.title==="tap"&&(e.key===" "||e.key==="Enter")){e.preventDefault();ACT.tapstart();return;}
-  if(UI.scene&&!(UI.scene.cur&&UI.scene.cur.choice)&&(e.key===" "||e.key==="Enter")){e.preventDefault();sceneNext();return;}
-  if(e.key==="Enter"&&e.target&&e.target.id){const b={petname:"petnamebtn",redeemcode:null,gatecode:null}[e.target.id];const el=b?document.getElementById(b):e.target.id==="redeemcode"?document.querySelector("[data-act=redeem]"):e.target.id==="gatecode"?document.querySelector("[data-act=gatego]"):null;if(el){e.preventDefault();el.click();}}});
-preloadCore();["happy","surprised","sad"].forEach(m=>warm(stand("kati","fight",m)));warm(`${ASSET}coach.webp`);render();
+    // v1.19[Truncated]
