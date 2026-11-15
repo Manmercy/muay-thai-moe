@@ -1,5 +1,5 @@
 // ================= MUAY THAI MOE v1.3 — UI =================
-const VERSION="1.80.16";
+const VERSION="1.80.17";
 const CUR_LANG=(typeof window!=="undefined"&&window.LANG)||"th";
 const TH_LABEL=String.fromCharCode(3652,3607,3618);
 function langSwitch(cls){return `<div class="langsw ${cls||""}" role="group" aria-label="Language">${[["th",TH_LABEL],["en","EN"]].map(([k,l])=>`<button class="lsb ${CUR_LANG===k?"on":""}" data-act="setlang" data-v="${k}" aria-pressed="${CUR_LANG===k}">${l}</button>`).join("")}</div>`;}
@@ -50,7 +50,7 @@ const PIX={
   thumb:pxIcon(["....kk....","...kssk...","...kssk...","..kkssk...",".kssssskk.",".ksssssssk",".ksssssssk",".ksssssssk","..kssssskk","...kkkkk.."],{k:"#3a2412",s:"#f7d24a"}),
   flag:pxIcon(["k.........","kwwwwww...","kwwwwwww..","kwwwwww...","kwwwwwww..","k.........","k.........","k.........","k.........","kk........"],{k:"#3a3550",w:"#f4f1ea"}),
   coach:pxIcon(["..gggggg..",".gggggggg.",".gsssssss.",".skssskss.",".sssssssss".slice(0,10),".ssgggsss.","..sgggss..","..rwwwwr..",".rrwwwwrr.",".rrrrrrrr."],{g:"#cfd3da",s:"#e2a978",k:"#2a1a10",r:"#c8283c",w:"#ffffff"})};
-const coachOn=()=>SETTINGS.coach&&!(G&&G.coachAway&&G.week<G.coachAway);
+const coachOn=()=>SETTINGS.coach&&!(G&&G.coachAwayAbs&&gameWeek(G)<G.coachAwayAbs);
 
 // v1.6: three save slots (the old single save moves into slot 1)
 const SLOTS=3;const slotKey=i=>`${SAVE_KEY}-s${i}`;
@@ -296,8 +296,8 @@ function coachTips(force){const T=[],R=roster(G);if(!coachOn()&&!force)return T;
   else if(weeklyNet(G)<0){const full=studentDemand(G)>studentCap(G);T.push({p:6,t:full?`Spending exceeds income by ${fmt(-weeklyNet(G))}/wk. More people want to learn than we can hold; hiring an assistant coach or expanding the class yard brings more money`:`Spending exceeds income by ${fmt(-weeklyNet(G))}/wk. Try a special class or more fights`,act:full?{k:"tab",v:"camp",sub:"staff",label:"Hire an assistant coach"}:{k:"campacts",label:"Choose a camp activity"}});}
   if(G.cash<0)T.push({p:10,t:`In the red for ${G.negWeeks} weeks. In the red 4 weeks and below ฿10,000, the camp goes bankrupt`});
   if(studentDemand(G)>studentCap(G)+2)T.push({p:5,t:`Classes are full and ${studentDemand(G)-studentCap(G)} more people want to join. Upgrading the class yard holds 3 more each level`,act:{k:"tab",v:"camp",sub:"fac",label:"Upgrade the class yard"}});
-  {const un=(G.losses||[]).filter(l=>!l.watched&&G.F[l.b]&&G.F[l.b].camp!=="quest"&&G.week-l.wk<=6);if(un.length)T.push({p:4,t:`Haven't reviewed the fight ${G.F[un[un.length-1].a].name} lost. Watch it with the team for EXP and a read on that opponent`,act:{k:"lossrev",label:"Review fight"}});}
-  if(G.disaster&&G.week<G.disaster.until)T.push({p:9,t:`${G.disaster.name} isn't over. Students can ${G.disaster.inc?"only come half the time":"not come at all"} for ${G.disaster.until-G.week} more weeks. Take fights to keep the money going`,act:{k:"tab",v:"fights",label:"See offers"}});
+  {const un=(G.losses||[]).filter(l=>!l.watched&&G.F[l.b]&&G.F[l.b].camp!=="quest"&&l.absWeek!=null&&gameWeek(G)-l.absWeek<=6);if(un.length)T.push({p:4,t:`Haven't reviewed the fight ${G.F[un[un.length-1].a].name} lost. Watch it with the team for EXP and a read on that opponent`,act:{k:"lossrev",label:"Review fight"}});}
+  if(G.disaster&&gameWeek(G)<G.disaster.untilAbs)T.push({p:9,t:`${G.disaster.name} isn't over. Students can ${G.disaster.inc?"only come half the time":"not come at all"} for ${G.disaster.untilAbs-gameWeek(G)} more weeks. Take fights to keep the money going`,act:{k:"tab",v:"fights",label:"See offers"}});
   if(dmOfferOn(G))T.push({p:8,t:"A promoter invites us to an 8-fighter cross-division Death Match, all fought this week. The champion takes ฿40,000!",act:{k:"tab",v:"fights",label:"See offers"}});
   if(!G.campUsed)T.push({p:3,t:"No camp activity chosen this week",act:{k:"campacts",label:"Choose activity"}});
   if(!G.freeUsed)T.push({p:2,t:"Don't forget free time with your fighters. Bond helps morale",act:{k:"tab",v:"people",label:"See characters"}});
@@ -326,7 +326,7 @@ function verdictOf(rate){return rate>=.6?{c:"green",t:"Weaker",say:"Easy win, bu
 function rinNoteHTML(){const n=G.rinNote;if(!n||!G.F.rin||G.F.rin.camp!=="player")return "";
   return `<button class="px rinnote" data-act="rinread"><img src="${faceSrc("rin")}" alt=""><span><b>Rin sent a report</b><small>3-week summary · tap to read</small></span><i class="tdot2"></i></button>`;}
 // v1.51: pets on the home card — tap once a week to play
-function petsRowHTML(){const P=G.pets||[];if(!P.length)return "";return `<div class="petrow">${P.map((p,i)=>{const done=p.wk===G.week;
+function petsRowHTML(){const P=G.pets||[];if(!P.length)return "";return `<div class="petrow">${P.map((p,i)=>{const done=p.wk===gameWeek(G);
   return `<span class="petg"><button class="petchip ${done?"done":""}" data-act="petplay" data-v="${i}" ${done?"disabled":""} title="${esc(PETS[p.k].eff)}"><img class="peti" src="${petIcon(p.k)}" alt=""><span><b>${esc(p.name)}</b><small>${done?"Played ✓":"Play"}</small></span></button><button class="btn sm petren" data-act="petren" data-v="${i}" aria-label="Rename ${esc(p.name)}">Rename</button></span>`;}).join("")}</div>`;}
 function homeHTML(){const R=roster(G);
   let guide="";
@@ -337,10 +337,10 @@ function homeHTML(){const R=roster(G);
       <div class="gact">${t.act?`<button class="btn sm gold" data-act="tipact" data-k="${t.act.k}" data-id="${t.act.id||""}" data-v="${t.act.v||""}">${t.act.label}</button>`:""}${T.length>1?`<button class="btn sm" data-act="tipnext">Next ${i+1}/${T.length} ▸</button>`:""}</div></div>
       <button class="xbtn" data-act="hideguide" aria-label="Hide this week's tips">✕</button></section>`;}
   // v1.39: while Kru Daeng is on leave, Kati "runs" the camp and it shows
-  if(G.coachAway&&G.week<G.coachAway&&G.guideHidden!==G.week&&rinIn()){const T=coachTips(true).filter(t=>t.p>=4);const t=T.length?T[G.week%Math.min(2,T.length)]:null;
-    guide=`<section class="px guide away"><img class="gface" src="${faceSrc("rin","happy")}" alt="Rin"><div class="gtxt"><b>Rin's observations · Coach Daeng back in week ${G.coachAway}</b><p>${t?esc("According to my data: "+t.t):"The data looks normal this week. Nothing to worry about"}</p><p class="meta">No coach to help decide; Rin can only point things out</p></div><button class="xbtn" data-act="hideguide" aria-label="Close">✕</button></section>`;}
-  else if(G.coachAway&&G.week<G.coachAway&&G.guideHidden!==G.week){const KS=["Coach Daeng's away, so I made everyone run three extra laps …I ran too!","I tried blowing the whistle like Coach Daeng. It came out like a duck","Coach Daeng called to ask if everyone's eaten. Four times today","Mali secretly switched the gym music to luk thung. I didn't stop her… because it's actually great","Coach Daeng's training schedule is on the wall, but I can't read his handwriting at all"];
-    guide=`<section class="px guide away"><img class="gface" src="${faceSrc("kati","happy")}" alt="Kati"><div class="gtxt"><b>Kati (acting coach · Coach Daeng back in week ${G.coachAway})</b><p>${esc(KS[G.week%KS.length])}</p><p class="meta">No coach advice for now; you make every call yourself</p></div><button class="xbtn" data-act="hideguide" aria-label="Close">✕</button></section>`;}
+  if(G.coachAwayAbs&&gameWeek(G)<G.coachAwayAbs&&G.guideHidden!==G.week&&rinIn()){const T=coachTips(true).filter(t=>t.p>=4);const t=T.length?T[G.week%Math.min(2,T.length)]:null;
+    guide=`<section class="px guide away"><img class="gface" src="${faceSrc("rin","happy")}" alt="Rin"><div class="gtxt"><b>Rin's observations · Coach Daeng back in week ${((G.coachAwayAbs-1)%52)+1}</b><p>${t?esc("According to my data: "+t.t):"The data looks normal this week. Nothing to worry about"}</p><p class="meta">No coach to help decide; Rin can only point things out</p></div><button class="xbtn" data-act="hideguide" aria-label="Close">✕</button></section>`;}
+  else if(G.coachAwayAbs&&gameWeek(G)<G.coachAwayAbs&&G.guideHidden!==G.week){const KS=["Coach Daeng's away, so I made everyone run three extra laps …I ran too!","I tried blowing the whistle like Coach Daeng. It came out like a duck","Coach Daeng called to ask if everyone's eaten. Four times today","Mali secretly switched the gym music to luk thung. I didn't stop her… because it's actually great","Coach Daeng's training schedule is on the wall, but I can't read his handwriting at all"];
+    guide=`<section class="px guide away"><img class="gface" src="${faceSrc("kati","happy")}" alt="Kati"><div class="gtxt"><b>Kati (acting coach · Coach Daeng back in week ${((G.coachAwayAbs-1)%52)+1})</b><p>${esc(KS[G.week%KS.length])}</p><p class="meta">No coach advice for now; you make every call yourself</p></div><button class="xbtn" data-act="hideguide" aria-label="Close">✕</button></section>`;}
   const lv=campLevel(G);
   return `${rinNoteHTML()}<div class="homegrid">${(()=>{const r=[["mali",G.flags.maliRecruit],["rin",G.flags.rinRecruit]].filter(([id,ok])=>ok&&G.F[id].camp==="free");
      return r.length?`<button class="px newfighter" data-act="tab" data-v="camp" data-sub="staff"><span class="newb">NEW!</span>${r.map(([id])=>`<img src="${faceSrc(id,"happy")}" alt="">`).join("")}<span><b>${r.map(([id])=>esc(G.F[id].name)).join(" and ")} wants to join</b><small>Tap to see the contract</small></span><span class="chev">▸</span></button>`:"";})()}<section class="px camp-wrap"><div class="cvbox"><canvas class="campcv" width="640" height="360" data-camp="1" aria-label="Sirichai Gym overview"></canvas>
@@ -461,10 +461,10 @@ function fightsHTML(){
   return `<div class="seg subtabs"><button data-act="fsub" data-v="offers" aria-pressed="${sub==="offers"}">Offers & schedule</button><button data-act="fsub" data-v="rank" aria-pressed="${sub==="rank"}">Rankings</button></div>`+(sub==="rank"?rankHTML():offersHTML());}
 // v1.7 scouting: watch tape to see the opponent's tendencies (free when Rin is in the camp)
 // v1.21: tape is always a deliberate step again — Rin (or the analyst) just makes it free
-const SCOUT_COST=400;const rinIn=()=>G.F.rin.camp==="player";const RIN_GAP=3;const rinFree=()=>rinIn()&&!(G.rinTapeWk!=null&&G.week-G.rinTapeWk<RIN_GAP); // v1.38: Rin studies one tape for free every 3 weeks
+const SCOUT_COST=400;const rinIn=()=>G.F.rin.camp==="player";const RIN_GAP=3;const rinFree=()=>rinIn()&&!(G.rinTapeAbs!=null&&gameWeek(G)>=G.rinTapeAbs&&gameWeek(G)-G.rinTapeAbs<RIN_GAP); // v1.38: Rin studies one tape for free every 3 weeks
 const scoutCost=()=>rinFree()||(G.staff||[]).includes("wit")?0:(G.fac.video||0)>=1?200:SCOUT_COST;
 const scoutLabel=()=>rinFree()?"Let Rin study the tape (free every 3 weeks)":scoutCost()?`Scout ${fmt(scoutCost())}`:"Scout (free)";
-const scouted=id=>G.scout&&G.scout[id]!=null&&G.week-G.scout[id]<=8;
+const scouted=id=>G.scoutAbs&&G.scoutAbs[id]!=null&&gameWeek(G)>=G.scoutAbs[id]&&gameWeek(G)-G.scoutAbs[id]<=8;
 function oppIntel(op){const a=op.a;const wp=[["Punch",a.punch],["Kick",a.kick],["Knee",a.knee],["Elbow",a.elbow]].sort((x,y)=>y[1]-x[1]);
   const weak=[["guard","Loose guard · head shots work"],["stamina","Low power · body shots drain her"],["foot","Slow footwork · leg kicks slow her more"],["clinch","Weak clinch · inside fighting has the edge"],["dur","Can't take much punishment"]].sort((x,y)=>a[x[0]]-a[y[0]])[0];
   return {top:`${wp[0][0]} (${wp[0][1].toFixed(0)}) and ${wp[1][0]} (${wp[1][1].toFixed(0)})`,weak:weak[1]};}
@@ -489,7 +489,7 @@ function offersHTML(){const mine=G.bookings.filter(b=>G.F[b.a].camp==="player").
        <div class="meta">Wk ${o.week} · ${TIER[o.tier].name}${o.beast?" · off the record":""}${o.fair?" · not ranked · purse paid by mail":""}${o.tier==="lab"?" · Unranked bout":""} · ${styleOf(op.a)}${op.camp==="rival"?op.lab?" · Vector Gym, Bangkok":" · Golden Tiger":""}${personaOf(op)?` · ${personaOf(op).tag}`:""}</div>${h2hText(op)?`<div class="meta goldt">${h2hText(op)}</div>`:""}
        <div class="meta">Purse ${fmt(o.lose)} · <b class="goldt">win +${fmt(o.win-o.lose)}</b> · <b class="${v.c}t">${v.t}</b>${ovr(op.a)-ovr(me.a)>.4?` · <b class="goldt">Win for bonus points/fame</b>`:ovr(op.a)-ovr(me.a)<-.6?` · <span class="mutt">Beating a weaker fighter earns little fame</span>`:""}</div>
        </div></div>
-       <div class="obtns3"><button class="btn sm" data-act="consider" data-v="${o.id}">${scouted(o.b)?"Opponent info":"Scout"}</button>${coachOn()?`<button class="btn sm" data-act="otip" data-v="${o.id}">Coach's advice</button>`:""}<button class="btn sm gold" data-act="accept" data-v="${o.id}">Accept</button></div></div>`;}).join("")||`<p class="lead">${G.bookings.length?"Fight booked. New offers arrive next week":"No offers (injured, or season over)"}</p>`}</div></section>`;}
+       <div class="obtns3"><button class="btn sm" data-act="consider" data-v="${o.id}">${scouted(o.b)?"Opponent info":"Scout"}</button>${coachOn()?`<button class="btn sm" data-act="otip" data-v="${o.id}">Coach's advice</button>`:""}<button class="btn sm gold" data-act="accept" data-v="${o.id}" ${o.status==="conflict"?"disabled title=\""+esc(o.reason)+"\"":""}>Accept</button></div></div>`;}).join("")||`<p class="lead">${G.bookings.length?"Fight booked. New offers arrive next week":"No offers (injured, or season over)"}</p>`}</div></section>`;}
 function rankHTML(){const st=stageOf(G.week),cut=st==="local"?4:st==="district"?4:0,d=UI.rdiv;const rows=standings(G,d);const mv=(G.rankMove&&G.rankMove[d])||{};
   return `<section class="px card"><div class="card-h"><div class="seg sm"><button data-act="rdiv" data-v="A" aria-pressed="${d==="A"}">Div A</button><button data-act="rdiv" data-v="B" aria-pressed="${d==="B"}">Div B</button></div>${G.champ[d]?`<span class="pill gold">Champion: ${esc(G.F[G.champ[d]].name)}</span>`:""}</div>
    <div class="rkhelp"><p class="meta">${st==="local"?"Top 4 (gold line) advance to the district round · cut at wk 20":st==="district"?"Top 4 (gold line) advance to the provincial semis · cut at wk 40":"Semis wk 44 · Final wk 49"} · win = 3 pts</p><button class="btn sm" data-act="rankhelp">How do rankings work?</button></div>
@@ -502,7 +502,7 @@ function peopleHTML(){const met=CANON_IDS.map(id=>G.F[id]).filter(f=>f.met);
   return `<div class="card-h"><p class="meta">Spend time with one person per week · Once you are close, they will sometimes text you first</p><button class="btn sm gold albbtn" data-act="album">🃏 Card album ${Object.keys(G.cards||{}).length}/${Object.keys(CARDS).length}${Object.values(G.cards||{}).some(c=>!c.seen)?'<i class="ndot"></i>':""}</button>${G.freeUsed?"<span class=\"pill\">Free time: used</span>":"<span class=\"pill gold\">Free time: 1 left</span>"}</div>
    <div class="plist">${met.map(f=>`<section class="px pcard"><button class="pthumb" data-act="fighter" data-id="${f.id}" data-v="rel" aria-label="View profile of ${esc(f.name)}"><img src="${stand(f.id,"casual")}" alt="" loading="lazy"></button>
      <div class="pbody"><div class="pnm"><b class="nm">${esc(f.name)}</b><span class="meta">${f.camp==="player"?"Sirichai Camp":f.camp==="rival"?"Golden Tiger":"Independent"}${G.romance===f.id?" · Sweetheart ♥":G.promise&&G.promise[f.id]!=null?" · Promised ♡":""}</span></div>${hearts(f.bond)}
-      <div class="pbtns"><button class="btn sm" data-act="fighter" data-id="${f.id}" data-v="rel">Profile</button><button class="btn sm primary" data-act="hang" data-id="${f.id}" ${G.freeUsed?"disabled":""}>Hang out</button><button class="btn sm gold giftb" data-act="giftpick" data-id="${f.id}" ${f.giftWeek===G.week?"disabled":""}>${PIX.gift}<span>${f.giftWeek===G.week?"Given":"Gift"}</span></button><button class="btn sm chatb" data-act="chat" data-id="${f.id}" ${canChat(f)?"":"disabled"}>${CHAT_PX}<span>${canChat(f)?"New chat":(f.bond||0)<CHAT_BOND?"Not close yet":"No messages"}</span>${canChat(f)?'<i class="dot"></i>':""}</button></div></div></section>`).join("")}</div>`;}
+      <div class="pbtns"><button class="btn sm" data-act="fighter" data-id="${f.id}" data-v="rel">Profile</button><button class="btn sm primary" data-act="hang" data-id="${f.id}" ${G.freeUsed?"disabled":""}>Hang out</button><button class="btn sm gold giftb" data-act="giftpick" data-id="${f.id}" ${f.giftWeek===gameWeek(G)?"disabled":""}>${PIX.gift}<span>${f.giftWeek===gameWeek(G)?"Given":"Gift"}</span></button><button class="btn sm chatb" data-act="chat" data-id="${f.id}" ${canChat(f)?"":"disabled"}>${CHAT_PX}<span>${canChat(f)?"New chat":(f.bond||0)<CHAT_BOND?"Not close yet":"No messages"}</span>${canChat(f)?'<i class="dot"></i>':""}</button></div></div></section>`).join("")}</div>`;}
 function hangHTML(id){const f=G.F[id];const pref=k=>f.know["act_"+k]==="like"?"<i class=\"likeb\">Likes</i>":f.know["act_"+k]==="dislike"?"<i class=\"disb\">Dislikes</i>":"";
   return `<h2>Time with ${esc(f.name)}</h2><p class="meta">Choose where to go together</p><div class="acts">${Object.entries(ACTIVITIES).filter(([k,a])=>!a.campOnly||f.camp==="player").map(([k,a])=>`<button class="actbtn" data-act="date" data-id="${f.id}" data-v="${k}" ${G.freeUsed||G.cash<a.cost?"disabled":""}><b>${a.name}${pref(k)}</b><small>${a.cost?fmt(a.cost):"Free"}</small></button>`).join("")}</div>`;}
 // v1.33: what each camp level brings, so upgrades feel like a goal
@@ -567,7 +567,7 @@ function recruitHTML(recs){if(!recs.length)return "";
 function fighterHTML(f){const mine=f.camp==="player";const P=PROFILES[f.id];
   const tabs=mine?[["rel","Profile"],["over","Stats"],["skill","Skills"]].concat(f.canon&&KIT_MASK[f.id]?[["look","Outfit"]]:[]):[["rel","Profile"],["over","Stats"]];
   let t=UI.ptab;if(!tabs.some(x=>x[0]===t))t="over";
-  const head=`<div class="fp-head">${faceImg(f)}<div><h2>${esc(f.full)}</h2><div class="meta">${P?P.age+" yrs · ":""}${f.camp==="player"?"Sirichai Camp":f.lab?"Vector Gym, Bangkok":f.camp==="rival"?"Golden Tiger Camp":"Free agent"} · Div ${f.div} · ${styleOf(f.a)} · ${rec(f)}</div>${G.belt&&Object.values(G.belt).some(x=>x.id===f.id)?`<div class="beltb">🏆 Tha Phae Stadium champion</div>`:f.belts?`<div class="beltb old">Former Tha Phae Stadium champion</div>`:""}${xpBar(f)}</div></div>
+  const head=`<div class="fp-head">${faceImg(f)}<div><h2>${esc(f.full)}</h2><div class="meta">${f.age!=null?f.age+" yrs · ":""}${f.camp==="player"?"Sirichai Camp":f.lab?"Vector Gym, Bangkok":f.camp==="rival"?"Golden Tiger Camp":"Free agent"} · Div ${f.div} · ${styleOf(f.a)} · ${rec(f)}</div>${G.belt&&Object.values(G.belt).some(x=>x.id===f.id)?`<div class="beltb">🏆 Tha Phae Stadium champion</div>`:f.belts?`<div class="beltb old">Former Tha Phae Stadium champion</div>`:""}${xpBar(f)}</div></div>
    <div class="seg ptabs">${tabs.map(([k,n])=>`<button data-act="ptab" data-v="${k}" aria-pressed="${t===k}">${n}${k==="skill"&&skReady(f)?'<i class="tdot2"></i>':""}</button>`).join("")}</div>`;
   let body="";
   if(t==="look"){const cur=f.outfit||"base";
@@ -644,7 +644,7 @@ function giftHTML(id){const f=G.F[id];
   {const lk=E.filter(([k,g])=>(g.bond||0)>(f.bond||0));const nx=lk[0];const hid=lk.length-(nx?1:0);E.splice(0,E.length,...E.filter(([k,g])=>(g.bond||0)<=(f.bond||0)),...(nx?[nx]:[]));E.hidden=hid;}
   return `<h2>A gift for ${esc(f.name)}</h2><p class="meta">Bought and given right away · 1 per person per week · the closer you are, the more to choose ${E.hidden?` (${E.hidden} more hidden)`:""} · cash ${fmt(G.cash)}</p><div class="gifts">${E.map(([k,g])=>{const kn=f.know["gift_"+k],lk=(g.bond||0)>(f.bond||0);
    if(lk)return `<div class="giftbtn lockg"><b>???</b><small>Unlocks at bond ${g.bond}</small></div>`;
-   const lw=f.giftL&&f.giftL[k],cd=lw&&G.week-lw<6&&(f.giftN||{})[k]?6-(G.week-lw):0;
+   const lw=f.giftL&&f.giftL[k],cd=lw&&gameWeek(G)-lw<6&&(f.giftN||{})[k]?6-(gameWeek(G)-lw):0;
    return `<button class="giftbtn" data-act="give" data-id="${id}" data-v="${k}" ${G.cash<g.price?"disabled":""}><b>${g.name}</b><small>${fmt(g.price)}${cd?` · given recently`:""}</small></button>`;}).join("")}</div>
    <p class="meta glegend">Watch how she reacts when you give it, or check her profile for what you've given before</p>`;}
 function considerHTML(o){const me=G.F[o.a],op=G.F[o.b];const A=adviseCached(o.a,o.b,3);const pct=x=>Math.round(x*100);const v=verdictOf(A.bestRate);const sc=scouted(op.id);const P=personaOf(op);
@@ -765,7 +765,7 @@ function sceneNext(){const S=UI.scene;if(!S)return;
     const n=val(st.n);S.lookOf=S.lookOf||{};
     // v1.8: each character keeps one outfit for the whole scene
     const look=CANON_IDS.includes(n)?(S.lookOf[n]=S.lookOf[n]||(st.l==="train"?"fight":st.l)||S.look):(st.l||S.look);
-    S.cur={n,f:val(st.f)||"happy",t:nameCall(n,val(st.t)),look,who:st.who,tel:n==="coach"&&!S.coachOK&&!!(G&&G.coachAway&&G.week<G.coachAway)};
+    S.cur={n,f:val(st.f)||"happy",t:nameCall(n,val(st.t)),look,who:st.who,tel:n==="coach"&&!S.coachOK&&!!(G&&G.coachAwayAbs&&gameWeek(G)<G.coachAwayAbs)};
     if(st.show)S.cast=st.show.map(x=>({id:x.id,f:x.f||"happy",look:S.lookOf[x.id]||x.l||look,back:!!x.back}));
     if(n==="npc"){const im=npcImg(st);if(im)S.cast=[{id:"npc:"+im,f:"happy",look}];}
     if(n==="coach"){S.cast=[{id:"coach",f:"happy",look}];}           // the coach always stands alone
@@ -826,14 +826,14 @@ function pendingEvents(){return EVENTS.filter(e=>e.when&&!evSeen(e)&&e.when(G));
 const EV_MUST=/^(prologue|daeng_leave|pre_qual|qual_result|final_result|semi_result|night_final|lover_final|ploy_prefinal|fah_prefinal|first_win|first_loss)/,EV_CAP=2;
 function runEvents(done){const list=pendingEvents().sort((a,b)=>(b.pri||0)-(a.pri||0));let played=0,opt=0;/* time-limited scenes go first */
   const step=()=>{const e=list.shift();if(!e||G.ended){done&&done(played);return;}if(evSeen(e)||!e.when(G)){step();return;}
-    if(G.coachAway&&G.week<G.coachAway&&!EV_MUST.test(e.id)&&!/daeng|coach/.test(e.id)&&e.steps.some(x=>x.n==="coach")){step();return;}/* v1.60: scenes where Kru Daeng talks wait until he is back */
+    if(G.coachAwayAbs&&gameWeek(G)<G.coachAwayAbs&&!EV_MUST.test(e.id)&&!/daeng|coach/.test(e.id)&&e.steps.some(x=>x.n==="coach")){step();return;}/* v1.60: scenes where Kru Daeng talks wait until he is back */
     if(!EV_MUST.test(e.id)){if(opt>=((G.season||1)>=2&&(G.week===44||G.week===49)?0:EV_CAP)){step();return;}opt++;}
     if(e.annual){G.seenY=G.seenY||{};G.seenY[e.id]=G.season||1;}else G.seen[e.id]=true;G.seenWk=G.seenWk||{};G.seenWk[e.id]=G.week;played++;playScene(e.steps,step,{bg:e.bg,look:e.look,coachOK:/daeng|coach/.test(e.id)});};step();}
 function weeklyExtra(done){const rng=mulberry32(G.seed+G.week*313);if(typeof questExtra==="function"&&questExtra(done,mulberry32(G.seed+G.week*59)))return;
   const dil=(typeof DILEMMAS!=="undefined"?DILEMMAS:[]).filter(d=>!G.seen[d.id]&&G.week>=d.from&&G.week<=d.to&&d.need(G));
-  const sinceD=G.week-(G.lastDilemma||0);
+  const sinceD=gameWeek(G)-(G.lastDilemma||0);
   // v1.21: something happens most weeks — a decision every couple of weeks, chatter or a happening in between
-  if(dil.length&&sinceD>=2&&rng()<.62){const d=dil[Math.floor(rng()*dil.length)];G.seen[d.id]=true;G.lastDilemma=G.week;
+  if(dil.length&&sinceD>=2&&rng()<.62){const d=dil[Math.floor(rng()*dil.length)];G.seen[d.id]=true;G.lastDilemma=gameWeek(G);
     playScene([{n:"nar",t:"— Decisions to make —"},...d.steps],done,{bg:d.bg==="camp"?"gym":d.bg,look:d.look||"train"});return;}
   const chats=CHATTER.filter(c=>!G.seen[c.id]&&c.need(G));const haps=HAPPENINGS.filter(h=>!G.seen[h.id]);
   const chats2=chats.filter(c=>!c.need2||c.need2(G)),haps2=haps.filter(h=>!h.need||h.need(G));
@@ -853,7 +853,7 @@ function tiredScene(done){G.tiredAt=G.tiredAt||{};const f=roster(G).find(x=>!x.i
 function aftermathScene(done){const L=G.lastBig;if(!L||L.shown||G.week-L.wk>1){done();return;}L.shown=true;const me=G.F[L.a];if(!me||me.camp!=="player"){done();return;}
   playScene(aftermathSteps(G,L),()=>{AU.startMusic("hub");save();done();},{bg:"gym",look:"train"});}
 // v1.15: Kru Daeng comes back from his leave and checks on everyone
-function coachBackScene(done){if(!G.coachAway||G.week<G.coachAway||(G.flags&&G.flags.coachBack)){done();return;}G.flags=G.flags||{};G.flags.coachBack=true;const R=roster(G);const k=R[0];
+function coachBackScene(done){if(!G.coachAwayAbs||gameWeek(G)<G.coachAwayAbs||(G.flags&&G.flags.coachBack)){done();return;}G.flags=G.flags||{};G.flags.coachBack=true;const R=roster(G);const k=R[0];
   const tired=R.filter(f=>f.fatigue>=50).map(f=>f.name);
   playScene([{n:"nar",t:"Monday morning, an old motorbike pulls up at the camp gate"},{n:"coach",t:"I'm back! Two weeks away, the camp didn't fall apart, did it? Haha"},
     ...(k?[{n:k.id,f:"happy",l:"train",t:k.id==="kati"?"Coach Daeng! I missed you so much! Nobody yelled at us in the morning, it was so quiet":"Welcome back, Coach!"}]:[]),
@@ -934,7 +934,7 @@ function openFight(b,done){const op=G.F[b.b],k=`taunt_${b.a}_${b.b}_${stageOf(G.
 // Wai khru opens the first bout, canon matchups, and major bouts.
 const RAM={phrom:{name:"Four-Faced Brahma",hint:"Bow to all four directions · calm mind, sharper in round one"},hong:{name:"Soaring Swan",hint:"Graceful as a swan · morale +6"},
   phra:{name:"Rama Draws His Bow",hint:"Drawing the bow · aggressive first round"}};
-function waiKhruScene(b){const me=G.F[b.a],first=!(G.flags&&G.flags.waiSeen);const away=!!(G.coachAway&&G.week<G.coachAway);
+function waiKhruScene(b){const me=G.F[b.a],first=!(G.flags&&G.flags.waiSeen);const away=!!(G.coachAwayAbs&&gameWeek(G)<G.coachAwayAbs);
   const own=vary("own_"+me.id,{kati:["Grandpa… I'm dedicating this wai khru to you","Grandpa, watch me. I'll dance every move just like you taught me","I practiced the dance every morning, Grandpa. No mistakes today!"],mali:["Mom, Mali will dance the most beautiful one ever","Is Mom watching live~? Mali will wave at the end of the dance!","Once the dance is done Mali won't be nervous anymore… probably~"],rin:["Wai khru isn't just ritual, it's focus… I'm ready","During the dance I'll observe how my opponent stands… Coach doesn't mind, right?","My pulse drops from 112 to 88 every time I finish the dance. Very interesting"],ploy:["Coach taught me: before you beat others, beat yourself"],fah:["I'll dance so the crowd remembers. Watch!"]}[me.id]||["Let me pay respects first"]);
   return [{n:"nar",t:vary("wai1",["The pi chawa rises in a long shrill note, the khaek drums beat slowly, the ching rings out. Time for the \"wai khru ram muay\"","The pi chawa sounds and the crowd hushes on its own. Time for the wai khru","The khaek drums begin slowly; the whole ring falls quiet as the fighter steps through the ropes","The cymbals ring three times and the wai khru music begins, a cool breeze sweeping the ring"])},
     ...(first&&!away?[{n:"coach",t:"Wai khru honors one's teachers, parents and the sacred. The fighter first walks around the ring to \"seal the ring\", then dances"}]:[]),
@@ -1163,7 +1163,7 @@ function fightEnd(){const U=UI.fight;U.stage="done";{const w=U.F.result.win;U.bu
     G.faceoffStats=G.faceoffStats||{};const key=`${U.b.a}_${U.b.b}`,s=G.faceoffStats[key]=G.faceoffStats[key]||{w:0,l:0,d:0};s[r.win==="A"?"w":r.win==="B"?"l":"d"]++;}
   {const op=G.F[U.b.b];if(r.win!=="D"&&!TIER[U.b.tier].off&&(op.canon||U.b.tier==="semi"||U.b.tier==="final"||/KO/.test(r.type)))G.lastBig={a:me.id,b:op.id,win:r.win,wk:G.week,shown:false};}
   if(r.win==="B"){const F=U.F,st=s=>({landed:s.landed,thrown:s.thrown,wl:{...s.wl},sta:Math.round(s.sta),kd:s.kd,legs:Math.round(s.legs)});
-    G.losses=(G.losses||[]).concat([{wk:G.week,a:me.id,b:U.b.b,type:r.type,round:r.round,cards:F.cards.map(c=>[...c]),A:st(F.A),B:st(F.B),sc:scouted(U.b.b),od:Math.round(ovr(G.F[U.b.b])-ovr(me)),plan:U.plan||"balanced",tg:(F.A.tac&&F.A.tac.target)||"",care:U.careOK||0}]).slice(-6);}
+    G.losses=(G.losses||[]).concat([{wk:G.week,absWeek:gameWeek(G),a:me.id,b:U.b.b,type:r.type,round:r.round,cards:F.cards.map(c=>[...c]),A:st(F.A),B:st(F.B),sc:scouted(U.b.b),od:Math.round(ovr(G.F[U.b.b])-ovr(me)),plan:U.plan||"balanced",tg:(F.A.tac&&F.A.tac.target)||"",care:U.careOK||0}]).slice(-6);}
   U.afterScene=prodigyResultScene(G,U.b,r.win)||vectorResultScene(G,U.b,r.win);
   save();render();}
 
@@ -1237,7 +1237,7 @@ const ACT={
   preset:d=>{if(trLocked(G.F[d.f]))return;const f=G.F[d.f];f.plan.preset=d.v;if(d.v==="rest")f.plan.intensity="normal";save();render();},
   intensity:d=>{if(trLocked(G.F[d.f]))return;G.F[d.f].plan.intensity=d.v;save();render();},
   consider:d=>{UI.modal={type:"consider",id:d.v};render();},
-  accept:d=>{const o=G.offers.find(x=>x.id===d.v);if(!o)return;const A=adviseCached(o.a,o.b,3);acceptOffer(G,d.v);UI.modal=null;save();toast(`Fight booked: ${G.F[o.a].name} vs ${G.F[o.b].name} week ${o.week}`);},
+  accept:d=>{const o=G.offers.find(x=>x.id===d.v),result=acceptOffer(G,d.v);UI.modal=null;save();if(!result.ok){toast(result.reason);render();return;}toast(`Fight booked: ${G.F[o.a].name} vs ${G.F[o.b].name} week ${o.week}`);render();},
   fsub:d=>{UI.fsub=d.v;if(d.v==="rank"&&G&&!(G.flags&&G.flags.rankGuide)){G.flags.rankGuide=1;UI.modal={type:"rankhelp"};save();}render();},csub:d=>{UI.csub=d.v;render();},rdiv:d=>{UI.rdiv=d.v;render();},
   tipnext:()=>{UI.tipIdx++;render();},hideguide:()=>{G.guideHidden=G.week;save();render();},
   tipact:d=>{if(d.k==="setrest"||d.k==="setprep"){ACT.tab({v:"train"});if(!trLocked(G.F[d.id])){UI.modal={type:"tpick",id:d.id};render();}}
@@ -1298,7 +1298,7 @@ const ACT={
   fpok:d=>{const b=G.bookings.find(x=>x.id===d.id);if(b){b.plan=UI.fpDraft.plan;b.tac={...(b.tac||{}),target:UI.fpDraft.target};b.planSet=true;save();}UI.modal=null;render();},
   bplanb:d=>{const b=G.bookings.find(x=>x.id===d.id);if(!b)return;b.plan=d.v;save();render();},
   btgt:d=>{const b=G.bookings.find(x=>x.id===d.id);if(!b)return;b.tac={...(b.tac||{}),target:d.v};save();render();},ctac:d=>{UI.fight.F.A.tac[d.k]=d.v;render();},
-  scout:d=>{if(G.cash<scoutCost()||scouted(d.v))return;const free=rinFree();G.cash-=scoutCost();G.scout=G.scout||{};G.scout[d.v]=G.week;if(free)G.rinTapeWk=G.week;save();if(free){toast(`Rin scouted ${G.F[d.v].name} (next free tape: week ${G.week+RIN_GAP})`);render();return;}toast("Tape scouted, Coach has noted the weak spots");render();},
+  scout:d=>{if(G.cash<scoutCost()||scouted(d.v))return;const free=rinFree();G.cash-=scoutCost();G.scoutAbs=G.scoutAbs||{};G.scoutAbs[d.v]=gameWeek(G);if(free)G.rinTapeAbs=gameWeek(G);save();if(free){toast(`Rin scouted ${G.F[d.v].name} (next free tape: week ${((G.week+RIN_GAP-1)%52)+1})`);render();return;}toast("Tape scouted, Coach has noted the weak spots");render();},
   corner:d=>{AU.sfx("ui");UI.fight.F.A.instr=d.v;playRound();},
   chint:()=>{UI.fight.hint=!UI.fight.hint;render();},
   repinfo:()=>{UI.modal={type:"repinfo"};render();},

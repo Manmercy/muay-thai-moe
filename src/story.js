@@ -4,7 +4,7 @@
 const vary=(key,arr)=>{if(typeof G==="undefined"||!G)return arr[0];G.vary=G.vary||{};const i=G.vary[key]||0;G.vary[key]=i+1;return arr[i%arr.length];};
 const ME=G=>G.player.name,
  // v1.41: the girls call you "ผู้จัดการ" — your name slips out now and then once close, and always once very close
- MEM=(G,k)=>{G.mem=G.mem||{};G.mem[k]=G.week;}, HAS=(G,k,gap)=>G.mem&&G.mem[k]!==undefined&&G.week-G.mem[k]>=(gap||0),
+ MEM=(G,k)=>{G.mem=G.mem||{};G.mem[k]=absWeek(G);}, HAS=(G,k,gap)=>G.mem&&G.mem[k]!==undefined&&absWeek(G)-G.mem[k]>=(gap||0),
  CALL=(G,id)=>{const f=G.F[id],b=f?f.bond||0:0;if(G.romance===id||b>=75)return G.player.name;if(b>=40&&Math.random()<.35)return G.player.name;return "ผู้จัดการ";}, PR=G=>G.player.gender==="m"?"ผม":"ฉัน", PA=G=>G.player.gender==="m"?"ครับ":"ค่ะ";
 const SPK={kati:{name:"กะทิ",color:"#e23b4e"},mali:{name:"มะลิ",color:"#4a7fe0"},rin:{name:"ริน",color:"#3fae6a"},
   ploy:{name:"พลอย",color:"#9b62e0"},fah:{name:"ฟ้า",color:"#e7b443"},pailin:{name:"ไพลิน",color:"#8e4ac3"},coach:{name:"ครูแดง",color:"#c98a5a"},nar:{name:""},me:{name:"(คุณ)"}};
@@ -715,18 +715,18 @@ EVENTS.push(
   {n:"kati",f:"surprised",l:"casual",t:G=>`${CALL(G,"kati")}คะ! หลังคาห้องซ้อมหายไปครึ่งนึง! ฝนตกใส่กระสอบทรายหมดเลย!`},
   {n:"coach",t:"เด็ก ๆ จะมาเรียนในห้องที่ไม่มีหลังคาไม่ได้ จะซ่อมแบบไหนดี"},
   {choice:[{t:"ซ่อมแบบดีให้เสร็จเร็ว (฿25,000)",fx:G=>{G.cash-=25000;},then:[{n:"nar",t:"ช่างมาครบทีมในสองวัน หลังคาใหม่เงาวับ คลาสเปิดต่อได้ไม่สะดุด"}]},
-   {t:"ซ่อมชั่วคราวไปก่อน (฿8,000)",fx:G=>{G.cash-=8000;G.disaster={name:"หลังคาที่ซ่อมชั่วคราว",until:G.week+3,inc:.5};roster(G).forEach(f=>f.morale=Math.max(0,f.morale-3));},then:[{n:"nar",t:"ผ้าใบสีฟ้าคลุมหลังคาไว้ ฝนตกทีไรน้ำหยดลงกลางเวที นักเรียนมาครึ่งเดียวไปอีกสามสัปดาห์"}]}]}]},
+   {t:"ซ่อมชั่วคราวไปก่อน (฿8,000)",fx:G=>{G.cash-=8000;G.disaster={name:"หลังคาที่ซ่อมชั่วคราว",untilAbs:absWeek(G)+3,inc:.5};roster(G).forEach(f=>f.morale=Math.max(0,f.morale-3));},then:[{n:"nar",t:"ผ้าใบสีฟ้าคลุมหลังคาไว้ ฝนตกทีไรน้ำหยดลงกลางเวที นักเรียนมาครึ่งเดียวไปอีกสามสัปดาห์"}]}]}]},
  {id:"dis_flood",pri:1,look:"casual",when:G=>G.week>=30&&G.week<=44&&G.cash>=40000,bg:"camp",steps:[
   {n:"nar",t:"ฝนตกหนักสามวันสามคืน แม่น้ำล้นตลิ่ง น้ำท่วมทั้งตำบล ในค่ายน้ำสูงถึงเข่า เบาะซ้อมลอยไปติดประตู"},
   {n:"mali",f:"sad",l:"casual",t:"นวมของมะลิลอยไปแล้วค่ะ! …อ๊ะ มีปลาว่ายเข้ามาในค่ายด้วย!"},
   {n:"rin",f:"sad",l:"casual",t:"ถนนเข้าตำบลถูกตัดขาดค่ะ นักเรียนมาไม่ได้แน่นอน อย่างน้อยสามสัปดาห์ เครื่องปั่นไฟกับเบาะต้องซื้อใหม่"},
   {n:"coach",t:G=>`${ME(G)} บ้านชาวบ้านแถวนี้ท่วมหนักกว่าเรา จะเอาแรงเด็ก ๆ ไปช่วยเขาก่อน หรือเร่งซ่อมค่ายเราก่อน`},
-  {choice:[{t:"ช่วยชาวบ้านขนของก่อน (ซ่อมค่าย ฿12,000)",fx:G=>{G.cash-=12000;G.rep+=3;G.disaster={name:"น้ำท่วม",until:G.week+4,inc:0};roster(G).forEach(f=>{f.trust=Math.min(100,f.trust+4);f.fatigue=Math.min(100,f.fatigue+8);});},then:[{n:"nar",t:"นักมวยค่ายศิริชัยแบกกระสอบทรายทั้งวัน ข่าวท้องถิ่นถ่ายรูปไปลงหน้าหนึ่ง"},{n:"npc",who:"ป้าศรี แม่ค้าผัก",t:"ค่ายนี้ใจดีที่สุดในอำเภอ! หายน้ำท่วมเมื่อไหร่ป้าจะส่งหลานไปเรียนสามคนเลย!"}]},
-   {t:"เร่งซ่อมค่ายให้เปิดเร็วที่สุด (฿25,000)",fx:G=>{G.cash-=25000;G.disaster={name:"น้ำท่วม",until:G.week+2,inc:0};},then:[{n:"nar",t:"ปั๊มน้ำเช่ามาสามตัว ค่ายแห้งเร็วกว่าใคร แต่ถนนยังเข้าไม่ได้อีกสองสัปดาห์"}]}]}]},
+  {choice:[{t:"ช่วยชาวบ้านขนของก่อน (ซ่อมค่าย ฿12,000)",fx:G=>{G.cash-=12000;G.rep+=3;G.disaster={name:"น้ำท่วม",untilAbs:absWeek(G)+4,inc:0};roster(G).forEach(f=>{f.trust=Math.min(100,f.trust+4);f.fatigue=Math.min(100,f.fatigue+8);});},then:[{n:"nar",t:"นักมวยค่ายศิริชัยแบกกระสอบทรายทั้งวัน ข่าวท้องถิ่นถ่ายรูปไปลงหน้าหนึ่ง"},{n:"npc",who:"ป้าศรี แม่ค้าผัก",t:"ค่ายนี้ใจดีที่สุดในอำเภอ! หายน้ำท่วมเมื่อไหร่ป้าจะส่งหลานไปเรียนสามคนเลย!"}]},
+   {t:"เร่งซ่อมค่ายให้เปิดเร็วที่สุด (฿25,000)",fx:G=>{G.cash-=25000;G.disaster={name:"น้ำท่วม",untilAbs:absWeek(G)+2,inc:0};},then:[{n:"nar",t:"ปั๊มน้ำเช่ามาสามตัว ค่ายแห้งเร็วกว่าใคร แต่ถนนยังเข้าไม่ได้อีกสองสัปดาห์"}]}]}]},
  {id:"dis_termite",pri:1,look:"train",when:G=>G.week>=36&&G.cash>=55000&&G.F.fah.met,bg:"gym",steps:[
   {n:"nar",t:"กร๊อบ! เสามุมเวทีหักลงมาตอนฟ้ายืนพิงอยู่ …เดี๋ยว ฟ้ามาทำอะไรที่ค่ายเรา"},
   {n:"fah",f:"surprised",l:"casual",t:"ฟ้าแค่ผ่านมา! ไม่ได้มาแอบดูซ้อม! …แล้วเสานี่มันกลวงนะ ปลวกกินหมดแล้ว!"},
-  {n:"coach",t:"ปลวกกินโครงไม้ทั้งค่าย ต้องรื้อทำใหม่ ฿18,000 ระหว่างทำนักเรียนมาได้ครึ่งเดียวสองสัปดาห์"},{fx:G=>{G.cash-=18000;G.disaster={name:"งานซ่อมปลวก",until:G.week+2,inc:.5};}},
+  {n:"coach",t:"ปลวกกินโครงไม้ทั้งค่าย ต้องรื้อทำใหม่ ฿18,000 ระหว่างทำนักเรียนมาได้ครึ่งเดียวสองสัปดาห์"},{fx:G=>{G.cash-=18000;G.disaster={name:"งานซ่อมปลวก",untilAbs:absWeek(G)+2,inc:.5};}},
   {n:"fah",f:"happy",l:"casual",t:G=>`สมน้ำหน้า! …ล้อเล่น ${ME(G)} ค่ายพยัคฆ์ทองมีช่างกำจัดปลวกเก่ง เดี๋ยวฟ้าขอเบอร์ให้ ไม่ต้องขอบใจ!`},{fx:G=>add(G,"fah","bond",2)}]});
 // v1.39: the player's own story: grandpa's real grandchild who left a good office job in Bangkok
 EVENTS.push(
@@ -752,24 +752,24 @@ EVENTS.push(
   {choice:[{t:G=>`ปู่${PA(G)} หลานจะดูแลค่ายกับกะทิให้ดีที่สุด`,fx:G=>{add(G,"kati","trust",6);add(G,"kati","bond",3);},then:[{n:"nar",t:"ลมพัดผ่านต้นโพธิ์ ใบไม้ร่วงลงมาบนนวมคู่นั้นใบหนึ่งพอดี"},{n:"kati",f:"happy",l:"casual",t:"ปู่ได้ยินแล้วค่ะ หนูเชื่อแบบนั้น"}]},
    {t:"(ไม่พูดอะไร แค่นั่งลงข้าง ๆ กะทิ)",fx:G=>{add(G,"kati","bond",5);},then:[{n:"nar",t:"สองคนนั่งเงียบอยู่นาน จนเสียงระฆังเพลดังขึ้น"}]}]}]});
 // v1.40: Kru Daeng takes leave more than once; while he is away only Rin's remarks are left
-const leaveSteps=(G,why,wk,post)=>[{inject:G2=>{G2.coachAway=G2.week+wk;G2.flags.coachBack=false;if(typeof addMail==="function")addMail(G2,{kind:"letter",from:"ครูแดง",title:post[0],body:post[1]});return [];}},
+const leaveSteps=(G,why,wk,post)=>[{inject:G2=>{G2.coachAwayAbs=absWeek(G2)+wk;G2.flags.coachBack=false;if(typeof addMail==="function")addMail(G2,{kind:"letter",from:"ครูแดง",title:post[0],body:post[1]});return [];}},
   {n:"nar",t:`ครูแดงลา ${wk} สัปดาห์ · ช่วงนี้ไม่มีคำแนะนำจากครู${inCamp(G,"rin")?" มีแค่ข้อสังเกตของริน":""}`}];
 EVENTS.push(
- {id:"daeng_leave_monk",look:"fight",when:G=>G.week>=17&&G.week<=19&&!(G.coachAway&&G.week<G.coachAway),bg:"camp",steps:[
+ {id:"daeng_leave_monk",look:"fight",when:G=>G.week>=17&&G.week<=19&&!(G.coachAwayAbs&&absWeek(G)<G.coachAwayAbs),bg:"camp",steps:[
   {n:"coach",t:"เจ้าของค่าย หลานชายครูจะบวช ครูต้องไปช่วยงานที่วัดสองสัปดาห์ ไปแห่นาค ไปโกนหัว ไปนั่งฟังพระสวด"},
   {n:"kati",f:"surprised",l:"casual",t:"ครูแดงจะโกนหัวด้วยเหรอคะ!?"},
   {n:"coach",t:"ครูไม่ได้บวช! …แต่ถ้าแพ้พนันเรื่องฟุตบอลกับพ่อนาค ก็อาจจะโกน"},
   {n:"rin",f:"happy",l:"casual",t:"ระหว่างนี้ฉันจะบันทึกทุกอย่างไว้ให้ค่ะ แต่ตัดสินใจแทนไม่ได้นะคะ ฉันแค่วิเคราะห์"},
   {inject:G=>leaveSteps(G,"monk",2,["ข่าวจากงานบวช","งานบวชหลานเรียบร้อยดี ครูแพ้พนันบอลกับพ่อนาค เลยต้องโกนหัวไปด้วย อย่าหัวเราะตอนครูกลับนะ ฝากเด็ก ๆ วิ่งตอนเช้าด้วย — ครูแดง"])}]},
- {id:"daeng_leave_knee",look:"fight",when:G=>G.week>=40&&G.week<=42&&!(G.coachAway&&G.week<G.coachAway),bg:"camp",steps:[
+ {id:"daeng_leave_knee",look:"fight",when:G=>G.week>=40&&G.week<=42&&!(G.coachAwayAbs&&absWeek(G)<G.coachAwayAbs),bg:"camp",steps:[
   {n:"coach",t:"หมอนัดผ่าตัดเข่าเล็ก ๆ ครูต้องนอนโรงพยาบาลสองสัปดาห์ ไม่ต้องห่วง หมอบอกว่าเข่าครูแข็งแรงเหมือนอายุห้าสิบ"},
   {n:"mali",f:"sad",l:"casual",t:"ครูแดงอายุหกสิบแปดนี่คะ…"},
   {n:"coach",t:"ก็นั่นแหละ ดีกว่าอายุจริงตั้งสิบแปดปี! ช่วงนี้ช่วงสำคัญ ตัดสินใจกันเองให้ดี ครูดูไลฟ์จากเตียงนะ"},
   {inject:G=>leaveSteps(G,"knee",2,["จากเตียงโรงพยาบาล","พยาบาลห้ามครูตะโกนเชียร์ไลฟ์ ครูเลยเชียร์ในใจจนความดันขึ้น ไม่ต้องมาเยี่ยม เอาเวลาไปซ้อม ถ้าจะเยี่ยมเอาส้มตำมาด้วย — ครูแดง"])}]});
-EVENTS.push({id:"daeng_leave",look:"fight",when:G=>G.week>=29&&G.week<=31&&!(G.coachAway&&G.week<G.coachAway),bg:"camp",steps:[
+EVENTS.push({id:"daeng_leave",look:"fight",when:G=>G.week>=29&&G.week<=31&&!(G.coachAwayAbs&&absWeek(G)<G.coachAwayAbs),bg:"camp",steps:[
   {n:"coach",t:"เจ้าของค่าย ครูขอลากลับบ้านที่สุรินทร์สองสัปดาห์นะ หลานสาวแต่งงาน"},
   {n:"coach",t:"ตารางซ้อมครูเขียนแปะไว้ที่ผนังแล้ว ช่วงนี้ต้องตัดสินใจเองทั้งหมดนะ ครูเชื่อมือ"},
-  {n:"kati",f:"surprised",t:"ห้ะ! สองสัปดาห์เลยเหรอคะ! …ไม่เป็นไรค่ะ หนูจะคุมทุกคนซ้อมเอง!"},{inject:G=>{G.coachAway=G.week+2;G.flags.coachBack=false;if(typeof addMail==="function")addMail(G,{kind:"letter",from:"ครูแดง (สุรินทร์)",title:"โปสการ์ดจากสุรินทร์",body:"ถึงเด็ก ๆ ค่ายศิริชัย งานแต่งหลานสนุกมาก ครูรำมวยโชว์แขกจนเอวเคล็ด อย่าลืมพันมือทุกครั้งก่อนซ้อม อย่าให้กะทิสั่งวิ่งเกินวันละสิบรอบ แล้วอย่าให้มะลิเปิดเพลงลูกทุ่งดังเกิน — ครูแดง (ป.ล. ฝากรดน้ำต้นมะม่วงด้วย)"});return [];}},
+  {n:"kati",f:"surprised",t:"ห้ะ! สองสัปดาห์เลยเหรอคะ! …ไม่เป็นไรค่ะ หนูจะคุมทุกคนซ้อมเอง!"},{inject:G=>{G.coachAwayAbs=absWeek(G)+2;G.flags.coachBack=false;if(typeof addMail==="function")addMail(G,{kind:"letter",from:"ครูแดง (สุรินทร์)",title:"โปสการ์ดจากสุรินทร์",body:"ถึงเด็ก ๆ ค่ายศิริชัย งานแต่งหลานสนุกมาก ครูรำมวยโชว์แขกจนเอวเคล็ด อย่าลืมพันมือทุกครั้งก่อนซ้อม อย่าให้กะทิสั่งวิ่งเกินวันละสิบรอบ แล้วอย่าให้มะลิเปิดเพลงลูกทุ่งดังเกิน — ครูแดง (ป.ล. ฝากรดน้ำต้นมะม่วงด้วย)"});return [];}},
   {n:"nar",t:"ครูแดงลาพักร้อน 2 สัปดาห์ · คำแนะนำของครูจะหายไปจนกว่าครูจะกลับ"}]});
 
 // ================= v1.13.1 longer outings: a small shared moment at each place =================
@@ -1053,8 +1053,8 @@ const BOND_BEATS={
      {choice:[{t:"ยายเธอต้องภูมิใจในตัวเธอมากแน่ ๆ",fx:G=>add(G,"fah","trust",5),then:[{n:"fah",f:"flustered",l:"casual",t:"…อย่าพูดแบบนั้นต่อหน้ายายนะ ยายจะร้องไห้ แล้วฟ้าก็จะร้องตาม"}]},{t:"ขอไส้กรอกยายไปฝากทุกคนที่ค่ายได้ไหม",fx:G=>{add(G,"fah","bond",3);G.cash+=0;},then:[{n:"nar",t:"ยายของฟ้าหัวเราะจนน้ำตาไหล แล้วจัดไส้กรอกให้สามถุงใหญ่"},{n:"fah",f:"happy",l:"casual",t:"ยายชอบนายแล้วล่ะ ซวยแล้ว ฮ่า ๆ"}]}]}]}};
 for(const id of Object.keys(BOND_BEATS))for(const th of [20,55]){
   EVENTS.push({id:`bb_${id}_${th}`,look:"casual",bg:th===55?"night":id==="ploy"||id==="fah"?"camp":"gym",
-    when:G=>G.F[id]&&G.F[id].met&&(G.F[id].bond||0)>=th&&(id==="ploy"||id==="fah"||G.F[id].camp==="player")&&G.week-(G.lastBeat||0)>=2,
-    steps:[{fx:G=>{G.lastBeat=G.week;}},...BOND_BEATS[id][th]]});}
+    when:G=>G.F[id]&&G.F[id].met&&(G.F[id].bond||0)>=th&&(id==="ploy"||id==="fah"||G.F[id].camp==="player")&&absWeek(G)-(G.lastBeat||0)>=2,
+    steps:[{fx:G=>{G.lastBeat=absWeek(G);}},...BOND_BEATS[id][th]]});}
 
 // ---------- sportsmanship ----------
 EVENTS.push(
@@ -1209,7 +1209,7 @@ EVENTS.push(
   {n:"nar",t:"เธอเดินกลับไปที่มุมพยัคฆ์ทองโดยไม่หันมาอีก"}]},
  {id:"rin_note",look:"casual",when:G=>G.week>=11&&G.seen.rin_corner&&G.F.rin.camp!=="player"&&G.bookings.some(b=>G.F[b.a].camp==="player"&&b.week>G.week),bg:"camp",steps:[
   {n:"nar",t:"เช้าวันจันทร์ มีกระดาษพับสามทบเสียบอยู่ที่ตู้จดหมาย ไม่มีชื่อผู้ส่ง ลายมือเล็กเป๊ะเหมือนพิมพ์"},
-  {inject:G=>{const b=G.bookings.filter(b=>G.F[b.a].camp==="player"&&b.week>G.week).sort((x,y)=>x.week-y.week)[0];G.scout=G.scout||{};G.scout[b.b]=G.week;const op=G.F[b.b];
+  {inject:G=>{const b=G.bookings.filter(b=>G.F[b.a].camp==="player"&&b.week>G.week).sort((x,y)=>x.week-y.week)[0];G.scoutAbs=G.scoutAbs||{};G.scoutAbs[b.b]=absWeek(G);const op=G.F[b.b];
    return [{n:"nar",t:`"${op.name} · ${styleOf(op.a)} · ถนัดออกอาวุธช่วงต้นยก ยกท้าย ๆ ช้าลงชัดเจน" ตัวเลขยาวเหยียดเต็มหน้ากระดาษ`},{n:"coach",t:"ใครเขียนวะเนี่ย… ละเอียดกว่าที่ครูดูเทปเองอีก"},{n:"nar",t:"(ได้ข้อมูลคู่ชกไฟต์ถัดไปฟรี)"}];}},
   {fx:G=>{add(G,"rin","bond",3);}}]},
  {id:"mali_day1",look:"casual",when:G=>inCamp(G,"mali")&&G.week>=5,bg:"camp",steps:[

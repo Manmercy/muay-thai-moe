@@ -307,9 +307,9 @@ const GIFT_LINES={
  fah:{love:"ห้ะ! ไส้กรอกชุดใหญ่! นายนี่รู้ใจฟ้าที่สุดเลย!",like:"ก็… ไม่เลวนี่ ขอบใจ",ok:"อือ ขอบใจ",dislike:"ชา? ฟ้าไม่ใช่คุณยายนะ!"},
 };
 function giftTier(id,g){const P=GIFT_PREF[id];return P.love.includes(g)?"love":P.like.includes(g)?"like":P.dislike.includes(g)?"dislike":"ok";}
-function giveGift(G,id,g){const f=G.F[id],it=GIFTS[g];if(G.cash<it.price||f.giftWeek===G.week)return null;G.cash-=it.price;f.giftWeek=G.week;if(typeof absWeek==="function")f.lastTouch=absWeek(G);
+function giveGift(G,id,g){const f=G.F[id],it=GIFTS[g];if(G.cash<it.price||f.giftWeek===gameWeek(G))return null;G.cash-=it.price;f.giftWeek=gameWeek(G);if(typeof absWeek==="function")f.lastTouch=absWeek(G);
   // v1.16: the same gift again means less (and she says so)
-  f.giftN=f.giftN||{};f.giftL=f.giftL||{};if(f.giftL[g]&&G.week-f.giftL[g]>=6)f.giftN[g]=0;const n=f.giftN[g]||0;f.giftN[g]=n+1;f.giftL[g]=G.week;f.giftTot=(f.giftTot||0)+1;
+  f.giftN=f.giftN||{};f.giftL=f.giftL||{};if(f.giftL[g]&&gameWeek(G)-f.giftL[g]>=6)f.giftN[g]=0;const n=f.giftN[g]||0;f.giftN[g]=n+1;f.giftL[g]=gameWeek(G);f.giftTot=(f.giftTot||0)+1;
   const t=giftTier(id,g),base=Math.round({love:6,like:4,ok:2,dislike:0}[t]*(it.bond&&t!=="dislike"?1.5:1)),gain=base>0?Math.max(1,Math.round(base*(n===0?1:t==="love"?(n===1?.6:.4):(n===1?.5:.25)))):base;
   const before=f.bond;add(G,id,"bond",gain);if(t==="love")add(G,id,"morale",n<2?6:4);
   f.know["gift_"+g]=t;return {t,gain:Math.round((f.bond-before)*10)/10,g,n};}

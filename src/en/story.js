@@ -4,7 +4,7 @@
 const vary=(key,arr)=>{if(typeof G==="undefined"||!G)return arr[0];G.vary=G.vary||{};const i=G.vary[key]||0;G.vary[key]=i+1;return arr[i%arr.length];};
 const ME=G=>G.player.name,
  // v1.41: the girls call you "ผู้จัดการ" — your name slips out now and then once close, and always once very close
- MEM=(G,k)=>{G.mem=G.mem||{};G.mem[k]=G.week;}, HAS=(G,k,gap)=>G.mem&&G.mem[k]!==undefined&&G.week-G.mem[k]>=(gap||0),
+ MEM=(G,k)=>{G.mem=G.mem||{};G.mem[k]=absWeek(G);}, HAS=(G,k,gap)=>G.mem&&G.mem[k]!==undefined&&absWeek(G)-G.mem[k]>=(gap||0),
  CALL=(G,id)=>{const f=G.F[id],b=f?f.bond||0:0;if(G.romance===id||b>=75)return G.player.name;if(b>=40&&Math.random()<.35)return G.player.name;return "Manager";}, PR=G=>G.player.gender==="m"?"":"", PA=G=>G.player.gender==="m"?"":"";
 const SPK={kati:{name:"Kati",color:"#e23b4e"},mali:{name:"Mali",color:"#4a7fe0"},rin:{name:"Rin",color:"#3fae6a"},
   ploy:{name:"Ploy",color:"#9b62e0"},fah:{name:"Fah",color:"#e7b443"},pailin:{name:"Pailin",color:"#8e4ac3"},coach:{name:"Coach Daeng",color:"#c98a5a"},nar:{name:""},me:{name:"(You)"}};
@@ -715,18 +715,18 @@ EVENTS.push(
   {n:"kati",f:"surprised",l:"casual",t:G=>`${CALL(G,"kati")}! Half the training room roof is gone! The rain's soaking all the sandbags!`},
   {n:"coach",t:"Kids can't train in a room with no roof. How do we fix it?"},
   {choice:[{t:"Repair it properly, fast (฿25,000)",fx:G=>{G.cash-=25000;},then:[{n:"nar",t:"A full crew arrives and finishes in two days; a shiny new roof, and classes carry on without a hitch"}]},
-   {t:"Patch it up for now (฿8,000)",fx:G=>{G.cash-=8000;G.disaster={name:"The temporary roof",until:G.week+3,inc:.5};roster(G).forEach(f=>f.morale=Math.max(0,f.morale-3));},then:[{n:"nar",t:"A blue tarp covers the roof. Every time it rains, water drips onto the middle of the ring; only half the students come for three weeks"}]}]}]},
+   {t:"Patch it up for now (฿8,000)",fx:G=>{G.cash-=8000;G.disaster={name:"The temporary roof",untilAbs:absWeek(G)+3,inc:.5};roster(G).forEach(f=>f.morale=Math.max(0,f.morale-3));},then:[{n:"nar",t:"A blue tarp covers the roof. Every time it rains, water drips onto the middle of the ring; only half the students come for three weeks"}]}]}]},
  {id:"dis_flood",pri:1,look:"casual",when:G=>G.week>=30&&G.week<=44&&G.cash>=40000,bg:"camp",steps:[
   {n:"nar",t:"Three days and nights of heavy rain. The river bursts its banks and floods the whole subdistrict; knee-deep water in camp, training mats drifting against the door"},
   {n:"mali",f:"sad",l:"casual",t:"Mali's gloves floated away! …Oh, there's a fish swimming into the camp!"},
   {n:"rin",f:"sad",l:"casual",t:"The road into the subdistrict is cut off. Students definitely can't come for at least three weeks. The generator and mats need replacing"},
   {n:"coach",t:G=>`${ME(G)}, the villagers' homes are flooded worse than ours. Do we send the girls to help them first, or rush to fix our camp?`},
-  {choice:[{t:"Help the villagers move their things first (camp repairs ฿12,000)",fx:G=>{G.cash-=12000;G.rep+=3;G.disaster={name:"The flood",until:G.week+4,inc:0};roster(G).forEach(f=>{f.trust=Math.min(100,f.trust+4);f.fatigue=Math.min(100,f.fatigue+8);});},then:[{n:"nar",t:"Sirichai's fighters haul sandbags all day; the local paper puts their photo on the front page"},{n:"npc",who:"Auntie Sri, vegetable vendor",t:"This camp has the kindest hearts in the district! When the water goes down I'm sending three grandkids to train!"}]},
-   {t:"Rush the camp repairs to reopen ASAP (฿25,000)",fx:G=>{G.cash-=25000;G.disaster={name:"The flood",until:G.week+2,inc:0};},then:[{n:"nar",t:"Three rented pumps; our camp dries out faster than anyone's, but the road stays cut off for two more weeks"}]}]}]},
+  {choice:[{t:"Help the villagers move their things first (camp repairs ฿12,000)",fx:G=>{G.cash-=12000;G.rep+=3;G.disaster={name:"The flood",untilAbs:absWeek(G)+4,inc:0};roster(G).forEach(f=>{f.trust=Math.min(100,f.trust+4);f.fatigue=Math.min(100,f.fatigue+8);});},then:[{n:"nar",t:"Sirichai's fighters haul sandbags all day; the local paper puts their photo on the front page"},{n:"npc",who:"Auntie Sri, vegetable vendor",t:"This camp has the kindest hearts in the district! When the water goes down I'm sending three grandkids to train!"}]},
+   {t:"Rush the camp repairs to reopen ASAP (฿25,000)",fx:G=>{G.cash-=25000;G.disaster={name:"The flood",untilAbs:absWeek(G)+2,inc:0};},then:[{n:"nar",t:"Three rented pumps; our camp dries out faster than anyone's, but the road stays cut off for two more weeks"}]}]}]},
  {id:"dis_termite",pri:1,look:"train",when:G=>G.week>=36&&G.cash>=55000&&G.F.fah.met,bg:"gym",steps:[
   {n:"nar",t:"Crack! The corner post snaps while Fah is leaning on it… wait, what is Fah doing at our camp?"},
   {n:"fah",f:"surprised",l:"casual",t:"Fah was just passing by! Not spying on training! …And this post is hollow, termites ate all of it!"},
-  {n:"coach",t:"Termites ate the camp's whole timber frame. It has to be rebuilt, ฿18,000. During the work, only half the students can come for two weeks"},{fx:G=>{G.cash-=18000;G.disaster={name:"Termite repairs",until:G.week+2,inc:.5};}},
+  {n:"coach",t:"Termites ate the camp's whole timber frame. It has to be rebuilt, ฿18,000. During the work, only half the students can come for two weeks"},{fx:G=>{G.cash-=18000;G.disaster={name:"Termite repairs",untilAbs:absWeek(G)+2,inc:.5};}},
   {n:"fah",f:"happy",l:"casual",t:G=>`Serves you right! …Kidding, ${ME(G)}. Golden Tiger has a great termite guy, Fah'll get you his number. No need to thank me!`},{fx:G=>add(G,"fah","bond",2)}]});
 // v1.39: the player's own story: grandpa's real grandchild who left a good office job in Bangkok
 EVENTS.push(
@@ -752,24 +752,24 @@ EVENTS.push(
   {choice:[{t:G=>`Grandpa, ${PA(G)} I'll take the best care of the camp and Kati`,fx:G=>{add(G,"kati","trust",6);add(G,"kati","bond",3);},then:[{n:"nar",t:"A breeze passes through the bodhi tree; one leaf falls right onto the gloves"},{n:"kati",f:"happy",l:"casual",t:"Grandpa heard you. I believe that"}]},
    {t:"(Say nothing, just sit down beside Kati)",fx:G=>{add(G,"kati","bond",5);},then:[{n:"nar",t:"The two of you sit in silence for a long time, until the noon temple bell rings"}]}]}]});
 // v1.40: Kru Daeng takes leave more than once; while he is away only Rin's remarks are left
-const leaveSteps=(G,why,wk,post)=>[{inject:G2=>{G2.coachAway=G2.week+wk;G2.flags.coachBack=false;if(typeof addMail==="function")addMail(G2,{kind:"letter",from:"Coach Daeng",title:post[0],body:post[1]});return [];}},
+const leaveSteps=(G,why,wk,post)=>[{inject:G2=>{G2.coachAwayAbs=absWeek(G2)+wk;G2.flags.coachBack=false;if(typeof addMail==="function")addMail(G2,{kind:"letter",from:"Coach Daeng",title:post[0],body:post[1]});return [];}},
   {n:"nar",t:`Coach Daeng is away ${wk} weeks · no coach advice for now.${inCamp(G,"rin")?" Only Rin's observations":""}`}];
 EVENTS.push(
- {id:"daeng_leave_monk",look:"fight",when:G=>G.week>=17&&G.week<=19&&!(G.coachAway&&G.week<G.coachAway),bg:"camp",steps:[
+ {id:"daeng_leave_monk",look:"fight",when:G=>G.week>=17&&G.week<=19&&!(G.coachAwayAbs&&absWeek(G)<G.coachAwayAbs),bg:"camp",steps:[
   {n:"coach",t:"Boss, my nephew is entering the monkhood. I have to help at the temple for two weeks: the procession, the head shaving, sitting through the chanting"},
   {n:"kati",f:"surprised",l:"casual",t:"Coach Daeng is shaving his head too?!"},
   {n:"coach",t:"I'm not ordaining! …But if I lose the football bet with the boy's father, I might shave"},
   {n:"rin",f:"happy",l:"casual",t:"In the meantime I'll record everything for you. But I can't decide for you, I only analyze"},
   {inject:G=>leaveSteps(G,"monk",2,["News from the ordination","My nephew's ordination went well. I lost a football bet with his father, so I had to shave my head too. Don't laugh when I get back. Make the kids do their morning runs. — Coach Daeng"])}]},
- {id:"daeng_leave_knee",look:"fight",when:G=>G.week>=40&&G.week<=42&&!(G.coachAway&&G.week<G.coachAway),bg:"camp",steps:[
+ {id:"daeng_leave_knee",look:"fight",when:G=>G.week>=40&&G.week<=42&&!(G.coachAwayAbs&&absWeek(G)<G.coachAwayAbs),bg:"camp",steps:[
   {n:"coach",t:"The doctor scheduled a small knee surgery; I'll be in hospital two weeks. Don't worry, the doctor says my knee is as strong as a fifty-year-old's"},
   {n:"mali",f:"sad",l:"casual",t:"Coach Daeng, you're sixty-eight…"},
   {n:"coach",t:"Exactly, eighteen years younger than my real age! This is a crucial stretch, make good decisions. I'll watch the livestream from bed"},
   {inject:G=>leaveSteps(G,"knee",2,["From a hospital bed","The nurses won't let me cheer at the livestream, so I cheer in my head until my blood pressure spikes. Don't visit, spend the time training. If you do visit, bring som tam. — Coach Daeng"])}]});
-EVENTS.push({id:"daeng_leave",look:"fight",when:G=>G.week>=29&&G.week<=31&&!(G.coachAway&&G.week<G.coachAway),bg:"camp",steps:[
+EVENTS.push({id:"daeng_leave",look:"fight",when:G=>G.week>=29&&G.week<=31&&!(G.coachAwayAbs&&absWeek(G)<G.coachAwayAbs),bg:"camp",steps:[
   {n:"coach",t:"Boss, I'm taking two weeks' leave to go home to Surin. My niece is getting married"},
   {n:"coach",t:"I've written the training schedule on the wall. For now you make all the calls. I trust you"},
-  {n:"kati",f:"surprised",t:"Huh! Two whole weeks! …It's fine, I'll keep everyone training myself!"},{inject:G=>{G.coachAway=G.week+2;G.flags.coachBack=false;if(typeof addMail==="function")addMail(G,{kind:"letter",from:"Coach Daeng (Surin)",title:"A postcard from Surin",body:"To the kids of Sirichai Camp: my grandniece's wedding was great fun. I did a Muay Thai dance for the guests and threw my back out. Always wrap your hands before training, don't let Kati order more than ten laps a day, and don't let Mali play luk thung too loud. — Coach Daeng (P.S. please water the mango tree)"});return [];}},
+  {n:"kati",f:"surprised",t:"Huh! Two whole weeks! …It's fine, I'll keep everyone training myself!"},{inject:G=>{G.coachAwayAbs=absWeek(G)+2;G.flags.coachBack=false;if(typeof addMail==="function")addMail(G,{kind:"letter",from:"Coach Daeng (Surin)",title:"A postcard from Surin",body:"To the kids of Sirichai Camp: my grandniece's wedding was great fun. I did a Muay Thai dance for the guests and threw my back out. Always wrap your hands before training, don't let Kati order more than ten laps a day, and don't let Mali play luk thung too loud. — Coach Daeng (P.S. please water the mango tree)"});return [];}},
   {n:"nar",t:"Coach Daeng on leave for 2 weeks · his advice disappears until he returns"}]});
 
 // ================= v1.13.1 longer outings: a small shared moment at each place =================
@@ -1053,8 +1053,8 @@ const BOND_BEATS={
      {choice:[{t:"Your grandma must be so proud of you",fx:G=>add(G,"fah","trust",5),then:[{n:"fah",f:"flustered",l:"casual",t:"…Don't say that in front of Grandma. She'll cry, and then Fah will cry too"}]},{t:"May I take some of Grandma's sausages for everyone at camp?",fx:G=>{add(G,"fah","bond",3);G.cash+=0;},then:[{n:"nar",t:"Fah's grandma laughs until she cries, then packs three big bags of sausages"},{n:"fah",f:"happy",l:"casual",t:"Grandma likes you now. You're doomed, haha"}]}]}]}};
 for(const id of Object.keys(BOND_BEATS))for(const th of [20,55]){
   EVENTS.push({id:`bb_${id}_${th}`,look:"casual",bg:th===55?"night":id==="ploy"||id==="fah"?"camp":"gym",
-    when:G=>G.F[id]&&G.F[id].met&&(G.F[id].bond||0)>=th&&(id==="ploy"||id==="fah"||G.F[id].camp==="player")&&G.week-(G.lastBeat||0)>=2,
-    steps:[{fx:G=>{G.lastBeat=G.week;}},...BOND_BEATS[id][th]]});}
+    when:G=>G.F[id]&&G.F[id].met&&(G.F[id].bond||0)>=th&&(id==="ploy"||id==="fah"||G.F[id].camp==="player")&&absWeek(G)-(G.lastBeat||0)>=2,
+    steps:[{fx:G=>{G.lastBeat=absWeek(G);}},...BOND_BEATS[id][th]]});}
 
 // ---------- sportsmanship ----------
 EVENTS.push(
@@ -1209,7 +1209,7 @@ EVENTS.push(
   {n:"nar",t:"She walks back to the Golden Tiger corner without looking back."}]},
  {id:"rin_note",look:"casual",when:G=>G.week>=11&&G.seen.rin_corner&&G.F.rin.camp!=="player"&&G.bookings.some(b=>G.F[b.a].camp==="player"&&b.week>G.week),bg:"camp",steps:[
   {n:"nar",t:"Monday morning, a sheet folded in three is tucked into the mailbox. No sender. The handwriting is tiny and precise, like print."},
-  {inject:G=>{const b=G.bookings.filter(b=>G.F[b.a].camp==="player"&&b.week>G.week).sort((x,y)=>x.week-y.week)[0];G.scout=G.scout||{};G.scout[b.b]=G.week;const op=G.F[b.b];
+  {inject:G=>{const b=G.bookings.filter(b=>G.F[b.a].camp==="player"&&b.week>G.week).sort((x,y)=>x.week-y.week)[0];G.scoutAbs=G.scoutAbs||{};G.scoutAbs[b.b]=absWeek(G);const op=G.F[b.b];
    return [{n:"nar",t:`"${op.name} · ${styleOf(op.a)} · strongest early in each round, clearly slower in the late rounds." Columns of numbers fill the page.`},{n:"coach",t:"Who on earth wrote this… It's more thorough than my own tape study."},{n:"nar",t:"(Free scouting info on the next opponent)"}];}},
   {fx:G=>{add(G,"rin","bond",3);}}]},
  {id:"mali_day1",look:"casual",when:G=>inCamp(G,"mali")&&G.week>=5,bg:"camp",steps:[
