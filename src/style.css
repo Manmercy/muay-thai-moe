@@ -1255,6 +1255,7 @@ details.skhelp summary{color:var(--muted);font-size:13px}
 .modal.fpm{height:calc(100dvh - 24px);max-height:calc(100dvh - 24px);overflow:hidden;grid-template-rows:auto auto minmax(0,1fr) auto;align-content:stretch}
 .modal.fpm .fp-body{min-height:0;overflow:hidden;display:flex;flex-direction:column}
 .modal.fpm.t-rel .fp-body,.modal.fpm.t-over .fp-body{overflow-y:auto}
+.modal.fpm.t-look .fp-body{overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain}
 .spchip{border:0;cursor:pointer;font:700 12px/1 var(--f-pixel,monospace);padding:4px 8px;background:var(--gold);color:#1b1426;box-shadow:0 0 0 2px #000;animation:readyglow 1.2s steps(2) infinite}
 .tdot2{display:inline-block;width:8px;height:8px;margin-left:5px;vertical-align:middle;background:var(--gold);box-shadow:0 0 0 2px #000}
 .skwrap{display:grid;grid-template-rows:auto auto minmax(0,1fr) auto;gap:8px;height:100%;min-height:0}
@@ -1441,11 +1442,12 @@ html.vnopen,html.vnopen body{overflow:hidden;overscroll-behavior:none;height:100
 .olook{display:grid;grid-template-columns:150px 1fr;gap:10px;align-items:start}
 .olook canvas{width:150px;height:auto;image-rendering:pixelated;background:radial-gradient(#3a2f5c,#1b1530 70%);box-shadow:inset 0 0 0 2px var(--line)}
 .olist{display:grid;gap:5px;max-height:330px;overflow-y:auto}
+.modal.fpm.t-look .olist{max-height:none;overflow:visible}
 .obtn{display:flex;gap:8px;align-items:center;text-align:left;padding:5px 8px;border:0;font:inherit;color:inherit;background:#2a2340;box-shadow:inset 0 0 0 2px #4a3f6b;cursor:pointer;min-height:40px}
 .obtn i{flex:none;width:18px;height:18px;box-shadow:inset 0 0 0 2px rgba(0,0,0,.45)}.obtn i.base{background:repeating-linear-gradient(45deg,#c8283c 0 4px,#2b6fc8 4px 8px)}
 .obtn b{display:block;font-size:13px}.obtn small{display:block;font-size:11px;color:var(--mute,#9a91ad)}
 .obtn.on{box-shadow:inset 0 0 0 2px var(--gold);background:#3a2f18}.obtn:disabled{opacity:.55;cursor:default}
-@media (max-width:420px){.olook{grid-template-columns:1fr}.olook canvas{justify-self:center;width:140px}.olist{max-height:none}}
+@media (max-width:420px){.olook{grid-template-columns:1fr}.olook canvas{justify-self:center;width:140px}}
 
 /* v1.72 demo gate after year 1 */
 .gate{display:grid;gap:10px;justify-items:center;text-align:center;max-width:560px;margin:0 auto}.gate p{max-width:46ch}.gatelink{text-decoration:none;min-height:44px;display:inline-flex;align-items:center}

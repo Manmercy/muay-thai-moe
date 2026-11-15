@@ -1510,6 +1510,68 @@ EVENTS.push(
   {n:"nar",t:"(Last year's rival is now the camp's sparring partner)"}]}
 );
 
+// Year 2: give Fah and Ploy room between the recruitment beats and the finals.
+const year2Pair=(G,a,b)=>G.season===2&&metR(G,a)&&metR(G,b)&&(G.F[a].bond||0)>=15&&(G.F[b].bond||0)>=15;
+EVENTS.push(
+ {id:"y2_fah_rooftop",pri:2,look:"casual",bg:"night",when:G=>G.season===2&&G.week>=6&&G.week<=16&&fahRival(G)&&metR(G,"fah"),steps:[
+  {n:"nar",t:"After the fight, Fah sits on the old gym roof, swinging her legs to music from the fair. She shuts off her phone when she spots you."},
+  {n:"fah",f:"pout",t:"The new coach says he'll replace Fah with Baiyok if she keeps having fun in the ring. I trained his way all night... But it wasn't me."},
+  {choice:[{t:"Enter the ring as yourself.",fx:G=>add(G,"fah","bond",4),then:[{n:"fah",f:"happy",t:"If I get another chance in the ring, I'll smile for the whole crowd. Watch me!"}]},{t:"If you want to train differently, our gym's door is open.",fx:G=>add(G,"fah","trust",5),then:[{n:"fah",f:"flustered",t:"That sounds like an invitation to join your gym... Fah hasn't said yes!"}]}]}]},
+ {id:"y2_ploy_stands",pri:2,look:"casual",bg:"ring",when:G=>G.season===2&&G.week>=14&&G.week<=30&&ployRival(G)&&metR(G,"ploy"),steps:[
+  {n:"nar",t:"After the event, Ploy stays in the stands, noting the younger fighters' rhythms even as half the arena lights go out."},
+  {n:"ploy",f:"sad",t:"Golden Tiger only asks whether I won or lost. No one asks what I saw in the ring... Will you listen?"},
+  {choice:[{t:"Listen to all of Ploy's analysis",fx:G=>{add(G,"ploy","bond",4);add(G,"ploy","trust",2);},then:[{n:"ploy",f:"happy",t:"Good. Next time I'll bring another notebook. Don't rush home before I finish."}]},{t:"Invite Ploy to watch tapes at our gym",fx:G=>add(G,"ploy","trust",5),then:[{n:"ploy",f:"flustered",t:"You invite a rival into your gym that easily? ...Fine, but only to watch tapes."}]}]}]},
+ {id:"y2_fah_team",pri:3,look:"casual",bg:"gym",when:G=>G.season===2&&inCamp(G,"fah")&&G.flags.fahJoined!=null&&G.week>=G.flags.fahJoined+5,steps:[
+  {n:"nar",t:"Fah secretly practices a post-fight dance in the mirror. A poster of Baiyok from her old gym hangs nearby."},
+  {n:"fah",f:"pout",t:"Everyone says Baiyok can replace Fah, like Fah was just an empty spot... But I really belong to this team now, right?"},
+  {choice:[{t:"No one here can replace you.",fx:G=>{add(G,"fah","bond",5);add(G,"fah","morale",5);},then:[{n:"fah",f:"happy",t:"Then Fah will train hard and make people remember her name, not the old gym's!"}]},{t:"Get everyone to practice Fah's victory dance",fx:G=>{add(G,"fah","trust",4);if(inCamp(G,"mali"))add(G,"mali","bond",2);},then:[{n:"nar",t:"Laughter reaches the front gate. Kru Daeng watches, then joins the victory dance for one beat."}]}]}]},
+ {id:"y2_fah_letter",pri:2,look:"casual",bg:"camp",when:G=>G.season===2&&inCamp(G,"fah")&&G.flags.fahJoined!=null&&G.week>=G.flags.fahJoined+11,steps:[
+  {n:"nar",t:"Fah's grandmother sends a letter to the gym with a photo of Fah and Baiyok sparring as young trainees."},
+  {n:"fah",f:"sad",t:"Baiyok used to be Fah's training partner, not a villain. If we meet in the ring, I'll fight hard, then invite him to dinner after the bell."},
+  {n:"nar",t:"Fah keeps the photo in her glove bag. She has not left her past at the old gym."}]},
+ {id:"y2_ploy_rehab",pri:3,look:"casual",bg:"gym",when:G=>G.season===2&&inCamp(G,"ploy")&&G.flags.ployJoined!=null&&G.week>=G.flags.ployJoined+2,steps:[
+  {n:"nar",t:"Ploy reaches the gym before anyone else and practices putting weight on her injured leg. Kati brings a chair, but Ploy waves it away."},
+  {n:"ploy",f:"sad",t:"At my old gym, they let Petchara train in my place as soon as I slowed down. Do I still have time here?"},
+  {choice:[{t:"Take your time. We'll wait.",fx:G=>{add(G,"ploy","bond",5);add(G,"ploy","trust",3);},then:[{n:"ploy",f:"flustered",t:"...It feels better than I expected to hear that you'll wait."}]},{t:"Ask Ploy to plan training during recovery",fx:G=>{add(G,"ploy","trust",5);add(G,"kati","morale",4);},then:[{n:"kati",f:"happy",t:"Ploy, will you help me with my knee timing?"},{n:"ploy",f:"happy",t:"Fine, but write down every word I say."}]}]}]},
+ {id:"y2_ploy_team",pri:2,look:"casual",bg:"night",when:G=>G.season===2&&inCamp(G,"ploy")&&G.flags.ployJoined!=null&&G.week>=G.flags.ployJoined+8&&!(G.F.ploy.injury>0),steps:[
+  {n:"nar",t:"After training, Ploy opens a new page in her fight notebook. Sirichai is written above her name and Kati's."},
+  {n:"ploy",f:"happy",t:"For the first time, I'm planning for a team instead of myself. If I meet Petchara, I want her to see what a team feels like."},
+  {n:"kati",f:"happy",t:"I'll be in your corner with everyone else, whether you win or lose."}]},
+ {id:"y2_cross_kati_mali",pri:2,look:"casual",bg:"market",when:G=>year2Pair(G,"kati","mali")&&G.week>=11&&G.week<=18,steps:[
+  {n:"nar",t:"Kati asks you to shop for new gloves. Mali arrives with two fair tickets. Both wait for your answer."},
+  {choice:[{t:"Shop for gloves with Kati (Mali bond −4)",fx:G=>{add(G,"kati","bond",5);add(G,"mali","bond",-4);},then:[{n:"mali",f:"sad",t:"It's okay~ Mali can go alone."}]},{t:"Go to the fair with Mali (Kati bond −4)",fx:G=>{add(G,"mali","bond",5);add(G,"kati","bond",-4);},then:[{n:"kati",f:"sad",t:"Okay... I'll pick out the gloves myself."}]}]}]},
+ {id:"y2_cross_rin_fah",pri:2,look:"casual",bg:"fair",when:G=>year2Pair(G,"rin","fah")&&G.week>=19&&G.week<=26,steps:[
+  {n:"nar",t:"Rin arranged to study an opponent's tape with you tonight. Fah invites you to a live fairground fight at the same time."},
+  {choice:[{t:"Watch the tape with Rin (Fah bond −4)",fx:G=>{add(G,"rin","bond",5);add(G,"fah","bond",-4);},then:[{n:"fah",f:"pout",t:"Oh, so a tape matters more than a real person!"}]},{t:"Watch the live fight with Fah (Rin bond −4)",fx:G=>{add(G,"fah","bond",5);add(G,"rin","bond",-4);},then:[{n:"rin",f:"sad",t:"I understand... I can watch the tape alone."}]}]}]},
+ {id:"y2_cross_kati_ploy",pri:2,look:"casual",bg:"cafe",when:G=>year2Pair(G,"kati","ploy")&&G.week>=27&&G.week<=34,steps:[
+  {n:"nar",t:"Ploy asks you to discuss the fight plan over tea. Kati calls to say she is waiting for you to work her corner."},
+  {choice:[{t:"Go see Ploy (Kati bond −4)",fx:G=>{add(G,"ploy","bond",5);add(G,"kati","bond",-4);},then:[{n:"kati",f:"sad",t:"I can train on my own..."}]},{t:"Go train with Kati (Ploy bond −4)",fx:G=>{add(G,"kati","bond",5);add(G,"ploy","bond",-4);},then:[{n:"ploy",f:"pout",t:"I understand. I'll discuss the fight myself later."}]}]}]},
+ {id:"y2_cross_fah_ploy",pri:2,look:"casual",bg:"night",when:G=>year2Pair(G,"fah","ploy")&&G.week>=35&&G.week<=42,steps:[
+  {n:"nar",t:"The night before the trip, Fah asks you to hold the pads a little longer. Ploy brings her fight notebook and asks for a private talk."},
+  {choice:[{t:"Stay and train with Fah (Ploy bond −4)",fx:G=>{add(G,"fah","bond",5);add(G,"ploy","bond",-4);},then:[{n:"ploy",f:"sad",t:"...Then I'll make the fight plan myself."}]},{t:"Talk with Ploy (Fah bond −4)",fx:G=>{add(G,"ploy","bond",5);add(G,"fah","bond",-4);},then:[{n:"fah",f:"pout",t:"I can hold the pads myself! ...But Fah thought you would stay."}]}]}]}
+);
+
+// The replacement bouts have their own exchange, including a first-fight aftermath.
+const prodigyMatch=(G,b)=>G.season>=2&&((b.a==="fah"&&b.b==="prod_B")||(b.a==="ploy"&&b.b==="prod_A"))&&inCamp(G,b.a)&&G.F[b.b];
+function prodigyFightScene(G,b){if(!prodigyMatch(G,b))return null;const fah=b.a==="fah",key=`prod_face_${b.a}`;const first=!G.seen[key];G.seen[key]=true;
+ return fah?[
+  {n:"nar",t:first?"Fah enters from Sirichai's corner. Baiyok wears Fah's old colors in Golden Tiger's corner while Coach Kriangkrai watches.":"Fah and Baiyok meet again. This time, each knows the other's moves."},
+  {n:"npc",who:"Baiyok",t:first?"Coach says I have to fight like you to earn my place in the ring.":"Today I'll fight in my own style, not the coach's."},
+  {n:"fah",f:"angry",l:"fight",t:first?"You don't need to be the new Fah. Be Baiyok and give it everything!":"Good! Let's see who trained harder!"}]:[
+  {n:"nar",t:first?"Ploy enters the ring on her healed knee. Petchara stands in the corner that used to be hers.":"Ploy and Petchara face each other in the middle of the ring again."},
+  {n:"npc",who:"Petcha",t:first?"They told me to replace you, but never asked who I wanted to be.":"I remember everything you said after our last fight. I'm ready this time."},
+  {n:"ploy",f:"angry",l:"fight",t:first?"You don't have to replace anyone. Show me your own style.":"Then show me again that you're fighting for yourself."}];}
+function prodigyResultScene(G,b,win){if(!prodigyMatch(G,b))return null;const key=`prod_result_${b.a}`;if(G.seen[key])return null;G.seen[key]=true;const fah=b.a==="fah";
+ return fah?[
+  {n:"nar",t:"After the bell, Fah and Baiyok stand panting in opposite corners, then meet to touch gloves."},
+  {n:"fah",f:win==="A"?"happy":"sad",l:"fight",t:win==="A"?"See? Fah won without giving up her smile! Get me next time, Baiyok.":"You were better today. Fah will train and see you again!"},
+  {n:"npc",who:"Baiyok",t:"From now on, I'll fight under my own name... Thanks for saying that."},
+  {n:"fah",f:"happy",l:"fight",t:"Stop looking so stern and come eat with us. Sirichai Gym is treating!"}]:[
+  {n:"nar",t:"Ploy touches her healed knee, then looks at Petchara waiting in the center of the ring."},
+  {n:"ploy",f:win==="A"?"happy":"sad",l:"fight",t:win==="A"?"I'm back, but you fought well. You don't have to be my shadow.":"I lost today, but my knee is no excuse. You won on your own skill."},
+  {n:"npc",who:"Petcha",t:"I thought there would be no place for me when you came back... Now I know there is room for both of us."},
+  {n:"ploy",f:"happy",l:"fight",t:"Remember, we're still rivals in the next match. We can talk after we leave the ring."}];}
+
 // ===== v1.55: character cards (round 1) — earned in play, collected in an album, each one replays a side story =====
 const CARD_R={N:{s:1,c:"#9aa3b5"},R:{s:2,c:"#4a9be0"},SR:{s:3,c:"#c46be0"},SSR:{s:4,c:"#f2c94c"}};
 const CARDS={
