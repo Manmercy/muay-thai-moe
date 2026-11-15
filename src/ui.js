@@ -93,7 +93,7 @@ function slotsHTML(mode){const rows=[];for(let i=1;i<=SLOTS;i++){const s=loadSlo
        `<button class="btn sm ${s?"":"primary"}" data-act="pickslot" data-v="${i}">${s?"เขียนทับ":"เลือก"}</button>`}</div>`);}
   const del=UI.delSlot?`<div class="confirm px"><b>ลบช่องเซฟ ${UI.delSlot}?</b><p class="meta">ลบแล้วกู้คืนไม่ได้</p><div class="mfoot"><button class="btn ghost" data-act="canceldel">ยกเลิก</button><button class="btn primary" data-act="delslot">ลบเลย</button></div></div>`:"";
   const ow=UI.owSlot?`<div class="confirm px"><b>เขียนทับช่องเซฟ ${UI.owSlot}?</b><p class="meta">เกมเดิมในช่องนี้จะหายไป</p><div class="mfoot"><button class="btn ghost" data-act="cancelow">ยกเลิก</button><button class="btn primary" data-act="confirmow">เริ่มเกมใหม่ที่ช่องนี้</button></div></div>`:"";
-  return `<h2>${mode==="load"?"โหลดเกม":"เลือกช่องเซฟสำหรับเกมใหม่"}</h2><div class="slots">${rows.join("")}</div>${del}${ow}`;}
+  return `<h2>${mode==="load"?"โหลดเกม":"เลือกช่องเซฟสำหรับเกมใหม่"}</h2><div class="slots">${rows.join("")}</div>${del}${ow}${mode==="load"?`<div style="margin-top:14px;text-align:left"><a class="btn sm ghost" href="./rescue-save.html">ย้ายรหัสเซฟ</a></div>`:""}`;}
 
 // ---------- small components ----------
 function faceImg(f,cls=""){return f.canon?`<img class="face ${cls}" style="--c:${f.color}" src="${faceSrc(f.id,"happy")}" alt="${esc(f.name)}">`:
@@ -195,6 +195,7 @@ function settingsHTML(){const t=(k,label,desc)=>`<label class="set"><span><b>${l
    ${G&&UI.slot&&bakInfo(UI.slot)?`<div class="set"><span><b>เซฟก่อนอัปเดต</b><small>เก็บไว้ตอนเกมอัปเดต · v${esc(String(bakInfo(UI.slot).ver))} สัปดาห์ ${bakInfo(UI.slot).week}</small></span><button class="btn sm" data-act="bakrestore">กู้คืน</button></div>`:""}
    <div class="set"><span><b>ใส่โค้ด</b><small>โค้ดอีเวนต์หรือโค้ดเล่นต่อ จากเพจและ Discord ของเกม</small></span><span class="obtns redeem"><input id="redeemcode" maxlength="24" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="โค้ด" aria-label="โค้ด"><button class="btn sm primary" data-act="redeem">ใช้โค้ด</button></span></div>
    <div class="set"><span><b>สำรองเซฟเป็นไฟล์</b><small>เก็บไฟล์ไว้เอง ย้ายเครื่องหรือเบราว์เซอร์ก็นำเข้าได้</small></span><span class="obtns"><button class="btn sm" data-act="exportsave">ส่งออก</button><label class="btn sm">นำเข้า<input type="file" accept=".json,application/json" data-act="importsave" hidden></label></span></div>`:`<div class="set"><span><b>นำเข้าเซฟจากไฟล์</b><small>ไฟล์ที่เคยส่งออกไว้ จะลงช่อง 1</small></span><label class="btn sm">นำเข้า<input type="file" accept=".json,application/json" data-act="importsave" hidden></label></div>`}
+   <div class="set"><span><b>ย้ายรหัสเซฟ</b><small>ย้ายเซฟระหว่าง Facebook กับ Safari</small></span><a class="btn sm" href="./rescue-save.html">ย้ายรหัสเซฟ</a></div>
    <details class="gloss"><summary><b>คำศัพท์ในเกม</b></summary><dl>${GLOSS.map(([k,v])=>`<dt>${k}</dt><dd>${v}</dd>`).join("")}</dl></details>
    <p class="meta">Muay Thai Moe v${VERSION}</p>`;}
 const GLOSS=[["ความพร้อม","สภาพร่างกายวันชก ยิ่งสูงยิ่งชกได้เต็มที่ ลดลงเมื่อล้าหรือบาดเจ็บ"],["ความล้า","สะสมจากการซ้อม เกิน 65 เริ่มเสี่ยงบาดเจ็บ ลดได้ด้วยพักฟื้น ห้องฟื้นฟู ครัว"],
