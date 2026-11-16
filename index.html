@@ -1609,7 +1609,7 @@ button.goal.ov.mini{right:auto;padding:3px 10px;opacity:.85}
 .lkrow .ccard.lock .card-art{filter:grayscale(1) brightness(.35)}
 
 /* ===== v1.83: one-handed mobile layout + full desktop =====
-   Phone: slim status bar on top; tabs and "end week" live in a thumb dock at the bottom; sheets rise from the bottom.
+   Phone: slim status bar on top; tabs and "end week" live in a thumb dock at the bottom; pop-ups stay centred.
    Desktop: wider canvas, camp scene fills the height, no dead space. */
 .sr{position:absolute!important;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
 .iconbtn{width:44px;height:44px}
@@ -1626,12 +1626,7 @@ button.goal.ov.mini{right:auto;padding:3px 10px;opacity:.85}
   .hud .endweek{min-height:46px;font-size:16px}.hud .endweek small{font-size:13px}
   .hud .tabs button{min-height:52px;font-size:12px}
   .hud .tabs button svg{width:20px;height:20px}
-  /* sheets rise from the bottom, inside thumb reach */
-  .overlay{justify-content:flex-end!important;align-items:stretch!important;padding:0!important}
-  .overlay>.modal{width:100%;max-height:92dvh;margin:0;padding:14px 14px calc(14px + env(safe-area-inset-bottom,0px));box-shadow:0 -3px 0 var(--line),0 -8px 24px rgba(0,0,0,.5)}
-  .overlay>.modal.fpm{height:92dvh;max-height:92dvh}
-  .modal .mfoot{position:sticky;bottom:calc(-14px - env(safe-area-inset-bottom,0px));background:linear-gradient(transparent,var(--surface) 30%);padding-top:10px;margin-top:4px}
-  .modal .mfoot .btn{min-height:48px;flex:1}
+  .modal .mfoot .btn{min-height:46px}
   /* camp sub-tabs: five equal cells, nothing cut off */
   .csubs{display:grid!important;grid-template-columns:repeat(5,1fr);gap:4px;overflow:visible}
   .csubs button{padding:4px 2px;font-size:12px;line-height:1.25;white-space:normal;text-align:center}
@@ -1678,14 +1673,6 @@ body.hasnews main>h1.sr+.homegrid,body.hasnews main>h1.sr+.rinnote{margin-top:46
 .skreset{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:10px;padding:10px 12px;background:var(--bg2);box-shadow:inset 0 0 0 2px var(--line)}
 .skreset span{display:flex;flex-direction:column;gap:2px}.skreset small{color:var(--muted)}
 .skreset .btn{min-height:44px;flex:none}
-@media (max-width:760px){
-  /* bottom sheets: short sheets sit on the bottom edge, tall sheets start near the top and scroll with the overlay (nothing pushed off-screen) */
-  .overlay{justify-content:flex-start!important;overscroll-behavior:contain}
-  .overlay>.modal{margin-top:auto!important}
-  .overlay>.modal:not(.fpm){max-height:none!important;overflow:visible;min-height:0}
-  .overlay>.modal:not(.fpm)::before{content:"";display:block;height:0}
-  .overlay{padding-top:max(48px,env(safe-area-inset-top,0px))!important}
-}
 /* v1.83.2: quiet reset button tucked into the skill header */
 .skbar3{position:relative}
 .skrbtn{position:absolute;top:0;right:0;min-height:36px;min-width:44px;padding:4px 8px;border:0;background:none;color:var(--muted);font:600 12px var(--f-display);cursor:pointer;text-decoration:underline;text-underline-offset:3px}
