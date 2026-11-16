@@ -806,6 +806,8 @@ function reportHTML(){const r=G.lastReport;const ann=[];
 // v1.81.1: "what's new" popup — shows once per save after loading, for players who started before this update
 /* v1.87: gacha machine popup */
 const GB_RATES={n:[["SSR",3],["SR",27],["N",70]],loy:[["SSR",4],["SR",23],["R",38],["N",35]]};
+function gbPreload(){if(GB.pre&&GB.pre[GB.box])return;GB.pre=GB.pre||{};GB.pre[GB.box]=1;const L=Object.keys(CARDS).filter(k=>CARDS[k].r==="SSR"&&(GB.box==="loy"?CARDS[k].lg:CARDS[k].g));
+  L.forEach(k=>{const C=CARDS[k];const srcs=/team/.test(k)?["mali","rin","kati","ploy","fah"].map(c=>`${ASSET}${c}_${C.lg?"thai":"casual"}.webp`):[`${ASSET}${C.ci||C.c+"_casual"}.webp`];srcs.forEach(u=>{const im=new Image();im.src=u;});});}
 function gbCost(){return GB.box==="loy"?LG_COST:GACHA_COST;}
 function gbPityLeft(){return GB.box==="loy"?Math.max(1,LG_PITY-(G.lgPity||0)):Math.max(1,GACHA_PITY-(G.pity||0));}
 function gbCutHTML(s){const C=CARDS[s.id];const team=/team/.test(s.id)?["mali","rin","kati","ploy","fah"]:null;
@@ -1464,7 +1466,7 @@ const ACT={
   sksel:d=>{UI.skSel=d.id+":"+d.v;AU.sfx("ui");render();},
   newsok:()=>{G.newsSeen=PATCH.id;UI.modal=null;save();render();},
   closeModal:()=>{const m=UI.modal;if(m&&m.type==="contest"){ACT.contestdone();return;}if(m&&m.type==="whatsnew"&&G){G.newsSeen=PATCH.id;save();}UI.modal=null;render();if(m&&m.after)m.after();},
-  gopen:d=>{GB.box=d.v==="loy"?"loy":"n";if(GB.box==="loy"&&!loyFest()){toast("ตู้ลอยกระทงปิดแล้ว ไว้เจอกันเทศกาลหน้า");return;}GB.st=null;GB.ps=[];UI.gq=false;UI.modal={type:"gbox"};render();},
+  gopen:d=>{GB.box=d.v==="loy"?"loy":"n";if(GB.box==="loy"&&!loyFest()){toast("ตู้ลอยกระทงปิดแล้ว ไว้เจอกันเทศกาลหน้า");return;}GB.st=null;GB.ps=[];UI.gq=false;UI.modal={type:"gbox"};render();gbPreload();},
   gpull:()=>{if(GB.st)return;const cost=gbCost();if((G.dust||0)<cost){AU.sfx("ui");toast(`เศษดาวไม่พอ ต้องใช้ ${cost}✦ · ได้จากชนะไฟต์ การ์ดใหม่ และย่อยใบซ้ำ`);return;}
     const r=GB.box==="loy"?loyPull(G):gachaPull(G);if(!r)return;save();const rr=CARDS[r.id].r;
     GB.st={res:r,id:r.id,r:rr,T:gbTimeline(rr),t0:performance.now(),fired:{},upg:rr==="SSR"&&Math.random()<.5};GB.ps=[];UI.gq=false;
