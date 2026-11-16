@@ -525,7 +525,7 @@ const DILEMMAS=[
    {t:"Raise her pay to compete (+฿1,000/wk)",fx:G=>{G.F.rin.wage+=1000;add(G,"rin","trust",3);},then:[{n:"rin",f:"pout",l:"casual",t:"I said I wasn't here for money… but thank you"}]}]}]},
  {id:"d_poor_kid",from:9,to:46,need:G=>true,bg:"camp",look:"train",steps:[
   {n:"nar",t:"A skinny girl clings to the fence every evening. Today she's brave enough to walk in and ask if she can learn for free"},
-  {choice:[{t:"Let her learn for free (fame +0.8 · Kati grows closer)",fx:G=>{G.rep+=.8;add(G,"kati","bond",3);},then:[{n:"kati",f:"happy",l:"train",t:"I'll teach her myself! Just like when Grandpa took me in"}]},
+  {choice:[{t:"Let her learn for free (fame +0.8)",fx:G=>{G.rep+=.8;add(G,"kati","bond",3);},then:[{n:"kati",f:"happy",l:"train",t:"I'll teach her myself! Just like when Grandpa took me in"}]},
    {t:"The camp can't take free students yet",fx:G=>{},then:[{n:"kati",f:"pout",l:"train",t:"…Okay. I'll secretly teach her during lunch break"}]}]}]},
  {id:"d_fah_night",from:24,to:46,need:G=>G.F.fah.met,bg:"night",look:"casual",steps:[
   {n:"nar",t:"Eleven at night, a knock at the camp gate. Fah stands there shivering, lips pale"},
@@ -973,7 +973,7 @@ DILEMMAS.push(
   {n:"nar",t:"A manager from a famous Bangkok camp messages Mali and Rin, offering double pay"},
   {n:"coach",t:"Word has reached me. The kids haven't answered him yet, they're waiting to hear from us"},
   {choice:[{t:"Raise everyone's pay first (−฿5,000 · trust +6)",fx:G=>{G.cash-=5000;roster(G).forEach(f=>add(G,f.id,"trust",6));},then:[{n:"rin",f:"flustered",t:"I wasn't going to leave anyway… but thank you for valuing us"}]},
-   {t:"Talk it out openly with the whole camp tonight (everyone's bond +2)",fx:G=>roster(G).forEach(f=>add(G,f.id,"bond",4)),then:[{n:"mali",f:"happy",t:"Mali's not going anywhere~ This place has khanom khrok and everyone"},{n:"kati",f:"happy",t:"This camp isn't big, but it's home"}]},
+   {t:"Talk it out openly with the whole camp tonight",fx:G=>roster(G).forEach(f=>add(G,f.id,"bond",4)),then:[{n:"mali",f:"happy",t:"Mali's not going anywhere~ This place has khanom khrok and everyone"},{n:"kati",f:"happy",t:"This camp isn't big, but it's home"}]},
    {t:"Let each decide for herself, we respect it (morale +3)",fx:G=>cheer(G,3),then:[{n:"rin",f:"happy",t:"…I've thought about it. All the data says stay here"}]}]}]},
  {id:"d_rival_hurt",from:12,to:46,need:G=>Object.keys(G.h2h||{}).length>=2,bg:"night",look:"casual",steps:[
   {n:"nar",t:"Nine at night, a pickup stops at the gate. A young fighter from a rival camp we just fought limps out"},
@@ -992,7 +992,7 @@ DILEMMAS.push(
   {n:"kati",f:"flustered",t:"Th-that's me? Why am I smiling so wide!"},
   {n:"mali",f:"happy",t:"So accurate~ just like Kati's face when she sees mango sticky rice!"},
   {choice:[{t:"Put it at the camp gate (fame +0.6)",fx:G=>{G.rep+=.6;},then:[{n:"nar",t:"Passing drivers stop to take photos with it every day. The motorbike-taxi uncle bows to it every morning thinking it's a shrine"}]},
-   {t:"Give it to Kati to keep (Kati bond +)",fx:G=>{add(G,"kati","bond",4);},then:[{n:"kati",f:"flustered",t:"I'll put it behind the wardrobe… nobody's allowed to see!"}]},
+   {t:"Give it to Kati to keep",fx:G=>{add(G,"kati","bond",4);},then:[{n:"kati",f:"flustered",t:"I'll put it behind the wardrobe… nobody's allowed to see!"}]},
    {t:"Auction it to raise money for camp (+฿3,500)",fx:G=>{G.cash+=3500;add(G,"kati","morale",-2);},then:[{n:"kati",f:"pout",t:"I sold for three thousand five hundred… isn't that too cheap?!"}]}]}]},
  {id:"d_uncle",from:20,to:48,need:G=>G.rep>=20,bg:"gym",look:"casual",steps:[
   {n:"npc",who:"A stranger",t:"Kati! My niece! I'm Grandpa Chai's half brother! I lost my job, could I borrow five thousand…"},
@@ -1239,7 +1239,7 @@ EVENTS.push(
    {n:"npc",who:"Golden Tiger owner",t:"…How does Sirichai Camp raise its people?"},
    {n:id,f:"flustered",l:"casual",t:POACH_AFTER[id]},
    {choice:[{t:"Thank you for choosing this camp (Trust +)",fx:G2=>{add(G2,id,"trust",8);add(G2,id,"bond",4);},then:[{n:id,f:"happy",l:"casual",t:POACH_THX[id]}]},
-    {t:"Raise her pay as a reward for loyalty (wage +฿600/week · Bond +)",fx:G2=>{f.wage+=600;add(G2,id,"bond",6);add(G2,id,"trust",4);},then:[{n:id,f:"flustered",l:"casual",t:POACH_RAISE[id]}]}]}];}}]},
+    {t:"Raise her pay as a reward for loyalty (wage +฿600/week)",fx:G2=>{f.wage+=600;add(G2,id,"bond",6);add(G2,id,"trust",4);},then:[{n:id,f:"flustered",l:"casual",t:POACH_RAISE[id]}]}]}];}}]},
  {id:"poach_end",look:"casual",when:G=>false,bg:"camp",steps:[{n:"nar",t:""}]}
 );
 
@@ -1264,7 +1264,7 @@ const BDAY_GIFT_LINE={kati:["I still use last year's gift every day!","Last year
  mali:["Last year's gift sits next to my jasmine every day.","Last year everyone sang so loud the neighbor's dog howled. I still laugh about it.","Your wishes last year were really short, but I wrote them down in my notebook."],
  rin:["Last year's gift, I use it every day. 100% utilization rate.","Last year's party exceeded the acceptable noise level… but I liked it.","Your wishes from last year, I saved in a file called ‘Important’."]};
 const bdayChoice=id=>({choice:[
-  {t:"A gift chosen with care (฿800 · Bond +)",fx:G=>{G.cash-=800;add(G,id,"bond",8);add(G,id,"trust",2);(G.bday=G.bday||{})[id]={y:yr(G),c:0};},then:[{n:id,f:"flustered",l:"casual",t:"…You picked this yourself? It's exactly what I wanted."}]},
+  {t:"A gift chosen with care (฿800)",fx:G=>{G.cash-=800;add(G,id,"bond",8);add(G,id,"trust",2);(G.bday=G.bday||{})[id]={y:yr(G),c:0};},then:[{n:id,f:"flustered",l:"casual",t:"…You picked this yourself? It's exactly what I wanted."}]},
   {t:"Throw a party for the whole camp (฿2,000 · everyone: morale +6)",fx:G=>{G.cash-=2000;add(G,id,"bond",5);R_ALL(G,f=>{f.morale=Math.min(100,f.morale+6);});(G.bday=G.bday||{})[id]={y:yr(G),c:1};},then:[{n:"nar",t:"That night Sirichai Camp keeps its lights on late, and the birthday song carries all the way to the market."}]},
   {t:"Heartfelt wishes",fx:G=>{add(G,id,"bond",3);(G.bday=G.bday||{})[id]={y:yr(G),c:2};},then:[{n:id,f:"happy",l:"casual",t:"Thank you… This is really enough."}]}]});
 for(const id of Object.keys(BDAY_CAMP)){const B=BDAY_CAMP[id];
@@ -1335,7 +1335,7 @@ EVENTS.push(
    S.push({n:"coach",t:"Alright, release the lanterns together, the whole camp. Anything you want to send to Grandpa, send it now."});
    S.push({n:"nar",t:"Paper lanterns rise from everyone's hands at once, shrinking until they become one star among hundreds."});
    S.push({n:T.id,f:"flustered",l:"casual",t:`${CALL(G,T.id)}, remember what we wished for last year? …This year I'm making the same wish again.`});
-   S.push({choice:[{t:"Release another lantern together, just you two (Bond +)",fx:G2=>add(G2,T.id,"bond",6),then:[{n:"nar",t:"The second lantern rises after the first. Two pairs of hands hold its edge until the very last second."},{n:T.id,f:"happy",l:"casual",t:"…You don't have to tell me what you wished for. I can guess."}]},
+   S.push({choice:[{t:"Release another lantern together, just you two",fx:G2=>add(G2,T.id,"bond",6),then:[{n:"nar",t:"The second lantern rises after the first. Two pairs of hands hold its edge until the very last second."},{n:T.id,f:"happy",l:"casual",t:"…You don't have to tell me what you wished for. I can guess."}]},
      {t:"Release one more lantern for Grandpa Chai with the whole camp (everyone morale +4)",fx:G2=>R_ALL(G2,x=>{x.morale=Math.min(100,x.morale+4);}),then:[{n:"coach",t:"…Thank you, Manager. Grandpa would have liked that."}]}]});
    S.push({n:"nar",bg:"night",t:"Walking back to camp at ten, fireworks still pop now and then. Everyone walks slowly, as if no one wants tonight to end."});
    S.push({fx:G2=>{G2.flags.fc_kt=(G2.flags.fc_kt||0)+1;}});
@@ -1547,16 +1547,16 @@ EVENTS.push(
   {n:"kati",f:"happy",t:"I'll be in your corner with everyone else, whether you win or lose."}]},
  {id:"y2_cross_kati_mali",pri:2,look:"casual",bg:"market",when:G=>year2Pair(G,"kati","mali")&&G.week>=11&&G.week<=18,steps:[
   {n:"nar",t:"Kati asks you to shop for new gloves. Mali arrives with two fair tickets. Both wait for your answer."},
-  {choice:[{t:"Shop for gloves with Kati (Mali bond −4)",fx:G=>{add(G,"kati","bond",5);add(G,"mali","bond",-4);},then:[{n:"mali",f:"sad",t:"It's okay~ Mali can go alone."}]},{t:"Go to the fair with Mali (Kati bond −4)",fx:G=>{add(G,"mali","bond",5);add(G,"kati","bond",-4);},then:[{n:"kati",f:"sad",t:"Okay... I'll pick out the gloves myself."}]}]}]},
+  {choice:[{t:"Shop for gloves with Kati",fx:G=>{add(G,"kati","bond",5);add(G,"mali","bond",-4);},then:[{n:"mali",f:"sad",t:"It's okay~ Mali can go alone."}]},{t:"Go to the fair with Mali",fx:G=>{add(G,"mali","bond",5);add(G,"kati","bond",-4);},then:[{n:"kati",f:"sad",t:"Okay... I'll pick out the gloves myself."}]}]}]},
  {id:"y2_cross_rin_fah",pri:2,look:"casual",bg:"fair",when:G=>year2Pair(G,"rin","fah")&&G.week>=19&&G.week<=26,steps:[
   {n:"nar",t:"Rin arranged to study an opponent's tape with you tonight. Fah invites you to a live fairground fight at the same time."},
-  {choice:[{t:"Watch the tape with Rin (Fah bond −4)",fx:G=>{add(G,"rin","bond",5);add(G,"fah","bond",-4);},then:[{n:"fah",f:"pout",t:"Oh, so a tape matters more than a real person!"}]},{t:"Watch the live fight with Fah (Rin bond −4)",fx:G=>{add(G,"fah","bond",5);add(G,"rin","bond",-4);},then:[{n:"rin",f:"sad",t:"I understand... I can watch the tape alone."}]}]}]},
+  {choice:[{t:"Watch the tape with Rin",fx:G=>{add(G,"rin","bond",5);add(G,"fah","bond",-4);},then:[{n:"fah",f:"pout",t:"Oh, so a tape matters more than a real person!"}]},{t:"Watch the live fight with Fah",fx:G=>{add(G,"fah","bond",5);add(G,"rin","bond",-4);},then:[{n:"rin",f:"sad",t:"I understand... I can watch the tape alone."}]}]}]},
  {id:"y2_cross_kati_ploy",pri:2,look:"casual",bg:"cafe",when:G=>year2Pair(G,"kati","ploy")&&G.week>=27&&G.week<=34,steps:[
   {n:"nar",t:"Ploy asks you to discuss the fight plan over tea. Kati calls to say she is waiting for you to work her corner."},
-  {choice:[{t:"Go see Ploy (Kati bond −4)",fx:G=>{add(G,"ploy","bond",5);add(G,"kati","bond",-4);},then:[{n:"kati",f:"sad",t:"I can train on my own..."}]},{t:"Go train with Kati (Ploy bond −4)",fx:G=>{add(G,"kati","bond",5);add(G,"ploy","bond",-4);},then:[{n:"ploy",f:"pout",t:"I understand. I'll discuss the fight myself later."}]}]}]},
+  {choice:[{t:"Go see Ploy",fx:G=>{add(G,"ploy","bond",5);add(G,"kati","bond",-4);},then:[{n:"kati",f:"sad",t:"I can train on my own..."}]},{t:"Go train with Kati",fx:G=>{add(G,"kati","bond",5);add(G,"ploy","bond",-4);},then:[{n:"ploy",f:"pout",t:"I understand. I'll discuss the fight myself later."}]}]}]},
  {id:"y2_cross_fah_ploy",pri:2,look:"casual",bg:"night",when:G=>year2Pair(G,"fah","ploy")&&G.week>=35&&G.week<=42,steps:[
   {n:"nar",t:"The night before the trip, Fah asks you to hold the pads a little longer. Ploy brings her fight notebook and asks for a private talk."},
-  {choice:[{t:"Stay and train with Fah (Ploy bond −4)",fx:G=>{add(G,"fah","bond",5);add(G,"ploy","bond",-4);},then:[{n:"ploy",f:"sad",t:"...Then I'll make the fight plan myself."}]},{t:"Talk with Ploy (Fah bond −4)",fx:G=>{add(G,"ploy","bond",5);add(G,"fah","bond",-4);},then:[{n:"fah",f:"pout",t:"I can hold the pads myself! ...But Fah thought you would stay."}]}]}]}
+  {choice:[{t:"Stay and train with Fah",fx:G=>{add(G,"fah","bond",5);add(G,"ploy","bond",-4);},then:[{n:"ploy",f:"sad",t:"...Then I'll make the fight plan myself."}]},{t:"Talk with Ploy",fx:G=>{add(G,"ploy","bond",5);add(G,"fah","bond",-4);},then:[{n:"fah",f:"pout",t:"I can hold the pads myself! ...But Fah thought you would stay."}]}]}]}
 );
 
 // The replacement bouts have their own exchange, including a first-fight aftermath.
