@@ -21,7 +21,19 @@ const bondCap=G=>100;
 // v1.44: bond grows a bit faster, and the girls who join later catch up while still distant
 const BOND_MUL=.3,BOND_LATE=["mali","rin"];
 const absWeek=G=>((G.season||1)-1)*52+G.week;
-const add=(G,id,k,v)=>{const f=G.F[id];if(!f)return;if(k==="bond"&&v>0)f.lastTouch=absWeek(G);if(k==="bond"&&v>0)v=Math.max(.5,Math.round(v*BOND_MUL*(BOND_LATE.includes(id)&&(f.bond||0)<50?1.6:1)*2)/2);f[k]=Math.max(0,Math.min(100,f[k]+v));};
+const add=(G,id,k,v)=>{const f=G.F[id];if(!f)return;if(k==="bond"&&v>0)f.lastTouch=absWeek(G);if(k==="bond"&&v>0)v=Math.max(.5,Math.round(v*BOND_MUL*(BOND_LATE.includes(id)&&(f.bond||0)<50?1.6:1)*2)/2);
+  if(k==="bond"){const lv0=heartLv(f).lv;/* v1.86: affection past 100 keeps counting as heart levels (bond itself stays 0–100 for every existing check) */
+    if(v>=0){const t=(f.bond||0)+v;f.bond=Math.min(100,t);if(t>100)f.bondX=(f.bondX||0)+(t-100);}
+    else{let d=-v;const x=Math.min(f.bondX||0,d);if(x>0){f.bondX-=x;d-=x;}if(d>0)f.bond=Math.max(0,(f.bond||0)-d);}
+    const lv1=heartLv(f).lv;if(lv1>lv0&&G.F[id].met)G.heartNews=(G.heartNews||[]).concat([{id,lv:lv1,week:G.week}]).slice(-8);return;}
+  f[k]=Math.max(0,Math.min(100,f[k]+v));};
+/* v1.86: heart levels — Lv.1–10 are the first 100 points (10 per level); past that each level asks a little more, with no ceiling */
+const HEART_TIERS=[[1,"คนรู้จัก"],[3,"เริ่มคุ้น"],[5,"สนิท"],[7,"ใกล้ชิด"],[9,"ผูกพันลึก"],[15,"รู้ใจ"],[20,"ขาดกันไม่ได้"]];
+const heartStep=n=>15+(n-11)*5; // points from Lv.n to Lv.n+1, for n ≥ 11
+function heartLv(f){const b=Math.max(0,Math.min(100,(f&&f.bond)||0)),x=Math.max(0,(f&&f.bondX)||0);
+  if(b<100){const lv=1+Math.floor(b/10);return {lv,into:b-(lv-1)*10,need:10,total:b};}
+  let lv=11,left=x;while(left>=heartStep(lv)){left-=heartStep(lv);lv++;}return {lv,into:left,need:heartStep(lv),total:100+x};}
+const heartTier=lv=>{let n=HEART_TIERS[0][1];for(const [m,t] of HEART_TIERS)if(lv>=m)n=t;return n;};
 
 const EVENTS=[
  {id:"prologue",look:"train",bg:"bus",steps:[
@@ -1814,27 +1826,27 @@ Object.assign(CARDS,{
   {n:"ploy",f:"sad",l:"casual",t:"ที่พยัคฆ์ทอง ตีห้าคือเวลาวิ่งสิบกิโล ไม่ใช่เวลาชงชา พี่ลืมไปแล้วว่าเช้าแบบนี้มันเงียบได้ขนาดนี้"},
   {n:"ploy",f:"flustered",l:"casual",t:"ขอบคุณที่รับพี่มานะ …ไม่ใช่ในฐานะอัจฉริยะ แต่ในฐานะคนเจ็บคนหนึ่ง"},
   {n:"ploy",f:"happy",l:"casual",t:"พอเข่าหาย พี่จะซ้อมให้กะทิเอง ถือว่าเป็นค่าเช่าห้อง"}]},
- h_kati:{c:"kati",r:"SR",t:"หนูเรียกชื่อได้ไหมคะ",hint:"ความสนิทกับกะทิเต็มหลอด",bg:"night",need:G=>(G.F.kati.bond||0)>=100,steps:[
+ h_kati:{c:"kati",r:"SR",t:"หนูเรียกชื่อได้ไหมคะ",hint:"ความสนิทกับกะทิถึง ♥ Lv.11",bg:"night",need:G=>(G.F.kati.bond||0)>=100,steps:[
   {n:"nar",t:"คืนหนึ่งหลังซ้อมเย็น กะทินั่งพันผ้าพันมือคืนใส่ม้วนอยู่ข้างคุณบนม้านั่งหน้าค่าย"},
   {n:"kati",f:"flustered",l:"casual",t:"ผู้จัดการคะ …หนูขออะไรอย่างหนึ่งได้ไหม"},
   {n:"kati",f:"flustered",l:"casual",t:G=>`ตอนอยู่กันสองคน หนูขอเรียกว่า "${G.player.name}" ได้ไหมคะ …เวลาเรียกผู้จัดการ มันไกลไปนิดนึง`},
   {n:"kati",f:"happy",l:"casual",t:G=>`${G.player.name} …${G.player.name} …อืม เรียกแล้วใจเต้นแปลก ๆ ค่ะ หนูไปนอนก่อนนะคะ!`}]},
- h_mali:{c:"mali",r:"SR",t:"จดหมายฉบับที่ส่งจริง",hint:"ความสนิทกับมะลิเต็มหลอด",bg:"camp",need:G=>(G.F.mali.bond||0)>=100,steps:[
+ h_mali:{c:"mali",r:"SR",t:"จดหมายฉบับที่ส่งจริง",hint:"ความสนิทกับมะลิถึง ♥ Lv.11",bg:"camp",need:G=>(G.F.mali.bond||0)>=100,steps:[
   {n:"nar",t:"มะลิยื่นซองจดหมายให้ ปากซองยังไม่ได้ปิด ด้านหน้าเขียนว่า 'ถึงแม่'"},
   {n:"mali",f:"flustered",l:"casual",t:"ผู้จัดการช่วยอ่านก่อนส่งได้ไหมคะ หนูกลัวเขียนผิด …ไม่ใช่ค่ะ หนูอยากให้ผู้จัดการอ่าน"},
   {n:"nar",t:"'แม่จ๋า หนูสบายดี ค่ายนี้มีคนที่ทำให้หนูรู้สึกว่ามีบ้านอีกหลัง วันหนึ่งหนูจะพาเขาไปกราบแม่นะ'"},
   {n:"mali",f:"happy",l:"casual",t:"ย่อหน้าสุดท้ายห้ามแก้นะคะ! …หนูตั้งใจเขียนแบบนั้นจริง ๆ ค่ะ"}]},
- h_rin:{c:"rin",r:"SR",t:"ค่าของ X",hint:"ความสนิทกับรินเต็มหลอด",bg:"night",need:G=>(G.F.rin.bond||0)>=100,steps:[
+ h_rin:{c:"rin",r:"SR",t:"ค่าของ X",hint:"ความสนิทกับรินถึง ♥ Lv.11",bg:"night",need:G=>(G.F.rin.bond||0)>=100,steps:[
   {n:"nar",t:"รินวางสมุดสถิติเล่มที่สิบสามลงตรงหน้าคุณ หน้าสุดท้ายมีสมการเดียว ขีดเส้นใต้สองเส้น"},
   {n:"rin",f:"pout",l:"casual",t:"จำสมการ 'X = ?' ได้ไหมคะ ฉันแก้ได้แล้ว"},
   {n:"rin",f:"flustered",l:"casual",t:G=>`X = ${G.player.name} …เหตุผลเดียวที่ฉันยังอยู่ค่ายนี้ทั้งที่มีข้อเสนอดีกว่า คือตัวแปรนี้ตัวเดียว`},
   {n:"rin",f:"flustered",l:"casual",t:"ฉันตรวจคำตอบแล้วสิบเจ็ดรอบ ไม่มีข้อผิดพลาด …ไม่ต้องตอบตอนนี้ก็ได้ค่ะ ข้อมูลนี้ไม่มีวันหมดอายุ"}]},
- h_ploy:{c:"ploy",r:"SR",t:"เรียกพี่ว่าพลอยเฉย ๆ",hint:"ความสนิทกับพลอยเต็มหลอด",bg:"river",need:G=>(G.F.ploy.bond||0)>=100,steps:[
+ h_ploy:{c:"ploy",r:"SR",t:"เรียกพี่ว่าพลอยเฉย ๆ",hint:"ความสนิทกับพลอยถึง ♥ Lv.11",bg:"river",need:G=>(G.F.ploy.bond||0)>=100,steps:[
   {n:"nar",t:"ริมน้ำปิงตอนพลบค่ำ พลอยโยนหินแบนลงน้ำ มันกระโดดได้เจ็ดครั้งพอดี"},
   {n:"ploy",f:"happy",l:"casual",t:"ทุกคนเรียกฉันว่าพี่พลอย อัจฉริยะพลอย กัปตันพลอย …ไม่มีใครเรียกพลอยเฉย ๆ เลย"},
   {n:"ploy",f:"flustered",l:"casual",t:"คุณลองเรียกดูได้ไหม …แค่ 'พลอย'"},
   {n:"ploy",f:"happy",l:"casual",t:"…อืม แบบนี้แหละ ดีกว่าฉายาทุกอันที่เคยได้มา"}]},
- h_fah:{c:"fah",r:"SR",t:"ฟ้าหลังฝนของจริง",hint:"ความสนิทกับฟ้าเต็มหลอด",bg:"camp",need:G=>(G.F.fah.bond||0)>=100,steps:[
+ h_fah:{c:"fah",r:"SR",t:"ฟ้าหลังฝนของจริง",hint:"ความสนิทกับฟ้าถึง ♥ Lv.11",bg:"camp",need:G=>(G.F.fah.bond||0)>=100,steps:[
   {n:"nar",t:"ฝนเพิ่งหยุด ฟ้าวิ่งมาลากแขนคุณออกไปกลางลานค่ายทั้งที่พื้นยังเปียก"},
   {n:"fah",f:"happy",l:"casual",t:"ดูสิ! รุ้งสองชั้น! แม่บอกว่าถ้าเห็นรุ้งสองชั้นกับใคร คนนั้นจะอยู่ด้วยกันไปนาน ๆ"},
   {n:"fah",f:"flustered",l:"casual",t:"…ฟ้าไม่ได้แต่งขึ้นนะ! แม่พูดจริง! …ครึ่งนึง"},

@@ -21,7 +21,19 @@ const bondCap=G=>100;
 // v1.44: bond grows a bit faster, and the girls who join later catch up while still distant
 const BOND_MUL=.3,BOND_LATE=["mali","rin"];
 const absWeek=G=>((G.season||1)-1)*52+G.week;
-const add=(G,id,k,v)=>{const f=G.F[id];if(!f)return;if(k==="bond"&&v>0)f.lastTouch=absWeek(G);if(k==="bond"&&v>0)v=Math.max(.5,Math.round(v*BOND_MUL*(BOND_LATE.includes(id)&&(f.bond||0)<50?1.6:1)*2)/2);f[k]=Math.max(0,Math.min(100,f[k]+v));};
+const add=(G,id,k,v)=>{const f=G.F[id];if(!f)return;if(k==="bond"&&v>0)f.lastTouch=absWeek(G);if(k==="bond"&&v>0)v=Math.max(.5,Math.round(v*BOND_MUL*(BOND_LATE.includes(id)&&(f.bond||0)<50?1.6:1)*2)/2);
+  if(k==="bond"){const lv0=heartLv(f).lv;/* v1.86: affection past 100 keeps counting as heart levels (bond itself stays 0–100 for every existing check) */
+    if(v>=0){const t=(f.bond||0)+v;f.bond=Math.min(100,t);if(t>100)f.bondX=(f.bondX||0)+(t-100);}
+    else{let d=-v;const x=Math.min(f.bondX||0,d);if(x>0){f.bondX-=x;d-=x;}if(d>0)f.bond=Math.max(0,(f.bond||0)-d);}
+    const lv1=heartLv(f).lv;if(lv1>lv0&&G.F[id].met)G.heartNews=(G.heartNews||[]).concat([{id,lv:lv1,week:G.week}]).slice(-8);return;}
+  f[k]=Math.max(0,Math.min(100,f[k]+v));};
+/* v1.86: heart levels — Lv.1–10 are the first 100 points (10 per level); past that each level asks a little more, with no ceiling */
+const HEART_TIERS=[[1,"Acquaintance"],[3,"Getting familiar"],[5,"Friends"],[7,"Close"],[9,"Deeply bonded"],[15,"Kindred"],[20,"Inseparable"]];
+const heartStep=n=>15+(n-11)*5; // points from Lv.n to Lv.n+1, for n ≥ 11
+function heartLv(f){const b=Math.max(0,Math.min(100,(f&&f.bond)||0)),x=Math.max(0,(f&&f.bondX)||0);
+  if(b<100){const lv=1+Math.floor(b/10);return {lv,into:b-(lv-1)*10,need:10,total:b};}
+  let lv=11,left=x;while(left>=heartStep(lv)){left-=heartStep(lv);lv++;}return {lv,into:left,need:heartStep(lv),total:100+x};}
+const heartTier=lv=>{let n=HEART_TIERS[0][1];for(const [m,t] of HEART_TIERS)if(lv>=m)n=t;return n;};
 
 const EVENTS=[
  {id:"prologue",look:"train",bg:"bus",steps:[
@@ -1814,27 +1826,27 @@ Object.assign(CARDS,{
   {n:"ploy",f:"sad",l:"casual",t:"At Golden Tiger, five a.m. was for a ten-kilometer run, not for tea. I'd forgotten a morning could be this quiet."},
   {n:"ploy",f:"flustered",l:"casual",t:"Thank you for taking me in… not as a genius, but as someone who got hurt."},
   {n:"ploy",f:"happy",l:"casual",t:"When my knee heals, I'll spar with Kati myself. Consider it rent."}]},
- h_kati:{c:"kati",r:"SR",t:"Can I Call You By Name?",hint:"Max bond with Kati",bg:"night",need:G=>(G.F.kati.bond||0)>=100,steps:[
+ h_kati:{c:"kati",r:"SR",t:"Can I Call You By Name?",hint:"Bond with Kati reaches ♥ Lv.11",bg:"night",need:G=>(G.F.kati.bond||0)>=100,steps:[
   {n:"nar",t:"One night after evening training, Kati sits beside you on the bench out front, rolling her hand wraps back up."},
   {n:"kati",f:"flustered",l:"casual",t:"Manager… can I ask you for something?"},
   {n:"kati",f:"flustered",l:"casual",t:G=>`When it's just us two, can I call you "${G.player.name}"? …"Manager" feels a little far away.`},
   {n:"kati",f:"happy",l:"casual",t:G=>`${G.player.name} …${G.player.name} …Mm. My heart's beating weird when I say it. I'm going to bed now!`}]},
- h_mali:{c:"mali",r:"SR",t:"The Letter She Actually Sent",hint:"Max bond with Mali",bg:"camp",need:G=>(G.F.mali.bond||0)>=100,steps:[
+ h_mali:{c:"mali",r:"SR",t:"The Letter She Actually Sent",hint:"Bond with Mali reaches ♥ Lv.11",bg:"camp",need:G=>(G.F.mali.bond||0)>=100,steps:[
   {n:"nar",t:"Mali hands you an envelope. It isn't sealed yet. On the front it says 'To Mom'."},
   {n:"mali",f:"flustered",l:"casual",t:"Manager, could you read it before I send it? I'm scared I wrote something wrong… No. I just want you to read it."},
   {n:"nar",t:"'Mom, I'm doing well. At this camp there's someone who makes me feel I have a second home. One day I'll bring them to meet you.'"},
   {n:"mali",f:"happy",l:"casual",t:"Don't change the last paragraph! …I really meant to write it that way."}]},
- h_rin:{c:"rin",r:"SR",t:"The Value of X",hint:"Max bond with Rin",bg:"night",need:G=>(G.F.rin.bond||0)>=100,steps:[
+ h_rin:{c:"rin",r:"SR",t:"The Value of X",hint:"Bond with Rin reaches ♥ Lv.11",bg:"night",need:G=>(G.F.rin.bond||0)>=100,steps:[
   {n:"nar",t:"Rin sets her thirteenth stat notebook in front of you. The last page holds one equation, underlined twice."},
   {n:"rin",f:"pout",l:"casual",t:"Remember the equation 'X = ?' I solved it."},
   {n:"rin",f:"flustered",l:"casual",t:G=>`X = ${G.player.name} …The only reason I stay at this camp despite better offers is this one variable.`},
   {n:"rin",f:"flustered",l:"casual",t:"I checked the answer seventeen times. No errors. …You don't have to answer now. This data never expires."}]},
- h_ploy:{c:"ploy",r:"SR",t:"Just Call Me Ploy",hint:"Max bond with Ploy",bg:"river",need:G=>(G.F.ploy.bond||0)>=100,steps:[
+ h_ploy:{c:"ploy",r:"SR",t:"Just Call Me Ploy",hint:"Bond with Ploy reaches ♥ Lv.11",bg:"river",need:G=>(G.F.ploy.bond||0)>=100,steps:[
   {n:"nar",t:"At dusk by the Ping River, Ploy skips a flat stone. It bounces exactly seven times."},
   {n:"ploy",f:"happy",l:"casual",t:"Everyone calls me Big Sis Ploy, Genius Ploy, Captain Ploy… Nobody ever calls me just Ploy."},
   {n:"ploy",f:"flustered",l:"casual",t:"Could you try calling me that? …Just 'Ploy'."},
   {n:"ploy",f:"happy",l:"casual",t:"…Mm. Like that. Better than every title I've ever had."}]},
- h_fah:{c:"fah",r:"SR",t:"The Real Sky After Rain",hint:"Max bond with Fah",bg:"camp",need:G=>(G.F.fah.bond||0)>=100,steps:[
+ h_fah:{c:"fah",r:"SR",t:"The Real Sky After Rain",hint:"Bond with Fah reaches ♥ Lv.11",bg:"camp",need:G=>(G.F.fah.bond||0)>=100,steps:[
   {n:"nar",t:"The rain has just stopped. Fah runs over and drags you into the middle of the wet camp yard."},
   {n:"fah",f:"happy",l:"casual",t:"Look! A double rainbow! Mom said if you see a double rainbow with someone, you'll be together for a long time."},
   {n:"fah",f:"flustered",l:"casual",t:"…Fah didn't make that up! Mom really said it! …Half of it."},

@@ -1,5 +1,5 @@
 // ================= MUAY THAI MOE v1.3 — UI =================
-const VERSION="1.85.2";
+const VERSION="1.86.0";
 const CUR_LANG=(typeof window!=="undefined"&&window.LANG)||"th";
 const TH_LABEL=String.fromCharCode(3652,3607,3618);
 function langSwitch(cls){return `<div class="langsw ${cls||""}" role="group" aria-label="Language">${[["th",TH_LABEL],["en","EN"]].map(([k,l])=>`<button class="lsb ${CUR_LANG===k?"on":""}" data-act="setlang" data-v="${k}" aria-pressed="${CUR_LANG===k}">${l}</button>`).join("")}</div>`;}
@@ -104,8 +104,9 @@ function slotsHTML(mode){const rows=[];for(let i=1;i<=SLOTS;i++){const s=loadSlo
 // ---------- small components ----------
 function faceImg(f,cls=""){return f.canon||f.id==="pailin"?`<img class="face ${cls}" style="--c:${f.color}" src="${faceSrc(f.id,"happy")}" alt="${esc(f.name)}">`:
   `<canvas class="face npcface ${cls}" width="96" height="96" data-sprite="${f.id}" data-mode="guard" style="--c:${f.color}" aria-label="${esc(f.name)}"></canvas>`;}
-function hearts(b){const v=Math.max(0,Math.min(100,b||0));let h="";for(let k=0;k<10;k++){const p=Math.max(0,Math.min(1,(v-k*10)/10));h+=`<i class="hp" style="--p:${p}"></i>`;}
-  const tier=v>=85?"ผูกพันลึก":v>=65?"ใกล้ชิด":v>=45?"สนิท":v>=25?"เริ่มคุ้น":"คนรู้จัก";return `<span class="hearts" title="ความสนิท ${Math.round(v)}/100">${h}<small>${tier}</small></span>`;}
+// v1.86: heart level — one heart, the level number, a gauge to the next level
+function hearts(b,f){f=f||{bond:b};const H=heartLv(f),pct=Math.round(H.into/H.need*100),left=Math.max(0,Math.ceil((H.need-H.into)*2)/2);
+  return `<span class="hearts hlv" title="ความสนิท ${Math.round(H.total)} · อีก ${left} ถึง Lv.${H.lv+1}"><i class="hp" style="--p:1"></i><b class="hlvn">Lv.${H.lv}</b><i class="hgauge"><i style="width:${pct}%"></i></i><small>${heartTier(H.lv)}</small></span>`;}
 function bar(label,v,color,txt){return `<div class="bar"><span>${label}</span><i style="--v:${clamp(v,0,100)}%;--bc:${color}"></i><b class="num">${txt??Math.round(v)}</b></div>`;}
 function mini(v,color){return `<i class="mini" style="--v:${clamp(v,0,100)}%;--bc:${color}"></i>`;}
 function xpBar(f){const need=xpNeed(f.lvl);return `<div class="xp"><span class="lv">Lv.${f.lvl}</span><i style="--v:${f.lvl>=MAX_LV?100:clamp(f.xp/need*100,0,100)}%"></i><span class="num dim">${f.lvl>=MAX_LV?"MAX":`${Math.round(f.xp)}/${need}`}</span>${f.sp>0&&f.camp==="player"?`<button class="spchip" data-act="ptab" data-v="skill">★ ${f.sp} แต้มสกิล</button>`:""}</div>`;}
@@ -547,7 +548,7 @@ function rankHTML(){const st=stageOf(G.week),cut=st==="local"?4:st==="district"?
 function peopleHTML(){const met=CANON_IDS.map(id=>G.F[id]).filter(f=>f.met);
   return `<div class="card-h"><p class="meta">ใช้เวลาด้วยกันสัปดาห์ละ 1 คน · พอสนิทกัน เธอจะทักแชทมาเองเป็นครั้งคราว</p><button class="btn sm gold albbtn" data-act="album">🃏 อัลบั้มการ์ด ${Object.keys(G.cards||{}).length}/${Object.keys(CARDS).length}${Object.entries(G.cards||{}).some(([k,c])=>cardFresh(k,c)||cardCanUp(k,c))?'<i class="ndot"></i>':""}</button>${G.freeUsed?'<span class="pill">เวลาว่าง: ใช้แล้ว</span>':'<span class="pill gold">เวลาว่าง: เหลือ 1</span>'}</div>
    <div class="plist">${met.map(f=>`<section class="px pcard"><button class="pthumb" data-act="fighter" data-id="${f.id}" data-v="rel" aria-label="ดูโปรไฟล์${esc(f.name)}"><img src="${stand(f.id,"casual")}" alt="" loading="lazy"></button>
-     <div class="pbody"><div class="pnm"><b class="nm">${esc(f.name)}</b><span class="meta">${f.camp==="player"?"ค่ายศิริชัย":f.camp==="rival"?"พยัคฆ์ทอง":"อิสระ"}${G.romance===f.id?" · คนรัก ♥":G.promise&&G.promise[f.id]!=null?" · สัญญาไว้ ♡":""}</span></div>${hearts(f.bond)}
+     <div class="pbody"><div class="pnm"><b class="nm">${esc(f.name)}</b><span class="meta">${f.camp==="player"?"ค่ายศิริชัย":f.camp==="rival"?"พยัคฆ์ทอง":"อิสระ"}${G.romance===f.id?" · คนรัก ♥":G.promise&&G.promise[f.id]!=null?" · สัญญาไว้ ♡":""}</span></div>${hearts(f.bond,f)}
       <div class="pbtns"><button class="btn sm" data-act="fighter" data-id="${f.id}" data-v="rel">ประวัติ</button><button class="btn sm primary" data-act="hang" data-id="${f.id}" ${G.freeUsed?"disabled":""}>ใช้เวลาด้วยกัน</button><button class="btn sm gold giftb" data-act="giftpick" data-id="${f.id}" ${f.giftWeek===gameWeek(G)?"disabled":""}>${PIX.gift}<span>${f.giftWeek===gameWeek(G)?"ให้แล้ว":"ของขวัญ"}</span></button><button class="btn sm chatb" data-act="chat" data-id="${f.id}" ${canChat(f)?"":"disabled"}>${CHAT_PX}<span>${canChat(f)?"แชทใหม่":(f.bond||0)<CHAT_BOND?"ยังไม่สนิท":"ไม่มีข้อความ"}</span>${canChat(f)?'<i class="dot"></i>':""}</button></div></div></section>`).join("")}</div>`;}
 function hangHTML(id){const f=G.F[id];const pref=k=>f.know["act_"+k]==="like"?'<i class="likeb">ชอบ</i>':f.know["act_"+k]==="dislike"?'<i class="disb">ไม่ชอบ</i>':"";
   return `<h2>ใช้เวลากับ${esc(f.name)}</h2><p class="meta">เลือกที่ที่อยากไปด้วยกัน</p><div class="acts">${Object.entries(ACTIVITIES).filter(([k,a])=>!a.campOnly||f.camp==="player").map(([k,a])=>`<button class="actbtn" data-act="date" data-id="${f.id}" data-v="${k}" ${G.freeUsed||G.cash<a.cost?"disabled":""}><b>${a.name}${pref(k)}</b><small>${a.cost?fmt(a.cost):"ฟรี"}</small></button>`).join("")}</div>`;}
@@ -675,7 +676,7 @@ function fighterHTML(f){const mine=f.camp==="player";const P=PROFILES[f.id];
       ${mine?`<p class="meta goldt">${masteryLine(f)}</p>`:""}<p class="meta">ฟอร์ม ${formHTML(f)}${nb?` · ไฟต์ถัดไปสัปดาห์ ${nb.week}`:""}</p><details><summary>ค่าสถานะละเอียด</summary>${attrsHTML(f,mine)}</details></div></div>`;}
   if(t==="train"){body=`<div class="fp-train"><div class="tr-anim big" style="background-image:url(${ASSET}${gymBg()})"><canvas width="260" height="200" data-sprite="${f.id}" data-floor="1"></canvas><span class="tr-tag">${PRESETS[f.plan.preset].name}</span></div>
      <div><p class="meta">${PRESETS[f.plan.preset].desc} · ความล้าสัปดาห์หน้า ${Math.round(projFatigue(f))}</p>${presetPicker(f)}${radarSVG(f,200)}</div></div>`;}
-  if(t==="skill"&&hasTree(f.id))body=skillGrid(f,mine);else if(t==="skill")body=skillGrid(f,mine)+(SIGNATURE[f.id]?`<details class="sigcard ${hasSignature(f)?"on":""}"><summary><b>${hasSignature(f)?"✦":"🔒"} ท่าไม้ตาย: ${SIGNATURE[f.id].name}</b></summary><span class="meta">${SIGNATURE[f.id].desc}${hasSignature(f)?"":` · ตอนนี้ความสนิท ${Math.round(f.bond||0)}/60`}</span></details>`:"")+`<details class="skhelp"><summary>สกิลทำงานยังไง?</summary><p class="meta">ได้แต้มสกิล 1 แต้มทุกเลเวลอัป · ท่าใหม่ปลดล็อกตามเลเวล · แต่ละท่าอัปได้ 3 ขั้น · ตอนชกกดใช้ได้เฉพาะ 3 ท่าที่ "ใช้" · แตะชื่อท่าเพื่อดูรายละเอียด</p></details>`;
+  if(t==="skill"&&hasTree(f.id))body=skillGrid(f,mine);else if(t==="skill")body=skillGrid(f,mine)+(SIGNATURE[f.id]?`<details class="sigcard ${hasSignature(f)?"on":""}"><summary><b>${hasSignature(f)?"✦":"🔒"} ท่าไม้ตาย: ${SIGNATURE[f.id].name}</b></summary><span class="meta">${SIGNATURE[f.id].desc}${hasSignature(f)?"":` · ตอนนี้ ♥ Lv.${heartLv(f).lv}/7`}</span></details>`:"")+`<details class="skhelp"><summary>สกิลทำงานยังไง?</summary><p class="meta">ได้แต้มสกิล 1 แต้มทุกเลเวลอัป · ท่าใหม่ปลดล็อกตามเลเวล · แต่ละท่าอัปได้ 3 ขั้น · ตอนชกกดใช้ได้เฉพาะ 3 ท่าที่ "ใช้" · แตะชื่อท่าเพื่อดูรายละเอียด</p></details>`;
   if(t==="rel")body=relHTML(f);
   return head+`<div class="fp-body">${body}</div>`;}
 const SK_AN=Object.fromEntries(ATTRS);
@@ -728,12 +729,12 @@ const relTier=b=>{let i=0;REL_TIERS.forEach((t,k)=>{if((b||0)>=t[0])i=k;});retur
 function relTierCheck(){if(!G)return;G.relT=G.relT||{};for(const f of Object.values(G.F)){if(!(f.camp==="player"||f.met))continue;const t=relTier(f.bond),o=G.relT[f.id];if(o===undefined){G.relT[f.id]=t;continue;}
   if(t>o){G.relT[f.id]=t;UI.relUp=UI.relUp||[];UI.relUp.push(`${f.name} · ${REL_TIERS[t][1]} — ${REL_TIERS[t][2]}`);}}}
 function relHTML(f){const P=PROFILES[f.id],b=f.bond;
-  const L=(ok,need,v)=>ok?esc(v):`<span class="lock">🔒 สนิท ${need}</span>`;
+  const L=(ok,need,v)=>ok?esc(v):`<span class="lock">🔒 ♥ Lv.${1+Math.floor(Math.min(100,need)/10)}</span>`;
   const chips=(arr,pre,all)=>arr.map((x,i)=>f.know[pre+i]||b>=all?`<span class="tchip">${esc(x)}</span>`:`<span class="tchip lock">???</span>`).join("");
   const gifts=Object.entries(f.know).filter(([k])=>k.startsWith("gift_")).map(([k,v])=>`<span class="tchip ${v}">${GIFTS[k.slice(5)].name}${v==="love"?" ♥♥":v==="like"?" ♥":v==="dislike"?" ✕":""}</span>`).join("");
   const looks=[["fight","ชุดชก"],["train","ชุดซ้อม"],["casual","ลำลอง"],...(typeof loyThaiLook==="function"&&loyThaiLook(G)&&THAI_IDS.includes(f.id)?[["thai","ชุดไทย"]]:[])];
   return `<div class="pf2"><div class="pf-art"><img src="${UI.look==="train"?`${ASSET}${f.id}_train.webp`:stand(f.id,UI.look,"happy")}" alt=""><div class="seg sm">${looks.map(([k,t])=>`<button data-act="plook" data-v="${k}" aria-pressed="${UI.look===k}">${t}</button>`).join("")}</div></div>
-   <div class="pf-side">${hearts(b)}${typeof missGap==="function"&&missGap(G,f.id)>=3?`<div class="missb">💭 คิดถึง · ไม่ได้เจอกัน ${missGap(G,f.id)} สัปดาห์${f.bond>(REL_FLOOR[(G.relT||{})[f.id]||0]||0)?" · ความสนิทเริ่มจางลง":""}</div>`:""}<div class="reltier"><b>${REL_TIERS[relTier(b)][1]}</b><small>${REL_TIERS[relTier(b)][2]}</small></div><div class="bars">${bar("สนิท",b,"var(--red)")}${bar("เชื่อใจ",f.trust,"var(--gold)")}</div>${f.camp==="player"?`<p class="meta trustx">${trustText(f)}</p>`:""}
+   <div class="pf-side">${hearts(b,f)}${typeof missGap==="function"&&missGap(G,f.id)>=3?`<div class="missb">💭 คิดถึง · ไม่ได้เจอกัน ${missGap(G,f.id)} สัปดาห์${!(f.bondX>0)&&f.bond>(REL_FLOOR[(G.relT||{})[f.id]||0]||0)?" · ความสนิทเริ่มจางลง":""}</div>`:""}<div class="reltier"><b>${REL_TIERS[relTier(b)][1]}</b><small>${REL_TIERS[relTier(b)][2]}</small></div><div class="bars">${(()=>{const H=heartLv(f);return bar("สนิท",H.into/H.need*100,"var(--red)",`${Math.round(H.total)}`);})()}${bar("เชื่อใจ",f.trust,"var(--gold)")}</div>${f.camp==="player"?`<p class="meta trustx">${trustText(f)}</p>`:""}
     <div class="info"><div><span>ส่วนสูง</span><b>${P.height}</b></div><div><span>กรุ๊ปเลือด</span><b>${L(b>=UNLOCK.blood||f.know.blood,UNLOCK.blood,P.blood)}</b></div>
      <div><span>วันเกิด</span><b>${L(b>=UNLOCK.bday||f.know.bday,UNLOCK.bday,P.bday)}</b></div><div><span>สายมวย</span><b>${esc(P.heritage)}</b></div></div></div></div>
    <div class="pf-sec"><h4>นิสัย</h4><p>${L(b>=UNLOCK.personality,UNLOCK.personality,P.personality)}</p></div>
@@ -746,7 +747,7 @@ function giftHTML(id){const f=G.F[id];
   const E=giftsFor(id).map(k=>[k,{...GIFTS[k],bond:giftBond(id,k)}]).sort((x,y)=>(x[1].bond||0)-(y[1].bond||0)||(x[1].only?1:0)-(y[1].only?1:0));
   {const lk=E.filter(([k,g])=>(g.bond||0)>(f.bond||0));const nx=lk[0];const hid=lk.length-(nx?1:0);E.splice(0,E.length,...E.filter(([k,g])=>(g.bond||0)<=(f.bond||0)),...(nx?[nx]:[]));E.hidden=hid;}
   return `<h2>ของขวัญให้${esc(f.name)}</h2><p class="meta">ซื้อแล้วให้ทันที · คนละ 1 ชิ้นต่อสัปดาห์ · ยิ่งสนิทยิ่งมีของให้เลือก${E.hidden?` (ยังซ่อนอีก ${E.hidden} ชิ้น)`:""} · เงินสด ${fmt(G.cash)}</p><div class="gifts">${E.map(([k,g])=>{const kn=f.know["gift_"+k],lk=(g.bond||0)>(f.bond||0);
-   if(lk)return `<div class="giftbtn lockg"><b>???</b><small>ปลดล็อกเมื่อสนิท ${g.bond}</small></div>`;
+   if(lk)return `<div class="giftbtn lockg"><b>???</b><small>ปลดล็อกเมื่อ ♥ Lv.${1+Math.floor(Math.min(100,g.bond)/10)}</small></div>`;
    const lw=f.giftL&&f.giftL[k],cd=lw&&gameWeek(G)-lw<6&&(f.giftN||{})[k]?6-(gameWeek(G)-lw):0;
    return `<button class="giftbtn" data-act="give" data-id="${id}" data-v="${k}" ${G.cash<g.price?"disabled":""}><b>${g.name}</b><small>${fmt(g.price)}${cd?` · เพิ่งให้ไป`:""}</small></button>`;}).join("")}</div>
    <p class="meta glegend">สังเกตท่าทีตอนให้ หรือดูในประวัติว่าเคยให้อะไรไปแล้วบ้าง</p>`;}
@@ -782,8 +783,9 @@ function reportHTML(){const r=G.lastReport;const ann=[];
     const m=(r.move&&r.move[d]&&r.move[d][id])||0;ann.push({f,pos,m,d});}
   ann.sort((a,b)=>(b.f.camp==="player")-(a.f.camp==="player"));
   const cut=r.stage==="local"?4:r.stage==="district"?4:0;
-  const tu=(r.tierUp||[]).filter(x=>G.F[x.id]);
+  const tu=(r.tierUp||[]).filter(x=>G.F[x.id]),hu=(r.heartUp||[]).filter(x=>G.F[x.id]);
   return `<h2>สรุปสัปดาห์ที่ ${r.week}</h2><p class="goal">${goalText()}</p>
+   ${hu.length?`<div class="heartup">${hu.map(x=>`<div class="hu">${faceImg(G.F[x.id],"sm")}<span>ความสนิทกับ <b>${esc(G.F[x.id].name)}</b> ขึ้นเป็น <b class="hlvn">♥ Lv.${x.lv}</b><small class="meta">${heartTier(x.lv)}</small></span></div>`).join("")}</div>`:""}
    ${tu.length?`<div class="tierup">${tu.map(x=>{const f=G.F[x.id],a=TIER_BY[x.from],b=TIER_BY[x.to],up=b.i>a.i;return `<div class="tu ${up?"up":"down"}">${faceImg(f,"sm")}<span><b>${esc(f.name)}</b> ${up?"เลื่อนขึ้นเป็น":"ตกลงเป็น"} <b>${b.ic} ${b.n}</b><small class="meta">จาก ${a.ic} ${a.n}</small></span></div>`;}).join("")}</div>`:""}
    ${ann.length&&cut?`<div class="announce"><div class="ann-h">ประกาศอันดับ · ${STAGE_NAME[r.stage]}</div>${ann.map(a=>`<div class="ann ${a.f.camp==="player"?"me":""}">${faceImg(a.f,"sm")}<b>${esc(a.f.name)}</b><span class="meta">รุ่น ${a.d}</span><span class="rk">อันดับ ${a.pos}</span>${moveIcon(a.m)}${cut?`<span class="pill ${a.pos<=cut?"green":"red"}">${a.pos<=cut?"อยู่ในโซนเข้ารอบ":"นอกโซน"}</span>`:""}</div>`).join("")}</div>`:""}
    ${r.prog?`<details class="prog"><summary class="ann-h">กราฟพัฒนาการ 4 สัปดาห์ (แตะเพื่อดู)</summary><div class="progrow">${r.prog.filter(p=>G.F[p.id]).map(p=>{const f=G.F[p.id];const sum=Object.keys(p.before).reduce((s,k)=>s+(f.a[k]-p.before[k]),0);
@@ -791,12 +793,13 @@ function reportHTML(){const r=G.lastReport;const ann=[];
    <div class="chips3"><span class="chip"><small>นักเรียน</small><b class="num pos">+${fmt(r.inc)}</b></span><span class="chip"><small>ค่าใช้จ่าย</small><b class="num neg">-${fmt(r.up+r.wg+(r.debtPay||0))}</b></span><span class="chip"><small>เงินสด</small><b class="num ${r.cash<0?"neg":""}">${fmt(r.cash)}</b></span></div>
    <details><summary>ผลการชกในวงการ (${r.log.length})</summary><div class="log">${r.log.map(l=>`<div>${esc(l)}</div>`).join("")||"<div>เงียบสงบ</div>"}</div></details>`;}
 // v1.81.1: "what's new" popup — shows once per save after loading, for players who started before this update
-const PATCH={id:"1.85.1",ver:"Muay Thai Moe v1.85.1",title:"รายงานประจำสัปดาห์จากค่ายศิริชัย",lead:"รอบนี้อัลบั้มการ์ดมีหน้ารายละเอียด อัปขั้นการ์ดเอง และย่อยการ์ดซ้ำได้",items:[
- ["🃏","หน้าการ์ด","แตะการ์ดในอัลบั้มเพื่อดูระดับ จำนวนที่มี ใบซ้ำ คำโปรยสั้น ๆ แล้วค่อยกดดูเรื่องราว"],
+const PATCH={id:"1.86.0",ver:"Muay Thai Moe v1.86.0",title:"รายงานประจำสัปดาห์จากค่ายศิริชัย",lead:"รอบนี้ความสนิทเป็นเลเวลไม่มีเพดาน และการ์ดมีหน้ารายละเอียด",items:[
+ ["♥","ความสนิทเป็นเลเวล","ความสนิทไม่มีเต็มแล้ว แสดงเป็นหัวใจ Lv. พร้อมเกจถึงขั้นถัดไป ผ่าน Lv.10 ไปแล้วยังสนิทขึ้นได้เรื่อย ๆ และไม่จางลงอีก"],
+ ["🃏","หน้าการ์ด","แตะการ์ดในอัลบั้มเพื่อดูระดับ จำนวนที่มี ใบซ้ำ และคำโปรยสั้น ๆ ก่อนกดดูเรื่องราว"],
  ["⬆","อัปขั้นการ์ดเอง","การ์ดซ้ำเก็บไว้ให้ทุกใบ เลือกเองว่าจะใช้อัปขั้นการ์ด (ความสนิทเพิ่มทุกขั้น) หรือย่อยเป็นเศษดาว มีหน้ายืนยันก่อนย่อย"],
  ["🏅","ระดับนักมวย 6 ขั้น","ทุกคนมีเรตติ้งตามผลชก ตั้งแต่หน้าใหม่ถึงตำนาน ดูได้ที่ ไฟต์ → อันดับ → ระดับนักมวย"],
  ["🛒","ของตกแต่งในร้าน","ซื้อได้ 15 ชิ้น มีหน้ายืนยันก่อนจ่ายเงิน"]],
- foot:"สะสมการ์ดให้ครบทุกใบนะคะ 🃏"};
+ foot:"สนิทกันให้ถึงเลเวลสูง ๆ นะคะ ♥"};
 function maybeWhatsNew(){if(!G||G.ended||UI.scene)return;if(G.newsSeen===PATCH.id)return;UI.modal={type:"whatsnew"};}
 function whatsNewHTML(){return `<div class="wnew"><span class="pill gold">อัปเดต · ${esc(PATCH.ver)}</span><h2>🥊 ${esc(PATCH.title)}</h2><p class="lead">${esc(PATCH.lead)}</p>
   <div class="wnlist">${PATCH.items.map(([ic,t,b])=>`<details class="wnitem"><summary><span class="wnic">${ic}</span><b>${esc(t)}</b><i>▸</i></summary><p>${esc(b)}</p></details>`).join("")}</div><p class="meta wnhint">แตะหัวข้อเพื่ออ่านรายละเอียด</p>
@@ -1039,7 +1042,7 @@ function endingHTML(){const E=UI.ending,all=roster(G),res=seasonResult();
    <section class="px card"><h3>ผลงานปีนี้</h3>${res.length?res.map(r=>`<div class="kv-row"><span>${faceImg(r.f,"sm")} ${esc(r.f.name)} · รุ่น ${r.d}</span><span class="pill ${r.c}">${r.t}</span></div>`).join(""):'<p class="meta">ปีนี้ยังไม่มีนักมวยผ่านรอบตำบล</p>'}</section>
    <div class="grid g3"><section class="px card"><h3>ค่าย</h3><div class="kv-row"><span>ระดับค่าย</span><b>Lv.${campLevel(G)} ${CAMP_LV_NAME[campLevel(G)]}</b></div><div class="kv-row"><span>เงินสด</span><b class="num">${fmt(G.cash)}</b></div><div class="kv-row"><span>หนี้คงเหลือ</span><b class="num">${fmt(G.debt)}</b></div><div class="kv-row"><span>นักเรียน</span><b class="num">${students(G)} คน</b></div><div class="kv-row"><span>ชื่อเสียง</span><b class="num">${G.rep.toFixed(1)}</b></div></section>
    <section class="px card"><h3>นักมวยในค่าย</h3>${all.map(f=>`<div class="kv-row"><span>${esc(f.name)} Lv.${f.lvl}</span><span class="num">${rec(f)}</span></div>`).join("")}</section>
-   <section class="px card"><h3>ความสัมพันธ์</h3>${CANON_IDS.map(id=>G.F[id]).filter(f=>f.met).map(f=>`<div class="kv-row"><span>${esc(f.name)}${G.romance===f.id?" ♥ คนรัก":G.promise&&G.promise[f.id]!=null?" ♡ สัญญาไว้":""}</span>${hearts(f.bond)}</div>`).join("")}</section></div>
+   <section class="px card"><h3>ความสัมพันธ์</h3>${CANON_IDS.map(id=>G.F[id]).filter(f=>f.met).map(f=>`<div class="kv-row"><span>${esc(f.name)}${G.romance===f.id?" ♥ คนรัก":G.promise&&G.promise[f.id]!=null?" ♡ สัญญาไว้":""}</span>${hearts(f.bond,f)}</div>`).join("")}</section></div>
    ${endTeaserHTML()}
    <p class="meta center">Seed ${esc(G.seedText||String(G.seed))} · ปีที่ ${G.season||1}</p>${!DEMO&&G.ended==="season"&&!gateOpen()?gateHTML():""}<div class="center endbtns">${!DEMO&&G.ended==="season"&&gateOpen()?`<button class="btn primary" data-act="newseason">เล่นต่อ ปีที่ ${(G.season||1)+1} ▸</button><p class="meta center">ค่าย นักมวย และความสัมพันธ์ไปต่อทั้งหมด · คู่แข่งก็ซ้อมหนักขึ้นเหมือนกัน</p>`:""}<button class="btn primary" data-act="replay">เล่นใหม่อีกรอบ</button><button class="btn" data-act="restart">กลับหน้าแรก</button></div></main>`;}
 

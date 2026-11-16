@@ -193,7 +193,7 @@ const REL_FLOOR=[0,20,40,75];
 const missGap=(G,id)=>{const f=G.F[id];if(!f||f.lastTouch==null)return 0;return absWeek(G)-f.lastTouch;};
 function bondFade(G){G.relT=G.relT||{};for(const id of CANON_IDS){const f=G.F[id];if(!f||!f.met)continue;if(f.lastTouch==null){f.lastTouch=absWeek(G);continue;}
   const gap=absWeek(G)-f.lastTouch;if(gap<4)continue;const mine=f.camp==="player",rate=mine?.5:.25,floor=REL_FLOOR[G.relT[id]||0]||0;
-  if(f.bond>floor)f.bond=Math.max(floor,Math.round((f.bond-rate)*100)/100);}}
+  if((f.bondX||0)>0)continue;/* v1.86: past the first 100 the bond no longer fades */if(f.bond>floor)f.bond=Math.max(floor,Math.round((f.bond-rate)*100)/100);}}
 function chatWeekly(G){bondFade(G);G.chatIn=G.chatIn||{};G.chatLast=G.chatLast||{};const rng=mulberry32(G.seed*31+G.week*7+3);
   for(const id of CANON_IDS){const f=G.F[id];if(!f||!f.met||G.chatIn[id])continue;
     {const L=CHAT[id]||[],seen=(G.chatSeen||{})[id]||[],W=G.chatWkAbs||{};if((f.bond||0)>=8&&gameWeek(G)-(G.chatLastAbs?.[id]??-999)>=1&&L.some(t=>t.need&&/_(lost|won|dm|flood|loan|miss|loy|loyw)$/.test(t.id)&&t.need(G)&&(!seen.includes(t.id)||(t.rep&&gameWeek(G)-(W[id+":"+t.id]??-999)>=t.rep)))){G.chatIn[id]=G.week;continue;}}

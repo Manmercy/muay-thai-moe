@@ -24,7 +24,7 @@ const OUTFITS={
  drum:{name:"ชุดกลองแขกสีส้ม",h:.065,s:.88,lm:1.05,sw:"#ec7a22",hint:"ได้เกรด S ในมินิเกมกลองแขก",need:G=>(G.flags.bagS||0)>0},
  live:{name:"ชุดไลฟ์ขายดีสีมิ้นต์",h:.47,s:.72,lm:1.05,sw:"#2fc4b2",hint:"ได้เกรด S ในไลฟ์ขายของ",need:G=>(G.flags.liveS||0)>0},
  tiger:{name:"ชุดดำล่าเสือ",h:.08,s:.06,lm:.42,sw:"#2a2630",hint:"ล้มพลอยได้ในไฟต์ทางการ",need:G=>(G.flags.beat_ploy||0)>0},
- heart:{name:"ชุดหัวใจสีชมพู",h:.95,s:.55,lm:1.35,sw:"#f59cc4",hint:"ความสนิทกับคนนี้เต็มหลอด",need:(G,f)=>(f.bond||0)>=100},
+ heart:{name:"ชุดหัวใจสีชมพู",h:.95,s:.55,lm:1.35,sw:"#f59cc4",hint:"ความสนิทกับคนนี้ถึง ♥ Lv.11",need:(G,f)=>(f.bond||0)>=100},
  champ:{name:"ชุดแชมป์ทองคำ",h:.14,s:.95,lm:1.3,sw:"#ffd34a",hint:"คว้าแชมป์จังหวัด",need:G=>Object.values(G.champ||{}).some(id=>G.F[id]&&G.F[id].camp==="player")||(G.titles||[]).some(t=>Object.values(t.champ||{}).some(id=>G.F[id]&&G.F[id].camp==="player"))}};
 const KIT_MASK={kati:(h,l,s)=>(h<.035||h>.93)&&s>.38&&l>.12&&l<.8,mali:(h,l,s)=>h>.53&&h<.74&&s>.25&&l>.1,rin:(h,l,s)=>h>.2&&h<.45&&s>.25&&l>.08,
  ploy:(h,l,s,fy,fx)=>h>.68&&h<.9&&s>.2&&l>.1&&fy>.4&&fx>.3,fah:(h,l,s,fy)=>h>.088&&h<.17&&l>.1&&((s>.5&&fy>.33)||(s>.22&&l<.55&&fy>.55))};

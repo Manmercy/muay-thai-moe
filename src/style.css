@@ -1711,3 +1711,11 @@ body.hasnews main>h1.sr+.homegrid,body.hasnews main>h1.sr+.rinnote{margin-top:46
 .ccard.lvfx{animation:cardlv .9s ease-out}
 @keyframes cardlv{0%{transform:scale(1);filter:brightness(1)}25%{transform:scale(1.08);filter:brightness(1.8) drop-shadow(0 0 12px var(--rc))}100%{transform:scale(1);filter:brightness(1)}}
 @media (prefers-reduced-motion:reduce){.ccard.lvfx{animation:none}}
+/* v1.86: heart levels */
+.hearts.hlv{display:inline-flex;align-items:center;gap:6px;letter-spacing:0}
+.hlvn{font:700 13px var(--f-display);color:#ff8fa3;white-space:nowrap}
+.hgauge{display:inline-block;width:72px;height:8px;background:var(--bg2);box-shadow:inset 0 0 0 1px var(--line);position:relative}
+.hgauge>i{position:absolute;left:0;top:0;bottom:0;background:linear-gradient(90deg,#e23b4e,#ff8fa3)}
+.heartup{display:flex;flex-direction:column;gap:6px;margin:8px 0}
+.hu{display:flex;align-items:center;gap:10px;padding:8px 10px;background:rgba(226,59,78,.12);box-shadow:inset 0 0 0 2px rgba(226,59,78,.5)}
+.hu>span{display:block;line-height:1.5}.hu small{display:block}

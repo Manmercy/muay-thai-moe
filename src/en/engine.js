@@ -179,11 +179,11 @@ const skResetCost=f=>Math.min(3,f.skReset||0)*10000;
 function resetAllSkills(G,id){const f=G.F[id];if(!f||!f.skills)return 0;const n=skPointsSpent(f);if(!n)return 0;f.skills={};f.sp=(f.sp||0)+n;f.equip=[];f.skReset=(f.skReset||0)+1;return n;}
 function resetSharedPath(G,id){const f=G.F[id];if(!f||!f.skills)return false;let n=0;for(const s of SHARED_SKILLS){n+=f.skills[s.id]||0;delete f.skills[s.id];}if(!n)return false;f.sp+=n;if(Array.isArray(f.equip))f.equip=f.equip.filter(k=>!k.startsWith("sh_"));return n;}
 // v1.12: a deep bond unlocks each heroine's signature move (bond 60+, player's camp only)
-const SIGNATURE={kati:{name:"Sirichai Heart Spinning Elbow",desc:"Bond 60+ · Elbow power +15% · extra 3% accuracy when hurt",fx:{dmg:{elbow:.15},clutch:.03}},
-  mali:{name:"Jasmine Bloom Kick",desc:"Bond 60+ · Kick accuracy +3% · between-round recovery +15%",fx:{hit:{kick:.03},regen:.15}},
-  rin:{name:"The Winning Equation",desc:"Bond 60+ · Corner orders +30% · counter +3%",fx:{corner:.3,ctr:.03}},
-  ploy:{name:"Tiger Wall",desc:"Bond 60+ · Evade/block +2% · inside defense +1",fx:{evade:.02,clDef:1}},
-  fah:{name:"Thundering Sky Storm",desc:"Bond 60+ · Punch power +12% · 6% less energy",fx:{dmg:{punch:.12},staSave:.06}}};
+const SIGNATURE={kati:{name:"Sirichai Heart Spinning Elbow",desc:"Bond ♥ Lv.7+ · Elbow power +15% · extra 3% accuracy when hurt",fx:{dmg:{elbow:.15},clutch:.03}},
+  mali:{name:"Jasmine Bloom Kick",desc:"Bond ♥ Lv.7+ · Kick accuracy +3% · between-round recovery +15%",fx:{hit:{kick:.03},regen:.15}},
+  rin:{name:"The Winning Equation",desc:"Bond ♥ Lv.7+ · Corner orders +30% · counter +3%",fx:{corner:.3,ctr:.03}},
+  ploy:{name:"Tiger Wall",desc:"Bond ♥ Lv.7+ · Evade/block +2% · inside defense +1",fx:{evade:.02,clDef:1}},
+  fah:{name:"Thundering Sky Storm",desc:"Bond ♥ Lv.7+ · Punch power +12% · 6% less energy",fx:{dmg:{punch:.12},staSave:.06}}};
 const hasSignature=f=>!!SIGNATURE[f.id]&&f.camp==="player"&&(f.bond||0)>=60;
 function skillMods(f){const m={hit:{},pts:{},dmg:{},ctr:0,ctrDmg:0,clutch:0,regen:0,mor:0,evade:0,corner:0,prep:0,clDef:0,staSave:0};
   if(hasSignature(f)){const e=SIGNATURE[f.id].fx;for(const k in e){if(typeof e[k]==="object")for(const w in e[k])m[k][w]=(m[k][w]||0)+e[k][w];else m[k]+=e[k];}}
@@ -1018,7 +1018,7 @@ function weekFinish(G){if(G.rep>55)G.rep=55+(G.rep-55)*(.96+(G.fac.hall||0)*.01)
     if(gameWeek(G)-G.snap.week<4)return null;const out=roster(G).filter(f=>G.snap.a[f.id]).map(f=>({id:f.id,before:G.snap.a[f.id]}));
     G.snap={week:gameWeek(G),a:Object.fromEntries(roster(G).map(f=>[f.id,{...f.a}]))};return out.length?out:null;})();
   grantDecorUnlocks(G);checkCampAwards(G);
-  G.lastReport={tierUp:(G.tierNews||[]).filter(x=>x.week===G.week),prog,week:G.week,inc,up,wg,debtPay,students:students(G),rank:after,move:G.rankMove,stage:stageOf(G.week),cash:G.cash,log:[...G.log],gains:roster(G).map(f=>({id:f.id,name:f.name,gains:{...f.gains},fatigue:f.fatigue,injury:f.injury,xp:f.xpGain||0,lvl:f.lvl,preset:f.plan.preset}))};
+  G.lastReport={heartUp:(()=>{const m={};for(const x of G.heartNews||[])m[x.id]=x;G.heartNews=[];return Object.values(m);})(),tierUp:(G.tierNews||[]).filter(x=>x.week===G.week),prog,week:G.week,inc,up,wg,debtPay,students:students(G),rank:after,move:G.rankMove,stage:stageOf(G.week),cash:G.cash,log:[...G.log],gains:roster(G).map(f=>({id:f.id,name:f.name,gains:{...f.gains},fatigue:f.fatigue,injury:f.injury,xp:f.xpGain||0,lvl:f.lvl,preset:f.plan.preset}))};
   stageTransition(G);
   {const pv=G.history.length?G.history[G.history.length-1].cash:60000,sp=G.sponsorWk||0;G.history.push({w:G.week,season:G.season||1,cash:Math.round(G.cash),rep:+G.rep.toFixed(1),inc,up,wg,debt:debtPay,sponsor:sp,fight:G.wkFight||0,oth:Math.round(G.cash-pv-(inc+sp-up-wg-debtPay)-(G.wkFight||0))});G.wkFight=0;}
   if((G.negWeeks>=4&&G.cash<-10000)||G.cash<-40000)G.ended="bankrupt";

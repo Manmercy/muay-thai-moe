@@ -24,7 +24,7 @@ const OUTFITS={
  drum:{name:"Khong Khaek Orange Kit",h:.065,s:.88,lm:1.05,sw:"#ec7a22",hint:"Get an S in the drum minigame",need:G=>(G.flags.bagS||0)>0},
  live:{name:"Bestseller Mint Kit",h:.47,s:.72,lm:1.05,sw:"#2fc4b2",hint:"Get an S on the merch live stream",need:G=>(G.flags.liveS||0)>0},
  tiger:{name:"Tiger-Hunter Black Kit",h:.08,s:.06,lm:.42,sw:"#2a2630",hint:"Beat Ploy in an official fight",need:G=>(G.flags.beat_ploy||0)>0},
- heart:{name:"Pink Heart Kit",h:.95,s:.55,lm:1.35,sw:"#f59cc4",hint:"Max bond with this fighter",need:(G,f)=>(f.bond||0)>=100},
+ heart:{name:"Pink Heart Kit",h:.95,s:.55,lm:1.35,sw:"#f59cc4",hint:"Bond with this fighter reaches ♥ Lv.11",need:(G,f)=>(f.bond||0)>=100},
  champ:{name:"Gold Champion Kit",h:.14,s:.95,lm:1.3,sw:"#ffd34a",hint:"Win the provincial championship",need:G=>Object.values(G.champ||{}).some(id=>G.F[id]&&G.F[id].camp==="player")||(G.titles||[]).some(t=>Object.values(t.champ||{}).some(id=>G.F[id]&&G.F[id].camp==="player"))}};
 const KIT_MASK={kati:(h,l,s)=>(h<.035||h>.93)&&s>.38&&l>.12&&l<.8,mali:(h,l,s)=>h>.53&&h<.74&&s>.25&&l>.1,rin:(h,l,s)=>h>.2&&h<.45&&s>.25&&l>.08,
  ploy:(h,l,s,fy,fx)=>h>.68&&h<.9&&s>.2&&l>.1&&fy>.4&&fx>.3,fah:(h,l,s,fy)=>h>.088&&h<.17&&l>.1&&((s>.5&&fy>.33)||(s>.22&&l<.55&&fy>.55))};
