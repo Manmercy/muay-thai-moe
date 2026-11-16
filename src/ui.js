@@ -383,6 +383,7 @@ function trainAdvice(f){const b=nextBooking(f);const wk=b?b.week-G.week:99;const
   if(b&&wk===1&&projF(f,"prep","light")>30)return {p:"rest",i:"light",why:`สัปดาห์หน้าขึ้นชกแล้ว ล้า ${Math.round(f.fatigue)} ยังสูง ขึ้นเวทีตอนล้าแรงจะหมดเร็ว พักให้สดก่อน`};
   if(b&&wk<=2){const cp=counterPreset(op),cap=wk===1?30:50;
     if(scouted(op.id))return {p:cp,i:safeInt(f,cp,cap),why:`${op.name}${COUNTER_WHY[cp]} ซ้อม "${PRESETS[cp].name}" ได้โบนัสแก้ทาง แล้วสัปดาห์ชกค่อยเตรียมไฟต์`};
+    const bk=oppKnown(G,op.id);if(bk&&bk.last.cp)return {p:bk.last.cp,i:safeInt(f,bk.last.cp,cap),why:`ครูยังจำ${op.name}ได้จากปีที่ ${bk.last.season} สัปดาห์ ${bk.last.wk} ตอนนั้น${COUNTER_WHY[bk.last.cp]} ซ้อม "${PRESETS[bk.last.cp].name}" ไว้ก่อน แต่เขาอาจมีท่าใหม่ ดูเทปจะชัวร์กว่า`};
     const [w,p]=weakPick(f);
     return {p,i:safeInt(f,p,cap),why:`ยังไม่รู้ทาง${op.name} ดูเทปก่อนจะซ้อมแก้ทางได้ ระหว่างนี้เสริม${w[0]}`};}
   const [w,p,rot]=weakPick(f);const i=safeInt(f,p,b?58:65);
@@ -396,7 +397,7 @@ function weakPick(f){const a=f.a;const ax=RADAR_AX.map(([n,fn])=>[n,fn(a)]).sort
   let k=0;const streak=(f.trainLog||[]).slice(-2);if(streak.length===2&&streak.every(x=>x===pre(ax[0][0])))k=1;
   return [ax[k],pre(ax[k][0]),k===1];}
 function planTip(f){const b=nextBooking(f);if(!b||f.injury)return "";const op=G.F[b.b];
-  if(!scouted(op.id))return `<div class="kv-row"><span>แผนไฟต์ สด.${b.week}</span><b class="dim">ดูเทป${op.name}ก่อน ครูถึงบอกแผนได้</b></div>`;
+  if(!scouted(op.id)){const bk=oppKnown(G,op.id);return `<div class="kv-row"><span>แผนไฟต์ สด.${b.week}</span><b class="dim">${bk?`จากไฟต์ครั้งก่อน ${op.name}ถนัด${attrName(bk.last.top)} · ดูเทปเพื่ออัปเดต`:`ดูเทป${op.name}ก่อน ครูถึงบอกแผนได้`}</b></div>`;}
   const A=adviseCached(f.id,op.id,b.rounds||3);const a=op.a;const tg=a.stamina<=Math.min(a.foot,a.guard)?"body":a.foot<=a.guard?"legs":"head";
   return `<div class="kv-row"><span>แผนไฟต์ สด.${b.week}</span><b class="goldt">${PLANS[A.best].name} · ${TGT[tg]}</b></div><p class="meta">${op.name}จุดอ่อนคือ${oppIntel(op).weak} · สัปดาห์ชกใช้ "เตรียมไฟต์" ได้โบนัสความพร้อม</p>`;}
 function masteryLine(f){const s=mainStyle(f),v=styleVal(f,s),m=mastery(f);
@@ -480,8 +481,10 @@ const trustBonus=f=>f&&f.camp==="player"?clamp(((f.trust||0)-40)/1000,-.02,.04):
 function trustText(f){const t=Math.round(f.trust||0),b=Math.round(trustBonus(f)*1000)/10;
   return `เชื่อใจ ${t}: ${b>0?`ทำตามคำสั่งจากมุมเวทีได้ดี ความแม่น +${b}%`:b<0?`ยังลังเลกับคำสั่งจากมุม ความแม่น ${b}%`:"ทำตามคำสั่งตามปกติ"}${t>=60?" · แพ้แล้วกำลังใจลดน้อยลง":" · ถึง 60 แพ้แล้วใจไม่ห่อเหี่ยว"}`;}
 function personaOf(op){return !op.canon&&typeof PERSONA!=="undefined"?PERSONA[op.name]:null;}
-function intelHTML(op){if(!scouted(op.id))return `<div class="intel locked"><span>ยังไม่ได้ดูเทปคู่ชก · รู้แค่สายมวย ${styleOf(op.a)}</span><button class="btn sm" data-act="scout" data-v="${op.id}" ${G.cash<scoutCost()?"disabled":""}>${scoutLabel()}</button></div>`;
-  const I=oppIntel(op);return `<div class="intel"><b>${G.F.rin.camp==="player"?"รินวิเคราะห์ให้":"ข้อมูลจากเทป"}</b><span>อาวุธหลัก: ${I.top}</span><span>จุดอ่อน: ${I.weak}</span></div>`;}
+function oppMemoHTML(op,bk){const L=bk.last,dv=+(ovr(op.a)-L.ovr).toFixed(1);
+  return `<div class="memo"><b>📒 สมุดครูแดง</b><span>เคยเจอ ${bk.n} ครั้ง · ล่าสุดปีที่ ${L.season} สัปดาห์ ${L.wk} (${L.res==="W"?"เราชนะ":L.res==="L"?"เราแพ้":"เสมอ"}${L.type?` ${esc(L.type)}`:""})</span><span>ตอนนั้นอาวุธหลัก: ${attrName(L.top)} · แผนแก้ทางเดิม: ซ้อม "${PRESETS[L.cp]?PRESETS[L.cp].name:"-"}"</span><span class="dim">${dv>=.8?`ดูฟิตขึ้นกว่าครั้งก่อนมาก`:dv>=.3?`ดูเก่งขึ้นจากครั้งก่อนนิดหน่อย`:"ฝีมือพอ ๆ กับครั้งก่อน"} · ข้อมูลเก่า อาจมีท่าใหม่</span></div>`;}
+function intelHTML(op){const bk=oppKnown(G,op.id);if(!scouted(op.id))return `${bk?oppMemoHTML(op,bk):""}<div class="intel locked"><span>${bk?"ดูเทปใหม่เพื่อเช็กว่ามีอะไรเปลี่ยนไป":"ยังไม่ได้ดูเทปคู่ชก"} · รู้แค่สายมวย ${styleOf(op.a)}</span><button class="btn sm" data-act="scout" data-v="${op.id}" ${G.cash<scoutCost()?"disabled":""}>${scoutLabel()}</button></div>`;
+  const I=oppIntel(op),nt=bk&&bk.trick?`<span class="newtrick">⚠️ ท่าใหม่: ฝึก${attrName(bk.trick.k)}เพิ่มมาหลังเจอกันครั้งก่อน</span>`:bk&&topWeapon(op.a)!==bk.last.top?`<span class="newtrick">⚠️ เปลี่ยนอาวุธหลักจาก${attrName(bk.last.top)}เป็น${attrName(topWeapon(op.a))}</span>`:"";return `<div class="intel"><b>${G.F.rin.camp==="player"?"รินวิเคราะห์ให้":"ข้อมูลจากเทป"}</b><span>อาวุธหลัก: ${I.top}</span><span>จุดอ่อน: ${I.weak}</span>${nt}${bk?`<span class="dim">เคยเจอ ${bk.n} ครั้ง</span>`:""}</div>`;}
 function offersHTML(){const mine=G.bookings.filter(b=>G.F[b.a].camp==="player").sort((a,b)=>a.week-b.week);
   return `${mine.length?`<section class="px card"><h3>ไฟต์ที่รับแล้ว</h3><div class="list">${mine.map(b=>{const o=G.F[b.b],me=G.F[b.a];
      return `<div class="bookcard"><div class="vsstage"><canvas width="150" height="150" data-sprite="${me.id}" data-mode="guard"></canvas><b class="vsx">VS</b><canvas width="150" height="150" data-sprite="${o.id}" data-mode="guard" data-flip="1"></canvas></div>

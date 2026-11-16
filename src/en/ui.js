@@ -383,6 +383,7 @@ function trainAdvice(f){const b=nextBooking(f);const wk=b?b.week-G.week:99;const
   if(b&&wk===1&&projF(f,"prep","light")>30)return {p:"rest",i:"light",why:`Fighting next week, fatigue ${Math.round(f.fatigue)} is still high. Fighting tired drains energy fast. Rest up first`};
   if(b&&wk<=2){const cp=counterPreset(op),cap=wk===1?30:50;
     if(scouted(op.id))return {p:cp,i:safeInt(f,cp,cap),why:`${op.name}${COUNTER_WHY[cp]} Train "${PRESETS[cp].name}" for the counter bonus, then fight prep in the fight week`};
+    const bk=oppKnown(G,op.id);if(bk&&bk.last.cp)return {p:bk.last.cp,i:safeInt(f,bk.last.cp,cap),why:`I still remember ${op.name} from year ${bk.last.season} week ${bk.last.wk}. Back then: ${COUNTER_WHY[bk.last.cp]} Train "${PRESETS[bk.last.cp].name}" for now, but she may have something new. Watching tape is safer.`};
     const [w,p]=weakPick(f);
     return {p,i:safeInt(f,p,cap),why:`Don't know ${op.name} yet. Scout the tape before counter-training. Meanwhile, work on ${w[0]}`};}
   const [w,p,rot]=weakPick(f);const i=safeInt(f,p,b?58:65);
@@ -396,7 +397,7 @@ function weakPick(f){const a=f.a;const ax=RADAR_AX.map(([n,fn])=>[n,fn(a)]).sort
   let k=0;const streak=(f.trainLog||[]).slice(-2);if(streak.length===2&&streak.every(x=>x===pre(ax[0][0])))k=1;
   return [ax[k],pre(ax[k][0]),k===1];}
 function planTip(f){const b=nextBooking(f);if(!b||f.injury)return "";const op=G.F[b.b];
-  if(!scouted(op.id))return `<div class="kv-row"><span>Fight plan wk ${b.week}</span><b class="dim">Scout ${op.name} first, then Coach can suggest a plan</b></div>`;
+  if(!scouted(op.id)){const bk=oppKnown(G,op.id);return `<div class="kv-row"><span>Fight plan wk ${b.week}</span><b class="dim">${bk?`From the last meeting, ${op.name} favors ${attrName(bk.last.top)} · watch tape to update`:`Scout ${op.name} first, then I can plan the fight`}</b></div>`;}
   const A=adviseCached(f.id,op.id,b.rounds||3);const a=op.a;const tg=a.stamina<=Math.min(a.foot,a.guard)?"body":a.foot<=a.guard?"legs":"head";
   return `<div class="kv-row"><span>Fight plan wk ${b.week}</span><b class="goldt">${PLANS[A.best].name} · ${TGT[tg]}</b></div><p class="meta">${op.name}'s weak spot is ${oppIntel(op).weak} · use "Fight prep" in the fight week for a readiness bonus</p>`;}
 function masteryLine(f){const s=mainStyle(f),v=styleVal(f,s),m=mastery(f);
@@ -480,8 +481,10 @@ const trustBonus=f=>f&&f.camp==="player"?clamp(((f.trust||0)-40)/1000,-.02,.04):
 function trustText(f){const t=Math.round(f.trust||0),b=Math.round(trustBonus(f)*1000)/10;
   return `Trust ${t}: ${b>0?`follows corner orders well, accuracy +${b}%`:b<0?`still hesitant with corner orders, accuracy ${b}%`:"follows orders as usual"}${t>=60?" · losses hurt morale less":" · at 60, losses won't crush her spirit"}`;}
 function personaOf(op){return !op.canon&&typeof PERSONA!=="undefined"?PERSONA[op.name]:null;}
-function intelHTML(op){if(!scouted(op.id))return `<div class="intel locked"><span>Tape not scouted · only the style is known: ${styleOf(op.a)}</span><button class="btn sm" data-act="scout" data-v="${op.id}" ${G.cash<scoutCost()?"disabled":""}>${scoutLabel()}</button></div>`;
-  const I=oppIntel(op);return `<div class="intel"><b>${G.F.rin.camp==="player"?"Rin's analysis":"From the tape"}</b><span>Main weapon: ${I.top}</span><span>Weak spot: ${I.weak}</span></div>`;}
+function oppMemoHTML(op,bk){const L=bk.last,dv=+(ovr(op.a)-L.ovr).toFixed(1);
+  return `<div class="memo"><b>📒 Kru Daeng's notebook</b><span>Met ${bk.n} times · last in year ${L.season} week ${L.wk} (${L.res==="W"?"we won":L.res==="L"?"we lost":"Draw"}${L.type?` ${esc(L.type)}`:""})</span><span>Main weapon then: ${attrName(L.top)} · counter plan then: train "${PRESETS[L.cp]?PRESETS[L.cp].name:"-"}"</span><span class="dim">${dv>=.8?`Looks much sharper than last time`:dv>=.3?`Looks a little better than last time`:"About as good as last time"} · old info, she may have something new</span></div>`;}
+function intelHTML(op){const bk=oppKnown(G,op.id);if(!scouted(op.id))return `${bk?oppMemoHTML(op,bk):""}<div class="intel locked"><span>${bk?"Watch new tape to see what changed":"No tape watched yet"} · only the style is known: ${styleOf(op.a)}</span><button class="btn sm" data-act="scout" data-v="${op.id}" ${G.cash<scoutCost()?"disabled":""}>${scoutLabel()}</button></div>`;
+  const I=oppIntel(op),nt=bk&&bk.trick?`<span class="newtrick">⚠️ New trick: trained ${attrName(bk.trick.k)} harder since your last meeting</span>`:bk&&topWeapon(op.a)!==bk.last.top?`<span class="newtrick">⚠️ Main weapon changed from ${attrName(bk.last.top)} to ${attrName(topWeapon(op.a))}</span>`:"";return `<div class="intel"><b>${G.F.rin.camp==="player"?"Rin's analysis":"From the tape"}</b><span>Main weapon: ${I.top}</span><span>Weak spot: ${I.weak}</span>${nt}${bk?`<span class="dim">Met ${bk.n} times</span>`:""}</div>`;}
 function offersHTML(){const mine=G.bookings.filter(b=>G.F[b.a].camp==="player").sort((a,b)=>a.week-b.week);
   return `${mine.length?`<section class="px card"><h3>Booked fights</h3><div class="list">${mine.map(b=>{const o=G.F[b.b],me=G.F[b.a];
      return `<div class="bookcard"><div class="vsstage"><canvas width="150" height="150" data-sprite="${me.id}" data-mode="guard"></canvas><b class="vsx">VS</b><canvas width="150" height="150" data-sprite="${o.id}" data-mode="guard" data-flip="1"></canvas></div>

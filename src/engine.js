@@ -760,11 +760,22 @@ function applyResult(G,F,booking){
         if(res==="W"){op.surge=(op.surge||0)+7;op.potential=Math.min(20,op.potential+.5);G.flags[`beat_${op.id}`]=(G.flags[`beat_${op.id}`]||0)+1;G.flags[`surgeWk_${op.id}`]=G.week;G.flags[`beatS_${op.id}`]=G.season||1;if(op.id==="ploy")op.aura=ployAura(G.week,G);}}
       gainXP(G,me,Math.round((res==="W"?45*(upset?1.3:1):res==="D"?35:30)*(1+pmods.fightXp+(res==="L"?pmods.lossXp:0))*(booking.tier==="district"?1.3:booking.tier==="semi"?1.6:booking.tier==="final"?2:1)));
       G.cal=G.cal||[];G.cal.push({wk:G.week,season:G.season||1,absWeek:gameWeek(G),a:me.id,b:op.id,bn:op.name,tier:booking.tier,res,type:r.type,cards:(F.cards||[]).map(c=>[...c]),pay});
+      oppRemember(G,me,op,res,r.type);
       ret={pay,res,upset};
     }
   }
   return ret;
 }
+// v1.82.3: Kru Daeng's notebook — what we saw of an opponent last time; after a meeting they may go away and add a new weapon
+const TRICK_KEYS=["punch","kick","knee","elbow","clinch","counter","guard","foot"];
+const attrName=k=>(ATTRS.find(x=>x[0]===k)||[k,k])[1];
+const topWeapon=a=>["punch","kick","knee","elbow"].sort((x,y)=>a[y]-a[x])[0];
+function oppRemember(G,me,op,res,type){if(!op||op.camp==="player"||op.camp==="quest"||op.div==="X")return;G.oppBook=G.oppBook||{};
+  const bk=G.oppBook[op.id]=G.oppBook[op.id]||{n:0};bk.n++;bk.last={season:G.season||1,wk:G.week,abs:gameWeek(G),res,type:type||"",top:topWeapon(op.a),cp:counterPreset(op),ovr:+ovr(op.a).toFixed(1),vs:me.id};bk.trick=null;
+  const rng=mulberry32(G.seed+gameWeek(G)*13+stableHash(op.id));if(rng()<(res==="W"?.55:.3)){const top=bk.last.top,mine=topWeapon(me.a);
+    const pool=TRICK_KEYS.filter(k=>k!==top&&op.a[k]<19.5);const k=res==="W"&&rng()<.5?(mine==="kick"||mine==="punch"?"guard":"counter"):pool[Math.floor(rng()*pool.length)];
+    if(k&&op.a[k]<19.5){op.a[k]=Math.min(20,op.a[k]+.9);bk.trick={k,abs:gameWeek(G)};}}}
+const oppKnown=(G,id)=>G.oppBook&&G.oppBook[id]&&G.oppBook[id].last?G.oppBook[id]:null;
 function simNPCWeek(G){
   const st=stageOf(G.week);if(st!=="local"&&st!=="district")return;
   const rng=mulberry32(G.seed+G.week*104729);
@@ -934,7 +945,7 @@ function newSeason(G){
   G.season=(G.season||1)+1;G.week=1;G.ended=null;G.qual={A:[],B:[]};G.finalists={A:[],B:[]};G.semis={A:[],B:[]};G.champ={};G.bookings=[];G.log=[];
   G.flags.qualDone=false;G.flags.finalDone=false;G.snub={};G.offers=[];G.dmSeen={};G.dmSeenSeason=G.season;G.dm=null;G.coachAway=null;G.coachAwayAbs=null;G.freeUsed=false;G.campUsed=null;G.rankMove={A:{},B:{}};
   G.npcVet={};for(const div of ["A","B"]){const best=Object.entries((G.rank||{})[div]||{}).filter(([id])=>/^p[AB]\d/.test(id)&&G.F[id]).sort((x,y)=>(y[1].pts||0)-(x[1].pts||0))[0];if(best)G.npcVet[div]=G.F[best[0]].name;}
-  for(const id of Object.keys(G.F))if(/^[dxp][AB]\d/.test(id)){delete G.F[id];if(G.h2h)delete G.h2h[id];if(G.fam)delete G.fam[id];if(G.snub)delete G.snub[id];}
+  for(const id of Object.keys(G.F))if(/^[dxp][AB]\d/.test(id)){delete G.F[id];if(G.oppBook)delete G.oppBook[id];if(G.h2h)delete G.h2h[id];if(G.fam)delete G.fam[id];if(G.snub)delete G.snub[id];}
   const rng=mulberry32(G.seed+G.season*977);
   G.rank={A:{},B:{}};
   for(const f of Object.values(G.F)){f.form=[];f.injury=0;f.fatigue=Math.min(f.fatigue,20);
