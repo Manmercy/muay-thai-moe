@@ -611,18 +611,19 @@ function fighterHTML(f){const mine=f.camp==="player";const P=PROFILES[f.id];
   if(t==="rel")body=relHTML(f);
   return head+`<div class="fp-body">${body}</div>`;}
 const SK_AN=Object.fromEntries(ATTRS);
-const SK_LINES={kati:["Shin line","Punch & elbow line","Guard & heart line"],mali:["Elbow line","Kick & speed line","Defense line"],rin:["Counter line","Ring-IQ line","Range line"]};
-const SK_ROWN=["Basics","Mid tier","Mid tier · passive","High tier"];
-const skReady=f=>f.sp>0&&(hasTree(f.id)?(SKILLS[f.id]||[]).some(k=>!skillBlock(f,k.id).length):true);
+const SK_LINES={kati:["Shin line","Punch & elbow line","Guard & heart line"],mali:["Elbow line","Kick & speed line","Defense line"],rin:["Counter line","Ring-IQ line","Range line"],ploy:["Korat Punch line","Neck-Cutter Kick line","Tiger Wall line"],fah:["Tiger Elbow line","Reckless Rush line","Mocking Smile line"]};
+const SK_SHARED=["Knockout build","Points build","Iron build"];const SK_RESET_COST=10000;
+const SK_ROWN=["Basics","Mid tier","Mid tier · passive","High tier","Signature · Lv.14","Master · Lv.22"];
+const skReady=f=>f.sp>0&&(hasTree(f.id)?skillList(f.id).some(k=>!skillBlock(f,k.id).length):true);
 const fmtA=v=>(Math.floor(v*10)/10).toFixed(1).replace(/\.0$/,"");
 // v1.31: skill screen — points up top, one line (สาย) at a time, a scrollable list of pixel cards with the upgrade button on each card
 const skState=(f,s,mine)=>{const r=(f.skills&&f.skills[s.id])||0;if(!mine)return {r,st:r?"has":"lock"};const B=skillBlock(f,s.id);
   if(r>=3)return {r,st:"max"};if(!B.length)return {r,st:"can"};const nb=B.filter(b=>b.t!=="sp");if(!nb.length)return {r,st:"nosp"};return {r,st:"lock",B:nb};};
-function skillTree(f,mine){const L=SKILLS[f.id],eqd=equipped(f),sc=SCHOOLS[L[0].school]||{name:""};
-  const lines=SK_LINES[f.id]||["Line 1","Line 2","Line 3"];const can=li=>mine&&L.some(s=>s.line===li&&skState(f,s,mine).st==="can");
-  let li=UI.skLine&&UI.skLine.id===f.id?UI.skLine.li:[0,1,2].find(can);if(li==null)li=0;
+function skillTree(f,mine){const L=skillList(f.id),eqd=equipped(f),sc=SCHOOLS[L[0].school]||{name:""};
+  const lines=(SK_LINES[f.id]||["Line 1","Line 2","Line 3"]).concat(SK_SHARED);const can=li=>mine&&L.some(s=>s.line===li&&skState(f,s,mine).st==="can");
+  let li=UI.skLine&&UI.skLine.id===f.id?UI.skLine.li:[0,1,2,3,4,5].find(can);if(li==null)li=0;const path=sharedPathOf(f);
   const nCan=L.filter(s=>skState(f,s,mine).st==="can").length;
-  const why=st=>st.B.map(b=>b.t==="pre"?`Needs "${skillDef(f.id,b.id).name}" first`:b.t==="lv"?`Needs Lv.${b.v}`:b.t==="stat"?`${SK_AN[b.k]} ${fmtA(b.have)}/${fmtA(b.v)}`:"").filter(Boolean).join(" · ");
+  const why=st=>st.B.map(b=>b.t==="pre"?`Needs "${skillDef(f.id,b.id).name}" first`:b.t==="lv"?`Needs Lv.${b.v}`:b.t==="stat"?`${SK_AN[b.k]} ${fmtA(b.have)}/${fmtA(b.v)}`:b.t==="path"?`Picked "${SK_SHARED[path-3]}" already (one build at a time)`:"").filter(Boolean).join(" · ");
   const card=s=>{const st=skState(f,s,mine),eq=eqd.includes(s.id),k=skillKind(s);
     return `<div class="skc ${st.st} ${eq?"eq":""}"><div class="skc-ic">${s.passive?PIX.sk_rec:PIX["sk_"+k.k]}</div>
      <div class="skc-m"><div class="skc-h"><b>${s.name}</b><span class="pips">${[1,2,3].map(i=>`<i class="${i<=st.r?"on":""}"></i>`).join("")}</span></div>
@@ -633,10 +634,12 @@ function skillTree(f,mine){const L=SKILLS[f.id],eqd=equipped(f),sc=SCHOOLS[L[0].
   return `<div class="skwrap">${mine?`<div class="skbar3"><div class="sppx"><small>Skill points</small><b class="num">★ ${f.sp}</b></div>
      <div class="sk-info"><span>${f.sp?nCan?`Can upgrade now: <b class="ok">${nCan}</b> moves`:"Nothing to upgrade yet. Train stats higher":"3 points every level up"}</span>
       <span class="sk-eq">Equipped ${[0,1,2].map(i=>{const s=eqd[i]&&skillDef(f.id,eqd[i]);return `<i class="${s?"on":""}" title="${s?s.name:"Empty"}">${s?PIX["sk_"+skillKind(s).k]:""}</i>`;}).join("")}</span></div></div>`:""}
-   <div class="seg sklines">${lines.map((n,i)=>`<button data-act="skline" data-id="${f.id}" data-v="${i}" aria-pressed="${li===i}">${n}${can(i)?'<i class="tdot2"></i>':""}</button>`).join("")}</div>
-   <div class="sklist pxscroll">${[0,1,2,3].map(row=>L.find(s=>s.line===li&&s.row===row)).filter(Boolean).map(card).join('<i class="skarrow" aria-hidden="true"></i>')}
+   <div class="sknav"><div class="seg sklines"><span class="sklbl">School lines</span>${lines.slice(0,3).map((n,i)=>`<button data-act="skline" data-id="${f.id}" data-v="${i}" aria-pressed="${li===i}">${n}${can(i)?'<i class="tdot2"></i>':""}</button>`).join("")}</div>
+   <div class="seg sklines shared"><span class="sklbl">Build path · pick 1</span>${lines.slice(3).map((n,j)=>{const i=j+3;return `<button data-act="skline" data-id="${f.id}" data-v="${i}" aria-pressed="${li===i}" class="${path!=null&&path!==i?"off":""}">${path===i?"✓ ":""}${n}${can(i)?'<i class="tdot2"></i>':""}</button>`;}).join("")}</div>
+   ${li>=3?`<p class="meta skpath">${path==null?"Build paths use skill points like school lines, but you can build only one at a time · the first skill you raise closes the other build paths":path===li?`Building this path ${mine?` · <button class="btn sm ghost" data-act="skreset" data-id="${f.id}" ${G.cash<SK_RESET_COST?"disabled":""}>Change build path (refund points · ${fmt(SK_RESET_COST)})</button>`:""}`:`Currently building "${SK_SHARED[path-3]}" now. Change build path before raising this one.`}</p>`:""}</div>
+   <div class="sklist pxscroll">${[0,1,2,3,4,5].map(row=>L.find(s=>s.line===li&&s.row===row)).filter(Boolean).map(card).join('<i class="skarrow" aria-hidden="true"></i>')}
      ${SIGNATURE[f.id]?`<div class="skc sig ${hasSignature(f)?"has":"lock"}"><div class="skc-m"><div class="skc-h"><b>✦ Signature: ${SIGNATURE[f.id].name}</b></div><p class="skc-d">${SIGNATURE[f.id].desc}${hasSignature(f)?"":` · unlocks at bond 60 (now ${Math.round(f.bond||0)})`}</p></div></div>`:""}</div>
-   ${mine?`<div class="skfoot"><button class="btn sm" data-act="skauto" data-id="${f.id}" data-v="${li}" ${[0,1,2,3].some(r=>{const s=L.find(x=>x.line===li&&x.row===r);return s&&skState(f,s,mine).st==="can";})?"":"disabled"}>Auto-upgrade · ${lines[li]}</button><span class="meta">Equip up to ${MAX_EQUIP} moves · passives work on their own, no slot needed</span></div>`:""}</div>`;}
+   ${mine?`<div class="skfoot"><button class="btn sm" data-act="skauto" data-id="${f.id}" data-v="${li}" ${[0,1,2,3,4,5].some(r=>{const s=L.find(x=>x.line===li&&x.row===r);return s&&skState(f,s,mine).st==="can";})?"":"disabled"}>Auto-upgrade · ${lines[li]}</button><span class="meta">Equip up to ${MAX_EQUIP} moves · passives work on their own, no slot needed</span></div>`:""}</div>`;}
 function skillGrid(f,mine){if(hasTree(f.id))return skillTree(f,mine);const L=SKILLS[f.id]||[];const sc=SCHOOLS[L[0]&&L[0].school]||{name:"",motto:""};
   // v1.23: compact — unlocked moves as short rows (tap the name for details), locked ones folded away
   const op=L.filter(s=>(s.lv||1)<=f.lvl),lk=L.filter(s=>(s.lv||1)>f.lvl),eqd=equipped(f);
@@ -1053,7 +1056,7 @@ function cornerHTML(F){const U=UI.fight,C=U.care,A=F.A,B=F.B,c=F.cards[F.cards.l
 </div>`;}
 // v1.13: the coach reads the actual fight (cards, stamina, what landed) before giving a hint
 // v1.21: only suggest what can actually be learned now, favour the carried 3, flag fresh unlocks, and vary the pick
-function skillTip(f){if(hasTree(f.id)){const L=SKILLS[f.id],eq=equipped(f);const ok=L.filter(k=>!skillBlock(f,k.id).length);
+function skillTip(f){if(hasTree(f.id)){const L=skillList(f.id),eq=equipped(f);const ok=L.filter(k=>!skillBlock(f,k.id).length);
     if(ok.length){const pick=ok.slice().sort((a,b)=>(eq.includes(b.id)?2:0)+b.row-((eq.includes(a.id)?2:0)+a.row))[0];return `You can raise "${pick.name}" now (rank ${(f.skills[pick.id]||0)+1}/3)`;}
     let best=null;for(const k of L){const B=skillBlock(f,k.id).filter(b=>b.t!=="sp");if(B.length!==1||B[0].t!=="stat")continue;const gap=B[0].v-B[0].have;if(!best||gap<best.gap)best={k,gap,st:B[0].k};}
     return best?`Train ${SK_AN[best.st]}${fmtA(Math.ceil(best.gap*10)/10)} more to raise "${best.k.name}"`:"The next moves need higher stats. Tap a move to see its requirements";}
@@ -1281,7 +1284,8 @@ const ACT={
   learn:d=>{const sl=document.querySelector(".sklist"),y=sl?sl.scrollTop:0;if(learnSkill(G,d.id,d.v)){AU.sfx("level");save();render();const n=document.querySelector(".sklist");if(n)n.scrollTop=y;}},
   rinread:()=>{const n=G.rinNote;if(!n)return;G.rinNote=null;save();playScene(n.steps,()=>{save();render();},{bg:"gym",look:"casual"});},
   skline:d=>{UI.skLine={id:d.id,li:+d.v};AU.sfx("ui");render();},
-  skauto:d=>{const f=G.F[d.id],li=+d.v;let n=0;for(let guard=0;guard<30&&f.sp>0;guard++){const s=(SKILLS[f.id]||[]).filter(x=>x.line===li).sort((a,b)=>a.row-b.row||(f.skills[a.id]||0)-(f.skills[b.id]||0)).find(x=>!skillBlock(f,x.id).length);if(!s||!learnSkill(G,f.id,s.id))break;n++;}
+  skreset:d=>{const f=G.F[d.id];if(!f||G.cash<SK_RESET_COST)return;const n=resetSharedPath(G,d.id);if(!n)return;G.cash-=SK_RESET_COST;save();toast(`Refunded ${n} points back. Pick a new build path.`);render();},
+  skauto:d=>{const f=G.F[d.id],li=+d.v;let n=0;for(let guard=0;guard<30&&f.sp>0;guard++){const s=skillList(f.id).filter(x=>x.line===li).sort((a,b)=>a.row-b.row||(f.skills[a.id]||0)-(f.skills[b.id]||0)).find(x=>!skillBlock(f,x.id).length);if(!s||!learnSkill(G,f.id,s.id))break;n++;}
     if(n){AU.sfx("level");save();toast(`Up ${(SK_LINES[f.id]||[])[li]||""} ${n} times`);}render();},
   sksel:d=>{UI.skSel=d.id+":"+d.v;AU.sfx("ui");render();},
   newsok:()=>{G.newsSeen=PATCH.id;UI.modal=null;save();render();},

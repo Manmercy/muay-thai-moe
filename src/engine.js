@@ -94,15 +94,86 @@ const SKILLS={
   {id:"lb_range",line:2,row:1,pre:"lb_teep",req:["kick","foot"],school:"lopburi",name:"ตัดวงนอก",desc:"คุมระยะด้วยลูกถีบและฟุตเวิร์ก · เตะแม่น +2% คะแนนเตะ +8% หลบ +1%",fx:r=>({hit:{kick:.02*r},pts:{kick:.08*r},evade:.01*r})},
   {id:"r_pace",line:2,row:2,pre:"lb_teep",passive:1,req:["stamina"],school:"lopburi",name:"นับจังหวะ",desc:"ติดตัว · ใช้แรงออกอาวุธน้อยลง 4% ทุกไฟต์",fx:r=>({staSave:.04*r})},
   {id:"lb_tiger",line:2,row:3,pre:"lb_range",req:["kick","foot"],school:"lopburi",name:"เสือลากหาง",desc:"ถอยหลอกแล้วเตะกลับ · แรงเตะ +10% เตะแม่น +3% สวนกลับ +2%",fx:r=>({dmg:{kick:.1*r},hit:{kick:.03*r},ctr:.02*r})}],
- ploy:[{id:"kr_swing",school:"korat",name:"หมัดเหวี่ยงควาย",desc:"หมัดวงกว้างหนักหน่วง · แรงหมัด +12% คะแนนหมัด +5%",fx:r=>({dmg:{punch:.12*r},pts:{punch:.05*r}})},
-       {id:"kr_knee",school:"korat",name:"เตะคอขาด",desc:"เตะตัดคอแบบโคราช · เตะแม่น +3% คะแนนเตะ +8%",fx:r=>({hit:{kick:.03*r},pts:{kick:.08*r}})},
-       {id:"captain",school:"korat",name:"คาดเชือกถึงศอก",desc:"แขนแกร่งรับลูกเตะ · หลบ/รับ +1% ใจนิ่ง +1% ป้องกันวงใน +0.5",fx:r=>({evade:.01*r,mor:.01*r,clDef:.5*r})},
-       {id:"kr_clinch",lv:6,school:"korat",name:"ปล้ำคอโคราช",desc:"ล็อกคอแล้วตีเข่าไม่ยั้ง · แรงเข่า +10% แม่น +2%",fx:r=>({dmg:{knee:.1*r},hit:{knee:.02*r}})}],
- fah:[{id:"tiger",school:"modern",name:"ศอกพยัคฆ์",desc:"แรงศอก +12% แม่น +2%",fx:r=>({dmg:{elbow:.12*r},hit:{elbow:.02*r}})},
-      {id:"reckless",school:"modern",name:"บ้าบิ่น",desc:"ใช้แรงบุกน้อยลง 8%",fx:r=>({staSave:.08*r})},
-      {id:"grin",school:"modern",name:"ยิ้มเยาะ",desc:"ร่างกายต่ำกว่า 45 แม่นขึ้น 3%",fx:r=>({clutch:.03*r})},
-      {id:"fah_rush",lv:5,school:"modern",name:"พายุหมัดชุด",desc:"บุกปล่อยหมัดชุด · หมัดแม่น +2% คะแนนหมัด +8%",fx:r=>({hit:{punch:.02*r},pts:{punch:.08*r}})}],
 };
+// v1.82.3: deeper trees — every school line gets a Lv.14 signature move and a Lv.22 master move,
+// Ploy and Fah get full trees, and three shared "build" paths (pick one per fighter)
+const SKX=(id,line,row,pre,req,school,name,desc,fx,more)=>Object.assign({id,line,row,pre,req,school,name,desc,fx},more||{});
+SKILLS.kati.push(
+ SKX("ts_thunder",0,4,"ts_croc",["kick","power"],"thasao","ฟ้าลั่นท่าเสา","Lv.14 · เตะก้านคอเต็มแรงหมุนตัว · เตะแม่น +4% แรงเตะ +12% คะแนนเตะ +10%",r=>({hit:{kick:.04*r},dmg:{kick:.12*r},pts:{kick:.1*r}}),{lv:14}),
+ SKX("ts_wind",0,5,"ts_thunder",["kick","speed"],"thasao","แข้งพระพาย","Lv.22 · ขั้นปรมาจารย์ · แรงเตะ +16% เตะแม่น +4% หลบ +1%",r=>({dmg:{kick:.16*r},hit:{kick:.04*r},evade:.01*r}),{lv:22}),
+ SKX("ts_bolt",1,4,"ts_ring",["elbow","punch"],"thasao","ศอกกลับฟ้าผ่า","Lv.14 · หมัดนำแล้วหมุนศอกกลับ · แรงศอก +14% ศอกแม่น +3% แรงหมัด +6%",r=>({dmg:{elbow:.14*r,punch:.06*r},hit:{elbow:.03*r}}),{lv:14}),
+ SKX("ts_trunk",1,5,"ts_bolt",["punch","power"],"thasao","หักงวงไอยรา","Lv.22 · ขั้นปรมาจารย์ · แรงหมัด +12% แรงศอก +12% หมัดแม่น +3%",r=>({dmg:{punch:.12*r,elbow:.12*r},hit:{punch:.03*r}}),{lv:22}),
+ SKX("ts_heart",2,4,"ts_iron",["guard","comp"],"thasao","ใจศิริชัย","Lv.14 · ยิ่งเจ็บยิ่งแม่น · เลือดต่ำแม่นขึ้น 5% หลบ +2% ป้องกันวงใน +0.6",r=>({clutch:.05*r,evade:.02*r,clDef:.6*r}),{lv:14}),
+ SKX("ts_fort",2,5,"ts_heart",["guard","dur"],"thasao","กำแพงเหล็กท่าเสา","Lv.22 · ขั้นปรมาจารย์ · หลบ +3% สวนกลับ +5% ป้องกันวงใน +1 ฟื้นแรง +10%",r=>({evade:.03*r,ctr:.05*r,clDef:1*r,regen:.1*r}),{lv:22}));
+SKILLS.mali.push(
+ SKX("cy_flash",0,4,"cy_erawan",["elbow","speed"],"chaiya","ศอกกลับฟ้าแลบ","Lv.14 · ศอกเร็วจนคู่ชกมองไม่ทัน · แรงศอก +14% ศอกแม่น +3%",r=>({dmg:{elbow:.14*r},hit:{elbow:.03*r}}),{lv:14}),
+ SKX("cy_soar",0,5,"cy_flash",["elbow","knee"],"chaiya","ทะยานฟ้าไชยา","Lv.22 · ขั้นปรมาจารย์ · แรงศอก +16% แรงเข่า +8% ศอกแม่น +3%",r=>({dmg:{elbow:.16*r,knee:.08*r},hit:{elbow:.03*r}}),{lv:22}),
+ SKX("cy_bloom",1,4,"cy_hanuman",["kick","foot"],"chaiya","ดอกมะลิร่ายรำ","Lv.14 · เตะต่อเนื่องเหมือนร่ายรำ · เตะแม่น +4% คะแนนเตะ +10% ฟื้นแรง +10%",r=>({hit:{kick:.04*r},pts:{kick:.1*r},regen:.1*r}),{lv:14}),
+ SKX("cy_gale",1,5,"cy_bloom",["speed","kick"],"chaiya","ลมกรดไชยา","Lv.22 · ขั้นปรมาจารย์ · หลบ +2.5% เตะแม่น +4% แรงเตะ +10% ใช้แรงน้อยลง 3%",r=>({evade:.025*r,hit:{kick:.04*r},dmg:{kick:.1*r},staSave:.03*r}),{lv:22}),
+ SKX("cy_gate",2,4,"cy_root",["guard","clinch"],"chaiya","ปิดประตูไชยา","Lv.14 · ปิดทุกช่องแล้วสวน · ป้องกันวงใน +1 หลบ +2% สวนกลับ +3%",r=>({clDef:1*r,evade:.02*r,ctr:.03*r}),{lv:14}),
+ SKX("cy_meru",2,5,"cy_gate",["guard","dur"],"chaiya","เขาพระสุเมรุ","Lv.22 · ขั้นปรมาจารย์ · ป้องกันวงใน +1.4 หลบ +3% ฟื้นแรง +12% เลือดต่ำแม่นขึ้น 3%",r=>({clDef:1.4*r,evade:.03*r,regen:.12*r,clutch:.03*r}),{lv:22}));
+SKILLS.rin.push(
+ SKX("lb_shadow",0,4,"lb_kris",["counter","speed"],"lopburi","สวนกลับไร้เงา","Lv.14 · สวนก่อนคู่ชกจะออกอาวุธจบ · สวนกลับ +5% แรงหมัดสวน +16%",r=>({ctr:.05*r,ctrDmg:.16*r}),{lv:14}),
+ SKX("lb_proof",0,5,"lb_shadow",["counter","iq"],"lopburi","สมการปิดเกม","Lv.22 · ขั้นปรมาจารย์ · สวนกลับ +6% แรงหมัดสวน +20% หมัดแม่น +2%",r=>({ctr:.06*r,ctrDmg:.2*r,hit:{punch:.02*r}}),{lv:22}),
+ SKX("lb_three",1,4,"lb_giant",["iq","comp"],"lopburi","อ่านใจสามยก","Lv.14 · วางแผนล่วงหน้าทั้งไฟต์ · คำสั่งพักยก +35% ความแม่นพื้นฐาน +1.2% หลบ +1%",r=>({corner:.35*r,prep:.012*r,evade:.01*r}),{lv:14}),
+ SKX("lb_book",1,5,"lb_three",["iq","counter"],"lopburi","ตำราลพบุรี","Lv.22 · ขั้นปรมาจารย์ · คำสั่งพักยก +45% ความแม่นพื้นฐาน +1.6% สวนกลับ +3%",r=>({corner:.45*r,prep:.016*r,ctr:.03*r}),{lv:22}),
+ SKX("lb_fold",2,4,"lb_tiger",["kick","power"],"lopburi","ถีบพับหลัง","Lv.14 · ถีบกลางลำตัวจนคู่ชกงอ · เตะแม่น +3% คะแนนเตะ +10% หลบ +1.5%",r=>({hit:{kick:.03*r},pts:{kick:.1*r},evade:.015*r}),{lv:14}),
+ SKX("lb_circle",2,5,"lb_fold",["foot","kick"],"lopburi","วงนอกไม่มีวันแตก","Lv.22 · ขั้นปรมาจารย์ · เตะแม่น +4% แรงเตะ +12% หลบ +2% สวนกลับ +3%",r=>({hit:{kick:.04*r},dmg:{kick:.12*r},evade:.02*r,ctr:.03*r}),{lv:22}));
+SKILLS.ploy=[
+ SKX("kr_swing",0,0,null,["punch"],"korat","หมัดเหวี่ยงควาย","หมัดวงกว้างหนักหน่วง · แรงหมัด +12% คะแนนหมัด +5%",r=>({dmg:{punch:.12*r},pts:{punch:.05*r}})),
+ SKX("kr_hook",0,1,"kr_swing",["punch","power"],"korat","หมัดเหวี่ยงสองจังหวะ","เหวี่ยงซ้ำทันทีที่คู่ชกเปิด · แรงหมัด +8% หมัดแม่น +1.5%",r=>({dmg:{punch:.08*r},hit:{punch:.015*r}})),
+ SKX("p_iron",0,2,"kr_swing",["dur"],"korat","แขนเหล็กโคราช","ติดตัว · ล้าจากการฝึกทุกโปรแกรมลดลง 6%",r=>({}),{passive:1,px:r=>({fatAll:.06*r})}),
+ SKX("kr_buffalo",0,3,"kr_hook",["punch","power"],"korat","ควายเผือกชนเสา","พุ่งเข้าพร้อมหมัดหนัก · หมัดแม่น +3% แรงหมัด +12% คะแนนหมัด +6%",r=>({hit:{punch:.03*r},dmg:{punch:.12*r},pts:{punch:.06*r}})),
+ SKX("kr_thunder",0,4,"kr_buffalo",["punch","speed"],"korat","ฟ้าผ่าโคราช","Lv.14 · หมัดเดียวเปลี่ยนเกม · แรงหมัด +15% หมัดแม่น +4%",r=>({dmg:{punch:.15*r},hit:{punch:.04*r}}),{lv:14}),
+ SKX("kr_genius",0,5,"kr_thunder",["punch","iq"],"korat","อัจฉริยะไร้พ่าย","Lv.22 · ขั้นปรมาจารย์ · แรงหมัด +12% หมัดแม่น +3% เลือดต่ำแม่นขึ้น 4% สวนกลับ +3%",r=>({dmg:{punch:.12*r},hit:{punch:.03*r},clutch:.04*r,ctr:.03*r}),{lv:22}),
+ SKX("kr_knee",1,0,null,["kick"],"korat","เตะคอขาด","เตะตัดคอแบบโคราช · เตะแม่น +3% คะแนนเตะ +8%",r=>({hit:{kick:.03*r},pts:{kick:.08*r}})),
+ SKX("kr_sweep",1,1,"kr_knee",["kick","foot"],"korat","เตะกวาดโคราช","เตะต่ำกวาดขาหลัก · เตะแม่น +2% แรงเตะ +8%",r=>({hit:{kick:.02*r},dmg:{kick:.08*r}})),
+ SKX("p_cold",1,2,"kr_knee",["comp"],"korat","ใจเย็นเฉียบ","ติดตัว · กำลังใจตกจากการแพ้น้อยลง 20%",r=>({}),{passive:1,px:r=>({moraleLoss:.2*r})}),
+ SKX("kr_clinch",1,3,"kr_sweep",["knee","clinch"],"korat","ปล้ำคอโคราช","ล็อกคอแล้วตีเข่าไม่ยั้ง · แรงเข่า +10% แม่น +2%",r=>({dmg:{knee:.1*r},hit:{knee:.02*r}})),
+ SKX("kr_neck",1,4,"kr_clinch",["kick","power"],"korat","เตะก้านคอ","Lv.14 · เตะสูงเต็มวง · แรงเตะ +14% เตะแม่น +4% คะแนนเตะ +8%",r=>({dmg:{kick:.14*r},hit:{kick:.04*r},pts:{kick:.08*r}}),{lv:14}),
+ SKX("kr_tiger",1,5,"kr_neck",["kick","knee"],"korat","พยัคฆ์ทองฟาดหาง","Lv.22 · ขั้นปรมาจารย์ · แรงเตะ +16% แรงเข่า +10% เตะแม่น +3%",r=>({dmg:{kick:.16*r,knee:.1*r},hit:{kick:.03*r}}),{lv:22}),
+ SKX("captain",2,0,null,["guard"],"korat","คาดเชือกถึงศอก","แขนแกร่งรับลูกเตะ · หลบ/รับ +1% ใจนิ่ง +1% ป้องกันวงใน +0.5",r=>({evade:.01*r,mor:.01*r,clDef:.5*r})),
+ SKX("p_read",2,1,"captain",["iq"],"korat","อ่านเกมพยัคฆ์","จดทุกจังหวะของคู่ชก · สวนกลับ +3% หลบ +1%",r=>({ctr:.03*r,evade:.01*r})),
+ SKX("p_note",2,2,"captain",["iq"],"korat","สมุดแผนไฟต์","ติดตัว · ได้ EXP จากทุกไฟต์เพิ่ม 6%",r=>({}),{passive:1,px:r=>({fightXp:.06*r})}),
+ SKX("p_wall",2,3,"p_read",["guard","iq"],"korat","กำแพงโคราช","ปิดการ์ดสูงแล้วสวน · หลบ +2% ป้องกันวงใน +0.8 สวนกลับ +3%",r=>({evade:.02*r,clDef:.8*r,ctr:.03*r})),
+ SKX("p_sister",2,4,"p_wall",["iq","counter"],"korat","เงาพี่สาว","Lv.14 · ท่าที่ไพลินเคยสอน · สวนกลับ +5% คำสั่งพักยก +25% หลบ +1.5%",r=>({ctr:.05*r,corner:.25*r,evade:.015*r}),{lv:14}),
+ SKX("p_crown",2,5,"p_sister",["guard","comp"],"korat","มงกุฎพยัคฆ์","Lv.22 · ขั้นปรมาจารย์ · หลบ +3% ป้องกันวงใน +1 สวนกลับ +5% เลือดต่ำแม่นขึ้น 3%",r=>({evade:.03*r,clDef:1*r,ctr:.05*r,clutch:.03*r}),{lv:22})];
+SKILLS.fah=[
+ SKX("tiger",0,0,null,["elbow"],"modern","ศอกพยัคฆ์","แรงศอก +12% แม่น +2%",r=>({dmg:{elbow:.12*r},hit:{elbow:.02*r}})),
+ SKX("f_cut",0,1,"tiger",["elbow","speed"],"modern","ศอกเฉียงฟ้า","ฟันศอกเฉียงขึ้น · แรงศอก +8% ศอกแม่น +1.5%",r=>({dmg:{elbow:.08*r},hit:{elbow:.015*r}})),
+ SKX("f_flex",0,2,"tiger",["foot"],"modern","ยืดหยุ่นนักเต้น","ติดตัว · ล้าจากการฝึกทุกโปรแกรมลดลง 5%",r=>({}),{passive:1,px:r=>({fatAll:.05*r})}),
+ SKX("f_storm",0,3,"f_cut",["elbow","clinch"],"modern","ศอกพายุ","ศอกต่อเนื่องในวงใน · แรงศอก +12% ศอกแม่น +3% คะแนนศอก +6%",r=>({dmg:{elbow:.12*r},hit:{elbow:.03*r},pts:{elbow:.06*r}})),
+ SKX("f_thunder",0,4,"f_storm",["elbow","power"],"modern","ฟ้าคำรามศอกคู่","Lv.14 · ศอกซ้ายขวาไม่เว้นจังหวะ · แรงศอก +14% ศอกแม่น +4%",r=>({dmg:{elbow:.14*r},hit:{elbow:.04*r}}),{lv:14}),
+ SKX("f_sky",0,5,"f_thunder",["elbow","speed"],"modern","ฟ้าสีทอง","Lv.22 · ขั้นปรมาจารย์ · แรงศอก +16% แรงหมัด +8% ศอกแม่น +3%",r=>({dmg:{elbow:.16*r,punch:.08*r},hit:{elbow:.03*r}}),{lv:22}),
+ SKX("fah_rush",1,0,null,["punch"],"modern","พายุหมัดชุด","บุกปล่อยหมัดชุด · หมัดแม่น +2% คะแนนหมัด +8%",r=>({hit:{punch:.02*r},pts:{punch:.08*r}})),
+ SKX("f_blitz",1,1,"fah_rush",["punch","stamina"],"modern","บุกไม่ถอย","เดินหน้าตลอดยก · หมัดแม่น +1.5% คะแนนหมัด +6% ใช้แรงน้อยลง 2%",r=>({hit:{punch:.015*r},pts:{punch:.06*r},staSave:.02*r})),
+ SKX("reckless",1,2,"fah_rush",["stamina"],"modern","บ้าบิ่น","ติดตัว · ใช้แรงบุกน้อยลง 8%",r=>({staSave:.08*r}),{passive:1}),
+ SKX("f_tornado",1,3,"f_blitz",["punch","speed"],"modern","พายุหมัดชุดใหญ่","หมัดชุดยาวไม่หยุด · หมัดแม่น +3% แรงหมัด +10% คะแนนหมัด +8%",r=>({hit:{punch:.03*r},dmg:{punch:.1*r},pts:{punch:.08*r}})),
+ SKX("f_hurricane",1,4,"f_tornado",["punch","stamina"],"modern","เฮอริเคนฟ้า","Lv.14 · บุกทั้งยกแรงไม่ตก · หมัดแม่น +4% แรงหมัด +12% ใช้แรงน้อยลง 3%",r=>({hit:{punch:.04*r},dmg:{punch:.12*r},staSave:.03*r}),{lv:14}),
+ SKX("f_heaven",1,5,"f_hurricane",["punch","power"],"modern","ฟ้าถล่ม","Lv.22 · ขั้นปรมาจารย์ · แรงหมัด +16% หมัดแม่น +4% คะแนนหมัด +8%",r=>({dmg:{punch:.16*r},hit:{punch:.04*r},pts:{punch:.08*r}}),{lv:22}),
+ SKX("grin",2,0,null,["comp"],"modern","ยิ้มเยาะ","ร่างกายต่ำกว่า 45 แม่นขึ้น 3%",r=>({clutch:.03*r})),
+ SKX("f_taunt",2,1,"grin",["iq"],"modern","ยั่วให้บุก","ยั่วจนคู่ชกพุ่งเข้ามาเอง · สวนกลับ +3% หลบ +1%",r=>({ctr:.03*r,evade:.01*r})),
+ SKX("f_party",2,2,"grin",["comp"],"modern","ปาร์ตี้หลังไฟต์","ติดตัว · ได้ EXP จากทุกไฟต์เพิ่ม 6%",r=>({}),{passive:1,px:r=>({fightXp:.06*r})}),
+ SKX("f_show",2,3,"f_taunt",["comp","foot"],"modern","โชว์ไทม์","ยิ่งคนเชียร์ยิ่งมา · กำลังใจมีผล +2% คะแนนหมัด +4% คะแนนเตะ +4% เลือดต่ำแม่นขึ้น 2%",r=>({mor:.02*r,pts:{punch:.04*r,kick:.04*r},clutch:.02*r})),
+ SKX("f_smile",2,4,"f_show",["comp","counter"],"modern","ยิ้มทั้งสนาม","Lv.14 · ยิ้มสู้ทุกสถานการณ์ · เลือดต่ำแม่นขึ้น 5% สวนกลับ +4% กำลังใจมีผล +2%",r=>({clutch:.05*r,ctr:.04*r,mor:.02*r}),{lv:14}),
+ SKX("f_star",2,5,"f_smile",["comp","speed"],"modern","ดาวค้างฟ้า","Lv.22 · ขั้นปรมาจารย์ · หลบ +3% สวนกลับ +5% เลือดต่ำแม่นขึ้น 4% ฟื้นแรง +10%",r=>({evade:.03*r,ctr:.05*r,clutch:.04*r,regen:.1*r}),{lv:22})];
+// shared build paths: line 3..5; once a fighter learns one, the other two are closed until reset
+const SHARED_SKILLS=[
+ SKX("sh_ko1",3,0,null,["power"],"build","ลงน้ำหนักทุกดอก","สายปั้นนักน็อก · แรงหมัด +5% แรงเตะ +4%",r=>({dmg:{punch:.05*r,kick:.04*r}}),{shared:1}),
+ SKX("sh_ko2",3,1,"sh_ko1",["power","punch"],"build","ปิดฉากไว","สายปั้นนักน็อก · แรงเข่า +5% แรงศอก +5% แรงหมัด +4%",r=>({dmg:{knee:.05*r,elbow:.05*r,punch:.04*r}}),{shared:1,lv:4}),
+ SKX("sh_ko3",3,2,"sh_ko1",["power"],"build","กล้ามเนื้อสปริง","สายปั้นนักน็อก · ติดตัว · ล้าจากการฝึกลดลง 4%",r=>({}),{shared:1,passive:1,lv:4,px:r=>({fatAll:.04*r})}),
+ SKX("sh_ko4",3,3,"sh_ko2",["power","speed"],"build","หมัดเดียวจอด","สายปั้นนักน็อก · Lv.10 · แรงหมัด +10% แรงศอก +6% แรงเข่า +6%",r=>({dmg:{punch:.1*r,elbow:.06*r,knee:.06*r}}),{shared:1,lv:10}),
+ SKX("sh_tc1",4,0,null,["iq"],"build","ออกอาวุธสวย","สายปั้นเก็บแต้ม · คะแนนหมัด +5% คะแนนเตะ +5%",r=>({pts:{punch:.05*r,kick:.05*r}}),{shared:1}),
+ SKX("sh_tc2",4,1,"sh_tc1",["iq","foot"],"build","แม่นทุกดอก","สายปั้นเก็บแต้ม · หมัดแม่น +1.5% เตะแม่น +1.5%",r=>({hit:{punch:.015*r,kick:.015*r}}),{shared:1,lv:4}),
+ SKX("sh_tc3",4,2,"sh_tc1",["iq"],"build","การบ้านทุกคืน","สายปั้นเก็บแต้ม · ติดตัว · ได้ EXP จากไฟต์เพิ่ม 6%",r=>({}),{shared:1,passive:1,lv:4,px:r=>({fightXp:.06*r})}),
+ SKX("sh_tc4",4,3,"sh_tc2",["iq","comp"],"build","ครองเกมทุกยก","สายปั้นเก็บแต้ม · Lv.10 · คะแนนเข่า/ศอก +6% คำสั่งพักยก +20% ความแม่นพื้นฐาน +0.6%",r=>({pts:{knee:.06*r,elbow:.06*r},corner:.2*r,prep:.006*r}),{shared:1,lv:10}),
+ SKX("sh_ir1",5,0,null,["dur"],"build","รับได้ทุกดอก","สายปั้นถึกอึด · ป้องกันวงใน +0.6 หลบ +0.8%",r=>({clDef:.6*r,evade:.008*r}),{shared:1}),
+ SKX("sh_ir2",5,1,"sh_ir1",["stamina","dur"],"build","ลมหายใจยาว","สายปั้นถึกอึด · ฟื้นแรงระหว่างยก +12% ใช้แรงน้อยลง 3%",r=>({regen:.12*r,staSave:.03*r}),{shared:1,lv:4}),
+ SKX("sh_ir3",5,2,"sh_ir1",["stamina"],"build","ฟื้นตัวไว","สายปั้นถึกอึด · ติดตัว · กำลังใจตกจากการแพ้น้อยลง 15% ล้าจากการฝึกลดลง 3%",r=>({}),{shared:1,passive:1,lv:4,px:r=>({moraleLoss:.15*r,fatAll:.03*r})}),
+ SKX("sh_ir4",5,3,"sh_ir2",["dur","stamina"],"build","ไม่มีวันล้ม","สายปั้นถึกอึด · Lv.10 · เลือดต่ำแม่นขึ้น 4% ป้องกันวงใน +0.8 ฟื้นแรง +10%",r=>({clutch:.04*r,clDef:.8*r,regen:.1*r}),{shared:1,lv:10})];
+const skillList=fid=>(SKILLS[fid]||[]).concat(SKILLS[fid]&&SKILLS[fid][0]&&SKILLS[fid][0].line!=null?SHARED_SKILLS:[]);
+const sharedPathOf=f=>{for(const s of SHARED_SKILLS)if((f.skills&&f.skills[s.id])>0)return s.line;return null;};
+function resetSharedPath(G,id){const f=G.F[id];if(!f||!f.skills)return false;let n=0;for(const s of SHARED_SKILLS){n+=f.skills[s.id]||0;delete f.skills[s.id];}if(!n)return false;f.sp+=n;if(Array.isArray(f.equip))f.equip=f.equip.filter(k=>!k.startsWith("sh_"));return n;}
 // v1.12: a deep bond unlocks each heroine's signature move (bond 60+, player's camp only)
 const SIGNATURE={kati:{name:"ศอกกลับใจศิริชัย",desc:"ความสนิท 60+ · ศอกแรง +15% · ตอนเลือดต่ำแม่นขึ้นอีก 3%",fx:{dmg:{elbow:.15},clutch:.03}},
   mali:{name:"เตะดอกมะลิบาน",desc:"ความสนิท 60+ · เตะแม่น +3% · ฟื้นแรงระหว่างยก +15%",fx:{hit:{kick:.03},regen:.15}},
@@ -112,7 +183,7 @@ const SIGNATURE={kati:{name:"ศอกกลับใจศิริชัย",d
 const hasSignature=f=>!!SIGNATURE[f.id]&&f.camp==="player"&&(f.bond||0)>=60;
 function skillMods(f){const m={hit:{},pts:{},dmg:{},ctr:0,ctrDmg:0,clutch:0,regen:0,mor:0,evade:0,corner:0,prep:0,clDef:0,staSave:0};
   if(hasSignature(f)){const e=SIGNATURE[f.id].fx;for(const k in e){if(typeof e[k]==="object")for(const w in e[k])m[k][w]=(m[k][w]||0)+e[k][w];else m[k]+=e[k];}}
-  const list=SKILLS[f.id];if(!list||!f.skills)return m;const eq=equipped(f);
+  const list=skillList(f.id);if(!list.length||!f.skills)return m;const eq=equipped(f);
   for(const sk of list){if(!sk.passive&&!eq.includes(sk.id))continue;const r=f.skills[sk.id]||0;if(!r)continue;const e=sk.fx(r);
     for(const k in e){if(typeof e[k]==="object")for(const w in e[k])m[k][w]=(m[k][w]||0)+e[k][w];else m[k]+=e[k];}}
   return m;}
@@ -121,28 +192,30 @@ const xpNeed=lvl=>50+lvl*30+Math.max(0,lvl-10)*20;
 const lvBeyond=f=>{if(f.lvl>10)f.potential=Math.min(21,(f.potential||14)+.12);};
 function gainXP(G,f,x){if(!f.canon)return;if(f.camp==="player"&&G.fac&&G.fac.ring)x=Math.round(x*(1+G.fac.ring*.15));f.xp+=x;f.xpGain=(f.xpGain||0)+x;
   while(f.lvl<MAX_LV&&f.xp>=xpNeed(f.lvl)){f.xp-=xpNeed(f.lvl);f.lvl++;f.sp+=SP_PER_LV(f);lvBeyond(f);if(f.camp==="player"){G.levelUps=G.levelUps||[];G.levelUps.push(f.id);}}}
-const skillDef=(fid,sk)=>(SKILLS[fid]||[]).find(s=>s.id===sk);
+const skillDef=(fid,sk)=>skillList(fid).find(s=>s.id===sk);
 // v1.29: stat requirements scale from each fighter's starting stats, so every line asks for real training
 const hasTree=fid=>!!(SKILLS[fid]&&SKILLS[fid][0]&&SKILLS[fid][0].line!=null);
 const SP_PER_LV=f=>hasTree(f.id)?3:1;
 // thresholds are written in "weeks of focused training" and converted with each fighter's measured growth (8 / 14 weeks of the best programme)
 const GROW={"kati":{"punch":[3.1,4.8],"counter":[2.6,4.5],"power":[1.8,3.2],"speed":[1.7,2.7],"kick":[3.5,5.6],"foot":[2.1,3.3],"knee":[3.5,5.9],"clinch":[3.7,5.9],"stamina":[3.2,5],"elbow":[3.7,6.1],"guard":[3.9,6.2],"iq":[2.6,4.2],"comp":[1.3,2.2],"dur":[1.7,2.8]},"mali":{"punch":[2.9,4.6],"counter":[2.3,4.1],"power":[1.5,2.7],"speed":[1.4,2.3],"kick":[2.3,3.7],"foot":[1.6,2.5],"knee":[2.8,4.8],"clinch":[3.2,5],"stamina":[2,3.1],"elbow":[3.1,5.2],"guard":[3,4.8],"iq":[2,3.2],"comp":[1,1.7],"dur":[1.4,2.3]},"rin":{"punch":[2.7,4.3],"counter":[1.7,3.1],"power":[1.5,2.8],"speed":[1.6,2.6],"kick":[2.6,4.2],"foot":[1.4,2.2],"knee":[2.8,4.7],"clinch":[2.9,4.5],"stamina":[2.5,4],"elbow":[2.8,4.7],"guard":[2.6,4.1],"iq":[1.1,1.7],"comp":[0.8,1.3],"dur":[1.4,2.3]}};
-const REQ_WK={main:[[0,2,4],[3,5,7],[3,5,7],[6,8,10]],cross:[[0,0,0],[1,2,3],[0,0,0],[2,3,4]],scale:{kati:1,mali:.85,rin:.7}};
+const REQ_WK={main:[[0,2,4],[3,5,7],[3,5,7],[6,8,10],[8,10,12],[10,12,14]],cross:[[0,0,0],[1,2,3],[0,0,0],[2,3,4],[3,4,5],[4,5,6]],scale:{kati:1,mali:.85,rin:.7,ploy:.75,fah:.8}};
+GROW.ploy=GROW.ploy||GROW.kati;GROW.fah=GROW.fah||GROW.mali;
 function skillReqs(fid,sk,rank){const d=skillDef(fid,sk);if(!d||!d.req||!CANON[fid]||!GROW[fid])return [];const base=CANON[fid].a,r=clamp(rank,1,3)-1,sc=REQ_WK.scale[fid]||1;
   return d.req.map((k,i)=>{const w=(i?REQ_WK.cross:REQ_WK.main)[d.row][r]*sc,g=GROW[fid][k]||[2,3.2];const up=w<=8?g[0]*w/8:g[0]+(g[1]-g[0])*(w-8)/6;return {k,v:Math.floor((base[k]+up)*2)/2};});}
 // why a skill can't be raised right now ([] = ok). Each entry: {t:"sp"|"max"|"lv"|"pre"|"stat", ...}
 function skillBlock(f,sk){const d=skillDef(f.id,sk),r=(f.skills&&f.skills[sk])||0,B=[];if(!d)return [{t:"none"}];
   if(r>=3)return [{t:"max"}];if((d.lv||1)>f.lvl)B.push({t:"lv",v:d.lv});
   if(d.pre&&!((f.skills[d.pre]||0)>0))B.push({t:"pre",id:d.pre});
+  if(d.shared){const p=sharedPathOf(f);if(p!=null&&p!==d.line)B.push({t:"path"});}
   for(const q of skillReqs(f.id,sk,r+1))if(f.a[q.k]+1e-6<q.v)B.push({t:"stat",k:q.k,v:q.v,have:f.a[q.k]});
   if(f.sp<1)B.push({t:"sp"});return B;}
 function learnSkill(G,id,sk){const f=G.F[id],d=skillDef(id,sk);if(!d||skillBlock(f,sk).length)return false;f.skills[sk]=(f.skills[sk]||0)+1;f.sp--;
   if(d.passive)return true;f.equip=equipped(f);if(!f.equip.includes(sk)&&f.equip.length<3)f.equip.push(sk);return true;}
-function passiveMods(f){const m={fatKick:0,fatAll:0,lossXp:0,fightXp:0,moraleLoss:0};for(const sk of SKILLS[f.id]||[]){const r=(f.skills&&f.skills[sk.id])||0;if(!r||!sk.px)continue;const e=sk.px(r);for(const k in e)m[k]+=e[k];}return m;}
+function passiveMods(f){const m={fatKick:0,fatAll:0,lossXp:0,fightXp:0,moraleLoss:0};for(const sk of skillList(f.id)){const r=(f.skills&&f.skills[sk.id])||0;if(!r||!sk.px)continue;const e=sk.px(r);for(const k in e)m[k]+=e[k];}return m;}
 // v1.20: only 3 techniques are carried into the ring (player picks; rivals carry their best 3)
 const MAX_EQUIP=3;
 function equipped(f){const pas=k=>{const d=skillDef(f.id,k);return !!(d&&d.passive);};const has=k=>(f.skills&&f.skills[k])>0&&!pas(k);if(Array.isArray(f.equip))return f.equip.filter(has).slice(0,MAX_EQUIP);
-  return (SKILLS[f.id]||[]).filter(s=>has(s.id)).sort((a,b)=>f.skills[b.id]-f.skills[a.id]).slice(0,MAX_EQUIP).map(s=>s.id);}
+  return skillList(f.id).filter(s=>has(s.id)).sort((a,b)=>f.skills[b.id]-f.skills[a.id]).slice(0,MAX_EQUIP).map(s=>s.id);}
 function toggleEquip(G,id,sk){const f=G.F[id];const dd=skillDef(id,sk);if(!(f.skills[sk]>0)||(dd&&dd.passive))return false;let e=equipped(f);if(e.includes(sk))e=e.filter(x=>x!==sk);else{if(e.length>=MAX_EQUIP)return false;e.push(sk);}f.equip=e;return true;}
 
 function baseFighter(id,d){return {id,name:d.name,full:d.full,div:d.div,camp:d.camp,color:d.color,potential:d.potential,wage:d.wage||0,fee:d.fee||0,
@@ -320,7 +393,7 @@ function fightRound(F){roundBegin(F);while(!roundDone(F))fightEx(F);return round
 // every learned school skill can be fired once per fight (max one per round): attack burst, guard burst or second wind
 function skillKind(sk){const e=sk.fx(1);const wk=e.hit||e.pts||e.dmg;if(wk)return {k:"atk",w:Object.keys(wk)[0]};if(e.evade||e.ctr||e.clDef||e.ctrDmg)return {k:"def"};return {k:"rec"};}
 const SKILL_KIND_NAME={atk:"ไม้เด็ดโจมตี",def:"ตั้งรับสวนกลับ",rec:"เรียกแรงคืน"};
-function fightSkills(s){const L=SKILLS[s.f.id]||[],eq=equipped(s.f);return L.filter(k=>eq.includes(k.id)).map(k=>({...k,r:s.f.skills[k.id],...skillKind(k)}));}
+function fightSkills(s){const L=skillList(s.f.id),eq=equipped(s.f);return L.filter(k=>eq.includes(k.id)).map(k=>({...k,r:s.f.skills[k.id],...skillKind(k)}));}
 function useSkill(F,s,id){const o=s===F.A?F.B:F.A;s.skUsed=s.skUsed||{};if(F.over||s.skRound||s.skUsed[id])return null;const sk=fightSkills(s).find(k=>k.id===id);if(!sk)return null;
   s.skUsed[id]=true;s.skRound=true;const pw=(.7+.15*sk.r)*(s.f.camp==="player"?1.1:F.dai||.8);
   if(sk.k==="atk"){s.burst={k:"atk",w:sk.w,left:4,pw};s.sta=clamp(s.sta-6,0,100);}

@@ -94,15 +94,86 @@ const SKILLS={
   {id:"lb_range",line:2,row:1,pre:"lb_teep",req:["kick","foot"],school:"lopburi",name:"Cutting the Outer Ring",desc:"Control range with teeps and footwork · kick accuracy +2%, kick points +8%, evade +1%",fx:r=>({hit:{kick:.02*r},pts:{kick:.08*r},evade:.01*r})},
   {id:"r_pace",line:2,row:2,pre:"lb_teep",passive:1,req:["stamina"],school:"lopburi",name:"Counting the Beat",desc:"Always on · attacks cost 4% less energy in every fight",fx:r=>({staSave:.04*r})},
   {id:"lb_tiger",line:2,row:3,pre:"lb_range",req:["kick","foot"],school:"lopburi",name:"Tiger Drags Its Tail",desc:"Feint a retreat, then kick back · kick power +10%, kick accuracy +3%, counter +2%",fx:r=>({dmg:{kick:.1*r},hit:{kick:.03*r},ctr:.02*r})}],
- ploy:[{id:"kr_swing",school:"korat",name:"Buffalo Swing",desc:"Wide, heavy hook · Punch power +12%, punch score +5%",fx:r=>({dmg:{punch:.12*r},pts:{punch:.05*r}})},
-       {id:"kr_knee",school:"korat",name:"Neck-Breaker Kick",desc:"Korat-style neck kick · Kick accuracy +3%, kick score +8%",fx:r=>({hit:{kick:.03*r},pts:{kick:.08*r}})},
-       {id:"captain",school:"korat",name:"Rope-Bound to the Elbow",desc:"Iron arms that eat kicks · Evade/block +1%, composure +1%, inside defense +0.5",fx:r=>({evade:.01*r,mor:.01*r,clDef:.5*r})},
-       {id:"kr_clinch",lv:6,school:"korat",name:"Korat Neck Wrestle",desc:"Lock the neck and knee nonstop · Knee power +10%, accuracy +2%",fx:r=>({dmg:{knee:.1*r},hit:{knee:.02*r}})}],
- fah:[{id:"tiger",school:"modern",name:"Tiger Elbow",desc:"Elbow power +12%, accuracy +2%",fx:r=>({dmg:{elbow:.12*r},hit:{elbow:.02*r}})},
-      {id:"reckless",school:"modern",name:"Reckless",desc:"Attacks cost 8% less energy",fx:r=>({staSave:.08*r})},
-      {id:"grin",school:"modern",name:"Smirk",desc:"Below 45 body: accuracy +3%",fx:r=>({clutch:.03*r})},
-      {id:"fah_rush",lv:5,school:"modern",name:"Combo Storm",desc:"Rush in with combos · Punch accuracy +2%, punch score +8%",fx:r=>({hit:{punch:.02*r},pts:{punch:.08*r}})}],
 };
+// v1.82.3: deeper trees — every school line gets a Lv.14 signature move and a Lv.22 master move,
+// Ploy and Fah get full trees, and three shared "build" paths (pick one per fighter)
+const SKX=(id,line,row,pre,req,school,name,desc,fx,more)=>Object.assign({id,line,row,pre,req,school,name,desc,fx},more||{});
+SKILLS.kati.push(
+ SKX("ts_thunder",0,4,"ts_croc",["kick","power"],"thasao","Tha Sao Thunderclap","Lv.14 · full spinning neck-line kick · kick accuracy +4%, kick power +12%, kick scoring +10%",r=>({hit:{kick:.04*r},dmg:{kick:.12*r},pts:{kick:.1*r}}),{lv:14}),
+ SKX("ts_wind",0,5,"ts_thunder",["kick","speed"],"thasao","Wind God Shin","Lv.22 · Master · kick power +16%, kick accuracy +4%, evade +1%",r=>({dmg:{kick:.16*r},hit:{kick:.04*r},evade:.01*r}),{lv:22}),
+ SKX("ts_bolt",1,4,"ts_ring",["elbow","punch"],"thasao","Thunderbolt Back Elbow","Lv.14 · lead punch into a spinning back elbow · elbow power +14%, elbow accuracy +3%, punch power +6%",r=>({dmg:{elbow:.14*r,punch:.06*r},hit:{elbow:.03*r}}),{lv:14}),
+ SKX("ts_trunk",1,5,"ts_bolt",["punch","power"],"thasao","Breaking the Elephant's Trunk","Lv.22 · Master · punch power +12%, elbow power +12%, punch accuracy +3%",r=>({dmg:{punch:.12*r,elbow:.12*r},hit:{punch:.03*r}}),{lv:22}),
+ SKX("ts_heart",2,4,"ts_iron",["guard","comp"],"thasao","Sirichai Heart","Lv.14 · the more it hurts, the sharper she gets · +5% accuracy at low health, evade +2%, clinch defense +0.6",r=>({clutch:.05*r,evade:.02*r,clDef:.6*r}),{lv:14}),
+ SKX("ts_fort",2,5,"ts_heart",["guard","dur"],"thasao","Tha Sao Iron Wall","Lv.22 · Master · evade +3%, counters +5%, clinch defense +1, recovery +10%",r=>({evade:.03*r,ctr:.05*r,clDef:1*r,regen:.1*r}),{lv:22}));
+SKILLS.mali.push(
+ SKX("cy_flash",0,4,"cy_erawan",["elbow","speed"],"chaiya","Lightning Return Elbow","Lv.14 · an elbow too fast to see · elbow power +14%, elbow accuracy +3%",r=>({dmg:{elbow:.14*r},hit:{elbow:.03*r}}),{lv:14}),
+ SKX("cy_soar",0,5,"cy_flash",["elbow","knee"],"chaiya","Chaiya Sky Leap","Lv.22 · Master · elbow power +16%, knee power +8%, elbow accuracy +3%",r=>({dmg:{elbow:.16*r,knee:.08*r},hit:{elbow:.03*r}}),{lv:22}),
+ SKX("cy_bloom",1,4,"cy_hanuman",["kick","foot"],"chaiya","Jasmine Dance","Lv.14 · flowing kicks like a dance · kick accuracy +4%, kick scoring +10%, recovery +10%",r=>({hit:{kick:.04*r},pts:{kick:.1*r},regen:.1*r}),{lv:14}),
+ SKX("cy_gale",1,5,"cy_bloom",["speed","kick"],"chaiya","Chaiya Whirlwind","Lv.22 · Master · evade +2.5%, kick accuracy +4%, kick power +10%, stamina use -3%",r=>({evade:.025*r,hit:{kick:.04*r},dmg:{kick:.1*r},staSave:.03*r}),{lv:22}),
+ SKX("cy_gate",2,4,"cy_root",["guard","clinch"],"chaiya","Chaiya Gate Closed","Lv.14 · closes every gap, then counters · clinch defense +1, evade +2%, counters +3%",r=>({clDef:1*r,evade:.02*r,ctr:.03*r}),{lv:14}),
+ SKX("cy_meru",2,5,"cy_gate",["guard","dur"],"chaiya","Mount Meru","Lv.22 · Master · clinch defense +1.4, evade +3%, recovery +12%, +3% accuracy at low health",r=>({clDef:1.4*r,evade:.03*r,regen:.12*r,clutch:.03*r}),{lv:22}));
+SKILLS.rin.push(
+ SKX("lb_shadow",0,4,"lb_kris",["counter","speed"],"lopburi","Shadowless Counter","Lv.14 · counters before the opponent's strike lands · counters +5%, counter-punch power +16%",r=>({ctr:.05*r,ctrDmg:.16*r}),{lv:14}),
+ SKX("lb_proof",0,5,"lb_shadow",["counter","iq"],"lopburi","Closing Equation","Lv.22 · Master · counters +6%, counter-punch power +20%, punch accuracy +2%",r=>({ctr:.06*r,ctrDmg:.2*r,hit:{punch:.02*r}}),{lv:22}),
+ SKX("lb_three",1,4,"lb_giant",["iq","comp"],"lopburi","Three-Round Mind Read","Lv.14 · plans the whole fight ahead · corner orders +35%, base accuracy +1.2%, evade +1%",r=>({corner:.35*r,prep:.012*r,evade:.01*r}),{lv:14}),
+ SKX("lb_book",1,5,"lb_three",["iq","counter"],"lopburi","Lopburi Textbook","Lv.22 · Master · corner orders +45%, base accuracy +1.6%, counters +3%",r=>({corner:.45*r,prep:.016*r,ctr:.03*r}),{lv:22}),
+ SKX("lb_fold",2,4,"lb_tiger",["kick","power"],"lopburi","Folding Teep","Lv.14 · body push-kick that folds the opponent · kick accuracy +3%, kick scoring +10%, evade +1.5%",r=>({hit:{kick:.03*r},pts:{kick:.1*r},evade:.015*r}),{lv:14}),
+ SKX("lb_circle",2,5,"lb_fold",["foot","kick"],"lopburi","Unbreakable Outer Ring","Lv.22 · Master · kick accuracy +4%, kick power +12%, evade +2%, counters +3%",r=>({hit:{kick:.04*r},dmg:{kick:.12*r},evade:.02*r,ctr:.03*r}),{lv:22}));
+SKILLS.ploy=[
+ SKX("kr_swing",0,0,null,["punch"],"korat","Buffalo Swing","Wide, heavy hook · Punch power +12%, punch score +5%",r=>({dmg:{punch:.12*r},pts:{punch:.05*r}})),
+ SKX("kr_hook",0,1,"kr_swing",["punch","power"],"korat","Double-Swing Punch","Swings again the moment the opponent opens · punch power +8%, punch accuracy +1.5%",r=>({dmg:{punch:.08*r},hit:{punch:.015*r}})),
+ SKX("p_iron",0,2,"kr_swing",["dur"],"korat","Korat Iron Arms","Passive · training fatigue -6% on every program",r=>({}),{passive:1,px:r=>({fatAll:.06*r})}),
+ SKX("kr_buffalo",0,3,"kr_hook",["punch","power"],"korat","White Buffalo Rams the Post","Charges in behind a heavy punch · punch accuracy +3%, punch power +12%, punch scoring +6%",r=>({hit:{punch:.03*r},dmg:{punch:.12*r},pts:{punch:.06*r}})),
+ SKX("kr_thunder",0,4,"kr_buffalo",["punch","speed"],"korat","Korat Lightning","Lv.14 · one punch that changes the fight · punch power +15%, punch accuracy +4%",r=>({dmg:{punch:.15*r},hit:{punch:.04*r}}),{lv:14}),
+ SKX("kr_genius",0,5,"kr_thunder",["punch","iq"],"korat","Undefeated Genius","Lv.22 · Master · punch power +12%, punch accuracy +3%, +4% accuracy at low health, counters +3%",r=>({dmg:{punch:.12*r},hit:{punch:.03*r},clutch:.04*r,ctr:.03*r}),{lv:22}),
+ SKX("kr_knee",1,0,null,["kick"],"korat","Neck-Breaker Kick","Korat-style neck kick · Kick accuracy +3%, kick score +8%",r=>({hit:{kick:.03*r},pts:{kick:.08*r}})),
+ SKX("kr_sweep",1,1,"kr_knee",["kick","foot"],"korat","Korat Sweep","Low sweep on the lead leg · kick accuracy +2%, kick power +8%",r=>({hit:{kick:.02*r},dmg:{kick:.08*r}})),
+ SKX("p_cold",1,2,"kr_knee",["comp"],"korat","Ice-Cold Mind","Passive · morale drops 20% less after losses",r=>({}),{passive:1,px:r=>({moraleLoss:.2*r})}),
+ SKX("kr_clinch",1,3,"kr_sweep",["knee","clinch"],"korat","Korat Neck Wrestle","Lock the neck and knee nonstop · Knee power +10%, accuracy +2%",r=>({dmg:{knee:.1*r},hit:{knee:.02*r}})),
+ SKX("kr_neck",1,4,"kr_clinch",["kick","power"],"korat","Neck-Line Kick","Lv.14 · full-arc high kick · kick power +14%, kick accuracy +4%, kick scoring +8%",r=>({dmg:{kick:.14*r},hit:{kick:.04*r},pts:{kick:.08*r}}),{lv:14}),
+ SKX("kr_tiger",1,5,"kr_neck",["kick","knee"],"korat","Golden Tiger Lashes Its Tail","Lv.22 · Master · kick power +16%, knee power +10%, kick accuracy +3%",r=>({dmg:{kick:.16*r,knee:.1*r},hit:{kick:.03*r}}),{lv:22}),
+ SKX("captain",2,0,null,["guard"],"korat","Rope-Bound to the Elbow","Iron arms that eat kicks · Evade/block +1%, composure +1%, inside defense +0.5",r=>({evade:.01*r,mor:.01*r,clDef:.5*r})),
+ SKX("p_read",2,1,"captain",["iq"],"korat","Tiger Reads the Fight","Notes every rhythm of the opponent · counters +3%, evade +1%",r=>({ctr:.03*r,evade:.01*r})),
+ SKX("p_note",2,2,"captain",["iq"],"korat","Fight-Plan Notebook","Passive · +6% EXP from every fight",r=>({}),{passive:1,px:r=>({fightXp:.06*r})}),
+ SKX("p_wall",2,3,"p_read",["guard","iq"],"korat","Korat Wall","High guard, then counter · evade +2%, clinch defense +0.8, counters +3%",r=>({evade:.02*r,clDef:.8*r,ctr:.03*r})),
+ SKX("p_sister",2,4,"p_wall",["iq","counter"],"korat","Sister's Shadow","Lv.14 · what Pailin once taught her · counters +5%, corner orders +25%, evade +1.5%",r=>({ctr:.05*r,corner:.25*r,evade:.015*r}),{lv:14}),
+ SKX("p_crown",2,5,"p_sister",["guard","comp"],"korat","Tiger Crown","Lv.22 · Master · evade +3%, clinch defense +1, counters +5%, +3% accuracy at low health",r=>({evade:.03*r,clDef:1*r,ctr:.05*r,clutch:.03*r}),{lv:22})];
+SKILLS.fah=[
+ SKX("tiger",0,0,null,["elbow"],"modern","Tiger Elbow","Elbow power +12%, accuracy +2%",r=>({dmg:{elbow:.12*r},hit:{elbow:.02*r}})),
+ SKX("f_cut",0,1,"tiger",["elbow","speed"],"modern","Sky-Slash Elbow","Rising diagonal elbow · elbow power +8%, elbow accuracy +1.5%",r=>({dmg:{elbow:.08*r},hit:{elbow:.015*r}})),
+ SKX("f_flex",0,2,"tiger",["foot"],"modern","Dancer's Flex","Passive · training fatigue -5% on every program",r=>({}),{passive:1,px:r=>({fatAll:.05*r})}),
+ SKX("f_storm",0,3,"f_cut",["elbow","clinch"],"modern","Elbow Storm","Nonstop elbows in the clinch · elbow power +12%, elbow accuracy +3%, elbow scoring +6%",r=>({dmg:{elbow:.12*r},hit:{elbow:.03*r},pts:{elbow:.06*r}})),
+ SKX("f_thunder",0,4,"f_storm",["elbow","power"],"modern","Twin Thunder Elbows","Lv.14 · left and right elbows without a pause · elbow power +14%, elbow accuracy +4%",r=>({dmg:{elbow:.14*r},hit:{elbow:.04*r}}),{lv:14}),
+ SKX("f_sky",0,5,"f_thunder",["elbow","speed"],"modern","Golden Sky","Lv.22 · Master · elbow power +16%, punch power +8%, elbow accuracy +3%",r=>({dmg:{elbow:.16*r,punch:.08*r},hit:{elbow:.03*r}}),{lv:22}),
+ SKX("fah_rush",1,0,null,["punch"],"modern","Combo Storm","Rush in with combos · Punch accuracy +2%, punch score +8%",r=>({hit:{punch:.02*r},pts:{punch:.08*r}})),
+ SKX("f_blitz",1,1,"fah_rush",["punch","stamina"],"modern","Never Retreat","Always moving forward · punch accuracy +1.5%, punch scoring +6%, stamina use -2%",r=>({hit:{punch:.015*r},pts:{punch:.06*r},staSave:.02*r})),
+ SKX("reckless",1,2,"fah_rush",["stamina"],"modern","Reckless","Passive · 8% less stamina spent attacking",r=>({staSave:.08*r}),{passive:1}),
+ SKX("f_tornado",1,3,"f_blitz",["punch","speed"],"modern","Grand Punch Storm","Long, nonstop combinations · punch accuracy +3%, punch power +10%, punch scoring +8%",r=>({hit:{punch:.03*r},dmg:{punch:.1*r},pts:{punch:.08*r}})),
+ SKX("f_hurricane",1,4,"f_tornado",["punch","stamina"],"modern","Sky Hurricane","Lv.14 · attacks all round without fading · punch accuracy +4%, punch power +12%, stamina use -3%",r=>({hit:{punch:.04*r},dmg:{punch:.12*r},staSave:.03*r}),{lv:14}),
+ SKX("f_heaven",1,5,"f_hurricane",["punch","power"],"modern","Sky Falls","Lv.22 · Master · punch power +16%, punch accuracy +4%, punch scoring +8%",r=>({dmg:{punch:.16*r},hit:{punch:.04*r},pts:{punch:.08*r}}),{lv:22}),
+ SKX("grin",2,0,null,["comp"],"modern","Smirk","Below 45 body: accuracy +3%",r=>({clutch:.03*r})),
+ SKX("f_taunt",2,1,"grin",["iq"],"modern","Bait the Rush","Taunts the opponent into charging in · counters +3%, evade +1%",r=>({ctr:.03*r,evade:.01*r})),
+ SKX("f_party",2,2,"grin",["comp"],"modern","After-Fight Party","Passive · +6% EXP from every fight",r=>({}),{passive:1,px:r=>({fightXp:.06*r})}),
+ SKX("f_show",2,3,"f_taunt",["comp","foot"],"modern","Showtime","The louder the crowd, the better · morale effect +2%, punch scoring +4%, kick scoring +4%, +2% accuracy at low health",r=>({mor:.02*r,pts:{punch:.04*r,kick:.04*r},clutch:.02*r})),
+ SKX("f_smile",2,4,"f_show",["comp","counter"],"modern","Smile for the Whole Stadium","Lv.14 · smiles through anything · +5% accuracy at low health, counters +4%, morale effect +2%",r=>({clutch:.05*r,ctr:.04*r,mor:.02*r}),{lv:14}),
+ SKX("f_star",2,5,"f_smile",["comp","speed"],"modern","Star in the Sky","Lv.22 · Master · evade +3%, counters +5%, +4% accuracy at low health, recovery +10%",r=>({evade:.03*r,ctr:.05*r,clutch:.04*r,regen:.1*r}),{lv:22})];
+// shared build paths: line 3..5; once a fighter learns one, the other two are closed until reset
+const SHARED_SKILLS=[
+ SKX("sh_ko1",3,0,null,["power"],"build","Weight Behind Every Shot","Knockout build · punch power +5%, kick power +4%",r=>({dmg:{punch:.05*r,kick:.04*r}}),{shared:1}),
+ SKX("sh_ko2",3,1,"sh_ko1",["power","punch"],"build","Quick Finish","Knockout build · knee power +5%, elbow power +5%, punch power +4%",r=>({dmg:{knee:.05*r,elbow:.05*r,punch:.04*r}}),{shared:1,lv:4}),
+ SKX("sh_ko3",3,2,"sh_ko1",["power"],"build","Spring Muscles","Knockout build · passive · training fatigue -4%",r=>({}),{shared:1,passive:1,lv:4,px:r=>({fatAll:.04*r})}),
+ SKX("sh_ko4",3,3,"sh_ko2",["power","speed"],"build","One-Punch Finish","Knockout build · Lv.10 · punch power +10%, elbow power +6%, knee power +6%",r=>({dmg:{punch:.1*r,elbow:.06*r,knee:.06*r}}),{shared:1,lv:10}),
+ SKX("sh_tc1",4,0,null,["iq"],"build","Clean Technique","Points build · punch scoring +5%, kick scoring +5%",r=>({pts:{punch:.05*r,kick:.05*r}}),{shared:1}),
+ SKX("sh_tc2",4,1,"sh_tc1",["iq","foot"],"build","Every Shot Lands","Points build · punch accuracy +1.5%, kick accuracy +1.5%",r=>({hit:{punch:.015*r,kick:.015*r}}),{shared:1,lv:4}),
+ SKX("sh_tc3",4,2,"sh_tc1",["iq"],"build","Homework Every Night","Points build · passive · +6% EXP from fights",r=>({}),{shared:1,passive:1,lv:4,px:r=>({fightXp:.06*r})}),
+ SKX("sh_tc4",4,3,"sh_tc2",["iq","comp"],"build","Owns Every Round","Points build · Lv.10 · knee/elbow scoring +6%, corner orders +20%, base accuracy +0.6%",r=>({pts:{knee:.06*r,elbow:.06*r},corner:.2*r,prep:.006*r}),{shared:1,lv:10}),
+ SKX("sh_ir1",5,0,null,["dur"],"build","Takes Every Shot","Iron build · clinch defense +0.6, evade +0.8%",r=>({clDef:.6*r,evade:.008*r}),{shared:1}),
+ SKX("sh_ir2",5,1,"sh_ir1",["stamina","dur"],"build","Long Breath","Iron build · recovery between rounds +12%, stamina use -3%",r=>({regen:.12*r,staSave:.03*r}),{shared:1,lv:4}),
+ SKX("sh_ir3",5,2,"sh_ir1",["stamina"],"build","Quick Recovery","Iron build · passive · morale drops 15% less after losses, training fatigue -3%",r=>({}),{shared:1,passive:1,lv:4,px:r=>({moraleLoss:.15*r,fatAll:.03*r})}),
+ SKX("sh_ir4",5,3,"sh_ir2",["dur","stamina"],"build","Never Goes Down","Iron build · Lv.10 · +4% accuracy at low health, clinch defense +0.8, recovery +10%",r=>({clutch:.04*r,clDef:.8*r,regen:.1*r}),{shared:1,lv:10})];
+const skillList=fid=>(SKILLS[fid]||[]).concat(SKILLS[fid]&&SKILLS[fid][0]&&SKILLS[fid][0].line!=null?SHARED_SKILLS:[]);
+const sharedPathOf=f=>{for(const s of SHARED_SKILLS)if((f.skills&&f.skills[s.id])>0)return s.line;return null;};
+function resetSharedPath(G,id){const f=G.F[id];if(!f||!f.skills)return false;let n=0;for(const s of SHARED_SKILLS){n+=f.skills[s.id]||0;delete f.skills[s.id];}if(!n)return false;f.sp+=n;if(Array.isArray(f.equip))f.equip=f.equip.filter(k=>!k.startsWith("sh_"));return n;}
 // v1.12: a deep bond unlocks each heroine's signature move (bond 60+, player's camp only)
 const SIGNATURE={kati:{name:"Sirichai Heart Spinning Elbow",desc:"Bond 60+ · Elbow power +15% · extra 3% accuracy when hurt",fx:{dmg:{elbow:.15},clutch:.03}},
   mali:{name:"Jasmine Bloom Kick",desc:"Bond 60+ · Kick accuracy +3% · between-round recovery +15%",fx:{hit:{kick:.03},regen:.15}},
@@ -112,7 +183,7 @@ const SIGNATURE={kati:{name:"Sirichai Heart Spinning Elbow",desc:"Bond 60+ · El
 const hasSignature=f=>!!SIGNATURE[f.id]&&f.camp==="player"&&(f.bond||0)>=60;
 function skillMods(f){const m={hit:{},pts:{},dmg:{},ctr:0,ctrDmg:0,clutch:0,regen:0,mor:0,evade:0,corner:0,prep:0,clDef:0,staSave:0};
   if(hasSignature(f)){const e=SIGNATURE[f.id].fx;for(const k in e){if(typeof e[k]==="object")for(const w in e[k])m[k][w]=(m[k][w]||0)+e[k][w];else m[k]+=e[k];}}
-  const list=SKILLS[f.id];if(!list||!f.skills)return m;const eq=equipped(f);
+  const list=skillList(f.id);if(!list.length||!f.skills)return m;const eq=equipped(f);
   for(const sk of list){if(!sk.passive&&!eq.includes(sk.id))continue;const r=f.skills[sk.id]||0;if(!r)continue;const e=sk.fx(r);
     for(const k in e){if(typeof e[k]==="object")for(const w in e[k])m[k][w]=(m[k][w]||0)+e[k][w];else m[k]+=e[k];}}
   return m;}
@@ -121,28 +192,30 @@ const xpNeed=lvl=>50+lvl*30+Math.max(0,lvl-10)*20;
 const lvBeyond=f=>{if(f.lvl>10)f.potential=Math.min(21,(f.potential||14)+.12);};
 function gainXP(G,f,x){if(!f.canon)return;if(f.camp==="player"&&G.fac&&G.fac.ring)x=Math.round(x*(1+G.fac.ring*.15));f.xp+=x;f.xpGain=(f.xpGain||0)+x;
   while(f.lvl<MAX_LV&&f.xp>=xpNeed(f.lvl)){f.xp-=xpNeed(f.lvl);f.lvl++;f.sp+=SP_PER_LV(f);lvBeyond(f);if(f.camp==="player"){G.levelUps=G.levelUps||[];G.levelUps.push(f.id);}}}
-const skillDef=(fid,sk)=>(SKILLS[fid]||[]).find(s=>s.id===sk);
+const skillDef=(fid,sk)=>skillList(fid).find(s=>s.id===sk);
 // v1.29: stat requirements scale from each fighter's starting stats, so every line asks for real training
 const hasTree=fid=>!!(SKILLS[fid]&&SKILLS[fid][0]&&SKILLS[fid][0].line!=null);
 const SP_PER_LV=f=>hasTree(f.id)?3:1;
 // thresholds are written in "weeks of focused training" and converted with each fighter's measured growth (8 / 14 weeks of the best programme)
 const GROW={"kati":{"punch":[3.1,4.8],"counter":[2.6,4.5],"power":[1.8,3.2],"speed":[1.7,2.7],"kick":[3.5,5.6],"foot":[2.1,3.3],"knee":[3.5,5.9],"clinch":[3.7,5.9],"stamina":[3.2,5],"elbow":[3.7,6.1],"guard":[3.9,6.2],"iq":[2.6,4.2],"comp":[1.3,2.2],"dur":[1.7,2.8]},"mali":{"punch":[2.9,4.6],"counter":[2.3,4.1],"power":[1.5,2.7],"speed":[1.4,2.3],"kick":[2.3,3.7],"foot":[1.6,2.5],"knee":[2.8,4.8],"clinch":[3.2,5],"stamina":[2,3.1],"elbow":[3.1,5.2],"guard":[3,4.8],"iq":[2,3.2],"comp":[1,1.7],"dur":[1.4,2.3]},"rin":{"punch":[2.7,4.3],"counter":[1.7,3.1],"power":[1.5,2.8],"speed":[1.6,2.6],"kick":[2.6,4.2],"foot":[1.4,2.2],"knee":[2.8,4.7],"clinch":[2.9,4.5],"stamina":[2.5,4],"elbow":[2.8,4.7],"guard":[2.6,4.1],"iq":[1.1,1.7],"comp":[0.8,1.3],"dur":[1.4,2.3]}};
-const REQ_WK={main:[[0,2,4],[3,5,7],[3,5,7],[6,8,10]],cross:[[0,0,0],[1,2,3],[0,0,0],[2,3,4]],scale:{kati:1,mali:.85,rin:.7}};
+const REQ_WK={main:[[0,2,4],[3,5,7],[3,5,7],[6,8,10],[8,10,12],[10,12,14]],cross:[[0,0,0],[1,2,3],[0,0,0],[2,3,4],[3,4,5],[4,5,6]],scale:{kati:1,mali:.85,rin:.7,ploy:.75,fah:.8}};
+GROW.ploy=GROW.ploy||GROW.kati;GROW.fah=GROW.fah||GROW.mali;
 function skillReqs(fid,sk,rank){const d=skillDef(fid,sk);if(!d||!d.req||!CANON[fid]||!GROW[fid])return [];const base=CANON[fid].a,r=clamp(rank,1,3)-1,sc=REQ_WK.scale[fid]||1;
   return d.req.map((k,i)=>{const w=(i?REQ_WK.cross:REQ_WK.main)[d.row][r]*sc,g=GROW[fid][k]||[2,3.2];const up=w<=8?g[0]*w/8:g[0]+(g[1]-g[0])*(w-8)/6;return {k,v:Math.floor((base[k]+up)*2)/2};});}
 // why a skill can't be raised right now ([] = ok). Each entry: {t:"sp"|"max"|"lv"|"pre"|"stat", ...}
 function skillBlock(f,sk){const d=skillDef(f.id,sk),r=(f.skills&&f.skills[sk])||0,B=[];if(!d)return [{t:"none"}];
   if(r>=3)return [{t:"max"}];if((d.lv||1)>f.lvl)B.push({t:"lv",v:d.lv});
   if(d.pre&&!((f.skills[d.pre]||0)>0))B.push({t:"pre",id:d.pre});
+  if(d.shared){const p=sharedPathOf(f);if(p!=null&&p!==d.line)B.push({t:"path"});}
   for(const q of skillReqs(f.id,sk,r+1))if(f.a[q.k]+1e-6<q.v)B.push({t:"stat",k:q.k,v:q.v,have:f.a[q.k]});
   if(f.sp<1)B.push({t:"sp"});return B;}
 function learnSkill(G,id,sk){const f=G.F[id],d=skillDef(id,sk);if(!d||skillBlock(f,sk).length)return false;f.skills[sk]=(f.skills[sk]||0)+1;f.sp--;
   if(d.passive)return true;f.equip=equipped(f);if(!f.equip.includes(sk)&&f.equip.length<3)f.equip.push(sk);return true;}
-function passiveMods(f){const m={fatKick:0,fatAll:0,lossXp:0,fightXp:0,moraleLoss:0};for(const sk of SKILLS[f.id]||[]){const r=(f.skills&&f.skills[sk.id])||0;if(!r||!sk.px)continue;const e=sk.px(r);for(const k in e)m[k]+=e[k];}return m;}
+function passiveMods(f){const m={fatKick:0,fatAll:0,lossXp:0,fightXp:0,moraleLoss:0};for(const sk of skillList(f.id)){const r=(f.skills&&f.skills[sk.id])||0;if(!r||!sk.px)continue;const e=sk.px(r);for(const k in e)m[k]+=e[k];}return m;}
 // v1.20: only 3 techniques are carried into the ring (player picks; rivals carry their best 3)
 const MAX_EQUIP=3;
 function equipped(f){const pas=k=>{const d=skillDef(f.id,k);return !!(d&&d.passive);};const has=k=>(f.skills&&f.skills[k])>0&&!pas(k);if(Array.isArray(f.equip))return f.equip.filter(has).slice(0,MAX_EQUIP);
-  return (SKILLS[f.id]||[]).filter(s=>has(s.id)).sort((a,b)=>f.skills[b.id]-f.skills[a.id]).slice(0,MAX_EQUIP).map(s=>s.id);}
+  return skillList(f.id).filter(s=>has(s.id)).sort((a,b)=>f.skills[b.id]-f.skills[a.id]).slice(0,MAX_EQUIP).map(s=>s.id);}
 function toggleEquip(G,id,sk){const f=G.F[id];const dd=skillDef(id,sk);if(!(f.skills[sk]>0)||(dd&&dd.passive))return false;let e=equipped(f);if(e.includes(sk))e=e.filter(x=>x!==sk);else{if(e.length>=MAX_EQUIP)return false;e.push(sk);}f.equip=e;return true;}
 
 function baseFighter(id,d){return {id,name:d.name,full:d.full,div:d.div,camp:d.camp,color:d.color,potential:d.potential,wage:d.wage||0,fee:d.fee||0,
@@ -320,7 +393,7 @@ function fightRound(F){roundBegin(F);while(!roundDone(F))fightEx(F);return round
 // every learned school skill can be fired once per fight (max one per round): attack burst, guard burst or second wind
 function skillKind(sk){const e=sk.fx(1);const wk=e.hit||e.pts||e.dmg;if(wk)return {k:"atk",w:Object.keys(wk)[0]};if(e.evade||e.ctr||e.clDef||e.ctrDmg)return {k:"def"};return {k:"rec"};}
 const SKILL_KIND_NAME={atk:"Finishing attack",def:"Defend & counter",rec:"Recover energy"};
-function fightSkills(s){const L=SKILLS[s.f.id]||[],eq=equipped(s.f);return L.filter(k=>eq.includes(k.id)).map(k=>({...k,r:s.f.skills[k.id],...skillKind(k)}));}
+function fightSkills(s){const L=skillList(s.f.id),eq=equipped(s.f);return L.filter(k=>eq.includes(k.id)).map(k=>({...k,r:s.f.skills[k.id],...skillKind(k)}));}
 function useSkill(F,s,id){const o=s===F.A?F.B:F.A;s.skUsed=s.skUsed||{};if(F.over||s.skRound||s.skUsed[id])return null;const sk=fightSkills(s).find(k=>k.id===id);if(!sk)return null;
   s.skUsed[id]=true;s.skRound=true;const pw=(.7+.15*sk.r)*(s.f.camp==="player"?1.1:F.dai||.8);
   if(sk.k==="atk"){s.burst={k:"atk",w:sk.w,left:4,pw};s.sta=clamp(s.sta-6,0,100);}

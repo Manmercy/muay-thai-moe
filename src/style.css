@@ -1564,3 +1564,13 @@ button.goal.ov.mini{right:auto;padding:3px 10px;opacity:.85}
 .memo b{font-size:13px}
 .memo .dim,.intel .dim{color:var(--muted);font-size:12px}
 .intel .newtrick{color:#ffb36b;font-weight:700}
+/* v1.82.3: school lines + shared build paths */
+.sklines{align-items:center}
+.sknav{display:flex;flex-direction:column;gap:4px}
+.sklines .sklbl{grid-column:1/-1;font-size:11px;color:var(--muted);margin:0}
+.sklines.shared{margin-top:2px}
+.sklines.shared button{box-shadow:inset 0 0 0 2px #5a4a7a}
+.sklines.shared button[aria-pressed="true"]{background:#5a3f9a;box-shadow:inset 0 0 0 2px #7a5fc0;color:#fff}
+.sklines button.off{opacity:.45}
+.skpath{margin:6px 0 0;font-size:12px}
+.skpath .btn{margin-left:6px}
