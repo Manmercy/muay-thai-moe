@@ -536,7 +536,7 @@ const CUP_PAL={province:{a:"#7a5a10",b:"#f1c232",c:"#5a3a2a"},district:{a:"#5d61
 function trophyItems(){const H=G.honors||[],items=[];
   for(const h of H){const who=esc(G.F[h.id]?.name||h.id),when=h.season?`Year ${h.season} week ${h.week}`:"Before update";
     if(h.kind==="belt"||h.kind==="defense"){const v=h.venue||"tha";items.push({kind:"belt",pal:BELT_PAL[v]||BELT_PAL.tha,title:honorLabel(h.kind,h.venue),sub:`${who} · Div ${h.div}`,when,shelf:"belt"});}
-    else if(h.kind==="dm")items.push({kind:"medal",pal:{a:"#5a1a22",b:"#d23246",d:"#2a2238"},title:"Death Match champion",sub:`${who} · Div ${h.div}`,when,shelf:"cup"});
+    else if(h.kind==="dm")items.push({kind:"medal",pal:{a:"#5a1a22",b:"#d23246",d:"#3a6fd0"},title:"Death Match champion",sub:`${who} · Div ${h.div}`,when,shelf:"cup"});
     else items.push({kind:"cup",pal:CUP_PAL[h.kind]||CUP_PAL.local,title:honorLabel(h.kind,h.venue),sub:`${who} · Div ${h.div}`,when,shelf:"cup"});}
   for(const a of (G.campAwards||[])){const A=CAMP_AWARDS[a.id];if(!A)continue;items.push({kind:"cert",pal:{a:"#c9961c",b:"#f4ead8",c:"#8a7a6a",d:"#c8283c"},title:A.name,sub:`Awarded by ${A.from}`,when:`Year ${a.season} week ${a.week}`,shelf:"cert"});}
   return items;}
