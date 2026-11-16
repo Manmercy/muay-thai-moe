@@ -1947,3 +1947,11 @@ EVENTS.push(
   {choice:[{t:"Do a Muay Thai demo for the kids",fx:G=>{G.rep+=yr(G)>=3?1.2:.6;roster(G).forEach(f=>f.morale=Math.min(100,f.morale+3));},then:[{n:"nar",t:"A little girl came up asking for an autograph on her shirt. Nobody could stop smiling (reputation and morale up)"}]},
    {t:"Sell camp souvenirs",fx:G=>{G.cash+=yr(G)>=3?3000:1200;},then:[{inject:G=>[{n:"nar",t:`The camp-pattern hand wraps sold out before noon, earning ${fmt(yr(G)>=3?3000:1200)}`}]}]}]}]}
 );
+// v1.86: the district chief reads the year's lucky colour and announces the camp beauty contest
+EVENTS.push({id:"nai_color",annual:true,pri:2,look:"casual",bg:"camp",when:G=>G.week>=((G.season||1)===1?4:2)&&G.week<CONTEST_WEEK,steps:[
+  {n:"nar",t:G=>(G.season||1)===1?"A district office pickup stops at the gate. A man in khaki climbs out with a brown leather folder":`The start of year ${G.season}, the district office car pulls up again. The District Chief steps out smiling, as he does every year`},
+  {n:"npc",who:"District Chief",img:"nai",t:G=>(G.season||1)===1?"Hello, I'm the District Chief. I heard Sirichai Camp has reopened. Congratulations!":"Hello! Sirichai Camp is as lively as ever this year"},
+  {n:"npc",who:"District Chief",img:"nai",t:G=>`The district fortune-teller has read the signs. This year's lucky colour is "${yearColor(G).n}" ${yearColor(G).luck}`},
+  {n:"npc",who:"District Chief",img:"nai",t:`In week ${CONTEST_WEEK} I'll walk every camp myself for the annual Camp Beauty Contest: seven areas, ten points each`},
+  {n:"npc",who:"District Chief",img:"nai",t:G=>`Decorations in ${yearColor(G).n} get bonus points, and don't forget to keep the yard clean. Last year ${(G.contests&&G.contests[(G.season||1)-1]&&G.contests[(G.season||1)-1].rank===1)?"this camp did very well":"Golden Tiger Camp started preparing at new year"}`},
+  {n:"coach",t:G=>`${yearColor(G).n}, huh… Manager, shall we check the decorations page? Pieces in the right colour are marked`}]});

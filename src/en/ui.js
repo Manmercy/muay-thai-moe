@@ -35,7 +35,7 @@ const cardFaceSrc=C=>{const scene=(C.steps||[]).find(s=>s.n===C.c)||{},mood=scen
   return `${ASSET}${C.c}_casual${suffix}_face.webp`;};
 const cardArtHTML=(C,lazy=false)=>`<span class="card-art" style="--card-scene:url('${ASSET}${BGIMG[C.bg]||BGIMG.camp}')"><img src="${cardFaceSrc(C)}" alt="" ${lazy?'loading="lazy" decoding="async"':""}></span>`;
 // v1.34: portraits for the market and helmet-gang side characters (matched by speaker name, or st.img)
-const NPC_IMG=[[/แม่ค้า|ป้าศรี|Auntie Sri|vendor/,"vendor_green"],[/ป้าแต๋ว|เจ๊หมวย|ป้าขาย|Auntie Taew|Jae Muay/,"vendor_red"],[/เสี่ยหมวกทองคำ|Big Boss Golden Helmet/,"gang_boss"],[/หมวก|แจ็กเก็ต|Helmet|Jacket/,"gang_group"],[/ยาย|Grandma/,"grandma"]];
+const NPC_IMG=[[/นายอำเภอ|District Chief/,"nai"],[/แม่ค้า|ป้าศรี|Auntie Sri|vendor/,"vendor_green"],[/ป้าแต๋ว|เจ๊หมวย|ป้าขาย|Auntie Taew|Jae Muay/,"vendor_red"],[/เสี่ยหมวกทองคำ|Big Boss Golden Helmet/,"gang_boss"],[/หมวก|แจ็กเก็ต|Helmet|Jacket/,"gang_group"],[/ยาย|Grandma/,"grandma"]];
 const npcImg=st=>st.img||(st.who&&(NPC_IMG.find(([r])=>r.test(st.who))||[])[1])||null;
 const TIER_BG={evloy:"bg_river.webp",pro:"bg_fair.webp",semi:"bg_hall.webp",local:"bg_local.webp",district:"bg_district.webp",final:"bg_final.webp",exhibition:"bg_fair.webp",special:"bg_district.webp",lab:"bg_hall.webp",quest:"bg_food.webp",beast:"bg_fair.webp",dm:"bg_hall.webp"};
 const gymBg=()=>`gym${G?campLevel(G):1}.webp`;
@@ -595,6 +595,7 @@ function hallHTML(){const T=(G.titles||[]).slice().reverse(),H=(G.honors||[]).sl
     return `<div class="hall-y"><b>Year ${t.season}</b>${res.length?res.map(r=>`<div class="kv-row"><span>${esc(r.name)} · Div ${r.d}</span><span class="pill ${r.c||""}">${r.t}</span></div>`).join(""):"<p class=\"meta\">That year nobody got past the subdistrict round, but the whole camp stayed together</p>"}</div>`;};
   return `${trophyRoomHTML()}${H.length?`<details class="hall-y hall-list"><summary><b>Major wins (${H.length})</b></summary>${H.map(h=>`<div class="kv-row"><span>${esc(G.F[h.id]?.name||h.id)} · Div ${h.div} · ${h.season?`Year ${h.season} week ${h.week}`:"Earlier result"}</span><span class="pill gold">🏆 ${honorLabel(h.kind,h.venue)}</span></div>`).join("")}</details>`:""}
    ${belts.length||venueBelts.length?`<div class="hall-y"><b>Belts held</b>${belts.map(([d,b])=>`<div class="kv-row"><span>${esc(G.F[b.id].name)} · Div ${d}</span><span class="pill gold">🏆 Tha Phae Stadium champion · defended ${b.def} times</span></div>`).join("")}${venueBelts.map(({v,d,b})=>`<div class="kv-row"><span>${esc(G.F[b.id].name)} · Div ${d}</span><span class="pill gold">🏆 ${STADIUMS[v].name} champion · defended ${b.def} times</span></div>`).join("")}</div>`:""}
+   ${(()=>{const C=Object.values(G.contests||{}).sort((a,b)=>b.season-a.season);return C.length?`<div class="hall-y"><b>Camp Beauty Contest</b>${C.map(c=>`<div class="kv-row"><span>Year ${c.season} · ${(YEAR_COLORS.find(y=>y.k===c.color)||{}).n||""} · ${c.total}/70</span><span class="pill ${c.rank===1?"gold":""}">${c.rank===1?"🏆 Camp of the Year":`Rank ${c.rank}`}</span></div>`).join("")}</div>`:"";})()}
    ${T.length?T.map(yr).join(""):`<p class="meta">The first year isn't over yet · when it ends, everyone's results land here, one row per year</p>`}`;}
 const DECOR_STARS={N:1,R:2,SR:3,SSR:4,SS:5};
 const DECOR_SHORT={tree:"Trees",gate:"Gate",ring:"Ring",track:"Track",vehicle:"Vehicle",bags:"Bags"};
@@ -606,10 +607,12 @@ function decorHTML(){let total=0,owned=0;const slots=Object.entries(CAMP_DECOR);
  const tiles=Object.entries(D.items).map(([key,item])=>{const reason=decorUnlockReason(G,cur,key),sel=on===key;
    const price=reason?decorPrice(G,cur,key):0;
    return `<button class="dtile r-${item.r} ${sel?"on":""} ${reason?"lock":""} ${price?"buy":""}" data-act="${price?"decorbuy":"decor"}" data-k="${cur}" data-v="${key}" ${reason&&(!price||G.cash<price)?"disabled":""} aria-pressed="${sel}">
-     <span class="dstars" aria-label="Rank ${item.r}">${"★".repeat(DECOR_STARS[item.r])}</span><b>${esc(item.name)}</b>
+     <span class="dstars" aria-label="Rank ${item.r}">${"★".repeat(DECOR_STARS[item.r])}</span>${decorColor(cur,key)?`<span class="dcol${decorColor(cur,key)===yearColor(G).k?" yc":""}" style="--c:${COLOR_HEX[decorColor(cur,key)]}" title="${COLOR_NAME[decorColor(cur,key)]}">${decorColor(cur,key)===yearColor(G).k?"Year colour +2":""}</span>`:""}<b>${esc(item.name)}</b>
      <small>${sel?"✓ In use":price?`🛒 Buy ${fmt(price)}`:reason?"🔒 "+esc(reason):"Tap to use"}</small></button>`;}).join("");
  const ready=goldRematchReady(G);
- return `<section class="px card cpane decorpane ${(UI.csub||"money")==="decor"?"on":""}"><h3>Decorations <span class="pill">${owned}/${total} items</span></h3>
+ const yc=yearColor(G),cr=(G.contests||{})[G.season||1];
+ const ctBox=`<div class="ctbox" style="--yc:${yc.hex}"><span class="ycdot"></span><div><b>Lucky colour this year: ${yc.n}</b><small>${cr?`This year's contest: place ${cr.rank} (${cr.total}/70)`:G.week>40?"This year's contest is over":`Camp Beauty Contest in week ${CONTEST_WEEK} · current score about ${beautyTotal(G)}/70`} · matching decorations +2</small></div></div>`;
+ return `<section class="px card cpane decorpane ${(UI.csub||"money")==="decor"?"on":""}"><h3>Decorations <span class="pill">${owned}/${total} styles</span></h3>${ctBox}
   <div class="dprev"><canvas class="campcv" width="640" height="360" data-camp="1" aria-label="Camp preview with decorations"></canvas></div>
   <div class="dchips">${chips}</div>
   <div class="dtiles">${tiles}</div>
@@ -793,7 +796,8 @@ function reportHTML(){const r=G.lastReport;const ann=[];
    <div class="chips3"><span class="chip"><small>Students</small><b class="num pos">+${fmt(r.inc)}</b></span><span class="chip"><small>Expenses</small><b class="num neg">-${fmt(r.up+r.wg+(r.debtPay||0))}</b></span><span class="chip"><small>Cash</small><b class="num ${r.cash<0?"neg":""}">${fmt(r.cash)}</b></span></div>
    <details><summary>Results around the circuit (${r.log.length})</summary><div class="log">${r.log.map(l=>`<div>${esc(l)}</div>`).join("")||"<div>All quiet</div>"}</div></details>`;}
 // v1.81.1: "what's new" popup — shows once per save after loading, for players who started before this update
-const PATCH={id:"1.86.0",ver:"Muay Thai Moe v1.86.0",title:"Weekly report from Sirichai Camp",lead:"Bond is now an open-ended level, and cards have a detail page",items:[
+const PATCH={id:"1.86.0",ver:"Muay Thai Moe v1.86.0",title:"Weekly report from Sirichai Camp",lead:"This round adds the annual Camp Beauty Contest, open-ended bond levels, and a card detail page",items:[
+ ["🌸","Annual Camp Beauty Contest","At new year the District Chief announces a lucky colour; matching decorations score extra. In week 30 he walks your camp and scores seven areas, then the results are read out at the district office. Winners get prize money and fame"],
  ["♥","Bond levels","Bond no longer caps out: it shows as a heart level with a gauge to the next one. Past Lv.10 it keeps growing, and no longer fades"],
  ["🃏","Card page","Tap a card in the album to see its rarity, copies, spares and a short teaser before opening the story"],
  ["⬆","Level cards up yourself","Every duplicate is kept: spend it to level the card up (bond grows each level) or break it into stardust, with a confirm step"],
@@ -824,6 +828,7 @@ function modalHTML(){const m=UI.modal;let body="",foot=true;
   if(m.type==="gift")body=giftHTML(m.id);
   if(m.type==="petname"){const p=(G.pets||[])[m.i];if(!p){UI.modal=null;return "";}body=`<h2>Name the ${esc(PETS[p.k].name)}</h2><div class="petnm"><img class="peti" src="${petIcon(p.k)}" alt=""><input id="petname" maxlength="12" value="${esc(p.name)}" autocomplete="off"></div><p class="meta">This name shows up in camp scenes</p><button class="btn primary" id="petnamebtn" data-act="petnamesave" data-v="${m.i}">Name</button>`;}
   if(m.type==="card"){body=cardInfoHTML(m.id);foot=false;}
+  if(m.type==="contest"){body=contestHTML();foot=false;}
   if(m.type==="album"){const byC={};for(const id in CARDS)(byC[CARDS[id].c]=byC[CARDS[id].c]||[]).push(id);const own=G.cards||{};
     body=`<h2>Card album</h2><p class="meta">Collected ${Object.keys(own).length}/${Object.keys(CARDS).length} · tap a card for details</p>
      <div class="gacha"><span><b class="goldt">✦ ${G.dust||0}</b> stardust<small>Earned from wins, new cards and duplicates · guaranteed SSR in ${GACHA_PITY-(G.pity||0)} more</small></span><button class="btn sm gold" data-act="gacha" ${(G.dust||0)<GACHA_COST?"disabled":""}>Pull a card ${GACHA_COST}✦</button></div>${typeof loyGachaHTML==="function"?loyGachaHTML():""}
@@ -969,7 +974,21 @@ function afterWeekFlow(){playHonorQueue(afterWeekFlowMain);}
 function afterWeekFlowMain(){if(typeof cardCheck==="function"){const got=cardCheck(G);if(got.length){G.cardPend=(G.cardPend||[]).concat(got);}}if(typeof mailWeekly==="function"&&!G.ended)mailWeekly(G);if(typeof chatWeekly==="function"&&!G.ended)chatWeekly(G);runEvents(played=>{const fin=()=>{if(G.ended){startEnding();return;}
     if(typeof cardCheck==="function"){const g2=cardCheck(G);if(g2.length)G.cardPend=(G.cardPend||[]).concat(g2);}relTierCheck();if((G.newCerts||[]).length){const n=G.newCerts.map(k=>CAMP_AWARDS[k]?CAMP_AWARDS[k].name:k);G.newCerts=[];setTimeout(()=>toast(`📜 Certificate received: ${n.join(", ")} · see them in the Trophy Room`),600);}if(typeof OUTFITS!=="undefined"){G.outSeen=G.outSeen||{};const nu=Object.keys(OUTFITS).filter(k=>k!=="base"&&k!=="heart"&&!G.outSeen[k]&&outfitOk(G,null,k));nu.forEach(k=>G.outSeen[k]=1);if(nu.length)setTimeout(()=>toast(`New outfit unlocked: ${nu.map(k=>OUTFITS[k].name).join(", ")} · change it in the fighter profile, "Outfit" tab`),400);}if(UI.relUp&&UI.relUp.length){const m=UI.relUp.join(" / ");UI.relUp=[];setTimeout(()=>toast("♥ "+m),300);}
     if(G.levelUps&&G.levelUps.length){const ids=[...new Set(G.levelUps)];G.levelUps=[];AU.sfx("level");UI.modal={type:"levelup",ids};}else if((G.cardPend||[]).length){AU.sfx&&AU.sfx("level");UI.modal={type:"cardnew"};}render();};
-    const go=()=>coachBackScene(()=>aftermathScene(()=>tiredScene(()=>rinScene(fin))));if(played)go();else weeklyExtra(go);});}
+    const go=()=>coachBackScene(()=>aftermathScene(()=>tiredScene(()=>rinScene(()=>contestScene(fin)))));if(played)go();else weeklyExtra(go);});}
+// v1.86: week 30 — the district chief judges the camp, then the results night at the district office
+function contestScene(done){const S=G.season||1;if(G.ended||G.week<CONTEST_WEEK||G.week>40||(G.contests||{})[S]){done();return;}
+  runContest(G);save();UI.contestDone=done;UI.ctSkip=false;UI.ctT0=performance.now();UI.modal={type:"contest",ph:"walk"};AU.sfx&&AU.sfx("bell");render();}
+function contestHTML(){const S=G.season||1,R=(G.contests||{})[S];if(!R)return "";const yc=YEAR_COLORS.find(c=>c.k===R.color)||YEAR_COLORS[0],now=UI.ctSkip?" now":"";
+  if(UI.modal.ph==="walk")return `<h2>Camp Beauty Contest, Year ${S}</h2><p class="meta">The District Chief inspects the camp himself · lucky colour <b style="color: ${yc.hex}">● ${yc.n}</b> · matching decorations +2</p>
+    <div class="cfxwrap ctwrap" data-act="contestskip" role="button" aria-label="Skip scene"><canvas class="campcv" width="640" height="360" data-contest="walk"></canvas></div>
+    <div class="ctscore">${R.areas.map((a,i)=>`<div class="ctrow${now}" style="--d:${CT_START+i*CT_STEP+CT_WALK+200}ms"><span>${esc(a.n)}<small>${esc(a.item)}${a.match?` · <b style="color:${yc.hex}">Year colour +2</b>`:""}</small></span><i class="ctbar"><i style="width:${a.score*10}%"></i></i><b>${a.score}/10</b></div>`).join("")}
+     <div class="ctrow tot${now}" style="--d:${CT_START+R.areas.length*CT_STEP} ms"><span>Total</span><i></i><b>${R.total}/70</b></div></div>
+    <div class="mfoot"><button class="btn primary" data-act="contestaward">Go to the results ▸</button></div>`;
+  const ord=[2,1,0].filter(k=>R.field[k]),me=R.field.find(f=>f.me);
+  return `<h2>Camp Beauty results, Year ${S}</h2><div class="cfxwrap ctwrap" data-act="contestskip" role="button" aria-label="Skip scene"><canvas class="campcv" width="640" height="360" data-contest="award"></canvas></div>
+    <div class="ctscore">${ord.map((k,j)=>{const f=R.field[k];return `<div class="ctrow rk${k+1}${f.me?" me":""}${now}" style="--d:${[1600,4200,6800][j]}ms"><span>${["🥇","🥈","🥉"][k]} Place ${k+1} · ${esc(f.name)}</span><i></i><b>${f.score}/70</b></div>`;}).join("")}
+     <div class="ctrow tot${now}" style="--d:7600ms"><span>${R.rank===1?"🏆 Sirichai Camp wins!":`Sirichai Camp placed ${R.rank} of ${R.field.length} camps`}<small>${R.prize?`Prize ${fmt(R.prize)} · `:""} Fame +${R.rep}</small></span><i></i><b>${me?me.score:R.total}/70</b></div></div>
+    <div class="mfoot"><button class="btn primary" data-act="contestdone">Continue ▸</button></div>`;}
 // v1.15: a worn-out fighter asks for a rest week herself
 function tiredScene(done){G.tiredAt=G.tiredAt||{};const f=roster(G).find(x=>!x.injury&&x.fatigue>=58&&x.plan.preset!=="rest"&&(G.tiredAt[x.id]??-9)<gameWeek(G)-3);if(!f||!coachOn()&&f.fatigue<70){done();return;}
   G.tiredAt[f.id]=gameWeek(G);const ask=vary("tired_"+f.id,({kati:["Coach… my legs feel so heavy. Can I rest for a week?","My run this morning was even slower than yesterday… can I rest a little?","My shoulders won't lift anymore, Coach… I can still go, but…"],mali:["Waah… Mali can't lift her kicks anymore. Let me sleep for a whole week~","Mali fell asleep twice while stretching… can I rest?","Mali's legs are wobbling like jelly~ can I sleep today?"],rin:["My morning heart rate is abnormally high… my body needs rest","My fatigue graph has shot past the red line. I need a week off","I made three typos in my spreadsheet this morning… my body is warning me"]})[f.id]||["Can I rest a little?"]);
@@ -1351,6 +1370,11 @@ const ACT={
   petren:d=>{UI.modal={type:"petname",i:+d.v};render();setTimeout(()=>{const el=document.getElementById("petname");if(el){el.focus();el.select();}},60);},
   gacha:()=>{const r=gachaPull(G);if(!r)return;AU.sfx&&AU.sfx(CARDS[r.id].r==="SSR"||CARDS[r.id].r==="SR"?"level":"ui");save();UI.modal={type:"gacha",res:r};render();},
   album:()=>{UI.modal={type:"album"};render();},
+  contestskip:()=>{UI.ctSkip=true;document.querySelectorAll(".ctrow").forEach(e=>e.classList.add("now"));},
+  contestaward:()=>{const R=(G.contests||{})[G.season||1];UI.ctSkip=false;UI.ctT0=performance.now();UI.modal={type:"contest",ph:"award"};render();
+    if(R&&R.rank===1){setTimeout(()=>{if(UI.modal&&UI.modal.type==="contest"&&UI.modal.ph==="award"&&!UI.ctSkip)AU.sfx&&AU.sfx("champ");},6800);for(let i=0;i<6;i++)setTimeout(()=>{if(UI.modal&&UI.modal.type==="contest"&&UI.modal.ph==="award")AU.sfx&&AU.sfx("pop");},7200+i*1150);}
+    else setTimeout(()=>{if(UI.modal&&UI.modal.type==="contest")AU.sfx&&AU.sfx("ui");},6800);},
+  contestdone:()=>{const R=(G.contests||{})[G.season||1];UI.modal=null;UI.ctSkip=false;if(R&&R.rank===1)AU.sfx&&AU.sfx("level");const d=UI.contestDone;UI.contestDone=null;save();if(d)d();else render();},
   cardinfo:d=>{if(!CARDS[d.v])return;AU.sfx&&AU.sfx("ui");UI.modal={type:"card",id:d.v};render();},
   carddust:d=>{const C=CARDS[d.v],o=(G.cards||{})[d.v];if(!C||!o)return;const k=Math.min(+d.n||1,o.spare||0);if(!k)return;
     UI.modal={type:"confirm",title:"Break down into stardust?",ok:`Break down +✦${DUST_OF[C.r]*k}`,no:"Cancel",noAct:"cardinfo",noV:d.v,yes:"carddustok",id:d.v,k,
@@ -1396,8 +1420,8 @@ const ACT={
     if(n){AU.sfx("level");save();toast(`Up ${(SK_LINES[f.id]||[])[li]||""} ${n} times`);}render();},
   sksel:d=>{UI.skSel=d.id+":"+d.v;AU.sfx("ui");render();},
   newsok:()=>{G.newsSeen=PATCH.id;UI.modal=null;save();render();},
-  closeModal:()=>{const m=UI.modal;if(m&&m.type==="whatsnew"&&G){G.newsSeen=PATCH.id;save();}UI.modal=null;render();if(m&&m.after)m.after();},
-  closeModalBg:(d,e)=>{if(e.target.classList.contains("overlay")&&UI.modal&&!["report","levelup"].includes(UI.modal.type)){UI.modal=null;render();}},
+  closeModal:()=>{const m=UI.modal;if(m&&m.type==="contest"){ACT.contestdone();return;}if(m&&m.type==="whatsnew"&&G){G.newsSeen=PATCH.id;save();}UI.modal=null;render();if(m&&m.after)m.after();},
+  closeModalBg:(d,e)=>{if(e.target.classList.contains("overlay")&&UI.modal&&!["report","levelup","contest"].includes(UI.modal.type)){UI.modal=null;render();}},
   preset:d=>{if(trLocked(G.F[d.f]))return;const f=G.F[d.f];f.plan.preset=d.v;if(d.v==="rest")f.plan.intensity="normal";save();render();},
   intensity:d=>{if(trLocked(G.F[d.f]))return;G.F[d.f].plan.intensity=d.v;save();render();},
   consider:d=>{UI.modal={type:"consider",id:d.v};render();},

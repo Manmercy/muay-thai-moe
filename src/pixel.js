@@ -405,7 +405,7 @@ function mountCanvases(){
     LOOPS.add(t=>{if(!cv.isConnected)return;const look=key==="coach"?COACH_LOOK:key==="player"?(G?G.avatar:UI.creator):UI.creator;if(!look)return;
       x.clearRect(0,0,cv.width,cv.height);x.imageSmoothingEnabled=false;const fr={dy:Math.floor(t/400)%2,blink:Math.floor(t/150)%24===0};
       const c=CHIBI.canvasFor(look,fr);const s=Math.floor(Math.min(cv.width/24,cv.height/32));x.drawImage(c,(cv.width-24*s)/2,cv.height-32*s,24*s,32*s);});});
-  if(typeof mountCampFx==="function")mountCampFx();
+  if(typeof mountCampFx==="function")mountCampFx();if(typeof mountContest==="function")mountContest();
   document.querySelectorAll("canvas[data-drill]").forEach(cv=>{const x=cv.getContext("2d");const id=cv.dataset.drill;
     LOOPS.add(t=>{if(!cv.isConnected||!G)return;const f=G.F[id],D=UI.drill;if(!f)return;const W=cv.width,H=cv.height;x.clearRect(0,0,W,H);x.imageSmoothingEnabled=false;
       const dt=D&&D.hitT?t-D.hitT:9999,hit=dt<600;const row=hit?(DRILL_ROW[f.plan.preset]||"punch"):"guard";const fr=hit?Math.min(3,Math.floor(dt/110)):Math.floor(t/260)%4;
@@ -532,3 +532,59 @@ function drawCampFx(x,k,t){const C=CFX[k]||CFX.rest,W=x.canvas.width,H=x.canvas.
 }
 function mountCampFx(){document.querySelectorAll("canvas[data-campfx]").forEach(cv=>{const x=cv.getContext("2d");const k=cv.dataset.campfx;const t0=performance.now();
   LOOPS.add(t=>{if(!cv.isConnected)return;drawCampFx(x,k,t-t0+400);});});}
+// ===== v1.86: camp beauty contest scenes =====
+const NAI_LOOK={kind:"manager",gender:"m",hairStyle:"crop",hair:"#8e939c",skin:"#b97d55",eyes:"#3a2a24",outfit:"polo",outfitColor:"#c4a57a",pantsColor:"#b0926a",stache:"#5d6068",epaulet:"#e0b41b"};
+const AIDE_LOOK={kind:"manager",gender:"m",hairStyle:"crop",hair:"#2b2530",skin:"#d9a27b",eyes:"#3a2a24",outfit:"tee",outfitColor:"#f2f2f2",pantsColor:"#1f1f24",glasses:"glasses"};
+const AIDE2_LOOK={...AIDE_LOOK,gender:"f",hairStyle:"bob",hair:"#3a2a24",skin:"#eec1a0",glasses:"none",outfitColor:"#f4f1ea",pantsColor:"#2c3a5a"};
+const CT_SPOT={gate:[34,152],bags:[134,128],tree:[176,118],ring:[214,136],vehicle:[262,174],track:[110,176],clean:[70,160]};
+const CT_STEP=2600,CT_WALK=1000,CT_START=700;
+function ctChib(ctx,S,look,key,x,y,sc,flip,dy){const c=chibiCache(look,key+(dy||0),{dy:dy||0});ctx.save();ctx.imageSmoothingEnabled=false;
+  if(flip){ctx.translate((x+24*sc)*S,0);ctx.scale(-1,1);ctx.drawImage(c,0,y*S,24*S*sc,32*S*sc);}else ctx.drawImage(c,x*S,y*S,24*S*sc,32*S*sc);ctx.restore();}
+function ctBubble(ctx,S,x,y,txt,hi){ctx.save();ctx.font=`700 ${8*S}px "Chakra Petch","IBM Plex Sans Thai",sans-serif`;const w=ctx.measureText(txt).width/S+10,W=ctx.canvas.width/S;
+  const bx=Math.max(2,Math.min(W-w-2,x-w/2)),by=y-16;ctx.fillStyle="#1b1230";ctx.fillRect((bx-1)*S,(by-1)*S,(w+2)*S,14*S);ctx.fillStyle=hi?"#ffe58a":"#ffffff";ctx.fillRect(bx*S,by*S,w*S,12*S);
+  ctx.fillRect((x-2)*S,(by+12)*S,4*S,3*S);ctx.fillStyle="#1b1230";ctx.textAlign="center";ctx.textBaseline="middle";ctx.fillText(txt,(bx+w/2)*S,(by+6.5)*S);ctx.restore();}
+function ctVerdict(v){return v>=10?"เต็ม 10!!":v>=8?"ดีมาก!":v>=6?"ใช้ได้":v>=4?"พอไหว":"อืม…";}
+/* the chief walks the real camp (with the player's own decorations), stopping at each judged area */
+function drawContestWalk(ctx,G,t,R){drawCamp(ctx,G,t);const S=2,A=R.areas;let x=-20,y=160,flip=false,moving=true,say=null,hi=false;
+  const pts=A.map(a=>CT_SPOT[a.k]||[160,160]);
+  if(t<CT_START){x=-20+(t/CT_START)*(pts[0][0]+20)*.4;y=pts[0][1];}
+  else{const i=Math.min(A.length,Math.floor((t-CT_START)/CT_STEP)),ph=(t-CT_START)-i*CT_STEP;
+    if(i>=A.length){x=150;y=158;moving=false;say=`รวม ${R.total}/70 · ไปประกาศผลที่อำเภอ!`;hi=true;}
+    else{const from=i?pts[i-1]:[-20*.6+pts[0][0]*.4,pts[0][1]],to=pts[i],k=Math.min(1,ph/CT_WALK);x=from[0]+(to[0]-from[0])*k;y=from[1]+(to[1]-from[1])*k;flip=to[0]<from[0];moving=k<1;
+      if(!moving){const a=A[i];say=`${a.n} ${a.score}/10 ${ctVerdict(a.score)}`;hi=a.score>=10||a.match;
+        if(a.match&&Math.floor(t/180)%2){const c=COLOR_HEX[R.color]||"#fff";for(let s=0;s<6;s++){const ang=s*1.05+t/400;ctx.fillStyle=c;ctx.fillRect((to[0]+12+Math.cos(ang)*14)*S,(to[1]-6+Math.sin(ang)*10)*S,2*S,2*S);}}}}}
+  const bob=moving?Math.floor(t/130)%2:Math.floor(t/520)%2;
+  // aide trails a step behind, clipboard in hand
+  ctChib(ctx,S,AIDE_LOOK,"aide",x-16*(flip?-1:1),y+2,.8,flip,bob);ctx.fillStyle="#8a5a32";ctx.fillRect((x-16*(flip?-1:1)+14)*S,(y+16)*S,5*S,7*S);ctx.fillStyle="#f4f1ea";ctx.fillRect((x-16*(flip?-1:1)+15)*S,(y+17)*S,3*S,5*S);
+  ctChib(ctx,S,NAI_LOOK,"nai",x,y,.95,flip,bob);
+  if(say)ctBubble(ctx,S,x+11,y-2,say,hi);}
+/* results night at the district office: stage, chief and aides, managers of every camp below; fireworks if we win */
+function drawContestAward(ctx,G,t,R){const S=2,P=(x,y,w,h,c)=>{ctx.fillStyle=c;ctx.fillRect(Math.round(x)*S,Math.round(y)*S,Math.round(w)*S,Math.round(h)*S);};ctx.imageSmoothingEnabled=false;
+  ["#140f2a","#1d1538","#291c48","#3a2456","#4a2b5e"].forEach((c,i)=>P(0,i*22,320,22,c));for(let i=0;i<30;i++){const sx=(i*53)%320,sy=(i*29)%90;if((Math.floor(t/500)+i)%4)P(sx,sy,1,1,"#efe6ff");}
+  P(0,110,320,70,"#3a2b3a");for(let i=0;i<40;i++)P((i*37)%320,112+(i*13)%66,2,1,"#47364a");
+  // district office building + stage
+  P(40,14,240,74,"#d9cdb4");P(40,14,240,4,"#b8ab92");for(let i=0;i<6;i++)P(56+i*38,56,18,22,"#6f6a7a");P(150,6,20,9,"#c8283c");
+  P(64,20,192,22,"#a8202f");P(64,20,192,2,"#f2c14e");P(64,40,192,2,"#f2c14e");
+  ctx.save();ctx.font=`700 ${9*S}px "Chakra Petch","IBM Plex Sans Thai",sans-serif`;ctx.fillStyle="#ffe58a";ctx.textAlign="center";ctx.textBaseline="middle";ctx.fillText(`ประกวดค่ายสวยประจำปี ${R.season} · ที่ว่าการอำเภอ`,160*S,31*S);ctx.restore();
+  P(56,96,208,16,"#6a4a32");P(56,96,208,3,"#8a6a4a");for(let i=0;i<13;i++)P(58+i*16,100,8,12,i%2?"#c8283c":"#f2f2f2");
+  for(let i=0;i<24;i++){const on=(Math.floor(t/350)+i)%3;P(50+i*9.5,47+Math.sin(i/2)*2,2,2,["#ffd36b","#ff7b8a","#8ad7ff"][on]);}
+  const bob=k=>Math.floor(t/520+k)%2;
+  ctChib(ctx,S,AIDE_LOOK,"aideA",112,68,.9,false,bob(1));ctChib(ctx,S,AIDE2_LOOK,"aideB",188,68,.9,true,bob(2));ctChib(ctx,S,NAI_LOOK,"naiA",148,64,1.05,false,bob(0));
+  // trophy table
+  P(206,84,22,12,"#5a3a22");P(212,74,10,10,"#f2c14e");P(214,70,6,4,"#f2c14e");P(215,84,4,2,"#d9a520");
+  // crowd of camp managers (ours wears the player's look)
+  const field=R.field,phase=t<1600?0:t<4200?1:t<6800?2:3,win=R.rank===1;
+  const crowd=[];for(let i=0;i<9;i++){const r=mulberry32(900+i);crowd.push({x:22+i*32+(i%2)*6,y:136+(i%2)*10,look:{kind:"manager",gender:r()<.5?"m":"f",hairStyle:["crop","bob","pony","long"][Math.floor(r()*4)],hair:["#2b2530","#5a3a2a","#a0663a","#c9ced8"][Math.floor(r()*4)],skin:["#f6d7c3","#eec1a0","#d9a27b","#b97d55"][Math.floor(r()*4)],eyes:"#3a2a24",outfit:["tee","polo","suit","hoodie"][Math.floor(r()*4)],outfitColor:["#c8283c","#2c5fb3","#2f8a4f","#e0a91b","#6a3fa0","#f2f2f2"][Math.floor(r()*6)],pantsColor:"#1f1f24"}});}
+  const meI=4;crowd.forEach((c,i)=>{const me=i===meI,jump=phase===3&&(me?win:!win&&i%3===0)?(Math.floor(t/180+i)%2?-4:0):0;
+    ctChib(ctx,S,me&&G.avatar?{...G.avatar}:c.look,"crowd"+i+(me?"me":""),c.x,c.y+jump,.9,i>meI,bob(i));});
+  {const c=crowd[meI];P(c.x+8,c.y-10,6,4,"#ffe58a");P(c.x+10,c.y-6,2,3,"#ffe58a");}
+  const nm=k=>field[k]?`${field[k].name} (${field[k].score})`:"";
+  const line=phase===0?"ขอประกาศผลการประกวดค่ายสวยประจำปี!":phase===1?`อันดับ 3 … ${nm(2)}`:phase===2?`อันดับ 2 … ${nm(1)}`:`ชนะเลิศ … ${nm(0)}!!`;
+  ctBubble(ctx,S,160,60,line,phase===3);
+  if(phase===3&&win){// fireworks
+    for(let b=0;b<5;b++){const per=1150,tt=(t-6800+b*230)%per,cyc=Math.floor((t-6800+b*230)/per),rr=mulberry32(b*97+cyc*13),cx=30+rr()*260,cy=14+rr()*50,col=["#ffd36b","#ff7b8a","#8ad7ff","#9dff8a","#f2a0ff"][(b+cyc)%5];
+      if(tt<300){P(cx,cy+60-tt/5,1,3,"#fff3c4");}else{const k=(tt-300)/(per-300);ctx.globalAlpha=Math.max(0,1-k);for(let s=0;s<12;s++){const a=s/12*Math.PI*2;P(cx+Math.cos(a)*k*26,cy+Math.sin(a)*k*20+k*k*8,2,2,col);}ctx.globalAlpha=1;}}
+    for(let i=0;i<24;i++){const ph=((t/1600)+i/24)%1;P((i*41+Math.sin(t/300+i)*6)%320,ph*180,2,3,["#ffd36b","#ff7b8a","#8ad7ff","#9dff8a"][i%4]);}}}
+function mountContest(){document.querySelectorAll("canvas[data-contest]").forEach(cv=>{const x=cv.getContext("2d"),k=cv.dataset.contest;
+  LOOPS.add(t=>{if(!cv.isConnected||!G)return;const R=(G.contests||{})[G.season||1];if(!R)return;let tt=t-(UI.ctT0||t);if(UI.ctSkip)tt+=60000;x.clearRect(0,0,cv.width,cv.height);
+    if(k==="walk")drawContestWalk(x,G,tt,R);else drawContestAward(x,G,tt,R);});});}

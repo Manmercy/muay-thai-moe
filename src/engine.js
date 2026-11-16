@@ -553,6 +553,36 @@ function grantDecorUnlocks(G){G.decorUnlocks=G.decorUnlocks||{};for(const [slot,
 // v1.83.1: two separate kinds — earned pieces come only from their condition; shop pieces are bought (late-game money sink)
 function decorPrice(G,slot,key){const D=CAMP_DECOR[slot]&&CAMP_DECOR[slot].items[key];if(!D||!D.shop||!decorUnlockReason(G,slot,key))return 0;return D.price||0;}
 function buyDecor(G,slot,key){const c=decorPrice(G,slot,key);if(!c||G.cash<c)return false;G.cash-=c;G.decorUnlocks=G.decorUnlocks||{};G.decorUnlocks[slot]=G.decorUnlocks[slot]||[];if(!G.decorUnlocks[slot].includes(key))G.decorUnlocks[slot].push(key);G.decor=G.decor||{};G.decor[slot]=key;G.decorSpent=(G.decorSpent||0)+c;return true;}
+// ===== v1.86: annual camp beauty contest =====
+/* the district chief reads the year's lucky colour at new year; at week 30 he walks the camp and scores seven areas out of 10 */
+const YEAR_COLORS=[{k:"red",n:"สีแดง",hex:"#d23246",luck:"สีแดงปีนี้ ใจกล้า สู้ไม่ถอย"},{k:"green",n:"สีเขียว",hex:"#3f9a4f",luck:"สีเขียวปีนี้ ร่มเย็น เติบโตงอกงาม"},
+  {k:"blue",n:"สีน้ำเงิน",hex:"#2c5fb3",luck:"สีน้ำเงินปีนี้ ใจนิ่ง คิดการใหญ่สำเร็จ"},{k:"pink",n:"สีชมพู",hex:"#e07aa0",luck:"สีชมพูปีนี้ มีเสน่ห์ คนรักคนหลง"},
+  {k:"white",n:"สีขาว",hex:"#f2f2f2",luck:"สีขาวปีนี้ บริสุทธิ์ใจ ผู้ใหญ่เมตตา"},{k:"orange",n:"สีส้ม",hex:"#e8892a",luck:"สีส้มปีนี้ ไฟแรง งานรุ่ง"},
+  {k:"yellow",n:"สีเหลือง",hex:"#e0b41b",luck:"สีเหลืองปีนี้ ปัญญาเฉียบ เงินทองไหลมา"},{k:"gold",n:"สีทอง",hex:"#f2c14e",luck:"สีทองปีนี้ บารมีสูง เกียรติยศมาเยือน"}];
+const DECOR_COL={tree:{plain:"green",blossom:"pink",sakura:"pink",champion:"gold",golden:"gold",flame:"red",lilawadee:"white",rachaphruek:"yellow"},
+  gate:{plain:"brown",painted:"red",lantern:"orange",trophy:"gold",gold:"gold",lanna:"brown",jade:"green"},
+  ring:{plain:"white",red:"red",blue:"blue",sponsor:"orange",gold:"gold",green:"green",purple:"purple",black:"black"},
+  track:{dirt:"brown",chalk:"white",gravel:"brown",rubber:"red",lantern:"orange",blue:"blue",green:"green"},
+  vehicle:{songthaew:"yellow",minibus:"white",tourbus:"blue",limo:"black",goldvan:"gold",rotdaeng:"red",pinkvan:"pink"},
+  bags:{plain:"brown",red:"red",blue:"blue",team:"red",gold:"gold",green:"green",black:"black",pink:"pink"}};
+const COLOR_NAME={red:"สีแดง",green:"สีเขียว",blue:"สีน้ำเงิน",pink:"สีชมพู",white:"สีขาว",orange:"สีส้ม",yellow:"สีเหลือง",gold:"สีทอง",brown:"สีน้ำตาล",purple:"สีม่วง",black:"สีดำ"};
+const COLOR_HEX={red:"#d23246",green:"#3f9a4f",blue:"#2c5fb3",pink:"#e07aa0",white:"#f2f2f2",orange:"#e8892a",yellow:"#e0b41b",gold:"#f2c14e",brown:"#8a5a32",purple:"#7a3fc0",black:"#24202c"};
+const decorColor=(slot,key)=>(DECOR_COL[slot]||{})[key]||null;
+function yearColor(G,season){const s=season||G.season||1;return YEAR_COLORS[(stableHash("ycol"+(G.seed||1))+s*3)%YEAR_COLORS.length];}
+const CONTEST_WEEK=30,BEAUTY_RARITY={N:4,R:6,SR:7,SSR:8,SS:9},CONTEST_PRIZE=[30000,15000,8000];
+const BEAUTY_AREAS=[["gate","ซุ้มทางเข้า"],["bags","กระสอบทราย"],["tree","ต้นไม้"],["ring","เวทีมวย"],["vehicle","รถประจำค่าย"],["track","ลู่วิ่ง"],["clean","ความสะอาด"]];
+function beautyAreas(G){const yc=yearColor(G).k;return BEAUTY_AREAS.map(([k,n])=>{
+  if(k==="clean"){const v=clamp(Math.round((G.camp&&G.camp.beauty)||0),1,10);return {k,n,score:v,base:v,match:false,item:v>=8?"ลานสะอาดเอี่ยม":v>=5?"ลานเรียบร้อย":"ยังรก ๆ อยู่"};}
+  const key=decorChoice(G,k),D=CAMP_DECOR[k].items[key]||{},none=key==="none",base=none?1:BEAUTY_RARITY[D.r]||4,match=!none&&decorColor(k,key)===yc;
+  return {k,n,score:Math.min(10,base+(match?2:0)),base,match,item:D.name||""};});}
+const beautyTotal=G=>beautyAreas(G).reduce((s,a)=>s+a.score,0);
+const RIVAL_CAMPS=[["ค่ายพยัคฆ์ทอง",7.1,.25],["ค่ายเพชรลานนา",6.0,.2],["ค่ายส.แม่ปิง",5.4,.18],["ค่ายลูกดอยคำ",4.8,.15]];
+function runContest(G){const S=G.season||1;G.contests=G.contests||{};if(G.contests[S])return G.contests[S];const rng=mulberry32((G.seed||1)*17+S*9173);
+  const areas=beautyAreas(G),me=areas.reduce((s,a)=>s+a.score,0);
+  const field=RIVAL_CAMPS.map(([name,mu,gr])=>{let t=0;for(let i=0;i<7;i++)t+=clamp(Math.round(mu+(S-1)*gr+(rng()-.5)*2.4),2,10);return {name,score:Math.min(t,66)};});
+  field.push({name:"ค่ายศิริชัย",score:me,me:true});field.sort((a,b)=>b.score-a.score||(b.me?1:0)-(a.me?1:0));const rank=field.findIndex(x=>x.me)+1;
+  const prize=CONTEST_PRIZE[rank-1]||0,rep=[4,2,1][rank-1]||.5;G.cash+=prize;G.rep+=rep;if(rank===1){G.beautyWins=(G.beautyWins||0)+1;}
+  const R={season:S,color:yearColor(G).k,areas,total:me,field,rank,prize,rep};G.contests[S]=R;return R;}
 function decorChoice(G,slot){const key=G.decor&&G.decor[slot];return decorUnlocked(G,slot,key)?key:decorDefault(slot);}
 const FACILITIES={
   gym:{name:"อุปกรณ์ซ้อม",cost:[20000,35000,60000],desc:"ผลการฝึก +10% ต่อระดับ"},

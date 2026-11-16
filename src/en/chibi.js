@@ -129,6 +129,8 @@ function managerLayers(st){
   out.push({rows:st.hairStyle==="crop"?L.hairFrontCrop:L.hairFrontBob,map:hairMap,move:"all"});
   if(st.hat&&st.hat!=="none")out.push({rows:LM[st.hat],map:{o:hat.outline,c:hat.base,d:hat.dark},move:"all"});
   if(st.glasses&&st.glasses!=="none")out.push({rows:LM[st.glasses],map:{o:"#1b1520",f:"#3a3550"},move:"all"});
+  if(st.stache)out.push({rows:{11:".........oooooo........."},map:{o:st.stache},move:"all"}); /* v1.86: the district chief's moustache */
+  if(st.epaulet)out.push({rows:{15:".....oyy........yyo....."},map:{o:"#7a5a10",y:st.epaulet},move:"all"});
   return out;}
 function rowsOf(rows){return Array.isArray(rows)?rows.map((r,i)=>[i,r]):Object.entries(rows).map(([k,r])=>[+k,r]);}
 // frame: {dy, blink}

@@ -35,7 +35,7 @@ const cardFaceSrc=C=>{const scene=(C.steps||[]).find(s=>s.n===C.c)||{},mood=scen
   return `${ASSET}${C.c}_casual${suffix}_face.webp`;};
 const cardArtHTML=(C,lazy=false)=>`<span class="card-art" style="--card-scene:url('${ASSET}${BGIMG[C.bg]||BGIMG.camp}')"><img src="${cardFaceSrc(C)}" alt="" ${lazy?'loading="lazy" decoding="async"':""}></span>`;
 // v1.34: portraits for the market and helmet-gang side characters (matched by speaker name, or st.img)
-const NPC_IMG=[[/แม่ค้า|ป้าศรี|Auntie Sri|vendor/,"vendor_green"],[/ป้าแต๋ว|เจ๊หมวย|ป้าขาย|Auntie Taew|Jae Muay/,"vendor_red"],[/เสี่ยหมวกทองคำ|Big Boss Golden Helmet/,"gang_boss"],[/หมวก|แจ็กเก็ต|Helmet|Jacket/,"gang_group"],[/ยาย|Grandma/,"grandma"]];
+const NPC_IMG=[[/นายอำเภอ|District Chief/,"nai"],[/แม่ค้า|ป้าศรี|Auntie Sri|vendor/,"vendor_green"],[/ป้าแต๋ว|เจ๊หมวย|ป้าขาย|Auntie Taew|Jae Muay/,"vendor_red"],[/เสี่ยหมวกทองคำ|Big Boss Golden Helmet/,"gang_boss"],[/หมวก|แจ็กเก็ต|Helmet|Jacket/,"gang_group"],[/ยาย|Grandma/,"grandma"]];
 const npcImg=st=>st.img||(st.who&&(NPC_IMG.find(([r])=>r.test(st.who))||[])[1])||null;
 const TIER_BG={evloy:"bg_river.webp",pro:"bg_fair.webp",semi:"bg_hall.webp",local:"bg_local.webp",district:"bg_district.webp",final:"bg_final.webp",exhibition:"bg_fair.webp",special:"bg_district.webp",lab:"bg_hall.webp",quest:"bg_food.webp",beast:"bg_fair.webp",dm:"bg_hall.webp"};
 const gymBg=()=>`gym${G?campLevel(G):1}.webp`;
@@ -595,6 +595,7 @@ function hallHTML(){const T=(G.titles||[]).slice().reverse(),H=(G.honors||[]).sl
     return `<div class="hall-y"><b>ปีที่ ${t.season}</b>${res.length?res.map(r=>`<div class="kv-row"><span>${esc(r.name)} · รุ่น ${r.d}</span><span class="pill ${r.c||""}">${r.t}</span></div>`).join(""):'<p class="meta">ปีนั้นยังไม่ผ่านรอบตำบล แต่ค่ายยังอยู่ครบ</p>'}</div>`;};
   return `${trophyRoomHTML()}${H.length?`<details class="hall-y hall-list"><summary><b>รายการชัยชนะสำคัญ (${H.length})</b></summary>${H.map(h=>`<div class="kv-row"><span>${esc(G.F[h.id]?.name||h.id)} · รุ่น ${h.div} · ${h.season?`ปี ${h.season} สัปดาห์ ${h.week}`:"ผลงานก่อนอัปเดต"}</span><span class="pill gold">🏆 ${honorLabel(h.kind,h.venue)}</span></div>`).join("")}</details>`:""}
    ${belts.length||venueBelts.length?`<div class="hall-y"><b>เข็มขัดที่ครองอยู่</b>${belts.map(([d,b])=>`<div class="kv-row"><span>${esc(G.F[b.id].name)} · รุ่น ${d}</span><span class="pill gold">🏆 แชมป์เวทีท่าแพ · ป้องกัน ${b.def} ครั้ง</span></div>`).join("")}${venueBelts.map(({v,d,b})=>`<div class="kv-row"><span>${esc(G.F[b.id].name)} · รุ่น ${d}</span><span class="pill gold">🏆 แชมป์${STADIUMS[v].name} · ป้องกัน ${b.def} ครั้ง</span></div>`).join("")}</div>`:""}
+   ${(()=>{const C=Object.values(G.contests||{}).sort((a,b)=>b.season-a.season);return C.length?`<div class="hall-y"><b>ประกวดค่ายสวยประจำปี</b>${C.map(c=>`<div class="kv-row"><span>ปีที่ ${c.season} · ${(YEAR_COLORS.find(y=>y.k===c.color)||{}).n||""} · ${c.total}/70</span><span class="pill ${c.rank===1?"gold":""}">${c.rank===1?"🏆 ค่ายสวยประจำปี":`อันดับ ${c.rank}`}</span></div>`).join("")}</div>`:"";})()}
    ${T.length?T.map(yr).join(""):`<p class="meta">ยังไม่ครบปีแรก · จบปีแล้วผลงานของทุกคนจะมาอยู่ที่นี่ ปีละหนึ่งแถว</p>`}`;}
 const DECOR_STARS={N:1,R:2,SR:3,SSR:4,SS:5};
 const DECOR_SHORT={tree:"ต้นไม้",gate:"ซุ้ม",ring:"เวที",track:"ลู่วิ่ง",vehicle:"รถค่าย",bags:"กระสอบ"};
@@ -606,10 +607,12 @@ function decorHTML(){let total=0,owned=0;const slots=Object.entries(CAMP_DECOR);
  const tiles=Object.entries(D.items).map(([key,item])=>{const reason=decorUnlockReason(G,cur,key),sel=on===key;
    const price=reason?decorPrice(G,cur,key):0;
    return `<button class="dtile r-${item.r} ${sel?"on":""} ${reason?"lock":""} ${price?"buy":""}" data-act="${price?"decorbuy":"decor"}" data-k="${cur}" data-v="${key}" ${reason&&(!price||G.cash<price)?"disabled":""} aria-pressed="${sel}">
-     <span class="dstars" aria-label="ระดับ ${item.r}">${"★".repeat(DECOR_STARS[item.r])}</span><b>${esc(item.name)}</b>
+     <span class="dstars" aria-label="ระดับ ${item.r}">${"★".repeat(DECOR_STARS[item.r])}</span>${decorColor(cur,key)?`<span class="dcol${decorColor(cur,key)===yearColor(G).k?" yc":""}" style="--c:${COLOR_HEX[decorColor(cur,key)]}" title="${COLOR_NAME[decorColor(cur,key)]}">${decorColor(cur,key)===yearColor(G).k?"สีปี +2":""}</span>`:""}<b>${esc(item.name)}</b>
      <small>${sel?"✓ ใช้อยู่":price?`🛒 ซื้อ ${fmt(price)}`:reason?"🔒 "+esc(reason):"แตะเพื่อใช้"}</small></button>`;}).join("");
  const ready=goldRematchReady(G);
- return `<section class="px card cpane decorpane ${(UI.csub||"money")==="decor"?"on":""}"><h3>ตกแต่งค่าย <span class="pill">${owned}/${total} แบบ</span></h3>
+ const yc=yearColor(G),cr=(G.contests||{})[G.season||1];
+ const ctBox=`<div class="ctbox" style="--yc:${yc.hex}"><span class="ycdot"></span><div><b>สีมงคลปีนี้: ${yc.n}</b><small>${cr?`ประกวดปีนี้จบแล้ว · อันดับ ${cr.rank} (${cr.total}/70)`:G.week>40?"ประกวดปีนี้ผ่านไปแล้ว":`ประกวดค่ายสวย สัปดาห์ที่ ${CONTEST_WEEK} · ตอนนี้ได้ราว ${beautyTotal(G)}/70`} · ของตกแต่งสีตรงได้ +2</small></div></div>`;
+ return `<section class="px card cpane decorpane ${(UI.csub||"money")==="decor"?"on":""}"><h3>ตกแต่งค่าย <span class="pill">${owned}/${total} แบบ</span></h3>${ctBox}
   <div class="dprev"><canvas class="campcv" width="640" height="360" data-camp="1" aria-label="ตัวอย่างค่ายหลังตกแต่ง"></canvas></div>
   <div class="dchips">${chips}</div>
   <div class="dtiles">${tiles}</div>
@@ -793,7 +796,8 @@ function reportHTML(){const r=G.lastReport;const ann=[];
    <div class="chips3"><span class="chip"><small>นักเรียน</small><b class="num pos">+${fmt(r.inc)}</b></span><span class="chip"><small>ค่าใช้จ่าย</small><b class="num neg">-${fmt(r.up+r.wg+(r.debtPay||0))}</b></span><span class="chip"><small>เงินสด</small><b class="num ${r.cash<0?"neg":""}">${fmt(r.cash)}</b></span></div>
    <details><summary>ผลการชกในวงการ (${r.log.length})</summary><div class="log">${r.log.map(l=>`<div>${esc(l)}</div>`).join("")||"<div>เงียบสงบ</div>"}</div></details>`;}
 // v1.81.1: "what's new" popup — shows once per save after loading, for players who started before this update
-const PATCH={id:"1.86.0",ver:"Muay Thai Moe v1.86.0",title:"รายงานประจำสัปดาห์จากค่ายศิริชัย",lead:"รอบนี้ความสนิทเป็นเลเวลไม่มีเพดาน และการ์ดมีหน้ารายละเอียด",items:[
+const PATCH={id:"1.86.0",ver:"Muay Thai Moe v1.86.0",title:"รายงานประจำสัปดาห์จากค่ายศิริชัย",lead:"รอบนี้มีประกวดค่ายสวยประจำปี ความสนิทเป็นเลเวลไม่มีเพดาน และการ์ดมีหน้ารายละเอียด",items:[
+ ["🌸","ประกวดค่ายสวยประจำปี","ต้นปีนายอำเภอประกาศสีมงคล ของตกแต่งสีตรงได้คะแนนพิเศษ สัปดาห์ที่ 30 นายอำเภอมาเดินดูค่ายให้คะแนน 7 ด้าน แล้วไปลุ้นผลที่อำเภอ ชนะเลิศได้เงินรางวัลและชื่อเสียง"],
  ["♥","ความสนิทเป็นเลเวล","ความสนิทไม่มีเต็มแล้ว แสดงเป็นหัวใจ Lv. พร้อมเกจถึงขั้นถัดไป ผ่าน Lv.10 ไปแล้วยังสนิทขึ้นได้เรื่อย ๆ และไม่จางลงอีก"],
  ["🃏","หน้าการ์ด","แตะการ์ดในอัลบั้มเพื่อดูระดับ จำนวนที่มี ใบซ้ำ และคำโปรยสั้น ๆ ก่อนกดดูเรื่องราว"],
  ["⬆","อัปขั้นการ์ดเอง","การ์ดซ้ำเก็บไว้ให้ทุกใบ เลือกเองว่าจะใช้อัปขั้นการ์ด (ความสนิทเพิ่มทุกขั้น) หรือย่อยเป็นเศษดาว มีหน้ายืนยันก่อนย่อย"],
@@ -824,6 +828,7 @@ function modalHTML(){const m=UI.modal;let body="",foot=true;
   if(m.type==="gift")body=giftHTML(m.id);
   if(m.type==="petname"){const p=(G.pets||[])[m.i];if(!p){UI.modal=null;return "";}body=`<h2>ตั้งชื่อ${esc(PETS[p.k].name)}</h2><div class="petnm"><img class="peti" src="${petIcon(p.k)}" alt=""><input id="petname" maxlength="12" value="${esc(p.name)}" autocomplete="off"></div><p class="meta">ชื่อนี้จะโผล่ในฉากต่าง ๆ ของค่าย</p><button class="btn primary" id="petnamebtn" data-act="petnamesave" data-v="${m.i}">ตั้งชื่อ</button>`;}
   if(m.type==="card"){body=cardInfoHTML(m.id);foot=false;}
+  if(m.type==="contest"){body=contestHTML();foot=false;}
   if(m.type==="album"){const byC={};for(const id in CARDS)(byC[CARDS[id].c]=byC[CARDS[id].c]||[]).push(id);const own=G.cards||{};
     body=`<h2>อัลบั้มการ์ด</h2><p class="meta">เก็บได้ ${Object.keys(own).length}/${Object.keys(CARDS).length} ใบ · แตะการ์ดเพื่อดูรายละเอียด</p>
      <div class="gacha"><span><b class="goldt">✦ ${G.dust||0}</b> เศษดาว<small>ได้จากชนะไฟต์ การ์ดใหม่ และการ์ดซ้ำ · การันตี SSR อีก ${GACHA_PITY-(G.pity||0)} ครั้ง</small></span><button class="btn sm gold" data-act="gacha" ${(G.dust||0)<GACHA_COST?"disabled":""}>สุ่มการ์ด ${GACHA_COST}✦</button></div>${typeof loyGachaHTML==="function"?loyGachaHTML():""}
@@ -969,7 +974,21 @@ function afterWeekFlow(){playHonorQueue(afterWeekFlowMain);}
 function afterWeekFlowMain(){if(typeof cardCheck==="function"){const got=cardCheck(G);if(got.length){G.cardPend=(G.cardPend||[]).concat(got);}}if(typeof mailWeekly==="function"&&!G.ended)mailWeekly(G);if(typeof chatWeekly==="function"&&!G.ended)chatWeekly(G);runEvents(played=>{const fin=()=>{if(G.ended){startEnding();return;}
     if(typeof cardCheck==="function"){const g2=cardCheck(G);if(g2.length)G.cardPend=(G.cardPend||[]).concat(g2);}relTierCheck();if((G.newCerts||[]).length){const n=G.newCerts.map(k=>CAMP_AWARDS[k]?CAMP_AWARDS[k].name:k);G.newCerts=[];setTimeout(()=>toast(`📜 ได้รับเกียรติบัตร: ${n.join(", ")} · ดูได้ที่ห้องถ้วยรางวัล`),600);}if(typeof OUTFITS!=="undefined"){G.outSeen=G.outSeen||{};const nu=Object.keys(OUTFITS).filter(k=>k!=="base"&&k!=="heart"&&!G.outSeen[k]&&outfitOk(G,null,k));nu.forEach(k=>G.outSeen[k]=1);if(nu.length)setTimeout(()=>toast(`ปลดล็อกชุดใหม่: ${nu.map(k=>OUTFITS[k].name).join(", ")} · เปลี่ยนได้ที่โปรไฟล์นักมวย แท็บ "ชุด"`),400);}if(UI.relUp&&UI.relUp.length){const m=UI.relUp.join(" / ");UI.relUp=[];setTimeout(()=>toast("♥ "+m),300);}
     if(G.levelUps&&G.levelUps.length){const ids=[...new Set(G.levelUps)];G.levelUps=[];AU.sfx("level");UI.modal={type:"levelup",ids};}else if((G.cardPend||[]).length){AU.sfx&&AU.sfx("level");UI.modal={type:"cardnew"};}render();};
-    const go=()=>coachBackScene(()=>aftermathScene(()=>tiredScene(()=>rinScene(fin))));if(played)go();else weeklyExtra(go);});}
+    const go=()=>coachBackScene(()=>aftermathScene(()=>tiredScene(()=>rinScene(()=>contestScene(fin)))));if(played)go();else weeklyExtra(go);});}
+// v1.86: week 30 — the district chief judges the camp, then the results night at the district office
+function contestScene(done){const S=G.season||1;if(G.ended||G.week<CONTEST_WEEK||G.week>40||(G.contests||{})[S]){done();return;}
+  runContest(G);save();UI.contestDone=done;UI.ctSkip=false;UI.ctT0=performance.now();UI.modal={type:"contest",ph:"walk"};AU.sfx&&AU.sfx("bell");render();}
+function contestHTML(){const S=G.season||1,R=(G.contests||{})[S];if(!R)return "";const yc=YEAR_COLORS.find(c=>c.k===R.color)||YEAR_COLORS[0],now=UI.ctSkip?" now":"";
+  if(UI.modal.ph==="walk")return `<h2>ประกวดค่ายสวยประจำปี ${S}</h2><p class="meta">นายอำเภอเดินดูค่ายด้วยตัวเอง · สีมงคลปีนี้ <b style="color:${yc.hex}">● ${yc.n}</b> ของตกแต่งสีตรงได้ +2</p>
+    <div class="cfxwrap ctwrap" data-act="contestskip" role="button" aria-label="ข้ามฉาก"><canvas class="campcv" width="640" height="360" data-contest="walk"></canvas></div>
+    <div class="ctscore">${R.areas.map((a,i)=>`<div class="ctrow${now}" style="--d:${CT_START+i*CT_STEP+CT_WALK+200}ms"><span>${esc(a.n)}<small>${esc(a.item)}${a.match?` · <b style="color:${yc.hex}">สีปี +2</b>`:""}</small></span><i class="ctbar"><i style="width:${a.score*10}%"></i></i><b>${a.score}/10</b></div>`).join("")}
+     <div class="ctrow tot${now}" style="--d:${CT_START+R.areas.length*CT_STEP}ms"><span>รวม</span><i></i><b>${R.total}/70</b></div></div>
+    <div class="mfoot"><button class="btn primary" data-act="contestaward">ไปฟังประกาศผล ▸</button></div>`;
+  const ord=[2,1,0].filter(k=>R.field[k]),me=R.field.find(f=>f.me);
+  return `<h2>ประกาศผลค่ายสวยประจำปี ${S}</h2><div class="cfxwrap ctwrap" data-act="contestskip" role="button" aria-label="ข้ามฉาก"><canvas class="campcv" width="640" height="360" data-contest="award"></canvas></div>
+    <div class="ctscore">${ord.map((k,j)=>{const f=R.field[k];return `<div class="ctrow rk${k+1}${f.me?" me":""}${now}" style="--d:${[1600,4200,6800][j]}ms"><span>${["🥇","🥈","🥉"][k]} อันดับ ${k+1} · ${esc(f.name)}</span><i></i><b>${f.score}/70</b></div>`;}).join("")}
+     <div class="ctrow tot${now}" style="--d:7600ms"><span>${R.rank===1?"🏆 ค่ายศิริชัยชนะเลิศ!":`ค่ายศิริชัยได้อันดับ ${R.rank} จาก ${R.field.length} ค่าย`}<small>${R.prize?`รางวัล ${fmt(R.prize)} · `:""}ชื่อเสียง +${R.rep}</small></span><i></i><b>${me?me.score:R.total}/70</b></div></div>
+    <div class="mfoot"><button class="btn primary" data-act="contestdone">ไปต่อ ▸</button></div>`;}
 // v1.15: a worn-out fighter asks for a rest week herself
 function tiredScene(done){G.tiredAt=G.tiredAt||{};const f=roster(G).find(x=>!x.injury&&x.fatigue>=58&&x.plan.preset!=="rest"&&(G.tiredAt[x.id]??-9)<gameWeek(G)-3);if(!f||!coachOn()&&f.fatigue<70){done();return;}
   G.tiredAt[f.id]=gameWeek(G);const ask=vary("tired_"+f.id,({kati:["ครูคะ… ขามันหนักไปหมดเลย ขอพักสักสัปดาห์ได้ไหมคะ","หนูวิ่งเช้านี้ช้ากว่าเมื่อวานอีกค่ะ… ขอพักสักหน่อยนะคะ","ไหล่หนูยกไม่ขึ้นแล้วค่ะ ครู… หนูยังไหวนะ แต่…"],mali:["ฮือ… มะลิเตะไม่ขึ้นแล้วอ่ะ ขอนอนยาว ๆ สักอาทิตย์นะ~","มะลิหลับในตอนยืดเส้นไปแล้วสองรอบ… ขอพักนะคะ","ขามะลิสั่นเหมือนเยลลี่เลยอ่ะ~ วันนี้ขอนอนได้ไหม"],rin:["ตัวเลขชีพจรตอนเช้าฉันสูงผิดปกติ… ร่างกายต้องการพักค่ะ","กราฟความล้าของฉันพุ่งเกินเส้นแดงแล้วค่ะ ขอพักหนึ่งสัปดาห์","ฉันพิมพ์ผิดในสเปรดชีตสามครั้งเช้านี้… ร่างกายเตือนแล้วค่ะ"]})[f.id]||["ขอพักสักหน่อยได้ไหมคะ"]);
@@ -1351,6 +1370,11 @@ const ACT={
   petren:d=>{UI.modal={type:"petname",i:+d.v};render();setTimeout(()=>{const el=document.getElementById("petname");if(el){el.focus();el.select();}},60);},
   gacha:()=>{const r=gachaPull(G);if(!r)return;AU.sfx&&AU.sfx(CARDS[r.id].r==="SSR"||CARDS[r.id].r==="SR"?"level":"ui");save();UI.modal={type:"gacha",res:r};render();},
   album:()=>{UI.modal={type:"album"};render();},
+  contestskip:()=>{UI.ctSkip=true;document.querySelectorAll(".ctrow").forEach(e=>e.classList.add("now"));},
+  contestaward:()=>{const R=(G.contests||{})[G.season||1];UI.ctSkip=false;UI.ctT0=performance.now();UI.modal={type:"contest",ph:"award"};render();
+    if(R&&R.rank===1){setTimeout(()=>{if(UI.modal&&UI.modal.type==="contest"&&UI.modal.ph==="award"&&!UI.ctSkip)AU.sfx&&AU.sfx("champ");},6800);for(let i=0;i<6;i++)setTimeout(()=>{if(UI.modal&&UI.modal.type==="contest"&&UI.modal.ph==="award")AU.sfx&&AU.sfx("pop");},7200+i*1150);}
+    else setTimeout(()=>{if(UI.modal&&UI.modal.type==="contest")AU.sfx&&AU.sfx("ui");},6800);},
+  contestdone:()=>{const R=(G.contests||{})[G.season||1];UI.modal=null;UI.ctSkip=false;if(R&&R.rank===1)AU.sfx&&AU.sfx("level");const d=UI.contestDone;UI.contestDone=null;save();if(d)d();else render();},
   cardinfo:d=>{if(!CARDS[d.v])return;AU.sfx&&AU.sfx("ui");UI.modal={type:"card",id:d.v};render();},
   carddust:d=>{const C=CARDS[d.v],o=(G.cards||{})[d.v];if(!C||!o)return;const k=Math.min(+d.n||1,o.spare||0);if(!k)return;
     UI.modal={type:"confirm",title:"ย่อยการ์ดเป็นเศษดาว?",ok:`ย่อย +✦${DUST_OF[C.r]*k}`,no:"ยกเลิก",noAct:"cardinfo",noV:d.v,yes:"carddustok",id:d.v,k,
@@ -1396,8 +1420,8 @@ const ACT={
     if(n){AU.sfx("level");save();toast(`อัป${(SK_LINES[f.id]||[])[li]||""} ${n} ครั้ง`);}render();},
   sksel:d=>{UI.skSel=d.id+":"+d.v;AU.sfx("ui");render();},
   newsok:()=>{G.newsSeen=PATCH.id;UI.modal=null;save();render();},
-  closeModal:()=>{const m=UI.modal;if(m&&m.type==="whatsnew"&&G){G.newsSeen=PATCH.id;save();}UI.modal=null;render();if(m&&m.after)m.after();},
-  closeModalBg:(d,e)=>{if(e.target.classList.contains("overlay")&&UI.modal&&!["report","levelup"].includes(UI.modal.type)){UI.modal=null;render();}},
+  closeModal:()=>{const m=UI.modal;if(m&&m.type==="contest"){ACT.contestdone();return;}if(m&&m.type==="whatsnew"&&G){G.newsSeen=PATCH.id;save();}UI.modal=null;render();if(m&&m.after)m.after();},
+  closeModalBg:(d,e)=>{if(e.target.classList.contains("overlay")&&UI.modal&&!["report","levelup","contest"].includes(UI.modal.type)){UI.modal=null;render();}},
   preset:d=>{if(trLocked(G.F[d.f]))return;const f=G.F[d.f];f.plan.preset=d.v;if(d.v==="rest")f.plan.intensity="normal";save();render();},
   intensity:d=>{if(trLocked(G.F[d.f]))return;G.F[d.f].plan.intensity=d.v;save();render();},
   consider:d=>{UI.modal={type:"consider",id:d.v};render();},

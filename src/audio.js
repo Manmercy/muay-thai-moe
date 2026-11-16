@@ -32,6 +32,7 @@ const AU={ctx:null,master:null,music:null,sfxBus:null,crowdG:null,timer:null,ste
     if(kind==="bell1"){[1,2.76,5.4].forEach((m,k)=>this.tone(t,{f:880*m,dur:1.4/(k+1),peak:.35/(k+1)}));}
     if(kind==="ui"){this.tone(t,{f:880,type:"square",dur:.035,peak:.16});this.tone(t+.035,{f:1320,type:"square",dur:.04,peak:.12});}
     if(kind==="win"){[523,659,784,1047].forEach((f,i)=>this.tone(t+i*.12,{f,type:"square",dur:i===3?.45:.12,peak:.18}));this.cheer(1);}
+    if(kind==="pop"){this.tone(t,{f:1200,type:"sine",dur:.22,peak:.04});this.noiseHit(t+.25,{f:700,type:"lowpass",dur:.45,peak:.32});this.noiseHit(t+.3,{f:3000,type:"highpass",dur:.3,peak:.08});} /* v1.86: fireworks */
     if(kind==="champ"){[392,523,659,784,1047].forEach((f,i)=>this.tone(t+i*.13,{f,type:"triangle",dur:i===4?1.1:.3,peak:.22}));this.noiseHit(t+.7,{f:3300,type:"highpass",dur:.7,peak:.25});this.cheer(1);}
     if(kind==="lose"){[392,349,311,262].forEach((f,i)=>this.tone(t+i*.22,{f,type:"triangle",dur:i===3?.6:.22,peak:.2}));}
     if(kind==="tick"){this.tone(t,{f:1500,type:"triangle",dur:.03,peak:.14});}
