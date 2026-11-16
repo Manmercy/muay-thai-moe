@@ -3323,5 +3323,8 @@
  "มีแก๊งหมวกด้วยนี่ ระวังหน่อยนะ": "The helmet gang will be there. Be careful.",
  "เย้! หนูจะพับกระทงให้ทุกคนเลยค่ะ คนละใบ ของผู้จัดการใบใหญ่สุด!": "Yay! I'll fold a krathong for everyone, one each, and yours will be the biggest!",
  "ไปสิ ปีนี้ไปด้วยกันทุกคน": "Sure, this year we all go together.",
- "ผู้จัดการคะ! ป้าแต๋วชวนไปงานลอยกระทงตลาดน้ำ ไปกันทั้งค่ายเลยนะคะ!": "Manager! Auntie Taew invited us to the floating-market Loy Krathong fair. Let's all go, the whole camp!"
+ "ผู้จัดการคะ! ป้าแต๋วชวนไปงานลอยกระทงตลาดน้ำ ไปกันทั้งค่ายเลยนะคะ!": "Manager! Auntie Taew invited us to the floating-market Loy Krathong fair. Let's all go, the whole camp!",
+ "แสดงการ์ดที่ยังไม่ได้ (ดูคำใบ้)": "Show cards not yet collected (hints)",
+ "ซ่อนการ์ดที่ยังไม่ได้": "Hide cards not yet collected",
+ " ใบ · แตะการ์ดเพื่อดูเรื่องราว</p>\n     <div class=\"gacha\"><span><b class=\"goldt\">✦ ": " cards · tap a card to view its story</p>\n     <div class=\"gacha\"><span><b class=\"goldt\">✦ "
 }
