@@ -222,7 +222,7 @@ function chatHTML(){const C=UI.chat;if(!C)return {body:"",foot:true};const f=G.F
      :C.done?`<p class="cend">${C.gain?`Great conversation · bond increased`:"A short chat today. She'll text again sometime"}</p><button class="btn primary" data-act="closeModal">Close chat</button>`:`<small class="meta">…</small>`}</div></div>`};}
 XMODAL.chat=()=>chatHTML();
 Object.assign(ACT,{chat:d=>chatOpen(d.id),chatpick:d=>chatPick(+d.v)});
-XMODAL.confirm=m=>({body:`<h2>${m.title}</h2>${m.html||`<p>${m.text}</p>`}<div class="mfoot"><button class="btn ghost" data-act="closeModal">${m.no||"No"}</button><button class="btn primary" data-act="${m.yes}">${m.ok||"Confirm"}</button></div>`,foot:false});
+XMODAL.confirm=m=>({body:`<h2>${m.title}</h2>${m.html||`<p>${m.text}</p>`}<div class="mfoot"><button class="btn ghost" data-act="${m.noAct||"closeModal"}" ${m.noV?`data-v="${m.noV}"`:""}>${m.no||"No"}</button><button class="btn primary" data-act="${m.yes}">${m.ok||"Confirm"}</button></div>`,foot:false});
 
 // v1.52: "haven't seen you in a while" texts — she reaches out before the bond starts to fade
 const MISS_X={

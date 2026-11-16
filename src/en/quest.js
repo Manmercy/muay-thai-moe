@@ -1009,7 +1009,7 @@ function loyPull(G){if(!loyFest()||(G.dust||0)<LG_COST)return null;G.dust-=LG_CO
   let r=G.lgPity>=LG_PITY?"SSR":x<.04?"SSR":x<.27?"SR":x<.65?"R":"N";if(r==="SSR")G.lgPity=0;const L=by(r);const id=L[Math.floor(srand(G,G.lgPulls*89+5)*L.length)];
   const o=G.cards[id];let res;if(!o){G.cards[id]={n:1,lv:1,wk:absWeek(G),seen:false};res={id,isNew:true};}
   else if((o.lv||1)<3){o.lv=(o.lv||1)+1;o.n=(o.n||1)+1;if(G.F[CARDS[id].c])add(G,CARDS[id].c,"bond",3);res={id,up:o.lv};}
-  else{const d=DUST_OF[CARDS[id].r];G.dust+=d;o.n=(o.n||1)+1;res={id,dust:d};}
+  else{o.n=(o.n||1)+1;o.spare=(o.spare||0)+1;res={id,spare:o.spare};}
   res.loy=1;return res;}
 function loyGachaHTML(){if(!loyFest())return "";const own=Object.keys(CARDS).filter(k=>CARDS[k].lg&&(G.cards||{})[k]).length,all=Object.keys(CARDS).filter(k=>CARDS[k].lg).length;
   return `<div class="gacha loyg"><span><b class="goldt">Loy Krathong Machine</b> <small>Open until Dec 7 only · Thai-dress cards ${own}/${all} cards · guaranteed SSR in ${LG_PITY-(G.lgPity||0)} left · cards you get stay in your album forever</small></span><button class="btn sm gold" data-act="loygacha" ${(G.dust||0)<LG_COST?"disabled":""}>Pull ${LG_COST}✦</button></div>`;}

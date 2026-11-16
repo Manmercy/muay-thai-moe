@@ -1899,8 +1899,13 @@ function gachaPull(G){if((G.dust||0)<GACHA_COST)return null;G.dust-=GACHA_COST;G
   let r=G.pity>=GACHA_PITY?"SSR":x<.03?"SSR":x<.30?"SR":"N";if(r==="SSR")G.pity=0;const L=by(r);const id=L[Math.floor(srand(G,G.pulls*97+11)*L.length)];
   const o=G.cards[id];let res;if(!o){G.cards[id]={n:1,lv:1,wk:absWeek(G),seen:false};res={id,isNew:true};}
   else if((o.lv||1)<3){o.lv=(o.lv||1)+1;o.n=(o.n||1)+1;if(G.F[CARDS[id].c])add(G,CARDS[id].c,"bond",3);res={id,up:o.lv};}
-  else{const d=DUST_OF[CARDS[id].r];G.dust+=d;o.n=(o.n||1)+1;res={id,dust:d};}
+  else{o.n=(o.n||1)+1;o.spare=(o.spare||0)+1;res={id,spare:o.spare};} /* v1.85: past max level a copy is kept, to break down from the card page */
   return res;}
+/* v1.85: break spare copies into stardust (the card itself is never lost) */
+function dustCard(G,id,count){const o=(G.cards||{})[id],C=CARDS[id];if(!o||!C)return 0;const k=Math.min(count||1,o.spare||0);if(k<=0)return 0;
+  const d=DUST_OF[C.r]*k;o.spare-=k;G.dust=(G.dust||0)+d;G.dustMade=(G.dustMade||0)+d;return d;}
+/* a card whose story was rewritten in an update carries rev:n — owners who already read it see a "new" star until they read it again */
+const cardFresh=(id,o)=>!!o&&(!o.seen||(CARDS[id]&&(CARDS[id].rev||0)>(o.rev||0)));
 
 // v1.82.4 (CM3/CM4): small annual camp moments — clean-up day, dinner after a hard loss,
 // open house, community fair. Choices state their cost or payoff; lines follow who is in camp and the year.

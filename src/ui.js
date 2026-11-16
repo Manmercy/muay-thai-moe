@@ -1,5 +1,5 @@
 // ================= MUAY THAI MOE v1.3 — UI =================
-const VERSION="1.84.0";
+const VERSION="1.85.0";
 const CUR_LANG=(typeof window!=="undefined"&&window.LANG)||"th";
 const TH_LABEL=String.fromCharCode(3652,3607,3618);
 function langSwitch(cls){return `<div class="langsw ${cls||""}" role="group" aria-label="Language">${[["th",TH_LABEL],["en","EN"]].map(([k,l])=>`<button class="lsb ${CUR_LANG===k?"on":""}" data-act="setlang" data-v="${k}" aria-pressed="${CUR_LANG===k}">${l}</button>`).join("")}</div>`;}
@@ -521,6 +521,20 @@ function careerHTML(d){const list=Object.values(G.F).filter(f=>f.div===d&&f.camp
    </tbody></table></div>
    <p class="meta tlegend">${TIERS.map(t=>`${t.ic} ${t.n} ${t.min||""}${t.min?"+":""}`).join(" · ")}</p>
    <p class="meta">เรตติ้งขึ้นลงทุกไฟต์ที่นับสถิติ ชนะคนที่เรตติ้งสูงกว่าได้เยอะ ชนะคนที่ต่ำกว่าได้น้อย ไฟต์รองชิงและชิงแชมป์มีผลมากกว่าปกติ</p>`;}
+// v1.85: card detail page — rarity, copies, a teaser line, read the story or break spare copies into stardust
+function cardBlurb(C){if(C.blurb)return C.blurb;const st=(C.steps||[]).find(x=>x&&typeof x.t==="string"&&x.n!=="nar")||(C.steps||[]).find(x=>x&&typeof x.t==="string");if(!st)return "";const t=st.t;return t.length>72?t.slice(0,70)+"…":t;}
+function cardInfoHTML(id){const C=CARDS[id];if(!C)return "";const o=(G.cards||{})[id],R=CARD_R[C.r],who=G.F[C.c]?G.F[C.c].name:"",src=C.lg?"ตู้ลอยกระทง (ช่วงเทศกาล)":C.g?"ตู้สุ่มการ์ด":`${C.hint||"ติดตามเนื้อเรื่องไปเรื่อย ๆ"}`;
+  if(!o)return `<h2>การ์ดที่ยังไม่ได้</h2><div class="cdet" style="--rc:#77747d"><div class="ccard big lock" data-rarity="${C.r}">${cardArtHTML(C,true)}<span class="tstar">${"★".repeat(R.s)}</span><b>???</b><small>${C.r}</small></div>
+    <div class="cdinfo"><div class="cdtop"><span class="pill">${C.r} ${"★".repeat(R.s)}</span><span class="meta">${esc(who)}</span></div><p class="meta"><b>วิธีได้:</b> ${esc(src)}</p></div></div>
+    <div class="mfoot roadbtns"><button class="btn primary" data-act="album">‹ กลับอัลบั้ม</button></div>`;
+  const sp=o.spare||0,per=DUST_OF[C.r],fresh=cardFresh(id,o);
+  return `<h2>${esc(C.t)}</h2><div class="cdet" style="--rc:${R.c}"><div class="ccard big" data-rarity="${C.r}" style="--rc:${R.c}">${cardArtHTML(C)}<span class="tstar">${"★".repeat(R.s)}</span><b>${esc(C.t)}</b><small>${C.r}</small></div>
+    <div class="cdinfo"><div class="cdtop"><span class="pill" style="box-shadow:inset 0 0 0 2px ${R.c};color:${R.c}">${C.r} ${"★".repeat(R.s)}</span><span class="meta">${esc(who)}</span>${fresh&&o.seen?'<span class="cnew">✦ ใหม่ในอัปเดตนี้</span>':""}</div>
+    ${cardBlurb(C)?`<p class="cblurb">“${esc(cardBlurb(C))}”</p>`:""}
+    <div class="kv-row"><span>ขั้นการ์ด</span><b>Lv.${o.lv||1}/3</b></div><div class="kv-row"><span>ได้มาทั้งหมด</span><b>${o.n||1} ใบ</b></div><div class="kv-row"><span>ใบซ้ำที่เก็บไว้</span><b>${sp} ใบ</b></div>
+    <p class="meta">ได้จาก: ${esc(src)}</p><p class="meta">การ์ดซ้ำจะอัปขั้นให้เองจนถึง Lv.3 เกินจากนั้นเก็บไว้ย่อยได้ ใบละ ✦ ${per}</p></div></div>
+    <div class="mfoot roadbtns"><button class="btn" data-act="carddust" data-v="${id}" data-n="1" ${sp?"":"disabled"}>ย่อย 1 ใบ +✦${per}</button>${sp>1?`<button class="btn" data-act="carddust" data-v="${id}" data-n="${sp}">ย่อยทั้งหมด +✦${per*sp}</button>`:""}<button class="btn primary" data-act="cardplay" data-v="${id}">ดูเรื่องราว ▸</button></div>
+    <div class="center"><button class="btn sm ghost" data-act="album">‹ กลับอัลบั้ม</button></div>`;}
 function rankHTML(){const st=stageOf(G.week),cut=st==="local"?4:st==="district"?4:0,d=UI.rdiv;const rows=standings(G,d);const mv=(G.rankMove&&G.rankMove[d])||{};
   if(UI.rview==="career")return `<section class="px card"><div class="card-h"><div class="seg sm"><button data-act="rdiv" data-v="A" aria-pressed="${d==="A"}">รุ่น A</button><button data-act="rdiv" data-v="B" aria-pressed="${d==="B"}">รุ่น B</button></div><div class="seg sm"><button data-act="rview" data-v="season" aria-pressed="false">อันดับฤดูนี้</button><button data-act="rview" data-v="career" aria-pressed="true">ระดับนักมวย</button></div></div>${careerHTML(d)}</section>`;
   return `<section class="px card"><div class="card-h"><div class="seg sm"><button data-act="rview" data-v="season" aria-pressed="true">อันดับฤดูนี้</button><button data-act="rview" data-v="career" aria-pressed="false">ระดับนักมวย</button></div></div><div class="card-h"><div class="seg sm"><button data-act="rdiv" data-v="A" aria-pressed="${d==="A"}">รุ่น A</button><button data-act="rdiv" data-v="B" aria-pressed="${d==="B"}">รุ่น B</button></div>${G.champ[d]?`<span class="pill gold">แชมป์: ${esc(G.F[G.champ[d]].name)}</span>`:""}</div>
@@ -531,7 +545,7 @@ function rankHTML(){const st=stageOf(G.week),cut=st==="local"?4:st==="district"?
    </tbody></table></div></section>${calendarHTML()}`;}
 
 function peopleHTML(){const met=CANON_IDS.map(id=>G.F[id]).filter(f=>f.met);
-  return `<div class="card-h"><p class="meta">ใช้เวลาด้วยกันสัปดาห์ละ 1 คน · พอสนิทกัน เธอจะทักแชทมาเองเป็นครั้งคราว</p><button class="btn sm gold albbtn" data-act="album">🃏 อัลบั้มการ์ด ${Object.keys(G.cards||{}).length}/${Object.keys(CARDS).length}${Object.values(G.cards||{}).some(c=>!c.seen)?'<i class="ndot"></i>':""}</button>${G.freeUsed?'<span class="pill">เวลาว่าง: ใช้แล้ว</span>':'<span class="pill gold">เวลาว่าง: เหลือ 1</span>'}</div>
+  return `<div class="card-h"><p class="meta">ใช้เวลาด้วยกันสัปดาห์ละ 1 คน · พอสนิทกัน เธอจะทักแชทมาเองเป็นครั้งคราว</p><button class="btn sm gold albbtn" data-act="album">🃏 อัลบั้มการ์ด ${Object.keys(G.cards||{}).length}/${Object.keys(CARDS).length}${Object.entries(G.cards||{}).some(([k,c])=>cardFresh(k,c))?'<i class="ndot"></i>':""}</button>${G.freeUsed?'<span class="pill">เวลาว่าง: ใช้แล้ว</span>':'<span class="pill gold">เวลาว่าง: เหลือ 1</span>'}</div>
    <div class="plist">${met.map(f=>`<section class="px pcard"><button class="pthumb" data-act="fighter" data-id="${f.id}" data-v="rel" aria-label="ดูโปรไฟล์${esc(f.name)}"><img src="${stand(f.id,"casual")}" alt="" loading="lazy"></button>
      <div class="pbody"><div class="pnm"><b class="nm">${esc(f.name)}</b><span class="meta">${f.camp==="player"?"ค่ายศิริชัย":f.camp==="rival"?"พยัคฆ์ทอง":"อิสระ"}${G.romance===f.id?" · คนรัก ♥":G.promise&&G.promise[f.id]!=null?" · สัญญาไว้ ♡":""}</span></div>${hearts(f.bond)}
       <div class="pbtns"><button class="btn sm" data-act="fighter" data-id="${f.id}" data-v="rel">ประวัติ</button><button class="btn sm primary" data-act="hang" data-id="${f.id}" ${G.freeUsed?"disabled":""}>ใช้เวลาด้วยกัน</button><button class="btn sm gold giftb" data-act="giftpick" data-id="${f.id}" ${f.giftWeek===gameWeek(G)?"disabled":""}>${PIX.gift}<span>${f.giftWeek===gameWeek(G)?"ให้แล้ว":"ของขวัญ"}</span></button><button class="btn sm chatb" data-act="chat" data-id="${f.id}" ${canChat(f)?"":"disabled"}>${CHAT_PX}<span>${canChat(f)?"แชทใหม่":(f.bond||0)<CHAT_BOND?"ยังไม่สนิท":"ไม่มีข้อความ"}</span>${canChat(f)?'<i class="dot"></i>':""}</button></div></div></section>`).join("")}</div>`;}
@@ -777,13 +791,12 @@ function reportHTML(){const r=G.lastReport;const ann=[];
    <div class="chips3"><span class="chip"><small>นักเรียน</small><b class="num pos">+${fmt(r.inc)}</b></span><span class="chip"><small>ค่าใช้จ่าย</small><b class="num neg">-${fmt(r.up+r.wg+(r.debtPay||0))}</b></span><span class="chip"><small>เงินสด</small><b class="num ${r.cash<0?"neg":""}">${fmt(r.cash)}</b></span></div>
    <details><summary>ผลการชกในวงการ (${r.log.length})</summary><div class="log">${r.log.map(l=>`<div>${esc(l)}</div>`).join("")||"<div>เงียบสงบ</div>"}</div></details>`;}
 // v1.81.1: "what's new" popup — shows once per save after loading, for players who started before this update
-const PATCH={id:"1.84.0",ver:"Muay Thai Moe v1.84.0",title:"รายงานประจำสัปดาห์จากค่ายศิริชัย",lead:"รอบนี้มีระดับนักมวย ให้รู้ว่าใครเก่งระดับไหน",items:[
- ["🏅","ระดับนักมวย 6 ขั้น","นักมวยทุกคน ทั้งค่ายเราและคู่แข่ง มีเรตติ้งที่ขึ้นลงตามผลชก แบ่งเป็น หน้าใหม่ · ดาวรุ่ง · มวยฝีมือ · หัวแถว · ยอดมวย · ตำนาน"],
- ["📊","ดูว่าใครอยู่ระดับไหน","แท็บไฟต์ → อันดับ → ระดับนักมวย เห็นเรตติ้งทั้งรุ่น และใครขึ้นหรือลงระดับในปีนี้ ป้ายระดับยังขึ้นที่การ์ดนักมวยและข้อเสนอไฟต์"],
- ["🎉","แจ้งเมื่อเลื่อนระดับ","นักมวยในค่ายเลื่อนระดับเมื่อไร สรุปสัปดาห์จะบอก และสรุปปีจะรวมว่าใครขึ้นระดับบ้าง"],
- ["🥊","คู่ชกสมน้ำสมเนื้อขึ้น","ตั้งแต่ปีที่ 2 โปรโมเตอร์ดูฝีมือจริง นับรวมสกิลและแผนชก คู่แข่งเก่งตามค่ายเรา ชนะคู่อ่อนได้ EXP และค่าตัวน้อยลง"],
- ["🛒","ของตกแต่งในร้าน 15 ชิ้น","ซื้อได้ในร้าน มีหน้ายืนยันก่อนจ่ายเงิน ส่วนชิ้นที่ได้จากผลงานยังต้องปลดล็อกเอง"]],
- foot:"ไต่ระดับจนถึงตำนานให้ได้นะคะ 👑"};
+const PATCH={id:"1.85.0",ver:"Muay Thai Moe v1.85.0",title:"รายงานประจำสัปดาห์จากค่ายศิริชัย",lead:"รอบนี้อัลบั้มการ์ดมีหน้ารายละเอียด และย่อยการ์ดซ้ำได้",items:[
+ ["🃏","หน้าการ์ด","แตะการ์ดในอัลบั้มเพื่อดูระดับ จำนวนที่มี ใบซ้ำ คำโปรยสั้น ๆ แล้วค่อยกดดูเรื่องราว"],
+ ["✦","ย่อยการ์ดซ้ำเป็นเศษดาว","การ์ดที่อัปถึง Lv.3 แล้ว ใบซ้ำจะเก็บไว้ให้ ย่อยเป็นเศษดาวได้เองจากหน้าการ์ด มีหน้ายืนยันก่อนย่อย"],
+ ["🏅","ระดับนักมวย 6 ขั้น","ทุกคนมีเรตติ้งตามผลชก ตั้งแต่หน้าใหม่ถึงตำนาน ดูได้ที่ ไฟต์ → อันดับ → ระดับนักมวย"],
+ ["🛒","ของตกแต่งในร้าน","ซื้อได้ 15 ชิ้น มีหน้ายืนยันก่อนจ่ายเงิน"]],
+ foot:"สะสมการ์ดให้ครบทุกใบนะคะ 🃏"};
 function maybeWhatsNew(){if(!G||G.ended||UI.scene)return;if(G.newsSeen===PATCH.id)return;UI.modal={type:"whatsnew"};}
 function whatsNewHTML(){return `<div class="wnew"><span class="pill gold">อัปเดต · ${esc(PATCH.ver)}</span><h2>🥊 ${esc(PATCH.title)}</h2><p class="lead">${esc(PATCH.lead)}</p>
   <div class="wnlist">${PATCH.items.map(([ic,t,b])=>`<details class="wnitem"><summary><span class="wnic">${ic}</span><b>${esc(t)}</b><i>▸</i></summary><p>${esc(b)}</p></details>`).join("")}</div><p class="meta wnhint">แตะหัวข้อเพื่ออ่านรายละเอียด</p>
@@ -807,17 +820,18 @@ function modalHTML(){const m=UI.modal;let body="",foot=true;
   if(m.type==="studinfo"){body=studInfoHTML();}
   if(m.type==="gift")body=giftHTML(m.id);
   if(m.type==="petname"){const p=(G.pets||[])[m.i];if(!p){UI.modal=null;return "";}body=`<h2>ตั้งชื่อ${esc(PETS[p.k].name)}</h2><div class="petnm"><img class="peti" src="${petIcon(p.k)}" alt=""><input id="petname" maxlength="12" value="${esc(p.name)}" autocomplete="off"></div><p class="meta">ชื่อนี้จะโผล่ในฉากต่าง ๆ ของค่าย</p><button class="btn primary" id="petnamebtn" data-act="petnamesave" data-v="${m.i}">ตั้งชื่อ</button>`;}
+  if(m.type==="card"){body=cardInfoHTML(m.id);foot=false;}
   if(m.type==="album"){const byC={};for(const id in CARDS)(byC[CARDS[id].c]=byC[CARDS[id].c]||[]).push(id);const own=G.cards||{};
-    body=`<h2>อัลบั้มการ์ด</h2><p class="meta">เก็บได้ ${Object.keys(own).length}/${Object.keys(CARDS).length} ใบ · แตะการ์ดเพื่อดูเรื่องราว</p>
+    body=`<h2>อัลบั้มการ์ด</h2><p class="meta">เก็บได้ ${Object.keys(own).length}/${Object.keys(CARDS).length} ใบ · แตะการ์ดเพื่อดูรายละเอียด</p>
      <div class="gacha"><span><b class="goldt">✦ ${G.dust||0}</b> เศษดาว<small>ได้จากชนะไฟต์ การ์ดใหม่ และการ์ดซ้ำ · การันตี SSR อีก ${GACHA_PITY-(G.pity||0)} ครั้ง</small></span><button class="btn sm gold" data-act="gacha" ${(G.dust||0)<GACHA_COST?"disabled":""}>สุ่มการ์ด ${GACHA_COST}✦</button></div>${typeof loyGachaHTML==="function"?loyGachaHTML():""}
      ${CANON_IDS.filter(c=>byC[c]&&(UI.albAll||byC[c].some(id=>own[id]))).map(c=>`<h4 class="albh">${esc(G.F[c].name)} <small>${byC[c].filter(id=>own[id]).length}/${byC[c].length}</small></h4><div class="albg">${byC[c].filter(id=>UI.albAll||own[id]).map(id=>{const C=CARDS[id],o=own[id],R=CARD_R[C.r];
-       return o?`<button class="ccard pxc" data-rarity="${C.r}" style="--rc:${R.c}" data-act="cardplay" data-v="${id}" title="${esc(C.t)}">${!o.seen?'<i class="ndot"></i>':""}${cardArtHTML(C,true)}<i class="rr">${C.r}${(o.lv||1)>1?`<u>${o.lv}</u>`:""}</i><span class="tstar">${"★".repeat(R.s)}</span><b>${esc(C.t)}</b></button>`
-         :`<button class="ccard pxc lock" data-rarity="${C.r}" style="--rc:#77747d" data-act="cardhint" data-v="${id}" aria-label="การ์ดที่ยังไม่ได้">${cardArtHTML(C,true)}<i class="rr">${C.r}</i><span class="tstar">${"★".repeat(R.s)}</span><b>???</b></button>`;}).join("")}</div>`).join("")}<div class="center"><button class="btn sm" data-act="albtog">${UI.albAll?"ซ่อนการ์ดที่ยังไม่ได้":"แสดงการ์ดที่ยังไม่ได้ (ดูคำใบ้)"}</button></div>`;}
+       return o?`<button class="ccard pxc" data-rarity="${C.r}" style="--rc:${R.c}" data-act="cardinfo" data-v="${id}" title="${esc(C.t)}">${!o.seen?'<i class="ndot"></i>':cardFresh(id,o)?'<i class="cnew">✦ใหม่</i>':""}${o.spare?`<i class="cdup">×${o.spare}</i>`:""}${cardArtHTML(C,true)}<i class="rr">${C.r}${(o.lv||1)>1?`<u>${o.lv}</u>`:""}</i><span class="tstar">${"★".repeat(R.s)}</span><b>${esc(C.t)}</b></button>`
+         :`<button class="ccard pxc lock" data-rarity="${C.r}" style="--rc:#77747d" data-act="cardinfo" data-v="${id}" aria-label="การ์ดที่ยังไม่ได้">${cardArtHTML(C,true)}<i class="rr">${C.r}</i><span class="tstar">${"★".repeat(R.s)}</span><b>???</b></button>`;}).join("")}</div>`).join("")}<div class="center"><button class="btn sm" data-act="albtog">${UI.albAll?"ซ่อนการ์ดที่ยังไม่ได้":"แสดงการ์ดที่ยังไม่ได้ (ดูคำใบ้)"}</button></div>`;}
   if(m.type==="cardnew"){const P=G.cardPend||[];const id=P[0];const C=CARDS[id];if(!C){G.cardPend=[];UI.modal=null;return "";}const RR=CARD_R[C.r];body=`<h2>ได้การ์ดใหม่!</h2><div class="gres" style="--rc:${RR.c}"><div class="ccard big" data-rarity="${C.r}" style="--rc:${RR.c}">${cardArtHTML(C)}<span class="tstar">${"★".repeat(RR.s)}</span><b>${esc(C.t)}</b><small>${C.r}</small></div>
     <p class="center meta">${C.hint?esc(C.hint)+" · ":""}ได้เศษดาว <b class="goldt">✦ 5</b>${P.length>1?` · ยังมีการ์ดใหม่อีก ${P.length-1} ใบ`:""}</p></div>
     <div class="mfoot roadbtns"><button class="btn primary" data-act="cardplay" data-v="${id}" data-from="new">ดูเรื่องราวเลย</button><button class="btn" data-act="cardlater">เก็บไว้ดูทีหลัง</button></div>`;foot=false;}
   if(m.type==="gacha"){const R=m.res,C=CARDS[R.id],RR=CARD_R[C.r];body=`<h2>ผลการสุ่ม</h2><div class="gres" style="--rc:${RR.c}"><div class="ccard big" data-rarity="${C.r}" style="--rc:${RR.c}">${cardArtHTML(C)}<span class="tstar">${"★".repeat(RR.s)}</span><b>${esc(C.t)}</b><small>${C.r}</small></div>
-    <p class="center">${R.isNew?"<b class=\"goldt\">การ์ดใหม่!</b>":R.up?`การ์ดซ้ำ · อัปเกรดเป็น <b>Lv.${R.up}</b> · ความสนิท +`:`การ์ดเต็มระดับแล้ว · ย่อยเป็น <b class="goldt">✦ ${R.dust}</b>`}</p></div>
+    <p class="center">${R.isNew?"<b class=\"goldt\">การ์ดใหม่!</b>":R.up?`การ์ดซ้ำ · อัปเกรดเป็น <b>Lv.${R.up}</b> · ความสนิท +`:`การ์ดเต็มขั้นแล้ว · เก็บเป็นใบซ้ำ (มี ${R.spare} ใบ) <small class="meta">ย่อยเป็นเศษดาวได้ที่หน้าการ์ด</small>`}</p></div>
     <div class="mfoot roadbtns">${R.isNew?`<button class="btn" data-act="cardplay" data-v="${R.id}">ดูเรื่องราว</button>`:""}<button class="btn gold" data-act="${R.loy?"loygacha":"gacha"}" ${(G.dust||0)<(R.loy?LG_COST:GACHA_COST)||(R.loy&&!loyFest())?"disabled":""}>สุ่มอีก ${GACHA_COST}✦ (มี ${G.dust||0})</button><button class="btn primary" data-act="album">กลับอัลบั้ม</button></div>`;foot=false;}
   if(m.type==="masters"){body=`<h2>เชิญครูมวยโบราณ</h2><p class="meta">${fmt(18000)} ต่อครั้ง · นักมวยแต่ละคนเรียนได้ครั้งเดียวต่อฤดูกาล</p><div class="mlist">${Object.entries(MASTERS).map(([k,M])=>`<div class="mrow"><b>${M.name}</b><small>เสริม ${M.attrs.map(a=>ATTR_LABEL[a]).join(" · ")}</small><div class="obtns">${roster(G).map(f=>`<button class="btn sm" data-act="hiremaster" data-id="${f.id}" data-v="${k}" ${G.cash<M.cost||f.masterSeason===(G.season||1)?"disabled":""}>${esc(f.name)}</button>`).join("")}</div></div>`).join("")}</div>`;}
   if(m.type==="advice"){body=adviceHTML(m.id);foot=false;}
@@ -1334,7 +1348,12 @@ const ACT={
   petren:d=>{UI.modal={type:"petname",i:+d.v};render();setTimeout(()=>{const el=document.getElementById("petname");if(el){el.focus();el.select();}},60);},
   gacha:()=>{const r=gachaPull(G);if(!r)return;AU.sfx&&AU.sfx(CARDS[r.id].r==="SSR"||CARDS[r.id].r==="SR"?"level":"ui");save();UI.modal={type:"gacha",res:r};render();},
   album:()=>{UI.modal={type:"album"};render();},
-  cardplay:d=>{const C=CARDS[d.v],o=(G.cards||{})[d.v];if(!C||!o)return;o.seen=true;G.cardPend=(G.cardPend||[]).filter(x=>x!==d.v);save();UI.modal=null;const nw=d.from==="new";playScene(C.steps,()=>{UI.modal=nw?((G.cardPend||[]).length?{type:"cardnew"}:null):{type:"album"};render();},{bg:C.bg,look:"casual"});},
+  cardinfo:d=>{if(!CARDS[d.v])return;AU.sfx&&AU.sfx("ui");UI.modal={type:"card",id:d.v};render();},
+  carddust:d=>{const C=CARDS[d.v],o=(G.cards||{})[d.v];if(!C||!o)return;const k=Math.min(+d.n||1,o.spare||0);if(!k)return;
+    UI.modal={type:"confirm",title:"ย่อยการ์ดเป็นเศษดาว?",ok:`ย่อย +✦${DUST_OF[C.r]*k}`,no:"ยกเลิก",noAct:"cardinfo",noV:d.v,yes:"carddustok",id:d.v,k,
+      html:`<div class="px confirm"><b>${esc(C.t)} ×${k}</b><p class="meta">ได้เศษดาว ✦ ${DUST_OF[C.r]*k} · ใบซ้ำเหลือ ${(o.spare||0)-k} ใบ</p><p class="meta">การ์ดใบหลัก ขั้นการ์ด และเรื่องราวยังอยู่ครบ ย่อยแล้วเอาคืนไม่ได้</p></div>`};render();},
+  carddustok:()=>{const m=UI.modal;if(!m||m.yes!=="carddustok")return;const d=dustCard(G,m.id,m.k);if(d){AU.sfx&&AU.sfx("level");save();toast(`ได้เศษดาว ✦ ${d}`);}UI.modal={type:"card",id:m.id};render();},
+  cardplay:d=>{const C=CARDS[d.v],o=(G.cards||{})[d.v];if(!C||!o)return;o.seen=true;o.rev=C.rev||0;G.cardPend=(G.cardPend||[]).filter(x=>x!==d.v);save();UI.modal=null;const nw=d.from==="new";playScene(C.steps,()=>{UI.modal=nw?((G.cardPend||[]).length?{type:"cardnew"}:null):{type:"album"};render();},{bg:C.bg,look:"casual"});},
   cardlater:()=>{(G.cardPend||[]).shift();save();UI.modal=(G.cardPend||[]).length?{type:"cardnew"}:null;render();},
   cancelCreate:()=>{AU.startMusic("title");UI.creator=null;render();},
   cset:d=>{UI.creator.name=(document.getElementById("pname")||{}).value||UI.creator.name;crSeed();UI.creator[d.k]=d.v;render();},
