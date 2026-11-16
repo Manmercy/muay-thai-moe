@@ -733,8 +733,15 @@ function evStartLoy(){const L=loyOf(G);if(!L)return;UI.modal=null;
   const open=()=>{L.run=null;L.pick=[];UI.modal={type:"gaunt"};render();};
   if(!L.intro){L.intro=1;save();playScene(loyIntro(G),open,{bg:"river",look:"thai"});}else open();}
 function gauntPool(){const R=roster(G).filter(f=>!f.injury);return R.length?R:roster(G);}
+// v1.82.4: the five riverside SR cards as a collection row — owned cards in colour, missing ones dark, with a "play again" nudge
+function loyCardRow(after){const own=G.cards||{},got=LOY_CARDS.filter(k=>own[k]).length,left=LOY_CARDS.length-got;
+  const row=LOY_CARDS.map(k=>{const C=CARDS[k],has=!!own[k];return `<div class="ccard pxc lk ${has?"":"lock"}" style="--rc:${CARD_R.SR.c}" title="${has?esc(C.t):"ยังไม่ได้"}">${cardArtHTML(C,true)}<small>${has?esc(G.F[C.c].name):"?"}</small></div>`;}).join("");
+  const msg=!left?`<b class="goldt">เก็บการ์ด SR ชุดไทยครบ ${LOY_CARDS.length} ใบแล้ว!</b> เล่นต่อเพื่อทำคะแนนหรือดูฉากจบที่ยังไม่เห็นได้`
+    :after?`<b>ยังขาดอีก ${left} ใบ</b> · ศึกนี้เล่นซ้ำได้ไม่จำกัด กด "ท้าอีกรอบ" เพื่อเก็บให้ครบ · ส่งสาวที่ยังไม่มีการ์ดลงชกก่อน จะได้การ์ดของเธอ`
+    :`<b>การ์ด SR ชุดไทย ${got}/${LOY_CARDS.length}</b> · จบศึกระดับทองแดงได้ 1 ใบ เงิน 2 ใบ ทอง 3 ใบ · ส่งสาวคนไหนลงชกก่อน จะได้การ์ดของคนนั้นก่อน · เล่นซ้ำได้จนครบ`;
+  return `<div class="lkrow"><div class="lkcards">${row}</div><p class="meta">🎴 ${msg}</p></div>`;}
 function gauntHTML(){const L=loyOf(G);if(!L){UI.modal=null;return "";}const R=L.run;
-  const head=`<h2>ศึกริมน้ำคืนลอยกระทง</h2><p class="meta">สามคน คนละสามไฟต์ติด พลังไม่ฟื้นเต็มระหว่างไฟต์ แพ้เมื่อไหร่คนถัดไปขึ้นแทน · ไฟต์สุดท้ายคือเสี่ยหมวกทองคำ</p>${(()=>{const own=LOY_CARDS.filter(k=>(G.cards||{})[k]).length;return own<LOY_CARDS.length?`<p class="meta">🎴 การ์ด SR ชุดไทย ${own}/${LOY_CARDS.length} · จบศึกระดับทองแดงได้ 1 ใบ เงินได้ 2 ใบ ทองได้ 3 ใบ (ได้การ์ดของคนที่ส่งลงชกก่อน)</p>`:`<p class="meta">🎴 เก็บการ์ด SR ชุดไทยครบ ${LOY_CARDS.length} ใบแล้ว</p>`;})()}`;
+  const head=`<h2>ศึกริมน้ำคืนลอยกระทง</h2><p class="meta">สามคน คนละสามไฟต์ติด พลังไม่ฟื้นเต็มระหว่างไฟต์ แพ้เมื่อไหร่คนถัดไปขึ้นแทน · ไฟต์สุดท้ายคือเสี่ยหมวกทองคำ</p>${!R?loyCardRow():""}`;
   const ladder=(cur)=>`<div class="gl">${LOY_LADDER.map((k,i)=>{const lg=R&&R.log[i];const st=lg?(lg.res==="W"?"ok":lg.res==="D"?"dr":"ng"):R&&i===cur?"now":"";
     return `<div class="glr ${st}"><canvas width="40" height="40" data-qsprite="${QK[k].sprite}"></canvas><span><b>${i+1}. ${esc(QK[k].name)}</b><small>${lg?lg.txt:R&&(R.done||i<cur)?"ข้าม (คนก่อนหน้าแพ้)":i===8?"บอส · 3 ยก":"2 ยก"}</small></span><i>${lg?(lg.res==="W"?"+"+lg.pts:lg.res==="D"?"+"+lg.pts:"✕"):""}</i></div>`;}).join("")}</div>`;
   if(!R){const pool=gauntPool(),P=L.pick||[];const need=Math.min(3,pool.length);
@@ -743,7 +750,7 @@ function gauntHTML(){const L=loyOf(G);if(!L){UI.modal=null;return "";}const R=L.
       ${pool.length<3?`<p class="meta">ค่ายมีนักมวยไม่ถึงสามคน คนที่มีจะได้ขึ้นซ้ำ (พลังเต็มทุกรอบที่ขึ้นใหม่)</p>`:""}
       <div class="center endbtns"><button class="btn primary" data-act="gstart" ${P.length<need?"disabled":""}>เริ่มศึก</button><button class="btn" data-act="closeModal">ไว้ก่อน</button></div>${ladder(-1)}`;}
   if(R.done){const tr=loyTier(R.score,R.boss);return head+`<div class="gres2"><p class="meta">คะแนนรวม</p><p class="gsc num">${R.score}</p>${tr?`<span class="pill gold">รางวัลระดับ${tr.n}</span>`:`<span class="pill">ยังไม่ถึงระดับรางวัล (ทองแดง ${LOY_TIERS[2][2]})</span>`}
-    ${(R.got||[]).length?`<ul class="glist">${R.got.map(x=>`<li>${x}</li>`).join("")}</ul>`:""}<p class="meta">ดีที่สุด ${L.best} · ทอง ${LOY_TIERS[0][2]}+ และต้องล้มเสี่ยหมวกทองคำ</p></div>
+    ${(R.got||[]).length?`<ul class="glist">${R.got.map(x=>`<li>${x}</li>`).join("")}</ul>`:""}${loyCardRow(1)}<p class="meta">ดีที่สุด ${L.best} · ทอง ${LOY_TIERS[0][2]}+ และต้องล้มเสี่ยหมวกทองคำ</p></div>
     <div class="center endbtns">${R.newEnd?`<button class="btn gold" data-act="loyend" data-v="${R.newEnd}">ดูฉากจบ (ใหม่!)</button>`:""}<button class="btn primary" data-act="gretry">ท้าอีกรอบ</button><button class="btn" data-act="closeModal">กลับค่าย</button></div>${ladder(-1)}`;}
   const f=G.F[R.order[R.slot]];
   return head+`<div class="gnow"><p class="meta">คะแนน <b class="goldt num">${R.score}</b> · คนที่ ${R.slot+1}/3 · ไฟต์ที่ ${R.k+1}/9</p>
