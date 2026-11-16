@@ -1,5 +1,5 @@
 // ================= MUAY THAI MOE v1.3 — UI =================
-const VERSION="1.83.3";
+const VERSION="1.83.4";
 const CUR_LANG=(typeof window!=="undefined"&&window.LANG)||"th";
 const TH_LABEL=String.fromCharCode(3652,3607,3618);
 function langSwitch(cls){return `<div class="langsw ${cls||""}" role="group" aria-label="Language">${[["th",TH_LABEL],["en","EN"]].map(([k,l])=>`<button class="lsb ${CUR_LANG===k?"on":""}" data-act="setlang" data-v="${k}" aria-pressed="${CUR_LANG===k}">${l}</button>`).join("")}</div>`;}
@@ -1394,7 +1394,10 @@ const ACT={
   giftpick:d=>{UI.modal={type:"gift",id:d.id};render();},
   give:d=>{const r=giveGift(G,d.id,d.v);if(!r)return;UI.modal=null;UI.tab="people";save();AU.startMusic("date");giftScene(d.id,r);},
   decor:d=>{if(chooseDecor(G,d.k,d.v)){AU.sfx&&AU.sfx("ui");save();render();}},
-  decorbuy:d=>{const c=decorPrice(G,d.k,d.v);if(buyDecor(G,d.k,d.v)){AU.sfx&&AU.sfx("level");save();toast(`Bought "${CAMP_DECOR[d.k].items[d.v].name}" for ${fmt(c)}`);render();}},
+  decorbuy:d=>{const c=decorPrice(G,d.k,d.v),it=CAMP_DECOR[d.k]&&CAMP_DECOR[d.k].items[d.v];if(!c||!it)return;AU.sfx&&AU.sfx("ui");
+    UI.modal={type:"confirm",title:"Buy this decoration?",ok:`Buy ${fmt(c)}`,no:"Cancel",yes:"decorbuyok",k:d.k,v:d.v,
+      html:`<div class="px confirm"><b>${esc(it.name)}</b><p class="meta">${esc(CAMP_DECOR[d.k].name)} · price ${fmt(c)} · left after: ${fmt(G.cash-c)}</p><p class="meta">Yours to keep; switch back to the old look any time</p></div>`};render();},
+  decorbuyok:()=>{const m=UI.modal;if(!m||m.yes!=="decorbuyok")return;const d={k:m.k,v:m.v};UI.modal=null;const c=decorPrice(G,d.k,d.v);if(buyDecor(G,d.k,d.v)){AU.sfx&&AU.sfx("level");save();toast(`Bought "${CAMP_DECOR[d.k].items[d.v].name}" for ${fmt(c)}`);}render();},
   trophy:d=>{UI.trophySel=UI.trophySel===+d.v?null:+d.v;AU.sfx&&AU.sfx("ui");render();},
   showcase:()=>{UI.modal={type:"showcase"};render();},
   showcaseSave:()=>{const src=document.querySelector(".m-showcase canvas[data-camp]");if(!src)return;const W=640,cv=document.createElement("canvas");cv.width=W;cv.height=470;const x=cv.getContext("2d");x.imageSmoothingEnabled=false;

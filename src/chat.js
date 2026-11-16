@@ -222,7 +222,7 @@ function chatHTML(){const C=UI.chat;if(!C)return {body:"",foot:true};const f=G.F
      :C.done?`<p class="cend">${C.gain?`คุยกันถูกคอ · ความสนิทเพิ่มขึ้น`:"คุยกันสั้น ๆ วันนี้ ไว้เธอทักมาใหม่"}</p><button class="btn primary" data-act="closeModal">ปิดแชท</button>`:`<small class="meta">…</small>`}</div></div>`};}
 XMODAL.chat=()=>chatHTML();
 Object.assign(ACT,{chat:d=>chatOpen(d.id),chatpick:d=>chatPick(+d.v)});
-XMODAL.confirm=m=>({body:`<h2>${m.title}</h2><p>${m.text}</p><div class="mfoot"><button class="btn ghost" data-act="closeModal">ไม่</button><button class="btn primary" data-act="${m.yes}">ยืนยัน</button></div>`,foot:false});
+XMODAL.confirm=m=>({body:`<h2>${m.title}</h2>${m.html||`<p>${m.text}</p>`}<div class="mfoot"><button class="btn ghost" data-act="closeModal">${m.no||"ไม่"}</button><button class="btn primary" data-act="${m.yes}">${m.ok||"ยืนยัน"}</button></div>`,foot:false});
 
 // v1.52: "haven't seen you in a while" texts — she reaches out before the bond starts to fade
 const MISS_X={
