@@ -486,8 +486,11 @@ const CFX={
   fightnight:{bg:"bg_camp.webp",tint:"rgba(80,20,60,.25)",cap:"ไฟต์ไนท์ในค่าย คนดูแน่นเวที",spar:true,fx:"hearts"},
   clinicday:{bg:"gym",tint:"rgba(40,120,120,.18)",cap:"วันฟื้นฟูที่คลินิกกายภาพ",masseuse:true,row:"idle",fx:"steam"},
   waikhru:{bg:"bg_temple.webp",tint:"rgba(255,180,80,.2)",cap:"พิธีไหว้ครูที่ศาลพ่อแก่",kneel:true,fx:"rice"},
+  // v1.82.5: special investments get their own scene too
+  master:{bg:"bg_temple.webp",tint:"rgba(255,170,70,.22)",cap:"ครูมวยโบราณมาถ่ายทอดวิชาที่ลานค่าย",elder:true,row:"knee",fx:"stars"},
+  hostshow:{bg:"bg_camp.webp",tint:"rgba(60,20,70,.3)",cap:"ศึกมวยค่ายศิริชัย คนดูแน่นลาน",spar:true,crowd:true,fx:"flash"},
 };
-function cfxRoster(){return (G?Object.values(G.F).filter(f=>f.camp==="player"):[]).slice(0,3);}
+function cfxRoster(){if(G&&typeof UI!=="undefined"&&UI.cfxIds&&UI.cfxIds.length)return UI.cfxIds.map(id=>G.F[id]).filter(Boolean);return (G?Object.values(G.F).filter(f=>f.camp==="player"):[]).slice(0,3);}
 const MONK_PX=["......kkkkk.......", ".....ksssssk......", "....kssssssdk.....", "....ksesssesk.....", "....kssssssdk.....", "....kdssmssdk.....", ".....kddssdk......", "......kkddk.......", ".....kOoookkk.....", "....kOoohoosdk....", "...kOoohoooossk...", "...kOohooooosdk...", "...kOohoookkkkk...", "...kOhoookBBBBBk..", "...kOhooksbbbbbk..", "...kOooooksbbbk...", "...kOooooookkkk...", "...kOoooohoooOk...", "...kOoooohoooOk...", "...kOooohooooOk...", "...kOooohooooOk...", "...kOoohoooooOk...", "...kOoohoooooOk...", "...kOohooooooOk...", "...kOOooooooOOk...", "....kOOOOOOOOk....", "....kdsk..kdsk....", "....kssk..kssk....", "...kkkkk..kkkkk..."];
 const MONK_PAL={k:"#3a2014",s:"#d9a27b",d:"#b07a55",e:"#2a1a10",m:"#965040",O:"#c25e10",o:"#e8892a",h:"#f6b45a",b:"#2b2530",B:"#6e6478"};
 function drawMonk(x,cx,y,t,i,sc,right){const bob=Math.floor(t/300+i)%2,H=MONK_PX.length,W=MONK_PX[0].length;x.save();x.translate(Math.round(cx),Math.round(y));x.scale(right?sc:-sc,sc);
@@ -501,6 +504,7 @@ function drawCampFx(x,k,t){const C=CFX[k]||CFX.rest,W=x.canvas.width,H=x.canvas.
   const R=cfxRoster(),fy=H*.94,fh=H*.62;const P=(a,b,w,h,c)=>{x.fillStyle=c;x.fillRect(Math.round(a),Math.round(b),w,h);};
   if(C.students)for(let i=0;i<C.students;i++){const sx=W*(.52+i*.12),sy=fy-6+(i%2)*6;drawStudentNpc(x,"stu"+i+k,sx,sy,fh*.78,Math.floor(t/1400+i)%2?C.row:"guard",t+i*90,true);}
   if(C.masseuse)drawStudentNpc(x,"masseuse",W*.72,fy,fh*.9,"idle",t,true);
+  if(C.elder){drawStudentNpc(x,"oldmaster",W*.7,fy,fh*.95,Math.floor(t/1300)%2?"knee":"guard",t,true);}
   if(C.crew){drawStudentNpc(x,"crew1",W*.84,fy,fh*.85,"idle",t,true);}
   if(C.monks)for(let i=0;i<3;i++){const mx=-40+((t/22)+i*70)%(W+160);drawMonk(x,mx,fy-fh*.1,t,i,fh*.7/29,true);} // v1.38: monks walk behind, left to right
   if(C.spar&&R.length){const a=R[0],b=R[1]||{id:"sparnpc",canon:false};const ph=Math.floor(t/900)%2;
@@ -509,6 +513,8 @@ function drawCampFx(x,k,t){const C=CFX[k]||CFX.rest,W=x.canvas.width,H=x.canvas.
     if(C.walk){const span=W*.5;cx=W*.15+((t/18+i*span/3)%span);row="walk";}
     if(C.kneel){cx=W*(.18+i*.13);row="idle";}
     drawFrame(x,sheetFor(f),ROW[row],Math.floor(t/(row==="idle"?260:150))%4,cx,C.kneel?fy+fh*.12:fy,C.kneel?fh*.88:fh,false);});
+  if(C.crowd)for(let i=0;i<16;i++){const cx=(i+.5)*W/16,hop=Math.floor(t/260+i*1.7)%3===0?3:0,cy=H*.9-hop+(i%2)*4;
+    P(cx-7,cy,14,H*.12,["#2b2238","#352a44","#241d30"][i%3]);P(cx-5,cy-10,10,10,["#3b2f4a","#2e2539","#43354f"][i%3]);if(hop&&i%4===0)P(cx+6,cy-14,3,10,"#3b2f4a");}
   if(C.planks){P(W*.7,fy-40,46,6,"#8a5a32");P(W*.7,fy-30,46,6,"#a06a3a");P(W*.72,fy-46,4,40,"#5a3a22");P(W*.82,fy-46,4,40,"#5a3a22");}
   if(C.phone){const px=W*.78,py=H*.18;P(px,py,44,74,"#111");P(px+3,py+6,38,58,"#2c5fb3");P(px+5,py+8,34,10,"#e23b4e");x.fillStyle="#fff";x.font="bold 8px sans-serif";x.fillText("LIVE",px+12,py+16);
     for(let i=0;i<3;i++)P(px+6,py+24+i*12,26-i*6,6,"rgba(255,255,255,.6)");}
