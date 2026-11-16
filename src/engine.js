@@ -116,9 +116,11 @@ function skillMods(f){const m={hit:{},pts:{},dmg:{},ctr:0,ctrDmg:0,clutch:0,rege
   for(const sk of list){if(!sk.passive&&!eq.includes(sk.id))continue;const r=f.skills[sk.id]||0;if(!r)continue;const e=sk.fx(r);
     for(const k in e){if(typeof e[k]==="object")for(const w in e[k])m[k][w]=(m[k][w]||0)+e[k][w];else m[k]+=e[k];}}
   return m;}
-const xpNeed=lvl=>50+lvl*30;
+const MAX_LV=99; // v1.82.3: level cap lifted (was 10); past Lv.10 each level costs more and raises potential a little
+const xpNeed=lvl=>50+lvl*30+Math.max(0,lvl-10)*20;
+const lvBeyond=f=>{if(f.lvl>10)f.potential=Math.min(21,(f.potential||14)+.12);};
 function gainXP(G,f,x){if(!f.canon)return;if(f.camp==="player"&&G.fac&&G.fac.ring)x=Math.round(x*(1+G.fac.ring*.15));f.xp+=x;f.xpGain=(f.xpGain||0)+x;
-  while(f.lvl<10&&f.xp>=xpNeed(f.lvl)){f.xp-=xpNeed(f.lvl);f.lvl++;f.sp+=SP_PER_LV(f);if(f.camp==="player"){G.levelUps=G.levelUps||[];G.levelUps.push(f.id);}}}
+  while(f.lvl<MAX_LV&&f.xp>=xpNeed(f.lvl)){f.xp-=xpNeed(f.lvl);f.lvl++;f.sp+=SP_PER_LV(f);lvBeyond(f);if(f.camp==="player"){G.levelUps=G.levelUps||[];G.levelUps.push(f.id);}}}
 const skillDef=(fid,sk)=>(SKILLS[fid]||[]).find(s=>s.id===sk);
 // v1.29: stat requirements scale from each fighter's starting stats, so every line asks for real training
 const hasTree=fid=>!!(SKILLS[fid]&&SKILLS[fid][0]&&SKILLS[fid][0].line!=null);
@@ -439,7 +441,7 @@ function newGame(opts){
   return G;
 }
 const roster=G=>Object.values(G.F).filter(f=>f.camp==="player");
-const wageOf=f=>Math.round(f.wage*(1+((f.lvl||1)-1)*.06)/100)*100; // v1.43: stars ask for more as they level up
+const wageOf=f=>Math.round(f.wage*(1+(Math.min(f.lvl||1,15)-1)*.06)/100)*100; // v1.43: stars ask for more as they level up
 const wages=G=>roster(G).reduce((s,f)=>s+wageOf(f),0)+(G.staff?G.staff.reduce((s,k)=>s+STAFF[k].wage,0):G.fac.assistants*2500);
 // ---------- CAMP FACILITIES & STUDENTS ----------
 // Fixed camp slots: rarity indicates acquisition difficulty, never an extra stat bonus.
@@ -688,14 +690,14 @@ function genOffers(G,opt){
       const c=(G.week<=14?[.4,.8,.5][i%3]:OFFER_BANDS[i%OFFER_BANDS.length])+(i>=3?(rng()-.5)*1.6:0); // early weeks: even fights, losses happen
       const o=pickW(rng,pool.map(x=>{const d=ovr(x.a)-ovr(f.a)+((x.lvl||1)-(f.lvl||1))*.15;return [x,Math.exp(-((d-c)**2)/(2*.45*.45))+.01];}));used.add(o.id);
       // v1.15: purse = fee (paid win or lose) + win bonus; a better opponent, a crowd-drawing name or our own fame raise it
-      const mult=clamp(1+(ovr(o.a)-ovr(f.a))*.12,.7,1.6)*(o.canon?1.35:1)*(1+(f.lvl-1)*.04)*(1+Math.min(G.rep,40)/200);
+      const mult=clamp(1+(ovr(o.a)-ovr(f.a))*.12,.7,1.6)*(o.canon?1.35:1)*(1+(Math.min(f.lvl,20)-1)*.04)*(1+Math.min(G.rep,40)/200);
       G.offers.push({id:`o${G.week}_${f.id}_${i}`,a:f.id,b:o.id,week:wk,tier,win:Math.round(TIER[tier].win*mult/100)*100,lose:Math.round(TIER[tier].lose*mult/100)*100});
     }
     // v1.26: every 3 weeks a promoter offers a clearly stronger opponent for a bigger purse
     if(G.week>=9&&G.week<=42&&G.week%3===0){const wk=weeks[weeks.length-1],tier=ranked&&wk<=stageEnd?st:"exhibition";
       const hp=Object.values(G.F).filter(o=>o.div===f.div&&o.camp!=="player"&&o.camp!=="free"&&!o.canon&&o.injury===0&&!used.has(o.id)&&!isBooked(G,o.id,wk)&&(tier==="exhibition"||eligible(G,o)))
         .map(o=>[o,ovr(o.a)-ovr(f.a)+((o.lvl||1)-(f.lvl||1))*.15]).filter(x=>x[1]>=.8&&x[1]<=2.1).sort((a,b)=>Math.abs(a[1]-1.4)-Math.abs(b[1]-1.4));
-      if(hp.length){const o=hp[0][0];used.add(o.id);const mult=1.5*clamp(1+(ovr(o.a)-ovr(f.a))*.12,.7,1.6)*(1+(f.lvl-1)*.04)*(1+Math.min(G.rep,40)/200);
+      if(hp.length){const o=hp[0][0];used.add(o.id);const mult=1.5*clamp(1+(ovr(o.a)-ovr(f.a))*.12,.7,1.6)*(1+(Math.min(f.lvl,20)-1)*.04)*(1+Math.min(G.rep,40)/200);
         G.offers.push({id:`o${G.week}_${f.id}_h`,a:f.id,b:o.id,week:wk,tier,hard:1,win:Math.round(TIER[tier].win*mult/100)*100,lose:Math.round(TIER[tier].lose*mult/100)*100});}}
     // v1.16: promoters stage cross-division star bouts a few times a season, so every rival pair can meet
     const X=CROSS_OF[f.id];if(X&&SPECIAL_WEEKS.includes(G.week)){const o=G.F[X],wk=G.week+3;
@@ -849,7 +851,7 @@ function weekTrain(G){
     npcGrow(f,rng,(f.canon&&f.camp==="rival"?dif(G).rival:1)*(f.id==="ploy"?(G.week>40?.07:G.week>30?.022:.012)+sg:f.id==="fah"?(G.week>40?.07:G.week>30?.03:G.week>10&&G.week<=24?.042:.026)+sg:f.camp==="rival"?.035:NPC_RATE(G.week)));f.morale+=(60-f.morale)*.1;
     // v1.15: rivals and NPCs level up too, so the opposition visibly gets stronger over the season
     if(f.camp==="rival"||f.camp==="npc"){f.xp=(f.xp||0)+(f.camp==="rival"?30:18)+Math.floor(rng()*10);
-      while(f.lvl<10&&f.xp>=xpNeed(f.lvl)){f.xp-=xpNeed(f.lvl);f.lvl++;if(f.camp==="rival"){const ks=Object.keys(f.a).sort((x,y)=>f.a[y]-f.a[x]).slice(0,2);ks.forEach(k=>f.a[k]=Math.min(20,f.a[k]+.2));}
+      while(f.lvl<MAX_LV&&f.xp>=xpNeed(f.lvl)){f.xp-=xpNeed(f.lvl);f.lvl++;lvBeyond(f);if(f.camp==="rival"){const ks=Object.keys(f.a).sort((x,y)=>f.a[y]-f.a[x]).slice(0,2);ks.forEach(k=>f.a[k]=Math.min(20,f.a[k]+.2));}
         if(f.camp==="rival")G.lvNews=(G.lvNews||[]).concat([`${f.name} ${f.lab?"ค่ายเวกเตอร์":"ค่ายพยัคฆ์ทอง"} เลเวลอัปเป็น Lv.${f.lvl}`]).slice(-3);}}}
 }
 // week phase 3: npc sim, economy, transitions, advance
@@ -901,9 +903,17 @@ function liftOpponent(f,target,maxGain){const delta=Math.min(maxGain,Math.max(0,
   const goal=Math.min(19.7,ovr(f.a)+delta);for(let n=0;n<4;n++){const gap=goal-ovr(f.a),room=ATTRS.filter(([k])=>f.a[k]<19.95);if(gap<=.01||!room.length)break;
     const each=gap*ATTRS.length/room.length;for(const [k] of room)f.a[k]=Math.min(20,f.a[k]+each);}
   f.potential=Math.max(f.potential||14,Math.min(20,goal));}
+// v1.82.3: from year 2 the district and provincial fields get fresh names each year (seeded per save);
+// last year's best provincial fighter in each division comes back as a familiar face.
+const NPC_GIVEN=["กานต์ธิดา","ปิ่นมณี","ชมพู่","รัชนี","สุดารัตน์","น้ำฝน","เกศินี","มะปราง","ดาวเรือง","อัญชัน","พิกุล","ลลิตา","จิราพร","บัวขาว","ทองกวาว","ดอกแก้ว","ศิรินทร์","ปาริชาต","ขิม","แพรพลอย","ณิชา","อรอุมา","สายไหม","ฟ้าใส","เอื้องคำ","นวลจันทร์","ภัทรา","มยุรี","ลำดวน","ยุพิน","ปทุม","รสสุคนธ์","กุหลาบ","บุหงา","ใบบัว","ต้นข้าว"];
+const NPC_CAMP=["ศิษย์ดอยสุเทพ","ส.แม่แตง","ลูกเชียงดาว","เพชรฝาง","ก.ลำพูน","ศิษย์พระธาตุ","ว.เวียงพิงค์","ช.ช้างเผือก","ลูกสันทราย","เพชรแม่ริม","ส.หางดง","ศิษย์ฮอด","ลูกจอมทอง","พ.พร้าว","ศ.สะเมิง","เกียรติลำปาง","ส.ดอยเต่า","ลูกแม่แจ่ม","เพชรอมก๋อย","ศิษย์สารภี"];
+function stageNpcName(G,stage,div,i){const y=G.season||1;if(y<2)return null;
+  if(stage==="province"&&i===0&&G.npcVet&&G.npcVet[div]&&!Object.values(G.F).some(f=>f.name===G.npcVet[div]))return G.npcVet[div];
+  const names=Object.values(G.F).map(f=>f.name||""),firsts=new Set(names.map(n=>n.split(" ")[0])),rng=mulberry32(G.seed+y*131+stableHash(stage+div)+i*17);
+  for(let t=0;t<40;t++){const g=NPC_GIVEN[Math.floor(rng()*NPC_GIVEN.length)];if(firsts.has(g))continue;return g+" "+NPC_CAMP[Math.floor(rng()*NPC_CAMP.length)];}return null;}
 function ensureStageNPCs(G,through=stageOf(G.week)){const stages=["local",...(through==="district"||through==="final"||through==="province"?["district"]:[]),...(through==="final"||through==="province"?["province"]:[])];
   G.rank=G.rank||{A:{},B:{}};for(const stage of stages)for(const div of ["A","B"]){G.rank[div]=G.rank[div]||{};
-    STAGE_NPCS[stage][div].forEach(([name,level],i)=>{const id=`${{local:"l",district:"x",province:"p"}[stage]}${div}${i}`;if(G.F[id])return;
+    STAGE_NPCS[stage][div].forEach(([name,level],i)=>{const id=`${{local:"l",district:"x",province:"p"}[stage]}${div}${i}`;if(G.F[id])return;if(stage!=="local")name=stageNpcName(G,stage,div,i)||name;
       const rng=mulberry32(G.seed+stableHash(id)+((G.season||1)-1)*977),f=G.F[id]=baseFighter(id,mkNPC(id,name,div,level,rng,i+2));
       if((G.season||1)>=2){const best=Math.max(level,...roster(G).filter(x=>x.div===div).map(x=>ovr(x.a))),gap=stage==="local"?-2:stage==="district"?-1.1:-.3;liftOpponent(f,Math.min(19.2,best+gap),20);}startLv(f);
       if(stage==="district"){G.qual=G.qual||{A:[],B:[]};G.qual[div]=G.qual[div]||[];if(!G.qual[div].includes(id))G.qual[div].push(id);}
@@ -923,7 +933,8 @@ function newSeason(G){
   G.titles=G.titles||[];G.titles.push({season:G.season||1,champ:{...G.champ}});
   G.season=(G.season||1)+1;G.week=1;G.ended=null;G.qual={A:[],B:[]};G.finalists={A:[],B:[]};G.semis={A:[],B:[]};G.champ={};G.bookings=[];G.log=[];
   G.flags.qualDone=false;G.flags.finalDone=false;G.snub={};G.offers=[];G.dmSeen={};G.dmSeenSeason=G.season;G.dm=null;G.coachAway=null;G.coachAwayAbs=null;G.freeUsed=false;G.campUsed=null;G.rankMove={A:{},B:{}};
-  for(const id of Object.keys(G.F))if(/^[dxp][AB]\d/.test(id))delete G.F[id];
+  G.npcVet={};for(const div of ["A","B"]){const best=Object.entries((G.rank||{})[div]||{}).filter(([id])=>/^p[AB]\d/.test(id)&&G.F[id]).sort((x,y)=>(y[1].pts||0)-(x[1].pts||0))[0];if(best)G.npcVet[div]=G.F[best[0]].name;}
+  for(const id of Object.keys(G.F))if(/^[dxp][AB]\d/.test(id)){delete G.F[id];if(G.h2h)delete G.h2h[id];if(G.fam)delete G.fam[id];if(G.snub)delete G.snub[id];}
   const rng=mulberry32(G.seed+G.season*977);
   G.rank={A:{},B:{}};
   for(const f of Object.values(G.F)){f.form=[];f.injury=0;f.fatigue=Math.min(f.fatigue,20);

@@ -108,7 +108,7 @@ function hearts(b){const v=Math.max(0,Math.min(100,b||0));let h="";for(let k=0;k
   const tier=v>=85?"Deeply bonded":v>=65?"Close":v>=45?"Friends":v>=25?"Getting familiar":"Acquaintance";return `<span class="hearts" title="Bond ${Math.round(v)}/100">${h}<small>${tier}</small></span>`;}
 function bar(label,v,color,txt){return `<div class="bar"><span>${label}</span><i style="--v:${clamp(v,0,100)}%;--bc:${color}"></i><b class="num">${txt??Math.round(v)}</b></div>`;}
 function mini(v,color){return `<i class="mini" style="--v:${clamp(v,0,100)}%;--bc:${color}"></i>`;}
-function xpBar(f){const need=xpNeed(f.lvl);return `<div class="xp"><span class="lv">Lv.${f.lvl}</span><i style="--v:${f.lvl>=10?100:clamp(f.xp/need*100,0,100)}%"></i><span class="num dim">${f.lvl>=10?"MAX":`${Math.round(f.xp)}/${need}`}</span>${f.sp>0&&f.camp==="player"?`<button class="spchip" data-act="ptab" data-v="skill">★ ${f.sp} skill pts</button>`:""}</div>`;}
+function xpBar(f){const need=xpNeed(f.lvl);return `<div class="xp"><span class="lv">Lv.${f.lvl}</span><i style="--v:${f.lvl>=MAX_LV?100:clamp(f.xp/need*100,0,100)}%"></i><span class="num dim">${f.lvl>=MAX_LV?"MAX":`${Math.round(f.xp)}/${need}`}</span>${f.sp>0&&f.camp==="player"?`<button class="spchip" data-act="ptab" data-v="skill">★ ${f.sp} skill pts</button>`:""}</div>`;}
 function formHTML(f){return `<span class="form">${f.form.map(r=>`<i class="${r}">${r==="W"?"W":r==="L"?"L":"D"}</i>`).join("")||'<span class="dim">—</span>'}</span>`;}
 const rec=f=>`${f.rec.w}-${f.rec.l}-${f.rec.d}`;
 const condColor=c=>c>=70?"var(--green)":c>=45?"var(--warn)":"var(--red)";
@@ -776,11 +776,11 @@ function modalHTML(){const m=UI.modal;let body="",foot=true;
 function montageHTML(){const M=UI.montage;
   return `<div class="montage" role="dialog" aria-label="Weekly training"><div class="mt-bg" style="background-image:url(${ASSET}${gymBg()})"></div>
    <h2 class="mt-h">Training · week ${M.week}</h2><div class="mt-row pxscroll">${M.items.map((g,i)=>{const f=G.F[g.id];const top=Object.entries(g.gains).sort((a,b)=>b[1]-a[1]).slice(0,3).filter(x=>x[1]>=.05);
-     const need=xpNeed(f.lvl),pct=f.lvl>=10?100:clamp(f.xp/need*100,0,100),gp=f.lvl>=10?0:clamp(g.xp/need*100,0,pct);
+     const need=xpNeed(f.lvl),pct=f.lvl>=MAX_LV?100:clamp(f.xp/need*100,0,100),gp=f.lvl>=MAX_LV?0:clamp(g.xp/need*100,0,pct);
      return `<div class="mt-col px" style="--d:${i*.2}s"><canvas width="160" height="150" data-sprite="${f.id}" data-floor="1"></canvas>
       <div class="mt-info"><b>${esc(f.name)} <span class="lv">Lv.${f.lvl}</span></b><span class="pill">${g.injury?"Recovering":PRESETS[g.preset].name}</span>
       <div class="pops">${top.map(([k,v],j)=>`<span style="--d:${i*.2+.3+j*.2}s">${ATTR_LABEL[k]} +${v.toFixed(1)}</span>`).join("")||"<span class=\"dim\">Recovering</span>"}</div>
-      <div class="mt-xp"><i style="--v:${pct}%;--g:${gp}%;--d:${i*.2+.8}s"></i><small>EXP +${g.xp}${f.lvl<10?` · ${Math.round(f.xp)}/${need}`:" · MAX"}</small></div></div></div>`;}).join("")}</div>
+      <div class="mt-xp"><i style="--v:${pct}%;--g:${gp}%;--d:${i*.2+.8}s"></i><small>EXP +${g.xp}${f.lvl<MAX_LV?` · ${Math.round(f.xp)}/${need}`:" · MAX"}</small></div></div></div>`;}).join("")}</div>
    <button class="btn primary mt-go" data-act="montageDone">${M.fights?"To the fight ▸":"Continue ▸"}</button></div>`;}
 
 // ---------- VN scene ----------
