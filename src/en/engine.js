@@ -356,7 +356,9 @@ function styleVal(f,s){const A=STYLE_ATTRS[s];return (f.a[A[0]]*2+f.a[A[1]])/3;}
 function mainStyle(f){if(STYLE_MAIN[f.id])return STYLE_MAIN[f.id];return Object.keys(STYLE_ATTRS).sort((x,y)=>styleVal(f,y)-styleVal(f,x))[0];}
 const MASTERY_AT=13,MK=2,CK=3.5;
 function mastery(f){if(f.camp!=="player")return 0;const v=styleVal(f,mainStyle(f));return v<MASTERY_AT?0:.3+.7*clamp((v-MASTERY_AT)/4,0,1);}
-function fightSide(f,plan,rng){const sk=skillMods(f);{const m=mastery(f)*MK,s=mainStyle(f);if(m){if(s==="defense"){sk.evade+=.04*m;sk.ctr+=.06*m;sk.ctrDmg+=.25*m;}else{const w=s;sk.hit[w]=(sk.hit[w]||0)+.05*m;sk.dmg[w]=(sk.dmg[w]||0)+.2*m;sk.pts[w]=(sk.pts[w]||0)+.1*m;}}}if(f.aura)sk.evade+=f.aura*.5;const gr=f.grit||0;if(gr)sk.evade+=gr*.4;
+/* v1.83.3: veterans past the stat ceiling (20) keep improving through ring craft instead — f.vet is measured in stat points */
+const VET_FX={hit:.08,dmg:.25,ev:.06}; // calibrated: vet 1 ≈ +1 stat point
+function fightSide(f,plan,rng){const sk=skillMods(f);{const m=mastery(f)*MK,s=mainStyle(f);if(m){if(s==="defense"){sk.evade+=.04*m;sk.ctr+=.06*m;sk.ctrDmg+=.25*m;}else{const w=s;sk.hit[w]=(sk.hit[w]||0)+.05*m;sk.dmg[w]=(sk.dmg[w]||0)+.2*m;sk.pts[w]=(sk.pts[w]||0)+.1*m;}}}if(f.aura)sk.evade+=f.aura*.5;if(f.vet>0){const v=f.vet;for(const w of ["punch","kick","knee","elbow"]){sk.hit[w]=(sk.hit[w]||0)+VET_FX.hit*v;sk.dmg[w]=(sk.dmg[w]||0)+VET_FX.dmg*v;}sk.evade+=VET_FX.ev*v;}const gr=f.grit||0;if(gr)sk.evade+=gr*.4;
   return {f,id:f.id,name:f.name,plan,instr:"none",hp:100-(f.injury?15:0)+Math.round(gr*30),sta:clamp(100-f.fatigue*.4,40,100),pts:0,rpts:0,kd:0,cuts:0,
     thrown:0,landed:0,dmgDealt:0,legs:0,tac:{focus:"auto",pace:"steady",target:"head"},sk,prep:(f.prepBonus?.04:0)+(f.counterPrep?.05:0)+sk.prep+(f.aura||0)+(f.grit||0)+(f.labPrep||0)+(f.camp==="player"?(f.facPrep||0):0),counterPrep:!!f.counterPrep,mor:(f.morale-60)/400+sk.mor,wl:{punch:0,kick:0,knee:0,elbow:0}};
 }
@@ -524,18 +526,19 @@ const wages=G=>roster(G).reduce((s,f)=>s+wageOf(f),0)+(G.staff?G.staff.reduce((s
 // Fixed camp slots: rarity indicates acquisition difficulty, never an extra stat bonus.
 const DECOR_RARITY={N:"#aab0ba",R:"#5ba9e8",SR:"#bd83e8",SSR:"#f4c75b",SS:"#ff8f62"};
 const CAMP_DECOR={
- tree:{name:"Trees",items:{none:{name:"No tree",r:"N"},plain:{name:"Local tree",r:"N"},blossom:{name:"Wild Himalayan cherry tree",r:"R",rep:15},sakura:{name:"Sakura garden",r:"SR",rep:30,year:2},champion:{name:"Victory tree",r:"SSR",honor:"province"},golden:{name:"Legendary golden tree",r:"SS",titles:3}}},
- gate:{name:"Entrance gate",items:{none:{name:"No gate",r:"N"},plain:{name:"Wooden gate",r:"N"},painted:{name:"Camp color gate",r:"R",fac:["brand",1]},lantern:{name:"Lantern gate",r:"SR",year:2,rep:18},trophy:{name:"Trophy gate",r:"SSR",honors:3},gold:{name:"Golden honor gate",r:"SS",honors:8}}},
- ring:{name:"Boxing ring",items:{plain:{name:"Original ring",r:"N"},red:{name:"Red ring trim",r:"R",fac:["ring",1]},blue:{name:"Blue ring trim",r:"R",fac:["ring",2]},sponsor:{name:"Sponsor ring",r:"SR",rep:30},gold:{name:"Champion ring",r:"SSR",honor:"province"}}},
- track:{name:"Camp running track",items:{dirt:{name:"Dirt path",r:"N"},chalk:{name:"Chalk lane",r:"R",fac:["hill",1]},gravel:{name:"Gravel track",r:"SR",fac:["hill",2]},rubber:{name:"Rubber track",r:"SR",fac:["gym",2],rep:20},lantern:{name:"Lantern track",r:"SSR",year:3,rep:35}}},
- vehicle:{name:"Camp vehicle",items:{none:{name:"No vehicle",r:"N"},songthaew:{name:"Songthaew",r:"R",fac:["van",1]},minibus:{name:"Van",r:"SR",fac:["van",2]},tourbus:{name:"Camp bus",r:"SR",fac:["van",2],rep:35},limo:{name:"Limousine",r:"SSR",fac:["van",2],rep:45,honor:"province"},goldvan:{name:"Golden van",r:"SS",bossWins:10}}},
- bags:{name:"Punching bags",items:{plain:{name:"Old bag",r:"N"},red:{name:"Red bag",r:"R",fac:["gym",1]},blue:{name:"Blue bag",r:"R",fac:["gym",2]},team:{name:"Camp crest bag",r:"SR",rep:20},gold:{name:"Champion bag",r:"SSR",honors:5}}}
+ tree:{name:"Trees",items:{none:{name:"No tree",r:"N"},plain:{name:"Local tree",r:"N"},blossom:{name:"Wild Himalayan cherry tree",r:"R",rep:15},sakura:{name:"Sakura garden",r:"SR",rep:30,year:2},champion:{name:"Victory tree",r:"SSR",honor:"province"},golden:{name:"Legendary golden tree",r:"SS",titles:3},flame:{name:"Flame tree",r:"R",shop:1,price:22000},lilawadee:{name:"Frangipani tree",r:"R",shop:1,price:28000},rachaphruek:{name:"Golden shower tree",r:"SR",shop:1,price:55000}}},
+ gate:{name:"Entrance gate",items:{none:{name:"No gate",r:"N"},plain:{name:"Wooden gate",r:"N"},painted:{name:"Camp color gate",r:"R",fac:["brand",1]},lantern:{name:"Lantern gate",r:"SR",year:2,rep:18},trophy:{name:"Trophy gate",r:"SSR",honors:3},gold:{name:"Golden honor gate",r:"SS",honors:8},lanna:{name:"Lanna teak gate",r:"SR",shop:1,price:60000},jade:{name:"Jade gate",r:"SR",shop:1,price:65000}}},
+ ring:{name:"Boxing ring",items:{plain:{name:"Original ring",r:"N"},red:{name:"Red ring trim",r:"R",fac:["ring",1]},blue:{name:"Blue ring trim",r:"R",fac:["ring",2]},sponsor:{name:"Sponsor ring",r:"SR",rep:30},gold:{name:"Champion ring",r:"SSR",honor:"province"},green:{name:"Emerald green ring",r:"R",shop:1,price:30000},purple:{name:"Royal purple ring",r:"SR",shop:1,price:60000},black:{name:"Midnight black ring",r:"SR",shop:1,price:75000}}},
+ track:{name:"Camp running track",items:{dirt:{name:"Dirt path",r:"N"},chalk:{name:"Chalk lane",r:"R",fac:["hill",1]},gravel:{name:"Gravel track",r:"SR",fac:["hill",2]},rubber:{name:"Rubber track",r:"SR",fac:["gym",2],rep:20},lantern:{name:"Lantern track",r:"SSR",year:3,rep:35},blue:{name:"Blue track",r:"R",shop:1,price:30000},green:{name:"Green track",r:"R",shop:1,price:30000}}},
+ vehicle:{name:"Camp vehicle",items:{none:{name:"No vehicle",r:"N"},songthaew:{name:"Songthaew",r:"R",fac:["van",1]},minibus:{name:"Van",r:"SR",fac:["van",2]},tourbus:{name:"Camp bus",r:"SR",fac:["van",2],rep:35},limo:{name:"Limousine",r:"SSR",fac:["van",2],rep:45,honor:"province"},goldvan:{name:"Golden van",r:"SS",bossWins:10},rotdaeng:{name:"Chiang Mai red truck",r:"R",shop:1,price:40000},pinkvan:{name:"Pastel pink van",r:"SR",shop:1,price:95000}}},
+ bags:{name:"Punching bags",items:{plain:{name:"Old bag",r:"N"},red:{name:"Red bag",r:"R",fac:["gym",1]},blue:{name:"Blue bag",r:"R",fac:["gym",2]},team:{name:"Camp crest bag",r:"SR",rep:20},gold:{name:"Champion bag",r:"SSR",honors:5},green:{name:"Army green bags",r:"N",shop:1,price:8000},black:{name:"Matte black bags",r:"R",shop:1,price:15000},pink:{name:"Sweet pink bags",r:"R",shop:1,price:15000}}}
 };
 const campWeekIndex=G=>gameWeek(G);
 const goldRematchReady=G=>(G.gang&&G.gang.st>=5)&&campWeekIndex(G)>=(G.gangRematchAt||0);
 const goldRematchLabel=G=>{const n=G.gangRematchAt||0;return "Year "+(Math.floor((n-1)/52)+1)+" week "+(((n-1)%52)+1);};
 const decorDefault=slot=>({tree:"plain",gate:"plain",ring:"plain",track:"dirt",vehicle:"none",bags:"plain"})[slot];
 function decorUnlockReason(G,slot,key){const D=CAMP_DECOR[slot]&&CAMP_DECOR[slot].items[key];if(!D)return "Unknown decoration";if(G.decorUnlocks&&G.decorUnlocks[slot]&&G.decorUnlocks[slot].includes(key))return "";const need=[];
+ if(D.shop)need.push("Buy in the shop");
  if(D.rep&&G.rep<D.rep)need.push("Fame "+D.rep+" (current: "+G.rep.toFixed(1)+")");
  if(D.fac&&(G.fac[D.fac[0]]||0)<D.fac[1])need.push("Upgrade "+FACILITIES[D.fac[0]].name+" level "+D.fac[1]);
  if(D.year&&(G.season||1)<D.year)need.push("Reach year "+D.year);
@@ -547,6 +550,9 @@ function decorUnlockReason(G,slot,key){const D=CAMP_DECOR[slot]&&CAMP_DECOR[slot
 function decorUnlocked(G,slot,key){return !!(CAMP_DECOR[slot]&&CAMP_DECOR[slot].items[key])&&!decorUnlockReason(G,slot,key);}
 function chooseDecor(G,slot,key){if(!decorUnlocked(G,slot,key))return false;G.decor=G.decor||{};G.decorUnlocks=G.decorUnlocks||{};G.decorUnlocks[slot]=G.decorUnlocks[slot]||[];if(!G.decorUnlocks[slot].includes(key))G.decorUnlocks[slot].push(key);G.decor[slot]=key;return true;}
 function grantDecorUnlocks(G){G.decorUnlocks=G.decorUnlocks||{};for(const [slot,D] of Object.entries(CAMP_DECOR)){G.decorUnlocks[slot]=G.decorUnlocks[slot]||[];for(const key of Object.keys(D.items))if(!decorUnlockReason(G,slot,key)&&!G.decorUnlocks[slot].includes(key))G.decorUnlocks[slot].push(key);}}
+// v1.83.1: two separate kinds — earned pieces come only from their condition; shop pieces are bought (late-game money sink)
+function decorPrice(G,slot,key){const D=CAMP_DECOR[slot]&&CAMP_DECOR[slot].items[key];if(!D||!D.shop||!decorUnlockReason(G,slot,key))return 0;return D.price||0;}
+function buyDecor(G,slot,key){const c=decorPrice(G,slot,key);if(!c||G.cash<c)return false;G.cash-=c;G.decorUnlocks=G.decorUnlocks||{};G.decorUnlocks[slot]=G.decorUnlocks[slot]||[];if(!G.decorUnlocks[slot].includes(key))G.decorUnlocks[slot].push(key);G.decor=G.decor||{};G.decor[slot]=key;G.decorSpent=(G.decorSpent||0)+c;return true;}
 function decorChoice(G,slot){const key=G.decor&&G.decor[slot];return decorUnlocked(G,slot,key)?key:decorDefault(slot);}
 const FACILITIES={
   gym:{name:"Training gear",cost:[20000,35000,60000],desc:"Training effect +10% per level"},
@@ -743,8 +749,21 @@ const RIVAL_OF={kati:"ploy",mali:"fah"},RIVAL_WEEKS=[25,29,33,36],RIVAL_EARLY={m
 // v1.21: promoters keep calling even when a fight is booked (further out), more calls with fame,
 // and each batch mixes an easier bout, an even one and (with fame) a step up — a real challenge curve
 // v1.43: a plain difficulty label for a matchup
-function diffTag(me,op){const d=ovr(op.a)-ovr(me.a)+((op.lvl||1)-(me.lvl||1))*.15;return d<-.6?["easy","Easy"]:d<.35?["even","Even"]:d<1.1?["hard","Hard"]:["vhard","Very hard"];}
-const OFFER_BANDS=[-.7,.45,1.4,.9];
+function diffTag(me,op){const d=effGap(typeof G!=="undefined"?G:null,me,op);return d<-.6?["easy","Easy"]:d<.35?["even","Even"]:d<1.1?["hard","Hard"]:["vhard","Very hard"];}
+const OFFER_BANDS=[-.7,.45,1.4,.9],EFF_BANDS=[-.9,-.1,.8,.3];
+/* v1.83.1: our fighters are stronger than their stats show — skills, mastery, aura, grit, facilities and the corner picking the right plan.
+   Measure that edge (in stat points) by sparring a mirror with none of it but a known ring-craft lead; from year 2 matchmaking, the field and rewards all use it. */
+const _edge={};
+function hiddenEdge(f){if(!f||f.camp!=="player")return 0;const key=(f.lvl||1)+":"+Object.values(f.skills||{}).reduce((s,v)=>s+v,0)+":"+(f.equip||[]).join()+":"+ovr(f.a).toFixed(1)+":"+(f.aura||0)+":"+(f.grit||0)+":"+(f.facPrep||0)+":"+hasSignature(f);
+  if(_edge[f.id]&&_edge[f.id].k===key)return _edge[f.id].v;
+  const me={...f,a:{...f.a},morale:65,fatigue:0,injury:0},OFF=3,o=ovr(f.a),mir={...f,id:"_mirror",camp:"npc",canon:false,vet:OFF,a:Object.fromEntries(Object.keys(f.a).map(k=>[k,o])),skills:{},aura:0,grit:0,counterPrep:false,prepBonus:false,ployNotes:false,labPrep:0,morale:65,fatigue:0,injury:0};
+  let best=0;for(const plan of Object.keys(PLANS)){let w=0;const n=16;for(let i=0;i<n;i++){const F=newFight(me,mir,{seed:7001+i*13,rounds:3,planA:plan});
+    while(!F.over){F.A.instr=aiCorner(F,F.A,F.B);F.B.instr=aiCorner(F,F.B,F.A);fightRound(F);}w+=F.result.win==="A"?1:F.result.win==="D"?.5:0;}best=Math.max(best,w/n);}
+  const r=clamp(best,.03,.97),v=Math.max(0,OFF+Math.log(r/(1-r))/.9);_edge[f.id]={k:key,v};return v;}
+const edgeOf=(G,f)=>f&&f.camp!=="player"?(f.vet||0):(G&&(G.season||1)>=2)?hiddenEdge(f):0;
+const effOvr=(G,f)=>ovr(f.a)+edgeOf(G,f);
+/* how much harder `op` is than `me` once the hidden edge is counted (positive = tougher) */
+const effGap=(G,me,op)=>ovr(op.a)-ovr(me.a)+((op.lvl||1)-(me.lvl||1))*.15-edgeOf(G,me)+edgeOf(G,op);
 function genOffers(G,opt){
   const rng=mulberry32(G.seed+G.week*7919+11);G.snub=G.snub||{};const ignored=new Set();
   /* v1.82.3: only offers the NPC really sent and the player let lapse at week end count as a snub — not temple-fair or Vector bookings, not a mid-week refresh */
@@ -764,17 +783,18 @@ function genOffers(G,opt){
       const tier=ranked&&wk<=stageEnd?st:"exhibition";
       const pool=Object.values(G.F).filter(o=>o.div===f.div&&o.camp!=="player"&&o.camp!=="free"&&o.injury===0&&!used.has(o.id)&&!isBooked(G,o.id,wk)&&(tier==="exhibition"||eligible(G,o)));
       if(!pool.length)continue;
-      const c=(G.week<=14?[.4,.8,.5][i%3]:OFFER_BANDS[i%OFFER_BANDS.length])+(i>=3?(rng()-.5)*1.6:0); // early weeks: even fights, losses happen
-      const o=pickW(rng,pool.map(x=>{const d=ovr(x.a)-ovr(f.a)+((x.lvl||1)-(f.lvl||1))*.15;return [x,Math.exp(-((d-c)**2)/(2*.45*.45))+.01];}));used.add(o.id);
+      const weakWk=((G.week+f.id.length*7+(G.season||1))%(G.rep>=40?4:3))===0; /* v1.83.1: an easy pick is on the table only some weeks */
+      const y2=(G.season||1)>=2,c=(f.mmOff||0)+(G.week<=14&&!y2?[.4,.8,.5][i%3]:y2?(i===0&&weakWk?-1.6:EFF_BANDS[i%EFF_BANDS.length]):(i===0&&!weakWk?.15:OFFER_BANDS[i%OFFER_BANDS.length]))+(i>=3?(rng()-.5)*1.6:0); // early weeks: even fights, losses happen
+      const o=pickW(rng,pool.map(x=>{const d=effGap(G,f,x);return [x,Math.exp(-((d-c)**2)/(2*.45*.45))+.01];}));used.add(o.id);
       // v1.15: purse = fee (paid win or lose) + win bonus; a better opponent, a crowd-drawing name or our own fame raise it
-      const mult=clamp(1+(ovr(o.a)-ovr(f.a))*.12,.7,1.6)*(o.canon?1.35:1)*(1+(Math.min(f.lvl,20)-1)*.04)*(1+Math.min(G.rep,40)/200);
+      const mult=clamp(1+effGap(G,f,o)*.12,.7,1.6)*(o.canon?1.35:1)*(1+(Math.min(f.lvl,20)-1)*.04)*(1+Math.min(G.rep,40)/200);
       G.offers.push({id:`o${G.week}_${f.id}_${i}`,a:f.id,b:o.id,week:wk,tier,win:Math.round(TIER[tier].win*mult/100)*100,lose:Math.round(TIER[tier].lose*mult/100)*100});
     }
     // v1.26: every 3 weeks a promoter offers a clearly stronger opponent for a bigger purse
     if(G.week>=9&&G.week<=42&&G.week%3===0){const wk=weeks[weeks.length-1],tier=ranked&&wk<=stageEnd?st:"exhibition";
       const hp=Object.values(G.F).filter(o=>o.div===f.div&&o.camp!=="player"&&o.camp!=="free"&&!o.canon&&o.injury===0&&!used.has(o.id)&&!isBooked(G,o.id,wk)&&(tier==="exhibition"||eligible(G,o)))
-        .map(o=>[o,ovr(o.a)-ovr(f.a)+((o.lvl||1)-(f.lvl||1))*.15]).filter(x=>x[1]>=.8&&x[1]<=2.1).sort((a,b)=>Math.abs(a[1]-1.4)-Math.abs(b[1]-1.4));
-      if(hp.length){const o=hp[0][0];used.add(o.id);const mult=1.5*clamp(1+(ovr(o.a)-ovr(f.a))*.12,.7,1.6)*(1+(Math.min(f.lvl,20)-1)*.04)*(1+Math.min(G.rep,40)/200);
+        .map(o=>[o,effGap(G,f,o)-(f.mmOff||0)]).filter(x=>x[1]>=.8&&x[1]<=2.1).sort((a,b)=>Math.abs(a[1]-1.4)-Math.abs(b[1]-1.4));
+      if(hp.length){const o=hp[0][0];used.add(o.id);const mult=1.5*clamp(1+effGap(G,f,o)*.12,.7,1.6)*(1+(Math.min(f.lvl,20)-1)*.04)*(1+Math.min(G.rep,40)/200);
         G.offers.push({id:`o${G.week}_${f.id}_h`,a:f.id,b:o.id,week:wk,tier,hard:1,win:Math.round(TIER[tier].win*mult/100)*100,lose:Math.round(TIER[tier].lose*mult/100)*100});}}
     // v1.16: promoters stage cross-division star bouts a few times a season, so every rival pair can meet
     const X=CROSS_OF[f.id];if(X&&SPECIAL_WEEKS.includes(G.week)){const o=G.F[X],wk=G.week+3;
@@ -826,16 +846,19 @@ function applyResult(G,F,booking){
     if(res==="L"&&/KO|TKO/.test(r.type)&&!booking.pro&&!booking.ev)me.injury=Math.max(me.injury,booking.dm?1:3); // v1.37.1: a Death Match KO costs one week, not three
     const pmods=passiveMods(me);if(G.romance===me.id)pmods.moraleLoss+=.3;if(me.camp==="player"&&me.trust>=60)pmods.moraleLoss+=.25;me.morale=clamp(me.morale+(res==="W"?10:res==="L"?-10*(1-Math.min(.9,pmods.moraleLoss)):2),0,100);
     // v1.21: beating someone stronger is worth more (ranking point, fame, EXP) — a reason to take the hard offers
-    const upset=res==="W"&&ovr(op.a)-ovr(me.a)>.4;
-    if(!off&&booking.tier!=="exhibition"&&booking.tier!=="special"&&booking.tier!=="lab"&&booking.tier!=="final"){const rk=G.rank[me.div][me.id];if(rk){rk.pts+=res==="W"?(ovr(op.a)-ovr(me.a)<-.6?2:3)+(upset?1:0):res==="D"?1:0;/* v1.47: farming weaker fighters earns fewer ranking points */rk[res==="W"?"w":res==="L"?"l":"d"]++;}}
+    const gapR=effGap(G,me,op),upset=res==="W"&&gapR>.4;
+    if(!off&&booking.tier!=="exhibition"&&booking.tier!=="special"&&booking.tier!=="lab"&&booking.tier!=="final"){const rk=G.rank[me.div][me.id];if(rk){rk.pts+=res==="W"?(gapR<-.6?2:3)+(upset?1:0):res==="D"?1:0;/* v1.47: farming weaker fighters earns fewer ranking points */rk[res==="W"?"w":res==="L"?"l":"d"]++;}}
     if(me.camp==="player"){
       const W=booking.win||tier.win,Lo=booking.lose||tier.lose;const pay=res==="W"?W:res==="D"?(W+Lo)/2:Lo;if(booking.fair){G.fairPay=G.fairPay||[];G.fairPay.push({amt:pay,op:op.name,res});}else{G.cash+=pay;G.wkFight=(G.wkFight||0)+pay;}
-      G.rep=Math.max(0,G.rep+(res==="W"?tier.rep*clamp(1+(ovr(op.a)-ovr(me.a))*.5,.35,1.6):res==="L"?0:.5)/(1+Math.max(0,G.rep-25)/25));
+      G.rep=Math.max(0,G.rep+(res==="W"?tier.rep*clamp(1+gapR*.5,.35,1.6):res==="L"?0:.5)/(1+Math.max(0,G.rep-25)/25));
+      /* v1.83.1: promoters read the record — a winning streak brings tougher offers, a loss brings them back down (settles near 2 wins in 3) */
+      if(!off)me.mmOff=clamp((me.mmOff||0)+(res==="W"?.2:res==="L"?-.45:0),-1,2);
       if(res==="W"&&!G.flags.firstWin)G.flags.firstWin=me.id;
       if(res==="L"&&!G.flags.firstLoss)G.flags.firstLoss=me.id;
       if(op.id==="fah"||op.id==="ploy"){G.flags[`vs_${op.id}`]=res;
         if(res==="W"){op.surge=(op.surge||0)+7;op.potential=Math.min(20,op.potential+.5);G.flags[`beat_${op.id}`]=(G.flags[`beat_${op.id}`]||0)+1;G.flags[`surgeWk_${op.id}`]=G.week;G.flags[`beatS_${op.id}`]=G.season||1;if(op.id==="ploy")op.aura=ployAura(G.week,G);}}
-      gainXP(G,me,Math.round((res==="W"?45*(upset?1.3:1):res==="D"?35:30)*(1+pmods.fightXp+(res==="L"?pmods.lossXp:0))*(booking.tier==="district"?1.3:booking.tier==="semi"?1.6:booking.tier==="final"?2:1)));
+      /* v1.83.1: a win over a much weaker opponent teaches less, a close or tougher fight teaches more */const xpm=clamp(1+gapR*.3,.5,1.45);
+      gainXP(G,me,Math.round((res==="W"?45*xpm:res==="D"?35*clamp(xpm,.75,1.2):30)*(1+pmods.fightXp+(res==="L"?pmods.lossXp:0))*(booking.tier==="district"?1.3:booking.tier==="semi"?1.6:booking.tier==="final"?2:1)));
       G.cal=G.cal||[];G.cal.push({wk:G.week,season:G.season||1,absWeek:gameWeek(G),a:me.id,b:op.id,bn:op.name,tier:booking.tier,res,type:r.type,cards:(F.cards||[]).map(c=>[...c]),pay});
       oppRemember(G,me,op,res,r.type);
       ret={pay,res,upset};
@@ -1002,10 +1025,14 @@ function ensureVector(G){if((G.season||1)<4)return false;G.rank=G.rank||{A:{},B:
     if(!G.F[id]){G.F[id]=baseFighter(id,spec);G.F[id].lvl=id==="pailin"?8:6;G.F[id].met=true;created=true;}
     G.F[id].lab=true;G.F[id].gymName="Vector Gym, Bangkok";if(id==="pailin"){G.F[id].name=spec.name;G.F[id].full=spec.full;G.F[id].sprite="pailin";}
     if(!G.rank[div][id])G.rank[div][id]={pts:0,w:0,l:0,d:0};}syncFighterAges(G);return created;}
-function liftOpponent(f,target,maxGain){const delta=Math.min(maxGain,Math.max(0,target-ovr(f.a)));if(delta<=0)return;
-  const goal=Math.min(19.7,ovr(f.a)+delta);for(let n=0;n<4;n++){const gap=goal-ovr(f.a),room=ATTRS.filter(([k])=>f.a[k]<19.95);if(gap<=.01||!room.length)break;
+function liftOpponent(f,target,maxGain){const delta=Math.min(maxGain,Math.max(0,target-ovr(f.a)-(f.vet||0)));if(delta<=0)return;
+  const want=ovr(f.a)+(f.vet||0)+delta,goal=Math.min(19.7,want);for(let n=0;n<4;n++){const gap=goal-ovr(f.a),room=ATTRS.filter(([k])=>f.a[k]<19.95);if(gap<=.01||!room.length)break;
     const each=gap*ATTRS.length/room.length;for(const [k] of room)f.a[k]=Math.min(20,f.a[k]+each);}
-  f.potential=Math.max(f.potential||14,Math.min(20,goal));}
+  f.potential=Math.max(f.potential||14,Math.min(20,goal));
+  /* v1.83.3: whatever the stat ceiling cannot hold becomes ring craft */const short=want-ovr(f.a)-(f.vet||0);if(short>.05)f.vet=+Math.min(8,(f.vet||0)+short).toFixed(2);}
+function lowerOpponent(f,target,maxDrop){let drop=Math.min(maxDrop,ovr(f.a)+(f.vet||0)-target);if(drop<=.05)return;
+  const v=Math.min(f.vet||0,drop);if(v>0){f.vet=+((f.vet||0)-v).toFixed(2);drop-=v;}if(drop<=.05)return;
+  for(const [k] of ATTRS)f.a[k]=Math.max(3,f.a[k]-drop);}
 // v1.82.3: from year 2 the district and provincial fields get fresh names each year (seeded per save);
 // last year's best provincial fighter in each division comes back as a familiar face.
 const NPC_GIVEN=["Kanthida","Pinmanee","Chomphu","Ratchanee","Sudarat","Namfon","Ketsinee","Maprang","Daoruang","Anchan","Pikul","Lalita","Jiraporn","Buakhao","Thongkwao","Dokkaew","Sirin","Parichat","Khim","Praeploy","Nicha","Ornuma","Saimai","Fasai","Ueangkham","Nuanchan","Phattra","Mayuree","Lamduan","Yupin","Pathum","Rotsukhon","Kulap","Bunga","Baibua","Tonkhao"];
@@ -1018,18 +1045,26 @@ function ensureStageNPCs(G,through=stageOf(G.week)){const stages=["local",...(th
   G.rank=G.rank||{A:{},B:{}};for(const stage of stages)for(const div of ["A","B"]){G.rank[div]=G.rank[div]||{};
     STAGE_NPCS[stage][div].forEach(([name,level],i)=>{const id=`${{local:"l",district:"x",province:"p"}[stage]}${div}${i}`;if(G.F[id])return;if(stage!=="local")name=stageNpcName(G,stage,div,i)||name;
       const rng=mulberry32(G.seed+stableHash(id)+((G.season||1)-1)*977),f=G.F[id]=baseFighter(id,mkNPC(id,name,div,level,rng,i+2));
-      if((G.season||1)>=2){const best=Math.max(level,...roster(G).filter(x=>x.div===div).map(x=>ovr(x.a))),gap=stage==="local"?-2:stage==="district"?-1.1:-.3;liftOpponent(f,Math.min(19.2,best+gap),20);}startLv(f);
+      if((G.season||1)>=2){const best=Math.max(level,...roster(G).filter(x=>x.div===div).map(x=>effOvr(G,x))),gap=stage==="local"?-2:stage==="district"?-1.1:-.3;liftOpponent(f,Math.min(24.5,best+gap),20);}startLv(f);
       if(stage==="district"){G.qual=G.qual||{A:[],B:[]};G.qual[div]=G.qual[div]||[];if(!G.qual[div].includes(id))G.qual[div].push(id);}
       G.rank[div][id]={pts:0,w:0,l:0,d:0};});}syncFighterAges(G);}
-function lateSeasonOpposition(G){const year=G.season||1;ensureStageNPCs(G);if(year<4)return;G.flags=G.flags||{};const created=ensureVector(G);
+function lateSeasonOpposition(G){const year=G.season||1;ensureStageNPCs(G);if(year<2)return;G.flags=G.flags||{};const created=year>=4?ensureVector(G):false;
   if(G.flags.oppositionSeason===year&&!created)return;
-  const d=G.diff||"normal";
-  for(const div of ["A","B"]){const mine=roster(G).filter(f=>f.div===div);const best=Math.max(12+(year-4)*.6,...mine.map(f=>ovr(f.a)));
-    for(const f of Object.values(G.F)){if(f.div!==div||f.camp==="player"||f.camp==="free")continue;
-      const lab=!!f.lab,rival=f.camp==="rival",boss=f.id==="pailin",gap=lab?(d==="easy"?(boss?.5:.3):d==="hard"?(boss?1.3:1):(boss?1:.65)):rival?(d==="easy"?-1.4:d==="hard"?-.1:-.7):(d==="easy"?-3:d==="hard"?-1.4:-2.2);
-      const floor=lab?(boss?16.5+(year-4)*.3:15.5+(year-5)*.3):rival?11.5+(year-4)*.35:9.5+(year-4)*.4;
-      liftOpponent(f,Math.min(lab?19.7:rival?19.2:18.4,Math.max(floor,best+gap)),lab?20:rival?2.4:1.2);
+  const d=G.diff||"normal",rng=mulberry32(((G.seed||1)*31+year*7919)>>>0),back=[];
+  for(const div of ["A","B"]){const mine=roster(G).filter(f=>f.div===div);const best=Math.max(year>=4?12+(year-4)*.6:10.5+(year-2)*.6,...mine.map(f=>effOvr(G,f))),bestLab=Math.max(year>=4?12+(year-4)*.6:10.5+(year-2)*.6,...mine.map(f=>ovr(f.a)+edgeOf(G,f)*.5));/* story bosses only take half the edge — their fights were tuned by hand */
+    for(const f of Object.values(G.F)){if(f.div!==div||f.camp==="player"||f.camp==="free"||f.camp==="quest")continue;
+      const lab=!!f.lab,rival=f.camp==="rival",boss=f.id==="pailin";let gap,max,floor,comeback=false;
+      if(lab){gap=d==="easy"?(boss?.5:.3):d==="hard"?(boss?1.3:1):(boss?1:.65);max=20;floor=boss?16.5+(year-4)*.3:15.5+(year-5)*.3;}
+      else if(rival){gap=d==="easy"?-1.2:d==="hard"?.1:-.4;max=2.4;floor=year>=4?11.5+(year-4)*.35:10+(year-2)*.5;}
+      else{ // v1.83.1: the field is uneven — most sit a step below our best, a few catch up or overtake us
+        const base=d==="easy"?-2.2:d==="hard"?-.5:-1.2,spread=(rng()-.5)*2.4;comeback=rng()<(year>=3?.18:.12);
+        gap=comeback?(d==="easy"?0:d==="hard"?1.2:.7):base+spread;max=comeback?3.5:2.2;floor=year>=4?9.5+(year-4)*.4:8.5+(year-1)*.6;
+        if(comeback&&ovr(f.a)<best+gap-1&&back.length<3&&f.name)back.push(f.name);}
+      const T=Math.min(lab?21.5:rival?25:24.5,Math.max(floor,(lab?bestLab:best)+gap));liftOpponent(f,T,max);
+      /* v1.83.3: last year's comebacks and old veterans settle back into the pack instead of piling up above us */
+      if(!lab&&!rival&&!comeback)lowerOpponent(f,T+.3,1.5);
       if(lab)f.labPrep=Math.min(boss?.09:.07,(boss?.05:.035)+Math.max(0,year-4)*.005);}}
+  if(back.length)G.lvNews=(G.lvNews||[]).concat(back.map(n=>`${n} trained hard in the off-season and is back stronger than ever`)).slice(-3);
   G.flags.oppositionSeason=year;}
 // v1.3: keep playing after the season — new season, same camp, fighters and bonds
 function newSeason(G){

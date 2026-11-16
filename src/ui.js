@@ -1,5 +1,5 @@
 // ================= MUAY THAI MOE v1.3 — UI =================
-const VERSION="1.83.2";
+const VERSION="1.83.3";
 const CUR_LANG=(typeof window!=="undefined"&&window.LANG)||"th";
 const TH_LABEL=String.fromCharCode(3652,3607,3618);
 function langSwitch(cls){return `<div class="langsw ${cls||""}" role="group" aria-label="Language">${[["th",TH_LABEL],["en","EN"]].map(([k,l])=>`<button class="lsb ${CUR_LANG===k?"on":""}" data-act="setlang" data-v="${k}" aria-pressed="${CUR_LANG===k}">${l}</button>`).join("")}</div>`;}
@@ -506,7 +506,7 @@ function offersHTML(){const mine=G.bookings.filter(b=>G.F[b.a].camp==="player").
        return `<div class="item offer ${v.c} ${sp?"spx "+sp[0]:""}">${sp?`<span class="ribbon">${sp[1]}</span>`:""}<button class="oxbtn" data-act="declo" data-v="${o.id}" aria-label="ปฏิเสธข้อเสนอนี้">✕</button><div class="l"><span class="vdot ${v.c}" aria-label="${v.t}"></span>${faceImg(op,"sm")}<div>
        <div class="t">${esc(me.name)} vs ${esc(op.name)}</div>
        <div class="meta">สด.${o.week} · ${TIER[o.tier].name}${o.beast?" · ไม่นับสถิติ":""}${o.fair?" · ไม่นับอันดับ · ค่าตัวส่งทางจดหมาย":""}${o.tier==="lab"?" · ไม่นับอันดับ":""} · ${styleOf(op.a)}${op.camp==="rival"?op.lab?" · เวกเตอร์ กรุงเทพฯ":" · พยัคฆ์ทอง":""}${personaOf(op)?` · ${personaOf(op).tag}`:""}</div>${h2hText(op)?`<div class="meta goldt">${h2hText(op)}</div>`:""}
-       <div class="meta">ค่าตัว ${fmt(o.lose)} · <b class="goldt">ชนะ +${fmt(o.win-o.lose)}</b> · <b class="${v.c}t">${v.t}</b>${ovr(op.a)-ovr(me.a)>.4?` · <b class="goldt">ชนะได้โบนัสแต้ม/ชื่อเสียง</b>`:ovr(op.a)-ovr(me.a)<-.6?` · <span class="mutt">ชนะคู่อ่อนได้ชื่อเสียงน้อย</span>`:""}</div>
+       <div class="meta">ค่าตัว ${fmt(o.lose)} · <b class="goldt">ชนะ +${fmt(o.win-o.lose)}</b> · <b class="${v.c}t">${v.t}</b>${effGap(G,me,op)>.4?` · <b class="goldt">ชนะได้โบนัสแต้ม/ชื่อเสียง</b>`:effGap(G,me,op)<-.6?` · <span class="mutt">ชนะคู่อ่อนได้ชื่อเสียงน้อย</span>`:""}</div>
        </div></div>
        <div class="obtns3"><button class="btn sm" data-act="consider" data-v="${o.id}">${scouted(o.b)?"ข้อมูลคู่ชก":"ดูเทป"}</button>${coachOn()?`<button class="btn sm" data-act="otip" data-v="${o.id}">คำแนะนำครู</button>`:""}<button class="btn sm gold" data-act="accept" data-v="${o.id}" ${o.status==="conflict"?"disabled title=\""+esc(o.reason)+"\"":""}>รับไฟต์</button>${o.status==="conflict"?`<span class="meta">${esc(o.reason)}</span>`:""}</div></div>`;}).join("")||`<p class="lead">${G.bookings.length?"รับไฟต์แล้ว ข้อเสนอใหม่จะเข้ามาสัปดาห์หน้า":"ไม่มีข้อเสนอ (บาดเจ็บ หรือหมดฤดูกาล)"}</p>`}</div></section>`;}
 function rankHTML(){const st=stageOf(G.week),cut=st==="local"?4:st==="district"?4:0,d=UI.rdiv;const rows=standings(G,d);const mv=(G.rankMove&&G.rankMove[d])||{};
@@ -576,15 +576,16 @@ function decorHTML(){let total=0,owned=0;const slots=Object.entries(CAMP_DECOR);
    return `<button class="dchip ${slot===cur?"on":""}" data-act="decorslot" data-v="${slot}" aria-pressed="${slot===cur}"><span class="dic">${DECOR_ICON[slot]||"✦"}</span><b>${DECOR_SHORT[slot]||D.name}</b><small>${esc(pick?pick.name:"")}</small><i>${have}/${keys.length}</i></button>`;}).join("");
  const D=CAMP_DECOR[cur],on=decorChoice(G,cur);
  const tiles=Object.entries(D.items).map(([key,item])=>{const reason=decorUnlockReason(G,cur,key),sel=on===key;
-   return `<button class="dtile r-${item.r} ${sel?"on":""} ${reason?"lock":""}" data-act="decor" data-k="${cur}" data-v="${key}" ${reason?"disabled":""} aria-pressed="${sel}">
+   const price=reason?decorPrice(G,cur,key):0;
+   return `<button class="dtile r-${item.r} ${sel?"on":""} ${reason?"lock":""} ${price?"buy":""}" data-act="${price?"decorbuy":"decor"}" data-k="${cur}" data-v="${key}" ${reason&&(!price||G.cash<price)?"disabled":""} aria-pressed="${sel}">
      <span class="dstars" aria-label="ระดับ ${item.r}">${"★".repeat(DECOR_STARS[item.r])}</span><b>${esc(item.name)}</b>
-     <small>${sel?"✓ ใช้อยู่":reason?"🔒 "+esc(reason):"แตะเพื่อใช้"}</small></button>`;}).join("");
+     <small>${sel?"✓ ใช้อยู่":price?`🛒 ซื้อ ${fmt(price)}`:reason?"🔒 "+esc(reason):"แตะเพื่อใช้"}</small></button>`;}).join("");
  const ready=goldRematchReady(G);
  return `<section class="px card cpane decorpane ${(UI.csub||"money")==="decor"?"on":""}"><h3>ตกแต่งค่าย <span class="pill">${owned}/${total} แบบ</span></h3>
   <div class="dprev"><canvas class="campcv" width="640" height="360" data-camp="1" aria-label="ตัวอย่างค่ายหลังตกแต่ง"></canvas></div>
   <div class="dchips">${chips}</div>
   <div class="dtiles">${tiles}</div>
-  <p class="meta">ดาว ★ ยิ่งมาก ยิ่งได้ยาก · ของตกแต่งเปลี่ยนแค่หน้าตาค่าย ไม่มีโบนัสค่าสถานะ</p>
+  <p class="meta">ดาว ★ ยิ่งมาก ยิ่งได้ยาก · ชิ้นที่มี 🔒 ได้จากผลงานเท่านั้น · ชิ้นที่มีป้ายราคา ซื้อจากร้านได้ · ของตกแต่งเปลี่ยนแค่หน้าตาค่าย</p>
   ${cur==="vehicle"?`<div class="dgold"><p class="meta">รถตู้สีทอง: ชนะเสี่ยหมวกทองคำ 10 ครั้ง (ชนะครั้งแรกแล้ว ท้าชิงซ้ำได้ทุก 4 สัปดาห์)</p>
   <button class="btn sm gold" data-act="goldrematch" ${ready?"":"disabled"}>ท้าชิงเสี่ยหมวกทองคำอีกครั้ง${!ready&&G.gangRematchAt?" · "+goldRematchLabel(G):""}</button></div>`:""}</section>`;}
 function campHTML(){const inc=classIncome(G),up=upkeep(G),wg=wages(G),lv=campLevel(G),cs=UI.csub||"money";
@@ -761,11 +762,15 @@ function reportHTML(){const r=G.lastReport;const ann=[];
    <div class="chips3"><span class="chip"><small>นักเรียน</small><b class="num pos">+${fmt(r.inc)}</b></span><span class="chip"><small>ค่าใช้จ่าย</small><b class="num neg">-${fmt(r.up+r.wg+(r.debtPay||0))}</b></span><span class="chip"><small>เงินสด</small><b class="num ${r.cash<0?"neg":""}">${fmt(r.cash)}</b></span></div>
    <details><summary>ผลการชกในวงการ (${r.log.length})</summary><div class="log">${r.log.map(l=>`<div>${esc(l)}</div>`).join("")||"<div>เงียบสงบ</div>"}</div></details>`;}
 // v1.81.1: "what's new" popup — shows once per save after loading, for players who started before this update
-const PATCH={id:"1.83.1",ver:"Muay Thai Moe v1.83.1",title:"รายงานประจำสัปดาห์จากค่ายศิริชัย",lead:"รอบนี้เปลี่ยนสายสกิลได้แล้ว ไม่ต้องกลัวอัปผิด",items:[
- ["🔄","รีเซ็ตสกิลทั้งหมด","การ์ดนักมวย → สกิล → ปุ่ม ↺ รีเซ็ต มุมขวาบน ได้แต้มที่อัปไปคืนครบ เลือกสายสำนักหรือสายปั้นใหม่ได้"],
- ["🆓","ครั้งแรกฟรี","นักมวยแต่ละคนรีเซ็ตครั้งแรกฟรี ครั้งต่อไป ฿10,000 · ฿20,000 · ฿30,000"],
- ["🥋","สายปั้นอัปควบสายสำนักได้","ถ้ามีแต้มเหลือ อัปสายปั้นได้เลยไม่ต้องรีเซ็ต"]],
- foot:"ใครปั้นสายผิดมา ตอนนี้แก้ตัวได้แล้วค่ะ 🥋"};
+const PATCH={id:"1.83.3",ver:"Muay Thai Moe v1.83.3",title:"รายงานประจำสัปดาห์จากค่ายศิริชัย",lead:"รอบนี้ปรับสมดุล ให้คู่ชกท้าทายขึ้นในปีหลัง ๆ",items:[
+ ["🥊","คู่ชกสมน้ำสมเนื้อขึ้น","ตั้งแต่ปีที่ 2 โปรโมเตอร์ดูฝีมือจริงของนักมวย นับรวมสกิล ความชำนาญ และแผนการชก ไม่ใช่แค่ค่าพลัง คู่ที่เสนอมาจึงสูสีขึ้น"],
+ ["🔄","คู่แข่งเก่งตามเรา","นักมวยในสายเก่งขึ้นตามค่ายของเรา มีทั้งคนที่ยังอ่อนกว่า และคนที่ซุ่มซ้อมช่วงปิดฤดูกลับมาแกร่งกว่าเดิม ตัวเก๋าที่ค่าพลังเต็มแล้วก็ยังเก่งขึ้นด้วยชั้นเชิงบนเวที"],
+ ["📈","ชนะคู่อ่อนได้ EXP น้อยลง","ชนะคู่ที่อ่อนกว่ามากได้ EXP ชื่อเสียง และแต้มอันดับน้อยลง ชนะคู่สูสีหรือเก่งกว่าได้มากขึ้น"],
+ ["🏟️","ชนะติดกัน คู่ก็ยากขึ้น","ชนะรวด โปรโมเตอร์จะส่งคู่ที่ยากขึ้นมา แพ้แล้วจะผ่อนลง บางสัปดาห์ยังมีคู่ง่ายให้เลือกพักหายใจ"],
+ ["💰","ค่าตัวตามความยากจริง","ค่าตัวคิดจากความยากจริงของคู่ ชกคู่อ่อนได้เงินน้อย ชกคู่เก่งได้เงินเยอะ"],
+ ["↺","รีเซ็ตสกิลได้","การ์ดนักมวย → สกิล → ปุ่ม ↺ รีเซ็ต ได้แต้มคืนครบ ครั้งแรกฟรี"],
+ ["🛒","ของตกแต่งในร้าน 15 ชิ้น","ต้นไม้ ประตูค่าย เวที ลู่วิ่ง รถ และกระสอบทรายแบบใหม่ ซื้อได้ในร้าน ส่วนชิ้นที่ได้จากผลงานยังต้องปลดล็อกเองเหมือนเดิม"]],
+ foot:"ลองเล่นแล้วคู่ยากหรือง่ายไป บอกครูแดงได้เลยค่ะ 🥊"};
 function maybeWhatsNew(){if(!G||G.ended||UI.scene)return;if(G.newsSeen===PATCH.id)return;UI.modal={type:"whatsnew"};}
 function whatsNewHTML(){return `<div class="wnew"><span class="pill gold">อัปเดต · ${esc(PATCH.ver)}</span><h2>🥊 ${esc(PATCH.title)}</h2><p class="lead">${esc(PATCH.lead)}</p>
   <div class="wnlist">${PATCH.items.map(([ic,t,b])=>`<details class="wnitem"><summary><span class="wnic">${ic}</span><b>${esc(t)}</b><i>▸</i></summary><p>${esc(b)}</p></details>`).join("")}</div><p class="meta wnhint">แตะหัวข้อเพื่ออ่านรายละเอียด</p>
@@ -1389,6 +1394,7 @@ const ACT={
   giftpick:d=>{UI.modal={type:"gift",id:d.id};render();},
   give:d=>{const r=giveGift(G,d.id,d.v);if(!r)return;UI.modal=null;UI.tab="people";save();AU.startMusic("date");giftScene(d.id,r);},
   decor:d=>{if(chooseDecor(G,d.k,d.v)){AU.sfx&&AU.sfx("ui");save();render();}},
+  decorbuy:d=>{const c=decorPrice(G,d.k,d.v);if(buyDecor(G,d.k,d.v)){AU.sfx&&AU.sfx("level");save();toast(`ซื้อ "${CAMP_DECOR[d.k].items[d.v].name}" แล้ว ${fmt(c)}`);render();}},
   trophy:d=>{UI.trophySel=UI.trophySel===+d.v?null:+d.v;AU.sfx&&AU.sfx("ui");render();},
   showcase:()=>{UI.modal={type:"showcase"};render();},
   showcaseSave:()=>{const src=document.querySelector(".m-showcase canvas[data-camp]");if(!src)return;const W=640,cv=document.createElement("canvas");cv.width=W;cv.height=470;const x=cv.getContext("2d");x.imageSmoothingEnabled=false;

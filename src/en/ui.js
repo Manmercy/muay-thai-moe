@@ -1,5 +1,5 @@
 // ================= MUAY THAI MOE v1.3 — UI =================
-const VERSION="1.83.2";
+const VERSION="1.83.3";
 const CUR_LANG=(typeof window!=="undefined"&&window.LANG)||"th";
 const TH_LABEL=String.fromCharCode(3652,3607,3618);
 function langSwitch(cls){return `<div class="langsw ${cls||""}" role="group" aria-label="Language">${[["th",TH_LABEL],["en","EN"]].map(([k,l])=>`<button class="lsb ${CUR_LANG===k?"on":""}" data-act="setlang" data-v="${k}" aria-pressed="${CUR_LANG===k}">${l}</button>`).join("")}</div>`;}
@@ -506,7 +506,7 @@ function offersHTML(){const mine=G.bookings.filter(b=>G.F[b.a].camp==="player").
        return `<div class="item offer ${v.c} ${sp?"spx "+sp[0]:""}">${sp?`<span class="ribbon">${sp[1]}</span>`:""}<button class="oxbtn" data-act="declo" data-v="${o.id}" aria-label="Decline this offer">✕</button><div class="l"><span class="vdot ${v.c}" aria-label="${v.t}"></span>${faceImg(op,"sm")}<div>
        <div class="t">${esc(me.name)} vs ${esc(op.name)}</div>
        <div class="meta">Wk ${o.week} · ${TIER[o.tier].name}${o.beast?" · off the record":""}${o.fair?" · not ranked · purse paid by mail":""}${o.tier==="lab"?" · Unranked bout":""} · ${styleOf(op.a)}${op.camp==="rival"?op.lab?" · Vector Gym, Bangkok":" · Golden Tiger":""}${personaOf(op)?` · ${personaOf(op).tag}`:""}</div>${h2hText(op)?`<div class="meta goldt">${h2hText(op)}</div>`:""}
-       <div class="meta">Purse ${fmt(o.lose)} · <b class="goldt">win +${fmt(o.win-o.lose)}</b> · <b class="${v.c}t">${v.t}</b>${ovr(op.a)-ovr(me.a)>.4?` · <b class="goldt">Win for bonus points/fame</b>`:ovr(op.a)-ovr(me.a)<-.6?` · <span class="mutt">Beating a weaker fighter earns little fame</span>`:""}</div>
+       <div class="meta">Purse ${fmt(o.lose)} · <b class="goldt">win +${fmt(o.win-o.lose)}</b> · <b class="${v.c}t">${v.t}</b>${effGap(G,me,op)>.4?` · <b class="goldt">Win for bonus points/fame</b>`:effGap(G,me,op)<-.6?` · <span class="mutt">Beating a weaker fighter earns little fame</span>`:""}</div>
        </div></div>
        <div class="obtns3"><button class="btn sm" data-act="consider" data-v="${o.id}">${scouted(o.b)?"Opponent info":"Scout"}</button>${coachOn()?`<button class="btn sm" data-act="otip" data-v="${o.id}">Coach's advice</button>`:""}<button class="btn sm gold" data-act="accept" data-v="${o.id}" ${o.status==="conflict"?"disabled title=\""+esc(o.reason)+"\"":""}>Accept</button></div></div>`;}).join("")||`<p class="lead">${G.bookings.length?"Fight booked. New offers arrive next week":"No offers (injured, or season over)"}</p>`}</div></section>`;}
 function rankHTML(){const st=stageOf(G.week),cut=st==="local"?4:st==="district"?4:0,d=UI.rdiv;const rows=standings(G,d);const mv=(G.rankMove&&G.rankMove[d])||{};
@@ -576,15 +576,16 @@ function decorHTML(){let total=0,owned=0;const slots=Object.entries(CAMP_DECOR);
    return `<button class="dchip ${slot===cur?"on":""}" data-act="decorslot" data-v="${slot}" aria-pressed="${slot===cur}"><span class="dic">${DECOR_ICON[slot]||"✦"}</span><b>${DECOR_SHORT[slot]||D.name}</b><small>${esc(pick?pick.name:"")}</small><i>${have}/${keys.length}</i></button>`;}).join("");
  const D=CAMP_DECOR[cur],on=decorChoice(G,cur);
  const tiles=Object.entries(D.items).map(([key,item])=>{const reason=decorUnlockReason(G,cur,key),sel=on===key;
-   return `<button class="dtile r-${item.r} ${sel?"on":""} ${reason?"lock":""}" data-act="decor" data-k="${cur}" data-v="${key}" ${reason?"disabled":""} aria-pressed="${sel}">
+   const price=reason?decorPrice(G,cur,key):0;
+   return `<button class="dtile r-${item.r} ${sel?"on":""} ${reason?"lock":""} ${price?"buy":""}" data-act="${price?"decorbuy":"decor"}" data-k="${cur}" data-v="${key}" ${reason&&(!price||G.cash<price)?"disabled":""} aria-pressed="${sel}">
      <span class="dstars" aria-label="Rank ${item.r}">${"★".repeat(DECOR_STARS[item.r])}</span><b>${esc(item.name)}</b>
-     <small>${sel?"✓ In use":reason?"🔒 "+esc(reason):"Tap to use"}</small></button>`;}).join("");
+     <small>${sel?"✓ In use":price?`🛒 Buy ${fmt(price)}`:reason?"🔒 "+esc(reason):"Tap to use"}</small></button>`;}).join("");
  const ready=goldRematchReady(G);
  return `<section class="px card cpane decorpane ${(UI.csub||"money")==="decor"?"on":""}"><h3>Decorations <span class="pill">${owned}/${total} items</span></h3>
   <div class="dprev"><canvas class="campcv" width="640" height="360" data-camp="1" aria-label="Camp preview with decorations"></canvas></div>
   <div class="dchips">${chips}</div>
   <div class="dtiles">${tiles}</div>
-  <p class="meta">More ★ = harder to get · Decorations only change how the camp looks, no stat bonus</p>
+  <p class="meta">More ★ = harder to get · 🔒 pieces are earned through achievements only · priced pieces are sold in the shop · decorations only change how the camp looks</p>
   ${cur==="vehicle"?`<div class="dgold"><p class="meta">Golden van: beat the Golden Helmet Boss 10 times (after the first win you can rematch every 4 weeks)</p>
   <button class="btn sm gold" data-act="goldrematch" ${ready?"":"disabled"}>Challenge the Golden Helmet boss again ${!ready&&G.gangRematchAt?" · "+goldRematchLabel(G):""}</button></div>`:""}</section>`;}
 function campHTML(){const inc=classIncome(G),up=upkeep(G),wg=wages(G),lv=campLevel(G),cs=UI.csub||"money";
@@ -761,11 +762,15 @@ function reportHTML(){const r=G.lastReport;const ann=[];
    <div class="chips3"><span class="chip"><small>Students</small><b class="num pos">+${fmt(r.inc)}</b></span><span class="chip"><small>Expenses</small><b class="num neg">-${fmt(r.up+r.wg+(r.debtPay||0))}</b></span><span class="chip"><small>Cash</small><b class="num ${r.cash<0?"neg":""}">${fmt(r.cash)}</b></span></div>
    <details><summary>Results around the circuit (${r.log.length})</summary><div class="log">${r.log.map(l=>`<div>${esc(l)}</div>`).join("")||"<div>All quiet</div>"}</div></details>`;}
 // v1.81.1: "what's new" popup — shows once per save after loading, for players who started before this update
-const PATCH={id:"1.83.1",ver:"Muay Thai Moe v1.83.1",title:"Weekly report from Sirichai Camp",lead:"You can now change skill lines, so no more fear of a wrong pick",items:[
- ["🔄","Reset all skills","Fighter card → Skills → the ↺ Reset button at the top right: every spent point comes back to pick a new school or build line"],
- ["🆓","first reset is free","Each fighter's first reset is free, then ฿10,000 · ฿20,000 · ฿30,000"],
- ["🥋","Build lines stack with school lines","With spare points you can learn a build line without resetting"]],
- foot:"Built the wrong line? Now you can fix it 🥋"};
+const PATCH={id:"1.83.3",ver:"Muay Thai Moe v1.83.3",title:"Weekly report from Sirichai Camp",lead:"This round rebalances fights so later years stay a challenge",items:[
+ ["🥊","Fairer matchups","From year 2, promoters judge a fighter's real ability, counting skills, mastery and fight plans, not just stats, so offers are closer fights"],
+ ["🔄","Rivals keep up","The field grows with our camp: some are still a step behind, some train hard over the off-season and come back stronger, and veterans who have maxed their stats keep improving through ring craft"],
+ ["📈","Less EXP for easy wins","Beating a much weaker opponent gives less EXP, fame and ranking points; beating an even or stronger one gives more"],
+ ["🏟️","Win streaks bring tougher offers","Keep winning and promoters send tougher opponents; after a loss they ease off. Some weeks still offer an easier bout for a breather"],
+ ["💰","Purses match real difficulty","Purses follow how hard the fight really is: easy opponents pay less, strong ones pay more"],
+ ["↺","Skill reset","Fighter card → Skills → ↺ Reset gives every point back; the first one is free"],
+ ["🛒","15 decorations in the shop","New trees, gates, rings, tracks, vehicles and bags to buy in the shop; pieces earned through achievements still have to be unlocked"]],
+ foot:"If fights feel too hard or too easy, tell Coach Daeng 🥊"};
 function maybeWhatsNew(){if(!G||G.ended||UI.scene)return;if(G.newsSeen===PATCH.id)return;UI.modal={type:"whatsnew"};}
 function whatsNewHTML(){return `<div class="wnew"><span class="pill gold">Update · ${esc(PATCH.ver)}</span><h2>🥊 ${esc(PATCH.title)}</h2><p class="lead">${esc(PATCH.lead)}</p>
   <div class="wnlist">${PATCH.items.map(([ic,t,b])=>`<details class="wnitem"><summary><span class="wnic">${ic}</span><b>${esc(t)}</b><i>▸</i></summary><p>${esc(b)}</p></details>`).join("")}</div><p class="meta wnhint">Tap a topic to read more</p>
@@ -1389,6 +1394,7 @@ const ACT={
   giftpick:d=>{UI.modal={type:"gift",id:d.id};render();},
   give:d=>{const r=giveGift(G,d.id,d.v);if(!r)return;UI.modal=null;UI.tab="people";save();AU.startMusic("date");giftScene(d.id,r);},
   decor:d=>{if(chooseDecor(G,d.k,d.v)){AU.sfx&&AU.sfx("ui");save();render();}},
+  decorbuy:d=>{const c=decorPrice(G,d.k,d.v);if(buyDecor(G,d.k,d.v)){AU.sfx&&AU.sfx("level");save();toast(`Bought "${CAMP_DECOR[d.k].items[d.v].name}" for ${fmt(c)}`);render();}},
   trophy:d=>{UI.trophySel=UI.trophySel===+d.v?null:+d.v;AU.sfx&&AU.sfx("ui");render();},
   showcase:()=>{UI.modal={type:"showcase"};render();},
   showcaseSave:()=>{const src=document.querySelector(".m-showcase canvas[data-camp]");if(!src)return;const W=640,cv=document.createElement("canvas");cv.width=W;cv.height=470;const x=cv.getContext("2d");x.imageSmoothingEnabled=false;

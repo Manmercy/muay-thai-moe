@@ -1674,3 +1674,7 @@ body.hasnews main>h1.sr+.homegrid,body.hasnews main>h1.sr+.rinnote{margin-top:46
 .skrbtn{position:absolute;top:0;right:0;min-height:36px;min-width:44px;padding:4px 8px;border:0;background:none;color:var(--muted);font:600 12px var(--f-display);cursor:pointer;text-decoration:underline;text-underline-offset:3px}
 .skrbtn:hover:not(:disabled){color:var(--fg)}.skrbtn:disabled{opacity:.45;cursor:default}
 .school.sm .skrbtn{position:static;margin-left:auto}
+
+.dtile.buy{opacity:1;filter:none;border-style:dashed}
+.dtile.buy small{color:var(--gold,#f2c14e)}
+.dtile.buy:disabled{opacity:.55}
