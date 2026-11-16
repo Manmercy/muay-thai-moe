@@ -226,13 +226,18 @@ function lineSVG(pts,key,col,fmtY){if(pts.length<2)return `<p class="meta">ย�
    <text x="${P-4}" y="${y(mx)+4}" text-anchor="end" class="gt">${fmtY(mx)}</text><text x="${P-4}" y="${y(mn)+4}" text-anchor="end" class="gt">${fmtY(mn)}</text>
    <text x="${x(0)}" y="${H-3}" class="gt">สด.${pts[0].w}</text><text x="${x(pts.length-1)}" y="${H-3}" text-anchor="end" class="gt">สด.${pts[pts.length-1].w}</text></svg>`;}
 const kfmt=v=>Math.abs(v)>=1000?(v<0?"-":"")+"฿"+(Math.abs(v)/1000).toFixed(Math.abs(v)>=10000?0:1)+"k":fmt(v);
-function cashflowHTML(){const H=(G.history||[]);const inc=classIncome(G),up=upkeep(G),wg=wages(G),net=inc-up-wg;
-  const L=H.slice(-7).map((h,i,a)=>i?{w:h.w,d:h.cash-a[i-1].cash,cash:h.cash,fight:h.fight}:null).filter(Boolean).reverse();
-  const tip=net<0?(G.cash/-net<6?`รายจ่ายประจำมากกว่ารายรับ เงินพอใช้อีกราว ${Math.max(1,Math.floor(G.cash/-net))} สัปดาห์ ควรรับไฟต์หรือเปิดตู้จดหมายหารายได้`:`รายจ่ายประจำมากกว่ารายรับ ต้องอาศัยค่าตัวไฟต์ เพิ่มนักเรียนด้วยการอัปเกรดห้องเรียนจะช่วยได้`):G.cash>25000?`เงินเหลือเยอะ ลองอัปเกรดค่ายหรือจ้างครูเพิ่ม`:`การเงินไปได้ดี เก็บเงินไว้อัปเกรดค่ายชิ้นถัดไป`;
+function cashflowHTML(){const H=(G.history||[]);const inc=classIncome(G),up=upkeep(G),wg=wages(G),sp=G.sponsorWk||0,debt=G.debt>0&&(G.week%4===0)?Math.min(5000,G.debt):0,net=inc+sp-up-wg;
+  const tip=net<0?(G.cash/-net<6?`รายจ่ายประจำมากกว่ารายรับ เงินพอใช้อีกราว ${Math.max(1,Math.floor(G.cash/-net))} สัปดาห์ ควรรับไฟต์หรือเปิดตู้จดหมายหารายได้`:`รายจ่ายประจำมากกว่ารายรับ ต้องอาศัยค่าตัวไฟต์ เพิ่มนักเรียน หรือลดค่าจ้าง`):`รายรับประจำพอจ่ายแล้ว เหลือสัปดาห์ละ ${fmt(net)} เก็บไว้อัปเกรดค่ายได้`;
+  const full=studentDemand(G)>studentCap(G),dis=G.disaster&&G.disaster.untilAbs!=null&&gameWeek(G)<G.disaster.untilAbs;
+  const why=dis?`รายได้ค่าเรียนลดเพราะ${esc(G.disaster.name)}`:full?`คนอยากเรียน ${studentDemand(G)} คน แต่ค่ายรับได้ ${studentCap(G)} คน · ขยายลานสอนจะได้นักเรียนเพิ่ม`:`ค่าเรียนคนละ ${fmt(studentFee(G))} ต่อสัปดาห์`;
+  const row=(l,v)=>v?`<div class="kv-row"><span>${l}</span><b class="num ${v<0?"neg":"pos"}">${v<0?"−":"+"}${fmt(Math.abs(Math.round(v)))}</b></div>`:"";
+  const R=H.slice(-5).map((h,i,a)=>i?{...h,d:h.cash-a[i-1].cash}:null).filter(Boolean).reverse();
   return `<h2>การเงิน</h2><div class="bigcash"><small>เงินสดตอนนี้</small><b class="num">${fmt(G.cash)}</b><span class="num ${net<0?"negt":"post"}">${net<0?"−":"+"}${fmt(Math.abs(net))} ต่อสัปดาห์</span></div>
    <div class="ctip"><img src="${ASSET}coach.webp" alt=""><span>${tip}</span></div>
-   <div class="kv-row"><span>ค่าเรียน ${students(G)} คน</span><b class="num pos">+${fmt(inc)}</b></div><div class="kv-row"><span>ค่าดูแลค่าย + ค่าจ้าง</span><b class="num neg">−${fmt(up+wg)}</b></div>
-   <h3>เงินเข้าออกล่าสุด</h3>${L.length?L.map(h=>`<div class="kv-row"><span>สัปดาห์ ${h.w}${h.fight?" · มีค่าตัวไฟต์":""}</span><b class="num ${h.d<0?"negt":"post"}">${h.d<0?"−":"+"}${fmt(Math.abs(Math.round(h.d)))}</b></div>`).join(""):`<p class="meta">ยังไม่มีประวัติ เล่นต่ออีกสักสัปดาห์</p>`}`;}
+   <h3>เงินประจำทุกสัปดาห์</h3>${row(`นักเรียน ${students(G)} คนจ่ายค่าเรียน`,inc)}${row("ผู้สนับสนุน",sp)}${row("ค่าดูแลค่าย",-up)}${row("ค่าจ้างนักมวยและครู",-wg)}${debt?row("ผ่อนหนี้ปู่ชัย (ทุก 4 สัปดาห์)",-debt):""}
+   <p class="meta">${why} · ค่าดูแลเพิ่มตามจำนวนอัปเกรด · ค่าตัวไฟต์และกิจกรรมคิดตอนเกิดขึ้นจริง</p>
+   <h3>ย้อนดู 4 สัปดาห์ล่าสุด</h3>${R.length?R.map(h=>`<details class="cfw"><summary><span>สัปดาห์ ${h.w}${h.fight?" · มีค่าตัวไฟต์":""}</span><b class="num ${h.d<0?"negt":"post"}">${h.d<0?"−":"+"}${fmt(Math.abs(Math.round(h.d)))}</b></summary>
+     ${row("ค่าเรียน",h.inc)}${row("ผู้สนับสนุน",h.sponsor||0)}${row("ค่าตัวไฟต์",h.fight||0)}${row("ค่าดูแลค่าย",-(h.up||0))}${row("ค่าจ้าง",-(h.wg||0))}${row("ผ่อนหนี้",-(h.debt||0))}${row("กิจกรรม อัปเกรด และอื่น ๆ",h.oth||0)}</details>`).join(""):`<p class="meta">ยังไม่มีประวัติ จบสัปดาห์แรกแล้วจะเห็นรายการ</p>`}`;}
 function repgraphHTML(){const r=G.rep,S=repSteps();const nx=S.find(([n])=>r<n),pv=[...S].reverse().find(([n])=>r>=n);const lo=pv?pv[0]:0,hi=nx?nx[0]:Math.max(lo+1,r);
   return `<h2>ชื่อเสียงค่าย</h2><div class="repg"><div class="repg-h"><b class="num">${r.toFixed(1)}</b><span>${nx?`อีก ${(nx[0]-r).toFixed(1)} ปลดล็อก: ${nx[1]}`:"ปลดล็อกครบทุกขั้นแล้ว"}</span></div>
     <div class="gauge" role="img" aria-label="ชื่อเสียง ${r.toFixed(1)}"><i style="width:${Math.round(100*Math.min(1,(r-lo)/(hi-lo)))}%"></i></div><div class="repg-f"><small class="num">${lo}</small><small class="num">${nx?hi:""}</small></div></div>

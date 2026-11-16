@@ -1574,3 +1574,27 @@ button.goal.ov.mini{right:auto;padding:3px 10px;opacity:.85}
 .sklines button.off{opacity:.45}
 .skpath{margin:6px 0 0;font-size:12px}
 .skpath .btn{margin-left:6px}
+/* v1.82.4: cashflow week breakdown */
+.cfw{border-top:1px solid var(--line)}
+.cfw summary{display:flex;justify-content:space-between;align-items:center;padding:7px 0;cursor:pointer;list-style:none}
+.cfw summary::-webkit-details-marker{display:none}
+.cfw summary span::before{content:"▸ ";color:var(--muted)}
+.cfw[open] summary span::before{content:"▾ "}
+.cfw .kv-row{padding-left:14px;font-size:13px}
+/* v1.82.4: trophy room */
+.troom{display:flex;flex-direction:column;gap:8px;margin-bottom:10px}
+.tshelf{position:relative;padding:22px 8px 0;background:linear-gradient(#2a1f33,#231a2c);box-shadow:inset 0 0 0 2px #3d2f4a}
+.tshelf .tlbl{position:absolute;top:4px;left:8px;font-size:11px;color:var(--muted)}
+.tshelf .tlbl b{color:var(--gold);font-family:"Pixelify Sans",monospace}
+.tshelf .trow{display:flex;flex-wrap:wrap;align-items:flex-end;gap:6px;min-height:58px;padding-bottom:8px;border-bottom:8px solid #7a5236;box-shadow:0 2px 0 #4a3020}
+.tit{border:0;background:none;padding:2px;cursor:pointer;line-height:0;filter:drop-shadow(0 2px 0 rgba(0,0,0,.35))}
+.tit svg{display:block;height:48px;width:auto;image-rendering:pixelated}
+.tit.belt svg{height:28px}.tit.cert svg{height:40px}.tit.medal svg{height:40px}
+.tit.on{outline:2px solid var(--gold);outline-offset:2px;background:rgba(242,193,78,.12)}
+.tit:not(.ghost):hover{transform:translateY(-2px)}
+.tit.ghost{opacity:.5;cursor:default}
+.tdetail{display:flex;flex-direction:column;gap:2px;padding:8px 10px;background:var(--bg2);box-shadow:inset 3px 0 0 var(--gold);min-height:44px}
+.tdetail small{color:var(--muted)}
+.tnext summary,.hall-list summary{cursor:pointer;padding:4px 0}
+.tnext .kv-row .meta{font-size:11.5px;text-align:right}
+.m-showcase .campcv{width:100%;height:auto;image-rendering:pixelated}

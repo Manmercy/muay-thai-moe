@@ -1901,3 +1901,29 @@ function gachaPull(G){if((G.dust||0)<GACHA_COST)return null;G.dust-=GACHA_COST;G
   else if((o.lv||1)<3){o.lv=(o.lv||1)+1;o.n=(o.n||1)+1;if(G.F[CARDS[id].c])add(G,CARDS[id].c,"bond",3);res={id,up:o.lv};}
   else{const d=DUST_OF[CARDS[id].r];G.dust+=d;o.n=(o.n||1)+1;res={id,dust:d};}
   return res;}
+
+// v1.82.4 (CM3/CM4): small annual camp moments — clean-up day, dinner after a hard loss,
+// open house, community fair. Choices state their cost or payoff; lines follow who is in camp and the year.
+const campVoice=(G,id,lines)=>inCamp(G,id)?[{n:id,f:"happy",l:"casual",t:lines[id]||lines.any}]:[];
+EVENTS.push(
+ {id:"camp_clean_day",annual:true,pri:1,look:"casual",bg:"camp",when:G=>G.week>=7&&G.week<=9&&roster(G).length>=2,steps:[
+  {n:"nar",t:G=>yr(G)>=3?`Weekend morning, year ${yr(G)} The little students came to help sweep too. There weren't enough brooms to go around`:"Weekend morning: everyone sweeps the yard, wipes down the heavy bags and washes the gloves"},
+  {inject:G=>[...campVoice(G,"kati",{kati:"I'll wipe Grandpa Chai's photo myself. Nobody take it!"}),...campVoice(G,"mali",{mali:"Mali will put on music. Sweep to the beat and you'll go faster~"}),...campVoice(G,"rin",{rin:"I've already made a cleaning roster. Everyone gets an equal share"}),...campVoice(G,"fah",{fah:"Fastest sweeper gets free ice cream! Fah's treat!"}),...campVoice(G,"ploy",{ploy:"…Mopping is just footwork practice"})].slice(0,3)},
+  {choice:[{t:"Pitch in with everyone",fx:G=>{roster(G).forEach(f=>{f.morale=Math.min(100,f.morale+3);add(G,f.id,"bond",1);});G.camp.beauty=(G.camp.beauty||0)+1;},then:[{n:"nar",t:"The camp yard is visibly cleaner. Everyone takes a break with coconut water"}]},
+   {t:"Buy new cleaning supplies (฿800)",fx:G=>{G.cash-=800;G.camp.beauty=(G.camp.beauty||0)+1;roster(G).forEach(f=>f.morale=Math.min(100,f.morale+1));},then:[{n:"nar",t:"The new mop gets the job done twice as fast"}]}]}]},
+ {id:"camp_after_loss",annual:true,pri:1,look:"casual",bg:"night",when:G=>G.week>=6&&G.week<=46&&roster(G).length>=2&&(G.cal||[]).some(c=>(c.season||1)===yr(G)&&c.res==="L"&&c.absWeek!=null&&gameWeek(G)-c.absWeek<=2),steps:[
+  {inject:G=>{const L=(G.cal||[]).filter(c=>(c.season||1)===yr(G)&&c.res==="L").slice(-1)[0],f=L&&G.F[L.a];return [{n:"nar",t:f?`The night after ${f.name} lost. Nobody let her eat alone; everyone brought food and sat in a circle in the camp yard`:"The night after a tough fight, everyone brought food and sat in a circle in the camp yard"},...(f?[{n:f.id,f:"sad",l:"casual",t:"I'm sorry I let everyone down…"}]:[])];}},
+  {inject:G=>{const others=roster(G).filter(x=>{const L=(G.cal||[]).filter(c=>c.res==="L").slice(-1)[0];return !L||x.id!==L.a;}).slice(0,2);return others.map(o=>({n:o.id,f:"happy",l:"casual",t:{kati:"Losing once doesn't mean losing forever. See you at the track at 5am!",mali:"Eat up~ Mali made her special omelette for you~",rin:"I watched the tape. There are three things we can fix within two weeks",fah:"Fah has lost like this too, and came back to win. Believe in Fah!",ploy:"I lost for the first time at fourteen and cried all night… then I kept training"}[o.id]||"We're with you"}));}},
+  {n:"coach",t:"Eat well, sleep enough, then start again. Nobody in this camp loses alone"},
+  {inject:G=>{roster(G).forEach(f=>{f.morale=Math.min(100,f.morale+4);});return [{n:"nar",t:"(Everyone's morale improves)"}];}}]},
+ {id:"camp_open_house",annual:true,pri:1,look:"casual",bg:"camp",when:G=>G.week>=17&&G.week<=19&&roster(G).length>0,steps:[
+  {n:"nar",t:G=>yr(G)>=5?`Open day, year ${yr(G)} The parents' queue stretched to the end of the lane, with some driving in from other districts`:yr(G)>=3?"This year's open day brought kids from several districts. The Sirichai name is starting to sound familiar around here":"Villagers drop by the newly reopened camp. Kids cling to the fence watching the fighters train"},
+  {inject:G=>campVoice(G,"kati",{kati:yr(G)>=3?"Back when Grandpa was here, open day was crowded just like this":"Grandpa would be so happy. The kids care about Muay Thai again"})},
+  {choice:[{t:"Open a free trial class",fx:G=>{G.rep+=yr(G)>=3?1:.6;},then:[{n:"nar",t:"Kids tried wrapping hands and kicking pads. Lots of families took the camp's name home (reputation up)"}]},
+   {t:"Sell tickets to watch training",fx:G=>{const v=yr(G)>=5?4000:yr(G)>=3?2500:1000;G.cash+=v;},then:[{inject:G=>[{n:"nar",t:`Ticket sales: ${fmt(yr(G)>=5?4000:yr(G)>=3?2500:1000)} to the camp`}]}]}]}]},
+ {id:"camp_community_fair",annual:true,pri:1,look:"casual",bg:"fair",when:G=>G.week>=35&&G.week<=37&&roster(G).length>=2,steps:[
+  {n:"nar",t:G=>yr(G)>=3?"The community fair is back. The whole square is packed waiting to see Team Sirichai, some holding fighter name signs":"The community fair invited Sirichai to set up a booth for the first time, between a fried meatball stall and a dart game"},
+  {inject:G=>[...campVoice(G,"mali",{mali:"Let Mali be the booth announcer~ I'm the loudest in the camp!"}),...campVoice(G,"fah",{fah:"Want Fah to kick a watermelon mid-air? People will scream!"})].slice(0,1)},
+  {choice:[{t:"Do a Muay Thai demo for the kids",fx:G=>{G.rep+=yr(G)>=3?1.2:.6;roster(G).forEach(f=>f.morale=Math.min(100,f.morale+3));},then:[{n:"nar",t:"A little girl came up asking for an autograph on her shirt. Nobody could stop smiling (reputation and morale up)"}]},
+   {t:"Sell camp souvenirs",fx:G=>{G.cash+=yr(G)>=3?3000:1200;},then:[{inject:G=>[{n:"nar",t:`The camp-pattern hand wraps sold out before noon, earning ${fmt(yr(G)>=3?3000:1200)}`}]}]}]}]}
+);

@@ -1901,3 +1901,29 @@ function gachaPull(G){if((G.dust||0)<GACHA_COST)return null;G.dust-=GACHA_COST;G
   else if((o.lv||1)<3){o.lv=(o.lv||1)+1;o.n=(o.n||1)+1;if(G.F[CARDS[id].c])add(G,CARDS[id].c,"bond",3);res={id,up:o.lv};}
   else{const d=DUST_OF[CARDS[id].r];G.dust+=d;o.n=(o.n||1)+1;res={id,dust:d};}
   return res;}
+
+// v1.82.4 (CM3/CM4): small annual camp moments — clean-up day, dinner after a hard loss,
+// open house, community fair. Choices state their cost or payoff; lines follow who is in camp and the year.
+const campVoice=(G,id,lines)=>inCamp(G,id)?[{n:id,f:"happy",l:"casual",t:lines[id]||lines.any}]:[];
+EVENTS.push(
+ {id:"camp_clean_day",annual:true,pri:1,look:"casual",bg:"camp",when:G=>G.week>=7&&G.week<=9&&roster(G).length>=2,steps:[
+  {n:"nar",t:G=>yr(G)>=3?`เช้าวันหยุดปีที่ ${yr(G)} นักเรียนรุ่นเล็กมาช่วยกวาดลานค่ายด้วย ไม้กวาดไม่พอแจก`:"เช้าวันหยุด ทุกคนช่วยกันกวาดลานค่าย เช็ดกระสอบทราย และล้างนวม"},
+  {inject:G=>[...campVoice(G,"kati",{kati:"หนูเช็ดรูปปู่ชัยเองนะคะ ห้ามใครแย่ง"}),...campVoice(G,"mali",{mali:"มะลิเปิดเพลงให้ กวาดเป็นจังหวะจะได้เร็วขึ้น~"}),...campVoice(G,"rin",{rin:"ฉันจัดตารางเวรทำความสะอาดไว้แล้วค่ะ ทุกคนได้งานเท่ากัน"}),...campVoice(G,"fah",{fah:"ใครกวาดเร็วที่สุดได้กินไอติมฟรี! ฟ้าเลี้ยง!"}),...campVoice(G,"ploy",{ploy:"…ถูพื้นก็เหมือนซ้อมฟุตเวิร์กนั่นแหละ"})].slice(0,3)},
+  {choice:[{t:"ลงมือช่วยทุกคน",fx:G=>{roster(G).forEach(f=>{f.morale=Math.min(100,f.morale+3);add(G,f.id,"bond",1);});G.camp.beauty=(G.camp.beauty||0)+1;},then:[{n:"nar",t:"ลานค่ายสะอาดขึ้นตา ทุกคนนั่งพักดื่มน้ำมะพร้าวด้วยกัน"}]},
+   {t:"ซื้ออุปกรณ์ทำความสะอาดใหม่ (฿800)",fx:G=>{G.cash-=800;G.camp.beauty=(G.camp.beauty||0)+1;roster(G).forEach(f=>f.morale=Math.min(100,f.morale+1));},then:[{n:"nar",t:"ไม้ถูพื้นอันใหม่ทำให้งานเสร็จไวกว่าเดิมครึ่งหนึ่ง"}]}]}]},
+ {id:"camp_after_loss",annual:true,pri:1,look:"casual",bg:"night",when:G=>G.week>=6&&G.week<=46&&roster(G).length>=2&&(G.cal||[]).some(c=>(c.season||1)===yr(G)&&c.res==="L"&&c.absWeek!=null&&gameWeek(G)-c.absWeek<=2),steps:[
+  {inject:G=>{const L=(G.cal||[]).filter(c=>(c.season||1)===yr(G)&&c.res==="L").slice(-1)[0],f=L&&G.F[L.a];return [{n:"nar",t:f?`คืนหลังไฟต์ที่${f.name}แพ้ ไม่มีใครปล่อยให้เธอกินข้าวคนเดียว ทุกคนยกกับข้าวมานั่งล้อมวงกลางลานค่าย`:"คืนหลังไฟต์ที่ยาก ทุกคนยกกับข้าวมานั่งล้อมวงกลางลานค่าย"},...(f?[{n:f.id,f:"sad",l:"casual",t:"ขอโทษนะคะที่ทำให้ทุกคนผิดหวัง…"}]:[])];}},
+  {inject:G=>{const others=roster(G).filter(x=>{const L=(G.cal||[]).filter(c=>c.res==="L").slice(-1)[0];return !L||x.id!==L.a;}).slice(0,2);return others.map(o=>({n:o.id,f:"happy",l:"casual",t:{kati:"แพ้ครั้งเดียวไม่ได้แปลว่าแพ้ตลอดไปนะ พรุ่งนี้ตีห้าเจอกันที่ลู่วิ่ง!",mali:"กินเยอะ ๆ นะ มะลิทำไข่เจียวสูตรพิเศษให้เลย~",rin:"ฉันดูเทปแล้ว มีสามจุดที่แก้ได้ภายในสองสัปดาห์ค่ะ",fah:"ฟ้าก็เคยแพ้แบบนี้ แล้วก็กลับมาชนะได้ เชื่อฟ้าสิ!",ploy:"ฉันแพ้ครั้งแรกตอนสิบสี่ ร้องไห้ทั้งคืน …แล้วก็ซ้อมต่อ"}[o.id]||"เราอยู่ข้างเธอนะ"}));}},
+  {n:"coach",t:"กินให้อิ่ม นอนให้พอ แล้วค่อยเริ่มใหม่ ค่ายนี้ไม่มีใครแพ้คนเดียว"},
+  {inject:G=>{roster(G).forEach(f=>{f.morale=Math.min(100,f.morale+4);});return [{n:"nar",t:"(กำลังใจทุกคนดีขึ้น)"}];}}]},
+ {id:"camp_open_house",annual:true,pri:1,look:"casual",bg:"camp",when:G=>G.week>=17&&G.week<=19&&roster(G).length>0,steps:[
+  {n:"nar",t:G=>yr(G)>=5?`วันเปิดค่ายประจำปีที่ ${yr(G)} คิวผู้ปกครองยาวถึงปากซอย มีคนขับรถมาจากต่างอำเภอ`:yr(G)>=3?"วันเปิดค่ายปีนี้มีเด็กจากหลายอำเภอมาเยี่ยม ชื่อค่ายศิริชัยเริ่มคุ้นหูคนแถวนี้แล้ว":"ชาวบ้านแวะมาดูค่ายที่เพิ่งกลับมาเปิด เด็ก ๆ ยืนเกาะรั้วดูพี่ ๆ ซ้อม"},
+  {inject:G=>campVoice(G,"kati",{kati:yr(G)>=3?"ตอนปู่ยังอยู่ วันเปิดค่ายก็คนเยอะแบบนี้แหละค่ะ":"ถ้าปู่เห็นคงดีใจ เด็ก ๆ กลับมาสนใจมวยไทยอีกแล้ว"})},
+  {choice:[{t:"เปิดให้ลองเรียนฟรี",fx:G=>{G.rep+=yr(G)>=3?1:.6;},then:[{n:"nar",t:"เด็ก ๆ ได้ลองพันมือ ลองเตะเป้า หลายบ้านขอชื่อค่ายกลับไป (ชื่อเสียงเพิ่ม)"}]},
+   {t:"ขายบัตรเข้าชมการซ้อม",fx:G=>{const v=yr(G)>=5?4000:yr(G)>=3?2500:1000;G.cash+=v;},then:[{inject:G=>[{n:"nar",t:`ขายบัตรได้ ${fmt(yr(G)>=5?4000:yr(G)>=3?2500:1000)} เข้าค่าย`}]}]}]}]},
+ {id:"camp_community_fair",annual:true,pri:1,look:"casual",bg:"fair",when:G=>G.week>=35&&G.week<=37&&roster(G).length>=2,steps:[
+  {n:"nar",t:G=>yr(G)>=3?"งานชุมชนกลับมาอีกปี คนยืนรอดูทีมค่ายศิริชัยเต็มลาน บางคนถือป้ายชื่อนักมวยมาเชียร์":"งานชุมชนชวนค่ายศิริชัยไปตั้งซุ้มเป็นครั้งแรก ข้าง ๆ เป็นร้านลูกชิ้นทอดกับซุ้มปาเป้า"},
+  {inject:G=>[...campVoice(G,"mali",{mali:"มะลิขอเป็นคนประกาศหน้าซุ้มนะ เสียงดังสุดในค่ายแล้ว~"}),...campVoice(G,"fah",{fah:"ให้ฟ้าโชว์เตะแตงโมกลางอากาศไหม! คนต้องกรี๊ดแน่"})].slice(0,1)},
+  {choice:[{t:"สาธิตมวยไทยให้เด็ก ๆ ดู",fx:G=>{G.rep+=yr(G)>=3?1.2:.6;roster(G).forEach(f=>f.morale=Math.min(100,f.morale+3));},then:[{n:"nar",t:"เด็กผู้หญิงคนหนึ่งเดินมาขอลายเซ็นบนเสื้อ ทุกคนยิ้มไม่หุบ (ชื่อเสียงและกำลังใจเพิ่ม)"}]},
+   {t:"ขายของที่ระลึกของค่าย",fx:G=>{G.cash+=yr(G)>=3?3000:1200;},then:[{inject:G=>[{n:"nar",t:`ผ้าพันมือลายค่ายขายหมดก่อนเที่ยง ได้ ${fmt(yr(G)>=3?3000:1200)}`}]}]}]}]}
+);

@@ -940,6 +940,21 @@ function weekTrain(G){
 }
 // week phase 3: npc sim, economy, transitions, advance
 function rankSnapshot(G){const o={};for(const d of ["A","B"]){o[d]={};standings(G,d).forEach((r,i)=>o[d][r.id]=i+1);}return o;}
+// v1.82.4 (CM5): camp certificates — awarded once when the camp reaches a milestone, shown in the trophy room
+const CAMP_AWARDS={
+ clean:{name:"ค่ายสะอาดประจำอำเภอ",from:"ที่ว่าการอำเภอ",hint:"ดูแลค่ายให้สวยงาม (ทำความสะอาด ตกแต่ง)",ok:G=>(G.camp&&G.camp.beauty||0)>=4},
+ local:{name:"ค่ายมวยดีเด่นประจำตำบล",from:"องค์การบริหารส่วนตำบล",hint:"ชื่อเสียง 25 และนักมวย 2 คนขึ้นไป",ok:G=>G.rep>=25&&roster(G).length>=2},
+ debt:{name:"ปลดหนี้ค่ายศิริชัย",from:"ครูแดงและชาวค่าย",hint:"ปลดหนี้ของปู่ชัยให้หมด",ok:G=>!!(G.flags&&G.flags.debtCleared)||G.debt<=0},
+ pretty:{name:"ค่ายสวยงามแห่งปี",from:"ชมรมคนรักมวยไทยเชียงใหม่",hint:"ตกแต่งค่ายอย่างน้อย 3 จุด",ok:G=>typeof CAMP_DECOR!=="undefined"&&Object.keys(CAMP_DECOR).filter(k=>decorChoice(G,k)!==decorDefault(k)&&decorChoice(G,k)!=="none").length>=3},
+ school:{name:"โรงเรียนมวยยอดนิยม",from:"สมาคมผู้ปกครองตำบล",hint:"มีนักเรียน 30 คน",ok:G=>students(G)>=30},
+ family:{name:"ครอบครัวศิริชัย",from:"ชาวค่ายศิริชัย",hint:"มีนักมวยในค่ายครบ 5 คน",ok:G=>roster(G).length>=5},
+ province:{name:"ค่ายแชมป์ประจำจังหวัด",from:"สมาคมมวยจังหวัดเชียงใหม่",hint:"คว้าแชมป์จังหวัด",ok:G=>(G.honors||[]).some(h=>h.kind==="province")},
+ legend:{name:"ค่ายมวยในตำนาน",from:"สมาคมมวยจังหวัดเชียงใหม่",hint:"สะสมเกียรติยศ 10 รายการ",ok:G=>(G.honors||[]).length>=10},
+ five:{name:"ห้าปีแห่งศิริชัย",from:"ชาวบ้านในตำบล",hint:"ดูแลค่ายครบ 5 ปี",ok:G=>(G.season||1)>=6}};
+function checkCampAwards(G){G.campAwards=Array.isArray(G.campAwards)?G.campAwards:[];const got=[];
+  for(const [id,A] of Object.entries(CAMP_AWARDS)){if(G.campAwards.some(x=>x.id===id))continue;let ok=false;try{ok=A.ok(G);}catch(e){}
+    if(ok){G.campAwards.push({id,season:G.season||1,week:G.week});got.push(id);}}
+  if(got.length){G.newCerts=(G.newCerts||[]).concat(got);}return got;}
 function weekFinish(G){if(G.rep>55)G.rep=55+(G.rep-55)*(.96+(G.fac.hall||0)*.01);if(G.sponsorWk)G.cash+=G.sponsorWk;growStudents(G); // v1.22.1: fame above 40 needs upkeep
 
   const before=rankSnapshot(G);
@@ -956,10 +971,10 @@ function weekFinish(G){if(G.rep>55)G.rep=55+(G.rep-55)*(.96+(G.fac.hall||0)*.01)
   const prog=(()=>{if(!G.snap){G.snap={week:gameWeek(G),a:Object.fromEntries(roster(G).map(f=>[f.id,{...f.a}]))};return null;}
     if(gameWeek(G)-G.snap.week<4)return null;const out=roster(G).filter(f=>G.snap.a[f.id]).map(f=>({id:f.id,before:G.snap.a[f.id]}));
     G.snap={week:gameWeek(G),a:Object.fromEntries(roster(G).map(f=>[f.id,{...f.a}]))};return out.length?out:null;})();
-  grantDecorUnlocks(G);
+  grantDecorUnlocks(G);checkCampAwards(G);
   G.lastReport={prog,week:G.week,inc,up,wg,debtPay,students:students(G),rank:after,move:G.rankMove,stage:stageOf(G.week),cash:G.cash,log:[...G.log],gains:roster(G).map(f=>({id:f.id,name:f.name,gains:{...f.gains},fatigue:f.fatigue,injury:f.injury,xp:f.xpGain||0,lvl:f.lvl,preset:f.plan.preset}))};
   stageTransition(G);
-  {const pv=G.history.length?G.history[G.history.length-1].cash:60000;G.history.push({w:G.week,cash:Math.round(G.cash),rep:+G.rep.toFixed(1),inc,up,wg,debt:debtPay,fight:G.wkFight||0,oth:Math.round(G.cash-pv-(inc-up-wg-debtPay)-(G.wkFight||0))});G.wkFight=0;}
+  {const pv=G.history.length?G.history[G.history.length-1].cash:60000,sp=G.sponsorWk||0;G.history.push({w:G.week,season:G.season||1,cash:Math.round(G.cash),rep:+G.rep.toFixed(1),inc,up,wg,debt:debtPay,sponsor:sp,fight:G.wkFight||0,oth:Math.round(G.cash-pv-(inc+sp-up-wg-debtPay)-(G.wkFight||0))});G.wkFight=0;}
   if((G.negWeeks>=4&&G.cash<-10000)||G.cash<-40000)G.ended="bankrupt";
   if(G.week===21||G.week===41){G.F.ploy.skills.captain=(G.F.ploy.skills.captain||0)+1;G.F.fah.skills.grin=(G.F.fah.skills.grin||0)+1;}
   if(G.week===41){G.F.ploy.skills.kr_knee=Math.max(1,G.F.ploy.skills.kr_knee||0);} // v1.19.2: Ploy brings one more weapon to the semis/final

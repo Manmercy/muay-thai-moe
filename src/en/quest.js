@@ -226,13 +226,18 @@ function lineSVG(pts,key,col,fmtY){if(pts.length<2)return `<p class="meta">Not e
    <text x="${P-4}" y="${y(mx)+4}" text-anchor="end" class="gt">${fmtY(mx)}</text><text x="${P-4}" y="${y(mn)+4}" text-anchor="end" class="gt">${fmtY(mn)}</text>
    <text x="${x(0)}" y="${H-3}" class="gt">wk ${pts[0].w}</text><text x="${x(pts.length-1)}" y="${H-3}" text-anchor="end" class="gt">wk ${pts[pts.length-1].w}</text></svg>`;}
 const kfmt=v=>Math.abs(v)>=1000?(v<0?"-":"")+"฿"+(Math.abs(v)/1000).toFixed(Math.abs(v)>=10000?0:1)+"k":fmt(v);
-function cashflowHTML(){const H=(G.history||[]);const inc=classIncome(G),up=upkeep(G),wg=wages(G),net=inc-up-wg;
-  const L=H.slice(-7).map((h,i,a)=>i?{w:h.w,d:h.cash-a[i-1].cash,cash:h.cash,fight:h.fight}:null).filter(Boolean).reverse();
-  const tip=net<0?(G.cash/-net<6?`Regular costs exceed income. Cash lasts about ${Math.max(1,Math.floor(G.cash/-net))} weeks. Take a fight or check the mailbox for income`:`Regular costs exceed income, so you rely on fight purses. More students (upgrade the classroom) will help`):G.cash>25000?`Plenty of cash. Try upgrading the camp or hiring another coach`:`Money is healthy. Save up for the next camp upgrade`;
+function cashflowHTML(){const H=(G.history||[]);const inc=classIncome(G),up=upkeep(G),wg=wages(G),sp=G.sponsorWk||0,debt=G.debt>0&&(G.week%4===0)?Math.min(5000,G.debt):0,net=inc+sp-up-wg;
+  const tip=net<0?(G.cash/-net<6?`Regular costs exceed income. Cash lasts about ${Math.max(1,Math.floor(G.cash/-net))} weeks. Take a fight or check the mailbox for income`:`Regular costs exceed income. You'll rely on fight purses, more students, or lower wages`):`Regular income covers costs, leaving per week ${fmt(net)} you can save for camp upgrades`;
+  const full=studentDemand(G)>studentCap(G),dis=G.disaster&&G.disaster.untilAbs!=null&&gameWeek(G)<G.disaster.untilAbs;
+  const why=dis?`Tuition income is down because ${esc(G.disaster.name)}`:full?`Students wanting to join: ${studentDemand(G)} but the camp only takes ${studentCap(G)} · expand the teaching area for more students`:`Tuition per student ${fmt(studentFee(G))} per week`;
+  const row=(l,v)=>v?`<div class="kv-row"><span>${l}</span><b class="num ${v<0?"neg":"pos"}">${v<0?"−":"+"}${fmt(Math.abs(Math.round(v)))}</b></div>`:"";
+  const R=H.slice(-5).map((h,i,a)=>i?{...h,d:h.cash-a[i-1].cash}:null).filter(Boolean).reverse();
   return `<h2>Finances</h2><div class="bigcash"><small>Cash right now</small><b class="num">${fmt(G.cash)}</b><span class="num ${net<0?"negt":"post"}">${net<0?"−":"+"}${fmt(Math.abs(net))} per week</span></div>
    <div class="ctip"><img src="${ASSET}coach.webp" alt=""><span>${tip}</span></div>
-   <div class="kv-row"><span>Class fees, ${students(G)} students</span><b class="num pos">+${fmt(inc)}</b></div><div class="kv-row"><span>Upkeep + wages</span><b class="num neg">−${fmt(up+wg)}</b></div>
-   <h3>Recent money in / out</h3>${L.length?L.map(h=>`<div class="kv-row"><span>Week ${h.w}${h.fight?" · fight purse":""}</span><b class="num ${h.d<0?"negt":"post"}">${h.d<0?"−":"+"}${fmt(Math.abs(Math.round(h.d)))}</b></div>`).join(""):`<p class="meta">No history yet. Play another week</p>`}`;}
+   <h3>Regular weekly money</h3>${row(`Tuition: ${students(G)} students`,inc)}${row("Sponsor",sp)}${row("Camp upkeep",-up)}${row("Fighter and coach wages",-wg)}${debt?row("Grandpa Chai's debt payment (every 4 weeks)",-debt):""}
+   <p class="meta">${why} · Upkeep grows with each upgrade · Fight purses and events are counted when they happen</p>
+   <h3>Last 4 weeks</h3>${R.length?R.map(h=>`<details class="cfw"><summary><span>Week ${h.w}${h.fight?" · fight purse":""}</span><b class="num ${h.d<0?"negt":"post"}">${h.d<0?"−":"+"}${fmt(Math.abs(Math.round(h.d)))}</b></summary>
+     ${row("Tuition",h.inc)}${row("Sponsor",h.sponsor||0)}${row("Fight purses",h.fight||0)}${row("Camp upkeep",-(h.up||0))}${row("Wages",-(h.wg||0))}${row("Debt payment",-(h.debt||0))}${row("Events, upgrades and other",h.oth||0)}</details>`).join(""):`<p class="meta">No history yet. Finish your first week to see entries</p>`}`;}
 function repgraphHTML(){const r=G.rep,S=repSteps();const nx=S.find(([n])=>r<n),pv=[...S].reverse().find(([n])=>r>=n);const lo=pv?pv[0]:0,hi=nx?nx[0]:Math.max(lo+1,r);
   return `<h2>Camp fame</h2><div class="repg"><div class="repg-h"><b class="num">${r.toFixed(1)}</b><span>${nx?`${(nx[0]-r).toFixed(1)} more to unlock: ${nx[1]}`:"Everything unlocked"}</span></div>
     <div class="gauge" role="img" aria-label="Fame ${r.toFixed(1)}"><i style="width:${Math.round(100*Math.min(1,(r-lo)/(hi-lo)))}%"></i></div><div class="repg-f"><small class="num">${lo}</small><small class="num">${nx?hi:""}</small></div></div>

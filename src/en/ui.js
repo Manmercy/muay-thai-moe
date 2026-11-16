@@ -522,10 +522,40 @@ function campLvHTML(){const lv=campLevel(G),t=facTotal(G),need=[0,0,5,13];
     <ul><li>Class fees ${L>1?`+${(L-1)*20}%`:"Normal"}</li><li>People wanting to join +${L*2}</li><li>Assistant coach slots: ${1+L}</li>${L>1?"<li>Gym gets a makeover</li>":""}${u.length?`<li class="goldt">Unlocks: ${u.join(", ")}</li>`:""}</ul></div>`;}).join("")}</div>
    <button class="btn primary" data-act="gofac">Go to camp upgrades</button>`;}
 // v1.50: the camp's hall of fame — one row per finished year, plus belts held now
+// v1.82.4: trophy room — trophies, belts and certificates as pixel items on shelves; tap one for its story
+const TROPHY_PX={
+ cup:["..aaaaaaaaaa..","aa.abbbbbbba.aa","a..abbbbbbba..a","a..abbbbbbba..a",".a.abbbbbbba.a.","..aabbbbbbbaa..","...aabbbbbaa...",".....abbba.....","......aba......","......aba......",".....aaaaa.....","....acccccca...","....acccccca...","....aaaaaaaa..."],
+ medal:["..dd.....dd..","...dd...dd...","....dd.dd....",".....ddd.....","....aaaaa....","...abbbbba...","..abbbabbba..","..abbaaabba..","..abbbabbba..","...abbbbba...","....aaaaa...."],
+ belt:["..............................","aaaaaaaaaaaaaaaaaaaaaaaaaaaaaa","accccccccaaaaaaaaaaaaacccccccca","accccccaabbbbbbbbbbbbaaccccccca","acccccabbbbbbaabbbbbbbacccccca","acccccabbbbbaddabbbbbbacccccca","acccccabbbbbaddabbbbbbacccccca","acccccabbbbbbaabbbbbbbacccccca","accccccaabbbbbbbbbbbbaaccccccca","accccccccaaaaaaaaaaaaacccccccca","aaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"],
+ cert:["aaaaaaaaaaaaaaa","abbbbbbbbbbbbba","abccccccccccbba","abbbbbbbbbbbbba","abccccccccbbbba","abbbbbbbbbbbbba","abcccccccccbbba","abbbbbbbbbbbbba","abbbbbbbbbdddba","abbbbbbbbbdddba","abbbbbbbbbbdbba","aaaaaaaaaaaaaaa"]};
+function trophySVG(kind,pal,dim){const rows=TROPHY_PX[kind],w=Math.max(...rows.map(r=>r.length)),h=rows.length;let r="";
+  rows.forEach((row,y)=>[...row].forEach((ch,x)=>{if(ch!==".")r+=`<rect x="${x}" y="${y}" width="1" height="1" fill="${dim?"#3a3150":pal[ch]||"#fff"}"/>`;}));
+  return `<svg viewBox="0 0 ${w} ${h}" shape-rendering="crispEdges" aria-hidden="true">${r}</svg>`;}
+const BELT_PAL={tha:{a:"#2a1d10",b:"#f1c232",c:"#c8283c",d:"#c8283c"},ping:{a:"#10202a",b:"#f1c232",c:"#2c5fb3",d:"#2c5fb3"},lanna:{a:"#14261a",b:"#f1c232",c:"#2f8a4f",d:"#2f8a4f"}};
+const CUP_PAL={province:{a:"#7a5a10",b:"#f1c232",c:"#5a3a2a"},district:{a:"#5d6168",b:"#d7dde4",c:"#4a3a2a"},local:{a:"#6b3d1c",b:"#d08a4a",c:"#4a3a2a"}};
+function trophyItems(){const H=G.honors||[],items=[];
+  for(const h of H){const who=esc(G.F[h.id]?.name||h.id),when=h.season?`Year ${h.season} week ${h.week}`:"Before update";
+    if(h.kind==="belt"||h.kind==="defense"){const v=h.venue||"tha";items.push({kind:"belt",pal:BELT_PAL[v]||BELT_PAL.tha,title:honorLabel(h.kind,h.venue),sub:`${who} · Div ${h.div}`,when,shelf:"belt"});}
+    else if(h.kind==="dm")items.push({kind:"medal",pal:{a:"#5a1a22",b:"#d23246",d:"#2a2238"},title:"Death Match champion",sub:`${who} · Div ${h.div}`,when,shelf:"cup"});
+    else items.push({kind:"cup",pal:CUP_PAL[h.kind]||CUP_PAL.local,title:honorLabel(h.kind,h.venue),sub:`${who} · Div ${h.div}`,when,shelf:"cup"});}
+  for(const a of (G.campAwards||[])){const A=CAMP_AWARDS[a.id];if(!A)continue;items.push({kind:"cert",pal:{a:"#c9961c",b:"#f4ead8",c:"#8a7a6a",d:"#c8283c"},title:A.name,sub:`Awarded by ${A.from}`,when:`Year ${a.season} week ${a.week}`,shelf:"cert"});}
+  return items;}
+function trophyRoomHTML(){const it=trophyItems(),sel=UI.trophySel!=null?it[UI.trophySel]:null;
+  const shelf=(key,label,empty)=>{const L=it.map((x,i)=>[x,i]).filter(([x])=>x.shelf===key);
+    return `<div class="tshelf ${key}"><span class="tlbl">${label} <b>${L.length}</b></span><div class="trow">${L.length?L.map(([x,i])=>`<button class="tit ${x.kind} ${UI.trophySel===i?"on":""}" data-act="trophy" data-v="${i}" aria-label="${esc(x.title)}">${trophySVG(x.kind,x.pal)}</button>`).join(""):empty.map(k=>`<span class="tit ghost ${k}">${trophySVG(k,{},true)}</span>`).join("")}</div></div>`;};
+  const certLeft=Object.entries(CAMP_AWARDS).filter(([id])=>!(G.campAwards||[]).some(a=>a.id===id));
+  return `<div class="troom">${shelf("cup","Trophies",["cup","cup","medal"])}${shelf("belt","Championship Belts",["belt"])}${shelf("cert","Camp Certificates",["cert","cert"])}
+    <div class="tdetail">${sel?`<b>${esc(sel.title)}</b><span>${sel.sub}</span><small>${sel.when}</small>`:`<span class="meta">Tap an item on the shelf to see which fight it came from · once the shelves fill up, snap a camp photo to show off</span>`}</div>
+    ${certLeft.length?`<details class="tnext"><summary>Certificates not yet earned (${certLeft.length})</summary>${certLeft.map(([id,A])=>`<div class="kv-row"><span>📜 ${A.name}</span><span class="meta">${A.hint}</span></div>`).join("")}</details>`:""}
+    <button class="btn sm gold" data-act="showcase">📸 Snap a camp photo to show off</button></div>`;}
+function showcaseHTML(){const R=roster(G),H=(G.honors||[]).length,C=(G.campAwards||[]).length;
+  return `<h2>Sirichai Boxing Camp · Year ${G.season||1}</h2><div class="px card"><canvas class="campcv" width="640" height="360" data-camp="1" aria-label="Current camp view"></canvas></div>
+   <p class="meta center">${esc(G.player.name)} · Camp Lv.${campLevel(G)} · Fighters ${R.length} · Students ${students(G)} · Honors ${H} · Certificates ${C}</p>
+   <div class="mfoot"><button class="btn primary" data-act="showcaseSave">💾 Save as image</button></div>`;}
 function hallHTML(){const T=(G.titles||[]).slice().reverse(),H=(G.honors||[]).slice().reverse(),belts=Object.entries(G.belt||{}).filter(([d,b])=>G.F[b.id]&&G.F[b.id].camp==="player"),venueBelts=Object.entries(G.venueBelts||{}).flatMap(([v,ds])=>Object.entries(ds).filter(([d,b])=>G.F[b.id]?.camp==="player").map(([d,b])=>({v,d,b})));
   const yr=t=>{const res=t.res||Object.entries(t.champ||{}).filter(([d,id])=>G.F[id]&&G.F[id].camp==="player").map(([d,id])=>({name:G.F[id].name,d,t:"Provincial champion",c:"gold"}));
     return `<div class="hall-y"><b>Year ${t.season}</b>${res.length?res.map(r=>`<div class="kv-row"><span>${esc(r.name)} · Div ${r.d}</span><span class="pill ${r.c||""}">${r.t}</span></div>`).join(""):"<p class=\"meta\">That year nobody got past the subdistrict round, but the whole camp stayed together</p>"}</div>`;};
-  return `${H.length?`<div class="hall-y"><b>Major victories</b>${H.map(h=>`<div class="kv-row"><span>${esc(G.F[h.id]?.name||h.id)} · Div ${h.div} · ${h.season?`Year ${h.season} Week ${h.week}`:"Earlier result"}</span><span class="pill gold">🏆 ${honorLabel(h.kind,h.venue)}</span></div>`).join("")}</div>`:""}
+  return `${trophyRoomHTML()}${H.length?`<details class="hall-y hall-list"><summary><b>Major wins (${H.length})</b></summary>${H.map(h=>`<div class="kv-row"><span>${esc(G.F[h.id]?.name||h.id)} · Div ${h.div} · ${h.season?`Year ${h.season} week ${h.week}`:"Earlier result"}</span><span class="pill gold">🏆 ${honorLabel(h.kind,h.venue)}</span></div>`).join("")}</details>`:""}
    ${belts.length||venueBelts.length?`<div class="hall-y"><b>Belts held</b>${belts.map(([d,b])=>`<div class="kv-row"><span>${esc(G.F[b.id].name)} · Div ${d}</span><span class="pill gold">🏆 Tha Phae Stadium champion · defended ${b.def} times</span></div>`).join("")}${venueBelts.map(({v,d,b})=>`<div class="kv-row"><span>${esc(G.F[b.id].name)} · Div ${d}</span><span class="pill gold">🏆 ${STADIUMS[v].name} champion · defended ${b.def} times</span></div>`).join("")}</div>`:""}
    ${T.length?T.map(yr).join(""):`<p class="meta">The first year isn't over yet · when it ends, everyone's results land here, one row per year</p>`}`;}
 const DECOR_STARS={N:1,R:2,SR:3,SSR:4,SS:5};
@@ -552,7 +582,7 @@ function campHTML(){const inc=classIncome(G),up=upkeep(G),wg=wages(G),lv=campLev
   const dots=(n,m)=>`<span class="pips">${Array.from({length:m},(_,i)=>`<i class="${i<n?"on":""}"></i>`).join("")}</span>`;
   return `<section class="px card camphead" style="background-image:linear-gradient(90deg,rgba(20,16,32,.95),rgba(20,16,32,.6)),url(${ASSET}${gymBg()})"><div><button class="pill gold lvbtn" data-act="camplv">Camp Lv.${lv} ▸</button><h3>${CAMP_LV_NAME[lv]}</h3>
     <p class="meta">Total upgrades ${facTotal(G)} levels · ${lv<3?`${lv===1?5-facTotal(G):13-facTotal(G)} levels to reach Lv.${lv+1} · tap to see what you get`:"Max level for the demo"}</p></div></section>
-   <div class="seg subtabs csubs"><button data-act="csub" data-v="money" aria-pressed="${cs==="money"}">Finance</button><button data-act="csub" data-v="staff" aria-pressed="${cs==="staff"}">Coaches & fighters</button><button data-act="csub" data-v="fac" aria-pressed="${cs==="fac"}">Camp upgrades</button><button data-act="csub" data-v="decor" aria-pressed="${cs==="decor"}">Decorations</button><button data-act="csub" data-v="hall" aria-pressed="${cs==="hall"}">Hall of fame</button></div>
+   <div class="seg subtabs csubs"><button data-act="csub" data-v="money" aria-pressed="${cs==="money"}">Finance</button><button data-act="csub" data-v="staff" aria-pressed="${cs==="staff"}">Coaches & fighters</button><button data-act="csub" data-v="fac" aria-pressed="${cs==="fac"}">Camp upgrades</button><button data-act="csub" data-v="decor" aria-pressed="${cs==="decor"}">Decorations</button><button data-act="csub" data-v="hall" aria-pressed="${cs==="hall"}">Trophies</button></div>
    ${recruitHTML(recs)}
    <div class="grid g2">
    <section class="px card cpane ${cs==="money"?"on":""}"><h3>Weekly income & expenses</h3>
@@ -574,7 +604,7 @@ function campHTML(){const inc=classIncome(G),up=upkeep(G),wg=wages(G),lv=campLev
     <div class="item nw"><div><div class="t">Invite an old-school master to teach</div><div class="meta">${fmt(18000)} · fighter gains +1 skill point and school stats · once per fighter per season · opens week 16</div></div><button class="btn sm gold" data-act="mastersOpen" ${G.week<16?"disabled":""}>Choose</button></div>
     <div class="item nw"><div><div class="t">Host a fight night at Sirichai</div><div class="meta">${fmt(SHOW_COST)} · fame +3, camp looks better, everyone's morale +8 · once per round</div></div><button class="btn sm gold" data-act="hostshow" ${G.cash<SHOW_COST||G.week<10||G.flags["show_"+stageOf(G.week)]?"disabled":""}>${G.flags["show_"+stageOf(G.week)]?"Hosted":"Host"}</button></div>
     <div class="item nw"><div><div class="t">Pay off Grandpa Chai's debt</div><div class="meta">${G.debt>0?`Remaining ${fmt(G.debt)} · paying it off gives fame +2 and a special scene`:"Debt fully paid"}</div></div>${G.debt>0?`<button class="btn sm gold" data-act="cleardebt" ${G.cash<G.debt?"disabled":""}>Pay off</button>`:"<span class=\"pill green\">Done</span>"}</div></section>
-   ${decorHTML()}<section class="px card cpane ${cs==="hall"?"on":""}"><h3>Hall of fame</h3>${hallHTML()}</section>
+   ${decorHTML()}<section class="px card cpane ${cs==="hall"?"on":""}"><h3>Trophy Room</h3>${hallHTML()}</section>
 `;}
 
 // v1.18: hired trainers with their own pixel sprite
@@ -733,6 +763,7 @@ function modalHTML(){const m=UI.modal;let body="",foot=true;
   if(m.type==="fighter"){body=fighterHTML(G.F[m.id]);foot=false;}
   if(m.type==="consider"){const o=G.offers.find(x=>x.id===m.id);if(!o){UI.modal=null;return "";}body=considerHTML(o);foot=false;}
   if(m.type==="whatsnew"){body=whatsNewHTML();foot=false;}
+  if(m.type==="showcase"){body=showcaseHTML();foot=false;}
   if(m.type==="report")body=reportHTML();
   if(m.type==="repinfo")body=repInfoHTML();
   if(m.type==="otip"){const o=G.offers.find(x=>x.id===m.id);if(!o){UI.modal=null;return "";}body=offerTipHTML(o);foot=false;}
@@ -886,7 +917,7 @@ function weeklyExtra(done){const rng=mulberry32(G.seed+G.week*313);if(typeof que
   if(!pick){done();return;}G.seen[pick.id]=true;playScene(pick.steps,done,{bg:pick.bg==="camp"?"gym":pick.bg,look:pick.look||"train"});}
 function afterWeekFlow(){playHonorQueue(afterWeekFlowMain);}
 function afterWeekFlowMain(){if(typeof cardCheck==="function"){const got=cardCheck(G);if(got.length){G.cardPend=(G.cardPend||[]).concat(got);}}if(typeof mailWeekly==="function"&&!G.ended)mailWeekly(G);if(typeof chatWeekly==="function"&&!G.ended)chatWeekly(G);runEvents(played=>{const fin=()=>{if(G.ended){startEnding();return;}
-    if(typeof cardCheck==="function"){const g2=cardCheck(G);if(g2.length)G.cardPend=(G.cardPend||[]).concat(g2);}relTierCheck();if(typeof OUTFITS!=="undefined"){G.outSeen=G.outSeen||{};const nu=Object.keys(OUTFITS).filter(k=>k!=="base"&&k!=="heart"&&!G.outSeen[k]&&outfitOk(G,null,k));nu.forEach(k=>G.outSeen[k]=1);if(nu.length)setTimeout(()=>toast(`New outfit unlocked: ${nu.map(k=>OUTFITS[k].name).join(", ")} · change it in the fighter profile, "Outfit" tab`),400);}if(UI.relUp&&UI.relUp.length){const m=UI.relUp.join(" / ");UI.relUp=[];setTimeout(()=>toast("♥ "+m),300);}
+    if(typeof cardCheck==="function"){const g2=cardCheck(G);if(g2.length)G.cardPend=(G.cardPend||[]).concat(g2);}relTierCheck();if((G.newCerts||[]).length){const n=G.newCerts.map(k=>CAMP_AWARDS[k]?CAMP_AWARDS[k].name:k);G.newCerts=[];setTimeout(()=>toast(`📜 Certificate received: ${n.join(", ")} · see them in the Trophy Room`),600);}if(typeof OUTFITS!=="undefined"){G.outSeen=G.outSeen||{};const nu=Object.keys(OUTFITS).filter(k=>k!=="base"&&k!=="heart"&&!G.outSeen[k]&&outfitOk(G,null,k));nu.forEach(k=>G.outSeen[k]=1);if(nu.length)setTimeout(()=>toast(`New outfit unlocked: ${nu.map(k=>OUTFITS[k].name).join(", ")} · change it in the fighter profile, "Outfit" tab`),400);}if(UI.relUp&&UI.relUp.length){const m=UI.relUp.join(" / ");UI.relUp=[];setTimeout(()=>toast("♥ "+m),300);}
     if(G.levelUps&&G.levelUps.length){const ids=[...new Set(G.levelUps)];G.levelUps=[];AU.sfx("level");UI.modal={type:"levelup",ids};}else if((G.cardPend||[]).length){AU.sfx&&AU.sfx("level");UI.modal={type:"cardnew"};}render();};
     const go=()=>coachBackScene(()=>aftermathScene(()=>tiredScene(()=>rinScene(fin))));if(played)go();else weeklyExtra(go);});}
 // v1.15: a worn-out fighter asks for a rest week herself
@@ -1323,6 +1354,13 @@ const ACT={
   giftpick:d=>{UI.modal={type:"gift",id:d.id};render();},
   give:d=>{const r=giveGift(G,d.id,d.v);if(!r)return;UI.modal=null;UI.tab="people";save();AU.startMusic("date");giftScene(d.id,r);},
   decor:d=>{if(chooseDecor(G,d.k,d.v)){AU.sfx&&AU.sfx("ui");save();render();}},
+  trophy:d=>{UI.trophySel=UI.trophySel===+d.v?null:+d.v;AU.sfx&&AU.sfx("ui");render();},
+  showcase:()=>{UI.modal={type:"showcase"};render();},
+  showcaseSave:()=>{const src=document.querySelector(".m-showcase canvas[data-camp]");if(!src)return;const W=640,cv=document.createElement("canvas");cv.width=W;cv.height=470;const x=cv.getContext("2d");x.imageSmoothingEnabled=false;
+    x.fillStyle="#141020";x.fillRect(0,0,W,470);x.drawImage(src,0,0,W,360);x.fillStyle="#f1c232";x.font='bold 26px "Chakra Petch","IBM Plex Sans Thai",sans-serif';x.fillText(`Sirichai Boxing Camp · Year ${G.season||1}`,20,400);
+    x.fillStyle="#e8e0f0";x.font='16px "IBM Plex Sans Thai",sans-serif';x.fillText(`${G.player.name} · Camp Lv.${campLevel(G)} · Fighters ${roster(G).length} · Honors ${(G.honors||[]).length} · Certificates ${(G.campAwards||[]).length}`,20,430);
+    x.fillStyle="#9a8fb0";x.font='14px "IBM Plex Sans Thai",sans-serif';x.fillText("Muay Thai Moe",20,456);
+    try{const a=document.createElement("a");a.href=cv.toDataURL("image/png");a.download=`muay-thai-moe-camp-y${G.season||1}.png`;document.body.appendChild(a);a.click();a.remove();toast("Camp photo saved");}catch(e){toast("Can't save images in this browser. Try a screenshot instead");}},
   decorslot:d=>{UI.decorSlot=d.v;AU.sfx&&AU.sfx("ui");render();},
   buyfac:d=>{const before=campLevel(G);if(buyFacility(G,d.v)){save();const after=campLevel(G);AU.sfx("level");toast(after>before?`The camp rose to Lv.${after}: ${CAMP_LV_NAME[after]}!`:`Upgraded ${FACILITIES[d.v].name}`);}},
   daeng:()=>{if(upgradeDaeng(G)){save();toast(`Coach Daeng completed training Lv.${G.fac.daeng}`);}},

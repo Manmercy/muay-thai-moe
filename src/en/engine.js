@@ -940,6 +940,21 @@ function weekTrain(G){
 }
 // week phase 3: npc sim, economy, transitions, advance
 function rankSnapshot(G){const o={};for(const d of ["A","B"]){o[d]={};standings(G,d).forEach((r,i)=>o[d][r.id]=i+1);}return o;}
+// v1.82.4 (CM5): camp certificates — awarded once when the camp reaches a milestone, shown in the trophy room
+const CAMP_AWARDS={
+ clean:{name:"District Clean Camp Award",from:"District Office",hint:"Keep the camp looking good (cleaning, decorating)",ok:G=>(G.camp&&G.camp.beauty||0)>=4},
+ local:{name:"Outstanding Subdistrict Boxing Camp",from:"Subdistrict Administrative Organization",hint:"Reputation 25 and 2+ fighters",ok:G=>G.rep>=25&&roster(G).length>=2},
+ debt:{name:"Sirichai Camp Debt-Free",from:"Kru Daeng and the whole camp",hint:"Pay off all of Grandpa Chai's debt",ok:G=>!!(G.flags&&G.flags.debtCleared)||G.debt<=0},
+ pretty:{name:"Most Beautiful Camp of the Year",from:"Chiang Mai Muay Thai Fan Club",hint:"Decorate at least 3 spots in the camp",ok:G=>typeof CAMP_DECOR!=="undefined"&&Object.keys(CAMP_DECOR).filter(k=>decorChoice(G,k)!==decorDefault(k)&&decorChoice(G,k)!=="none").length>=3},
+ school:{name:"Most Popular Muay Thai School",from:"Subdistrict Parents' Association",hint:"Have 30 students",ok:G=>students(G)>=30},
+ family:{name:"The Sirichai Family",from:"The Sirichai camp family",hint:"Have 5 fighters in the camp",ok:G=>roster(G).length>=5},
+ province:{name:"Provincial Champion Camp",from:"Chiang Mai Provincial Boxing Association",hint:"Win the provincial championship",ok:G=>(G.honors||[]).some(h=>h.kind==="province")},
+ legend:{name:"Legendary Boxing Camp",from:"Chiang Mai Provincial Boxing Association",hint:"Collect 10 honors",ok:G=>(G.honors||[]).length>=10},
+ five:{name:"Five Years of Sirichai",from:"The villagers of the subdistrict",hint:"Run the camp for 5 years",ok:G=>(G.season||1)>=6}};
+function checkCampAwards(G){G.campAwards=Array.isArray(G.campAwards)?G.campAwards:[];const got=[];
+  for(const [id,A] of Object.entries(CAMP_AWARDS)){if(G.campAwards.some(x=>x.id===id))continue;let ok=false;try{ok=A.ok(G);}catch(e){}
+    if(ok){G.campAwards.push({id,season:G.season||1,week:G.week});got.push(id);}}
+  if(got.length){G.newCerts=(G.newCerts||[]).concat(got);}return got;}
 function weekFinish(G){if(G.rep>55)G.rep=55+(G.rep-55)*(.96+(G.fac.hall||0)*.01);if(G.sponsorWk)G.cash+=G.sponsorWk;growStudents(G); // v1.22.1: fame above 40 needs upkeep
 
   const before=rankSnapshot(G);
@@ -956,10 +971,10 @@ function weekFinish(G){if(G.rep>55)G.rep=55+(G.rep-55)*(.96+(G.fac.hall||0)*.01)
   const prog=(()=>{if(!G.snap){G.snap={week:gameWeek(G),a:Object.fromEntries(roster(G).map(f=>[f.id,{...f.a}]))};return null;}
     if(gameWeek(G)-G.snap.week<4)return null;const out=roster(G).filter(f=>G.snap.a[f.id]).map(f=>({id:f.id,before:G.snap.a[f.id]}));
     G.snap={week:gameWeek(G),a:Object.fromEntries(roster(G).map(f=>[f.id,{...f.a}]))};return out.length?out:null;})();
-  grantDecorUnlocks(G);
+  grantDecorUnlocks(G);checkCampAwards(G);
   G.lastReport={prog,week:G.week,inc,up,wg,debtPay,students:students(G),rank:after,move:G.rankMove,stage:stageOf(G.week),cash:G.cash,log:[...G.log],gains:roster(G).map(f=>({id:f.id,name:f.name,gains:{...f.gains},fatigue:f.fatigue,injury:f.injury,xp:f.xpGain||0,lvl:f.lvl,preset:f.plan.preset}))};
   stageTransition(G);
-  {const pv=G.history.length?G.history[G.history.length-1].cash:60000;G.history.push({w:G.week,cash:Math.round(G.cash),rep:+G.rep.toFixed(1),inc,up,wg,debt:debtPay,fight:G.wkFight||0,oth:Math.round(G.cash-pv-(inc-up-wg-debtPay)-(G.wkFight||0))});G.wkFight=0;}
+  {const pv=G.history.length?G.history[G.history.length-1].cash:60000,sp=G.sponsorWk||0;G.history.push({w:G.week,season:G.season||1,cash:Math.round(G.cash),rep:+G.rep.toFixed(1),inc,up,wg,debt:debtPay,sponsor:sp,fight:G.wkFight||0,oth:Math.round(G.cash-pv-(inc+sp-up-wg-debtPay)-(G.wkFight||0))});G.wkFight=0;}
   if((G.negWeeks>=4&&G.cash<-10000)||G.cash<-40000)G.ended="bankrupt";
   if(G.week===21||G.week===41){G.F.ploy.skills.captain=(G.F.ploy.skills.captain||0)+1;G.F.fah.skills.grin=(G.F.fah.skills.grin||0)+1;}
   if(G.week===41){G.F.ploy.skills.kr_knee=Math.max(1,G.F.ploy.skills.kr_knee||0);} // v1.19.2: Ploy brings one more weapon to the semis/final
