@@ -1,5 +1,5 @@
 // ================= MUAY THAI MOE v1.3 — UI =================
-const VERSION="1.82.2";
+const VERSION="1.82.3";
 const CUR_LANG=(typeof window!=="undefined"&&window.LANG)||"th";
 const TH_LABEL=String.fromCharCode(3652,3607,3618);
 function langSwitch(cls){return `<div class="langsw ${cls||""}" role="group" aria-label="Language">${[["th",TH_LABEL],["en","EN"]].map(([k,l])=>`<button class="lsb ${CUR_LANG===k?"on":""}" data-act="setlang" data-v="${k}" aria-pressed="${CUR_LANG===k}">${l}</button>`).join("")}</div>`;}
@@ -717,15 +717,14 @@ function reportHTML(){const r=G.lastReport;const ann=[];
    <div class="chips3"><span class="chip"><small>Students</small><b class="num pos">+${fmt(r.inc)}</b></span><span class="chip"><small>Expenses</small><b class="num neg">-${fmt(r.up+r.wg+(r.debtPay||0))}</b></span><span class="chip"><small>Cash</small><b class="num ${r.cash<0?"neg":""}">${fmt(r.cash)}</b></span></div>
    <details><summary>Results around the circuit (${r.log.length})</summary><div class="log">${r.log.map(l=>`<div>${esc(l)}</div>`).join("")||"<div>All quiet</div>"}</div></details>`;}
 // v1.81.1: "what's new" popup — shows once per save after loading, for players who started before this update
-const PATCH={id:"1.82.2",ver:"Muay Thai Moe v1.82.2",title:"Weekly report from Sirichai Camp",lead:"This round clears the freezes, closes a big chapter, and opens camp decorations!",items:[
- ["🛠️","Fixed the mid-year freeze","A Death Match short on fighters now fills itself. Stuck saves just reopen the Death Match bracket to carry on · Fixed the new year not starting when a rooster/bull bout was booked at year's end."],
- ["📖","Main story closes at year 5","The Vector Gym story now has its finale. Finish year 5 for the closing scene, then carry on in free mode as long as you like, with rivals growing stronger every year."],
- ["🌑","Pailin returns every year","From year 6, Pailin challenges Sirichai every year. She remembers last year's results and sends a letter at year's end."],
- ["📷","Year-end memory album","Before the yearly photo, Kati flips through the camp scrapbook to relive the year's highlights, and the end of year 5 looks back on all five years."],
- ["🎨","Camp decorations are open","Trees, gates, ring, running track, camp vehicle and punching bags, N to SS, unlock as your camp achieves more. Pick one and see the camp change right away in Manage Camp → Decorate."],
- ["💬","Choose from the heart","Story choices no longer tell you who grows closer or drifts away. Just follow your heart!"],
- ["🏟️","From last round (v1.80.18)","Pailin and Vector Gym · Rim Ping and Lanna stadiums · belt ceremonies · more Death Matches and special challengers · Fah and Ploy's year-2 scenes"]],
- foot:"Reached year 5? Tell Kru Daeng whether you beat Vector! 🥋"};
+const PATCH={id:"1.82.3",ver:"Muay Thai Moe v1.82.3",title:"Weekly report from Sirichai Camp",lead:"Deeper skills, a prettier camp, and Kru Daeng now remembers your opponents!",items:[
+ ["🥋","A big skill update","Every line gains a Lv.14 signature move and a Lv.22 master move · Ploy and Fah get full 3-line trees · New build paths (Knockout / Points / Iron), one at a time"],
+ ["⬆️","Level cap lifted","Levels no longer stop at 10. The higher the level, the further training can take you."],
+ ["📒","Kru Daeng's notebook","Meet an old opponent and Kru Daeng remembers your last fight. Careful: she may have trained something new. Watch the tape to find out."],
+ ["🏟️","New rivals every year","The district and provincial rounds bring new fighters every year, and last year's champion comes back as a rival"],
+ ["🎨","Prettier camp decorations","Every piece redrawn in pixel art, an easier decoration screen, and “no tree / no gate” options"],
+ ["✉️","Fairer challenge letters","“Why won't you fight me?” now only comes from fighters who really challenged you that year"]],
+ foot:"Which build are you going for? Come show Kru Daeng! 🥋"};
 function maybeWhatsNew(){if(!G||G.ended||UI.scene)return;if(G.newsSeen===PATCH.id)return;UI.modal={type:"whatsnew"};}
 function whatsNewHTML(){return `<div class="wnew"><span class="pill gold">Update · ${esc(PATCH.ver)}</span><h2>🥊 ${esc(PATCH.title)}</h2><p class="lead">${esc(PATCH.lead)}</p>
   <div class="wnlist">${PATCH.items.map(([ic,t,b])=>`<details class="wnitem"><summary><span class="wnic">${ic}</span><b>${esc(t)}</b><i>▸</i></summary><p>${esc(b)}</p></details>`).join("")}</div><p class="meta wnhint">Tap a topic to read more</p>
