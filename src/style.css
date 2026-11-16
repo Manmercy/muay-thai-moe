@@ -1607,7 +1607,6 @@ button.goal.ov.mini{right:auto;padding:3px 10px;opacity:.85}
 /* ===== v1.83: one-handed mobile layout + full desktop =====
    Phone: slim status bar on top; tabs and "end week" live in a thumb dock at the bottom; sheets rise from the bottom.
    Desktop: wider canvas, camp scene fills the height, no dead space. */
-:root{--dock-h:58px;--endbar-h:52px}
 .sr{position:absolute!important;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
 .iconbtn{width:44px;height:44px}
 .xbtn,.modal .x,[data-act=closeModal][aria-label]{min-width:44px;min-height:44px}
@@ -1618,25 +1617,11 @@ button.goal.ov.mini{right:auto;padding:3px 10px;opacity:.85}
 #live{position:fixed;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
 
 @media (max-width:760px){
-  /* status bar: week · cash · rep · mail · settings in one row */
-  .hud-in{display:flex!important;flex-wrap:nowrap;align-items:center;gap:8px;padding:6px 10px 6px!important}
-  .hud .wk{flex:none}.hud .wk strong{font-size:15px}.hud .wk span{font-size:12px}
-  .hud .stats{flex:1;display:flex;gap:12px;justify-content:flex-end;margin:0;flex-wrap:nowrap}
-  .hud .stat{min-height:44px;justify-content:center}.hud .stat span{font-size:12px}.hud .stat b{font-size:16px}
-  .hud .hbtns{display:flex;gap:6px;flex:none}
-  /* thumb dock */
-  .hud .tabs{position:fixed;left:0;right:0;bottom:0;z-index:40;margin:0;padding:0 4px env(safe-area-inset-bottom,0px)!important;gap:0;
-    background:#120e1e;box-shadow:0 -3px 0 var(--edge),0 -1px 0 var(--line);height:calc(var(--dock-h) + env(safe-area-inset-bottom,0px));overflow:visible}
-  .hud .tabs button{flex:1 1 0;flex-direction:column;justify-content:center;gap:2px;min-height:var(--dock-h);padding:4px 2px;font-size:12px;
-    border-bottom:0;border-top:3px solid transparent}
-  .hud .tabs button svg{width:22px;height:22px}
-  .hud .tabs button[aria-current="page"]{border-top-color:var(--red);background:rgba(255,255,255,.04);color:var(--fg)}
-  .hud .tabs .dot{top:8px;right:calc(50% - 18px)}
-  .hud .endweek{position:fixed;left:10px;right:10px;bottom:calc(var(--dock-h) + 8px + env(safe-area-inset-bottom,0px));z-index:40;
-    min-height:var(--endbar-h);font-size:16px;grid-column:auto;grid-row:auto;box-shadow:0 4px 0 rgba(0,0,0,.45),inset 0 0 0 3px var(--red-d)}
-  .hud .endweek small{font-size:13px}
-  main{padding-bottom:calc(var(--dock-h) + var(--endbar-h) + 28px + env(safe-area-inset-bottom,0px))!important}
-  .toast{bottom:calc(var(--dock-h) + var(--endbar-h) + 22px + env(safe-area-inset-bottom,0px))!important}
+  /* top bar stays where players know it: stats row, end-week row, tabs — only bigger targets */
+  .hud .stats{flex-wrap:nowrap}.hud .stat{min-height:44px;justify-content:center}.hud .stat span{font-size:12px;white-space:nowrap}
+  .hud .endweek{min-height:46px;font-size:16px}.hud .endweek small{font-size:13px}
+  .hud .tabs button{min-height:52px;font-size:12px}
+  .hud .tabs button svg{width:20px;height:20px}
   /* sheets rise from the bottom, inside thumb reach */
   .overlay{justify-content:flex-end!important;align-items:stretch!important;padding:0!important}
   .overlay>.modal{width:100%;max-height:92dvh;margin:0;padding:14px 14px calc(14px + env(safe-area-inset-bottom,0px));box-shadow:0 -3px 0 var(--line),0 -8px 24px rgba(0,0,0,.5)}
@@ -1646,12 +1631,11 @@ button.goal.ov.mini{right:auto;padding:3px 10px;opacity:.85}
   /* camp sub-tabs: five equal cells, nothing cut off */
   .csubs{display:grid!important;grid-template-columns:repeat(5,1fr);gap:4px;overflow:visible}
   .csubs button{padding:4px 2px;font-size:12px;line-height:1.25;white-space:normal;text-align:center}
-  /* compact home: fighter chips and actions stay above the dock */
+  /* compact home */
   .homegrid{gap:8px}
   .camp-info .cinfo{min-height:44px}
   .campact{min-height:52px}
 }
-@media (max-width:760px) and (max-height:700px){:root{--dock-h:52px;--endbar-h:46px}.hud .endweek{font-size:15px}}
 
 @media (min-width:980px){
   .hud-in,.tabs{max-width:1440px}
@@ -1668,13 +1652,7 @@ button.goal.ov.mini{right:auto;padding:3px 10px;opacity:.85}
 @media (max-width:760px){
   main>.newspop,.homegrid .newspop,.newspop{position:relative!important;left:auto!important;top:auto!important;transform:none!important;width:auto!important;margin:0!important;z-index:1}
 }
-@media (max-width:760px){
-  .newsbar{top:auto!important;bottom:calc(var(--dock-h) + var(--endbar-h) + 16px + env(safe-area-inset-bottom,0px));width:calc(100vw - 20px)!important}
-  .newsbar .nclose{min-width:40px;min-height:40px}
-  body.hasnews main{padding-top:12px!important}
-}
-@media (max-width:760px){body.hasnews .rinnote,body.hasnews .rinnote+.homegrid,body.hasnews .homegrid:first-child{margin-top:0}}
-@media (max-width:380px){.hud .wk small{display:none}.hud .stats{gap:8px}.hud .stat span{white-space:nowrap}.hud .stat b{font-size:15px}.hud-in{gap:6px}}
+@media (max-width:380px){.hud .stats{gap:8px}.hud .stat span{white-space:nowrap}}
 @media (max-width:760px){
   .pre.px{display:flex;flex-direction:column;min-height:calc(100dvh - 120px)}
   .pre.px>.ctrl{margin-top:auto;padding-top:12px;flex-wrap:nowrap}
@@ -1689,3 +1667,6 @@ button.goal.ov.mini{right:auto;padding:3px 10px;opacity:.85}
   .fight .fctl2 .seg button{min-width:52px;min-height:52px;font-size:16px}
   .fight .logd{order:10}
 }
+body.hasnews main>h1.sr+.homegrid,body.hasnews main>h1.sr+.rinnote{margin-top:46px}
+@media (max-width:760px){.hud .wk strong{white-space:nowrap}.hud .wk strong small{font-size:12px}}
+@media (max-width:380px){.hud .wk strong small{display:none}.hud .iconbtn{width:40px;height:40px}.hud-in{column-gap:6px!important}.hud .stat b{font-size:15px}}
