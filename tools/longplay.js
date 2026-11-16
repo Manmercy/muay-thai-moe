@@ -11,7 +11,7 @@ const STRONG=process.env.STRONG==='1';const URL=process.argv[2]||'http://127.0.0
    let guard=0;while(((G.season||1)<S||G.week<W)&&guard++<2000){weekFinish(G);if(G.ended==='season'){newSeason(G);}}
    fixSave(G);UI.slot=1;save();UI.tab='home';render();return {season:G.season,week:G.week};},[S,W]);
  console.log('start',JSON.stringify(info));
- const log=[];let lastWk='';let stuck=0;
+ const cnt={};const log=[];let lastWk='';let stuck=0;
  for(let i=0;i<4000;i++){
   const st=await p.evaluate(()=>{const has=s=>!!document.querySelector(s);const click=s=>{const e=document.querySelector(s);if(e){e.click();return true;}return false;};
     if(has('.vn')){if(click('[data-act=vchoose]'))return 'choose';if(click('.vtap'))return 'vtap';}
@@ -21,14 +21,15 @@ const STRONG=process.env.STRONG==='1';const URL=process.argv[2]||'http://127.0.0
     if(UI.fight){if(!click('[data-act=fdone]')){ACT.fquick&&ACT.fquick();}return 'fightdone';}
     if(click('[data-act=montageDone]'))return 'montage';
     if(UI.modal&&UI.modal.type==='dm'){if(click('[data-act=dmgo]'))return 'dmgo';if(click('[data-act=dmclose]'))return 'dmclose';return 'dm-stuck';}
-    if(UI.modal){const t=UI.modal.type;if(t==='endwarn'){ACT.endgo();return 'endgo';}if(t==='levelup'){const k=document.querySelector('[data-act=learn]');if(k){k.click();}UI.modal=null;render();return 'lvl';}UI.modal=null;render();return 'modal:'+t;}
+    if(UI.modal){const t=UI.modal.type;if(t==='endwarn'){ACT.endgo();return 'endgo';}if(t==='levelup'){const k=document.querySelector('[data-act=learn]');if(k){k.click();}UI.modal=null;render();return 'lvl';}ACT.closeModal();return 'modal:'+t;}
     if(UI.scene||UI.montage)return 'busy';
-    if(window.__strong){roster(G).forEach(f=>{for(const k in f.a)f.a[k]=Math.max(f.a[k],19);f.fatigue=0;f.injury=0;});(G.offers||[]).slice().forEach(o=>{try{acceptOffer(G,o.id);}catch(e){}});}if(window.__strong&&typeof dmOfferOn==='function'&&dmOfferOn(G)&&!G.dm){ACT.dmpick();UI.dmSel=roster(G).filter(dmCanEnter).slice(0,3).map(f=>f.id);ACT.dmstart();return 'dmstart';}if(G.dm&&!G.dm.done&&G.dm.wk===G.week){ACT.dmopen();return 'dmopen';}ACT.endweek();return 'wk '+G.season+'/'+G.week;});
+    if(window.__strong){roster(G).forEach(f=>{for(const k in f.a)f.a[k]=Math.max(f.a[k],19);f.fatigue=0;f.injury=0;});(G.offers||[]).slice().forEach(o=>{try{acceptOffer(G,o.id);}catch(e){}});}if(window.__strong&&typeof dmOfferOn==='function'&&dmOfferOn(G)&&!G.dm){ACT.dmpick();UI.dmSel=roster(G).filter(dmCanEnter).slice(0,3).map(f=>f.id);if(UI.dmSel.length)ACT.dmstart();else ACT.dmno();return 'dmstart';}if(G.dm&&!G.dm.done&&G.dm.wk===G.week){ACT.dmopen();return 'dmopen';}ACT.endweek();return 'wk '+G.season+'/'+G.week;});
+  cnt[st.split(' ')[0].split(':')[0]]=(cnt[st.split(' ')[0].split(':')[0]]||0)+1;
   if(st.startsWith('wk')){log.push(st);if(st===lastWk){if(++stuck>5){console.log('STUCK at',st);break;}}else stuck=0;lastWk=st;}
   if(st.startsWith('ending-no'))log.push(st);
   if(st==='NEWSEASON')log.push(st);
   await p.waitForTimeout(st==='busy'?120:15);
   const done=await p.evaluate(([S,W,N])=>((G.season-S)*52+G.week-W)>=N,[S,W,N]);if(done)break;}
- const end=await p.evaluate(()=>({season:G.season,week:G.week,ended:G.ended,scene:!!UI.scene,modal:UI.modal&&UI.modal.type}));
- console.log(log.filter((x,i,a)=>a.indexOf(x)===i).join(' | '));console.log('end',JSON.stringify(end));console.log('ERR',JSON.stringify(errs.slice(0,6)));
+ const end=await p.evaluate(()=>({keys:Object.keys(G.seen).filter(k=>/pailin|vector|^y[2-6]/.test(k)).join(','),recent:Object.entries(G.seenAbs||{}).sort((a,b)=>b[1]-a[1]).slice(0,8).map(x=>x[0]).join(','),story:['y4_pailin_warning','y5_vector_arrive','y5_vector_fighters','y5_vector_contract','y5_vector_challenge','y5_vector_resolve'].filter(k=>G.seen[k]).length+'/6',annual:(G.seenY||{}).vector_annual_return,vecRec:G.vecRec,season:G.season,week:G.week,ended:G.ended,scene:!!UI.scene,modal:UI.modal&&UI.modal.type}));
+ console.log(log.filter((x,i,a)=>a.indexOf(x)===i).join(' | '));console.log('end',JSON.stringify(end));console.log('CNT',JSON.stringify(cnt));console.log('ERR',JSON.stringify(errs.slice(0,6)));
  await p.screenshot({path:'/home/claude/work/longplay_'+L+'.png'});await b.close();})();

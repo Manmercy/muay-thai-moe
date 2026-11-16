@@ -525,19 +525,22 @@ function hallHTML(){const T=(G.titles||[]).slice().reverse(),H=(G.honors||[]).sl
   return `${H.length?`<div class="hall-y"><b>Major victories</b>${H.map(h=>`<div class="kv-row"><span>${esc(G.F[h.id]?.name||h.id)} · Div ${h.div} · ${h.season?`Year ${h.season} Week ${h.week}`:"Earlier result"}</span><span class="pill gold">🏆 ${honorLabel(h.kind,h.venue)}</span></div>`).join("")}</div>`:""}
    ${belts.length||venueBelts.length?`<div class="hall-y"><b>Belts held</b>${belts.map(([d,b])=>`<div class="kv-row"><span>${esc(G.F[b.id].name)} · Div ${d}</span><span class="pill gold">🏆 Tha Phae Stadium champion · defended ${b.def} times</span></div>`).join("")}${venueBelts.map(({v,d,b})=>`<div class="kv-row"><span>${esc(G.F[b.id].name)} · Div ${d}</span><span class="pill gold">🏆 ${STADIUMS[v].name} champion · defended ${b.def} times</span></div>`).join("")}</div>`:""}
    ${T.length?T.map(yr).join(""):`<p class="meta">The first year isn't over yet · when it ends, everyone's results land here, one row per year</p>`}`;}
-function decorHTML(){let total=0,owned=0,sections="";
- for(const [slot,D] of Object.entries(CAMP_DECOR)){let choices="";
-  for(const [key,item] of Object.entries(D.items)){total++;const reason=decorUnlockReason(G,slot,key),on=decorChoice(G,slot)===key;if(!reason)owned++;
-   choices+='<button class="btn sm '+(on?'gold':'')+'" data-act="decor" data-k="'+slot+'" data-v="'+key+'" '+(reason?'disabled':'')+
-    ' style="border-color:'+(reason?'#777':DECOR_RARITY[item.r])+';'+(reason?'opacity:.55;filter:grayscale(1)':'')+'">'+
-    '<b style="color:'+DECOR_RARITY[item.r]+'">'+item.r+'</b> '+esc(item.name)+(on?' ✓':'')+
-    (reason?'<small style="display:block;white-space:normal">🔒 '+esc(reason)+'</small>':'')+'</button>';}
-  sections+='<div class="item fac"><div style="width:100%"><div class="t">'+D.name+'</div><div class="obtns" style="display:flex;flex-wrap:wrap;gap:6px">'+choices+'</div></div></div>';}
+const DECOR_STARS={N:1,R:2,SR:3,SSR:4,SS:5};
+const DECOR_ICON={tree:"🌳",gate:"⛩️",ring:"🥊",track:"🏃",vehicle:"🚐",bags:"🎯"};
+function decorHTML(){let total=0,owned=0,sections="";const open=UI.decorOpen||"tree";
+ for(const [slot,D] of Object.entries(CAMP_DECOR)){let tiles="",have=0;const cur=decorChoice(G,slot),keys=Object.keys(D.items);
+  for(const key of keys){const item=D.items[key];total++;const reason=decorUnlockReason(G,slot,key),on=cur===key;if(!reason){owned++;have++;}
+   tiles+=`<button class="dtile r-${item.r} ${on?"on":""} ${reason?"lock":""}" data-act="decor" data-k="${slot}" data-v="${key}" ${reason?"disabled":""} aria-pressed="${on}">
+     <span class="dstars" aria-label="Rank ${item.r}">${"★".repeat(DECOR_STARS[item.r])}</span><b>${esc(item.name)}</b>
+     <small>${on?"In use":reason?"🔒 "+esc(reason):item.r}</small></button>`;}
+  const isOpen=open===slot;
+  sections+=`<div class="dslot ${isOpen?"open":""}"><button class="dhead" data-act="decoropen" data-v="${slot}" aria-expanded="${isOpen}"><span class="dic">${DECOR_ICON[slot]||"✦"}</span><span class="dname">${D.name}<small>${esc(D.items[cur].name)}</small></span><span class="dcount">${have}/${keys.length}</span><i>${isOpen?"▾":"▸"}</i></button>${isOpen?`<div class="dtiles">${tiles}</div>`:""}</div>`;}
  const ready=goldRematchReady(G);
- return '<section class="px card cpane '+((UI.csub||"money")==="decor"?"on":"")+"\"><h3>Camp decorations · "+owned+'/'+total+" items</h3>"+
-  "<p class=\"meta\">Rarity N → R → SR → SSR → SS shows how hard each item is to earn. Decorations do not add stat bonuses.</p>"+sections+
-  "<p class=\"meta\">Golden van: defeat the Golden Helmet boss 10 times. After your first win, you can challenge him again every 4 weeks.</p>"+
-  '<button class="btn sm gold" data-act="goldrematch" '+(ready?'':'disabled')+">Challenge the Golden Helmet boss again "+(!ready&&G.gangRematchAt?' · '+goldRematchLabel(G):'')+'</button></section>';}
+ return `<section class="px card cpane decorpane ${(UI.csub||"money")==="decor"?"on":""}"><h3>Decorations <span class="pill">${owned}/${total} items</span></h3>
+  <div class="dprev"><canvas class="campcv" width="640" height="360" data-camp="1" aria-label="Camp preview with decorations"></canvas></div>
+  <p class="meta">More ★ = harder to get (N → SS) · Decorations only change how the camp looks, no stat bonus · Tap an unlocked piece to switch; the preview above updates right away</p>${sections}
+  <div class="dgold"><p class="meta">Golden van: beat the Golden Helmet Boss 10 times (after the first win you can rematch every 4 weeks)</p>
+  <button class="btn sm gold" data-act="goldrematch" ${ready?"":"disabled"}>Challenge the Golden Helmet boss again ${!ready&&G.gangRematchAt?" · "+goldRematchLabel(G):""}</button></div></section>`;}
 function campHTML(){const inc=classIncome(G),up=upkeep(G),wg=wages(G),lv=campLevel(G),cs=UI.csub||"money";
   const recs=[["mali",G.flags.maliRecruit],["rin",G.flags.rinRecruit]].filter(([id,ok])=>ok&&G.F[id].camp==="free");
   const dots=(n,m)=>`<span class="pips">${Array.from({length:m},(_,i)=>`<i class="${i<n?"on":""}"></i>`).join("")}</span>`;
@@ -704,9 +707,24 @@ function reportHTML(){const r=G.lastReport;const ann=[];
      return `<div class="pcell">${radarSVG(f,150,p.before)}<b>${esc(f.name)}</b><span class="meta">Overall ${sum>=0?"+":""}${sum.toFixed(1)}</span></div>`;}).join("")}</div></details>`:""}
    <div class="chips3"><span class="chip"><small>Students</small><b class="num pos">+${fmt(r.inc)}</b></span><span class="chip"><small>Expenses</small><b class="num neg">-${fmt(r.up+r.wg+(r.debtPay||0))}</b></span><span class="chip"><small>Cash</small><b class="num ${r.cash<0?"neg":""}">${fmt(r.cash)}</b></span></div>
    <details><summary>Results around the circuit (${r.log.length})</summary><div class="log">${r.log.map(l=>`<div>${esc(l)}</div>`).join("")||"<div>All quiet</div>"}</div></details>`;}
+// v1.81.1: "what's new" popup — shows once per save after loading, for players who started before this update
+const PATCH={id:"1.80.18",ver:"Muay Thai Moe v1.80.18",title:"Weekly report from Sirichai Camp",lead:"This week brings new stories and new rivals for managers playing on for many years!",items:[
+ ["📖","Fah and Ploy's story","New year-2 scenes: life in the camp, choices that may leave someone else sulking, and fights against the fighters who replaced them at their old gym."],
+ ["🌑","Pailin and Vector Gym arrive","Pailin, Ploy's older sister, heads Vector Gym from Bangkok, a camp built on hard-core sports science. Vector's story and fighters arrive in the later years and keep coming back to challenge us."],
+ ["🏟️","More stages and rivals","More rivals in the sub-district, district and provincial rounds, plus the Rim Ping and Lanna stadiums, each with its own belt. Opponents improve along with your camp."],
+ ["🏆","Unforgettable victories","Title fights now have a winner announcement, belt raise, music and effects, and big wins are recorded in the camp's Hall of Honor."],
+ ["🔥","Challengers return","Death Match comes around more often, and the helmet gang, fighting roosters and bulls come back for rematches. The more years you play, the less you can relax!"],
+ ["🛠️","Important bug fixes","Fixed how time carries across years, fighters' birthdays and ages, double-booked fights, and the \"Why won't you fight me?\" letter. Old saves still load fine!"],
+ ["🎨","Decorate the camp","Trees, gates, ring, running track, camp vehicle and punching bags unlock as your camp achieves more. Find them in Manage Camp → Decorate."]],
+ foot:"Which year have you reached? Come tell Kru Daeng! 🥋"};
+function maybeWhatsNew(){if(!G||G.ended||UI.scene)return;if(G.newsSeen===PATCH.id)return;UI.modal={type:"whatsnew"};}
+function whatsNewHTML(){return `<div class="wnew"><span class="pill gold">Update · ${esc(PATCH.ver)}</span><h2>🥊 ${esc(PATCH.title)}</h2><p class="lead">${esc(PATCH.lead)}</p>
+  ${PATCH.items.map(([ic,t,b])=>`<div class="wnitem"><span class="wnic">${ic}</span><div><b>${esc(t)}</b><p>${esc(b)}</p></div></div>`).join("")}
+  <p class="meta center">${esc(PATCH.foot)}</p></div><div class="mfoot"><button class="btn primary" data-act="newsok">To the camp ▸</button></div>`;}
 function modalHTML(){const m=UI.modal;let body="",foot=true;
   if(m.type==="fighter"){body=fighterHTML(G.F[m.id]);foot=false;}
   if(m.type==="consider"){const o=G.offers.find(x=>x.id===m.id);if(!o){UI.modal=null;return "";}body=considerHTML(o);foot=false;}
+  if(m.type==="whatsnew"){body=whatsNewHTML();foot=false;}
   if(m.type==="report")body=reportHTML();
   if(m.type==="repinfo")body=repInfoHTML();
   if(m.type==="otip"){const o=G.offers.find(x=>x.id===m.id);if(!o){UI.modal=null;return "";}body=offerTipHTML(o);foot=false;}
@@ -773,13 +791,13 @@ function warmChar(id,look){if(id==="coach"){warm(`${ASSET}coach.webp`);return;}i
 function warmSteps(steps,look){const walk=list=>(list||[]).forEach(st=>{if(!st)return;const n=typeof st.n==="function"?null:st.n;if(n)warmChar(n,st.l==="casual"||st.l==="thai"?st.l:(look==="casual"||look==="thai")&&!st.l?look:"fight");
   if(st.with)warmChar(st.with,look==="casual"||look==="thai"?look:"fight");if(st.bg&&BGIMG[st.bg])warm(ASSET+BGIMG[st.bg]);if(st.choice)st.choice.forEach(c=>walk(c.then));});walk(steps);}
 function playScene(steps,done,opts={}){warmSteps(steps,opts.look||"fight");if(opts.bg&&BGIMG[opts.bg])warm(ASSET+BGIMG[opts.bg]);UI.scene={steps:[...steps],i:0,done,bg:opts.bg||"night",look:opts.look||"fight",cur:null,cast:[],coachOK:!!opts.coachOK,award:opts.award||null};sceneNext();}
-function playHonorQueue(done){const h=(G.awards||[])[0];if(!h){AU.startMusic("hub");if(done)done();return;}AU.startMusic("victory");AU.sfx("champ");
+function playHonorQueue(done){while((G.awards||[]).length&&!(G.F[G.awards[0].id]))G.awards.shift();const h=(G.awards||[])[0];if(!h){AU.startMusic("hub");if(done)done();return;}AU.startMusic("victory");AU.sfx("champ");
   playScene(honorSteps(G,h),()=>{G.awards.shift();save();playHonorQueue(done);},{bg:"hall",look:"fight",award:h});}
 function sceneNext(){const S=UI.scene;if(!S)return;
   while(S.i<S.steps.length){const st=S.steps[S.i];
-    if(st.inject){const more=st.inject(G)||[];S.steps.splice(S.i,1,...more);continue;}
+    if(st.inject){let more=[];try{more=st.inject(G)||[];}catch(e){console.error("scene inject",e);}S.steps.splice(S.i,1,...more);continue;}/* v1.81.1: a broken step never freezes the week */
     if(st.bg)S.bg=st.bg;
-    if(st.fx&&!st.n&&!st.choice&&!st.choiceFn){st.fx(G);S.i++;continue;}
+    if(st.fx&&!st.n&&!st.choice&&!st.choiceFn){try{st.fx(G);}catch(e){console.error("scene fx",e);}S.i++;continue;}
     if(st.choice||st.choiceFn){S.cur={choice:(st.choice||st.choiceFn(G))};render();return;}
     const n=val(st.n);S.lookOf=S.lookOf||{};
     // v1.8: each character keeps one outfit for the whole scene
@@ -840,11 +858,11 @@ function goalText(){const st=stageOf(G.week),me=roster(G);const best=d=>{const r
 // ---------- events / extras ----------
 // v1.49: annual events can play once per year
 const evSeen=e=>e.annual?((G.seenY||{})[e.id]===(G.season||1)):!!G.seen[e.id];
-function pendingEvents(){return EVENTS.filter(e=>e.when&&!evSeen(e)&&e.when(G));}
+function pendingEvents(){return EVENTS.filter(e=>{try{return e.when&&!evSeen(e)&&e.when(G);}catch(err){console.error("event when",e.id,err);return false;}});}
 // v1.41: at most two optional story scenes a week — the rest wait for next week (main story / finals always play)
 const EV_MUST=/^(prologue|daeng_leave|pre_qual|qual_result|final_result|semi_result|night_final|lover_final|ploy_prefinal|fah_prefinal|first_win|first_loss)/,EV_CAP=2;
 function runEvents(done){const list=pendingEvents().sort((a,b)=>(b.pri||0)-(a.pri||0));let played=0,opt=0;/* time-limited scenes go first */
-  const step=()=>{const e=list.shift();if(!e||G.ended){done&&done(played);return;}if(evSeen(e)||!e.when(G)){step();return;}
+  const step=()=>{const e=list.shift();if(!e||G.ended){done&&done(played);return;}if(evSeen(e)||!(()=>{try{return e.when(G);}catch(x){return false;}})()){step();return;}
     if(G.coachAwayAbs&&gameWeek(G)<G.coachAwayAbs&&!EV_MUST.test(e.id)&&!/daeng|coach/.test(e.id)&&e.steps.some(x=>x.n==="coach")){step();return;}/* v1.60: scenes where Kru Daeng talks wait until he is back */
     if(!EV_MUST.test(e.id)){if(opt>=((G.season||1)>=2&&(G.week===44||G.week===49)?0:EV_CAP)){step();return;}opt++;}
     if(e.annual){G.seenY=G.seenY||{};G.seenY[e.id]=G.season||1;}else G.seen[e.id]=true;G.seenWk=G.seenWk||{};G.seenWk[e.id]=G.week;G.seenAbs=G.seenAbs||{};G.seenAbs[e.id]=gameWeek(G);played++;playScene(e.steps,step,{bg:e.bg,look:e.look,coachOK:/daeng|coach/.test(e.id)});};step();}
@@ -917,6 +935,15 @@ function gateHTML(){return `<section class="px card gate"><span class="pill gold
   <a class="btn gatelink" href="${GATE.url}" target="_blank" rel="noopener">Join the game Discord ▸</a>
   <div class="gatein"><input id="gatecode" maxlength="20" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="Enter code here" aria-label="Continue code"><button class="btn primary" data-act="gatego">Unlock</button></div>
   ${UI.gateErr?"<p class=\"meta redt\">That code isn't right. Check the spelling and try again</p>":""}</section>`;}
+// v1.81.1: year 1 teases the next chapter, year 5 closes the main story (demo), later years are free mode
+function endTeaserHTML(){const y=G.season||1;if(G.ended==="bankrupt")return "";
+  if(y===5)return `<section class="px card teaser demo-done"><span class="pill gold">Main story complete</span><h3>Thank you for playing the Muay Thai Moe demo!</h3>
+    <p>The demo's main story ends in year 5. From here on it's <b>free mode</b>: play on as long as you like. Rivals get stronger every year, and Pailin and Vector Gym come back to challenge you every year.</p>
+    <p class="meta">Stay tuned for more. We plan to keep adding new story, characters and stages.</p></section>`;
+  if(y>=6)return `<section class="px card teaser"><span class="pill red">Free mode</span><h3>Year ${y+1}: rivals train even harder</h3><p class="meta">New story chapters are in the works. This save will carry on when they arrive.</p></section>`;
+  if(y===1)return `<section class="px card teaser"><span class="pill red">Next chapter · Coming soon</span><h3>The road to the regional stage</h3>
+    <ul><li>Golden Tiger Gym brings in a trainer from Bangkok, and Fah won't be the same anymore</li><li>New fighters from the Tha Sao and Korat styles are looking for a camp</li><li>Grandpa Chai's debt still holds secrets Kati hasn't told</li></ul></section>`;
+  return "";}
 function endingHTML(){const E=UI.ending,all=roster(G),res=seasonResult();
   return `<main class="endpage"><section class="px card end-hero"><img class="endlogo" src="${ASSET}logo.webp" alt="Muay Thai Moe">
     <span class="pill gold">${G.ended==="bankrupt"?"Camp closed":(G.season||1)>=2?`End of Year ${G.season}`:"End of Chapter 1 · Year 1"}</span><h1>${(G.season||1)>=2&&G.ended!=="bankrupt"?esc(E.title):`Ending: ${E.title}`}</h1>
@@ -925,8 +952,7 @@ function endingHTML(){const E=UI.ending,all=roster(G),res=seasonResult();
    <div class="grid g3"><section class="px card"><h3>Camp</h3><div class="kv-row"><span>Camp level</span><b>Lv.${campLevel(G)} ${CAMP_LV_NAME[campLevel(G)]}</b></div><div class="kv-row"><span>Cash</span><b class="num">${fmt(G.cash)}</b></div><div class="kv-row"><span>Remaining debt</span><b class="num">${fmt(G.debt)}</b></div><div class="kv-row"><span>Students</span><b class="num">${students(G)}</b></div><div class="kv-row"><span>Fame</span><b class="num">${G.rep.toFixed(1)}</b></div></section>
    <section class="px card"><h3>Camp fighters</h3>${all.map(f=>`<div class="kv-row"><span>${esc(f.name)} Lv.${f.lvl}</span><span class="num">${rec(f)}</span></div>`).join("")}</section>
    <section class="px card"><h3>Relationships</h3>${CANON_IDS.map(id=>G.F[id]).filter(f=>f.met).map(f=>`<div class="kv-row"><span>${esc(f.name)}${G.romance===f.id?" ♥ Sweetheart":G.promise&&G.promise[f.id]!=null?" ♡ Promised":""}</span>${hearts(f.bond)}</div>`).join("")}</section></div>
-   <section class="px card teaser"><span class="pill red">Next chapter · coming soon</span><h3>The road to the regional stage</h3>
-    <ul><li>Golden Tiger poaches a Bangkok trainer, and Fah won't be the same anymore</li><li>New fighters from the Tha Sao and Korat styles are looking for a camp</li><li>Grandpa Chai's debt still hides a secret Kati hasn't told</li></ul></section>
+   ${endTeaserHTML()}
    <p class="meta center">Seed ${esc(G.seedText||String(G.seed))} · Year ${G.season||1}</p>${!DEMO&&G.ended==="season"&&!gateOpen()?gateHTML():""}<div class="center endbtns">${!DEMO&&G.ended==="season"&&gateOpen()?`<button class="btn primary" data-act="newseason">Continue to Year ${(G.season||1)+1} ▸</button><p class="meta center">The camp, fighters and relationships all carry over · the rivals trained harder too</p>`:""}<button class="btn primary" data-act="replay">Play again</button><button class="btn" data-act="restart">Back to title</button></div></main>`;}
 
 // ---------- FIGHT ----------
@@ -1207,7 +1233,7 @@ const ACT={
   pickslot:d=>{const i=+d.v;if(loadSlot(i)){UI.owSlot=i;render();return;}ACT.beginNew(i);},
   confirmow:()=>{const i=UI.owSlot;UI.owSlot=null;ACT.beginNew(i);},cancelow:()=>{UI.owSlot=null;render();},
   openload:()=>{UI.delSlot=null;UI.owSlot=null;UI.modal={type:"slots",mode:"load"};render();},
-  loadslot:d=>{backupSlot(+d.v);const s0=loadSlot(+d.v);if(!s0)return;const s=safeFix(s0);if(!s){toast("This save can't be opened in this version. Nothing was deleted");return;}G=s;const pk=G.F.ploy&&G.F.ploy.skills;if(pk&&pk.korat){G.F.ploy.skills={kr_swing:2,captain:1};}UI.slot=+d.v;UI.tab="home";UI.modal=null;UI.advCache={};AU.startMusic("hub");if(G.ended){UI.ending=endingScene(G);}render();},
+  loadslot:d=>{backupSlot(+d.v);const s0=loadSlot(+d.v);if(!s0)return;const s=safeFix(s0);if(!s){toast("This save can't be opened in this version. Nothing was deleted");return;}G=s;const pk=G.F.ploy&&G.F.ploy.skills;if(pk&&pk.korat){G.F.ploy.skills={kr_swing:2,captain:1};}UI.slot=+d.v;UI.tab="home";UI.modal=null;UI.advCache={};AU.startMusic("hub");if(G.ended){UI.ending=endingScene(G);}maybeWhatsNew();render();},
   askdelslot:d=>{UI.delSlot=+d.v;render();},canceldel:()=>{UI.delSlot=null;render();},
   delslot:()=>{clearSave(UI.delSlot);UI.delSlot=null;if(!loadSave())UI.modal=null;render();},
   beginNew:i=>{UI.slot=i;UI.modal=null;AU.startMusic("hub");UI.creator={name:"",...CHIBI.randomManager(Math.random),gender:"m",diff:"normal",outfit:"tee",hat:"none",glasses:"none"};UI.modal=null;render();},
@@ -1226,9 +1252,9 @@ const ACT={
   crand:()=>{const n=(document.getElementById("pname")||{}).value||"",o=UI.creator||{};crSeed();UI.creator={...CHIBI.randomManager(Math.random),name:n,diff:o.diff||"normal",gender:o.gender||"m",tab:o.tab,seed:o.seed};render();},
   ctab:d=>{UI.creator.name=(document.getElementById("pname")||{}).value||UI.creator.name;crSeed();UI.creator.tab=d.v;render();},
   startGame:()=>{const c=UI.creator;c.name=((document.getElementById("pname")||{}).value||"").trim()||(c.gender==="m"?"Start":"Dao");
-    crSeed();const {name,diff,seed,...look}=c;G=newGame({name,gender:c.gender,diff:diff||"normal",avatar:look,seed:seedFrom(seed)});if(seed&&!/^\d{1,10}$/.test(seed))G.seedText=seed;genOffers(G);UI.creator=null;UI.tab="home";G.seen.prologue=true;AU.resume();AU.startMusic("date");
+    crSeed();const {name,diff,seed,...look}=c;G=newGame({name,gender:c.gender,diff:diff||"normal",avatar:look,seed:seedFrom(seed)});if(seed&&!/^\d{1,10}$/.test(seed))G.seedText=seed;G.newsSeen=PATCH.id;genOffers(G);UI.creator=null;UI.tab="home";G.seen.prologue=true;AU.resume();AU.startMusic("date");
     playScene(EVENTS[0].steps,()=>{save();UI.tab="home";UI.spot=0;AU.startMusic("hub");render();},{bg:"bus",look:"train"});},
-  continue:()=>{let si=0;for(let i=1;i<=SLOTS;i++)if(loadSlot(i)){si=i;break;}if(!si)return;backupSlot(si);const s=safeFix(loadSlot(si));if(!s){toast("This save can't be opened in this version. Nothing was deleted");return;}G=s;UI.slot=si;UI.tab="home";UI.modal=null;AU.startMusic("hub");if(G.ended){UI.ending=endingScene(G);}render();},
+  continue:()=>{let si=0;for(let i=1;i<=SLOTS;i++)if(loadSlot(i)){si=i;break;}if(!si)return;backupSlot(si);const s=safeFix(loadSlot(si));if(!s){toast("This save can't be opened in this version. Nothing was deleted");return;}G=s;UI.slot=si;UI.tab="home";UI.modal=null;AU.startMusic("hub");if(G.ended){UI.ending=endingScene(G);}maybeWhatsNew();render();},
   exportsave:()=>exportSave(),
   bakrestore:()=>{const b=bakInfo(UI.slot);if(!b)return;UI.modal={type:"confirm",title:"Restore the pre-update save?",text:`This goes back to week ${b.week} (v${b.ver}). Progress after that in this slot will be lost`,yes:"bakyes"};render();},
   bakyes:()=>{const b=bakInfo(UI.slot);if(!b)return;try{const i=UI.slot;const cur=localStorage.getItem(slotKey(i));localStorage.setItem(slotKey(i),b.raw);const s=safeFix(loadSlot(i));if(!s){localStorage.setItem(slotKey(i),cur);toast("Restore failed. Your current save is untouched");return;}G=s;UI.modal=null;UI.tab="home";save();render();toast("Save restored");}catch(e){}},
@@ -1251,7 +1277,8 @@ const ACT={
   skauto:d=>{const f=G.F[d.id],li=+d.v;let n=0;for(let guard=0;guard<30&&f.sp>0;guard++){const s=(SKILLS[f.id]||[]).filter(x=>x.line===li).sort((a,b)=>a.row-b.row||(f.skills[a.id]||0)-(f.skills[b.id]||0)).find(x=>!skillBlock(f,x.id).length);if(!s||!learnSkill(G,f.id,s.id))break;n++;}
     if(n){AU.sfx("level");save();toast(`Up ${(SK_LINES[f.id]||[])[li]||""} ${n} times`);}render();},
   sksel:d=>{UI.skSel=d.id+":"+d.v;AU.sfx("ui");render();},
-  closeModal:()=>{const m=UI.modal;UI.modal=null;render();if(m&&m.after)m.after();},
+  newsok:()=>{G.newsSeen=PATCH.id;UI.modal=null;save();render();},
+  closeModal:()=>{const m=UI.modal;if(m&&m.type==="whatsnew"&&G){G.newsSeen=PATCH.id;save();}UI.modal=null;render();if(m&&m.after)m.after();},
   closeModalBg:(d,e)=>{if(e.target.classList.contains("overlay")&&UI.modal&&!["report","levelup"].includes(UI.modal.type)){UI.modal=null;render();}},
   preset:d=>{if(trLocked(G.F[d.f]))return;const f=G.F[d.f];f.plan.preset=d.v;if(d.v==="rest")f.plan.intensity="normal";save();render();},
   intensity:d=>{if(trLocked(G.F[d.f]))return;G.F[d.f].plan.intensity=d.v;save();render();},
@@ -1285,7 +1312,8 @@ const ACT={
   date:d=>{UI.modal=null;UI.tab="people";const steps=dateScene(G,d.id,d.v);AU.startMusic("date");playScene(steps,()=>{AU.startMusic("hub");render();},{bg:ACTIVITIES[d.v].bg==="camp"?"gym":ACTIVITIES[d.v].bg,look:"casual"});},
   giftpick:d=>{UI.modal={type:"gift",id:d.id};render();},
   give:d=>{const r=giveGift(G,d.id,d.v);if(!r)return;UI.modal=null;UI.tab="people";save();AU.startMusic("date");giftScene(d.id,r);},
-  decor:d=>{if(chooseDecor(G,d.k,d.v)){save();render();toast("Camp decoration changed");}},
+  decor:d=>{if(chooseDecor(G,d.k,d.v)){AU.sfx&&AU.sfx("ui");save();render();}},
+  decoropen:d=>{UI.decorOpen=UI.decorOpen===d.v?"":d.v;render();},
   buyfac:d=>{const before=campLevel(G);if(buyFacility(G,d.v)){save();const after=campLevel(G);AU.sfx("level");toast(after>before?`The camp rose to Lv.${after}: ${CAMP_LV_NAME[after]}!`:`Upgraded ${FACILITIES[d.v].name}`);}},
   daeng:()=>{if(upgradeDaeng(G)){save();toast(`Coach Daeng completed training Lv.${G.fac.daeng}`);}},
   useroad:d=>{const f=G.F[d.id];if(!f||trLocked(f)||!PRESETS[d.p])return;f.plan={...f.plan,preset:d.p,intensity:d.i};UI.modal=null;save();toast(`Set ${f.name}: ${planName(d.p,d.i)}. Don't forget to confirm`);},
@@ -1346,7 +1374,7 @@ const ACT={
   fdone:()=>{const done=UI.fight.done,after=UI.fight.afterScene;UI.fight=null;render();playHonorQueue(()=>{if(after)playScene(after,done,{bg:"ring",look:"fight"});else done();});},
   gatego:()=>{const v=((document.getElementById("gatecode")||{}).value||"").toUpperCase().replace(/\s+/g,"");let ok=false;try{ok=btoa(v)===GATE.code;}catch(e){}
     if(ok){G.unlocked=true;try{localStorage.setItem(GATE.key,"1");}catch(e){}UI.gateErr=false;save();AU.sfx("level");toast("Unlocked! Year 2 is ready to play");}else{UI.gateErr=true;AU.sfx("miss");}render();},
-  newseason:()=>{if(!gateOpen())return;const res=seasonResult().map(r=>({id:r.f.id,name:r.f.name,d:r.d,t:r.t,c:r.c}));newSeason(G);const T=G.titles[G.titles.length-1];if(T)T.res=res;UI.ending=null;UI.tab="home";UI.advCache={};save();AU.startMusic("hub");
+  newseason:()=>{if(!gateOpen())return;const res=seasonResult().map(r=>({id:r.f.id,name:r.f.name,d:r.d,t:r.t,c:r.c}));const snap=JSON.stringify(G);try{newSeason(G);}catch(e){console.error("newSeason",e);G=JSON.parse(snap);toast("Could not start the new year. Your save is safe. Try again, or tell us on Discord.");render();return;}const T=G.titles[G.titles.length-1];if(T)T.res=res;UI.ending=null;UI.tab="home";UI.advCache={};save();AU.startMusic("hub");
     playScene([{n:"coach",bg:"gym",t:`A new season is here, ${G.player.name}. Rankings reset for everyone, but our camp isn't starting from zero anymore`},
       {n:"kati",f:"happy",l:"train",with:"coach",t:"This year I won't let anyone pass me! Let's go!"}],()=>render(),{bg:"gym",look:"train"});},
   replay:()=>{const i=UI.slot;ACT.restart();ACT.beginNew(i);},

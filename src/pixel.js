@@ -160,7 +160,7 @@ function drawCamp(ctx,G,t){
   if(G.fac.kitchen>=1){P(120,128,26,14,"#e8d8b8");for(let i=0;i<26;i+=4)P(120+i,124,4,4,i%8?"#f2f2f2":"#c8283c");if(Math.floor(t/500)%2)P(128,118,2,4,"#dcdcdc");}
   // brand billboard
   if(G.fac.brand>=1){P(212,36,60,26,"#2a1d40");P(214,38,56,22,G.fac.brand>=2?"#c8283c":"#7a3fc0");ctx.save();ctx.font=`bold ${7*S}px "Chakra Petch",sans-serif`;ctx.fillStyle="#fff";ctx.textAlign="center";ctx.fillText(G.fac.brand>=3?"แชมป์มวยหญิง!":"เปิดคอร์สมวยไทย",242*S,52*S);ctx.restore();P(240,62,3,34,"#5a4030");}
-  {const tree=decorChoice(G,"tree");if(tree!=="plain"){const leaves=tree==="golden"?"#d9a520":tree==="champion"?"#f5c747":tree==="sakura"?"#f3a0c5":"#e992bd";P(309,111,3,37,"#6a3e36");for(const [x,y] of [[297,103],[305,96],[314,100]]){P(x,y,12,8,leaves);P(x+3,y-3,6,3,"#ffd3e5");}}}
+  {const tree=decorChoice(G,"tree");if(tree!=="plain"){const leaves=tree==="golden"?"#d9a520":tree==="champion"?"#f5c747":tree==="sakura"?"#f3a0c5":"#e992bd";P(301,111,3,37,"#6a3e36");for(const [x,y] of [[289,103],[297,96],[306,100]]){P(x,y,12,8,leaves);P(x+3,y-3,6,3,"#ffd3e5");}}}
   {const gate=decorChoice(G,"gate");if(gate!=="plain"){const c=gate==="gold"?"#d9a520":gate==="trophy"?"#f2c94c":gate==="lantern"?"#a63e4c":"#c8283c";P(3,112,4,38,c);P(34,112,4,38,c);P(3,110,35,5,c);if(gate==="lantern"){P(12,116,4,6,"#ffe9a0");P(24,116,4,6,"#ffe9a0");}}}
   // v1.10: a living yard — everyone moves, drawn back-to-front
   const D=[];const chib=(look,key,x,y,sc,flip,dy)=>{const c=chibiCache(look,key+dy,{dy});D.push({y:y+32*sc,f:()=>{ctx.save();ctx.imageSmoothingEnabled=false;

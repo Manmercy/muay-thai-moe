@@ -525,19 +525,22 @@ function hallHTML(){const T=(G.titles||[]).slice().reverse(),H=(G.honors||[]).sl
   return `${H.length?`<div class="hall-y"><b>ชัยชนะสำคัญ</b>${H.map(h=>`<div class="kv-row"><span>${esc(G.F[h.id]?.name||h.id)} · รุ่น ${h.div} · ${h.season?`ปี ${h.season} สัปดาห์ ${h.week}`:"ผลงานก่อนอัปเดต"}</span><span class="pill gold">🏆 ${honorLabel(h.kind,h.venue)}</span></div>`).join("")}</div>`:""}
    ${belts.length||venueBelts.length?`<div class="hall-y"><b>เข็มขัดที่ครองอยู่</b>${belts.map(([d,b])=>`<div class="kv-row"><span>${esc(G.F[b.id].name)} · รุ่น ${d}</span><span class="pill gold">🏆 แชมป์เวทีท่าแพ · ป้องกัน ${b.def} ครั้ง</span></div>`).join("")}${venueBelts.map(({v,d,b})=>`<div class="kv-row"><span>${esc(G.F[b.id].name)} · รุ่น ${d}</span><span class="pill gold">🏆 แชมป์${STADIUMS[v].name} · ป้องกัน ${b.def} ครั้ง</span></div>`).join("")}</div>`:""}
    ${T.length?T.map(yr).join(""):`<p class="meta">ยังไม่ครบปีแรก · จบปีแล้วผลงานของทุกคนจะมาอยู่ที่นี่ ปีละหนึ่งแถว</p>`}`;}
-function decorHTML(){let total=0,owned=0,sections="";
- for(const [slot,D] of Object.entries(CAMP_DECOR)){let choices="";
-  for(const [key,item] of Object.entries(D.items)){total++;const reason=decorUnlockReason(G,slot,key),on=decorChoice(G,slot)===key;if(!reason)owned++;
-   choices+='<button class="btn sm '+(on?'gold':'')+'" data-act="decor" data-k="'+slot+'" data-v="'+key+'" '+(reason?'disabled':'')+
-    ' style="border-color:'+(reason?'#777':DECOR_RARITY[item.r])+';'+(reason?'opacity:.55;filter:grayscale(1)':'')+'">'+
-    '<b style="color:'+DECOR_RARITY[item.r]+'">'+item.r+'</b> '+esc(item.name)+(on?' ✓':'')+
-    (reason?'<small style="display:block;white-space:normal">🔒 '+esc(reason)+'</small>':'')+'</button>';}
-  sections+='<div class="item fac"><div style="width:100%"><div class="t">'+D.name+'</div><div class="obtns" style="display:flex;flex-wrap:wrap;gap:6px">'+choices+'</div></div></div>';}
+const DECOR_STARS={N:1,R:2,SR:3,SSR:4,SS:5};
+const DECOR_ICON={tree:"🌳",gate:"⛩️",ring:"🥊",track:"🏃",vehicle:"🚐",bags:"🎯"};
+function decorHTML(){let total=0,owned=0,sections="";const open=UI.decorOpen||"tree";
+ for(const [slot,D] of Object.entries(CAMP_DECOR)){let tiles="",have=0;const cur=decorChoice(G,slot),keys=Object.keys(D.items);
+  for(const key of keys){const item=D.items[key];total++;const reason=decorUnlockReason(G,slot,key),on=cur===key;if(!reason){owned++;have++;}
+   tiles+=`<button class="dtile r-${item.r} ${on?"on":""} ${reason?"lock":""}" data-act="decor" data-k="${slot}" data-v="${key}" ${reason?"disabled":""} aria-pressed="${on}">
+     <span class="dstars" aria-label="ระดับ ${item.r}">${"★".repeat(DECOR_STARS[item.r])}</span><b>${esc(item.name)}</b>
+     <small>${on?"ใช้อยู่":reason?"🔒 "+esc(reason):item.r}</small></button>`;}
+  const isOpen=open===slot;
+  sections+=`<div class="dslot ${isOpen?"open":""}"><button class="dhead" data-act="decoropen" data-v="${slot}" aria-expanded="${isOpen}"><span class="dic">${DECOR_ICON[slot]||"✦"}</span><span class="dname">${D.name}<small>${esc(D.items[cur].name)}</small></span><span class="dcount">${have}/${keys.length}</span><i>${isOpen?"▾":"▸"}</i></button>${isOpen?`<div class="dtiles">${tiles}</div>`:""}</div>`;}
  const ready=goldRematchReady(G);
- return '<section class="px card cpane '+((UI.csub||"money")==="decor"?"on":"")+'"><h3>ตกแต่งค่าย · '+owned+'/'+total+' แบบ</h3>'+
-  '<p class="meta">ระดับ N → R → SR → SSR → SS บอกความยากในการได้มา ของตกแต่งไม่มีโบนัสค่าสถานะ</p>'+sections+
-  '<p class="meta">รถตู้สีทอง: ชนะเสี่ยหมวกทองคำ 10 ครั้ง หลังชนะครั้งแรกท้าชิงซ้ำได้ทุก 4 สัปดาห์</p>'+
-  '<button class="btn sm gold" data-act="goldrematch" '+(ready?'':'disabled')+'>ท้าชิงเสี่ยหมวกทองคำอีกครั้ง'+(!ready&&G.gangRematchAt?' · '+goldRematchLabel(G):'')+'</button></section>';}
+ return `<section class="px card cpane decorpane ${(UI.csub||"money")==="decor"?"on":""}"><h3>ตกแต่งค่าย <span class="pill">${owned}/${total} แบบ</span></h3>
+  <div class="dprev"><canvas class="campcv" width="640" height="360" data-camp="1" aria-label="ตัวอย่างค่ายหลังตกแต่ง"></canvas></div>
+  <p class="meta">ดาว ★ ยิ่งมาก ยิ่งได้ยาก (N → SS) · ของตกแต่งเปลี่ยนแค่หน้าตาค่าย ไม่มีโบนัสค่าสถานะ · แตะชิ้นที่ปลดแล้วเพื่อเปลี่ยน ภาพด้านบนจะเปลี่ยนทันที</p>${sections}
+  <div class="dgold"><p class="meta">รถตู้สีทอง: ชนะเสี่ยหมวกทองคำ 10 ครั้ง (ชนะครั้งแรกแล้ว ท้าชิงซ้ำได้ทุก 4 สัปดาห์)</p>
+  <button class="btn sm gold" data-act="goldrematch" ${ready?"":"disabled"}>ท้าชิงเสี่ยหมวกทองคำอีกครั้ง${!ready&&G.gangRematchAt?" · "+goldRematchLabel(G):""}</button></div></section>`;}
 function campHTML(){const inc=classIncome(G),up=upkeep(G),wg=wages(G),lv=campLevel(G),cs=UI.csub||"money";
   const recs=[["mali",G.flags.maliRecruit],["rin",G.flags.rinRecruit]].filter(([id,ok])=>ok&&G.F[id].camp==="free");
   const dots=(n,m)=>`<span class="pips">${Array.from({length:m},(_,i)=>`<i class="${i<n?"on":""}"></i>`).join("")}</span>`;
@@ -704,9 +707,24 @@ function reportHTML(){const r=G.lastReport;const ann=[];
      return `<div class="pcell">${radarSVG(f,150,p.before)}<b>${esc(f.name)}</b><span class="meta">ค่ารวม ${sum>=0?"+":""}${sum.toFixed(1)}</span></div>`;}).join("")}</div></details>`:""}
    <div class="chips3"><span class="chip"><small>นักเรียน</small><b class="num pos">+${fmt(r.inc)}</b></span><span class="chip"><small>ค่าใช้จ่าย</small><b class="num neg">-${fmt(r.up+r.wg+(r.debtPay||0))}</b></span><span class="chip"><small>เงินสด</small><b class="num ${r.cash<0?"neg":""}">${fmt(r.cash)}</b></span></div>
    <details><summary>ผลการชกในวงการ (${r.log.length})</summary><div class="log">${r.log.map(l=>`<div>${esc(l)}</div>`).join("")||"<div>เงียบสงบ</div>"}</div></details>`;}
+// v1.81.1: "what's new" popup — shows once per save after loading, for players who started before this update
+const PATCH={id:"1.80.18",ver:"Muay Thai Moe v1.80.18",title:"รายงานประจำสัปดาห์จากค่ายศิริชัย",lead:"สัปดาห์นี้มีทั้งเรื่องใหม่และคู่ชกใหม่ให้ผู้จัดการที่เล่นต่อไปหลายปีค่ะ!",items:[
+ ["📖","เรื่องราวของฟ้าและพลอย","เพิ่มซีนในปีที่ 2 ทั้งความสัมพันธ์ในค่าย การตัดสินใจที่อาจทำให้อีกคนน้อยใจ และไฟต์กับนักมวยจากค่ายเก่าที่เข้ามาแทนที่พวกเธอ"],
+ ["🌑","ไพลินและค่ายเวกเตอร์เข้าเกมแล้ว","ไพลิน พี่สาวของพลอย เป็นหัวหน้าค่ายเวกเตอร์จากกรุงเทพฯ ค่ายที่ใช้วิทยาศาสตร์การกีฬาอย่างเข้มข้น เรื่องราวและคู่ชกจากเวกเตอร์จะเริ่มเข้ามาในช่วงปีหลัง ๆ และกลับมาท้าทายค่ายเราอีกเรื่อย ๆ"],
+ ["🏟️","เวทีและคู่ชกมากขึ้น","เพิ่มนักมวยคู่แข่งตามรอบตำบล อำเภอ และจังหวัด พร้อมเวทีริมปิงและเวทีล้านนา แต่ละเวทีมีเข็มขัดของตัวเอง คู่ต่อสู้จะพัฒนาฝีมือตามค่ายของเราด้วย"],
+ ["🏆","ชัยชนะที่น่าจดจำ","ไฟต์ชิงแชมป์มีฉากประกาศผู้ชนะ ชูเข็มขัด เพลงและเอฟเฟกต์ พร้อมบันทึกผลงานสำคัญไว้ในเกียรติประวัติค่าย"],
+ ["🔥","คู่ท้ากลับมาอีก","Death Match จัดบ่อยขึ้น แก๊งหมวกกันน็อก ไก่ชน และวัวก็กลับมาท้าซ้ำ ยิ่งเล่นไปหลายปี ยิ่งประมาทไม่ได้ค่ะ!"],
+ ["🛠️","แก้บั๊กสำคัญ","ปรับการนับเวลาข้ามปี วันเกิดและอายุของนักมวย การจองไฟต์ซ้อน และจดหมาย “ทำไมไม่รับไฟต์ฉัน?” เซฟเดิมยังเปิดเล่นต่อได้ค่ะ"],
+ ["🎨","ตกแต่งค่าย","ต้นไม้ ซุ้ม เวทีมวย ลู่วิ่ง รถประจำค่าย และกระสอบทราย ปลดล็อกได้ตามความสำเร็จของค่าย ดูได้ที่ จัดการค่าย → ตกแต่ง"]],
+ foot:"ใครไปถึงปีไหนแล้ว มาเล่าให้ครูแดงฟังหน่อยค่ะ 🥋"};
+function maybeWhatsNew(){if(!G||G.ended||UI.scene)return;if(G.newsSeen===PATCH.id)return;UI.modal={type:"whatsnew"};}
+function whatsNewHTML(){return `<div class="wnew"><span class="pill gold">อัปเดต · ${esc(PATCH.ver)}</span><h2>🥊 ${esc(PATCH.title)}</h2><p class="lead">${esc(PATCH.lead)}</p>
+  ${PATCH.items.map(([ic,t,b])=>`<div class="wnitem"><span class="wnic">${ic}</span><div><b>${esc(t)}</b><p>${esc(b)}</p></div></div>`).join("")}
+  <p class="meta center">${esc(PATCH.foot)}</p></div><div class="mfoot"><button class="btn primary" data-act="newsok">เข้าค่ายเลย ▸</button></div>`;}
 function modalHTML(){const m=UI.modal;let body="",foot=true;
   if(m.type==="fighter"){body=fighterHTML(G.F[m.id]);foot=false;}
   if(m.type==="consider"){const o=G.offers.find(x=>x.id===m.id);if(!o){UI.modal=null;return "";}body=considerHTML(o);foot=false;}
+  if(m.type==="whatsnew"){body=whatsNewHTML();foot=false;}
   if(m.type==="report")body=reportHTML();
   if(m.type==="repinfo")body=repInfoHTML();
   if(m.type==="otip"){const o=G.offers.find(x=>x.id===m.id);if(!o){UI.modal=null;return "";}body=offerTipHTML(o);foot=false;}
@@ -773,13 +791,13 @@ function warmChar(id,look){if(id==="coach"){warm(`${ASSET}coach.webp`);return;}i
 function warmSteps(steps,look){const walk=list=>(list||[]).forEach(st=>{if(!st)return;const n=typeof st.n==="function"?null:st.n;if(n)warmChar(n,st.l==="casual"||st.l==="thai"?st.l:(look==="casual"||look==="thai")&&!st.l?look:"fight");
   if(st.with)warmChar(st.with,look==="casual"||look==="thai"?look:"fight");if(st.bg&&BGIMG[st.bg])warm(ASSET+BGIMG[st.bg]);if(st.choice)st.choice.forEach(c=>walk(c.then));});walk(steps);}
 function playScene(steps,done,opts={}){warmSteps(steps,opts.look||"fight");if(opts.bg&&BGIMG[opts.bg])warm(ASSET+BGIMG[opts.bg]);UI.scene={steps:[...steps],i:0,done,bg:opts.bg||"night",look:opts.look||"fight",cur:null,cast:[],coachOK:!!opts.coachOK,award:opts.award||null};sceneNext();}
-function playHonorQueue(done){const h=(G.awards||[])[0];if(!h){AU.startMusic("hub");if(done)done();return;}AU.startMusic("victory");AU.sfx("champ");
+function playHonorQueue(done){while((G.awards||[]).length&&!(G.F[G.awards[0].id]))G.awards.shift();const h=(G.awards||[])[0];if(!h){AU.startMusic("hub");if(done)done();return;}AU.startMusic("victory");AU.sfx("champ");
   playScene(honorSteps(G,h),()=>{G.awards.shift();save();playHonorQueue(done);},{bg:"hall",look:"fight",award:h});}
 function sceneNext(){const S=UI.scene;if(!S)return;
   while(S.i<S.steps.length){const st=S.steps[S.i];
-    if(st.inject){const more=st.inject(G)||[];S.steps.splice(S.i,1,...more);continue;}
+    if(st.inject){let more=[];try{more=st.inject(G)||[];}catch(e){console.error("scene inject",e);}S.steps.splice(S.i,1,...more);continue;}/* v1.81.1: a broken step never freezes the week */
     if(st.bg)S.bg=st.bg;
-    if(st.fx&&!st.n&&!st.choice&&!st.choiceFn){st.fx(G);S.i++;continue;}
+    if(st.fx&&!st.n&&!st.choice&&!st.choiceFn){try{st.fx(G);}catch(e){console.error("scene fx",e);}S.i++;continue;}
     if(st.choice||st.choiceFn){S.cur={choice:(st.choice||st.choiceFn(G))};render();return;}
     const n=val(st.n);S.lookOf=S.lookOf||{};
     // v1.8: each character keeps one outfit for the whole scene
@@ -840,11 +858,11 @@ function goalText(){const st=stageOf(G.week),me=roster(G);const best=d=>{const r
 // ---------- events / extras ----------
 // v1.49: annual events can play once per year
 const evSeen=e=>e.annual?((G.seenY||{})[e.id]===(G.season||1)):!!G.seen[e.id];
-function pendingEvents(){return EVENTS.filter(e=>e.when&&!evSeen(e)&&e.when(G));}
+function pendingEvents(){return EVENTS.filter(e=>{try{return e.when&&!evSeen(e)&&e.when(G);}catch(err){console.error("event when",e.id,err);return false;}});}
 // v1.41: at most two optional story scenes a week — the rest wait for next week (main story / finals always play)
 const EV_MUST=/^(prologue|daeng_leave|pre_qual|qual_result|final_result|semi_result|night_final|lover_final|ploy_prefinal|fah_prefinal|first_win|first_loss)/,EV_CAP=2;
 function runEvents(done){const list=pendingEvents().sort((a,b)=>(b.pri||0)-(a.pri||0));let played=0,opt=0;/* time-limited scenes go first */
-  const step=()=>{const e=list.shift();if(!e||G.ended){done&&done(played);return;}if(evSeen(e)||!e.when(G)){step();return;}
+  const step=()=>{const e=list.shift();if(!e||G.ended){done&&done(played);return;}if(evSeen(e)||!(()=>{try{return e.when(G);}catch(x){return false;}})()){step();return;}
     if(G.coachAwayAbs&&gameWeek(G)<G.coachAwayAbs&&!EV_MUST.test(e.id)&&!/daeng|coach/.test(e.id)&&e.steps.some(x=>x.n==="coach")){step();return;}/* v1.60: scenes where Kru Daeng talks wait until he is back */
     if(!EV_MUST.test(e.id)){if(opt>=((G.season||1)>=2&&(G.week===44||G.week===49)?0:EV_CAP)){step();return;}opt++;}
     if(e.annual){G.seenY=G.seenY||{};G.seenY[e.id]=G.season||1;}else G.seen[e.id]=true;G.seenWk=G.seenWk||{};G.seenWk[e.id]=G.week;G.seenAbs=G.seenAbs||{};G.seenAbs[e.id]=gameWeek(G);played++;playScene(e.steps,step,{bg:e.bg,look:e.look,coachOK:/daeng|coach/.test(e.id)});};step();}
@@ -917,6 +935,15 @@ function gateHTML(){return `<section class="px card gate"><span class="pill gold
   <a class="btn gatelink" href="${GATE.url}" target="_blank" rel="noopener">เข้า Discord ของเกม ▸</a>
   <div class="gatein"><input id="gatecode" maxlength="20" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="ใส่โค้ดตรงนี้" aria-label="โค้ดเล่นต่อ"><button class="btn primary" data-act="gatego">ปลดล็อก</button></div>
   ${UI.gateErr?'<p class="meta redt">โค้ดไม่ถูก ลองเช็กตัวสะกดอีกครั้ง</p>':""}</section>`;}
+// v1.81.1: year 1 teases the next chapter, year 5 closes the main story (demo), later years are free mode
+function endTeaserHTML(){const y=G.season||1;if(G.ended==="bankrupt")return "";
+  if(y===5)return `<section class="px card teaser demo-done"><span class="pill gold">จบเนื้อเรื่องหลัก</span><h3>ขอบคุณที่ทดสอบเดโม Muay Thai Moe!</h3>
+    <p>เนื้อเรื่องหลักของเดโมจบที่ปีที่ 5 หลังจากนี้เป็น<b>โหมดอิสระ</b> เล่นต่อได้ไม่จำกัด คู่แข่งจะเก่งขึ้นทุกปี และไพลินกับค่ายเวกเตอร์จะกลับมาท้าทุกปี</p>
+    <p class="meta">โปรดติดตามเนื้อหาเพิ่มเติมในอนาคต เรามีแผนเพิ่มเนื้อเรื่อง ตัวละคร และเวทีใหม่เรื่อย ๆ ครับ</p></section>`;
+  if(y>=6)return `<section class="px card teaser"><span class="pill red">โหมดอิสระ</span><h3>ปีที่ ${y+1} คู่แข่งซ้อมหนักขึ้นอีก</h3><p class="meta">เนื้อเรื่องใหม่กำลังทำอยู่ เซฟนี้จะเล่นต่อได้เมื่อบทใหม่มาถึง</p></section>`;
+  if(y===1)return `<section class="px card teaser"><span class="pill red">บทต่อไป · เร็ว ๆ นี้</span><h3>เส้นทางสู่เวทีระดับภาค</h3>
+    <ul><li>ค่ายพยัคฆ์ทองดึงเทรนเนอร์จากกรุงเทพฯ และฟ้าจะไม่ใช่คนเดิมอีกต่อไป</li><li>นักมวยหน้าใหม่จากมวยท่าเสาและมวยโคราชกำลังมองหาค่าย</li><li>หนี้ของปู่ชัยยังมีความลับที่กะทิไม่ได้เล่าทั้งหมด</li></ul></section>`;
+  return "";}
 function endingHTML(){const E=UI.ending,all=roster(G),res=seasonResult();
   return `<main class="endpage"><section class="px card end-hero"><img class="endlogo" src="${ASSET}logo.webp" alt="Muay Thai Moe">
     <span class="pill gold">${G.ended==="bankrupt"?"ค่ายปิดตัว":(G.season||1)>=2?`จบปีที่ ${G.season}`:"จบบทที่ 1 · ปีที่ 1"}</span><h1>${(G.season||1)>=2&&G.ended!=="bankrupt"?esc(E.title):`ฉากจบ: ${E.title}`}</h1>
@@ -925,8 +952,7 @@ function endingHTML(){const E=UI.ending,all=roster(G),res=seasonResult();
    <div class="grid g3"><section class="px card"><h3>ค่าย</h3><div class="kv-row"><span>ระดับค่าย</span><b>Lv.${campLevel(G)} ${CAMP_LV_NAME[campLevel(G)]}</b></div><div class="kv-row"><span>เงินสด</span><b class="num">${fmt(G.cash)}</b></div><div class="kv-row"><span>หนี้คงเหลือ</span><b class="num">${fmt(G.debt)}</b></div><div class="kv-row"><span>นักเรียน</span><b class="num">${students(G)} คน</b></div><div class="kv-row"><span>ชื่อเสียง</span><b class="num">${G.rep.toFixed(1)}</b></div></section>
    <section class="px card"><h3>นักมวยในค่าย</h3>${all.map(f=>`<div class="kv-row"><span>${esc(f.name)} Lv.${f.lvl}</span><span class="num">${rec(f)}</span></div>`).join("")}</section>
    <section class="px card"><h3>ความสัมพันธ์</h3>${CANON_IDS.map(id=>G.F[id]).filter(f=>f.met).map(f=>`<div class="kv-row"><span>${esc(f.name)}${G.romance===f.id?" ♥ คนรัก":G.promise&&G.promise[f.id]!=null?" ♡ สัญญาไว้":""}</span>${hearts(f.bond)}</div>`).join("")}</section></div>
-   <section class="px card teaser"><span class="pill red">บทต่อไป · เร็ว ๆ นี้</span><h3>เส้นทางสู่เวทีระดับภาค</h3>
-    <ul><li>ค่ายพยัคฆ์ทองดึงเทรนเนอร์จากกรุงเทพฯ และฟ้าจะไม่ใช่คนเดิมอีกต่อไป</li><li>นักมวยหน้าใหม่จากมวยท่าเสาและมวยโคราชกำลังมองหาค่าย</li><li>หนี้ของปู่ชัยยังมีความลับที่กะทิไม่ได้เล่าทั้งหมด</li></ul></section>
+   ${endTeaserHTML()}
    <p class="meta center">Seed ${esc(G.seedText||String(G.seed))} · ปีที่ ${G.season||1}</p>${!DEMO&&G.ended==="season"&&!gateOpen()?gateHTML():""}<div class="center endbtns">${!DEMO&&G.ended==="season"&&gateOpen()?`<button class="btn primary" data-act="newseason">เล่นต่อ ปีที่ ${(G.season||1)+1} ▸</button><p class="meta center">ค่าย นักมวย และความสัมพันธ์ไปต่อทั้งหมด · คู่แข่งก็ซ้อมหนักขึ้นเหมือนกัน</p>`:""}<button class="btn primary" data-act="replay">เล่นใหม่อีกรอบ</button><button class="btn" data-act="restart">กลับหน้าแรก</button></div></main>`;}
 
 // ---------- FIGHT ----------
@@ -1207,7 +1233,7 @@ const ACT={
   pickslot:d=>{const i=+d.v;if(loadSlot(i)){UI.owSlot=i;render();return;}ACT.beginNew(i);},
   confirmow:()=>{const i=UI.owSlot;UI.owSlot=null;ACT.beginNew(i);},cancelow:()=>{UI.owSlot=null;render();},
   openload:()=>{UI.delSlot=null;UI.owSlot=null;UI.modal={type:"slots",mode:"load"};render();},
-  loadslot:d=>{backupSlot(+d.v);const s0=loadSlot(+d.v);if(!s0)return;const s=safeFix(s0);if(!s){toast("เซฟนี้เปิดกับเวอร์ชันนี้ไม่ได้ ข้อมูลยังอยู่ครบ ไม่ถูกลบ");return;}G=s;const pk=G.F.ploy&&G.F.ploy.skills;if(pk&&pk.korat){G.F.ploy.skills={kr_swing:2,captain:1};}UI.slot=+d.v;UI.tab="home";UI.modal=null;UI.advCache={};AU.startMusic("hub");if(G.ended){UI.ending=endingScene(G);}render();},
+  loadslot:d=>{backupSlot(+d.v);const s0=loadSlot(+d.v);if(!s0)return;const s=safeFix(s0);if(!s){toast("เซฟนี้เปิดกับเวอร์ชันนี้ไม่ได้ ข้อมูลยังอยู่ครบ ไม่ถูกลบ");return;}G=s;const pk=G.F.ploy&&G.F.ploy.skills;if(pk&&pk.korat){G.F.ploy.skills={kr_swing:2,captain:1};}UI.slot=+d.v;UI.tab="home";UI.modal=null;UI.advCache={};AU.startMusic("hub");if(G.ended){UI.ending=endingScene(G);}maybeWhatsNew();render();},
   askdelslot:d=>{UI.delSlot=+d.v;render();},canceldel:()=>{UI.delSlot=null;render();},
   delslot:()=>{clearSave(UI.delSlot);UI.delSlot=null;if(!loadSave())UI.modal=null;render();},
   beginNew:i=>{UI.slot=i;UI.modal=null;AU.startMusic("hub");UI.creator={name:"",...CHIBI.randomManager(Math.random),gender:"m",diff:"normal",outfit:"tee",hat:"none",glasses:"none"};UI.modal=null;render();},
@@ -1226,9 +1252,9 @@ const ACT={
   crand:()=>{const n=(document.getElementById("pname")||{}).value||"",o=UI.creator||{};crSeed();UI.creator={...CHIBI.randomManager(Math.random),name:n,diff:o.diff||"normal",gender:o.gender||"m",tab:o.tab,seed:o.seed};render();},
   ctab:d=>{UI.creator.name=(document.getElementById("pname")||{}).value||UI.creator.name;crSeed();UI.creator.tab=d.v;render();},
   startGame:()=>{const c=UI.creator;c.name=((document.getElementById("pname")||{}).value||"").trim()||(c.gender==="m"?"ต้น":"ดาว");
-    crSeed();const {name,diff,seed,...look}=c;G=newGame({name,gender:c.gender,diff:diff||"normal",avatar:look,seed:seedFrom(seed)});if(seed&&!/^\d{1,10}$/.test(seed))G.seedText=seed;genOffers(G);UI.creator=null;UI.tab="home";G.seen.prologue=true;AU.resume();AU.startMusic("date");
+    crSeed();const {name,diff,seed,...look}=c;G=newGame({name,gender:c.gender,diff:diff||"normal",avatar:look,seed:seedFrom(seed)});if(seed&&!/^\d{1,10}$/.test(seed))G.seedText=seed;G.newsSeen=PATCH.id;genOffers(G);UI.creator=null;UI.tab="home";G.seen.prologue=true;AU.resume();AU.startMusic("date");
     playScene(EVENTS[0].steps,()=>{save();UI.tab="home";UI.spot=0;AU.startMusic("hub");render();},{bg:"bus",look:"train"});},
-  continue:()=>{let si=0;for(let i=1;i<=SLOTS;i++)if(loadSlot(i)){si=i;break;}if(!si)return;backupSlot(si);const s=safeFix(loadSlot(si));if(!s){toast("เซฟนี้เปิดกับเวอร์ชันนี้ไม่ได้ ข้อมูลยังอยู่ครบ ไม่ถูกลบ");return;}G=s;UI.slot=si;UI.tab="home";UI.modal=null;AU.startMusic("hub");if(G.ended){UI.ending=endingScene(G);}render();},
+  continue:()=>{let si=0;for(let i=1;i<=SLOTS;i++)if(loadSlot(i)){si=i;break;}if(!si)return;backupSlot(si);const s=safeFix(loadSlot(si));if(!s){toast("เซฟนี้เปิดกับเวอร์ชันนี้ไม่ได้ ข้อมูลยังอยู่ครบ ไม่ถูกลบ");return;}G=s;UI.slot=si;UI.tab="home";UI.modal=null;AU.startMusic("hub");if(G.ended){UI.ending=endingScene(G);}maybeWhatsNew();render();},
   exportsave:()=>exportSave(),
   bakrestore:()=>{const b=bakInfo(UI.slot);if(!b)return;UI.modal={type:"confirm",title:"กู้เซฟก่อนอัปเดต?",text:`จะย้อนกลับไปสัปดาห์ ${b.week} (v${b.ver}) ความคืบหน้าหลังจากนั้นในช่องนี้จะหายไป`,yes:"bakyes"};render();},
   bakyes:()=>{const b=bakInfo(UI.slot);if(!b)return;try{const i=UI.slot;const cur=localStorage.getItem(slotKey(i));localStorage.setItem(slotKey(i),b.raw);const s=safeFix(loadSlot(i));if(!s){localStorage.setItem(slotKey(i),cur);toast("กู้คืนไม่สำเร็จ เซฟปัจจุบันยังอยู่");return;}G=s;UI.modal=null;UI.tab="home";save();render();toast("กู้คืนเซฟแล้ว");}catch(e){}},
@@ -1251,7 +1277,8 @@ const ACT={
   skauto:d=>{const f=G.F[d.id],li=+d.v;let n=0;for(let guard=0;guard<30&&f.sp>0;guard++){const s=(SKILLS[f.id]||[]).filter(x=>x.line===li).sort((a,b)=>a.row-b.row||(f.skills[a.id]||0)-(f.skills[b.id]||0)).find(x=>!skillBlock(f,x.id).length);if(!s||!learnSkill(G,f.id,s.id))break;n++;}
     if(n){AU.sfx("level");save();toast(`อัป${(SK_LINES[f.id]||[])[li]||""} ${n} ครั้ง`);}render();},
   sksel:d=>{UI.skSel=d.id+":"+d.v;AU.sfx("ui");render();},
-  closeModal:()=>{const m=UI.modal;UI.modal=null;render();if(m&&m.after)m.after();},
+  newsok:()=>{G.newsSeen=PATCH.id;UI.modal=null;save();render();},
+  closeModal:()=>{const m=UI.modal;if(m&&m.type==="whatsnew"&&G){G.newsSeen=PATCH.id;save();}UI.modal=null;render();if(m&&m.after)m.after();},
   closeModalBg:(d,e)=>{if(e.target.classList.contains("overlay")&&UI.modal&&!["report","levelup"].includes(UI.modal.type)){UI.modal=null;render();}},
   preset:d=>{if(trLocked(G.F[d.f]))return;const f=G.F[d.f];f.plan.preset=d.v;if(d.v==="rest")f.plan.intensity="normal";save();render();},
   intensity:d=>{if(trLocked(G.F[d.f]))return;G.F[d.f].plan.intensity=d.v;save();render();},
@@ -1285,7 +1312,8 @@ const ACT={
   date:d=>{UI.modal=null;UI.tab="people";const steps=dateScene(G,d.id,d.v);AU.startMusic("date");playScene(steps,()=>{AU.startMusic("hub");render();},{bg:ACTIVITIES[d.v].bg==="camp"?"gym":ACTIVITIES[d.v].bg,look:"casual"});},
   giftpick:d=>{UI.modal={type:"gift",id:d.id};render();},
   give:d=>{const r=giveGift(G,d.id,d.v);if(!r)return;UI.modal=null;UI.tab="people";save();AU.startMusic("date");giftScene(d.id,r);},
-  decor:d=>{if(chooseDecor(G,d.k,d.v)){save();render();toast("เปลี่ยนของตกแต่งค่ายแล้ว");}},
+  decor:d=>{if(chooseDecor(G,d.k,d.v)){AU.sfx&&AU.sfx("ui");save();render();}},
+  decoropen:d=>{UI.decorOpen=UI.decorOpen===d.v?"":d.v;render();},
   buyfac:d=>{const before=campLevel(G);if(buyFacility(G,d.v)){save();const after=campLevel(G);AU.sfx("level");toast(after>before?`ค่ายเลื่อนเป็น Lv.${after}: ${CAMP_LV_NAME[after]}!`:`อัปเกรด${FACILITIES[d.v].name}แล้ว`);}},
   daeng:()=>{if(upgradeDaeng(G)){save();toast(`ครูแดงผ่านการอบรม Lv.${G.fac.daeng}`);}},
   useroad:d=>{const f=G.F[d.id];if(!f||trLocked(f)||!PRESETS[d.p])return;f.plan={...f.plan,preset:d.p,intensity:d.i};UI.modal=null;save();toast(`ตั้ง${f.name}: ${planName(d.p,d.i)} แล้ว อย่าลืมกดยืนยัน`);},
@@ -1346,7 +1374,7 @@ const ACT={
   fdone:()=>{const done=UI.fight.done,after=UI.fight.afterScene;UI.fight=null;render();playHonorQueue(()=>{if(after)playScene(after,done,{bg:"ring",look:"fight"});else done();});},
   gatego:()=>{const v=((document.getElementById("gatecode")||{}).value||"").toUpperCase().replace(/\s+/g,"");let ok=false;try{ok=btoa(v)===GATE.code;}catch(e){}
     if(ok){G.unlocked=true;try{localStorage.setItem(GATE.key,"1");}catch(e){}UI.gateErr=false;save();AU.sfx("level");toast("ปลดล็อกแล้ว! เล่นต่อปีที่ 2 ได้เลย");}else{UI.gateErr=true;AU.sfx("miss");}render();},
-  newseason:()=>{if(!gateOpen())return;const res=seasonResult().map(r=>({id:r.f.id,name:r.f.name,d:r.d,t:r.t,c:r.c}));newSeason(G);const T=G.titles[G.titles.length-1];if(T)T.res=res;UI.ending=null;UI.tab="home";UI.advCache={};save();AU.startMusic("hub");
+  newseason:()=>{if(!gateOpen())return;const res=seasonResult().map(r=>({id:r.f.id,name:r.f.name,d:r.d,t:r.t,c:r.c}));const snap=JSON.stringify(G);try{newSeason(G);}catch(e){console.error("newSeason",e);G=JSON.parse(snap);toast("ขึ้นปีใหม่ไม่สำเร็จ เซฟยังอยู่ครบ ลองอีกครั้งหรือแจ้งทีมงานใน Discord");render();return;}const T=G.titles[G.titles.length-1];if(T)T.res=res;UI.ending=null;UI.tab="home";UI.advCache={};save();AU.startMusic("hub");
     playScene([{n:"coach",bg:"gym",t:`ฤดูกาลใหม่มาแล้ว ${G.player.name} อันดับเริ่มนับใหม่ทุกคน แต่ค่ายเราไม่ได้เริ่มจากศูนย์อีกแล้ว`},
       {n:"kati",f:"happy",l:"train",with:"coach",t:"ปีนี้หนูจะไม่ยอมให้ใครแซงแน่ค่ะ! ไปกันเลย!"}],()=>render(),{bg:"gym",look:"train"});},
   replay:()=>{const i=UI.slot;ACT.restart();ACT.beginNew(i);},
