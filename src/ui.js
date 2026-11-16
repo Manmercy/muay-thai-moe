@@ -1,5 +1,5 @@
 // ================= MUAY THAI MOE v1.3 — UI =================
-const VERSION="1.83.1";
+const VERSION="1.83.2";
 const CUR_LANG=(typeof window!=="undefined"&&window.LANG)||"th";
 const TH_LABEL=String.fromCharCode(3652,3607,3618);
 function langSwitch(cls){return `<div class="langsw ${cls||""}" role="group" aria-label="Language">${[["th",TH_LABEL],["en","EN"]].map(([k,l])=>`<button class="lsb ${CUR_LANG===k?"on":""}" data-act="setlang" data-v="${k}" aria-pressed="${CUR_LANG===k}">${l}</button>`).join("")}</div>`;}
@@ -672,14 +672,16 @@ function skillTree(f,mine){const L=skillList(f.id),eqd=equipped(f),sc=SCHOOLS[L[
       <p class="skc-s">${st.st==="can"?`<span class="ok">อัปได้ → ขั้น ${st.r+1}</span>`:st.st==="max"?'<span class="goldt">อัปเต็มแล้ว</span>':st.st==="nosp"?'<span class="dim">ไม่มีแต้มสกิล · รอเลเวลอัป</span>':`<span class="no">ยังอัปไม่ได้: ${why(st)}</span>`}</p></div>
      ${mine?`<div class="skc-b">${st.st==="can"?`<button class="btn sm gold" data-act="learn" data-id="${f.id}" data-v="${s.id}" aria-label="อัป ${s.name}">+ อัป</button>`:""}${st.r&&!s.passive?`<button class="btn sm eqbtn ${eq?"on":""}" data-act="equip" data-id="${f.id}" data-v="${s.id}" ${!eq&&eqd.length>=MAX_EQUIP?"disabled":""}>${eq?"ถอด":"ใส่"}</button>`:""}</div>`:""}</div>`;};
   return `<div class="skwrap">${mine?`<div class="skbar3"><div class="sppx"><small>แต้มสกิล</small><b class="num">★ ${f.sp}</b></div>
-     <div class="sk-info"><span>${f.sp?nCan?`อัปได้ตอนนี้ <b class="ok">${nCan}</b> ท่า`:"ยังไม่มีท่าที่อัปได้ ฝึกค่าพลังเพิ่ม":"ได้ 3 แต้มทุกเลเวลอัป"}</span>
+     ${skResetBtn(f)}<div class="sk-info"><span>${f.sp?nCan?`อัปได้ตอนนี้ <b class="ok">${nCan}</b> ท่า`:"ยังไม่มีท่าที่อัปได้ ฝึกค่าพลังเพิ่ม":"ได้ 3 แต้มทุกเลเวลอัป"}</span>
       <span class="sk-eq">ใช้ขึ้นชก ${[0,1,2].map(i=>{const s=eqd[i]&&skillDef(f.id,eqd[i]);return `<i class="${s?"on":""}" title="${s?s.name:"ว่าง"}">${s?PIX["sk_"+skillKind(s).k]:""}</i>`;}).join("")}</span></div></div>`:""}
    <div class="sknav"><div class="seg sklines"><span class="sklbl">สายสำนัก</span>${lines.slice(0,3).map((n,i)=>`<button data-act="skline" data-id="${f.id}" data-v="${i}" aria-pressed="${li===i}">${n}${can(i)?'<i class="tdot2"></i>':""}</button>`).join("")}</div>
    <div class="seg sklines shared"><span class="sklbl">สายปั้น · เลือก 1</span>${lines.slice(3).map((n,j)=>{const i=j+3;return `<button data-act="skline" data-id="${f.id}" data-v="${i}" aria-pressed="${li===i}" class="${path!=null&&path!==i?"off":""}">${path===i?"✓ ":""}${n}${can(i)?'<i class="tdot2"></i>':""}</button>`;}).join("")}</div>
-   ${li>=3?`<p class="meta skpath">${path==null?"สายปั้นใช้แต้มสกิลเหมือนสายสำนัก แต่เลือกปั้นได้ทีละ 1 สาย · อัปสกิลแรกเมื่อไหร่ สายปั้นอื่นจะปิด":path===li?`กำลังปั้นสายนี้${mine?` · <button class="btn sm ghost" data-act="skreset" data-id="${f.id}" ${G.cash<SK_RESET_COST?"disabled":""}>เปลี่ยนสายปั้น (คืนแต้ม · ${fmt(SK_RESET_COST)})</button>`:""}`:`ตอนนี้ปั้น "${SK_SHARED[path-3]}" อยู่ ต้องเปลี่ยนสายปั้นก่อนถึงจะอัปสายนี้ได้`}</p>`:""}</div>
+   ${li>=3?`<p class="meta skpath">${path==null?"สายปั้นใช้แต้มสกิลเหมือนสายสำนัก แต่เลือกปั้นได้ทีละ 1 สาย · อัปสกิลแรกเมื่อไหร่ สายปั้นอื่นจะปิด":path===li?`กำลังปั้นสายนี้`:`ตอนนี้ปั้น "${SK_SHARED[path-3]}" อยู่ ต้องเปลี่ยนสายปั้นก่อนถึงจะอัปสายนี้ได้`}</p>`:""}</div>
    <div class="sklist pxscroll">${[0,1,2,3,4,5].map(row=>L.find(s=>s.line===li&&s.row===row)).filter(Boolean).map(card).join('<i class="skarrow" aria-hidden="true"></i>')}
      ${SIGNATURE[f.id]?`<div class="skc sig ${hasSignature(f)?"has":"lock"}"><div class="skc-m"><div class="skc-h"><b>✦ ท่าไม้ตาย: ${SIGNATURE[f.id].name}</b></div><p class="skc-d">${SIGNATURE[f.id].desc}${hasSignature(f)?"":` · ปลดเมื่อความสนิทถึง 60 (ตอนนี้ ${Math.round(f.bond||0)})`}</p></div></div>`:""}</div>
-   ${mine?`<div class="skfoot"><button class="btn sm" data-act="skauto" data-id="${f.id}" data-v="${li}" ${[0,1,2,3,4,5].some(r=>{const s=L.find(x=>x.line===li&&x.row===r);return s&&skState(f,s,mine).st==="can";})?"":"disabled"}>อัปอัตโนมัติ · ${lines[li]}</button><span class="meta">ใส่ขึ้นชกได้ ${MAX_EQUIP} ท่า · ท่าติดตัวทำงานเองไม่ใช้ช่อง</span></div>${skResetRow(f)}`:""}</div>`;}
+   ${mine?`<div class="skfoot"><button class="btn sm" data-act="skauto" data-id="${f.id}" data-v="${li}" ${[0,1,2,3,4,5].some(r=>{const s=L.find(x=>x.line===li&&x.row===r);return s&&skState(f,s,mine).st==="can";})?"":"disabled"}>อัปอัตโนมัติ · ${lines[li]}</button><span class="meta">ใส่ขึ้นชกได้ ${MAX_EQUIP} ท่า · ท่าติดตัวทำงานเองไม่ใช้ช่อง</span></div>`:""}</div>`;}
+function skResetBtn(f){const n=skPointsSpent(f);if(!n)return "";const c=skResetCost(f);
+  return `<button class="skrbtn" data-act="skresetask" data-id="${f.id}" ${c&&G.cash<c?"disabled":""} aria-label="รีเซ็ตสกิล คืน ${n} แต้ม" title="รีเซ็ตสกิล · คืน ${n} แต้ม · ${c?fmt(c):"ครั้งแรกฟรี"}">↺ รีเซ็ต</button>`;}
 function skResetRow(f){const n=skPointsSpent(f);if(!n)return "";const c=skResetCost(f);
   return `<div class="skreset"><span><b>รีเซ็ตสกิลทั้งหมด</b><small>คืน ${n} แต้ม แล้วเลือกสายใหม่ได้ · ${c?`ค่าใช้จ่าย ${fmt(c)}`:"ครั้งแรกฟรี"}</small></span><button class="btn sm" data-act="skresetask" data-id="${f.id}" ${c&&G.cash<c?"disabled":""}>รีเซ็ต</button></div>`;}
 function skillGrid(f,mine){if(hasTree(f.id))return skillTree(f,mine);const L=SKILLS[f.id]||[];const sc=SCHOOLS[L[0]&&L[0].school]||{name:"",motto:""};
@@ -689,8 +691,8 @@ function skillGrid(f,mine){if(hasTree(f.id))return skillTree(f,mine);const L=SKI
     return `<div class="skrow ${r?"has":""} ${eq?"eq":""}"><button class="skn" data-act="skdesc" data-v="${f.id+s.id}" aria-expanded="${o}">${PIX["sk_"+k.k]}<b>${s.name}</b><span class="pips">${[1,2,3].map(i=>`<i class="${i<=r?"on":""}"></i>`).join("")}</span></button>
      ${mine?`<span class="skb">${r?`<button class="btn sm eqbtn ${eq?"on":""}" data-act="equip" data-id="${f.id}" data-v="${s.id}" ${!eq&&eqd.length>=MAX_EQUIP?"disabled":""}>${eq?"ใช้อยู่":"ใช้"}</button>`:""}<button class="plus" data-act="learn" data-id="${f.id}" data-v="${s.id}" ${f.sp<1||r>=3?"disabled":""} aria-label="อัป ${s.name}">${r>=3?"MAX":"+"}</button></span>`:""}
      ${o?`<small class="skd">${s.desc}</small>`:""}</div>`;};
-  return `<div class="school sm" style="--c:${sc.color}"><b>${sc.name}</b>${mine?`<span class="pill ${f.sp>0?"gold":""}">แต้มสกิล ${f.sp}</span><span class="pill">ใช้ขึ้นชก ${eqd.length}/${MAX_EQUIP}</span>`:""}</div>
-   <div class="sklist">${op.map(row).join("")||`<p class="meta">ยังไม่มีท่าที่ปลดล็อก</p>`}</div>${mine?skResetRow(f):""}
+  return `<div class="school sm" style="--c:${sc.color}"><b>${sc.name}</b>${mine?`<span class="pill ${f.sp>0?"gold":""}">แต้มสกิล ${f.sp}</span><span class="pill">ใช้ขึ้นชก ${eqd.length}/${MAX_EQUIP}</span>${skResetBtn(f)}`:""}</div>
+   <div class="sklist">${op.map(row).join("")||`<p class="meta">ยังไม่มีท่าที่ปลดล็อก</p>`}</div>
    ${lk.length?`<details class="sklock"><summary>ท่าที่ยังล็อก ${lk.length} ท่า · ถัดไป Lv.${lk[0].lv}</summary>${lk.map(s=>`<div class="sklk"><span>Lv.${s.lv}</span><b>${s.name}</b><small>${s.desc}</small></div>`).join("")}</details>`:""}`;}
 // v1.41: visible relationship stages — each one changes how she treats you
 const REL_TIERS=[[0,"คนรู้จัก","ยังเรียกคุณว่าผู้จัดการแบบเกร็ง ๆ"],[20,"เพื่อนร่วมค่าย","เริ่มคุยเล่น ทักแชตเรื่องทั่วไป"],[40,"คนสนิท","บางทีก็หลุดเรียกชื่อคุณ · มีเรื่องส่วนตัวมาเล่า"],[75,"คนพิเศษ","เรียกชื่อคุณตลอด"]];
@@ -760,9 +762,9 @@ function reportHTML(){const r=G.lastReport;const ann=[];
    <details><summary>ผลการชกในวงการ (${r.log.length})</summary><div class="log">${r.log.map(l=>`<div>${esc(l)}</div>`).join("")||"<div>เงียบสงบ</div>"}</div></details>`;}
 // v1.81.1: "what's new" popup — shows once per save after loading, for players who started before this update
 const PATCH={id:"1.83.1",ver:"Muay Thai Moe v1.83.1",title:"รายงานประจำสัปดาห์จากค่ายศิริชัย",lead:"รอบนี้เปลี่ยนสายสกิลได้แล้ว ไม่ต้องกลัวอัปผิด",items:[
- ["🔄","รีเซ็ตสกิลทั้งหมด","การ์ดนักมวย → สกิล → ล่างสุด กดรีเซ็ตแล้วได้แต้มที่อัปไปคืนครบ เลือกสายสำนักหรือสายปั้นใหม่ได้"],
+ ["🔄","รีเซ็ตสกิลทั้งหมด","การ์ดนักมวย → สกิล → ปุ่ม ↺ รีเซ็ต มุมขวาบน ได้แต้มที่อัปไปคืนครบ เลือกสายสำนักหรือสายปั้นใหม่ได้"],
  ["🆓","ครั้งแรกฟรี","นักมวยแต่ละคนรีเซ็ตครั้งแรกฟรี ครั้งต่อไป ฿10,000 · ฿20,000 · ฿30,000"],
- ["🥋","สายปั้นอัปควบสายสำนักได้","ถ้ามีแต้มเหลือ อัปสายปั้นได้เลยไม่ต้องรีเซ็ต · อยากเปลี่ยนแค่สายปั้นใช้ปุ่มรีเซ็ตสายปั้น"]],
+ ["🥋","สายปั้นอัปควบสายสำนักได้","ถ้ามีแต้มเหลือ อัปสายปั้นได้เลยไม่ต้องรีเซ็ต"]],
  foot:"ใครปั้นสายผิดมา ตอนนี้แก้ตัวได้แล้วค่ะ 🥋"};
 function maybeWhatsNew(){if(!G||G.ended||UI.scene)return;if(G.newsSeen===PATCH.id)return;UI.modal={type:"whatsnew"};}
 function whatsNewHTML(){return `<div class="wnew"><span class="pill gold">อัปเดต · ${esc(PATCH.ver)}</span><h2>🥊 ${esc(PATCH.title)}</h2><p class="lead">${esc(PATCH.lead)}</p>

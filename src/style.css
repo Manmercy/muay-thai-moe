@@ -1674,3 +1674,16 @@ body.hasnews main>h1.sr+.homegrid,body.hasnews main>h1.sr+.rinnote{margin-top:46
 .skreset{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:10px;padding:10px 12px;background:var(--bg2);box-shadow:inset 0 0 0 2px var(--line)}
 .skreset span{display:flex;flex-direction:column;gap:2px}.skreset small{color:var(--muted)}
 .skreset .btn{min-height:44px;flex:none}
+@media (max-width:760px){
+  /* bottom sheets: short sheets sit on the bottom edge, tall sheets start near the top and scroll with the overlay (nothing pushed off-screen) */
+  .overlay{justify-content:flex-start!important;overscroll-behavior:contain}
+  .overlay>.modal{margin-top:auto!important}
+  .overlay>.modal:not(.fpm){max-height:none!important;overflow:visible;min-height:0}
+  .overlay>.modal:not(.fpm)::before{content:"";display:block;height:0}
+  .overlay{padding-top:max(48px,env(safe-area-inset-top,0px))!important}
+}
+/* v1.83.2: quiet reset button tucked into the skill header */
+.skbar3{position:relative}
+.skrbtn{position:absolute;top:0;right:0;min-height:36px;min-width:44px;padding:4px 8px;border:0;background:none;color:var(--muted);font:600 12px var(--f-display);cursor:pointer;text-decoration:underline;text-underline-offset:3px}
+.skrbtn:hover:not(:disabled){color:var(--fg)}.skrbtn:disabled{opacity:.45;cursor:default}
+.school.sm .skrbtn{position:static;margin-left:auto}

@@ -1,5 +1,5 @@
 // ================= MUAY THAI MOE v1.3 — UI =================
-const VERSION="1.83.1";
+const VERSION="1.83.2";
 const CUR_LANG=(typeof window!=="undefined"&&window.LANG)||"th";
 const TH_LABEL=String.fromCharCode(3652,3607,3618);
 function langSwitch(cls){return `<div class="langsw ${cls||""}" role="group" aria-label="Language">${[["th",TH_LABEL],["en","EN"]].map(([k,l])=>`<button class="lsb ${CUR_LANG===k?"on":""}" data-act="setlang" data-v="${k}" aria-pressed="${CUR_LANG===k}">${l}</button>`).join("")}</div>`;}
@@ -672,14 +672,16 @@ function skillTree(f,mine){const L=skillList(f.id),eqd=equipped(f),sc=SCHOOLS[L[
       <p class="skc-s">${st.st==="can"?`<span class="ok">Can upgrade → rank ${st.r+1}</span>`:st.st==="max"?"<span class=\"goldt\">Maxed out</span>":st.st==="nosp"?"<span class=\"dim\">No skill points · wait for a level up</span>":`<span class="no">Can't upgrade yet: ${why(st)}</span>`}</p></div>
      ${mine?`<div class="skc-b">${st.st==="can"?`<button class="btn sm gold" data-act="learn" data-id="${f.id}" data-v="${s.id}" aria-label="Upgrade ${s.name}">+ Up</button>`:""}${st.r&&!s.passive?`<button class="btn sm eqbtn ${eq?"on":""}" data-act="equip" data-id="${f.id}" data-v="${s.id}" ${!eq&&eqd.length>=MAX_EQUIP?"disabled":""}>${eq?"Remove":"Equip"}</button>`:""}</div>`:""}</div>`;};
   return `<div class="skwrap">${mine?`<div class="skbar3"><div class="sppx"><small>Skill points</small><b class="num">★ ${f.sp}</b></div>
-     <div class="sk-info"><span>${f.sp?nCan?`Can upgrade now: <b class="ok">${nCan}</b> moves`:"Nothing to upgrade yet. Train stats higher":"3 points every level up"}</span>
+     ${skResetBtn(f)}<div class="sk-info"><span>${f.sp?nCan?`Can upgrade now: <b class="ok">${nCan}</b> moves`:"Nothing to upgrade yet. Train stats higher":"3 points every level up"}</span>
       <span class="sk-eq">Equipped ${[0,1,2].map(i=>{const s=eqd[i]&&skillDef(f.id,eqd[i]);return `<i class="${s?"on":""}" title="${s?s.name:"Empty"}">${s?PIX["sk_"+skillKind(s).k]:""}</i>`;}).join("")}</span></div></div>`:""}
    <div class="sknav"><div class="seg sklines"><span class="sklbl">School lines</span>${lines.slice(0,3).map((n,i)=>`<button data-act="skline" data-id="${f.id}" data-v="${i}" aria-pressed="${li===i}">${n}${can(i)?'<i class="tdot2"></i>':""}</button>`).join("")}</div>
    <div class="seg sklines shared"><span class="sklbl">Build path · pick 1</span>${lines.slice(3).map((n,j)=>{const i=j+3;return `<button data-act="skline" data-id="${f.id}" data-v="${i}" aria-pressed="${li===i}" class="${path!=null&&path!==i?"off":""}">${path===i?"✓ ":""}${n}${can(i)?'<i class="tdot2"></i>':""}</button>`;}).join("")}</div>
-   ${li>=3?`<p class="meta skpath">${path==null?"Build paths use skill points like school lines, but you can build only one at a time · the first skill you raise closes the other build paths":path===li?`Building this path ${mine?` · <button class="btn sm ghost" data-act="skreset" data-id="${f.id}" ${G.cash<SK_RESET_COST?"disabled":""}>Change build path (refund points · ${fmt(SK_RESET_COST)})</button>`:""}`:`Currently building "${SK_SHARED[path-3]}" now. Change build path before raising this one.`}</p>`:""}</div>
+   ${li>=3?`<p class="meta skpath">${path==null?"Build paths use skill points like school lines, but you can build only one at a time · the first skill you raise closes the other build paths":path===li?`Building this path`:`Currently building "${SK_SHARED[path-3]}" now. Change build path before raising this one.`}</p>`:""}</div>
    <div class="sklist pxscroll">${[0,1,2,3,4,5].map(row=>L.find(s=>s.line===li&&s.row===row)).filter(Boolean).map(card).join('<i class="skarrow" aria-hidden="true"></i>')}
      ${SIGNATURE[f.id]?`<div class="skc sig ${hasSignature(f)?"has":"lock"}"><div class="skc-m"><div class="skc-h"><b>✦ Signature: ${SIGNATURE[f.id].name}</b></div><p class="skc-d">${SIGNATURE[f.id].desc}${hasSignature(f)?"":` · unlocks at bond 60 (now ${Math.round(f.bond||0)})`}</p></div></div>`:""}</div>
-   ${mine?`<div class="skfoot"><button class="btn sm" data-act="skauto" data-id="${f.id}" data-v="${li}" ${[0,1,2,3,4,5].some(r=>{const s=L.find(x=>x.line===li&&x.row===r);return s&&skState(f,s,mine).st==="can";})?"":"disabled"}>Auto-upgrade · ${lines[li]}</button><span class="meta">Equip up to ${MAX_EQUIP} moves · passives work on their own, no slot needed</span></div>${skResetRow(f)}`:""}</div>`;}
+   ${mine?`<div class="skfoot"><button class="btn sm" data-act="skauto" data-id="${f.id}" data-v="${li}" ${[0,1,2,3,4,5].some(r=>{const s=L.find(x=>x.line===li&&x.row===r);return s&&skState(f,s,mine).st==="can";})?"":"disabled"}>Auto-upgrade · ${lines[li]}</button><span class="meta">Equip up to ${MAX_EQUIP} moves · passives work on their own, no slot needed</span></div>`:""}</div>`;}
+function skResetBtn(f){const n=skPointsSpent(f);if(!n)return "";const c=skResetCost(f);
+  return `<button class="skrbtn" data-act="skresetask" data-id="${f.id}" ${c&&G.cash<c?"disabled":""} aria-label="Reset skills, refunds ${n} points" title="Reset skills · refunds ${n} points · ${c?fmt(c):"first reset is free"}">↺ Reset</button>`;}
 function skResetRow(f){const n=skPointsSpent(f);if(!n)return "";const c=skResetCost(f);
   return `<div class="skreset"><span><b>Reset all skills</b><small>Refunds ${n} points so you can pick a new line · ${c?`Cost ${fmt(c)}`:"first reset is free"}</small></span><button class="btn sm" data-act="skresetask" data-id="${f.id}" ${c&&G.cash<c?"disabled":""}>Reset</button></div>`;}
 function skillGrid(f,mine){if(hasTree(f.id))return skillTree(f,mine);const L=SKILLS[f.id]||[];const sc=SCHOOLS[L[0]&&L[0].school]||{name:"",motto:""};
@@ -689,8 +691,8 @@ function skillGrid(f,mine){if(hasTree(f.id))return skillTree(f,mine);const L=SKI
     return `<div class="skrow ${r?"has":""} ${eq?"eq":""}"><button class="skn" data-act="skdesc" data-v="${f.id+s.id}" aria-expanded="${o}">${PIX["sk_"+k.k]}<b>${s.name}</b><span class="pips">${[1,2,3].map(i=>`<i class="${i<=r?"on":""}"></i>`).join("")}</span></button>
      ${mine?`<span class="skb">${r?`<button class="btn sm eqbtn ${eq?"on":""}" data-act="equip" data-id="${f.id}" data-v="${s.id}" ${!eq&&eqd.length>=MAX_EQUIP?"disabled":""}>${eq?"In use":"Use"}</button>`:""}<button class="plus" data-act="learn" data-id="${f.id}" data-v="${s.id}" ${f.sp<1||r>=3?"disabled":""} aria-label="Upgrade ${s.name}">${r>=3?"MAX":"+"}</button></span>`:""}
      ${o?`<small class="skd">${s.desc}</small>`:""}</div>`;};
-  return `<div class="school sm" style="--c:${sc.color}"><b>${sc.name}</b>${mine?`<span class="pill ${f.sp>0?"gold":""}">Skill points ${f.sp}</span><span class="pill">In the fight ${eqd.length}/${MAX_EQUIP}</span>`:""}</div>
-   <div class="sklist">${op.map(row).join("")||`<p class="meta">No moves unlocked yet</p>`}</div>${mine?skResetRow(f):""}
+  return `<div class="school sm" style="--c:${sc.color}"><b>${sc.name}</b>${mine?`<span class="pill ${f.sp>0?"gold":""}">Skill points ${f.sp}</span><span class="pill">In the fight ${eqd.length}/${MAX_EQUIP}</span>${skResetBtn(f)}`:""}</div>
+   <div class="sklist">${op.map(row).join("")||`<p class="meta">No moves unlocked yet</p>`}</div>
    ${lk.length?`<details class="sklock"><summary>Locked moves ${lk.length} · next Lv.${lk[0].lv}</summary>${lk.map(s=>`<div class="sklk"><span>Lv.${s.lv}</span><b>${s.name}</b><small>${s.desc}</small></div>`).join("")}</details>`:""}`;}
 // v1.41: visible relationship stages — each one changes how she treats you
 const REL_TIERS=[[0,"Acquaintance","Still calls you \"Manager\", a bit stiffly"],[20,"Teammate","Jokes around, texts about everyday things"],[40,"Close","Sometimes lets your name slip · shares personal stories"],[75,"Special","Always calls you by name"]];
@@ -760,9 +762,9 @@ function reportHTML(){const r=G.lastReport;const ann=[];
    <details><summary>Results around the circuit (${r.log.length})</summary><div class="log">${r.log.map(l=>`<div>${esc(l)}</div>`).join("")||"<div>All quiet</div>"}</div></details>`;}
 // v1.81.1: "what's new" popup — shows once per save after loading, for players who started before this update
 const PATCH={id:"1.83.1",ver:"Muay Thai Moe v1.83.1",title:"Weekly report from Sirichai Camp",lead:"You can now change skill lines, so no more fear of a wrong pick",items:[
- ["🔄","Reset all skills","Fighter card → Skills → bottom: reset to get every spent point back and pick a new school or build line"],
+ ["🔄","Reset all skills","Fighter card → Skills → the ↺ Reset button at the top right: every spent point comes back to pick a new school or build line"],
  ["🆓","first reset is free","Each fighter's first reset is free, then ฿10,000 · ฿20,000 · ฿30,000"],
- ["🥋","Build lines stack with school lines","With spare points you can learn a build line without resetting · to swap only the build line, use the build-line reset"]],
+ ["🥋","Build lines stack with school lines","With spare points you can learn a build line without resetting"]],
  foot:"Built the wrong line? Now you can fix it 🥋"};
 function maybeWhatsNew(){if(!G||G.ended||UI.scene)return;if(G.newsSeen===PATCH.id)return;UI.modal={type:"whatsnew"};}
 function whatsNewHTML(){return `<div class="wnew"><span class="pill gold">Update · ${esc(PATCH.ver)}</span><h2>🥊 ${esc(PATCH.title)}</h2><p class="lead">${esc(PATCH.lead)}</p>
