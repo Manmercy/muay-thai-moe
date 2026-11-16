@@ -1,5 +1,5 @@
 // ================= MUAY THAI MOE v1.3 — UI =================
-const VERSION="1.83.0";
+const VERSION="1.83.1";
 const CUR_LANG=(typeof window!=="undefined"&&window.LANG)||"th";
 const TH_LABEL=String.fromCharCode(3652,3607,3618);
 function langSwitch(cls){return `<div class="langsw ${cls||""}" role="group" aria-label="Language">${[["th",TH_LABEL],["en","EN"]].map(([k,l])=>`<button class="lsb ${CUR_LANG===k?"on":""}" data-act="setlang" data-v="${k}" aria-pressed="${CUR_LANG===k}">${l}</button>`).join("")}</div>`;}
@@ -759,14 +759,11 @@ function reportHTML(){const r=G.lastReport;const ann=[];
    <div class="chips3"><span class="chip"><small>นักเรียน</small><b class="num pos">+${fmt(r.inc)}</b></span><span class="chip"><small>ค่าใช้จ่าย</small><b class="num neg">-${fmt(r.up+r.wg+(r.debtPay||0))}</b></span><span class="chip"><small>เงินสด</small><b class="num ${r.cash<0?"neg":""}">${fmt(r.cash)}</b></span></div>
    <details><summary>ผลการชกในวงการ (${r.log.length})</summary><div class="log">${r.log.map(l=>`<div>${esc(l)}</div>`).join("")||"<div>เงียบสงบ</div>"}</div></details>`;}
 // v1.81.1: "what's new" popup — shows once per save after loading, for players who started before this update
-const PATCH={id:"1.83.0",ver:"Muay Thai Moe v1.83.0",title:"รายงานประจำสัปดาห์จากค่ายศิริชัย",lead:"รอบนี้ปรับหน้าตาให้กดง่าย อ่านง่ายขึ้นทั้งมือถือและคอม",items:[
- ["👆","ปุ่มใหญ่ขึ้น กดง่ายขึ้น","ปุ่มจบสัปดาห์ แท็บ จดหมาย และตั้งค่า ใหญ่ขึ้นทุกจุด กดด้วยนิ้วโป้งได้สบาย"],
- ["📱","หน้าต่างขึ้นจากด้านล่าง","บนมือถือ หน้าต่างสรุปสัปดาห์ ตั้งค่า และการ์ดนักมวยเลื่อนขึ้นจากล่าง ปุ่มยืนยันอยู่ในระยะนิ้วโป้ง"],
- ["🥊","ปุ่มขึ้นชกอยู่ล่างจอ","ปุ่ม \"ขึ้นชก!\" และปุ่มความเร็ว/สกิลระหว่างชก ย้ายลงล่างจอ กดมือเดียวได้"],
- ["🔤","ตัวอักษรอ่านง่ายขึ้น","ขยายตัวอักษรเล็กทั้งเกม และปรับสีตัวอักษรจางให้ชัดขึ้นบนพื้นมืด"],
- ["⏭️","ไม่ต้องถามอีก","หน้ายืนยันจบสัปดาห์มีช่อง \"ไม่ต้องถามอีก\" เปิดคืนได้ในตั้งค่า"],
- ["🖥️","เล่นบนคอมเต็มจอขึ้น","จอกว้างใช้พื้นที่เต็มขึ้น ภาพค่ายใหญ่ขึ้นตามความสูงจอ"]],
- foot:"ลองเล่นแล้วตรงไหนกดยาก บอกครูแดงได้เลยค่ะ 🥊"};
+const PATCH={id:"1.83.1",ver:"Muay Thai Moe v1.83.1",title:"รายงานประจำสัปดาห์จากค่ายศิริชัย",lead:"รอบนี้เปลี่ยนสายสกิลได้แล้ว ไม่ต้องกลัวอัปผิด",items:[
+ ["🔄","รีเซ็ตสกิลทั้งหมด","การ์ดนักมวย → สกิล → ล่างสุด กดรีเซ็ตแล้วได้แต้มที่อัปไปคืนครบ เลือกสายสำนักหรือสายปั้นใหม่ได้"],
+ ["🆓","ครั้งแรกฟรี","นักมวยแต่ละคนรีเซ็ตครั้งแรกฟรี ครั้งต่อไป ฿10,000 · ฿20,000 · ฿30,000"],
+ ["🥋","สายปั้นอัปควบสายสำนักได้","ถ้ามีแต้มเหลือ อัปสายปั้นได้เลยไม่ต้องรีเซ็ต · อยากเปลี่ยนแค่สายปั้นใช้ปุ่มรีเซ็ตสายปั้น"]],
+ foot:"ใครปั้นสายผิดมา ตอนนี้แก้ตัวได้แล้วค่ะ 🥋"};
 function maybeWhatsNew(){if(!G||G.ended||UI.scene)return;if(G.newsSeen===PATCH.id)return;UI.modal={type:"whatsnew"};}
 function whatsNewHTML(){return `<div class="wnew"><span class="pill gold">อัปเดต · ${esc(PATCH.ver)}</span><h2>🥊 ${esc(PATCH.title)}</h2><p class="lead">${esc(PATCH.lead)}</p>
   <div class="wnlist">${PATCH.items.map(([ic,t,b])=>`<details class="wnitem"><summary><span class="wnic">${ic}</span><b>${esc(t)}</b><i>▸</i></summary><p>${esc(b)}</p></details>`).join("")}</div><p class="meta wnhint">แตะหัวข้อเพื่ออ่านรายละเอียด</p>

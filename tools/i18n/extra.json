@@ -4048,5 +4048,12 @@
  "<div class=\"skreset\"><span><b>รีเซ็ตสกิลทั้งหมด</b><small>คืน ": "<div class=\"skreset\"><span><b>Reset all skills</b><small>Refunds ",
  "</p>\n     <div class=\"mfoot\"><button class=\"btn ghost\" data-act=\"skresetno\">ยกเลิก</button><button class=\"btn primary\" data-act=\"skresetgo\">รีเซ็ตสกิล": "</p>\n     <div class=\"mfoot\"><button class=\"btn ghost\" data-act=\"skresetno\">Cancel</button><button class=\"btn primary\" data-act=\"skresetgo\">Reset skills: ",
  " แต้ม</b> เอาไปอัปสายไหนก็ได้ใหม่ ท่าที่ใส่ขึ้นชกจะถูกถอดออก</p>\n     <p class=\"meta\">": " points</b> to spend on any line. Equipped moves will be removed.</p>\n     <p class=\"meta\">",
- "?</h2><p>สกิลที่อัปไว้ทั้งหมดจะหายไป และได้คืน <b class=\"goldt\">": "?</h2><p>All learned skills will be cleared and you get back <b class=\"goldt\">"
+ "?</h2><p>สกิลที่อัปไว้ทั้งหมดจะหายไป และได้คืน <b class=\"goldt\">": "?</h2><p>All learned skills will be cleared and you get back <b class=\"goldt\">",
+ "ใครปั้นสายผิดมา ตอนนี้แก้ตัวได้แล้วค่ะ 🥋": "Built the wrong line? Now you can fix it 🥋",
+ "ถ้ามีแต้มเหลือ อัปสายปั้นได้เลยไม่ต้องรีเซ็ต · อยากเปลี่ยนแค่สายปั้นใช้ปุ่มรีเซ็ตสายปั้น": "With spare points you can learn a build line without resetting · to swap only the build line, use the build-line reset",
+ "สายปั้นอัปควบสายสำนักได้": "Build lines stack with school lines",
+ "นักมวยแต่ละคนรีเซ็ตครั้งแรกฟรี ครั้งต่อไป ฿10,000 · ฿20,000 · ฿30,000": "Each fighter's first reset is free, then ฿10,000 · ฿20,000 · ฿30,000",
+ "การ์ดนักมวย → สกิล → ล่างสุด กดรีเซ็ตแล้วได้แต้มที่อัปไปคืนครบ เลือกสายสำนักหรือสายปั้นใหม่ได้": "Fighter card → Skills → bottom: reset to get every spent point back and pick a new school or build line",
+ "รีเซ็ตสกิลทั้งหมด": "Reset all skills",
+ "รอบนี้เปลี่ยนสายสกิลได้แล้ว ไม่ต้องกลัวอัปผิด": "You can now change skill lines, so no more fear of a wrong pick"
 }
