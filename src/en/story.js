@@ -1898,9 +1898,12 @@ function gachaPull(G){if((G.dust||0)<GACHA_COST)return null;G.dust-=GACHA_COST;G
   const pool=Object.keys(CARDS).filter(k=>CARDS[k].g);const by=r=>pool.filter(k=>CARDS[k].r===r);const x=srand(G,(G.pity*131+(G.pulls||0)*7)|0);G.pulls=(G.pulls||0)+1;
   let r=G.pity>=GACHA_PITY?"SSR":x<.03?"SSR":x<.30?"SR":"N";if(r==="SSR")G.pity=0;const L=by(r);const id=L[Math.floor(srand(G,G.pulls*97+11)*L.length)];
   const o=G.cards[id];let res;if(!o){G.cards[id]={n:1,lv:1,wk:absWeek(G),seen:false};res={id,isNew:true};}
-  else if((o.lv||1)<3){o.lv=(o.lv||1)+1;o.n=(o.n||1)+1;if(G.F[CARDS[id].c])add(G,CARDS[id].c,"bond",3);res={id,up:o.lv};}
-  else{o.n=(o.n||1)+1;o.spare=(o.spare||0)+1;res={id,spare:o.spare};} /* v1.85: past max level a copy is kept, to break down from the card page */
+  else{o.n=(o.n||1)+1;o.spare=(o.spare||0)+1;res={id,spare:o.spare,canUp:(o.lv||1)<3};} /* v1.85.1: every duplicate is kept — the player levels the card up or breaks it down on the card page */
   return res;}
+/* v1.85.1: spend one spare copy to raise the card a level (max 3) — the character warms to you a little */
+const CARD_MAX_LV=3,CARD_UP_BOND=3;
+const cardCanUp=(id,o)=>!!o&&(o.lv||1)<CARD_MAX_LV&&(o.spare||0)>0;
+function levelCard(G,id){const o=(G.cards||{})[id],C=CARDS[id];if(!C||!cardCanUp(id,o))return 0;o.spare--;o.lv=(o.lv||1)+1;if(G.F[C.c])add(G,C.c,"bond",CARD_UP_BOND);return o.lv;}
 /* v1.85: break spare copies into stardust (the card itself is never lost) */
 function dustCard(G,id,count){const o=(G.cards||{})[id],C=CARDS[id];if(!o||!C)return 0;const k=Math.min(count||1,o.spare||0);if(k<=0)return 0;
   const d=DUST_OF[C.r]*k;o.spare-=k;G.dust=(G.dust||0)+d;G.dustMade=(G.dustMade||0)+d;return d;}

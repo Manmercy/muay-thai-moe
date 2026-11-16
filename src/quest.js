@@ -1008,8 +1008,7 @@ function loyPull(G){if(!loyFest()||(G.dust||0)<LG_COST)return null;G.dust-=LG_CO
   const pool=Object.keys(CARDS).filter(k=>CARDS[k].lg),by=r=>pool.filter(k=>CARDS[k].r===r);const x=srand(G,(G.lgPity*173+G.lgPulls*11)|0);
   let r=G.lgPity>=LG_PITY?"SSR":x<.04?"SSR":x<.27?"SR":x<.65?"R":"N";if(r==="SSR")G.lgPity=0;const L=by(r);const id=L[Math.floor(srand(G,G.lgPulls*89+5)*L.length)];
   const o=G.cards[id];let res;if(!o){G.cards[id]={n:1,lv:1,wk:absWeek(G),seen:false};res={id,isNew:true};}
-  else if((o.lv||1)<3){o.lv=(o.lv||1)+1;o.n=(o.n||1)+1;if(G.F[CARDS[id].c])add(G,CARDS[id].c,"bond",3);res={id,up:o.lv};}
-  else{o.n=(o.n||1)+1;o.spare=(o.spare||0)+1;res={id,spare:o.spare};}
+  else{o.n=(o.n||1)+1;o.spare=(o.spare||0)+1;res={id,spare:o.spare,canUp:(o.lv||1)<3};} /* v1.85.1: every duplicate is kept — the player levels the card up or breaks it down on the card page */
   res.loy=1;return res;}
 function loyGachaHTML(){if(!loyFest())return "";const own=Object.keys(CARDS).filter(k=>CARDS[k].lg&&(G.cards||{})[k]).length,all=Object.keys(CARDS).filter(k=>CARDS[k].lg).length;
   return `<div class="gacha loyg"><span><b class="goldt">ตู้ลอยกระทง</b> <small>เปิดถึง 7 ธ.ค. เท่านั้น · การ์ดชุดไทย ${own}/${all} ใบ · การันตี SSR อีก ${LG_PITY-(G.lgPity||0)} ครั้ง · การ์ดที่ได้แล้วอยู่ในอัลบั้มตลอดไป</small></span><button class="btn sm gold" data-act="loygacha" ${(G.dust||0)<LG_COST?"disabled":""}>สุ่ม ${LG_COST}✦</button></div>`;}
