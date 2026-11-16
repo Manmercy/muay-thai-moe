@@ -209,8 +209,10 @@ function drawPetQ(Q,k,t,moving){const leg=moving&&Math.floor(t/110)%2;
   else if(k==="rooster"){const peck=!moving&&Math.floor(t/400)%4===0?1:0;Q(0,-1,2,4,"#1d6b5a");Q(1,-2,1,2,"#2d8c74");Q(1,2,6,4,"#c0392b");Q(3,3,3,2,"#8e2a20");
     Q(6,0+peck,2,3,"#e8a23a");Q(7,-2+peck,2,2,"#e8a23a");Q(7,-3+peck,2,1,"#d23246");Q(9,-1+peck,1,1,"#f2c94c");Q(8,-2+peck,1,1,"#2b2530");Q(3,6,1,2-(leg?1:0),"#e8a23a");Q(5,6,1,2-(leg?0:1)+1,"#e8a23a");}
   else if(k==="turtle"){const h=moving?0:(Math.floor(t/1800)%3===0?-1:0);Q(1,1,7,3,"#3f7a3a");Q(2,0,5,1,"#3f7a3a");Q(2,1,1,1,"#5aa34f");Q(4,2,1,1,"#5aa34f");Q(6,1,1,1,"#5aa34f");
-    Q(8+h,2,2,2,"#8fbf6a");Q(9+h,2,1,1,"#2b2530");Q(1,4,1,1,"#8fbf6a");Q(7,4,1,1,"#8fbf6a");Q(0,3,1,1,"#8fbf6a");}}
-const PET_BOX={cat:[8,116,100,128],dog:[20,120,148,130],rooster:[110,114,150,126],turtle:[60,126,130,130]},PET_SPD={cat:3000,dog:2600,rooster:2200,turtle:9000};
+    Q(8+h,2,2,2,"#8fbf6a");Q(9+h,2,1,1,"#2b2530");Q(1,4,1,1,"#8fbf6a");Q(7,4,1,1,"#8fbf6a");Q(0,3,1,1,"#8fbf6a");}
+  else if(k==="otter"){const b="#7a5230",d="#563a22",c="#d2ad84",bob=moving?0:(Math.floor(t/700)%2?-1:0),wag=Math.floor(t/200)%2;
+    Q(0,3+wag,2,1,b);Q(2,2,7,3,b);Q(3,4,5,1,c);Q(8,0+bob,4,3,b);Q(10,1+bob,2,2,c);Q(8,-1+bob,1,1,d);Q(10,0+bob,1,1,"#2b2530");Q(12,1+bob,1,1,"#2b2530");Q(12,2+bob,1,1,"#efe6d8");Q(3+(leg?1:0),5,1,1,d);Q(7-(leg?1:0),5,1,1,d);}}
+const PET_BOX={otter:[150,128,250,134],cat:[8,116,100,128],dog:[20,120,148,130],rooster:[110,114,150,126],turtle:[60,126,130,130]},PET_SPD={otter:2400,cat:3000,dog:2600,rooster:2200,turtle:9000};
 const PET_ICON={};function petIcon(k){if(PET_ICON[k])return PET_ICON[k];const c=document.createElement("canvas");c.width=34;c.height=26;const x=c.getContext("2d");
   const Q=(a,b,w,h,col)=>{x.fillStyle=col;x.fillRect((a+1)*2,(b+5)*2,w*2,h*2);};drawPetQ(Q,k,0,false);return PET_ICON[k]=c.toDataURL();}
 function wander(seed,t,box,period){const seg=Math.floor(t/period),ph=(t%period)/period;

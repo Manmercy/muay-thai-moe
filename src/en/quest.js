@@ -202,7 +202,7 @@ function questExtra(done,rng){if(!G||G.ended)return false;G.gang=G.gang||{st:0,n
 
 // ---------- modals ----------
 function mailListHTML(){const L=G.mail||[];
-  return `<h2 class="mailh">${MAILBOX_PX} Mailbox</h2>${L.length?`<div class="mlist2">${L.map(m=>`<button class="mrow2 ${m.read?"":"unread"} ${mailOpen(m)?"act":""} ${m.done||m.expired?"old":""}" data-act="mopen" data-v="${m.id}"><span class="mk ${m.kind}">${{letter:"Letter",take:"Money",pay:"Invoice",quiz:"Quiz",quest:"Request",job:"Job"}[m.kind]}</span><span class="mt"><b>${esc(m.title)}</b><small>${esc(m.from)} · wk ${m.wk}${m.expired?" · expired":m.done?" · handled":m.expAbs!=null?` · by wk ${((m.expAbs-1)%52)+1}`:""}</small></span>${mailOpen(m)?'<i class="dot"></i>':""}</button>`).join("")}</div>`:`<p class="lead">No mail yet</p>`}`;}
+  return `<h2 class="mailh">${MAILBOX_PX} Mailbox</h2>${L.length?`<div class="mlist2">${L.map(m=>`<button class="mrow2 ${m.read?"":"unread"} ${mailOpen(m)?"act":""} ${m.done||m.expired?"old":""}" data-act="mopen" data-v="${m.id}"><span class="mk ${m.kind}">${{letter:"Letter",take:"Money",pay:"Invoice",quiz:"Quiz",quest:"Request",job:"Job",event:"Event"}[m.kind]}</span><span class="mt"><b>${esc(m.title)}</b><small>${esc(m.from)} · wk ${m.wk}${m.expired?" · expired":m.done?" · handled":m.expAbs!=null?` · by wk ${((m.expAbs-1)%52)+1}`:""}</small></span>${mailOpen(m)?'<i class="dot"></i>':""}</button>`).join("")}</div>`:`<p class="lead">No mail yet</p>`}`;}
 function letterHTML(m){m.read=true;let act="";
   if(m.kind==="take")act=m.done?`<p class="meta center">Received ${fmt(m.amt)}</p>`:`<button class="btn primary" data-act="mtake" data-v="${m.id}">Collect ${fmt(m.amt)}</button>`;
   if(m.kind==="pay")act=m.done?`<p class="meta center">${m.paid?"Paid":"Didn't pay (fame −0.3)"}</p>`:m.expired?"":`<button class="btn" data-act="mskip" data-v="${m.id}">Don't pay (fame −0.3)</button><button class="btn primary" data-act="mpay" data-v="${m.id}" ${G.cash<m.amt?"disabled":""}>Pay ${fmt(m.amt)}</button>`;
@@ -678,18 +678,52 @@ function redeemCode(raw){const v=(raw||"").toUpperCase().replace(/\s+/g,"");if(!
     G.ev=G.ev||{};G.ev.loy={got:G.week,season:G.season||1,best:0,tiers:{},runs:0};
     addMail(G,{kind:"event",ev:"loy",from:"Auntie Taew, som tam stall by the temple",title:"Loy Krathong at the floating market tonight!",body:"Manager dear, tonight I'm selling krathong at the floating-market fair. Bring the girls! Lots of food, and the som tam's on me! But I hear the helmet gang plans to make trouble… I'd feel much safer with you all there."});
     save();AU.sfx("level");toast("You got a Loy Krathong event invitation! Check your mailbox");}}
-function evMailAct(m){const L=loyOf(G);if(!L)return "";const tr=loyTier(L.best,L.boss);
-  return `${L.runs?`<p class="meta center">Best score <b class="goldt num">${L.best}</b>${tr?` · Reward tier: <b>${tr.n}</b>`:""}</p>`:""}<button class="btn primary" data-act="evloy">${L.runs?"Take on the Riverside Brawl again":"Go to the Loy Krathong fair"}</button>`;}
-const LOY_INTRO=[
-  {n:"nar",bg:"river",t:"Full moon night. The floating market by the temple is busier than ever, krathong boats lined along the bank, candlelight glittering on the water."},
-  {n:"npc",who:"Auntie Taew",t:"You made it, Manager! I've sold fifty krathong already… but look, the helmet gang is back."},
+function evMailAct(m){const L=loyOf(G);if(!L)return "";const tr=loyTier(L.best,L.boss);const T=L.tiers||{};
+  const ends=["bronze","silver","gold"].filter(k=>T[k]).map(k=>`<button class="btn sm" data-act="loyend" data-v="${k}">Ending: ${LOY_TIERS.find(x=>x[0]===k)[1]} · ${LOY_END[k].t}</button>`).join("");
+  return `${L.runs?`<p class="meta center">Best score <b class="goldt num">${L.best}</b>${tr?` · Reward tier: <b>${tr.n}</b>`:""}</p>`:""}<button class="btn primary" data-act="evloy">${L.runs?"Take on the Riverside Brawl again":"Go to the Loy Krathong fair"}</button>
+  ${L.runs?`<button class="btn" data-act="thief" ${L.thiefWk===absWeek(G)?"disabled":""}>${L.thiefWk===absWeek(G)?"Thief caught (back next week)":"Catch the Krathong Thief"}</button>`:""}
+  ${L.intro?`<div class="evrep"><button class="btn sm" data-act="loyintro">Replay the opening</button>${ends}</div>`:""}
+  ${T.gold?`<div class="evrep"><button class="btn sm" data-act="loydress" aria-pressed="${!!L.dressOn}">Thai dress off-stage: ${L.dressOn?"On":"Close"}</button></div>`:""}`;}
+function loyIntro(G){const S=[
+  {n:"nar",bg:"river",t:"The full moon of the twelfth month. The floating market by the Ping is busier than ever, krathong boats lined along the bank, candlelight glittering on the water."},
+  {n:"npc",who:"Auntie Taew",t:"You made it, Manager! Auntie brought her daughter's Thai dresses for the kids to wear at the fair. Go change, quick!"},
+  {n:"nar",t:"Ten minutes later"},
+  {n:"kati",f:"flustered",l:"thai",t:"Manager… this dress is so tight at the waist. Do I look weird? …Don't stare so long!"}];
+  if(inCamp(G,"mali"))S.push({n:"mali",f:"happy",l:"thai",t:"Kati looks gorgeous! Mali pinned her sabai herself~ And Mali's… looks pretty too, right, Manager?"});
+  if(inCamp(G,"rin"))S.push({n:"rin",f:"flustered",l:"thai",t:"This pha sin limits my stride to about forty centimeters. Not ideal for fighting… but not bad either."});
+  S.push({n:"npc",who:"Auntie Taew",t:"Everyone looks lovely! …But look over there. The helmet gang is back."},
   {n:"npc",who:"Big Boss Golden Helmet",t:"Everyone in this market pays us for their spot! Don't pay, pack up and go home, som tam lady!"},
   {n:"coach",t:"Easy now, no trouble… wait, they're challenging us to the makeshift ring by the pier?"},
   {n:"npc",who:"Big Boss Golden Helmet",t:"Send three. I've got nine boys. No breaks, no mercy. If your camp wins, my gang never sets foot in this market again!"},
-  {n:"kati",f:"happy",t:"Challenge accepted! Pick our fighters, Manager, in any order you like."}];
+  {n:"kati",f:"happy",l:"thai",t:"I accept the challenge! Auntie Taew says this pha sin stretches, so it won't rip in a fight! Pick who goes, Manager!"});
+  return S;}
+const LOY_END={
+ bronze:{t:"The Helmet Gang Retreats",steps:[{n:"nar",bg:"river",t:"The helmet gang's goons retreat to the far bank. They haven't given up, but they won't come near Auntie Taew's stall again."},
+  {n:"npc",who:"Auntie Taew",t:"Well done, kids! Auntie sold so many more krathongs. Here, pocket money for everyone."},
+  {n:"kati",f:"happy",l:"thai",t:"They'll be back next year for sure. I'll train even harder!"},
+  {n:"nar",t:"Squeaking comes from under the pier. A tiny otter is tangled in krathong string. Kati kneels to free it, the hem of her pha sin soaking wet."},
+  {n:"kati",f:"flustered",l:"thai",t:"It followed me, Manager… it won't leave. Can we keep it at camp? We can, right?"}]},
+ silver:{t:"The Whole Market Cheers",steps:[{n:"nar",bg:"river",t:"The whole floating market crowds around the makeshift ring. The cheers drown out the fireworks."},
+  {n:"coach",t:"Not bad… but you haven't reached the boss yet. There's still time this year."},
+  {n:"npc",who:"Auntie Taew",t:"Those Thai dresses are yours to keep. Wear them anywhere. Auntie's happy they got worn for something good."},
+  {n:"kati",f:"flustered",l:"thai",t:"Manager… Auntie Taew gave me a krathong. Want to float it together? …Just one. She only gave me one."}]},
+ gold:{t:"The Golden Helmet Floats Away",steps:[{n:"nar",bg:"river",t:"Big Boss Golden Helmet crashes onto the pier. His golden helmet rolls into the river and floats off with a hundred krathongs."},
+  {n:"npc",who:"Big Boss Golden Helmet",t:"My helmet!! …Fine, fine! I won't come to this market again. This year! Just this year!"},
+  {n:"npc",who:"Auntie Taew",t:"Auntie's sewn extra Thai dresses for all of you. Wear them on outings, dates, anywhere!"},
+  {n:"kati",f:"flustered",l:"thai",t:"…Manager, can I wear this on a date? …Not a date! An outing! An outing!"},
+  {n:"nar",t:"The name Sirichai Gym echoes across the floating market all night, and for many nights after."}]}};
+const LOY_THIEF={name:"Tum the Krathong Thief",
+ line:{kati:"Give it back right now! That krathong belongs to the grandma next door to me!",mali:"Mali helped Auntie fold that krathong! Give it back!",rin:"I counted. You took seventeen. Return every one of them.",ploy:"This dress is expensive. But if I have to dive in for them myself, I won't hesitate.",fah:"Fah's seen you since last year! You're not getting away this time!"},
+ pre:[{n:"nar",bg:"river",t:"Splash! Someone dives in, fishing coins out of the villagers' krathongs by the plastic-bagful."},
+  {n:"npc",who:"Auntie Taew",t:"Tum again! He fishes coins out of people's krathongs every year. This year he took the whole krathongs!"},
+  {n:"npc",who:"Tum the Krathong Thief",t:"The krathongs floated to me, so I took 'em! Want 'em back? Come up on the pier!"}],
+ win:[{n:"nar",bg:"river",t:"Tum hits the water with a splash. The coin bag bobs on the surface, and the villagers fish it out for the temple."},
+  {n:"npc",who:"Auntie Taew",t:"Well done, dear! Here's a share of tonight's krathong sales. Buy the kids at camp some milk."}],
+ lose:[{n:"nar",bg:"river",t:"Tum laughs and dives in with the bag of coins… but the bag rips mid-river and every coin sinks."},
+  {n:"npc",who:"Tum the Krathong Thief",t:"Hey! My coins!! …See you next year!"},{n:"npc",who:"Auntie Taew",t:"Never mind, dear. At least he didn't get anything."}]};
 function evStartLoy(){const L=loyOf(G);if(!L)return;UI.modal=null;
   const open=()=>{L.run=null;L.pick=[];UI.modal={type:"gaunt"};render();};
-  if(!L.intro){L.intro=1;save();playScene(LOY_INTRO,open,{bg:"river",look:"casual"});}else open();}
+  if(!L.intro){L.intro=1;save();playScene(loyIntro(G),open,{bg:"river",look:"thai"});}else open();}
 function gauntPool(){const R=roster(G).filter(f=>!f.injury);return R.length?R:roster(G);}
 function gauntHTML(){const L=loyOf(G);if(!L){UI.modal=null;return "";}const R=L.run;
   const head=`<h2>Loy Krathong Riverside Brawl</h2><p class="meta">Three fighters, three bouts each in a row. HP barely recovers between bouts; lose and the next fighter steps in · The last bout is Boss Golden Helmet</p>`;
@@ -701,8 +735,8 @@ function gauntHTML(){const L=loyOf(G);if(!L){UI.modal=null;return "";}const R=L.
       ${pool.length<3?`<p class="meta">Your camp has fewer than three fighters, so some will go again (full HP each new turn)</p>`:""}
       <div class="center endbtns"><button class="btn primary" data-act="gstart" ${P.length<need?"disabled":""}>Start</button><button class="btn" data-act="closeModal">Later</button></div>${ladder(-1)}`;}
   if(R.done){const tr=loyTier(R.score,R.boss);return head+`<div class="gres2"><p class="meta">Total score</p><p class="gsc num">${R.score}</p>${tr?`<span class="pill gold">Reward tier: ${tr.n}</span>`:`<span class="pill">No reward tier yet (Bronze ${LOY_TIERS[2][2]})</span>`}
-    ${(R.got||[]).length?`<ul class="glist">${R.got.map(x=>`<li>${x}</li>`).join("")}</ul>`:""}<p class="meta">Best ${L.best} · Gold ${LOY_TIERS[0][2]}+ and beat Boss Golden Helmet</p></div>
-    <div class="center endbtns"><button class="btn primary" data-act="gretry">Try again</button><button class="btn" data-act="closeModal">Back to camp</button></div>${ladder(-1)}`;}
+    ${(R.got||[]).length?`<ul class="glist">${R.got.map(x=>`<li>${x}</li>`).join("")}</ul>`:""}<p class="meta">Best ${L.best} · Gold ${LOY_TIERS[0][2]}+ and Big Boss Golden Helmet must fall</p></div>
+    <div class="center endbtns">${R.newEnd?`<button class="btn gold" data-act="loyend" data-v="${R.newEnd}">Watch the ending (new!)</button>`:""}<button class="btn primary" data-act="gretry">Challenge again</button><button class="btn" data-act="closeModal">Back to camp</button></div>${ladder(-1)}`;}
   const f=G.F[R.order[R.slot]];
   return head+`<div class="gnow"><p class="meta">Score <b class="goldt num">${R.score}</b> · Fighter ${R.slot+1}/3 · Bout ${R.k+1}/9</p>
     <div class="gcur">${faceImg(f)}<span><b>${esc(f.name)}</b><small>HP ${Math.round(R.hp)} · Stamina ${Math.round(R.sta)}</small><div class="meter"><i style="--v:${clamp(R.hp,0,100)}%;--bc:${R.hp>50?"var(--green)":R.hp>25?"var(--warn)":"var(--red)"}"></i></div></span></div></div>
@@ -710,11 +744,11 @@ function gauntHTML(){const L=loyOf(G);if(!L){UI.modal=null;return "";}const R=L.
 function gauntNextSlot(R){R.slot++;R.j=0;R.k=R.slot*3;R.hp=100;R.sta=100;if(R.slot>=3||R.k>=9)gauntFinish(R);}
 function gauntFinish(R){const L=loyOf(G);R.done=true;L.runs=(L.runs||0)+1;L.best=Math.max(L.best||0,R.score);if(R.boss)L.boss=1;R.got=[];
   const tr=loyTier(R.score,R.boss);const order=["bronze","silver","gold"];
-  if(tr)for(const k of order.slice(0,order.indexOf(tr.k)+1))if(!L.tiers[k]){L.tiers[k]=1;R.got.push(...loyReward(k));}
+  if(tr){for(const k of order.slice(0,order.indexOf(tr.k)+1))if(!L.tiers[k]){L.tiers[k]=1;R.newEnd=k;R.got.push(...loyReward(k));}const c=loyCardDrop(G,R.order);if(c)R.got.push(c);}
   for(let i=0;i<9;i++)delete G.F["q_evloy_"+i];save();}
 function loyReward(k){const out=[];
-  if(k==="bronze"){G.cash+=3000;out.push("Prize money from Auntie Taew ฿3,000");if(typeof PETS!=="undefined"&&PETS.otter&&typeof adoptPet==="function"&&!hasPet(G,"otter")){adoptPet(G,"otter");out.push("A little otter followed you back to camp!");}}
-  if(k==="silver"){G.cash+=5000;out.push("Prize money ฿5,000");if(typeof loyCardDrop==="function"){const c=loyCardDrop(G);if(c)out.push(c);}}
+  if(k==="bronze"){G.cash+=3000;out.push("Prize money from Auntie Taew ฿3,000");if(typeof PETS!=="undefined"&&PETS.otter&&typeof adoptPet==="function"&&!hasPet(G,"otter")){adoptPet(G,"otter",null,"kati");UI.petName=G.pets.length-1;out.push("A little otter followed you back to camp! (Give it a name)");}}
+  if(k==="silver"){G.cash+=5000;out.push("Prize money ฿5,000");out.push("Thai dress unlocked on character profiles");}
   if(k==="gold"){G.rep+=1.5;out.push("Fame +1.5");if(typeof loyGold==="function"){const c=loyGold(G);if(c)out.push(c);}}
   return out;}
 function gauntAfter(){const L=loyOf(G),R=L&&L.run,F=LASTF;if(!R||!F){UI.modal={type:"gaunt"};render();return;}
@@ -736,4 +770,67 @@ Object.assign(ACT,{
     UI.modal=null;openFight2(bk,gauntAfter);},
   gquit:()=>{const L=loyOf(G),R=L&&L.run;if(!R||R.done)return;gauntFinish(R);render();},
   gretry:()=>{const L=loyOf(G);if(!L)return;L.run=null;L.pick=[];render();},
+});
+
+/* ===== v1.81: Loy Krathong round 2 — Thai-dress scenes, SR cards, the krathong thief, the otter, Thai dress off-stage ===== */
+const LOY_CARDS=["lk_kati","lk_mali","lk_rin","lk_ploy","lk_fah"];
+Object.assign(CARDS,{
+ lk_kati:{c:"kati",r:"SR",ev:1,t:"Lost at Loy Krathong",hint:"Loy Krathong 2026 event · from the Riverside Brawl",bg:"river",need:()=>false,steps:[
+  {n:"nar",t:"A little boy stands crying by a meatball stall, clutching a bread krathong that's half crumbled."},
+  {n:"kati",f:"happy",l:"thai",t:"Don't cry. I'm Kati. Climb up on my shoulders and you can spot your mom from up high!"},
+  {n:"nar",t:"Kati hoists him onto her shoulders without a second thought. Her pha sin has to hitch up a little, but she doesn't care."},
+  {n:"npc",who:"Little Boy",t:"There's Mom! …Kati, is that guy your boyfriend?"},
+  {n:"kati",f:"flustered",l:"thai",t:"Huh!? No! He's the manager! …Not yet— no… No! Go find your mom already!"},
+  {n:"nar",t:"The boy runs off to his mother, leaving a red-faced Kati in the middle of the fair, right beside you."}]},
+ lk_mali:{c:"mali",r:"SR",ev:1,t:"Pageant Stand-In",hint:"Loy Krathong 2026 event · from the Riverside Brawl",bg:"river",need:()=>false,steps:[
+  {n:"nar",t:"Contestant number seven for the Nang Noppamas pageant suddenly falls ill. Auntie Taew, a judge, turns to look at Mali."},
+  {n:"npc",who:"Auntie Taew",t:"Mali! Yes, you. You're already dressed for it. Get up on stage, dear!"},
+  {n:"mali",f:"flustered",l:"thai",t:"Huh!? All I can do is sew, Auntie! I can't do a catwalk!"},
+  {n:"nar",t:"On stage another contestant's sash snaps. Mali pulls the needle out of her hair and sews it back in thirty seconds flat."},
+  {n:"npc",who:"MC",t:"The Judges' Favorite award goes to… number seven, Mali!"},
+  {n:"mali",f:"flustered",l:"thai",t:"…Manager, on stage I didn't look at a single judge. Only ever at one person… Don't ask who!"}]},
+ lk_rin:{c:"rin",r:"SR",ev:1,t:"Destined Match by the River",hint:"Loy Krathong 2026 event · from the Riverside Brawl",bg:"river",need:()=>false,steps:[
+  {n:"nar",t:"A fortune teller by the pier beckons Rin over. Thirty baht a reading. Rin pays to test its accuracy."},
+  {n:"npc",who:"Pier Fortune Teller",t:"Your palm says… your destined match is very close. Close enough to be standing right beside you."},
+  {n:"rin",f:"happy",l:"thai",t:"The odds of a prediction like that being right depend on how many people are standing nearby. Which right now is… one."},
+  {n:"rin",f:"flustered",l:"thai",t:"…Not enough data. We need more samples. Will you come get a reading with me again next year? To retest."},
+  {n:"nar",t:"Rin folds the fortune neatly into her pocket and won't let you read it."}]},
+ lk_ploy:{c:"ploy",r:"SR",ev:1,t:"Ditching the Photo Shoot",hint:"Loy Krathong 2026 event · from the Riverside Brawl",bg:"river",need:()=>false,steps:[
+  {n:"nar",t:"Someone in a purple Thai dress dashes behind you at the pier. Three photographers run past the other way."},
+  {n:"ploy",f:"flustered",l:"thai",t:"Shh! Stand still like that. The sponsor's had me holding a krathong and smiling for two hours."},
+  {n:"ploy",f:"happy",l:"thai",t:"I've held a krathong for photos for ten years… and never once floated one myself."},
+  {n:"nar",t:"You hand her a banana-leaf krathong from Auntie Taew's stall. Ploy lights the candle herself, hands shaking a little."},
+  {n:"ploy",f:"flustered",l:"thai",t:"…Don't tell anyone I wished for that long. And don't ask what I wished for."}]},
+ lk_fah:{c:"fah",r:"SR",ev:1,t:"Lantern Showdown",hint:"Loy Krathong 2026 event · from the Riverside Brawl",bg:"river",need:()=>false,steps:[
+  {n:"nar",t:"Fah and Mali each light a sky lantern. Whoever's flies higher gets to stand next to the manager for the fireworks."},
+  {n:"fah",f:"angry",l:"thai",t:"Fah's lantern is bigger, the wick's thicker! Easy win!"},
+  {n:"nar",t:"Fah's lantern shoots up fast… and snags on the first rain tree. Mali's drifts past, slow and graceful."},
+  {n:"fah",f:"flustered",l:"thai",t:"…Doesn't count! The tree cheated! …Fine, Fah'll take the other side. You've got two sides, right?"},
+  {n:"nar",t:"The first firework bursts overhead. Someone is standing on each side of you, and neither will budge."}]}});
+function loyCardDrop(G,order){G.cards=G.cards||{};const left=LOY_CARDS.filter(k=>!G.cards[k]);if(!left.length)return null;
+  const pref=(order||[]).map(id=>"lk_"+id).filter(k=>left.includes(k));const L=loyOf(G);const id=pref[0]||left[((L&&L.runs)||0)%left.length];
+  G.cards[id]={n:1,lv:1,wk:absWeek(G),seen:false};if(G.F[CARDS[id].c])add(G,CARDS[id].c,"bond",3);G.dust=(G.dust||0)+5;
+  return `New SR card: "${CARDS[id].t}" (see it in the album)`;}
+function loyGold(G){const L=loyOf(G);if(!L)return null;L.dressOn=1;return "Thai dress off-stage unlocked: the girls wear Thai dress in outings and dates (toggle it in Auntie Taew's letter)";}
+const loyThaiLook=G=>!!(G&&G.ev&&G.ev.loy&&G.ev.loy.tiers&&G.ev.loy.tiers.silver);
+function evThief(G,f){const K=QK.gang1,t=Math.max(6,ovr(f.a)+K.lvl-1.2),rng=mulberry32((G.seed^0x7a1)+absWeek(G)*17);const a={};
+  for(const [x] of ATTRS)a[x]=clamp(t+(K.tilt[x]||0)+(rng()*1.2-.6),3,19.5);const id="q_evthief";
+  const o=baseFighter(id,{name:LOY_THIEF.name,full:LOY_THIEF.name,div:"X",camp:"quest",color:K.color,potential:t+2,a});
+  o.sprite=K.sprite;o.kind="gang1";o.grp="gang";o.lvl=clamp(Math.round(t-6),1,10);o.fatigue=0;o.morale=70;G.F[id]=o;return id;}
+function thiefHTML(){const pool=gauntPool();return `<h2>Catch the Krathong Thief</h2><p class="meta">A silly 2-round bout · no injuries, no effect on records · win to earn krathong money from Auntie Taew · once per week</p>
+  <div class="gpick">${pool.map(f=>`<button class="gpk" data-act="thiefgo" data-v="${f.id}">${faceImg(f)}<span><b>${esc(f.name)}</b><small>Lv.${f.lvl} · Fatigue ${Math.round(f.fatigue)}</small></span></button>`).join("")}</div>
+  <div class="center endbtns"><button class="btn" data-act="closeModal">Later</button></div>`;}
+function thiefGo(fid){const L=loyOf(G);if(!L)return;const f=G.F[fid];if(!f)return;UI.modal=null;
+  const pre=[...LOY_THIEF.pre,f.canon&&LOY_THIEF.line[fid]?{n:fid,f:"angry",l:"thai",t:LOY_THIEF.line[fid]}:{n:"nar",t:`${f.name} steps onto the pier and rolls up their sleeves`}];
+  playScene(pre,()=>{const qid=evThief(G,f);const bk={id:"bthief",a:fid,b:qid,week:G.week,tier:"evloy",rounds:2,ev:1,bg:"bg_river.webp"};
+    openFight2(bk,()=>{const F=LASTF,win=F&&F.result&&F.result.win==="A";L.thiefWk=absWeek(G);delete G.F.q_evthief;
+      if(win){const c=1200;G.cash+=c;G.rep+=.2;L.thiefN=(L.thiefN||0)+1;}save();
+      playScene(win?[...LOY_THIEF.win,{n:"nar",t:`Krathong fee ฿1,200 · Fame +0.2`}]:LOY_THIEF.lose,()=>{AU.startMusic("hub");UI.tab="home";save();render();},{bg:"river",look:"thai"});});},{bg:"river",look:"thai"});}
+Object.assign(ACT,{
+  loyintro:()=>{UI.modal=null;playScene(loyIntro(G),()=>{AU.startMusic("hub");render();},{bg:"river",look:"thai"});},
+  loyend:d=>{const E=LOY_END[d.v];if(!E)return;const L=loyOf(G);if(L&&L.run&&L.run.newEnd===d.v)L.run.newEnd=null;UI.modal=null;
+    playScene(E.steps,()=>{AU.startMusic("hub");if(L&&L.run&&L.run.done)UI.modal={type:"gaunt"};render();},{bg:"river",look:"thai"});},
+  thief:()=>{const L=loyOf(G);if(!L||L.thiefWk===absWeek(G))return;UI.modal={type:"thief"};render();},
+  thiefgo:d=>thiefGo(d.v),
+  loydress:()=>{const L=loyOf(G);if(!L||!L.tiers.gold)return;L.dressOn=L.dressOn?0:1;save();render();},
 });

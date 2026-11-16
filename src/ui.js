@@ -1,5 +1,5 @@
 // ================= MUAY THAI MOE v1.3 — UI =================
-const VERSION="1.80.18";
+const VERSION="1.81";
 const CUR_LANG=(typeof window!=="undefined"&&window.LANG)||"th";
 const TH_LABEL=String.fromCharCode(3652,3607,3618);
 function langSwitch(cls){return `<div class="langsw ${cls||""}" role="group" aria-label="Language">${[["th",TH_LABEL],["en","EN"]].map(([k,l])=>`<button class="lsb ${CUR_LANG===k?"on":""}" data-act="setlang" data-v="${k}" aria-pressed="${CUR_LANG===k}">${l}</button>`).join("")}</div>`;}
@@ -13,17 +13,23 @@ const val=(x,...a)=>typeof x==="function"?x(G,...a):x;
 // v1.5: the big portrait carries the emotion. fight: happy/sad/flustered/angry · casual: normal/flustered/pout · train: normal only (other moods fall back to the main fight outfit)
 // v1.9: the fight art has no blush face — its "flustered" art is a startled face, so only real surprises use it
 const SURPRISE=/^(…)?\s*(ใครน่ะ|ห้ะ|หา[!?]|เอ๊ะ|อ๊ะ|อะไรนะ|จริงเหรอ|ตะ… |เดี๋ยว|ว้าย|อุ๊ย)/;
-const moodFor=(mood,look,text)=>{if(mood==="surprised")return look==="casual"?"flustered":"surprised";
+const moodFor=(mood,look,text)=>{if(look==="thai")return mood;if(mood==="surprised")return look==="casual"?"flustered":"surprised";
   if(look!=="casual"&&mood==="flustered")return SURPRISE.test(text||"")?"surprised":"happy";return mood;};
 const FMOOD=m=>m==="surprised"?"flustered":m==="pout"?"sad":["happy","sad","angry"].includes(m)?m:"happy";
-const stand=(id,look,mood)=>{if(id==="coach")return `${ASSET}coach.webp`;if(id==="pailin")return `${ASSET}pailin_fight_${mood==="surprised"||mood==="flustered"?"surprised":FMOOD(mood)}.webp`;
+const stand=(id,look,mood)=>{if(id==="coach")return `${ASSET}coach.webp`;
+  // v1.81: Loy Krathong Thai dress — happy + flustered art only; gold-tier players can dress the girls in it off-stage
+  if(look==="casual"&&THAI_IDS.includes(id)&&typeof G!=="undefined"&&G&&G.ev&&G.ev.loy&&G.ev.loy.dressOn&&G.ev.loy.tiers&&G.ev.loy.tiers.gold)look="thai";
+  if(look==="thai"&&THAI_IDS.includes(id))return `${ASSET}${id}_thai${["flustered","surprised","pout","sad","angry"].includes(mood)?"_fl":""}.webp`;
+if(id==="pailin")return `${ASSET}pailin_fight_${mood==="surprised"||mood==="flustered"?"surprised":FMOOD(mood)}.webp`;
   if(look==="casual"){const v=mood==="flustered"?"_flustered":["pout","angry","sad"].includes(mood)?"_pout":"";return `${ASSET}${id}_casual${v}.webp`;}
   // v1.8: one main outfit — training scenes use the fight outfit too, so clothes never flip mid-scene
   return `${ASSET}${id}_fight_${FMOOD(mood)}.webp`;};
-const faceSrc=(id,mood,look)=>id==="coach"?`${ASSET}coach_face.webp`:id==="pailin"?`${ASSET}pailin_face.webp`:look&&look!=="fight"?`${ASSET}${id}_${look}_face.webp`:`${ASSET}${id}_${["happy","sad","flustered"].includes(mood)?mood:"happy"}_face.webp`;
+const THAI_IDS=["kati","mali","rin","ploy","fah"];
+const faceSrc=(id,mood,look)=>id==="coach"?`${ASSET}coach_face.webp`:id==="pailin"?`${ASSET}pailin_face.webp`:look&&look!=="fight"&&look!=="thai"?`${ASSET}${id}_${look}_face.webp`:`${ASSET}${id}_${["happy","sad","flustered"].includes(mood)?mood:"happy"}_face.webp`;
 const BGIMG={camp:"bg_camp.webp",night:"bg_camp.webp",bus:"bg_bus_rain.webp",letter:"bg_grandpa_letter.webp",fair:"bg_fair.webp",local:"bg_local.webp",district:"bg_district.webp",ring:"bg_local.webp",final:"bg_final.webp",hall:"bg_hall.webp",gym:null,gymdusk:"gym1.webp",food:"bg_food.webp",temple:"bg_temple.webp",cafe:"bg_cafe.webp",river:"bg_river.webp",market:"bg_market.webp",rooster:"bg_rooster.webp",farm:"bg_farm.webp"};
 const cardFaceSrc=C=>{const scene=(C.steps||[]).find(s=>s.n===C.c)||{},mood=scene.f||"happy",look=scene.l||"casual";
   if(look==="train")return `${ASSET}${C.c}_train_face.webp`;
+  if(look==="thai"&&THAI_IDS.includes(C.c))return `${ASSET}${C.c}_thai${["flustered","surprised","pout","sad","angry"].includes(mood)?"_fl":""}_face.webp`;
   if(look==="fight")return `${ASSET}${C.c}_${["happy","sad","flustered","angry"].includes(mood)?mood:"happy"}_face.webp`;
   const suffix=["pout","sad","angry"].includes(mood)?"_pout":["flustered","surprised"].includes(mood)?"_flustered":"";
   return `${ASSET}${C.c}_casual${suffix}_face.webp`;};
@@ -628,7 +634,7 @@ function relHTML(f){const P=PROFILES[f.id],b=f.bond;
   const L=(ok,need,v)=>ok?esc(v):`<span class="lock">🔒 สนิท ${need}</span>`;
   const chips=(arr,pre,all)=>arr.map((x,i)=>f.know[pre+i]||b>=all?`<span class="tchip">${esc(x)}</span>`:`<span class="tchip lock">???</span>`).join("");
   const gifts=Object.entries(f.know).filter(([k])=>k.startsWith("gift_")).map(([k,v])=>`<span class="tchip ${v}">${GIFTS[k.slice(5)].name}${v==="love"?" ♥♥":v==="like"?" ♥":v==="dislike"?" ✕":""}</span>`).join("");
-  const looks=[["fight","ชุดชก"],["train","ชุดซ้อม"],["casual","ลำลอง"]];
+  const looks=[["fight","ชุดชก"],["train","ชุดซ้อม"],["casual","ลำลอง"],...(typeof loyThaiLook==="function"&&loyThaiLook(G)&&THAI_IDS.includes(f.id)?[["thai","ชุดไทย"]]:[])];
   return `<div class="pf2"><div class="pf-art"><img src="${UI.look==="train"?`${ASSET}${f.id}_train.webp`:stand(f.id,UI.look,"happy")}" alt=""><div class="seg sm">${looks.map(([k,t])=>`<button data-act="plook" data-v="${k}" aria-pressed="${UI.look===k}">${t}</button>`).join("")}</div></div>
    <div class="pf-side">${hearts(b)}${typeof missGap==="function"&&missGap(G,f.id)>=3?`<div class="missb">💭 คิดถึง · ไม่ได้เจอกัน ${missGap(G,f.id)} สัปดาห์${f.bond>(REL_FLOOR[(G.relT||{})[f.id]||0]||0)?" · ความสนิทเริ่มจางลง":""}</div>`:""}<div class="reltier"><b>${REL_TIERS[relTier(b)][1]}</b><small>${REL_TIERS[relTier(b)][2]}</small></div><div class="bars">${bar("สนิท",b,"var(--red)")}${bar("เชื่อใจ",f.trust,"var(--gold)")}</div>${f.camp==="player"?`<p class="meta trustx">${trustText(f)}</p>`:""}
     <div class="info"><div><span>ส่วนสูง</span><b>${P.height}</b></div><div><span>กรุ๊ปเลือด</span><b>${L(b>=UNLOCK.blood||f.know.blood,UNLOCK.blood,P.blood)}</b></div>
@@ -692,7 +698,7 @@ function modalHTML(){const m=UI.modal;let body="",foot=true;
   if(m.type==="repinfo")body=repInfoHTML();
   if(m.type==="otip"){const o=G.offers.find(x=>x.id===m.id);if(!o){UI.modal=null;return "";}body=offerTipHTML(o);foot=false;}
   if(m.type==="lossrev")body=lossRevHTML();
-  if(m.type==="settings")body=settingsHTML();if(m.type==="gaunt"){body=gauntHTML();foot=false;}
+  if(m.type==="settings")body=settingsHTML();if(m.type==="gaunt"){body=gauntHTML();foot=false;}if(m.type==="thief"){body=thiefHTML();foot=false;}
   if(m.type==="slots")body=slotsHTML(m.mode);
   if(m.type==="campacts"){body=campActsHTML();foot=!m.pick;}
   if(m.type==="studinfo"){body=studInfoHTML();}
@@ -750,9 +756,9 @@ function montageHTML(){const M=UI.montage;
 // v1.8: warm portraits before they are needed so scenes don't pop in late
 const WARMED={};function warm(src){if(!src||WARMED[src])return;const i=new Image();i.src=src;WARMED[src]=i;}
 function warmChar(id,look){if(id==="coach"){warm(`${ASSET}coach.webp`);return;}if(!CANON_IDS.includes(id)&&id!=="pailin")return;
-  (look==="casual"?["happy","flustered","pout"]:["happy","sad","surprised","angry"]).forEach(m=>warm(stand(id,look,m)));}
-function warmSteps(steps,look){const walk=list=>(list||[]).forEach(st=>{if(!st)return;const n=typeof st.n==="function"?null:st.n;if(n)warmChar(n,st.l==="casual"?"casual":look==="casual"&&!st.l?"casual":"fight");
-  if(st.with)warmChar(st.with,look==="casual"?"casual":"fight");if(st.bg&&BGIMG[st.bg])warm(ASSET+BGIMG[st.bg]);if(st.choice)st.choice.forEach(c=>walk(c.then));});walk(steps);}
+  (look==="casual"||look==="thai"?["happy","flustered","pout"]:["happy","sad","surprised","angry"]).forEach(m=>warm(stand(id,look,m)));}
+function warmSteps(steps,look){const walk=list=>(list||[]).forEach(st=>{if(!st)return;const n=typeof st.n==="function"?null:st.n;if(n)warmChar(n,st.l==="casual"||st.l==="thai"?st.l:(look==="casual"||look==="thai")&&!st.l?look:"fight");
+  if(st.with)warmChar(st.with,look==="casual"||look==="thai"?look:"fight");if(st.bg&&BGIMG[st.bg])warm(ASSET+BGIMG[st.bg]);if(st.choice)st.choice.forEach(c=>walk(c.then));});walk(steps);}
 function playScene(steps,done,opts={}){warmSteps(steps,opts.look||"fight");if(opts.bg&&BGIMG[opts.bg])warm(ASSET+BGIMG[opts.bg]);UI.scene={steps:[...steps],i:0,done,bg:opts.bg||"night",look:opts.look||"fight",cur:null,cast:[],coachOK:!!opts.coachOK,award:opts.award||null};sceneNext();}
 function playHonorQueue(done){const h=(G.awards||[])[0];if(!h){AU.startMusic("hub");if(done)done();return;}AU.startMusic("victory");AU.sfx("champ");
   playScene(honorSteps(G,h),()=>{G.awards.shift();save();playHonorQueue(done);},{bg:"hall",look:"fight",award:h});}

@@ -202,7 +202,7 @@ function questExtra(done,rng){if(!G||G.ended)return false;G.gang=G.gang||{st:0,n
 
 // ---------- modals ----------
 function mailListHTML(){const L=G.mail||[];
-  return `<h2 class="mailh">${MAILBOX_PX}ตู้จดหมาย</h2>${L.length?`<div class="mlist2">${L.map(m=>`<button class="mrow2 ${m.read?"":"unread"} ${mailOpen(m)?"act":""} ${m.done||m.expired?"old":""}" data-act="mopen" data-v="${m.id}"><span class="mk ${m.kind}">${{letter:"จดหมาย",take:"เงินเข้า",pay:"ใบแจ้งหนี้",quiz:"ตอบคำถาม",quest:"ขอความช่วยเหลือ",job:"งานจ้าง"}[m.kind]}</span><span class="mt"><b>${esc(m.title)}</b><small>${esc(m.from)} · สด.${m.wk}${m.expired?" · หมดเวลา":m.done?" · จัดการแล้ว":m.expAbs!=null?` · ภายใน สด.${((m.expAbs-1)%52)+1}`:""}</small></span>${mailOpen(m)?'<i class="dot"></i>':""}</button>`).join("")}</div>`:`<p class="lead">ยังไม่มีจดหมาย</p>`}`;}
+  return `<h2 class="mailh">${MAILBOX_PX}ตู้จดหมาย</h2>${L.length?`<div class="mlist2">${L.map(m=>`<button class="mrow2 ${m.read?"":"unread"} ${mailOpen(m)?"act":""} ${m.done||m.expired?"old":""}" data-act="mopen" data-v="${m.id}"><span class="mk ${m.kind}">${{letter:"จดหมาย",take:"เงินเข้า",pay:"ใบแจ้งหนี้",quiz:"ตอบคำถาม",quest:"ขอความช่วยเหลือ",job:"งานจ้าง",event:"อีเวนต์"}[m.kind]}</span><span class="mt"><b>${esc(m.title)}</b><small>${esc(m.from)} · สด.${m.wk}${m.expired?" · หมดเวลา":m.done?" · จัดการแล้ว":m.expAbs!=null?` · ภายใน สด.${((m.expAbs-1)%52)+1}`:""}</small></span>${mailOpen(m)?'<i class="dot"></i>':""}</button>`).join("")}</div>`:`<p class="lead">ยังไม่มีจดหมาย</p>`}`;}
 function letterHTML(m){m.read=true;let act="";
   if(m.kind==="take")act=m.done?`<p class="meta center">รับแล้ว ${fmt(m.amt)}</p>`:`<button class="btn primary" data-act="mtake" data-v="${m.id}">รับเงิน ${fmt(m.amt)}</button>`;
   if(m.kind==="pay")act=m.done?`<p class="meta center">${m.paid?"จ่ายแล้ว":"ไม่จ่าย (ชื่อเสียง −0.3)"}</p>`:m.expired?"":`<button class="btn" data-act="mskip" data-v="${m.id}">ไม่จ่าย (ชื่อเสียง −0.3)</button><button class="btn primary" data-act="mpay" data-v="${m.id}" ${G.cash<m.amt?"disabled":""}>จ่าย ${fmt(m.amt)}</button>`;
@@ -678,18 +678,52 @@ function redeemCode(raw){const v=(raw||"").toUpperCase().replace(/\s+/g,"");if(!
     G.ev=G.ev||{};G.ev.loy={got:G.week,season:G.season||1,best:0,tiers:{},runs:0};
     addMail(G,{kind:"event",ev:"loy",from:"ป้าแต๋ว ร้านส้มตำหน้าวัด",title:"คืนนี้งานลอยกระทงตลาดน้ำ!",body:"ผู้จัดการจ๋า คืนนี้ป้าไปเปิดแผงขายกระทงที่งานตลาดน้ำ พาเด็ก ๆ ในค่ายมาเที่ยวกันนะ มีของกินเพียบ ป้าเลี้ยงส้มตำเอง! แต่ได้ยินว่าแก๊งหมวกกันน็อกจะมาป่วนงานด้วย… ถ้ามากันได้ป้าอุ่นใจขึ้นเยอะเลย"});
     save();AU.sfx("level");toast("ได้รับจดหมายเชิญอีเวนต์ลอยกระทง! ดูที่กล่องจดหมาย");}}
-function evMailAct(m){const L=loyOf(G);if(!L)return "";const tr=loyTier(L.best,L.boss);
-  return `${L.runs?`<p class="meta center">คะแนนดีที่สุด <b class="goldt num">${L.best}</b>${tr?` · รางวัลระดับ<b>${tr.n}</b>`:""}</p>`:""}<button class="btn primary" data-act="evloy">${L.runs?"ท้าศึกริมน้ำอีกรอบ":"ไปงานลอยกระทง"}</button>`;}
-const LOY_INTRO=[
-  {n:"nar",bg:"river",t:"คืนวันเพ็ญ ตลาดน้ำหน้าวัดคึกคักกว่าทุกปี เรือขายกระทงจอดเรียงริมตลิ่ง แสงเทียนสะท้อนน้ำวิบวับ"},
-  {n:"npc",who:"ป้าแต๋ว",t:"มาแล้วเหรอผู้จัดการ! ป้าขายกระทงได้ห้าสิบใบแล้วนะ… แต่ดูนั่นสิ พวกหมวกกันน็อกมาอีกแล้ว"},
+function evMailAct(m){const L=loyOf(G);if(!L)return "";const tr=loyTier(L.best,L.boss);const T=L.tiers||{};
+  const ends=["bronze","silver","gold"].filter(k=>T[k]).map(k=>`<button class="btn sm" data-act="loyend" data-v="${k}">ฉากจบ${LOY_TIERS.find(x=>x[0]===k)[1]} · ${LOY_END[k].t}</button>`).join("");
+  return `${L.runs?`<p class="meta center">คะแนนดีที่สุด <b class="goldt num">${L.best}</b>${tr?` · รางวัลระดับ<b>${tr.n}</b>`:""}</p>`:""}<button class="btn primary" data-act="evloy">${L.runs?"ท้าศึกริมน้ำอีกรอบ":"ไปงานลอยกระทง"}</button>
+  ${L.runs?`<button class="btn" data-act="thief" ${L.thiefWk===absWeek(G)?"disabled":""}>${L.thiefWk===absWeek(G)?"ไล่จับโจรงมกระทงแล้ว (สัปดาห์หน้ามาอีก)":"ไล่จับโจรงมกระทง"}</button>`:""}
+  ${L.intro?`<div class="evrep"><button class="btn sm" data-act="loyintro">ดูฉากเปิดอีกครั้ง</button>${ends}</div>`:""}
+  ${T.gold?`<div class="evrep"><button class="btn sm" data-act="loydress" aria-pressed="${!!L.dressOn}">ชุดไทยนอกเวที: ${L.dressOn?"เปิด":"ปิด"}</button></div>`:""}`;}
+function loyIntro(G){const S=[
+  {n:"nar",bg:"river",t:"คืนวันเพ็ญเดือนสิบสอง ตลาดน้ำริมปิงคึกคักกว่าทุกปี เรือขายกระทงจอดเรียงริมตลิ่ง แสงเทียนสะท้อนน้ำวิบวับ"},
+  {n:"npc",who:"ป้าแต๋ว",t:"มาแล้วเหรอผู้จัดการ! ป้าขนชุดไทยของลูกสาวป้ามาให้เด็ก ๆ ใส่เที่ยวงาน ไปเปลี่ยนเร็ว ๆ!"},
+  {n:"nar",t:"สิบนาทีต่อมา"},
+  {n:"kati",f:"flustered",l:"thai",t:"ผู้จัดการ… ชุดนี้รัดเอวจังเลยค่ะ หนูดูแปลกไหม …อย่ามองนานสิคะ!"}];
+  if(inCamp(G,"mali"))S.push({n:"mali",f:"happy",l:"thai",t:"กะทิสวยจะตาย! มะลิช่วยกลัดสไบให้เองเลยนะ~ ส่วนของมะลิก็… สวยใช่ไหมคะ ผู้จัดการ"});
+  if(inCamp(G,"rin"))S.push({n:"rin",f:"flustered",l:"thai",t:"ผ้าถุงจำกัดการก้าวขาเหลือราวสี่สิบเซนติเมตร ไม่เหมาะกับการต่อสู้ …แต่ก็ไม่ได้แย่"});
+  S.push({n:"npc",who:"ป้าแต๋ว",t:"สวยกันทุกคนเลย! …แต่ดูนั่นสิ พวกหมวกกันน็อกมาอีกแล้ว"},
   {n:"npc",who:"เสี่ยหมวกทองคำ",t:"ตลาดน้ำนี้ต้องจ่ายค่าที่ให้พวกเรา! ไม่จ่ายก็เก็บแผงกลับบ้านไปซะ ป้าส้มตำ!"},
   {n:"coach",t:"ใจเย็นก่อน อย่าเพิ่งมีเรื่อง… เดี๋ยวนะ พวกมันท้าให้ขึ้นเวทีชั่วคราวข้างท่าเรือแทนเหรอ"},
   {n:"npc",who:"เสี่ยหมวกทองคำ",t:"ส่งมาสามคน ลูกน้องฉันเก้าคน สู้ไม่ยั้ง ไม่มีพัก ถ้าค่ายแกชนะ แก๊งเราไม่มาตลาดนี้อีก!"},
-  {n:"kati",f:"happy",t:"รับคำท้าค่ะ! ผู้จัดการเลือกคนเลยค่ะ ใครขึ้นก่อนหลังก็ได้"}];
+  {n:"kati",f:"happy",l:"thai",t:"รับคำท้าค่ะ! ป้าแต๋วบอกว่าผ้าถุงนี้ยืดได้ ใส่ต่อยก็ไม่ขาด! ผู้จัดการเลือกคนเลยค่ะ"});
+  return S;}
+const LOY_END={
+ bronze:{t:"แก๊งหมวกถอยทัพ",steps:[{n:"nar",bg:"river",t:"ลูกน้องแก๊งหมวกถอยไปยืนออกันฝั่งตรงข้าม ยังไม่ยอมแพ้ แต่ก็ไม่กล้าเข้าใกล้แผงป้าแต๋วอีก"},
+  {n:"npc",who:"ป้าแต๋ว",t:"เก่งมากลูก ๆ! ป้าขายกระทงได้อีกตั้งเยอะ เอาไปเลย ค่าขนมของทุกคน"},
+  {n:"kati",f:"happy",l:"thai",t:"ปีหน้าพวกนั้นมาอีกแน่ค่ะ หนูจะซ้อมให้หนักกว่านี้!"},
+  {n:"nar",t:"เสียงจี๊ด ๆ ดังมาจากใต้ท่าเรือ ลูกนากตัวเล็กติดเชือกกระทงอยู่ กะทิก้มลงแกะให้ทั้งที่ชายผ้าถุงเปียก"},
+  {n:"kati",f:"flustered",l:"thai",t:"มันเดินตามหนูมาค่ะ ผู้จัดการ… ไม่ยอมไปเลย เลี้ยงที่ค่ายได้ไหมคะ ได้นะคะ"}]},
+ silver:{t:"ทั้งตลาดเชียร์",steps:[{n:"nar",bg:"river",t:"คนทั้งตลาดน้ำมายืนล้อมเวทีชั่วคราว เสียงเชียร์ดังกลบเสียงพลุ"},
+  {n:"coach",t:"ไม่เลวนี่หว่า… แต่ยังไม่ถึงตัวเสี่ยเลยนะเว้ย ปีนี้ยังมีเวลา"},
+  {n:"npc",who:"ป้าแต๋ว",t:"ชุดไทยพวกนั้น ป้ายกให้เลย ใส่ไปไหนก็ได้ ป้าดีใจที่มันได้ใส่ไปทำเรื่องดี ๆ"},
+  {n:"kati",f:"flustered",l:"thai",t:"ผู้จัดการคะ… ป้าแต๋วให้กระทงมาใบนึง ไปลอยด้วยกันไหมคะ …ใบเดียวค่ะ ป้าให้มาแค่ใบเดียว"}]},
+ gold:{t:"หมวกทองลอยน้ำ",steps:[{n:"nar",bg:"river",t:"เสี่ยหมวกทองคำล้มลงบนท่าเรือ หมวกทองกลิ้งตกน้ำ ลอยไปพร้อมกระทงอีกร้อยใบ"},
+  {n:"npc",who:"เสี่ยหมวกทองคำ",t:"หมวกข้า!! …ก็ได้ ๆ ตลาดน้ำนี้ข้าไม่มาอีกแล้ว ปีนี้นะ! ปีนี้!"},
+  {n:"npc",who:"ป้าแต๋ว",t:"ป้าตัดชุดไทยเพิ่มให้ทุกคนแล้ว ใส่ไปเที่ยว ไปเดท ไปไหนก็ได้!"},
+  {n:"kati",f:"flustered",l:"thai",t:"…ผู้จัดการ หนูใส่ชุดนี้ไปเดทได้ไหมคะ …ไม่ใช่เดท! ไปเที่ยว! ไปเที่ยวค่ะ!"},
+  {n:"nar",t:"ชื่อค่ายศิริชัยถูกพูดถึงทั่วตลาดน้ำทั้งคืน และอีกหลายคืนหลังจากนั้น"}]}};
+const LOY_THIEF={name:"ไอ้ตุ่ม โจรงมกระทง",
+ line:{kati:"ขอคืนเดี๋ยวนี้ค่ะ! กระทงใบนั้นของยายบ้านข้าง ๆ หนู!",mali:"กระทงใบนั้นมะลิช่วยป้าพับนะคะ! เอาคืนมา!",rin:"ฉันนับไว้แล้ว นายเอาไปสิบเจ็ดใบ คืนมาให้ครบ",ploy:"ชุดนี้แพงนะ แต่ถ้าต้องลงไปงมเอง ฉันก็ไม่ลังเล",fah:"ฟ้าเห็นนายตั้งแต่ปีที่แล้ว! คราวนี้ไม่รอดแน่!"},
+ pre:[{n:"nar",bg:"river",t:"ตูม! มีคนกระโดดลงน้ำ งมเหรียญจากกระทงของชาวบ้านใส่ถุงพลาสติกเต็มมือ"},
+  {n:"npc",who:"ป้าแต๋ว",t:"ไอ้ตุ่มอีกแล้ว! งมเหรียญจากกระทงคนอื่นทุกปี ปีนี้หอบไปทั้งกระทงเลย!"},
+  {n:"npc",who:"ไอ้ตุ่ม โจรงมกระทง",t:"กระทงลอยมาหาข้าเอง ข้าก็เก็บสิ! อยากได้คืนก็ขึ้นมาบนท่าเรือนี่!"}],
+ win:[{n:"nar",bg:"river",t:"ไอ้ตุ่มตกน้ำดังตูม ถุงเหรียญลอยเท้งเต้ง ชาวบ้านช่วยกันเก็บไปคืนวัด"},
+  {n:"npc",who:"ป้าแต๋ว",t:"เก่งมากลูก! ป้าแบ่งค่ากระทงคืนนี้ให้ เอาไปซื้อนมให้เด็ก ๆ ในค่าย"}],
+ lose:[{n:"nar",bg:"river",t:"ไอ้ตุ่มหัวเราะแล้วกระโดดน้ำหนีพร้อมถุงเหรียญ… แต่ถุงขาดกลางน้ำ เหรียญจมหมด"},
+  {n:"npc",who:"ไอ้ตุ่ม โจรงมกระทง",t:"เฮ้ย! เหรียญข้า!! …ปีหน้าเจอกันใหม่!"},{n:"npc",who:"ป้าแต๋ว",t:"ช่างมันลูก อย่างน้อยมันก็ไม่ได้อะไรไป"}]};
 function evStartLoy(){const L=loyOf(G);if(!L)return;UI.modal=null;
   const open=()=>{L.run=null;L.pick=[];UI.modal={type:"gaunt"};render();};
-  if(!L.intro){L.intro=1;save();playScene(LOY_INTRO,open,{bg:"river",look:"casual"});}else open();}
+  if(!L.intro){L.intro=1;save();playScene(loyIntro(G),open,{bg:"river",look:"thai"});}else open();}
 function gauntPool(){const R=roster(G).filter(f=>!f.injury);return R.length?R:roster(G);}
 function gauntHTML(){const L=loyOf(G);if(!L){UI.modal=null;return "";}const R=L.run;
   const head=`<h2>ศึกริมน้ำคืนลอยกระทง</h2><p class="meta">สามคน คนละสามไฟต์ติด พลังไม่ฟื้นเต็มระหว่างไฟต์ แพ้เมื่อไหร่คนถัดไปขึ้นแทน · ไฟต์สุดท้ายคือเสี่ยหมวกทองคำ</p>`;
@@ -702,7 +736,7 @@ function gauntHTML(){const L=loyOf(G);if(!L){UI.modal=null;return "";}const R=L.
       <div class="center endbtns"><button class="btn primary" data-act="gstart" ${P.length<need?"disabled":""}>เริ่มศึก</button><button class="btn" data-act="closeModal">ไว้ก่อน</button></div>${ladder(-1)}`;}
   if(R.done){const tr=loyTier(R.score,R.boss);return head+`<div class="gres2"><p class="meta">คะแนนรวม</p><p class="gsc num">${R.score}</p>${tr?`<span class="pill gold">รางวัลระดับ${tr.n}</span>`:`<span class="pill">ยังไม่ถึงระดับรางวัล (ทองแดง ${LOY_TIERS[2][2]})</span>`}
     ${(R.got||[]).length?`<ul class="glist">${R.got.map(x=>`<li>${x}</li>`).join("")}</ul>`:""}<p class="meta">ดีที่สุด ${L.best} · ทอง ${LOY_TIERS[0][2]}+ และต้องล้มเสี่ยหมวกทองคำ</p></div>
-    <div class="center endbtns"><button class="btn primary" data-act="gretry">ท้าอีกรอบ</button><button class="btn" data-act="closeModal">กลับค่าย</button></div>${ladder(-1)}`;}
+    <div class="center endbtns">${R.newEnd?`<button class="btn gold" data-act="loyend" data-v="${R.newEnd}">ดูฉากจบ (ใหม่!)</button>`:""}<button class="btn primary" data-act="gretry">ท้าอีกรอบ</button><button class="btn" data-act="closeModal">กลับค่าย</button></div>${ladder(-1)}`;}
   const f=G.F[R.order[R.slot]];
   return head+`<div class="gnow"><p class="meta">คะแนน <b class="goldt num">${R.score}</b> · คนที่ ${R.slot+1}/3 · ไฟต์ที่ ${R.k+1}/9</p>
     <div class="gcur">${faceImg(f)}<span><b>${esc(f.name)}</b><small>พลัง ${Math.round(R.hp)} · แรง ${Math.round(R.sta)}</small><div class="meter"><i style="--v:${clamp(R.hp,0,100)}%;--bc:${R.hp>50?"var(--green)":R.hp>25?"var(--warn)":"var(--red)"}"></i></div></span></div></div>
@@ -710,11 +744,11 @@ function gauntHTML(){const L=loyOf(G);if(!L){UI.modal=null;return "";}const R=L.
 function gauntNextSlot(R){R.slot++;R.j=0;R.k=R.slot*3;R.hp=100;R.sta=100;if(R.slot>=3||R.k>=9)gauntFinish(R);}
 function gauntFinish(R){const L=loyOf(G);R.done=true;L.runs=(L.runs||0)+1;L.best=Math.max(L.best||0,R.score);if(R.boss)L.boss=1;R.got=[];
   const tr=loyTier(R.score,R.boss);const order=["bronze","silver","gold"];
-  if(tr)for(const k of order.slice(0,order.indexOf(tr.k)+1))if(!L.tiers[k]){L.tiers[k]=1;R.got.push(...loyReward(k));}
+  if(tr){for(const k of order.slice(0,order.indexOf(tr.k)+1))if(!L.tiers[k]){L.tiers[k]=1;R.newEnd=k;R.got.push(...loyReward(k));}const c=loyCardDrop(G,R.order);if(c)R.got.push(c);}
   for(let i=0;i<9;i++)delete G.F["q_evloy_"+i];save();}
 function loyReward(k){const out=[];
-  if(k==="bronze"){G.cash+=3000;out.push("เงินรางวัลจากป้าแต๋ว ฿3,000");if(typeof PETS!=="undefined"&&PETS.otter&&typeof adoptPet==="function"&&!hasPet(G,"otter")){adoptPet(G,"otter");out.push("ลูกนากตัวน้อยตามกลับค่ายมาด้วย!");}}
-  if(k==="silver"){G.cash+=5000;out.push("เงินรางวัล ฿5,000");if(typeof loyCardDrop==="function"){const c=loyCardDrop(G);if(c)out.push(c);}}
+  if(k==="bronze"){G.cash+=3000;out.push("เงินรางวัลจากป้าแต๋ว ฿3,000");if(typeof PETS!=="undefined"&&PETS.otter&&typeof adoptPet==="function"&&!hasPet(G,"otter")){adoptPet(G,"otter",null,"kati");UI.petName=G.pets.length-1;out.push("ลูกนากตัวน้อยตามกลับค่ายมาด้วย! (ตั้งชื่อได้เลย)");}}
+  if(k==="silver"){G.cash+=5000;out.push("เงินรางวัล ฿5,000");out.push("ปลดล็อกชุดไทยในหน้าโปรไฟล์ตัวละคร");}
   if(k==="gold"){G.rep+=1.5;out.push("ชื่อเสียง +1.5");if(typeof loyGold==="function"){const c=loyGold(G);if(c)out.push(c);}}
   return out;}
 function gauntAfter(){const L=loyOf(G),R=L&&L.run,F=LASTF;if(!R||!F){UI.modal={type:"gaunt"};render();return;}
@@ -736,4 +770,67 @@ Object.assign(ACT,{
     UI.modal=null;openFight2(bk,gauntAfter);},
   gquit:()=>{const L=loyOf(G),R=L&&L.run;if(!R||R.done)return;gauntFinish(R);render();},
   gretry:()=>{const L=loyOf(G);if(!L)return;L.run=null;L.pick=[];render();},
+});
+
+/* ===== v1.81: Loy Krathong round 2 — Thai-dress scenes, SR cards, the krathong thief, the otter, Thai dress off-stage ===== */
+const LOY_CARDS=["lk_kati","lk_mali","lk_rin","lk_ploy","lk_fah"];
+Object.assign(CARDS,{
+ lk_kati:{c:"kati",r:"SR",ev:1,t:"เด็กหลงในงานลอยกระทง",hint:"อีเวนต์ลอยกระทง 2569 · ได้จากศึกริมน้ำ",bg:"river",need:()=>false,steps:[
+  {n:"nar",t:"เด็กชายตัวเล็กยืนร้องไห้ข้างแผงลูกชิ้น มือกำกระทงขนมปังที่แหลกไปครึ่งใบ"},
+  {n:"kati",f:"happy",l:"thai",t:"ไม่ร้องนะ พี่ชื่อกะทิ ขึ้นมาขี่คอพี่ จะได้มองหาแม่จากข้างบน!"},
+  {n:"nar",t:"กะทิยกเด็กขึ้นบ่าโดยไม่ลังเล ผ้าถุงต้องถกขึ้นนิดหน่อย แต่เจ้าตัวไม่สนใจเลย"},
+  {n:"npc",who:"เด็กชาย",t:"นั่นแม่! …พี่กะทิ พี่ผู้ชายคนนั้นเป็นแฟนพี่เหรอ"},
+  {n:"kati",f:"flustered",l:"thai",t:"ฮะ!? ไม่ใช่! เขาเป็นผู้จัดการ! …ยัง ไม่ใช่ …ไม่ใช่ค่ะ! ไปหาแม่ได้แล้ว!"},
+  {n:"nar",t:"เด็กชายวิ่งไปหาแม่ ทิ้งกะทิหน้าแดงไว้กลางงาน ข้าง ๆ คุณ"}]},
+ lk_mali:{c:"mali",r:"SR",ev:1,t:"นางนพมาศจำเป็น",hint:"อีเวนต์ลอยกระทง 2569 · ได้จากศึกริมน้ำ",bg:"river",need:()=>false,steps:[
+  {n:"nar",t:"ผู้เข้าประกวดนางนพมาศหมายเลขเจ็ดป่วยกะทันหัน ป้าแต๋วซึ่งนั่งเป็นกรรมการหันมามองมะลิ"},
+  {n:"npc",who:"ป้าแต๋ว",t:"มะลิ! หนูนั่นแหละ ชุดก็ใส่อยู่แล้ว ขึ้นเวทีเลยลูก!"},
+  {n:"mali",f:"flustered",l:"thai",t:"ห้ะ!? หนูเย็บผ้าเป็นอย่างเดียวนะคะป้า เดินแบบไม่เป็น!"},
+  {n:"nar",t:"บนเวที สายสะพายของผู้เข้าประกวดอีกคนขาดกลางทาง มะลิดึงเข็มที่เหน็บผมไว้ เย็บต่อให้ภายในสามสิบวินาที"},
+  {n:"npc",who:"พิธีกร",t:"รางวัลขวัญใจกรรมการ… ได้แก่ หมายเลขเจ็ด น้องมะลิ!"},
+  {n:"mali",f:"flustered",l:"thai",t:"…ผู้จัดการคะ บนเวทีหนูไม่ได้มองกรรมการเลยสักคน มองอยู่คนเดียวตลอด …ห้ามถามว่าใคร!"}]},
+ lk_rin:{c:"rin",r:"SR",ev:1,t:"ดวงสมพงศ์ริมท่าน้ำ",hint:"อีเวนต์ลอยกระทง 2569 · ได้จากศึกริมน้ำ",bg:"river",need:()=>false,steps:[
+  {n:"nar",t:"หมอดูริมท่าเรือกวักมือเรียกริน ค่าดูดวงสามสิบบาท รินจ่ายเพราะอยากทดสอบความแม่นยำ"},
+  {n:"npc",who:"หมอดูริมท่าน้ำ",t:"ลายมือหนูบอกว่า… คู่สมพงศ์อยู่ใกล้มาก ใกล้จนยืนอยู่ข้าง ๆ ตอนนี้เลย"},
+  {n:"rin",f:"happy",l:"thai",t:"ความน่าจะเป็นที่คำทำนายแบบนี้จะถูก ขึ้นกับจำนวนคนที่ยืนอยู่ข้าง ๆ ซึ่งตอนนี้มีอยู่… หนึ่งคน"},
+  {n:"rin",f:"flustered",l:"thai",t:"…ข้อมูลไม่พอค่ะ ต้องเก็บตัวอย่างเพิ่ม ปีหน้ามาดูกับฉันอีกรอบได้ไหม เพื่อทดสอบซ้ำ"},
+  {n:"nar",t:"รินพับใบทำนายใส่กระเป๋าอย่างเรียบร้อย แล้วไม่ยอมให้คุณอ่าน"}]},
+ lk_ploy:{c:"ploy",r:"SR",ev:1,t:"หนีงานพรีเซนเตอร์",hint:"อีเวนต์ลอยกระทง 2569 · ได้จากศึกริมน้ำ",bg:"river",need:()=>false,steps:[
+  {n:"nar",t:"ใครบางคนในชุดไทยสีม่วงวิ่งมาหลบหลังคุณที่ท่าเรือ ช่างภาพสามคนวิ่งผ่านไปอีกทาง"},
+  {n:"ploy",f:"flustered",l:"thai",t:"ชู่ว์! ยืนนิ่ง ๆ แบบนั้นแหละ สปอนเซอร์ให้ฉันยืนถือกระทงยิ้มมาสองชั่วโมงแล้ว"},
+  {n:"ploy",f:"happy",l:"thai",t:"ฉันถือกระทงถ่ายรูปมาสิบปี …แต่ไม่เคยได้ลอยเองเลยสักใบ"},
+  {n:"nar",t:"คุณยื่นกระทงใบตองจากแผงป้าแต๋วให้ พลอยจุดเทียนเอง มือสั่นนิดหน่อย"},
+  {n:"ploy",f:"flustered",l:"thai",t:"…อย่าบอกใครนะว่าฉันอธิษฐานนานขนาดนี้ และอย่าถามว่าขออะไร"}]},
+ lk_fah:{c:"fah",r:"SR",ev:1,t:"ศึกโคมลอย",hint:"อีเวนต์ลอยกระทง 2569 · ได้จากศึกริมน้ำ",bg:"river",need:()=>false,steps:[
+  {n:"nar",t:"ฟ้ากับมะลิจุดโคมลอยคนละใบ ตกลงกันว่าโคมใครลอยสูงกว่า คนนั้นได้ยืนข้างผู้จัดการตอนดูพลุ"},
+  {n:"fah",f:"angry",l:"thai",t:"โคมฟ้าใหญ่กว่า ไส้ก็หนากว่า! ชนะขาดแน่!"},
+  {n:"nar",t:"โคมของฟ้าพุ่งขึ้นเร็ว… แล้วไปติดกิ่งจามจุรีต้นแรก โคมของมะลิลอยผ่านไปช้า ๆ อย่างสง่างาม"},
+  {n:"fah",f:"flustered",l:"thai",t:"…ไม่นับ! ต้นไม้โกง! …ก็ได้ ฟ้ายืนอีกข้างก็ได้ ข้างนายมีสองข้างนี่"},
+  {n:"nar",t:"พลุดอกแรกแตกบนฟ้า คุณมีคนยืนขนาบทั้งสองข้าง และไม่มีใครยอมขยับออก"}]}});
+function loyCardDrop(G,order){G.cards=G.cards||{};const left=LOY_CARDS.filter(k=>!G.cards[k]);if(!left.length)return null;
+  const pref=(order||[]).map(id=>"lk_"+id).filter(k=>left.includes(k));const L=loyOf(G);const id=pref[0]||left[((L&&L.runs)||0)%left.length];
+  G.cards[id]={n:1,lv:1,wk:absWeek(G),seen:false};if(G.F[CARDS[id].c])add(G,CARDS[id].c,"bond",3);G.dust=(G.dust||0)+5;
+  return `การ์ด SR ใหม่: "${CARDS[id].t}" (ดูได้ในอัลบั้ม)`;}
+function loyGold(G){const L=loyOf(G);if(!L)return null;L.dressOn=1;return "ปลดล็อกชุดไทยนอกเวที: สาว ๆ ใส่ชุดไทยในฉากเที่ยวและเดท (เปิด/ปิดได้ในจดหมายของป้าแต๋ว)";}
+const loyThaiLook=G=>!!(G&&G.ev&&G.ev.loy&&G.ev.loy.tiers&&G.ev.loy.tiers.silver);
+function evThief(G,f){const K=QK.gang1,t=Math.max(6,ovr(f.a)+K.lvl-1.2),rng=mulberry32((G.seed^0x7a1)+absWeek(G)*17);const a={};
+  for(const [x] of ATTRS)a[x]=clamp(t+(K.tilt[x]||0)+(rng()*1.2-.6),3,19.5);const id="q_evthief";
+  const o=baseFighter(id,{name:LOY_THIEF.name,full:LOY_THIEF.name,div:"X",camp:"quest",color:K.color,potential:t+2,a});
+  o.sprite=K.sprite;o.kind="gang1";o.grp="gang";o.lvl=clamp(Math.round(t-6),1,10);o.fatigue=0;o.morale=70;G.F[id]=o;return id;}
+function thiefHTML(){const pool=gauntPool();return `<h2>ไล่จับโจรงมกระทง</h2><p class="meta">ไฟต์ขำ ๆ 2 ยก ไม่บาดเจ็บ ไม่มีผลกับสถิติ · ชนะได้เงินค่ากระทงจากป้าแต๋ว · เล่นได้สัปดาห์ละครั้ง</p>
+  <div class="gpick">${pool.map(f=>`<button class="gpk" data-act="thiefgo" data-v="${f.id}">${faceImg(f)}<span><b>${esc(f.name)}</b><small>Lv.${f.lvl} · ล้า ${Math.round(f.fatigue)}</small></span></button>`).join("")}</div>
+  <div class="center endbtns"><button class="btn" data-act="closeModal">ไว้ก่อน</button></div>`;}
+function thiefGo(fid){const L=loyOf(G);if(!L)return;const f=G.F[fid];if(!f)return;UI.modal=null;
+  const pre=[...LOY_THIEF.pre,f.canon&&LOY_THIEF.line[fid]?{n:fid,f:"angry",l:"thai",t:LOY_THIEF.line[fid]}:{n:"nar",t:`${f.name}ก้าวขึ้นท่าเรือ ถกแขนเสื้อพร้อมลุย`}];
+  playScene(pre,()=>{const qid=evThief(G,f);const bk={id:"bthief",a:fid,b:qid,week:G.week,tier:"evloy",rounds:2,ev:1,bg:"bg_river.webp"};
+    openFight2(bk,()=>{const F=LASTF,win=F&&F.result&&F.result.win==="A";L.thiefWk=absWeek(G);delete G.F.q_evthief;
+      if(win){const c=1200;G.cash+=c;G.rep+=.2;L.thiefN=(L.thiefN||0)+1;}save();
+      playScene(win?[...LOY_THIEF.win,{n:"nar",t:`ได้ค่ากระทง ฿1,200 · ชื่อเสียง +0.2`}]:LOY_THIEF.lose,()=>{AU.startMusic("hub");UI.tab="home";save();render();},{bg:"river",look:"thai"});});},{bg:"river",look:"thai"});}
+Object.assign(ACT,{
+  loyintro:()=>{UI.modal=null;playScene(loyIntro(G),()=>{AU.startMusic("hub");render();},{bg:"river",look:"thai"});},
+  loyend:d=>{const E=LOY_END[d.v];if(!E)return;const L=loyOf(G);if(L&&L.run&&L.run.newEnd===d.v)L.run.newEnd=null;UI.modal=null;
+    playScene(E.steps,()=>{AU.startMusic("hub");if(L&&L.run&&L.run.done)UI.modal={type:"gaunt"};render();},{bg:"river",look:"thai"});},
+  thief:()=>{const L=loyOf(G);if(!L||L.thiefWk===absWeek(G))return;UI.modal={type:"thief"};render();},
+  thiefgo:d=>thiefGo(d.v),
+  loydress:()=>{const L=loyOf(G);if(!L||!L.tiers.gold)return;L.dressOn=L.dressOn?0:1;save();render();},
 });
