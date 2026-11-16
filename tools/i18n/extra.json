@@ -3965,5 +3965,8 @@
  "เกียรติบัตรของค่าย 9 ใบ": "9 camp certificates",
  "จัดการค่าย → ถ้วยรางวัล · ถ้วย เข็มขัดแชมป์ และเกียรติบัตรวางบนชั้นโชว์ แตะดูได้ว่าได้มาจากไฟต์ไหน": "Camp → Trophies · cups, championship belts and certificates on display shelves; tap one to see which fight it came from",
  "ห้องถ้วยรางวัล": "Trophy Room",
- "รอบนี้ค่ายมีห้องถ้วยรางวัล ของตกแต่งสวยขึ้น และการ์ดลอยกระทงเก็บง่ายขึ้น": "This round: a Trophy Room, prettier decorations and easier Loy Krathong cards"
+ "รอบนี้ค่ายมีห้องถ้วยรางวัล ของตกแต่งสวยขึ้น และการ์ดลอยกระทงเก็บง่ายขึ้น": "This round: a Trophy Room, prettier decorations and easier Loy Krathong cards",
+ "</ul><p class=\"meta\">ข้ามได้ ไม่มีโทษ แต่อาจเสียโอกาสในสัปดาห์นี้</p><label class=\"endwarn-opt\"><input type=\"checkbox\" data-act=\"noaskend\"> ไม่ต้องถามอีก (เปิดคืนได้ในตั้งค่า)</label><div class=\"mfoot\"><button class=\"btn ghost\" data-act=\"closeModal\">กลับไปทำต่อ</button><button class=\"btn primary\" data-act=\"endgo\">จบสัปดาห์เลย</button></div>": "</ul><p class=\"meta\">You can skip without penalty, but you might miss chances this week</p><label class=\"endwarn-opt\"><input type=\"checkbox\" data-act=\"noaskend\"> Don't ask again (turn back on in Settings)</label><div class=\"mfoot\"><button class=\"btn ghost\" data-act=\"closeModal\">Go back</button><button class=\"btn primary\" data-act=\"endgo\">End week now</button></div>",
+ "เตือนเมื่อยังมีสิ่งที่ยังไม่ได้ทำในสัปดาห์นี้": "Warn me when something is still left to do this week",
+ "ถามก่อนจบสัปดาห์": "Ask before ending the week"
 }

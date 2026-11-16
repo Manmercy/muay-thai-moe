@@ -113,7 +113,7 @@ function formHTML(f){return `<span class="form">${f.form.map(r=>`<i class="${r}"
 const rec=f=>`${f.rec.w}-${f.rec.l}-${f.rec.d}`;
 const condColor=c=>c>=70?"var(--green)":c>=45?"var(--warn)":"var(--red)";
 const stageLabel=()=>STAGE_NAME[stageOf(G.week)];
-function toast(msg){UI.toast={msg,t:Date.now()};render();setTimeout(()=>{if(UI.toast&&Date.now()-UI.toast.t>2300){UI.toast=null;render();}},2500);}
+function toast(msg){UI.toast={msg,t:Date.now()};try{const L=document.getElementById("live");if(L){L.textContent="";setTimeout(()=>{L.textContent=String(msg).replace(/<[^>]+>/g,"");},30);}}catch(e){}render();setTimeout(()=>{if(UI.toast&&Date.now()-UI.toast.t>2300){UI.toast=null;render();}},2500);}
 const ICON={home:'<path d="M3 11 12 4l9 7v9h-6v-6H9v6H3z"/>',train:'<path d="M2 10h3v4H2zM19 10h3v4h-3zM5 8h3v8H5zM16 8h3v8h-3zM8 11h8v2H8z"/>',
   fights:'<path d="M4 4h6l2 3v6l-2 2H6l-2-2zM14 9h6v6l-2 3h-4l-1-3z"/>',people:'<path d="M8 4a4 4 0 110 8 4 4 0 010-8zM2 21c0-4 3-7 6-7s6 3 6 7zM17 6a3 3 0 110 6 3 3 0 010-6zM15 14c4 0 7 2 7 7h-6"/>',
   camp:'<path d="M2 11 12 3l10 8v2h-2v8H4v-8H2zM9 21v-6h6v6"/>',gear:'<path d="M10 2h4l1 3 3 1 3-1 2 4-2 2v2l2 2-2 4-3-1-3 1-1 3h-4l-1-3-3-1-3 1-2-4 2-2v-2L1 9l2-4 3 1 3-1zM12 8a4 4 0 100 8 4 4 0 000-8z"/>',
@@ -133,7 +133,7 @@ function render(){
   if(G&&UI.montage)h+=montageHTML();
   if(G&&UI.fight)h+=fightHTML();
   if(UI.scene)h+=sceneHTML();
-  if(UI.toast)h+=`<div class="toast" role="status">${esc(UI.toast.msg)}</div>`;
+  if(UI.toast)h+=`<div class="toast" aria-hidden="true">${esc(UI.toast.msg)}</div>`;
   const keep={};document.querySelectorAll(".pxscroll[data-sk]").forEach(e=>keep[e.dataset.sk]=e.scrollTop);const fsEl=document.querySelector(".fight"),fsTop=fsEl?fsEl.scrollTop:0;
   const albumTop=document.querySelector(".m-album")?.parentElement.scrollTop||0;
   $app.innerHTML=h;
@@ -196,7 +196,7 @@ function seedFrom(v){v=String(v||"").trim();if(!v)return undefined;if(/^\d{1,10}
 function crSeed(){const e=document.getElementById("pseed");if(e&&UI.creator)UI.creator.seed=e.value.trim();}
 const seedHTML=()=>G?`<div class="set"><span><b>Seed ของโลกนี้</b><small>แชร์ให้เพื่อนใส่ตอนสร้างตัว จะได้โลกเดียวกัน · แจ้งบั๊กพร้อม seed กับสัปดาห์ได้เลย</small></span><span class="obtns"><code class="seedv">${esc(G.seedText||String(G.seed))}</code><button class="btn sm" data-act="copyseed">คัดลอก</button></span></div>`:"";
 function settingsHTML(){const t=(k,label,desc)=>`<label class="set"><span><b>${label}</b><small>${desc}</small></span><input type="checkbox" data-act="setopt" data-k="${k}" ${SETTINGS[k]?"checked":""}></label>`;
-  return `<h2>ตั้งค่า</h2><div class="sets"><div class="set"><span><b>ภาษา · Language</b><small>สลับแล้วเกมจะโหลดใหม่ เซฟยังอยู่</small></span>${langSwitch()}</div>${t("music","เพลงประกอบ","ปี่ชวา กลองแขก ฉิ่ง ระหว่างชก")}${t("sfx","เอฟเฟกต์เสียง","เสียงต่อย เตะ ระฆัง เสียงเชียร์")}${t("coach","ครูแดงแนะนำ","ครูคอยไกด์ในหน้าค่าย ข้อเสนอไฟต์ และช่วงพักยก")}${t("quick","เล่นเร็ว","ข้ามฉากฝึกซ้อมตอนจบสัปดาห์ ไปสรุปผลทันที")}${seedHTML()}</div>
+  return `<h2>ตั้งค่า</h2><div class="sets"><div class="set"><span><b>ภาษา · Language</b><small>สลับแล้วเกมจะโหลดใหม่ เซฟยังอยู่</small></span>${langSwitch()}</div>${t("music","เพลงประกอบ","ปี่ชวา กลองแขก ฉิ่ง ระหว่างชก")}${t("sfx","เอฟเฟกต์เสียง","เสียงต่อย เตะ ระฆัง เสียงเชียร์")}${t("coach","ครูแดงแนะนำ","ครูคอยไกด์ในหน้าค่าย ข้อเสนอไฟต์ และช่วงพักยก")+t("askEnd","ถามก่อนจบสัปดาห์","เตือนเมื่อยังมีสิ่งที่ยังไม่ได้ทำในสัปดาห์นี้")}${t("quick","เล่นเร็ว","ข้ามฉากฝึกซ้อมตอนจบสัปดาห์ ไปสรุปผลทันที")}${seedHTML()}</div>
    ${!G&&loadSave()?`<div class="set danger"><span><b>จัดการช่องเซฟ</b><small>ดู โหลด หรือลบเซฟแต่ละช่อง</small></span><button class="btn sm" data-act="openload">เปิด</button></div>`:""}${G?`<p class="meta">กำลังเล่นช่องเซฟ ${UI.slot} · บันทึกอัตโนมัติทุกครั้งที่มีความคืบหน้า${CLOUD.ready?" · สำรองบนคลาวด์แล้ว":" · ยังไม่ได้เชื่อมคลาวด์ (เซฟอยู่ในเบราว์เซอร์นี้เท่านั้น)"}</p>
    ${G&&UI.slot&&bakInfo(UI.slot)?`<div class="set"><span><b>เซฟก่อนอัปเดต</b><small>เก็บไว้ตอนเกมอัปเดต · v${esc(String(bakInfo(UI.slot).ver))} สัปดาห์ ${bakInfo(UI.slot).week}</small></span><button class="btn sm" data-act="bakrestore">กู้คืน</button></div>`:""}
    <div class="set"><span><b>ใส่โค้ด</b><small>โค้ดอีเวนต์หรือโค้ดเล่นต่อ จากเพจและ Discord ของเกม</small></span><span class="obtns redeem"><input id="redeemcode" maxlength="24" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="โค้ด" aria-label="โค้ด"><button class="btn sm primary" data-act="redeem">ใช้โค้ด</button></span></div>${typeof codeContentHTML==="function"?codeContentHTML():""}
@@ -279,7 +279,7 @@ function hubHTML(){
     <button class="btn primary endweek ${weekTodo().length?"":"ready"}" data-act="endweek">${weekTodo().length?`จบสัปดาห์ ▸ <small>(เหลือ ${weekTodo().length} อย่าง)</small>`:"พร้อมแล้ว · จบสัปดาห์ ▸"}</button>
   </div>
   <nav class="tabs" aria-label="เมนู">${TABS.map(([k,t])=>`<button data-act="tab" data-v="${k}" ${UI.tab===k?'aria-current="page"':""}>${icon(k)}<span>${t}</span>${dots[k]?'<i class="dot" aria-hidden="true"></i>':""}</button>`).join("")}</nav></header>
-  <main class="pxscroll" data-sk="main-${UI.tab}">${({home:homeHTML,train:trainHTML,fights:fightsHTML,people:peopleHTML,camp:campHTML})[UI.tab]()}</main>`;}
+  <main class="pxscroll" data-sk="main-${UI.tab}"><h1 class="sr">${(TABS.find(t=>t[0]===UI.tab)||["",""])[1]} · สัปดาห์ ${Math.min(G.week,52)}</h1>${({home:homeHTML,train:trainHTML,fights:fightsHTML,people:peopleHTML,camp:campHTML})[UI.tab]()}</main>`;}
 
 const DONE_LINES=["สัปดาห์นี้จัดการครบแล้ว กดจบสัปดาห์ได้เลย","เรียบร้อยหมดแล้ว ไปพักกินข้าวเหนียวหมูปิ้งกันเถอะ แล้วค่อยจบสัปดาห์","ทุกอย่างพร้อม ครูไม่มีอะไรจะติแล้ว จบสัปดาห์ได้","งานครบ ซ้อมครบ วางแผนครบ ไปจบสัปดาห์กันเลย"];
 const pickDone=()=>DONE_LINES[G.week%DONE_LINES.length];
@@ -802,7 +802,7 @@ function modalHTML(){const m=UI.modal;let body="",foot=true;
     <div class="row2"><button class="btn" data-act="closeModal">ไม่เอาดีกว่า</button><button class="btn red" data-act="loanyes">กู้ ${fmt(LOAN_AMT)}</button></div>`;}
   if(m.type==="campres"){foot=false;const a=CAMP_ACTIONS[m.k];const C=CFX[m.k];body=`<div class="campres ${m.skip?"skip":""}">${C?`<div class="cfxwrap" data-act="cfxskip" role="button" aria-label="ข้ามฉาก"><canvas width="320" height="180" data-campfx="${m.k}"></canvas><span class="cfxcap">${esc(C.cap)}</span><i class="cfxbar"></i></div>`:""}
    <div class="cr-res"><h2>${esc(a.name)}</h2><p class="cr-note">${esc(m.note)}</p>${a.cost?`<p class="meta">ใช้เงิน ${fmt(a.cost)}</p>`:""}<div class="mfoot"><button class="btn primary" data-act="closeModal">เยี่ยม!</button></div></div></div>`;}
-  if(m.type==="endwarn"){foot=false;body=`<h2>จบสัปดาห์เลยไหม?</h2><ul class="mlist">${m.todo.map(t=>`<li>${t}</li>`).join("")}</ul><p class="meta">ข้ามได้ ไม่มีโทษ แต่อาจเสียโอกาสในสัปดาห์นี้</p><div class="mfoot"><button class="btn ghost" data-act="closeModal">กลับไปทำต่อ</button><button class="btn primary" data-act="endgo">จบสัปดาห์เลย</button></div>`;}
+  if(m.type==="endwarn"){foot=false;body=`<h2>จบสัปดาห์เลยไหม?</h2><ul class="mlist">${m.todo.map(t=>`<li>${t}</li>`).join("")}</ul><p class="meta">ข้ามได้ ไม่มีโทษ แต่อาจเสียโอกาสในสัปดาห์นี้</p><label class="endwarn-opt"><input type="checkbox" data-act="noaskend"> ไม่ต้องถามอีก (เปิดคืนได้ในตั้งค่า)</label><div class="mfoot"><button class="btn ghost" data-act="closeModal">กลับไปทำต่อ</button><button class="btn primary" data-act="endgo">จบสัปดาห์เลย</button></div>`;}
   if(m.type==="signwarn"){const f=G.F[m.id],net=weeklyNet(G)-f.wage;foot=false;
     body=`<h2>เซ็นสัญญา${esc(f.name)}?</h2><div class="ctip big"><img src="${faceSrc("coach")}" alt=""><span><b>ครูแดงเตือน:</b> ${net<0?`ถ้าเซ็นตอนนี้ ค่ายจะติดลบ ${fmt(-net)} ทุกสัปดาห์ ต้องพึ่งค่าตัวไฟต์ ถ้าเงินติดลบ 4 สัปดาห์จนเกิน ฿10,000 ค่ายจะล้มละลาย`:`ค่าเซ็น ${fmt(f.fee)} จะทำให้เงินสดเหลือแค่ ${fmt(G.cash-f.fee)} เผื่อเงินฉุกเฉินไว้ด้วย`}</span></div>
      <div class="kv-row"><span>ค่าเซ็น</span><b class="num">${fmt(f.fee)}</b></div><div class="kv-row"><span>ค่าจ้าง</span><b class="num">${fmt(f.wage)}/สัปดาห์</b></div><div class="kv-row"><span>สุทธิต่อสัปดาห์หลังเซ็น</span><b class="num ${net<0?"neg":"pos"}">${fmt(net)}</b></div>
@@ -1306,8 +1306,9 @@ const ACT={
   trsel:d=>{UI.trSel=d.v;render();},
   tab:d=>{UI.tab=d.v;if(d.sub)UI.csub=d.sub;if(G&&(d.v==="train"||d.v==="fights")){G.tut=G.tut||{};G.tut[d.v]=true;}UI.resetScroll=true;render();window.scrollTo(0,0);},
   endweek:()=>{if(G.dm&&!G.dm.done&&G.dm.wk===G.week){toast("ศึก Death Match ยังไม่จบ ชกให้จบก่อนนะ");UI.modal={type:"dm"};render();return;}const todo=weekTodo();
-    if(todo.length&&!UI.skipWarn){UI.modal={type:"endwarn",todo};render();return;}UI.skipWarn=false;endWeek();},
+    if(todo.length&&!UI.skipWarn&&SETTINGS.askEnd!==false){UI.modal={type:"endwarn",todo};render();return;}UI.skipWarn=false;endWeek();},
   endgo:()=>{UI.modal=null;UI.skipWarn=true;ACT.endweek();},
+  noaskend:d=>{const el=document.querySelector("[data-act=noaskend]");SETTINGS.askEnd=!(el&&el.checked);saveSettings();},
   fighter:d=>{UI.ptab=d.v||"over";UI.look=G.F[d.id].camp==="player"?"train":"fight";UI.modal={type:"fighter",id:d.id};render();},
   ptab:d=>{UI.ptab=d.v;render();},
   plook:d=>{UI.look=d.v;render();},

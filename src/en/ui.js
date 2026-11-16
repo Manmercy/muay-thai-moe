@@ -113,7 +113,7 @@ function formHTML(f){return `<span class="form">${f.form.map(r=>`<i class="${r}"
 const rec=f=>`${f.rec.w}-${f.rec.l}-${f.rec.d}`;
 const condColor=c=>c>=70?"var(--green)":c>=45?"var(--warn)":"var(--red)";
 const stageLabel=()=>STAGE_NAME[stageOf(G.week)];
-function toast(msg){UI.toast={msg,t:Date.now()};render();setTimeout(()=>{if(UI.toast&&Date.now()-UI.toast.t>2300){UI.toast=null;render();}},2500);}
+function toast(msg){UI.toast={msg,t:Date.now()};try{const L=document.getElementById("live");if(L){L.textContent="";setTimeout(()=>{L.textContent=String(msg).replace(/<[^>]+>/g,"");},30);}}catch(e){}render();setTimeout(()=>{if(UI.toast&&Date.now()-UI.toast.t>2300){UI.toast=null;render();}},2500);}
 const ICON={home:'<path d="M3 11 12 4l9 7v9h-6v-6H9v6H3z"/>',train:'<path d="M2 10h3v4H2zM19 10h3v4h-3zM5 8h3v8H5zM16 8h3v8h-3zM8 11h8v2H8z"/>',
   fights:'<path d="M4 4h6l2 3v6l-2 2H6l-2-2zM14 9h6v6l-2 3h-4l-1-3z"/>',people:'<path d="M8 4a4 4 0 110 8 4 4 0 010-8zM2 21c0-4 3-7 6-7s6 3 6 7zM17 6a3 3 0 110 6 3 3 0 010-6zM15 14c4 0 7 2 7 7h-6"/>',
   camp:'<path d="M2 11 12 3l10 8v2h-2v8H4v-8H2zM9 21v-6h6v6"/>',gear:'<path d="M10 2h4l1 3 3 1 3-1 2 4-2 2v2l2 2-2 4-3-1-3 1-1 3h-4l-1-3-3-1-3 1-2-4 2-2v-2L1 9l2-4 3 1 3-1zM12 8a4 4 0 100 8 4 4 0 000-8z"/>',
@@ -133,7 +133,7 @@ function render(){
   if(G&&UI.montage)h+=montageHTML();
   if(G&&UI.fight)h+=fightHTML();
   if(UI.scene)h+=sceneHTML();
-  if(UI.toast)h+=`<div class="toast" role="status">${esc(UI.toast.msg)}</div>`;
+  if(UI.toast)h+=`<div class="toast" aria-hidden="true">${esc(UI.toast.msg)}</div>`;
   const keep={};document.querySelectorAll(".pxscroll[data-sk]").forEach(e=>keep[e.dataset.sk]=e.scrollTop);const fsEl=document.querySelector(".fight"),fsTop=fsEl?fsEl.scrollTop:0;
   const albumTop=document.querySelector(".m-album")?.parentElement.scrollTop||0;
   $app.innerHTML=h;
@@ -196,7 +196,7 @@ function seedFrom(v){v=String(v||"").trim();if(!v)return undefined;if(/^\d{1,10}
 function crSeed(){const e=document.getElementById("pseed");if(e&&UI.creator)UI.creator.seed=e.value.trim();}
 const seedHTML=()=>G?`<div class="set"><span><b>This world's seed</b><small>Share it so friends get the same world · include it (with the week) when reporting bugs</small></span><span class="obtns"><code class="seedv">${esc(G.seedText||String(G.seed))}</code><button class="btn sm" data-act="copyseed">Copy</button></span></div>`:"";
 function settingsHTML(){const t=(k,label,desc)=>`<label class="set"><span><b>${label}</b><small>${desc}</small></span><input type="checkbox" data-act="setopt" data-k="${k}" ${SETTINGS[k]?"checked":""}></label>`;
-  return `<h2>Settings</h2><div class="sets"><div class="set"><span><b>Language · ภาษา</b><small>Switching reloads the game. Your saves are kept</small></span>${langSwitch()}</div>${t("music","Music","Pi chawa, khaek drums and ching during fights")}${t("sfx","Sound effects","Punches, kicks, bells, cheering")}${t("coach","Coach Daeng's tips","Coach guides you on the camp screen, fight offers and between rounds")}${t("quick","Fast mode","Skip the training scenes at week's end and go straight to the summary")}${seedHTML()}</div>
+  return `<h2>Settings</h2><div class="sets"><div class="set"><span><b>Language · ภาษา</b><small>Switching reloads the game. Your saves are kept</small></span>${langSwitch()}</div>${t("music","Music","Pi chawa, khaek drums and ching during fights")}${t("sfx","Sound effects","Punches, kicks, bells, cheering")}${t("coach","Coach Daeng's tips","Coach guides you on the camp screen, fight offers and between rounds")+t("askEnd","Ask before ending the week","Warn me when something is still left to do this week")}${t("quick","Fast mode","Skip the training scenes at week's end and go straight to the summary")}${seedHTML()}</div>
    ${!G&&loadSave()?`<div class="set danger"><span><b>Manage save slots</b><small>View, load or delete each slot</small></span><button class="btn sm" data-act="openload">Open</button></div>`:""}${G?`<p class="meta">Playing save slot ${UI.slot} · autosaves whenever you make progress ${CLOUD.ready?" · backed up to the cloud":" · not connected to the cloud (saved in this browser only)"}</p>
    ${G&&UI.slot&&bakInfo(UI.slot)?`<div class="set"><span><b>Pre-update save</b><small>Kept when the game updated · v${esc(String(bakInfo(UI.slot).ver))} week ${bakInfo(UI.slot).week}</small></span><button class="btn sm" data-act="bakrestore">Restore</button></div>`:""}
    <div class="set"><span><b>Enter code</b><small>Event or continue codes from the game page and Discord</small></span><span class="obtns redeem"><input id="redeemcode" maxlength="24" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="Code" aria-label="Code"><button class="btn sm primary" data-act="redeem">Redeem</button></span></div>${typeof codeContentHTML==="function"?codeContentHTML():""}
@@ -279,7 +279,7 @@ function hubHTML(){
     <button class="btn primary endweek ${weekTodo().length?"":"ready"}" data-act="endweek">${weekTodo().length?`End week ▸ <small>(${weekTodo().length} left)</small>`:"Ready · End week ▸"}</button>
   </div>
   <nav class="tabs" aria-label="Menu">${TABS.map(([k,t])=>`<button data-act="tab" data-v="${k}" ${UI.tab===k?'aria-current="page"':""}>${icon(k)}<span>${t}</span>${dots[k]?'<i class="dot" aria-hidden="true"></i>':""}</button>`).join("")}</nav></header>
-  <main class="pxscroll" data-sk="main-${UI.tab}">${({home:homeHTML,train:trainHTML,fights:fightsHTML,people:peopleHTML,camp:campHTML})[UI.tab]()}</main>`;}
+  <main class="pxscroll" data-sk="main-${UI.tab}"><h1 class="sr">${(TABS.find(t=>t[0]===UI.tab)||["",""])[1]} · Week ${Math.min(G.week,52)}</h1>${({home:homeHTML,train:trainHTML,fights:fightsHTML,people:peopleHTML,camp:campHTML})[UI.tab]()}</main>`;}
 
 const DONE_LINES=["Everything's handled this week. Go ahead and end the week","All done. Go grab some sticky rice and grilled pork, then end the week","Everything's ready, Coach has nothing to nitpick. End the week","Work done, training done, plans done. Let's end the week"];
 const pickDone=()=>DONE_LINES[G.week%DONE_LINES.length];
@@ -802,7 +802,7 @@ function modalHTML(){const m=UI.modal;let body="",foot=true;
     <div class="row2"><button class="btn" data-act="closeModal">Better not</button><button class="btn red" data-act="loanyes">Borrow ${fmt(LOAN_AMT)}</button></div>`;}
   if(m.type==="campres"){foot=false;const a=CAMP_ACTIONS[m.k];const C=CFX[m.k];body=`<div class="campres ${m.skip?"skip":""}">${C?`<div class="cfxwrap" data-act="cfxskip" role="button" aria-label="Skip scene"><canvas width="320" height="180" data-campfx="${m.k}"></canvas><span class="cfxcap">${esc(C.cap)}</span><i class="cfxbar"></i></div>`:""}
    <div class="cr-res"><h2>${esc(a.name)}</h2><p class="cr-note">${esc(m.note)}</p>${a.cost?`<p class="meta">Costs ${fmt(a.cost)}</p>`:""}<div class="mfoot"><button class="btn primary" data-act="closeModal">Great!</button></div></div></div>`;}
-  if(m.type==="endwarn"){foot=false;body=`<h2>End the week now?</h2><ul class="mlist">${m.todo.map(t=>`<li>${t}</li>`).join("")}</ul><p class="meta">You can skip without penalty, but you might miss chances this week</p><div class="mfoot"><button class="btn ghost" data-act="closeModal">Go back</button><button class="btn primary" data-act="endgo">End week now</button></div>`;}
+  if(m.type==="endwarn"){foot=false;body=`<h2>End the week now?</h2><ul class="mlist">${m.todo.map(t=>`<li>${t}</li>`).join("")}</ul><p class="meta">You can skip without penalty, but you might miss chances this week</p><label class="endwarn-opt"><input type="checkbox" data-act="noaskend"> Don't ask again (turn back on in Settings)</label><div class="mfoot"><button class="btn ghost" data-act="closeModal">Go back</button><button class="btn primary" data-act="endgo">End week now</button></div>`;}
   if(m.type==="signwarn"){const f=G.F[m.id],net=weeklyNet(G)-f.wage;foot=false;
     body=`<h2>Sign ${esc(f.name)}?</h2><div class="ctip big"><img src="${faceSrc("coach")}" alt=""><span><b>Coach Daeng warns:</b> ${net<0?`If you sign now, the camp runs a deficit of ${fmt(-net)} every week and must rely on fight purses. In the red 4 weeks and below ฿10,000, the camp goes bankrupt`:`The signing fee of ${fmt(f.fee)} leaves only ${fmt(G.cash-f.fee)}. Keep an emergency fund too`}</span></div>
      <div class="kv-row"><span>Signing fee</span><b class="num">${fmt(f.fee)}</b></div><div class="kv-row"><span>Wage</span><b class="num">${fmt(f.wage)}/wk</b></div><div class="kv-row"><span>Weekly net after signing</span><b class="num ${net<0?"neg":"pos"}">${fmt(net)}</b></div>
@@ -1306,8 +1306,9 @@ const ACT={
   trsel:d=>{UI.trSel=d.v;render();},
   tab:d=>{UI.tab=d.v;if(d.sub)UI.csub=d.sub;if(G&&(d.v==="train"||d.v==="fights")){G.tut=G.tut||{};G.tut[d.v]=true;}UI.resetScroll=true;render();window.scrollTo(0,0);},
   endweek:()=>{if(G.dm&&!G.dm.done&&G.dm.wk===G.week){toast("The Death Match isn't over yet. Finish it first");UI.modal={type:"dm"};render();return;}const todo=weekTodo();
-    if(todo.length&&!UI.skipWarn){UI.modal={type:"endwarn",todo};render();return;}UI.skipWarn=false;endWeek();},
+    if(todo.length&&!UI.skipWarn&&SETTINGS.askEnd!==false){UI.modal={type:"endwarn",todo};render();return;}UI.skipWarn=false;endWeek();},
   endgo:()=>{UI.modal=null;UI.skipWarn=true;ACT.endweek();},
+  noaskend:d=>{const el=document.querySelector("[data-act=noaskend]");SETTINGS.askEnd=!(el&&el.checked);saveSettings();},
   fighter:d=>{UI.ptab=d.v||"over";UI.look=G.F[d.id].camp==="player"?"train":"fight";UI.modal={type:"fighter",id:d.id};render();},
   ptab:d=>{UI.ptab=d.v;render();},
   plook:d=>{UI.look=d.v;render();},

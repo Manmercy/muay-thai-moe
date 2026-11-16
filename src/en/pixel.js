@@ -384,7 +384,10 @@ function chibiDataURL(look,scale=4){const c=CHIBI.canvasFor(look,{dy:0});const b
 
 // ---------- ANIMATION LOOP REGISTRY ----------
 const LOOPS=new Set();let rafOn=false;
-function startLoops(){if(rafOn)return;rafOn=true;const tick=t=>{for(const fn of LOOPS){try{fn(t);}catch(e){console.error(e);LOOPS.delete(fn);}}if(LOOPS.size)requestAnimationFrame(tick);else rafOn=false;};requestAnimationFrame(tick);}
+// v1.83: with reduced motion the camp is painted a few times (so sprites finish loading) and then holds still
+const RM=typeof matchMedia==="function"?matchMedia("(prefers-reduced-motion: reduce)"):null;
+function startLoops(){if(RM&&RM.matches){const now=performance.now();[0,300,900,1800].forEach(d=>setTimeout(()=>{for(const fn of LOOPS){try{fn(now);}catch(e){}}},d));return;}
+  if(rafOn)return;rafOn=true;const tick=t=>{for(const fn of LOOPS){try{fn(t);}catch(e){console.error(e);LOOPS.delete(fn);}}if(LOOPS.size)requestAnimationFrame(tick);else rafOn=false;};requestAnimationFrame(tick);}
 function mountCanvases(){
   LOOPS.clear();
   document.querySelectorAll("canvas[data-camp]").forEach(cv=>{const x=cv.getContext("2d");LOOPS.add(t=>{if(!cv.isConnected)return;x.clearRect(0,0,cv.width,cv.height);drawCamp(x,G,t);});});

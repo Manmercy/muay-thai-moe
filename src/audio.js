@@ -113,6 +113,6 @@ const AU={ctx:null,master:null,music:null,sfxBus:null,crowdG:null,timer:null,ste
     const n=this.HUB[s];if(n){const f=440*Math.pow(2,(n-69)/12);this.tone(t,{f,type:"triangle",dur:spb*1.6,peak:.14,bus:m});this.tone(t,{f:f*2,type:"sine",dur:spb*.8,peak:.04,bus:m});}
   },
 };
-const SETTINGS={music:true,sfx:true,coach:true,quick:false};
+const SETTINGS={music:true,sfx:true,coach:true,quick:false,askEnd:true};
 try{Object.assign(SETTINGS,JSON.parse(localStorage.getItem("mtm-settings")||"{}"));}catch(e){}
 function saveSettings(){try{localStorage.setItem("mtm-settings",JSON.stringify(SETTINGS));}catch(e){}}
