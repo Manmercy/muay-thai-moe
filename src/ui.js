@@ -526,21 +526,24 @@ function hallHTML(){const T=(G.titles||[]).slice().reverse(),H=(G.honors||[]).sl
    ${belts.length||venueBelts.length?`<div class="hall-y"><b>เข็มขัดที่ครองอยู่</b>${belts.map(([d,b])=>`<div class="kv-row"><span>${esc(G.F[b.id].name)} · รุ่น ${d}</span><span class="pill gold">🏆 แชมป์เวทีท่าแพ · ป้องกัน ${b.def} ครั้ง</span></div>`).join("")}${venueBelts.map(({v,d,b})=>`<div class="kv-row"><span>${esc(G.F[b.id].name)} · รุ่น ${d}</span><span class="pill gold">🏆 แชมป์${STADIUMS[v].name} · ป้องกัน ${b.def} ครั้ง</span></div>`).join("")}</div>`:""}
    ${T.length?T.map(yr).join(""):`<p class="meta">ยังไม่ครบปีแรก · จบปีแล้วผลงานของทุกคนจะมาอยู่ที่นี่ ปีละหนึ่งแถว</p>`}`;}
 const DECOR_STARS={N:1,R:2,SR:3,SSR:4,SS:5};
+const DECOR_SHORT={tree:"ต้นไม้",gate:"ซุ้ม",ring:"เวที",track:"ลู่วิ่ง",vehicle:"รถค่าย",bags:"กระสอบ"};
 const DECOR_ICON={tree:"🌳",gate:"⛩️",ring:"🥊",track:"🏃",vehicle:"🚐",bags:"🎯"};
-function decorHTML(){let total=0,owned=0,sections="";const open=UI.decorOpen||"tree";
- for(const [slot,D] of Object.entries(CAMP_DECOR)){let tiles="",have=0;const cur=decorChoice(G,slot),keys=Object.keys(D.items);
-  for(const key of keys){const item=D.items[key];total++;const reason=decorUnlockReason(G,slot,key),on=cur===key;if(!reason){owned++;have++;}
-   tiles+=`<button class="dtile r-${item.r} ${on?"on":""} ${reason?"lock":""}" data-act="decor" data-k="${slot}" data-v="${key}" ${reason?"disabled":""} aria-pressed="${on}">
+function decorHTML(){let total=0,owned=0;const slots=Object.entries(CAMP_DECOR);const cur=CAMP_DECOR[UI.decorSlot]?UI.decorSlot:"tree";
+ const chips=slots.map(([slot,D])=>{const keys=Object.keys(D.items),have=keys.filter(k=>!decorUnlockReason(G,slot,k)).length;total+=keys.length;owned+=have;const pick=D.items[decorChoice(G,slot)];
+   return `<button class="dchip ${slot===cur?"on":""}" data-act="decorslot" data-v="${slot}" aria-pressed="${slot===cur}"><span class="dic">${DECOR_ICON[slot]||"✦"}</span><b>${DECOR_SHORT[slot]||D.name}</b><small>${esc(pick?pick.name:"")}</small><i>${have}/${keys.length}</i></button>`;}).join("");
+ const D=CAMP_DECOR[cur],on=decorChoice(G,cur);
+ const tiles=Object.entries(D.items).map(([key,item])=>{const reason=decorUnlockReason(G,cur,key),sel=on===key;
+   return `<button class="dtile r-${item.r} ${sel?"on":""} ${reason?"lock":""}" data-act="decor" data-k="${cur}" data-v="${key}" ${reason?"disabled":""} aria-pressed="${sel}">
      <span class="dstars" aria-label="ระดับ ${item.r}">${"★".repeat(DECOR_STARS[item.r])}</span><b>${esc(item.name)}</b>
-     <small>${on?"ใช้อยู่":reason?"🔒 "+esc(reason):item.r}</small></button>`;}
-  const isOpen=open===slot;
-  sections+=`<div class="dslot ${isOpen?"open":""}"><button class="dhead" data-act="decoropen" data-v="${slot}" aria-expanded="${isOpen}"><span class="dic">${DECOR_ICON[slot]||"✦"}</span><span class="dname">${D.name}<small>${esc(D.items[cur].name)}</small></span><span class="dcount">${have}/${keys.length}</span><i>${isOpen?"▾":"▸"}</i></button>${isOpen?`<div class="dtiles">${tiles}</div>`:""}</div>`;}
+     <small>${sel?"✓ ใช้อยู่":reason?"🔒 "+esc(reason):"แตะเพื่อใช้"}</small></button>`;}).join("");
  const ready=goldRematchReady(G);
  return `<section class="px card cpane decorpane ${(UI.csub||"money")==="decor"?"on":""}"><h3>ตกแต่งค่าย <span class="pill">${owned}/${total} แบบ</span></h3>
   <div class="dprev"><canvas class="campcv" width="640" height="360" data-camp="1" aria-label="ตัวอย่างค่ายหลังตกแต่ง"></canvas></div>
-  <p class="meta">ดาว ★ ยิ่งมาก ยิ่งได้ยาก (N → SS) · ของตกแต่งเปลี่ยนแค่หน้าตาค่าย ไม่มีโบนัสค่าสถานะ · แตะชิ้นที่ปลดแล้วเพื่อเปลี่ยน ภาพด้านบนจะเปลี่ยนทันที</p>${sections}
-  <div class="dgold"><p class="meta">รถตู้สีทอง: ชนะเสี่ยหมวกทองคำ 10 ครั้ง (ชนะครั้งแรกแล้ว ท้าชิงซ้ำได้ทุก 4 สัปดาห์)</p>
-  <button class="btn sm gold" data-act="goldrematch" ${ready?"":"disabled"}>ท้าชิงเสี่ยหมวกทองคำอีกครั้ง${!ready&&G.gangRematchAt?" · "+goldRematchLabel(G):""}</button></div></section>`;}
+  <div class="dchips">${chips}</div>
+  <div class="dtiles">${tiles}</div>
+  <p class="meta">ดาว ★ ยิ่งมาก ยิ่งได้ยาก · ของตกแต่งเปลี่ยนแค่หน้าตาค่าย ไม่มีโบนัสค่าสถานะ</p>
+  ${cur==="vehicle"?`<div class="dgold"><p class="meta">รถตู้สีทอง: ชนะเสี่ยหมวกทองคำ 10 ครั้ง (ชนะครั้งแรกแล้ว ท้าชิงซ้ำได้ทุก 4 สัปดาห์)</p>
+  <button class="btn sm gold" data-act="goldrematch" ${ready?"":"disabled"}>ท้าชิงเสี่ยหมวกทองคำอีกครั้ง${!ready&&G.gangRematchAt?" · "+goldRematchLabel(G):""}</button></div>`:""}</section>`;}
 function campHTML(){const inc=classIncome(G),up=upkeep(G),wg=wages(G),lv=campLevel(G),cs=UI.csub||"money";
   const recs=[["mali",G.flags.maliRecruit],["rin",G.flags.rinRecruit]].filter(([id,ok])=>ok&&G.F[id].camp==="free");
   const dots=(n,m)=>`<span class="pips">${Array.from({length:m},(_,i)=>`<i class="${i<n?"on":""}"></i>`).join("")}</span>`;
@@ -1314,7 +1317,7 @@ const ACT={
   giftpick:d=>{UI.modal={type:"gift",id:d.id};render();},
   give:d=>{const r=giveGift(G,d.id,d.v);if(!r)return;UI.modal=null;UI.tab="people";save();AU.startMusic("date");giftScene(d.id,r);},
   decor:d=>{if(chooseDecor(G,d.k,d.v)){AU.sfx&&AU.sfx("ui");save();render();}},
-  decoropen:d=>{UI.decorOpen=UI.decorOpen===d.v?"":d.v;render();},
+  decorslot:d=>{UI.decorSlot=d.v;AU.sfx&&AU.sfx("ui");render();},
   buyfac:d=>{const before=campLevel(G);if(buyFacility(G,d.v)){save();const after=campLevel(G);AU.sfx("level");toast(after>before?`ค่ายเลื่อนเป็น Lv.${after}: ${CAMP_LV_NAME[after]}!`:`อัปเกรด${FACILITIES[d.v].name}แล้ว`);}},
   daeng:()=>{if(upgradeDaeng(G)){save();toast(`ครูแดงผ่านการอบรม Lv.${G.fac.daeng}`);}},
   useroad:d=>{const f=G.F[d.id];if(!f||trLocked(f)||!PRESETS[d.p])return;f.plan={...f.plan,preset:d.p,intensity:d.i};UI.modal=null;save();toast(`ตั้ง${f.name}: ${planName(d.p,d.i)} แล้ว อย่าลืมกดยืนยัน`);},

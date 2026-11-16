@@ -3633,5 +3633,17 @@
  "รัชนี": "Ratchanee",
  "ชมพู่": "Chomphu",
  "ปิ่นมณี": "Pinmanee",
- "กานต์ธิดา": "Kanthida"
+ "กานต์ธิดา": "Kanthida",
+ "ไม่มีซุ้ม": "No gate",
+ "ไม่ปลูกต้นไม้": "No tree",
+ "<div class=\"dgold\"><p class=\"meta\">รถตู้สีทอง: ชนะเสี่ยหมวกทองคำ 10 ครั้ง (ชนะครั้งแรกแล้ว ท้าชิงซ้ำได้ทุก 4 สัปดาห์)</p>\n  <button class=\"btn sm gold\" data-act=\"goldrematch\" ": "<div class=\"dgold\"><p class=\"meta\">Golden van: beat the Golden Helmet Boss 10 times (after the first win you can rematch every 4 weeks)</p>\n  <button class=\"btn sm gold\" data-act=\"goldrematch\" ",
+ "</div>\n  <p class=\"meta\">ดาว ★ ยิ่งมาก ยิ่งได้ยาก · ของตกแต่งเปลี่ยนแค่หน้าตาค่าย ไม่มีโบนัสค่าสถานะ</p>\n  ": "</div>\n  <p class=\"meta\">More ★ = harder to get · Decorations only change how the camp looks, no stat bonus</p>\n  ",
+ " แบบ</span></h3>\n  <div class=\"dprev\"><canvas class=\"campcv\" width=\"640\" height=\"360\" data-camp=\"1\" aria-label=\"ตัวอย่างค่ายหลังตกแต่ง\"></canvas></div>\n  <div class=\"dchips\">": " items</span></h3>\n  <div class=\"dprev\"><canvas class=\"campcv\" width=\"640\" height=\"360\" data-camp=\"1\" aria-label=\"Camp preview with decorations\"></canvas></div>\n  <div class=\"dchips\">",
+ "แตะเพื่อใช้": "Tap to use",
+ "✓ ใช้อยู่": "✓ In use",
+ "กระสอบ": "Bags",
+ "รถค่าย": "Vehicle",
+ "ลู่วิ่ง": "Track",
+ "เวที": "Ring",
+ "ซุ้ม": "Gate"
 }

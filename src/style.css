@@ -1516,15 +1516,14 @@ button.goal.ov.mini{right:auto;padding:3px 10px;opacity:.85}
 .decorpane h3{display:flex;align-items:center;gap:8px}
 .dprev{margin:6px 0 8px;background:var(--bg);box-shadow:0 0 0 2px var(--line)}
 .dprev canvas{display:block;width:100%;height:auto;image-rendering:pixelated}
-.dslot{margin-top:8px;box-shadow:inset 0 0 0 2px var(--line);background:var(--bg2)}
-.dslot.open{box-shadow:inset 0 0 0 2px var(--gold)}
-.dhead{display:flex;align-items:center;gap:10px;width:100%;padding:10px 12px;border:0;background:none;color:inherit;cursor:pointer;text-align:left;font:inherit}
-.dhead .dic{font-size:20px;width:26px;text-align:center}
-.dhead .dname{flex:1;display:flex;flex-direction:column;font-weight:700}
-.dhead .dname small{font-weight:500;color:var(--muted);font-size:12px}
-.dhead .dcount{font-family:"Pixelify Sans",monospace;color:var(--gold);font-size:14px}
-.dhead i{font-style:normal;color:var(--muted)}
-.dtiles{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px;padding:0 10px 10px}
+.dchips{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;margin:8px 0}
+.dchip{display:grid;grid-template-columns:auto 1fr;grid-template-rows:auto auto;column-gap:6px;align-items:center;text-align:left;padding:7px 8px;border:0;background:var(--bg2);color:inherit;font:inherit;cursor:pointer;box-shadow:inset 0 0 0 2px var(--line);position:relative;min-width:0}
+.dchip .dic{grid-row:1/3;font-size:20px}
+.dchip b{font-size:13px;line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.dchip small{font-size:11px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.dchip i{position:absolute;top:3px;right:5px;font-style:normal;font-family:"Pixelify Sans",monospace;font-size:10px;color:var(--gold)}
+.dchip.on{box-shadow:inset 0 0 0 3px var(--gold);background:color-mix(in srgb,var(--gold) 14%,var(--bg2))}
+.dtiles{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px}
 @media (min-width:600px){.dtiles{grid-template-columns:repeat(3,minmax(0,1fr))}}
 .dtile{--rc:#aab0ba;display:flex;flex-direction:column;align-items:flex-start;gap:2px;min-height:64px;padding:8px 9px;border:0;background:var(--bg);color:inherit;text-align:left;cursor:pointer;font:inherit;box-shadow:inset 0 0 0 2px var(--rc);position:relative}
 .dtile.r-R{--rc:#5ba9e8}.dtile.r-SR{--rc:#bd83e8}.dtile.r-SSR{--rc:#f4c75b}.dtile.r-SS{--rc:#ff8f62}
