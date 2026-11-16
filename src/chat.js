@@ -1,7 +1,7 @@
 // ================= MUAY THAI MOE v1.24 — PIXEL CHAT (one chat per character per week) =================
 // each exchange: [their line, [[my reply, score 0-2, their answer], ...]] — score 2 = what she loves to hear, 0 = falls flat (never negative)
 const lastFight=(G,id)=>(G.cal||[]).filter(c=>c.a===id).slice(-1)[0];
-const recentRes=(G,id,res)=>{const c=lastFight(G,id);return !!(c&&c.res===res&&G.week-c.wk<=2&&TIER[c.tier]&&!TIER[c.tier].off);};
+const recentRes=(G,id,res)=>{const c=lastFight(G,id);return !!(c&&c.res===res&&c.absWeek!=null&&gameWeek(G)-c.absWeek>=0&&gameWeek(G)-c.absWeek<=2&&TIER[c.tier]&&!TIER[c.tier].off);};
 const nearFinal=G=>G.week>=42&&G.week<=49;
 const CHAT={
  kati:[
@@ -160,8 +160,8 @@ const CHAT={
    ["วันหลังมาซ้อมเตะกับฟ้าได้ไหม (ไม่ได้ชวนนะ แค่ถาม)",[["ไป แต่ขอยืนห่าง ๆ",2,"ฮ่า! กลัวล่ะสิ! …วันเสาร์บ่ายสามนะ ห้ามเบี้ยว!"],["ฉันชกไม่เป็นนะ",1,"ก็จะสอนให้ไง ใจร้อนจริง"],["ไม่ว่าง",0,"ไม่ได้ชวนอยู่แล้ว!!"]]]]}]};
 // extra lines once she trusts you more (bond 40 / 70): one more exchange each
 // v1.39: things that just happened make her text you (results can come up again after a while)
-const dmJust=G=>!!(G.dm&&G.dm.done&&G.week-G.dm.wk<=2);
-const evJust=(G,id,n=3)=>!!(G.seen&&G.seen[id]&&(G.seenWk||{})[id]!=null&&G.week-G.seenWk[id]<=n);
+const dmJust=G=>!!(G.dm&&G.dm.done&&G.dm.absWeek!=null&&gameWeek(G)-G.dm.absWeek>=0&&gameWeek(G)-G.dm.absWeek<=2);
+const evJust=(G,id,n=3)=>!!(G.seen&&G.seen[id]&&(G.seenAbs||{})[id]!=null&&gameWeek(G)-G.seenAbs[id]>=0&&gameWeek(G)-G.seenAbs[id]<=n);
 const CHAT_EV={
  kati:[{id:"k_dm",need:G=>dmJust(G)&&G.dm.mine.includes("kati"),x:[["ขาหนูยังสั่นอยู่เลยค่ะ ชกติดกันแบบนั้นนี่ใจจะขาด!",[["เธอสู้ไม่ถอยเลยนะ",2,"…ปู่สอนไว้ค่ะ ถอยได้แต่ห้ามหันหลัง หนูจำมาตลอด"],["พักขาก่อนนะ",1,"ค่ะ! หนูแช่น้ำแข็งอยู่ ส่งรูปให้ดูไหม เท้าแดงเป็นกุ้งเลย"],["ครั้งหน้าต้องชนะนะ",0,"รู้แล้วค่ะ… ไม่ต้องย้ำก็ได้"]]]]},
   {id:"k_flood",need:G=>evJust(G,"dis_flood"),x:[["ผู้จัดการคะ เสื่อในห้องซ้อมยังชื้นอยู่เลย แต่หนูเจอนวมของปู่ลอยไปติดต้นมะม่วง เก็บมาได้แล้วค่ะ!",[["เก่งมาก ของสำคัญที่สุดเลย",2,"ใช่ไหมคะ! หนูตากแดดไว้ข้างหิ้งปู่แล้ว"],["ระวังไฟดูดนะ",1,"ครูแดงตัดไฟหมดแล้วค่ะ ตอนนี้ค่ายมืดเหมือนบ้านผี"],["นวมเก่าแล้วทิ้งเถอะ",0,"ไม่ทิ้งค่ะ! นั่นนวมของปู่นะ!"]]]]},
@@ -183,7 +183,7 @@ const CHAT_X={
  fah:[["…นี่ ถ้าฟ้าบอกว่าดีใจที่ได้รู้จักนาย นายจะหัวเราะไหม",[["ไม่หัวเราะ ฉันก็ดีใจเหมือนกัน",2,"…!! พอ ๆ ไม่ต้องพูดต่อ ฟ้าเขินแล้ว!!"],["ขึ้นอยู่กับว่าพูดหน้าแบบไหน",1,"หน้าปกติไง! …มั้ง"],["หัวเราะแน่",0,"งั้นไม่พูดย่ะ!"]]],["หมัดเหล็ก (แมว) นอนบนเสื้อที่นายลืมไว้ทั้งคืนเลย",[["งั้นยกเสื้อให้หมัดเหล็กเลย",2,"…ไม่ได้ให้หมัดเหล็กนะ ฟ้าเก็บไว้ให้เอง! เอ๊ย!"],["ฝากซักด้วยนะ",1,"ไม่ใช่แม่บ้านย่ะ!"],["ขนแมวติดเสื้อเลย",0,"ใจร้าย!"]]]]};
 
 function chatTopic(G,id){const L=CHAT[id]||[];G.chatSeen=G.chatSeen||{};const seen=G.chatSeen[id]||[];
-  const hot=t=>/_(lost|won|final|beaten)$/.test(t.id)?0:1;const W=G.chatWk||{};const ctx=L.filter(t=>t.need&&t.need(G)&&(!seen.includes(t.id)||(t.rep&&G.week-(W[id+":"+t.id]||0)>=t.rep))).sort((p,q)=>hot(p)-hot(q));if(ctx.length)return ctx[0];
+  const hot=t=>/_(lost|won|final|beaten)$/.test(t.id)?0:1;const W=G.chatWkAbs||{};const ctx=L.filter(t=>t.need&&t.need(G)&&(!seen.includes(t.id)||(t.rep&&gameWeek(G)-(W[id+":"+t.id]??-999)>=t.rep))).sort((p,q)=>hot(p)-hot(q));if(ctx.length)return ctx[0];
   const gen=L.filter(t=>!t.need&&!seen.includes(t.id));if(gen.length)return gen[(G.week+G.seed)%gen.length];
   const all=L.filter(t=>!t.need).sort((a,b)=>seen.indexOf(a.id)-seen.indexOf(b.id));return all[0];}
 // v1.27: she texts first, now and then, once you're close enough; an unread chat waits for you
@@ -196,13 +196,13 @@ function bondFade(G){G.relT=G.relT||{};for(const id of CANON_IDS){const f=G.F[id
   if(f.bond>floor)f.bond=Math.max(floor,Math.round((f.bond-rate)*100)/100);}}
 function chatWeekly(G){bondFade(G);G.chatIn=G.chatIn||{};G.chatLast=G.chatLast||{};const rng=mulberry32(G.seed*31+G.week*7+3);
   for(const id of CANON_IDS){const f=G.F[id];if(!f||!f.met||G.chatIn[id])continue;
-    {const L=CHAT[id]||[],seen=(G.chatSeen||{})[id]||[],W=G.chatWk||{};if((f.bond||0)>=8&&G.week-(G.chatLast[id]||-9)>=1&&L.some(t=>t.need&&/_(lost|won|dm|flood|loan|miss)$/.test(t.id)&&t.need(G)&&(!seen.includes(t.id)||(t.rep&&G.week-(W[id+":"+t.id]||0)>=t.rep)))){G.chatIn[id]=G.week;continue;}}
+    {const L=CHAT[id]||[],seen=(G.chatSeen||{})[id]||[],W=G.chatWkAbs||{};if((f.bond||0)>=8&&gameWeek(G)-(G.chatLastAbs?.[id]??-999)>=1&&L.some(t=>t.need&&/_(lost|won|dm|flood|loan|miss)$/.test(t.id)&&t.need(G)&&(!seen.includes(t.id)||(t.rep&&gameWeek(G)-(W[id+":"+t.id]??-999)>=t.rep)))){G.chatIn[id]=G.week;continue;}}
     if((f.bond||0)<CHAT_BOND)continue;
-    if(G.week-(G.chatLast[id]||-9)<3)continue;if(rng()<.3+((f.bond||0)>=50?.1:0))G.chatIn[id]=G.week;}}
+    if(gameWeek(G)-(G.chatLastAbs?.[id]??-999)<3)continue;if(rng()<.3+((f.bond||0)>=50?.1:0))G.chatIn[id]=G.week;}}
 const chatLen=f=>3+((f.bond||0)>=40?1:0)+((f.bond||0)>=70?1:0);
 const canChat=f=>!!(f&&f.met&&G.chatIn&&G.chatIn[f.id]);
-function chatOpen(id){const f=G.F[id];if(!f||!canChat(f))return;f.lastTouch=absWeek(G);delete G.chatIn[id];G.chatLast=G.chatLast||{};G.chatLast[id]=G.week;const T=chatTopic(G,id);
-  G.chatSeen=G.chatSeen||{};G.chatSeen[id]=(G.chatSeen[id]||[]).filter(x=>x!==T.id).concat([T.id]);G.chatWk=G.chatWk||{};G.chatWk[id+":"+T.id]=G.week;
+function chatOpen(id){const f=G.F[id];if(!f||!canChat(f))return;f.lastTouch=absWeek(G);delete G.chatIn[id];G.chatLast=G.chatLast||{};G.chatLast[id]=G.week;G.chatLastAbs=G.chatLastAbs||{};G.chatLastAbs[id]=gameWeek(G);const T=chatTopic(G,id);
+  G.chatSeen=G.chatSeen||{};G.chatSeen[id]=(G.chatSeen[id]||[]).filter(x=>x!==T.id).concat([T.id]);G.chatWk=G.chatWk||{};G.chatWk[id+":"+T.id]=G.week;G.chatWkAbs=G.chatWkAbs||{};G.chatWkAbs[id+":"+T.id]=gameWeek(G);
   const x=[...T.x];const ex=CHAT_X[id]||[];G.chatX=G.chatX||{};const xs=G.chatX[id]=G.chatX[id]||[];const extra=Math.min(1,chatLen(f)-3);for(let i=0;i<ex.length&&extra>0;i++)if(!xs.includes(i)&&(i===0||(f.bond||0)>=70)){x.push(ex[i]);xs.push(i);break;}
   const rng=mulberry32(G.seed+G.week*17+id.length);x.forEach(e=>{e.ord=[0,1,2].sort(()=>rng()-.5);});
   UI.chat={id,x,i:0,log:[{w:"them",t:x[0][0]}],gain:0,typing:false};UI.modal={type:"chat"};save();render();}

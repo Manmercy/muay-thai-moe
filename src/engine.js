@@ -35,6 +35,11 @@ const NPC_NAMES={
   B:[["ฝนทิพย์ พ.พงษ์ไทย",8],["ลำไย ศิษย์ดอยคำ",8],["ขวัญข้าว ช.ชัยวัฒน์",9],["บุษบา แสงทองยิม",10],["ใบเตย ส.เมืองเหนือ",10]],
 };
 const NPC_DISTRICT={A:[["สายฟ้า ว.วันทวี",11],["มุกดา เพชรยินดี",11]],B:[["แก้วกัลยา ก.กิตติ",11],["อรุณี ศ.ศรีสุข",11]]};
+const STAGE_NPCS={
+ local:{A:[["แสงดาว ศิษย์แม่ริม",8],["มินตรา ก.กำแพง",9]],B:[["สายรุ้ง ลูกน้ำปิง",8],["ข้าวหอม ว.วัดเหนือ",9]]},
+ district:{A:[["นิลวรรณ ศิษย์แม่ปิง",11],["เดือนเพ็ญ ว.ล้านนา",12],["แพรไหม เพชรดอย",12]],B:[["วาริน ศ.วายุ",11],["พิมพ์ดาว ค่ายเหนือฟ้า",12],["กิ่งแก้ว เมืองแก้ว",12]]},
+ province:{A:[["ชลธิชา ศิษย์นคร",13],["นภัสสร พยัคฆ์เมือง",14],["ศศิพร เพชรหลวง",14],["มณีรัตน์ ก.กรุงเก่า",15]],B:[["ธาราทิพย์ ศิษย์เวียง",13],["รวีวรรณ ลูกเจ้าพระยา",14],["ศิรินภา เพชรตะวัน",14],["บุษกร ศ.สนามใหญ่",15]]}
+};
 const NPC_COLORS=["#8a6f5a","#5a7a8a","#7a5a8a","#5a8a6a","#8a5a5a","#6a6a8a"];
 
 // v1.43: the field keeps improving through the season so mid/late fights stay honest
@@ -419,7 +424,7 @@ const dif=G=>DIFF[(G&&G.diff)||"normal"]||DIFF.normal;
 function srand(G,salt){return mulberry32((((G&&G.seed)||1)+((G&&G.week)||0)*7919+(salt|0)*104729)>>>0)();}
 function newGame(opts){
   const seed=(opts.seed??Math.floor(Math.random()*1e9))>>>0;const rng=mulberry32(seed);
-  const G={v:1,timeV:2,seed,week:1,diff:opts.diff||"normal",player:{name:opts.name||"ต้น",gender:opts.gender||"m"},cash:60000,debt:120000,rep:5,
+  const G={v:1,timeV:3,snubV:2,dmSeenSeason:1,dmSeen:{},seed,week:1,diff:opts.diff||"normal",player:{name:opts.name||"ต้น",gender:opts.gender||"m"},cash:60000,debt:120000,rep:5,
     fac:{gym:0,recovery:0,classroom:0,brand:0,dorm:0,kitchen:0,hill:0,video:0,ring:0,clinic:0,shrine:0,van:0,sauna:0,lights:0,hall:0,daeng:1,assistants:0},stu:1,staff:[],rankMove:{A:{},B:{}},camp:{beauty:0},campUsed:null,levelUps:[],avatar:opts.avatar||null,F:{},rank:{A:{},B:{}},qual:{A:[],B:[]},finalists:{A:[],B:[]},semis:{A:[],B:[]},champ:{},
     bookings:[],offers:[],log:[],flags:{},seen:{},freeUsed:false,negWeeks:0,history:[],honors:[],awards:[],ended:null,lastReport:null,romance:null};
   for(const [id,d] of Object.entries(CANON))G.F[id]=baseFighter(id,d);
@@ -428,6 +433,7 @@ function newGame(opts){
   syncFighterAges(G);
   for(const f of Object.values(G.F))if(f.camp!=="player"&&f.camp!=="free")G.rank[f.div][f.id]={pts:0,w:0,l:0,d:0};
   G.rank.A.kati={pts:0,w:0,l:0,d:0};
+  ensureStageNPCs(G,"local");
   // v1.22 difficulty also moves where the two stars start
   {const d=G.diff;for(const id of ["ploy","fah"]){const adj=(d==="easy"?-.7:d==="hard"?.35:0)+(id==="ploy"?-.8:-1.5);/* v1.23: stars start lower, grow when beaten */const f=G.F[id];if(!f)continue;for(const [k] of ATTRS)f.a[k]=clamp(f.a[k]+adj,1,20);f.potential+=adj*.8;}}
   return G;
@@ -504,6 +510,19 @@ function fixSave(G){if(G&&G.flags&&G.flags.beat_ploy&&G.flags.beatS_ploy==null)G
     if(G.gang&&G.gang.next!=null&&G.gang.nextAbs==null)G.gang.nextAbs=oldExpiry(G.gang.next,6);
     if(G.tamNext!=null&&G.tamNextAbs==null)G.tamNextAbs=oldExpiry(G.tamNext,6);
     G.timeV=2;}
+  if((G.timeV||0)<3){for(const f of Object.values(G.F||{})){if(f.lastFightAbs==null&&f.lastFight>0)f.lastFightAbs=oldPast(f.lastFight,52);f.lockWeek=null;}
+    if(G.romWk!=null)G.romWk=oldPast(G.romWk,52);
+    if(G.lastBig&&!G.lastBig.shown){G.lastBig.absWeek=oldPast(G.lastBig.wk,1);if(G.lastBig.absWeek==null)G.lastBig.shown=true;}
+    for(const [id,w] of Object.entries(G.tiredAt||{}))G.tiredAt[id]=oldPast(w,3);
+    for(const id of ["fah","ploy"]){const key=id+"Joined",old=G.flags?.[key];if(old!=null&&G.flags[key+"Abs"]==null)G.flags[key+"Abs"]=oldPast(old,52);}
+    G.seenAbs=G.seenAbs||{};for(const [id,w] of Object.entries(G.seenWk||{}))G.seenAbs[id]=oldPast(w,3);
+    G.chatLastAbs=G.chatLastAbs||{};for(const [id,w] of Object.entries(G.chatLast||{}))G.chatLastAbs[id]=oldPast(w,3);
+    G.chatWkAbs=G.chatWkAbs||{};for(const [id,w] of Object.entries(G.chatWk||{}))G.chatWkAbs[id]=oldPast(w,52);
+    if(G.flags?.maliIn!=null&&G.flags.maliInAbs==null)G.flags.maliInAbs=oldPast(G.flags.maliIn,52);
+    if(G.dm?.wk!=null&&G.dm.absWeek==null)G.dm.absWeek=oldPast(G.dm.wk,2);
+    G.timeV=3;}
+  if(!G.snubV){G.snub={};G.declineReason={};G.snubV=2;}
+  if(G.dmSeenSeason==null){const played=G.dm&&G.dm.wk===G.week;G.dmSeen=(G.season||1)>1?{}:G.dmSeen||{};if(played)G.dmSeen[G.week]=1;G.dmSeenSeason=G.season||1;}
   syncFighterAges(G);
 if(G.F)for(const id in G.F){const f=G.F[id];if(f&&hasTree(id)&&!f.spv){f.sp=(f.sp||0)+2*Math.max(0,(f.lvl||1)-1);f.spv=2;}}G.fac=G.fac||{};for(const k of Object.keys(FACILITIES))G.fac[k]=G.fac[k]||0;G.fac.daeng=G.fac.daeng||1;
   if(!G.staff){G.staff=["nok","paeng"].slice(0,G.fac.assistants||0);}G.fac.assistants=G.staff.length;
@@ -514,9 +533,9 @@ if(G.F)for(const id in G.F){const f=G.F[id];if(f&&hasTree(id)&&!f.spv){f.sp=(f.s
     for(const [div,b] of Object.entries(G.belt||{}))if(G.F[b.id]?.camp==="player")G.honors.push({key:`legacy:belt:${div}`,season:null,week:b.since||0,id:b.id,div,kind:"belt"});
     for(const f of Object.values(G.F))if(f.camp==="player"&&f.belts>0&&!G.honors.some(h=>h.kind==="belt"&&h.id===f.id))G.honors.push({key:`legacy:belt:${f.id}`,season:null,week:0,id:f.id,div:f.div,kind:"belt"});}
   G.awards=Array.isArray(G.awards)?G.awards:[];lateSeasonOpposition(G);return G;}
-function recordHonor(G,kind,id,div,week=G.week){if(!G.F[id]||G.F[id].camp!=="player")return null;G.honors=G.honors||[];G.awards=G.awards||[];
-  const season=G.season||1,key=`${season}:${kind}:${div}:${kind==="dm"||kind==="belt"||kind==="defense"?week:id}`;
-  if(G.honors.some(h=>h.key===key))return null;const h={key,season,week,id,div,kind};G.honors.push(h);G.awards.push(h);return h;}
+function recordHonor(G,kind,id,div,week=G.week,venue=null){if(!G.F[id]||G.F[id].camp!=="player")return null;G.honors=G.honors||[];G.awards=G.awards||[];
+  const season=G.season||1,key=`${season}:${kind}:${div}:${venue||""}:${kind==="dm"||kind==="belt"||kind==="defense"?week:id}`;
+  if(G.honors.some(h=>h.key===key))return null;const h={key,season,week,id,div,kind,...(venue?{venue}:{})};G.honors.push(h);G.awards.push(h);return h;}
 const DAENG_COST=[0,15000,30000];
 function facTotal(G){return Object.keys(FACILITIES).reduce((s,k)=>s+(G.fac[k]||0),0)+(G.fac.daeng-1);}
 function campLevel(G){const t=facTotal(G);return t>=13?3:t>=5?2:1;}
@@ -620,7 +639,10 @@ const RIVAL_OF={kati:"ploy",mali:"fah"},RIVAL_WEEKS=[25,29,33,36],RIVAL_EARLY={m
 function diffTag(me,op){const d=ovr(op.a)-ovr(me.a)+((op.lvl||1)-(me.lvl||1))*.15;return d<-.6?["easy","ง่าย"]:d<.35?["even","สูสี"]:d<1.1?["hard","ยาก"]:["vhard","ยากมาก"];}
 const OFFER_BANDS=[-.7,.45,1.4,.9];
 function genOffers(G){
-  const rng=mulberry32(G.seed+G.week*7919+11);G.snub=G.snub||{};for(const o of G.offers||[])if(!o.beast)G.snub[o.b]=(G.snub[o.b]||0)+1;G.offers=[];const st=stageOf(G.week);
+  const rng=mulberry32(G.seed+G.week*7919+11);G.snub=G.snub||{};const ignored=new Set();
+  for(const o of G.offers||[])if(!o.beast&&o.status!=="conflict"&&!ignored.has(o.b)&&G.F[o.a]?.camp==="player"&&!isBooked(G,o.b)){
+    ignored.add(o.b);G.snub[o.b]=(G.snub[o.b]||0)+1;}
+  G.offers=[];const st=stageOf(G.week);
   const stageEnd=st==="local"?20:st==="district"?40:0;const nOff=G.week<=8?1:(2+(G.rep>=30?1:0)); // v1.32: one offer per fighter early, a third only once the camp is famous
   for(const f of roster(G)){
     if(f.injury>0)continue;
@@ -675,7 +697,7 @@ function acceptOffer(G,oid){const o=G.offers.find(x=>x.id===oid);
   const bad=duplicate?"รับข้อเสนอนี้ไปแล้ว":clash?`${G.F[clash.a===o.a||clash.b===o.a?o.a:o.b]?.name||"นักมวย"}มีไฟต์ในสัปดาห์ ${o.week} แล้ว`:null;
   if(bad){o.status="conflict";o.reason=bad;return {ok:false,reason:bad};}
   const booking={id:"b"+oid,a:o.a,b:o.b,week:o.week,tier:o.tier,rounds:3,win:o.win,lose:o.lose,...(o.fair?{fair:1,cross:o.cross}:{})};
-  G.bookings.push(booking);
+  G.bookings.push(booking);G.snub=G.snub||{};G.snub[o.b]=0;for(const m of G.mail||[])if(m.q==="challenge"&&m.npc===o.b&&!m.done){m.done=true;m.resolved=true;}
   G.offers=G.offers.filter(x=>!(x.a===o.a&&Math.abs(x.week-o.week)<=1)&&!(x.a===o.a&&x.b===o.b));
   for(const x of G.offers)if(x.week===o.week&&(x.a===o.b||x.b===o.b)){x.status="conflict";x.reason=`${G.F[o.b].name}มีไฟต์ในสัปดาห์ ${o.week} แล้ว`;}
   return {ok:true,booking};}
@@ -686,10 +708,10 @@ function applyResult(G,F,booking){
   for(const [me,op,side] of [[fa,fb,"A"],[fb,fa,"B"]]){
     const res=r.win==="D"?"D":r.win===side?"W":"L";
     const off=tier.off;
-    if(off&&me.camp!=="player"){me.lastFight=G.week;continue;}
+    if(off&&me.camp!=="player"){me.lastFight=G.week;me.lastFightAbs=gameWeek(G);continue;}
     if(me.camp==="player"&&op.camp!=="player"&&!off){G.h2h=G.h2h||{};const h=G.h2h[op.id]=G.h2h[op.id]||{w:0,l:0,d:0};h[res==="W"?"w":res==="L"?"l":"d"]++;}
     if(me.camp==="player"&&res==="W")G.dust=(G.dust||0)+(/KO|น็อก/.test(r.type||"")?3:2); /* v1.58: stardust for wins */
-    if(!off){me.rec[res==="W"?"w":res==="L"?"l":"d"]++;me.form.unshift(res);me.form=me.form.slice(0,5);}me.lastFight=G.week;
+    if(!off){me.rec[res==="W"?"w":res==="L"?"l":"d"]++;me.form.unshift(res);me.form=me.form.slice(0,5);}me.lastFight=G.week;me.lastFightAbs=gameWeek(G);
     me.fatigue=clamp(me.fatigue+(booking.ev?4:off?14:22),0,100);
     const s=side==="A"?A:B;
     if(s.hp<40&&!off&&mulberry32(F.seed+(side==="A"?1:2))()<.45)me.injury=Math.max(me.injury,2+(s.hp<15?2:0));
@@ -716,7 +738,7 @@ function simNPCWeek(G){
   const st=stageOf(G.week);if(st!=="local"&&st!=="district")return;
   const rng=mulberry32(G.seed+G.week*104729);
   for(const div of ["A","B"]){
-    let pool=Object.values(G.F).filter(f=>f.div===div&&f.camp!=="player"&&f.camp!=="free"&&f.injury===0&&G.week-f.lastFight>=3&&!isBooked(G,f.id)&&eligible(G,f));
+    let pool=Object.values(G.F).filter(f=>f.div===div&&f.camp!=="player"&&f.camp!=="free"&&f.injury===0&&(f.lastFightAbs==null||gameWeek(G)-f.lastFightAbs>=3)&&!isBooked(G,f.id)&&eligible(G,f));
     pool.sort(()=>rng()-.5);
     let n=0;while(pool.length>=2&&n<2){const a=pool.pop(),b=pool.pop();n++;
       const F=quickFight(a,b,Math.floor(rng()*1e9),3);applyResult(G,F,{tier:st});
@@ -734,7 +756,7 @@ function stageTransition(G){ // called after week's results, before week++
     for(const div of ["A","B"]){G.qual[div]=storyTop4(G,div);}
     for(const div of ["A","B"]){NPC_DISTRICT[div].forEach(([n,l],i)=>{const id=`d${div}${i}`;G.F[id]=baseFighter(id,mkNPC(id,n,div,l,rng,i+3));startLv(G.F[id]);G.qual[div].push(id);});
       G.rank[div]={};G.qual[div].forEach((id,i)=>{G.rank[div][id]={pts:id.startsWith("d")?0:[4,3,2,1][i]||0,w:0,l:0,d:0};});}
-    G.flags.qualDone=true;
+    G.flags.qualDone=true;ensureStageNPCs(G,"district");
   }
   if(G.week===40){
     for(const div of ["A","B"]){const lead=standings(G,div)[0];if(lead)recordHonor(G,"district",lead.id,div);}
@@ -742,7 +764,7 @@ function stageTransition(G){ // called after week's results, before week++
     G.semis=G.semis||{A:[],B:[]};
     for(const div of ["A","B"]){const t=storyTop4(G,div);G.semis[div]=t;G.finalists[div]=[];
       [[t[0],t[3]],[t[1],t[2]]].forEach(([a,b],i)=>{if(a&&b)bookBracket(G,`semi${div}${i}`,a,b,44,"semi",3);});}
-    G.flags.finalDone=true;
+    G.flags.finalDone=true;ensureStageNPCs(G,"province");
   }
 }
 // v1.23: the story needs its final — our lead heroine and her rival always make the cut (wildcard if needed)
@@ -756,6 +778,7 @@ function makeProdigy(G,div,from){G.prodigy=G.prodigy||{};if(G.prodigy[div])retur
   for(const k in src.a)f.a[k]=Math.min(20,src.a[k]+.8);f.lvl=Math.max(1,(src.lvl||5));f.xp=0;f.canon=false;f.prodigy=true;f.met=true;f.skills={...(src.skills||{})};
   G.F[id]=f;syncFighterAges(G);G.prodigy[div]=id;G.rank=G.rank||{A:{},B:{}};G.rank[div][id]={pts:0,w:0,l:0,d:0};return f;}
 function joinCamp(G,id,wage){const f=G.F[id];if(!f)return;f.camp="player";f.wage=wage;f.met=true;G.bookings=G.bookings.filter(b=>!(b.b===id&&G.F[b.a]&&G.F[b.a].camp==="player"));
+  if(id==="mali"){G.flags.maliIn=G.week;G.flags.maliInAbs=gameWeek(G);}
   G.offers=(G.offers||[]).filter(o=>o.b!==id);G.rank[f.div]=G.rank[f.div]||{};if(!G.rank[f.div][id])G.rank[f.div][id]={pts:0,w:0,l:0,d:0};}
 function storyTop4(G,div){let t=standings(G,div).slice(0,4).map(s=>s.id);const me=LEADS[div][0],rv=leadRival(G,div);G.wild=G.wild||{};
   /* v1.66: only year 1 is story-protected; from year 2 everyone qualifies on points */
@@ -848,7 +871,14 @@ function liftOpponent(f,target,maxGain){const delta=Math.min(maxGain,Math.max(0,
   const goal=Math.min(19.7,ovr(f.a)+delta);for(let n=0;n<4;n++){const gap=goal-ovr(f.a),room=ATTRS.filter(([k])=>f.a[k]<19.95);if(gap<=.01||!room.length)break;
     const each=gap*ATTRS.length/room.length;for(const [k] of room)f.a[k]=Math.min(20,f.a[k]+each);}
   f.potential=Math.max(f.potential||14,Math.min(20,goal));}
-function lateSeasonOpposition(G){const year=G.season||1;if(year<4)return;G.flags=G.flags||{};const created=ensureVector(G);
+function ensureStageNPCs(G,through=stageOf(G.week)){const stages=["local",...(through==="district"||through==="final"||through==="province"?["district"]:[]),...(through==="final"||through==="province"?["province"]:[])];
+  G.rank=G.rank||{A:{},B:{}};for(const stage of stages)for(const div of ["A","B"]){G.rank[div]=G.rank[div]||{};
+    STAGE_NPCS[stage][div].forEach(([name,level],i)=>{const id=`${{local:"l",district:"x",province:"p"}[stage]}${div}${i}`;if(G.F[id])return;
+      const rng=mulberry32(G.seed+stableHash(id)+((G.season||1)-1)*977),f=G.F[id]=baseFighter(id,mkNPC(id,name,div,level,rng,i+2));
+      if((G.season||1)>=2){const best=Math.max(level,...roster(G).filter(x=>x.div===div).map(x=>ovr(x.a))),gap=stage==="local"?-2:stage==="district"?-1.1:-.3;liftOpponent(f,Math.min(19.2,best+gap),20);}startLv(f);
+      if(stage==="district"){G.qual=G.qual||{A:[],B:[]};G.qual[div]=G.qual[div]||[];if(!G.qual[div].includes(id))G.qual[div].push(id);}
+      G.rank[div][id]={pts:0,w:0,l:0,d:0};});}syncFighterAges(G);}
+function lateSeasonOpposition(G){const year=G.season||1;ensureStageNPCs(G);if(year<4)return;G.flags=G.flags||{};const created=ensureVector(G);
   if(G.flags.oppositionSeason===year&&!created)return;
   const d=G.diff||"normal";
   for(const div of ["A","B"]){const mine=roster(G).filter(f=>f.div===div);const best=Math.max(12+(year-4)*.6,...mine.map(f=>ovr(f.a)));
@@ -862,8 +892,8 @@ function lateSeasonOpposition(G){const year=G.season||1;if(year<4)return;G.flags
 function newSeason(G){
   G.titles=G.titles||[];G.titles.push({season:G.season||1,champ:{...G.champ}});
   G.season=(G.season||1)+1;G.week=1;G.ended=null;G.qual={A:[],B:[]};G.finalists={A:[],B:[]};G.semis={A:[],B:[]};G.champ={};G.bookings=[];G.log=[];
-  G.flags.qualDone=false;G.flags.finalDone=false;G.coachAway=null;G.coachAwayAbs=null;G.freeUsed=false;G.campUsed=null;G.rankMove={A:{},B:{}};
-  for(const id of Object.keys(G.F))if(/^d[AB]\d/.test(id))delete G.F[id];
+  G.flags.qualDone=false;G.flags.finalDone=false;G.dmSeen={};G.dmSeenSeason=G.season;G.dm=null;G.coachAway=null;G.coachAwayAbs=null;G.freeUsed=false;G.campUsed=null;G.rankMove={A:{},B:{}};
+  for(const id of Object.keys(G.F))if(/^[dxp][AB]\d/.test(id))delete G.F[id];
   const rng=mulberry32(G.seed+G.season*977);
   G.rank={A:{},B:{}};
   for(const f of Object.values(G.F)){f.form=[];f.injury=0;f.fatigue=Math.min(f.fatigue,20);
