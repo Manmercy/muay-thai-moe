@@ -803,7 +803,7 @@ const PATCH={id:"1.86.0",ver:"Muay Thai Moe v1.86.0",title:"Weekly report from S
  ["🌸","Annual Camp Beauty Contest","At new year the District Chief announces a lucky colour; matching decorations score extra. In week 30 he walks your camp and scores seven areas, then the results are read out at the district office. Winners get prize money and fame"],
  ["🎨","19 new decorations","Every lucky colour now has a piece in every category: marigold and bougainvillea arches, a jacaranda tree, an orange tuk-tuk, and a gold carpet track for beauty champions"],
  ["♥","Bond levels","Bond no longer caps out: it shows as a heart level with a gauge to the next one. Past Lv.10 it keeps growing, and no longer fades"],
- ["📖","More story in cards","12 SR/SSR cards from both gachas have longer stories: Lv.2 unlocks an epilogue, Lv.3 a special scene, and the SSR cards have their own minigame. Cards with new content show a ✦NEW badge"],
+ ["📖","More story in cards","23 cards have longer stories. Gacha cards unlock an epilogue at Lv.2 and a special scene at Lv.3, SSR cards have their own minigame, and cards with new content show a ✦NEW badge"],
  ["🃏","Card page","Tap a card in the album to see its rarity, copies, spares and a short teaser before opening the story"],
  ["⬆","Level cards up yourself","Every duplicate is kept: spend it to level the card up (bond grows each level) or break it into stardust, with a confirm step"],
  ["🏅","Six fighter tiers","Every fighter has a rating from Rookie to Legend; see Fights → Rankings → Fighter tiers"],
