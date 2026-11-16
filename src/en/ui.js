@@ -1324,7 +1324,7 @@ const ACT={
   paydebt:()=>{const p=Math.min(10000,G.debt);G.cash-=p;G.debt-=p;save();render();},
   sign:d=>{const f=G.F[d.v];if(G.cash<f.fee)return;
     if(!d.ok&&(weeklyNet(G)-f.wage<0||G.cash-f.fee<15000)){UI.modal={type:"signwarn",id:f.id};render();return;}UI.modal=null;G.cash-=f.fee;f.camp="player";f.met=true;if(f.id==="mali"){G.flags.maliIn=G.week;G.flags.maliInAbs=gameWeek(G);}add(G,f.id,"trust",5);
-    if(stageOf(G.week)==="local")G.rank[f.div][f.id]={pts:0,w:0,l:0,d:0};genOffers(G);save();
+    if(stageOf(G.week)==="local")G.rank[f.div][f.id]={pts:0,w:0,l:0,d:0};genOffers(G,{midweek:true});save();
     playScene([{n:f.id,f:"happy",l:"train",t:f.id==="mali"?"Pleased to be here! I'll kick Sirichai's name across the whole province~":"Contract done. I'll send the first week's training plan tonight"},
       {n:"kati",f:"happy",l:"train",with:f.id,t:f.id==="mali"?"Welcome, Mali! Our camp won't be lonely anymore!":"Welcome, Rin! …Please don't count how many times my guard drops"}],()=>render(),{bg:"gym",look:"train"});},
   vnext:()=>sceneNext(),vchoose:d=>{if(Date.now()-(UI._ct||0)<500)return;sceneChoose(+d.v);},vskip:()=>sceneSkip(),

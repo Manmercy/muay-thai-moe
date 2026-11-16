@@ -666,9 +666,10 @@ const RIVAL_OF={kati:"ploy",mali:"fah"},RIVAL_WEEKS=[25,29,33,36],RIVAL_EARLY={m
 // v1.43: a plain difficulty label for a matchup
 function diffTag(me,op){const d=ovr(op.a)-ovr(me.a)+((op.lvl||1)-(me.lvl||1))*.15;return d<-.6?["easy","ง่าย"]:d<.35?["even","สูสี"]:d<1.1?["hard","ยาก"]:["vhard","ยากมาก"];}
 const OFFER_BANDS=[-.7,.45,1.4,.9];
-function genOffers(G){
+function genOffers(G,opt){
   const rng=mulberry32(G.seed+G.week*7919+11);G.snub=G.snub||{};const ignored=new Set();
-  for(const o of G.offers||[])if(!o.beast&&o.status!=="conflict"&&!ignored.has(o.b)&&G.F[o.a]?.camp==="player"&&!isBooked(G,o.b)){
+  /* v1.82.3: only offers the NPC really sent and the player let lapse at week end count as a snub — not temple-fair or Vector bookings, not a mid-week refresh */
+  if(!(opt&&opt.midweek))for(const o of G.offers||[])if(!o.beast&&!o.fair&&!o.lab&&o.status!=="conflict"&&!ignored.has(o.b)&&G.F[o.a]?.camp==="player"&&!isBooked(G,o.b)){
     ignored.add(o.b);G.snub[o.b]=(G.snub[o.b]||0)+1;}
   G.offers=[];const st=stageOf(G.week);
   const stageEnd=st==="local"?20:st==="district"?40:0;const nOff=G.week<=8?1:(2+(G.rep>=30?1:0)); // v1.32: one offer per fighter early, a third only once the camp is famous
@@ -921,7 +922,7 @@ function lateSeasonOpposition(G){const year=G.season||1;ensureStageNPCs(G);if(ye
 function newSeason(G){
   G.titles=G.titles||[];G.titles.push({season:G.season||1,champ:{...G.champ}});
   G.season=(G.season||1)+1;G.week=1;G.ended=null;G.qual={A:[],B:[]};G.finalists={A:[],B:[]};G.semis={A:[],B:[]};G.champ={};G.bookings=[];G.log=[];
-  G.flags.qualDone=false;G.flags.finalDone=false;G.dmSeen={};G.dmSeenSeason=G.season;G.dm=null;G.coachAway=null;G.coachAwayAbs=null;G.freeUsed=false;G.campUsed=null;G.rankMove={A:{},B:{}};
+  G.flags.qualDone=false;G.flags.finalDone=false;G.snub={};G.offers=[];G.dmSeen={};G.dmSeenSeason=G.season;G.dm=null;G.coachAway=null;G.coachAwayAbs=null;G.freeUsed=false;G.campUsed=null;G.rankMove={A:{},B:{}};
   for(const id of Object.keys(G.F))if(/^[dxp][AB]\d/.test(id))delete G.F[id];
   const rng=mulberry32(G.seed+G.season*977);
   G.rank={A:{},B:{}};
