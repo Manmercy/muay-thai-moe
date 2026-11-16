@@ -1920,7 +1920,8 @@ function levelCard(G,id){const o=(G.cards||{})[id],C=CARDS[id];if(!C||!cardCanUp
 function dustCard(G,id,count){const o=(G.cards||{})[id],C=CARDS[id];if(!o||!C)return 0;const k=Math.min(count||1,o.spare||0);if(k<=0)return 0;
   const d=DUST_OF[C.r]*k;o.spare-=k;G.dust=(G.dust||0)+d;G.dustMade=(G.dustMade||0)+d;return d;}
 /* a card whose story was rewritten in an update carries rev:n — owners who already read it see a "new" star until they read it again */
-const cardFresh=(id,o)=>!!o&&(!o.seen||(CARDS[id]&&(CARDS[id].rev||0)>(o.rev||0)));
+const cardFresh=(id,o)=>{if(!o)return false;const C=CARDS[id];if(!o.seen)return true;if(C&&(C.rev||0)>(o.rev||0))return true;
+  /* v1.86: a level reached whose epilogue / special scene hasn't been read yet */const lv=o.lv||1,sn=o.lvSeen||1;return !!C&&((C.lv2&&lv>=2&&sn<2)||(C.lv3&&lv>=3&&sn<3));};
 
 // v1.82.4 (CM3/CM4): small annual camp moments — clean-up day, dinner after a hard loss,
 // open house, community fair. Choices state their cost or payoff; lines follow who is in camp and the year.

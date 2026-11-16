@@ -533,8 +533,11 @@ function cardInfoHTML(id){const C=CARDS[id];if(!C)return "";const o=(G.cards||{}
     <div class="cdinfo"><div class="cdtop"><span class="pill" style="box-shadow:inset 0 0 0 2px ${R.c};color:${R.c}">${C.r} ${"★".repeat(R.s)}</span><span class="meta">${esc(who)}</span>${fresh&&o.seen?'<span class="cnew">✦ ใหม่ในอัปเดตนี้</span>':""}</div>
     ${cardBlurb(C)?`<p class="cblurb">“${esc(cardBlurb(C))}”</p>`:""}
     <div class="kv-row"><span>ขั้นการ์ด</span><b>${"◆".repeat(lv)}${"◇".repeat(CARD_MAX_LV-lv)} Lv.${lv}/${CARD_MAX_LV}</b></div><div class="kv-row"><span>ได้มาทั้งหมด</span><b>${o.n||1} ใบ</b></div><div class="kv-row"><span>ใบซ้ำที่เก็บไว้</span><b>${sp} ใบ</b></div>
+    ${C.lv2?`<div class="cdlv"><span class="${lv>=2?"on":""}">${lv>=2?"✓":"🔒"} ◆◆ Lv.2 · บทส่งท้าย</span><span class="${lv>=3?"on":""}">${lv>=3?"✓":"🔒"} ◆◆◆ Lv.3 · ฉากพิเศษ "${esc(C.lv3t||"")}"${C.mg?" + มินิเกม":""}</span></div>`:""}
     <p class="meta">ได้จาก: ${esc(src)}</p><p class="meta">ใบซ้ำใช้อัปขั้นการ์ด (สูงสุด Lv.${CARD_MAX_LV} · ความสนิทกับ${esc(who)}เพิ่มทุกขั้น) หรือย่อยเป็นเศษดาว ใบละ ✦ ${per}</p></div></div>
-    <div class="cdacts"><button class="btn primary cdread" data-act="cardplay" data-v="${id}">ดูเรื่องราว ▸</button>
+    <div class="cdacts"><button class="btn primary cdread" data-act="cardplay" data-v="${id}">ดูเรื่องราว${lv>=2&&C.lv2?" + บทส่งท้าย":""} ▸</button>
+     ${C.lv3?`<button class="btn gold cdsp" data-act="cardspecial" data-v="${id}" ${lv>=3?"":"disabled"}>${lv>=3?`✦ ฉากพิเศษ: ${esc(C.lv3t||"")}${(o.lvSeen||1)<3?" · ใหม่":""}`:`🔒 ฉากพิเศษ ปลดที่ Lv.3`}</button>`:""}
+     ${C.mg&&lv>=3?`<button class="btn cdmg" data-act="cardmg" data-v="${id}">🥁 มินิเกม: ${esc(C.mgt||"")}<small>${o.mgDone?`เกรดล่าสุด ${o.mgGrade||"-"} · เล่นซ้อมได้`:"เล่นครั้งแรกได้เศษดาว"}</small></button>`:""}
      <div class="cdsub">${lv<CARD_MAX_LV?`<button class="btn" data-act="cardup" data-v="${id}" ${up?"":"disabled"}>⬆ อัปเป็น Lv.${lv+1}<small>${up?"ใช้ใบซ้ำ 1 ใบ":"ต้องมีใบซ้ำ"}</small></button>`:`<button class="btn" disabled>◆ เต็มขั้นแล้ว<small>Lv.${CARD_MAX_LV}</small></button>`}<button class="btn" data-act="carddust" data-v="${id}" data-n="1" ${sp?"":"disabled"}>ย่อย 1 ใบ<small>+✦${per}</small></button></div><button class="btn ghost cdback" data-act="album">‹ กลับอัลบั้ม</button></div>`;}
 function rankHTML(){const st=stageOf(G.week),cut=st==="local"?4:st==="district"?4:0,d=UI.rdiv;const rows=standings(G,d);const mv=(G.rankMove&&G.rankMove[d])||{};
   if(UI.rview==="career")return `<section class="px card"><div class="card-h"><div class="seg sm"><button data-act="rdiv" data-v="A" aria-pressed="${d==="A"}">รุ่น A</button><button data-act="rdiv" data-v="B" aria-pressed="${d==="B"}">รุ่น B</button></div><div class="seg sm"><button data-act="rview" data-v="season" aria-pressed="false">อันดับฤดูนี้</button><button data-act="rview" data-v="career" aria-pressed="true">ระดับนักมวย</button></div></div>${careerHTML(d)}</section>`;
@@ -800,6 +803,7 @@ const PATCH={id:"1.86.0",ver:"Muay Thai Moe v1.86.0",title:"รายงาน�
  ["🌸","ประกวดค่ายสวยประจำปี","ต้นปีนายอำเภอประกาศสีมงคล ของตกแต่งสีตรงได้คะแนนพิเศษ สัปดาห์ที่ 30 นายอำเภอมาเดินดูค่ายให้คะแนน 7 ด้าน แล้วไปลุ้นผลที่อำเภอ ชนะเลิศได้เงินรางวัลและชื่อเสียง"],
  ["🎨","ของตกแต่งใหม่ 19 ชิ้น","ทุกสีมงคลมีของครบทุกหมวดแล้ว เช่น ซุ้มดาวเรือง ซุ้มดอกเฟื่องฟ้า ต้นศรีตรัง รถตุ๊กตุ๊กส้ม และลู่วิ่งพรมทองสำหรับแชมป์ค่ายสวย"],
  ["♥","ความสนิทเป็นเลเวล","ความสนิทไม่มีเต็มแล้ว แสดงเป็นหัวใจ Lv. พร้อมเกจถึงขั้นถัดไป ผ่าน Lv.10 ไปแล้วยังสนิทขึ้นได้เรื่อย ๆ และไม่จางลงอีก"],
+ ["📖","การ์ดมีบทเพิ่ม","การ์ด SR/SSR จากตู้ปกติและตู้ลอยกระทง 12 ใบมีเรื่องยาวขึ้น อัปถึง Lv.2 ปลดบทส่งท้าย Lv.3 ปลดฉากพิเศษ การ์ด SSR มีมินิเกมของตัวเอง การ์ดที่มีเนื้อหาใหม่ขึ้นป้าย ✦ใหม่"],
  ["🃏","หน้าการ์ด","แตะการ์ดในอัลบั้มเพื่อดูระดับ จำนวนที่มี ใบซ้ำ และคำโปรยสั้น ๆ ก่อนกดดูเรื่องราว"],
  ["⬆","อัปขั้นการ์ดเอง","การ์ดซ้ำเก็บไว้ให้ทุกใบ เลือกเองว่าจะใช้อัปขั้นการ์ด (ความสนิทเพิ่มทุกขั้น) หรือย่อยเป็นเศษดาว มีหน้ายืนยันก่อนย่อย"],
  ["🏅","ระดับนักมวย 6 ขั้น","ทุกคนมีเรตติ้งตามผลชก ตั้งแต่หน้าใหม่ถึงตำนาน ดูได้ที่ ไฟต์ → อันดับ → ระดับนักมวย"],
@@ -1382,7 +1386,10 @@ const ACT={
       html:`<div class="px confirm"><b>${esc(C.t)} ×${k}</b><p class="meta">ได้เศษดาว ✦ ${DUST_OF[C.r]*k} · ใบซ้ำเหลือ ${(o.spare||0)-k} ใบ</p><p class="meta">การ์ดใบหลัก ขั้นการ์ด และเรื่องราวยังอยู่ครบ ย่อยแล้วเอาคืนไม่ได้</p>${(o.lv||1)<CARD_MAX_LV?`<p class="meta goldt">การ์ดนี้ยังอัปขั้นได้อีก ${CARD_MAX_LV-(o.lv||1)} ขั้น ด้วยใบซ้ำ</p>`:""}</div>`};render();},
   cardup:d=>{const C=CARDS[d.v],F=G.F[C.c],b0=F?F.bond||0:0;const lv=levelCard(G,d.v);if(!lv)return;const db=F?Math.round(((F.bond||0)-b0)*10)/10:0;AU.sfx&&AU.sfx("level");save();UI.cardFx=d.v;toast(`${C.t} อัปเป็น Lv.${lv}${db>0?` · ${F.name} ความสนิท +${db}`:""}`);UI.modal={type:"card",id:d.v};render();},
   carddustok:()=>{const m=UI.modal;if(!m||m.yes!=="carddustok")return;const d=dustCard(G,m.id,m.k);if(d){AU.sfx&&AU.sfx("level");save();toast(`ได้เศษดาว ✦ ${d}`);}UI.modal={type:"card",id:m.id};render();},
-  cardplay:d=>{const C=CARDS[d.v],o=(G.cards||{})[d.v];if(!C||!o)return;o.seen=true;o.rev=C.rev||0;G.cardPend=(G.cardPend||[]).filter(x=>x!==d.v);save();UI.modal=null;const nw=d.from==="new";playScene(C.steps,()=>{UI.modal=nw?((G.cardPend||[]).length?{type:"cardnew"}:null):{type:"album"};render();},{bg:C.bg,look:"casual"});},
+  cardplay:d=>{const C=CARDS[d.v],o=(G.cards||{})[d.v];if(!C||!o)return;o.seen=true;o.rev=C.rev||0;const ep=(o.lv||1)>=2&&C.lv2;if(ep)o.lvSeen=Math.max(o.lvSeen||1,2);G.cardPend=(G.cardPend||[]).filter(x=>x!==d.v);save();UI.modal=null;const nw=d.from==="new";
+    playScene(ep?C.steps.concat([{n:"nar",t:"✦ บทส่งท้าย · Lv.2"}],C.lv2):C.steps,()=>{UI.modal=nw?((G.cardPend||[]).length?{type:"cardnew"}:null):{type:"card",id:d.v};render();},{bg:C.bg,look:"casual"});},
+  cardspecial:d=>{const C=CARDS[d.v],o=(G.cards||{})[d.v];if(!C||!o||!C.lv3||(o.lv||1)<3)return;o.lvSeen=3;save();UI.modal=null;playScene([{n:"nar",t:`✦ ฉากพิเศษ · ${C.lv3t||""}`}].concat(C.lv3),()=>{UI.modal={type:"card",id:d.v};render();},{bg:C.bg,look:"casual"});},
+  cardmg:d=>{const C=CARDS[d.v],o=(G.cards||{})[d.v];if(!C||!o||!C.mg||(o.lv||1)<3)return;BAG.openCard(C.mg,d.v);},
   cardlater:()=>{(G.cardPend||[]).shift();save();UI.modal=(G.cardPend||[]).length?{type:"cardnew"}:null;render();},
   cancelCreate:()=>{AU.startMusic("title");UI.creator=null;render();},
   cset:d=>{UI.creator.name=(document.getElementById("pname")||{}).value||UI.creator.name;crSeed();UI.creator[d.k]=d.v;render();},
