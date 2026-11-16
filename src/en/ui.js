@@ -525,12 +525,25 @@ function hallHTML(){const T=(G.titles||[]).slice().reverse(),H=(G.honors||[]).sl
   return `${H.length?`<div class="hall-y"><b>Major victories</b>${H.map(h=>`<div class="kv-row"><span>${esc(G.F[h.id]?.name||h.id)} · Div ${h.div} · ${h.season?`Year ${h.season} Week ${h.week}`:"Earlier result"}</span><span class="pill gold">🏆 ${honorLabel(h.kind,h.venue)}</span></div>`).join("")}</div>`:""}
    ${belts.length||venueBelts.length?`<div class="hall-y"><b>Belts held</b>${belts.map(([d,b])=>`<div class="kv-row"><span>${esc(G.F[b.id].name)} · Div ${d}</span><span class="pill gold">🏆 Tha Phae Stadium champion · defended ${b.def} times</span></div>`).join("")}${venueBelts.map(({v,d,b})=>`<div class="kv-row"><span>${esc(G.F[b.id].name)} · Div ${d}</span><span class="pill gold">🏆 ${STADIUMS[v].name} champion · defended ${b.def} times</span></div>`).join("")}</div>`:""}
    ${T.length?T.map(yr).join(""):`<p class="meta">The first year isn't over yet · when it ends, everyone's results land here, one row per year</p>`}`;}
+function decorHTML(){let total=0,owned=0,sections="";
+ for(const [slot,D] of Object.entries(CAMP_DECOR)){let choices="";
+  for(const [key,item] of Object.entries(D.items)){total++;const reason=decorUnlockReason(G,slot,key),on=decorChoice(G,slot)===key;if(!reason)owned++;
+   choices+='<button class="btn sm '+(on?'gold':'')+'" data-act="decor" data-k="'+slot+'" data-v="'+key+'" '+(reason?'disabled':'')+
+    ' style="border-color:'+(reason?'#777':DECOR_RARITY[item.r])+';'+(reason?'opacity:.55;filter:grayscale(1)':'')+'">'+
+    '<b style="color:'+DECOR_RARITY[item.r]+'">'+item.r+'</b> '+esc(item.name)+(on?' ✓':'')+
+    (reason?'<small style="display:block;white-space:normal">🔒 '+esc(reason)+'</small>':'')+'</button>';}
+  sections+='<div class="item fac"><div style="width:100%"><div class="t">'+D.name+'</div><div class="obtns" style="display:flex;flex-wrap:wrap;gap:6px">'+choices+'</div></div></div>';}
+ const ready=goldRematchReady(G);
+ return '<section class="px card cpane '+((UI.csub||"money")==="decor"?"on":"")+"\"><h3>Camp decorations · "+owned+'/'+total+" items</h3>"+
+  "<p class=\"meta\">Rarity N → R → SR → SSR → SS shows how hard each item is to earn. Decorations do not add stat bonuses.</p>"+sections+
+  "<p class=\"meta\">Golden van: defeat the Golden Helmet boss 10 times. After your first win, you can challenge him again every 4 weeks.</p>"+
+  '<button class="btn sm gold" data-act="goldrematch" '+(ready?'':'disabled')+">Challenge the Golden Helmet boss again "+(!ready&&G.gangRematchAt?' · '+goldRematchLabel(G):'')+'</button></section>';}
 function campHTML(){const inc=classIncome(G),up=upkeep(G),wg=wages(G),lv=campLevel(G),cs=UI.csub||"money";
   const recs=[["mali",G.flags.maliRecruit],["rin",G.flags.rinRecruit]].filter(([id,ok])=>ok&&G.F[id].camp==="free");
   const dots=(n,m)=>`<span class="pips">${Array.from({length:m},(_,i)=>`<i class="${i<n?"on":""}"></i>`).join("")}</span>`;
   return `<section class="px card camphead" style="background-image:linear-gradient(90deg,rgba(20,16,32,.95),rgba(20,16,32,.6)),url(${ASSET}${gymBg()})"><div><button class="pill gold lvbtn" data-act="camplv">Camp Lv.${lv} ▸</button><h3>${CAMP_LV_NAME[lv]}</h3>
     <p class="meta">Total upgrades ${facTotal(G)} levels · ${lv<3?`${lv===1?5-facTotal(G):13-facTotal(G)} levels to reach Lv.${lv+1} · tap to see what you get`:"Max level for the demo"}</p></div></section>
-   <div class="seg subtabs csubs"><button data-act="csub" data-v="money" aria-pressed="${cs==="money"}">Finance</button><button data-act="csub" data-v="staff" aria-pressed="${cs==="staff"}">Coaches & fighters</button><button data-act="csub" data-v="fac" aria-pressed="${cs==="fac"}">Upgrades</button><button data-act="csub" data-v="hall" aria-pressed="${cs==="hall"}">Hall of fame</button></div>
+   <div class="seg subtabs csubs"><button data-act="csub" data-v="money" aria-pressed="${cs==="money"}">Finance</button><button data-act="csub" data-v="staff" aria-pressed="${cs==="staff"}">Coaches & fighters</button><button data-act="csub" data-v="fac" aria-pressed="${cs==="fac"}">Camp upgrades</button><button data-act="csub" data-v="decor" aria-pressed="${cs==="decor"}">Decorations</button><button data-act="csub" data-v="hall" aria-pressed="${cs==="hall"}">Hall of fame</button></div>
    ${recruitHTML(recs)}
    <div class="grid g2">
    <section class="px card cpane ${cs==="money"?"on":""}"><h3>Weekly income & expenses</h3>
@@ -552,7 +565,7 @@ function campHTML(){const inc=classIncome(G),up=upkeep(G),wg=wages(G),lv=campLev
     <div class="item nw"><div><div class="t">Invite an old-school master to teach</div><div class="meta">${fmt(18000)} · fighter gains +1 skill point and school stats · once per fighter per season · opens week 16</div></div><button class="btn sm gold" data-act="mastersOpen" ${G.week<16?"disabled":""}>Choose</button></div>
     <div class="item nw"><div><div class="t">Host a fight night at Sirichai</div><div class="meta">${fmt(SHOW_COST)} · fame +3, camp looks better, everyone's morale +8 · once per round</div></div><button class="btn sm gold" data-act="hostshow" ${G.cash<SHOW_COST||G.week<10||G.flags["show_"+stageOf(G.week)]?"disabled":""}>${G.flags["show_"+stageOf(G.week)]?"Hosted":"Host"}</button></div>
     <div class="item nw"><div><div class="t">Pay off Grandpa Chai's debt</div><div class="meta">${G.debt>0?`Remaining ${fmt(G.debt)} · paying it off gives fame +2 and a special scene`:"Debt fully paid"}</div></div>${G.debt>0?`<button class="btn sm gold" data-act="cleardebt" ${G.cash<G.debt?"disabled":""}>Pay off</button>`:"<span class=\"pill green\">Done</span>"}</div></section>
-   <section class="px card cpane ${cs==="hall"?"on":""}"><h3>Hall of fame</h3>${hallHTML()}</section>
+   ${decorHTML()}<section class="px card cpane ${cs==="hall"?"on":""}"><h3>Hall of fame</h3>${hallHTML()}</section>
 `;}
 
 // v1.18: hired trainers with their own pixel sprite
@@ -1272,6 +1285,7 @@ const ACT={
   date:d=>{UI.modal=null;UI.tab="people";const steps=dateScene(G,d.id,d.v);AU.startMusic("date");playScene(steps,()=>{AU.startMusic("hub");render();},{bg:ACTIVITIES[d.v].bg==="camp"?"gym":ACTIVITIES[d.v].bg,look:"casual"});},
   giftpick:d=>{UI.modal={type:"gift",id:d.id};render();},
   give:d=>{const r=giveGift(G,d.id,d.v);if(!r)return;UI.modal=null;UI.tab="people";save();AU.startMusic("date");giftScene(d.id,r);},
+  decor:d=>{if(chooseDecor(G,d.k,d.v)){save();render();toast("Camp decoration changed");}},
   buyfac:d=>{const before=campLevel(G);if(buyFacility(G,d.v)){save();const after=campLevel(G);AU.sfx("level");toast(after>before?`The camp rose to Lv.${after}: ${CAMP_LV_NAME[after]}!`:`Upgraded ${FACILITIES[d.v].name}`);}},
   daeng:()=>{if(upgradeDaeng(G)){save();toast(`Coach Daeng completed training Lv.${G.fac.daeng}`);}},
   useroad:d=>{const f=G.F[d.id];if(!f||trLocked(f)||!PRESETS[d.p])return;f.plan={...f.plan,preset:d.p,intensity:d.i};UI.modal=null;save();toast(`Set ${f.name}: ${planName(d.p,d.i)}. Don't forget to confirm`);},
