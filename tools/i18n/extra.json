@@ -3528,5 +3528,6 @@
  " แบบ</span></h3>\n  <div class=\"dprev\"><canvas class=\"campcv\" width=\"640\" height=\"360\" data-camp=\"1\" aria-label=\"ตัวอย่างค่ายหลังตกแต่ง\"></canvas></div>\n  <p class=\"meta\">ดาว ★ ยิ่งมาก ยิ่งได้ยาก (N → SS) · ของตกแต่งเปลี่ยนแค่หน้าตาค่าย ไม่มีโบนัสค่าสถานะ · แตะชิ้นที่ปลดแล้วเพื่อเปลี่ยน ภาพด้านบนจะเปลี่ยนทันที</p>": " items</span></h3>\n  <div class=\"dprev\"><canvas class=\"campcv\" width=\"640\" height=\"360\" data-camp=\"1\" aria-label=\"Camp preview with decorations\"></canvas></div>\n  <p class=\"meta\">More ★ = harder to get (N → SS) · Decorations only change how the camp looks, no stat bonus · Tap an unlocked piece to switch; the preview above updates right away</p>",
  "\"><h3>ตกแต่งค่าย <span class=\"pill\">": "\"><h3>Decorations <span class=\"pill\">",
  "\">\n     <span class=\"dstars\" aria-label=\"ระดับ ": "\">\n     <span class=\"dstars\" aria-label=\"Rank ",
- "ขึ้นปีใหม่ไม่สำเร็จ เซฟยังอยู่ครบ ลองอีกครั้งหรือแจ้งทีมงานใน Discord": "Could not start the new year. Your save is safe. Try again, or tell us on Discord."
+ "ขึ้นปีใหม่ไม่สำเร็จ เซฟยังอยู่ครบ ลองอีกครั้งหรือแจ้งทีมงานใน Discord": "Could not start the new year. Your save is safe. Try again, or tell us on Discord.",
+ "</div><p class=\"meta wnhint\">แตะหัวข้อเพื่ออ่านรายละเอียด</p>\n  <p class=\"meta center\">": "</div><p class=\"meta wnhint\">Tap a topic to read more</p>\n  <p class=\"meta center\">"
 }

@@ -1541,13 +1541,24 @@ button.goal.ov.mini{right:auto;padding:3px 10px;opacity:.85}
 .dtile.lock .dstars{color:#777}
 .dtile.r-SSR:not(.lock),.dtile.r-SS:not(.lock){background-image:linear-gradient(120deg,transparent 40%,rgba(255,240,180,.12) 50%,transparent 60%)}
 .dgold{margin-top:10px}
-/* v1.81.1: what's-new popup */
-.wnew h2{margin:8px 0 4px}
-.wnew .lead{margin:0 0 10px;color:var(--muted)}
-.wnitem{display:flex;gap:10px;padding:9px 0;border-top:1px solid var(--line)}
-.wnitem .wnic{font-size:20px;width:28px;flex:none;text-align:center}
-.wnitem b{display:block;margin-bottom:2px}
-.wnitem p{margin:0;font-size:14px;line-height:1.5;color:var(--muted)}
+/* v1.81.1: what's-new popup — compact card */
+.m-whatsnew{max-width:340px;width:calc(100% - 32px);margin-left:auto;margin-right:auto;padding:14px 14px 12px}
+.wnew h2{margin:8px 0 2px;font-size:17px;line-height:1.3}
+.wnew .lead{margin:0 0 6px;font-size:12.5px;color:var(--muted);line-height:1.45}
+.wnew .pill{font-size:11px}
+.wnlist{margin-top:4px}
+.wnitem{border-top:1px solid var(--line)}
+.wnitem summary{display:flex;align-items:center;gap:8px;padding:7px 0;cursor:pointer;list-style:none}
+.wnitem summary::-webkit-details-marker{display:none}
+.wnitem .wnic{font-size:15px;width:20px;flex:none;text-align:center}
+.wnitem b{flex:1;font-size:13.5px;line-height:1.35}
+.wnitem summary i{font-style:normal;color:var(--muted);font-size:11px;transition:transform .15s}
+.wnitem[open] summary i{transform:rotate(90deg)}
+.wnitem p{margin:0 0 8px 28px;font-size:12.5px;line-height:1.5;color:var(--muted)}
+.wnew .wnhint{font-size:11px;text-align:center;margin:4px 0 0}
+.wnew .meta{font-size:12px;margin:6px 0 0}
+.m-whatsnew .mfoot{margin-top:8px}
+.m-whatsnew .mfoot .btn{padding:8px 14px;font-size:14px}
 
 .gacha.loyg{background:linear-gradient(90deg,rgba(200,40,60,.22),rgba(242,193,78,.12));box-shadow:inset 0 0 0 1px rgba(242,193,78,.45);margin-top:6px}
 .endbtns.col{flex-direction:column;align-items:stretch;gap:8px}
@@ -6267,7 +6278,7 @@ const PATCH={id:"1.80.18",ver:"Muay Thai Moe v1.80.18",title:"รายงาน
  foot:"ใครไปถึงปีไหนแล้ว มาเล่าให้ครูแดงฟังหน่อยค่ะ 🥋"};
 function maybeWhatsNew(){if(!G||G.ended||UI.scene)return;if(G.newsSeen===PATCH.id)return;UI.modal={type:"whatsnew"};}
 function whatsNewHTML(){return `<div class="wnew"><span class="pill gold">อัปเดต · ${esc(PATCH.ver)}</span><h2>🥊 ${esc(PATCH.title)}</h2><p class="lead">${esc(PATCH.lead)}</p>
-  ${PATCH.items.map(([ic,t,b])=>`<div class="wnitem"><span class="wnic">${ic}</span><div><b>${esc(t)}</b><p>${esc(b)}</p></div></div>`).join("")}
+  <div class="wnlist">${PATCH.items.map(([ic,t,b])=>`<details class="wnitem"><summary><span class="wnic">${ic}</span><b>${esc(t)}</b><i>▸</i></summary><p>${esc(b)}</p></details>`).join("")}</div><p class="meta wnhint">แตะหัวข้อเพื่ออ่านรายละเอียด</p>
   <p class="meta center">${esc(PATCH.foot)}</p></div><div class="mfoot"><button class="btn primary" data-act="newsok">เข้าค่ายเลย ▸</button></div>`;}
 function modalHTML(){const m=UI.modal;let body="",foot=true;
   if(m.type==="fighter"){body=fighterHTML(G.F[m.id]);foot=false;}
@@ -12937,7 +12948,7 @@ const PATCH={id:"1.80.18",ver:"Muay Thai Moe v1.80.18",title:"Weekly report from
  foot:"Which year have you reached? Come tell Kru Daeng! 🥋"};
 function maybeWhatsNew(){if(!G||G.ended||UI.scene)return;if(G.newsSeen===PATCH.id)return;UI.modal={type:"whatsnew"};}
 function whatsNewHTML(){return `<div class="wnew"><span class="pill gold">Update · ${esc(PATCH.ver)}</span><h2>🥊 ${esc(PATCH.title)}</h2><p class="lead">${esc(PATCH.lead)}</p>
-  ${PATCH.items.map(([ic,t,b])=>`<div class="wnitem"><span class="wnic">${ic}</span><div><b>${esc(t)}</b><p>${esc(b)}</p></div></div>`).join("")}
+  <div class="wnlist">${PATCH.items.map(([ic,t,b])=>`<details class="wnitem"><summary><span class="wnic">${ic}</span><b>${esc(t)}</b><i>▸</i></summary><p>${esc(b)}</p></details>`).join("")}</div><p class="meta wnhint">Tap a topic to read more</p>
   <p class="meta center">${esc(PATCH.foot)}</p></div><div class="mfoot"><button class="btn primary" data-act="newsok">To the camp ▸</button></div>`;}
 function modalHTML(){const m=UI.modal;let body="",foot=true;
   if(m.type==="fighter"){body=fighterHTML(G.F[m.id]);foot=false;}

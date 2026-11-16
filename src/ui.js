@@ -719,7 +719,7 @@ const PATCH={id:"1.80.18",ver:"Muay Thai Moe v1.80.18",title:"รายงาน
  foot:"ใครไปถึงปีไหนแล้ว มาเล่าให้ครูแดงฟังหน่อยค่ะ 🥋"};
 function maybeWhatsNew(){if(!G||G.ended||UI.scene)return;if(G.newsSeen===PATCH.id)return;UI.modal={type:"whatsnew"};}
 function whatsNewHTML(){return `<div class="wnew"><span class="pill gold">อัปเดต · ${esc(PATCH.ver)}</span><h2>🥊 ${esc(PATCH.title)}</h2><p class="lead">${esc(PATCH.lead)}</p>
-  ${PATCH.items.map(([ic,t,b])=>`<div class="wnitem"><span class="wnic">${ic}</span><div><b>${esc(t)}</b><p>${esc(b)}</p></div></div>`).join("")}
+  <div class="wnlist">${PATCH.items.map(([ic,t,b])=>`<details class="wnitem"><summary><span class="wnic">${ic}</span><b>${esc(t)}</b><i>▸</i></summary><p>${esc(b)}</p></details>`).join("")}</div><p class="meta wnhint">แตะหัวข้อเพื่ออ่านรายละเอียด</p>
   <p class="meta center">${esc(PATCH.foot)}</p></div><div class="mfoot"><button class="btn primary" data-act="newsok">เข้าค่ายเลย ▸</button></div>`;}
 function modalHTML(){const m=UI.modal;let body="",foot=true;
   if(m.type==="fighter"){body=fighterHTML(G.F[m.id]);foot=false;}
