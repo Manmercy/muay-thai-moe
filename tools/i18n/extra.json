@@ -4035,5 +4035,18 @@
  "หน้าต่างขึ้นจากด้านล่าง": "Sheets from the bottom",
  "ปุ่มจบสัปดาห์ แท็บ จดหมาย และตั้งค่า ใหญ่ขึ้นทุกจุด กดด้วยนิ้วโป้งได้สบาย": "End week, tabs, mail and settings buttons are all bigger and easy to hit with a thumb",
  "ปุ่มใหญ่ขึ้น กดง่ายขึ้น": "Bigger, easier buttons",
- "รอบนี้ปรับหน้าตาให้กดง่าย อ่านง่ายขึ้นทั้งมือถือและคอม": "This round makes the game easier to tap and read on phones and computers"
+ "รอบนี้ปรับหน้าตาให้กดง่าย อ่านง่ายขึ้นทั้งมือถือและคอม": "This round makes the game easier to tap and read on phones and computers",
+ " เลือกสายใหม่ได้เลย": ". Pick a new line now",
+ " แต้มให้": " points to ",
+ "ครั้งแรกฟรี ครั้งต่อไป ฿10,000": "First reset is free, the next costs ฿10,000",
+ " (ครั้งถัดไป ": " (next time ",
+ "ค่าใช้จ่าย ": "Cost ",
+ "<h2>รีเซ็ตสกิลของ": "<h2>Reset skills for ",
+ ">รีเซ็ต</button></div>": ">Reset</button></div>",
+ "ครั้งแรกฟรี": "first reset is free",
+ " แต้ม แล้วเลือกสายใหม่ได้ · ": " points so you can pick a new line · ",
+ "<div class=\"skreset\"><span><b>รีเซ็ตสกิลทั้งหมด</b><small>คืน ": "<div class=\"skreset\"><span><b>Reset all skills</b><small>Refunds ",
+ "</p>\n     <div class=\"mfoot\"><button class=\"btn ghost\" data-act=\"skresetno\">ยกเลิก</button><button class=\"btn primary\" data-act=\"skresetgo\">รีเซ็ตสกิล": "</p>\n     <div class=\"mfoot\"><button class=\"btn ghost\" data-act=\"skresetno\">Cancel</button><button class=\"btn primary\" data-act=\"skresetgo\">Reset skills: ",
+ " แต้ม</b> เอาไปอัปสายไหนก็ได้ใหม่ ท่าที่ใส่ขึ้นชกจะถูกถอดออก</p>\n     <p class=\"meta\">": " points</b> to spend on any line. Equipped moves will be removed.</p>\n     <p class=\"meta\">",
+ "?</h2><p>สกิลที่อัปไว้ทั้งหมดจะหายไป และได้คืน <b class=\"goldt\">": "?</h2><p>All learned skills will be cleared and you get back <b class=\"goldt\">"
 }

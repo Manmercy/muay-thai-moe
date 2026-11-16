@@ -679,7 +679,9 @@ function skillTree(f,mine){const L=skillList(f.id),eqd=equipped(f),sc=SCHOOLS[L[
    ${li>=3?`<p class="meta skpath">${path==null?"Build paths use skill points like school lines, but you can build only one at a time · the first skill you raise closes the other build paths":path===li?`Building this path ${mine?` · <button class="btn sm ghost" data-act="skreset" data-id="${f.id}" ${G.cash<SK_RESET_COST?"disabled":""}>Change build path (refund points · ${fmt(SK_RESET_COST)})</button>`:""}`:`Currently building "${SK_SHARED[path-3]}" now. Change build path before raising this one.`}</p>`:""}</div>
    <div class="sklist pxscroll">${[0,1,2,3,4,5].map(row=>L.find(s=>s.line===li&&s.row===row)).filter(Boolean).map(card).join('<i class="skarrow" aria-hidden="true"></i>')}
      ${SIGNATURE[f.id]?`<div class="skc sig ${hasSignature(f)?"has":"lock"}"><div class="skc-m"><div class="skc-h"><b>✦ Signature: ${SIGNATURE[f.id].name}</b></div><p class="skc-d">${SIGNATURE[f.id].desc}${hasSignature(f)?"":` · unlocks at bond 60 (now ${Math.round(f.bond||0)})`}</p></div></div>`:""}</div>
-   ${mine?`<div class="skfoot"><button class="btn sm" data-act="skauto" data-id="${f.id}" data-v="${li}" ${[0,1,2,3,4,5].some(r=>{const s=L.find(x=>x.line===li&&x.row===r);return s&&skState(f,s,mine).st==="can";})?"":"disabled"}>Auto-upgrade · ${lines[li]}</button><span class="meta">Equip up to ${MAX_EQUIP} moves · passives work on their own, no slot needed</span></div>`:""}</div>`;}
+   ${mine?`<div class="skfoot"><button class="btn sm" data-act="skauto" data-id="${f.id}" data-v="${li}" ${[0,1,2,3,4,5].some(r=>{const s=L.find(x=>x.line===li&&x.row===r);return s&&skState(f,s,mine).st==="can";})?"":"disabled"}>Auto-upgrade · ${lines[li]}</button><span class="meta">Equip up to ${MAX_EQUIP} moves · passives work on their own, no slot needed</span></div>${skResetRow(f)}`:""}</div>`;}
+function skResetRow(f){const n=skPointsSpent(f);if(!n)return "";const c=skResetCost(f);
+  return `<div class="skreset"><span><b>Reset all skills</b><small>Refunds ${n} points so you can pick a new line · ${c?`Cost ${fmt(c)}`:"first reset is free"}</small></span><button class="btn sm" data-act="skresetask" data-id="${f.id}" ${c&&G.cash<c?"disabled":""}>Reset</button></div>`;}
 function skillGrid(f,mine){if(hasTree(f.id))return skillTree(f,mine);const L=SKILLS[f.id]||[];const sc=SCHOOLS[L[0]&&L[0].school]||{name:"",motto:""};
   // v1.23: compact — unlocked moves as short rows (tap the name for details), locked ones folded away
   const op=L.filter(s=>(s.lv||1)<=f.lvl),lk=L.filter(s=>(s.lv||1)>f.lvl),eqd=equipped(f);
@@ -688,7 +690,7 @@ function skillGrid(f,mine){if(hasTree(f.id))return skillTree(f,mine);const L=SKI
      ${mine?`<span class="skb">${r?`<button class="btn sm eqbtn ${eq?"on":""}" data-act="equip" data-id="${f.id}" data-v="${s.id}" ${!eq&&eqd.length>=MAX_EQUIP?"disabled":""}>${eq?"In use":"Use"}</button>`:""}<button class="plus" data-act="learn" data-id="${f.id}" data-v="${s.id}" ${f.sp<1||r>=3?"disabled":""} aria-label="Upgrade ${s.name}">${r>=3?"MAX":"+"}</button></span>`:""}
      ${o?`<small class="skd">${s.desc}</small>`:""}</div>`;};
   return `<div class="school sm" style="--c:${sc.color}"><b>${sc.name}</b>${mine?`<span class="pill ${f.sp>0?"gold":""}">Skill points ${f.sp}</span><span class="pill">In the fight ${eqd.length}/${MAX_EQUIP}</span>`:""}</div>
-   <div class="sklist">${op.map(row).join("")||`<p class="meta">No moves unlocked yet</p>`}</div>
+   <div class="sklist">${op.map(row).join("")||`<p class="meta">No moves unlocked yet</p>`}</div>${mine?skResetRow(f):""}
    ${lk.length?`<details class="sklock"><summary>Locked moves ${lk.length} · next Lv.${lk[0].lv}</summary>${lk.map(s=>`<div class="sklk"><span>Lv.${s.lv}</span><b>${s.name}</b><small>${s.desc}</small></div>`).join("")}</details>`:""}`;}
 // v1.41: visible relationship stages — each one changes how she treats you
 const REL_TIERS=[[0,"Acquaintance","Still calls you \"Manager\", a bit stiffly"],[20,"Teammate","Jokes around, texts about everyday things"],[40,"Close","Sometimes lets your name slip · shares personal stories"],[75,"Special","Always calls you by name"]];
@@ -773,6 +775,10 @@ function modalHTML(){const m=UI.modal;let body="",foot=true;
   if(m.type==="fighter"){body=fighterHTML(G.F[m.id]);foot=false;}
   if(m.type==="consider"){const o=G.offers.find(x=>x.id===m.id);if(!o){UI.modal=null;return "";}body=considerHTML(o);foot=false;}
   if(m.type==="whatsnew"){body=whatsNewHTML();foot=false;}
+  if(m.type==="skresetask"){const f=G.F[m.id],n=skPointsSpent(f),c=skResetCost(f);foot=false;
+    body=`<h2>Reset skills for ${esc(f.name)}?</h2><p>All learned skills will be cleared and you get back <b class="goldt">${n} points</b> to spend on any line. Equipped moves will be removed.</p>
+     <p class="meta">${c?`Cost ${fmt(c)} (next time ${fmt(Math.min(3,(f.skReset||0)+1)*10000)})`:"First reset is free, the next costs ฿10,000"}</p>
+     <div class="mfoot"><button class="btn ghost" data-act="skresetno">Cancel</button><button class="btn primary" data-act="skresetgo">Reset skills: ${esc(f.name)}</button></div>`;}
   if(m.type==="showcase"){body=showcaseHTML();foot=false;}
   if(m.type==="report")body=reportHTML();
   if(m.type==="repinfo")body=repInfoHTML();
@@ -1340,6 +1346,9 @@ const ACT={
   learn:d=>{const sl=document.querySelector(".sklist"),y=sl?sl.scrollTop:0;if(learnSkill(G,d.id,d.v)){AU.sfx("level");save();render();const n=document.querySelector(".sklist");if(n)n.scrollTop=y;}},
   rinread:()=>{const n=G.rinNote;if(!n)return;G.rinNote=null;save();playScene(n.steps,()=>{save();render();},{bg:"gym",look:"casual"});},
   skline:d=>{UI.skLine={id:d.id,li:+d.v};AU.sfx("ui");render();},
+  skresetask:d=>{const f=G.F[d.id];if(!f)return;UI.modal={type:"skresetask",id:d.id,back:UI.modal};render();},
+  skresetgo:()=>{const m=UI.modal;if(!m)return;const f=G.F[m.id];const c=skResetCost(f);if(c&&G.cash<c)return;const n=resetAllSkills(G,m.id);if(!n){UI.modal=m.back||null;render();return;}G.cash-=c;save();UI.modal=m.back||null;toast(`Refunded ${n} points to ${f.name}. Pick a new line now`);render();},
+  skresetno:()=>{const m=UI.modal;UI.modal=m&&m.back||null;render();},
   skreset:d=>{const f=G.F[d.id];if(!f||G.cash<SK_RESET_COST)return;const n=resetSharedPath(G,d.id);if(!n)return;G.cash-=SK_RESET_COST;save();toast(`Refunded ${n} points back. Pick a new build path.`);render();},
   skauto:d=>{const f=G.F[d.id],li=+d.v;let n=0;for(let guard=0;guard<30&&f.sp>0;guard++){const s=skillList(f.id).filter(x=>x.line===li).sort((a,b)=>a.row-b.row||(f.skills[a.id]||0)-(f.skills[b.id]||0)).find(x=>!skillBlock(f,x.id).length);if(!s||!learnSkill(G,f.id,s.id))break;n++;}
     if(n){AU.sfx("level");save();toast(`Up ${(SK_LINES[f.id]||[])[li]||""} ${n} times`);}render();},

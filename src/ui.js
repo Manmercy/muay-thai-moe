@@ -679,7 +679,9 @@ function skillTree(f,mine){const L=skillList(f.id),eqd=equipped(f),sc=SCHOOLS[L[
    ${li>=3?`<p class="meta skpath">${path==null?"สายปั้นใช้แต้มสกิลเหมือนสายสำนัก แต่เลือกปั้นได้ทีละ 1 สาย · อัปสกิลแรกเมื่อไหร่ สายปั้นอื่นจะปิด":path===li?`กำลังปั้นสายนี้${mine?` · <button class="btn sm ghost" data-act="skreset" data-id="${f.id}" ${G.cash<SK_RESET_COST?"disabled":""}>เปลี่ยนสายปั้น (คืนแต้ม · ${fmt(SK_RESET_COST)})</button>`:""}`:`ตอนนี้ปั้น "${SK_SHARED[path-3]}" อยู่ ต้องเปลี่ยนสายปั้นก่อนถึงจะอัปสายนี้ได้`}</p>`:""}</div>
    <div class="sklist pxscroll">${[0,1,2,3,4,5].map(row=>L.find(s=>s.line===li&&s.row===row)).filter(Boolean).map(card).join('<i class="skarrow" aria-hidden="true"></i>')}
      ${SIGNATURE[f.id]?`<div class="skc sig ${hasSignature(f)?"has":"lock"}"><div class="skc-m"><div class="skc-h"><b>✦ ท่าไม้ตาย: ${SIGNATURE[f.id].name}</b></div><p class="skc-d">${SIGNATURE[f.id].desc}${hasSignature(f)?"":` · ปลดเมื่อความสนิทถึง 60 (ตอนนี้ ${Math.round(f.bond||0)})`}</p></div></div>`:""}</div>
-   ${mine?`<div class="skfoot"><button class="btn sm" data-act="skauto" data-id="${f.id}" data-v="${li}" ${[0,1,2,3,4,5].some(r=>{const s=L.find(x=>x.line===li&&x.row===r);return s&&skState(f,s,mine).st==="can";})?"":"disabled"}>อัปอัตโนมัติ · ${lines[li]}</button><span class="meta">ใส่ขึ้นชกได้ ${MAX_EQUIP} ท่า · ท่าติดตัวทำงานเองไม่ใช้ช่อง</span></div>`:""}</div>`;}
+   ${mine?`<div class="skfoot"><button class="btn sm" data-act="skauto" data-id="${f.id}" data-v="${li}" ${[0,1,2,3,4,5].some(r=>{const s=L.find(x=>x.line===li&&x.row===r);return s&&skState(f,s,mine).st==="can";})?"":"disabled"}>อัปอัตโนมัติ · ${lines[li]}</button><span class="meta">ใส่ขึ้นชกได้ ${MAX_EQUIP} ท่า · ท่าติดตัวทำงานเองไม่ใช้ช่อง</span></div>${skResetRow(f)}`:""}</div>`;}
+function skResetRow(f){const n=skPointsSpent(f);if(!n)return "";const c=skResetCost(f);
+  return `<div class="skreset"><span><b>รีเซ็ตสกิลทั้งหมด</b><small>คืน ${n} แต้ม แล้วเลือกสายใหม่ได้ · ${c?`ค่าใช้จ่าย ${fmt(c)}`:"ครั้งแรกฟรี"}</small></span><button class="btn sm" data-act="skresetask" data-id="${f.id}" ${c&&G.cash<c?"disabled":""}>รีเซ็ต</button></div>`;}
 function skillGrid(f,mine){if(hasTree(f.id))return skillTree(f,mine);const L=SKILLS[f.id]||[];const sc=SCHOOLS[L[0]&&L[0].school]||{name:"",motto:""};
   // v1.23: compact — unlocked moves as short rows (tap the name for details), locked ones folded away
   const op=L.filter(s=>(s.lv||1)<=f.lvl),lk=L.filter(s=>(s.lv||1)>f.lvl),eqd=equipped(f);
@@ -688,7 +690,7 @@ function skillGrid(f,mine){if(hasTree(f.id))return skillTree(f,mine);const L=SKI
      ${mine?`<span class="skb">${r?`<button class="btn sm eqbtn ${eq?"on":""}" data-act="equip" data-id="${f.id}" data-v="${s.id}" ${!eq&&eqd.length>=MAX_EQUIP?"disabled":""}>${eq?"ใช้อยู่":"ใช้"}</button>`:""}<button class="plus" data-act="learn" data-id="${f.id}" data-v="${s.id}" ${f.sp<1||r>=3?"disabled":""} aria-label="อัป ${s.name}">${r>=3?"MAX":"+"}</button></span>`:""}
      ${o?`<small class="skd">${s.desc}</small>`:""}</div>`;};
   return `<div class="school sm" style="--c:${sc.color}"><b>${sc.name}</b>${mine?`<span class="pill ${f.sp>0?"gold":""}">แต้มสกิล ${f.sp}</span><span class="pill">ใช้ขึ้นชก ${eqd.length}/${MAX_EQUIP}</span>`:""}</div>
-   <div class="sklist">${op.map(row).join("")||`<p class="meta">ยังไม่มีท่าที่ปลดล็อก</p>`}</div>
+   <div class="sklist">${op.map(row).join("")||`<p class="meta">ยังไม่มีท่าที่ปลดล็อก</p>`}</div>${mine?skResetRow(f):""}
    ${lk.length?`<details class="sklock"><summary>ท่าที่ยังล็อก ${lk.length} ท่า · ถัดไป Lv.${lk[0].lv}</summary>${lk.map(s=>`<div class="sklk"><span>Lv.${s.lv}</span><b>${s.name}</b><small>${s.desc}</small></div>`).join("")}</details>`:""}`;}
 // v1.41: visible relationship stages — each one changes how she treats you
 const REL_TIERS=[[0,"คนรู้จัก","ยังเรียกคุณว่าผู้จัดการแบบเกร็ง ๆ"],[20,"เพื่อนร่วมค่าย","เริ่มคุยเล่น ทักแชตเรื่องทั่วไป"],[40,"คนสนิท","บางทีก็หลุดเรียกชื่อคุณ · มีเรื่องส่วนตัวมาเล่า"],[75,"คนพิเศษ","เรียกชื่อคุณตลอด"]];
@@ -773,6 +775,10 @@ function modalHTML(){const m=UI.modal;let body="",foot=true;
   if(m.type==="fighter"){body=fighterHTML(G.F[m.id]);foot=false;}
   if(m.type==="consider"){const o=G.offers.find(x=>x.id===m.id);if(!o){UI.modal=null;return "";}body=considerHTML(o);foot=false;}
   if(m.type==="whatsnew"){body=whatsNewHTML();foot=false;}
+  if(m.type==="skresetask"){const f=G.F[m.id],n=skPointsSpent(f),c=skResetCost(f);foot=false;
+    body=`<h2>รีเซ็ตสกิลของ${esc(f.name)}?</h2><p>สกิลที่อัปไว้ทั้งหมดจะหายไป และได้คืน <b class="goldt">${n} แต้ม</b> เอาไปอัปสายไหนก็ได้ใหม่ ท่าที่ใส่ขึ้นชกจะถูกถอดออก</p>
+     <p class="meta">${c?`ค่าใช้จ่าย ${fmt(c)} (ครั้งถัดไป ${fmt(Math.min(3,(f.skReset||0)+1)*10000)})`:"ครั้งแรกฟรี ครั้งต่อไป ฿10,000"}</p>
+     <div class="mfoot"><button class="btn ghost" data-act="skresetno">ยกเลิก</button><button class="btn primary" data-act="skresetgo">รีเซ็ตสกิล${esc(f.name)}</button></div>`;}
   if(m.type==="showcase"){body=showcaseHTML();foot=false;}
   if(m.type==="report")body=reportHTML();
   if(m.type==="repinfo")body=repInfoHTML();
@@ -1340,6 +1346,9 @@ const ACT={
   learn:d=>{const sl=document.querySelector(".sklist"),y=sl?sl.scrollTop:0;if(learnSkill(G,d.id,d.v)){AU.sfx("level");save();render();const n=document.querySelector(".sklist");if(n)n.scrollTop=y;}},
   rinread:()=>{const n=G.rinNote;if(!n)return;G.rinNote=null;save();playScene(n.steps,()=>{save();render();},{bg:"gym",look:"casual"});},
   skline:d=>{UI.skLine={id:d.id,li:+d.v};AU.sfx("ui");render();},
+  skresetask:d=>{const f=G.F[d.id];if(!f)return;UI.modal={type:"skresetask",id:d.id,back:UI.modal};render();},
+  skresetgo:()=>{const m=UI.modal;if(!m)return;const f=G.F[m.id];const c=skResetCost(f);if(c&&G.cash<c)return;const n=resetAllSkills(G,m.id);if(!n){UI.modal=m.back||null;render();return;}G.cash-=c;save();UI.modal=m.back||null;toast(`คืนแต้มสกิล ${n} แต้มให้${f.name} เลือกสายใหม่ได้เลย`);render();},
+  skresetno:()=>{const m=UI.modal;UI.modal=m&&m.back||null;render();},
   skreset:d=>{const f=G.F[d.id];if(!f||G.cash<SK_RESET_COST)return;const n=resetSharedPath(G,d.id);if(!n)return;G.cash-=SK_RESET_COST;save();toast(`คืนแต้มสกิล ${n} แต้ม เลือกสายปั้นใหม่ได้แล้ว`);render();},
   skauto:d=>{const f=G.F[d.id],li=+d.v;let n=0;for(let guard=0;guard<30&&f.sp>0;guard++){const s=skillList(f.id).filter(x=>x.line===li).sort((a,b)=>a.row-b.row||(f.skills[a.id]||0)-(f.skills[b.id]||0)).find(x=>!skillBlock(f,x.id).length);if(!s||!learnSkill(G,f.id,s.id))break;n++;}
     if(n){AU.sfx("level");save();toast(`อัป${(SK_LINES[f.id]||[])[li]||""} ${n} ครั้ง`);}render();},

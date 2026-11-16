@@ -173,6 +173,10 @@ const SHARED_SKILLS=[
  SKX("sh_ir4",5,3,"sh_ir2",["dur","stamina"],"build","ไม่มีวันล้ม","สายปั้นถึกอึด · Lv.10 · เลือดต่ำแม่นขึ้น 4% ป้องกันวงใน +0.8 ฟื้นแรง +10%",r=>({clutch:.04*r,clDef:.8*r,regen:.1*r}),{shared:1,lv:10})];
 const skillList=fid=>(SKILLS[fid]||[]).concat(SKILLS[fid]&&SKILLS[fid][0]&&SKILLS[fid][0].line!=null?SHARED_SKILLS:[]);
 const sharedPathOf=f=>{for(const s of SHARED_SKILLS)if((f.skills&&f.skills[s.id])>0)return s.line;return null;};
+// v1.83: full skill reset — every point spent comes back so a fighter can move to another line. First reset per fighter is free.
+const skPointsSpent=f=>Object.values(f.skills||{}).reduce((a,b)=>a+(b||0),0);
+const skResetCost=f=>Math.min(3,f.skReset||0)*10000;
+function resetAllSkills(G,id){const f=G.F[id];if(!f||!f.skills)return 0;const n=skPointsSpent(f);if(!n)return 0;f.skills={};f.sp=(f.sp||0)+n;f.equip=[];f.skReset=(f.skReset||0)+1;return n;}
 function resetSharedPath(G,id){const f=G.F[id];if(!f||!f.skills)return false;let n=0;for(const s of SHARED_SKILLS){n+=f.skills[s.id]||0;delete f.skills[s.id];}if(!n)return false;f.sp+=n;if(Array.isArray(f.equip))f.equip=f.equip.filter(k=>!k.startsWith("sh_"));return n;}
 // v1.12: a deep bond unlocks each heroine's signature move (bond 60+, player's camp only)
 const SIGNATURE={kati:{name:"ศอกกลับใจศิริชัย",desc:"ความสนิท 60+ · ศอกแรง +15% · ตอนเลือดต่ำแม่นขึ้นอีก 3%",fx:{dmg:{elbow:.15},clutch:.03}},
