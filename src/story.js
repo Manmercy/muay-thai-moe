@@ -442,6 +442,48 @@ function dateScene(G,id,act){
 
 // ---------- ENDINGS ----------
 // v1.50: from year 2 on, the year closes with a recap instead of the story ending
+// v1.82.2: year-end memory album — built from what the save already records (fights, honors, joins, pets, festivals, birthdays)
+const memSeasonOf=abs=>Math.floor((abs-1)/52)+1,memWeekOf=abs=>((abs-1)%52)+1;
+const MEM_BIG=new Set(["ploy","fah","pailin","vector_A","vector_B","prod_A","prod_B"]);
+function yearMemories(G,y){const M=[],nm=id=>(G.F[id]&&G.F[id].name)||"";
+  for(const h of (G.honors||[]))if(h.season===y&&G.F[h.id])M.push({pri:100,wk:h.week,bg:"hall",txt:`${nm(h.id)}คว้า${honorLabel(h.kind,h.venue)} รุ่น ${h.div}`});
+  const joins=(G.joinLog||[]).slice();const fl=G.flags||{};
+  if(fl.fahJoinedAbs!=null&&!joins.some(j=>j.id==="fah"))joins.push({id:"fah",season:memSeasonOf(fl.fahJoinedAbs),wk:memWeekOf(fl.fahJoinedAbs)});
+  if(fl.ployJoinedAbs!=null&&!joins.some(j=>j.id==="ploy"))joins.push({id:"ploy",season:memSeasonOf(fl.ployJoinedAbs),wk:memWeekOf(fl.ployJoinedAbs)});
+  for(const j of joins)if(j.season===y&&G.F[j.id]&&G.F[j.id].camp==="player")M.push({pri:90,wk:j.wk,bg:"camp",txt:`${nm(j.id)}ย้ายเข้ามาอยู่ค่ายศิริชัย`});
+  if(G.romance&&G.romWk!=null&&memSeasonOf(G.romWk)===y)M.push({pri:85,wk:memWeekOf(G.romWk),bg:"night",txt:`${nm(G.romance)}กับผู้จัดการตกลงคบกัน`});
+  const cal=(G.cal||[]).filter(c=>(c.season||1)===y);
+  const allW=(G.cal||[]).filter(c=>c.res==="W").sort((a,b)=>(a.absWeek||0)-(b.absWeek||0));
+  if(allW[0]&&(allW[0].season||1)===y)M.push({pri:78,wk:allW[0].wk,bg:"ring",txt:`ชัยชนะไฟต์แรกของค่าย · ${nm(allW[0].a)}ชนะ${allW[0].bn||"คู่ชก"}`});
+  const seenBig=new Set();
+  for(const c of cal)if(c.res==="W"&&MEM_BIG.has(c.b)&&!seenBig.has(c.b)){seenBig.add(c.b);M.push({pri:c.b==="ploy"||c.b==="pailin"?82:72,wk:c.wk,bg:"final",txt:`${nm(c.a)}ล้ม${c.bn||nm(c.b)}ได้สำเร็จ`});}
+  const ko=cal.filter(c=>c.res==="W"&&/KO|น็อก/.test(c.type||"")).length;if(ko>=3)M.push({pri:50,wk:null,bg:"ring",txt:`ปีนี้ค่ายเราชนะน็อกไป ${ko} ไฟต์`});
+  for(const p of (G.pets||[]))if(p.since!=null&&memSeasonOf(p.since)===y)M.push({pri:60,wk:memWeekOf(p.since),bg:"camp",txt:`${p.name}มาเป็นสมาชิกใหม่ของค่าย`});
+  const SY=G.seenY||{};
+  if(SY.fest_songkran===y)M.push({pri:40,wk:47,bg:"temple",txt:"สงกรานต์ ทั้งค่ายสาดน้ำกันจนครูแดงเปียกทั้งตัว"});
+  if(SY.fest_krathong===y)M.push({pri:40,wk:26,bg:"river",txt:"ลอยกระทงด้วยกันริมน้ำ ใครอธิษฐานอะไรไว้ก็ไม่ยอมบอก"});
+  if(SY.fest_newyear===y)M.push({pri:38,wk:32,bg:"market",txt:"ฉลองปีใหม่ด้วยกันทั้งค่าย"});
+  for(const id of ["kati","mali","rin","ploy","fah"])if(SY["bday_"+id]===y&&G.F[id])M.push({pri:36,wk:bdayWeek(id),bg:"cafe",txt:`วันเกิดของ${nm(id)}`});
+  const vr=(G.vecRec||{})[y];if(vr&&vr.w+vr.l>0)M.push({pri:65,wk:null,bg:"hall",txt:`ศึกกับค่ายเวกเตอร์ปีนี้ ศิริชัยชนะ ${vr.w} แพ้ ${vr.l}`});
+  return M;}
+function pickMemories(M,n){return M.slice().sort((a,b)=>b.pri-a.pri).slice(0,n).sort((a,b)=>(a.wk||99)-(b.wk||99));}
+function memStep(m,y){return {n:"nar",bg:m.bg,t:`📷 ${m.wk?`ปีที่ ${y} สัปดาห์ ${m.wk}`:`ปีที่ ${y}`} · ${m.txt}`};}
+function yearAlbumSteps(G){const y=G.season||1,mem=pickMemories(yearMemories(G,y),6),cal=(G.cal||[]).filter(c=>(c.season||1)===y);
+  const w=cal.filter(c=>c.res==="W").length,l=cal.filter(c=>c.res==="L").length,hon=(G.honors||[]).filter(h=>h.season===y).length;
+  const out=[{n:"nar",bg:"camp",t:`ก่อนถ่ายรูปประจำปี กะทิเปิดสมุดภาพเล่มหนาของค่าย พลิกไปหน้าปีที่ ${y}`}];
+  if(mem.length)out.push(...mem.map(m=>memStep(m,y)));else out.push({n:"nar",bg:"gym",t:`📷 ปีที่ ${y} · ปีที่ซ้อมกันเงียบ ๆ ทุกเช้า ไม่มีใครเจ็บหนัก ไม่มีใครถอดใจ`});
+  out.push({n:"nar",bg:"camp",t:`สรุปปีที่ ${y}: ชนะ ${w} แพ้ ${l}${hon?` · เกียรติยศ ${hon} รายการ`:""} · นักเรียน ${students(G)} คน · เงินในค่าย ${fmt(G.cash)}`});
+  return out;}
+// Year 5 closes the main story: one memory per year, totals, and a word for Grandpa Chai
+function fiveYearSteps(G){const out=[{n:"nar",bg:"camp",t:"รูปประจำปีห้าใบเรียงกันบนผนังค่าย ทุกคนยืนดูนานกว่าทุกปี"}];
+  for(let y=1;y<=5;y++){const top=pickMemories(yearMemories(G,y),1)[0];out.push(top?{...memStep(top,y),t:`🖼️ ปีที่ ${y} · ${top.txt}`}:{n:"nar",bg:"gym",t:`🖼️ ปีที่ ${y} · ปีที่ทุกคนซ้อมด้วยกันทุกเช้า`});}
+  const cal=G.cal||[],w=cal.filter(c=>c.res==="W").length,l=cal.filter(c=>c.res==="L").length,hon=(G.honors||[]).length;
+  const R=roster(G),top=R.slice().sort((a,b)=>(b.bond||0)-(a.bond||0))[0];
+  out.push({n:"nar",bg:"camp",t:`ห้าปีของค่ายศิริชัย: ขึ้นชก ${w+l} ไฟต์ ชนะ ${w} · เกียรติยศ ${hon} รายการ · นักมวยในค่าย ${R.length} คน`});
+  out.push({n:"coach",bg:"letter",t:"ห้าปีก่อน ค่ายนี้มีแต่หนี้ หลังคารั่ว กับเด็กผู้หญิงคนเดียวที่ไม่ยอมเลิกซ้อม …ปู่ชัยคงยิ้มอยู่ที่ไหนสักแห่ง"});
+  if(R.some(f=>f.id==="kati"))out.push({n:"kati",f:"happy",l:"casual",t:`ปู่คะ ค่ายเราไม่ปิดแล้วนะคะ แล้วก็ไม่ได้เหลือหนูคนเดียวแล้วด้วย`});
+  if(top&&top.id!=="kati")out.push({n:top.id,f:"happy",l:"casual",t:`${CALL(G,top.id)}คะ ปีที่หกก็อยู่ด้วยกันแบบนี้นะคะ`});
+  return out;}
 function yearEndScene(G){const y=G.season||1,R=roster(G),pChamp=Object.entries(G.champ).filter(([d,id])=>G.F[id]&&G.F[id].camp==="player").map(([d,id])=>G.F[id]);
   const top=R.slice().sort((a,b)=>(b.bond||0)-(a.bond||0))[0];
   const steps=[{n:"nar",t:`ปลายเดือนพฤษภาคม ปีที่ ${y} ของค่ายศิริชัยปิดฉากลง ทุกคนมายืนเรียงกันหน้าป้ายค่ายเพื่อถ่ายรูปประจำปี`},
@@ -451,6 +493,7 @@ function yearEndScene(G){const y=G.season||1,R=roster(G),pChamp=Object.entries(G
   if(top)steps.push({n:top.id,f:"happy",l:"casual",t:`${CALL(G,top.id)}คะ ปีหน้าก็อยู่ด้วยกันแบบนี้อีกนะคะ`});
   if((G.pets||[]).length)steps.push({n:"nar",t:`${G.pets.map(p=>p.name).join(" ")} ก็ต้องอยู่ในรูปด้วย ใช้เวลาจัดท่าสัตว์เลี้ยงนานกว่าจัดท่าคนอีก`});
   steps.push({n:"nar",t:`กล้องตั้งเวลาดังแชะ รูปปีที่ ${y} ถูกแขวนต่อจากรูปปีที่แล้วบนผนังค่าย`});
+  steps.unshift(...yearAlbumSteps(G));if(y===5)steps.push(...fiveYearSteps(G));
   return {key:"year",title:pChamp.length?`ปีที่ ${y} · แชมป์อีกครั้ง`:`ปีที่ ${y} · ค่ายยังเดินต่อ`,steps,bg:"camp",look:"casual"};}
 function endingScene(G){if((G.season||1)>=2&&G.ended!=="bankrupt")return yearEndScene(G);
   const pChamp=Object.entries(G.champ).filter(([d,id])=>G.F[id]&&G.F[id].camp==="player").map(([d,id])=>G.F[id]);

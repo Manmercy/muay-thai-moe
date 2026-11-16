@@ -442,6 +442,48 @@ function dateScene(G,id,act){
 
 // ---------- ENDINGS ----------
 // v1.50: from year 2 on, the year closes with a recap instead of the story ending
+// v1.82.2: year-end memory album — built from what the save already records (fights, honors, joins, pets, festivals, birthdays)
+const memSeasonOf=abs=>Math.floor((abs-1)/52)+1,memWeekOf=abs=>((abs-1)%52)+1;
+const MEM_BIG=new Set(["ploy","fah","pailin","vector_A","vector_B","prod_A","prod_B"]);
+function yearMemories(G,y){const M=[],nm=id=>(G.F[id]&&G.F[id].name)||"";
+  for(const h of (G.honors||[]))if(h.season===y&&G.F[h.id])M.push({pri:100,wk:h.week,bg:"hall",txt:`${nm(h.id)} won the ${honorLabel(h.kind,h.venue)} Div ${h.div}`});
+  const joins=(G.joinLog||[]).slice();const fl=G.flags||{};
+  if(fl.fahJoinedAbs!=null&&!joins.some(j=>j.id==="fah"))joins.push({id:"fah",season:memSeasonOf(fl.fahJoinedAbs),wk:memWeekOf(fl.fahJoinedAbs)});
+  if(fl.ployJoinedAbs!=null&&!joins.some(j=>j.id==="ploy"))joins.push({id:"ploy",season:memSeasonOf(fl.ployJoinedAbs),wk:memWeekOf(fl.ployJoinedAbs)});
+  for(const j of joins)if(j.season===y&&G.F[j.id]&&G.F[j.id].camp==="player")M.push({pri:90,wk:j.wk,bg:"camp",txt:`${nm(j.id)} moved into Sirichai Camp`});
+  if(G.romance&&G.romWk!=null&&memSeasonOf(G.romWk)===y)M.push({pri:85,wk:memWeekOf(G.romWk),bg:"night",txt:`${nm(G.romance)} and the Manager started dating`});
+  const cal=(G.cal||[]).filter(c=>(c.season||1)===y);
+  const allW=(G.cal||[]).filter(c=>c.res==="W").sort((a,b)=>(a.absWeek||0)-(b.absWeek||0));
+  if(allW[0]&&(allW[0].season||1)===y)M.push({pri:78,wk:allW[0].wk,bg:"ring",txt:`The camp's first win · ${nm(allW[0].a)} Win ${allW[0].bn||"Opponent"}`});
+  const seenBig=new Set();
+  for(const c of cal)if(c.res==="W"&&MEM_BIG.has(c.b)&&!seenBig.has(c.b)){seenBig.add(c.b);M.push({pri:c.b==="ploy"||c.b==="pailin"?82:72,wk:c.wk,bg:"final",txt:`${nm(c.a)} takes down ${c.bn||nm(c.b)}!`});}
+  const ko=cal.filter(c=>c.res==="W"&&/KO|น็อก/.test(c.type||"")).length;if(ko>=3)M.push({pri:50,wk:null,bg:"ring",txt:`This year the camp won by KO ${ko} fights`});
+  for(const p of (G.pets||[]))if(p.since!=null&&memSeasonOf(p.since)===y)M.push({pri:60,wk:memWeekOf(p.since),bg:"camp",txt:`${p.name} became the camp's newest member`});
+  const SY=G.seenY||{};
+  if(SY.fest_songkran===y)M.push({pri:40,wk:47,bg:"temple",txt:"Songkran: the whole camp splashed water until Kru Daeng was soaked head to toe"});
+  if(SY.fest_krathong===y)M.push({pri:40,wk:26,bg:"river",txt:"Floating krathongs together by the river. Nobody would say what they wished for."});
+  if(SY.fest_newyear===y)M.push({pri:38,wk:32,bg:"market",txt:"The whole camp celebrated New Year together"});
+  for(const id of ["kati","mali","rin","ploy","fah"])if(SY["bday_"+id]===y&&G.F[id])M.push({pri:36,wk:bdayWeek(id),bg:"cafe",txt:`Birthday: ${nm(id)}`});
+  const vr=(G.vecRec||{})[y];if(vr&&vr.w+vr.l>0)M.push({pri:65,wk:null,bg:"hall",txt:`This year against Vector: Sirichai won ${vr.w} lost ${vr.l}`});
+  return M;}
+function pickMemories(M,n){return M.slice().sort((a,b)=>b.pri-a.pri).slice(0,n).sort((a,b)=>(a.wk||99)-(b.wk||99));}
+function memStep(m,y){return {n:"nar",bg:m.bg,t:`📷 ${m.wk?`Year ${y} week ${m.wk}`:`Year ${y}`} · ${m.txt}`};}
+function yearAlbumSteps(G){const y=G.season||1,mem=pickMemories(yearMemories(G,y),6),cal=(G.cal||[]).filter(c=>(c.season||1)===y);
+  const w=cal.filter(c=>c.res==="W").length,l=cal.filter(c=>c.res==="L").length,hon=(G.honors||[]).filter(h=>h.season===y).length;
+  const out=[{n:"nar",bg:"camp",t:`Before the yearly photo, Kati opens the camp's thick scrapbook and turns to year ${y}`}];
+  if(mem.length)out.push(...mem.map(m=>memStep(m,y)));else out.push({n:"nar",bg:"gym",t:`📷 Year ${y} · A quiet year of training every morning. No one badly hurt, no one gave up.`});
+  out.push({n:"nar",bg:"camp",t:`Year ${y} recap: won ${w} lost ${l}${hon?` · ${hon} honors`:""} · ${students(G)} students · camp funds ${fmt(G.cash)}`});
+  return out;}
+// Year 5 closes the main story: one memory per year, totals, and a word for Grandpa Chai
+function fiveYearSteps(G){const out=[{n:"nar",bg:"camp",t:"Five yearly photos hang side by side on the camp wall. Everyone stands looking a little longer than usual."}];
+  for(let y=1;y<=5;y++){const top=pickMemories(yearMemories(G,y),1)[0];out.push(top?{...memStep(top,y),t:`🖼️ Year ${y} · ${top.txt}`}:{n:"nar",bg:"gym",t:`🖼️ Year ${y} · The year everyone trained together every morning`});}
+  const cal=G.cal||[],w=cal.filter(c=>c.res==="W").length,l=cal.filter(c=>c.res==="L").length,hon=(G.honors||[]).length;
+  const R=roster(G),top=R.slice().sort((a,b)=>(b.bond||0)-(a.bond||0))[0];
+  out.push({n:"nar",bg:"camp",t:`Five years of Sirichai: ${w+l} fights, won ${w} · ${hon} honors · ${R.length} fighters in camp`});
+  out.push({n:"coach",bg:"letter",t:"Five years ago this camp had nothing but debt, a leaking roof, and one girl who refused to stop training. …Grandpa Chai must be smiling somewhere."});
+  if(R.some(f=>f.id==="kati"))out.push({n:"kati",f:"happy",l:"casual",t:`Grandpa, our camp isn't closing anymore. And I'm not the only one left here now.`});
+  if(top&&top.id!=="kati")out.push({n:top.id,f:"happy",l:"casual",t:`${CALL(G,top.id)}, let's stay together like this in year six too, okay?`});
+  return out;}
 function yearEndScene(G){const y=G.season||1,R=roster(G),pChamp=Object.entries(G.champ).filter(([d,id])=>G.F[id]&&G.F[id].camp==="player").map(([d,id])=>G.F[id]);
   const top=R.slice().sort((a,b)=>(b.bond||0)-(a.bond||0))[0];
   const steps=[{n:"nar",t:`Late May. Year ${y} at Sirichai Camp comes to a close. Everyone lines up in front of the camp sign for the yearly photo.`},
@@ -451,6 +493,7 @@ function yearEndScene(G){const y=G.season||1,R=roster(G),pChamp=Object.entries(G
   if(top)steps.push({n:top.id,f:"happy",l:"casual",t:`${CALL(G,top.id)}, let's stay together like this next year too.`});
   if((G.pets||[]).length)steps.push({n:"nar",t:`${G.pets.map(p=>p.name).join(" ")} have to be in the photo too. Posing the pets takes longer than posing the people.`});
   steps.push({n:"nar",t:`The self-timer clicks. The photo for year ${y} is hung next to last year's on the camp wall.`});
+  steps.unshift(...yearAlbumSteps(G));if(y===5)steps.push(...fiveYearSteps(G));
   return {key:"year",title:pChamp.length?`Year ${y} · Champions again`:`Year ${y} · The camp goes on`,steps,bg:"camp",look:"casual"};}
 function endingScene(G){if((G.season||1)>=2&&G.ended!=="bankrupt")return yearEndScene(G);
   const pChamp=Object.entries(G.champ).filter(([d,id])=>G.F[id]&&G.F[id].camp==="player").map(([d,id])=>G.F[id]);

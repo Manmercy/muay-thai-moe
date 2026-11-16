@@ -805,7 +805,7 @@ function makeProdigy(G,div,from){G.prodigy=G.prodigy||{};if(G.prodigy[div])retur
   const f=baseFighter(id,{name:names[div][1],full:names[div][0],div,camp:"rival",color:"#3b3f8f",potential:Math.min(20,(src?src.potential:17)+2),a:{}});
   for(const k in src.a)f.a[k]=Math.min(20,src.a[k]+.8);f.lvl=Math.max(1,(src.lvl||5));f.xp=0;f.canon=false;f.prodigy=true;f.met=true;f.skills={...(src.skills||{})};
   G.F[id]=f;syncFighterAges(G);G.prodigy[div]=id;G.rank=G.rank||{A:{},B:{}};G.rank[div][id]={pts:0,w:0,l:0,d:0};return f;}
-function joinCamp(G,id,wage){const f=G.F[id];if(!f)return;f.camp="player";f.wage=wage;f.met=true;G.bookings=G.bookings.filter(b=>!(b.b===id&&G.F[b.a]&&G.F[b.a].camp==="player"));
+function joinCamp(G,id,wage){const f=G.F[id];if(!f)return;G.joinLog=(G.joinLog||[]).filter(x=>x.id!==id).concat([{id,season:G.season||1,wk:G.week}]);f.camp="player";f.wage=wage;f.met=true;G.bookings=G.bookings.filter(b=>!(b.b===id&&G.F[b.a]&&G.F[b.a].camp==="player"));
   if(id==="mali"){G.flags.maliIn=G.week;G.flags.maliInAbs=gameWeek(G);}
   G.offers=(G.offers||[]).filter(o=>o.b!==id);G.rank[f.div]=G.rank[f.div]||{};if(!G.rank[f.div][id])G.rank[f.div][id]={pts:0,w:0,l:0,d:0};}
 function storyTop4(G,div){let t=standings(G,div).slice(0,4).map(s=>s.id);const me=LEADS[div][0],rv=leadRival(G,div);G.wild=G.wild||{};
