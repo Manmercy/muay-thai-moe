@@ -1,5 +1,5 @@
 // ================= MUAY THAI MOE v1.3 — UI =================
-const VERSION="1.82.4";
+const VERSION="1.82.5";
 const CUR_LANG=(typeof window!=="undefined"&&window.LANG)||"th";
 const TH_LABEL=String.fromCharCode(3652,3607,3618);
 function langSwitch(cls){return `<div class="langsw ${cls||""}" role="group" aria-label="Language">${[["th",TH_LABEL],["en","EN"]].map(([k,l])=>`<button class="lsb ${CUR_LANG===k?"on":""}" data-act="setlang" data-v="${k}" aria-pressed="${CUR_LANG===k}">${l}</button>`).join("")}</div>`;}
@@ -800,7 +800,7 @@ function modalHTML(){const m=UI.modal;let body="",foot=true;
     <div class="kv-row"><span>ยืม</span><b class="num pos">${fmt(LOAN_AMT)}</b></div><div class="kv-row"><span>ดอกเบี้ย</span><b class="num neg">10% ทุก 4 สัปดาห์ (ทบต้น)</b></div><div class="kv-row"><span>ผลข้างเคียง</span><b class="warnt">พวกหมวกกันน็อกจะมาท้าที่ตลาดบ่อยขึ้น</b></div>
     <p class="meta">คืนได้ทั้งก้อนที่หน้าการเงินเมื่อมีเงินพอ · ครูแดง: "กู้เงินพวกนี้ ปู่ชัยเคยเจ็บมาแล้วนะ"</p>
     <div class="row2"><button class="btn" data-act="closeModal">ไม่เอาดีกว่า</button><button class="btn red" data-act="loanyes">กู้ ${fmt(LOAN_AMT)}</button></div>`;}
-  if(m.type==="campres"){foot=false;const a=CAMP_ACTIONS[m.k];const C=CFX[m.k];body=`<div class="campres ${m.skip?"skip":""}">${C?`<div class="cfxwrap" data-act="cfxskip" role="button" aria-label="ข้ามฉาก"><canvas width="320" height="180" data-campfx="${m.k}"></canvas><span class="cfxcap">${esc(C.cap)}</span><i class="cfxbar"></i></div>`:""}
+  if(m.type==="campres"){foot=false;const a=CAMP_ACTIONS[m.k]||{name:m.title,cost:m.cost};const C=CFX[m.k];body=`<div class="campres ${m.skip?"skip":""}">${C?`<div class="cfxwrap" data-act="cfxskip" role="button" aria-label="ข้ามฉาก"><canvas width="320" height="180" data-campfx="${m.k}"></canvas><span class="cfxcap">${esc(m.cap||C.cap)}</span><i class="cfxbar"></i></div>`:""}
    <div class="cr-res"><h2>${esc(a.name)}</h2><p class="cr-note">${esc(m.note)}</p>${a.cost?`<p class="meta">ใช้เงิน ${fmt(a.cost)}</p>`:""}<div class="mfoot"><button class="btn primary" data-act="closeModal">เยี่ยม!</button></div></div></div>`;}
   if(m.type==="endwarn"){foot=false;body=`<h2>จบสัปดาห์เลยไหม?</h2><ul class="mlist">${m.todo.map(t=>`<li>${t}</li>`).join("")}</ul><p class="meta">ข้ามได้ ไม่มีโทษ แต่อาจเสียโอกาสในสัปดาห์นี้</p><div class="mfoot"><button class="btn ghost" data-act="closeModal">กลับไปทำต่อ</button><button class="btn primary" data-act="endgo">จบสัปดาห์เลย</button></div>`;}
   if(m.type==="signwarn"){const f=G.F[m.id],net=weeklyNet(G)-f.wage;foot=false;
@@ -1340,8 +1340,9 @@ const ACT={
   repayloan:()=>{if(repayLoan(G)){save();AU.sfx("level");toast("คืนเงินกู้หมวกทองครบแล้ว หายใจโล่ง");render();}},
   advice:d=>{UI.modal={type:"advice",id:d.id};render();},
   mastersOpen:()=>{UI.modal={type:"masters"};render();},
-  hiremaster:d=>{if(hireMaster(G,d.id,d.v)){AU.sfx("level");UI.modal=null;save();toast(`${G.F[d.id].name}ได้เรียนกับ${MASTERS[d.v].name} · แต้มสกิล +1`);}},
-  hostshow:()=>{if(hostShow(G)){AU.cheer(1);save();toast("ศึกมวยค่ายศิริชัยคนดูแน่นลาน! ชื่อเสียง +3");}},
+  hiremaster:d=>{if(hireMaster(G,d.id,d.v)){AU.sfx("level");const f=G.F[d.id],M=MASTERS[d.v];UI.cfxIds=[d.id];save();
+    UI.modal={type:"campres",k:"master",title:`เชิญ${M.name}มาสอน`,cost:M.cost,cap:`${M.name}ถ่ายทอดวิชาให้${f.name}`,note:`${f.name}ได้เรียนกับ${M.name} · แต้มสกิล +1 · ${M.attrs.map(k=>(ATTRS.find(a=>a[0]===k)||[k,k])[1]).join(" ")} เพิ่มขึ้น · กำลังใจ +6`};render();}},
+  hostshow:()=>{if(hostShow(G)){AU.cheer(1);UI.cfxIds=null;save();UI.modal={type:"campres",k:"hostshow",title:"จัดศึกมวยที่ค่ายศิริชัย",cost:SHOW_COST,note:"คนดูแน่นลานทั้งคืน · ชื่อเสียง +3 · ค่ายสวยขึ้น · กำลังใจทุกคน +8"};render();}},
   cleardebt:()=>{if(clearDebt(G)){save();playScene(DEBT_CLEAR_SCENE,()=>{add(G,"kati","bond",5);render();},{bg:"gym",look:"casual"});}},
   campacts:()=>{UI.modal={type:"campacts"};render();},
   studinfo:()=>{UI.modal={type:"studinfo"};render();},
@@ -1350,7 +1351,7 @@ const ACT={
   outfit:d=>{const f=G.F[d.id];if(!f||f.camp!=="player")return;if(d.v!=="base"&&!outfitOk(G,f,d.v))return;f.outfit=d.v;AU.sfx&&AU.sfx("ui");save();render();},
   campmg:()=>{const k=UI.modal.pick,a=CAMP_ACTIONS[k];if(!a||!a.mg||G.campUsed)return;UI.modal=null;render();BAG.openMode(a.mg,k);},
   cfxskip:()=>{if(UI.modal&&UI.modal.type==="campres"&&!UI.modal.skip){UI.modal.skip=true;const el=document.querySelector(".campres");if(el)el.classList.add("skip");}},
-  campact:d=>{const note=doCampAction(G,d.v);if(note==null)return;G.campNote=note;AU.sfx("level");UI.modal={type:"campres",k:d.v,note};save();render();},
+  campact:d=>{UI.cfxIds=null;const note=doCampAction(G,d.v);if(note==null)return;G.campNote=note;AU.sfx("level");UI.modal={type:"campres",k:d.v,note};save();render();},
   date:d=>{UI.modal=null;UI.tab="people";const steps=dateScene(G,d.id,d.v);AU.startMusic("date");playScene(steps,()=>{AU.startMusic("hub");render();},{bg:ACTIVITIES[d.v].bg==="camp"?"gym":ACTIVITIES[d.v].bg,look:"casual"});},
   giftpick:d=>{UI.modal={type:"gift",id:d.id};render();},
   give:d=>{const r=giveGift(G,d.id,d.v);if(!r)return;UI.modal=null;UI.tab="people";save();AU.startMusic("date");giftScene(d.id,r);},
