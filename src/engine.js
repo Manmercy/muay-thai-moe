@@ -526,12 +526,12 @@ const wages=G=>roster(G).reduce((s,f)=>s+wageOf(f),0)+(G.staff?G.staff.reduce((s
 // Fixed camp slots: rarity indicates acquisition difficulty, never an extra stat bonus.
 const DECOR_RARITY={N:"#aab0ba",R:"#5ba9e8",SR:"#bd83e8",SSR:"#f4c75b",SS:"#ff8f62"};
 const CAMP_DECOR={
- tree:{name:"ต้นไม้",items:{none:{name:"ไม่ปลูกต้นไม้",r:"N"},plain:{name:"ต้นไม้พื้นบ้าน",r:"N"},blossom:{name:"ต้นพญาเสือโคร่ง",r:"R",rep:15},sakura:{name:"สวนซากุระ",r:"SR",rep:30,year:2},champion:{name:"ต้นชัยชนะ",r:"SSR",honor:"province"},golden:{name:"ต้นทองแห่งตำนาน",r:"SS",titles:3},flame:{name:"ต้นหางนกยูงฝรั่ง",r:"R",shop:1,price:22000},lilawadee:{name:"ต้นลีลาวดี",r:"R",shop:1,price:28000},rachaphruek:{name:"ต้นราชพฤกษ์",r:"SR",shop:1,price:55000}}},
- gate:{name:"ซุ้มทางเข้า",items:{none:{name:"ไม่มีซุ้ม",r:"N"},plain:{name:"ซุ้มไม้",r:"N"},painted:{name:"ซุ้มสีค่าย",r:"R",fac:["brand",1]},lantern:{name:"ซุ้มโคมไฟ",r:"SR",year:2,rep:18},trophy:{name:"ซุ้มถ้วยรางวัล",r:"SSR",honors:3},gold:{name:"ซุ้มเกียรติยศทอง",r:"SS",honors:8},lanna:{name:"ซุ้มไม้สักล้านนา",r:"SR",shop:1,price:60000},jade:{name:"ซุ้มหยกเขียว",r:"SR",shop:1,price:65000}}},
- ring:{name:"เวทีมวย",items:{plain:{name:"เวทีเดิม",r:"N"},red:{name:"ขอบเวทีแดง",r:"R",fac:["ring",1]},blue:{name:"ขอบเวทีน้ำเงิน",r:"R",fac:["ring",2]},sponsor:{name:"เวทีผู้สนับสนุน",r:"SR",rep:30},gold:{name:"เวทีแชมป์",r:"SSR",honor:"province"},green:{name:"ขอบเวทีเขียวมรกต",r:"R",shop:1,price:30000},purple:{name:"ขอบเวทีม่วงราชา",r:"SR",shop:1,price:60000},black:{name:"เวทีดำมิดไนท์",r:"SR",shop:1,price:75000}}},
- track:{name:"ลู่วิ่งรอบค่าย",items:{dirt:{name:"ทางดิน",r:"N"},chalk:{name:"เส้นชอล์ก",r:"R",fac:["hill",1]},gravel:{name:"ลู่วิ่งกรวด",r:"SR",fac:["hill",2]},rubber:{name:"ลู่วิ่งยาง",r:"SR",fac:["gym",2],rep:20},lantern:{name:"ลู่วิ่งโคมไฟ",r:"SSR",year:3,rep:35},blue:{name:"ลู่วิ่งสีน้ำเงิน",r:"R",shop:1,price:30000},green:{name:"ลู่วิ่งสีเขียว",r:"R",shop:1,price:30000}}},
- vehicle:{name:"รถประจำค่าย",items:{none:{name:"ยังไม่มีรถ",r:"N"},songthaew:{name:"รถสองแถว",r:"R",fac:["van",1]},minibus:{name:"รถตู้",r:"SR",fac:["van",2]},tourbus:{name:"รถบัสค่าย",r:"SR",fac:["van",2],rep:35},limo:{name:"ลีมูซีน",r:"SSR",fac:["van",2],rep:45,honor:"province"},goldvan:{name:"รถตู้สีทอง",r:"SS",bossWins:10},rotdaeng:{name:"รถแดงเชียงใหม่",r:"R",shop:1,price:40000},pinkvan:{name:"รถตู้ชมพูพาสเทล",r:"SR",shop:1,price:95000}}},
- bags:{name:"กระสอบทราย",items:{plain:{name:"กระสอบเดิม",r:"N"},red:{name:"กระสอบแดง",r:"R",fac:["gym",1]},blue:{name:"กระสอบน้ำเงิน",r:"R",fac:["gym",2]},team:{name:"กระสอบลายค่าย",r:"SR",rep:20},gold:{name:"กระสอบแชมป์",r:"SSR",honors:5},green:{name:"กระสอบเขียวทหาร",r:"N",shop:1,price:8000},black:{name:"กระสอบดำด้าน",r:"R",shop:1,price:15000},pink:{name:"กระสอบชมพูหวาน",r:"R",shop:1,price:15000}}}
+ tree:{name:"ต้นไม้",items:{none:{name:"ไม่ปลูกต้นไม้",r:"N"},plain:{name:"ต้นไม้พื้นบ้าน",r:"N"},blossom:{name:"ต้นพญาเสือโคร่ง",r:"R",rep:15},sakura:{name:"สวนซากุระ",r:"SR",rep:30,year:2},champion:{name:"ต้นชัยชนะ",r:"SSR",honor:"province"},golden:{name:"ต้นทองแห่งตำนาน",r:"SS",titles:3},flame:{name:"ต้นหางนกยูงฝรั่ง",r:"R",shop:1,price:22000},lilawadee:{name:"ต้นลีลาวดี",r:"R",shop:1,price:28000},rachaphruek:{name:"ต้นราชพฤกษ์",r:"SR",shop:1,price:55000},sritrang:{name:"ต้นศรีตรัง",r:"R",shop:1,price:28000},thongkwao:{name:"ต้นทองกวาว",r:"R",shop:1,price:26000}}},
+ gate:{name:"ซุ้มทางเข้า",items:{none:{name:"ไม่มีซุ้ม",r:"N"},plain:{name:"ซุ้มไม้",r:"N"},painted:{name:"ซุ้มสีค่าย",r:"R",fac:["brand",1]},lantern:{name:"ซุ้มโคมไฟ",r:"SR",year:2,rep:18},trophy:{name:"ซุ้มถ้วยรางวัล",r:"SSR",honors:3},gold:{name:"ซุ้มเกียรติยศทอง",r:"SS",honors:8},lanna:{name:"ซุ้มไม้สักล้านนา",r:"SR",shop:1,price:60000},jade:{name:"ซุ้มหยกเขียว",r:"SR",shop:1,price:65000},indigo:{name:"ซุ้มผ้าคราม",r:"SR",shop:1,price:58000},stucco:{name:"ซุ้มปูนปั้นขาว",r:"SR",shop:1,price:62000},bougain:{name:"ซุ้มดอกเฟื่องฟ้า",r:"SR",shop:1,price:60000},marigold:{name:"ซุ้มดาวเรือง",r:"SR",shop:1,price:60000}}},
+ ring:{name:"เวทีมวย",items:{plain:{name:"เวทีเดิม",r:"N"},red:{name:"ขอบเวทีแดง",r:"R",fac:["ring",1]},blue:{name:"ขอบเวทีน้ำเงิน",r:"R",fac:["ring",2]},sponsor:{name:"เวทีผู้สนับสนุน",r:"SR",rep:30},gold:{name:"เวทีแชมป์",r:"SSR",honor:"province"},green:{name:"ขอบเวทีเขียวมรกต",r:"R",shop:1,price:30000},purple:{name:"ขอบเวทีม่วงราชา",r:"SR",shop:1,price:60000},black:{name:"เวทีดำมิดไนท์",r:"SR",shop:1,price:75000},pink:{name:"ขอบเวทีชมพูพาสเทล",r:"R",shop:1,price:35000},orange:{name:"ขอบเวทีส้มสด",r:"R",shop:1,price:35000},yellow:{name:"ขอบเวทีเหลืองทานตะวัน",r:"R",shop:1,price:35000}}},
+ track:{name:"ลู่วิ่งรอบค่าย",items:{dirt:{name:"ทางดิน",r:"N"},chalk:{name:"เส้นชอล์ก",r:"R",fac:["hill",1]},gravel:{name:"ลู่วิ่งกรวด",r:"SR",fac:["hill",2]},rubber:{name:"ลู่วิ่งยาง",r:"SR",fac:["gym",2],rep:20},lantern:{name:"ลู่วิ่งโคมไฟ",r:"SSR",year:3,rep:35},blue:{name:"ลู่วิ่งสีน้ำเงิน",r:"R",shop:1,price:30000},green:{name:"ลู่วิ่งสีเขียว",r:"R",shop:1,price:30000},pink:{name:"ลู่วิ่งสีชมพู",r:"R",shop:1,price:30000},yellow:{name:"ลู่วิ่งสีเหลือง",r:"R",shop:1,price:30000},goldcarpet:{name:"ลู่วิ่งพรมทอง",r:"SSR",beauty:1}}},
+ vehicle:{name:"รถประจำค่าย",items:{none:{name:"ยังไม่มีรถ",r:"N"},songthaew:{name:"รถสองแถว",r:"R",fac:["van",1]},minibus:{name:"รถตู้",r:"SR",fac:["van",2]},tourbus:{name:"รถบัสค่าย",r:"SR",fac:["van",2],rep:35},limo:{name:"ลีมูซีน",r:"SSR",fac:["van",2],rep:45,honor:"province"},goldvan:{name:"รถตู้สีทอง",r:"SS",bossWins:10},rotdaeng:{name:"รถแดงเชียงใหม่",r:"R",shop:1,price:40000},pinkvan:{name:"รถตู้ชมพูพาสเทล",r:"SR",shop:1,price:95000},bluevan:{name:"รถตู้น้ำเงินทะเล",r:"SR",shop:1,price:85000},tuktuk:{name:"รถตุ๊กตุ๊กส้ม",r:"R",shop:1,price:45000},yellowthaew:{name:"รถสองแถวเหลือง",r:"R",shop:1,price:40000}}},
+ bags:{name:"กระสอบทราย",items:{plain:{name:"กระสอบเดิม",r:"N"},red:{name:"กระสอบแดง",r:"R",fac:["gym",1]},blue:{name:"กระสอบน้ำเงิน",r:"R",fac:["gym",2]},team:{name:"กระสอบลายค่าย",r:"SR",rep:20},gold:{name:"กระสอบแชมป์",r:"SSR",honors:5},green:{name:"กระสอบเขียวทหาร",r:"N",shop:1,price:8000},black:{name:"กระสอบดำด้าน",r:"R",shop:1,price:15000},pink:{name:"กระสอบชมพูหวาน",r:"R",shop:1,price:15000},white:{name:"กระสอบขาวมุก",r:"N",shop:1,price:8000},orange:{name:"กระสอบส้มสด",r:"R",shop:1,price:15000},yellow:{name:"กระสอบเหลืองสด",r:"R",shop:1,price:15000}}}
 };
 const campWeekIndex=G=>gameWeek(G);
 const goldRematchReady=G=>(G.gang&&G.gang.st>=5)&&campWeekIndex(G)>=(G.gangRematchAt||0);
@@ -545,6 +545,7 @@ function decorUnlockReason(G,slot,key){const D=CAMP_DECOR[slot]&&CAMP_DECOR[slot
  if(D.honor&&!(G.honors||[]).some(h=>h.kind===D.honor))need.push("คว้าแชมป์จังหวัด");
  if(D.honors&&(G.honors||[]).length<D.honors)need.push("สะสมเกียรติยศ "+D.honors+" รายการ (มี "+(G.honors||[]).length+")");
  if(D.titles&&(G.honors||[]).filter(h=>h.kind==="province").length<D.titles)need.push("คว้าแชมป์จังหวัด "+D.titles+" ครั้ง");
+ if(D.beauty&&(G.beautyWins||0)<D.beauty)need.push("ชนะเลิศประกวดค่ายสวยประจำปี");
  if(D.bossWins&&(G.goldHelmetWins||0)<D.bossWins)need.push("ชนะเสี่ยหมวกทองคำ "+D.bossWins+" ครั้ง (มี "+(G.goldHelmetWins||0)+")");
  return need.join(" · ");}
 function decorUnlocked(G,slot,key){return !!(CAMP_DECOR[slot]&&CAMP_DECOR[slot].items[key])&&!decorUnlockReason(G,slot,key);}
@@ -559,12 +560,12 @@ const YEAR_COLORS=[{k:"red",n:"สีแดง",hex:"#d23246",luck:"สีแด
   {k:"blue",n:"สีน้ำเงิน",hex:"#2c5fb3",luck:"สีน้ำเงินปีนี้ ใจนิ่ง คิดการใหญ่สำเร็จ"},{k:"pink",n:"สีชมพู",hex:"#e07aa0",luck:"สีชมพูปีนี้ มีเสน่ห์ คนรักคนหลง"},
   {k:"white",n:"สีขาว",hex:"#f2f2f2",luck:"สีขาวปีนี้ บริสุทธิ์ใจ ผู้ใหญ่เมตตา"},{k:"orange",n:"สีส้ม",hex:"#e8892a",luck:"สีส้มปีนี้ ไฟแรง งานรุ่ง"},
   {k:"yellow",n:"สีเหลือง",hex:"#e0b41b",luck:"สีเหลืองปีนี้ ปัญญาเฉียบ เงินทองไหลมา"},{k:"gold",n:"สีทอง",hex:"#f2c14e",luck:"สีทองปีนี้ บารมีสูง เกียรติยศมาเยือน"}];
-const DECOR_COL={tree:{plain:"green",blossom:"pink",sakura:"pink",champion:"gold",golden:"gold",flame:"red",lilawadee:"white",rachaphruek:"yellow"},
-  gate:{plain:"brown",painted:"red",lantern:"orange",trophy:"gold",gold:"gold",lanna:"brown",jade:"green"},
-  ring:{plain:"white",red:"red",blue:"blue",sponsor:"orange",gold:"gold",green:"green",purple:"purple",black:"black"},
-  track:{dirt:"brown",chalk:"white",gravel:"brown",rubber:"red",lantern:"orange",blue:"blue",green:"green"},
-  vehicle:{songthaew:"yellow",minibus:"white",tourbus:"blue",limo:"black",goldvan:"gold",rotdaeng:"red",pinkvan:"pink"},
-  bags:{plain:"brown",red:"red",blue:"blue",team:"red",gold:"gold",green:"green",black:"black",pink:"pink"}};
+const DECOR_COL={tree:{plain:"green",blossom:"pink",sakura:"pink",champion:"gold",golden:"gold",flame:"red",lilawadee:"white",rachaphruek:"yellow",sritrang:"blue",thongkwao:"orange"},
+  gate:{plain:"brown",painted:"red",lantern:"orange",trophy:"gold",gold:"gold",lanna:"brown",jade:"green",indigo:"blue",stucco:"white",bougain:"pink",marigold:"yellow"},
+  ring:{plain:"white",red:"red",blue:"blue",sponsor:"purple",gold:"gold",green:"green",purple:"purple",black:"black",pink:"pink",orange:"orange",yellow:"yellow"},
+  track:{dirt:"brown",chalk:"white",gravel:"brown",rubber:"red",lantern:"orange",blue:"blue",green:"green",pink:"pink",yellow:"yellow",goldcarpet:"gold"},
+  vehicle:{songthaew:"green",minibus:"white",tourbus:"red",limo:"black",goldvan:"gold",rotdaeng:"red",pinkvan:"pink",bluevan:"blue",tuktuk:"orange",yellowthaew:"yellow"},
+  bags:{plain:"brown",red:"red",blue:"blue",team:"purple",gold:"gold",green:"green",black:"black",pink:"pink",white:"white",orange:"orange",yellow:"yellow"}};
 const COLOR_NAME={red:"สีแดง",green:"สีเขียว",blue:"สีน้ำเงิน",pink:"สีชมพู",white:"สีขาว",orange:"สีส้ม",yellow:"สีเหลือง",gold:"สีทอง",brown:"สีน้ำตาล",purple:"สีม่วง",black:"สีดำ"};
 const COLOR_HEX={red:"#d23246",green:"#3f9a4f",blue:"#2c5fb3",pink:"#e07aa0",white:"#f2f2f2",orange:"#e8892a",yellow:"#e0b41b",gold:"#f2c14e",brown:"#8a5a32",purple:"#7a3fc0",black:"#24202c"};
 const decorColor=(slot,key)=>(DECOR_COL[slot]||{})[key]||null;
@@ -582,7 +583,8 @@ function runContest(G){const S=G.season||1;G.contests=G.contests||{};if(G.contes
   const field=RIVAL_CAMPS.map(([name,mu,gr])=>{let t=0;for(let i=0;i<7;i++)t+=clamp(Math.round(mu+(S-1)*gr+(rng()-.5)*2.4),2,10);return {name,score:Math.min(t,66)};});
   field.push({name:"ค่ายศิริชัย",score:me,me:true});field.sort((a,b)=>b.score-a.score||(b.me?1:0)-(a.me?1:0));const rank=field.findIndex(x=>x.me)+1;
   const prize=CONTEST_PRIZE[rank-1]||0,rep=[4,2,1][rank-1]||.5;G.cash+=prize;G.rep+=rep;if(rank===1){G.beautyWins=(G.beautyWins||0)+1;}
-  const R={season:S,color:yearColor(G).k,areas,total:me,field,rank,prize,rep};G.contests[S]=R;return R;}
+  const unlock=rank===1&&G.beautyWins===1?"ลู่วิ่งพรมทอง":null;if(unlock)grantDecorUnlocks(G);
+  const R={season:S,color:yearColor(G).k,areas,total:me,field,rank,prize,rep,unlock};G.contests[S]=R;return R;}
 function decorChoice(G,slot){const key=G.decor&&G.decor[slot];return decorUnlocked(G,slot,key)?key:decorDefault(slot);}
 const FACILITIES={
   gym:{name:"อุปกรณ์ซ้อม",cost:[20000,35000,60000],desc:"ผลการฝึก +10% ต่อระดับ"},

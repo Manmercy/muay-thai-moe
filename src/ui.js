@@ -798,6 +798,7 @@ function reportHTML(){const r=G.lastReport;const ann=[];
 // v1.81.1: "what's new" popup — shows once per save after loading, for players who started before this update
 const PATCH={id:"1.86.0",ver:"Muay Thai Moe v1.86.0",title:"รายงานประจำสัปดาห์จากค่ายศิริชัย",lead:"รอบนี้มีประกวดค่ายสวยประจำปี ความสนิทเป็นเลเวลไม่มีเพดาน และการ์ดมีหน้ารายละเอียด",items:[
  ["🌸","ประกวดค่ายสวยประจำปี","ต้นปีนายอำเภอประกาศสีมงคล ของตกแต่งสีตรงได้คะแนนพิเศษ สัปดาห์ที่ 30 นายอำเภอมาเดินดูค่ายให้คะแนน 7 ด้าน แล้วไปลุ้นผลที่อำเภอ ชนะเลิศได้เงินรางวัลและชื่อเสียง"],
+ ["🎨","ของตกแต่งใหม่ 19 ชิ้น","ทุกสีมงคลมีของครบทุกหมวดแล้ว เช่น ซุ้มดาวเรือง ซุ้มดอกเฟื่องฟ้า ต้นศรีตรัง รถตุ๊กตุ๊กส้ม และลู่วิ่งพรมทองสำหรับแชมป์ค่ายสวย"],
  ["♥","ความสนิทเป็นเลเวล","ความสนิทไม่มีเต็มแล้ว แสดงเป็นหัวใจ Lv. พร้อมเกจถึงขั้นถัดไป ผ่าน Lv.10 ไปแล้วยังสนิทขึ้นได้เรื่อย ๆ และไม่จางลงอีก"],
  ["🃏","หน้าการ์ด","แตะการ์ดในอัลบั้มเพื่อดูระดับ จำนวนที่มี ใบซ้ำ และคำโปรยสั้น ๆ ก่อนกดดูเรื่องราว"],
  ["⬆","อัปขั้นการ์ดเอง","การ์ดซ้ำเก็บไว้ให้ทุกใบ เลือกเองว่าจะใช้อัปขั้นการ์ด (ความสนิทเพิ่มทุกขั้น) หรือย่อยเป็นเศษดาว มีหน้ายืนยันก่อนย่อย"],
@@ -987,7 +988,7 @@ function contestHTML(){const S=G.season||1,R=(G.contests||{})[S];if(!R)return ""
   const ord=[2,1,0].filter(k=>R.field[k]),me=R.field.find(f=>f.me);
   return `<h2>ประกาศผลค่ายสวยประจำปี ${S}</h2><div class="cfxwrap ctwrap" data-act="contestskip" role="button" aria-label="ข้ามฉาก"><canvas class="campcv" width="640" height="360" data-contest="award"></canvas></div>
     <div class="ctscore">${ord.map((k,j)=>{const f=R.field[k];return `<div class="ctrow rk${k+1}${f.me?" me":""}${now}" style="--d:${[1600,4200,6800][j]}ms"><span>${["🥇","🥈","🥉"][k]} อันดับ ${k+1} · ${esc(f.name)}</span><i></i><b>${f.score}/70</b></div>`;}).join("")}
-     <div class="ctrow tot${now}" style="--d:7600ms"><span>${R.rank===1?"🏆 ค่ายศิริชัยชนะเลิศ!":`ค่ายศิริชัยได้อันดับ ${R.rank} จาก ${R.field.length} ค่าย`}<small>${R.prize?`รางวัล ${fmt(R.prize)} · `:""}ชื่อเสียง +${R.rep}</small></span><i></i><b>${me?me.score:R.total}/70</b></div></div>
+     <div class="ctrow tot${now}" style="--d:7600ms"><span>${R.rank===1?"🏆 ค่ายศิริชัยชนะเลิศ!":`ค่ายศิริชัยได้อันดับ ${R.rank} จาก ${R.field.length} ค่าย`}<small>${R.prize?`รางวัล ${fmt(R.prize)} · `:""}ชื่อเสียง +${R.rep}${R.unlock?` · ปลดล็อกของตกแต่ง "${esc(R.unlock)}"`:""}</small></span><i></i><b>${me?me.score:R.total}/70</b></div></div>
     <div class="mfoot"><button class="btn primary" data-act="contestdone">ไปต่อ ▸</button></div>`;}
 // v1.15: a worn-out fighter asks for a rest week herself
 function tiredScene(done){G.tiredAt=G.tiredAt||{};const f=roster(G).find(x=>!x.injury&&x.fatigue>=58&&x.plan.preset!=="rest"&&(G.tiredAt[x.id]??-9)<gameWeek(G)-3);if(!f||!coachOn()&&f.fatigue<70){done();return;}

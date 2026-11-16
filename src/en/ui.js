@@ -798,6 +798,7 @@ function reportHTML(){const r=G.lastReport;const ann=[];
 // v1.81.1: "what's new" popup — shows once per save after loading, for players who started before this update
 const PATCH={id:"1.86.0",ver:"Muay Thai Moe v1.86.0",title:"Weekly report from Sirichai Camp",lead:"This round adds the annual Camp Beauty Contest, open-ended bond levels, and a card detail page",items:[
  ["🌸","Annual Camp Beauty Contest","At new year the District Chief announces a lucky colour; matching decorations score extra. In week 30 he walks your camp and scores seven areas, then the results are read out at the district office. Winners get prize money and fame"],
+ ["🎨","19 new decorations","Every lucky colour now has a piece in every category: marigold and bougainvillea arches, a jacaranda tree, an orange tuk-tuk, and a gold carpet track for beauty champions"],
  ["♥","Bond levels","Bond no longer caps out: it shows as a heart level with a gauge to the next one. Past Lv.10 it keeps growing, and no longer fades"],
  ["🃏","Card page","Tap a card in the album to see its rarity, copies, spares and a short teaser before opening the story"],
  ["⬆","Level cards up yourself","Every duplicate is kept: spend it to level the card up (bond grows each level) or break it into stardust, with a confirm step"],
@@ -987,7 +988,7 @@ function contestHTML(){const S=G.season||1,R=(G.contests||{})[S];if(!R)return ""
   const ord=[2,1,0].filter(k=>R.field[k]),me=R.field.find(f=>f.me);
   return `<h2>Camp Beauty results, Year ${S}</h2><div class="cfxwrap ctwrap" data-act="contestskip" role="button" aria-label="Skip scene"><canvas class="campcv" width="640" height="360" data-contest="award"></canvas></div>
     <div class="ctscore">${ord.map((k,j)=>{const f=R.field[k];return `<div class="ctrow rk${k+1}${f.me?" me":""}${now}" style="--d:${[1600,4200,6800][j]}ms"><span>${["🥇","🥈","🥉"][k]} Place ${k+1} · ${esc(f.name)}</span><i></i><b>${f.score}/70</b></div>`;}).join("")}
-     <div class="ctrow tot${now}" style="--d:7600ms"><span>${R.rank===1?"🏆 Sirichai Camp wins!":`Sirichai Camp placed ${R.rank} of ${R.field.length} camps`}<small>${R.prize?`Prize ${fmt(R.prize)} · `:""} Fame +${R.rep}</small></span><i></i><b>${me?me.score:R.total}/70</b></div></div>
+     <div class="ctrow tot${now}" style="--d:7600ms"><span>${R.rank===1?"🏆 Sirichai Camp wins!":`Sirichai Camp placed ${R.rank} of ${R.field.length} camps`}<small>${R.prize?`Prize ${fmt(R.prize)} · `:""} Fame +${R.rep}${R.unlock?` · unlocked decoration "${esc(R.unlock)}"`:""}</small></span><i></i><b>${me?me.score:R.total}/70</b></div></div>
     <div class="mfoot"><button class="btn primary" data-act="contestdone">Continue ▸</button></div>`;}
 // v1.15: a worn-out fighter asks for a rest week herself
 function tiredScene(done){G.tiredAt=G.tiredAt||{};const f=roster(G).find(x=>!x.injury&&x.fatigue>=58&&x.plan.preset!=="rest"&&(G.tiredAt[x.id]??-9)<gameWeek(G)-3);if(!f||!coachOn()&&f.fatigue<70){done();return;}
