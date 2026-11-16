@@ -1707,6 +1707,7 @@ body.hasnews main>h1.sr+.homegrid,body.hasnews main>h1.sr+.rinnote{margin-top:46
 .cdsub{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 .cdsub .btn{display:flex;flex-direction:column;align-items:center;gap:1px;min-height:48px}
 .cdsub small{font:500 12px var(--f-body,inherit);opacity:.8}
+.cdacts .cdback{width:100%;min-height:44px;background:none;box-shadow:none;color:var(--muted)}.cdacts .cdback:hover{color:var(--fg)}
 .ccard.lvfx{animation:cardlv .9s ease-out}
 @keyframes cardlv{0%{transform:scale(1);filter:brightness(1)}25%{transform:scale(1.08);filter:brightness(1.8) drop-shadow(0 0 12px var(--rc))}100%{transform:scale(1);filter:brightness(1)}}
 @media (prefers-reduced-motion:reduce){.ccard.lvfx{animation:none}}

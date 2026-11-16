@@ -4202,5 +4202,6 @@
  "ต้องมีใบซ้ำ": "needs a spare",
  "ใช้ใบซ้ำ 1 ใบ": "uses 1 spare",
  ">⬆ อัปเป็น Lv.": ">⬆ Level to Lv.",
- "\">ดูเรื่องราว ▸</button>\n     <div class=\"cdsub\">": "\">Read the story ▸</button>\n     <div class=\"cdsub\">"
+ "\">ดูเรื่องราว ▸</button>\n     <div class=\"cdsub\">": "\">Read the story ▸</button>\n     <div class=\"cdsub\">",
+ "</small></button></div><button class=\"btn ghost cdback\" data-act=\"album\">‹ กลับอัลบั้ม</button></div>": "</small></button></div><button class=\"btn ghost cdback\" data-act=\"album\">‹ Back to album</button></div>"
 }
