@@ -3949,5 +3949,21 @@
  "<b>ยังขาดอีก ": "<b>Cards still missing: ",
  " ใบแล้ว!</b> เล่นต่อเพื่อทำคะแนนหรือดูฉากจบที่ยังไม่เห็นได้": " cards!</b> Keep playing for a high score or the endings you haven't seen yet",
  "<b class=\"goldt\">เก็บการ์ด SR ชุดไทยครบ ": "<b class=\"goldt\">Thai-dress SR set complete: all ",
- "ยังไม่ได้": "Not yet earned"
+ "ยังไม่ได้": "Not yet earned",
+ "ห้องถ้วยของใครเต็มแล้ว ถ่ายรูปมาอวดครูแดงหน่อยค่ะ 🏆": "Trophy shelf full? Snap a photo and show Kru Daeng 🏆",
+ "วันทำความสะอาดค่าย ล้อมวงกินข้าวหลังแพ้ วันเปิดค่าย และซุ้มงานชุมชน · บทพูดเปลี่ยนไปตามปี": "Camp clean-up day, a shared dinner after a loss, open day and a community fair booth · lines change every year",
+ "อีเวนต์ชีวิตในค่าย": "Camp life events",
+ "แยกค่าเรียน ผู้สนับสนุน ค่าจ้าง ค่าดูแลค่าย และผ่อนหนี้ บอกเหตุผลถ้าขาดทุน และย้อนดูได้ 4 สัปดาห์": "Tuition, sponsors, wages, upkeep and debt shown line by line, with the reason when you run at a loss and a 4-week history",
+ "รายรับรายจ่ายชัดขึ้น": "Clearer cash flow",
+ "ศึกริมน้ำจบระดับทองแดงได้ 1 ใบ เงิน 2 ใบ ทอง 3 ใบ และมีแถวการ์ดบอกว่ายังขาดใบไหน · ตู้ลอยกระทงเปิดถึง 7 ธ.ค.": "The riverside battle gives 1 card at Bronze, 2 at Silver, 3 at Gold, and a card row shows which you still need · the Loy Krathong gacha is open until Dec 7",
+ "การ์ดลอยกระทงเก็บง่ายขึ้น": "Easier Loy Krathong cards",
+ "ต้นไม้ ซุ้ม เวที ลู่วิ่ง รถ และกระสอบทราย วาดใหม่ละเอียดขึ้น 2 เท่า มีแสงเงาและไฟเรืองแสง": "Trees, gates, rings, tracks, vehicles and heavy bags redrawn at twice the detail, with shading and glowing lights",
+ "ของตกแต่งละเอียดขึ้น": "More detailed decorations",
+ "กดปุ่มในห้องถ้วยรางวัล บันทึกภาพค่ายพร้อมสถิติเป็นรูปไว้แชร์ได้": "Tap the button in the Trophy Room to save a picture of your camp and its stats to share",
+ "ถ่ายรูปค่ายไว้อวด": "Camp photo",
+ "ค่ายสะอาด ค่ายดีเด่นประจำตำบล ปลดหนี้ปู่ชัย ค่ายในตำนาน และอื่น ๆ ใบที่ยังไม่ได้มีบอกวิธีได้": "Clean camp, best subdistrict camp, Grandpa Chai's debt cleared, legendary camp and more · unearned ones show how to get them",
+ "เกียรติบัตรของค่าย 9 ใบ": "9 camp certificates",
+ "จัดการค่าย → ถ้วยรางวัล · ถ้วย เข็มขัดแชมป์ และเกียรติบัตรวางบนชั้นโชว์ แตะดูได้ว่าได้มาจากไฟต์ไหน": "Camp → Trophies · cups, championship belts and certificates on display shelves; tap one to see which fight it came from",
+ "ห้องถ้วยรางวัล": "Trophy Room",
+ "รอบนี้ค่ายมีห้องถ้วยรางวัล ของตกแต่งสวยขึ้น และการ์ดลอยกระทงเก็บง่ายขึ้น": "This round: a Trophy Room, prettier decorations and easier Loy Krathong cards"
 }
