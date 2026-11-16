@@ -889,7 +889,7 @@ function applyResult(G,F,booking){
     const off=tier.off;
     if(off&&me.camp!=="player"){me.lastFight=G.week;me.lastFightAbs=gameWeek(G);continue;}
     if(me.camp==="player"&&op.camp!=="player"&&!off){G.h2h=G.h2h||{};const h=G.h2h[op.id]=G.h2h[op.id]||{w:0,l:0,d:0};h[res==="W"?"w":res==="L"?"l":"d"]++;}
-    if(me.camp==="player"&&res==="W")G.dust=(G.dust||0)+(/KO|น็อก/.test(r.type||"")?3:2); /* v1.58: stardust for wins */
+    if(me.camp==="player"&&res==="W")G.dust=(G.dust||0)+(/KO|น็อก/.test(r.type||"")?4:3); /* v1.58: stardust for wins · v1.87: +1 */
     if(!off){me.rec[res==="W"?"w":res==="L"?"l":"d"]++;me.form.unshift(res);me.form=me.form.slice(0,5);}me.lastFight=G.week;me.lastFightAbs=gameWeek(G);
     me.fatigue=clamp(me.fatigue+(booking.ev?4:off?14:22),0,100);
     const s=side==="A"?A:B;

@@ -117,3 +117,15 @@ const AU={ctx:null,master:null,music:null,sfxBus:null,crowdG:null,timer:null,ste
 const SETTINGS={music:true,sfx:true,coach:true,quick:false,askEnd:true};
 try{Object.assign(SETTINGS,JSON.parse(localStorage.getItem("mtm-settings")||"{}"));}catch(e){}
 function saveSettings(){try{localStorage.setItem("mtm-settings",JSON.stringify(SETTINGS));}catch(e){}}
+
+/* v1.87: gacha machine sounds */
+AU.gsfx=function(kind,a){if(!this.init()||this.muted||!SETTINGS.sfx)return;const t=this.ctx.currentTime+.01,T=(d,o)=>this.tone(t+d,o),N=(d,o)=>this.noiseHit(t+d,o);
+  if(kind==="click"){N(0,{f:3500,type:"bandpass",q:4,dur:.03,peak:.35});T(0,{f:900,type:"square",dur:.03,peak:.08});}
+  if(kind==="drop"){T(0,{f:180,to:70,dur:.12,peak:.5});N(0,{f:600,dur:.06,peak:.25});}
+  if(kind==="bounce")T(0,{f:240,to:120,dur:.07,peak:.25});
+  if(kind==="rattle")N(0,{f:2500+(a||0)*400,type:"bandpass",q:3,dur:.05,peak:.18+(a||0)*.04});
+  if(kind==="upg")[988,1319,1760].forEach((f,i)=>T(i*.06,{f,type:"triangle",dur:.18,peak:.22}));
+  if(kind==="pop"){N(0,{f:5000,type:"highpass",dur:.18,peak:.5});T(0,{f:a==="SSR"?523:a==="SR"?440:392,type:"triangle",dur:.35,peak:.3});T(.04,{f:a==="SSR"?784:a==="SR"?659:587,type:"triangle",dur:.35,peak:.22});}
+  if(kind==="star")T(0,{f:[784,988,1175,1568][a]||1568,type:"square",dur:.09,peak:.12});
+  if(kind==="fanfare"){const n=[523,659,784,1047,784,1047,1319];n.forEach((f,i)=>T(i*.09,{f,type:"square",dur:i===n.length-1?.6:.12,peak:.16}));[262,392].forEach(f=>T(.54,{f,type:"triangle",dur:.7,peak:.2}));}
+  if(kind==="shimmer")for(let i=0;i<6;i++)T(i*.05,{f:1400+Math.random()*1400,type:"sine",dur:.12,peak:.06});};

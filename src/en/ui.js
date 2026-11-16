@@ -1,5 +1,5 @@
 // ================= MUAY THAI MOE v1.3 — UI =================
-const VERSION="1.86.0";
+const VERSION="1.87.0";
 const CUR_LANG=(typeof window!=="undefined"&&window.LANG)||"th";
 const TH_LABEL=String.fromCharCode(3652,3607,3618);
 function langSwitch(cls){return `<div class="langsw ${cls||""}" role="group" aria-label="Language">${[["th",TH_LABEL],["en","EN"]].map(([k,l])=>`<button class="lsb ${CUR_LANG===k?"on":""}" data-act="setlang" data-v="${k}" aria-pressed="${CUR_LANG===k}">${l}</button>`).join("")}</div>`;}
@@ -27,7 +27,7 @@ if(id==="pailin")return `${ASSET}pailin_fight_${mood==="surprised"||mood==="flus
 const THAI_IDS=["kati","mali","rin","ploy","fah"];
 const faceSrc=(id,mood,look)=>id==="coach"?`${ASSET}coach_face.webp`:id==="pailin"?`${ASSET}pailin_face.webp`:look&&look!=="fight"&&look!=="thai"?`${ASSET}${id}_${look}_face.webp`:`${ASSET}${id}_${["happy","sad","flustered"].includes(mood)?mood:"happy"}_face.webp`;
 const BGIMG={camp:"bg_camp.webp",night:"bg_camp.webp",bus:"bg_bus_rain.webp",letter:"bg_grandpa_letter.webp",fair:"bg_fair.webp",local:"bg_local.webp",district:"bg_district.webp",ring:"bg_local.webp",final:"bg_final.webp",hall:"bg_hall.webp",gym:null,gymdusk:"gym1.webp",food:"bg_food.webp",temple:"bg_temple.webp",cafe:"bg_cafe.webp",river:"bg_river.webp",market:"bg_market.webp",rooster:"bg_rooster.webp",farm:"bg_farm.webp"};
-const cardFaceSrc=C=>{const scene=(C.steps||[]).find(s=>s.n===C.c)||{},mood=scene.f||"happy",look=scene.l||"casual";
+const cardFaceSrc=C=>{if(C.face)return `${ASSET}${C.face}.webp`;const scene=(C.steps||[]).find(s=>s.n===C.c)||{},mood=scene.f||"happy",look=scene.l||"casual";
   if(look==="train")return `${ASSET}${C.c}_train_face.webp`;
   if(look==="thai"&&THAI_IDS.includes(C.c))return `${ASSET}${C.c}_thai${["flustered","surprised","pout","sad","angry"].includes(mood)?"_fl":""}_face.webp`;
   if(look==="fight")return `${ASSET}${C.c}_${["happy","sad","flustered","angry"].includes(mood)?mood:"happy"}_face.webp`;
@@ -524,6 +524,11 @@ function careerHTML(d){const list=Object.values(G.F).filter(f=>f.div===d&&f.camp
    <p class="meta">Ratings move after every counted bout: beating a higher-rated fighter gains a lot, beating a lower-rated one gains little. Semi-finals and finals count for more</p>`;}
 // v1.85: card detail page — rarity, copies, a teaser line, read the story or break spare copies into stardust
 function cardBlurb(C){if(C.blurb)return C.blurb;const st=(C.steps||[]).find(x=>x&&typeof x.t==="string"&&x.n!=="nar")||(C.steps||[]).find(x=>x&&typeof x.t==="string");if(!st)return "";const t=st.t;return t.length>72?t.slice(0,70)+"…":t;}
+/* v1.87: some cards continue another card's story — once both are owned, the card page links them */
+const CARD_SEQ={h_mali:"g_mali_sr",h_rin:"g_rin_sr",h_fah:"g_fah_sr",g_mali_ssr:"h_mali",g_ploy_ssr:"g_ploy_sr"};
+function cardLinkHTML(id){const own=G.cards||{},out=[];const pv=CARD_SEQ[id];if(pv&&own[pv]&&CARDS[pv])out.push(`↩ Continues from <button class="clinkb" data-act="cardinfo" data-v="${pv}">${esc(CARDS[pv].t)}</button>`);
+  Object.keys(CARD_SEQ).filter(k=>CARD_SEQ[k]===id&&own[k]&&CARDS[k]).forEach(k=>out.push(`↪ Continues in <button class="clinkb" data-act="cardinfo" data-v="${k}">${esc(CARDS[k].t)}</button>`));
+  return out.length?`<p class="clink">${out.join("<br>")}</p>`:"";}
 function cardInfoHTML(id){const C=CARDS[id];if(!C)return "";const o=(G.cards||{})[id],R=CARD_R[C.r],who=G.F[C.c]?G.F[C.c].name:"",src=C.lg?"the Loy Krathong gacha (festival only)":C.g?"the card gacha":`${C.hint||"keep following the story"}`;
   if(!o)return `<h2>Not collected yet</h2><div class="cdet" style="--rc:#77747d"><div class="ccard big lock" data-rarity="${C.r}">${cardArtHTML(C,true)}<span class="tstar">${"★".repeat(R.s)}</span><b>???</b><small>${C.r}</small></div>
     <div class="cdinfo"><div class="cdtop"><span class="pill">${C.r} ${"★".repeat(R.s)}</span><span class="meta">${esc(who)}</span></div><p class="meta"><b>How to get:</b> ${esc(src)}</p></div></div>
@@ -531,13 +536,13 @@ function cardInfoHTML(id){const C=CARDS[id];if(!C)return "";const o=(G.cards||{}
   const sp=o.spare||0,per=DUST_OF[C.r],fresh=cardFresh(id,o),lv=o.lv||1,up=cardCanUp(id,o),fx=UI.cardFx===id;UI.cardFx=null;
   return `<h2>${esc(C.t)}</h2><div class="cdet" style="--rc:${R.c}"><div class="ccard big ${fx?"lvfx":""}" data-rarity="${C.r}" style="--rc:${R.c}">${cardArtHTML(C)}<span class="tstar">${"★".repeat(R.s)}</span><b>${esc(C.t)}</b><small>${C.r} · Lv.${lv}</small></div>
     <div class="cdinfo"><div class="cdtop"><span class="pill" style="box-shadow:inset 0 0 0 2px ${R.c};color:${R.c}">${C.r} ${"★".repeat(R.s)}</span><span class="meta">${esc(who)}</span>${fresh&&o.seen?"<span class=\"cnew\">✦ New in this update</span>":""}</div>
-    ${cardBlurb(C)?`<p class="cblurb">“${esc(cardBlurb(C))}”</p>`:""}
+    ${cardBlurb(C)?`<p class="cblurb">“${esc(cardBlurb(C))}”</p>`:""}${cardLinkHTML(id)}
     <div class="kv-row"><span>Card level</span><b>${"◆".repeat(lv)}${"◇".repeat(CARD_MAX_LV-lv)} Lv.${lv}/${CARD_MAX_LV}</b></div><div class="kv-row"><span>Copies collected</span><b>${o.n||1}</b></div><div class="kv-row"><span>Spare copies</span><b>${sp}</b></div>
     ${C.lv2?`<div class="cdlv"><span class="${lv>=2?"on":""}">${lv>=2?"✓":"🔒"} ◆◆ Lv.2 · epilogue</span><span class="${lv>=3?"on":""}">${lv>=3?"✓":"🔒"} ◆◆◆ Lv.3 · special scene "${esc(C.lv3t||"")}"${C.mg?" + minigame":""}</span></div>`:""}
     <p class="meta">From: ${esc(src)}</p><p class="meta">Spare copies level the card up (max Lv.${CARD_MAX_LV} · bond with ${esc(who)} grows each level) or break them into stardust at ✦ ${per}</p></div></div>
     <div class="cdacts"><button class="btn primary cdread" data-act="cardplay" data-v="${id}">Read the story ${lv>=2&&C.lv2?" + epilogue":""} ▸</button>
      ${C.lv3?`<button class="btn gold cdsp" data-act="cardspecial" data-v="${id}" ${lv>=3?"":"disabled"}>${lv>=3?`✦ Special scene: ${esc(C.lv3t||"")}${(o.lvSeen||1)<3?" · new":""}`:`🔒 Special scene unlocks at Lv.3`}</button>`:""}
-     ${C.mg&&lv>=3?`<button class="btn cdmg" data-act="cardmg" data-v="${id}">🥁 Minigame: ${esc(C.mgt||"")}<small>${o.mgDone?`last grade ${o.mgGrade||"-"} · practice any time`:"first clear gives stardust"}</small></button>`:""}
+     ${C.mg&&lv>=3?`<button class="btn cdmg" data-act="cardmg" data-v="${id}">${(MG_MODES[C.mg]||{}).icon||"🥁"} Minigame: ${esc(C.mgt||"")}<small>${o.mgDone?`last grade ${o.mgGrade||"-"} · practice any time`:"first clear gives stardust"}</small></button>`:""}
      <div class="cdsub">${lv<CARD_MAX_LV?`<button class="btn" data-act="cardup" data-v="${id}" ${up?"":"disabled"}>⬆ Level to Lv.${lv+1}<small>${up?"uses 1 spare":"needs a spare"}</small></button>`:`<button class="btn" disabled>◆ Max level<small>Lv.${CARD_MAX_LV}</small></button>`}<button class="btn" data-act="carddust" data-v="${id}" data-n="1" ${sp?"":"disabled"}>Break down 1<small>+✦${per}</small></button></div><button class="btn ghost cdback" data-act="album">‹ Back to album</button></div>`;}
 function rankHTML(){const st=stageOf(G.week),cut=st==="local"?4:st==="district"?4:0,d=UI.rdiv;const rows=standings(G,d);const mv=(G.rankMove&&G.rankMove[d])||{};
   if(UI.rview==="career")return `<section class="px card"><div class="card-h"><div class="seg sm"><button data-act="rdiv" data-v="A" aria-pressed="${d==="A"}">Div A</button><button data-act="rdiv" data-v="B" aria-pressed="${d==="B"}">Div B</button></div><div class="seg sm"><button data-act="rview" data-v="season" aria-pressed="false">This season</button><button data-act="rview" data-v="career" aria-pressed="true">Fighter tiers</button></div></div>${careerHTML(d)}</section>`;
@@ -799,16 +804,45 @@ function reportHTML(){const r=G.lastReport;const ann=[];
    <div class="chips3"><span class="chip"><small>Students</small><b class="num pos">+${fmt(r.inc)}</b></span><span class="chip"><small>Expenses</small><b class="num neg">-${fmt(r.up+r.wg+(r.debtPay||0))}</b></span><span class="chip"><small>Cash</small><b class="num ${r.cash<0?"neg":""}">${fmt(r.cash)}</b></span></div>
    <details><summary>Results around the circuit (${r.log.length})</summary><div class="log">${r.log.map(l=>`<div>${esc(l)}</div>`).join("")||"<div>All quiet</div>"}</div></details>`;}
 // v1.81.1: "what's new" popup — shows once per save after loading, for players who started before this update
-const PATCH={id:"1.86.0",ver:"Muay Thai Moe v1.86.0",title:"Weekly report from Sirichai Camp",lead:"This round adds the annual Camp Beauty Contest, open-ended bond levels, and a card detail page",items:[
- ["🌸","Annual Camp Beauty Contest","At new year the District Chief announces a lucky colour; matching decorations score extra. In week 30 he walks your camp and scores seven areas, then the results are read out at the district office. Winners get prize money and fame"],
- ["🎨","19 new decorations","Every lucky colour now has a piece in every category: marigold and bougainvillea arches, a jacaranda tree, an orange tuk-tuk, and a gold carpet track for beauty champions"],
- ["♥","Bond levels","Bond no longer caps out: it shows as a heart level with a gauge to the next one. Past Lv.10 it keeps growing, and no longer fades"],
- ["📖","More story in cards","60 cards got new content: longer stories, an epilogue at Lv.2 and a special scene at Lv.3, SSR cards have their own minigame, and cards with new content show a ✦NEW badge"],
- ["🃏","Card page","Tap a card in the album to see its rarity, copies, spares and a short teaser before opening the story"],
- ["⬆","Level cards up yourself","Every duplicate is kept: spend it to level the card up (bond grows each level) or break it into stardust, with a confirm step"],
- ["🏅","Six fighter tiers","Every fighter has a rating from Rookie to Legend; see Fights → Rankings → Fighter tiers"],
- ["🛒","Shop decorations","15 pieces to buy, with a confirm step before paying"]],
- foot:"Grow those bonds sky-high ♥"};
+/* v1.87: gacha machine popup */
+const GB_RATES={n:[["SSR",3],["SR",27],["N",70]],loy:[["SSR",4],["SR",23],["R",38],["N",35]]};
+function gbCost(){return GB.box==="loy"?LG_COST:GACHA_COST;}
+function gbPityLeft(){return GB.box==="loy"?Math.max(1,LG_PITY-(G.lgPity||0)):Math.max(1,GACHA_PITY-(G.pity||0));}
+function gbCutHTML(s){const C=CARDS[s.id];const team=/team/.test(s.id)?["mali","rin","kati","ploy","fah"]:null;
+  const ims=team?team.map(c=>`${ASSET}${c}_${C.lg?"thai":"casual"}.webp`):[`${ASSET}${C.ci||C.c+"_casual"}.webp`];const n=ims.length;
+  return `<div class="gbglow"></div><div class="gbrays"></div><div class="gbteam">${ims.map((src,i)=>{const off=i-(n-1)/2,h=n>1?74-Math.abs(off)*6:92;
+    return `<div class="m" style="left:${50+off*21}%;z-index:${10-Math.abs(off)}"><img src="${src}" alt="" style="height:${h}%;animation-delay:${.12*Math.abs(off)+.05}s"></div>`;}).join("")}</div>
+    <div class="gbssr"><b>SSR</b><span>${esc(C.t)}</span></div>`;}
+function gbRevealHTML(s){const C=CARDS[s.id],RR=CARD_R[C.r],res=s.res,o=(G.cards||{})[s.id]||{},d0=.45+RR.s*.14,who=G.F[C.c]?G.F[C.c].name:"";
+  const q=(C.r==="SR"||C.r==="SSR")?(C.q||cardBlurb(C)):"";
+  return `<div class="ccard big gbcard" data-rarity="${C.r}" style="--rc:${RR.c}">${cardArtHTML(C)}<span class="tstar">${Array.from({length:RR.s},(_,i)=>`<i style="animation-delay:${.45+i*.14}s">★</i>`).join("")}</span><b>${esc(C.t)}</b><small>${C.r} · ${esc(who)}</small></div>
+    <span class="gbtag ${res.isNew?"new":"dup"}" style="animation-delay:${d0}s">${res.isNew?"New card!":res.canUp?"Duplicate! Ready to level up":"Duplicate! Keep it to break into stardust"}</span>
+    ${q?`<p class="gbq" style="animation-delay:${d0+.25}s">“${esc(q)}” <em>— ${esc(who)}</em></p>`:""}
+    <div class="gbacts" style="animation-delay:${d0+.4}s">${res.isNew?`<button class="btn" data-act="cardplay" data-v="${s.id}">View story</button>`:`<button class="btn" data-act="cardinfo" data-v="${s.id}">${res.canUp?"⬆ Level it up":"Card page"}</button>`}<button class="btn gold" data-act="gok">OK</button></div>`;}
+function gboxHTML(){const loy=GB.box==="loy",s=GB.st,cost=gbCost(),ok=(G.dust||0)>=cost;
+  const rates=GB_RATES[GB.box].map(([r,p])=>`<span class="rr" style="color:${CARD_R[r].c}">${r}</span><span class="bar" style="color:${CARD_R[r].c}"><i style="width:${p}%"></i></span><span class="pc">${p}%</span>`).join("");
+  const pity=loy?LG_PITY:GACHA_PITY,left=gbPityLeft();
+  return `<div class="gbhead"><h2>${loy?"Loy Krathong Machine":"Sirichai Gacha Machine"}</h2><span class="gbdust">✦ ${G.dust||0}</span><button class="gbq-btn" data-act="gboxq" aria-label="Drop rates and guarantee">?</button></div>
+  <div class="gbstage ${loy?"loy":""}" data-act="gskip">
+   <canvas width="180" height="240" data-gbox="1"></canvas>
+   ${s?"":`<button class="gbhit" data-act="gpull" aria-label="Spin the machine for ${cost} stardust"></button>`}
+   <div class="gbcut ${s&&s.fired.cut&&!s.shown?"on":""}">${s&&s.fired.cut&&!s.shown?gbCutHTML(s):""}</div>
+   <div class="gbrev ${s&&s.shown?"on still":""}">${s&&s.shown?gbRevealHTML(s):""}</div>
+   <div class="gbflash"></div>
+   <div class="gbhint ${s||ok?"blink":""}" ${s&&s.shown?'style="display:none"':""}>${s?"Tap to skip":ok?`Tap the machine to spin · ${cost}✦`:`Not enough stardust · need ${cost}✦`}</div>
+   ${UI.gq?`<div class="gbsheet"><div class="gbsbox"><h3>Drop rates</h3><div class="gbrt">${rates}</div>
+     <div class="gbpity">Guaranteed SSR every ${pity} pulls · always one you don't own yet<br><b>${left}</b> more pulls to a guaranteed SSR<div class="gbmeter"><i style="width: ${Math.min(100,(pity-left)/pity*100)}%"></i></div></div>
+     <p>${loy?"This machine is only open during Loy Krathong. ":""} Cards you already own are kept as spares. Use them to level up the card or break them into stardust on the card page.</p>
+     <button class="btn" data-act="gboxq">Close</button></div></div>`:""}
+  </div>`;}
+const PATCH={id:"1.87.0",ver:"Muay Thai Moe v1.87.0",title:"News from Sirichai Camp",lead:"A brand-new gacha machine you spin yourself, and every girl now has her own SSR",items:[
+ ["🎰","Temple-fair gacha machine","Tap the machine to turn the crank and a capsule rolls out. Its colour is the card's real rarity, and SSRs get a special scene. Tap ? for drop rates and the guarantee, and tap the screen to skip anytime"],
+ ["🌟","An SSR for everyone","Mali, Rin, Ploy and Fah each have their own SSR card in the gacha, with a long story, an epilogue, a special scene and their own minigame"],
+ ["🎯","Easier guarantee","The regular machine guarantees an SSR every 30 pulls, the Loy Krathong machine every 10, and a guaranteed pull always gives an SSR you don't own yet"],
+ ["✦","More stardust","A win now gives 3 stardust, a knockout win gives 4"],
+ ["↩","Linked card stories","Own both cards and the card page shows which story it continues. Tap to jump straight there."],
+ ["🏮","A green Loy Krathong machine","The festival machine has its own look, down by the Ping River"]],
+ foot:"Here's hoping you find a golden capsule ✦"};
 function maybeWhatsNew(){if(!G||G.ended||UI.scene)return;if(G.newsSeen===PATCH.id)return;UI.modal={type:"whatsnew"};}
 function whatsNewHTML(){return `<div class="wnew"><span class="pill gold">Update · ${esc(PATCH.ver)}</span><h2>🥊 ${esc(PATCH.title)}</h2><p class="lead">${esc(PATCH.lead)}</p>
   <div class="wnlist">${PATCH.items.map(([ic,t,b])=>`<details class="wnitem"><summary><span class="wnic">${ic}</span><b>${esc(t)}</b><i>▸</i></summary><p>${esc(b)}</p></details>`).join("")}</div><p class="meta wnhint">Tap a topic to read more</p>
@@ -834,9 +868,10 @@ function modalHTML(){const m=UI.modal;let body="",foot=true;
   if(m.type==="petname"){const p=(G.pets||[])[m.i];if(!p){UI.modal=null;return "";}body=`<h2>Name the ${esc(PETS[p.k].name)}</h2><div class="petnm"><img class="peti" src="${petIcon(p.k)}" alt=""><input id="petname" maxlength="12" value="${esc(p.name)}" autocomplete="off"></div><p class="meta">This name shows up in camp scenes</p><button class="btn primary" id="petnamebtn" data-act="petnamesave" data-v="${m.i}">Name</button>`;}
   if(m.type==="card"){body=cardInfoHTML(m.id);foot=false;}
   if(m.type==="contest"){body=contestHTML();foot=false;}
+  if(m.type==="gbox"){body=gboxHTML();foot=false;}
   if(m.type==="album"){const byC={};for(const id in CARDS)(byC[CARDS[id].c]=byC[CARDS[id].c]||[]).push(id);const own=G.cards||{};
     body=`<h2>Card album</h2><p class="meta">Collected ${Object.keys(own).length}/${Object.keys(CARDS).length} · tap a card for details</p>
-     <div class="gacha"><span><b class="goldt">✦ ${G.dust||0}</b> stardust<small>Earned from wins, new cards and duplicates · guaranteed SSR in ${GACHA_PITY-(G.pity||0)} more</small></span><button class="btn sm gold" data-act="gacha" ${(G.dust||0)<GACHA_COST?"disabled":""}>Pull a card ${GACHA_COST}✦</button></div>${typeof loyGachaHTML==="function"?loyGachaHTML():""}
+     <div class="gacha"><span><b class="goldt">✦ ${G.dust||0}</b> stardust<small>Earned from wins, new cards and duplicates · guaranteed SSR in ${Math.max(1,GACHA_PITY-(G.pity||0))} more</small></span><button class="btn sm gold" data-act="gopen" data-v="n">🎰 Gacha machine ${GACHA_COST}✦</button></div>${typeof loyGachaHTML==="function"?loyGachaHTML():""}
      ${CANON_IDS.filter(c=>byC[c]&&(UI.albAll||byC[c].some(id=>own[id]))).map(c=>`<h4 class="albh">${esc(G.F[c].name)} <small>${byC[c].filter(id=>own[id]).length}/${byC[c].length}</small></h4><div class="albg">${byC[c].filter(id=>UI.albAll||own[id]).map(id=>{const C=CARDS[id],o=own[id],R=CARD_R[C.r];
        return o?`<button class="ccard pxc" data-rarity="${C.r}" style="--rc:${R.c}" data-act="cardinfo" data-v="${id}" title="${esc(C.t)}">${!o.seen?'<i class="ndot"></i>':cardFresh(id,o)?"<i class=\"cnew\">✦NEW</i>":""}${o.spare?`<i class="cdup">${cardCanUp(id,o)?"⬆ ":""}×${o.spare}</i>`:""}${cardArtHTML(C,true)}<i class="rr">${C.r}${(o.lv||1)>1?`<u>${o.lv}</u>`:""}</i><span class="tstar">${"★".repeat(R.s)}</span><b>${esc(C.t)}</b></button>`
          :`<button class="ccard pxc lock" data-rarity="${C.r}" style="--rc:#77747d" data-act="cardinfo" data-v="${id}" aria-label="Uncollected card">${cardArtHTML(C,true)}<i class="rr">${C.r}</i><span class="tstar">${"★".repeat(R.s)}</span><b>???</b></button>`;}).join("")}</div>`).join("")}<div class="center"><button class="btn sm" data-act="albtog">${UI.albAll?"Hide cards not yet collected":"Show cards not yet collected (hints)"}</button></div>`;}
@@ -1429,6 +1464,14 @@ const ACT={
   sksel:d=>{UI.skSel=d.id+":"+d.v;AU.sfx("ui");render();},
   newsok:()=>{G.newsSeen=PATCH.id;UI.modal=null;save();render();},
   closeModal:()=>{const m=UI.modal;if(m&&m.type==="contest"){ACT.contestdone();return;}if(m&&m.type==="whatsnew"&&G){G.newsSeen=PATCH.id;save();}UI.modal=null;render();if(m&&m.after)m.after();},
+  gopen:d=>{GB.box=d.v==="loy"?"loy":"n";if(GB.box==="loy"&&!loyFest()){toast("The Loy Krathong machine is closed. See you next festival!");return;}GB.st=null;GB.ps=[];UI.gq=false;UI.modal={type:"gbox"};render();},
+  gpull:()=>{if(GB.st)return;const cost=gbCost();if((G.dust||0)<cost){AU.sfx("ui");toast(`Not enough stardust. You need ${cost}✦ · earn it by winning fights, getting new cards and breaking down spares`);return;}
+    const r=GB.box==="loy"?loyPull(G):gachaPull(G);if(!r)return;save();const rr=CARDS[r.id].r;
+    GB.st={res:r,id:r.id,r:rr,T:gbTimeline(rr),t0:performance.now(),fired:{},upg:rr==="SSR"&&Math.random()<.5};GB.ps=[];UI.gq=false;
+    if(RM&&RM.matches)GB.st.t0-=GB.st.T.card;render();},
+  gskip:()=>{const s=GB.st;if(!s||s.shown||UI.gq)return;const now=performance.now(),t=now-s.t0;if(s.T.cut&&t<s.T.cut)s.t0=now-s.T.cut;else s.t0=now-s.T.card;},
+  gok:()=>{GB.st=null;GB.ps=[];render();},
+  gboxq:()=>{UI.gq=!UI.gq;render();},
   closeModalBg:(d,e)=>{if(e.target.classList.contains("overlay")&&UI.modal&&!["report","levelup","contest"].includes(UI.modal.type)){UI.modal=null;render();}},
   preset:d=>{if(trLocked(G.F[d.f]))return;const f=G.F[d.f];f.plan.preset=d.v;if(d.v==="rest")f.plan.intensity="normal";save();render();},
   intensity:d=>{if(trLocked(G.F[d.f]))return;G.F[d.f].plan.intensity=d.v;save();render();},
@@ -1542,7 +1585,7 @@ const ACT={
   replay:()=>{const i=UI.slot;ACT.restart();ACT.beginNew(i);},
   restart:()=>{AU.startMusic("title");G=null;UI.ending=null;UI.creator=null;UI.tab="home";UI.title="menu";render();},
 };
-const QUIET_ACTS=new Set(["vnext","vchoose","corner","tapstart","fspeed","care","cgo"]);
+const QUIET_ACTS=new Set(["gpull","gskip","vnext","vchoose","corner","tapstart","fspeed","care","cgo"]);
 document.addEventListener("click",e=>{AU.resume();const el=e.target.closest("[data-act]");if(!el)return;const a=el.dataset.act;if(!a||!ACT[a])return;if(el.disabled)return;
   if(el.classList.contains("title")&&e.target.closest("button"))return;if(a==="vnext")AU.sfx("tick");else if(a==="vchoose")AU.sfx("choose");else if(!QUIET_ACTS.has(a))AU.sfx("ui");ACT[a](el.dataset,e);});
 ["pointerdown","touchend","keydown"].forEach(t=>document.addEventListener(t,()=>AU.resume(),{passive:true}));
