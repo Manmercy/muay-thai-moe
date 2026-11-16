@@ -1,5 +1,5 @@
 // ================= MUAY THAI MOE v1.3 — UI =================
-const VERSION="1.80.18";
+const VERSION="1.80.19";
 const CUR_LANG=(typeof window!=="undefined"&&window.LANG)||"th";
 const TH_LABEL=String.fromCharCode(3652,3607,3618);
 function langSwitch(cls){return `<div class="langsw ${cls||""}" role="group" aria-label="Language">${[["th",TH_LABEL],["en","EN"]].map(([k,l])=>`<button class="lsb ${CUR_LANG===k?"on":""}" data-act="setlang" data-v="${k}" aria-pressed="${CUR_LANG===k}">${l}</button>`).join("")}</div>`;}
@@ -519,12 +519,25 @@ function hallHTML(){const T=(G.titles||[]).slice().reverse(),H=(G.honors||[]).sl
   return `${H.length?`<div class="hall-y"><b>ชัยชนะสำคัญ</b>${H.map(h=>`<div class="kv-row"><span>${esc(G.F[h.id]?.name||h.id)} · รุ่น ${h.div} · ${h.season?`ปี ${h.season} สัปดาห์ ${h.week}`:"ผลงานก่อนอัปเดต"}</span><span class="pill gold">🏆 ${honorLabel(h.kind,h.venue)}</span></div>`).join("")}</div>`:""}
    ${belts.length||venueBelts.length?`<div class="hall-y"><b>เข็มขัดที่ครองอยู่</b>${belts.map(([d,b])=>`<div class="kv-row"><span>${esc(G.F[b.id].name)} · รุ่น ${d}</span><span class="pill gold">🏆 แชมป์เวทีท่าแพ · ป้องกัน ${b.def} ครั้ง</span></div>`).join("")}${venueBelts.map(({v,d,b})=>`<div class="kv-row"><span>${esc(G.F[b.id].name)} · รุ่น ${d}</span><span class="pill gold">🏆 แชมป์${STADIUMS[v].name} · ป้องกัน ${b.def} ครั้ง</span></div>`).join("")}</div>`:""}
    ${T.length?T.map(yr).join(""):`<p class="meta">ยังไม่ครบปีแรก · จบปีแล้วผลงานของทุกคนจะมาอยู่ที่นี่ ปีละหนึ่งแถว</p>`}`;}
+function decorHTML(){let total=0,owned=0,sections="";
+ for(const [slot,D] of Object.entries(CAMP_DECOR)){let choices="";
+  for(const [key,item] of Object.entries(D.items)){total++;const reason=decorUnlockReason(G,slot,key),on=decorChoice(G,slot)===key;if(!reason)owned++;
+   choices+='<button class="btn sm '+(on?'gold':'')+'" data-act="decor" data-k="'+slot+'" data-v="'+key+'" '+(reason?'disabled':'')+
+    ' style="border-color:'+(reason?'#777':DECOR_RARITY[item.r])+';'+(reason?'opacity:.55;filter:grayscale(1)':'')+'">'+
+    '<b style="color:'+DECOR_RARITY[item.r]+'">'+item.r+'</b> '+esc(item.name)+(on?' ✓':'')+
+    (reason?'<small style="display:block;white-space:normal">🔒 '+esc(reason)+'</small>':'')+'</button>';}
+  sections+='<div class="item fac"><div style="width:100%"><div class="t">'+D.name+'</div><div class="obtns" style="display:flex;flex-wrap:wrap;gap:6px">'+choices+'</div></div></div>';}
+ const ready=goldRematchReady(G);
+ return '<section class="px card cpane '+((UI.csub||"money")==="decor"?"on":"")+'"><h3>ตกแต่งค่าย · '+owned+'/'+total+' แบบ</h3>'+
+  '<p class="meta">ระดับ N → R → SR → SSR → SS บอกความยากในการได้มา ของตกแต่งไม่มีโบนัสค่าสถานะ</p>'+sections+
+  '<p class="meta">รถตู้สีทอง: ชนะเสี่ยหมวกทองคำ 10 ครั้ง หลังชนะครั้งแรกท้าชิงซ้ำได้ทุก 4 สัปดาห์</p>'+
+  '<button class="btn sm gold" data-act="goldrematch" '+(ready?'':'disabled')+'>ท้าชิงเสี่ยหมวกทองคำอีกครั้ง'+(!ready&&G.gangRematchAt?' · '+goldRematchLabel(G):'')+'</button></section>';}
 function campHTML(){const inc=classIncome(G),up=upkeep(G),wg=wages(G),lv=campLevel(G),cs=UI.csub||"money";
   const recs=[["mali",G.flags.maliRecruit],["rin",G.flags.rinRecruit]].filter(([id,ok])=>ok&&G.F[id].camp==="free");
   const dots=(n,m)=>`<span class="pips">${Array.from({length:m},(_,i)=>`<i class="${i<n?"on":""}"></i>`).join("")}</span>`;
   return `<section class="px card camphead" style="background-image:linear-gradient(90deg,rgba(20,16,32,.95),rgba(20,16,32,.6)),url(${ASSET}${gymBg()})"><div><button class="pill gold lvbtn" data-act="camplv">ค่าย Lv.${lv} ▸</button><h3>${CAMP_LV_NAME[lv]}</h3>
     <p class="meta">อัปเกรดรวม ${facTotal(G)} ขั้น · ${lv<3?`อีก ${lv===1?5-facTotal(G):13-facTotal(G)} ขั้นจะเลื่อนเป็น Lv.${lv+1} · กดดูว่าได้อะไร`:"ระดับสูงสุดของเดโม"}</p></div></section>
-   <div class="seg subtabs csubs"><button data-act="csub" data-v="money" aria-pressed="${cs==="money"}">การเงิน</button><button data-act="csub" data-v="staff" aria-pressed="${cs==="staff"}">ครู & นักมวย</button><button data-act="csub" data-v="fac" aria-pressed="${cs==="fac"}">อัปเกรดค่าย</button><button data-act="csub" data-v="hall" aria-pressed="${cs==="hall"}">เกียรติยศ</button></div>
+   <div class="seg subtabs csubs"><button data-act="csub" data-v="money" aria-pressed="${cs==="money"}">การเงิน</button><button data-act="csub" data-v="staff" aria-pressed="${cs==="staff"}">ครู & นักมวย</button><button data-act="csub" data-v="fac" aria-pressed="${cs==="fac"}">อัปเกรดค่าย</button><button data-act="csub" data-v="decor" aria-pressed="${cs==="decor"}">ตกแต่ง</button><button data-act="csub" data-v="hall" aria-pressed="${cs==="hall"}">เกียรติยศ</button></div>
    ${recruitHTML(recs)}
    <div class="grid g2">
    <section class="px card cpane ${cs==="money"?"on":""}"><h3>รายรับ-รายจ่ายต่อสัปดาห์</h3>
@@ -546,7 +559,7 @@ function campHTML(){const inc=classIncome(G),up=upkeep(G),wg=wages(G),lv=campLev
     <div class="item nw"><div><div class="t">เชิญครูมวยโบราณมาสอน</div><div class="meta">${fmt(18000)} · นักมวยได้แต้มสกิล +1 และค่าสถานะตามสำนัก · คนละครั้งต่อฤดูกาล · เปิดสัปดาห์ 16</div></div><button class="btn sm gold" data-act="mastersOpen" ${G.week<16?"disabled":""}>เลือก</button></div>
     <div class="item nw"><div><div class="t">จัดศึกมวยที่ค่ายศิริชัย</div><div class="meta">${fmt(SHOW_COST)} · ชื่อเสียง +3 ค่ายสวยขึ้น กำลังใจทุกคน +8 · รอบละครั้ง</div></div><button class="btn sm gold" data-act="hostshow" ${G.cash<SHOW_COST||G.week<10||G.flags["show_"+stageOf(G.week)]?"disabled":""}>${G.flags["show_"+stageOf(G.week)]?"จัดแล้ว":"จัดงาน"}</button></div>
     <div class="item nw"><div><div class="t">ปิดหนี้ปู่ชัยทั้งหมด</div><div class="meta">${G.debt>0?`คงเหลือ ${fmt(G.debt)} · ปิดแล้วชื่อเสียง +2 และมีฉากพิเศษ`:"ปิดหนี้เรียบร้อยแล้ว"}</div></div>${G.debt>0?`<button class="btn sm gold" data-act="cleardebt" ${G.cash<G.debt?"disabled":""}>ปิดหนี้</button>`:'<span class="pill green">เรียบร้อย</span>'}</div></section>
-   <section class="px card cpane ${cs==="hall"?"on":""}"><h3>มุมเกียรติยศ</h3>${hallHTML()}</section>
+   ${decorHTML()}<section class="px card cpane ${cs==="hall"?"on":""}"><h3>มุมเกียรติยศ</h3>${hallHTML()}</section>
 `;}
 
 // v1.18: hired trainers with their own pixel sprite
@@ -1266,6 +1279,7 @@ const ACT={
   date:d=>{UI.modal=null;UI.tab="people";const steps=dateScene(G,d.id,d.v);AU.startMusic("date");playScene(steps,()=>{AU.startMusic("hub");render();},{bg:ACTIVITIES[d.v].bg==="camp"?"gym":ACTIVITIES[d.v].bg,look:"casual"});},
   giftpick:d=>{UI.modal={type:"gift",id:d.id};render();},
   give:d=>{const r=giveGift(G,d.id,d.v);if(!r)return;UI.modal=null;UI.tab="people";save();AU.startMusic("date");giftScene(d.id,r);},
+  decor:d=>{if(chooseDecor(G,d.k,d.v)){save();render();toast("เปลี่ยนของตกแต่งค่ายแล้ว");}},
   buyfac:d=>{const before=campLevel(G);if(buyFacility(G,d.v)){save();const after=campLevel(G);AU.sfx("level");toast(after>before?`ค่ายเลื่อนเป็น Lv.${after}: ${CAMP_LV_NAME[after]}!`:`อัปเกรด${FACILITIES[d.v].name}แล้ว`);}},
   daeng:()=>{if(upgradeDaeng(G)){save();toast(`ครูแดงผ่านการอบรม Lv.${G.fac.daeng}`);}},
   useroad:d=>{const f=G.F[d.id];if(!f||trLocked(f)||!PRESETS[d.p])return;f.plan={...f.plan,preset:d.p,intensity:d.i};UI.modal=null;save();toast(`ตั้ง${f.name}: ${planName(d.p,d.i)} แล้ว อย่าลืมกดยืนยัน`);},

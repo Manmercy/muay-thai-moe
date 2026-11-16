@@ -105,6 +105,7 @@ function drawCamp(ctx,G,t){
   P(0,108,320,72,look>=10?"#5f7a45":"#7a5f43");
   for(let i=0;i<60;i++){const x=rng()*320,y=110+rng()*68;P(x,y,2,1,look>=10?"#6f8a52":"#8a6c4c");}
   if(look>=6){P(118,142,200,30,"#b8a58a");for(let x=118;x<318;x+=10)P(x,142,1,30,"#a8957a");}
+  const track=decorChoice(G,"track");if(track!=="dirt"){const c={chalk:"#e5dcc8",gravel:"#8d8985",rubber:"#40506a",lantern:"#d9a520"}[track];P(116,147,198,3,c);P(116,175,198,3,c);P(114,147,3,31,c);P(313,147,3,31,c);if(track==="lantern")for(const x of [121,190,260,310]){P(x,139,2,9,"#5a4030");P(x-2,137,6,3,"#ffe9a0");}}
   // building
   const bx=8,by=58,bw=104,bh=62;
   P(bx,by,bw,bh,look>=4?"#9a6a42":"#7d573a");for(let y=by+4;y<by+bh;y+=6)P(bx,y,bw,1,look>=4?"#87593a":"#6b4a31");
@@ -130,15 +131,15 @@ function drawCamp(ctx,G,t){
   if(look>=8){for(let i=0;i<9;i++){const x=bx+2+i*11;P(x,by+bh,4,4,"#3f7a3a");P(x+1,by+bh-2,2,2,["#ff8ab0","#fff3b0","#ff6b6b"][i%3]);}}
   // bags frame
   P(120,74,2,50,"#5a4030");P(146,74,2,50,"#5a4030");P(118,74,32,3,"#5a4030");
-  const nb=1+G.fac.gym;for(let i=0;i<nb;i++){const x=123+i*8,sw=Math.sin(t/350+i)*1.2;P(x+sw,77,1,8,"#2b2530");P(x-1+sw,85,5,20,i===0&&look<5?"#7a6a5a":["#c8283c","#1f1f24","#2c5fb3"][i%3]);
-    if(i===0&&look<5){P(x-1+sw,91,5,2,"#bbb");P(x-1+sw,99,5,2,"#bbb");}}
+  const nb=1+G.fac.gym;for(let i=0;i<nb;i++){const x=123+i*8,sw=Math.sin(t/350+i)*1.2;P(x+sw,77,1,8,"#2b2530");P(x-1+sw,85,5,20,decorChoice(G,"bags")==="gold"?"#d9a520":decorChoice(G,"bags")==="team"?"#8b4fa8":decorChoice(G,"bags")==="blue"?"#2c5fb3":decorChoice(G,"bags")==="red"?"#c8283c":i===0&&look<5?"#7a6a5a":["#c8283c","#1f1f24","#2c5fb3"][i%3]);
+    if(i===0&&look<5&&decorChoice(G,"bags")==="plain"){P(x-1+sw,91,5,2,"#bbb");P(x-1+sw,99,5,2,"#bbb");}}
   // ice tub
   if(G.fac.recovery>=1){P(92,124,22,10,"#2c5fb3");P(93,125,20,4,"#9fd6ff");P(95,125,3,2,"#ffffff");}
   if(G.fac.recovery>=2){P(70,124,18,10,"#6d747c");P(71,125,16,3,"#c8e8ff");}
   // ring
   const rx=156,ry=96,rw=140,rh=34;
   P(rx,ry+rh,rw,8,"#3b2f4a");P(rx-4,ry+rh-2,rw+8,4,"#5a4a6a");
-  P(rx,ry,rw,rh,look>=6?"#e8e0f0":"#bdb3a8");
+  P(rx,ry,rw,rh,decorChoice(G,"ring")==="gold"?"#f5e3aa":decorChoice(G,"ring")==="red"?"#f4c7cb":decorChoice(G,"ring")==="blue"?"#c7dcf4":decorChoice(G,"ring")==="sponsor"?"#e2c6ec":look>=6?"#e8e0f0":"#bdb3a8");
   if(look>=10){P(rx+58,ry+12,24,10,"#c879c8");P(rx+64,ry+10,12,14,"#d99ad9");}
   const sag=look>=6?0:2;
   [["#d23246",0],["#f2f2f2",7],["#2c5fb3",14]].forEach(([c,o])=>{for(let x=0;x<rw;x+=2){const s=Math.round(Math.sin(x/rw*Math.PI)*sag);P(rx+x,ry-22+o+s,2,1,c);}});
@@ -149,7 +150,7 @@ function drawCamp(ctx,G,t){
   // classroom mats
   for(let i=0;i<G.fac.classroom;i++)P(6+i*24,152,22,18,["#c8283c","#2c5fb3","#2f8a4f","#d9a520","#7a3fc0"][i%5]);
   // v1.23 props for the late facilities
-  if(G.fac.van){P(232,160,40,14,"#2f8a4f");P(234,154,26,8,"#e8e0c8");P(262,156,8,6,"#9fd6ff");P(236,172,6,4,"#1f1f24");P(262,172,6,4,"#1f1f24");if(G.fac.van>=2){P(232,164,40,2,"#d9a520");}}
+  {const v=decorChoice(G,"vehicle");if(v!=="none"){const limo=v==="limo",bus=v==="tourbus",gold=v==="goldvan",x=limo?219:bus?218:232,w=limo?58:bus?56:40,c=gold?"#d9a520":limo?"#2a2239":v==="minibus"?"#ece9df":bus?"#c8283c":"#2f8a4f";P(x,160,w,14,c);P(x+2,154,w-14,8,bus?"#f4d07c":"#e8e0c8");P(x+w-10,156,8,6,"#9fd6ff");P(x+4,172,6,4,"#1f1f24");P(x+w-10,172,6,4,"#1f1f24");if(gold||v==="minibus")P(x,164,w,2,gold?"#fff1a6":"#d9a520");}}
   if(G.fac.sauna){P(296,146,22,16,"#7a4a2a");for(let i=0;i<6;i++)P(294+i,140+i,26-i*2,1,"#5a3a2a");P(303,152,7,10,"#3b2518");for(let k=0;k<3;k++){const y=136-((t/40+k*9)%16);P(299+k*6+Math.sin(t/300+k)*2,y,2,2,"rgba(255,255,255,.55)");}}
   if(G.fac.lights){for(const lx of [150,300]){P(lx,46,2,62,"#9aa0a8");P(lx-4,44,10,4,"#3a3550");P(lx-3,45,8,2,Math.floor(t/700)%2&&G.fac.lights>=2?"#fff7c4":"#ffe9a0");}}
   if(G.fac.hall){P(286,112,22,24,"#5a3a2a");P(288,114,18,18,"#2a1d2e");P(293,117,8,6,"#f7d24a");P(295,123,4,6,"#d9a520");if(G.fac.hall>=2){P(289,128,6,3,"#c8283c");P(299,128,6,3,"#2c5fb3");}}
@@ -159,6 +160,8 @@ function drawCamp(ctx,G,t){
   if(G.fac.kitchen>=1){P(120,128,26,14,"#e8d8b8");for(let i=0;i<26;i+=4)P(120+i,124,4,4,i%8?"#f2f2f2":"#c8283c");if(Math.floor(t/500)%2)P(128,118,2,4,"#dcdcdc");}
   // brand billboard
   if(G.fac.brand>=1){P(212,36,60,26,"#2a1d40");P(214,38,56,22,G.fac.brand>=2?"#c8283c":"#7a3fc0");ctx.save();ctx.font=`bold ${7*S}px "Chakra Petch",sans-serif`;ctx.fillStyle="#fff";ctx.textAlign="center";ctx.fillText(G.fac.brand>=3?"แชมป์มวยหญิง!":"เปิดคอร์สมวยไทย",242*S,52*S);ctx.restore();P(240,62,3,34,"#5a4030");}
+  {const tree=decorChoice(G,"tree");if(tree!=="plain"){const leaves=tree==="golden"?"#d9a520":tree==="champion"?"#f5c747":tree==="sakura"?"#f3a0c5":"#e992bd";P(309,111,3,37,"#6a3e36");for(const [x,y] of [[297,103],[305,96],[314,100]]){P(x,y,12,8,leaves);P(x+3,y-3,6,3,"#ffd3e5");}}}
+  {const gate=decorChoice(G,"gate");if(gate!=="plain"){const c=gate==="gold"?"#d9a520":gate==="trophy"?"#f2c94c":gate==="lantern"?"#a63e4c":"#c8283c";P(3,112,4,38,c);P(34,112,4,38,c);P(3,110,35,5,c);if(gate==="lantern"){P(12,116,4,6,"#ffe9a0");P(24,116,4,6,"#ffe9a0");}}}
   // v1.10: a living yard — everyone moves, drawn back-to-front
   const D=[];const chib=(look,key,x,y,sc,flip,dy)=>{const c=chibiCache(look,key+dy,{dy});D.push({y:y+32*sc,f:()=>{ctx.save();ctx.imageSmoothingEnabled=false;
     if(flip){ctx.translate((x+24*sc)*S,0);ctx.scale(-1,1);ctx.drawImage(c,0,y*S,24*S*sc,32*S*sc);}else ctx.drawImage(c,x*S,y*S,24*S*sc,32*S*sc);ctx.restore();}});};

@@ -17,9 +17,9 @@ const QK={
 };
 const BELT_WEEKS=[10,18,26,34,42];
 const STADIUMS={
- tha:{name:"Tha Phae Stadium",scene:"district",bg:"bg_district.webp",weeks:[10,18,26,34,42],minYear:1,win:15000,defend:10000},
- ping:{name:"Ping Riverside Stadium",scene:"river",bg:"bg_river.webp",weeks:[15,30,45],minYear:2,win:18000,defend:12000},
- lanna:{name:"Lanna Stadium",scene:"hall",bg:"bg_hall.webp",weeks:[22,38,48],minYear:3,win:22000,defend:14000}
+ tha:{name:"เวทีท่าแพ",scene:"district",bg:"bg_district.webp",weeks:[10,18,26,34,42],minYear:1,win:15000,defend:10000},
+ ping:{name:"เวทีริมปิง",scene:"river",bg:"bg_river.webp",weeks:[15,30,45],minYear:2,win:18000,defend:12000},
+ lanna:{name:"เวทีล้านนา",scene:"hall",bg:"bg_hall.webp",weeks:[22,38,48],minYear:3,win:22000,defend:14000}
 };
 function beltStore(G,venue="tha"){if(venue==="tha")return G.belt=G.belt||{};G.venueBelts=G.venueBelts||{};return G.venueBelts[venue]=G.venueBelts[venue]||{};}
 
@@ -113,22 +113,22 @@ function mailWeekly(G){G.mail=G.mail||[];G.gang=G.gang||{st:0,next:0};G.mailSeen
     if(early){addMail(G,{kind:"quest",q:"gang",qk:k,early:1,from:"Morning-market vendors (unsigned)",title:"Big Boss Golden Helmet shows up himself!",body:`His goons lost to Sirichai Camp three times in a row. Big Boss Golden Helmet lost face, so he's running the market himself, and he knows your camp owes him. Word is, whoever knocks him down wipes out the whole market's debts.`,exp:G.week+3});G.gang.nextAbs=gameWeek(G)+5;}
     else addMail(G,{kind:"quest",q:"gang",qk:k,from:"Morning-market vendors (unsigned)",title:G.gang.st>=4?"Big Boss Golden Helmet is coming himself!":"The helmet gang is back",
       body:[`They're back collecting interest again. This time "${QK[k].name}" is in charge. Anyone who doesn't pay twenty percent gets their stall wrecked. Can you help us one more time?`,`${QK[k].name} threatened to seize Grandma Waew's meatball cart. If Sirichai doesn't stop him, no one can`,`The whole market has gone silent, because "${QK[k].name}" has been sitting guard since five a.m. Please`,`They say the big boss "${QK[k].name}" is coming to collect himself. The whole market owes him. Take this one down and the gang is finished`][G.gang.st-1],exp:G.week+3});G.gang.nextAbs=gameWeek(G)+5;}
-  // Recurring side challenges become more frequent each year.
+  // Recurring side challenges return more often as the years pass.
   if((G.season||1)>=2&&G.week>=7&&G.week<=47){const year=G.season||1;
     if(G.gang.st>=5&&gameWeek(G)>=(G.gang.loopNextAbs||0)&&!G.mail.some(m=>m.q==="gang"&&!m.done&&!m.expired)){
       const i=G.gang.loopN||0,k=["gang2","gang3","gang4","gang5"][i%4];G.gang.loopN=i+1;G.gang.loopNextAbs=gameWeek(G)+Math.max(5,15-year*2);
-      addMail(G,{kind:"quest",q:"gang",qk:k,repeat:1,from:"Aunt Sri at the Market",title:"The helmet gang is back",body:`${QK[k].name} is causing trouble at the market again. They have trained harder this year. Can your gym help?`,exp:G.week+3,pay:3000+year*500});}
+      addMail(G,{kind:"quest",q:"gang",qk:k,repeat:1,from:"ป้าศรี ตลาดเช้า",title:"แก๊งหมวกกันน็อกกลับมาอีก",body:`${QK[k].name} กลับมาก่อเรื่องที่ตลาดอีกแล้ว คราวนี้พวกมันซ้อมมาหนักกว่าเดิม ช่วยมาจัดการให้หน่อยได้ไหม`,exp:G.week+3,pay:3000+year*500});}
     G.animalLoop=G.animalLoop||{nextAbs:0,turn:0};
     if(gameWeek(G)>=G.animalLoop.nextAbs&&!G.mail.some(m=>["cow","rooster"].includes(m.q)&&!m.done&&!m.expired)){
       const cow=G.animalLoop.turn%2===0,k=cow?(year>=4?"bull3":"bull2"):(year>=4?"rooster5":"rooster3");
       G.animalLoop.turn++;G.animalLoop.nextAbs=gameWeek(G)+Math.max(4,15-year*2);
-      addMail(G,{kind:"quest",q:cow?"cow":"rooster",qk:k,repeat:1,from:cow?"Uncle Chaloem's Dairy Farm":"Sia Tong's Rooster Ring",title:cow?"The cow wants a rematch!":"The rooster wants a rematch!",body:cow?`${QK[k].name} has been kicking a heavy bag every day. No one dares enter the farm. Please face it again.`:`${QK[k].name} has beaten every rooster at the ring and is waiting for a fighter from Sirichai.`,exp:G.week+2,pay:2000+year*400});}}
-  // Stadium titles: legacy Tha Phae saves retain their original G.belt slots.
+      addMail(G,{kind:"quest",q:cow?"cow":"rooster",qk:k,repeat:1,from:cow?"Uncle Chaloem, dairy farm":"Sia Tong, rooster arena",title:cow?"วัวกลับมาท้าค่าย!":"ไก่ชนกลับมาขอรีแมตช์!",body:cow?`เจ้า${QK[k].name}ฝึกถีบกระสอบทรายทุกวัน ตอนนี้ไม่มีใครกล้าเข้าฟาร์ม ช่วยมาสู้กับมันอีกที`:`${QK[k].name}ชนะไก่ทั้งสนามมาแล้ว มันกำลังรอคู่ชกจากค่ายศิริชัย`,exp:G.week+2,pay:2000+year*400});}}
+  // Stadium titles: Tha Phae saves keep their original G.belt slots.
   for(const [venue,V] of Object.entries(STADIUMS))if((G.season||1)>=V.minYear&&V.weeks.includes(G.week))
     for(const div of [...new Set(roster(G).map(f=>f.div))]){const h=beltHolder(G,div,venue);if(!h)continue;
       const ours=h.camp==="player",op=ours?beltChallenger(G,div,h.id):h;if(!op)continue;const B=beltStore(G,venue)[div];
-      addMail(G,{kind:"quest",q:"belt",venue,bg:V.bg,npc:op.id,div,defend:ours?h.id:null,from:`${V.name} promoter`,title:ours?`Defend the ${V.name} belt · Div ${div}`:`Challenge for the ${V.name} belt · Div ${div}`,
-        body:ours?`${op.name} challenges ${h.name} at ${V.name}. Accept within two weeks. Win ${fmt(V.defend)}.`:`${op.name} has defended the ${V.name} belt ${B.def} times. Five rounds; win ${fmt(V.win)} and the belt.`,exp:G.week+2,pay:ours?V.defend:V.win});}
+      addMail(G,{kind:"quest",q:"belt",venue,bg:V.bg,npc:op.id,div,defend:ours?h.id:null,from:`The promoter ${V.name}`,title:ours?`ป้องกันเข็มขัด${V.name} Div ${div}`:`ชิงเข็มขัด${V.name} Div ${div}`,
+        body:ours?`${op.name} มาท้าชิงเข็มขัดของ${h.name}ที่${V.name} รับภายในสองสัปดาห์ ชนะรับ ${fmt(V.defend)}`:`${op.name} ครองเข็มขัด${V.name}มา ${B.def} ครั้งแล้ว ห้ายก ชนะรับ ${fmt(V.win)} พร้อมเข็มขัด`,exp:G.week+2,pay:ours?V.defend:V.win});}
   // v1.69: Auntie Taew writes in for help at her som tam stall every few weeks (a minigame that does not use the camp activity)
   if(G.week>=4&&G.week<=49&&gameWeek(G)>=(G.tamNextAbs||4)&&!G.mail.some(m=>m.kind==="job"&&!m.done&&!m.expired)){G.tamNextAbs=gameWeek(G)+3+Math.floor(rng()*2);
     const T=TAM_MAIL[(G.mailN_tam=(G.mailN_tam||0)+1)%TAM_MAIL.length];addMail(G,{kind:"job",job:"somtam",exp:G.week+1,from:"Auntie Taew, som tam stall by the temple",title:T[0],body:T[1]});}
@@ -171,7 +171,7 @@ function startQuest(spec,fid,done){const f=G.F[fid];if(!f){done&&done();return;}
   openFight(b,()=>questAfter(b,done));}
 function questAfter(b,done){const S=b.quest,res=(G.cal||[]).slice(-1)[0];const win=res&&res.b===b.b&&res.res==="W";const me=G.F[b.a],op=G.F[b.b]||{name:"Opponent"};
   const fin=()=>{save();render();done&&done();};
-  if(S.q==="gang"){G.gang=G.gang||{st:0,next:0};if(win){G.gang.st=Math.max(G.gang.st,+S.qk.slice(4));G.gang.nextAbs=gameWeek(G)+(G.loan>0?2:4);if(S.qk==="gang5"&&G.loan>0){G.loan=0;G.flags.loanWiped=1;}G.rep+=S.qk==="gang5"?2:.5;
+  if(S.q==="gang"){G.gang=G.gang||{st:0,next:0};if(S.rematch){if(win){G.goldHelmetWins=(G.goldHelmetWins||0)+1;G.rep+=.2;}playScene([{n:"npc",who:"Big Boss Golden Helmet",t:win?"I lost again! I will be back.":"I won this time! But your camp has grown stronger."},{n:b.a,f:win?"happy":"sad",l:"fight",t:win?"Sirichai Camp is always ready.":"We will win next time."}],fin,{bg:"market",look:"fight"});return;}if(win){if(S.qk==="gang5")G.goldHelmetWins=(G.goldHelmetWins||0)+1;G.gang.st=Math.max(G.gang.st,+S.qk.slice(4));G.gang.nextAbs=gameWeek(G)+(G.loan>0?2:4);if(S.qk==="gang5"&&G.loan>0){G.loan=0;G.flags.loanWiped=1;}G.rep+=S.qk==="gang5"?2:.5;
       const amt=S.qk==="gang5"?12000:S.qk==="gang4"?5000:S.qk==="gang3"?2000:200+Math.floor(srand(G,7)*7)*50;
       addMail(G,{kind:"take",from:"(sender unknown)",title:S.qk==="gang5"?"The morning market thanks Sirichai":"A brown envelope with no name",body:S.qk==="gang5"?"The helmet gang has disbanded. The whole market's loan-shark debts are void. Every stall chipped in for the camp. Thank you for not just standing by":"Inside: money and a note in shaky handwriting: 'Thank you for helping the market. We sold out today'",amt});
       playScene([{n:"npc",who:"Auntie Sri, vegetable vendor",t:S.qk==="gang5"?(G.flags.loanWiped===1?(G.flags.loanWiped=2,"Gold Helmet Boss is down!! The whole market is free! His debt book got burned, and the camp's loan is gone too!"):"The Golden Helmet boss is down!! The whole market is free!"):"They're gone! They rode off on their bikes! Thank you, dear"},{n:b.a,f:"happy",l:"fight",t:S.qk==="gang5"?"This market has protection now. Its name is Sirichai Camp!":"Anyone who bullies this market goes through Sirichai first!"},{n:"nar",t:"By evening, a brown envelope with no sender is tucked into the camp mailbox"}],fin,{bg:"market",look:"fight"});return;}
@@ -182,7 +182,7 @@ function questAfter(b,done){const S=b.quest,res=(G.cal||[]).slice(-1)[0];const w
     if(win&&!S.defend){slot[S.div]={id:me.id,def:0,since:G.week};G.rep+=3;me.belts=(me.belts||0)+1;
       recordHonor(G,"belt",me.id,S.div,G.week,venue==="tha"?null:venue);playHonorQueue(fin);return;}
     if(win&&S.defend){B.def++;G.rep+=1.5;recordHonor(G,"defense",me.id,S.div,G.week,venue==="tha"?null:venue);playHonorQueue(fin);return;}
-    if(!win&&S.defend){slot[S.div]={id:op.id,def:0,since:G.week};playScene([{n:"nar",t:`The ${V.name} belt changes hands to ${op.name}`},{n:me.id,f:"sad",l:"fight",t:"I will win it back"}],fin,{bg:V.scene,look:"fight"});return;}
+    if(!win&&S.defend){slot[S.div]={id:op.id,def:0,since:G.week};playScene([{n:"nar",t:`เข็มขัด${V.name}เปลี่ยนมือไปอยู่กับ${op.name}`},{n:me.id,f:"sad",l:"fight",t:"…I'm sorry. I'll win it back, I promise."}],fin,{bg:V.scene,look:"fight"});return;}
     if(!win&&!S.defend&&B)B.def++;}
   fin();}
 
@@ -273,7 +273,7 @@ Object.assign(ACT,{
   qsend:d=>{const m=G.mail.find(x=>x.id===d.v);if(!m||m.done)return;m.done=true;UI.modal=null;
     const spec=m.q==="belt"?{q:"belt",npc:m.npc,pay:m.pay,from:m.from,div:m.div,defend:m.defend,venue:m.venue||"tha",bg:m.bg,rounds:5}:m.q==="challenge"?{q:"challenge",npc:m.npc,pay:m.pay,from:m.from}:{q:m.q,qk:m.qk,pay:m.pay,from:m.from,rounds:m.qk==="gang5"?4:3};
     const intro=m.q==="gang"?[{n:"nar",t:"Morning market… more than ten motorbikes are lined up in front of the vegetable stalls"},{n:"npc",who:QK[m.qk].name,t:m.early?"My boys lost to you again and again. My name's mud! And your camp still owes me. Today I handle you myself!":m.qk==="gang5"?"I hear some fight camp is meddling in my business. Today the big boss came down himself!":"So who chased off my boys? Come on out!"},{n:d.id,f:"angry",l:"fight",t:"Me!"}]
-      :m.q==="belt"?[{n:"nar",t:`${STADIUMS[m.venue||"tha"].name}. Spotlights hit the center of the ring as the announcer calls both corners.`},{n:"npc",who:G.F[m.npc].name,t:m.defend?"That belt should be mine. Today I'm taking it back.":"Want the belt? You'll have to get through me first."},{n:d.id,f:"angry",l:"fight",t:m.defend?"Come and take it, then!":"That's exactly why I'm here!"}]
+      :m.q==="belt"?[{n:"nar",t:`${STADIUMS[m.venue||"tha"].name} ไฟสปอตไลต์ส่องลงกลางเวที โฆษกประกาศชื่อทั้งสองมุม`},{n:"npc",who:G.F[m.npc].name,t:m.defend?"That belt should be mine. Today I'm taking it back.":"Want the belt? You'll have to get through me first."},{n:d.id,f:"angry",l:"fight",t:m.defend?"Come and take it, then!":"That's exactly why I'm here!"}]
       :m.q==="challenge"?[{n:"nar",t:"The yard behind the fresh market. Crowds on both sides; someone has set up a table taking bets in red soda"},{n:"npc",who:G.F[m.npc].name,t:"So you finally came. I thought you'd run all season"},{n:d.id,f:"angry",l:"fight",t:"I wasn't running, I was busy. Now I'm free!"}]
       :m.q==="cow"?[{n:"nar",t:"In the middle of the road by the market, a huge dairy cow holds a guard, front hooves doing footwork no cow should be able to do"},{n:"npc",who:"Uncle Chaloem",t:"That's her! Watch out for the kicks, dear, she watches fight replays every night!"},{n:d.id,f:"surprised",l:"fight",t:"…A cow really can hold a guard!?"}]
       :[{n:"nar",t:"A small bantam stands on the heavy bag, chest puffed, neck feathers bristling"},{n:"npc",who:"Sia Tong",t:"Don't underestimate him. He once chased every big dog on the street"},{n:d.id,f:"happy",l:"fight",t:"Come on, chicken! I'm not a dog!"}];
@@ -719,13 +719,14 @@ function loyReward(k){const out=[];
   return out;}
 function gauntAfter(){const L=loyOf(G),R=L&&L.run,F=LASTF;if(!R||!F){UI.modal={type:"gaunt"};render();return;}
   const r=F.result,res=r.win==="D"?"D":r.win==="A"?"W":"L",rds=R.k===8?3:2;let pts=0,txt="";
-  if(res==="W"){pts=100+(/KO|น็อก/.test(r.type||"")?60:0)+Math.max(0,rds-F.round)*30+Math.round(Math.max(0,F.A.hp)*.6);txt=/KO|น็อก/.test(r.type||"")?`Won by KO, round ${F.round}`:"Decision win";if(R.k===8)R.boss=1;}
+  if(res==="W"){if(R.k===8)G.goldHelmetWins=(G.goldHelmetWins||0)+1;pts=100+(/KO|น็อก/.test(r.type||"")?60:0)+Math.max(0,rds-F.round)*30+Math.round(Math.max(0,F.A.hp)*.6);txt=/KO|น็อก/.test(r.type||"")?`Won by KO, round ${F.round}`:"Decision win";if(R.k===8)R.boss=1;}
   else if(res==="D"){pts=30;txt="Draw";}else txt=/KO|น็อก/.test(r.type||"")?`Lost by KO, round ${F.round}`:"Lost on points";
   R.log[R.k]={res,pts,txt};R.score+=pts;
   if(res==="L")gauntNextSlot(R);
   else{R.hp=Math.min(100,Math.max(0,F.A.hp)+15);R.sta=Math.min(100,Math.max(0,F.A.sta)+20);R.j++;R.k++;if(R.j>=3)gauntNextSlot(R);else if(R.k>=9)gauntFinish(R);}
   save();UI.modal={type:"gaunt"};render();}
 Object.assign(ACT,{
+  goldrematch:()=>{if(!goldRematchReady(G))return;const f=roster(G).find(f=>!f.injury);if(!f){toast("All fighters are injured");return;}G.gangRematchAt=campWeekIndex(G)+4;save();startQuest({q:"gang",qk:"gang5",rematch:true},f.id,()=>{});},
   redeem:()=>{const el=document.getElementById("redeemcode");redeemCode(el&&el.value);if(el)el.value="";render();},
   evloy:()=>evStartLoy(),
   gpick:d=>{const L=loyOf(G);if(!L)return;L.pick=L.pick||[];const i=L.pick.indexOf(d.v);if(i>=0)L.pick.splice(i,1);else if(L.pick.length<Math.min(3,gauntPool().length))L.pick.push(d.v);render();},

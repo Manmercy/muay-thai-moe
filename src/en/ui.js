@@ -1,5 +1,5 @@
 // ================= MUAY THAI MOE v1.3 — UI =================
-const VERSION="1.80.18";
+const VERSION="1.80.19";
 const CUR_LANG=(typeof window!=="undefined"&&window.LANG)||"th";
 const TH_LABEL=String.fromCharCode(3652,3607,3618);
 function langSwitch(cls){return `<div class="langsw ${cls||""}" role="group" aria-label="Language">${[["th",TH_LABEL],["en","EN"]].map(([k,l])=>`<button class="lsb ${CUR_LANG===k?"on":""}" data-act="setlang" data-v="${k}" aria-pressed="${CUR_LANG===k}">${l}</button>`).join("")}</div>`;}
@@ -93,7 +93,7 @@ function slotsHTML(mode){const rows=[];for(let i=1;i<=SLOTS;i++){const s=loadSlo
        `<button class="btn sm ${s?"":"primary"}" data-act="pickslot" data-v="${i}">${s?"Overwrite":"Select"}</button>`}</div>`);}
   const del=UI.delSlot?`<div class="confirm px"><b>Delete save slot ${UI.delSlot}?</b><p class="meta">This can't be undone</p><div class="mfoot"><button class="btn ghost" data-act="canceldel">Cancel</button><button class="btn primary" data-act="delslot">Delete</button></div></div>`:"";
   const ow=UI.owSlot?`<div class="confirm px"><b>Overwrite save slot ${UI.owSlot}?</b><p class="meta">The old game in this slot will be lost</p><div class="mfoot"><button class="btn ghost" data-act="cancelow">Cancel</button><button class="btn primary" data-act="confirmow">Start a new game here</button></div></div>`:"";
-  return `<h2>${mode==="load"?"Load game":"Choose a save slot for the new game"}</h2><div class="slots">${rows.join("")}</div>${del}${ow}${mode==="load"?`<div style="margin-top:14px;text-align:left"><a class="btn sm ghost" href="./rescue-save.html">Transfer save code</a></div>`:""}`;}
+  return `<h2>${mode==="load"?"Load game":"Choose a save slot for the new game"}</h2><div class="slots">${rows.join("")}</div>${del}${ow}${mode==="load"?`<div style="margin-top:14px;text-align:left"><a class="btn sm ghost" href="./rescue-save.html">Move save code</a></div>`:""}`;}
 
 // ---------- small components ----------
 function faceImg(f,cls=""){return f.canon||f.id==="pailin"?`<img class="face ${cls}" style="--c:${f.color}" src="${faceSrc(f.id,"happy")}" alt="${esc(f.name)}">`:
@@ -194,15 +194,14 @@ function settingsHTML(){const t=(k,label,desc)=>`<label class="set"><span><b>${l
    ${!G&&loadSave()?`<div class="set danger"><span><b>Manage save slots</b><small>View, load or delete each slot</small></span><button class="btn sm" data-act="openload">Open</button></div>`:""}${G?`<p class="meta">Playing save slot ${UI.slot} · autosaves whenever you make progress ${CLOUD.ready?" · backed up to the cloud":" · not connected to the cloud (saved in this browser only)"}</p>
    ${G&&UI.slot&&bakInfo(UI.slot)?`<div class="set"><span><b>Pre-update save</b><small>Kept when the game updated · v${esc(String(bakInfo(UI.slot).ver))} week ${bakInfo(UI.slot).week}</small></span><button class="btn sm" data-act="bakrestore">Restore</button></div>`:""}
    <div class="set"><span><b>Enter code</b><small>Event or continue codes from the game page and Discord</small></span><span class="obtns redeem"><input id="redeemcode" maxlength="24" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="Code" aria-label="Code"><button class="btn sm primary" data-act="redeem">Redeem</button></span></div>
-   <div class="set"><span><b>Back up save to file</b><small>Keep the file yourself; import it on another device or browser</small></span><span class="obtns"><button class="btn sm" data-act="exportsave">Export</button><label class="btn sm">Import<input type="file" accept=".json,application/json" data-act="importsave" hidden></label></span></div>`:`<div class="set"><span><b>Import a save file</b><small>A previously exported file goes into slot 1</small></span><label class="btn sm">Import<input type="file" accept=".json,application/json" data-act="importsave" hidden></label></div>`}
-   <div class="set"><span><b>Transfer save code</b><small>Move a save between Facebook and Safari</small></span><a class="btn sm" href="./rescue-save.html">Transfer save code</a></div>
+   <div class="set"><span><b>Back up save to file</b><small>Keep the file yourself; import it on another device or browser</small></span><span class="obtns"><button class="btn sm" data-act="exportsave">Export</button><label class="btn sm">Import<input type="file" accept=".json,application/json" data-act="importsave" hidden></label></span></div>`:`<div class="set"><span><b>Import a save file</b><small>A previously exported file goes into slot 1</small></span><label class="btn sm">Import<input type="file" accept=".json,application/json" data-act="importsave" hidden></label></div>`}   <div class="set"><span><b>Move save code</b><small>Move a save between Facebook and Safari</small></span><a class="btn sm" href="./rescue-save.html">Move save code</a></div>
    <details class="gloss"><summary><b>Game glossary</b></summary><dl>${GLOSS.map(([k,v])=>`<dt>${k}</dt><dd>${v}</dd>`).join("")}</dl></details>
    <p class="meta">Muay Thai Moe v${VERSION}</p>`;}
 const GLOSS=[["Readiness","Condition on fight day. The higher, the better she fights. Drops with fatigue or injury"],["Fatigue","Builds up from training. Over 65 risks injury. Reduce with recovery, the recovery room, the kitchen"],
  ["Morale","Higher morale means sharper strikes. Rises with wins, dates, merit-making; drops with losses or overtraining"],["Bond","Her closeness to you. Unlocks special scenes, the signature move at 60, and raises the chance of blood-boil mode"],
  ["Trust","How much a fighter trusts your orders. Higher trust makes corner orders work better (up to +4% accuracy); at 60 losses hurt morale less, and it affects confession scenes · raise it with merit-making scenes, wai khru, not overtraining, and a camp out of debt"],["Fame","How well-known the camp is. The higher, the more students come"],
  ["Skill points","Earned every level-up, spent on the ancient techniques of the fighter's school"],["Counter-training","After scouting a tape, train the program that counters the opponent's main weapon in the week before the fight for a fight-day bonus"],
- ["Blood-boil mode","When badly hurt or behind on points, a fighter may 'change eyes' for a moment: stronger counters, easier criticals. Once per fight"],["Wai khru ram muay","Ritual before the first fight, canon matchups, and major bouts. Choose a dance; each gives a different effect"]];
+ ["Blood-boil mode","When badly hurt or behind on points, a fighter may 'change eyes' for a moment: stronger counters, easier criticals. Once per fight"],["Wai khru ram muay","The wai khru ceremony opens your first fight, major character fights, and important bouts. Choose a dance; each grants a different effect."]];
 
 // ---------- creator (manager look) ----------
 function creatorHTML(){const c=UI.creator,O=CHIBI.OPT;
@@ -489,7 +488,7 @@ function offersHTML(){const mine=G.bookings.filter(b=>G.F[b.a].camp==="player").
        <div class="meta">Wk ${o.week} · ${TIER[o.tier].name}${o.beast?" · off the record":""}${o.fair?" · not ranked · purse paid by mail":""}${o.tier==="lab"?" · Unranked bout":""} · ${styleOf(op.a)}${op.camp==="rival"?op.lab?" · Vector Gym, Bangkok":" · Golden Tiger":""}${personaOf(op)?` · ${personaOf(op).tag}`:""}</div>${h2hText(op)?`<div class="meta goldt">${h2hText(op)}</div>`:""}
        <div class="meta">Purse ${fmt(o.lose)} · <b class="goldt">win +${fmt(o.win-o.lose)}</b> · <b class="${v.c}t">${v.t}</b>${ovr(op.a)-ovr(me.a)>.4?` · <b class="goldt">Win for bonus points/fame</b>`:ovr(op.a)-ovr(me.a)<-.6?` · <span class="mutt">Beating a weaker fighter earns little fame</span>`:""}</div>
        </div></div>
-       <div class="obtns3"><button class="btn sm" data-act="consider" data-v="${o.id}">${scouted(o.b)?"Opponent info":"Scout"}</button>${coachOn()?`<button class="btn sm" data-act="otip" data-v="${o.id}">Coach's advice</button>`:""}<button class="btn sm gold" data-act="accept" data-v="${o.id}" ${o.status==="conflict"?"disabled title=\""+esc(o.reason)+"\"":""}>Accept</button></div></div>`;}).join("")||`<p class="lead">${G.bookings.length?"Fight booked. New offers arrive next week":"No offers (injured, or season over)"}</p>`}</div></section>`;}
+       <div class="obtns3"><button class="btn sm" data-act="consider" data-v="${o.id}">${scouted(o.b)?"Opponent info":"Scout"}</button>${coachOn()?`<button class="btn sm" data-act="otip" data-v="${o.id}">Coach's advice</button>`:""}<button class="btn sm gold" data-act="accept" data-v="${o.id}" ${o.status==="conflict"?"disabled title=\""+esc(o.reason)+"\"":""}>รับไฟต์</button>${o.status==="conflict"?`<span class="meta">${esc(o.reason)}</span>`:""}</div></div>`;}).join("")||`<p class="lead">${G.bookings.length?"Fight booked. New offers arrive next week":"No offers (injured, or season over)"}</p>`}</div></section>`;}
 function rankHTML(){const st=stageOf(G.week),cut=st==="local"?4:st==="district"?4:0,d=UI.rdiv;const rows=standings(G,d);const mv=(G.rankMove&&G.rankMove[d])||{};
   return `<section class="px card"><div class="card-h"><div class="seg sm"><button data-act="rdiv" data-v="A" aria-pressed="${d==="A"}">Div A</button><button data-act="rdiv" data-v="B" aria-pressed="${d==="B"}">Div B</button></div>${G.champ[d]?`<span class="pill gold">Champion: ${esc(G.F[G.champ[d]].name)}</span>`:""}</div>
    <div class="rkhelp"><p class="meta">${st==="local"?"Top 4 (gold line) advance to the district round · cut at wk 20":st==="district"?"Top 4 (gold line) advance to the provincial semis · cut at wk 40":"Semis wk 44 · Final wk 49"} · win = 3 pts</p><button class="btn sm" data-act="rankhelp">How do rankings work?</button></div>
@@ -516,15 +515,28 @@ function campLvHTML(){const lv=campLevel(G),t=facTotal(G),need=[0,0,5,13];
 function hallHTML(){const T=(G.titles||[]).slice().reverse(),H=(G.honors||[]).slice().reverse(),belts=Object.entries(G.belt||{}).filter(([d,b])=>G.F[b.id]&&G.F[b.id].camp==="player"),venueBelts=Object.entries(G.venueBelts||{}).flatMap(([v,ds])=>Object.entries(ds).filter(([d,b])=>G.F[b.id]?.camp==="player").map(([d,b])=>({v,d,b})));
   const yr=t=>{const res=t.res||Object.entries(t.champ||{}).filter(([d,id])=>G.F[id]&&G.F[id].camp==="player").map(([d,id])=>({name:G.F[id].name,d,t:"Provincial champion",c:"gold"}));
     return `<div class="hall-y"><b>Year ${t.season}</b>${res.length?res.map(r=>`<div class="kv-row"><span>${esc(r.name)} · Div ${r.d}</span><span class="pill ${r.c||""}">${r.t}</span></div>`).join(""):"<p class=\"meta\">That year nobody got past the subdistrict round, but the whole camp stayed together</p>"}</div>`;};
-  return `${H.length?`<div class="hall-y"><b>Major victories</b>${H.map(h=>`<div class="kv-row"><span>${esc(G.F[h.id]?.name||h.id)} · Div ${h.div} · ${h.season?`Year ${h.season} Week ${h.week}`:"Earlier result"}</span><span class="pill gold">🏆 ${honorLabel(h.kind,h.venue)}</span></div>`).join("")}</div>`:""}
-   ${belts.length||venueBelts.length?`<div class="hall-y"><b>Belts held</b>${belts.map(([d,b])=>`<div class="kv-row"><span>${esc(G.F[b.id].name)} · Div ${d}</span><span class="pill gold">🏆 Tha Phae Stadium champion · defended ${b.def} times</span></div>`).join("")}${venueBelts.map(({v,d,b})=>`<div class="kv-row"><span>${esc(G.F[b.id].name)} · Div ${d}</span><span class="pill gold">🏆 ${STADIUMS[v].name} champion · defended ${b.def} times</span></div>`).join("")}</div>`:""}
+  return `${H.length?`<div class="hall-y"><b>Major victories</b>${H.map(h=>`<div class="kv-row"><span>${esc(G.F[h.id]?.name||h.id)} · Div ${h.div} · ${h.season?`Year ${h.season} week ${h.week}`:"Earlier result"}</span><span class="pill gold">🏆 ${honorLabel(h.kind,h.venue)}</span></div>`).join("")}</div>`:""}
+   ${belts.length||venueBelts.length?`<div class="hall-y"><b>Belts held</b>${belts.map(([d,b])=>`<div class="kv-row"><span>${esc(G.F[b.id].name)} · Div ${d}</span><span class="pill gold">🏆 Tha Phae Stadium champion · defended ${b.def} times</span></div>`).join("")}${venueBelts.map(({v,d,b})=>`<div class="kv-row"><span>${esc(G.F[b.id].name)} · Div ${d}</span><span class="pill gold">🏆 แชมป์${STADIUMS[v].name} · ป้องกัน ${b.def} times</span></div>`).join("")}</div>`:""}
    ${T.length?T.map(yr).join(""):`<p class="meta">The first year isn't over yet · when it ends, everyone's results land here, one row per year</p>`}`;}
+function decorHTML(){let total=0,owned=0,sections="";
+ for(const [slot,D] of Object.entries(CAMP_DECOR)){let choices="";
+  for(const [key,item] of Object.entries(D.items)){total++;const reason=decorUnlockReason(G,slot,key),on=decorChoice(G,slot)===key;if(!reason)owned++;
+   choices+='<button class="btn sm '+(on?'gold':'')+'" data-act="decor" data-k="'+slot+'" data-v="'+key+'" '+(reason?'disabled':'')+
+    ' style="border-color:'+(reason?'#777':DECOR_RARITY[item.r])+';'+(reason?'opacity:.55;filter:grayscale(1)':'')+'">'+
+    '<b style="color:'+DECOR_RARITY[item.r]+'">'+item.r+'</b> '+esc(item.name)+(on?' ✓':'')+
+    (reason?'<small style="display:block;white-space:normal">🔒 '+esc(reason)+'</small>':'')+'</button>';}
+  sections+='<div class="item fac"><div style="width:100%"><div class="t">'+D.name+'</div><div class="obtns" style="display:flex;flex-wrap:wrap;gap:6px">'+choices+'</div></div></div>';}
+ const ready=goldRematchReady(G);
+ return '<section class="px card cpane '+((UI.csub||"money")==="decor"?"on":"")+"\"><h3>Camp decorations · "+owned+'/'+total+" items</h3>"+
+  "<p class=\"meta\">Rarity N → R → SR → SSR → SS shows how hard each item is to earn. Decorations do not add stat bonuses.</p>"+sections+
+  "<p class=\"meta\">Golden van: defeat the Golden Helmet boss 10 times. After your first win, you can challenge him again every 4 weeks.</p>"+
+  '<button class="btn sm gold" data-act="goldrematch" '+(ready?'':'disabled')+">Challenge the Golden Helmet boss again "+(!ready&&G.gangRematchAt?' · '+goldRematchLabel(G):'')+'</button></section>';}
 function campHTML(){const inc=classIncome(G),up=upkeep(G),wg=wages(G),lv=campLevel(G),cs=UI.csub||"money";
   const recs=[["mali",G.flags.maliRecruit],["rin",G.flags.rinRecruit]].filter(([id,ok])=>ok&&G.F[id].camp==="free");
   const dots=(n,m)=>`<span class="pips">${Array.from({length:m},(_,i)=>`<i class="${i<n?"on":""}"></i>`).join("")}</span>`;
   return `<section class="px card camphead" style="background-image:linear-gradient(90deg,rgba(20,16,32,.95),rgba(20,16,32,.6)),url(${ASSET}${gymBg()})"><div><button class="pill gold lvbtn" data-act="camplv">Camp Lv.${lv} ▸</button><h3>${CAMP_LV_NAME[lv]}</h3>
     <p class="meta">Total upgrades ${facTotal(G)} levels · ${lv<3?`${lv===1?5-facTotal(G):13-facTotal(G)} levels to reach Lv.${lv+1} · tap to see what you get`:"Max level for the demo"}</p></div></section>
-   <div class="seg subtabs csubs"><button data-act="csub" data-v="money" aria-pressed="${cs==="money"}">Finance</button><button data-act="csub" data-v="staff" aria-pressed="${cs==="staff"}">Coaches & fighters</button><button data-act="csub" data-v="fac" aria-pressed="${cs==="fac"}">Upgrades</button><button data-act="csub" data-v="hall" aria-pressed="${cs==="hall"}">Hall of fame</button></div>
+   <div class="seg subtabs csubs"><button data-act="csub" data-v="money" aria-pressed="${cs==="money"}">Finance</button><button data-act="csub" data-v="staff" aria-pressed="${cs==="staff"}">Coaches & fighters</button><button data-act="csub" data-v="fac" aria-pressed="${cs==="fac"}">Camp upgrades</button><button data-act="csub" data-v="decor" aria-pressed="${cs==="decor"}">Decorations</button><button data-act="csub" data-v="hall" aria-pressed="${cs==="hall"}">Hall of fame</button></div>
    ${recruitHTML(recs)}
    <div class="grid g2">
    <section class="px card cpane ${cs==="money"?"on":""}"><h3>Weekly income & expenses</h3>
@@ -546,7 +558,7 @@ function campHTML(){const inc=classIncome(G),up=upkeep(G),wg=wages(G),lv=campLev
     <div class="item nw"><div><div class="t">Invite an old-school master to teach</div><div class="meta">${fmt(18000)} · fighter gains +1 skill point and school stats · once per fighter per season · opens week 16</div></div><button class="btn sm gold" data-act="mastersOpen" ${G.week<16?"disabled":""}>Choose</button></div>
     <div class="item nw"><div><div class="t">Host a fight night at Sirichai</div><div class="meta">${fmt(SHOW_COST)} · fame +3, camp looks better, everyone's morale +8 · once per round</div></div><button class="btn sm gold" data-act="hostshow" ${G.cash<SHOW_COST||G.week<10||G.flags["show_"+stageOf(G.week)]?"disabled":""}>${G.flags["show_"+stageOf(G.week)]?"Hosted":"Host"}</button></div>
     <div class="item nw"><div><div class="t">Pay off Grandpa Chai's debt</div><div class="meta">${G.debt>0?`Remaining ${fmt(G.debt)} · paying it off gives fame +2 and a special scene`:"Debt fully paid"}</div></div>${G.debt>0?`<button class="btn sm gold" data-act="cleardebt" ${G.cash<G.debt?"disabled":""}>Pay off</button>`:"<span class=\"pill green\">Done</span>"}</div></section>
-   <section class="px card cpane ${cs==="hall"?"on":""}"><h3>Hall of fame</h3>${hallHTML()}</section>
+   ${decorHTML()}<section class="px card cpane ${cs==="hall"?"on":""}"><h3>Hall of fame</h3>${hallHTML()}</section>
 `;}
 
 // v1.18: hired trainers with their own pixel sprite
@@ -567,7 +579,7 @@ function recruitHTML(recs){if(!recs.length)return "";
 function fighterHTML(f){const mine=f.camp==="player";const P=PROFILES[f.id];
   const tabs=mine?[["rel","Profile"],["over","Stats"],["skill","Skills"]].concat(f.canon&&KIT_MASK[f.id]?[["look","Outfit"]]:[]):[["rel","Profile"],["over","Stats"]];
   let t=UI.ptab;if(!tabs.some(x=>x[0]===t))t="over";
-  const head=`<div class="fp-head">${faceImg(f)}<div><h2>${esc(f.full)}</h2><div class="meta">${f.age!=null?f.age+" yrs · ":""}${f.camp==="player"?"Sirichai Camp":f.lab?"Vector Gym, Bangkok":f.camp==="rival"?"Golden Tiger Camp":"Free agent"} · Div ${f.div} · ${styleOf(f.a)} · ${rec(f)}</div>${G.belt&&Object.values(G.belt).some(x=>x.id===f.id)?`<div class="beltb">🏆 Tha Phae Stadium champion</div>`:Object.entries(G.venueBelts||{}).some(([v,ds])=>Object.values(ds).some(b=>b.id===f.id))?`<div class="beltb">🏆 ${STADIUMS[Object.entries(G.venueBelts).find(([v,ds])=>Object.values(ds).some(b=>b.id===f.id))[0]].name} champion</div>`:f.belts?`<div class="beltb old">Former stadium champion</div>`:""}${xpBar(f)}</div></div>
+  const head=`<div class="fp-head">${faceImg(f)}<div><h2>${esc(f.full)}</h2><div class="meta">${f.age!=null?f.age+" yrs · ":""}${f.camp==="player"?"Sirichai Camp":f.lab?"Vector Gym, Bangkok":f.camp==="rival"?"Golden Tiger Camp":"Free agent"} · Div ${f.div} · ${styleOf(f.a)} · ${rec(f)}</div>${G.belt&&Object.values(G.belt).some(x=>x.id===f.id)?`<div class="beltb">🏆 Tha Phae Stadium champion</div>`:Object.entries(G.venueBelts||{}).some(([v,ds])=>Object.values(ds).some(b=>b.id===f.id))?`<div class="beltb">🏆 แชมป์${STADIUMS[Object.entries(G.venueBelts).find(([v,ds])=>Object.values(ds).some(b=>b.id===f.id))[0]].name}</div>`:f.belts?`<div class="beltb old">อดีตแชมป์เวที</div>`:""}${xpBar(f)}</div></div>
    <div class="seg ptabs">${tabs.map(([k,n])=>`<button data-act="ptab" data-v="${k}" aria-pressed="${t===k}">${n}${k==="skill"&&skReady(f)?'<i class="tdot2"></i>':""}</button>`).join("")}</div>`;
   let body="";
   if(t==="look"){const cur=f.outfit||"base";
@@ -703,7 +715,7 @@ function modalHTML(){const m=UI.modal;let body="",foot=true;
      <div class="gacha"><span><b class="goldt">✦ ${G.dust||0}</b> stardust<small>Earned from wins, new cards and duplicates · guaranteed SSR in ${GACHA_PITY-(G.pity||0)} more</small></span><button class="btn sm gold" data-act="gacha" ${(G.dust||0)<GACHA_COST?"disabled":""}>Pull a card ${GACHA_COST}✦</button></div>
      ${CANON_IDS.filter(c=>byC[c]).map(c=>`<h4 class="albh">${esc(G.F[c].name)}</h4><div class="albg">${byC[c].map(id=>{const C=CARDS[id],o=own[id],R=CARD_R[C.r];
        return o?`<button class="ccard pxc" data-rarity="${C.r}" style="--rc:${R.c}" data-act="cardplay" data-v="${id}" title="${esc(C.t)}">${!o.seen?'<i class="ndot"></i>':""}${cardArtHTML(C,true)}<i class="rr">${C.r}${(o.lv||1)>1?`<u>${o.lv}</u>`:""}</i><span class="tstar">${"★".repeat(R.s)}</span><b>${esc(C.t)}</b></button>`
-         :`<button class="ccard pxc lock" data-rarity="${C.r}" style="--rc:#77747d" data-act="cardhint" data-v="${id}" aria-label="Card not yet collected">${cardArtHTML(C,true)}<i class="rr">${C.r}</i><span class="tstar">${"★".repeat(R.s)}</span><b>???</b></button>`;}).join("")}</div>`).join("")}<p class="meta center">Tap a shadow card to see how to get it</p>`;}
+         :`<button class="ccard pxc lock" data-rarity="${C.r}" style="--rc:#77747d" data-act="cardhint" data-v="${id}" aria-label="Uncollected card">${cardArtHTML(C,true)}<i class="rr">${C.r}</i><span class="tstar">${"★".repeat(R.s)}</span><b>???</b></button>`;}).join("")}</div>`).join("")}<p class="meta center">Tap a shadow card to see how to get it</p>`;}
   if(m.type==="cardnew"){const P=G.cardPend||[];const id=P[0];const C=CARDS[id];if(!C){G.cardPend=[];UI.modal=null;return "";}const RR=CARD_R[C.r];body=`<h2>New card!</h2><div class="gres" style="--rc: ${RR.c}"><div class="ccard big" data-rarity="${C.r}" style="--rc:${RR.c}">${cardArtHTML(C)}<span class="tstar">${"★".repeat(RR.s)}</span><b>${esc(C.t)}</b><small>${C.r}</small></div>
     <p class="center meta">${C.hint?esc(C.hint)+" · ":""} Stardust <b class="goldt">✦ 5</b>${P.length>1?` · new cards left: ${P.length-1} more`:""}</p></div>
     <div class="mfoot roadbtns"><button class="btn primary" data-act="cardplay" data-v="${id}" data-from="new">View story now</button><button class="btn" data-act="cardlater">Save for later</button></div>`;foot=false;}
@@ -913,15 +925,15 @@ function endingHTML(){const E=UI.ending,all=roster(G),res=seasonResult();
 // ---------- FIGHT ----------
 function fightFaceoff(b){const me=G.F[b.a],op=G.F[b.b],key=`${b.a}_${b.b}`,h=G.h2h&&G.h2h[op.id],s=G.faceoffStats&&G.faceoffStats[key],last=G.faceoffLast&&G.faceoffLast[key];
   const met=h&&(h.w+h.l+h.d)>0;
-  const tally=s&&(s.w+s.l+s.d)>=2?` We've met ${s.w+s.l+s.d} times now: you've won ${s.w}, I've won ${s.l}${s.d?`, with ${s.d} draws`:""}`:"";
-  const rival={ploy:"Let's see if you can read me this time",fah:"Come on! I've been waiting for this bout",kati:"I won't back down",mali:"I'll make this a beautiful fight~",rin:"I've studied the way you fight"};
-  const opener=last?(last.win==="A"?"You beat me last time. I've trained to counter you":last.win==="B"?"I won last time, but you look different today":"We drew last time. Today there'll be a winner")+tally
-    :s?`We've met ${s.w+s.l+s.d} times. You've won ${s.w}, I've won ${s.l}${s.d?`, with ${s.d} draws`:""}. Let's see what happens today`
-    :met?"We've met before. Let's see who prepared better this time"
+  const tally=s&&(s.w+s.l+s.d)>=2?` So far we've fought ${s.w+s.l+s.d} times. You won ${s.w} I won ${s.l}${s.d?` drew ${s.d}`:""}`:"";
+  const rival={ploy:"This time I'll see whether you can read my game.",fah:"Come on! I've been waiting for this fight.",kati:"I won't back down!",mali:"Mali will fight beautifully today~",rin:"I've analyzed your fighting style."};
+  const opener=last?(last.win==="A"?`You beat me last time. I've prepared a counter for this fight.`:last.win==="B"?`I won last time, but you look different today.`:"Last time was a draw. Someone has to win today.")+tally
+    :s?`We've fought ${s.w+s.l+s.d} times. You won ${s.w} I won ${s.l}${s.d?` drew ${s.d}`:""} Let's see how it goes today.`
+    :met?"We've met before. Let's see who prepared better."
     :rival[op.id];
-  const reply=last?(last.win==="A"?"I won last time, but I won't underestimate you":last.win==="B"?"I lost last time. I'm here for a rematch":"Last time settled nothing. Let's finish it today")
-    :({kati:"Sirichai Camp is back. I'll give this everything I've got!",mali:"All right~ I'm ready!",rin:"I've got the data in my head. Let's begin",ploy:"I'll give you my answer in the ring",fah:"Good! I like someone who fights back"})[me.id]||"I'm ready. Let's begin";
-  return [{n:"nar",t:`${me.name} and ${op.name} meet at center ring before the pi chawa begins`},
+  const reply=last?(last.win==="A"?`I won last time, but I won't underestimate you today.`:last.win==="B"?`I lost last time. I'm here for a rematch.`:"Last time was a draw. Let's settle it today.")
+    :({kati:"Sirichai Gym is back. I'll give this fight everything!",mali:"Sure~ Mali is ready!",rin:"I have the data in my head. Let's begin.",ploy:"I'll give my answer in the ring.",fah:"Good! I like someone who dares to fight."})[me.id]||"I'm ready. Let's begin.";
+  return [{n:"nar",t:`${me.name} and ${op.name} meet in the middle of the ring before the piphat music begins`},
     {n:op.id,f:"angry",l:"fight",t:opener},
     {n:me.id,f:"angry",l:"fight",with:op.id,t:reply}];}
 function openFight(b,done){const op=G.F[b.b],k=`taunt_${b.a}_${b.b}_${stageOf(G.week)}`;
@@ -1266,6 +1278,7 @@ const ACT={
   date:d=>{UI.modal=null;UI.tab="people";const steps=dateScene(G,d.id,d.v);AU.startMusic("date");playScene(steps,()=>{AU.startMusic("hub");render();},{bg:ACTIVITIES[d.v].bg==="camp"?"gym":ACTIVITIES[d.v].bg,look:"casual"});},
   giftpick:d=>{UI.modal={type:"gift",id:d.id};render();},
   give:d=>{const r=giveGift(G,d.id,d.v);if(!r)return;UI.modal=null;UI.tab="people";save();AU.startMusic("date");giftScene(d.id,r);},
+  decor:d=>{if(chooseDecor(G,d.k,d.v)){save();render();toast("Camp decoration changed");}},
   buyfac:d=>{const before=campLevel(G);if(buyFacility(G,d.v)){save();const after=campLevel(G);AU.sfx("level");toast(after>before?`The camp rose to Lv.${after}: ${CAMP_LV_NAME[after]}!`:`Upgraded ${FACILITIES[d.v].name}`);}},
   daeng:()=>{if(upgradeDaeng(G)){save();toast(`Coach Daeng completed training Lv.${G.fac.daeng}`);}},
   useroad:d=>{const f=G.F[d.id];if(!f||trLocked(f)||!PRESETS[d.p])return;f.plan={...f.plan,preset:d.p,intensity:d.i};UI.modal=null;save();toast(`Set ${f.name}: ${planName(d.p,d.i)}. Don't forget to confirm`);},

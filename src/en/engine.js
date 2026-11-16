@@ -36,9 +36,9 @@ const NPC_NAMES={
 };
 const NPC_DISTRICT={A:[["Saifa W.Wanthawi",11],["Mukda Petchyindee",11]],B:[["Kaewkanlaya K.Kitti",11],["Arunee S.Srisuk",11]]};
 const STAGE_NPCS={
- local:{A:[["Saengdao Sit Mae Rim",8],["Mintra K.Kamphaeng",9]],B:[["Sairung Luk Nam Ping",8],["Khaohom W.Wat Nuea",9]]},
- district:{A:[["Nilawan Sit Mae Ping",11],["Dueanphen W.Lanna",12],["Phraemai Petch Doi",12]],B:[["Warin S.Wayu",11],["Phimdao Nuea Fa Camp",12],["Kingkaew Mueang Kaew",12]]},
- province:{A:[["Chonthicha Sit Nakhon",13],["Naphatsorn Phayak Mueang",14],["Sasiporn Petch Luang",14],["Maneerat K.Krung Kao",15]],B:[["Tharathip Sit Wiang",13],["Raweewan Luk Chao Phraya",14],["Sirinapha Petch Tawan",14],["Butsakorn S.Sanam Yai",15]]}
+ local:{A:[["แสงดาว ศิษย์แม่ริม",8],["มินตรา ก.กำแพง",9]],B:[["สายรุ้ง ลูกน้ำปิง",8],["ข้าวหอม ว.วัดเหนือ",9]]},
+ district:{A:[["นิลวรรณ ศิษย์แม่ปิง",11],["เดือนเพ็ญ ว.ล้านนา",12],["แพรไหม เพชรดอย",12]],B:[["วาริน ศ.วายุ",11],["พิมพ์ดาว ค่ายเหนือฟ้า",12],["กิ่งแก้ว เมืองแก้ว",12]]},
+ province:{A:[["ชลธิชา ศิษย์นคร",13],["นภัสสร พยัคฆ์เมือง",14],["ศศิพร เพชรหลวง",14],["มณีรัตน์ ก.กรุงเก่า",15]],B:[["ธาราทิพย์ ศิษย์เวียง",13],["รวีวรรณ ลูกเจ้าพระยา",14],["ศิรินภา เพชรตะวัน",14],["บุษกร ศ.สนามใหญ่",15]]}
 };
 const NPC_COLORS=["#8a6f5a","#5a7a8a","#7a5a8a","#5a8a6a","#8a5a5a","#6a6a8a"];
 
@@ -442,6 +442,33 @@ const roster=G=>Object.values(G.F).filter(f=>f.camp==="player");
 const wageOf=f=>Math.round(f.wage*(1+((f.lvl||1)-1)*.06)/100)*100; // v1.43: stars ask for more as they level up
 const wages=G=>roster(G).reduce((s,f)=>s+wageOf(f),0)+(G.staff?G.staff.reduce((s,k)=>s+STAFF[k].wage,0):G.fac.assistants*2500);
 // ---------- CAMP FACILITIES & STUDENTS ----------
+// Fixed camp slots: rarity indicates acquisition difficulty, never an extra stat bonus.
+const DECOR_RARITY={N:"#aab0ba",R:"#5ba9e8",SR:"#bd83e8",SSR:"#f4c75b",SS:"#ff8f62"};
+const CAMP_DECOR={
+ tree:{name:"Trees",items:{plain:{name:"Local tree",r:"N"},blossom:{name:"Wild Himalayan cherry tree",r:"R",rep:15},sakura:{name:"Sakura garden",r:"SR",rep:30,year:2},champion:{name:"Victory tree",r:"SSR",honor:"province"},golden:{name:"Legendary golden tree",r:"SS",titles:3}}},
+ gate:{name:"Entrance gate",items:{plain:{name:"Wooden gate",r:"N"},painted:{name:"Camp color gate",r:"R",fac:["brand",1]},lantern:{name:"Lantern gate",r:"SR",year:2,rep:18},trophy:{name:"Trophy gate",r:"SSR",honors:3},gold:{name:"Golden honor gate",r:"SS",honors:8}}},
+ ring:{name:"Boxing ring",items:{plain:{name:"Original ring",r:"N"},red:{name:"Red ring trim",r:"R",fac:["ring",1]},blue:{name:"Blue ring trim",r:"R",fac:["ring",2]},sponsor:{name:"Sponsor ring",r:"SR",rep:30},gold:{name:"Champion ring",r:"SSR",honor:"province"}}},
+ track:{name:"Camp running track",items:{dirt:{name:"Dirt path",r:"N"},chalk:{name:"Chalk lane",r:"R",fac:["hill",1]},gravel:{name:"Gravel track",r:"SR",fac:["hill",2]},rubber:{name:"Rubber track",r:"SR",fac:["gym",2],rep:20},lantern:{name:"Lantern track",r:"SSR",year:3,rep:35}}},
+ vehicle:{name:"Camp vehicle",items:{none:{name:"No vehicle",r:"N"},songthaew:{name:"Songthaew",r:"R",fac:["van",1]},minibus:{name:"Van",r:"SR",fac:["van",2]},tourbus:{name:"Camp bus",r:"SR",fac:["van",2],rep:35},limo:{name:"Limousine",r:"SSR",fac:["van",2],rep:45,honor:"province"},goldvan:{name:"Golden van",r:"SS",bossWins:10}}},
+ bags:{name:"Punching bags",items:{plain:{name:"Old bag",r:"N"},red:{name:"Red bag",r:"R",fac:["gym",1]},blue:{name:"Blue bag",r:"R",fac:["gym",2]},team:{name:"Camp crest bag",r:"SR",rep:20},gold:{name:"Champion bag",r:"SSR",honors:5}}}
+};
+const campWeekIndex=G=>gameWeek(G);
+const goldRematchReady=G=>(G.gang&&G.gang.st>=5)&&campWeekIndex(G)>=(G.gangRematchAt||0);
+const goldRematchLabel=G=>{const n=G.gangRematchAt||0;return "Year "+(Math.floor((n-1)/52)+1)+" week "+(((n-1)%52)+1);};
+const decorDefault=slot=>({tree:"plain",gate:"plain",ring:"plain",track:"dirt",vehicle:"none",bags:"plain"})[slot];
+function decorUnlockReason(G,slot,key){const D=CAMP_DECOR[slot]&&CAMP_DECOR[slot].items[key];if(!D)return "Unknown decoration";if(G.decorUnlocks&&G.decorUnlocks[slot]&&G.decorUnlocks[slot].includes(key))return "";const need=[];
+ if(D.rep&&G.rep<D.rep)need.push("Fame "+D.rep+" (current: "+G.rep.toFixed(1)+")");
+ if(D.fac&&(G.fac[D.fac[0]]||0)<D.fac[1])need.push("Upgrade "+FACILITIES[D.fac[0]].name+" level "+D.fac[1]);
+ if(D.year&&(G.season||1)<D.year)need.push("Reach year "+D.year);
+ if(D.honor&&!(G.honors||[]).some(h=>h.kind===D.honor))need.push("Win the provincial championship");
+ if(D.honors&&(G.honors||[]).length<D.honors)need.push("Collect "+D.honors+" honors (current: "+(G.honors||[]).length+")");
+ if(D.titles&&(G.honors||[]).filter(h=>h.kind==="province").length<D.titles)need.push("Win the provincial title "+D.titles+" times");
+ if(D.bossWins&&(G.goldHelmetWins||0)<D.bossWins)need.push("Defeat the Golden Helmet boss "+D.bossWins+" wins (current: "+(G.goldHelmetWins||0)+")");
+ return need.join(" · ");}
+function decorUnlocked(G,slot,key){return !!(CAMP_DECOR[slot]&&CAMP_DECOR[slot].items[key])&&!decorUnlockReason(G,slot,key);}
+function chooseDecor(G,slot,key){if(!decorUnlocked(G,slot,key))return false;G.decor=G.decor||{};G.decorUnlocks=G.decorUnlocks||{};G.decorUnlocks[slot]=G.decorUnlocks[slot]||[];if(!G.decorUnlocks[slot].includes(key))G.decorUnlocks[slot].push(key);G.decor[slot]=key;return true;}
+function grantDecorUnlocks(G){G.decorUnlocks=G.decorUnlocks||{};for(const [slot,D] of Object.entries(CAMP_DECOR)){G.decorUnlocks[slot]=G.decorUnlocks[slot]||[];for(const key of Object.keys(D.items))if(!decorUnlockReason(G,slot,key)&&!G.decorUnlocks[slot].includes(key))G.decorUnlocks[slot].push(key);}}
+function decorChoice(G,slot){const key=G.decor&&G.decor[slot];return decorUnlocked(G,slot,key)?key:decorDefault(slot);}
 const FACILITIES={
   gym:{name:"Training gear",cost:[20000,35000,60000],desc:"Training effect +10% per level"},
   recovery:{name:"Recovery room & ice baths",cost:[15000,30000,50000],desc:"Fatigue recovery +5/wk per level"},
@@ -532,7 +559,7 @@ if(G.F)for(const id in G.F){const f=G.F[id];if(f&&hasTree(id)&&!f.spv){f.sp=(f.s
     (G.dmLog||[]).forEach((x,i)=>{if(G.F[x.champ]?.camp==="player")G.honors.push({key:`legacy:dm:${i}`,season:null,week:x.wk,id:x.champ,div:G.F[x.champ].div,kind:"dm"});});
     for(const [div,b] of Object.entries(G.belt||{}))if(G.F[b.id]?.camp==="player")G.honors.push({key:`legacy:belt:${div}`,season:null,week:b.since||0,id:b.id,div,kind:"belt"});
     for(const f of Object.values(G.F))if(f.camp==="player"&&f.belts>0&&!G.honors.some(h=>h.kind==="belt"&&h.id===f.id))G.honors.push({key:`legacy:belt:${f.id}`,season:null,week:0,id:f.id,div:f.div,kind:"belt"});}
-  G.awards=Array.isArray(G.awards)?G.awards:[];lateSeasonOpposition(G);return G;}
+  G.awards=Array.isArray(G.awards)?G.awards:[];G.decor=G.decor||{};if(G.goldHelmetWins==null)G.goldHelmetWins=G.gang&&G.gang.st>=5?1:0;grantDecorUnlocks(G);for(const [slot,key] of Object.entries(G.decor))if(CAMP_DECOR[slot]&&CAMP_DECOR[slot].items[key]&&!G.decorUnlocks[slot].includes(key))G.decorUnlocks[slot].push(key);lateSeasonOpposition(G);return G;}
 function recordHonor(G,kind,id,div,week=G.week,venue=null){if(!G.F[id]||G.F[id].camp!=="player")return null;G.honors=G.honors||[];G.awards=G.awards||[];
   const season=G.season||1,key=`${season}:${kind}:${div}:${venue||""}:${kind==="dm"||kind==="belt"||kind==="defense"?week:id}`;
   if(G.honors.some(h=>h.key===key))return null;const h={key,season,week,id,div,kind,...(venue?{venue}:{})};G.honors.push(h);G.awards.push(h);return h;}
@@ -547,7 +574,7 @@ function studentDemand(G){return Math.round(3+Math.min(G.rep,30)*.4+G.fac.brand*
 function students(G){if(G.stu==null)G.stu=Math.min(studentCap(G),studentDemand(G));return Math.min(G.stu,studentCap(G));}
 function growStudents(G){const t=Math.min(studentCap(G),studentDemand(G)),n=students(G);G.stu=n<t?n+(t-n>=8?2:1):n>t?n-1:n;}
 const studentFee=G=>Math.round(dif(G).inc*560*(1+(G.fac.daeng-1)*.12)*(1+(campLevel(G)-1)*.2));
-const classIncome=G=>Math.round(students(G)*studentFee(G)*(G.disaster&&gameWeek(G)<G.disaster.untilAbs?(G.disaster.inc||0):1)); // v1.37: floods and storms keep students away
+const classIncome=G=>Math.round(students(G)*studentFee(G)*(G.disaster&&gameWeek(G)<G.disaster.untilAbs?(G.disaster.inc||0):1));
 function campLook(G){return clamp(Math.round(facTotal(G)+(G.camp?G.camp.beauty:0)/2+Math.min(G.rep,30)/8),0,20);}
 function buyFacility(G,k){const F=FACILITIES[k],lv=G.fac[k]||0;if(lv>=F.cost.length||facLocked(G,k))return false;const c=F.cost[lv];if(G.cash<c)return false;
   G.cash-=c;G.fac[k]=lv+1;if(k==="brand")G.rep+=.5;if(k==="shrine")G.rep+=1;if(k==="hall")G.rep+=1.5;if(k==="retreat")roster(G).forEach(f=>{["punch","kick","knee","elbow","clinch","guard","foot","stamina","power","speed"].forEach(q=>{f.a[q]=Math.min(Math.max(f.a[q],f.potential||18),f.a[q]+.4);});f.morale=Math.min(100,f.morale+15);f.fatigue=0;});return true;}
@@ -690,16 +717,16 @@ function genOffers(G){
       if(o){const m=(1+Math.min(G.rep,50)/80)*(cross?1.6:1);G.offers.push({id:`o${G.week}_${f.id}_fair`,a:f.id,b:o.id,week:wk,tier:"exhibition",fair:1,cross:cross?1:0,win:Math.round(TIER.exhibition.win*m/100)*100,lose:Math.round(TIER.exhibition.lose*m/100)*100});}}}}
 }
 function acceptOffer(G,oid){const o=G.offers.find(x=>x.id===oid);
-  if(!o)return {ok:false,reason:"This offer is no longer available"};
+  if(!o)return {ok:false,reason:"ข้อเสนอนี้ไม่มีแล้ว"};
   if(o.status==="conflict")return {ok:false,reason:o.reason};
   const clash=(G.bookings||[]).find(b=>b.week===o.week&&[o.a,o.b].some(id=>id===b.a||id===b.b));
   const duplicate=(G.bookings||[]).some(b=>b.id==="b"+oid);
-  const bad=duplicate?"This offer was already accepted":clash?`${G.F[clash.a===o.a||clash.b===o.a?o.a:o.b]?.name||"Fighter"} is already booked in week ${o.week}`:null;
+  const bad=duplicate?"รับข้อเสนอนี้ไปแล้ว":clash?`${G.F[clash.a===o.a||clash.b===o.a?o.a:o.b]?.name||"นักมวย"}มีไฟต์ในสัปดาห์ ${o.week}`:null;
   if(bad){o.status="conflict";o.reason=bad;return {ok:false,reason:bad};}
   const booking={id:"b"+oid,a:o.a,b:o.b,week:o.week,tier:o.tier,rounds:3,win:o.win,lose:o.lose,...(o.fair?{fair:1,cross:o.cross}:{})};
   G.bookings.push(booking);G.snub=G.snub||{};G.snub[o.b]=0;for(const m of G.mail||[])if(m.q==="challenge"&&m.npc===o.b&&!m.done){m.done=true;m.resolved=true;}
   G.offers=G.offers.filter(x=>!(x.a===o.a&&Math.abs(x.week-o.week)<=1)&&!(x.a===o.a&&x.b===o.b));
-  for(const x of G.offers)if(x.week===o.week&&(x.a===o.b||x.b===o.b)){x.status="conflict";x.reason=`${G.F[o.b].name} is already booked in week ${o.week}`;}
+  for(const x of G.offers)if(x.week===o.week&&(x.a===o.b||x.b===o.b)){x.status="conflict";x.reason=`${G.F[o.b].name}มีไฟต์ในสัปดาห์ ${o.week}`;}
   return {ok:true,booking};}
 
 function applyResult(G,F,booking){
@@ -793,9 +820,9 @@ function bookBracket(G,id,a,b,week,tier,rounds){
   // Championship fixtures take priority over promoter bookings made earlier.
   const conflicts=G.bookings.filter(x=>x.week===week&&[a,b].some(f=>f===x.a||f===x.b));
   if(conflicts.some(x=>x.tier==="semi"||x.tier==="final"))return false;
-  if(conflicts.length){G.bookings=G.bookings.filter(x=>!conflicts.includes(x));G.cancelledBookings=(G.cancelledBookings||[]).concat(conflicts.map(x=>({...x,reason:"Championship schedule conflict"})));
-    if(typeof addMail==="function")addMail(G,{kind:"letter",from:"Provincial Boxing Association",title:"Championship schedule update",body:"A previously booked bout was cancelled because the fighter must compete in the championship that week. No purse was deducted"});}
-  for(const x of G.offers||[])if(x.week===week&&[a,b].some(f=>f===x.a||f===x.b)){x.status="conflict";x.reason="Fighter has a championship bout this week";}
+  if(conflicts.length){G.bookings=G.bookings.filter(x=>!conflicts.includes(x));G.cancelledBookings=(G.cancelledBookings||[]).concat(conflicts.map(x=>({...x,reason:"ตารางชิงแชมป์ชนกับไฟต์นี้"})));
+    if(typeof addMail==="function")addMail(G,{kind:"letter",from:"Provincial Muay Thai Association",title:"ปรับตารางชกเพื่อศึกชิงแชมป์",body:"ไฟต์ที่รับไว้ก่อนหน้านี้ถูกยกเลิก เพราะนักมวยต้องขึ้นชกรอบชิงแชมป์ในสัปดาห์เดียวกัน ไม่มีการหักค่าตัว"});}
+  for(const x of G.offers||[])if(x.week===week&&[a,b].some(f=>f===x.a||f===x.b)){x.status="conflict";x.reason="นักมวยมีศึกชิงแชมป์ในสัปดาห์นี้";}
   if(![a,b].some(x=>G.F[x].camp==="player"))G.bookings.push({id,a,b,week,tier,rounds,npc:true});
   else{const p=G.F[a].camp==="player"?a:b,o=p===a?b:a;G.bookings.push({id,a:p,b:o,week,tier,rounds});}return true;}
 function finishBracket(G,booking,F){
@@ -841,6 +868,7 @@ function weekFinish(G){if(G.rep>55)G.rep=55+(G.rep-55)*(.96+(G.fac.hall||0)*.01)
   const prog=(()=>{if(!G.snap){G.snap={week:gameWeek(G),a:Object.fromEntries(roster(G).map(f=>[f.id,{...f.a}]))};return null;}
     if(gameWeek(G)-G.snap.week<4)return null;const out=roster(G).filter(f=>G.snap.a[f.id]).map(f=>({id:f.id,before:G.snap.a[f.id]}));
     G.snap={week:gameWeek(G),a:Object.fromEntries(roster(G).map(f=>[f.id,{...f.a}]))};return out.length?out:null;})();
+  grantDecorUnlocks(G);
   G.lastReport={prog,week:G.week,inc,up,wg,debtPay,students:students(G),rank:after,move:G.rankMove,stage:stageOf(G.week),cash:G.cash,log:[...G.log],gains:roster(G).map(f=>({id:f.id,name:f.name,gains:{...f.gains},fatigue:f.fatigue,injury:f.injury,xp:f.xpGain||0,lvl:f.lvl,preset:f.plan.preset}))};
   stageTransition(G);
   {const pv=G.history.length?G.history[G.history.length-1].cash:60000;G.history.push({w:G.week,cash:Math.round(G.cash),rep:+G.rep.toFixed(1),inc,up,wg,debt:debtPay,fight:G.wkFight||0,oth:Math.round(G.cash-pv-(inc-up-wg-debtPay)-(G.wkFight||0))});G.wkFight=0;}
@@ -915,4 +943,4 @@ const loanOk=G=>!(G.loan>0)&&G.cash<3000&&!G.ended;
 function takeLoan(G){if(!loanOk(G))return false;G.loan=LOAN_AMT;G.cash+=LOAN_AMT;G.loanN=(G.loanN||0)+1;G.gang=G.gang||{st:0,next:0};G.gang.nextAbs=Math.min(G.gang.nextAbs||Infinity,gameWeek(G)+2);return true;}
 function repayLoan(G){if(!(G.loan>0)||G.cash<G.loan)return false;G.cash-=G.loan;G.loan=0;return true;}
 function clearDebt(G){if(G.debt<=0||G.cash<G.debt)return false;G.cash-=G.debt;G.debt=0;G.flags.debtCleared=true;G.rep+=2;return true;}
-if(typeof module!=="undefined")module.exports={takeLoan,repayLoan,loanOk,LOAN_AMT,cornerOdds,cloneFight,trainWeek,passiveMods,skillReqs,skillBlock,hasTree,DIFF,studentCap,studentDemand,studentFee,growStudents,storyTop4,RIVAL_OF,LEADS,upkeep,campActLocked,equipped,toggleEquip,MAX_EQUIP,roundBegin,fightEx,roundDone,roundFinish,useSkill,fightSkills,SKILL_KIND_NAME,fixSave,gameWeek,syncFighterAges,classIncome,STAFF,hireStaff,fireStaff,staffSlots,staffLocked,facLocked,mainStyle,mastery,styleVal,STYLE_NAME,STYLE_ATTRS,MASTERY_AT,aiCorner,FACILITIES,SIGNATURE,hasSignature,counterPreset,oppTop,careNeeds,applyCare,throwTowel,CARE,MASTERS,hireMaster,hostShow,clearDebt,SHOW_COST,TAC,setTactics,finishBracket,mulberry32,newGame,weekTrain,weekFinish,genOffers,acceptOffer,buyFacility,upgradeDaeng,students,campLevel,newFight,fightRound,quickFight,applyResult,standings,roster,ovr,styleOf,stageOf,finishFinal,condition,ATTRS,isBooked,PRESETS,CANON,advise,doCampAction,learnSkill,SKILLS,SCHOOLS,campLook,newSeason};
+if(typeof module!=="undefined")module.exports={takeLoan,repayLoan,loanOk,LOAN_AMT,cornerOdds,cloneFight,trainWeek,passiveMods,skillReqs,skillBlock,hasTree,DIFF,studentCap,studentDemand,studentFee,growStudents,storyTop4,RIVAL_OF,LEADS,upkeep,campActLocked,equipped,toggleEquip,MAX_EQUIP,roundBegin,fightEx,roundDone,roundFinish,useSkill,fightSkills,SKILL_KIND_NAME,fixSave,STAFF,hireStaff,fireStaff,staffSlots,staffLocked,facLocked,mainStyle,mastery,styleVal,STYLE_NAME,STYLE_ATTRS,MASTERY_AT,aiCorner,FACILITIES,SIGNATURE,hasSignature,counterPreset,oppTop,careNeeds,applyCare,throwTowel,CARE,MASTERS,hireMaster,hostShow,clearDebt,SHOW_COST,TAC,setTactics,finishBracket,mulberry32,newGame,weekTrain,weekFinish,genOffers,acceptOffer,buyFacility,upgradeDaeng,students,campLevel,newFight,fightRound,quickFight,applyResult,standings,roster,ovr,styleOf,stageOf,finishFinal,condition,ATTRS,isBooked,PRESETS,CANON,advise,doCampAction,learnSkill,SKILLS,SCHOOLS,campLook,newSeason};

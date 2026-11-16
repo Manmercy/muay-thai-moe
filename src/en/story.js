@@ -9,13 +9,13 @@ const ME=G=>G.player.name,
 const SPK={kati:{name:"Kati",color:"#e23b4e"},mali:{name:"Mali",color:"#4a7fe0"},rin:{name:"Rin",color:"#3fae6a"},
   ploy:{name:"Ploy",color:"#9b62e0"},fah:{name:"Fah",color:"#e7b443"},pailin:{name:"Pailin",color:"#8e4ac3"},coach:{name:"Coach Daeng",color:"#c98a5a"},nar:{name:""},me:{name:"(You)"}};
 const HONOR_LABEL={local:"Subdistrict round champion",district:"District round champion",province:"Provincial champion",belt:"Tha Phae Stadium champion",defense:"Tha Phae Stadium title defense",dm:"Death Match champion"};
-function honorLabel(kind,venue){if(venue&&typeof STADIUMS!=="undefined"&&STADIUMS[venue]&&(kind==="belt"||kind==="defense"))return (kind==="belt"?"Champion of ":"Defended title at ")+STADIUMS[venue].name;return HONOR_LABEL[kind]||"Champion";}
+function honorLabel(kind,venue){if(venue&&typeof STADIUMS!=="undefined"&&STADIUMS[venue]&&(kind==="belt"||kind==="defense"))return (kind==="belt"?"Champion":"ป้องกันแชมป์")+STADIUMS[venue].name;return HONOR_LABEL[kind]||"Champion";}
 function honorSteps(G,h){const f=G.F[h.id],label=honorLabel(h.kind,h.venue),ranked=h.kind==="local"||h.kind==="district";
-  return [{n:"nar",t:ranked?`The ${h.kind==="local"?"subdistrict":"district"} standings are final. ${f.name} takes first place, and the referee calls her back to center ring.`:`The final bell rings. The referee raises ${f.name}'s arm in center ring as the crowd roars.`},
-    {n:"npc",who:"Ring announcer",t:`Ladies and gentlemen! The Division ${h.div} ${label} is… ${f.name} of Sirichai Gym!`},
-    {n:"nar",t:`The referee hands over the belt. ${f.name} lifts it high beneath the spotlights as gold confetti falls across the ring.`},
+  return [{n:"nar",t:ranked?`The standings for the ${h.kind==="local"?"subdistrict":"district"} round are final. ${f.name} takes first place, and the referee calls her back to center ring.`:`The final bell rings. The referee raises ${f.name}'s arm in center ring as the crowd roars.`},
+    {n:"npc",who:"Ring announcer",t:`Ladies and gentlemen! ${label} Div ${h.div} is… ${f.name} of Sirichai Gym!`},
+    {n:"nar",t:`The referee hands the belt to ${f.name} lifts it high beneath the spotlights as gold confetti falls across the ring.`},
     {n:h.id,f:"happy",l:"fight",t:h.kind==="defense"?"The belt stays with our gym! I'll be ready for the next challenger!":"We brought the belt home! Thank you for cheering for us!"},
-    {n:"coach",t:`Remember tonight, ${f.name}. This victory is now part of Sirichai's hall of fame.`}];}
+    {n:"coach",t:`Remember tonight, ${f.name} This victory is now part of Sirichai's hall of fame.`}];}
 // v1.7: bonds deepen by chapter — the ceiling rises as the season's story moves on
 const bondCap=G=>100;
 // v1.44: bond grows a bit faster, and the girls who join later catch up while still distant
