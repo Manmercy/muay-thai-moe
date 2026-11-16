@@ -1,5 +1,5 @@
 // ================= MUAY THAI MOE v1.3 — UI =================
-const VERSION="1.82.1";
+const VERSION="1.82.2";
 const CUR_LANG=(typeof window!=="undefined"&&window.LANG)||"th";
 const TH_LABEL=String.fromCharCode(3652,3607,3618);
 function langSwitch(cls){return `<div class="langsw ${cls||""}" role="group" aria-label="Language">${[["th",TH_LABEL],["en","EN"]].map(([k,l])=>`<button class="lsb ${CUR_LANG===k?"on":""}" data-act="setlang" data-v="${k}" aria-pressed="${CUR_LANG===k}">${l}</button>`).join("")}</div>`;}
@@ -708,15 +708,15 @@ function reportHTML(){const r=G.lastReport;const ann=[];
    <div class="chips3"><span class="chip"><small>Students</small><b class="num pos">+${fmt(r.inc)}</b></span><span class="chip"><small>Expenses</small><b class="num neg">-${fmt(r.up+r.wg+(r.debtPay||0))}</b></span><span class="chip"><small>Cash</small><b class="num ${r.cash<0?"neg":""}">${fmt(r.cash)}</b></span></div>
    <details><summary>Results around the circuit (${r.log.length})</summary><div class="log">${r.log.map(l=>`<div>${esc(l)}</div>`).join("")||"<div>All quiet</div>"}</div></details>`;}
 // v1.81.1: "what's new" popup — shows once per save after loading, for players who started before this update
-const PATCH={id:"1.80.18",ver:"Muay Thai Moe v1.80.18",title:"Weekly report from Sirichai Camp",lead:"This week brings new stories and new rivals for managers playing on for many years!",items:[
- ["📖","Fah and Ploy's story","New year-2 scenes: life in the camp, choices that may leave someone else sulking, and fights against the fighters who replaced them at their old gym."],
- ["🌑","Pailin and Vector Gym arrive","Pailin, Ploy's older sister, heads Vector Gym from Bangkok, a camp built on hard-core sports science. Vector's story and fighters arrive in the later years and keep coming back to challenge us."],
- ["🏟️","More stages and rivals","More rivals in the sub-district, district and provincial rounds, plus the Rim Ping and Lanna stadiums, each with its own belt. Opponents improve along with your camp."],
- ["🏆","Unforgettable victories","Title fights now have a winner announcement, belt raise, music and effects, and big wins are recorded in the camp's Hall of Honor."],
- ["🔥","Challengers return","Death Match comes around more often, and the helmet gang, fighting roosters and bulls come back for rematches. The more years you play, the less you can relax!"],
- ["🛠️","Important bug fixes","Fixed how time carries across years, fighters' birthdays and ages, double-booked fights, and the \"Why won't you fight me?\" letter. Old saves still load fine!"],
- ["🎨","Decorate the camp","Trees, gates, ring, running track, camp vehicle and punching bags unlock as your camp achieves more. Find them in Manage Camp → Decorate."]],
- foot:"Which year have you reached? Come tell Kru Daeng! 🥋"};
+const PATCH={id:"1.82.2",ver:"Muay Thai Moe v1.82.2",title:"Weekly report from Sirichai Camp",lead:"This round clears the freezes, closes a big chapter, and opens camp decorations!",items:[
+ ["🛠️","Fixed the mid-year freeze","A Death Match short on fighters now fills itself. Stuck saves just reopen the Death Match bracket to carry on · Fixed the new year not starting when a rooster/bull bout was booked at year's end."],
+ ["📖","Main story closes at year 5","The Vector Gym story now has its finale. Finish year 5 for the closing scene, then carry on in free mode as long as you like, with rivals growing stronger every year."],
+ ["🌑","Pailin returns every year","From year 6, Pailin challenges Sirichai every year. She remembers last year's results and sends a letter at year's end."],
+ ["📷","Year-end memory album","Before the yearly photo, Kati flips through the camp scrapbook to relive the year's highlights, and the end of year 5 looks back on all five years."],
+ ["🎨","Camp decorations are open","Trees, gates, ring, running track, camp vehicle and punching bags, N to SS, unlock as your camp achieves more. Pick one and see the camp change right away in Manage Camp → Decorate."],
+ ["💬","Choose from the heart","Story choices no longer tell you who grows closer or drifts away. Just follow your heart!"],
+ ["🏟️","From last round (v1.80.18)","Pailin and Vector Gym · Rim Ping and Lanna stadiums · belt ceremonies · more Death Matches and special challengers · Fah and Ploy's year-2 scenes"]],
+ foot:"Reached year 5? Tell Kru Daeng whether you beat Vector! 🥋"};
 function maybeWhatsNew(){if(!G||G.ended||UI.scene)return;if(G.newsSeen===PATCH.id)return;UI.modal={type:"whatsnew"};}
 function whatsNewHTML(){return `<div class="wnew"><span class="pill gold">Update · ${esc(PATCH.ver)}</span><h2>🥊 ${esc(PATCH.title)}</h2><p class="lead">${esc(PATCH.lead)}</p>
   <div class="wnlist">${PATCH.items.map(([ic,t,b])=>`<details class="wnitem"><summary><span class="wnic">${ic}</span><b>${esc(t)}</b><i>▸</i></summary><p>${esc(b)}</p></details>`).join("")}</div><p class="meta wnhint">Tap a topic to read more</p>

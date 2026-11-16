@@ -3561,5 +3561,21 @@
  "ชัยชนะไฟต์แรกของค่าย · ": "The camp's first win · ",
  "กับผู้จัดการตกลงคบกัน": " and the Manager started dating",
  "ย้ายเข้ามาอยู่ค่ายศิริชัย": " moved into Sirichai Camp",
- "คว้า": " won the "
+ "คว้า": " won the ",
+ "ใครเล่นถึงปีที่ 5 แล้ว มาบอกครูแดงหน่อยว่าชนะศึกเวกเตอร์ไหมค่ะ 🥋": "Reached year 5? Tell Kru Daeng whether you beat Vector! 🥋",
+ "ไพลินและค่ายเวกเตอร์ · เวทีริมปิงและล้านนา · พิธีชูเข็มขัด · Death Match และคู่ท้าพิเศษมาบ่อยขึ้น · ซีนปีที่ 2 ของฟ้าและพลอย": "Pailin and Vector Gym · Rim Ping and Lanna stadiums · belt ceremonies · more Death Matches and special challengers · Fah and Ploy's year-2 scenes",
+ "จากรอบที่แล้ว (v1.80.18)": "From last round (v1.80.18)",
+ "ตัวเลือกในฉากเนื้อเรื่องไม่บอกแล้วว่าใครสนิทขึ้นหรือลดลง เลือกตามที่ใจคิดได้เลยค่ะ": "Story choices no longer tell you who grows closer or drifts away. Just follow your heart!",
+ "ตัดสินใจจากใจ": "Choose from the heart",
+ "ต้นไม้ ซุ้ม เวทีมวย ลู่วิ่ง รถประจำค่าย และกระสอบทราย ระดับ N ถึง SS ปลดล็อกตามผลงานค่าย เลือกแล้วเห็นค่ายเปลี่ยนทันที ที่ จัดการค่าย → ตกแต่ง": "Trees, gates, ring, running track, camp vehicle and punching bags, N to SS, unlock as your camp achieves more. Pick one and see the camp change right away in Manage Camp → Decorate.",
+ "ระบบตกแต่งค่ายเปิดแล้ว": "Camp decorations are open",
+ "ก่อนถ่ายรูปประจำปี กะทิจะเปิดสมุดภาพย้อนดูเรื่องเด่นของปีนั้น และจบปีที่ 5 จะได้ย้อนดูภาพรวม 5 ปีของค่าย": "Before the yearly photo, Kati flips through the camp scrapbook to relive the year's highlights, and the end of year 5 looks back on all five years.",
+ "อัลบั้มความทรงจำท้ายปี": "Year-end memory album",
+ "ตั้งแต่ปีที่ 6 ไพลินกลับมาท้าค่ายศิริชัยทุกปี จำผลแพ้ชนะปีก่อนได้หมด และส่งจดหมายสรุปผลมาตอนปลายปี": "From year 6, Pailin challenges Sirichai every year. She remembers last year's results and sends a letter at year's end.",
+ "ไพลินกลับมาท้าทุกปี": "Pailin returns every year",
+ "ศึกกับค่ายเวกเตอร์มีบทสรุปแล้ว จบปีที่ 5 จะได้ฉากปิดบท จากนั้นเข้าสู่โหมดอิสระ เล่นต่อได้ไม่จำกัด คู่แข่งเก่งขึ้นทุกปี": "The Vector Gym story now has its finale. Finish year 5 for the closing scene, then carry on in free mode as long as you like, with rivals growing stronger every year.",
+ "ปิดบทเนื้อเรื่องหลักที่ปีที่ 5": "Main story closes at year 5",
+ "Death Match ที่คู่ชกไม่ครบจะเติมคู่ชกให้เอง เซฟที่ค้างอยู่แค่กดเข้าสาย Death Match อีกครั้งก็เล่นต่อได้ · ขึ้นปีใหม่ไม่ได้เพราะไฟต์ไก่ชน/วัวค้างปลายปี แก้แล้วค่ะ": "A Death Match short on fighters now fills itself. Stuck saves just reopen the Death Match bracket to carry on · Fixed the new year not starting when a rooster/bull bout was booked at year's end.",
+ "แก้บั๊กค้างกลางปี": "Fixed the mid-year freeze",
+ "รอบนี้เคลียร์บั๊กค้าง ปิดบทใหญ่ และเปิดระบบตกแต่งค่ายแล้วค่ะ!": "This round clears the freezes, closes a big chapter, and opens camp decorations!"
 }
