@@ -1798,3 +1798,8 @@ body.hasnews main>h1.sr+.homegrid,body.hasnews main>h1.sr+.rinnote{margin-top:46
 .gbpity{font-size:13px;line-height:1.55;background:var(--edge);border:1px solid var(--line);padding:8px 10px}.gbpity b{color:var(--gold)}
 .gbmeter{height:8px;background:#1b1530;margin-top:6px;border:1px solid var(--line)}.gbmeter i{display:block;height:100%;background:var(--gold)}
 @media (prefers-reduced-motion:reduce){.gbrays,.gbteam img,.gbssr,.gbrev.on .gbcard,.gbrev.on .tstar i,.gbrev.on .gbtag,.gbrev.on .gbq,.gbrev.on .gbacts{animation-duration:.01s!important}.gbhint.blink{animation:none}}
+
+/* v1.87: calendar events */
+.cday u{position:absolute;left:2px;top:1px;text-decoration:none;font-size:10px;line-height:1;letter-spacing:-1px}
+.cday.ev{cursor:pointer;color:var(--fg)}
+.calres.ev{border-left:3px solid var(--gold)}

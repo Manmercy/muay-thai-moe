@@ -4996,5 +4996,16 @@
  "แตะตู้เพื่อหมุนก้าน แคปซูลกลิ้งออกมา สีแคปซูลคือระดับการ์ดจริง SSR มีฉากพิเศษ กดปุ่ม ? ดูอัตราออกและการันตีได้ แตะจอเพื่อข้ามได้ตลอด": "Tap the machine to turn the crank and a capsule rolls out. Its colour is the card's real rarity, and SSRs get a special scene. Tap ? for drop rates and the guarantee, and tap the screen to skip anytime",
  "ตู้กาชางานวัด": "Temple-fair gacha machine",
  "ตู้กาชาโฉมใหม่ หมุนเองกับมือ และทุกคนมี SSR ของตัวเองแล้ว": "A brand-new gacha machine you spin yourself, and every girl now has her own SSR",
- "อัปเดตจากค่ายศิริชัย": "News from Sirichai Camp"
+ "อัปเดตจากค่ายศิริชัย": "News from Sirichai Camp",
+ "<section class=\"px card cal\"><div class=\"card-h\"><h3>ปฏิทินปีที่ ": "<section class=\"px card cal\"><div class=\"card-h\"><h3>Calendar · Year ",
+ "</h3><span class=\"legend\"><i class=\"cw\"></i>ชนะ <i class=\"cl\"></i>แพ้ <i class=\"cn\"></i>นัดถัดไป</span></div>\n   <div class=\"calg\">": "</h3><span class=\"legend\"><i class=\"cw\"></i>Win <i class=\"cl\"></i>Loss <i class=\"cn\"></i>Upcoming</span></div>\n   <div class=\"calg\">",
+ "</div>\n   <p class=\"meta\">แตะช่องเพื่อดูผลไฟต์และกิจกรรม · 🎂 วันเกิด · 🏮🎆💦 เทศกาล · 🌸 ประกวดค่ายสวย · ขีดทอง = สัปดาห์ตัดรอบ (20, 40) และรองชิง/ชิง (44, 49)</p></section>": "</div>\n   <p class=\"meta\">Tap a week for fight results and events · 🎂 birthday · 🏮🎆💦 festival · 🌸 camp beauty contest · gold underline = cut-off weeks (20, 40) and semi-final/final (44, 49)</p></section>",
+ "ประกวดค่ายสวย นายอำเภอมาตรวจค่าย": "Camp beauty contest: the District Chief inspects the camp",
+ "ประกวดค่ายสวย · ได้อันดับ ": "Camp beauty contest · placed #",
+ "สงกรานต์": "Songkran",
+ "ปีใหม่": "New Year",
+ "ลอยกระทง": "Loy Krathong",
+ "วันเกิด": "Birthday: ",
+ "ปฏิทินรวมทั้งปี": "A calendar for the whole year",
+ "ปฏิทินบอกว่าเป็นปีที่เท่าไหร่ มีวันเกิด เทศกาล และวันประกวดค่ายสวย แตะช่องเพื่อดูรายละเอียด": "The calendar now shows which year you're in, plus birthdays, festivals and the camp beauty contest. Tap a week for details"
 }

@@ -843,7 +843,8 @@ const PATCH={id:"1.87.0",ver:"Muay Thai Moe v1.87.0",title:"News from Sirichai C
  ["🎯","Easier guarantee","The regular machine guarantees an SSR every 30 pulls, the Loy Krathong machine every 10, and a guaranteed pull always gives an SSR you don't own yet"],
  ["✦","More stardust","A win now gives 3 stardust, a knockout win gives 4"],
  ["↩","Linked card stories","Own both cards and the card page shows which story it continues. Tap to jump straight there."],
- ["🏮","A green Loy Krathong machine","The festival machine has its own look, down by the Ping River"]],
+ ["🏮","A green Loy Krathong machine","The festival machine has its own look, down by the Ping River"],
+ ["📅","A calendar for the whole year","The calendar now shows which year you're in, plus birthdays, festivals and the camp beauty contest. Tap a week for details"]],
  foot:"Here's hoping you find a golden capsule ✦"};
 function maybeWhatsNew(){if(!G||G.ended||UI.scene)return;if(G.newsSeen===PATCH.id)return;UI.modal={type:"whatsnew"};}
 function whatsNewHTML(){return `<div class="wnew"><span class="pill gold">Update · ${esc(PATCH.ver)}</span><h2>🥊 ${esc(PATCH.title)}</h2><p class="lead">${esc(PATCH.lead)}</p>
