@@ -4195,5 +4195,12 @@
  "\n    <div class=\"kv-row\"><span>ขั้นการ์ด</span><b>": "\n    <div class=\"kv-row\"><span>Card level</span><b>",
  "การ์ดซ้ำเก็บไว้ให้ทุกใบ เลือกเองว่าจะใช้อัปขั้นการ์ด (ความสนิทเพิ่มทุกขั้น) หรือย่อยเป็นเศษดาว มีหน้ายืนยันก่อนย่อย": "Every duplicate is kept: spend it to level the card up (bond grows each level) or break it into stardust, with a confirm step",
  "ใช้ใบซ้ำ 1 ใบ · ความสนิทเพิ่มขึ้น": "uses 1 spare · bond grows",
- "เพิ่มทุกขั้น) หรือย่อยเป็นเศษดาว ใบละ ✦ ": " grows each level) or break them into stardust at ✦ "
+ "เพิ่มทุกขั้น) หรือย่อยเป็นเศษดาว ใบละ ✦ ": " grows each level) or break them into stardust at ✦ ",
+ "</small></button></div></div>\n    <div class=\"center\"><button class=\"btn sm ghost\" data-act=\"album\">‹ กลับอัลบั้ม</button></div>": "</small></button></div></div>\n    <div class=\"center\"><button class=\"btn sm ghost\" data-act=\"album\">‹ Back to album</button></div>",
+ ">ย่อย 1 ใบ<small>+✦": ">Break down 1<small>+✦",
+ "<button class=\"btn\" disabled>◆ เต็มขั้นแล้ว<small>Lv.": "<button class=\"btn\" disabled>◆ Max level<small>Lv.",
+ "ต้องมีใบซ้ำ": "needs a spare",
+ "ใช้ใบซ้ำ 1 ใบ": "uses 1 spare",
+ ">⬆ อัปเป็น Lv.": ">⬆ Level to Lv.",
+ "\">ดูเรื่องราว ▸</button>\n     <div class=\"cdsub\">": "\">Read the story ▸</button>\n     <div class=\"cdsub\">"
 }

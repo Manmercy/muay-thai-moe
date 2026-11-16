@@ -1,5 +1,5 @@
 // ================= MUAY THAI MOE v1.3 — UI =================
-const VERSION="1.85.1";
+const VERSION="1.85.2";
 const CUR_LANG=(typeof window!=="undefined"&&window.LANG)||"th";
 const TH_LABEL=String.fromCharCode(3652,3607,3618);
 function langSwitch(cls){return `<div class="langsw ${cls||""}" role="group" aria-label="Language">${[["th",TH_LABEL],["en","EN"]].map(([k,l])=>`<button class="lsb ${CUR_LANG===k?"on":""}" data-act="setlang" data-v="${k}" aria-pressed="${CUR_LANG===k}">${l}</button>`).join("")}</div>`;}
@@ -533,8 +533,8 @@ function cardInfoHTML(id){const C=CARDS[id];if(!C)return "";const o=(G.cards||{}
     ${cardBlurb(C)?`<p class="cblurb">“${esc(cardBlurb(C))}”</p>`:""}
     <div class="kv-row"><span>Card level</span><b>${"◆".repeat(lv)}${"◇".repeat(CARD_MAX_LV-lv)} Lv.${lv}/${CARD_MAX_LV}</b></div><div class="kv-row"><span>Copies collected</span><b>${o.n||1}</b></div><div class="kv-row"><span>Spare copies</span><b>${sp}</b></div>
     <p class="meta">From: ${esc(src)}</p><p class="meta">Spare copies level the card up (max Lv.${CARD_MAX_LV} · bond with ${esc(who)} grows each level) or break them into stardust at ✦ ${per}</p></div></div>
-    ${lv<CARD_MAX_LV?`<button class="btn gold wide cdup-btn" data-act="cardup" data-v="${id}" ${up?"":"disabled"}>⬆ Level up to Lv.${lv+1} <small>${up?`uses 1 spare · bond grows`:"needs 1 spare copy"}</small></button>`:`<p class="meta center">◆ This card is at max level</p>`}
-    <div class="mfoot roadbtns"><button class="btn" data-act="carddust" data-v="${id}" data-n="1" ${sp?"":"disabled"}>Break down 1 +✦${per}</button>${sp>1?`<button class="btn" data-act="carddust" data-v="${id}" data-n="${sp}">Break down all +✦${per*sp}</button>`:""}<button class="btn primary" data-act="cardplay" data-v="${id}">Read the story ▸</button></div>
+    <div class="cdacts"><button class="btn primary cdread" data-act="cardplay" data-v="${id}">Read the story ▸</button>
+     <div class="cdsub">${lv<CARD_MAX_LV?`<button class="btn" data-act="cardup" data-v="${id}" ${up?"":"disabled"}>⬆ Level to Lv.${lv+1}<small>${up?"uses 1 spare":"needs a spare"}</small></button>`:`<button class="btn" disabled>◆ Max level<small>Lv.${CARD_MAX_LV}</small></button>`}<button class="btn" data-act="carddust" data-v="${id}" data-n="1" ${sp?"":"disabled"}>Break down 1<small>+✦${per}</small></button></div></div>
     <div class="center"><button class="btn sm ghost" data-act="album">‹ Back to album</button></div>`;}
 function rankHTML(){const st=stageOf(G.week),cut=st==="local"?4:st==="district"?4:0,d=UI.rdiv;const rows=standings(G,d);const mv=(G.rankMove&&G.rankMove[d])||{};
   if(UI.rview==="career")return `<section class="px card"><div class="card-h"><div class="seg sm"><button data-act="rdiv" data-v="A" aria-pressed="${d==="A"}">Div A</button><button data-act="rdiv" data-v="B" aria-pressed="${d==="B"}">Div B</button></div><div class="seg sm"><button data-act="rview" data-v="season" aria-pressed="false">This season</button><button data-act="rview" data-v="career" aria-pressed="true">Fighter tiers</button></div></div>${careerHTML(d)}</section>`;

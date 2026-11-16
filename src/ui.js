@@ -1,5 +1,5 @@
 // ================= MUAY THAI MOE v1.3 — UI =================
-const VERSION="1.85.1";
+const VERSION="1.85.2";
 const CUR_LANG=(typeof window!=="undefined"&&window.LANG)||"th";
 const TH_LABEL=String.fromCharCode(3652,3607,3618);
 function langSwitch(cls){return `<div class="langsw ${cls||""}" role="group" aria-label="Language">${[["th",TH_LABEL],["en","EN"]].map(([k,l])=>`<button class="lsb ${CUR_LANG===k?"on":""}" data-act="setlang" data-v="${k}" aria-pressed="${CUR_LANG===k}">${l}</button>`).join("")}</div>`;}
@@ -533,8 +533,8 @@ function cardInfoHTML(id){const C=CARDS[id];if(!C)return "";const o=(G.cards||{}
     ${cardBlurb(C)?`<p class="cblurb">“${esc(cardBlurb(C))}”</p>`:""}
     <div class="kv-row"><span>ขั้นการ์ด</span><b>${"◆".repeat(lv)}${"◇".repeat(CARD_MAX_LV-lv)} Lv.${lv}/${CARD_MAX_LV}</b></div><div class="kv-row"><span>ได้มาทั้งหมด</span><b>${o.n||1} ใบ</b></div><div class="kv-row"><span>ใบซ้ำที่เก็บไว้</span><b>${sp} ใบ</b></div>
     <p class="meta">ได้จาก: ${esc(src)}</p><p class="meta">ใบซ้ำใช้อัปขั้นการ์ด (สูงสุด Lv.${CARD_MAX_LV} · ความสนิทกับ${esc(who)}เพิ่มทุกขั้น) หรือย่อยเป็นเศษดาว ใบละ ✦ ${per}</p></div></div>
-    ${lv<CARD_MAX_LV?`<button class="btn gold wide cdup-btn" data-act="cardup" data-v="${id}" ${up?"":"disabled"}>⬆ อัปขั้นเป็น Lv.${lv+1} <small>${up?`ใช้ใบซ้ำ 1 ใบ · ความสนิทเพิ่มขึ้น`:"ต้องมีใบซ้ำ 1 ใบ"}</small></button>`:`<p class="meta center">◆ การ์ดใบนี้เต็มขั้นแล้ว</p>`}
-    <div class="mfoot roadbtns"><button class="btn" data-act="carddust" data-v="${id}" data-n="1" ${sp?"":"disabled"}>ย่อย 1 ใบ +✦${per}</button>${sp>1?`<button class="btn" data-act="carddust" data-v="${id}" data-n="${sp}">ย่อยทั้งหมด +✦${per*sp}</button>`:""}<button class="btn primary" data-act="cardplay" data-v="${id}">ดูเรื่องราว ▸</button></div>
+    <div class="cdacts"><button class="btn primary cdread" data-act="cardplay" data-v="${id}">ดูเรื่องราว ▸</button>
+     <div class="cdsub">${lv<CARD_MAX_LV?`<button class="btn" data-act="cardup" data-v="${id}" ${up?"":"disabled"}>⬆ อัปเป็น Lv.${lv+1}<small>${up?"ใช้ใบซ้ำ 1 ใบ":"ต้องมีใบซ้ำ"}</small></button>`:`<button class="btn" disabled>◆ เต็มขั้นแล้ว<small>Lv.${CARD_MAX_LV}</small></button>`}<button class="btn" data-act="carddust" data-v="${id}" data-n="1" ${sp?"":"disabled"}>ย่อย 1 ใบ<small>+✦${per}</small></button></div></div>
     <div class="center"><button class="btn sm ghost" data-act="album">‹ กลับอัลบั้ม</button></div>`;}
 function rankHTML(){const st=stageOf(G.week),cut=st==="local"?4:st==="district"?4:0,d=UI.rdiv;const rows=standings(G,d);const mv=(G.rankMove&&G.rankMove[d])||{};
   if(UI.rview==="career")return `<section class="px card"><div class="card-h"><div class="seg sm"><button data-act="rdiv" data-v="A" aria-pressed="${d==="A"}">รุ่น A</button><button data-act="rdiv" data-v="B" aria-pressed="${d==="B"}">รุ่น B</button></div><div class="seg sm"><button data-act="rview" data-v="season" aria-pressed="false">อันดับฤดูนี้</button><button data-act="rview" data-v="career" aria-pressed="true">ระดับนักมวย</button></div></div>${careerHTML(d)}</section>`;
