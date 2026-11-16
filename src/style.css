@@ -1678,3 +1678,16 @@ body.hasnews main>h1.sr+.homegrid,body.hasnews main>h1.sr+.rinnote{margin-top:46
 .dtile.buy{opacity:1;filter:none;border-style:dashed}
 .dtile.buy small{color:var(--gold,#f2c14e)}
 .dtile.buy:disabled{opacity:.55}
+/* v1.84: career tiers */
+.tchip{display:inline-flex;align-items:center;gap:3px;padding:1px 7px;font:700 12px var(--f-display);white-space:nowrap;background:var(--raise);box-shadow:inset 0 0 0 2px var(--tc,var(--line));color:var(--tc,var(--fg));vertical-align:middle}
+.tchip.sm{padding:0 3px;box-shadow:none;background:none;font-size:13px}
+.t-rookie{--tc:#9a93ad}.t-rising{--tc:#6cc0e6}.t-skilled{--tc:#4cc38a}.t-top{--tc:#f0a03a}.t-elite{--tc:#c38af0}.t-legend{--tc:#f2c14e}
+.tchip.t-legend{background:rgba(242,193,78,.16)}.tchip.t-elite{background:rgba(155,98,224,.16)}
+.tierline{display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px;margin:6px 0 4px}
+.tmoves{display:flex;flex-direction:column;gap:6px;margin:4px 0 12px}
+.tmv{display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:6px 8px;background:var(--bg2);box-shadow:inset 0 0 0 2px var(--line)}
+.tmv.me{box-shadow:inset 0 0 0 2px rgba(242,193,78,.55)}.tmv .face.sm{width:32px;height:32px}
+.tlegend{margin-top:10px;line-height:1.7}
+.tierup{display:flex;flex-direction:column;gap:6px;margin:8px 0}
+.tu{display:flex;align-items:center;gap:10px;padding:8px 10px;background:rgba(242,193,78,.12);box-shadow:inset 0 0 0 2px rgba(242,193,78,.55)}
+.tu.down{background:var(--bg2);box-shadow:inset 0 0 0 2px var(--line)}.tu>span{display:block;line-height:1.5}.tu small{display:block}

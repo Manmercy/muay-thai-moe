@@ -1,5 +1,5 @@
 // ================= MUAY THAI MOE v1.3 — UI =================
-const VERSION="1.83.4";
+const VERSION="1.84.0";
 const CUR_LANG=(typeof window!=="undefined"&&window.LANG)||"th";
 const TH_LABEL=String.fromCharCode(3652,3607,3618);
 function langSwitch(cls){return `<div class="langsw ${cls||""}" role="group" aria-label="Language">${[["th",TH_LABEL],["en","EN"]].map(([k,l])=>`<button class="lsb ${CUR_LANG===k?"on":""}" data-act="setlang" data-v="${k}" aria-pressed="${CUR_LANG===k}">${l}</button>`).join("")}</div>`;}
@@ -504,17 +504,30 @@ function offersHTML(){const mine=G.bookings.filter(b=>G.F[b.a].camp==="player").
      [...G.offers].sort((x,y)=>(y.rv||y.beast||y.hard||y.tier==="special"?1:0)-(x.rv||x.beast||x.hard||x.tier==="special"?1:0)).map(o=>{const op=G.F[o.b],me=G.F[o.a];const A=adviseCached(o.a,o.b,o.rounds||3);const v=verdictOf(A.bestRate);
        const sp=o.rv?["rv","ศึกล้างตา · ทั้งจังหวัดรอดู"]:o.beast?["beast",QK[o.beast].grp==="rooster"?"ศึกพิสดาร · คนปะทะไก่ชน":"ศึกพิสดาร · ล้มวัวฉบับมวยไทย"]:o.tier==="special"?["sp","ศึกพิเศษข้ามรุ่น"]:o.hard?["hard","ท้าชนคู่เหนือชั้น · ค่าตัว ×1.5"]:o.fair?["fair",o.cross?"งานวัด · ดาราข้ามรุ่น!":"ไฟต์งานวัด · ไม่นับอันดับ"]:null;
        return `<div class="item offer ${v.c} ${sp?"spx "+sp[0]:""}">${sp?`<span class="ribbon">${sp[1]}</span>`:""}<button class="oxbtn" data-act="declo" data-v="${o.id}" aria-label="ปฏิเสธข้อเสนอนี้">✕</button><div class="l"><span class="vdot ${v.c}" aria-label="${v.t}"></span>${faceImg(op,"sm")}<div>
-       <div class="t">${esc(me.name)} vs ${esc(op.name)}</div>
+       <div class="t">${esc(me.name)} vs ${esc(op.name)} ${tierChip(op,1)}</div>
        <div class="meta">สด.${o.week} · ${TIER[o.tier].name}${o.beast?" · ไม่นับสถิติ":""}${o.fair?" · ไม่นับอันดับ · ค่าตัวส่งทางจดหมาย":""}${o.tier==="lab"?" · ไม่นับอันดับ":""} · ${styleOf(op.a)}${op.camp==="rival"?op.lab?" · เวกเตอร์ กรุงเทพฯ":" · พยัคฆ์ทอง":""}${personaOf(op)?` · ${personaOf(op).tag}`:""}</div>${h2hText(op)?`<div class="meta goldt">${h2hText(op)}</div>`:""}
        <div class="meta">ค่าตัว ${fmt(o.lose)} · <b class="goldt">ชนะ +${fmt(o.win-o.lose)}</b> · <b class="${v.c}t">${v.t}</b>${effGap(G,me,op)>.4?` · <b class="goldt">ชนะได้โบนัสแต้ม/ชื่อเสียง</b>`:effGap(G,me,op)<-.6?` · <span class="mutt">ชนะคู่อ่อนได้ชื่อเสียงน้อย</span>`:""}</div>
        </div></div>
        <div class="obtns3"><button class="btn sm" data-act="consider" data-v="${o.id}">${scouted(o.b)?"ข้อมูลคู่ชก":"ดูเทป"}</button>${coachOn()?`<button class="btn sm" data-act="otip" data-v="${o.id}">คำแนะนำครู</button>`:""}<button class="btn sm gold" data-act="accept" data-v="${o.id}" ${o.status==="conflict"?"disabled title=\""+esc(o.reason)+"\"":""}>รับไฟต์</button>${o.status==="conflict"?`<span class="meta">${esc(o.reason)}</span>`:""}</div></div>`;}).join("")||`<p class="lead">${G.bookings.length?"รับไฟต์แล้ว ข้อเสนอใหม่จะเข้ามาสัปดาห์หน้า":"ไม่มีข้อเสนอ (บาดเจ็บ หรือหมดฤดูกาล)"}</p>`}</div></section>`;}
+// v1.84: career tier chips
+function tierChip(f,full){const t=tierOf(f);return full?`<span class="tchip t-${t.k}">${t.ic} <b>${t.n}</b></span>`:`<span class="tchip sm t-${t.k}" title="${t.n}" aria-label="ระดับ ${t.n}">${t.ic}</span>`;}
+function tierYearNote(f){if(!G.tierStart||G.tierStart.season!==(G.season||1))snapTiers(G);const k=G.tierStart.t[f.id];if(!k)return "";const t=tierOf(f),a=TIER_BY[k];
+  return a.k===t.k?"":`<span class="meta">ต้นปี ${a.ic} ${a.n} → <b class="${t.i>a.i?"goldt":"mutt"}">${t.ic} ${t.n}</b></span>`;}
+function careerHTML(d){const list=Object.values(G.F).filter(f=>f.div===d&&f.camp!=="free"&&f.camp!=="quest").sort((x,y)=>ratingOf(y)-ratingOf(x));
+  const mv=tierMoves(G).filter(m=>m.f.div===d);if(!G.tierStart||G.tierStart.season!==(G.season||1))snapTiers(G);
+  return `${mv.length?`<div class="tmoves"><div class="ann-h">ความเคลื่อนไหวปีนี้</div>${mv.slice(0,8).map(m=>`<div class="tmv ${m.f.camp==="player"?"me":""}">${faceImg(m.f,"sm")}<b>${esc(m.f.name)}</b><span class="meta">${m.from.ic} ${m.from.n}</span><span class="${m.up?"goldt":"mutt"}">${m.up?"▲":"▼"}</span>${tierChip(m.f,1)}</div>`).join("")}</div>`:`<p class="meta">ปีนี้ยังไม่มีใครเปลี่ยนระดับ</p>`}
+   <div class="tbl-wrap"><table><thead><tr><th>#</th><th>ระดับ</th><th>นักมวย</th><th>เรตติ้ง</th><th>ปีนี้</th></tr></thead><tbody>
+   ${list.map((f,i)=>{const k=G.tierStart.t[f.id],t=tierOf(f),dd=k?t.i-TIER_BY[k].i:0;return `<tr class="${f.camp==="player"?"me":f.camp==="rival"?"rival":""}"><td class="num">${i+1}</td><td>${tierChip(f,1)}</td><td>${esc(f.name)}</td><td class="num"><b>${ratingOf(f)}</b></td><td>${dd>0?'<span class="goldt">▲</span>':dd<0?'<span class="mutt">▼</span>':k?"":'<span class="meta">ใหม่</span>'}</td></tr>`;}).join("")}
+   </tbody></table></div>
+   <p class="meta tlegend">${TIERS.map(t=>`${t.ic} ${t.n} ${t.min||""}${t.min?"+":""}`).join(" · ")}</p>
+   <p class="meta">เรตติ้งขึ้นลงทุกไฟต์ที่นับสถิติ ชนะคนที่เรตติ้งสูงกว่าได้เยอะ ชนะคนที่ต่ำกว่าได้น้อย ไฟต์รองชิงและชิงแชมป์มีผลมากกว่าปกติ</p>`;}
 function rankHTML(){const st=stageOf(G.week),cut=st==="local"?4:st==="district"?4:0,d=UI.rdiv;const rows=standings(G,d);const mv=(G.rankMove&&G.rankMove[d])||{};
-  return `<section class="px card"><div class="card-h"><div class="seg sm"><button data-act="rdiv" data-v="A" aria-pressed="${d==="A"}">รุ่น A</button><button data-act="rdiv" data-v="B" aria-pressed="${d==="B"}">รุ่น B</button></div>${G.champ[d]?`<span class="pill gold">แชมป์: ${esc(G.F[G.champ[d]].name)}</span>`:""}</div>
+  if(UI.rview==="career")return `<section class="px card"><div class="card-h"><div class="seg sm"><button data-act="rdiv" data-v="A" aria-pressed="${d==="A"}">รุ่น A</button><button data-act="rdiv" data-v="B" aria-pressed="${d==="B"}">รุ่น B</button></div><div class="seg sm"><button data-act="rview" data-v="season" aria-pressed="false">อันดับฤดูนี้</button><button data-act="rview" data-v="career" aria-pressed="true">ระดับนักมวย</button></div></div>${careerHTML(d)}</section>`;
+  return `<section class="px card"><div class="card-h"><div class="seg sm"><button data-act="rview" data-v="season" aria-pressed="true">อันดับฤดูนี้</button><button data-act="rview" data-v="career" aria-pressed="false">ระดับนักมวย</button></div></div><div class="card-h"><div class="seg sm"><button data-act="rdiv" data-v="A" aria-pressed="${d==="A"}">รุ่น A</button><button data-act="rdiv" data-v="B" aria-pressed="${d==="B"}">รุ่น B</button></div>${G.champ[d]?`<span class="pill gold">แชมป์: ${esc(G.F[G.champ[d]].name)}</span>`:""}</div>
    <div class="rkhelp"><p class="meta">${st==="local"?"ท็อป 4 (เส้นทอง) ไปรอบอำเภอ · ตัดรอบ สด.20":st==="district"?"ท็อป 4 (เส้นทอง) ไปรองชิงจังหวัด · ตัดรอบ สด.40":"รองชิง สด.44 · ชิงแชมป์ สด.49"} · ชนะ 3 แต้ม</p><button class="btn sm" data-act="rankhelp">อันดับมีผลยังไง?</button></div>
    ${st==="final"||st==="off"?`<p class="meta">รองชิง (สด.44): ${(()=>{const t=(G.semis||{})[d]||[];return t.length===4?`<b>${esc(G.F[t[0]].name)}</b> vs <b>${esc(G.F[t[3]].name)}</b> · <b>${esc(G.F[t[1]].name)}</b> vs <b>${esc(G.F[t[2]].name)}</b>`:"—";})()}<br>ชิงแชมป์ (สด.49): ${G.finalists[d].map(id=>`<b>${esc(G.F[id].name)}</b>`).join(" vs ")||"รอผลรองชิง"}</p>`:""}
    <div class="tbl-wrap"><table><thead><tr><th>#</th><th></th><th>นักมวย</th><th>แต้ม</th><th>ช-พ-ส</th><th>ฟอร์ม</th></tr></thead><tbody>
-   ${rows.map((r,i)=>`<tr class="${r.f.camp==="player"?"me":r.f.camp==="rival"?"rival":""} ${cut&&i<cut?"zone":""} ${cut&&i===cut-1?"cut":""}"><td class="num">${i+1}</td><td>${moveIcon(mv[r.id])}</td><td>${esc(r.f.name)}</td><td class="num"><b>${r.pts}</b></td><td class="num">${r.w}-${r.l}-${r.d}</td><td>${formHTML(r.f)}</td></tr>`).join("")}
+   ${rows.map((r,i)=>`<tr class="${r.f.camp==="player"?"me":r.f.camp==="rival"?"rival":""} ${cut&&i<cut?"zone":""} ${cut&&i===cut-1?"cut":""}"><td class="num">${i+1}</td><td>${moveIcon(mv[r.id])}</td><td>${tierChip(r.f)} ${esc(r.f.name)}</td><td class="num"><b>${r.pts}</b></td><td class="num">${r.w}-${r.l}-${r.d}</td><td>${formHTML(r.f)}</td></tr>`).join("")}
    </tbody></table></div></section>${calendarHTML()}`;}
 
 function peopleHTML(){const met=CANON_IDS.map(id=>G.F[id]).filter(f=>f.met);
@@ -636,7 +649,7 @@ function recruitHTML(recs){if(!recs.length)return "";
 function fighterHTML(f){const mine=f.camp==="player";const P=PROFILES[f.id];
   const tabs=mine?[["rel","ประวัติ"],["over","ค่าพลัง"],["skill","สกิล"]].concat(f.canon&&KIT_MASK[f.id]?[["look","ชุด"]]:[]):[["rel","ประวัติ"],["over","ค่าพลัง"]];
   let t=UI.ptab;if(!tabs.some(x=>x[0]===t))t="over";
-  const head=`<div class="fp-head">${faceImg(f)}<div><h2>${esc(f.full)}</h2><div class="meta">${f.age!=null?f.age+" ปี · ":""}${f.camp==="player"?"ค่ายศิริชัย":f.lab?"ค่ายเวกเตอร์ กรุงเทพฯ":f.camp==="rival"?"ค่ายพยัคฆ์ทอง":"นักมวยอิสระ"} · รุ่น ${f.div} · ${styleOf(f.a)} · ${rec(f)}</div>${G.belt&&Object.values(G.belt).some(x=>x.id===f.id)?`<div class="beltb">🏆 แชมป์เวทีท่าแพ</div>`:Object.entries(G.venueBelts||{}).some(([v,ds])=>Object.values(ds).some(b=>b.id===f.id))?`<div class="beltb">🏆 แชมป์${STADIUMS[Object.entries(G.venueBelts).find(([v,ds])=>Object.values(ds).some(b=>b.id===f.id))[0]].name}</div>`:f.belts?`<div class="beltb old">อดีตแชมป์เวที</div>`:""}${xpBar(f)}</div></div>
+  const head=`<div class="fp-head">${faceImg(f)}<div><h2>${esc(f.full)}</h2><div class="meta">${f.age!=null?f.age+" ปี · ":""}${f.camp==="player"?"ค่ายศิริชัย":f.lab?"ค่ายเวกเตอร์ กรุงเทพฯ":f.camp==="rival"?"ค่ายพยัคฆ์ทอง":"นักมวยอิสระ"} · รุ่น ${f.div} · ${styleOf(f.a)} · ${rec(f)}</div>${G.belt&&Object.values(G.belt).some(x=>x.id===f.id)?`<div class="beltb">🏆 แชมป์เวทีท่าแพ</div>`:Object.entries(G.venueBelts||{}).some(([v,ds])=>Object.values(ds).some(b=>b.id===f.id))?`<div class="beltb">🏆 แชมป์${STADIUMS[Object.entries(G.venueBelts).find(([v,ds])=>Object.values(ds).some(b=>b.id===f.id))[0]].name}</div>`:f.belts?`<div class="beltb old">อดีตแชมป์เวที</div>`:""}<div class="tierline">${tierChip(f,1)}<span class="meta">เรตติ้ง <b>${ratingOf(f)}</b></span>${tierYearNote(f)}</div>${xpBar(f)}</div></div>
    <div class="seg ptabs">${tabs.map(([k,n])=>`<button data-act="ptab" data-v="${k}" aria-pressed="${t===k}">${n}${k==="skill"&&skReady(f)?'<i class="tdot2"></i>':""}</button>`).join("")}</div>`;
   let body="";
   if(t==="look"){const cur=f.outfit||"base";
@@ -755,22 +768,22 @@ function reportHTML(){const r=G.lastReport;const ann=[];
     const m=(r.move&&r.move[d]&&r.move[d][id])||0;ann.push({f,pos,m,d});}
   ann.sort((a,b)=>(b.f.camp==="player")-(a.f.camp==="player"));
   const cut=r.stage==="local"?4:r.stage==="district"?4:0;
+  const tu=(r.tierUp||[]).filter(x=>G.F[x.id]);
   return `<h2>สรุปสัปดาห์ที่ ${r.week}</h2><p class="goal">${goalText()}</p>
+   ${tu.length?`<div class="tierup">${tu.map(x=>{const f=G.F[x.id],a=TIER_BY[x.from],b=TIER_BY[x.to],up=b.i>a.i;return `<div class="tu ${up?"up":"down"}">${faceImg(f,"sm")}<span><b>${esc(f.name)}</b> ${up?"เลื่อนขึ้นเป็น":"ตกลงเป็น"} <b>${b.ic} ${b.n}</b><small class="meta">จาก ${a.ic} ${a.n}</small></span></div>`;}).join("")}</div>`:""}
    ${ann.length&&cut?`<div class="announce"><div class="ann-h">ประกาศอันดับ · ${STAGE_NAME[r.stage]}</div>${ann.map(a=>`<div class="ann ${a.f.camp==="player"?"me":""}">${faceImg(a.f,"sm")}<b>${esc(a.f.name)}</b><span class="meta">รุ่น ${a.d}</span><span class="rk">อันดับ ${a.pos}</span>${moveIcon(a.m)}${cut?`<span class="pill ${a.pos<=cut?"green":"red"}">${a.pos<=cut?"อยู่ในโซนเข้ารอบ":"นอกโซน"}</span>`:""}</div>`).join("")}</div>`:""}
    ${r.prog?`<details class="prog"><summary class="ann-h">กราฟพัฒนาการ 4 สัปดาห์ (แตะเพื่อดู)</summary><div class="progrow">${r.prog.filter(p=>G.F[p.id]).map(p=>{const f=G.F[p.id];const sum=Object.keys(p.before).reduce((s,k)=>s+(f.a[k]-p.before[k]),0);
      return `<div class="pcell">${radarSVG(f,150,p.before)}<b>${esc(f.name)}</b><span class="meta">ค่ารวม ${sum>=0?"+":""}${sum.toFixed(1)}</span></div>`;}).join("")}</div></details>`:""}
    <div class="chips3"><span class="chip"><small>นักเรียน</small><b class="num pos">+${fmt(r.inc)}</b></span><span class="chip"><small>ค่าใช้จ่าย</small><b class="num neg">-${fmt(r.up+r.wg+(r.debtPay||0))}</b></span><span class="chip"><small>เงินสด</small><b class="num ${r.cash<0?"neg":""}">${fmt(r.cash)}</b></span></div>
    <details><summary>ผลการชกในวงการ (${r.log.length})</summary><div class="log">${r.log.map(l=>`<div>${esc(l)}</div>`).join("")||"<div>เงียบสงบ</div>"}</div></details>`;}
 // v1.81.1: "what's new" popup — shows once per save after loading, for players who started before this update
-const PATCH={id:"1.83.3",ver:"Muay Thai Moe v1.83.3",title:"รายงานประจำสัปดาห์จากค่ายศิริชัย",lead:"รอบนี้ปรับสมดุล ให้คู่ชกท้าทายขึ้นในปีหลัง ๆ",items:[
- ["🥊","คู่ชกสมน้ำสมเนื้อขึ้น","ตั้งแต่ปีที่ 2 โปรโมเตอร์ดูฝีมือจริงของนักมวย นับรวมสกิล ความชำนาญ และแผนการชก ไม่ใช่แค่ค่าพลัง คู่ที่เสนอมาจึงสูสีขึ้น"],
- ["🔄","คู่แข่งเก่งตามเรา","นักมวยในสายเก่งขึ้นตามค่ายของเรา มีทั้งคนที่ยังอ่อนกว่า และคนที่ซุ่มซ้อมช่วงปิดฤดูกลับมาแกร่งกว่าเดิม ตัวเก๋าที่ค่าพลังเต็มแล้วก็ยังเก่งขึ้นด้วยชั้นเชิงบนเวที"],
- ["📈","ชนะคู่อ่อนได้ EXP น้อยลง","ชนะคู่ที่อ่อนกว่ามากได้ EXP ชื่อเสียง และแต้มอันดับน้อยลง ชนะคู่สูสีหรือเก่งกว่าได้มากขึ้น"],
- ["🏟️","ชนะติดกัน คู่ก็ยากขึ้น","ชนะรวด โปรโมเตอร์จะส่งคู่ที่ยากขึ้นมา แพ้แล้วจะผ่อนลง บางสัปดาห์ยังมีคู่ง่ายให้เลือกพักหายใจ"],
- ["💰","ค่าตัวตามความยากจริง","ค่าตัวคิดจากความยากจริงของคู่ ชกคู่อ่อนได้เงินน้อย ชกคู่เก่งได้เงินเยอะ"],
- ["↺","รีเซ็ตสกิลได้","การ์ดนักมวย → สกิล → ปุ่ม ↺ รีเซ็ต ได้แต้มคืนครบ ครั้งแรกฟรี"],
- ["🛒","ของตกแต่งในร้าน 15 ชิ้น","ต้นไม้ ประตูค่าย เวที ลู่วิ่ง รถ และกระสอบทรายแบบใหม่ ซื้อได้ในร้าน ส่วนชิ้นที่ได้จากผลงานยังต้องปลดล็อกเองเหมือนเดิม"]],
- foot:"ลองเล่นแล้วคู่ยากหรือง่ายไป บอกครูแดงได้เลยค่ะ 🥊"};
+const PATCH={id:"1.84.0",ver:"Muay Thai Moe v1.84.0",title:"รายงานประจำสัปดาห์จากค่ายศิริชัย",lead:"รอบนี้มีระดับนักมวย ให้รู้ว่าใครเก่งระดับไหน",items:[
+ ["🏅","ระดับนักมวย 6 ขั้น","นักมวยทุกคน ทั้งค่ายเราและคู่แข่ง มีเรตติ้งที่ขึ้นลงตามผลชก แบ่งเป็น หน้าใหม่ · ดาวรุ่ง · มวยฝีมือ · หัวแถว · ยอดมวย · ตำนาน"],
+ ["📊","ดูว่าใครอยู่ระดับไหน","แท็บไฟต์ → อันดับ → ระดับนักมวย เห็นเรตติ้งทั้งรุ่น และใครขึ้นหรือลงระดับในปีนี้ ป้ายระดับยังขึ้นที่การ์ดนักมวยและข้อเสนอไฟต์"],
+ ["🎉","แจ้งเมื่อเลื่อนระดับ","นักมวยในค่ายเลื่อนระดับเมื่อไร สรุปสัปดาห์จะบอก และสรุปปีจะรวมว่าใครขึ้นระดับบ้าง"],
+ ["🥊","คู่ชกสมน้ำสมเนื้อขึ้น","ตั้งแต่ปีที่ 2 โปรโมเตอร์ดูฝีมือจริง นับรวมสกิลและแผนชก คู่แข่งเก่งตามค่ายเรา ชนะคู่อ่อนได้ EXP และค่าตัวน้อยลง"],
+ ["🛒","ของตกแต่งในร้าน 15 ชิ้น","ซื้อได้ในร้าน มีหน้ายืนยันก่อนจ่ายเงิน ส่วนชิ้นที่ได้จากผลงานยังต้องปลดล็อกเอง"]],
+ foot:"ไต่ระดับจนถึงตำนานให้ได้นะคะ 👑"};
 function maybeWhatsNew(){if(!G||G.ended||UI.scene)return;if(G.newsSeen===PATCH.id)return;UI.modal={type:"whatsnew"};}
 function whatsNewHTML(){return `<div class="wnew"><span class="pill gold">อัปเดต · ${esc(PATCH.ver)}</span><h2>🥊 ${esc(PATCH.title)}</h2><p class="lead">${esc(PATCH.lead)}</p>
   <div class="wnlist">${PATCH.items.map(([ic,t,b])=>`<details class="wnitem"><summary><span class="wnic">${ic}</span><b>${esc(t)}</b><i>▸</i></summary><p>${esc(b)}</p></details>`).join("")}</div><p class="meta wnhint">แตะหัวข้อเพื่ออ่านรายละเอียด</p>
@@ -1007,6 +1020,8 @@ function endingHTML(){const E=UI.ending,all=roster(G),res=seasonResult();
   return `<main class="endpage"><section class="px card end-hero"><img class="endlogo" src="${ASSET}logo.webp" alt="Muay Thai Moe">
     <span class="pill gold">${G.ended==="bankrupt"?"ค่ายปิดตัว":(G.season||1)>=2?`จบปีที่ ${G.season}`:"จบบทที่ 1 · ปีที่ 1"}</span><h1>${(G.season||1)>=2&&G.ended!=="bankrupt"?esc(E.title):`ฉากจบ: ${E.title}`}</h1>
     <p class="lead">${(G.season||1)>=2&&G.ended!=="bankrupt"?`ปีที่ ${G.season} ผ่านไปแล้ว ${esc(G.player.name)} กับค่ายศิริชัยยังเดินหน้าต่อ`:`ขอบคุณที่เล่น <b>Muay Thai Moe</b>! ${esc(G.player.name)} พาค่ายศิริชัยมาได้ถึงตรงนี้แล้ว`}</p></section>
+   ${(()=>{const mv=tierMoves(G);if(!mv.length)return "";const mine=mv.filter(m=>m.f.camp==="player"),oth=mv.filter(m=>m.f.camp!=="player"&&m.up).slice(0,6);
+     return `<section class="px card"><h3>ใครขึ้นระดับปีนี้</h3>${mine.concat(oth).map(m=>`<div class="kv-row"><span>${faceImg(m.f,"sm")} ${esc(m.f.name)} · รุ่น ${m.f.div}${m.f.camp==="player"?" · ค่ายเรา":""}</span><span>${m.from.ic} ${m.from.n} <b class="${m.up?"goldt":"mutt"}">${m.up?"▲":"▼"}</b> ${tierChip(m.f,1)}</span></div>`).join("")}</section>`;})()}
    <section class="px card"><h3>ผลงานปีนี้</h3>${res.length?res.map(r=>`<div class="kv-row"><span>${faceImg(r.f,"sm")} ${esc(r.f.name)} · รุ่น ${r.d}</span><span class="pill ${r.c}">${r.t}</span></div>`).join(""):'<p class="meta">ปีนี้ยังไม่มีนักมวยผ่านรอบตำบล</p>'}</section>
    <div class="grid g3"><section class="px card"><h3>ค่าย</h3><div class="kv-row"><span>ระดับค่าย</span><b>Lv.${campLevel(G)} ${CAMP_LV_NAME[campLevel(G)]}</b></div><div class="kv-row"><span>เงินสด</span><b class="num">${fmt(G.cash)}</b></div><div class="kv-row"><span>หนี้คงเหลือ</span><b class="num">${fmt(G.debt)}</b></div><div class="kv-row"><span>นักเรียน</span><b class="num">${students(G)} คน</b></div><div class="kv-row"><span>ชื่อเสียง</span><b class="num">${G.rep.toFixed(1)}</b></div></section>
    <section class="px card"><h3>นักมวยในค่าย</h3>${all.map(f=>`<div class="kv-row"><span>${esc(f.name)} Lv.${f.lvl}</span><span class="num">${rec(f)}</span></div>`).join("")}</section>
@@ -1364,7 +1379,7 @@ const ACT={
   intensity:d=>{if(trLocked(G.F[d.f]))return;G.F[d.f].plan.intensity=d.v;save();render();},
   consider:d=>{UI.modal={type:"consider",id:d.v};render();},
   accept:d=>{const o=G.offers.find(x=>x.id===d.v),result=acceptOffer(G,d.v);UI.modal=null;save();if(!result.ok){toast(result.reason);render();return;}toast(`รับไฟต์แล้ว: ${G.F[o.a].name} vs ${G.F[o.b].name} สัปดาห์ ${o.week}`);render();},
-  fsub:d=>{UI.fsub=d.v;if(d.v==="rank"&&G&&!(G.flags&&G.flags.rankGuide)){G.flags.rankGuide=1;UI.modal={type:"rankhelp"};save();}render();},csub:d=>{UI.csub=d.v;render();},rdiv:d=>{UI.rdiv=d.v;render();},
+  fsub:d=>{UI.fsub=d.v;if(d.v==="rank"&&G&&!(G.flags&&G.flags.rankGuide)){G.flags.rankGuide=1;UI.modal={type:"rankhelp"};save();}render();},csub:d=>{UI.csub=d.v;render();},rview:d=>{UI.rview=d.v;AU.sfx&&AU.sfx("ui");render();},rdiv:d=>{UI.rdiv=d.v;render();},
   tipnext:()=>{UI.tipIdx++;render();},hideguide:()=>{G.guideHidden=G.week;save();render();},
   tipact:d=>{if(d.k==="setrest"||d.k==="setprep"){ACT.tab({v:"train"});if(!trLocked(G.F[d.id])){UI.modal={type:"tpick",id:d.id};render();}}
     else if(d.k==="tab"&&d.sub){UI.csub=d.sub;ACT.tab({v:d.v});}

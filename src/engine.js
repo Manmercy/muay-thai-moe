@@ -830,8 +830,27 @@ function acceptOffer(G,oid){const o=G.offers.find(x=>x.id===oid);
   for(const x of G.offers)if(x.week===o.week&&(x.a===o.b||x.b===o.b)){x.status="conflict";x.reason=`${G.F[o.b].name}มีไฟต์ในสัปดาห์ ${o.week} แล้ว`;}
   return {ok:true,booking};}
 
+/* v1.84: career rating — every fighter (ours and NPCs) carries an Elo-style rating that moves with each counted bout;
+   tiers turn it into a readable class. NPCs start from their strength; ours start from their stats and record. */
+const TIERS=[{k:"rookie",n:"หน้าใหม่",min:0,ic:"🌱"},{k:"rising",n:"ดาวรุ่ง",min:950,ic:"⭐"},{k:"skilled",n:"มวยฝีมือ",min:1100,ic:"🥊"},
+  {k:"top",n:"หัวแถว",min:1250,ic:"🔥"},{k:"elite",n:"ยอดมวย",min:1400,ic:"💎"},{k:"legend",n:"ตำนาน",min:1550,ic:"👑"}];
+const TIER_BY=Object.fromEntries(TIERS.map((t,i)=>[t.k,{...t,i}]));
+function seedRating(f){const r=f.rec||{},recB=clamp(((r.w||0)-(r.l||0))*4,-100,200);
+  return Math.round(clamp(1000+(ovr(f.a)+(f.vet||0)+(f.camp==="player"?hiddenEdge(f):0)-10)*45+(f.canon&&f.camp==="rival"?120:0)+(f.lab?60:0)+(f.prodigy?80:0)+recB,700,1750));}
+function ratingOf(f){if(!f)return 1000;if(f.elo==null)f.elo=seedRating(f);return f.elo;}
+function tierOf(f){const r=ratingOf(f);let t=TIERS[0];for(const x of TIERS)if(r>=x.min)t=x;return TIER_BY[t.k];}
+function rateBout(G,a,b,res,tierKey){const ra=ratingOf(a),rb=ratingOf(b),E=1/(1+Math.pow(10,(rb-ra)/400)),S=res==="W"?1:res==="D"?.5:0;
+  const K=tierKey==="final"||tierKey==="semi"?36:tierKey==="exhibition"?16:24,d=K*(S-E),t0=[tierOf(a),tierOf(b)];
+  a.elo=Math.round(ra+d);b.elo=Math.round(rb-d);
+  [[a,t0[0]],[b,t0[1]]].forEach(([f,t])=>{const t1=tierOf(f);if(t1.k!==t.k&&f.camp==="player")G.tierNews=(G.tierNews||[]).concat([{id:f.id,from:t.k,to:t1.k,week:G.week}]).slice(-8);});}
+/* tiers at the start of the year, so the ranking page and the year-end can say who moved */
+function snapTiers(G){G.tierStart={season:G.season||1,t:{}};for(const f of Object.values(G.F))if(f.camp!=="free"&&f.camp!=="quest"&&(f.div==="A"||f.div==="B"))G.tierStart.t[f.id]=tierOf(f).k;}
+function tierMoves(G){if(!G.tierStart||G.tierStart.season!==(G.season||1))snapTiers(G);const out=[];
+  for(const [id,k] of Object.entries(G.tierStart.t)){const f=G.F[id];if(!f)continue;const t=tierOf(f),d=t.i-TIER_BY[k].i;if(d)out.push({f,from:TIER_BY[k],to:t,up:d>0});}
+  return out.sort((x,y)=>(y.f.camp==="player")-(x.f.camp==="player")||y.to.i-x.to.i||ratingOf(y.f)-ratingOf(x.f));}
 function applyResult(G,F,booking){
   const {A,B}=F;const fa=A.f,fb=B.f,r=F.result,tier=TIER[booking.tier];
+  if(!tier.off&&!booking.beast){if(!G.tierStart||G.tierStart.season!==(G.season||1))snapTiers(G);rateBout(G,fa,fb,r.win==="D"?"D":r.win==="A"?"W":"L",booking.tier);}
   let ret=null;
   for(const [me,op,side] of [[fa,fb,"A"],[fb,fa,"B"]]){
     const res=r.win==="D"?"D":r.win===side?"W":"L";
@@ -999,7 +1018,7 @@ function weekFinish(G){if(G.rep>55)G.rep=55+(G.rep-55)*(.96+(G.fac.hall||0)*.01)
     if(gameWeek(G)-G.snap.week<4)return null;const out=roster(G).filter(f=>G.snap.a[f.id]).map(f=>({id:f.id,before:G.snap.a[f.id]}));
     G.snap={week:gameWeek(G),a:Object.fromEntries(roster(G).map(f=>[f.id,{...f.a}]))};return out.length?out:null;})();
   grantDecorUnlocks(G);checkCampAwards(G);
-  G.lastReport={prog,week:G.week,inc,up,wg,debtPay,students:students(G),rank:after,move:G.rankMove,stage:stageOf(G.week),cash:G.cash,log:[...G.log],gains:roster(G).map(f=>({id:f.id,name:f.name,gains:{...f.gains},fatigue:f.fatigue,injury:f.injury,xp:f.xpGain||0,lvl:f.lvl,preset:f.plan.preset}))};
+  G.lastReport={tierUp:(G.tierNews||[]).filter(x=>x.week===G.week),prog,week:G.week,inc,up,wg,debtPay,students:students(G),rank:after,move:G.rankMove,stage:stageOf(G.week),cash:G.cash,log:[...G.log],gains:roster(G).map(f=>({id:f.id,name:f.name,gains:{...f.gains},fatigue:f.fatigue,injury:f.injury,xp:f.xpGain||0,lvl:f.lvl,preset:f.plan.preset}))};
   stageTransition(G);
   {const pv=G.history.length?G.history[G.history.length-1].cash:60000,sp=G.sponsorWk||0;G.history.push({w:G.week,season:G.season||1,cash:Math.round(G.cash),rep:+G.rep.toFixed(1),inc,up,wg,debt:debtPay,sponsor:sp,fight:G.wkFight||0,oth:Math.round(G.cash-pv-(inc+sp-up-wg-debtPay)-(G.wkFight||0))});G.wkFight=0;}
   if((G.negWeeks>=4&&G.cash<-10000)||G.cash<-40000)G.ended="bankrupt";
@@ -1079,7 +1098,10 @@ function newSeason(G){
     // v1.50: the whole field trains through the off-season too, so year 2 is not a walkover
     if(f.camp!=="player"){f.potential=Math.min(20,(f.potential||14)+1.5);for(const k in f.a)f.a[k]=Math.min(20,f.a[k]+(f.canon?.4:.6+rng()*.5));}
     if(f.camp!=="free"&&f.camp!=="quest"&&G.rank[f.div])G.rank[f.div][f.id]={pts:0,w:0,l:0,d:0};} /* v1.81.1: a beast/gang bout booked over new year (div X) used to crash here and block year 6 */
-  lateSeasonOpposition(G);syncFighterAges(G);genOffers(G);return G;}
+  lateSeasonOpposition(G);syncFighterAges(G);
+  /* v1.84: over the off-season every rating drifts part-way toward the fighter's real strength (ours count skills too), so tiers follow growth */
+  for(const f of Object.values(G.F))if(f.elo!=null&&f.camp!=="free"&&f.camp!=="quest")f.elo=Math.round(f.elo*.6+seedRating(f)*.4);
+  G.tierNews=[];snapTiers(G);genOffers(G);return G;}
 // v1.7 late-game money sinks
 const MASTERS={thasao:{name:"ครูมวยท่าเสา",cost:18000,attrs:["speed","foot"]},chaiya:{name:"ครูมวยไชยา",cost:18000,attrs:["guard","counter"]},
   lopburi:{name:"ครูมวยลพบุรี",cost:18000,attrs:["iq","counter"]},korat:{name:"ครูมวยโคราช",cost:18000,attrs:["punch","power"]}};
