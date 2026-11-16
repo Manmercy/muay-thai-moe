@@ -1,5 +1,5 @@
 // ================= MUAY THAI MOE v1.3 — UI =================
-const VERSION="1.82.4";
+const VERSION="1.83.0";
 const CUR_LANG=(typeof window!=="undefined"&&window.LANG)||"th";
 const TH_LABEL=String.fromCharCode(3652,3607,3618);
 function langSwitch(cls){return `<div class="langsw ${cls||""}" role="group" aria-label="Language">${[["th",TH_LABEL],["en","EN"]].map(([k,l])=>`<button class="lsb ${CUR_LANG===k?"on":""}" data-act="setlang" data-v="${k}" aria-pressed="${CUR_LANG===k}">${l}</button>`).join("")}</div>`;}
@@ -747,15 +747,14 @@ function reportHTML(){const r=G.lastReport;const ann=[];
    <div class="chips3"><span class="chip"><small>Students</small><b class="num pos">+${fmt(r.inc)}</b></span><span class="chip"><small>Expenses</small><b class="num neg">-${fmt(r.up+r.wg+(r.debtPay||0))}</b></span><span class="chip"><small>Cash</small><b class="num ${r.cash<0?"neg":""}">${fmt(r.cash)}</b></span></div>
    <details><summary>Results around the circuit (${r.log.length})</summary><div class="log">${r.log.map(l=>`<div>${esc(l)}</div>`).join("")||"<div>All quiet</div>"}</div></details>`;}
 // v1.81.1: "what's new" popup — shows once per save after loading, for players who started before this update
-const PATCH={id:"1.82.4",ver:"Muay Thai Moe v1.82.4",title:"Weekly report from Sirichai Camp",lead:"This round: a Trophy Room, prettier decorations and easier Loy Krathong cards",items:[
- ["🏆","Trophy Room","Camp → Trophies · cups, championship belts and certificates on display shelves; tap one to see which fight it came from"],
- ["📜","9 camp certificates","Clean camp, best subdistrict camp, Grandpa Chai's debt cleared, legendary camp and more · unearned ones show how to get them"],
- ["📸","Camp photo","Tap the button in the Trophy Room to save a picture of your camp and its stats to share"],
- ["🎨","More detailed decorations","Trees, gates, rings, tracks, vehicles and heavy bags redrawn at twice the detail, with shading and glowing lights"],
- ["🏮","Easier Loy Krathong cards","The riverside battle gives 1 card at Bronze, 2 at Silver, 3 at Gold, and a card row shows which you still need · the Loy Krathong gacha is open until Dec 7"],
- ["💰","Clearer cash flow","Tuition, sponsors, wages, upkeep and debt shown line by line, with the reason when you run at a loss and a 4-week history"],
- ["🧹","Camp life events","Camp clean-up day, a shared dinner after a loss, open day and a community fair booth · lines change every year"]],
- foot:"Trophy shelf full? Snap a photo and show Kru Daeng 🏆"};
+const PATCH={id:"1.83.0",ver:"Muay Thai Moe v1.83.0",title:"Weekly report from Sirichai Camp",lead:"This round makes the game easier to tap and read on phones and computers",items:[
+ ["👆","Bigger, easier buttons","End week, tabs, mail and settings buttons are all bigger and easy to hit with a thumb"],
+ ["📱","Sheets from the bottom","On phones, the weekly report, settings and fighter cards slide up from the bottom with buttons in thumb reach"],
+ ["🥊","Fight button at the bottom","The \"Fight!\" button and the in-fight speed/skill buttons moved to the bottom of the screen for one-handed play"],
+ ["🔤","Easier-to-read text","Small text is bigger across the game, and faint text is easier to read on dark backgrounds"],
+ ["⏭️","Don't ask again","The end-week prompt has a \"Don't ask again\" box; turn it back on in Settings"],
+ ["🖥️","Fuller desktop layout","Wide screens use more of the space, and the camp scene grows with your screen height"]],
+ foot:"Anything still hard to tap? Tell Kru Daeng 🥊"};
 function maybeWhatsNew(){if(!G||G.ended||UI.scene)return;if(G.newsSeen===PATCH.id)return;UI.modal={type:"whatsnew"};}
 function whatsNewHTML(){return `<div class="wnew"><span class="pill gold">Update · ${esc(PATCH.ver)}</span><h2>🥊 ${esc(PATCH.title)}</h2><p class="lead">${esc(PATCH.lead)}</p>
   <div class="wnlist">${PATCH.items.map(([ic,t,b])=>`<details class="wnitem"><summary><span class="wnic">${ic}</span><b>${esc(t)}</b><i>▸</i></summary><p>${esc(b)}</p></details>`).join("")}</div><p class="meta wnhint">Tap a topic to read more</p>

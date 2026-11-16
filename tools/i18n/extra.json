@@ -3968,5 +3968,19 @@
  "รอบนี้ค่ายมีห้องถ้วยรางวัล ของตกแต่งสวยขึ้น และการ์ดลอยกระทงเก็บง่ายขึ้น": "This round: a Trophy Room, prettier decorations and easier Loy Krathong cards",
  "</ul><p class=\"meta\">ข้ามได้ ไม่มีโทษ แต่อาจเสียโอกาสในสัปดาห์นี้</p><label class=\"endwarn-opt\"><input type=\"checkbox\" data-act=\"noaskend\"> ไม่ต้องถามอีก (เปิดคืนได้ในตั้งค่า)</label><div class=\"mfoot\"><button class=\"btn ghost\" data-act=\"closeModal\">กลับไปทำต่อ</button><button class=\"btn primary\" data-act=\"endgo\">จบสัปดาห์เลย</button></div>": "</ul><p class=\"meta\">You can skip without penalty, but you might miss chances this week</p><label class=\"endwarn-opt\"><input type=\"checkbox\" data-act=\"noaskend\"> Don't ask again (turn back on in Settings)</label><div class=\"mfoot\"><button class=\"btn ghost\" data-act=\"closeModal\">Go back</button><button class=\"btn primary\" data-act=\"endgo\">End week now</button></div>",
  "เตือนเมื่อยังมีสิ่งที่ยังไม่ได้ทำในสัปดาห์นี้": "Warn me when something is still left to do this week",
- "ถามก่อนจบสัปดาห์": "Ask before ending the week"
+ "ถามก่อนจบสัปดาห์": "Ask before ending the week",
+ "ลองเล่นแล้วตรงไหนกดยาก บอกครูแดงได้เลยค่ะ 🥊": "Anything still hard to tap? Tell Kru Daeng 🥊",
+ "จอกว้างใช้พื้นที่เต็มขึ้น ภาพค่ายใหญ่ขึ้นตามความสูงจอ": "Wide screens use more of the space, and the camp scene grows with your screen height",
+ "เล่นบนคอมเต็มจอขึ้น": "Fuller desktop layout",
+ "หน้ายืนยันจบสัปดาห์มีช่อง \"ไม่ต้องถามอีก\" เปิดคืนได้ในตั้งค่า": "The end-week prompt has a \"Don't ask again\" box; turn it back on in Settings",
+ "ไม่ต้องถามอีก": "Don't ask again",
+ "ขยายตัวอักษรเล็กทั้งเกม และปรับสีตัวอักษรจางให้ชัดขึ้นบนพื้นมืด": "Small text is bigger across the game, and faint text is easier to read on dark backgrounds",
+ "ตัวอักษรอ่านง่ายขึ้น": "Easier-to-read text",
+ "ปุ่ม \"ขึ้นชก!\" และปุ่มความเร็ว/สกิลระหว่างชก ย้ายลงล่างจอ กดมือเดียวได้": "The \"Fight!\" button and the in-fight speed/skill buttons moved to the bottom of the screen for one-handed play",
+ "ปุ่มขึ้นชกอยู่ล่างจอ": "Fight button at the bottom",
+ "บนมือถือ หน้าต่างสรุปสัปดาห์ ตั้งค่า และการ์ดนักมวยเลื่อนขึ้นจากล่าง ปุ่มยืนยันอยู่ในระยะนิ้วโป้ง": "On phones, the weekly report, settings and fighter cards slide up from the bottom with buttons in thumb reach",
+ "หน้าต่างขึ้นจากด้านล่าง": "Sheets from the bottom",
+ "ปุ่มจบสัปดาห์ แท็บ จดหมาย และตั้งค่า ใหญ่ขึ้นทุกจุด กดด้วยนิ้วโป้งได้สบาย": "End week, tabs, mail and settings buttons are all bigger and easy to hit with a thumb",
+ "ปุ่มใหญ่ขึ้น กดง่ายขึ้น": "Bigger, easier buttons",
+ "รอบนี้ปรับหน้าตาให้กดง่าย อ่านง่ายขึ้นทั้งมือถือและคอม": "This round makes the game easier to tap and read on phones and computers"
 }
