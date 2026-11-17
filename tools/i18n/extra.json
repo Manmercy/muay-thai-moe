@@ -5045,5 +5045,9 @@
  "<div class=\"trbox\"><div class=\"trh\"><b>จุดเด่นประจำตัว</b><span class=\"meta\">": "<div class=\"trbox\"><div class=\"trh\"><b>Innate trait</b><span class=\"meta\">",
  "<p class=\"meta\">✦ จุดเด่น: <b>": "<p class=\"meta\">✦ Trait: <b>",
  "จุดเด่นประจำตัว 2 แบบ": "Two innate traits per girl",
- "ทุกคนมีจุดเด่นติดตัว 2 แบบ เลือกสลับได้ในหน้าสกิล เช่น มะลิเคลื่อนไหวดั่งสายน้ำ รินคลังความรู้ ฟ้าแข็งอย่างหิน พลอยจังหวะเทพ": "Every girl has two innate traits to switch between on the skill page, like Mali's Move Like Water, Rin's Walking Library, Fah's Hard as Stone and Ploy's Godlike Timing"
+ "ทุกคนมีจุดเด่นติดตัว 2 แบบ เลือกสลับได้ในหน้าสกิล เช่น มะลิเคลื่อนไหวดั่งสายน้ำ รินคลังความรู้ ฟ้าแข็งอย่างหิน พลอยจังหวะเทพ": "Every girl has two innate traits to switch between on the skill page, like Mali's Move Like Water, Rin's Walking Library, Fah's Hard as Stone and Ploy's Godlike Timing",
+ "<p class=\"meta\">อีกแบบ: ": "<p class=\"meta\">Other option: ",
+ "</div>\n   <details class=\"trd\"><summary>รายละเอียด</summary><p>": "</div>\n   <details class=\"trd\"><summary>Details</summary><p>",
+ "<div class=\"seg trseg\" role=\"group\" aria-label=\"เลือกจุดเด่น\">": "<div class=\"seg trseg\" role=\"group\" aria-label=\"Choose a trait\">",
+ "<div class=\"trbox\"><div class=\"trh\"><b>จุดเด่น</b>": "<div class=\"trbox\"><div class=\"trh\"><b>Trait</b>"
 }

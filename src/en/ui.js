@@ -722,10 +722,10 @@ function skillTree(f,mine){const L=skillList(f.id),eqd=equipped(f),sc=SCHOOLS[L[
      ${SIGNATURE[f.id]?`<div class="skc sig ${hasSignature(f)?"has":"lock"}"><div class="skc-m"><div class="skc-h"><b>✦ Signature: ${SIGNATURE[f.id].name}</b></div><p class="skc-d">${SIGNATURE[f.id].desc}${hasSignature(f)?"":` · unlocks at bond 60 (now ${Math.round(f.bond||0)})`}</p></div></div>`:""}</div>
    ${mine?`<div class="skfoot"><button class="btn sm" data-act="skauto" data-id="${f.id}" data-v="${li}" ${[0,1,2,3,4,5].some(r=>{const s=L.find(x=>x.line===li&&x.row===r);return s&&skState(f,s,mine).st==="can";})?"":"disabled"}>Auto-upgrade · ${lines[li]}</button><span class="meta">Equip up to ${MAX_EQUIP} moves · passives work on their own, no slot needed</span></div>`:""}</div>`;}
 /* v1.87: innate traits — two per girl, pick one */
-function traitHTML(f,mine){const L=TRAITS[f.id];if(!L)return "";const cur=traitOf(f);
-  return `<div class="trbox"><div class="trh"><b>Innate trait</b><span class="meta">${mine?"Pick one at a time, switch anytime":"The one she uses now"}</span></div>
-   <div class="trgrid">${L.map(t=>{const on=cur===t.id;const extra=t.id==="grit"&&f.grit?` <span class="goldt">· stored so far +${Math.round(f.grit*100)}%</span>`:"";
-     return `<div class="trc ${on?"on":""}"><b>${on?"✓ ":""}${t.name}</b><p>${t.desc}${extra}</p>${mine?(on?`<span class="trtag">In use</span>`:`<button class="btn sm" data-act="trait" data-id="${f.id}" data-v="${t.id}">Use this</button>`):""}</div>`;}).join("")}</div></div>`;}
+function traitHTML(f,mine){const L=TRAITS[f.id];if(!L)return "";const cur=traitOf(f),T=L.find(t=>t.id===cur);
+  const extra=cur==="grit"&&f.grit?` <span class="goldt">· stored so far +${Math.round(f.grit*100)}%</span>`:"";
+  return `<div class="trbox"><div class="trh"><b>Trait</b>${mine?`<div class="seg trseg" role="group" aria-label="Choose a trait">${L.map(t=>`<button data-act="trait" data-id="${f.id}" data-v="${t.id}" aria-pressed="${cur===t.id}">${t.name}</button>`).join("")}</div>`:`<span class="trone">${T.name}</span>`}</div>
+   <details class="trd"><summary>Details</summary><p>${T.desc}${extra}</p>${mine?`<p class="meta">Other option: ${L.filter(t=>t.id!==cur).map(t=>`<b>${t.name}</b> · ${t.desc}`).join("")}</p>`:""}</details></div>`;}
 function skResetBtn(f){const n=skPointsSpent(f);if(!n)return "";const c=skResetCost(f);
   return `<button class="skrbtn" data-act="skresetask" data-id="${f.id}" ${c&&G.cash<c?"disabled":""} aria-label="Reset skills, refunds ${n} points" title="Reset skills · refunds ${n} points · ${c?fmt(c):"first reset is free"}">↺ Reset</button>`;}
 function skResetRow(f){const n=skPointsSpent(f);if(!n)return "";const c=skResetCost(f);
@@ -1476,7 +1476,7 @@ const ACT={
   sksel:d=>{UI.skSel=d.id+":"+d.v;AU.sfx("ui");render();},
   newsok:()=>{G.newsSeen=PATCH.id;UI.modal=null;save();render();},
   closeModal:()=>{const m=UI.modal;if(m&&m.type==="contest"){ACT.contestdone();return;}if(m&&m.type==="whatsnew"&&G){G.newsSeen=PATCH.id;save();}UI.modal=null;render();if(m&&m.after)m.after();},
-  trait:d=>{const f=G.F[d.id],L=TRAITS[d.id];if(!f||!L||f.camp!=="player")return;const t=L.find(x=>x.id===d.v);if(!t)return;f.trait=t.id;save();render();toast(`${f.name} now uses the trait "${t.name}"`);},
+  trait:d=>{const f=G.F[d.id],L=TRAITS[d.id];if(!f||!L||f.camp!=="player")return;const t=L.find(x=>x.id===d.v);if(!t||traitOf(f)===t.id)return;f.trait=t.id;save();render();toast(`${f.name} now uses the trait "${t.name}"`);},
   gopen:d=>{GB.box=d.v==="loy"?"loy":"n";if(GB.box==="loy"&&!loyFest()){toast("The Loy Krathong machine is closed. See you next festival!");return;}GB.st=null;GB.ps=[];UI.gq=false;UI.modal={type:"gbox"};render();gbPreload();},
   gpull:()=>{if(GB.st)return;const cost=gbCost();if((G.dust||0)<cost){AU.sfx("ui");toast(`Not enough stardust. You need ${cost}✦ · earn it by winning fights, getting new cards and breaking down spares`);return;}
     const r=GB.box==="loy"?loyPull(G):gachaPull(G);if(!r)return;save();const rr=CARDS[r.id].r;

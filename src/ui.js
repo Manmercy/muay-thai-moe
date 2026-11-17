@@ -722,10 +722,10 @@ function skillTree(f,mine){const L=skillList(f.id),eqd=equipped(f),sc=SCHOOLS[L[
      ${SIGNATURE[f.id]?`<div class="skc sig ${hasSignature(f)?"has":"lock"}"><div class="skc-m"><div class="skc-h"><b>✦ ท่าไม้ตาย: ${SIGNATURE[f.id].name}</b></div><p class="skc-d">${SIGNATURE[f.id].desc}${hasSignature(f)?"":` · ปลดเมื่อความสนิทถึง 60 (ตอนนี้ ${Math.round(f.bond||0)})`}</p></div></div>`:""}</div>
    ${mine?`<div class="skfoot"><button class="btn sm" data-act="skauto" data-id="${f.id}" data-v="${li}" ${[0,1,2,3,4,5].some(r=>{const s=L.find(x=>x.line===li&&x.row===r);return s&&skState(f,s,mine).st==="can";})?"":"disabled"}>อัปอัตโนมัติ · ${lines[li]}</button><span class="meta">ใส่ขึ้นชกได้ ${MAX_EQUIP} ท่า · ท่าติดตัวทำงานเองไม่ใช้ช่อง</span></div>`:""}</div>`;}
 /* v1.87: innate traits — two per girl, pick one */
-function traitHTML(f,mine){const L=TRAITS[f.id];if(!L)return "";const cur=traitOf(f);
-  return `<div class="trbox"><div class="trh"><b>จุดเด่นประจำตัว</b><span class="meta">${mine?"เลือกใช้ได้ทีละ 1 แบบ สลับได้ตลอด":"แบบที่เธอใช้อยู่ตอนนี้"}</span></div>
-   <div class="trgrid">${L.map(t=>{const on=cur===t.id;const extra=t.id==="grit"&&f.grit?` <span class="goldt">· สะสมแล้ว +${Math.round(f.grit*100)}%</span>`:"";
-     return `<div class="trc ${on?"on":""}"><b>${on?"✓ ":""}${t.name}</b><p>${t.desc}${extra}</p>${mine?(on?`<span class="trtag">กำลังใช้</span>`:`<button class="btn sm" data-act="trait" data-id="${f.id}" data-v="${t.id}">ใช้แบบนี้</button>`):""}</div>`;}).join("")}</div></div>`;}
+function traitHTML(f,mine){const L=TRAITS[f.id];if(!L)return "";const cur=traitOf(f),T=L.find(t=>t.id===cur);
+  const extra=cur==="grit"&&f.grit?` <span class="goldt">· สะสมแล้ว +${Math.round(f.grit*100)}%</span>`:"";
+  return `<div class="trbox"><div class="trh"><b>จุดเด่น</b>${mine?`<div class="seg trseg" role="group" aria-label="เลือกจุดเด่น">${L.map(t=>`<button data-act="trait" data-id="${f.id}" data-v="${t.id}" aria-pressed="${cur===t.id}">${t.name}</button>`).join("")}</div>`:`<span class="trone">${T.name}</span>`}</div>
+   <details class="trd"><summary>รายละเอียด</summary><p>${T.desc}${extra}</p>${mine?`<p class="meta">อีกแบบ: ${L.filter(t=>t.id!==cur).map(t=>`<b>${t.name}</b> · ${t.desc}`).join("")}</p>`:""}</details></div>`;}
 function skResetBtn(f){const n=skPointsSpent(f);if(!n)return "";const c=skResetCost(f);
   return `<button class="skrbtn" data-act="skresetask" data-id="${f.id}" ${c&&G.cash<c?"disabled":""} aria-label="รีเซ็ตสกิล คืน ${n} แต้ม" title="รีเซ็ตสกิล · คืน ${n} แต้ม · ${c?fmt(c):"ครั้งแรกฟรี"}">↺ รีเซ็ต</button>`;}
 function skResetRow(f){const n=skPointsSpent(f);if(!n)return "";const c=skResetCost(f);
@@ -1476,7 +1476,7 @@ const ACT={
   sksel:d=>{UI.skSel=d.id+":"+d.v;AU.sfx("ui");render();},
   newsok:()=>{G.newsSeen=PATCH.id;UI.modal=null;save();render();},
   closeModal:()=>{const m=UI.modal;if(m&&m.type==="contest"){ACT.contestdone();return;}if(m&&m.type==="whatsnew"&&G){G.newsSeen=PATCH.id;save();}UI.modal=null;render();if(m&&m.after)m.after();},
-  trait:d=>{const f=G.F[d.id],L=TRAITS[d.id];if(!f||!L||f.camp!=="player")return;const t=L.find(x=>x.id===d.v);if(!t)return;f.trait=t.id;save();render();toast(`${f.name}ใช้จุดเด่น "${t.name}"`);},
+  trait:d=>{const f=G.F[d.id],L=TRAITS[d.id];if(!f||!L||f.camp!=="player")return;const t=L.find(x=>x.id===d.v);if(!t||traitOf(f)===t.id)return;f.trait=t.id;save();render();toast(`${f.name}ใช้จุดเด่น "${t.name}"`);},
   gopen:d=>{GB.box=d.v==="loy"?"loy":"n";if(GB.box==="loy"&&!loyFest()){toast("ตู้ลอยกระทงปิดแล้ว ไว้เจอกันเทศกาลหน้า");return;}GB.st=null;GB.ps=[];UI.gq=false;UI.modal={type:"gbox"};render();gbPreload();},
   gpull:()=>{if(GB.st)return;const cost=gbCost();if((G.dust||0)<cost){AU.sfx("ui");toast(`เศษดาวไม่พอ ต้องใช้ ${cost}✦ · ได้จากชนะไฟต์ การ์ดใหม่ และย่อยใบซ้ำ`);return;}
     const r=GB.box==="loy"?loyPull(G):gachaPull(G);if(!r)return;save();const rr=CARDS[r.id].r;
