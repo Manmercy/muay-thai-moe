@@ -365,10 +365,21 @@ function drawCamp(ctx,G,t){
     const f=p.f,rr=row;D.push({y,f:()=>{ctx.imageSmoothingEnabled=true;drawFrame(ctx,sheetFor(f),ROW[rr],fr,x*S,y*S,46*S,flip);}});}
   // birds cross the sky now and then
   {const bt=(t%14000)/14000;if(bt<.5){const bxp=-10+bt*2*340;for(let k=0;k<3;k++){const yy=26+k*5+Math.sin(t/200+k)*2,wing=Math.floor(t/160+k)%2;P(bxp-k*9,yy,2,1,"#1b1230");P(bxp-k*9-2,yy-wing,2,1,"#1b1230");P(bxp-k*9+2,yy-wing,2,1,"#1b1230");}}}
+  // v1.88: the filtered indoor gym (airgym) — a sealed box with a big window and a filter unit
+  if(G.fac.airgym){P(114,72,40,36,"#7c8796");P(114,72,40,3,"#5d6775");P(118,80,32,16,"#2b3a4c");P(119,81,30,14,Math.floor(t/900)%2?"#9fd3f0":"#8cc6e8");P(133,81,1,14,"#5d6775");
+    P(146,98,8,8,"#c9d1da");const fa=Math.floor(t/90)%4;P(148+(fa%2?2:0),100+(fa>1?2:0),2,2,"#5d6775");P(150-(fa%2?2:0),102-(fa>1?2:0),2,2,"#5d6775");P(118,99,22,6,"#3a4757");}
   D.sort((a,b)=>a.y-b.y).forEach(d=>d.f());
+  yearFx(ctx,P,G,t);
   for(const [x,y] of bubble){const tx=SAYS[bi%SAYS.length];ctx.save();ctx.font=`700 ${7*S}px "Chakra Petch",sans-serif`;const w=ctx.measureText(tx).width/S+6;
     P(x-w/2,y-10,w,9,"#ffffff");P(x-1,y-1,2,2,"#ffffff");ctx.fillStyle="#1b1230";ctx.textAlign="center";ctx.fillText(tx,x*S,(y-3)*S);ctx.restore();}
 }
+/* v1.88 yearly themes on the camp scene: flood water over the yard, PM2.5 haze over everything */
+function yearFx(ctx,P,G,t){if(typeof ytIn!=="function")return;
+  if(ytIn(G,"flood")){P(0,146,320,34,"rgba(70,120,175,.55)");for(let i=0;i<14;i++){const x=((i*53+t/40)%340)-10,y=150+(i*7)%26;P(x,y,12,1,"rgba(210,235,255,.55)");}
+    const fx=((t/55)%360)-20,fy=158+Math.sin(t/500)*2;P(fx,fy,8,3,"#c8283c");P(fx+2,fy-1,4,1,"#f2c94c"); /* a floating sandal */
+    for(let i=0;i<3;i++){const bx=40+i*110+Math.sin(t/700+i)*6,by=166+Math.sin(t/400+i)*1.5;P(bx,by,10,6,"#6a4a2a");P(bx+1,by-1,8,1,"#8a6a4a");}}
+  if(ytIn(G,"pm25")&&!(G.fac.airgym>0&&false)){P(0,0,320,180,"rgba(196,150,108,.30)");P(0,0,320,60,"rgba(150,110,90,.28)");
+    for(let i=0;i<40;i++){const x=(i*37+t/60*(1+i%3))%320,y=(i*23+Math.sin(t/900+i)*8)%170;P(x,y,1+(i%2),1,"rgba(110,90,80,.45)");}}}
 // smooth stroll between random points, pausing in between
 // v1.51: camp pets — tiny rect sprites, Q(x,y,w,h,color) already mirrored for facing
 function drawPetQ(Q,k,t,moving){const leg=moving&&Math.floor(t/110)%2;

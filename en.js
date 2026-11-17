@@ -293,13 +293,13 @@ function trainWeek(G,f,rng){
   // v1.15: Kati's answer to talent — every honest training week builds "grit" that shows on fight night
   if(f.id==="kati"&&traitOf(f)==="grit"&&f.plan.preset!=="rest"&&f.plan.preset!=="prep")f.grit=Math.min(.1,(f.grit||0)+(f.plan.intensity==="heavy"?.004:f.plan.intensity==="normal"?.003:.0015));
   const pr=f.plan.preset,spec=st.some(k=>STAFF[k].pre===pr||STAFF[k].pre2===pr);
-  const coach=dif(G).train*(1+st.length*.02+(G.fac.daeng-1)*.05+(spec?.1:0))+(pr==="cond"?hill*.2:0),fac=1+G.fac.gym*.1+(G.fac.lights||0)*.06;
+  const coach=dif(G).train*(1+st.length*.02+(G.fac.daeng-1)*.05+(spec?.1:0))+(pr==="cond"?hill*.2:0),fac=1+G.fac.gym*.1+(G.fac.lights||0)*.06+(G.fac.airgym||0)*.03;
   const ms=mainStyle(f),core=pr===ms?STYLE_ATTRS[ms]:[];
   const ready=1-f.fatigue/160,mot=.8+f.morale/250;
   for(const [k,w] of Object.entries(p.w)){
     // v1.18: training your own style's core weapons fights diminishing returns less (style mastery path)
     const dim=1-Math.pow(f.a[k]/(f.potential+(core.includes(k)?CK:1.5)),2.2);
-    const g=.5*w*it.g*coach*fac*ready*mot*clamp(dim,.04,1)*(.75+rng()*.5)*(traitOf(f)==="surge"?1.15:traitOf(f)==="talent"?1.1:1)*(1+(f.drillBonus||0));
+    const g=.5*w*it.g*coach*fac*ready*mot*clamp(dim,.04,1)*(.75+rng()*.5)*(traitOf(f)==="surge"?1.15:traitOf(f)==="talent"?1.1:1)*(1+(f.drillBonus||0))*ytTrainMul(G,f);
     if(g>0){f.a[k]=Math.min(20,f.a[k]+g);f.gains[k]=g;}
   }
   f.drillBonus=0;
@@ -546,7 +546,7 @@ function srand(G,salt){return mulberry32((((G&&G.seed)||1)+((G&&G.week)||0)*7919
 function newGame(opts){
   const seed=(opts.seed??Math.floor(Math.random()*1e9))>>>0;const rng=mulberry32(seed);
   const G={v:1,timeV:3,snubV:2,dmSeenSeason:1,dmSeen:{},seed,week:1,diff:opts.diff||"normal",player:{name:opts.name||"Start",gender:opts.gender||"m"},cash:60000,debt:120000,rep:5,
-    fac:{gym:0,recovery:0,classroom:0,brand:0,dorm:0,kitchen:0,hill:0,video:0,ring:0,clinic:0,shrine:0,van:0,sauna:0,lights:0,hall:0,daeng:1,assistants:0},stu:1,staff:[],rankMove:{A:{},B:{}},camp:{beauty:0},campUsed:null,levelUps:[],avatar:opts.avatar||null,F:{},rank:{A:{},B:{}},qual:{A:[],B:[]},finalists:{A:[],B:[]},semis:{A:[],B:[]},champ:{},
+    fac:{gym:0,airgym:0,recovery:0,classroom:0,brand:0,dorm:0,kitchen:0,hill:0,video:0,ring:0,clinic:0,shrine:0,van:0,sauna:0,lights:0,hall:0,daeng:1,assistants:0},stu:1,staff:[],rankMove:{A:{},B:{}},camp:{beauty:0},campUsed:null,levelUps:[],avatar:opts.avatar||null,F:{},rank:{A:{},B:{}},qual:{A:[],B:[]},finalists:{A:[],B:[]},semis:{A:[],B:[]},champ:{},
     bookings:[],offers:[],log:[],flags:{},seen:{},freeUsed:false,negWeeks:0,history:[],honors:[],awards:[],ended:null,lastReport:null,romance:null};
   for(const [id,d] of Object.entries(CANON))G.F[id]=baseFighter(id,d);
   for(const div of ["A","B"])NPC_NAMES[div].forEach(([n,l],i)=>{const id=`n${div}${i}`;G.F[id]=baseFighter(id,mkNPC(id,n,div,l,rng,i));});
@@ -644,6 +644,7 @@ const FACILITIES={
   sauna:{name:"Herbal sauna",cost:[30000,50000],desc:"Fatigue recovery +3 · morale +1 weekly, per level",req:{week:28}},
   lights:{name:"Night-training floodlights",cost:[40000,60000],desc:"All training +6% per level",req:{week:32}},
   retreat:{name:"Chiang Dao training retreat",cost:[55000],desc:"One-time: take every fighter up the mountain for two weeks. Core stats +0.4, morale +15, fatigue fully cleared.",req:{week:38}},
+  airgym:{name:"Filtered indoor gym",cost:[250000],desc:"Sealed, air-conditioned and filtered: full training even in PM2.5 years · all training +3%",req:{lv:2}},
   hall:{name:"Grandpa Chai Hall of Honor",cost:[50000,80000],desc:"Fame +1.5 · fame fades slower · morale +1/wk",req:{week:36}},
 };
 const facLocked=(G,k)=>{const r=FACILITIES[k].req;if(!r)return "";if(r.lv&&campLevel(G)<r.lv)return `Camp Lv.${r.lv}`;if(r.rep&&G.rep<r.rep)return `Fame ${r.rep}`;if(r.week&&G.week<r.week&&!(G.season>1))return `Week ${r.week}`;return "";};
@@ -710,7 +711,7 @@ function fixSave(G){if(G&&G.flags&&G.flags.beat_ploy&&G.flags.beatS_ploy==null)G
   syncFighterAges(G);
 if(G.F)for(const id in G.F){const f=G.F[id];if(f&&hasTree(id)&&!f.spv){f.sp=(f.sp||0)+2*Math.max(0,(f.lvl||1)-1);f.spv=2;}}G.fac=G.fac||{};for(const k of Object.keys(FACILITIES))G.fac[k]=G.fac[k]||0;G.fac.daeng=G.fac.daeng||1;
   if(!G.staff){G.staff=["nok","paeng"].slice(0,G.fac.assistants||0);}G.fac.assistants=G.staff.length;
-  if(G.stu==null)G.stu=Math.min(studentCap(G),studentDemand(G));G.mail=G.mail||[];G.cal=G.cal||[];
+  if(G.stu==null)G.stu=Math.min(studentCap(G),studentDemand(G));G.mail=G.mail||[];G.cal=G.cal||[];if((G.season||1)>=2&&(!G.yt||G.yt.season!==(G.season||1))&&G.week<=3)pickYearTheme(G);
   if(!Array.isArray(G.honors)){G.honors=[];for(const t of G.titles||[])for(const [div,id] of Object.entries(t.champ||{}))if(G.F[id]?.camp==="player")G.honors.push({key:`${t.season}:province:${div}`,season:t.season,week:49,id,div,kind:"province"});
     for(const [div,id] of Object.entries(G.champ||{}))if(G.F[id]?.camp==="player")G.honors.push({key:`${G.season||1}:province:${div}`,season:G.season||1,week:49,id,div,kind:"province"});
     (G.dmLog||[]).forEach((x,i)=>{if(G.F[x.champ]?.camp==="player")G.honors.push({key:`legacy:dm:${i}`,season:null,week:x.wk,id:x.champ,div:G.F[x.champ].div,kind:"dm"});});
@@ -731,7 +732,7 @@ function studentDemand(G){return Math.round(3+Math.min(G.rep,30)*.4+G.fac.brand*
 function students(G){if(G.stu==null)G.stu=Math.min(studentCap(G),studentDemand(G));return Math.min(G.stu,studentCap(G));}
 function growStudents(G){const t=Math.min(studentCap(G),studentDemand(G)),n=students(G);G.stu=n<t?n+(t-n>=8?2:1):n>t?n-1:n;}
 const studentFee=G=>Math.round(dif(G).inc*560*(1+(G.fac.daeng-1)*.12)*(1+(campLevel(G)-1)*.2));
-const classIncome=G=>Math.round(students(G)*studentFee(G)*(G.disaster&&gameWeek(G)<G.disaster.untilAbs?(G.disaster.inc||0):1)); // v1.37: floods and storms keep students away
+const classIncome=G=>Math.round(students(G)*studentFee(G)*(ytKey(G)==="tourist"?1.2:1)*(G.disaster&&gameWeek(G)<G.disaster.untilAbs?(G.disaster.inc||0):1));
 function campLook(G){return clamp(Math.round(facTotal(G)+(G.camp?G.camp.beauty:0)/2+Math.min(G.rep,30)/8),0,20);}
 function buyFacility(G,k){const F=FACILITIES[k],lv=G.fac[k]||0;if(lv>=F.cost.length||facLocked(G,k))return false;const c=F.cost[lv];if(G.cash<c)return false;
   G.cash-=c;G.fac[k]=lv+1;if(k==="brand")G.rep+=.5;if(k==="shrine")G.rep+=1;if(k==="hall")G.rep+=1.5;if(k==="retreat")roster(G).forEach(f=>{["punch","kick","knee","elbow","clinch","guard","foot","stamina","power","speed"].forEach(q=>{f.a[q]=Math.min(Math.max(f.a[q],f.potential||18),f.a[q]+.4);});f.morale=Math.min(100,f.morale+15);f.fatigue=0;});return true;}
@@ -760,9 +761,10 @@ const CAMP_ACTIONS={
   tape:{name:"Old fight-tape night together",desc:"EXP +15 · free scouting on all booked opponents",cost:0,fac:["video",1]},
   fightnight:{name:"Camp fight night, sell tickets",desc:"+฿4,000 · fame +1 · fatigue +6",cost:0,fac:["ring",1]},
   clinicday:{name:"Clinic recovery day",desc:"Fatigue −15 · injuries heal 1 week faster",cost:1000,fac:["clinic",1]},
+  mask:{name:"Hand out dust masks to the neighbours",desc:"Fame +1.5 · morale +2 (PM2.5 weeks only)",cost:3000,yt:"pm25"},
   waikhru:{name:"Wai khru ceremony at the shrine",desc:"Everyone's morale +8 · trust +2 · fame +1",cost:3000,fac:["shrine",1]},
 };
-const campActLocked=(G,a)=>a.rep&&G.rep<a.rep?`Fame ${a.rep}`:a.fac&&(G.fac[a.fac[0]]||0)<a.fac[1]?`${FACILITIES[a.fac[0]].name}${a.fac[1]>1?` level ${a.fac[1]}`:""}`:"";
+const campActLocked=(G,a)=>a.yt&&!ytIn(G,a.yt)?"PM2.5 weeks only":a.rep&&G.rep<a.rep?`Fame ${a.rep}`:a.fac&&(G.fac[a.fac[0]]||0)<a.fac[1]?`${FACILITIES[a.fac[0]].name}${a.fac[1]>1?` level ${a.fac[1]}`:""}`:"";
 function doCampAction(G,k){const A=CAMP_ACTIONS[k];if(!A||G.campUsed||G.cash<A.cost||campActLocked(G,A))return null;G.cash-=A.cost;G.campUsed=k;const R=roster(G);let note="";
   if(k==="rest"){R.forEach(f=>f.fatigue=clamp(f.fatigue-4,0,100));note="Everyone gets a breather, fatigue drops a little";}
   if(k==="class"){G.cash+=1000;R.forEach(f=>f.fatigue=clamp(f.fatigue+6,0,100));note="Extra ฿1,000, fighters a little more tired";}
@@ -784,6 +786,7 @@ function doCampAction(G,k){const A=CAMP_ACTIONS[k];if(!A||G.campUsed||G.cash<A.c
   if(k==="tape"){R.forEach(f=>gainXP(G,f,15));G.scoutAbs=G.scoutAbs||{};for(const b of G.bookings)if(G.F[b.a].camp==="player")G.scoutAbs[b.b]=gameWeek(G);note="Watched tapes of every booked opponent, EXP +15";}
   if(k==="fightnight"){G.cash+=4000;G.rep+=1;R.forEach(f=>f.fatigue=clamp(f.fatigue+6,0,100));note="Tickets sold out, packed ringside, +฿4,000";}
   if(k==="clinicday"){R.forEach(f=>{f.fatigue=clamp(f.fatigue-15,0,100);if(f.injury>0)f.injury--;});note="Everyone feels lighter, fatigue −15";}
+  if(k==="mask"){G.rep+=1.5;R.forEach(f=>f.morale=clamp(f.morale+2,0,100));note="The whole subdistrict is wearing Sirichai masks. Fame +1.5";}
   if(k==="waikhru"){G.rep+=1;R.forEach(f=>{f.morale=clamp(f.morale+8,0,100);f.trust=clamp(f.trust+2,0,100);});note="A powerful wai khru ceremony, everyone's fired up";}
   return note;}
 // advisor: estimate win chance per plan
@@ -959,7 +962,7 @@ function applyResult(G,F,booking){
     if(!off&&booking.tier!=="exhibition"&&booking.tier!=="special"&&booking.tier!=="lab"&&booking.tier!=="final"){const rk=G.rank[me.div][me.id];if(rk){rk.pts+=res==="W"?(gapR<-.6?2:3)+(upset?1:0):res==="D"?1:0;/* v1.47: farming weaker fighters earns fewer ranking points */rk[res==="W"?"w":res==="L"?"l":"d"]++;}}
     if(me.camp==="player"){
       const W=booking.win||tier.win,Lo=booking.lose||tier.lose;const pay=res==="W"?W:res==="D"?(W+Lo)/2:Lo;if(booking.fair){G.fairPay=G.fairPay||[];G.fairPay.push({amt:pay,op:op.name,res});}else{G.cash+=pay;G.wkFight=(G.wkFight||0)+pay;}
-      G.rep=Math.max(0,G.rep+(res==="W"?tier.rep*clamp(1+gapR*.5,.35,1.6):res==="L"?0:.5)/(1+Math.max(0,G.rep-25)/25));
+      G.rep=Math.max(0,G.rep+(res==="W"?tier.rep*clamp(1+gapR*.5,.35,1.6)*(ytKey(G)==="tv"?1.4:1):res==="L"?(ytKey(G)==="tv"?-.4:0):.5)/(1+Math.max(0,G.rep-25)/25));
       /* v1.83.1: promoters read the record — a winning streak brings tougher offers, a loss brings them back down (settles near 2 wins in 3) */
       if(!off)me.mmOff=clamp((me.mmOff||0)+(res==="W"?.2:res==="L"?-.45:0),-1,2);
       if(res==="W"&&!G.flags.firstWin)G.flags.firstWin=me.id;
@@ -1091,7 +1094,9 @@ function checkCampAwards(G){G.campAwards=Array.isArray(G.campAwards)?G.campAward
   for(const [id,A] of Object.entries(CAMP_AWARDS)){if(G.campAwards.some(x=>x.id===id))continue;let ok=false;try{ok=A.ok(G);}catch(e){}
     if(ok){G.campAwards.push({id,season:G.season||1,week:G.week});got.push(id);}}
   if(got.length){G.newCerts=(G.newCerts||[]).concat(got);}return got;}
-function weekFinish(G){if(G.rep>55)G.rep=55+(G.rep-55)*(.96+(G.fac.hall||0)*.01);if(G.sponsorWk)G.cash+=G.sponsorWk;growStudents(G); // v1.22.1: fame above 40 needs upkeep
+function weekFinish(G){if(G.rep>55)G.rep=55+(G.rep-55)*(.96+(G.fac.hall||0)*.01);if(G.sponsorWk)G.cash+=G.sponsorWk;
+  if(ytKey(G)==="sponsor"&&G.yt.acc&&G.week<=40)G.cash+=2000;if(ytKey(G)==="tourist")for(const f of roster(G))f.fatigue=clamp(f.fatigue+1,0,100); /* v1.88 yearly themes */
+ growStudents(G); // v1.22.1: fame above 40 needs upkeep
 
   const before=rankSnapshot(G);
   simNPCWeek(G);
@@ -1188,6 +1193,21 @@ function lateSeasonOpposition(G){arcSync(G);const year=G.season||1;ensureStageNP
   if(back.length)G.lvNews=(G.lvNews||[]).concat(back.map(n=>`${n} trained hard in the off-season and is back stronger than ever`)).slice(-3);
   G.flags.oppositionSeason=year;}
 // v1.3: keep playing after the season — new season, same camp, fighters and bonds
+/* v1.88 yearly themes — from year 2 every season draws one mild theme (seeded per save, never the same twice in a row).
+   They nudge money, fatigue or training for a while; they never change how fights work. */
+const YEAR_THEMES={
+ flood:{ic:"🌊",name:"Flood year",desc:"Weeks 14–16 the rains flood the camp: training is 80% effective and only half the students can come.",from:14,to:16},
+ sponsor:{ic:"💼",name:"Sponsor year",desc:"If you take the deal: ฿2,000 every week until week 40, plus a ฿20,000 bonus if the camp wins 8 fights by week 40."},
+ pm25:{ic:"😷",name:"PM2.5 haze year",desc:"Weeks 37–46 haze covers Chiang Mai and training is less effective (conditioning most of all). A filtered indoor gym lets you train fully.",from:37,to:46},
+ tourist:{ic:"🧳",name:"Tourist boom year",desc:"Class fees +20% all year, but the camp is busy and fighters get a little more tired each week."},
+ tv:{ic:"📺",name:"TV year",desc:"A TV crew follows the camp all year: wins earn more fame, losses cost a little."},
+ lotto:{ic:"🎟️",name:"Lottery year",desc:"The old man next door hits the lottery: a donation arrives around week 20."}};
+const ytKey=G=>G&&G.yt&&G.yt.season===(G.season||1)?G.yt.k:null;
+const ytIn=(G,k)=>{if(ytKey(G)!==k)return false;const T=YEAR_THEMES[k];return T.from==null||(G.week>=T.from&&G.week<=T.to);};
+function pickYearTheme(G){const S=G.season||1;if(S<2)return null;const last=G.yt&&G.yt.k;const keys=Object.keys(YEAR_THEMES).filter(k=>k!==last);
+  const r=mulberry32((G.seed||1)*131+S*7919)();G.yt={season:S,k:keys[Math.floor(r*keys.length)]};return G.yt.k;}
+function ytTrainMul(G,f){if(ytIn(G,"flood"))return .8;if(ytIn(G,"pm25")&&!((G.fac&&G.fac.airgym)>0))return f.plan.preset==="cond"?.6:.75;return 1;}
+const ytSponsorWins=G=>(G.cal||[]).filter(c=>c.season===(G.season||1)&&c.res==="W"&&c.wk<=40).length;
 function newSeason(G){
   G.titles=G.titles||[];G.titles.push({season:G.season||1,champ:{...G.champ}});
   G.season=(G.season||1)+1;G.week=1;G.ended=null;G.qual={A:[],B:[]};G.finalists={A:[],B:[]};G.semis={A:[],B:[]};G.champ={};G.bookings=[];G.log=[];
@@ -1203,7 +1223,7 @@ function newSeason(G){
   lateSeasonOpposition(G);syncFighterAges(G);
   /* v1.84: over the off-season every rating drifts part-way toward the fighter's real strength (ours count skills too), so tiers follow growth */
   for(const f of Object.values(G.F))if(f.elo!=null&&f.camp!=="free"&&f.camp!=="quest")f.elo=Math.round(f.elo*.6+seedRating(f)*.4);
-  G.tierNews=[];snapTiers(G);genOffers(G);return G;}
+  pickYearTheme(G);G.tierNews=[];snapTiers(G);genOffers(G);return G;}
 // v1.7 late-game money sinks
 const MASTERS={thasao:{name:"Tha Sao master",cost:18000,attrs:["speed","foot"]},chaiya:{name:"Chaiya master",cost:18000,attrs:["guard","counter"]},
   lopburi:{name:"Lopburi master",cost:18000,attrs:["iq","counter"]},korat:{name:"Korat master",cost:18000,attrs:["punch","power"]}};
@@ -2733,7 +2753,7 @@ EVENTS.push(
   {n:"coach",t:"Kids can't train in a room with no roof. How do we fix it?"},
   {choice:[{t:"Repair it properly, fast (฿25,000)",fx:G=>{G.cash-=25000;},then:[{n:"nar",t:"A full crew arrives and finishes in two days; a shiny new roof, and classes carry on without a hitch"}]},
    {t:"Patch it up for now (฿8,000)",fx:G=>{G.cash-=8000;G.disaster={name:"The temporary roof",untilAbs:absWeek(G)+3,inc:.5};roster(G).forEach(f=>f.morale=Math.max(0,f.morale-3));},then:[{n:"nar",t:"A blue tarp covers the roof. Every time it rains, water drips onto the middle of the ring; only half the students come for three weeks"}]}]}]},
- {id:"dis_flood",pri:1,look:"casual",when:G=>G.week>=30&&G.week<=44&&G.cash>=40000,bg:"camp",steps:[
+ {id:"dis_flood",pri:1,look:"casual",when:G=>G.week>=30&&G.week<=44&&G.cash>=40000&&ytKey(G)!=="flood",bg:"camp",steps:[
   {n:"nar",t:"Three days and nights of heavy rain. The river bursts its banks and floods the whole subdistrict; knee-deep water in camp, training mats drifting against the door"},
   {n:"mali",f:"sad",l:"casual",t:"Mali's gloves floated away! …Oh, there's a fish swimming into the camp!"},
   {n:"rin",f:"sad",l:"casual",t:"The road into the subdistrict is cut off. Students definitely can't come for at least three weeks. The generator and mats need replacing"},
@@ -3779,6 +3799,24 @@ const CARDS={
  f_r1:{c:"fah",r:"R",t:"Vampire by the River",hint:"Reach the Close stage with Fah",bg:"river",need:G=>(G.F.fah.bond||0)>=40,steps:[
   {n:"nar",t:"Halloween night. Fah, wearing plastic vampire fangs, dangles her feet in the water at the pier."},{n:"fah",f:"happy",l:"casual",t:"When I was a kid nobody threw me a birthday, so I dressed up as a ghost and celebrated myself!"},
   {n:"fah",f:"flustered",l:"casual",t:"…This year someone's sitting with me. Guess I don't need to dress as a ghost anymore."}]}};
+
+/* v1.88 funny-condition cards — helpers read the fight log (G.cal holds our camp's bouts) */
+const funCal=(G,id)=>(G.cal||[]).filter(c=>!id||c.a===id).slice().sort((x,y)=>(x.absWeek||0)-(y.absWeek||0));
+const funKO1=(G,id)=>funCal(G,id).filter(c=>c.res==="W"&&/KO/.test(c.type||"")&&(c.cards||[]).length===1).length;
+const funCount=(G,id,r)=>funCal(G,id).filter(c=>c.res===r).length;
+function funStreak(G,id,r){let best=0,cur=0;for(const c of funCal(G,id)){if(c.res===r){cur++;best=Math.max(best,cur);}else cur=0;}return best;}
+const funByOne=(G,id)=>funCal(G,id).filter(c=>c.res==="W"&&!/KO/.test(c.type||"")&&(c.cards||[]).length&&Math.abs(c.cards.reduce((s,x)=>s+x[0]-x[1],0))===1).length;
+Object.assign(CARDS,{
+ x_kati_r1:{c:"kati",r:"R",t:"One Round, Noodles Not Done",hint:"Kati wins by knockout in round 1 twice",bg:"local",need:G=>funKO1(G,"kati")>=2,steps:[{"n":"nar","t":"The first-round bell has barely stopped ringing and the opponent is already down for the count. The noodle lady by the ring has only blanched half her noodles."},{"n":"npc","who":"The noodle lady by the ring","t":"Last fight round one, this fight round one! Make it last a bit, dear, I can't even sell anything."},{"n":"kati","f":"flustered","l":"fight","t":"Sorry, auntie! …Let me blanch the noodles then. Call it a cool-down."},{"n":"nar","t":"That night the crowd eats noodles made by the winner. The broth is a little salty, but nobody dares say so."}]},
+ x_kati_sr1:{c:"kati",r:"SR",t:"A Letter From the Girl Who Lost Five Times",hint:"Beat the same opponent 5 times",bg:"night",need:G=>Object.values(G.h2h||{}).some(h=>h.w>=5),steps:[{"n":"nar","t":"A letter in messy handwriting arrives, addressed to 'Sirichai Camp, the reason I quit boxing'."},{"n":"nar","t":"'After losing to you five times, I opened a boat-noodle shop instead. It sells better than boxing ever did. Come eat sometime, half price… just no fighting in the shop.'"},{"n":"kati","f":"flustered","l":"casual","t":"I feel a little guilty… but boat noodles? I'm definitely going."},{"n":"coach","t":"I hear her shop gets bigger crowds than our fights."}]},
+ x_mali_r1:{c:"mali",r:"R",t:"Victory Som Tam, Spicy for Everyone",hint:"Mali wins 5 fights in a row",bg:"food",need:G=>funStreak(G,"mali","W")>=5,steps:[{"n":"mali","f":"happy","l":"casual","t":"Five in a row! I'm making som tam for everyone. Five chillies, one per win!"},{"n":"nar","t":"Mali's 'five chillies' turn out to be five fistfuls. Coach Daeng takes one bite and goes silent for three minutes."},{"n":"coach","t":"…Water. Anyone. Water."},{"n":"mali","f":"flustered","l":"casual","t":"Champions eat spicy! …You can have the mild one, though. I secretly made you a plate."}]},
+ x_mali_n1:{c:"mali",r:"N",t:"Cheer-Up Party",hint:"The camp loses 4 fights in a row",bg:"night",need:G=>inCamp(G,"mali")&&funStreak(G,null,"L")>=4,steps:[{"n":"nar","t":"Four losses in a row. The camp is so quiet you can hear the geckos, until Mali drags a mookata pan into the yard."},{"n":"mali","f":"happy","l":"casual","t":"New rule! Whoever lost eats the first piece, whoever won grills for the losers. …Nobody's won, so I'll grill!"},{"n":"nar","t":"Late into the night there's laughter in the yard. Nobody mentions the losses again."}]},
+ x_rin_r1:{c:"rin",r:"R",t:"One Point, As Planned",hint:"Rin wins on points by exactly 1",bg:"local",need:G=>funByOne(G,"rin")>=1,steps:[{"n":"nar","t":"The judges announce it: Rin wins by a single point. The whole camp finally breathes out."},{"n":"rin","f":"happy","l":"fight","t":"As planned. I calculated a one-point margin to conserve energy."},{"n":"coach","t":"Then why were your hands shaking in round five?"},{"n":"rin","f":"flustered","l":"fight","t":"…That was acting, to make her overconfident. I won't be taking further questions."}]},
+ x_rin_sr1:{c:"rin",r:"SR",t:"The Fifteenth Tape",hint:"Scout 15 different opponents while Rin is in camp",bg:"night",need:G=>inCamp(G,"rin")&&Object.keys(G.scoutAbs||{}).length>=15,steps:[{"n":"nar","t":"It's 2 a.m. and the tape-room light is still on. Rin sits surrounded by fifteen tapes and fifteen notebooks."},{"n":"rin","f":"happy","l":"casual","t":"Tape fifteen. I've found the pattern: every fighter in this province blinks before a left kick."},{"n":"rin","f":"flustered","l":"casual","t":"…Except you. You blink when you look at me. I don't know what it means yet, but I'll find out."}]},
+ x_ploy_r1:{c:"ploy",r:"R",t:"The Cat Finally Lets Her",hint:"Have 4 pets, including a cat, while Ploy is in camp",bg:"camp",need:G=>inCamp(G,"ploy")&&(G.pets||[]).length>=4&&(G.pets||[]).some(p=>p.k==="cat"),steps:[{"n":"nar","t":"The camp has four pets now. This morning the orange cat walks past everyone and hops straight into Ploy's lap."},{"n":"ploy","f":"flustered","l":"casual","t":"…Don't move. Whoever moves gets punched."},{"n":"nar","t":"Ploy sits perfectly still for two hours and misses the whole morning session. Coach Daeng doesn't dare call her."},{"n":"ploy","f":"happy","l":"casual","t":"She's warm… You took a photo, right? Send it to me. Don't post it anywhere."}]},
+ x_ploy_r2:{c:"ploy",r:"R",t:"I Wasn't Nervous",hint:"Ploy wins a title fight for Sirichai",bg:"final",need:G=>(G.cal||[]).some(c=>c.a==="ploy"&&c.tier==="final"&&c.res==="W"),steps:[{"n":"nar","t":"The belt goes around Ploy's waist. The crowd stands to applaud; Ploy stands still, expressionless."},{"n":"ploy","f":"happy","l":"fight","t":"I'm not excited. I've won like this plenty of times."},{"n":"nar","t":"On the way down, though, she walks into a corner post, and quietly apologises to it."},{"n":"ploy","f":"flustered","l":"fight","t":"…You didn't see anything. Understood?"}]},
+ x_fah_n1:{c:"fah",r:"N",t:"Nobody Won, Fah's Furious",hint:"Fah fights to a draw for Sirichai",bg:"local",need:G=>funCount(G,"fah","D")>=1,steps:[{"n":"nar","t":"The referee raises both hands. A draw. Fah stomps in the middle of the ring."},{"n":"fah","f":"angry","l":"fight","t":"What's a draw!? I don't get it! Then who gets the medal! Who gets the grilled chicken!"},{"n":"coach","t":"Half a chicken each."},{"n":"fah","f":"happy","l":"fight","t":"…Half is fine. But I want the drumstick!"}]},
+ x_fah_r1:{c:"fah",r:"R",t:"Fah Isn't Crying",hint:"Fah loses 3 fights in a row",bg:"night",need:G=>funStreak(G,"fah","L")>=3,steps:[{"n":"nar","t":"Three losses in a row. Fah vanishes all evening, until you find her behind the heavy bag, face buried in her knees."},{"n":"fah","f":"sad","l":"casual","t":"I'm not crying! It's dust! This camp is dusty!"},{"n":"nar","t":"You sit down beside her without a word. Slowly, Fah leans her head on your shoulder."},{"n":"fah","f":"flustered","l":"casual","t":"…Can we train extra tomorrow? Double. And don't tell anyone I sat here."}]}});
 function cardCheck(G){G.cards=G.cards||{};const got=[];for(const id in CARDS){if(G.cards[id])continue;const C=CARDS[id];if(C.g)continue;try{if(C.need(G)){G.cards[id]={n:1,lv:1,wk:absWeek(G),seen:false};got.push(id);G.dust=(G.dust||0)+5;}}catch(e){}}return got;}
 
 
@@ -3972,6 +4010,20 @@ EVENTS.push({id:"nai_color",annual:true,pri:2,look:"casual",bg:"camp",when:G=>G.
   {n:"npc",who:"District Chief",img:"nai",t:`In week ${CONTEST_WEEK} I'll walk every camp myself for the annual Camp Beauty Contest: seven areas, ten points each`},
   {n:"npc",who:"District Chief",img:"nai",t:G=>`Decorations in ${yearColor(G).n} get bonus points, and don't forget to keep the yard clean. Last year ${(G.contests&&G.contests[(G.season||1)-1]&&G.contests[(G.season||1)-1].rank===1)?"this camp did very well":"Golden Tiger Camp started preparing at new year"}`},
   {n:"coach",t:G=>`${yearColor(G).n}, huh… Manager, shall we check the decorations page? Pieces in the right colour are marked`}]});
+
+/* v1.88 yearly theme scenes (annual — play once in the year that drew the theme) */
+EVENTS.push(
+{id:"yt_intro_flood",annual:true,pri:2,look:"casual",bg:"camp",when:G=>ytKey(G)==="flood"&&G.week>=1,steps:[{"n": "nar", "t": "The forecast says this year's rains will be the heaviest yet. The old man next door is already moving his things up high."},{n:"coach",t:G=>`Our camp sits lowest in the subdistrict. When the water comes, we get it first. Around week 14, be ready, ${ME(G)}`},{"n": "kati", "f": "happy", "l": "casual", "t": "It's fine! Grandpa used to train me in the water, said it was great for the legs. …Or maybe he was just fooling me."},{n:"nar",t:"🌊 Flood year: weeks 14–16 training is 80% effective and only half the students can come."}]},
+{id:"yt_flood_hit",annual:true,pri:3,look:"casual",bg:"camp",when:G=>ytIn(G,"flood"),steps:[{fx:G=>{G.cash-=6000;G.disaster={name:"The flood",untilAbs:absWeek(G)+3,inc:.5};}},{"n": "nar", "t": "In one night the Ping river floods the camp knee-deep. The heavy bags float like buoys, and the rooster stands on the ring glaring down."},{"n": "coach", "t": "Repairs cost ฿6,000. For three weeks we can't train properly, and only half the students can make it."},{"n": "kati", "f": "happy", "l": "casual", "t": "I can kick through water harder now! …That doesn't really help, does it."}]},
+{id:"yt_flood_end",annual:true,pri:2,look:"casual",bg:"camp",when:G=>ytKey(G)==="flood"&&G.week>=17&&G.week<=19,steps:[{fx:G=>{roster(G).forEach(f=>f.morale=Math.min(100,f.morale+3));}},{"n": "nar", "t": "The water goes down. Half the subdistrict turns up with brooms to scrub the camp, and someone brings sticky rice and fried pork for everyone."},{"n": "npc", "who": "Auntie Sri, the vegetable seller", "t": "Last year your kids carried my vegetables out of the flood. This year it's my turn."},{n:"nar",t:"Everyone's morale +3"}]},
+{id:"yt_intro_sponsor",annual:true,pri:2,look:"casual",bg:"camp",when:G=>ytKey(G)==="sponsor"&&G.week>=1,steps:[{"n": "nar", "t": "A man in a suit steps out of a van with a folder. He's from a new energy-drink brand."},{"n": "npc", "who": "Brand manager, 'One Push'", "t": "We pay two thousand a week until week 40, just for our logo on the shorts. If the camp wins 8 fights by week 40, there's a twenty-thousand bonus."},{choice:[{t:"Take the deal and wear the 'One Push' logo",fx:G=>{G.yt.acc=1;},then:[{"n": "kati", "f": "flustered", "l": "casual", "t": "That logo's huge… bigger than my name."}]},{t:"Politely decline",then:[{"n": "coach", "t": "Fine by me. Grandpa Chai's shorts never had a logo."}]}]}]},
+{id:"yt_sponsor_end",annual:true,pri:2,look:"casual",bg:"camp",when:G=>ytKey(G)==="sponsor"&&G.yt.acc&&G.week>=41,steps:[{fx:G=>{const w=ytSponsorWins(G);G.yt.win=w;if(w>=8)G.cash+=20000;}},{n:"npc",who:"Brand manager, 'One Push'",t:G=>G.yt.win>=8?`This year the camp won ${G.yt.win} fights! Here's the twenty-thousand bonus as promised. Let's talk again next year.`:`This year: ${G.yt.win} fights, short of eight, so no bonus this time. Thanks for wearing the logo all year.`}]},
+{id:"yt_intro_pm25",annual:true,pri:2,look:"casual",bg:"camp",when:G=>ytKey(G)==="pm25"&&G.week>=1,steps:[{"n": "nar", "t": "Early-year news says the dry-season fires will be bad. The haze will come early."},{"n": "coach", "t": "From around week 37 to 46 the haze will cover the city and outdoor training won't do much. An indoor gym with air filters would fix it, if we can afford it. It isn't cheap."},{n:"nar",t:"😷 PM2.5 year: weeks 37–46 training is less effective. The filtered indoor gym is in Manage camp."}]},
+{id:"yt_pm_start",annual:true,pri:2,look:"casual",bg:"camp",when:G=>ytIn(G,"pm25"),steps:[{"n": "nar", "t": "This morning Doi Suthep has vanished. The sky is a murky orange and everyone trains in masks."},{"n": "kati", "f": "pout", "l": "casual", "t": "Breathing feels like eating burnt rice…"},{n:"coach",t:G=>G.fac.airgym?"Lucky we built the filtered gym. Move inside and train as usual.":"Train light for now. If you want to help the neighbours, hand out masks as this week's camp activity."}]},
+{id:"yt_intro_tourist",annual:true,pri:2,look:"casual",bg:"market",when:G=>ytKey(G)==="tourist"&&G.week>=1,steps:[{"n": "nar", "t": "A new direct flight opens and the city fills with tourists. Every day someone is taking photos at the camp gate."},{"n": "coach", "t": "We can charge 20% more for classes this year, but the camp will be hectic and the girls a little more tired each week."},{"n": "kati", "f": "happy", "l": "casual", "t": "I need to practise my 'how are you' again."}]},
+{id:"yt_intro_tv",annual:true,pri:2,look:"casual",bg:"camp",when:G=>ytKey(G)==="tv"&&G.week>=1,steps:[{"n": "nar", "t": "The crew of 'Fight Camp Life' wants to film all year. The cameras follow everyone, even Coach Daeng at lunch."},{"n": "coach", "t": "Win on TV and people know you. Lose on TV and they know you too. Careful."},{"n": "kati", "f": "flustered", "l": "casual", "t": "Can I put on some make-up first…?"},{n:"nar",t:"📺 TV year: wins earn more fame, losses cost a little."}]},
+{id:"yt_intro_lotto",annual:true,pri:2,look:"casual",bg:"camp",when:G=>ytKey(G)==="lotto"&&G.week>=1,steps:[{"n": "nar", "t": "Uncle Wang from next door shows up with a lottery paper. Last night he dreamed Kati won in three rounds."},{"n": "npc", "who": "Uncle Wang", "t": "This year I'm betting Sirichai's numbers every draw. If I win, the camp gets a share, I promise!"}]},
+{id:"yt_lotto",annual:true,pri:3,look:"casual",bg:"camp",when:G=>ytKey(G)==="lotto"&&G.week>=20&&G.week<=24,steps:[{fx:G=>{G.cash+=30000;}},{"n": "nar", "t": "Uncle Wang runs into the camp wearing one sandal, waving a ticket."},{"n": "npc", "who": "Uncle Wang", "t": "I won! Three straight digits! The camp's opening date! Thirty thousand for the camp."},{"n": "coach", "t": "You really don't have to, uncle…"},{"n": "npc", "who": "Uncle Wang", "t": "I do! I promised. A man keeps his word."},{n:"nar",t:"Donation received: ฿30,000"}]});
 
 // ================= MUAY THAI MOE v1.2 — PIXEL SYSTEMS =================
 const ASSET="a/";
@@ -4340,10 +4392,21 @@ function drawCamp(ctx,G,t){
     const f=p.f,rr=row;D.push({y,f:()=>{ctx.imageSmoothingEnabled=true;drawFrame(ctx,sheetFor(f),ROW[rr],fr,x*S,y*S,46*S,flip);}});}
   // birds cross the sky now and then
   {const bt=(t%14000)/14000;if(bt<.5){const bxp=-10+bt*2*340;for(let k=0;k<3;k++){const yy=26+k*5+Math.sin(t/200+k)*2,wing=Math.floor(t/160+k)%2;P(bxp-k*9,yy,2,1,"#1b1230");P(bxp-k*9-2,yy-wing,2,1,"#1b1230");P(bxp-k*9+2,yy-wing,2,1,"#1b1230");}}}
+  // v1.88: the filtered indoor gym (airgym) — a sealed box with a big window and a filter unit
+  if(G.fac.airgym){P(114,72,40,36,"#7c8796");P(114,72,40,3,"#5d6775");P(118,80,32,16,"#2b3a4c");P(119,81,30,14,Math.floor(t/900)%2?"#9fd3f0":"#8cc6e8");P(133,81,1,14,"#5d6775");
+    P(146,98,8,8,"#c9d1da");const fa=Math.floor(t/90)%4;P(148+(fa%2?2:0),100+(fa>1?2:0),2,2,"#5d6775");P(150-(fa%2?2:0),102-(fa>1?2:0),2,2,"#5d6775");P(118,99,22,6,"#3a4757");}
   D.sort((a,b)=>a.y-b.y).forEach(d=>d.f());
+  yearFx(ctx,P,G,t);
   for(const [x,y] of bubble){const tx=SAYS[bi%SAYS.length];ctx.save();ctx.font=`700 ${7*S}px "Chakra Petch",sans-serif`;const w=ctx.measureText(tx).width/S+6;
     P(x-w/2,y-10,w,9,"#ffffff");P(x-1,y-1,2,2,"#ffffff");ctx.fillStyle="#1b1230";ctx.textAlign="center";ctx.fillText(tx,x*S,(y-3)*S);ctx.restore();}
 }
+/* v1.88 yearly themes on the camp scene: flood water over the yard, PM2.5 haze over everything */
+function yearFx(ctx,P,G,t){if(typeof ytIn!=="function")return;
+  if(ytIn(G,"flood")){P(0,146,320,34,"rgba(70,120,175,.55)");for(let i=0;i<14;i++){const x=((i*53+t/40)%340)-10,y=150+(i*7)%26;P(x,y,12,1,"rgba(210,235,255,.55)");}
+    const fx=((t/55)%360)-20,fy=158+Math.sin(t/500)*2;P(fx,fy,8,3,"#c8283c");P(fx+2,fy-1,4,1,"#f2c94c"); /* a floating sandal */
+    for(let i=0;i<3;i++){const bx=40+i*110+Math.sin(t/700+i)*6,by=166+Math.sin(t/400+i)*1.5;P(bx,by,10,6,"#6a4a2a");P(bx+1,by-1,8,1,"#8a6a4a");}}
+  if(ytIn(G,"pm25")&&!(G.fac.airgym>0&&false)){P(0,0,320,180,"rgba(196,150,108,.30)");P(0,0,320,60,"rgba(150,110,90,.28)");
+    for(let i=0;i<40;i++){const x=(i*37+t/60*(1+i%3))%320,y=(i*23+Math.sin(t/900+i)*8)%170;P(x,y,1+(i%2),1,"rgba(110,90,80,.45)");}}}
 // smooth stroll between random points, pausing in between
 // v1.51: camp pets — tiny rect sprites, Q(x,y,w,h,color) already mirrored for facing
 function drawPetQ(Q,k,t,moving){const leg=moving&&Math.floor(t/110)%2;
@@ -5139,6 +5202,15 @@ function newsItems(){const N=[...(G.lvNews||[]).slice(0,1)],st=standings(G,"A").
   if(typeof bdayWeek==="function")for(const id of ["kati","mali","rin","ploy","fah"]){const f=G.F[id];if(!f||!(f.camp==="player"||f.met))continue;const d=bdayWeek(id)-G.week;if(d>=0&&d<=2)N.unshift(d===0?`🎂 This week: birthday of ${f.name}!`:`🎂 In ${d} weeks: birthday of ${f.name}`);}
   N.push(["Muay oil prices up 5 baht. Vendor says 'business is good lately'","The district stadium installs new air con. No more fanning for spectators","An 80-year-old Korat coach still teaches the buffalo swing every morning","Women's Muay Thai is booming; attendance nearly doubled","Foreigners flock to learn Muay Thai in high season"][G.week%5]);
   return N;}
+/* v1.88 yearly theme chip on the camp page; tap for what it means this year */
+function ytChipHTML(){const k=typeof ytKey==="function"&&ytKey(G);if(!k)return "";const T=YEAR_THEMES[k];const on=T.from==null||ytIn(G,k);
+  return `<button class="ytchip ${on?"on":""}" data-act="ytinfo"><span>${T.ic}</span><b>${T.name}</b><small>${T.from!=null?(on?"Now":`wk ${T.from}–${T.to}`):k==="sponsor"&&!G.yt.acc?"Declined":"All year"}</small><i>▸</i></button>`;}
+function ytInfoHTML(){const k=ytKey(G);if(!k)return "";const T=YEAR_THEMES[k];let st="";
+  if(k==="sponsor")st=G.yt.acc?(G.week<=40?`Won ${ytSponsorWins(G)}/8 fights · ฿2,000 every week until week 40`:`This year: ${ytSponsorWins(G)} fights before the deadline`):"You turned the sponsor down this year";
+  if(k==="pm25")st=G.fac.airgym?"The filtered gym is built: full training":`Filtered indoor gym ${fmt(FACILITIES.airgym.cost[0])} · see Manage camp`;
+  if(k==="flood")st=ytIn(G,"flood")?"The camp is still flooded":G.week<T.from?`The flood should arrive around week ${T.from}`:"The water has gone down";
+  if(k==="lotto")st=G.week>=20?"Uncle Wang already donated ฿30,000":"Uncle Wang is chasing the lottery until week 20";
+  return `<h2>${T.ic} ${esc(T.name)}</h2><p class="lead">${esc(T.desc)}</p>${st?`<p class="meta goldt">${esc(st)}</p>`:""}<p class="meta">A new yearly theme is drawn at the start of every year.</p>`;}
 function weekTodo(){const R=roster(G),todo=[];if(R.some(f=>!f.injury&&!trLocked(f)))todo.push("Some training programs aren't confirmed yet");if(!G.campUsed)todo.push("No camp activity chosen yet");
   if(G.offers.length&&!G.bookings.some(b=>G.F[b.a].camp==="player"))todo.push("No fights scheduled yet");return todo;}
 // v1.15: what reputation actually does, and what it unlocks next
@@ -5247,7 +5319,7 @@ function homeHTML(){const R=roster(G);
     ${goalHidden()?`<button class="goal ov mini" data-act="goaltog" aria-label="Show goal">Goal ▾</button>`:`<button class="goal ov" data-act="goaltog" aria-label="Hide goal">${goalText()}<span class="gx">▴ Hide</span></button>`}</div>
     ${G.campUsed?`<button class="campact done" data-act="campacts"><span class="ci">✓</span><span><small>This week's camp activity</small><b>${esc(CAMP_ACTIONS[G.campUsed].name)}</b></span></button>`
       :`<button class="campact" data-act="campacts"><span class="ci"></span><span><small>This week's camp activity · not chosen</small><b>Choose a camp activity</b></span><span class="chev">▸</span></button>`}
-    ${petsRowHTML()}
+    ${ytChipHTML()}${petsRowHTML()}
     <div class="camp-info"><button class="cinfo" data-act="tab" data-v="camp"><small>Camp level</small><b>Lv.${lv} ${CAMP_LV_NAME[lv]}</b></button><button class="cinfo" data-act="studinfo"><small>Students</small><b>${students(G)}/${studentCap(G)}</b></button></div></section>
    <div class="side">${guide}<div class="fgrid">${R.map(fighterChip).join("")}</div></div></div>`;}
 function fighterMini(f){const c=condition(f);const nb=nextBooking(f);
@@ -5673,7 +5745,7 @@ function considerHTML(o){const me=G.F[o.a],op=G.F[o.b];const A=adviseCached(o.a,
 function actNear(a){let s=0;if(a.rep)s+=Math.max(0,a.rep-G.rep)*2;if(a.week)s+=Math.max(0,a.week-G.week);if(a.fac)s+=20;if(a.lv)s+=15;return s;}
 function campActsHTML(){const pk=UI.modal.pick;if(pk){const a=CAMP_ACTIONS[pk];return `<h2>Confirm activity?</h2><div class="px confirm"><b>${a.name}</b><p class="meta">${a.desc}${a.cost?` · cost ${fmt(a.cost)}`:""}</p><p class="meta">One per week</p>${a.mg?`<p class="meta">Play the minigame yourself for a skill-based result · or skip for an average one: ${a.skip}</p>`:""}</div><div class="mfoot"><button class="btn ghost" data-act="campback">Back</button>${a.mg?`<button class="btn" data-act="campok">Skip (average result)</button><button class="btn primary" data-act="campmg">${JOY_PX} Play it</button>`:`<button class="btn primary" data-act="campok">Confirm</button>`}</div>`;}
   // v1.23: locked activities stay hidden except the next one to open, so the list stays short
-  const all=Object.entries(CAMP_ACTIONS).filter(([k,a])=>!a.hidden),open=all.filter(([k,a])=>!campActLocked(G,a)),lockd=all.filter(([k,a])=>campActLocked(G,a));
+  const all=Object.entries(CAMP_ACTIONS).filter(([k,a])=>!a.hidden&&!(a.yt&&!ytIn(G,a.yt))),open=all.filter(([k,a])=>!campActLocked(G,a)),lockd=all.filter(([k,a])=>campActLocked(G,a));
   const nx=lockd.sort((x,y)=>actNear(x[1])-actNear(y[1]))[0];
   return `<h2>This week's camp activity</h2><p class="meta">Choose 1 per week ${lockd.length>1?` · ${lockd.length-1} more activities hidden`:""}</p><div class="acts">${[...open,...(nx?[nx]:[])].map(([k,a])=>{const lock=campActLocked(G,a);return `<button class="actbtn ${lock?"lockd":""} ${a.mg?"mg":""}" data-act="campick" data-v="${k}" ${lock||G.campUsed||G.cash<a.cost?"disabled":""}>${a.mg?`<span class="mgtag">${JOY_PX}MINIGAME</span>`:""}<b>${a.name}</b><small>${lock?`Unlocks: ${lock}`:a.desc+(a.cost?` · ${fmt(a.cost)}`:"")}</small></button>`;}).join("")}</div>`;}
 function studInfoHTML(){const n=students(G),cap=studentCap(G),d=studentDemand(G),fee=studentFee(G);
@@ -5812,6 +5884,7 @@ function modalHTML(){const m=UI.modal;let body="",foot=true;
      <div class="kv-row"><span>Signing fee</span><b class="num">${fmt(f.fee)}</b></div><div class="kv-row"><span>Wage</span><b class="num">${fmt(f.wage)}/wk</b></div><div class="kv-row"><span>Weekly net after signing</span><b class="num ${net<0?"neg":"pos"}">${fmt(net)}</b></div>
      <div class="mfoot"><button class="btn ghost" data-act="closeModal">Wait</button><button class="btn primary" data-act="sign" data-v="${f.id}" data-ok="1">Sign now</button></div>`;}
   if(m.type==="levelup"){body=`<h2 class="lvup">LEVEL UP!</h2>${m.ids.map(id=>{const f=G.F[id];return `<div class="lvrow"><div class="l">${faceImg(f,"sm")}<b>${esc(f.name)} Lv.${f.lvl}</b></div>${coachOn()&&f.sp>0&&!hasTree(f.id)?`<p class="hinttxt"><img src="${faceSrc("coach")}" alt=""><span>${skillTip(f)}</span></p>`:""}${skillGrid(f,true)}</div>`;}).join("")}`;}
+  if(m.type==="ytinfo"){body=ytInfoHTML();foot=true;}
   if(typeof XMODAL!=="undefined"&&XMODAL[m.type]){const r=XMODAL[m.type](m);body=r.body;foot=r.foot;}
   return `<div class="overlay" data-act="closeModalBg"><div class="px modal pxscroll m-${m.type}${m.type==="fighter"?" fpm t-"+(UI.ptab||"over"):""}" data-sk="modal-${m.type}" role="dialog" aria-modal="true"><button class="xbtn" data-act="closeModal" aria-label="Close">✕</button>${body}
     ${foot?`<div class="mfoot"><button class="btn primary" data-act="closeModal">${m.type==="report"||m.type==="levelup"?"Continue ▸":"Close"}</button></div>`:""}</div></div>`;}
@@ -5894,9 +5967,9 @@ function tutorialHTML(){const T=G.tut||{};const items=[["train","Set training",T
 function goalText(){const st=stageOf(G.week),me=roster(G);const best=d=>{const rows=standings(G,d);const i=rows.findIndex(r=>r.f.camp==="player");return i<0?null:{i:i+1,f:rows[i].f};};
   const a=best("A");
   if(st==="local")return `🎯 Subdistrict top 4 by wk 20${a?` · ${a.f.name} (#${a.i})`:""}`;
-  if(st==="district"){const inQ=[...G.qual.A,...G.qual.B].some(id=>G.F[id]&&G.F[id].camp==="player");return inQ?`🎯 District top 4 by wk 40 for the provincial semis ${a?` · ${a.f.name} (#${a.i})`:""}`:"Goal: missed the district round this year. Strengthen the camp and save money for next season";}
-  if(st==="final"&&G.week<=44&&[...((G.semis||{}).A||[]),...((G.semis||{}).B||[])].some(id=>G.F[id]&&G.F[id].camp==="player")&&!G.finalists.A.concat(G.finalists.B).some(id=>G.F[id]&&G.F[id].camp==="player"))return "Goal: win the provincial semifinal, week 44";
-  if(st==="final"){const inF=[...G.finalists.A,...G.finalists.B].some(id=>G.F[id]&&G.F[id].camp==="player");return inF?"Goal: the provincial final, week 49, five rounds":"Goal: look after the camp until the season ends";}
+  if(st==="district"){const inQ=[...G.qual.A,...G.qual.B].some(id=>G.F[id]&&G.F[id].camp==="player");return inQ?`🎯 District top 4 by wk 40 for the provincial semis ${a?` · ${a.f.name} (#${a.i})`:""}`:"🎯 Missed the district round · build up for next year";}
+  if(st==="final"&&G.week<=44&&[...((G.semis||{}).A||[]),...((G.semis||{}).B||[])].some(id=>G.F[id]&&G.F[id].camp==="player")&&!G.finalists.A.concat(G.finalists.B).some(id=>G.F[id]&&G.F[id].camp==="player"))return "🎯 Win the provincial semi, wk 44";
+  if(st==="final"){const inF=[...G.finalists.A,...G.finalists.B].some(id=>G.F[id]&&G.F[id].camp==="player");return inF?"🎯 Provincial final, wk 49, five rounds":"🎯 Look after the camp until season's end";}
   return "Year end · preparing for next year";}
 
 // ---------- events / extras ----------
@@ -6428,6 +6501,7 @@ const ACT={
   gok:()=>{GB.st=null;GB.ps=[];render();},
   gboxq:()=>{UI.gq=!UI.gq;render();},
   closeModalBg:(d,e)=>{if(e.target.classList.contains("overlay")&&UI.modal&&!["report","levelup","contest"].includes(UI.modal.type)){UI.modal=null;render();}},
+  ytinfo:()=>{UI.modal={type:"ytinfo"};render();},
   autotr:d=>{const f=G.F[d.id];if(!f||f.camp!=="player")return;if(autoOn(f)){delete f.autoTr;for(const b of G.bookings)if(b.a===f.id&&b.autoPlan){b.planSet=false;delete b.autoPlan;}}else{f.autoTr=gameWeek(G)+3;autoPlans();}AU.sfx("ui");save();render();},
   preset:d=>{if(handLocked(G.F[d.f]))return;const f=G.F[d.f];f.plan.preset=d.v;if(d.v==="rest")f.plan.intensity="normal";save();render();},
   intensity:d=>{if(handLocked(G.F[d.f]))return;G.F[d.f].plan.intensity=d.v;save();render();},
@@ -6819,6 +6893,8 @@ function repgraphHTML(){const r=G.rep,S=repSteps();const nx=S.find(([n])=>r<n),p
 function calEvents(w){const E=[],S=G.season||1;
   for(const id of ["kati","mali","rin","ploy","fah"]){const f=G.F[id];if(f&&(f.camp==="player"||f.met)&&typeof bdayWeek==="function"&&bdayWeek(id)===w)E.push({ic:"🎂",t:`Birthday: ${f.name}`});}
   const FE={26:["🏮","Loy Krathong"],32:["🎆","New Year"],47:["💦","Songkran"]};if(FE[w])E.push({ic:FE[w][0],t:FE[w][1]});
+  /* v1.88 yearly theme marks */const yk=typeof ytKey==="function"&&ytKey(G);if(yk){const T=YEAR_THEMES[yk];if(T.from!=null&&w>=T.from&&w<=T.to)E.push({ic:T.ic,t:T.name});
+    if(yk==="sponsor"&&G.yt.acc&&w===40)E.push({ic:"💼",t:"Sponsor deadline: 8 wins"});if(yk==="lotto"&&w===20)E.push({ic:"🎟️",t:"Uncle Wang's lottery draw"});}
   if(typeof CONTEST_WEEK!=="undefined"&&w===CONTEST_WEEK){const c=G.contests&&G.contests[S];E.push({ic:"🌸",t:c&&c.rank?`Camp beauty contest · placed #${c.rank}`:"Camp beauty contest: the District Chief inspects the camp"});}
   return E;}
 function calendarHTML(){const past={},next={};for(const c of G.cal||[])if(c.season===(G.season||1)||c.absWeek>=gameWeek(G)-G.week+1)(past[c.wk]=past[c.wk]||[]).push(c);for(const b of G.bookings)if(G.F[b.a]&&G.F[b.a].camp==="player")(next[b.week]=next[b.week]||[]).push(b);

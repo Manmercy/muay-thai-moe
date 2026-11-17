@@ -261,6 +261,8 @@ function repgraphHTML(){const r=G.rep,S=repSteps();const nx=S.find(([n])=>r<n),p
 function calEvents(w){const E=[],S=G.season||1;
   for(const id of ["kati","mali","rin","ploy","fah"]){const f=G.F[id];if(f&&(f.camp==="player"||f.met)&&typeof bdayWeek==="function"&&bdayWeek(id)===w)E.push({ic:"🎂",t:`วันเกิด${f.name}`});}
   const FE={26:["🏮","ลอยกระทง"],32:["🎆","ปีใหม่"],47:["💦","สงกรานต์"]};if(FE[w])E.push({ic:FE[w][0],t:FE[w][1]});
+  /* v1.88 yearly theme marks */const yk=typeof ytKey==="function"&&ytKey(G);if(yk){const T=YEAR_THEMES[yk];if(T.from!=null&&w>=T.from&&w<=T.to)E.push({ic:T.ic,t:T.name});
+    if(yk==="sponsor"&&G.yt.acc&&w===40)E.push({ic:"💼",t:"ตัดยอดชนะ 8 ไฟต์ของสปอนเซอร์"});if(yk==="lotto"&&w===20)E.push({ic:"🎟️",t:"ลุงหวังลุ้นหวย"});}
   if(typeof CONTEST_WEEK!=="undefined"&&w===CONTEST_WEEK){const c=G.contests&&G.contests[S];E.push({ic:"🌸",t:c&&c.rank?`ประกวดค่ายสวย · ได้อันดับ ${c.rank}`:"ประกวดค่ายสวย นายอำเภอมาตรวจค่าย"});}
   return E;}
 function calendarHTML(){const past={},next={};for(const c of G.cal||[])if(c.season===(G.season||1)||c.absWeek>=gameWeek(G)-G.week+1)(past[c.wk]=past[c.wk]||[]).push(c);for(const b of G.bookings)if(G.F[b.a]&&G.F[b.a].camp==="player")(next[b.week]=next[b.week]||[]).push(b);

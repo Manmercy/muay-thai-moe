@@ -293,6 +293,15 @@ function newsItems(){const N=[...(G.lvNews||[]).slice(0,1)],st=standings(G,"A").
   if(typeof bdayWeek==="function")for(const id of ["kati","mali","rin","ploy","fah"]){const f=G.F[id];if(!f||!(f.camp==="player"||f.met))continue;const d=bdayWeek(id)-G.week;if(d>=0&&d<=2)N.unshift(d===0?`🎂 This week: birthday of ${f.name}!`:`🎂 In ${d} weeks: birthday of ${f.name}`);}
   N.push(["Muay oil prices up 5 baht. Vendor says 'business is good lately'","The district stadium installs new air con. No more fanning for spectators","An 80-year-old Korat coach still teaches the buffalo swing every morning","Women's Muay Thai is booming; attendance nearly doubled","Foreigners flock to learn Muay Thai in high season"][G.week%5]);
   return N;}
+/* v1.88 yearly theme chip on the camp page; tap for what it means this year */
+function ytChipHTML(){const k=typeof ytKey==="function"&&ytKey(G);if(!k)return "";const T=YEAR_THEMES[k];const on=T.from==null||ytIn(G,k);
+  return `<button class="ytchip ${on?"on":""}" data-act="ytinfo"><span>${T.ic}</span><b>${T.name}</b><small>${T.from!=null?(on?"Now":`wk ${T.from}–${T.to}`):k==="sponsor"&&!G.yt.acc?"Declined":"All year"}</small><i>▸</i></button>`;}
+function ytInfoHTML(){const k=ytKey(G);if(!k)return "";const T=YEAR_THEMES[k];let st="";
+  if(k==="sponsor")st=G.yt.acc?(G.week<=40?`Won ${ytSponsorWins(G)}/8 fights · ฿2,000 every week until week 40`:`This year: ${ytSponsorWins(G)} fights before the deadline`):"You turned the sponsor down this year";
+  if(k==="pm25")st=G.fac.airgym?"The filtered gym is built: full training":`Filtered indoor gym ${fmt(FACILITIES.airgym.cost[0])} · see Manage camp`;
+  if(k==="flood")st=ytIn(G,"flood")?"The camp is still flooded":G.week<T.from?`The flood should arrive around week ${T.from}`:"The water has gone down";
+  if(k==="lotto")st=G.week>=20?"Uncle Wang already donated ฿30,000":"Uncle Wang is chasing the lottery until week 20";
+  return `<h2>${T.ic} ${esc(T.name)}</h2><p class="lead">${esc(T.desc)}</p>${st?`<p class="meta goldt">${esc(st)}</p>`:""}<p class="meta">A new yearly theme is drawn at the start of every year.</p>`;}
 function weekTodo(){const R=roster(G),todo=[];if(R.some(f=>!f.injury&&!trLocked(f)))todo.push("Some training programs aren't confirmed yet");if(!G.campUsed)todo.push("No camp activity chosen yet");
   if(G.offers.length&&!G.bookings.some(b=>G.F[b.a].camp==="player"))todo.push("No fights scheduled yet");return todo;}
 // v1.15: what reputation actually does, and what it unlocks next
@@ -401,7 +410,7 @@ function homeHTML(){const R=roster(G);
     ${goalHidden()?`<button class="goal ov mini" data-act="goaltog" aria-label="Show goal">Goal ▾</button>`:`<button class="goal ov" data-act="goaltog" aria-label="Hide goal">${goalText()}<span class="gx">▴ Hide</span></button>`}</div>
     ${G.campUsed?`<button class="campact done" data-act="campacts"><span class="ci">✓</span><span><small>This week's camp activity</small><b>${esc(CAMP_ACTIONS[G.campUsed].name)}</b></span></button>`
       :`<button class="campact" data-act="campacts"><span class="ci"></span><span><small>This week's camp activity · not chosen</small><b>Choose a camp activity</b></span><span class="chev">▸</span></button>`}
-    ${petsRowHTML()}
+    ${ytChipHTML()}${petsRowHTML()}
     <div class="camp-info"><button class="cinfo" data-act="tab" data-v="camp"><small>Camp level</small><b>Lv.${lv} ${CAMP_LV_NAME[lv]}</b></button><button class="cinfo" data-act="studinfo"><small>Students</small><b>${students(G)}/${studentCap(G)}</b></button></div></section>
    <div class="side">${guide}<div class="fgrid">${R.map(fighterChip).join("")}</div></div></div>`;}
 function fighterMini(f){const c=condition(f);const nb=nextBooking(f);
@@ -827,7 +836,7 @@ function considerHTML(o){const me=G.F[o.a],op=G.F[o.b];const A=adviseCached(o.a,
 function actNear(a){let s=0;if(a.rep)s+=Math.max(0,a.rep-G.rep)*2;if(a.week)s+=Math.max(0,a.week-G.week);if(a.fac)s+=20;if(a.lv)s+=15;return s;}
 function campActsHTML(){const pk=UI.modal.pick;if(pk){const a=CAMP_ACTIONS[pk];return `<h2>Confirm activity?</h2><div class="px confirm"><b>${a.name}</b><p class="meta">${a.desc}${a.cost?` · cost ${fmt(a.cost)}`:""}</p><p class="meta">One per week</p>${a.mg?`<p class="meta">Play the minigame yourself for a skill-based result · or skip for an average one: ${a.skip}</p>`:""}</div><div class="mfoot"><button class="btn ghost" data-act="campback">Back</button>${a.mg?`<button class="btn" data-act="campok">Skip (average result)</button><button class="btn primary" data-act="campmg">${JOY_PX} Play it</button>`:`<button class="btn primary" data-act="campok">Confirm</button>`}</div>`;}
   // v1.23: locked activities stay hidden except the next one to open, so the list stays short
-  const all=Object.entries(CAMP_ACTIONS).filter(([k,a])=>!a.hidden),open=all.filter(([k,a])=>!campActLocked(G,a)),lockd=all.filter(([k,a])=>campActLocked(G,a));
+  const all=Object.entries(CAMP_ACTIONS).filter(([k,a])=>!a.hidden&&!(a.yt&&!ytIn(G,a.yt))),open=all.filter(([k,a])=>!campActLocked(G,a)),lockd=all.filter(([k,a])=>campActLocked(G,a));
   const nx=lockd.sort((x,y)=>actNear(x[1])-actNear(y[1]))[0];
   return `<h2>This week's camp activity</h2><p class="meta">Choose 1 per week ${lockd.length>1?` · ${lockd.length-1} more activities hidden`:""}</p><div class="acts">${[...open,...(nx?[nx]:[])].map(([k,a])=>{const lock=campActLocked(G,a);return `<button class="actbtn ${lock?"lockd":""} ${a.mg?"mg":""}" data-act="campick" data-v="${k}" ${lock||G.campUsed||G.cash<a.cost?"disabled":""}>${a.mg?`<span class="mgtag">${JOY_PX}MINIGAME</span>`:""}<b>${a.name}</b><small>${lock?`Unlocks: ${lock}`:a.desc+(a.cost?` · ${fmt(a.cost)}`:"")}</small></button>`;}).join("")}</div>`;}
 function studInfoHTML(){const n=students(G),cap=studentCap(G),d=studentDemand(G),fee=studentFee(G);
@@ -966,6 +975,7 @@ function modalHTML(){const m=UI.modal;let body="",foot=true;
      <div class="kv-row"><span>Signing fee</span><b class="num">${fmt(f.fee)}</b></div><div class="kv-row"><span>Wage</span><b class="num">${fmt(f.wage)}/wk</b></div><div class="kv-row"><span>Weekly net after signing</span><b class="num ${net<0?"neg":"pos"}">${fmt(net)}</b></div>
      <div class="mfoot"><button class="btn ghost" data-act="closeModal">Wait</button><button class="btn primary" data-act="sign" data-v="${f.id}" data-ok="1">Sign now</button></div>`;}
   if(m.type==="levelup"){body=`<h2 class="lvup">LEVEL UP!</h2>${m.ids.map(id=>{const f=G.F[id];return `<div class="lvrow"><div class="l">${faceImg(f,"sm")}<b>${esc(f.name)} Lv.${f.lvl}</b></div>${coachOn()&&f.sp>0&&!hasTree(f.id)?`<p class="hinttxt"><img src="${faceSrc("coach")}" alt=""><span>${skillTip(f)}</span></p>`:""}${skillGrid(f,true)}</div>`;}).join("")}`;}
+  if(m.type==="ytinfo"){body=ytInfoHTML();foot=true;}
   if(typeof XMODAL!=="undefined"&&XMODAL[m.type]){const r=XMODAL[m.type](m);body=r.body;foot=r.foot;}
   return `<div class="overlay" data-act="closeModalBg"><div class="px modal pxscroll m-${m.type}${m.type==="fighter"?" fpm t-"+(UI.ptab||"over"):""}" data-sk="modal-${m.type}" role="dialog" aria-modal="true"><button class="xbtn" data-act="closeModal" aria-label="Close">✕</button>${body}
     ${foot?`<div class="mfoot"><button class="btn primary" data-act="closeModal">${m.type==="report"||m.type==="levelup"?"Continue ▸":"Close"}</button></div>`:""}</div></div>`;}
@@ -1048,9 +1058,9 @@ function tutorialHTML(){const T=G.tut||{};const items=[["train","Set training",T
 function goalText(){const st=stageOf(G.week),me=roster(G);const best=d=>{const rows=standings(G,d);const i=rows.findIndex(r=>r.f.camp==="player");return i<0?null:{i:i+1,f:rows[i].f};};
   const a=best("A");
   if(st==="local")return `🎯 Subdistrict top 4 by wk 20${a?` · ${a.f.name} (#${a.i})`:""}`;
-  if(st==="district"){const inQ=[...G.qual.A,...G.qual.B].some(id=>G.F[id]&&G.F[id].camp==="player");return inQ?`🎯 District top 4 by wk 40 for the provincial semis ${a?` · ${a.f.name} (#${a.i})`:""}`:"Goal: missed the district round this year. Strengthen the camp and save money for next season";}
-  if(st==="final"&&G.week<=44&&[...((G.semis||{}).A||[]),...((G.semis||{}).B||[])].some(id=>G.F[id]&&G.F[id].camp==="player")&&!G.finalists.A.concat(G.finalists.B).some(id=>G.F[id]&&G.F[id].camp==="player"))return "Goal: win the provincial semifinal, week 44";
-  if(st==="final"){const inF=[...G.finalists.A,...G.finalists.B].some(id=>G.F[id]&&G.F[id].camp==="player");return inF?"Goal: the provincial final, week 49, five rounds":"Goal: look after the camp until the season ends";}
+  if(st==="district"){const inQ=[...G.qual.A,...G.qual.B].some(id=>G.F[id]&&G.F[id].camp==="player");return inQ?`🎯 District top 4 by wk 40 for the provincial semis ${a?` · ${a.f.name} (#${a.i})`:""}`:"🎯 Missed the district round · build up for next year";}
+  if(st==="final"&&G.week<=44&&[...((G.semis||{}).A||[]),...((G.semis||{}).B||[])].some(id=>G.F[id]&&G.F[id].camp==="player")&&!G.finalists.A.concat(G.finalists.B).some(id=>G.F[id]&&G.F[id].camp==="player"))return "🎯 Win the provincial semi, wk 44";
+  if(st==="final"){const inF=[...G.finalists.A,...G.finalists.B].some(id=>G.F[id]&&G.F[id].camp==="player");return inF?"🎯 Provincial final, wk 49, five rounds":"🎯 Look after the camp until season's end";}
   return "Year end · preparing for next year";}
 
 // ---------- events / extras ----------
@@ -1582,6 +1592,7 @@ const ACT={
   gok:()=>{GB.st=null;GB.ps=[];render();},
   gboxq:()=>{UI.gq=!UI.gq;render();},
   closeModalBg:(d,e)=>{if(e.target.classList.contains("overlay")&&UI.modal&&!["report","levelup","contest"].includes(UI.modal.type)){UI.modal=null;render();}},
+  ytinfo:()=>{UI.modal={type:"ytinfo"};render();},
   autotr:d=>{const f=G.F[d.id];if(!f||f.camp!=="player")return;if(autoOn(f)){delete f.autoTr;for(const b of G.bookings)if(b.a===f.id&&b.autoPlan){b.planSet=false;delete b.autoPlan;}}else{f.autoTr=gameWeek(G)+3;autoPlans();}AU.sfx("ui");save();render();},
   preset:d=>{if(handLocked(G.F[d.f]))return;const f=G.F[d.f];f.plan.preset=d.v;if(d.v==="rest")f.plan.intensity="normal";save();render();},
   intensity:d=>{if(handLocked(G.F[d.f]))return;G.F[d.f].plan.intensity=d.v;save();render();},
