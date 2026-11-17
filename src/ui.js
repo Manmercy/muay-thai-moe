@@ -154,6 +154,7 @@ function prefetchArt(){if(PREF||!G)return;PREF=true;const c=navigator.connection
   const q=[...S].filter(u=>!WARMED[u]);let busy=0;const next=()=>{while(busy<2&&q.length){const u=q.shift();busy++;const i=new Image();i.decoding="async";i.onload=i.onerror=()=>{busy--;setTimeout(next,60);};i.src=u;WARMED[u]=i;}};
   (window.requestIdleCallback||((f)=>setTimeout(f,300)))(next);}
 function render(){
+  try{if(typeof G!=="undefined"&&G&&!G.ended)autoPlans();}catch(e){}
   document.documentElement.classList.toggle("vnopen",!!(UI&&(UI.scene||UI.fight)));
   let h="";
   if(UI.loadScr){$app.innerHTML=loadScrHTML();return;}
@@ -318,7 +319,7 @@ const pickDone=()=>DONE_LINES[G.week%DONE_LINES.length];
 function coachTips(force){const T=[],R=roster(G);if(!coachOn()&&!force)return T;
   for(const f of R){const b=G.bookings.find(x=>x.a===f.id);
     if(f.injury)T.push({p:9,t:`${f.name}บาดเจ็บอีก ${f.injury} สัปดาห์ ร่างกายพักเองอัตโนมัติ อย่าเพิ่งรับไฟต์`});
-    else if(f.fatigue>=52&&f.plan.preset!=="rest"&&!trLocked(f))T.push({p:9,t:`${f.name} ล้า ${Math.round(f.fatigue)} แล้ว สัปดาห์นี้ให้พักฟื้นเถอะ`,act:{k:"setrest",id:f.id,label:"ไปหน้าฝึก"}});
+    else if(f.fatigue>=52&&f.plan.preset!=="rest"&&!handLocked(f))T.push({p:9,t:`${f.name} ล้า ${Math.round(f.fatigue)} แล้ว สัปดาห์นี้ให้พักฟื้นเถอะ`,act:{k:"setrest",id:f.id,label:"ไปหน้าฝึก"}});
     if(b&&b.week-G.week<=1&&f.plan.preset!=="prep"&&!f.injury&&!trLocked(f))T.push({p:7,t:`${f.name}มีไฟต์สัปดาห์ ${b.week} กับ${G.F[b.b].name} เปลี่ยนเป็นเตรียมไฟต์ดีไหม`,act:{k:"setprep",id:f.id,label:"ไปหน้าฝึก"}});
     if(b&&scouted(b.b)){const cp=counterPreset(G.F[b.b]);if(cp&&f.plan.preset!==cp&&b.week-G.week>1&&!trLocked(f))T.push({p:4,t:`คู่ชกของ${f.name}${COUNTER_WHY[cp]} ฝึก "${PRESETS[cp].name}" แก้ทางจะได้โบนัสวันชก`,act:{k:"setprep",id:f.id,label:"ไปตั้งโปรแกรม"}});}
     if(b&&!scouted(b.b)&&G.cash>=scoutCost())T.push({p:5,t:`ยังไม่ได้ดูเทป${G.F[b.b].name} คู่ชกของ${f.name} ดูก่อนจะได้รู้ทางแก้`,act:{k:"tab",v:"fights",label:"ไปดูเทป"}});
@@ -471,7 +472,14 @@ function adviceHTML(id){const f=G.F[id],A=trainAdvice(f);const same=f.plan.prese
    <div class="kv-row"><span>ครูแนะนำ</span><b class="goldt">${planName(A.p,A.i)}</b></div>
    ${planTip(f)}<p class="meta">${same?"ตอนนี้ตั้งตรงกับที่ครูคิดไว้แล้ว":"ครูแค่ให้ความเห็น ตัดสินใจเองนะ"}</p>
    <div class="mfoot roadbtns"><button class="btn primary" data-act="closeModal">ปิด</button></div>`;}
-const trLocked=f=>f?f.lockWeek===gameWeek(G):false;
+/* v1.88: "keep this programme for 4 weeks" — a quiet per-fighter tick in the programme sheet; while on, the week counts as confirmed
+   and her fight plan is filled with the coach's pick, so nothing asks to be confirmed. Untick any time. */
+const autoOn=f=>!!(f&&f.autoTr&&gameWeek(G)<=f.autoTr);
+const autoLeft=f=>autoOn(f)?f.autoTr-gameWeek(G)+1:0;
+const trLocked=f=>f?(f.lockWeek===gameWeek(G)||autoOn(f)):false;
+const handLocked=f=>!!f&&f.lockWeek===gameWeek(G)&&!autoOn(f);
+function autoPlans(){if(!G||!G.bookings)return;for(const b of G.bookings){const f=G.F[b.a];if(!f||f.camp!=="player"||b.planSet||!autoOn(f))continue;
+  let pl="balanced";try{if(scouted(b.b))pl=adviseCached(b.a,b.b,b.rounds||3).best||"balanced";}catch(e){}b.plan=pl;b.planSet=true;b.autoPlan=true;}}
 const planName=(p,i)=>PRESETS[p].name+(p==="rest"||!INTENSITY[i]?"":" · "+INTENSITY[i].name);
 function trainHTML(){const R=roster(G);if(!R.length)return "";
   // v1.13: each fighter gets her own card with the big training animation; programmes are picked in a sheet, then the week is locked in
@@ -483,14 +491,15 @@ function tcard(f,L){const pf=projFatigue(f),rest=f.plan.preset==="rest";const ti
     <div class="fatg"><span>ล้า <b class="num">${Math.round(f.fatigue)}</b> → <b class="num">${Math.round(pf)}</b></span><i class="fgbar" style="--now:${clamp(f.fatigue,0,100)}%;--next:${clamp(pf,0,100)}%;--bc:${pf>70?"var(--red)":pf>55?"var(--warn)":"var(--green)"}"><s></s></i></div>
     ${tired?`<p class="warnchip">ล้ามาก ควรพักฟื้นสัปดาห์นี้</p>`:""}
     ${skReady(f)?`<button class="spchip" data-act="fighter" data-id="${f.id}" data-v="skill">★ อัปสกิลได้</button>`:""}<div class="tc-prog"><span class="pill ${L?"":"gold"}">${f.injury?"พักรักษาตัว":PRESETS[f.plan.preset].name+(rest?"":" · "+INTENSITY[f.plan.intensity].name)}</span></div>
-    ${f.injury?"":`<div class="tc-btns">${L?"":`<button class="btn sm" data-act="tpick" data-id="${f.id}">โปรแกรมฝึก</button>`}${coachOn()&&!L?`<button class="btn sm" data-act="advice" data-id="${f.id}">คำแนะนำครู</button>`:""}
-     ${L?`<span class="tc-ok">✓ ยืนยันโปรแกรมแล้ว</span>`:`<button class="btn sm gold tc-go" data-act="tlock" data-id="${f.id}">ยืนยันโปรแกรม</button>`}</div>`}
+    ${f.injury?"":`<div class="tc-btns">${L&&!autoOn(f)?"":`<button class="btn sm" data-act="tpick" data-id="${f.id}">โปรแกรมฝึก</button>`}${coachOn()&&!L?`<button class="btn sm" data-act="advice" data-id="${f.id}">คำแนะนำครู</button>`:""}
+     ${autoOn(f)?`<span class="tc-ok auto">↻ ซ้อมแผนเดิมอีก ${autoLeft(f)} สัปดาห์</span>`:L?`<span class="tc-ok">✓ ยืนยันโปรแกรมแล้ว</span>`:`<button class="btn sm gold tc-go" data-act="tlock" data-id="${f.id}">ยืนยันโปรแกรม</button>`}</div>`}
 </div></section>`;}
 // programme sheet: 4 columns, intensity hidden for rest
 function tpickHTML(id){const f=G.F[id],rest=f.plan.preset==="rest";
   return `<h2>โปรแกรมฝึก · ${esc(f.name)}</h2><div class="tgrid four">${Object.entries(PRESETS).map(([k,p])=>`<button data-act="preset" data-f="${f.id}" data-v="${k}" aria-pressed="${f.plan.preset===k}" title="${esc(p.desc)}">${p.name}</button>`).join("")}</div>
    <p class="meta tdesc">${esc(PRESETS[f.plan.preset].desc)}</p>
    ${rest?`<p class="meta">พักฟื้นไม่มีหนัก-เบา ร่างกายได้พักเต็มที่</p>`:`<h3>ความหนัก</h3><div class="tgrid three">${Object.entries(INTENSITY).map(([k,i])=>`<button data-act="intensity" data-f="${f.id}" data-v="${k}" aria-pressed="${f.plan.intensity===k}">${i.name}</button>`).join("")}</div>`}
+   <label class="autotr"><input type="checkbox" data-act="autotr" data-id="${f.id}" ${autoOn(f)?"checked":""}><span>ซ้อมแผนนี้ต่อ 4 สัปดาห์<small>${autoOn(f)?`เหลืออีก ${autoLeft(f)} สัปดาห์ · `:""}ไม่ต้องยืนยันทุกสัปดาห์ แผนไฟต์ใช้ตามที่ครูแนะนำ เอาติ๊กออกได้ทุกเมื่อ</small></span></label>
    <div class="mfoot"><button class="btn primary" data-act="closeModal">เลือกแล้ว</button></div>`;}
 const TGT={head:"เล่นหัว",body:"เล่นลำตัว",legs:"เตะขา"};
 function nextBooking(f){return G.bookings.filter(b=>b.a===f.id).sort((x,y)=>x.week-y.week)[0];}
@@ -1523,13 +1532,14 @@ const ACT={
   gok:()=>{GB.st=null;GB.ps=[];render();},
   gboxq:()=>{UI.gq=!UI.gq;render();},
   closeModalBg:(d,e)=>{if(e.target.classList.contains("overlay")&&UI.modal&&!["report","levelup","contest"].includes(UI.modal.type)){UI.modal=null;render();}},
-  preset:d=>{if(trLocked(G.F[d.f]))return;const f=G.F[d.f];f.plan.preset=d.v;if(d.v==="rest")f.plan.intensity="normal";save();render();},
-  intensity:d=>{if(trLocked(G.F[d.f]))return;G.F[d.f].plan.intensity=d.v;save();render();},
+  autotr:d=>{const f=G.F[d.id];if(!f||f.camp!=="player")return;if(autoOn(f)){delete f.autoTr;for(const b of G.bookings)if(b.a===f.id&&b.autoPlan){b.planSet=false;delete b.autoPlan;}}else{f.autoTr=gameWeek(G)+3;autoPlans();}AU.sfx("ui");save();render();},
+  preset:d=>{if(handLocked(G.F[d.f]))return;const f=G.F[d.f];f.plan.preset=d.v;if(d.v==="rest")f.plan.intensity="normal";save();render();},
+  intensity:d=>{if(handLocked(G.F[d.f]))return;G.F[d.f].plan.intensity=d.v;save();render();},
   consider:d=>{UI.modal={type:"consider",id:d.v};render();},
   accept:d=>{const o=G.offers.find(x=>x.id===d.v),result=acceptOffer(G,d.v);UI.modal=null;save();if(!result.ok){toast(result.reason);render();return;}toast(`รับไฟต์แล้ว: ${G.F[o.a].name} vs ${G.F[o.b].name} สัปดาห์ ${o.week}`);render();},
   fsub:d=>{UI.fsub=d.v;if(d.v==="rank"&&G&&!(G.flags&&G.flags.rankGuide)){G.flags.rankGuide=1;UI.modal={type:"rankhelp"};save();}render();},csub:d=>{UI.csub=d.v;render();},rview:d=>{UI.rview=d.v;AU.sfx&&AU.sfx("ui");render();},rdiv:d=>{UI.rdiv=d.v;render();},
   tipnext:()=>{UI.tipIdx++;render();},hideguide:()=>{G.guideHidden=G.week;save();render();},
-  tipact:d=>{if(d.k==="setrest"||d.k==="setprep"){ACT.tab({v:"train"});if(!trLocked(G.F[d.id])){UI.modal={type:"tpick",id:d.id};render();}}
+  tipact:d=>{if(d.k==="setrest"||d.k==="setprep"){ACT.tab({v:"train"});if(!handLocked(G.F[d.id])){UI.modal={type:"tpick",id:d.id};render();}}
     else if(d.k==="tab"&&d.sub){UI.csub=d.sub;ACT.tab({v:d.v});}
     else if(d.k==="fighter")ACT.fighter({id:d.id,v:d.v});else if(d.k==="tab")ACT.tab({v:d.v});else if(d.k==="campacts")ACT.campacts();else if(d.k==="loan")ACT.loan();else if(d.k==="lossrev")ACT.lossrev();else if(d.k==="endweek")ACT.endweek();},
   newsoff:()=>{UI.newsWeek=G.week;const el=document.querySelector(".newspop");if(el)el.remove();},
@@ -1587,7 +1597,7 @@ const ACT={
   fstart:()=>beginFight(false),fquick:()=>beginFight(true),fskip:()=>fskip(),fskill:d=>fskill(d.v),
   fspeed:d=>{UI.speed=+d.v===2?2:1;render();},
   tac:d=>{UI.fight.tac[d.k]=d.v;render();},
-  tpick:d=>{if(trLocked(G.F[d.id]))return;UI.modal={type:"tpick",id:d.id};render();},
+  tpick:d=>{if(handLocked(G.F[d.id]))return;UI.modal={type:"tpick",id:d.id};render();},
   tlock:d=>{const f=G.F[d.id];if(!f)return;f.lockWeek=gameWeek(G);f.drillBonus=0;AU.sfx("level");save();
     // v1.19.1: a short drill scene — tap to make her strike, then see how the session went
     const pr=f.plan.preset;if(!f.injury&&pr!=="rest"&&pr!=="prep"){UI.drill={id:f.id,taps:0,need:f.plan.intensity==="light"?2:3,res:[],hitT:0};UI.modal={type:"drill",id:f.id};}else UI.modal=null;render();},

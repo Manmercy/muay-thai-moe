@@ -5188,5 +5188,11 @@
  "ดูคำใบ้การ์ดหรือเปิดตู้กาชาจากอัลบั้ม กลับมาแล้วอยู่ตำแหน่งเดิม": "View a card hint or open the gacha from the album and you come back to the same spot",
  "อัลบั้มการ์ดไม่เด้งแล้ว": "Album keeps your place",
  "ตู้กาชาลอยกระทงกับโค้ด LOYKRATHONG69 เปิดพร้อมกันวันที่ 18 พ.ย.–7 ธ.ค.": "The Loy Krathong gacha and code LOYKRATHONG69 open together, Nov 18 – Dec 7",
- "ตู้ลอยกระทงเปิด 18 พ.ย.": "Loy Krathong gacha opens Nov 18"
+ "ตู้ลอยกระทงเปิด 18 พ.ย.": "Loy Krathong gacha opens Nov 18",
+ "ไม่ต้องยืนยันทุกสัปดาห์ แผนไฟต์ใช้ตามที่ครูแนะนำ เอาติ๊กออกได้ทุกเมื่อ</small></span></label>\n   <div class=\"mfoot\"><button class=\"btn primary\" data-act=\"closeModal\">เลือกแล้ว</button></div>": "No weekly confirm needed; fight plans follow the coach's pick. Untick any time.</small></span></label>\n   <div class=\"mfoot\"><button class=\"btn primary\" data-act=\"closeModal\">Done</button></div>",
+ " สัปดาห์ · ": " weeks left · ",
+ "เหลืออีก ": "",
+ "><span>ซ้อมแผนนี้ต่อ 4 สัปดาห์<small>": "><span>Keep this programme for 4 weeks<small>",
+ " สัปดาห์</span>": " more weeks</span>",
+ "<span class=\"tc-ok auto\">↻ ซ้อมแผนเดิมอีก ": "<span class=\"tc-ok auto\">↻ Same programme for "
 }
