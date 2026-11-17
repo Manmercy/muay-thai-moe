@@ -1837,3 +1837,4 @@ body.hasnews main>h1.sr+.homegrid,body.hasnews main>h1.sr+.rinnote{margin-top:46
 
 /* v1.88 opponent level tone (RPG style) */
 .lv.lt-red{color:#ff6b5e}.lv.lt-green{color:#7ddc7a}.lv.lt-gold{color:var(--gold)}
+.gacha.loyg.soon{opacity:.85}.gacha.loyg.soon .btn[disabled]{opacity:.7;cursor:not-allowed}

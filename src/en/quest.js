@@ -1019,13 +1019,17 @@ function loyPull(G){if(!loyFest()||(G.dust||0)<LG_COST)return null;G.dust-=LG_CO
   const o=G.cards[id];let res;if(!o){G.cards[id]={n:1,lv:1,wk:absWeek(G),seen:false};res={id,isNew:true};}
   else{o.n=(o.n||1)+1;o.spare=(o.spare||0)+1;res={id,spare:o.spare,canUp:(o.lv||1)<3};} /* v1.85.1: every duplicate is kept — the player levels the card up or breaks it down on the card page */
   res.loy=1;return res;}
-function loyGachaHTML(){if(!loyFest())return "";const own=Object.keys(CARDS).filter(k=>CARDS[k].lg&&(G.cards||{})[k]).length,all=Object.keys(CARDS).filter(k=>CARDS[k].lg).length;
+// v1.87.3: before the festival the box is on show but locked, with its opening time
+function loySoon(){const t=todayStr();return !evTest()&&t<LOY_FEST.from;}
+function loyGachaHTML(){if(loySoon()){const all=Object.keys(CARDS).filter(k=>CARDS[k].lg).length;
+    return `<div class="gacha loyg soon"><span><b class="goldt">Loy Krathong gacha</b> <small>Opens Nov 18 at 00:00 until Dec 7 · Thai-dress cards: ${all} cards · save up your stardust</small></span><button class="btn sm" disabled aria-disabled="true">🔒 Opens Nov 18</button></div>`;}
+  if(!loyFest())return "";const own=Object.keys(CARDS).filter(k=>CARDS[k].lg&&(G.cards||{})[k]).length,all=Object.keys(CARDS).filter(k=>CARDS[k].lg).length;
   return `<div class="gacha loyg"><span><b class="goldt">Loy Krathong Machine</b> <small>Open until Dec 7 only · Thai-dress cards ${own}/${all} cards · guaranteed SSR in ${Math.max(1,LG_PITY-(G.lgPity||0))} left · cards you get stay in your album forever</small></span><button class="btn sm gold" data-act="gopen" data-v="loy">🏮 Loy Krathong machine ${LG_COST}✦</button></div>`;}
 function codeContentHTML(){const L=loyOf(G);if(!L)return "";
   return `<div class="set"><span><b>Code content</b><small>Go back to events you unlocked with a code, anytime</small></span><span class="obtns"><button class="btn sm" data-act="loyhub">Loy Krathong 2026 ▸</button></span></div>`;}
 function loyHubHTML(){return `<h2>Riverside Brawl on Loy Krathong Night</h2><p class="meta">Event from code LOYKRATHONG69 · replay the brawl, rewatch the opening and endings, and catch the thief here</p><div class="center endbtns col">${evMailAct({})}</div>${loyGachaHTML()}`;}
 Object.assign(ACT,{
-  loygacha:()=>{const r=loyPull(G);if(!r){if(!loyFest())toast("The Loy Krathong machine is closed. See you next festival!");return;}AU.sfx&&AU.sfx(["SSR","SR"].includes(CARDS[r.id].r)?"level":"ui");save();UI.modal={type:"gacha",res:r};render();},
+  loygacha:()=>{const r=loyPull(G);if(!r){if(loySoon())toast("The Loy Krathong gacha opens Nov 18 at 00:00");else if(!loyFest())toast("The Loy Krathong machine is closed. See you next festival!");return;}AU.sfx&&AU.sfx(["SSR","SR"].includes(CARDS[r.id].r)?"level":"ui");save();UI.modal={type:"gacha",res:r};render();},
   loyhub:()=>{UI.modal={type:"loyhub"};render();},
 });
 // v1.86: card levels — longer stories, a Lv.2 epilogue and a Lv.3 special scene (and a minigame on the SSR cards)

@@ -1019,13 +1019,17 @@ function loyPull(G){if(!loyFest()||(G.dust||0)<LG_COST)return null;G.dust-=LG_CO
   const o=G.cards[id];let res;if(!o){G.cards[id]={n:1,lv:1,wk:absWeek(G),seen:false};res={id,isNew:true};}
   else{o.n=(o.n||1)+1;o.spare=(o.spare||0)+1;res={id,spare:o.spare,canUp:(o.lv||1)<3};} /* v1.85.1: every duplicate is kept — the player levels the card up or breaks it down on the card page */
   res.loy=1;return res;}
-function loyGachaHTML(){if(!loyFest())return "";const own=Object.keys(CARDS).filter(k=>CARDS[k].lg&&(G.cards||{})[k]).length,all=Object.keys(CARDS).filter(k=>CARDS[k].lg).length;
+// v1.87.3: before the festival the box is on show but locked, with its opening time
+function loySoon(){const t=todayStr();return !evTest()&&t<LOY_FEST.from;}
+function loyGachaHTML(){if(loySoon()){const all=Object.keys(CARDS).filter(k=>CARDS[k].lg).length;
+    return `<div class="gacha loyg soon"><span><b class="goldt">ตู้ลอยกระทง</b> <small>เปิด 18 พ.ย. เวลา 00:00 ถึง 7 ธ.ค. · การ์ดชุดไทย ${all} ใบ · เก็บเศษดาวรอไว้ได้เลย</small></span><button class="btn sm" disabled aria-disabled="true">🔒 เปิด 18 พ.ย.</button></div>`;}
+  if(!loyFest())return "";const own=Object.keys(CARDS).filter(k=>CARDS[k].lg&&(G.cards||{})[k]).length,all=Object.keys(CARDS).filter(k=>CARDS[k].lg).length;
   return `<div class="gacha loyg"><span><b class="goldt">ตู้ลอยกระทง</b> <small>เปิดถึง 7 ธ.ค. เท่านั้น · การ์ดชุดไทย ${own}/${all} ใบ · การันตี SSR อีก ${Math.max(1,LG_PITY-(G.lgPity||0))} ครั้ง · การ์ดที่ได้แล้วอยู่ในอัลบั้มตลอดไป</small></span><button class="btn sm gold" data-act="gopen" data-v="loy">🏮 ตู้ลอยกระทง ${LG_COST}✦</button></div>`;}
 function codeContentHTML(){const L=loyOf(G);if(!L)return "";
   return `<div class="set"><span><b>เนื้อหาจากโค้ด</b><small>กลับไปเล่นอีเวนต์ที่เคยใส่โค้ดไว้ได้ทุกเมื่อ</small></span><span class="obtns"><button class="btn sm" data-act="loyhub">ลอยกระทง 2569 ▸</button></span></div>`;}
 function loyHubHTML(){return `<h2>ศึกริมน้ำคืนลอยกระทง</h2><p class="meta">อีเวนต์จากโค้ด LOYKRATHONG69 · กลับมาเล่นซ้ำ ดูฉากเปิด ฉากจบ และไล่จับโจรได้ที่นี่</p><div class="center endbtns col">${evMailAct({})}</div>${loyGachaHTML()}`;}
 Object.assign(ACT,{
-  loygacha:()=>{const r=loyPull(G);if(!r){if(!loyFest())toast("ตู้ลอยกระทงปิดแล้ว ไว้เจอกันเทศกาลหน้า");return;}AU.sfx&&AU.sfx(["SSR","SR"].includes(CARDS[r.id].r)?"level":"ui");save();UI.modal={type:"gacha",res:r};render();},
+  loygacha:()=>{const r=loyPull(G);if(!r){if(loySoon())toast("ตู้ลอยกระทงเปิด 18 พ.ย. เวลา 00:00");else if(!loyFest())toast("ตู้ลอยกระทงปิดแล้ว ไว้เจอกันเทศกาลหน้า");return;}AU.sfx&&AU.sfx(["SSR","SR"].includes(CARDS[r.id].r)?"level":"ui");save();UI.modal={type:"gacha",res:r};render();},
   loyhub:()=>{UI.modal={type:"loyhub"};render();},
 });
 // v1.86: card levels — longer stories, a Lv.2 epilogue and a Lv.3 special scene (and a minigame on the SSR cards)
