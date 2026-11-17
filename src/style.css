@@ -1814,3 +1814,5 @@ body.hasnews main>h1.sr+.homegrid,body.hasnews main>h1.sr+.rinnote{margin-top:46
 .trd summary{cursor:pointer;font-size:12px;color:var(--muted);min-height:24px;display:flex;align-items:center}
 .trd p{margin:2px 0 0;font-size:12.5px;line-height:1.5}.trd p.meta{color:var(--muted);font-size:12px}
 .trd summary{list-style:none}.trd summary::-webkit-details-marker{display:none}.trd summary::before{content:"▸";margin-right:6px}.trd[open] summary::before{content:"▾"}
+.trseg button{display:flex;align-items:center;justify-content:center;gap:6px;text-align:left}.trseg .pxi,.trone .pxi,.trov .pxi{width:18px;height:18px;flex:none}
+.trseg button[aria-pressed="false"] .pxi{opacity:.6}.trone{display:inline-flex;align-items:center;gap:6px}.trov{display:flex;align-items:center;gap:6px}

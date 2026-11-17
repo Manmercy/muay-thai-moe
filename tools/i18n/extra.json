@@ -5049,5 +5049,6 @@
  "<p class=\"meta\">อีกแบบ: ": "<p class=\"meta\">Other option: ",
  "</div>\n   <details class=\"trd\"><summary>รายละเอียด</summary><p>": "</div>\n   <details class=\"trd\"><summary>Details</summary><p>",
  "<div class=\"seg trseg\" role=\"group\" aria-label=\"เลือกจุดเด่น\">": "<div class=\"seg trseg\" role=\"group\" aria-label=\"Choose a trait\">",
- "<div class=\"trbox\"><div class=\"trh\"><b>จุดเด่น</b>": "<div class=\"trbox\"><div class=\"trh\"><b>Trait</b>"
+ "<div class=\"trbox\"><div class=\"trh\"><b>จุดเด่น</b>": "<div class=\"trbox\"><div class=\"trh\"><b>Trait</b>",
+ " จุดเด่น: <b>": " Trait: <b>"
 }
