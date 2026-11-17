@@ -370,7 +370,7 @@ function mastery(f){if(f.camp!=="player")return 0;const v=styleVal(f,mainStyle(f
 /* v1.83.3: veterans past the stat ceiling (20) keep improving through ring craft instead — f.vet is measured in stat points */
 const VET_FX={hit:.08,dmg:.25,ev:.06}; // calibrated: vet 1 ≈ +1 stat point
 function fightSide(f,plan,rng){const sk=skillMods(f);{const m=mastery(f)*MK,s=mainStyle(f);if(m){if(s==="defense"){sk.evade+=.04*m;sk.ctr+=.06*m;sk.ctrDmg+=.25*m;}else{const w=s;sk.hit[w]=(sk.hit[w]||0)+.05*m;sk.dmg[w]=(sk.dmg[w]||0)+.2*m;sk.pts[w]=(sk.pts[w]||0)+.1*m;}}}if(f.aura)sk.evade+=f.aura*.5;if(f.vet>0){const v=f.vet;for(const w of ["punch","kick","knee","elbow"]){sk.hit[w]=(sk.hit[w]||0)+VET_FX.hit*v;sk.dmg[w]=(sk.dmg[w]||0)+VET_FX.dmg*v;}sk.evade+=VET_FX.ev*v;}const gr=f.id==="kati"&&traitOf(f)!=="grit"?0:(f.grit||0);if(gr)sk.evade+=gr*.4;
-  const hp0=100-(f.injury?15:0)+Math.round(gr*30),tl=f.trainLog||[];const brk=STA.brk+f.a.stamina*STA.brkK+(tl[tl.length-1]==="prep"?STA.prep:0)+(tl.slice(-2).includes("cond")?STA.cond:0);
+  const hp0=100-(f.injury?15:0)+Math.round(gr*30),tl=f.trainLog||[];const brk=STA.brk+f.a.stamina*STA.brkK+(tl[tl.length-1]==="prep"?STA.prep:0)+(tl.slice(-2).includes("cond")?STA.cond:0)+(f.id==="fah"?STA.fah:0); /* Fah: hot-blooded and tireless, gets her breath back faster */
   return {f,id:f.id,name:f.name,plan,instr:"none",hp:hp0,hp0,brk,sta:clamp(100-f.fatigue*.4,40,100),pts:0,rpts:0,kd:0,cuts:0,
     thrown:0,landed:0,dmgDealt:0,legs:0,tac:{focus:"auto",pace:"steady",target:"head"},sk,prep:(f.prepBonus?.04:0)+(f.counterPrep?.05:0)+sk.prep+(f.aura||0)+gr+(f.labPrep||0)+(f.camp==="player"?(f.facPrep||0):0),counterPrep:!!f.counterPrep,trait:traitOf(f),mor:(f.morale-60)/400+sk.mor,wl:{punch:0,kick:0,knee:0,elbow:0}};
 }
@@ -404,7 +404,7 @@ function mods(s,F){const p0=PLANS[s.plan],c=CORNER[s.instr]||{};const cm=1+((s.s
 const CARE={water:{icon:"💧",name:"Water"},rub:{icon:"💆",name:"Muay oil massage"},wipe:{icon:"🧻",name:"Wipe the face"},cheer:{icon:"💪",name:"Encourage"}};
 function careNeeds(F){const A=F.A,B=F.B,r=mulberry32(F.seed+F.round*977);const sc=k=>({water:100-A.sta,rub:(A.sta<60?20:0)+B.rw.kick*4,wipe:B.rdmg*1.5+B.rlanded*3,cheer:(F.cards.reduce((s,c)=>s+c[1]-c[0],0))*25+(A.hp<50?20:0)}[k])+r()*30;
   return Object.keys(CARE).sort((a,b)=>sc(b)-sc(a)).slice(0,3);}
-function applyCare(F,q){const A=F.A;careSide(A,q);A.careMor=q>=1?.02:0;return q;}
+function applyCare(F,q){const A=F.A;careSide(A,STA.qf+q*(1-STA.qf)); /* even a poor corner does a little; a great one does a lot */A.careMor=q>=1?.02:0;return q;}
 function throwTowel(F){if(F.over)return;F.over=true;F.result={win:"B",type:"Corner throws in the towel",round:F.round,towel:true};}
 function aiCorner(F,me,op){ if(F.round===0)return "none";
   const lead=me.pts-op.pts;if(me.sta<35)return "defend";if(lead>4)return "defend";if(lead<-3)return "push";
@@ -498,7 +498,7 @@ function fightEx(F){const rng=F.rng,log=[],ex=F.ex,mA=F.mA,mB=F.mB;
   }
   F.ex++;F.rlog.push(...log);return log;}
 let RND_REC={b:11,d:.5};
-const STA={hit:.35,drain:1.3,cA:1.15,cB:70,ex:0,exK:1/120,brk:3,brkK:.2,prep:4,cond:3,care:16,careHp:5,ai:.45};
+const STA={qf:.4,fah:12,hit:.25,drain:1.15,cA:1.15,cB:70,ex:0,exK:1/120,brk:3,brkK:.2,prep:4,cond:3,care:16,careHp:5,ai:.45};
 function careSide(s,q){s.sta=clamp(s.sta+q*STA.care,0,100);s.hp=clamp(s.hp+q*STA.careHp,0,Math.max(100,s.hp0||100));}
 function roundFinish(F){const log=F.rlog,kd0=F.kd0;for(const s of [F.A,F.B])s.burst=null;
   // judges
