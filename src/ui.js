@@ -1246,19 +1246,24 @@ function fightHTML(){const U=UI.fight,b=U.b,me=G.F[b.a],op=G.F[b.b],F=U.F;
     if(U.stage==="corner")mid+=cornerHTML(F);
     if(U.stage==="done")mid+=resultHTML();
     mid+=`<details class="logd" ${UI.logOpen?"open":""} ontoggle="UI.logOpen=this.open"><summary>บันทึกการชกทั้งหมด</summary><div class="flog">${U.shown.map(l=>l.rd?`<div class="rd">${l.rd}</div>`:`<div class="${l.s}">${esc(l.t||"")}</div>`).join("")}</div></details>`;}
-  const tw=UI.confirmTowel?`<div class="tconfirm" role="alertdialog"><div class="px"><h3>🏳️ โยนผ้ายอมแพ้?</h3><p>ไฟต์นี้จะนับเป็นแพ้ทันที แต่นักมวยจะไม่เจ็บหนักกว่านี้</p><div class="ctrl"><button class="btn" data-act="towelno">ชกต่อ</button><button class="btn primary" data-act="towelyes">ยอมแพ้</button></div></div></div>`:"";
+  const tw=UI.confirmTowel?`<div class="tconfirm" role="alertdialog"><div class="px">${UI.towelCoach?`<div class="ctip big"><img src="${faceSrc("coach")}" alt=""><span><b>ครูแดง:</b> ${esc(me.name)}เจ็บหนักแล้ว เลือดเหลือแค่ ${Math.max(1,Math.round(U.F.A.hp))} ถ้าชกต่อแล้วโดนน็อก ต้องพักหลายสัปดาห์ จะโยนผ้าไหม</span></div>`:""}<h3>🏳️ โยนผ้ายอมแพ้?</h3><p>ไฟต์นี้จะนับเป็นแพ้ทันที แต่นักมวยจะไม่เจ็บหนักกว่านี้ (กำลังใจลดลง)</p><div class="ctrl"><button class="btn" data-act="towelno">ชกต่อ</button><button class="btn primary" data-act="towelyes">ยอมแพ้</button></div></div></div>`:"";
   return `${tw}${fpopHTML()}<div class="fight pxscroll ${U.stage==="corner"?"incorner":U.stage==="done"?"isdone":""}" data-sk="fight" role="dialog" aria-label="การชก"><div class="fight-in"><div class="fhead">${side(me,"a",hpA,stA)}<div class="vsmid"><b>${TIER[b.tier].name}</b>${U.F&&U.F.round&&U.stage==="playing"?(()=>{const s=Math.max(0,Math.round(180*(1-Math.min(U.F.ex||0,EX_PER_ROUND)/EX_PER_ROUND)));return `<span class="meta">ยก ${U.F.round}/${b.rounds}</span><span class="rclock num">${Math.floor(s/60)}:${String(s%60).padStart(2,"0")}</span><i class="rcbar" style="--v:${Math.round(s/1.8)}%"></i>`;})():`<span class="meta">${b.rounds} ยก</span>`}</div>${side(op,"b",hpB,stB)}</div>${mid}</div></div>`;}
 function liveStats(){const U=UI.fight,F=U.F;if(!F)return "";let la=0,lb=0;
   for(const e of U.shown){if(!e.ev)continue;const sd=sideOf(e,F);if(e.ev==="hit"||e.ev==="counter"){if(sd==="A")la++;else lb++;}}
   const ctl=la+lb?Math.round(la/(la+lb)*100):50;
   return `<div class="live px"><span>เข้าเป้า <b class="num">${la}</b> – <b class="num">${lb}</b></span><span class="ctlbar" style="--v:${ctl}%"><i></i></span><span>คุมเกม <b class="num">${ctl}%</b></span><span>ขาคู่ชก ${F.B.legs>25?"หนักมาก":F.B.legs>12?"เริ่มหนัก":"ปกติ"}</span></div>`;}
 // v1.10 corner: tiny care puzzle + pick an order, then confirm
+const CARD_FACE={1.4:["🌟","ฟื้นเต็มที่!","สดชื่นกว่าเดิม แรงกลับมาเยอะ"],1:["💧","ฟื้นตามปกติ","พักหายใจได้ดี"],"-0.3":["😵","ตะคริวกิน!","ขาตึง แรงลดลงนิดหน่อย"]};
+function careCardHTML(A,C){return `<div class="care cmode"><div class="need"><img class="face sm" src="${faceSrc(A.f.id,"happy")}" alt=""><span>${C.done?esc(CARD_FACE[String(C.q)][1]+" · "+CARD_FACE[String(C.q)][2]):"เปิดไพ่ลุ้นการฟื้นตัว เลือก 1 ใบ"}</span></div>
+  <div class="ccards">${C.deck.map((q,i)=>{const open=C.done,me=C.flip===i,F=CARD_FACE[String(q)];return `<button class="ccard ${open?"open":""} ${me?"mine":""} ${q<0?"bad":q>1?"good":""}" data-act="ccard" data-v="${i}" ${C.done?"disabled":""}>${open?`<b>${F[0]}</b><small>${esc(F[1])}</small>`:`<i></i>`}</button>`;}).join("")}</div></div>`;}
+function careOilHTML(A,C){const p=Math.min(100,Math.round(C.taps/20*100));return `<div class="care cmode"><div class="need"><img class="face sm" src="${faceSrc(A.f.id,"happy")}" alt=""><span>${C.done?(C.q>=1?"นวดจนตัวเบา!":C.q>=.5?"คลายขึ้นเยอะ":"นวดไม่ทัน แรงฟื้นนิดเดียว"):C.t0?"รัวเลย! นวดให้ทันก่อนหมดเวลา":"ราดน้ำมันมวยแล้วกดรัว ๆ ใน 3 วินาที"}</span></div>
+  <div class="oil"><i class="oilbar" style="--v:${p}%"><s></s></i><button class="btn oilbtn" data-act="coil" ${C.done?"disabled":""}>${C.done?`นวดได้ ${C.taps} ครั้ง`:"🫙 นวด!"}</button></div></div>`;}
 function cornerHTML(F){const U=UI.fight,C=U.care,A=F.A,B=F.B,c=F.cards[F.cards.length-1]||[10,10];const rec=aiCorner(F,A,B);
   const note=B.sta<40?"คู่ชกเริ่มหมดแรง":A.sta<40?"เราแรงเหลือน้อย":A.rlanded<B.rlanded-2?"ยกนี้เราโดนเยอะ":B.legs>20?"ขาคู่ชกเริ่มหนัก":A.rage?"ยังเลือดเดือดอยู่!":"";
-  const slots=C.need.map((k,i)=>{const g=C.got[i];return `<span class="cslot ${g==null?"":g===k?"ok":"bad"}">${PIX[k]}</span>`;}).join('<i class="arr">›</i>');
+  const slots=(C.need||[]).map((k,i)=>{const g=C.got[i];return `<span class="cslot ${g==null?"":g===k?"ok":"bad"}">${PIX[k]}</span>`;}).join('<i class="arr">›</i>');
   return `<div class="corner px"><div class="chead"><b>พักยก ${F.round}</b><button class="chip cardbtn" data-act="cshow" aria-pressed="${!!U.cshow}">${U.cshow?F.cards.map((c,i)=>`ย${i+1} ${c[0]}–${c[1]}`).join(" · "):"ดูคะแนนยกที่ผ่านมา ▸"}</button><span class="chip">เข้าเป้า ${A.rlanded}–${B.rlanded}</span>${note?`<span class="chip warn">${note}</span>`:""}</div>
-   <div class="care"><div class="need"><img class="face sm" src="${faceSrc(A.f.id,"happy")}" alt=""><span>${C.done?(C.q>=1?"สดชื่นเต็มที่!":C.q>0?"ดีขึ้นนิดหน่อย":"ยังไม่ค่อยดีขึ้น"):"ทำตามลำดับนี้"}</span><div class="cslots">${slots}</div></div>
-    <div class="carebtns">${Object.entries(CARE).map(([k,v])=>{const o=C.got.indexOf(k);return `<button data-act="care" data-v="${k}" ${C.done||o>=0?"disabled":""} class="${o>=0?"picked":""}">${o>=0?`<i class="ord">${o+1}</i>`:""}${PIX[k]}<small>${v.name}</small></button>`;}).join("")}</div></div>
+   ${C.mode==="card"?careCardHTML(A,C):C.mode==="oil"?careOilHTML(A,C):`<div class="care"><div class="need"><img class="face sm" src="${faceSrc(A.f.id,"happy")}" alt=""><span>${C.done?(C.q>=1?"สดชื่นเต็มที่!":C.q>0?"ดีขึ้นนิดหน่อย":"ยังไม่ค่อยดีขึ้น"):"ทำตามลำดับนี้"}</span><div class="cslots">${slots}</div></div>
+    <div class="carebtns">${Object.entries(CARE).map(([k,v])=>{const o=C.got.indexOf(k);return `<button data-act="care" data-v="${k}" ${C.done||o>=0?"disabled":""} class="${o>=0?"picked":""}">${o>=0?`<i class="ord">${o+1}</i>`:""}${PIX[k]}<small>${v.name}</small></button>`;}).join("")}</div></div>`}
    <div class="ohead"><b>คำสั่งยกถัดไป</b>${coachOn()?`<button class="btn sm" data-act="chint">คำแนะนำครู</button>`:""}</div>
    <div class="opts">${Object.entries(CORNER).map(([k,o])=>`<button data-act="cpick" data-v="${k}" aria-pressed="${U.pick===k}">${o.name}</button>`).join("")}</div>
    <div class="cfoot"><button class="towel" data-act="towel" aria-label="โยนผ้ายอมแพ้">${PIX.flag}<span>ผ้าขาว</span></button><button class="btn primary" data-act="cgo" ${U.pick?"":"disabled"}>เริ่มยก ${F.round+1} ▸</button></div>
@@ -1429,7 +1434,16 @@ function tick(){const U=UI.fight;if(!U||U.stage!=="playing")return;
 function fskip(){const U=UI.fight;clearTimeout(U.timer);while(!roundDone(U.F))U.pending.push(...fightEx(U.F));const rest=U.pending.filter(x=>!x.bell&&!x.tired);U.shown.push(...rest);U.pending=[];
   const ko=rest.find(x=>x.ev==="ko");if(ko)FS.play({...ko,side:sideOf(ko,U.F)},performance.now());roundFinish(U.F);roundEnd();}
 function roundEnd(){const U=UI.fight;clearTimeout(U.timer);const F=U.F;
-  if(F.over){fightEnd();return;}AU.sfx("bell1");U.caption={text:COM.end[Math.floor(Math.random()*2)],side:""};U.stage="corner";U.care={need:careNeeds(F),got:[],done:false};U.pick=null;U.hint=false;render();}
+  if(F.over){fightEnd();return;}AU.sfx("bell1");U.caption={text:COM.end[Math.floor(Math.random()*2)],side:""};U.stage="corner";U.care=newCare(F);U.pick=null;U.hint=false;if(F.A.hp<35&&!U.towelAsked&&F.round<F.rounds){U.towelAsked=true;UI.confirmTowel=true;UI.towelCoach=true;AU.sfx("miss");}render();}
+/* v1.88 corner care comes in three flavours: the order puzzle, a face-down card, or a fast oil massage */
+function newCare(F){const r=Math.random(),mode=F.round<2||r<.5?"order":r<.75?"card":"oil";
+  if(mode==="card"){const o=[1.4,1,-.3].sort(()=>Math.random()-.5);return {mode,deck:o,flip:-1,done:false};}
+  if(mode==="oil")return {mode,taps:0,t0:0,done:false};return {mode,need:careNeeds(F),got:[],done:false};}
+/* v1.88: after the towel — she is safe, but it hurts her pride (morale −8 is applied in applyResult) */
+function towelScene(f){const L={kati:["หนูยังยืนได้นะคะครู… ปู่ไม่เคยโยนผ้า","sad"],mali:["มะลิยังไหวค่ะ! …ทำไมโยนล่ะคะ","sad"],rin:["ข้อมูลบอกว่าฉันยังมีโอกาสสิบสองเปอร์เซ็นต์ …ฉันเข้าใจค่ะ แต่ไม่ได้แปลว่าฉันชอบ","sad"],ploy:["…ครั้งแรกในชีวิตที่มีคนโยนผ้าให้พี่ จำไว้นะ","angry"],fah:["ฟ้ายังไม่แพ้!! ใครโยนผ้า!! …ครูเหรอ ฟ้าโกรธครูสามวัน","angry"]}[f.id];
+  const R={kati:"ปู่ไม่เคยมีหลานให้ห่วงแบบนี้ไง",mali:"เพราะครูอยากเห็นมะลิยิ้มได้พรุ่งนี้ ไม่ใช่นอนโรงพยาบาล",rin:"ไม่ต้องชอบ แค่หายเจ็บก่อนแล้วค่อยมาเถียงครู",ploy:"จำไว้เลย ครูก็จะจำว่าพลอยยังยืนอยู่",fah:"สามวันพอ วันที่สี่มาซ้อมด้วย"}[f.id]||"ไม่เป็นไรนะ ไฟต์หน้ายังมี";
+  const me=L?{n:f.id,f:L[1],l:"fight",t:L[0]}:{n:"npc",who:f.name,t:"หนูยังไหว… แต่ก็ขอบคุณค่ะ"};
+  return [{n:"coach",t:`ครูขอโทษนะ ${f.name} ครูไม่อยากเห็นหนูล้มลงไปมากกว่านี้`},me,{n:"coach",t:R},{n:"nar",t:`${f.name} ไม่บาดเจ็บหนักเพิ่ม แต่กำลังใจลดลง 8`}];}
 function fightEnd(){const U=UI.fight;U.stage="done";{const w=U.F.result.win;U.bubble=postBubble(U.F.B.f,w==="A"?"lose":w==="B"?"win":"draw",(U.F.seed>>>3)+G.week+[...U.F.B.f.id].reduce((a,c)=>a*31+c.charCodeAt(0)|0,0)+(G.cal||[]).length*7,U.F.A.f);}AU.startMusic("hub");setTimeout(()=>AU.sfx(U.F.result.win==="A"?"win":U.F.result.win==="B"?"lose":"bell1"),200);
   const me=G.F[U.b.a];if(me.injury)me.trust=clamp(me.trust-12,0,100);
   U.res=applyResult(G,U.F,U.b);if(U.b.dm)U.b.result=dmWinFrom(U.F);me.prepBonus=false;if(U.b.tier==="final"||U.b.tier==="semi")finishBracket(G,U.b,U.F);
@@ -1442,7 +1456,7 @@ function fightEnd(){const U=UI.fight;U.stage="done";{const w=U.F.result.win;U.bu
   {const op=G.F[U.b.b];if(r.win!=="D"&&!TIER[U.b.tier].off&&(op.canon||U.b.tier==="semi"||U.b.tier==="final"||/KO/.test(r.type)))G.lastBig={a:me.id,b:op.id,win:r.win,wk:G.week,absWeek:gameWeek(G),shown:false};}
   if(r.win==="B"){const F=U.F,st=s=>({landed:s.landed,thrown:s.thrown,wl:{...s.wl},sta:Math.round(s.sta),kd:s.kd,legs:Math.round(s.legs)});
     G.losses=(G.losses||[]).concat([{wk:G.week,absWeek:gameWeek(G),a:me.id,b:U.b.b,type:r.type,round:r.round,cards:F.cards.map(c=>[...c]),A:st(F.A),B:st(F.B),sc:scouted(U.b.b),od:Math.round(ovr(G.F[U.b.b])-ovr(me)),plan:U.plan||"balanced",tg:(F.A.tac&&F.A.tac.target)||"",care:U.careOK||0}]).slice(-6);}
-  U.afterScene=prodigyResultScene(G,U.b,r.win)||vectorResultScene(G,U.b,r.win);
+  U.afterScene=r.towel?towelScene(me):(prodigyResultScene(G,U.b,r.win)||vectorResultScene(G,U.b,r.win));
   save();render();}
 
 // ---------- actions ----------
@@ -1639,12 +1653,16 @@ const ACT={
   lossrev:()=>{UI.revIdx=0;UI.modal={type:"lossrev"};render();},
   revpick:d=>{UI.revIdx=+d.v;render();},
   cpick:d=>{UI.fight.pick=d.v;render();},
-  cgo:()=>{const U=UI.fight;if(!U.pick)return;const C=U.care;if(C&&!C.done){C.q=0;applyCare(U.F,0);}AU.sfx("bell1");U.F.A.instr=U.pick;U.pick=null;playRound();},
+  cgo:()=>{const U=UI.fight;if(!U.pick)return;const C=U.care;if(C&&!C.done){C.q=0;C.done=true;applyCare(U.F,0);}AU.sfx("bell1");U.F.A.instr=U.pick;U.pick=null;playRound();},
+  ccard:d=>{const U=UI.fight,C=U.care;if(!C||C.mode!=="card"||C.done)return;const i=+d.v;C.flip=i;C.q=C.deck[i];C.done=true;applyCare(U.F,C.q);if(C.q>=1)U.careOK=(U.careOK||0)+1;AU.sfx(C.q>1?"level":C.q<0?"miss":"ui");render();},
+  coil:()=>{const U=UI.fight,C=U.care;if(!C||C.mode!=="oil"||C.done)return;C.taps++;AU.sfx("ui");
+    if(!C.t0){C.t0=performance.now();setTimeout(()=>{if(UI.fight&&UI.fight.care===C&&!C.done){C.done=true;C.q=C.taps>=20?1.2:C.taps>=14?1:C.taps>=8?.5:.2;applyCare(UI.fight.F,C.q);if(C.q>=1){UI.fight.careOK=(UI.fight.careOK||0)+1;AU.sfx("level");}render();}},3000);}
+    const b=document.querySelector(".oilbar");if(b&&C.taps>1)b.style.setProperty("--v",Math.min(100,Math.round(C.taps/20*100))+"%");else render();},
   care:d=>{const U=UI.fight,C=U.care;if(!C||C.done)return;const i=C.got.length;C.got.push(d.v);const ok=C.need[i]===d.v;AU.sfx(ok?"ui":"miss");
     if(C.got.length>=C.need.length){C.done=true;const n=C.got.filter((g,k)=>g===C.need[k]).length;C.q=n===3?1:n===2?.5:0;if(C.q>=1)U.careOK=(U.careOK||0)+1;applyCare(U.F,C.q);if(C.q>=1){AU.sfx("level");const me=G.F[U.b.a];popToast({kati:"สดชื่นจังเลยค่ะ!",mali:"หายเหนื่อยแล้ว! ลุยต่อ!",rin:"สภาพร่างกายกลับมา 90%",ploy:"ขอบคุณค่ะ ใจมาแล้ว",fah:"โอเค! พร้อมจัดหนัก!"}[me.id]||"สดชื่นแล้ว!","good");}}render();},
   towel:()=>{UI.confirmTowel=true;render();},
-  towelno:()=>{UI.confirmTowel=false;render();},
-  towelyes:()=>{UI.confirmTowel=false;const U=UI.fight;throwTowel(U.F);U.shown.push({s:"x",t:`มุม${G.F[U.b.a].name}โยนผ้าขาวยอมแพ้`});fightEnd();},
+  towelno:()=>{UI.confirmTowel=false;UI.towelCoach=false;render();},
+  towelyes:()=>{UI.confirmTowel=false;UI.towelCoach=false;const U=UI.fight;throwTowel(U.F);U.shown.push({s:"x",t:`มุม${G.F[U.b.a].name}โยนผ้าขาวยอมแพ้`});fightEnd();},
   withdraw:()=>{const U=UI.fight;G.bookings=G.bookings.filter(x=>x!==U.b);G.rep=Math.max(0,G.rep-1);add(G,U.b.a,"trust",3);
     G.log.push(`${G.F[U.b.a].name} ถอนตัวเพราะบาดเจ็บ`);const done=U.done;UI.fight=null;render();done();},
   fdone:()=>{const done=UI.fight.done,after=UI.fight.afterScene;UI.fight=null;render();playHonorQueue(()=>{if(after)playScene(after,done,{bg:"ring",look:"fight"});else done();});},

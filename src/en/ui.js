@@ -1246,19 +1246,24 @@ function fightHTML(){const U=UI.fight,b=U.b,me=G.F[b.a],op=G.F[b.b],F=U.F;
     if(U.stage==="corner")mid+=cornerHTML(F);
     if(U.stage==="done")mid+=resultHTML();
     mid+=`<details class="logd" ${UI.logOpen?"open":""} ontoggle="UI.logOpen=this.open"><summary>Full fight log</summary><div class="flog">${U.shown.map(l=>l.rd?`<div class="rd">${l.rd}</div>`:`<div class="${l.s}">${esc(l.t||"")}</div>`).join("")}</div></details>`;}
-  const tw=UI.confirmTowel?`<div class="tconfirm" role="alertdialog"><div class="px"><h3>🏳️ Throw in the towel?</h3><p>This fight counts as a loss immediately, but your fighter won't get hurt any worse</p><div class="ctrl"><button class="btn" data-act="towelno">Keep fighting</button><button class="btn primary" data-act="towelyes">Surrender</button></div></div></div>`:"";
+  const tw=UI.confirmTowel?`<div class="tconfirm" role="alertdialog"><div class="px">${UI.towelCoach?`<div class="ctip big"><img src="${faceSrc("coach")}" alt=""><span><b>Coach Daeng:</b> ${esc(me.name)} is badly hurt, only HP ${Math.max(1,Math.round(U.F.A.hp))}. If she gets knocked out she'll be off for weeks. Throw the towel?</span></div>`:""}<h3>🏳️ Throw in the towel?</h3><p>The fight counts as a loss right away, but she won't get hurt any worse (morale drops).</p><div class="ctrl"><button class="btn" data-act="towelno">Keep fighting</button><button class="btn primary" data-act="towelyes">Throw it</button></div></div></div>`:"";
   return `${tw}${fpopHTML()}<div class="fight pxscroll ${U.stage==="corner"?"incorner":U.stage==="done"?"isdone":""}" data-sk="fight" role="dialog" aria-label="Fight"><div class="fight-in"><div class="fhead">${side(me,"a",hpA,stA)}<div class="vsmid"><b>${TIER[b.tier].name}</b>${U.F&&U.F.round&&U.stage==="playing"?(()=>{const s=Math.max(0,Math.round(180*(1-Math.min(U.F.ex||0,EX_PER_ROUND)/EX_PER_ROUND)));return `<span class="meta">Rd ${U.F.round}/${b.rounds}</span><span class="rclock num">${Math.floor(s/60)}:${String(s%60).padStart(2,"0")}</span><i class="rcbar" style="--v:${Math.round(s/1.8)}%"></i>`;})():`<span class="meta">${b.rounds} rds</span>`}</div>${side(op,"b",hpB,stB)}</div>${mid}</div></div>`;}
 function liveStats(){const U=UI.fight,F=U.F;if(!F)return "";let la=0,lb=0;
   for(const e of U.shown){if(!e.ev)continue;const sd=sideOf(e,F);if(e.ev==="hit"||e.ev==="counter"){if(sd==="A")la++;else lb++;}}
   const ctl=la+lb?Math.round(la/(la+lb)*100):50;
   return `<div class="live px"><span>Landed <b class="num">${la}</b> – <b class="num">${lb}</b></span><span class="ctlbar" style="--v:${ctl}%"><i></i></span><span>Control <b class="num">${ctl}%</b></span><span>Opp. legs ${F.B.legs>25?"Very heavy":F.B.legs>12?"Getting heavy":"Normal"}</span></div>`;}
 // v1.10 corner: tiny care puzzle + pick an order, then confirm
+const CARD_FACE={1.4:["🌟","Full recovery!","Fresher than before, lots of energy back"],1:["💧","Normal recovery","A good breather"],"-0.3":["😵","Cramp!","Tight legs, a little less energy"]};
+function careCardHTML(A,C){return `<div class="care cmode"><div class="need"><img class="face sm" src="${faceSrc(A.f.id,"happy")}" alt=""><span>${C.done?esc(CARD_FACE[String(C.q)][1]+" · "+CARD_FACE[String(C.q)][2]):"Draw a card for her recovery, pick 1"}</span></div>
+  <div class="ccards">${C.deck.map((q,i)=>{const open=C.done,me=C.flip===i,F=CARD_FACE[String(q)];return `<button class="ccard ${open?"open":""} ${me?"mine":""} ${q<0?"bad":q>1?"good":""}" data-act="ccard" data-v="${i}" ${C.done?"disabled":""}>${open?`<b>${F[0]}</b><small>${esc(F[1])}</small>`:`<i></i>`}</button>`;}).join("")}</div></div>`;}
+function careOilHTML(A,C){const p=Math.min(100,Math.round(C.taps/20*100));return `<div class="care cmode"><div class="need"><img class="face sm" src="${faceSrc(A.f.id,"happy")}" alt=""><span>${C.done?(C.q>=1?"Feels light as air!":C.q>=.5?"Much looser":"Too slow, only a little recovery"):C.t0?"Faster! Rub before time runs out":"Pour the boxing oil and tap fast for 3 seconds"}</span></div>
+  <div class="oil"><i class="oilbar" style="--v:${p}%"><s></s></i><button class="btn oilbtn" data-act="coil" ${C.done?"disabled":""}>${C.done?`Massaged ${C.taps} times`:"🫙 Massage!"}</button></div></div>`;}
 function cornerHTML(F){const U=UI.fight,C=U.care,A=F.A,B=F.B,c=F.cards[F.cards.length-1]||[10,10];const rec=aiCorner(F,A,B);
   const note=B.sta<40?"Opponent is fading":A.sta<40?"We're low on energy":A.rlanded<B.rlanded-2?"We took a lot this round":B.legs>20?"Opponent's legs getting heavy":A.rage?"Still in blood-boil!":"";
-  const slots=C.need.map((k,i)=>{const g=C.got[i];return `<span class="cslot ${g==null?"":g===k?"ok":"bad"}">${PIX[k]}</span>`;}).join('<i class="arr">›</i>');
+  const slots=(C.need||[]).map((k,i)=>{const g=C.got[i];return `<span class="cslot ${g==null?"":g===k?"ok":"bad"}">${PIX[k]}</span>`;}).join('<i class="arr">›</i>');
   return `<div class="corner px"><div class="chead"><b>Break · round ${F.round}</b><button class="chip cardbtn" data-act="cshow" aria-pressed="${!!U.cshow}">${U.cshow?F.cards.map((c,i)=>`R${i+1} ${c[0]}–${c[1]}`).join(" · "):"See previous round scores ▸"}</button><span class="chip">Landed ${A.rlanded}–${B.rlanded}</span>${note?`<span class="chip warn">${note}</span>`:""}</div>
-   <div class="care"><div class="need"><img class="face sm" src="${faceSrc(A.f.id,"happy")}" alt=""><span>${C.done?(C.q>=1?"Fully refreshed!":C.q>0?"A little better":"Not much better"):"Do it in this order"}</span><div class="cslots">${slots}</div></div>
-    <div class="carebtns">${Object.entries(CARE).map(([k,v])=>{const o=C.got.indexOf(k);return `<button data-act="care" data-v="${k}" ${C.done||o>=0?"disabled":""} class="${o>=0?"picked":""}">${o>=0?`<i class="ord">${o+1}</i>`:""}${PIX[k]}<small>${v.name}</small></button>`;}).join("")}</div></div>
+   ${C.mode==="card"?careCardHTML(A,C):C.mode==="oil"?careOilHTML(A,C):`<div class="care"><div class="need"><img class="face sm" src="${faceSrc(A.f.id,"happy")}" alt=""><span>${C.done?(C.q>=1?"Fully refreshed!":C.q>0?"A little better":"Not much better"):"Do it in this order"}</span><div class="cslots">${slots}</div></div>
+    <div class="carebtns">${Object.entries(CARE).map(([k,v])=>{const o=C.got.indexOf(k);return `<button data-act="care" data-v="${k}" ${C.done||o>=0?"disabled":""} class="${o>=0?"picked":""}">${o>=0?`<i class="ord">${o+1}</i>`:""}${PIX[k]}<small>${v.name}</small></button>`;}).join("")}</div></div>`}
    <div class="ohead"><b>Orders for next round</b>${coachOn()?`<button class="btn sm" data-act="chint">Coach's tip</button>`:""}</div>
    <div class="opts">${Object.entries(CORNER).map(([k,o])=>`<button data-act="cpick" data-v="${k}" aria-pressed="${U.pick===k}">${o.name}</button>`).join("")}</div>
    <div class="cfoot"><button class="towel" data-act="towel" aria-label="Throw in the towel">${PIX.flag}<span>Towel</span></button><button class="btn primary" data-act="cgo" ${U.pick?"":"disabled"}>Start round ${F.round+1} ▸</button></div>
@@ -1429,7 +1434,16 @@ function tick(){const U=UI.fight;if(!U||U.stage!=="playing")return;
 function fskip(){const U=UI.fight;clearTimeout(U.timer);while(!roundDone(U.F))U.pending.push(...fightEx(U.F));const rest=U.pending.filter(x=>!x.bell&&!x.tired);U.shown.push(...rest);U.pending=[];
   const ko=rest.find(x=>x.ev==="ko");if(ko)FS.play({...ko,side:sideOf(ko,U.F)},performance.now());roundFinish(U.F);roundEnd();}
 function roundEnd(){const U=UI.fight;clearTimeout(U.timer);const F=U.F;
-  if(F.over){fightEnd();return;}AU.sfx("bell1");U.caption={text:COM.end[Math.floor(Math.random()*2)],side:""};U.stage="corner";U.care={need:careNeeds(F),got:[],done:false};U.pick=null;U.hint=false;render();}
+  if(F.over){fightEnd();return;}AU.sfx("bell1");U.caption={text:COM.end[Math.floor(Math.random()*2)],side:""};U.stage="corner";U.care=newCare(F);U.pick=null;U.hint=false;if(F.A.hp<35&&!U.towelAsked&&F.round<F.rounds){U.towelAsked=true;UI.confirmTowel=true;UI.towelCoach=true;AU.sfx("miss");}render();}
+/* v1.88 corner care comes in three flavours: the order puzzle, a face-down card, or a fast oil massage */
+function newCare(F){const r=Math.random(),mode=F.round<2||r<.5?"order":r<.75?"card":"oil";
+  if(mode==="card"){const o=[1.4,1,-.3].sort(()=>Math.random()-.5);return {mode,deck:o,flip:-1,done:false};}
+  if(mode==="oil")return {mode,taps:0,t0:0,done:false};return {mode,need:careNeeds(F),got:[],done:false};}
+/* v1.88: after the towel — she is safe, but it hurts her pride (morale −8 is applied in applyResult) */
+function towelScene(f){const L={kati:["I could still stand, coach… Grandpa never threw the towel.","sad"],mali:["I could keep going! …Why did you throw it?","sad"],rin:["The data said I still had a twelve percent chance… I understand. That doesn't mean I like it.","sad"],ploy:["…First time in my life anyone threw the towel for me. Remember that.","angry"],fah:["I wasn't beaten!! Who threw the towel!! …You, coach? I'm mad at you for three days.","angry"]}[f.id];
+  const R={kati:"Your grandpa never had a granddaughter to worry about like this.",mali:"Because I want to see you smiling tomorrow, not lying in a hospital.",rin:"You don't have to like it. Heal first, then argue with me.",ploy:"Remember it. I'll remember you were still standing.",fah:"Three days is fine. Day four, you're back in training."}[f.id]||"It's okay. There's always the next fight.";
+  const me=L?{n:f.id,f:L[1],l:"fight",t:L[0]}:{n:"npc",who:f.name,t:"I could still go on… but thank you."};
+  return [{n:"coach",t:`I'm sorry, ${f.name}. I couldn't watch you go down again.`},me,{n:"coach",t:R},{n:"nar",t:`${f.name} isn't hurt any worse, but her morale drops by 8`}];}
 function fightEnd(){const U=UI.fight;U.stage="done";{const w=U.F.result.win;U.bubble=postBubble(U.F.B.f,w==="A"?"lose":w==="B"?"win":"draw",(U.F.seed>>>3)+G.week+[...U.F.B.f.id].reduce((a,c)=>a*31+c.charCodeAt(0)|0,0)+(G.cal||[]).length*7,U.F.A.f);}AU.startMusic("hub");setTimeout(()=>AU.sfx(U.F.result.win==="A"?"win":U.F.result.win==="B"?"lose":"bell1"),200);
   const me=G.F[U.b.a];if(me.injury)me.trust=clamp(me.trust-12,0,100);
   U.res=applyResult(G,U.F,U.b);if(U.b.dm)U.b.result=dmWinFrom(U.F);me.prepBonus=false;if(U.b.tier==="final"||U.b.tier==="semi")finishBracket(G,U.b,U.F);
@@ -1442,7 +1456,7 @@ function fightEnd(){const U=UI.fight;U.stage="done";{const w=U.F.result.win;U.bu
   {const op=G.F[U.b.b];if(r.win!=="D"&&!TIER[U.b.tier].off&&(op.canon||U.b.tier==="semi"||U.b.tier==="final"||/KO/.test(r.type)))G.lastBig={a:me.id,b:op.id,win:r.win,wk:G.week,absWeek:gameWeek(G),shown:false};}
   if(r.win==="B"){const F=U.F,st=s=>({landed:s.landed,thrown:s.thrown,wl:{...s.wl},sta:Math.round(s.sta),kd:s.kd,legs:Math.round(s.legs)});
     G.losses=(G.losses||[]).concat([{wk:G.week,absWeek:gameWeek(G),a:me.id,b:U.b.b,type:r.type,round:r.round,cards:F.cards.map(c=>[...c]),A:st(F.A),B:st(F.B),sc:scouted(U.b.b),od:Math.round(ovr(G.F[U.b.b])-ovr(me)),plan:U.plan||"balanced",tg:(F.A.tac&&F.A.tac.target)||"",care:U.careOK||0}]).slice(-6);}
-  U.afterScene=prodigyResultScene(G,U.b,r.win)||vectorResultScene(G,U.b,r.win);
+  U.afterScene=r.towel?towelScene(me):(prodigyResultScene(G,U.b,r.win)||vectorResultScene(G,U.b,r.win));
   save();render();}
 
 // ---------- actions ----------
@@ -1639,12 +1653,16 @@ const ACT={
   lossrev:()=>{UI.revIdx=0;UI.modal={type:"lossrev"};render();},
   revpick:d=>{UI.revIdx=+d.v;render();},
   cpick:d=>{UI.fight.pick=d.v;render();},
-  cgo:()=>{const U=UI.fight;if(!U.pick)return;const C=U.care;if(C&&!C.done){C.q=0;applyCare(U.F,0);}AU.sfx("bell1");U.F.A.instr=U.pick;U.pick=null;playRound();},
+  cgo:()=>{const U=UI.fight;if(!U.pick)return;const C=U.care;if(C&&!C.done){C.q=0;C.done=true;applyCare(U.F,0);}AU.sfx("bell1");U.F.A.instr=U.pick;U.pick=null;playRound();},
+  ccard:d=>{const U=UI.fight,C=U.care;if(!C||C.mode!=="card"||C.done)return;const i=+d.v;C.flip=i;C.q=C.deck[i];C.done=true;applyCare(U.F,C.q);if(C.q>=1)U.careOK=(U.careOK||0)+1;AU.sfx(C.q>1?"level":C.q<0?"miss":"ui");render();},
+  coil:()=>{const U=UI.fight,C=U.care;if(!C||C.mode!=="oil"||C.done)return;C.taps++;AU.sfx("ui");
+    if(!C.t0){C.t0=performance.now();setTimeout(()=>{if(UI.fight&&UI.fight.care===C&&!C.done){C.done=true;C.q=C.taps>=20?1.2:C.taps>=14?1:C.taps>=8?.5:.2;applyCare(UI.fight.F,C.q);if(C.q>=1){UI.fight.careOK=(UI.fight.careOK||0)+1;AU.sfx("level");}render();}},3000);}
+    const b=document.querySelector(".oilbar");if(b&&C.taps>1)b.style.setProperty("--v",Math.min(100,Math.round(C.taps/20*100))+"%");else render();},
   care:d=>{const U=UI.fight,C=U.care;if(!C||C.done)return;const i=C.got.length;C.got.push(d.v);const ok=C.need[i]===d.v;AU.sfx(ok?"ui":"miss");
     if(C.got.length>=C.need.length){C.done=true;const n=C.got.filter((g,k)=>g===C.need[k]).length;C.q=n===3?1:n===2?.5:0;if(C.q>=1)U.careOK=(U.careOK||0)+1;applyCare(U.F,C.q);if(C.q>=1){AU.sfx("level");const me=G.F[U.b.a];popToast({kati:"So refreshing!",mali:"Not tired anymore! Let's go!",rin:"Body back to 90%",ploy:"Thank you, my heart's in it",fah:"Okay! Ready to go hard!"}[me.id]||"Refreshed!","good");}}render();},
   towel:()=>{UI.confirmTowel=true;render();},
-  towelno:()=>{UI.confirmTowel=false;render();},
-  towelyes:()=>{UI.confirmTowel=false;const U=UI.fight;throwTowel(U.F);U.shown.push({s:"x",t:`${G.F[U.b.a].name}'s corner throws in the towel`});fightEnd();},
+  towelno:()=>{UI.confirmTowel=false;UI.towelCoach=false;render();},
+  towelyes:()=>{UI.confirmTowel=false;UI.towelCoach=false;const U=UI.fight;throwTowel(U.F);U.shown.push({s:"x",t:`${G.F[U.b.a].name}'s corner throws in the towel`});fightEnd();},
   withdraw:()=>{const U=UI.fight;G.bookings=G.bookings.filter(x=>x!==U.b);G.rep=Math.max(0,G.rep-1);add(G,U.b.a,"trust",3);
     G.log.push(`${G.F[U.b.a].name} withdraws due to injury`);const done=U.done;UI.fight=null;render();done();},
   fdone:()=>{const done=UI.fight.done,after=UI.fight.afterScene;UI.fight=null;render();playHonorQueue(()=>{if(after)playScene(after,done,{bg:"ring",look:"fight"});else done();});},
