@@ -1837,17 +1837,7 @@ body.hasnews main>h1.sr+.homegrid,body.hasnews main>h1.sr+.rinnote{margin-top:46
 
 /* v1.88 opponent level tone (RPG style) */
 .lv.lt-red{color:#ff6b5e}.lv.lt-green{color:#7ddc7a}.lv.lt-gold{color:var(--gold)}
-
-/* v1.88 keep-programme tick: quiet, below the choices */
-.autotr{display:flex;gap:10px;align-items:flex-start;margin:14px 0 4px;padding:10px 4px 0;border-top:1px dashed rgba(255,255,255,.12);cursor:pointer;color:var(--mut,#b9b0cc);font-size:13px}
-.autotr input{width:20px;height:20px;margin:1px 0 0;flex:none;accent-color:var(--gold,#f2c94c)}
-.autotr span{display:flex;flex-direction:column;gap:2px}.autotr small{font-size:11.5px;opacity:.8;line-height:1.35}
-.tc-ok.auto{color:#cfc6e6;background:rgba(160,140,220,.10);box-shadow:inset 0 0 0 2px rgba(160,140,220,.45);font-weight:600}
-
-/* v1.88 yearly theme chip */
-.ytchip{display:flex;align-items:center;gap:8px;width:100%;margin:6px 0 0;padding:6px 10px;background:#241d38;border:2px solid #4a3f6b;color:inherit;font:inherit;cursor:pointer;text-align:left}
-.ytchip span{font-size:16px}.ytchip b{font-size:13px}.ytchip small{margin-left:auto;font-size:12px;color:var(--mut,#9a91ad)}.ytchip i{font-style:normal;color:var(--mut,#9a91ad)}
-.ytchip.on{border-color:#c8963c;background:#2f2338}.ytchip.on small{color:var(--gold,#f2c94c)}
+.gacha.loyg.soon{opacity:.85}.gacha.loyg.soon .btn[disabled]{opacity:.7;cursor:not-allowed}
 
 /* v1.88 corner care variants — same box and buttons as the order puzzle */
 .carebtns.three{grid-template-columns:repeat(3,1fr)}
@@ -1859,14 +1849,6 @@ body.hasnews main>h1.sr+.homegrid,body.hasnews main>h1.sr+.rinnote{margin-top:46
 .oilknob:active{cursor:grabbing}.oilknob .pxi{width:30px;height:30px}.oiltrack.done{opacity:.6}
 .cslot.oilcombo b,.cslot.oiltime b{font-family:var(--f-pixel,monospace);font-size:16px;color:var(--gold)}.cslot.oiltime{grid-auto-flow:column;gap:1px}.cslot.oiltime small{font-size:9px;opacity:.7}
 .cslot.oilcombo.pop{animation:oilpop .18s}@keyframes oilpop{50%{transform:scale(1.25)}}
-
-/* v1.88 camp lottery */
-.ltgrid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:10px 0}
-.ltk{border:0;padding:0;background:none;cursor:pointer;transition:transform .12s}.ltk:hover,.ltk:focus-visible{transform:translateY(-3px) rotate(-1deg)}.ltk:disabled{opacity:.5;cursor:not-allowed}
-.ltk img,.ltmine img{width:100%;display:block;image-rendering:pixelated;filter:drop-shadow(0 3px 0 rgba(0,0,0,.45))}
-.ltres{display:grid;grid-template-columns:1.4fr 1fr 1fr;gap:6px;margin:8px 0}.ltres>div{display:grid;gap:2px;padding:8px;background:#1b1530;box-shadow:inset 0 0 0 2px var(--line,#4a3f6b);text-align:center}
-.ltres small{font-size:11px;color:var(--mut,#9a91ad)}.ltres b{font-family:var(--f-pixel,monospace);font-size:18px;color:var(--gold,#f2c94c);letter-spacing:1px}
-.ltmine{display:grid;gap:4px;max-width:260px;margin:6px auto}.ltmine small{text-align:center;color:var(--mut,#9a91ad)}
 
 .cshuf{position:relative;height:92px}
 .cshuf.spin{animation:cspin .6s ease-in-out 3}@keyframes cspin{50%{transform:rotate(-1.5deg) scale(.98)}}
@@ -1884,3 +1866,22 @@ body.hasnews main>h1.sr+.homegrid,body.hasnews main>h1.sr+.rinnote{margin-top:46
 .oiltrack .oilend.r{width:40px;right:6px;top:8px;bottom:8px;display:grid;place-items:center;background:rgba(74,168,255,.12)}.oiltrack .oilend .pxi{width:24px;height:24px}
 .carebtns.one{grid-template-columns:1fr}.carebtns .oilrub{min-height:72px;touch-action:manipulation;user-select:none;-webkit-user-select:none}
 .carebtns .oilrub .pxi{width:36px;height:36px}.carebtns .oilrub.go{box-shadow:inset 0 0 0 2px var(--gold)}.carebtns .oilrub.go:active{transform:scale(.96)}
+
+/* v1.88 keep-programme tick: quiet, below the choices */
+.autotr{display:flex;gap:10px;align-items:flex-start;margin:14px 0 4px;padding:10px 4px 0;border-top:1px dashed rgba(255,255,255,.12);cursor:pointer;color:var(--mut,#b9b0cc);font-size:13px}
+.autotr input{width:20px;height:20px;margin:1px 0 0;flex:none;accent-color:var(--gold,#f2c94c)}
+.autotr span{display:flex;flex-direction:column;gap:2px}.autotr small{font-size:11.5px;opacity:.8;line-height:1.35}
+.tc-ok.auto{color:#cfc6e6;background:rgba(160,140,220,.10);box-shadow:inset 0 0 0 2px rgba(160,140,220,.45);font-weight:600}
+
+/* v1.88 yearly theme chip */
+.ytchip{display:flex;align-items:center;gap:8px;width:100%;margin:6px 0 0;padding:6px 10px;background:#241d38;border:2px solid #4a3f6b;color:inherit;font:inherit;cursor:pointer;text-align:left}
+.ytchip span{font-size:16px}.ytchip b{font-size:13px}.ytchip small{margin-left:auto;font-size:12px;color:var(--mut,#9a91ad)}.ytchip i{font-style:normal;color:var(--mut,#9a91ad)}
+.ytchip.on{border-color:#c8963c;background:#2f2338}.ytchip.on small{color:var(--gold,#f2c94c)}
+
+/* v1.88 camp lottery */
+.ltgrid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:10px 0}
+.ltk{border:0;padding:0;background:none;cursor:pointer;transition:transform .12s}.ltk:hover,.ltk:focus-visible{transform:translateY(-3px) rotate(-1deg)}.ltk:disabled{opacity:.5;cursor:not-allowed}
+.ltk img,.ltmine img{width:100%;display:block;image-rendering:pixelated;filter:drop-shadow(0 3px 0 rgba(0,0,0,.45))}
+.ltres{display:grid;grid-template-columns:1.4fr 1fr 1fr;gap:6px;margin:8px 0}.ltres>div{display:grid;gap:2px;padding:8px;background:#1b1530;box-shadow:inset 0 0 0 2px var(--line,#4a3f6b);text-align:center}
+.ltres small{font-size:11px;color:var(--mut,#9a91ad)}.ltres b{font-family:var(--f-pixel,monospace);font-size:18px;color:var(--gold,#f2c94c);letter-spacing:1px}
+.ltmine{display:grid;gap:4px;max-width:260px;margin:6px auto}.ltmine small{text-align:center;color:var(--mut,#9a91ad)}

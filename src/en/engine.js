@@ -409,9 +409,12 @@ function aiCorner(F,me,op){ if(F.round===0)return "none";
   const lead=me.pts-op.pts;if(me.sta<35)return "defend";if(lead>4)return "defend";if(lead<-3)return "push";
   if(op.f.a.kick>op.f.a.knee+2)return "clinch";if(op.f.a.clinch>op.f.a.kick+2)return "range";return "none";}
 // v1.19: a round is simulated exchange by exchange so a skill pressed mid-round changes what comes next
+// a stat far above the fighter's own average gives back less accuracy/speed (power keeps its punch, and a power build lands more flash KOs)
+const BAL={flashPow:.025,specPow:0,wdef:.15,spec:4,specK:.4,clGap:9,clK:.03,repFree:.5,repPen:.7,chkBase:5,chkK:.016,chkMax:.3,chkLegs:4,chkSta:5,chkHp:1.2};
+function effA(s,k){const a=s.f.a,o=s.ov!=null?s.ov:(s.ov=ovr(a)),v=a[k],c=o+BAL.spec;return v>c?c+(v-c)*BAL.specK:v;}
 const EX_PER_ROUND=12;
 function roundBegin(F){F.round++;F.A.rpts=0;F.B.rpts=0;F.kd0={A:F.A.kd,B:F.B.kd};F.ex=0;F.rlog=[];
-  F.mA=mods(F.A,F);F.mB=mods(F.B,F);for(const s of [F.A,F.B]){s.rw={punch:0,kick:0,knee:0,elbow:0};s.rdmg=0;s.rthrown=0;s.rlanded=0;s.skRound=false;}}
+  F.mA=mods(F.A,F);F.mB=mods(F.B,F);for(const s of [F.A,F.B]){s.rw={punch:0,kick:0,knee:0,elbow:0};s.rtw={punch:0,kick:0,knee:0,elbow:0};s.rdmg=0;s.rthrown=0;s.rlanded=0;s.skRound=false;}}
 const roundDone=F=>F.over||F.ex>=EX_PER_ROUND;
 function fightRound(F){roundBegin(F);while(!roundDone(F))fightEx(F);return roundFinish(F);}
 // ---------- active skills (v1.19) ----------
@@ -443,32 +446,39 @@ function fightEx(F){const rng=F.rng,log=[],ex=F.ex,mA=F.mA,mB=F.mB;
       const forced=F.forceRage&&s===F.A&&s.f.camp==="player"&&F.round>=2&&ex>=4;
       const need=(s.hp<62&&behind)||s.hp<45||(F.round>=2&&behind&&s.hp<75);
       if(forced||(need&&rng()<(s.f.camp==="player"?.03+(s.f.bond||0)/1500+(s.f.morale||60)/2400:.08))){s.rageUsed=true;s.rage=4;log.push({ha:F.A.hp,hb:F.B.hp,sa:F.A.sta,sb:F.B.sta,s:s===F.A?"A":"B",t:`${s.name} — the eyes change! Blood-boil mode!`,k:"big",ev:"rage",rid:s.f.id,an:s.name,dn:o.name});}}}}
-    const ini=s=>{const a=s.f.a,m=s===F.A?mA:mB;return -s.legs/12+a.speed*.3+a.foot*.15+a.iq*.2+a.comp*.1+m.aggr*10+rng()*9+(s.sta-60)/12;};
+    const ini=s=>{const a=s.f.a,m=s===F.A?mA:mB;return -s.legs/12+effA(s,"speed")*.3+a.foot*.15+a.iq*.2+a.comp*.1+m.aggr*10+rng()*9+(s.sta-60)/12;};
     const [at,df]=ini(F.A)>=ini(F.B)?[F.A,F.B]:[F.B,F.A];const ma=at===F.A?mA:mB,md=at===F.A?mB:mA;
     const a=at.f.a,d=df.f.a;
     // clinch?
-    const clinch=rng()<clamp(.12+ma.cl+(a.clinch-d.foot)*.02,.03,.55);
+    const clinch=rng()<clamp(.12+ma.cl+(a.clinch-d.foot)*.02+Math.max(0,BAL.clGap-d.clinch)*BAL.clK,.03,.55); // v1.87.4: a fighter who never trained the clinch gets tied up more
     const items=clinch?[["knee",a.knee*ma.w.knee],["elbow",a.elbow*ma.w.elbow*.8]]:
       [["punch",a.punch*ma.w.punch],["kick",a.kick*ma.w.kick],["knee",a.knee*ma.w.knee*.5],["elbow",a.elbow*ma.w.elbow*.6]];
     const bA=at.burst&&at.burst.k==="atk"?at.burst:null,bD=df.burst&&df.burst.k==="def"?df.burst:null;
     const wpn=pickW(rng,items.map(([k,v])=>[k,Math.pow(v,1.6)*(bA&&bA.w===k?4:1)]));
-    const atk=a[wpn]*.7+a.speed*.15+a.iq*.15;
-    const def=clinch?((d.clinch+df.sk.clDef)*.5+d.guard*.3+d.iq*.2):(d.guard*.5+d.foot*.3+d.iq*.2);
+    const atk=effA(at,wpn)*.7+effA(at,"speed")*.15+a.iq*.15;
+    // v1.87.4: knowing a weapon helps to defend it, so dumping punches/knees/elbows leaves a hole
+    const def=clinch?((d.clinch+df.sk.clDef)*.5+d.guard*.3+d.iq*.2):(d.guard*.42+d.foot*.25+d.iq*.18+d[wpn]*BAL.wdef);
     const fatA=(100-at.sta)/100*.22,fatD=(100-df.sta)/100*.12;
     const fury=at.trait==="fury"?clamp((70-at.hp)/50,0,1):0; // v1.38 → v1.87 trait: the more she is hurt, the more dangerous
     /* v1.87 traits that fire mid-fight */
     if(df.trait==="wits"&&df.hp<TRV.witsHp&&!df.witsOn){df.witsOn=1;log.push({ha:F.A.hp,hb:F.B.hp,sa:F.A.sta,sb:F.B.sta,s:df===F.A?"A":"B",t:`${df.name} keeps her head despite the damage. Quick Wits! She's slipping everything now`,k:"big",ev:"wake",an:df.name,dn:at.name});}
     for(const S of [at,df])if(S.trait==="tempo"&&!S.tempoOn&&(F.round>=F.rounds||S.hp<50)){S.tempoOn=1;const O=S===at?df:at;if(!S.ctrW){S.ctrW=oppTop(O.f);O.prep-=CTR_READ;}log.push({ha:F.A.hp,hb:F.B.hp,sa:F.A.sta,sb:F.B.sta,s:S===F.A?"A":"B",t:`${S.name} switches rhythm! Godlike Timing, she's reading ${O.name} now`,k:"big",ev:"wake",an:S.name,dn:O.name});}
     if(fury>.4&&!at.wake){at.wake=1;log.push({ha:F.A.hp,hb:F.B.hp,sa:F.A.sta,sb:F.B.sta,s:at===F.A?"A":"B",t:`${at.name} smiles through the blood… the more she's hurt, the fiercer she gets! Her eyes have changed!`,k:"big",ev:"wake",an:at.name,dn:df.name});}
-    const hitP=clamp(.42+fury*.04+(atk-def)*.03+at.prep+at.mor+(at.careMor||0)-fatA+fatD-md.evade-md.guard-df.sk.evade-(df.ctrW===wpn?CTR_W:0)+(at.sk.hit[wpn]||0)+(at.hp<45?at.sk.clutch:0)+(at.rage?.1:0)-(at.tac.target==="head"?.015:0)+df.legs/400+(bA&&bA.w===wpn?.12*bA.pw:0)-(bD?.12*bD.pw:0),.12,.9)*(at.trait==="flow"?TRV.flowAtk:1)*(df.trait==="flow"?TRV.flowDef:1)*(df.witsOn?TRV.wits:1)*(df.trait==="eye"?TRV.eyeDef:1)*(1+fury*TRV.furyHit)*(at.libOn?TRV.libHit:1);
-    at.thrown++;at.rthrown++;at.sta=clamp(at.sta-STA.drain*W_INFO[wpn].cost*(STA.cA-a.stamina/STA.cB)*ma.sta*(1+Math.max(0,ma.aggr))*(1-at.sk.staSave),0,100);
+    /* v1.87.4 balance: one weapon thrown again and again gets read inside the round, and a kick can be checked by a tight guard and good feet */
+    const rtw=at.rtw||(at.rtw={punch:0,kick:0,knee:0,elbow:0}),rep=at.rthrown>=3?Math.max(0,(rtw[wpn]||0)/at.rthrown-BAL.repFree)*BAL.repPen:0;
+    const chkP=wpn==="kick"&&!clinch?clamp((d.guard*.55+d.foot*.45-effA(at,"speed")*.3-BAL.chkBase)*BAL.chkK+rep*.6,0,BAL.chkMax):0;
+    const hitP=clamp(.42-rep+fury*.04+(atk-def)*.03+at.prep+at.mor+(at.careMor||0)-fatA+fatD-md.evade-md.guard-df.sk.evade-(df.ctrW===wpn?CTR_W:0)+(at.sk.hit[wpn]||0)+(at.hp<45?at.sk.clutch:0)+(at.rage?.1:0)-(at.tac.target==="head"?.015:0)+df.legs/400+(bA&&bA.w===wpn?.12*bA.pw:0)-(bD?.12*bD.pw:0),.12,.9)*(at.trait==="flow"?TRV.flowAtk:1)*(df.trait==="flow"?TRV.flowDef:1)*(df.witsOn?TRV.wits:1)*(df.trait==="eye"?TRV.eyeDef:1)*(1+fury*TRV.furyHit)*(at.libOn?TRV.libHit:1);
+    at.thrown++;at.rthrown++;rtw[wpn]=(rtw[wpn]||0)+1;at.sta=clamp(at.sta-STA.drain*W_INFO[wpn].cost*(STA.cA-a.stamina/STA.cB)*ma.sta*(1+Math.max(0,ma.aggr))*(1-at.sk.staSave),0,100);
     const tx=TXT[wpn][Math.floor(rng()*TXT[wpn].length)];
-    if(rng()<hitP){
+    const checked=chkP>0&&rng()<chkP;
+    if(checked){at.legs=Math.min(60,at.legs+BAL.chkLegs);at.sta=clamp(at.sta-BAL.chkSta,0,100);at.hp-=BAL.chkHp;df.pts+=.3;df.rpts+=.3;
+      log.push({ha:F.A.hp,hb:F.B.hp,sa:F.A.sta,sb:F.B.sta,s:df===F.A?"A":"B",t:`${df.name} lifts a shin and checks ${at.name}'s kick. Shin meets shin!`,k:"miss",ev:"miss",w:wpn,cl:clinch,mside:at===F.A?"A":"B",an:at.name,dn:df.name});}
+    else if(rng()<hitP){
       const crit=rng()<(at.rage?.35:.07);const q=crit?1.6:.6+rng()*.6;if(at.rage)at.rage--;
-      let dmg=1.35*W_INFO[wpn].imp*q*(.6+a.power/25)*(1-d.guard/70)*(1.25-d.dur/40)*(1+(at.sk.dmg[wpn]||0))*(bA&&bA.w===wpn?1+.3*bA.pw:1)*(1+fury*TRV.furyDmg)*(at.libOn?TRV.lib:1)*(at.trait==="rock"?TRV.rockAtk:1)*(df.trait==="rock"?TRV.rockDef:1);const tg=at.tac.target;
+      let dmg=1.35*W_INFO[wpn].imp*q*(.6+(BAL.specPow?effA(at,"power"):a.power)/25)*(1-d.guard/70)*(1.25-d.dur/40)*(1+(at.sk.dmg[wpn]||0))*(bA&&bA.w===wpn?1+.3*bA.pw:1)*(1+fury*TRV.furyDmg)*(at.libOn?TRV.lib:1)*(at.trait==="rock"?TRV.rockAtk:1)*(df.trait==="rock"?TRV.rockDef:1);const tg=at.tac.target;
       if(tg==="head")dmg*=1.1;if(tg==="body"){dmg*=.9;df.sta=clamp(df.sta-dmg*.9,0,100);}if(tg==="legs"&&(wpn==="kick"||wpn==="knee")){dmg*=.85;df.legs=Math.min(60,df.legs+dmg*.8);}
       // v1.32 "flash knockout": a clean crit to the head can drop anyone early — rarer for durable/guarded fighters, likelier when the attacker clearly outclasses
-      if(crit&&tg!=="body"&&(wpn!=="punch"||a.power>=10)&&rng()<clamp(.16+(ovr(a)-ovr(d))*.06-(d.dur-8)*.012,.05,.4)){dmg+=10+rng()*8;at.flash=1;}
+      if(crit&&tg!=="body"&&(wpn!=="punch"||a.power>=10)&&rng()<clamp(.16+(ovr(a)-ovr(d))*.06-(d.dur-8)*.012+Math.max(0,a.power-12)*BAL.flashPow,.05,.45)){dmg+=10+rng()*8;at.flash=1;}
       at.rw[wpn]++;at.rdmg+=dmg;at.rlanded++;
       df.hp-=dmg;df.sta=clamp(df.sta-dmg*STA.hit,0,100);at.landed++;at.wl[wpn]++;at.dmgDealt+=dmg;const p=W_INFO[wpn].pts*q*(1+(at.sk.pts[wpn]||0))*(df.trait==="rock"?TRV.rockPts:1);at.pts+=p;at.rpts+=p;
       log.push({ha:F.A.hp,hb:F.B.hp,sa:F.A.sta,sb:F.B.sta,s:at===F.A?"A":"B",t:`${at.name} ${tx}${crit?" — clean hit!":""}`,k:crit?"big":"hit",ev:"hit",w:wpn,cl:clinch,crit,an:at.name,dn:df.name});
@@ -486,7 +496,7 @@ function fightEx(F){const rng=F.rng,log=[],ex=F.ex,mA=F.mA,mB=F.mB;
     } else {
       const ctrP=clamp(d.counter/20*.32+md.ctr-fatD+df.sk.ctr+(df.rage?.2:0)+(bD?.18*bD.pw:0),0,.8)*(df.trait==="eye"?TRV.eyeCtr:1);
       if(rng()<ctrP){const cw=d.kick>d.punch&&!clinch?"kick":"punch";
-        const rc=!!df.rage;if(df.rage)df.rage--;const dmg=1.3*W_INFO[cw].imp*(rc?1.5:.7+rng()*.5)*(.6+d.power/25)*(1-a.guard/70)*(1.25-a.dur/40)*(1+df.sk.ctrDmg)*(df.libOn?TRV.lib:1)*(df.trait==="rock"?TRV.rockAtk:1)*(at.trait==="rock"?TRV.rockDef:1);
+        const rc=!!df.rage;if(df.rage)df.rage--;const dmg=1.3*W_INFO[cw].imp*(rc?1.5:.7+rng()*.5)*(.6+(BAL.specPow?effA(df,"power"):d.power)/25)*(1-a.guard/70)*(1.25-a.dur/40)*(1+df.sk.ctrDmg)*(df.libOn?TRV.lib:1)*(df.trait==="rock"?TRV.rockAtk:1)*(at.trait==="rock"?TRV.rockDef:1);
         at.hp-=dmg;at.sta=clamp(at.sta-dmg*STA.hit,0,100);df.landed++;df.thrown++;df.wl[cw]++;df.dmgDealt+=dmg;df.rw[cw]++;df.rdmg+=dmg;df.rlanded++;df.rthrown++;const p=W_INFO[cw].pts*.9;df.pts+=p;df.rpts+=p;
         log.push({ha:F.A.hp,hb:F.B.hp,sa:F.A.sta,sb:F.B.sta,s:df===F.A?"A":"B",t:`${at.name} misses — ${df.name} counters with ${cw==="kick"?"kick":"Punch"} Clean hit!${rc?" Critical!":""}`,k:rc?"big":"hit",ev:"counter",crit:rc,w:cw,mw:wpn,an:df.name,dn:at.name});
         if(at.hp<=0){F.over=true;F.result={win:df===F.A?"A":"B",type:"KO",round:F.round};log.push({ha:F.A.hp,hb:F.B.hp,sa:F.A.sta,sb:F.B.sta,s:"x",t:`${at.name} is down and not getting up! Knockout win`,k:"big",ev:"ko",an:df.name,dn:at.name,koSide:df===F.A?"A":"B"});}
@@ -496,8 +506,8 @@ function fightEx(F){const rng=F.rng,log=[],ex=F.ex,mA=F.mA,mB=F.mB;
     for(const s of [F.A,F.B])if(s.burst&&--s.burst.left<=0)s.burst=null;
   }
   F.ex++;F.rlog.push(...log);return log;}
-let RND_REC={b:11,d:.5};
-const STA={qf:.4,fah:12,hit:.25,drain:1.15,cA:1.15,cB:70,ex:0,exK:1/120,brk:3,brkK:.2,prep:4,cond:3,care:16,careHp:5,ai:.45};
+let RND_REC={b:8,d:.4};
+const STA={qf:.4,fah:7,hit:.25,drain:1.15,cA:1.15,cB:70,ex:0,exK:1/120,brk:3,brkK:.2,prep:4,cond:3,care:20,careHp:5,ai:.3};
 function careSide(s,q){s.sta=clamp(s.sta+q*STA.care,0,100);s.hp=clamp(s.hp+q*STA.careHp,0,Math.max(100,s.hp0||100));}
 function roundFinish(F){const log=F.rlog,kd0=F.kd0;for(const s of [F.A,F.B])s.burst=null;
   // judges

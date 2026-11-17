@@ -5189,6 +5189,9 @@
  "อัลบั้มการ์ดไม่เด้งแล้ว": "Album keeps your place",
  "ตู้กาชาลอยกระทงกับโค้ด LOYKRATHONG69 เปิดพร้อมกันวันที่ 18 พ.ย.–7 ธ.ค.": "The Loy Krathong gacha and code LOYKRATHONG69 open together, Nov 18 – Dec 7",
  "ตู้ลอยกระทงเปิด 18 พ.ย.": "Loy Krathong gacha opens Nov 18",
+ "ตู้ลอยกระทงเปิด 18 พ.ย. เวลา 00:00": "The Loy Krathong gacha opens Nov 18 at 00:00",
+ " ใบ · เก็บเศษดาวรอไว้ได้เลย</small></span><button class=\"btn sm\" disabled aria-disabled=\"true\">🔒 เปิด 18 พ.ย.</button></div>": " cards · save up your stardust</small></span><button class=\"btn sm\" disabled aria-disabled=\"true\">🔒 Opens Nov 18</button></div>",
+ "<div class=\"gacha loyg soon\"><span><b class=\"goldt\">ตู้ลอยกระทง</b> <small>เปิด 18 พ.ย. เวลา 00:00 ถึง 7 ธ.ค. · การ์ดชุดไทย ": "<div class=\"gacha loyg soon\"><span><b class=\"goldt\">Loy Krathong gacha</b> <small>Opens Nov 18 at 00:00 until Dec 7 · Thai-dress cards: ",
  "ไม่ต้องยืนยันทุกสัปดาห์ แผนไฟต์ใช้ตามที่ครูแนะนำ เอาติ๊กออกได้ทุกเมื่อ</small></span></label>\n   <div class=\"mfoot\"><button class=\"btn primary\" data-act=\"closeModal\">เลือกแล้ว</button></div>": "No weekly confirm needed; fight plans follow the coach's pick. Untick any time.</small></span></label>\n   <div class=\"mfoot\"><button class=\"btn primary\" data-act=\"closeModal\">Done</button></div>",
  " สัปดาห์ · ": " weeks left · ",
  "เหลืออีก ": "",
@@ -5436,5 +5439,7 @@
  "</i><button class=\"oilknob\" aria-label=\"ลากเพื่อราดน้ำมันมวย\">": "</i><button class=\"oilknob\" aria-label=\"Drag to pour the boxing oil\">",
  "</b><small>วิ</small></span></div></div>\n  ": "</b><small>s</small></span></div></div>\n  ",
  "กดรัว ๆ เพื่อนวด ก่อนหมดเวลา!": "Tap fast to massage before time runs out!",
- "ลากขวดไปทางขวาเพื่อราดน้ำมันมวย": "Drag the bottle right to pour the boxing oil"
+ "ลากขวดไปทางขวาเพื่อราดน้ำมันมวย": "Drag the bottle right to pour the boxing oil",
+ "ไว้ได้ แข้งปะทะแข้ง!": "'s kick. Shin meets shin!",
+ " ยกแข้งรับลูกเตะของ": " lifts a shin and checks "
 }
