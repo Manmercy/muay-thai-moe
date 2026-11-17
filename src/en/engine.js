@@ -694,7 +694,7 @@ function fightEx(F){const rng=F.rng,log=[],ex=F.ex,mA=F.mA,mB=F.mB;
   }
   F.ex++;F.rlog.push(...log);return log;}
 let RND_REC={b:8,d:.4};
-const STA={cNorm:.6,cMin:.6,cBonus:.5,qf:.4,fah:7,hit:.25,drain:1.15,cA:1.15,cB:70,ex:0,exK:1/120,brk:3,brkK:.2,prep:4,cond:3,care:20,careHp:5,ai:.3};
+const STA={cNorm:.6,cMin:.6,cBonus:.5,qf:.4,fah:7,hit:.25,drain:1.15,cA:1.15,cB:70,ex:0,exK:1/120,brk:16,brkK:.8,prep:4,cond:3,care:20,careHp:5,ai:.3};
 function careSide(s,q){s.sta=clamp(s.sta+q*STA.care,0,100);s.hp=clamp(s.hp+q*STA.careHp,0,Math.max(100,s.hp0||100));}
 function roundFinish(F){const log=F.rlog,kd0=F.kd0;for(const s of [F.A,F.B])s.burst=null;
   // judges
@@ -706,7 +706,7 @@ function roundFinish(F){const log=F.rlog,kd0=F.kd0;for(const s of [F.A,F.B])s.bu
      v1.88: stamina no longer refills by itself. A break gives back a little (conditioning, last week's fight prep), the corner does the rest:
      the player's corner mini-game in a live fight, an average corner for everyone else. */
   for(const s of [F.A,F.B]){s.sta=clamp(s.sta+(s.brk||0),0,100);s.hp=clamp(s.hp+RND_REC.b+s.f.a.dur*RND_REC.d,0,Math.max(100,s.hp0||100));
-    if(!F.over&&F.round<F.rounds&&!(F.live&&s===F.A))careSide(s,s.f.camp==="player"?STA.cNorm:STA.ai);} /* v1.89.1: the player's quick fights get coach Daeng's normal corner */
+    } /* v1.89.1: corner mini-games are off — everyone gets her breath back between rounds again (16 + stamina×0.8, plus conditioning / fight prep / Fah's bonus); careSide/applyCare stay for a mini-game later */
   if(!F.over&&F.round>=F.rounds){F.over=true;const tA=F.cards.reduce((x,c)=>x+c[0],0),tB=F.cards.reduce((x,c)=>x+c[1],0);
     const pd=F.A.pts-F.B.pts;const tie=tA===tB;
     F.result=tie&&Math.abs(pd)<1?{win:"D",type:"Draw",round:F.round}:tie?{win:pd>0?"A":"B",type:"Decision win (on dominance)",round:F.round,score:`${tA}–${tB}`}:{win:tA>tB?"A":"B",type:"Decision win",round:F.round,score:`${Math.max(tA,tB)}–${Math.min(tA,tB)}`};}
