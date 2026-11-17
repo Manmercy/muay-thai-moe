@@ -587,7 +587,10 @@ function mods(s,F){const p0=PLANS[s.plan],c=CORNER[s.instr]||{};const cm=1+((s.s
 const CARE={water:{icon:"💧",name:"ให้น้ำ"},rub:{icon:"💆",name:"นวดน้ำมันมวย"},wipe:{icon:"🧻",name:"เช็ดหน้า"},cheer:{icon:"💪",name:"ให้กำลังใจ"}};
 function careNeeds(F){const A=F.A,B=F.B,r=mulberry32(F.seed+F.round*977);const sc=k=>({water:100-A.sta,rub:(A.sta<60?20:0)+B.rw.kick*4,wipe:B.rdmg*1.5+B.rlanded*3,cheer:(F.cards.reduce((s,c)=>s+c[1]-c[0],0))*25+(A.hp<50?20:0)}[k])+r()*30;
   return Object.keys(CARE).sort((a,b)=>sc(b)-sc(a)).slice(0,3);}
-function applyCare(F,q){const A=F.A;careSide(A,STA.qf+q*(1-STA.qf)); /* even a poor corner does a little; a great one does a lot */A.careMor=q>=1?.02:0;return q;}
+// v1.89.1: corner care on one scale — a missed mini-game still gives 60% of a normal corner, coach Daeng / quick fights give a normal corner,
+// a great mini-game is a small bonus on top (not the thing that decides the fight)
+const careMult=q=>q<=1?STA.cNorm*(STA.cMin+(1-STA.cMin)*Math.max(0,q)):STA.cNorm*(1+(q-1)*STA.cBonus);
+function applyCare(F,q){const A=F.A;careSide(A,careMult(q));A.careMor=q>=1?.02:0;return q;}
 function throwTowel(F){if(F.over)return;F.over=true;F.result={win:"B",type:"มุมโยนผ้ายอมแพ้",round:F.round,towel:true};}
 function aiCorner(F,me,op){ if(F.round===0)return "none";
   const lead=me.pts-op.pts;if(me.sta<35)return "defend";if(lead>4)return "defend";if(lead<-3)return "push";
@@ -691,7 +694,7 @@ function fightEx(F){const rng=F.rng,log=[],ex=F.ex,mA=F.mA,mB=F.mB;
   }
   F.ex++;F.rlog.push(...log);return log;}
 let RND_REC={b:8,d:.4};
-const STA={qf:.4,fah:7,hit:.25,drain:1.15,cA:1.15,cB:70,ex:0,exK:1/120,brk:3,brkK:.2,prep:4,cond:3,care:20,careHp:5,ai:.3};
+const STA={cNorm:.6,cMin:.6,cBonus:.5,qf:.4,fah:7,hit:.25,drain:1.15,cA:1.15,cB:70,ex:0,exK:1/120,brk:3,brkK:.2,prep:4,cond:3,care:20,careHp:5,ai:.3};
 function careSide(s,q){s.sta=clamp(s.sta+q*STA.care,0,100);s.hp=clamp(s.hp+q*STA.careHp,0,Math.max(100,s.hp0||100));}
 function roundFinish(F){const log=F.rlog,kd0=F.kd0;for(const s of [F.A,F.B])s.burst=null;
   // judges
@@ -703,7 +706,7 @@ function roundFinish(F){const log=F.rlog,kd0=F.kd0;for(const s of [F.A,F.B])s.bu
      v1.88: stamina no longer refills by itself. A break gives back a little (conditioning, last week's fight prep), the corner does the rest:
      the player's corner mini-game in a live fight, an average corner for everyone else. */
   for(const s of [F.A,F.B]){s.sta=clamp(s.sta+(s.brk||0),0,100);s.hp=clamp(s.hp+RND_REC.b+s.f.a.dur*RND_REC.d,0,Math.max(100,s.hp0||100));
-    if(!F.over&&F.round<F.rounds&&!(F.live&&s===F.A))careSide(s,STA.ai);}
+    if(!F.over&&F.round<F.rounds&&!(F.live&&s===F.A))careSide(s,s.f.camp==="player"?STA.cNorm:STA.ai);} /* v1.89.1: the player's quick fights get coach Daeng's normal corner */
   if(!F.over&&F.round>=F.rounds){F.over=true;const tA=F.cards.reduce((x,c)=>x+c[0],0),tB=F.cards.reduce((x,c)=>x+c[1],0);
     const pd=F.A.pts-F.B.pts;const tie=tA===tB;
     F.result=tie&&Math.abs(pd)<1?{win:"D",type:"เสมอ",round:F.round}:tie?{win:pd>0?"A":"B",type:"ชนะคะแนน (ตัดสินจากความเหนือกว่า)",round:F.round,score:`${tA}–${tB}`}:{win:tA>tB?"A":"B",type:"ชนะคะแนน",round:F.round,score:`${Math.max(tA,tB)}–${Math.min(tA,tB)}`};}

@@ -8948,5 +8948,7 @@
  "<p class=\"meta skpath\">เลือกปั้นได้ 1 สาย · อัปสกิลแรกของสายไหน อีก 2 สายจะปิดจนกว่าจะรีเซ็ตสกิล</p>": "<p class=\"meta skpath\">Pick one build path · once you learn its first skill, the other two lock until you reset skills</p>",
  "<span class=\"pips\" aria-label=\"ขั้น ": "<span class=\"pips\" aria-label=\"Rank ",
  "<p class=\"skfd\">↗ หนุน": "<p class=\"skfd\">↗ Boosts ",
- "ใส่แล้ว": "Equipped"
+ "ใส่แล้ว": "Equipped",
+ "<div class=\"cauto\"><button class=\"btn sm\" data-act=\"cauto\">🧑‍🏫 ให้ครูแดงจัดการ</button><small>ข้ามมินิเกม ได้ผลระดับปกติ · เล่นเองเก่ง ๆ ได้โบนัสเพิ่ม</small></div>": "<div class=\"cauto\"><button class=\"btn sm\" data-act=\"cauto\">🧑‍🏫 Let Coach Daeng handle it</button><small>Skips the mini-game for a normal corner · play it well yourself for a bonus</small></div>",
+ "\" alt=\"\"><span>ครูแดงจัดการให้แล้ว · ": "\" alt=\"\"><span>Coach Daeng took care of it · "
 }

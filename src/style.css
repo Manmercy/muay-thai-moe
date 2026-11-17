@@ -2058,3 +2058,5 @@ body.hasnews main>h1.sr+.homegrid,body.hasnews main>h1.sr+.rinnote{margin-top:46
 .skeq:active,.skplus:active{transform:translateY(1px)}
 .skplus{width:40px;height:40px}
 html[lang=en] .skeq{font-size:13px;padding:0 8px}
+/* v1.89.1: coach Daeng handles the corner */
+.cauto{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:6px 0 2px}.cauto .btn{min-height:40px}.cauto small{font-size:11.5px;color:var(--muted);flex:1;min-width:140px}
