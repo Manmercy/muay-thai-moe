@@ -2155,7 +2155,7 @@ const TXT={
   miss:["หลบได้ทัน","ยกการ์ดรับไว้","ถอยออกนอกระยะ","เบี่ยงตัวหลบ"],
 };
 // v1.12: training the right counter for the next opponent pays off on fight night
-let CTR_W=.07,CTR_READ=.06;
+let CTR_W=.12,CTR_READ=.1;
 function oppTop(op){return [["punch",op.a.punch],["kick",op.a.kick],["knee",op.a.knee],["elbow",op.a.elbow]].sort((x,y)=>y[1]-x[1])[0][0];}
 const COUNTER_OF={punch:"defense",kick:"knee",knee:"kick",elbow:"kick"};
 // v1.15: the counter is read from the whole opponent, not just her top weapon
