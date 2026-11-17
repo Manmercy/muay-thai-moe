@@ -1,5 +1,5 @@
 // ================= MUAY THAI MOE v1.3 — UI =================
-const VERSION="1.87.6";
+const VERSION="1.87.8";
 const CUR_LANG=(typeof window!=="undefined"&&window.LANG)||"th";
 const TH_LABEL=String.fromCharCode(3652,3607,3618);
 function langSwitch(cls){return `<div class="langsw ${cls||""}" role="group" aria-label="Language">${[["th",TH_LABEL],["en","EN"]].map(([k,l])=>`<button class="lsb ${CUR_LANG===k?"on":""}" data-act="setlang" data-v="${k}" aria-pressed="${CUR_LANG===k}">${l}</button>`).join("")}</div>`;}
@@ -616,8 +616,8 @@ function peopleHTML(){const met=CANON_IDS.map(id=>G.F[id]).filter(f=>f.met);
    <div class="plist">${met.map(f=>`<section class="px pcard"><button class="pthumb" data-act="fighter" data-id="${f.id}" data-v="rel" aria-label="View profile of ${esc(f.name)}"><img src="${stand(f.id,"casual")}" alt="" loading="lazy"></button>
      <div class="pbody"><div class="pnm"><b class="nm">${esc(f.name)}</b><span class="meta">${f.camp==="player"?"Sirichai Camp":f.camp==="rival"?"Golden Tiger":"Independent"}${G.romance===f.id?" · Sweetheart ♥":G.promise&&G.promise[f.id]!=null?" · Promised ♡":""}</span></div>${hearts(f.bond,f)}
       <div class="pbtns"><button class="btn sm" data-act="fighter" data-id="${f.id}" data-v="rel">Profile</button><button class="btn sm primary" data-act="hang" data-id="${f.id}" ${G.freeUsed?"disabled":""}>Hang out</button><button class="btn sm gold giftb" data-act="giftpick" data-id="${f.id}" ${f.giftWeek===gameWeek(G)?"disabled":""}>${PIX.gift}<span>${f.giftWeek===gameWeek(G)?"Given":"Gift"}</span></button><button class="btn sm chatb" data-act="chat" data-id="${f.id}" ${canChat(f)?"":"disabled"}>${CHAT_PX}<span>${canChat(f)?"New chat":(f.bond||0)<CHAT_BOND?"Not close yet":"No messages"}</span>${canChat(f)?'<i class="dot"></i>':""}</button></div></div></section>`).join("")}</div>`;}
-function hangHTML(id){const f=G.F[id];const pref=k=>f.know["act_"+k]==="like"?"<i class=\"likeb\">Likes</i>":f.know["act_"+k]==="dislike"?"<i class=\"disb\">Dislikes</i>":"";
-  return `<h2>Time with ${esc(f.name)}</h2><p class="meta">Choose where to go together</p><div class="acts">${Object.entries(ACTIVITIES).filter(([k,a])=>!a.campOnly||f.camp==="player").map(([k,a])=>`<button class="actbtn" data-act="date" data-id="${f.id}" data-v="${k}" ${G.freeUsed||G.cash<a.cost?"disabled":""}><b>${a.name}${pref(k)}</b><small>${a.cost?fmt(a.cost):"Free"}</small></button>`).join("")}</div>`;}
+function hangHTML(id){const f=G.F[id],hlv=heartLv(f).lv;const pref=k=>f.know["act_"+k]==="like"?"<i class=\"likeb\">Likes</i>":f.know["act_"+k]==="dislike"?"<i class=\"disb\">Dislikes</i>":"";
+  return `<h2>Time with ${esc(f.name)}</h2><p class="meta">Choose where to go together</p><div class="acts">${Object.entries(ACTIVITIES).filter(([k,a])=>(!a.campOnly||f.camp==="player")&&(!a.heart||hlv>=10)).map(([k,a])=>{const lock=a.heart&&hlv<a.heart;return `<button class="actbtn${lock?" lockd":a.heart?" hspot":""}" data-act="date" data-id="${f.id}" data-v="${k}" ${lock||G.freeUsed||G.cash<a.cost?"disabled":""}><b>${a.heart?"♥ ":""}${a.name}${lock?"":pref(k)}</b><small>${lock?`🔒 Unlocks at ♥Lv.${a.heart}`:a.cost?fmt(a.cost):"Free"}</small></button>`;}).join("")}</div>`;}
 // v1.33: what each camp level brings, so upgrades feel like a goal
 function campLvHTML(){const lv=campLevel(G),t=facTotal(G),need=[0,0,5,13];
   const unlock=L=>[...Object.entries(FACILITIES).filter(([k,F])=>F.req&&F.req.lv===L).map(([k,F])=>F.name),...Object.entries(STAFF).filter(([k,S])=>S.req&&S.req.lv===L).map(([k,S])=>S.name)];
@@ -1125,7 +1125,7 @@ function rinScene(done){const r=G.F.rin;if(!r||r.camp!=="player"||G.week%3!==0||
   const tired=R.filter(f=>f.fatigue>=50);const w=R.map(f=>[f,RADAR_AX.map(([n,fn])=>[n,fn(f.a)]).sort((a,b)=>a[1]-b[1])[0]]).sort((a,b)=>a[1][1]-b[1][1])[0];
   // v1.22.1: rotate whose weakness Rin talks about, and how she says it
   const rf=R[Math.floor(G.week/3)%R.length],rw=RADAR_AX.map(([n,fn])=>[n,fn(rf.a)]).sort((a,b)=>a[1]-b[1]);const rpick=rw[Math.floor(G.week/6)%2]||rw[0];
-  const RW=[`This time I'll talk about ${rf.name}. ${rpick[0]} is still her lowest stat. A little more training will show results`,`${rf.name} still leaves an opening in ${rpick[0]}. Opponents who read the game will target it`,`If I had to pick one thing to fix right now, I'd pick ${rpick[0]} of ${rf.name}`];
+  const RW=[`This time I'll talk about ${rf.name}. ${rpick[0]} is still her lowest stat. A little more training will show results`,`${rf.name} still leaves an opening in ${rpick[0]}. Opponents who read the game will target it`,`If I had to pick one thing to fix right now, I'd pick ${rpick[0]} of ${rf.name} Mm`];
   L.push(tired.length?`${tired.map(f=>f.name).join(", ")} is over half fatigued. Give her a recovery week and she'll come back stronger`:RW[Math.floor(G.week/3)%RW.length]);
   const net=weeklyNet(G),wl=weeksLeft();
   L.push(net<0?`Money: we're losing ${fmt(-net)} per week. In about ${wl} weeks the money runs out. More fights or the special-class activity will help`:G.cash>40000?`Money: we have ${fmt(G.cash)} to spare. Try upgrading the camp or sending Coach Daeng to train. It pays off more than saving it`:`Money: we profit ${fmt(net)} per week. We're okay, but don't spend much yet`);
@@ -1219,7 +1219,7 @@ function waiKhruScene(b){const me=G.F[b.a],first=!(G.flags&&G.flags.waiSeen);con
 const CHEER={kati:[["Grandpa Chai is watching. Make him proud","…Yes! I'll fight so Grandpa hears the cheers all the way up there!",1],["Win and we'll go eat moo kratha","Haha, it's a promise! I'm ordering a lot",0],["Stay calm, follow the plan","Mm… the plan, the plan",0]],
   mali:[["Go show the whole arena that kick!","You got it~ Mali's kicks will be the loudest tonight!",1],["Your mom must be proud","…Thank you. Mali won't cry before a fight",0],["Don't get careless","I know, I know~",0]],
   rin:[["Trust the data you analyzed","…Yes. It's all in my head. Now I just have to do it",1],["Go get 'em, Rin!","Thank you… I'll try",0],["Have fun out there","Fun… I'll try",0]]};
-function cheerLines(f){return CHEER[f.id]||[["You can do it!","Yes!",1],["Follow the plan","Understood",0],["Don't get hurt","",0]];}
+function cheerLines(f){return CHEER[f.id]||[["You can do it!","Good!",1],["Follow the plan","Got it",0],["Don't get hurt","Mm",0]];}
 function openFight2(b,done){UI.fight={b,done,stage:"pre",plan:b.plan||"balanced",tac:{focus:"auto",pace:"steady",target:(b.tac&&b.tac.target)||"body"},F:null,shown:[],pending:[],timer:null,res:null,caption:null};render();}
 // v1.46: side-by-side numbers before the bell (opponent hidden until scouted)
 function preCompare(me,op,b){const sc=scouted(op.id)||op.camp==="player";const v=verdictOf(adviseCached(me.id,op.id,b.rounds||3).bestRate);
