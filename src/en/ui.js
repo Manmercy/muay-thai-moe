@@ -208,7 +208,7 @@ function settingsHTML(){const t=(k,label,desc)=>`<label class="set"><span><b>${l
 const GLOSS=[["Readiness","Condition on fight day. The higher, the better she fights. Drops with fatigue or injury"],["Fatigue","Builds up from training. Over 65 risks injury. Reduce with recovery, the recovery room, the kitchen"],
  ["Morale","Higher morale means sharper strikes. Rises with wins, dates, merit-making; drops with losses or overtraining"],["Bond","Her closeness to you. Unlocks special scenes, the signature move at 60, and raises the chance of blood-boil mode"],
  ["Trust","How much a fighter trusts your orders. Higher trust makes corner orders work better (up to +4% accuracy); at 60 losses hurt morale less, and it affects confession scenes · raise it with merit-making scenes, wai khru, not overtraining, and a camp out of debt"],["Fame","How well-known the camp is. The higher, the more students come"],
- ["Skill points","Earned every level-up, spent on the ancient techniques of the fighter's school"],["Counter-training","After scouting a tape, train the program that counters the opponent's main weapon in the week before the fight for a fight-day bonus"],
+ ["Skill points","Earned every level-up, spent on the ancient techniques of the fighter's school"],["Counter-training","Scout the opponent, then train the program that counters their main weapon the week before the fight. On fight night their main weapon lands less often and you read their game better"],
  ["Blood-boil mode","When badly hurt or behind on points, a fighter may 'change eyes' for a moment: stronger counters, easier criticals. Once per fight"],["Wai khru ram muay","Ritual before the first fight, canon matchups, and major bouts. Choose a dance; each gives a different effect"]];
 
 // ---------- creator (manager look) ----------
@@ -844,6 +844,8 @@ const PATCH={id:"1.87.0",ver:"Muay Thai Moe v1.87.0",title:"News from Sirichai C
  ["✦","More stardust","A win now gives 3 stardust, a knockout win gives 4"],
  ["↩","Linked card stories","Own both cards and the card page shows which story it continues. Tap to jump straight there."],
  ["🏮","A green Loy Krathong machine","The festival machine has its own look, down by the Ping River"],
+ ["🥊","Counter-training works better","Counter-train before a fight and on fight night the opponent's main weapon lands less often while you read their game better. It helps a lot against the top fighters in later years"],
+ ["📖","Missed story arcs are back","If you skipped Pailin and Vector Gym, or Fah and Ploy's second-year stories, they now start in the year you're playing. No need for a new save"],
  ["📅","A calendar for the whole year","The calendar now shows which year you're in, plus birthdays, festivals and the camp beauty contest. Tap a week for details"]],
  foot:"Here's hoping you find a golden capsule ✦"};
 function maybeWhatsNew(){if(!G||G.ended||UI.scene)return;if(G.newsSeen===PATCH.id)return;UI.modal={type:"whatsnew"};}

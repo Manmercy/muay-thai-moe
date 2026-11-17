@@ -342,6 +342,7 @@ const TXT={
   miss:["หลบได้ทัน","ยกการ์ดรับไว้","ถอยออกนอกระยะ","เบี่ยงตัวหลบ"],
 };
 // v1.12: training the right counter for the next opponent pays off on fight night
+let CTR_W=.07,CTR_READ=.06;
 function oppTop(op){return [["punch",op.a.punch],["kick",op.a.kick],["knee",op.a.knee],["elbow",op.a.elbow]].sort((x,y)=>y[1]-x[1])[0][0];}
 const COUNTER_OF={punch:"defense",kick:"knee",knee:"kick",elbow:"kick"};
 // v1.15: the counter is read from the whole opponent, not just her top weapon
@@ -370,6 +371,8 @@ function newFight(fa,fb,o){
   const rng=mulberry32(o.seed);const SA=fightSide(fa,o.planA||aiPlan(fa,fb,rng),rng),SB=fightSide(fb,o.planB||aiPlan(fb,fa,rng),rng);
   // v1.20: a canon rival fights a level above herself on final night
   if(o.tier==="final"){for(const S of [SA,SB])if(S.f.canon&&S.f.camp==="rival")S.prep+=.05;}
+  /* v1.87: counter-training reads the opponent's best weapon — it lands less often on fight night */
+  if(SA.counterPrep){SA.ctrW=oppTop(fb);SB.prep-=CTR_READ;}if(SB.counterPrep){SB.ctrW=oppTop(fa);SA.prep-=CTR_READ;}
   if(fa.ployNotes&&fb.id==="ploy")SA.prep+=.025;if(fb.ployNotes&&fa.id==="ploy")SB.prep+=.025; // Rin's notebook on Ploy
   return {seed:o.seed,rng,rounds:o.rounds,round:0,tier:o.tier,A:SA,B:SB,
     cards:[],logs:[],over:false,result:null,forceRage:!!o.forceRage};
@@ -438,7 +441,7 @@ function fightEx(F){const rng=F.rng,log=[],ex=F.ex,mA=F.mA,mB=F.mB;
     const fatA=(100-at.sta)/100*.22,fatD=(100-df.sta)/100*.12;
     const fury=at.f&&at.f.id==="fah"?clamp((60-at.hp)/50,0,1):0; // v1.38: Fah gets more dangerous the more she is hurt
     if(fury>.4&&!at.wake){at.wake=1;log.push({ha:F.A.hp,hb:F.B.hp,sa:F.A.sta,sb:F.B.sta,s:at===F.A?"A":"B",t:`${at.name}ยิ้มทั้งที่เลือดออก… ยิ่งเจ็บยิ่งดุ! สายตาเปลี่ยนไปแล้ว!`,k:"big",ev:"wake",an:at.name,dn:df.name});}
-    const hitP=clamp(.42+fury*.04+(atk-def)*.03+at.prep+at.mor+(at.careMor||0)-fatA+fatD-md.evade-md.guard-df.sk.evade+(at.sk.hit[wpn]||0)+(at.hp<45?at.sk.clutch:0)+(at.rage?.1:0)-(at.tac.target==="head"?.015:0)+df.legs/400+(bA&&bA.w===wpn?.12*bA.pw:0)-(bD?.12*bD.pw:0),.12,.9);
+    const hitP=clamp(.42+fury*.04+(atk-def)*.03+at.prep+at.mor+(at.careMor||0)-fatA+fatD-md.evade-md.guard-df.sk.evade-(df.ctrW===wpn?CTR_W:0)+(at.sk.hit[wpn]||0)+(at.hp<45?at.sk.clutch:0)+(at.rage?.1:0)-(at.tac.target==="head"?.015:0)+df.legs/400+(bA&&bA.w===wpn?.12*bA.pw:0)-(bD?.12*bD.pw:0),.12,.9);
     at.thrown++;at.rthrown++;at.sta=clamp(at.sta-W_INFO[wpn].cost*(1.25-a.stamina/40)*ma.sta*(1+Math.max(0,ma.aggr))*(1-at.sk.staSave),0,100);
     const tx=TXT[wpn][Math.floor(rng()*TXT[wpn].length)];
     if(rng()<hitP){
@@ -837,7 +840,7 @@ function genOffers(G,opt){
         G.offers.push({id:`o${G.week}_${f.id}_rv`,a:f.id,b:o.id,week:wk,tier,rv:1,win:Math.round(TIER[tier].win*1.6/100)*100,lose:Math.round(TIER[tier].lose*1.4/100)*100});}}
   }
   // Bangkok's sports-science camp calls out our strongest available fighter in each division.
-  if((G.season||1)>=4&&[8,22,35].includes(G.week))for(const opId of (G.season>=5?["pailin","vector_A","vector_B"]:["pailin"])){const op=G.F[opId];if(!op||op.injury>0)continue;
+  if(arcYear(G,"vector")>=1&&[8,22,35].includes(G.week))for(const opId of (arcYear(G,"vector")>=2?["pailin","vector_A","vector_B"]:["pailin"])){const op=G.F[opId];if(!op||op.injury>0)continue;
     const fighters=roster(G).filter(f=>f.div===op.div&&f.injury===0).sort((a,b)=>ovr(b.a)-ovr(a.a));
     for(const f of fighters){const wk=[G.week+2,G.week+3,G.week+4].find(w=>w<=48&&!isBooked(G,op.id,w)&&!G.bookings.some(b=>b.a===f.id&&Math.abs(b.week-w)<=1));
       if(wk&&!G.offers.some(o=>o.a===f.id&&o.b===op.id)){G.offers.push({id:`o${G.week}_${f.id}_${op.id}`,a:f.id,b:op.id,week:wk,tier:"lab",lab:1,win:TIER.lab.win,lose:TIER.lab.lose});break;}}}
@@ -1071,8 +1074,20 @@ const VECTOR_SPEC={
  B:{name:"เวกา",full:"เวกา ศิษย์เวกเตอร์",div:"B",camp:"rival",color:"#47216b",potential:19,
    a:{punch:14,kick:16,knee:12,elbow:14,clinch:11,guard:13,foot:16,counter:13,power:16,speed:17,stamina:15,dur:13,iq:14,comp:15}}
 };
-function ensureVector(G){if((G.season||1)<4)return false;G.rank=G.rank||{A:{},B:{}};let created=false;
-  for(const id of (G.season>=5?["pailin","vector_A","vector_B"]:["pailin"])){const div=id==="vector_B"?"B":"A",spec=id==="pailin"?VECTOR_SPEC.pailin:VECTOR_SPEC[div];G.rank[div]=G.rank[div]||{};
+/* v1.87: story arcs count their own years. Saves that were already past the arc's year when it was added
+   (or that skipped it) start the arc now, so nobody misses Pailin, Vector or the second-year stories of Fah and Ploy. */
+const ARCS={y2:{min:2,win:16,ev:["y2_fah_rooftop","y2_ploy_stands","y2_fah_team","y2_fah_letter","y2_ploy_rehab","y2_ploy_team"]},
+  vector:{min:4,win:30,ev:["y4_pailin_arrive","y4_pailin_sister","y4_pailin_warning"],ev2:["y5_vector_arrive","y5_vector_fighters","y5_vector_contract","y5_vector_challenge","y5_vector_resolve"]}};
+function arcSync(G){G.arcs=G.arcs||{};const S=G.season||1,seen=k=>!!(G.seen&&G.seen[k]);
+  for(const id in ARCS){if(G.arcs[id]!=null)continue;const A=ARCS[id];if(S<A.min)continue;let st;
+    if(A.ev2&&A.ev2.some(seen))st=A.min;
+    else if(A.ev.some(seen))st=A.ev2?Math.max(A.min,S-1):A.min;
+    else if(S===A.min)st=A.min;
+    else st=(G.week||1)<=A.win?S:S+1;
+    G.arcs[id]=st;}}
+const arcYear=(G,id)=>{const s=G.arcs&&G.arcs[id];return s==null?0:(G.season||1)-s+1;};
+function ensureVector(G){arcSync(G);const vy=arcYear(G,"vector");if(vy<1)return false;G.rank=G.rank||{A:{},B:{}};let created=false;
+  for(const id of (vy>=2?["pailin","vector_A","vector_B"]:["pailin"])){const div=id==="vector_B"?"B":"A",spec=id==="pailin"?VECTOR_SPEC.pailin:VECTOR_SPEC[div];G.rank[div]=G.rank[div]||{};
     if(!G.F[id]){G.F[id]=baseFighter(id,spec);G.F[id].lvl=id==="pailin"?8:6;G.F[id].met=true;created=true;}
     G.F[id].lab=true;G.F[id].gymName="ค่ายเวกเตอร์ กรุงเทพฯ";if(id==="pailin"){G.F[id].name=spec.name;G.F[id].full=spec.full;G.F[id].sprite="pailin";}
     if(!G.rank[div][id])G.rank[div][id]={pts:0,w:0,l:0,d:0};}syncFighterAges(G);return created;}
@@ -1099,7 +1114,7 @@ function ensureStageNPCs(G,through=stageOf(G.week)){const stages=["local",...(th
       if((G.season||1)>=2){const best=Math.max(level,...roster(G).filter(x=>x.div===div).map(x=>effOvr(G,x))),gap=stage==="local"?-2:stage==="district"?-1.1:-.3;liftOpponent(f,Math.min(24.5,best+gap),20);}startLv(f);
       if(stage==="district"){G.qual=G.qual||{A:[],B:[]};G.qual[div]=G.qual[div]||[];if(!G.qual[div].includes(id))G.qual[div].push(id);}
       G.rank[div][id]={pts:0,w:0,l:0,d:0};});}syncFighterAges(G);}
-function lateSeasonOpposition(G){const year=G.season||1;ensureStageNPCs(G);if(year<2)return;G.flags=G.flags||{};const created=year>=4?ensureVector(G):false;
+function lateSeasonOpposition(G){arcSync(G);const year=G.season||1;ensureStageNPCs(G);if(year<2)return;G.flags=G.flags||{};const created=year>=4?ensureVector(G):false;
   if(G.flags.oppositionSeason===year&&!created)return;
   const d=G.diff||"normal",rng=mulberry32(((G.seed||1)*31+year*7919)>>>0),back=[];
   for(const div of ["A","B"]){const mine=roster(G).filter(f=>f.div===div);const best=Math.max(year>=4?12+(year-4)*.6:10.5+(year-2)*.6,...mine.map(f=>effOvr(G,f))),bestLab=Math.max(year>=4?12+(year-4)*.6:10.5+(year-2)*.6,...mine.map(f=>ovr(f.a)+edgeOf(G,f)*.5));/* story bosses only take half the edge — their fights were tuned by hand */

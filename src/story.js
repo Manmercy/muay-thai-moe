@@ -1574,29 +1574,29 @@ EVENTS.push(
 );
 
 // Year 2: give Fah and Ploy room between the recruitment beats and the finals.
-const year2Pair=(G,a,b)=>G.season===2&&metR(G,a)&&metR(G,b)&&(G.F[a].bond||0)>=15&&(G.F[b].bond||0)>=15;
+const year2Pair=(G,a,b)=>arcYear(G,"y2")===1&&metR(G,a)&&metR(G,b)&&(G.F[a].bond||0)>=15&&(G.F[b].bond||0)>=15;
 EVENTS.push(
- {id:"y2_fah_rooftop",pri:2,look:"casual",bg:"night",when:G=>G.season===2&&G.week>=6&&G.week<=16&&fahRival(G)&&metR(G,"fah"),steps:[
+ {id:"y2_fah_rooftop",pri:2,look:"casual",bg:"night",when:G=>arcYear(G,"y2")===1&&G.week>=6&&G.week<=16&&fahRival(G)&&metR(G,"fah"),steps:[
   {n:"nar",t:"หลังไฟต์ ฟ้านั่งบนหลังคาโรงยิมเก่า แกว่งขาตามจังหวะเพลงจากงานวัด แต่พอเห็นคุณก็รีบปิดโทรศัพท์"},
   {n:"fah",f:"pout",t:"โค้ชใหม่บอกว่าถ้าฟ้ายังชกสนุก ๆ เขาจะส่งใบหยกขึ้นแทน ฟ้าเลยซ้อมท่าตามที่เขาสั่งทั้งคืน… แต่มันไม่ใช่ฟ้าเลย"},
   {choice:[{t:"ขึ้นเวทีแบบที่เธอเป็น",fx:G=>add(G,"fah","bond",4),then:[{n:"fah",f:"happy",t:"ถ้าได้ขึ้นอีก ฟ้าจะยิ้มให้เห็นทั้งสนามเลย คอยดู!"}]},{t:"ถ้าอยากลองซ้อมแบบอื่น ค่ายเราเปิดประตูให้",fx:G=>add(G,"fah","trust",5),then:[{n:"fah",f:"flustered",t:"พูดเหมือนชวนเข้าค่ายเลยนะ… ฟ้ายังไม่ได้ตอบตกลงสักหน่อย!"}]}]}]},
- {id:"y2_ploy_stands",pri:2,look:"casual",bg:"ring",when:G=>G.season===2&&G.week>=14&&G.week<=30&&ployRival(G)&&metR(G,"ploy"),steps:[
+ {id:"y2_ploy_stands",pri:2,look:"casual",bg:"ring",when:G=>arcYear(G,"y2")===1&&G.week>=14&&G.week<=30&&ployRival(G)&&metR(G,"ploy"),steps:[
   {n:"nar",t:"หลังการแข่งขัน พลอยยังนั่งบนอัฒจันทร์ จดจังหวะชกของนักมวยรุ่นใหม่ลงในสมุด แม้ไฟในสนามดับไปครึ่งหนึ่งแล้ว"},
   {n:"ploy",f:"sad",t:"ค่ายพยัคฆ์ทองถามแต่ผลแพ้ชนะ ไม่มีใครถามว่าฉันเห็นอะไรบนเวที …คุณจะฟังไหม"},
   {choice:[{t:"นั่งฟังพลอยวิเคราะห์จนจบ",fx:G=>{add(G,"ploy","bond",4);add(G,"ploy","trust",2);},then:[{n:"ploy",f:"happy",t:"ดี งั้นคราวหน้าฉันจะเอาสมุดอีกเล่มมา อย่าเพิ่งหนีกลับนะ"}]},{t:"ชวนพลอยมาดูเทปที่ค่าย",fx:G=>add(G,"ploy","trust",5),then:[{n:"ploy",f:"flustered",t:"ชวนคู่แข่งเข้าค่ายง่าย ๆ แบบนี้เลยเหรอ …ก็ได้ แค่ดูเทปนะ"}]}]}]},
- {id:"y2_fah_team",pri:3,look:"casual",bg:"gym",when:G=>G.season===2&&inCamp(G,"fah")&&G.flags.fahJoinedAbs!=null&&absWeek(G)>=G.flags.fahJoinedAbs+5,steps:[
+ {id:"y2_fah_team",pri:3,look:"casual",bg:"gym",when:G=>arcYear(G,"y2")===1&&inCamp(G,"fah")&&G.flags.fahJoinedAbs!=null&&absWeek(G)>=G.flags.fahJoinedAbs+5,steps:[
   {n:"nar",t:"ฟ้าแอบซ้อมท่าเต้นหลังชกหน้ากระจก ข้าง ๆ มีรูปใบหยกจากโปสเตอร์ค่ายเก่าแปะอยู่"},
   {n:"fah",f:"pout",t:"ทุกคนบอกว่าใบหยกมาแทนฟ้าได้เลย เหมือนฟ้าเป็นแค่ตำแหน่งว่าง ๆ …แต่ตอนนี้ฟ้าอยู่ทีมนี้จริง ๆ ใช่ไหม"},
   {choice:[{t:"ที่นี่ไม่มีใครแทนเธอได้",fx:G=>{add(G,"fah","bond",5);add(G,"fah","morale",5);},then:[{n:"fah",f:"happy",t:"งั้นฟ้าจะซ้อมให้หนัก แล้วชกให้คนจำชื่อฟ้า ไม่ใช่ชื่อค่ายเก่า!"}]},{t:"ชวนทุกคนซ้อมท่าฉลองชัยกับฟ้า",fx:G=>{add(G,"fah","trust",4);if(inCamp(G,"mali"))add(G,"mali","bond",2);},then:[{n:"nar",t:"เสียงหัวเราะดังไปถึงหน้าค่าย ครูแดงยืนมองก่อนยอมทำท่าเต้นหนึ่งจังหวะ"}]}]}]},
- {id:"y2_fah_letter",pri:2,look:"casual",bg:"camp",when:G=>G.season===2&&inCamp(G,"fah")&&G.flags.fahJoinedAbs!=null&&absWeek(G)>=G.flags.fahJoinedAbs+11,steps:[
+ {id:"y2_fah_letter",pri:2,look:"casual",bg:"camp",when:G=>arcYear(G,"y2")===1&&inCamp(G,"fah")&&G.flags.fahJoinedAbs!=null&&absWeek(G)>=G.flags.fahJoinedAbs+11,steps:[
   {n:"nar",t:"ยายของฟ้าส่งจดหมายมาที่ค่าย ข้างในมีรูปฟ้าชกไฟต์แรกกับใบหยกตอนยังเป็นเด็กฝึก"},
   {n:"fah",f:"sad",t:"ใบหยกเคยเป็นเพื่อนซ้อมฟ้า ไม่ใช่ตัวร้าย …ถ้าได้เจอกันบนเวที ฟ้าจะชกเต็มที่ แล้วหลังระฆังจะชวนเขากินข้าว"},
   {n:"nar",t:"ฟ้าเก็บรูปไว้ในกระเป๋านวม ไม่ได้ทิ้งอดีตไว้ที่ค่ายเก่า"}]},
- {id:"y2_ploy_rehab",pri:3,look:"casual",bg:"gym",when:G=>G.season===2&&inCamp(G,"ploy")&&G.flags.ployJoinedAbs!=null&&absWeek(G)>=G.flags.ployJoinedAbs+2,steps:[
+ {id:"y2_ploy_rehab",pri:3,look:"casual",bg:"gym",when:G=>arcYear(G,"y2")===1&&inCamp(G,"ploy")&&G.flags.ployJoinedAbs!=null&&absWeek(G)>=G.flags.ployJoinedAbs+2,steps:[
   {n:"nar",t:"พลอยมาถึงค่ายก่อนใคร กำลังหัดลงน้ำหนักบนขาข้างที่เจ็บ กะทิถือเก้าอี้มาให้แต่พลอยส่ายหน้า"},
   {n:"ploy",f:"sad",t:"ที่ค่ายเก่า พอเดินช้าเขาก็ให้เพชราซ้อมแทน ที่นี่ฉันยังมีเวลาใช่ไหม"},
   {choice:[{t:"ค่อย ๆ กลับมา เราจะรอ",fx:G=>{add(G,"ploy","bond",5);add(G,"ploy","trust",3);},then:[{n:"ploy",f:"flustered",t:"…คำว่าเราจะรอ ฟังดีกว่าที่คิด"}]},{t:"ให้พลอยช่วยวางแผนซ้อมระหว่างพัก",fx:G=>{add(G,"ploy","trust",5);add(G,"kati","morale",4);},then:[{n:"kati",f:"happy",t:"พี่พลอยช่วยดูจังหวะเข่าให้หนูด้วยนะคะ!"},{n:"ploy",f:"happy",t:"ได้ แต่จดทุกคำที่ฉันบอกนะ"}]}]}]},
- {id:"y2_ploy_team",pri:2,look:"casual",bg:"night",when:G=>G.season===2&&inCamp(G,"ploy")&&G.flags.ployJoinedAbs!=null&&absWeek(G)>=G.flags.ployJoinedAbs+8&&!(G.F.ploy.injury>0),steps:[
+ {id:"y2_ploy_team",pri:2,look:"casual",bg:"night",when:G=>arcYear(G,"y2")===1&&inCamp(G,"ploy")&&G.flags.ployJoinedAbs!=null&&absWeek(G)>=G.flags.ployJoinedAbs+8&&!(G.F.ploy.injury>0),steps:[
   {n:"nar",t:"หลังซ้อม พลอยเปิดสมุดแผนการชกหน้าใหม่ หัวกระดาษเขียนว่า ศิริชัย ข้างชื่อกะทิและชื่อตัวเอง"},
   {n:"ploy",f:"happy",t:"ครั้งแรกที่ฉันวางแผนให้ทีม ไม่ใช่แค่ให้ตัวเอง …ถ้าวันหนึ่งเจอเพชรา ฉันอยากให้เขาเห็นว่าการมีทีมมันเป็นยังไง"},
   {n:"kati",f:"happy",t:"หนูกับทุกคนจะอยู่ข้างมุมพี่ค่ะ ไม่ว่าจะชนะหรือแพ้"}]},
@@ -1641,16 +1641,16 @@ const vecRec=(G,s)=>((G.vecRec||{})[s==null?(G.season||1):s])||{w:0,l:0};
 const vecAll=G=>Object.values(G.vecRec||{}).reduce((a,r)=>({w:a.w+(r.w||0),l:a.l+(r.l||0)}),{w:0,l:0});
 const vecPick=(G,arr)=>arr[((G.season||1)-6)%arr.length];
 EVENTS.push(
- {id:"y4_pailin_arrive",pri:3,look:"fight",bg:"hall",when:G=>G.season===4&&G.week>=3&&!!G.F.pailin,steps:[
+ {id:"y4_pailin_arrive",pri:3,look:"fight",bg:"hall",when:G=>arcYear(G,"vector")===1&&G.week>=3&&!!G.F.pailin,steps:[
   {n:"nar",t:"รถตู้สีดำม่วงจากกรุงเทพฯ จอดหน้าเวทีจังหวัด ผู้หญิงในเสื้อคลุมดำก้าวลงมาก่อน ตามด้วยทีมงานที่ขนกล้องวิเคราะห์การชกลงจากรถ"},
   {n:"pailin",f:"happy",t:"ฉันชื่อไพลิน หัวหน้าค่ายเวกเตอร์ เราใช้วิทยาศาสตร์การกีฬาทุกขั้นตอน …แต่ตัวเลขไม่เคยขึ้นชกแทนใคร สุดท้ายก็ต้องมีคนกล้าขึ้นเวทีอยู่ดี"},
   {inject:G=>G.F.ploy&&G.F.ploy.met?[{n:"ploy",f:"surprised",t:"พี่ไพลิน… พี่เคยบอกว่าจะไม่กลับมาเชียงใหม่อีก"},{n:"pailin",f:"angry",t:"พี่กลับมาเพราะอยากรู้ว่าน้องสาวพี่โตขึ้นแค่ไหนแล้ว พลอย"}]:[{n:"kati",f:"angry",t:"ค่ายศิริชัยรับคำท้าค่ะ แต่นักมวยไม่ใช่หนูทดลองนะคะ"},{n:"pailin",f:"happy",t:"พูดแรงดีนี่ งั้นไว้พิสูจน์กันบนเวที"}]},
   {n:"nar",t:"ชื่อไพลินขึ้นในอันดับรุ่น A ภายในสัปดาห์เดียว และคำท้าฉบับแรกจากค่ายเวกเตอร์ก็ส่งมาถึงศิริชัย"}]},
- {id:"y4_pailin_sister",pri:2,look:"casual",bg:"river",when:G=>G.season===4&&G.week>=17&&G.seen.y4_pailin_arrive&&!!G.F.ploy?.met,steps:[
+ {id:"y4_pailin_sister",pri:2,look:"casual",bg:"river",when:G=>arcYear(G,"vector")===1&&G.week>=17&&G.seen.y4_pailin_arrive&&!!G.F.ploy?.met,steps:[
   {n:"nar",t:"พลอยเปิดรูปเก่าในโทรศัพท์ ในรูปไพลินวัยรุ่นกำลังพันผ้าพันมือให้น้องสาว ก่อนที่พี่สาวจะย้ายไปกรุงเทพฯ"},
   {n:"ploy",f:"sad",t:"พี่เคยยืนข้างมุมฉันทุกไฟต์ แต่พอมีค่ายใหญ่ พี่เริ่มพูดถึงคนเป็นตัวเลข …ฉันยังไม่รู้ว่าพี่เปลี่ยนไปจริง ๆ หรือแค่กลัวแพ้"},
   {choice:[{t:"ให้พลอยคุยกับพี่ด้วยตัวเอง",fx:G=>add(G,"ploy","trust",4),then:[{n:"ploy",f:"happy",t:"ใช่ เรื่องนี้ฉันต้องถามพี่เอง ไม่ใช่ให้ใครตัดสินแทน"}]},{t:"บอกว่าบนเวทีพลอยไม่ต้องเป็นเงาของพี่",fx:G=>add(G,"ploy","bond",4),then:[{n:"ploy",f:"angry",t:"ฉันจะชกแบบของฉัน ให้พี่เห็นกับตาเลย"}]}]}]},
- {id:"y4_pailin_warning",pri:2,look:"casual",bg:"camp",when:G=>G.season===4&&G.week>=34&&G.seen.y4_pailin_arrive,steps:[
+ {id:"y4_pailin_warning",pri:2,look:"casual",bg:"camp",when:G=>arcYear(G,"vector")===1&&G.week>=34&&G.seen.y4_pailin_arrive,steps:[
   {n:"nar",t:"ข่าวจากกรุงเทพฯ: ค่ายเวกเตอร์จะกลับมาปีหน้า พร้อมนักมวยที่ไพลินคัดเองจากค่ายต่างจังหวัด"},
   {n:"pailin",f:"angry",t:"ปีนี้ฉันมาดูฝีมือเฉย ๆ ปีหน้าไนท์กับเวกาจะมาด้วย แล้วค่อยมาดูกันว่าศิริชัยตามทันไหม"},
   {n:"kati",f:"angry",t:"ค่ายเราไม่หนีค่ะ ปีหน้าเจอกันบนเวที"}]}
@@ -1659,29 +1659,29 @@ EVENTS.push(
 // Year 5: Vector comes back with a full team. The technology is useful; the conflict is the
 // gym treating provincial fighters as test subjects. The arc resolves before the year ends.
 EVENTS.push(
- {id:"y5_vector_arrive",pri:3,look:"casual",bg:"camp",when:G=>G.season===5&&G.week>=3&&!!G.F.vector_A,steps:[
+ {id:"y5_vector_arrive",pri:3,look:"casual",bg:"camp",when:G=>arcYear(G,"vector")===2&&G.week>=3&&!!G.F.vector_A,steps:[
   {inject:G=>G.seen.y4_pailin_arrive?[{n:"nar",t:"ต้นปี ไพลินกลับมาตามที่ลั่นวาจาไว้ คราวนี้เธอเดินเข้าประตูค่ายศิริชัยเอง ข้างหลังมีผู้หญิงถือแฟ้มหนาเดินตามมา"},{n:"pailin",f:"happy",t:"บอกแล้วว่าฉันจะกลับมา ปีนี้เวกเตอร์มาครบทีม"}]:[{n:"nar",t:"รถตู้สีดำม่วงจากกรุงเทพฯ จอดหน้าค่ายศิริชัย ผู้หญิงในเสื้อคลุมดำเดินนำทีมงานเข้ามา"},{n:"pailin",f:"happy",t:"ฉันชื่อไพลิน พี่สาวของพลอย และเป็นหัวหน้าค่ายเวกเตอร์ ปีนี้ฉันมาดูว่าค่ายศิริชัยชกได้แค่ไหน"}]},
   {n:"npc",who:"เมษา · แมวมองเวกเตอร์",t:"สวัสดีค่ะ ฉันเมษา เราตระเวนหานักมวยต่างจังหวัดที่มีแวว เข้าโปรแกรมวิทยาศาสตร์การกีฬาของเรา ค่าเดินทางกับค่าตรวจร่างกายเราออกให้หมดค่ะ"},
   {n:"kati",f:"pout",t:"แต่ทำไมใบสมัครถึงเขียนว่า 'ผู้เข้าร่วมการทดลอง' ตัวใหญ่กว่าคำว่านักมวยล่ะคะ"},
   {n:"pailin",f:"angry",t:"ข้อมูลที่แม่นยำทำให้คนชกปลอดภัยขึ้น แต่จะแม่นได้ ก็ต้องมีคนยอมให้วัดทุกอย่าง"},
   {choice:[{t:"ขอดูสัญญาและสิทธิ์ของนักมวยก่อน",fx:G=>{add(G,"kati","trust",4);G.flags.vectorContract=1;},then:[{n:"npc",who:"เมษา",t:"…ได้ค่ะ จริง ๆ มีบางหน้าที่ฉันเองก็อยากให้คนอ่านเหมือนกัน"}]},{t:"บอกว่าค่ายเราตัดสินใจเอง ไม่ใช่หนูทดลอง",fx:G=>{add(G,"kati","bond",4);G.rep+=.5;},then:[{n:"kati",f:"happy",t:"หนูจะขึ้นเวทีในนามค่ายศิริชัยค่ะ"}]}]}]},
- {id:"y5_vector_fighters",pri:2,look:"fight",bg:"hall",when:G=>G.season===5&&G.week>=9&&!!G.F.vector_B,steps:[
+ {id:"y5_vector_fighters",pri:2,look:"fight",bg:"hall",when:G=>arcYear(G,"vector")===2&&G.week>=9&&!!G.F.vector_B,steps:[
   {n:"nar",t:"งานแถลงข่าวค่ายเวกเตอร์ เปิดตัวไนท์รุ่น A กับเวการุ่น B ทั้งคู่สวมเสื้อคลุมดำม่วง จอด้านหลังมีกราฟชีพจรวิ่งไม่หยุด"},
   {n:"npc",who:"ไนท์ · รุ่น A",t:"ฉันมาจากค่ายเล็ก ๆ ที่อุบล พอได้ใช้เครื่องวิเคราะห์ ฉันถึงเห็นข้อผิดพลาดที่ครูเก่าไม่เคยมีเวลาบอก"},
   {n:"npc",who:"เวกา · รุ่น B",t:"ฉันชอบข้อมูลนะ แต่เวลาเครื่องเตือนว่าควรพัก แล้วค่ายยังสั่งให้ซ้อมต่อ …ไม่มีใครดูตัวเลขนั้นเลย"},
   {n:"nar",t:"ชื่อทั้งสองขึ้นตารางชกปีนี้ และคำท้าจากค่ายเวกเตอร์ก็ส่งมาถึงศิริชัยอีกหลายฉบับ"}]},
- {id:"y5_vector_contract",pri:3,look:"casual",bg:"night",when:G=>G.season===5&&G.week>=18&&G.seen.y5_vector_arrive,steps:[
+ {id:"y5_vector_contract",pri:3,look:"casual",bg:"night",when:G=>arcYear(G,"vector")===2&&G.week>=18&&G.seen.y5_vector_arrive,steps:[
   {n:"nar",t:"เมษากลับมาพร้อมสัญญาฉบับใหม่ เธอวงปากกาแดงไว้ที่บรรทัดหนึ่ง: ค่ายเก็บข้อมูลร่างกายนักมวยต่อได้ แม้นักมวยจะถอนตัวไปแล้ว"},
   {n:"npc",who:"เมษา",t:"ฉันเคยคิดว่าพาเด็กต่างจังหวัดไปกรุงเทพฯ คือการช่วยเขา แต่บางคนถูกตัดชื่อทันทีที่ผลทดสอบออกมาไม่ดี …ฉันไม่อยากชวนใครอีก โดยไม่บอกเรื่องนี้"},
   {n:"pailin",f:"angry",t:"กฎนั่นฉันตั้งเอง ถ้ามันทำร้ายนักมวย ฉันก็ต้องเป็นคนแก้ …แต่อย่าคิดว่าฉันจะเลิกชกเพื่อชนะ"},
   {inject:G=>inCamp(G,"rin")?[{n:"rin",f:"angry",t:"ข้อมูลช่วยวางแผนชกได้จริงค่ะ แต่เจ้าของข้อมูลต้องเป็นนักมวย ไม่ใช่ค่าย"}]:[{n:"kati",f:"angry",t:"ร่างกายเป็นของคนชกค่ะ ไม่ใช่ของค่ายไหนทั้งนั้น"}]},
   {choice:[{t:"ให้เมษานำสัญญาไปแก้และให้นักมวยตัดสินใจเอง",fx:G=>{G.flags.vectorEthics=1;add(G,"rin","trust",5);},then:[{n:"npc",who:"เมษา",t:"ขอบคุณค่ะ ฉันจะเอาคำนี้ไปพูดกับหัวหน้าเอง"}]},{t:"เตือนนักมวยในจังหวัดให้รู้ข้อสัญญา",fx:G=>{G.flags.vectorEthics=2;G.rep+=1;},then:[{n:"kati",f:"angry",t:"ค่ายเราไม่ได้ห้ามใครไปไหนค่ะ แค่อยากให้ทุกคนรู้ก่อนว่ากำลังเซ็นอะไร"}]}]}]},
- {id:"y5_vector_challenge",pri:2,look:"casual",bg:"hall",when:G=>G.season===5&&G.week>=36&&G.seen.y5_vector_fighters,steps:[
+ {id:"y5_vector_challenge",pri:2,look:"casual",bg:"hall",when:G=>arcYear(G,"vector")===2&&G.week>=36&&G.seen.y5_vector_fighters,steps:[
   {n:"nar",t:"ปลายปี เวกเตอร์กลับมาที่เวทีจังหวัดพร้อมรายงานหนาเป็นปึก ไพลินประกาศว่าสถิติทำนายผลไฟต์ได้เกือบทุกไฟต์"},
   {n:"pailin",f:"happy",t:"เกือบทุกไฟต์นะ ส่วนที่ทำนายไม่ได้นั่นแหละ คือเหตุผลที่ฉันยังขึ้นชกเอง"},
   {n:"kati",f:"happy",t:"งั้นบนเวทีก็ยังมีเรื่องที่ตัวเลขไม่รู้ สินะคะ"},
   {inject:G=>G.h2h&&((G.h2h.vector_A||{}).w||(G.h2h.vector_B||{}).w)?[{n:"npc",who:"ไนท์",t:"ฉันแพ้พวกเธอมาแล้วครั้งหนึ่ง ตัวเลขไม่ได้บอกเลยว่าพวกเธอจะเปลี่ยนแผนกลางยกได้ขนาดนั้น"}]:[{n:"npc",who:"เวกา",t:"ถ้าได้เจอกันอีก ฉันอยากชกโดยไม่ต้องกลัวว่าผลตรวจหลังไฟต์จะตัดชื่อฉันออก"}]}]},
- {id:"y5_vector_resolve",pri:3,look:"casual",bg:"hall",when:G=>G.season===5&&G.week>=41&&G.seen.y5_vector_contract,steps:[
+ {id:"y5_vector_resolve",pri:3,look:"casual",bg:"hall",when:G=>arcYear(G,"vector")===2&&G.week>=41&&G.seen.y5_vector_contract,steps:[
   {n:"nar",t:"คืนก่อนศึกปลายปี เมษาติดป้ายใหม่ไว้ข้างมุมค่ายเวกเตอร์: 'นักมวยมีสิทธิ์หยุดตรวจ หยุดซ้อม และนำข้อมูลของตัวเองกลับบ้าน'"},
   {n:"npc",who:"เวกา",t:"พี่ไพลินฉีกสัญญาฉบับเก่าต่อหน้าทุกคนเลยค่ะ ตอนนี้พวกเราเลือกไฟต์กับวันพักเองได้แล้ว"},
   {n:"pailin",f:"sad",t:"ฉันเคยคิดว่าแค่ชนะ ทุกอย่างก็ถูกต้องเอง ที่จริงถ้าคนชกไม่มีสิทธิ์เลือก ต่อให้ข้อมูลดีแค่ไหนก็ถูกใช้ผิดทาง"},
@@ -1692,7 +1692,7 @@ EVENTS.push(
 
 // Year 6 onward (free mode): Pailin returns every year. Lines follow the year, last year's record and who is in camp.
 EVENTS.push(
- {id:"vector_annual_return",annual:true,pri:2,look:"casual",bg:"camp",when:G=>G.season>=6&&G.week>=5&&!!G.F.pailin,steps:[
+ {id:"vector_annual_return",annual:true,pri:2,look:"casual",bg:"camp",when:G=>arcYear(G,"vector")>=3&&G.week>=5&&!!G.F.pailin,steps:[
   {inject:G=>{const y=G.season,last=vecRec(G,y-1),all=vecAll(G);
     const open=vecPick(G,[`ปีที่ ${y} รถตู้ดำม่วงคันเดิมจอดหน้าค่ายอีกครั้ง คราวนี้ไนท์กับเวกาลงจากรถก่อนทีมงาน ต่างคนต่างถือแผนซ้อมที่ตัวเองแก้เอง`,
       `ปีที่ ${y} ยังไม่ทันพ้นเดือนแรก ซองจดหมายสีดำม่วงก็มาวางอยู่หน้าประตูค่ายตามเคย ข้างในมีคำท้าลายมือไพลิน`,
@@ -1707,10 +1707,10 @@ EVENTS.push(
     out.push(inCamp(G,"ploy")?{n:"ploy",f:"happy",t:vecPick(G,["พี่มาเร็วกว่าปีที่แล้วอีกนะ","ปีนี้พี่ผมยาวขึ้น แต่หมัดคงยังหนักเหมือนเดิม","พี่ไพลิน ปีนี้กินข้าวกับค่ายเราก่อนค่อยท้าก็ได้","ฉันเตรียมสมุดเล่มใหม่ไว้จดมวยพี่แล้ว"])}
       :{n:"kati",f:"happy",t:vecPick(G,["รับคำท้าค่ะ แต่ขอให้ทุกคนได้พักตามแผนด้วยนะคะ","มาอีกแล้วเหรอคะ! …ดีค่ะ หนูก็รออยู่","ปีนี้ค่ายเราแข็งขึ้นเยอะนะคะ อย่าประมาท","ค่ายศิริชัยพร้อมเสมอค่ะ"])});
     return out;}}]},
- {id:"vector_annual_plan",annual:true,pri:2,look:"casual",bg:"hall",when:G=>G.season>=6&&G.week>=28&&!!G.F.vector_B,steps:[
+ {id:"vector_annual_plan",annual:true,pri:2,look:"casual",bg:"hall",when:G=>arcYear(G,"vector")>=3&&G.week>=28&&!!G.F.vector_B,steps:[
   {inject:G=>[{n:"nar",t:vecPick(G,["ก่อนศึกกลางปี เวกเตอร์ส่งเทปไฟต์ของไนท์กับเวกามาให้ พร้อมขอดูแผนซ้อมของค่ายเราเป็นการแลกเปลี่ยน","ดร.วิรา นักวิจัยของเวกเตอร์ ส่งผลวิจัยการฟื้นตัวฉบับใหม่มาให้ค่ายศิริชัย พร้อมขอแลกข้อมูลซ้อม","เวกาแวะมาที่ค่ายคนเดียว ยื่นแฟ้มแผนซ้อมของเวกเตอร์ให้ แล้วขอดูแผนของเราบ้าง","ไนท์โทรมาตรง ๆ ว่าอยากแลกเทปไฟต์ก่อนศึกกลางปี ไพลินรู้แล้วและไม่ได้ห้าม"])}]},
   {choice:[{t:"แลกข้อมูลซ้อมโดยถามนักมวยก่อน",fx:G=>roster(G).forEach(f=>add(G,f.id,"trust",2)),then:[{inject:G=>inCamp(G,"rin")?[{n:"rin",f:"happy",t:"ข้อมูลที่ทุกฝ่ายยินยอม ใช้ได้จริงค่ะ"}]:[{n:"kati",f:"happy",t:"ทุกคนเลือกเองแล้วค่ะ แบบนี้สบายใจ"}]}]},{t:"เก็บแผนไว้ แล้วเจอกันบนเวที",fx:G=>roster(G).forEach(f=>add(G,f.id,"morale",4)),then:[{n:"npc",who:"ไนท์",t:"ดี ฉันก็อยากเห็นของจริงบนเวทีมากกว่า"}]}]}]},
- {id:"vector_annual_letter",annual:true,pri:1,look:"casual",bg:"night",when:G=>G.season>=6&&G.week>=46&&(G.seenY||{}).vector_annual_return===G.season,steps:[
+ {id:"vector_annual_letter",annual:true,pri:1,look:"casual",bg:"night",when:G=>arcYear(G,"vector")>=3&&G.week>=46&&(G.seenY||{}).vector_annual_return===G.season,steps:[
   {inject:G=>{const r=vecRec(G),y=G.season;const body=r.w+r.l===0?"ปีนี้เราไม่ได้เจอกันบนเวทีเลย น่าเสียดาย ปีหน้าฉันจะส่งคำท้าให้เร็วกว่าเดิม"
      :r.w>r.l?`ปีนี้ศิริชัยชนะเวกเตอร์ ${r.w} ต่อ ${r.l} ฉันยอมรับ แต่ปีที่ ${y+1} ฉันจะกลับมาพร้อมแผนใหม่`
      :r.w<r.l?`ปีนี้เวกเตอร์ชนะ ${r.l} ต่อ ${r.w} อย่าเพิ่งหมดแรงล่ะ ปีที่ ${y+1} ฉันอยากเจอศิริชัยที่เก่งกว่านี้`

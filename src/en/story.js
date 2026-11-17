@@ -1574,29 +1574,29 @@ EVENTS.push(
 );
 
 // Year 2: give Fah and Ploy room between the recruitment beats and the finals.
-const year2Pair=(G,a,b)=>G.season===2&&metR(G,a)&&metR(G,b)&&(G.F[a].bond||0)>=15&&(G.F[b].bond||0)>=15;
+const year2Pair=(G,a,b)=>arcYear(G,"y2")===1&&metR(G,a)&&metR(G,b)&&(G.F[a].bond||0)>=15&&(G.F[b].bond||0)>=15;
 EVENTS.push(
- {id:"y2_fah_rooftop",pri:2,look:"casual",bg:"night",when:G=>G.season===2&&G.week>=6&&G.week<=16&&fahRival(G)&&metR(G,"fah"),steps:[
+ {id:"y2_fah_rooftop",pri:2,look:"casual",bg:"night",when:G=>arcYear(G,"y2")===1&&G.week>=6&&G.week<=16&&fahRival(G)&&metR(G,"fah"),steps:[
   {n:"nar",t:"After the fight, Fah sits on the old gym roof, swinging her legs to music from the fair. She shuts off her phone when she spots you."},
   {n:"fah",f:"pout",t:"The new coach says he'll replace Fah with Baiyok if she keeps having fun in the ring. I trained his way all night... But it wasn't me."},
   {choice:[{t:"Enter the ring as yourself.",fx:G=>add(G,"fah","bond",4),then:[{n:"fah",f:"happy",t:"If I get another chance in the ring, I'll smile for the whole crowd. Watch me!"}]},{t:"If you want to train differently, our gym's door is open.",fx:G=>add(G,"fah","trust",5),then:[{n:"fah",f:"flustered",t:"That sounds like an invitation to join your gym... Fah hasn't said yes!"}]}]}]},
- {id:"y2_ploy_stands",pri:2,look:"casual",bg:"ring",when:G=>G.season===2&&G.week>=14&&G.week<=30&&ployRival(G)&&metR(G,"ploy"),steps:[
+ {id:"y2_ploy_stands",pri:2,look:"casual",bg:"ring",when:G=>arcYear(G,"y2")===1&&G.week>=14&&G.week<=30&&ployRival(G)&&metR(G,"ploy"),steps:[
   {n:"nar",t:"After the event, Ploy stays in the stands, noting the younger fighters' rhythms even as half the arena lights go out."},
   {n:"ploy",f:"sad",t:"Golden Tiger only asks whether I won or lost. No one asks what I saw in the ring... Will you listen?"},
   {choice:[{t:"Listen to all of Ploy's analysis",fx:G=>{add(G,"ploy","bond",4);add(G,"ploy","trust",2);},then:[{n:"ploy",f:"happy",t:"Good. Next time I'll bring another notebook. Don't rush home before I finish."}]},{t:"Invite Ploy to watch tapes at our gym",fx:G=>add(G,"ploy","trust",5),then:[{n:"ploy",f:"flustered",t:"You invite a rival into your gym that easily? ...Fine, but only to watch tapes."}]}]}]},
- {id:"y2_fah_team",pri:3,look:"casual",bg:"gym",when:G=>G.season===2&&inCamp(G,"fah")&&G.flags.fahJoinedAbs!=null&&absWeek(G)>=G.flags.fahJoinedAbs+5,steps:[
+ {id:"y2_fah_team",pri:3,look:"casual",bg:"gym",when:G=>arcYear(G,"y2")===1&&inCamp(G,"fah")&&G.flags.fahJoinedAbs!=null&&absWeek(G)>=G.flags.fahJoinedAbs+5,steps:[
   {n:"nar",t:"Fah secretly practices a post-fight dance in the mirror. A poster of Baiyok from her old gym hangs nearby."},
   {n:"fah",f:"pout",t:"Everyone says Baiyok can replace Fah, like Fah was just an empty spot... But I really belong to this team now, right?"},
   {choice:[{t:"No one here can replace you.",fx:G=>{add(G,"fah","bond",5);add(G,"fah","morale",5);},then:[{n:"fah",f:"happy",t:"Then Fah will train hard and make people remember her name, not the old gym's!"}]},{t:"Get everyone to practice Fah's victory dance",fx:G=>{add(G,"fah","trust",4);if(inCamp(G,"mali"))add(G,"mali","bond",2);},then:[{n:"nar",t:"Laughter reaches the front gate. Kru Daeng watches, then joins the victory dance for one beat."}]}]}]},
- {id:"y2_fah_letter",pri:2,look:"casual",bg:"camp",when:G=>G.season===2&&inCamp(G,"fah")&&G.flags.fahJoinedAbs!=null&&absWeek(G)>=G.flags.fahJoinedAbs+11,steps:[
+ {id:"y2_fah_letter",pri:2,look:"casual",bg:"camp",when:G=>arcYear(G,"y2")===1&&inCamp(G,"fah")&&G.flags.fahJoinedAbs!=null&&absWeek(G)>=G.flags.fahJoinedAbs+11,steps:[
   {n:"nar",t:"Fah's grandmother sends a letter to the gym with a photo of Fah and Baiyok sparring as young trainees."},
   {n:"fah",f:"sad",t:"Baiyok used to be Fah's training partner, not a villain. If we meet in the ring, I'll fight hard, then invite him to dinner after the bell."},
   {n:"nar",t:"Fah keeps the photo in her glove bag. She has not left her past at the old gym."}]},
- {id:"y2_ploy_rehab",pri:3,look:"casual",bg:"gym",when:G=>G.season===2&&inCamp(G,"ploy")&&G.flags.ployJoinedAbs!=null&&absWeek(G)>=G.flags.ployJoinedAbs+2,steps:[
+ {id:"y2_ploy_rehab",pri:3,look:"casual",bg:"gym",when:G=>arcYear(G,"y2")===1&&inCamp(G,"ploy")&&G.flags.ployJoinedAbs!=null&&absWeek(G)>=G.flags.ployJoinedAbs+2,steps:[
   {n:"nar",t:"Ploy reaches the gym before anyone else and practices putting weight on her injured leg. Kati brings a chair, but Ploy waves it away."},
   {n:"ploy",f:"sad",t:"At my old gym, they let Petchara train in my place as soon as I slowed down. Do I still have time here?"},
   {choice:[{t:"Take your time. We'll wait.",fx:G=>{add(G,"ploy","bond",5);add(G,"ploy","trust",3);},then:[{n:"ploy",f:"flustered",t:"...It feels better than I expected to hear that you'll wait."}]},{t:"Ask Ploy to plan training during recovery",fx:G=>{add(G,"ploy","trust",5);add(G,"kati","morale",4);},then:[{n:"kati",f:"happy",t:"Ploy, will you help me with my knee timing?"},{n:"ploy",f:"happy",t:"Fine, but write down every word I say."}]}]}]},
- {id:"y2_ploy_team",pri:2,look:"casual",bg:"night",when:G=>G.season===2&&inCamp(G,"ploy")&&G.flags.ployJoinedAbs!=null&&absWeek(G)>=G.flags.ployJoinedAbs+8&&!(G.F.ploy.injury>0),steps:[
+ {id:"y2_ploy_team",pri:2,look:"casual",bg:"night",when:G=>arcYear(G,"y2")===1&&inCamp(G,"ploy")&&G.flags.ployJoinedAbs!=null&&absWeek(G)>=G.flags.ployJoinedAbs+8&&!(G.F.ploy.injury>0),steps:[
   {n:"nar",t:"After training, Ploy opens a new page in her fight notebook. Sirichai is written above her name and Kati's."},
   {n:"ploy",f:"happy",t:"For the first time, I'm planning for a team instead of myself. If I meet Petchara, I want her to see what a team feels like."},
   {n:"kati",f:"happy",t:"I'll be in your corner with everyone else, whether you win or lose."}]},
@@ -1641,16 +1641,16 @@ const vecRec=(G,s)=>((G.vecRec||{})[s==null?(G.season||1):s])||{w:0,l:0};
 const vecAll=G=>Object.values(G.vecRec||{}).reduce((a,r)=>({w:a.w+(r.w||0),l:a.l+(r.l||0)}),{w:0,l:0});
 const vecPick=(G,arr)=>arr[((G.season||1)-6)%arr.length];
 EVENTS.push(
- {id:"y4_pailin_arrive",pri:3,look:"fight",bg:"hall",when:G=>G.season===4&&G.week>=3&&!!G.F.pailin,steps:[
+ {id:"y4_pailin_arrive",pri:3,look:"fight",bg:"hall",when:G=>arcYear(G,"vector")===1&&G.week>=3&&!!G.F.pailin,steps:[
   {n:"nar",t:"A black-and-purple van from Bangkok pulls up at the provincial stadium. A woman in a black coat steps out first, followed by a crew unloading fight-analysis cameras."},
   {n:"pailin",f:"happy",t:"I'm Pailin, head of Vector Gym. We use sports science at every step. …But numbers have never stepped into a ring for anyone. In the end, someone still has to be brave enough to fight."},
   {inject:G=>G.F.ploy&&G.F.ploy.met?[{n:"ploy",f:"surprised",t:"Sis Pailin… you said you'd never come back to Chiang Mai."},{n:"pailin",f:"angry",t:"I came back to see how much my little sister has grown, Ploy."}]:[{n:"kati",f:"angry",t:"Sirichai accepts the challenge. But our fighters are not lab rats!"},{n:"pailin",f:"happy",t:"Bold words. Then let's prove it in the ring."}]},
   {n:"nar",t:"Within a week Pailin's name is in the Division A rankings, and Vector Gym's first challenge arrives at Sirichai."}]},
- {id:"y4_pailin_sister",pri:2,look:"casual",bg:"river",when:G=>G.season===4&&G.week>=17&&G.seen.y4_pailin_arrive&&!!G.F.ploy?.met,steps:[
+ {id:"y4_pailin_sister",pri:2,look:"casual",bg:"river",when:G=>arcYear(G,"vector")===1&&G.week>=17&&G.seen.y4_pailin_arrive&&!!G.F.ploy?.met,steps:[
   {n:"nar",t:"Ploy opens an old photo on her phone: a teenage Pailin wrapping her little sister's hands, before she moved to Bangkok."},
   {n:"ploy",f:"sad",t:"You used to stand by my corner every fight. But once you had a big gym, you started talking about people like numbers. …I still don't know if you really changed, or you're just scared of losing."},
   {choice:[{t:"Let Ploy talk to her sister herself",fx:G=>add(G,"ploy","trust",4),then:[{n:"ploy",f:"happy",t:"Yes. I need to ask my sister myself, not let anyone decide for me."}]},{t:"Tell Ploy she doesn't have to be her sister's shadow in the ring",fx:G=>add(G,"ploy","bond",4),then:[{n:"ploy",f:"angry",t:"I'll fight my way, and make you see it with your own eyes."}]}]}]},
- {id:"y4_pailin_warning",pri:2,look:"casual",bg:"camp",when:G=>G.season===4&&G.week>=34&&G.seen.y4_pailin_arrive,steps:[
+ {id:"y4_pailin_warning",pri:2,look:"casual",bg:"camp",when:G=>arcYear(G,"vector")===1&&G.week>=34&&G.seen.y4_pailin_arrive,steps:[
   {n:"nar",t:"News from Bangkok: Vector Gym is coming back next year, with fighters Pailin hand-picked from provincial camps."},
   {n:"pailin",f:"angry",t:"This year I only came to size you up. Next year Knight and Vega come too. Then we'll see if Sirichai can keep up."},
   {n:"kati",f:"angry",t:"We're not running. See you in the ring next year."}]}
@@ -1659,29 +1659,29 @@ EVENTS.push(
 // Year 5: Vector comes back with a full team. The technology is useful; the conflict is the
 // gym treating provincial fighters as test subjects. The arc resolves before the year ends.
 EVENTS.push(
- {id:"y5_vector_arrive",pri:3,look:"casual",bg:"camp",when:G=>G.season===5&&G.week>=3&&!!G.F.vector_A,steps:[
+ {id:"y5_vector_arrive",pri:3,look:"casual",bg:"camp",when:G=>arcYear(G,"vector")===2&&G.week>=3&&!!G.F.vector_A,steps:[
   {inject:G=>G.seen.y4_pailin_arrive?[{n:"nar",t:"At the start of the year, Pailin returns as promised. This time she walks through Sirichai's gate herself, a woman with a thick folder following behind her."},{n:"pailin",f:"happy",t:"Told you I'd be back. This year Vector brought the whole team."}]:[{n:"nar",t:"A black-and-purple van from Bangkok pulls up at Sirichai. A woman in a black coat leads her team inside."},{n:"pailin",f:"happy",t:"I'm Pailin, Ploy's older sister and head of Vector Gym. This year I'm here to see what Sirichai can really do."}]},
   {n:"npc",who:"Mesa · Vector Scout",t:"Hello, I'm Mesa. We scout promising fighters from the provinces for our sports-science program. We cover all travel and medical tests."},
   {n:"kati",f:"pout",t:"But why does the application say 'Trial Participant' in bigger letters than 'Fighter'?"},
   {n:"pailin",f:"angry",t:"Precise data keeps fighters safer. But for it to be precise, someone has to agree to be measured on everything."},
   {choice:[{t:"Ask to see the contract and fighters' rights first",fx:G=>{add(G,"kati","trust",4);G.flags.vectorContract=1;},then:[{n:"npc",who:"Mesa",t:"…Okay. Honestly, there are pages I want people to read too."}]},{t:"Tell them our gym decides for itself, not as test subjects",fx:G=>{add(G,"kati","bond",4);G.rep+=.5;},then:[{n:"kati",f:"happy",t:"I'll step into the ring under Sirichai's name!"}]}]}]},
- {id:"y5_vector_fighters",pri:2,look:"fight",bg:"hall",when:G=>G.season===5&&G.week>=9&&!!G.F.vector_B,steps:[
+ {id:"y5_vector_fighters",pri:2,look:"fight",bg:"hall",when:G=>arcYear(G,"vector")===2&&G.week>=9&&!!G.F.vector_B,steps:[
   {n:"nar",t:"Vector's press conference unveils Knight in Division A and Vega in Division B, both in black-and-purple robes, a heart-rate graph racing on the screen behind them."},
   {n:"npc",who:"Night · Division A",t:"I come from a tiny camp in Ubon. With the analysis machines, I finally saw mistakes my old coach never had time to point out."},
   {n:"npc",who:"Vega · Division B",t:"I like data. But when the machine says rest and the gym still makes you train… nobody looks at that number."},
   {n:"nar",t:"Both names go up on this year's fight schedule, and more challenges from Vector arrive at Sirichai."}]},
- {id:"y5_vector_contract",pri:3,look:"casual",bg:"night",when:G=>G.season===5&&G.week>=18&&G.seen.y5_vector_arrive,steps:[
+ {id:"y5_vector_contract",pri:3,look:"casual",bg:"night",when:G=>arcYear(G,"vector")===2&&G.week>=18&&G.seen.y5_vector_arrive,steps:[
   {n:"nar",t:"Mesa comes back with a new contract. She has circled one line in red: the gym may keep a fighter's body data even after the fighter leaves."},
   {n:"npc",who:"Mesa",t:"I used to think taking kids from the provinces to Bangkok was helping them. But some got cut the moment a test came back bad. …I won't recruit anyone again without telling them that."},
   {n:"pailin",f:"angry",t:"I made that rule myself. If it hurts fighters, I'm the one who has to fix it. …But don't think I'll stop fighting to win."},
   {inject:G=>inCamp(G,"rin")?[{n:"rin",f:"angry",t:"Data really does help plan fights. But the data should belong to the fighter, not the camp."}]:[{n:"kati",f:"angry",t:"A fighter's body belongs to the fighter. Not to any camp."}]},
   {choice:[{t:"Ask Mesa to revise the contract and let fighters decide",fx:G=>{G.flags.vectorEthics=1;add(G,"rin","trust",5);},then:[{n:"npc",who:"Mesa",t:"Thank you. I'll take that message to my boss."}]},{t:"Warn the province's fighters about the contract",fx:G=>{G.flags.vectorEthics=2;G.rep+=1;},then:[{n:"kati",f:"angry",t:"We're not stopping anyone from going anywhere. We just want everyone to know what they're signing first."}]}]}]},
- {id:"y5_vector_challenge",pri:2,look:"casual",bg:"hall",when:G=>G.season===5&&G.week>=36&&G.seen.y5_vector_fighters,steps:[
+ {id:"y5_vector_challenge",pri:2,look:"casual",bg:"hall",when:G=>arcYear(G,"vector")===2&&G.week>=36&&G.seen.y5_vector_fighters,steps:[
   {n:"nar",t:"At year's end, Vector returns to the provincial stadium with a thick stack of reports. Pailin announces their stats can predict almost every fight."},
   {n:"pailin",f:"happy",t:"Almost every fight. The part it can't predict is exactly why I still fight myself."},
   {n:"kati",f:"happy",t:"So there are still things in the ring the numbers don't know, huh?"},
   {inject:G=>G.h2h&&((G.h2h.vector_A||{}).w||(G.h2h.vector_B||{}).w)?[{n:"npc",who:"Night",t:"I've already lost to you once. The numbers never said you could change your plan mid-round like that."}]:[{n:"npc",who:"Vega",t:"If we meet again, I want to fight without fearing that a post-fight test will remove me from the team."}]}]},
- {id:"y5_vector_resolve",pri:3,look:"casual",bg:"hall",when:G=>G.season===5&&G.week>=41&&G.seen.y5_vector_contract,steps:[
+ {id:"y5_vector_resolve",pri:3,look:"casual",bg:"hall",when:G=>arcYear(G,"vector")===2&&G.week>=41&&G.seen.y5_vector_contract,steps:[
   {n:"nar",t:"The night before the year-end bouts, Mesa puts up a new sign beside Vector's corner: 'Fighters have the right to stop testing, stop training, and take their own data home.'"},
   {n:"npc",who:"Vega",t:"Sis Pailin tore up the old contract in front of everyone. Now we pick our own fights and rest days."},
   {n:"pailin",f:"sad",t:"I used to think winning made everything right. But if the fighters have no choice, even the best data gets used the wrong way."},
@@ -1692,7 +1692,7 @@ EVENTS.push(
 
 // Year 6 onward (free mode): Pailin returns every year. Lines follow the year, last year's record and who is in camp.
 EVENTS.push(
- {id:"vector_annual_return",annual:true,pri:2,look:"casual",bg:"camp",when:G=>G.season>=6&&G.week>=5&&!!G.F.pailin,steps:[
+ {id:"vector_annual_return",annual:true,pri:2,look:"casual",bg:"camp",when:G=>arcYear(G,"vector")>=3&&G.week>=5&&!!G.F.pailin,steps:[
   {inject:G=>{const y=G.season,last=vecRec(G,y-1),all=vecAll(G);
     const open=vecPick(G,[`Year ${y}: The same black-and-purple van pulls up at the camp again. This time Knight and Vega step out before the staff, each holding a training plan they rewrote themselves.`,
       `Year ${y}: Before the first month is even out, a black-and-purple envelope lands at the camp gate as usual. Inside, a challenge in Pailin's handwriting.`,
@@ -1707,10 +1707,10 @@ EVENTS.push(
     out.push(inCamp(G,"ploy")?{n:"ploy",f:"happy",t:vecPick(G,["You came even earlier than last year.","Your hair's longer this year, sis. Bet your punches are just as heavy.","Sis, have dinner with our camp first this year. Challenge us after.","I've got a new notebook ready for your Muay Thai, sis."])}
       :{n:"kati",f:"happy",t:vecPick(G,["Challenge accepted! But everyone gets their rest days as planned, okay?","You're here again?! …Good. I've been waiting.","Our camp is a lot stronger this year. Don't get careless.","Sirichai Camp is always ready."])});
     return out;}}]},
- {id:"vector_annual_plan",annual:true,pri:2,look:"casual",bg:"hall",when:G=>G.season>=6&&G.week>=28&&!!G.F.vector_B,steps:[
+ {id:"vector_annual_plan",annual:true,pri:2,look:"casual",bg:"hall",when:G=>arcYear(G,"vector")>=3&&G.week>=28&&!!G.F.vector_B,steps:[
   {inject:G=>[{n:"nar",t:vecPick(G,["Before the mid-year bouts, Vector sends over fight tapes of Knight and Vega, and asks to see our training plans in exchange.","Dr. Wira, Vector's researcher, sends Sirichai a new recovery study and asks to swap training data.","Vega drops by the camp alone, hands over Vector's training plan folder, and asks to see ours in return.","Knight calls straight up asking to swap fight tapes before the mid-year bouts. Pailin knows, and didn't stop her."])}]},
   {choice:[{t:"Swap training data, but ask our fighters first",fx:G=>roster(G).forEach(f=>add(G,f.id,"trust",2)),then:[{inject:G=>inCamp(G,"rin")?[{n:"rin",f:"happy",t:"Data everyone agreed to share actually works."}]:[{n:"kati",f:"happy",t:"Everyone chose for themselves. That feels right."}]}]},{t:"Keep our plans, see them in the ring",fx:G=>roster(G).forEach(f=>add(G,f.id,"morale",4)),then:[{n:"npc",who:"Night",t:"Good. I'd rather see the real thing in the ring anyway."}]}]}]},
- {id:"vector_annual_letter",annual:true,pri:1,look:"casual",bg:"night",when:G=>G.season>=6&&G.week>=46&&(G.seenY||{}).vector_annual_return===G.season,steps:[
+ {id:"vector_annual_letter",annual:true,pri:1,look:"casual",bg:"night",when:G=>arcYear(G,"vector")>=3&&G.week>=46&&(G.seenY||{}).vector_annual_return===G.season,steps:[
   {inject:G=>{const r=vecRec(G),y=G.season;const body=r.w+r.l===0?"We never met in the ring this year. What a shame. Next year I'll send my challenge sooner."
      :r.w>r.l?`This year Sirichai beat Vector ${r.w} to ${r.l}. I admit it. But in year ${y+1} I'll be back with a new plan.`
      :r.w<r.l?`This year Vector won ${r.l} to ${r.w}. Don't run out of steam. In year ${y+1} I want to face a stronger Sirichai.`
