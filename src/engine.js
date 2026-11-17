@@ -409,8 +409,8 @@ function aiCorner(F,me,op){ if(F.round===0)return "none";
   const lead=me.pts-op.pts;if(me.sta<35)return "defend";if(lead>4)return "defend";if(lead<-3)return "push";
   if(op.f.a.kick>op.f.a.knee+2)return "clinch";if(op.f.a.clinch>op.f.a.kick+2)return "range";return "none";}
 // v1.19: a round is simulated exchange by exchange so a skill pressed mid-round changes what comes next
-// a stat far above the fighter's own average gives back less: lopsided builds stay strong but stop running the table
-const BAL={wdef:.15,spec:4,specK:.4,clGap:9,clK:.03,repFree:.5,repPen:.7,chkBase:4,chkK:.024,chkMax:.3,chkLegs:4,chkSta:5,chkHp:1.2};
+// a stat far above the fighter's own average gives back less accuracy/speed (power keeps its punch, and a power build lands more flash KOs)
+const BAL={flashPow:.025,specPow:0,wdef:.15,spec:4,specK:.4,clGap:9,clK:.03,repFree:.5,repPen:.7,chkBase:5,chkK:.016,chkMax:.3,chkLegs:4,chkSta:5,chkHp:1.2};
 function effA(s,k){const a=s.f.a,o=s.ov!=null?s.ov:(s.ov=ovr(a)),v=a[k],c=o+BAL.spec;return v>c?c+(v-c)*BAL.specK:v;}
 const EX_PER_ROUND=12;
 function roundBegin(F){F.round++;F.A.rpts=0;F.B.rpts=0;F.kd0={A:F.A.kd,B:F.B.kd};F.ex=0;F.rlog=[];
@@ -475,10 +475,10 @@ function fightEx(F){const rng=F.rng,log=[],ex=F.ex,mA=F.mA,mB=F.mB;
       log.push({ha:F.A.hp,hb:F.B.hp,sa:F.A.sta,sb:F.B.sta,s:df===F.A?"A":"B",t:`${df.name} ยกแข้งรับลูกเตะของ${at.name}ไว้ได้ แข้งปะทะแข้ง!`,k:"miss",ev:"miss",w:wpn,cl:clinch,mside:at===F.A?"A":"B",an:at.name,dn:df.name});}
     else if(rng()<hitP){
       const crit=rng()<(at.rage?.35:.07);const q=crit?1.6:.6+rng()*.6;if(at.rage)at.rage--;
-      let dmg=1.35*W_INFO[wpn].imp*q*(.6+effA(at,"power")/25)*(1-d.guard/70)*(1.25-d.dur/40)*(1+(at.sk.dmg[wpn]||0))*(bA&&bA.w===wpn?1+.3*bA.pw:1)*(1+fury*TRV.furyDmg)*(at.libOn?TRV.lib:1)*(at.trait==="rock"?TRV.rockAtk:1)*(df.trait==="rock"?TRV.rockDef:1);const tg=at.tac.target;
+      let dmg=1.35*W_INFO[wpn].imp*q*(.6+(BAL.specPow?effA(at,"power"):a.power)/25)*(1-d.guard/70)*(1.25-d.dur/40)*(1+(at.sk.dmg[wpn]||0))*(bA&&bA.w===wpn?1+.3*bA.pw:1)*(1+fury*TRV.furyDmg)*(at.libOn?TRV.lib:1)*(at.trait==="rock"?TRV.rockAtk:1)*(df.trait==="rock"?TRV.rockDef:1);const tg=at.tac.target;
       if(tg==="head")dmg*=1.1;if(tg==="body"){dmg*=.9;df.sta=clamp(df.sta-dmg*.9,0,100);}if(tg==="legs"&&(wpn==="kick"||wpn==="knee")){dmg*=.85;df.legs=Math.min(60,df.legs+dmg*.8);}
       // v1.32 "flash knockout": a clean crit to the head can drop anyone early — rarer for durable/guarded fighters, likelier when the attacker clearly outclasses
-      if(crit&&tg!=="body"&&(wpn!=="punch"||a.power>=10)&&rng()<clamp(.16+(ovr(a)-ovr(d))*.06-(d.dur-8)*.012,.05,.4)){dmg+=10+rng()*8;at.flash=1;}
+      if(crit&&tg!=="body"&&(wpn!=="punch"||a.power>=10)&&rng()<clamp(.16+(ovr(a)-ovr(d))*.06-(d.dur-8)*.012+Math.max(0,a.power-12)*BAL.flashPow,.05,.45)){dmg+=10+rng()*8;at.flash=1;}
       at.rw[wpn]++;at.rdmg+=dmg;at.rlanded++;
       df.hp-=dmg;at.landed++;at.wl[wpn]++;at.dmgDealt+=dmg;const p=W_INFO[wpn].pts*q*(1+(at.sk.pts[wpn]||0))*(df.trait==="rock"?TRV.rockPts:1);at.pts+=p;at.rpts+=p;
       log.push({ha:F.A.hp,hb:F.B.hp,sa:F.A.sta,sb:F.B.sta,s:at===F.A?"A":"B",t:`${at.name} ${tx}${crit?" — เข้าเต็ม ๆ!":""}`,k:crit?"big":"hit",ev:"hit",w:wpn,cl:clinch,crit,an:at.name,dn:df.name});
@@ -496,7 +496,7 @@ function fightEx(F){const rng=F.rng,log=[],ex=F.ex,mA=F.mA,mB=F.mB;
     } else {
       const ctrP=clamp(d.counter/20*.32+md.ctr-fatD+df.sk.ctr+(df.rage?.2:0)+(bD?.18*bD.pw:0),0,.8)*(df.trait==="eye"?TRV.eyeCtr:1);
       if(rng()<ctrP){const cw=d.kick>d.punch&&!clinch?"kick":"punch";
-        const rc=!!df.rage;if(df.rage)df.rage--;const dmg=1.3*W_INFO[cw].imp*(rc?1.5:.7+rng()*.5)*(.6+effA(df,"power")/25)*(1-a.guard/70)*(1.25-a.dur/40)*(1+df.sk.ctrDmg)*(df.libOn?TRV.lib:1)*(df.trait==="rock"?TRV.rockAtk:1)*(at.trait==="rock"?TRV.rockDef:1);
+        const rc=!!df.rage;if(df.rage)df.rage--;const dmg=1.3*W_INFO[cw].imp*(rc?1.5:.7+rng()*.5)*(.6+(BAL.specPow?effA(df,"power"):d.power)/25)*(1-a.guard/70)*(1.25-a.dur/40)*(1+df.sk.ctrDmg)*(df.libOn?TRV.lib:1)*(df.trait==="rock"?TRV.rockAtk:1)*(at.trait==="rock"?TRV.rockDef:1);
         at.hp-=dmg;df.landed++;df.thrown++;df.wl[cw]++;df.dmgDealt+=dmg;df.rw[cw]++;df.rdmg+=dmg;df.rlanded++;df.rthrown++;const p=W_INFO[cw].pts*.9;df.pts+=p;df.rpts+=p;
         log.push({ha:F.A.hp,hb:F.B.hp,sa:F.A.sta,sb:F.B.sta,s:df===F.A?"A":"B",t:`${at.name} พลาดเป้า — ${df.name} สวนกลับด้วย${cw==="kick"?"ลูกเตะ":"หมัด"}เข้าเต็ม!${rc?" คริติคอล!":""}`,k:rc?"big":"hit",ev:"counter",crit:rc,w:cw,mw:wpn,an:df.name,dn:at.name});
         if(at.hp<=0){F.over=true;F.result={win:df===F.A?"A":"B",type:"KO",round:F.round};log.push({ha:F.A.hp,hb:F.B.hp,sa:F.A.sta,sb:F.B.sta,s:"x",t:`${at.name} ล้มลงไม่ลุก! ชนะน็อก`,k:"big",ev:"ko",an:df.name,dn:at.name,koSide:df===F.A?"A":"B"});}
