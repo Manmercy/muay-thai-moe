@@ -162,6 +162,7 @@ function render(){
   else if(UI.ending)h=endingHTML();
   else h=`<div class="shell">${hubHTML()}</div>`;
   if(G&&UI.petName!=null&&!UI.scene&&!UI.fight){if(UI.modal&&UI.modal.type!=="petname")UI.modalQ=UI.modal;UI.modal={type:"petname",i:UI.petName};UI.petName=null;} /* v1.80: naming comes first, whatever else is waiting */
+  if(G&&!UI.ending&&!UI.modal&&!UI.scene&&!UI.fight&&!UI.montage&&typeof lottoPending==="function"){const L=lottoPending(G);if(L)UI.modal=L;} /* v1.88 lottery */
   if(UI.modal)h+=modalHTML();
   if(G&&UI.montage)h+=montageHTML();
   if(G&&UI.fight)h+=fightHTML();
@@ -294,7 +295,6 @@ function ytInfoHTML(){const k=ytKey(G);if(!k)return "";const T=YEAR_THEMES[k];le
   if(k==="sponsor")st=G.yt.acc?(G.week<=40?`Won ${ytSponsorWins(G)}/8 fights · ฿2,000 every week until week 40`:`This year: ${ytSponsorWins(G)} fights before the deadline`):"You turned the sponsor down this year";
   if(k==="pm25")st=G.fac.airgym?"The filtered gym is built: full training":`Filtered indoor gym ${fmt(FACILITIES.airgym.cost[0])} · see Manage camp`;
   if(k==="flood")st=ytIn(G,"flood")?"The camp is still flooded":G.week<T.from?`The flood should arrive around week ${T.from}`:"The water has gone down";
-  if(k==="lotto")st=G.week>=20?"Uncle Wang already donated ฿30,000":"Uncle Wang is chasing the lottery until week 20";
   return `<h2>${T.ic} ${esc(T.name)}</h2><p class="lead">${esc(T.desc)}</p>${st?`<p class="meta goldt">${esc(st)}</p>`:""}<p class="meta">A new yearly theme is drawn at the start of every year.</p>`;}
 function weekTodo(){const R=roster(G),todo=[];if(R.some(f=>!f.injury&&!trLocked(f)))todo.push("Some training programs aren't confirmed yet");if(!G.campUsed)todo.push("No camp activity chosen yet");
   if(G.offers.length&&!G.bookings.some(b=>G.F[b.a].camp==="player"))todo.push("No fights scheduled yet");return todo;}
@@ -1545,7 +1545,7 @@ const ACT={
     if(n){AU.sfx("level");save();toast(`Up ${(SK_LINES[f.id]||[])[li]||""} ${n} times`);}render();},
   sksel:d=>{UI.skSel=d.id+":"+d.v;AU.sfx("ui");render();},
   newsok:()=>{G.newsSeen=PATCH.id;UI.modal=null;save();render();},
-  closeModal:()=>{const m=UI.modal;if(m&&m.back==="album"&&G){ACT.album();return;}if(m&&m.type==="contest"){ACT.contestdone();return;}if(m&&m.type==="whatsnew"&&G){G.newsSeen=PATCH.id;save();}UI.modal=null;render();if(m&&m.after)m.after();},
+  closeModal:()=>{const m=UI.modal;if(m&&m.type==="lotto"&&typeof ACT.lottoskip==="function"){ACT.lottoskip();return;} /* closing the ticket sheet skips the draw */if(m&&m.back==="album"&&G){ACT.album();return;}if(m&&m.type==="contest"){ACT.contestdone();return;}if(m&&m.type==="whatsnew"&&G){G.newsSeen=PATCH.id;save();}UI.modal=null;render();if(m&&m.after)m.after();},
   trait:d=>{const f=G.F[d.id],L=TRAITS[d.id];if(!f||!L||f.camp!=="player")return;const t=L.find(x=>x.id===d.v);if(!t||traitOf(f)===t.id)return;f.trait=t.id;save();render();toast(`${f.name} now uses the trait "${t.name}"`);},
   gopen:d=>{GB.box=d.v==="loy"?"loy":"n";if(GB.box==="loy"&&!loyFest()){toast("The Loy Krathong machine is closed. See you next festival!");return;}const fromAlb=UI.modal&&UI.modal.type==="album";if(fromAlb)albKeep();GB.st=null;GB.ps=[];UI.gq=false;UI.modal={type:"gbox",back:fromAlb?"album":null};render();gbPreload();},
   gpull:()=>{if(GB.st)return;const cost=gbCost();if((G.dust||0)<cost){AU.sfx("ui");toast(`Not enough stardust. You need ${cost}✦ · earn it by winning fights, getting new cards and breaking down spares`);return;}

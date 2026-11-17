@@ -1184,8 +1184,7 @@ const YEAR_THEMES={
  sponsor:{ic:"💼",name:"Sponsor year",desc:"If you take the deal: ฿2,000 every week until week 40, plus a ฿20,000 bonus if the camp wins 8 fights by week 40."},
  pm25:{ic:"😷",name:"PM2.5 haze year",desc:"Weeks 37–46 haze covers Chiang Mai and training is less effective (conditioning most of all). A filtered indoor gym lets you train fully.",from:37,to:46},
  tourist:{ic:"🧳",name:"Tourist boom year",desc:"Class fees +20% all year, but the camp is busy and fighters get a little more tired each week."},
- tv:{ic:"📺",name:"TV year",desc:"A TV crew follows the camp all year: wins earn more fame, losses cost a little."},
- lotto:{ic:"🎟️",name:"Lottery year",desc:"The old man next door hits the lottery: a donation arrives around week 20."}};
+ tv:{ic:"📺",name:"TV year",desc:"A TV crew follows the camp all year: wins earn more fame, losses cost a little."}};
 const ytKey=G=>G&&G.yt&&G.yt.season===(G.season||1)?G.yt.k:null;
 const ytIn=(G,k)=>{if(ytKey(G)!==k)return false;const T=YEAR_THEMES[k];return T.from==null||(G.week>=T.from&&G.week<=T.to);};
 function pickYearTheme(G){const S=G.season||1;if(S<2)return null;const last=G.yt&&G.yt.k;const keys=Object.keys(YEAR_THEMES).filter(k=>k!==last);
