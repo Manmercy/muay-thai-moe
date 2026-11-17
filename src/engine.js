@@ -719,6 +719,28 @@ function quickFight(fa,fb,seed,rounds,tacA){const F=newFight(fa,fb,{seed,rounds}
 const TIER={local:{name:"ระดับตำบล",win:4000,lose:2000,rep:1.5},district:{name:"ระดับอำเภอ",win:9000,lose:4500,rep:3},
   semi:{name:"รองชิงจังหวัด",win:18000,lose:8000,rep:4},final:{name:"ชิงแชมป์จังหวัด",win:50000,lose:20000,rep:8},exhibition:{name:"ไฟต์งานวัด",win:2500,lose:1500,rep:.5},pro:{name:"มวยงานวัดคืนแรก",win:1500,lose:1000,rep:.5,off:1},evloy:{name:"ศึกริมน้ำคืนลอยกระทง",win:0,lose:0,rep:.3,off:1},special:{name:"ศึกพิเศษข้ามรุ่น",win:8000,lose:4000,rep:2},
   quest:{name:"ไฟต์นอกตาราง",win:0,lose:0,rep:.4,off:1},dm:{name:"ศึก Death Match",win:0,lose:0,rep:.5,off:1},beast:{name:"ศึกพิสดาร",win:7000,lose:2500,rep:1,off:1},lab:{name:"ศึกท้าค่ายเวกเตอร์",win:18000,lose:8000,rep:3}};
+// v1.90 (hidden): ศึกชิงเจ้าสี่ภาค — the regional chapter lives in region.js (+ road.js) and loads only once the chapter opens.
+// Off for players until the whole chapter ships; #regiondev turns it on for testing on this device.
+const REGION_LIVE=false;
+TIER.region={name:"ศึกชิงเจ้าสี่ภาค",win:12000,lose:5000,rep:2.5,off:1};
+function regionOn(){if(REGION_LIVE)return true;try{if(typeof location!=="undefined"&&/regiondev/.test(location.hash||""))localStorage.setItem("mtm_regiondev","1");return localStorage.getItem("mtm_regiondev")==="1";}catch(e){return false;}}
+const regionReady=G=>(G.season||1)>=6&&(G.honors||[]).filter(h=>h.kind==="province").length>=3; /* year 5 is over + three provincial titles */
+const regionBlock=(G,wk)=>!!(G.region&&G.region.trip&&G.region.trip.season===(G.season||1)&&G.region.trip.wk===wk); /* the whole camp is on the road that week */
+let REGION_P=null;
+function regionLoad(){if(typeof REGION!=="undefined")return Promise.resolve(REGION);if(REGION_P)return REGION_P;
+  if(typeof window==="undefined"||!window.MTM_JS)return Promise.reject(new Error("no loader"));
+  REGION_P=window.MTM_JS((window.LANG==="en"?"region-en.js":"region.js")+"?v="+(window.MTM_BUILD||"")).then(()=>{if(typeof REGION==="undefined")throw new Error("region.js did not run");return REGION;},e=>{REGION_P=null;throw e;});return REGION_P;}
+function regionStart(G){if(G.region)return;const now=gameWeek(G),R=["north","isan","central","south"];
+  G.region={edition:1,startAbs:now,belts:Object.fromEntries(R.map(r=>[r,{}])),trip:null,nextTripAbs:now+1,
+    champ:Object.fromEntries(R.map(r=>[r,{state:"locked",fid:null,w:0,l:0}])),cups:[],meet:{},hall:[],pend:[],gc:[]};
+  addMail(G,{kind:"letter",from:"นาคาเอเนอร์จี้ดริงค์",title:"จดหมายเชิญ: ศึกชิงเจ้าสี่ภาค",
+    body:`เรียน ผู้จัดการค่ายศิริชัย\n\nด้วยผลงานแชมป์จังหวัดถึงสามสมัย นาคาเอเนอร์จี้ดริงค์ขอเชิญค่ายของท่านร่วม "ศึกชิงเจ้าสี่ภาค" ทัวร์นาเมนต์ระดับภาคครั้งแรกของประเทศ\n\nเก็บเข็มขัดจังหวัดให้ครบสี่จังหวัดในแต่ละภาค แล้วท้าชิงถ้วยกับแชมป์ประจำภาค เหนือ อีสาน กลาง ใต้\n\nเปิดดูรายละเอียดและวางแผนการเดินทางได้ที่หน้าไฟต์ › ศึกชิงเจ้าสี่ภาค\n\nด้วยความนับถือ\nเกริก ประธานนาคาเอเนอร์จี้ดริงค์`});}
+/* weekly: send the invitation once the camp qualifies, tidy finished trips */
+function regionWeek(G){if(!regionOn())return;if(!G.region){if(regionReady(G))regionStart(G);return;}
+  if(typeof REGION!=="undefined"&&REGION.weekly)REGION.weekly(G);}
+/* a regional bout just ended: queue it for region.js (it may still be loading) */
+function regionAfterFight(G,b,ret){if(!G.region)return;G.region.pend=G.region.pend||[];G.region.pend.push({bid:b.id,a:b.a,b:b.b,region:b.region,res:ret?ret.res:null});
+  if(typeof REGION!=="undefined"&&REGION.flush)REGION.flush(G);}
 function stageOf(w){return w<=20?"local":w<=40?"district":w<=50?"final":"off";}
 const STAGE_NAME={local:"รอบตำบล",district:"รอบอำเภอ",final:"ชิงแชมป์จังหวัด",off:"ปิดปี"};
 
@@ -1094,9 +1116,11 @@ function genOffers(G,opt){
       if(G.week>=8&&X&&X.camp!=="player"&&!X.injury&&!isBooked(G,X.id,wk)&&rng()<.35){o=X;cross=true;}
       else{const pool=Object.values(G.F).filter(x=>x.div===f.div&&x.camp!=="player"&&!x.canon&&!x.injury&&!isBooked(G,x.id,wk)).map(x=>[x,Math.abs(ovr(x.a)-ovr(f.a)-.1)]).sort((a,b)=>a[1]-b[1]).slice(0,4);if(pool.length)o=pool[Math.floor(rng()*pool.length)][0];}
       if(o){const m=(1+Math.min(G.rep,50)/80)*(cross?1.6:1);G.offers.push({id:`o${G.week}_${f.id}_fair`,a:f.id,b:o.id,week:wk,tier:"exhibition",fair:1,cross:cross?1:0,win:Math.round(TIER.exhibition.win*m/100)*100,lose:Math.round(TIER.exhibition.lose*m/100)*100});}}}}
+  if(G.region&&G.region.trip)G.offers=G.offers.filter(o=>!regionBlock(G,o.week)); /* v1.90: no home bouts while the camp is away */
 }
 function acceptOffer(G,oid){const o=G.offers.find(x=>x.id===oid);
   if(!o)return {ok:false,reason:"ข้อเสนอนี้ไม่มีแล้ว"};
+  if(regionBlock(G,o.week))return {ok:false,reason:"สัปดาห์นี้ทั้งค่ายเดินทางไปศึกชิงเจ้าสี่ภาค"};
   if(o.status==="conflict")return {ok:false,reason:o.reason};
   const clash=(G.bookings||[]).find(b=>b.week===o.week&&[o.a,o.b].some(id=>id===b.a||id===b.b));
   const duplicate=(G.bookings||[]).some(b=>b.id==="b"+oid);
@@ -1162,6 +1186,7 @@ function applyResult(G,F,booking){
       ret={pay,res,upset};
     }
   }
+  if(booking.region)regionAfterFight(G,booking,ret);
   return ret;
 }
 // v1.82.3: Kru Daeng's notebook — what we saw of an opponent last time; after a meeting they may go away and add a new weapon

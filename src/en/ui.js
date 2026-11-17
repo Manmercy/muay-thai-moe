@@ -161,6 +161,7 @@ function prefetchArt(){if(PREF||!G)return;PREF=true;const c=navigator.connection
   (window.requestIdleCallback||((f)=>setTimeout(f,300)))(next);}
 function render(){
   try{if(typeof G!=="undefined"&&G&&!G.ended)autoPlans();}catch(e){}
+  try{if(typeof G!=="undefined"&&G&&G.region&&typeof REGION==="undefined"&&regionOn())regionLoad().then(R=>{if(R.flush&&G)R.flush(G);render();}).catch(()=>{});}catch(e){}
   document.documentElement.classList.toggle("vnopen",!!(UI&&(UI.scene||UI.fight)));
   let h="";
   if(UI.loadScr){$app.innerHTML=loadScrHTML();return;}
@@ -532,7 +533,11 @@ function fplanHTML(bid){const b=G.bookings.find(x=>x.id===bid);if(!b)return "";c
    <div class="mfoot"><button class="btn ghost" data-act="closeModal">Cancel</button><button class="btn primary" data-act="fpok" data-id="${b.id}">Confirm plan</button></div>`;}
 function fightsHTML(){
   const sub=UI.fsub;
-  return `<div class="seg subtabs"><button data-act="fsub" data-v="offers" aria-pressed="${sub==="offers"}">Offers & schedule</button><button data-act="fsub" data-v="rank" aria-pressed="${sub==="rank"}">Rankings</button></div>`+(sub==="rank"?rankHTML():offersHTML());}
+  const rg=regionOn()&&(!!G.region||REGION_LIVE===false); /* v1.90 (hidden): the regional chapter tab — players see it once the letter came; testers (#regiondev) always */
+  return `<div class="seg subtabs"><button data-act="fsub" data-v="offers" aria-pressed="${sub==="offers"}">Offers & schedule</button><button data-act="fsub" data-v="rank" aria-pressed="${sub==="rank"}">Rankings</button>${rg?`<button data-act="fsub" data-v="region" aria-pressed="${sub==="region"}">Four Regions</button>`:""}</div>`+(sub==="rank"?rankHTML():sub==="region"&&rg?regionTabHTML():offersHTML());}
+function regionTabHTML(){if(typeof REGION!=="undefined")return REGION.html();
+  regionLoad().then(()=>render()).catch(()=>{UI.rgErr=1;render();});
+  return `<section class="px card"><p class="meta center">${UI.rgErr?"Couldn't load the Four Regions Championship. Try opening this page again.":"Loading the Four Regions Championship…"}</p></section>`;}
 // v1.7 scouting: watch tape to see the opponent's tendencies (free when Rin is in the camp)
 // v1.21: tape is always a deliberate step again — Rin (or the analyst) just makes it free
 const SCOUT_COST=400;const rinIn=()=>G.F.rin.camp==="player";const RIN_GAP=3;const rinFree=()=>rinIn()&&!(G.rinTapeAbs!=null&&gameWeek(G)>=G.rinTapeAbs&&gameWeek(G)-G.rinTapeAbs<RIN_GAP); // v1.38: Rin studies one tape for free every 3 weeks

@@ -111,7 +111,7 @@ const LOAN_MAIL=[
  ["ลูกน้องหมวกทอง","ฝากถึงผู้จัดการค่ายศิริชัย","ซองสีน้ำตาลมีคราบน้ำมันเครื่อง \"รู้นะว่าค่าไฟเดือนนี้ยังไม่จ่าย เรามีเงินสองหมื่น ไม่ต้องค้ำ ไม่ถามเยอะ ถามแค่ว่าจะคืนเมื่อไหร่\""],
  ["ลูกน้องหมวกทอง","คูปองเงินกู้ (ตัดเก็บไว้)","กระดาษตัดเป็นรูปคูปอง ขอบหยัก ๆ เหมือนตัดด้วยกรรไกรตัดเล็บ \"แลกเงินสด ฿20,000 ได้ทันที ไม่มีวันหมดอายุ แต่ดอกมีวันขึ้น\""]];
 const LOAN_COACH=["อย่าเพิ่ง ลองดูจดหมายงานจ้างกับไฟต์งานวัดก่อน","ปู่ชัยก็เคยได้นามบัตรใบนี้ ใบเดียวกันเป๊ะ","ถ้าจำเป็นจริง ๆ ก็กู้ แต่รีบคืน ดอกมันโตเร็วกว่ากะทิอีก","ครูเก็บไว้ให้ดู ไม่ได้บอกให้โทรนะ","อ่านตัวเล็ก ๆ ตรงดอกจันด้วย"];
-function mailWeekly(G){G.mail=G.mail||[];G.gang=G.gang||{st:0,next:0};G.mailSeen=G.mailSeen||{};const rng=mulberry32(G.seed+G.week*4441);
+function mailWeekly(G){G.mail=G.mail||[];if(typeof regionWeek==="function")regionWeek(G);G.gang=G.gang||{st:0,next:0};G.mailSeen=G.mailSeen||{};const rng=mulberry32(G.seed+G.week*4441);
   if(typeof lottoWeekly==="function")lottoWeekly(G);
   for(const m of G.mail)if(m.expAbs!=null&&gameWeek(G)>m.expAbs&&!m.done)m.expired=true;
   // v1.88: every time cash dips low, the helmet gang slips a gold card into the mailbox

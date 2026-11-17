@@ -12,6 +12,8 @@ function rev(){if(!D)return {};if(!R){var d=D,c={};R={};for(var k in d){var v=d[
 function addJs(u){return new Promise(function(ok,no){var el=document.createElement("script");el.src=u;el.async=false;el.onload=ok;el.onerror=function(){el.remove();no(new Error("load "+u));};document.body.appendChild(el);});}
 function loadDict(){if(DP)return DP;DP=addJs("i18n.js?v="+B).then(function(){D=window.__MTM_DICT||{};R=null;return D;},function(e){DP=null;throw e;});return DP;}
 window.MTM_DICT=loadDict;
+/* v1.90: chapters that ship as their own file (region.js) load through the same plain <script src> */
+window.MTM_JS=addJs;window.MTM_BUILD=B;
 function tr(s,m,split){if(Object.prototype.hasOwnProperty.call(m,s))return m[s];
   if(split&&s.indexOf(" ")>0){var p=s.split(" ");for(var i=0;i<p.length;i++)if(!Object.prototype.hasOwnProperty.call(m,p[i]))return s;return p.map(function(x){return m[x];}).join(" ");}return s;}
 function walk(o,m,split,depth){if(depth>12||!o||typeof o!=="object")return o;

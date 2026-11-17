@@ -720,6 +720,37 @@ function quickFight(fa,fb,seed,rounds,tacA){const F=newFight(fa,fb,{seed,rounds}
 const TIER={local:{name:"Subdistrict",win:4000,lose:2000,rep:1.5},district:{name:"District",win:9000,lose:4500,rep:3},
   semi:{name:"Provincial semi",win:18000,lose:8000,rep:4},final:{name:"Provincial final",win:50000,lose:20000,rep:8},exhibition:{name:"Temple fair fight",win:2500,lose:1500,rep:.5},pro:{name:"Opening-night temple fair bout",win:1500,lose:1000,rep:.5,off:1},evloy:{name:"Loy Krathong Riverside Brawl",win:0,lose:0,rep:.3,off:1},special:{name:"Special cross-division bout",win:8000,lose:4000,rep:2},
   quest:{name:"Off-the-books fight",win:0,lose:0,rep:.4,off:1},dm:{name:"Death Match",win:0,lose:0,rep:.5,off:1},beast:{name:"Wild bout",win:7000,lose:2500,rep:1,off:1},lab:{name:"Vector Gym Challenge",win:18000,lose:8000,rep:3}};
+// v1.90 (hidden): ศึกชิงเจ้าสี่ภาค — the regional chapter lives in region.js (+ road.js) and loads only once the chapter opens.
+// Off for players until the whole chapter ships; #regiondev turns it on for testing on this device.
+const REGION_LIVE=false;
+TIER.region={name:"Four Regions Championship",win:12000,lose:5000,rep:2.5,off:1};
+function regionOn(){if(REGION_LIVE)return true;try{if(typeof location!=="undefined"&&/regiondev/.test(location.hash||""))localStorage.setItem("mtm_regiondev","1");return localStorage.getItem("mtm_regiondev")==="1";}catch(e){return false;}}
+const regionReady=G=>(G.season||1)>=6&&(G.honors||[]).filter(h=>h.kind==="province").length>=3; /* year 5 is over + three provincial titles */
+const regionBlock=(G,wk)=>!!(G.region&&G.region.trip&&G.region.trip.season===(G.season||1)&&G.region.trip.wk===wk); /* the whole camp is on the road that week */
+let REGION_P=null;
+function regionLoad(){if(typeof REGION!=="undefined")return Promise.resolve(REGION);if(REGION_P)return REGION_P;
+  if(typeof window==="undefined"||!window.MTM_JS)return Promise.reject(new Error("no loader"));
+  REGION_P=window.MTM_JS((window.LANG==="en"?"region-en.js":"region.js")+"?v="+(window.MTM_BUILD||"")).then(()=>{if(typeof REGION==="undefined")throw new Error("region.js did not run");return REGION;},e=>{REGION_P=null;throw e;});return REGION_P;}
+function regionStart(G){if(G.region)return;const now=gameWeek(G),R=["north","isan","central","south"];
+  G.region={edition:1,startAbs:now,belts:Object.fromEntries(R.map(r=>[r,{}])),trip:null,nextTripAbs:now+1,
+    champ:Object.fromEntries(R.map(r=>[r,{state:"locked",fid:null,w:0,l:0}])),cups:[],meet:{},hall:[],pend:[],gc:[]};
+  addMail(G,{kind:"letter",from:"NAGA Energy Drink",title:"Invitation: Four Regions Championship",
+    body:`Dear Manager of Sirichai Camp,
+
+With three provincial titles to your name, NAGA Energy Drink invites your camp to the "Four Regions Championship", the country's first regional tournament.
+
+Win the belts of all four provinces in each region, then challenge the regional champion of the North, Isan, the Central Plains and the South for the cup.
+
+See the details and plan your trips under Fights › Four Regions.
+
+Respectfully,
+Kerk, Chairman of NAGA Energy Drink`});}
+/* weekly: send the invitation once the camp qualifies, tidy finished trips */
+function regionWeek(G){if(!regionOn())return;if(!G.region){if(regionReady(G))regionStart(G);return;}
+  if(typeof REGION!=="undefined"&&REGION.weekly)REGION.weekly(G);}
+/* a regional bout just ended: queue it for region.js (it may still be loading) */
+function regionAfterFight(G,b,ret){if(!G.region)return;G.region.pend=G.region.pend||[];G.region.pend.push({bid:b.id,a:b.a,b:b.b,region:b.region,res:ret?ret.res:null});
+  if(typeof REGION!=="undefined"&&REGION.flush)REGION.flush(G);}
 function stageOf(w){return w<=20?"local":w<=40?"district":w<=50?"final":"off";}
 const STAGE_NAME={local:"Subdistrict round",district:"District round",final:"Provincial final",off:"Year end"};
 
@@ -1095,9 +1126,11 @@ function genOffers(G,opt){
       if(G.week>=8&&X&&X.camp!=="player"&&!X.injury&&!isBooked(G,X.id,wk)&&rng()<.35){o=X;cross=true;}
       else{const pool=Object.values(G.F).filter(x=>x.div===f.div&&x.camp!=="player"&&!x.canon&&!x.injury&&!isBooked(G,x.id,wk)).map(x=>[x,Math.abs(ovr(x.a)-ovr(f.a)-.1)]).sort((a,b)=>a[1]-b[1]).slice(0,4);if(pool.length)o=pool[Math.floor(rng()*pool.length)][0];}
       if(o){const m=(1+Math.min(G.rep,50)/80)*(cross?1.6:1);G.offers.push({id:`o${G.week}_${f.id}_fair`,a:f.id,b:o.id,week:wk,tier:"exhibition",fair:1,cross:cross?1:0,win:Math.round(TIER.exhibition.win*m/100)*100,lose:Math.round(TIER.exhibition.lose*m/100)*100});}}}}
+  if(G.region&&G.region.trip)G.offers=G.offers.filter(o=>!regionBlock(G,o.week)); /* v1.90: no home bouts while the camp is away */
 }
 function acceptOffer(G,oid){const o=G.offers.find(x=>x.id===oid);
   if(!o)return {ok:false,reason:"This offer is no longer available"};
+  if(regionBlock(G,o.week))return {ok:false,reason:"The whole camp is away at the Four Regions Championship this week"};
   if(o.status==="conflict")return {ok:false,reason:o.reason};
   const clash=(G.bookings||[]).find(b=>b.week===o.week&&[o.a,o.b].some(id=>id===b.a||id===b.b));
   const duplicate=(G.bookings||[]).some(b=>b.id==="b"+oid);
@@ -1163,6 +1196,7 @@ function applyResult(G,F,booking){
       ret={pay,res,upset};
     }
   }
+  if(booking.region)regionAfterFight(G,booking,ret);
   return ret;
 }
 // v1.82.3: Kru Daeng's notebook — what we saw of an opponent last time; after a meeting they may go away and add a new weapon
@@ -5260,6 +5294,7 @@ function prefetchArt(){if(PREF||!G)return;PREF=true;const c=navigator.connection
   (window.requestIdleCallback||((f)=>setTimeout(f,300)))(next);}
 function render(){
   try{if(typeof G!=="undefined"&&G&&!G.ended)autoPlans();}catch(e){}
+  try{if(typeof G!=="undefined"&&G&&G.region&&typeof REGION==="undefined"&&regionOn())regionLoad().then(R=>{if(R.flush&&G)R.flush(G);render();}).catch(()=>{});}catch(e){}
   document.documentElement.classList.toggle("vnopen",!!(UI&&(UI.scene||UI.fight)));
   let h="";
   if(UI.loadScr){$app.innerHTML=loadScrHTML();return;}
@@ -5631,7 +5666,11 @@ function fplanHTML(bid){const b=G.bookings.find(x=>x.id===bid);if(!b)return "";c
    <div class="mfoot"><button class="btn ghost" data-act="closeModal">Cancel</button><button class="btn primary" data-act="fpok" data-id="${b.id}">Confirm plan</button></div>`;}
 function fightsHTML(){
   const sub=UI.fsub;
-  return `<div class="seg subtabs"><button data-act="fsub" data-v="offers" aria-pressed="${sub==="offers"}">Offers & schedule</button><button data-act="fsub" data-v="rank" aria-pressed="${sub==="rank"}">Rankings</button></div>`+(sub==="rank"?rankHTML():offersHTML());}
+  const rg=regionOn()&&(!!G.region||REGION_LIVE===false); /* v1.90 (hidden): the regional chapter tab — players see it once the letter came; testers (#regiondev) always */
+  return `<div class="seg subtabs"><button data-act="fsub" data-v="offers" aria-pressed="${sub==="offers"}">Offers & schedule</button><button data-act="fsub" data-v="rank" aria-pressed="${sub==="rank"}">Rankings</button>${rg?`<button data-act="fsub" data-v="region" aria-pressed="${sub==="region"}">Four Regions</button>`:""}</div>`+(sub==="rank"?rankHTML():sub==="region"&&rg?regionTabHTML():offersHTML());}
+function regionTabHTML(){if(typeof REGION!=="undefined")return REGION.html();
+  regionLoad().then(()=>render()).catch(()=>{UI.rgErr=1;render();});
+  return `<section class="px card"><p class="meta center">${UI.rgErr?"Couldn't load the Four Regions Championship. Try opening this page again.":"Loading the Four Regions Championship…"}</p></section>`;}
 // v1.7 scouting: watch tape to see the opponent's tendencies (free when Rin is in the camp)
 // v1.21: tape is always a deliberate step again — Rin (or the analyst) just makes it free
 const SCOUT_COST=400;const rinIn=()=>G.F.rin.camp==="player";const RIN_GAP=3;const rinFree=()=>rinIn()&&!(G.rinTapeAbs!=null&&gameWeek(G)>=G.rinTapeAbs&&gameWeek(G)-G.rinTapeAbs<RIN_GAP); // v1.38: Rin studies one tape for free every 3 weeks
@@ -6994,7 +7033,7 @@ const LOAN_MAIL=[
  ["Gold Helmet's goon","For the manager of Sirichai Camp","A brown envelope with engine-oil stains. \"We know the power bill isn't paid this month. We've got twenty thousand. No guarantor, no questions. Just one: when do you pay it back?\""],
  ["Gold Helmet's goon","Loan coupon (cut and keep)","Paper cut into a coupon, the edges jagged like it was done with nail clippers. \"Redeem for ฿20,000 cash, instantly. Never expires. The interest, however, goes up.\""]];
 const LOAN_COACH=["Not yet. Check the job letters and temple-fair fights first.","Grandpa Chai got this exact same card once.","If you really must, borrow. But pay it back fast. The interest grows faster than Kati did.","I kept it so you could see it. Not so you'd call.","Read the small print by the asterisk."];
-function mailWeekly(G){G.mail=G.mail||[];G.gang=G.gang||{st:0,next:0};G.mailSeen=G.mailSeen||{};const rng=mulberry32(G.seed+G.week*4441);
+function mailWeekly(G){G.mail=G.mail||[];if(typeof regionWeek==="function")regionWeek(G);G.gang=G.gang||{st:0,next:0};G.mailSeen=G.mailSeen||{};const rng=mulberry32(G.seed+G.week*4441);
   if(typeof lottoWeekly==="function")lottoWeekly(G);
   for(const m of G.mail)if(m.expAbs!=null&&gameWeek(G)>m.expAbs&&!m.done)m.expired=true;
   // v1.88: every time cash dips low, the helmet gang slips a gold card into the mailbox
