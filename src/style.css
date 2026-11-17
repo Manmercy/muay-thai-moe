@@ -1869,3 +1869,9 @@ body.hasnews main>h1.sr+.homegrid,body.hasnews main>h1.sr+.rinnote{margin-top:46
 .oiltrack .oilend.r{width:40px;right:6px;top:8px;bottom:8px;display:grid;place-items:center;background:rgba(74,168,255,.12)}.oiltrack .oilend .pxi{width:24px;height:24px}
 .carebtns.one{grid-template-columns:1fr}.carebtns .oilrub{min-height:72px;touch-action:manipulation;user-select:none;-webkit-user-select:none}
 .carebtns .oilrub .pxi{width:36px;height:36px}.carebtns .oilrub.go{box-shadow:inset 0 0 0 2px var(--gold)}.carebtns .oilrub.go:active{transform:scale(.96)}
+
+/* v1.88 keep-programme tick: quiet, below the choices */
+.autotr{display:flex;gap:10px;align-items:flex-start;margin:14px 0 4px;padding:10px 4px 0;border-top:1px dashed rgba(255,255,255,.12);cursor:pointer;color:var(--mut,#b9b0cc);font-size:13px}
+.autotr input{width:20px;height:20px;margin:1px 0 0;flex:none;accent-color:var(--gold,#f2c94c)}
+.autotr span{display:flex;flex-direction:column;gap:2px}.autotr small{font-size:11.5px;opacity:.8;line-height:1.35}
+.tc-ok.auto{color:#cfc6e6;background:rgba(160,140,220,.10);box-shadow:inset 0 0 0 2px rgba(160,140,220,.45);font-weight:600}
