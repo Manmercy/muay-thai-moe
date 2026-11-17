@@ -1511,6 +1511,8 @@ button.goal.ov.mini{right:auto;padding:3px 10px;opacity:.85}
 .mail .btn.sm[aria-pressed="true"],.btn.sm[aria-pressed="true"]{box-shadow:inset 0 0 0 2px var(--gold)}
 
 .mk.event{background:#c8283c;color:#fff}
+.mk.loan{background:#1a1a1a;color:#f2c94c}
+.mk.lotto{background:#7a4fb3;color:#fff}
 /* v1.81.1: camp subtabs fit one row (5 tabs) + decoration tiles with live preview */
 .csubs{flex-wrap:nowrap;gap:4px;overflow-x:auto;scrollbar-width:none}.csubs::-webkit-scrollbar{display:none}
 .csubs button{flex:1 0 auto;padding:8px 10px;font-size:13px;white-space:nowrap}

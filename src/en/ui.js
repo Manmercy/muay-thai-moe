@@ -1,5 +1,5 @@
 // ================= MUAY THAI MOE v1.3 — UI =================
-const VERSION="1.87.7";
+const VERSION="1.87.8";
 const CUR_LANG=(typeof window!=="undefined"&&window.LANG)||"th";
 const TH_LABEL=String.fromCharCode(3652,3607,3618);
 function langSwitch(cls){return `<div class="langsw ${cls||""}" role="group" aria-label="Language">${[["th",TH_LABEL],["en","EN"]].map(([k,l])=>`<button class="lsb ${CUR_LANG===k?"on":""}" data-act="setlang" data-v="${k}" aria-pressed="${CUR_LANG===k}">${l}</button>`).join("")}</div>`;}
@@ -1581,7 +1581,7 @@ const ACT={
   gofac:()=>{UI.modal=null;UI.csub="fac";ACT.tab({v:"camp"});},
   camplv:()=>{UI.modal={type:"camplv"};render();},
   loan:()=>{if(!loanOk(G)){toast(G.loan>0?"You still have a loan outstanding":"Not desperate enough to borrow yet");return;}UI.modal={type:"loan"};render();},
-  loanyes:()=>{if(!takeLoan(G))return;UI.modal=null;save();AU.sfx("coin");playScene([{n:"npc",who:"Gold Helmet's goon",t:"Thanks for your business, boss. Interest goes up every four weeks. We'll drop by the market to visit often"},{n:"coach",t:"…Fine. You've got the money, now find a way to pay it back fast before it snowballs"}],()=>render(),{bg:"food",look:"casual"});},
+  loanyes:()=>{if(!takeLoan(G))return;for(const m of G.mail||[])if(m.kind==="loan"&&!m.done){m.done=true;m.took=true;}UI.modal=null;save();AU.sfx("coin");playScene([{n:"npc",who:"Gold Helmet's goon",t:"Thanks for your business, boss. Interest goes up every four weeks. We'll drop by the market to visit often"},{n:"coach",t:"…Fine. You've got the money, now find a way to pay it back fast before it snowballs"}],()=>render(),{bg:"food",look:"casual"});},
   repayloan:()=>{if(repayLoan(G)){save();AU.sfx("level");toast("Gold Helmet loan fully repaid. You can breathe again");render();}},
   advice:d=>{UI.modal={type:"advice",id:d.id};render();},
   mastersOpen:()=>{UI.modal={type:"masters"};render();},

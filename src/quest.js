@@ -104,8 +104,20 @@ const TAM_MAIL=[["ร้านคนแน่น มาช่วยหน่อ�
  ["รถทัวร์ลงร้านป้า!","นักท่องเที่ยวลงรถทัวร์มาสามคันรวด สั่งส้มตำไทยไม่เผ็ดกันทั้งคัน ป้าแขนจะหลุดแล้ว มาช่วยหน่อยเถอะ"],
  ["ลูกจ้างป้าลาป่วย","น้องที่ช่วยป้าตำไข้ขึ้น ร้านยังต้องเปิด ใครว่างแวะมาช่วยครึ่งวัน ป้าให้ค่าแรงงาม ๆ เลย"],
  ["ส้มตำปูปลาร้าเมนูใหม่","ป้าคิดเมนูใหม่ได้ อยากให้นักมวยค่ายศิริชัยมาช่วยตำเปิดตัว คนดูเยอะ ได้โปรโมทค่ายไปด้วยนะ"]];
+const LOAN_MAIL=[
+ ["ลูกน้องหมวกทอง","เงินด่วน ไม่ต้องค้ำ ไม่ต้องรอ","นามบัตรสีทองเสียบมาในตู้จดหมาย \"ค่ายมวยเงินช็อต? หมวกทองช่วยได้! ยืม ฿20,000 วันนี้ ดอกแค่ 10% ทุกสี่อาทิตย์ โทรเลย\""],
+ ["ลูกน้องหมวกทอง","ได้ข่าวว่าช่วงนี้เงินตึงมือ","ใบปลิวพับสี่เขียนลายมือหวัด ๆ \"เห็นค่ายเงียบ ๆ ไปนะเฮีย เงินสดสองหมื่นรออยู่ เรื่องดอกไว้ค่อยคุย ค่อยคุยจริง ๆ\""],
+ ["เสี่ยหมวกทองคำ (ฝ่ายการตลาด)","โปรโมชันพิเศษสำหรับค่ายมวย","แผ่นพับมันวาวพิมพ์สี่สี รูปเสี่ยยิ้มชูนิ้วโป้ง \"สมาชิกใหม่ กู้ง่าย คืนเมื่อไหร่ก็ได้* (*ดอกขึ้นทุกสี่อาทิตย์)\""],
+ ["ลูกน้องหมวกทอง","ฝากถึงผู้จัดการค่ายศิริชัย","ซองสีน้ำตาลมีคราบน้ำมันเครื่อง \"รู้นะว่าค่าไฟเดือนนี้ยังไม่จ่าย เรามีเงินสองหมื่น ไม่ต้องค้ำ ไม่ถามเยอะ ถามแค่ว่าจะคืนเมื่อไหร่\""],
+ ["ลูกน้องหมวกทอง","คูปองเงินกู้ (ตัดเก็บไว้)","กระดาษตัดเป็นรูปคูปอง ขอบหยัก ๆ เหมือนตัดด้วยกรรไกรตัดเล็บ \"แลกเงินสด ฿20,000 ได้ทันที ไม่มีวันหมดอายุ แต่ดอกมีวันขึ้น\""]];
+const LOAN_COACH=["อย่าเพิ่ง ลองดูจดหมายงานจ้างกับไฟต์งานวัดก่อน","ปู่ชัยก็เคยได้นามบัตรใบนี้ ใบเดียวกันเป๊ะ","ถ้าจำเป็นจริง ๆ ก็กู้ แต่รีบคืน ดอกมันโตเร็วกว่ากะทิอีก","ครูเก็บไว้ให้ดู ไม่ได้บอกให้โทรนะ","อ่านตัวเล็ก ๆ ตรงดอกจันด้วย"];
 function mailWeekly(G){G.mail=G.mail||[];G.gang=G.gang||{st:0,next:0};G.mailSeen=G.mailSeen||{};const rng=mulberry32(G.seed+G.week*4441);
   for(const m of G.mail)if(m.expAbs!=null&&gameWeek(G)>m.expAbs&&!m.done)m.expired=true;
+  // v1.88: every time cash dips low, the helmet gang slips a gold card into the mailbox
+  if(typeof loanOk==="function"){const low=loanOk(G);
+    if(low&&!G.loanMailArm){G.loanMailArm=1;const n=G.loanMailN=(G.loanMailN||0)+1,L=LOAN_MAIL[(n-1)%LOAN_MAIL.length],C=LOAN_COACH[(n-1)%LOAN_COACH.length];
+      addMail(G,{kind:"loan",from:L[0],title:L[1],body:`${L[2]} (หลังซองมีลายมือครูแดงเขียนไว้: "${C}")`});}
+    else if(!low&&(G.loan>0||G.cash>=LOAN_LOW+4000))G.loanMailArm=0;}
   for(const M of STORY_MAIL)if(!G.mailSeen[M.id]&&M.when(G)){G.mailSeen[M.id]=1;addMail(G,{kind:"letter",from:M.from,title:M.title,body:M.body});}
   for(const M of SPONSOR_MAIL)if(!G.mailSeen[M.id]&&M.when(G)){G.mailSeen[M.id]=1;addMail(G,{kind:"take",from:M.from,title:M.title,body:M.body,amt:M.amt});}
   // gang: after the first market fight, the next tier writes in every few weeks
@@ -202,13 +214,14 @@ function questExtra(done,rng){if(!G||G.ended)return false;G.gang=G.gang||{st:0,n
 
 // ---------- modals ----------
 function mailListHTML(){const L=G.mail||[];
-  return `<h2 class="mailh">${MAILBOX_PX}ตู้จดหมาย</h2>${L.length?`<div class="mlist2">${L.map(m=>`<button class="mrow2 ${m.read?"":"unread"} ${mailOpen(m)?"act":""} ${m.done||m.expired?"old":""}" data-act="mopen" data-v="${m.id}"><span class="mk ${m.kind}">${{letter:"จดหมาย",take:"เงินเข้า",pay:"ใบแจ้งหนี้",quiz:"ตอบคำถาม",quest:"ขอความช่วยเหลือ",job:"งานจ้าง",event:"อีเวนต์"}[m.kind]}</span><span class="mt"><b>${esc(m.title)}</b><small>${esc(m.from)} · สด.${m.wk}${m.expired?" · หมดเวลา":m.done?" · จัดการแล้ว":m.expAbs!=null?` · ภายใน สด.${((m.expAbs-1)%52)+1}`:""}</small></span>${mailOpen(m)?'<i class="dot"></i>':""}</button>`).join("")}</div>`:`<p class="lead">ยังไม่มีจดหมาย</p>`}`;}
+  return `<h2 class="mailh">${MAILBOX_PX}ตู้จดหมาย</h2>${L.length?`<div class="mlist2">${L.map(m=>`<button class="mrow2 ${m.read?"":"unread"} ${mailOpen(m)?"act":""} ${m.done||m.expired?"old":""}" data-act="mopen" data-v="${m.id}"><span class="mk ${m.kind}">${{letter:"จดหมาย",take:"เงินเข้า",pay:"ใบแจ้งหนี้",quiz:"ตอบคำถาม",quest:"ขอความช่วยเหลือ",job:"งานจ้าง",event:"อีเวนต์",loan:"เงินกู้"}[m.kind]}</span><span class="mt"><b>${esc(m.title)}</b><small>${esc(m.from)} · สด.${m.wk}${m.expired?" · หมดเวลา":m.done?" · จัดการแล้ว":m.expAbs!=null?` · ภายใน สด.${((m.expAbs-1)%52)+1}`:""}</small></span>${mailOpen(m)?'<i class="dot"></i>':""}</button>`).join("")}</div>`:`<p class="lead">ยังไม่มีจดหมาย</p>`}`;}
 function letterHTML(m){m.read=true;let act="";
   if(m.kind==="take")act=m.done?`<p class="meta center">รับแล้ว ${fmt(m.amt)}</p>`:`<button class="btn primary" data-act="mtake" data-v="${m.id}">รับเงิน ${fmt(m.amt)}</button>`;
   if(m.kind==="pay")act=m.done?`<p class="meta center">${m.paid?"จ่ายแล้ว":"ไม่จ่าย (ชื่อเสียง −0.3)"}</p>`:m.expired?"":`<button class="btn" data-act="mskip" data-v="${m.id}">ไม่จ่าย (ชื่อเสียง −0.3)</button><button class="btn primary" data-act="mpay" data-v="${m.id}" ${G.cash<m.amt?"disabled":""}>จ่าย ${fmt(m.amt)}</button>`;
   if(m.kind==="quiz")act=m.done?`<p class="meta center">${m.ok?`ตอบถูก! ได้ ${fmt(m.amt)}`:`ผิดจ้า คำตอบคือ "${esc(m.opts[m.ans])}"`}</p>`:m.expired?"":`<p class="qz"><b>${esc(m.q)}</b></p><div class="qopts">${m.opts.map((o,i)=>`<button class="btn" data-act="mquiz" data-v="${m.id}" data-k="${i}">${esc(o)}</button>`).join("")}</div>`;
   if(m.kind==="job")act=m.done?`<p class="meta center">${m.declined?"ไม่ได้ไปช่วย":m.grade?`ไปช่วยแล้ว · เกรด ${m.grade}`:"ส่งคนไปช่วยแล้ว ได้ ฿550"}</p>`:m.expired?`<p class="meta center">หมดเวลาแล้ว</p>`:`<span class="mgtag">${JOY_PX}MINIGAME</span><button class="btn" data-act="mjdecl" data-v="${m.id}">ไม่ว่าง</button><button class="btn" data-act="mjskip" data-v="${m.id}">ส่งคนไปช่วย (฿550)</button><button class="btn primary" data-act="mjplay" data-v="${m.id}">${JOY_PX}ไปช่วยเอง</button>`;
   if(m.kind==="event")act=evMailAct(m);
+  if(m.kind==="loan")act=m.done?`<p class="meta center">${m.took?"กู้ไปแล้ว":"ทิ้งนามบัตรลงถังแล้ว"}</p>`:!loanOk(G)?`<p class="meta center">${G.loan>0?"ยังมีเงินกู้หมวกทองค้างอยู่ กู้ซ้ำไม่ได้":"เงินพ้นขั้นวิกฤตแล้ว ไม่ต้องพึ่งนามบัตรนี้"}</p>`:`<button class="btn" data-act="mloanno" data-v="${m.id}">ทิ้งนามบัตร</button><button class="btn red" data-act="mloan" data-v="${m.id}">ดูเงินกู้ ${fmt(LOAN_AMT)}</button>`;
   if(m.kind==="quest")act=m.done?`<p class="meta center">${m.declined?"ปฏิเสธแล้ว":"ส่งนักมวยไปแล้ว"}</p>`:m.expired?`<p class="meta center">หมดเวลาแล้ว</p>`:`<button class="btn" data-act="mdecl" data-v="${m.id}">ไม่ไป</button><button class="btn primary" data-act="macc" data-v="${m.id}">รับงาน · เลือกนักมวย</button>`;
   const opp=m.qk?QK[m.qk]:m.npc?G.F[m.npc]:null;
   return `<button class="btn sm ghost mback" data-act="mail">◂ ตู้จดหมาย</button><div class="letter px"><div class="lhead"><small>จาก</small><b>${esc(m.from)}</b><small>สัปดาห์ ${m.wk}</small></div><h3>${esc(m.title)}</h3><p>${esc(m.body)}</p>
@@ -279,6 +292,8 @@ Object.assign(ACT,{
   mjdecl:d=>{const m=G.mail.find(x=>x.id===d.v);if(!m||m.done)return;m.done=true;m.declined=true;save();render();},
   mjskip:d=>{const m=G.mail.find(x=>x.id===d.v);if(!m||m.done)return;m.done=true;G.cash+=550;G.dust=(G.dust||0)+1;roster(G).forEach(f=>f.morale=clamp(f.morale+3,0,100));AU.sfx("ui");toast("ป้าแต๋วฝากขอบคุณ ได้ ฿550 · ✦ +1");save();render();},
   mjplay:d=>{const m=G.mail.find(x=>x.id===d.v);if(!m||m.done||m.expired)return;UI.modal=null;render();BAG.openMode("somtam",null,m.id);},
+  mloan:d=>{ACT.loan();},
+  mloanno:d=>{const m=G.mail.find(x=>x.id===d.v);if(!m||m.done)return;m.done=true;save();render();toast("ครูแดงพยักหน้าเงียบ ๆ");},
   mdecl:d=>{const m=G.mail.find(x=>x.id===d.v);if(!m)return;m.done=true;m.declined=true;if(m.q==="gang"&&G.gang)G.gang.nextAbs=gameWeek(G)+(G.loan>0?2:4);save();render();},
   macc:d=>{UI.modal={type:"qpick",id:d.v};render();},
   qsend:d=>{const m=G.mail.find(x=>x.id===d.v);if(!m||m.done)return;m.done=true;UI.modal=null;

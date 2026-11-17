@@ -1,5 +1,5 @@
 // ================= MUAY THAI MOE v1.3 — UI =================
-const VERSION="1.87.7";
+const VERSION="1.87.8";
 const CUR_LANG=(typeof window!=="undefined"&&window.LANG)||"th";
 const TH_LABEL=String.fromCharCode(3652,3607,3618);
 function langSwitch(cls){return `<div class="langsw ${cls||""}" role="group" aria-label="Language">${[["th",TH_LABEL],["en","EN"]].map(([k,l])=>`<button class="lsb ${CUR_LANG===k?"on":""}" data-act="setlang" data-v="${k}" aria-pressed="${CUR_LANG===k}">${l}</button>`).join("")}</div>`;}
@@ -1581,7 +1581,7 @@ const ACT={
   gofac:()=>{UI.modal=null;UI.csub="fac";ACT.tab({v:"camp"});},
   camplv:()=>{UI.modal={type:"camplv"};render();},
   loan:()=>{if(!loanOk(G)){toast(G.loan>0?"ยังมีเงินกู้ค้างอยู่":"ยังไม่ถึงขั้นต้องกู้");return;}UI.modal={type:"loan"};render();},
-  loanyes:()=>{if(!takeLoan(G))return;UI.modal=null;save();AU.sfx("coin");playScene([{n:"npc",who:"ลูกน้องหมวกทอง",t:"ขอบคุณที่ใช้บริการครับเฮีย ครบสี่อาทิตย์ดอกขึ้นนะ เดี๋ยวพวกเราแวะไปเยี่ยมแถวตลาดบ่อย ๆ"},{n:"coach",t:"…เอาเถอะ ได้เงินมาแล้วก็รีบหาทางคืน อย่าให้มันพอกหางหมู"}],()=>render(),{bg:"food",look:"casual"});},
+  loanyes:()=>{if(!takeLoan(G))return;for(const m of G.mail||[])if(m.kind==="loan"&&!m.done){m.done=true;m.took=true;}UI.modal=null;save();AU.sfx("coin");playScene([{n:"npc",who:"ลูกน้องหมวกทอง",t:"ขอบคุณที่ใช้บริการครับเฮีย ครบสี่อาทิตย์ดอกขึ้นนะ เดี๋ยวพวกเราแวะไปเยี่ยมแถวตลาดบ่อย ๆ"},{n:"coach",t:"…เอาเถอะ ได้เงินมาแล้วก็รีบหาทางคืน อย่าให้มันพอกหางหมู"}],()=>render(),{bg:"food",look:"casual"});},
   repayloan:()=>{if(repayLoan(G)){save();AU.sfx("level");toast("คืนเงินกู้หมวกทองครบแล้ว หายใจโล่ง");render();}},
   advice:d=>{UI.modal={type:"advice",id:d.id};render();},
   mastersOpen:()=>{UI.modal={type:"masters"};render();},
