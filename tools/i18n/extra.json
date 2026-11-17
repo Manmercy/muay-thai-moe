@@ -8950,5 +8950,7 @@
  "<p class=\"skfd\">↗ หนุน": "<p class=\"skfd\">↗ Boosts ",
  "ใส่แล้ว": "Equipped",
  "<div class=\"cauto\"><button class=\"btn sm\" data-act=\"cauto\">🧑‍🏫 ให้ครูแดงจัดการ</button><small>ข้ามมินิเกม ได้ผลระดับปกติ · เล่นเองเก่ง ๆ ได้โบนัสเพิ่ม</small></div>": "<div class=\"cauto\"><button class=\"btn sm\" data-act=\"cauto\">🧑‍🏫 Let Coach Daeng handle it</button><small>Skips the mini-game for a normal corner · play it well yourself for a bonus</small></div>",
- "\" alt=\"\"><span>ครูแดงจัดการให้แล้ว · ": "\" alt=\"\"><span>Coach Daeng took care of it · "
+ "\" alt=\"\"><span>ครูแดงจัดการให้แล้ว · ": "\" alt=\"\"><span>Coach Daeng took care of it · ",
+ "\" อยู่ รีเซ็ตสกิลก่อนถึงจะเปลี่ยนสายปั้นได้</p>": "\" right now · reset skills to switch build paths</p>",
+ "<p class=\"meta skpath\">ดูได้ แต่อัปไม่ได้ · ตอนนี้ปั้น \"": "<p class=\"meta skpath\">View only · she is on \""
 }

@@ -2064,3 +2064,7 @@ html[lang=en] .skeq{font-size:13px;padding:0 8px}
 .vsmid .fspd{display:grid;grid-template-columns:1fr 1fr;gap:4px;margin-top:4px;width:100%}
 .vsmid .fspd button{min-height:36px;min-width:40px;font-size:14px;padding:0 4px}
 .fctl2.nospd{grid-template-columns:minmax(0,1fr)}
+/* v1.89.2: closed build paths can be viewed; hidden-power box keeps its height when switching */
+.modal.fpm.t-skill .sklines button.off{filter:grayscale(1);opacity:.55;cursor:pointer}
+.modal.fpm.t-skill .sklines button.off[aria-pressed="true"]{opacity:.85;box-shadow:inset 0 0 0 2px #9a96b0}
+.trdesc{display:grid}.trdesc p{grid-area:1/1;margin:0;visibility:hidden}.trdesc p.on{visibility:visible}
