@@ -1403,7 +1403,7 @@ function fskip(){const U=UI.fight;clearTimeout(U.timer);while(!roundDone(U.F))U.
   const ko=rest.find(x=>x.ev==="ko");if(ko)FS.play({...ko,side:sideOf(ko,U.F)},performance.now());roundFinish(U.F);roundEnd();}
 function roundEnd(){const U=UI.fight;clearTimeout(U.timer);const F=U.F;
   if(F.over){fightEnd();return;}AU.sfx("bell1");U.caption={text:COM.end[Math.floor(Math.random()*2)],side:""};U.stage="corner";U.care={need:careNeeds(F),got:[],done:false};U.pick=null;U.hint=false;render();}
-function fightEnd(){const U=UI.fight;U.stage="done";{const w=U.F.result.win;U.bubble=postBubble(U.F.B.f,w==="A"?"lose":w==="B"?"win":"draw",(U.F.seed>>>3)+G.week+[...U.F.B.f.id].reduce((a,c)=>a*31+c.charCodeAt(0)|0,0)+(G.cal||[]).length*7);}AU.startMusic("hub");setTimeout(()=>AU.sfx(U.F.result.win==="A"?"win":U.F.result.win==="B"?"lose":"bell1"),200);
+function fightEnd(){const U=UI.fight;U.stage="done";{const w=U.F.result.win;U.bubble=postBubble(U.F.B.f,w==="A"?"lose":w==="B"?"win":"draw",(U.F.seed>>>3)+G.week+[...U.F.B.f.id].reduce((a,c)=>a*31+c.charCodeAt(0)|0,0)+(G.cal||[]).length*7,U.F.A.f);}AU.startMusic("hub");setTimeout(()=>AU.sfx(U.F.result.win==="A"?"win":U.F.result.win==="B"?"lose":"bell1"),200);
   const me=G.F[U.b.a];if(me.injury)me.trust=clamp(me.trust-12,0,100);
   U.res=applyResult(G,U.F,U.b);if(U.b.dm)U.b.result=dmWinFrom(U.F);me.prepBonus=false;if(U.b.tier==="final"||U.b.tier==="semi")finishBracket(G,U.b,U.F);
   const r=U.F.result;if(FS.A){if(r.win==="A"){FS.A.win=true;FS.A.anim="win";}else if(r.win==="B"){FS.B.win=true;FS.B.anim="win";}}
