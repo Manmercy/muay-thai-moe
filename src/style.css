@@ -1365,7 +1365,7 @@ html.vnopen,html.vnopen body{overflow:hidden;overscroll-behavior:none;height:100
 .petrow{display:flex;gap:6px;flex-wrap:wrap;margin:6px 0 0}.petchip{display:flex;align-items:center;gap:6px;padding:3px 8px 3px 4px;background:#2a2340;border:2px solid #4a3f6b;color:inherit;font:inherit;cursor:pointer;flex:1 1 0;min-width:0}
 .petchip span{display:flex;flex-direction:column;line-height:1.15;min-width:0;text-align:left}.petchip b{font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.petchip small{font-size:12px;color:var(--gold,#f2c94c)}
 .petchip.done{opacity:.6}.petchip.done small{color:var(--mut,#9a91ad)}.peti{width:34px;height:26px;image-rendering:pixelated;flex:none}.petnm{display:flex;gap:8px;align-items:center;margin:8px 0}.petnm input{flex:1;font:inherit;padding:8px;background:#1b1530;color:#fff;border:2px solid #4a3f6b}
-.petrow{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.petrow{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px}
 .missb{margin:3px 0;padding:2px 6px;background:#3a2240;border:1px solid #7a3f6b;color:#ffb3d1;font-size:12px}
 .albbtn{position:relative;white-space:nowrap}.albh{margin:10px 0 4px;font:700 14px "Chakra Petch",sans-serif;color:var(--gold,#f2c94c)}
 .albg{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.ccard{position:relative;display:flex;flex-direction:column;align-items:center;gap:2px;padding:6px 4px;background:#1b1530;border:3px solid var(--rc);color:inherit;font:inherit;cursor:pointer;text-align:center;min-width:0}
@@ -1467,7 +1467,7 @@ html.vnopen,html.vnopen body{overflow:hidden;overscroll-behavior:none;height:100
 /* v1.80: fight screen — no native scrollbar flashing, room above the home indicator */
 .fight{scrollbar-width:none;padding-bottom:env(safe-area-inset-bottom,0px)}.fight::-webkit-scrollbar{display:none}
 .petnm input{font-size:16px}.petren{min-height:40px}
-.petg{display:flex;gap:2px;align-items:stretch}.petg .petren{padding:0 8px;font-size:12px;min-height:0;align-self:stretch}
+.petg{display:flex;gap:2px;align-items:stretch;min-width:0}.petg .petren{padding:0 8px;font-size:12px;min-height:0;align-self:stretch}
 /* Compact card album — five cards a row */
 .albg{grid-template-columns:repeat(5,minmax(0,1fr));gap:6px}
 .ccard.pxc{padding:3px 3px 4px;gap:1px;background:linear-gradient(180deg,#261d3d,#15102a);border:3px solid var(--rc);box-shadow:inset 0 0 0 2px #0f0c17,3px 3px 0 #0f0c17}

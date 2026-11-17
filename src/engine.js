@@ -322,7 +322,7 @@ function condition(f){return clamp(Math.round(100-f.fatigue*.7-(f.injury?40:0)),
 
 // ---------- FIGHT ENGINE ----------
 const PLANS={
-  balanced:{name:"สมดุล",aggr:0,desc:"ปรับตามสถานการณ์"},
+  balanced:{name:"สมดุล",aggr:0,ctr:.04,evade:.02,desc:"ปรับตามสถานการณ์"}, /* v1.87.2: adapting on the fly is worth a little */
   pressure:{name:"บุกกดดัน",aggr:.25,w:{punch:1.3,elbow:1.3},sta:1.25,desc:"เดินหน้าไล่ต้อน กินแรงมาก"},
   counter:{name:"รอสวน",aggr:-.15,ctr:.12,desc:"ให้คู่ต่อสู้เข้ามาแล้วสวน"},
   outside:{name:"คุมระยะ",aggr:0,w:{kick:1.6},evade:.06,desc:"ใช้ลูกเตะ รักษาระยะห่าง"},
@@ -369,7 +369,8 @@ function mastery(f){if(f.camp!=="player")return 0;const v=styleVal(f,mainStyle(f
 /* v1.83.3: veterans past the stat ceiling (20) keep improving through ring craft instead — f.vet is measured in stat points */
 const VET_FX={hit:.08,dmg:.25,ev:.06}; // calibrated: vet 1 ≈ +1 stat point
 function fightSide(f,plan,rng){const sk=skillMods(f);{const m=mastery(f)*MK,s=mainStyle(f);if(m){if(s==="defense"){sk.evade+=.04*m;sk.ctr+=.06*m;sk.ctrDmg+=.25*m;}else{const w=s;sk.hit[w]=(sk.hit[w]||0)+.05*m;sk.dmg[w]=(sk.dmg[w]||0)+.2*m;sk.pts[w]=(sk.pts[w]||0)+.1*m;}}}if(f.aura)sk.evade+=f.aura*.5;if(f.vet>0){const v=f.vet;for(const w of ["punch","kick","knee","elbow"]){sk.hit[w]=(sk.hit[w]||0)+VET_FX.hit*v;sk.dmg[w]=(sk.dmg[w]||0)+VET_FX.dmg*v;}sk.evade+=VET_FX.ev*v;}const gr=f.id==="kati"&&traitOf(f)!=="grit"?0:(f.grit||0);if(gr)sk.evade+=gr*.4;
-  return {f,id:f.id,name:f.name,plan,instr:"none",hp:100-(f.injury?15:0)+Math.round(gr*30),sta:clamp(100-f.fatigue*.4,40,100),pts:0,rpts:0,kd:0,cuts:0,
+  const hp0=100-(f.injury?15:0)+Math.round(gr*30);
+  return {f,id:f.id,name:f.name,plan,instr:"none",hp:hp0,hp0,sta:clamp(100-f.fatigue*.4,40,100),pts:0,rpts:0,kd:0,cuts:0,
     thrown:0,landed:0,dmgDealt:0,legs:0,tac:{focus:"auto",pace:"steady",target:"head"},sk,prep:(f.prepBonus?.04:0)+(f.counterPrep?.05:0)+sk.prep+(f.aura||0)+gr+(f.labPrep||0)+(f.camp==="player"?(f.facPrep||0):0),counterPrep:!!f.counterPrep,trait:traitOf(f),mor:(f.morale-60)/400+sk.mor,wl:{punch:0,kick:0,knee:0,elbow:0}};
 }
 function aiPlan(f,opp,rng){
@@ -390,7 +391,10 @@ function newFight(fa,fb,o){
     cards:[],logs:[],over:false,result:null,forceRage:!!o.forceRage};
 }
 function setTactics(F,tA){F.A.tac={focus:"auto",pace:"steady",target:"body",...(tA||{})};F.B.tac=aiTac(F.B.f,F.rng);}
-function mods(s,F){const p=PLANS[s.plan],c=CORNER[s.instr]||{};const cm=1+((s.sk&&s.sk.corner)||0);
+/* v1.87.2: the fight plan still matters, but a little less than before (PLAN_K scales every plan effect) */
+let PLAN_K=.75;
+function mods(s,F){const p0=PLANS[s.plan],c=CORNER[s.instr]||{};const cm=1+((s.sk&&s.sk.corner)||0);const K=PLAN_K;
+  const p={aggr:(p0.aggr||0)*K,ctr:(p0.ctr||0)*K,evade:(p0.evade||0)*K,cl:(p0.cl||0)*K,sta:p0.sta?1+(p0.sta-1)*K:undefined,w:p0.w?Object.fromEntries(Object.entries(p0.w).map(([k,v])=>[k,1+(v-1)*K])):undefined};
   const w={punch:1,kick:1,knee:1,elbow:1};if(p.w)for(const k in p.w)w[k]*=p.w[k];if(c.w)for(const k in c.w)w[k]*=1+(c.w[k]-1)*cm;
   const t=s.tac||{};if(t.focus&&t.focus!=="auto")w[t.focus]*=1.7;
   let pa=0,ps=1;if(F){const r=F.round,n=F.rounds;if(t.pace==="fast"){pa=r<=2?.15:-.08;ps=r<=2?1.15:1;}if(t.pace==="late"){pa=r>=n-1?.2:-.1;ps=r>=n-1?1.1:.85;}}
@@ -492,13 +496,15 @@ function fightEx(F){const rng=F.rng,log=[],ex=F.ex,mA=F.mA,mB=F.mB;
     for(const s of [F.A,F.B])if(s.burst&&--s.burst.left<=0)s.burst=null;
   }
   F.ex++;F.rlog.push(...log);return log;}
+let RND_REC={b:8,d:.4};
 function roundFinish(F){const log=F.rlog,kd0=F.kd0;for(const s of [F.A,F.B])s.burst=null;
   // judges
   const dif=(F.A.rpts-F.B.rpts)+(F.B.kd-kd0.B-(F.A.kd-kd0.A))*3;
   let card=[10,10];if(dif>.4)card=[10,9];if(dif<-.4)card=[9,10];
   if(F.B.kd>kd0.B&&dif>4)card=[10,8];if(F.A.kd>kd0.A&&dif<-4)card=[8,10];
   F.cards.push(card);F.logs.push(log);
-  for(const s of [F.A,F.B])s.sta=clamp(s.sta+16+s.f.a.stamina*.8,0,100),s.hp=clamp(s.hp+2,0,100);
+  /* v1.87.2: a fighter gets her breath back between rounds — tougher fighters recover more — so long bouts are not just a slow knockout */
+  for(const s of [F.A,F.B])s.sta=clamp(s.sta+16+s.f.a.stamina*.8,0,100),s.hp=clamp(s.hp+RND_REC.b+s.f.a.dur*RND_REC.d,0,Math.max(100,s.hp0||100));
   if(!F.over&&F.round>=F.rounds){F.over=true;const tA=F.cards.reduce((x,c)=>x+c[0],0),tB=F.cards.reduce((x,c)=>x+c[1],0);
     const pd=F.A.pts-F.B.pts;const tie=tA===tB;
     F.result=tie&&Math.abs(pd)<1?{win:"D",type:"เสมอ",round:F.round}:tie?{win:pd>0?"A":"B",type:"ชนะคะแนน (ตัดสินจากความเหนือกว่า)",round:F.round,score:`${tA}–${tB}`}:{win:tA>tB?"A":"B",type:"ชนะคะแนน",round:F.round,score:`${Math.max(tA,tB)}–${Math.min(tA,tB)}`};}
@@ -818,16 +824,19 @@ const effOvr=(G,f)=>ovr(f.a)+edgeOf(G,f);
    Our fighters and the five canon girls keep the level they earned. */
 const LV_BASE=6,LV_STEP=.75;
 function powLv(f){return clamp(Math.round((ovr(f.a)+(f.vet||0)-LV_BASE)/LV_STEP),1,MAX_LV);}
-/* v1.88: read against our own camp — an even opponent sits at our best fighter's level in that division,
-   each LV_REL of real strength above or below is one level (a clearly stronger opponent ≈ 2–3 levels above us).
-   The level shown never drops, so a fighter who has improved since you last met always reads higher. */
-const LV_REL=.55;
+/* v1.88: read against our own camp. An even opponent sits at our best fighter's level in that division; the gap comes from
+   simulated fights (the same coach advice the offers use), so hidden edges — Ploy's aura, Vector lab prep, rage — count too.
+   Win 50% = same level · ~25% = about +2.5 · ~10% = about +5. The level shown never drops, so an improved opponent reads higher. */
+const LV_LOGIT=.44,_lvc={};
 function lvRef(G,f){if(!G||!G.F)return null;const P=Object.values(G.F).filter(x=>x.camp==="player"&&x.a);const mine=P.filter(x=>x.div===f.div);const L=mine.length?mine:P;if(!L.length)return null;
-  let best=null,be=-1e9;for(const x of L){const e=effOvr(G,x);if(e>be){be=e;best=x;}}return {lv:best.lvl||1,eff:be};}
-function lvOf(f){if(!f)return 1;if(f.camp==="player"||f.canon)return f.lvl||1;
-  const g=typeof G!=="undefined"?G:null,r=lvRef(g,f);let v=r?clamp(Math.round(r.lv+(effOvr(g,f)-r.eff)/LV_REL),1,MAX_LV):powLv(f);
-  if(f.plv&&f.plv>v)v=f.plv;f.plv=v;return v;}
-const effGap=(G,me,op)=>ovr(op.a)-ovr(me.a)+(lvOf(op)-lvOf(me))*.15-edgeOf(G,me)+edgeOf(G,op);
+  let best=null,be=-1e9;for(const x of L){const e=effOvr(G,x);if(e>be){be=e;best=x;}}return best;}
+function lvRate(G,me,op){const k=(G.season||1)+"_"+G.week+"_"+me.id+"_"+op.id;if(_lvc[k]==null){try{_lvc[k]=advise(G,me.id,op.id,3,24).bestRate;}catch(e){_lvc[k]=-1;}}return _lvc[k];}
+function lvInfo(f){if(!f)return {lv:1,rate:null};if(f.camp==="player"||f.canon)return {lv:f.lvl||1,rate:null};
+  const g=typeof G!=="undefined"?G:null,me=lvRef(g,f);let v=powLv(f),rate=null;
+  if(me){rate=lvRate(g,me,f);if(rate>=0){const r=clamp(rate,.03,.97);v=clamp(Math.round((me.lvl||1)-Math.log(r/(1-r))/LV_LOGIT),1,MAX_LV);}else rate=null;}
+  if(f.plv&&f.plv>v)v=f.plv;f.plv=v;return {lv:v,rate,me};}
+function lvOf(f){return lvInfo(f).lv;}
+const effGap=(G,me,op)=>ovr(op.a)-ovr(me.a)+((op.lvl||1)-(me.lvl||1))*.15-edgeOf(G,me)+edgeOf(G,op);
 function genOffers(G,opt){
   const rng=mulberry32(G.seed+G.week*7919+11);G.snub=G.snub||{};const ignored=new Set();
   /* v1.82.3: only offers the NPC really sent and the player let lapse at week end count as a snub — not temple-fair or Vector bookings, not a mid-week refresh */

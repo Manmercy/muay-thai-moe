@@ -323,7 +323,7 @@ function condition(f){return clamp(Math.round(100-f.fatigue*.7-(f.injury?40:0)),
 
 // ---------- FIGHT ENGINE ----------
 const PLANS={
-  balanced:{name:"Balanced",aggr:0,desc:"Adapt to the fight"},
+  balanced:{name:"Balanced",aggr:0,ctr:.04,evade:.02,desc:"Adapt to the fight"}, /* v1.87.2: adapting on the fly is worth a little */
   pressure:{name:"Pressure",aggr:.25,w:{punch:1.3,elbow:1.3},sta:1.25,desc:"March forward and hunt. Very tiring"},
   counter:{name:"Counter-fighter",aggr:-.15,ctr:.12,desc:"Let them come in, then counter"},
   outside:{name:"Control range",aggr:0,w:{kick:1.6},evade:.06,desc:"Use kicks, keep distance"},
@@ -370,7 +370,8 @@ function mastery(f){if(f.camp!=="player")return 0;const v=styleVal(f,mainStyle(f
 /* v1.83.3: veterans past the stat ceiling (20) keep improving through ring craft instead — f.vet is measured in stat points */
 const VET_FX={hit:.08,dmg:.25,ev:.06}; // calibrated: vet 1 ≈ +1 stat point
 function fightSide(f,plan,rng){const sk=skillMods(f);{const m=mastery(f)*MK,s=mainStyle(f);if(m){if(s==="defense"){sk.evade+=.04*m;sk.ctr+=.06*m;sk.ctrDmg+=.25*m;}else{const w=s;sk.hit[w]=(sk.hit[w]||0)+.05*m;sk.dmg[w]=(sk.dmg[w]||0)+.2*m;sk.pts[w]=(sk.pts[w]||0)+.1*m;}}}if(f.aura)sk.evade+=f.aura*.5;if(f.vet>0){const v=f.vet;for(const w of ["punch","kick","knee","elbow"]){sk.hit[w]=(sk.hit[w]||0)+VET_FX.hit*v;sk.dmg[w]=(sk.dmg[w]||0)+VET_FX.dmg*v;}sk.evade+=VET_FX.ev*v;}const gr=f.id==="kati"&&traitOf(f)!=="grit"?0:(f.grit||0);if(gr)sk.evade+=gr*.4;
-  return {f,id:f.id,name:f.name,plan,instr:"none",hp:100-(f.injury?15:0)+Math.round(gr*30),sta:clamp(100-f.fatigue*.4,40,100),pts:0,rpts:0,kd:0,cuts:0,
+  const hp0=100-(f.injury?15:0)+Math.round(gr*30);
+  return {f,id:f.id,name:f.name,plan,instr:"none",hp:hp0,hp0,sta:clamp(100-f.fatigue*.4,40,100),pts:0,rpts:0,kd:0,cuts:0,
     thrown:0,landed:0,dmgDealt:0,legs:0,tac:{focus:"auto",pace:"steady",target:"head"},sk,prep:(f.prepBonus?.04:0)+(f.counterPrep?.05:0)+sk.prep+(f.aura||0)+gr+(f.labPrep||0)+(f.camp==="player"?(f.facPrep||0):0),counterPrep:!!f.counterPrep,trait:traitOf(f),mor:(f.morale-60)/400+sk.mor,wl:{punch:0,kick:0,knee:0,elbow:0}};
 }
 function aiPlan(f,opp,rng){
@@ -391,7 +392,10 @@ function newFight(fa,fb,o){
     cards:[],logs:[],over:false,result:null,forceRage:!!o.forceRage};
 }
 function setTactics(F,tA){F.A.tac={focus:"auto",pace:"steady",target:"body",...(tA||{})};F.B.tac=aiTac(F.B.f,F.rng);}
-function mods(s,F){const p=PLANS[s.plan],c=CORNER[s.instr]||{};const cm=1+((s.sk&&s.sk.corner)||0);
+/* v1.87.2: the fight plan still matters, but a little less than before (PLAN_K scales every plan effect) */
+let PLAN_K=.75;
+function mods(s,F){const p0=PLANS[s.plan],c=CORNER[s.instr]||{};const cm=1+((s.sk&&s.sk.corner)||0);const K=PLAN_K;
+  const p={aggr:(p0.aggr||0)*K,ctr:(p0.ctr||0)*K,evade:(p0.evade||0)*K,cl:(p0.cl||0)*K,sta:p0.sta?1+(p0.sta-1)*K:undefined,w:p0.w?Object.fromEntries(Object.entries(p0.w).map(([k,v])=>[k,1+(v-1)*K])):undefined};
   const w={punch:1,kick:1,knee:1,elbow:1};if(p.w)for(const k in p.w)w[k]*=p.w[k];if(c.w)for(const k in c.w)w[k]*=1+(c.w[k]-1)*cm;
   const t=s.tac||{};if(t.focus&&t.focus!=="auto")w[t.focus]*=1.7;
   let pa=0,ps=1;if(F){const r=F.round,n=F.rounds;if(t.pace==="fast"){pa=r<=2?.15:-.08;ps=r<=2?1.15:1;}if(t.pace==="late"){pa=r>=n-1?.2:-.1;ps=r>=n-1?1.1:.85;}}
@@ -493,13 +497,15 @@ function fightEx(F){const rng=F.rng,log=[],ex=F.ex,mA=F.mA,mB=F.mB;
     for(const s of [F.A,F.B])if(s.burst&&--s.burst.left<=0)s.burst=null;
   }
   F.ex++;F.rlog.push(...log);return log;}
+let RND_REC={b:8,d:.4};
 function roundFinish(F){const log=F.rlog,kd0=F.kd0;for(const s of [F.A,F.B])s.burst=null;
   // judges
   const dif=(F.A.rpts-F.B.rpts)+(F.B.kd-kd0.B-(F.A.kd-kd0.A))*3;
   let card=[10,10];if(dif>.4)card=[10,9];if(dif<-.4)card=[9,10];
   if(F.B.kd>kd0.B&&dif>4)card=[10,8];if(F.A.kd>kd0.A&&dif<-4)card=[8,10];
   F.cards.push(card);F.logs.push(log);
-  for(const s of [F.A,F.B])s.sta=clamp(s.sta+16+s.f.a.stamina*.8,0,100),s.hp=clamp(s.hp+2,0,100);
+  /* v1.87.2: a fighter gets her breath back between rounds — tougher fighters recover more — so long bouts are not just a slow knockout */
+  for(const s of [F.A,F.B])s.sta=clamp(s.sta+16+s.f.a.stamina*.8,0,100),s.hp=clamp(s.hp+RND_REC.b+s.f.a.dur*RND_REC.d,0,Math.max(100,s.hp0||100));
   if(!F.over&&F.round>=F.rounds){F.over=true;const tA=F.cards.reduce((x,c)=>x+c[0],0),tB=F.cards.reduce((x,c)=>x+c[1],0);
     const pd=F.A.pts-F.B.pts;const tie=tA===tB;
     F.result=tie&&Math.abs(pd)<1?{win:"D",type:"Draw",round:F.round}:tie?{win:pd>0?"A":"B",type:"Decision win (on dominance)",round:F.round,score:`${tA}–${tB}`}:{win:tA>tB?"A":"B",type:"Decision win",round:F.round,score:`${Math.max(tA,tB)}–${Math.min(tA,tB)}`};}
@@ -819,16 +825,19 @@ const effOvr=(G,f)=>ovr(f.a)+edgeOf(G,f);
    Our fighters and the five canon girls keep the level they earned. */
 const LV_BASE=6,LV_STEP=.75;
 function powLv(f){return clamp(Math.round((ovr(f.a)+(f.vet||0)-LV_BASE)/LV_STEP),1,MAX_LV);}
-/* v1.88: read against our own camp — an even opponent sits at our best fighter's level in that division,
-   each LV_REL of real strength above or below is one level (a clearly stronger opponent ≈ 2–3 levels above us).
-   The level shown never drops, so a fighter who has improved since you last met always reads higher. */
-const LV_REL=.55;
+/* v1.88: read against our own camp. An even opponent sits at our best fighter's level in that division; the gap comes from
+   simulated fights (the same coach advice the offers use), so hidden edges — Ploy's aura, Vector lab prep, rage — count too.
+   Win 50% = same level · ~25% = about +2.5 · ~10% = about +5. The level shown never drops, so an improved opponent reads higher. */
+const LV_LOGIT=.44,_lvc={};
 function lvRef(G,f){if(!G||!G.F)return null;const P=Object.values(G.F).filter(x=>x.camp==="player"&&x.a);const mine=P.filter(x=>x.div===f.div);const L=mine.length?mine:P;if(!L.length)return null;
-  let best=null,be=-1e9;for(const x of L){const e=effOvr(G,x);if(e>be){be=e;best=x;}}return {lv:best.lvl||1,eff:be};}
-function lvOf(f){if(!f)return 1;if(f.camp==="player"||f.canon)return f.lvl||1;
-  const g=typeof G!=="undefined"?G:null,r=lvRef(g,f);let v=r?clamp(Math.round(r.lv+(effOvr(g,f)-r.eff)/LV_REL),1,MAX_LV):powLv(f);
-  if(f.plv&&f.plv>v)v=f.plv;f.plv=v;return v;}
-const effGap=(G,me,op)=>ovr(op.a)-ovr(me.a)+(lvOf(op)-lvOf(me))*.15-edgeOf(G,me)+edgeOf(G,op);
+  let best=null,be=-1e9;for(const x of L){const e=effOvr(G,x);if(e>be){be=e;best=x;}}return best;}
+function lvRate(G,me,op){const k=(G.season||1)+"_"+G.week+"_"+me.id+"_"+op.id;if(_lvc[k]==null){try{_lvc[k]=advise(G,me.id,op.id,3,24).bestRate;}catch(e){_lvc[k]=-1;}}return _lvc[k];}
+function lvInfo(f){if(!f)return {lv:1,rate:null};if(f.camp==="player"||f.canon)return {lv:f.lvl||1,rate:null};
+  const g=typeof G!=="undefined"?G:null,me=lvRef(g,f);let v=powLv(f),rate=null;
+  if(me){rate=lvRate(g,me,f);if(rate>=0){const r=clamp(rate,.03,.97);v=clamp(Math.round((me.lvl||1)-Math.log(r/(1-r))/LV_LOGIT),1,MAX_LV);}else rate=null;}
+  if(f.plv&&f.plv>v)v=f.plv;f.plv=v;return {lv:v,rate,me};}
+function lvOf(f){return lvInfo(f).lv;}
+const effGap=(G,me,op)=>ovr(op.a)-ovr(me.a)+((op.lvl||1)-(me.lvl||1))*.15-edgeOf(G,me)+edgeOf(G,op);
 function genOffers(G,opt){
   const rng=mulberry32(G.seed+G.week*7919+11);G.snub=G.snub||{};const ignored=new Set();
   /* v1.82.3: only offers the NPC really sent and the player let lapse at week end count as a snub — not temple-fair or Vector bookings, not a mid-week refresh */
@@ -3807,6 +3816,7 @@ Object.assign(CARDS,{
  g_rin_ssr:{g:1,c:"rin",r:"SSR",t:"The Page Without Numbers",bg:"local",ci:"rin_fight_happy",face:"rin_happy_face",q:"Today I won because I trusted someone who trusted me first.",steps:[{n:"nar",t:"Round three. The opponent switches to southpaw, and thirty pages of Rin's notes are suddenly useless."},{n:"nar",t:"Rin drops onto the corner stool, still gasping. Her hand goes up to push glasses she isn't wearing."},{n:"rin",f:"sad",l:"fight",t:"All my data is wrong. I don't have a backup plan… I don't know what to do next."},{choice:[{t:"Tell her to forget the notebook and fight on instinct",then:[{n:"rin",f:"flustered",l:"fight",t:"However my heart tells me… That's not a measurable variable… Fine. Just this once."}]},{t:"Say you believe in Rin more than any notebook",then:[{n:"rin",f:"flustered",l:"fight",t:"The probability that you're right… No. I won't calculate it. I'll just believe you."}]}]},{n:"nar",t:"Round four. Rin isn't counting steps or reading shoulders. She just sees the opening and kicks."},{n:"nar",t:"A left kick lands flush on the neck. The opponent crumples in the middle of the ring before the referee can reach ten."},{n:"coach",t:"That one isn't in any of your notebooks, Rin."},{n:"rin",f:"happy",l:"fight",t:"No, it isn't… I wasn't thinking anything. First time in my life."},{n:"nar",t:"That night Rin opens a new notebook. The first page has no tables, no numbers, just one line."},{n:"nar",t:"'Today I won because I trusted someone who trusted me first.'"},{n:"rin",f:"flustered",l:"casual",t:"Don't read it out loud! …Is the grammar wrong? Don't answer that."}]},
  g_ploy_ssr:{g:1,c:"ploy",r:"SSR",t:"Mom's Front Row",bg:"final",ci:"ploy_fight_happy",face:"ploy_happy_face",q:"This one I sent myself, because you made me brave enough.",steps:[{n:"nar",t:"Title night. In ringside seat number one sits a woman, back straight, no hat, nothing hiding her face."},{n:"npc",who:"Ploy's mom",t:"My daughter sent me a front-row ticket herself. Twenty years I've never sat here… My hands are still shaking."},{n:"nar",t:"Backstage, Ploy finished wrapping her hands long ago, but she still won't get up."},{n:"ploy",f:"flustered",l:"fight",t:"Mom really came…? If I get kicked till I bleed, will she cry again?"},{choice:[{t:"Tell her to show her mom she loves fighting",then:[{n:"ploy",f:"happy",l:"fight",t:"Fun… Right. I forgot fighting used to be fun, back when nobody watched but the referee."}]},{t:"Promise to work her corner and not move the whole fight",then:[{n:"ploy",f:"happy",l:"fight",t:"Right there in that corner. Don't move. I'll be looking over a lot."}]}]},{n:"nar",t:"Every time she ties up in the clinch, Ploy glances at the front row. Her mom isn't covering her eyes. She's cheering herself hoarse."},{n:"nar",t:"Her seventeenth knee of the night lands clean to the body. The opponent waves it off. Ploy stands still in the middle of the ring and does something no one has ever seen."},{n:"nar",t:"She smiles, so wide her eyes crinkle shut, and points at the front row."},{n:"npc",who:"Ploy's mom",t:"Ploy! My girl is smiling! Twenty years, and this is the first time I've seen you smile in the ring!"},{n:"ploy",f:"flustered",l:"fight",t:"…Don't look at me right now. I'm not crying. It's sweat in my eyes."},{n:"ploy",f:"happy",l:"casual",t:"You sent Mom that first ticket… This one I sent myself, because you made me brave enough."}]},
  g_fah_ssr:{g:1,c:"fah",r:"SSR",t:"The Night the Storm Came",bg:"night",ci:"fah_casual",q:"Fah's not scared of anything anymore!! …Except thunder. But now someone sits with me through it!!",steps:[{n:"nar",t:"The night before Fah's big fight, a storm hits Chiang Mai. The whole camp loses power, and the thunder rattles the tin roof."},{n:"nar",t:"A soft knock at the office door. Fah stands there wrapped head to toe in a tiger-print blanket, only her face showing."},{n:"fah",f:"flustered",l:"casual",t:"Fah's not scared! …My roof's leaking, that's all."},{n:"nar",t:"Lightning strikes somewhere close. Fah leaps in and clings to your arm."},{n:"fah",f:"flustered",l:"casual",t:"…Okay, I'm scared. Since I was little. My name means sky and I'm scared of thunder. Funny, right? Go ahead and laugh."},{choice:[{t:"Light a candle and keep her talking until the storm passes",then:[{n:"fah",f:"happy",l:"casual",t:"…You're way too nice. Keep this up and Fah's gonna get used to it."}]},{t:"Say you're scared of thunder too",then:[{n:"fah",f:"happy",l:"casual",t:"Liar! …But thanks for lying. Fah really does feel better."}]}]},{n:"nar",t:"By candlelight, Fah admits she trash-talks everyone because if she's loud enough, nobody can hear how much she's shaking inside."},{n:"fah",f:"sad",l:"casual",t:"Before every fight, Fah's as scared as she is of thunder… She's just never told anyone."},{n:"nar",t:"The storm stopped at 4 a.m. Somewhere along the way, Fah fell asleep on your shoulder."},{n:"nar",t:"That morning the sky was so clear you could see all of Doi Suthep. That night Fah won by knockout in round two, then grabbed the ring mic."},{n:"fah",f:"happy",l:"fight",t:"Fah's not scared of anything anymore!! …Except thunder. But now someone sits with me through it!!"}]},
+ g_kati_ssr:{"g":1,"c":"kati","r":"SSR","t":"A New Mongkhon","bg":"temple","ci":"kati_thai","face":"kati_thai_face","q":"Grandpa, I've finished the wai khru… and my teacher is right here too.","steps":[{"n":"nar","t":"Before dawn on Grandpa Chai's memorial day, Kati carries a wooden box to the temple. Inside is Grandpa's old mongkhon, its thread faded almost white."},{"n":"kati","f":"flustered","l":"thai","t":"The abbot says this mongkhon is too worn to wear in the ring… but I want Grandpa with me when I do the wai khru."},{"n":"npc","who":"The abbot","t":"Old thread can be braided into new, just like that camp of yours. The old generation hands it on to the new. Manager, hold the end of the thread for me."},{"n":"nar","t":"You hold the thread still while the abbot braids new red thread around the old white strand. Kati sits with her palms together, silent, until it's done."},{"choice":[{"t":"Ask Kati to try the wai khru in the temple yard","then":[{"n":"kati","f":"flustered","l":"thai","t":"Right here…? Then you have to sit where Grandpa used to sit."}]},{"t":"Say she should save it for the real ring","then":[{"n":"kati","f":"happy","l":"casual","t":"Okay! Then on that day you have to be in the red corner, as close to me as you can."}]}]},{"n":"nar","t":"That evening, in Thai dress and the new mongkhon, Kati performs the wai khru slowly around the temple yard. The wind rustles the bodhi leaves like applause."},{"n":"kati","f":"flustered","l":"thai","t":"Grandpa, I've finished the wai khru… and my teacher is right here too."}]},
  g_team_ssr:{g:1,c:"kati",r:"SSR",t:"Sirichai Camp, Group Photo",bg:"camp",steps:[{n:"nar",t:"Holy-day morning. Everyone lines up in front of the freshly painted sign. Coach Daeng sets Grandpa Chai's old camera on a tripod."},{n:"coach",t:"Everyone smile! This camera has photographed the camp since the first generation. Last roll of film, don't waste it."},{n:"kati",f:"happy",l:"casual",t:"Manager, stand in the middle! Right there. Grandpa's old spot."},{n:"nar",t:"Click. The first group photo of the new Sirichai Camp goes into a frame, hung next to Grandpa Chai's portrait."}]}});
 const GACHA_COST=30,GACHA_PITY=30,DUST_OF={N:5,R:10,SR:25,SSR:60};
 function gachaPull(G){if((G.dust||0)<GACHA_COST)return null;G.dust-=GACHA_COST;G.pity=(G.pity||0)+1;G.cards=G.cards||{};
@@ -4670,7 +4680,7 @@ AU.gsfx=function(kind,a){if(!this.init()||this.muted||!SETTINGS.sfx)return;const
   if(kind==="shimmer")for(let i=0;i<6;i++)T(i*.05,{f:1400+Math.random()*1400,type:"sine",dur:.12,peak:.06});};
 
 // ================= MUAY THAI MOE v1.3 — UI =================
-const VERSION="1.87.1";
+const VERSION="1.87.3";
 const CUR_LANG=(typeof window!=="undefined"&&window.LANG)||"th";
 const TH_LABEL=String.fromCharCode(3652,3607,3618);
 function langSwitch(cls){return `<div class="langsw ${cls||""}" role="group" aria-label="Language">${[["th",TH_LABEL],["en","EN"]].map(([k,l])=>`<button class="lsb ${CUR_LANG===k?"on":""}" data-act="setlang" data-v="${k}" aria-pressed="${CUR_LANG===k}">${l}</button>`).join("")}</div>`;}
@@ -4783,8 +4793,8 @@ function hearts(b,f){f=f||{bond:b};const H=heartLv(f),pct=Math.round(H.into/H.ne
 function bar(label,v,color,txt){return `<div class="bar"><span>${label}</span><i style="--v:${clamp(v,0,100)}%;--bc:${color}"></i><b class="num">${txt??Math.round(v)}</b></div>`;}
 function mini(v,color){return `<i class="mini" style="--v:${clamp(v,0,100)}%;--bc:${color}"></i>`;}
 /* v1.88: an opponent shows her strength level, coloured against our best fighter in her division (red = stronger) */
-function lvTone(f){if(!G||!f||f.camp==="player")return null;const mine=Object.values(G.F).filter(x=>x.camp==="player"&&x.div===f.div);if(!mine.length)return null;
-  const d=effOvr(G,f)-Math.max(...mine.map(x=>effOvr(G,x)));return d>=1.2?{c:"red",t:"Stronger than ours"}:d<=-1.2?{c:"green",t:"Weaker than ours"}:{c:"gold",t:"Even with ours"};}
+function lvTone(f){if(!G||!f||f.camp==="player")return null;const I=lvInfo(f);if(I.rate==null)return null;
+  return I.rate<.4?{c:"red",t:"Stronger than ours"}:I.rate>=.6?{c:"green",t:"Weaker than ours"}:{c:"gold",t:"Even with ours"};}
 function xpBar(f){if(f.camp!=="player"&&!f.canon){const t=lvTone(f);return `<div class="xp"><span class="lv${t?" lt-"+t.c:""}">Lv.${lvOf(f)}</span>${t?`<span class="pill ${t.c}">${t.t}</span>`:""}</div>`;}const need=xpNeed(f.lvl);return `<div class="xp"><span class="lv">Lv.${f.lvl}</span><i style="--v:${f.lvl>=MAX_LV?100:clamp(f.xp/need*100,0,100)}%"></i><span class="num dim">${f.lvl>=MAX_LV?"MAX":`${Math.round(f.xp)}/${need}`}</span>${f.sp>0&&f.camp==="player"?`<button class="spchip" data-act="ptab" data-v="skill">★ ${f.sp} skill pts</button>`:""}</div>`;}
 function formHTML(f){return `<span class="form">${f.form.map(r=>`<i class="${r}">${r==="W"?"W":r==="L"?"L":"D"}</i>`).join("")||'<span class="dim">—</span>'}</span>`;}
 const rec=f=>`${f.rec.w}-${f.rec.l}-${f.rec.d}`;
@@ -5227,10 +5237,13 @@ function careerHTML(d){const list=Object.values(G.F).filter(f=>f.div===d&&f.camp
 // v1.85: card detail page — rarity, copies, a teaser line, read the story or break spare copies into stardust
 function cardBlurb(C){if(C.blurb)return C.blurb;const st=(C.steps||[]).find(x=>x&&typeof x.t==="string"&&x.n!=="nar")||(C.steps||[]).find(x=>x&&typeof x.t==="string");if(!st)return "";const t=st.t;return t.length>72?t.slice(0,70)+"…":t;}
 /* v1.87: some cards continue another card's story — once both are owned, the card page links them */
-const CARD_SEQ={h_mali:"g_mali_sr",h_rin:"g_rin_sr",h_fah:"g_fah_sr",g_mali_ssr:"h_mali",g_ploy_ssr:"g_ploy_sr"};
+const CARD_SEQ={h_mali:"g_mali_sr",h_rin:"g_rin_sr",h_fah:"g_fah_sr",g_mali_ssr:"h_mali",g_ploy_ssr:"g_ploy_sr",g_kati_ssr:"g_kati_sr"};
 function cardLinkHTML(id){const own=G.cards||{},out=[];const pv=CARD_SEQ[id];if(pv&&own[pv]&&CARDS[pv])out.push(`↩ Continues from <button class="clinkb" data-act="cardinfo" data-v="${pv}">${esc(CARDS[pv].t)}</button>`);
   Object.keys(CARD_SEQ).filter(k=>CARD_SEQ[k]===id&&own[k]&&CARDS[k]).forEach(k=>out.push(`↪ Continues in <button class="clinkb" data-act="cardinfo" data-v="${k}">${esc(CARDS[k].t)}</button>`));
   return out.length?`<p class="clink">${out.join("<br>")}</p>`:"";}
+// v1.87.2: the album keeps its scroll position when a card or the gacha is opened from it and closed again
+function albKeep(){try{const o=document.querySelector(".overlay");if(UI.modal&&UI.modal.type==="album"&&o)UI.albY=o.scrollTop;}catch(e){}}
+function albRestore(){const y=UI.albY||0;if(!y)return;const go=()=>{const o=document.querySelector(".overlay");if(o)o.scrollTop=y;};go();requestAnimationFrame(go);}
 function cardInfoHTML(id){const C=CARDS[id];if(!C)return "";const o=(G.cards||{})[id],R=CARD_R[C.r],who=G.F[C.c]?G.F[C.c].name:"",src=C.lg?"the Loy Krathong gacha (festival only)":C.g?"the card gacha":`${C.hint||"keep following the story"}`;
   if(!o)return `<h2>Not collected yet</h2><div class="cdet" style="--rc:#77747d"><div class="ccard big lock" data-rarity="${C.r}">${cardArtHTML(C,true)}<span class="tstar">${"★".repeat(R.s)}</span><b>???</b><small>${C.r}</small></div>
     <div class="cdinfo"><div class="cdtop"><span class="pill">${C.r} ${"★".repeat(R.s)}</span><span class="meta">${esc(who)}</span></div><p class="meta"><b>How to get:</b> ${esc(src)}</p></div></div>
@@ -5545,7 +5558,7 @@ function gboxHTML(){const loy=GB.box==="loy",s=GB.st,cost=gbCost(),ok=(G.dust||0
      <p>${loy?"This machine is only open during Loy Krathong. ":""} Cards you already own are kept as spares. Use them to level up the card or break them into stardust on the card page.</p>
      <button class="btn" data-act="gboxq">Close</button></div></div>`:""}
   </div>`;}
-const PATCH={id:"1.87.1",ver:"Muay Thai Moe v1.87.1",title:"News from Sirichai Camp",lead:"Everyone has a signature trait, counter-training works better, a new gacha machine, rivals have more to say, and the game opens faster.",items:[
+const PATCH={id:"1.87.1",ver:"Muay Thai Moe v1.87.2",title:"News from Sirichai Camp",lead:"Everyone has a signature trait, counter-training works better, a new gacha machine, rivals have more to say, and the game opens faster.",items:[
  ["✦","Two innate traits per girl","Every girl has two innate traits to switch between on the skill page, like Mali's Move Like Water, Rin's Walking Library, Fah's Hard as Stone and Ploy's Godlike Timing"],
  ["🥊","Counter-training works better","Counter-train before a fight and on fight night the opponent's main weapon lands less often while you read their game better. It helps a lot against the top fighters in later years"],
  ["📖","Missed story arcs are back","If you skipped Pailin and Vector Gym, or Fah and Ploy's second-year stories, they now start in the year you're playing. No need for a new save"],
@@ -5556,7 +5569,9 @@ const PATCH={id:"1.87.1",ver:"Muay Thai Moe v1.87.1",title:"News from Sirichai C
  ["📊", "Opponent levels show real strength", "An opponent's level is read against our best fighter in her division: a clearly stronger one sits 2–3 levels above us. Her sheet says stronger, even or weaker than ours, and if she has improved, her level is higher next time you meet."],
  ["🖤", "Vector camp in black and purple", "Night and Vega now wear the camp's black-and-purple kit, and the Vector camp has its own post-fight lines, sneering at the country camp, until the contract story."],
  ["💬", "More post-fight lines", "Opponents say funny and serious things and remember your record: lose to us often and they grumble, beat us often and they tell you to go train. Ploy is a colder prodigy now, and no longer calls out Kati after fighting someone else."],
- ["⚡","The game opens faster","The game file is less than half its old size, loading a save shows a camp-prep screen with tips, and art stays on your device so the next visit opens instantly"]],
+ ["⚡","The game opens faster","The game file is less than half its old size, loading a save shows a camp-prep screen with tips, and art stays on your device so the next visit opens instantly"],
+ ["🏮","Loy Krathong gacha opens Nov 18","The Loy Krathong gacha and code LOYKRATHONG69 open together, Nov 18 – Dec 7"],
+ ["🎴","Album keeps your place","View a card hint or open the gacha from the album and you come back to the same spot"]],
  foot:"Here's hoping you find a golden capsule ✦"};
 function maybeWhatsNew(){if(!G||G.ended||UI.scene)return;if(G.newsSeen===PATCH.id)return;UI.modal={type:"whatsnew"};}
 function whatsNewHTML(){return `<div class="wnew"><span class="pill gold">Update · ${esc(PATCH.ver)}</span><h2>🥊 ${esc(PATCH.title)}</h2><p class="lead">${esc(PATCH.lead)}</p>
@@ -5698,8 +5713,8 @@ function tutorialHTML(){const T=G.tut||{};const items=[["train","Set training",T
    ${done===4?`<p class="meta">All done! Press 'End week'</p>`:""}`;}
 function goalText(){const st=stageOf(G.week),me=roster(G);const best=d=>{const rows=standings(G,d);const i=rows.findIndex(r=>r.f.camp==="player");return i<0?null:{i:i+1,f:rows[i].f};};
   const a=best("A");
-  if(st==="local")return `Goal: subdistrict top 4 by week 20${a?` · ${a.f.name} is ranked #${a.i}`:""}`;
-  if(st==="district"){const inQ=[...G.qual.A,...G.qual.B].some(id=>G.F[id]&&G.F[id].camp==="player");return inQ?`Goal: district top 4 by week 40 to reach the provincial semis ${a?` · ${a.f.name} rank ${a.i}`:""}`:"Goal: missed the district round this year. Strengthen the camp and save money for next season";}
+  if(st==="local")return `🎯 Subdistrict top 4 by wk 20${a?` · ${a.f.name} (#${a.i})`:""}`;
+  if(st==="district"){const inQ=[...G.qual.A,...G.qual.B].some(id=>G.F[id]&&G.F[id].camp==="player");return inQ?`🎯 District top 4 by wk 40 for the provincial semis ${a?` · ${a.f.name} (#${a.i})`:""}`:"Goal: missed the district round this year. Strengthen the camp and save money for next season";}
   if(st==="final"&&G.week<=44&&[...((G.semis||{}).A||[]),...((G.semis||{}).B||[])].some(id=>G.F[id]&&G.F[id].camp==="player")&&!G.finalists.A.concat(G.finalists.B).some(id=>G.F[id]&&G.F[id].camp==="player"))return "Goal: win the provincial semifinal, week 44";
   if(st==="final"){const inF=[...G.finalists.A,...G.finalists.B].some(id=>G.F[id]&&G.F[id].camp==="player");return inF?"Goal: the provincial final, week 49, five rounds":"Goal: look after the camp until the season ends";}
   return "Year end · preparing for next year";}
@@ -6124,13 +6139,13 @@ const ACT={
   cardhint:d=>{const C=CARDS[d.v];if(C)toast(C.g?"This card comes from the gacha":`How to get it: ${C.hint||"keep following the story"}`);},
   petren:d=>{UI.modal={type:"petname",i:+d.v};render();setTimeout(()=>{const el=document.getElementById("petname");if(el){el.focus();el.select();}},60);},
   gacha:()=>{const r=gachaPull(G);if(!r)return;AU.sfx&&AU.sfx(CARDS[r.id].r==="SSR"||CARDS[r.id].r==="SR"?"level":"ui");save();UI.modal={type:"gacha",res:r};render();},
-  album:()=>{UI.modal={type:"album"};render();},
+  album:()=>{const from=UI.modal&&UI.modal.type;if(from!=="card"&&from!=="gbox")UI.albY=0;UI.modal={type:"album"};render();albRestore();},
   contestskip:()=>{UI.ctSkip=true;document.querySelectorAll(".ctrow").forEach(e=>e.classList.add("now"));},
   contestaward:()=>{const R=(G.contests||{})[G.season||1];UI.ctSkip=false;UI.ctT0=performance.now();UI.modal={type:"contest",ph:"award"};render();
     if(R&&R.rank===1){setTimeout(()=>{if(UI.modal&&UI.modal.type==="contest"&&UI.modal.ph==="award"&&!UI.ctSkip)AU.sfx&&AU.sfx("champ");},6800);for(let i=0;i<6;i++)setTimeout(()=>{if(UI.modal&&UI.modal.type==="contest"&&UI.modal.ph==="award")AU.sfx&&AU.sfx("pop");},7200+i*1150);}
     else setTimeout(()=>{if(UI.modal&&UI.modal.type==="contest")AU.sfx&&AU.sfx("ui");},6800);},
   contestdone:()=>{const R=(G.contests||{})[G.season||1];UI.modal=null;UI.ctSkip=false;if(R&&R.rank===1)AU.sfx&&AU.sfx("level");const d=UI.contestDone;UI.contestDone=null;save();if(d)d();else render();},
-  cardinfo:d=>{if(!CARDS[d.v])return;AU.sfx&&AU.sfx("ui");UI.modal={type:"card",id:d.v};render();},
+  cardinfo:d=>{if(!CARDS[d.v])return;AU.sfx&&AU.sfx("ui");const fromAlb=UI.modal&&UI.modal.type==="album";albKeep();UI.modal={type:"card",id:d.v,back:fromAlb?"album":null};render();},
   carddust:d=>{const C=CARDS[d.v],o=(G.cards||{})[d.v];if(!C||!o)return;const k=Math.min(+d.n||1,o.spare||0);if(!k)return;
     UI.modal={type:"confirm",title:"Break down into stardust?",ok:`Break down +✦${DUST_OF[C.r]*k}`,no:"Cancel",noAct:"cardinfo",noV:d.v,yes:"carddustok",id:d.v,k,
       html:`<div class="px confirm"><b>${esc(C.t)} ×${k}</b><p class="meta">Stardust +✦ ${DUST_OF[C.r]*k} · spare copies: ${(o.spare||0)-k} left</p><p class="meta">The card itself, its level and its story stay. This can't be undone</p>${(o.lv||1)<CARD_MAX_LV?`<p class="meta goldt">This card can still go up ${CARD_MAX_LV-(o.lv||1)} more level(s) with spares</p>`:""}</div>`};render();},
@@ -6178,9 +6193,9 @@ const ACT={
     if(n){AU.sfx("level");save();toast(`Up ${(SK_LINES[f.id]||[])[li]||""} ${n} times`);}render();},
   sksel:d=>{UI.skSel=d.id+":"+d.v;AU.sfx("ui");render();},
   newsok:()=>{G.newsSeen=PATCH.id;UI.modal=null;save();render();},
-  closeModal:()=>{const m=UI.modal;if(m&&m.type==="contest"){ACT.contestdone();return;}if(m&&m.type==="whatsnew"&&G){G.newsSeen=PATCH.id;save();}UI.modal=null;render();if(m&&m.after)m.after();},
+  closeModal:()=>{const m=UI.modal;if(m&&m.back==="album"&&G){ACT.album();return;}if(m&&m.type==="contest"){ACT.contestdone();return;}if(m&&m.type==="whatsnew"&&G){G.newsSeen=PATCH.id;save();}UI.modal=null;render();if(m&&m.after)m.after();},
   trait:d=>{const f=G.F[d.id],L=TRAITS[d.id];if(!f||!L||f.camp!=="player")return;const t=L.find(x=>x.id===d.v);if(!t||traitOf(f)===t.id)return;f.trait=t.id;save();render();toast(`${f.name} now uses the trait "${t.name}"`);},
-  gopen:d=>{GB.box=d.v==="loy"?"loy":"n";if(GB.box==="loy"&&!loyFest()){toast("The Loy Krathong machine is closed. See you next festival!");return;}GB.st=null;GB.ps=[];UI.gq=false;UI.modal={type:"gbox"};render();gbPreload();},
+  gopen:d=>{GB.box=d.v==="loy"?"loy":"n";if(GB.box==="loy"&&!loyFest()){toast(loySoon()?"The Loy Krathong gacha opens Nov 18 at 00:00":"The Loy Krathong machine is closed. See you next festival!");return;}const fromAlb=UI.modal&&UI.modal.type==="album";if(fromAlb)albKeep();GB.st=null;GB.ps=[];UI.gq=false;UI.modal={type:"gbox",back:fromAlb?"album":null};render();gbPreload();},
   gpull:()=>{if(GB.st)return;const cost=gbCost();if((G.dust||0)<cost){AU.sfx("ui");toast(`Not enough stardust. You need ${cost}✦ · earn it by winning fights, getting new cards and breaking down spares`);return;}
     const r=GB.box==="loy"?loyPull(G):gachaPull(G);if(!r)return;save();const rr=CARDS[r.id].r;
     GB.st={res:r,id:r.id,r:rr,T:gbTimeline(rr),t0:performance.now(),fired:{},upg:rr==="SSR"&&Math.random()<.5};GB.ps=[];UI.gq=false;
@@ -6990,7 +7005,7 @@ Object.assign(CARDS,{
   {n:"coach",t:"In Grandpa Chai's day the camp sold ten shirts a year… today we sold them in five minutes. The world really has changed."}]}});
 
 /* ===== v1.80: redeem codes + the Loy Krathong event (a floating-market gauntlet against the helmet gang) ===== */
-const REDEEM={"U0lSSUNIQUky":{k:"gate"},"TE9ZS1JBVEhPTkc2OQ==":{k:"loy",from:"2026-11-15",to:"2026-12-07"}};
+const REDEEM={"U0lSSUNIQUky":{k:"gate"},"TE9ZS1JBVEhPTkc2OQ==":{k:"loy",from:"2026-11-18",to:"2026-12-07"}};
 function evTest(){try{return !/github\.io$/.test(location.hostname)||/evtest/.test(location.hash)||localStorage.getItem("mtm-evtest")==="1";}catch(e){return false;}}
 function todayStr(){const d=new Date();return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;}
 const LOY_LADDER=["gang1","gang1","gang2","gang2","gang3","gang3","gang4","gang4","gang5"];
@@ -7004,7 +7019,7 @@ function evGang(G,k,f){const kind=LOY_LADDER[k],K=QK[kind],t=ovr(f.a)+K.lvl+k*.1
 function redeemCode(raw){const v=(raw||"").toUpperCase().replace(/\s+/g,"");if(!v)return;let key="";try{key=btoa(v);}catch(e){}const R=REDEEM[key];
   if(!R){AU.sfx("miss");toast("Code not found. Check the spelling and try again");return;}
   if(R.k==="gate"){G.unlocked=true;try{localStorage.setItem(GATE.key,"1");}catch(e){}save();AU.sfx("level");toast("Year 2 unlocked!");return;}
-  if(R.k==="loy"){const t=todayStr();if(!evTest()){if(t<R.from){toast("This code opens on Nov 15. Follow the page and Discord for news!");return;}if(t>R.to){toast("This year's Loy Krathong event has ended. See you next year!");return;}}
+  if(R.k==="loy"){const t=todayStr();if(!evTest()){if(t<R.from){toast("This code opens on Nov 18. Watch the page and Discord for the announcement");return;}if(t>R.to){toast("This year's Loy Krathong event has ended. See you next year!");return;}}
     if(loyOf(G)){toast("This save already used that code. Find the invitation in your mailbox");return;}
     G.ev=G.ev||{};G.ev.loy={got:G.week,season:G.season||1,best:0,tiers:{},runs:0};
     addMail(G,{kind:"event",ev:"loy",from:"Auntie Taew, som tam stall by the temple",title:"Loy Krathong at the floating market tonight!",body:"Manager dear, tonight I'm selling krathong at the floating-market fair. Bring the girls! Lots of food, and the som tam's on me! But I hear the helmet gang plans to make trouble… I'd feel much safer with you all there."});
@@ -7115,7 +7130,7 @@ Object.assign(ACT,{
 /* ===== v1.81: Loy Krathong round 2 — Thai-dress scenes, SR cards, the krathong thief, the otter, Thai dress off-stage ===== */
 const LOY_CARDS=["lk_kati","lk_mali","lk_rin","lk_ploy","lk_fah"];
 (()=>{
-const LOY_HINT="Loy Krathong 2026 event · from the Riverside Brawl",LG_HINT="Loy Krathong gacha machine · open only during the festival, Nov 15–Dec 7";
+const LOY_HINT="Loy Krathong 2026 event · from the Riverside Brawl",LG_HINT="Loy Krathong gacha · festival only, Nov 18 – Dec 7";
 const T=(n,f,t)=>({n,f,l:"thai",t}),N=t=>({n:"nar",t}),P=(who,t)=>({n:"npc",who,t});
 Object.assign(CARDS,{
  lk_kati:{c:"kati",r:"SR",ev:1,t:"Lost at Loy Krathong",hint:LOY_HINT,bg:"river",need:()=>false,steps:[
@@ -7325,7 +7340,7 @@ Object.assign(ACT,{
 });
 
 /* ===== v1.82: code-content replay in settings + the Loy Krathong gacha (festival only) ===== */
-const LOY_FEST={from:"2026-11-15",to:"2026-12-07"};
+const LOY_FEST={from:"2026-11-18",to:"2026-12-07"};
 function loyFest(){const t=todayStr();return evTest()||(t>=LOY_FEST.from&&t<=LOY_FEST.to);}
 const LG_COST=30,LG_PITY=10;
 function loyPull(G){if(!loyFest()||(G.dust||0)<LG_COST)return null;G.dust-=LG_COST;G.lgPity=(G.lgPity||0)+1;G.lgPulls=(G.lgPulls||0)+1;G.cards=G.cards||{};
@@ -7334,13 +7349,17 @@ function loyPull(G){if(!loyFest()||(G.dust||0)<LG_COST)return null;G.dust-=LG_CO
   const o=G.cards[id];let res;if(!o){G.cards[id]={n:1,lv:1,wk:absWeek(G),seen:false};res={id,isNew:true};}
   else{o.n=(o.n||1)+1;o.spare=(o.spare||0)+1;res={id,spare:o.spare,canUp:(o.lv||1)<3};} /* v1.85.1: every duplicate is kept — the player levels the card up or breaks it down on the card page */
   res.loy=1;return res;}
-function loyGachaHTML(){if(!loyFest())return "";const own=Object.keys(CARDS).filter(k=>CARDS[k].lg&&(G.cards||{})[k]).length,all=Object.keys(CARDS).filter(k=>CARDS[k].lg).length;
+// v1.87.3: before the festival the box is on show but locked, with its opening time
+function loySoon(){const t=todayStr();return !evTest()&&t<LOY_FEST.from;}
+function loyGachaHTML(){if(loySoon()){const all=Object.keys(CARDS).filter(k=>CARDS[k].lg).length;
+    return `<div class="gacha loyg soon"><span><b class="goldt">Loy Krathong gacha</b> <small>Opens Nov 18 at 00:00 until Dec 7 · Thai-dress cards: ${all} cards · save up your stardust</small></span><button class="btn sm" disabled aria-disabled="true">🔒 Opens Nov 18</button></div>`;}
+  if(!loyFest())return "";const own=Object.keys(CARDS).filter(k=>CARDS[k].lg&&(G.cards||{})[k]).length,all=Object.keys(CARDS).filter(k=>CARDS[k].lg).length;
   return `<div class="gacha loyg"><span><b class="goldt">Loy Krathong Machine</b> <small>Open until Dec 7 only · Thai-dress cards ${own}/${all} cards · guaranteed SSR in ${Math.max(1,LG_PITY-(G.lgPity||0))} left · cards you get stay in your album forever</small></span><button class="btn sm gold" data-act="gopen" data-v="loy">🏮 Loy Krathong machine ${LG_COST}✦</button></div>`;}
 function codeContentHTML(){const L=loyOf(G);if(!L)return "";
   return `<div class="set"><span><b>Code content</b><small>Go back to events you unlocked with a code, anytime</small></span><span class="obtns"><button class="btn sm" data-act="loyhub">Loy Krathong 2026 ▸</button></span></div>`;}
 function loyHubHTML(){return `<h2>Riverside Brawl on Loy Krathong Night</h2><p class="meta">Event from code LOYKRATHONG69 · replay the brawl, rewatch the opening and endings, and catch the thief here</p><div class="center endbtns col">${evMailAct({})}</div>${loyGachaHTML()}`;}
 Object.assign(ACT,{
-  loygacha:()=>{const r=loyPull(G);if(!r){if(!loyFest())toast("The Loy Krathong machine is closed. See you next festival!");return;}AU.sfx&&AU.sfx(["SSR","SR"].includes(CARDS[r.id].r)?"level":"ui");save();UI.modal={type:"gacha",res:r};render();},
+  loygacha:()=>{const r=loyPull(G);if(!r){if(loySoon())toast("The Loy Krathong gacha opens Nov 18 at 00:00");else if(!loyFest())toast("The Loy Krathong machine is closed. See you next festival!");return;}AU.sfx&&AU.sfx(["SSR","SR"].includes(CARDS[r.id].r)?"level":"ui");save();UI.modal={type:"gacha",res:r};render();},
   loyhub:()=>{UI.modal={type:"loyhub"};render();},
 });
 // v1.86: card levels — longer stories, a Lv.2 epilogue and a Lv.3 special scene (and a minigame on the SSR cards)
@@ -7356,6 +7375,7 @@ const CARD_LV={
  g_mali_ssr:{lv2:[cN("Two weeks later, a big parcel arrives from Isan, addressed to 'the manager,' not to Mali."),cN("Inside are sticky rice, a jar of jaew bong chili paste and a letter in big, careful handwriting."),cN("'To the manager. I had the neighbor's kid write this for me. Tell Mali to go to bed early. And thank you for making my girl laugh every time she calls.'"),{n:"mali",f:"pout",l:"casual",t:"Mom sent more to the manager than to me! …I'm not jealous. Just a little."}],lv3:[cN("At the Rocket Festival, Mali brings you back to the village. This time her mom has a som tam stall at the temple fair."),cP("Mali's mom","The customers are piling up! Mali, take that mortar. Manager, this one. Quick, quick!"),{n:"mali",f:"happy",l:"casual",t:"Do you know how to pound som tam? If not, no problem. Just pound to the mor lam drums from the stage."},{n:"mali",f:"happy",l:"casual",t:"Ready? First mortar! (Play the card's minigame from the card page)"}],lv3t:"Mali's Mom's Som Tam Stall",mg:"somtam",mgt:"Help Mali's mom pound som tam at the temple fair"},
  g_rin_ssr:{lv2:[cN("Rin writes in the new notebook every night, but there isn't a single number in it."),{n:"rin",f:"happy",l:"casual",t:"It's a feelings journal. Today Kati burned the rice, Mali laughed until she choked, and Coach Daeng secretly fed the cat."},{n:"rin",f:"flustered",l:"casual",t:"I left this page blank for you to write on… Anything at all. I won't analyze it. Promise."},{n:"rin",f:"pout",l:"casual",t:"…Just a tiny analysis. Your handwriting slants right. That means you're an optimist."}],lv3:[cN("Rin finds you in the training room with two drumsticks and a sheet of paper that reads 'Experiment 1: No plans allowed.'"),{n:"rin",f:"happy",l:"train",t:"You drum at random, no warning. I'll kick on pure instinct."},{n:"coach",t:"Glasses girl training without a plan? The world must be ending."},{n:"rin",f:"flustered",l:"train",t:"Quiet, Coach Daeng! …I'm ready, even though I don't know what's coming. (Play the card's minigame from the card page)"}],lv3t:"The Experiment With No Plan",mg:"bag",mgt:"Drum at random so Rin kicks on instinct"},
  g_ploy_ssr:{lv2:[cN("Sunday morning, Ploy's mom shows up at camp with a three-tier tiffin carrier."),cP("Ploy's mom","When Ploy was little she was afraid of the dark. She slept with the light on until she was twelve. Don't tell anyone."),{n:"ploy",f:"flustered",l:"casual",t:"MOM!! …You did not hear that. Delete it from your head right now."},{n:"ploy",f:"happy",l:"casual",t:"…Come visit Mom's place sometime. She keeps a photo of every win. I want you to see the ones you're in."}],lv3:[cN("Ploy takes you to her mom's house. The walls are covered in photos from her very first fight, and in the corner hangs a small heavy bag, split open to the stuffing."),{n:"ploy",f:"happy",l:"casual",t:"My very first bag. When I was little, Mom would sit and clap the rhythm, and I'd throw knees to her claps."},cP("Ploy's mom","I can't clap like that anymore, my wrists are too old. Could the manager drum for her instead?"),{n:"ploy",f:"flustered",l:"train",t:"…I haven't hit this bag in twenty years. Give me the rhythm, okay? (Play the card's minigame from the card page)"}],lv3t:"Ploy's First Heavy Bag",mg:"bag",mgt:"Keep the knee rhythm the way Ploy's mom used to clap it"},
+ g_kati_ssr:{lv2:[cN("After her next fight, Kati holds out her wrist: a thin white thread is tied there, a scrap from Grandpa's old mongkhon."),{"n":"kati","f":"happy","l":"casual","t":"I kept two pieces. One for me… and one for you. Give me your hand."},{"n":"kati","f":"flustered","l":"casual","t":"Don't take it off. Grandpa said a blessing thread only breaks once you don't need it anymore."}],lv3:[cN("At the yearly temple fair, the villagers ask Sirichai to open the ring with a wai khru, but the drummer hasn't shown up."),{"n":"kati","f":"happy","l":"thai","t":"Could you play the drum for me? Slow, like Grandpa used to when I was little."},{"n":"kati","f":"flustered","l":"thai","t":"I'll follow your drum. Ready! (Tap the minigame button on the card page.)"}],lv3t:"Grandpa's wai khru drum",mg:"bag",mgt:"Drum for Kati's wai khru at the temple fair"},
  g_fah_ssr:{lv2:[cN("Fah hands you a Polaroid of the morning sky after the storm, signed in big letters in the corner."),{n:"fah",f:"happy",l:"casual",t:"Fah took it that very morning. The prettiest sky is the one after a storm. Keep it, and don't you dare lose it."},{n:"fah",f:"flustered",l:"casual",t:"And… this rainy season, if it thunders at night, can Fah come knock on your door? Not 'cause I'm scared. Just asking."}],lv3:[cN("Another storm rolls in, but this time Fah drags a khaek drum into the middle of the office."),{n:"fah",f:"happy",l:"casual",t:"Fah figured it out! Whenever it thunders, you drum louder, and Fah kicks to the drum instead!"},{n:"fah",f:"happy",l:"train",t:"That way Fah only hears your drum, not the thunder. Genius, right?!"},{n:"fah",f:"flustered",l:"train",t:"Go! Here comes the thunder! (Play the card's minigame from the card page)"}],lv3t:"Drums Over Thunder",mg:"bag",mgt:"Drown out the thunder with drums for Fah's kicks"},
  lg_kati_sr:{lv2:[cN("Next morning you find Kati's little krathong caught on the bank below the pier, its candle out."),cN("Under its base is a tiny folded note, half soaked. Only one word is readable: 'Manager'."),{n:"kati",f:"flustered",l:"thai",t:"Don't read it!! …The angels already read it. You don't need to!"}],lv3:[cN("The next Loy Krathong, Kati brings two krathongs: one with Grandpa's name, one with the camp's."),{n:"kati",f:"happy",l:"thai",t:"This year I'm not asking for anything. I came to say thank you."},{n:"kati",f:"sad",l:"thai",t:"Thank you that the camp's still here. Thank you, Grandpa, for sending the Manager… I really believe you did."},{choice:[{t:"\"Then I'll make a wish for you this year.\"",then:[{n:"kati",f:"flustered",l:"thai",t:"What did you wish for… No, don't tell me! I'll die of embarrassment right here."}]},{t:"Help Kati light both candles",then:[cN("The wind blows the candles out three times until you and Kati cup the flame together.")]}]},cN("The two krathongs drift off together, Grandpa's leading and the camp's following."),{n:"kati",f:"happy",l:"thai",t:"Next year I'll make three. The third one gets your name."}],lv3t:"Kati's Two Krathongs"},
  lg_mali_sr:{lv2:[cN("A year later: the same ramwong stage, the same songs. Mali has been waiting at the edge of the circle since dusk."),{n:"mali",f:"happy",l:"thai",t:"See! Mom was right! We got to dance together again~"},{n:"mali",f:"flustered",l:"thai",t:"…And you're on the beat this year. You've been practising in secret, haven't you?"}],lv3:[cN("The ramwong organiser comes looking for Mali: the lead dancer has suddenly fallen ill."),cP("Ramwong organiser","You, the girl in yellow. Could you lead the circle? I've watched you dance beautifully two years running."),{n:"mali",f:"flustered",l:"thai",t:"Me!? I only copied my mom. I never had lessons…"},{choice:[{t:"\"You're the best dancer in the circle. Go on.\"",then:[cN("Mali steps up with trembling hands, but once the music starts the whole circle turns with her.")]},{t:"\"I'll dance right at the front for you.\"",then:[cN("You dance at the very front. Mali watches you every beat and forgets she's leading the whole circle.")]}]},cN("When the song ends the whole square applauds, and the organiser hands her a jasmine garland."),{n:"mali",f:"happy",l:"thai",t:"I'll take it to Mom… and half of it is yours, Manager~"}],lv3t:"Leading the Circle"},

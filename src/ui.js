@@ -112,8 +112,8 @@ function hearts(b,f){f=f||{bond:b};const H=heartLv(f),pct=Math.round(H.into/H.ne
 function bar(label,v,color,txt){return `<div class="bar"><span>${label}</span><i style="--v:${clamp(v,0,100)}%;--bc:${color}"></i><b class="num">${txt??Math.round(v)}</b></div>`;}
 function mini(v,color){return `<i class="mini" style="--v:${clamp(v,0,100)}%;--bc:${color}"></i>`;}
 /* v1.88: an opponent shows her strength level, coloured against our best fighter in her division (red = stronger) */
-function lvTone(f){if(!G||!f||f.camp==="player")return null;const mine=Object.values(G.F).filter(x=>x.camp==="player"&&x.div===f.div);if(!mine.length)return null;
-  const d=effOvr(G,f)-Math.max(...mine.map(x=>effOvr(G,x)));return d>=1.2?{c:"red",t:"เก่งกว่าค่ายเรา"}:d<=-1.2?{c:"green",t:"อ่อนกว่าค่ายเรา"}:{c:"gold",t:"สูสีกับค่ายเรา"};}
+function lvTone(f){if(!G||!f||f.camp==="player")return null;const I=lvInfo(f);if(I.rate==null)return null;
+  return I.rate<.4?{c:"red",t:"เก่งกว่าค่ายเรา"}:I.rate>=.6?{c:"green",t:"อ่อนกว่าค่ายเรา"}:{c:"gold",t:"สูสีกับค่ายเรา"};}
 function xpBar(f){if(f.camp!=="player"&&!f.canon){const t=lvTone(f);return `<div class="xp"><span class="lv${t?" lt-"+t.c:""}">Lv.${lvOf(f)}</span>${t?`<span class="pill ${t.c}">${t.t}</span>`:""}</div>`;}const need=xpNeed(f.lvl);return `<div class="xp"><span class="lv">Lv.${f.lvl}</span><i style="--v:${f.lvl>=MAX_LV?100:clamp(f.xp/need*100,0,100)}%"></i><span class="num dim">${f.lvl>=MAX_LV?"MAX":`${Math.round(f.xp)}/${need}`}</span>${f.sp>0&&f.camp==="player"?`<button class="spchip" data-act="ptab" data-v="skill">★ ${f.sp} แต้มสกิล</button>`:""}</div>`;}
 function formHTML(f){return `<span class="form">${f.form.map(r=>`<i class="${r}">${r==="W"?"ช":r==="L"?"พ":"ส"}</i>`).join("")||'<span class="dim">—</span>'}</span>`;}
 const rec=f=>`${f.rec.w}-${f.rec.l}-${f.rec.d}`;
@@ -556,7 +556,7 @@ function careerHTML(d){const list=Object.values(G.F).filter(f=>f.div===d&&f.camp
 // v1.85: card detail page — rarity, copies, a teaser line, read the story or break spare copies into stardust
 function cardBlurb(C){if(C.blurb)return C.blurb;const st=(C.steps||[]).find(x=>x&&typeof x.t==="string"&&x.n!=="nar")||(C.steps||[]).find(x=>x&&typeof x.t==="string");if(!st)return "";const t=st.t;return t.length>72?t.slice(0,70)+"…":t;}
 /* v1.87: some cards continue another card's story — once both are owned, the card page links them */
-const CARD_SEQ={h_mali:"g_mali_sr",h_rin:"g_rin_sr",h_fah:"g_fah_sr",g_mali_ssr:"h_mali",g_ploy_ssr:"g_ploy_sr"};
+const CARD_SEQ={h_mali:"g_mali_sr",h_rin:"g_rin_sr",h_fah:"g_fah_sr",g_mali_ssr:"h_mali",g_ploy_ssr:"g_ploy_sr",g_kati_ssr:"g_kati_sr"};
 function cardLinkHTML(id){const own=G.cards||{},out=[];const pv=CARD_SEQ[id];if(pv&&own[pv]&&CARDS[pv])out.push(`↩ เรื่องต่อจาก <button class="clinkb" data-act="cardinfo" data-v="${pv}">${esc(CARDS[pv].t)}</button>`);
   Object.keys(CARD_SEQ).filter(k=>CARD_SEQ[k]===id&&own[k]&&CARDS[k]).forEach(k=>out.push(`↪ มีเรื่องต่อใน <button class="clinkb" data-act="cardinfo" data-v="${k}">${esc(CARDS[k].t)}</button>`));
   return out.length?`<p class="clink">${out.join("<br>")}</p>`:"";}
@@ -1032,8 +1032,8 @@ function tutorialHTML(){const T=G.tut||{};const items=[["train","ตั้งโ
    ${done===4?`<p class="meta">ครบแล้ว! กด 'จบสัปดาห์' ได้เลย</p>`:""}`;}
 function goalText(){const st=stageOf(G.week),me=roster(G);const best=d=>{const rows=standings(G,d);const i=rows.findIndex(r=>r.f.camp==="player");return i<0?null:{i:i+1,f:rows[i].f};};
   const a=best("A");
-  if(st==="local")return `เป้าหมาย: ติดท็อป 4 รอบตำบลภายในสัปดาห์ 20${a?` · ${a.f.name}อยู่อันดับ ${a.i}`:""}`;
-  if(st==="district"){const inQ=[...G.qual.A,...G.qual.B].some(id=>G.F[id]&&G.F[id].camp==="player");return inQ?`เป้าหมาย: ติดท็อป 4 รอบอำเภอภายในสัปดาห์ 40 เพื่อไปรองชิงจังหวัด${a?` · ${a.f.name}อันดับ ${a.i}`:""}`:"เป้าหมาย: ปีนี้พลาดรอบอำเภอ สร้างค่ายให้แกร่งและเก็บเงินรอฤดูกาลหน้า";}
+  if(st==="local")return `🎯 ท็อป 4 ตำบล ก่อน สด.20${a?` · ${a.f.name} (อันดับ ${a.i})`:""}`;
+  if(st==="district"){const inQ=[...G.qual.A,...G.qual.B].some(id=>G.F[id]&&G.F[id].camp==="player");return inQ?`🎯 ท็อป 4 อำเภอ ก่อน สด.40 ไปรองชิงจังหวัด${a?` · ${a.f.name} (อันดับ ${a.i})`:""}`:"เป้าหมาย: ปีนี้พลาดรอบอำเภอ สร้างค่ายให้แกร่งและเก็บเงินรอฤดูกาลหน้า";}
   if(st==="final"&&G.week<=44&&[...((G.semis||{}).A||[]),...((G.semis||{}).B||[])].some(id=>G.F[id]&&G.F[id].camp==="player")&&!G.finalists.A.concat(G.finalists.B).some(id=>G.F[id]&&G.F[id].camp==="player"))return "เป้าหมาย: ชนะรอบรองชิงจังหวัด สัปดาห์ 44";
   if(st==="final"){const inF=[...G.finalists.A,...G.finalists.B].some(id=>G.F[id]&&G.F[id].camp==="player");return inF?"เป้าหมาย: ชิงแชมป์จังหวัด สัปดาห์ 49 ห้ายก":"เป้าหมาย: ดูแลค่ายจนจบฤดูกาล";}
   return "ปิดปี · เตรียมตัวสำหรับปีหน้า";}
