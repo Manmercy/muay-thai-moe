@@ -1199,8 +1199,7 @@ const YEAR_THEMES={
  sponsor:{ic:"💼",name:"ปีสปอนเซอร์",desc:"ถ้ารับข้อเสนอ ได้ ฿2,000 ทุกสัปดาห์จนถึงสัปดาห์ 40 และถ้าค่ายชนะครบ 8 ไฟต์ภายในสัปดาห์ 40 ได้โบนัสอีก ฿20,000"},
  pm25:{ic:"😷",name:"ปีฝุ่น PM2.5",desc:"สัปดาห์ 37–46 ฝุ่นคลุมเชียงใหม่ ซ้อมได้ผลน้อยลง (ฟิตร่างกายลดมากสุด) ถ้ามีห้องซ้อมในร่มกรองฝุ่นจะซ้อมได้เต็มที่",from:37,to:46},
  tourist:{ic:"🧳",name:"ปีนักท่องเที่ยวบูม",desc:"ค่าเรียนแพงขึ้น 20% ทั้งปี แต่ค่ายวุ่น นักมวยล้าเพิ่มสัปดาห์ละนิด"},
- tv:{ic:"📺",name:"ปีรายการทีวี",desc:"ทีวีตามถ่ายค่ายทั้งปี ชนะได้ชื่อเสียงมากขึ้น แพ้ก็เสียชื่อเสียงนิดหน่อย"},
- lotto:{ic:"🎟️",name:"ปีหวยออก",desc:"ลุงข้างค่ายถูกหวย สัปดาห์ 20 จะมีเงินก้อนบริจาคเข้าค่าย"}};
+ tv:{ic:"📺",name:"ปีรายการทีวี",desc:"ทีวีตามถ่ายค่ายทั้งปี ชนะได้ชื่อเสียงมากขึ้น แพ้ก็เสียชื่อเสียงนิดหน่อย"}};
 const ytKey=G=>G&&G.yt&&G.yt.season===(G.season||1)?G.yt.k:null;
 const ytIn=(G,k)=>{if(ytKey(G)!==k)return false;const T=YEAR_THEMES[k];return T.from==null||(G.week>=T.from&&G.week<=T.to);};
 function pickYearTheme(G){const S=G.season||1;if(S<2)return null;const last=G.yt&&G.yt.k;const keys=Object.keys(YEAR_THEMES).filter(k=>k!==last);
