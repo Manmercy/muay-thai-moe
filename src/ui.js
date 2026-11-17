@@ -1602,7 +1602,7 @@ const ACT={
   gofac:()=>{UI.modal=null;UI.csub="fac";ACT.tab({v:"camp"});},
   camplv:()=>{UI.modal={type:"camplv"};render();},
   loan:()=>{if(!loanOk(G)){toast(G.loan>0?"ยังมีเงินกู้ค้างอยู่":"ยังไม่ถึงขั้นต้องกู้");return;}UI.modal={type:"loan"};render();},
-  loanyes:()=>{if(!takeLoan(G))return;UI.modal=null;save();AU.sfx("coin");playScene([{n:"npc",who:"ลูกน้องหมวกทอง",t:"ขอบคุณที่ใช้บริการครับเฮีย ครบสี่อาทิตย์ดอกขึ้นนะ เดี๋ยวพวกเราแวะไปเยี่ยมแถวตลาดบ่อย ๆ"},{n:"coach",t:"…เอาเถอะ ได้เงินมาแล้วก็รีบหาทางคืน อย่าให้มันพอกหางหมู"}],()=>render(),{bg:"food",look:"casual"});},
+  loanyes:()=>{if(!takeLoan(G))return;for(const m of G.mail||[])if(m.kind==="loan"&&!m.done){m.done=true;m.took=true;}UI.modal=null;save();AU.sfx("coin");playScene([{n:"npc",who:"ลูกน้องหมวกทอง",t:"ขอบคุณที่ใช้บริการครับเฮีย ครบสี่อาทิตย์ดอกขึ้นนะ เดี๋ยวพวกเราแวะไปเยี่ยมแถวตลาดบ่อย ๆ"},{n:"coach",t:"…เอาเถอะ ได้เงินมาแล้วก็รีบหาทางคืน อย่าให้มันพอกหางหมู"}],()=>render(),{bg:"food",look:"casual"});},
   repayloan:()=>{if(repayLoan(G)){save();AU.sfx("level");toast("คืนเงินกู้หมวกทองครบแล้ว หายใจโล่ง");render();}},
   advice:d=>{UI.modal={type:"advice",id:d.id};render();},
   mastersOpen:()=>{UI.modal={type:"masters"};render();},
