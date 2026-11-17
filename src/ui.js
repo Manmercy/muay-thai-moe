@@ -1271,22 +1271,23 @@ function cardSeq(C){const live=()=>UI.fight&&UI.fight.care===C;const q=s=>docume
     setTimeout(()=>{if(!live())return;C.phase="shuffle";const box=q(".cshuf");if(box)box.classList.add("spin");let n=0;
       const swap=()=>{if(!live())return;if(n++>=7){C.phase="pick";render();return;}let a=Math.floor(Math.random()*5),b=(a+1+Math.floor(Math.random()*4))%5;
         const ka=C.pos.indexOf(a),kb=C.pos.indexOf(b);C.pos[ka]=b;C.pos[kb]=a;for(const k of [ka,kb]){const e=q(`.cshc[data-k="${k}"]`);if(e)e.style.left=(C.pos[k]*20)+"%";}AU.sfx("miss");setTimeout(swap,240);};swap();},450);},1400);}
-function careOilHTML(A,C){const left=C.done?0:C.t0?Math.max(0,Math.ceil(C.secs-(performance.now()-C.t0)/1000)):C.secs;
-  return `<div class="care"><div class="need"><img class="face sm" src="${faceSrc(A.f.id,"happy")}" alt=""><span>${C.done?`นวดได้ ${C.taps} ครั้ง · ${careSum(C)}`:"ราดน้ำมันมวย แล้วลากไปมาเร็ว ๆ"}</span><div class="cslots"><span class="cslot oilcombo"><b class="num">${C.taps}</b></span><span class="cslot oiltime"><b class="num">${left}</b><small>วิ</small></span></div></div>
-  <div class="oiltrack ${C.done?"done":""}" data-oil="1"><i class="oilend l"></i><i class="oilend r"></i><button class="oilknob" aria-label="ลากนวดไปมา" ${C.done?"disabled":""}>${PIX.oilhand}</button></div></div>`;}
+/* oil massage, two steps: slide the bottle all the way to pour the boxing oil, then tap the button as fast as you can before time runs out */
+function careOilHTML(A,C){const left=C.done?0:C.t0?Math.max(0,Math.ceil(C.secs-(performance.now()-C.t0)/1000)):C.secs;const pour=C.phase==="pour";
+  return `<div class="care"><div class="need"><img class="face sm" src="${faceSrc(A.f.id,"happy")}" alt=""><span>${C.done?`นวดได้ ${C.taps} ครั้ง · ${careSum(C)}`:pour?"ลากขวดไปทางขวาเพื่อราดน้ำมันมวย":"กดรัว ๆ เพื่อนวด ก่อนหมดเวลา!"}</span><div class="cslots"><span class="cslot oilcombo"><b class="num">${C.taps}</b></span><span class="cslot oiltime"><b class="num">${left}</b><small>วิ</small></span></div></div>
+  ${pour?`<div class="oiltrack" data-oil="1"><span class="oilhint">▸ ▸ ▸</span><i class="oilend r">${PIX.water}</i><button class="oilknob" aria-label="ลากเพื่อราดน้ำมันมวย">${PIX.rub}</button></div>`
+   :`<div class="carebtns one"><button class="oilrub ${C.done?"":"go"}" data-act="coil" ${C.done?"disabled":""}>${PIX.oilhand}<small>${C.done?`นวดได้ ${C.taps} ครั้ง`:"นวด!"}</small></button></div>`}</div>`;}
 /* apply a corner result and remember how much it gave back, for the summary line */
 function careApply(U,C){const A=U.F.A,s0=A.sta,h0=A.hp;applyCare(U.F,C.q);C.gain={sta:Math.round(A.sta-s0),hp:Math.round(A.hp-h0)};if(C.q>=1)U.careOK=(U.careOK||0)+1;}
-/* oil massage: drag the hand from one end of the track to the other; every arrival at the far end is one stroke */
-function oilFinish(){const U=UI.fight,C=U&&U.care;if(!C||C.mode!=="oil"||C.done)return;C.done=true;const target=C.secs*2;C.q=Math.max(.15,Math.min(1.3,C.taps/target));careApply(U,C);AU.sfx(C.q>=1?"level":"ui");render();}
-function oilTick(){const U=UI.fight,C=U&&U.care;if(!C||C.mode!=="oil"||C.done||!C.t0)return;const left=Math.max(0,Math.ceil(C.secs-(performance.now()-C.t0)/1000));const el=document.querySelector(".oiltime b");if(el)el.textContent=left;if(left<=0){oilFinish();return;}setTimeout(oilTick,200);}
+function oilFinish(){const U=UI.fight,C=U&&U.care;if(!C||C.mode!=="oil"||C.done)return;C.done=true;const target=C.secs*3;C.q=Math.max(.15,Math.min(1.3,C.taps/target));careApply(U,C);AU.sfx(C.q>=1?"level":"ui");render();}
+function oilTick(){const U=UI.fight,C=U&&U.care;if(!C||C.mode!=="oil"||C.done||!C.t0)return;const left=Math.max(0,Math.ceil(C.secs-(performance.now()-C.t0)/1000));const el=document.querySelector(".oiltime b");if(el)el.textContent=left;if(left<=0){oilFinish();return;}setTimeout(oilTick,150);}
+function oilPoured(C){C.phase="rub";C.t0=performance.now();AU.sfx("level");render();setTimeout(oilTick,150);}
 (function(){let drag=null;
-  const pos=e=>{const t=document.querySelector(".oiltrack");if(!t)return null;const r=t.getBoundingClientRect();return Math.max(0,Math.min(1,(e.clientX-r.left-22)/(r.width-44)));};
-  document.addEventListener("pointerdown",e=>{const k=e.target.closest&&e.target.closest(".oilknob");if(!k||k.disabled)return;const C=UI.fight&&UI.fight.care;if(!C||C.mode!=="oil"||C.done)return;e.preventDefault();drag=true;
-    if(!C.t0){C.t0=performance.now();setTimeout(oilTick,200);}});
-  document.addEventListener("pointermove",e=>{if(!drag)return;const C=UI.fight&&UI.fight.care;if(!C||C.done){drag=null;return;}const x=pos(e);if(x==null)return;
-    const k=document.querySelector(".oilknob");if(k)k.style.left=`calc(${(x*100).toFixed(1)}% - ${(x*44).toFixed(1)}px)`;
-    const side=x<.12?"L":x>.88?"R":null;if(side&&side!==C.side){if(C.side){C.taps++;AU.sfx("ui");const b=document.querySelector(".oilcombo b");if(b){b.textContent=C.taps;b.parentElement.classList.remove("pop");void b.offsetWidth;b.parentElement.classList.add("pop");}}C.side=side;}});
-  document.addEventListener("pointerup",()=>{drag=null;});document.addEventListener("pointercancel",()=>{drag=null;});})();
+  const pos=e=>{const t=document.querySelector(".oiltrack");if(!t)return null;const r=t.getBoundingClientRect();return Math.max(0,Math.min(1,(e.clientX-r.left-28)/(r.width-56)));};
+  document.addEventListener("pointerdown",e=>{const k=e.target.closest&&e.target.closest(".oilknob");if(!k)return;const C=UI.fight&&UI.fight.care;if(!C||C.mode!=="oil"||C.phase!=="pour")return;e.preventDefault();drag=true;});
+  document.addEventListener("pointermove",e=>{if(!drag)return;const C=UI.fight&&UI.fight.care;if(!C||C.phase!=="pour"){drag=null;return;}const x=pos(e);if(x==null)return;
+    const k=document.querySelector(".oilknob");if(k)k.style.left=`calc(${(x*100).toFixed(1)}% - ${(x*56).toFixed(1)}px + 6px)`;if(x>=.95){drag=null;oilPoured(C);}});
+  const up=()=>{if(!drag)return;drag=null;const k=document.querySelector(".oilknob");if(k){k.style.transition="left .2s";k.style.left="6px";setTimeout(()=>{if(k)k.style.transition="";},220);}};
+  document.addEventListener("pointerup",up);document.addEventListener("pointercancel",up);})();
 function cornerHTML(F){const U=UI.fight,C=U.care,A=F.A,B=F.B,c=F.cards[F.cards.length-1]||[10,10];const rec=aiCorner(F,A,B);
   const note=B.sta<40?"คู่ชกเริ่มหมดแรง":A.sta<40?"เราแรงเหลือน้อย":A.rlanded<B.rlanded-2?"ยกนี้เราโดนเยอะ":B.legs>20?"ขาคู่ชกเริ่มหนัก":A.rage?"ยังเลือดเดือดอยู่!":"";
   const slots=(C.need||[]).map((k,i)=>{const g=C.got[i];return `<span class="cslot ${g==null?"":g===k?"ok":"bad"}">${PIX[k]}</span>`;}).join('<i class="arr">›</i>');
@@ -1467,7 +1468,7 @@ function roundEnd(){const U=UI.fight;clearTimeout(U.timer);const F=U.F;
 /* v1.88 corner care comes in three flavours: the order puzzle, a face-down card, or a fast oil massage */
 function newCare(F){const r=Math.random(),mode=r<.5?"order":r<.75?"card":"oil";
   if(mode==="card")return {mode,deck:[1.4,1,1,.6,-.3],pos:[0,1,2,3,4],phase:"show",flip:-1,done:false};
-  if(mode==="oil")return {mode,taps:0,t0:0,done:false,secs:F.round<=1?10:F.round===2?8:5,side:null};return {mode,need:careNeeds(F),got:[],done:false};}
+  if(mode==="oil")return {mode,taps:0,t0:0,done:false,secs:F.round<=1?10:F.round===2?8:5,phase:"pour"};return {mode,need:careNeeds(F),got:[],done:false};}
 /* v1.88: after the towel — she is safe, but it hurts her pride (morale −8 is applied in applyResult) */
 function towelScene(f){const L={kati:["หนูยังยืนได้นะคะครู… ปู่ไม่เคยโยนผ้า","sad"],mali:["มะลิยังไหวค่ะ! …ทำไมโยนล่ะคะ","sad"],rin:["ข้อมูลบอกว่าฉันยังมีโอกาสสิบสองเปอร์เซ็นต์ …ฉันเข้าใจค่ะ แต่ไม่ได้แปลว่าฉันชอบ","sad"],ploy:["…ครั้งแรกในชีวิตที่มีคนโยนผ้าให้พี่ จำไว้นะ","angry"],fah:["ฟ้ายังไม่แพ้!! ใครโยนผ้า!! …ครูเหรอ ฟ้าโกรธครูสามวัน","angry"]}[f.id];
   const R={kati:"ปู่ไม่เคยมีหลานให้ห่วงแบบนี้ไง",mali:"เพราะครูอยากเห็นมะลิยิ้มได้พรุ่งนี้ ไม่ใช่นอนโรงพยาบาล",rin:"ไม่ต้องชอบ แค่หายเจ็บก่อนแล้วค่อยมาเถียงครู",ploy:"จำไว้เลย ครูก็จะจำว่าพลอยยังยืนอยู่",fah:"สามวันพอ วันที่สี่มาซ้อมด้วย"}[f.id]||"ไม่เป็นไรนะ ไฟต์หน้ายังมี";
@@ -1683,6 +1684,8 @@ const ACT={
   revpick:d=>{UI.revIdx=+d.v;render();},
   cpick:d=>{UI.fight.pick=d.v;render();},
   cgo:()=>{const U=UI.fight;if(!U.pick)return;const C=U.care;if(C&&!C.done){C.q=0;C.done=true;applyCare(U.F,0);}AU.sfx("bell1");U.F.A.instr=U.pick;U.pick=null;playRound();},
+  coil:()=>{const U=UI.fight,C=U&&U.care;if(!C||C.mode!=="oil"||C.phase!=="rub"||C.done)return;if(performance.now()-C.t0>C.secs*1000){oilFinish();return;}C.taps++;AU.sfx("ui");
+    const b=document.querySelector(".oilcombo b");if(b){b.textContent=C.taps;const p=b.parentElement;p.classList.remove("pop");void p.offsetWidth;p.classList.add("pop");}},
   ccard:d=>{const U=UI.fight,C=U.care;if(!C||C.mode!=="card"||C.done)return;const i=+d.v;C.flip=i;C.q=C.deck[i];C.done=true;careApply(U,C);AU.sfx(C.q>1?"level":C.q<0?"miss":"ui");render();},
   care:d=>{const U=UI.fight,C=U.care;if(!C||C.done)return;const i=C.got.length;C.got.push(d.v);const ok=C.need[i]===d.v;AU.sfx(ok?"ui":"miss");
     if(C.got.length>=C.need.length){C.done=true;const n=C.got.filter((g,k)=>g===C.need[k]).length;C.q=n===3?1:n===2?.5:0;if(C.q>=1)U.careOK=(U.careOK||0)+1;applyCare(U.F,C.q);if(C.q>=1){AU.sfx("level");const me=G.F[U.b.a];popToast({kati:"สดชื่นจังเลยค่ะ!",mali:"หายเหนื่อยแล้ว! ลุยต่อ!",rin:"สภาพร่างกายกลับมา 90%",ploy:"ขอบคุณค่ะ ใจมาแล้ว",fah:"โอเค! พร้อมจัดหนัก!"}[me.id]||"สดชื่นแล้ว!","good");}}render();},

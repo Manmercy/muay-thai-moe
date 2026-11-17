@@ -5431,5 +5431,10 @@
  "แรงไม่ขึ้น": "no stamina back",
  "แรงเต็มแล้ว": "stamina already full",
  "แรง ": "stamina ",
- "เลือด ": "HP "
+ "เลือด ": "HP ",
+ "นวด!": "Rub!",
+ "</i><button class=\"oilknob\" aria-label=\"ลากเพื่อราดน้ำมันมวย\">": "</i><button class=\"oilknob\" aria-label=\"Drag to pour the boxing oil\">",
+ "</b><small>วิ</small></span></div></div>\n  ": "</b><small>s</small></span></div></div>\n  ",
+ "กดรัว ๆ เพื่อนวด ก่อนหมดเวลา!": "Tap fast to massage before time runs out!",
+ "ลากขวดไปทางขวาเพื่อราดน้ำมันมวย": "Drag the bottle right to pour the boxing oil"
 }
