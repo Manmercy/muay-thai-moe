@@ -1034,7 +1034,7 @@ function modalHTML(){const m=UI.modal;let body="",foot=true;
   if(m.type==="levelup"){body=`<h2 class="lvup">LEVEL UP!</h2>${m.ids.map(id=>{const f=G.F[id];return `<div class="lvrow"><div class="l">${faceImg(f,"sm")}<b>${esc(f.name)} Lv.${f.lvl}</b></div>${coachOn()&&f.sp>0&&!hasTree(f.id)?`<p class="hinttxt"><img src="${faceSrc("coach")}" alt=""><span>${skillTip(f)}</span></p>`:""}${skillGrid(f,true)}</div>`;}).join("")}`;}
   if(m.type==="ytinfo"){body=ytInfoHTML();foot=true;}
   if(typeof XMODAL!=="undefined"&&XMODAL[m.type]){const r=XMODAL[m.type](m);body=r.body;foot=r.foot;}
-  return `<div class="overlay" data-act="closeModalBg"><div class="px modal pxscroll m-${m.type}${m.type==="fighter"?" fpm t-"+(UI.ptab||"over"):""}" data-sk="modal-${m.type}" role="dialog" aria-modal="true"><button class="xbtn" data-act="closeModal" aria-label="Close">✕</button>${body}
+  return `<div class="overlay" data-act="closeModalBg" data-sk="ov-${m.type}"><div class="px modal pxscroll m-${m.type}${m.type==="fighter"?" fpm t-"+(UI.ptab||"over"):""}" data-sk="modal-${m.type}" role="dialog" aria-modal="true"><button class="xbtn" data-act="closeModal" aria-label="Close">✕</button>${body}
     ${foot?`<div class="mfoot"><button class="btn primary" data-act="closeModal">${m.type==="report"||m.type==="levelup"?"Continue ▸":"Close"}</button></div>`:""}</div></div>`;}
 
 // ---------- montage ----------
@@ -1385,8 +1385,9 @@ function cornerRateH(F){const A=F.A,B=F.B,fa=A.f.a,fb=B.f.a,left=F.rounds-F.roun
 function cornerTrue(F){const U=UI.fight;U.otrue=U.otrue||{};if(!U.otrue[F.round]){const o=typeof cornerOdds==="function"?cornerOdds(F,48):null;U.otrue[F.round]=o;}return U.otrue[F.round];}
 function cornerRate(F){const H=cornerRateH(F),O=cornerTrue(F);if(!O)return H;const ks=Object.keys(O),best=Math.max(...ks.map(k=>O[k])),worst=Math.min(...ks.map(k=>O[k]));const R={};
   const flat=best-worst<.08;
-  for(const k of ks){const d=best-O[k],c=flat?(d<=.03?"g":"y"):d<=.05?"g":d<=.15?"y":"r";
-    const why=H[k]&&H[k][0]===c?H[k][1]:c==="g"?(flat?"All options are close; this one's slightly best":H[k]&&H[k][0]!=="r"?H[k][1]:"Kru ran through the options: this has the best odds")
+  const top=ks.find(k=>O[k]===best); /* v1.89.3: when all orders are about the same, only the best one is green (was: everything green) */
+  for(const k of ks){const d=best-O[k],c=flat?(k===top?"g":"y"):d<=.05?"g":d<=.15?"y":"r";
+    const why=flat&&c==="y"?"About as good as the best option, picking this won't hurt":H[k]&&H[k][0]===c?H[k][1]:c==="g"?(flat?"All options are close; this one's slightly best":H[k]&&H[k][0]!=="r"?H[k][1]:"Kru ran through the options: this has the best odds")
       :c==="r"?(H[k]&&H[k][0]==="y"?H[k][1]+" · Kru reckons it clearly loses out":"Kru ran it through: clearly worse odds than the others")
       :(H[k]&&H[k][0]==="g"?"Sounds good, but Kru thinks it's not the best option":H[k]?H[k][1]:"Somewhat");
     R[k]=[c,why];}
