@@ -370,8 +370,8 @@ function mastery(f){if(f.camp!=="player")return 0;const v=styleVal(f,mainStyle(f
 /* v1.83.3: veterans past the stat ceiling (20) keep improving through ring craft instead — f.vet is measured in stat points */
 const VET_FX={hit:.08,dmg:.25,ev:.06}; // calibrated: vet 1 ≈ +1 stat point
 function fightSide(f,plan,rng){const sk=skillMods(f);{const m=mastery(f)*MK,s=mainStyle(f);if(m){if(s==="defense"){sk.evade+=.04*m;sk.ctr+=.06*m;sk.ctrDmg+=.25*m;}else{const w=s;sk.hit[w]=(sk.hit[w]||0)+.05*m;sk.dmg[w]=(sk.dmg[w]||0)+.2*m;sk.pts[w]=(sk.pts[w]||0)+.1*m;}}}if(f.aura)sk.evade+=f.aura*.5;if(f.vet>0){const v=f.vet;for(const w of ["punch","kick","knee","elbow"]){sk.hit[w]=(sk.hit[w]||0)+VET_FX.hit*v;sk.dmg[w]=(sk.dmg[w]||0)+VET_FX.dmg*v;}sk.evade+=VET_FX.ev*v;}const gr=f.id==="kati"&&traitOf(f)!=="grit"?0:(f.grit||0);if(gr)sk.evade+=gr*.4;
-  const hp0=100-(f.injury?15:0)+Math.round(gr*30);
-  return {f,id:f.id,name:f.name,plan,instr:"none",hp:hp0,hp0,sta:clamp(100-f.fatigue*.4,40,100),pts:0,rpts:0,kd:0,cuts:0,
+  const hp0=100-(f.injury?15:0)+Math.round(gr*30),tl=f.trainLog||[];const brk=STA.brk+f.a.stamina*STA.brkK+(tl[tl.length-1]==="prep"?STA.prep:0)+(tl.slice(-2).includes("cond")?STA.cond:0);
+  return {f,id:f.id,name:f.name,plan,instr:"none",hp:hp0,hp0,brk,sta:clamp(100-f.fatigue*.4,40,100),pts:0,rpts:0,kd:0,cuts:0,
     thrown:0,landed:0,dmgDealt:0,legs:0,tac:{focus:"auto",pace:"steady",target:"head"},sk,prep:(f.prepBonus?.04:0)+(f.counterPrep?.05:0)+sk.prep+(f.aura||0)+gr+(f.labPrep||0)+(f.camp==="player"?(f.facPrep||0):0),counterPrep:!!f.counterPrep,trait:traitOf(f),mor:(f.morale-60)/400+sk.mor,wl:{punch:0,kick:0,knee:0,elbow:0}};
 }
 function aiPlan(f,opp,rng){
@@ -404,7 +404,7 @@ function mods(s,F){const p0=PLANS[s.plan],c=CORNER[s.instr]||{};const cm=1+((s.s
 const CARE={water:{icon:"💧",name:"Water"},rub:{icon:"💆",name:"Muay oil massage"},wipe:{icon:"🧻",name:"Wipe the face"},cheer:{icon:"💪",name:"Encourage"}};
 function careNeeds(F){const A=F.A,B=F.B,r=mulberry32(F.seed+F.round*977);const sc=k=>({water:100-A.sta,rub:(A.sta<60?20:0)+B.rw.kick*4,wipe:B.rdmg*1.5+B.rlanded*3,cheer:(F.cards.reduce((s,c)=>s+c[1]-c[0],0))*25+(A.hp<50?20:0)}[k])+r()*30;
   return Object.keys(CARE).sort((a,b)=>sc(b)-sc(a)).slice(0,3);}
-function applyCare(F,q){const A=F.A;A.sta=clamp(A.sta+q*9,0,100);A.hp=clamp(A.hp+q*4,0,100);A.careMor=q>=1?.02:0;return q;}
+function applyCare(F,q){const A=F.A;careSide(A,q);A.careMor=q>=1?.02:0;return q;}
 function throwTowel(F){if(F.over)return;F.over=true;F.result={win:"B",type:"Corner throws in the towel",round:F.round,towel:true};}
 function aiCorner(F,me,op){ if(F.round===0)return "none";
   const lead=me.pts-op.pts;if(me.sta<35)return "defend";if(lead>4)return "defend";if(lead<-3)return "push";
@@ -462,7 +462,7 @@ function fightEx(F){const rng=F.rng,log=[],ex=F.ex,mA=F.mA,mB=F.mB;
     for(const S of [at,df])if(S.trait==="tempo"&&!S.tempoOn&&(F.round>=F.rounds||S.hp<50)){S.tempoOn=1;const O=S===at?df:at;if(!S.ctrW){S.ctrW=oppTop(O.f);O.prep-=CTR_READ;}log.push({ha:F.A.hp,hb:F.B.hp,sa:F.A.sta,sb:F.B.sta,s:S===F.A?"A":"B",t:`${S.name} switches rhythm! Godlike Timing, she's reading ${O.name} now`,k:"big",ev:"wake",an:S.name,dn:O.name});}
     if(fury>.4&&!at.wake){at.wake=1;log.push({ha:F.A.hp,hb:F.B.hp,sa:F.A.sta,sb:F.B.sta,s:at===F.A?"A":"B",t:`${at.name} smiles through the blood… the more she's hurt, the fiercer she gets! Her eyes have changed!`,k:"big",ev:"wake",an:at.name,dn:df.name});}
     const hitP=clamp(.42+fury*.04+(atk-def)*.03+at.prep+at.mor+(at.careMor||0)-fatA+fatD-md.evade-md.guard-df.sk.evade-(df.ctrW===wpn?CTR_W:0)+(at.sk.hit[wpn]||0)+(at.hp<45?at.sk.clutch:0)+(at.rage?.1:0)-(at.tac.target==="head"?.015:0)+df.legs/400+(bA&&bA.w===wpn?.12*bA.pw:0)-(bD?.12*bD.pw:0),.12,.9)*(at.trait==="flow"?TRV.flowAtk:1)*(df.trait==="flow"?TRV.flowDef:1)*(df.witsOn?TRV.wits:1)*(df.trait==="eye"?TRV.eyeDef:1)*(1+fury*TRV.furyHit)*(at.libOn?TRV.libHit:1);
-    at.thrown++;at.rthrown++;at.sta=clamp(at.sta-W_INFO[wpn].cost*(1.25-a.stamina/40)*ma.sta*(1+Math.max(0,ma.aggr))*(1-at.sk.staSave),0,100);
+    at.thrown++;at.rthrown++;at.sta=clamp(at.sta-STA.drain*W_INFO[wpn].cost*(STA.cA-a.stamina/STA.cB)*ma.sta*(1+Math.max(0,ma.aggr))*(1-at.sk.staSave),0,100);
     const tx=TXT[wpn][Math.floor(rng()*TXT[wpn].length)];
     if(rng()<hitP){
       const crit=rng()<(at.rage?.35:.07);const q=crit?1.6:.6+rng()*.6;if(at.rage)at.rage--;
@@ -471,7 +471,7 @@ function fightEx(F){const rng=F.rng,log=[],ex=F.ex,mA=F.mA,mB=F.mB;
       // v1.32 "flash knockout": a clean crit to the head can drop anyone early — rarer for durable/guarded fighters, likelier when the attacker clearly outclasses
       if(crit&&tg!=="body"&&(wpn!=="punch"||a.power>=10)&&rng()<clamp(.16+(ovr(a)-ovr(d))*.06-(d.dur-8)*.012,.05,.4)){dmg+=10+rng()*8;at.flash=1;}
       at.rw[wpn]++;at.rdmg+=dmg;at.rlanded++;
-      df.hp-=dmg;at.landed++;at.wl[wpn]++;at.dmgDealt+=dmg;const p=W_INFO[wpn].pts*q*(1+(at.sk.pts[wpn]||0))*(df.trait==="rock"?TRV.rockPts:1);at.pts+=p;at.rpts+=p;
+      df.hp-=dmg;df.sta=clamp(df.sta-dmg*STA.hit,0,100);at.landed++;at.wl[wpn]++;at.dmgDealt+=dmg;const p=W_INFO[wpn].pts*q*(1+(at.sk.pts[wpn]||0))*(df.trait==="rock"?TRV.rockPts:1);at.pts+=p;at.rpts+=p;
       log.push({ha:F.A.hp,hb:F.B.hp,sa:F.A.sta,sb:F.B.sta,s:at===F.A?"A":"B",t:`${at.name} ${tx}${crit?" — clean hit!":""}`,k:crit?"big":"hit",ev:"hit",w:wpn,cl:clinch,crit,an:at.name,dn:df.name});
       if(wpn==="elbow"&&q>1.3&&rng()<.25){df.cuts++;log.push({ha:F.A.hp,hb:F.B.hp,sa:F.A.sta,sb:F.B.sta,s:"x",t:`${df.name} is cut by an elbow, bleeding over the eyebrow`,k:"warn",ev:"cut",an:at.name,dn:df.name});
         if(df.cuts>=2&&rng()<.5){F.over=true;F.result={win:at===F.A?"A":"B",type:"TKO (doctor stoppage)",round:F.round};}}
@@ -488,24 +488,29 @@ function fightEx(F){const rng=F.rng,log=[],ex=F.ex,mA=F.mA,mB=F.mB;
       const ctrP=clamp(d.counter/20*.32+md.ctr-fatD+df.sk.ctr+(df.rage?.2:0)+(bD?.18*bD.pw:0),0,.8)*(df.trait==="eye"?TRV.eyeCtr:1);
       if(rng()<ctrP){const cw=d.kick>d.punch&&!clinch?"kick":"punch";
         const rc=!!df.rage;if(df.rage)df.rage--;const dmg=1.3*W_INFO[cw].imp*(rc?1.5:.7+rng()*.5)*(.6+d.power/25)*(1-a.guard/70)*(1.25-a.dur/40)*(1+df.sk.ctrDmg)*(df.libOn?TRV.lib:1)*(df.trait==="rock"?TRV.rockAtk:1)*(at.trait==="rock"?TRV.rockDef:1);
-        at.hp-=dmg;df.landed++;df.thrown++;df.wl[cw]++;df.dmgDealt+=dmg;df.rw[cw]++;df.rdmg+=dmg;df.rlanded++;df.rthrown++;const p=W_INFO[cw].pts*.9;df.pts+=p;df.rpts+=p;
+        at.hp-=dmg;at.sta=clamp(at.sta-dmg*STA.hit,0,100);df.landed++;df.thrown++;df.wl[cw]++;df.dmgDealt+=dmg;df.rw[cw]++;df.rdmg+=dmg;df.rlanded++;df.rthrown++;const p=W_INFO[cw].pts*.9;df.pts+=p;df.rpts+=p;
         log.push({ha:F.A.hp,hb:F.B.hp,sa:F.A.sta,sb:F.B.sta,s:df===F.A?"A":"B",t:`${at.name} misses — ${df.name} counters with ${cw==="kick"?"kick":"Punch"} Clean hit!${rc?" Critical!":""}`,k:rc?"big":"hit",ev:"counter",crit:rc,w:cw,mw:wpn,an:df.name,dn:at.name});
         if(at.hp<=0){F.over=true;F.result={win:df===F.A?"A":"B",type:"KO",round:F.round};log.push({ha:F.A.hp,hb:F.B.hp,sa:F.A.sta,sb:F.B.sta,s:"x",t:`${at.name} is down and not getting up! Knockout win`,k:"big",ev:"ko",an:df.name,dn:at.name,koSide:df===F.A?"A":"B"});}
       } else if(rng()<.45) log.push({ha:F.A.hp,hb:F.B.hp,sa:F.A.sta,sb:F.B.sta,s:"x",t:`${at.name} ${tx} but ${df.name} ${TXT.miss[Math.floor(rng()*4)]}`,k:"miss",ev:"miss",w:wpn,cl:clinch,mside:at===F.A?"A":"B",an:at.name,dn:df.name});
     }
-    for(const s of [F.A,F.B])s.sta=clamp(s.sta+.4+s.f.a.stamina/70+s.sk.regen,0,100);
+    for(const s of [F.A,F.B])s.sta=clamp(s.sta+STA.ex+s.f.a.stamina*STA.exK+s.sk.regen,0,100);
     for(const s of [F.A,F.B])if(s.burst&&--s.burst.left<=0)s.burst=null;
   }
   F.ex++;F.rlog.push(...log);return log;}
-let RND_REC={b:8,d:.4};
+let RND_REC={b:11,d:.5};
+const STA={hit:.35,drain:1.3,cA:1.15,cB:70,ex:0,exK:1/120,brk:3,brkK:.2,prep:4,cond:3,care:16,careHp:5,ai:.45};
+function careSide(s,q){s.sta=clamp(s.sta+q*STA.care,0,100);s.hp=clamp(s.hp+q*STA.careHp,0,Math.max(100,s.hp0||100));}
 function roundFinish(F){const log=F.rlog,kd0=F.kd0;for(const s of [F.A,F.B])s.burst=null;
   // judges
   const dif=(F.A.rpts-F.B.rpts)+(F.B.kd-kd0.B-(F.A.kd-kd0.A))*3;
   let card=[10,10];if(dif>.4)card=[10,9];if(dif<-.4)card=[9,10];
   if(F.B.kd>kd0.B&&dif>4)card=[10,8];if(F.A.kd>kd0.A&&dif<-4)card=[8,10];
   F.cards.push(card);F.logs.push(log);
-  /* v1.87.2: a fighter gets her breath back between rounds — tougher fighters recover more — so long bouts are not just a slow knockout */
-  for(const s of [F.A,F.B])s.sta=clamp(s.sta+16+s.f.a.stamina*.8,0,100),s.hp=clamp(s.hp+RND_REC.b+s.f.a.dur*RND_REC.d,0,Math.max(100,s.hp0||100));
+  /* v1.87.2: a fighter gets her breath back between rounds — tougher fighters recover more — so long bouts are not just a slow knockout
+     v1.88: stamina no longer refills by itself. A break gives back a little (conditioning, last week's fight prep), the corner does the rest:
+     the player's corner mini-game in a live fight, an average corner for everyone else. */
+  for(const s of [F.A,F.B]){s.sta=clamp(s.sta+(s.brk||0),0,100);s.hp=clamp(s.hp+RND_REC.b+s.f.a.dur*RND_REC.d,0,Math.max(100,s.hp0||100));
+    if(!F.over&&F.round<F.rounds&&!(F.live&&s===F.A))careSide(s,STA.ai);}
   if(!F.over&&F.round>=F.rounds){F.over=true;const tA=F.cards.reduce((x,c)=>x+c[0],0),tB=F.cards.reduce((x,c)=>x+c[1],0);
     const pd=F.A.pts-F.B.pts;const tie=tA===tB;
     F.result=tie&&Math.abs(pd)<1?{win:"D",type:"Draw",round:F.round}:tie?{win:pd>0?"A":"B",type:"Decision win (on dominance)",round:F.round,score:`${tA}–${tB}`}:{win:tA>tB?"A":"B",type:"Decision win",round:F.round,score:`${Math.max(tA,tB)}–${Math.min(tA,tB)}`};}
@@ -6178,7 +6183,7 @@ function coachNote(F,me){const A=F.A,B=F.B,r=F.result,w=r.win==="A",d=r.win==="D
 function rinNote(F){const A=F.A;const best=Object.entries(A.wl).sort((a,b)=>b[1]-a[1])[0];return `Landed ${A.landed}/${A.thrown} times, most effective weapon: ${WNAME[best[0]]} (${best[1]} times)`;}
 let LASTF=null; /* v1.80: the last fight, read by the gauntlet to carry HP between bouts */
 function fightStart(quick){const U=UI.fight,b=U.b;AU.resume();
-  U.F=newFight(G.F[b.a],G.F[b.b],{seed:(G.seed+G.week*131+b.b.length*7)>>>0,rounds:b.rounds,tier:b.tier,planA:U.plan,forceRage:!quick&&!(G.flags&&G.flags.rageShown)});U.F.dai=(DIFF[G.diff||"normal"]||DIFF.normal).ai;
+  U.F=newFight(G.F[b.a],G.F[b.b],{seed:(G.seed+G.week*131+b.b.length*7)>>>0,rounds:b.rounds,tier:b.tier,planA:U.plan,forceRage:!quick&&!(G.flags&&G.flags.rageShown)});U.F.dai=(DIFF[G.diff||"normal"]||DIFF.normal).ai;U.F.live=!quick;
   if(b.wai==="phrom")U.F.A.careMor=.02;if(b.wai==="phra")U.F.A.careMor=.01;if(b.cheer)U.F.A.mor+=b.cheer*.01;U.F.A.mor+=trustBonus(G.F[b.a]);{const fam=(G.fam||{})[b.b]||0;if(fam)U.F.A.mor+=fam*.015;}setTactics(U.F,U.tac);if(b.carry){U.F.A.hp=Math.min(U.F.A.hp,b.carry.hp);U.F.A.sta=Math.min(U.F.A.sta,b.carry.sta);}LASTF=U.F;
   if(quick){FS.init(null,b.bg||TIER_BG[b.tier]||"bg_local.webp",G.F[b.a],G.F[b.b]);const F=U.F;while(!F.over){F.A.instr=aiCorner(F,F.A,F.B);F.B.instr=aiCorner(F,F.B,F.A);const lg=fightRound(F);U.shown.push({rd:`Round ${F.round}`},...lg);}fightEnd();return;}
   FS.init(null,b.bg||TIER_BG[b.tier]||"bg_local.webp",G.F[b.a],G.F[b.b]);AU.setTempo(126);AU.startMusic();playRound();}
