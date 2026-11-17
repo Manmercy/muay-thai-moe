@@ -4911,7 +4911,7 @@ AU.gsfx=function(kind,a){if(!this.init()||this.muted||!SETTINGS.sfx)return;const
   if(kind==="shimmer")for(let i=0;i<6;i++)T(i*.05,{f:1400+Math.random()*1400,type:"sine",dur:.12,peak:.06});};
 
 // ================= MUAY THAI MOE v1.3 — UI =================
-const VERSION="1.88.3";
+const VERSION="1.88.4";
 const CUR_LANG=(typeof window!=="undefined"&&window.LANG)||"th";
 const TH_LABEL=String.fromCharCode(3652,3607,3618);
 function langSwitch(cls){return `<div class="langsw ${cls||""}" role="group" aria-label="Language">${[["th",TH_LABEL],["en","EN"]].map(([k,l])=>`<button class="lsb ${CUR_LANG===k?"on":""}" data-act="setlang" data-v="${k}" aria-pressed="${CUR_LANG===k}">${l}</button>`).join("")}</div>`;}
@@ -5686,8 +5686,8 @@ function skillTree(f,mine){const L=skillList(f.id),eqd=equipped(f),sc=SCHOOLS[L[
      ${skResetBtn(f)}<div class="sk-info"><span>${f.sp?nCan?`Can upgrade now: <b class="ok">${nCan}</b> moves`:"Nothing to upgrade yet. Train stats higher":"3 points every level up"}</span>
       <span class="sk-eq">Equipped ${[0,1,2].map(i=>{const s=eqd[i]&&skillDef(f.id,eqd[i]);return `<i class="${s?"on":""}" title="${s?s.name:"Empty"}">${s?PIX["sk_"+skillKind(s).k]:""}</i>`;}).join("")}</span></div></div>`:""}
    <div class="sknav"><div class="seg sklines"><span class="sklbl">School lines</span>${lines.slice(0,3).map((n,i)=>`<button data-act="skline" data-id="${f.id}" data-v="${i}" aria-pressed="${li===i}">${n}${can(i)?'<i class="tdot2"></i>':""}</button>`).join("")}</div>
-   <div class="seg sklines shared"><span class="sklbl">Build path · pick 1</span>${lines.slice(3).map((n,j)=>{const i=j+3;return `<button data-act="skline" data-id="${f.id}" data-v="${i}" aria-pressed="${li===i}" class="${path!=null&&path!==i?"off":""}">${path===i?"✓ ":""}${n}${can(i)?'<i class="tdot2"></i>':""}</button>`;}).join("")}</div>
-   ${li>=3?`<p class="meta skpath">${path==null?"Build paths use skill points like school lines, but you can build only one at a time · the first skill you raise closes the other build paths":path===li?`Building this path`:`Currently building "${SK_SHARED[path-3]}" now. Change build path before raising this one.`}</p>`:""}</div>
+   <div class="seg sklines shared"><span class="sklbl" title="Pick one build path at a time">Build path</span>${lines.slice(3).map((n,j)=>{const i=j+3;return `<button data-act="skline" data-id="${f.id}" data-v="${i}" aria-pressed="${li===i}" class="${path!=null&&path!==i?"off":""}">${path===i?"✓ ":""}${n}${can(i)?'<i class="tdot2"></i>':""}</button>`;}).join("")}</div>
+   ${li>=3&&path!==li?`<p class="meta skpath">${path==null?"Build paths use skill points like school lines, but you can build only one at a time · the first skill you raise closes the other build paths":path===li?`Building this path`:`Currently building "${SK_SHARED[path-3]}" now. Change build path before raising this one.`}</p>`:""}</div>
    <div class="sklist pxscroll">${[0,1,2,3,4,5].map(row=>L.find(s=>s.line===li&&s.row===row)).filter(Boolean).map(card).join('<i class="skarrow" aria-hidden="true"></i>')}
      ${SIGNATURE[f.id]?`<div class="skc sig ${hasSignature(f)?"has":"lock"}"><div class="skc-m"><div class="skc-h"><b>✦ Signature: ${SIGNATURE[f.id].name}</b></div><p class="skc-d">${SIGNATURE[f.id].desc}${hasSignature(f)?"":` · unlocks at bond 60 (now ${Math.round(f.bond||0)})`}</p></div></div>`:""}</div>
    ${mine?`<div class="skfoot"><button class="btn sm" data-act="skauto" data-id="${f.id}" data-v="${li}" ${[0,1,2,3,4,5].some(r=>{const s=L.find(x=>x.line===li&&x.row===r);return s&&skState(f,s,mine).st==="can";})?"":"disabled"}>Auto-upgrade · ${lines[li]}</button><span class="meta">Equip up to ${MAX_EQUIP} moves · passives work on their own, no slot needed</span></div>`:""}</div>`;}

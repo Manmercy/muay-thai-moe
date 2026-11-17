@@ -1910,6 +1910,24 @@ body.hasnews main>h1.sr+.homegrid,body.hasnews main>h1.sr+.rinnote{margin-top:46
 .modal.fpm.t-skill .skwrap{height:auto;grid-template-rows:none}
 .modal.fpm.t-skill .sklist{overflow:visible}
 .modal.fpm.t-skill .skfoot{position:sticky;bottom:0;z-index:2;padding:8px 0 2px;background:linear-gradient(180deg,rgba(28,20,48,0),var(--panel,#221a3a) 30%)}
+/* v1.88.4: compact skill header on the skill tab — trait, points and line pickers take about half the height */
+.modal.fpm.t-skill .trbox{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin:0 0 6px;padding:4px 6px}
+.modal.fpm.t-skill .trh{flex:1;min-width:0}
+.modal.fpm.t-skill .trseg button{min-height:34px;font-size:12px}
+.modal.fpm.t-skill .trd summary{font-size:0;min-height:34px;min-width:34px;justify-content:center}
+.modal.fpm.t-skill .trd summary::before{content:"ⓘ";font-size:17px;margin:0;color:var(--muted)}
+.modal.fpm.t-skill .trd[open]{flex-basis:100%}.modal.fpm.t-skill .trd[open] summary{display:none}
+.modal.fpm.t-skill .skwrap{gap:6px}
+.modal.fpm.t-skill .sppx{padding:2px 10px}.modal.fpm.t-skill .sppx small{font-size:11px}.modal.fpm.t-skill .sppx b{font-size:20px}
+.modal.fpm.t-skill .sk-info{gap:3px;font-size:12.5px}.modal.fpm.t-skill .sk-eq i{width:24px;height:24px}
+.modal.fpm.t-skill .sknav{gap:4px}
+.modal.fpm.t-skill .sklines{grid-template-columns:52px repeat(3,minmax(0,1fr));align-items:center;gap:4px}
+.modal.fpm.t-skill .sklines .sklbl{grid-column:auto;font-size:11px;line-height:1.2}
+.modal.fpm.t-skill .sklines button{min-height:36px;font-size:12px;padding:2px}
+.modal.fpm.t-skill .skpath{margin:2px 0 0;font-size:11.5px}
+.modal.fpm.t-skill .sklines button{display:flex;align-items:center;justify-content:center;gap:3px;white-space:nowrap;font-size:11.5px;letter-spacing:-.1px}
+.modal.fpm.t-skill .sklines button .tdot2{margin-left:2px;flex:none}
+.modal.fpm.t-skill .sklines button{white-space:normal;line-height:1.15;text-align:center}
 </style></head><body>
 <div id="app"></div><div id="live" aria-live="polite" role="status"></div>
 <script type="text/plain" id="js-th">
@@ -7601,8 +7619,8 @@ function skillTree(f,mine){const L=skillList(f.id),eqd=equipped(f),sc=SCHOOLS[L[
      ${skResetBtn(f)}<div class="sk-info"><span>${f.sp?nCan?`อัปได้ตอนนี้ <b class="ok">${nCan}</b> ท่า`:"ยังไม่มีท่าที่อัปได้ ฝึกค่าพลังเพิ่ม":"ได้ 3 แต้มทุกเลเวลอัป"}</span>
       <span class="sk-eq">ใช้ขึ้นชก ${[0,1,2].map(i=>{const s=eqd[i]&&skillDef(f.id,eqd[i]);return `<i class="${s?"on":""}" title="${s?s.name:"ว่าง"}">${s?PIX["sk_"+skillKind(s).k]:""}</i>`;}).join("")}</span></div></div>`:""}
    <div class="sknav"><div class="seg sklines"><span class="sklbl">สายสำนัก</span>${lines.slice(0,3).map((n,i)=>`<button data-act="skline" data-id="${f.id}" data-v="${i}" aria-pressed="${li===i}">${n}${can(i)?'<i class="tdot2"></i>':""}</button>`).join("")}</div>
-   <div class="seg sklines shared"><span class="sklbl">สายปั้น · เลือก 1</span>${lines.slice(3).map((n,j)=>{const i=j+3;return `<button data-act="skline" data-id="${f.id}" data-v="${i}" aria-pressed="${li===i}" class="${path!=null&&path!==i?"off":""}">${path===i?"✓ ":""}${n}${can(i)?'<i class="tdot2"></i>':""}</button>`;}).join("")}</div>
-   ${li>=3?`<p class="meta skpath">${path==null?"สายปั้นใช้แต้มสกิลเหมือนสายสำนัก แต่เลือกปั้นได้ทีละ 1 สาย · อัปสกิลแรกเมื่อไหร่ สายปั้นอื่นจะปิด":path===li?`กำลังปั้นสายนี้`:`ตอนนี้ปั้น "${SK_SHARED[path-3]}" อยู่ ต้องเปลี่ยนสายปั้นก่อนถึงจะอัปสายนี้ได้`}</p>`:""}</div>
+   <div class="seg sklines shared"><span class="sklbl" title="เลือกปั้นได้ทีละ 1 สาย">สายปั้น</span>${lines.slice(3).map((n,j)=>{const i=j+3;return `<button data-act="skline" data-id="${f.id}" data-v="${i}" aria-pressed="${li===i}" class="${path!=null&&path!==i?"off":""}">${path===i?"✓ ":""}${n}${can(i)?'<i class="tdot2"></i>':""}</button>`;}).join("")}</div>
+   ${li>=3&&path!==li?`<p class="meta skpath">${path==null?"สายปั้นใช้แต้มสกิลเหมือนสายสำนัก แต่เลือกปั้นได้ทีละ 1 สาย · อัปสกิลแรกเมื่อไหร่ สายปั้นอื่นจะปิด":path===li?`กำลังปั้นสายนี้`:`ตอนนี้ปั้น "${SK_SHARED[path-3]}" อยู่ ต้องเปลี่ยนสายปั้นก่อนถึงจะอัปสายนี้ได้`}</p>`:""}</div>
    <div class="sklist pxscroll">${[0,1,2,3,4,5].map(row=>L.find(s=>s.line===li&&s.row===row)).filter(Boolean).map(card).join('<i class="skarrow" aria-hidden="true"></i>')}
      ${SIGNATURE[f.id]?`<div class="skc sig ${hasSignature(f)?"has":"lock"}"><div class="skc-m"><div class="skc-h"><b>✦ ท่าไม้ตาย: ${SIGNATURE[f.id].name}</b></div><p class="skc-d">${SIGNATURE[f.id].desc}${hasSignature(f)?"":` · ปลดเมื่อความสนิทถึง 60 (ตอนนี้ ${Math.round(f.bond||0)})`}</p></div></div>`:""}</div>
    ${mine?`<div class="skfoot"><button class="btn sm" data-act="skauto" data-id="${f.id}" data-v="${li}" ${[0,1,2,3,4,5].some(r=>{const s=L.find(x=>x.line===li&&x.row===r);return s&&skState(f,s,mine).st==="can";})?"":"disabled"}>อัปอัตโนมัติ · ${lines[li]}</button><span class="meta">ใส่ขึ้นชกได้ ${MAX_EQUIP} ท่า · ท่าติดตัวทำงานเองไม่ใช้ช่อง</span></div>`:""}</div>`;}
@@ -10498,7 +10516,7 @@ CHAT.fah.push(
 <script>
 (function(){
 /* v1.87: Thai code ships inside index.html; English code (en.js) and the dictionary (i18n.js) load only when needed */
-var B="c1e1b52bb8";
+var B="8d9add08bc";
 var L="";try{L=localStorage.getItem("mtm_lang")||"";}catch(e){}
 try{var h=(location.hash||"").match(/lang=(th|en)/);if(h)L=h[1];}catch(e){}
 if(L!=="th"&&L!=="en")L="th";
