@@ -111,7 +111,10 @@ function hearts(b,f){f=f||{bond:b};const H=heartLv(f),pct=Math.round(H.into/H.ne
   return `<span class="hearts hlv" title="Bond ${Math.round(H.total)} · ${left} to Lv.${H.lv+1}"><i class="hp" style="--p:1"></i><b class="hlvn">Lv.${H.lv}</b><i class="hgauge"><i style="width:${pct}%"></i></i><small>${heartTier(H.lv)}</small></span>`;}
 function bar(label,v,color,txt){return `<div class="bar"><span>${label}</span><i style="--v:${clamp(v,0,100)}%;--bc:${color}"></i><b class="num">${txt??Math.round(v)}</b></div>`;}
 function mini(v,color){return `<i class="mini" style="--v:${clamp(v,0,100)}%;--bc:${color}"></i>`;}
-function xpBar(f){const need=xpNeed(f.lvl);return `<div class="xp"><span class="lv">Lv.${f.lvl}</span><i style="--v:${f.lvl>=MAX_LV?100:clamp(f.xp/need*100,0,100)}%"></i><span class="num dim">${f.lvl>=MAX_LV?"MAX":`${Math.round(f.xp)}/${need}`}</span>${f.sp>0&&f.camp==="player"?`<button class="spchip" data-act="ptab" data-v="skill">★ ${f.sp} skill pts</button>`:""}</div>`;}
+/* v1.88: an opponent shows her strength level, coloured against our best fighter in her division (red = stronger) */
+function lvTone(f){if(!G||!f||f.camp==="player")return null;const mine=Object.values(G.F).filter(x=>x.camp==="player"&&x.div===f.div);if(!mine.length)return null;
+  const d=effOvr(G,f)-Math.max(...mine.map(x=>effOvr(G,x)));return d>=1.2?{c:"red",t:"Stronger than ours"}:d<=-1.2?{c:"green",t:"Weaker than ours"}:{c:"gold",t:"Even with ours"};}
+function xpBar(f){if(f.camp!=="player"&&!f.canon){const t=lvTone(f);return `<div class="xp"><span class="lv${t?" lt-"+t.c:""}">Lv.${lvOf(f)}</span>${t?`<span class="pill ${t.c}">${t.t}</span>`:""}</div>`;}const need=xpNeed(f.lvl);return `<div class="xp"><span class="lv">Lv.${f.lvl}</span><i style="--v:${f.lvl>=MAX_LV?100:clamp(f.xp/need*100,0,100)}%"></i><span class="num dim">${f.lvl>=MAX_LV?"MAX":`${Math.round(f.xp)}/${need}`}</span>${f.sp>0&&f.camp==="player"?`<button class="spchip" data-act="ptab" data-v="skill">★ ${f.sp} skill pts</button>`:""}</div>`;}
 function formHTML(f){return `<span class="form">${f.form.map(r=>`<i class="${r}">${r==="W"?"W":r==="L"?"L":"D"}</i>`).join("")||'<span class="dim">—</span>'}</span>`;}
 const rec=f=>`${f.rec.w}-${f.rec.l}-${f.rec.d}`;
 const condColor=c=>c>=70?"var(--green)":c>=45?"var(--warn)":"var(--red)";
@@ -395,7 +398,7 @@ function homeHTML(){const R=roster(G);
     <div class="camp-info"><button class="cinfo" data-act="tab" data-v="camp"><small>Camp level</small><b>Lv.${lv} ${CAMP_LV_NAME[lv]}</b></button><button class="cinfo" data-act="studinfo"><small>Students</small><b>${students(G)}/${studentCap(G)}</b></button></div></section>
    <div class="side">${guide}<div class="fgrid">${R.map(fighterChip).join("")}</div></div></div>`;}
 function fighterMini(f){const c=condition(f);const nb=nextBooking(f);
-  return `<button class="px fmini" data-act="fighter" data-id="${f.id}" aria-label="See status and info of ${esc(f.name)}">${faceImg(f)}<b>${esc(f.name)} <span class="lv">Lv.${f.lvl}</span></b>
+  return `<button class="px fmini" data-act="fighter" data-id="${f.id}" aria-label="See status and info of ${esc(f.name)}">${faceImg(f)}<b>${esc(f.name)} <span class="lv">Lv.${lvOf(f)}</span></b>
     <div class="minis"><span>Ready</span>${mini(c,condColor(c))}<span>Fatigue</span>${mini(f.fatigue,f.fatigue>=52?"var(--red)":"var(--warn)")}</div>
     <span class="meta">${f.injury?"<span class=\"redt\">Injured</span>":nb?`Fight wk ${nb.week}`:"Empty"}${skReady(f)?" · <span class=\"goldt\">Skill!</span>":""}</span><span class="fmore">▸</span></button>`;}
 function fighterChip(f){const c=condition(f);const nb=G.bookings.find(b=>b.a===f.id);
@@ -533,7 +536,7 @@ function offersHTML(){const mine=G.bookings.filter(b=>G.F[b.a].camp==="player").
      [...G.offers].sort((x,y)=>(y.rv||y.beast||y.hard||y.tier==="special"?1:0)-(x.rv||x.beast||x.hard||x.tier==="special"?1:0)).map(o=>{const op=G.F[o.b],me=G.F[o.a];const A=adviseCached(o.a,o.b,o.rounds||3);const v=verdictOf(A.bestRate);
        const sp=o.rv?["rv","Grudge match · the whole province is watching"]:o.beast?["beast",QK[o.beast].grp==="rooster"?"Wild bout · Human vs fighting rooster":"Wild bout · Bull wrestling, Muay Thai edition"]:o.tier==="special"?["sp","Special cross-division bout"]:o.hard?["hard","Punch up · purse ×1.5"]:o.fair?["fair",o.cross?"Temple fair · cross-division star!":"Temple fair bout · not ranked"]:null;
        return `<div class="item offer ${v.c} ${sp?"spx "+sp[0]:""}">${sp?`<span class="ribbon">${sp[1]}</span>`:""}<button class="oxbtn" data-act="declo" data-v="${o.id}" aria-label="Decline this offer">✕</button><div class="l"><span class="vdot ${v.c}" aria-label="${v.t}"></span>${faceImg(op,"sm")}<div>
-       <div class="t">${esc(me.name)} vs ${esc(op.name)} ${tierChip(op,1)}</div>
+       <div class="t">${esc(me.name)} vs ${esc(op.name)} <span class="lv lt-${v.c}">Lv.${lvOf(op)}</span> ${tierChip(op,1)}</div>
        <div class="meta">Wk ${o.week} · ${TIER[o.tier].name}${o.beast?" · off the record":""}${o.fair?" · not ranked · purse paid by mail":""}${o.tier==="lab"?" · Unranked bout":""} · ${styleOf(op.a)}${op.camp==="rival"?op.lab?" · Vector Gym, Bangkok":" · Golden Tiger":""}${personaOf(op)?` · ${personaOf(op).tag}`:""}</div>${h2hText(op)?`<div class="meta goldt">${h2hText(op)}</div>`:""}
        <div class="meta">Purse ${fmt(o.lose)} · <b class="goldt">win +${fmt(o.win-o.lose)}</b> · <b class="${v.c}t">${v.t}</b>${effGap(G,me,op)>.4?` · <b class="goldt">Win for bonus points/fame</b>`:effGap(G,me,op)<-.6?` · <span class="mutt">Beating a weaker fighter earns little fame</span>`:""}</div>
        </div></div>

@@ -813,7 +813,13 @@ function hiddenEdge(f){if(!f||f.camp!=="player")return 0;const key=(traitOf(f)||
 const edgeOf=(G,f)=>f&&f.camp!=="player"?(f.vet||0):(G&&(G.season||1)>=2)?hiddenEdge(f):0;
 const effOvr=(G,f)=>ovr(f.a)+edgeOf(G,f);
 /* how much harder `op` is than `me` once the hidden edge is counted (positive = tougher) */
-const effGap=(G,me,op)=>ovr(op.a)-ovr(me.a)+((op.lvl||1)-(me.lvl||1))*.15-edgeOf(G,me)+edgeOf(G,op);
+/* v1.88: like an RPG enemy level, an opponent's level follows her real strength (stats + ring craft),
+   on the same scale our own fighters reach (fitted from long bot runs: our Lv 8 ≈ 12, Lv 15 ≈ 17 effective).
+   Our fighters and the five canon girls keep the level they earned. */
+const LV_BASE=6,LV_STEP=.75;
+function powLv(f){return clamp(Math.round((ovr(f.a)+(f.vet||0)-LV_BASE)/LV_STEP),1,MAX_LV);}
+function lvOf(f){return !f?1:(f.camp==="player"||f.canon)?(f.lvl||1):powLv(f);}
+const effGap=(G,me,op)=>ovr(op.a)-ovr(me.a)+(lvOf(op)-lvOf(me))*.15-edgeOf(G,me)+edgeOf(G,op);
 function genOffers(G,opt){
   const rng=mulberry32(G.seed+G.week*7919+11);G.snub=G.snub||{};const ignored=new Set();
   /* v1.82.3: only offers the NPC really sent and the player let lapse at week end count as a snub — not temple-fair or Vector bookings, not a mid-week refresh */

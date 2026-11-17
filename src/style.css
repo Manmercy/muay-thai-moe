@@ -1834,3 +1834,6 @@ body.hasnews main>h1.sr+.homegrid,body.hasnews main>h1.sr+.rinnote{margin-top:46
 .ldbar{width:100%;height:10px;background:var(--edge);border:2px solid var(--line)}.ldbar i{display:block;height:100%;background:var(--gold);transition:width .2s}
 .ldn{margin:0;font-size:14px;color:var(--fg)}.ldn span{font-family:var(--f-pixel);color:var(--muted)}
 .ldtip{margin:0;font-size:13px;line-height:1.55;color:var(--muted);background:var(--surface);border:1px solid var(--line);padding:8px 10px}
+
+/* v1.88 opponent level tone (RPG style) */
+.lv.lt-red{color:#ff6b5e}.lv.lt-green{color:#7ddc7a}.lv.lt-gold{color:var(--gold)}

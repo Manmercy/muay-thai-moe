@@ -111,7 +111,10 @@ function hearts(b,f){f=f||{bond:b};const H=heartLv(f),pct=Math.round(H.into/H.ne
   return `<span class="hearts hlv" title="ความสนิท ${Math.round(H.total)} · อีก ${left} ถึง Lv.${H.lv+1}"><i class="hp" style="--p:1"></i><b class="hlvn">Lv.${H.lv}</b><i class="hgauge"><i style="width:${pct}%"></i></i><small>${heartTier(H.lv)}</small></span>`;}
 function bar(label,v,color,txt){return `<div class="bar"><span>${label}</span><i style="--v:${clamp(v,0,100)}%;--bc:${color}"></i><b class="num">${txt??Math.round(v)}</b></div>`;}
 function mini(v,color){return `<i class="mini" style="--v:${clamp(v,0,100)}%;--bc:${color}"></i>`;}
-function xpBar(f){const need=xpNeed(f.lvl);return `<div class="xp"><span class="lv">Lv.${f.lvl}</span><i style="--v:${f.lvl>=MAX_LV?100:clamp(f.xp/need*100,0,100)}%"></i><span class="num dim">${f.lvl>=MAX_LV?"MAX":`${Math.round(f.xp)}/${need}`}</span>${f.sp>0&&f.camp==="player"?`<button class="spchip" data-act="ptab" data-v="skill">★ ${f.sp} แต้มสกิล</button>`:""}</div>`;}
+/* v1.88: an opponent shows her strength level, coloured against our best fighter in her division (red = stronger) */
+function lvTone(f){if(!G||!f||f.camp==="player")return null;const mine=Object.values(G.F).filter(x=>x.camp==="player"&&x.div===f.div);if(!mine.length)return null;
+  const d=effOvr(G,f)-Math.max(...mine.map(x=>effOvr(G,x)));return d>=1.2?{c:"red",t:"เก่งกว่าค่ายเรา"}:d<=-1.2?{c:"green",t:"อ่อนกว่าค่ายเรา"}:{c:"gold",t:"สูสีกับค่ายเรา"};}
+function xpBar(f){if(f.camp!=="player"&&!f.canon){const t=lvTone(f);return `<div class="xp"><span class="lv${t?" lt-"+t.c:""}">Lv.${lvOf(f)}</span>${t?`<span class="pill ${t.c}">${t.t}</span>`:""}</div>`;}const need=xpNeed(f.lvl);return `<div class="xp"><span class="lv">Lv.${f.lvl}</span><i style="--v:${f.lvl>=MAX_LV?100:clamp(f.xp/need*100,0,100)}%"></i><span class="num dim">${f.lvl>=MAX_LV?"MAX":`${Math.round(f.xp)}/${need}`}</span>${f.sp>0&&f.camp==="player"?`<button class="spchip" data-act="ptab" data-v="skill">★ ${f.sp} แต้มสกิล</button>`:""}</div>`;}
 function formHTML(f){return `<span class="form">${f.form.map(r=>`<i class="${r}">${r==="W"?"ช":r==="L"?"พ":"ส"}</i>`).join("")||'<span class="dim">—</span>'}</span>`;}
 const rec=f=>`${f.rec.w}-${f.rec.l}-${f.rec.d}`;
 const condColor=c=>c>=70?"var(--green)":c>=45?"var(--warn)":"var(--red)";
@@ -395,7 +398,7 @@ function homeHTML(){const R=roster(G);
     <div class="camp-info"><button class="cinfo" data-act="tab" data-v="camp"><small>ระดับค่าย</small><b>Lv.${lv} ${CAMP_LV_NAME[lv]}</b></button><button class="cinfo" data-act="studinfo"><small>นักเรียน</small><b>${students(G)}/${studentCap(G)} คน</b></button></div></section>
    <div class="side">${guide}<div class="fgrid">${R.map(fighterChip).join("")}</div></div></div>`;}
 function fighterMini(f){const c=condition(f);const nb=nextBooking(f);
-  return `<button class="px fmini" data-act="fighter" data-id="${f.id}" aria-label="ดูสถานะและข้อมูล ${esc(f.name)}">${faceImg(f)}<b>${esc(f.name)} <span class="lv">Lv.${f.lvl}</span></b>
+  return `<button class="px fmini" data-act="fighter" data-id="${f.id}" aria-label="ดูสถานะและข้อมูล ${esc(f.name)}">${faceImg(f)}<b>${esc(f.name)} <span class="lv">Lv.${lvOf(f)}</span></b>
     <div class="minis"><span>พร้อม</span>${mini(c,condColor(c))}<span>ล้า</span>${mini(f.fatigue,f.fatigue>=52?"var(--red)":"var(--warn)")}</div>
     <span class="meta">${f.injury?'<span class="redt">บาดเจ็บ</span>':nb?`ชก สด.${nb.week}`:"ว่าง"}${skReady(f)?' · <span class="goldt">สกิล!</span>':""}</span><span class="fmore">▸</span></button>`;}
 function fighterChip(f){const c=condition(f);const nb=G.bookings.find(b=>b.a===f.id);
@@ -533,7 +536,7 @@ function offersHTML(){const mine=G.bookings.filter(b=>G.F[b.a].camp==="player").
      [...G.offers].sort((x,y)=>(y.rv||y.beast||y.hard||y.tier==="special"?1:0)-(x.rv||x.beast||x.hard||x.tier==="special"?1:0)).map(o=>{const op=G.F[o.b],me=G.F[o.a];const A=adviseCached(o.a,o.b,o.rounds||3);const v=verdictOf(A.bestRate);
        const sp=o.rv?["rv","ศึกล้างตา · ทั้งจังหวัดรอดู"]:o.beast?["beast",QK[o.beast].grp==="rooster"?"ศึกพิสดาร · คนปะทะไก่ชน":"ศึกพิสดาร · ล้มวัวฉบับมวยไทย"]:o.tier==="special"?["sp","ศึกพิเศษข้ามรุ่น"]:o.hard?["hard","ท้าชนคู่เหนือชั้น · ค่าตัว ×1.5"]:o.fair?["fair",o.cross?"งานวัด · ดาราข้ามรุ่น!":"ไฟต์งานวัด · ไม่นับอันดับ"]:null;
        return `<div class="item offer ${v.c} ${sp?"spx "+sp[0]:""}">${sp?`<span class="ribbon">${sp[1]}</span>`:""}<button class="oxbtn" data-act="declo" data-v="${o.id}" aria-label="ปฏิเสธข้อเสนอนี้">✕</button><div class="l"><span class="vdot ${v.c}" aria-label="${v.t}"></span>${faceImg(op,"sm")}<div>
-       <div class="t">${esc(me.name)} vs ${esc(op.name)} ${tierChip(op,1)}</div>
+       <div class="t">${esc(me.name)} vs ${esc(op.name)} <span class="lv lt-${v.c}">Lv.${lvOf(op)}</span> ${tierChip(op,1)}</div>
        <div class="meta">สด.${o.week} · ${TIER[o.tier].name}${o.beast?" · ไม่นับสถิติ":""}${o.fair?" · ไม่นับอันดับ · ค่าตัวส่งทางจดหมาย":""}${o.tier==="lab"?" · ไม่นับอันดับ":""} · ${styleOf(op.a)}${op.camp==="rival"?op.lab?" · เวกเตอร์ กรุงเทพฯ":" · พยัคฆ์ทอง":""}${personaOf(op)?` · ${personaOf(op).tag}`:""}</div>${h2hText(op)?`<div class="meta goldt">${h2hText(op)}</div>`:""}
        <div class="meta">ค่าตัว ${fmt(o.lose)} · <b class="goldt">ชนะ +${fmt(o.win-o.lose)}</b> · <b class="${v.c}t">${v.t}</b>${effGap(G,me,op)>.4?` · <b class="goldt">ชนะได้โบนัสแต้ม/ชื่อเสียง</b>`:effGap(G,me,op)<-.6?` · <span class="mutt">ชนะคู่อ่อนได้ชื่อเสียงน้อย</span>`:""}</div>
        </div></div>
