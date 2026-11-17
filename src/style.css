@@ -1838,3 +1838,31 @@ body.hasnews main>h1.sr+.homegrid,body.hasnews main>h1.sr+.rinnote{margin-top:46
 /* v1.88 opponent level tone (RPG style) */
 .lv.lt-red{color:#ff6b5e}.lv.lt-green{color:#7ddc7a}.lv.lt-gold{color:var(--gold)}
 .gacha.loyg.soon{opacity:.85}.gacha.loyg.soon .btn[disabled]{opacity:.7;cursor:not-allowed}
+
+/* v1.88 corner care variants — same box and buttons as the order puzzle */
+.carebtns.three{grid-template-columns:repeat(3,1fr)}
+.carebtns.three button{min-height:64px}
+.oiltrack{position:relative;height:56px;background:var(--bg2);box-shadow:inset 0 0 0 2px var(--line);touch-action:none;
+  background-image:repeating-linear-gradient(90deg,transparent 0 10px,rgba(255,255,255,.04) 10px 12px)}
+.oiltrack .oilend{position:absolute;top:6px;bottom:6px;width:8px;background:rgba(231,180,67,.35)}.oilend.l{left:6px}.oilend.r{right:6px}
+.oilknob{position:absolute;top:6px;left:6px;width:44px;height:44px;border:0;padding:6px;cursor:grab;background:var(--panel,#2a2150);box-shadow:inset 0 0 0 2px var(--gold),0 2px 0 #120d22;touch-action:none}
+.oilknob:active{cursor:grabbing}.oilknob .pxi{width:30px;height:30px}.oiltrack.done{opacity:.6}
+.cslot.oilcombo b,.cslot.oiltime b{font-family:var(--f-pixel,monospace);font-size:16px;color:var(--gold)}.cslot.oiltime{grid-auto-flow:column;gap:1px}.cslot.oiltime small{font-size:9px;opacity:.7}
+.cslot.oilcombo.pop{animation:oilpop .18s}@keyframes oilpop{50%{transform:scale(1.25)}}
+
+.cshuf{position:relative;height:92px}
+.cshuf.spin{animation:cspin .6s ease-in-out 3}@keyframes cspin{50%{transform:rotate(-1.5deg) scale(.98)}}
+.cshc{position:absolute;top:0;width:calc(20% - 6px);margin:0 3px;height:88px;border:0;padding:0;cursor:pointer;background:var(--bg2);box-shadow:inset 0 0 0 2px var(--line);font:inherit;color:var(--fg);transition:left .22s ease-in-out}
+.cshc .cb,.cshc .cf{position:absolute;inset:2px;display:grid;place-items:center;align-content:center;gap:4px}
+.cshc .cb{background:repeating-linear-gradient(45deg,#3b2c63 0 4px,#2a2150 4px 8px);box-shadow:inset 0 0 0 2px #c8963c}
+.cshc .cf{display:none}.cshc.up .cf{display:grid}.cshc.up .cb{display:none}.cshc.up{animation:cflip .25s}
+@keyframes cflip{0%{transform:scaleX(1)}50%{transform:scaleX(.05)}100%{transform:scaleX(1)}}
+.cshc .pxi{width:30px;height:30px}.cshc small{font-size:11px;opacity:.85}
+.cshc:disabled{cursor:default;filter:none;opacity:1}.cshc.picked{box-shadow:inset 0 0 0 2px var(--gold);background:rgba(231,180,67,.15)}.cshc.dim{opacity:.45}
+.cshuf.spin .cshc{transform:translateY(-2px)}
+
+.oiltrack .oilhint{position:absolute;inset:0;display:grid;place-items:center;font-family:var(--f-pixel,monospace);color:var(--gold);opacity:.5;letter-spacing:6px;animation:oilhint 1s steps(3) infinite}
+@keyframes oilhint{0%{opacity:.25}100%{opacity:.7}}
+.oiltrack .oilend.r{width:40px;right:6px;top:8px;bottom:8px;display:grid;place-items:center;background:rgba(74,168,255,.12)}.oiltrack .oilend .pxi{width:24px;height:24px}
+.carebtns.one{grid-template-columns:1fr}.carebtns .oilrub{min-height:72px;touch-action:manipulation;user-select:none;-webkit-user-select:none}
+.carebtns .oilrub .pxi{width:36px;height:36px}.carebtns .oilrub.go{box-shadow:inset 0 0 0 2px var(--gold)}.carebtns .oilrub.go:active{transform:scale(.96)}

@@ -344,7 +344,7 @@ const EVENTS=[
   {n:"kati",f:"happy",l:"train",with:"fah",t:"Who's asking you to hold back! See you in the provincial ring!"}]},
  {id:"district_mid",look:"train",when:G=>G.week>=36,bg:"night",steps:[
   {n:"nar",t:"Four weeks left in the district round. The camp lights are off except one lamp where Coach Daeng sits writing in his log"},
-  {n:"coach",t:G=>{const rows=standings(G,"A");const i=rows.findIndex(r=>r.f.camp==="player");return i<0?"We're not on the district board this year, but I still log every fight. Next year we'll know what to fix":i<4?`Right now ${rows[i].f.name} is ranked #${i+1}. Stay in the top four and you go to the provincial semis. Don't risk injury now`:`Right now ${rows[i].f.name} is ranked #${i+1}. Needs at least two more wins to make the final four`;}},
+  {n:"coach",t:G=>{const rows=standings(G,"A");const i=rows.findIndex(r=>r.f.camp==="player");return i<0?"We're not on the district board this year, but I still log every fight. Next year we'll know what to fix":i<4?`Now ${rows[i].f.name} is ranked #${i+1}. Stay in the top four and you go to the provincial semis. Don't risk injury now`:`Now ${rows[i].f.name} is ranked #${i+1}. Needs at least two more wins to make the final four`;}},
   {n:"coach",t:"Grandpa Chai once told me 'a camp isn't measured by championships, but by the people who stay together when they lose' …I only understand it now"}]},
 ];
 
@@ -776,7 +776,7 @@ EVENTS.push(
   {n:"mali",f:"sad",l:"casual",t:"Mali's gloves floated away! …Oh, there's a fish swimming into the camp!"},
   {n:"rin",f:"sad",l:"casual",t:"The road into the subdistrict is cut off. Students definitely can't come for at least three weeks. The generator and mats need replacing"},
   {n:"coach",t:G=>`${ME(G)}, the villagers' homes are flooded worse than ours. Do we send the girls to help them first, or rush to fix our camp?`},
-  {choice:[{t:"Help the villagers move their things first (camp repairs ฿12,000)",fx:G=>{G.cash-=12000;G.rep+=3;G.disaster={name:"The flood",untilAbs:absWeek(G)+4,inc:0};roster(G).forEach(f=>{f.trust=Math.min(100,f.trust+4);f.fatigue=Math.min(100,f.fatigue+8);});},then:[{n:"nar",t:"Sirichai's fighters haul sandbags all day; the local paper puts their photo on the front page"},{n:"npc",who:"Auntie Sri, vegetable vendor",t:"This camp has the kindest hearts in the district! When the water goes down I'm sending three grandkids to train!"}]},
+  {choice:[{t:"Help the villagers move their things first (camp repairs ฿12,000)",fx:G=>{G.cash-=12000;G.rep+=3;G.disaster={name:"The flood",untilAbs:absWeek(G)+4,inc:0};roster(G).forEach(f=>{f.trust=Math.min(100,f.trust+4);f.fatigue=Math.min(100,f.fatigue+8);});},then:[{n:"nar",t:"Sirichai's fighters haul sandbags all day; the local paper puts their photo on the front page"},{n:"npc",who:"Auntie Sri, the vegetable seller",t:"This camp has the kindest hearts in the district! When the water goes down I'm sending three grandkids to train!"}]},
    {t:"Rush the camp repairs to reopen ASAP (฿25,000)",fx:G=>{G.cash-=25000;G.disaster={name:"The flood",untilAbs:absWeek(G)+2,inc:0};},then:[{n:"nar",t:"Three rented pumps; our camp dries out faster than anyone's, but the road stays cut off for two more weeks"}]}]}]},
  {id:"dis_termite",pri:1,look:"train",when:G=>G.week>=36&&G.cash>=55000&&G.F.fah.met,bg:"gym",steps:[
   {n:"nar",t:"Crack! The corner post snaps while Fah is leaning on it… wait, what is Fah doing at our camp?"},
