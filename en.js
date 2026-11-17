@@ -819,7 +819,15 @@ const effOvr=(G,f)=>ovr(f.a)+edgeOf(G,f);
    Our fighters and the five canon girls keep the level they earned. */
 const LV_BASE=6,LV_STEP=.75;
 function powLv(f){return clamp(Math.round((ovr(f.a)+(f.vet||0)-LV_BASE)/LV_STEP),1,MAX_LV);}
-function lvOf(f){return !f?1:(f.camp==="player"||f.canon)?(f.lvl||1):powLv(f);}
+/* v1.88: read against our own camp — an even opponent sits at our best fighter's level in that division,
+   each LV_REL of real strength above or below is one level (a clearly stronger opponent ≈ 2–3 levels above us).
+   The level shown never drops, so a fighter who has improved since you last met always reads higher. */
+const LV_REL=.55;
+function lvRef(G,f){if(!G||!G.F)return null;const P=Object.values(G.F).filter(x=>x.camp==="player"&&x.a);const mine=P.filter(x=>x.div===f.div);const L=mine.length?mine:P;if(!L.length)return null;
+  let best=null,be=-1e9;for(const x of L){const e=effOvr(G,x);if(e>be){be=e;best=x;}}return {lv:best.lvl||1,eff:be};}
+function lvOf(f){if(!f)return 1;if(f.camp==="player"||f.canon)return f.lvl||1;
+  const g=typeof G!=="undefined"?G:null,r=lvRef(g,f);let v=r?clamp(Math.round(r.lv+(effOvr(g,f)-r.eff)/LV_REL),1,MAX_LV):powLv(f);
+  if(f.plv&&f.plv>v)v=f.plv;f.plv=v;return v;}
 const effGap=(G,me,op)=>ovr(op.a)-ovr(me.a)+(lvOf(op)-lvOf(me))*.15-edgeOf(G,me)+edgeOf(G,op);
 function genOffers(G,opt){
   const rng=mulberry32(G.seed+G.week*7919+11);G.snub=G.snub||{};const ignored=new Set();
@@ -5189,7 +5197,7 @@ function offersHTML(){const mine=G.bookings.filter(b=>G.F[b.a].camp==="player").
      [...G.offers].sort((x,y)=>(y.rv||y.beast||y.hard||y.tier==="special"?1:0)-(x.rv||x.beast||x.hard||x.tier==="special"?1:0)).map(o=>{const op=G.F[o.b],me=G.F[o.a];const A=adviseCached(o.a,o.b,o.rounds||3);const v=verdictOf(A.bestRate);
        const sp=o.rv?["rv","Grudge match · the whole province is watching"]:o.beast?["beast",QK[o.beast].grp==="rooster"?"Wild bout · Human vs fighting rooster":"Wild bout · Bull wrestling, Muay Thai edition"]:o.tier==="special"?["sp","Special cross-division bout"]:o.hard?["hard","Punch up · purse ×1.5"]:o.fair?["fair",o.cross?"Temple fair · cross-division star!":"Temple fair bout · not ranked"]:null;
        return `<div class="item offer ${v.c} ${sp?"spx "+sp[0]:""}">${sp?`<span class="ribbon">${sp[1]}</span>`:""}<button class="oxbtn" data-act="declo" data-v="${o.id}" aria-label="Decline this offer">✕</button><div class="l"><span class="vdot ${v.c}" aria-label="${v.t}"></span>${faceImg(op,"sm")}<div>
-       <div class="t">${esc(me.name)} vs ${esc(op.name)} <span class="lv lt-${v.c}">Lv.${lvOf(op)}</span> ${tierChip(op,1)}</div>
+       <div class="t">${esc(me.name)} vs ${esc(op.name)} ${tierChip(op,1)}</div>
        <div class="meta">Wk ${o.week} · ${TIER[o.tier].name}${o.beast?" · off the record":""}${o.fair?" · not ranked · purse paid by mail":""}${o.tier==="lab"?" · Unranked bout":""} · ${styleOf(op.a)}${op.camp==="rival"?op.lab?" · Vector Gym, Bangkok":" · Golden Tiger":""}${personaOf(op)?` · ${personaOf(op).tag}`:""}</div>${h2hText(op)?`<div class="meta goldt">${h2hText(op)}</div>`:""}
        <div class="meta">Purse ${fmt(o.lose)} · <b class="goldt">win +${fmt(o.win-o.lose)}</b> · <b class="${v.c}t">${v.t}</b>${effGap(G,me,op)>.4?` · <b class="goldt">Win for bonus points/fame</b>`:effGap(G,me,op)<-.6?` · <span class="mutt">Beating a weaker fighter earns little fame</span>`:""}</div>
        </div></div>

@@ -818,7 +818,15 @@ const effOvr=(G,f)=>ovr(f.a)+edgeOf(G,f);
    Our fighters and the five canon girls keep the level they earned. */
 const LV_BASE=6,LV_STEP=.75;
 function powLv(f){return clamp(Math.round((ovr(f.a)+(f.vet||0)-LV_BASE)/LV_STEP),1,MAX_LV);}
-function lvOf(f){return !f?1:(f.camp==="player"||f.canon)?(f.lvl||1):powLv(f);}
+/* v1.88: read against our own camp — an even opponent sits at our best fighter's level in that division,
+   each LV_REL of real strength above or below is one level (a clearly stronger opponent ≈ 2–3 levels above us).
+   The level shown never drops, so a fighter who has improved since you last met always reads higher. */
+const LV_REL=.55;
+function lvRef(G,f){if(!G||!G.F)return null;const P=Object.values(G.F).filter(x=>x.camp==="player"&&x.a);const mine=P.filter(x=>x.div===f.div);const L=mine.length?mine:P;if(!L.length)return null;
+  let best=null,be=-1e9;for(const x of L){const e=effOvr(G,x);if(e>be){be=e;best=x;}}return {lv:best.lvl||1,eff:be};}
+function lvOf(f){if(!f)return 1;if(f.camp==="player"||f.canon)return f.lvl||1;
+  const g=typeof G!=="undefined"?G:null,r=lvRef(g,f);let v=r?clamp(Math.round(r.lv+(effOvr(g,f)-r.eff)/LV_REL),1,MAX_LV):powLv(f);
+  if(f.plv&&f.plv>v)v=f.plv;f.plv=v;return v;}
 const effGap=(G,me,op)=>ovr(op.a)-ovr(me.a)+(lvOf(op)-lvOf(me))*.15-edgeOf(G,me)+edgeOf(G,op);
 function genOffers(G,opt){
   const rng=mulberry32(G.seed+G.week*7919+11);G.snub=G.snub||{};const ignored=new Set();
