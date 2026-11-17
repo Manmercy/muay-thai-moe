@@ -1,5 +1,5 @@
 // ================= MUAY THAI MOE v1.3 — UI =================
-const VERSION="1.88.4";
+const VERSION="1.89.0";
 const CUR_LANG=(typeof window!=="undefined"&&window.LANG)||"th";
 const TH_LABEL=String.fromCharCode(3652,3607,3618);
 function langSwitch(cls){return `<div class="langsw ${cls||""}" role="group" aria-label="Language">${[["th",TH_LABEL],["en","EN"]].map(([k,l])=>`<button class="lsb ${CUR_LANG===k?"on":""}" data-act="setlang" data-v="${k}" aria-pressed="${CUR_LANG===k}">${l}</button>`).join("")}</div>`;}
@@ -135,7 +135,7 @@ const moveIcon=m=>!m?'<span class="mv eq">–</span>':m>0?`<span class="mv up">�
 
 // ---------- root render ----------
 /* v1.87: a loading screen when a save opens — the art this save needs downloads first, then the rest trickles in */
-const LOAD_TIPS=["Counter-train before a fight and the opponent's main weapon lands less often","Scout your opponent first to know which counter-training to do","Each girl has two traits. Switch between them on the skill page",
+const LOAD_TIPS=["Counter-train before a fight and the opponent's main weapon lands less often","Scout your opponent first to know which counter-training to do","Each girl has two hidden powers. Switch between them on the skill page",
   "Use duplicate cards to level up, or break them into stardust on the card page","Decorations in the year's lucky colour score extra in the camp beauty contest","Reach ♥ Lv.7 to unlock a girl's signature move",
   "Fighters above 70 fatigue can get hurt in training. Let them rest","Tap a week on the calendar to see birthdays and festivals"];
 function saveArt(){const S=new Set(),add=u=>{if(u)S.add(u);};
@@ -174,10 +174,11 @@ function render(){
   if(G&&UI.fight)h+=fightHTML();
   if(UI.scene)h+=sceneHTML();
   if(UI.toast)h+=`<div class="toast" aria-hidden="true">${esc(UI.toast.msg)}</div>`;
-  const keep={};document.querySelectorAll(".pxscroll[data-sk]").forEach(e=>keep[e.dataset.sk]=e.scrollTop);const fsEl=document.querySelector(".fight"),fsTop=fsEl?fsEl.scrollTop:0;
+  const keep={};document.querySelectorAll("[data-sk]").forEach(e=>keep[e.dataset.sk]=e.scrollTop);const fsEl=document.querySelector(".fight"),fsTop=fsEl?fsEl.scrollTop:0;
   const albumTop=document.querySelector(".m-album")?.parentElement.scrollTop||0;
   $app.innerHTML=h;
-  document.querySelectorAll(".pxscroll[data-sk]").forEach(e=>{const k=e.dataset.sk;if(keep[k]!=null&&!UI.resetScroll)e.scrollTop=keep[k];});{const f2=document.querySelector(".fight");if(f2&&fsTop)f2.scrollTop=fsTop;} /* v1.80: the fight screen re-renders every beat; keep its scroll put */UI.resetScroll=false;{const cb=document.querySelector(".cbody");if(cb)cb.scrollTop=cb.scrollHeight;}
+  {const pp=document.querySelector(".modal .skpop-ov");if(pp)$app.appendChild(pp);} /* v1.89.2: skill details pop up in the middle of the screen, outside the scrolling modal */
+  document.querySelectorAll("[data-sk]").forEach(e=>{const k=e.dataset.sk;if(keep[k]!=null&&!UI.resetScroll)e.scrollTop=keep[k];});{const f2=document.querySelector(".fight");if(f2&&fsTop)f2.scrollTop=fsTop;} /* v1.80: the fight screen re-renders every beat; keep its scroll put */UI.resetScroll=false;{const cb=document.querySelector(".cbody");if(cb)cb.scrollTop=cb.scrollHeight;}
   if(albumTop&&UI.modal?.type==="album"){const modal=document.querySelector(".m-album");if(modal)modal.parentElement.scrollTop=albumTop;}
   const fc=document.getElementById("fstage");if(fc)FS.attach(fc);
   const lg=document.querySelector(".flog");if(lg)lg.scrollTop=lg.scrollHeight;
@@ -742,13 +743,13 @@ function fighterHTML(f){const mine=f.camp==="player";const P=PROFILES[f.id];
       <p class="meta center">Outfits only change the pixel sprite in camp, training and fights · no effect on stats</p>`;}
   if(t==="over"){const c=condition(f);const nb=G.bookings.find(b=>b.a===f.id||b.b===f.id);
     body=`<div class="fp-over">${radarSVG(f,240)}<div><div class="bars">${bar("Readiness",c,condColor(c))}${bar("Fatigue",f.fatigue,"var(--warn)")}${bar("Morale",f.morale,"var(--blue)")}</div>
-      ${mine?`<p class="meta goldt">${masteryLine(f)}</p>`:""}${TRAITS[f.id]?`<p class="meta trov">${TRAIT_PX[traitOf(f)]||""} Trait: <b>${TRAITS[f.id].find(t=>t.id===traitOf(f)).name}</b></p>`:""}<p class="meta">Form ${formHTML(f)}${nb?` · next fight week ${nb.week}`:""}</p><details><summary>Detailed stats</summary>${attrsHTML(f,mine)}</details></div></div>`;}
+      ${mine?`<p class="meta goldt">${masteryLine(f)}</p>`:""}${TRAITS[f.id]?`<p class="meta trov">${TRAIT_PX[traitOf(f)]||""} Hidden power: <b>${TRAITS[f.id].find(t=>t.id===traitOf(f)).name}</b></p>`:""}<p class="meta">Form ${formHTML(f)}${nb?` · next fight week ${nb.week}`:""}</p><details><summary>Detailed stats</summary>${attrsHTML(f,mine)}</details></div></div>`;}
   if(t==="train"){body=`<div class="fp-train"><div class="tr-anim big" style="background-image:url(${ASSET}${gymBg()})"><canvas width="260" height="200" data-sprite="${f.id}" data-floor="1"></canvas><span class="tr-tag">${PRESETS[f.plan.preset].name}</span></div>
      <div><p class="meta">${PRESETS[f.plan.preset].desc} · fatigue next week ${Math.round(projFatigue(f))}</p>${presetPicker(f)}${radarSVG(f,200)}</div></div>`;}
   if(t==="skill"&&hasTree(f.id))body=skillGrid(f,mine);else if(t==="skill")body=skillGrid(f,mine)+(SIGNATURE[f.id]?`<details class="sigcard ${hasSignature(f)?"on":""}"><summary><b>${hasSignature(f)?"✦":"🔒"} Signature move: ${SIGNATURE[f.id].name}</b></summary><span class="meta">${SIGNATURE[f.id].desc}${hasSignature(f)?"":` · now ♥ Lv.${heartLv(f).lv}/7`}</span></details>`:"")+`<details class="skhelp"><summary>How do skills work?</summary><p class="meta">1 skill point per level-up · new moves unlock by level · each move upgrades 3 times · in a fight you can only use the 3 moves marked "Use" · tap a move's name for details</p></details>`;
   if(t==="skill")body=traitHTML(f,mine)+body;
   if(t==="rel")body=relHTML(f);
-  return head+`<div class="fp-body">${body}</div>`;}
+  return head+`<div class="fp-body"${t==="skill"?' data-sk="fpb"':""}>${body}</div>`;}
 const SK_AN=Object.fromEntries(ATTRS);
 const SK_LINES={kati:["Shin line","Punch & elbow line","Guard & heart line"],mali:["Elbow line","Kick & speed line","Defense line"],rin:["Counter line","Ring-IQ line","Range line"],ploy:["Korat Punch line","Neck-Cutter Kick line","Tiger Wall line"],fah:["Tiger Elbow line","Reckless Rush line","Mocking Smile line"]};
 const SK_SHARED=["Knockout build","Points build","Iron build"];const SK_RESET_COST=10000;
@@ -772,20 +773,76 @@ function skillTree(f,mine){const L=skillList(f.id),eqd=equipped(f),sc=SCHOOLS[L[
      ${mine?`<div class="skc-b">${st.st==="can"?`<button class="btn sm gold" data-act="learn" data-id="${f.id}" data-v="${s.id}" aria-label="Upgrade ${s.name}">+ Up</button>`:""}${st.r&&!s.passive?`<button class="btn sm eqbtn ${eq?"on":""}" data-act="equip" data-id="${f.id}" data-v="${s.id}" ${!eq&&eqd.length>=MAX_EQUIP?"disabled":""}>${eq?"Remove":"Equip"}</button>`:""}</div>`:""}</div>`;};
   return `<div class="skwrap">${mine?`<div class="skbar3"><div class="sppx"><small>Skill points</small><b class="num">★ ${f.sp}</b></div>
      ${skResetBtn(f)}<div class="sk-info"><span>${f.sp?nCan?`Can upgrade now: <b class="ok">${nCan}</b> moves`:"Nothing to upgrade yet. Train stats higher":"3 points every level up"}</span>
-      <span class="sk-eq">Equipped ${[0,1,2].map(i=>{const s=eqd[i]&&skillDef(f.id,eqd[i]);return `<i class="${s?"on":""}" title="${s?s.name:"Empty"}">${s?PIX["sk_"+skillKind(s).k]:""}</i>`;}).join("")}</span></div></div>`:""}
-   <div class="sknav"><div class="seg sklines"><span class="sklbl">School lines</span>${lines.slice(0,3).map((n,i)=>`<button data-act="skline" data-id="${f.id}" data-v="${i}" aria-pressed="${li===i}">${n}${can(i)?'<i class="tdot2"></i>':""}</button>`).join("")}</div>
-   <div class="seg sklines shared"><span class="sklbl" title="Pick one build path at a time">Build path</span>${lines.slice(3).map((n,j)=>{const i=j+3;return `<button data-act="skline" data-id="${f.id}" data-v="${i}" aria-pressed="${li===i}" class="${path!=null&&path!==i?"off":""}">${path===i?"✓ ":""}${n}${can(i)?'<i class="tdot2"></i>':""}</button>`;}).join("")}</div>
-   ${li>=3&&path!==li?`<p class="meta skpath">${path==null?"Build paths use skill points like school lines, but you can build only one at a time · the first skill you raise closes the other build paths":path===li?`Building this path`:`Currently building "${SK_SHARED[path-3]}" now. Change build path before raising this one.`}</p>`:""}</div>
-   <div class="sklist pxscroll">${[0,1,2,3,4,5].map(row=>L.find(s=>s.line===li&&s.row===row)).filter(Boolean).map(card).join('<i class="skarrow" aria-hidden="true"></i>')}
-     ${SIGNATURE[f.id]?`<div class="skc sig ${hasSignature(f)?"has":"lock"}"><div class="skc-m"><div class="skc-h"><b>✦ Signature: ${SIGNATURE[f.id].name}</b></div><p class="skc-d">${SIGNATURE[f.id].desc}${hasSignature(f)?"":` · unlocks at bond 60 (now ${Math.round(f.bond||0)})`}</p></div></div>`:""}</div>
-   ${mine?`<div class="skfoot"><button class="btn sm" data-act="skauto" data-id="${f.id}" data-v="${li}" ${[0,1,2,3,4,5].some(r=>{const s=L.find(x=>x.line===li&&x.row===r);return s&&skState(f,s,mine).st==="can";})?"":"disabled"}>Auto-upgrade · ${lines[li]}</button><span class="meta">Equip up to ${MAX_EQUIP} moves · passives work on their own, no slot needed</span></div>`:""}</div>`;}
+      <span class="sk-eq">Equipped ${[0,1,2].map(i=>{const s=eqd[i]&&skillDef(f.id,eqd[i]);return `<i class="${s?"on":""}" title="${s?s.name:"Empty"}">${s?skIcon(s,f.id):""}</i>`;}).join("")}</span></div></div>`:""}
+   <div class="sknav"><div class="seg sklines"><span class="sklbl">School</span>${lines.slice(0,3).map((n,i)=>`<button data-act="skline" data-id="${f.id}" data-v="${i}" aria-pressed="${li===i}" aria-label="${n}" class="${skShort(n).length>10?"lng":""}">${skShort(n)}${can(i)?'<i class="tdot2"></i>':""}</button>`).join("")}</div>
+   <div class="seg sklines shared"><span class="sklbl" title="Pick one build path at a time">Build</span>${lines.slice(3).map((n,j)=>{const i=j+3;return `<button data-act="skline" data-id="${f.id}" data-v="${i}" aria-pressed="${li===i}" aria-label="${n}" class="${path!=null&&path!==i?"off":""}" ${path!=null&&path!==i?"disabled":""}>${path===i?"✓ ":""}${skShort(n)}${can(i)?'<i class="tdot2"></i>':""}</button>`;}).join("")}</div>
+   ${li>=3&&path==null?`<p class="meta skpath">Pick one build path · once you learn its first skill, the other two lock until you reset skills</p>`:""}</div>
+   ${skTreeHTML(f,li,mine,lines,path)}</div>`;}
+// v1.89: the skill tab is a tree — small nodes in three columns (trunk in the middle, the two roots split left and right);
+// tapping a node opens its details in the panel pinned to the bottom, where the upgrade and equip buttons live
+const skShort=n=>String(n).replace(/ (line|build)$/i,"").replace(/^(\u0e2a\u0e32\u0e22|\u0e1b\u0e31\u0e49\u0e19)/,""); // v1.89.1: "สายแข้ง"→"แข้ง", "Shin line"→"Shin" on the buttons
+const skKindTag=s=>s.br==null?SK_ROWN[s.row]:s.nd===5?`Legend · Lv.${s.lv}`:s.nd===4?"Always on · boost":s.nd===2?`Always on · Lv.${s.lv}`:`Lv.${s.lv}`;
+// v1.89.3: skills keep the original three icons (fist = attack, shield = guard, heart = recovery/always-on);
+// each skill only adds a tiny mark or two in the corners so no two skills of one fighter look exactly alike
+const SKO={atk:{r:["..........",".kkkkkkk..","kydydydyk.","kyyyyyyyk.","kyyyyyyykk","kyyyyyyyyk",".kyyyyyyk.",".kyyyyyk..","..kyyyk...","..kkkkk..."],p:{k:"#4a1020",y:"#ff6a4d",d:"#b8322a"}},
+ def:{r:[".kkkkkkkk.",".kbbbbbbk.",".kbwbbbbk.",".kbwbbbbk.",".kbbbbbbk.",".kbbbbbbk.","..kbbbbk..","..kbbbbk..","...kbbk...","....kk...."],p:{k:"#16264a",b:"#4a8fe8",w:"#bfe0ff"}},
+ rec:{r:["..........",".kk...kk..","kggk.kggk.","kgwgkgggk.","kgggggggk.",".kgggggk..","..kgggk...","...kgk....","....k.....",".........."],p:{k:"#123a22",g:"#3fd17a",w:"#c8ffd9"}}};
+const SKM={tl:[[0,0],[1,0],[0,1]],tr:[[11,0],[10,0],[11,1]],bl:[[0,11],[1,11],[0,10]],br:[[11,11],[10,11],[11,10]],tm:[[5,0],[6,0]],bm:[[5,11],[6,11]],lm:[[0,5],[0,6]],rm:[[11,5],[11,6]]};
+const SKM_POOL=[];for(const c of ["e","w"])for(const k of Object.keys(SKM))SKM_POOL.push(k+":"+c);
+let SK_ICONS=null;
+function skGrid(I){const N=12,grid=[...Array(N)].map(()=>Array(N).fill("."));
+  SKO[I.g].r.forEach((row,y)=>[...row].forEach((c,x)=>{if(c!==".")grid[y+1][x+1]=c;}));
+  for(const m of I.mk){const [k,c]=m.split(":");for(const [x,y] of SKM[k])if(grid[y][x]===".")grid[y][x]=c;}
+  return grid.map(r=>r.join(""));}
+function skBuildIcons(){SK_ICONS={};const all=[];for(const fid of CANON_IDS)for(const s of SKILLS[fid]||[])all.push([fid,s]);for(const s of SHARED_SKILLS)all.push(["build",s]);
+  const used={};let n=0;
+  for(const [fid,s] of all){const g=s.passive?"rec":skillKind(s).k;const tag=s.nd===5?"tr:e":s.row===5&&s.br==null?"tm:e":s.feed!=null?"br:g":null;
+    const scope=s.shared?"build":fid;used[scope]=used[scope]||{};let pick=null;const P=SKM_POOL.length,st=(n++*5)%P;
+    const tries=[[]];for(let a=0;a<P;a++)tries.push([SKM_POOL[(st+a)%P]]);for(let a=0;a<P;a++)for(let b=a+1;b<P;b++)tries.push([SKM_POOL[(st+a)%P],SKM_POOL[(st+b)%P]]);
+    for(const t of tries){const mk=[tag].concat(t).filter(Boolean);if(new Set(mk.map(x=>x.split(":")[0])).size<mk.length)continue;const I={g,mk};const k=skGrid(I).join("");if(!used[scope][k]){used[scope][k]=1;pick=I;break;}}
+    SK_ICONS[(s.shared?"":fid+":")+s.id]=pick||{g,mk:[]};}}
+function skIconSVG(fid,s){if(!SK_ICONS)skBuildIcons();const I=SK_ICONS[(s.shared?"":fid+":")+s.id];if(!I)return PIX.sk_rec;
+  return pxIcon(skGrid(I),Object.assign({e:"#ffd65a",w:"#fff6e8",g:"#5fe39a"},SKO[I.g].p));}
+const skIcon=(s,fid)=>`<span class="ic">${skIconSVG(fid||skOwner(s),s)}</span>`;
+const skOwner=s=>{for(const id of CANON_IDS)if((SKILLS[id]||[]).includes(s))return id;return "kati";};
+function skTreeHTML(f,li,mine,lines,path){const L=skillList(f.id).filter(s=>s.line===li),eqd=equipped(f);
+  const st=s=>skState(f,s,mine);
+  let sel=UI.skSel&&UI.skSel.startsWith(f.id+":")?L.find(s=>s.id===UI.skSel.slice(f.id.length+1)):null;
+  // v1.89.1: the original moves stay one per row down the middle (as before); only the new roots split into two columns
+  const trunk=L.filter(s=>s.br==null).sort((a,b)=>a.row-b.row),last=trunk.length,ocol=0;
+  const pos=s=>s.br==null?[trunk.indexOf(s)+1,"1/-1",(trunk.indexOf(s)?"up":"")+" wide"]:[last+1+s.nd,s.br?2:1,s.nd>1?"up":""];
+  const tag=s=>{const t=st(s);if(t.st==="can")return "<small class=\"tg ok\">Ready</small>";if(t.st==="max")return "<small class=\"tg gold\">Max</small>";
+    if(t.st==="lock"&&t.B){const lv=t.B.find(b=>b.t==="lv");if(lv)return `<small class="tg">Lv.${lv.v}</small>`;return "";}
+    return "";};
+  const R=(SK_ROOTS[li<3?f.id:"build"]||[])[li<3?li:li-3];
+  // v1.89.3: description sits on the row again (no i / popup); equip is a pixel toggle — yellow while equipped, grey when not
+  const sdesc=s=>{const rn=s.br!=null&&R?R[s.br].n:null;return s.desc.split(" · ").filter(x=>!/^Lv\.\d+$/.test(x)&&x!==rn).join(" · ");};
+  const node=s=>{const t=st(s),[r,c,cn]=pos(s),eq=eqd.includes(s.id);
+    const lockTxt=mine&&t.st==="lock"&&t.B?`<p class="skwhy">${why(t)}</p>`:"";
+    return `<div class="skn2 ${t.st}${s.passive?" pas":""}${s.feed!=null?" feed":""}${s.nd===5?" leg":""}${eq?" eq":""}${cn?" "+cn:""}" style="grid-row:${r};grid-column:${c}">
+      ${skIcon(s,f.id)}<b class="nm">${s.name}${s.br==null?`<small class="tier">${skKindTag(s)}</small>`:""}<span class="pips" aria-label="Rank ${t.r}/3">${[1,2,3].map(i=>`<i class="${i<=t.r?"on":""}"></i>`).join("")}</span></b>
+      <div class="sktx"><p class="skds">${sdesc(s)}</p>${lockTxt}</div>
+      <span class="ctl">${mine&&t.r&&!s.passive?`<button class="skeq${eq?" on":""}" data-act="equip" data-id="${f.id}" data-v="${s.id}" aria-pressed="${eq}" ${!eq&&eqd.length>=MAX_EQUIP?"disabled":""} aria-label="${eq?"Remove":"Equip"} ${s.name}">${eq?"Remove":"Equip"}</button>`:""}${mine&&t.st==="can"?`<button class="skplus" data-act="learn" data-id="${f.id}" data-v="${s.id}" aria-label="Upgrade ${s.name} to rank ${t.r+1}">+</button>`:""}</span>${tag(s)}${eq?'<i class="eqm" aria-hidden="true">E</i>':""}</div>`;};
+  const split=R&&L.some(s=>s.br!=null)?`<div class="sksplit" style="grid-row:${last+1}" aria-hidden="false"><svg viewBox="0 0 300 20" preserveAspectRatio="none" aria-hidden="true"><path d="M150 0V8H73V20M150 8H227V20"/></svg>
+    <span class="rt a"><b>${R[0].n}</b><small>${R[0].m}</small></span><span class="rt b"><b>${R[1].n}</b><small>${R[1].m}</small></span></div>`:"";
+  const why=t=>t.B.map(b=>b.t==="pre"?`Needs "${skillDef(f.id,b.id).name}" first`:b.t==="lv"?`Needs Lv.${b.v}`:b.t==="stat"?`${SK_AN[b.k]} ${fmtA(b.have)}/${fmtA(b.v)}`:b.t==="path"?`Picked "${SK_SHARED[path-3]}" already (one build at a time)`:"").filter(Boolean).join(" · ");
+  let det="";if(sel){const t=st(sel),eq=eqd.includes(sel.id);
+    const ftxt=sel.feed!=null?`<p class="skfeed">↗ Boosts ${sel.feed==="school"?"every school line":`"${lines[sel.feed]}"`} · always on, uses no fight slot</p>`:"";
+    // v1.89.1: details open as a popup in the middle of the screen; upgrading stays on the + of each row
+    det=`<div class="skpop-ov" data-act="skpopbg"><div class="px skpop" role="dialog" aria-modal="true" aria-label="${sel.name}"><div class="skdet-h">${skIcon(sel,f.id)}<div><b>${sel.name}</b><small>${skKindTag(sel)} · ${sel.passive?"Always on, uses no slot":eq?"<span class=\"goldt\">Equipped</span>":"Active, can be equipped"}</small></div><button class="skx" data-act="skselx" aria-label="Close details">✕</button></div>
+      <div class="skpop-r"><span class="pips">${[1,2,3].map(i=>`<i class="${i<=t.r?"on":""}"></i>`).join("")}</span><small>Rank ${t.r}/3</small></div>
+      <p class="skc-d">${sel.desc}</p>${ftxt}
+      <p class="skc-s">${t.st==="can"?`<span class="ok">Ready · tap + on the skill row</span>`:t.st==="max"?"<span class=\"goldt\">Maxed out</span>":t.st==="nosp"?"<span class=\"dim\">No skill points · wait for a level up</span>":t.st==="has"?"":t.B?`<span class="no">Can't upgrade yet: ${why(t)}</span>`:""}</p>
+      ${mine&&t.r&&!sel.passive?`<div class="skdet-b"><button class="btn eqbtn ${eq?"on":""}" data-act="equip" data-id="${f.id}" data-v="${sel.id}" ${!eq&&eqd.length>=MAX_EQUIP?"disabled":""}>${eq?"Remove from fight slots":"Equip"}</button></div>`:""}</div></div>`;}
+  const sig=SIGNATURE[f.id]?`<div class="skc sig ${hasSignature(f)?"has":"lock"}"><div class="skc-m"><div class="skc-h"><b>✦ Signature: ${SIGNATURE[f.id].name}</b></div><p class="skc-d">${SIGNATURE[f.id].desc}${hasSignature(f)?"":` · unlocks at bond 60 (now ${Math.round(f.bond||0)})`}</p></div></div>`:"";
+  return `<div class="sktree">${L.map(node).join("")}${split}</div>${sig}`;}
 /* v1.87: innate traits — two per girl, pick one */
 function traitHTML(f,mine){const L=TRAITS[f.id];if(!L)return "";const cur=traitOf(f),T=L.find(t=>t.id===cur);
   const extra=cur==="grit"&&f.grit?` <span class="goldt">· stored so far +${Math.round(f.grit*100)}%</span>`:"";
-  return `<div class="trbox"><div class="trh"><b>Trait</b>${mine?`<div class="seg trseg" role="group" aria-label="Choose a trait">${L.map(t=>`<button data-act="trait" data-id="${f.id}" data-v="${t.id}" aria-pressed="${cur===t.id}">${TRAIT_PX[t.id]||""}<span>${t.name}</span></button>`).join("")}</div>`:`<span class="trone">${TRAIT_PX[T.id]||""}${T.name}</span>`}</div>
-   <details class="trd"><summary>Details</summary><p>${T.desc}${extra}</p>${mine?`<p class="meta">Other option: ${L.filter(t=>t.id!==cur).map(t=>`<b>${t.name}</b> · ${t.desc}`).join("")}</p>`:""}</details></div>`;}
+  return `<div class="trbox"><div class="trh"><b>Hidden power</b>${mine?`<div class="seg trseg" role="group" aria-label="Choose a hidden power">${L.map(t=>`<button data-act="trait" data-id="${f.id}" data-v="${t.id}" aria-pressed="${cur===t.id}">${TRAIT_PX[t.id]||""}<span>${t.name}</span></button>`).join("")}</div>`:`<span class="trone">${TRAIT_PX[T.id]||""}${T.name}</span>`}</div>
+   <p class="trdesc">${T.desc}${extra}</p></div>`;}
 function skResetBtn(f){const n=skPointsSpent(f);if(!n)return "";const c=skResetCost(f);
-  return `<button class="skrbtn" data-act="skresetask" data-id="${f.id}" ${c&&G.cash<c?"disabled":""} aria-label="Reset skills, refunds ${n} points" title="Reset skills · refunds ${n} points · ${c?fmt(c):"first reset is free"}">↺ Reset</button>`;}
+  return `<button class="btn sm skrbtn" data-act="skresetask" data-id="${f.id}" ${c&&G.cash<c?"disabled":""} aria-label="Reset skills, refunds ${n} points" title="Reset skills · refunds ${n} points · ${c?fmt(c):"first reset is free"}">↺ Reset</button>`;}
 function skResetRow(f){const n=skPointsSpent(f);if(!n)return "";const c=skResetCost(f);
   return `<div class="skreset"><span><b>Reset all skills</b><small>Refunds ${n} points so you can pick a new line · ${c?`Cost ${fmt(c)}`:"first reset is free"}</small></span><button class="btn sm" data-act="skresetask" data-id="${f.id}" ${c&&G.cash<c?"disabled":""}>Reset</button></div>`;}
 function skillGrid(f,mine){if(hasTree(f.id))return skillTree(f,mine);const L=SKILLS[f.id]||[];const sc=SCHOOLS[L[0]&&L[0].school]||{name:"",motto:""};
@@ -1571,17 +1628,19 @@ const ACT={
   albtog:()=>{UI.albAll=!UI.albAll;render();},
   learn:d=>{const sl=document.querySelector(".sklist"),y=sl?sl.scrollTop:0;if(learnSkill(G,d.id,d.v)){AU.sfx("level");save();render();const n=document.querySelector(".sklist");if(n)n.scrollTop=y;}},
   rinread:()=>{const n=G.rinNote;if(!n)return;G.rinNote=null;save();playScene(n.steps,()=>{save();render();},{bg:"gym",look:"casual"});},
-  skline:d=>{UI.skLine={id:d.id,li:+d.v};AU.sfx("ui");render();},
+  skline:d=>{UI.skLine={id:d.id,li:+d.v};UI.skSel=null;AU.sfx("ui");render();},
   skresetask:d=>{const f=G.F[d.id];if(!f)return;UI.modal={type:"skresetask",id:d.id,back:UI.modal};render();},
   skresetgo:()=>{const m=UI.modal;if(!m)return;const f=G.F[m.id];const c=skResetCost(f);if(c&&G.cash<c)return;const n=resetAllSkills(G,m.id);if(!n){UI.modal=m.back||null;render();return;}G.cash-=c;save();UI.modal=m.back||null;toast(`Refunded ${n} points to ${f.name}. Pick a new line now`);render();},
   skresetno:()=>{const m=UI.modal;UI.modal=m&&m.back||null;render();},
   skreset:d=>{const f=G.F[d.id];if(!f||G.cash<SK_RESET_COST)return;const n=resetSharedPath(G,d.id);if(!n)return;G.cash-=SK_RESET_COST;save();toast(`Refunded ${n} points back. Pick a new build path.`);render();},
   skauto:d=>{const f=G.F[d.id],li=+d.v;let n=0;for(let guard=0;guard<30&&f.sp>0;guard++){const s=skillList(f.id).filter(x=>x.line===li).sort((a,b)=>a.row-b.row||(f.skills[a.id]||0)-(f.skills[b.id]||0)).find(x=>!skillBlock(f,x.id).length);if(!s||!learnSkill(G,f.id,s.id))break;n++;}
     if(n){AU.sfx("level");save();toast(`Up ${(SK_LINES[f.id]||[])[li]||""} ${n} times`);}render();},
-  sksel:d=>{UI.skSel=d.id+":"+d.v;AU.sfx("ui");render();},
+  sksel:d=>{const k=d.id+":"+d.v;UI.skSel=UI.skSel===k?null:k;AU.sfx("ui");render();},
+  skselx:()=>{UI.skSel=null;render();},
+  skpopbg:(d,e)=>{if(e.target.classList.contains("skpop-ov")){UI.skSel=null;render();}},
   newsok:()=>{G.newsSeen=PATCH.id;UI.modal=null;save();render();},
   closeModal:()=>{const m=UI.modal;if(m&&m.type==="lotto"&&typeof ACT.lottoskip==="function"){ACT.lottoskip();return;} /* closing the ticket sheet skips the draw */if(m&&m.back==="album"&&G){ACT.album();return;}if(m&&m.type==="contest"){ACT.contestdone();return;}if(m&&m.type==="whatsnew"&&G){G.newsSeen=PATCH.id;save();}UI.modal=null;render();if(m&&m.after)m.after();},
-  trait:d=>{const f=G.F[d.id],L=TRAITS[d.id];if(!f||!L||f.camp!=="player")return;const t=L.find(x=>x.id===d.v);if(!t||traitOf(f)===t.id)return;f.trait=t.id;save();render();toast(`${f.name} now uses the trait "${t.name}"`);},
+  trait:d=>{const f=G.F[d.id],L=TRAITS[d.id];if(!f||!L||f.camp!=="player")return;const t=L.find(x=>x.id===d.v);if(!t||traitOf(f)===t.id)return;f.trait=t.id;save();render();toast(`${f.name} now uses the hidden power "${t.name}"`);},
   gopen:d=>{GB.box=d.v==="loy"?"loy":"n";if(GB.box==="loy"&&!loyFest()){toast(loySoon()?"The Loy Krathong gacha opens Nov 18 at 00:00":"The Loy Krathong machine is closed. See you next festival!");return;}const fromAlb=UI.modal&&UI.modal.type==="album";if(fromAlb)albKeep();GB.st=null;GB.ps=[];UI.gq=false;UI.modal={type:"gbox",back:fromAlb?"album":null};render();gbPreload();},
   gpull:()=>{if(GB.st)return;const cost=gbCost();if((G.dust||0)<cost){AU.sfx("ui");toast(`Not enough stardust. You need ${cost}✦ · earn it by winning fights, getting new cards and breaking down spares`);return;}
     const r=GB.box==="loy"?loyPull(G):gachaPull(G);if(!r)return;save();const rr=CARDS[r.id].r;

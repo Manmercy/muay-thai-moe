@@ -26,6 +26,22 @@ const chrome=process.env.CHROME_PATH||'/Applications/Google Chrome.app/Contents/
   test('post-max chats come one per level, everyday chats rotate',()=>{const g=fresh();G=g;g.week=20;g.F.kati.met=true;atHeart(g,11);if(chatTopic(g,'kati').id!=='k_h11')return false;g.chatSeen={kati:['k_h11']};const t=chatTopic(g,'kati');return t.id!=='k_h12';});
   test('heart date spots: hidden, then locked, then open with a scene',()=>{const g=fresh();G=g;g.F.kati.bond=60;g.F.kati.bondX=0;if(hangHTML('kati').includes('fairnight'))return false;g.F.kati.bond=100;if(!/data-v="fairnight"[^>]*disabled/.test(hangHTML('kati')))return false;atHeart(g,12);if(/data-v="fairnight"[^>]*disabled/.test(hangHTML('kati')))return false;
     const st=dateScene(g,'kati','fairnight');return st.length>4&&(g.F.kati.spotN.fairnight===1);});
+  // v1.89 skill roots
+  test('every line splits into two roots of five (school after Lv.22, build after Lv.10)',()=>{for(const id of ['kati','mali','rin','ploy','fah']){const L=skillList(id);
+    for(let li=0;li<6;li++){const R=L.filter(s=>s.line===li&&s.br!=null);if(R.length!==10)throw Error(id+' line '+li+' has '+R.length);
+      for(const br of [0,1]){const ch=R.filter(s=>s.br===br).sort((a,b)=>a.nd-b.nd);if(ch.map(s=>s.passive?'P':'A').join('')!=='APAPA')throw Error('pattern '+id+li+br);
+        const top=L.filter(s=>s.line===li&&s.br==null&&!s.passive).sort((a,b)=>b.row-a.row)[0];if(ch[0].pre!==top.id)throw Error('root start '+ch[0].id);
+        for(let i=1;i<5;i++)if(ch[i].pre!==ch[i-1].id)throw Error('chain '+ch[i].id);if(ch[3].feed==null)throw Error('no feed '+ch[3].id);
+        if(li<3&&ch[3].feed!==(li+1+br)%3)throw Error('feed target '+ch[3].id);}}
+    if(!SK_ROOTS[id]||SK_ROOTS[id].length!==3)throw Error('root names '+id);}return true;});
+  test('a root can be learned, equipped, and its passive feed counts without a slot',()=>{const g=fresh();G=g;const f=g.F.kati;f.lvl=40;for(const k in f.a)f.a[k]=20;f.sp=200;
+    for(const s of skillList('kati').filter(s=>s.line===0&&s.br==null))f.skills[s.id]=3;f.equip=[];
+    for(const k of ['kati_0a1','kati_0a2','kati_0a3','kati_0a4'])if(!learnSkill(g,'kati',k))throw Error('learn '+k+' '+JSON.stringify(skillBlock(f,k)));
+    if(!toggleEquip(g,'kati','kati_0a1')&&!equipped(f).includes('kati_0a1'))throw Error('equip');const m=skillMods(f);if(!(m.dmg.elbow>=.03))throw Error('feed not applied');
+    if(skillBlock(f,'kati_0a5').some(b=>b.t==='pre'))throw Error('chain block');return true;});
+  test('the skill tab draws the tree with descriptions and an equip toggle',()=>{const g=fresh();G=g;const f=g.F.kati;f.lvl=30;f.sp=5;UI.ptab='skill';UI.modal={type:'fighter',id:'kati'};render();
+    const n=document.querySelectorAll('.sktree .skn2').length;if(n<15)throw Error('nodes '+n);if(!document.querySelector('.sksplit .rt.b'))throw Error('split');
+    if(document.querySelectorAll('.skn2 .skds').length!==n)throw Error('desc');f.skills.ts_fast=1;f.equip=[];UI.skLine={id:'kati',li:0};render();const b=document.querySelector('.skn2 .skeq');if(!b)throw Error('equip btn');b.click();if(!equipped(f).includes('ts_fast'))throw Error('equip');UI.modal=null;render();return true;});
   test('every heart spot plays and has its background',()=>{const g=fresh();G=g;atHeart(g,20);for(const k in ACTIVITIES){const A=ACTIVITIES[k];if(!A.heart)continue;if(!BGIMG[A.bg])throw Error('no bg '+k);g.freeUsed=false;for(const id of ['kati','mali','rin','ploy','fah']){const f=g.F[id];f.met=true;f.bond=100;f.bondX=g.F.kati.bondX;for(let i=0;i<3;i++){g.freeUsed=false;const st=dateScene(g,id,k);if(st.length<4)throw Error('short '+id+k);}}}return true;});
   return R;});for(const [name,ok,err] of out){console.log(ok?'OK  ':'FAIL',lang,name,err||'');if(!ok)failed++;}for(const e of errors){console.log('PAGE ERROR',lang,e);failed++;}await p.close();}
  await browser.close();process.exit(failed?1:0);
