@@ -25,6 +25,7 @@ const chrome=process.env.CHROME_PATH||'/Applications/Google Chrome.app/Contents/
   test('post-max chats come one per level, everyday chats rotate',()=>{const g=fresh();G=g;g.week=20;g.F.kati.met=true;atHeart(g,11);if(chatTopic(g,'kati').id!=='k_h11')return false;g.chatSeen={kati:['k_h11']};const t=chatTopic(g,'kati');return t.id!=='k_h12';});
   test('heart date spots: hidden, then locked, then open with a scene',()=>{const g=fresh();G=g;g.F.kati.bond=60;g.F.kati.bondX=0;if(hangHTML('kati').includes('fairnight'))return false;g.F.kati.bond=100;if(!/data-v="fairnight"[^>]*disabled/.test(hangHTML('kati')))return false;atHeart(g,12);if(/data-v="fairnight"[^>]*disabled/.test(hangHTML('kati')))return false;
     const st=dateScene(g,'kati','fairnight');return st.length>4&&(g.F.kati.spotN.fairnight===1);});
+  test('every heart spot plays and has its background',()=>{const g=fresh();G=g;atHeart(g,20);for(const k in ACTIVITIES){const A=ACTIVITIES[k];if(!A.heart)continue;if(!BGIMG[A.bg])throw Error('no bg '+k);g.freeUsed=false;for(let i=0;i<3;i++){const st=dateScene(g,'kati',k);if(st.length<4)throw Error('short '+k);}}return true;});
   return R;});for(const [name,ok,err] of out){console.log(ok?'OK  ':'FAIL',lang,name,err||'');if(!ok)failed++;}for(const e of errors){console.log('PAGE ERROR',lang,e);failed++;}await p.close();}
  await browser.close();process.exit(failed?1:0);
 })().catch(e=>{console.error(e);process.exit(1)});
