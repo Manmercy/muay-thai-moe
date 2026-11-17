@@ -428,7 +428,7 @@ function useSkill(F,s,id){const o=s===F.A?F.B:F.A;s.skUsed=s.skUsed||{};if(F.ove
   if(sk.k==="atk"){s.burst={k:"atk",w:sk.w,left:4,pw};s.sta=clamp(s.sta-6,0,100);}
   if(sk.k==="def")s.burst={k:"def",left:4,pw};
   if(sk.k==="rec"){s.sta=clamp(s.sta+22*pw,0,100);s.hp=clamp(s.hp+6*pw,0,100);s.mor+=.01;s.burst=null;}
-  return {ha:F.A.hp,hb:F.B.hp,sa:F.A.sta,sb:F.B.sta,s:s===F.A?"A":"B",t:`${s.name} uses "${sk.name}"!`,k:"big",ev:"skill",rid:s.f.id,an:s.name,dn:o.name,skn:sk.name,skk:sk.k,w:sk.w};}
+  return {ha:F.A.hp,hb:F.B.hp,sa:F.A.sta,sb:F.B.sta,s:s===F.A?"A":"B",t:`${s.name} uses "${sk.name}"!`,k:"big",ev:"skill",rid:s.f.id,an:s.name,dn:o.name,skn:sk.name,skk:sk.k,w:sk.w,skid:sk.id,skrow:sk.row};}
 function aiSkill(F,s,rng){if(s.skRound||F.over)return null;const L=fightSkills(s).filter(k=>!(s.skUsed&&s.skUsed[k.id]));if(!L.length)return null;
   const o=s===F.A?F.B:F.A,ex=F.ex,last=F.round>=F.rounds;const behind=F.cards.reduce((x,c)=>x+(s===F.A?c[0]-c[1]:c[1]-c[0]),0)<0;
   const rec=L.find(k=>k.k==="rec"),atk=L.find(k=>k.k==="atk"),def=L.find(k=>k.k==="def");
@@ -4389,10 +4389,42 @@ function mountCanvases(){
 }
 
 // ---------- FIGHT STAGE ----------
+// v1.88: heroine special moves — 8-frame sheets (a/<id>_special.webp, 4×2 cells of 128) that play on their own at big moments.
+/* Unlock (player camp): the bond signature (♥ Lv.7+) or any Lv.14 move learned. Rivals (Ploy/Fah before they join) only on a knockdown/KO.
+   At most once a round per side. The name shown is the learned Lv.14 move, else the default name. */
+const SPECIALS={
+ kati:[{img:"kati_special",w:"elbow",def:"Sirichai Heart Spinning Elbow",sk:"ts_bolt",when:(e,hp)=>(e.ev==="hit"||e.ev==="counter")&&e.w==="elbow"&&(e.crit||hp<45)}],
+ mali:[{img:"mali_special",w:"kick",def:"Jasmine Bloom Kick",sk:"cy_bloom",when:e=>e.ev==="hit"&&e.w==="kick"&&e.crit},
+       {img:"mali_dodge",def:"Move Like Water",dodge:1,p:.18}],
+ rin:[{img:"rin_special",w:"knee",def:"The Winning Equation",sk:"lb_shadow",when:e=>e.ev==="counter",p:.35}],
+ ploy:[{img:"ploy_special",w:"punch",def:"Buffalo Swing",sk:"kr_thunder",when:e=>e.ev==="hit"&&e.w==="punch"&&e.crit,p:.6}],
+ fah:[{img:"fah_special",w:"punch",def:"Thundering Sky Storm",sk:"f_hurricane",when:(e,hp)=>(e.ev==="hit"||e.ev==="counter")&&e.w==="punch"&&hp<50,p:.5}]};
+const SP_FRAME=150,SP_LEN=SP_FRAME*8+200,FX_LEN=1250;
+/* the drawn sheet that fits a move: a guard move → the dodge sheet; otherwise the sheet for that weapon. None → the plain row + code effects */
+/* one sprite frame as a flat colour silhouette (glow outline, afterimages) — cached per sheet/frame/colour */
+const SIL=new WeakMap();
+function silFrame(sheet,row,col,color){if(!sheet||!(sheet.width||sheet.naturalWidth))return null;let m=SIL.get(sheet);if(!m){m={};SIL.set(sheet,m);}const k=row+"_"+col+color;if(m[k])return m[k];
+  const c=document.createElement("canvas");c.width=CELL;c.height=CELL;const x=c.getContext("2d");x.drawImage(sheet,col*CELL,row*CELL,CELL,CELL,0,0,CELL,CELL);x.globalCompositeOperation="source-in";x.fillStyle=color;x.fillRect(0,0,CELL,CELL);return m[k]=c;}
+function spSheet(id,w,kind){const L=SPECIALS[id]||[];if(kind==="def")return L.find(m=>m.dodge)||null;return L.find(m=>!m.dodge&&m.w===w)||null;}
+function spOpen(f){if(!f||!f.canon||!SPECIALS[f.id])return false;if(f.camp!=="player")return true;
+  return hasSignature(f)||skillList(f.id).some(k=>k.row===4&&((f.skills||{})[k.id]||0)>0);}
+function spName(f,mv){const k=mv.sk&&skillList(f.id).find(x=>x.id===mv.sk);return k&&((f.skills||{})[k.id]||0)>0?k.name:mv.def;}
+/* which special (if any) this fight event sets off: {side, mv, name} */
+function spPick(e,side,F,rng){if(!e||!e.ev||!F||!F.A||!F.B)return null;const R=F.round||1;FS.spR=FS.spR||{A:-1,B:-1};
+  const ok=(sd,s)=>FS.spR[sd]!==R&&spOpen(s.f);
+  if(e.ev==="miss"){const ds=side==="A"?"B":"A",d=F[ds],mv=(SPECIALS[d.f.id]||[]).find(m=>m.dodge);
+    if(mv&&d.f.camp==="player"&&ok(ds,d)&&rng()<mv.p)return {side:ds,mv,name:spName(d.f,mv)};return null;}
+  const me=F[side];if(!me||!SPECIALS[me.f.id]||!ok(side,me))return null;
+  const big=e.ev==="ko"||(e.ev==="kd"&&rng()<.6),hp=100*(side==="A"?(e.ha??me.hp):(e.hb??me.hp))/(me.hp0||100);
+  for(const mv of SPECIALS[me.f.id]){if(mv.dodge)continue;
+    if(me.f.camp==="player"&&mv.when&&mv.when(e,hp)&&(!mv.p||rng()<mv.p))return {side,mv,name:spName(me.f,mv)};}
+  if(big){const mv=spSheet(me.f.id,e.w),m0=SPECIALS[me.f.id].find(m=>!m.dodge);return {side,mv,w:e.w,name:spName(me.f,mv||m0)};}
+  return null;}
 const FS={cv:null,ctx:null,bg:null,A:null,B:null,fx:[],shake:0,
   init(cv,bgName,fa,fb){this.cv=cv;this.ctx=cv?cv.getContext("2d"):null;this.bg=img(bgName);
     const mk=(f,side)=>({f,side,x:side==="A"?370:590,base:side==="A"?370:590,anim:"guard",t0:0,flash:0,down:0,ko:false,win:false});
-    this.A=mk(fa,"A");this.B=mk(fb,"B");this.fx=[];this.shake=0;},
+    this.A=mk(fa,"A");this.B=mk(fb,"B");this.fx=[];this.shake=0;this.spR={A:-1,B:-1};this.banner=null;
+    for(const f of [fa,fb])if(f&&f.canon&&SPECIALS[f.id])SPECIALS[f.id].forEach(m=>img(m.img+".webp"));},
   attach(cv){if(!cv)return;this.cv=cv;this.ctx=cv.getContext("2d");},
   play(e,now){const at=e.at||(e.ev==="counter"?(e.mside?e.mside:null):null);
     const atk=this[e.side==="A"?"A":"B"],def=this[e.side==="A"?"B":"A"];if(!atk)return;
@@ -4405,11 +4437,34 @@ const FS={cv:null,ctx:null,bg:null,A:null,B:null,fx:[],shake:0,
     if(e.ev==="ko"){def.ko=true;def.down=now;atk.win=true;atk.anim="win";this.shake=16;}
     if(e.ev==="cut"){this.fx.push({x:def.x,y:250,t0:now,txt:"Crack!",cut:true});}
   },
+  special(sp,round,now){const s=this[sp.side];if(!s)return;this.spR[sp.side]=round;this.banner={txt:sp.name,side:sp.side,t0:now};
+    if(sp.mv){s.anim="special";s.sp={im:img(sp.mv.img+".webp"),t0:now};this.shake=sp.mv.dodge?6:14;return;}
+    /* no drawn sheet for this move: the normal row, dressed up in code — aura, afterimages, speed lines, a dash and an impact ring */
+    const kind=sp.kind||"atk",row=kind==="def"?"guard":kind==="rec"?"win":(sp.w==="kick"||sp.w==="knee")?"knee":"punch";
+    s.anim="fx";s.fx={t0:now,row,kind,col:kind==="def"?"#5ab0ff":kind==="rec"?"#4fe08a":(s.f&&s.f.color)||"#ffd34a",hit:false};if(kind==="atk")s.x+=s.side==="A"?40:-40;this.shake=kind==="atk"?8:4;},
   render(t){const S=FS;if(!S.cv||!S.cv.isConnected)return;const x=S.ctx,W=S.cv.width,H=S.cv.height;
     x.save();const sh=S.shake;if(sh>.3){x.translate((Math.random()-.5)*sh,(Math.random()-.5)*sh);S.shake*=.88;}
     if(S.bg&&S.bg.naturalWidth){const r=S.bg.naturalWidth/S.bg.naturalHeight;const bw=H*r;x.drawImage(S.bg,(W-bw)/2,0,bw,H);}else{x.fillStyle="#221b3d";x.fillRect(0,0,W,H);}
     // approach centre
     if(!S.A||!S.B){x.restore();return;}for(const s of [S.A,S.B]){s.x+=(s.base-s.x)*.08;
+      if(s.anim==="fx"){const X=s.fx,se=t-X.t0;if(se>FX_LEN){s.anim=s.win?"win":"guard";}
+        else{const foot=H*.8,h=H*.5,flip=s.side==="B",dir=flip?-1:1,atk=X.kind==="atk",sh=sheetFor(s.f);
+          const col=atk?Math.min(3,Math.floor(se/140)):Math.floor(t/160)%4,pulse=.55+.45*Math.sin(se/70);
+          x.save();x.globalCompositeOperation="lighter";const g=x.createRadialGradient(s.x,foot-h*.45,4,s.x,foot-h*.45,h*.75);g.addColorStop(0,X.col+"aa");g.addColorStop(1,X.col+"00");
+          x.globalAlpha=Math.min(1,se/150)*(se>FX_LEN-300?(FX_LEN-se)/300:1)*pulse;x.fillStyle=g;x.fillRect(s.x-h,foot-h*1.3,h*2,h*1.5);x.restore();
+          if(atk&&se<700)for(let i=0;i<9;i++){const yy=foot-h*(.15+((i*37)%70)/100),len=40+((i*53)%60),off=((se*1.4+i*90)%260);x.fillStyle="rgba(255,255,255,.8)";x.fillRect(s.x-dir*(off+20),yy,-dir*len*1.6,5);}
+          x.fillStyle="rgba(0,0,0,.3)";x.beginPath();x.ellipse(s.x,foot,h*.25,h*.04,0,0,7);x.fill();
+          const fade=Math.min(1,se/120)*(se>FX_LEN-250?(FX_LEN-se)/250:1);
+          if(atk||X.kind==="def"){const gh=silFrame(sh,ROW[X.row],Math.max(0,col-1),X.col);if(gh)for(let i=3;i>=1;i--){x.save();x.imageSmoothingEnabled=true;
+            drawFrame(x,gh,0,0,s.x-dir*i*(atk?30:18)*(X.kind==="def"?Math.sin(se/90+i):1),foot,h,flip,fade*(.55-.13*i));x.restore();}}
+          const ol=silFrame(sh,ROW[X.row],col,X.col);if(ol){x.save();x.imageSmoothingEnabled=true;for(const [ox,oy] of [[-5,0],[5,0],[0,-5],[0,4]])drawFrame(x,ol,0,0,s.x+ox,foot+oy,h,flip,fade*pulse*.9);x.restore();}
+          x.save();x.imageSmoothingEnabled=true;drawFrame(x,sh,ROW[X.row],col,s.x,foot,h,flip);x.restore();
+          if(atk&&!X.hit&&se>420){X.hit=true;const o=s===S.A?S.B:S.A;S.shake=16;S.fx.push({ring:1,x:o.x,y:foot-h*.5,t0:t,col:X.col});S.flashAt=t;}
+          if(X.kind==="rec"&&Math.floor(se/120)%2)for(let i=0;i<5;i++){const a=se/300+i*1.26;x.fillStyle=X.col;x.fillRect(s.x+Math.cos(a)*h*.35-3,foot-h*.5+Math.sin(a)*h*.4-se*.05%40,6,6);}
+          continue;}}
+      if(s.anim==="special"){const se=t-s.sp.t0,im=s.sp.im;if(se>SP_LEN||!im||!im.naturalWidth){s.anim=s.win?"win":"guard";}
+        else{const k=Math.min(7,Math.floor(se/SP_FRAME)),foot=H*.8,h=H*.5,flip=s.side==="B";x.fillStyle="rgba(0,0,0,.3)";x.beginPath();x.ellipse(s.x,foot,h*.25,h*.04,0,0,7);x.fill();
+          x.save();x.imageSmoothingEnabled=true;drawFrame(x,im,k>>2,k&3,s.x,foot,h,flip);x.restore();continue;}}
       const el=t-s.t0;let row=s.anim,col;
       if((row==="punch"||row==="knee")&&el>520){s.anim=s.win?"win":"guard";row=s.anim;}
       if(row==="punch"||row==="knee")col=Math.min(3,Math.floor(el/130));else col=Math.floor(t/(row==="win"?180:200))%4;
@@ -4426,9 +4481,16 @@ const FS={cv:null,ctx:null,bg:null,A:null,B:null,fx:[],shake:0,
     }
     // effects
     S.fx=S.fx.filter(f=>t-f.t0<900);
-    for(const f of S.fx){const k=(t-f.t0)/900;x.save();x.globalAlpha=1-k;x.translate(f.x,f.y-40*k);
+    for(const f of S.fx){const k=(t-f.t0)/900;if(f.ring){x.save();x.globalAlpha=Math.max(0,1-k*1.4);x.strokeStyle=f.col;x.lineWidth=16*(1-k)+3;x.beginPath();x.arc(f.x,f.y,30+k*170,0,7);x.stroke();
+        x.strokeStyle="#ffffff";x.lineWidth=3;x.beginPath();x.arc(f.x,f.y,18+k*110,0,7);x.stroke();for(let i=0;i<12;i++){const a=i/12*6.283;x.fillStyle="#fff3a6";x.fillRect(f.x+Math.cos(a)*(40+k*150)-3,f.y+Math.sin(a)*(40+k*150)-3,6,6);}x.restore();continue;}
+      x.save();x.globalAlpha=1-k;x.translate(f.x,f.y-40*k);
       if(!f.miss){x.fillStyle=f.cut?"#ff4b5c":"#fff3a6";for(let i=0;i<8;i++){const a=i/8*6.283;x.fillRect(Math.cos(a)*(14+40*k)-3,Math.sin(a)*(14+40*k)-3,6,6);}}
       x.font=`700 ${f.big?34:24}px "Pixelify Sans","Chakra Petch",sans-serif`;x.textAlign="center";x.lineWidth=6;x.strokeStyle="#1b1230";x.strokeText(f.txt,0,-24);x.fillStyle=f.miss?"#bfe3ff":f.cut?"#ff8a97":"#ffe36b";x.fillText(f.txt,0,-24);x.restore();}
+    if(S.flashAt&&t-S.flashAt<110){x.save();x.globalAlpha=.28*(1-(t-S.flashAt)/110);x.fillStyle="#ffffff";x.fillRect(0,0,W,H);x.restore();}
+    if(S.banner){const k=(t-S.banner.t0)/1600;if(k>=1)S.banner=null;else{x.save();x.globalAlpha=k<.12?k/.12:k>.8?(1-k)/.2:1;const y=H*.29,pop=1+Math.max(0,.25-k)*.8;
+      x.translate(W/2,y);x.scale(pop,pop);x.fillStyle=S.banner.side==="A"?"rgba(150,20,40,.75)":"rgba(40,20,120,.75)";x.fillRect(-W*.38,-H*.1,W*.76,H*.2);x.fillStyle="#ffd34a";x.fillRect(-W*.38,-H*.1,W*.76,3);x.fillRect(-W*.38,H*.1-3,W*.76,3);
+      x.font=`700 ${Math.round(H*.05)}px "Chakra Petch",sans-serif`;x.textAlign="center";x.textBaseline="middle";x.fillStyle="#ffe9a0";x.fillText("SPECIAL MOVE!",0,-H*.05);
+      x.font=`700 ${Math.round(H*(S.banner.txt.length>12?.075:.09))}px "Chakra Petch",sans-serif`;x.lineWidth=8;x.strokeStyle="#1b1230";x.strokeText(S.banner.txt,0,H*.035);x.fillStyle="#ffffff";x.fillText(S.banner.txt,0,H*.035);x.restore();}}
     x.restore();}
 };
 
@@ -6195,14 +6257,20 @@ function tick(){const U=UI.fight;if(!U||U.stage!=="playing")return;
   if(e.bell){AU.sfx("bell");U.caption=e.cap;}
   else if(e.tired){U.caption=e.cap;wait=1300;}
   else if(e.ev){const sd=sideOf(e,F);FS.play({...e,side:sd},now);U.caption={text:comLine(e,F,U.rng),side:e.ev==="miss"?"":sd,heat:fightHeat(F)};
+    if(e.ev!=="skill"){const sp=spPick({...e},sd,F,U.rng);if(sp){FS.special(sp,F.round||1,now);const n=F[sp.side].f.name,R=[`Here comes the finisher!! ${sp.name}!!`,`${n} unleashes ${sp.name}!! The whole crowd is on its feet!`,`That right there is ${sp.name}!! The real deal, folks!!`];
+      U.caption={text:R[Math.floor(U.rng()*R.length)],side:sp.side,heat:fightHeat(F)};AU.cheer(1);U.spWait=1900;}}
     if(e.ev==="hit"||e.ev==="counter"){AU.sfx(e.w||"punch");if(e.crit)AU.cheer(.8);}
     if(e.ev==="miss"){AU.sfx("miss");wait=1150;}
     if(e.ev==="kd"){AU.sfx("kd");wait=2300;}
     if(e.ev==="ko"){AU.sfx("kd");AU.cheer(1);wait=2600;}
     if(e.ev==="cut")wait=1700;
     if(e.ev==="wake"){AU.sfx("kd");AU.cheer(.9);wait=2200;}
-    if(e.ev==="skill"){U.cutin={id:e.rid,name:e.an,side:sd,t:now,skill:e.skn,kind:e.skk,w:e.w};AU.sfx(e.skk==="rec"?"level":"kd");AU.cheer(.7);wait=2000;setTimeout(()=>{if(UI.fight&&UI.fight.cutin&&UI.fight.cutin.t===now){UI.fight.cutin=null;render();}},1900);}
+    if(e.ev==="skill"&&e.skrow>=4&&SPECIALS[e.rid]){/* v1.88: a Lv.14/Lv.22 move pressed (or used by the AI) plays the heroine's special sheet */
+      const mv=e.skk==="atk"?spSheet(e.rid,e.w):e.skk==="def"?spSheet(e.rid,null,"def"):null;FS.special({side:sd,mv,w:e.w,kind:e.skk,name:e.skn},F.round||1,now);
+      U.caption={text:`${e.an} unleashes "${e.skn}"!!`,side:sd,heat:fightHeat(F)};AU.sfx("kd");AU.cheer(1);wait=2000;}
+    else if(e.ev==="skill"){U.cutin={id:e.rid,name:e.an,side:sd,t:now,skill:e.skn,kind:e.skk,w:e.w};AU.sfx(e.skk==="rec"?"level":"kd");AU.cheer(.7);wait=2000;setTimeout(()=>{if(UI.fight&&UI.fight.cutin&&UI.fight.cutin.t===now){UI.fight.cutin=null;render();}},1900);}
     if(e.ev==="rage"){if(sd==="A"){G.flags=G.flags||{};G.flags.rageShown=true;}U.cutin={id:e.rid,name:e.an,side:sd,t:now};AU.sfx("kd");AU.cheer(1);wait=2200;setTimeout(()=>{if(UI.fight&&UI.fight.cutin&&UI.fight.cutin.t===now){UI.fight.cutin=null;render();}},2000);}}
+  if(U.spWait){wait=Math.max(wait,U.spWait);U.spWait=0;}
   render();U.timer=setTimeout(tick,(window.matchMedia&&matchMedia("(prefers-reduced-motion: reduce)").matches?400:wait)/(UI.speed===2?2:1));}
 function fskip(){const U=UI.fight;clearTimeout(U.timer);while(!roundDone(U.F))U.pending.push(...fightEx(U.F));const rest=U.pending.filter(x=>!x.bell&&!x.tired);U.shown.push(...rest);U.pending=[];
   const ko=rest.find(x=>x.ev==="ko");if(ko)FS.play({...ko,side:sideOf(ko,U.F)},performance.now());roundFinish(U.F);roundEnd();}

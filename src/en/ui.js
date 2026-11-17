@@ -1433,14 +1433,20 @@ function tick(){const U=UI.fight;if(!U||U.stage!=="playing")return;
   if(e.bell){AU.sfx("bell");U.caption=e.cap;}
   else if(e.tired){U.caption=e.cap;wait=1300;}
   else if(e.ev){const sd=sideOf(e,F);FS.play({...e,side:sd},now);U.caption={text:comLine(e,F,U.rng),side:e.ev==="miss"?"":sd,heat:fightHeat(F)};
+    if(e.ev!=="skill"){const sp=spPick({...e},sd,F,U.rng);if(sp){FS.special(sp,F.round||1,now);const n=F[sp.side].f.name,R=[`Here comes the finisher!! ${sp.name}!!`,`${n} unleashes ${sp.name}!! The whole crowd is on its feet!`,`That right there is ${sp.name}!! The real deal, folks!!`];
+      U.caption={text:R[Math.floor(U.rng()*R.length)],side:sp.side,heat:fightHeat(F)};AU.cheer(1);U.spWait=1900;}}
     if(e.ev==="hit"||e.ev==="counter"){AU.sfx(e.w||"punch");if(e.crit)AU.cheer(.8);}
     if(e.ev==="miss"){AU.sfx("miss");wait=1150;}
     if(e.ev==="kd"){AU.sfx("kd");wait=2300;}
     if(e.ev==="ko"){AU.sfx("kd");AU.cheer(1);wait=2600;}
     if(e.ev==="cut")wait=1700;
     if(e.ev==="wake"){AU.sfx("kd");AU.cheer(.9);wait=2200;}
-    if(e.ev==="skill"){U.cutin={id:e.rid,name:e.an,side:sd,t:now,skill:e.skn,kind:e.skk,w:e.w};AU.sfx(e.skk==="rec"?"level":"kd");AU.cheer(.7);wait=2000;setTimeout(()=>{if(UI.fight&&UI.fight.cutin&&UI.fight.cutin.t===now){UI.fight.cutin=null;render();}},1900);}
+    if(e.ev==="skill"&&e.skrow>=4&&SPECIALS[e.rid]){/* v1.88: a Lv.14/Lv.22 move pressed (or used by the AI) plays the heroine's special sheet */
+      const mv=e.skk==="atk"?spSheet(e.rid,e.w):e.skk==="def"?spSheet(e.rid,null,"def"):null;FS.special({side:sd,mv,w:e.w,kind:e.skk,name:e.skn},F.round||1,now);
+      U.caption={text:`${e.an} unleashes "${e.skn}"!!`,side:sd,heat:fightHeat(F)};AU.sfx("kd");AU.cheer(1);wait=2000;}
+    else if(e.ev==="skill"){U.cutin={id:e.rid,name:e.an,side:sd,t:now,skill:e.skn,kind:e.skk,w:e.w};AU.sfx(e.skk==="rec"?"level":"kd");AU.cheer(.7);wait=2000;setTimeout(()=>{if(UI.fight&&UI.fight.cutin&&UI.fight.cutin.t===now){UI.fight.cutin=null;render();}},1900);}
     if(e.ev==="rage"){if(sd==="A"){G.flags=G.flags||{};G.flags.rageShown=true;}U.cutin={id:e.rid,name:e.an,side:sd,t:now};AU.sfx("kd");AU.cheer(1);wait=2200;setTimeout(()=>{if(UI.fight&&UI.fight.cutin&&UI.fight.cutin.t===now){UI.fight.cutin=null;render();}},2000);}}
+  if(U.spWait){wait=Math.max(wait,U.spWait);U.spWait=0;}
   render();U.timer=setTimeout(tick,(window.matchMedia&&matchMedia("(prefers-reduced-motion: reduce)").matches?400:wait)/(UI.speed===2?2:1));}
 function fskip(){const U=UI.fight;clearTimeout(U.timer);while(!roundDone(U.F))U.pending.push(...fightEx(U.F));const rest=U.pending.filter(x=>!x.bell&&!x.tired);U.shown.push(...rest);U.pending=[];
   const ko=rest.find(x=>x.ev==="ko");if(ko)FS.play({...ko,side:sideOf(ko,U.F)},performance.now());roundFinish(U.F);roundEnd();}
