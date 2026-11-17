@@ -1369,7 +1369,7 @@ html.vnopen,html.vnopen body{overflow:hidden;overscroll-behavior:none;height:100
 .petrow{display:flex;gap:6px;flex-wrap:wrap;margin:6px 0 0}.petchip{display:flex;align-items:center;gap:6px;padding:3px 8px 3px 4px;background:#2a2340;border:2px solid #4a3f6b;color:inherit;font:inherit;cursor:pointer;flex:1 1 0;min-width:0}
 .petchip span{display:flex;flex-direction:column;line-height:1.15;min-width:0;text-align:left}.petchip b{font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.petchip small{font-size:12px;color:var(--gold,#f2c94c)}
 .petchip.done{opacity:.6}.petchip.done small{color:var(--mut,#9a91ad)}.peti{width:34px;height:26px;image-rendering:pixelated;flex:none}.petnm{display:flex;gap:8px;align-items:center;margin:8px 0}.petnm input{flex:1;font:inherit;padding:8px;background:#1b1530;color:#fff;border:2px solid #4a3f6b}
-.petrow{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.petrow{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px}
 .missb{margin:3px 0;padding:2px 6px;background:#3a2240;border:1px solid #7a3f6b;color:#ffb3d1;font-size:12px}
 .albbtn{position:relative;white-space:nowrap}.albh{margin:10px 0 4px;font:700 14px "Chakra Petch",sans-serif;color:var(--gold,#f2c94c)}
 .albg{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.ccard{position:relative;display:flex;flex-direction:column;align-items:center;gap:2px;padding:6px 4px;background:#1b1530;border:3px solid var(--rc);color:inherit;font:inherit;cursor:pointer;text-align:center;min-width:0}
@@ -1471,7 +1471,7 @@ html.vnopen,html.vnopen body{overflow:hidden;overscroll-behavior:none;height:100
 /* v1.80: fight screen — no native scrollbar flashing, room above the home indicator */
 .fight{scrollbar-width:none;padding-bottom:env(safe-area-inset-bottom,0px)}.fight::-webkit-scrollbar{display:none}
 .petnm input{font-size:16px}.petren{min-height:40px}
-.petg{display:flex;gap:2px;align-items:stretch}.petg .petren{padding:0 8px;font-size:12px;min-height:0;align-self:stretch}
+.petg{display:flex;gap:2px;align-items:stretch;min-width:0}.petg .petren{padding:0 8px;font-size:12px;min-height:0;align-self:stretch}
 /* Compact card album — five cards a row */
 .albg{grid-template-columns:repeat(5,minmax(0,1fr));gap:6px}
 .ccard.pxc{padding:3px 3px 4px;gap:1px;background:linear-gradient(180deg,#261d3d,#15102a);border:3px solid var(--rc);box-shadow:inset 0 0 0 2px #0f0c17,3px 3px 0 #0f0c17}
@@ -2665,16 +2665,19 @@ const effOvr=(G,f)=>ovr(f.a)+edgeOf(G,f);
    Our fighters and the five canon girls keep the level they earned. */
 const LV_BASE=6,LV_STEP=.75;
 function powLv(f){return clamp(Math.round((ovr(f.a)+(f.vet||0)-LV_BASE)/LV_STEP),1,MAX_LV);}
-/* v1.88: read against our own camp — an even opponent sits at our best fighter's level in that division,
-   each LV_REL of real strength above or below is one level (a clearly stronger opponent ≈ 2–3 levels above us).
-   The level shown never drops, so a fighter who has improved since you last met always reads higher. */
-const LV_REL=.55;
+/* v1.88: read against our own camp. An even opponent sits at our best fighter's level in that division; the gap comes from
+   simulated fights (the same coach advice the offers use), so hidden edges — Ploy's aura, Vector lab prep, rage — count too.
+   Win 50% = same level · ~25% = about +2.5 · ~10% = about +5. The level shown never drops, so an improved opponent reads higher. */
+const LV_LOGIT=.44,_lvc={};
 function lvRef(G,f){if(!G||!G.F)return null;const P=Object.values(G.F).filter(x=>x.camp==="player"&&x.a);const mine=P.filter(x=>x.div===f.div);const L=mine.length?mine:P;if(!L.length)return null;
-  let best=null,be=-1e9;for(const x of L){const e=effOvr(G,x);if(e>be){be=e;best=x;}}return {lv:best.lvl||1,eff:be};}
-function lvOf(f){if(!f)return 1;if(f.camp==="player"||f.canon)return f.lvl||1;
-  const g=typeof G!=="undefined"?G:null,r=lvRef(g,f);let v=r?clamp(Math.round(r.lv+(effOvr(g,f)-r.eff)/LV_REL),1,MAX_LV):powLv(f);
-  if(f.plv&&f.plv>v)v=f.plv;f.plv=v;return v;}
-const effGap=(G,me,op)=>ovr(op.a)-ovr(me.a)+(lvOf(op)-lvOf(me))*.15-edgeOf(G,me)+edgeOf(G,op);
+  let best=null,be=-1e9;for(const x of L){const e=effOvr(G,x);if(e>be){be=e;best=x;}}return best;}
+function lvRate(G,me,op){const k=(G.season||1)+"_"+G.week+"_"+me.id+"_"+op.id;if(_lvc[k]==null){try{_lvc[k]=advise(G,me.id,op.id,3,24).bestRate;}catch(e){_lvc[k]=-1;}}return _lvc[k];}
+function lvInfo(f){if(!f)return {lv:1,rate:null};if(f.camp==="player"||f.canon)return {lv:f.lvl||1,rate:null};
+  const g=typeof G!=="undefined"?G:null,me=lvRef(g,f);let v=powLv(f),rate=null;
+  if(me){rate=lvRate(g,me,f);if(rate>=0){const r=clamp(rate,.03,.97);v=clamp(Math.round((me.lvl||1)-Math.log(r/(1-r))/LV_LOGIT),1,MAX_LV);}else rate=null;}
+  if(f.plv&&f.plv>v)v=f.plv;f.plv=v;return {lv:v,rate,me};}
+function lvOf(f){return lvInfo(f).lv;}
+const effGap=(G,me,op)=>ovr(op.a)-ovr(me.a)+((op.lvl||1)-(me.lvl||1))*.15-edgeOf(G,me)+edgeOf(G,op);
 function genOffers(G,opt){
   const rng=mulberry32(G.seed+G.week*7919+11);G.snub=G.snub||{};const ignored=new Set();
   /* v1.82.3: only offers the NPC really sent and the player let lapse at week end count as a snub — not temple-fair or Vector bookings, not a mid-week refresh */
@@ -6629,8 +6632,8 @@ function hearts(b,f){f=f||{bond:b};const H=heartLv(f),pct=Math.round(H.into/H.ne
 function bar(label,v,color,txt){return `<div class="bar"><span>${label}</span><i style="--v:${clamp(v,0,100)}%;--bc:${color}"></i><b class="num">${txt??Math.round(v)}</b></div>`;}
 function mini(v,color){return `<i class="mini" style="--v:${clamp(v,0,100)}%;--bc:${color}"></i>`;}
 /* v1.88: an opponent shows her strength level, coloured against our best fighter in her division (red = stronger) */
-function lvTone(f){if(!G||!f||f.camp==="player")return null;const mine=Object.values(G.F).filter(x=>x.camp==="player"&&x.div===f.div);if(!mine.length)return null;
-  const d=effOvr(G,f)-Math.max(...mine.map(x=>effOvr(G,x)));return d>=1.2?{c:"red",t:"เก่งกว่าค่ายเรา"}:d<=-1.2?{c:"green",t:"อ่อนกว่าค่ายเรา"}:{c:"gold",t:"สูสีกับค่ายเรา"};}
+function lvTone(f){if(!G||!f||f.camp==="player")return null;const I=lvInfo(f);if(I.rate==null)return null;
+  return I.rate<.4?{c:"red",t:"เก่งกว่าค่ายเรา"}:I.rate>=.6?{c:"green",t:"อ่อนกว่าค่ายเรา"}:{c:"gold",t:"สูสีกับค่ายเรา"};}
 function xpBar(f){if(f.camp!=="player"&&!f.canon){const t=lvTone(f);return `<div class="xp"><span class="lv${t?" lt-"+t.c:""}">Lv.${lvOf(f)}</span>${t?`<span class="pill ${t.c}">${t.t}</span>`:""}</div>`;}const need=xpNeed(f.lvl);return `<div class="xp"><span class="lv">Lv.${f.lvl}</span><i style="--v:${f.lvl>=MAX_LV?100:clamp(f.xp/need*100,0,100)}%"></i><span class="num dim">${f.lvl>=MAX_LV?"MAX":`${Math.round(f.xp)}/${need}`}</span>${f.sp>0&&f.camp==="player"?`<button class="spchip" data-act="ptab" data-v="skill">★ ${f.sp} แต้มสกิล</button>`:""}</div>`;}
 function formHTML(f){return `<span class="form">${f.form.map(r=>`<i class="${r}">${r==="W"?"ช":r==="L"?"พ":"ส"}</i>`).join("")||'<span class="dim">—</span>'}</span>`;}
 const rec=f=>`${f.rec.w}-${f.rec.l}-${f.rec.d}`;
@@ -9547,7 +9550,7 @@ for(const id in CHAT_LOY)CHAT[id].unshift(...CHAT_LOY[id]);
 <script>
 (function(){
 /* v1.87: Thai code ships inside index.html; English code (en.js) and the dictionary (i18n.js) load only when needed */
-var B="f47931fbdc";
+var B="c04b18afd1";
 var L="";try{L=localStorage.getItem("mtm_lang")||"";}catch(e){}
 try{var h=(location.hash||"").match(/lang=(th|en)/);if(h)L=h[1];}catch(e){}
 if(L!=="th"&&L!=="en")L="th";

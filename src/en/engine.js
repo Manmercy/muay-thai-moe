@@ -818,16 +818,19 @@ const effOvr=(G,f)=>ovr(f.a)+edgeOf(G,f);
    Our fighters and the five canon girls keep the level they earned. */
 const LV_BASE=6,LV_STEP=.75;
 function powLv(f){return clamp(Math.round((ovr(f.a)+(f.vet||0)-LV_BASE)/LV_STEP),1,MAX_LV);}
-/* v1.88: read against our own camp — an even opponent sits at our best fighter's level in that division,
-   each LV_REL of real strength above or below is one level (a clearly stronger opponent ≈ 2–3 levels above us).
-   The level shown never drops, so a fighter who has improved since you last met always reads higher. */
-const LV_REL=.55;
+/* v1.88: read against our own camp. An even opponent sits at our best fighter's level in that division; the gap comes from
+   simulated fights (the same coach advice the offers use), so hidden edges — Ploy's aura, Vector lab prep, rage — count too.
+   Win 50% = same level · ~25% = about +2.5 · ~10% = about +5. The level shown never drops, so an improved opponent reads higher. */
+const LV_LOGIT=.44,_lvc={};
 function lvRef(G,f){if(!G||!G.F)return null;const P=Object.values(G.F).filter(x=>x.camp==="player"&&x.a);const mine=P.filter(x=>x.div===f.div);const L=mine.length?mine:P;if(!L.length)return null;
-  let best=null,be=-1e9;for(const x of L){const e=effOvr(G,x);if(e>be){be=e;best=x;}}return {lv:best.lvl||1,eff:be};}
-function lvOf(f){if(!f)return 1;if(f.camp==="player"||f.canon)return f.lvl||1;
-  const g=typeof G!=="undefined"?G:null,r=lvRef(g,f);let v=r?clamp(Math.round(r.lv+(effOvr(g,f)-r.eff)/LV_REL),1,MAX_LV):powLv(f);
-  if(f.plv&&f.plv>v)v=f.plv;f.plv=v;return v;}
-const effGap=(G,me,op)=>ovr(op.a)-ovr(me.a)+(lvOf(op)-lvOf(me))*.15-edgeOf(G,me)+edgeOf(G,op);
+  let best=null,be=-1e9;for(const x of L){const e=effOvr(G,x);if(e>be){be=e;best=x;}}return best;}
+function lvRate(G,me,op){const k=(G.season||1)+"_"+G.week+"_"+me.id+"_"+op.id;if(_lvc[k]==null){try{_lvc[k]=advise(G,me.id,op.id,3,24).bestRate;}catch(e){_lvc[k]=-1;}}return _lvc[k];}
+function lvInfo(f){if(!f)return {lv:1,rate:null};if(f.camp==="player"||f.canon)return {lv:f.lvl||1,rate:null};
+  const g=typeof G!=="undefined"?G:null,me=lvRef(g,f);let v=powLv(f),rate=null;
+  if(me){rate=lvRate(g,me,f);if(rate>=0){const r=clamp(rate,.03,.97);v=clamp(Math.round((me.lvl||1)-Math.log(r/(1-r))/LV_LOGIT),1,MAX_LV);}else rate=null;}
+  if(f.plv&&f.plv>v)v=f.plv;f.plv=v;return {lv:v,rate,me};}
+function lvOf(f){return lvInfo(f).lv;}
+const effGap=(G,me,op)=>ovr(op.a)-ovr(me.a)+((op.lvl||1)-(me.lvl||1))*.15-edgeOf(G,me)+edgeOf(G,op);
 function genOffers(G,opt){
   const rng=mulberry32(G.seed+G.week*7919+11);G.snub=G.snub||{};const ignored=new Set();
   /* v1.82.3: only offers the NPC really sent and the player let lapse at week end count as a snub — not temple-fair or Vector bookings, not a mid-week refresh */

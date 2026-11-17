@@ -112,8 +112,8 @@ function hearts(b,f){f=f||{bond:b};const H=heartLv(f),pct=Math.round(H.into/H.ne
 function bar(label,v,color,txt){return `<div class="bar"><span>${label}</span><i style="--v:${clamp(v,0,100)}%;--bc:${color}"></i><b class="num">${txt??Math.round(v)}</b></div>`;}
 function mini(v,color){return `<i class="mini" style="--v:${clamp(v,0,100)}%;--bc:${color}"></i>`;}
 /* v1.88: an opponent shows her strength level, coloured against our best fighter in her division (red = stronger) */
-function lvTone(f){if(!G||!f||f.camp==="player")return null;const mine=Object.values(G.F).filter(x=>x.camp==="player"&&x.div===f.div);if(!mine.length)return null;
-  const d=effOvr(G,f)-Math.max(...mine.map(x=>effOvr(G,x)));return d>=1.2?{c:"red",t:"Stronger than ours"}:d<=-1.2?{c:"green",t:"Weaker than ours"}:{c:"gold",t:"Even with ours"};}
+function lvTone(f){if(!G||!f||f.camp==="player")return null;const I=lvInfo(f);if(I.rate==null)return null;
+  return I.rate<.4?{c:"red",t:"Stronger than ours"}:I.rate>=.6?{c:"green",t:"Weaker than ours"}:{c:"gold",t:"Even with ours"};}
 function xpBar(f){if(f.camp!=="player"&&!f.canon){const t=lvTone(f);return `<div class="xp"><span class="lv${t?" lt-"+t.c:""}">Lv.${lvOf(f)}</span>${t?`<span class="pill ${t.c}">${t.t}</span>`:""}</div>`;}const need=xpNeed(f.lvl);return `<div class="xp"><span class="lv">Lv.${f.lvl}</span><i style="--v:${f.lvl>=MAX_LV?100:clamp(f.xp/need*100,0,100)}%"></i><span class="num dim">${f.lvl>=MAX_LV?"MAX":`${Math.round(f.xp)}/${need}`}</span>${f.sp>0&&f.camp==="player"?`<button class="spchip" data-act="ptab" data-v="skill">★ ${f.sp} skill pts</button>`:""}</div>`;}
 function formHTML(f){return `<span class="form">${f.form.map(r=>`<i class="${r}">${r==="W"?"W":r==="L"?"L":"D"}</i>`).join("")||'<span class="dim">—</span>'}</span>`;}
 const rec=f=>`${f.rec.w}-${f.rec.l}-${f.rec.d}`;
