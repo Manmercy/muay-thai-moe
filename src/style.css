@@ -1816,3 +1816,21 @@ body.hasnews main>h1.sr+.homegrid,body.hasnews main>h1.sr+.rinnote{margin-top:46
 .trd summary{list-style:none}.trd summary::-webkit-details-marker{display:none}.trd summary::before{content:"▸";margin-right:6px}.trd[open] summary::before{content:"▾"}
 .trseg button{display:flex;align-items:center;justify-content:center;gap:6px;text-align:left}.trseg .pxi,.trone .pxi,.trov .pxi{width:18px;height:18px;flex:none}
 .trseg button[aria-pressed="false"] .pxi{opacity:.6}.trone{display:inline-flex;align-items:center;gap:6px}.trov{display:flex;align-items:center;gap:6px}
+
+/* v1.87: boot veil while English or the dictionary downloads */
+#mtm-veil{position:fixed;inset:0;z-index:9999;display:grid;place-items:center;background:#141020;color:#f5f0fa;font-family:"IBM Plex Sans Thai",sans-serif}
+#mtm-veil .mv-box{width:min(320px,80vw);display:grid;gap:14px;justify-items:center;text-align:center}
+#mtm-veil img{width:220px;max-width:70vw;height:auto}
+#mtm-veil .mv-bar{width:100%;height:8px;background:#0b0814;border:2px solid #4a3f72;overflow:hidden}
+#mtm-veil .mv-bar i{display:block;height:100%;width:40%;background:#f2c14e;animation:mvslide 1.1s ease-in-out infinite}
+@keyframes mvslide{0%{transform:translateX(-100%)}100%{transform:translateX(250%)}}
+#mtm-veil p{margin:0;font-size:14px;color:#b2a8c8}
+
+/* v1.87: save loading screen */
+.ldscr{position:fixed;inset:0;z-index:50;display:grid;place-items:center;background:radial-gradient(circle at 50% 40%,#2f2750,#141020 70%);padding:16px}
+.ldbox{width:min(340px,100%);display:grid;gap:12px;justify-items:center;text-align:center}
+.ldbox img{width:230px;max-width:70vw;aspect-ratio:1.6;object-fit:contain}
+.ldbox h2{margin:0;font-family:var(--f-pixel);font-size:22px;letter-spacing:2px;color:var(--gold);text-shadow:2px 2px 0 #000}
+.ldbar{width:100%;height:10px;background:var(--edge);border:2px solid var(--line)}.ldbar i{display:block;height:100%;background:var(--gold);transition:width .2s}
+.ldn{margin:0;font-size:14px;color:var(--fg)}.ldn span{font-family:var(--f-pixel);color:var(--muted)}
+.ldtip{margin:0;font-size:13px;line-height:1.55;color:var(--muted);background:var(--surface);border:1px solid var(--line);padding:8px 10px}

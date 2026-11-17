@@ -125,9 +125,35 @@ const icon=k=>`<svg class="ic" viewBox="0 0 24 24" aria-hidden="true">${ICON[k]}
 const moveIcon=m=>!m?'<span class="mv eq">–</span>':m>0?`<span class="mv up">▲${m}</span>`:`<span class="mv dn">▼${-m}</span>`;
 
 // ---------- root render ----------
+/* v1.87: a loading screen when a save opens — the art this save needs downloads first, then the rest trickles in */
+const LOAD_TIPS=["ซ้อมแก้ทางก่อนชก วันชกอาวุธหลักของคู่ชกจะโดนยากขึ้น","ดูเทปคู่ชกก่อน จะรู้ว่าควรซ้อมแก้ทางแบบไหน","แต่ละคนมีจุดเด่น 2 แบบ สลับได้ในหน้าสกิล",
+  "การ์ดซ้ำเอาไปอัปขั้น หรือย่อยเป็นเศษดาวได้ที่หน้าการ์ด","ของตกแต่งที่ตรงสีมงคลประจำปี ได้คะแนนประกวดค่ายสวยเพิ่ม","สนิทถึง ♥ Lv.7 ปลดท่าไม้ตายประจำตัว",
+  "นักมวยล้าเกิน 70 เสี่ยงบาดเจ็บตอนซ้อม ให้พักบ้างนะ","แตะช่องในปฏิทินเพื่อดูวันเกิดและเทศกาล"];
+function saveArt(){const S=new Set(),add=u=>{if(u)S.add(u);};
+  /* only what the camp screen shows first: faces, the camp sprites of girls in the camp, the gym and the camp */
+  add(`${ASSET}coach_face.webp`);add(ASSET+gymBg());add(`${ASSET}bg_camp.webp`);
+  for(const id of CANON_IDS){const f=G.F[id];if(!f||!(f.camp==="player"||f.met))continue;add(`${ASSET}${id}_happy_face.webp`);add(`${ASSET}${id}_casual_face.webp`);if(f.camp==="player")add(`${ASSET}${id}_sheet.webp`);}
+  return [...S];}
+function loadScrHTML(){const L=UI.loadScr,pc=L.total?Math.round(L.n/L.total*100):100;
+  const lg=WARMED[`${ASSET}logo.webp`]||IMGS["logo.webp"];return `<div class="ldscr"><div class="ldbox">${lg&&lg.complete&&lg.naturalWidth?`<img src="${ASSET}logo.webp" alt="Muay Thai Moe">`:`<h2>MUAY THAI MOE</h2>`}<div class="ldbar"><i style="width:${pc}%"></i></div><p class="ldn">กำลังเตรียมค่าย… <span>${L.n}/${L.total}</span></p><p class="ldtip">💡 ${esc(L.tip)}</p></div></div>`;}
+function withArt(done){warm(`${ASSET}logo.webp`);const list=saveArt(),total=list.length;let n=0,fin=false;
+  const finish=()=>{if(fin)return;fin=true;clearTimeout(to);clearTimeout(sh);UI.loadScr=null;done();setTimeout(prefetchArt,1500);};
+  const sh=setTimeout(()=>{if(fin)return;UI.loadScr={n,total,tip:LOAD_TIPS[Math.floor(Math.random()*LOAD_TIPS.length)]};render();},150);
+  const to=setTimeout(finish,6000);
+  const tick=()=>{n++;if(UI.loadScr){UI.loadScr.n=n;const b=document.querySelector(".ldbar i"),c=document.querySelector(".ldn span");if(b)b.style.width=Math.round(n/total*100)+"%";if(c)c.textContent=`${n}/${total}`;}if(n>=total)setTimeout(finish,UI.loadScr?250:0);};
+  list.forEach(u=>{if(WARMED[u]&&WARMED[u].complete){tick();return;}const i=new Image();i.decoding="async";i.onload=tick;i.onerror=tick;i.src=u;WARMED[u]=i;});
+  if(!total)finish();}
+/* after the camp is open, quietly fetch backgrounds and the girls' other looks — skipped on data saver or 2G */
+let PREF=false;
+function prefetchArt(){if(PREF||!G)return;PREF=true;const c=navigator.connection||{};if(c.saveData||/2g/.test(c.effectiveType||""))return;
+  const S=new Set();Object.values(BGIMG).forEach(b=>{if(b)S.add(ASSET+b);});
+  SHEET_IDS.forEach(id=>S.add(`${ASSET}${id}_sheet.webp`));S.add(`${ASSET}coach.webp`);for(const id of CANON_IDS){const f=G.F[id];if(!f||!(f.camp==="player"||f.met))continue;for(const l of ["casual","fight","train"])for(const m of ["happy","flustered","pout","sad"])S.add(stand(id,l,m));}
+  const q=[...S].filter(u=>!WARMED[u]);let busy=0;const next=()=>{while(busy<2&&q.length){const u=q.shift();busy++;const i=new Image();i.decoding="async";i.onload=i.onerror=()=>{busy--;setTimeout(next,60);};i.src=u;WARMED[u]=i;}};
+  (window.requestIdleCallback||((f)=>setTimeout(f,300)))(next);}
 function render(){
   document.documentElement.classList.toggle("vnopen",!!(UI&&(UI.scene||UI.fight)));
   let h="";
+  if(UI.loadScr){$app.innerHTML=loadScrHTML();return;}
   if(!G)h=UI.creator?creatorHTML():titleHTML();
   else if(UI.ending)h=endingHTML();
   else h=`<div class="shell">${hubHTML()}</div>`;
@@ -845,17 +871,15 @@ function gboxHTML(){const loy=GB.box==="loy",s=GB.st,cost=gbCost(),ok=(G.dust||0
      <p>${loy?"ตู้นี้เปิดเฉพาะช่วงเทศกาลลอยกระทง ":""}ได้การ์ดที่มีแล้วจะเก็บเป็นใบซ้ำ ใช้อัปขั้นการ์ด หรือย่อยเป็นเศษดาวได้ที่หน้าการ์ด</p>
      <button class="btn" data-act="gboxq">ปิด</button></div></div>`:""}
   </div>`;}
-const PATCH={id:"1.87.0",ver:"Muay Thai Moe v1.87.0",title:"อัปเดตจากค่ายศิริชัย",lead:"ตู้กาชาโฉมใหม่ หมุนเองกับมือ และทุกคนมี SSR ของตัวเองแล้ว",items:[
- ["🎰","ตู้กาชางานวัด","แตะตู้เพื่อหมุนก้าน แคปซูลกลิ้งออกมา สีแคปซูลคือระดับการ์ดจริง SSR มีฉากพิเศษ กดปุ่ม ? ดูอัตราออกและการันตีได้ แตะจอเพื่อข้ามได้ตลอด"],
- ["🌟","SSR ครบทุกคน","มะลิ ริน พลอย ฟ้า มีการ์ด SSR ของตัวเองในตู้กาชา เรื่องยาว มีบทส่งท้าย ฉากพิเศษ และมินิเกมของตัวเอง"],
- ["🎯","การันตีง่ายขึ้น","ตู้ปกติการันตี SSR ทุก 30 ครั้ง ตู้ลอยกระทงทุก 10 ครั้ง และครั้งที่การันตีจะได้ SSR ใบที่ยังไม่มีเสมอ"],
- ["✦","เศษดาวเพิ่ม","ชนะไฟต์ได้เศษดาว 3 ชนะน็อกได้ 4"],
- ["↩","การ์ดที่เป็นเรื่องต่อกัน","ถ้ามีครบทั้งสองใบ หน้าการ์ดจะบอกว่าเรื่องต่อจากใบไหน แตะไปอ่านต่อได้เลย"],
- ["🏮","ตู้ลอยกระทงสีเขียว","ตู้ช่วงเทศกาลมีหน้าตาของตัวเอง ริมน้ำปิง"],
+const PATCH={id:"1.87.0",ver:"Muay Thai Moe v1.87.0",title:"อัปเดตจากค่ายศิริชัย",lead:"ทุกคนมีจุดเด่นของตัวเอง ซ้อมแก้ทางได้ผลขึ้น ตู้กาชาโฉมใหม่ และเปิดเกมเร็วขึ้นค่ะ",items:[
  ["✦","จุดเด่นประจำตัว 2 แบบ","ทุกคนมีจุดเด่นติดตัว 2 แบบ เลือกสลับได้ในหน้าสกิล เช่น มะลิเคลื่อนไหวดั่งสายน้ำ รินคลังความรู้ ฟ้าแข็งอย่างหิน พลอยจังหวะเทพ"],
  ["🥊","ซ้อมแก้ทางได้ผลขึ้น","ซ้อมแก้ทางก่อนชก วันชกอาวุธหลักของคู่ชกจะโดนยากขึ้น และเราอ่านเกมเขาขาดกว่าเดิม ช่วยได้มากกับคู่ชกตัวท็อปปีหลัง ๆ"],
  ["📖","เนื้อเรื่องที่พลาดไป กลับมาแล้ว","ใครข้ามช่วงไพลินกับค่ายเวกเตอร์ หรือเรื่องปีที่สองของฟ้ากับพลอยไป เรื่องจะเริ่มให้ในปีที่เล่นอยู่ ไม่ต้องเริ่มเซฟใหม่"],
- ["📅","ปฏิทินรวมทั้งปี","ปฏิทินบอกว่าเป็นปีที่เท่าไหร่ มีวันเกิด เทศกาล และวันประกวดค่ายสวย แตะช่องเพื่อดูรายละเอียด"]],
+ ["🎰","ตู้กาชางานวัด","แตะตู้เพื่อหมุนก้าน แคปซูลกลิ้งออกมา สีแคปซูลคือระดับการ์ดจริง SSR มีฉากพิเศษ กดปุ่ม ? ดูอัตราออกและการันตีได้ ตู้ลอยกระทงเป็นสีเขียวริมน้ำปิง"],
+ ["🌟","SSR ครบทุกคน","มะลิ ริน พลอย ฟ้า มีการ์ด SSR ของตัวเองในตู้กาชา เรื่องยาว มีบทส่งท้าย ฉากพิเศษ และมินิเกมของตัวเอง การ์ดที่เป็นเรื่องต่อกันจะมีลิงก์ถึงกันในหน้าการ์ด"],
+ ["🎯","การันตีง่ายขึ้น เศษดาวเพิ่ม","ตู้ปกติการันตี SSR ทุก 30 ครั้ง ตู้ลอยกระทงทุก 10 ครั้ง ได้ใบที่ยังไม่มีเสมอ และชนะไฟต์ได้เศษดาว 3 ชนะน็อกได้ 4"],
+ ["📅","ปฏิทินรวมทั้งปี","ปฏิทินบอกว่าเป็นปีที่เท่าไหร่ มีวันเกิด เทศกาล และวันประกวดค่ายสวย แตะช่องเพื่อดูรายละเอียด"],
+ ["⚡","เปิดเกมเร็วขึ้น","ไฟล์เกมเล็กลงเกินครึ่ง โหลดเซฟมีหน้าเตรียมค่ายพร้อมทิป และภาพจะถูกเก็บไว้ในเครื่อง ครั้งต่อไปเปิดได้ทันที"]],
  foot:"ขอให้เจอแคปซูลสีทองนะคะ ✦"};
 function maybeWhatsNew(){if(!G||G.ended||UI.scene)return;if(G.newsSeen===PATCH.id)return;UI.modal={type:"whatsnew"};}
 function whatsNewHTML(){return `<div class="wnew"><span class="pill gold">อัปเดต · ${esc(PATCH.ver)}</span><h2>🥊 ${esc(PATCH.title)}</h2><p class="lead">${esc(PATCH.lead)}</p>
@@ -1412,7 +1436,7 @@ const ACT={
   pickslot:d=>{const i=+d.v;if(loadSlot(i)){UI.owSlot=i;render();return;}ACT.beginNew(i);},
   confirmow:()=>{const i=UI.owSlot;UI.owSlot=null;ACT.beginNew(i);},cancelow:()=>{UI.owSlot=null;render();},
   openload:()=>{UI.delSlot=null;UI.owSlot=null;UI.modal={type:"slots",mode:"load"};render();},
-  loadslot:d=>{backupSlot(+d.v);const s0=loadSlot(+d.v);if(!s0)return;const s=safeFix(s0);if(!s){toast("เซฟนี้เปิดกับเวอร์ชันนี้ไม่ได้ ข้อมูลยังอยู่ครบ ไม่ถูกลบ");return;}G=s;const pk=G.F.ploy&&G.F.ploy.skills;if(pk&&pk.korat){G.F.ploy.skills={kr_swing:2,captain:1};}UI.slot=+d.v;UI.tab="home";UI.modal=null;UI.advCache={};AU.startMusic("hub");if(G.ended){UI.ending=endingScene(G);}maybeWhatsNew();render();},
+  loadslot:d=>{backupSlot(+d.v);const s0=loadSlot(+d.v);if(!s0)return;const s=safeFix(s0);if(!s){toast("เซฟนี้เปิดกับเวอร์ชันนี้ไม่ได้ ข้อมูลยังอยู่ครบ ไม่ถูกลบ");return;}G=s;const pk=G.F.ploy&&G.F.ploy.skills;if(pk&&pk.korat){G.F.ploy.skills={kr_swing:2,captain:1};}UI.slot=+d.v;UI.tab="home";UI.modal=null;UI.advCache={};withArt(()=>{AU.startMusic("hub");if(G.ended){UI.ending=endingScene(G);}maybeWhatsNew();render();});},
   askdelslot:d=>{UI.delSlot=+d.v;render();},canceldel:()=>{UI.delSlot=null;render();},
   delslot:()=>{clearSave(UI.delSlot);UI.delSlot=null;if(!loadSave())UI.modal=null;render();},
   beginNew:i=>{UI.slot=i;UI.modal=null;AU.startMusic("hub");UI.creator={name:"",...CHIBI.randomManager(Math.random),gender:"m",diff:"normal",outfit:"tee",hat:"none",glasses:"none"};UI.modal=null;render();},
@@ -1447,7 +1471,7 @@ const ACT={
   startGame:()=>{const c=UI.creator;c.name=((document.getElementById("pname")||{}).value||"").trim()||(c.gender==="m"?"ต้น":"ดาว");
     crSeed();const {name,diff,seed,...look}=c;G=newGame({name,gender:c.gender,diff:diff||"normal",avatar:look,seed:seedFrom(seed)});if(seed&&!/^\d{1,10}$/.test(seed))G.seedText=seed;G.newsSeen=PATCH.id;genOffers(G);UI.creator=null;UI.tab="home";G.seen.prologue=true;AU.resume();AU.startMusic("date");
     playScene(EVENTS[0].steps,()=>{save();UI.tab="home";UI.spot=0;AU.startMusic("hub");render();},{bg:"bus",look:"train"});},
-  continue:()=>{let si=0;for(let i=1;i<=SLOTS;i++)if(loadSlot(i)){si=i;break;}if(!si)return;backupSlot(si);const s=safeFix(loadSlot(si));if(!s){toast("เซฟนี้เปิดกับเวอร์ชันนี้ไม่ได้ ข้อมูลยังอยู่ครบ ไม่ถูกลบ");return;}G=s;UI.slot=si;UI.tab="home";UI.modal=null;AU.startMusic("hub");if(G.ended){UI.ending=endingScene(G);}maybeWhatsNew();render();},
+  continue:()=>{let si=0;for(let i=1;i<=SLOTS;i++)if(loadSlot(i)){si=i;break;}if(!si)return;backupSlot(si);const s=safeFix(loadSlot(si));if(!s){toast("เซฟนี้เปิดกับเวอร์ชันนี้ไม่ได้ ข้อมูลยังอยู่ครบ ไม่ถูกลบ");return;}G=s;UI.slot=si;UI.tab="home";UI.modal=null;withArt(()=>{AU.startMusic("hub");if(G.ended){UI.ending=endingScene(G);}maybeWhatsNew();render();});},
   exportsave:()=>exportSave(),
   bakrestore:()=>{const b=bakInfo(UI.slot);if(!b)return;UI.modal={type:"confirm",title:"กู้เซฟก่อนอัปเดต?",text:`จะย้อนกลับไปสัปดาห์ ${b.week} (v${b.ver}) ความคืบหน้าหลังจากนั้นในช่องนี้จะหายไป`,yes:"bakyes"};render();},
   bakyes:()=>{const b=bakInfo(UI.slot);if(!b)return;try{const i=UI.slot;const cur=localStorage.getItem(slotKey(i));localStorage.setItem(slotKey(i),b.raw);const s=safeFix(loadSlot(i));if(!s){localStorage.setItem(slotKey(i),cur);toast("กู้คืนไม่สำเร็จ เซฟปัจจุบันยังอยู่");return;}G=s;UI.modal=null;UI.tab="home";save();render();toast("กู้คืนเซฟแล้ว");}catch(e){}},
@@ -1605,9 +1629,9 @@ document.addEventListener("click",e=>{AU.resume();const el=e.target.closest("[da
   if(el.classList.contains("title")&&e.target.closest("button"))return;if(a==="vnext")AU.sfx("tick");else if(a==="vchoose")AU.sfx("choose");else if(!QUIET_ACTS.has(a))AU.sfx("ui");ACT[a](el.dataset,e);});
 ["pointerdown","touchend","keydown"].forEach(t=>document.addEventListener(t,()=>AU.resume(),{passive:true}));
 document.addEventListener("visibilitychange",()=>{if(!document.hidden)AU.resume();});
-document.addEventListener("change",e=>{const el=e.target;if(el.dataset&&el.dataset.act==="importsave"&&el.files&&el.files[0]){if(!G)UI.slot=1;importSave(el.files[0]);return;}if(el.dataset&&el.dataset.act==="bplan"){const b=G.bookings.find(x=>x.id===el.dataset.id);if(b){b.plan=el.value;save();AU.sfx("ui");render();}}});
+document.addEventListener("change",e=>{const el=e.target;if(el.dataset&&el.dataset.act==="importsave"&&el.files&&el.files[0]){if(!G)UI.slot=1;const f0=el.files[0];/* v1.87: a save from the other language needs the dictionary first */(window.MTM_DICT?window.MTM_DICT().catch(()=>{}):Promise.resolve()).then(()=>importSave(f0));return;}if(el.dataset&&el.dataset.act==="bplan"){const b=G.bookings.find(x=>x.id===el.dataset.id);if(b){b.plan=el.value;save();AU.sfx("ui");render();}}});
 document.addEventListener("keydown",e=>{
   if(!G&&UI.title==="tap"&&(e.key===" "||e.key==="Enter")){e.preventDefault();ACT.tapstart();return;}
   if(UI.scene&&!(UI.scene.cur&&UI.scene.cur.choice)&&(e.key===" "||e.key==="Enter")){e.preventDefault();sceneNext();return;}
   if(e.key==="Enter"&&e.target&&e.target.id){const b={petname:"petnamebtn",redeemcode:null,gatecode:null}[e.target.id];const el=b?document.getElementById(b):e.target.id==="redeemcode"?document.querySelector("[data-act=redeem]"):e.target.id==="gatecode"?document.querySelector("[data-act=gatego]"):null;if(el){e.preventDefault();el.click();}}});
-preloadCore();["happy","surprised","sad"].forEach(m=>warm(stand("kati","fight",m)));warm(`${ASSET}coach.webp`);render();
+preloadCore();setTimeout(()=>{if(!G){["happy","surprised","sad"].forEach(m=>warm(stand("kati","fight",m)));warm(`${ASSET}coach.webp`);}},4000);render();

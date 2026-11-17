@@ -5050,5 +5050,21 @@
  "</div>\n   <details class=\"trd\"><summary>รายละเอียด</summary><p>": "</div>\n   <details class=\"trd\"><summary>Details</summary><p>",
  "<div class=\"seg trseg\" role=\"group\" aria-label=\"เลือกจุดเด่น\">": "<div class=\"seg trseg\" role=\"group\" aria-label=\"Choose a trait\">",
  "<div class=\"trbox\"><div class=\"trh\"><b>จุดเด่น</b>": "<div class=\"trbox\"><div class=\"trh\"><b>Trait</b>",
- " จุดเด่น: <b>": " Trait: <b>"
+ " จุดเด่น: <b>": " Trait: <b>",
+ "%\"></i></div><p class=\"ldn\">กำลังเตรียมค่าย… <span>": "%\"></i></div><p class=\"ldn\">Getting the camp ready… <span>",
+ "แตะช่องในปฏิทินเพื่อดูวันเกิดและเทศกาล": "Tap a week on the calendar to see birthdays and festivals",
+ "นักมวยล้าเกิน 70 เสี่ยงบาดเจ็บตอนซ้อม ให้พักบ้างนะ": "Fighters above 70 fatigue can get hurt in training. Let them rest",
+ "สนิทถึง ♥ Lv.7 ปลดท่าไม้ตายประจำตัว": "Reach ♥ Lv.7 to unlock a girl's signature move",
+ "ของตกแต่งที่ตรงสีมงคลประจำปี ได้คะแนนประกวดค่ายสวยเพิ่ม": "Decorations in the year's lucky colour score extra in the camp beauty contest",
+ "การ์ดซ้ำเอาไปอัปขั้น หรือย่อยเป็นเศษดาวได้ที่หน้าการ์ด": "Use duplicate cards to level up, or break them into stardust on the card page",
+ "แต่ละคนมีจุดเด่น 2 แบบ สลับได้ในหน้าสกิล": "Each girl has two traits. Switch between them on the skill page",
+ "ดูเทปคู่ชกก่อน จะรู้ว่าควรซ้อมแก้ทางแบบไหน": "Scout your opponent first to know which counter-training to do",
+ "ซ้อมแก้ทางก่อนชก วันชกอาวุธหลักของคู่ชกจะโดนยากขึ้น": "Counter-train before a fight and the opponent's main weapon lands less often",
+ "ทุกคนมีจุดเด่นของตัวเอง ซ้อมแก้ทางได้ผลขึ้น ตู้กาชาโฉมใหม่ และเปิดเกมเร็วขึ้นค่ะ": "Every girl gets her own traits, counter-training hits harder, a brand-new gacha machine, and the game opens faster",
+ "แตะตู้เพื่อหมุนก้าน แคปซูลกลิ้งออกมา สีแคปซูลคือระดับการ์ดจริง SSR มีฉากพิเศษ กดปุ่ม ? ดูอัตราออกและการันตีได้ ตู้ลอยกระทงเป็นสีเขียวริมน้ำปิง": "Tap the machine to turn the crank and a capsule rolls out. Its colour is the card's real rarity, and SSRs get a special scene. Tap ? for drop rates and the guarantee. The Loy Krathong machine is green, down by the Ping River",
+ "มะลิ ริน พลอย ฟ้า มีการ์ด SSR ของตัวเองในตู้กาชา เรื่องยาว มีบทส่งท้าย ฉากพิเศษ และมินิเกมของตัวเอง การ์ดที่เป็นเรื่องต่อกันจะมีลิงก์ถึงกันในหน้าการ์ด": "Mali, Rin, Ploy and Fah each have their own SSR card in the gacha, with a long story, an epilogue, a special scene and their own minigame. Cards that continue each other's stories now link on the card page",
+ "การันตีง่ายขึ้น เศษดาวเพิ่ม": "Easier guarantee, more stardust",
+ "ตู้ปกติการันตี SSR ทุก 30 ครั้ง ตู้ลอยกระทงทุก 10 ครั้ง ได้ใบที่ยังไม่มีเสมอ และชนะไฟต์ได้เศษดาว 3 ชนะน็อกได้ 4": "The regular machine guarantees an SSR every 30 pulls and the Loy Krathong machine every 10, always one you don't own yet. A win now gives 3 stardust, a knockout 4",
+ "เปิดเกมเร็วขึ้น": "The game opens faster",
+ "ไฟล์เกมเล็กลงเกินครึ่ง โหลดเซฟมีหน้าเตรียมค่ายพร้อมทิป และภาพจะถูกเก็บไว้ในเครื่อง ครั้งต่อไปเปิดได้ทันที": "The game file is less than half its old size, loading a save shows a camp-prep screen with tips, and art stays on your device so the next visit opens instantly"
 }

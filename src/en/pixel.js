@@ -3,7 +3,7 @@ const ASSET="a/";
 const IMGS={};
 function img(name){if(!IMGS[name]){const i=new Image();i.decoding="async";i.src=ASSET+name;IMGS[name]=i;}return IMGS[name];}
 const SHEET_IDS=["kati","mali","rin","ploy","fah","pailin"];
-function preloadCore(){SHEET_IDS.forEach(id=>img(id+"_sheet.webp"));["bg_camp.webp","bg_local.webp","gym1.webp","coach.webp"].forEach(img);}
+function preloadCore(){/* v1.87: the title only needs Kati — the rest arrives with the save that uses it */img("kati_sheet.webp");}
 // sprite rows in sheets (4 frames each): 0 idle,1 guard,2 step,3 punch,4 knee/kick,5 victory
 const ROW={idle:0,guard:1,walk:2,punch:3,knee:4,win:5};
 const PRESET_ROW={balanced:"cycle",punch:"punch",kick:"knee",knee:"knee",elbow:"punch",defense:"guard",cond:"walk",prep:"guard",rest:"idle"};

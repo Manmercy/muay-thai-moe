@@ -4,6 +4,7 @@
 set -e
 cd "$(dirname "$0")"
 FILES="engine chibi data story pixel audio ui quest chat"
+BUILD=$(cat src/*.js src/en/*.js src/i18n_dict.json src/style.css | md5sum | cut -c1-10)
 js(){ d=$1; echo 'window.__MTM_RAN=1;'; for f in $FILES; do if [ -f "src/$d$f.js" ]; then cat "src/$d$f.js"; else cat "src/$f.js"; fi; echo; done | grep -v '^if(typeof module'; }
 {
 echo '<!doctype html><html lang="th"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">'
@@ -12,9 +13,11 @@ echo '<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="styl
 echo '<style>'; cat src/style.css; echo '</style></head><body>'
 echo '<div id="app"></div><div id="live" aria-live="polite" role="status"></div>'
 echo '<script type="text/plain" id="js-th">'; js ""; echo '</script>'
-echo '<script type="text/plain" id="js-en">'; js "en/"; echo '</script>'
-echo '<script type="application/json" id="i18n-dict">'; cat src/i18n_dict.json; echo '</script>'
-echo '<script>'; cat src/boot.js; echo '</script>'
+echo '<script>'; sed "s/__BUILD__/$BUILD/" src/boot.js; echo '</script>'
 echo '</body></html>'
 } > index.html
-echo "built index.html"
+# v1.87: English code and the dictionary are separate files, loaded only when needed
+js "en/" > en.js
+{ printf "window.__MTM_DICT="; cat src/i18n_dict.json; echo ";"; } > i18n.js; rm -f i18n.json
+sed "s/__BUILD__/$BUILD/" src/sw.js > sw.js
+echo "built index.html en.js i18n.js sw.js ($BUILD)"
