@@ -422,7 +422,7 @@ Object.assign(ACT,{
 
 // ===== v1.64: MINIGAME — kick the heavy bag to the khong khaek drum (rhythm, taiko-style) =====
 // self-contained overlay: its own DOM + animation loop, so the main render() never touches it mid-song
-const BAG_DIFF={easy:{name:"Easy",bpm:92,bars:8,dens:0,mul:1},normal:{name:"Normal",bpm:108,bars:10,dens:1,mul:1.25},hard:{name:"Hard",bpm:124,bars:12,dens:2,mul:1.6}};
+const BAG_DIFF={easy:{name:"Easy",bpm:92,bars:8,dens:0,mul:1},normal:{name:"Normal",bpm:108,bars:10,dens:1,mul:1.25},hard:{name:"It is",bpm:124,bars:12,dens:2,mul:1.6}};
 const BAG_PAT=[["L...L...","L...R...","R...R...","L.L.R...","L...R.R.","R...L..."],["L.R.L.R.","LLR.L...","L.RRL...","R.L.R.L.","L.L.RR.."],["LRLRL.R.","L.LRR.L.","RRL.RRL.","LLRRL.R.","LRRLLRR."]];
 const BAG_WIN={perfect:.06,great:.12,ok:.19};
 function bagChart(G,dk,salt=0){const D=BAG_DIFF[dk],beat=60/D.bpm,half=beat/2,N=[];let t=4*beat;/* one bar of count-in */

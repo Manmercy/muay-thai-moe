@@ -538,7 +538,7 @@ const STAGE_NAME={local:"Subdistrict round",district:"District round",final:"Pro
 function ployAura(w,G){const b=Math.max(0,.42*(1-(w-1)/27));if(!G||!G.F||!G.F.ploy||G.F.ploy.camp!=="rival")return G&&G.F&&G.F.ploy&&G.F.ploy.camp==="player"?0:b;if(G.flags&&G.flags.beatS_ploy===(G.season||1))return b;/* v1.59: the undefeated genius keeps her edge until someone beats her this year */return Math.max(b,w<41?.2:w<49?.14:.05);} // v1.23: Ploy's early edge is gone by week 28
 function startLv(f){if(f.id==="ploy")f.aura=ployAura(1);if(f.id==="ploy")f.lvl=5;else if(f.id==="fah")f.lvl=3;else if(f.camp==="npc")f.lvl=clamp(Math.round(ovr(f.a)-7),1,6);}
 // v1.22 difficulty: easy = rivals grow slower + more class income; hard = rivals grow faster and use skills harder
-const DIFF={easy:{rival:.7,ai:.6,inc:1.2,train:1.12,name:"Easy"},normal:{rival:1,ai:.8,inc:1,train:1,name:"Normal"},hard:{rival:1.12,ai:.95,inc:.9,train:.97,name:"Hard"}};
+const DIFF={easy:{rival:.7,ai:.6,inc:1.2,train:1.12,name:"Easy"},normal:{rival:1,ai:.8,inc:1,train:1,name:"Normal"},hard:{rival:1.12,ai:.95,inc:.9,train:.97,name:"It is"}};
 const dif=G=>DIFF[(G&&G.diff)||"normal"]||DIFF.normal;
 // v1.48: seeded "random" for gameplay rolls outside fights, so a shared seed replays the same
 function srand(G,salt){return mulberry32((((G&&G.seed)||1)+((G&&G.week)||0)*7919+(salt|0)*104729)>>>0)();}
@@ -820,7 +820,7 @@ const RIVAL_OF={kati:"ploy",mali:"fah"},RIVAL_WEEKS=[25,29,33,36],RIVAL_EARLY={m
 // v1.21: promoters keep calling even when a fight is booked (further out), more calls with fame,
 // and each batch mixes an easier bout, an even one and (with fame) a step up — a real challenge curve
 // v1.43: a plain difficulty label for a matchup
-function diffTag(me,op){const d=effGap(typeof G!=="undefined"?G:null,me,op);return d<-.6?["easy","Easy"]:d<.35?["even","Even"]:d<1.1?["hard","Hard"]:["vhard","Very hard"];}
+function diffTag(me,op){const d=effGap(typeof G!=="undefined"?G:null,me,op);return d<-.6?["easy","Easy"]:d<.35?["even","Even"]:d<1.1?["hard","It is"]:["vhard","Very hard"];}
 const OFFER_BANDS=[-.7,.45,1.4,.9],EFF_BANDS=[-.9,-.1,.8,.3];
 /* v1.83.1: our fighters are stronger than their stats show — skills, mastery, aura, grit, facilities and the corner picking the right plan.
    Measure that edge (in stat points) by sparring a mirror with none of it but a known ring-craft lead; from year 2 matchmaking, the field and rewards all use it. */

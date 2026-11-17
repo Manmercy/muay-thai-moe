@@ -1,5 +1,5 @@
 // ================= MUAY THAI MOE v1.3 — UI =================
-const VERSION="1.87.9";
+const VERSION="1.88.0";
 const CUR_LANG=(typeof window!=="undefined"&&window.LANG)||"th";
 const TH_LABEL=String.fromCharCode(3652,3607,3618);
 function langSwitch(cls){return `<div class="langsw ${cls||""}" role="group" aria-label="Language">${[["th",TH_LABEL],["en","EN"]].map(([k,l])=>`<button class="lsb ${CUR_LANG===k?"on":""}" data-act="setlang" data-v="${k}" aria-pressed="${CUR_LANG===k}">${l}</button>`).join("")}</div>`;}
@@ -254,7 +254,7 @@ function creatorHTML(){const c=UI.creator,O=CHIBI.OPT;
   const seg=(prop,list)=>`<div class="seg">${list.map(([v,t])=>`<button data-act="cset" data-k="${prop}" data-v="${v}" aria-pressed="${c[prop]===v}">${t}</button>`).join("")}</div>`;
   const F=(label,inner)=>`<div class="field"><span class="lb">${label}</span>${inner}</div>`;
   const tab=c.tab||"base";
-  const T={base:F("Gender (affects dialogue)",seg("gender",[["m","Male"],["f","Female"]]))+F("Difficulty",seg("diff",[["easy","Easy"],["normal","Normal"],["hard","Hard"]]))+`<p class="meta">${{easy:"Rivals grow slower, more class income. For players who want the story",normal:"Balanced as designed",hard:"Ploy and Fah are tougher, use stronger skills, money is tighter"}[c.diff||"normal"]}</p>`+F("Seed (optional)",`<input id="pseed" maxlength="20" value="${esc(c.seed||"")}" autocomplete="off" placeholder="Leave blank = random world">`)+`<p class="meta">Use the same seed as a friend to get the same world: rival fighters, fight offers and random events all match. Numbers or words both work.</p>`,
+  const T={base:F("Gender (affects dialogue)",seg("gender",[["m","Male"],["f","Female"]]))+F("Difficulty",seg("diff",[["easy","Easy"],["normal","Normal"],["hard","It is"]]))+`<p class="meta">${{easy:"Rivals grow slower, more class income. For players who want the story",normal:"Balanced as designed",hard:"Ploy and Fah are tougher, use stronger skills, money is tighter"}[c.diff||"normal"]}</p>`+F("Seed (optional)",`<input id="pseed" maxlength="20" value="${esc(c.seed||"")}" autocomplete="off" placeholder="Leave blank = random world">`)+`<p class="meta">Use the same seed as a friend to get the same world: rival fighters, fight offers and random events all match. Numbers or words both work.</p>`,
    face:F("Hairstyle",seg("hairStyle",O.hairStyle))+F("Hair color",sw("hair",O.hair))+`<div class="two">${F("Skin tone",sw("skin",O.skin))}${F("Eye color",sw("eyes",O.eyes))}</div>`,
    wear:F("Outfit",seg("outfit",[["tee","T-shirt"],["polo","Polo"],["suit","Suit"],["hoodie","Hoodie"]])+sw("outfitColor",O.cloth))+F("Pants",seg("pants",[["long","Long"],["shorts","Shorts"]])+sw("pantsColor",["#1f1f24","#2c3e6b","#5a4a3a","#8a8f99","#e8dcc0"])),
    acc:F("Hat",seg("hat",[["none","None"],["cap","Cap"],["bucket","Bucket"]]))+(c.hat!=="none"?F("Hat color",sw("hatColor",O.cloth)):"")+F("Glasses",seg("glasses",[["none","None"],["glasses","Prescription"],["sun","Sunglasses"]]))};
@@ -1106,7 +1106,7 @@ function rinScene(done){const r=G.F.rin;if(!r||r.camp!=="player"||G.week%3!==0||
   const tired=R.filter(f=>f.fatigue>=50);const w=R.map(f=>[f,RADAR_AX.map(([n,fn])=>[n,fn(f.a)]).sort((a,b)=>a[1]-b[1])[0]]).sort((a,b)=>a[1][1]-b[1][1])[0];
   // v1.22.1: rotate whose weakness Rin talks about, and how she says it
   const rf=R[Math.floor(G.week/3)%R.length],rw=RADAR_AX.map(([n,fn])=>[n,fn(rf.a)]).sort((a,b)=>a[1]-b[1]);const rpick=rw[Math.floor(G.week/6)%2]||rw[0];
-  const RW=[`This time I'll talk about ${rf.name}. ${rpick[0]} is still her lowest stat. A little more training will show results`,`${rf.name} still leaves an opening in ${rpick[0]}. Opponents who read the game will target it`,`If I had to pick one thing to fix right now, I'd pick ${rpick[0]} of ${rf.name} Mm`];
+  const RW=[`This time I'll talk about ${rf.name}. ${rpick[0]} is still her lowest stat. A little more training will show results`,`${rf.name} still leaves an opening in ${rpick[0]}. Opponents who read the game will target it`,`If I had to pick one thing to fix right now, I'd pick ${rpick[0]} of ${rf.name} Of course`];
   L.push(tired.length?`${tired.map(f=>f.name).join(", ")} is over half fatigued. Give her a recovery week and she'll come back stronger`:RW[Math.floor(G.week/3)%RW.length]);
   const net=weeklyNet(G),wl=weeksLeft();
   L.push(net<0?`Money: we're losing ${fmt(-net)} per week. In about ${wl} weeks the money runs out. More fights or the special-class activity will help`:G.cash>40000?`Money: we have ${fmt(G.cash)} to spare. Try upgrading the camp or sending Coach Daeng to train. It pays off more than saving it`:`Money: we profit ${fmt(net)} per week. We're okay, but don't spend much yet`);
@@ -1200,7 +1200,7 @@ function waiKhruScene(b){const me=G.F[b.a],first=!(G.flags&&G.flags.waiSeen);con
 const CHEER={kati:[["Grandpa Chai is watching. Make him proud","…Yes! I'll fight so Grandpa hears the cheers all the way up there!",1],["Win and we'll go eat moo kratha","Haha, it's a promise! I'm ordering a lot",0],["Stay calm, follow the plan","Mm… the plan, the plan",0]],
   mali:[["Go show the whole arena that kick!","You got it~ Mali's kicks will be the loudest tonight!",1],["Your mom must be proud","…Thank you. Mali won't cry before a fight",0],["Don't get careless","I know, I know~",0]],
   rin:[["Trust the data you analyzed","…Yes. It's all in my head. Now I just have to do it",1],["Go get 'em, Rin!","Thank you… I'll try",0],["Have fun out there","Fun… I'll try",0]]};
-function cheerLines(f){return CHEER[f.id]||[["You can do it!","Good!",1],["Follow the plan","Got it",0],["Don't get hurt","Mm",0]];}
+function cheerLines(f){return CHEER[f.id]||[["You can do it!","Good!",1],["Follow the plan","Noted",0],["Don't get hurt","Of course",0]];}
 function openFight2(b,done){UI.fight={b,done,stage:"pre",plan:b.plan||"balanced",tac:{focus:"auto",pace:"steady",target:(b.tac&&b.tac.target)||"body"},F:null,shown:[],pending:[],timer:null,res:null,caption:null};render();}
 // v1.46: side-by-side numbers before the bell (opponent hidden until scouted)
 function preCompare(me,op,b){const sc=scouted(op.id)||op.camp==="player";const v=verdictOf(adviseCached(me.id,op.id,b.rounds||3).bestRate);
