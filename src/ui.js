@@ -1,5 +1,5 @@
 // ================= MUAY THAI MOE v1.3 — UI =================
-const VERSION="1.87.1";
+const VERSION="1.87.2";
 const CUR_LANG=(typeof window!=="undefined"&&window.LANG)||"th";
 const TH_LABEL=String.fromCharCode(3652,3607,3618);
 function langSwitch(cls){return `<div class="langsw ${cls||""}" role="group" aria-label="Language">${[["th",TH_LABEL],["en","EN"]].map(([k,l])=>`<button class="lsb ${CUR_LANG===k?"on":""}" data-act="setlang" data-v="${k}" aria-pressed="${CUR_LANG===k}">${l}</button>`).join("")}</div>`;}
@@ -556,7 +556,7 @@ function careerHTML(d){const list=Object.values(G.F).filter(f=>f.div===d&&f.camp
 // v1.85: card detail page — rarity, copies, a teaser line, read the story or break spare copies into stardust
 function cardBlurb(C){if(C.blurb)return C.blurb;const st=(C.steps||[]).find(x=>x&&typeof x.t==="string"&&x.n!=="nar")||(C.steps||[]).find(x=>x&&typeof x.t==="string");if(!st)return "";const t=st.t;return t.length>72?t.slice(0,70)+"…":t;}
 /* v1.87: some cards continue another card's story — once both are owned, the card page links them */
-const CARD_SEQ={h_mali:"g_mali_sr",h_rin:"g_rin_sr",h_fah:"g_fah_sr",g_mali_ssr:"h_mali",g_ploy_ssr:"g_ploy_sr"};
+const CARD_SEQ={h_mali:"g_mali_sr",h_rin:"g_rin_sr",h_fah:"g_fah_sr",g_mali_ssr:"h_mali",g_ploy_ssr:"g_ploy_sr",g_kati_ssr:"g_kati_sr"};
 function cardLinkHTML(id){const own=G.cards||{},out=[];const pv=CARD_SEQ[id];if(pv&&own[pv]&&CARDS[pv])out.push(`↩ เรื่องต่อจาก <button class="clinkb" data-act="cardinfo" data-v="${pv}">${esc(CARDS[pv].t)}</button>`);
   Object.keys(CARD_SEQ).filter(k=>CARD_SEQ[k]===id&&own[k]&&CARDS[k]).forEach(k=>out.push(`↪ มีเรื่องต่อใน <button class="clinkb" data-act="cardinfo" data-v="${k}">${esc(CARDS[k].t)}</button>`));
   return out.length?`<p class="clink">${out.join("<br>")}</p>`:"";}
@@ -1027,8 +1027,8 @@ function tutorialHTML(){const T=G.tut||{};const items=[["train","ตั้งโ
    ${done===4?`<p class="meta">ครบแล้ว! กด 'จบสัปดาห์' ได้เลย</p>`:""}`;}
 function goalText(){const st=stageOf(G.week),me=roster(G);const best=d=>{const rows=standings(G,d);const i=rows.findIndex(r=>r.f.camp==="player");return i<0?null:{i:i+1,f:rows[i].f};};
   const a=best("A");
-  if(st==="local")return `เป้าหมาย: ติดท็อป 4 รอบตำบลภายในสัปดาห์ 20${a?` · ${a.f.name}อยู่อันดับ ${a.i}`:""}`;
-  if(st==="district"){const inQ=[...G.qual.A,...G.qual.B].some(id=>G.F[id]&&G.F[id].camp==="player");return inQ?`เป้าหมาย: ติดท็อป 4 รอบอำเภอภายในสัปดาห์ 40 เพื่อไปรองชิงจังหวัด${a?` · ${a.f.name}อันดับ ${a.i}`:""}`:"เป้าหมาย: ปีนี้พลาดรอบอำเภอ สร้างค่ายให้แกร่งและเก็บเงินรอฤดูกาลหน้า";}
+  if(st==="local")return `🎯 ท็อป 4 ตำบล ก่อน สด.20${a?` · ${a.f.name} (อันดับ ${a.i})`:""}`;
+  if(st==="district"){const inQ=[...G.qual.A,...G.qual.B].some(id=>G.F[id]&&G.F[id].camp==="player");return inQ?`🎯 ท็อป 4 อำเภอ ก่อน สด.40 ไปรองชิงจังหวัด${a?` · ${a.f.name} (อันดับ ${a.i})`:""}`:"เป้าหมาย: ปีนี้พลาดรอบอำเภอ สร้างค่ายให้แกร่งและเก็บเงินรอฤดูกาลหน้า";}
   if(st==="final"&&G.week<=44&&[...((G.semis||{}).A||[]),...((G.semis||{}).B||[])].some(id=>G.F[id]&&G.F[id].camp==="player")&&!G.finalists.A.concat(G.finalists.B).some(id=>G.F[id]&&G.F[id].camp==="player"))return "เป้าหมาย: ชนะรอบรองชิงจังหวัด สัปดาห์ 44";
   if(st==="final"){const inF=[...G.finalists.A,...G.finalists.B].some(id=>G.F[id]&&G.F[id].camp==="player");return inF?"เป้าหมาย: ชิงแชมป์จังหวัด สัปดาห์ 49 ห้ายก":"เป้าหมาย: ดูแลค่ายจนจบฤดูกาล";}
   return "ปิดปี · เตรียมตัวสำหรับปีหน้า";}
