@@ -4720,9 +4720,12 @@ QBUB.bull.win.push("(เคี้ยวเอื้องอย่างผู�
 const TEAM_BUB={kati:{win:["เฮ้อ… ชกกับคนในค่ายนี่ใจเต้นกว่าชกกับพลอยอีก ไปกินข้าวกันนะ","ขอโทษนะ! หนูเตะแรงไปไหม เดี๋ยวหนูประคบให้!"],lose:["เก่งมาก! หนูภูมิใจที่แพ้ให้คนในค่ายเรา","รอบหน้าหนูเอาคืนนะ! …ตอนซ้อมพรุ่งนี้เลย"]},
  mali:{win:["ฮิ ๆ มะลิชนะ~ แต่เย็นนี้มะลิเลี้ยงหมูกระทะเองนะ","ขอโทษน้า~ ขามะลิมันไปเอง!"],lose:["เก่งชะมัดเลย มะลิยอมจริง ๆ~","ฮือ… แต่ก็ดีใจที่คนชนะเป็นคนในค่ายเรา!"]},
  rin:{win:["ขอบคุณที่ชกเต็มที่ ข้อมูลไฟต์นี้มีค่ามากค่ะ","ฉันจะส่งสรุปจุดที่โดนให้นะคะ คืนนี้เลย"],lose:["…ฉันคำนวณพลาดไปจุดหนึ่ง เธอเก่งขึ้นเร็วกว่ากราฟ","ยินดีด้วยค่ะ ชนะฉันได้แปลว่าค่ายเราแข็งแรงจริง"]}};
+/* v1.88: Vector camp looks down on the provincial camp — until the contract is torn up (y5_vector_resolve), then it turns into rivals' banter */
+const VECTOR_BUB={"pailin":{"win":["ค่ายที่ยังจับเวลาด้วยนาฬิกาปลุก จะชนะคนที่วัดได้ทุกจังหวะหัวใจได้ยังไง","กลับไปซ้อมใต้ต้นมะม่วงต่อเถอะ เวทีนี้ของมืออาชีพ","บอก{me}ด้วยนะ ว่าความขยันแบบบ้าน ๆ มันมีเพดาน","น่ารักดีนะ ค่ายเล็ก ๆ ที่ยังฝากชีวิตไว้กับพระเครื่องกับน้ำมันมวย","ข้อมูลของเธอ ฉันมีครบตั้งแต่ก่อนเธอขึ้นเวทีด้วยซ้ำ"],"lose":["…ค่าคลาดเคลื่อน ฉันจะสั่งตรวจเครื่องใหม่ทั้งหมด","อย่าเพิ่งดีใจ ฟลุคของค่ายบ้านนอกเกิดได้ปีละครั้ง","ตัวเลขไม่มีวันผิด ต้องมีอะไรที่ฉันยังไม่ได้วัด…"]},"vector_A":{"win":["ฉันก็เคยเป็นเด็กค่ายบ้านนอกแบบเธอ ซ้อมตามใจครู แล้วก็แพ้ตามดวง","อุบลสอนให้ฉันอดทน กรุงเทพฯ สอนให้ฉันชนะ เธอยังติดอยู่ด่านแรกเลย","ไปบอก{me}ด้วยนะ ว่าเลิกใช้สมุดจดมือได้แล้ว นี่มันปีไหน"],"lose":["…ค่ายบ้านนอกชนะได้ยังไง ระบบต้องมีจุดบอด","อย่าคิดว่าเราเหมือนกันนะ ฉันออกมาจากที่แบบนั้นแล้ว"]},"vector_B":{"win":["ช้าจัง! นี่ซ้อมบนลานตากข้าวมาเหรอ","ชกเหมือนนั่งรถสองแถว จอดทุกป้ายเลยนะ","มีห้องซ้อมติดแอร์เมื่อไหร่ค่อยมาท้าใหม่นะ น้องบ้านนอก"],"lose":["เดี๋ยว! เครื่องบอกว่าฉันต้องชนะนี่!","โชคดีล่ะสิ เวทีนี้อยู่ใกล้ทุ่งนาบ้านเธอ"]}},VECTOR_BUB_LATE={"pailin":{"win":["ยังบ้านนอกเหมือนเดิม …แต่ฉันต้องใช้ข้อมูลมากขึ้นทุกปีถึงจะชนะเธอได้"],"lose":["ปีนี้ยอมรับก็ได้ ศิริชัยไม่ใช่ค่ายบ้านนอกธรรมดา"]},"vector_A":{"win":["เกือบแล้ว เด็กบ้านนอก …ฉันพูดแบบชมนะ"],"lose":["สมุดจดมือของ{me}ยังใช้ได้อยู่จริง ๆ ด้วย"]},"vector_B":{"win":["ยังช้าอยู่ดี แต่ช้าแบบน่ากลัวขึ้นแล้วนะ"],"lose":["โอเค ลานตากข้าวก็สร้างนักมวยได้ ยอมแล้ว!"]}};
 function postBubble(op,res,seed){const R=a=>a[Math.abs(seed)%a.length].replace(/\{me\}/g,typeof G!=="undefined"&&G?G.player.name:"");
   if(op.camp==="player"&&TEAM_BUB[op.id]&&res!=="draw")return R(TEAM_BUB[op.id][res]);
   if(op.grp&&QBUB[op.grp])return R(QBUB[op.grp][res]||QBUB[op.grp].draw);
+  if(VECTOR_BUB[op.id]&&res!=="draw"){const late=typeof G!=="undefined"&&G&&G.seen&&G.seen.y5_vector_resolve;return R((late?VECTOR_BUB_LATE:VECTOR_BUB)[op.id][res]);}
   if(POST_BUBBLE[op.id]&&res!=="draw")return R(POST_BUBBLE[op.id][res]);
   const P=typeof PERSONA!=="undefined"&&PERSONA[op.name];if(P&&res==="win"&&seed%3===0)return P.line;
   return R(POST_GENERIC[res]);}
@@ -9534,7 +9537,7 @@ for(const id in CHAT_LOY)CHAT[id].unshift(...CHAT_LOY[id]);
 <script>
 (function(){
 /* v1.87: Thai code ships inside index.html; English code (en.js) and the dictionary (i18n.js) load only when needed */
-var B="eb8544ccca";
+var B="6a72ebceb5";
 var L="";try{L=localStorage.getItem("mtm_lang")||"";}catch(e){}
 try{var h=(location.hash||"").match(/lang=(th|en)/);if(h)L=h[1];}catch(e){}
 if(L!=="th"&&L!=="en")L="th";
