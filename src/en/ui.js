@@ -684,10 +684,11 @@ function fighterHTML(f){const mine=f.camp==="player";const P=PROFILES[f.id];
       <p class="meta center">Outfits only change the pixel sprite in camp, training and fights · no effect on stats</p>`;}
   if(t==="over"){const c=condition(f);const nb=G.bookings.find(b=>b.a===f.id||b.b===f.id);
     body=`<div class="fp-over">${radarSVG(f,240)}<div><div class="bars">${bar("Readiness",c,condColor(c))}${bar("Fatigue",f.fatigue,"var(--warn)")}${bar("Morale",f.morale,"var(--blue)")}</div>
-      ${mine?`<p class="meta goldt">${masteryLine(f)}</p>`:""}<p class="meta">Form ${formHTML(f)}${nb?` · next fight week ${nb.week}`:""}</p><details><summary>Detailed stats</summary>${attrsHTML(f,mine)}</details></div></div>`;}
+      ${mine?`<p class="meta goldt">${masteryLine(f)}</p>`:""}${TRAITS[f.id]?`<p class="meta">✦ Trait: <b>${TRAITS[f.id].find(t=>t.id===traitOf(f)).name}</b></p>`:""}<p class="meta">Form ${formHTML(f)}${nb?` · next fight week ${nb.week}`:""}</p><details><summary>Detailed stats</summary>${attrsHTML(f,mine)}</details></div></div>`;}
   if(t==="train"){body=`<div class="fp-train"><div class="tr-anim big" style="background-image:url(${ASSET}${gymBg()})"><canvas width="260" height="200" data-sprite="${f.id}" data-floor="1"></canvas><span class="tr-tag">${PRESETS[f.plan.preset].name}</span></div>
      <div><p class="meta">${PRESETS[f.plan.preset].desc} · fatigue next week ${Math.round(projFatigue(f))}</p>${presetPicker(f)}${radarSVG(f,200)}</div></div>`;}
   if(t==="skill"&&hasTree(f.id))body=skillGrid(f,mine);else if(t==="skill")body=skillGrid(f,mine)+(SIGNATURE[f.id]?`<details class="sigcard ${hasSignature(f)?"on":""}"><summary><b>${hasSignature(f)?"✦":"🔒"} Signature move: ${SIGNATURE[f.id].name}</b></summary><span class="meta">${SIGNATURE[f.id].desc}${hasSignature(f)?"":` · now ♥ Lv.${heartLv(f).lv}/7`}</span></details>`:"")+`<details class="skhelp"><summary>How do skills work?</summary><p class="meta">1 skill point per level-up · new moves unlock by level · each move upgrades 3 times · in a fight you can only use the 3 moves marked "Use" · tap a move's name for details</p></details>`;
+  if(t==="skill")body=traitHTML(f,mine)+body;
   if(t==="rel")body=relHTML(f);
   return head+`<div class="fp-body">${body}</div>`;}
 const SK_AN=Object.fromEntries(ATTRS);
@@ -720,6 +721,11 @@ function skillTree(f,mine){const L=skillList(f.id),eqd=equipped(f),sc=SCHOOLS[L[
    <div class="sklist pxscroll">${[0,1,2,3,4,5].map(row=>L.find(s=>s.line===li&&s.row===row)).filter(Boolean).map(card).join('<i class="skarrow" aria-hidden="true"></i>')}
      ${SIGNATURE[f.id]?`<div class="skc sig ${hasSignature(f)?"has":"lock"}"><div class="skc-m"><div class="skc-h"><b>✦ Signature: ${SIGNATURE[f.id].name}</b></div><p class="skc-d">${SIGNATURE[f.id].desc}${hasSignature(f)?"":` · unlocks at bond 60 (now ${Math.round(f.bond||0)})`}</p></div></div>`:""}</div>
    ${mine?`<div class="skfoot"><button class="btn sm" data-act="skauto" data-id="${f.id}" data-v="${li}" ${[0,1,2,3,4,5].some(r=>{const s=L.find(x=>x.line===li&&x.row===r);return s&&skState(f,s,mine).st==="can";})?"":"disabled"}>Auto-upgrade · ${lines[li]}</button><span class="meta">Equip up to ${MAX_EQUIP} moves · passives work on their own, no slot needed</span></div>`:""}</div>`;}
+/* v1.87: innate traits — two per girl, pick one */
+function traitHTML(f,mine){const L=TRAITS[f.id];if(!L)return "";const cur=traitOf(f);
+  return `<div class="trbox"><div class="trh"><b>Innate trait</b><span class="meta">${mine?"Pick one at a time, switch anytime":"The one she uses now"}</span></div>
+   <div class="trgrid">${L.map(t=>{const on=cur===t.id;const extra=t.id==="grit"&&f.grit?` <span class="goldt">· stored so far +${Math.round(f.grit*100)}%</span>`:"";
+     return `<div class="trc ${on?"on":""}"><b>${on?"✓ ":""}${t.name}</b><p>${t.desc}${extra}</p>${mine?(on?`<span class="trtag">In use</span>`:`<button class="btn sm" data-act="trait" data-id="${f.id}" data-v="${t.id}">Use this</button>`):""}</div>`;}).join("")}</div></div>`;}
 function skResetBtn(f){const n=skPointsSpent(f);if(!n)return "";const c=skResetCost(f);
   return `<button class="skrbtn" data-act="skresetask" data-id="${f.id}" ${c&&G.cash<c?"disabled":""} aria-label="Reset skills, refunds ${n} points" title="Reset skills · refunds ${n} points · ${c?fmt(c):"first reset is free"}">↺ Reset</button>`;}
 function skResetRow(f){const n=skPointsSpent(f);if(!n)return "";const c=skResetCost(f);
@@ -844,6 +850,7 @@ const PATCH={id:"1.87.0",ver:"Muay Thai Moe v1.87.0",title:"News from Sirichai C
  ["✦","More stardust","A win now gives 3 stardust, a knockout win gives 4"],
  ["↩","Linked card stories","Own both cards and the card page shows which story it continues. Tap to jump straight there."],
  ["🏮","A green Loy Krathong machine","The festival machine has its own look, down by the Ping River"],
+ ["✦","Two innate traits per girl","Every girl has two innate traits to switch between on the skill page, like Mali's Move Like Water, Rin's Walking Library, Fah's Hard as Stone and Ploy's Godlike Timing"],
  ["🥊","Counter-training works better","Counter-train before a fight and on fight night the opponent's main weapon lands less often while you read their game better. It helps a lot against the top fighters in later years"],
  ["📖","Missed story arcs are back","If you skipped Pailin and Vector Gym, or Fah and Ploy's second-year stories, they now start in the year you're playing. No need for a new save"],
  ["📅","A calendar for the whole year","The calendar now shows which year you're in, plus birthdays, festivals and the camp beauty contest. Tap a week for details"]],
@@ -1469,6 +1476,7 @@ const ACT={
   sksel:d=>{UI.skSel=d.id+":"+d.v;AU.sfx("ui");render();},
   newsok:()=>{G.newsSeen=PATCH.id;UI.modal=null;save();render();},
   closeModal:()=>{const m=UI.modal;if(m&&m.type==="contest"){ACT.contestdone();return;}if(m&&m.type==="whatsnew"&&G){G.newsSeen=PATCH.id;save();}UI.modal=null;render();if(m&&m.after)m.after();},
+  trait:d=>{const f=G.F[d.id],L=TRAITS[d.id];if(!f||!L||f.camp!=="player")return;const t=L.find(x=>x.id===d.v);if(!t)return;f.trait=t.id;save();render();toast(`${f.name} now uses the trait "${t.name}"`);},
   gopen:d=>{GB.box=d.v==="loy"?"loy":"n";if(GB.box==="loy"&&!loyFest()){toast("The Loy Krathong machine is closed. See you next festival!");return;}GB.st=null;GB.ps=[];UI.gq=false;UI.modal={type:"gbox"};render();gbPreload();},
   gpull:()=>{if(GB.st)return;const cost=gbCost();if((G.dust||0)<cost){AU.sfx("ui");toast(`Not enough stardust. You need ${cost}✦ · earn it by winning fights, getting new cards and breaking down spares`);return;}
     const r=GB.box==="loy"?loyPull(G):gachaPull(G);if(!r)return;save();const rr=CARDS[r.id].r;

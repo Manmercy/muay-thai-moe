@@ -684,10 +684,11 @@ function fighterHTML(f){const mine=f.camp==="player";const P=PROFILES[f.id];
       <p class="meta center">ชุดเปลี่ยนแค่ตัวพิกเซลในค่าย ตอนซ้อม และตอนชก · ไม่มีผลกับค่าพลัง</p>`;}
   if(t==="over"){const c=condition(f);const nb=G.bookings.find(b=>b.a===f.id||b.b===f.id);
     body=`<div class="fp-over">${radarSVG(f,240)}<div><div class="bars">${bar("ความพร้อม",c,condColor(c))}${bar("ความล้า",f.fatigue,"var(--warn)")}${bar("กำลังใจ",f.morale,"var(--blue)")}</div>
-      ${mine?`<p class="meta goldt">${masteryLine(f)}</p>`:""}<p class="meta">ฟอร์ม ${formHTML(f)}${nb?` · ไฟต์ถัดไปสัปดาห์ ${nb.week}`:""}</p><details><summary>ค่าสถานะละเอียด</summary>${attrsHTML(f,mine)}</details></div></div>`;}
+      ${mine?`<p class="meta goldt">${masteryLine(f)}</p>`:""}${TRAITS[f.id]?`<p class="meta">✦ จุดเด่น: <b>${TRAITS[f.id].find(t=>t.id===traitOf(f)).name}</b></p>`:""}<p class="meta">ฟอร์ม ${formHTML(f)}${nb?` · ไฟต์ถัดไปสัปดาห์ ${nb.week}`:""}</p><details><summary>ค่าสถานะละเอียด</summary>${attrsHTML(f,mine)}</details></div></div>`;}
   if(t==="train"){body=`<div class="fp-train"><div class="tr-anim big" style="background-image:url(${ASSET}${gymBg()})"><canvas width="260" height="200" data-sprite="${f.id}" data-floor="1"></canvas><span class="tr-tag">${PRESETS[f.plan.preset].name}</span></div>
      <div><p class="meta">${PRESETS[f.plan.preset].desc} · ความล้าสัปดาห์หน้า ${Math.round(projFatigue(f))}</p>${presetPicker(f)}${radarSVG(f,200)}</div></div>`;}
   if(t==="skill"&&hasTree(f.id))body=skillGrid(f,mine);else if(t==="skill")body=skillGrid(f,mine)+(SIGNATURE[f.id]?`<details class="sigcard ${hasSignature(f)?"on":""}"><summary><b>${hasSignature(f)?"✦":"🔒"} ท่าไม้ตาย: ${SIGNATURE[f.id].name}</b></summary><span class="meta">${SIGNATURE[f.id].desc}${hasSignature(f)?"":` · ตอนนี้ ♥ Lv.${heartLv(f).lv}/7`}</span></details>`:"")+`<details class="skhelp"><summary>สกิลทำงานยังไง?</summary><p class="meta">ได้แต้มสกิล 1 แต้มทุกเลเวลอัป · ท่าใหม่ปลดล็อกตามเลเวล · แต่ละท่าอัปได้ 3 ขั้น · ตอนชกกดใช้ได้เฉพาะ 3 ท่าที่ "ใช้" · แตะชื่อท่าเพื่อดูรายละเอียด</p></details>`;
+  if(t==="skill")body=traitHTML(f,mine)+body;
   if(t==="rel")body=relHTML(f);
   return head+`<div class="fp-body">${body}</div>`;}
 const SK_AN=Object.fromEntries(ATTRS);
@@ -720,6 +721,11 @@ function skillTree(f,mine){const L=skillList(f.id),eqd=equipped(f),sc=SCHOOLS[L[
    <div class="sklist pxscroll">${[0,1,2,3,4,5].map(row=>L.find(s=>s.line===li&&s.row===row)).filter(Boolean).map(card).join('<i class="skarrow" aria-hidden="true"></i>')}
      ${SIGNATURE[f.id]?`<div class="skc sig ${hasSignature(f)?"has":"lock"}"><div class="skc-m"><div class="skc-h"><b>✦ ท่าไม้ตาย: ${SIGNATURE[f.id].name}</b></div><p class="skc-d">${SIGNATURE[f.id].desc}${hasSignature(f)?"":` · ปลดเมื่อความสนิทถึง 60 (ตอนนี้ ${Math.round(f.bond||0)})`}</p></div></div>`:""}</div>
    ${mine?`<div class="skfoot"><button class="btn sm" data-act="skauto" data-id="${f.id}" data-v="${li}" ${[0,1,2,3,4,5].some(r=>{const s=L.find(x=>x.line===li&&x.row===r);return s&&skState(f,s,mine).st==="can";})?"":"disabled"}>อัปอัตโนมัติ · ${lines[li]}</button><span class="meta">ใส่ขึ้นชกได้ ${MAX_EQUIP} ท่า · ท่าติดตัวทำงานเองไม่ใช้ช่อง</span></div>`:""}</div>`;}
+/* v1.87: innate traits — two per girl, pick one */
+function traitHTML(f,mine){const L=TRAITS[f.id];if(!L)return "";const cur=traitOf(f);
+  return `<div class="trbox"><div class="trh"><b>จุดเด่นประจำตัว</b><span class="meta">${mine?"เลือกใช้ได้ทีละ 1 แบบ สลับได้ตลอด":"แบบที่เธอใช้อยู่ตอนนี้"}</span></div>
+   <div class="trgrid">${L.map(t=>{const on=cur===t.id;const extra=t.id==="grit"&&f.grit?` <span class="goldt">· สะสมแล้ว +${Math.round(f.grit*100)}%</span>`:"";
+     return `<div class="trc ${on?"on":""}"><b>${on?"✓ ":""}${t.name}</b><p>${t.desc}${extra}</p>${mine?(on?`<span class="trtag">กำลังใช้</span>`:`<button class="btn sm" data-act="trait" data-id="${f.id}" data-v="${t.id}">ใช้แบบนี้</button>`):""}</div>`;}).join("")}</div></div>`;}
 function skResetBtn(f){const n=skPointsSpent(f);if(!n)return "";const c=skResetCost(f);
   return `<button class="skrbtn" data-act="skresetask" data-id="${f.id}" ${c&&G.cash<c?"disabled":""} aria-label="รีเซ็ตสกิล คืน ${n} แต้ม" title="รีเซ็ตสกิล · คืน ${n} แต้ม · ${c?fmt(c):"ครั้งแรกฟรี"}">↺ รีเซ็ต</button>`;}
 function skResetRow(f){const n=skPointsSpent(f);if(!n)return "";const c=skResetCost(f);
@@ -844,6 +850,7 @@ const PATCH={id:"1.87.0",ver:"Muay Thai Moe v1.87.0",title:"อัปเดต�
  ["✦","เศษดาวเพิ่ม","ชนะไฟต์ได้เศษดาว 3 ชนะน็อกได้ 4"],
  ["↩","การ์ดที่เป็นเรื่องต่อกัน","ถ้ามีครบทั้งสองใบ หน้าการ์ดจะบอกว่าเรื่องต่อจากใบไหน แตะไปอ่านต่อได้เลย"],
  ["🏮","ตู้ลอยกระทงสีเขียว","ตู้ช่วงเทศกาลมีหน้าตาของตัวเอง ริมน้ำปิง"],
+ ["✦","จุดเด่นประจำตัว 2 แบบ","ทุกคนมีจุดเด่นติดตัว 2 แบบ เลือกสลับได้ในหน้าสกิล เช่น มะลิเคลื่อนไหวดั่งสายน้ำ รินคลังความรู้ ฟ้าแข็งอย่างหิน พลอยจังหวะเทพ"],
  ["🥊","ซ้อมแก้ทางได้ผลขึ้น","ซ้อมแก้ทางก่อนชก วันชกอาวุธหลักของคู่ชกจะโดนยากขึ้น และเราอ่านเกมเขาขาดกว่าเดิม ช่วยได้มากกับคู่ชกตัวท็อปปีหลัง ๆ"],
  ["📖","เนื้อเรื่องที่พลาดไป กลับมาแล้ว","ใครข้ามช่วงไพลินกับค่ายเวกเตอร์ หรือเรื่องปีที่สองของฟ้ากับพลอยไป เรื่องจะเริ่มให้ในปีที่เล่นอยู่ ไม่ต้องเริ่มเซฟใหม่"],
  ["📅","ปฏิทินรวมทั้งปี","ปฏิทินบอกว่าเป็นปีที่เท่าไหร่ มีวันเกิด เทศกาล และวันประกวดค่ายสวย แตะช่องเพื่อดูรายละเอียด"]],
@@ -1469,6 +1476,7 @@ const ACT={
   sksel:d=>{UI.skSel=d.id+":"+d.v;AU.sfx("ui");render();},
   newsok:()=>{G.newsSeen=PATCH.id;UI.modal=null;save();render();},
   closeModal:()=>{const m=UI.modal;if(m&&m.type==="contest"){ACT.contestdone();return;}if(m&&m.type==="whatsnew"&&G){G.newsSeen=PATCH.id;save();}UI.modal=null;render();if(m&&m.after)m.after();},
+  trait:d=>{const f=G.F[d.id],L=TRAITS[d.id];if(!f||!L||f.camp!=="player")return;const t=L.find(x=>x.id===d.v);if(!t)return;f.trait=t.id;save();render();toast(`${f.name}ใช้จุดเด่น "${t.name}"`);},
   gopen:d=>{GB.box=d.v==="loy"?"loy":"n";if(GB.box==="loy"&&!loyFest()){toast("ตู้ลอยกระทงปิดแล้ว ไว้เจอกันเทศกาลหน้า");return;}GB.st=null;GB.ps=[];UI.gq=false;UI.modal={type:"gbox"};render();gbPreload();},
   gpull:()=>{if(GB.st)return;const cost=gbCost();if((G.dust||0)<cost){AU.sfx("ui");toast(`เศษดาวไม่พอ ต้องใช้ ${cost}✦ · ได้จากชนะไฟต์ การ์ดใหม่ และย่อยใบซ้ำ`);return;}
     const r=GB.box==="loy"?loyPull(G):gachaPull(G);if(!r)return;save();const rr=CARDS[r.id].r;
