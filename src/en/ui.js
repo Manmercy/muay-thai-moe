@@ -1,5 +1,5 @@
 // ================= MUAY THAI MOE v1.3 — UI =================
-const VERSION="1.88.2";
+const VERSION="1.88.3";
 const CUR_LANG=(typeof window!=="undefined"&&window.LANG)||"th";
 const TH_LABEL=String.fromCharCode(3652,3607,3618);
 function langSwitch(cls){return `<div class="langsw ${cls||""}" role="group" aria-label="Language">${[["th",TH_LABEL],["en","EN"]].map(([k,l])=>`<button class="lsb ${CUR_LANG===k?"on":""}" data-act="setlang" data-v="${k}" aria-pressed="${CUR_LANG===k}">${l}</button>`).join("")}</div>`;}
@@ -901,21 +901,20 @@ function gboxHTML(){const loy=GB.box==="loy",s=GB.st,cost=gbCost(),ok=(G.dust||0
      <p>${loy?"This machine is only open during Loy Krathong. ":""} Cards you already own are kept as spares. Use them to level up the card or break them into stardust on the card page.</p>
      <button class="btn" data-act="gboxq">Close</button></div></div>`:""}
   </div>`;}
-const PATCH={id:"1.87.1",ver:"Muay Thai Moe v1.87.2",title:"News from Sirichai Camp",lead:"Everyone has a signature trait, counter-training works better, a new gacha machine, rivals have more to say, and the game opens faster.",items:[
- ["✦","Two innate traits per girl","Every girl has two innate traits to switch between on the skill page, like Mali's Move Like Water, Rin's Walking Library, Fah's Hard as Stone and Ploy's Godlike Timing"],
- ["🥊","Counter-training works better","Counter-train before a fight and on fight night the opponent's main weapon lands less often while you read their game better. It helps a lot against the top fighters in later years"],
- ["📖","Missed story arcs are back","If you skipped Pailin and Vector Gym, or Fah and Ploy's second-year stories, they now start in the year you're playing. No need for a new save"],
- ["🎰","Temple-fair gacha machine","Tap the machine to turn the crank and a capsule rolls out. Its colour is the card's real rarity, and SSRs get a special scene. Tap ? for drop rates and the guarantee. The Loy Krathong machine is green, down by the Ping River"],
- ["🌟","An SSR for everyone","Mali, Rin, Ploy and Fah each have their own SSR card in the gacha, with a long story, an epilogue, a special scene and their own minigame. Cards that continue each other's stories now link on the card page"],
- ["🎯","Easier guarantee, more stardust","The regular machine guarantees an SSR every 30 pulls and the Loy Krathong machine every 10, always one you don't own yet. A win now gives 3 stardust, a knockout 4"],
- ["📅","A calendar for the whole year","The calendar now shows which year you're in, plus birthdays, festivals and the camp beauty contest. Tap a week for details"],
- ["📊", "Opponent levels show real strength", "An opponent's level is read against our best fighter in her division: a clearly stronger one sits 2–3 levels above us. Her sheet says stronger, even or weaker than ours, and if she has improved, her level is higher next time you meet."],
- ["🖤", "Vector camp in black and purple", "Night and Vega now wear the camp's black-and-purple kit, and the Vector camp has its own post-fight lines, sneering at the country camp, until the contract story."],
- ["💬", "More post-fight lines", "Opponents say funny and serious things and remember your record: lose to us often and they grumble, beat us often and they tell you to go train. Ploy is a colder prodigy now, and no longer calls out Kati after fighting someone else."],
- ["⚡","The game opens faster","The game file is less than half its old size, loading a save shows a camp-prep screen with tips, and art stays on your device so the next visit opens instantly"],
- ["🏮","Loy Krathong gacha opens Nov 18","The Loy Krathong gacha and code LOYKRATHONG69 open together, Nov 18 – Dec 7"],
- ["🎴","Album keeps your place","View a card hint or open the gacha from the album and you come back to the same spot"]],
- foot:"Here's hoping you find a golden capsule ✦"};
+const PATCH={id:"1.88.3",ver:"Muay Thai Moe v1.88.3",title:"News from Sirichai Camp",lead:"Past heart Lv.10 the story now runs to ♥30, with 7 new date spots, drawn signature moves, new corner breaks and a theme for every year at camp.",items:[
+ ["💗","Past heart Lv.10, the story goes on","Everyone has special scenes at ♥12, 15, 20, 25 and 30, and the ♥30 ending changes if you're dating. It's all story: relationships don't change anyone's stats in the ring."],
+ ["🗺️","7 new date spots","They open with the heart level: night temple fair, sunset boat ride, Bang Saen, the rice fields, Khao Yai, Ayutthaya and Amphawa. Every heroine has her own scene at each one. Locked spots start showing from ♥Lv.10."],
+ ["💬","Over 120 new chats","Chats that unlock with the heart level, chats for the rainy, cool and hot seasons, and plenty of everyday small talk, so conversations won't repeat so soon."],
+ ["✨","Signature moves, now drawn","Kati's spinning elbow, Mali's three-height kicks, Rin's flying knee, Ploy's buffalo hooks and Fah's lightning punch. They fire on their own at big moments once unlocked, and when you use a Lv.14 / Lv.22 skill."],
+ ["🧺","New corner breaks","Stamina no longer refills by itself between rounds; the corner is where you earn it back, with the item puzzle, a 5-card pick or an oil massage. When she's badly hurt, Kru Daeng will ask whether to throw in the towel."],
+ ["🥊","All-in builds can win","Maxing power or kicks now clearly pays off, and heavy hitters can land one-punch knockouts. Opponents also check repeated kicks better, so a balanced build is still the steadiest path."],
+ ["✅","Keep this programme","A tick box in the training sheet repeats her programme for 4 weeks, with Kru Daeng's fight plan filled in. You can open it to change things or untick any time."],
+ ["🌧️","A theme every year","From year 2, each year brings something: a flood, a sponsor, PM2.5 haze, a tourist boom or a TV crew. Details are on the camp page and the calendar."],
+ ["🎫","Camp lottery with Kru Daeng","Three draws a year: Kru Daeng asks you to pick a ticket for 80 baht, and two weeks later Auntie Jan's letter brings the results."],
+ ["🎴","10 quirky new cards","Unlocked by odd moments in the ring, like a first-round KO, beating the same opponent five times, a losing streak, winning by a single point or a draw. See how many you can find."],
+ ["💰","The Gold Helmet's business card","Whenever camp cash drops below 8,000, a loan offer arrives in the mail. Borrow if you must, but Kru Daeng says try the odd jobs first."],
+ ["🩶","Fah's hair is silver","Lines that called Fah blonde now say silver, to match the real her."]],
+ foot:"Hope you get to see the ♥30 scene with your favourite ✦"};
 function maybeWhatsNew(){if(!G||G.ended||UI.scene)return;if(G.newsSeen===PATCH.id)return;UI.modal={type:"whatsnew"};}
 function whatsNewHTML(){return `<div class="wnew"><span class="pill gold">Update · ${esc(PATCH.ver)}</span><h2>🥊 ${esc(PATCH.title)}</h2><p class="lead">${esc(PATCH.lead)}</p>
   <div class="wnlist">${PATCH.items.map(([ic,t,b])=>`<details class="wnitem"><summary><span class="wnic">${ic}</span><b>${esc(t)}</b><i>▸</i></summary><p>${esc(b)}</p></details>`).join("")}</div><p class="meta wnhint">Tap a topic to read more</p>

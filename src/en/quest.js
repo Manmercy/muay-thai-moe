@@ -112,6 +112,7 @@ const LOAN_MAIL=[
  ["Gold Helmet's goon","Loan coupon (cut and keep)","Paper cut into a coupon, the edges jagged like it was done with nail clippers. \"Redeem for ฿20,000 cash, instantly. Never expires. The interest, however, goes up.\""]];
 const LOAN_COACH=["Not yet. Check the job letters and temple-fair fights first.","Grandpa Chai got this exact same card once.","If you really must, borrow. But pay it back fast. The interest grows faster than Kati did.","I kept it so you could see it. Not so you'd call.","Read the small print by the asterisk."];
 function mailWeekly(G){G.mail=G.mail||[];G.gang=G.gang||{st:0,next:0};G.mailSeen=G.mailSeen||{};const rng=mulberry32(G.seed+G.week*4441);
+  if(typeof lottoWeekly==="function")lottoWeekly(G);
   for(const m of G.mail)if(m.expAbs!=null&&gameWeek(G)>m.expAbs&&!m.done)m.expired=true;
   // v1.88: every time cash dips low, the helmet gang slips a gold card into the mailbox
   if(typeof loanOk==="function"){const low=loanOk(G);
@@ -222,6 +223,7 @@ function letterHTML(m){m.read=true;let act="";
   if(m.kind==="job")act=m.done?`<p class="meta center">${m.declined?"Didn't go":m.grade?`Helped out · grade ${m.grade}`:"Sent someone to help: ฿550"}</p>`:m.expired?`<p class="meta center">Expired</p>`:`<span class="mgtag">${JOY_PX}MINIGAME</span><button class="btn" data-act="mjdecl" data-v="${m.id}">Too busy</button><button class="btn" data-act="mjskip" data-v="${m.id}">Send someone (฿550)</button><button class="btn primary" data-act="mjplay" data-v="${m.id}">${JOY_PX} Help in person</button>`;
   if(m.kind==="event")act=evMailAct(m);
   if(m.kind==="loan")act=m.done?`<p class="meta center">${m.took?"Loan taken":"Card binned"}</p>`:!loanOk(G)?`<p class="meta center">${G.loan>0?"A Gold Helmet loan is still unpaid. You can't borrow again.":"Cash is out of the danger zone. No need for this card."}</p>`:`<button class="btn" data-act="mloanno" data-v="${m.id}">Bin the card</button><button class="btn red" data-act="mloan" data-v="${m.id}">See loan ${fmt(LOAN_AMT)}</button>`;
+  if(m.kind==="lotto")act=lottoLetterAct(m);
   if(m.kind==="quest")act=m.done?`<p class="meta center">${m.declined?"Declined":"Fighter sent"}</p>`:m.expired?`<p class="meta center">Expired</p>`:`<button class="btn" data-act="mdecl" data-v="${m.id}">Not going</button><button class="btn primary" data-act="macc" data-v="${m.id}">Take the job · choose a fighter</button>`;
   const opp=m.qk?QK[m.qk]:m.npc?G.F[m.npc]:null;
   return `<button class="btn sm ghost mback" data-act="mail">◂ Mailbox</button><div class="letter px"><div class="lhead"><small>From</small><b>${esc(m.from)}</b><small>Week ${m.wk}</small></div><h3>${esc(m.title)}</h3><p>${esc(m.body)}</p>
@@ -260,9 +262,9 @@ function repgraphHTML(){const r=G.rep,S=repSteps();const nx=S.find(([n])=>r<n),p
 /* v1.87: the calendar also shows birthdays, festivals and the camp beauty contest */
 function calEvents(w){const E=[],S=G.season||1;
   for(const id of ["kati","mali","rin","ploy","fah"]){const f=G.F[id];if(f&&(f.camp==="player"||f.met)&&typeof bdayWeek==="function"&&bdayWeek(id)===w)E.push({ic:"🎂",t:`Birthday: ${f.name}`});}
-  const FE={26:["🏮","Loy Krathong"],32:["🎆","New Year"],47:["💦","Songkran"]};if(FE[w])E.push({ic:FE[w][0],t:FE[w][1]});
+  const FE={26:["🏮","Loy Krathong"],32:["🎆","New Year"],47:["💦","Songkran"]};if(FE[w])E.push({ic:FE[w][0],t:FE[w][1]});if(typeof LOTTO_WK!=="undefined"&&LOTTO_WK.some(x=>x+2===w))E.push({ic:"🎟️",t:"Lottery results"});
   /* v1.88 yearly theme marks */const yk=typeof ytKey==="function"&&ytKey(G);if(yk){const T=YEAR_THEMES[yk];if(T.from!=null&&w>=T.from&&w<=T.to)E.push({ic:T.ic,t:T.name});
-    if(yk==="sponsor"&&G.yt.acc&&w===40)E.push({ic:"💼",t:"Sponsor deadline: 8 wins"});if(yk==="lotto"&&w===20)E.push({ic:"🎟️",t:"Uncle Wang's lottery draw"});}
+    if(yk==="sponsor"&&G.yt.acc&&w===40)E.push({ic:"💼",t:"Sponsor deadline: 8 wins"});}
   if(typeof CONTEST_WEEK!=="undefined"&&w===CONTEST_WEEK){const c=G.contests&&G.contests[S];E.push({ic:"🌸",t:c&&c.rank?`Camp beauty contest · placed #${c.rank}`:"Camp beauty contest: the District Chief inspects the camp"});}
   return E;}
 function calendarHTML(){const past={},next={};for(const c of G.cal||[])if(c.season===(G.season||1)||c.absWeek>=gameWeek(G)-G.week+1)(past[c.wk]=past[c.wk]||[]).push(c);for(const b of G.bookings)if(G.F[b.a]&&G.F[b.a].camp==="player")(next[b.week]=next[b.week]||[]).push(b);
@@ -1131,3 +1133,52 @@ const CARD_MAIN3={
 };
 Object.entries(CARD_LV3).forEach(([id,X])=>{const C=CARDS[id];if(!C)return;if(X.main&&!C.mainDone){C.steps=C.steps.concat(X.main);C.mainDone=1;}C.lv2=X.lv2;C.lv3=X.lv3;C.lv3t=X.lv3t;C.rev=Math.max(C.rev||0,1);});
 Object.entries(CARD_MAIN3).forEach(([id,L])=>{const C=CARDS[id];if(!C||C.mainDone3)return;C.steps=C.steps.concat(L);C.mainDone3=1;C.rev=Math.max(C.rev||0,1);}); // end batch 3
+
+// ===== v1.88 camp lottery — three draws a year; Coach Daeng asks the manager to pick one of six tickets, results come by mail two weeks later =====
+const LOTTO_WK=[10,24,38],LOTTO_COST=80,LOTTO_PRIZE={first:60000,last3:4000,last2:2000};
+const lottoSt=G=>{G.lotto=G.lotto||{draws:[]};return G.lotto;};
+const lottoDraw=(G,i)=>lottoSt(G).draws.find(d=>d.season===(G.season||1)&&d.i===i);
+function lottoTickets(G,i){const r=mulberry32((G.seed||1)*977+(G.season||1)*131+i*17+5);return Array.from({length:6},()=>String(Math.floor(r()*1e6)).padStart(6,"0"));}
+function lottoBuy(G,i,k){if(lottoDraw(G,i))return null;const nums=lottoTickets(G,i),pick=k==null?null:nums[k];if(pick)G.cash-=LOTTO_COST;
+  const d={season:G.season||1,i,wk:G.week,abs:gameWeek(G),pick,tk:k,res:null,done:false};const L=lottoSt(G);L.draws.push(d);L.draws=L.draws.slice(-12);L.ask=null;return d;}
+function lottoResult(G,d){const r=mulberry32((G.seed||1)*7919+d.season*313+d.i*29+1);const x=r(),out=x<.02?"first":x<.10?"last3":x<.30?"last2":"none";
+  const rn=n=>String(Math.floor(r()*Math.pow(10,n))).padStart(n,"0"),p=d.pick||"000000";let first=rn(6),l3=rn(3),l2=rn(2);
+  if(out==="first")first=p;else while(first===p)first=rn(6);
+  if(out==="last3")l3=p.slice(-3);else while(l3===p.slice(-3))l3=rn(3);
+  if(out==="last2")l2=p.slice(-2);else while(l2===p.slice(-2))l2=rn(2);
+  d.res={first,l3,l2,out,prize:LOTTO_PRIZE[out]||0};return d.res;}
+function lottoWeekly(G){const L=lottoSt(G);
+  if(L.ask!=null&&!LOTTO_WK.some((w,k)=>k===L.ask&&G.week>=w&&G.week<=w+2))L.ask=null;
+  for(const d of L.draws)if(d.pick&&!d.res&&gameWeek(G)>=d.abs+2){lottoResult(G,d);
+    addMail(G,{kind:"lotto",draw:d.season+"_"+d.i,from:"Auntie Jan, lottery stall by the market",title:"This draw's results are in!",body:"I've checked them for you. Hold your ticket up against these and see!"});}}
+const LOTTO_COL=[["#f6c9d4","#b8536f"],["#cde9c9","#3f8a4f"],["#cfe0f6","#3c6fb0"],["#f6e3b4","#b07a1c"],["#e3d1f2","#7a4fb0"],["#f3d2b8","#b0603c"]];
+const LOTTO_DIG={0:"111101101101111",1:"010110010010111",2:"111001111100111",3:"111001111001111",4:"101101111001001",5:"111100111001111",6:"111100111101111",7:"111001001010010",8:"111101111101111",9:"111101111001111"};
+const _ltk={};
+function lottoTicketURL(num,ci,hl){const key=num+"|"+ci+"|"+(hl||0);if(_ltk[key])return _ltk[key];const S=3,W=96,H=46,c=document.createElement("canvas");c.width=W*S;c.height=H*S;const x=c.getContext("2d");
+  const P=(a,b,w,h,col)=>{x.fillStyle=col;x.fillRect(a*S,b*S,w*S,h*S);};const [bg,ink]=LOTTO_COL[ci%6];
+  P(0,0,W,H,ink);P(1,1,W-2,H-2,bg);for(let y=3;y<H-2;y+=4)P(1,y,2,2,"#ffffff");P(4,4,W-8,9,ink);P(5,5,W-10,7,bg);
+  x.fillStyle=ink;x.font=`700 ${6*S}px "IBM Plex Sans Thai","Chakra Petch",sans-serif`;x.textBaseline="middle";x.fillText("Fair ticket",8*S,8.7*S);x.textAlign="right";x.fillText("฿80",(W-7)*S,8.7*S);
+  /* a little pixel elephant in the corner */const el=["0110000","1111110","1111111","1111101","1101100","1001000"];el.forEach((row,yy)=>[...row].forEach((v,xx)=>{if(v==="1")P(80+xx,30+yy,1,1,ink);}));
+  const dg=String(num).split(""),dw=3*2,gap=3,tot=dg.length*dw+(dg.length-1)*gap,x0=Math.round((W-tot)/2)-4;
+  dg.forEach((d,k)=>{const on=hl&&k>=6-hl;const m=LOTTO_DIG[d];const ox=x0+k*(dw+gap);if(on)P(ox-1,17,dw+2,13,"#f2c94c");for(let r=0;r<5;r++)for(let cc=0;cc<3;cc++)if(m[r*3+cc]==="1")P(ox+cc*2,18+r*2,2,2,on?"#2a1d2e":ink);});
+  P(4,H-6,40,1,ink);P(4,H-4,26,1,ink);_ltk[key]=c.toDataURL();return _ltk[key];}
+function lottoPickHTML(i){const N=lottoTickets(G,i);return `<h2>Pick a number for Coach · Draw ${i+1}</h2><p class="meta">Pick 1 ticket, ฿80 each. Results arrive by mail in 2 weeks.</p>
+  <div class="ltgrid">${N.map((n,k)=>`<button class="ltk" data-act="lottobuy" data-v="${k}" aria-label="Ticket ${n}" ${G.cash<LOTTO_COST?"disabled":""}><img src="${lottoTicketURL(n,k)}" alt=""></button>`).join("")}</div>
+  <div class="mfoot"><button class="btn ghost" data-act="lottoskip">Skip this draw</button></div>`;}
+function lottoLetterAct(m){const [s,i]=String(m.draw).split("_").map(Number),d=lottoSt(G).draws.find(x=>x.season===s&&x.i===i);if(!d||!d.res)return "";const R=d.res,hl=R.out==="first"?6:R.out==="last3"?3:R.out==="last2"?2:0;
+  return `<div class="ltres"><div><small>First prize</small><b class="num">${R.first}</b></div><div><small>Last 3 digits</small><b class="num">${R.l3}</b></div><div><small>Last 2 digits</small><b class="num">${R.l2}</b></div></div>
+  <div class="ltmine"><small>Your ticket</small><img src="${lottoTicketURL(d.pick,d.tk||0,hl)}" alt="${d.pick}"></div>
+  ${d.done?`<p class="meta center">${R.prize?"Cashed in "+fmt(R.prize):"Torn up"}</p>`:R.prize?`<p class="lamt take">+${fmt(R.prize)}</p><button class="btn primary" data-act="lottoclaim" data-v="${m.id}">Cash it in ${fmt(R.prize)}</button>`:`<p class="meta center">Not a single prize…</p><button class="btn" data-act="lottoclaim" data-v="${m.id}">Tear it up</button>`}`;}
+const LOTTO_COACH={first:["All six digits!? Manager… we can buy a new ring next year! …Can I get one new pair of sandals?"],
+  last3:["Three straight! Four thousand, enough for a new pair of gloves. The rest goes on next draw's tickets… kidding."],
+  last2:["Last two digits! Twenty-five times our money. Told you it came from my dream… I dreamed about stewed pork leg."],
+  none:["Not one digit… I think the numbers are shy around you. Next time I pick.","Eighty baht. Call it a donation to the state. The camp's paid its taxes this year.","So close! Only six digits off…","At least the ticket's good for wrapping fried bananas."]};
+function lottoPending(G){if(!G||G.ended)return null;const L=G.lotto;if(L&&L.ask!=null&&!lottoDraw(G,L.ask))return {type:"lotto",i:L.ask};const m=(G.mail||[]).find(x=>x.kind==="lotto"&&!x.read);return m?{type:"letter",id:m.id}:null;}
+XMODAL.lotto=m=>({body:lottoPickHTML(m.i),foot:false});
+Object.assign(ACT,{
+  lottobuy:d=>{const L=lottoSt(G),i=L.ask;if(i==null||G.cash<LOTTO_COST)return;const dd=lottoBuy(G,i,+d.v);AU.sfx("level");UI.modal=null;save();render();toast(`Bought ticket ${dd.pick} · results in 2 weeks`);},
+  lottoskip:()=>{const L=lottoSt(G),i=L.ask;if(i!=null)lottoBuy(G,i,null);UI.modal=null;save();render();},
+  lottoclaim:d=>{const m=(G.mail||[]).find(x=>x.id===d.v);if(!m)return;const [s,i]=String(m.draw).split("_").map(Number),dd=lottoSt(G).draws.find(x=>x.season===s&&x.i===i);if(!dd||!dd.res||dd.done)return;
+    dd.done=true;m.done=true;if(dd.res.prize){G.cash+=dd.res.prize;AU.sfx("level");}else AU.sfx("miss");save();const Ls=LOTTO_COACH[dd.res.out],line=Ls[(dd.i+dd.season)%Ls.length];
+    UI.modal=null;render();playScene([{n:"coach",t:line}],()=>{render();},{bg:"camp",look:"casual"});}
+});

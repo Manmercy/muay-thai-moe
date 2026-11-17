@@ -1200,8 +1200,7 @@ const YEAR_THEMES={
  sponsor:{ic:"💼",name:"Sponsor year",desc:"If you take the deal: ฿2,000 every week until week 40, plus a ฿20,000 bonus if the camp wins 8 fights by week 40."},
  pm25:{ic:"😷",name:"PM2.5 haze year",desc:"Weeks 37–46 haze covers Chiang Mai and training is less effective (conditioning most of all). A filtered indoor gym lets you train fully.",from:37,to:46},
  tourist:{ic:"🧳",name:"Tourist boom year",desc:"Class fees +20% all year, but the camp is busy and fighters get a little more tired each week."},
- tv:{ic:"📺",name:"TV year",desc:"A TV crew follows the camp all year: wins earn more fame, losses cost a little."},
- lotto:{ic:"🎟️",name:"Lottery year",desc:"The old man next door hits the lottery: a donation arrives around week 20."}};
+ tv:{ic:"📺",name:"TV year",desc:"A TV crew follows the camp all year: wins earn more fame, losses cost a little."}};
 const ytKey=G=>G&&G.yt&&G.yt.season===(G.season||1)?G.yt.k:null;
 const ytIn=(G,k)=>{if(ytKey(G)!==k)return false;const T=YEAR_THEMES[k];return T.from==null||(G.week>=T.from&&G.week<=T.to);};
 function pickYearTheme(G){const S=G.season||1;if(S<2)return null;const last=G.yt&&G.yt.k;const keys=Object.keys(YEAR_THEMES).filter(k=>k!==last);
@@ -4021,9 +4020,13 @@ EVENTS.push(
 {id:"yt_intro_pm25",annual:true,pri:2,look:"casual",bg:"camp",when:G=>ytKey(G)==="pm25"&&G.week>=1,steps:[{"n": "nar", "t": "Early-year news says the dry-season fires will be bad. The haze will come early."},{"n": "coach", "t": "From around week 37 to 46 the haze will cover the city and outdoor training won't do much. An indoor gym with air filters would fix it, if we can afford it. It isn't cheap."},{n:"nar",t:"😷 PM2.5 year: weeks 37–46 training is less effective. The filtered indoor gym is in Manage camp."}]},
 {id:"yt_pm_start",annual:true,pri:2,look:"casual",bg:"camp",when:G=>ytIn(G,"pm25"),steps:[{"n": "nar", "t": "This morning Doi Suthep has vanished. The sky is a murky orange and everyone trains in masks."},{"n": "kati", "f": "pout", "l": "casual", "t": "Breathing feels like eating burnt rice…"},{n:"coach",t:G=>G.fac.airgym?"Lucky we built the filtered gym. Move inside and train as usual.":"Train light for now. If you want to help the neighbours, hand out masks as this week's camp activity."}]},
 {id:"yt_intro_tourist",annual:true,pri:2,look:"casual",bg:"market",when:G=>ytKey(G)==="tourist"&&G.week>=1,steps:[{"n": "nar", "t": "A new direct flight opens and the city fills with tourists. Every day someone is taking photos at the camp gate."},{"n": "coach", "t": "We can charge 20% more for classes this year, but the camp will be hectic and the girls a little more tired each week."},{"n": "kati", "f": "happy", "l": "casual", "t": "I need to practise my 'how are you' again."}]},
-{id:"yt_intro_tv",annual:true,pri:2,look:"casual",bg:"camp",when:G=>ytKey(G)==="tv"&&G.week>=1,steps:[{"n": "nar", "t": "The crew of 'Fight Camp Life' wants to film all year. The cameras follow everyone, even Coach Daeng at lunch."},{"n": "coach", "t": "Win on TV and people know you. Lose on TV and they know you too. Careful."},{"n": "kati", "f": "flustered", "l": "casual", "t": "Can I put on some make-up first…?"},{n:"nar",t:"📺 TV year: wins earn more fame, losses cost a little."}]},
-{id:"yt_intro_lotto",annual:true,pri:2,look:"casual",bg:"camp",when:G=>ytKey(G)==="lotto"&&G.week>=1,steps:[{"n": "nar", "t": "Uncle Wang from next door shows up with a lottery paper. Last night he dreamed Kati won in three rounds."},{"n": "npc", "who": "Uncle Wang", "t": "This year I'm betting Sirichai's numbers every draw. If I win, the camp gets a share, I promise!"}]},
-{id:"yt_lotto",annual:true,pri:3,look:"casual",bg:"camp",when:G=>ytKey(G)==="lotto"&&G.week>=20&&G.week<=24,steps:[{fx:G=>{G.cash+=30000;}},{"n": "nar", "t": "Uncle Wang runs into the camp wearing one sandal, waving a ticket."},{"n": "npc", "who": "Uncle Wang", "t": "I won! Three straight digits! The camp's opening date! Thirty thousand for the camp."},{"n": "coach", "t": "You really don't have to, uncle…"},{"n": "npc", "who": "Uncle Wang", "t": "I do! I promised. A man keeps his word."},{n:"nar",t:"Donation received: ฿30,000"}]});
+{id:"yt_intro_tv",annual:true,pri:2,look:"casual",bg:"camp",when:G=>ytKey(G)==="tv"&&G.week>=1,steps:[{"n": "nar", "t": "The crew of 'Fight Camp Life' wants to film all year. The cameras follow everyone, even Coach Daeng at lunch."},{"n": "coach", "t": "Win on TV and people know you. Lose on TV and they know you too. Careful."},{"n": "kati", "f": "flustered", "l": "casual", "t": "Can I put on some make-up first…?"},{n:"nar",t:"📺 TV year: wins earn more fame, losses cost a little."}]});
+
+/* v1.88 camp lottery — Coach Daeng asks for a number three times a year (the ticket picker opens right after) */
+EVENTS.push(
+{id:"lotto_ask_0",annual:true,pri:1,look:"casual",bg:"camp",when:G=>G.week>=LOTTO_WK[0]&&G.week<=LOTTO_WK[0]+2&&!lottoDraw(G,0),steps:[{n:"coach",t:"Manager, help me pick a number this draw. I've picked my own for thirty years and only won once, the year I got drafted."},{fx:G=>{lottoSt(G).ask=0;}}]},
+{id:"lotto_ask_1",annual:true,pri:1,look:"casual",bg:"camp",when:G=>G.week>=LOTTO_WK[1]&&G.week<=LOTTO_WK[1]+2&&!lottoDraw(G,1),steps:[{n:"coach",t:"I went to pray at the old tree behind the temple. The tree spirit gave me no numbers, only mosquitoes… You pick for me."},{fx:G=>{lottoSt(G).ask=1;}}]},
+{id:"lotto_ask_2",annual:true,pri:1,look:"casual",bg:"camp",when:G=>G.week>=LOTTO_WK[2]&&G.week<=LOTTO_WK[2]+2&&!lottoDraw(G,2),steps:[{n:"coach",t:"Last draw of the year. The girls chipped in twenty baht each and want you to pick. If it loses, they'll blame you, not me."},{fx:G=>{lottoSt(G).ask=2;}}]});
 
 // ================= MUAY THAI MOE v1.2 — PIXEL SYSTEMS =================
 const ASSET="a/";
@@ -4908,7 +4911,7 @@ AU.gsfx=function(kind,a){if(!this.init()||this.muted||!SETTINGS.sfx)return;const
   if(kind==="shimmer")for(let i=0;i<6;i++)T(i*.05,{f:1400+Math.random()*1400,type:"sine",dur:.12,peak:.06});};
 
 // ================= MUAY THAI MOE v1.3 — UI =================
-const VERSION="1.88.2";
+const VERSION="1.88.3";
 const CUR_LANG=(typeof window!=="undefined"&&window.LANG)||"th";
 const TH_LABEL=String.fromCharCode(3652,3607,3618);
 function langSwitch(cls){return `<div class="langsw ${cls||""}" role="group" aria-label="Language">${[["th",TH_LABEL],["en","EN"]].map(([k,l])=>`<button class="lsb ${CUR_LANG===k?"on":""}" data-act="setlang" data-v="${k}" aria-pressed="${CUR_LANG===k}">${l}</button>`).join("")}</div>`;}
@@ -5077,6 +5080,7 @@ function render(){
   else if(UI.ending)h=endingHTML();
   else h=`<div class="shell">${hubHTML()}</div>`;
   if(G&&UI.petName!=null&&!UI.scene&&!UI.fight){if(UI.modal&&UI.modal.type!=="petname")UI.modalQ=UI.modal;UI.modal={type:"petname",i:UI.petName};UI.petName=null;} /* v1.80: naming comes first, whatever else is waiting */
+  if(G&&!UI.ending&&!UI.modal&&!UI.scene&&!UI.fight&&!UI.montage&&typeof lottoPending==="function"){const L=lottoPending(G);if(L)UI.modal=L;} /* v1.88 lottery */
   if(UI.modal)h+=modalHTML();
   if(G&&UI.montage)h+=montageHTML();
   if(G&&UI.fight)h+=fightHTML();
@@ -5209,7 +5213,6 @@ function ytInfoHTML(){const k=ytKey(G);if(!k)return "";const T=YEAR_THEMES[k];le
   if(k==="sponsor")st=G.yt.acc?(G.week<=40?`Won ${ytSponsorWins(G)}/8 fights · ฿2,000 every week until week 40`:`This year: ${ytSponsorWins(G)} fights before the deadline`):"You turned the sponsor down this year";
   if(k==="pm25")st=G.fac.airgym?"The filtered gym is built: full training":`Filtered indoor gym ${fmt(FACILITIES.airgym.cost[0])} · see Manage camp`;
   if(k==="flood")st=ytIn(G,"flood")?"The camp is still flooded":G.week<T.from?`The flood should arrive around week ${T.from}`:"The water has gone down";
-  if(k==="lotto")st=G.week>=20?"Uncle Wang already donated ฿30,000":"Uncle Wang is chasing the lottery until week 20";
   return `<h2>${T.ic} ${esc(T.name)}</h2><p class="lead">${esc(T.desc)}</p>${st?`<p class="meta goldt">${esc(st)}</p>`:""}<p class="meta">A new yearly theme is drawn at the start of every year.</p>`;}
 function weekTodo(){const R=roster(G),todo=[];if(R.some(f=>!f.injury&&!trLocked(f)))todo.push("Some training programs aren't confirmed yet");if(!G.campUsed)todo.push("No camp activity chosen yet");
   if(G.offers.length&&!G.bookings.some(b=>G.F[b.a].camp==="player"))todo.push("No fights scheduled yet");return todo;}
@@ -5810,21 +5813,20 @@ function gboxHTML(){const loy=GB.box==="loy",s=GB.st,cost=gbCost(),ok=(G.dust||0
      <p>${loy?"This machine is only open during Loy Krathong. ":""} Cards you already own are kept as spares. Use them to level up the card or break them into stardust on the card page.</p>
      <button class="btn" data-act="gboxq">Close</button></div></div>`:""}
   </div>`;}
-const PATCH={id:"1.87.1",ver:"Muay Thai Moe v1.87.2",title:"News from Sirichai Camp",lead:"Everyone has a signature trait, counter-training works better, a new gacha machine, rivals have more to say, and the game opens faster.",items:[
- ["✦","Two innate traits per girl","Every girl has two innate traits to switch between on the skill page, like Mali's Move Like Water, Rin's Walking Library, Fah's Hard as Stone and Ploy's Godlike Timing"],
- ["🥊","Counter-training works better","Counter-train before a fight and on fight night the opponent's main weapon lands less often while you read their game better. It helps a lot against the top fighters in later years"],
- ["📖","Missed story arcs are back","If you skipped Pailin and Vector Gym, or Fah and Ploy's second-year stories, they now start in the year you're playing. No need for a new save"],
- ["🎰","Temple-fair gacha machine","Tap the machine to turn the crank and a capsule rolls out. Its colour is the card's real rarity, and SSRs get a special scene. Tap ? for drop rates and the guarantee. The Loy Krathong machine is green, down by the Ping River"],
- ["🌟","An SSR for everyone","Mali, Rin, Ploy and Fah each have their own SSR card in the gacha, with a long story, an epilogue, a special scene and their own minigame. Cards that continue each other's stories now link on the card page"],
- ["🎯","Easier guarantee, more stardust","The regular machine guarantees an SSR every 30 pulls and the Loy Krathong machine every 10, always one you don't own yet. A win now gives 3 stardust, a knockout 4"],
- ["📅","A calendar for the whole year","The calendar now shows which year you're in, plus birthdays, festivals and the camp beauty contest. Tap a week for details"],
- ["📊", "Opponent levels show real strength", "An opponent's level is read against our best fighter in her division: a clearly stronger one sits 2–3 levels above us. Her sheet says stronger, even or weaker than ours, and if she has improved, her level is higher next time you meet."],
- ["🖤", "Vector camp in black and purple", "Night and Vega now wear the camp's black-and-purple kit, and the Vector camp has its own post-fight lines, sneering at the country camp, until the contract story."],
- ["💬", "More post-fight lines", "Opponents say funny and serious things and remember your record: lose to us often and they grumble, beat us often and they tell you to go train. Ploy is a colder prodigy now, and no longer calls out Kati after fighting someone else."],
- ["⚡","The game opens faster","The game file is less than half its old size, loading a save shows a camp-prep screen with tips, and art stays on your device so the next visit opens instantly"],
- ["🏮","Loy Krathong gacha opens Nov 18","The Loy Krathong gacha and code LOYKRATHONG69 open together, Nov 18 – Dec 7"],
- ["🎴","Album keeps your place","View a card hint or open the gacha from the album and you come back to the same spot"]],
- foot:"Here's hoping you find a golden capsule ✦"};
+const PATCH={id:"1.88.3",ver:"Muay Thai Moe v1.88.3",title:"News from Sirichai Camp",lead:"Past heart Lv.10 the story now runs to ♥30, with 7 new date spots, drawn signature moves, new corner breaks and a theme for every year at camp.",items:[
+ ["💗","Past heart Lv.10, the story goes on","Everyone has special scenes at ♥12, 15, 20, 25 and 30, and the ♥30 ending changes if you're dating. It's all story: relationships don't change anyone's stats in the ring."],
+ ["🗺️","7 new date spots","They open with the heart level: night temple fair, sunset boat ride, Bang Saen, the rice fields, Khao Yai, Ayutthaya and Amphawa. Every heroine has her own scene at each one. Locked spots start showing from ♥Lv.10."],
+ ["💬","Over 120 new chats","Chats that unlock with the heart level, chats for the rainy, cool and hot seasons, and plenty of everyday small talk, so conversations won't repeat so soon."],
+ ["✨","Signature moves, now drawn","Kati's spinning elbow, Mali's three-height kicks, Rin's flying knee, Ploy's buffalo hooks and Fah's lightning punch. They fire on their own at big moments once unlocked, and when you use a Lv.14 / Lv.22 skill."],
+ ["🧺","New corner breaks","Stamina no longer refills by itself between rounds; the corner is where you earn it back, with the item puzzle, a 5-card pick or an oil massage. When she's badly hurt, Kru Daeng will ask whether to throw in the towel."],
+ ["🥊","All-in builds can win","Maxing power or kicks now clearly pays off, and heavy hitters can land one-punch knockouts. Opponents also check repeated kicks better, so a balanced build is still the steadiest path."],
+ ["✅","Keep this programme","A tick box in the training sheet repeats her programme for 4 weeks, with Kru Daeng's fight plan filled in. You can open it to change things or untick any time."],
+ ["🌧️","A theme every year","From year 2, each year brings something: a flood, a sponsor, PM2.5 haze, a tourist boom or a TV crew. Details are on the camp page and the calendar."],
+ ["🎫","Camp lottery with Kru Daeng","Three draws a year: Kru Daeng asks you to pick a ticket for 80 baht, and two weeks later Auntie Jan's letter brings the results."],
+ ["🎴","10 quirky new cards","Unlocked by odd moments in the ring, like a first-round KO, beating the same opponent five times, a losing streak, winning by a single point or a draw. See how many you can find."],
+ ["💰","The Gold Helmet's business card","Whenever camp cash drops below 8,000, a loan offer arrives in the mail. Borrow if you must, but Kru Daeng says try the odd jobs first."],
+ ["🩶","Fah's hair is silver","Lines that called Fah blonde now say silver, to match the real her."]],
+ foot:"Hope you get to see the ♥30 scene with your favourite ✦"};
 function maybeWhatsNew(){if(!G||G.ended||UI.scene)return;if(G.newsSeen===PATCH.id)return;UI.modal={type:"whatsnew"};}
 function whatsNewHTML(){return `<div class="wnew"><span class="pill gold">Update · ${esc(PATCH.ver)}</span><h2>🥊 ${esc(PATCH.title)}</h2><p class="lead">${esc(PATCH.lead)}</p>
   <div class="wnlist">${PATCH.items.map(([ic,t,b])=>`<details class="wnitem"><summary><span class="wnic">${ic}</span><b>${esc(t)}</b><i>▸</i></summary><p>${esc(b)}</p></details>`).join("")}</div><p class="meta wnhint">Tap a topic to read more</p>
@@ -6490,7 +6492,7 @@ const ACT={
     if(n){AU.sfx("level");save();toast(`Up ${(SK_LINES[f.id]||[])[li]||""} ${n} times`);}render();},
   sksel:d=>{UI.skSel=d.id+":"+d.v;AU.sfx("ui");render();},
   newsok:()=>{G.newsSeen=PATCH.id;UI.modal=null;save();render();},
-  closeModal:()=>{const m=UI.modal;if(m&&m.back==="album"&&G){ACT.album();return;}if(m&&m.type==="contest"){ACT.contestdone();return;}if(m&&m.type==="whatsnew"&&G){G.newsSeen=PATCH.id;save();}UI.modal=null;render();if(m&&m.after)m.after();},
+  closeModal:()=>{const m=UI.modal;if(m&&m.type==="lotto"&&typeof ACT.lottoskip==="function"){ACT.lottoskip();return;} /* closing the ticket sheet skips the draw */if(m&&m.back==="album"&&G){ACT.album();return;}if(m&&m.type==="contest"){ACT.contestdone();return;}if(m&&m.type==="whatsnew"&&G){G.newsSeen=PATCH.id;save();}UI.modal=null;render();if(m&&m.after)m.after();},
   trait:d=>{const f=G.F[d.id],L=TRAITS[d.id];if(!f||!L||f.camp!=="player")return;const t=L.find(x=>x.id===d.v);if(!t||traitOf(f)===t.id)return;f.trait=t.id;save();render();toast(`${f.name} now uses the trait "${t.name}"`);},
   gopen:d=>{GB.box=d.v==="loy"?"loy":"n";if(GB.box==="loy"&&!loyFest()){toast(loySoon()?"The Loy Krathong gacha opens Nov 18 at 00:00":"The Loy Krathong machine is closed. See you next festival!");return;}const fromAlb=UI.modal&&UI.modal.type==="album";if(fromAlb)albKeep();GB.st=null;GB.ps=[];UI.gq=false;UI.modal={type:"gbox",back:fromAlb?"album":null};render();gbPreload();},
   gpull:()=>{if(GB.st)return;const cost=gbCost();if((G.dust||0)<cost){AU.sfx("ui");toast(`Not enough stardust. You need ${cost}✦ · earn it by winning fights, getting new cards and breaking down spares`);return;}
@@ -6744,6 +6746,7 @@ const LOAN_MAIL=[
  ["Gold Helmet's goon","Loan coupon (cut and keep)","Paper cut into a coupon, the edges jagged like it was done with nail clippers. \"Redeem for ฿20,000 cash, instantly. Never expires. The interest, however, goes up.\""]];
 const LOAN_COACH=["Not yet. Check the job letters and temple-fair fights first.","Grandpa Chai got this exact same card once.","If you really must, borrow. But pay it back fast. The interest grows faster than Kati did.","I kept it so you could see it. Not so you'd call.","Read the small print by the asterisk."];
 function mailWeekly(G){G.mail=G.mail||[];G.gang=G.gang||{st:0,next:0};G.mailSeen=G.mailSeen||{};const rng=mulberry32(G.seed+G.week*4441);
+  if(typeof lottoWeekly==="function")lottoWeekly(G);
   for(const m of G.mail)if(m.expAbs!=null&&gameWeek(G)>m.expAbs&&!m.done)m.expired=true;
   // v1.88: every time cash dips low, the helmet gang slips a gold card into the mailbox
   if(typeof loanOk==="function"){const low=loanOk(G);
@@ -6854,6 +6857,7 @@ function letterHTML(m){m.read=true;let act="";
   if(m.kind==="job")act=m.done?`<p class="meta center">${m.declined?"Didn't go":m.grade?`Helped out · grade ${m.grade}`:"Sent someone to help: ฿550"}</p>`:m.expired?`<p class="meta center">Expired</p>`:`<span class="mgtag">${JOY_PX}MINIGAME</span><button class="btn" data-act="mjdecl" data-v="${m.id}">Too busy</button><button class="btn" data-act="mjskip" data-v="${m.id}">Send someone (฿550)</button><button class="btn primary" data-act="mjplay" data-v="${m.id}">${JOY_PX} Help in person</button>`;
   if(m.kind==="event")act=evMailAct(m);
   if(m.kind==="loan")act=m.done?`<p class="meta center">${m.took?"Loan taken":"Card binned"}</p>`:!loanOk(G)?`<p class="meta center">${G.loan>0?"A Gold Helmet loan is still unpaid. You can't borrow again.":"Cash is out of the danger zone. No need for this card."}</p>`:`<button class="btn" data-act="mloanno" data-v="${m.id}">Bin the card</button><button class="btn red" data-act="mloan" data-v="${m.id}">See loan ${fmt(LOAN_AMT)}</button>`;
+  if(m.kind==="lotto")act=lottoLetterAct(m);
   if(m.kind==="quest")act=m.done?`<p class="meta center">${m.declined?"Declined":"Fighter sent"}</p>`:m.expired?`<p class="meta center">Expired</p>`:`<button class="btn" data-act="mdecl" data-v="${m.id}">Not going</button><button class="btn primary" data-act="macc" data-v="${m.id}">Take the job · choose a fighter</button>`;
   const opp=m.qk?QK[m.qk]:m.npc?G.F[m.npc]:null;
   return `<button class="btn sm ghost mback" data-act="mail">◂ Mailbox</button><div class="letter px"><div class="lhead"><small>From</small><b>${esc(m.from)}</b><small>Week ${m.wk}</small></div><h3>${esc(m.title)}</h3><p>${esc(m.body)}</p>
@@ -6892,9 +6896,9 @@ function repgraphHTML(){const r=G.rep,S=repSteps();const nx=S.find(([n])=>r<n),p
 /* v1.87: the calendar also shows birthdays, festivals and the camp beauty contest */
 function calEvents(w){const E=[],S=G.season||1;
   for(const id of ["kati","mali","rin","ploy","fah"]){const f=G.F[id];if(f&&(f.camp==="player"||f.met)&&typeof bdayWeek==="function"&&bdayWeek(id)===w)E.push({ic:"🎂",t:`Birthday: ${f.name}`});}
-  const FE={26:["🏮","Loy Krathong"],32:["🎆","New Year"],47:["💦","Songkran"]};if(FE[w])E.push({ic:FE[w][0],t:FE[w][1]});
+  const FE={26:["🏮","Loy Krathong"],32:["🎆","New Year"],47:["💦","Songkran"]};if(FE[w])E.push({ic:FE[w][0],t:FE[w][1]});if(typeof LOTTO_WK!=="undefined"&&LOTTO_WK.some(x=>x+2===w))E.push({ic:"🎟️",t:"Lottery results"});
   /* v1.88 yearly theme marks */const yk=typeof ytKey==="function"&&ytKey(G);if(yk){const T=YEAR_THEMES[yk];if(T.from!=null&&w>=T.from&&w<=T.to)E.push({ic:T.ic,t:T.name});
-    if(yk==="sponsor"&&G.yt.acc&&w===40)E.push({ic:"💼",t:"Sponsor deadline: 8 wins"});if(yk==="lotto"&&w===20)E.push({ic:"🎟️",t:"Uncle Wang's lottery draw"});}
+    if(yk==="sponsor"&&G.yt.acc&&w===40)E.push({ic:"💼",t:"Sponsor deadline: 8 wins"});}
   if(typeof CONTEST_WEEK!=="undefined"&&w===CONTEST_WEEK){const c=G.contests&&G.contests[S];E.push({ic:"🌸",t:c&&c.rank?`Camp beauty contest · placed #${c.rank}`:"Camp beauty contest: the District Chief inspects the camp"});}
   return E;}
 function calendarHTML(){const past={},next={};for(const c of G.cal||[])if(c.season===(G.season||1)||c.absWeek>=gameWeek(G)-G.week+1)(past[c.wk]=past[c.wk]||[]).push(c);for(const b of G.bookings)if(G.F[b.a]&&G.F[b.a].camp==="player")(next[b.week]=next[b.week]||[]).push(b);
@@ -7763,6 +7767,55 @@ const CARD_MAIN3={
 };
 Object.entries(CARD_LV3).forEach(([id,X])=>{const C=CARDS[id];if(!C)return;if(X.main&&!C.mainDone){C.steps=C.steps.concat(X.main);C.mainDone=1;}C.lv2=X.lv2;C.lv3=X.lv3;C.lv3t=X.lv3t;C.rev=Math.max(C.rev||0,1);});
 Object.entries(CARD_MAIN3).forEach(([id,L])=>{const C=CARDS[id];if(!C||C.mainDone3)return;C.steps=C.steps.concat(L);C.mainDone3=1;C.rev=Math.max(C.rev||0,1);}); // end batch 3
+
+// ===== v1.88 camp lottery — three draws a year; Coach Daeng asks the manager to pick one of six tickets, results come by mail two weeks later =====
+const LOTTO_WK=[10,24,38],LOTTO_COST=80,LOTTO_PRIZE={first:60000,last3:4000,last2:2000};
+const lottoSt=G=>{G.lotto=G.lotto||{draws:[]};return G.lotto;};
+const lottoDraw=(G,i)=>lottoSt(G).draws.find(d=>d.season===(G.season||1)&&d.i===i);
+function lottoTickets(G,i){const r=mulberry32((G.seed||1)*977+(G.season||1)*131+i*17+5);return Array.from({length:6},()=>String(Math.floor(r()*1e6)).padStart(6,"0"));}
+function lottoBuy(G,i,k){if(lottoDraw(G,i))return null;const nums=lottoTickets(G,i),pick=k==null?null:nums[k];if(pick)G.cash-=LOTTO_COST;
+  const d={season:G.season||1,i,wk:G.week,abs:gameWeek(G),pick,tk:k,res:null,done:false};const L=lottoSt(G);L.draws.push(d);L.draws=L.draws.slice(-12);L.ask=null;return d;}
+function lottoResult(G,d){const r=mulberry32((G.seed||1)*7919+d.season*313+d.i*29+1);const x=r(),out=x<.02?"first":x<.10?"last3":x<.30?"last2":"none";
+  const rn=n=>String(Math.floor(r()*Math.pow(10,n))).padStart(n,"0"),p=d.pick||"000000";let first=rn(6),l3=rn(3),l2=rn(2);
+  if(out==="first")first=p;else while(first===p)first=rn(6);
+  if(out==="last3")l3=p.slice(-3);else while(l3===p.slice(-3))l3=rn(3);
+  if(out==="last2")l2=p.slice(-2);else while(l2===p.slice(-2))l2=rn(2);
+  d.res={first,l3,l2,out,prize:LOTTO_PRIZE[out]||0};return d.res;}
+function lottoWeekly(G){const L=lottoSt(G);
+  if(L.ask!=null&&!LOTTO_WK.some((w,k)=>k===L.ask&&G.week>=w&&G.week<=w+2))L.ask=null;
+  for(const d of L.draws)if(d.pick&&!d.res&&gameWeek(G)>=d.abs+2){lottoResult(G,d);
+    addMail(G,{kind:"lotto",draw:d.season+"_"+d.i,from:"Auntie Jan, lottery stall by the market",title:"This draw's results are in!",body:"I've checked them for you. Hold your ticket up against these and see!"});}}
+const LOTTO_COL=[["#f6c9d4","#b8536f"],["#cde9c9","#3f8a4f"],["#cfe0f6","#3c6fb0"],["#f6e3b4","#b07a1c"],["#e3d1f2","#7a4fb0"],["#f3d2b8","#b0603c"]];
+const LOTTO_DIG={0:"111101101101111",1:"010110010010111",2:"111001111100111",3:"111001111001111",4:"101101111001001",5:"111100111001111",6:"111100111101111",7:"111001001010010",8:"111101111101111",9:"111101111001111"};
+const _ltk={};
+function lottoTicketURL(num,ci,hl){const key=num+"|"+ci+"|"+(hl||0);if(_ltk[key])return _ltk[key];const S=3,W=96,H=46,c=document.createElement("canvas");c.width=W*S;c.height=H*S;const x=c.getContext("2d");
+  const P=(a,b,w,h,col)=>{x.fillStyle=col;x.fillRect(a*S,b*S,w*S,h*S);};const [bg,ink]=LOTTO_COL[ci%6];
+  P(0,0,W,H,ink);P(1,1,W-2,H-2,bg);for(let y=3;y<H-2;y+=4)P(1,y,2,2,"#ffffff");P(4,4,W-8,9,ink);P(5,5,W-10,7,bg);
+  x.fillStyle=ink;x.font=`700 ${6*S}px "IBM Plex Sans Thai","Chakra Petch",sans-serif`;x.textBaseline="middle";x.fillText("Fair ticket",8*S,8.7*S);x.textAlign="right";x.fillText("฿80",(W-7)*S,8.7*S);
+  /* a little pixel elephant in the corner */const el=["0110000","1111110","1111111","1111101","1101100","1001000"];el.forEach((row,yy)=>[...row].forEach((v,xx)=>{if(v==="1")P(80+xx,30+yy,1,1,ink);}));
+  const dg=String(num).split(""),dw=3*2,gap=3,tot=dg.length*dw+(dg.length-1)*gap,x0=Math.round((W-tot)/2)-4;
+  dg.forEach((d,k)=>{const on=hl&&k>=6-hl;const m=LOTTO_DIG[d];const ox=x0+k*(dw+gap);if(on)P(ox-1,17,dw+2,13,"#f2c94c");for(let r=0;r<5;r++)for(let cc=0;cc<3;cc++)if(m[r*3+cc]==="1")P(ox+cc*2,18+r*2,2,2,on?"#2a1d2e":ink);});
+  P(4,H-6,40,1,ink);P(4,H-4,26,1,ink);_ltk[key]=c.toDataURL();return _ltk[key];}
+function lottoPickHTML(i){const N=lottoTickets(G,i);return `<h2>Pick a number for Coach · Draw ${i+1}</h2><p class="meta">Pick 1 ticket, ฿80 each. Results arrive by mail in 2 weeks.</p>
+  <div class="ltgrid">${N.map((n,k)=>`<button class="ltk" data-act="lottobuy" data-v="${k}" aria-label="Ticket ${n}" ${G.cash<LOTTO_COST?"disabled":""}><img src="${lottoTicketURL(n,k)}" alt=""></button>`).join("")}</div>
+  <div class="mfoot"><button class="btn ghost" data-act="lottoskip">Skip this draw</button></div>`;}
+function lottoLetterAct(m){const [s,i]=String(m.draw).split("_").map(Number),d=lottoSt(G).draws.find(x=>x.season===s&&x.i===i);if(!d||!d.res)return "";const R=d.res,hl=R.out==="first"?6:R.out==="last3"?3:R.out==="last2"?2:0;
+  return `<div class="ltres"><div><small>First prize</small><b class="num">${R.first}</b></div><div><small>Last 3 digits</small><b class="num">${R.l3}</b></div><div><small>Last 2 digits</small><b class="num">${R.l2}</b></div></div>
+  <div class="ltmine"><small>Your ticket</small><img src="${lottoTicketURL(d.pick,d.tk||0,hl)}" alt="${d.pick}"></div>
+  ${d.done?`<p class="meta center">${R.prize?"Cashed in "+fmt(R.prize):"Torn up"}</p>`:R.prize?`<p class="lamt take">+${fmt(R.prize)}</p><button class="btn primary" data-act="lottoclaim" data-v="${m.id}">Cash it in ${fmt(R.prize)}</button>`:`<p class="meta center">Not a single prize…</p><button class="btn" data-act="lottoclaim" data-v="${m.id}">Tear it up</button>`}`;}
+const LOTTO_COACH={first:["All six digits!? Manager… we can buy a new ring next year! …Can I get one new pair of sandals?"],
+  last3:["Three straight! Four thousand, enough for a new pair of gloves. The rest goes on next draw's tickets… kidding."],
+  last2:["Last two digits! Twenty-five times our money. Told you it came from my dream… I dreamed about stewed pork leg."],
+  none:["Not one digit… I think the numbers are shy around you. Next time I pick.","Eighty baht. Call it a donation to the state. The camp's paid its taxes this year.","So close! Only six digits off…","At least the ticket's good for wrapping fried bananas."]};
+function lottoPending(G){if(!G||G.ended)return null;const L=G.lotto;if(L&&L.ask!=null&&!lottoDraw(G,L.ask))return {type:"lotto",i:L.ask};const m=(G.mail||[]).find(x=>x.kind==="lotto"&&!x.read);return m?{type:"letter",id:m.id}:null;}
+XMODAL.lotto=m=>({body:lottoPickHTML(m.i),foot:false});
+Object.assign(ACT,{
+  lottobuy:d=>{const L=lottoSt(G),i=L.ask;if(i==null||G.cash<LOTTO_COST)return;const dd=lottoBuy(G,i,+d.v);AU.sfx("level");UI.modal=null;save();render();toast(`Bought ticket ${dd.pick} · results in 2 weeks`);},
+  lottoskip:()=>{const L=lottoSt(G),i=L.ask;if(i!=null)lottoBuy(G,i,null);UI.modal=null;save();render();},
+  lottoclaim:d=>{const m=(G.mail||[]).find(x=>x.id===d.v);if(!m)return;const [s,i]=String(m.draw).split("_").map(Number),dd=lottoSt(G).draws.find(x=>x.season===s&&x.i===i);if(!dd||!dd.res||dd.done)return;
+    dd.done=true;m.done=true;if(dd.res.prize){G.cash+=dd.res.prize;AU.sfx("level");}else AU.sfx("miss");save();const Ls=LOTTO_COACH[dd.res.out],line=Ls[(dd.i+dd.season)%Ls.length];
+    UI.modal=null;render();playScene([{n:"coach",t:line}],()=>{render();},{bg:"camp",look:"casual"});}
+});
 
 // ================= MUAY THAI MOE v1.24 — PIXEL CHAT (one chat per character per week) =================
 // each exchange: [their line, [[my reply, score 0-2, their answer], ...]] — score 2 = what she loves to hear, 0 = falls flat (never negative)
