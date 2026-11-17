@@ -287,6 +287,15 @@ function newsItems(){const N=[...(G.lvNews||[]).slice(0,1)],st=standings(G,"A").
   if(typeof bdayWeek==="function")for(const id of ["kati","mali","rin","ploy","fah"]){const f=G.F[id];if(!f||!(f.camp==="player"||f.met))continue;const d=bdayWeek(id)-G.week;if(d>=0&&d<=2)N.unshift(d===0?`🎂 สัปดาห์นี้วันเกิด${f.name}!`:`🎂 อีก ${d} สัปดาห์ วันเกิด${f.name}`);}
   N.push(["ราคาน้ำมันมวยปรับขึ้น 5 บาท แม่ค้าบอก 'ช่วงนี้ขายดี'","สนามมวยอำเภอติดแอร์ใหม่ คนดูไม่ต้องพัดวีแล้ว","ครูมวยโคราชวัย 80 ยังสอนหมัดเหวี่ยงควายทุกเช้า","มวยหญิงได้รับความนิยมขึ้น ผู้ชมเพิ่มเกือบเท่าตัว","ชาวต่างชาติแห่เรียนมวยไทยช่วงไฮซีซัน"][G.week%5]);
   return N;}
+/* v1.88 yearly theme chip on the camp page; tap for what it means this year */
+function ytChipHTML(){const k=typeof ytKey==="function"&&ytKey(G);if(!k)return "";const T=YEAR_THEMES[k];const on=T.from==null||ytIn(G,k);
+  return `<button class="ytchip ${on?"on":""}" data-act="ytinfo"><span>${T.ic}</span><b>${T.name}</b><small>${T.from!=null?(on?"ตอนนี้":`สด.${T.from}–${T.to}`):k==="sponsor"&&!G.yt.acc?"ไม่ได้รับข้อเสนอ":"ทั้งปี"}</small><i>▸</i></button>`;}
+function ytInfoHTML(){const k=ytKey(G);if(!k)return "";const T=YEAR_THEMES[k];let st="";
+  if(k==="sponsor")st=G.yt.acc?(G.week<=40?`ชนะแล้ว ${ytSponsorWins(G)}/8 ไฟต์ · ได้ ฿2,000 ทุกสัปดาห์ถึงสัปดาห์ 40`:`ปีนี้ชนะ ${ytSponsorWins(G)} ไฟต์ก่อนตัดยอด`):"ปีนี้ไม่ได้รับข้อเสนอสปอนเซอร์";
+  if(k==="pm25")st=G.fac.airgym?"มีห้องซ้อมกรองฝุ่นแล้ว ซ้อมได้เต็มที่":`ห้องซ้อมในร่มกรองฝุ่น ${fmt(FACILITIES.airgym.cost[0])} · ดูได้ที่หน้าจัดการค่าย`;
+  if(k==="flood")st=ytIn(G,"flood")?"ตอนนี้น้ำยังท่วมค่ายอยู่":G.week<T.from?`น้ำจะมาราวสัปดาห์ ${T.from}`:"น้ำลดแล้ว";
+  if(k==="lotto")st=G.week>=20?"ลุงหวังบริจาคแล้ว ฿30,000":"รอลุงหวังลุ้นหวยถึงสัปดาห์ 20";
+  return `<h2>${T.ic} ${esc(T.name)}</h2><p class="lead">${esc(T.desc)}</p>${st?`<p class="meta goldt">${esc(st)}</p>`:""}<p class="meta">ธีมประจำปีจะสุ่มใหม่ทุกต้นปี</p>`;}
 function weekTodo(){const R=roster(G),todo=[];if(R.some(f=>!f.injury&&!trLocked(f)))todo.push("ยังไม่ได้ยืนยันโปรแกรมฝึกบางคน");if(!G.campUsed)todo.push("ยังไม่ได้เลือกกิจกรรมค่าย");
   if(G.offers.length&&!G.bookings.some(b=>G.F[b.a].camp==="player"))todo.push("ยังไม่มีไฟต์ในตาราง");return todo;}
 // v1.15: what reputation actually does, and what it unlocks next
@@ -395,7 +404,7 @@ function homeHTML(){const R=roster(G);
     ${goalHidden()?`<button class="goal ov mini" data-act="goaltog" aria-label="แสดงเป้าหมาย">เป้าหมาย ▾</button>`:`<button class="goal ov" data-act="goaltog" aria-label="ซ่อนเป้าหมาย">${goalText()}<span class="gx">▴ ซ่อน</span></button>`}</div>
     ${G.campUsed?`<button class="campact done" data-act="campacts"><span class="ci">✓</span><span><small>กิจกรรมค่ายสัปดาห์นี้</small><b>${esc(CAMP_ACTIONS[G.campUsed].name)}</b></span></button>`
       :`<button class="campact" data-act="campacts"><span class="ci"></span><span><small>กิจกรรมค่ายสัปดาห์นี้ · ยังไม่ได้เลือก</small><b>เลือกกิจกรรมค่าย</b></span><span class="chev">▸</span></button>`}
-    ${petsRowHTML()}
+    ${ytChipHTML()}${petsRowHTML()}
     <div class="camp-info"><button class="cinfo" data-act="tab" data-v="camp"><small>ระดับค่าย</small><b>Lv.${lv} ${CAMP_LV_NAME[lv]}</b></button><button class="cinfo" data-act="studinfo"><small>นักเรียน</small><b>${students(G)}/${studentCap(G)} คน</b></button></div></section>
    <div class="side">${guide}<div class="fgrid">${R.map(fighterChip).join("")}</div></div></div>`;}
 function fighterMini(f){const c=condition(f);const nb=nextBooking(f);
@@ -821,7 +830,7 @@ function considerHTML(o){const me=G.F[o.a],op=G.F[o.b];const A=adviseCached(o.a,
 function actNear(a){let s=0;if(a.rep)s+=Math.max(0,a.rep-G.rep)*2;if(a.week)s+=Math.max(0,a.week-G.week);if(a.fac)s+=20;if(a.lv)s+=15;return s;}
 function campActsHTML(){const pk=UI.modal.pick;if(pk){const a=CAMP_ACTIONS[pk];return `<h2>ยืนยันกิจกรรม?</h2><div class="px confirm"><b>${a.name}</b><p class="meta">${a.desc}${a.cost?` · ค่าใช้จ่าย ${fmt(a.cost)}`:""}</p><p class="meta">ทำได้สัปดาห์ละ 1 อย่าง</p>${a.mg?`<p class="meta">เล่นมินิเกมเองได้ผลตามฝีมือ · หรือข้ามแล้วรับผลกลาง ๆ: ${a.skip}</p>`:""}</div><div class="mfoot"><button class="btn ghost" data-act="campback">ย้อนกลับ</button>${a.mg?`<button class="btn" data-act="campok">ข้าม (ผลกลาง ๆ)</button><button class="btn primary" data-act="campmg">${JOY_PX}เล่นเอง</button>`:`<button class="btn primary" data-act="campok">ยืนยัน</button>`}</div>`;}
   // v1.23: locked activities stay hidden except the next one to open, so the list stays short
-  const all=Object.entries(CAMP_ACTIONS).filter(([k,a])=>!a.hidden),open=all.filter(([k,a])=>!campActLocked(G,a)),lockd=all.filter(([k,a])=>campActLocked(G,a));
+  const all=Object.entries(CAMP_ACTIONS).filter(([k,a])=>!a.hidden&&!(a.yt&&!ytIn(G,a.yt))),open=all.filter(([k,a])=>!campActLocked(G,a)),lockd=all.filter(([k,a])=>campActLocked(G,a));
   const nx=lockd.sort((x,y)=>actNear(x[1])-actNear(y[1]))[0];
   return `<h2>กิจกรรมค่ายสัปดาห์นี้</h2><p class="meta">เลือกได้ 1 อย่างต่อสัปดาห์${lockd.length>1?` · ยังมีอีก ${lockd.length-1} กิจกรรมที่ซ่อนอยู่`:""}</p><div class="acts">${[...open,...(nx?[nx]:[])].map(([k,a])=>{const lock=campActLocked(G,a);return `<button class="actbtn ${lock?"lockd":""} ${a.mg?"mg":""}" data-act="campick" data-v="${k}" ${lock||G.campUsed||G.cash<a.cost?"disabled":""}>${a.mg?`<span class="mgtag">${JOY_PX}MINIGAME</span>`:""}<b>${a.name}</b><small>${lock?`ปลดล็อก: ${lock}`:a.desc+(a.cost?` · ${fmt(a.cost)}`:"")}</small></button>`;}).join("")}</div>`;}
 function studInfoHTML(){const n=students(G),cap=studentCap(G),d=studentDemand(G),fee=studentFee(G);
@@ -960,6 +969,7 @@ function modalHTML(){const m=UI.modal;let body="",foot=true;
      <div class="kv-row"><span>ค่าเซ็น</span><b class="num">${fmt(f.fee)}</b></div><div class="kv-row"><span>ค่าจ้าง</span><b class="num">${fmt(f.wage)}/สัปดาห์</b></div><div class="kv-row"><span>สุทธิต่อสัปดาห์หลังเซ็น</span><b class="num ${net<0?"neg":"pos"}">${fmt(net)}</b></div>
      <div class="mfoot"><button class="btn ghost" data-act="closeModal">รอก่อน</button><button class="btn primary" data-act="sign" data-v="${f.id}" data-ok="1">เซ็นเลย</button></div>`;}
   if(m.type==="levelup"){body=`<h2 class="lvup">LEVEL UP!</h2>${m.ids.map(id=>{const f=G.F[id];return `<div class="lvrow"><div class="l">${faceImg(f,"sm")}<b>${esc(f.name)} Lv.${f.lvl}</b></div>${coachOn()&&f.sp>0&&!hasTree(f.id)?`<p class="hinttxt"><img src="${faceSrc("coach")}" alt=""><span>${skillTip(f)}</span></p>`:""}${skillGrid(f,true)}</div>`;}).join("")}`;}
+  if(m.type==="ytinfo"){body=ytInfoHTML();foot=true;}
   if(typeof XMODAL!=="undefined"&&XMODAL[m.type]){const r=XMODAL[m.type](m);body=r.body;foot=r.foot;}
   return `<div class="overlay" data-act="closeModalBg"><div class="px modal pxscroll m-${m.type}${m.type==="fighter"?" fpm t-"+(UI.ptab||"over"):""}" data-sk="modal-${m.type}" role="dialog" aria-modal="true"><button class="xbtn" data-act="closeModal" aria-label="ปิด">✕</button>${body}
     ${foot?`<div class="mfoot"><button class="btn primary" data-act="closeModal">${m.type==="report"||m.type==="levelup"?"ไปต่อ ▸":"ปิด"}</button></div>`:""}</div></div>`;}
@@ -1042,9 +1052,9 @@ function tutorialHTML(){const T=G.tut||{};const items=[["train","ตั้งโ
 function goalText(){const st=stageOf(G.week),me=roster(G);const best=d=>{const rows=standings(G,d);const i=rows.findIndex(r=>r.f.camp==="player");return i<0?null:{i:i+1,f:rows[i].f};};
   const a=best("A");
   if(st==="local")return `🎯 ท็อป 4 ตำบล ก่อน สด.20${a?` · ${a.f.name} (อันดับ ${a.i})`:""}`;
-  if(st==="district"){const inQ=[...G.qual.A,...G.qual.B].some(id=>G.F[id]&&G.F[id].camp==="player");return inQ?`🎯 ท็อป 4 อำเภอ ก่อน สด.40 ไปรองชิงจังหวัด${a?` · ${a.f.name} (อันดับ ${a.i})`:""}`:"เป้าหมาย: ปีนี้พลาดรอบอำเภอ สร้างค่ายให้แกร่งและเก็บเงินรอฤดูกาลหน้า";}
-  if(st==="final"&&G.week<=44&&[...((G.semis||{}).A||[]),...((G.semis||{}).B||[])].some(id=>G.F[id]&&G.F[id].camp==="player")&&!G.finalists.A.concat(G.finalists.B).some(id=>G.F[id]&&G.F[id].camp==="player"))return "เป้าหมาย: ชนะรอบรองชิงจังหวัด สัปดาห์ 44";
-  if(st==="final"){const inF=[...G.finalists.A,...G.finalists.B].some(id=>G.F[id]&&G.F[id].camp==="player");return inF?"เป้าหมาย: ชิงแชมป์จังหวัด สัปดาห์ 49 ห้ายก":"เป้าหมาย: ดูแลค่ายจนจบฤดูกาล";}
+  if(st==="district"){const inQ=[...G.qual.A,...G.qual.B].some(id=>G.F[id]&&G.F[id].camp==="player");return inQ?`🎯 ท็อป 4 อำเภอ ก่อน สด.40 ไปรองชิงจังหวัด${a?` · ${a.f.name} (อันดับ ${a.i})`:""}`:"🎯 พลาดรอบอำเภอปีนี้ · สร้างค่ายรอปีหน้า";}
+  if(st==="final"&&G.week<=44&&[...((G.semis||{}).A||[]),...((G.semis||{}).B||[])].some(id=>G.F[id]&&G.F[id].camp==="player")&&!G.finalists.A.concat(G.finalists.B).some(id=>G.F[id]&&G.F[id].camp==="player"))return "🎯 ชนะรองชิงจังหวัด สด.44";
+  if(st==="final"){const inF=[...G.finalists.A,...G.finalists.B].some(id=>G.F[id]&&G.F[id].camp==="player");return inF?"🎯 ชิงแชมป์จังหวัด สด.49 ห้ายก":"🎯 ดูแลค่ายจนจบฤดูกาล";}
   return "ปิดปี · เตรียมตัวสำหรับปีหน้า";}
 
 // ---------- events / extras ----------
@@ -1532,6 +1542,7 @@ const ACT={
   gok:()=>{GB.st=null;GB.ps=[];render();},
   gboxq:()=>{UI.gq=!UI.gq;render();},
   closeModalBg:(d,e)=>{if(e.target.classList.contains("overlay")&&UI.modal&&!["report","levelup","contest"].includes(UI.modal.type)){UI.modal=null;render();}},
+  ytinfo:()=>{UI.modal={type:"ytinfo"};render();},
   autotr:d=>{const f=G.F[d.id];if(!f||f.camp!=="player")return;if(autoOn(f)){delete f.autoTr;for(const b of G.bookings)if(b.a===f.id&&b.autoPlan){b.planSet=false;delete b.autoPlan;}}else{f.autoTr=gameWeek(G)+3;autoPlans();}AU.sfx("ui");save();render();},
   preset:d=>{if(handLocked(G.F[d.f]))return;const f=G.F[d.f];f.plan.preset=d.v;if(d.v==="rest")f.plan.intensity="normal";save();render();},
   intensity:d=>{if(handLocked(G.F[d.f]))return;G.F[d.f].plan.intensity=d.v;save();render();},
