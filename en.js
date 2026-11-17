@@ -4804,6 +4804,12 @@ const PIX={
   thumb:pxIcon(["....kk....","...kssk...","...kssk...","..kkssk...",".kssssskk.",".ksssssssk",".ksssssssk",".ksssssssk","..kssssskk","...kkkkk.."],{k:"#3a2412",s:"#f7d24a"}),
   flag:pxIcon(["k.........","kwwwwww...","kwwwwwww..","kwwwwww...","kwwwwwww..","k.........","k.........","k.........","k.........","kk........"],{k:"#3a3550",w:"#f4f1ea"}),
   coach:pxIcon(["..gggggg..",".gggggggg.",".gsssssss.",".skssskss.",".sssssssss".slice(0,10),".ssgggsss.","..sgggss..","..rwwwwr..",".rrwwwwrr.",".rrrrrrrr."],{g:"#cfd3da",s:"#e2a978",k:"#2a1a10",r:"#c8283c",w:"#ffffff"})};
+/* v1.88 corner games — pixel icons */
+Object.assign(PIX,{
+  cback:pxIcon([".kkkkkkkk.","kppppppppk","kpykppykpk","kppppppppk","kpkyppkypk","kppppppppk","kpykppykpk","kppppppppk","kpkyppkypk",".kkkkkkkk."],{k:"#2a1d40",p:"#5a3b8a",y:"#e7b443"}),
+  star:pxIcon(["....kk....","....ky....","...kyyk...","kkkyyyykkk","kyyywyyyyk",".kyywyyyk.","..kyyyyk..",".kyykkyyk.",".kyk..kyk.",".kk....kk."],{k:"#5a3a10",y:"#f7d24a",w:"#fff6c8"}),
+  cramp:pxIcon(["......kk..",".....krk..","....krrk..","...krrk...","..krrrrrk.","..kkkrrk..","...krrk...","..krrk....","..krk.....","..kk......"],{k:"#4a1020",r:"#ff5a4a"}),
+  oilhand:pxIcon(["..kkkkk...",".kssssskk.",".kssssssk.","kksssssssk","kssssssssk","ksssyysssk",".kssyysssk",".ksssssk..","..kkkkkk..",".........."],{k:"#3a2412",s:"#e8b088",y:"#f2c94c"})});
 /* v1.87: pixel icons for the innate traits */
 const TRAIT_PX={grit:pxIcon(["....k.......", "...kok......", "...koyk..k..", "..koyyk.kok.", "..koyyokoyk.", ".koyywyooyk.", ".koyywwyoyk.", "koyyywwyyok.", "koyyywwyyok.", ".koyyyyyyok.", "..kooooook..", "...kkkkkk..."],{"k": "#4a1020", "o": "#e8432e", "y": "#ffb02e", "w": "#fff2b0"}),surge:pxIcon(["......kkkk..", ".....kyyyk..", "....kyyyk...", "...kyyyk....", "..kyyyyyyk..", "..kkkkyyyk..", "....kyyyk...", "...kyyyk....", "..kyyyk.....", "..kyyk......", "..kyk.......", "..kk........"],{"k": "#4a1020", "y": "#ffd34a"}),flow:pxIcon(["......k.....", ".....kbk....", ".....kbk....", "....kbbbk...", "...kbwbbbk..", "ll.kbwbbbk..", "..kbwbbbbbk.", "l.kbbbbbbbk.", "..kbbbbbbdk.", "...kbbbbdk..", "....kkkkk...", "............"],{"k": "#16324f", "b": "#4aa8ff", "w": "#d8f0ff", "d": "#2a6fc4", "l": "#4aa8ff"}),wits:pxIcon(["....kkkk....", "...kyyyyk...", "..kywwyyyk..", "..kywyyyyk..", "..kyyyyyyk..", "..kyyyyyyk..", "...kyyyyk...", "....kyyk....", "....kggk....", "....kggk....", ".....kk.....", "............"],{"k": "#16324f", "y": "#ffe27a", "w": "#ffffff", "g": "#8fa3c8"}),eye:pxIcon(["............", "............", "...kkkkkk...", "..kwwwwwwk..", ".kwwkggkwwk.", "kwwkgkkgkwwk", "kwwkgkkgkwwk", ".kwwkggkwwk.", "..kwwwwwwk..", "...kkkkkk...", "............", "............"],{"k": "#123a22", "w": "#e8fff0", "g": "#3fd17a"}),lib:pxIcon(["............", ".kkkk..kkkk.", "kwwwwkkwwwwk", "kwggwkkwggwk", "kwwwwkkwwwwk", "kwggwkkwggwk", "kwwwwkkwwwwk", "kwggwkkwggwk", "kwwwwkkwwwwk", ".kkkkggkkkk.", "....kkkk....", "............"],{"k": "#123a22", "w": "#e8fff0", "g": "#3fd17a"}),fury:pxIcon(["............", ".kkk...kkk..", "krrrk.krrrk.", "krwrrkrrrrrk", "krwrrkrrrrrk", "krrrrk.krrrk", ".krrrk.krrk.", "..krrk.krk..", "...krkkrk...", "....krrk....", ".....kk.....", "............"],{"k": "#4a1020", "r": "#ff4d6d", "w": "#ffd0da"}),rock:pxIcon(["............", "....kkkk....", "..kkggwgkk..", ".kgggwggggk.", ".kgggggggdk.", "kggggggggddk", "kgggdgggggdk", "kggggggggddk", ".kgggggdddk.", "..kkdddddk..", "....kkkkk...", "............"],{"k": "#2a2630", "g": "#9a94a8", "w": "#e8e4f0", "d": "#6a6478"}),talent:pxIcon([".....kk.....", ".....kyk....", "....kyyk....", "kkkkkyyykkkk", "kyyyyywyyyyk", ".kyyyywyyyk.", "..kyyyyyyk..", "..kyyyyyyk..", ".kyyykkyyyk.", ".kyyk..kyyk.", ".kkk....kkk.", "............"],{"k": "#3a1450", "y": "#c98aff", "w": "#ffffff"}),tempo:pxIcon(["......kkk...", "......kppk..", "......kpppk.", "......kkppk.", "......k..kk.", "......k.....", "..kkkkk.....", ".kpppppk....", "kpwppppk....", "kpppppk.....", ".kkkkk......", "............"],{"k": "#3a1450", "p": "#c98aff", "w": "#ffffff"})};
 const coachOn=()=>SETTINGS.coach&&!(G&&G.coachAwayAbs&&gameWeek(G)<G.coachAwayAbs);
@@ -6001,11 +6007,34 @@ function liveStats(){const U=UI.fight,F=U.F;if(!F)return "";let la=0,lb=0;
   const ctl=la+lb?Math.round(la/(la+lb)*100):50;
   return `<div class="live px"><span>Landed <b class="num">${la}</b> – <b class="num">${lb}</b></span><span class="ctlbar" style="--v:${ctl}%"><i></i></span><span>Control <b class="num">${ctl}%</b></span><span>Opp. legs ${F.B.legs>25?"Very heavy":F.B.legs>12?"Getting heavy":"Normal"}</span></div>`;}
 // v1.10 corner: tiny care puzzle + pick an order, then confirm
-const CARD_FACE={1.4:["🌟","Full recovery!","Fresher than before, lots of energy back"],1:["💧","Normal recovery","A good breather"],"-0.3":["😵","Cramp!","Tight legs, a little less energy"]};
-function careCardHTML(A,C){return `<div class="care cmode"><div class="need"><img class="face sm" src="${faceSrc(A.f.id,"happy")}" alt=""><span>${C.done?esc(CARD_FACE[String(C.q)][1]+" · "+CARD_FACE[String(C.q)][2]):"Draw a card for her recovery, pick 1"}</span></div>
-  <div class="ccards">${C.deck.map((q,i)=>{const open=C.done,me=C.flip===i,F=CARD_FACE[String(q)];return `<button class="ccard ${open?"open":""} ${me?"mine":""} ${q<0?"bad":q>1?"good":""}" data-act="ccard" data-v="${i}" ${C.done?"disabled":""}>${open?`<b>${F[0]}</b><small>${esc(F[1])}</small>`:`<i></i>`}</button>`;}).join("")}</div></div>`;}
-function careOilHTML(A,C){const p=Math.min(100,Math.round(C.taps/20*100));return `<div class="care cmode"><div class="need"><img class="face sm" src="${faceSrc(A.f.id,"happy")}" alt=""><span>${C.done?(C.q>=1?"Feels light as air!":C.q>=.5?"Much looser":"Too slow, only a little recovery"):C.t0?"Faster! Rub before time runs out":"Pour the boxing oil and tap fast for 3 seconds"}</span></div>
-  <div class="oil"><i class="oilbar" style="--v:${p}%"><s></s></i><button class="btn oilbtn" data-act="coil" ${C.done?"disabled":""}>${C.done?`Massaged ${C.taps} times`:"🫙 Massage!"}</button></div></div>`;}
+const CARD_FACE={1.4:["star","Full recovery!"],1:["water","Normal recovery"],.6:["thumb","Passable"],"-0.3":["cramp","Cramp!"]};
+const careSum=C=>C.gain?`HP ${C.gain.hp>=0?"+":""}${C.gain.hp} · ${C.gain.sta?`stamina ${C.gain.sta>0?"+":""}${C.gain.sta}`:C.q>0?"stamina already full":"no stamina back"}`:"";
+/* five cards: shown face up, flipped, shuffled around, then the player picks one */
+function careCardHTML(A,C){const ph=C.phase;const msg=C.done?`${esc(CARD_FACE[String(C.q)][1])} · ${careSum(C)}`:ph==="show"?"Remember the cards…":ph==="pick"?"Pick 1 card":"Shuffling…";
+  return `<div class="care"><div class="need"><img class="face sm" src="${faceSrc(A.f.id,"happy")}" alt=""><span>${msg}</span></div>
+  <div class="cshuf ${ph==="shuffle"?"spin":""}">${C.deck.map((q,k)=>{const F=CARD_FACE[String(q)],up=ph==="show"||C.done,mine=C.flip===k;
+    return `<button class="cshc ${up?"up":""} ${mine?"picked":""} ${C.done&&!mine?"dim":""}" data-k="${k}" data-act="ccard" data-v="${k}" style="left:${C.pos[k]*20}%" ${ph!=="pick"||C.done?"disabled":""}><span class="cb">${PIX.cback}</span><span class="cf">${PIX[F[0]]}<small>${esc(F[1])}</small></span></button>`;}).join("")}</div></div>`;}
+function cardSeq(C){const live=()=>UI.fight&&UI.fight.care===C;const q=s=>document.querySelector(s);
+  setTimeout(()=>{if(!live())return;C.phase="hide";document.querySelectorAll(".cshc").forEach(e=>e.classList.remove("up"));const m=q(".care .need span");if(m)m.textContent="Shuffling…";AU.sfx("ui");
+    setTimeout(()=>{if(!live())return;C.phase="shuffle";const box=q(".cshuf");if(box)box.classList.add("spin");let n=0;
+      const swap=()=>{if(!live())return;if(n++>=7){C.phase="pick";render();return;}let a=Math.floor(Math.random()*5),b=(a+1+Math.floor(Math.random()*4))%5;
+        const ka=C.pos.indexOf(a),kb=C.pos.indexOf(b);C.pos[ka]=b;C.pos[kb]=a;for(const k of [ka,kb]){const e=q(`.cshc[data-k="${k}"]`);if(e)e.style.left=(C.pos[k]*20)+"%";}AU.sfx("miss");setTimeout(swap,240);};swap();},450);},1400);}
+function careOilHTML(A,C){const left=C.done?0:C.t0?Math.max(0,Math.ceil(C.secs-(performance.now()-C.t0)/1000)):C.secs;
+  return `<div class="care"><div class="need"><img class="face sm" src="${faceSrc(A.f.id,"happy")}" alt=""><span>${C.done?`Massaged ${C.taps} strokes · ${careSum(C)}`:"Pour on the boxing oil, then drag back and forth fast"}</span><div class="cslots"><span class="cslot oilcombo"><b class="num">${C.taps}</b></span><span class="cslot oiltime"><b class="num">${left}</b><small>s</small></span></div></div>
+  <div class="oiltrack ${C.done?"done":""}" data-oil="1"><i class="oilend l"></i><i class="oilend r"></i><button class="oilknob" aria-label="Drag back and forth to massage" ${C.done?"disabled":""}>${PIX.oilhand}</button></div></div>`;}
+/* apply a corner result and remember how much it gave back, for the summary line */
+function careApply(U,C){const A=U.F.A,s0=A.sta,h0=A.hp;applyCare(U.F,C.q);C.gain={sta:Math.round(A.sta-s0),hp:Math.round(A.hp-h0)};if(C.q>=1)U.careOK=(U.careOK||0)+1;}
+/* oil massage: drag the hand from one end of the track to the other; every arrival at the far end is one stroke */
+function oilFinish(){const U=UI.fight,C=U&&U.care;if(!C||C.mode!=="oil"||C.done)return;C.done=true;const target=C.secs*2;C.q=Math.max(.15,Math.min(1.3,C.taps/target));careApply(U,C);AU.sfx(C.q>=1?"level":"ui");render();}
+function oilTick(){const U=UI.fight,C=U&&U.care;if(!C||C.mode!=="oil"||C.done||!C.t0)return;const left=Math.max(0,Math.ceil(C.secs-(performance.now()-C.t0)/1000));const el=document.querySelector(".oiltime b");if(el)el.textContent=left;if(left<=0){oilFinish();return;}setTimeout(oilTick,200);}
+(function(){let drag=null;
+  const pos=e=>{const t=document.querySelector(".oiltrack");if(!t)return null;const r=t.getBoundingClientRect();return Math.max(0,Math.min(1,(e.clientX-r.left-22)/(r.width-44)));};
+  document.addEventListener("pointerdown",e=>{const k=e.target.closest&&e.target.closest(".oilknob");if(!k||k.disabled)return;const C=UI.fight&&UI.fight.care;if(!C||C.mode!=="oil"||C.done)return;e.preventDefault();drag=true;
+    if(!C.t0){C.t0=performance.now();setTimeout(oilTick,200);}});
+  document.addEventListener("pointermove",e=>{if(!drag)return;const C=UI.fight&&UI.fight.care;if(!C||C.done){drag=null;return;}const x=pos(e);if(x==null)return;
+    const k=document.querySelector(".oilknob");if(k)k.style.left=`calc(${(x*100).toFixed(1)}% - ${(x*44).toFixed(1)}px)`;
+    const side=x<.12?"L":x>.88?"R":null;if(side&&side!==C.side){if(C.side){C.taps++;AU.sfx("ui");const b=document.querySelector(".oilcombo b");if(b){b.textContent=C.taps;b.parentElement.classList.remove("pop");void b.offsetWidth;b.parentElement.classList.add("pop");}}C.side=side;}});
+  document.addEventListener("pointerup",()=>{drag=null;});document.addEventListener("pointercancel",()=>{drag=null;});})();
 function cornerHTML(F){const U=UI.fight,C=U.care,A=F.A,B=F.B,c=F.cards[F.cards.length-1]||[10,10];const rec=aiCorner(F,A,B);
   const note=B.sta<40?"Opponent is fading":A.sta<40?"We're low on energy":A.rlanded<B.rlanded-2?"We took a lot this round":B.legs>20?"Opponent's legs getting heavy":A.rage?"Still in blood-boil!":"";
   const slots=(C.need||[]).map((k,i)=>{const g=C.got[i];return `<span class="cslot ${g==null?"":g===k?"ok":"bad"}">${PIX[k]}</span>`;}).join('<i class="arr">›</i>');
@@ -6182,11 +6211,11 @@ function tick(){const U=UI.fight;if(!U||U.stage!=="playing")return;
 function fskip(){const U=UI.fight;clearTimeout(U.timer);while(!roundDone(U.F))U.pending.push(...fightEx(U.F));const rest=U.pending.filter(x=>!x.bell&&!x.tired);U.shown.push(...rest);U.pending=[];
   const ko=rest.find(x=>x.ev==="ko");if(ko)FS.play({...ko,side:sideOf(ko,U.F)},performance.now());roundFinish(U.F);roundEnd();}
 function roundEnd(){const U=UI.fight;clearTimeout(U.timer);const F=U.F;
-  if(F.over){fightEnd();return;}AU.sfx("bell1");U.caption={text:COM.end[Math.floor(Math.random()*2)],side:""};U.stage="corner";U.care=newCare(F);U.pick=null;U.hint=false;if(F.A.hp<35&&!U.towelAsked&&F.round<F.rounds){U.towelAsked=true;UI.confirmTowel=true;UI.towelCoach=true;AU.sfx("miss");}render();}
+  if(F.over){fightEnd();return;}AU.sfx("bell1");U.caption={text:COM.end[Math.floor(Math.random()*2)],side:""};U.stage="corner";U.care=newCare(F);if(U.care.mode==="card")cardSeq(U.care);U.pick=null;U.hint=false;if(F.A.hp<35&&!U.towelAsked&&F.round<F.rounds){U.towelAsked=true;UI.confirmTowel=true;UI.towelCoach=true;AU.sfx("miss");}render();}
 /* v1.88 corner care comes in three flavours: the order puzzle, a face-down card, or a fast oil massage */
-function newCare(F){const r=Math.random(),mode=F.round<2||r<.5?"order":r<.75?"card":"oil";
-  if(mode==="card"){const o=[1.4,1,-.3].sort(()=>Math.random()-.5);return {mode,deck:o,flip:-1,done:false};}
-  if(mode==="oil")return {mode,taps:0,t0:0,done:false};return {mode,need:careNeeds(F),got:[],done:false};}
+function newCare(F){const r=Math.random(),mode=r<.5?"order":r<.75?"card":"oil";
+  if(mode==="card")return {mode,deck:[1.4,1,1,.6,-.3],pos:[0,1,2,3,4],phase:"show",flip:-1,done:false};
+  if(mode==="oil")return {mode,taps:0,t0:0,done:false,secs:F.round<=1?10:F.round===2?8:5,side:null};return {mode,need:careNeeds(F),got:[],done:false};}
 /* v1.88: after the towel — she is safe, but it hurts her pride (morale −8 is applied in applyResult) */
 function towelScene(f){const L={kati:["I could still stand, coach… Grandpa never threw the towel.","sad"],mali:["I could keep going! …Why did you throw it?","sad"],rin:["The data said I still had a twelve percent chance… I understand. That doesn't mean I like it.","sad"],ploy:["…First time in my life anyone threw the towel for me. Remember that.","angry"],fah:["I wasn't beaten!! Who threw the towel!! …You, coach? I'm mad at you for three days.","angry"]}[f.id];
   const R={kati:"Your grandpa never had a granddaughter to worry about like this.",mali:"Because I want to see you smiling tomorrow, not lying in a hospital.",rin:"You don't have to like it. Heal first, then argue with me.",ploy:"Remember it. I'll remember you were still standing.",fah:"Three days is fine. Day four, you're back in training."}[f.id]||"It's okay. There's always the next fight.";
@@ -6402,10 +6431,7 @@ const ACT={
   revpick:d=>{UI.revIdx=+d.v;render();},
   cpick:d=>{UI.fight.pick=d.v;render();},
   cgo:()=>{const U=UI.fight;if(!U.pick)return;const C=U.care;if(C&&!C.done){C.q=0;C.done=true;applyCare(U.F,0);}AU.sfx("bell1");U.F.A.instr=U.pick;U.pick=null;playRound();},
-  ccard:d=>{const U=UI.fight,C=U.care;if(!C||C.mode!=="card"||C.done)return;const i=+d.v;C.flip=i;C.q=C.deck[i];C.done=true;applyCare(U.F,C.q);if(C.q>=1)U.careOK=(U.careOK||0)+1;AU.sfx(C.q>1?"level":C.q<0?"miss":"ui");render();},
-  coil:()=>{const U=UI.fight,C=U.care;if(!C||C.mode!=="oil"||C.done)return;C.taps++;AU.sfx("ui");
-    if(!C.t0){C.t0=performance.now();setTimeout(()=>{if(UI.fight&&UI.fight.care===C&&!C.done){C.done=true;C.q=C.taps>=20?1.2:C.taps>=14?1:C.taps>=8?.5:.2;applyCare(UI.fight.F,C.q);if(C.q>=1){UI.fight.careOK=(UI.fight.careOK||0)+1;AU.sfx("level");}render();}},3000);}
-    const b=document.querySelector(".oilbar");if(b&&C.taps>1)b.style.setProperty("--v",Math.min(100,Math.round(C.taps/20*100))+"%");else render();},
+  ccard:d=>{const U=UI.fight,C=U.care;if(!C||C.mode!=="card"||C.done)return;const i=+d.v;C.flip=i;C.q=C.deck[i];C.done=true;careApply(U,C);AU.sfx(C.q>1?"level":C.q<0?"miss":"ui");render();},
   care:d=>{const U=UI.fight,C=U.care;if(!C||C.done)return;const i=C.got.length;C.got.push(d.v);const ok=C.need[i]===d.v;AU.sfx(ok?"ui":"miss");
     if(C.got.length>=C.need.length){C.done=true;const n=C.got.filter((g,k)=>g===C.need[k]).length;C.q=n===3?1:n===2?.5:0;if(C.q>=1)U.careOK=(U.careOK||0)+1;applyCare(U.F,C.q);if(C.q>=1){AU.sfx("level");const me=G.F[U.b.a];popToast({kati:"So refreshing!",mali:"Not tired anymore! Let's go!",rin:"Body back to 90%",ploy:"Thank you, my heart's in it",fah:"Okay! Ready to go hard!"}[me.id]||"Refreshed!","good");}}render();},
   towel:()=>{UI.confirmTowel=true;render();},

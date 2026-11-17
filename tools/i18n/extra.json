@@ -5415,5 +5415,21 @@
  "\" aria-label=\"สลากเลข ": "\" aria-label=\"Ticket ",
  "</h2><p class=\"meta\">เลือกสลาก 1 ใบ ใบละ ฿80 ผลออกในอีก 2 สัปดาห์ทางตู้จดหมาย</p>\n  <div class=\"ltgrid\">": "</h2><p class=\"meta\">Pick 1 ticket, ฿80 each. Results arrive by mail in 2 weeks.</p>\n  <div class=\"ltgrid\">",
  "<h2>ช่วยครูเลือกเลขหน่อย · งวดที่ ": "<h2>Pick a number for Coach · Draw ",
- "฿80": "฿80"
+ "฿80": "฿80",
+ "\" data-oil=\"1\"><i class=\"oilend l\"></i><i class=\"oilend r\"></i><button class=\"oilknob\" aria-label=\"ลากนวดไปมา\" ": "\" data-oil=\"1\"><i class=\"oilend l\"></i><i class=\"oilend r\"></i><button class=\"oilknob\" aria-label=\"Drag back and forth to massage\" ",
+ "</b><small>วิ</small></span></div></div>\n  <div class=\"oiltrack ": "</b><small>s</small></span></div></div>\n  <div class=\"oiltrack ",
+ "ราดน้ำมันมวย แล้วลากไปมาเร็ว ๆ": "Pour on the boxing oil, then drag back and forth fast",
+ " ครั้ง · ": " strokes · ",
+ "ไพ่ใบที่ ": "Card ",
+ " · เลือด ": " · HP ",
+ "ฟื้นแรง ": "Stamina ",
+ "สับไพ่…": "Shuffling…",
+ "เลือกไพ่ 1 ใบ": "Pick 1 card",
+ "จำไพ่ไว้นะ…": "Remember the cards…",
+ "ตะคริว!": "Cramp!",
+ "ฟื้นปกติ": "Normal recovery",
+ "แรงไม่ขึ้น": "no stamina back",
+ "แรงเต็มแล้ว": "stamina already full",
+ "แรง ": "stamina ",
+ "เลือด ": "HP "
 }

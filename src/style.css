@@ -1849,17 +1849,16 @@ body.hasnews main>h1.sr+.homegrid,body.hasnews main>h1.sr+.rinnote{margin-top:46
 .ytchip span{font-size:16px}.ytchip b{font-size:13px}.ytchip small{margin-left:auto;font-size:12px;color:var(--mut,#9a91ad)}.ytchip i{font-style:normal;color:var(--mut,#9a91ad)}
 .ytchip.on{border-color:#c8963c;background:#2f2338}.ytchip.on small{color:var(--gold,#f2c94c)}
 
-/* v1.88 corner care variants */
-.ccards{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:6px}
-.ccard{aspect-ratio:3/4;border:0;cursor:pointer;font:inherit;color:#fff;display:grid;place-items:center;align-content:center;gap:4px;padding:6px;
-  background:repeating-linear-gradient(45deg,#3b2c63 0 6px,#2a2150 6px 12px);box-shadow:inset 0 0 0 3px #c8963c,0 3px 0 #120d22;image-rendering:pixelated}
-.ccard i{width:22px;height:22px;background:#c8963c;clip-path:polygon(50% 0,100% 50%,50% 100%,0 50%)}
-.ccard.open{background:#f4ead8;color:#2a1d2e;box-shadow:inset 0 0 0 3px #8a6a4a}.ccard.open.good{background:#fff3c4}.ccard.open.bad{background:#e9d3d3}
-.ccard.open:not(.mine){opacity:.45}.ccard.mine{transform:translateY(-4px);box-shadow:inset 0 0 0 3px var(--gold,#f2c94c),0 0 0 3px #f2c94c}
-.ccard b{font-size:26px;line-height:1}.ccard small{font-size:12px;font-weight:700;text-align:center}
-.oil{display:grid;gap:8px;margin-top:6px}.oilbar{display:block;height:12px;background:#1b1530;box-shadow:inset 0 0 0 2px var(--line,#4a3f6b);position:relative}
-.oilbar s{position:absolute;left:0;top:0;bottom:0;width:var(--v,0%);background:linear-gradient(90deg,#c8963c,#f2c94c);transition:width .08s}
-.oilbtn{min-height:64px;font-size:20px;touch-action:manipulation;user-select:none}
+/* v1.88 corner care variants — same box and buttons as the order puzzle */
+.carebtns.three{grid-template-columns:repeat(3,1fr)}
+.carebtns.three button{min-height:64px}
+.oiltrack{position:relative;height:56px;background:var(--bg2);box-shadow:inset 0 0 0 2px var(--line);touch-action:none;
+  background-image:repeating-linear-gradient(90deg,transparent 0 10px,rgba(255,255,255,.04) 10px 12px)}
+.oiltrack .oilend{position:absolute;top:6px;bottom:6px;width:8px;background:rgba(231,180,67,.35)}.oilend.l{left:6px}.oilend.r{right:6px}
+.oilknob{position:absolute;top:6px;left:0;width:44px;height:44px;border:0;padding:6px;cursor:grab;background:var(--panel,#2a2150);box-shadow:inset 0 0 0 2px var(--gold),0 2px 0 #120d22;touch-action:none}
+.oilknob:active{cursor:grabbing}.oilknob .pxi{width:30px;height:30px}.oiltrack.done{opacity:.6}
+.cslot.oilcombo b,.cslot.oiltime b{font-family:var(--f-pixel,monospace);font-size:16px;color:var(--gold)}.cslot.oiltime{grid-auto-flow:column;gap:1px}.cslot.oiltime small{font-size:9px;opacity:.7}
+.cslot.oilcombo.pop{animation:oilpop .18s}@keyframes oilpop{50%{transform:scale(1.25)}}
 
 /* v1.88 camp lottery */
 .ltgrid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:10px 0}
@@ -1868,3 +1867,14 @@ body.hasnews main>h1.sr+.homegrid,body.hasnews main>h1.sr+.rinnote{margin-top:46
 .ltres{display:grid;grid-template-columns:1.4fr 1fr 1fr;gap:6px;margin:8px 0}.ltres>div{display:grid;gap:2px;padding:8px;background:#1b1530;box-shadow:inset 0 0 0 2px var(--line,#4a3f6b);text-align:center}
 .ltres small{font-size:11px;color:var(--mut,#9a91ad)}.ltres b{font-family:var(--f-pixel,monospace);font-size:18px;color:var(--gold,#f2c94c);letter-spacing:1px}
 .ltmine{display:grid;gap:4px;max-width:260px;margin:6px auto}.ltmine small{text-align:center;color:var(--mut,#9a91ad)}
+
+.cshuf{position:relative;height:92px}
+.cshuf.spin{animation:cspin .6s ease-in-out 3}@keyframes cspin{50%{transform:rotate(-1.5deg) scale(.98)}}
+.cshc{position:absolute;top:0;width:calc(20% - 6px);margin:0 3px;height:88px;border:0;padding:0;cursor:pointer;background:var(--bg2);box-shadow:inset 0 0 0 2px var(--line);font:inherit;color:var(--fg);transition:left .22s ease-in-out}
+.cshc .cb,.cshc .cf{position:absolute;inset:2px;display:grid;place-items:center;align-content:center;gap:4px}
+.cshc .cb{background:repeating-linear-gradient(45deg,#3b2c63 0 4px,#2a2150 4px 8px);box-shadow:inset 0 0 0 2px #c8963c}
+.cshc .cf{display:none}.cshc.up .cf{display:grid}.cshc.up .cb{display:none}.cshc.up{animation:cflip .25s}
+@keyframes cflip{0%{transform:scaleX(1)}50%{transform:scaleX(.05)}100%{transform:scaleX(1)}}
+.cshc .pxi{width:30px;height:30px}.cshc small{font-size:11px;opacity:.85}
+.cshc:disabled{cursor:default;filter:none;opacity:1}.cshc.picked{box-shadow:inset 0 0 0 2px var(--gold);background:rgba(231,180,67,.15)}.cshc.dim{opacity:.45}
+.cshuf.spin .cshc{transform:translateY(-2px)}
