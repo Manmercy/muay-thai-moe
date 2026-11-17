@@ -1,5 +1,5 @@
 // ================= MUAY THAI MOE v1.3 — UI =================
-const VERSION="1.87.2";
+const VERSION="1.87.3";
 const CUR_LANG=(typeof window!=="undefined"&&window.LANG)||"th";
 const TH_LABEL=String.fromCharCode(3652,3607,3618);
 function langSwitch(cls){return `<div class="langsw ${cls||""}" role="group" aria-label="Language">${[["th",TH_LABEL],["en","EN"]].map(([k,l])=>`<button class="lsb ${CUR_LANG===k?"on":""}" data-act="setlang" data-v="${k}" aria-pressed="${CUR_LANG===k}">${l}</button>`).join("")}</div>`;}
@@ -560,6 +560,9 @@ const CARD_SEQ={h_mali:"g_mali_sr",h_rin:"g_rin_sr",h_fah:"g_fah_sr",g_mali_ssr:
 function cardLinkHTML(id){const own=G.cards||{},out=[];const pv=CARD_SEQ[id];if(pv&&own[pv]&&CARDS[pv])out.push(`↩ เรื่องต่อจาก <button class="clinkb" data-act="cardinfo" data-v="${pv}">${esc(CARDS[pv].t)}</button>`);
   Object.keys(CARD_SEQ).filter(k=>CARD_SEQ[k]===id&&own[k]&&CARDS[k]).forEach(k=>out.push(`↪ มีเรื่องต่อใน <button class="clinkb" data-act="cardinfo" data-v="${k}">${esc(CARDS[k].t)}</button>`));
   return out.length?`<p class="clink">${out.join("<br>")}</p>`:"";}
+// v1.87.2: the album keeps its scroll position when a card or the gacha is opened from it and closed again
+function albKeep(){try{const o=document.querySelector(".overlay");if(UI.modal&&UI.modal.type==="album"&&o)UI.albY=o.scrollTop;}catch(e){}}
+function albRestore(){const y=UI.albY||0;if(!y)return;const go=()=>{const o=document.querySelector(".overlay");if(o)o.scrollTop=y;};go();requestAnimationFrame(go);}
 function cardInfoHTML(id){const C=CARDS[id];if(!C)return "";const o=(G.cards||{})[id],R=CARD_R[C.r],who=G.F[C.c]?G.F[C.c].name:"",src=C.lg?"ตู้ลอยกระทง (ช่วงเทศกาล)":C.g?"ตู้สุ่มการ์ด":`${C.hint||"ติดตามเนื้อเรื่องไปเรื่อย ๆ"}`;
   if(!o)return `<h2>การ์ดที่ยังไม่ได้</h2><div class="cdet" style="--rc:#77747d"><div class="ccard big lock" data-rarity="${C.r}">${cardArtHTML(C,true)}<span class="tstar">${"★".repeat(R.s)}</span><b>???</b><small>${C.r}</small></div>
     <div class="cdinfo"><div class="cdtop"><span class="pill">${C.r} ${"★".repeat(R.s)}</span><span class="meta">${esc(who)}</span></div><p class="meta"><b>วิธีได้:</b> ${esc(src)}</p></div></div>
@@ -874,7 +877,7 @@ function gboxHTML(){const loy=GB.box==="loy",s=GB.st,cost=gbCost(),ok=(G.dust||0
      <p>${loy?"ตู้นี้เปิดเฉพาะช่วงเทศกาลลอยกระทง ":""}ได้การ์ดที่มีแล้วจะเก็บเป็นใบซ้ำ ใช้อัปขั้นการ์ด หรือย่อยเป็นเศษดาวได้ที่หน้าการ์ด</p>
      <button class="btn" data-act="gboxq">ปิด</button></div></div>`:""}
   </div>`;}
-const PATCH={id:"1.87.1",ver:"Muay Thai Moe v1.87.1",title:"อัปเดตจากค่ายศิริชัย",lead:"ทุกคนมีจุดเด่นของตัวเอง ซ้อมแก้ทางได้ผลขึ้น ตู้กาชาโฉมใหม่ คู่แข่งพูดเยอะขึ้น และเปิดเกมเร็วขึ้นค่ะ",items:[
+const PATCH={id:"1.87.1",ver:"Muay Thai Moe v1.87.2",title:"อัปเดตจากค่ายศิริชัย",lead:"ทุกคนมีจุดเด่นของตัวเอง ซ้อมแก้ทางได้ผลขึ้น ตู้กาชาโฉมใหม่ คู่แข่งพูดเยอะขึ้น และเปิดเกมเร็วขึ้นค่ะ",items:[
  ["✦","จุดเด่นประจำตัว 2 แบบ","ทุกคนมีจุดเด่นติดตัว 2 แบบ เลือกสลับได้ในหน้าสกิล เช่น มะลิเคลื่อนไหวดั่งสายน้ำ รินคลังความรู้ ฟ้าแข็งอย่างหิน พลอยจังหวะเทพ"],
  ["🥊","ซ้อมแก้ทางได้ผลขึ้น","ซ้อมแก้ทางก่อนชก วันชกอาวุธหลักของคู่ชกจะโดนยากขึ้น และเราอ่านเกมเขาขาดกว่าเดิม ช่วยได้มากกับคู่ชกตัวท็อปปีหลัง ๆ"],
  ["📖","เนื้อเรื่องที่พลาดไป กลับมาแล้ว","ใครข้ามช่วงไพลินกับค่ายเวกเตอร์ หรือเรื่องปีที่สองของฟ้ากับพลอยไป เรื่องจะเริ่มให้ในปีที่เล่นอยู่ ไม่ต้องเริ่มเซฟใหม่"],
@@ -885,7 +888,9 @@ const PATCH={id:"1.87.1",ver:"Muay Thai Moe v1.87.1",title:"อัปเดต�
  ["📊", "เลเวลคู่แข่งบอกฝีมือจริง", "เลเวลคู่แข่งเทียบกับนักมวยของเราในรุ่นเดียวกัน เก่งกว่าชัดจะสูงกว่าเรา 2–3 เลเวล หน้าข้อมูลมีป้ายเก่งกว่า สูสี หรืออ่อนกว่าค่ายเรา และถ้าคู่แข่งพัฒนาขึ้น เจอกันรอบหน้าเลเวลก็สูงขึ้น"],
  ["🖤", "ค่ายเวกเตอร์ชุดดำม่วง", "ไนท์กับเวกาใส่ชุดดำม่วงประจำค่ายแล้ว และค่ายเวกเตอร์มีคำพูดหลังไฟต์ของตัวเอง ดูถูกค่ายบ้านนอกแบบไม่เกรงใจ จนกว่าจะเจอเรื่องสัญญา"],
  ["💬", "คำพูดหลังไฟต์หลากหลายขึ้น", "คู่ชกพูดได้ทั้งตลกและจริงจัง และจำได้ว่าเคยเจอกันกี่ครั้ง แพ้เราบ่อยจะบ่น ชนะเราบ่อยจะไล่ไปฝึกมาใหม่ พลอยโหดขึ้นแบบอัจฉริยะ และไม่เรียกชื่อกะทิตอนชกกับคนอื่นแล้ว"],
- ["⚡","เปิดเกมเร็วขึ้น","ไฟล์เกมเล็กลงเกินครึ่ง โหลดเซฟมีหน้าเตรียมค่ายพร้อมทิป และภาพจะถูกเก็บไว้ในเครื่อง ครั้งต่อไปเปิดได้ทันที"]],
+ ["⚡","เปิดเกมเร็วขึ้น","ไฟล์เกมเล็กลงเกินครึ่ง โหลดเซฟมีหน้าเตรียมค่ายพร้อมทิป และภาพจะถูกเก็บไว้ในเครื่อง ครั้งต่อไปเปิดได้ทันที"],
+ ["🏮","ตู้ลอยกระทงเปิด 18 พ.ย.","ตู้กาชาลอยกระทงกับโค้ด LOYKRATHONG69 เปิดพร้อมกันวันที่ 18 พ.ย.–7 ธ.ค."],
+ ["🎴","อัลบั้มการ์ดไม่เด้งแล้ว","ดูคำใบ้การ์ดหรือเปิดตู้กาชาจากอัลบั้ม กลับมาแล้วอยู่ตำแหน่งเดิม"]],
  foot:"ขอให้เจอแคปซูลสีทองนะคะ ✦"};
 function maybeWhatsNew(){if(!G||G.ended||UI.scene)return;if(G.newsSeen===PATCH.id)return;UI.modal={type:"whatsnew"};}
 function whatsNewHTML(){return `<div class="wnew"><span class="pill gold">อัปเดต · ${esc(PATCH.ver)}</span><h2>🥊 ${esc(PATCH.title)}</h2><p class="lead">${esc(PATCH.lead)}</p>
@@ -1453,13 +1458,13 @@ const ACT={
   cardhint:d=>{const C=CARDS[d.v];if(C)toast(C.g?"การ์ดใบนี้ได้จากตู้กาชา":`วิธีได้: ${C.hint||"ติดตามเนื้อเรื่องไปเรื่อย ๆ"}`);},
   petren:d=>{UI.modal={type:"petname",i:+d.v};render();setTimeout(()=>{const el=document.getElementById("petname");if(el){el.focus();el.select();}},60);},
   gacha:()=>{const r=gachaPull(G);if(!r)return;AU.sfx&&AU.sfx(CARDS[r.id].r==="SSR"||CARDS[r.id].r==="SR"?"level":"ui");save();UI.modal={type:"gacha",res:r};render();},
-  album:()=>{UI.modal={type:"album"};render();},
+  album:()=>{const from=UI.modal&&UI.modal.type;if(from!=="card"&&from!=="gbox")UI.albY=0;UI.modal={type:"album"};render();albRestore();},
   contestskip:()=>{UI.ctSkip=true;document.querySelectorAll(".ctrow").forEach(e=>e.classList.add("now"));},
   contestaward:()=>{const R=(G.contests||{})[G.season||1];UI.ctSkip=false;UI.ctT0=performance.now();UI.modal={type:"contest",ph:"award"};render();
     if(R&&R.rank===1){setTimeout(()=>{if(UI.modal&&UI.modal.type==="contest"&&UI.modal.ph==="award"&&!UI.ctSkip)AU.sfx&&AU.sfx("champ");},6800);for(let i=0;i<6;i++)setTimeout(()=>{if(UI.modal&&UI.modal.type==="contest"&&UI.modal.ph==="award")AU.sfx&&AU.sfx("pop");},7200+i*1150);}
     else setTimeout(()=>{if(UI.modal&&UI.modal.type==="contest")AU.sfx&&AU.sfx("ui");},6800);},
   contestdone:()=>{const R=(G.contests||{})[G.season||1];UI.modal=null;UI.ctSkip=false;if(R&&R.rank===1)AU.sfx&&AU.sfx("level");const d=UI.contestDone;UI.contestDone=null;save();if(d)d();else render();},
-  cardinfo:d=>{if(!CARDS[d.v])return;AU.sfx&&AU.sfx("ui");UI.modal={type:"card",id:d.v};render();},
+  cardinfo:d=>{if(!CARDS[d.v])return;AU.sfx&&AU.sfx("ui");const fromAlb=UI.modal&&UI.modal.type==="album";albKeep();UI.modal={type:"card",id:d.v,back:fromAlb?"album":null};render();},
   carddust:d=>{const C=CARDS[d.v],o=(G.cards||{})[d.v];if(!C||!o)return;const k=Math.min(+d.n||1,o.spare||0);if(!k)return;
     UI.modal={type:"confirm",title:"ย่อยการ์ดเป็นเศษดาว?",ok:`ย่อย +✦${DUST_OF[C.r]*k}`,no:"ยกเลิก",noAct:"cardinfo",noV:d.v,yes:"carddustok",id:d.v,k,
       html:`<div class="px confirm"><b>${esc(C.t)} ×${k}</b><p class="meta">ได้เศษดาว ✦ ${DUST_OF[C.r]*k} · ใบซ้ำเหลือ ${(o.spare||0)-k} ใบ</p><p class="meta">การ์ดใบหลัก ขั้นการ์ด และเรื่องราวยังอยู่ครบ ย่อยแล้วเอาคืนไม่ได้</p>${(o.lv||1)<CARD_MAX_LV?`<p class="meta goldt">การ์ดนี้ยังอัปขั้นได้อีก ${CARD_MAX_LV-(o.lv||1)} ขั้น ด้วยใบซ้ำ</p>`:""}</div>`};render();},
@@ -1507,9 +1512,9 @@ const ACT={
     if(n){AU.sfx("level");save();toast(`อัป${(SK_LINES[f.id]||[])[li]||""} ${n} ครั้ง`);}render();},
   sksel:d=>{UI.skSel=d.id+":"+d.v;AU.sfx("ui");render();},
   newsok:()=>{G.newsSeen=PATCH.id;UI.modal=null;save();render();},
-  closeModal:()=>{const m=UI.modal;if(m&&m.type==="contest"){ACT.contestdone();return;}if(m&&m.type==="whatsnew"&&G){G.newsSeen=PATCH.id;save();}UI.modal=null;render();if(m&&m.after)m.after();},
+  closeModal:()=>{const m=UI.modal;if(m&&m.back==="album"&&G){ACT.album();return;}if(m&&m.type==="contest"){ACT.contestdone();return;}if(m&&m.type==="whatsnew"&&G){G.newsSeen=PATCH.id;save();}UI.modal=null;render();if(m&&m.after)m.after();},
   trait:d=>{const f=G.F[d.id],L=TRAITS[d.id];if(!f||!L||f.camp!=="player")return;const t=L.find(x=>x.id===d.v);if(!t||traitOf(f)===t.id)return;f.trait=t.id;save();render();toast(`${f.name}ใช้จุดเด่น "${t.name}"`);},
-  gopen:d=>{GB.box=d.v==="loy"?"loy":"n";if(GB.box==="loy"&&!loyFest()){toast("ตู้ลอยกระทงปิดแล้ว ไว้เจอกันเทศกาลหน้า");return;}GB.st=null;GB.ps=[];UI.gq=false;UI.modal={type:"gbox"};render();gbPreload();},
+  gopen:d=>{GB.box=d.v==="loy"?"loy":"n";if(GB.box==="loy"&&!loyFest()){toast("ตู้ลอยกระทงปิดแล้ว ไว้เจอกันเทศกาลหน้า");return;}const fromAlb=UI.modal&&UI.modal.type==="album";if(fromAlb)albKeep();GB.st=null;GB.ps=[];UI.gq=false;UI.modal={type:"gbox",back:fromAlb?"album":null};render();gbPreload();},
   gpull:()=>{if(GB.st)return;const cost=gbCost();if((G.dust||0)<cost){AU.sfx("ui");toast(`เศษดาวไม่พอ ต้องใช้ ${cost}✦ · ได้จากชนะไฟต์ การ์ดใหม่ และย่อยใบซ้ำ`);return;}
     const r=GB.box==="loy"?loyPull(G):gachaPull(G);if(!r)return;save();const rr=CARDS[r.id].r;
     GB.st={res:r,id:r.id,r:rr,T:gbTimeline(rr),t0:performance.now(),fired:{},upg:rr==="SSR"&&Math.random()<.5};GB.ps=[];UI.gq=false;

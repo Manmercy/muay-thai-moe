@@ -4680,7 +4680,7 @@ AU.gsfx=function(kind,a){if(!this.init()||this.muted||!SETTINGS.sfx)return;const
   if(kind==="shimmer")for(let i=0;i<6;i++)T(i*.05,{f:1400+Math.random()*1400,type:"sine",dur:.12,peak:.06});};
 
 // ================= MUAY THAI MOE v1.3 — UI =================
-const VERSION="1.87.2";
+const VERSION="1.87.3";
 const CUR_LANG=(typeof window!=="undefined"&&window.LANG)||"th";
 const TH_LABEL=String.fromCharCode(3652,3607,3618);
 function langSwitch(cls){return `<div class="langsw ${cls||""}" role="group" aria-label="Language">${[["th",TH_LABEL],["en","EN"]].map(([k,l])=>`<button class="lsb ${CUR_LANG===k?"on":""}" data-act="setlang" data-v="${k}" aria-pressed="${CUR_LANG===k}">${l}</button>`).join("")}</div>`;}
@@ -5241,6 +5241,9 @@ const CARD_SEQ={h_mali:"g_mali_sr",h_rin:"g_rin_sr",h_fah:"g_fah_sr",g_mali_ssr:
 function cardLinkHTML(id){const own=G.cards||{},out=[];const pv=CARD_SEQ[id];if(pv&&own[pv]&&CARDS[pv])out.push(`↩ Continues from <button class="clinkb" data-act="cardinfo" data-v="${pv}">${esc(CARDS[pv].t)}</button>`);
   Object.keys(CARD_SEQ).filter(k=>CARD_SEQ[k]===id&&own[k]&&CARDS[k]).forEach(k=>out.push(`↪ Continues in <button class="clinkb" data-act="cardinfo" data-v="${k}">${esc(CARDS[k].t)}</button>`));
   return out.length?`<p class="clink">${out.join("<br>")}</p>`:"";}
+// v1.87.2: the album keeps its scroll position when a card or the gacha is opened from it and closed again
+function albKeep(){try{const o=document.querySelector(".overlay");if(UI.modal&&UI.modal.type==="album"&&o)UI.albY=o.scrollTop;}catch(e){}}
+function albRestore(){const y=UI.albY||0;if(!y)return;const go=()=>{const o=document.querySelector(".overlay");if(o)o.scrollTop=y;};go();requestAnimationFrame(go);}
 function cardInfoHTML(id){const C=CARDS[id];if(!C)return "";const o=(G.cards||{})[id],R=CARD_R[C.r],who=G.F[C.c]?G.F[C.c].name:"",src=C.lg?"the Loy Krathong gacha (festival only)":C.g?"the card gacha":`${C.hint||"keep following the story"}`;
   if(!o)return `<h2>Not collected yet</h2><div class="cdet" style="--rc:#77747d"><div class="ccard big lock" data-rarity="${C.r}">${cardArtHTML(C,true)}<span class="tstar">${"★".repeat(R.s)}</span><b>???</b><small>${C.r}</small></div>
     <div class="cdinfo"><div class="cdtop"><span class="pill">${C.r} ${"★".repeat(R.s)}</span><span class="meta">${esc(who)}</span></div><p class="meta"><b>How to get:</b> ${esc(src)}</p></div></div>
@@ -5555,7 +5558,7 @@ function gboxHTML(){const loy=GB.box==="loy",s=GB.st,cost=gbCost(),ok=(G.dust||0
      <p>${loy?"This machine is only open during Loy Krathong. ":""} Cards you already own are kept as spares. Use them to level up the card or break them into stardust on the card page.</p>
      <button class="btn" data-act="gboxq">Close</button></div></div>`:""}
   </div>`;}
-const PATCH={id:"1.87.1",ver:"Muay Thai Moe v1.87.1",title:"News from Sirichai Camp",lead:"Everyone has a signature trait, counter-training works better, a new gacha machine, rivals have more to say, and the game opens faster.",items:[
+const PATCH={id:"1.87.1",ver:"Muay Thai Moe v1.87.2",title:"News from Sirichai Camp",lead:"Everyone has a signature trait, counter-training works better, a new gacha machine, rivals have more to say, and the game opens faster.",items:[
  ["✦","Two innate traits per girl","Every girl has two innate traits to switch between on the skill page, like Mali's Move Like Water, Rin's Walking Library, Fah's Hard as Stone and Ploy's Godlike Timing"],
  ["🥊","Counter-training works better","Counter-train before a fight and on fight night the opponent's main weapon lands less often while you read their game better. It helps a lot against the top fighters in later years"],
  ["📖","Missed story arcs are back","If you skipped Pailin and Vector Gym, or Fah and Ploy's second-year stories, they now start in the year you're playing. No need for a new save"],
@@ -5566,7 +5569,9 @@ const PATCH={id:"1.87.1",ver:"Muay Thai Moe v1.87.1",title:"News from Sirichai C
  ["📊", "Opponent levels show real strength", "An opponent's level is read against our best fighter in her division: a clearly stronger one sits 2–3 levels above us. Her sheet says stronger, even or weaker than ours, and if she has improved, her level is higher next time you meet."],
  ["🖤", "Vector camp in black and purple", "Night and Vega now wear the camp's black-and-purple kit, and the Vector camp has its own post-fight lines, sneering at the country camp, until the contract story."],
  ["💬", "More post-fight lines", "Opponents say funny and serious things and remember your record: lose to us often and they grumble, beat us often and they tell you to go train. Ploy is a colder prodigy now, and no longer calls out Kati after fighting someone else."],
- ["⚡","The game opens faster","The game file is less than half its old size, loading a save shows a camp-prep screen with tips, and art stays on your device so the next visit opens instantly"]],
+ ["⚡","The game opens faster","The game file is less than half its old size, loading a save shows a camp-prep screen with tips, and art stays on your device so the next visit opens instantly"],
+ ["🏮","Loy Krathong gacha opens Nov 18","The Loy Krathong gacha and code LOYKRATHONG69 open together, Nov 18 – Dec 7"],
+ ["🎴","Album keeps your place","View a card hint or open the gacha from the album and you come back to the same spot"]],
  foot:"Here's hoping you find a golden capsule ✦"};
 function maybeWhatsNew(){if(!G||G.ended||UI.scene)return;if(G.newsSeen===PATCH.id)return;UI.modal={type:"whatsnew"};}
 function whatsNewHTML(){return `<div class="wnew"><span class="pill gold">Update · ${esc(PATCH.ver)}</span><h2>🥊 ${esc(PATCH.title)}</h2><p class="lead">${esc(PATCH.lead)}</p>
@@ -6134,13 +6139,13 @@ const ACT={
   cardhint:d=>{const C=CARDS[d.v];if(C)toast(C.g?"This card comes from the gacha":`How to get it: ${C.hint||"keep following the story"}`);},
   petren:d=>{UI.modal={type:"petname",i:+d.v};render();setTimeout(()=>{const el=document.getElementById("petname");if(el){el.focus();el.select();}},60);},
   gacha:()=>{const r=gachaPull(G);if(!r)return;AU.sfx&&AU.sfx(CARDS[r.id].r==="SSR"||CARDS[r.id].r==="SR"?"level":"ui");save();UI.modal={type:"gacha",res:r};render();},
-  album:()=>{UI.modal={type:"album"};render();},
+  album:()=>{const from=UI.modal&&UI.modal.type;if(from!=="card"&&from!=="gbox")UI.albY=0;UI.modal={type:"album"};render();albRestore();},
   contestskip:()=>{UI.ctSkip=true;document.querySelectorAll(".ctrow").forEach(e=>e.classList.add("now"));},
   contestaward:()=>{const R=(G.contests||{})[G.season||1];UI.ctSkip=false;UI.ctT0=performance.now();UI.modal={type:"contest",ph:"award"};render();
     if(R&&R.rank===1){setTimeout(()=>{if(UI.modal&&UI.modal.type==="contest"&&UI.modal.ph==="award"&&!UI.ctSkip)AU.sfx&&AU.sfx("champ");},6800);for(let i=0;i<6;i++)setTimeout(()=>{if(UI.modal&&UI.modal.type==="contest"&&UI.modal.ph==="award")AU.sfx&&AU.sfx("pop");},7200+i*1150);}
     else setTimeout(()=>{if(UI.modal&&UI.modal.type==="contest")AU.sfx&&AU.sfx("ui");},6800);},
   contestdone:()=>{const R=(G.contests||{})[G.season||1];UI.modal=null;UI.ctSkip=false;if(R&&R.rank===1)AU.sfx&&AU.sfx("level");const d=UI.contestDone;UI.contestDone=null;save();if(d)d();else render();},
-  cardinfo:d=>{if(!CARDS[d.v])return;AU.sfx&&AU.sfx("ui");UI.modal={type:"card",id:d.v};render();},
+  cardinfo:d=>{if(!CARDS[d.v])return;AU.sfx&&AU.sfx("ui");const fromAlb=UI.modal&&UI.modal.type==="album";albKeep();UI.modal={type:"card",id:d.v,back:fromAlb?"album":null};render();},
   carddust:d=>{const C=CARDS[d.v],o=(G.cards||{})[d.v];if(!C||!o)return;const k=Math.min(+d.n||1,o.spare||0);if(!k)return;
     UI.modal={type:"confirm",title:"Break down into stardust?",ok:`Break down +✦${DUST_OF[C.r]*k}`,no:"Cancel",noAct:"cardinfo",noV:d.v,yes:"carddustok",id:d.v,k,
       html:`<div class="px confirm"><b>${esc(C.t)} ×${k}</b><p class="meta">Stardust +✦ ${DUST_OF[C.r]*k} · spare copies: ${(o.spare||0)-k} left</p><p class="meta">The card itself, its level and its story stay. This can't be undone</p>${(o.lv||1)<CARD_MAX_LV?`<p class="meta goldt">This card can still go up ${CARD_MAX_LV-(o.lv||1)} more level(s) with spares</p>`:""}</div>`};render();},
@@ -6188,9 +6193,9 @@ const ACT={
     if(n){AU.sfx("level");save();toast(`Up ${(SK_LINES[f.id]||[])[li]||""} ${n} times`);}render();},
   sksel:d=>{UI.skSel=d.id+":"+d.v;AU.sfx("ui");render();},
   newsok:()=>{G.newsSeen=PATCH.id;UI.modal=null;save();render();},
-  closeModal:()=>{const m=UI.modal;if(m&&m.type==="contest"){ACT.contestdone();return;}if(m&&m.type==="whatsnew"&&G){G.newsSeen=PATCH.id;save();}UI.modal=null;render();if(m&&m.after)m.after();},
+  closeModal:()=>{const m=UI.modal;if(m&&m.back==="album"&&G){ACT.album();return;}if(m&&m.type==="contest"){ACT.contestdone();return;}if(m&&m.type==="whatsnew"&&G){G.newsSeen=PATCH.id;save();}UI.modal=null;render();if(m&&m.after)m.after();},
   trait:d=>{const f=G.F[d.id],L=TRAITS[d.id];if(!f||!L||f.camp!=="player")return;const t=L.find(x=>x.id===d.v);if(!t||traitOf(f)===t.id)return;f.trait=t.id;save();render();toast(`${f.name} now uses the trait "${t.name}"`);},
-  gopen:d=>{GB.box=d.v==="loy"?"loy":"n";if(GB.box==="loy"&&!loyFest()){toast("The Loy Krathong machine is closed. See you next festival!");return;}GB.st=null;GB.ps=[];UI.gq=false;UI.modal={type:"gbox"};render();gbPreload();},
+  gopen:d=>{GB.box=d.v==="loy"?"loy":"n";if(GB.box==="loy"&&!loyFest()){toast("The Loy Krathong machine is closed. See you next festival!");return;}const fromAlb=UI.modal&&UI.modal.type==="album";if(fromAlb)albKeep();GB.st=null;GB.ps=[];UI.gq=false;UI.modal={type:"gbox",back:fromAlb?"album":null};render();gbPreload();},
   gpull:()=>{if(GB.st)return;const cost=gbCost();if((G.dust||0)<cost){AU.sfx("ui");toast(`Not enough stardust. You need ${cost}✦ · earn it by winning fights, getting new cards and breaking down spares`);return;}
     const r=GB.box==="loy"?loyPull(G):gachaPull(G);if(!r)return;save();const rr=CARDS[r.id].r;
     GB.st={res:r,id:r.id,r:rr,T:gbTimeline(rr),t0:performance.now(),fired:{},upg:rr==="SSR"&&Math.random()<.5};GB.ps=[];UI.gq=false;
@@ -7000,7 +7005,7 @@ Object.assign(CARDS,{
   {n:"coach",t:"In Grandpa Chai's day the camp sold ten shirts a year… today we sold them in five minutes. The world really has changed."}]}});
 
 /* ===== v1.80: redeem codes + the Loy Krathong event (a floating-market gauntlet against the helmet gang) ===== */
-const REDEEM={"U0lSSUNIQUky":{k:"gate"},"TE9ZS1JBVEhPTkc2OQ==":{k:"loy",from:"2026-11-15",to:"2026-12-07"}};
+const REDEEM={"U0lSSUNIQUky":{k:"gate"},"TE9ZS1JBVEhPTkc2OQ==":{k:"loy",from:"2026-11-18",to:"2026-12-07"}};
 function evTest(){try{return !/github\.io$/.test(location.hostname)||/evtest/.test(location.hash)||localStorage.getItem("mtm-evtest")==="1";}catch(e){return false;}}
 function todayStr(){const d=new Date();return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;}
 const LOY_LADDER=["gang1","gang1","gang2","gang2","gang3","gang3","gang4","gang4","gang5"];
@@ -7014,7 +7019,7 @@ function evGang(G,k,f){const kind=LOY_LADDER[k],K=QK[kind],t=ovr(f.a)+K.lvl+k*.1
 function redeemCode(raw){const v=(raw||"").toUpperCase().replace(/\s+/g,"");if(!v)return;let key="";try{key=btoa(v);}catch(e){}const R=REDEEM[key];
   if(!R){AU.sfx("miss");toast("Code not found. Check the spelling and try again");return;}
   if(R.k==="gate"){G.unlocked=true;try{localStorage.setItem(GATE.key,"1");}catch(e){}save();AU.sfx("level");toast("Year 2 unlocked!");return;}
-  if(R.k==="loy"){const t=todayStr();if(!evTest()){if(t<R.from){toast("This code opens on Nov 15. Follow the page and Discord for news!");return;}if(t>R.to){toast("This year's Loy Krathong event has ended. See you next year!");return;}}
+  if(R.k==="loy"){const t=todayStr();if(!evTest()){if(t<R.from){toast("This code opens on Nov 18. Watch the page and Discord for the announcement");return;}if(t>R.to){toast("This year's Loy Krathong event has ended. See you next year!");return;}}
     if(loyOf(G)){toast("This save already used that code. Find the invitation in your mailbox");return;}
     G.ev=G.ev||{};G.ev.loy={got:G.week,season:G.season||1,best:0,tiers:{},runs:0};
     addMail(G,{kind:"event",ev:"loy",from:"Auntie Taew, som tam stall by the temple",title:"Loy Krathong at the floating market tonight!",body:"Manager dear, tonight I'm selling krathong at the floating-market fair. Bring the girls! Lots of food, and the som tam's on me! But I hear the helmet gang plans to make trouble… I'd feel much safer with you all there."});
@@ -7125,7 +7130,7 @@ Object.assign(ACT,{
 /* ===== v1.81: Loy Krathong round 2 — Thai-dress scenes, SR cards, the krathong thief, the otter, Thai dress off-stage ===== */
 const LOY_CARDS=["lk_kati","lk_mali","lk_rin","lk_ploy","lk_fah"];
 (()=>{
-const LOY_HINT="Loy Krathong 2026 event · from the Riverside Brawl",LG_HINT="Loy Krathong gacha machine · open only during the festival, Nov 15–Dec 7";
+const LOY_HINT="Loy Krathong 2026 event · from the Riverside Brawl",LG_HINT="Loy Krathong gacha · festival only, Nov 18 – Dec 7";
 const T=(n,f,t)=>({n,f,l:"thai",t}),N=t=>({n:"nar",t}),P=(who,t)=>({n:"npc",who,t});
 Object.assign(CARDS,{
  lk_kati:{c:"kati",r:"SR",ev:1,t:"Lost at Loy Krathong",hint:LOY_HINT,bg:"river",need:()=>false,steps:[
@@ -7335,7 +7340,7 @@ Object.assign(ACT,{
 });
 
 /* ===== v1.82: code-content replay in settings + the Loy Krathong gacha (festival only) ===== */
-const LOY_FEST={from:"2026-11-15",to:"2026-12-07"};
+const LOY_FEST={from:"2026-11-18",to:"2026-12-07"};
 function loyFest(){const t=todayStr();return evTest()||(t>=LOY_FEST.from&&t<=LOY_FEST.to);}
 const LG_COST=30,LG_PITY=10;
 function loyPull(G){if(!loyFest()||(G.dust||0)<LG_COST)return null;G.dust-=LG_COST;G.lgPity=(G.lgPity||0)+1;G.lgPulls=(G.lgPulls||0)+1;G.cards=G.cards||{};
