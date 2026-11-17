@@ -2072,6 +2072,16 @@ html[lang=en] .skeq{font-size:13px;padding:0 8px}
 .modal.fpm.t-skill .sklines button.off{filter:grayscale(1);opacity:.55;cursor:pointer}
 .modal.fpm.t-skill .sklines button.off[aria-pressed="true"]{opacity:.85;box-shadow:inset 0 0 0 2px #9a96b0}
 .trdesc{display:grid}.trdesc p{grid-area:1/1;margin:0;visibility:hidden}.trdesc p.on{visibility:visible}
+/* v1.89.3: speed + skills sit right under the live stats on phones too (no longer pinned to the bottom) */
+@media (max-width:760px){.fight .fctl2{order:0;margin-top:8px;position:static;background:none;padding:0}}
+@media (max-width:760px){.fight .fctl2 .seg button{min-width:40px;min-height:46px;font-size:14px;padding:0 6px}.fight .fctl2{gap:6px}}
+/* v1.89.3: match the older compact row — small speed squares, skill names wrap instead of being cut */
+@media (max-width:760px){.fight .fctl2 .seg button{min-width:36px;min-height:36px;font-size:13px;padding:0 4px}}
+.fight .fctl2 .skbtn2{min-height:36px}.fight .fctl2 .skbtn2 b{-webkit-line-clamp:unset;display:block;overflow:visible;font-size:12.5px;line-height:1.2}
+.fight .fctl2 .skbtn2{padding:4px 6px;gap:4px}.fight .fctl2 .skbtn2 b{font-size:11.5px;line-height:1.15}.fight .fctl2 .skbtn2 svg{width:18px;height:18px}
+@media (max-width:760px){.fight .fctl2 .seg button{min-width:40px}}
+@media (max-width:760px){.fight .fctl2 .seg button{min-width:34px;padding:0 2px}.fight .fctl2{gap:5px}.fight .fctl2 .seg{gap:3px}}
+html[lang=en] .fight .fctl2 .skbtn2 b{font-size:11px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
 </style></head><body>
 <div id="app"></div><div id="live" aria-live="polite" role="status"></div>
 <script type="text/plain" id="js-th">
@@ -7175,7 +7185,7 @@ AU.gsfx=function(kind,a){if(!this.init()||this.muted||!SETTINGS.sfx)return;const
   if(kind==="shimmer")for(let i=0;i<6;i++)T(i*.05,{f:1400+Math.random()*1400,type:"sine",dur:.12,peak:.06});};
 
 // ================= MUAY THAI MOE v1.3 — UI =================
-const VERSION="1.89.2";
+const VERSION="1.89.3";
 const CUR_LANG=(typeof window!=="undefined"&&window.LANG)||"th";
 const TH_LABEL=String.fromCharCode(3652,3607,3618);
 function langSwitch(cls){return `<div class="langsw ${cls||""}" role="group" aria-label="Language">${[["th",TH_LABEL],["en","EN"]].map(([k,l])=>`<button class="lsb ${CUR_LANG===k?"on":""}" data-act="setlang" data-v="${k}" aria-pressed="${CUR_LANG===k}">${l}</button>`).join("")}</div>`;}
@@ -8481,12 +8491,12 @@ function fightHTML(){const U=UI.fight,b=U.b,me=G.F[b.a],op=G.F[b.b],F=U.F;
      ${U.cutin?(U.cutin.skill?`<div class="cutin sk ${U.cutin.kind} ${U.cutin.side}" aria-live="assertive"><div class="cut-band"><img src="${ASSET}${U.cutin.id}_fight_angry.webp" alt=""></div><b>${esc(U.cutin.skill)}</b><span>${esc(U.cutin.name)} · ${U.cutin.kind==="atk"?`${WNAME[U.cutin.w]}แม่นและแรงขึ้นช่วงหนึ่ง`:U.cutin.kind==="def"?"หลบและสวนกลับดีขึ้นช่วงหนึ่ง":"เรียกแรงกลับมา"}</span></div>`:`<div class="cutin ${U.cutin.side}" aria-live="assertive"><div class="cut-band"><img src="${ASSET}${U.cutin.id}_fight_angry.webp" alt=""></div><b>โหมดเลือดเดือด!</b><span>${esc(U.cutin.name)} ตาเปลี่ยน · สวนกลับแรงขึ้น คริติคอลง่ายขึ้น</span></div>`):""}
      ${U.stage==="corner"?"":liveStats()}`;
     // v1.21: one compact row — speed, then the 3 carried skills
-    if(U.stage==="playing")mid+=`<div class="fctl2 nospd">${skillBarHTML()}</div>`;
+    if(U.stage==="playing")mid+=`<div class="fctl2"><div class="seg sm">${[["1","x1"],["2","x2"]].map(([v,t])=>`<button data-act="fspeed" data-v="${v}" aria-pressed="${String(UI.speed)===v}" aria-label="ความเร็ว ${t}">${t}</button>`).join("")}</div>${skillBarHTML()}</div>`; /* v1.89.3: speed and skills share one row right under the live stats again (as before v1.83 pinned them to the bottom) */
     if(U.stage==="corner")mid+=cornerHTML(F);
     if(U.stage==="done")mid+=resultHTML();
     mid+=`<details class="logd" ${UI.logOpen?"open":""} ontoggle="UI.logOpen=this.open"><summary>บันทึกการชกทั้งหมด</summary><div class="flog">${U.shown.map(l=>l.rd?`<div class="rd">${l.rd}</div>`:`<div class="${l.s}">${esc(l.t||"")}</div>`).join("")}</div></details>`;}
   const tw=UI.confirmTowel?`<div class="tconfirm" role="alertdialog"><div class="px">${UI.towelCoach?`<div class="ctip big"><img src="${faceSrc("coach")}" alt=""><span><b>ครูแดง:</b> ${esc(me.name)}เจ็บหนักแล้ว เลือดเหลือแค่ ${Math.max(1,Math.round(U.F.A.hp))} ถ้าชกต่อแล้วโดนน็อก ต้องพักหลายสัปดาห์ จะโยนผ้าไหม</span></div>`:""}<h3>🏳️ โยนผ้ายอมแพ้?</h3><p>ไฟต์นี้จะนับเป็นแพ้ทันที แต่นักมวยจะไม่เจ็บหนักกว่านี้ (กำลังใจลดลง)</p><div class="ctrl"><button class="btn" data-act="towelno">ชกต่อ</button><button class="btn primary" data-act="towelyes">ยอมแพ้</button></div></div></div>`:"";
-  return `${tw}${fpopHTML()}<div class="fight pxscroll ${U.stage==="corner"?"incorner":U.stage==="done"?"isdone":""}" data-sk="fight" role="dialog" aria-label="การชก"><div class="fight-in"><div class="fhead">${side(me,"a",hpA,stA)}<div class="vsmid"><b>${TIER[b.tier].name}</b>${U.F&&U.F.round&&U.stage==="playing"?(()=>{const s=Math.max(0,Math.round(180*(1-Math.min(U.F.ex||0,EX_PER_ROUND)/EX_PER_ROUND)));return `<span class="meta">ยก ${U.F.round}/${b.rounds}</span><span class="rclock num">${Math.floor(s/60)}:${String(s%60).padStart(2,"0")}</span><i class="rcbar" style="--v:${Math.round(s/1.8)}%"></i><span class="seg sm fspd">${[["1","x1"],["2","x2"]].map(([v,t])=>`<button data-act="fspeed" data-v="${v}" aria-pressed="${String(UI.speed)===v}" aria-label="ความเร็ว ${t}">${t}</button>`).join("")}</span>`;})():`<span class="meta">${b.rounds} ยก</span>`}</div>${side(op,"b",hpB,stB)}</div>${mid}</div></div>`;}
+  return `${tw}${fpopHTML()}<div class="fight pxscroll ${U.stage==="corner"?"incorner":U.stage==="done"?"isdone":""}" data-sk="fight" role="dialog" aria-label="การชก"><div class="fight-in"><div class="fhead">${side(me,"a",hpA,stA)}<div class="vsmid"><b>${TIER[b.tier].name}</b>${U.F&&U.F.round&&U.stage==="playing"?(()=>{const s=Math.max(0,Math.round(180*(1-Math.min(U.F.ex||0,EX_PER_ROUND)/EX_PER_ROUND)));return `<span class="meta">ยก ${U.F.round}/${b.rounds}</span><span class="rclock num">${Math.floor(s/60)}:${String(s%60).padStart(2,"0")}</span><i class="rcbar" style="--v:${Math.round(s/1.8)}%"></i>`;})():`<span class="meta">${b.rounds} ยก</span>`}</div>${side(op,"b",hpB,stB)}</div>${mid}</div></div>`;}
 function liveStats(){const U=UI.fight,F=U.F;if(!F)return "";let la=0,lb=0;
   for(const e of U.shown){if(!e.ev)continue;const sd=sideOf(e,F);if(e.ev==="hit"||e.ev==="counter"){if(sd==="A")la++;else lb++;}}
   const ctl=la+lb?Math.round(la/(la+lb)*100):50;
@@ -10908,7 +10918,7 @@ CHAT.fah.push(
 <script>
 (function(){
 /* v1.87: Thai code ships inside index.html; English code (en.js) and the dictionary (i18n.js) load only when needed */
-var B="47d23a69df";
+var B="7985f251ab";
 var L="";try{L=localStorage.getItem("mtm_lang")||"";}catch(e){}
 try{var h=(location.hash||"").match(/lang=(th|en)/);if(h)L=h[1];}catch(e){}
 if(L!=="th"&&L!=="en")L="th";
