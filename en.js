@@ -473,7 +473,7 @@ function fightEx(F){const rng=F.rng,log=[],ex=F.ex,mA=F.mA,mB=F.mB;
     const tx=TXT[wpn][Math.floor(rng()*TXT[wpn].length)];
     const checked=chkP>0&&rng()<chkP;
     if(checked){at.legs=Math.min(60,at.legs+BAL.chkLegs);at.sta=clamp(at.sta-BAL.chkSta,0,100);at.hp-=BAL.chkHp;df.pts+=.3;df.rpts+=.3;
-      log.push({ha:F.A.hp,hb:F.B.hp,sa:F.A.sta,sb:F.B.sta,s:df===F.A?"A":"B",t:`${df.name} checks the kick from ${at.name}. Shin meets shin!`,k:"miss",ev:"miss",w:wpn,cl:clinch,mside:at===F.A?"A":"B",an:at.name,dn:df.name});}
+      log.push({ha:F.A.hp,hb:F.B.hp,sa:F.A.sta,sb:F.B.sta,s:df===F.A?"A":"B",t:`${df.name} lifts a shin and checks ${at.name}'s kick. Shin meets shin!`,k:"miss",ev:"miss",w:wpn,cl:clinch,mside:at===F.A?"A":"B",an:at.name,dn:df.name});}
     else if(rng()<hitP){
       const crit=rng()<(at.rage?.35:.07);const q=crit?1.6:.6+rng()*.6;if(at.rage)at.rage--;
       let dmg=1.35*W_INFO[wpn].imp*q*(.6+(BAL.specPow?effA(at,"power"):a.power)/25)*(1-d.guard/70)*(1.25-d.dur/40)*(1+(at.sk.dmg[wpn]||0))*(bA&&bA.w===wpn?1+.3*bA.pw:1)*(1+fury*TRV.furyDmg)*(at.libOn?TRV.lib:1)*(at.trait==="rock"?TRV.rockAtk:1)*(df.trait==="rock"?TRV.rockDef:1);const tg=at.tac.target;
