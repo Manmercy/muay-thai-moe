@@ -5,7 +5,7 @@ const vary=(key,arr)=>{if(typeof G==="undefined"||!G)return arr[0];G.vary=G.vary
 const ME=G=>G.player.name,
  // v1.41: the girls call you "ผู้จัดการ" — your name slips out now and then once close, and always once very close
  MEM=(G,k)=>{G.mem=G.mem||{};G.mem[k]=absWeek(G);}, HAS=(G,k,gap)=>G.mem&&G.mem[k]!==undefined&&absWeek(G)-G.mem[k]>=(gap||0),
- CALL=(G,id)=>{const f=G.F[id],b=f?f.bond||0:0;if(G.romance===id||b>=75)return G.player.name;if(b>=40&&Math.random()<.35)return G.player.name;return "Manager";}, PR=G=>G.player.gender==="m"?"":"", PA=G=>G.player.gender==="m"?"":"";
+ CALL=(G,id)=>{const f=G.F[id],b=f?f.bond||0:0;if(G.romance===id||b>=75)return G.player.name;if(b>=40&&Math.random()<.35)return G.player.name;return "Manager";}, PR=G=>G.player.gender==="m"?"":"", PA=G=>G.player.gender==="m"?"":"Mm";
 const SPK={kati:{name:"Kati",color:"#e23b4e"},mali:{name:"Mali",color:"#4a7fe0"},rin:{name:"Rin",color:"#3fae6a"},
   ploy:{name:"Ploy",color:"#9b62e0"},fah:{name:"Fah",color:"#e7b443"},pailin:{name:"Pailin",color:"#8e4ac3"},coach:{name:"Coach Daeng",color:"#c98a5a"},nar:{name:""},me:{name:"(You)"}};
 const HONOR_LABEL={local:"Subdistrict round champion",district:"District round champion",province:"Provincial champion",belt:"Tha Phae Stadium champion",defense:"Tha Phae Stadium title defense",dm:"Death Match champion"};
@@ -405,6 +405,9 @@ function revealFact(G,f,key){if(!key||f.know[key])return null;f.know[key]=true;c
   if(key==="hobby")return `Hobby: ${P.hobby}`;if(key==="bday")return `Birthday: ${P.bday}`;if(key==="blood")return `Blood type: ${P.blood}`;
   const m=key.match(/^(like|dislike)(\d)$/);if(!m)return null;
   return `${m[1]==="like"?"Likes":"Dislikes"}: ${P[m[1]+"s"][+m[2]]}`;}
+// v1.88: heart-level date spots play their own little scene, a different one each visit
+function spotSteps(f,act){const L=typeof HEART_SPOT!=="undefined"&&HEART_SPOT[f.id]&&HEART_SPOT[f.id][act];if(!L||!L.length)return [];
+  f.spotN=f.spotN||{};const k=f.spotN[act]||0;f.spotN[act]=k+1;return L[k%L.length];}
 function dateScene(G,id,act){
   const f=G.F[id],A=ACTIVITIES[act],P=ACT_PREF[id];const rng=Math.random;
   const pref=P.like.includes(act)?"like":P.dislike.includes(act)?"dislike":"ok";
@@ -423,7 +426,7 @@ function dateScene(G,id,act){
     mid=f.momentIdx<M.length?[{n:"nar",t:M[f.momentIdx++]}]:[{n:"nar",t:freshLine(f,"quiet",quiet,rng)}];D.score+=1;}
   const intro=freshOnce(f,"in_"+act,A.intro,rng),opener=freshOnce(f,"op_"+pref,OPENERS[id][pref],rng);
   const steps=[{n:"nar",bg:A.bg,t:intro||`${A.name}`},...(opener?[{n:id,f:pref==="dislike"?"sad":"happy",l:look,t:opener}]:[]),
-    ...mid,...dateTwist(G,f,D,look),
+    ...spotSteps(f,act),...mid,...dateTwist(G,f,D,look),
     {inject:G2=>{const gain=Math.max(0,1+Math.round(D.score*.7));const capped=false,b0=f.bond;add(G2,id,"bond",gain);const real=Math.round(f.bond-b0);if(gain>=4)add(G2,id,"morale",4);
       if(act==="spar"){f.a.iq=Math.min(20,f.a.iq+.3);f.a.guard=Math.min(20,f.a.guard+.3);f.fatigue=Math.min(100,f.fatigue+4);}
       const tier=gain>=5?"great":gain>=2?"ok":"meh";
@@ -1121,6 +1124,18 @@ for(const id of Object.keys(BOND_BEATS))for(const th of [20,55]){
     when:G=>G.F[id]&&G.F[id].met&&(G.F[id].bond||0)>=th&&(id==="ploy"||id==="fah"||G.F[id].camp==="player")&&absWeek(G)-(G.lastBeat||0)>=2,
     steps:[{fx:G=>{G.lastBeat=absWeek(G);}},...BOND_BEATS[id][th]]});}
 
+// ---------- v1.88: heart-level scenes (no gameplay effect — story only) ----------
+const hAt=(G,id)=>G.F[id]?heartLv(G.F[id]).lv:0;
+const HEART_SCENES={
+ kati:{
+ 12:{bg:"camp",steps:[{n:"nar",t:"10 p.m. Kati's light is still on, and you can hear her talking quietly to herself"},{n:"kati",f:"flustered",l:"casual",t:"Manager! …You heard? I'm not crazy. I'm talking to my gloves"},{n:"nar",t:"She holds out a small pair of faded red gloves. The leather is cracked and the laces have been replaced many times"},{n:"kati",f:"happy",l:"casual",t:"The first pair Grandpa bought me, when I was twelve. He haggled for half an hour and got twenty baht off"},{n:"kati",f:"sad",l:"casual",t:"Since Grandpa's been gone I tell them about my day every night. What I trained, what Kru Daeng scolded me for… like telling Grandpa"},{n:"kati",f:"flustered",l:"casual",t:"Lately… most of the stories are about you. The gloves must be sick of your name"},{choice:[{t:"Then tell the gloves I'll look after you",fx:G=>add(G,"kati","bond",3),then:[{n:"kati",f:"flustered",l:"casual",t:"…Tell them yourself. Here"},{n:"nar",t:"You speak to the old gloves. Kati looks away, but her ears have gone bright red"}]},{t:"What's tonight's story? Can I listen?",fx:G=>add(G,"kati","trust",3),then:[{n:"kati",f:"happy",l:"casual",t:"Today's, obviously. You bought coconut water for everyone and forgot your own… the gloves laughed so hard"}]},{t:"You've come a long way from these gloves",fx:G=>add(G,"kati","bond",2),then:[{n:"kati",f:"sad",l:"casual",t:"…I'm not as good as Grandpa hoped yet"},{n:"kati",f:"happy",l:"casual",t:"But I'm still training. Every day. And I'm not training alone anymore"}]}]}]},
+ 15:{bg:"market",steps:[{n:"nar",t:"Kati leads you behind the morning market, down a narrow lane by a fabric shop. She stops in front of a lamppost"},{n:"kati",f:"happy",l:"casual",t:"This is it. Where I fought three boys when I was twelve. They'd taken my friend's shoes"},{n:"kati",f:"pout",l:"casual",t:"I won! …But I had a black eye for two weeks and got called to the teacher's office"},{n:"nar",t:"She points at the old coffee stall across the lane"},{n:"kati",f:"happy",l:"casual",t:"Grandpa was sitting right there watching. Afterwards he walked over, said 'Good punches, but use them in the right place,' and bought me pa thong ko"},{n:"kati",f:"sad",l:"casual",t:"As a kid I thought 'the right place' meant the ring. Win everything, and Grandpa would be proud"},{n:"kati",f:"flustered",l:"casual",t:"But after losing so many times, and you were still here, everyone was still here… I started thinking he meant something else"},{n:"kati",f:"happy",l:"casual",t:"What do you think? Am I using my punches in the right place yet?"},{choice:[{t:"You are. When you use them to protect people, not only when you win",fx:G=>add(G,"kati","bond",3),then:[{n:"kati",f:"happy",l:"casual",t:"…Yeah. I think Grandpa would say the same. Or something shorter, and then buy pa thong ko"}]},{t:"You already know. Say it yourself",fx:G=>add(G,"kati","trust",4),then:[{n:"kati",f:"flustered",l:"casual",t:"…I know. I just wanted to hear it out loud once"},{n:"kati",f:"happy",l:"casual",t:"Then I'll say it. The right place. Because now I fight for the camp, not to prove I'm worth something"}]},{t:"Not yet. You've still got a lot to learn",fx:G=>add(G,"kati","bond",1),then:[{n:"kati",f:"pout",l:"casual",t:"Mean! …But true. I'll keep learning. You have to be the one teaching me though"}]}]},{n:"nar",t:"On the way back Kati stops at the same stall for two bags of pa thong ko. One for you, one for Grandpa's picture at the camp"}]},
+ 20:{bg:"camp",steps:[{n:"nar",t:"On a day off, Kati carries an old wooden box out of the storeroom. Inside is a thick red hardback ledger"},{n:"kati",f:"happy",l:"casual",t:"The Sirichai Camp roll book. Grandpa wrote down everyone who ever trained here, since the camp opened forty years ago"},{n:"nar",t:"On the last page, in Grandpa's scrawl: 'Kati — the last pupil.' The rest of the page is blank"},{n:"kati",f:"sad",l:"casual",t:"He wrote 'the last.' I haven't dared open it in years"},{inject:G=>[{n:"kati",f:"happy",l:"casual",t:roster(G).length>1?"But it isn't the last anymore. I've written everyone in the camp in after me":"I've added every new fighter who's come through after me, however long they stayed"}]},{n:"kati",f:"flustered",l:"casual",t:"But there's one name I didn't know where to put… not a pupil, not exactly a teacher"},{n:"kati",f:"happy",l:"casual",t:"So I made a new column"},{n:"nar",t:"She turns the page. A new heading in big red pen: 'Family.' Underneath is one name. Yours"},{choice:[{t:"Can I write your name next to mine?",fx:G=>add(G,"kati","bond",3),then:[{inject:G=>G.romance==="kati"?[{n:"kati",f:"flustered",l:"casual",t:"…Okay. Write it close. The column's small"}]:[{n:"kati",f:"happy",l:"casual",t:"Yes! A family needs at least two people anyway"}]}]},{t:"This camp is my home now too",fx:G=>add(G,"kati","trust",4),then:[{n:"kati",f:"happy",l:"casual",t:"Yeah… a home where someone's waiting. I haven't felt that since Grandpa"}]},{t:"Grandpa would love to see this page",fx:G=>add(G,"kati","bond",2),then:[{n:"kati",f:"sad",l:"casual",t:"…I'll leave it in front of his picture tonight. Let him read it first"}]}]},{inject:G=>G.romance==="kati"?[{n:"kati",f:"flustered",l:"casual",t:"Someday… this heading might need changing. You don't have to answer now!"}]:[{n:"kati",f:"happy",l:"casual",t:"Promise me. Whatever happens to the camp, no name on this page ever gets crossed out"}]}]}}};
+for(const id in HEART_SCENES)for(const lv in HEART_SCENES[id]){const S=HEART_SCENES[id][lv];
+  EVENTS.push({id:`hs_${id}_${lv}`,look:"casual",bg:S.bg,
+    when:G=>{const f=G.F[id];return !!(f&&f.met&&hAt(G,id)>=+lv&&(S.need?S.need(G):f.camp==="player")&&absWeek(G)-(G.lastBeat||0)>=2);},
+    steps:[{fx:G=>{G.lastBeat=absWeek(G);}},...S.steps]});}
+
 // ---------- sportsmanship ----------
 EVENTS.push(
  {id:"sp_ploy_return",look:"casual",bg:"gym",when:G=>G.flags&&G.flags.vs_ploy&&G.week<48&&metR(G,"ploy")&&inCamp(G,"kati"),steps:[
@@ -1506,7 +1521,7 @@ EVENTS.push(
 const fahRival=G=>G.F.fah&&G.F.fah.camp==="rival";
 EVENTS.push(
  {id:"fah_trainer",look:"casual",bg:"night",when:G=>(G.season||1)>=2&&G.week>=4&&fahRival(G)&&G.F.fah.met,steps:[
-  {n:"nar",t:"9 p.m., by the river behind the camp. Someone is hurling stones into the water. Familiar messy blond hair."},
+  {n:"nar",t:"9 p.m., by the river behind the camp. Someone is hurling stones into the water. Familiar messy silver hair."},
   {n:"fah",f:"angry",l:"casual",t:"Golden Tiger hired a new coach from Bangkok, Coach Kraingkrai! No smiling in the ring, no showboating, no dancing when I win, no being Fah!"},
   {n:"fah",f:"sad",l:"casual",t:"He says I fight like a kid playing around… If I don't change, he'll replace me with the new kid he's been grooming."},
   {choice:[{t:"Your style is your strength. Don't throw it away.",fx:G=>{add(G,"fah","bond",5);add(G,"fah","trust",3);},then:[{n:"fah",f:"flustered",l:"casual",t:"…You're the first person to say that. And you're from a different camp."}]},
@@ -1522,9 +1537,9 @@ EVENTS.push(
       :[{n:"nar",t:"Fah's buyout is a steep ฿60,000. Golden Tiger won't let its star go cheap. The camp can't afford it yet. Fah says she'll wait and ask again."},{n:"fah",f:"pout",l:"casual",t:"…It's okay. I can wait. Just not too long!"}]}]},
    {t:"Give me time to get the camp ready first.",fx:G=>{G.flags.fahRetry=absWeek(G)+6;G.seen.fah_join=false;add(G,"fah","trust",2);},then:[{n:"fah",f:"pout",l:"casual",t:"Fine! I'm not in a hurry anyway! …I'll ask again in a month."}]}]}]},
  {id:"prodigy_intro",look:"fight",bg:"ring",when:G=>!!(G.prodigy&&G.prodigy.B)&&G.flags.fahJoinedAbs!=null&&absWeek(G)>G.flags.fahJoinedAbs,steps:[
-  {n:"nar",t:"At the district stadium, Golden Tiger unveils a new fighter: a high blond ponytail just like Fah used to wear, black kit with gold trim, a face without expression. She kicks the bag so hard the chain rattles."},
+  {n:"nar",t:"At the district stadium, Golden Tiger unveils a new fighter: a high silver ponytail just like Fah used to wear, black kit with gold trim, a face without expression. She kicks the bag so hard the chain rattles."},
   {n:"npc",who:"Coach Kraingkrai",t:"Baiyok, Golden Tiger disciple. Trains ten hours a day. Doesn't smile, doesn't show off, doesn't lose. …Those who left the camp will see what they gave up."},
-  {n:"fah",f:"sad",l:"casual",t:"Baiyok… When I was there, she never got a day off. Nobody ever asked her to eat with them."},{n:"fah",f:"angry",l:"casual",t:"And the coach made her dye her hair blond like mine! Blond is MY thing! …It's not a uniform."},
+  {n:"fah",f:"sad",l:"casual",t:"Baiyok… When I was there, she never got a day off. Nobody ever asked her to eat with them."},{n:"fah",f:"angry",l:"casual",t:"And the coach made her dye her hair silver like mine! Silver is MY thing! …It's not a uniform."},
   {inject:G=>inCamp(G,"mali")?[{n:"mali",f:"angry",l:"train",t:"My new rival, huh… Good. I won't lose to someone who fights without joy!"}]:[]},
   {n:"nar",t:"(Baiyok becomes the top rival in Division B, taking Fah's place)"}]},
  {id:"fah_settle",look:"casual",bg:"camp",when:G=>inCamp(G,"fah")&&G.flags.fahJoinedAbs!=null&&absWeek(G)>=G.flags.fahJoinedAbs+2,steps:[
@@ -1824,12 +1839,12 @@ Object.assign(CARDS,{
   {n:"ploy",f:"happy",l:"fight",t:"Don't look at me like that. I'm not upset. Strange… I feel lighter."},
   {n:"ploy",f:"happy",l:"fight",t:"Since I was twelve, everyone told me I must never lose. Tonight I lost, and the world didn't end."},
   {n:"ploy",f:"flustered",l:"fight",t:"Tell that girl for me: next time I won't be a genius who can't lose. I'll be an opponent who really wants to beat her."}]},
- e_fahjoin:{c:"fah",r:"SR",t:"The Blonde Moves In",hint:"Fah moves to Sirichai Camp",bg:"camp",need:G=>inCamp(G,"fah"),steps:[
+ e_fahjoin:{c:"fah",r:"SR",t:"The Silver-Hair Moves In",hint:"Fah moves to Sirichai Camp",bg:"camp",need:G=>inCamp(G,"fah"),steps:[
   {n:"nar",t:"Fah's first day at Sirichai Camp. She brings three bags: two of clothes, one of hairspray and water guns."},
   {n:"fah",f:"happy",l:"casual",t:"Where's Fah's room! …This one? It's tiny! …But you can see the mountain from the window. Okay, Fah'll take it!"},
   {n:"fah",f:"flustered",l:"casual",t:"At Golden Tiger, Fah always ate alone, because the coach said star fighters shouldn't get close to anyone."},
   {n:"fah",f:"pout",l:"casual",t:"Here everyone eats together and fights over the omelet… Fah likes it. Don't tell anyone."},
-  {n:"fah",f:"happy",l:"casual",t:"Blonde hair belongs to Fah! Anyone who copies gets kicked! …Except you, Manager. You can dye yours."}]},
+  {n:"fah",f:"happy",l:"casual",t:"Silver hair belongs to Fah! Anyone who copies gets kicked! …Except you, Manager. You can dye yours."}]},
  e_ployjoin:{c:"ploy",r:"SR",t:"First Cup of Tea at Sirichai",hint:"Ploy moves to Sirichai Camp to recover",bg:"camp",need:G=>inCamp(G,"ploy"),steps:[
   {n:"nar",t:"Before dawn on her first day, Ploy is up before everyone, walking slowly on crutches to boil water in the camp's little kitchen."},
   {n:"ploy",f:"happy",l:"casual",t:"You're an early riser too… Dan Kwian tea, I brought it from home. Want some?"},
@@ -1877,8 +1892,8 @@ Object.assign(CARDS,{
   {n:"nar",t:"Ploy's birthday is New Year's Day, so nobody has ever remembered it. Everyone is too busy celebrating the new year."},
   {n:"ploy",f:"surprised",l:"casual",t:"…You actually remembered? January first. Everyone forgets, even me some years."},
   {n:"ploy",f:"happy",l:"casual",t:"This year I'll count it as my real birthday, not just everyone else's holiday. Thank you."}]},
- b_fah:{c:"fah",r:"R",t:"Blonde Halloween",hint:"Celebrate Fah's birthday",bg:"market",need:G=>bdGot(G,"fah"),steps:[
-  {n:"nar",t:"Fah's birthday falls on Halloween. She dresses as a blonde witch and hands out candy across the whole market."},
+ b_fah:{c:"fah",r:"R",t:"Silver-Haired Halloween",hint:"Celebrate Fah's birthday",bg:"market",need:G=>bdGot(G,"fah"),steps:[
+  {n:"nar",t:"Fah's birthday falls on Halloween. She dresses as a silver-haired witch and hands out candy across the whole market."},
   {n:"fah",f:"happy",l:"casual",t:"Today is Fah's day! The whole world dressed up to celebrate Fah! …It didn't? Whatever, Fah thinks it did."},
   {n:"fah",f:"flustered",l:"casual",t:"Your present goes in Fah's special box… Don't read into it. There's only one thing in that box."}]}});
 
