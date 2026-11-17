@@ -1,5 +1,5 @@
 // ================= MUAY THAI MOE v1.3 — UI =================
-const VERSION="1.87.1";
+const VERSION="1.87.2";
 const CUR_LANG=(typeof window!=="undefined"&&window.LANG)||"th";
 const TH_LABEL=String.fromCharCode(3652,3607,3618);
 function langSwitch(cls){return `<div class="langsw ${cls||""}" role="group" aria-label="Language">${[["th",TH_LABEL],["en","EN"]].map(([k,l])=>`<button class="lsb ${CUR_LANG===k?"on":""}" data-act="setlang" data-v="${k}" aria-pressed="${CUR_LANG===k}">${l}</button>`).join("")}</div>`;}
@@ -877,7 +877,7 @@ function gboxHTML(){const loy=GB.box==="loy",s=GB.st,cost=gbCost(),ok=(G.dust||0
      <p>${loy?"This machine is only open during Loy Krathong. ":""} Cards you already own are kept as spares. Use them to level up the card or break them into stardust on the card page.</p>
      <button class="btn" data-act="gboxq">Close</button></div></div>`:""}
   </div>`;}
-const PATCH={id:"1.87.1",ver:"Muay Thai Moe v1.87.1",title:"News from Sirichai Camp",lead:"Everyone has a signature trait, counter-training works better, a new gacha machine, rivals have more to say, and the game opens faster.",items:[
+const PATCH={id:"1.87.1",ver:"Muay Thai Moe v1.87.2",title:"News from Sirichai Camp",lead:"Everyone has a signature trait, counter-training works better, a new gacha machine, rivals have more to say, and the game opens faster.",items:[
  ["✦","Two innate traits per girl","Every girl has two innate traits to switch between on the skill page, like Mali's Move Like Water, Rin's Walking Library, Fah's Hard as Stone and Ploy's Godlike Timing"],
  ["🥊","Counter-training works better","Counter-train before a fight and on fight night the opponent's main weapon lands less often while you read their game better. It helps a lot against the top fighters in later years"],
  ["📖","Missed story arcs are back","If you skipped Pailin and Vector Gym, or Fah and Ploy's second-year stories, they now start in the year you're playing. No need for a new save"],
@@ -888,7 +888,9 @@ const PATCH={id:"1.87.1",ver:"Muay Thai Moe v1.87.1",title:"News from Sirichai C
  ["📊", "Opponent levels show real strength", "An opponent's level is read against our best fighter in her division: a clearly stronger one sits 2–3 levels above us. Her sheet says stronger, even or weaker than ours, and if she has improved, her level is higher next time you meet."],
  ["🖤", "Vector camp in black and purple", "Night and Vega now wear the camp's black-and-purple kit, and the Vector camp has its own post-fight lines, sneering at the country camp, until the contract story."],
  ["💬", "More post-fight lines", "Opponents say funny and serious things and remember your record: lose to us often and they grumble, beat us often and they tell you to go train. Ploy is a colder prodigy now, and no longer calls out Kati after fighting someone else."],
- ["⚡","The game opens faster","The game file is less than half its old size, loading a save shows a camp-prep screen with tips, and art stays on your device so the next visit opens instantly"]],
+ ["⚡","The game opens faster","The game file is less than half its old size, loading a save shows a camp-prep screen with tips, and art stays on your device so the next visit opens instantly"],
+ ["🏮","Loy Krathong gacha opens Nov 18","The Loy Krathong gacha and code LOYKRATHONG69 open together, Nov 18 – Dec 7"],
+ ["🎴","Album keeps your place","View a card hint or open the gacha from the album and you come back to the same spot"]],
  foot:"Here's hoping you find a golden capsule ✦"};
 function maybeWhatsNew(){if(!G||G.ended||UI.scene)return;if(G.newsSeen===PATCH.id)return;UI.modal={type:"whatsnew"};}
 function whatsNewHTML(){return `<div class="wnew"><span class="pill gold">Update · ${esc(PATCH.ver)}</span><h2>🥊 ${esc(PATCH.title)}</h2><p class="lead">${esc(PATCH.lead)}</p>
