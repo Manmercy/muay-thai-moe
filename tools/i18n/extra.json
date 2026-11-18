@@ -11425,5 +11425,19 @@
  "…อยากกินขนมครกอีกถาดค่ะ! ใช่ ๆ ขนมครก!": "…that I want another tray of khanom khrok! Yes, yes, khanom khrok!",
  "เอ่อ… คือมะลิ… มะลิอยากจะบอกว่า…": "Um… so, I… I wanted to say…",
  "…ไม่มีอะไรค่ะ! ลืมไปเถอะนะคะ กลับค่ายกันเถอะ": "…It's nothing! Please forget it. Let's head back to camp.",
- "ผู้จัดการคะ… หนูมีเรื่องอยากบอกมานานแล้ว คือว่า…": "Manager… there's something I've wanted to tell you for a long time. It's…"
+ "ผู้จัดการคะ… หนูมีเรื่องอยากบอกมานานแล้ว คือว่า…": "Manager… there's something I've wanted to tell you for a long time. It's…",
+ "% (อีก ": "% (",
+ " รายได้นักเรียนเหลือ ": ": student income at ",
+ "ธีมปีนี้นักท่องเที่ยวเยอะ รายได้นักเรียน ×1.2": "Tourist year: student income ×1.2",
+ " <small class=\"meta\">(แตะดูรายละเอียด)</small></span><b class=\"num neg\">-": " <small class=\"meta\">(tap for details)</small></span><b class=\"num neg\">-",
+ "ผู้ช่วยครู ": "Assistant coaches: ",
+ "ค่ายใหญ่ขึ้น (ค่าย Lv.": "Bigger camp (camp Lv.",
+ " ระดับ × ฿220": " levels × ฿220",
+ "อัปเกรดค่ายรวม ": "Camp upgrades: ",
+ "ค่าดูแลค่ายพื้นฐาน": "Base camp upkeep",
+ "\n    <div class=\"kv-row\"><b>สุทธิ</b><b class=\"num ": "\n    <div class=\"kv-row\"><b>Net</b><b class=\"num ",
+ "ค่าจ้างนักมวยและผู้ช่วยครู": "Fighter and coach wages",
+ "ค่าใช้จ่ายค่าย": "Camp upkeep",
+ "อาหารสัตว์เลี้ยง (": "Pet food (",
+ " ตัว)": " pets)"
 }

@@ -2159,3 +2159,8 @@ html[lang=en] .fight .fctl2 .skbtn2 b{font-size:11px;display:-webkit-box;-webkit
 
 /* v1.90.2: stats / history / training tabs scroll as one page too — on iPhone Safari the flex-column body would not take a touch scroll, so the detailed stats under the radar could not be reached */
 .modal.fpm.t-over .fp-body,.modal.fpm.t-rel .fp-body,.modal.fpm.t-train .fp-body{display:block;overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;touch-action:pan-y}
+
+/* v1.90.7: money tab breakdowns */
+.kvd>summary{list-style:none;cursor:pointer}.kvd>summary::-webkit-details-marker{display:none}
+.kvd>summary small.meta{font-size:11px;opacity:.7}.kvd[open]>summary small.meta{display:none}
+.kv-sub{padding:2px 0 6px 12px;font-size:12px;color:var(--muted,#b9b0d8)}.kv-sub>div{display:flex;justify-content:space-between;gap:10px;padding:2px 0}

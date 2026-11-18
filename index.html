@@ -2164,6 +2164,11 @@ html[lang=en] .fight .fctl2 .skbtn2 b{font-size:11px;display:-webkit-box;-webkit
 
 /* v1.90.2: stats / history / training tabs scroll as one page too — on iPhone Safari the flex-column body would not take a touch scroll, so the detailed stats under the radar could not be reached */
 .modal.fpm.t-over .fp-body,.modal.fpm.t-rel .fp-body,.modal.fpm.t-train .fp-body{display:block;overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;touch-action:pan-y}
+
+/* v1.90.7: money tab breakdowns */
+.kvd>summary{list-style:none;cursor:pointer}.kvd>summary::-webkit-details-marker{display:none}
+.kvd>summary small.meta{font-size:11px;opacity:.7}.kvd[open]>summary small.meta{display:none}
+.kv-sub{padding:2px 0 6px 12px;font-size:12px;color:var(--muted,#b9b0d8)}.kv-sub>div{display:flex;justify-content:space-between;gap:10px;padding:2px 0}
 </style></head><body>
 <div id="app"></div><div id="live" aria-live="polite" role="status"></div>
 <script type="text/plain" id="js-th">
@@ -8677,9 +8682,9 @@ function campHTML(){const inc=classIncome(G),up=upkeep(G),wg=wages(G),lv=campLev
    ${recruitHTML(recs)}
    <div class="grid g2">
    <section class="px card cpane ${cs==="money"?"on":""}"><h3>รายรับ-รายจ่ายต่อสัปดาห์</h3>
-    <div class="kv-row"><span>นักเรียน ${students(G)} คน × ${fmt(studentFee(G))}</span><b class="num pos">+${fmt(inc)}</b></div>
-    <div class="kv-row"><span>ค่าใช้จ่ายค่าย</span><b class="num neg">-${fmt(up)}</b></div>
-    <div class="kv-row"><span>ค่าจ้างนักมวยและผู้ช่วยครู</span><b class="num neg">-${fmt(wg)}</b></div>
+    <div class="kv-row"><span>นักเรียน ${students(G)} คน × ${fmt(studentFee(G))}</span><b class="num pos">+${fmt(inc)}</b></div>${incNote(G)}
+    ${kvDetails("ค่าใช้จ่ายค่าย",up,upkeepParts(G))}
+    ${kvDetails("ค่าจ้างนักมวยและผู้ช่วยครู",wg,wageParts(G))}
     <div class="kv-row"><b>สุทธิ</b><b class="num ${weeklyNet(G)<0?"neg":"pos"}">${fmt(weeklyNet(G))}</b></div>
     <div class="kv-row"><span>หนี้ ${fmt(G.debt)} · ผ่อนทุก 4 สัปดาห์ ${fmt(Math.min(5000,G.debt))}</span><button class="btn sm" data-act="paydebt" ${G.cash<10000||G.debt<=0?"disabled":""}>โปะ ฿10,000</button></div>
     ${G.loan>0?`<div class="kv-row loanrow"><span>เงินกู้หมวกทอง ${fmt(G.loan)} · ดอก 10% ทุก 4 สัปดาห์</span><button class="btn sm gold" data-act="repayloan" ${G.cash<G.loan?"disabled":""}>คืนทั้งหมด</button></div>`:loanOk(G)?`<div class="kv-row loanrow"><span>เงินใกล้หมด · มีเงินกู้ด่วนให้ยืม</span><button class="btn sm red" data-act="loan">ดูเงินกู้</button></div>`:""}</section>
@@ -8903,6 +8908,14 @@ function weekCards(r){const R=roster(G);if(!R.length)return "";const P={};(r.pro
   return `<div class="wkcards">${R.map(f=>{const p=P[f.id];const nb=nextBooking(f);return `<div class="wkc px">${faceImg(f,"sm")}<b>${esc(f.name)} <span class="lv">Lv.${f.lvl}</span></b>
     <div class="minis"><span>EXP</span>${mini(f.xp/Math.max(1,xpNeed(f))*100,"var(--gold)")}<span>ล้า</span>${mini(f.fatigue,f.fatigue>=52?"var(--red)":"var(--warn)")}</div>
     ${p?radarSVG(f,110,p.before):""}<span class="meta">${f.injury?`<span class="redt">เจ็บ ${f.injury} สด.</span>`:nb?`ไฟต์ สด.${nb.week}`:"ยังไม่มีไฟต์"}${f.sp>0?' · <span class="goldt">มีแต้มสกิล</span>':""}</span></div>`;}).join("")}</div>`;}
+/* v1.90.7: the money tab says where the weekly costs come from (players could not tell what "camp upkeep" was) */
+function upkeepParts(G){const t=facTotal(G),lv=campLevel(G),pf=petFood(G),P=[["ค่าดูแลค่ายพื้นฐาน",1800],[`อัปเกรดค่ายรวม ${t} ระดับ × ฿220`,t*220]];
+  if(lv>1)P.push([`ค่ายใหญ่ขึ้น (ค่าย Lv.${lv})`,[0,0,800,1800][lv]]);if(pf)P.push([`อาหารสัตว์เลี้ยง (${(G.pets||[]).length} ตัว)`,pf]);return P;}
+function wageParts(G){const P=roster(G).map(f=>[`${f.name} (Lv.${f.lvl||1})`,wageOf(f)]).filter(x=>x[1]>0);
+  if(G.staff)G.staff.forEach(k=>STAFF[k]&&P.push([`${STAFF[k].name} · ${STAFF[k].role}`,STAFF[k].wage]));else if(G.fac.assistants)P.push([`ผู้ช่วยครู ${G.fac.assistants} คน`,G.fac.assistants*2500]);return P;}
+const kvDetails=(label,total,parts)=>`<details class="kvd"><summary class="kv-row"><span>${label} <small class="meta">(แตะดูรายละเอียด)</small></span><b class="num neg">-${fmt(total)}</b></summary><div class="kv-sub">${parts.map(([n,v])=>`<div><span>${esc(n)}</span><span class="num">-${fmt(v)}</span></div>`).join("")}</div></details>`;
+function incNote(G){const L=[];if(ytKey(G)==="tourist")L.push("ธีมปีนี้นักท่องเที่ยวเยอะ รายได้นักเรียน ×1.2");if(G.disaster&&gameWeek(G)<G.disaster.untilAbs)L.push(`${G.disaster.name} รายได้นักเรียนเหลือ ${Math.round((G.disaster.inc||0)*100)}% (อีก ${G.disaster.untilAbs-gameWeek(G)} สัปดาห์)`);
+  return L.length?`<div class="kv-sub">${L.map(t=>`<div><span>${esc(t)}</span></div>`).join("")}</div>`:"";}
 function reportHTML(){const r=G.lastReport;const ann=[];
   for(const d of ["A","B"])for(const [id,pos] of Object.entries(r.rank[d]||{})){const f=G.F[id];if(!f||(f.camp!=="player"&&f.camp!=="rival"))continue;
     const m=(r.move&&r.move[d]&&r.move[d][id])||0;ann.push({f,pos,m,d});}
@@ -12191,7 +12204,7 @@ CHAT.fah.push(
 <script>
 (function(){
 /* v1.87: Thai code ships inside index.html; English code (en.js) and the dictionary (i18n.js) load only when needed */
-var B="426fea8c84";
+var B="41bb2d0a1c";
 var L="";try{L=localStorage.getItem("mtm_lang")||"";}catch(e){}
 try{var h=(location.hash||"").match(/lang=(th|en)/);if(h)L=h[1];}catch(e){}
 if(L!=="th"&&L!=="en")L="th";

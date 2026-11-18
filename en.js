@@ -6517,9 +6517,9 @@ function campHTML(){const inc=classIncome(G),up=upkeep(G),wg=wages(G),lv=campLev
    ${recruitHTML(recs)}
    <div class="grid g2">
    <section class="px card cpane ${cs==="money"?"on":""}"><h3>Weekly income & expenses</h3>
-    <div class="kv-row"><span>Students ${students(G)} × ${fmt(studentFee(G))}</span><b class="num pos">+${fmt(inc)}</b></div>
-    <div class="kv-row"><span>Camp upkeep</span><b class="num neg">-${fmt(up)}</b></div>
-    <div class="kv-row"><span>Fighter & assistant wages</span><b class="num neg">-${fmt(wg)}</b></div>
+    <div class="kv-row"><span>Students ${students(G)} × ${fmt(studentFee(G))}</span><b class="num pos">+${fmt(inc)}</b></div>${incNote(G)}
+    ${kvDetails("Camp upkeep",up,upkeepParts(G))}
+    ${kvDetails("Fighter and coach wages",wg,wageParts(G))}
     <div class="kv-row"><b>Net</b><b class="num ${weeklyNet(G)<0?"neg":"pos"}">${fmt(weeklyNet(G))}</b></div>
     <div class="kv-row"><span>Debt ${fmt(G.debt)} · paid every 4 weeks ${fmt(Math.min(5000,G.debt))}</span><button class="btn sm" data-act="paydebt" ${G.cash<10000||G.debt<=0?"disabled":""}>Pay ฿10,000</button></div>
     ${G.loan>0?`<div class="kv-row loanrow"><span>Gold Helmet loan ${fmt(G.loan)} · 10% interest every 4 weeks</span><button class="btn sm gold" data-act="repayloan" ${G.cash<G.loan?"disabled":""}>Repay all</button></div>`:loanOk(G)?`<div class="kv-row loanrow"><span>Cash is running out · a quick loan is available</span><button class="btn sm red" data-act="loan">See loan</button></div>`:""}</section>
@@ -6743,6 +6743,14 @@ function weekCards(r){const R=roster(G);if(!R.length)return "";const P={};(r.pro
   return `<div class="wkcards">${R.map(f=>{const p=P[f.id];const nb=nextBooking(f);return `<div class="wkc px">${faceImg(f,"sm")}<b>${esc(f.name)} <span class="lv">Lv.${f.lvl}</span></b>
     <div class="minis"><span>EXP</span>${mini(f.xp/Math.max(1,xpNeed(f))*100,"var(--gold)")}<span>Fatigue</span>${mini(f.fatigue,f.fatigue>=52?"var(--red)":"var(--warn)")}</div>
     ${p?radarSVG(f,110,p.before):""}<span class="meta">${f.injury?`<span class="redt">Hurt ${f.injury} wk</span>`:nb?`Fight wk ${nb.week}`:"No fight yet"}${f.sp>0?" · <span class=\"goldt\">Skill points</span>":""}</span></div>`;}).join("")}</div>`;}
+/* v1.90.7: the money tab says where the weekly costs come from (players could not tell what "camp upkeep" was) */
+function upkeepParts(G){const t=facTotal(G),lv=campLevel(G),pf=petFood(G),P=[["Base camp upkeep",1800],[`Camp upgrades: ${t} levels × ฿220`,t*220]];
+  if(lv>1)P.push([`Bigger camp (camp Lv.${lv})`,[0,0,800,1800][lv]]);if(pf)P.push([`Pet food (${(G.pets||[]).length} pets)`,pf]);return P;}
+function wageParts(G){const P=roster(G).map(f=>[`${f.name} (Lv.${f.lvl||1})`,wageOf(f)]).filter(x=>x[1]>0);
+  if(G.staff)G.staff.forEach(k=>STAFF[k]&&P.push([`${STAFF[k].name} · ${STAFF[k].role}`,STAFF[k].wage]));else if(G.fac.assistants)P.push([`Assistant coaches: ${G.fac.assistants} fighters in camp`,G.fac.assistants*2500]);return P;}
+const kvDetails=(label,total,parts)=>`<details class="kvd"><summary class="kv-row"><span>${label} <small class="meta">(tap for details)</small></span><b class="num neg">-${fmt(total)}</b></summary><div class="kv-sub">${parts.map(([n,v])=>`<div><span>${esc(n)}</span><span class="num">-${fmt(v)}</span></div>`).join("")}</div></details>`;
+function incNote(G){const L=[];if(ytKey(G)==="tourist")L.push("Tourist year: student income ×1.2");if(G.disaster&&gameWeek(G)<G.disaster.untilAbs)L.push(`${G.disaster.name}: student income at ${Math.round((G.disaster.inc||0)*100)}% (${G.disaster.untilAbs-gameWeek(G)} wk)`);
+  return L.length?`<div class="kv-sub">${L.map(t=>`<div><span>${esc(t)}</span></div>`).join("")}</div>`:"";}
 function reportHTML(){const r=G.lastReport;const ann=[];
   for(const d of ["A","B"])for(const [id,pos] of Object.entries(r.rank[d]||{})){const f=G.F[id];if(!f||(f.camp!=="player"&&f.camp!=="rival"))continue;
     const m=(r.move&&r.move[d]&&r.move[d][id])||0;ann.push({f,pos,m,d});}
