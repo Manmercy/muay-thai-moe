@@ -4842,7 +4842,7 @@ function sheetFor(f){
       const dd=mx-mn;let s=l>.5?dd/(2-mx-mn):dd/(mx+mn);let h=mx===r?(g-b)/dd+(g<b?6:0):mx===g?(b-r)/dd+2:(r-g)/dd+4;h/=6;
       if(blonde&&l>.07&&l<.42&&!(h>.53&&h<.74&&s>.25)&&!((h<.035||h>.93)&&s>.38)&&(s<.45||(h>.02&&h<.16))){gold();continue;}
       const red=(h<.035||h>.93)&&s>.38&&l>.12&&l<.8,blue=h>.53&&h<.74&&s>.25&&l>.1,kit=NPC_KIT[base]&&NPC_KIT[base](h,l,s);if(!red&&!blue&&!kit)continue; // outfit only: skin & hair stay
-      h=th;if(dark){s*=.15;l*=.55;}else if(lab){if(l<.5){s*=.35;l*=.3;}else{s=Math.min(.8,Math.max(s,.55));l=Math.min(.5,l*.6);}} /* black kit, purple highlights */
+      h=th;/* v1.89.27: never dye a kit near-white (Man: no white NPC kits) */if(!dark&&!lab&&l>.78&&s<.35){l=.6;s=Math.max(s,.5);}if(dark){s*=.15;l*=.55;}else if(lab){if(l<.5){s*=.35;l*=.3;}else{s=Math.min(.8,Math.max(s,.55));l=Math.min(.5,l*.6);}} /* black kit, purple highlights */
       const q=l<.5?l*(1+s):l+s-l*s,pp=2*l-q;const fn=t=>{t=(t+1)%1;return t<1/6?pp+(q-pp)*6*t:t<1/2?q:t<2/3?pp+(q-pp)*(2/3-t)*6:pp;};
       p[i]=fn(h+1/3)*255;p[i+1]=fn(h)*255;p[i+2]=fn(h-1/3)*255;}
     x.putImageData(d,0,0);}catch(e){}
@@ -5771,7 +5771,7 @@ AU.gsfx=function(kind,a){if(!this.init()||this.muted||!SETTINGS.sfx)return;const
   if(kind==="shimmer")for(let i=0;i<6;i++)T(i*.05,{f:1400+Math.random()*1400,type:"sine",dur:.12,peak:.06});};
 
 // ================= MUAY THAI MOE v1.3 — UI =================
-const VERSION="1.89.27";
+const VERSION="1.89.28";
 const CUR_LANG=(typeof window!=="undefined"&&window.LANG)||"th";
 const TH_LABEL=String.fromCharCode(3652,3607,3618);
 function langSwitch(cls){return `<div class="langsw ${cls||""}" role="group" aria-label="Language">${[["th",TH_LABEL],["en","EN"]].map(([k,l])=>`<button class="lsb ${CUR_LANG===k?"on":""}" data-act="setlang" data-v="${k}" aria-pressed="${CUR_LANG===k}">${l}</button>`).join("")}</div>`;}
