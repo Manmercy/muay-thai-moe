@@ -1141,7 +1141,11 @@ function genOffers(G,opt){
   // v1.89.25: Baiyok's rematch letters to Fah — twice a year from her second season on, before and after she leaves Golden Tiger
   {const pb=G.prodigy&&G.prodigy.B,o=pb&&G.F[pb],fah=G.F.fah;if(o&&fah&&fah.camp==="player"&&(G.season||1)>=2&&[14,30].includes(G.week)&&!o.injury&&!fah.injury&&!(typeof isAway==="function"&&isAway(G,"fah"))){
     const wk=[G.week+3,G.week+4,G.week+2].find(w=>w<=48&&!isBooked(G,o.id,w)&&!G.bookings.some(b=>b.a==="fah"&&Math.abs(b.week-w)<=1));
-    if(wk&&!G.offers.some(x=>x.a==="fah"&&x.b===o.id))G.offers.push({id:`o${G.week}_fah_by`,a:"fah",b:o.id,week:wk,tier:"special",rv:1,by:1,win:Math.round(TIER.special.win*1.6/100)*100,lose:Math.round(TIER.special.lose*1.4/100)*100});}}
+    if(wk){G.offers=G.offers.filter(x=>!(x.a==="fah"&&x.b===o.id));G.offers.push({id:`o${G.week}_fah_by`,a:"fah",b:o.id,week:wk,tier:"special",rv:1,by:1,win:Math.round(TIER.special.win*1.6/100)*100,lose:Math.round(TIER.special.lose*1.4/100)*100});}}}
+  // v1.89.27: Petchara's yearly challenge letter to Kati (week 12; the grudge offers at 25/29/33/36 come on top)
+  {const pa=G.prodigy&&G.prodigy.A,o=pa&&G.F[pa],k=G.F.kati;if(o&&o.camp==="rival"&&k&&k.camp==="player"&&(G.season||1)>=2&&G.week===12&&!o.injury&&!k.injury&&!(typeof isAway==="function"&&isAway(G,"kati"))){
+    const wk=[G.week+3,G.week+4,G.week+2].find(w=>w<=48&&!isBooked(G,o.id,w)&&!G.bookings.some(b=>b.a==="kati"&&Math.abs(b.week-w)<=1));
+    if(wk){G.offers=G.offers.filter(x=>!(x.a==="kati"&&x.b===o.id));G.offers.push({id:`o${G.week}_kati_pc`,a:"kati",b:o.id,week:wk,tier:"special",rv:1,pc:1,win:Math.round(TIER.special.win*1.6/100)*100,lose:Math.round(TIER.special.lose*1.4/100)*100});}}}
   // v1.33: temple-fair bouts every other week: off the ranking, paid later by mail, now and then a cross-division star
   if(G.week>=4&&G.week<=46&&G.week%2===0){const R=roster(G).filter(f=>!f.injury);if(R.length){const f=R[Math.floor(rng()*R.length)];
     const myB=G.bookings.filter(b=>b.a===f.id).map(b=>b.week);const wk=[G.week+1,G.week+2,G.week+3].find(w=>!myB.some(x=>Math.abs(x-w)<=1)&&!G.offers.some(x=>x.a===f.id&&x.week===w));
@@ -1286,7 +1290,7 @@ function makeProdigy(G,div,from){G.prodigy=G.prodigy||{};if(G.prodigy[div])retur
   const names={A:["Petcha Golden Tiger","Petcha"],B:["Baiyok Golden Tiger","Baiyok"]};
   const f=baseFighter(id,{name:names[div][1],full:names[div][0],div,camp:"rival",color:"#3b3f8f",potential:Math.min(20,(src?src.potential:17)+2),a:{}});
   for(const k in src.a)f.a[k]=Math.min(20,src.a[k]+.8);f.lvl=Math.max(1,(src.lvl||5));f.xp=0;f.canon=false;f.prodigy=true;f.met=true;f.sprite=PROD_SPRITE[div];f.skills={...(src.skills||{})};
-  G.F[id]=f;syncFighterAges(G);G.prodigy[div]=id;G.rank=G.rank||{A:{},B:{}};G.rank[div][id]={pts:0,w:0,l:0,d:0};return f;}
+  G.F[id]=f;syncFighterAges(G);G.prodigy[div]=id;G.rank=G.rank||{A:{},B:{}};G.rank[div][id]={pts:0,w:0,l:0,d:0};if((G.season||1)>=2)rivalCatchUp(G,id);return f;}
 function joinCamp(G,id,wage){const f=G.F[id];if(!f)return;G.joinLog=(G.joinLog||[]).filter(x=>x.id!==id).concat([{id,season:G.season||1,wk:G.week}]);f.camp="player";f.wage=wage;f.met=true;G.bookings=G.bookings.filter(b=>!(b.b===id&&G.F[b.a]&&G.F[b.a].camp==="player"));
   if(id==="mali"){G.flags.maliIn=G.week;G.flags.maliInAbs=gameWeek(G);}
   G.offers=(G.offers||[]).filter(o=>o.b!==id);G.rank[f.div]=G.rank[f.div]||{};if(!G.rank[f.div][id])G.rank[f.div][id]={pts:0,w:0,l:0,d:0};}
@@ -1320,6 +1324,9 @@ function finishFinal(G,booking,F){const div=G.F[booking.a].div;const w=F.result.
 // week phase 1: training & upkeep (before fights)
 function weekTrain(G){
   const rng=mulberry32(G.seed+G.week*977);G.log=[];
+  /* v1.89.27: rivals re-check our camp mid-year and late-year too (the off-season check is in lateSeasonOpposition) */
+  if((G.week===24||G.week===40)&&(G.season||1)>=2){G.flags=G.flags||{};const k=(G.season||1)+"_"+G.week;if(G.flags.rcWk!==k){G.flags.rcWk=k;const mv=rivalCatchUp(G);
+    if(mv.length)G.lvNews=(G.lvNews||[]).concat([`${mv.slice(0,3).join(" · ")} train hard to keep up with Sirichai`]).slice(-3);}}
   for(const f of roster(G)){if(typeof isAway==="function"&&isAway(G,f.id)){/* v1.89.11: she left camp for a while — no training, just rest */f.gains={};f.xpGain=0;f.fatigue=clamp(f.fatigue-10,0,100);if(f.injury>0)f.injury--;continue;}trainWeek(G,f,rng);}
   // v1.15: Ploy's raw talent makes her near-untouchable early; the edge fades by the district round
   if(G.F.ploy)G.F.ploy.aura=ployAura(G.week,G);
@@ -1430,19 +1437,36 @@ function ensureStageNPCs(G,through=stageOf(G.week)){const stages=["local",...(th
       if((G.season||1)>=2){const best=Math.max(level,...roster(G).filter(x=>x.div===div).map(x=>effOvr(G,x))),gap=stage==="local"?-2:stage==="district"?-1.1:-.3;liftOpponent(f,Math.min(24.5,best+gap),20);}startLv(f);
       if(stage==="district"){G.qual=G.qual||{A:[],B:[]};G.qual[div]=G.qual[div]||[];if(!G.qual[div].includes(id))G.qual[div].push(id);}
       G.rank[div][id]={pts:0,w:0,l:0,d:0};});}syncFighterAges(G);}
+/* v1.89.27: story rivals (Golden Tiger, Baiyok, Vector) track our best fighter in their division.
+   gap/floor as before; how far they may climb in one check grows with how far behind they are, so a maxed-out camp still meets a real rival */
+function storyRivalTarget(G,f,best,bestLab,year,d){const lab=!!f.lab,boss=f.id==="pailin";let gap,floor,max;
+  if(lab){gap=d==="easy"?(boss?.5:.3):d==="hard"?(boss?1.3:1):(boss?1:.65);max=20;floor=boss?16.5+(year-4)*.3:15.5+(year-5)*.3;}
+  else{gap=d==="easy"?-1.6:d==="hard"?-.2:-.8;/* v1.89.27: a step softer — a camp that built its fighters should still win most of these */floor=year>=4?11.5+(year-4)*.35:10+(year-2)*.5;
+    const T=rivalT(f,Math.min(25,Math.max(floor,best+gap))),behind=T-ovr(f.a)-(f.vet||0);max=Math.max(2.4,behind*.6);}
+  return {gap,floor,max};}
+/* ring craft (vet) wins more fights than the same number of stat points of skills on our side — past the stat ceiling a rival only takes part of the target */
+var RIVAL_VET_K=.65;const rivalT=(f,T)=>f.lab||T<=19.7?T:19.7+(T-19.7)*RIVAL_VET_K;
+const divBest=(G,div,year)=>{const mine=roster(G).filter(f=>f.div===div),fl=year>=4?12+(year-4)*.6:10.5+(year-2)*.6;
+  return {best:Math.max(fl,...mine.map(f=>effOvr(G,f))),bestLab:Math.max(fl,...mine.map(f=>ovr(f.a)+edgeOf(G,f)*.5))};};
+/* mid-year (week 24) and late-year (week 40) re-check — rivals only climb, never drop; they get a smaller step than the off-season */
+function rivalCatchUp(G,only){const year=G.season||1;if(year<2&&!only)return [];const d=G.diff||"normal",moved=[];
+  for(const div of ["A","B"]){const {best,bestLab}=divBest(G,div,year);
+    for(const f of Object.values(G.F)){if(f.div!==div||f.camp!=="rival"||(only&&f.id!==only))continue;
+      const R=storyRivalTarget(G,f,best,bestLab,year,d),T=rivalT(f,Math.min(f.lab?21.5:25,Math.max(R.floor,(f.lab?bestLab:best)+R.gap))),b0=ovr(f.a)+(f.vet||0);
+      liftOpponent(f,T,only?R.max:Math.max(1.2,R.max*.5));if(ovr(f.a)+(f.vet||0)-b0>.3)moved.push(f.name);}}
+  return moved;}
 function lateSeasonOpposition(G){arcSync(G);const year=G.season||1;ensureStageNPCs(G);if(year<2)return;G.flags=G.flags||{};const created=year>=4?ensureVector(G):false;
   if(G.flags.oppositionSeason===year&&!created)return;
   const d=G.diff||"normal",rng=mulberry32(((G.seed||1)*31+year*7919)>>>0),back=[];
   for(const div of ["A","B"]){const mine=roster(G).filter(f=>f.div===div);const best=Math.max(year>=4?12+(year-4)*.6:10.5+(year-2)*.6,...mine.map(f=>effOvr(G,f))),bestLab=Math.max(year>=4?12+(year-4)*.6:10.5+(year-2)*.6,...mine.map(f=>ovr(f.a)+edgeOf(G,f)*.5));/* story bosses only take half the edge — their fights were tuned by hand */
     for(const f of Object.values(G.F)){if(f.div!==div||f.camp==="player"||f.camp==="free"||f.camp==="quest")continue;
       const lab=!!f.lab,rival=f.camp==="rival",boss=f.id==="pailin";let gap,max,floor,comeback=false;
-      if(lab){gap=d==="easy"?(boss?.5:.3):d==="hard"?(boss?1.3:1):(boss?1:.65);max=20;floor=boss?16.5+(year-4)*.3:15.5+(year-5)*.3;}
-      else if(rival){gap=d==="easy"?-1.2:d==="hard"?.1:-.4;max=2.4;floor=year>=4?11.5+(year-4)*.35:10+(year-2)*.5;}
+      if(lab||rival){const R=storyRivalTarget(G,f,best,bestLab,year,d);gap=R.gap;max=R.max;floor=R.floor;}
       else{ // v1.83.1: the field is uneven — most sit a step below our best, a few catch up or overtake us
         const base=d==="easy"?-2.2:d==="hard"?-.5:-1.2,spread=(rng()-.5)*2.4;comeback=rng()<(year>=3?.18:.12);
         gap=comeback?(d==="easy"?0:d==="hard"?1.2:.7):base+spread;max=comeback?3.5:2.2;floor=year>=4?9.5+(year-4)*.4:8.5+(year-1)*.6;
         if(comeback&&ovr(f.a)<best+gap-1&&back.length<3&&f.name)back.push(f.name);}
-      const T=Math.min(lab?21.5:rival?25:24.5,Math.max(floor,(lab?bestLab:best)+gap));liftOpponent(f,T,max);
+      const T0=Math.min(lab?21.5:rival?25:24.5,Math.max(floor,(lab?bestLab:best)+gap)),T=rival?rivalT(f,T0):T0;liftOpponent(f,T,max);
       /* v1.83.3: last year's comebacks and old veterans settle back into the pack instead of piling up above us */
       if(!lab&&!rival&&!comeback)lowerOpponent(f,T+.3,1.5);
       if(lab)f.labPrep=Math.min(boss?.09:.07,(boss?.05:.035)+Math.max(0,year-4)*.005);}}
