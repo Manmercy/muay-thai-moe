@@ -4908,6 +4908,19 @@ const LOVE_TAKEN={kati:"…อย่างนั้นเองเหรอค�
 /* v1.90.3: when you last said no — counted in absolute weeks so a "no" late in the year does not block her second ask for most of the next year (old saves kept G.loveNo as the week of the year) */
 function noteNo(G,id){G.loveNoAbs=G.loveNoAbs||{};G.loveNoAbs[id]=absWeek(G);if(G.loveNo)delete G.loveNo[id];}
 const loveNoGap=(G,id)=>{const a=(G.loveNoAbs||{})[id];if(a!=null)return absWeek(G)-a;const w=(G.loveNo||{})[id];if(w==null)return 99;const d=G.week-w;return d<0?99:d;};
+/* v1.90.4: confessions are no longer a sure thing on the next date — once she is ready each date has a 40% chance (the 3rd is certain),
+   and after anyone confesses the others wait 4 weeks, so they do not come one a week like clockwork. Only rolled when everything else already says yes. */
+const CONF_GAP=4,CONF_P=.4,CONF_MAX=3;
+/* the first time she is ready she almost says it and backs off (G._almost) — the real confession comes on a later date: 40% each, certain on the 3rd after */
+function confGo(G,id,first){if(absWeek(G)-(G.lastConfAbs??-99)<CONF_GAP)return false;G.confTry=G.confTry||{};const n=(G.confTry[id]||0)+1;G.confTry[id]=n;
+  if(first&&n===1){G._almost=id;return false;}const k=first?n-1:n;
+  if(k>=CONF_MAX||Math.random()<CONF_P){G.lastConfAbs=absWeek(G);delete G.confTry[id];return true;}return false;}
+const LOVE_ALMOST={kati:[["flustered","ผู้จัดการคะ… หนูมีเรื่องอยากบอกมานานแล้ว คือว่า…"],["happy","…ไม่มีอะไรค่ะ! ลืมไปเถอะนะคะ กลับค่ายกันเถอะ"]],
+  mali:[["flustered","เอ่อ… คือมะลิ… มะลิอยากจะบอกว่า…"],["happy","…อยากกินขนมครกอีกถาดค่ะ! ใช่ ๆ ขนมครก!"]],
+  rin:[["flustered","ผู้จัดการ ฉันมีข้อสรุปเรื่องหนึ่งที่อยากแจ้งให้ทราบ…"],["pout","…ไม่สิ ข้อมูลยังไม่พอ ขอเก็บไว้ก่อนค่ะ"]],
+  ploy:[["flustered","คุณ… ฉันมีอะไรอยากพูดมาสักพักแล้ว…"],["sad","…ช่างเถอะ ไว้วันที่ฉันพร้อมกว่านี้ก่อน"]],
+  fah:[["flustered","นี่! ฟ้ามีเรื่องจะบอก… คือ… ฟ้า…"],["angry","…ไม่มีอะไร! อย่ามองหน้าฟ้าแบบนั้นสิ!"]]};
+const almostSteps=(G,f)=>{const L=LOVE_ALMOST[f.id];if(!L)return [];return [...L.map(([fc,t])=>({n:f.id,f:fc,l:"casual",t})),{n:"nar",t:`${f.name}หลบตา แล้วเปลี่ยนเรื่องไปเฉยเลย`}];};
 const takenOpt=(G,id)=>partners(G).some(k=>k!==id)?[{t:"ขอโทษนะ ฉันมีคนที่รักอยู่แล้ว",fx:G3=>{befriend(G3,id);add(G3,id,"trust",3);noteNo(G3,id);},then:[{n:id,f:"sad",l:"casual",t:LOVE_TAKEN[id]}]}]:[];
 // an ex who still feels the same, once she has had time
 const LOVE_EX={kati:"ผู้จัดการคะ… หนูลองแล้ว ลองเป็นแค่นักมวยของคุณแล้ว แต่หนูทำไม่ได้ค่ะ",
@@ -5148,23 +5161,24 @@ function dateScene(G,id,act){
         {n:"nar",t:`ความสนิทกับ${f.name} ${(real>=0?"+":"")+real}${HL.max?" · หัวใจเต็มแล้ว":heartCapped(G2,f)?" · หัวใจเต็มขั้นของบทนี้แล้ว":` · อีก ${hleft} ถึง ♥${HL.lv+1}`}${pref==="like"?" · เป็นกิจกรรมที่เธอชอบ!":pref==="dislike"?" · ดูเหมือนเธอจะไม่ค่อยชอบที่นี่":""}${D.facts.length?" · ข้อมูลใหม่ในโปรไฟล์: "+D.facts.join(" / "):D.missed?" · ดูเหมือนเธอยังมีเรื่องอยากเล่ามากกว่านี้ ถ้าตอบให้ตรงใจ":""}`}];
       if(typeof hasSignature!=="undefined"&&hasSignature(f)&&!G2.seen["sig_"+id]){G2.seen["sig_"+id]=true;out.push({n:"nar",t:`✦ ความผูกพันปลดล็อกท่าไม้ตายของ${f.name}: "${SIGNATURE[id].name}" — ${SIGNATURE[id].desc}`});}
       if(f.bond>=40&&!G2.seen["b1_"+id]){G2.seen["b1_"+id]=true;out.push(...BOND_EVENTS[id].lv1.map(x=>({l:look,...x})));}
-      if(f.bond>=75&&f.trust>=40&&RIVAL_LOVE.includes(id)&&f.camp==="player"&&(G2.season||1)>=2&&!isLov(G2,id)&&!exWait(G2,id)&&!G2.seen["love2_"+id]){G2.seen["love2_"+id]=true;
+      if(f.bond>=75&&f.trust>=40&&RIVAL_LOVE.includes(id)&&f.camp==="player"&&(G2.season||1)>=2&&!isLov(G2,id)&&!exWait(G2,id)&&!G2.seen["love2_"+id]&&confGo(G2,id,1)){G2.seen["love2_"+id]=true;
         out.push(...LOVE_EVENTS[id].map(x=>({l:"casual",...x})),...cheatWarn(G2,id),{choice:[
           {t:yesTxt(G2,id,"ฉันก็รู้สึกแบบเดียวกัน"),fx:G3=>takeLover(G3,id),then:[{n:id,f:"flustered",l:"casual",t:LOVE_YES[id]}]},
           {t:"ขอบคุณ แต่ฉันอยากเป็นคนที่คอยอยู่ข้าง ๆ แบบนี้ต่อไป",fx:G3=>{befriend(G3,id);add(G3,id,"trust",5);},then:[{n:id,f:"sad",l:"casual",t:LOVE_NO[id]||"…เข้าใจแล้ว"}]},...takenOpt(G2,id)]});}
-      else if(f.bond>=75&&f.trust>=40&&RIVAL_LOVE.includes(id)&&f.camp==="rival"&&!G2.seen["love_"+id]){G2.seen["love_"+id]=true;out.push(...lvSteps(PROMISE_EVENTS[id],null,G2,id,true).flatMap(x=>x.choice?[...cheatWarn(G2,id),{choice:[...x.choice,...takenOpt(G2,id)]}]:[{l:"casual",...x}]),{inject:G3=>isProm(G3,id)?[{n:"nar",t:`ความสัมพันธ์กับ${f.name}: สัญญาไว้ ♡ · เรื่องนี้จะไปต่อในฤดูกาลที่สอง`}]:[]});}
-      else if(f.bond>=75&&f.trust>=40&&!isLov(G2,id)&&!RIVAL_LOVE.includes(id)&&!G2.seen["love_"+id]){G2.seen["love_"+id]=true;
+      else if(f.bond>=75&&f.trust>=40&&RIVAL_LOVE.includes(id)&&f.camp==="rival"&&!G2.seen["love_"+id]&&confGo(G2,id,1)){G2.seen["love_"+id]=true;out.push(...lvSteps(PROMISE_EVENTS[id],null,G2,id,true).flatMap(x=>x.choice?[...cheatWarn(G2,id),{choice:[...x.choice,...takenOpt(G2,id)]}]:[{l:"casual",...x}]),{inject:G3=>isProm(G3,id)?[{n:"nar",t:`ความสัมพันธ์กับ${f.name}: สัญญาไว้ ♡ · เรื่องนี้จะไปต่อในฤดูกาลที่สอง`}]:[]});}
+      else if(f.bond>=75&&f.trust>=40&&!isLov(G2,id)&&!RIVAL_LOVE.includes(id)&&!G2.seen["love_"+id]&&confGo(G2,id,1)){G2.seen["love_"+id]=true;
         out.push(...LOVE_EVENTS[id].map(x=>({l:"casual",...x})),...cheatWarn(G2,id),{choice:[
           {t:yesTxt(G2,id,"ฉันก็รู้สึกแบบเดียวกัน"),fx:G3=>takeLover(G3,id),then:[{n:id,f:"flustered",l:"casual",t:LOVE_YES[id]}]},
           {t:"ขอบคุณ แต่ฉันอยากเป็นคนที่คอยอยู่ข้าง ๆ แบบนี้ต่อไป",fx:G3=>{befriend(G3,id);add(G3,id,"trust",5);noteNo(G3,id);},then:[{n:id,f:"sad",l:"casual",t:LOVE_NO[id]}]},...takenOpt(G2,id)]});}
       // v1.29.3: a second chance — she won't ask twice, but after a while she lets you know the door is still open
-      else if(f.bond>=75&&f.trust>=40&&!isLov(G2,id)&&!exWait(G2,id)&&!RIVAL_LOVE.includes(id)&&G2.seen["love_"+id]&&loveNoGap(G2,id)>=2){noteNo(G2,id);
+      else if(f.bond>=75&&f.trust>=40&&!isLov(G2,id)&&!exWait(G2,id)&&!RIVAL_LOVE.includes(id)&&G2.seen["love_"+id]&&loveNoGap(G2,id)>=2&&confGo(G2,id)){noteNo(G2,id);
         out.push({n:id,f:"flustered",l:"casual",t:isEx(G2,id)?LOVE_EX[id]:LOVE_AGAIN[id]},...cheatWarn(G2,id),{choice:[
           {t:yesTxt(G2,id,isEx(G2,id)?"ฉันก็ยังคิดถึงเธอ กลับมาคบกันนะ":"วันนั้นฉันตอบเร็วไป ฉันก็รู้สึกเหมือนเธอ"),fx:G3=>takeLover(G3,id),then:[{n:id,f:"flustered",l:"casual",t:LOVE_YES[id]}]},
           {t:"ขออยู่ข้าง ๆ แบบนี้ต่อไปนะ",fx:G3=>{befriend(G3,id);add(G3,id,"trust",2);},then:[{n:"nar",t:`${f.name}ยิ้มแล้วพยักหน้า ไม่ได้พูดอะไรต่อ`}]}]});}
       /* v1.90.3: hearts are there but trust is not — say so, players could not tell why nobody confessed */
       else if(f.bond>=75&&(f.trust||0)<40&&!isLov(G2,id)&&!exWait(G2,id)&&LOVE_IDS.includes(id)&&(!RIVAL_LOVE.includes(id)||(f.camp==="rival"?!G2.seen["love_"+id]:(G2.season||1)>=2&&!G2.seen["love2_"+id])))
         out.push({n:"nar",t:`${f.name}ดูเหมือนยังไม่กล้าพูดอะไรบางอย่าง · ความเชื่อใจ ${Math.floor(f.trust||0)}/40`});
+      if(G2._almost===id){delete G2._almost;out.push(...almostSteps(G2,f));}
       return out;}}];
   if(romOf(G,id)&&LOVER_DATES[id]){f.lovIdx=f.lovIdx||0;const lw=(G.lovWk||{})[id],since=absWeek(G)-(lw!=null?lw:absWeek(G)-1);
     if(f.lovIdx<LOVER_DATES[id].length&&since>=LOVER_WK[f.lovIdx]){const sc=lvSteps(LOVER_DATES[id][f.lovIdx++],D,G,id,false);D.score+=2;return [...sc,steps[steps.length-1]];}}
@@ -7946,7 +7960,7 @@ AU.gsfx=function(kind,a){if(!this.init()||this.muted||!SETTINGS.sfx)return;const
   if(kind==="shimmer")for(let i=0;i<6;i++)T(i*.05,{f:1400+Math.random()*1400,type:"sine",dur:.12,peak:.06});};
 
 // ================= MUAY THAI MOE v1.3 — UI =================
-const VERSION="1.90.6";
+const VERSION="1.90.7";
 const CUR_LANG=(typeof window!=="undefined"&&window.LANG)||"th";
 const TH_LABEL=String.fromCharCode(3652,3607,3618);
 function langSwitch(cls){return `<div class="langsw ${cls||""}" role="group" aria-label="Language">${[["th",TH_LABEL],["en","EN"]].map(([k,l])=>`<button class="lsb ${CUR_LANG===k?"on":""}" data-act="setlang" data-v="${k}" aria-pressed="${CUR_LANG===k}">${l}</button>`).join("")}</div>`;}
@@ -12177,7 +12191,7 @@ CHAT.fah.push(
 <script>
 (function(){
 /* v1.87: Thai code ships inside index.html; English code (en.js) and the dictionary (i18n.js) load only when needed */
-var B="54aa2696c6";
+var B="426fea8c84";
 var L="";try{L=localStorage.getItem("mtm_lang")||"";}catch(e){}
 try{var h=(location.hash||"").match(/lang=(th|en)/);if(h)L=h[1];}catch(e){}
 if(L!=="th"&&L!=="en")L="th";

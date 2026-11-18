@@ -116,7 +116,7 @@ const chrome=process.env.CHROME_PATH||'/Applications/Google Chrome.app/Contents/
     if(ev('lv_back').when(g))throw Error('early');g.week+=2;if(!ev('lv_back').when(g))throw Error('no return');walkL(g,ev('lv_back').steps);return !isAway(g,'kati')&&g.F.kati.awayBack&&!g.seen.lv_back;});
   test('breaking up: no longer a lover, ex, big bond drop, away 4 weeks, she may come back later',()=>{const g=fresh();G=g;lovUp(g,['kati','mali']);const n=walkL(g,breakSteps(g,'mali'));if(n<4)throw Error('short');
     if(isLov(g,'mali')||!isEx(g,'mali')||g.F.mali.bond!==55||awayLeft(g,'mali')!==4)return false;if(!/อกหัก|Heartbroken/.test(relLabel(g,g.F.mali))||relLabel(g,g.F.mali).indexOf('4')<0)throw Error('tag '+relLabel(g,g.F.mali));
-    g.week+=4;walkL(g,ev('lv_back').steps);if(isAway(g,'mali'))throw Error('still away');g.F.mali.bond=90;g.week+=12;g.seen.love_mali=true;g.loveNo={};
+    g.week+=4;walkL(g,ev('lv_back').steps);if(isAway(g,'mali'))throw Error('still away');g.F.mali.bond=90;g.week+=12;g.seen.love_mali=true;g.loveNo={};g.confTry={mali:2};
     const D=dateScene(g,'mali','cafe');let back=false;walkL(g,D,ch=>{const i=ch.findIndex(c=>/กลับมาคบ|back together/.test(c.t));if(i>=0)back=true;return i>=0?i:0;});return back&&isLov(g,'mali');});
   test('breaking a promise with a rival works the same way',()=>{const g=fresh();G=g;const f=g.F.ploy;f.met=true;f.bond=90;g.promise={ploy:10};walkL(g,breakSteps(g,'ploy'));return !isProm(g,'ploy')&&isEx(g,'ploy')&&isAway(g,'ploy');});
   test('harem: honest at Valentine, win everyone back, then group scenes replace the top heart scene',()=>{const g=fresh();G=g;lovUp(g,['kati','mali']);g.week=38;walkL(g,ev('lv_val').steps,ch=>Math.max(0,ch.findIndex(c=>/รักทุกคน|love all/i.test(c.t))));
@@ -158,9 +158,16 @@ const chrome=process.env.CHROME_PATH||'/Applications/Google Chrome.app/Contents/
   test('hearts there but trust short: the date ends with a trust hint, gone once trust is 40',()=>{const act=Object.keys(ACTIVITIES)[0];const g=fresh();G=g;g.F.mali.met=true;g.F.mali.camp='player';g.F.mali.bond=89.5;g.F.mali.trust=31;
     const txt=()=>JSON.stringify(dateScene(g,'mali',act).flatMap(x=>x.inject?x.inject(g):[x]));if(!/31\/40/.test(txt()))throw Error('no hint');g.F.mali.trust=45;delete g.seen.love_mali;if(/\/40/.test(txt()))throw Error('hint at 45');
     const h=fresh();G=h;h.F.ploy.met=true;h.F.ploy.camp='player';h.F.ploy.bond=89.5;h.F.ploy.trust=20;G=h;if(/\/40/.test(JSON.stringify(dateScene(h,'ploy',act).flatMap(x=>x.inject?x.inject(h):[x]))))throw Error('ploy year 1 hint');return true;});
+  test('confessions: first ready date she almost says it, then 40% a date, certain by the 3rd after, and others wait 4 weeks after one',()=>{const act=Object.keys(ACTIVITIES)[0];const said=(g,id)=>/คบซ้อน|two-timing|รู้สึกแบบเดียวกัน|feel the same/i.test(JSON.stringify(dateScene(g,id,act).flatMap(x=>x.inject?x.inject(g):[x])));
+    const mk=()=>{const g=fresh();G=g;for(const id of ['kati','mali','rin']){g.F[id].met=true;g.F[id].camp='player';g.F[id].bond=89.5;g.F[id].trust=60;}g.week=10;return g;};
+    let first=0,miss=0;for(let i=0;i<60;i++){const g=mk();g.confTry={kati:1};if(said(g,'kati'))first++;}if(first<10||first>45)throw Error('first-date rate '+first+'/60');
+    for(let i=0;i<20;i++){const g=mk();let n=0;while(n<4&&!g.seen.love_kati){said(g,'kati');n++;}if(!g.seen.love_kati)miss++;}if(miss)throw Error('not certain by 3rd');
+    {const g=mk();const s=JSON.stringify(dateScene(g,'kati',act).flatMap(x=>x.inject?x.inject(g):[x]));if(!/เปลี่ยนเรื่อง|changes the subject/.test(s)||g.seen.love_kati)throw Error('almost first');}
+    const g=mk();g.confTry={kati:3};said(g,'kati');if(!g.seen.love_kati)throw Error('kati');for(let w=0;w<3;w++){g.week++;g.confTry={mali:5};if(said(g,'mali'))throw Error('mali too soon week +'+(w+1));}
+    g.week++;g.confTry={mali:3};if(!said(g,'mali'))throw Error('mali after 4 weeks');return true;});
   test('a no late in the year does not block her second ask next year (old week-of-year saves too)',()=>{const act=Object.keys(ACTIVITIES)[0];const asks=g=>{const s=JSON.stringify(dateScene(g,'mali',act).flatMap(x=>x.inject?x.inject(g):[x]));return /คบซ้อน|two-timing/i.test(s);};
     for(const old of [false,true]){const g=fresh();G=g;for(const id of ['kati','mali']){g.F[id].met=true;g.F[id].camp='player';}g.F.kati.bond=90;g.F.kati.trust=60;takeLover(g,'kati');g.F.mali.bond=89.5;g.F.mali.trust=50;g.seen.love_mali=true;g.week=50;
-      if(old){g.loveNo={mali:50};}else noteNo(g,'mali');newSeason(g);g.week=5;if(!asks(g))throw Error((old?'old save':'new')+' blocked');}return true;});
+      if(old){g.loveNo={mali:50};}else noteNo(g,'mali');newSeason(g);g.week=5;g.confTry={mali:2};if(!asks(g))throw Error((old?'old save':'new')+' blocked');}return true;});
   test('old single-lover saves become a one-item list',()=>{const g=fresh();delete g.lovers;delete g.lovWk;g.romance='rin';g.romWk=30;g.timeV=3;fixSave(g);return g.lovers.length===1&&g.lovers[0]==='rin'&&g.lovWk.rin===30&&isLov(g,'rin');});
   test('chat with a lover always opens and its menu leads to a confirmed breakup scene',()=>{const g=fresh();G=g;lovUp(g,['kati','mali']);UI.tab='people';render();
     const btn=document.querySelector('.chatb[data-id="mali"]');if(!btn||btn.disabled)throw Error('chat btn');ACT.chat({id:'mali'});render();
