@@ -180,7 +180,10 @@ const RG_VISIT={
   {n:"nar",t:"At noon Baibua sits and watches the whole camp carry the rice pot, wash gloves and hang hand wraps out to dry, and goes quiet for a long time."},
   {n:"baibua",f:"sad",l:"casual",t:"…At my camp, I do all of this by myself, jao."},{n:"baibua",f:"flustered",l:"casual",t:DUEL_TALK.north.intro}],
  isan:G=>[{n:"nar",t:"You hear the motorbike from the end of the lane. Tabtim waves before she's even stopped."},{n:"tabtim",f:"happy",l:"casual",t:"Visiting, okay! This is the camp that kicked Tabtim dizzy in bout 1, haha"},
-  ...(G.F.ploy&&G.F.ploy.camp==="player"?[{n:"ploy",f:"pout",l:"casual",with:"tabtim",t:"Why so early… I'm not telling you to leave."}]:[]),{n:"tabtim",f:"happy",l:"casual",t:DUEL_TALK.isan.intro}],
+  ...(G.F.ploy&&G.F.ploy.camp==="player"?[{n:"ploy",f:"pout",l:"casual",with:"tabtim",t:"Why so early… I'm not telling you to leave."},
+   {n:"nar",t:"Tabtim challenges Ploy to a hundred punches each on the bag, loses by seventeen and laughs so loud the whole camp hears."}]:[]),
+  {n:"nar",t:"Over lunch Tabtim tells joke after joke, until one thing slips out before she can stop it."},
+  {n:"tabtim",f:"sad",l:"casual",t:"…Nobody from home has ever come to watch Tabtim fight. Not once, haha… Hey, why's everyone gone quiet?"},{n:"tabtim",f:"happy",l:"casual",t:DUEL_TALK.isan.intro}],
  central:G=>[{n:"nar",t:"A white van stops outside the camp. Alicia steps out alone in sunglasses and a cap."},{n:"alicia",f:"happy",l:"casual",t:"The sponsor's team has followed me with cameras all week. Let me hide here for a day. …Not to see anyone in particular."},
   ...(G.F.rin&&G.F.rin.camp==="player"?[{n:"rin",f:"happy",l:"casual",with:"alicia",t:"Views on the bout 1 clip are up 340%. I have a graph."}]:[]),{n:"alicia",f:"flustered",l:"casual",t:DUEL_TALK.central.intro}],
  south:G=>[{n:"nar",t:"Chaba arrives without telling anyone and has fixed half the back fence before anyone notices."},{n:"chaba",f:"happy",l:"casual",t:"…Fence wobbles"},
@@ -383,6 +386,70 @@ const RG_CHAT={
    ["Sometimes I think if I sold the camp, Dad could get his knee treated at a good hospital.",[["There are other ways. I'll help you look.",2,"…You're really thinking it through with me. Thank you, jao."],["I know how hard that is.",1,"Yes… thank you for understanding."],["It's one option.",0,""]]],
    ["Talking to you makes my heart feel lighter, jao… I don't know why.",[["Because you're not carrying it alone anymore.",2,"…Yes. I'm not carrying it alone anymore."],["Message me anytime.",1,"Yes! I'll message you often, jao."],["Good",0,""]]]]}]};
 if(typeof CHAT!=="undefined")for(const k in RG_CHAT)CHAT[k]=RG_CHAT[k];
+/* v1.90 round 7: Isan in full — Tabtim hitches a ride on the first trip, Buriram brings Vector (Vega + Pailin) and Ploy's answer, a richer visit, the letter after the cup and Tabtim's chats. Isan lines are drafts for a native speaker to check. */
+RG_ARRIVE.isan=(G,D)=>{const top=rgTopGirl(G),ploy=rgIn(G,"ploy"),me=G.F[(G.region.trip||{}).fid];return [
+  {n:"nar",bg:"gas_station",t:"A straight road runs through the rice fields as far as the eye can see. Ahead, a motorbike sits smoking outside an abandoned petrol station, and a red-haired girl stands in the middle of the road waving with both arms."},
+  {n:"tabtim",f:"happy",l:"casual",t:"Stop, stop, stop! Is this Sirichai Camp? It's Tabtim! Tabtim's bike just broke down. Give Tabtim a lift to the ring!"},
+  {n:"nar",t:"Before anyone can answer, Tabtim opens the front door and climbs into the passenger seat as if it were hers."},
+  {n:"tabtim",f:"happy",l:"casual",t:"Tabtim's sitting in front, car sick… not really car sick, just want to sit near you, haha. Joking, joking. Take Tabtim as your girlfriend. Joking again!",choice:[
+    {t:"\"Joking twice means it's not a joke.\"",fx:G2=>rgMeet(G2,"tabtim",2),then:[{n:"tabtim",f:"flustered",l:"casual",t:"…Whoa! You answered seriously. Tabtim's out of jokes now."}]},
+    {t:"Laugh and keep driving",fx:G2=>rgMeet(G2,"tabtim",1),then:[{n:"tabtim",f:"happy",l:"casual",t:"Haha, you're so calm. Tabtim likes calm people."}]},
+    {t:"\"Put your seatbelt on.\"",fx:G2=>rgMeet(G2,"tabtim",1),then:[{n:"tabtim",f:"pout",l:"casual",t:"Okay, okay… geez, Manager, you're so serious."}]}]},
+  ...(top?[{n:top.id,f:"pout",l:"casual",t:rgJeal(top.id,"Tubtim")}]:[]),
+  ...rgIf(ploy,[{n:"tabtim",f:"happy",l:"casual",t:"Hey! Is that Ploy in the back? The Korat fist from Bangkok! Tabtim's been wanting to take one since the gala!"},
+    {n:"ploy",f:"pout",l:"casual",t:"…Face the front. You'll hurt your neck."}]),
+  {n:"nar",bg:"somtam_stall",t:"Tabtim talks the whole way, then makes them stop at a roadside som tam stall. \"Best in the region, and Tabtim's paying!\""},
+  {n:"tabtim",f:"happy",l:"casual",t:`The champion of ${D.name} is from near Tabtim's home. She kicks hard but drops her left guard, so counter with a left kick.`},
+  {fx:G2=>{if(me)me.morale=Math.min(100,(me.morale||0)+3);}},
+  {n:"nar",t:me?`${me.name} remembers Tabtim's tips · morale +3`:"Everyone remembers Tabtim's tips."},
+  {n:"coach",t:"The som tam here is so spicy Kru's crying… but it's really good."},
+  {n:"tabtim",f:"happy",l:"casual",t:"Let's go, everyone! Tabtim will cheer by the ring… not saying which side, haha."}];};
+RG_TRIPX.buriram={bg:"night_isan",steps:G=>{const ploy=rgIn(G,"ploy");return [
+  {n:"nar",t:"Same night, same ring: on the undercard before our bout, a Vector Camp fighter wins by knockout in round two."},
+  {n:"npc",who:"Vega",t:"The data said he'd raise his guard late in round two. …Data never lies."},
+  ...(ploy?[
+   {n:"npc",who:"Ringside gambler",t:"That Bangkok girl they say throws the Korat punch… is it real, or a copy?"},
+   {n:"nar",t:"The people around them laugh. Ploy hears every word, but doesn't turn around."},
+   {n:"pailin",f:"happy",t:"Ploy, come back to Vector. Nobody here sees you as Korat boxing. At Vector, you're the best data I've ever had."},
+   {n:"npc",who:"Vega",t:"Big sis Ploy… your training room is still empty. Nobody dares use it."},
+   {n:"ploy",f:"angry",l:"casual",with:"pailin",t:"Pailin, I'm not answering with words."},
+   {n:"nar",t:"Ploy walks to the warm-up corner, picks up a pair of pads and hands them to Tabtim, who's been watching."},
+   {n:"ploy",f:"happy",l:"casual",t:"Hold these for me. Hold them tight."},
+   {n:"nar",t:"One swinging Korat punch. It's so loud the whole corner turns to look, and Tabtim staggers three steps back."},
+   {n:"tabtim",f:"surprised",l:"casual",with:"ploy",t:"Ow! Tabtim's hand is numb up to the elbow… that's the real thing, everyone! The real deal!"},
+   {n:"npc",who:"Ringside gambler",t:"…The real thing."},
+   {n:"pailin",f:"sad",t:"…My data has never been able to measure that punch."},
+   {n:"nar",t:"Pailin turns and leaves with Vega, but stops to look back at Ploy once more before the door.",choice:[
+     {t:"\"That punch is Ploy's own. Nobody else's.\"",fx:G2=>add(G2,"ploy","bond",2),then:[{n:"ploy",f:"flustered",l:"casual",t:"…I knew that without you saying it. But hearing it… thank you."}]},
+     {t:"\"Your sister still cares about you.\"",fx:G2=>add(G2,"ploy","bond",1),then:[{n:"ploy",f:"sad",l:"casual",t:"I know… she worries about me the way she worries about a dataset. The day she worries about me like a sister, I'll go back and talk."}]}]},
+   {fx:G2=>{const p=G2.F.ploy;if(p)p.morale=Math.min(100,(p.morale||0)+5);rgMeet(G2,"tabtim",1);G2.flags.ployKorat=1;}},
+   {n:"nar",t:"Ploy morale +5"}]
+  :[{n:"pailin",f:"happy",t:"Sirichai Camp has gone further than my data said it would. …Interesting."},
+   {n:"tabtim",f:"happy",l:"casual",t:"Data, data, data. Bangkok people really love their data. Tabtim says som tam is better, haha."},
+   {fx:G2=>rgMeet(G2,"tabtim",1)}])];}};
+RG_POST.isan="To Manager,\n\nDad came home and didn't say a word for three days.\n\nOn the fourth day he left his old sash by Tabtim's pillow, the one he fought in when he was young. All he said was, \"If you're going to kick, kick all the way.\"\n\nTabtim cried all night. Don't tell anyone.\n\nThe cup is at Sirichai now. Look after it, because Tabtim's coming to take it back one day, haha.\n\n— Tabtim";
+RG_CHAT.tabtim=[
+ {id:"tt_fee",x:[
+  ["Manager! Tabtim's little sister got into university!!",[["Congratulations! You did so well getting her this far.",2,"…Hey, you praised Tabtim instead of her. Now Tabtim's going to cry."],["Shall we celebrate?",1,"Moo kratha for the whole village! You're paying half, haha."],["What's she studying?",1,"Law! Same one who read the green envelope contract."]]],
+  ["But tuition is so expensive… Tabtim has to win a lot more fights.",[["Don't carry it alone. Tell me if you need anything.",2,"…You're so kind. Tabtim's not used to it."],["You'll win, your kicks are brutal.",1,"Haha, right! Tabtim's kicks pay tuition."],["There are scholarships too.",1,"Yeah! Tabtim'll go ask her."]]],
+  ["Off to train! Ten kicks, each one's worth a textbook, haha.",[["Go for it.",1,"Fighting!"],["Kick one for me too",2,"Sure! The eleventh kick is for you, Manager."],["Don't forget to rest.",1,"Okay, okay. You worry so much."]]]]},
+ {id:"tt_somtam",x:[
+  ["Tabtim taught the girls at camp to make som tam with twenty chillies. One of them cried, haha.",[["Twenty chillies is brutal!",1,"Harsh? Isan people eat thirty chillies, no big deal."],["Send the camp the recipe.",2,"Sure! But don't tell Auntie Taew. It's Tabtim's secret family recipe."],["Is she okay?",1,"She's fine. Drank three bottles of water and now she's teasing Tabtim back."]]],
+  ["Can you eat spicy food, Manager?",[["Easily.",1,"Really? Next time Tabtim'll pound ten chillies for you to try!"],["A little.",1,"No problem, Tabtim will make a mild one. Specially, just for you."],["I can if Tabtim makes it.",2,"…Ugh, Manager! Say that and Tabtim can't pound straight anymore."]]],
+  ["Off to sell som tam at the morning market. For my sister's tuition!",[["Sell well!",1,"Sold out!"],["Save me a mortar's worth.",2,"Tabtim saved you one, with extra pla ra!"],["OK",0,"Yeah!"]]]]},
+ {id:"tt_live",x:[
+  ["Tabtim watches your camp's lives every day. It's so fun. Is Kru Daeng really that scary?",[["Scary face, kind heart.",1,"Right! Scary face, but sneaks the kids snacks. Tabtim saw it on the live."],["You watch the lives every day?",2,"…Huh, how is Tabtim supposed to answer that? Yes, every day. Happy now?"],["Really scary. Watch out or you'll be running laps.",1,"Haha, Tabtim will come run laps at your camp one day."]]],
+  ["Someone commented on the live that Tabtim has the prettiest kicks in Isan!",[["It's true.",2,"…Haha, did you write it yourself? That account name looks suspicious."],["Whoever wrote that has a good eye.",1,"They've got a good eye! Tabtim's going to like that comment."],["Don't read the comments too much.",1,"Haha, I know, but the nice comments are okay to read."]]],
+  ["You're definitely going on camera in the next live. Tabtim will be watching.",[["I'll wave.",2,"Wave away, Tabtim will wave back… even if you can't see it."],["I'm camera-shy.",1,"Don't be shy, your face is fine, haha."],["No promises.",0,"Aww!"]]]]},
+ {id:"tt_dad",x:[
+  ["Dad called today to ask if Tabtim had eaten… he's never called before.",[["Your dad's starting to open up.",2,"…That's what Tabtim thinks too. Tabtim told him yes, even though Tabtim hadn't eaten yet, haha."],["So have you eaten?",1,"Not yet! You asked just like Dad."],["I'm glad",1,"Thanks. Tabtim's been smiling all day."]]],
+  ["Do you think Dad will come to watch Tabtim fight one day?",[["He'll come for sure, if you keep kicking like that.",2,"…Then Tabtim will keep kicking until Dad comes to watch."],["Invite him.",1,"Yeah, Tabtim'll try inviting him… and if Dad doesn't come, you come instead."],["I'm not sure.",0,"…Okay"]]],
+  ["Thanks for listening. You're the only one Tabtim can talk to about this.",[["You can tell me anytime.",2,"…Haha, not funny anymore. Tabtim's embarrassed."],["Always",1,"Thanks!"],["No problem",0,"Okay"]]]]},
+ {id:"tt_kick",x:[
+  ["Tabtim's flying kick is a hand-span higher than before! Almost reaching the light bulb!",[["Don't break the light bulb.",1,"One already broke, haha. Don't tell Dad."],["Higher than the rockets yet?",2,"…You still remember the rockets? Tabtim's so happy."],["Great job",1,"Tabtim's amazing, right? More praise, more!"]]],
+  ["If Tabtim met Ploy in the ring, who do you think would win?",[["Tabtim wins on kicks, Ploy wins on punches.",2,"Nobody gets upset with that answer. You're so smart."],["Ploy, she's from our camp.",1,"Ugh! Siding with your own camp. Tabtim's telling Ploy."],["I don't know",0,"Such a middle-of-the-road answer. No fun at all."]]],
+  ["Back to training! A hundred more kicks!",[["Kick one for me too",2,"The hundredth kick is for you!"],["Don't overdo it.",1,"I know, I know"],["OK",0,"Yeah!"]]]]}];
+CHAT.tabtim=RG_CHAT.tabtim;
 const REGION={
   /* end of week (after the weekly events): the gala the week after the invitation, the contract beat the week after the first cup */
   weekScene(G,done){const R=G.region;if(!R){done();return;}const now=gameWeek(G);
