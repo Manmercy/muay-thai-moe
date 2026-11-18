@@ -1038,7 +1038,7 @@ const petFood=G=>(G&&G.pets||[]).reduce((s,p)=>s+(PETS[p.k]?PETS[p.k].food:0),0)
 function petPlay(G,i){const p=(G.pets||[])[i];if(!p||p.wk===gameWeek(G))return false;p.wk=gameWeek(G);p.joy=Math.min(100,(p.joy||50)+10);const R=roster(G);
   if(p.k==="cat")R.forEach(f=>f.morale=Math.min(100,f.morale+2));if(p.k==="dog")R.forEach(f=>f.fatigue=Math.max(0,f.fatigue-3));
   if(p.k==="rooster")R.forEach(f=>{f.morale=Math.min(100,f.morale+1);f.fatigue=Math.max(0,f.fatigue-1);});if(p.k==="turtle")R.forEach(f=>f.morale=Math.min(100,f.morale+3));
-  /* v1.89.23: the Loy Krathong otter is a companion only — event rewards stay out of the real game */
+  /* v1.89.24: the Loy Krathong otter is a companion only — event rewards stay out of the real game */
   const fav=p.fav&&G.F[p.fav];if(fav&&fav.camp==="player")fav.morale=Math.min(100,fav.morale+3);return true;}
 const upkeep=G=>1800+(G?facTotal(G)*220+[0,0,800,1800][campLevel(G)]+petFood(G):0); // v1.43: a bigger camp costs more to run
 function weeklyNet(G){return classIncome(G)-upkeep(G)-wages(G);}
@@ -1178,7 +1178,7 @@ function applyResult(G,F,booking){
   for(const [me,op,side] of [[fa,fb,"A"],[fb,fa,"B"]]){
     const res=r.win==="D"?"D":r.win===side?"W":"L";
     const off=tier.off;
-    if(booking.ev){if(me.camp==="player")ret={pay:0,res,upset:false};continue;} /* v1.89.23: event bouts (Loy Krathong) stay inside the event — no EXP, stardust, morale, fatigue, fame or record */
+    if(booking.ev){if(me.camp==="player")ret={pay:0,res,upset:false};continue;} /* v1.89.24: event bouts (Loy Krathong) stay inside the event — no EXP, stardust, morale, fatigue, fame or record */
     if(off&&me.camp!=="player"){me.lastFight=G.week;me.lastFightAbs=gameWeek(G);continue;}
     if(me.camp==="player"&&op.camp!=="player"&&!off){G.h2h=G.h2h||{};const h=G.h2h[op.id]=G.h2h[op.id]||{w:0,l:0,d:0};h[res==="W"?"w":res==="L"?"l":"d"]++;}
     if(me.camp==="player"&&res==="W")G.dust=(G.dust||0)+(/KO|น็อก/.test(r.type||"")?4:3); /* v1.58: stardust for wins · v1.87: +1 */

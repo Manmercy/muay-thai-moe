@@ -42,9 +42,14 @@ function outfitSheet(f,k){const key=f.id+"|"+k;if(TINTS[key])return TINTS[key];c
       p[i]=fn(O.h+1/3)*255;p[i+1]=fn(O.h)*255;p[i+2]=fn(O.h-1/3)*255;}
     x.putImageData(d,0,0);}catch(e){return src;}
   TINTS[key]=c;return c;}
+/* v1.89.24: Loy Krathong pixel outfits — every event bout, and off-stage when the gold-tier "Thai dress" toggle is on */
+const LOY_SP=["kati","mali","rin","ploy","fah"];
+function loyLookNow(){try{if(typeof UI!=="undefined"&&UI.fight&&UI.fight.b)return !!UI.fight.b.ev;const L=typeof G!=="undefined"&&G&&G.ev&&G.ev.loy;return !!(L&&L.dressOn&&L.tiers&&L.tiers.gold);}catch(e){return false;}}
+const loyImg=(id,name)=>LOY_SP.includes(id)&&loyLookNow()?name.replace(id+"_",id+"_loykrathong_"):name;
 function sheetFor(f){
+  if(f.canon&&LOY_SP.includes(f.id)&&loyLookNow())return img(f.id+"_loykrathong_sheet.webp");
   if(f.canon){if(f.outfit&&f.outfit!=="base"&&f.camp==="player"&&OUTFITS[f.outfit])return outfitSheet(f,f.outfit);return img(f.id+"_sheet.webp");}
-  if(f.sprite)return f.tintHue!=null?spriteTint(f.sprite,f.tintHue):img(f.sprite+"_sheet.webp"); // v1.23: gang, roosters, bulls · v1.89.23: tintHue re-dyes the red kit (the krathong thief)
+  if(f.sprite)return f.tintHue!=null?spriteTint(f.sprite,f.tintHue):img(f.sprite+"_sheet.webp"); // v1.23: gang, roosters, bulls · v1.89.24: tintHue re-dyes the red kit (the krathong thief)
   if(TINTS[f.id])return TINTS[f.id];
   const nb=npcBase(f.id),base=nb.base,blonde=!!(f.prodigy||(f.id||"").startsWith("prod_")),lab=!!f.lab&&!blonde,hue=blonde?42:lab?276:nb.hue,dark=blonde?true:lab?false:nb.dark; /* v1.88: Vector camp fighters wear their black-purple kit */const src=img(base+"_sheet.webp"); /* v1.56: Golden Tiger prodigies: black-gold kit; v1.88: hair dyed silver like Fah */if(!src.complete||!src.naturalWidth)return src;
   const c=document.createElement("canvas");c.width=src.naturalWidth;c.height=src.naturalHeight;const x=c.getContext("2d",{willReadFrequently:true});x.drawImage(src,0,0);
@@ -440,7 +445,7 @@ function mountCanvases(){
     LOOPS.add(t=>{if(!cv.isConnected)return;const look=key==="coach"?COACH_LOOK:key==="player"?(G?G.avatar:UI.creator):UI.creator;if(!look)return;
       x.clearRect(0,0,cv.width,cv.height);x.imageSmoothingEnabled=false;const fr={dy:Math.floor(t/400)%2,blink:Math.floor(t/150)%24===0};
       const c=CHIBI.canvasFor(look,fr);const s=Math.floor(Math.min(cv.width/24,cv.height/32));x.drawImage(c,(cv.width-24*s)/2,cv.height-32*s,24*s,32*s);});});
-  if(typeof mountCampFx==="function")mountCampFx();if(typeof mountContest==="function")mountContest();if(typeof mountWaiKhru==="function")mountWaiKhru();if(typeof mountGbox==="function")mountGbox();
+  if(typeof mountCampFx==="function")mountCampFx();if(typeof mountContest==="function")mountContest();if(typeof mountWaiKhru==="function")mountWaiKhru();if(typeof mountLoyWish==="function")mountLoyWish();if(typeof mountGbox==="function")mountGbox();
   document.querySelectorAll("canvas[data-drill]").forEach(cv=>{const x=cv.getContext("2d");const id=cv.dataset.drill;
     LOOPS.add(t=>{if(!cv.isConnected||!G)return;const f=G.F[id],D=UI.drill;if(!f)return;const W=cv.width,H=cv.height;x.clearRect(0,0,W,H);x.imageSmoothingEnabled=false;
       const dt=D&&D.hitT?t-D.hitT:9999,hit=dt<600;const row=hit?(DRILL_ROW[f.plan.preset]||"punch"):"guard";const fr=hit?Math.min(3,Math.floor(dt/110)):Math.floor(t/260)%4;
@@ -493,7 +498,7 @@ const FS={cv:null,ctx:null,bg:null,A:null,B:null,fx:[],shake:0,
   init(cv,bgName,fa,fb){this.cv=cv;this.ctx=cv?cv.getContext("2d"):null;this.bg=img(bgName);
     const mk=(f,side)=>({f,side,x:side==="A"?370:590,base:side==="A"?370:590,anim:"guard",t0:0,flash:0,down:0,ko:false,win:false});
     this.A=mk(fa,"A");this.B=mk(fb,"B");this.fx=[];this.shake=0;this.spR={A:-1,B:-1};this.banner=null;
-    for(const f of [fa,fb])if(f&&f.canon&&SPECIALS[f.id])SPECIALS[f.id].forEach(m=>img(m.img+".webp"));},
+    for(const f of [fa,fb])if(f&&f.canon&&SPECIALS[f.id])SPECIALS[f.id].forEach(m=>img(loyImg(f.id,m.img)+".webp"));},
   attach(cv){if(!cv)return;this.cv=cv;this.ctx=cv.getContext("2d");},
   play(e,now){const at=e.at||(e.ev==="counter"?(e.mside?e.mside:null):null);
     const atk=this[e.side==="A"?"A":"B"],def=this[e.side==="A"?"B":"A"];if(!atk)return;
@@ -507,7 +512,7 @@ const FS={cv:null,ctx:null,bg:null,A:null,B:null,fx:[],shake:0,
     if(e.ev==="cut"){this.fx.push({x:def.x,y:250,t0:now,txt:"แตก!",cut:true});}
   },
   special(sp,round,now){const s=this[sp.side];if(!s)return;this.spR[sp.side]=round;this.banner={txt:sp.name,side:sp.side,t0:now};
-    if(sp.mv){s.anim="special";s.sp={im:img(sp.mv.img+".webp"),t0:now};this.shake=sp.mv.dodge?6:14;return;}
+    if(sp.mv){s.anim="special";s.sp={im:img(loyImg(s.f.id,sp.mv.img)+".webp"),t0:now};this.shake=sp.mv.dodge?6:14;return;}
     /* no drawn sheet for this move: the normal row, dressed up in code — aura, afterimages, speed lines, a dash and an impact ring */
     const kind=sp.kind||"atk",row=kind==="def"?"guard":kind==="rec"?"win":(sp.w==="kick"||sp.w==="knee")?"knee":"punch";
     s.anim="fx";s.fx={t0:now,row,kind,col:kind==="def"?"#5ab0ff":kind==="rec"?"#4fe08a":(s.f&&s.f.color)||"#ffd34a",hit:false};if(kind==="atk")s.x+=s.side==="A"?40:-40;this.shake=kind==="atk"?8:4;},
@@ -721,6 +726,33 @@ function drawWaiKhru(ctx,G,t,R){const S=2,W=320,H=180,P=(x,y,w,h,c)=>{ctx.fillSt
   ctx.globalAlpha=.22;P(0,0,W,10,"#000");P(0,H-10,W,10,"#000");ctx.globalAlpha=1;}
 function mountWaiKhru(){document.querySelectorAll("canvas[data-waikhru]").forEach(cv=>{const x=cv.getContext("2d");
   LOOPS.add(t=>{if(!cv.isConnected||!G)return;const R=(G.waikhru||{})[G.season||1];if(!R)return;let tt=t-(UI.wkT0||t);if(UI.wkSkip)tt+=60000;x.clearRect(0,0,cv.width,cv.height);drawWaiKhru(x,G,tt,R);});});}
+/* v1.89.24: Loy Krathong night — the five girls float their krathongs off the pier, lanterns rise; then the player makes a wish */
+const LW_TL=n=>{const k0=1400,gap=650;return {k0,gap,stand:k0+n*gap+900,cheer:k0+n*gap+2200,end:k0+n*gap+3000};};
+function drawLoyWish(ctx,t,ids){const S=2,W=320,H=180,P=(x,y,w,h,c)=>{ctx.fillStyle=c;ctx.fillRect(Math.round(x*S),Math.round(y*S),Math.max(1,Math.round(w*S)),Math.max(1,Math.round(h*S)));};
+  const n=ids.length,T=LW_TL(n),bg=img("bg_loy_night.webp");
+  ctx.imageSmoothingEnabled=true;if(bg.complete&&bg.naturalWidth)ctx.drawImage(bg,0,0,W*S,H*S);else P(0,0,W,H,"#1a1640");ctx.imageSmoothingEnabled=false;
+  ctx.globalAlpha=Math.max(0,.55-t/2600);P(0,0,W,H,"#05040f");ctx.globalAlpha=1;
+  // sky lanterns drifting up
+  for(let i=0;i<16;i++){const ph=((t/11000)+i/16)%1,x=(i*41+Math.sin(t/1400+i)*5)%W,y=150-ph*165;ctx.globalAlpha=.22*(1-ph);P(x-3,y-3,8,9,"#ffb347");ctx.globalAlpha=.9*(1-ph*.6);P(x,y,3,4,"#ffcf6b");P(x+1,y+3,1,1,"#fff3c4");ctx.globalAlpha=1;}
+  // the krathongs (drawn before the pier so they sit out on the water)
+  const pos=i=>W*(.12+(n>1?i*.76/(n-1):.38));
+  ids.forEach((id,i)=>{const sp=T.k0+i*T.gap+250;if(t<sp)return;const d=t-sp,x0=pos(i)+10,slide=Math.min(1,d/700),drift=Math.max(0,d-700)/1000;
+    const y=140-slide*8-Math.min(26,drift*5),x=x0+slide*8+drift*6+Math.sin(drift*1.6+i)*2,sc=2.1*Math.max(.5,1-drift*.09);
+    const w=12*sc,h=3*sc,fl=Math.floor(t/110+i)%2;
+    ctx.globalAlpha=.18;P(x-1,y+h,2,8*sc,"#ffcf6b");{const g=ctx.createRadialGradient(x*S,(y-5*sc)*S,0,x*S,(y-5*sc)*S,9*sc*S);g.addColorStop(0,"rgba(255,190,90,.45)");g.addColorStop(1,"rgba(255,160,60,0)");ctx.globalAlpha=1;ctx.fillStyle=g;ctx.fillRect((x-9*sc)*S,(y-14*sc)*S,18*sc*S,18*sc*S);}ctx.globalAlpha=1;
+    P(x-w/2,y,w,h,"#2f8f4a");P(x-w/2+1,y+h-1,w-2,1,"#1d6a36");
+    for(let k=-1;k<=1;k++)P(x+k*4*sc-1.5*sc,y-3*sc+Math.abs(k)*sc,3*sc,3*sc,k?"#f06aa0":"#ff8fbd");
+    P(x-.5,y-6*sc,1,3*sc,"#f4ead2");P(x-.5,y-7*sc-fl,1,1+fl,"#ffd36b");});
+  // the wooden pier
+  P(0,146,W,34,"#4a2e1c");P(0,146,W,2,"#7a4e30");for(let i=0;i<6;i++)P(0,152+i*5,W,1,"rgba(0,0,0,.22)");for(let i=0;i<9;i++)P(i*38+10,148,3,32,"rgba(0,0,0,.15)");
+  // the girls: walk-in done, each kneels in turn, sets her krathong down, stands; all cheer at the end
+  ids.forEach((id,i)=>{const sh=img(id+"_loykrathong_sheet.webp"),x=pos(i),h=H*.44,kA=T.k0+i*T.gap,kneel=t>=kA&&t<T.stand;
+    let row="idle",foot=H*.97;if(kneel){row="guard";foot+=h*.08;}if(t>=T.cheer)row="win";
+    drawFrame(ctx,sh,ROW[row],Math.floor(t/(row==="idle"?280:row==="win"?200:400))%4,x*S,foot*S,h*S,false);
+    if(t>=T.cheer&&Math.floor((t-T.cheer)/400)%2===0)P(x+6,foot-h-6+((i%2)*2),3,3,"#ff8fbd");});
+  ctx.globalAlpha=.25;P(0,0,W,8,"#000");P(0,H-8,W,8,"#000");ctx.globalAlpha=1;}
+function mountLoyWish(){document.querySelectorAll("canvas[data-loywish]").forEach(cv=>{const x=cv.getContext("2d"),ids=(cv.dataset.loywish||"").split(",").filter(Boolean);
+  LOOPS.add(t=>{if(!cv.isConnected)return;let tt=t-(UI.lwT0||t);if(UI.lwSkip)tt+=60000;x.clearRect(0,0,cv.width,cv.height);drawLoyWish(x,tt,ids);});});}
 function mountContest(){document.querySelectorAll("canvas[data-contest]").forEach(cv=>{const x=cv.getContext("2d"),k=cv.dataset.contest;
   LOOPS.add(t=>{if(!cv.isConnected||!G)return;const R=(G.contests||{})[G.season||1];if(!R)return;let tt=t-(UI.ctT0||t);if(UI.ctSkip)tt+=60000;x.clearRect(0,0,cv.width,cv.height);
     if(k==="walk")drawContestWalk(x,G,tt,R);else drawContestAward(x,G,tt,R);});});}

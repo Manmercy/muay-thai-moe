@@ -1,5 +1,5 @@
 // ================= MUAY THAI MOE v1.3 — UI =================
-const VERSION="1.89.23";
+const VERSION="1.89.24";
 const CUR_LANG=(typeof window!=="undefined"&&window.LANG)||"th";
 const TH_LABEL=String.fromCharCode(3652,3607,3618);
 function langSwitch(cls){return `<div class="langsw ${cls||""}" role="group" aria-label="Language">${[["th",TH_LABEL],["en","EN"]].map(([k,l])=>`<button class="lsb ${CUR_LANG===k?"on":""}" data-act="setlang" data-v="${k}" aria-pressed="${CUR_LANG===k}">${l}</button>`).join("")}</div>`;}
@@ -38,7 +38,7 @@ const cardFaceSrc=C=>{if(C.face)return `${ASSET}${C.face}.webp`;const scene=(C.s
   return `${ASSET}${C.c}_casual${suffix}_face.webp`;};
 const cardArtHTML=(C,lazy=false)=>`<span class="card-art" style="--card-scene:url('${ASSET}${BGIMG[C.bg]||BGIMG.camp}')"><img src="${cardFaceSrc(C)}" alt="" ${lazy?'loading="lazy" decoding="async"':""}></span>`;
 // v1.34: portraits for the market and helmet-gang side characters (matched by speaker name, or st.img)
-const NPC_IMG=[[/เกริก|Krerk/,"krerk"],[/นายอำเภอ|District Chief/,"nai"],[/แม่ค้า|ป้าศรี|Auntie Sri|vendor/,"vendor_green"],[/ป้าแต๋ว|เจ๊หมวย|ป้าขาย|Auntie Taew|Jae Muay/,"vendor_red"],[/เสี่ยหมวกทองคำ|Big Boss Golden Helmet/,"gang_boss"],[/หมวก|แจ็กเก็ต|Helmet|Jacket/,"gang_group"],[/ยาย|Grandma/,"grandma"]];
+const NPC_IMG=[[/เกริก|Krerk/,"krerk"],[/นายอำเภอ|District Chief/,"nai"],[/แม่ค้า|ป้าศรี|Auntie Sri|vendor/,"vendor_green"],[/ป้าแต๋ว|เจ๊หมวย|ป้าขาย|Auntie Taew|Jae Muay/,"vendor_red"],[/ไอ้ตุ่ม|โจรงมกระทง|Krathong Thief/,"thief"],[/เสี่ยหมวกทองคำ|Big Boss Golden Helmet/,"gang_boss"],[/หมวกเงิน|Silver Helmet/,"gang_silver"],[/หมวกทองดำ|ลูกน้องหมวกทอง|Gold-Black Helmet|Golden Helmet's (man|men)|Gold Helmet/,"gang_goldblack"],[/หมวก|แจ็กเก็ต|Helmet|Jacket/,"gang_group"],[/ยาย|Grandma/,"grandma"]];
 const npcImg=st=>st.img||(st.who&&(NPC_IMG.find(([r])=>r.test(st.who))||[])[1])||null;
 const TIER_BG={evloy:"bg_river.webp",pro:"bg_fair.webp",semi:"bg_hall.webp",local:"bg_local.webp",district:"bg_district.webp",final:"bg_final.webp",exhibition:"bg_fair.webp",special:"bg_district.webp",lab:"bg_hall.webp",quest:"bg_food.webp",beast:"bg_fair.webp",dm:"bg_hall.webp"};
 const gymBg=()=>`gym${G?campLevel(G):1}.webp`;
@@ -1012,7 +1012,7 @@ function modalHTML(){const m=UI.modal;let body="",foot=true;
   if(m.type==="repinfo")body=repInfoHTML();
   if(m.type==="otip"){const o=G.offers.find(x=>x.id===m.id);if(!o){UI.modal=null;return "";}body=offerTipHTML(o);foot=false;}
   if(m.type==="lossrev")body=lossRevHTML();
-  if(m.type==="settings")body=settingsHTML();if(m.type==="gaunt"){body=gauntHTML();foot=false;}if(m.type==="thief"){body=thiefHTML();foot=false;}if(m.type==="loyhub"){body=loyHubHTML();}
+  if(m.type==="settings")body=settingsHTML();if(m.type==="gaunt"){body=gauntHTML();foot=false;}if(m.type==="thief"){body=thiefHTML();foot=false;}if(m.type==="loywish"){body=loyWishHTML();foot=false;}if(m.type==="loyhub"){body=loyHubHTML();}
   if(m.type==="slots")body=slotsHTML(m.mode);
   if(m.type==="campacts"){body=campActsHTML();foot=!m.pick;}
   if(m.type==="studinfo"){body=studInfoHTML();}
@@ -1716,7 +1716,7 @@ const ACT={
   skselx:()=>{UI.skSel=null;render();},
   skpopbg:(d,e)=>{if(e.target.classList.contains("skpop-ov")){UI.skSel=null;render();}},
   newsok:()=>{G.newsSeen=PATCH.id;UI.modal=null;save();render();},
-  closeModal:()=>{const m=UI.modal;if(m&&m.type==="waikhru"){if(m.ph==="pick")runWaiKhru(G,"s");ACT.waidone();return;}if(m&&m.type==="lotto"&&typeof ACT.lottoskip==="function"){ACT.lottoskip();return;} /* closing the ticket sheet skips the draw */if(m&&m.back==="album"&&G){ACT.album();return;}if(m&&m.type==="contest"){ACT.contestdone();return;}if(m&&m.type==="whatsnew"&&G){G.newsSeen=PATCH.id;save();}UI.modal=null;render();if(m&&m.after)m.after();},
+  closeModal:()=>{const m=UI.modal;if(m&&m.type==="loywish"){ACT.lwclose();return;}if(m&&m.type==="waikhru"){if(m.ph==="pick")runWaiKhru(G,"s");ACT.waidone();return;}if(m&&m.type==="lotto"&&typeof ACT.lottoskip==="function"){ACT.lottoskip();return;} /* closing the ticket sheet skips the draw */if(m&&m.back==="album"&&G){ACT.album();return;}if(m&&m.type==="contest"){ACT.contestdone();return;}if(m&&m.type==="whatsnew"&&G){G.newsSeen=PATCH.id;save();}UI.modal=null;render();if(m&&m.after)m.after();},
   trait:d=>{const f=G.F[d.id],L=TRAITS[d.id];if(!f||!L||f.camp!=="player")return;const t=L.find(x=>x.id===d.v);if(!t||traitOf(f)===t.id)return;f.trait=t.id;save();render();toast(`${f.name}ใช้พลังแฝง "${t.name}"`);},
   gopen:d=>{GB.box=d.v==="loy"?"loy":"n";if(GB.box==="loy"&&!loyFest()){toast(loySoon()?"ตู้ลอยกระทงเปิด 18 พ.ย. เวลา 00:00":"ตู้ลอยกระทงปิดแล้ว ไว้เจอกันเทศกาลหน้า");return;}const fromAlb=UI.modal&&UI.modal.type==="album";if(fromAlb)albKeep();GB.st=null;GB.ps=[];UI.gq=false;UI.modal={type:"gbox",back:fromAlb?"album":null};render();gbPreload();},
   gpull:()=>{if(GB.st)return;const cost=gbCost();if((G.dust||0)<cost){AU.sfx("ui");toast(`เศษดาวไม่พอ ต้องใช้ ${cost}✦ · ได้จากชนะไฟต์ การ์ดใหม่ และย่อยใบซ้ำ`);return;}
