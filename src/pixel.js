@@ -730,7 +730,7 @@ function mountWaiKhru(){document.querySelectorAll("canvas[data-waikhru]").forEac
 const LW_TL=n=>{const k0=1400,gap=650;return {k0,gap,stand:k0+n*gap+900,cheer:k0+n*gap+2200,end:k0+n*gap+3000};};
 function drawLoyWish(ctx,t,ids){const S=2,W=320,H=180,P=(x,y,w,h,c)=>{ctx.fillStyle=c;ctx.fillRect(Math.round(x*S),Math.round(y*S),Math.max(1,Math.round(w*S)),Math.max(1,Math.round(h*S)));};
   const n=ids.length,T=LW_TL(n),bg=img("bg_loy_night.webp");
-  ctx.imageSmoothingEnabled=false;if(bg.complete&&bg.naturalWidth){const z=1.4,bw=bg.naturalWidth,bh=bg.naturalHeight,sw=bw/z,sh=bh/z;ctx.drawImage(bg,(bw-sw)*.42,bh-sh,sw,sh,0,0,W*S,H*S);}else P(0,0,W,H,"#1a1640");ctx.imageSmoothingEnabled=false;
+  ctx.imageSmoothingEnabled=true;if(bg.complete&&bg.naturalWidth)ctx.drawImage(bg,0,0,W*S,H*S);else P(0,0,W,H,"#1a1640");ctx.imageSmoothingEnabled=false;
   ctx.globalAlpha=Math.max(0,.55-t/2600);P(0,0,W,H,"#05040f");ctx.globalAlpha=1;
   // sky lanterns drifting up
   for(let i=0;i<16;i++){const ph=((t/11000)+i/16)%1,x=(i*41+Math.sin(t/1400+i)*5)%W,y=150-ph*165;ctx.globalAlpha=.22*(1-ph);P(x-3,y-3,8,9,"#ffb347");ctx.globalAlpha=.9*(1-ph*.6);P(x,y,3,4,"#ffcf6b");P(x+1,y+3,1,1,"#fff3c4");ctx.globalAlpha=1;}
