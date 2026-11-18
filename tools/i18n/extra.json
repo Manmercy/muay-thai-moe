@@ -11271,5 +11271,8 @@
  "เพชรายืนข้างเถ้าแก่ ยิ้มให้กล้องตามที่ถูกสั่ง แต่มือที่พันผ้าพันมือไว้กำแน่นจนข้อนิ้วขาว": "Petcha stands beside the boss and smiles for the cameras as ordered — but her wrapped hands are clenched white at the knuckles.",
  "(ประกาศกลางตลาด) ใครไปใครมาไม่สำคัญ! พยัคฆ์ทองมีเพชราคนเดียวก็พอ!": "(Announcing in the market) Who comes and who goes doesn't matter! Golden Tiger needs only Petcha!",
  "ป้ายผ้าหน้าค่ายพยัคฆ์ทองเปลี่ยนใหม่ทั้งแผ่น รูปเพชราตัวใหญ่อยู่กลางป้าย ใต้รูปเขียนว่า 'กัปตันพยัคฆ์ทอง'": "A brand-new banner hangs at Golden Tiger's gate — a huge picture of Petcha in the middle, and beneath it: 'Golden Tiger Captain.'",
- "จดหมายท้าจากเพชรา": "Challenge letter from Petcha"
+ "จดหมายท้าจากเพชรา": "Challenge letter from Petcha",
+ "เบราว์เซอร์นี้เปิดเต็มจอไม่ได้ ลองเพิ่มเกมลงหน้าจอหลักแทน": "This browser can't go full screen — try adding the game to your Home screen instead",
+ "<div class=\"set\"><span><b>เต็มจอ</b><small>iPhone: กดปุ่มแชร์ แล้ว \"เพิ่มไปยังหน้าจอโฮม\" เปิดเกมจากไอคอนนั้นจะไม่มีแถบเบราว์เซอร์ · เซฟใน Safari ไม่ตามไปเอง ส่งออกเซฟก่อนแล้วนำเข้าในไอคอนใหม่</small></span></div>": "<div class=\"set\"><span><b>Full screen</b><small>iPhone: tap Share, then \"Add to Home Screen\" — the game opens from that icon without the browser bars · Safari saves don't carry over, so export your save first and import it in the new icon</small></span></div>",
+ "<label class=\"set\"><span><b>เต็มจอ</b><small>ซ่อนแถบเบราว์เซอร์ · อยากเปิดเต็มจอทุกครั้ง กด ⋮ ของเบราว์เซอร์ แล้ว \"เพิ่มลงในหน้าจอหลัก\"</small></span><input type=\"checkbox\" data-act=\"fullscreen\" ": "<label class=\"set\"><span><b>Full screen</b><small>Hides the browser bars · To open full screen every time, tap the browser's ⋮ menu, then \"Add to Home screen\"</small></span><input type=\"checkbox\" data-act=\"fullscreen\" "
 }

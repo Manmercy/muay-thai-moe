@@ -5771,7 +5771,7 @@ AU.gsfx=function(kind,a){if(!this.init()||this.muted||!SETTINGS.sfx)return;const
   if(kind==="shimmer")for(let i=0;i<6;i++)T(i*.05,{f:1400+Math.random()*1400,type:"sine",dur:.12,peak:.06});};
 
 // ================= MUAY THAI MOE v1.3 — UI =================
-const VERSION="1.89.27";
+const VERSION="1.89.28";
 const CUR_LANG=(typeof window!=="undefined"&&window.LANG)||"th";
 const TH_LABEL=String.fromCharCode(3652,3607,3618);
 function langSwitch(cls){return `<div class="langsw ${cls||""}" role="group" aria-label="Language">${[["th",TH_LABEL],["en","EN"]].map(([k,l])=>`<button class="lsb ${CUR_LANG===k?"on":""}" data-act="setlang" data-v="${k}" aria-pressed="${CUR_LANG===k}">${l}</button>`).join("")}</div>`;}
@@ -6012,8 +6012,16 @@ function titleHTML(){const sv=loadSave();
 function seedFrom(v){v=String(v||"").trim();if(!v)return undefined;if(/^\d{1,10}$/.test(v))return Number(v)>>>0;let h=2166136261;for(const ch of v.toLowerCase()){h^=ch.codePointAt(0);h=Math.imul(h,16777619);}return h>>>0;}
 function crSeed(){const e=document.getElementById("pseed");if(e&&UI.creator)UI.creator.seed=e.value.trim();}
 const seedHTML=()=>G?`<div class="set"><span><b>This world's seed</b><small>Share it so friends get the same world · include it (with the week) when reporting bugs</small></span><span class="obtns"><code class="seedv">${esc(G.seedText||String(G.seed))}</code><button class="btn sm" data-act="copyseed">Copy</button></span></div>`:"";
+/* v1.89.28: full screen — Android/desktop get a button; iPhone Safari can't do page full screen, so it gets the Home-screen tip (manifest.webmanifest opens the installed game full screen) */
+const fsOn=()=>typeof document!=="undefined"&&!!(document.fullscreenElement||document.webkitFullscreenElement);
+const fsCan=()=>typeof document!=="undefined"&&!!(document.fullscreenEnabled||document.webkitFullscreenEnabled);
+const fsApp=()=>{try{return matchMedia("(display-mode: fullscreen)").matches||matchMedia("(display-mode: standalone)").matches||navigator.standalone===true;}catch(e){return false;}};
+function fsHTML(){if(fsApp())return "";
+  if(fsCan())return `<label class="set"><span><b>Full screen</b><small>Hides the browser bars · To open full screen every time, tap the browser's ⋮ menu, then "Add to Home screen"</small></span><input type="checkbox" data-act="fullscreen" ${fsOn()?"checked":""}></label>`;
+  return `<div class="set"><span><b>Full screen</b><small>iPhone: tap Share, then "Add to Home Screen" — the game opens from that icon without the browser bars · Safari saves don't carry over, so export your save first and import it in the new icon</small></span></div>`;}
+if(typeof document!=="undefined")["fullscreenchange","webkitfullscreenchange"].forEach(ev=>document.addEventListener(ev,()=>{if(UI.modal&&UI.modal.type==="settings")render();}));
 function settingsHTML(){const t=(k,label,desc)=>`<label class="set"><span><b>${label}</b><small>${desc}</small></span><input type="checkbox" data-act="setopt" data-k="${k}" ${SETTINGS[k]?"checked":""}></label>`;
-  return `<h2>Settings</h2><div class="sets"><div class="set"><span><b>Language · ภาษา</b><small>Switching reloads the game. Your saves are kept</small></span>${langSwitch()}</div>${t("music","Music","Pi chawa, khaek drums and ching during fights")}${t("sfx","Sound effects","Punches, kicks, bells, cheering")}${t("coach","Coach Daeng's tips","Coach guides you on the camp screen, fight offers and between rounds")+t("askEnd","Ask before ending the week","Warn me when something is still left to do this week")}${t("quick","Fast mode","Skip the training scenes at week's end and go straight to the summary")}${seedHTML()}</div>
+  return `<h2>Settings</h2><div class="sets"><div class="set"><span><b>Language · ภาษา</b><small>Switching reloads the game. Your saves are kept</small></span>${langSwitch()}</div>${fsHTML()}${t("music","Music","Pi chawa, khaek drums and ching during fights")}${t("sfx","Sound effects","Punches, kicks, bells, cheering")}${t("coach","Coach Daeng's tips","Coach guides you on the camp screen, fight offers and between rounds")+t("askEnd","Ask before ending the week","Warn me when something is still left to do this week")}${t("quick","Fast mode","Skip the training scenes at week's end and go straight to the summary")}${seedHTML()}</div>
    ${!G&&loadSave()?`<div class="set danger"><span><b>Manage save slots</b><small>View, load or delete each slot</small></span><button class="btn sm" data-act="openload">Open</button></div>`:""}${G?`<p class="meta">Playing save slot ${UI.slot} · autosaves whenever you make progress ${CLOUD.ready?" · backed up to the cloud":" · not connected to the cloud (saved in this browser only)"}</p>
    ${G&&UI.slot&&bakInfo(UI.slot)?`<div class="set"><span><b>Pre-update save</b><small>Kept when the game updated · v${esc(String(bakInfo(UI.slot).ver))} week ${bakInfo(UI.slot).week}</small></span><button class="btn sm" data-act="bakrestore">Restore</button></div>`:""}
    <div class="set"><span><b>Enter code</b><small>Event or continue codes from the game page and Discord</small></span><span class="obtns redeem"><input id="redeemcode" maxlength="24" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="Code" aria-label="Code"><button class="btn sm primary" data-act="redeem">Redeem</button></span></div>${typeof codeContentHTML==="function"?codeContentHTML():""}
@@ -7425,6 +7433,8 @@ const ACT={
   askdelslot:d=>{UI.delSlot=+d.v;render();},canceldel:()=>{UI.delSlot=null;render();},
   delslot:()=>{clearSave(UI.delSlot);UI.delSlot=null;if(!loadSave())UI.modal=null;render();},
   beginNew:i=>{UI.slot=i;UI.modal=null;AU.startMusic("hub");UI.creator={name:"",...CHIBI.randomManager(Math.random),gender:"m",diff:"normal",outfit:"tee",hat:"none",glasses:"none"};UI.modal=null;render();},
+  fullscreen:()=>{const d=document,e=d.documentElement,no=()=>toast("This browser can't go full screen — try adding the game to your Home screen instead");
+    try{if(fsOn()){(d.exitFullscreen||d.webkitExitFullscreen).call(d);}else{const r=(e.requestFullscreen||e.webkitRequestFullscreen).call(e,{navigationUI:"hide"});if(r&&r.catch)r.catch(no);}}catch(x){no();}},
   copyseed:()=>{const v=G.seedText||String(G.seed);const ok=()=>toast("Seed copied: "+v);try{navigator.clipboard.writeText(v).then(ok,()=>toast("seed: "+v));}catch(e){toast("seed: "+v);}},
   petplay:d=>{const i=+d.v,p=(G.pets||[])[i];if(!p||!petPlay(G,i))return;AU.sfx&&AU.sfx("ui");const PL={cat:"rolls over for belly rubs",dog:"chases a ball around the ring",rooster:"crows a show-off crow and makes everyone laugh",turtle:"pokes its head out for a slow pat"};
     toast(`${p.name} ${PL[p.k]} · ${PETS[p.k].eff}`);save();render();},
