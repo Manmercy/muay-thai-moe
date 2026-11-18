@@ -2167,3 +2167,6 @@ html[lang=en] .fight .fctl2 .skbtn2 b{font-size:11px;display:-webkit-box;-webkit
 
 /* v1.90.17: route title on her profile */
 .ltitle{margin:6px 0 2px;padding:6px 8px;border:1px solid #f2c94c;border-radius:6px;background:rgba(242,201,76,.10)}.ltitle b{display:block;color:#f2c94c}.ltitle small{display:block;opacity:.85}
+
+/* v1.91.5 hot-form title */
+.pill.hotb{background:linear-gradient(90deg,#ff7a1a,#ff3d5a);color:#fff;border:0;font-weight:700;white-space:nowrap}.pill.hotb.sm{font-size:10px;padding:1px 6px;margin-left:4px}.hotl{color:#ffb070}
