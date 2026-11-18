@@ -116,7 +116,7 @@ function faceImg(f,cls=""){return f.canon||f.id==="pailin"?`<img class="face ${c
   `<canvas class="face npcface ${cls}" width="96" height="96" data-sprite="${f.id}" data-mode="guard" style="--c:${f.color}" aria-label="${esc(f.name)}"></canvas>`;}
 // v1.86: heart level — one heart, the level number, a gauge to the next level
 function hearts(b,f){f=f||{bond:b};const H=heartLv(f),pct=Math.round(H.into/H.need*100),left=Math.max(0,Math.ceil((H.need-H.into)*2)/2);
-  return `<span class="hearts hlv" title="ความสนิท ${Math.round(H.total)} · อีก ${left} ถึง Lv.${H.lv+1}"><i class="hp" style="--p:1"></i><b class="hlvn">Lv.${H.lv}</b><i class="hgauge"><i style="width:${pct}%"></i></i><small>${heartTier(H.lv)}</small></span>`;}
+  return `<span class="hearts hlv" title="ความสนิท ${Math.round(H.total)} · อีก ${left} ถึง Lv.${H.lv+1}"><i class="hp" style="--p:1"></i><b class="hlvn">Lv.${H.lv}</b><i class="hgauge"><i style="width:${pct}%"></i></i><small class="${G&&f.id&&relIsStatus(G,f)?"hstat":""}">${G&&f.id?relLabel(G,f,H.lv):heartTier(H.lv)}</small></span>`;}
 function bar(label,v,color,txt){return `<div class="bar"><span>${label}</span><i style="--v:${clamp(v,0,100)}%;--bc:${color}"></i><b class="num">${txt??Math.round(v)}</b></div>`;}
 function mini(v,color){return `<i class="mini" style="--v:${clamp(v,0,100)}%;--bc:${color}"></i>`;}
 /* v1.88: an opponent shows her strength level, coloured against our best fighter in her division (red = stronger) */
@@ -933,7 +933,7 @@ function reportHTML(){const r=G.lastReport;const ann=[];
   const cut=r.stage==="local"?4:r.stage==="district"?4:0;
   const tu=(r.tierUp||[]).filter(x=>G.F[x.id]),hu=(r.heartUp||[]).filter(x=>G.F[x.id]);
   return `<h2>สรุปสัปดาห์ที่ ${r.week}</h2><p class="goal">${goalText()}</p>
-   ${hu.length?`<div class="heartup">${hu.map(x=>`<div class="hu">${faceImg(G.F[x.id],"sm")}<span>ความสนิทกับ <b>${esc(G.F[x.id].name)}</b> ขึ้นเป็น <b class="hlvn">♥ Lv.${x.lv}</b><small class="meta">${heartTier(x.lv)}</small></span></div>`).join("")}</div>`:""}
+   ${hu.length?`<div class="heartup">${hu.map(x=>`<div class="hu">${faceImg(G.F[x.id],"sm")}<span>ความสนิทกับ <b>${esc(G.F[x.id].name)}</b> ขึ้นเป็น <b class="hlvn">♥ Lv.${x.lv}</b><small class="meta">${relLabel(G,G.F[x.id],x.lv)}</small></span></div>`).join("")}</div>`:""}
    ${tu.length?`<div class="tierup">${tu.map(x=>{const f=G.F[x.id],a=TIER_BY[x.from],b=TIER_BY[x.to],up=b.i>a.i;return `<div class="tu ${up?"up":"down"}">${faceImg(f,"sm")}<span><b>${esc(f.name)}</b> ${up?"เลื่อนขึ้นเป็น":"ตกลงเป็น"} <b>${b.ic} ${b.n}</b><small class="meta">จาก ${a.ic} ${a.n}</small></span></div>`;}).join("")}</div>`:""}
    ${ann.length&&cut?`<div class="announce"><div class="ann-h">ประกาศอันดับ · ${STAGE_NAME[r.stage]}</div>${ann.map(a=>`<div class="ann ${a.f.camp==="player"?"me":""}">${faceImg(a.f,"sm")}<b>${esc(a.f.name)}</b><span class="meta">รุ่น ${a.d}</span><span class="rk">อันดับ ${a.pos}</span>${moveIcon(a.m)}${cut?`<span class="pill ${a.pos<=cut?"green":"red"}">${a.pos<=cut?"อยู่ในโซนเข้ารอบ":"นอกโซน"}</span>`:""}</div>`).join("")}</div>`:""}
    ${r.prog?`<details class="prog"><summary class="ann-h">กราฟพัฒนาการ 4 สัปดาห์ (แตะเพื่อดู)</summary><div class="progrow">${r.prog.filter(p=>G.F[p.id]).map(p=>{const f=G.F[p.id];const sum=Object.keys(p.before).reduce((s,k)=>s+(f.a[k]-p.before[k]),0);

@@ -395,7 +395,11 @@ const awayLeft=(G,id)=>isAway(G,id)?G.F[id].awayAbs-absWeek(G):0;
 const awaySpeaks=(G,steps)=>(steps||[]).some(x=>x&&typeof x.n==="string"&&isAway(G,x.n));
 function sendAway(G,id,wk,why){const f=G.F[id];if(!f)return;const now=absWeek(G);f.awayAbs=Math.max(isAway(G,id)?f.awayAbs:0,now+wk);f.awayWhy=why;f.awayBack=false;}
 const lovFinal=G=>{for(const id of lovList(G)){if(!romOf(G,id)||!LOVER_FINAL[id])continue;const b=G.bookings.find(b=>b.tier==="final"&&G.F[b.a].camp==="player"&&(b.a===id||id==="rin"));if(b)return {id,b};}return null;};
-function relTag(G,f){const id=f.id;let t=isLov(G,id)?(G.harem?" · Sweetheart ♥ (harem)":" · Sweetheart ♥"):isProm(G,id)?" · Promised ♡":isEx(G,id)?" · Ex":"";
+/* v1.89.11: one label — the closeness name until you are together, then what you are to each other (shown under the hearts) */
+function relLabel(G,f,lv){const id=f&&f.id;if(G&&id&&G.F&&G.F[id]){if(isLov(G,id))return G.harem?"Sweetheart ♥ (harem)":"Sweetheart ♥";if(isProm(G,id))return "Promised ♡";if(isEx(G,id))return "Ex";}return heartTier(lv!=null?lv:heartLv(f||{}).lv);}
+const relIsStatus=(G,f)=>!!(G&&f&&f.id&&G.F&&G.F[f.id]&&(isLov(G,f.id)||isProm(G,f.id)||isEx(G,f.id)));
+/* beside the name: only where she is right now */
+function relTag(G,f){const id=f.id;let t="";
   if(isAway(G,id))t+=f.camp==="player"?` · Away from camp (${awayLeft(G,id)} wk)`:` · Not in touch (${awayLeft(G,id)} wk)`;return t;}
 // she confesses while you are already with someone — you can tell her the truth
 const LOVE_TAKEN={kati:"…I see. Sorry I said anything. Please forget it",mali:"Oh… you already have someone. It's okay, Mali's happy for you",

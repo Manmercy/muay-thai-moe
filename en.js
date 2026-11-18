@@ -2645,7 +2645,11 @@ const awayLeft=(G,id)=>isAway(G,id)?G.F[id].awayAbs-absWeek(G):0;
 const awaySpeaks=(G,steps)=>(steps||[]).some(x=>x&&typeof x.n==="string"&&isAway(G,x.n));
 function sendAway(G,id,wk,why){const f=G.F[id];if(!f)return;const now=absWeek(G);f.awayAbs=Math.max(isAway(G,id)?f.awayAbs:0,now+wk);f.awayWhy=why;f.awayBack=false;}
 const lovFinal=G=>{for(const id of lovList(G)){if(!romOf(G,id)||!LOVER_FINAL[id])continue;const b=G.bookings.find(b=>b.tier==="final"&&G.F[b.a].camp==="player"&&(b.a===id||id==="rin"));if(b)return {id,b};}return null;};
-function relTag(G,f){const id=f.id;let t=isLov(G,id)?(G.harem?" · Sweetheart ♥ (harem)":" · Sweetheart ♥"):isProm(G,id)?" · Promised ♡":isEx(G,id)?" · Ex":"";
+/* v1.89.11: one label — the closeness name until you are together, then what you are to each other (shown under the hearts) */
+function relLabel(G,f,lv){const id=f&&f.id;if(G&&id&&G.F&&G.F[id]){if(isLov(G,id))return G.harem?"Sweetheart ♥ (harem)":"Sweetheart ♥";if(isProm(G,id))return "Promised ♡";if(isEx(G,id))return "Ex";}return heartTier(lv!=null?lv:heartLv(f||{}).lv);}
+const relIsStatus=(G,f)=>!!(G&&f&&f.id&&G.F&&G.F[f.id]&&(isLov(G,f.id)||isProm(G,f.id)||isEx(G,f.id)));
+/* beside the name: only where she is right now */
+function relTag(G,f){const id=f.id;let t="";
   if(isAway(G,id))t+=f.camp==="player"?` · Away from camp (${awayLeft(G,id)} wk)`:` · Not in touch (${awayLeft(G,id)} wk)`;return t;}
 // she confesses while you are already with someone — you can tell her the truth
 const LOVE_TAKEN={kati:"…I see. Sorry I said anything. Please forget it",mali:"Oh… you already have someone. It's okay, Mali's happy for you",
@@ -5550,7 +5554,7 @@ function faceImg(f,cls=""){return f.canon||f.id==="pailin"?`<img class="face ${c
   `<canvas class="face npcface ${cls}" width="96" height="96" data-sprite="${f.id}" data-mode="guard" style="--c:${f.color}" aria-label="${esc(f.name)}"></canvas>`;}
 // v1.86: heart level — one heart, the level number, a gauge to the next level
 function hearts(b,f){f=f||{bond:b};const H=heartLv(f),pct=Math.round(H.into/H.need*100),left=Math.max(0,Math.ceil((H.need-H.into)*2)/2);
-  return `<span class="hearts hlv" title="Bond ${Math.round(H.total)} · ${left} to Lv.${H.lv+1}"><i class="hp" style="--p:1"></i><b class="hlvn">Lv.${H.lv}</b><i class="hgauge"><i style="width:${pct}%"></i></i><small>${heartTier(H.lv)}</small></span>`;}
+  return `<span class="hearts hlv" title="Bond ${Math.round(H.total)} · ${left} to Lv.${H.lv+1}"><i class="hp" style="--p:1"></i><b class="hlvn">Lv.${H.lv}</b><i class="hgauge"><i style="width:${pct}%"></i></i><small class="${G&&f.id&&relIsStatus(G,f)?"hstat":""}">${G&&f.id?relLabel(G,f,H.lv):heartTier(H.lv)}</small></span>`;}
 function bar(label,v,color,txt){return `<div class="bar"><span>${label}</span><i style="--v:${clamp(v,0,100)}%;--bc:${color}"></i><b class="num">${txt??Math.round(v)}</b></div>`;}
 function mini(v,color){return `<i class="mini" style="--v:${clamp(v,0,100)}%;--bc:${color}"></i>`;}
 /* v1.88: an opponent shows her strength level, coloured against our best fighter in her division (red = stronger) */
@@ -6367,7 +6371,7 @@ function reportHTML(){const r=G.lastReport;const ann=[];
   const cut=r.stage==="local"?4:r.stage==="district"?4:0;
   const tu=(r.tierUp||[]).filter(x=>G.F[x.id]),hu=(r.heartUp||[]).filter(x=>G.F[x.id]);
   return `<h2>Week ${r.week}</h2><p class="goal">${goalText()}</p>
-   ${hu.length?`<div class="heartup">${hu.map(x=>`<div class="hu">${faceImg(G.F[x.id],"sm")}<span>Bond with <b>${esc(G.F[x.id].name)}</b> rose to <b class="hlvn">♥ Lv.${x.lv}</b><small class="meta">${heartTier(x.lv)}</small></span></div>`).join("")}</div>`:""}
+   ${hu.length?`<div class="heartup">${hu.map(x=>`<div class="hu">${faceImg(G.F[x.id],"sm")}<span>Bond with <b>${esc(G.F[x.id].name)}</b> rose to <b class="hlvn">♥ Lv.${x.lv}</b><small class="meta">${relLabel(G,G.F[x.id],x.lv)}</small></span></div>`).join("")}</div>`:""}
    ${tu.length?`<div class="tierup">${tu.map(x=>{const f=G.F[x.id],a=TIER_BY[x.from],b=TIER_BY[x.to],up=b.i>a.i;return `<div class="tu ${up?"up":"down"}">${faceImg(f,"sm")}<span><b>${esc(f.name)}</b> ${up?"moved up to":"dropped to"} <b>${b.ic} ${b.n}</b><small class="meta">from ${a.ic} ${a.n}</small></span></div>`;}).join("")}</div>`:""}
    ${ann.length&&cut?`<div class="announce"><div class="ann-h">Rankings · ${STAGE_NAME[r.stage]}</div>${ann.map(a=>`<div class="ann ${a.f.camp==="player"?"me":""}">${faceImg(a.f,"sm")}<b>${esc(a.f.name)}</b><span class="meta">Div ${a.d}</span><span class="rk">Rank ${a.pos}</span>${moveIcon(a.m)}${cut?`<span class="pill ${a.pos<=cut?"green":"red"}">${a.pos<=cut?"In the qualifying zone":"Outside the zone"}</span>`:""}</div>`).join("")}</div>`:""}
    ${r.prog?`<details class="prog"><summary class="ann-h">4-week progress chart (tap to view)</summary><div class="progrow">${r.prog.filter(p=>G.F[p.id]).map(p=>{const f=G.F[p.id];const sum=Object.keys(p.before).reduce((s,k)=>s+(f.a[k]-p.before[k]),0);
