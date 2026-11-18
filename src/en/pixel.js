@@ -49,7 +49,7 @@ const loyImg=(id,name)=>LOY_SP.includes(id)&&loyLookNow()?name.replace(id+"_",id
 function sheetFor(f){
   if(f.canon&&LOY_SP.includes(f.id)&&loyLookNow())return img(f.id+"_loykrathong_sheet.webp");
   if(f.canon){if(f.outfit&&f.outfit!=="base"&&f.camp==="player"&&OUTFITS[f.outfit])return outfitSheet(f,f.outfit);return img(f.id+"_sheet.webp");}
-  if(f.sprite)return f.tintHue!=null?spriteTint(f.sprite,f.tintHue):img(f.sprite+"_sheet.webp"); // v1.23: gang, roosters, bulls · v1.89.23: tintHue re-dyes the red kit (the krathong thief)
+  if(f.sprite)return f.tintHue!=null?spriteTint(f.sprite,f.tintHue):img(f.sprite+"_sheet.webp"); // v1.23: gang, roosters, bulls · v1.89.24: tintHue re-dyes the red kit (the krathong thief)
   if(TINTS[f.id])return TINTS[f.id];
   const nb=npcBase(f.id),base=nb.base,blonde=!!(f.prodigy||(f.id||"").startsWith("prod_")),lab=!!f.lab&&!blonde,hue=blonde?42:lab?276:nb.hue,dark=blonde?true:lab?false:nb.dark; /* v1.88: Vector camp fighters wear their black-purple kit */const src=img(base+"_sheet.webp"); /* v1.56: Golden Tiger prodigies: black-gold kit; v1.88: hair dyed silver like Fah */if(!src.complete||!src.naturalWidth)return src;
   const c=document.createElement("canvas");c.width=src.naturalWidth;c.height=src.naturalHeight;const x=c.getContext("2d",{willReadFrequently:true});x.drawImage(src,0,0);
