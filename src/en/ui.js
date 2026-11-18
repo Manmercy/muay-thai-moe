@@ -1076,6 +1076,7 @@ function playHonorQueue(done){while((G.awards||[]).length&&!(G.F[G.awards[0].id]
 function sceneNext(){const S=UI.scene;if(!S)return;
   while(S.i<S.steps.length){const st=S.steps[S.i];
     if(st.inject){let more=[];try{more=st.inject(G)||[];}catch(e){console.error("scene inject",e);}S.steps.splice(S.i,1,...more);continue;}/* v1.81.1: a broken step never freezes the week */
+    if(st.brawl){S.i++;UI.scene=null;openBrawl(st.brawl.a,st.brawl.b,st.brawl.hard,res=>{UI.scene=S;let more=[];try{more=st.after?st.after(G,res)||[]:[];}catch(e){console.error("brawl after",e);}S.steps.splice(S.i,0,...more);sceneNext();});return;}/* v1.89.11: a live bout inside a scene */
     if(st.bg)S.bg=st.bg;
     if(st.fx&&!st.n&&!st.choice&&!st.choiceFn){try{st.fx(G);}catch(e){console.error("scene fx",e);}S.i++;continue;}
     if(st.choice||st.choiceFn){S.cur={choice:(st.choice||st.choiceFn(G))};render();return;}
@@ -1337,12 +1338,13 @@ function fightHTML(){const U=UI.fight,b=U.b,me=G.F[b.a],op=G.F[b.b],F=U.F;
      ${U.cutin?(U.cutin.skill?`<div class="cutin sk ${U.cutin.kind} ${U.cutin.side}" aria-live="assertive"><div class="cut-band"><img src="${ASSET}${U.cutin.id}_fight_angry.webp" alt=""></div><b>${esc(U.cutin.skill)}</b><span>${esc(U.cutin.name)} · ${U.cutin.kind==="atk"?`${WNAME[U.cutin.w]}: sharper and harder for a while`:U.cutin.kind==="def"?"Better evasion and counters for a while":"Energy recovered"}</span></div>`:`<div class="cutin ${U.cutin.side}" aria-live="assertive"><div class="cut-band"><img src="${ASSET}${U.cutin.id}_fight_angry.webp" alt=""></div><b>Blood-boil mode!</b><span>${esc(U.cutin.name)} changes eyes · stronger counters, easier criticals</span></div>`):""}
      ${U.stage==="corner"?"":liveStats()}`;
     // v1.21: one compact row — speed, then the 3 carried skills
-    if(U.stage==="playing")mid+=`<div class="fctl2"><div class="seg sm">${[["1","x1"],["2","x2"]].map(([v,t])=>`<button data-act="fspeed" data-v="${v}" aria-pressed="${String(UI.speed)===v}" aria-label="Speed ${t}">${t}</button>`).join("")}</div>${skillBarHTML()}</div>`; /* v1.89.3: speed and skills share one row right under the live stats again (as before v1.83 pinned them to the bottom) */
+    if(U.stage==="playing")mid+=`<div class="fctl2"><div class="seg sm">${[["1","x1"],["2","x2"]].map(([v,t])=>`<button data-act="fspeed" data-v="${v}" aria-pressed="${String(UI.speed)===v}" aria-label="Speed ${t}">${t}</button>`).join("")}</div>${U.brawl?`<span class="meta skhint">Watching from ringside · they fight on their own</span>`:skillBarHTML()}</div>`; /* v1.89.3: speed and skills share one row right under the live stats again (as before v1.83 pinned them to the bottom) */
     if(U.stage==="corner")mid+=cornerHTML(F);
-    if(U.stage==="done")mid+=resultHTML();
+    if(U.stage==="talk")mid+=brawlTalkHTML();
+    if(U.stage==="done")mid+=U.brawl?brawlDoneHTML():resultHTML();
     mid+=`<details class="logd" ${UI.logOpen?"open":""} ontoggle="UI.logOpen=this.open"><summary>Full fight log</summary><div class="flog">${U.shown.map(l=>l.rd?`<div class="rd">${l.rd}</div>`:`<div class="${l.s}">${esc(l.t||"")}</div>`).join("")}</div></details>`;}
   const tw=UI.confirmTowel?`<div class="tconfirm" role="alertdialog"><div class="px">${UI.towelCoach?`<div class="ctip big"><img src="${faceSrc("coach")}" alt=""><span><b>Coach Daeng:</b> ${esc(me.name)} is badly hurt, only HP ${Math.max(1,Math.round(U.F.A.hp))}. If she gets knocked out she'll be off for weeks. Throw the towel?</span></div>`:""}<h3>🏳️ Throw in the towel?</h3><p>The fight counts as a loss right away, but she won't get hurt any worse (morale drops).</p><div class="ctrl"><button class="btn" data-act="towelno">Keep fighting</button><button class="btn primary" data-act="towelyes">Throw it</button></div></div></div>`:"";
-  return `${tw}${fpopHTML()}<div class="fight pxscroll ${U.stage==="corner"?"incorner":U.stage==="done"?"isdone":""}" data-sk="fight" role="dialog" aria-label="Fight"><div class="fight-in"><div class="fhead">${side(me,"a",hpA,stA)}<div class="vsmid"><b>${TIER[b.tier].name}</b>${U.F&&U.F.round&&U.stage==="playing"?(()=>{const s=Math.max(0,Math.round(180*(1-Math.min(U.F.ex||0,EX_PER_ROUND)/EX_PER_ROUND)));return `<span class="meta">Rd ${U.F.round}/${b.rounds}</span><span class="rclock num">${Math.floor(s/60)}:${String(s%60).padStart(2,"0")}</span><i class="rcbar" style="--v:${Math.round(s/1.8)}%"></i>`;})():`<span class="meta">${b.rounds} rds</span>`}</div>${side(op,"b",hpB,stB)}</div>${mid}</div></div>`;}
+  return `${tw}${fpopHTML()}<div class="fight pxscroll ${U.stage==="corner"?"incorner":U.stage==="done"?"isdone":""}" data-sk="fight" role="dialog" aria-label="Fight"><div class="fight-in"><div class="fhead">${side(me,"a",hpA,stA)}<div class="vsmid"><b>${b.brawl?"Settling it in the ring":TIER[b.tier].name}</b>${U.F&&U.F.round&&U.stage==="playing"?(()=>{const s=Math.max(0,Math.round(180*(1-Math.min(U.F.ex||0,EX_PER_ROUND)/EX_PER_ROUND)));return `<span class="meta">Rd ${U.F.round}/${b.rounds}</span><span class="rclock num">${Math.floor(s/60)}:${String(s%60).padStart(2,"0")}</span><i class="rcbar" style="--v:${Math.round(s/1.8)}%"></i>`;})():`<span class="meta">${b.rounds} rds</span>`}</div>${side(op,"b",hpB,stB)}</div>${mid}</div></div>`;}
 function liveStats(){const U=UI.fight,F=U.F;if(!F)return "";let la=0,lb=0;
   for(const e of U.shown){if(!e.ev)continue;const sd=sideOf(e,F);if(e.ev==="hit"||e.ev==="counter"){if(sd==="A")la++;else lb++;}}
   const ctl=la+lb?Math.round(la/(la+lb)*100):50;
@@ -1524,7 +1526,7 @@ function fightStart(quick){const U=UI.fight,b=U.b;AU.resume();
   if(b.wai==="phrom")U.F.A.careMor=.02;if(b.wai==="phra")U.F.A.careMor=.01;if(b.cheer)U.F.A.mor+=b.cheer*.01;U.F.A.mor+=trustBonus(G.F[b.a]);{const fam=(G.fam||{})[b.b]||0;if(fam)U.F.A.mor+=fam*.015;}setTactics(U.F,U.tac);if(b.carry){U.F.A.hp=Math.min(U.F.A.hp,b.carry.hp);U.F.A.sta=Math.min(U.F.A.sta,b.carry.sta);}LASTF=U.F;
   if(quick){FS.init(null,b.bg||TIER_BG[b.tier]||"bg_local.webp",G.F[b.a],G.F[b.b]);const F=U.F;while(!F.over){F.A.instr=aiCorner(F,F.A,F.B);F.B.instr=aiCorner(F,F.B,F.A);const lg=fightRound(F);U.shown.push({rd:`Round ${F.round}`},...lg);}fightEnd();return;}
   FS.init(null,b.bg||TIER_BG[b.tier]||"bg_local.webp",G.F[b.a],G.F[b.b]);AU.setTempo(104);AU.setHeat&&AU.setHeat(0);AU.startMusic();playRound();}
-function playRound(){const U=UI.fight,F=U.F;fightMusic(F);F.B.instr=aiCorner(F,F.B,F.A);F.A.autoSkill=false;roundBegin(F);
+function playRound(){const U=UI.fight,F=U.F;fightMusic(F);F.B.instr=aiCorner(F,F.B,F.A);F.A.autoSkill=false;if(U.brawl){F.A.instr=aiCorner(F,F.A,F.B);F.A.autoSkill=true;}roundBegin(F);
   const rng=mulberry32(F.seed+F.round);U.rng=rng;U.tiredShown=false;
   F.tier=F.tier||U.b.tier;const sl=startLine(F,rng);U.pending=[{rd:`Round ${F.round}`,cap:{text:sl.text,side:"",heat:sl.heat},bell:true}];
   U.stage="playing";fightMusic(F);render();tick();}
@@ -1543,6 +1545,7 @@ function fightMusic(F,surge){if(!F||!AU.setTempo)return;const R=Math.max(1,F.rou
   const late=(F.ex||0)>=EX_PER_ROUND*.7?1:0,kd=F.musicKd&&performance.now()-F.musicKd<9000?1:0;
   AU.setTempo(Math.round(104+p*54+late*8+kd*10+(surge||0)*4));AU.setHeat&&AU.setHeat(Math.round(p*2)+(late||kd?1:0));}
 function tick(){const U=UI.fight;if(!U||U.stage!=="playing")return;
+  if(U.brawl&&U.brawl.asked<BRAWL_AT.length&&(U.F.ex||0)>=BRAWL_AT[U.brawl.asked]){U.stage="talk";U.brawl.q=brawlPrompt(U);AU.sfx("ui");render();return;}
   if(!U.pending.length&&!feedRound()){roundFinish(U.F);roundEnd();return;}
   const e=U.pending.shift();U.shown.push(e);const F=U.F;const now=performance.now();let wait=1500;
   if(e.bell){AU.sfx("bell");U.caption=e.cap;}
@@ -1566,7 +1569,7 @@ function tick(){const U=UI.fight;if(!U||U.stage!=="playing")return;
   render();U.timer=setTimeout(tick,(window.matchMedia&&matchMedia("(prefers-reduced-motion: reduce)").matches?400:wait)/(UI.speed===2?2:1));}
 function fskip(){const U=UI.fight;clearTimeout(U.timer);while(!roundDone(U.F))U.pending.push(...fightEx(U.F));const rest=U.pending.filter(x=>!x.bell&&!x.tired);U.shown.push(...rest);U.pending=[];
   const ko=rest.find(x=>x.ev==="ko");if(ko)FS.play({...ko,side:sideOf(ko,U.F)},performance.now());roundFinish(U.F);roundEnd();}
-function roundEnd(){const U=UI.fight;clearTimeout(U.timer);const F=U.F;
+function roundEnd(){const U=UI.fight;clearTimeout(U.timer);const F=U.F;if(U.brawl){brawlEnd();return;}
   if(F.over){fightEnd();return;}AU.sfx("bell1");U.caption={text:COM.end[Math.floor(Math.random()*2)],side:""};U.stage="corner";U.care={mode:"order",need:careNeeds(F),got:[],done:false}; /* v1.89.1: only the order puzzle, as before v1.87.6; card / oil games stay in the code for an outside mini-game later */ /* v1.89.1: corner mini-games are off for now (too tiring every break) — coach Daeng gives a normal corner; newCare/cardSeq/oil stay for an outside mini-game later */U.pick=null;U.hint=false;if(F.A.hp<35&&!U.towelAsked&&F.round<F.rounds){U.towelAsked=true;UI.confirmTowel=true;UI.towelCoach=true;AU.sfx("miss");}render();}
 /* v1.88 corner care comes in three flavours: the order puzzle, a face-down card, or a fast oil massage */
 function newCare(F){const r=Math.random(),mode=r<.5?"order":r<.75?"card":"oil";
@@ -1577,7 +1580,26 @@ function towelScene(f){const L={kati:["I could still stand, coach… Grandpa nev
   const R={kati:"Your grandpa never had a granddaughter to worry about like this.",mali:"Because I want to see you smiling tomorrow, not lying in a hospital.",rin:"You don't have to like it. Heal first, then argue with me.",ploy:"Remember it. I'll remember you were still standing.",fah:"Three days is fine. Day four, you're back in training."}[f.id]||"It's okay. There's always the next fight.";
   const me=L?{n:f.id,f:L[1],l:"fight",t:L[0]}:{n:"npc",who:f.name,t:"I could still go on… but thank you."};
   return [{n:"coach",t:`I'm sorry, ${f.name}. I couldn't watch you go down again.`},me,{n:"coach",t:R},{n:"nar",t:`${f.name} isn't hurt any worse, but her morale drops by 8`}];}
-function fightEnd(){const U=UI.fight;U.stage="done";{const w=U.F.result.win;U.bubble=postBubble(U.F.B.f,w==="A"?"lose":w==="B"?"win":"draw",(U.F.seed>>>3)+G.week+[...U.F.B.f.id].reduce((a,c)=>a*31+c.charCodeAt(0)|0,0)+(G.cal||[]).length*7,U.F.A.f);}AU.startMusic("hub");setTimeout(()=>AU.sfx(U.F.result.win==="A"?"win":U.F.result.win==="B"?"lose":"bell1"),200);
+/* v1.89.11: Valentine brawl — both sides on auto for one round; three times the player can shout from ringside */
+const BRAWL_AT=[2,6,9];
+function openBrawl(a,b,hard,done){AU.resume&&AU.resume();UI.modal=null;
+  UI.fight={b:{a,b,tier:"exhibition",rounds:1,brawl:true,hard,bg:gymBg()},done,stage:"pre",plan:"balanced",tac:{focus:"auto",pace:"steady",target:"body"},F:null,shown:[],pending:[],timer:null,res:null,caption:null,brawl:{sc:0,asked:0,q:null,stopped:false}};
+  fightStart(false);}
+function brawlPrompt(U){const k=U.brawl.asked,T=BRAWL_TALK[k],who=k===0?U.b.a:k===1?U.b.b:null,rng=mulberry32((U.F.seed||1)+k*97);
+  return {ctx:T[0],who,line:who?vx(G,who,BRAWL_MID):"",opts:[...T[1]].sort(()=>rng()-.5)};}
+function brawlTalkHTML(){const U=UI.fight,q=U.brawl&&U.brawl.q;if(!q)return "";
+  return `<div class="btalk px" role="dialog" aria-label="Shout to stop them"><p class="meta">${esc(q.ctx)}</p>${q.who?`<div class="btline"><img class="face sm" src="${faceSrc(q.who,"angry")}" alt=""><span><b>${esc(G.F[q.who].name)}</b>${esc(q.line)}</span></div>`:""}
+   <small class="meta">Shout from ringside (${U.brawl.asked+1}/${BRAWL_AT.length})</small><div class="btopts">${q.opts.map((o,i)=>`<button class="copt" data-act="fbrawl" data-v="${i}">${esc(o[0])}</button>`).join("")}</div></div>`;}
+function brawlPick(i){const U=UI.fight;if(!U||!U.brawl||!U.brawl.q)return;const o=U.brawl.q.opts[i];if(!o)return;
+  U.brawl.sc+=o[1];U.brawl.q=null;U.brawl.asked++;U.caption={text:o[2],side:""};AU.sfx(o[1]>=2?"level":"ui");if(o[1]<0)AU.cheer(.8);
+  if(U.brawl.asked>=BRAWL_AT.length&&U.brawl.sc>=5){U.brawl.stopped=true;U.stage="playing";render();U.timer=setTimeout(brawlEnd,1800);return;}
+  U.stage="playing";render();U.timer=setTimeout(tick,1600/(UI.speed===2?2:1));}
+function brawlEnd(){const U=UI.fight;if(!U||U.stage==="done")return;clearTimeout(U.timer);U.stage="done";const F=U.F;AU.sfx("bell1");
+  U.caption={text:U.brawl.stopped?"They both lower their guard at once. The round ends there":"End of the round! Neither gave an inch",side:""};render();}
+function brawlDoneHTML(){const U=UI.fight,B=U.brawl;
+  return `<div class="res px brawlres"><h3>${B.sc>=5?"You stopped them":"Couldn't stop them"}</h3><p class="meta">${B.sc>=5?"Your words cooled them both down":"Neither of them listened to you"} · This bout doesn't count and nobody gets hurt</p>
+   <button class="btn primary big" data-act="fbrawldone">Continue ▸</button></div>`;}
+function fightEnd(){const U=UI.fight;if(U.brawl){brawlEnd();return;}U.stage="done";{const w=U.F.result.win;U.bubble=postBubble(U.F.B.f,w==="A"?"lose":w==="B"?"win":"draw",(U.F.seed>>>3)+G.week+[...U.F.B.f.id].reduce((a,c)=>a*31+c.charCodeAt(0)|0,0)+(G.cal||[]).length*7,U.F.A.f);}AU.startMusic("hub");setTimeout(()=>AU.sfx(U.F.result.win==="A"?"win":U.F.result.win==="B"?"lose":"bell1"),200);
   const me=G.F[U.b.a];if(me.injury)me.trust=clamp(me.trust-12,0,100);
   U.res=applyResult(G,U.F,U.b);if(U.b.dm)U.b.result=dmWinFrom(U.F);me.prepBonus=false;if(U.b.tier==="final"||U.b.tier==="semi")finishBracket(G,U.b,U.F);
   const r=U.F.result;if(FS.A){if(r.win==="A"){FS.A.win=true;FS.A.anim="win";}else if(r.win==="B"){FS.B.win=true;FS.B.anim="win";}}
@@ -1804,6 +1826,8 @@ const ACT={
   towelyes:()=>{UI.confirmTowel=false;UI.towelCoach=false;const U=UI.fight;throwTowel(U.F);U.shown.push({s:"x",t:`${G.F[U.b.a].name}'s corner throws in the towel`});fightEnd();},
   withdraw:()=>{const U=UI.fight;G.bookings=G.bookings.filter(x=>x!==U.b);G.rep=Math.max(0,G.rep-1);add(G,U.b.a,"trust",3);
     G.log.push(`${G.F[U.b.a].name} withdraws due to injury`);const done=U.done;UI.fight=null;render();done();},
+  fbrawl:d=>brawlPick(+d.v),
+  fbrawldone:()=>{const U=UI.fight;if(!U||!U.brawl)return;const F=U.F,res={sc:U.brawl.sc,stopped:U.brawl.stopped,hpA:Math.round(F.A.hp),hpB:Math.round(F.B.hp)};const done=U.done;UI.fight=null;AU.startMusic("hub");render();if(done)done(res);},
   fdone:()=>{const done=UI.fight.done,after=UI.fight.afterScene;UI.fight=null;render();playHonorQueue(()=>{if(after)playScene(after,done,{bg:"ring",look:"fight"});else done();});},
   gatego:()=>{const v=((document.getElementById("gatecode")||{}).value||"").toUpperCase().replace(/\s+/g,"");let ok=false;try{ok=btoa(v)===GATE.code;}catch(e){}
     if(ok){G.unlocked=true;try{localStorage.setItem(GATE.key,"1");}catch(e){}UI.gateErr=false;save();AU.sfx("level");toast("Unlocked! Year 2 is ready to play");}else{UI.gateErr=true;AU.sfx("miss");}render();},

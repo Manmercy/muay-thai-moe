@@ -45,7 +45,7 @@ const chrome=process.env.CHROME_PATH||'/Applications/Google Chrome.app/Contents/
   test('every heart spot plays and has its background',()=>{const g=fresh();G=g;atHeart(g,20);for(const k in ACTIVITIES){const A=ACTIVITIES[k];if(!A.heart)continue;if(!BGIMG[A.bg])throw Error('no bg '+k);g.freeUsed=false;for(const id of ['kati','mali','rin','ploy','fah']){const f=g.F[id];f.met=true;f.bond=100;f.bondX=g.F.kati.bondX;for(let i=0;i<3;i++){g.freeUsed=false;const st=dateScene(g,id,k);if(st.length<4)throw Error('short '+id+k);}}}return true;});
   /* v1.89.11: lovers — several at once, Valentine, the ring, breakup, harem */
   const walkL=(g,L,pick)=>{let n=0;const go=A=>{for(const x of A){if(x.inject){go(x.inject(g)||[]);continue;}if(x.fx&&!x.choice&&!x.n){x.fx(g);continue;}
-      if(x.choice){const c=x.choice[pick?pick(x.choice):0];if(c.fx)c.fx(g);go(c.then||[]);continue;}if(x.n&&typeof x.t!=='string')throw Error('text '+x.n);if(x.n&&!x.t)throw Error('empty '+x.n);n++;}};go(L);return n;};
+      if(x.choice){const c=x.choice[pick?pick(x.choice):0];if(c.fx)c.fx(g);go(c.then||[]);continue;}if(x.brawl){go(x.after(g,{sc:g.__brawlSc||0})||[]);continue;}if(x.n&&typeof x.t!=='string')throw Error('text '+x.n);if(x.n&&!x.t)throw Error('empty '+x.n);n++;}};go(L);return n;};
   const ev=id=>EVENTS.find(e=>e.id===id);
   const lovUp=(g,ids)=>{for(const id of ids){const f=g.F[id];f.met=true;f.bond=90;f.trust=60;if(id!=='ploy'&&id!=='fah')f.camp='player';takeLover(g,id);}};
   test('a second lover can be taken; both are lovers and status tags read right',()=>{const g=fresh();G=g;lovUp(g,['kati','mali']);if(!isLov(g,'kati')||!isLov(g,'mali')||g.romance!=='kati')return false;
@@ -55,6 +55,29 @@ const chrome=process.env.CHROME_PATH||'/Applications/Google Chrome.app/Contents/
       if(!ev('lv_val').when(g)||ev('lv_valh').when(g))throw Error('when');const b0=g.F.rin.bond;const n=walkL(g,ev('lv_val').steps,pickFn||(ch=>Math.max(0,ch.findIndex(c=>/รักทุกคน|love all/i.test(c.t)))));if(n<12)throw Error('short '+n);
       if(g.F.rin.bond!==b0-15)throw Error('drop '+g.F.rin.bond);if(g.valCaught!==1)throw Error('count');}
     const g=fresh();G=g;lovUp(g,['kati','mali']);g.week=38;g.valCaught=1;walkL(g,ev('lv_val').steps,ch=>ch.length-1);return g.F.kati.bond===65&&(isAway(g,'kati')||isAway(g,'mali'));});
+  test('the Valentine ring is a live auto bout: three ringside shouts, no result, no injury, then the scene goes on',()=>{const g=fresh();G=g;lovUp(g,['kati','mali']);g.week=38;
+    const keep={k:JSON.stringify([g.F.kati.fatigue,g.F.kati.injury,g.F.kati.rec,g.F.kati.xp]),m:JSON.stringify([g.F.mali.fatigue,g.F.mali.injury,g.F.mali.rec]),cal:(g.cal||[]).length,cash:g.cash};
+    let got=null;playScene(ringSteps(g,'kati','mali',false),()=>{got='done';},{bg:'gym',look:'casual'});let guard=0;while(UI.scene&&guard++<20)sceneNext();
+    if(!UI.fight||!UI.fight.brawl)throw Error('no brawl');const U=UI.fight;clearTimeout(U.timer);
+    for(let k=0;k<3;k++){U.stage='playing';let n=0;while(U.stage==='playing'&&n++<200){clearTimeout(U.timer);if(!U.pending.length&&!feedRound()){roundFinish(U.F);roundEnd();break;}tick();clearTimeout(U.timer);}
+      if(U.stage==='done')break;if(U.stage!=='talk'||!document.querySelector('.btalk'))throw Error('no prompt '+k+' '+U.stage);const best=U.brawl.q.opts.findIndex(o=>o[1]===2);ACT.fbrawl({v:best});clearTimeout(U.timer);}
+    if(U.brawl.sc<5)throw Error('score '+U.brawl.sc);clearTimeout(U.timer);brawlEnd();render();if(!document.querySelector('.brawlres'))throw Error('done panel');ACT.fbrawldone();
+    guard=0;while(UI.scene&&guard++<40){if(UI.scene.cur&&UI.scene.cur.choice)sceneChoose(0);else sceneNext();}
+    if(got!=='done')throw Error('scene did not resume');if(isAway(g,'kati')||isAway(g,'mali'))throw Error('nobody should run after a good stop');
+    return JSON.stringify([g.F.kati.fatigue,g.F.kati.injury,g.F.kati.rec,g.F.kati.xp])===keep.k&&JSON.stringify([g.F.mali.fatigue,g.F.mali.injury,g.F.mali.rec])===keep.m&&(g.cal||[]).length===keep.cal&&g.cash===keep.cash;});
+  test('five lovers (Ploy and Fah moved in): Valentine, the brawl hand-off, harem — everyone still tagged as lover',()=>{const g=fresh();G=g;g.season=2;for(const id of ['ploy','fah']){g.F[id].camp='player';}
+    lovUp(g,['kati','mali','rin','ploy','fah']);for(const id of ['ploy','fah'])g.F[id].camp='player';g.week=38;if(partners(g).length!==5)throw Error('five');
+    const L=[];const n=walkL(g,ev('lv_val').steps.map(x=>x),ch=>Math.max(0,ch.findIndex(c=>/รักทุกคน|love all/i.test(c.t))));
+    const txt=JSON.stringify(valSteps({...g,valCaught:0,F:g.F,promise:g.promise,lovers:g.lovers}).filter(x=>x.n==='ploy'));if(!/ค่ายเดียวกับคุณ|same camp/i.test(txt))throw Error('ploy camp line '+txt);
+    if(!g.haremOK)throw Error('honest');for(const id of partners(g)){g.F[id].bond=95;g.F[id].awayAbs=null;}g.week=42;if(!ev('lv_harem').when(g))throw Error('harem');walkL(g,ev('lv_harem').steps);
+    if(!g.harem)throw Error('harem flag');return partners(g).every(id=>relTag(g,g.F[id])===' · คนรัก ♥'||relTag(g,g.F[id])===' · Sweetheart ♥');});
+  test('the ring pair follows the bond, whichever camp they train at',()=>{const pairOf=g=>{const st=valSteps(g);const r=st.find(x=>x.brawl);return r?[r.brawl.a,r.brawl.b].sort().join('+'):'none';};
+    let g=fresh();G=g;lovUp(g,['mali','rin']);g.F.rin.bond=99;g.week=38;if(pairOf(g)!=='mali+rin')throw Error('mali rin '+pairOf(g));
+    g=fresh();G=g;lovUp(g,['kati']);const f=g.F.fah;f.met=true;f.bond=90;g.promise={fah:10};g.week=38;if(pairOf(g)!=='fah+kati')throw Error('rival fah fights too '+pairOf(g));
+    g=fresh();G=g;g.season=2;g.F.fah.camp='player';lovUp(g,['kati','fah']);g.week=38;if(pairOf(g)!=='fah+kati')throw Error('kati fah '+pairOf(g));
+    g=fresh();G=g;g.season=2;for(const id of ['ploy','fah'])g.F[id].camp='player';lovUp(g,['kati','mali','rin','ploy','fah']);for(const id of ['ploy','fah'])g.F[id].camp='player';
+    g.F.ploy.bond=100;g.F.ploy.bondX=50;g.F.fah.bond=100;g.F.fah.bondX=40;return pairOf(g)==='fah+ploy';});
+  test('no ring when one of the two already left camp: the most hurt one still leaves',()=>{const g=fresh();G=g;lovUp(g,['kati','mali']);g.F.mali.bond=99;g.week=38;sendAway(g,'kati',1,'cheat');if(valSteps(g).some(x=>x.brawl))throw Error('ring');g.valCaught=0;walkL(g,ev('lv_val').steps);return isAway(g,'mali');});
   test('only one partner: no Valentine scene',()=>{const g=fresh();G=g;lovUp(g,['kati']);g.week=38;return !ev('lv_val').when(g);});
   test('a girl who left camp skips training, gets no offers, cannot be booked, and comes back',()=>{const g=fresh();G=g;lovUp(g,['kati','mali']);sendAway(g,'kati',2,'cheat');
     const lv=g.F.kati.a.power;weekTrain(g);if(g.F.kati.a.power!==lv)throw Error('trained');genOffers(g);if(g.offers.some(o=>o.a==='kati'))throw Error('offer');
@@ -67,7 +90,7 @@ const chrome=process.env.CHROME_PATH||'/Applications/Google Chrome.app/Contents/
   test('breaking a promise with a rival works the same way',()=>{const g=fresh();G=g;const f=g.F.ploy;f.met=true;f.bond=90;g.promise={ploy:10};walkL(g,breakSteps(g,'ploy'));return !isProm(g,'ploy')&&isEx(g,'ploy')&&isAway(g,'ploy');});
   test('harem: honest at Valentine, win everyone back, then group scenes replace the top heart scene',()=>{const g=fresh();G=g;lovUp(g,['kati','mali']);g.week=38;walkL(g,ev('lv_val').steps,ch=>Math.max(0,ch.findIndex(c=>/รักทุกคน|love all/i.test(c.t))));
     if(!g.haremOK)throw Error('ok flag');g.F.kati.awayAbs=null;g.F.mali.awayAbs=null;if(ev('lv_harem').when(g))throw Error('too early');g.week+=3;if(ev('lv_harem').when(g))throw Error('not won back yet');g.F.kati.bond=86;g.F.mali.bond=86;if(!ev('lv_harem').when(g))throw Error('no harem');
-    walkL(g,ev('lv_harem').steps);if(!g.harem||romOf(g,'kati'))throw Error('harem state');if(!relTag(g,g.F.kati).includes('♥'))throw Error('tag');
+    walkL(g,ev('lv_harem').steps);if(!g.harem||romOf(g,'kati'))throw Error('harem state');if(/ฮาเร็ม|Harem/.test(relTag(g,g.F.kati))||!relTag(g,g.F.kati).includes('♥'))throw Error('tag');
     g.F.kati.bond=100;g.F.kati.bondX=2000;g.lastBeat=-99;const top=EVENTS.find(e=>e.id==='hs_kati_30');if(top.when(g))throw Error('top scene still on');
     g.week+=9;for(const k of [1,2,3]){if(!ev('lv_hm'+k).when(g))throw Error('hm'+k);walkL(g,ev('lv_hm'+k).steps);}
     g.season=2;g.week=38;if(ev('lv_val').when(g)||!ev('lv_valh').when(g))throw Error('harem valentine');walkL(g,ev('lv_valh').steps);return haremYearEnd(g).length===3;});

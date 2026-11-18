@@ -378,6 +378,7 @@ const LOVE_YES={kati:"…Really? Then from now on I have one more reason to win"
   rin:"The result matches what I hoped for… thank you",ploy:"…Then after my next fight, I'll come find you, win or lose",fah:"…Yeah, good! Don't you dare change your mind, Fah remembers everything"};
 // ---------- v1.89.11: more than one lover — Valentine catches you, the girls settle it in the ring, breakup from chat, harem route ----------
 const LOVE_IDS=["kati","mali","rin","ploy","fah"];
+const vx=(G,id,M)=>(G.F[id]&&G.F[id].camp==="player"&&M["_"+id])||M[id]; /* "_ploy"/"_fah": once she trains at Sirichai */
 const lovList=G=>Array.isArray(G.lovers)?G.lovers:(G.romance?[G.romance]:[]);
 const isLov=(G,id)=>!!id&&lovList(G).includes(id);
 const isProm=(G,id)=>!!(G.promise&&G.promise[id]!=null);
@@ -394,7 +395,7 @@ const awayLeft=(G,id)=>isAway(G,id)?G.F[id].awayAbs-absWeek(G):0;
 const awaySpeaks=(G,steps)=>(steps||[]).some(x=>x&&typeof x.n==="string"&&isAway(G,x.n));
 function sendAway(G,id,wk,why){const f=G.F[id];if(!f)return;const now=absWeek(G);f.awayAbs=Math.max(isAway(G,id)?f.awayAbs:0,now+wk);f.awayWhy=why;f.awayBack=false;}
 const lovFinal=G=>{for(const id of lovList(G)){if(!romOf(G,id)||!LOVER_FINAL[id])continue;const b=G.bookings.find(b=>b.tier==="final"&&G.F[b.a].camp==="player"&&(b.a===id||id==="rin"));if(b)return {id,b};}return null;};
-function relTag(G,f){const id=f.id;let t=isLov(G,id)?(G.harem?" · Harem ♥":" · Sweetheart ♥"):isProm(G,id)?" · Promised ♡":isEx(G,id)?" · Ex":"";
+function relTag(G,f){const id=f.id;let t=isLov(G,id)?" · Sweetheart ♥":isProm(G,id)?" · Promised ♡":isEx(G,id)?" · Ex":"";
   if(isAway(G,id))t+=f.camp==="player"?` · Away from camp (${awayLeft(G,id)} wk)`:` · Not in touch (${awayLeft(G,id)} wk)`;return t;}
 // she confesses while you are already with someone — you can tell her the truth
 const LOVE_TAKEN={kati:"…I see. Sorry I said anything. Please forget it",mali:"Oh… you already have someone. It's okay, Mali's happy for you",
@@ -410,7 +411,8 @@ const VAL_GIFT={kati:"Manager! I made chocolate myself for the first time. It's 
   mali:"Happy Valentine's~ Mali made heart-shaped khanom khrok, still warm!",
   rin:"I chose 70% dark chocolate. By my calculations, it suits you best",
   ploy:"I could only sneak out of Golden Tiger for an hour. This rose… take it",
-  fah:"Here! Chocolate! Grandma made me buy extra, it's not like I bought it for you!"};
+  fah:"Here! Chocolate! Grandma made me buy extra, it's not like I bought it for you!",
+  _ploy:"This year I'm in the same camp as you, no need to sneak out. This rose… take it",_fah:"Here! Chocolate! I bought for the whole camp, it's not like it's just for you!"};
 const VAL_CAUGHT={kati:"…Manager, could you explain why so many people brought you chocolate today?",
   mali:"Huh… Mali's not the only one? The khanom khrok's still warm, but Mali's heart just went ice cold",
   rin:"The data doesn't match. In my model you have one girlfriend… please explain the surplus",
@@ -419,11 +421,14 @@ const VAL_CAUGHT={kati:"…Manager, could you explain why so many people brought
 const VAL_AGAIN={kati:"I forgave you last year… and it's the same again?",mali:"Mali thought this year would be different… guess that was just Mali",
   rin:"I gave this model a full year. Same result",ploy:"I'm not here for excuses. I came to see what you'll say this year",fah:"Again!? You didn't learn last year!?"};
 const FIGHT_TAUNT={kati:"This is Grandpa's ring. I won't let anyone mess around in it",mali:"Mali doesn't want to hit a friend… but today, just one round!",
-  rin:"I've studied all your stats. This round ends in two minutes",ploy:"Want to see what Golden Tiger is really made of? Fine",fah:"Come on! Fah's waited a long time for this. No referee!"};
-const FIGHT_ROUNDS=[
- ["Round one. Neither has even put gloves on. The first punch barely misses",[["Stop! You're both fighters of this camp!",2,"They freeze for half a beat, but neither leaves the ring"],["Someone's going to get hurt. Come down",1,"Nobody listens, but the next punch is a little softer"],["Whoever wins gets the first date with me",-1,"That makes both of them turn and glare at you, then hit each other harder"]]],
- ["Round two. Someone at camp starts beating the drums. This is getting out of hand",[["It's my fault. If you want to hit someone, hit me",2,"They both stop and look at you, as if considering the offer"],["Somebody kill the lights!",0,"The lights go out for three seconds, then someone switches them back on. They're both still standing there"],["You two look great out there",-1,"The drums get louder and the whole camp roars"]]],
- ["Round three. Both are gasping, but neither will drop her guard first",[["I've never seen you two this out of breath. Please, that's enough",2,"One of them drops her guard first, and the other follows"],["There's morning training tomorrow, you know",1,"They both sigh at once, as if they'd only just remembered"],["It's a draw! You both win!",0,"…Nobody laughs"]]]];
+  rin:"I've studied all your stats. This round ends in two minutes",ploy:"Want to see what Golden Tiger is really made of? Fine",fah:"Come on! Fah's waited a long time for this. No referee!",_ploy:"Want to see what your senior can really do? Fine"};
+/* v1.89.11: the ring is a live bout on auto (one round) — three times the player gets to shout something from ringside */
+const BRAWL_TALK=[
+ ["The first punch barely misses. The whole camp crowds around the ring",[["Stop! You're both fighters of this camp!",2,"They freeze for half a beat, but neither leaves the ring"],["Someone's going to get hurt. Come down",1,"Nobody listens, but the next punch is a little softer"],["Whoever wins gets the first date with me",-1,"That makes both of them turn and glare at you, then hit each other harder"]]],
+ ["Someone at camp starts beating the drums. This is getting out of hand",[["It's my fault. If you want to hit someone, hit me",2,"They both stop and look at you, as if considering the offer"],["Somebody kill the lights!",0,"The lights go out for three seconds, then someone switches them back on. They're both still standing there"],["You two look great out there",-1,"The drums get louder and the whole camp roars"]]],
+ ["Both are gasping, but neither will drop her guard first",[["I've never seen you two this out of breath. Please, that's enough",2,"One of them drops her guard first, and the other follows"],["There's morning training tomorrow, you know",1,"They both sigh at once, as if they'd only just remembered"],["It's a draw! You both win!",0,"…Nobody laughs"]]]];
+const BRAWL_MID={kati:"Stop smiling! I'm not holding back today!",mali:"Mali doesn't want to hit you! Her hands just keep going!",rin:"You drop your left guard every time you get tired. I've noted it",
+  ploy:"Is that all, Sirichai?",fah:"That doesn't even make Fah flinch! Again!",_ploy:"Is that all, kid? That much training isn't enough"};
 const FIGHT_OK={kati:"…I'm tired. We'll settle this another day",mali:"Ow, Mali's hands hurt… but she's less angry now",rin:"Stopping here is optimal. Let's call it a draw for now",
   ploy:"Not bad… but this isn't over",fah:"Hmph! I'll let it go today! But you're not off the hook!"};
 const RUN_NOTE={kati:"I'm going to the temple to pay respects to Grandpa for a while. Don't come after me",mali:"Mali's gone home to Mom and Thongkham. Back soon… probably",
@@ -436,29 +441,30 @@ const RUN_BACK={kati:[{n:"nar",t:"Kati comes back to camp before dawn, holding a
 function runAway(G,id,wk){const f=G.F[id];sendAway(G,id,wk,"cheat");const mine=f.camp==="player";
   return [{n:"nar",bg:"camp",t:mine?`The next morning, ${f.name} is gone from camp, leaving just one note`:`The next day, ${f.name} sends one short message and then stops answering`},
     {n:"nar",t:`"${RUN_NOTE[id]}"`},{n:"nar",t:mine?`${f.name} is away from camp for ${wk} weeks · No training and no new fights meanwhile (she'll come back for fights already booked)`:`${f.name} won't be in touch for ${wk} weeks`}];}
-function ringSteps(G,a,b,hard){const A=G.F[a].name,B=G.F[b].name,F={sc:0},sh=arr=>[...arr].sort(()=>Math.random()-.5);
-  const out=[{fx:()=>{if(typeof UI!=="undefined"&&UI.scene)UI.scene.lookOf={};}},/* into fight gear for the ring */{n:"nar",bg:"gym",t:`${A} and ${B} lock eyes for one second, then climb into the ring together without a word`},
-    {n:"nar",t:"The whole camp crowds around the ring. Someone even runs to switch on the floodlights"},
-    {n:a,f:"angry",l:"fight",t:FIGHT_TAUNT[a],with:b},{n:b,f:"angry",l:"fight",t:FIGHT_TAUNT[b],with:a}];
-  for(const [nar,opts] of FIGHT_ROUNDS)out.push({n:"nar",t:nar},{choice:sh(opts).map(([t,sc,rep])=>({t,fx:()=>{F.sc+=sc;},then:[{n:"nar",t:rep}]}))});
-  out.push({inject:G2=>{const ok=F.sc>=5,r=[];
-    if(ok)r.push({n:"nar",t:`${A} and ${B} stand panting in the middle of the ring, then suddenly burst out laughing together`},{n:a,f:"pout",l:"fight",t:FIGHT_OK[a],with:b},{n:b,f:"pout",l:"fight",t:FIGHT_OK[b],with:a});
-    else r.push({n:"nar",t:"In the end Coach Daeng throws a whole bucket of ice water over both of them, and that's the end of it"},{n:"nar",t:"They climb out on opposite sides. Neither of them looks at you"});
-    if(ok&&!hard)r.push({n:"nar",t:"Nobody runs off that night. But nobody talks to you either"});
-    else if(!ok&&hard)r.push(...runAway(G2,a,3),...runAway(G2,b,3));
-    else r.push(...runAway(G2,a,hard?3:2));
-    return r;}});
-  return out;}
+function ringSteps(G,a,b,hard){const A=G.F[a].name,B=G.F[b].name;
+  return [{fx:()=>{if(typeof UI!=="undefined"&&UI.scene)UI.scene.lookOf={};}},/* into fight gear for the ring */
+    {n:"nar",bg:"gym",t:`${A} and ${B} lock eyes for one second, then climb into the ring together without a word`},
+    {n:a,f:"angry",l:"fight",t:vx(G,a,FIGHT_TAUNT),with:b},{n:b,f:"angry",l:"fight",t:vx(G,b,FIGHT_TAUNT),with:a},
+    {n:"nar",t:"All you can do is stand at ringside and shout at the right moment"},
+    {brawl:{a,b,hard},after:(G2,res)=>ringAfter(G2,a,b,hard,res||{sc:0})}];}
+function ringAfter(G,a,b,hard,res){const A=G.F[a].name,B=G.F[b].name,ok=res.sc>=5,r=[];
+  if(ok)r.push({n:"nar",bg:"gym",t:`${A} and ${B} stand panting in the middle of the ring, then suddenly burst out laughing together`},{n:a,f:"pout",l:"fight",t:FIGHT_OK[a],with:b},{n:b,f:"pout",l:"fight",t:FIGHT_OK[b],with:a});
+  else r.push({n:"nar",bg:"gym",t:"In the end Coach Daeng throws a whole bucket of ice water over both of them, and that's the end of it"},{n:"nar",t:"They climb out on opposite sides. Neither of them looks at you"});
+  if(ok&&!hard)r.push({n:"nar",t:"Nobody runs off that night. But nobody talks to you either"});
+  else if(!ok&&hard)r.push(...runAway(G,a,3),...runAway(G,b,3));
+  else r.push(...runAway(G,a,hard?3:2));
+  return r;}
 function valSteps(G){const P=partners(G),hard=(G.valCaught||0)>=1,drop=hard?25:15;G.valCaught=(G.valCaught||0)+1;
-  const pre=Object.fromEntries(P.map(k=>[k,(G.F[k].bond||0)+(G.F[k].bondX||0)])),two=[...P].sort((x,y)=>pre[y]-pre[x]).slice(0,2);
+  /* the two closest to you settle it in the ring — whichever camp they train at (anyone who already left is not there) */
+  const pre=Object.fromEntries(P.map(k=>[k,(G.F[k].bond||0)+(G.F[k].bondX||0)])),byBond=[...P].sort((x,y)=>pre[y]-pre[x]),two=byBond.filter(k=>!isAway(G,k)).slice(0,2);
   return [{n:"nar",bg:"camp",t:hard?"Another Valentine's Day. They all show up together again, but this year nobody is smiling":"February 14th, Valentine's Day. That evening you had a date… several dates, at the same time, in front of Sirichai Camp"},
-    ...P.map(k=>({n:k,f:hard?"pout":"happy",l:"casual",t:(hard?VAL_AGAIN:VAL_GIFT)[k]})),
+    ...P.map(k=>({n:k,f:hard?"pout":"happy",l:"casual",t:vx(G,k,hard?VAL_AGAIN:VAL_GIFT)})),
     ...(hard?[]:[{n:"nar",t:`${P.map(k=>G.F[k].name).join(" ")} look at each other, then at what everyone's holding`},...P.map(k=>({n:k,f:k==="mali"?"sad":"angry",l:"casual",t:VAL_CAUGHT[k]}))]),
     {choice:[{t:"I'm sorry. It's my fault",then:[{n:"nar",t:"Nobody answers. The crickets are the loudest thing in the world right now"}]},
       {t:"I really do love all of you. I never lied to anyone",fx:G2=>{G2.haremOK=true;},then:[{n:"nar",t:"A long silence… a few of them blush, angry as they are"}]},
       {t:"Calm down, let me explain",then:[{n:"nar",t:"Before you get a word out, a bag of sweets hits you in the face"}]}]},
     {fx:G2=>{P.forEach(k=>add(G2,k,"bond",-drop));G2.valAbs=absWeek(G2);G2.valFloor=Object.fromEntries(P.map(k=>[k,bondTot(G2.F[k])]));}},{n:"nar",t:`Bond with everyone you're seeing −${drop}`},
-    ...ringSteps(G,two[0],two[1],hard)];}
+    ...(two.length>=2?ringSteps(G,two[0],two[1],hard):[{n:"nar",t:"Nobody steps into a ring. Everyone just leaves in silence, which is worse than a fight"},{inject:G2=>runAway(G2,byBond[0],hard?3:2)}])];}
 const backDue=(G,id)=>{const f=G.F[id];return !!(f&&f.met&&f.awayAbs!=null&&!f.awayBack&&absWeek(G)>=f.awayAbs);};
 // --- breakup (from the chat menu) ---
 const BREAK={kati:[{n:"nar",t:"You ask Kati to talk at the edge of the ring, the same spot where she confessed"},{n:"kati",f:"surprised",t:"…Break up?"},{n:"kati",f:"sad",t:"I'm not crying. Grandpa taught me a fighter never cries in the ring"},{n:"kati",f:"sad",t:"Give me a little time. Then I'll come back as your fighter, same as before"}],
@@ -492,29 +498,29 @@ function haremForm(G){const P=partners(G);
     {choice:[{t:"I promise I'll take the best care of all of you",then:[{n:"nar",t:"Everyone clinks their red soda glasses at once, so loud the next table turns to look"}]},
       {t:"…Are you all sure?",then:[{n:"nar",t:"They all nod at once, then laugh at how embarrassed they are"}]}]},
     {fx:G2=>{G2.harem=true;G2.haremAbs=absWeek(G2);}},
-    {n:"nar",t:"Relationship: Harem ♥ · No more angry Valentines · Each girl's top heart scene becomes a cute scene with everyone instead"}];}
+    {n:"nar",t:"They're all still your Sweetheart ♥ · No more angry Valentines · Each girl's top heart scene becomes a cute scene with everyone instead"}];}
 const HAREM_SCENES=[
  {wk:2,bg:"market",open:"The first group date at the night market. Nobody can agree what to eat first",close:"In the end everyone ate at every stall, and you carried everyone's bags until your arms gave out",
   say:{kati:"Our usual chicken rice! Grandpa brought me here since I was little",mali:"Khanom khrok first~ Dessert opens up the appetite!",rin:"I've sorted the stalls by distance. Least walking, most eating",ploy:"All I want is one Thai tea… and to walk next to you",fah:"Isan sausage! If nobody wants it, Fah's eating it!"}},
  {wk:5,bg:"camp",open:"A day-off morning. Everyone shows up at camp in matching shirts printed 'Team Manager'",close:"Coach Daeng walks past, looks at the shirts, and lets out the longest sigh of his life",
-  say:{kati:"It wasn't my idea! …But I picked the color",mali:"Mali printed them herself~ The manager's says 'Team Captain'!",rin:"I ordered everyone's size. Yours I estimated by eye — 97% accurate",ploy:"I can only wear it on days off. If the boss sees, I'm in trouble",fah:"This looks so dumb! …Take a picture though"}},
+  say:{kati:"It wasn't my idea! …But I picked the color",mali:"Mali printed them herself~ The manager's says 'Team Captain'!",rin:"I ordered everyone's size. Yours I estimated by eye — 97% accurate",ploy:"I can only wear it on days off. If the boss sees, I'm in trouble",_ploy:"Now I can wear it every day. No boss to scold me",fah:"This looks so dumb! …Take a picture though"}},
  {wk:9,bg:"night",open:"A moonlit night. Everyone climbs onto the camp roof, and one blanket isn't nearly enough",close:"You didn't look at a single star, but it's the night you remember best",
   say:{kati:"Scoot over a bit, my legs are out of the blanket",mali:"Mali thinks this beats stargazing alone by a mile",rin:"The brightest star over there is Sirius… why is everyone looking at me instead",ploy:"When I was little, I never had anyone to sit with like this",fah:"Whoever kicks the blanket off one more time, Fah's kicking them off the roof!"}}];
 const HAREM_VAL={kati:"This year's chocolate isn't lopsided. I practiced all week",mali:"This year's heart-shaped khanom khrok is for everyone~",
-  rin:"This year I weighed everyone's chocolate to the gram. Perfectly fair",ploy:"This year I didn't have to sneak out. I told the boss straight",fah:"Chocolate! This year I bought it for you on purpose! …Happy now!"};
+  rin:"This year I weighed everyone's chocolate to the gram. Perfectly fair",ploy:"This year I didn't have to sneak out. I told the boss straight",_ploy:"This year I don't have to sneak anywhere. We're in the same camp",fah:"Chocolate! This year I bought it for you on purpose! …Happy now!"};
 const HAREM_END={kati:"Let's stay like this next year too. All of us",mali:"For New Year Mali's taking everyone to Mom's! She's going to be so shocked~",
   rin:"I've already made next year's schedule. Everyone gets the same number of dates",ploy:"Next year I'll still be right here… with all of them",fah:"Next year you're buying sausages for everyone! Not just Fah!"};
 const haremYearEnd=G=>[{n:"nar",bg:"camp",t:"New Year's Eve. Everyone sits in a circle around the moo kratha grill at camp, and you're in the middle whether you like it or not"},...partners(G).map(k=>({n:k,f:"flustered",l:"casual",t:HAREM_END[k]}))];
 EVENTS.push(
  {id:"lv_val",annual:true,look:"casual",bg:"camp",pri:95,when:G=>G.week>=38&&G.week<=39&&!G.harem&&partners(G).length>=2,steps:[{inject:G=>valSteps(G)}]},
  {id:"lv_valh",annual:true,look:"casual",bg:"camp",pri:95,when:G=>G.week>=38&&G.week<=39&&G.harem&&partners(G).length>=2,steps:[{inject:G=>[
-   {n:"nar",t:"This Valentine's Day they all come to see you together, and nobody is angry at anybody"},...partners(G).map(k=>({n:k,f:"happy",l:"casual",t:HAREM_VAL[k]})),
+   {n:"nar",t:"This Valentine's Day they all come to see you together, and nobody is angry at anybody"},...partners(G).map(k=>({n:k,f:"happy",l:"casual",t:vx(G,k,HAREM_VAL)})),
    {fx:G2=>partners(G2).forEach(k=>add(G2,k,"bond",3))},{n:"nar",t:"Bond with everyone +3"}]}]},
  {id:"lv_harem",look:"casual",bg:"food",pri:70,when:G=>haremReady(G),steps:[{inject:G=>haremForm(G)}]},
  {id:"lv_back",look:"casual",bg:"camp",pri:80,when:G=>LOVE_IDS.some(k=>backDue(G,k)),steps:[{inject:G=>{const id=LOVE_IDS.find(k=>backDue(G,k));if(!id)return [];const f=G.F[id];f.awayBack=true;
    return [...((f.awayWhy==="break"?BREAK_BACK:RUN_BACK)[id]||[]).map(x=>({l:"casual",...x})),{fx:G2=>{delete G2.seen.lv_back;}}];}}]},
  ...HAREM_SCENES.map((S,i)=>({id:"lv_hm"+(i+1),look:"casual",bg:S.bg,when:G=>!!G.harem&&G.haremAbs!=null&&absWeek(G)-G.haremAbs>=S.wk&&partners(G).length>=2&&!partners(G).some(k=>isAway(G,k)),
-   steps:[{inject:G=>[{n:"nar",t:S.open},...partners(G).map(k=>({n:k,f:"happy",l:"casual",t:S.say[k]})),{n:"nar",t:S.close}]}]})));
+   steps:[{inject:G=>[{n:"nar",t:S.open},...partners(G).map(k=>({n:k,f:"happy",l:"casual",t:vx(G,k,S.say)})),{n:"nar",t:S.close}]}]})));
 // v1.30: lovers get their own dates/scenes; Ploy & Fah make a promise instead (romance with them waits for season 2)
 const RIVAL_LOVE=["ploy","fah"];
 const LOVER_DATES={"kati": [[{"n": "nar", "t": "Sunday morning. Kati takes you to the temple at the edge of the village, carrying a garland and the pastries Grandpa loved", "bg": "camp"}, {"n": "kati", "t": "Grandpa, this is the person I always tell you about. …Today I'm bringing them as my partner", "f": "happy", "l": "casual"}, {"n": "kati", "t": "He's definitely laughing. He used to tease that no one would date me because I kick too hard", "f": "flustered", "l": "casual"}, {"choice": [{"t": "I'll take good care of your granddaughter", "sc": 3, "then": [{"n": "kati", "t": "…You said that to Grandpa for real. He heard you. No breaking it", "f": "flustered", "l": "casual"}]}, {"t": "Kicking hard is good. Very safe", "sc": 2, "then": [{"n": "kati", "t": "Haha, Grandpa would've liked you", "f": "happy", "l": "casual"}]}]}], [{"n": "nar", "t": "10 p.m. One light still on in the gym. Kati is kicking the bag alone", "bg": "gym"}, {"n": "kati", "t": "Manager… I mean, darling… I'm not used to it yet. What should I call you?", "f": "flustered", "l": "casual", "bg": "casual"}, {"choice": [{"t": "Whatever feels right to you", "sc": 3, "then": [{"n": "kati", "t": "Then 'manager' inside the gym, 'darling' outside it. Work and heart, kept separate", "f": "happy", "l": "casual"}]}, {"t": "Darling sounds nice", "sc": 2, "then": [{"n": "kati", "t": "…Not so loud! Mali's still awake!", "f": "flustered", "l": "casual"}, {"n": "nar", "t": "Giggling drifts out of Mali's bedroom window"}]}]}], [{"n": "nar", "t": "Kati takes you to the old ring by the market, where Grandpa Chai fought forty years ago. It's abandoned now", "bg": "ring"}, {"n": "kati", "t": "Grandpa said this is where he proposed to Grandma. In front of the whole crowd", "f": "happy", "l": "casual"}, {"n": "kati", "t": "…I don't mean anything by it! Just telling you!", "f": "flustered", "l": "casual"}, {"choice": [{"t": "Then let's come back here together someday", "sc": 3, "then": [{"n": "kati", "t": "…Okay. That's a promise. I'll remember today", "f": "flustered", "l": "casual"}]}, {"t": "Grandpa was brave", "sc": 2, "then": [{"n": "kati", "t": "He was. Grandma said she was so embarrassed she wanted to crawl under the ring, haha", "f": "happy", "l": "casual"}]}]}]], "mali": [[{"n": "nar", "t": "Mali hands you her phone: a video call from Isan, a woman beaming with a huge buffalo behind her", "bg": "camp"}, {"n": "mali", "t": "Mom, this is… Mali's partner! And that's Thongkham behind Mom. Say hi", "f": "flustered", "l": "casual"}, {"n": "nar", "t": "Mali's mom speaks Isan dialect so fast you only catch 'Have you eaten yet?'"}, {"choice": [{"t": "I have! Thank you for raising Mali so well", "sc": 3, "then": [{"n": "mali", "t": "Mom's crying! She says you have to come home for New Year", "f": "happy", "l": "casual"}]}, {"t": "Wave at Thongkham", "sc": 2, "then": [{"n": "mali", "t": "Thongkham wagged his tail! He likes you. First test passed!", "f": "happy", "l": "casual"}]}]}], [{"n": "nar", "t": "Mali booked the biggest karaoke room, just like she said. But it's only the two of you", "bg": "night"}, {"n": "mali", "t": "Duet! No skipping the high notes!", "f": "happy", "l": "casual"}, {"choice": [{"t": "Sing at full volume", "sc": 3, "then": [{"n": "nar", "t": "You both belt out luk thung until staff knock three times asking you to keep it down"}, {"n": "mali", "t": "This is the best night of Mali's life!", "f": "happy", "l": "casual"}]}, {"t": "I'd rather just listen to you", "sc": 2, "then": [{"n": "mali", "t": "Then Mali's singing this one just for you. …Listen carefully", "f": "flustered", "l": "casual"}]}]}], [{"n": "nar", "t": "Mali brings you to a little khanom khrok stall behind the market, the kind she says she'll open someday", "bg": "food"}, {"n": "mali", "t": "Mali has a new shop name. Instead of 'Champion Khanom Khrok', maybe 'Our Khanom Khrok'", "f": "happy", "l": "casual"}, {"n": "mali", "t": "…'Our' meaning you and Mali. If you don't mind", "f": "flustered", "l": "casual"}, {"choice": [{"t": "I'll be the one washing the pans", "sc": 3, "then": [{"n": "mali", "t": "Deal! You promised. Washing pans for life!", "f": "happy", "l": "casual"}]}, {"t": "The old name was nice too", "sc": 2, "then": [{"n": "mali", "t": "Then 'Our Champion Khanom Khrok'. Both names~", "f": "happy", "l": "casual"}]}]}]], "rin": [[{"n": "nar", "t": "Rin sent a schedule three days early, titled 'Date No. 1 (Official)', planned down to the minute", "bg": "cafe"}, {"n": "rin", "t": "14:00 tea. 14:20 small talk. 14:35 hold hands (if appropriate). …I left a ten-minute buffer", "f": "flustered", "l": "casual"}, {"choice": [{"t": "What time is it now?", "sc": 3, "then": [{"n": "rin", "t": "…Exactly 14:35", "f": "flustered", "l": "casual"}, {"n": "nar", "t": "Rin rests her hand on the table, right on schedule"}]}, {"t": "Want to ditch the schedule for a day?", "sc": 2, "then": [{"n": "rin", "t": "No schedule… fine, I'll try. If my heart rate goes over plan, that's on you", "f": "flustered", "l": "casual"}]}]}], [{"n": "nar", "t": "Rin shows up to morning training in round glasses. The whole camp goes silent for five seconds", "bg": "camp"}, {"n": "rin", "t": "…No need to stare. I chose based on data I collected, that a certain someone likes round frames", "f": "flustered", "l": "casual"}, {"choice": [{"t": "They suit you perfectly", "sc": 3, "then": [{"n": "rin", "t": "Recorded. 100% satisfaction. …Mine too", "f": "happy", "l": "casual"}]}, {"t": "Who likes round frames, I wonder", "sc": 2, "then": [{"n": "rin", "t": "…Don't pretend you forgot. That data came from you", "f": "flustered", "l": "casual"}]}]}], [{"n": "nar", "t": "Friday night. Rin sits at the computer in the analysis room, drawing some kind of graph", "bg": "night"}, {"n": "rin", "t": "This is my happiness graph since joining Sirichai. Vertical axis, happiness. Horizontal, weeks", "f": "happy", "l": "casual"}, {"n": "rin", "t": "The highest spike… is the week you said yes. Data doesn't lie", "f": "flustered", "l": "casual"}, {"choice": [{"t": "Then let's keep it climbing", "sc": 3, "then": [{"n": "rin", "t": "A good objective. I'll track it weekly", "f": "happy", "l": "casual"}]}, {"t": "That's a beautiful graph", "sc": 2, "then": [{"n": "rin", "t": "…Are you complimenting the graph or me? Please specify", "f": "flustered", "l": "casual"}]}]}]]};
