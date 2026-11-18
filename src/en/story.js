@@ -671,7 +671,7 @@ EVENTS.push(
     {t:"Let me think about it (everyone's trust −6)",fx:G=>{G.cash+=10000;R_ALL(G,f=>f.trust=Math.max(0,f.trust-6));},
       then:[{n:"kati",f:"sad",t:"…Boss, are you really going to sell Grandpa's camp?"},{n:"nar",t:"You return the envelope the next day, but the silence in camp lingers for days"}]}]}]},
 
- {id:"songkran",look:"casual",when:G=>G.week>=47&&(G.season||1)===1,bg:"gym",steps:[
+ {id:"songkran",look:"casual",when:G=>G.week>=47&&(G.season||1)===1,bg:"songkran",steps:[
   {n:"nar",t:"Songkran arrives. The camp stops training for half a day; everyone pours fragrant Thai scented water over Coach Daeng's hands"},
   {n:"coach",t:"May everyone be strong, free of injury and illness, and fight with the honor of Sirichai…"},
   {n:"kati",f:"happy",t:"The ceremony's over! Now— water fight!!!"},
@@ -759,7 +759,7 @@ EVENTS.push(
   {n:"rin",f:"sad",l:"casual",t:G=>`Dad says boxing has nothing worth analyzing. ${CALL(G,"rin")}, do you think… he's right?`},
   {choice:[{t:"Send your dad your fight stats. Let the numbers speak",fx:G=>{add(G,"rin","trust",5);add(G,"rin","bond",3);},then:[{n:"nar",t:"Rin types for twenty minutes, attaches three files, and hits send"},{n:"nar",t:"Ten minutes later, the reply: 'Table three has the SD wrong, but… interesting. I'd like to watch the next fight live'"},{n:"rin",f:"flustered",l:"casual",t:"…Dad's going to watch the livestream. He's never watched anything of mine"}]},
    {t:"You don't have to prove anything to anyone. Being here is enough",fx:G=>{add(G,"rin","morale",8);add(G,"rin","bond",4);},then:[{n:"rin",f:"flustered",l:"casual",t:"…There's no variable in that sentence to analyze. But I understand"}]}]}]},
- {id:"rin_cook",look:"casual",when:G=>G.week>=33&&inCamp(G,"rin")&&inCamp(G,"mali"),bg:"camp",steps:[
+ {id:"rin_cook",look:"casual",when:G=>G.week>=33&&inCamp(G,"rin")&&inCamp(G,"mali"),bg:"kitchen",steps:[
   {n:"nar",t:"The camp kitchen: a digital scale, beakers and a thermometer lined up beside the som tam mortar"},
   {n:"rin",f:"happy",l:"casual",t:"Today I'm making pad kra pao. Fish sauce 12.5 ml, sugar 4 g, high heat 3 minutes 20 seconds"},
   {n:"mali",f:"happy",l:"casual",t:"Rin, you don't weigh basil stir-fry. You use your heart… and your hands, like this~ (pours fish sauce freely)"},
@@ -768,13 +768,13 @@ EVENTS.push(
    {t:"Taste Mali's first",fx:G=>{add(G,"mali","bond",3);add(G,"rin","bond",1);},then:[{n:"nar",t:"So salty your eyes cross, but weirdly delicious"},{n:"rin",f:"happy",l:"casual",t:"…Noted. 'Heart and hands' is a variable I can't measure yet"}]}]}]});
 // v1.37: when the camp is flush, bad luck comes for the money (students stay home, repairs cost)
 EVENTS.push(
- {id:"dis_storm",pri:1,look:"casual",when:G=>G.week>=14&&G.week<=30&&G.cash>=45000,bg:"camp",steps:[
+ {id:"dis_storm",pri:1,look:"casual",when:G=>G.week>=14&&G.week<=30&&G.cash>=45000,bg:"camp_rain",steps:[
   {n:"nar",t:"A summer storm hits at 2 a.m.; sheets of tin roofing fly off and slam into the mango tree next door"},
   {n:"kati",f:"surprised",l:"casual",t:G=>`${CALL(G,"kati")}! Half the training room roof is gone! The rain's soaking all the sandbags!`},
   {n:"coach",t:"Kids can't train in a room with no roof. How do we fix it?"},
   {choice:[{t:"Repair it properly, fast (฿25,000)",fx:G=>{G.cash-=25000;},then:[{n:"nar",t:"A full crew arrives and finishes in two days; a shiny new roof, and classes carry on without a hitch"}]},
    {t:"Patch it up for now (฿8,000)",fx:G=>{G.cash-=8000;G.disaster={name:"The temporary roof",untilAbs:absWeek(G)+3,inc:.5};roster(G).forEach(f=>f.morale=Math.max(0,f.morale-3));},then:[{n:"nar",t:"A blue tarp covers the roof. Every time it rains, water drips onto the middle of the ring; only half the students come for three weeks"}]}]}]},
- {id:"dis_flood",pri:1,look:"casual",when:G=>G.week>=30&&G.week<=44&&G.cash>=40000&&ytKey(G)!=="flood",bg:"camp",steps:[
+ {id:"dis_flood",pri:1,look:"casual",when:G=>G.week>=30&&G.week<=44&&G.cash>=40000&&ytKey(G)!=="flood",bg:"camp_rain",steps:[
   {n:"nar",t:"Three days and nights of heavy rain. The river bursts its banks and floods the whole subdistrict; knee-deep water in camp, training mats drifting against the door"},
   {n:"mali",f:"sad",l:"casual",t:"Mali's gloves floated away! …Oh, there's a fish swimming into the camp!"},
   {n:"rin",f:"sad",l:"casual",t:"The road into the subdistrict is cut off. Students definitely can't come for at least three weeks. The generator and mats need replacing"},
@@ -1079,7 +1079,7 @@ DILEMMAS.push(
 
 // ---------- two of them want the same evening (the one you don't pick drops a little) ----------
 DILEMMAS.push(
- {id:"j_loykrathong",from:30,to:40,need:G=>inCamp(G,"kati")&&inCamp(G,"mali"),bg:"river",look:"casual",steps:[
+ {id:"j_loykrathong",from:30,to:40,need:G=>inCamp(G,"kati")&&inCamp(G,"mali"),bg:"loy_night",look:"casual",steps:[
   {n:"nar",t:"Loy Krathong night. Lights twinkle along the Ping River"},
   {n:"kati",f:"flustered",t:"Manager… would you float a krathong with me tonight? I made one from banana leaves",with:"mali"},
   {n:"mali",f:"happy",t:"Oh! Mali was going to invite you too~ Mali made a bread krathong for the fish to eat!"},
@@ -1398,7 +1398,7 @@ EVENTS.push(
    if(FIN(G,"rin"))S.push({n:"rin",f:"pout",l:"casual",t:"…I made a list. Twelve items. The cart now has twenty-seven. Who put in the chicken balloon?"});
    if(FIN(G,"fah"))S.push({n:"fah",f:"flustered",l:"casual",t:"Fireworks! We need fireworks! I only bought… three bags. That's not a lot!"});
    if(FIN(G,"ploy"))S.push({n:"ploy",f:"happy",l:"casual",t:"Fah, put two bags back… I'll carry the rest myself. It's safer."});
-   S.push({n:"nar",bg:"camp",t:"That night the yard becomes a party. A jim jum hot pot sits in the middle, and Coach Daeng brings out Grandpa Chai's old chair for the head of the table. Nobody sits in it."});
+   S.push({n:"nar",bg:"camp_night",t:"That night the yard becomes a party. A jim jum hot pot sits in the middle, and Coach Daeng brings out Grandpa Chai's old chair for the head of the table. Nobody sits in it."});
    S.push({n:"coach",t:"Grandpa sat in this chair every New Year's Eve… I'll leave it right here so he can celebrate too."});
    const dog=petOf(G,"dog"),cat=petOf(G,"cat"),roo=petOf(G,"rooster");
    if(dog)S.push({n:"nar",t:`${dog.name} guards the hot pot without moving a step, tail sweeping the yard half clean.`});
@@ -1411,7 +1411,7 @@ EVENTS.push(
    if(FIN(G,"fah"))S.push({n:"fah",f:"happy",l:"casual",t:"I want the whole country to see me fight my way! And… I want khao soi at the same shop with everyone every week."});
    if(FIN(G,"ploy"))S.push({n:"ploy",f:"sad",l:"casual",t:"I want to live one year without having to be a genius… Here, I think I can."});
    S.push({n:"coach",t:"All I ask is that next year nobody wrecks a knee and nobody breaks a wrist. That's enough. The rest you can do yourselves."});
-   S.push({n:"nar",bg:"night",t:"11:50 p.m. Everyone climbs onto the tin roof. The city lights of Chiang Mai sparkle far away, and Doi Suthep is pitch dark behind them."});
+   S.push({n:"nar",bg:"newyear",t:"11:50 p.m. Everyone climbs onto the tin roof. The city lights of Chiang Mai sparkle far away, and Doi Suthep is pitch dark behind them."});
    S.push({n:T.id,f:"happy",l:"casual",t:"Ten! Nine! Eight!… Three! Two! One! Happy New Year!"});
    S.push({n:"nar",t:"Fireworks from the city burst into gold across the sky."+(FIN(G,"fah")?" As for Fah's three bags of fireworks, only one lit, but it was the loudest in the whole street.":"")});
    if(dog)S.push({n:"nar",t:`${dog.name} dove under Coach Daeng's bed at the first firework and won't come out until morning.`});
@@ -1451,7 +1451,7 @@ EVENTS.push(
    S.push({n:"nar",t:"Songkran again. On the morning of the thirteenth the whole camp puts on floral shirts and goes to make merit at the temple, building sand pagodas in a row."});
    if(FIN(G,"rin"))S.push({n:"rin",f:"pout",l:"casual",t:"My sand pagoda is forty-two centimeters tall. The strongest structure here. …Fah's has collapsed twice."});
    if(FIN(G,"fah"))S.push({n:"fah",f:"angry",l:"casual",t:"It didn't fall down by itself! The dog bumped it! …Right, dog?"});
-   S.push({n:"nar",bg:"camp",t:"Back at camp, everyone lines up to pour water over Coach Daeng's hands. The manager gets the front of the line."});
+   S.push({n:"nar",bg:"songkran",t:"Back at camp, everyone lines up to pour water over Coach Daeng's hands. The manager gets the front of the line."});
    S.push({n:"coach",t:G2=>`This camp has had ${yr(G2)} years with this manager… I wish for next year, and the year after, and on and on.`});
    if(FIN(G,"kati"))S.push({n:"kati",f:"sad",l:"casual",t:"(Kati pours slower than anyone) Coach… thank you for staying with Grandpa's camp all this time."});
    if(FIN(G,"ploy"))S.push({n:"ploy",f:"happy",l:"casual",t:"Coach Daeng, may I? …At Golden Tiger I never once got to pour water for a coach like this."});
