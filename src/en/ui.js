@@ -1353,8 +1353,7 @@ function styleCardHTML(f){const st=fightStyle(f),home=HOME_STYLE[f.id];
 function preCompare(me,op,b){const sc=scouted(op.id)||op.camp==="player";const v=verdictOf(adviseCached(me.id,op.id,b.rounds||3).bestRate);
   const rows=[["Punch",a=>a.punch],["Kick",a=>a.kick],["Knee/Elbow",a=>(a.knee+a.elbow)/2],["Guard",a=>(a.guard+a.counter)/2],["Stamina",a=>(a.stamina+a.dur)/2]];
   /* v1.91.0 style wheel line — your build decides your style; the opponent's comes from her best weapon */
-  const s1=fightStyle(me),s2=fightStyle(op);
-  const sty=`<p class="meta center styline">Style <b>${FSTYLE[s1]}</b> vs <b>${FSTYLE[s2]}</b></p>`; /* v1.91.1 (Man): styles only — who beats whom is for the player to find out */
+    const sty=""; /* v1.91.2 (Man): nothing about styles before the fight — a build can change any time */
   return sty+`<div class="pcmp"><div class="pcmp-h"><span class="pill dtag ${v.c}">${v.t}</span>${sc?"":`<small class="mutt">Not scouted · opponent stats hidden</small>`}</div>${rows.map(([n,g])=>{const x=g(me.a),y=g(op.a);
     return `<div class="pcr"><b class="num ${sc&&x>y+.4?"goldt":""}">${x.toFixed(1)}</b><i class="pb l" style="--v:${clamp(x/20*100,0,100)}%"></i><span>${n}</span><i class="pb r" style="--v:${sc?clamp(y/20*100,0,100):0}%"></i><b class="num ${sc&&y>x+.4?"redt":""}">${sc?y.toFixed(1):"?"}</b></div>`;}).join("")}</div>`;}
 function fightHTML(){const U=UI.fight,b=U.b,me=G.F[b.a],op=G.F[b.b],F=U.F;
