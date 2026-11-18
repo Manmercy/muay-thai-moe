@@ -2146,6 +2146,8 @@ html[lang=en] .fight .fctl2 .skbtn2 b{font-size:11px;display:-webkit-box;-webkit
 .lwopts{display:grid;gap:8px;margin:8px 0}.lwopts .btn{white-space:normal;text-align:center;opacity:0;animation:ctin .35s ease-out var(--d) forwards}.lwopts .btn.now,.lwq.now{animation-delay:0s}
 .lwq{opacity:0;animation:ctin .35s ease-out var(--d) forwards}
 .lwopts .btn{display:flex;flex-direction:column;align-items:center;gap:2px;line-height:1.35}.lwopts .btn small{font-weight:400}
+/* v1.89.24: the .bg-food/.bg-temple/.bg-cafe/.bg-river fallbacks use the background shorthand, which reset background-size to auto — the scene art tiled and its bottom edge showed again at the top of tall phones */
+.vbg[class*="bg-"]{background-size:cover;background-repeat:no-repeat}
 </style></head><body>
 <div id="app"></div><div id="live" aria-live="polite" role="status"></div>
 <script type="text/plain" id="js-th">
@@ -10884,7 +10886,8 @@ Object.assign(ACT,{
     playScene(loyEndSteps(d.v,L&&L.endCast&&L.endCast[d.v]),()=>{AU.startMusic("hub");const back=()=>{if(L&&L.run&&L.run.done)UI.modal={type:"gaunt"};render();};
       if(L&&!L.wish)loyWishOpen(back);else back();},{bg:"river",look:"thai"});},
   loywish:d=>loyWishPick(d.v),
-  kongka:d=>{const m=(G.mail||[]).find(x=>x.id===d.v);if(!m||m.done)return;const B=KONGKA[m.wish];if(!B)return;m.done=true;B.fx(G,m);AU.sfx&&AU.sfx("level");toast(`ได้รับ${B.n} · ${B.d}`);save();render();},lwskip:()=>{UI.lwSkip=true;render();},
+  kongka:d=>{const m=(G.mail||[]).find(x=>x.id===d.v);if(!m||m.done)return;const B=KONGKA[m.wish];if(!B)return;m.done=true;B.fx(G,m);save();UI.modal=null;
+    playScene([{n:"nar",bg:"river",t:"ผู้จัดการเดินลงไปที่ท่าน้ำหน้าค่าย หมอกเช้ายังไม่จาง กระทงเมื่อคืนลอยกลับมาเกยตลิ่ง เทียนดับไปนานแล้ว แต่กลิ่นมะลิยังอยู่"},{n:"nar",t:`ผู้จัดการพนมมือขอบคุณสายน้ำ · ได้รับ${B.n} · ${B.d}`}],()=>{AU.sfx&&AU.sfx("level");render();},{bg:"river",look:"casual"});},lwskip:()=>{UI.lwSkip=true;render();},
   lwclose:()=>{UI.modal=null;const d=UI.lwDone;UI.lwDone=null;AU.startMusic("hub");if(d)d();else render();},
   loywishopen:()=>loyWishOpen(()=>{UI.modal=null;render();}),
   thief:()=>{const L=loyOf(G);if(!L||L.thiefWk===absWeek(G))return;UI.modal={type:"thief"};render();},
@@ -11823,7 +11826,7 @@ CHAT.fah.push(
 <script>
 (function(){
 /* v1.87: Thai code ships inside index.html; English code (en.js) and the dictionary (i18n.js) load only when needed */
-var B="638ef15196";
+var B="77b0910e5c";
 var L="";try{L=localStorage.getItem("mtm_lang")||"";}catch(e){}
 try{var h=(location.hash||"").match(/lang=(th|en)/);if(h)L=h[1];}catch(e){}
 if(L!=="th"&&L!=="en")L="th";

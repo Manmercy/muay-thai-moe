@@ -8742,7 +8742,8 @@ Object.assign(ACT,{
     playScene(loyEndSteps(d.v,L&&L.endCast&&L.endCast[d.v]),()=>{AU.startMusic("hub");const back=()=>{if(L&&L.run&&L.run.done)UI.modal={type:"gaunt"};render();};
       if(L&&!L.wish)loyWishOpen(back);else back();},{bg:"river",look:"thai"});},
   loywish:d=>loyWishPick(d.v),
-  kongka:d=>{const m=(G.mail||[]).find(x=>x.id===d.v);if(!m||m.done)return;const B=KONGKA[m.wish];if(!B)return;m.done=true;B.fx(G,m);AU.sfx&&AU.sfx("level");toast(`Received ${B.n} · ${B.d}`);save();render();},lwskip:()=>{UI.lwSkip=true;render();},
+  kongka:d=>{const m=(G.mail||[]).find(x=>x.id===d.v);if(!m||m.done)return;const B=KONGKA[m.wish];if(!B)return;m.done=true;B.fx(G,m);save();UI.modal=null;
+    playScene([{n:"nar",bg:"river",t:"The manager walks down to the pier in front of the camp. The morning mist hasn't lifted; last night's krathongs have drifted back to the bank, candles long out, but the jasmine scent lingers."},{n:"nar",t:`The manager presses palms together and thanks the river · Received ${B.n} · ${B.d}`}],()=>{AU.sfx&&AU.sfx("level");render();},{bg:"river",look:"casual"});},lwskip:()=>{UI.lwSkip=true;render();},
   lwclose:()=>{UI.modal=null;const d=UI.lwDone;UI.lwDone=null;AU.startMusic("hub");if(d)d();else render();},
   loywishopen:()=>loyWishOpen(()=>{UI.modal=null;render();}),
   thief:()=>{const L=loyOf(G);if(!L||L.thiefWk===absWeek(G))return;UI.modal={type:"thief"};render();},
