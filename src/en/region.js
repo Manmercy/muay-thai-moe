@@ -187,7 +187,9 @@ const RG_VISIT={
  central:G=>[{n:"nar",t:"A white van stops outside the camp. Alicia steps out alone in sunglasses and a cap."},{n:"alicia",f:"happy",l:"casual",t:"The sponsor's team has followed me with cameras all week. Let me hide here for a day. …Not to see anyone in particular."},
   ...(G.F.rin&&G.F.rin.camp==="player"?[{n:"rin",f:"happy",l:"casual",with:"alicia",t:"Views on the bout 1 clip are up 340%. I have a graph."}]:[]),{n:"alicia",f:"flustered",l:"casual",t:DUEL_TALK.central.intro}],
  south:G=>[{n:"nar",t:"Chaba arrives without telling anyone and has fixed half the back fence before anyone notices."},{n:"chaba",f:"happy",l:"casual",t:"…Fence wobbles"},
-  ...(G.F.mali&&G.F.mali.camp==="player"?[{n:"mali",f:"happy",l:"casual",with:"chaba",t:"Big sis Chaba! Why didn't you tell Mali you were coming~ Mali would've made snacks"}]:[]),{n:"chaba",f:"flustered",l:"casual",t:DUEL_TALK.south.intro}]};
+  ...(G.F.mali&&G.F.mali.camp==="player"?[{n:"mali",f:"happy",l:"casual",with:"chaba",t:"Big sis Chaba! Why didn't you tell Mali you were coming~ Mali would've made snacks"}]:[]),
+  {n:"nar",t:(G.pets||[]).length?"At lunch everyone sees Chaba quietly stroking the camp's pet until it falls asleep in her lap. She doesn't move her legs for half an hour.":"At lunch everyone catches Chaba sneaking rice to the sparrows outside the camp, then quickly putting on a blank face when she realises she's been seen."},
+  {n:"chaba",f:"flustered",l:"casual",t:"…Don't like it. It just came to me."},{n:"chaba",f:"flustered",l:"casual",t:DUEL_TALK.south.intro}]};
 const DUEL={st:null,
   el(){return document.getElementById("minibag");},
   open(r,practice,after){const C=DUEL_CFG[r],F=bagFighters(G).filter(f=>C.game!=="live"||f.canon);if(!F.length){toast("Nobody is fit to duel");after&&after(null);return;}
@@ -450,6 +452,68 @@ RG_CHAT.tabtim=[
   ["If Tabtim met Ploy in the ring, who do you think would win?",[["Tabtim wins on kicks, Ploy wins on punches.",2,"Nobody gets upset with that answer. You're so smart."],["Ploy, she's from our camp.",1,"Ugh! Siding with your own camp. Tabtim's telling Ploy."],["I don't know",0,"Such a middle-of-the-road answer. No fun at all."]]],
   ["Back to training! A hundred more kicks!",[["Kick one for me too",2,"The hundredth kick is for you!"],["Don't overdo it.",1,"I know, I know"],["OK",0,"Yeah!"]]]]}];
 CHAT.tabtim=RG_CHAT.tabtim;
+/* v1.90 round 8: the South in full — Chaba's sidecar at the bus terminal, Mali's home at Chaiya and the pier at Don Sak (Mali's story), a richer visit, the letter after the cup and Chaba's chats. Southern lines are drafts for a native speaker to check. */
+RG_ARRIVE.south=(G,D)=>{const top=rgTopGirl(G),mali=rgIn(G,"mali"),me=G.F[(G.region.trip||{}).fid];return [
+  {n:"nar",bg:"bus_terminal",t:"After driving all night, the camp's van pulls into the bus terminal at dawn. By the exit, a faded sidecar motorbike is parked all alone."},
+  {n:"chaba",f:"happy",l:"casual",t:"…The guesthouse is down a lane. Big vans can't get in. Sidecar. One at a time."},
+  {n:"nar",t:"Chaba points at the sidecar seat and looks only at the Manager, without explaining anything.",choice:[
+    {t:"Sit where Chaba points",fx:G2=>rgMeet(G2,"chaba",2),then:[{n:"nar",t:"Chaba rides slower than she needs to. She says nothing the whole way, but swerves around every pothole."}]},
+    {t:"Ask why she picked you first",fx:G2=>rgMeet(G2,"chaba",2),then:[{n:"chaba",f:"flustered",l:"casual",t:"…Don't ask. Get on. Quick."}]},
+    {t:"Let someone else go first",fx:G2=>rgMeet(G2,"chaba",1),then:[{n:"chaba",f:"happy",l:"casual",t:"…Fine. Next run."},{n:"nar",t:"On the last run, Chaba comes back for the Manager alone, even though everyone else has already arrived."}]}]},
+  ...(top&&top.id!=="mali"?[{n:top.id,f:"pout",l:"casual",t:rgJeal(top.id,"Chaba")}]:[]),
+  ...rgIf(mali,[{n:"mali",f:"happy",l:"casual",with:"chaba",t:"Big sis Chaba! Mali gets the second ride! You used to give Mali sidecar rides when we were little!"},
+    {n:"chaba",f:"happy",l:"casual",t:"…Wrong person."},{n:"nar",t:"But on the second run it's Mali in the sidecar, and Chaba takes a loop along the beach that nobody asked for."}]),
+  {n:"chaba",f:"happy",l:"casual",t:`${D.name}… The champion hits hard but moves slowly. …Go in from round three.`},
+  {fx:G2=>{if(me)me.morale=Math.min(100,(me.morale||0)+3);}},
+  {n:"nar",t:me?`${me.name} remembers Chaba's tips · morale +3`:"Everyone remembers Chaba's tips."},
+  {n:"coach",t:"She really doesn't talk much… but every word counts."}];};
+RG_TRIPX.surat={bg:"mali_home",steps:G=>{const mali=rgIn(G,"mali");return mali?[
+  {n:"nar",t:"The morning after the bout, Mali asks to stop in Chaiya. \"Mali's house is right on the way!\" In fact it's a forty-kilometre detour."},
+  {n:"nar",t:"A two-storey wooden house by the sea. Three little siblings run out to hug Mali, and Mali's mum fills the platform with khao yam."},
+  {n:"npc",who:"Mali's mom",t:"You're here! Eat first, my dear, everyone… oh, and why is that girl standing out front?"},
+  {n:"nar",show:[{id:"chaba",l:"casual"}],t:"Chaba leans against her motorbike outside the gate and won't come in, even when Mali's mum calls her twice."},
+  {n:"mali",f:"sad",l:"casual",with:"chaba",t:"Big sis Chaba… when Mali was six, you just disappeared without saying goodbye. Mali waited for you in front of the house every evening."},
+  {n:"chaba",f:"sad",l:"casual",t:"…"},
+  {n:"nar",bg:"pier_south",t:"That afternoon at Don Sak pier, while they wait for the boat, Chaba comes and sits beside Mali at the end of the pier."},
+  {n:"chaba",f:"sad",l:"casual",t:"That year my brother's boat capsized. His leg never got better. Mum moved us to Phuket that same night. Doctors. Work."},
+  {n:"chaba",f:"sad",l:"casual",t:"I didn't forget you, Mali. …Just didn't know how to say it. The longer it got, the harder."},
+  {n:"mali",f:"sad",l:"casual",with:"chaba",t:"…Why didn't you send even one letter? Mali could read by then.",choice:[
+    {t:"\"It's not too late, for either of you.\"",fx:G2=>{add(G2,"mali","bond",2);rgMeet(G2,"chaba",1);},then:[{n:"chaba",f:"flustered",l:"casual",t:"…Not too late."}]},
+    {t:"Stay quiet and let them talk",fx:G2=>{add(G2,"mali","bond",1);rgMeet(G2,"chaba",2);},then:[{n:"nar",t:"The Manager steps back and stands at a distance. For a long time, waves against the pier posts speak instead of them."}]}]},
+  {n:"chaba",f:"flustered",l:"casual",t:"…I wrote. Eleven letters. Never sent one. Still in the drawer."},
+  {n:"mali",f:"surprised",l:"casual",t:"Eleven letters?! …Big sis Chaba, send all of them to Mali! No more keeping them!"},
+  {n:"nar",t:"Mali laughs and cries at the same time. Chaba reaches up and pats Mali's head twice, just like when Mali was little."},
+  {n:"chaba",f:"happy",l:"casual",t:"…You got bigger, Mali. Still a crybaby."},
+  {n:"mali",f:"happy",l:"casual",t:"I'm not a crybaby anymore! …Okay, a little."},
+  {fx:G2=>{add(G2,"mali","bond",2);const m=G2.F.mali;if(m)m.morale=Math.min(100,(m.morale||0)+5);rgMeet(G2,"chaba",2);G2.flags.chabaMali=1;}},
+  {n:"nar",t:"Mali morale +5 · Mali and Chaba have made up"}]
+ :[{n:"nar",bg:"pier_south",t:"Before heading back, Chaba takes the Manager to sit at the end of the Don Sak pier, waiting for the last ferry."},
+  {n:"chaba",f:"sad",l:"casual",t:"…When I was little there was a girl next door in Chaiya. Cried a lot. We moved and I never said goodbye."},
+  {n:"chaba",f:"happy",l:"casual",t:"She must be grown now. …Probably boxing somewhere."},
+  {fx:G2=>rgMeet(G2,"chaba",2)}];}};
+RG_POST.south="Manager,\n\nTold Naka to take down the ad that used my brother's story.\n\nThey took it down.\n\nMy brother says thank you to Sirichai Camp. He says the day he watched from his wheelchair by the ring was the best day since the boat.\n\nThe cup is yours now. Look after it.\n\n— Chaba\n\nP.S. Sent Mali the eleven letters.";
+RG_CHAT.chaba=[
+ {id:"cb_sea",x:[
+  ["…Big waves today.",[["Be careful if you go out to sea.",2,"…Not going out. Staying home. Thinking… never mind."],["Training on the sand?",1,"Ran already. Ten laps."],["Mm",0,"…"]]],
+  ["My brother said to message you.",[["Your brother's so kind.",1,"…He said to. Not me."],["I'm glad you messaged.",2,"…I know."],["Something up?",0,"Nothing."]]],
+  ["Going to train.",[["Go on, and message me again.",2,"…Mm."],["Go go!",1,"Mm."],["OK",0,"…"]]]]},
+ {id:"cb_bro",x:[
+  ["My brother stood up for ten seconds. Today.",[["Amazing! Tell him I said so.",2,"Told him. He cried. …Me too. A little."],["He's getting better and better.",1,"…Mm. Doctor says so."],["Only ten seconds?",0,"…Ten seconds is long."]]],
+  ["My brother wants to see Sirichai Camp.",[["Anytime. I'll build a ramp for him.",2,"…A ramp. Will tell him. He'll be happy."],["He's always welcome.",1,"Mm, thanks"],["It's far",0,"…I know."]]],
+  ["Thanks, Manager.",[["No need to thank me.",1,"…Thanks anyway."],["Message me more often, Chaba.",2,"…Will try."],["No problem",0,"Mm."]]]]},
+ {id:"cb_food",x:[
+  ["Had gaeng tai pla yet?",[["Never had it.",1,"…Never? Come to Phuket. I'll take you."],["Too spicy for me.",1,"Weak."],["Send some to the camp.",2,"…Sent. Two jars. Arrives tomorrow."]]],
+  ["The kopi shop by my house. Best hot tea there is.",[["I'd love to sit there with you.",2,"…There's a free seat. One. Next to me."],["Hot tea in the morning is nice.",1,"Mm. Every morning."],["I prefer coffee.",0,"…Fine"]]],
+  ["Hungry. Going to eat.",[["Eat lots.",1,"Mm."],["Send me a photo.",2,"…(sends one photo of chicken rice, no text)"],["OK",0,"…"]]]]},
+ {id:"cb_mali",x:[
+  ["Mali sends twenty messages a day.",[["Do you reply?",1,"I reply. …One a day."],["Mali waited ten years for you.",2,"…I know. I'll reply more. Two messages."],["Isn't that a lot?",0,"…Not too many."]]],
+  ["Mali fights much better now. You teach well.",[["Mali's the talented one.",2,"…Same thing Mali says about you."],["Kru Daeng teaches her.",1,"Kru Daeng too."],["Thanks for the compliment.",0,"Mm."]]],
+  ["Look after Mali.",[["I already am.",2,"…Trust you."],["Come and see her yourself sometimes.",1,"…Will come."],["Mali's grown up now.",0,"…Still a kid."]]]]},
+ {id:"cb_naka",x:[
+  ["Naka sent another contract.",[["Don't sign yet. Let Rin read it first.",2,"…Sent it to Rin. Twelve red marks."],["Is it a lot of money?",0,"…Don't care about money."],["If you don't want to sign, don't.",1,"Not signing."]]],
+  ["Khun Krerk smiles all the time. …Don't like it.",[["People who smile all the time are the scariest.",2,"…You think so too."],["He seems kind.",0,"…No."],["Be careful.",1,"Being careful."]]],
+  ["…Talked to you. Now I can sleep.",[["Then message me every night.",2,"…Fine"],["What a lovely dream",1,"Mm. Good night."],["Go to sleep.",0,"…"]]]]}];
+CHAT.chaba=RG_CHAT.chaba;
 const REGION={
   /* end of week (after the weekly events): the gala the week after the invitation, the contract beat the week after the first cup */
   weekScene(G,done){const R=G.region;if(!R){done();return;}const now=gameWeek(G);

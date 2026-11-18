@@ -1,5 +1,5 @@
 // ================= MUAY THAI MOE v1.3 — UI =================
-const VERSION="1.89.20";
+const VERSION="1.89.23";
 const CUR_LANG=(typeof window!=="undefined"&&window.LANG)||"th";
 const TH_LABEL=String.fromCharCode(3652,3607,3618);
 function langSwitch(cls){return `<div class="langsw ${cls||""}" role="group" aria-label="Language">${[["th",TH_LABEL],["en","EN"]].map(([k,l])=>`<button class="lsb ${CUR_LANG===k?"on":""}" data-act="setlang" data-v="${k}" aria-pressed="${CUR_LANG===k}">${l}</button>`).join("")}</div>`;}
@@ -116,8 +116,8 @@ function slotsHTML(mode){const rows=[];for(let i=1;i<=SLOTS;i++){const s=loadSlo
 function faceImg(f,cls=""){return f.canon||f.id==="pailin"?`<img class="face ${cls}" style="--c:${f.color}" src="${faceSrc(f.id,"happy")}" alt="${esc(f.name)}">`:
   `<canvas class="face npcface ${cls}" width="96" height="96" data-sprite="${f.id}" data-mode="guard" style="--c:${f.color}" aria-label="${esc(f.name)}"></canvas>`;}
 // v1.86: heart level — one heart, the level number, a gauge to the next level
-function hearts(b,f){f=f||{bond:b};const H=heartLv(f),pct=Math.round(H.into/H.need*100),left=Math.max(0,Math.ceil((H.need-H.into)*2)/2);
-  return `<span class="hearts hlv" title="Bond ${Math.round(H.total)} · ${left} to Lv.${H.lv+1}"><i class="hp" style="--p:1"></i><b class="hlvn">Lv.${H.lv}</b><i class="hgauge"><i style="width:${pct}%"></i></i><small>${heartTier(H.lv,f.id)}</small></span>`;}
+function hearts(b,f){f=f||{bond:b};const H=heartLv(f),cap=!H.max&&!!(G&&f.id&&heartCapped(G,f)),pct=H.max||cap?100:Math.round(H.into/H.need*100),left=Math.max(0,Math.ceil((H.need-H.into)*2)/2);
+  return `<span class="hearts hlv${cap?" hcap":""}" title="Bond ${Math.round(H.total)} · ${H.max?"maxed":cap?`hearts full for this chapter (cap Lv.${heartCapLv(G)})`:`${left} to Lv.${H.lv+1}`}"><i class="hp" style="--p:1"></i><b class="hlvn">Lv.${H.lv}</b><i class="hgauge"><i style="width:${pct}%"></i></i><small class="${G&&f.id&&relIsStatus(G,f)?"hstat":""}">${G&&f.id?relLabel(G,f,H.lv,true):heartTier(H.lv)}</small></span>`;}
 function bar(label,v,color,txt){return `<div class="bar"><span>${label}</span><i style="--v:${clamp(v,0,100)}%;--bc:${color}"></i><b class="num">${txt??Math.round(v)}</b></div>`;}
 function mini(v,color){return `<i class="mini" style="--v:${clamp(v,0,100)}%;--bc:${color}"></i>`;}
 /* v1.88: an opponent shows her strength level, coloured against our best fighter in her division (red = stronger) */
@@ -496,7 +496,7 @@ function adviceHTML(id){const f=G.F[id],A=trainAdvice(f);const same=f.plan.prese
    and her fight plan is filled with the coach's pick, so nothing asks to be confirmed. Untick any time. */
 const autoOn=f=>!!(f&&f.autoTr&&gameWeek(G)<=f.autoTr);
 const autoLeft=f=>autoOn(f)?f.autoTr-gameWeek(G)+1:0;
-const trLocked=f=>f?(f.lockWeek===gameWeek(G)||autoOn(f)):false;
+const trLocked=f=>f?(f.lockWeek===gameWeek(G)||autoOn(f)||isAway(G,f.id)):false;
 const handLocked=f=>!!f&&f.lockWeek===gameWeek(G)&&!autoOn(f);
 function autoPlans(){if(!G||!G.bookings)return;for(const b of G.bookings){const f=G.F[b.a];if(!f||f.camp!=="player"||b.planSet||!autoOn(f))continue;
   let pl="balanced";try{if(scouted(b.b))pl=adviseCached(b.a,b.b,b.rounds||3).best||"balanced";}catch(e){}b.plan=pl;b.planSet=true;b.autoPlan=true;}}
@@ -506,13 +506,13 @@ function trainHTML(){const R=roster(G);if(!R.length)return "";
   return `<div class="tcards">${R.map(f=>tcard(f,trLocked(f))).join("")}</div>`;}
 function tcard(f,L){const pf=projFatigue(f),rest=f.plan.preset==="rest";const tired=!f.injury&&f.fatigue>=55&&!rest;
   return `<section class="px tcard ${L?"locked":""}">${!L&&!f.injury?"<i class=\"tdot\" aria-label=\"Program not confirmed\"></i>":""}<div class="tc-anim" role="button" tabindex="0" data-act="fighter" data-id="${f.id}" data-v="train" aria-label="Info ${esc(f.name)}" style="background-image:url(${ASSET}${gymBg()})"><canvas width="220" height="190" data-sprite="${f.id}" data-floor="1"></canvas>
-     <span class="tr-pre">${f.injury?"Recovering":PRESETS[f.plan.preset].name}</span></div>
+     <span class="tr-pre">${isAway(G,f.id)?"Away":f.injury?"Recovering":PRESETS[f.plan.preset].name}</span></div>
    <div class="tc-body"><div class="tc-h"><b class="nm">${esc(f.name)}</b><span class="lv">Lv.${f.lvl}</span>${prepLine(f)}</div>
     <div class="fatg"><span>Fatigue <b class="num">${Math.round(f.fatigue)}</b> → <b class="num">${Math.round(pf)}</b></span><i class="fgbar" style="--now:${clamp(f.fatigue,0,100)}%;--next:${clamp(pf,0,100)}%;--bc:${pf>70?"var(--red)":pf>55?"var(--warn)":"var(--green)"}"><s></s></i></div>
     ${tired?`<p class="warnchip">Very tired, should recover this week</p>`:""}
-    ${skReady(f)?`<button class="spchip" data-act="fighter" data-id="${f.id}" data-v="skill">★ Skills ready</button>`:""}<div class="tc-prog"><span class="pill ${L?"":"gold"}">${f.injury?"Recovering":PRESETS[f.plan.preset].name+(rest?"":" · "+INTENSITY[f.plan.intensity].name)}</span></div>
+    ${skReady(f)?`<button class="spchip" data-act="fighter" data-id="${f.id}" data-v="skill">★ Skills ready</button>`:""}<div class="tc-prog"><span class="pill ${L?"":"gold"}">${isAway(G,f.id)?`Away from camp · back in ${awayLeft(G,f.id)} weeks`:f.injury?"Recovering":PRESETS[f.plan.preset].name+(rest?"":" · "+INTENSITY[f.plan.intensity].name)}</span></div>
     ${f.injury?"":`<div class="tc-btns">${L&&!autoOn(f)?"":`<button class="btn sm" data-act="tpick" data-id="${f.id}">Program</button>`}${coachOn()&&!L?`<button class="btn sm" data-act="advice" data-id="${f.id}">Coach's advice</button>`:""}
-     ${autoOn(f)?`<span class="tc-ok auto">↻ Same programme for ${autoLeft(f)} more weeks</span>`:L?`<span class="tc-ok">✓ Program confirmed</span>`:`<button class="btn sm gold tc-go" data-act="tlock" data-id="${f.id}">Confirm program</button>`}</div>`}
+     ${isAway(G,f.id)?`<span class="tc-ok auto">Away from camp · no training</span>`:autoOn(f)?`<span class="tc-ok auto">↻ Same programme for ${autoLeft(f)} more weeks</span>`:L?`<span class="tc-ok">✓ Program confirmed</span>`:`<button class="btn sm gold tc-go" data-act="tlock" data-id="${f.id}">Confirm program</button>`}</div>`}
 </div></section>`;}
 // programme sheet: 4 columns, intensity hidden for rest
 function tpickHTML(id){const f=G.F[id],rest=f.plan.preset==="rest";
@@ -629,8 +629,8 @@ function rankHTML(){const st=stageOf(G.week),cut=st==="local"?4:st==="district"?
 function peopleHTML(){const met=CANON_IDS.map(id=>G.F[id]).filter(f=>f.met);
   return `<div class="card-h"><p class="meta">Spend time with one person per week · Once you are close, they will sometimes text you first</p><button class="btn sm gold albbtn" data-act="album">🃏 Card album ${Object.keys(G.cards||{}).length}/${Object.keys(CARDS).length}${Object.entries(G.cards||{}).some(([k,c])=>cardFresh(k,c)||cardCanUp(k,c))?'<i class="ndot"></i>':""}</button>${G.freeUsed?"<span class=\"pill\">Free time: used</span>":"<span class=\"pill gold\">Free time: 1 left</span>"}</div>
    <div class="plist">${met.map(f=>`<section class="px pcard"><button class="pthumb" data-act="fighter" data-id="${f.id}" data-v="rel" aria-label="View profile of ${esc(f.name)}"><img src="${stand(f.id,"casual")}" alt="" loading="lazy"></button>
-     <div class="pbody"><div class="pnm"><b class="nm">${esc(f.name)}</b><span class="meta">${f.camp==="player"?"Sirichai Camp":f.camp==="rival"?"Golden Tiger":"Independent"}${G.romance===f.id?" · Sweetheart ♥":G.promise&&G.promise[f.id]!=null?" · Promised ♡":""}</span></div>${hearts(f.bond,f)}
-      <div class="pbtns"><button class="btn sm" data-act="fighter" data-id="${f.id}" data-v="rel">Profile</button><button class="btn sm primary" data-act="hang" data-id="${f.id}" ${G.freeUsed?"disabled":""}>Hang out</button><button class="btn sm gold giftb" data-act="giftpick" data-id="${f.id}" ${f.giftWeek===gameWeek(G)?"disabled":""}>${PIX.gift}<span>${f.giftWeek===gameWeek(G)?"Given":"Gift"}</span></button><button class="btn sm chatb" data-act="chat" data-id="${f.id}" ${canChat(f)?"":"disabled"}>${CHAT_PX}<span>${canChat(f)?"New chat":(f.bond||0)<CHAT_BOND?"Not close yet":"No messages"}</span>${canChat(f)?'<i class="dot"></i>':""}</button></div></div></section>`).join("")}</div>`;}
+     <div class="pbody"><div class="pnm"><b class="nm">${esc(f.name)}</b><span class="meta">${f.camp==="player"?"Sirichai Camp":f.camp==="rival"?"Golden Tiger":"Independent"}${relTag(G,f)}</span></div>${hearts(f.bond,f)}
+      <div class="pbtns"><button class="btn sm" data-act="fighter" data-id="${f.id}" data-v="rel">Profile</button><button class="btn sm primary" data-act="hang" data-id="${f.id}" ${G.freeUsed||isAway(G,f.id)?"disabled":""}>${isAway(G,f.id)?"Away":"Hang out"}</button><button class="btn sm gold giftb" data-act="giftpick" data-id="${f.id}" ${f.giftWeek===gameWeek(G)||isAway(G,f.id)?"disabled":""}>${PIX.gift}<span>${f.giftWeek===gameWeek(G)?"Given":"Gift"}</span></button><button class="btn sm chatb" data-act="chat" data-id="${f.id}" ${canChat(f)||canChatLov(f)?"":"disabled"}>${CHAT_PX}<span>${canChat(f)?"New chat":isAway(G,f.id)?"Not answering":canChatLov(f)?"Chat":(f.bond||0)<CHAT_BOND?"Not close yet":"No messages"}</span>${canChat(f)?'<i class="dot"></i>':""}</button></div></div></section>`).join("")}</div>`;}
 function hangHTML(id){const f=G.F[id],hlv=heartLv(f).lv;const pref=k=>f.know["act_"+k]==="like"?"<i class=\"likeb\">Likes</i>":f.know["act_"+k]==="dislike"?"<i class=\"disb\">Dislikes</i>":"";
   return `<h2>Time with ${esc(f.name)}</h2><p class="meta">Choose where to go together</p><div class="acts">${Object.entries(ACTIVITIES).filter(([k,a])=>(!a.campOnly||f.camp==="player")&&(!a.heart||hlv>=10)).map(([k,a])=>{const lock=a.heart&&hlv<a.heart;return `<button class="actbtn${lock?" lockd":a.heart?" hspot":""}" data-act="date" data-id="${f.id}" data-v="${k}" ${lock||G.freeUsed||G.cash<a.cost?"disabled":""}><b>${a.heart?"♥ ":""}${a.name}${lock?"":pref(k)}</b><small>${lock?`🔒 Unlocks at ♥Lv.${a.heart}`:a.cost?fmt(a.cost):"Free"}</small></button>`;}).join("")}</div>`;}
 // v1.33: what each camp level brings, so upgrades feel like a goal
@@ -882,7 +882,7 @@ function relHTML(f){const P=PROFILES[f.id],b=f.bond;
   const gifts=Object.entries(f.know).filter(([k])=>k.startsWith("gift_")).map(([k,v])=>`<span class="tchip ${v}">${GIFTS[k.slice(5)].name}${v==="love"?" ♥♥":v==="like"?" ♥":v==="dislike"?" ✕":""}</span>`).join("");
   const looks=[["fight","Fight gear"],["train","Training gear"],["casual","Casual"],...(typeof loyThaiLook==="function"&&loyThaiLook(G)&&THAI_IDS.includes(f.id)?[["thai","Thai Dress"]]:[])];
   return `<div class="pf2"><div class="pf-art"><img src="${UI.look==="train"?`${ASSET}${f.id}_train.webp`:stand(f.id,UI.look,"happy")}" alt=""><div class="seg sm">${looks.map(([k,t])=>`<button data-act="plook" data-v="${k}" aria-pressed="${UI.look===k}">${t}</button>`).join("")}</div></div>
-   <div class="pf-side">${hearts(b,f)}${typeof missGap==="function"&&missGap(G,f.id)>=3?`<div class="missb">💭 Missing you · haven't met in ${missGap(G,f.id)} weeks ${!(f.bondX>0)&&f.bond>(REL_FLOOR[(G.relT||{})[f.id]||0]||0)?" · bond starting to fade":""}</div>`:""}<div class="reltier"><b>${REL_TIERS[relTier(b)][1]}</b><small>${REL_TIERS[relTier(b)][2]}</small></div><div class="bars">${(()=>{const H=heartLv(f);return bar("Friends",H.into/H.need*100,"var(--red)",`${Math.round(H.total)}`);})()}${bar("Trust",f.trust,"var(--gold)")}</div>${f.camp==="player"?`<p class="meta trustx">${trustText(f)}</p>`:""}
+   <div class="pf-side">${hearts(b,f)}${typeof missGap==="function"&&missGap(G,f.id)>=3?`<div class="missb">💭 Missing you · haven't met in ${missGap(G,f.id)} weeks ${!(f.bondX>0)&&f.bond>(REL_FLOOR[(G.relT||{})[f.id]||0]||0)?" · bond starting to fade":""}</div>`:""}${relLadderHTML(f)}<div class="bars">${(()=>{const H=heartLv(f);return bar("Friends",H.max||heartCapped(G,f)?100:H.into/H.need*100,H.max||heartCapped(G,f)?"var(--gold)":"var(--red)",`${Math.round(H.total)}`);})()}${bar("Trust",f.trust,"var(--gold)")}</div>${f.camp==="player"?`<p class="meta trustx">${trustText(f)}</p>`:""}
     <div class="info"><div><span>Height</span><b>${P.height}</b></div><div><span>Blood type</span><b>${L(b>=UNLOCK.blood||f.know.blood,UNLOCK.blood,P.blood)}</b></div>
      <div><span>Birthday</span><b>${L(b>=UNLOCK.bday||f.know.bday,UNLOCK.bday,P.bday)}</b></div><div><span>Style</span><b>${esc(P.heritage)}</b></div></div></div></div>
    <div class="pf-sec"><h4>Personality</h4><p>${L(b>=UNLOCK.personality,UNLOCK.personality,P.personality)}</p></div>
@@ -891,6 +891,13 @@ function relHTML(f){const P=PROFILES[f.id],b=f.bond;
    ${gifts?`<div class="pf-sec"><h4>Known gifts</h4><div class="tchips">${gifts}</div></div>`:""}
    <div class="pf-two"><div class="pf-sec"><h4>Hometown</h4><p>${esc(P.home)}</p></div><div class="pf-sec"><h4>Hobby</h4><p>${L(b>=UNLOCK.hobby||f.know.hobby,UNLOCK.hobby,P.hobby)}</p></div></div>
    <details class="pf-sec"><summary>Story & secrets</summary><h4>Story</h4><p>${L(b>=UNLOCK.story,UNLOCK.story,P.story)}</p><h4>Secret</h4><p>${L(b>=UNLOCK.secret,UNLOCK.secret,P.secret)}</p></details>`;}
+/* v1.89.11: the relationship ladder — the same label as under the hearts, the current step lit */
+function relLadderHTML(f){const H=heartLv(f).lv,cur=relLabel(G,f,H),k=relKind(G,f),away=isAway(G,f.id),T=k==="lover"?LOVER_TIERS:HEART_TIERS,tierNow=heartTier(H,k==="lover"||k==="promise"||k==="ex"?f.id:undefined);
+  const lit=T.reduce((a,[lv],i)=>H>=lv?i:a,0),key=k==="friend"?"Close friend":tierNow;
+  return `<div class="reltier rlad"><b class="${relIsStatus(G,f)?"hstat":""}">${esc(cur)}</b><small>${esc(away?"The label goes back once she returns":REL_DESC[key]||"")}</small>
+   <ol class="rsteps">${T.map(([lv,n],i)=>`<li class="${i===lit&&k!=="friend"&&k!=="ex"?"on":H>=lv?"done":""}"><i>Lv.${lv}</i>${esc(n)}</li>`).join("")}</ol>
+   <p class="meta rcap">This chapter's heart cap: Lv.${heartCapLv(G)}${HEART_NEXT[heartCapLv(G)]?` · ${HEART_NEXT[heartCapLv(G)]}`:""}</p>
+   <div class="rbranch"><small>At the confession (bond 75 + trust 40)</small><div>${REL_BRANCH.map(([kk,n])=>`<span class="${kk===k?"on":""}">${esc(n)}</span>`).join("")}</div></div></div>`;}
 function giftHTML(id){const f=G.F[id];
   const E=giftsFor(id).map(k=>[k,{...GIFTS[k],bond:giftBond(id,k)}]).sort((x,y)=>(x[1].bond||0)-(y[1].bond||0)||(x[1].only?1:0)-(y[1].only?1:0));
   {const lk=E.filter(([k,g])=>(g.bond||0)>(f.bond||0));const nx=lk[0];const hid=lk.length-(nx?1:0);E.splice(0,E.length,...E.filter(([k,g])=>(g.bond||0)<=(f.bond||0)),...(nx?[nx]:[]));E.hidden=hid;}
@@ -933,7 +940,7 @@ function reportHTML(){const r=G.lastReport;const ann=[];
   const cut=r.stage==="local"?4:r.stage==="district"?4:0;
   const tu=(r.tierUp||[]).filter(x=>G.F[x.id]),hu=(r.heartUp||[]).filter(x=>G.F[x.id]);
   return `<h2>Week ${r.week}</h2><p class="goal">${goalText()}</p>
-   ${hu.length?`<div class="heartup">${hu.map(x=>`<div class="hu">${faceImg(G.F[x.id],"sm")}<span>Bond with <b>${esc(G.F[x.id].name)}</b> rose to <b class="hlvn">♥ Lv.${x.lv}</b><small class="meta">${heartTier(x.lv,x.id)}</small></span></div>`).join("")}</div>`:""}
+   ${hu.length?`<div class="heartup">${hu.map(x=>`<div class="hu">${faceImg(G.F[x.id],"sm")}<span>Bond with <b>${esc(G.F[x.id].name)}</b> rose to <b class="hlvn">♥ Lv.${x.lv}</b><small class="meta">${relLabel(G,G.F[x.id],x.lv,true)}</small></span></div>`).join("")}</div>`:""}
    ${tu.length?`<div class="tierup">${tu.map(x=>{const f=G.F[x.id],a=TIER_BY[x.from],b=TIER_BY[x.to],up=b.i>a.i;return `<div class="tu ${up?"up":"down"}">${faceImg(f,"sm")}<span><b>${esc(f.name)}</b> ${up?"moved up to":"dropped to"} <b>${b.ic} ${b.n}</b><small class="meta">from ${a.ic} ${a.n}</small></span></div>`;}).join("")}</div>`:""}
    ${ann.length&&cut?`<div class="announce"><div class="ann-h">Rankings · ${STAGE_NAME[r.stage]}</div>${ann.map(a=>`<div class="ann ${a.f.camp==="player"?"me":""}">${faceImg(a.f,"sm")}<b>${esc(a.f.name)}</b><span class="meta">Div ${a.d}</span><span class="rk">Rank ${a.pos}</span>${moveIcon(a.m)}${cut?`<span class="pill ${a.pos<=cut?"green":"red"}">${a.pos<=cut?"In the qualifying zone":"Outside the zone"}</span>`:""}</div>`).join("")}</div>`:""}
    ${r.prog?`<details class="prog"><summary class="ann-h">4-week progress chart (tap to view)</summary><div class="progrow">${r.prog.filter(p=>G.F[p.id]).map(p=>{const f=G.F[p.id];const sum=Object.keys(p.before).reduce((s,k)=>s+(f.a[k]-p.before[k]),0);
@@ -1077,6 +1084,7 @@ function playHonorQueue(done){while((G.awards||[]).length&&!(G.F[G.awards[0].id]
 function sceneNext(){const S=UI.scene;if(!S)return;
   while(S.i<S.steps.length){const st=S.steps[S.i];
     if(st.inject){let more=[];try{more=st.inject(G)||[];}catch(e){console.error("scene inject",e);}S.steps.splice(S.i,1,...more);continue;}/* v1.81.1: a broken step never freezes the week */
+    if(st.brawl){S.i++;UI.scene=null;openBrawl(st.brawl.a,st.brawl.b,st.brawl.hard,res=>{UI.scene=S;let more=[];try{more=st.after?st.after(G,res)||[]:[];}catch(e){console.error("brawl after",e);}S.steps.splice(S.i,0,...more);sceneNext();});return;}/* v1.89.11: a live bout inside a scene */
     if(st.bg)S.bg=st.bg;
     if(st.fx&&!st.n&&!st.choice&&!st.choiceFn){try{st.fx(G);}catch(e){console.error("scene fx",e);}S.i++;continue;}
     if((st.choice||st.choiceFn)&&st.t!=null&&!st._ask){const {choice,choiceFn,...line}=st;S.steps.splice(S.i,1,line,{choice,choiceFn,_ask:1});continue;} /* v1.90: a line that carries a choice is shown first, then the options */
@@ -1102,7 +1110,7 @@ function sceneHTML(){const S=UI.scene,c=S.cur||{};const sp=c.n==="coach"?{name:c
   const spk=c.n||S.lastN;if(c.n)S.lastN=c.n;
   const bgKey=(S.bg==="gym"||S.bg==="camp")?gymBg():BGIMG[S.bg];
   const cast=S.cast.map((m,i)=>{const active=m.id===spk||(c.choice&&i===S.cast.length-1);const pos=S.cast.length===1?"c":i===0?"l":"r";
-    return `<img class="stand ${pos} ${active&&!m.back?"on":"off"}${m.back?" back":""}" src="${m.id.startsWith("npc:")?`${ASSET}npc_${m.id.slice(4)}.webp`:m.back?`${ASSET}${m.id}_back.webp`:stand(m.id,m.look,active?moodFor(c.f,m.look,c.t):moodFor(m.f,m.look,""))}" alt="">`;}).join("");
+    return `<img class="stand ${pos} ${active&&!m.back?"on":"off"}${m.back?" back":""}" src="${m.id.startsWith("npc:")?`${ASSET}npc_${m.id.slice(4)}.webp`:m.back?`${ASSET}${m.id}_back.webp`:stand(m.id,m.look,active&&!c.choice?moodFor(c.f,m.look,c.t):moodFor(m.f,m.look,""))}" alt="">`;}).join("");
   const tag="";
   return `<div class="vn" role="dialog" aria-label="Story scene"><div class="vbg bg-${S.bg==="camp"?"gym":S.bg}" ${bgKey?`style="background-image:url(${ASSET}${bgKey})"`:""}></div>
    <div class="cast ${(S.cast||[]).length>1?"duo":""}">${cast}</div>
@@ -1142,20 +1150,21 @@ function goalText(){const st=stageOf(G.week),me=roster(G);const best=d=>{const r
 const evSeen=e=>e.annual?((G.seenY||{})[e.id]===(G.season||1)):!!G.seen[e.id];
 function pendingEvents(){return EVENTS.filter(e=>{try{return e.when&&!evSeen(e)&&e.when(G);}catch(err){console.error("event when",e.id,err);return false;}});}
 // v1.41: at most two optional story scenes a week — the rest wait for next week (main story / finals always play)
-const EV_MUST=/^(prologue|daeng_leave|pre_qual|qual_result|final_result|semi_result|night_final|lover_final|ploy_prefinal|fah_prefinal|first_win|first_loss)/,EV_CAP=2;
+const EV_MUST=/^(lv_val|lv_harem|lv_back|prologue|daeng_leave|pre_qual|qual_result|final_result|semi_result|night_final|lover_final|ploy_prefinal|fah_prefinal|first_win|first_loss)/,EV_CAP=2;
 function runEvents(done){const list=pendingEvents().sort((a,b)=>(b.pri||0)-(a.pri||0));let played=0,opt=0;/* time-limited scenes go first */
   const step=()=>{const e=list.shift();if(!e||G.ended){done&&done(played);return;}if(evSeen(e)||!(()=>{try{return e.when(G);}catch(x){return false;}})()){step();return;}
     if(G.coachAwayAbs&&gameWeek(G)<G.coachAwayAbs&&!EV_MUST.test(e.id)&&!/daeng|coach/.test(e.id)&&e.steps.some(x=>x.n==="coach")){step();return;}/* v1.60: scenes where Kru Daeng talks wait until he is back */
+    if(!EV_MUST.test(e.id)&&!/^lv_/.test(e.id)&&awaySpeaks(G,e.steps)){step();return;}/* v1.89.11: scenes with a girl who left camp wait until she is back */
     if(!EV_MUST.test(e.id)){if(opt>=((G.season||1)>=2&&(G.week===44||G.week===49)?0:EV_CAP)){step();return;}opt++;}
     if(e.annual){G.seenY=G.seenY||{};G.seenY[e.id]=G.season||1;}else G.seen[e.id]=true;G.seenWk=G.seenWk||{};G.seenWk[e.id]=G.week;G.seenAbs=G.seenAbs||{};G.seenAbs[e.id]=gameWeek(G);played++;playScene(e.steps,step,{bg:e.bg,look:e.look,coachOK:/daeng|coach/.test(e.id)});};step();}
 function weeklyExtra(done){const rng=mulberry32(G.seed+G.week*313);if(typeof questExtra==="function"&&questExtra(done,mulberry32(G.seed+G.week*59)))return;
-  const dil=(typeof DILEMMAS!=="undefined"?DILEMMAS:[]).filter(d=>!G.seen[d.id]&&G.week>=d.from&&G.week<=d.to&&d.need(G));
+  const dil=(typeof DILEMMAS!=="undefined"?DILEMMAS:[]).filter(d=>!G.seen[d.id]&&G.week>=d.from&&G.week<=d.to&&d.need(G)&&!awaySpeaks(G,d.steps));
   const sinceD=gameWeek(G)-(G.lastDilemma||0);
   // v1.21: something happens most weeks — a decision every couple of weeks, chatter or a happening in between
   if(dil.length&&sinceD>=2&&rng()<.62){const d=dil[Math.floor(rng()*dil.length)];G.seen[d.id]=true;G.lastDilemma=gameWeek(G);
     playScene([{n:"nar",t:"— Decisions to make —"},...d.steps],done,{bg:d.bg==="camp"?"gym":d.bg,look:d.look||"train"});return;}
   const chats=CHATTER.filter(c=>!G.seen[c.id]&&c.need(G));const haps=HAPPENINGS.filter(h=>!G.seen[h.id]);
-  const chats2=chats.filter(c=>!c.need2||c.need2(G)),haps2=haps.filter(h=>!h.need||h.need(G));
+  const chats2=chats.filter(c=>(!c.need2||c.need2(G))&&!awaySpeaks(G,c.steps)),haps2=haps.filter(h=>(!h.need||h.need(G))&&!awaySpeaks(G,h.steps));
   let pick=null;if(chats2.length&&rng()<.6)pick=chats2[Math.floor(rng()*chats2.length)];else if(haps2.length&&rng()<.7)pick=haps2[Math.floor(rng()*haps2.length)];
   if(!pick){done();return;}G.seen[pick.id]=true;playScene(pick.steps,done,{bg:pick.bg==="camp"?"gym":pick.bg,look:pick.look||"train"});}
 function afterWeekFlow(){playHonorQueue(afterWeekFlowMain);}
@@ -1267,7 +1276,7 @@ function endingHTML(){const E=UI.ending,all=roster(G),res=seasonResult();
    <section class="px card"><h3>This year's results</h3>${res.length?res.map(r=>`<div class="kv-row"><span>${faceImg(r.f,"sm")} ${esc(r.f.name)} · Div ${r.d}</span><span class="pill ${r.c}">${r.t}</span></div>`).join(""):"<p class=\"meta\">No fighter passed the subdistrict round this year</p>"}</section>
    <div class="grid g3"><section class="px card"><h3>Camp</h3><div class="kv-row"><span>Camp level</span><b>Lv.${campLevel(G)} ${CAMP_LV_NAME[campLevel(G)]}</b></div><div class="kv-row"><span>Cash</span><b class="num">${fmt(G.cash)}</b></div><div class="kv-row"><span>Remaining debt</span><b class="num">${fmt(G.debt)}</b></div><div class="kv-row"><span>Students</span><b class="num">${students(G)}</b></div><div class="kv-row"><span>Fame</span><b class="num">${G.rep.toFixed(1)}</b></div></section>
    <section class="px card"><h3>Camp fighters</h3>${all.map(f=>`<div class="kv-row"><span>${esc(f.name)} Lv.${f.lvl}</span><span class="num">${rec(f)}</span></div>`).join("")}</section>
-   <section class="px card"><h3>Relationships</h3>${CANON_IDS.map(id=>G.F[id]).filter(f=>f.met).map(f=>`<div class="kv-row"><span>${esc(f.name)}${G.romance===f.id?" ♥ Sweetheart":G.promise&&G.promise[f.id]!=null?" ♡ Promised":""}</span>${hearts(f.bond,f)}</div>`).join("")}</section></div>
+   <section class="px card"><h3>Relationships</h3>${CANON_IDS.map(id=>G.F[id]).filter(f=>f.met).map(f=>`<div class="kv-row"><span>${esc(f.name)}${relTag(G,f).replace(/^ · /," ")}</span>${hearts(f.bond,f)}</div>`).join("")}</section></div>
    ${endTeaserHTML()}
    <p class="meta center">Seed ${esc(G.seedText||String(G.seed))} · Year ${G.season||1}</p>${!DEMO&&G.ended==="season"&&!gateOpen()?gateHTML():""}<div class="center endbtns">${!DEMO&&G.ended==="season"&&gateOpen()?`<button class="btn primary" data-act="newseason">Continue to Year ${(G.season||1)+1} ▸</button><p class="meta center">The camp, fighters and relationships all carry over · the rivals trained harder too</p>`:""}<button class="btn primary" data-act="replay">Play again</button><button class="btn" data-act="restart">Back to title</button></div></main>`;}
 
@@ -1340,12 +1349,13 @@ function fightHTML(){const U=UI.fight,b=U.b,me=G.F[b.a],op=G.F[b.b],F=U.F;
      ${U.cutin?(U.cutin.skill?`<div class="cutin sk ${U.cutin.kind} ${U.cutin.side}" aria-live="assertive"><div class="cut-band"><img src="${ASSET}${U.cutin.id}_fight_angry.webp" alt=""></div><b>${esc(U.cutin.skill)}</b><span>${esc(U.cutin.name)} · ${U.cutin.kind==="atk"?`${WNAME[U.cutin.w]}: sharper and harder for a while`:U.cutin.kind==="def"?"Better evasion and counters for a while":"Energy recovered"}</span></div>`:`<div class="cutin ${U.cutin.side}" aria-live="assertive"><div class="cut-band"><img src="${ASSET}${U.cutin.id}_fight_angry.webp" alt=""></div><b>Blood-boil mode!</b><span>${esc(U.cutin.name)} changes eyes · stronger counters, easier criticals</span></div>`):""}
      ${U.stage==="corner"?"":liveStats()}`;
     // v1.21: one compact row — speed, then the 3 carried skills
-    if(U.stage==="playing")mid+=`<div class="fctl2"><div class="seg sm">${[["1","x1"],["2","x2"]].map(([v,t])=>`<button data-act="fspeed" data-v="${v}" aria-pressed="${String(UI.speed)===v}" aria-label="Speed ${t}">${t}</button>`).join("")}</div>${skillBarHTML()}</div>`; /* v1.89.3: speed and skills share one row right under the live stats again (as before v1.83 pinned them to the bottom) */
+    if(U.stage==="playing")mid+=`<div class="fctl2"><div class="seg sm">${[["1","x1"],["2","x2"]].map(([v,t])=>`<button data-act="fspeed" data-v="${v}" aria-pressed="${String(UI.speed)===v}" aria-label="Speed ${t}">${t}</button>`).join("")}</div>${U.brawl?`<span class="meta skhint">Watching from ringside · they fight on their own</span>`:skillBarHTML()}</div>`; /* v1.89.3: speed and skills share one row right under the live stats again (as before v1.83 pinned them to the bottom) */
     if(U.stage==="corner")mid+=cornerHTML(F);
-    if(U.stage==="done")mid+=resultHTML();
+    if(U.stage==="talk")mid+=brawlTalkHTML();
+    if(U.stage==="done")mid+=U.brawl?brawlDoneHTML():resultHTML();
     mid+=`<details class="logd" ${UI.logOpen?"open":""} ontoggle="UI.logOpen=this.open"><summary>Full fight log</summary><div class="flog">${U.shown.map(l=>l.rd?`<div class="rd">${l.rd}</div>`:`<div class="${l.s}">${esc(l.t||"")}</div>`).join("")}</div></details>`;}
   const tw=UI.confirmTowel?`<div class="tconfirm" role="alertdialog"><div class="px">${UI.towelCoach?`<div class="ctip big"><img src="${faceSrc("coach")}" alt=""><span><b>Coach Daeng:</b> ${esc(me.name)} is badly hurt, only HP ${Math.max(1,Math.round(U.F.A.hp))}. If she gets knocked out she'll be off for weeks. Throw the towel?</span></div>`:""}<h3>🏳️ Throw in the towel?</h3><p>The fight counts as a loss right away, but she won't get hurt any worse (morale drops).</p><div class="ctrl"><button class="btn" data-act="towelno">Keep fighting</button><button class="btn primary" data-act="towelyes">Throw it</button></div></div></div>`:"";
-  return `${tw}${fpopHTML()}<div class="fight pxscroll ${U.stage==="corner"?"incorner":U.stage==="done"?"isdone":""}" data-sk="fight" role="dialog" aria-label="Fight"><div class="fight-in"><div class="fhead">${side(me,"a",hpA,stA)}<div class="vsmid"><b>${TIER[b.tier].name}</b>${U.F&&U.F.round&&U.stage==="playing"?(()=>{const s=Math.max(0,Math.round(180*(1-Math.min(U.F.ex||0,EX_PER_ROUND)/EX_PER_ROUND)));return `<span class="meta">Rd ${U.F.round}/${b.rounds}</span><span class="rclock num">${Math.floor(s/60)}:${String(s%60).padStart(2,"0")}</span><i class="rcbar" style="--v:${Math.round(s/1.8)}%"></i>`;})():`<span class="meta">${b.rounds} rds</span>`}</div>${side(op,"b",hpB,stB)}</div>${mid}</div></div>`;}
+  return `${tw}${fpopHTML()}<div class="fight pxscroll ${U.stage==="corner"?"incorner":U.stage==="done"?"isdone":""}" data-sk="fight" role="dialog" aria-label="Fight"><div class="fight-in"><div class="fhead">${side(me,"a",hpA,stA)}<div class="vsmid"><b>${b.brawl?"Settling it in the ring":TIER[b.tier].name}</b>${U.F&&U.F.round&&U.stage==="playing"?(()=>{const s=Math.max(0,Math.round(180*(1-Math.min(U.F.ex||0,EX_PER_ROUND)/EX_PER_ROUND)));return `<span class="meta">Rd ${U.F.round}/${b.rounds}</span><span class="rclock num">${Math.floor(s/60)}:${String(s%60).padStart(2,"0")}</span><i class="rcbar" style="--v:${Math.round(s/1.8)}%"></i>`;})():`<span class="meta">${b.rounds} rds</span>`}</div>${side(op,"b",hpB,stB)}</div>${mid}</div></div>`;}
 function liveStats(){const U=UI.fight,F=U.F;if(!F)return "";let la=0,lb=0;
   for(const e of U.shown){if(!e.ev)continue;const sd=sideOf(e,F);if(e.ev==="hit"||e.ev==="counter"){if(sd==="A")la++;else lb++;}}
   const ctl=la+lb?Math.round(la/(la+lb)*100):50;
@@ -1527,7 +1537,7 @@ function fightStart(quick){const U=UI.fight,b=U.b;AU.resume();
   if(b.wai==="phrom")U.F.A.careMor=.02;if(b.wai==="phra")U.F.A.careMor=.01;if(b.cheer)U.F.A.mor+=b.cheer*.01;U.F.A.mor+=trustBonus(G.F[b.a]);{const fam=(G.fam||{})[b.b]||0;if(fam)U.F.A.mor+=fam*.015;}setTactics(U.F,U.tac);if(b.carry){U.F.A.hp=Math.min(U.F.A.hp,b.carry.hp);U.F.A.sta=Math.min(U.F.A.sta,b.carry.sta);}LASTF=U.F;
   if(quick){FS.init(null,b.bg||TIER_BG[b.tier]||"bg_local.webp",G.F[b.a],G.F[b.b]);const F=U.F;while(!F.over){F.A.instr=aiCorner(F,F.A,F.B);F.B.instr=aiCorner(F,F.B,F.A);const lg=fightRound(F);U.shown.push({rd:`Round ${F.round}`},...lg);}fightEnd();return;}
   FS.init(null,b.bg||TIER_BG[b.tier]||"bg_local.webp",G.F[b.a],G.F[b.b]);AU.setTempo(104);AU.setHeat&&AU.setHeat(0);AU.startMusic();playRound();}
-function playRound(){const U=UI.fight,F=U.F;fightMusic(F);F.B.instr=aiCorner(F,F.B,F.A);F.A.autoSkill=false;roundBegin(F);
+function playRound(){const U=UI.fight,F=U.F;fightMusic(F);F.B.instr=aiCorner(F,F.B,F.A);F.A.autoSkill=false;if(U.brawl){F.A.instr=aiCorner(F,F.A,F.B);F.A.autoSkill=true;}roundBegin(F);
   const rng=mulberry32(F.seed+F.round);U.rng=rng;U.tiredShown=false;
   F.tier=F.tier||U.b.tier;const sl=startLine(F,rng);U.pending=[{rd:`Round ${F.round}`,cap:{text:sl.text,side:"",heat:sl.heat},bell:true}];
   U.stage="playing";fightMusic(F);render();tick();}
@@ -1546,6 +1556,7 @@ function fightMusic(F,surge){if(!F||!AU.setTempo)return;const R=Math.max(1,F.rou
   const late=(F.ex||0)>=EX_PER_ROUND*.7?1:0,kd=F.musicKd&&performance.now()-F.musicKd<9000?1:0;
   AU.setTempo(Math.round(104+p*54+late*8+kd*10+(surge||0)*4));AU.setHeat&&AU.setHeat(Math.round(p*2)+(late||kd?1:0));}
 function tick(){const U=UI.fight;if(!U||U.stage!=="playing")return;
+  if(U.brawl&&U.brawl.asked<BRAWL_AT.length&&(U.F.ex||0)>=BRAWL_AT[U.brawl.asked]){U.stage="talk";U.brawl.q=brawlPrompt(U);AU.sfx("ui");render();return;}
   if(!U.pending.length&&!feedRound()){roundFinish(U.F);roundEnd();return;}
   const e=U.pending.shift();U.shown.push(e);const F=U.F;const now=performance.now();let wait=1500;
   if(e.bell){AU.sfx("bell");U.caption=e.cap;}
@@ -1569,7 +1580,7 @@ function tick(){const U=UI.fight;if(!U||U.stage!=="playing")return;
   render();U.timer=setTimeout(tick,(window.matchMedia&&matchMedia("(prefers-reduced-motion: reduce)").matches?400:wait)/(UI.speed===2?2:1));}
 function fskip(){const U=UI.fight;clearTimeout(U.timer);while(!roundDone(U.F))U.pending.push(...fightEx(U.F));const rest=U.pending.filter(x=>!x.bell&&!x.tired);U.shown.push(...rest);U.pending=[];
   const ko=rest.find(x=>x.ev==="ko");if(ko)FS.play({...ko,side:sideOf(ko,U.F)},performance.now());roundFinish(U.F);roundEnd();}
-function roundEnd(){const U=UI.fight;clearTimeout(U.timer);const F=U.F;
+function roundEnd(){const U=UI.fight;clearTimeout(U.timer);const F=U.F;if(U.brawl){brawlEnd();return;}
   if(F.over){fightEnd();return;}AU.sfx("bell1");U.caption={text:COM.end[Math.floor(Math.random()*2)],side:""};U.stage="corner";U.care={mode:"order",need:careNeeds(F),got:[],done:false}; /* v1.89.1: only the order puzzle, as before v1.87.6; card / oil games stay in the code for an outside mini-game later */ /* v1.89.1: corner mini-games are off for now (too tiring every break) — coach Daeng gives a normal corner; newCare/cardSeq/oil stay for an outside mini-game later */U.pick=null;U.hint=false;if(F.A.hp<35&&!U.towelAsked&&F.round<F.rounds){U.towelAsked=true;UI.confirmTowel=true;UI.towelCoach=true;AU.sfx("miss");}render();}
 /* v1.88 corner care comes in three flavours: the order puzzle, a face-down card, or a fast oil massage */
 function newCare(F){const r=Math.random(),mode=r<.5?"order":r<.75?"card":"oil";
@@ -1580,7 +1591,26 @@ function towelScene(f){const L={kati:["I could still stand, coach… Grandpa nev
   const R={kati:"Your grandpa never had a granddaughter to worry about like this.",mali:"Because I want to see you smiling tomorrow, not lying in a hospital.",rin:"You don't have to like it. Heal first, then argue with me.",ploy:"Remember it. I'll remember you were still standing.",fah:"Three days is fine. Day four, you're back in training."}[f.id]||"It's okay. There's always the next fight.";
   const me=L?{n:f.id,f:L[1],l:"fight",t:L[0]}:{n:"npc",who:f.name,t:"I could still go on… but thank you."};
   return [{n:"coach",t:`I'm sorry, ${f.name}. I couldn't watch you go down again.`},me,{n:"coach",t:R},{n:"nar",t:`${f.name} isn't hurt any worse, but her morale drops by 8`}];}
-function fightEnd(){const U=UI.fight;U.stage="done";{const w=U.F.result.win;U.bubble=postBubble(U.F.B.f,w==="A"?"lose":w==="B"?"win":"draw",(U.F.seed>>>3)+G.week+[...U.F.B.f.id].reduce((a,c)=>a*31+c.charCodeAt(0)|0,0)+(G.cal||[]).length*7,U.F.A.f);}AU.startMusic("hub");setTimeout(()=>AU.sfx(U.F.result.win==="A"?"win":U.F.result.win==="B"?"lose":"bell1"),200);
+/* v1.89.11: Valentine brawl — both sides on auto for one round; three times the player can shout from ringside */
+const BRAWL_AT=[2,6,9];
+function openBrawl(a,b,hard,done){AU.resume&&AU.resume();UI.modal=null;
+  UI.fight={b:{a,b,tier:"exhibition",rounds:1,brawl:true,hard,bg:gymBg()},done,stage:"pre",plan:"balanced",tac:{focus:"auto",pace:"steady",target:"body"},F:null,shown:[],pending:[],timer:null,res:null,caption:null,brawl:{sc:0,asked:0,q:null,stopped:false}};
+  fightStart(false);}
+function brawlPrompt(U){const k=U.brawl.asked,T=BRAWL_TALK[k],who=k===0?U.b.a:k===1?U.b.b:null,rng=mulberry32((U.F.seed||1)+k*97);
+  return {ctx:T[0],who,line:who?vx(G,who,BRAWL_MID):"",opts:[...T[1]].sort(()=>rng()-.5)};}
+function brawlTalkHTML(){const U=UI.fight,q=U.brawl&&U.brawl.q;if(!q)return "";
+  return `<div class="btalk px" role="dialog" aria-label="Shout to stop them"><p class="meta">${esc(q.ctx)}</p>${q.who?`<div class="btline"><img class="face sm" src="${faceSrc(q.who,"angry")}" alt=""><span><b>${esc(G.F[q.who].name)}</b>${esc(q.line)}</span></div>`:""}
+   <small class="meta">Shout from ringside (${U.brawl.asked+1}/${BRAWL_AT.length})</small><div class="btopts">${q.opts.map((o,i)=>`<button class="copt" data-act="fbrawl" data-v="${i}">${esc(o[0])}</button>`).join("")}</div></div>`;}
+function brawlPick(i){const U=UI.fight;if(!U||!U.brawl||!U.brawl.q)return;const o=U.brawl.q.opts[i];if(!o)return;
+  U.brawl.sc+=o[1];U.brawl.q=null;U.brawl.asked++;U.caption={text:o[2],side:""};AU.sfx(o[1]>=2?"level":"ui");if(o[1]<0)AU.cheer(.8);
+  if(U.brawl.asked>=BRAWL_AT.length&&U.brawl.sc>=5){U.brawl.stopped=true;U.stage="playing";render();U.timer=setTimeout(brawlEnd,1800);return;}
+  U.stage="playing";render();U.timer=setTimeout(tick,1600/(UI.speed===2?2:1));}
+function brawlEnd(){const U=UI.fight;if(!U||U.stage==="done")return;clearTimeout(U.timer);U.stage="done";const F=U.F;AU.sfx("bell1");
+  U.caption={text:U.brawl.stopped?"They both lower their guard at once. The round ends there":"End of the round! Neither gave an inch",side:""};render();}
+function brawlDoneHTML(){const U=UI.fight,B=U.brawl;
+  return `<div class="res px brawlres"><h3>${B.sc>=5?"You stopped them":"Couldn't stop them"}</h3><p class="meta">${B.sc>=5?"Your words cooled them both down":"Neither of them listened to you"} · This bout doesn't count and nobody gets hurt</p>
+   <button class="btn primary big" data-act="fbrawldone">Continue ▸</button></div>`;}
+function fightEnd(){const U=UI.fight;if(U.brawl){brawlEnd();return;}U.stage="done";{const w=U.F.result.win;U.bubble=postBubble(U.F.B.f,w==="A"?"lose":w==="B"?"win":"draw",(U.F.seed>>>3)+G.week+[...U.F.B.f.id].reduce((a,c)=>a*31+c.charCodeAt(0)|0,0)+(G.cal||[]).length*7,U.F.A.f);}AU.startMusic("hub");setTimeout(()=>AU.sfx(U.F.result.win==="A"?"win":U.F.result.win==="B"?"lose":"bell1"),200);
   const me=G.F[U.b.a];if(me.injury&&!U.b.ev)me.trust=clamp(me.trust-12,0,100);
   U.res=applyResult(G,U.F,U.b);if(U.b.dm)U.b.result=dmWinFrom(U.F);if(!U.b.ev)me.prepBonus=false;if(U.b.tier==="final"||U.b.tier==="semi")finishBracket(G,U.b,U.F);
   const r=U.F.result;if(FS.A){if(r.win==="A"){FS.A.win=true;FS.A.anim="win";}else if(r.win==="B"){FS.B.win=true;FS.B.anim="win";}}
@@ -1598,7 +1628,7 @@ function fightEnd(){const U=UI.fight;U.stage="done";{const w=U.F.result.win;U.bu
 // ---------- actions ----------
 function giftScene(id,res){const f=G.F[id];const mood=res.t==="dislike"?"pout":res.t==="love"?"flustered":"happy";
   playScene([{n:id,f:mood,l:"casual",t:(res.n&&res.t!=="dislike"&&giftAgainLine(id,res.t,res.n,res.g))||(GIFT_TALK_PERSONAL[id]&&GIFT_TALK_PERSONAL[id][res.g])||((GIFT_TALK[id]&&GIFT_TALK[id][res.g])||GIFT_LINES[id][res.t])},{n:"nar",t:res.gain>0?(res.n>=2?`Bond with ${f.name} +${res.gain} · a bit too often, so it rises less`:`Bond with ${f.name} +${res.gain}`)
-      :res.t==="dislike"?`${f.name} accepts it with a smile, but it may not be a favorite · Bond unchanged`:f.bond>=100?`${f.name} is thrilled · Bond is already maxed`:`${f.name} is happy, but has been getting this a lot lately. Try mixing it up.`},
+      :res.t==="dislike"?`${f.name} accepts it with a smile, but it may not be a favorite · Bond unchanged`:heartCapped(G,f)?`${f.name} is delighted · hearts are full for this chapter`:f.bond>=100?`${f.name} is thrilled · Bond is already maxed`:`${f.name} is happy, but has been getting this a lot lately. Try mixing it up.`},
     ...((()=>{const k=f.giftTot===5?0:f.giftTot===10?1:-1;if(k<0||!GIFT_FREQ[id]||(f.giftFreq||0)>k)return [];f.giftFreq=k+1;
       return [...GIFT_FREQ[id][k].map(s=>({...s,l:"casual"})),k===1?{inject:G2=>{add(G2,id,"bond",3);G2.F[id].morale=Math.min(100,G2.F[id].morale+8);return [{n:"nar",t:`A gift in return from ${f.name} · Bond +3 · Morale: ${f.name} +8`}];}}:{inject:()=>[]}];})())],()=>{AU.startMusic("hub");render();},{bg:f.camp==="player"?"gym":"fair",look:"casual"});}
 function goalHidden(){try{return localStorage.getItem("mtm-goalhide")==="1"}catch(e){return !!UI.goalHide}}
@@ -1807,6 +1837,8 @@ const ACT={
   towelyes:()=>{UI.confirmTowel=false;UI.towelCoach=false;const U=UI.fight;throwTowel(U.F);U.shown.push({s:"x",t:`${G.F[U.b.a].name}'s corner throws in the towel`});fightEnd();},
   withdraw:()=>{const U=UI.fight;G.bookings=G.bookings.filter(x=>x!==U.b);G.rep=Math.max(0,G.rep-1);add(G,U.b.a,"trust",3);
     G.log.push(`${G.F[U.b.a].name} withdraws due to injury`);const done=U.done;UI.fight=null;render();done();},
+  fbrawl:d=>brawlPick(+d.v),
+  fbrawldone:()=>{const U=UI.fight;if(!U||!U.brawl)return;const F=U.F,res={sc:U.brawl.sc,stopped:U.brawl.stopped,hpA:Math.round(F.A.hp),hpB:Math.round(F.B.hp)};const done=U.done;UI.fight=null;AU.startMusic("hub");render();if(done)done(res);},
   fdone:()=>{const done=UI.fight.done,after=UI.fight.afterScene;UI.fight=null;render();playHonorQueue(()=>{if(after)playScene(after,done,{bg:"ring",look:"fight"});else done();});},
   gatego:()=>{const v=((document.getElementById("gatecode")||{}).value||"").toUpperCase().replace(/\s+/g,"");let ok=false;try{ok=btoa(v)===GATE.code;}catch(e){}
     if(ok){G.unlocked=true;try{localStorage.setItem(GATE.key,"1");}catch(e){}UI.gateErr=false;save();AU.sfx("level");toast("Unlocked! Year 2 is ready to play");}else{UI.gateErr=true;AU.sfx("miss");}render();},

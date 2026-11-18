@@ -772,7 +772,7 @@ function newGame(opts){
   const seed=(opts.seed??Math.floor(Math.random()*1e9))>>>0;const rng=mulberry32(seed);
   const G={v:1,timeV:3,snubV:2,dmSeenSeason:1,dmSeen:{},seed,week:1,diff:opts.diff||"normal",player:{name:opts.name||"Start",gender:opts.gender||"m"},cash:60000,debt:120000,rep:5,
     fac:{gym:0,airgym:0,recovery:0,classroom:0,brand:0,dorm:0,kitchen:0,hill:0,video:0,ring:0,clinic:0,shrine:0,van:0,sauna:0,lights:0,hall:0,daeng:1,assistants:0},stu:1,staff:[],rankMove:{A:{},B:{}},camp:{beauty:0},campUsed:null,levelUps:[],avatar:opts.avatar||null,F:{},rank:{A:{},B:{}},qual:{A:[],B:[]},finalists:{A:[],B:[]},semis:{A:[],B:[]},champ:{},
-    bookings:[],offers:[],log:[],flags:{},seen:{},freeUsed:false,negWeeks:0,history:[],honors:[],awards:[],ended:null,lastReport:null,romance:null};
+    bookings:[],offers:[],log:[],flags:{},seen:{},freeUsed:false,negWeeks:0,history:[],honors:[],awards:[],ended:null,lastReport:null,romance:null,lovers:[],lovWk:{}};
   for(const [id,d] of Object.entries(CANON))G.F[id]=baseFighter(id,d);
   for(const div of ["A","B"])NPC_NAMES[div].forEach(([n,l],i)=>{const id=`n${div}${i}`;G.F[id]=baseFighter(id,mkNPC(id,n,div,l,rng,i));});
   for(const f of Object.values(G.F))startLv(f);
@@ -937,6 +937,8 @@ function fixSave(G){if(G&&G.flags&&G.flags.beat_ploy&&G.flags.beatS_ploy==null)G
     if(G.flags?.maliIn!=null&&G.flags.maliInAbs==null)G.flags.maliInAbs=oldPast(G.flags.maliIn,52);
     if(G.dm?.wk!=null&&G.dm.absWeek==null)G.dm.absWeek=oldPast(G.dm.wk,2);
     G.timeV=3;}
+  /* v1.89.11: one lover became a list (several at once, Valentine can catch you) */
+  if(!Array.isArray(G.lovers)){G.lovers=G.romance?[G.romance]:[];G.lovWk={};if(G.romance&&G.romWk!=null)G.lovWk[G.romance]=G.romWk;}
   if(!G.snubV){G.snub={};G.declineReason={};G.snubV=2;}
   if(G.dmSeenSeason==null){const played=G.dm&&G.dm.wk===G.week;G.dmSeen=(G.season||1)>1?{}:G.dmSeen||{};if(played)G.dmSeen[G.week]=1;G.dmSeenSeason=G.season||1;}
   syncFighterAges(G);
@@ -1040,13 +1042,13 @@ function advise(G,a,b,rounds,n=40){const fa=G.F[a],fb=G.F[b];const res={};
     while(!F.over){F.A.instr=aiCorner(F,F.A,F.B);F.B.instr=aiCorner(F,F.B,F.A);fightRound(F);}if(F.result.win==="A")w++;else if(F.result.win==="D")w+=.5;}res[plan]=w/n;}
   const best=Object.entries(res).sort((x,y)=>y[1]-x[1])[0];return {rates:res,best:best[0],bestRate:best[1],base:res.balanced};}
 // v1.51: camp pets — they join through little stories, wander the yard, and cheer the team up once a week
-const PETS={cat:{name:"Orange cat",food:150,eff:"Everyone: morale +2"},dog:{name:"Thai Ridgeback",food:250,eff:"Everyone: fatigue −3"},rooster:{name:"Retired fighting rooster",food:100,eff:"Everyone: morale +1 · fatigue −1"},turtle:{name:"Temple turtle",food:80,eff:"Everyone: morale +3 (calmer minds)"},otter:{name:"Riverside Otter",food:180,eff:"Everyone morale +2 · fatigue −1"}};
+const PETS={cat:{name:"Orange cat",food:150,eff:"Everyone: morale +2"},dog:{name:"Thai Ridgeback",food:250,eff:"Everyone: fatigue −3"},rooster:{name:"Retired fighting rooster",food:100,eff:"Everyone: morale +1 · fatigue −1"},turtle:{name:"Temple turtle",food:80,eff:"Everyone: morale +3 (calmer minds)"},otter:{name:"Riverside Otter",food:0,eff:"A little friend from the Loy Krathong fair · no effect on training"}};
 const PET_NAMES={cat:["Pomelo","Bread","Chubbs"],dog:["Blackie","Goldie","Khao Tu"],rooster:["Greenie","King Cluck","Goofy"],turtle:["Slowpoke","Mochi","Abbot"],otter:["Nam Ping","Krathong","Khao Niao"]};
 const petFood=G=>(G&&G.pets||[]).reduce((s,p)=>s+(PETS[p.k]?PETS[p.k].food:0),0);
 function petPlay(G,i){const p=(G.pets||[])[i];if(!p||p.wk===gameWeek(G))return false;p.wk=gameWeek(G);p.joy=Math.min(100,(p.joy||50)+10);const R=roster(G);
   if(p.k==="cat")R.forEach(f=>f.morale=Math.min(100,f.morale+2));if(p.k==="dog")R.forEach(f=>f.fatigue=Math.max(0,f.fatigue-3));
   if(p.k==="rooster")R.forEach(f=>{f.morale=Math.min(100,f.morale+1);f.fatigue=Math.max(0,f.fatigue-1);});if(p.k==="turtle")R.forEach(f=>f.morale=Math.min(100,f.morale+3));
-  if(p.k==="otter")R.forEach(f=>{f.morale=Math.min(100,f.morale+2);f.fatigue=Math.max(0,f.fatigue-1);});
+  /* v1.89.23: the Loy Krathong otter is a companion only — event rewards stay out of the real game */
   const fav=p.fav&&G.F[p.fav];if(fav&&fav.camp==="player")fav.morale=Math.min(100,fav.morale+3);return true;}
 const upkeep=G=>1800+(G?facTotal(G)*220+[0,0,800,1800][campLevel(G)]+petFood(G):0); // v1.43: a bigger camp costs more to run
 function weeklyNet(G){return classIncome(G)-upkeep(G)-wages(G);}
@@ -1100,7 +1102,7 @@ function genOffers(G,opt){
   G.offers=[];const st=stageOf(G.week);
   const stageEnd=st==="local"?20:st==="district"?40:0;const nOff=G.week<=8?1:(2+(G.rep>=30?1:0)); // v1.32: one offer per fighter early, a third only once the camp is famous
   for(const f of roster(G)){
-    if(f.injury>0)continue;
+    if(f.injury>0||(typeof isAway==="function"&&isAway(G,f.id)))continue;
     const ranked=(st==="local"||st==="district")&&eligible(G,f);
     const myB=G.bookings.filter(b=>b.a===f.id).map(b=>b.week);
     const weeks=[];for(let wk=G.week+2;wk<=Math.min(48,G.week+5);wk++)if(!myB.some(x=>Math.abs(x-wk)<=1))weeks.push(wk);
@@ -1149,6 +1151,7 @@ function genOffers(G,opt){
 function acceptOffer(G,oid){const o=G.offers.find(x=>x.id===oid);
   if(!o)return {ok:false,reason:"This offer is no longer available"};
   if(regionBlock(G,o.week))return {ok:false,reason:"The whole camp is away at the Four Regions Championship this week"};
+  if(typeof isAway==="function"&&isAway(G,o.a)&&G.F[o.a].awayAbs>absWeek(G)+(o.week-G.week))return {ok:false,reason:`${G.F[o.a].name} isn't back at camp yet — can't take a fight that week`};
   if(o.status==="conflict")return {ok:false,reason:o.reason};
   const clash=(G.bookings||[]).find(b=>b.week===o.week&&[o.a,o.b].some(id=>id===b.a||id===b.b));
   const duplicate=(G.bookings||[]).some(b=>b.id==="b"+oid);
@@ -1185,6 +1188,7 @@ function applyResult(G,F,booking){
   for(const [me,op,side] of [[fa,fb,"A"],[fb,fa,"B"]]){
     const res=r.win==="D"?"D":r.win===side?"W":"L";
     const off=tier.off;
+    if(booking.ev){if(me.camp==="player")ret={pay:0,res,upset:false};continue;} /* v1.89.23: event bouts (Loy Krathong) stay inside the event — no EXP, stardust, morale, fatigue, fame or record */
     if(off&&me.camp!=="player"){me.lastFight=G.week;me.lastFightAbs=gameWeek(G);continue;}
     if(me.camp==="player"&&op.camp!=="player"&&!off){G.h2h=G.h2h||{};const h=G.h2h[op.id]=G.h2h[op.id]||{w:0,l:0,d:0};h[res==="W"?"w":res==="L"?"l":"d"]++;}
     if(me.camp==="player"&&res==="W")G.dust=(G.dust||0)+(/KO|น็อก/.test(r.type||"")?4:3); /* v1.58: stardust for wins · v1.87: +1 */
@@ -1194,7 +1198,7 @@ function applyResult(G,F,booking){
     if(r.towel&&side==="A"){if(s.hp<20&&!off)me.injury=Math.max(me.injury,1);me.morale=clamp(me.morale-8,0,100);} /* v1.88: the towel spares her — at most a week off, but it stings */
     else if(s.hp<40&&!off&&mulberry32(F.seed+(side==="A"?1:2))()<.45)me.injury=Math.max(me.injury,2+(s.hp<15?2:0));
     if(res==="L"&&/KO|TKO/.test(r.type)&&!booking.pro&&!booking.ev)me.injury=Math.max(me.injury,booking.dm?1:3); // v1.37.1: a Death Match KO costs one week, not three
-    const pmods=passiveMods(me);if(G.romance===me.id)pmods.moraleLoss+=.3;if(me.camp==="player"&&me.trust>=60)pmods.moraleLoss+=.25;me.morale=clamp(me.morale+(res==="W"?10:res==="L"?-10*(1-Math.min(.9,pmods.moraleLoss)):2),0,100);
+    const pmods=passiveMods(me);if(isLov(G,me.id)&&lovSolo(G))pmods.moraleLoss+=.3;if(me.camp==="player"&&me.trust>=60)pmods.moraleLoss+=.25;me.morale=clamp(me.morale+(res==="W"?10:res==="L"?-10*(1-Math.min(.9,pmods.moraleLoss)):2),0,100);
     // v1.21: beating someone stronger is worth more (ranking point, fame, EXP) — a reason to take the hard offers
     const gapR=effGap(G,me,op),upset=res==="W"&&gapR>.4;
     if(!off&&booking.tier!=="exhibition"&&booking.tier!=="special"&&booking.tier!=="lab"&&booking.tier!=="final"){const rk=G.rank[me.div][me.id];if(rk){rk.pts+=res==="W"?(gapR<-.6?2:3)+(upset?1:0):res==="D"?1:0;/* v1.47: farming weaker fighters earns fewer ranking points */rk[res==="W"?"w":res==="L"?"l":"d"]++;}}
@@ -1303,7 +1307,7 @@ function finishFinal(G,booking,F){const div=G.F[booking.a].div;const w=F.result.
 // week phase 1: training & upkeep (before fights)
 function weekTrain(G){
   const rng=mulberry32(G.seed+G.week*977);G.log=[];
-  for(const f of roster(G))trainWeek(G,f,rng);
+  for(const f of roster(G)){if(typeof isAway==="function"&&isAway(G,f.id)){/* v1.89.11: she left camp for a while — no training, just rest */f.gains={};f.xpGain=0;f.fatigue=clamp(f.fatigue-10,0,100);if(f.injury>0)f.injury--;continue;}trainWeek(G,f,rng);}
   // v1.15: Ploy's raw talent makes her near-untouchable early; the edge fades by the district round
   if(G.F.ploy)G.F.ploy.aura=ployAura(G.week,G);
   for(const f of Object.values(G.F)){if(f.camp==="player")continue;
@@ -2254,7 +2258,7 @@ const vary=(key,arr)=>{if(typeof G==="undefined"||!G)return arr[0];G.vary=G.vary
 const ME=G=>G.player.name,
  // v1.41: the girls call you "ผู้จัดการ" — your name slips out now and then once close, and always once very close
  MEM=(G,k)=>{G.mem=G.mem||{};G.mem[k]=absWeek(G);}, HAS=(G,k,gap)=>G.mem&&G.mem[k]!==undefined&&absWeek(G)-G.mem[k]>=(gap||0),
- CALL=(G,id)=>{const f=G.F[id],b=f?f.bond||0:0;if(G.romance===id||b>=75)return G.player.name;if(b>=40&&Math.random()<.35)return G.player.name;return "Manager";}, PR=G=>G.player.gender==="m"?"":"", PA=G=>G.player.gender==="m"?"":"It is";
+ CALL=(G,id)=>{const f=G.F[id],b=f?f.bond||0:0;if(isLov(G,id)||b>=75)return G.player.name;if(b>=40&&Math.random()<.35)return G.player.name;return "Manager";}, PR=G=>G.player.gender==="m"?"":"", PA=G=>G.player.gender==="m"?"":"It is";
 const SPK={kati:{name:"Kati",color:"#e23b4e"},mali:{name:"Mali",color:"#4a7fe0"},rin:{name:"Rin",color:"#3fae6a"},
   ploy:{name:"Ploy",color:"#9b62e0"},fah:{name:"Fah",color:"#e7b443"},pailin:{name:"Pailin",color:"#8e4ac3"},baibua:{name:"Baibua",color:"#e86fa0"},tabtim:{name:"Tubtim",color:"#d23246"},alicia:{name:"Alicia",color:"#2f62c8"},chaba:{name:"Chaba",color:"#1f9a7a"},lada:{name:"Ladda",color:"#d8263a"},coach:{name:"Coach Daeng",color:"#c98a5a"},nar:{name:""},me:{name:"(You)"}};
 const HONOR_LABEL={local:"Subdistrict round champion",district:"District round champion",province:"Provincial champion",belt:"Tha Phae Stadium champion",defense:"Tha Phae Stadium title defense",dm:"Death Match champion",rg_north:"Northern Regional Cup",rg_isan:"Isan Regional Cup",rg_central:"Central Regional Cup",rg_south:"Southern Regional Cup"};
@@ -2270,9 +2274,10 @@ const bondCap=G=>100;
 // v1.44: bond grows a bit faster, and the girls who join later catch up while still distant
 const BOND_MUL=.3,BOND_LATE=["mali","rin"];
 const absWeek=G=>((G.season||1)-1)*52+G.week;
-const add=(G,id,k,v)=>{const f=G.F[id];if(!f)return;if(k==="bond"&&v>0)f.lastTouch=absWeek(G);if(k==="bond"&&v>0)v=Math.max(.5,Math.round(v*BOND_MUL*(BOND_LATE.includes(id)&&(f.bond||0)<50?1.6:1)*2)/2);
+const add=(G,id,k,v)=>{const f=G.F[id];if(!f)return;if(k==="bond"&&v>0&&typeof partners==="function"&&LOVE_IDS.includes(id)&&!isPartner(G,id)){const n=partners(G).length;if(n)v*=n>=2?.6:.75;}/* v1.89.11: courting while taken is slower */if(k==="bond"&&v>0)f.lastTouch=absWeek(G);if(k==="bond"&&v>0)v=Math.max(.5,Math.round(v*BOND_MUL*(BOND_LATE.includes(id)&&(f.bond||0)<50?1.6:1)*2)/2);
   if(k==="bond"){const lv0=heartLv(f).lv;/* v1.86: affection past 100 keeps counting as heart levels (bond itself stays 0–100 for every existing check) */
-    if(v>=0){const t=(f.bond||0)+v;f.bond=Math.min(100,t);if(t>100)f.bondX=(f.bondX||0)+(t-100);}
+    if(v>=0){const tot=(f.bond||0)+(f.bondX||0),cap=heartAt(heartCapLv(G));v=tot>=cap?0:Math.min(v,cap-tot);/* v1.89.11: chapter cap, never takes away what she already has */
+      const t=(f.bond||0)+v;f.bond=Math.min(100,t);if(t>100)f.bondX=(f.bondX||0)+(t-100);}
     else{let d=-v;const x=Math.min(f.bondX||0,d);if(x>0){f.bondX-=x;d-=x;}if(d>0)f.bond=Math.max(0,(f.bond||0)-d);}
     const lv1=heartLv(f).lv;if(lv1>lv0&&G.F[id].met)G.heartNews=(G.heartNews||[]).concat([{id,lv:lv1,week:G.week}]).slice(-8);return;}
   f[k]=Math.max(0,Math.min(100,f[k]+v));};
@@ -2284,10 +2289,19 @@ const hTot=f=>((f&&f.bond)||0)+((f&&f.bondX)||0);
 // relationship state, written to work with a single romance (G.romance) and with several lovers / promises / exes (G.lovers, G.promise, G.exAbs)
 function relState(G,id){if(!G||!id)return null;const L=Array.isArray(G.lovers)?G.lovers:(G.romance?[G.romance]:[]);if(L.includes(id))return "lover";
   if(G.promise&&G.promise[id]!=null)return "promise";if(G.exAbs&&G.exAbs[id]!=null)return "ex";return null;}
-const heartStep=n=>15+(n-11)*5; // points from Lv.n to Lv.n+1, for n ≥ 11
+/* v1.89.11: Lv.30 is the top at 1,000 points — each step past 100 asks a little more (15 → 80) */
+const HEART_STEPS=[15,20,20,25,30,35,35,40,45,45,50,55,60,60,65,70,75,75,80],HEART_MAX=30,HEART_TOP=1000;
+const heartStep=n=>HEART_STEPS[n-11]||0; // points from Lv.n to Lv.n+1, for 11 ≤ n < 30
+const heartAt=lv=>lv<=10?(lv-1)*10:100+HEART_STEPS.slice(0,lv-11).reduce((a,b)=>a+b,0);
 function heartLv(f){const b=Math.max(0,Math.min(100,(f&&f.bond)||0)),x=Math.max(0,(f&&f.bondX)||0);
   if(b<100){const lv=1+Math.floor(b/10);return {lv,into:b-(lv-1)*10,need:10,total:b};}
-  let lv=11,left=x;while(left>=heartStep(lv)){left-=heartStep(lv);lv++;}return {lv,into:left,need:heartStep(lv),total:100+x};}
+  let lv=11,left=x;while(lv<HEART_MAX&&left>=heartStep(lv)){left-=heartStep(lv);lv++;}
+  if(lv>=HEART_MAX)return {lv:HEART_MAX,into:1,need:1,total:Math.min(HEART_TOP,100+x),max:true};
+  return {lv,into:left,need:heartStep(lv),total:100+x};}
+/* v1.89.11: how far hearts can go in each chapter — province Lv.20 · regional Lv.25 · national Lv.28 · international Lv.30 */
+const heartCapLv=G=>G&&G.flags&&G.flags.intl?30:G&&G.flags&&G.flags.national?28:G&&G.region?25:20;
+const heartCapped=(G,f)=>!!(G&&f)&&(f.bond||0)+(f.bondX||0)>=heartAt(heartCapLv(G));
+const HEART_NEXT={20:"up to Lv.25 in the regional chapter",25:"up to Lv.28 in the national chapter",28:"up to Lv.30 in the international chapter",30:""};
 const heartTier=(lv,id)=>{const st=typeof G!=="undefined"&&G?relState(G,id):null;if(st==="ex")return "Ex";const T=st==="lover"?LOVER_TIERS:HEART_TIERS;
   let n=T[0][1];for(const [m,t] of T)if(lv>=m)n=t;return st==="promise"&&lv>=8&&lv<15?"Promised":n;};
 
@@ -2519,8 +2533,8 @@ const EVENTS=[
   {n:"coach",t:"Whatever happens tomorrow, Sirichai is back this year. Thank you, all of you"},
   {n:"kati",f:"flustered",t:"Manager… thank you for not selling the camp on day one"},
   {choice:[{t:"Thank you for waiting here for me, training",fx:G=>{for(const f of roster(G)){add(G,f.id,"morale",10);add(G,f.id,"bond",3);}},then:[{n:"kati",f:"happy",t:"Tomorrow we go get that belt!"}]}]}]},
- {id:"lover_final",look:"fight",when:G=>G.week>=48&&G.romance&&LOVER_FINAL[G.romance]&&G.bookings.some(b=>b.tier==="final"&&G.F[b.a].camp==="player"&&(b.a===G.romance||G.romance==="rin")),bg:"ring",
-  steps:[{inject:G2=>{const b=G2.bookings.find(b=>b.tier==="final"&&G2.F[b.a].camp==="player"&&(b.a===G2.romance||G2.romance==="rin"));if(b)add(G2,b.a,"morale",8);return LOVER_FINAL[G2.romance]||[];}}]},
+ {id:"lover_final",look:"fight",when:G=>G.week>=48&&!!lovFinal(G),bg:"ring",
+  steps:[{inject:G2=>{const L=lovFinal(G2);if(!L)return [];if(lovSolo(G2))add(G2,L.b.a,"morale",8);return LOVER_FINAL[L.id]||[];}}]},
  // v1.32 fame milestones: something visible happens when the camp's name grows
  // v1.33: the camp itself nudges you toward upgrades, and the coach sits down to talk money
  {id:"up_rope",look:"train",when:G=>G.week>=7&&facTotal(G)<3,bg:"gym",steps:[
@@ -2632,6 +2646,228 @@ const LOVE_EVENTS={
 };
 const LOVE_YES={kati:"…Really? Then from now on I have one more reason to win",mali:"Yay… wait, why am I crying! I'm too happy",
   rin:"The result matches what I hoped for… thank you",ploy:"…Then after my next fight, I'll come find you, win or lose",fah:"…Yeah, good! Don't you dare change your mind, Fah remembers everything"};
+// ---------- v1.89.11: more than one lover — Valentine catches you, the girls settle it in the ring, breakup from chat, harem route ----------
+const LOVE_IDS=["kati","mali","rin","ploy","fah"];
+const vx=(G,id,M)=>(G.F[id]&&G.F[id].camp==="player"&&M["_"+id])||M[id]; /* "_ploy"/"_fah": once she trains at Sirichai */
+const lovList=G=>Array.isArray(G.lovers)?G.lovers:(G.romance?[G.romance]:[]);
+const isLov=(G,id)=>!!id&&lovList(G).includes(id);
+const isProm=(G,id)=>!!(G.promise&&G.promise[id]!=null);
+const isEx=(G,id)=>!!(G.exAbs&&G.exAbs[id]!=null);
+const exWait=(G,id)=>isEx(G,id)&&absWeek(G)-G.exAbs[id]<12;
+const partners=G=>[...new Set([...lovList(G),...Object.keys(G.promise||{}).filter(k=>G.promise[k]!=null)])].filter(k=>G.F&&G.F[k]);
+const isPartner=(G,id)=>partners(G).includes(id);
+const romOf=(G,id)=>isLov(G,id)&&!G.harem; // lover-only scenes; on the harem route the top scenes give way to group ones
+const romFirst=G=>G.harem?null:(lovList(G)[0]||null);
+function setLovers(G,L){G.lovers=[...new Set(L)];G.romance=G.lovers[0]||null;G.romWk=G.romance?((G.lovWk||{})[G.romance]??null):null;}
+function takeLover(G,id){const solo=!partners(G).some(k=>k!==id);if(G.friendz)delete G.friendz[id];G.lovWk=G.lovWk||{};G.lovWk[id]=absWeek(G);if(G.promise)delete G.promise[id];if(G.exAbs)delete G.exAbs[id];setLovers(G,[...lovList(G),id]);if(solo)add(G,id,"morale",15);}
+const isAway=(G,id)=>{const f=G&&G.F&&G.F[id];return !!(f&&f.awayAbs!=null&&absWeek(G)<f.awayAbs);};
+const awayLeft=(G,id)=>isAway(G,id)?G.F[id].awayAbs-absWeek(G):0;
+const awaySpeaks=(G,steps)=>(steps||[]).some(x=>x&&typeof x.n==="string"&&isAway(G,x.n));
+function sendAway(G,id,wk,why){const f=G.F[id];if(!f)return;const now=absWeek(G);f.awayAbs=Math.max(isAway(G,id)?f.awayAbs:0,now+wk);f.awayWhy=why;f.awayBack=false;}
+const lovFinal=G=>{for(const id of lovList(G)){if(!romOf(G,id)||!LOVER_FINAL[id])continue;const b=G.bookings.find(b=>b.tier==="final"&&G.F[b.a].camp==="player"&&(b.a===id||id==="rin"));if(b)return {id,b};}return null;};
+/* v1.89.11: one label — the closeness name until you are together, then what you are to each other (shown under the hearts) */
+function befriend(G,id){G.friendz=G.friendz||{};G.friendz[id]=true;}
+const isFriendz=(G,id)=>!!(G.friendz&&G.friendz[id]);
+const awayWord=(G,id)=>G.F[id].camp==="player"?"Left camp":"Not in touch";
+function relLabel(G,f,lv,short){const id=f&&f.id;if(G&&id&&G.F&&G.F[id]&&isAway(G,id)){const w=G.F[id].awayWhy==="break"?"Heartbroken":"Sulking";return short?w:`${w} · ${awayWord(G,id)} (back in ${awayLeft(G,id)} wk)`;}
+  return relBase(G,f,lv);}
+/* the ladder shown in her profile: the same labels, the current step lit — lovers climb their own ladder (LOVER_TIERS) */
+const REL_DESC={"Acquaintance":"Still calls you \"Manager\", a bit stiffly","Teammate":"Jokes around, texts about everyday things","Close":"Sometimes lets your name slip · shares personal stories","Special":"Always calls you by name",
+  "Deeply bonded":"On the same page about almost everything","Kindred":"One look and she knows what you're thinking","Inseparable":"Misses you after a single week apart","Most important person":"You're the first person she thinks of","Partner in the ring":"In the same corner, in the ring and out of it",
+  "Lover":"Together","Kindred sweetheart":"Together long enough to know each other's every thought","Inseparable pair":"Can't be apart anymore","Soon-to-be partner":"Starting to talk about the future","Life partner":"Walking the whole road together",
+  "Promised":"A promise made, waiting for the day you're in the same camp","Close friend":"You said no once, but you still matter to each other","Ex":"You used to date. Still a little awkward"};
+const REL_BRANCH=[["lover","Lover"],["promise","Promised"],["friend","Close friend"],["ex","Ex"]];
+/* what she is to you: lover / promise / ex (relState) or a close friend after you said no */
+const relKind=(G,f)=>{const id=f&&f.id;if(!G||!id||!G.F||!G.F[id])return null;const st=relState(G,id);if(st)return st;return isFriendz(G,id)&&(G.F[id].bond||0)>=40?"friend":null;};
+function relBase(G,f,lv){lv=lv!=null?lv:heartLv(f||{}).lv;const k=relKind(G,f);
+  if(k==="lover")return heartTier(lv,f.id)+" ♥"+(G.harem?" (harem)":"");if(k==="friend")return "Close friend";if(k)return heartTier(lv,f.id);return heartTier(lv);}
+const relIsStatus=(G,f)=>!!relKind(G,f)||!!(G&&f&&f.id&&isAway(G,f.id));
+/* beside the name: only where she is right now */
+function relTag(G,f){return "";} /* v1.89.11: everything about the relationship now sits in the one label under the hearts */
+// she confesses while you are already with someone — you can tell her the truth
+const LOVE_TAKEN={kati:"…I see. Sorry I said anything. Please forget it",mali:"Oh… you already have someone. It's okay, Mali's happy for you",
+  rin:"Thank you for being honest. I'll update my data",ploy:"Then I'll keep what I said today to myself",fah:"Huh! Why didn't you say so! …Whatever. Forget what Fah said!"};
+const takenOpt=(G,id)=>partners(G).some(k=>k!==id)?[{t:"I'm sorry. I'm already with someone",fx:G3=>{befriend(G3,id);add(G3,id,"trust",3);G3.loveNo=G3.loveNo||{};G3.loveNo[id]=G3.week;},then:[{n:id,f:"sad",l:"casual",t:LOVE_TAKEN[id]}]}]:[];
+// an ex who still feels the same, once she has had time
+const LOVE_EX={kati:"Manager… I tried. I tried being just your fighter, but I can't",
+  mali:"Mali tried to forget. But every time she makes khanom khrok, she still thinks of you",
+  rin:"I deleted the data once. But every time I recalculate, the same conclusion comes back",
+  ploy:"I told myself I wouldn't look back. I still do",fah:"Fah said she didn't care! …Fah lied"};
+// --- Valentine ---
+const VAL_GIFT={kati:"Manager! I made chocolate myself for the first time. It's a bit lopsided, but I tried really hard",
+  mali:"Happy Valentine's~ Mali made heart-shaped khanom khrok, still warm!",
+  rin:"I chose 70% dark chocolate. By my calculations, it suits you best",
+  ploy:"I could only sneak out of Golden Tiger for an hour. This rose… take it",
+  fah:"Here! Chocolate! Grandma made me buy extra, it's not like I bought it for you!",
+  _ploy:"This year I'm in the same camp as you, no need to sneak out. This rose… take it",_fah:"Here! Chocolate! I bought for the whole camp, it's not like it's just for you!"};
+const VAL_CAUGHT={kati:"…Manager, could you explain why so many people brought you chocolate today?",
+  mali:"Huh… Mali's not the only one? The khanom khrok's still warm, but Mali's heart just went ice cold",
+  rin:"The data doesn't match. In my model you have one girlfriend… please explain the surplus",
+  ploy:"Oh… I thought I was someone special. Turns out I'm just one in the queue",
+  fah:"Huh!? What is this! You've been dating a bunch of us at once!? Should Fah just punch you first!"};
+const VAL_AGAIN={kati:"I forgave you last year… and it's the same again?",mali:"Mali thought this year would be different… guess that was just Mali",
+  rin:"I gave this model a full year. Same result",ploy:"I'm not here for excuses. I came to see what you'll say this year",fah:"Again!? You didn't learn last year!?"};
+const FIGHT_TAUNT={kati:"This is Grandpa's ring. I won't let anyone mess around in it",mali:"Mali doesn't want to hit a friend… but today, just one round!",
+  rin:"I've studied all your stats. This round ends in two minutes",ploy:"Want to see what Golden Tiger is really made of? Fine",fah:"Come on! Fah's waited a long time for this. No referee!",_ploy:"Want to see what your senior can really do? Fine"};
+/* v1.89.11: the ring is a live bout on auto (one round) — three times the player gets to shout something from ringside */
+const BRAWL_TALK=[
+ ["The first punch barely misses. The whole camp crowds around the ring",[["Stop! You're both fighters of this camp!",2,"They freeze for half a beat, but neither leaves the ring"],["Someone's going to get hurt. Come down",1,"Nobody listens, but the next punch is a little softer"],["Whoever wins gets the first date with me",-1,"That makes both of them turn and glare at you, then hit each other harder"]]],
+ ["Someone at camp starts beating the drums. This is getting out of hand",[["It's my fault. If you want to hit someone, hit me",2,"They both stop and look at you, as if considering the offer"],["Somebody kill the lights!",0,"The lights go out for three seconds, then someone switches them back on. They're both still standing there"],["You two look great out there",-1,"The drums get louder and the whole camp roars"]]],
+ ["Both are gasping, but neither will drop her guard first",[["I've never seen you two this out of breath. Please, that's enough",2,"One of them drops her guard first, and the other follows"],["There's morning training tomorrow, you know",1,"They both sigh at once, as if they'd only just remembered"],["It's a draw! You both win!",0,"…Nobody laughs"]]]];
+const BRAWL_MID={kati:"Stop smiling! I'm not holding back today!",mali:"Mali doesn't want to hit you! Her hands just keep going!",rin:"You drop your left guard every time you get tired. I've noted it",
+  ploy:"Is that all, Sirichai?",fah:"That doesn't even make Fah flinch! Again!",_ploy:"Is that all, kid? That much training isn't enough"};
+const FIGHT_OK={kati:"…I'm tired. We'll settle this another day",mali:"Ow, Mali's hands hurt… but she's less angry now",rin:"Stopping here is optimal. Let's call it a draw for now",
+  ploy:"Not bad… but this isn't over",fah:"Hmph! I'll let it go today! But you're not off the hook!"};
+const RUN_NOTE={kati:"I'm going to the temple to pay respects to Grandpa for a while. Don't come after me",mali:"Mali's gone home to Mom and Thongkham. Back soon… probably",
+  rin:"I'm taking leave to review the data. Expected return: about two weeks",ploy:"I won't be in touch for a while. Don't message me",fah:"Fah's at Grandma's! Don't follow!"};
+const RUN_BACK={kati:[{n:"nar",t:"Kati comes back to camp before dawn, holding a garland from the temple"},{n:"kati",f:"pout",t:"I asked Grandpa to help me calm down… I'm still angry, but I'll keep training"}],
+  mali:[{n:"nar",t:"Mali comes back with a box of sticky rice from her mom"},{n:"mali",f:"sad",t:"Mom says people make mistakes, but they have to own them… have you, Manager?"}],
+  rin:[{n:"nar",t:"Rin comes back exactly on the date in her note"},{n:"rin",f:"pout",t:"I've reviewed it. The feelings are still there, but the trust is down. I'll have to collect all the data again"}],
+  ploy:[{n:"nar",t:"Ploy messages you after a long silence"},{n:"ploy",f:"sad",t:"I'm half over it. The other half is up to you"}],
+  fah:[{n:"nar",t:"Fah's motorbike roars up and stops in front of the camp"},{n:"fah",f:"pout",t:"Grandma said to come back and talk properly, so I'm back! …Not because I missed you!"}]};
+function runAway(G,id,wk){const f=G.F[id];sendAway(G,id,wk,"cheat");const mine=f.camp==="player";
+  return [{n:"nar",bg:"camp",t:mine?`The next morning, ${f.name} is gone from camp, leaving just one note`:`The next day, ${f.name} sends one short message and then stops answering`},
+    {n:"nar",t:`"${RUN_NOTE[id]}"`},{n:"nar",t:mine?`${f.name} is away from camp for ${wk} weeks · No training and no new fights meanwhile (she'll come back for fights already booked)`:`${f.name} won't be in touch for ${wk} weeks`}];}
+function ringSteps(G,a,b,hard){const A=G.F[a].name,B=G.F[b].name;
+  return [{fx:()=>{if(typeof UI!=="undefined"&&UI.scene)UI.scene.lookOf={};}},/* into fight gear for the ring */
+    {n:"nar",bg:"gym",t:`${A} and ${B} lock eyes for one second, then climb into the ring together without a word`},
+    {n:a,f:"angry",l:"fight",t:ringTaunt(G,a,b),with:b},{n:b,f:"angry",l:"fight",t:ringTaunt(G,b,a),with:a},
+    {n:"nar",t:"All you can do is stand at ringside and shout at the right moment"},
+    {brawl:{a,b,hard},after:(G2,res)=>ringAfter(G2,a,b,hard,res||{sc:0})}];}
+function ringAfter(G,a,b,hard,res){const A=G.F[a].name,B=G.F[b].name,ok=res.sc>=5,r=[];
+  if(ok)r.push({n:"nar",bg:"gym",t:`${A} and ${B} stand panting in the middle of the ring, then suddenly burst out laughing together`},{n:a,f:"pout",l:"fight",t:FIGHT_OK[a],with:b},{n:b,f:"pout",l:"fight",t:FIGHT_OK[b],with:a});
+  else r.push({n:"nar",bg:"gym",t:"In the end Coach Daeng throws a whole bucket of ice water over both of them, and that's the end of it"},{n:"nar",t:"They climb out on opposite sides. Neither of them looks at you"});
+  if(ok&&!hard)r.push({n:"nar",t:"Nobody runs off that night. But nobody talks to you either"});
+  else if(!ok&&hard)r.push(...runAway(G,a,3),...runAway(G,b,3));
+  else r.push(...runAway(G,a,hard?3:2));
+  return r;}
+function valSteps(G){const P=partners(G),hard=(G.valCaught||0)>=1,drop=hard?25:15;G.valCaught=(G.valCaught||0)+1;
+  /* the two closest to you settle it in the ring — whichever camp they train at (anyone who already left is not there) */
+  const pre=Object.fromEntries(P.map(k=>[k,(G.F[k].bond||0)+(G.F[k].bondX||0)])),byBond=[...P].sort((x,y)=>pre[y]-pre[x]),two=byBond.filter(k=>!isAway(G,k)).slice(0,2);
+  return [{n:"nar",bg:"camp",t:hard?"Another Valentine's Day. They all show up together again, but this year nobody is smiling":"February 14th, Valentine's Day. That evening you had a date… several dates, at the same time, in front of Sirichai Camp"},
+    ...P.map(k=>({n:k,f:hard?"pout":"happy",l:"casual",t:vx(G,k,hard?VAL_AGAIN:VAL_GIFT)})),
+    ...(hard?[]:[{n:"nar",t:`${P.map(k=>G.F[k].name).join(" ")} look at each other, then at what everyone's holding`},...P.map(k=>({n:k,f:k==="mali"?"sad":"angry",l:"casual",t:VAL_CAUGHT[k]}))]),
+    {choice:[{t:"I'm sorry. It's my fault",then:[{n:"nar",t:"Nobody answers. The crickets are the loudest thing in the world right now"}]},
+      {t:"I really do love all of you. I never lied to anyone",fx:G2=>{G2.haremOK=true;},then:[{n:"nar",t:"A long silence… a few of them blush, angry as they are"}]},
+      {t:"Calm down, let me explain",then:[{n:"nar",t:"Before you get a word out, a bag of sweets hits you in the face"}]}]},
+    {fx:G2=>{P.forEach(k=>add(G2,k,"bond",-drop));G2.valAbs=absWeek(G2);G2.valFloor=Object.fromEntries(P.map(k=>[k,bondTot(G2.F[k])]));}},{n:"nar",t:`Bond with everyone you're seeing −${drop}`},
+    ...(two.length>=2?ringSteps(G,two[0],two[1],hard):[{n:"nar",t:"Nobody steps into a ring. Everyone just leaves in silence, which is worse than a fight"},{inject:G2=>runAway(G2,byBond[0],hard?3:2)}])];}
+const backDue=(G,id)=>{const f=G.F[id];return !!(f&&f.met&&f.awayAbs!=null&&!f.awayBack&&absWeek(G)>=f.awayAbs);};
+// --- breakup (from the chat menu) ---
+const BREAK={kati:[{n:"nar",t:"You ask Kati to talk at the edge of the ring, the same spot where she confessed"},{n:"kati",f:"surprised",t:"…Break up?"},{n:"kati",f:"sad",t:"I'm not crying. Grandpa taught me a fighter never cries in the ring"},{n:"kati",f:"sad",t:"Give me a little time. Then I'll come back as your fighter, same as before"}],
+  mali:[{n:"nar",t:"Mali listens in silence, when she usually never stops talking"},{n:"mali",f:"sad",t:"Oh… okay. Mali understands. Mali can smile, see? Smiling"},{n:"nar",t:"The smile wobbles for a moment, then the tears come on their own"},{n:"mali",f:"sad",t:"Mali's going home to Mom for a bit"}],
+  rin:[{n:"nar",t:"Rin slowly closes her laptop while you talk"},{n:"rin",f:"sad",t:"Could I have the reasons as a list? …Never mind. I really don't want to hear them"},{n:"rin",f:"sad",t:"Tonight I'll rename the folder with both our names on it. Then I'd like some time off"}],
+  ploy:[{n:"nar",t:"Ploy hears you out, then goes back to wrapping her hands as if nothing happened"},{n:"ploy",f:"sad",t:"I've lost plenty of times. This is just one more"},{n:"ploy",f:"sad",t:"Don't come see me for a while. I don't want anyone to see me when I'm not strong"}],
+  fah:[{n:"nar",t:"Fah stands still longer than she ever has"},{n:"fah",f:"angry",t:"…Huh? Fine! I don't care one bit!"},{n:"fah",f:"sad",t:"…Fah's staying at Grandma's for a while. Don't follow me. If you do, I'll really punch you"}]};
+const BREAK_BACK={kati:[{n:"nar",t:"Kati turns up for morning training as if she'd never left"},{n:"kati",f:"happy",t:"Good morning, Manager… what are we training today?"},{n:"nar",t:"She calls you 'Manager', just like the day you met"}],
+  mali:[{n:"nar",t:"Mali comes back with a big box of khanom khrok for the whole camp, you included"},{n:"mali",f:"happy",t:"Mom says you can break up and still be good to each other… Mali will try"}],
+  rin:[{n:"nar",t:"Rin comes back with a new binder. The cover says 'Professional Relationship'"},{n:"rin",f:"pout",t:"From now on we only talk about work… at least for a while"}],
+  ploy:[{n:"nar",t:"Ploy messages you after a month of silence"},{n:"ploy",f:"happy",t:"I'm okay now. When we meet at the ring, we can say hi like normal"}],
+  fah:[{n:"nar",t:"After a whole month of silence, Fah sends one cat sticker"},{n:"fah",f:"pout",t:"…Just showing you the cat's fine. Not because I missed you"}]};
+function doBreak(G,id){setLovers(G,lovList(G).filter(k=>k!==id));if(G.promise)delete G.promise[id];if(G.lovWk)delete G.lovWk[id];
+  G.exAbs=G.exAbs||{};G.exAbs[id]=absWeek(G);add(G,id,"bond",-35);sendAway(G,id,4,"break");if(G.harem&&partners(G).length<2)G.harem=false;}
+function breakSteps(G,id){const f=G.F[id],mine=f.camp==="player";
+  return [...BREAK[id].map(x=>({l:"casual",...x})),{fx:G2=>doBreak(G2,id)},
+    {n:"nar",t:mine?`${f.name} is away from camp for 4 weeks · Bond −35 · No training and no new fights until she's back`:`${f.name} won't be in touch for 4 weeks · Bond −35`}];}
+// --- harem route: after Valentine, if you told the truth and win every one of them back ---
+const HAREM_YES={kati:"We've been talking it over all week… not one of us would back down",
+  mali:"Nobody wants anybody hurt, so Mali said… then let's just all be together!",
+  rin:"I've drafted the rules. One: dates follow a schedule. Two: no more lying to anyone, ever",
+  ploy:"I don't like sharing. But if it's someone we all love… I can live with it",
+  fah:"And! If you make anyone cry again, Fah punches you first! Got it!"};
+const bondTot=f=>(f.bond||0)+(f.bondX||0);
+/* winning them back: a few weeks after Valentine, everyone at lover level again and at least +10 over where the scene left them */
+const haremReady=G=>{const P=partners(G),fl=G.valFloor||{};return !!G.haremOK&&!G.harem&&P.length>=2&&G.valAbs!=null&&absWeek(G)-G.valAbs>=3&&P.every(k=>bondTot(G.F[k])>=Math.max(75,(fl[k]??0)+10)&&!isAway(G,k));};
+function haremForm(G){const P=partners(G);
+  return [{n:"nar",bg:"food",t:"One night, weeks after Valentine's, you're summoned to the moo kratha place by the market"},
+    {n:"nar",t:`${P.map(k=>G.F[k].name).join(" ")} are waiting at one table, with a single sheet of paper in the middle`},
+    ...P.map(k=>({n:k,f:"flustered",l:"casual",t:HAREM_YES[k]})),
+    {choice:[{t:"I promise I'll take the best care of all of you",then:[{n:"nar",t:"Everyone clinks their red soda glasses at once, so loud the next table turns to look"}]},
+      {t:"…Are you all sure?",then:[{n:"nar",t:"They all nod at once, then laugh at how embarrassed they are"}]}]},
+    {fx:G2=>{G2.harem=true;G2.haremAbs=absWeek(G2);}},
+    {n:"nar",t:"They're all still your Sweetheart ♥ · No more angry Valentines · Each girl's top heart scene becomes a cute scene with everyone instead"}];}
+const HAREM_SCENES=[
+ {wk:2,bg:"market",open:"The first group date at the night market. Nobody can agree what to eat first",close:"In the end everyone ate at every stall, and you carried everyone's bags until your arms gave out",
+  say:{kati:"Our usual chicken rice! Grandpa brought me here since I was little",mali:"Khanom khrok first~ Dessert opens up the appetite!",rin:"I've sorted the stalls by distance. Least walking, most eating",ploy:"All I want is one Thai tea… and to walk next to you",fah:"Isan sausage! If nobody wants it, Fah's eating it!"}},
+ {wk:5,bg:"camp",open:"A day-off morning. Everyone shows up at camp in matching shirts printed 'Team Manager'",close:"Coach Daeng walks past, looks at the shirts, and lets out the longest sigh of his life",
+  say:{kati:"It wasn't my idea! …But I picked the color",mali:"Mali printed them herself~ The manager's says 'Team Captain'!",rin:"I ordered everyone's size. Yours I estimated by eye — 97% accurate",ploy:"I can only wear it on days off. If the boss sees, I'm in trouble",_ploy:"Now I can wear it every day. No boss to scold me",fah:"This looks so dumb! …Take a picture though"}},
+ {wk:9,bg:"night",open:"A moonlit night. Everyone climbs onto the camp roof, and one blanket isn't nearly enough",close:"You didn't look at a single star, but it's the night you remember best",
+  say:{kati:"Scoot over a bit, my legs are out of the blanket",mali:"Mali thinks this beats stargazing alone by a mile",rin:"The brightest star over there is Sirius… why is everyone looking at me instead",ploy:"When I was little, I never had anyone to sit with like this",fah:"Whoever kicks the blanket off one more time, Fah's kicking them off the roof!"}}];
+const HAREM_VAL={kati:"This year's chocolate isn't lopsided. I practiced all week",mali:"This year's heart-shaped khanom khrok is for everyone~",
+  rin:"This year I weighed everyone's chocolate to the gram. Perfectly fair",ploy:"This year I didn't have to sneak out. I told the boss straight",_ploy:"This year I don't have to sneak anywhere. We're in the same camp",fah:"Chocolate! This year I bought it for you on purpose! …Happy now!"};
+const HAREM_END={kati:"Let's stay like this next year too. All of us",mali:"For New Year Mali's taking everyone to Mom's! She's going to be so shocked~",
+  rin:"I've already made next year's schedule. Everyone gets the same number of dates",ploy:"Next year I'll still be right here… with all of them",fah:"Next year you're buying sausages for everyone! Not just Fah!"};
+const haremYearEnd=G=>[{n:"nar",bg:"camp",t:"New Year's Eve. Everyone sits in a circle around the moo kratha grill at camp, and you're in the middle whether you like it or not"},...partners(G).map(k=>({n:k,f:"flustered",l:"casual",t:HAREM_END[k]}))];
+EVENTS.push(
+ {id:"lv_val",annual:true,look:"casual",bg:"camp",pri:95,when:G=>G.week>=38&&G.week<=39&&!G.harem&&partners(G).length>=2,steps:[{inject:G=>valSteps(G)}]},
+ {id:"lv_valh",annual:true,look:"casual",bg:"camp",pri:95,when:G=>G.week>=38&&G.week<=39&&G.harem&&partners(G).length>=2,steps:[{inject:G=>[
+   {n:"nar",t:"This Valentine's Day they all come to see you together, and nobody is angry at anybody"},...partners(G).map(k=>({n:k,f:"happy",l:"casual",t:vx(G,k,HAREM_VAL)})),
+   {fx:G2=>partners(G2).forEach(k=>add(G2,k,"bond",3))},{n:"nar",t:"Bond with everyone +3"}]}]},
+ {id:"lv_harem",look:"casual",bg:"food",pri:70,when:G=>haremReady(G),steps:[{inject:G=>haremForm(G)}]},
+ {id:"lv_back",look:"casual",bg:"camp",pri:80,when:G=>LOVE_IDS.some(k=>backDue(G,k)),steps:[{inject:G=>{const id=LOVE_IDS.find(k=>backDue(G,k));if(!id)return [];const f=G.F[id];f.awayBack=true;
+   return [...((f.awayWhy==="break"?BREAK_BACK:RUN_BACK)[id]||[]).map(x=>({l:"casual",...x})),{fx:G2=>{delete G2.seen.lv_back;}}];}}]},
+ ...HAREM_SCENES.map((S,i)=>({id:"lv_hm"+(i+1),look:"casual",bg:S.bg,when:G=>!!G.harem&&G.haremAbs!=null&&absWeek(G)-G.haremAbs>=S.wk&&partners(G).length>=2&&!partners(G).some(k=>isAway(G,k)),
+   steps:[{inject:G=>[{n:"nar",t:S.open},...partners(G).map(k=>({n:k,f:"happy",l:"casual",t:vx(G,k,S.say)})),{n:"nar",t:S.close}]}]})));
+// --- v1.89.11: every pair has its own quarrel — in the Valentine ring and in the spats while you see more than one ---
+const pairKey=(a,b)=>[a,b].sort((x,y)=>LOVE_IDS.indexOf(x)-LOVE_IDS.indexOf(y)).join("_");
+const PAIR={
+ kati_mali:{ring:{kati:"Mali, I could give you my mango sticky rice, but not this!",mali:"You don't have to give it, Kati! Mali will win it herself!"},
+  spat:[["mali","pout","Kati's sat next to the manager at dinner three days in a row! Today it's Mali's turn!"],["kati","angry","Because I was here first! I was at this camp before you!"],["mali","angry","Being first doesn't mean you get dibs for life!"]]},
+ kati_rin:{ring:{kati:"Rin, you can calculate anything, but not the manager's heart!",rin:"I can. The result says you're at a disadvantage"},
+  spat:[["rin","pout","Kati, yesterday the manager talked to you for forty minutes and to me for twenty. I wrote it down"],["kati","angry","Why write that down! Who are you telling!"],["rin","pout","Not tell. The data's unbalanced, and I don't like unbalanced data"]]},
+ kati_ploy:{ring:{kati:"You've always taught me, Ploy. Today I'll show you I've graduated!",ploy:"Ten years too early, Kati"},
+  spat:[["ploy","happy","Kati, I'm borrowing the manager for the fights at the district stadium on Saturday"],["kati","angry","He's not something to borrow, Ploy! And on Saturday he has a date with me!"],["ploy","flustered","Then the three of us go… kidding. I'll go alone"]]},
+ kati_fah:{ring:{kati:"Fah! This ring isn't a playground!",fah:"Fah's not playing! Fah's here for payback!"},
+  spat:[["fah","pout","Kati! Who gave Grandma's sausages to the manager yesterday!"],["kati","pout","I gave him Grandpa's favourite pastries. I never touched your sausages!"],["fah","angry","…So you give him things too! Not okay!"]]},
+ mali_rin:{ring:{mali:"Rin! Mali's name isn't anywhere on your date schedule!",rin:"Because I made it before I knew you were a rival"},
+  spat:[["mali","pout","Rin, you fixed the schedule so you get every Sunday, didn't you!"],["rin","flustered","…Sunday is when everyone's most free. It was a data-driven decision"],["mali","angry","What data! The data that Rin wants to go herself!"]]},
+ mali_ploy:{ring:{mali:"Ploy's good at everything, but Mali won't give in on this!",ploy:"Don't give in. I never asked you to"},
+  spat:[["mali","sad","Ploy, you're prettier and stronger, and you want the manager too…"],["ploy","sad","…I don't want to beat you at this, Mali"],["mali","pout","But you won't give up either, will you!"]]},
+ mali_fah:{ring:{mali:"Fah! At karaoke that night, the manager sang a duet with Mali!",fah:"So what! He's ridden on Fah's bike three times!"},
+  spat:[["fah","angry","Mali! Ten heart stickers a day to the manager? Are you nuts!"],["mali","happy","Fah sends twenty cat stickers a day too~"],["fah","flustered","Th-those are cats! It's not the same!"]]},
+ rin_ploy:{ring:{rin:"I've analysed your fights for three years. Today I finally use it",ploy:"Three years at ringside isn't the same as three minutes in the ring"},
+  spat:[["rin","pout","Ploy, the stats say the manager smiles at your chats 1.4 times more than at mine"],["ploy","happy","You count while he reads his chats? That's scary"],["rin","angry","…I don't count. I observe. And I'd like to change the subject"]]},
+ rin_fah:{ring:{rin:"You fight with no plan. I read you from the first step",fah:"What plan! Wherever Fah's heart goes, her fists follow!"},
+  spat:[["fah","angry","Rin! Your binder says 'Fah: high risk'. What's that supposed to mean!"],["rin","happy","It means you're high risk. In the ring, and in the manager's heart"],["fah","flustered","…H-huh!? Was that last part a compliment or an insult!"]]},
+ ploy_fah:{ring:{ploy:"We've sparred for years, Fah. You've never beaten me",fah:"Today's the day! Fah beats you, in the ring and in this!"},
+  spat:[["fah","pout","Ploy! You sat by the river with the manager yesterday, didn't you! That's Fah's spot!"],["ploy","happy","The Ping riverside goes on for kilometres. You reserved all of it?"],["fah","angry","Yes! The whole river! Nobody else sits there!"]]}};
+const pairOf=(a,b)=>PAIR[pairKey(a,b)];
+const ringTaunt=(G,me,other)=>{const P=pairOf(me,other);return (P&&P.ring[me])||vx(G,me,FIGHT_TAUNT);};
+// a pair already argued once — later spats use a short line each
+const SPAT_AGAIN={kati:"This again! I'm not giving in!",mali:"Mali asked nicely! Nobody listens!",rin:"I've logged this as the third time this month",
+  ploy:"I don't want to fight, but I won't back down either",fah:"Again!? Fah's tired of arguing! …But she'll keep going!"};
+const SIDE_WIN={kati:"…See? The manager's on my side",mali:"Yay! The manager gets Mali the most~",rin:"Thank you. My data was right again",ploy:"Thanks… I didn't ask you to take my side, but I'm glad",fah:"Ha! We all know who was right!"};
+const SIDE_LOSE={kati:"…Okay. I understand",mali:"Oh… okay. It's Mali's fault, then",rin:"Noted. I won't bring it up again",ploy:"I see. I'll remember that",fah:"Hmph! Fine! I'm not upset!"};
+const CLASH_ASK={kati:"Come to the temple with me tonight? The lights are beautiful",mali:"Karaoke's half price tonight! Come with me~",rin:"I've booked a table at the tea house tonight. 7 p.m. sharp",
+  ploy:"I'm free tonight. Walk by the river?",fah:"Tonight, hop on the bike, we're getting sausages! No saying no!"};
+const CLASH_YES={kati:"You really came! …I thought you'd go somewhere else",mali:"Yay! First song is a duet!",rin:"Right on time. I like that",ploy:"I'm glad you chose me",fah:"Ha! I knew you'd pick Fah!"};
+const CLASH_NO={kati:"It's okay. I'll go to the temple by myself",mali:"Oh… you're busy? Then Mali will sing alone",rin:"Reservation cancelled.",ploy:"I see.",fah:"Hmph! Busy, then!"};
+const lvRoll=(G,salt)=>mulberry32(((G.seed||1)*7+absWeek(G)*131+salt)>>>0)();
+const lvPresent=G=>partners(G).filter(k=>!isAway(G,k));
+/* one spat pair: the two who are not both very close to you — the lowest pair first */
+const spatPair=G=>{const P=lvPresent(G);let best=null;for(let i=0;i<P.length;i++)for(let j=i+1;j<P.length;j++){const a=P[i],b=P[j],ta=bondTot(G.F[a]),tb=bondTot(G.F[b]);if(ta>=100&&tb>=100)continue;if(!best||ta+tb<best.s)best={a,b,s:ta+tb};}return best;};
+const sideOpts=(a,b,G)=>[{t:`Side with ${G.F[a].name}`,fx:G2=>{add(G2,a,"bond",3);add(G2,b,"bond",-5);},then:[{n:a,f:"happy",l:"casual",t:SIDE_WIN[a],with:b},{n:b,f:"sad",l:"casual",t:SIDE_LOSE[b],with:a}]},
+  {t:`Side with ${G.F[b].name}`,fx:G2=>{add(G2,b,"bond",3);add(G2,a,"bond",-5);},then:[{n:b,f:"happy",l:"casual",t:SIDE_WIN[b],with:a},{n:a,f:"sad",l:"casual",t:SIDE_LOSE[a],with:b}]},
+  {t:"Stop them both, take no side",fx:G2=>{add(G2,a,"bond",-2);add(G2,b,"bond",-2);},then:[{n:"nar",t:"They stop arguing, but neither of them is happy with you"}]}];
+function spatSteps(G){const p=spatPair(G);if(!p)return [];const {a,b}=p,k=pairKey(a,b);G.spatDone=G.spatDone||{};const first=!G.spatDone[k];G.spatDone[k]=(G.spatDone[k]||0)+1;G.spatAbs=absWeek(G);
+  const lines=first&&pairOf(a,b)?pairOf(a,b).spat.map(([n,f,t])=>({n,f,l:"casual",t,with:n===a?b:a})):[{n:a,f:"angry",l:"casual",t:SPAT_AGAIN[a],with:b},{n:b,f:"angry",l:"casual",t:SPAT_AGAIN[b],with:a}];
+  return [{n:"nar",bg:"camp",t:`Raised voices behind the camp. ${G.F[a].name} and ${G.F[b].name} turn and see you`},...lines,{choice:sideOpts(a,b,G)},{n:"nar",t:"Whoever you side with +3 bond, the other −5 · Stopping both: −2 each"}];}
+function clashSteps(G){const P=lvPresent(G),r=lvRoll(G,9),i=Math.floor(r*P.length),a=P[i],b=P[(i+1+Math.floor(lvRoll(G,11)*(P.length-1)))%P.length];G.clashAbs=absWeek(G);
+  const go=(x,y)=>({t:`Out with ${G.F[x].name}`,fx:G2=>{add(G2,x,"bond",3);add(G2,y,"bond",-5);},then:[{n:x,f:"happy",l:"casual",t:CLASH_YES[x]},{n:"nar",t:`Message from ${G.F[y].name}: "${CLASH_NO[y]}"`}]});
+  return [{n:"nar",bg:"night",t:"Friday evening. Two chats pop up at once, asking for the exact same time"},{n:a,f:"happy",l:"casual",t:CLASH_ASK[a]},{n:b,f:"happy",l:"casual",t:CLASH_ASK[b]},
+    {choice:[go(a,b),go(b,a),{t:"Sorry to both, I'm staying in tonight",fx:G2=>{add(G2,a,"bond",-1);add(G2,b,"bond",-1);},then:[{n:"nar",t:"You spend the night alone staring at the ceiling. Nobody wins"}]}]},
+    {n:"nar",t:"Double-booked: the one you went with +3 bond · the other −5"}];}
+const lvBusyWeek=G=>G.lvEvAbs===absWeek(G);
+EVENTS.push(
+ {id:"lv_clash",look:"casual",bg:"night",when:G=>!G.harem&&lvPresent(G).length>=2&&!lvBusyWeek(G)&&absWeek(G)-(G.clashAbs??-99)>=3&&lvRoll(G,3)<.25,
+  steps:[{inject:G=>{G.lvEvAbs=absWeek(G);return clashSteps(G);}},{fx:G=>{delete G.seen.lv_clash;}}]},
+ {id:"lv_spat",look:"casual",bg:"camp",when:G=>lvPresent(G).length>=2&&!lvBusyWeek(G)&&absWeek(G)-(G.spatAbs??-99)>=4&&!!spatPair(G)&&lvRoll(G,5)<(G.harem?.06:.2),
+  steps:[{inject:G=>{G.lvEvAbs=absWeek(G);return spatSteps(G);}},{fx:G=>{delete G.seen.lv_spat;}}]});
+// warn before a second "yes"
+const cheatWarn=(G,id)=>partners(G).some(k=>k!==id)?[{n:"nar",t:"⚠ You're already seeing someone. Saying yes means two-timing · the sweetheart bonus is lost at once · top heart scenes won't play · more double-bookings and fights · Valentine's Day will catch you out"}]:[];
+const yesTxt=(G,id,t)=>partners(G).some(k=>k!==id)?t+" (two-timing)":t;
+const lovSolo=G=>partners(G).length===1;
+const topLock=(G,id)=>isPartner(G,id)&&partners(G).length>1; /* the top heart scene and the Lv.27/30 chats wait while you see more than one person (harem too) */ /* the lover bonus only holds while you see one person */
 // v1.30: lovers get their own dates/scenes; Ploy & Fah make a promise instead (romance with them waits for season 2)
 const RIVAL_LOVE=["ploy","fah"];
 const LOVER_DATES={"kati": [[{"n": "nar", "t": "Sunday morning. Kati takes you to the temple at the edge of the village, carrying a garland and the pastries Grandpa loved", "bg": "camp"}, {"n": "kati", "t": "Grandpa, this is the person I always tell you about. …Today I'm bringing them as my partner", "f": "happy", "l": "casual"}, {"n": "kati", "t": "He's definitely laughing. He used to tease that no one would date me because I kick too hard", "f": "flustered", "l": "casual"}, {"choice": [{"t": "I'll take good care of your granddaughter", "sc": 3, "then": [{"n": "kati", "t": "…You said that to Grandpa for real. He heard you. No breaking it", "f": "flustered", "l": "casual"}]}, {"t": "Kicking hard is good. Very safe", "sc": 2, "then": [{"n": "kati", "t": "Haha, Grandpa would've liked you", "f": "happy", "l": "casual"}]}]}], [{"n": "nar", "t": "10 p.m. One light still on in the gym. Kati is kicking the bag alone", "bg": "gym"}, {"n": "kati", "t": "Manager… I mean, darling… I'm not used to it yet. What should I call you?", "f": "flustered", "l": "casual", "bg": "casual"}, {"choice": [{"t": "Whatever feels right to you", "sc": 3, "then": [{"n": "kati", "t": "Then 'manager' inside the gym, 'darling' outside it. Work and heart, kept separate", "f": "happy", "l": "casual"}]}, {"t": "Darling sounds nice", "sc": 2, "then": [{"n": "kati", "t": "…Not so loud! Mali's still awake!", "f": "flustered", "l": "casual"}, {"n": "nar", "t": "Giggling drifts out of Mali's bedroom window"}]}]}], [{"n": "nar", "t": "Kati takes you to the old ring by the market, where Grandpa Chai fought forty years ago. It's abandoned now", "bg": "ring"}, {"n": "kati", "t": "Grandpa said this is where he proposed to Grandma. In front of the whole crowd", "f": "happy", "l": "casual"}, {"n": "kati", "t": "…I don't mean anything by it! Just telling you!", "f": "flustered", "l": "casual"}, {"choice": [{"t": "Then let's come back here together someday", "sc": 3, "then": [{"n": "kati", "t": "…Okay. That's a promise. I'll remember today", "f": "flustered", "l": "casual"}]}, {"t": "Grandpa was brave", "sc": 2, "then": [{"n": "kati", "t": "He was. Grandma said she was so embarrassed she wanted to crawl under the ring, haha", "f": "happy", "l": "casual"}]}]}]], "mali": [[{"n": "nar", "t": "Mali hands you her phone: a video call from Isan, a woman beaming with a huge buffalo behind her", "bg": "camp"}, {"n": "mali", "t": "Mom, this is… Mali's partner! And that's Thongkham behind Mom. Say hi", "f": "flustered", "l": "casual"}, {"n": "nar", "t": "Mali's mom speaks Isan dialect so fast you only catch 'Have you eaten yet?'"}, {"choice": [{"t": "I have! Thank you for raising Mali so well", "sc": 3, "then": [{"n": "mali", "t": "Mom's crying! She says you have to come home for New Year", "f": "happy", "l": "casual"}]}, {"t": "Wave at Thongkham", "sc": 2, "then": [{"n": "mali", "t": "Thongkham wagged his tail! He likes you. First test passed!", "f": "happy", "l": "casual"}]}]}], [{"n": "nar", "t": "Mali booked the biggest karaoke room, just like she said. But it's only the two of you", "bg": "night"}, {"n": "mali", "t": "Duet! No skipping the high notes!", "f": "happy", "l": "casual"}, {"choice": [{"t": "Sing at full volume", "sc": 3, "then": [{"n": "nar", "t": "You both belt out luk thung until staff knock three times asking you to keep it down"}, {"n": "mali", "t": "This is the best night of Mali's life!", "f": "happy", "l": "casual"}]}, {"t": "I'd rather just listen to you", "sc": 2, "then": [{"n": "mali", "t": "Then Mali's singing this one just for you. …Listen carefully", "f": "flustered", "l": "casual"}]}]}], [{"n": "nar", "t": "Mali brings you to a little khanom khrok stall behind the market, the kind she says she'll open someday", "bg": "food"}, {"n": "mali", "t": "Mali has a new shop name. Instead of 'Champion Khanom Khrok', maybe 'Our Khanom Khrok'", "f": "happy", "l": "casual"}, {"n": "mali", "t": "…'Our' meaning you and Mali. If you don't mind", "f": "flustered", "l": "casual"}, {"choice": [{"t": "I'll be the one washing the pans", "sc": 3, "then": [{"n": "mali", "t": "Deal! You promised. Washing pans for life!", "f": "happy", "l": "casual"}]}, {"t": "The old name was nice too", "sc": 2, "then": [{"n": "mali", "t": "Then 'Our Champion Khanom Khrok'. Both names~", "f": "happy", "l": "casual"}]}]}]], "rin": [[{"n": "nar", "t": "Rin sent a schedule three days early, titled 'Date No. 1 (Official)', planned down to the minute", "bg": "cafe"}, {"n": "rin", "t": "14:00 tea. 14:20 small talk. 14:35 hold hands (if appropriate). …I left a ten-minute buffer", "f": "flustered", "l": "casual"}, {"choice": [{"t": "What time is it now?", "sc": 3, "then": [{"n": "rin", "t": "…Exactly 14:35", "f": "flustered", "l": "casual"}, {"n": "nar", "t": "Rin rests her hand on the table, right on schedule"}]}, {"t": "Want to ditch the schedule for a day?", "sc": 2, "then": [{"n": "rin", "t": "No schedule… fine, I'll try. If my heart rate goes over plan, that's on you", "f": "flustered", "l": "casual"}]}]}], [{"n": "nar", "t": "Rin shows up to morning training in round glasses. The whole camp goes silent for five seconds", "bg": "camp"}, {"n": "rin", "t": "…No need to stare. I chose based on data I collected, that a certain someone likes round frames", "f": "flustered", "l": "casual"}, {"choice": [{"t": "They suit you perfectly", "sc": 3, "then": [{"n": "rin", "t": "Recorded. 100% satisfaction. …Mine too", "f": "happy", "l": "casual"}]}, {"t": "Who likes round frames, I wonder", "sc": 2, "then": [{"n": "rin", "t": "…Don't pretend you forgot. That data came from you", "f": "flustered", "l": "casual"}]}]}], [{"n": "nar", "t": "Friday night. Rin sits at the computer in the analysis room, drawing some kind of graph", "bg": "night"}, {"n": "rin", "t": "This is my happiness graph since joining Sirichai. Vertical axis, happiness. Horizontal, weeks", "f": "happy", "l": "casual"}, {"n": "rin", "t": "The highest spike… is the week you said yes. Data doesn't lie", "f": "flustered", "l": "casual"}, {"choice": [{"t": "Then let's keep it climbing", "sc": 3, "then": [{"n": "rin", "t": "A good objective. I'll track it weekly", "f": "happy", "l": "casual"}]}, {"t": "That's a beautiful graph", "sc": 2, "then": [{"n": "rin", "t": "…Are you complimenting the graph or me? Please specify", "f": "flustered", "l": "casual"}]}]}]]};
@@ -2688,25 +2924,25 @@ function dateScene(G,id,act){
       const tier=gain>=5?"great":gain>=2?"ok":"meh";
       f.closed=f.closed||{};const firstClose=!f.closed[tier];f.closed[tier]=true;
       const out=[...(firstClose?[{n:id,f:tier==="meh"?"sad":"happy",l:look,t:DATE_CLOSE[tier][id]}]:[]),
-        {n:"nar",t:`Bond with ${f.name} ${(real>=0?"+":"")+real} · ${hleft} to ♥${HL.lv+1}${pref==="like"?" · it's an activity she likes!":pref==="dislike"?" · she doesn't seem to like it here":""}${D.facts.length?" · new profile info: "+D.facts.join(" / "):D.missed?" · she seems to have more she wants to share, if you say the right thing":""}`}];
+        {n:"nar",t:`Bond with ${f.name} ${(real>=0?"+":"")+real}${HL.max?" · hearts maxed":heartCapped(G2,f)?" · hearts are full for this chapter":` · ${hleft} to ♥${HL.lv+1}`}${pref==="like"?" · it's an activity she likes!":pref==="dislike"?" · she doesn't seem to like it here":""}${D.facts.length?" · new profile info: "+D.facts.join(" / "):D.missed?" · she seems to have more she wants to share, if you say the right thing":""}`}];
       if(typeof hasSignature!=="undefined"&&hasSignature(f)&&!G2.seen["sig_"+id]){G2.seen["sig_"+id]=true;out.push({n:"nar",t:`✦ The bond unlocked the signature move of ${f.name}: "${SIGNATURE[id].name}" — ${SIGNATURE[id].desc}`});}
       if(f.bond>=40&&!G2.seen["b1_"+id]){G2.seen["b1_"+id]=true;out.push(...BOND_EVENTS[id].lv1.map(x=>({l:look,...x})));}
-      if(f.bond>=75&&f.trust>=40&&RIVAL_LOVE.includes(id)&&f.camp==="player"&&(G2.season||1)>=2&&!G2.romance&&!G2.seen["love2_"+id]){G2.seen["love2_"+id]=true;
-        out.push(...LOVE_EVENTS[id].map(x=>({l:"casual",...x})),{choice:[
-          {t:"I feel the same way",fx:G3=>{G3.romance=id;G3.romWk=absWeek(G3);add(G3,id,"morale",15);},then:[{n:id,f:"flustered",l:"casual",t:LOVE_YES[id]}]},
-          {t:"Thank you, but I want to keep being the one beside you like this",fx:G3=>{add(G3,id,"trust",5);},then:[{n:id,f:"sad",l:"casual",t:LOVE_NO[id]||"…Got it."}]}]});}
-      else if(f.bond>=75&&f.trust>=40&&RIVAL_LOVE.includes(id)&&f.camp==="rival"&&!G2.seen["love_"+id]){G2.seen["love_"+id]=true;out.push(...lvSteps(PROMISE_EVENTS[id],null,G2,id,true).map(x=>x.choice?x:{l:"casual",...x}),{n:"nar",t:`Relationship with ${f.name}: Promised ♡ · this story continues in season two`});}
-      else if(f.bond>=75&&f.trust>=40&&!G2.romance&&!RIVAL_LOVE.includes(id)&&!G2.seen["love_"+id]){G2.seen["love_"+id]=true;
-        out.push(...LOVE_EVENTS[id].map(x=>({l:"casual",...x})),{choice:[
-          {t:"I feel the same way",fx:G3=>{G3.romance=id;G3.romWk=absWeek(G3);add(G3,id,"morale",15);},then:[{n:id,f:"flustered",l:"casual",t:LOVE_YES[id]}]},
-          {t:"Thank you, but I want to keep being the one beside you like this",fx:G3=>{add(G3,id,"trust",5);G3.loveNo=G3.loveNo||{};G3.loveNo[id]=G3.week;},then:[{n:id,f:"sad",l:"casual",t:LOVE_NO[id]}]}]});}
+      if(f.bond>=75&&f.trust>=40&&RIVAL_LOVE.includes(id)&&f.camp==="player"&&(G2.season||1)>=2&&!isLov(G2,id)&&!exWait(G2,id)&&!G2.seen["love2_"+id]){G2.seen["love2_"+id]=true;
+        out.push(...LOVE_EVENTS[id].map(x=>({l:"casual",...x})),...cheatWarn(G2,id),{choice:[
+          {t:yesTxt(G2,id,"I feel the same way"),fx:G3=>takeLover(G3,id),then:[{n:id,f:"flustered",l:"casual",t:LOVE_YES[id]}]},
+          {t:"Thank you, but I want to keep being the one beside you like this",fx:G3=>{befriend(G3,id);add(G3,id,"trust",5);},then:[{n:id,f:"sad",l:"casual",t:LOVE_NO[id]||"…Got it."}]},...takenOpt(G2,id)]});}
+      else if(f.bond>=75&&f.trust>=40&&RIVAL_LOVE.includes(id)&&f.camp==="rival"&&!G2.seen["love_"+id]){G2.seen["love_"+id]=true;out.push(...lvSteps(PROMISE_EVENTS[id],null,G2,id,true).flatMap(x=>x.choice?[...cheatWarn(G2,id),{choice:[...x.choice,...takenOpt(G2,id)]}]:[{l:"casual",...x}]),{inject:G3=>isProm(G3,id)?[{n:"nar",t:`Relationship with ${f.name}: Promised ♡ · this story continues in season two`}]:[]});}
+      else if(f.bond>=75&&f.trust>=40&&!isLov(G2,id)&&!RIVAL_LOVE.includes(id)&&!G2.seen["love_"+id]){G2.seen["love_"+id]=true;
+        out.push(...LOVE_EVENTS[id].map(x=>({l:"casual",...x})),...cheatWarn(G2,id),{choice:[
+          {t:yesTxt(G2,id,"I feel the same way"),fx:G3=>takeLover(G3,id),then:[{n:id,f:"flustered",l:"casual",t:LOVE_YES[id]}]},
+          {t:"Thank you, but I want to keep being the one beside you like this",fx:G3=>{befriend(G3,id);add(G3,id,"trust",5);G3.loveNo=G3.loveNo||{};G3.loveNo[id]=G3.week;},then:[{n:id,f:"sad",l:"casual",t:LOVE_NO[id]}]},...takenOpt(G2,id)]});}
       // v1.29.3: a second chance — she won't ask twice, but after a while she lets you know the door is still open
-      else if(f.bond>=75&&f.trust>=40&&!G2.romance&&!RIVAL_LOVE.includes(id)&&G2.seen["love_"+id]&&G2.week-((G2.loveNo&&G2.loveNo[id])||-99)>=2){G2.loveNo=G2.loveNo||{};G2.loveNo[id]=G2.week;
-        out.push({n:id,f:"flustered",l:"casual",t:LOVE_AGAIN[id]},{choice:[
-          {t:"I answered too fast that day. I feel the same way",fx:G3=>{G3.romance=id;G3.romWk=absWeek(G3);add(G3,id,"morale",15);},then:[{n:id,f:"flustered",l:"casual",t:LOVE_YES[id]}]},
-          {t:"I'd like to stay by your side, just like this",fx:G3=>add(G3,id,"trust",2),then:[{n:"nar",t:`${f.name} smiles and nods, and says nothing more`}]}]});}
+      else if(f.bond>=75&&f.trust>=40&&!isLov(G2,id)&&!exWait(G2,id)&&!RIVAL_LOVE.includes(id)&&G2.seen["love_"+id]&&G2.week-((G2.loveNo&&G2.loveNo[id])||-99)>=2){G2.loveNo=G2.loveNo||{};G2.loveNo[id]=G2.week;
+        out.push({n:id,f:"flustered",l:"casual",t:isEx(G2,id)?LOVE_EX[id]:LOVE_AGAIN[id]},...cheatWarn(G2,id),{choice:[
+          {t:yesTxt(G2,id,isEx(G2,id)?"I still miss you too. Let's get back together":"I answered too fast that day. I feel the same way"),fx:G3=>takeLover(G3,id),then:[{n:id,f:"flustered",l:"casual",t:LOVE_YES[id]}]},
+          {t:"I'd like to stay by your side, just like this",fx:G3=>{befriend(G3,id);add(G3,id,"trust",2);},then:[{n:"nar",t:`${f.name} smiles and nods, and says nothing more`}]}]});}
       return out;}}];
-  if(G.romance===id&&LOVER_DATES[id]){f.lovIdx=f.lovIdx||0;const since=absWeek(G)-(G.romWk!=null?G.romWk:absWeek(G)-1);
+  if(romOf(G,id)&&LOVER_DATES[id]){f.lovIdx=f.lovIdx||0;const lw=(G.lovWk||{})[id],since=absWeek(G)-(lw!=null?lw:absWeek(G)-1);
     if(f.lovIdx<LOVER_DATES[id].length&&since>=LOVER_WK[f.lovIdx]){const sc=lvSteps(LOVER_DATES[id][f.lovIdx++],D,G,id,false);D.score+=2;return [...sc,steps[steps.length-1]];}}
   return steps;
 }
@@ -2722,7 +2958,7 @@ function yearMemories(G,y){const M=[],nm=id=>(G.F[id]&&G.F[id].name)||"";
   if(fl.fahJoinedAbs!=null&&!joins.some(j=>j.id==="fah"))joins.push({id:"fah",season:memSeasonOf(fl.fahJoinedAbs),wk:memWeekOf(fl.fahJoinedAbs)});
   if(fl.ployJoinedAbs!=null&&!joins.some(j=>j.id==="ploy"))joins.push({id:"ploy",season:memSeasonOf(fl.ployJoinedAbs),wk:memWeekOf(fl.ployJoinedAbs)});
   for(const j of joins)if(j.season===y&&G.F[j.id]&&G.F[j.id].camp==="player")M.push({pri:90,wk:j.wk,bg:"camp",txt:`${nm(j.id)} moved into Sirichai Camp`});
-  if(G.romance&&G.romWk!=null&&memSeasonOf(G.romWk)===y)M.push({pri:85,wk:memWeekOf(G.romWk),bg:"night",txt:`${nm(G.romance)} and the Manager started dating`});
+  for(const [k,w] of Object.entries(G.lovWk||{}))if(w!=null&&isLov(G,k)&&memSeasonOf(w)===y)M.push({pri:85,wk:memWeekOf(w),bg:"night",txt:`${nm(k)} and the Manager started dating`});
   const cal=(G.cal||[]).filter(c=>(c.season||1)===y);
   const allW=(G.cal||[]).filter(c=>c.res==="W").sort((a,b)=>(a.absWeek||0)-(b.absWeek||0));
   if(allW[0]&&(allW[0].season||1)===y)M.push({pri:78,wk:allW[0].wk,bg:"ring",txt:`The camp's first win · ${nm(allW[0].a)} Win ${allW[0].bn||"Opponent"}`});
@@ -2786,8 +3022,9 @@ function endingScene(G){if((G.season||1)>=2&&G.ended!=="bankrupt")return yearEnd
     steps=[{n:"nar",bg:"camp",t:"The camp is still open, the debt isn't gone, results aren't great, but the light in the camp hasn't gone out"},
       {n:"kati",f:"happy",t:"The first year is the hardest. Next year has to be better"}];}
   if(key!=="bankrupt"&&typeof personalEnding==="function")steps.push(...personalEnding(G));
-  if(G.romance&&key!=="bankrupt")steps.push({n:G.romance,f:"flustered",t:{kati:"Next year… let's stay together like this, in camp and outside it",mali:"This New Year, I'm taking you to my home, Mom wants to meet you~",
-    rin:"I've already planned next year. Your name is on every page",ploy:"Next year we're still rivals… and the most important people to each other",fah:"Next year you're still buying Fah sausage. Forever!"}[G.romance]});
+  if(G.harem&&key!=="bankrupt")steps.push(...haremYearEnd(G));
+  else if(romFirst(G)&&key!=="bankrupt")steps.push({n:romFirst(G),f:"flustered",t:{kati:"Next year… let's stay together like this, in camp and outside it",mali:"This New Year, I'm taking you to my home, Mom wants to meet you~",
+    rin:"I've already planned next year. Your name is on every page",ploy:"Next year we're still rivals… and the most important people to each other",fah:"Next year you're still buying Fah sausage. Forever!"}[romFirst(G)]});
   steps.push(...season2Hooks(G,key));
   steps.push({n:"nar",t:"— End of the year-one demo · Thank you for playing Muay Thai Moe —"});
   return {key,title,steps};
@@ -3377,7 +3614,7 @@ const BOND_BEATS={
      {choice:[{t:"Your grandma must be so proud of you",fx:G=>add(G,"fah","trust",5),then:[{n:"fah",f:"flustered",l:"casual",t:"…Don't say that in front of Grandma. She'll cry, and then Fah will cry too"}]},{t:"May I take some of Grandma's sausages for everyone at camp?",fx:G=>{add(G,"fah","bond",3);G.cash+=0;},then:[{n:"nar",t:"Fah's grandma laughs until she cries, then packs three big bags of sausages"},{n:"fah",f:"happy",l:"casual",t:"Grandma likes you now. You're doomed, haha"}]}]}]}};
 for(const id of Object.keys(BOND_BEATS))for(const th of [20,55]){
   EVENTS.push({id:`bb_${id}_${th}`,look:"casual",bg:th===55?"night":id==="ploy"||id==="fah"?"camp":"gym",
-    when:G=>G.F[id]&&G.F[id].met&&(G.F[id].bond||0)>=th&&(id==="ploy"||id==="fah"||G.F[id].camp==="player")&&absWeek(G)-(G.lastBeat||0)>=2,
+    when:G=>G.F[id]&&G.F[id].met&&(G.F[id].bond||0)>=th&&(id==="ploy"||id==="fah"||G.F[id].camp==="player")&&!isAway(G,id)&&absWeek(G)-(G.lastBeat||0)>=2,
     steps:[{fx:G=>{G.lastBeat=absWeek(G);}},...BOND_BEATS[id][th]]});}
 
 // ---------- v1.88: heart-level scenes (no gameplay effect — story only) ----------
@@ -3386,36 +3623,36 @@ const HEART_SCENES={
  kati:{
  12:{bg:"camp",steps:[{n:"nar",t:"10 p.m. Kati's light is still on, and you can hear her talking quietly to herself"},{n:"kati",f:"flustered",l:"casual",t:"Manager! …You heard? I'm not crazy. I'm talking to my gloves"},{n:"nar",t:"She holds out a small pair of faded red gloves. The leather is cracked and the laces have been replaced many times"},{n:"kati",f:"happy",l:"casual",t:"The first pair Grandpa bought me, when I was twelve. He haggled for half an hour and got twenty baht off"},{n:"kati",f:"sad",l:"casual",t:"Since Grandpa's been gone I tell them about my day every night. What I trained, what Kru Daeng scolded me for… like telling Grandpa"},{n:"kati",f:"flustered",l:"casual",t:"Lately… most of the stories are about you. The gloves must be sick of your name"},{choice:[{t:"Then tell the gloves I'll look after you",fx:G=>add(G,"kati","bond",3),then:[{n:"kati",f:"flustered",l:"casual",t:"…Tell them yourself. Here"},{n:"nar",t:"You speak to the old gloves. Kati looks away, but her ears have gone bright red"}]},{t:"What's tonight's story? Can I listen?",fx:G=>add(G,"kati","trust",3),then:[{n:"kati",f:"happy",l:"casual",t:"Today's, obviously. You bought coconut water for everyone and forgot your own… the gloves laughed so hard"}]},{t:"You've come a long way from these gloves",fx:G=>add(G,"kati","bond",2),then:[{n:"kati",f:"sad",l:"casual",t:"…I'm not as good as Grandpa hoped yet"},{n:"kati",f:"happy",l:"casual",t:"But I'm still training. Every day. And I'm not training alone anymore"}]}]}]},
  15:{bg:"market",steps:[{n:"nar",t:"Kati leads you behind the morning market, down a narrow lane by a fabric shop. She stops in front of a lamppost"},{n:"kati",f:"happy",l:"casual",t:"This is it. Where I fought three boys when I was twelve. They'd taken my friend's shoes"},{n:"kati",f:"pout",l:"casual",t:"I won! …But I had a black eye for two weeks and got called to the teacher's office"},{n:"nar",t:"She points at the old coffee stall across the lane"},{n:"kati",f:"happy",l:"casual",t:"Grandpa was sitting right there watching. Afterwards he walked over, said 'Good punches, but use them in the right place,' and bought me pa thong ko"},{n:"kati",f:"sad",l:"casual",t:"As a kid I thought 'the right place' meant the ring. Win everything, and Grandpa would be proud"},{n:"kati",f:"flustered",l:"casual",t:"But after losing so many times, and you were still here, everyone was still here… I started thinking he meant something else"},{n:"kati",f:"happy",l:"casual",t:"What do you think? Am I using my punches in the right place yet?"},{choice:[{t:"You are. When you use them to protect people, not only when you win",fx:G=>add(G,"kati","bond",3),then:[{n:"kati",f:"happy",l:"casual",t:"…Yeah. I think Grandpa would say the same. Or something shorter, and then buy pa thong ko"}]},{t:"You already know. Say it yourself",fx:G=>add(G,"kati","trust",4),then:[{n:"kati",f:"flustered",l:"casual",t:"…I know. I just wanted to hear it out loud once"},{n:"kati",f:"happy",l:"casual",t:"Then I'll say it. The right place. Because now I fight for the camp, not to prove I'm worth something"}]},{t:"Not yet. You've still got a lot to learn",fx:G=>add(G,"kati","bond",1),then:[{n:"kati",f:"pout",l:"casual",t:"Mean! …But true. I'll keep learning. You have to be the one teaching me though"}]}]},{n:"nar",t:"On the way back Kati stops at the same stall for two bags of pa thong ko. One for you, one for Grandpa's picture at the camp"}]},
- 20:{bg:"camp",steps:[{n:"nar",t:"On a day off, Kati carries an old wooden box out of the storeroom. Inside is a thick red hardback ledger"},{n:"kati",f:"happy",l:"casual",t:"The Sirichai Camp roll book. Grandpa wrote down everyone who ever trained here, since the camp opened forty years ago"},{n:"nar",t:"On the last page, in Grandpa's scrawl: 'Kati — the last pupil.' The rest of the page is blank"},{n:"kati",f:"sad",l:"casual",t:"He wrote 'the last.' I haven't dared open it in years"},{inject:G=>[{n:"kati",f:"happy",l:"casual",t:roster(G).length>1?"But it isn't the last anymore. I've written everyone in the camp in after me":"I've added every new fighter who's come through after me, however long they stayed"}]},{n:"kati",f:"flustered",l:"casual",t:"But there's one name I didn't know where to put… not a pupil, not exactly a teacher"},{n:"kati",f:"happy",l:"casual",t:"So I made a new column"},{n:"nar",t:"She turns the page. A new heading in big red pen: 'Family.' Underneath is one name. Yours"},{choice:[{t:"Can I write your name next to mine?",fx:G=>add(G,"kati","bond",3),then:[{inject:G=>G.romance==="kati"?[{n:"kati",f:"flustered",l:"casual",t:"…Okay. Write it close. The column's small"}]:[{n:"kati",f:"happy",l:"casual",t:"Yes! A family needs at least two people anyway"}]}]},{t:"This camp is my home now too",fx:G=>add(G,"kati","trust",4),then:[{n:"kati",f:"happy",l:"casual",t:"Yeah… a home where someone's waiting. I haven't felt that since Grandpa"}]},{t:"Grandpa would love to see this page",fx:G=>add(G,"kati","bond",2),then:[{n:"kati",f:"sad",l:"casual",t:"…I'll leave it in front of his picture tonight. Let him read it first"}]}]},{inject:G=>G.romance==="kati"?[{n:"kati",f:"flustered",l:"casual",t:"Someday… this heading might need changing. You don't have to answer now!"}]:[{n:"kati",f:"happy",l:"casual",t:"Promise me. Whatever happens to the camp, no name on this page ever gets crossed out"}]}]},
+ 20:{bg:"camp",steps:[{n:"nar",t:"On a day off, Kati carries an old wooden box out of the storeroom. Inside is a thick red hardback ledger"},{n:"kati",f:"happy",l:"casual",t:"The Sirichai Camp roll book. Grandpa wrote down everyone who ever trained here, since the camp opened forty years ago"},{n:"nar",t:"On the last page, in Grandpa's scrawl: 'Kati — the last pupil.' The rest of the page is blank"},{n:"kati",f:"sad",l:"casual",t:"He wrote 'the last.' I haven't dared open it in years"},{inject:G=>[{n:"kati",f:"happy",l:"casual",t:roster(G).length>1?"But it isn't the last anymore. I've written everyone in the camp in after me":"I've added every new fighter who's come through after me, however long they stayed"}]},{n:"kati",f:"flustered",l:"casual",t:"But there's one name I didn't know where to put… not a pupil, not exactly a teacher"},{n:"kati",f:"happy",l:"casual",t:"So I made a new column"},{n:"nar",t:"She turns the page. A new heading in big red pen: 'Family.' Underneath is one name. Yours"},{choice:[{t:"Can I write your name next to mine?",fx:G=>add(G,"kati","bond",3),then:[{inject:G=>romOf(G,"kati")?[{n:"kati",f:"flustered",l:"casual",t:"…Okay. Write it close. The column's small"}]:[{n:"kati",f:"happy",l:"casual",t:"Yes! A family needs at least two people anyway"}]}]},{t:"This camp is my home now too",fx:G=>add(G,"kati","trust",4),then:[{n:"kati",f:"happy",l:"casual",t:"Yeah… a home where someone's waiting. I haven't felt that since Grandpa"}]},{t:"Grandpa would love to see this page",fx:G=>add(G,"kati","bond",2),then:[{n:"kati",f:"sad",l:"casual",t:"…I'll leave it in front of his picture tonight. Let him read it first"}]}]},{inject:G=>romOf(G,"kati")?[{n:"kati",f:"flustered",l:"casual",t:"Someday… this heading might need changing. You don't have to answer now!"}]:[{n:"kati",f:"happy",l:"casual",t:"Promise me. Whatever happens to the camp, no name on this page ever gets crossed out"}]}]},
  25:{bg:"camp",steps:[{n:"nar",t:"Saturday morning. Sirichai's gym is full of seven little girls in gloves twice the size of their hands"},{n:"kati",f:"happy",l:"casual",t:"Hello! I'm Kru Kati. Welcome to 'Little Sirichai'!"},{n:"nar",t:"One girl hides behind a pillar, refusing her gloves, eyes on the floor. Kati crouches down in front of her"},{n:"kati",f:"happy",l:"casual",t:"Scared? That's okay. I'm scared every fight. I still get in the ring"},{n:"kati",f:"sad",l:"casual",t:"When I was your age I fought some boys who were bullying my friend. An old man told me, 'Good punches, but use them in the right place'"},{n:"kati",f:"happy",l:"casual",t:"Today I'll show you where the right place is"},{n:"nar",t:"Slowly the girl holds out her hands for the gloves. When class ends she runs over and hugs Kati's waist tight"},{n:"kati",f:"flustered",l:"casual",t:"…Manager, did you see? I passed Grandpa's words on"},{choice:[{t:"Grandpa must be grinning ear to ear",fx:G=>add(G,"kati","bond",3),then:[{n:"kati",f:"happy",l:"casual",t:"And buying pa thong ko for all seven kids"}]},{t:"You're a wonderful teacher",fx:G=>add(G,"kati","trust",4),then:[{n:"kati",f:"flustered",l:"casual",t:"Kru Kati… still makes me blush. But I'll get used to it"}]}]}]},
- 30:{bg:"camp",steps:[{n:"nar",t:"Sirichai Camp's annual wai khru day. This year the yard is full of fighters, and the pi java drifts from the corner of the ring"},{n:"nar",t:"Kati performs her wai khru last. She bows three times before Grandpa's picture, then turns to you and bows once more"},{n:"kati",f:"happy",l:"casual",t:"This year I'm honouring two teachers. The first taught me to fight"},{n:"kati",f:"flustered",l:"casual",t:"The second taught me there's still a home to come back to when I lose, and that I'm worth something without winning"},{n:"kati",f:"happy",l:"casual",t:"Grandpa's last pupil isn't the last anymore. And she isn't alone anymore"},{choice:[{t:"I couldn't be prouder of you",fx:G=>add(G,"kati","bond",3),then:[{inject:G=>G.romance==="kati"?[{n:"nar",t:"Kati unties the red-and-white cord she braided herself and carefully ties it round your wrist"},{n:"kati",f:"flustered",l:"casual",t:"The old folks call it tying wrists. …Can I tie it for life? You don't have to answer now. Just don't untie it"}]:[{n:"kati",f:"happy",l:"casual",t:"My second teacher has to watch my wai khru every year. Promise!"}]}]},{t:"Did Grandpa send you to me, or me to you?",fx:G=>add(G,"kati","trust",4),then:[{n:"kati",f:"happy",l:"casual",t:"…Both. Grandpa was the smartest"}]}]},{n:"kati",f:"happy",l:"casual",t:"Come on! Everyone's waiting for Auntie Daeng's khao soi. My treat today. The whole camp!"}]}},
+ 30:{bg:"camp",steps:[{n:"nar",t:"Sirichai Camp's annual wai khru day. This year the yard is full of fighters, and the pi java drifts from the corner of the ring"},{n:"nar",t:"Kati performs her wai khru last. She bows three times before Grandpa's picture, then turns to you and bows once more"},{n:"kati",f:"happy",l:"casual",t:"This year I'm honouring two teachers. The first taught me to fight"},{n:"kati",f:"flustered",l:"casual",t:"The second taught me there's still a home to come back to when I lose, and that I'm worth something without winning"},{n:"kati",f:"happy",l:"casual",t:"Grandpa's last pupil isn't the last anymore. And she isn't alone anymore"},{choice:[{t:"I couldn't be prouder of you",fx:G=>add(G,"kati","bond",3),then:[{inject:G=>romOf(G,"kati")?[{n:"nar",t:"Kati unties the red-and-white cord she braided herself and carefully ties it round your wrist"},{n:"kati",f:"flustered",l:"casual",t:"The old folks call it tying wrists. …Can I tie it for life? You don't have to answer now. Just don't untie it"}]:[{n:"kati",f:"happy",l:"casual",t:"My second teacher has to watch my wai khru every year. Promise!"}]}]},{t:"Did Grandpa send you to me, or me to you?",fx:G=>add(G,"kati","trust",4),then:[{n:"kati",f:"happy",l:"casual",t:"…Both. Grandpa was the smartest"}]}]},{n:"kati",f:"happy",l:"casual",t:"Come on! Everyone's waiting for Auntie Daeng's khao soi. My treat today. The whole camp!"}]}},
  mali:{
  12:{bg:"camp",steps:[{n:"nar",t:"On a quiet afternoon Mali sits cross-legged outside her room, lap full of plumeria, threading and unthreading the same garland"},{n:"mali",f:"flustered",l:"casual",t:"Ah! You're early! It's not done… it broke again. That's the fourth one"},{n:"mali",f:"happy",l:"casual",t:"Mom says a garland for someone important can't have a single bruised flower. So I'm being a bit picky"},{n:"mali",f:"sad",l:"casual",t:"As a kid I'd sit with Mom outside the market from 4 a.m. Whatever didn't sell went to the temple. We never threw one away"},{n:"mali",f:"happy",l:"casual",t:"Done! Lower your head a bit… you're too tall, I can't reach"},{choice:[{t:"Bow your head for her",fx:G=>add(G,"mali","bond",3),then:[{n:"nar",t:"Mali puts the garland on you and spends far longer than needed straightening the centre flower"},{n:"mali",f:"flustered",l:"casual",t:"…Does it smell nice? I put my whole heart into it"}]},{t:"Sit down so she can reach",fx:G=>add(G,"mali","trust",3),then:[{n:"mali",f:"happy",l:"casual",t:"You're the best! Everyone else tiptoes away to tease me"}]},{t:"Let me make one for you",fx:G=>add(G,"mali","bond",2),then:[{n:"nar",t:"Your garland leans left and has two bruised flowers"},{n:"mali",f:"happy",l:"casual",t:"It's the prettiest! …The bruised ones don't matter, as long as the person who made it isn't"}]}]}]},
  15:{bg:"night",steps:[{n:"nar",t:"Late at night, Mali's voice drifts from behind the camp, bright as always, on the phone"},{n:"mali",f:"happy",l:"casual",t:"It's fine, Mom. I'll handle the school fees. My next purse is good… okay. Sweet dreams"},{n:"nar",t:"When she hangs up she sits still, hugging her knees, staring at the ground. The smile is completely gone"},{n:"mali",f:"flustered",l:"casual",t:"…Manager. You heard all that? I'm fine. Really"},{n:"mali",f:"sad",l:"casual",t:"It's just… some months it's a lot. School fees, Grandma's doctor, the leaking roof. I want it all to stop with me. I don't want anyone else tired because of it"},{choice:[{t:"You don't have to smile here. Tell me all of it",fx:G=>add(G,"mali","trust",4),then:[{n:"nar",t:"Mali tells you everything, slowly, one thing at a time, until nearly 1 a.m. You just listen"},{n:"mali",f:"happy",l:"casual",t:"…That's so much lighter. Like putting a sandbag down off my shoulders"}]},{t:"You're not doing this alone. Tell me when it's too much",fx:G=>add(G,"mali","bond",3),then:[{n:"mali",f:"flustered",l:"casual",t:"…I promise. If it gets too heavy I'll say so. No more carrying it in secret"}]},{t:"Your mom must be so proud of you",fx:G=>add(G,"mali","bond",2),then:[{n:"mali",f:"sad",l:"casual",t:"She says so every time. I'd rather she didn't have to worry than be proud"}]}]},{n:"mali",f:"happy",l:"casual",t:"Tomorrow I'll be smiling like usual. But this time it'll be for real"}]},
- 20:{bg:"camp",steps:[{n:"nar",t:"Mali hands you her phone. A video from her mom: the sea in front of their house, small waves rolling in at dawn"},{n:"mali",f:"happy",l:"casual",t:"This is my home sea. I ran along this beach every morning as a kid, kicking waves until my legs got strong"},{n:"mali",f:"sad",l:"casual",t:"When I first got here I watched this every night. I missed it so much I couldn't sleep"},{n:"mali",f:"flustered",l:"casual",t:"But this month I realised I hadn't watched it once… because it's not lonely here anymore"},{n:"mali",f:"happy",l:"casual",t:"Next Songkran, come home with me. Mom can meet the person I talk about every day"},{choice:[{t:"Yes. I want to see the sea that made your kicks so good",fx:G=>add(G,"mali","bond",3),then:[{inject:G=>G.romance==="mali"?[{n:"mali",f:"flustered",l:"casual",t:"…Mom will definitely ask what you are to me. You answer that one!"}]:[{n:"mali",f:"happy",l:"casual",t:"Yay! Morning beach run. Loser buys khanom jeen!"}]}]},{t:"This is your home too now",fx:G=>add(G,"mali","trust",4),then:[{n:"mali",f:"happy",l:"casual",t:"Yeah… I have two homes now. One with the sea, one with everyone"}]}]},{inject:G=>G.romance==="mali"?[{n:"mali",f:"flustered",l:"casual",t:"Take care of me… darling. And that one's not a typo"}]:[{n:"mali",f:"happy",l:"casual",t:"Whatever day it is, if you're tired, come find me. I'll always have snacks and a smile"}]}]},
+ 20:{bg:"camp",steps:[{n:"nar",t:"Mali hands you her phone. A video from her mom: the sea in front of their house, small waves rolling in at dawn"},{n:"mali",f:"happy",l:"casual",t:"This is my home sea. I ran along this beach every morning as a kid, kicking waves until my legs got strong"},{n:"mali",f:"sad",l:"casual",t:"When I first got here I watched this every night. I missed it so much I couldn't sleep"},{n:"mali",f:"flustered",l:"casual",t:"But this month I realised I hadn't watched it once… because it's not lonely here anymore"},{n:"mali",f:"happy",l:"casual",t:"Next Songkran, come home with me. Mom can meet the person I talk about every day"},{choice:[{t:"Yes. I want to see the sea that made your kicks so good",fx:G=>add(G,"mali","bond",3),then:[{inject:G=>romOf(G,"mali")?[{n:"mali",f:"flustered",l:"casual",t:"…Mom will definitely ask what you are to me. You answer that one!"}]:[{n:"mali",f:"happy",l:"casual",t:"Yay! Morning beach run. Loser buys khanom jeen!"}]}]},{t:"This is your home too now",fx:G=>add(G,"mali","trust",4),then:[{n:"mali",f:"happy",l:"casual",t:"Yeah… I have two homes now. One with the sea, one with everyone"}]}]},{inject:G=>romOf(G,"mali")?[{n:"mali",f:"flustered",l:"casual",t:"Take care of me… darling. And that one's not a typo"}]:[{n:"mali",f:"happy",l:"casual",t:"Whatever day it is, if you're tired, come find me. I'll always have snacks and a smile"}]}]},
  25:{bg:"camp",steps:[{n:"nar",t:"School break. Mali's middle sibling arrives at camp with a bag bigger than they are, hair in two buns just like their sister"},{n:"mali",f:"happy",l:"casual",t:"This is my sibling! I'm teaching today. Nobody steal my job!"},{n:"nar",t:"Mali teaches kicks all morning, more patient than anyone's ever seen her. Every miss, she laughs and says try again"},{n:"mali",f:"sad",l:"casual",t:"…When I was little nobody taught me like this. I watched temple-fair fights in secret and kicked banana trees"},{n:"mali",f:"happy",l:"casual",t:"Today I get to be the person I wished I had as a kid"},{choice:[{t:"Your sibling's lucky to have you",fx:G=>add(G,"mali","bond",3),then:[{n:"mali",f:"flustered",l:"casual",t:"…We're both lucky. They make me want to be even better"}]},{t:"I can see the future Kru Mali",fx:G=>add(G,"mali","trust",4),then:[{n:"mali",f:"happy",l:"casual",t:"Kru Mali~ When I retire, I'll open a little camp by the sea, next to Mom's house. You have to help"}]}]}]},
- 30:{bg:"sea",steps:[{n:"nar",t:"Songkran. Mali's mother's two-storey wooden house by the sea is finished. You're standing in front of a house you'd only seen in a sketchbook"},{n:"nar",t:"Mali's mother threads garlands on the balcony facing the sea. All three siblings run out and splash you at once"},{n:"mali",f:"happy",l:"casual",t:"Welcome to my home! Built from every kick I've ever thrown"},{n:"nar",t:"Mali's mother comes down, places a plumeria garland on you, and gently pours water over your hands in the traditional blessing"},{n:"mali",f:"flustered",l:"casual",t:"Mom says, 'Thank you for looking after my daughter.' …I told her we look after each other"},{choice:[{t:"Thank you for letting me be part of this home",fx:G=>add(G,"mali","bond",3),then:[{inject:G=>G.romance==="mali"?[{n:"mali",f:"flustered",l:"casual",t:"…The room next to mine is yours forever. Or… if someday you want the same room, Mom says that's fine"}]:[{n:"mali",f:"happy",l:"casual",t:"There'll always be a room here for you, wherever I am"}]}]},{t:"What's your next dream?",fx:G=>add(G,"mali","trust",4),then:[{n:"mali",f:"happy",l:"casual",t:"A little boxing camp next to this house. So the small kids here can kick something besides banana trees"}]}]},{n:"mali",f:"happy",l:"casual",t:"Come on! The giant pot of tai pla is waiting. Tonight we all eat on the balcony watching the sea"}]}},
+ 30:{bg:"sea",steps:[{n:"nar",t:"Songkran. Mali's mother's two-storey wooden house by the sea is finished. You're standing in front of a house you'd only seen in a sketchbook"},{n:"nar",t:"Mali's mother threads garlands on the balcony facing the sea. All three siblings run out and splash you at once"},{n:"mali",f:"happy",l:"casual",t:"Welcome to my home! Built from every kick I've ever thrown"},{n:"nar",t:"Mali's mother comes down, places a plumeria garland on you, and gently pours water over your hands in the traditional blessing"},{n:"mali",f:"flustered",l:"casual",t:"Mom says, 'Thank you for looking after my daughter.' …I told her we look after each other"},{choice:[{t:"Thank you for letting me be part of this home",fx:G=>add(G,"mali","bond",3),then:[{inject:G=>romOf(G,"mali")?[{n:"mali",f:"flustered",l:"casual",t:"…The room next to mine is yours forever. Or… if someday you want the same room, Mom says that's fine"}]:[{n:"mali",f:"happy",l:"casual",t:"There'll always be a room here for you, wherever I am"}]}]},{t:"What's your next dream?",fx:G=>add(G,"mali","trust",4),then:[{n:"mali",f:"happy",l:"casual",t:"A little boxing camp next to this house. So the small kids here can kick something besides banana trees"}]}]},{n:"mali",f:"happy",l:"casual",t:"Come on! The giant pot of tai pla is waiting. Tonight we all eat on the balcony watching the sea"}]}},
  rin:{
  12:{bg:"cafe",steps:[{n:"nar",t:"1 a.m. Rin's light is still on. Her door's ajar, and she's editing on three screens"},{n:"rin",f:"flustered",l:"casual",t:"Manager… I'm not working late. This is 'structured leisure'"},{n:"rin",f:"happy",l:"casual",t:"My fight-analysis channel. 313 subscribers. I've been working on this one for three weeks"},{n:"nar",t:"On screen is a huge table. The header reads: 'The Manager's Decisions, This Season'"},{n:"rin",f:"flustered",l:"casual",t:"…This isn't for the channel. I just wanted to understand how you think. You don't decide like any formula I know"},{choice:[{t:"Figured me out yet?",fx:G=>add(G,"rin","trust",3),then:[{n:"rin",f:"happy",l:"casual",t:"Not yet. But I found that you always pick what's good for people over what's good for the stats. …I think that's my favourite data in the file"}]},{t:"Go to sleep. The table can wait",fx:G=>add(G,"rin","bond",3),then:[{n:"rin",f:"flustered",l:"casual",t:"…You're the first person to tell me data can wait"},{n:"nar",t:"Rin hits Save and closes the laptop. Her first night before 2 a.m. in months"}]},{t:"Can I watch one of your channel videos?",fx:G=>add(G,"rin","bond",2),then:[{n:"nar",t:"Rin plays one. Her voice in the video is twice as fast and excited as in real life"},{n:"rin",f:"flustered",l:"casual",t:"…Please don't look at me while it plays"}]}]}]},
  15:{bg:"night",steps:[{n:"nar",t:"Rin hands you a flash drive. Her fingers are ice-cold"},{n:"rin",f:"sad",l:"casual",t:"My first fight. I was nineteen. My parents were in the front row. I got knocked out in round two"},{n:"rin",f:"sad",l:"casual",t:"I've never watched it to the end. Every time it reaches 4:12, I stop it"},{n:"rin",f:"flustered",l:"casual",t:"Today I want to finish it. But not alone…"},{choice:[{t:"We'll watch together. Tell me if you want to stop",fx:G=>add(G,"rin","trust",4),then:[{n:"nar",t:"4:12 passes. A punch lands flush on the chin and the Rin on screen goes down. The Rin beside you doesn't look away"},{n:"rin",f:"sad",l:"casual",t:"…Look. Half a second before the punch I glanced at the stands. I was scared of disappointing my mother, not of my opponent"},{n:"rin",f:"happy",l:"casual",t:"The plan that day wasn't wrong. I just wasn't really in the ring. …Five years trying to calculate it away, and the answer was never in a formula"}]},{t:"You don't have to watch it today",fx:G=>add(G,"rin","bond",2),then:[{n:"rin",f:"sad",l:"casual",t:"…I do. If it's not a day with you beside me, I'll never dare"},{n:"nar",t:"Rin presses Play and holds your sleeve until it ends"}]}]},{n:"rin",f:"flustered",l:"casual",t:"Thank you. I'm deleting this file now. Not out of fear. I just don't need it anymore"}]},
- 20:{bg:"cafe",steps:[{n:"nar",t:"Rin asks to meet at a quiet café. She opens her laptop and turns the screen to you, very formally"},{n:"rin",f:"happy",l:"casual",t:"This is my model of Sirichai Camp's success. 214 variables. Three years of work"},{n:"nar",t:"Every cell has a number except the last. It's labelled 'Manager.' Value: #CANNOT_CALCULATE"},{n:"rin",f:"flustered",l:"casual",t:"There was a time a cell like that would keep me up all night until I fixed it"},{n:"rin",f:"happy",l:"casual",t:"But I'm leaving this one on purpose. The first time in my life I'm glad something can't be calculated"},{choice:[{t:"Can the next cell be you?",fx:G=>add(G,"rin","bond",3),then:[{inject:G=>G.romance==="rin"?[{n:"rin",f:"flustered",l:"casual",t:"…I'll link the two cells with a formula. If one changes, the other follows. Forever"}]:[{n:"rin",f:"happy",l:"casual",t:"Yes. Same value in both. #CANNOT_CALCULATE"}]}]},{t:"You can't be calculated either",fx:G=>add(G,"rin","trust",4),then:[{n:"rin",f:"flustered",l:"casual",t:"…No one's ever said that to me. Everyone says I'm the most predictable person alive"}]}]},{inject:G=>G.romance==="rin"?[{n:"rin",f:"happy",l:"casual",t:"I've renamed the file. From 'Success Model' to 'Us'"}]:[{n:"rin",f:"happy",l:"casual",t:"I'll never delete that cell, however many times I update the file"}]}]},
+ 20:{bg:"cafe",steps:[{n:"nar",t:"Rin asks to meet at a quiet café. She opens her laptop and turns the screen to you, very formally"},{n:"rin",f:"happy",l:"casual",t:"This is my model of Sirichai Camp's success. 214 variables. Three years of work"},{n:"nar",t:"Every cell has a number except the last. It's labelled 'Manager.' Value: #CANNOT_CALCULATE"},{n:"rin",f:"flustered",l:"casual",t:"There was a time a cell like that would keep me up all night until I fixed it"},{n:"rin",f:"happy",l:"casual",t:"But I'm leaving this one on purpose. The first time in my life I'm glad something can't be calculated"},{choice:[{t:"Can the next cell be you?",fx:G=>add(G,"rin","bond",3),then:[{inject:G=>romOf(G,"rin")?[{n:"rin",f:"flustered",l:"casual",t:"…I'll link the two cells with a formula. If one changes, the other follows. Forever"}]:[{n:"rin",f:"happy",l:"casual",t:"Yes. Same value in both. #CANNOT_CALCULATE"}]}]},{t:"You can't be calculated either",fx:G=>add(G,"rin","trust",4),then:[{n:"rin",f:"flustered",l:"casual",t:"…No one's ever said that to me. Everyone says I'm the most predictable person alive"}]}]},{inject:G=>romOf(G,"rin")?[{n:"rin",f:"happy",l:"casual",t:"I've renamed the file. From 'Success Model' to 'Us'"}]:[{n:"rin",f:"happy",l:"casual",t:"I'll never delete that cell, however many times I update the file"}]}]},
  25:{bg:"hall",steps:[{n:"nar",t:"A university lecture hall, three hundred people. Rin stands on stage with forty-eight slides, the remote shaking slightly in her hand"},{n:"rin",f:"flustered",l:"casual",t:"…Good afternoon. Today I'll talk about… about…"},{n:"nar",t:"Rin looks at the front row, centre. You raise a thumb. She takes a deep breath"},{n:"rin",f:"happy",l:"casual",t:"Today I'll talk about the muay thai we can measure, and the muay thai we can't"},{n:"nar",t:"Rin speaks for forty minutes without a stumble. The final slide is a photo of five women fighters arm in arm outside an old camp"},{n:"rin",f:"happy",l:"casual",t:"The most important variable I've found is having someone who believes in you before the data does. Thank you"},{n:"nar",t:"The whole hall stands to applaud. The front row, centre, claps first"},{choice:[{t:"You did it. On the big stage",fx:G=>add(G,"rin","bond",3),then:[{n:"rin",f:"flustered",l:"casual",t:"…The big stage I've always feared. Today I wasn't scared, because I knew where to look"}]},{t:"Is that last slide our camp?",fx:G=>add(G,"rin","trust",4),then:[{n:"rin",f:"happy",l:"casual",t:"Yes. The best data I have"}]}]}]},
- 30:{bg:"local",steps:[{n:"nar",t:"The biggest fight of Rin's life. The stadium's packed. Her parents are in the front row, the first time since the day she was knocked out"},{n:"nar",t:"Before the walk-out she hands you her glasses as always. But this time she doesn't recite the plan"},{n:"rin",f:"happy",l:"casual",t:"No plan today. I'll fight with everything my body remembers. And I'll look at this corner, not the stands"},{n:"nar",t:"Round five. Rin slips a punch nobody expected her to, then counters on a rhythm she never drilled. The whole stadium rises"},{n:"nar",t:"At the final bell Rin doesn't look at the scorecards. She runs to the corner, then looks at the front row. Her mother is crying, smiling through it this time"},{n:"rin",f:"flustered",l:"casual",t:"…I don't know if I won or lost. And I don't care. First time in my life"},{choice:[{t:"Put your glasses on and go to your parents",fx:G=>add(G,"rin","bond",3),then:[{inject:G=>G.romance==="rin"?[{n:"rin",f:"flustered",l:"casual",t:"…Come with me. I'll introduce you as 'the one I can't calculate.' Mother already knows what it means"}]:[{n:"rin",f:"happy",l:"casual",t:"…Come with me. I want her to meet the person who got me back in the ring"}]}]},{t:"You've won, whatever the scorecards say",fx:G=>add(G,"rin","trust",4),then:[{n:"rin",f:"happy",l:"casual",t:"…That's data I believe without checking"}]}]}]}},
+ 30:{bg:"local",steps:[{n:"nar",t:"The biggest fight of Rin's life. The stadium's packed. Her parents are in the front row, the first time since the day she was knocked out"},{n:"nar",t:"Before the walk-out she hands you her glasses as always. But this time she doesn't recite the plan"},{n:"rin",f:"happy",l:"casual",t:"No plan today. I'll fight with everything my body remembers. And I'll look at this corner, not the stands"},{n:"nar",t:"Round five. Rin slips a punch nobody expected her to, then counters on a rhythm she never drilled. The whole stadium rises"},{n:"nar",t:"At the final bell Rin doesn't look at the scorecards. She runs to the corner, then looks at the front row. Her mother is crying, smiling through it this time"},{n:"rin",f:"flustered",l:"casual",t:"…I don't know if I won or lost. And I don't care. First time in my life"},{choice:[{t:"Put your glasses on and go to your parents",fx:G=>add(G,"rin","bond",3),then:[{inject:G=>romOf(G,"rin")?[{n:"rin",f:"flustered",l:"casual",t:"…Come with me. I'll introduce you as 'the one I can't calculate.' Mother already knows what it means"}]:[{n:"rin",f:"happy",l:"casual",t:"…Come with me. I want her to meet the person who got me back in the ring"}]}]},{t:"You've won, whatever the scorecards say",fx:G=>add(G,"rin","trust",4),then:[{n:"rin",f:"happy",l:"casual",t:"…That's data I believe without checking"}]}]}]}},
  ploy:{
  12:{bg:"temple",need:G=>!!G.F.ploy.met,steps:[{n:"nar",t:"5:30 a.m. The temple courtyard is still dark. Ploy sits on a stone bench, sewing hand wraps with hands steadier than in the ring"},{n:"ploy",f:"happy",l:"casual",t:"You're on time. …I'm nearly done. Sit"},{n:"nar",t:"The wraps are dark grey. At the end, stitched small in purple thread, is your name"},{n:"ploy",f:"flustered",l:"casual",t:"I've sewn three hundred pairs for juniors. This is three-hundred-and-one. I know you don't fight"},{n:"ploy",f:"happy",l:"casual",t:"But whoever stands in the corner has to wrap their fighter's hands. You wrap too loose every time. I've been watching"},{choice:[{t:"Then teach me to do it right",fx:G=>add(G,"ploy","trust",3),then:[{n:"nar",t:"Ploy takes your hand and wraps it slowly, explaining every turn. Somewhere far off the old monk's broom scrapes the stones"},{n:"ploy",f:"flustered",l:"casual",t:"…Your hand's warmer than I expected. Ignore that. Pay attention"}]},{t:"I'll take good care of them",fx:G=>add(G,"ploy","bond",3),then:[{n:"ploy",f:"happy",l:"casual",t:"Don't keep them. Use them. Unused wraps are just cloth"}]},{t:"Why purple thread?",fx:G=>add(G,"ploy","bond",2),then:[{n:"ploy",f:"flustered",l:"casual",t:"…It's my colour. So you know who made them. No more questions"}]}]}]},
  15:{bg:"night",need:G=>!!G.F.ploy.met,steps:[{n:"nar",t:"Late at night Ploy asks to meet by the river. She holds an old faded-yellow envelope, edges worn soft from being opened many times"},{n:"ploy",f:"sad",l:"casual",t:"When I was fifteen, Grandpa Chai sent this to Korat. He invited me to join Sirichai Camp"},{n:"nar",t:"In shaky handwriting: 'Our camp has no money and no fame. But it has people who'll never send you in hurt, and who'll stand by you when you lose'"},{n:"ploy",f:"sad",l:"casual",t:"I didn't come. Golden Tiger offered a scholarship and my family needed money. I chose right. But I've kept this letter eleven years"},{n:"ploy",f:"flustered",l:"casual",t:"Back then I didn't believe a camp like the one he described existed. …Until I saw you stand beside Kati when she lost"},{choice:[{t:"Grandpa would be glad you kept it",fx:G=>add(G,"ploy","bond",3),then:[{n:"ploy",f:"sad",l:"casual",t:"…I never answered it. He was gone before I could"}]},{t:"Whatever camp you're in, what he wrote holds true for you",fx:G=>add(G,"ploy","trust",4),then:[{n:"ploy",f:"flustered",l:"casual",t:"…I don't know how to answer you. So I'll fold the letter away like always. But it doesn't hurt this time"}]}]},{inject:G=>inCamp(G,"ploy")?[{n:"ploy",f:"happy",l:"casual",t:"Eleven years late. But I made it to the camp he wrote about"}]:[{n:"ploy",f:"happy",l:"casual",t:"Someday… I might answer this letter in person. Not on paper"}]}]},
- 20:{bg:"river",need:G=>!!G.F.ploy.met,steps:[{n:"nar",t:"Ploy sits beside you by the water. She isn't holding the letter this time. She holds out an empty hand"},{n:"ploy",f:"happy",l:"casual",t:"I finally understand. All my life I was scared of losing, not because it hurts, but because I thought no one would stay"},{n:"ploy",f:"flustered",l:"casual",t:"Now I know someone will. Win or lose, that person will be standing right here"},{n:"ploy",f:"happy",l:"casual",t:"I'm not just 'the prodigy' anymore. I'm Ploy, and I can choose my own path"},{choice:[{t:"Take her hand",fx:G=>add(G,"ploy","bond",3),then:[{inject:G=>G.romance==="ploy"?[{n:"ploy",f:"flustered",l:"casual",t:"…Still as warm as when I taught you to wrap. I won't let go. Even though this isn't training"}]:[{n:"ploy",f:"happy",l:"casual",t:"…Thank you. You're the first person I've ever reached out to first"}]}]},{t:"I'm always here. Win or lose",fx:G=>add(G,"ploy","trust",4),then:[{n:"ploy",f:"happy",l:"casual",t:"I'll remember. And for the first time, I'll step into the ring without fearing a loss"}]}]},{inject:G=>G.romance==="ploy"?[{n:"ploy",f:"happy",l:"casual",t:"This New Year, my birthday, be with me. I won't ask for anything more"}]:[{n:"ploy",f:"happy",l:"casual",t:"Thank you for making Grandpa's letter come true"}]}]},
+ 20:{bg:"river",need:G=>!!G.F.ploy.met,steps:[{n:"nar",t:"Ploy sits beside you by the water. She isn't holding the letter this time. She holds out an empty hand"},{n:"ploy",f:"happy",l:"casual",t:"I finally understand. All my life I was scared of losing, not because it hurts, but because I thought no one would stay"},{n:"ploy",f:"flustered",l:"casual",t:"Now I know someone will. Win or lose, that person will be standing right here"},{n:"ploy",f:"happy",l:"casual",t:"I'm not just 'the prodigy' anymore. I'm Ploy, and I can choose my own path"},{choice:[{t:"Take her hand",fx:G=>add(G,"ploy","bond",3),then:[{inject:G=>romOf(G,"ploy")?[{n:"ploy",f:"flustered",l:"casual",t:"…Still as warm as when I taught you to wrap. I won't let go. Even though this isn't training"}]:[{n:"ploy",f:"happy",l:"casual",t:"…Thank you. You're the first person I've ever reached out to first"}]}]},{t:"I'm always here. Win or lose",fx:G=>add(G,"ploy","trust",4),then:[{n:"ploy",f:"happy",l:"casual",t:"I'll remember. And for the first time, I'll step into the ring without fearing a loss"}]}]},{inject:G=>romOf(G,"ploy")?[{n:"ploy",f:"happy",l:"casual",t:"This New Year, my birthday, be with me. I won't ask for anything more"}]:[{n:"ploy",f:"happy",l:"casual",t:"Thank you for making Grandpa's letter come true"}]}]},
  25:{bg:"farm",need:G=>!!G.F.ploy.met,steps:[{n:"nar",t:"New Year in Korat. Ploy's wooden house sits at the edge of the fields. Her father waits out front in an old PE tracksuit, exactly on time"},{n:"ploy",f:"flustered",l:"casual",t:"Father, this is the person I told you about"},{n:"nar",t:"Ploy's father studies you a long moment, then offers his hand. A grip as strong as his daughter's"},{n:"nar",t:"Midnight, January 1. Ploy takes you to the flower field she ran through as a child. New Year fireworks bloom over the distant town"},{n:"ploy",f:"happy",l:"casual",t:"As a kid I thought the fireworks were for me. Then I grew up and knew better. This year I want to believe it again"},{choice:[{t:"Happy birthday, Ploy. This year they really are for you",fx:G=>add(G,"ploy","bond",3),then:[{n:"ploy",f:"flustered",l:"casual",t:"…One second before midnight, exactly. Your timing's better than mine"}]},{t:"Thank you for bringing me home",fx:G=>add(G,"ploy","trust",4),then:[{n:"ploy",f:"happy",l:"casual",t:"Father said, 'Punctual. Acceptable.' That's the highest praise he gives"}]}]}]},
- 30:{bg:"temple",need:G=>!!G.F.ploy.met,steps:[{n:"nar",t:"Instructor certification day. Ploy teaches juniors in front of the examiners. She doesn't shout or order, yet everyone listens"},{n:"nar",t:"A junior misses a kick and falls. Ploy doesn't scold. She sits beside him and rewraps his loose hand wraps"},{n:"ploy",f:"happy",l:"casual",t:"Falling's fine. Get back up. I'm right here"},{n:"nar",t:"The examiners pass her on the spot. Ploy stands still, then turns to you"},{n:"ploy",f:"flustered",l:"casual",t:"What I just said, I got from Grandpa Chai's letter. And from you"},{n:"ploy",f:"happy",l:"casual",t:"I've chosen my path now. A teacher who never lets anyone fall alone"},{choice:[{t:"Congratulations, Kru Ploy",fx:G=>add(G,"ploy","bond",3),then:[{inject:G=>G.romance==="ploy"?[{n:"ploy",f:"flustered",l:"casual",t:"…Kru Ploy has a request. Not as a teacher. I want to be beside you every morning at five, for life. On time, every day"}]:[{n:"ploy",f:"happy",l:"casual",t:"Kru Ploy… sounds so much better than 'prodigy'. Thank you for being the first to say it"}]}]},{t:"Grandpa Chai would be proud to call you a pupil",fx:G=>add(G,"ploy","trust",4),then:[{n:"ploy",f:"sad",l:"casual",t:"…I was never his pupil. But today, let me count myself as one"}]}]},{inject:G=>inCamp(G,"ploy")?[{n:"ploy",f:"happy",l:"casual",t:"Let's go back to camp. I'll start teaching the Sirichai juniors tomorrow"}]:[{n:"ploy",f:"happy",l:"casual",t:"I'll go back and teach Golden Tiger's juniors the way Grandpa's letter describes, not the way I was taught"}]}]}},
+ 30:{bg:"temple",need:G=>!!G.F.ploy.met,steps:[{n:"nar",t:"Instructor certification day. Ploy teaches juniors in front of the examiners. She doesn't shout or order, yet everyone listens"},{n:"nar",t:"A junior misses a kick and falls. Ploy doesn't scold. She sits beside him and rewraps his loose hand wraps"},{n:"ploy",f:"happy",l:"casual",t:"Falling's fine. Get back up. I'm right here"},{n:"nar",t:"The examiners pass her on the spot. Ploy stands still, then turns to you"},{n:"ploy",f:"flustered",l:"casual",t:"What I just said, I got from Grandpa Chai's letter. And from you"},{n:"ploy",f:"happy",l:"casual",t:"I've chosen my path now. A teacher who never lets anyone fall alone"},{choice:[{t:"Congratulations, Kru Ploy",fx:G=>add(G,"ploy","bond",3),then:[{inject:G=>romOf(G,"ploy")?[{n:"ploy",f:"flustered",l:"casual",t:"…Kru Ploy has a request. Not as a teacher. I want to be beside you every morning at five, for life. On time, every day"}]:[{n:"ploy",f:"happy",l:"casual",t:"Kru Ploy… sounds so much better than 'prodigy'. Thank you for being the first to say it"}]}]},{t:"Grandpa Chai would be proud to call you a pupil",fx:G=>add(G,"ploy","trust",4),then:[{n:"ploy",f:"sad",l:"casual",t:"…I was never his pupil. But today, let me count myself as one"}]}]},{inject:G=>inCamp(G,"ploy")?[{n:"ploy",f:"happy",l:"casual",t:"Let's go back to camp. I'll start teaching the Sirichai juniors tomorrow"}]:[{n:"ploy",f:"happy",l:"casual",t:"I'll go back and teach Golden Tiger's juniors the way Grandpa's letter describes, not the way I was taught"}]}]}},
  fah:{
  12:{bg:"night",need:G=>!!G.F.fah.met,steps:[{n:"nar",t:"10 p.m. A storm rolls in and lightning lights up the whole city. Your phone rings. It's Fah"},{n:"fah",f:"pout",l:"casual",t:"…It's nothing!! I just called to ask… have you eaten?"},{n:"nar",t:"Thunder cracks overhead. The line goes silent for three seconds, then you hear shaky breathing"},{n:"fah",f:"sad",l:"casual",t:"…Okay. I admit it. I'm scared of thunder. My name is literally 'sky' and I'm scared of thunder. Funny, right? Go on, laugh"},{n:"fah",f:"sad",l:"casual",t:"When I was little, the night my parents left, it stormed like this. Thunder all night. Grandma held me till morning. I've hated the sound ever since"},{choice:[{t:"I'm not laughing. I'll stay on the line until the storm's over",fx:G=>add(G,"fah","trust",4),then:[{n:"nar",t:"You talk about nothing for hours: sausages, tiger sketches, Grandma's motorbike, until the rain eases at 1 a.m."},{n:"fah",f:"flustered",l:"casual",t:"…Rain's stopped. I'm not scared anymore. …Thanks. Don't tell anyone"}]},{t:"Want to blast music to drown it out? I'll play some too",fx:G=>add(G,"fah","bond",3),then:[{n:"fah",f:"happy",l:"casual",t:"…What is this music?! Dad-era luk thung! Hahaha, I forgot to be scared"}]},{t:"It's not funny. Everyone's scared of something",fx:G=>add(G,"fah","bond",2),then:[{n:"fah",f:"flustered",l:"casual",t:"…You sound like Grandma. She says it's okay to be scared, just not alone"}]}]}]},
  15:{bg:"market",need:G=>!!G.F.fah.met,steps:[{n:"nar",t:"Fah drags you into a tiny tattoo parlour off the market lane and slaps her tiger sketchbook on the counter"},{n:"fah",f:"happy",l:"casual",t:"Today I'm getting it done for real! No stopping me! Grandma said yes!"},{n:"fah",f:"flustered",l:"casual",t:"I'm going with the one you picked. The tiger looking back. But I changed it a little"},{n:"nar",t:"In the drawing, beside the tiger's paw, is a little wooden house. And beside that, a small boxing camp"},{n:"fah",f:"sad",l:"casual",t:"Grandma's house, and… the place I want to protect. This tiger has two places to guard now"},{choice:[{t:"I'll sit right here the whole time",fx:G=>add(G,"fah","bond",3),then:[{n:"nar",t:"Fah grits her teeth and doesn't make a sound. But her grip on your hand is so tight your fingers go white"},{n:"fah",f:"flustered",l:"casual",t:"…I'm not holding on because it hurts. It's because… never mind!!"}]},{t:"Your tiger can guard both",fx:G=>add(G,"fah","trust",4),then:[{n:"fah",f:"happy",l:"casual",t:"…Yeah. Because this tiger isn't guarding alone anymore"}]}]},{inject:G=>inCamp(G,"fah")?[{n:"fah",f:"happy",l:"casual",t:"Done! Sirichai Camp is on my arm forever now. Take responsibility!"}]:[{n:"fah",f:"happy",l:"casual",t:"Done! Don't ask which camp that is! …You already know"}]}]},
- 20:{bg:"river",need:G=>!!G.F.fah.met,steps:[{n:"nar",t:"5:30 a.m. Fah rides Grandma's old motorbike along the Ping with you on the back, to an abandoned pier beside a rotting wooden house"},{n:"fah",f:"sad",l:"casual",t:"My old house. Before my parents left. Grandma and I moved out when I was seven. I've never brought anyone here"},{n:"fah",f:"sad",l:"casual",t:"I always knew. I'm sharp with everyone because I'm scared. If nobody gets close, nobody can leave"},{n:"fah",f:"flustered",l:"casual",t:"But you got too close before I could chase you off. …So I brought you here. To leave the fear here, together"},{choice:[{t:"I'm not going anywhere. Leave it here",fx:G=>add(G,"fah","bond",3),then:[{n:"nar",t:"Fah picks up a stone and hurls it into the river as hard as she can. Water sprays up high, and she laughs"},{inject:G=>G.romance==="fah"?[{n:"fah",f:"flustered",l:"casual",t:"…Darling. …I couldn't type it, but I can say it. Darling! Happy now?!"}]:[{n:"fah",f:"happy",l:"casual",t:"Gone! From now on I'm sharp because it's fun, not because I'm scared!"}]}]},{t:"Thank you for bringing me",fx:G=>add(G,"fah","trust",4),then:[{n:"fah",f:"flustered",l:"casual",t:"…Don't thank me! I should be the one… thank you. For staying"}]}]},{n:"fah",f:"happy",l:"casual",t:"Let's head back. Grandma's making rice soup. She said today's a celebration. No idea how she knew"}]},
+ 20:{bg:"river",need:G=>!!G.F.fah.met,steps:[{n:"nar",t:"5:30 a.m. Fah rides Grandma's old motorbike along the Ping with you on the back, to an abandoned pier beside a rotting wooden house"},{n:"fah",f:"sad",l:"casual",t:"My old house. Before my parents left. Grandma and I moved out when I was seven. I've never brought anyone here"},{n:"fah",f:"sad",l:"casual",t:"I always knew. I'm sharp with everyone because I'm scared. If nobody gets close, nobody can leave"},{n:"fah",f:"flustered",l:"casual",t:"But you got too close before I could chase you off. …So I brought you here. To leave the fear here, together"},{choice:[{t:"I'm not going anywhere. Leave it here",fx:G=>add(G,"fah","bond",3),then:[{n:"nar",t:"Fah picks up a stone and hurls it into the river as hard as she can. Water sprays up high, and she laughs"},{inject:G=>romOf(G,"fah")?[{n:"fah",f:"flustered",l:"casual",t:"…Darling. …I couldn't type it, but I can say it. Darling! Happy now?!"}]:[{n:"fah",f:"happy",l:"casual",t:"Gone! From now on I'm sharp because it's fun, not because I'm scared!"}]}]},{t:"Thank you for bringing me",fx:G=>add(G,"fah","trust",4),then:[{n:"fah",f:"flustered",l:"casual",t:"…Don't thank me! I should be the one… thank you. For staying"}]}]},{n:"fah",f:"happy",l:"casual",t:"Let's head back. Grandma's making rice soup. She said today's a celebration. No idea how she knew"}]},
  25:{bg:"mountain",need:G=>!!G.F.fah.met,steps:[{n:"nar",t:"5 a.m., Khao Yai. Fah has brought Grandma to see the sea of fog as she promised. Grandma sits wrapped in a thick blanket, her granddaughter never more than a step away"},{n:"fah",f:"pout",l:"casual",t:"Are you cold? Hungry? Need the toilet… Grandma, answer something!"},{n:"nar",t:"Grandma laughs and takes Fah's hand. The first light falls across the fog. Grandma goes quiet, tears running slowly"},{n:"nar",t:"Grandma says softly, 'I thought I'd never see it. The sea of fog, or my grandchild smiling like this'"},{n:"fah",f:"flustered",l:"casual",t:"…Grandma!! Not in front of him!! I'm not crying, the fog got in my eyes!"},{choice:[{t:"Let me take a photo of you two",fx:G=>add(G,"fah","bond",3),then:[{n:"nar",t:"In the photo Grandma grins widely. Fah's face and eyes are red, but her grin is wider still"},{n:"fah",f:"happy",l:"casual",t:"…I'm turning this photo into tiger number fifty-three"}]},{t:"Thank you for bringing her. You did it",fx:G=>add(G,"fah","trust",4),then:[{n:"fah",f:"happy",l:"casual",t:"We did it! You drove, I pushed Grandma. Teamwork!"}]}]}]},
- 30:{bg:"river",need:G=>!!G.F.fah.met,steps:[{n:"nar",t:"Fah's birthday, October 31. She's dressed as the silver-haired witch as always, but this year Grandma's house is packed"},{n:"nar",t:"Neighbourhood kids come for candy, market vendors bring sausages, tattoo clients bring cake. Nobody goes to any other Halloween party"},{n:"fah",f:"flustered",l:"casual",t:"…Why is everyone here? Nobody ever comes to my birthday"},{n:"nar",t:"Grandma whispers, 'Someone went door to door inviting the whole street last week,' and looks at you"},{n:"fah",f:"sad",l:"casual",t:"…You. Why would you do this? I said I didn't want a present. Just you there till the candles went out"},{choice:[{t:"I'm staying till the candles go out. And after that too",fx:G=>add(G,"fah","bond",3),then:[{inject:G=>G.romance==="fah"?[{n:"nar",t:"Fah blows out the last candle, then tugs your sleeve out to the pier behind the house"},{n:"fah",f:"flustered",l:"casual",t:"…Darling. I can say it now. Every day. From now on I won't fear you leaving, because you promised. No take-backs. For life!"}]:[{n:"fah",f:"happy",l:"casual",t:"…You!! Fine! Best birthday of my life! Happy now?! …Thank you"}]}]},{t:"Your birthday should've always been like this",fx:G=>add(G,"fah","trust",4),then:[{n:"fah",f:"happy",l:"casual",t:"…It wasn't from the start. But from now on it is. That's enough"}]}]},{n:"fah",f:"happy",l:"casual",t:"Come on! I'm giving the kids every last candy. This year the silver-haired witch is the kindest one!"}]}}};
+ 30:{bg:"river",need:G=>!!G.F.fah.met,steps:[{n:"nar",t:"Fah's birthday, October 31. She's dressed as the silver-haired witch as always, but this year Grandma's house is packed"},{n:"nar",t:"Neighbourhood kids come for candy, market vendors bring sausages, tattoo clients bring cake. Nobody goes to any other Halloween party"},{n:"fah",f:"flustered",l:"casual",t:"…Why is everyone here? Nobody ever comes to my birthday"},{n:"nar",t:"Grandma whispers, 'Someone went door to door inviting the whole street last week,' and looks at you"},{n:"fah",f:"sad",l:"casual",t:"…You. Why would you do this? I said I didn't want a present. Just you there till the candles went out"},{choice:[{t:"I'm staying till the candles go out. And after that too",fx:G=>add(G,"fah","bond",3),then:[{inject:G=>romOf(G,"fah")?[{n:"nar",t:"Fah blows out the last candle, then tugs your sleeve out to the pier behind the house"},{n:"fah",f:"flustered",l:"casual",t:"…Darling. I can say it now. Every day. From now on I won't fear you leaving, because you promised. No take-backs. For life!"}]:[{n:"fah",f:"happy",l:"casual",t:"…You!! Fine! Best birthday of my life! Happy now?! …Thank you"}]}]},{t:"Your birthday should've always been like this",fx:G=>add(G,"fah","trust",4),then:[{n:"fah",f:"happy",l:"casual",t:"…It wasn't from the start. But from now on it is. That's enough"}]}]},{n:"fah",f:"happy",l:"casual",t:"Come on! I'm giving the kids every last candy. This year the silver-haired witch is the kindest one!"}]}}};
 for(const id in HEART_SCENES)for(const lv in HEART_SCENES[id]){const S=HEART_SCENES[id][lv];
   EVENTS.push({id:`hs_${id}_${lv}`,look:"casual",bg:S.bg,
-    when:G=>{const f=G.F[id];return !!(f&&f.met&&hAt(G,id)>=+lv&&(S.need?S.need(G):f.camp==="player")&&absWeek(G)-(G.lastBeat||0)>=2);},
+    when:G=>{const f=G.F[id];return !!(f&&f.met&&hAt(G,id)>=+lv&&(S.need?S.need(G):f.camp==="player")&&!isAway(G,id)&&!(+lv>=30&&topLock(G,id))&&absWeek(G)-(G.lastBeat||0)>=2);},/* v1.89.11: on the harem route the top scene gives way to the group ones */
     steps:[{fx:G=>{G.lastBeat=absWeek(G);}},...S.steps]});}
 
 // ---------- sportsmanship ----------
@@ -3527,8 +3764,8 @@ const PERSONAL_END={
  rin:[{n:"nar",t:"Rin hands you a thick binder; the cover says 'Sirichai Camp Three-Year Plan'"},{n:"rin",f:"happy",l:"casual",t:"I've planned up to year three. Your name is on every page"},{n:"rin",f:"flustered",l:"casual",t:"…Not just because you're the manager. I still haven't found an explanation for this variable"}],
  ploy:[{n:"nar",t:"After the final, Ploy waits in the parking lot, hand wraps still on"},{n:"ploy",f:"happy",l:"casual",t:"This year I learned what fighting for fun feels like, because of your camp"},{n:"ploy",f:"flustered",l:"casual",t:"Next year we'll meet again. As rivals… or something else, that's up to you"}],
  fah:[{n:"nar",t:"Fah pulls up on her old motorbike: 'Get on, Grandma's waiting for dinner'"},{n:"fah",f:"pout",l:"casual",t:"Grandma says on New Year's Eve you eat with someone important, so Fah… uh… Grandma made me!"},{n:"fah",f:"flustered",l:"casual",t:"…Come eat next year too. Not begging, just saying"}]};
-function personalEnding(G){let id=G.romance;if(!id){const c=["kati","mali","rin","ploy","fah"].filter(k=>G.F[k]&&G.F[k].met&&(G.F[k].bond||0)>=40).sort((a,b)=>G.F[b].bond-G.F[a].bond);id=c[0];}
-  const base=id&&PERSONAL_END[id]?PERSONAL_END[id]:[];if(G.romance===id&&LOVER_END[id])return [...base,...LOVER_END[id]];
+function personalEnding(G){if(G.harem)return [];let id=romFirst(G);if(!id){const c=["kati","mali","rin","ploy","fah"].filter(k=>G.F[k]&&G.F[k].met&&(G.F[k].bond||0)>=40).sort((a,b)=>G.F[b].bond-G.F[a].bond);id=c[0];}
+  const base=id&&PERSONAL_END[id]?PERSONAL_END[id]:[];if(romOf(G,id)&&LOVER_END[id])return [...base,...LOVER_END[id]];
   const pr=G.promise?Object.keys(G.promise).find(k=>PROMISE_END[k]):null;return [...base,...(pr&&pr!==id?[]:pr?PROMISE_END[pr]:[])];}
 
 // v1.41: they remember what you said — callbacks to earlier choices
@@ -4372,7 +4609,7 @@ function outfitSheet(f,k){const key=f.id+"|"+k;if(TINTS[key])return TINTS[key];c
   TINTS[key]=c;return c;}
 function sheetFor(f){
   if(f.canon){if(f.outfit&&f.outfit!=="base"&&f.camp==="player"&&OUTFITS[f.outfit])return outfitSheet(f,f.outfit);return img(f.id+"_sheet.webp");}
-  if(f.sprite)return img(f.sprite+"_sheet.webp"); // v1.23: gang, roosters, bulls
+  if(f.sprite)return f.tintHue!=null?spriteTint(f.sprite,f.tintHue):img(f.sprite+"_sheet.webp"); // v1.23: gang, roosters, bulls · v1.89.23: tintHue re-dyes the red kit (the krathong thief)
   if(TINTS[f.id])return TINTS[f.id];
   const nb=npcBase(f.id),base=nb.base,blonde=!!(f.prodigy||(f.id||"").startsWith("prod_")),lab=!!f.lab&&!blonde,hue=blonde?42:lab?276:nb.hue,dark=blonde?true:lab?false:nb.dark; /* v1.88: Vector camp fighters wear their black-purple kit */const src=img(base+"_sheet.webp"); /* v1.56: Golden Tiger prodigies: black-gold kit; v1.88: hair dyed silver like Fah */if(!src.complete||!src.naturalWidth)return src;
   const c=document.createElement("canvas");c.width=src.naturalWidth;c.height=src.naturalHeight;const x=c.getContext("2d",{willReadFrequently:true});x.drawImage(src,0,0);
@@ -4386,6 +4623,15 @@ function sheetFor(f){
       p[i]=fn(h+1/3)*255;p[i+1]=fn(h)*255;p[i+2]=fn(h-1/3)*255;}
     x.putImageData(d,0,0);}catch(e){}
   TINTS[f.id]=c;return c;}
+function spriteTint(sp,hue){const key=sp+"|h"+hue;if(TINTS[key])return TINTS[key];const src=img(sp+"_sheet.webp");if(!src.complete||!src.naturalWidth)return src;
+  const c=document.createElement("canvas");c.width=src.naturalWidth;c.height=src.naturalHeight;const x=c.getContext("2d",{willReadFrequently:true});x.drawImage(src,0,0);const th=hue/360;
+  try{const d=x.getImageData(0,0,c.width,c.height),p=d.data;
+    for(let i=0;i<p.length;i+=4){if(p[i+3]<10)continue;const r=p[i]/255,g=p[i+1]/255,b=p[i+2]/255,mx=Math.max(r,g,b),mn=Math.min(r,g,b),l=(mx+mn)/2,dd=mx-mn;if(dd<.001)continue;
+      const s=l>.5?dd/(2-mx-mn):dd/(mx+mn);let h=mx===r?(g-b)/dd+(g<b?6:0):mx===g?(b-r)/dd+2:(r-g)/dd+4;h/=6;if(!((h<.035||h>.93)&&s>.38&&l>.08&&l<.62))continue;
+      const q=l<.5?l*(1+s):l+s-l*s,pp=2*l-q;const fn=t=>{t=(t+1)%1;return t<1/6?pp+(q-pp)*6*t:t<1/2?q:t<2/3?pp+(q-pp)*(2/3-t)*6:pp;};
+      p[i]=fn(th+1/3)*255;p[i+1]=fn(th)*255;p[i+2]=fn(th-1/3)*255;}
+    x.putImageData(d,0,0);}catch(e){return src;}
+  TINTS[key]=c;return c;}
 function drawFrame(ctx,sheet,row,col,cx,footY,h,flip,alpha){
   if(!sheet||(sheet.complete===false)||(!sheet.width&&!sheet.naturalWidth))return;
   const sc=h/CELL*1.0,w=CELL*sc;ctx.save();ctx.globalAlpha=alpha??1;ctx.translate(cx,footY);if(flip)ctx.scale(-1,1);
@@ -5255,7 +5501,7 @@ AU.gsfx=function(kind,a){if(!this.init()||this.muted||!SETTINGS.sfx)return;const
   if(kind==="shimmer")for(let i=0;i<6;i++)T(i*.05,{f:1400+Math.random()*1400,type:"sine",dur:.12,peak:.06});};
 
 // ================= MUAY THAI MOE v1.3 — UI =================
-const VERSION="1.89.19";
+const VERSION="1.89.23";
 const CUR_LANG=(typeof window!=="undefined"&&window.LANG)||"th";
 const TH_LABEL=String.fromCharCode(3652,3607,3618);
 function langSwitch(cls){return `<div class="langsw ${cls||""}" role="group" aria-label="Language">${[["th",TH_LABEL],["en","EN"]].map(([k,l])=>`<button class="lsb ${CUR_LANG===k?"on":""}" data-act="setlang" data-v="${k}" aria-pressed="${CUR_LANG===k}">${l}</button>`).join("")}</div>`;}
@@ -5372,8 +5618,8 @@ function slotsHTML(mode){const rows=[];for(let i=1;i<=SLOTS;i++){const s=loadSlo
 function faceImg(f,cls=""){return f.canon||f.id==="pailin"?`<img class="face ${cls}" style="--c:${f.color}" src="${faceSrc(f.id,"happy")}" alt="${esc(f.name)}">`:
   `<canvas class="face npcface ${cls}" width="96" height="96" data-sprite="${f.id}" data-mode="guard" style="--c:${f.color}" aria-label="${esc(f.name)}"></canvas>`;}
 // v1.86: heart level — one heart, the level number, a gauge to the next level
-function hearts(b,f){f=f||{bond:b};const H=heartLv(f),pct=Math.round(H.into/H.need*100),left=Math.max(0,Math.ceil((H.need-H.into)*2)/2);
-  return `<span class="hearts hlv" title="Bond ${Math.round(H.total)} · ${left} to Lv.${H.lv+1}"><i class="hp" style="--p:1"></i><b class="hlvn">Lv.${H.lv}</b><i class="hgauge"><i style="width:${pct}%"></i></i><small>${heartTier(H.lv,f.id)}</small></span>`;}
+function hearts(b,f){f=f||{bond:b};const H=heartLv(f),cap=!H.max&&!!(G&&f.id&&heartCapped(G,f)),pct=H.max||cap?100:Math.round(H.into/H.need*100),left=Math.max(0,Math.ceil((H.need-H.into)*2)/2);
+  return `<span class="hearts hlv${cap?" hcap":""}" title="Bond ${Math.round(H.total)} · ${H.max?"maxed":cap?`hearts full for this chapter (cap Lv.${heartCapLv(G)})`:`${left} to Lv.${H.lv+1}`}"><i class="hp" style="--p:1"></i><b class="hlvn">Lv.${H.lv}</b><i class="hgauge"><i style="width:${pct}%"></i></i><small class="${G&&f.id&&relIsStatus(G,f)?"hstat":""}">${G&&f.id?relLabel(G,f,H.lv,true):heartTier(H.lv)}</small></span>`;}
 function bar(label,v,color,txt){return `<div class="bar"><span>${label}</span><i style="--v:${clamp(v,0,100)}%;--bc:${color}"></i><b class="num">${txt??Math.round(v)}</b></div>`;}
 function mini(v,color){return `<i class="mini" style="--v:${clamp(v,0,100)}%;--bc:${color}"></i>`;}
 /* v1.88: an opponent shows her strength level, coloured against our best fighter in her division (red = stronger) */
@@ -5752,7 +5998,7 @@ function adviceHTML(id){const f=G.F[id],A=trainAdvice(f);const same=f.plan.prese
    and her fight plan is filled with the coach's pick, so nothing asks to be confirmed. Untick any time. */
 const autoOn=f=>!!(f&&f.autoTr&&gameWeek(G)<=f.autoTr);
 const autoLeft=f=>autoOn(f)?f.autoTr-gameWeek(G)+1:0;
-const trLocked=f=>f?(f.lockWeek===gameWeek(G)||autoOn(f)):false;
+const trLocked=f=>f?(f.lockWeek===gameWeek(G)||autoOn(f)||isAway(G,f.id)):false;
 const handLocked=f=>!!f&&f.lockWeek===gameWeek(G)&&!autoOn(f);
 function autoPlans(){if(!G||!G.bookings)return;for(const b of G.bookings){const f=G.F[b.a];if(!f||f.camp!=="player"||b.planSet||!autoOn(f))continue;
   let pl="balanced";try{if(scouted(b.b))pl=adviseCached(b.a,b.b,b.rounds||3).best||"balanced";}catch(e){}b.plan=pl;b.planSet=true;b.autoPlan=true;}}
@@ -5762,13 +6008,13 @@ function trainHTML(){const R=roster(G);if(!R.length)return "";
   return `<div class="tcards">${R.map(f=>tcard(f,trLocked(f))).join("")}</div>`;}
 function tcard(f,L){const pf=projFatigue(f),rest=f.plan.preset==="rest";const tired=!f.injury&&f.fatigue>=55&&!rest;
   return `<section class="px tcard ${L?"locked":""}">${!L&&!f.injury?"<i class=\"tdot\" aria-label=\"Program not confirmed\"></i>":""}<div class="tc-anim" role="button" tabindex="0" data-act="fighter" data-id="${f.id}" data-v="train" aria-label="Info ${esc(f.name)}" style="background-image:url(${ASSET}${gymBg()})"><canvas width="220" height="190" data-sprite="${f.id}" data-floor="1"></canvas>
-     <span class="tr-pre">${f.injury?"Recovering":PRESETS[f.plan.preset].name}</span></div>
+     <span class="tr-pre">${isAway(G,f.id)?"Away":f.injury?"Recovering":PRESETS[f.plan.preset].name}</span></div>
    <div class="tc-body"><div class="tc-h"><b class="nm">${esc(f.name)}</b><span class="lv">Lv.${f.lvl}</span>${prepLine(f)}</div>
     <div class="fatg"><span>Fatigue <b class="num">${Math.round(f.fatigue)}</b> → <b class="num">${Math.round(pf)}</b></span><i class="fgbar" style="--now:${clamp(f.fatigue,0,100)}%;--next:${clamp(pf,0,100)}%;--bc:${pf>70?"var(--red)":pf>55?"var(--warn)":"var(--green)"}"><s></s></i></div>
     ${tired?`<p class="warnchip">Very tired, should recover this week</p>`:""}
-    ${skReady(f)?`<button class="spchip" data-act="fighter" data-id="${f.id}" data-v="skill">★ Skills ready</button>`:""}<div class="tc-prog"><span class="pill ${L?"":"gold"}">${f.injury?"Recovering":PRESETS[f.plan.preset].name+(rest?"":" · "+INTENSITY[f.plan.intensity].name)}</span></div>
+    ${skReady(f)?`<button class="spchip" data-act="fighter" data-id="${f.id}" data-v="skill">★ Skills ready</button>`:""}<div class="tc-prog"><span class="pill ${L?"":"gold"}">${isAway(G,f.id)?`Away from camp · back in ${awayLeft(G,f.id)} weeks`:f.injury?"Recovering":PRESETS[f.plan.preset].name+(rest?"":" · "+INTENSITY[f.plan.intensity].name)}</span></div>
     ${f.injury?"":`<div class="tc-btns">${L&&!autoOn(f)?"":`<button class="btn sm" data-act="tpick" data-id="${f.id}">Program</button>`}${coachOn()&&!L?`<button class="btn sm" data-act="advice" data-id="${f.id}">Coach's advice</button>`:""}
-     ${autoOn(f)?`<span class="tc-ok auto">↻ Same programme for ${autoLeft(f)} more weeks</span>`:L?`<span class="tc-ok">✓ Program confirmed</span>`:`<button class="btn sm gold tc-go" data-act="tlock" data-id="${f.id}">Confirm program</button>`}</div>`}
+     ${isAway(G,f.id)?`<span class="tc-ok auto">Away from camp · no training</span>`:autoOn(f)?`<span class="tc-ok auto">↻ Same programme for ${autoLeft(f)} more weeks</span>`:L?`<span class="tc-ok">✓ Program confirmed</span>`:`<button class="btn sm gold tc-go" data-act="tlock" data-id="${f.id}">Confirm program</button>`}</div>`}
 </div></section>`;}
 // programme sheet: 4 columns, intensity hidden for rest
 function tpickHTML(id){const f=G.F[id],rest=f.plan.preset==="rest";
@@ -5885,8 +6131,8 @@ function rankHTML(){const st=stageOf(G.week),cut=st==="local"?4:st==="district"?
 function peopleHTML(){const met=CANON_IDS.map(id=>G.F[id]).filter(f=>f.met);
   return `<div class="card-h"><p class="meta">Spend time with one person per week · Once you are close, they will sometimes text you first</p><button class="btn sm gold albbtn" data-act="album">🃏 Card album ${Object.keys(G.cards||{}).length}/${Object.keys(CARDS).length}${Object.entries(G.cards||{}).some(([k,c])=>cardFresh(k,c)||cardCanUp(k,c))?'<i class="ndot"></i>':""}</button>${G.freeUsed?"<span class=\"pill\">Free time: used</span>":"<span class=\"pill gold\">Free time: 1 left</span>"}</div>
    <div class="plist">${met.map(f=>`<section class="px pcard"><button class="pthumb" data-act="fighter" data-id="${f.id}" data-v="rel" aria-label="View profile of ${esc(f.name)}"><img src="${stand(f.id,"casual")}" alt="" loading="lazy"></button>
-     <div class="pbody"><div class="pnm"><b class="nm">${esc(f.name)}</b><span class="meta">${f.camp==="player"?"Sirichai Camp":f.camp==="rival"?"Golden Tiger":"Independent"}${G.romance===f.id?" · Sweetheart ♥":G.promise&&G.promise[f.id]!=null?" · Promised ♡":""}</span></div>${hearts(f.bond,f)}
-      <div class="pbtns"><button class="btn sm" data-act="fighter" data-id="${f.id}" data-v="rel">Profile</button><button class="btn sm primary" data-act="hang" data-id="${f.id}" ${G.freeUsed?"disabled":""}>Hang out</button><button class="btn sm gold giftb" data-act="giftpick" data-id="${f.id}" ${f.giftWeek===gameWeek(G)?"disabled":""}>${PIX.gift}<span>${f.giftWeek===gameWeek(G)?"Given":"Gift"}</span></button><button class="btn sm chatb" data-act="chat" data-id="${f.id}" ${canChat(f)?"":"disabled"}>${CHAT_PX}<span>${canChat(f)?"New chat":(f.bond||0)<CHAT_BOND?"Not close yet":"No messages"}</span>${canChat(f)?'<i class="dot"></i>':""}</button></div></div></section>`).join("")}</div>`;}
+     <div class="pbody"><div class="pnm"><b class="nm">${esc(f.name)}</b><span class="meta">${f.camp==="player"?"Sirichai Camp":f.camp==="rival"?"Golden Tiger":"Independent"}${relTag(G,f)}</span></div>${hearts(f.bond,f)}
+      <div class="pbtns"><button class="btn sm" data-act="fighter" data-id="${f.id}" data-v="rel">Profile</button><button class="btn sm primary" data-act="hang" data-id="${f.id}" ${G.freeUsed||isAway(G,f.id)?"disabled":""}>${isAway(G,f.id)?"Away":"Hang out"}</button><button class="btn sm gold giftb" data-act="giftpick" data-id="${f.id}" ${f.giftWeek===gameWeek(G)||isAway(G,f.id)?"disabled":""}>${PIX.gift}<span>${f.giftWeek===gameWeek(G)?"Given":"Gift"}</span></button><button class="btn sm chatb" data-act="chat" data-id="${f.id}" ${canChat(f)||canChatLov(f)?"":"disabled"}>${CHAT_PX}<span>${canChat(f)?"New chat":isAway(G,f.id)?"Not answering":canChatLov(f)?"Chat":(f.bond||0)<CHAT_BOND?"Not close yet":"No messages"}</span>${canChat(f)?'<i class="dot"></i>':""}</button></div></div></section>`).join("")}</div>`;}
 function hangHTML(id){const f=G.F[id],hlv=heartLv(f).lv;const pref=k=>f.know["act_"+k]==="like"?"<i class=\"likeb\">Likes</i>":f.know["act_"+k]==="dislike"?"<i class=\"disb\">Dislikes</i>":"";
   return `<h2>Time with ${esc(f.name)}</h2><p class="meta">Choose where to go together</p><div class="acts">${Object.entries(ACTIVITIES).filter(([k,a])=>(!a.campOnly||f.camp==="player")&&(!a.heart||hlv>=10)).map(([k,a])=>{const lock=a.heart&&hlv<a.heart;return `<button class="actbtn${lock?" lockd":a.heart?" hspot":""}" data-act="date" data-id="${f.id}" data-v="${k}" ${lock||G.freeUsed||G.cash<a.cost?"disabled":""}><b>${a.heart?"♥ ":""}${a.name}${lock?"":pref(k)}</b><small>${lock?`🔒 Unlocks at ♥Lv.${a.heart}`:a.cost?fmt(a.cost):"Free"}</small></button>`;}).join("")}</div>`;}
 // v1.33: what each camp level brings, so upgrades feel like a goal
@@ -6138,7 +6384,7 @@ function relHTML(f){const P=PROFILES[f.id],b=f.bond;
   const gifts=Object.entries(f.know).filter(([k])=>k.startsWith("gift_")).map(([k,v])=>`<span class="tchip ${v}">${GIFTS[k.slice(5)].name}${v==="love"?" ♥♥":v==="like"?" ♥":v==="dislike"?" ✕":""}</span>`).join("");
   const looks=[["fight","Fight gear"],["train","Training gear"],["casual","Casual"],...(typeof loyThaiLook==="function"&&loyThaiLook(G)&&THAI_IDS.includes(f.id)?[["thai","Thai Dress"]]:[])];
   return `<div class="pf2"><div class="pf-art"><img src="${UI.look==="train"?`${ASSET}${f.id}_train.webp`:stand(f.id,UI.look,"happy")}" alt=""><div class="seg sm">${looks.map(([k,t])=>`<button data-act="plook" data-v="${k}" aria-pressed="${UI.look===k}">${t}</button>`).join("")}</div></div>
-   <div class="pf-side">${hearts(b,f)}${typeof missGap==="function"&&missGap(G,f.id)>=3?`<div class="missb">💭 Missing you · haven't met in ${missGap(G,f.id)} weeks ${!(f.bondX>0)&&f.bond>(REL_FLOOR[(G.relT||{})[f.id]||0]||0)?" · bond starting to fade":""}</div>`:""}<div class="reltier"><b>${REL_TIERS[relTier(b)][1]}</b><small>${REL_TIERS[relTier(b)][2]}</small></div><div class="bars">${(()=>{const H=heartLv(f);return bar("Friends",H.into/H.need*100,"var(--red)",`${Math.round(H.total)}`);})()}${bar("Trust",f.trust,"var(--gold)")}</div>${f.camp==="player"?`<p class="meta trustx">${trustText(f)}</p>`:""}
+   <div class="pf-side">${hearts(b,f)}${typeof missGap==="function"&&missGap(G,f.id)>=3?`<div class="missb">💭 Missing you · haven't met in ${missGap(G,f.id)} weeks ${!(f.bondX>0)&&f.bond>(REL_FLOOR[(G.relT||{})[f.id]||0]||0)?" · bond starting to fade":""}</div>`:""}${relLadderHTML(f)}<div class="bars">${(()=>{const H=heartLv(f);return bar("Friends",H.max||heartCapped(G,f)?100:H.into/H.need*100,H.max||heartCapped(G,f)?"var(--gold)":"var(--red)",`${Math.round(H.total)}`);})()}${bar("Trust",f.trust,"var(--gold)")}</div>${f.camp==="player"?`<p class="meta trustx">${trustText(f)}</p>`:""}
     <div class="info"><div><span>Height</span><b>${P.height}</b></div><div><span>Blood type</span><b>${L(b>=UNLOCK.blood||f.know.blood,UNLOCK.blood,P.blood)}</b></div>
      <div><span>Birthday</span><b>${L(b>=UNLOCK.bday||f.know.bday,UNLOCK.bday,P.bday)}</b></div><div><span>Style</span><b>${esc(P.heritage)}</b></div></div></div></div>
    <div class="pf-sec"><h4>Personality</h4><p>${L(b>=UNLOCK.personality,UNLOCK.personality,P.personality)}</p></div>
@@ -6147,6 +6393,13 @@ function relHTML(f){const P=PROFILES[f.id],b=f.bond;
    ${gifts?`<div class="pf-sec"><h4>Known gifts</h4><div class="tchips">${gifts}</div></div>`:""}
    <div class="pf-two"><div class="pf-sec"><h4>Hometown</h4><p>${esc(P.home)}</p></div><div class="pf-sec"><h4>Hobby</h4><p>${L(b>=UNLOCK.hobby||f.know.hobby,UNLOCK.hobby,P.hobby)}</p></div></div>
    <details class="pf-sec"><summary>Story & secrets</summary><h4>Story</h4><p>${L(b>=UNLOCK.story,UNLOCK.story,P.story)}</p><h4>Secret</h4><p>${L(b>=UNLOCK.secret,UNLOCK.secret,P.secret)}</p></details>`;}
+/* v1.89.11: the relationship ladder — the same label as under the hearts, the current step lit */
+function relLadderHTML(f){const H=heartLv(f).lv,cur=relLabel(G,f,H),k=relKind(G,f),away=isAway(G,f.id),T=k==="lover"?LOVER_TIERS:HEART_TIERS,tierNow=heartTier(H,k==="lover"||k==="promise"||k==="ex"?f.id:undefined);
+  const lit=T.reduce((a,[lv],i)=>H>=lv?i:a,0),key=k==="friend"?"Close friend":tierNow;
+  return `<div class="reltier rlad"><b class="${relIsStatus(G,f)?"hstat":""}">${esc(cur)}</b><small>${esc(away?"The label goes back once she returns":REL_DESC[key]||"")}</small>
+   <ol class="rsteps">${T.map(([lv,n],i)=>`<li class="${i===lit&&k!=="friend"&&k!=="ex"?"on":H>=lv?"done":""}"><i>Lv.${lv}</i>${esc(n)}</li>`).join("")}</ol>
+   <p class="meta rcap">This chapter's heart cap: Lv.${heartCapLv(G)}${HEART_NEXT[heartCapLv(G)]?` · ${HEART_NEXT[heartCapLv(G)]}`:""}</p>
+   <div class="rbranch"><small>At the confession (bond 75 + trust 40)</small><div>${REL_BRANCH.map(([kk,n])=>`<span class="${kk===k?"on":""}">${esc(n)}</span>`).join("")}</div></div></div>`;}
 function giftHTML(id){const f=G.F[id];
   const E=giftsFor(id).map(k=>[k,{...GIFTS[k],bond:giftBond(id,k)}]).sort((x,y)=>(x[1].bond||0)-(y[1].bond||0)||(x[1].only?1:0)-(y[1].only?1:0));
   {const lk=E.filter(([k,g])=>(g.bond||0)>(f.bond||0));const nx=lk[0];const hid=lk.length-(nx?1:0);E.splice(0,E.length,...E.filter(([k,g])=>(g.bond||0)<=(f.bond||0)),...(nx?[nx]:[]));E.hidden=hid;}
@@ -6189,7 +6442,7 @@ function reportHTML(){const r=G.lastReport;const ann=[];
   const cut=r.stage==="local"?4:r.stage==="district"?4:0;
   const tu=(r.tierUp||[]).filter(x=>G.F[x.id]),hu=(r.heartUp||[]).filter(x=>G.F[x.id]);
   return `<h2>Week ${r.week}</h2><p class="goal">${goalText()}</p>
-   ${hu.length?`<div class="heartup">${hu.map(x=>`<div class="hu">${faceImg(G.F[x.id],"sm")}<span>Bond with <b>${esc(G.F[x.id].name)}</b> rose to <b class="hlvn">♥ Lv.${x.lv}</b><small class="meta">${heartTier(x.lv,x.id)}</small></span></div>`).join("")}</div>`:""}
+   ${hu.length?`<div class="heartup">${hu.map(x=>`<div class="hu">${faceImg(G.F[x.id],"sm")}<span>Bond with <b>${esc(G.F[x.id].name)}</b> rose to <b class="hlvn">♥ Lv.${x.lv}</b><small class="meta">${relLabel(G,G.F[x.id],x.lv,true)}</small></span></div>`).join("")}</div>`:""}
    ${tu.length?`<div class="tierup">${tu.map(x=>{const f=G.F[x.id],a=TIER_BY[x.from],b=TIER_BY[x.to],up=b.i>a.i;return `<div class="tu ${up?"up":"down"}">${faceImg(f,"sm")}<span><b>${esc(f.name)}</b> ${up?"moved up to":"dropped to"} <b>${b.ic} ${b.n}</b><small class="meta">from ${a.ic} ${a.n}</small></span></div>`;}).join("")}</div>`:""}
    ${ann.length&&cut?`<div class="announce"><div class="ann-h">Rankings · ${STAGE_NAME[r.stage]}</div>${ann.map(a=>`<div class="ann ${a.f.camp==="player"?"me":""}">${faceImg(a.f,"sm")}<b>${esc(a.f.name)}</b><span class="meta">Div ${a.d}</span><span class="rk">Rank ${a.pos}</span>${moveIcon(a.m)}${cut?`<span class="pill ${a.pos<=cut?"green":"red"}">${a.pos<=cut?"In the qualifying zone":"Outside the zone"}</span>`:""}</div>`).join("")}</div>`:""}
    ${r.prog?`<details class="prog"><summary class="ann-h">4-week progress chart (tap to view)</summary><div class="progrow">${r.prog.filter(p=>G.F[p.id]).map(p=>{const f=G.F[p.id];const sum=Object.keys(p.before).reduce((s,k)=>s+(f.a[k]-p.before[k]),0);
@@ -6333,6 +6586,7 @@ function playHonorQueue(done){while((G.awards||[]).length&&!(G.F[G.awards[0].id]
 function sceneNext(){const S=UI.scene;if(!S)return;
   while(S.i<S.steps.length){const st=S.steps[S.i];
     if(st.inject){let more=[];try{more=st.inject(G)||[];}catch(e){console.error("scene inject",e);}S.steps.splice(S.i,1,...more);continue;}/* v1.81.1: a broken step never freezes the week */
+    if(st.brawl){S.i++;UI.scene=null;openBrawl(st.brawl.a,st.brawl.b,st.brawl.hard,res=>{UI.scene=S;let more=[];try{more=st.after?st.after(G,res)||[]:[];}catch(e){console.error("brawl after",e);}S.steps.splice(S.i,0,...more);sceneNext();});return;}/* v1.89.11: a live bout inside a scene */
     if(st.bg)S.bg=st.bg;
     if(st.fx&&!st.n&&!st.choice&&!st.choiceFn){try{st.fx(G);}catch(e){console.error("scene fx",e);}S.i++;continue;}
     if((st.choice||st.choiceFn)&&st.t!=null&&!st._ask){const {choice,choiceFn,...line}=st;S.steps.splice(S.i,1,line,{choice,choiceFn,_ask:1});continue;} /* v1.90: a line that carries a choice is shown first, then the options */
@@ -6358,7 +6612,7 @@ function sceneHTML(){const S=UI.scene,c=S.cur||{};const sp=c.n==="coach"?{name:c
   const spk=c.n||S.lastN;if(c.n)S.lastN=c.n;
   const bgKey=(S.bg==="gym"||S.bg==="camp")?gymBg():BGIMG[S.bg];
   const cast=S.cast.map((m,i)=>{const active=m.id===spk||(c.choice&&i===S.cast.length-1);const pos=S.cast.length===1?"c":i===0?"l":"r";
-    return `<img class="stand ${pos} ${active&&!m.back?"on":"off"}${m.back?" back":""}" src="${m.id.startsWith("npc:")?`${ASSET}npc_${m.id.slice(4)}.webp`:m.back?`${ASSET}${m.id}_back.webp`:stand(m.id,m.look,active?moodFor(c.f,m.look,c.t):moodFor(m.f,m.look,""))}" alt="">`;}).join("");
+    return `<img class="stand ${pos} ${active&&!m.back?"on":"off"}${m.back?" back":""}" src="${m.id.startsWith("npc:")?`${ASSET}npc_${m.id.slice(4)}.webp`:m.back?`${ASSET}${m.id}_back.webp`:stand(m.id,m.look,active&&!c.choice?moodFor(c.f,m.look,c.t):moodFor(m.f,m.look,""))}" alt="">`;}).join("");
   const tag="";
   return `<div class="vn" role="dialog" aria-label="Story scene"><div class="vbg bg-${S.bg==="camp"?"gym":S.bg}" ${bgKey?`style="background-image:url(${ASSET}${bgKey})"`:""}></div>
    <div class="cast ${(S.cast||[]).length>1?"duo":""}">${cast}</div>
@@ -6398,20 +6652,21 @@ function goalText(){const st=stageOf(G.week),me=roster(G);const best=d=>{const r
 const evSeen=e=>e.annual?((G.seenY||{})[e.id]===(G.season||1)):!!G.seen[e.id];
 function pendingEvents(){return EVENTS.filter(e=>{try{return e.when&&!evSeen(e)&&e.when(G);}catch(err){console.error("event when",e.id,err);return false;}});}
 // v1.41: at most two optional story scenes a week — the rest wait for next week (main story / finals always play)
-const EV_MUST=/^(prologue|daeng_leave|pre_qual|qual_result|final_result|semi_result|night_final|lover_final|ploy_prefinal|fah_prefinal|first_win|first_loss)/,EV_CAP=2;
+const EV_MUST=/^(lv_val|lv_harem|lv_back|prologue|daeng_leave|pre_qual|qual_result|final_result|semi_result|night_final|lover_final|ploy_prefinal|fah_prefinal|first_win|first_loss)/,EV_CAP=2;
 function runEvents(done){const list=pendingEvents().sort((a,b)=>(b.pri||0)-(a.pri||0));let played=0,opt=0;/* time-limited scenes go first */
   const step=()=>{const e=list.shift();if(!e||G.ended){done&&done(played);return;}if(evSeen(e)||!(()=>{try{return e.when(G);}catch(x){return false;}})()){step();return;}
     if(G.coachAwayAbs&&gameWeek(G)<G.coachAwayAbs&&!EV_MUST.test(e.id)&&!/daeng|coach/.test(e.id)&&e.steps.some(x=>x.n==="coach")){step();return;}/* v1.60: scenes where Kru Daeng talks wait until he is back */
+    if(!EV_MUST.test(e.id)&&!/^lv_/.test(e.id)&&awaySpeaks(G,e.steps)){step();return;}/* v1.89.11: scenes with a girl who left camp wait until she is back */
     if(!EV_MUST.test(e.id)){if(opt>=((G.season||1)>=2&&(G.week===44||G.week===49)?0:EV_CAP)){step();return;}opt++;}
     if(e.annual){G.seenY=G.seenY||{};G.seenY[e.id]=G.season||1;}else G.seen[e.id]=true;G.seenWk=G.seenWk||{};G.seenWk[e.id]=G.week;G.seenAbs=G.seenAbs||{};G.seenAbs[e.id]=gameWeek(G);played++;playScene(e.steps,step,{bg:e.bg,look:e.look,coachOK:/daeng|coach/.test(e.id)});};step();}
 function weeklyExtra(done){const rng=mulberry32(G.seed+G.week*313);if(typeof questExtra==="function"&&questExtra(done,mulberry32(G.seed+G.week*59)))return;
-  const dil=(typeof DILEMMAS!=="undefined"?DILEMMAS:[]).filter(d=>!G.seen[d.id]&&G.week>=d.from&&G.week<=d.to&&d.need(G));
+  const dil=(typeof DILEMMAS!=="undefined"?DILEMMAS:[]).filter(d=>!G.seen[d.id]&&G.week>=d.from&&G.week<=d.to&&d.need(G)&&!awaySpeaks(G,d.steps));
   const sinceD=gameWeek(G)-(G.lastDilemma||0);
   // v1.21: something happens most weeks — a decision every couple of weeks, chatter or a happening in between
   if(dil.length&&sinceD>=2&&rng()<.62){const d=dil[Math.floor(rng()*dil.length)];G.seen[d.id]=true;G.lastDilemma=gameWeek(G);
     playScene([{n:"nar",t:"— Decisions to make —"},...d.steps],done,{bg:d.bg==="camp"?"gym":d.bg,look:d.look||"train"});return;}
   const chats=CHATTER.filter(c=>!G.seen[c.id]&&c.need(G));const haps=HAPPENINGS.filter(h=>!G.seen[h.id]);
-  const chats2=chats.filter(c=>!c.need2||c.need2(G)),haps2=haps.filter(h=>!h.need||h.need(G));
+  const chats2=chats.filter(c=>(!c.need2||c.need2(G))&&!awaySpeaks(G,c.steps)),haps2=haps.filter(h=>(!h.need||h.need(G))&&!awaySpeaks(G,h.steps));
   let pick=null;if(chats2.length&&rng()<.6)pick=chats2[Math.floor(rng()*chats2.length)];else if(haps2.length&&rng()<.7)pick=haps2[Math.floor(rng()*haps2.length)];
   if(!pick){done();return;}G.seen[pick.id]=true;playScene(pick.steps,done,{bg:pick.bg==="camp"?"gym":pick.bg,look:pick.look||"train"});}
 function afterWeekFlow(){playHonorQueue(afterWeekFlowMain);}
@@ -6523,7 +6778,7 @@ function endingHTML(){const E=UI.ending,all=roster(G),res=seasonResult();
    <section class="px card"><h3>This year's results</h3>${res.length?res.map(r=>`<div class="kv-row"><span>${faceImg(r.f,"sm")} ${esc(r.f.name)} · Div ${r.d}</span><span class="pill ${r.c}">${r.t}</span></div>`).join(""):"<p class=\"meta\">No fighter passed the subdistrict round this year</p>"}</section>
    <div class="grid g3"><section class="px card"><h3>Camp</h3><div class="kv-row"><span>Camp level</span><b>Lv.${campLevel(G)} ${CAMP_LV_NAME[campLevel(G)]}</b></div><div class="kv-row"><span>Cash</span><b class="num">${fmt(G.cash)}</b></div><div class="kv-row"><span>Remaining debt</span><b class="num">${fmt(G.debt)}</b></div><div class="kv-row"><span>Students</span><b class="num">${students(G)}</b></div><div class="kv-row"><span>Fame</span><b class="num">${G.rep.toFixed(1)}</b></div></section>
    <section class="px card"><h3>Camp fighters</h3>${all.map(f=>`<div class="kv-row"><span>${esc(f.name)} Lv.${f.lvl}</span><span class="num">${rec(f)}</span></div>`).join("")}</section>
-   <section class="px card"><h3>Relationships</h3>${CANON_IDS.map(id=>G.F[id]).filter(f=>f.met).map(f=>`<div class="kv-row"><span>${esc(f.name)}${G.romance===f.id?" ♥ Sweetheart":G.promise&&G.promise[f.id]!=null?" ♡ Promised":""}</span>${hearts(f.bond,f)}</div>`).join("")}</section></div>
+   <section class="px card"><h3>Relationships</h3>${CANON_IDS.map(id=>G.F[id]).filter(f=>f.met).map(f=>`<div class="kv-row"><span>${esc(f.name)}${relTag(G,f).replace(/^ · /," ")}</span>${hearts(f.bond,f)}</div>`).join("")}</section></div>
    ${endTeaserHTML()}
    <p class="meta center">Seed ${esc(G.seedText||String(G.seed))} · Year ${G.season||1}</p>${!DEMO&&G.ended==="season"&&!gateOpen()?gateHTML():""}<div class="center endbtns">${!DEMO&&G.ended==="season"&&gateOpen()?`<button class="btn primary" data-act="newseason">Continue to Year ${(G.season||1)+1} ▸</button><p class="meta center">The camp, fighters and relationships all carry over · the rivals trained harder too</p>`:""}<button class="btn primary" data-act="replay">Play again</button><button class="btn" data-act="restart">Back to title</button></div></main>`;}
 
@@ -6596,12 +6851,13 @@ function fightHTML(){const U=UI.fight,b=U.b,me=G.F[b.a],op=G.F[b.b],F=U.F;
      ${U.cutin?(U.cutin.skill?`<div class="cutin sk ${U.cutin.kind} ${U.cutin.side}" aria-live="assertive"><div class="cut-band"><img src="${ASSET}${U.cutin.id}_fight_angry.webp" alt=""></div><b>${esc(U.cutin.skill)}</b><span>${esc(U.cutin.name)} · ${U.cutin.kind==="atk"?`${WNAME[U.cutin.w]}: sharper and harder for a while`:U.cutin.kind==="def"?"Better evasion and counters for a while":"Energy recovered"}</span></div>`:`<div class="cutin ${U.cutin.side}" aria-live="assertive"><div class="cut-band"><img src="${ASSET}${U.cutin.id}_fight_angry.webp" alt=""></div><b>Blood-boil mode!</b><span>${esc(U.cutin.name)} changes eyes · stronger counters, easier criticals</span></div>`):""}
      ${U.stage==="corner"?"":liveStats()}`;
     // v1.21: one compact row — speed, then the 3 carried skills
-    if(U.stage==="playing")mid+=`<div class="fctl2"><div class="seg sm">${[["1","x1"],["2","x2"]].map(([v,t])=>`<button data-act="fspeed" data-v="${v}" aria-pressed="${String(UI.speed)===v}" aria-label="Speed ${t}">${t}</button>`).join("")}</div>${skillBarHTML()}</div>`; /* v1.89.3: speed and skills share one row right under the live stats again (as before v1.83 pinned them to the bottom) */
+    if(U.stage==="playing")mid+=`<div class="fctl2"><div class="seg sm">${[["1","x1"],["2","x2"]].map(([v,t])=>`<button data-act="fspeed" data-v="${v}" aria-pressed="${String(UI.speed)===v}" aria-label="Speed ${t}">${t}</button>`).join("")}</div>${U.brawl?`<span class="meta skhint">Watching from ringside · they fight on their own</span>`:skillBarHTML()}</div>`; /* v1.89.3: speed and skills share one row right under the live stats again (as before v1.83 pinned them to the bottom) */
     if(U.stage==="corner")mid+=cornerHTML(F);
-    if(U.stage==="done")mid+=resultHTML();
+    if(U.stage==="talk")mid+=brawlTalkHTML();
+    if(U.stage==="done")mid+=U.brawl?brawlDoneHTML():resultHTML();
     mid+=`<details class="logd" ${UI.logOpen?"open":""} ontoggle="UI.logOpen=this.open"><summary>Full fight log</summary><div class="flog">${U.shown.map(l=>l.rd?`<div class="rd">${l.rd}</div>`:`<div class="${l.s}">${esc(l.t||"")}</div>`).join("")}</div></details>`;}
   const tw=UI.confirmTowel?`<div class="tconfirm" role="alertdialog"><div class="px">${UI.towelCoach?`<div class="ctip big"><img src="${faceSrc("coach")}" alt=""><span><b>Coach Daeng:</b> ${esc(me.name)} is badly hurt, only HP ${Math.max(1,Math.round(U.F.A.hp))}. If she gets knocked out she'll be off for weeks. Throw the towel?</span></div>`:""}<h3>🏳️ Throw in the towel?</h3><p>The fight counts as a loss right away, but she won't get hurt any worse (morale drops).</p><div class="ctrl"><button class="btn" data-act="towelno">Keep fighting</button><button class="btn primary" data-act="towelyes">Throw it</button></div></div></div>`:"";
-  return `${tw}${fpopHTML()}<div class="fight pxscroll ${U.stage==="corner"?"incorner":U.stage==="done"?"isdone":""}" data-sk="fight" role="dialog" aria-label="Fight"><div class="fight-in"><div class="fhead">${side(me,"a",hpA,stA)}<div class="vsmid"><b>${TIER[b.tier].name}</b>${U.F&&U.F.round&&U.stage==="playing"?(()=>{const s=Math.max(0,Math.round(180*(1-Math.min(U.F.ex||0,EX_PER_ROUND)/EX_PER_ROUND)));return `<span class="meta">Rd ${U.F.round}/${b.rounds}</span><span class="rclock num">${Math.floor(s/60)}:${String(s%60).padStart(2,"0")}</span><i class="rcbar" style="--v:${Math.round(s/1.8)}%"></i>`;})():`<span class="meta">${b.rounds} rds</span>`}</div>${side(op,"b",hpB,stB)}</div>${mid}</div></div>`;}
+  return `${tw}${fpopHTML()}<div class="fight pxscroll ${U.stage==="corner"?"incorner":U.stage==="done"?"isdone":""}" data-sk="fight" role="dialog" aria-label="Fight"><div class="fight-in"><div class="fhead">${side(me,"a",hpA,stA)}<div class="vsmid"><b>${b.brawl?"Settling it in the ring":TIER[b.tier].name}</b>${U.F&&U.F.round&&U.stage==="playing"?(()=>{const s=Math.max(0,Math.round(180*(1-Math.min(U.F.ex||0,EX_PER_ROUND)/EX_PER_ROUND)));return `<span class="meta">Rd ${U.F.round}/${b.rounds}</span><span class="rclock num">${Math.floor(s/60)}:${String(s%60).padStart(2,"0")}</span><i class="rcbar" style="--v:${Math.round(s/1.8)}%"></i>`;})():`<span class="meta">${b.rounds} rds</span>`}</div>${side(op,"b",hpB,stB)}</div>${mid}</div></div>`;}
 function liveStats(){const U=UI.fight,F=U.F;if(!F)return "";let la=0,lb=0;
   for(const e of U.shown){if(!e.ev)continue;const sd=sideOf(e,F);if(e.ev==="hit"||e.ev==="counter"){if(sd==="A")la++;else lb++;}}
   const ctl=la+lb?Math.round(la/(la+lb)*100):50;
@@ -6783,7 +7039,7 @@ function fightStart(quick){const U=UI.fight,b=U.b;AU.resume();
   if(b.wai==="phrom")U.F.A.careMor=.02;if(b.wai==="phra")U.F.A.careMor=.01;if(b.cheer)U.F.A.mor+=b.cheer*.01;U.F.A.mor+=trustBonus(G.F[b.a]);{const fam=(G.fam||{})[b.b]||0;if(fam)U.F.A.mor+=fam*.015;}setTactics(U.F,U.tac);if(b.carry){U.F.A.hp=Math.min(U.F.A.hp,b.carry.hp);U.F.A.sta=Math.min(U.F.A.sta,b.carry.sta);}LASTF=U.F;
   if(quick){FS.init(null,b.bg||TIER_BG[b.tier]||"bg_local.webp",G.F[b.a],G.F[b.b]);const F=U.F;while(!F.over){F.A.instr=aiCorner(F,F.A,F.B);F.B.instr=aiCorner(F,F.B,F.A);const lg=fightRound(F);U.shown.push({rd:`Round ${F.round}`},...lg);}fightEnd();return;}
   FS.init(null,b.bg||TIER_BG[b.tier]||"bg_local.webp",G.F[b.a],G.F[b.b]);AU.setTempo(104);AU.setHeat&&AU.setHeat(0);AU.startMusic();playRound();}
-function playRound(){const U=UI.fight,F=U.F;fightMusic(F);F.B.instr=aiCorner(F,F.B,F.A);F.A.autoSkill=false;roundBegin(F);
+function playRound(){const U=UI.fight,F=U.F;fightMusic(F);F.B.instr=aiCorner(F,F.B,F.A);F.A.autoSkill=false;if(U.brawl){F.A.instr=aiCorner(F,F.A,F.B);F.A.autoSkill=true;}roundBegin(F);
   const rng=mulberry32(F.seed+F.round);U.rng=rng;U.tiredShown=false;
   F.tier=F.tier||U.b.tier;const sl=startLine(F,rng);U.pending=[{rd:`Round ${F.round}`,cap:{text:sl.text,side:"",heat:sl.heat},bell:true}];
   U.stage="playing";fightMusic(F);render();tick();}
@@ -6802,6 +7058,7 @@ function fightMusic(F,surge){if(!F||!AU.setTempo)return;const R=Math.max(1,F.rou
   const late=(F.ex||0)>=EX_PER_ROUND*.7?1:0,kd=F.musicKd&&performance.now()-F.musicKd<9000?1:0;
   AU.setTempo(Math.round(104+p*54+late*8+kd*10+(surge||0)*4));AU.setHeat&&AU.setHeat(Math.round(p*2)+(late||kd?1:0));}
 function tick(){const U=UI.fight;if(!U||U.stage!=="playing")return;
+  if(U.brawl&&U.brawl.asked<BRAWL_AT.length&&(U.F.ex||0)>=BRAWL_AT[U.brawl.asked]){U.stage="talk";U.brawl.q=brawlPrompt(U);AU.sfx("ui");render();return;}
   if(!U.pending.length&&!feedRound()){roundFinish(U.F);roundEnd();return;}
   const e=U.pending.shift();U.shown.push(e);const F=U.F;const now=performance.now();let wait=1500;
   if(e.bell){AU.sfx("bell");U.caption=e.cap;}
@@ -6825,7 +7082,7 @@ function tick(){const U=UI.fight;if(!U||U.stage!=="playing")return;
   render();U.timer=setTimeout(tick,(window.matchMedia&&matchMedia("(prefers-reduced-motion: reduce)").matches?400:wait)/(UI.speed===2?2:1));}
 function fskip(){const U=UI.fight;clearTimeout(U.timer);while(!roundDone(U.F))U.pending.push(...fightEx(U.F));const rest=U.pending.filter(x=>!x.bell&&!x.tired);U.shown.push(...rest);U.pending=[];
   const ko=rest.find(x=>x.ev==="ko");if(ko)FS.play({...ko,side:sideOf(ko,U.F)},performance.now());roundFinish(U.F);roundEnd();}
-function roundEnd(){const U=UI.fight;clearTimeout(U.timer);const F=U.F;
+function roundEnd(){const U=UI.fight;clearTimeout(U.timer);const F=U.F;if(U.brawl){brawlEnd();return;}
   if(F.over){fightEnd();return;}AU.sfx("bell1");U.caption={text:COM.end[Math.floor(Math.random()*2)],side:""};U.stage="corner";U.care={mode:"order",need:careNeeds(F),got:[],done:false}; /* v1.89.1: only the order puzzle, as before v1.87.6; card / oil games stay in the code for an outside mini-game later */ /* v1.89.1: corner mini-games are off for now (too tiring every break) — coach Daeng gives a normal corner; newCare/cardSeq/oil stay for an outside mini-game later */U.pick=null;U.hint=false;if(F.A.hp<35&&!U.towelAsked&&F.round<F.rounds){U.towelAsked=true;UI.confirmTowel=true;UI.towelCoach=true;AU.sfx("miss");}render();}
 /* v1.88 corner care comes in three flavours: the order puzzle, a face-down card, or a fast oil massage */
 function newCare(F){const r=Math.random(),mode=r<.5?"order":r<.75?"card":"oil";
@@ -6836,17 +7093,36 @@ function towelScene(f){const L={kati:["I could still stand, coach… Grandpa nev
   const R={kati:"Your grandpa never had a granddaughter to worry about like this.",mali:"Because I want to see you smiling tomorrow, not lying in a hospital.",rin:"You don't have to like it. Heal first, then argue with me.",ploy:"Remember it. I'll remember you were still standing.",fah:"Three days is fine. Day four, you're back in training."}[f.id]||"It's okay. There's always the next fight.";
   const me=L?{n:f.id,f:L[1],l:"fight",t:L[0]}:{n:"npc",who:f.name,t:"I could still go on… but thank you."};
   return [{n:"coach",t:`I'm sorry, ${f.name}. I couldn't watch you go down again.`},me,{n:"coach",t:R},{n:"nar",t:`${f.name} isn't hurt any worse, but her morale drops by 8`}];}
-function fightEnd(){const U=UI.fight;U.stage="done";{const w=U.F.result.win;U.bubble=postBubble(U.F.B.f,w==="A"?"lose":w==="B"?"win":"draw",(U.F.seed>>>3)+G.week+[...U.F.B.f.id].reduce((a,c)=>a*31+c.charCodeAt(0)|0,0)+(G.cal||[]).length*7,U.F.A.f);}AU.startMusic("hub");setTimeout(()=>AU.sfx(U.F.result.win==="A"?"win":U.F.result.win==="B"?"lose":"bell1"),200);
-  const me=G.F[U.b.a];if(me.injury)me.trust=clamp(me.trust-12,0,100);
-  U.res=applyResult(G,U.F,U.b);if(U.b.dm)U.b.result=dmWinFrom(U.F);me.prepBonus=false;if(U.b.tier==="final"||U.b.tier==="semi")finishBracket(G,U.b,U.F);
+/* v1.89.11: Valentine brawl — both sides on auto for one round; three times the player can shout from ringside */
+const BRAWL_AT=[2,6,9];
+function openBrawl(a,b,hard,done){AU.resume&&AU.resume();UI.modal=null;
+  UI.fight={b:{a,b,tier:"exhibition",rounds:1,brawl:true,hard,bg:gymBg()},done,stage:"pre",plan:"balanced",tac:{focus:"auto",pace:"steady",target:"body"},F:null,shown:[],pending:[],timer:null,res:null,caption:null,brawl:{sc:0,asked:0,q:null,stopped:false}};
+  fightStart(false);}
+function brawlPrompt(U){const k=U.brawl.asked,T=BRAWL_TALK[k],who=k===0?U.b.a:k===1?U.b.b:null,rng=mulberry32((U.F.seed||1)+k*97);
+  return {ctx:T[0],who,line:who?vx(G,who,BRAWL_MID):"",opts:[...T[1]].sort(()=>rng()-.5)};}
+function brawlTalkHTML(){const U=UI.fight,q=U.brawl&&U.brawl.q;if(!q)return "";
+  return `<div class="btalk px" role="dialog" aria-label="Shout to stop them"><p class="meta">${esc(q.ctx)}</p>${q.who?`<div class="btline"><img class="face sm" src="${faceSrc(q.who,"angry")}" alt=""><span><b>${esc(G.F[q.who].name)}</b>${esc(q.line)}</span></div>`:""}
+   <small class="meta">Shout from ringside (${U.brawl.asked+1}/${BRAWL_AT.length})</small><div class="btopts">${q.opts.map((o,i)=>`<button class="copt" data-act="fbrawl" data-v="${i}">${esc(o[0])}</button>`).join("")}</div></div>`;}
+function brawlPick(i){const U=UI.fight;if(!U||!U.brawl||!U.brawl.q)return;const o=U.brawl.q.opts[i];if(!o)return;
+  U.brawl.sc+=o[1];U.brawl.q=null;U.brawl.asked++;U.caption={text:o[2],side:""};AU.sfx(o[1]>=2?"level":"ui");if(o[1]<0)AU.cheer(.8);
+  if(U.brawl.asked>=BRAWL_AT.length&&U.brawl.sc>=5){U.brawl.stopped=true;U.stage="playing";render();U.timer=setTimeout(brawlEnd,1800);return;}
+  U.stage="playing";render();U.timer=setTimeout(tick,1600/(UI.speed===2?2:1));}
+function brawlEnd(){const U=UI.fight;if(!U||U.stage==="done")return;clearTimeout(U.timer);U.stage="done";const F=U.F;AU.sfx("bell1");
+  U.caption={text:U.brawl.stopped?"They both lower their guard at once. The round ends there":"End of the round! Neither gave an inch",side:""};render();}
+function brawlDoneHTML(){const U=UI.fight,B=U.brawl;
+  return `<div class="res px brawlres"><h3>${B.sc>=5?"You stopped them":"Couldn't stop them"}</h3><p class="meta">${B.sc>=5?"Your words cooled them both down":"Neither of them listened to you"} · This bout doesn't count and nobody gets hurt</p>
+   <button class="btn primary big" data-act="fbrawldone">Continue ▸</button></div>`;}
+function fightEnd(){const U=UI.fight;if(U.brawl){brawlEnd();return;}U.stage="done";{const w=U.F.result.win;U.bubble=postBubble(U.F.B.f,w==="A"?"lose":w==="B"?"win":"draw",(U.F.seed>>>3)+G.week+[...U.F.B.f.id].reduce((a,c)=>a*31+c.charCodeAt(0)|0,0)+(G.cal||[]).length*7,U.F.A.f);}AU.startMusic("hub");setTimeout(()=>AU.sfx(U.F.result.win==="A"?"win":U.F.result.win==="B"?"lose":"bell1"),200);
+  const me=G.F[U.b.a];if(me.injury&&!U.b.ev)me.trust=clamp(me.trust-12,0,100);
+  U.res=applyResult(G,U.F,U.b);if(U.b.dm)U.b.result=dmWinFrom(U.F);if(!U.b.ev)me.prepBonus=false;if(U.b.tier==="final"||U.b.tier==="semi")finishBracket(G,U.b,U.F);
   const r=U.F.result;if(FS.A){if(r.win==="A"){FS.A.win=true;FS.A.anim="win";}else if(r.win==="B"){FS.B.win=true;FS.B.anim="win";}}
   AU.cheer(r.win==="A"?1:.4);
   U.caption={text:r.win==="A"?`${me.name} wins! ${r.type}`:r.win==="D"?"A draw":`${G.F[U.b.b].name} wins · ${r.type}`,side:r.win==="A"?"A":"B"};
-  G.log.push(`${me.name} ${r.win==="A"?"Win":r.win==="B"?"Loss":"Draw"} ${G.F[U.b.b].name} (${r.type})`);
+  if(!U.b.ev)G.log.push(`${me.name} ${r.win==="A"?"Win":r.win==="B"?"Loss":"Draw"} ${G.F[U.b.b].name} (${r.type})`);
   if(G.F[U.b.b].canon){G.faceoffLast=G.faceoffLast||{};G.faceoffLast[`${U.b.a}_${U.b.b}`]={win:r.win,week:G.week};
     G.faceoffStats=G.faceoffStats||{};const key=`${U.b.a}_${U.b.b}`,s=G.faceoffStats[key]=G.faceoffStats[key]||{w:0,l:0,d:0};s[r.win==="A"?"w":r.win==="B"?"l":"d"]++;}
   {const op=G.F[U.b.b];if(r.win!=="D"&&!TIER[U.b.tier].off&&(op.canon||U.b.tier==="semi"||U.b.tier==="final"||/KO/.test(r.type)))G.lastBig={a:me.id,b:op.id,win:r.win,wk:G.week,absWeek:gameWeek(G),shown:false};}
-  if(r.win==="B"){const F=U.F,st=s=>({landed:s.landed,thrown:s.thrown,wl:{...s.wl},sta:Math.round(s.sta),kd:s.kd,legs:Math.round(s.legs)});
+  if(r.win==="B"&&!U.b.ev){const F=U.F,st=s=>({landed:s.landed,thrown:s.thrown,wl:{...s.wl},sta:Math.round(s.sta),kd:s.kd,legs:Math.round(s.legs)});
     G.losses=(G.losses||[]).concat([{wk:G.week,absWeek:gameWeek(G),a:me.id,b:U.b.b,type:r.type,round:r.round,cards:F.cards.map(c=>[...c]),A:st(F.A),B:st(F.B),sc:scouted(U.b.b),od:Math.round(ovr(G.F[U.b.b])-ovr(me)),plan:U.plan||"balanced",tg:(F.A.tac&&F.A.tac.target)||"",care:U.careOK||0}]).slice(-6);}
   U.afterScene=r.towel?towelScene(me):(prodigyResultScene(G,U.b,r.win)||vectorResultScene(G,U.b,r.win));
   save();render();}
@@ -6854,7 +7130,7 @@ function fightEnd(){const U=UI.fight;U.stage="done";{const w=U.F.result.win;U.bu
 // ---------- actions ----------
 function giftScene(id,res){const f=G.F[id];const mood=res.t==="dislike"?"pout":res.t==="love"?"flustered":"happy";
   playScene([{n:id,f:mood,l:"casual",t:(res.n&&res.t!=="dislike"&&giftAgainLine(id,res.t,res.n,res.g))||(GIFT_TALK_PERSONAL[id]&&GIFT_TALK_PERSONAL[id][res.g])||((GIFT_TALK[id]&&GIFT_TALK[id][res.g])||GIFT_LINES[id][res.t])},{n:"nar",t:res.gain>0?(res.n>=2?`Bond with ${f.name} +${res.gain} · a bit too often, so it rises less`:`Bond with ${f.name} +${res.gain}`)
-      :res.t==="dislike"?`${f.name} accepts it with a smile, but it may not be a favorite · Bond unchanged`:f.bond>=100?`${f.name} is thrilled · Bond is already maxed`:`${f.name} is happy, but has been getting this a lot lately. Try mixing it up.`},
+      :res.t==="dislike"?`${f.name} accepts it with a smile, but it may not be a favorite · Bond unchanged`:heartCapped(G,f)?`${f.name} is delighted · hearts are full for this chapter`:f.bond>=100?`${f.name} is thrilled · Bond is already maxed`:`${f.name} is happy, but has been getting this a lot lately. Try mixing it up.`},
     ...((()=>{const k=f.giftTot===5?0:f.giftTot===10?1:-1;if(k<0||!GIFT_FREQ[id]||(f.giftFreq||0)>k)return [];f.giftFreq=k+1;
       return [...GIFT_FREQ[id][k].map(s=>({...s,l:"casual"})),k===1?{inject:G2=>{add(G2,id,"bond",3);G2.F[id].morale=Math.min(100,G2.F[id].morale+8);return [{n:"nar",t:`A gift in return from ${f.name} · Bond +3 · Morale: ${f.name} +8`}];}}:{inject:()=>[]}];})())],()=>{AU.startMusic("hub");render();},{bg:f.camp==="player"?"gym":"fair",look:"casual"});}
 function goalHidden(){try{return localStorage.getItem("mtm-goalhide")==="1"}catch(e){return !!UI.goalHide}}
@@ -7063,6 +7339,8 @@ const ACT={
   towelyes:()=>{UI.confirmTowel=false;UI.towelCoach=false;const U=UI.fight;throwTowel(U.F);U.shown.push({s:"x",t:`${G.F[U.b.a].name}'s corner throws in the towel`});fightEnd();},
   withdraw:()=>{const U=UI.fight;G.bookings=G.bookings.filter(x=>x!==U.b);G.rep=Math.max(0,G.rep-1);add(G,U.b.a,"trust",3);
     G.log.push(`${G.F[U.b.a].name} withdraws due to injury`);const done=U.done;UI.fight=null;render();done();},
+  fbrawl:d=>brawlPick(+d.v),
+  fbrawldone:()=>{const U=UI.fight;if(!U||!U.brawl)return;const F=U.F,res={sc:U.brawl.sc,stopped:U.brawl.stopped,hpA:Math.round(F.A.hp),hpB:Math.round(F.B.hp)};const done=U.done;UI.fight=null;AU.startMusic("hub");render();if(done)done(res);},
   fdone:()=>{const done=UI.fight.done,after=UI.fight.afterScene;UI.fight=null;render();playHonorQueue(()=>{if(after)playScene(after,done,{bg:"ring",look:"fight"});else done();});},
   gatego:()=>{const v=((document.getElementById("gatecode")||{}).value||"").toUpperCase().replace(/\s+/g,"");let ok=false;try{ok=btoa(v)===GATE.code;}catch(e){}
     if(ok){G.unlocked=true;try{localStorage.setItem(GATE.key,"1");}catch(e){}UI.gateErr=false;save();AU.sfx("level");toast("Unlocked! Year 2 is ready to play");}else{UI.gateErr=true;AU.sfx("miss");}render();},
@@ -8012,10 +8290,10 @@ const LOY_LADDER=["gang1","gang1","gang2","gang2","gang3","gang3","gang4","gang4
 const LOY_TIERS=[["gold","Gold",1500],["silver","Silver",1000],["bronze","Bronze",450]];
 const loyOf=G=>(G.ev||{}).loy||null;
 function loyTier(sc,boss){for(const [k,n,min] of LOY_TIERS)if(sc>=min&&(k!=="gold"||boss))return {k,n};return null;}
-function evGang(G,k,f){const kind=LOY_LADDER[k],K=QK[kind],t=ovr(f.a)+K.lvl+k*.12,rng=mulberry32((G.seed^0x10e)+k*131);const a={};
+function evGang(G,k,f){const kind=LOY_LADDER[k],K=QK[kind],t=ovr(f.a)+.4+k*.1+(k===8?.3:0),rng=mulberry32((G.seed^0x10e)+k*131);const a={};
   for(const [x] of ATTRS)a[x]=clamp(t+(K.tilt[x]||0)+(rng()*1.2-.6),3,19.5);const d=t-ovr(a);for(const [x] of ATTRS)a[x]=clamp(a[x]+d,3,19.5);
   const id="q_evloy_"+k;const o=baseFighter(id,{name:K.name,full:K.name,div:"X",camp:"quest",color:K.color,potential:t+2,a});
-  o.sprite=K.sprite;o.kind=kind;o.grp="gang";o.lvl=clamp(Math.round(t-6),1,10);o.fatigue=0;o.morale=75;G.F[id]=o;syncFighterAges(G);return id;}
+  o.sprite=K.sprite;o.kind=kind;o.grp="gang";o.lvl=(f.lvl||1)+1+Math.floor(k/3);o.fatigue=0;o.morale=75;G.F[id]=o;syncFighterAges(G);return id;}
 function redeemCode(raw){const v=(raw||"").toUpperCase().replace(/\s+/g,"");if(!v)return;let key="";try{key=btoa(v);}catch(e){}const R=REDEEM[key];
   if(!R){AU.sfx("miss");toast("Code not found. Check the spelling and try again");return;}
   if(R.k==="gate"){G.unlocked=true;try{localStorage.setItem(GATE.key,"1");}catch(e){}save();AU.sfx("level");toast("Year 2 unlocked!");return;}
@@ -8038,40 +8316,77 @@ function loyIntro(G){const S=[
   {n:"kati",f:"flustered",l:"thai",t:"Manager… this dress is so tight at the waist. Do I look weird? …Don't stare so long!"}];
   if(inCamp(G,"mali"))S.push({n:"mali",f:"happy",l:"thai",t:"Kati looks gorgeous! Mali pinned her sabai herself~ And Mali's… looks pretty too, right, Manager?"});
   if(inCamp(G,"rin"))S.push({n:"rin",f:"flustered",l:"thai",t:"This pha sin limits my stride to about forty centimeters. Not ideal for fighting… but not bad either."});
+  if(G.F.ploy){if(inCamp(G,"ploy"))S.push({n:"ploy",f:"flustered",l:"thai",t:"…Auntie Taew said purple suits me. I'm not sure, but I'm not taking it off now."});
+    else S.push({n:"nar",t:"In the crowd, a woman in a purple Thai dress stands still in front of a banana-leaf krathong stall — Ploy, from the rival camp."},{n:"ploy",f:"flustered",l:"thai",t:"…Coincidence. I came to float a krathong alone. Auntie Taew got me into this outfit before I could say no."});}
+  if(G.F.fah){if(inCamp(G,"fah"))S.push({n:"fah",f:"happy",l:"thai",t:"Look at Fah! Thai dress on and the elbows still flow! Somebody take Fah's picture!"});
+    else S.push({n:"fah",f:"happy",l:"thai",t:"Oh, Sirichai camp! Fah just happened to be walking the fair! Auntie Taew dressed Fah up in Thai dress too, haha — pretty, right?!"});}
   S.push({n:"npc",who:"Auntie Taew",t:"Everyone looks lovely! …But look over there. The helmet gang is back."},
   {n:"npc",who:"Big Boss Golden Helmet",t:"Everyone in this market pays us for their spot! Don't pay, pack up and go home, som tam lady!"},
   {n:"coach",t:"Easy now, no trouble… wait, they're challenging us to the makeshift ring by the pier?"},
   {n:"npc",who:"Big Boss Golden Helmet",t:"Send three. I've got nine boys. No breaks, no mercy. If your camp wins, my gang never sets foot in this market again!"},
   {n:"kati",f:"happy",l:"thai",t:"I accept the challenge! Auntie Taew says this pha sin stretches, so it won't rip in a fight! Pick who goes, Manager!"});
+  const gs=loyGuests(G);
+  if(gs.some(f=>f.id==="ploy"))S.push({n:"ploy",f:"angry",l:"thai",t:"I'm not from your camp … but I shop at this market every year. If you're short a fighter, I'll step in."});
+  if(gs.some(f=>f.id==="fah"))S.push({n:"fah",f:"happy",l:"thai",t:"Fah too! Punching the helmet gang for free, no fee! …A tray of khanom krok is enough."});
+  if(gs.length)S.push({n:"nar",t:`${gs.map(f=>f.name).join(" and ")} are here to help as guests — pick them for the riverside gauntlet. No effect on your real camp.`});
   return S;}
 const LOY_END={
  bronze:{t:"The Helmet Gang Retreats",steps:[{n:"nar",bg:"loy_night",t:"The helmet gang's goons retreat to the far bank. They haven't given up, but they won't come near Auntie Taew's stall again."},
-  {n:"npc",who:"Auntie Taew",t:"Well done, kids! Auntie sold so many more krathongs. Here, pocket money for everyone."},
-  {n:"kati",f:"happy",l:"thai",t:"They'll be back next year for sure. I'll train even harder!"},
-  {n:"nar",t:"Squeaking comes from under the pier. A tiny otter is tangled in krathong string. Kati kneels to free it, the hem of her pha sin soaking wet."},
-  {n:"kati",f:"flustered",l:"thai",t:"It followed me, Manager… it won't leave. Can we keep it at camp? We can, right?"}]},
+  {n:"npc",who:"Auntie Taew",t:"Well done, kids! Auntie sold so many more krathongs. Khanom krok's on me tonight!"}]},
  silver:{t:"The Whole Market Cheers",steps:[{n:"nar",bg:"loy_night",t:"The whole floating market crowds around the makeshift ring. The cheers drown out the fireworks."},
   {n:"coach",t:"Not bad… but you haven't reached the boss yet. There's still time this year."},
-  {n:"npc",who:"Auntie Taew",t:"Those Thai dresses are yours to keep. Wear them anywhere. Auntie's happy they got worn for something good."},
-  {n:"kati",f:"flustered",l:"thai",t:"Manager… Auntie Taew gave me a krathong. Want to float it together? …Just one. She only gave me one."}]},
+  {n:"npc",who:"Auntie Taew",t:"Those Thai dresses are yours to keep. Wear them anywhere. Auntie's happy they got worn for something good."}]},
  gold:{t:"The Golden Helmet Floats Away",steps:[{n:"nar",bg:"loy_night",t:"Big Boss Golden Helmet crashes onto the pier. His golden helmet rolls into the river and floats off with a hundred krathongs."},
   {n:"npc",who:"Big Boss Golden Helmet",t:"My helmet!! …Fine, fine! I won't come to this market again. This year! Just this year!"},
-  {n:"npc",who:"Auntie Taew",t:"Auntie's sewn extra Thai dresses for all of you. Wear them on outings, dates, anywhere!"},
-  {n:"kati",f:"flustered",l:"thai",t:"…Manager, can I wear this on a date? …Not a date! An outing! An outing!"},
-  {n:"nar",t:"The name Sirichai Gym echoes across the floating market all night, and for many nights after."}]}};
+  {n:"npc",who:"Auntie Taew",t:"Auntie's sewn extra Thai dresses for all of you. Wear them on outings, dates, anywhere!"}],
+  tail:[{n:"nar",t:"The name Sirichai Gym echoes across the floating market all night, and for many nights after."}]}};
+/* v1.89.23: the ending follows the three who fought — the first heroine sent is the lead, the others chip in */
+const LOY_REACT={
+ bronze:{kati:"They'll be back next year for sure. I'll train even harder!",mali:"My pha sin tore a little… Auntie Taew, please don't scold Mali.",rin:"Bronze is the lowest of the three tiers. I've noted it. Next year it won't be.",ploy:"We didn't reach the boss … Next time I'll get there.",fah:"Not satisfied yet! The gold helmet guy didn't take a single hit!"},
+ silver:{kati:"The whole market shouted my name… Grandpa, can you hear it?",mali:"So many people cheering — Mali wants to dance for them again!",rin:"The cheering's about ninety decibels … I'm not smiling.",ploy:"…I'm not used to cheering like this. But it's not bad.",fah:"You hear that?! They're calling Fah's name! Did anyone film it?!"},
+ gold:{kati:"We did it! Auntie Taew doesn't have to pay protection money anymore!",mali:"The gold helmet floated off with the krathongs~ May all the bad luck float away with it.",rin:"Nine fights, no rest. The result matches my calculation … almost.",ploy:"We took down the boss … I'm proud. I won't say it twice.",fah:"See? Fah told you! Let him come back next year — Fah'll punch him again!"}};
+const LOY_LEAD={
+ bronze:{kati:[["nar","Squeaking comes from under the pier. A tiny otter is tangled in krathong string. Kati kneels to free it, the hem of her pha sin soaking wet."],["flustered","It followed me, Manager… it won't leave. Can we keep it at camp? We can, right?"]],
+  mali:[["nar","A squeak comes from under the pier. A baby otter is tangled in a krathong string. Mali kneels to free it, laughing as it nibbles her finger."],["happy","It likes Mali! Manager, let's keep it at the camp. Mali will take care of it~"]],
+  rin:[["nar","A squeak comes from under the pier. A baby otter is tangled in a krathong string. Rin kneels and calmly works the knots — three seconds each."],["flustered","Until we find it a home, I'll look after it. The camp has a big enough tub … I'm not attached or anything."]],
+  ploy:[["nar","A squeak comes from under the pier. A baby otter is tangled in a krathong string. Ploy frees it without a word, and it climbs straight up her arm."],["flustered","…It won't get down. The camp has room for it, right?"],["flustered","…It won't get down. My camp doesn't allow pets. Can I leave it with you? I'll drop by to see it."]],
+  fah:[["nar","A squeak comes from under the pier. A baby otter is tangled in a krathong string. Fah jumps into the river, Thai dress and all, to free it."],["happy","Got it! I'm soaked, but worth it! Let's keep it at the camp — Fah'll feed it!"],["happy","Got it! Keep it at your camp. Fah will come visit every week — and say it's for the otter!"]]},
+ silver:{kati:[["flustered","Manager… Auntie Taew gave me a krathong. Want to float it together? …Just one. She only gave me one."]],
+  mali:[["happy","Manager, Auntie Taew gave me a krathong. Let's float it together! Mali already made a wish, but she's not telling~"]],
+  rin:[["flustered","Auntie Taew gave us one krathong. Two people, one krathong … Mathematically, we have to float it together."]],
+  ploy:[["flustered","Auntie gave me a krathong… I've never floated one with anyone. Want to try it together?"]],
+  fah:[["happy","Just one krathong! Let's float it together, the two of us. Anyone who tries to cut in gets an elbow!"]]},
+ gold:{kati:[["flustered","…Manager, can I wear this on a date? …Not a date! An outing! An outing!"]],
+  mali:[["flustered","Can I wear this on a date…? Mali's asking for real, not teasing~"]],
+  rin:[["flustered","If I wear this out somewhere with you, the data says it probably wouldn't be bad … That's not an invitation."]],
+  ploy:[["flustered","Auntie gave me this outfit … If you're free, walk the floating market with me again? When nobody's fighting."]],
+  fah:[["happy","This outfit's good for a date! Yes! Fah said 'date'! And she's not taking it back!"]]}};
+function loyCastOf(cast){const ids=[...new Set(cast||[])].filter(id=>LOY_REACT.gold[id]&&G.F[id]);return ids.length?ids:["kati"];}
+function loyLeadOf(cast){return loyCastOf(cast)[0];}
+function loyEndSteps(k,cast){const E=LOY_END[k],ids=loyCastOf(cast),lead=ids[0],S=[...E.steps];
+  for(const id of ids.slice(1,3))S.push({n:id,f:"happy",l:"thai",t:LOY_REACT[k][id]});
+  if(ids.length===1)S.push({n:lead,f:"happy",l:"thai",t:LOY_REACT[k][lead]});
+  const L=LOY_LEAD[k][lead]||LOY_LEAD[k].kati,guest=isLoyGuest(G.F[lead]);
+  L.forEach((x,i)=>{if(x[0]==="nar"){S.push({n:"nar",t:x[1]});return;}
+    if(L.length===3&&i===(guest?1:2))return;S.push({n:lead,f:x[0],l:"thai",t:x[1]});});
+  return S.concat(E.tail||[]);}
 const LOY_THIEF={name:"Tum the Krathong Thief",
  line:{kati:"Give it back right now! That krathong belongs to the grandma next door to me!",mali:"Mali helped Auntie fold that krathong! Give it back!",rin:"I counted. You took seventeen. Return every one of them.",ploy:"This dress is expensive. But if I have to dive in for them myself, I won't hesitate.",fah:"Fah's seen you since last year! You're not getting away this time!"},
  pre:[{n:"nar",bg:"loy_night",t:"Splash! Someone dives in, fishing coins out of the villagers' krathongs by the plastic-bagful."},
   {n:"npc",who:"Auntie Taew",t:"Tum again! He fishes coins out of people's krathongs every year. This year he took the whole krathongs!"},
   {n:"npc",who:"Tum the Krathong Thief",t:"The krathongs floated to me, so I took 'em! Want 'em back? Come up on the pier!"}],
  win:[{n:"nar",bg:"loy_night",t:"Tum hits the water with a splash. The coin bag bobs on the surface, and the villagers fish it out for the temple."},
-  {n:"npc",who:"Auntie Taew",t:"Well done, dear! Here's a share of tonight's krathong sales. Buy the kids at camp some milk."}],
+  {n:"npc",who:"Auntie Taew",t:"Well done, dear! Auntie's frying khanom krok for the whole team. Eat up before you go home!"}],
  lose:[{n:"nar",bg:"loy_night",t:"Tum laughs and dives in with the bag of coins… but the bag rips mid-river and every coin sinks."},
   {n:"npc",who:"Tum the Krathong Thief",t:"Hey! My coins!! …See you next year!"},{n:"npc",who:"Auntie Taew",t:"Never mind, dear. At least he didn't get anything."}]};
 function evStartLoy(){const L=loyOf(G);if(!L)return;UI.modal=null;
   const open=()=>{L.run=null;L.pick=[];UI.modal={type:"gaunt"};render();};
   if(!L.intro){L.intro=1;save();playScene(loyIntro(G),open,{bg:"loy_night",look:"thai"});}else open();}
-function gauntPool(){const R=roster(G).filter(f=>!f.injury);return R.length?R:roster(G);}
+/* v1.89.23: Ploy / Fah join as guests when they are not in the camp yet — event-only, nothing carries back */
+const LOY_GUESTS=["ploy","fah"];
+const loyGuests=G=>LOY_GUESTS.map(id=>G.F[id]).filter(f=>f&&f.camp!=="player");
+const isLoyGuest=f=>f&&LOY_GUESTS.includes(f.id)&&f.camp!=="player";
+function gauntPool(){const R=roster(G).filter(f=>!f.injury);return (R.length?R:roster(G)).concat(loyGuests(G));}
 // v1.82.4: the five riverside SR cards as a collection row — owned cards in colour, missing ones dark, with a "play again" nudge
 function loyCardRow(after){const own=G.cards||{},got=LOY_CARDS.filter(k=>own[k]).length,left=LOY_CARDS.length-got;
   const row=LOY_CARDS.map(k=>{const C=CARDS[k],has=!!own[k];return `<div class="ccard pxc lk ${has?"":"lock"}" style="--rc:${CARD_R.SR.c}" title="${has?esc(C.t):"Not yet earned"}">${cardArtHTML(C,true)}<small>${has?esc(G.F[C.c].name):"?"}</small></div>`;}).join("");
@@ -8085,7 +8400,7 @@ function gauntHTML(){const L=loyOf(G);if(!L){UI.modal=null;return "";}const R=L.
     return `<div class="glr ${st}"><canvas width="40" height="40" data-qsprite="${QK[k].sprite}"></canvas><span><b>${i+1}. ${esc(QK[k].name)}</b><small>${lg?lg.txt:R&&(R.done||i<cur)?"Skipped (previous fighter lost)":i===8?"Boss · 3 rounds":"2 rounds"}</small></span><i>${lg?(lg.res==="W"?"+"+lg.pts:lg.res==="D"?"+"+lg.pts:"✕"):""}</i></div>`;}).join("")}</div>`;
   if(!R){const pool=gauntPool(),P=L.pick||[];const need=Math.min(3,pool.length);
     return head+`<p><b>Choose your fighter order</b> <small class="meta">(${P.length}/${need}) tap fighters in the order they go in</small></p><div class="gpick">${pool.map(f=>{const i=P.indexOf(f.id);
-      return `<button class="gpk ${i>=0?"on":""}" data-act="gpick" data-v="${f.id}">${faceImg(f)}<span><b>${esc(f.name)}</b><small>Lv.${f.lvl} · Fatigue ${Math.round(f.fatigue)}</small></span>${i>=0?`<i>${i+1}</i>`:""}</button>`;}).join("")}</div>
+      return `<button class="gpk ${i>=0?"on":""}" data-act="gpick" data-v="${f.id}">${faceImg(f)}<span><b>${esc(f.name)}</b><small>${isLoyGuest(f)?"Guest · ":""}Lv.${f.lvl} · Fatigue ${Math.round(f.fatigue)}</small></span>${i>=0?`<i>${i+1}</i>`:""}</button>`;}).join("")}</div>
       ${pool.length<3?`<p class="meta">Your camp has fewer than three fighters, so some will go again (full HP each new turn)</p>`:""}
       <div class="center endbtns"><button class="btn primary" data-act="gstart" ${P.length<need?"disabled":""}>Start</button><button class="btn" data-act="closeModal">Later</button></div>${ladder(-1)}`;}
   if(R.done){const tr=loyTier(R.score,R.boss);return head+`<div class="gres2"><p class="meta">Total score</p><p class="gsc num">${R.score}</p>${tr?`<span class="pill gold">Reward tier: ${tr.n}</span>`:`<span class="pill">No reward tier yet (Bronze ${LOY_TIERS[2][2]})</span>`}
@@ -8098,16 +8413,16 @@ function gauntHTML(){const L=loyOf(G);if(!L){UI.modal=null;return "";}const R=L.
 function gauntNextSlot(R){R.slot++;R.j=0;R.k=R.slot*3;R.hp=100;R.sta=100;if(R.slot>=3||R.k>=9)gauntFinish(R);}
 function gauntFinish(R){const L=loyOf(G);R.done=true;L.runs=(L.runs||0)+1;L.best=Math.max(L.best||0,R.score);if(R.boss)L.boss=1;R.got=[];
   const tr=loyTier(R.score,R.boss);const order=["bronze","silver","gold"];
-  if(tr){for(const k of order.slice(0,order.indexOf(tr.k)+1))if(!L.tiers[k]){L.tiers[k]=1;R.newEnd=k;R.got.push(...loyReward(k));}const nC={bronze:1,silver:2,gold:3}[tr.k]||1;for(let i=0;i<nC;i++){const c=loyCardDrop(G,R.order);if(c)R.got.push(c);else break;}}
+  if(tr){for(const k of order.slice(0,order.indexOf(tr.k)+1))if(!L.tiers[k]){L.tiers[k]=1;R.newEnd=k;L.endCast=L.endCast||{};L.endCast[k]=[...R.order];R.got.push(...loyReward(k,R.order));}const nC={bronze:1,silver:2,gold:3}[tr.k]||1;for(let i=0;i<nC;i++){const c=loyCardDrop(G,R.order);if(c)R.got.push(c);else break;}}
   for(let i=0;i<9;i++)delete G.F["q_evloy_"+i];save();}
-function loyReward(k){const out=[];
-  if(k==="bronze"){G.cash+=3000;out.push("Prize money from Auntie Taew ฿3,000");if(typeof PETS!=="undefined"&&PETS.otter&&typeof adoptPet==="function"&&!hasPet(G,"otter")){adoptPet(G,"otter",null,"kati");UI.petName=G.pets.length-1;out.push("A little otter followed you back to camp! (Give it a name)");}}
-  if(k==="silver"){G.cash+=5000;out.push("Prize money ฿5,000");out.push("Thai dress unlocked on character profiles");}
-  if(k==="gold"){G.rep+=1.5;out.push("Fame +1.5");if(typeof loyGold==="function"){const c=loyGold(G);if(c)out.push(c);}}
+function loyReward(k,R0){const out=[];
+  if(k==="bronze"){out.push("Auntie Taew treats the whole team to khanom krok (event reward)");if(typeof PETS!=="undefined"&&PETS.otter&&typeof adoptPet==="function"&&!hasPet(G,"otter")){adoptPet(G,"otter",null,(o=>G.F[o]&&G.F[o].camp==="player"?o:"kati")(loyLeadOf(R0)));UI.petName=G.pets.length-1;out.push("A little otter followed you back to camp! (Give it a name)");}}
+  if(k==="silver"){out.push("Thai dress unlocked on character profiles");}
+  if(k==="gold"){out.push("\"Floating Market Champ\" name tag on the event page");if(typeof loyGold==="function"){const c=loyGold(G);if(c)out.push(c);}}
   return out;}
 function gauntAfter(){const L=loyOf(G),R=L&&L.run,F=LASTF;if(!R||!F){UI.modal={type:"gaunt"};render();return;}
   const r=F.result,res=r.win==="D"?"D":r.win==="A"?"W":"L",rds=R.k===8?3:2;let pts=0,txt="";
-  if(res==="W"){if(R.k===8)G.goldHelmetWins=(G.goldHelmetWins||0)+1;pts=100+(/KO|น็อก/.test(r.type||"")?60:0)+Math.max(0,rds-F.round)*30+Math.round(Math.max(0,F.A.hp)*.6);txt=/KO|น็อก/.test(r.type||"")?`Won by KO, round ${F.round}`:"Decision win";if(R.k===8)R.boss=1;}
+  if(res==="W"){pts=100+(/KO|น็อก/.test(r.type||"")?60:0)+Math.max(0,rds-F.round)*30+Math.round(Math.max(0,F.A.hp)*.6);txt=/KO|น็อก/.test(r.type||"")?`Won by KO, round ${F.round}`:"Decision win";if(R.k===8)R.boss=1;}
   else if(res==="D"){pts=30;txt="Draw";}else txt=/KO|น็อก/.test(r.type||"")?`Lost by KO, round ${F.round}`:"Lost on points";
   R.log[R.k]={res,pts,txt};R.score+=pts;
   if(res==="L")gauntNextSlot(R);
@@ -8311,29 +8626,31 @@ Object.assign(CARDS,{
   N("The Sirichai krathong floats away until it's out of sight. No one gets up until the last candle on the pier goes out.")]}});
 
 })();
+/* v1.89.23: the riverside SR card stories keep their choices, but nothing (bond, cash) leaks into the main game */
+(()=>{const mute=st=>(st||[]).forEach(x=>{if(x&&x.choice)x.choice.forEach(o=>{o.fx=()=>{};mute(o.then);});});for(const k of LOY_CARDS)if(CARDS[k])mute(CARDS[k].steps);})();
 function loyCardDrop(G,order){G.cards=G.cards||{};const left=LOY_CARDS.filter(k=>!G.cards[k]);if(!left.length)return null;
   const pref=(order||[]).map(id=>"lk_"+id).filter(k=>left.includes(k));const L=loyOf(G);const id=pref[0]||left[((L&&L.runs)||0)%left.length];
-  G.cards[id]={n:1,lv:1,wk:absWeek(G),seen:false};if(G.F[CARDS[id].c])add(G,CARDS[id].c,"bond",3);G.dust=(G.dust||0)+5;
+  G.cards[id]={n:1,lv:1,wk:absWeek(G),seen:false}; /* v1.89.23: event card — no bond or stardust carried into the main game */
   return `New SR card: "${CARDS[id].t}" (see it in the album)`;}
 function loyGold(G){const L=loyOf(G);if(!L)return null;L.dressOn=1;return "Thai dress off-stage unlocked: the girls wear Thai dress in outings and dates (toggle it in Auntie Taew's letter)";}
 const loyThaiLook=G=>!!(G&&G.ev&&G.ev.loy&&G.ev.loy.tiers&&G.ev.loy.tiers.silver);
-function evThief(G,f){const K=QK.gang1,t=Math.max(6,ovr(f.a)+K.lvl-1.2),rng=mulberry32((G.seed^0x7a1)+absWeek(G)*17);const a={};
+function evThief(G,f){const K=QK.gang1,t=Math.max(6,ovr(f.a)+.6),rng=mulberry32((G.seed^0x7a1)+absWeek(G)*17);const a={};
   for(const [x] of ATTRS)a[x]=clamp(t+(K.tilt[x]||0)+(rng()*1.2-.6),3,19.5);const id="q_evthief";
   const o=baseFighter(id,{name:LOY_THIEF.name,full:LOY_THIEF.name,div:"X",camp:"quest",color:K.color,potential:t+2,a});
-  o.sprite=K.sprite;o.kind="gang1";o.grp="gang";o.lvl=clamp(Math.round(t-6),1,10);o.fatigue=0;o.morale=70;G.F[id]=o;return id;}
-function thiefHTML(){const pool=gauntPool();return `<h2>Catch the Krathong Thief</h2><p class="meta">A silly 2-round bout · no injuries, no effect on records · win to earn krathong money from Auntie Taew · once per week</p>
-  <div class="gpick">${pool.map(f=>`<button class="gpk" data-act="thiefgo" data-v="${f.id}">${faceImg(f)}<span><b>${esc(f.name)}</b><small>Lv.${f.lvl} · Fatigue ${Math.round(f.fatigue)}</small></span></button>`).join("")}</div>
+  o.sprite=K.sprite;o.tintHue=150;o.kind="gang1";o.grp="gang";o.lvl=(f.lvl||1)+1;o.fatigue=0;o.morale=70;G.F[id]=o;return id;}
+function thiefHTML(){const pool=gauntPool();return `<h2>Catch the Krathong Thief</h2><p class="meta">A silly 2-round bout · no injuries, no effect on the main game · win and Auntie Taew fries khanom krok for the team · once per week</p>
+  <div class="gpick">${pool.map(f=>`<button class="gpk" data-act="thiefgo" data-v="${f.id}">${faceImg(f)}<span><b>${esc(f.name)}</b><small>${isLoyGuest(f)?"Guest · ":""}Lv.${f.lvl} · Fatigue ${Math.round(f.fatigue)}</small></span></button>`).join("")}</div>
   <div class="center endbtns"><button class="btn" data-act="closeModal">Later</button></div>`;}
 function thiefGo(fid){const L=loyOf(G);if(!L)return;const f=G.F[fid];if(!f)return;UI.modal=null;
   const pre=[...LOY_THIEF.pre,f.canon&&LOY_THIEF.line[fid]?{n:fid,f:"angry",l:"thai",t:LOY_THIEF.line[fid]}:{n:"nar",t:`${f.name} steps onto the pier and rolls up their sleeves`}];
   playScene(pre,()=>{const qid=evThief(G,f);const bk={id:"bthief",a:fid,b:qid,week:G.week,tier:"evloy",rounds:2,ev:1,bg:"bg_river.webp"};
     openFight2(bk,()=>{const F=LASTF,win=F&&F.result&&F.result.win==="A";L.thiefWk=absWeek(G);delete G.F.q_evthief;
-      if(win){const c=1200;G.cash+=c;G.rep+=.2;L.thiefN=(L.thiefN||0)+1;}save();
-      playScene(win?[...LOY_THIEF.win,{n:"nar",t:`Krathong fee ฿1,200 · Fame +0.2`}]:LOY_THIEF.lose,()=>{AU.startMusic("hub");UI.tab="home";save();render();},{bg:"river",look:"thai"});});},{bg:"river",look:"thai"});}
+      if(win){L.thiefN=(L.thiefN||0)+1;}save();
+      playScene(win?[...LOY_THIEF.win,{n:"nar",t:`Caught Ai Tum ${L.thiefN} times`}]:LOY_THIEF.lose,()=>{AU.startMusic("hub");UI.tab="home";save();render();},{bg:"river",look:"thai"});});},{bg:"river",look:"thai"});}
 Object.assign(ACT,{
   loyintro:()=>{UI.modal=null;playScene(loyIntro(G),()=>{AU.startMusic("hub");render();},{bg:"river",look:"thai"});},
   loyend:d=>{const E=LOY_END[d.v];if(!E)return;const L=loyOf(G);if(L&&L.run&&L.run.newEnd===d.v)L.run.newEnd=null;UI.modal=null;
-    playScene(E.steps,()=>{AU.startMusic("hub");if(L&&L.run&&L.run.done)UI.modal={type:"gaunt"};render();},{bg:"river",look:"thai"});},
+    playScene(loyEndSteps(d.v,L&&L.endCast&&L.endCast[d.v]),()=>{AU.startMusic("hub");if(L&&L.run&&L.run.done)UI.modal={type:"gaunt"};render();},{bg:"river",look:"thai"});},
   thief:()=>{const L=loyOf(G);if(!L||L.thiefWk===absWeek(G))return;UI.modal={type:"thief"};render();},
   thiefgo:d=>thiefGo(d.v),
   loydress:()=>{const L=loyOf(G);if(!L||!L.tiers.gold)return;L.dressOn=L.dressOn?0:1;save();render();},
@@ -8501,7 +8818,7 @@ const recentRes=(G,id,res)=>{const c=lastFight(G,id);return !!(c&&c.res===res&&c
 const nearFinal=G=>G.week>=42&&G.week<=49;
 const CHAT={
  kati:[
-  {id:"k_lv1",need:G=>G.romance==="kati",x:[
+  {id:"k_lv1",need:G=>romOf(G,"kati"),x:[
    ["Darling… I mean, Manager! Typo! …Not really a typo",[["Feel free to make that typo often",2,"…Then I'll make it every day"],["That made me smile",1,"How big? Send a photo"],["Focus on training",0,"Yes… Mister Manager"]]],
    ["Mali teased me all day about walking around smiling to myself",[["Well, it's a nice smile",2,"…Now you're doing it! No teasing after Mali!"],["Mali knows?",1,"The whole camp knows. Even Coach Daeng nodded at me"],["Try to play it cool",0,"I tried. It won't go away"]]]]},
   {id:"k_student",need:G=>G.seen&&G.seen.first_student,x:[
@@ -8537,7 +8854,7 @@ const CHAT={
    ["I'm bad at resting. I feel guilty every time I don't train",[["Rest is a kind of training too",2,"Rest is training… I'll remember that"],["You'll get used to it",1,"Yeah, I hope so"],["Then go train",0,"Coach Daeng will scold you, Manager, haha"]]],
    ["Thanks for messaging me. I'm not lonely today",[["Message me anytime",2,"Then I'll message you a lot. No getting annoyed!"],["No problem",1,"Okay, good night"],["Mm",0,"…Okay"]]]]}],
  mali:[
-  {id:"m_lv1",need:G=>G.romance==="mali",x:[
+  {id:"m_lv1",need:G=>romOf(G,"mali"),x:[
    ["Manager~ Mali saved your name in her phone as 'Mali's Khanom Khrok'",[["Then you're 'My Som Tam'",2,"Hehe, spicy, just like the name!"],["That's cute",1,"Right!? Mali thought for three days"],["Use my normal name",0,"No! It's permanent now!"]]],
    ["If Mali wins next fight, can she have one reward?",[["Sure, what do you want?",2,"Go to the night market together and hold hands the whole way! So everyone sees!"],["Win first, then we'll talk",1,"Then Mali's finishing it in round one!"],["You'll ask for a lot",0,"Just a tiny bit!"]]]]},
   {id:"m_join",need:G=>G.F.mali&&G.F.mali.camp==="player",x:[
@@ -8569,7 +8886,7 @@ const CHAT={
    ["Mali secretly practices jumping high kicks every night, didn't tell anyone",[["Can I see?",2,"Sure! But don't laugh if Mali falls!"],["Don't train till you get hurt",1,"Yes, yes, Coach Daeng says that too"],["If it's a secret, why tell me?",0,"Because I'm only telling you!"]]],
    ["Thank you for taking Mali into the camp. Nowhere else would",[["We're lucky to have you",2,"…Waah, don't say that late at night, Mali's crying"],["Our camp welcomes everyone",1,"Yes, this camp is the best!"],["Don't forget to pay rent",0,"Haha, way to ruin the mood!"]]]]}],
  rin:[
-  {id:"r_lv1",need:G=>G.romance==="rin",x:[
+  {id:"r_lv1",need:G=>romOf(G,"rin"),x:[
    ["Since we started dating, my work efficiency has dropped 8% from daydreaming",[["Worth it for the happiness",2,"…I ran the numbers. Very worth it"],["Daydreaming about who?",1,"That question has one answer. I don't need to say it"],["Then stop daydreaming",0,"…I can't. I tried"]]],
    ["No spreadsheet tonight. I just wanted to type that I miss you. End of message",[["I miss you too",2,"…Saved. I've reread it four times"],["Shortest message you've ever sent",1,"Yes. Some things need no appendix"],["What time is training tomorrow?",0,"…Six"]]]]},
   {id:"r_join",need:G=>G.F.rin&&G.F.rin.camp==="player",x:[
@@ -8691,13 +9008,15 @@ function bondFade(G){G.relT=G.relT||{};for(const id of CANON_IDS){const f=G.F[id
   const gap=absWeek(G)-f.lastTouch;if(gap<4)continue;const mine=f.camp==="player",rate=mine?.5:.25,floor=REL_FLOOR[G.relT[id]||0]||0;
   if((f.bondX||0)>0)continue;/* v1.86: past the first 100 the bond no longer fades */if(f.bond>floor)f.bond=Math.max(floor,Math.round((f.bond-rate)*100)/100);}}
 function chatWeekly(G){bondFade(G);G.chatIn=G.chatIn||{};G.chatLast=G.chatLast||{};const rng=mulberry32(G.seed*31+G.week*7+3);
-  for(const id of CANON_IDS){const f=G.F[id];if(!f||!f.met||G.chatIn[id])continue;
+  for(const id of CANON_IDS){const f=G.F[id];if(!f||!f.met||G.chatIn[id]||isAway(G,id))continue;
     {const L=CHAT[id]||[],seen=(G.chatSeen||{})[id]||[],W=G.chatWkAbs||{};if((f.bond||0)>=8&&gameWeek(G)-(G.chatLastAbs?.[id]??-999)>=1&&L.some(t=>t.need&&/_(lost|won|dm|flood|loan|miss|loy|loyw)$/.test(t.id)&&t.need(G)&&(!seen.includes(t.id)||(t.rep&&gameWeek(G)-(W[id+":"+t.id]??-999)>=t.rep)))){G.chatIn[id]=G.week;continue;}}
     if((f.bond||0)<CHAT_BOND)continue;
     if(gameWeek(G)-(G.chatLastAbs?.[id]??-999)<3)continue;if(rng()<.3+((f.bond||0)>=50?.1:0))G.chatIn[id]=G.week;}}
 const chatLen=f=>3+((f.bond||0)>=40?1:0)+((f.bond||0)>=70?1:0);
-const canChat=f=>!!(f&&f.met&&G.chatIn&&G.chatIn[f.id]);
-function chatOpen(id){const f=G.F[id];if(!f||!canChat(f))return;f.lastTouch=absWeek(G);delete G.chatIn[id];G.chatLast=G.chatLast||{};G.chatLast[id]=G.week;G.chatLastAbs=G.chatLastAbs||{};G.chatLastAbs[id]=gameWeek(G);const T=chatTopic(G,id);
+const canChat=f=>!!(f&&f.met&&G.chatIn&&G.chatIn[f.id]&&!isAway(G,f.id));
+/* v1.89.11: you can always open a chat with someone you are seeing (the ⋯ menu holds "break up") */
+const canChatLov=f=>!!(f&&f.met&&isPartner(G,f.id)&&!isAway(G,f.id));
+function chatOpen(id){const f=G.F[id];UI.lvMenu=false;if(f&&!canChat(f)&&canChatLov(f)){UI.chat={id,x:[],i:0,log:[],gain:0,typing:false,done:true,idle:true};UI.modal={type:"chat"};render();return;}if(!f||!canChat(f))return;f.lastTouch=absWeek(G);delete G.chatIn[id];G.chatLast=G.chatLast||{};G.chatLast[id]=G.week;G.chatLastAbs=G.chatLastAbs||{};G.chatLastAbs[id]=gameWeek(G);const T=chatTopic(G,id);
   G.chatSeen=G.chatSeen||{};G.chatSeen[id]=(G.chatSeen[id]||[]).filter(x=>x!==T.id).concat([T.id]);G.chatWk=G.chatWk||{};G.chatWk[id+":"+T.id]=G.week;G.chatWkAbs=G.chatWkAbs||{};G.chatWkAbs[id+":"+T.id]=gameWeek(G);
   const x=[...T.x];const ex=CHAT_X[id]||[];G.chatX=G.chatX||{};const xs=G.chatX[id]=G.chatX[id]||[];const extra=Math.min(1,chatLen(f)-3);for(let i=0;i<ex.length&&extra>0;i++)if(!xs.includes(i)&&(i===0||(f.bond||0)>=70)){x.push(ex[i]);xs.push(i);break;}
   const rng=mulberry32(G.seed+G.week*17+id.length);x.forEach(e=>{e.ord=[0,1,2].sort(()=>rng()-.5);});
@@ -8712,12 +9031,20 @@ const HEART_PX=pxIcon([".kk.kk.","krrkrrk","krwrrrk","krrrrrk",".krrrk.","..krk.
 function chatHTML(){const C=UI.chat;if(!C)return {body:"",foot:true};const f=G.F[C.id];
   const msgs=C.log.map(m=>`<div class="cmsg ${m.w}">${m.w==="them"?`<img class="cav" src="${faceSrc(f.id,"happy","casual")}" alt="">`:""}<p>${esc(m.w==="them"&&typeof nameCall==="function"?nameCall(C.id,m.t):m.t)}${m.s===2?`<i class="chrt">${HEART_PX}</i>`:""}</p></div>`).join("");
   const e=!C.done&&!C.typing&&C.x[C.i];
-  return {foot:false,body:`<div class="chatw px"><div class="chead"><img src="${faceSrc(f.id,"happy","casual")}" alt=""><span><b>${esc(f.name)}</b><small>${C.typing?"typing…":"online"}</small></span><span class="cbond">${HEART_PX}<b class="num">${Math.round(f.bond||0)}</b></span></div>
+  return {foot:false,body:`<div class="chatw px"><div class="chead"><img src="${faceSrc(f.id,"happy","casual")}" alt=""><span><b>${esc(f.name)}</b><small>${C.typing?"typing…":"online"}</small></span><span class="cbond">${HEART_PX}<b class="num">${Math.round(f.bond||0)}</b></span>${isPartner(G,f.id)?`<button class="cmenu" data-act="lvmenu" aria-label="Options" aria-expanded="${!!UI.lvMenu}">⋯</button>`:""}${UI.lvMenu&&isPartner(G,f.id)?`<div class="cmenupop px"><button class="btn sm danger" data-act="lvask">${isLov(G,f.id)?"Break up":"Call off the promise"}</button></div>`:""}</div>
    <div class="cbody pxscroll" data-sk="chat">${msgs}${C.typing?`<div class="cmsg them typing"><img class="cav" src="${faceSrc(f.id,"happy","casual")}" alt=""><p><i></i><i></i><i></i></p></div>`:""}</div>
    <div class="cfoot2">${e?`<small class="meta">Choose a message to send (${C.i+1}/${C.x.length})</small>${e.ord.map(k=>`<button class="copt" data-act="chatpick" data-v="${k}">${esc(e[1][k][0])}</button>`).join("")}`
-     :C.done?`<p class="cend">${C.gain?`Great conversation · bond increased`:"A short chat today. She'll text again sometime"}</p><button class="btn primary" data-act="closeModal">Close chat</button>`:`<small class="meta">…</small>`}</div></div>`};}
+     :C.idle?`<p class="cend">No new messages from ${esc(f.name)}</p><button class="btn primary" data-act="closeModal">Close chat</button>`:C.done?`<p class="cend">${C.gain?`Great conversation · bond increased`:"A short chat today. She'll text again sometime"}</p><button class="btn primary" data-act="closeModal">Close chat</button>`:`<small class="meta">…</small>`}</div></div>`};}
 XMODAL.chat=()=>chatHTML();
-Object.assign(ACT,{chat:d=>chatOpen(d.id),chatpick:d=>chatPick(+d.v)});
+Object.assign(ACT,{chat:d=>chatOpen(d.id),chatpick:d=>chatPick(+d.v),
+  lvmenu:()=>{const C=UI.chat;if(!C)return;UI.lvMenu=!UI.lvMenu;render();},
+  lvask:()=>{const C=UI.chat;if(!C)return;const f=G.F[C.id],lov=isLov(G,f.id),mine=f.camp==="player";UI.lvMenu=false;UI.lvBreak=f.id;
+    UI.modal={type:"confirm",title:lov?`Break up with ${esc(f.name)}?`:`Call off the promise with ${esc(f.name)}?`,
+      text:`${esc(f.name)} will be heartbroken. Bond −35, ${mine?"and she'll leave camp for about 4 weeks — no training and no new fights meanwhile":"and she won't be in touch for about 4 weeks"} · This can't be undone`,
+      no:"Not now",noAct:"lvno",ok:lov?"Break up":"Call off the promise",yes:"lvbreak"};render();},
+  lvno:()=>{UI.lvBreak=null;UI.modal={type:"chat"};render();},
+  lvbreak:()=>{const id=UI.lvBreak;UI.lvBreak=null;UI.chat=null;UI.modal=null;if(!id||!isPartner(G,id)){render();return;}AU.sfx("ui");
+    playScene(breakSteps(G,id),()=>{save();render();},{bg:G.F[id].camp==="player"?"gym":"night",look:"casual"});}});
 XMODAL.confirm=m=>({body:`<h2>${m.title}</h2>${m.html||`<p>${m.text}</p>`}<div class="mfoot"><button class="btn ghost" data-act="${m.noAct||"closeModal"}" ${m.noV?`data-v="${m.noV}"`:""}>${m.no||"No"}</button><button class="btn primary" data-act="${m.yes}">${m.ok||"Confirm"}</button></div>`,foot:false});
 
 // v1.52: "haven't seen you in a while" texts — she reaches out before the bond starts to fade
@@ -8799,11 +9126,11 @@ CHAT.kati.push(
    ["Manager, there's something I want to say, but I've typed and deleted it five times",[["Take your time. I'll wait",2,"…Thank you for not leaving. When I lost, when the camp was broke, when I was stubborn"],["Typos are fine",1,"It's not about typos! …I'm just embarrassed"],["Want to just call?",0,"No!! If I hear your voice I won't get a word out"]]],
    ["Grandpa taught me to fight. You taught me that even when I lose, someone's still waiting",[["You taught me too, what never giving up looks like",2,"…Now I'm crying on my phone screen"],["You're worth waiting for",2,"…!! (ten blushing red-glove stickers in a row)"],["That's a manager's job",0,"Okay… a job's a job"]]],
    ["Whatever happens from here, I'm staying. This camp. This person",[["Same here",2,"Then it's settled! …I'm going for a run. My face is burning"],["Glad to hear it",1,"It is"],["You make it sound like you're going somewhere",0,"I'm not going anywhere! That's what I'm trying to say!"]]]]},
-  {id:"k_hr13",need:G=>G.romance==="kati"&&hAt(G,"kati")>=13,x:[
+  {id:"k_hr13",need:G=>romOf(G,"kati")&&hAt(G,"kati")>=13,x:[
    ["Manager, next time can we go out and not talk about muay thai at all?",[["Sure. That day we're just two ordinary people",2,"…Two ordinary people. I like that"],["Can you actually manage that?",1,"Not sure. I might kick a lamppost by accident"],["Then what would we talk about?",0,"…Good question. I don't know either"]]],
    ["Mali says when I talk about you, I look like I just won by KO",[["I want to see that face more often",2,"Then stay close. That face is only visible at clinch range"],["Mali's exaggerating",1,"She isn't… I checked in the mirror"],["What do you look like after a KO?",0,"Like… grinning like an idiot! Don't ask!"]]],
    ["Sweet dreams… darling. Another typo. I'm not deleting it this time",[["Sweet dreams to you too, darling",2,"…!! I'm definitely not sleeping tonight"],["You make that typo a lot",1,"My fingers are used to it now"],["Night",0,"…That's it?"]]]]},
-  {id:"k_hr16",need:G=>G.romance==="kati"&&hAt(G,"kati")>=16,x:[
+  {id:"k_hr16",need:G=>romOf(G,"kati")&&hAt(G,"kati")>=16,x:[
    ["Auntie Taew asked me in the middle of the market, 'When's the wedding?' The whole market turned to look",[["What did you say?",2,"I said 'Ask the manager!' and ran"],["Auntie Taew doesn't hold back",1,"Straighter than my jab"],["Just ignore her",0,"Can't. She's followed me to the camp"]]],
    ["But… have you ever thought about it? Just asking. You don't have to answer",[["I have. But I want you to win the belt first",2,"…Then I'll hurry up and become champion. Not for the belt. For something else"],["One step at a time",1,"I'm not in a rush… much"],["Never crossed my mind",0,"…Oh. I was just kidding anyway"]]],
    ["Forget I asked! Going to train!",[["I'm not forgetting",2,"…You're such a cheat"],["Train well",1,"Yes!"],["Already forgotten",0,"…That was fast"]]]]},
@@ -8871,11 +9198,11 @@ CHAT.kati.push(
    ["Manager, for my birthday this year I don't want a present",[["Then what do you want?",2,"I want the class kids to come play Songkran at the camp, and you to be their target"],["That's unusual",1,"I'm grown up now"],["Great, saves money",0,"Manager…"]]],
    ["As a kid nobody came to my birthday. This year I want it to be a day other kids remember",[["You're turning loneliness into a gift for someone else",2,"…I need to go wash my face after that"],["That's lovely",1,"Yes!"],["Lots of kids, lots of chaos",0,"Chaos is fun"]]],
    ["Bring a change of shirt. Seven kids, seven water guns. Fah's handing them out",[["I'm ready to be soaked all day",2,"You're Little Sirichai's hero!"],["Of course Fah's behind it",1,"She bought them herself. Too nice"],["Can I hide indoors?",0,"No! Targets stay in the yard"]]]]},
-  {id:"k_h27",need:G=>hAt(G,"kati")>=27,x:[
+  {id:"k_h27",need:G=>hAt(G,"kati")>=27&&!topLock(G,"kati"),x:[
    ["Manager, I dreamt about Grandpa last night. He didn't say anything. Just smiled and patted my shoulder",[["He must be proud of everything you've done",2,"…I woke up crying. Warm crying, not lonely crying"],["What a lovely dream",1,"The best"],["Dreams are just dreams",0,"…Not to me"]]],
    ["After he died I dreamt of him a lot. But he always turned and walked out of the camp",[["This time he turned and smiled, because he doesn't need to worry anymore",2,"…Yes. I think so too. He came to say goodbye with a light heart"],["You must miss him",1,"Every day. It doesn't hurt anymore"],["Don't overthink it",0,"It is"]]],
    ["I'm buying pa thong ko for Grandpa's picture today. To tell him I'm doing well",[["I'll come. Tell him the camp's in good hands",2,"Yes… in both of ours"],["Get me some too",1,"Already got three bags"],["He can't eat them",0,"…I'll eat them for him"]]]]},
-  {id:"k_h30",need:G=>hAt(G,"kati")>=30,x:[
+  {id:"k_h30",need:G=>hAt(G,"kati")>=30&&!topLock(G,"kati"),x:[
    ["Manager, I found Grandpa's last notebook. On the final page he wrote: 'May Kati find someone who makes this camp a home'",[["Grandpa's wish came true",2,"…I cried for half an hour, then ran straight to message you"],["He must have known that day would come",1,"He knew everything"],["Written long ago?",0,"A few days before he died"]]],
    ["I think he's smiling. He handed the camp to the right person",[["He handed it to both of us",2,"…Both of us. That's my favourite phrase now"],["Thank you for trusting me",1,"Since day one"],["I just came to work",0,"…It's more than that now"]]],
    ["From now on, win or lose, I won't ask whether I'm worth enough anymore",[["You always were",2,"…I only just believe it. Thank you for saying it until I did"],["Glad to hear it",1,"It is"],["Just keep winning",0,"…Manager!"]]]]});
@@ -8912,11 +9239,11 @@ CHAT.mali.push(
    ["Manager… I just realised I haven't cried after a fight in a while",[["Why do you think?",2,"Because every time I come down from the ring, someone's already waiting. I don't need to wish anyone could see"],["I'm glad",1,"Mm~"],["Crying's okay too",1,"I know. I'll cry if I need to. I just don't anymore"]]],
    ["When I first came here I thought boxing was a job. Fight, send money home",[["And now?",2,"Now I fight because I love it. Money still matters, but it's not the only reason anymore"],["A job's not a bad thing",1,"No, but a job you love is better~"],["Your purse went up too",0,"Ha! That too"]]],
    ["Thank you for never calling me a kid. And for never letting me smile alone",[["You're one of the fighters I'm proudest of",2,"…'One of'? Then I'll work on becoming 'the' proudest!"],["Let's keep smiling together",2,"Yes! On the good days and the bad ones"],["No need to thank me",0,"I do! Take it!"]]]]},
-  {id:"m_hr13",need:G=>G.romance==="mali"&&hAt(G,"mali")>=13,x:[
+  {id:"m_hr13",need:G=>romOf(G,"mali")&&hAt(G,"mali")>=13,x:[
    ["Darling~ I slipped a plumeria into your bag. Go look",[["Smells lovely. Thank you",2,"Every day from now on! No throwing them out"],["When did you do that?",1,"Secret~"],["My papers are all wet",0,"…Sorry. The flowers were still damp"]]],
    ["Mom asked what you like to eat. She wants to send southern food",[["Anything she makes",2,"She'll be thrilled! Expect a huge box"],["Southern curry with rice noodles",1,"Spoken like a southerner~"],["She doesn't have to",0,"You can't refuse Mom!"]]],
    ["Sweet dreams. Tonight I'm dreaming of the sea and you",[["Sweet dreams to you too",2,"~~~ (ten plumeria stickers)"],["Your home sea?",1,"Yep. One day I'll take you for real"],["Night",0,"…So short"]]]]},
-  {id:"m_hr16",need:G=>G.romance==="mali"&&hAt(G,"mali")>=16,x:[
+  {id:"m_hr16",need:G=>romOf(G,"mali")&&hAt(G,"mali")>=16,x:[
    ["The kids at home really want to meet you. Every day they ask, 'When's our brother-in-law coming?'",[["I'll visit this school break",2,"Really?! I'll tell them now! No… better not yet, they'd be too excited to sleep"],["Brother-in-law already?",1,"I didn't teach them that! They came up with it!"],["That's a bit soon",0,"…That's what I told them too"]]],
    ["But I'm a bit nervous. Our house is small and old. Will you be okay?",[["The house you grew up in is the one I most want to see",2,"…Now I'm crying again. And I didn't even win anything"],["Of course I'll be okay",1,"Really?"],["I can sleep on a mat",1,"Ha! You really will"]]],
    ["Then get ready. Mom will feed you until you can't walk",[["Very ready",2,"Good~ future… uh, Manager!"],["I can handle it",1,"You can't. Nobody can"],["Better diet first",0,"No dieting! Go get fattened by Mom!"]]]]},
@@ -8964,11 +9291,11 @@ CHAT.mali.push(
    ["Manager~ I set up a garland stall outside the stadium every Saturday night. Like Mom's",[["Selling well?",2,"Sold out every time!! Fans buy them for the fighters they cheer. I'm so happy"],["Not tiring?",1,"Tiring but fun"],["Wouldn't you rather train?",0,"I did train! I'm not slacking"]]],
    ["Today an auntie bought one and said, 'For the little fighter called Mali.' She didn't know I was the seller",[["Did you tell her?",2,"I did. She hugged me and cried, said she's watched every fight. I cried too"],["You've got fans now",1,"I have fans!! Can't believe it"],["Selling to your own fan",0,"Ha, it is weird"]]],
    ["I'll make that auntie a special one every week. Free",[["Your kindness is the best thing about you",2,"…Compliment me like that and you get free ones too"],["So kind",1,"Mom taught me"],["You'll lose money",0,"One garland won't hurt"]]]]},
-  {id:"m_h27",need:G=>hAt(G,"mali")>=27,x:[
+  {id:"m_h27",need:G=>hAt(G,"mali")>=27&&!topLock(G,"mali"),x:[
    ["Manager, I finally understand why Mom always smiles, even when things are hard",[["Why?",2,"She isn't smiling to hide being tired. She smiles because she has people to smile with. Like me now"],["Your mom's strong",1,"Strongest in the world"],["Doesn't smiling get tiring?",0,"Not anymore. It's real now"]]],
    ["I used to smile so people wouldn't worry. Now I smile because I'm genuinely happy",[["I can see the difference. Your eyes smile now too",2,"…Really? Hold on, checking the mirror"],["I'm glad",1,"Mm~"],["Looks the same to me",0,"It's not! Look closer"]]],
    ["Thank you for making it so I never have to fake a smile again",[["Thank you for letting me see the real one",2,"~~~ (ten smiley stickers, all eyes-closed grins)"],["Always",1,"It is"],["You did that",1,"We did it together"]]]]},
-  {id:"m_h30",need:G=>hAt(G,"mali")>=30,x:[
+  {id:"m_h30",need:G=>hAt(G,"mali")>=30&&!topLock(G,"mali"),x:[
    ["Manager!! Mom's house is done!! She's threading garlands on the balcony right now (photo)",[["The balcony faces the sea, just like your drawing",2,"Yes!! Exactly like the drawing. Except my drawing was prettier, ha"],["Congratulations!",1,"Thank you!!"],["How much did it cost?",0,"Secret! Worth every baht"]]],
    ["Mom says the room next to mine is made up and waiting for you",[["I'll be sleeping there this Songkran",2,"Promise!! Mom will make the biggest pot of gaeng tai pla"],["Your mom's so kind",1,"She adores you"],["Your room?",0,"NEXT to mine!! Read properly!"]]],
    ["Manager, the dream I never told anyone came true. Because of you",[["Because you fought for it. I was just beside you",2,"Being beside me was the most important part"],["What's the next dream?",1,"Secret~ but you're in it"],["I'm happy for you",1,"Mm~"]]]]});
@@ -9005,11 +9332,11 @@ CHAT.rin.push(
    ["Manager, I have the most important analysis of my life to report",[["Go ahead. I'm listening",2,"The variable with the biggest effect on my happiness isn't wins or losses or stats. …It's you"],["Is it long?",1,"Short. But it took three years"],["Just send the file",0,"…This one has to be said, not sent"]]],
    ["I've tried to put you into a formula all along. Nothing explains you",[["Then stop calculating and use instinct",2,"…Instinct says stay right here. For good. I trust it now"],["Some things don't need explaining",1,"A concept I'm learning to accept"],["Try another formula?",0,"I've tried forty-seven"]]],
    ["Thank you for being the variable I can't calculate. I only just realised how good that is",[["Thank you for letting me into your spreadsheet",2,"Not a part of it. You're the first sheet"],["Let's keep going together",2,"Confirmed. Saved"],["I'm just doing my job",0,"…I don't believe that data"]]]]},
-  {id:"r_hr13",need:G=>G.romance==="rin"&&hAt(G,"rin")>=13,x:[
+  {id:"r_hr13",need:G=>romOf(G,"rin")&&hAt(G,"rin")>=13,x:[
    ["I've planned our next date. With three backup plans",[["No plan this time. Anywhere with you",2,"…No plan? That scares me a little. But I'll try. Because it's you"],["Which one's best?",1,"Plan B. Bookshop, then café"],["Three's a lot",0,"If anything it's too few"]]],
    ["When we walk together, I counted: you slow down for me every time",[["I want more time walking beside you",2,"…That answer just spiked my heart-rate graph"],["You counted?",1,"I count everything. You know that"],["I'm just lazy",0,"The data doesn't support that"]]],
    ["Good night… darling. That took three minutes of typing and deleting",[["Worth every minute. Good night",2,"…Timestamp saved. 23:47"],["Three whole minutes?",1,"Three minutes twelve seconds"],["Night",0,"…Okay"]]]]},
-  {id:"r_hr16",need:G=>G.romance==="rin"&&hAt(G,"rin")>=16,x:[
+  {id:"r_hr16",need:G=>romOf(G,"rin")&&hAt(G,"rin")>=16,x:[
    ["My mother asked, 'Who's the person in your spreadsheet?' I don't know how she saw it",[["What did you say?",2,"I said, 'The one I can't calculate.' She laughed for a long time"],["Maybe you left it open on a video call",1,"…That's the most probable explanation"],["Say I'm a client",0,"I can't lie to my mother"]]],
    ["She wants to meet you, next time I go to Bangkok",[["Happy to. She can prepare questions",2,"She already has twenty. You can guess where I get it from"],["Do I wear a suit?",1,"She likes tidy, but not a suit"],["Can it wait?",0,"…Sure. I'll tell her you're not ready"]]],
    ["I made a new folder on my laptop called 'Future'. It's still empty",[["We'll fill it together, bit by bit",2,"…The first file will be a photo of us. Decided"],["Good folder name",1,"Took me two days"],["Why make an empty one?",0,"So there's somewhere waiting"]]]]},
@@ -9057,11 +9384,11 @@ CHAT.rin.push(
    ["The lecture's done. I stumbled twice. Both times I looked at the front row and carried on",[["You were brilliant. The whole hall stood up",2,"…I saw. But I only looked at the one who clapped first"],["Only twice",1,"60% fewer than predicted"],["No stumbles next time",0,"…Okay"]]],
    ["My old professor invited me back for a master's. I haven't answered",[["Whatever you choose, I'll back you",2,"…I made a comparison table. Every row ties except one. The one with you in it"],["Go for it",1,"I'm thinking"],["You don't need it",0,"…The data disagrees"]]],
    ["I've decided. Online study. I won't move. Study, fight, and stay here",[["I couldn't be happier",2,"…I decided by instinct. The table just confirmed it"],["Can you handle it all?",1,"I've made a schedule"],["That'll be exhausting",0,"Exhausting by choice"]]]]},
-  {id:"r_h27",need:G=>hAt(G,"rin")>=27,x:[
+  {id:"r_h27",need:G=>hAt(G,"rin")>=27&&!topLock(G,"rin"),x:[
    ["Manager, my mother called today. She's watched every video I've made, liked every one",[["She's your number one fan",2,"…I just found out 'Silent Viewer 1' is my mother. Since the very first video"],["That's sweet",1,"It is"],["She never comments?",0,"She didn't want to embarrass me"]]],
    ["For five years I thought she was disappointed I lost that day. But she watched everything I did after",[["She was never disappointed",2,"…She said the same. I cried in front of her on a video call. First time in ten years"],["Feel better after talking?",1,"Much lighter"],["Should've talked sooner",0,"I know…"]]],
    ["I'm going to Bangkok for New Year. Mother says bring you",[["Definitely",2,"Then the chicken rice place, as promised. Status: about to be completed"],["If I'm not intruding",1,"She's the one inviting"],["Next year?",0,"…Okay. I'll tell her"]]]]},
-  {id:"r_h30",need:G=>hAt(G,"rin")>=30,x:[
+  {id:"r_h30",need:G=>hAt(G,"rin")>=30&&!topLock(G,"rin"),x:[
    ["Manager, you can finally see my 'Special data' file (file attached)",[["Opened… it's so long",2,"2,847 rows. Every line you said that I thought about all night, since day one"],["Thank you for showing me",1,"You should see it"],["You logged all this?",0,"…Yes. Don't tease me"]]],
    ["Row one says, 'Nobody here fights hurt.' You said that the day I applied",[["I remember. And it'll always be true",2,"…Row 2,848, saved"],["You remember that?",1,"Every word"],["I said that?",0,"…I'm adding a 'Things the manager forgot' column"]]],
    ["I'll never delete this file. I'll keep adding to it. It'll never be finished",[["Then I'll keep giving you things to log",2,"…It's the only file in my life I never want to finish"],["Guard it well",1,"Backed up in three places"],["It'll get huge",0,"I bought more storage"]]]]});
@@ -9098,11 +9425,11 @@ CHAT.ploy.push(
    ["I used to think strength meant never needing anyone",[["And now?",2,"Now I think strength is daring to tell someone you need them. …You"],["You're already strong",1,"Strong enough to be lonely"],["That's right. Self-reliance is best",0,"…I used to believe that"]]],
    ["Grandpa Chai once wrote to me, 'Our camp has no money, but it has people who'll stand by you.' I never believed it until I met you",[["Grandpa would be glad it came true",2,"…I think he'd smile the way Kati describes. Smile, then buy pa thong ko"],["I'll keep standing by you",2,"Stand up straight then. I'll be checking your posture daily"],["Just doing my part",0,"…It's more than that"]]],
    ["I don't say things like this, so listen. Thank you. For teaching me losing is okay, as long as someone's waiting",[["I'll always be waiting",2,"…I'll be on time, as always. You won't wait long"],["I'm listening",1,"Good"],["You've never even lost",0,"That doesn't matter anymore"]]]]},
-  {id:"p_hr13",need:G=>G.romance==="ploy"&&hAt(G,"ploy")>=13,x:[
+  {id:"p_hr13",need:G=>romOf(G,"ploy")&&hAt(G,"ploy")>=13,x:[
    ["I've never dated anyone. Are there rules I should know?",[["Just one: be yourself, on time",2,"…The simplest rule I've ever heard. I can do that"],["There aren't any",1,"Without rules how do I know I'm doing it right?"],["Take turns paying",0,"Noted"]]],
    ["I booked dinner for six sharp. I'll be there at 5:50",[["I'll be there at 5:45, waiting for you",2,"…You lose to me at everything except this"],["I'll be on time",1,"Good"],["Six-oh-five okay?",0,"No"]]],
    ["Good night. I don't say that to many people",[["Good night, Ploy",2,"…Just my name like that. Better than I expected"],["Night, captain",1,"Don't call me captain"],["Go to sleep",0,"I'm going"]]]]},
-  {id:"p_hr16",need:G=>G.romance==="ploy"&&hAt(G,"ploy")>=16,x:[
+  {id:"p_hr16",need:G=>romOf(G,"ploy")&&hAt(G,"ploy")>=16,x:[
    ["My mother asked why I smile more these days. I didn't know I did",[["I've noticed. You smile whenever you read my messages",2,"…How would you know? You're not there when I read them. …Or you just know"],["What did you tell her?",1,"Said the weather's nice"],["You don't smile more",0,"Mother says I do"]]],
    ["Mother wants me to bring you to Korat for New Year. I haven't answered yet",[["Let's go. It's your birthday too. We'll celebrate at your home",2,"…A birthday at home, with Mother, with you. I never dared ask for that"],["If you're ready",1,"Not sure I'm ready. But I want to"],["Maybe next year?",0,"…Fine"]]],
    ["If we go, I'll show you the flower fields I ran through as a kid. Only my father and I know the spot",[["Thank you for letting me know it too",2,"…Three people now"],["No running. Walking's fine",1,"Light jog"],["Is it far?",0,"Ten kilometres. We run"]]]]},
@@ -9150,11 +9477,11 @@ CHAT.ploy.push(
    ["My father called. He watched my last fight and said, 'You fight like you're enjoying it.' First time he's ever said that",[["Because you are now",2,"…Yes. I'm not afraid of losing anymore. So all that's left is the fun"],["He's perceptive",1,"He's watched me for sixteen years"],["Did you win?",0,"That doesn't matter anymore"]]],
    ["I just realised in sixteen years I never smiled in the ring. Father kept a photo of every fight. Not one smile",[["Next fight I'll photograph you smiling, for him",2,"…If I smile in the ring, take it. He'll finally have one"],["Smiling might break focus",1,"I'll smile at the final bell"],["No smile looks cool",0,"Cool, but lonely"]]],
    ["Thank you for making me enjoy the thing I've done all my life",[["Enjoy it for a long time",2,"I promise. And I never break promises"],["No problem",1,"Mm"],["You did that",1,"We did"]]]]},
-  {id:"p_h27",need:G=>hAt(G,"ploy")>=27,x:[
+  {id:"p_h27",need:G=>hAt(G,"ploy")>=27&&!topLock(G,"ploy"),x:[
    ["Temple at 5 a.m. today. The old monk asked again who I keep coming with",[["What did you say this time?",2,"…I said, 'The person who made me unafraid to lose.' He smiled and said, 'Good'"],["He still remembers",1,"He remembers everyone"],["Same answer as before?",0,"Different"]]],
    ["He gave me two amulets. One for me, one for 'that person'",[["I'll wear it always",2,"…I'll wear mine too. Two amulets, two people"],["Thank him for me",1,"Thank him yourself. Tomorrow, 5 a.m."],["I don't really wear amulets",0,"Keep it in your pocket then"]]],
    ["Tomorrow, 5 a.m., I'll be at the temple gate",[["I'll be there at 4:55",2,"…You've learned too much from me"],["I'll try to wake up",1,"I'll call you"],["Six instead?",0,"No"]]]]},
-  {id:"p_h30",need:G=>hAt(G,"ploy")>=30,x:[
+  {id:"p_h30",need:G=>hAt(G,"ploy")>=30&&!topLock(G,"ploy"),x:[
    ["I have something to return. Wrap pair three-hundred-and-one. Bring it so I can mend it. It's frayed",[["It's frayed because I use it every day",2,"…I know. I've seen. That's the best thing that can happen to a pair of wraps"],["Thanks for mending it",1,"I'll restitch the name clearer"],["I can buy new ones",0,"No"]]],
    ["I'll stitch one more name, next to yours",[["Yours?",2,"…Yes. Wraps with two names. The only pair out of three hundred and one"],["Whose?",1,"Guess"],["One name is enough",0,"…Not anymore"]]],
    ["Since I was ten, I fought so no one would be disappointed. Now I fight because I want to, and someone's always waiting ringside",[["I'll be there every fight",2,"…I know. You don't need to promise. I already believe it"],["I'm glad",1,"Mm"],["Win too",0,"Win or lose, either's fine"]]]]});
@@ -9191,11 +9518,11 @@ CHAT.fah.push(
    ["Hey. I'm saying this once. No repeats. Read carefully",[["Reading carefully",2,"…Thanks for not leaving. When I was sharp with you, when I ran home, when I said I hated you. I was lying"],["Ready",1,"Good"],["Can't you send a voice note?",0,"No!! My voice would shake!"]]],
    ["I've never told anyone I'm glad they're around. You're the first. Count it as bonus points",[["I'm keeping those points forever",2,"…Forever? Then I'll keep giving more, so they never run out"],["I'm glad you're here too",2,"…!!! Enough!! That's all for today!!"],["What do points get me?",0,"One free pass from getting kicked"]]],
    ["Tomorrow I'll pretend I never typed any of this. Don't bring it up!",[["I won't mention it. I won't forget it either",2,"…Me neither"],["Deal",1,"Good"],["Already screenshotted",0,"DELETE IT NOW!!!"]]]]},
-  {id:"f_hr13",need:G=>G.romance==="fah"&&hAt(G,"fah")>=13,x:[
+  {id:"f_hr13",need:G=>romOf(G,"fah")&&hAt(G,"fah")>=13,x:[
    ["Hey, dar… dar… I can't! I can't type it! You say it first!",[["Darling",2,"…!!!!! I just rolled off the bed. You're responsible!!"],["No rush",1,"I'm not! …Next month maybe"],["Dar-what?",0,"Nothing!! Forget it!!"]]],
    ["Mali says when I talk to you I grin like a cat with a fish",[["I'd like to see that face",2,"You can't!! …Sent you a photo. Don't save it"],["Mali's a tease",1,"I'm getting her back tomorrow"],["You don't smile at me",0,"…I smile when you're not looking"]]],
    ["Good night. No dreaming about anyone else. Just me",[["You're the only one in them already",2,"…Good. I'll dream of you too. But in my dream I win the sausage contest"],["I'll try",1,"You'd better!"],["Can't control dreams",0,"Then don't sleep!"]]]]},
-  {id:"f_hr16",need:G=>G.romance==="fah"&&hAt(G,"fah")>=16,x:[
+  {id:"f_hr16",need:G=>romOf(G,"fah")&&hAt(G,"fah")>=16,x:[
    ["Grandma asked when you're staying over. She's already made up a room!",[["This Saturday",2,"…!!! She'll cook all night. I'll be pounding nam prik num. You have to finish it all"],["Which room?",1,"My old one. I'm sleeping in Grandma's"],["Might be awkward",0,"…Grandma will be sad"]]],
    ["Grandma told me, 'This one won't leave, dear.' I cried in front of her for the first time in ten years",[["She's right",2,"…She's right about everything. Except that I'm soft"],["It's okay to cry",1,"I know!"],["She was just comforting you",0,"…Then prove her right"]]],
    ["Hey. When I get the tiger, I'm putting the date we met next to it. Don't laugh",[["I won't. I remember that day",2,"…You actually remember!! You're… why are you this good?"],["That'll hurt",1,"I'm not scared of pain"],["What if we break up?",0,"…Why would you say that!!"]]]]},
@@ -9247,11 +9574,11 @@ CHAT.fah.push(
    ["I've thought about it. I want to find my parents. Not to forgive them. Just to know how they are",[["Whatever you find, I'll come with you",2,"…I didn't ask. But… thank you. You always know before I say it"],["What does Grandma say?",1,"She says it's up to me. She'll wait at home"],["You don't have to",0,"I know. I want to"]]],
    ["Grandma has an address from a letter they sent three years ago. I never knew there was a letter",[["She was waiting until you were ready",2,"…That's exactly what she said. Why do you always sound like her?"],["Were you shocked?",1,"A bit. Then a bit angry. Then… I don't know"],["Why didn't she tell you?",0,"She had her reasons. I get it"]]],
    ["If I cry when we go, no teasing",[["I'll stand in front so no one sees",2,"…Even a tiger needs a bodyguard sometimes, huh"],["I won't",1,"Promise"],["You won't cry",0,"…Maybe I will"]]]]},
-  {id:"f_h27",need:G=>hAt(G,"fah")>=27,x:[
+  {id:"f_h27",need:G=>hAt(G,"fah")>=27&&!topLock(G,"fah"),x:[
    ["Hey… the day we found my parents, I didn't cry when I saw them. I cried on the ride home",[["I know. I was on the back",2,"…And you held on tighter and didn't say anything. I remember"],["Did crying help?",1,"Yeah. Like throwing another stone in the river"],["Why not when you saw them?",0,"Didn't want them to see"]]],
    ["They have a new family. Two little kids. I'm not angry anymore. Just… letting go",[["You're stronger than anyone knows",2,"…Not strong. I have a home now. So I don't need to chase the old one"],["Letting go is good",1,"Mm"],["That's a shame",0,"Not a shame. I've got Grandma. I've got you"]]],
    ["I drew tiger fifty-three. Three tigers sleeping in a row",[["Grandma, you, and…",2,"…Don't finish that!! You already know!!"],["Send a pic",1,"(photo) …I'm the middle one"],["Why not four?",0,"…Three is just right"]]]]},
-  {id:"f_h30",need:G=>hAt(G,"fah")>=30,x:[
+  {id:"f_h30",need:G=>hAt(G,"fah")>=30&&!topLock(G,"fah"),x:[
    ["Grandma gave the old motorbike key to you, not me. She said, 'For the one who'll always bring my grandchild home'",[["I'll always bring you home",2,"…!!! You!!! Now I'm crying again. I'm way over my yearly quota!"],["Grandma trusts me that much?",1,"More than she trusts me"],["But I can't ride well",0,"I'll teach you!"]]],
    ["Grandma says tigers mean protection. Now I have a tiger protecting me, not just me protecting others",[["We protect each other",2,"…Two tigers. Fifty-four will be that"],["Glad you feel safe",1,"Safest I've ever felt"],["I'm no tiger",0,"You are! I say so!"]]],
    ["Hey… thank you for staying. Always. I can type it now. No deleting",[["Thank you for letting me stay",2,"…I never once managed to chase you off. Good"],["Always",2,"Forever. No take-backs"],["No problem",0,"…Your answers are so unromantic"]]]]});

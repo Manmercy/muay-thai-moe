@@ -976,7 +976,7 @@ const LOY_END={
   {n:"npc",who:"Big Boss Golden Helmet",t:"My helmet!! …Fine, fine! I won't come to this market again. This year! Just this year!"},
   {n:"npc",who:"Auntie Taew",t:"Auntie's sewn extra Thai dresses for all of you. Wear them on outings, dates, anywhere!"}],
   tail:[{n:"nar",t:"The name Sirichai Gym echoes across the floating market all night, and for many nights after."}]}};
-/* v1.89.20: the ending follows the three who fought — the first heroine sent is the lead, the others chip in */
+/* v1.89.23: the ending follows the three who fought — the first heroine sent is the lead, the others chip in */
 const LOY_REACT={
  bronze:{kati:"They'll be back next year for sure. I'll train even harder!",mali:"My pha sin tore a little… Auntie Taew, please don't scold Mali.",rin:"Bronze is the lowest of the three tiers. I've noted it. Next year it won't be.",ploy:"We didn't reach the boss … Next time I'll get there.",fah:"Not satisfied yet! The gold helmet guy didn't take a single hit!"},
  silver:{kati:"The whole market shouted my name… Grandpa, can you hear it?",mali:"So many people cheering — Mali wants to dance for them again!",rin:"The cheering's about ninety decibels … I'm not smiling.",ploy:"…I'm not used to cheering like this. But it's not bad.",fah:"You hear that?! They're calling Fah's name! Did anyone film it?!"},
@@ -1018,7 +1018,7 @@ const LOY_THIEF={name:"Tum the Krathong Thief",
 function evStartLoy(){const L=loyOf(G);if(!L)return;UI.modal=null;
   const open=()=>{L.run=null;L.pick=[];UI.modal={type:"gaunt"};render();};
   if(!L.intro){L.intro=1;save();playScene(loyIntro(G),open,{bg:"loy_night",look:"thai"});}else open();}
-/* v1.89.20: Ploy / Fah join as guests when they are not in the camp yet — event-only, nothing carries back */
+/* v1.89.23: Ploy / Fah join as guests when they are not in the camp yet — event-only, nothing carries back */
 const LOY_GUESTS=["ploy","fah"];
 const loyGuests=G=>LOY_GUESTS.map(id=>G.F[id]).filter(f=>f&&f.camp!=="player");
 const isLoyGuest=f=>f&&LOY_GUESTS.includes(f.id)&&f.camp!=="player";
@@ -1262,11 +1262,11 @@ Object.assign(CARDS,{
   N("The Sirichai krathong floats away until it's out of sight. No one gets up until the last candle on the pier goes out.")]}});
 
 })();
-/* v1.89.20: the riverside SR card stories keep their choices, but nothing (bond, cash) leaks into the main game */
+/* v1.89.23: the riverside SR card stories keep their choices, but nothing (bond, cash) leaks into the main game */
 (()=>{const mute=st=>(st||[]).forEach(x=>{if(x&&x.choice)x.choice.forEach(o=>{o.fx=()=>{};mute(o.then);});});for(const k of LOY_CARDS)if(CARDS[k])mute(CARDS[k].steps);})();
 function loyCardDrop(G,order){G.cards=G.cards||{};const left=LOY_CARDS.filter(k=>!G.cards[k]);if(!left.length)return null;
   const pref=(order||[]).map(id=>"lk_"+id).filter(k=>left.includes(k));const L=loyOf(G);const id=pref[0]||left[((L&&L.runs)||0)%left.length];
-  G.cards[id]={n:1,lv:1,wk:absWeek(G),seen:false}; /* v1.89.20: event card — no bond or stardust carried into the main game */
+  G.cards[id]={n:1,lv:1,wk:absWeek(G),seen:false}; /* v1.89.23: event card — no bond or stardust carried into the main game */
   return `New SR card: "${CARDS[id].t}" (see it in the album)`;}
 function loyGold(G){const L=loyOf(G);if(!L)return null;L.dressOn=1;return "Thai dress off-stage unlocked: the girls wear Thai dress in outings and dates (toggle it in Auntie Taew's letter)";}
 const loyThaiLook=G=>!!(G&&G.ev&&G.ev.loy&&G.ev.loy.tiers&&G.ev.loy.tiers.silver);
