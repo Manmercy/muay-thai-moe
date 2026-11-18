@@ -1,5 +1,5 @@
 // ================= MUAY THAI MOE v1.3 — UI =================
-const VERSION="1.91.10";
+const VERSION="1.91.11";
 const CUR_LANG=(typeof window!=="undefined"&&window.LANG)||"th";
 const TH_LABEL=String.fromCharCode(3652,3607,3618);
 function langSwitch(cls){return `<div class="langsw ${cls||""}" role="group" aria-label="Language">${[["th",TH_LABEL],["en","EN"]].map(([k,l])=>`<button class="lsb ${CUR_LANG===k?"on":""}" data-act="setlang" data-v="${k}" aria-pressed="${CUR_LANG===k}">${l}</button>`).join("")}</div>`;}
@@ -1360,8 +1360,12 @@ function preCompare(me,op,b){const sc=scouted(op.id)||op.camp==="player";const v
   const rows=[["Punch",a=>a.punch],["Kick",a=>a.kick],["Knee/Elbow",a=>(a.knee+a.elbow)/2],["Guard",a=>(a.guard+a.counter)/2],["Stamina",a=>(a.stamina+a.dur)/2]];
   /* v1.91.0 style wheel line — your build decides your style; the opponent's comes from her best weapon */
     const sty=""; /* v1.91.2 (Man): nothing about styles before the fight — a build can change any time */
-  return sty+`<div class="pcmp"><div class="pcmp-h"><span class="pill dtag ${v.c}">${v.t}</span>${sc?"":`<small class="mutt">Not scouted · opponent stats hidden</small>`}</div>${rows.map(([n,g])=>{const x=g(me.a),y=g(op.a);
-    return `<div class="pcr"><b class="num ${sc&&x>y+.4?"goldt":""}">${x.toFixed(1)}</b><i class="pb l" style="--v:${clamp(x/20*100,0,100)}%"></i><span>${n}</span><i class="pb r" style="--v:${sc?clamp(y/20*100,0,100):0}%"></i><b class="num ${sc&&y>x+.4?"redt":""}">${sc?y.toFixed(1):"?"}</b></div>`;}).join("")}</div>`;}
+  /* v1.91.10 (Man): regional opponents show their real strength — ring craft (vet) on top of the 20 stat ceiling, the part past 20 in gold.
+     Main-game NPCs stay as before: your own skill edge is hidden there too, so adding only theirs would mislead */
+  const oX=(op.rg||op.nl||op.camp==="region")?(op.vet||0):0,vals=rows.map(([,g])=>[g(me.a),g(op.a)+oX]),S=Math.max(20,...vals.flat().map(Math.ceil));
+  const bar=(cls,val,on)=>`<i class="pb ${cls}${val>20.05?" ov":""}" style="--v:${on?clamp(val/S*100,0,100):0}%;--g:${clamp(20/Math.max(val,.1)*100,0,100)}%"></i>`;
+  return sty+`<div class="pcmp"><div class="pcmp-h"><span class="pill dtag ${v.c}">${v.t}</span>${sc?"":`<small class="mutt">Not scouted · opponent stats hidden</small>`}</div>${rows.map(([n],i)=>{const [x,y]=vals[i];
+    return `<div class="pcr"><b class="num ${sc&&x>y+.4?"goldt":""}">${x.toFixed(1)}</b>${bar("l",x,1)}<span>${n}</span>${bar("r",y,sc)}<b class="num ${sc&&y>x+.4?"redt":""}">${sc?y.toFixed(1):"?"}</b></div>`;}).join("")}</div>`;}
 function fightHTML(){const U=UI.fight,b=U.b,me=G.F[b.a],op=G.F[b.b],F=U.F;
   const last=U.shown.filter(x=>x.ha!=null).slice(-1)[0];const sv=(s,k)=>F?(last?last[k]:s):100;
   const side=(f,cls,hp,sta)=>`<div class="fside ${cls}"><div class="fn">${f.canon||f.id==="pailin"?`<img class="face sm" src="${faceSrc(f.id,"happy")}" alt="">`:""}<b>${esc(f.name)}</b><span class="meta">Lv.${f.lvl}</span>${hotBadge(f,1)}</div>

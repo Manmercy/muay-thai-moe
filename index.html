@@ -1367,7 +1367,7 @@ html.vnopen,html.vnopen body{overflow:hidden;overscroll-behavior:none;height:100
 .pill.dtag{margin-left:4px}.pill.dtag.green{background:#1f4a2e;color:#8fe0a8}.pill.dtag.gold{background:#4a3d12;color:#f2d36b}.pill.dtag.red{background:#5a1f26;color:#ff9aa5}.pill.dtag.vhard{background:#7a1020;color:#fff}.mutt{color:var(--mut,#9a91ad)}
 .pcmp{margin:10px 4px 4px;display:grid;gap:5px}.pcmp-h{display:flex;gap:8px;align-items:center;justify-content:center;margin-bottom:2px}
 .pcr{display:grid;grid-template-columns:34px 1fr 64px 1fr 34px;align-items:center;gap:6px;font-size:13px}.pcr span{text-align:center;color:var(--mut,#b9b0c9)}.pcr b{text-align:center}
-.pb{display:block;height:8px;background:#2a2340;position:relative}.pb::after{content:"";position:absolute;top:0;bottom:0;width:var(--v)}.pb.l::after{right:0;background:var(--red,#e23b4e)}.pb.r::after{left:0;background:#4a7fe0}.redt{color:#ff8a96}
+.pb{display:block;height:8px;background:#2a2340;position:relative}.pb::after{content:"";position:absolute;top:0;bottom:0;width:var(--v)}.pb.l::after{right:0;background:var(--red,#e23b4e)}.pb.r::after{left:0;background:#4a7fe0}.pb.l.ov::after{background:linear-gradient(to left,var(--red,#e23b4e) var(--g),#f2c14e var(--g))}.pb.r.ov::after{background:linear-gradient(to right,#4a7fe0 var(--g),#f2c14e var(--g))}.redt{color:#ff8a96}
 .tc-h .fpbtn:not(.set){background:transparent;color:#ff9aa5;box-shadow:inset 0 0 0 2px var(--red)}
 .hall-y{margin:6px 0 10px}.hall-y>b{display:block;color:var(--gold,#f2c94c);margin-bottom:4px;font:700 14px "Chakra Petch",sans-serif}
 .petrow{display:flex;gap:6px;flex-wrap:wrap;margin:6px 0 0}.petchip{display:flex;align-items:center;gap:6px;padding:3px 8px 3px 4px;background:#2a2340;border:2px solid #4a3f6b;color:inherit;font:inherit;cursor:pointer;flex:1 1 0;min-width:0}
@@ -8282,7 +8282,7 @@ AU.gsfx=function(kind,a){if(!this.init()||this.muted||!SETTINGS.sfx)return;const
   if(kind==="shimmer")for(let i=0;i<6;i++)T(i*.05,{f:1400+Math.random()*1400,type:"sine",dur:.12,peak:.06});};
 
 // ================= MUAY THAI MOE v1.3 — UI =================
-const VERSION="1.91.10";
+const VERSION="1.91.11";
 const CUR_LANG=(typeof window!=="undefined"&&window.LANG)||"th";
 const TH_LABEL=String.fromCharCode(3652,3607,3618);
 function langSwitch(cls){return `<div class="langsw ${cls||""}" role="group" aria-label="Language">${[["th",TH_LABEL],["en","EN"]].map(([k,l])=>`<button class="lsb ${CUR_LANG===k?"on":""}" data-act="setlang" data-v="${k}" aria-pressed="${CUR_LANG===k}">${l}</button>`).join("")}</div>`;}
@@ -9643,8 +9643,12 @@ function preCompare(me,op,b){const sc=scouted(op.id)||op.camp==="player";const v
   const rows=[["หมัด",a=>a.punch],["เตะ",a=>a.kick],["เข่า/ศอก",a=>(a.knee+a.elbow)/2],["การ์ด",a=>(a.guard+a.counter)/2],["แรง",a=>(a.stamina+a.dur)/2]];
   /* v1.91.0 style wheel line — your build decides your style; the opponent's comes from her best weapon */
     const sty=""; /* v1.91.2 (Man): nothing about styles before the fight — a build can change any time */
-  return sty+`<div class="pcmp"><div class="pcmp-h"><span class="pill dtag ${v.c}">${v.t}</span>${sc?"":`<small class="mutt">ยังไม่ได้ดูเทป · ไม่เห็นค่าพลังคู่ชก</small>`}</div>${rows.map(([n,g])=>{const x=g(me.a),y=g(op.a);
-    return `<div class="pcr"><b class="num ${sc&&x>y+.4?"goldt":""}">${x.toFixed(1)}</b><i class="pb l" style="--v:${clamp(x/20*100,0,100)}%"></i><span>${n}</span><i class="pb r" style="--v:${sc?clamp(y/20*100,0,100):0}%"></i><b class="num ${sc&&y>x+.4?"redt":""}">${sc?y.toFixed(1):"?"}</b></div>`;}).join("")}</div>`;}
+  /* v1.91.10 (Man): regional opponents show their real strength — ring craft (vet) on top of the 20 stat ceiling, the part past 20 in gold.
+     Main-game NPCs stay as before: your own skill edge is hidden there too, so adding only theirs would mislead */
+  const oX=(op.rg||op.nl||op.camp==="region")?(op.vet||0):0,vals=rows.map(([,g])=>[g(me.a),g(op.a)+oX]),S=Math.max(20,...vals.flat().map(Math.ceil));
+  const bar=(cls,val,on)=>`<i class="pb ${cls}${val>20.05?" ov":""}" style="--v:${on?clamp(val/S*100,0,100):0}%;--g:${clamp(20/Math.max(val,.1)*100,0,100)}%"></i>`;
+  return sty+`<div class="pcmp"><div class="pcmp-h"><span class="pill dtag ${v.c}">${v.t}</span>${sc?"":`<small class="mutt">ยังไม่ได้ดูเทป · ไม่เห็นค่าพลังคู่ชก</small>`}</div>${rows.map(([n],i)=>{const [x,y]=vals[i];
+    return `<div class="pcr"><b class="num ${sc&&x>y+.4?"goldt":""}">${x.toFixed(1)}</b>${bar("l",x,1)}<span>${n}</span>${bar("r",y,sc)}<b class="num ${sc&&y>x+.4?"redt":""}">${sc?y.toFixed(1):"?"}</b></div>`;}).join("")}</div>`;}
 function fightHTML(){const U=UI.fight,b=U.b,me=G.F[b.a],op=G.F[b.b],F=U.F;
   const last=U.shown.filter(x=>x.ha!=null).slice(-1)[0];const sv=(s,k)=>F?(last?last[k]:s):100;
   const side=(f,cls,hp,sta)=>`<div class="fside ${cls}"><div class="fn">${f.canon||f.id==="pailin"?`<img class="face sm" src="${faceSrc(f.id,"happy")}" alt="">`:""}<b>${esc(f.name)}</b><span class="meta">Lv.${f.lvl}</span>${hotBadge(f,1)}</div>
@@ -12567,7 +12571,7 @@ CHAT.fah.push(
 <script>
 (function(){
 /* v1.87: Thai code ships inside index.html; English code (en.js) and the dictionary (i18n.js) load only when needed */
-var B="756dcf845a";
+var B="23fc12dc37";
 var L="";try{L=localStorage.getItem("mtm_lang")||"";}catch(e){}
 try{var h=(location.hash||"").match(/lang=(th|en)/);if(h)L=h[1];}catch(e){}
 if(L!=="th"&&L!=="en")L="th";
