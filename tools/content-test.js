@@ -125,6 +125,19 @@ const chrome=process.env.CHROME_PATH||'/Applications/Google Chrome.app/Contents/
     g.F.kati.bond=100;g.F.kati.bondX=2000;g.lastBeat=-99;const top=EVENTS.find(e=>e.id==='hs_kati_30');if(top.when(g))throw Error('top scene still on');
     g.week+=9;for(const k of [1,2,3]){if(!ev('lv_hm'+k).when(g))throw Error('hm'+k);walkL(g,ev('lv_hm'+k).steps);}
     g.season=2;g.week=38;if(ev('lv_val').when(g)||!ev('lv_valh').when(g))throw Error('harem valentine');walkL(g,ev('lv_valh').steps);return haremYearEnd(g).length===3;});
+  test('Baiyok: own sprites + camp-suffixed names, leaves Golden Tiger in white, then visits on a loop',()=>{const g=fresh();G=g;g.season=2;g.week=12;
+    joinCamp(g,'fah',1800);joinCamp(g,'mali',1200);g.flags.fahJoinedAbs=absWeek(g)-1;const b=makeProdigy(g,'B','fah'),a=makeProdigy(g,'A','ploy');
+    if(b.sprite!=='baiyok'||a.sprite!=='petchara'||!/พยัคฆ์ทอง|Golden Tiger/.test(b.full)||!/พยัคฆ์ทอง|Golden Tiger/.test(a.full))throw Error('names/sprites');
+    if(npcImg({who:b.name})!=='baiyok_black'||npcImg({who:a.name})!=='petchara')throw Error('portrait before');
+    const ev=id=>EVENTS.find(e=>e.id===id);if(ev('by_leave').when(g))throw Error('left too early');
+    const bk=(x)=>({a:x,b:'prod_B'});for(const x of ['mali','mali']){const s=prodigyFightScene(g,bk(x));if(!s||!s.length)throw Error('mali pre');prodigyResultScene(g,bk(x),'A');}
+    g.week+=2;if(!ev('by_leave').when(g))throw Error('no leave');walkL(g,ev('by_leave').steps);
+    if(!byFree(g)||b.sprite!=='baiyok_white'||b.full!==b.name||!b.indie||npcImg({who:b.name})!=='baiyok')throw Error('free state');
+    const pre=prodigyFightScene(g,bk('fah'));if(!pre||!/ชุดขาว|white/.test(JSON.stringify(pre)))throw Error('white intro');
+    const seen=[];for(let i=0;i<9;i++){g.week+=12;if(g.week>46){g.week-=40;g.season++;}const e=ev('by_visit');if(!e.when(g))throw Error('visit '+i);const st=e.steps[0].inject(g);seen.push(JSON.stringify(st).slice(0,40));walkL(g,st);delete g.seen.by_visit;}
+    if(new Set(seen).size<7)throw Error('visits repeat too soon');
+    g.week=14;g.offers=[];genOffers(g);if(!g.offers.some(o=>o.a==='fah'&&o.b==='prod_B'&&o.by))throw Error('rematch letter');
+    const k=prodigyFightScene(g,{a:'kati',b:'prod_A'}),kr=prodigyResultScene(g,{a:'kati',b:'prod_A'},'B');return !!k&&!!kr&&fixSave(g)!==false&&b.sprite==='baiyok_white';});
   test('old single-lover saves become a one-item list',()=>{const g=fresh();delete g.lovers;delete g.lovWk;g.romance='rin';g.romWk=30;g.timeV=3;fixSave(g);return g.lovers.length===1&&g.lovers[0]==='rin'&&g.lovWk.rin===30&&isLov(g,'rin');});
   test('chat with a lover always opens and its menu leads to a confirmed breakup scene',()=>{const g=fresh();G=g;lovUp(g,['kati','mali']);UI.tab='people';render();
     const btn=document.querySelector('.chatb[data-id="mali"]');if(!btn||btn.disabled)throw Error('chat btn');ACT.chat({id:'mali'});render();
