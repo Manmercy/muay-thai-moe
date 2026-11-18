@@ -952,7 +952,13 @@ function redeemCode(raw){const v=(raw||"").toUpperCase().replace(/\s+/g,"");if(!
     addMail(G,{kind:"event",ev:"loy",from:"ป้าแต๋ว ร้านส้มตำหน้าวัด",title:"คืนนี้งานลอยกระทงตลาดน้ำ!",body:"ผู้จัดการจ๋า คืนนี้ป้าไปเปิดแผงขายกระทงที่งานตลาดน้ำ พาเด็ก ๆ ในค่ายมาเที่ยวกันนะ มีของกินเพียบ ป้าเลี้ยงส้มตำเอง! แต่ได้ยินว่าแก๊งหมวกกันน็อกจะมาป่วนงานด้วย… ถ้ามากันได้ป้าอุ่นใจขึ้นเยอะเลย"});
     G.chatIn=G.chatIn||{};for(const id of CANON_IDS){const f=G.F[id];if(f&&f.met&&(f.bond||0)>=8&&!G.chatIn[id])G.chatIn[id]=G.week;}
     save();AU.sfx("level");toast("ได้รับจดหมายเชิญอีเวนต์ลอยกระทง! ดูที่กล่องจดหมาย");}}
-function evMailAct(m){if(m.ev==="thief"){const L=loyOf(G);return m.done||!L||L.thiefWk===absWeek(G)?`<p class="meta center">ไล่จับไอ้ตุ่มแล้ว</p>`:m.expired?"":`<button class="btn primary" data-act="thief">ไปไล่จับไอ้ตุ่ม</button>`;}
+/* v1.89.26: fetch the event's art up front (sprites, specials, ring art, portraits) so the first scene and bout don't pop in */
+function loyPreload(){if(loyPreload.done)return;loyPreload.done=1;try{
+  for(const id of ["kati","mali","rin","ploy","fah"]){img(id+"_loykrathong_sheet.webp");img(id+"_loykrathong_special.webp");for(const m of ["happy","flustered","angry","sad"])warm(stand(id,"thai",m));}
+  img("mali_loykrathong_dodge.webp");for(const s of ["gang1","gang2","gang3","gangsilver","gang4","gang5","thief"])img(s+"_sheet.webp");
+  for(const b of ["bg_loy_ring.webp","bg_loy_night.webp","bg_river.webp","bg_river_dawn.webp"])img(b);
+  for(const n of ["gang_group","gang_silver","gang_goldblack","gang_boss","gang_boss_face","thief","vendor_red"])warm(`${ASSET}npc_${n}.webp`);}catch(e){}}
+function evMailAct(m){loyPreload();if(m.ev==="thief"){const L=loyOf(G);return m.done||!L||L.thiefWk===absWeek(G)?`<p class="meta center">ไล่จับไอ้ตุ่มแล้ว</p>`:m.expired?"":`<button class="btn primary" data-act="thief">ไปไล่จับไอ้ตุ่ม</button>`;}
   if(m.ev==="kongka"){const B=KONGKA[m.wish];return B?(m.done?`<p class="meta center">รับพรแล้ว · ${B.n}</p>`:`<button class="btn primary" data-act="kongka" data-v="${m.id}">รับพร · ${B.d}</button>`):"";}
   const L=loyOf(G);if(!L)return "";const tr=loyTier(L.best,L.boss);const T=L.tiers||{};
   const ends=["bronze","silver","gold"].filter(k=>T[k]).map(k=>`<button class="btn sm" data-act="loyend" data-v="${k}">ฉากจบ${LOY_TIERS.find(x=>x[0]===k)[1]} · ${LOY_END[k].t}</button>`).join("");
@@ -1039,7 +1045,7 @@ const LOY_THIEF={name:"ไอ้ตุ่ม โจรงมกระทง",
   {n:"npc",who:"ป้าแต๋ว",t:"เก่งมากลูก! ป้าทอดขนมครกให้ทั้งทีมเลย กินให้อิ่มก่อนกลับนะ"}],
  lose:[{n:"nar",bg:"loy_night",t:"ไอ้ตุ่มหัวเราะแล้วกระโดดน้ำหนีพร้อมถุงเหรียญ… แต่ถุงขาดกลางน้ำ เหรียญจมหมด"},
   {n:"npc",who:"ไอ้ตุ่ม โจรงมกระทง",t:"เฮ้ย! เหรียญข้า!! …ปีหน้าเจอกันใหม่!"},{n:"npc",who:"ป้าแต๋ว",t:"ช่างมันลูก อย่างน้อยมันก็ไม่ได้อะไรไป"}]};
-function evStartLoy(){const L=loyOf(G);if(!L)return;UI.modal=null;
+function evStartLoy(){const L=loyOf(G);if(!L)return;loyPreload();UI.modal=null;
   const open=()=>{L.run=null;L.pick=[];UI.modal={type:L.rulesSeen?"gaunt":"loyrules"};render();};
   if(!L.intro){L.intro=1;save();playScene(loyIntro(G),open,{bg:"loy_night",look:"thai"});}else open();}
 /* v1.89.24: Ploy / Fah join as guests when they are not in the camp yet — event-only, nothing carries back */
