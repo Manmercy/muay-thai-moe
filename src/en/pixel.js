@@ -481,26 +481,30 @@ const SP_FRAME=150,SP_LEN=SP_FRAME*8+200,FX_LEN=1250;
 const SIL=new WeakMap();
 function silFrame(sheet,row,col,color){if(!sheet||!(sheet.width||sheet.naturalWidth))return null;let m=SIL.get(sheet);if(!m){m={};SIL.set(sheet,m);}const k=row+"_"+col+color;if(m[k])return m[k];
   const c=document.createElement("canvas");c.width=CELL;c.height=CELL;const x=c.getContext("2d");x.drawImage(sheet,col*CELL,row*CELL,CELL,CELL,0,0,CELL,CELL);x.globalCompositeOperation="source-in";x.fillStyle=color;x.fillRect(0,0,CELL,CELL);return m[k]=c;}
-function spSheet(id,w,kind){const L=SPECIALS[id]||[];if(kind==="def")return L.find(m=>m.dodge)||null;return L.find(m=>!m.dodge&&m.w===w)||null;}
-function spOpen(f){if(!f||!f.canon||!SPECIALS[f.id])return false;if(f.camp!=="player")return true;
+/* v1.90: a fighter may carry her own move list (f.spl — the province champions' moves, code effects only) */
+const spList=f=>f?(SPECIALS[f.id]||f.spl||null):null;
+function spSheet(id,w,kind,f){const L=SPECIALS[id]||(f&&f.spl)||[];if(kind==="def")return L.find(m=>m.dodge)||null;return L.find(m=>!m.dodge&&m.w===w)||null;}
+function spOpen(f){if(!f||!spList(f)||(!f.canon&&!f.spl))return false;if(f.camp!=="player")return true;
   return hasSignature(f)||skillList(f.id).some(k=>k.row===4&&((f.skills||{})[k.id]||0)>0);}
 function spName(f,mv){const k=mv.sk&&skillList(f.id).find(x=>x.id===mv.sk);return k&&((f.skills||{})[k.id]||0)>0?k.name:mv.def;}
 /* which special (if any) this fight event sets off: {side, mv, name} */
 function spPick(e,side,F,rng){if(!e||!e.ev||!F||!F.A||!F.B)return null;const R=F.round||1;FS.spR=FS.spR||{A:-1,B:-1};
   const ok=(sd,s)=>FS.spR[sd]!==R&&spOpen(s.f);
-  if(e.ev==="miss"){const ds=side==="A"?"B":"A",d=F[ds],mv=(SPECIALS[d.f.id]||[]).find(m=>m.dodge);
+  if(e.ev==="miss"){const ds=side==="A"?"B":"A",d=F[ds],mv=(spList(d.f)||[]).find(m=>m.dodge);
     if(mv&&d.f.camp==="player"&&ok(ds,d)&&rng()<mv.p)return {side:ds,mv,name:spName(d.f,mv)};return null;}
-  const me=F[side];if(!me||!SPECIALS[me.f.id]||!ok(side,me))return null;
+  const me=F[side];if(!me||!spList(me.f)||!ok(side,me))return null;
   const big=e.ev==="ko"||(e.ev==="kd"&&rng()<.6),hp=100*(side==="A"?(e.ha??me.hp):(e.hb??me.hp))/(me.hp0||100);
-  for(const mv of SPECIALS[me.f.id]){if(mv.dodge)continue;
-    if(me.f.camp==="player"&&mv.when&&mv.when(e,hp)&&(!mv.p||rng()<mv.p))return {side,mv,name:spName(me.f,mv)};}
-  if(big){const mv=spSheet(me.f.id,e.w),m0=SPECIALS[me.f.id].find(m=>!m.dodge);return {side,mv,w:e.w,name:spName(me.f,mv||m0)};}
+  for(const mv of spList(me.f)){if(mv.dodge)continue;
+    if(me.f.camp==="player"&&mv.when&&mv.when(e,hp)&&(!mv.p||rng()<mv.p))return {side,mv,name:spName(me.f,mv)};
+    /* v1.90: a province champion's move — her weapon landing clean, or a big hit when she's hurt */
+    if(mv.npc&&(e.ev==="hit"||e.ev==="counter")&&e.w===mv.w&&(e.crit||hp<40)&&rng()<mv.p)return {side,mv,w:mv.w,name:mv.def};}
+  if(big){const mv=spSheet(me.f.id,e.w,null,me.f),m0=spList(me.f).find(m=>!m.dodge);return {side,mv,w:e.w,name:spName(me.f,mv||m0)};}
   return null;}
 const FS={cv:null,ctx:null,bg:null,A:null,B:null,fx:[],shake:0,
   init(cv,bgName,fa,fb){this.cv=cv;this.ctx=cv?cv.getContext("2d"):null;this.bg=img(bgName);
     const mk=(f,side)=>({f,side,x:side==="A"?370:590,base:side==="A"?370:590,anim:"guard",t0:0,flash:0,down:0,ko:false,win:false});
     this.A=mk(fa,"A");this.B=mk(fb,"B");this.fx=[];this.shake=0;this.spR={A:-1,B:-1};this.banner=null;
-    for(const f of [fa,fb])if(f&&f.canon&&SPECIALS[f.id])SPECIALS[f.id].forEach(m=>img(loyImg(f.id,m.img)+".webp"));},
+    for(const f of [fa,fb])if(f&&f.canon&&SPECIALS[f.id])SPECIALS[f.id].forEach(m=>m.img&&img(loyImg(f.id,m.img)+".webp"));},
   attach(cv){if(!cv)return;this.cv=cv;this.ctx=cv.getContext("2d");},
   play(e,now){const at=e.at||(e.ev==="counter"?(e.mside?e.mside:null):null);
     const atk=this[e.side==="A"?"A":"B"],def=this[e.side==="A"?"B":"A"];if(!atk)return;
@@ -514,7 +518,7 @@ const FS={cv:null,ctx:null,bg:null,A:null,B:null,fx:[],shake:0,
     if(e.ev==="cut"){this.fx.push({x:def.x,y:250,t0:now,txt:"Crack!",cut:true});}
   },
   special(sp,round,now){const s=this[sp.side];if(!s)return;this.spR[sp.side]=round;this.banner={txt:sp.name,side:sp.side,t0:now};
-    if(sp.mv){s.anim="special";s.sp={im:img(loyImg(s.f.id,sp.mv.img)+".webp"),t0:now};this.shake=sp.mv.dodge?6:14;return;}
+    if(sp.mv&&sp.mv.img){s.anim="special";s.sp={im:img(loyImg(s.f.id,sp.mv.img)+".webp"),t0:now};this.shake=sp.mv.dodge?6:14;return;}
     /* no drawn sheet for this move: the normal row, dressed up in code — aura, afterimages, speed lines, a dash and an impact ring */
     const kind=sp.kind||"atk",row=kind==="def"?"guard":kind==="rec"?"win":(sp.w==="kick"||sp.w==="knee")?"knee":"punch";
     s.anim="fx";s.fx={t0:now,row,kind,col:kind==="def"?"#5ab0ff":kind==="rec"?"#4fe08a":(s.f&&s.f.color)||"#ffd34a",hit:false};if(kind==="atk")s.x+=s.side==="A"?40:-40;this.shake=kind==="atk"?8:4;},

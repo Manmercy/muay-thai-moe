@@ -11274,5 +11274,21 @@
  "จดหมายท้าจากเพชรา": "Challenge letter from Petcha",
  "เบราว์เซอร์นี้เปิดเต็มจอไม่ได้ ลองเพิ่มเกมลงหน้าจอหลักแทน": "This browser can't go full screen — try adding the game to your Home screen instead",
  "<div class=\"set\"><span><b>เต็มจอ</b><small>iPhone: กดปุ่มแชร์ แล้ว \"เพิ่มไปยังหน้าจอโฮม\" เปิดเกมจากไอคอนนั้นจะไม่มีแถบเบราว์เซอร์ · เซฟใน Safari ไม่ตามไปเอง ส่งออกเซฟก่อนแล้วนำเข้าในไอคอนใหม่</small></span></div>": "<div class=\"set\"><span><b>Full screen</b><small>iPhone: tap Share, then \"Add to Home Screen\" — the game opens from that icon without the browser bars · Safari saves don't carry over, so export your save first and import it in the new icon</small></span></div>",
- "<label class=\"set\"><span><b>เต็มจอ</b><small>ซ่อนแถบเบราว์เซอร์ · อยากเปิดเต็มจอทุกครั้ง กด ⋮ ของเบราว์เซอร์ แล้ว \"เพิ่มลงในหน้าจอหลัก\"</small></span><input type=\"checkbox\" data-act=\"fullscreen\" ": "<label class=\"set\"><span><b>Full screen</b><small>Hides the browser bars · To open full screen every time, tap the browser's ⋮ menu, then \"Add to Home screen\"</small></span><input type=\"checkbox\" data-act=\"fullscreen\" "
+ "<label class=\"set\"><span><b>เต็มจอ</b><small>ซ่อนแถบเบราว์เซอร์ · อยากเปิดเต็มจอทุกครั้ง กด ⋮ ของเบราว์เซอร์ แล้ว \"เพิ่มลงในหน้าจอหลัก\"</small></span><input type=\"checkbox\" data-act=\"fullscreen\" ": "<label class=\"set\"><span><b>Full screen</b><small>Hides the browser bars · To open full screen every time, tap the browser's ⋮ menu, then \"Add to Home screen\"</small></span><input type=\"checkbox\" data-act=\"fullscreen\" ",
+ "เตะนางเงือกสมิหลา": "Samila Mermaid Kick",
+ "หมัดหนังตะลุง": "Shadow Puppet Punch",
+ "ศอกเปลือกหอยดอนสัก": "Don Sak Oyster Shell Elbow",
+ "เตะนางนวลโฉบ": "Swooping Gull Kick",
+ "หมัดเปลือกมังคุด": "Mangosteen Shell Punch",
+ "เข่าเขาวังเมืองเพชร": "Khao Wang Knee of Phetchaburi",
+ "เตะแม่ไม้สุพรรณ": "Suphan Master-Move Kick",
+ "หมัดลิงหลอกเจ้า": "Monkey Fools the Master Punch",
+ "ศอกเทียนพรรษา": "Candle Festival Elbow",
+ "หมัดสายฟ้าพนมรุ้ง": "Phanom Rung Lightning Punch",
+ "เข่าทอไหมขอนแก่น": "Silk-Weaver Knee of Khon Kaen",
+ "เตะบัวแดงบาน": "Red Lotus Bloom Kick",
+ "ถีบม้าเหล็กลำปาง": "Iron Horse Push Kick of Lampang",
+ "ศอกดาบหักพระยาพิชัย": "Broken-Sword Elbow of Phraya Phichai",
+ "เข่าเรือแข่งน่าน": "Nan Longboat Knee",
+ "ศอกวัดร่องขุ่น": "White Temple Elbow"
 }
