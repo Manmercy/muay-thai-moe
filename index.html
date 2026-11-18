@@ -7940,7 +7940,7 @@ AU.gsfx=function(kind,a){if(!this.init()||this.muted||!SETTINGS.sfx)return;const
   if(kind==="shimmer")for(let i=0;i<6;i++)T(i*.05,{f:1400+Math.random()*1400,type:"sine",dur:.12,peak:.06});};
 
 // ================= MUAY THAI MOE v1.3 — UI =================
-const VERSION="1.90.2";
+const VERSION="1.90.3";
 const CUR_LANG=(typeof window!=="undefined"&&window.LANG)||"th";
 const TH_LABEL=String.fromCharCode(3652,3607,3618);
 function langSwitch(cls){return `<div class="langsw ${cls||""}" role="group" aria-label="Language">${[["th",TH_LABEL],["en","EN"]].map(([k,l])=>`<button class="lsb ${CUR_LANG===k?"on":""}" data-act="setlang" data-v="${k}" aria-pressed="${CUR_LANG===k}">${l}</button>`).join("")}</div>`;}
@@ -10787,7 +10787,7 @@ function evMailAct(m){loyPreload();if(m.ev==="dress"){const f=G.F[m.fid],L=loyOf
   const ends=["bronze","silver","gold"].filter(k=>T[k]).map(k=>`<button class="btn sm" data-act="loyend" data-v="${k}">ฉากจบ${LOY_TIERS.find(x=>x[0]===k)[1]} · ${LOY_END[k].t}</button>`).join("");
   return `${L.runs?`<p class="meta center">คะแนนดีที่สุด <b class="goldt num">${L.best}</b>${tr?` · รางวัลระดับ<b>${tr.n}</b>`:""}</p>`:""}<button class="btn primary" data-act="evloy">${L.runs?"ท้าศึกริมน้ำอีกรอบ":"ไปงานลอยกระทง"}</button>
   ${thiefOn(G)?`<button class="btn" data-act="thief" ${L.thiefWk===absWeek(G)?"disabled":""}>${L.thiefWk===absWeek(G)?"ไล่จับไอ้ตุ่มแล้ว (สัปดาห์หน้ามาอีก)":"ไล่จับไอ้ตุ่ม โจรงมกระทง"}</button>`:`<p class="meta center">ไอ้ตุ่มจะกลับมาช่วงลอยกระทงในเกม (สัปดาห์ ${THIEF_WK[0]}–${THIEF_WK[1]} ทุกปี) ป้าแต๋วจะส่งจดหมายมาบอก</p>`}
-  ${L.intro?`<div class="evrep"><button class="btn sm" data-act="loyintro">ดูฉากเปิดอีกครั้ง</button>${ends}${L.wish?`<button class="btn sm" data-act="loywishopen">ลอยกระทงกับสาว ๆ อีกครั้ง</button>`:""}</div>`:""}
+  ${L.intro?`<div class="evrep"><button class="btn sm" data-act="loyintro">ดูฉากเปิดอีกครั้ง</button>${ends}${L.floatTok?`<button class="btn sm gold" data-act="loywishopen">🪷 ไปลอยกระทงกับสาว ๆ</button>`:""}</div>`:""}
   ${L.wish?`<p class="meta center">คำอธิษฐานของผู้จัดการ: "${esc((LOY_WISH.find(w=>w.k===L.wish)||{}).t||"")}"</p>`:""}
   ${T.gold?`<div class="evrep"><button class="btn sm" data-act="loydress" aria-pressed="${!!L.dressOn}">ชุดไทยนอกเวที: ${L.dressOn?"เปิด":"ปิด"}</button></div>`:""}`;}
 function loyIntro(G){const S=[
@@ -10815,7 +10815,7 @@ function loyIntro(G){const S=[
 function loyRulesHTML(){const T=LOY_TIERS,E=LOY_END;return `<h2>ศึกริมน้ำ · กติกา</h2>
   <ul class="glist lrules"><li>ส่งสาว 3 คน คนละ 3 ไฟต์ติดกัน พลังไม่ฟื้นเต็มระหว่างไฟต์ แพ้เมื่อไหร่คนถัดไปขึ้นแทน</li><li>ไฟต์ที่ 9 คือเสี่ยหมวกทองคำ (3 ยก)</li>
   <li><b>ฉากจบ 3 แบบตามคะแนน</b><div class="lrtier"><span class="pill">ทองแดง ${T[2][2]}</span>${E.bronze.t}</div><div class="lrtier"><span class="pill">เงิน ${fmtN(T[1][2])}</span>${E.silver.t}</div><div class="lrtier"><span class="pill gold">ทอง ${fmtN(T[0][2])} + ล้มเสี่ย</span>${E.gold.t}</div></li>
-  <li>การ์ด SR ชุดไทย: ทองแดง 1 ใบ · เงิน 2 ใบ · ทอง 3 ใบ</li><li>แพ้ได้ เล่นซ้ำได้ไม่จำกัด ฉากจบที่ปลดแล้วดูซ้ำได้ในจดหมายเชิญ</li><li>ไฟต์ในศึกนี้ไม่บาดเจ็บ และไม่นับสถิติในเกมหลัก</li></ul>
+  <li>การ์ด SR ชุดไทย: ทองแดง 1 ใบ · เงิน 2 ใบ · ทอง 3 ใบ</li><li>แพ้ได้ เล่นซ้ำได้ไม่จำกัด ฉากจบที่ปลดแล้วดูซ้ำได้ในจดหมายเชิญ</li><li>จบศึกได้ระดับทองแดงขึ้นไป ได้ไปลอยกระทงกับสาว ๆ 1 ครั้ง</li><li>ไฟต์ในศึกนี้ไม่บาดเจ็บ และไม่นับสถิติในเกมหลัก</li></ul>
   <div class="center endbtns"><button class="btn primary" data-act="loyrulesok">เข้าใจแล้ว</button></div>`;}
 const fmtN=n=>Number(n).toLocaleString("en-US");
 const LOY_END={
@@ -10884,7 +10884,7 @@ function gauntPool(){const R=roster(G).filter(f=>!f.injury);return (R.length?R:r
 // v1.82.4: the five riverside SR cards as a collection row — owned cards in colour, missing ones dark, with a "play again" nudge
 function loyCardRow(after){const own=G.cards||{},got=LOY_CARDS.filter(k=>own[k]).length,left=LOY_CARDS.length-got;
   const row=LOY_CARDS.map(k=>{const C=CARDS[k],has=!!own[k];return `<div class="ccard pxc lk ${has?"":"lock"}" style="--rc:${CARD_R.SR.c}" title="${has?esc(C.t):"ยังไม่ได้"}">${cardArtHTML(C,true)}<small>${has?esc(G.F[C.c].name):"?"}</small></div>`;}).join("");
-  const msg=!left?`<b class="goldt">เก็บการ์ด SR ชุดไทยครบ ${LOY_CARDS.length} ใบแล้ว!</b> เล่นต่อเพื่อทำคะแนนหรือดูฉากจบที่ยังไม่เห็นได้`
+  const msg=!left?`<b class="goldt">เก็บการ์ด SR ชุดไทยครบ ${LOY_CARDS.length} ใบแล้ว!</b> ฉากจบทั้งหมดดูซ้ำได้ในจดหมายเชิญ · จบศึกระดับทองแดงขึ้นไป ได้ไปลอยกระทงกับสาว ๆ อีกครั้ง`
     :after?`<b>ยังขาดอีก ${left} ใบ</b> · ศึกนี้เล่นซ้ำได้ไม่จำกัด กด "ท้าอีกรอบ" เพื่อเก็บให้ครบ · ส่งสาวที่ยังไม่มีการ์ดลงชกก่อน จะได้การ์ดของเธอ`
     :`<b>การ์ด SR ชุดไทย ${got}/${LOY_CARDS.length}</b> · จบศึกระดับทองแดงได้ 1 ใบ เงิน 2 ใบ ทอง 3 ใบ · ส่งสาวคนไหนลงชกก่อน จะได้การ์ดของคนนั้นก่อน · เล่นซ้ำได้จนครบ`;
   return `<div class="lkrow"><div class="lkcards">${row}</div><p class="meta">🎴 ${msg}</p></div>`;}
@@ -10899,7 +10899,7 @@ function gauntHTML(){const L=loyOf(G);if(!L){UI.modal=null;return "";}const R=L.
       <div class="center endbtns"><button class="btn primary" data-act="gstart" ${P.length<need?"disabled":""}>เริ่มศึก</button><button class="btn" data-act="closeModal">ไว้ก่อน</button></div>${ladder(-1)}`;}
   if(R.done){const tr=loyTier(R.score,R.boss);return head+`<div class="gres2"><p class="meta">คะแนนรวม</p><p class="gsc num">${R.score}</p>${tr?`<span class="pill gold">รางวัลระดับ${tr.n}</span>`:`<span class="pill">ยังไม่ถึงระดับรางวัล (ทองแดง ${LOY_TIERS[2][2]})</span>`}
     ${(R.got||[]).length?`<ul class="glist">${R.got.map(x=>`<li>${x}</li>`).join("")}</ul>`:""}${loyCardRow(1)}<p class="meta">ดีที่สุด ${L.best} · ทอง ${LOY_TIERS[0][2]}+ และต้องล้มเสี่ยหมวกทองคำ</p></div>
-    <div class="center endbtns">${R.newEnd?`<button class="btn gold" data-act="loyend" data-v="${R.newEnd}">ดูฉากจบ (ใหม่!)</button>`:""}<button class="btn primary" data-act="gretry">ท้าอีกรอบ</button><button class="btn" data-act="closeModal">กลับค่าย</button></div>${ladder(-1)}`;}
+    <div class="center endbtns">${R.newEnd?`<button class="btn gold" data-act="loyend" data-v="${R.newEnd}">ดูฉากจบ (ใหม่!)</button>`:L.floatTok&&L.wish?`<button class="btn gold" data-act="loyfloat">🪷 ไปลอยกระทง</button>`:""}<button class="btn primary" data-act="gretry">ท้าอีกรอบ</button><button class="btn" data-act="closeModal">กลับค่าย</button></div>${ladder(-1)}`;}
   const f=G.F[R.order[R.slot]];
   return head+`<div class="gnow"><p class="meta">คะแนน <b class="goldt num">${R.score}</b> · คนที่ ${R.slot+1}/3 · ไฟต์ที่ ${R.k+1}/9</p>
     <div class="gcur">${faceImg(f)}<span><b>${esc(f.name)}</b><small>พลัง ${Math.round(R.hp)} · แรง ${Math.round(R.sta)}</small><div class="meter"><i style="--v:${clamp(R.hp,0,100)}%;--bc:${R.hp>50?"var(--green)":R.hp>25?"var(--warn)":"var(--red)"}"></i></div></span></div></div>
@@ -10943,11 +10943,11 @@ function loyWishOpen(done){const L=loyOf(G);if(!L){done&&done();return;}UI.lwDon
 function loyWishHTML(){const ids=loyWishIds(),T=LW_TL(ids.length),now=UI.lwSkip?" now":"",L=loyOf(G),prev=L&&L.wish&&LOY_WISH.find(w=>w.k===L.wish);
   if(UI.modal.ph==="float")return `<h2>ลอยกระทงริมน้ำ</h2><div class="cfxwrap ctwrap" data-act="lwfloatdone" role="button" aria-label="ไปต่อ"><canvas class="campcv" width="640" height="360" data-loywish="${ids.join(",")}"></canvas></div><p class="meta center">กระทงของผู้จัดการค่อย ๆ ลอยออกไปกลางน้ำ พลุชุดใหญ่จุดขึ้นฟ้าพอดี</p>`;
   return `<h2>ลอยกระทงริมน้ำ</h2><div class="cfxwrap ctwrap" data-act="lwskip" role="button" aria-label="ข้ามฉาก"><canvas class="campcv" width="640" height="360" data-loywish="${ids.join(",")}"></canvas></div>
-   <p class="meta center lwq wkgo${now}" style="${"--d:"+T.end+"ms"}">กระทงห้าใบลอยออกไปกลางน้ำ ถึงตาผู้จัดการอธิษฐานบ้างแล้ว${prev?` · ปีก่อนขอไว้ว่า "${esc(prev.t)}"`:""}</p>
+   <p class="meta center lwq wkgo${now}" style="${"--d:"+T.end+"ms"}">กระทงห้าใบลอยออกไปกลางน้ำ ถึงตาผู้จัดการอธิษฐานบ้างแล้ว${prev?` · ครั้งก่อนขอไว้ว่า "${esc(prev.t)}"`:""}</p>
    <div class="lwopts">${LOY_WISH.map(w=>`<button class="btn wkgo${now}" style="${"--d:"+T.end+"ms"}" data-act="loywish" data-v="${w.k}">${esc(w.t)}</button>`).join("")}</div>
 
    <div class="mfoot"><button class="btn wkgo${now}" style="${"--d:"+T.end+"ms"}" data-act="lwclose">ไว้ก่อน</button></div>`;}
-function loyWishPick(k){const W=LOY_WISH.find(w=>w.k===k),L=loyOf(G);if(!W||!L)return;L.wish=k;L.wishN=(L.wishN||0)+1;const bless=kongkaReady(G);
+function loyWishPick(k){const W=LOY_WISH.find(w=>w.k===k),L=loyOf(G);if(!W||!L)return;L.wish=k;L.wishN=(L.wishN||0)+1;L.floatTok=0;const bless=kongkaReady(G);
   UI.modal={type:"loywish",ph:"float"};UI.lwSkip=true;UI.lwF0=performance.now();AU.sfx&&AU.sfx("level");render();
   UI.lwGo=()=>{UI.lwGo=null;UI.lwF0=0;UI.modal=null;loyWishScene(W,L,bless,k);};setTimeout(()=>{if(UI.lwGo)UI.lwGo();},3800);}
 function loyWishScene(W,L,bless,k){
@@ -10962,6 +10962,7 @@ function loyWishScene(W,L,bless,k){
 function gauntNextSlot(R){R.slot++;R.j=0;R.k=R.slot*3;R.hp=100;R.sta=100;if(R.slot>=3||R.k>=9)gauntFinish(R);}
 function gauntFinish(R){const L=loyOf(G);R.done=true;L.runs=(L.runs||0)+1;L.best=Math.max(L.best||0,R.score);if(R.boss)L.boss=1;R.got=[];
   const tr=loyTier(R.score,R.boss);const order=["bronze","silver","gold"];
+  if(tr)L.floatTok=1; /* v1.90.3: each run that reaches bronze+ earns one krathong float — no free replay button */
   if(tr){for(const k of order.slice(0,order.indexOf(tr.k)+1))if(!L.tiers[k]){L.tiers[k]=1;R.newEnd=k;L.endCast=L.endCast||{};L.endCast[k]=[...R.order];L.endBoss=L.endBoss||{};L.endBoss[k]=R.boss?1:0;R.got.push(...loyReward(k,R.order));}const nC={bronze:1,silver:2,gold:3}[tr.k]||1;for(let i=0;i<nC;i++){const c=loyCardDrop(G,R.order);if(c)R.got.push(c);else break;}}
   for(let i=0;i<9;i++)delete G.F["q_evloy_"+i];save();}
 function loyReward(k,R0){const out=[];
@@ -11222,12 +11223,13 @@ Object.assign(ACT,{
   loyintro:()=>{UI.modal=null;playScene(loyIntro(G),()=>{AU.startMusic("hub");render();},{bg:"river",look:"thai"});},
   loyend:d=>{const E=LOY_END[d.v];if(!E)return;const L=loyOf(G);if(L&&L.run&&L.run.newEnd===d.v)L.run.newEnd=null;UI.modal=null;
     playScene(loyEndSteps(d.v,L&&L.endCast&&L.endCast[d.v],L&&L.endBoss&&L.endBoss[d.v]),()=>{AU.startMusic("hub");const back=()=>{if(L&&L.run&&L.run.done)UI.modal={type:"gaunt"};if(L&&L.petPend!=null){UI.petName=L.petPend;L.petPend=null;save();}render();};
-      if(L&&!L.wish)loyWishOpen(back);else back();},{bg:"river",look:"thai"});},
+      if(L&&(!L.wish||L.floatTok))loyWishOpen(back);else back();},{bg:"river",look:"thai"});},
   loywish:d=>loyWishPick(d.v),lwfloatdone:()=>{if(UI.lwGo)UI.lwGo();},
   kongka:d=>{const m=(G.mail||[]).find(x=>x.id===d.v);if(!m||m.done)return;const B=KONGKA[m.wish];if(!B)return;m.done=true;B.fx(G,m);save();UI.modal=null;
     playScene([{n:"nar",bg:"river_dawn",t:"ผู้จัดการเดินลงไปที่ท่าน้ำหน้าค่าย หมอกเช้ายังไม่จาง กระทงเมื่อคืนลอยกลับมาเกยตลิ่ง เทียนดับไปนานแล้ว แต่กลิ่นมะลิยังอยู่"},{n:"nar",t:`ผู้จัดการพนมมือขอบคุณสายน้ำ · ได้รับ${B.n} · ${B.d}`}],()=>{AU.sfx&&AU.sfx("level");render();},{bg:"river_dawn",look:"casual"});},lwskip:()=>{UI.lwSkip=true;render();},
   lwclose:()=>{if(UI.lwGo){UI.lwGo();return;}UI.modal=null;const d=UI.lwDone;UI.lwDone=null;AU.startMusic("hub");if(d)d();else render();},
-  loywishopen:()=>loyWishOpen(()=>{UI.modal=null;render();}),
+  loywishopen:()=>{const L=loyOf(G);if(!L||!L.floatTok)return;loyWishOpen(()=>{UI.modal=null;render();});},
+  loyfloat:()=>{const L=loyOf(G);if(!L||!L.floatTok)return;loyWishOpen(()=>{UI.modal=L.run&&L.run.done?{type:"gaunt"}:null;render();});},
   thief:()=>{const L=loyOf(G);if(!L||!thiefOn(G)||L.thiefWk===absWeek(G))return;UI.modal={type:"thief"};render();},
   thiefgo:d=>thiefGo(d.v),
   loydress:()=>{const L=loyOf(G);if(!L||!L.tiers.gold)return;L.dressOn=L.dressOn?0:1;save();render();},
@@ -12164,7 +12166,7 @@ CHAT.fah.push(
 <script>
 (function(){
 /* v1.87: Thai code ships inside index.html; English code (en.js) and the dictionary (i18n.js) load only when needed */
-var B="186ca99da2";
+var B="843ce19ee1";
 var L="";try{L=localStorage.getItem("mtm_lang")||"";}catch(e){}
 try{var h=(location.hash||"").match(/lang=(th|en)/);if(h)L=h[1];}catch(e){}
 if(L!=="th"&&L!=="en")L="th";

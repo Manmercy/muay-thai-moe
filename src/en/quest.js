@@ -967,7 +967,7 @@ function evMailAct(m){loyPreload();if(m.ev==="dress"){const f=G.F[m.fid],L=loyOf
   const ends=["bronze","silver","gold"].filter(k=>T[k]).map(k=>`<button class="btn sm" data-act="loyend" data-v="${k}">Ending: ${LOY_TIERS.find(x=>x[0]===k)[1]} · ${LOY_END[k].t}</button>`).join("");
   return `${L.runs?`<p class="meta center">Best score <b class="goldt num">${L.best}</b>${tr?` · Reward tier: <b>${tr.n}</b>`:""}</p>`:""}<button class="btn primary" data-act="evloy">${L.runs?"Take on the Riverside Brawl again":"Go to the Loy Krathong fair"}</button>
   ${thiefOn(G)?`<button class="btn" data-act="thief" ${L.thiefWk===absWeek(G)?"disabled":""}>${L.thiefWk===absWeek(G)?"Tum caught (back next week)":"Catch Tum the Krathong Thief"}</button>`:`<p class="meta center">Tum returns during the in-game Loy Krathong (weeks ${THIEF_WK[0]}–${THIEF_WK[1]} every year) — Auntie Taew will send a letter</p>`}
-  ${L.intro?`<div class="evrep"><button class="btn sm" data-act="loyintro">Replay the opening</button>${ends}${L.wish?`<button class="btn sm" data-act="loywishopen">Float krathongs with the girls again</button>`:""}</div>`:""}
+  ${L.intro?`<div class="evrep"><button class="btn sm" data-act="loyintro">Replay the opening</button>${ends}${L.floatTok?`<button class="btn sm gold" data-act="loywishopen">🪷 Float krathongs with the girls</button>`:""}</div>`:""}
   ${L.wish?`<p class="meta center">Your wish: "${esc((LOY_WISH.find(w=>w.k===L.wish)||{}).t||"")}"</p>`:""}
   ${T.gold?`<div class="evrep"><button class="btn sm" data-act="loydress" aria-pressed="${!!L.dressOn}">Thai dress off-stage: ${L.dressOn?"On":"Close"}</button></div>`:""}`;}
 function loyIntro(G){const S=[
@@ -995,7 +995,7 @@ function loyIntro(G){const S=[
 function loyRulesHTML(){const T=LOY_TIERS,E=LOY_END;return `<h2>Riverside Brawl · Rules</h2>
   <ul class="glist lrules"><li>Send 3 girls, 3 bouts each in a row. HP barely recovers between bouts; lose and the next girl steps in</li><li>Bout 9 is Big Boss Golden Helmet (3 rounds)</li>
   <li><b>3 endings by score</b><div class="lrtier"><span class="pill">Bronze ${T[2][2]}</span>${E.bronze.t}</div><div class="lrtier"><span class="pill">Silver ${fmtN(T[1][2])}</span>${E.silver.t}</div><div class="lrtier"><span class="pill gold">Gold ${fmtN(T[0][2])} + beat the boss</span>${E.gold.t}</div></li>
-  <li>Thai-dress SR cards: bronze 1 · silver 2 · gold 3</li><li>Losing is fine — replay as often as you like; unlocked endings can be rewatched from the invitation letter</li><li>No injuries in this brawl, and nothing counts toward your main-game record</li></ul>
+  <li>Thai-dress SR cards: bronze 1 · silver 2 · gold 3</li><li>Losing is fine — replay as often as you like; unlocked endings can be rewatched from the invitation letter</li><li>Finish at bronze or higher to float krathongs with the girls once</li><li>No injuries in this brawl, and nothing counts toward your main-game record</li></ul>
   <div class="center endbtns"><button class="btn primary" data-act="loyrulesok">Got it</button></div>`;}
 const fmtN=n=>Number(n).toLocaleString("en-US");
 const LOY_END={
@@ -1064,7 +1064,7 @@ function gauntPool(){const R=roster(G).filter(f=>!f.injury);return (R.length?R:r
 // v1.82.4: the five riverside SR cards as a collection row — owned cards in colour, missing ones dark, with a "play again" nudge
 function loyCardRow(after){const own=G.cards||{},got=LOY_CARDS.filter(k=>own[k]).length,left=LOY_CARDS.length-got;
   const row=LOY_CARDS.map(k=>{const C=CARDS[k],has=!!own[k];return `<div class="ccard pxc lk ${has?"":"lock"}" style="--rc:${CARD_R.SR.c}" title="${has?esc(C.t):"Not yet earned"}">${cardArtHTML(C,true)}<small>${has?esc(G.F[C.c].name):"?"}</small></div>`;}).join("");
-  const msg=!left?`<b class="goldt">Thai-dress SR set complete: all ${LOY_CARDS.length} cards!</b> Keep playing for a high score or the endings you haven't seen yet`
+  const msg=!left?`<b class="goldt">Thai-dress SR set complete: all ${LOY_CARDS.length} cards!</b> Every ending can be rewatched from the invitation letter · Finish at bronze or higher to float krathongs with the girls again`
     :after?`<b>Cards still missing: ${left}</b> · This battle can be replayed any time. Tap "Challenge again" to complete the set · send a girl without her card first to get it`
     :`<b>Thai-dress SR cards ${got}/${LOY_CARDS.length}</b> · Bronze finish gives 1 card, Silver 2, Gold 3 · whoever fights first gets her card first · replay until you have them all`;
   return `<div class="lkrow"><div class="lkcards">${row}</div><p class="meta">🎴 ${msg}</p></div>`;}
@@ -1079,7 +1079,7 @@ function gauntHTML(){const L=loyOf(G);if(!L){UI.modal=null;return "";}const R=L.
       <div class="center endbtns"><button class="btn primary" data-act="gstart" ${P.length<need?"disabled":""}>Start</button><button class="btn" data-act="closeModal">Later</button></div>${ladder(-1)}`;}
   if(R.done){const tr=loyTier(R.score,R.boss);return head+`<div class="gres2"><p class="meta">Total score</p><p class="gsc num">${R.score}</p>${tr?`<span class="pill gold">Reward tier: ${tr.n}</span>`:`<span class="pill">No reward tier yet (Bronze ${LOY_TIERS[2][2]})</span>`}
     ${(R.got||[]).length?`<ul class="glist">${R.got.map(x=>`<li>${x}</li>`).join("")}</ul>`:""}${loyCardRow(1)}<p class="meta">Best ${L.best} · Gold ${LOY_TIERS[0][2]}+ and Big Boss Golden Helmet must fall</p></div>
-    <div class="center endbtns">${R.newEnd?`<button class="btn gold" data-act="loyend" data-v="${R.newEnd}">Watch the ending (new!)</button>`:""}<button class="btn primary" data-act="gretry">Challenge again</button><button class="btn" data-act="closeModal">Back to camp</button></div>${ladder(-1)}`;}
+    <div class="center endbtns">${R.newEnd?`<button class="btn gold" data-act="loyend" data-v="${R.newEnd}">Watch the ending (new!)</button>`:L.floatTok&&L.wish?`<button class="btn gold" data-act="loyfloat">🪷 Float a krathong</button>`:""}<button class="btn primary" data-act="gretry">Challenge again</button><button class="btn" data-act="closeModal">Back to camp</button></div>${ladder(-1)}`;}
   const f=G.F[R.order[R.slot]];
   return head+`<div class="gnow"><p class="meta">Score <b class="goldt num">${R.score}</b> · Fighter ${R.slot+1}/3 · Bout ${R.k+1}/9</p>
     <div class="gcur">${faceImg(f)}<span><b>${esc(f.name)}</b><small>HP ${Math.round(R.hp)} · Stamina ${Math.round(R.sta)}</small><div class="meter"><i style="--v:${clamp(R.hp,0,100)}%;--bc:${R.hp>50?"var(--green)":R.hp>25?"var(--warn)":"var(--red)"}"></i></div></span></div></div>
@@ -1127,7 +1127,7 @@ function loyWishHTML(){const ids=loyWishIds(),T=LW_TL(ids.length),now=UI.lwSkip?
    <div class="lwopts">${LOY_WISH.map(w=>`<button class="btn wkgo${now}" style="${"--d:"+T.end+"ms"}" data-act="loywish" data-v="${w.k}">${esc(w.t)}</button>`).join("")}</div>
 
    <div class="mfoot"><button class="btn wkgo${now}" style="${"--d:"+T.end+"ms"}" data-act="lwclose">Later</button></div>`;}
-function loyWishPick(k){const W=LOY_WISH.find(w=>w.k===k),L=loyOf(G);if(!W||!L)return;L.wish=k;L.wishN=(L.wishN||0)+1;const bless=kongkaReady(G);
+function loyWishPick(k){const W=LOY_WISH.find(w=>w.k===k),L=loyOf(G);if(!W||!L)return;L.wish=k;L.wishN=(L.wishN||0)+1;L.floatTok=0;const bless=kongkaReady(G);
   UI.modal={type:"loywish",ph:"float"};UI.lwSkip=true;UI.lwF0=performance.now();AU.sfx&&AU.sfx("level");render();
   UI.lwGo=()=>{UI.lwGo=null;UI.lwF0=0;UI.modal=null;loyWishScene(W,L,bless,k);};setTimeout(()=>{if(UI.lwGo)UI.lwGo();},3800);}
 function loyWishScene(W,L,bless,k){
@@ -1142,6 +1142,7 @@ function loyWishScene(W,L,bless,k){
 function gauntNextSlot(R){R.slot++;R.j=0;R.k=R.slot*3;R.hp=100;R.sta=100;if(R.slot>=3||R.k>=9)gauntFinish(R);}
 function gauntFinish(R){const L=loyOf(G);R.done=true;L.runs=(L.runs||0)+1;L.best=Math.max(L.best||0,R.score);if(R.boss)L.boss=1;R.got=[];
   const tr=loyTier(R.score,R.boss);const order=["bronze","silver","gold"];
+  if(tr)L.floatTok=1; /* v1.90.3: each run that reaches bronze+ earns one krathong float — no free replay button */
   if(tr){for(const k of order.slice(0,order.indexOf(tr.k)+1))if(!L.tiers[k]){L.tiers[k]=1;R.newEnd=k;L.endCast=L.endCast||{};L.endCast[k]=[...R.order];L.endBoss=L.endBoss||{};L.endBoss[k]=R.boss?1:0;R.got.push(...loyReward(k,R.order));}const nC={bronze:1,silver:2,gold:3}[tr.k]||1;for(let i=0;i<nC;i++){const c=loyCardDrop(G,R.order);if(c)R.got.push(c);else break;}}
   for(let i=0;i<9;i++)delete G.F["q_evloy_"+i];save();}
 function loyReward(k,R0){const out=[];
@@ -1402,12 +1403,13 @@ Object.assign(ACT,{
   loyintro:()=>{UI.modal=null;playScene(loyIntro(G),()=>{AU.startMusic("hub");render();},{bg:"river",look:"thai"});},
   loyend:d=>{const E=LOY_END[d.v];if(!E)return;const L=loyOf(G);if(L&&L.run&&L.run.newEnd===d.v)L.run.newEnd=null;UI.modal=null;
     playScene(loyEndSteps(d.v,L&&L.endCast&&L.endCast[d.v],L&&L.endBoss&&L.endBoss[d.v]),()=>{AU.startMusic("hub");const back=()=>{if(L&&L.run&&L.run.done)UI.modal={type:"gaunt"};if(L&&L.petPend!=null){UI.petName=L.petPend;L.petPend=null;save();}render();};
-      if(L&&!L.wish)loyWishOpen(back);else back();},{bg:"river",look:"thai"});},
+      if(L&&(!L.wish||L.floatTok))loyWishOpen(back);else back();},{bg:"river",look:"thai"});},
   loywish:d=>loyWishPick(d.v),lwfloatdone:()=>{if(UI.lwGo)UI.lwGo();},
   kongka:d=>{const m=(G.mail||[]).find(x=>x.id===d.v);if(!m||m.done)return;const B=KONGKA[m.wish];if(!B)return;m.done=true;B.fx(G,m);save();UI.modal=null;
     playScene([{n:"nar",bg:"river_dawn",t:"The manager walks down to the pier in front of the camp. The morning mist hasn't lifted; last night's krathongs have drifted back to the bank, candles long out, but the jasmine scent lingers."},{n:"nar",t:`The manager presses palms together and thanks the river · Received ${B.n} · ${B.d}`}],()=>{AU.sfx&&AU.sfx("level");render();},{bg:"river_dawn",look:"casual"});},lwskip:()=>{UI.lwSkip=true;render();},
   lwclose:()=>{if(UI.lwGo){UI.lwGo();return;}UI.modal=null;const d=UI.lwDone;UI.lwDone=null;AU.startMusic("hub");if(d)d();else render();},
-  loywishopen:()=>loyWishOpen(()=>{UI.modal=null;render();}),
+  loywishopen:()=>{const L=loyOf(G);if(!L||!L.floatTok)return;loyWishOpen(()=>{UI.modal=null;render();});},
+  loyfloat:()=>{const L=loyOf(G);if(!L||!L.floatTok)return;loyWishOpen(()=>{UI.modal=L.run&&L.run.done?{type:"gaunt"}:null;render();});},
   thief:()=>{const L=loyOf(G);if(!L||!thiefOn(G)||L.thiefWk===absWeek(G))return;UI.modal={type:"thief"};render();},
   thiefgo:d=>thiefGo(d.v),
   loydress:()=>{const L=loyOf(G);if(!L||!L.tiers.gold)return;L.dressOn=L.dressOn?0:1;save();render();},
