@@ -53,19 +53,24 @@ const AU={ctx:null,master:null,music:null,sfxBus:null,crowdG:null,timer:null,ste
   watch(){if(!this.ctx||!this.playing)return;if(this.ctx.state!=="running")this.resume();if(this.next<this.ctx.currentTime-.2)this.next=this.ctx.currentTime+.05;},
   stopMusic(){this.playing=false;clearInterval(this.timer);if(this.crowdG){const g=this.crowdG.gain,t=this.ctx.currentTime;g.cancelScheduledValues(t);g.setValueAtTime(g.value,t);g.setTargetAtTime(0,t,.3);}},
   setTempo(b){this.tempo=b;},
+  setHeat(h){this.heat=Math.max(0,Math.min(3,h|0));},
   sched(){const c=this.ctx;const spb=60/this.tempo/2;while(this.next<c.currentTime+.12){this.playStep(this.step,this.next,spb);this.next+=spb;this.step=(this.step+1)%32;}},
   HUB:[76,0,79,0,81,79,76,0,74,0,76,0,0,0,72,74,76,0,79,81,84,0,81,79,76,0,74,72,74,0,0,0],
   playStep(s,t,spb){const m=this.music,st=s%16;if(this.mode==="hub"){this.hubStep(s,t,spb);return;}if(this.mode==="title"){this.titleStep(s,t,spb);return;}if(this.mode==="victory"){this.victoryStep(s,t,spb);return;}if(this.mode==="date"){this.dateStep(s,t,spb);return;}if(this.mode==="waikhru"){this.waiStep(s,t,spb);return;}
-    // ching (open on 0, closed "chap" on 8)
-    if(st===0)[2600,3900,5200].forEach((f,k)=>this.tone(t,{f,dur:.5/(k+1),peak:.08/(k+1),bus:m}));
-    if(st===8)this.tone(t,{f:3100,dur:.06,peak:.08,bus:m});
-    // klong khaek: tum (low) & ting (high slap)
-    if([0,3,6,10,12].includes(st))this.tone(t,{f:150,to:95,dur:.16,peak:.5,bus:m});
-    if([2,5,8,11,14,15].includes(st)){this.tone(t,{f:420,to:300,dur:.06,peak:.25,bus:m});}
+    // v1.89.8: the band follows the fight — heat 0 (feeling-out) to 3 (last round, someone hurt)
+    const H=this.heat||0;
+    // ching (open on 0, closed "chap" on 8); hotter rounds play it twice, then on every beat
+    if(st===0||(H>=2&&st===8))[2600,3900,5200].forEach((f,k)=>this.tone(t,{f,dur:.5/(k+1),peak:.08/(k+1),bus:m}));
+    if(st===8&&H<2)this.tone(t,{f:3100,dur:.06,peak:.08,bus:m});
+    if((H>=1&&(st===4||st===12))||(H>=3&&st%2===0&&st%4!==0))this.tone(t,{f:3100,dur:.05,peak:H>=3?.07:.06,bus:m});
+    // klong khaek: tum (low) & ting (high slap); fills and a roll into the bar when it heats up
+    if([0,3,6,10,12].includes(st)||(H>=2&&(st===9||st===14)))this.tone(t,{f:150,to:95,dur:.16,peak:.5,bus:m});
+    if([2,5,8,11,14,15].includes(st)||(H>=1&&(st===1||st===7||st===13))){this.tone(t,{f:420,to:300,dur:.06,peak:st===1||st===7||st===13?.18:.25,bus:m});}
+    if(H>=3&&st>=12)this.tone(t+spb/2,{f:470,to:330,dur:.04,peak:.14,bus:m});
     // pi java
     const n=this.MEL[s];if(n){const f=440*Math.pow(2,(n-69)/12),c=this.ctx,o=c.createOscillator(),o2=c.createOscillator(),lfo=c.createOscillator(),lg=c.createGain(),bp=c.createBiquadFilter(),g=c.createGain();
       o.type="sawtooth";o2.type="square";o.frequency.value=f;o2.frequency.value=f*1.003;lfo.frequency.value=6;lg.gain.value=f*.012;lfo.connect(lg);lg.connect(o.frequency);lg.connect(o2.frequency);
-      bp.type="bandpass";bp.frequency.value=1500;bp.Q.value=1.6;const dur=spb*1.9;g.gain.setValueAtTime(.0001,t);g.gain.exponentialRampToValueAtTime(.16,t+.03);g.gain.exponentialRampToValueAtTime(.0001,t+dur);
+      bp.type="bandpass";bp.frequency.value=H>=3?1900:H>=2?1700:1500;bp.Q.value=1.6;const dur=spb*1.9;g.gain.setValueAtTime(.0001,t);g.gain.exponentialRampToValueAtTime(.16,t+.03);g.gain.exponentialRampToValueAtTime(.0001,t+dur);
       o.connect(bp);o2.connect(bp);bp.connect(g);g.connect(m);[o,o2,lfo].forEach(x=>{x.start(t);x.stop(t+dur+.05);});}
   },
   // Championship fanfare: brass-like lead over a rising bass, ching and arena drums.

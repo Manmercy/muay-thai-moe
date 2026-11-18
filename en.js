@@ -5064,19 +5064,24 @@ const AU={ctx:null,master:null,music:null,sfxBus:null,crowdG:null,timer:null,ste
   watch(){if(!this.ctx||!this.playing)return;if(this.ctx.state!=="running")this.resume();if(this.next<this.ctx.currentTime-.2)this.next=this.ctx.currentTime+.05;},
   stopMusic(){this.playing=false;clearInterval(this.timer);if(this.crowdG){const g=this.crowdG.gain,t=this.ctx.currentTime;g.cancelScheduledValues(t);g.setValueAtTime(g.value,t);g.setTargetAtTime(0,t,.3);}},
   setTempo(b){this.tempo=b;},
+  setHeat(h){this.heat=Math.max(0,Math.min(3,h|0));},
   sched(){const c=this.ctx;const spb=60/this.tempo/2;while(this.next<c.currentTime+.12){this.playStep(this.step,this.next,spb);this.next+=spb;this.step=(this.step+1)%32;}},
   HUB:[76,0,79,0,81,79,76,0,74,0,76,0,0,0,72,74,76,0,79,81,84,0,81,79,76,0,74,72,74,0,0,0],
   playStep(s,t,spb){const m=this.music,st=s%16;if(this.mode==="hub"){this.hubStep(s,t,spb);return;}if(this.mode==="title"){this.titleStep(s,t,spb);return;}if(this.mode==="victory"){this.victoryStep(s,t,spb);return;}if(this.mode==="date"){this.dateStep(s,t,spb);return;}if(this.mode==="waikhru"){this.waiStep(s,t,spb);return;}
-    // ching (open on 0, closed "chap" on 8)
-    if(st===0)[2600,3900,5200].forEach((f,k)=>this.tone(t,{f,dur:.5/(k+1),peak:.08/(k+1),bus:m}));
-    if(st===8)this.tone(t,{f:3100,dur:.06,peak:.08,bus:m});
-    // klong khaek: tum (low) & ting (high slap)
-    if([0,3,6,10,12].includes(st))this.tone(t,{f:150,to:95,dur:.16,peak:.5,bus:m});
-    if([2,5,8,11,14,15].includes(st)){this.tone(t,{f:420,to:300,dur:.06,peak:.25,bus:m});}
+    // v1.89.8: the band follows the fight — heat 0 (feeling-out) to 3 (last round, someone hurt)
+    const H=this.heat||0;
+    // ching (open on 0, closed "chap" on 8); hotter rounds play it twice, then on every beat
+    if(st===0||(H>=2&&st===8))[2600,3900,5200].forEach((f,k)=>this.tone(t,{f,dur:.5/(k+1),peak:.08/(k+1),bus:m}));
+    if(st===8&&H<2)this.tone(t,{f:3100,dur:.06,peak:.08,bus:m});
+    if((H>=1&&(st===4||st===12))||(H>=3&&st%2===0&&st%4!==0))this.tone(t,{f:3100,dur:.05,peak:H>=3?.07:.06,bus:m});
+    // klong khaek: tum (low) & ting (high slap); fills and a roll into the bar when it heats up
+    if([0,3,6,10,12].includes(st)||(H>=2&&(st===9||st===14)))this.tone(t,{f:150,to:95,dur:.16,peak:.5,bus:m});
+    if([2,5,8,11,14,15].includes(st)||(H>=1&&(st===1||st===7||st===13))){this.tone(t,{f:420,to:300,dur:.06,peak:st===1||st===7||st===13?.18:.25,bus:m});}
+    if(H>=3&&st>=12)this.tone(t+spb/2,{f:470,to:330,dur:.04,peak:.14,bus:m});
     // pi java
     const n=this.MEL[s];if(n){const f=440*Math.pow(2,(n-69)/12),c=this.ctx,o=c.createOscillator(),o2=c.createOscillator(),lfo=c.createOscillator(),lg=c.createGain(),bp=c.createBiquadFilter(),g=c.createGain();
       o.type="sawtooth";o2.type="square";o.frequency.value=f;o2.frequency.value=f*1.003;lfo.frequency.value=6;lg.gain.value=f*.012;lfo.connect(lg);lg.connect(o.frequency);lg.connect(o2.frequency);
-      bp.type="bandpass";bp.frequency.value=1500;bp.Q.value=1.6;const dur=spb*1.9;g.gain.setValueAtTime(.0001,t);g.gain.exponentialRampToValueAtTime(.16,t+.03);g.gain.exponentialRampToValueAtTime(.0001,t+dur);
+      bp.type="bandpass";bp.frequency.value=H>=3?1900:H>=2?1700:1500;bp.Q.value=1.6;const dur=spb*1.9;g.gain.setValueAtTime(.0001,t);g.gain.exponentialRampToValueAtTime(.16,t+.03);g.gain.exponentialRampToValueAtTime(.0001,t+dur);
       o.connect(bp);o2.connect(bp);bp.connect(g);g.connect(m);[o,o2,lfo].forEach(x=>{x.start(t);x.stop(t+dur+.05);});}
   },
   // Championship fanfare: brass-like lead over a rising bass, ching and arena drums.
@@ -5142,7 +5147,7 @@ AU.gsfx=function(kind,a){if(!this.init()||this.muted||!SETTINGS.sfx)return;const
   if(kind==="shimmer")for(let i=0;i<6;i++)T(i*.05,{f:1400+Math.random()*1400,type:"sine",dur:.12,peak:.06});};
 
 // ================= MUAY THAI MOE v1.3 — UI =================
-const VERSION="1.89.7";
+const VERSION="1.89.8";
 const CUR_LANG=(typeof window!=="undefined"&&window.LANG)||"th";
 const TH_LABEL=String.fromCharCode(3652,3607,3618);
 function langSwitch(cls){return `<div class="langsw ${cls||""}" role="group" aria-label="Language">${[["th",TH_LABEL],["en","EN"]].map(([k,l])=>`<button class="lsb ${CUR_LANG===k?"on":""}" data-act="setlang" data-v="${k}" aria-pressed="${CUR_LANG===k}">${l}</button>`).join("")}</div>`;}
@@ -6650,11 +6655,11 @@ function fightStart(quick){const U=UI.fight,b=U.b;AU.resume();
   U.F=newFight(G.F[b.a],G.F[b.b],{seed:(G.seed+G.week*131+b.b.length*7)>>>0,rounds:b.rounds,tier:b.tier,planA:U.plan,forceRage:!quick&&!(G.flags&&G.flags.rageShown)});U.F.dai=(DIFF[G.diff||"normal"]||DIFF.normal).ai;U.F.live=!quick;
   if(b.wai==="phrom")U.F.A.careMor=.02;if(b.wai==="phra")U.F.A.careMor=.01;if(b.cheer)U.F.A.mor+=b.cheer*.01;U.F.A.mor+=trustBonus(G.F[b.a]);{const fam=(G.fam||{})[b.b]||0;if(fam)U.F.A.mor+=fam*.015;}setTactics(U.F,U.tac);if(b.carry){U.F.A.hp=Math.min(U.F.A.hp,b.carry.hp);U.F.A.sta=Math.min(U.F.A.sta,b.carry.sta);}LASTF=U.F;
   if(quick){FS.init(null,b.bg||TIER_BG[b.tier]||"bg_local.webp",G.F[b.a],G.F[b.b]);const F=U.F;while(!F.over){F.A.instr=aiCorner(F,F.A,F.B);F.B.instr=aiCorner(F,F.B,F.A);const lg=fightRound(F);U.shown.push({rd:`Round ${F.round}`},...lg);}fightEnd();return;}
-  FS.init(null,b.bg||TIER_BG[b.tier]||"bg_local.webp",G.F[b.a],G.F[b.b]);AU.setTempo(126);AU.startMusic();playRound();}
-function playRound(){const U=UI.fight,F=U.F;AU.setTempo(126+F.round*10);F.B.instr=aiCorner(F,F.B,F.A);F.A.autoSkill=false;roundBegin(F);
+  FS.init(null,b.bg||TIER_BG[b.tier]||"bg_local.webp",G.F[b.a],G.F[b.b]);AU.setTempo(104);AU.setHeat&&AU.setHeat(0);AU.startMusic();playRound();}
+function playRound(){const U=UI.fight,F=U.F;fightMusic(F);F.B.instr=aiCorner(F,F.B,F.A);F.A.autoSkill=false;roundBegin(F);
   const rng=mulberry32(F.seed+F.round);U.rng=rng;U.tiredShown=false;
   F.tier=F.tier||U.b.tier;const sl=startLine(F,rng);U.pending=[{rd:`Round ${F.round}`,cap:{text:sl.text,side:"",heat:sl.heat},bell:true}];
-  U.stage="playing";AU.setTempo(126+F.round*8);render();tick();}
+  U.stage="playing";fightMusic(F);render();tick();}
 // v1.19: pull the next exchange only when the last one has been shown, so a skill pressed now shapes what follows
 function feedRound(){const U=UI.fight,F=U.F;
   while(!U.pending.length&&!roundDone(F)){U.pending.push(...fightEx(F));
@@ -6663,6 +6668,12 @@ function feedRound(){const U=UI.fight,F=U.F;
 function fskill(id){const U=UI.fight;if(!U||U.stage!=="playing")return;const e=useSkill(U.F,U.F.A,id);if(!e)return;U.pending.unshift(e);clearTimeout(U.timer);tick();}
 function skillBarHTML(){const U=UI.fight,F=U.F;const L=fightSkills(F.A);const used=F.A.skUsed||{};if(!L.length)return `<span class="meta skhint">No skills yet · level up, then upgrade skills in the fighter info</span>`;const slots=[0,1,2].map(i=>L[i]);
   return `<div class="skbar2" role="group" aria-label="Skills ${F.A.skRound?" (used this round)":""}">${slots.map(k=>k?`<button class="skbtn2 ${k.k}" data-act="fskill" data-v="${k.id}" ${used[k.id]||F.A.skRound||F.over?"disabled":""} title="${esc(k.name)} · ${esc(SKILL_KIND_NAME[k.k])}">${PIX["sk_"+k.k]}<b>${esc(k.name)}</b></button>`:`<span class="skbtn2 empty">Empty</span>`).join("")}</div>`;}function sideOf(e,F){if(e.s==="A"||e.s==="B")return e.s;if(e.mside)return e.mside;return e.an===F.A.name?"A":"B";}
+/* v1.89.8: sarama follows the fight — slow feeling-out in round 1, fastest in the deciding round, a surge late in each round and after a knockdown.
+   5-round bouts keep the stadium shape: 3–4 hottest, 5 eases off when someone is clearly ahead (dancing the round out). */
+function fightMusic(F,surge){if(!F||!AU.setTempo)return;const R=Math.max(1,F.rounds||3),r=Math.min(F.round||1,R);
+  let p=R<=1?1:(r-1)/(R-1);if(R>=5){const sc=F.cards.reduce((x,c)=>x+c[0]-c[1],0);p=[0,.25,.75,1,Math.abs(sc)>=2?.45:1][r-1];}
+  const late=(F.ex||0)>=EX_PER_ROUND*.7?1:0,kd=F.musicKd&&performance.now()-F.musicKd<9000?1:0;
+  AU.setTempo(Math.round(104+p*54+late*8+kd*10+(surge||0)*4));AU.setHeat&&AU.setHeat(Math.round(p*2)+(late||kd?1:0));}
 function tick(){const U=UI.fight;if(!U||U.stage!=="playing")return;
   if(!U.pending.length&&!feedRound()){roundFinish(U.F);roundEnd();return;}
   const e=U.pending.shift();U.shown.push(e);const F=U.F;const now=performance.now();let wait=1500;
@@ -6673,7 +6684,8 @@ function tick(){const U=UI.fight;if(!U||U.stage!=="playing")return;
       U.caption={text:R[Math.floor(U.rng()*R.length)],side:sp.side,heat:fightHeat(F)};AU.cheer(1);U.spWait=1900;}}
     if(e.ev==="hit"||e.ev==="counter"){AU.sfx(e.w||"punch");if(e.crit)AU.cheer(.8);}
     if(e.ev==="miss"){AU.sfx("miss");wait=1150;}
-    if(e.ev==="kd"){AU.sfx("kd");wait=2300;}
+    if(e.ev==="kd"){AU.sfx("kd");wait=2300;F.musicKd=performance.now();}
+    if(e.ev)fightMusic(F);
     if(e.ev==="ko"){AU.sfx("kd");AU.cheer(1);wait=2600;}
     if(e.ev==="cut")wait=1700;
     if(e.ev==="wake"){AU.sfx("kd");AU.cheer(.9);wait=2200;}
