@@ -11305,5 +11305,9 @@
  "เข้าค่าย</p>": " joins the camp</p>",
  "<p class=\"meta center\">รับชุดแล้ว · ใส่ได้เมื่อ": "<p class=\"meta center\">Dress received · can be worn once ",
  "ใส่ชุดนี้ให้": "Dress ",
- "<p class=\"meta center\">รับชุดแล้ว</p><button class=\"btn\" data-act=\"loydresswear\" data-v=\"": "<p class=\"meta center\">Dress received</p><button class=\"btn\" data-act=\"loydresswear\" data-v=\""
+ "<p class=\"meta center\">รับชุดแล้ว</p><button class=\"btn\" data-act=\"loydresswear\" data-v=\"": "<p class=\"meta center\">Dress received</p><button class=\"btn\" data-act=\"loydresswear\" data-v=\"",
+ "ลูกนากตัวน้อยตามกลับค่ายมาด้วย! (ตั้งชื่อได้หลังดูฉากจบ)": "A baby otter followed you back to camp! (name it after the ending)",
+ "ล้มเสี่ยได้ด้วยนี่หว่า! …แต่คะแนนยังไม่พอให้มันยอมทั้งแก๊งนะเว้ย คราวหน้าต้องชนะให้ขาดกว่านี้": "You even took down the boss! …But the score isn't enough to make the whole gang give up. Next time, win by a wider margin.",
+ "เก่งมากลูก ๆ! ล้มเสี่ยได้ด้วย! ป้าขายกระทงได้อีกตั้งเยอะ คืนนี้ขนมครกป้าเลี้ยงเอง": "Well done, kids! You even took down the boss! Auntie sold so many more krathongs. Khanom krok's on me tonight!",
+ "เสี่ยหมวกทองคำล้มลงกลางเวที แต่ลูกน้องที่ยังไม่มีใครล้มได้ยืนออกันเต็มท่าเรือ เสี่ยลุกขึ้นปัดฝุ่น แล้วพาลูกน้องถอยไปอีกฝั่ง ยังไม่ยอมแพ้": "Big Boss Golden Helmet goes down in the middle of the ring — but the men nobody beat still crowd the pier. The boss gets up, dusts himself off and leads them back across the river. Not giving up yet."
 }

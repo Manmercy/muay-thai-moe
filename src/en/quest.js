@@ -1032,7 +1032,12 @@ const LOY_LEAD={
   fah:[["happy","This outfit's good for a date! Yes! Fah said 'date'! And she's not taking it back!"]]}};
 function loyCastOf(cast){const ids=[...new Set(cast||[])].filter(id=>LOY_REACT.gold[id]&&G.F[id]);return ids.length?ids:["kati"];}
 function loyLeadOf(cast){return loyCastOf(cast)[0];}
-function loyEndSteps(k,cast){const E=LOY_END[k],ids=loyCastOf(cast),lead=ids[0],S=[...E.steps];
+/* v1.89.31: beat the boss but missed the gold score — the bronze/silver ending says so instead of "not even close to the boss" */
+const LOY_BOSS_DOWN={bronze:[{n:"nar",bg:"loy_night",t:"Big Boss Golden Helmet goes down in the middle of the ring — but the men nobody beat still crowd the pier. The boss gets up, dusts himself off and leads them back across the river. Not giving up yet."},
+  {n:"npc",who:"Auntie Taew",t:"Well done, kids! You even took down the boss! Auntie sold so many more krathongs. Khanom krok's on me tonight!"}],
+ silver:{coach:"You even took down the boss! …But the score isn't enough to make the whole gang give up. Next time, win by a wider margin."}};
+function loyEndSteps(k,cast,boss){const E=LOY_END[k],ids=loyCastOf(cast),lead=ids[0];let S=[...E.steps];
+  if(boss&&k==="bronze")S=[...LOY_BOSS_DOWN.bronze];if(boss&&k==="silver")S=S.map(x=>x.n==="coach"?{n:"coach",t:LOY_BOSS_DOWN.silver.coach}:x);
   for(const id of ids.slice(1,3))S.push({n:id,f:"happy",l:"thai",t:LOY_REACT[k][id]});
   if(ids.length===1)S.push({n:lead,f:"happy",l:"thai",t:LOY_REACT[k][lead]});
   const L=LOY_LEAD[k][lead]||LOY_LEAD[k].kati,guest=isLoyGuest(G.F[lead]);
@@ -1069,7 +1074,7 @@ function gauntHTML(){const L=loyOf(G);if(!L){UI.modal=null;return "";}const R=L.
     return `<div class="glr ${st}"><canvas width="40" height="40" data-qsprite="${QK[k].sprite}"></canvas><span><b>${i+1}. ${esc(QK[k].name)}</b><small>${lg?lg.txt:R&&(R.done||i<cur)?"Skipped (previous fighter lost)":i===8?"Boss · 3 rounds":"2 rounds"}</small></span><i>${lg?(lg.res==="W"?"+"+lg.pts:lg.res==="D"?"+"+lg.pts:"✕"):""}</i></div>`;}).join("")}</div>`;
   if(!R){const pool=gauntPool(),P=L.pick||[];const need=Math.min(3,pool.length);
     return head+`<p><b>Choose your fighter order</b> <small class="meta">(${P.length}/${need}) tap fighters in the order they go in</small></p><div class="gpick">${pool.map(f=>{const i=P.indexOf(f.id);
-      return `<button class="gpk ${i>=0?"on":""}" data-act="gpick" data-v="${f.id}">${faceImg(f)}<span><b>${esc(f.name)}</b><small>${isLoyGuest(f)?"Guest · ":""}Lv.${f.lvl} · Fatigue ${Math.round(f.fatigue)}</small></span>${i>=0?`<i>${i+1}</i>`:""}</button>`;}).join("")}</div>
+      return `<button class="gpk ${i>=0?"on":""}" data-act="gpick" data-v="${f.id}">${faceImg(f)}<span><b>${esc(f.name)}</b><small>${isLoyGuest(f)?"Guest · ":""}Lv.${f.lvl}</small></span>${i>=0?`<i>${i+1}</i>`:""}</button>`;}).join("")}</div>
       ${pool.length<3?`<p class="meta">Your camp has fewer than three fighters, so some will go again (full HP each new turn)</p>`:""}
       <div class="center endbtns"><button class="btn primary" data-act="gstart" ${P.length<need?"disabled":""}>Start</button><button class="btn" data-act="closeModal">Later</button></div>${ladder(-1)}`;}
   if(R.done){const tr=loyTier(R.score,R.boss);return head+`<div class="gres2"><p class="meta">Total score</p><p class="gsc num">${R.score}</p>${tr?`<span class="pill gold">Reward tier: ${tr.n}</span>`:`<span class="pill">No reward tier yet (Bronze ${LOY_TIERS[2][2]})</span>`}
@@ -1111,7 +1116,7 @@ const LOY_WISH_HEART={kati:"…What did you wish for, Manager? Your face is all 
 const KONGKA={safe:{n:"Blessing of Cool Waters",d:"Fatigue −20 for every fighter in camp",fx:(G,m)=>roster(G).forEach(f=>f.fatigue=clamp((f.fatigue||0)-20,0,100))},
  champ:{n:"Blessing of Victory",d:"Morale +10 for every fighter in camp",fx:(G,m)=>roster(G).forEach(f=>f.morale=clamp((f.morale||0)+10,0,100))},
  together:{n:"Blessing of Plenty",d:"฿10,000 for the camp",fx:(G,m)=>{G.cash+=10000;}},
- heart:{n:"Blessing of the Heart",d:"Bond +3 with the one who turned to look",fx:(G,m)=>{if(m.hid&&G.F[m.hid])add(G,m.hid,"bond",3);}}};
+ heart:{n:"Blessing of the Heart",d:"Bond +3 with the one who turned to look",fx:(G,m)=>{if(m.hid&&G.F[m.hid])add(G,m.hid,"bond",10); /* add() scales by BOND_MUL (.3) → about +3 */}}};
 const kongkaReady=G=>{const L=loyOf(G);return !!L&&L.kongkaS!==(G.season||1);};
 const loyWishIds=()=>["kati","mali","rin","ploy","fah"].filter(id=>G.F[id]);
 function loyWishOpen(done){const L=loyOf(G);if(!L){done&&done();return;}UI.lwDone=done||null;UI.lwSkip=false;UI.lwT0=performance.now();UI.modal={type:"loywish"};AU.startMusic&&AU.startMusic("date");render();}
@@ -1137,10 +1142,10 @@ function loyWishScene(W,L,bless,k){
 function gauntNextSlot(R){R.slot++;R.j=0;R.k=R.slot*3;R.hp=100;R.sta=100;if(R.slot>=3||R.k>=9)gauntFinish(R);}
 function gauntFinish(R){const L=loyOf(G);R.done=true;L.runs=(L.runs||0)+1;L.best=Math.max(L.best||0,R.score);if(R.boss)L.boss=1;R.got=[];
   const tr=loyTier(R.score,R.boss);const order=["bronze","silver","gold"];
-  if(tr){for(const k of order.slice(0,order.indexOf(tr.k)+1))if(!L.tiers[k]){L.tiers[k]=1;R.newEnd=k;L.endCast=L.endCast||{};L.endCast[k]=[...R.order];R.got.push(...loyReward(k,R.order));}const nC={bronze:1,silver:2,gold:3}[tr.k]||1;for(let i=0;i<nC;i++){const c=loyCardDrop(G,R.order);if(c)R.got.push(c);else break;}}
+  if(tr){for(const k of order.slice(0,order.indexOf(tr.k)+1))if(!L.tiers[k]){L.tiers[k]=1;R.newEnd=k;L.endCast=L.endCast||{};L.endCast[k]=[...R.order];L.endBoss=L.endBoss||{};L.endBoss[k]=R.boss?1:0;R.got.push(...loyReward(k,R.order));}const nC={bronze:1,silver:2,gold:3}[tr.k]||1;for(let i=0;i<nC;i++){const c=loyCardDrop(G,R.order);if(c)R.got.push(c);else break;}}
   for(let i=0;i<9;i++)delete G.F["q_evloy_"+i];save();}
 function loyReward(k,R0){const out=[];
-  if(k==="bronze"){out.push("Auntie Taew treats the whole team to khanom krok (event reward)");if(typeof PETS!=="undefined"&&PETS.otter&&typeof adoptPet==="function"&&!hasPet(G,"otter")){adoptPet(G,"otter",null,(o=>G.F[o]&&G.F[o].camp==="player"?o:"kati")(loyLeadOf(R0)));UI.petName=G.pets.length-1;out.push("A little otter followed you back to camp! (Give it a name)");}}
+  if(k==="bronze"){out.push("Auntie Taew treats the whole team to khanom krok (event reward)");if(typeof PETS!=="undefined"&&PETS.otter&&typeof adoptPet==="function"&&!hasPet(G,"otter")){adoptPet(G,"otter",null,(o=>G.F[o]&&G.F[o].camp==="player"?o:"kati")(loyLeadOf(R0)));{const L=loyOf(G);if(L)L.petPend=G.pets.length-1;}out.push("A baby otter followed you back to camp! (name it after the ending)");}}
   if(k==="silver"){out.push("Thai dress unlocked on character profiles");}
   if(k==="gold"){out.push("\"Floating Market Champ\" name tag on the event page");if(typeof loyGold==="function"){const c=loyGold(G);if(c)out.push(c);}}
   return out;}
@@ -1382,7 +1387,7 @@ function evThief(G,f){const K=QK.gang1,t=Math.min(19.2,Math.max(6,campPow(G)*1.0
   const o=baseFighter(id,{name:LOY_THIEF.name,full:LOY_THIEF.name,div:"X",camp:"quest",color:"#6b7a2e",potential:t+2,a});
   o.sprite="thief";o.kind="gang1";o.grp="gang";o.lvl=campLv(G)+1;o.fatigue=0;o.morale=70;G.F[id]=o;return id;}
 function thiefHTML(){const pool=gauntPool();return `<h2>Catch the Krathong Thief</h2><p class="meta">A 2-round bout, no injuries · win for EXP and stardust ✦ (a little stardust even if you lose) · Tum gets tougher as your camp does · only during Loy Krathong, once a week</p>
-  <div class="gpick">${pool.map(f=>`<button class="gpk" data-act="thiefgo" data-v="${f.id}">${faceImg(f)}<span><b>${esc(f.name)}</b><small>${isLoyGuest(f)?"Guest · ":""}Lv.${f.lvl} · Fatigue ${Math.round(f.fatigue)}</small></span></button>`).join("")}</div>
+  <div class="gpick">${pool.map(f=>`<button class="gpk" data-act="thiefgo" data-v="${f.id}">${faceImg(f)}<span><b>${esc(f.name)}</b><small>${isLoyGuest(f)?"Guest · ":""}Lv.${f.lvl}</small></span></button>`).join("")}</div>
   <div class="center endbtns"><button class="btn" data-act="closeModal">Later</button></div>`;}
 function thiefGo(fid){const L=loyOf(G);if(!L)return;const f=G.F[fid];if(!f)return;UI.modal=null;
   const pre=[...LOY_THIEF.pre,f.canon&&LOY_THIEF.line[fid]?{n:fid,f:"angry",l:"thai",t:LOY_THIEF.line[fid]}:{n:"nar",t:`${f.name} steps onto the pier and rolls up their sleeves`}];
@@ -1396,7 +1401,7 @@ function thiefGo(fid){const L=loyOf(G);if(!L)return;const f=G.F[fid];if(!f)retur
 Object.assign(ACT,{
   loyintro:()=>{UI.modal=null;playScene(loyIntro(G),()=>{AU.startMusic("hub");render();},{bg:"river",look:"thai"});},
   loyend:d=>{const E=LOY_END[d.v];if(!E)return;const L=loyOf(G);if(L&&L.run&&L.run.newEnd===d.v)L.run.newEnd=null;UI.modal=null;
-    playScene(loyEndSteps(d.v,L&&L.endCast&&L.endCast[d.v]),()=>{AU.startMusic("hub");const back=()=>{if(L&&L.run&&L.run.done)UI.modal={type:"gaunt"};render();};
+    playScene(loyEndSteps(d.v,L&&L.endCast&&L.endCast[d.v],L&&L.endBoss&&L.endBoss[d.v]),()=>{AU.startMusic("hub");const back=()=>{if(L&&L.run&&L.run.done)UI.modal={type:"gaunt"};if(L&&L.petPend!=null){UI.petName=L.petPend;L.petPend=null;save();}render();};
       if(L&&!L.wish)loyWishOpen(back);else back();},{bg:"river",look:"thai"});},
   loywish:d=>loyWishPick(d.v),lwfloatdone:()=>{if(UI.lwGo)UI.lwGo();},
   kongka:d=>{const m=(G.mail||[]).find(x=>x.id===d.v);if(!m||m.done)return;const B=KONGKA[m.wish];if(!B)return;m.done=true;B.fx(G,m);save();UI.modal=null;
