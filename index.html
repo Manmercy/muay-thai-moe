@@ -2740,13 +2740,13 @@ const LINE_STYLE={thasao:["footwork","inside","counter"],chaiya:["pressure","foo
 const HOME_STYLE={kati:"inside",mali:"footwork",rin:"counter",ploy:"power",fah:"pressure"};
 const HOME_LINE={kati:1,mali:1,rin:0,ploy:0,fah:1};
 /* v1.91.2: per-line kit offset so every line of every heroine stands about level (some lines' skills were much weaker or stronger than others) */
-let LINE_K={kati:[.08,0,-.08],mali:[.08,0,.03],rin:[0,.06,.17],ploy:[0,.13,0],fah:[-.1,0,-.04]};
+let LINE_K={kati:[.085,.045,-.09],mali:[.09,-.015,.065],rin:[-.045,0,.185],ploy:[.005,.15,.01],fah:[-.1,.04,0]},STY_PAIR={"inside>power":1.8}; /* v1.91.4: the heroine offset now lives here per line (HERO_K emptied) */
 const STAT_STYLE={punch:"power",kick:"footwork",knee:"inside",elbow:"pressure",defense:"counter"};
 /* v1.91.0 tuning (Man: Ploy strongest, Kati next, Mali/Rin/Fah level; each beats and loses to someone; any of them can win with the right build).
    Equal builds at Lv.18/25 (stats 20, home-line skills, 300 bouts each), v1.91.2: all five 48–53% vs the other four; vs any rival's home build each heroine has a line that wins 55–76%.
    STY_K: the style-wheel edge · MDEF: Rin's defense mastery (was .04/.06/.25 — it guarded every attack and made her win 78%) · MWPN: weapon mastery
    HERO_K: heroine kit offset on landing (player camp) · HERO_D: Ploy hits harder rather than more often, so a counter-puncher can still read her */
-let STY_POW=0,STY_K=.11,MDEF={ev:.015,ctr:.025,cd:.1},MWPN={hit:.05,dmg:.2},HERO_K={kati:.01,fah:.06,rin:-.045,mali:.005},HERO_D={ploy:.11}; /* v1.91.2 (Man): all five level — the build, training, level and bonuses decide */
+let STY_POW=0,STY_K=.11,MDEF={ev:.015,ctr:.025,cd:.1},MWPN={hit:.05,dmg:.2},HERO_K={},HERO_D={ploy:.11}; /* v1.91.2 (Man): all five level — the build, training, level and bonuses decide */
 /* the school line a main heroine has built most (skill ranks + skills carried into the ring); -1 = none yet → her home line */
 function heroLine(f){if(!HOME_STYLE[f.id])return -1;const sc=[0,0,0],eq=f.skills?equipped(f):[];for(const s of skillList(f.id)){const r=(f.skills&&f.skills[s.id])||0;if(!r||!s.school||s.school==="build"||s.line>2)continue;sc[s.line]+=r+(eq.includes(s.id)?1:0);}
   const h=HOME_LINE[f.id];let best=h,bv=sc[h];for(let i=0;i<3;i++)if(sc[i]>bv){best=i;bv=sc[i];}return best;}
@@ -2774,7 +2774,7 @@ function newFight(fa,fb,o){
   if(o.tier==="final"){for(const S of [SA,SB])if(S.f.canon&&S.f.camp==="rival")S.prep+=.05;}
   /* v1.87: counter-training reads the opponent's best weapon — it lands less often on fight night */
   if(SA.counterPrep){SA.ctrW=oppTop(fb);SB.prep-=CTR_READ;}if(SB.counterPrep){SB.ctrW=oppTop(fa);SA.prep-=CTR_READ;}
-  {SA.fst=fightStyle(fa);SB.fst=fightStyle(fb);const e=styleEdge(SA.fst,SB.fst),W=e>0?SA:e<0?SB:null;if(W){W.styleUp=1;W.prep+=STY_K*.6;W.sk.evade+=STY_K*.4;if(W.fst==="counter")W.sk.ctr+=STY_K*.5;}}
+  {SA.fst=fightStyle(fa);SB.fst=fightStyle(fb);const e=styleEdge(SA.fst,SB.fst),W=e>0?SA:e<0?SB:null;if(W){const L=W===SA?SB:SA,k=STY_K*(STY_PAIR[W.fst+">"+L.fst]||1);W.styleUp=1;W.prep+=k*.6;W.sk.evade+=k*.4;if(W.fst==="counter")W.sk.ctr+=k*.5;}}
   for(const [S,O] of [[SA,SB],[SB,SA]])if(S.fst==="power")O.sk.ctr+=STY_POW; /* big swings leave openings: everyone counters a power puncher a little more, a counter-puncher most of all */ /* v1.91.0 style wheel: the favoured side lands cleaner, slips more, and a counter-puncher counters more */
   /* v1.87 traits: Rin's library needs a scouted or counter-trained opponent */
   const scout=(me,op)=>me.counterPrep||!!(me.f.camp==="player"&&typeof G!=="undefined"&&G&&G.scoutAbs&&G.scoutAbs[op.id]!=null&&gameWeek(G)-G.scoutAbs[op.id]<=8);
@@ -3014,7 +3014,7 @@ function regionAfterFight(G,b,ret){if(!G.region)return;G.region.pend=G.region.pe
 function stageOf(w){return w<=20?"local":w<=40?"district":w<=50?"final":"off";}
 const STAGE_NAME={local:"รอบตำบล",district:"รอบอำเภอ",final:"ชิงแชมป์จังหวัด",off:"ปิดปี"};
 
-function ployAura(w,G){const b=Math.max(0,.42*(1-(w-1)/27));if(!G||!G.F||!G.F.ploy||G.F.ploy.camp!=="rival")return G&&G.F&&G.F.ploy&&G.F.ploy.camp==="player"?0:b;if(G.flags&&G.flags.beatS_ploy===(G.season||1))return b;/* v1.59: the undefeated genius keeps her edge until someone beats her this year */return Math.max(b,w<41?.2:w<49?.14:.05);} // v1.23: Ploy's early edge is gone by week 28
+function ployAura(w,G){const b=Math.max(0,.42*(1-(w-1)/27));if(!G||!G.F||!G.F.ploy||G.F.ploy.camp!=="rival")return G&&G.F&&G.F.ploy&&G.F.ploy.camp==="player"?0:b;if(G.flags&&G.flags.beatS_ploy===(G.season||1))return Math.max(b,.17);/* v1.59: the undefeated genius keeps her edge until someone beats her this year · v1.91.4 (Man): even beaten she stays a genius (floor .17, was 0 from week 28) */return Math.max(b,w<41?.25:w<49?.2:.15);} // v1.23: Ploy's early edge is gone by week 28
 function startLv(f){if(f.id==="ploy")f.aura=ployAura(1);if(f.id==="ploy")f.lvl=5;else if(f.id==="fah")f.lvl=3;else if(f.camp==="npc")f.lvl=clamp(Math.round(ovr(f.a)-7),1,6);}
 // v1.22 difficulty: easy = rivals grow slower + more class income; hard = rivals grow faster and use skills harder
 const DIFF={easy:{rival:.7,ai:.6,inc:1.2,train:1.12,name:"ง่าย"},normal:{rival:1,ai:.8,inc:1,train:1,name:"ปกติ"},hard:{rival:1.12,ai:.95,inc:.9,train:.97,name:"ยาก"}};
@@ -12453,7 +12453,7 @@ CHAT.fah.push(
 <script>
 (function(){
 /* v1.87: Thai code ships inside index.html; English code (en.js) and the dictionary (i18n.js) load only when needed */
-var B="99e914ca7c";
+var B="eeeae674b0";
 var L="";try{L=localStorage.getItem("mtm_lang")||"";}catch(e){}
 try{var h=(location.hash||"").match(/lang=(th|en)/);if(h)L=h[1];}catch(e){}
 if(L!=="th"&&L!=="en")L="th";
