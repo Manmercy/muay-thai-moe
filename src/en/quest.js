@@ -926,10 +926,10 @@ const LOY_LADDER=["gang1","gang1","gang2","gang2","gang3","gang3","gang4","gang4
 const LOY_TIERS=[["gold","Gold",1500],["silver","Silver",1000],["bronze","Bronze",450]];
 const loyOf=G=>(G.ev||{}).loy||null;
 function loyTier(sc,boss){for(const [k,n,min] of LOY_TIERS)if(sc>=min&&(k!=="gold"||boss))return {k,n};return null;}
-function evGang(G,k,f){const kind=LOY_LADDER[k],K=QK[kind],t=ovr(f.a)+K.lvl+k*.12,rng=mulberry32((G.seed^0x10e)+k*131);const a={};
+function evGang(G,k,f){const kind=LOY_LADDER[k],K=QK[kind],t=ovr(f.a)+.4+k*.1+(k===8?.3:0),rng=mulberry32((G.seed^0x10e)+k*131);const a={};
   for(const [x] of ATTRS)a[x]=clamp(t+(K.tilt[x]||0)+(rng()*1.2-.6),3,19.5);const d=t-ovr(a);for(const [x] of ATTRS)a[x]=clamp(a[x]+d,3,19.5);
   const id="q_evloy_"+k;const o=baseFighter(id,{name:K.name,full:K.name,div:"X",camp:"quest",color:K.color,potential:t+2,a});
-  o.sprite=K.sprite;o.kind=kind;o.grp="gang";o.lvl=clamp(Math.round(t-6),1,10);o.fatigue=0;o.morale=75;G.F[id]=o;syncFighterAges(G);return id;}
+  o.sprite=K.sprite;o.kind=kind;o.grp="gang";o.lvl=(f.lvl||1)+1+Math.floor(k/3);o.fatigue=0;o.morale=75;G.F[id]=o;syncFighterAges(G);return id;}
 function redeemCode(raw){const v=(raw||"").toUpperCase().replace(/\s+/g,"");if(!v)return;let key="";try{key=btoa(v);}catch(e){}const R=REDEEM[key];
   if(!R){AU.sfx("miss");toast("Code not found. Check the spelling and try again");return;}
   if(R.k==="gate"){G.unlocked=true;try{localStorage.setItem(GATE.key,"1");}catch(e){}save();AU.sfx("level");toast("Year 2 unlocked!");return;}
@@ -952,40 +952,77 @@ function loyIntro(G){const S=[
   {n:"kati",f:"flustered",l:"thai",t:"Manager… this dress is so tight at the waist. Do I look weird? …Don't stare so long!"}];
   if(inCamp(G,"mali"))S.push({n:"mali",f:"happy",l:"thai",t:"Kati looks gorgeous! Mali pinned her sabai herself~ And Mali's… looks pretty too, right, Manager?"});
   if(inCamp(G,"rin"))S.push({n:"rin",f:"flustered",l:"thai",t:"This pha sin limits my stride to about forty centimeters. Not ideal for fighting… but not bad either."});
+  if(G.F.ploy){if(inCamp(G,"ploy"))S.push({n:"ploy",f:"flustered",l:"thai",t:"…Auntie Taew said purple suits me. I'm not sure, but I'm not taking it off now."});
+    else S.push({n:"nar",t:"In the crowd, a woman in a purple Thai dress stands still in front of a banana-leaf krathong stall — Ploy, from the rival camp."},{n:"ploy",f:"flustered",l:"thai",t:"…Coincidence. I came to float a krathong alone. Auntie Taew got me into this outfit before I could say no."});}
+  if(G.F.fah){if(inCamp(G,"fah"))S.push({n:"fah",f:"happy",l:"thai",t:"Look at Fah! Thai dress on and the elbows still flow! Somebody take Fah's picture!"});
+    else S.push({n:"fah",f:"happy",l:"thai",t:"Oh, Sirichai camp! Fah just happened to be walking the fair! Auntie Taew dressed Fah up in Thai dress too, haha — pretty, right?!"});}
   S.push({n:"npc",who:"Auntie Taew",t:"Everyone looks lovely! …But look over there. The helmet gang is back."},
   {n:"npc",who:"Big Boss Golden Helmet",t:"Everyone in this market pays us for their spot! Don't pay, pack up and go home, som tam lady!"},
   {n:"coach",t:"Easy now, no trouble… wait, they're challenging us to the makeshift ring by the pier?"},
   {n:"npc",who:"Big Boss Golden Helmet",t:"Send three. I've got nine boys. No breaks, no mercy. If your camp wins, my gang never sets foot in this market again!"},
   {n:"kati",f:"happy",l:"thai",t:"I accept the challenge! Auntie Taew says this pha sin stretches, so it won't rip in a fight! Pick who goes, Manager!"});
+  const gs=loyGuests(G);
+  if(gs.some(f=>f.id==="ploy"))S.push({n:"ploy",f:"angry",l:"thai",t:"I'm not from your camp … but I shop at this market every year. If you're short a fighter, I'll step in."});
+  if(gs.some(f=>f.id==="fah"))S.push({n:"fah",f:"happy",l:"thai",t:"Fah too! Punching the helmet gang for free, no fee! …A tray of khanom krok is enough."});
+  if(gs.length)S.push({n:"nar",t:`${gs.map(f=>f.name).join(" and ")} are here to help as guests — pick them for the riverside gauntlet. No effect on your real camp.`});
   return S;}
 const LOY_END={
  bronze:{t:"The Helmet Gang Retreats",steps:[{n:"nar",bg:"loy_night",t:"The helmet gang's goons retreat to the far bank. They haven't given up, but they won't come near Auntie Taew's stall again."},
-  {n:"npc",who:"Auntie Taew",t:"Well done, kids! Auntie sold so many more krathongs. Here, pocket money for everyone."},
-  {n:"kati",f:"happy",l:"thai",t:"They'll be back next year for sure. I'll train even harder!"},
-  {n:"nar",t:"Squeaking comes from under the pier. A tiny otter is tangled in krathong string. Kati kneels to free it, the hem of her pha sin soaking wet."},
-  {n:"kati",f:"flustered",l:"thai",t:"It followed me, Manager… it won't leave. Can we keep it at camp? We can, right?"}]},
+  {n:"npc",who:"Auntie Taew",t:"Well done, kids! Auntie sold so many more krathongs. Khanom krok's on me tonight!"}]},
  silver:{t:"The Whole Market Cheers",steps:[{n:"nar",bg:"loy_night",t:"The whole floating market crowds around the makeshift ring. The cheers drown out the fireworks."},
   {n:"coach",t:"Not bad… but you haven't reached the boss yet. There's still time this year."},
-  {n:"npc",who:"Auntie Taew",t:"Those Thai dresses are yours to keep. Wear them anywhere. Auntie's happy they got worn for something good."},
-  {n:"kati",f:"flustered",l:"thai",t:"Manager… Auntie Taew gave me a krathong. Want to float it together? …Just one. She only gave me one."}]},
+  {n:"npc",who:"Auntie Taew",t:"Those Thai dresses are yours to keep. Wear them anywhere. Auntie's happy they got worn for something good."}]},
  gold:{t:"The Golden Helmet Floats Away",steps:[{n:"nar",bg:"loy_night",t:"Big Boss Golden Helmet crashes onto the pier. His golden helmet rolls into the river and floats off with a hundred krathongs."},
   {n:"npc",who:"Big Boss Golden Helmet",t:"My helmet!! …Fine, fine! I won't come to this market again. This year! Just this year!"},
-  {n:"npc",who:"Auntie Taew",t:"Auntie's sewn extra Thai dresses for all of you. Wear them on outings, dates, anywhere!"},
-  {n:"kati",f:"flustered",l:"thai",t:"…Manager, can I wear this on a date? …Not a date! An outing! An outing!"},
-  {n:"nar",t:"The name Sirichai Gym echoes across the floating market all night, and for many nights after."}]}};
+  {n:"npc",who:"Auntie Taew",t:"Auntie's sewn extra Thai dresses for all of you. Wear them on outings, dates, anywhere!"}],
+  tail:[{n:"nar",t:"The name Sirichai Gym echoes across the floating market all night, and for many nights after."}]}};
+/* v1.89.20: the ending follows the three who fought — the first heroine sent is the lead, the others chip in */
+const LOY_REACT={
+ bronze:{kati:"They'll be back next year for sure. I'll train even harder!",mali:"My pha sin tore a little… Auntie Taew, please don't scold Mali.",rin:"Bronze is the lowest of the three tiers. I've noted it. Next year it won't be.",ploy:"We didn't reach the boss … Next time I'll get there.",fah:"Not satisfied yet! The gold helmet guy didn't take a single hit!"},
+ silver:{kati:"The whole market shouted my name… Grandpa, can you hear it?",mali:"So many people cheering — Mali wants to dance for them again!",rin:"The cheering's about ninety decibels … I'm not smiling.",ploy:"…I'm not used to cheering like this. But it's not bad.",fah:"You hear that?! They're calling Fah's name! Did anyone film it?!"},
+ gold:{kati:"We did it! Auntie Taew doesn't have to pay protection money anymore!",mali:"The gold helmet floated off with the krathongs~ May all the bad luck float away with it.",rin:"Nine fights, no rest. The result matches my calculation … almost.",ploy:"We took down the boss … I'm proud. I won't say it twice.",fah:"See? Fah told you! Let him come back next year — Fah'll punch him again!"}};
+const LOY_LEAD={
+ bronze:{kati:[["nar","Squeaking comes from under the pier. A tiny otter is tangled in krathong string. Kati kneels to free it, the hem of her pha sin soaking wet."],["flustered","It followed me, Manager… it won't leave. Can we keep it at camp? We can, right?"]],
+  mali:[["nar","A squeak comes from under the pier. A baby otter is tangled in a krathong string. Mali kneels to free it, laughing as it nibbles her finger."],["happy","It likes Mali! Manager, let's keep it at the camp. Mali will take care of it~"]],
+  rin:[["nar","A squeak comes from under the pier. A baby otter is tangled in a krathong string. Rin kneels and calmly works the knots — three seconds each."],["flustered","Until we find it a home, I'll look after it. The camp has a big enough tub … I'm not attached or anything."]],
+  ploy:[["nar","A squeak comes from under the pier. A baby otter is tangled in a krathong string. Ploy frees it without a word, and it climbs straight up her arm."],["flustered","…It won't get down. The camp has room for it, right?"],["flustered","…It won't get down. My camp doesn't allow pets. Can I leave it with you? I'll drop by to see it."]],
+  fah:[["nar","A squeak comes from under the pier. A baby otter is tangled in a krathong string. Fah jumps into the river, Thai dress and all, to free it."],["happy","Got it! I'm soaked, but worth it! Let's keep it at the camp — Fah'll feed it!"],["happy","Got it! Keep it at your camp. Fah will come visit every week — and say it's for the otter!"]]},
+ silver:{kati:[["flustered","Manager… Auntie Taew gave me a krathong. Want to float it together? …Just one. She only gave me one."]],
+  mali:[["happy","Manager, Auntie Taew gave me a krathong. Let's float it together! Mali already made a wish, but she's not telling~"]],
+  rin:[["flustered","Auntie Taew gave us one krathong. Two people, one krathong … Mathematically, we have to float it together."]],
+  ploy:[["flustered","Auntie gave me a krathong… I've never floated one with anyone. Want to try it together?"]],
+  fah:[["happy","Just one krathong! Let's float it together, the two of us. Anyone who tries to cut in gets an elbow!"]]},
+ gold:{kati:[["flustered","…Manager, can I wear this on a date? …Not a date! An outing! An outing!"]],
+  mali:[["flustered","Can I wear this on a date…? Mali's asking for real, not teasing~"]],
+  rin:[["flustered","If I wear this out somewhere with you, the data says it probably wouldn't be bad … That's not an invitation."]],
+  ploy:[["flustered","Auntie gave me this outfit … If you're free, walk the floating market with me again? When nobody's fighting."]],
+  fah:[["happy","This outfit's good for a date! Yes! Fah said 'date'! And she's not taking it back!"]]}};
+function loyCastOf(cast){const ids=[...new Set(cast||[])].filter(id=>LOY_REACT.gold[id]&&G.F[id]);return ids.length?ids:["kati"];}
+function loyLeadOf(cast){return loyCastOf(cast)[0];}
+function loyEndSteps(k,cast){const E=LOY_END[k],ids=loyCastOf(cast),lead=ids[0],S=[...E.steps];
+  for(const id of ids.slice(1,3))S.push({n:id,f:"happy",l:"thai",t:LOY_REACT[k][id]});
+  if(ids.length===1)S.push({n:lead,f:"happy",l:"thai",t:LOY_REACT[k][lead]});
+  const L=LOY_LEAD[k][lead]||LOY_LEAD[k].kati,guest=isLoyGuest(G.F[lead]);
+  L.forEach((x,i)=>{if(x[0]==="nar"){S.push({n:"nar",t:x[1]});return;}
+    if(L.length===3&&i===(guest?1:2))return;S.push({n:lead,f:x[0],l:"thai",t:x[1]});});
+  return S.concat(E.tail||[]);}
 const LOY_THIEF={name:"Tum the Krathong Thief",
  line:{kati:"Give it back right now! That krathong belongs to the grandma next door to me!",mali:"Mali helped Auntie fold that krathong! Give it back!",rin:"I counted. You took seventeen. Return every one of them.",ploy:"This dress is expensive. But if I have to dive in for them myself, I won't hesitate.",fah:"Fah's seen you since last year! You're not getting away this time!"},
  pre:[{n:"nar",bg:"loy_night",t:"Splash! Someone dives in, fishing coins out of the villagers' krathongs by the plastic-bagful."},
   {n:"npc",who:"Auntie Taew",t:"Tum again! He fishes coins out of people's krathongs every year. This year he took the whole krathongs!"},
   {n:"npc",who:"Tum the Krathong Thief",t:"The krathongs floated to me, so I took 'em! Want 'em back? Come up on the pier!"}],
  win:[{n:"nar",bg:"loy_night",t:"Tum hits the water with a splash. The coin bag bobs on the surface, and the villagers fish it out for the temple."},
-  {n:"npc",who:"Auntie Taew",t:"Well done, dear! Here's a share of tonight's krathong sales. Buy the kids at camp some milk."}],
+  {n:"npc",who:"Auntie Taew",t:"Well done, dear! Auntie's frying khanom krok for the whole team. Eat up before you go home!"}],
  lose:[{n:"nar",bg:"loy_night",t:"Tum laughs and dives in with the bag of coins… but the bag rips mid-river and every coin sinks."},
   {n:"npc",who:"Tum the Krathong Thief",t:"Hey! My coins!! …See you next year!"},{n:"npc",who:"Auntie Taew",t:"Never mind, dear. At least he didn't get anything."}]};
 function evStartLoy(){const L=loyOf(G);if(!L)return;UI.modal=null;
   const open=()=>{L.run=null;L.pick=[];UI.modal={type:"gaunt"};render();};
   if(!L.intro){L.intro=1;save();playScene(loyIntro(G),open,{bg:"loy_night",look:"thai"});}else open();}
-function gauntPool(){const R=roster(G).filter(f=>!f.injury);return R.length?R:roster(G);}
+/* v1.89.20: Ploy / Fah join as guests when they are not in the camp yet — event-only, nothing carries back */
+const LOY_GUESTS=["ploy","fah"];
+const loyGuests=G=>LOY_GUESTS.map(id=>G.F[id]).filter(f=>f&&f.camp!=="player");
+const isLoyGuest=f=>f&&LOY_GUESTS.includes(f.id)&&f.camp!=="player";
+function gauntPool(){const R=roster(G).filter(f=>!f.injury);return (R.length?R:roster(G)).concat(loyGuests(G));}
 // v1.82.4: the five riverside SR cards as a collection row — owned cards in colour, missing ones dark, with a "play again" nudge
 function loyCardRow(after){const own=G.cards||{},got=LOY_CARDS.filter(k=>own[k]).length,left=LOY_CARDS.length-got;
   const row=LOY_CARDS.map(k=>{const C=CARDS[k],has=!!own[k];return `<div class="ccard pxc lk ${has?"":"lock"}" style="--rc:${CARD_R.SR.c}" title="${has?esc(C.t):"Not yet earned"}">${cardArtHTML(C,true)}<small>${has?esc(G.F[C.c].name):"?"}</small></div>`;}).join("");
@@ -999,7 +1036,7 @@ function gauntHTML(){const L=loyOf(G);if(!L){UI.modal=null;return "";}const R=L.
     return `<div class="glr ${st}"><canvas width="40" height="40" data-qsprite="${QK[k].sprite}"></canvas><span><b>${i+1}. ${esc(QK[k].name)}</b><small>${lg?lg.txt:R&&(R.done||i<cur)?"Skipped (previous fighter lost)":i===8?"Boss · 3 rounds":"2 rounds"}</small></span><i>${lg?(lg.res==="W"?"+"+lg.pts:lg.res==="D"?"+"+lg.pts:"✕"):""}</i></div>`;}).join("")}</div>`;
   if(!R){const pool=gauntPool(),P=L.pick||[];const need=Math.min(3,pool.length);
     return head+`<p><b>Choose your fighter order</b> <small class="meta">(${P.length}/${need}) tap fighters in the order they go in</small></p><div class="gpick">${pool.map(f=>{const i=P.indexOf(f.id);
-      return `<button class="gpk ${i>=0?"on":""}" data-act="gpick" data-v="${f.id}">${faceImg(f)}<span><b>${esc(f.name)}</b><small>Lv.${f.lvl} · Fatigue ${Math.round(f.fatigue)}</small></span>${i>=0?`<i>${i+1}</i>`:""}</button>`;}).join("")}</div>
+      return `<button class="gpk ${i>=0?"on":""}" data-act="gpick" data-v="${f.id}">${faceImg(f)}<span><b>${esc(f.name)}</b><small>${isLoyGuest(f)?"Guest · ":""}Lv.${f.lvl} · Fatigue ${Math.round(f.fatigue)}</small></span>${i>=0?`<i>${i+1}</i>`:""}</button>`;}).join("")}</div>
       ${pool.length<3?`<p class="meta">Your camp has fewer than three fighters, so some will go again (full HP each new turn)</p>`:""}
       <div class="center endbtns"><button class="btn primary" data-act="gstart" ${P.length<need?"disabled":""}>Start</button><button class="btn" data-act="closeModal">Later</button></div>${ladder(-1)}`;}
   if(R.done){const tr=loyTier(R.score,R.boss);return head+`<div class="gres2"><p class="meta">Total score</p><p class="gsc num">${R.score}</p>${tr?`<span class="pill gold">Reward tier: ${tr.n}</span>`:`<span class="pill">No reward tier yet (Bronze ${LOY_TIERS[2][2]})</span>`}
@@ -1012,16 +1049,16 @@ function gauntHTML(){const L=loyOf(G);if(!L){UI.modal=null;return "";}const R=L.
 function gauntNextSlot(R){R.slot++;R.j=0;R.k=R.slot*3;R.hp=100;R.sta=100;if(R.slot>=3||R.k>=9)gauntFinish(R);}
 function gauntFinish(R){const L=loyOf(G);R.done=true;L.runs=(L.runs||0)+1;L.best=Math.max(L.best||0,R.score);if(R.boss)L.boss=1;R.got=[];
   const tr=loyTier(R.score,R.boss);const order=["bronze","silver","gold"];
-  if(tr){for(const k of order.slice(0,order.indexOf(tr.k)+1))if(!L.tiers[k]){L.tiers[k]=1;R.newEnd=k;R.got.push(...loyReward(k));}const nC={bronze:1,silver:2,gold:3}[tr.k]||1;for(let i=0;i<nC;i++){const c=loyCardDrop(G,R.order);if(c)R.got.push(c);else break;}}
+  if(tr){for(const k of order.slice(0,order.indexOf(tr.k)+1))if(!L.tiers[k]){L.tiers[k]=1;R.newEnd=k;L.endCast=L.endCast||{};L.endCast[k]=[...R.order];R.got.push(...loyReward(k,R.order));}const nC={bronze:1,silver:2,gold:3}[tr.k]||1;for(let i=0;i<nC;i++){const c=loyCardDrop(G,R.order);if(c)R.got.push(c);else break;}}
   for(let i=0;i<9;i++)delete G.F["q_evloy_"+i];save();}
-function loyReward(k){const out=[];
-  if(k==="bronze"){G.cash+=3000;out.push("Prize money from Auntie Taew ฿3,000");if(typeof PETS!=="undefined"&&PETS.otter&&typeof adoptPet==="function"&&!hasPet(G,"otter")){adoptPet(G,"otter",null,"kati");UI.petName=G.pets.length-1;out.push("A little otter followed you back to camp! (Give it a name)");}}
-  if(k==="silver"){G.cash+=5000;out.push("Prize money ฿5,000");out.push("Thai dress unlocked on character profiles");}
-  if(k==="gold"){G.rep+=1.5;out.push("Fame +1.5");if(typeof loyGold==="function"){const c=loyGold(G);if(c)out.push(c);}}
+function loyReward(k,R0){const out=[];
+  if(k==="bronze"){out.push("Auntie Taew treats the whole team to khanom krok (event reward)");if(typeof PETS!=="undefined"&&PETS.otter&&typeof adoptPet==="function"&&!hasPet(G,"otter")){adoptPet(G,"otter",null,(o=>G.F[o]&&G.F[o].camp==="player"?o:"kati")(loyLeadOf(R0)));UI.petName=G.pets.length-1;out.push("A little otter followed you back to camp! (Give it a name)");}}
+  if(k==="silver"){out.push("Thai dress unlocked on character profiles");}
+  if(k==="gold"){out.push("\"Floating Market Champ\" name tag on the event page");if(typeof loyGold==="function"){const c=loyGold(G);if(c)out.push(c);}}
   return out;}
 function gauntAfter(){const L=loyOf(G),R=L&&L.run,F=LASTF;if(!R||!F){UI.modal={type:"gaunt"};render();return;}
   const r=F.result,res=r.win==="D"?"D":r.win==="A"?"W":"L",rds=R.k===8?3:2;let pts=0,txt="";
-  if(res==="W"){if(R.k===8)G.goldHelmetWins=(G.goldHelmetWins||0)+1;pts=100+(/KO|น็อก/.test(r.type||"")?60:0)+Math.max(0,rds-F.round)*30+Math.round(Math.max(0,F.A.hp)*.6);txt=/KO|น็อก/.test(r.type||"")?`Won by KO, round ${F.round}`:"Decision win";if(R.k===8)R.boss=1;}
+  if(res==="W"){pts=100+(/KO|น็อก/.test(r.type||"")?60:0)+Math.max(0,rds-F.round)*30+Math.round(Math.max(0,F.A.hp)*.6);txt=/KO|น็อก/.test(r.type||"")?`Won by KO, round ${F.round}`:"Decision win";if(R.k===8)R.boss=1;}
   else if(res==="D"){pts=30;txt="Draw";}else txt=/KO|น็อก/.test(r.type||"")?`Lost by KO, round ${F.round}`:"Lost on points";
   R.log[R.k]={res,pts,txt};R.score+=pts;
   if(res==="L")gauntNextSlot(R);
@@ -1225,29 +1262,31 @@ Object.assign(CARDS,{
   N("The Sirichai krathong floats away until it's out of sight. No one gets up until the last candle on the pier goes out.")]}});
 
 })();
+/* v1.89.20: the riverside SR card stories keep their choices, but nothing (bond, cash) leaks into the main game */
+(()=>{const mute=st=>(st||[]).forEach(x=>{if(x&&x.choice)x.choice.forEach(o=>{o.fx=()=>{};mute(o.then);});});for(const k of LOY_CARDS)if(CARDS[k])mute(CARDS[k].steps);})();
 function loyCardDrop(G,order){G.cards=G.cards||{};const left=LOY_CARDS.filter(k=>!G.cards[k]);if(!left.length)return null;
   const pref=(order||[]).map(id=>"lk_"+id).filter(k=>left.includes(k));const L=loyOf(G);const id=pref[0]||left[((L&&L.runs)||0)%left.length];
-  G.cards[id]={n:1,lv:1,wk:absWeek(G),seen:false};if(G.F[CARDS[id].c])add(G,CARDS[id].c,"bond",3);G.dust=(G.dust||0)+5;
+  G.cards[id]={n:1,lv:1,wk:absWeek(G),seen:false}; /* v1.89.20: event card — no bond or stardust carried into the main game */
   return `New SR card: "${CARDS[id].t}" (see it in the album)`;}
 function loyGold(G){const L=loyOf(G);if(!L)return null;L.dressOn=1;return "Thai dress off-stage unlocked: the girls wear Thai dress in outings and dates (toggle it in Auntie Taew's letter)";}
 const loyThaiLook=G=>!!(G&&G.ev&&G.ev.loy&&G.ev.loy.tiers&&G.ev.loy.tiers.silver);
-function evThief(G,f){const K=QK.gang1,t=Math.max(6,ovr(f.a)+K.lvl-1.2),rng=mulberry32((G.seed^0x7a1)+absWeek(G)*17);const a={};
+function evThief(G,f){const K=QK.gang1,t=Math.max(6,ovr(f.a)+.6),rng=mulberry32((G.seed^0x7a1)+absWeek(G)*17);const a={};
   for(const [x] of ATTRS)a[x]=clamp(t+(K.tilt[x]||0)+(rng()*1.2-.6),3,19.5);const id="q_evthief";
   const o=baseFighter(id,{name:LOY_THIEF.name,full:LOY_THIEF.name,div:"X",camp:"quest",color:K.color,potential:t+2,a});
-  o.sprite=K.sprite;o.kind="gang1";o.grp="gang";o.lvl=clamp(Math.round(t-6),1,10);o.fatigue=0;o.morale=70;G.F[id]=o;return id;}
-function thiefHTML(){const pool=gauntPool();return `<h2>Catch the Krathong Thief</h2><p class="meta">A silly 2-round bout · no injuries, no effect on records · win to earn krathong money from Auntie Taew · once per week</p>
-  <div class="gpick">${pool.map(f=>`<button class="gpk" data-act="thiefgo" data-v="${f.id}">${faceImg(f)}<span><b>${esc(f.name)}</b><small>Lv.${f.lvl} · Fatigue ${Math.round(f.fatigue)}</small></span></button>`).join("")}</div>
+  o.sprite=K.sprite;o.tintHue=150;o.kind="gang1";o.grp="gang";o.lvl=(f.lvl||1)+1;o.fatigue=0;o.morale=70;G.F[id]=o;return id;}
+function thiefHTML(){const pool=gauntPool();return `<h2>Catch the Krathong Thief</h2><p class="meta">A silly 2-round bout · no injuries, no effect on the main game · win and Auntie Taew fries khanom krok for the team · once per week</p>
+  <div class="gpick">${pool.map(f=>`<button class="gpk" data-act="thiefgo" data-v="${f.id}">${faceImg(f)}<span><b>${esc(f.name)}</b><small>${isLoyGuest(f)?"Guest · ":""}Lv.${f.lvl} · Fatigue ${Math.round(f.fatigue)}</small></span></button>`).join("")}</div>
   <div class="center endbtns"><button class="btn" data-act="closeModal">Later</button></div>`;}
 function thiefGo(fid){const L=loyOf(G);if(!L)return;const f=G.F[fid];if(!f)return;UI.modal=null;
   const pre=[...LOY_THIEF.pre,f.canon&&LOY_THIEF.line[fid]?{n:fid,f:"angry",l:"thai",t:LOY_THIEF.line[fid]}:{n:"nar",t:`${f.name} steps onto the pier and rolls up their sleeves`}];
   playScene(pre,()=>{const qid=evThief(G,f);const bk={id:"bthief",a:fid,b:qid,week:G.week,tier:"evloy",rounds:2,ev:1,bg:"bg_river.webp"};
     openFight2(bk,()=>{const F=LASTF,win=F&&F.result&&F.result.win==="A";L.thiefWk=absWeek(G);delete G.F.q_evthief;
-      if(win){const c=1200;G.cash+=c;G.rep+=.2;L.thiefN=(L.thiefN||0)+1;}save();
-      playScene(win?[...LOY_THIEF.win,{n:"nar",t:`Krathong fee ฿1,200 · Fame +0.2`}]:LOY_THIEF.lose,()=>{AU.startMusic("hub");UI.tab="home";save();render();},{bg:"river",look:"thai"});});},{bg:"river",look:"thai"});}
+      if(win){L.thiefN=(L.thiefN||0)+1;}save();
+      playScene(win?[...LOY_THIEF.win,{n:"nar",t:`Caught Ai Tum ${L.thiefN} times`}]:LOY_THIEF.lose,()=>{AU.startMusic("hub");UI.tab="home";save();render();},{bg:"river",look:"thai"});});},{bg:"river",look:"thai"});}
 Object.assign(ACT,{
   loyintro:()=>{UI.modal=null;playScene(loyIntro(G),()=>{AU.startMusic("hub");render();},{bg:"river",look:"thai"});},
   loyend:d=>{const E=LOY_END[d.v];if(!E)return;const L=loyOf(G);if(L&&L.run&&L.run.newEnd===d.v)L.run.newEnd=null;UI.modal=null;
-    playScene(E.steps,()=>{AU.startMusic("hub");if(L&&L.run&&L.run.done)UI.modal={type:"gaunt"};render();},{bg:"river",look:"thai"});},
+    playScene(loyEndSteps(d.v,L&&L.endCast&&L.endCast[d.v]),()=>{AU.startMusic("hub");if(L&&L.run&&L.run.done)UI.modal={type:"gaunt"};render();},{bg:"river",look:"thai"});},
   thief:()=>{const L=loyOf(G);if(!L||L.thiefWk===absWeek(G))return;UI.modal={type:"thief"};render();},
   thiefgo:d=>thiefGo(d.v),
   loydress:()=>{const L=loyOf(G);if(!L||!L.tiers.gold)return;L.dressOn=L.dressOn?0:1;save();render();},
