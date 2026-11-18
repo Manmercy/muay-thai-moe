@@ -429,7 +429,7 @@ function mountCanvases(){
     LOOPS.add(t=>{if(!cv.isConnected)return;const look=key==="coach"?COACH_LOOK:key==="player"?(G?G.avatar:UI.creator):UI.creator;if(!look)return;
       x.clearRect(0,0,cv.width,cv.height);x.imageSmoothingEnabled=false;const fr={dy:Math.floor(t/400)%2,blink:Math.floor(t/150)%24===0};
       const c=CHIBI.canvasFor(look,fr);const s=Math.floor(Math.min(cv.width/24,cv.height/32));x.drawImage(c,(cv.width-24*s)/2,cv.height-32*s,24*s,32*s);});});
-  if(typeof mountCampFx==="function")mountCampFx();if(typeof mountContest==="function")mountContest();if(typeof mountGbox==="function")mountGbox();
+  if(typeof mountCampFx==="function")mountCampFx();if(typeof mountContest==="function")mountContest();if(typeof mountWaiKhru==="function")mountWaiKhru();if(typeof mountGbox==="function")mountGbox();
   document.querySelectorAll("canvas[data-drill]").forEach(cv=>{const x=cv.getContext("2d");const id=cv.dataset.drill;
     LOOPS.add(t=>{if(!cv.isConnected||!G)return;const f=G.F[id],D=UI.drill;if(!f)return;const W=cv.width,H=cv.height;x.clearRect(0,0,W,H);x.imageSmoothingEnabled=false;
       const dt=D&&D.hitT?t-D.hitT:9999,hit=dt<600;const row=hit?(DRILL_ROW[f.plan.preset]||"punch"):"guard";const fr=hit?Math.min(3,Math.floor(dt/110)):Math.floor(t/260)%4;
@@ -671,6 +671,45 @@ function drawContestAward(ctx,G,t,R){const S=2,P=(x,y,w,h,c)=>{ctx.fillStyle=c;c
     for(let b=0;b<5;b++){const per=1150,tt=(t-6800+b*230)%per,cyc=Math.floor((t-6800+b*230)/per),rr=mulberry32(b*97+cyc*13),cx=30+rr()*260,cy=14+rr()*50,col=["#ffd36b","#ff7b8a","#8ad7ff","#9dff8a","#f2a0ff"][(b+cyc)%5];
       if(tt<300){P(cx,cy+60-tt/5,1,3,"#fff3c4");}else{const k=(tt-300)/(per-300);ctx.globalAlpha=Math.max(0,1-k);for(let s=0;s<12;s++){const a=s/12*Math.PI*2;P(cx+Math.cos(a)*k*26,cy+Math.sin(a)*k*20+k*k*8,2,2,col);}ctx.globalAlpha=1;}}
     for(let i=0;i<24;i++){const ph=((t/1600)+i/24)%1;P((i*41+Math.sin(t/300+i)*6)%320,ph*180,2,3,["#ffd36b","#ff7b8a","#8ad7ff","#9dff8a"][i%4]);}}}
+// ===== v1.90: annual wai kru — altar with Grandpa Chai's photo, candles and incense; the camp kneels, bows three times, Kru Daeng crowns each fighter =====
+const WK_TL=n=>{const t1=1500,t2=t1+1500,t3=t2+3*1000,t4=t3+Math.max(1,n)*1100;return {t1,t2,t3,t4,end:t4+900};};
+function drawWaiKhru(ctx,G,t,R){const S=2,W=320,H=180,P=(x,y,w,h,c)=>{ctx.fillStyle=c;ctx.fillRect(Math.round(x*S),Math.round(y*S),Math.max(1,Math.round(w*S)),Math.max(1,Math.round(h*S)));};
+  ctx.imageSmoothingEnabled=false;const T=WK_TL(R.ids.length);
+  // hall: warm wall, wooden floor, the ring rope behind
+  P(0,0,W,H,"#2a1a22");for(let i=0;i<8;i++)P(i*40,0,38,112,i%2?"#3a2530":"#36222c");P(0,112,W,68,"#5a3a26");for(let i=0;i<12;i++)P(0,116+i*6,W,1,"rgba(0,0,0,.18)");
+  P(0,96,W,2,"#c8283c");P(0,102,W,2,"#e8e2d6");
+  // altar shelf, Grandpa Chai's photo, mongkol on its stand, phan of flowers, two candles
+  const ax=246;P(ax-58,58,116,6,"#7a4a26");P(ax-54,64,4,32,"#5a3420");P(ax+50,64,4,32,"#5a3420");P(ax-60,56,120,3,"#a0683a");
+  P(ax-13,22,26,32,"#c9a14a");P(ax-11,24,22,28,"#3a2c26");P(ax-6,30,12,12,"#b97d55");P(ax-7,28,14,4,"#c9ced8");P(ax-5,42,10,8,"#c8283c");
+  const glowT=Math.min(1,t/T.t1);
+  [[-34,0],[34,0]].forEach(([dx])=>{P(ax+dx-2,44,4,12,"#f4ead2");if(t>200){const fl=Math.floor(t/120)%2;ctx.globalAlpha=glowT;P(ax+dx-1,40-fl,2,4,"#ffd36b");P(ax+dx,38-fl,1,2,"#fff3c4");ctx.globalAlpha=glowT*.18;P(ax+dx-10,30,20,20,"#ffcf6b");ctx.globalAlpha=1;}});
+  P(ax-24,50,14,6,"#e0b41b");P(ax-22,44,10,6,"#f4f1ea");P(ax-20,42,6,3,"#ffe27a");P(ax+12,50,14,6,"#e0b41b");P(ax+13,44,12,6,"#f2a640");P(ax+15,42,8,3,"#ff8a3a");
+  P(ax-4,50,8,6,"#7a4a26");P(ax-3,47,6,3,"#e8e2d6");P(ax-2,46,4,1,"#c8283c");
+  // incense: three sticks, smoke curls upward once lit
+  for(let i=0;i<3;i++){P(ax-2+i*2,48-6,1,6,"#8a5a32");if(t>600){for(let k=0;k<5;k++){const ph=((t/1400)+k/5+i*.13)%1;ctx.globalAlpha=(1-ph)*.45*glowT;P(ax-2+i*2+Math.sin(ph*6+i+t/500)*3,40-ph*34,2,2,"#d9d4e6");}ctx.globalAlpha=1;}}
+  // fighters walk in, kneel on the mat facing the altar, bow three times; Kru Daeng walks the row with the mongkol
+  const ids=R.ids.slice(0,6),n=ids.length,fy=H*.96,fh=H*.62,matY=H*.9,span=Math.min(.52,(n-1)*.2),pos=i=>W*(.14+(n>1?i*span/(n-1):0)+(n<4?.12:0));
+  const crownAt=i=>T.t3+i*1100;
+  ids.forEach((id,i)=>{const f=G.F[id];if(!f)return;const cx=pos(i),k=Math.min(1,Math.max(0,(t-T.t1)/(T.t2-T.t1))),face=1;
+    let x=cx,row="idle",h=fh,y=fy,bow=0;const kneel=t>=T.t2;
+    if(!kneel){x=-30+(cx+30)*k;row=k<1?"walk":"idle";}
+    if(kneel&&t<T.t3){const ph=((t-T.t2)%1000)/1000;bow=ph<.4?ph/.4:ph<.7?1:1-(ph-.7)/.3;}
+    const foot=kneel?y+h*.16:y;ctx.save();
+    if(bow>0){const hx=x*S,hy=(foot-h*.42)*S;ctx.translate(hx,hy);ctx.rotate(face*bow*.5);ctx.translate(-hx,-hy);}
+    drawFrame(ctx,sheetFor(f),ROW[row],Math.floor(t/(row==="idle"?260:150))%4,x*S,foot*S,h*S,face<0);ctx.restore();
+    if(kneel&&t>crownAt(i)+600){const hy=foot-h*.8;P(x-7,hy,14,2,"#f4f1ea");P(x-7,hy+1,14,1,"#c8283c");P(x-1,hy-2,2,3,"#f4f1ea");}
+    if(t>crownAt(i)&&t<crownAt(i)+1100&&R.krob.includes(id)){ctx.save();ctx.font=`700 ${7*S}px "Chakra Petch","IBM Plex Sans Thai",sans-serif`;ctx.fillStyle="#ffd36b";ctx.textAlign="center";ctx.fillText("ครอบครู",x*S,(foot-h-6)*S);ctx.restore();}});
+  if(t>=T.t3&&t<T.t4+600){const i=Math.min(n-1,Math.floor((t-T.t3)/1100)),bob=Math.floor(t/300)%2,sc=1.7;
+    ctChib(ctx,S,COACH_LOOK,"coachwk",pos(i)+14,matY-32*sc+3,sc,true,bob);}
+  // the mat hides the folded legs
+  P(0,matY,W,H-matY,"#7a2a2e");P(0,matY,W,2,"#a8443e");for(let i=0;i<16;i++)P(i*20+4,matY+6,12,1,"rgba(255,220,160,.25)");
+  if(t>=T.t3&&t<T.t4){const i=Math.min(n-1,Math.floor((t-T.t3)/1100));if((t-T.t3)%1100<550)ctBubble(ctx,S,pos(i)+34,matY-58,"ฟู่…",false);}
+  // flower petals drift over the end
+  if(t>T.t4-300)for(let i=0;i<18;i++){const ph=((t/2200)+i/18)%1;P((i*53+Math.sin(t/400+i)*6)%W,ph*H,2,2,["#ffe27a","#f4f1ea","#f2a640"][i%3]);}
+  // warm vignette
+  ctx.globalAlpha=.22;P(0,0,W,10,"#000");P(0,H-10,W,10,"#000");ctx.globalAlpha=1;}
+function mountWaiKhru(){document.querySelectorAll("canvas[data-waikhru]").forEach(cv=>{const x=cv.getContext("2d");
+  LOOPS.add(t=>{if(!cv.isConnected||!G)return;const R=(G.waikhru||{})[G.season||1];if(!R)return;let tt=t-(UI.wkT0||t);if(UI.wkSkip)tt+=60000;x.clearRect(0,0,cv.width,cv.height);drawWaiKhru(x,G,tt,R);});});}
 function mountContest(){document.querySelectorAll("canvas[data-contest]").forEach(cv=>{const x=cv.getContext("2d"),k=cv.dataset.contest;
   LOOPS.add(t=>{if(!cv.isConnected||!G)return;const R=(G.contests||{})[G.season||1];if(!R)return;let tt=t-(UI.ctT0||t);if(UI.ctSkip)tt+=60000;x.clearRect(0,0,cv.width,cv.height);
     if(k==="walk")drawContestWalk(x,G,tt,R);else drawContestAward(x,G,tt,R);});});}

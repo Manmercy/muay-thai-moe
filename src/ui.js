@@ -1,5 +1,5 @@
 // ================= MUAY THAI MOE v1.3 — UI =================
-const VERSION="1.89.9";
+const VERSION="1.89.10";
 const CUR_LANG=(typeof window!=="undefined"&&window.LANG)||"th";
 const TH_LABEL=String.fromCharCode(3652,3607,3618);
 function langSwitch(cls){return `<div class="langsw ${cls||""}" role="group" aria-label="Language">${[["th",TH_LABEL],["en","EN"]].map(([k,l])=>`<button class="lsb ${CUR_LANG===k?"on":""}" data-act="setlang" data-v="${k}" aria-pressed="${CUR_LANG===k}">${l}</button>`).join("")}</div>`;}
@@ -1012,6 +1012,7 @@ function modalHTML(){const m=UI.modal;let body="",foot=true;
   if(m.type==="petname"){const p=(G.pets||[])[m.i];if(!p){UI.modal=null;return "";}body=`<h2>ตั้งชื่อ${esc(PETS[p.k].name)}</h2><div class="petnm"><img class="peti" src="${petIcon(p.k)}" alt=""><input id="petname" maxlength="12" value="${esc(p.name)}" autocomplete="off"></div><p class="meta">ชื่อนี้จะโผล่ในฉากต่าง ๆ ของค่าย</p><button class="btn primary" id="petnamebtn" data-act="petnamesave" data-v="${m.i}">ตั้งชื่อ</button>`;}
   if(m.type==="card"){body=cardInfoHTML(m.id);foot=false;}
   if(m.type==="contest"){body=contestHTML();foot=false;}
+  if(m.type==="waikhru"){body=waiKhruHTML();foot=false;}
   if(m.type==="gbox"){body=gboxHTML();foot=false;}
   if(m.type==="album"){const byC={};for(const id in CARDS)(byC[CARDS[id].c]=byC[CARDS[id].c]||[]).push(id);const own=G.cards||{};
     body=`<h2>อัลบั้มการ์ด</h2><p class="meta">เก็บได้ ${Object.keys(own).length}/${Object.keys(CARDS).length} ใบ · แตะการ์ดเพื่อดูรายละเอียด</p>
@@ -1159,7 +1160,21 @@ function afterWeekFlow(){playHonorQueue(afterWeekFlowMain);}
 function afterWeekFlowMain(){if(typeof cardCheck==="function"){const got=cardCheck(G);if(got.length){G.cardPend=(G.cardPend||[]).concat(got);}}if(typeof mailWeekly==="function"&&!G.ended)mailWeekly(G);if(typeof chatWeekly==="function"&&!G.ended)chatWeekly(G);runEvents(played=>{const fin=()=>{if(G.ended){startEnding();return;}
     if(typeof cardCheck==="function"){const g2=cardCheck(G);if(g2.length)G.cardPend=(G.cardPend||[]).concat(g2);}relTierCheck();if((G.newCerts||[]).length){const n=G.newCerts.map(k=>CAMP_AWARDS[k]?CAMP_AWARDS[k].name:k);G.newCerts=[];setTimeout(()=>toast(`📜 ได้รับเกียรติบัตร: ${n.join(", ")} · ดูได้ที่ห้องถ้วยรางวัล`),600);}if(typeof OUTFITS!=="undefined"){G.outSeen=G.outSeen||{};const nu=Object.keys(OUTFITS).filter(k=>k!=="base"&&k!=="heart"&&!G.outSeen[k]&&outfitOk(G,null,k));nu.forEach(k=>G.outSeen[k]=1);if(nu.length)setTimeout(()=>toast(`ปลดล็อกชุดใหม่: ${nu.map(k=>OUTFITS[k].name).join(", ")} · เปลี่ยนได้ที่โปรไฟล์นักมวย แท็บ "ชุด"`),400);}if(UI.relUp&&UI.relUp.length){const m=UI.relUp.join(" / ");UI.relUp=[];setTimeout(()=>toast("♥ "+m),300);}
     if(G.levelUps&&G.levelUps.length){const ids=[...new Set(G.levelUps)];G.levelUps=[];AU.sfx("level");UI.modal={type:"levelup",ids};}else if((G.cardPend||[]).length){AU.sfx&&AU.sfx("level");UI.modal={type:"cardnew"};}render();};
-    const go=()=>coachBackScene(()=>aftermathScene(()=>tiredScene(()=>rinScene(()=>contestScene(fin)))));if(played)go();else weeklyExtra(go);});}
+    const go=()=>coachBackScene(()=>aftermathScene(()=>tiredScene(()=>rinScene(()=>contestScene(()=>waiKhruYear(fin))))));if(played)go();else weeklyExtra(go);});}
+// v1.90: week 37 — the camp's annual wai kru; pick the offering, then watch the rite
+function waiKhruYear(done){const S=G.season||1;if(G.ended||G.week<WAIKHRU_WEEK||G.week>48||(G.waikhru||{})[S]||!roster(G).length){done();return;}
+  UI.wkDone=done;UI.wkSkip=false;UI.modal={type:"waikhru",ph:"pick"};AU.startMusic&&AU.startMusic("waikhru");render();}
+function waiKhruHTML(){const S=G.season||1,R=(G.waikhru||{})[S],first=!Object.keys(G.waikhru||{}).length;
+  if(UI.modal.ph==="pick")return `<h2>ไหว้ครูประจำปี ${S}</h2>
+   <div class="ctip"><img src="${faceSrc("coach")}" alt=""><span>${first?"ค่ายศิริชัยไม่ได้จัดไหว้ครูมาสิบปีแล้ว ปีนี้ครูอยากให้เด็ก ๆ ได้กราบปู่ชัยกับครูบาอาจารย์ให้ถูกต้อง":"ถึงวันไหว้ครูอีกปีแล้ว ใครเข้าค่ายใหม่ ปีนี้ครูจะครอบครูรับเป็นศิษย์"} จะจัดแบบไหนดี</span></div>
+   <div class="wkset">${Object.entries(WAI_SET).map(([k,W])=>`<button class="wkopt" data-act="waipick" data-v="${k}" ${G.cash<W.cost?"disabled":""}><b>${W.n}</b><small>${W.d}</small><span class="meta">${W.cost?fmt(W.cost):"ไม่มีค่าใช้จ่าย"} · กำลังใจทุกคน +${W.mor}${W.bless?` · พรครู ${W.bless} สัปดาห์ (บาดเจ็บจากการซ้อมน้อยลงครึ่งหนึ่ง)`:""}${W.rep?" · ชื่อเสียง +"+W.rep:""}</span></button>`).join("")}</div>`;
+  if(!R)return "";const now=UI.wkSkip?" now":"",T=WK_TL(R.ids.length),nm=id=>esc(G.F[id]?G.F[id].name:id);
+  const rows=[["จุดธูปเทียนบูชาครู","ปี่ชวาเป่าเพลงไหว้ครูเบา ๆ",T.t1],["ทุกคนคุกเข่า กราบครูสามครั้ง",R.ids.map(nm).join(" · "),T.t3],
+    [R.krob.length?"ครอบครู รับเป็นศิษย์ค่ายศิริชัย":"ครูแดงสวมมงคล เป่ากระหม่อมทีละคน",R.krob.length?R.krob.map(nm).join(" · "):"ทุกคนเป็นศิษย์ค่ายนี้แล้ว",T.t4-400],
+    ["พรครู",`กำลังใจทุกคน +${R.mor}${R.bless?` · บาดเจ็บจากการซ้อมน้อยลงครึ่งหนึ่ง ${R.bless} สัปดาห์`:""}`,T.t4+200]];
+  return `<h2>ไหว้ครูประจำปี ${S}</h2><div class="cfxwrap ctwrap" data-act="waiskip" role="button" aria-label="ข้ามฉาก"><canvas class="campcv" width="640" height="360" data-waikhru="1"></canvas></div>
+   <div class="ctscore">${rows.map(([a,b,d])=>`<div class="ctrow wkrow${now}" style="--d:${d}ms"><span>${a}<small>${b}</small></span></div>`).join("")}</div>
+   <div class="mfoot"><button class="btn primary wkgo${now}" style="${"--d:"+T.end+"ms"}" data-act="waidone">ไปต่อ</button></div>`;}
 // v1.86: week 30 — the district chief judges the camp, then the results night at the district office
 function contestScene(done){const S=G.season||1;if(G.ended||G.week<CONTEST_WEEK||G.week>40||(G.contests||{})[S]){done();return;}
   runContest(G);save();UI.contestDone=done;UI.ctSkip=false;UI.ctT0=performance.now();UI.modal={type:"contest",ph:"walk"};AU.sfx&&AU.sfx("bell");render();}
@@ -1609,6 +1624,9 @@ const ACT={
   petren:d=>{UI.modal={type:"petname",i:+d.v};render();setTimeout(()=>{const el=document.getElementById("petname");if(el){el.focus();el.select();}},60);},
   gacha:()=>{const r=gachaPull(G);if(!r)return;AU.sfx&&AU.sfx(CARDS[r.id].r==="SSR"||CARDS[r.id].r==="SR"?"level":"ui");save();UI.modal={type:"gacha",res:r};render();},
   album:()=>{const from=UI.modal&&UI.modal.type;if(from!=="card"&&from!=="gbox")UI.albY=0;UI.modal={type:"album"};render();albRestore();},
+  waipick:d=>{const R=runWaiKhru(G,d.v);if(!R)return;save();UI.wkSkip=false;UI.wkT0=performance.now();UI.modal={type:"waikhru",ph:"rite"};AU.sfx&&AU.sfx("bell");render();},
+  waiskip:()=>{UI.wkSkip=true;document.querySelectorAll(".wkrow,.wkgo").forEach(e=>e.classList.add("now"));},
+  waidone:()=>{UI.modal=null;UI.wkSkip=false;AU.startMusic&&AU.startMusic("hub");const d=UI.wkDone;UI.wkDone=null;save();if(d)d();else render();},
   contestskip:()=>{UI.ctSkip=true;document.querySelectorAll(".ctrow").forEach(e=>e.classList.add("now"));},
   contestaward:()=>{const R=(G.contests||{})[G.season||1];UI.ctSkip=false;UI.ctT0=performance.now();UI.modal={type:"contest",ph:"award"};render();
     if(R&&R.rank===1){setTimeout(()=>{if(UI.modal&&UI.modal.type==="contest"&&UI.modal.ph==="award"&&!UI.ctSkip)AU.sfx&&AU.sfx("champ");},6800);for(let i=0;i<6;i++)setTimeout(()=>{if(UI.modal&&UI.modal.type==="contest"&&UI.modal.ph==="award")AU.sfx&&AU.sfx("pop");},7200+i*1150);}
@@ -1664,7 +1682,7 @@ const ACT={
   skselx:()=>{UI.skSel=null;render();},
   skpopbg:(d,e)=>{if(e.target.classList.contains("skpop-ov")){UI.skSel=null;render();}},
   newsok:()=>{G.newsSeen=PATCH.id;UI.modal=null;save();render();},
-  closeModal:()=>{const m=UI.modal;if(m&&m.type==="lotto"&&typeof ACT.lottoskip==="function"){ACT.lottoskip();return;} /* closing the ticket sheet skips the draw */if(m&&m.back==="album"&&G){ACT.album();return;}if(m&&m.type==="contest"){ACT.contestdone();return;}if(m&&m.type==="whatsnew"&&G){G.newsSeen=PATCH.id;save();}UI.modal=null;render();if(m&&m.after)m.after();},
+  closeModal:()=>{const m=UI.modal;if(m&&m.type==="waikhru"){if(m.ph==="pick")runWaiKhru(G,"s");ACT.waidone();return;}if(m&&m.type==="lotto"&&typeof ACT.lottoskip==="function"){ACT.lottoskip();return;} /* closing the ticket sheet skips the draw */if(m&&m.back==="album"&&G){ACT.album();return;}if(m&&m.type==="contest"){ACT.contestdone();return;}if(m&&m.type==="whatsnew"&&G){G.newsSeen=PATCH.id;save();}UI.modal=null;render();if(m&&m.after)m.after();},
   trait:d=>{const f=G.F[d.id],L=TRAITS[d.id];if(!f||!L||f.camp!=="player")return;const t=L.find(x=>x.id===d.v);if(!t||traitOf(f)===t.id)return;f.trait=t.id;save();render();toast(`${f.name}ใช้พลังแฝง "${t.name}"`);},
   gopen:d=>{GB.box=d.v==="loy"?"loy":"n";if(GB.box==="loy"&&!loyFest()){toast(loySoon()?"ตู้ลอยกระทงเปิด 18 พ.ย. เวลา 00:00":"ตู้ลอยกระทงปิดแล้ว ไว้เจอกันเทศกาลหน้า");return;}const fromAlb=UI.modal&&UI.modal.type==="album";if(fromAlb)albKeep();GB.st=null;GB.ps=[];UI.gq=false;UI.modal={type:"gbox",back:fromAlb?"album":null};render();gbPreload();},
   gpull:()=>{if(GB.st)return;const cost=gbCost();if((G.dust||0)<cost){AU.sfx("ui");toast(`เศษดาวไม่พอ ต้องใช้ ${cost}✦ · ได้จากชนะไฟต์ การ์ดใหม่ และย่อยใบซ้ำ`);return;}

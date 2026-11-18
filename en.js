@@ -498,7 +498,7 @@ function trainWeek(G,f,rng){
   {const nb=G.bookings.filter(b=>b.a===f.id&&b.week>=G.week).sort((x,y)=>x.week-y.week)[0];const sc=!!(nb&&G.scoutAbs&&G.scoutAbs[nb.b]!=null&&gameWeek(G)-G.scoutAbs[nb.b]<=8);const hit=!!(nb&&sc&&f.plan.preset===counterPreset(G.F[nb.b]));
    // v1.14: counter work done before fight week carries into fight night if that week is spent on fight prep
    f.counterPrep=hit||!!(nb&&nb.week===G.week&&f.plan.preset==="prep"&&f.counterPrep);}
-  if(f.fatigue>70&&rng()<(f.fatigue-70)/110*(1-G.fac.kitchen*.2)){f.injury=2+Math.floor(rng()*2);G.log.push(`⚠ ${f.name} picked up a minor training injury (rest ${f.injury} wk)`);
+  if(f.fatigue>70&&rng()<(f.fatigue-70)/110*(1-G.fac.kitchen*.2)*(G.waiBless&&gameWeek(G)<=G.waiBless?.5:1)){f.injury=2+Math.floor(rng()*2);G.log.push(`⚠ ${f.name} picked up a minor training injury (rest ${f.injury} wk)`);
     if(f.plan.intensity==="heavy")f.trust=clamp(f.trust-4,0,100);}
   if(f.fatigue>80&&f.plan.intensity==="heavy")f.trust=clamp(f.trust-2,0,100);
   f.morale+=(60-f.morale)*.08;
@@ -835,6 +835,12 @@ const COLOR_NAME={red:"Red",green:"Green",blue:"Blue",pink:"Pink",white:"White",
 const COLOR_HEX={red:"#d23246",green:"#3f9a4f",blue:"#2c5fb3",pink:"#e07aa0",white:"#f2f2f2",orange:"#e8892a",yellow:"#e0b41b",gold:"#f2c14e",brown:"#8a5a32",purple:"#7a3fc0",black:"#24202c"};
 const decorColor=(slot,key)=>(DECOR_COL[slot]||{})[key]||null;
 function yearColor(G,season){const s=season||G.season||1;return YEAR_COLORS[(stableHash("ycol"+(G.seed||1))+s*3)%YEAR_COLORS.length];}
+// v1.90: annual wai kru (week 37 ≈ Muay Thai Day, 6 Feb) — the whole camp pays respect to the teachers; new fighters are taken in as students (khrop khru)
+const WAIKHRU_WEEK=37,WAI_SET={s:{n:"Simple set",d:"Flowers, incense and candles from the morning market",cost:0,mor:4,bless:0},m:{n:"Standard set",d:"Jasmine tray, white cloth, an envelope for the teacher",cost:2500,mor:7,bless:4},l:{n:"Full ceremony",d:"Baisri offering, a live pi-and-drum band, a meal for the whole subdistrict",cost:7000,mor:10,bless:8,rep:1}};
+function runWaiKhru(G,k){const S=G.season||1;G.waikhru=G.waikhru||{};if(G.waikhru[S])return G.waikhru[S];const W=WAI_SET[k]||WAI_SET.s;if(G.cash<W.cost)return null;G.cash-=W.cost;
+  const R=roster(G),krob=R.filter(f=>!f.krob&&f.id!=="kati").map(f=>f.id);R.forEach(f=>{f.morale=clamp(f.morale+W.mor,0,100);f.trust=clamp((f.trust||0)+(W.bless?2:1),0,100);f.krob=f.krob||S;});
+  if(W.bless)G.waiBless=gameWeek(G)+W.bless;if(W.rep)G.rep+=W.rep;
+  return G.waikhru[S]={k,ids:R.map(f=>f.id),krob,mor:W.mor,bless:W.bless,first:!Object.keys(G.waikhru).length};}
 const CONTEST_WEEK=30,BEAUTY_RARITY={N:4,R:6,SR:7,SSR:8,SS:9},CONTEST_PRIZE=[30000,15000,8000];
 const BEAUTY_AREAS=[["gate","Entrance gate"],["bags","Punching bags"],["tree","Trees"],["ring","Boxing ring"],["vehicle","Camp vehicle"],["track","Track"],["clean","Cleanliness"]];
 function beautyAreas(G){const yc=yearColor(G).k;return BEAUTY_AREAS.map(([k,n])=>{
@@ -4722,7 +4728,7 @@ function mountCanvases(){
     LOOPS.add(t=>{if(!cv.isConnected)return;const look=key==="coach"?COACH_LOOK:key==="player"?(G?G.avatar:UI.creator):UI.creator;if(!look)return;
       x.clearRect(0,0,cv.width,cv.height);x.imageSmoothingEnabled=false;const fr={dy:Math.floor(t/400)%2,blink:Math.floor(t/150)%24===0};
       const c=CHIBI.canvasFor(look,fr);const s=Math.floor(Math.min(cv.width/24,cv.height/32));x.drawImage(c,(cv.width-24*s)/2,cv.height-32*s,24*s,32*s);});});
-  if(typeof mountCampFx==="function")mountCampFx();if(typeof mountContest==="function")mountContest();if(typeof mountGbox==="function")mountGbox();
+  if(typeof mountCampFx==="function")mountCampFx();if(typeof mountContest==="function")mountContest();if(typeof mountWaiKhru==="function")mountWaiKhru();if(typeof mountGbox==="function")mountGbox();
   document.querySelectorAll("canvas[data-drill]").forEach(cv=>{const x=cv.getContext("2d");const id=cv.dataset.drill;
     LOOPS.add(t=>{if(!cv.isConnected||!G)return;const f=G.F[id],D=UI.drill;if(!f)return;const W=cv.width,H=cv.height;x.clearRect(0,0,W,H);x.imageSmoothingEnabled=false;
       const dt=D&&D.hitT?t-D.hitT:9999,hit=dt<600;const row=hit?(DRILL_ROW[f.plan.preset]||"punch"):"guard";const fr=hit?Math.min(3,Math.floor(dt/110)):Math.floor(t/260)%4;
@@ -4964,6 +4970,45 @@ function drawContestAward(ctx,G,t,R){const S=2,P=(x,y,w,h,c)=>{ctx.fillStyle=c;c
     for(let b=0;b<5;b++){const per=1150,tt=(t-6800+b*230)%per,cyc=Math.floor((t-6800+b*230)/per),rr=mulberry32(b*97+cyc*13),cx=30+rr()*260,cy=14+rr()*50,col=["#ffd36b","#ff7b8a","#8ad7ff","#9dff8a","#f2a0ff"][(b+cyc)%5];
       if(tt<300){P(cx,cy+60-tt/5,1,3,"#fff3c4");}else{const k=(tt-300)/(per-300);ctx.globalAlpha=Math.max(0,1-k);for(let s=0;s<12;s++){const a=s/12*Math.PI*2;P(cx+Math.cos(a)*k*26,cy+Math.sin(a)*k*20+k*k*8,2,2,col);}ctx.globalAlpha=1;}}
     for(let i=0;i<24;i++){const ph=((t/1600)+i/24)%1;P((i*41+Math.sin(t/300+i)*6)%320,ph*180,2,3,["#ffd36b","#ff7b8a","#8ad7ff","#9dff8a"][i%4]);}}}
+// ===== v1.90: annual wai kru — altar with Grandpa Chai's photo, candles and incense; the camp kneels, bows three times, Kru Daeng crowns each fighter =====
+const WK_TL=n=>{const t1=1500,t2=t1+1500,t3=t2+3*1000,t4=t3+Math.max(1,n)*1100;return {t1,t2,t3,t4,end:t4+900};};
+function drawWaiKhru(ctx,G,t,R){const S=2,W=320,H=180,P=(x,y,w,h,c)=>{ctx.fillStyle=c;ctx.fillRect(Math.round(x*S),Math.round(y*S),Math.max(1,Math.round(w*S)),Math.max(1,Math.round(h*S)));};
+  ctx.imageSmoothingEnabled=false;const T=WK_TL(R.ids.length);
+  // hall: warm wall, wooden floor, the ring rope behind
+  P(0,0,W,H,"#2a1a22");for(let i=0;i<8;i++)P(i*40,0,38,112,i%2?"#3a2530":"#36222c");P(0,112,W,68,"#5a3a26");for(let i=0;i<12;i++)P(0,116+i*6,W,1,"rgba(0,0,0,.18)");
+  P(0,96,W,2,"#c8283c");P(0,102,W,2,"#e8e2d6");
+  // altar shelf, Grandpa Chai's photo, mongkol on its stand, phan of flowers, two candles
+  const ax=246;P(ax-58,58,116,6,"#7a4a26");P(ax-54,64,4,32,"#5a3420");P(ax+50,64,4,32,"#5a3420");P(ax-60,56,120,3,"#a0683a");
+  P(ax-13,22,26,32,"#c9a14a");P(ax-11,24,22,28,"#3a2c26");P(ax-6,30,12,12,"#b97d55");P(ax-7,28,14,4,"#c9ced8");P(ax-5,42,10,8,"#c8283c");
+  const glowT=Math.min(1,t/T.t1);
+  [[-34,0],[34,0]].forEach(([dx])=>{P(ax+dx-2,44,4,12,"#f4ead2");if(t>200){const fl=Math.floor(t/120)%2;ctx.globalAlpha=glowT;P(ax+dx-1,40-fl,2,4,"#ffd36b");P(ax+dx,38-fl,1,2,"#fff3c4");ctx.globalAlpha=glowT*.18;P(ax+dx-10,30,20,20,"#ffcf6b");ctx.globalAlpha=1;}});
+  P(ax-24,50,14,6,"#e0b41b");P(ax-22,44,10,6,"#f4f1ea");P(ax-20,42,6,3,"#ffe27a");P(ax+12,50,14,6,"#e0b41b");P(ax+13,44,12,6,"#f2a640");P(ax+15,42,8,3,"#ff8a3a");
+  P(ax-4,50,8,6,"#7a4a26");P(ax-3,47,6,3,"#e8e2d6");P(ax-2,46,4,1,"#c8283c");
+  // incense: three sticks, smoke curls upward once lit
+  for(let i=0;i<3;i++){P(ax-2+i*2,48-6,1,6,"#8a5a32");if(t>600){for(let k=0;k<5;k++){const ph=((t/1400)+k/5+i*.13)%1;ctx.globalAlpha=(1-ph)*.45*glowT;P(ax-2+i*2+Math.sin(ph*6+i+t/500)*3,40-ph*34,2,2,"#d9d4e6");}ctx.globalAlpha=1;}}
+  // fighters walk in, kneel on the mat facing the altar, bow three times; Kru Daeng walks the row with the mongkol
+  const ids=R.ids.slice(0,6),n=ids.length,fy=H*.96,fh=H*.62,matY=H*.9,span=Math.min(.52,(n-1)*.2),pos=i=>W*(.14+(n>1?i*span/(n-1):0)+(n<4?.12:0));
+  const crownAt=i=>T.t3+i*1100;
+  ids.forEach((id,i)=>{const f=G.F[id];if(!f)return;const cx=pos(i),k=Math.min(1,Math.max(0,(t-T.t1)/(T.t2-T.t1))),face=1;
+    let x=cx,row="idle",h=fh,y=fy,bow=0;const kneel=t>=T.t2;
+    if(!kneel){x=-30+(cx+30)*k;row=k<1?"walk":"idle";}
+    if(kneel&&t<T.t3){const ph=((t-T.t2)%1000)/1000;bow=ph<.4?ph/.4:ph<.7?1:1-(ph-.7)/.3;}
+    const foot=kneel?y+h*.16:y;ctx.save();
+    if(bow>0){const hx=x*S,hy=(foot-h*.42)*S;ctx.translate(hx,hy);ctx.rotate(face*bow*.5);ctx.translate(-hx,-hy);}
+    drawFrame(ctx,sheetFor(f),ROW[row],Math.floor(t/(row==="idle"?260:150))%4,x*S,foot*S,h*S,face<0);ctx.restore();
+    if(kneel&&t>crownAt(i)+600){const hy=foot-h*.8;P(x-7,hy,14,2,"#f4f1ea");P(x-7,hy+1,14,1,"#c8283c");P(x-1,hy-2,2,3,"#f4f1ea");}
+    if(t>crownAt(i)&&t<crownAt(i)+1100&&R.krob.includes(id)){ctx.save();ctx.font=`700 ${7*S}px "Chakra Petch","IBM Plex Sans Thai",sans-serif`;ctx.fillStyle="#ffd36b";ctx.textAlign="center";ctx.fillText("Khrop khru",x*S,(foot-h-6)*S);ctx.restore();}});
+  if(t>=T.t3&&t<T.t4+600){const i=Math.min(n-1,Math.floor((t-T.t3)/1100)),bob=Math.floor(t/300)%2,sc=1.7;
+    ctChib(ctx,S,COACH_LOOK,"coachwk",pos(i)+14,matY-32*sc+3,sc,true,bob);}
+  // the mat hides the folded legs
+  P(0,matY,W,H-matY,"#7a2a2e");P(0,matY,W,2,"#a8443e");for(let i=0;i<16;i++)P(i*20+4,matY+6,12,1,"rgba(255,220,160,.25)");
+  if(t>=T.t3&&t<T.t4){const i=Math.min(n-1,Math.floor((t-T.t3)/1100));if((t-T.t3)%1100<550)ctBubble(ctx,S,pos(i)+34,matY-58,"Phoo…",false);}
+  // flower petals drift over the end
+  if(t>T.t4-300)for(let i=0;i<18;i++){const ph=((t/2200)+i/18)%1;P((i*53+Math.sin(t/400+i)*6)%W,ph*H,2,2,["#ffe27a","#f4f1ea","#f2a640"][i%3]);}
+  // warm vignette
+  ctx.globalAlpha=.22;P(0,0,W,10,"#000");P(0,H-10,W,10,"#000");ctx.globalAlpha=1;}
+function mountWaiKhru(){document.querySelectorAll("canvas[data-waikhru]").forEach(cv=>{const x=cv.getContext("2d");
+  LOOPS.add(t=>{if(!cv.isConnected||!G)return;const R=(G.waikhru||{})[G.season||1];if(!R)return;let tt=t-(UI.wkT0||t);if(UI.wkSkip)tt+=60000;x.clearRect(0,0,cv.width,cv.height);drawWaiKhru(x,G,tt,R);});});}
 function mountContest(){document.querySelectorAll("canvas[data-contest]").forEach(cv=>{const x=cv.getContext("2d"),k=cv.dataset.contest;
   LOOPS.add(t=>{if(!cv.isConnected||!G)return;const R=(G.contests||{})[G.season||1];if(!R)return;let tt=t-(UI.ctT0||t);if(UI.ctSkip)tt+=60000;x.clearRect(0,0,cv.width,cv.height);
     if(k==="walk")drawContestWalk(x,G,tt,R);else drawContestAward(x,G,tt,R);});});}
@@ -5179,7 +5224,7 @@ AU.gsfx=function(kind,a){if(!this.init()||this.muted||!SETTINGS.sfx)return;const
   if(kind==="shimmer")for(let i=0;i<6;i++)T(i*.05,{f:1400+Math.random()*1400,type:"sine",dur:.12,peak:.06});};
 
 // ================= MUAY THAI MOE v1.3 — UI =================
-const VERSION="1.89.9";
+const VERSION="1.89.10";
 const CUR_LANG=(typeof window!=="undefined"&&window.LANG)||"th";
 const TH_LABEL=String.fromCharCode(3652,3607,3618);
 function langSwitch(cls){return `<div class="langsw ${cls||""}" role="group" aria-label="Language">${[["th",TH_LABEL],["en","EN"]].map(([k,l])=>`<button class="lsb ${CUR_LANG===k?"on":""}" data-act="setlang" data-v="${k}" aria-pressed="${CUR_LANG===k}">${l}</button>`).join("")}</div>`;}
@@ -6192,6 +6237,7 @@ function modalHTML(){const m=UI.modal;let body="",foot=true;
   if(m.type==="petname"){const p=(G.pets||[])[m.i];if(!p){UI.modal=null;return "";}body=`<h2>Name the ${esc(PETS[p.k].name)}</h2><div class="petnm"><img class="peti" src="${petIcon(p.k)}" alt=""><input id="petname" maxlength="12" value="${esc(p.name)}" autocomplete="off"></div><p class="meta">This name shows up in camp scenes</p><button class="btn primary" id="petnamebtn" data-act="petnamesave" data-v="${m.i}">Name</button>`;}
   if(m.type==="card"){body=cardInfoHTML(m.id);foot=false;}
   if(m.type==="contest"){body=contestHTML();foot=false;}
+  if(m.type==="waikhru"){body=waiKhruHTML();foot=false;}
   if(m.type==="gbox"){body=gboxHTML();foot=false;}
   if(m.type==="album"){const byC={};for(const id in CARDS)(byC[CARDS[id].c]=byC[CARDS[id].c]||[]).push(id);const own=G.cards||{};
     body=`<h2>Card album</h2><p class="meta">Collected ${Object.keys(own).length}/${Object.keys(CARDS).length} · tap a card for details</p>
@@ -6339,7 +6385,21 @@ function afterWeekFlow(){playHonorQueue(afterWeekFlowMain);}
 function afterWeekFlowMain(){if(typeof cardCheck==="function"){const got=cardCheck(G);if(got.length){G.cardPend=(G.cardPend||[]).concat(got);}}if(typeof mailWeekly==="function"&&!G.ended)mailWeekly(G);if(typeof chatWeekly==="function"&&!G.ended)chatWeekly(G);runEvents(played=>{const fin=()=>{if(G.ended){startEnding();return;}
     if(typeof cardCheck==="function"){const g2=cardCheck(G);if(g2.length)G.cardPend=(G.cardPend||[]).concat(g2);}relTierCheck();if((G.newCerts||[]).length){const n=G.newCerts.map(k=>CAMP_AWARDS[k]?CAMP_AWARDS[k].name:k);G.newCerts=[];setTimeout(()=>toast(`📜 Certificate received: ${n.join(", ")} · see them in the Trophy Room`),600);}if(typeof OUTFITS!=="undefined"){G.outSeen=G.outSeen||{};const nu=Object.keys(OUTFITS).filter(k=>k!=="base"&&k!=="heart"&&!G.outSeen[k]&&outfitOk(G,null,k));nu.forEach(k=>G.outSeen[k]=1);if(nu.length)setTimeout(()=>toast(`New outfit unlocked: ${nu.map(k=>OUTFITS[k].name).join(", ")} · change it in the fighter profile, "Outfit" tab`),400);}if(UI.relUp&&UI.relUp.length){const m=UI.relUp.join(" / ");UI.relUp=[];setTimeout(()=>toast("♥ "+m),300);}
     if(G.levelUps&&G.levelUps.length){const ids=[...new Set(G.levelUps)];G.levelUps=[];AU.sfx("level");UI.modal={type:"levelup",ids};}else if((G.cardPend||[]).length){AU.sfx&&AU.sfx("level");UI.modal={type:"cardnew"};}render();};
-    const go=()=>coachBackScene(()=>aftermathScene(()=>tiredScene(()=>rinScene(()=>contestScene(fin)))));if(played)go();else weeklyExtra(go);});}
+    const go=()=>coachBackScene(()=>aftermathScene(()=>tiredScene(()=>rinScene(()=>contestScene(()=>waiKhruYear(fin))))));if(played)go();else weeklyExtra(go);});}
+// v1.90: week 37 — the camp's annual wai kru; pick the offering, then watch the rite
+function waiKhruYear(done){const S=G.season||1;if(G.ended||G.week<WAIKHRU_WEEK||G.week>48||(G.waikhru||{})[S]||!roster(G).length){done();return;}
+  UI.wkDone=done;UI.wkSkip=false;UI.modal={type:"waikhru",ph:"pick"};AU.startMusic&&AU.startMusic("waikhru");render();}
+function waiKhruHTML(){const S=G.season||1,R=(G.waikhru||{})[S],first=!Object.keys(G.waikhru||{}).length;
+  if(UI.modal.ph==="pick")return `<h2>Annual wai kru · Year ${S}</h2>
+   <div class="ctip"><img src="${faceSrc("coach")}" alt=""><span>${first?"Sirichai hasn't held a wai kru in ten years. This year I want the kids to pay respect to Grandpa Chai and all our teachers properly.":"Wai kru day again. Anyone new to the camp, I'll take in as a student this year."} How should we hold it?</span></div>
+   <div class="wkset">${Object.entries(WAI_SET).map(([k,W])=>`<button class="wkopt" data-act="waipick" data-v="${k}" ${G.cash<W.cost?"disabled":""}><b>${W.n}</b><small>${W.d}</small><span class="meta">${W.cost?fmt(W.cost):"Free"} · Morale for everyone +${W.mor}${W.bless?` · Teacher's blessing ${W.bless} weeks (half the training injuries)`:""}${W.rep?" · Reputation +"+W.rep:""}</span></button>`).join("")}</div>`;
+  if(!R)return "";const now=UI.wkSkip?" now":"",T=WK_TL(R.ids.length),nm=id=>esc(G.F[id]?G.F[id].name:id);
+  const rows=[["Light incense and candles for the teachers","The pi java plays the wai kru song softly",T.t1],["Everyone kneels and bows three times",R.ids.map(nm).join(" · "),T.t3],
+    [R.krob.length?"Khrop khru: taken in as Sirichai students":"Kru Daeng crowns each fighter with the mongkol and blows a blessing",R.krob.length?R.krob.map(nm).join(" · "):"Everyone is already a student of this camp",T.t4-400],
+    ["Teacher's blessing",`Morale for everyone +${R.mor}${R.bless?` · half the training injuries for ${R.bless} weeks`:""}`,T.t4+200]];
+  return `<h2>Annual wai kru · Year ${S}</h2><div class="cfxwrap ctwrap" data-act="waiskip" role="button" aria-label="Skip scene"><canvas class="campcv" width="640" height="360" data-waikhru="1"></canvas></div>
+   <div class="ctscore">${rows.map(([a,b,d])=>`<div class="ctrow wkrow${now}" style="--d:${d}ms"><span>${a}<small>${b}</small></span></div>`).join("")}</div>
+   <div class="mfoot"><button class="btn primary wkgo${now}" style="${"--d:"+T.end+"ms"}" data-act="waidone">Continue</button></div>`;}
 // v1.86: week 30 — the district chief judges the camp, then the results night at the district office
 function contestScene(done){const S=G.season||1;if(G.ended||G.week<CONTEST_WEEK||G.week>40||(G.contests||{})[S]){done();return;}
   runContest(G);save();UI.contestDone=done;UI.ctSkip=false;UI.ctT0=performance.now();UI.modal={type:"contest",ph:"walk"};AU.sfx&&AU.sfx("bell");render();}
@@ -6789,6 +6849,9 @@ const ACT={
   petren:d=>{UI.modal={type:"petname",i:+d.v};render();setTimeout(()=>{const el=document.getElementById("petname");if(el){el.focus();el.select();}},60);},
   gacha:()=>{const r=gachaPull(G);if(!r)return;AU.sfx&&AU.sfx(CARDS[r.id].r==="SSR"||CARDS[r.id].r==="SR"?"level":"ui");save();UI.modal={type:"gacha",res:r};render();},
   album:()=>{const from=UI.modal&&UI.modal.type;if(from!=="card"&&from!=="gbox")UI.albY=0;UI.modal={type:"album"};render();albRestore();},
+  waipick:d=>{const R=runWaiKhru(G,d.v);if(!R)return;save();UI.wkSkip=false;UI.wkT0=performance.now();UI.modal={type:"waikhru",ph:"rite"};AU.sfx&&AU.sfx("bell");render();},
+  waiskip:()=>{UI.wkSkip=true;document.querySelectorAll(".wkrow,.wkgo").forEach(e=>e.classList.add("now"));},
+  waidone:()=>{UI.modal=null;UI.wkSkip=false;AU.startMusic&&AU.startMusic("hub");const d=UI.wkDone;UI.wkDone=null;save();if(d)d();else render();},
   contestskip:()=>{UI.ctSkip=true;document.querySelectorAll(".ctrow").forEach(e=>e.classList.add("now"));},
   contestaward:()=>{const R=(G.contests||{})[G.season||1];UI.ctSkip=false;UI.ctT0=performance.now();UI.modal={type:"contest",ph:"award"};render();
     if(R&&R.rank===1){setTimeout(()=>{if(UI.modal&&UI.modal.type==="contest"&&UI.modal.ph==="award"&&!UI.ctSkip)AU.sfx&&AU.sfx("champ");},6800);for(let i=0;i<6;i++)setTimeout(()=>{if(UI.modal&&UI.modal.type==="contest"&&UI.modal.ph==="award")AU.sfx&&AU.sfx("pop");},7200+i*1150);}
@@ -6844,7 +6907,7 @@ const ACT={
   skselx:()=>{UI.skSel=null;render();},
   skpopbg:(d,e)=>{if(e.target.classList.contains("skpop-ov")){UI.skSel=null;render();}},
   newsok:()=>{G.newsSeen=PATCH.id;UI.modal=null;save();render();},
-  closeModal:()=>{const m=UI.modal;if(m&&m.type==="lotto"&&typeof ACT.lottoskip==="function"){ACT.lottoskip();return;} /* closing the ticket sheet skips the draw */if(m&&m.back==="album"&&G){ACT.album();return;}if(m&&m.type==="contest"){ACT.contestdone();return;}if(m&&m.type==="whatsnew"&&G){G.newsSeen=PATCH.id;save();}UI.modal=null;render();if(m&&m.after)m.after();},
+  closeModal:()=>{const m=UI.modal;if(m&&m.type==="waikhru"){if(m.ph==="pick")runWaiKhru(G,"s");ACT.waidone();return;}if(m&&m.type==="lotto"&&typeof ACT.lottoskip==="function"){ACT.lottoskip();return;} /* closing the ticket sheet skips the draw */if(m&&m.back==="album"&&G){ACT.album();return;}if(m&&m.type==="contest"){ACT.contestdone();return;}if(m&&m.type==="whatsnew"&&G){G.newsSeen=PATCH.id;save();}UI.modal=null;render();if(m&&m.after)m.after();},
   trait:d=>{const f=G.F[d.id],L=TRAITS[d.id];if(!f||!L||f.camp!=="player")return;const t=L.find(x=>x.id===d.v);if(!t||traitOf(f)===t.id)return;f.trait=t.id;save();render();toast(`${f.name} now uses the hidden power "${t.name}"`);},
   gopen:d=>{GB.box=d.v==="loy"?"loy":"n";if(GB.box==="loy"&&!loyFest()){toast(loySoon()?"The Loy Krathong gacha opens Nov 18 at 00:00":"The Loy Krathong machine is closed. See you next festival!");return;}const fromAlb=UI.modal&&UI.modal.type==="album";if(fromAlb)albKeep();GB.st=null;GB.ps=[];UI.gq=false;UI.modal={type:"gbox",back:fromAlb?"album":null};render();gbPreload();},
   gpull:()=>{if(GB.st)return;const cost=gbCost();if((G.dust||0)<cost){AU.sfx("ui");toast(`Not enough stardust. You need ${cost}✦ · earn it by winning fights, getting new cards and breaking down spares`);return;}
@@ -7251,7 +7314,7 @@ function repgraphHTML(){const r=G.rep,S=repSteps();const nx=S.find(([n])=>r<n),p
 /* v1.87: the calendar also shows birthdays, festivals and the camp beauty contest */
 function calEvents(w){const E=[],S=G.season||1;
   for(const id of ["kati","mali","rin","ploy","fah"]){const f=G.F[id];if(f&&(f.camp==="player"||f.met)&&typeof bdayWeek==="function"&&bdayWeek(id)===w)E.push({ic:"🎂",t:`Birthday: ${f.name}`});}
-  const FE={26:["🏮","Loy Krathong"],32:["🎆","New Year"],47:["💦","Songkran"]};if(FE[w])E.push({ic:FE[w][0],t:FE[w][1]});if(typeof LOTTO_WK!=="undefined"&&LOTTO_WK.some(x=>x+2===w))E.push({ic:"🎟️",t:"Lottery results"});
+  const FE={26:["🏮","Loy Krathong"],32:["🎆","New Year"],37:["🙏","Annual wai kru"],47:["💦","Songkran"]};if(FE[w])E.push({ic:FE[w][0],t:FE[w][1]});if(typeof LOTTO_WK!=="undefined"&&LOTTO_WK.some(x=>x+2===w))E.push({ic:"🎟️",t:"Lottery results"});
   /* v1.88 yearly theme marks */const yk=typeof ytKey==="function"&&ytKey(G);if(yk){const T=YEAR_THEMES[yk];if(T.from!=null&&w>=T.from&&w<=T.to)E.push({ic:T.ic,t:T.name});
     if(yk==="sponsor"&&G.yt.acc&&w===40)E.push({ic:"💼",t:"Sponsor deadline: 8 wins"});}
   if(typeof CONTEST_WEEK!=="undefined"&&w===CONTEST_WEEK){const c=G.contests&&G.contests[S];E.push({ic:"🌸",t:c&&c.rank?`Camp beauty contest · placed #${c.rank}`:"Camp beauty contest: the District Chief inspects the camp"});}

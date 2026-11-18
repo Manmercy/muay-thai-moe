@@ -497,7 +497,7 @@ function trainWeek(G,f,rng){
   {const nb=G.bookings.filter(b=>b.a===f.id&&b.week>=G.week).sort((x,y)=>x.week-y.week)[0];const sc=!!(nb&&G.scoutAbs&&G.scoutAbs[nb.b]!=null&&gameWeek(G)-G.scoutAbs[nb.b]<=8);const hit=!!(nb&&sc&&f.plan.preset===counterPreset(G.F[nb.b]));
    // v1.14: counter work done before fight week carries into fight night if that week is spent on fight prep
    f.counterPrep=hit||!!(nb&&nb.week===G.week&&f.plan.preset==="prep"&&f.counterPrep);}
-  if(f.fatigue>70&&rng()<(f.fatigue-70)/110*(1-G.fac.kitchen*.2)){f.injury=2+Math.floor(rng()*2);G.log.push(`⚠ ${f.name} บาดเจ็บเล็กน้อยจากการซ้อมหนัก (พัก ${f.injury} สัปดาห์)`);
+  if(f.fatigue>70&&rng()<(f.fatigue-70)/110*(1-G.fac.kitchen*.2)*(G.waiBless&&gameWeek(G)<=G.waiBless?.5:1)){f.injury=2+Math.floor(rng()*2);G.log.push(`⚠ ${f.name} บาดเจ็บเล็กน้อยจากการซ้อมหนัก (พัก ${f.injury} สัปดาห์)`);
     if(f.plan.intensity==="heavy")f.trust=clamp(f.trust-4,0,100);}
   if(f.fatigue>80&&f.plan.intensity==="heavy")f.trust=clamp(f.trust-2,0,100);
   f.morale+=(60-f.morale)*.08;
@@ -825,6 +825,12 @@ const COLOR_NAME={red:"สีแดง",green:"สีเขียว",blue:"ส�
 const COLOR_HEX={red:"#d23246",green:"#3f9a4f",blue:"#2c5fb3",pink:"#e07aa0",white:"#f2f2f2",orange:"#e8892a",yellow:"#e0b41b",gold:"#f2c14e",brown:"#8a5a32",purple:"#7a3fc0",black:"#24202c"};
 const decorColor=(slot,key)=>(DECOR_COL[slot]||{})[key]||null;
 function yearColor(G,season){const s=season||G.season||1;return YEAR_COLORS[(stableHash("ycol"+(G.seed||1))+s*3)%YEAR_COLORS.length];}
+// v1.90: annual wai kru (week 37 ≈ Muay Thai Day, 6 Feb) — the whole camp pays respect to the teachers; new fighters are taken in as students (khrop khru)
+const WAIKHRU_WEEK=37,WAI_SET={s:{n:"ชุดเรียบง่าย",d:"ดอกไม้ ธูป เทียน จากตลาดเช้า",cost:0,mor:4,bless:0},m:{n:"ชุดมาตรฐาน",d:"พานดอกมะลิ ผ้าขาว เงินกำนลครู",cost:2500,mor:7,bless:4},l:{n:"ชุดใหญ่เต็มพิธี",d:"พานบายศรี ปี่กลองสด เลี้ยงข้าวทั้งตำบล",cost:7000,mor:10,bless:8,rep:1}};
+function runWaiKhru(G,k){const S=G.season||1;G.waikhru=G.waikhru||{};if(G.waikhru[S])return G.waikhru[S];const W=WAI_SET[k]||WAI_SET.s;if(G.cash<W.cost)return null;G.cash-=W.cost;
+  const R=roster(G),krob=R.filter(f=>!f.krob&&f.id!=="kati").map(f=>f.id);R.forEach(f=>{f.morale=clamp(f.morale+W.mor,0,100);f.trust=clamp((f.trust||0)+(W.bless?2:1),0,100);f.krob=f.krob||S;});
+  if(W.bless)G.waiBless=gameWeek(G)+W.bless;if(W.rep)G.rep+=W.rep;
+  return G.waikhru[S]={k,ids:R.map(f=>f.id),krob,mor:W.mor,bless:W.bless,first:!Object.keys(G.waikhru).length};}
 const CONTEST_WEEK=30,BEAUTY_RARITY={N:4,R:6,SR:7,SSR:8,SS:9},CONTEST_PRIZE=[30000,15000,8000];
 const BEAUTY_AREAS=[["gate","ซุ้มทางเข้า"],["bags","กระสอบทราย"],["tree","ต้นไม้"],["ring","เวทีมวย"],["vehicle","รถประจำค่าย"],["track","ลู่วิ่ง"],["clean","ความสะอาด"]];
 function beautyAreas(G){const yc=yearColor(G).k;return BEAUTY_AREAS.map(([k,n])=>{
