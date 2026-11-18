@@ -563,7 +563,7 @@ const BAG={st:null,
     if(typeof cardCheck==="function"){const got=cardCheck(G);if(got.length){G.cardPend=(G.cardPend||[]).concat(got);out.push(`🃏 การ์ดใหม่ ×${got.length}`);}}
     return `<span class="rwl">${out.map(x=>`<span class="rwi">${x}</span>`).join("")}</span>`;},
   rewardBag(grade,acc){const S=this.st,f=G.F[S.id],D=BAG_DIFF[S.dk],out=[];
-    const g=Math.round(acc*.3*D.mul*100)/100;const up=k=>{const cap=Math.min(20,(f.potential||14)+1.5);const before=f.a[k];f.a[k]=Math.min(cap,Math.round((f.a[k]+g/2)*100)/100);return f.a[k]>before;};
+    const g=Math.round(acc*.3*D.mul*100)/100;const up=k=>{const cap=Math.min(stCap(f),(f.potential||14)+1.5);const before=f.a[k];f.a[k]=Math.min(cap,Math.round((f.a[k]+g/2)*100)/100);return f.a[k]>before;};
     if(g>0){const a=up("kick"),b=up("punch");if(a||b)out.push(`เตะ/หมัด +${(g/2).toFixed(2)}`);else out.push("ค่าเตะ/หมัดเต็มศักยภาพแล้ว");}
     const mo={S:8,A:5,B:3,C:1}[grade];f.morale=Math.min(100,(f.morale||0)+mo);out.push(`กำลังใจ +${mo}`);
     f.fatigue=Math.min(100,(f.fatigue||0)+4);out.push("ล้า +4");
@@ -799,7 +799,7 @@ const RUN={st:null,
     else if(!S.practice)S.res.rw=this.reward(grade,win);
     save();this.draw();AU.sfx&&AU.sfx(win?"level":"ui");},
   reward(grade,win){const S=this.st,f=this.runner(),out=[];G.campUsed=S.act||"run";G.campNote=`${CAMP_ACTIONS.run.name} · เกรด ${grade}`;
-    const g={S:.16,A:.12,B:.08,C:.04}[grade],cap=Math.min(20,(f.potential||14)+1.5);
+    const g={S:.16,A:.12,B:.08,C:.04}[grade],cap=Math.min(stCap(f),(f.potential||14)+1.5);
     const up=k=>{const b=f.a[k];f.a[k]=Math.min(cap,Math.round((f.a[k]+g)*100)/100);return f.a[k]>b;};
     if(up("speed")|up("stamina"))out.push(`ความเร็ว/ความอึด +${g}`);else out.push("ความเร็ว/ความอึดเต็มศักยภาพแล้ว");
     const mo=win?6:3;f.morale=Math.min(100,(f.morale||0)+mo);out.push(`กำลังใจ +${mo}`);f.fatigue=Math.min(100,(f.fatigue||0)+5);out.push("ล้า +5");

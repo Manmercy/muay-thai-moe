@@ -462,6 +462,9 @@ function fatigueAfter(G,f,preset,intensity){const fx=G.fac,clin=fx.clinic||0,hil
   const p=PRESETS[preset],it=INTENSITY[intensity]||INTENSITY.normal;let load=p.load*it.l*7*(preset==="cond"?1-hill*.08-(st.includes("tong")?.1:0):1);
   {const pm=passiveMods(f);load*=clamp(1-pm.fatAll-(preset==="kick"?pm.fatKick:0),.4,1);}
   return clamp(v+load-(10+fx.recovery*5+fx.kitchen*2+clin*3)-(preset==="rest"?22:0),0,100);}
+/* v1.90 limit break: a fighter's stat ceiling (20; 25 after the regional limit break, 30 later at national level).
+   Past 20 a stat grows at LB_RATE of the normal pace, so the extra five points take years, not weeks. */
+const stCap=f=>f&&f.cap>20?f.cap:20,LB_RATE=.6;
 function trainWeek(G,f,rng){
   const p=PRESETS[f.plan.preset],it=INTENSITY[f.plan.intensity];f.gains={};
   f.xpGain=0;
@@ -484,7 +487,7 @@ function trainWeek(G,f,rng){
     // v1.18: training your own style's core weapons fights diminishing returns less (style mastery path)
     const dim=1-Math.pow(f.a[k]/(f.potential+(core.includes(k)?CK:1.5)),2.2);
     const g=.5*w*it.g*coach*fac*ready*mot*clamp(dim,.04,1)*(.75+rng()*.5)*(traitOf(f)==="surge"?1.15:traitOf(f)==="talent"?1.1:1)*(1+(f.drillBonus||0))*ytTrainMul(G,f);
-    if(g>0){f.a[k]=Math.min(20,f.a[k]+g);f.gains[k]=g;}
+    if(g>0){const g2=f.a[k]>=20?g*LB_RATE:g,b4=f.a[k];f.a[k]=Math.max(b4,Math.min(stCap(f),b4+g2));f.gains[k]=f.a[k]-b4;}
   }
   f.drillBonus=0;
   let load=p.load*it.l*7*(pr==="cond"?1-hill*.08-(st.includes("tong")?.1:0):1);{const pm=passiveMods(f);load*=clamp(1-pm.fatAll-(pr==="kick"?pm.fatKick:0),.4,1);}{const tr=traitOf(f);if(tr==="surge")load*=1.05;if(tr==="talent")load*=.95;}
@@ -1005,9 +1008,9 @@ function doCampAction(G,k){const A=CAMP_ACTIONS[k];if(!A||G.campUsed||G.cash<A.c
   if(k==="rest"){R.forEach(f=>f.fatigue=clamp(f.fatigue-4,0,100));note="Everyone gets a breather, fatigue drops a little";}
   if(k==="class"){G.cash+=1000;R.forEach(f=>f.fatigue=clamp(f.fatigue+6,0,100));note="Extra ฿1,000, fighters a little more tired";}
   if(k==="promo"){G.rep+=.6;note="Fame +0.6";}
-  if(k==="run"){const f=R.slice().sort((a,b)=>(b.bond||0)-(a.bond||0))[0];if(f)f.a.speed=Math.min(20,f.a.speed+.05);R.forEach(x=>x.morale=clamp(x.morale+3,0,100));G.dust=(G.dust||0)+1;note="A race around the camp yard · speed +0.05 · ✦ +1";}
+  if(k==="run"){const f=R.slice().sort((a,b)=>(b.bond||0)-(a.bond||0))[0];if(f)f.a.speed=Math.min(stCap(f),f.a.speed+.05);R.forEach(x=>x.morale=clamp(x.morale+3,0,100));G.dust=(G.dust||0)+1;note="A race around the camp yard · speed +0.05 · ✦ +1";}
   if(k==="live"){G.cash+=600;G.dust=(G.dust||0)+1;note="A short live sold a few shirts: ฿600 · ✦ +1";}
-  if(k==="drum"){const f=R.slice().sort((a,b)=>(b.bond||0)-(a.bond||0))[0];if(f){f.a.kick=Math.min(20,f.a.kick+.1);f.a.punch=Math.min(20,f.a.punch+.1);}R.forEach(x=>x.morale=clamp(x.morale+3,0,100));G.dust=(G.dust||0)+2;note="Light drills to the khong khaek drum: kick/punch +0.1 · ✦ +2";}
+  if(k==="drum"){const f=R.slice().sort((a,b)=>(b.bond||0)-(a.bond||0))[0];if(f){f.a.kick=Math.min(stCap(f),f.a.kick+.1);f.a.punch=Math.min(stCap(f),f.a.punch+.1);}R.forEach(x=>x.morale=clamp(x.morale+3,0,100));G.dust=(G.dust||0)+2;note="Light drills to the khong khaek drum: kick/punch +0.1 · ✦ +2";}
   if(k==="somtam"){G.cash+=550;R.forEach(x=>x.morale=clamp(x.morale+3,0,100));G.dust=(G.dust||0)+1;note="Helped Auntie Taew pound som tam: ฿550 · ✦ +1";}
   if(k==="repair"){G.camp.beauty=Math.min(10,G.camp.beauty+1);R.forEach(f=>f.morale=clamp(f.morale+3,0,100));note=`Camp looks nicer (level ${G.camp.beauty}/10)`;}
   if(k==="clip"){G.rep+=.9;R.forEach(f=>f.fatigue=clamp(f.fatigue+3,0,100));note="The clip got shared, fame +0.9";}
@@ -1019,7 +1022,7 @@ function doCampAction(G,k){const A=CAMP_ACTIONS[k];if(!A||G.campUsed||G.cash<A.c
   if(k==="kids"){G.cash+=1800;G.rep+=.4;R.forEach(f=>f.fatigue=clamp(f.fatigue+3,0,100));note="The kids' wai khru was adorable, +฿1,800";}
   if(k==="stall"){G.cash+=1500;G.rep+=.3;R.forEach(f=>f.morale=clamp(f.morale+2,0,100));note="Khanom khrok sold out, +฿1,500";}
   if(k==="tourist"){G.cash+=3500;R.forEach(f=>f.fatigue=clamp(f.fatigue+7,0,100));note="The tourists loved it, +฿3,500, but the fighters are pretty worn out";}
-  if(k==="trail"){R.forEach(f=>{f.a.stamina=Math.min(20,f.a.stamina+.2);f.fatigue=clamp(f.fatigue+5,0,100);f.morale=clamp(f.morale+2,0,100);});note="The view from the mountain was gorgeous, stamina +0.2";}
+  if(k==="trail"){R.forEach(f=>{f.a.stamina=Math.min(stCap(f),f.a.stamina+.2);f.fatigue=clamp(f.fatigue+5,0,100);f.morale=clamp(f.morale+2,0,100);});note="The view from the mountain was gorgeous, stamina +0.2";}
   if(k==="tape"){R.forEach(f=>gainXP(G,f,15));G.scoutAbs=G.scoutAbs||{};for(const b of G.bookings)if(G.F[b.a].camp==="player")G.scoutAbs[b.b]=gameWeek(G);note="Watched tapes of every booked opponent, EXP +15";}
   if(k==="fightnight"){G.cash+=4000;G.rep+=1;R.forEach(f=>f.fatigue=clamp(f.fatigue+6,0,100));note="Tickets sold out, packed ringside, +฿4,000";}
   if(k==="clinicday"){R.forEach(f=>{f.fatigue=clamp(f.fatigue-15,0,100);if(f.injury>0)f.injury--;});note="Everyone feels lighter, fatigue −15";}
@@ -1418,7 +1421,7 @@ function liftOpponent(f,target,maxGain){const delta=Math.min(maxGain,Math.max(0,
   const want=ovr(f.a)+(f.vet||0)+delta,goal=Math.min(19.7,want);for(let n=0;n<4;n++){const gap=goal-ovr(f.a),room=ATTRS.filter(([k])=>f.a[k]<19.95);if(gap<=.01||!room.length)break;
     const each=gap*ATTRS.length/room.length;for(const [k] of room)f.a[k]=Math.min(20,f.a[k]+each);}
   f.potential=Math.max(f.potential||14,Math.min(20,goal));
-  /* v1.83.3: whatever the stat ceiling cannot hold becomes ring craft */const short=want-ovr(f.a)-(f.vet||0);if(short>.05)f.vet=+Math.min(8,(f.vet||0)+short).toFixed(2);}
+  /* v1.83.3: whatever the stat ceiling cannot hold becomes ring craft */const short=want-ovr(f.a)-(f.vet||0);if(short>.05)f.vet=+Math.min(12,(f.vet||0)+short).toFixed(2);} /* v1.90: 12 (was 8) so the field keeps up with limit-broken fighters */
 function lowerOpponent(f,target,maxDrop){let drop=Math.min(maxDrop,ovr(f.a)+(f.vet||0)-target);if(drop<=.05)return;
   const v=Math.min(f.vet||0,drop);if(v>0){f.vet=+((f.vet||0)-v).toFixed(2);drop-=v;}if(drop<=.05)return;
   for(const [k] of ATTRS)f.a[k]=Math.max(3,f.a[k]-drop);}
@@ -1507,7 +1510,7 @@ function newSeason(G){
 const MASTERS={thasao:{name:"Tha Sao master",cost:18000,attrs:["speed","foot"]},chaiya:{name:"Chaiya master",cost:18000,attrs:["guard","counter"]},
   lopburi:{name:"Lopburi master",cost:18000,attrs:["iq","counter"]},korat:{name:"Korat master",cost:18000,attrs:["punch","power"]}};
 function hireMaster(G,fid,school){const f=G.F[fid],M=MASTERS[school];if(!f||!M||G.cash<M.cost||G.week<16||f.masterSeason===(G.season||1))return false;
-  G.cash-=M.cost;f.masterSeason=G.season||1;f.sp=(f.sp||0)+1;M.attrs.forEach(k=>f.a[k]=Math.min(20,f.a[k]+.6));f.morale=Math.min(100,f.morale+6);return true;}
+  G.cash-=M.cost;f.masterSeason=G.season||1;f.sp=(f.sp||0)+1;M.attrs.forEach(k=>f.a[k]=Math.max(f.a[k],Math.min(stCap(f),f.a[k]+(f.a[k]>=20?.6*LB_RATE:.6))));f.morale=Math.min(100,f.morale+6);return true;}
 const SHOW_COST=25000;
 function hostShow(G){const st=stageOf(G.week);if(G.cash<SHOW_COST||G.week<10||G.flags["show_"+st])return false;G.cash-=SHOW_COST;G.flags["show_"+st]=true;
   G.rep+=3;G.camp.beauty=Math.min(10,G.camp.beauty+1);roster(G).forEach(f=>f.morale=Math.min(100,f.morale+8));return true;}

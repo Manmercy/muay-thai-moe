@@ -1,5 +1,5 @@
 // ================= MUAY THAI MOE v1.3 — UI =================
-const VERSION="1.89.33";
+const VERSION="1.89.35";
 const CUR_LANG=(typeof window!=="undefined"&&window.LANG)||"th";
 const TH_LABEL=String.fromCharCode(3652,3607,3618);
 function langSwitch(cls){return `<div class="langsw ${cls||""}" role="group" aria-label="Language">${[["th",TH_LABEL],["en","EN"]].map(([k,l])=>`<button class="lsb ${CUR_LANG===k?"on":""}" data-act="setlang" data-v="${k}" aria-pressed="${CUR_LANG===k}">${l}</button>`).join("")}</div>`;}
@@ -435,8 +435,8 @@ function fighterChip(f){const c=condition(f);const nb=G.bookings.find(b=>b.a===f
     <div class="meta">${nb?`Fight wk ${nb.week} vs ${esc(G.F[nb.b].name)}`:"No fight yet"}</div></div></button>`;}
 
 function projFatigue(f){return fatigueAfter(G,f,f.plan.preset,f.plan.intensity);}
-function attrsHTML(f,showGain){return `<div class="attrs">${ATTR_GROUPS.map(([g,ks])=>`<h4>${g}</h4>`+ks.map(k=>{const v=f.a[k],gn=f.gains&&f.gains[k];
-  return `<div class="attr"><span>${ATTR_LABEL[k]}</span><i style="--v:${v/20*100}%"></i><b class="num">${v.toFixed(1)}${showGain&&gn>=.05?`<span class="up">+${gn.toFixed(1)}</span>`:""}</b></div>`;}).join("")).join("")}</div>`;}
+function attrsHTML(f,showGain){const cap=stCap(f);return `<div class="attrs">${cap>20?`<p class="meta goldt lbcap">Stat ceiling ${cap} · the part past 20 is gold</p>`:""}${ATTR_GROUPS.map(([g,ks])=>`<h4>${g}</h4>`+ks.map(k=>{const v=f.a[k],gn=f.gains&&f.gains[k];
+  return `<div class="attr${cap>20?" lb":""}"><span>${ATTR_LABEL[k]}</span><i style="--v:${v/cap*100}%;--m:${20/cap*100}%;--c:${v>20?20/v*100:100}%"></i><b class="num">${v.toFixed(1)}${showGain&&gn>=.05?`<span class="up">+${gn.toFixed(1)}</span>`:""}</b></div>`;}).join("")).join("")}</div>`;}
 function presetPicker(f){return `<div class="tgrid">${Object.entries(PRESETS).map(([k,p])=>`<button data-act="preset" data-f="${f.id}" data-v="${k}" ${trLocked(f)?"disabled":""} aria-pressed="${f.plan.preset===k}" title="${p.desc}">${p.name}</button>`).join("")}</div>
   <div class="tgrid three" role="group" aria-label="Intensity">${Object.entries(INTENSITY).map(([k,i])=>`<button data-act="intensity" data-f="${f.id}" data-v="${k}" aria-pressed="${f.plan.intensity===k}">${i.name}</button>`).join("")}</div>`;}
 const AX_PRESET={"Punch":"punch","Kick":"kick","Knee-Elbow":"knee","Defense":"defense","Body":"cond","Mind":"defense"};
@@ -763,7 +763,7 @@ function fighterHTML(f){const mine=f.camp==="player";const P=PROFILES[f.id];
       return `<button class="obtn ${cur===k?"on":""}" data-act="outfit" data-id="${f.id}" data-v="${k}" ${ok?"":"disabled"}><i style="background:${O.sw||"transparent"}" class="${O.sw?"":"base"}"></i><span><b>${ok?esc(O.name):"???"}</b><small>${cur===k?"Wearing":ok?"Tap to wear":"Unlocks: "+esc(O.hint)}</small></span></button>`;}).join("")}</div></div>
       <p class="meta center">Outfits only change the pixel sprite in camp, training and fights · no effect on stats</p>`;}
   if(t==="over"){const c=condition(f);const nb=G.bookings.find(b=>b.a===f.id||b.b===f.id);
-    body=`<div class="fp-over">${radarSVG(f,240)}<div><div class="bars">${bar("Readiness",c,condColor(c))}${bar("Fatigue",f.fatigue,"var(--warn)")}${bar("Morale",f.morale,"var(--blue)")}</div>
+    body=`${mine&&typeof lbCardHTML==="function"?lbCardHTML(f):""}<div class="fp-over">${radarSVG(f,240)}<div><div class="bars">${bar("Readiness",c,condColor(c))}${bar("Fatigue",f.fatigue,"var(--warn)")}${bar("Morale",f.morale,"var(--blue)")}</div>
       ${mine?`<p class="meta goldt">${masteryLine(f)}</p>`:""}${TRAITS[f.id]?`<p class="meta trov">${TRAIT_PX[traitOf(f)]||""} Hidden power: <b>${TRAITS[f.id].find(t=>t.id===traitOf(f)).name}</b></p>`:""}<p class="meta">Form ${formHTML(f)}${nb?` · next fight week ${nb.week}`:""}</p><details><summary>Detailed stats</summary>${attrsHTML(f,mine)}</details></div></div>`;}
   if(t==="train"){body=`<div class="fp-train"><div class="tr-anim big" style="background-image:url(${ASSET}${gymBg()})"><canvas width="260" height="200" data-sprite="${f.id}" data-floor="1"></canvas><span class="tr-tag">${PRESETS[f.plan.preset].name}</span></div>
      <div><p class="meta">${PRESETS[f.plan.preset].desc} · fatigue next week ${Math.round(projFatigue(f))}</p>${presetPicker(f)}${radarSVG(f,200)}</div></div>`;}

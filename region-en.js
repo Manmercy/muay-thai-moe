@@ -257,10 +257,18 @@ const RG_PSP={chiangrai:["White Temple Elbow","elbow",{dmg:{elbow:.10}}],nan:["N
  lopburi:["Monkey Fools the Master Punch","punch",{dmg:{punch:.08},evade:.01}],suphan:["Suphan Master-Move Kick","kick",{dmg:{kick:.10}}],phetchaburi:["Khao Wang Knee of Phetchaburi","knee",{dmg:{knee:.10}}],chanthaburi:["Mangosteen Shell Punch","punch",{dmg:{punch:.08},clDef:1}],
  chumphon:["Swooping Gull Kick","kick",{dmg:{kick:.08},evade:.01}],surat:["Don Sak Oyster Shell Elbow","elbow",{dmg:{elbow:.10}}],nakhonsi:["Shadow Puppet Punch","punch",{dmg:{punch:.10}}],songkhla:["Samila Mermaid Kick","kick",{dmg:{kick:.08},regen:.06}]};
 function rgDress(f){const P=f&&f.rg&&RG_PSP[f.rg];if(!P)return f;f.spl=[{w:P[1],def:P[0],npc:1,p:.45}];f.pfx=P[2];return f;}
-/* v1.90 difficulty ladder (fixed, not sized to your fighter): opponent strength in stat points + ring craft.
+/* v1.90 difficulty (18 Nov 2026, Man): every fighter gets a fair-but-hard bout — belts ~38% → 30%, a championship series ~18% → 10% —
+   found by sparring her against the opponent at a few strengths (rgFit). The ladder below is the CEILING: past it the opponent stops
+   growing, so a fighter beyond the stat ceiling of 20 (limit break) starts winning more. Ceiling values: */
+/* (old note) difficulty ladder: opponent strength in stat points + ring craft.
    Tuned (18 Nov 2026, 200 bouts each) so a fully built Ploy (stats 20, Lv.23, full skills) wins belt 1 ~39% → belt 16 ~27% and a championship series 20% (cup 1) → 10% (cup 4).
    A casual build (stats 20, Lv.18) wins ~5% / ~0% — the limit break is meant to be the way past it. */
-const RG_LADDER={belt:n=>RG_LADDER.b0+n*RG_LADDER.bs,champ:(cups,tries)=>RG_LADDER.c0+cups*RG_LADDER.cs-Math.min(2,tries||0)*.15,b0:23.9,bs:.027,c0:23.8,cs:.15};
+const RG_ODDS={belt:n=>.38-.08*Math.min(15,n)/15,series:cups=>.18-.08*Math.min(3,cups)/3,bout:s=>{let lo=0,hi=1;for(let i=0;i<30;i++){const m=(lo+hi)/2;m*m*(3-2*m)<s?lo=m:hi=m;}return (lo+hi)/2;}};
+/* the opponent strength (≤ ceil) at which `me` wins about `p` of 5-round bouts. setT(T) rebuilds the opponent at strength T. */
+function rgFit(me,opp,setT,p,ceil){const M={...me,a:{...me.a},fatigue:0,injury:0,morale:70},N=60;
+  const win=T=>{setT(T);let w=0;for(let i=0;i<N;i++){const F=quickFight(M,opp,40417+i*131,5);if(F.result.win==="A")w++;else if(F.result.win==="D")w+=.5;}return w/N;};
+  if(win(ceil)>=p)return ceil;let lo=Math.min(12,ceil-1),hi=ceil;for(let i=0;i<7;i++){const m=(lo+hi)/2;win(m)>p?lo=m:hi=m;}const T=(lo+hi)/2;setT(T);return T;}
+const RG_LADDER={belt:n=>RG_LADDER.b0+n*RG_LADDER.bs,champ:(cups,tries)=>RG_LADDER.c0+cups*RG_LADDER.cs-Math.min(2,tries||0)*.15,b0:24.9,bs:.027,c0:24.8,cs:.15};
 const RG_OPP={chiangrai:"Kaewkan Sor Mae Sai",nan:"Namphueng Luk Muang Nan",uttaradit:"Thongdee Sit Dap Hak",lampang:"Ma Lek Luk Rot Ma",
  udon:"Buadaeng Nong Han",khonkaen:"Maikaew Luk Chonnabot",buriram:"Saifah Phanom Rung",ubon:"Thianthong Rim Khong",
  lopburi:"Jo Thong Sor Phra Prang",suphan:"Maemai Bang Pla Ma",phetchaburi:"Mokaeng Muang Phet",chanthaburi:"Mangkhut Luk Chan",
@@ -840,9 +848,56 @@ RG_CHAT.alicia=[
   ["If one day nobody watches my lives anymore, would you still watch?",[["Of course. Even if I'm your only viewer.",2,"…One viewer is enough."],["Your viewers won't disappear.",1,"Dodging the question. But thanks anyway."],["I don't know",0,"…That's a bit too honest."]]],
   ["Going to bed. Don't reply with a sticker, so I don't have to answer back.",[["(Send a sticker)",1,"…Replied. Happy? (heart sticker)"],["What a lovely dream",2,"…Sweet dreams, Manager."],["OK",0,"Good night."]]]]}];
 CHAT.alicia=RG_CHAT.alicia;
+/* ---------- v1.90 limit break: a fighter with every stat at 20 (Lv.20+) leaves camp for two weeks of training and comes back with a ceiling of 25 ---------- */
+const LB_CAP=25;
+const lbFull=f=>!!f&&ATTRS.every(([k])=>f.a[k]>=19.95);
+function lbBlock(G,f){if(!G.region)return "The Four Regions chapter isn't open yet";if(stCap(f)>=LB_CAP)return "Limit already broken";if(!lbFull(f))return "Every stat must be 20";
+  if((f.lvl||1)<20)return "Needs Lv.20 or higher";if(isAway(G,f.id))return "Not in camp";if(f.injury)return "Wait until she's healed";
+  if(G.bookings.some(b=>(b.a===f.id||b.b===f.id)&&b.week>=G.week&&b.week<=G.week+2))return "Has a fight within 2 weeks — cancel it or fight it first";
+  const T=G.region.trip;if(T&&T.abs!=null&&T.abs-absWeek(G)<=2)return "The whole camp has a regional trip within 2 weeks";return "";}
+function lbCardHTML(f){if(!G.region||f.camp!=="player")return "";
+  if(isAway(G,f.id)&&f.lbTrip)return `<div class="lbcard"><h4>✦ Training away</h4><p class="meta">${esc(f.name)} Back in camp in ${awayLeft(G,f.id)} weeks · no training, no fights</p></div>`;
+  if(stCap(f)>=LB_CAP||!lbFull(f))return "";const why=lbBlock(G,f);
+  return `<div class="lbcard"><h4>✦ Limit Break</h4><p class="meta">Every stat is at 20 · train away from camp for 2 weeks (no training, no fights) and the stat ceiling rises to ${LB_CAP}</p>
+    <p class="meta">Stats past 20 grow slower than usual — it takes a long time.</p>${why?`<p class="meta redt">${why}</p>`:""}<button class="btn primary" data-act="lbgo" data-v="${f.id}" ${why?"disabled":""}>Send away to train ▸</button></div>`;}
+const LB_GO={
+ kati:[{n:"coach",t:"Kati, your stats are all maxed. More training here will only keep them where they are."},{n:"coach",t:"I know an old monk at a mountain temple near Omkoi. When he was young he fought Grandpa Chai. Go stay with him for two weeks."},
+  {n:"kati",f:"sad",t:"Two weeks… I've never been away from camp that long."}],
+ mali:[{n:"coach",t:"Mali, your stats are all maxed. There's an old master in Chaiya who still teaches Yang Sam Khum the traditional way."},{n:"mali",f:"happy",t:"Back to Chaiya~? Grandma will be so happy! But Mali's going to miss everyone!"}],
+ rin:[{n:"coach",t:"Rin, your numbers have topped out. The same training won't raise them."},{n:"rin",f:"happy",t:"I know. And I've planned it already: two weeks in Bangkok, at the camp where I was knocked out at nineteen."},
+  {n:"rin",f:"sad",t:"I'll step into that ring again… the one variable I've never solved."}],
+ ploy:[{n:"coach",t:"Ploy, your stats are all maxed. How about two weeks back in Korat? I've already talked to your dad."},{n:"ploy",f:"pout",t:"I don't want to go back… but Dad calls every week to ask if I can still run up the hill."}],
+ fah:[{n:"coach",t:"Fah, your stats are all maxed. Want to go train somewhere for two weeks?"},{n:"fah",f:"happy",t:"Doi Inthanon! Fah's going to run to the summit every morning. Nobody will keep up!"}]};
+const LB_BACK={
+ kati:[{n:"nar",t:"Two weeks later Kati walks back into camp before dawn, darker from the sun, hands wrapped in old white cloth."},{n:"kati",f:"happy",t:"The abbot had me carry water up the mountain a hundred times a day. I didn't hit a bag once."},
+  {n:"kati",f:"sad",t:"On the last day he said Grandpa Chai didn't leave my training unfinished — he kept the last move for me to find myself."},{n:"coach",t:"And did you find it?"},{n:"kati",f:"happy",t:"Not yet. But I know now it isn't at twenty."}],
+ mali:[{n:"nar",t:"Mali comes back with a big foam box — Grandma made khanom jeen with tai pla curry for the whole camp."},{n:"mali",f:"happy",t:"The old master had me walk Yang Sam Khum on the paddy dykes every day, and on the last day I didn't fall in the mud once~"},
+  {n:"mali",f:"happy",t:"Now I can walk in on an opponent without thinking. My feet just go!"}],
+ rin:[{n:"nar",t:"Rin comes back with a new notebook. Every page is blank."},{n:"rin",f:"happy",t:"I got back in that same ring. This time I didn't count anything. I just fought."},
+  {n:"rin",f:"flustered",t:"Results: fear down about ninety percent… I'm keeping the other ten to remind myself."}],
+ ploy:[{n:"nar",t:"Ploy comes back in new running shoes. The old pair died on the mountain."},{n:"ploy",f:"happy",t:"Dad timed my hill runs every day. On the last day I beat the record he set when he was young."},
+  {n:"ploy",f:"flustered",t:"Dad didn't praise me… he just wiped his own name off the board and wrote mine instead."}],
+ fah:[{n:"nar",t:"Fah comes back with ten bags of mountain coffee."},{n:"fah",f:"happy",t:"Fah ran to the summit fourteen times! The last time I watched the sunrise all alone."},
+  {n:"fah",f:"sad",t:"…and I missed the camp a lot. Don't tell anyone."},{n:"fah",f:"happy",t:"This coffee's for everyone! Manager, pay me back!"}]};
+const lbGo=(f)=>LB_GO[f.id]||[{n:"coach",t:`${f.name} has maxed every stat. I'll send her to train with an old master I know, for two weeks.`}];
+const lbBack=(f)=>LB_BACK[f.id]||[{n:"nar",t:`${f.name} is back from two weeks of training, eyes calmer than before`},{n:"coach",t:"Don't tell me. I can see it in how you walk."}];
+function lbStart(G,id){const f=G.F[id];if(!f||lbBlock(G,f))return;const who=LB_GO[id]?id:"coach";
+  playScene([...lbGo(f).map(x=>({l:"casual",...x})),{n:"nar",t:`Send ${f.name} away to train for 2 weeks?`,choice:[
+    {t:"Go. The camp can wait.",fx:G2=>{sendAway(G2,id,2,"train");G2.F[id].lbTrip=1;G2.log.push(`${f.name} left camp to train for 2 weeks`);},then:[{n:who==="coach"?"coach":id,f:"happy",l:"casual",t:"See you in two weeks!"}]},
+    {t:"Not yet",then:[{n:"coach",t:"All right, no rush. Tell me when you're ready."}]}]}],()=>{save();render();},{bg:"camp",look:"casual"});}
+/* weekly: the homecoming, else the first time someone hits the ceiling Kru Daeng points it out */
+function lbWeek(G,done){const R=roster(G).concat(Object.values(G.F).filter(f=>f.lbTrip&&f.camp==="player"&&!roster(G).includes(f)));
+  const back=R.find(f=>f.lbTrip&&!isAway(G,f.id));
+  if(back){playScene([...lbBack(back).map(x=>({l:"casual",...x})),{fx:G2=>{const f=G2.F[back.id];f.cap=LB_CAP;f.potential=Math.max(f.potential||14,LB_CAP);f.lbTrip=0;f.awayBack=true;
+      for(const [k] of ATTRS)f.a[k]=Math.min(LB_CAP,f.a[k]+.2);f.morale=Math.min(100,(f.morale||0)+10);G2.log.push(`${f.name} broke the limit · stat ceiling 20 → ${LB_CAP}`);}},
+    {n:"nar",t:`${back.name} broke the limit · stat ceiling 20 → ${LB_CAP} · every stat +0.2 · morale +10`}],()=>{save();done();},{bg:"camp",look:"casual"});return true;}
+  const ready=roster(G).find(f=>!f.lbNote&&stCap(f)<LB_CAP&&lbFull(f)&&(f.lvl||1)>=20);
+  if(ready){ready.lbNote=1;playScene([{n:"coach",t:`Manager, ${ready.name} has maxed every stat at 20 — no amount of training raises them now.`},{n:"coach",t:"There is one way. Go look at her stats page."},
+    {n:"nar",t:"Unlocked: Limit Break · see Fighter › Stats"}],()=>{save();done();},{bg:"camp",look:"casual"});return true;}
+  return false;}
 const REGION={
   /* end of week (after the weekly events): the gala the week after the invitation, the contract beat the week after the first cup */
-  weekScene(G,done){const R=G.region;if(!R){done();return;}const now=gameWeek(G);
+  weekScene(G,done){const R=G.region;if(!R){done();return;}const now=gameWeek(G);if(lbWeek(G,done))return;
     if(!R.gala){if(R.galaAbs==null)R.galaAbs=now+1;if(now>=R.galaAbs){R.gala=1;AU.startMusic&&AU.startMusic("hub");playScene(rgGala(G),()=>{save();done();},{bg:"gala",look:"casual"});return;}}
     const r=(R.cups||[])[0],c=r&&R.champ[r];
     if(r&&!R.c1&&c&&now>=(c.wonAbs||0)+1){R.c1="seen";playScene(rgCup1(G,r),()=>{save();done();},{bg:"camp",look:"casual"});return;}
@@ -862,10 +917,10 @@ const REGION={
   makeOpp(G,dest,me,abs){const r=ROAD_DEST[dest].r,id=`rg_${dest}_${abs}`;if(G.F[id])return id;
     /* a little under your fighter at the first belt, a little over by the sixteenth; the regional style (tilt) is part of that budget, not on top of it */
     const n=this.beltTotal(G),target=RG_LADDER.belt(n),rng=mulberry32((G.seed||1)+stableHash(id)),tilt=RG[r].tilt;
-    const f=baseFighter(id,mkNPC(id,RG_OPP[dest]||"Provincial champion","X",Math.min(19,Math.round(target-1)),rng,RG_ORDER.indexOf(r)+2));
-    for(const [k,v] of Object.entries(tilt))f.a[k]=Math.min(20,f.a[k]+v);
-    liftOpponent(f,target,20);
-    for(let i=0;i<60&&ovr(f.a)>target+.05;i++)for(const k in f.a)if(!(k in tilt))f.a[k]=Math.max(1,f.a[k]-.15);f.camp="quest";f.div="X";f.rg=dest;rgDress(f);f.sprite="rgp_"+dest;/* v1.89.14: high-level sheet dyed in the province colour */f.color=RG[r].col;f.lvl=me.lvl||1;f.fatigue=0;f.morale=70;
+    const f=baseFighter(id,mkNPC(id,RG_OPP[dest]||"Provincial champion","X",Math.min(19,Math.round(target-1)),rng,RG_ORDER.indexOf(r)+2)),base={...f.a};
+    const setT=T=>{f.a={...base};f.vet=0;for(const [k,v] of Object.entries(tilt))f.a[k]=Math.min(20,f.a[k]+v);liftOpponent(f,T,20);
+      for(let i=0;i<80&&ovr(f.a)>T+.05;i++)for(const k in f.a)if(!(k in tilt))f.a[k]=Math.max(1,f.a[k]-.15);};
+    f.rg=dest;rgDress(f);f.lvl=me.lvl||1;f.fatigue=0;f.morale=70;f.rgT=+rgFit(me,f,setT,RG_ODDS.belt(n),target).toFixed(2);f.camp="quest";f.div="X";f.rg=dest;rgDress(f);f.sprite="rgp_"+dest;/* v1.89.14: high-level sheet dyed in the province colour */f.color=RG[r].col;f.lvl=me.lvl||1;f.fatigue=0;f.morale=70;
     G.F[id]=f;syncFighterAges(G);return id;},
   purse(G){const n=this.beltTotal(G),w=Math.round((10000+n*800)*(1+Math.min(G.rep,50)/100)/100)*100;return {win:w,lose:Math.round(w*.4/100)*100};},
   book(G,dest,fid){const R=G.region,D=ROAD_DEST[dest],me=G.F[fid];if(!R||!D||!me)return {ok:false,why:"Missing data"};
@@ -970,10 +1025,13 @@ const REGION={
     if(!f){const rng=mulberry32((G.seed||1)+stableHash(id));f=baseFighter(id,mkNPC(id,C.champ,"X",14,rng,RG_ORDER.indexOf(r)+2));
       Object.assign(f,{name:C.champ,nick:C.nick,color:C.col,canon:true,camp:"region",div:"X",fatigue:0,injury:0,morale:75});G.F[id]=f;syncFighterAges(G);}
     f.pfx=H.perk.fx;f.canon=true;f.camp="region";
-    if(me){const cups=(G.region.cups||[]).length,c=G.region.champ[r],target=RG_LADDER.champ(cups,c.tries),tilt=C.tilt;f.vet=0;
-      for(const k in f.a)f.a[k]=Math.max(1,Math.min(20,target-.6));for(const [k,v] of Object.entries(tilt))f.a[k]=Math.min(20,f.a[k]+v);
-      liftOpponent(f,target,20);for(let i=0;i<80&&ovr(f.a)>target+.05;i++)for(const k in f.a)if(!(k in tilt))f.a[k]=Math.max(1,f.a[k]-.12);
-      f.lvl=Math.max(me.lvl||1,1)+1;f.fatigue=0;f.injury=0;f.morale=75;}
+    if(me){const cups=(G.region.cups||[]).length,c=G.region.champ[r],ceil=RG_LADDER.champ(cups,c.tries),tilt=C.tilt;
+      f.lvl=Math.max(me.lvl||1,1)+1;f.fatigue=0;f.injury=0;f.morale=75;
+      /* re-fit only when your fighter or the stakes changed (this runs before every bout) */
+      const key=[me.id,ovr(me.a).toFixed(2),me.lvl,Object.values(me.skills||{}).reduce((s,v)=>s+v,0),(me.equip||[]).join(),cups,c.tries||0].join("|");
+      if(f.rgKey!==key){const setT=T=>{f.vet=0;for(const k in f.a)f.a[k]=Math.max(1,Math.min(20,T-.6));for(const [k,v] of Object.entries(tilt))f.a[k]=Math.min(20,f.a[k]+v);
+          liftOpponent(f,T,20);for(let i=0;i<80&&ovr(f.a)>T+.05;i++)for(const k in f.a)if(!(k in tilt))f.a[k]=Math.max(1,f.a[k]-.12);};
+        const t=RG_ODDS.bout(RG_ODDS.series(cups))-Math.min(2,c.tries||0)*.02;f.rgT=+rgFit(me,f,setT,t,ceil).toFixed(2);f.rgKey=key;}}
     return f;},
   seriesPurse(G){const cups=(G.region.cups||[]).length,w=Math.round((30000+cups*6000)*(1+Math.min(G.rep,50)/100)/100)*100;return {win:w,lose:Math.round(w*.4/100)*100};},
   /* the first week from `from` that suits a championship bout: weeks 1–50, the camp home and rested, no other trip next to it */
@@ -1121,6 +1179,7 @@ Welcome her at Fights › Four Regions Cup`});}
 
 if(typeof XMODAL!=="undefined"){XMODAL.rgplan=m=>({body:REGION.planHTML(m.dest),foot:false});XMODAL.rgser=m=>({body:REGION.seriesHTML(m.r),foot:false});}
 if(typeof ACT!=="undefined")Object.assign(ACT,{
+  lbgo:d=>{UI.modal=null;lbStart(G,d.v);},
   rgplan:d=>{UI.rgFid=null;UI.modal={type:"rgplan",dest:d.v};render();},
   rgfid:d=>{UI.rgFid=d.v;render();},
   rggo:d=>{const r=REGION.book(G,d.v,UI.rgFid);if(!r.ok){toast(r.why);return;}UI.modal=null;AU.sfx&&AU.sfx("level");toast(`Trip booked for week ${r.wk} · travel cost paid ${fmt(r.cost)}`);save();render();},

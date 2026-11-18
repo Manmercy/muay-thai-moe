@@ -236,8 +236,8 @@ const EVENTS=[
   {n:"rin",f:"sad",t:"แผนของฉันพลาดอีกแล้ว ข้อมูลบอกว่าคู่ต่อสู้จะถอย แต่เธอเดินหน้าเข้ามา"},
   {n:"rin",f:"sad",t:"ถ้าคำนวณไม่ได้ ฉันก็ไม่รู้จะเชื่ออะไร"},
   {choice:[
-   {t:"บางครั้งต้องเชื่อสัญชาตญาณตัวเองบ้าง",fx:G=>{add(G,"rin","bond",8);G.F.rin.a.comp=Math.min(20,G.F.rin.a.comp+1);},then:[{n:"rin",f:"flustered",t:"สัญชาตญาณ… ฉันจะลองดูค่ะ ถ้าพลาด คุณรับผิดชอบด้วยนะ (ใจนิ่ง +1)"}]},
-   {t:"งั้นวางแผนสำรองไว้สองชั้น",fx:G=>{add(G,"rin","trust",6);G.F.rin.a.iq=Math.min(20,G.F.rin.a.iq+1);},then:[{n:"rin",f:"happy",t:"แผน B… แน่นอนค่ะ ฉันชอบวิธีคิดของคุณ (ไหวพริบ +1)"}]}]}]},
+   {t:"บางครั้งต้องเชื่อสัญชาตญาณตัวเองบ้าง",fx:G=>{add(G,"rin","bond",8);G.F.rin.a.comp=Math.min(stCap(G.F.rin),G.F.rin.a.comp+1);},then:[{n:"rin",f:"flustered",t:"สัญชาตญาณ… ฉันจะลองดูค่ะ ถ้าพลาด คุณรับผิดชอบด้วยนะ (ใจนิ่ง +1)"}]},
+   {t:"งั้นวางแผนสำรองไว้สองชั้น",fx:G=>{add(G,"rin","trust",6);G.F.rin.a.iq=Math.min(stCap(G.F.rin),G.F.rin.a.iq+1);},then:[{n:"rin",f:"happy",t:"แผน B… แน่นอนค่ะ ฉันชอบวิธีคิดของคุณ (ไหวพริบ +1)"}]}]}]},
 
  {id:"final_result",look:"fight",when:G=>G.week>=41,bg:"hall",steps:[
   {n:"nar",t:"ศาลากลางจังหวัดประดับธง ป้ายประกาศรายชื่อสี่คนสุดท้ายของแต่ละรุ่นแขวนอยู่หน้าเวที"},
@@ -263,7 +263,7 @@ const EVENTS=[
   {n:"fah",f:"happy",t:"ได้ยินว่าค่ายศิริชัยมีกระสอบใบใหม่แล้วนี่ ขอยืมเวทีซ้อมหน่อยสิ… กับกะทิด้วย"},
   {n:"kati",f:"flustered",t:"ห้ะ! มาซ้อมที่ค่ายคู่แข่งเนี่ยนะ!",with:"fah"},
   {choice:[
-   {t:"ได้ ซ้อมเบา ๆ สามยก ห้ามจริงจัง",fx:G=>{G.F.kati.a.guard=Math.min(20,G.F.kati.a.guard+.5);G.F.kati.a.counter=Math.min(20,G.F.kati.a.counter+.3);add(G,"fah","bond",5);G.F.kati.fatigue=Math.min(100,G.F.kati.fatigue+6);},
+   {t:"ได้ ซ้อมเบา ๆ สามยก ห้ามจริงจัง",fx:G=>{G.F.kati.a.guard=Math.min(stCap(G.F.kati),G.F.kati.a.guard+.5);G.F.kati.a.counter=Math.min(stCap(G.F.kati),G.F.kati.a.counter+.3);add(G,"fah","bond",5);G.F.kati.fatigue=Math.min(100,G.F.kati.fatigue+6);},
     then:[{n:"nar",t:"สามยกกลายเป็นหกยก ทั้งคู่ล้มลงนอนหอบกลางเวทีพร้อมกัน"},{n:"fah",f:"happy",t:"…ไม่เลวนี่ กะทิ เก่งขึ้นนะ (การ์ดและสวนกลับของกะทิดีขึ้น)"}]},
    {t:"ไม่ได้ เก็บไว้ชกกันบนเวทีจริง",fx:G=>{add(G,"kati","morale",5);add(G,"fah","bond",2);},then:[{n:"fah",f:"happy",t:"ฮ่า! ขี้หวงนี่ ก็ได้ เจอกันบนเวทีแล้วกัน"}]}]}]},
  {id:"pre_qual",look:"train",when:G=>G.week>=17,bg:"night",steps:[
@@ -416,7 +416,8 @@ const lovFinal=G=>{for(const id of lovList(G)){if(!romOf(G,id)||!LOVER_FINAL[id]
 function befriend(G,id){G.friendz=G.friendz||{};G.friendz[id]=true;}
 const isFriendz=(G,id)=>!!(G.friendz&&G.friendz[id]);
 const awayWord=(G,id)=>G.F[id].camp==="player"?"หนีไปจากค่าย":"ไม่ติดต่อมา";
-function relLabel(G,f,lv,short){const id=f&&f.id;if(G&&id&&G.F&&G.F[id]&&isAway(G,id)){const w=G.F[id].awayWhy==="break"?"อกหัก":"งอน";return short?w:`${w} · ${awayWord(G,id)} (อีก ${awayLeft(G,id)} สัปดาห์)`;}
+function relLabel(G,f,lv,short){const id=f&&f.id;if(G&&id&&G.F&&G.F[id]&&isAway(G,id)&&G.F[id].awayWhy==="train"){const n=awayLeft(G,id);return short?"ไปฝึกวิชา":`ไปฝึกวิชา (อีก ${n} สัปดาห์)`;}
+  if(G&&id&&G.F&&G.F[id]&&isAway(G,id)){const w=G.F[id].awayWhy==="break"?"อกหัก":"งอน";return short?w:`${w} · ${awayWord(G,id)} (อีก ${awayLeft(G,id)} สัปดาห์)`;}
   return relBase(G,f,lv);}
 /* the ladder shown in her profile: the same labels, the current step lit — lovers climb their own ladder (LOVER_TIERS) */
 const REL_DESC={"คนรู้จัก":"ยังเรียกคุณว่าผู้จัดการแบบเกร็ง ๆ","เพื่อนร่วมค่าย":"เริ่มคุยเล่น ทักแชตเรื่องทั่วไป","คนสนิท":"บางทีก็หลุดเรียกชื่อคุณ · มีเรื่องส่วนตัวมาเล่า","คนพิเศษ":"เรียกชื่อคุณตลอด",
@@ -499,7 +500,7 @@ function valSteps(G){const P=partners(G),hard=(G.valCaught||0)>=1,drop=hard?25:1
       {t:"ใจเย็นก่อน ฟังฉันอธิบายก่อน",then:[{n:"nar",t:"ยังไม่ทันได้อธิบายสักคำ ถุงขนมก็ลอยมาโดนหน้าคุณ"}]}]},
     {fx:G2=>{P.forEach(k=>add(G2,k,"bond",-drop));G2.valAbs=absWeek(G2);G2.valFloor=Object.fromEntries(P.map(k=>[k,bondTot(G2.F[k])]));}},{n:"nar",t:`ความสนิทกับทุกคนที่คบอยู่ −${drop}`},
     ...(two.length>=2?ringSteps(G,two[0],two[1],hard):[{n:"nar",t:"ไม่มีใครขึ้นเวที แต่ละคนแยกย้ายกลับไปเงียบ ๆ ซึ่งแย่กว่าการทะเลาะกันเสียอีก"},{inject:G2=>runAway(G2,byBond[0],hard?3:2)}])];}
-const backDue=(G,id)=>{const f=G.F[id];return !!(f&&f.met&&f.awayAbs!=null&&!f.awayBack&&absWeek(G)>=f.awayAbs);};
+const backDue=(G,id)=>{const f=G.F[id];return !!(f&&f.met&&f.awayAbs!=null&&!f.awayBack&&f.awayWhy!=="train"&&absWeek(G)>=f.awayAbs);}; /* v1.90: the limit-break trip has its own homecoming (region.js) */
 // --- breakup (from the chat menu) ---
 const BREAK={kati:[{n:"nar",t:"คุณขอคุยกับกะทิที่ขอบเวที ที่เดียวกับวันที่เธอสารภาพ"},{n:"kati",f:"surprised",t:"…เลิกเหรอคะ"},{n:"kati",f:"sad",t:"หนูไม่ร้องไห้หรอกค่ะ คุณปู่สอนว่านักมวยห้ามร้องไห้บนเวที"},{n:"kati",f:"sad",t:"ขอเวลาหนูสักพักนะคะ แล้วหนูจะกลับมาเป็นนักมวยของคุณเหมือนเดิม"}],
   mali:[{n:"nar",t:"มะลิฟังเงียบ ๆ ทั้งที่ปกติเธอพูดไม่หยุด"},{n:"mali",f:"sad",t:"อ๋อ… ค่ะ มะลิเข้าใจ มะลิยิ้มได้ ดูสิ ยิ้มได้"},{n:"nar",t:"รอยยิ้มนั้นสั่นอยู่ครู่หนึ่ง แล้วน้ำตาก็ไหลลงมาเอง"},{n:"mali",f:"sad",t:"มะลิขอกลับบ้านไปหาแม่ก่อนนะคะ"}],
@@ -667,7 +668,7 @@ function dateScene(G,id,act){
   const steps=[{n:"nar",bg:A.bg,t:intro||`${A.name}`},...(opener?[{n:id,f:pref==="dislike"?"sad":"happy",l:look,t:opener}]:[]),
     ...spotSteps(f,act),...mid,...dateTwist(G,f,D,look),
     {inject:G2=>{const gain=Math.max(0,1+Math.round(D.score*.7));const capped=false,b0=hTot(f);add(G2,id,"bond",gain);const real=Math.round((hTot(f)-b0)*2)/2,HL=heartLv(f),hleft=Math.max(0,Math.ceil((HL.need-HL.into)*2)/2);if(gain>=4)add(G2,id,"morale",4);
-      if(act==="spar"){f.a.iq=Math.min(20,f.a.iq+.3);f.a.guard=Math.min(20,f.a.guard+.3);f.fatigue=Math.min(100,f.fatigue+4);}
+      if(act==="spar"){f.a.iq=Math.min(stCap(f),f.a.iq+.3);f.a.guard=Math.min(stCap(f),f.a.guard+.3);f.fatigue=Math.min(100,f.fatigue+4);}
       const tier=gain>=5?"great":gain>=2?"ok":"meh";
       f.closed=f.closed||{};const firstClose=!f.closed[tier];f.closed[tier]=true;
       const out=[...(firstClose?[{n:id,f:tier==="meh"?"sad":"happy",l:look,t:DATE_CLOSE[tier][id]}]:[]),
@@ -975,7 +976,7 @@ EVENTS.push(
   {n:"rin",f:"happy",l:"casual",t:G=>`${CALL(G,"rin")}คะ ฉันวางแผนไฟต์ไว้เองสามหน้า เป็นครั้งแรกที่ไม่ได้ให้ครูแดงตรวจ คุณจะยอมให้ฉันใช้ไหมคะ`},
   {n:"nar",t:"หน้ากระดาษเต็มไปด้วยลูกศร ตัวเลข และรูปวาดนักมวยตัวกลมที่ดูเหมือนซาลาเปา"},
   {choice:[{t:"ฉันเชื่อแผนของเธอ ใช้ได้เลย",fx:G=>{add(G,"rin","trust",8);add(G,"rin","morale",5);},then:[{n:"rin",f:"flustered",l:"casual",t:"…คำว่าเชื่อ ฉันวัดค่าไม่ได้ แต่รู้สึกได้ค่ะ ขอบคุณ"}]},
-   {t:"ขอให้ครูแดงดูอีกรอบก่อนนะ",fx:G=>{add(G,"rin","trust",1);G.F.rin.a.iq=Math.min(20,G.F.rin.a.iq+.2);},then:[{n:"rin",f:"sad",l:"casual",t:"เข้าใจค่ะ ระวังไว้ก่อนก็มีเหตุผล …ฉันจะทำให้ดีกว่านี้"},{n:"nar",t:"(ครูแดงแก้ให้สองจุด รินจดทุกคำ การอ่านเกมดีขึ้นเล็กน้อย)"}]}]}]});
+   {t:"ขอให้ครูแดงดูอีกรอบก่อนนะ",fx:G=>{add(G,"rin","trust",1);G.F.rin.a.iq=Math.min(stCap(G.F.rin),G.F.rin.a.iq+.2);},then:[{n:"rin",f:"sad",l:"casual",t:"เข้าใจค่ะ ระวังไว้ก่อนก็มีเหตุผล …ฉันจะทำให้ดีกว่านี้"},{n:"nar",t:"(ครูแดงแก้ให้สองจุด รินจดทุกคำ การอ่านเกมดีขึ้นเล็กน้อย)"}]}]}]});
 // v1.37: more of Rin between joining and the late-season arc
 EVENTS.push(
  {id:"rin_sheet",look:"train",when:G=>G.week>=18&&inCamp(G,"rin"),bg:"gym",steps:[
@@ -984,7 +985,7 @@ EVENTS.push(
   {n:"rin",f:"happy",l:"train",t:"ศอกซ้ายของกะทิตกเวลาเหนื่อยค่ะ เฉลี่ยยกละสามครั้ง ฉันวาดลูกศรตามจำนวนครั้งที่โดนสวน"},
   {n:"coach",t:"ครูสอนมวยมายี่สิบปี เพิ่งรู้ว่าศอกตกมีกราฟได้"},
   {n:"rin",f:"flustered",l:"train",t:G=>`${CALL(G,"rin")}คะ ฉันทำมากไปไหมคะ ที่ค่ายเก่าเขาเอากระดาษพวกนี้ไปห่อกล้วยทอด`},
-  {choice:[{t:"ทำต่อเลย ค่ายเราต้องการแบบนี้",fx:G=>{add(G,"rin","trust",4);add(G,"rin","bond",3);G.F.kati.a.guard=Math.min(20,G.F.kati.a.guard+.3);},then:[{n:"rin",f:"happy",l:"train",t:"…ขอบคุณค่ะ ฉันจะทำฉบับสีด้วย"},{n:"nar",t:"(การ์ดของกะทิดีขึ้นเล็กน้อย)"}]},
+  {choice:[{t:"ทำต่อเลย ค่ายเราต้องการแบบนี้",fx:G=>{add(G,"rin","trust",4);add(G,"rin","bond",3);G.F.kati.a.guard=Math.min(stCap(G.F.kati),G.F.kati.a.guard+.3);},then:[{n:"rin",f:"happy",l:"train",t:"…ขอบคุณค่ะ ฉันจะทำฉบับสีด้วย"},{n:"nar",t:"(การ์ดของกะทิดีขึ้นเล็กน้อย)"}]},
    {t:"ลดเหลือสักสิบแผ่นได้ไหม ผนังจะพังแล้ว",fx:G=>{add(G,"rin","bond",2);},then:[{n:"rin",f:"pout",l:"train",t:"สิบแผ่นค่ะ …ตัวหนังสือจะเล็กลงหน่อยนะคะ"},{n:"nar",t:"วันต่อมามีกระดาษสิบแผ่น ตัวหนังสือขนาดเท่ามด"}]}]}]},
  {id:"rin_glasses",look:"train",when:G=>G.week>=22&&inCamp(G,"rin"),bg:"gym",steps:[
   {n:"nar",t:"เปรี๊ยะ! แว่นของรินกระเด็นไปโดนเท้ามะลิระหว่างซ้อมเป้า เลนส์ข้างซ้ายแตกเป็นใยแมงมุม"},
@@ -992,7 +993,7 @@ EVENTS.push(
   {n:"mali",f:"flustered",l:"train",t:"นั่นกระสอบทรายค่ะพี่ริน! มะลิอยู่ทางนี้!"},
   {n:"rin",f:"flustered",l:"train",t:G=>`${CALL(G,"rin")}คะ… สารภาพก็ได้ ฉันสายตาสั้นสามร้อย ตอนชกจริงถอดแว่น ฉันเลยต้องจำทุกอย่างก่อนขึ้นเวที นั่นแหละที่มาของข้อมูลทั้งหมด`},
   {choice:[{t:"(พาไปร้านแว่นในเมือง จ่ายให้เอง ฿1,500)",fx:G=>{G.cash-=1500;add(G,"rin","bond",5);add(G,"rin","trust",4);MEM(G,"rin_glasses");},then:[{n:"rin",f:"flustered",l:"casual",t:"…กรอบนี้เบากว่าเดิมครึ่งหนึ่ง ฉันจะคืนเงินให้นะคะ ผ่อนได้ไหม"},{n:"nar",t:"ระหว่างทางกลับ รินเดินชิดกว่าทุกครั้ง เพราะยังปรับสายตาไม่ได้ …มั้ง"}]},
-   {t:"แบบนี้ยิ่งเก่งนะ ชกด้วยความจำ",fx:G=>{add(G,"rin","morale",6);G.F.rin.a.iq=Math.min(20,G.F.rin.a.iq+.3);MEM(G,"rin_memory");},then:[{n:"rin",f:"happy",l:"train",t:"…ไม่มีใครเคยมองแบบนี้ ขอบคุณค่ะ ฉันจะจำคำนี้ด้วย"},{n:"nar",t:"(การอ่านเกมของรินดีขึ้นเล็กน้อย)"}]}]}]},
+   {t:"แบบนี้ยิ่งเก่งนะ ชกด้วยความจำ",fx:G=>{add(G,"rin","morale",6);G.F.rin.a.iq=Math.min(stCap(G.F.rin),G.F.rin.a.iq+.3);MEM(G,"rin_memory");},then:[{n:"rin",f:"happy",l:"train",t:"…ไม่มีใครเคยมองแบบนี้ ขอบคุณค่ะ ฉันจะจำคำนี้ด้วย"},{n:"nar",t:"(การอ่านเกมของรินดีขึ้นเล็กน้อย)"}]}]}]},
  {id:"rin_dad",look:"casual",when:G=>G.week>=26&&inCamp(G,"rin"),bg:"night",steps:[
   {n:"nar",t:"สามทุ่ม รินนั่งอยู่หน้าค่าย มือถือสั่นไม่หยุด หน้าจอขึ้นว่า 'พ่อ (ศ.ดร.)'"},
   {n:"rin",f:"sad",l:"casual",t:"พ่อเป็นอาจารย์มหาวิทยาลัยค่ะ อยากให้ฉันเรียนต่อเอก ไม่ใช่มาชกมวยต่างจังหวัด"},
@@ -1196,7 +1197,7 @@ EVENTS.push(
   {n:"nar",t:"หลังซ้อมเสร็จ รินนั่งดูมือที่พันผ้าของตัวเองอยู่นาน"},
   {n:"rin",f:"sad",l:"fight",t:"ผู้จัดการคะ… ทุกคนเรียกฉันว่า \"ยัยแว่นนักวิเคราะห์\" ฉันเป็นนักมวยจริง ๆ หรือแค่คนที่ชอบตัวเลข"},
   {choice:[{t:"เธอคือนักมวยที่อ่านเกมเก่งที่สุดที่ฉันเคยเห็น",fx:G=>{add(G,"rin","morale",8);add(G,"rin","bond",4);},then:[{n:"rin",f:"flustered",l:"fight",t:"…ประโยคนี้ ฉันจะจดไว้หน้าแรกเลยค่ะ"}]},
-   {t:"ไฟต์หน้า ลองชกโดยไม่ดูโน้ตสักไฟต์สิ",fx:G=>{const f=G.F.rin;f.a.comp=Math.min(20,f.a.comp+.5);f.a.iq=Math.min(20,f.a.iq+.3);add(G,"rin","trust",4);},then:[{n:"rin",f:"angry",l:"fight",t:"ไม่ดูโน้ต… น่ากลัวแต่ก็น่าลอง ได้ค่ะ!"},{n:"nar",t:"(ความใจนิ่งและการอ่านเกมของรินดีขึ้น)"}]}]}]});
+   {t:"ไฟต์หน้า ลองชกโดยไม่ดูโน้ตสักไฟต์สิ",fx:G=>{const f=G.F.rin;f.a.comp=Math.min(stCap(f),f.a.comp+.5);f.a.iq=Math.min(stCap(f),f.a.iq+.3);add(G,"rin","trust",4);},then:[{n:"rin",f:"angry",l:"fight",t:"ไม่ดูโน้ต… น่ากลัวแต่ก็น่าลอง ได้ค่ะ!"},{n:"nar",t:"(ความใจนิ่งและการอ่านเกมของรินดีขึ้น)"}]}]}]});
 
 // ---------- v1.21: opponent's parting words, shown in a bubble over her head after the bell ----------
 const POST_BUBBLE={
@@ -1534,7 +1535,7 @@ EVENTS.push(
  {id:"mem_rin_memory",look:"train",when:G=>HAS(G,"rin_memory",10)&&inCamp(G,"rin"),bg:"gym",steps:[
   {n:"rin",f:"happy",l:"train",t:G=>`${CALL(G,"rin")}เคยบอกว่าฉันชกด้วยความจำ ตอนนี้ฉันจำได้หมดเลยค่ะ ทุกไฟต์ของค่ายเรา ใครออกหมัดอะไรยกไหน`},
   {n:"rin",f:"flustered",l:"train",t:"…รวมถึงคำที่คุณพูดวันนั้นด้วย"},
-  {fx:G=>{add(G,"rin","bond",3);G.F.rin.a.iq=Math.min(20,G.F.rin.a.iq+.2);}},{n:"nar",t:"(รินยังจำคำพูดวันนั้นได้ · การอ่านเกมดีขึ้นอีกนิด)"}]},
+  {fx:G=>{add(G,"rin","bond",3);G.F.rin.a.iq=Math.min(stCap(G.F.rin),G.F.rin.a.iq+.2);}},{n:"nar",t:"(รินยังจำคำพูดวันนั้นได้ · การอ่านเกมดีขึ้นอีกนิด)"}]},
  {id:"mem_kati_promise",look:"casual",when:G=>G.week>=44&&HAS(G,"kati_promise")&&inCamp(G,"kati"),bg:"night",steps:[
   {n:"nar",t:"คืนก่อนรอบสำคัญ กะทินั่งพันเทปมือช้า ๆ อยู่หน้าค่าย"},
   {n:"kati",f:"flustered",l:"casual",t:G=>`${CALL(G,"kati")}คะ จำได้ไหม อาทิตย์ที่สองที่มาที่นี่ บอกหนูว่าจะไม่ทำให้หนูเสียใจ`},
