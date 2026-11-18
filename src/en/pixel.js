@@ -473,6 +473,8 @@ const SPECIALS={
  rin:[{img:"rin_special",w:"knee",def:"The Winning Equation",sk:"lb_shadow",when:e=>e.ev==="counter",p:.35}],
  ploy:[{img:"ploy_special",w:"punch",def:"Buffalo Swing",sk:"kr_thunder",when:e=>e.ev==="hit"&&e.w==="punch"&&e.crit,p:.6}],
  fah:[{img:"fah_special",w:"punch",def:"Thundering Sky Storm",sk:"f_hurricane",when:(e,hp)=>(e.ev==="hit"||e.ev==="counter")&&e.w==="punch"&&hp<50,p:.5}]};
+/* v1.89.24: arena art with the ring in the middle distance — zoom in so the fighters' feet (80% down the stage) land on the canvas (fy = that spot in the art) */
+const BG_FIT={"bg_loy_ring.webp":{z:1.5,fy:.71}};
 const SP_FRAME=150,SP_LEN=SP_FRAME*8+200,FX_LEN=1250;
 /* the drawn sheet that fits a move: a guard move → the dodge sheet; otherwise the sheet for that weapon. None → the plain row + code effects */
 /* one sprite frame as a flat colour silhouette (glow outline, afterimages) — cached per sheet/frame/colour */
@@ -518,7 +520,8 @@ const FS={cv:null,ctx:null,bg:null,A:null,B:null,fx:[],shake:0,
     s.anim="fx";s.fx={t0:now,row,kind,col:kind==="def"?"#5ab0ff":kind==="rec"?"#4fe08a":(s.f&&s.f.color)||"#ffd34a",hit:false};if(kind==="atk")s.x+=s.side==="A"?40:-40;this.shake=kind==="atk"?8:4;},
   render(t){const S=FS;if(!S.cv||!S.cv.isConnected)return;const x=S.ctx,W=S.cv.width,H=S.cv.height;
     x.save();const sh=S.shake;if(sh>.3){x.translate((Math.random()-.5)*sh,(Math.random()-.5)*sh);S.shake*=.88;}
-    if(S.bg&&S.bg.naturalWidth){const r=S.bg.naturalWidth/S.bg.naturalHeight;const bw=H*r;x.drawImage(S.bg,(W-bw)/2,0,bw,H);}else{x.fillStyle="#221b3d";x.fillRect(0,0,W,H);}
+    if(S.bg&&S.bg.naturalWidth){const r=S.bg.naturalWidth/S.bg.naturalHeight,fit=BG_FIT[(S.bg.src||"").split("/").pop()];
+      if(fit){const dh=H*fit.z,dw=dh*r;x.drawImage(S.bg,(W-dw)/2+(fit.dx||0)*dw,H*.8-fit.fy*dh,dw,dh);}else{const bw=H*r;x.drawImage(S.bg,(W-bw)/2,0,bw,H);}}else{x.fillStyle="#221b3d";x.fillRect(0,0,W,H);}
     // approach centre
     if(!S.A||!S.B){x.restore();return;}for(const s of [S.A,S.B]){s.x+=(s.base-s.x)*.08;
       if(s.anim==="fx"){const X=s.fx,se=t-X.t0;if(se>FX_LEN){s.anim=s.win?"win":"guard";}

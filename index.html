@@ -7182,6 +7182,8 @@ const SPECIALS={
  rin:[{img:"rin_special",w:"knee",def:"สมการชนะ",sk:"lb_shadow",when:e=>e.ev==="counter",p:.35}],
  ploy:[{img:"ploy_special",w:"punch",def:"หมัดเหวี่ยงควาย",sk:"kr_thunder",when:e=>e.ev==="hit"&&e.w==="punch"&&e.crit,p:.6}],
  fah:[{img:"fah_special",w:"punch",def:"พายุฟ้าคำราม",sk:"f_hurricane",when:(e,hp)=>(e.ev==="hit"||e.ev==="counter")&&e.w==="punch"&&hp<50,p:.5}]};
+/* v1.89.24: arena art with the ring in the middle distance — zoom in so the fighters' feet (80% down the stage) land on the canvas (fy = that spot in the art) */
+const BG_FIT={"bg_loy_ring.webp":{z:1.5,fy:.71}};
 const SP_FRAME=150,SP_LEN=SP_FRAME*8+200,FX_LEN=1250;
 /* the drawn sheet that fits a move: a guard move → the dodge sheet; otherwise the sheet for that weapon. None → the plain row + code effects */
 /* one sprite frame as a flat colour silhouette (glow outline, afterimages) — cached per sheet/frame/colour */
@@ -7227,7 +7229,8 @@ const FS={cv:null,ctx:null,bg:null,A:null,B:null,fx:[],shake:0,
     s.anim="fx";s.fx={t0:now,row,kind,col:kind==="def"?"#5ab0ff":kind==="rec"?"#4fe08a":(s.f&&s.f.color)||"#ffd34a",hit:false};if(kind==="atk")s.x+=s.side==="A"?40:-40;this.shake=kind==="atk"?8:4;},
   render(t){const S=FS;if(!S.cv||!S.cv.isConnected)return;const x=S.ctx,W=S.cv.width,H=S.cv.height;
     x.save();const sh=S.shake;if(sh>.3){x.translate((Math.random()-.5)*sh,(Math.random()-.5)*sh);S.shake*=.88;}
-    if(S.bg&&S.bg.naturalWidth){const r=S.bg.naturalWidth/S.bg.naturalHeight;const bw=H*r;x.drawImage(S.bg,(W-bw)/2,0,bw,H);}else{x.fillStyle="#221b3d";x.fillRect(0,0,W,H);}
+    if(S.bg&&S.bg.naturalWidth){const r=S.bg.naturalWidth/S.bg.naturalHeight,fit=BG_FIT[(S.bg.src||"").split("/").pop()];
+      if(fit){const dh=H*fit.z,dw=dh*r;x.drawImage(S.bg,(W-dw)/2+(fit.dx||0)*dw,H*.8-fit.fy*dh,dw,dh);}else{const bw=H*r;x.drawImage(S.bg,(W-bw)/2,0,bw,H);}}else{x.fillStyle="#221b3d";x.fillRect(0,0,W,H);}
     // approach centre
     if(!S.A||!S.B){x.restore();return;}for(const s of [S.A,S.B]){s.x+=(s.base-s.x)*.08;
       if(s.anim==="fx"){const X=s.fx,se=t-X.t0;if(se>FX_LEN){s.anim=s.win?"win":"guard";}
@@ -7706,7 +7709,7 @@ if(id==="pailin")return `${ASSET}pailin_fight_${mood==="surprised"||mood==="flus
   return `${ASSET}${id}_fight_${FMOOD(mood)}.webp`;};
 const THAI_IDS=["kati","mali","rin","ploy","fah"];
 const faceSrc=(id,mood,look)=>id==="coach"?`${ASSET}coach_face.webp`:id==="pailin"?`${ASSET}pailin_face.webp`:look&&look!=="fight"&&look!=="thai"?`${ASSET}${id}_${look}_face.webp`:`${ASSET}${id}_${["happy","sad","flustered"].includes(mood)?mood:"happy"}_face.webp`;
-const BGIMG={river_dawn:"bg_river_dawn.webp",gang_hq:"bg_gang_hq.webp",gang_hideout:"bg_gang_hideout.webp",loy_ring:"bg_loy_ring.webp",river_ring:"bg_river_ring.webp",market_morning:"bg_market_morning.webp",camp:"bg_camp.webp",night:"bg_camp_night.webp",bus:"bg_bus_rain.webp",letter:"bg_grandpa_letter.webp",fair:"bg_fair.webp",local:"bg_local.webp",district:"bg_district.webp",ring:"bg_local.webp",final:"bg_final.webp",hall:"bg_hall.webp",gym:null,gymdusk:"gym1.webp",food:"bg_food.webp",temple:"bg_temple.webp",cafe:"bg_cafe.webp",river:"bg_river.webp",market:"bg_market.webp",rooster:"bg_rooster.webp",farm:"bg_farm.webp",sea:"bg_sea.webp",mountain:"bg_mountain.webp",ayutthaya:"bg_ayutthaya.webp",amphawa:"bg_amphawa.webp",
+const BGIMG={river_dawn:"bg_river_dawn.webp",gang_hq:"bg_gang_hq.webp",gang_hideout:"bg_gang_hideout.webp",loy_ring:"bg_loy_ring.webp",market_morning:"bg_market_morning.webp",camp:"bg_camp.webp",night:"bg_camp_night.webp",bus:"bg_bus_rain.webp",letter:"bg_grandpa_letter.webp",fair:"bg_fair.webp",local:"bg_local.webp",district:"bg_district.webp",ring:"bg_local.webp",final:"bg_final.webp",hall:"bg_hall.webp",gym:null,gymdusk:"gym1.webp",food:"bg_food.webp",temple:"bg_temple.webp",cafe:"bg_cafe.webp",river:"bg_river.webp",market:"bg_market.webp",rooster:"bg_rooster.webp",farm:"bg_farm.webp",sea:"bg_sea.webp",mountain:"bg_mountain.webp",ayutthaya:"bg_ayutthaya.webp",amphawa:"bg_amphawa.webp",
   /* v1.89.7: new scenes, ready to use */camp_night:"bg_camp_night.webp",camp_rain:"bg_camp_rain.webp",songkran:"bg_songkran.webp",newyear:"bg_newyear.webp",kitchen:"bg_kitchen.webp",hill:"bg_hill.webp",tvstudio:"bg_tvstudio.webp",live_corner:"bg_live_corner.webp",hospital:"bg_hospital.webp",vector_lab:"bg_vector_lab.webp",loy_night:"bg_loy_night.webp",sportsday:"bg_sportsday.webp",dorm_room:"bg_dorm_room.webp"};
 const cardFaceSrc=C=>{if(C.face)return `${ASSET}${C.face}.webp`;const scene=(C.steps||[]).find(s=>s.n===C.c)||{},mood=scene.f||"happy",look=scene.l||"casual";
   if(look==="train")return `${ASSET}${C.c}_train_face.webp`;
@@ -9662,6 +9665,10 @@ function mailWeekly(G){G.mail=G.mail||[];if(typeof regionWeek==="function")regio
     else if(!low&&(G.loan>0||G.cash>=LOAN_LOW+4000))G.loanMailArm=0;}
   for(const M of STORY_MAIL)if(!G.mailSeen[M.id]&&M.when(G)){G.mailSeen[M.id]=1;addMail(G,{kind:"letter",from:M.from,title:M.title,body:M.body});}
   for(const M of SPONSOR_MAIL)if(!G.mailSeen[M.id]&&M.when(G)){G.mailSeen[M.id]=1;addMail(G,{kind:"take",from:M.from,title:M.title,body:M.body,amt:M.amt});}
+  // v1.89.24: win against the gang often enough and they call you out to their own warehouse
+  if((G.gang.beat||0)-(G.gang.hqAt||0)>=3&&G.week<=48&&!G.mail.some(m=>m.q==="gang"&&!m.done&&!m.expired)){const i=G.gang.hqN||0,k=["gang4","gang6","gang3"][i%3],year=G.season||1;G.gang.hqN=i+1;G.gang.hqAt=G.gang.beat;
+    addMail(G,{kind:"quest",q:"gang",qk:k,hq:1,from:"แก๊งหมวกกันน็อก (สอดมาใต้ประตู)",title:"จดหมายท้า: มาเจอกันที่โกดัง",
+      body:`กระดาษสีแดงลายมือหวัด ๆ: "ค่ายศิริชัยล้มลูกน้องข้าไปหลายรอบแล้ว ถ้าแน่จริงมาที่โกดังหลังตลาดเช้า ${QK[k].name}รออยู่ ชนะได้ข้าจ่ายค่าเหนื่อยให้ แพ้ก็อย่ามาเหยียบตลาดอีก"`,exp:G.week+3,pay:4000+year*1000});}
   // gang: after the first market fight, the next tier writes in every few weeks
   if(G.gang.st>=1&&G.gang.st<5&&gameWeek(G)>=(G.gang.nextAbs||0)&&!G.mail.some(m=>m.q==="gang"&&!m.done&&!m.expired)&&G.week<=48){const early=G.gang.st===3&&G.loan>0,k=early?"gang5":"gang"+(G.gang.st+1);
     if(early){addMail(G,{kind:"quest",q:"gang",qk:k,early:1,from:"แม่ค้าตลาดเช้า (ไม่ลงชื่อ)",title:"เสี่ยหมวกทองคำลงมาเอง!",body:`ลูกน้องมันแพ้ค่ายศิริชัยมาสามรอบติด เสี่ยหมวกทองคำเสียหน้าหนัก เลยลงมาคุมตลาดเอง แถมรู้ว่าค่ายติดหนี้มันอยู่ เขาลือกันว่าถ้าใครล้มเสี่ยได้ หนี้ทั้งตลาดก็จบ`,exp:G.week+3});G.gang.nextAbs=gameWeek(G)+5;}
@@ -9721,16 +9728,20 @@ function questFighters(){return roster(G).filter(f=>!f.injury);}
 function startQuest(spec,fid,done){const f=G.F[fid];if(!f){done&&done();return;}
   const opp=spec.npc||makeQ(G,spec.qk,fid,spec.tag||("w"+G.week));const tier="quest";
   const b={id:"q"+G.week+"_"+fid+"_"+Math.floor(Math.random()*1e4),a:fid,b:opp,week:G.week,tier,rounds:spec.rounds||3,win:spec.purse||0,lose:0,quest:spec};
-  b.bg=spec.bg||(spec.rematch?"bg_gang_hideout.webp":spec.q==="belt"?"bg_district.webp":spec.npc?"bg_food.webp":QGRP_BG[QK[spec.qk].grp]);
+  b.bg=spec.bg||(spec.rematch||spec.hq?"bg_gang_hideout.webp":spec.q==="belt"?"bg_district.webp":spec.npc?"bg_food.webp":QGRP_BG[QK[spec.qk].grp]);
   if(typeof questPlan==="function"){questPlan(b,()=>openFight(b,()=>questAfter(b,done)));return;}
   openFight(b,()=>questAfter(b,done));}
+const GANG_HQ_TAUNT={gang3:"ที่ตลาดแกเก่ง แต่ที่นี่ถิ่นข้า!",gang4:"มาจนได้! ที่นี่ไม่มีแม่ค้าคอยเชียร์แล้วนะ หมวกเงินจะสอนมารยาทให้เอง",gang6:"เสี่ยสั่งมาว่าห้ามให้แกเดินออกจากโกดังนี้ไปง่าย ๆ"};
 function questAfter(b,done){const S=b.quest,res=(G.cal||[]).slice(-1)[0];const win=res&&res.b===b.b&&res.res==="W";const me=G.F[b.a],op=G.F[b.b]||{name:"คู่ชก"};
   const fin=()=>{save();render();done&&done();};
-  if(S.q==="gang"){G.gang=G.gang||{st:0,next:0};if(S.rematch){if(win){G.goldHelmetWins=(G.goldHelmetWins||0)+1;G.rep+=.2;}playScene([{n:"npc",who:"เสี่ยหมวกทองคำ",t:win?"คราวนี้ก็แพ้อีก! ครั้งหน้าจะมาใหม่":"ครั้งนี้ฉันชนะ! แต่ค่ายแกเก่งขึ้นเยอะ"},{n:b.a,f:win?"happy":"sad",l:"fight",t:win?"ค่ายศิริชัยพร้อมเสมอค่ะ":"ครั้งหน้าจะชนะให้ได้ค่ะ"}],fin,{bg:"market",look:"fight"});return;}if(win){if(S.qk==="gang5")G.goldHelmetWins=(G.goldHelmetWins||0)+1;G.gang.st=Math.max(G.gang.st,+S.qk.slice(4));G.gang.nextAbs=gameWeek(G)+(G.loan>0?2:4);if(S.qk==="gang5"&&G.loan>0){G.loan=0;G.flags.loanWiped=1;}G.rep+=S.qk==="gang5"?2:.5;
+  if(S.q==="gang"){G.gang=G.gang||{st:0,next:0};if(win)G.gang.beat=(G.gang.beat||0)+1;
+    if(S.hq){if(win){G.rep+=.4;addMail(G,{kind:"take",from:"แก๊งหมวกกันน็อก",title:"ค่าเหนื่อยจากโกดัง",body:"ซองสีแดงยับ ๆ โยนมาทางหน้าต่าง: \"ข้าพูดคำไหนคำนั้น …อย่าบอกเสี่ยนะว่าแพ้\"",amt:S.pay||5000});}
+      playScene(win?[{n:"npc",who:op.name,t:"…เอาไป ค่าเหนื่อย! ข้าพูดคำไหนคำนั้น แต่อย่าบอกเสี่ยนะว่าแพ้"},{n:b.a,f:"happy",l:"fight",t:"ขอบคุณค่ะ! ครั้งหน้าก็ไม่แพ้ค่ะ"}]:[{n:"npc",who:op.name,t:"ฮ่า! ถิ่นข้าก็ต้องเป็นของข้า!"},{n:b.a,f:"sad",l:"fight",t:"คราวหน้าหนูจะกลับมาใหม่ค่ะ"}],fin,{bg:"gang_hideout",look:"fight"});return;}
+    if(S.rematch){if(win){G.goldHelmetWins=(G.goldHelmetWins||0)+1;G.rep+=.2;}playScene([{n:"npc",who:"เสี่ยหมวกทองคำ",t:win?"คราวนี้ก็แพ้อีก! ครั้งหน้าจะมาใหม่":"ครั้งนี้ฉันชนะ! แต่ค่ายแกเก่งขึ้นเยอะ"},{n:b.a,f:win?"happy":"sad",l:"fight",t:win?"ค่ายศิริชัยพร้อมเสมอค่ะ":"ครั้งหน้าจะชนะให้ได้ค่ะ"}],fin,{bg:"gang_hideout",look:"fight"});return;}if(win){if(S.qk==="gang5")G.goldHelmetWins=(G.goldHelmetWins||0)+1;G.gang.st=Math.max(G.gang.st,+S.qk.slice(4));G.gang.nextAbs=gameWeek(G)+(G.loan>0?2:4);if(S.qk==="gang5"&&G.loan>0){G.loan=0;G.flags.loanWiped=1;}G.rep+=S.qk==="gang5"?2:.5;
       const amt=S.qk==="gang5"?12000:S.qk==="gang6"?8000:S.qk==="gang4"?5000:S.qk==="gang3"?2000:200+Math.floor(srand(G,7)*7)*50;
       addMail(G,{kind:"take",from:"(ไม่ระบุชื่อผู้ส่ง)",title:S.qk==="gang5"?"ตลาดเช้าขอบคุณค่ายศิริชัย":"ซองสีน้ำตาลไม่มีชื่อ",body:S.qk==="gang5"?"แก๊งหมวกกันน็อกยุบแล้ว หนี้นอกระบบของทั้งตลาดเป็นโมฆะ แม่ค้าทุกแผงลงขันกันมาให้ค่าย ขอบคุณที่ไม่ยืนดูเฉย ๆ":"ข้างในมีเงินกับกระดาษโน้ตลายมือสั่น ๆ: 'ขอบคุณที่ช่วยตลาด วันนี้ขายได้เต็มแผงเลย'",amt});
-      playScene([{n:"npc",who:"ป้าศรี แม่ค้าผัก",t:S.qk==="gang5"?(G.flags.loanWiped===1?(G.flags.loanWiped=2,"เสี่ยหมวกทองคำล้มแล้ว!! ทั้งตลาดเป็นอิสระแล้วจ้า! สมุดหนี้ของมันโดนเผาทิ้งหมด หนี้ที่ค่ายกู้ไว้ก็หายไปด้วยนะ!"):"เสี่ยหมวกทองคำล้มแล้ว!! ทั้งตลาดเป็นอิสระแล้วจ้า!"):"ไปแล้ว! พวกมันขี่มอไซค์หนีไปแล้ว! ขอบใจนะหนู"},{n:b.a,f:"happy",l:"fight",t:S.qk==="gang5"?"ตลาดนี้มีคนคุ้มครองแล้วค่ะ ชื่อค่ายศิริชัย!":"ใครรังแกตลาดนี้ ต้องผ่านค่ายศิริชัยก่อนค่ะ!"},{n:"nar",t:"ตกเย็นมีซองสีน้ำตาลไม่มีชื่อผู้ส่งเสียบอยู่ที่ตู้จดหมายค่าย"}],fin,{bg:"market",look:"fight"});return;}
-    playScene([{n:"npc",who:op.name,t:"ฮ่า! ค่ายมวยก็แค่นี้! บอกแม่ค้าให้เตรียมดอกไว้!"},{n:b.a,f:"sad",l:"fight",t:"…ขอโทษนะคะ ป้า คราวหน้าหนูไม่แพ้แล้ว"},{n:"nar",t:"แม่ค้าบอกว่าไม่เป็นไร พวกมันจะกลับมาอีก และค่ายจะมีโอกาสอีกครั้ง"}],()=>{G.gang.nextAbs=gameWeek(G)+3;fin();},{bg:"market",look:"fight"});return;}
+      playScene([{n:"npc",who:"ป้าศรี แม่ค้าผัก",t:S.qk==="gang5"?(G.flags.loanWiped===1?(G.flags.loanWiped=2,"เสี่ยหมวกทองคำล้มแล้ว!! ทั้งตลาดเป็นอิสระแล้วจ้า! สมุดหนี้ของมันโดนเผาทิ้งหมด หนี้ที่ค่ายกู้ไว้ก็หายไปด้วยนะ!"):"เสี่ยหมวกทองคำล้มแล้ว!! ทั้งตลาดเป็นอิสระแล้วจ้า!"):"ไปแล้ว! พวกมันขี่มอไซค์หนีไปแล้ว! ขอบใจนะหนู"},{n:b.a,f:"happy",l:"fight",t:S.qk==="gang5"?"ตลาดนี้มีคนคุ้มครองแล้วค่ะ ชื่อค่ายศิริชัย!":"ใครรังแกตลาดนี้ ต้องผ่านค่ายศิริชัยก่อนค่ะ!"},{n:"nar",t:"ตกเย็นมีซองสีน้ำตาลไม่มีชื่อผู้ส่งเสียบอยู่ที่ตู้จดหมายค่าย"}],fin,{bg:"market_morning",look:"fight"});return;}
+    playScene([{n:"npc",who:op.name,t:"ฮ่า! ค่ายมวยก็แค่นี้! บอกแม่ค้าให้เตรียมดอกไว้!"},{n:b.a,f:"sad",l:"fight",t:"…ขอโทษนะคะ ป้า คราวหน้าหนูไม่แพ้แล้ว"},{n:"nar",t:"แม่ค้าบอกว่าไม่เป็นไร พวกมันจะกลับมาอีก และค่ายจะมีโอกาสอีกครั้ง"}],()=>{G.gang.nextAbs=gameWeek(G)+3;fin();},{bg:"market_morning",look:"fight"});return;}
   if(win&&S.pay){addMail(G,{kind:"take",from:S.from||"ผู้ว่าจ้าง",title:"ค่าเหนื่อยตามสัญญา",body:S.q==="cow"?"ค่าเหนื่อยพร้อมนมสดหนึ่งถัง (นมถูกดื่มหมดภายในสิบนาทีโดยนักมวยในค่าย)":S.q==="rooster"?"ค่าจ้างพร้อมไข่สองแผง ไก่แจ้กลับบ้านไปนอนซึม เจ้าของบอกว่ามันไม่เคยแพ้ใครมาก่อน":"เดิมพันข้างเวทีที่คนดูลงขันกัน ทั้งตำบลพูดถึงไฟต์นี้",amt:S.pay});G.rep+=.6;}
   if(S.q==="challenge")op&&(win?G.rep+=1:0);
   if(S.q==="belt"){const venue=S.venue||"tha",V=STADIUMS[venue],slot=beltStore(G,venue),B=slot[S.div];
@@ -9845,13 +9856,14 @@ Object.assign(ACT,{
   mdecl:d=>{const m=G.mail.find(x=>x.id===d.v);if(!m)return;m.done=true;m.declined=true;if(m.q==="gang"&&G.gang)G.gang.nextAbs=gameWeek(G)+(G.loan>0?2:4);save();render();},
   macc:d=>{UI.modal={type:"qpick",id:d.v};render();},
   qsend:d=>{const m=G.mail.find(x=>x.id===d.v);if(!m||m.done)return;m.done=true;UI.modal=null;
-    const spec=m.q==="belt"?{q:"belt",npc:m.npc,pay:m.pay,from:m.from,div:m.div,defend:m.defend,venue:m.venue||"tha",bg:m.bg,rounds:5}:m.q==="challenge"?{q:"challenge",npc:m.npc,pay:m.pay,from:m.from}:{q:m.q,qk:m.qk,pay:m.pay,from:m.from,rounds:m.qk==="gang5"?4:3};
-    const intro=m.q==="gang"?[{n:"nar",t:"ตลาดเช้า… มอเตอร์ไซค์สิบกว่าคันจอดเรียงหน้าแผงผัก"},{n:"npc",who:QK[m.qk].name,t:m.early?"ลูกน้องฉันแพ้เธอซ้ำแล้วซ้ำเล่า เสียชื่อหมด! แถมค่ายเธอยังติดหนี้ฉันอยู่ วันนี้ฉันจัดการเอง!":m.qk==="gang5"?"ได้ยินว่ามีค่ายมวยมาเกะกะธุรกิจฉัน วันนี้หัวหน้าใหญ่ลงมาเอง!":m.qk==="gang4"?"ลูกน้องหมวกแดงของฉันโดนเด็กค่ายมวยไล่ตะเพิดเหรอ? หมวกเงินคนนี้จะสอนมารยาทให้เอง":m.qk==="gang6"?"เสี่ยไม่ต้องลงมาเปลืองแรงหรอก มือขวาอย่างฉันจัดการแทนได้":"ไหนใครที่ไล่ลูกน้องฉัน ออกมาเลย!"},{n:d.id,f:"angry",l:"fight",t:"ฉันเอง!"}]
+    const spec=m.q==="belt"?{q:"belt",npc:m.npc,pay:m.pay,from:m.from,div:m.div,defend:m.defend,venue:m.venue||"tha",bg:m.bg,rounds:5}:m.q==="challenge"?{q:"challenge",npc:m.npc,pay:m.pay,from:m.from}:{q:m.q,qk:m.qk,hq:m.hq,pay:m.pay,from:m.from,rounds:m.qk==="gang5"?4:3};
+    const intro=m.q==="gang"&&m.hq?[{n:"nar",t:"โกดังหลังตลาดเช้า ไฟสลัว ลูกน้องหมวกแดงนั่งล้อมโต๊ะแผนที่ พอเห็นค่ายศิริชัยเดินเข้ามา ทุกคนลุกพรวด"},{n:"npc",who:QK[m.qk].name,t:GANG_HQ_TAUNT[m.qk]||"มาจนได้! ที่นี่ไม่มีแม่ค้าคอยเชียร์แล้วนะ"},{n:d.id,f:"angry",l:"fight",t:"มาตามนัดแล้วค่ะ!"}]
+      :m.q==="gang"?[{n:"nar",t:"ตลาดเช้า… มอเตอร์ไซค์สิบกว่าคันจอดเรียงหน้าแผงผัก"},{n:"npc",who:QK[m.qk].name,t:m.early?"ลูกน้องฉันแพ้เธอซ้ำแล้วซ้ำเล่า เสียชื่อหมด! แถมค่ายเธอยังติดหนี้ฉันอยู่ วันนี้ฉันจัดการเอง!":m.qk==="gang5"?"ได้ยินว่ามีค่ายมวยมาเกะกะธุรกิจฉัน วันนี้หัวหน้าใหญ่ลงมาเอง!":m.qk==="gang4"?"ลูกน้องหมวกแดงของฉันโดนเด็กค่ายมวยไล่ตะเพิดเหรอ? หมวกเงินคนนี้จะสอนมารยาทให้เอง":m.qk==="gang6"?"เสี่ยไม่ต้องลงมาเปลืองแรงหรอก มือขวาอย่างฉันจัดการแทนได้":"ไหนใครที่ไล่ลูกน้องฉัน ออกมาเลย!"},{n:d.id,f:"angry",l:"fight",t:"ฉันเอง!"}]
       :m.q==="belt"?[{n:"nar",t:`${STADIUMS[m.venue||"tha"].name} ไฟสปอตไลต์ส่องลงกลางเวที โฆษกประกาศชื่อทั้งสองมุม`},{n:"npc",who:G.F[m.npc].name,t:m.defend?"เข็มขัดเส้นนั้นควรเป็นของฉัน วันนี้ฉันมาเอาคืน":"อยากได้เข็มขัดเหรอ? ต้องข้ามศพฉันไปก่อน"},{n:d.id,f:"angry",l:"fight",t:m.defend?"มาเอาให้ได้สิ!":"หนูมาเพื่อสิ่งนั้นแหละ!"}]
       :m.q==="challenge"?[{n:"nar",t:"ลานหลังตลาดสด คนมามุงเต็มสองฝั่ง มีคนตั้งโต๊ะรับพนันน้ำแดง"},{n:"npc",who:G.F[m.npc].name,t:"มาจนได้นะ นึกว่าจะหนีตลอดฤดูกาล"},{n:d.id,f:"angry",l:"fight",t:"ไม่ได้หนี แค่ยังไม่ว่าง ตอนนี้ว่างแล้ว!"}]
       :m.q==="cow"?[{n:"nar",t:"กลางถนนหน้าตลาด วัวนมตัวใหญ่ยืนตั้งการ์ด ขาหน้าเต้นฟุตเวิร์กแบบที่ไม่มีวัวตัวไหนควรทำได้"},{n:"npc",who:"ลุงเฉลิม",t:"นั่นแหละ! ระวังถีบนะหนู มันดูไฟต์ย้อนหลังทุกคืน!"},{n:d.id,f:"surprised",l:"fight",t:"…วัวตั้งการ์ดได้จริง ๆ ด้วย!?"}]
       :[{n:"nar",t:"ไก่แจ้ตัวเล็กยืนบนกระสอบทราย อกพองโต ขนคอตั้งชัน"},{n:"npc",who:"เสี่ยต๋อง",t:"อย่าดูถูกมันนะครับ มันเคยไล่สุนัขพันธุ์ใหญ่ทั้งซอยมาแล้ว"},{n:d.id,f:"happy",l:"fight",t:"มาเลยเจ้าไก่! หนูไม่ใช่สุนัขนะ!"}];
-    playScene(intro,()=>startQuest(spec,d.id,()=>{}),{bg:m.q==="gang"?"market_morning":m.q==="belt"?STADIUMS[m.venue||"tha"].scene:m.q==="challenge"?"food":m.q==="rooster"?"rooster":m.q==="cow"||m.q==="bull"?"farm":"fair",look:"fight"});},
+    playScene(intro,()=>startQuest(spec,d.id,()=>{}),{bg:m.q==="gang"?(m.hq?"gang_hq":"market_morning"):m.q==="belt"?STADIUMS[m.venue||"tha"].scene:m.q==="challenge"?"food":m.q==="rooster"?"rooster":m.q==="cow"||m.q==="bull"?"farm":"fair",look:"fight"});},
   cashflow:()=>{UI.modal={type:"cashflow"};render();},
   repgraph:()=>{UI.modal={type:"repgraph"};render();},
   calday:d=>{const w=+d.v;if(!(G.cal||[]).some(c=>c.wk===w&&(c.season===(G.season||1)||c.absWeek>=gameWeek(G)-G.week+1))&&!G.bookings.some(b=>b.week===w)&&!calEvents(w).length)return;UI.modal={type:"calday",w};render();},
@@ -10877,7 +10889,7 @@ function thiefHTML(){const pool=gauntPool();return `<h2>ไล่จับโจ
   <div class="center endbtns"><button class="btn" data-act="closeModal">ไว้ก่อน</button></div>`;}
 function thiefGo(fid){const L=loyOf(G);if(!L)return;const f=G.F[fid];if(!f)return;UI.modal=null;
   const pre=[...LOY_THIEF.pre,f.canon&&LOY_THIEF.line[fid]?{n:fid,f:"angry",l:"thai",t:LOY_THIEF.line[fid]}:{n:"nar",t:`${f.name}ก้าวขึ้นท่าเรือ ถกแขนเสื้อพร้อมลุย`}];
-  playScene(pre,()=>{const qid=evThief(G,f);const bk={id:"bthief",a:fid,b:qid,week:G.week,tier:"evloy",rounds:2,ev:1,bg:"bg_river_ring.webp"};
+  playScene(pre,()=>{const qid=evThief(G,f);const bk={id:"bthief",a:fid,b:qid,week:G.week,tier:"evloy",rounds:2,ev:1,bg:"bg_loy_ring.webp"};
     openFight2(bk,()=>{const F=LASTF,win=F&&F.result&&F.result.win==="A";L.thiefWk=absWeek(G);delete G.F.q_evthief;
       if(win){L.thiefN=(L.thiefN||0)+1;}save();
       playScene(win?[...LOY_THIEF.win,{n:"nar",t:`จับไอ้ตุ่มได้แล้ว ${L.thiefN} ครั้ง`}]:LOY_THIEF.lose,()=>{AU.startMusic("hub");UI.tab="home";save();render();},{bg:"river",look:"thai"});});},{bg:"river",look:"thai"});}
@@ -11827,7 +11839,7 @@ CHAT.fah.push(
 <script>
 (function(){
 /* v1.87: Thai code ships inside index.html; English code (en.js) and the dictionary (i18n.js) load only when needed */
-var B="41b0b8c6f0";
+var B="fb31344aab";
 var L="";try{L=localStorage.getItem("mtm_lang")||"";}catch(e){}
 try{var h=(location.hash||"").match(/lang=(th|en)/);if(h)L=h[1];}catch(e){}
 if(L!=="th"&&L!=="en")L="th";
