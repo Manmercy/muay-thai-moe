@@ -419,7 +419,7 @@ RG_TRIPX.buriram={bg:"night_isan",steps:G=>{const ploy=rgIn(G,"ploy");return [
    {n:"tabtim",f:"surprised",l:"casual",with:"ploy",t:"Ow! Tabtim's hand is numb up to the elbow… that's the real thing, everyone! The real deal!"},
    {n:"npc",who:"Ringside gambler",t:"…The real thing."},
    {n:"pailin",f:"sad",t:"…My data has never been able to measure that punch."},
-   {n:"nar",t:"Pailin turns and leaves with Vega, but stops to look back at Ploy once more before the door.",choice:[
+   {n:"nar",show:[{id:"pailin"},{id:"ploy",l:"casual",f:"sad"}],t:"Pailin turns and leaves with Vega, but stops to look back at Ploy once more before the door.",choice:[
      {t:"\"That punch is Ploy's own. Nobody else's.\"",fx:G2=>add(G2,"ploy","bond",2),then:[{n:"ploy",f:"flustered",l:"casual",t:"…I knew that without you saying it. But hearing it… thank you."}]},
      {t:"\"Your sister still cares about you.\"",fx:G2=>add(G2,"ploy","bond",1),then:[{n:"ploy",f:"sad",l:"casual",t:"I know… she worries about me the way she worries about a dataset. The day she worries about me like a sister, I'll go back and talk."}]}]},
    {fx:G2=>{const p=G2.F.ploy;if(p)p.morale=Math.min(100,(p.morale||0)+5);rgMeet(G2,"tabtim",1);G2.flags.ployKorat=1;}},

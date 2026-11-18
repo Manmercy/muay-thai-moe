@@ -933,7 +933,7 @@ function evGang(G,k,f){const kind=LOY_LADDER[k],K=QK[kind],t=ovr(f.a)+K.lvl+k*.1
 function redeemCode(raw){const v=(raw||"").toUpperCase().replace(/\s+/g,"");if(!v)return;let key="";try{key=btoa(v);}catch(e){}const R=REDEEM[key];
   if(!R){AU.sfx("miss");toast("ไม่พบโค้ดนี้ ลองเช็กตัวสะกดอีกครั้ง");return;}
   if(R.k==="gate"){G.unlocked=true;try{localStorage.setItem(GATE.key,"1");}catch(e){}save();AU.sfx("level");toast("ปลดล็อกปีที่ 2 แล้ว!");return;}
-  if(R.k==="loy"){const t=todayStr();if(!evTest()){if(t<R.from){toast("โค้ดนี้จะเปิดใช้วันที่ 18 พ.ย. ติดตามประกาศที่เพจและ Discord นะ");return;}if(t>R.to){toast("อีเวนต์ลอยกระทงปีนี้จบไปแล้ว ไว้เจอกันปีหน้า!");return;}}
+  if(R.k==="loy"){const t=todayStr();if(!evTest()){if(t<R.from){toast("โค้ดนี้จะเปิดใช้วันที่ 18 พ.ย. ติดตามประกาศที่เพจและ Discord นะ");return;}/* v1.89.19: the Loy Krathong code stays redeemable after the festival (only the gacha machine is seasonal) */}
     if(loyOf(G)){toast("เซฟนี้ใช้โค้ดนี้ไปแล้ว ดูจดหมายเชิญในกล่องจดหมายได้เลย");return;}
     G.ev=G.ev||{};G.ev.loy={got:G.week,season:G.season||1,best:0,tiers:{},runs:0};
     addMail(G,{kind:"event",ev:"loy",from:"ป้าแต๋ว ร้านส้มตำหน้าวัด",title:"คืนนี้งานลอยกระทงตลาดน้ำ!",body:"ผู้จัดการจ๋า คืนนี้ป้าไปเปิดแผงขายกระทงที่งานตลาดน้ำ พาเด็ก ๆ ในค่ายมาเที่ยวกันนะ มีของกินเพียบ ป้าเลี้ยงส้มตำเอง! แต่ได้ยินว่าแก๊งหมวกกันน็อกจะมาป่วนงานด้วย… ถ้ามากันได้ป้าอุ่นใจขึ้นเยอะเลย"});
