@@ -7,8 +7,8 @@ const ME=G=>G.player.name,
  MEM=(G,k)=>{G.mem=G.mem||{};G.mem[k]=absWeek(G);}, HAS=(G,k,gap)=>G.mem&&G.mem[k]!==undefined&&absWeek(G)-G.mem[k]>=(gap||0),
  CALL=(G,id)=>{const f=G.F[id],b=f?f.bond||0:0;if(G.romance===id||b>=75)return G.player.name;if(b>=40&&Math.random()<.35)return G.player.name;return "ผู้จัดการ";}, PR=G=>G.player.gender==="m"?"ผม":"ฉัน", PA=G=>G.player.gender==="m"?"ครับ":"ค่ะ";
 const SPK={kati:{name:"กะทิ",color:"#e23b4e"},mali:{name:"มะลิ",color:"#4a7fe0"},rin:{name:"ริน",color:"#3fae6a"},
-  ploy:{name:"พลอย",color:"#9b62e0"},fah:{name:"ฟ้า",color:"#e7b443"},pailin:{name:"ไพลิน",color:"#8e4ac3"},coach:{name:"ครูแดง",color:"#c98a5a"},nar:{name:""},me:{name:"(คุณ)"}};
-const HONOR_LABEL={local:"แชมป์รอบตำบล",district:"แชมป์รอบอำเภอ",province:"แชมป์จังหวัด",belt:"แชมป์เวทีท่าแพ",defense:"ป้องกันแชมป์เวทีท่าแพ",dm:"แชมป์ Death Match"};
+  ploy:{name:"พลอย",color:"#9b62e0"},fah:{name:"ฟ้า",color:"#e7b443"},pailin:{name:"ไพลิน",color:"#8e4ac3"},baibua:{name:"ใบบัว",color:"#e86fa0"},tabtim:{name:"ทับทิม",color:"#d23246"},alicia:{name:"อลิเซีย",color:"#2f62c8"},chaba:{name:"ชบา",color:"#1f9a7a"},coach:{name:"ครูแดง",color:"#c98a5a"},nar:{name:""},me:{name:"(คุณ)"}};
+const HONOR_LABEL={local:"แชมป์รอบตำบล",district:"แชมป์รอบอำเภอ",province:"แชมป์จังหวัด",belt:"แชมป์เวทีท่าแพ",defense:"ป้องกันแชมป์เวทีท่าแพ",dm:"แชมป์ Death Match",rg_north:"ถ้วยเจ้าภาคเหนือ",rg_isan:"ถ้วยเจ้าภาคอีสาน",rg_central:"ถ้วยเจ้าภาคกลาง",rg_south:"ถ้วยเจ้าภาคใต้"};
 function honorLabel(kind,venue){if(venue&&typeof STADIUMS!=="undefined"&&STADIUMS[venue]&&(kind==="belt"||kind==="defense"))return (kind==="belt"?"แชมป์":"ป้องกันแชมป์")+STADIUMS[venue].name;return HONOR_LABEL[kind]||"แชมป์";}
 function honorSteps(G,h){const f=G.F[h.id],label=honorLabel(h.kind,h.venue),ranked=h.kind==="local"||h.kind==="district";
   return [{n:"nar",t:ranked?`คะแนนตลอดรอบ${h.kind==="local"?"ตำบล":"อำเภอ"}สรุปแล้ว ${f.name}ขึ้นอันดับหนึ่ง กรรมการเรียกเธอกลับมากลางเวที`:`เสียงระฆังจบ กรรมการชูแขน${f.name}ขึ้นกลางเวที เสียงเชียร์ดังกลบทุกอย่าง`},

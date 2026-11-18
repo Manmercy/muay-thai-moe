@@ -206,7 +206,7 @@ const ROAD={st:null,
     if(S.phase==="sheet"){const P=S.opts.plan||roadPlan(G,S.dest,S.car),D=P.D,poor=!S.opts.paid&&S.opts.charge!==false&&G.cash<P.total;
       el.innerHTML=`<div class="mbox px"><h2>🚐 Trip to ${esc(D.name)}</h2><p class="meta center">${ROAD_REGION[D.r].name} · ${D.km} km ${D.final?" · regional title ring":""}</p>
        ${this.sheetHTML(P,S)}${this.frontHTML(S)}
-       ${S.opts.paid?`<p class="meta center">Travel cost already paid when you planned the trip</p><div class="mfoot roadbtns"><button class="btn primary" data-rd="go">Set off ▸</button></div></div>`
+       ${S.opts.paid?`<p class="meta center">${S.opts.sponsor?"NAGA Energy Drink covers travel for camps in a regional title fight":"Travel cost already paid when you planned the trip"}</p><div class="mfoot roadbtns"><button class="btn primary" data-rd="go">Set off ▸</button></div></div>`
         :`<div class="mfoot roadbtns"><button class="btn" data-rd="close">Not now</button><button class="btn primary" data-rd="go" ${poor?"disabled":""}>${poor?"Not enough money":`Set off · ${fmt(P.total)}`}</button></div></div>`}`;return;}
     if(S.phase==="demo"){const cars=["none",...Object.keys(CAMP_DECOR.vehicle.items).filter(k=>k!=="none"&&ROAD_CAR[k])];
       const dk=Object.keys(ROAD_DEST).find(k=>ROAD_DEST[k].r===S.region&&ROAD_DEST[k].final),P=roadPlan(G,dk,S.car);

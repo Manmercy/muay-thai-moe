@@ -380,6 +380,7 @@ const SIGNATURE={kati:{name:"ศอกกลับใจศิริชัย",d
 const hasSignature=f=>!!SIGNATURE[f.id]&&f.camp==="player"&&(f.bond||0)>=60;
 function skillMods(f){const m={hit:{},pts:{},dmg:{},ctr:0,ctrDmg:0,clutch:0,regen:0,mor:0,evade:0,corner:0,prep:0,clDef:0,staSave:0};
   if(hasSignature(f)){const e=SIGNATURE[f.id].fx;for(const k in e){if(typeof e[k]==="object")for(const w in e[k])m[k][w]=(m[k][w]||0)+e[k][w];else m[k]+=e[k];}}
+  if(f.pfx)for(const k in f.pfx){const e=f.pfx;if(typeof e[k]==="object")for(const w in e[k])m[k][w]=(m[k][w]||0)+e[k][w];else m[k]+=e[k];} /* v1.90: a regional champion's own perk */
   const list=skillList(f.id);if(!list.length||!f.skills)return m;const eq=equipped(f);
   for(const sk of list){if(!sk.passive&&!eq.includes(sk.id))continue;const r=f.skills[sk.id]||0;if(!r)continue;const e=sk.fx(r);
     for(const k in e){if(typeof e[k]==="object")for(const w in e[k])m[k][w]=(m[k][w]||0)+e[k][w];else m[k]+=e[k];}}
@@ -725,7 +726,8 @@ const REGION_LIVE=false;
 TIER.region={name:"ศึกชิงเจ้าสี่ภาค",win:12000,lose:5000,rep:2.5,off:1};
 function regionOn(){if(REGION_LIVE)return true;try{if(typeof location!=="undefined"&&/regiondev/.test(location.hash||""))localStorage.setItem("mtm_regiondev","1");return localStorage.getItem("mtm_regiondev")==="1";}catch(e){return false;}}
 const regionReady=G=>(G.season||1)>=6&&(G.honors||[]).filter(h=>h.kind==="province").length>=3; /* year 5 is over + three provincial titles */
-const regionBlock=(G,wk)=>!!(G.region&&G.region.trip&&G.region.trip.season===(G.season||1)&&G.region.trip.wk===wk); /* the whole camp is on the road that week */
+const regionBlock=(G,wk)=>{const R=G.region;if(!R)return false;const s=G.season||1;if(R.trip&&R.trip.season===s&&R.trip.wk===wk)return true; /* the whole camp is on the road that week */
+  return Object.values(R.champ||{}).some(c=>c&&c.next&&c.next.season===s&&c.next.wk===wk);}; /* …or at a regional championship bout */
 let REGION_P=null;
 function regionLoad(){if(typeof REGION!=="undefined")return Promise.resolve(REGION);if(REGION_P)return REGION_P;
   if(typeof window==="undefined"||!window.MTM_JS)return Promise.reject(new Error("no loader"));
@@ -839,7 +841,7 @@ const FACILITIES={
   recovery:{name:"ห้องฟื้นฟูและอ่างน้ำแข็ง",cost:[15000,30000,50000],desc:"ฟื้นความล้า +5/สัปดาห์ ต่อระดับ"},
   classroom:{name:"ลานสอนคอร์ส",cost:[8000,14000,22000,32000,45000],desc:"รับนักเรียนได้เพิ่ม 3 คน ต่อระดับ"},
   brand:{name:"ป้ายและโปรโมทค่าย",cost:[8000,20000,40000,50000],desc:"คนอยากมาเรียนเพิ่ม 3 คน ต่อระดับ ชื่อเสียง +0.5"},
-  dorm:{name:"ห้องพักนักมวย",cost:[18000,40000,60000],desc:"กำลังใจ +1.5 และความเชื่อใจ +0.3 ทุกสัปดาห์ ต่อระดับ"},
+  dorm:{name:"ห้องพักนักมวย",cost:[18000,40000,60000,90000],desc:"กำลังใจ +1.5 และความเชื่อใจ +0.3 ทุกสัปดาห์ ต่อระดับ"},
   kitchen:{name:"ครัวโภชนาการ",cost:[10000,25000],desc:"ฟื้นความล้า +2 และลดโอกาสบาดเจ็บ 20% ต่อระดับ"},
   // v1.18: bigger projects that open up as the camp grows (late-game money sinks with real effects)
   hill:{name:"ลู่วิ่งขึ้นเขาหลังค่าย",cost:[20000,45000],desc:"ฝึกฟิตร่างกายได้ผล +20% และล้าน้อยลง ต่อระดับ",req:{week:12}},
@@ -942,7 +944,10 @@ function growStudents(G){const t=Math.min(studentCap(G),studentDemand(G)),n=stud
 const studentFee=G=>Math.round(dif(G).inc*560*(1+(G.fac.daeng-1)*.12)*(1+(campLevel(G)-1)*.2));
 const classIncome=G=>Math.round(students(G)*studentFee(G)*(ytKey(G)==="tourist"?1.2:1)*(G.disaster&&gameWeek(G)<G.disaster.untilAbs?(G.disaster.inc||0):1));
 function campLook(G){return clamp(Math.round(facTotal(G)+(G.camp?G.camp.beauty:0)/2+Math.min(G.rep,30)/8),0,20);}
-function buyFacility(G,k){const F=FACILITIES[k],lv=G.fac[k]||0;if(lv>=F.cost.length||facLocked(G,k))return false;const c=F.cost[lv];if(G.cash<c)return false;
+/* v1.90: the dorm's fourth level opens with the regional chapter · main characters get 5 + dorm level rooms */
+const facMax=(G,k)=>k==="dorm"&&!G.region?3:FACILITIES[k].cost.length;
+const dormRooms=G=>5+((G.fac&&G.fac.dorm)||0);
+function buyFacility(G,k){const F=FACILITIES[k],lv=G.fac[k]||0;if(lv>=facMax(G,k)||facLocked(G,k))return false;const c=F.cost[lv];if(G.cash<c)return false;
   G.cash-=c;G.fac[k]=lv+1;if(k==="brand")G.rep+=.5;if(k==="shrine")G.rep+=1;if(k==="hall")G.rep+=1.5;if(k==="retreat")roster(G).forEach(f=>{["punch","kick","knee","elbow","clinch","guard","foot","stamina","power","speed"].forEach(q=>{f.a[q]=Math.min(Math.max(f.a[q],f.potential||18),f.a[q]+.4);});f.morale=Math.min(100,f.morale+15);f.fatigue=0;});return true;}
 function upgradeDaeng(G){const lv=G.fac.daeng;if(lv>=3)return false;const c=DAENG_COST[lv];if(G.cash<c)return false;G.cash-=c;G.fac.daeng++;return true;}
 const CAMP_ACTIONS={
@@ -1116,7 +1121,7 @@ function genOffers(G,opt){
       if(G.week>=8&&X&&X.camp!=="player"&&!X.injury&&!isBooked(G,X.id,wk)&&rng()<.35){o=X;cross=true;}
       else{const pool=Object.values(G.F).filter(x=>x.div===f.div&&x.camp!=="player"&&!x.canon&&!x.injury&&!isBooked(G,x.id,wk)).map(x=>[x,Math.abs(ovr(x.a)-ovr(f.a)-.1)]).sort((a,b)=>a[1]-b[1]).slice(0,4);if(pool.length)o=pool[Math.floor(rng()*pool.length)][0];}
       if(o){const m=(1+Math.min(G.rep,50)/80)*(cross?1.6:1);G.offers.push({id:`o${G.week}_${f.id}_fair`,a:f.id,b:o.id,week:wk,tier:"exhibition",fair:1,cross:cross?1:0,win:Math.round(TIER.exhibition.win*m/100)*100,lose:Math.round(TIER.exhibition.lose*m/100)*100});}}}}
-  if(G.region&&G.region.trip)G.offers=G.offers.filter(o=>!regionBlock(G,o.week)); /* v1.90: no home bouts while the camp is away */
+  if(G.region)G.offers=G.offers.filter(o=>!regionBlock(G,o.week)); /* v1.90: no home bouts while the camp is away */
 }
 function acceptOffer(G,oid){const o=G.offers.find(x=>x.id===oid);
   if(!o)return {ok:false,reason:"ข้อเสนอนี้ไม่มีแล้ว"};

@@ -381,6 +381,7 @@ const SIGNATURE={kati:{name:"Sirichai Heart Spinning Elbow",desc:"Bond ♥ Lv.7+
 const hasSignature=f=>!!SIGNATURE[f.id]&&f.camp==="player"&&(f.bond||0)>=60;
 function skillMods(f){const m={hit:{},pts:{},dmg:{},ctr:0,ctrDmg:0,clutch:0,regen:0,mor:0,evade:0,corner:0,prep:0,clDef:0,staSave:0};
   if(hasSignature(f)){const e=SIGNATURE[f.id].fx;for(const k in e){if(typeof e[k]==="object")for(const w in e[k])m[k][w]=(m[k][w]||0)+e[k][w];else m[k]+=e[k];}}
+  if(f.pfx)for(const k in f.pfx){const e=f.pfx;if(typeof e[k]==="object")for(const w in e[k])m[k][w]=(m[k][w]||0)+e[k][w];else m[k]+=e[k];} /* v1.90: a regional champion's own perk */
   const list=skillList(f.id);if(!list.length||!f.skills)return m;const eq=equipped(f);
   for(const sk of list){if(!sk.passive&&!eq.includes(sk.id))continue;const r=f.skills[sk.id]||0;if(!r)continue;const e=sk.fx(r);
     for(const k in e){if(typeof e[k]==="object")for(const w in e[k])m[k][w]=(m[k][w]||0)+e[k][w];else m[k]+=e[k];}}
@@ -726,7 +727,8 @@ const REGION_LIVE=false;
 TIER.region={name:"Four Regions Championship",win:12000,lose:5000,rep:2.5,off:1};
 function regionOn(){if(REGION_LIVE)return true;try{if(typeof location!=="undefined"&&/regiondev/.test(location.hash||""))localStorage.setItem("mtm_regiondev","1");return localStorage.getItem("mtm_regiondev")==="1";}catch(e){return false;}}
 const regionReady=G=>(G.season||1)>=6&&(G.honors||[]).filter(h=>h.kind==="province").length>=3; /* year 5 is over + three provincial titles */
-const regionBlock=(G,wk)=>!!(G.region&&G.region.trip&&G.region.trip.season===(G.season||1)&&G.region.trip.wk===wk); /* the whole camp is on the road that week */
+const regionBlock=(G,wk)=>{const R=G.region;if(!R)return false;const s=G.season||1;if(R.trip&&R.trip.season===s&&R.trip.wk===wk)return true; /* the whole camp is on the road that week */
+  return Object.values(R.champ||{}).some(c=>c&&c.next&&c.next.season===s&&c.next.wk===wk);}; /* …or at a regional championship bout */
 let REGION_P=null;
 function regionLoad(){if(typeof REGION!=="undefined")return Promise.resolve(REGION);if(REGION_P)return REGION_P;
   if(typeof window==="undefined"||!window.MTM_JS)return Promise.reject(new Error("no loader"));
@@ -849,7 +851,7 @@ const FACILITIES={
   recovery:{name:"Recovery room & ice baths",cost:[15000,30000,50000],desc:"Fatigue recovery +5/wk per level"},
   classroom:{name:"Class yard",cost:[8000,14000,22000,32000,45000],desc:"Holds 3 more students per level"},
   brand:{name:"Signs & camp promotion",cost:[8000,20000,40000,50000],desc:"+3 people want to join per level, fame +0.5"},
-  dorm:{name:"Fighter dorm",cost:[18000,40000,60000],desc:"Morale +1.5 and trust +0.3 weekly, per level"},
+  dorm:{name:"Fighter dorm",cost:[18000,40000,60000,90000],desc:"Morale +1.5 and trust +0.3 weekly, per level"},
   kitchen:{name:"Nutrition kitchen",cost:[10000,25000],desc:"Fatigue recovery +2 and 20% lower injury risk per level"},
   // v1.18: bigger projects that open up as the camp grows (late-game money sinks with real effects)
   hill:{name:"Hill-run track behind camp",cost:[20000,45000],desc:"Conditioning +20% and less fatigue per level",req:{week:12}},
@@ -952,7 +954,10 @@ function growStudents(G){const t=Math.min(studentCap(G),studentDemand(G)),n=stud
 const studentFee=G=>Math.round(dif(G).inc*560*(1+(G.fac.daeng-1)*.12)*(1+(campLevel(G)-1)*.2));
 const classIncome=G=>Math.round(students(G)*studentFee(G)*(ytKey(G)==="tourist"?1.2:1)*(G.disaster&&gameWeek(G)<G.disaster.untilAbs?(G.disaster.inc||0):1));
 function campLook(G){return clamp(Math.round(facTotal(G)+(G.camp?G.camp.beauty:0)/2+Math.min(G.rep,30)/8),0,20);}
-function buyFacility(G,k){const F=FACILITIES[k],lv=G.fac[k]||0;if(lv>=F.cost.length||facLocked(G,k))return false;const c=F.cost[lv];if(G.cash<c)return false;
+/* v1.90: the dorm's fourth level opens with the regional chapter · main characters get 5 + dorm level rooms */
+const facMax=(G,k)=>k==="dorm"&&!G.region?3:FACILITIES[k].cost.length;
+const dormRooms=G=>5+((G.fac&&G.fac.dorm)||0);
+function buyFacility(G,k){const F=FACILITIES[k],lv=G.fac[k]||0;if(lv>=facMax(G,k)||facLocked(G,k))return false;const c=F.cost[lv];if(G.cash<c)return false;
   G.cash-=c;G.fac[k]=lv+1;if(k==="brand")G.rep+=.5;if(k==="shrine")G.rep+=1;if(k==="hall")G.rep+=1.5;if(k==="retreat")roster(G).forEach(f=>{["punch","kick","knee","elbow","clinch","guard","foot","stamina","power","speed"].forEach(q=>{f.a[q]=Math.min(Math.max(f.a[q],f.potential||18),f.a[q]+.4);});f.morale=Math.min(100,f.morale+15);f.fatigue=0;});return true;}
 function upgradeDaeng(G){const lv=G.fac.daeng;if(lv>=3)return false;const c=DAENG_COST[lv];if(G.cash<c)return false;G.cash-=c;G.fac.daeng++;return true;}
 const CAMP_ACTIONS={
@@ -1126,7 +1131,7 @@ function genOffers(G,opt){
       if(G.week>=8&&X&&X.camp!=="player"&&!X.injury&&!isBooked(G,X.id,wk)&&rng()<.35){o=X;cross=true;}
       else{const pool=Object.values(G.F).filter(x=>x.div===f.div&&x.camp!=="player"&&!x.canon&&!x.injury&&!isBooked(G,x.id,wk)).map(x=>[x,Math.abs(ovr(x.a)-ovr(f.a)-.1)]).sort((a,b)=>a[1]-b[1]).slice(0,4);if(pool.length)o=pool[Math.floor(rng()*pool.length)][0];}
       if(o){const m=(1+Math.min(G.rep,50)/80)*(cross?1.6:1);G.offers.push({id:`o${G.week}_${f.id}_fair`,a:f.id,b:o.id,week:wk,tier:"exhibition",fair:1,cross:cross?1:0,win:Math.round(TIER.exhibition.win*m/100)*100,lose:Math.round(TIER.exhibition.lose*m/100)*100});}}}}
-  if(G.region&&G.region.trip)G.offers=G.offers.filter(o=>!regionBlock(G,o.week)); /* v1.90: no home bouts while the camp is away */
+  if(G.region)G.offers=G.offers.filter(o=>!regionBlock(G,o.week)); /* v1.90: no home bouts while the camp is away */
 }
 function acceptOffer(G,oid){const o=G.offers.find(x=>x.id===oid);
   if(!o)return {ok:false,reason:"This offer is no longer available"};
@@ -2206,8 +2211,8 @@ const ME=G=>G.player.name,
  MEM=(G,k)=>{G.mem=G.mem||{};G.mem[k]=absWeek(G);}, HAS=(G,k,gap)=>G.mem&&G.mem[k]!==undefined&&absWeek(G)-G.mem[k]>=(gap||0),
  CALL=(G,id)=>{const f=G.F[id],b=f?f.bond||0:0;if(G.romance===id||b>=75)return G.player.name;if(b>=40&&Math.random()<.35)return G.player.name;return "Manager";}, PR=G=>G.player.gender==="m"?"":"", PA=G=>G.player.gender==="m"?"":"It is";
 const SPK={kati:{name:"Kati",color:"#e23b4e"},mali:{name:"Mali",color:"#4a7fe0"},rin:{name:"Rin",color:"#3fae6a"},
-  ploy:{name:"Ploy",color:"#9b62e0"},fah:{name:"Fah",color:"#e7b443"},pailin:{name:"Pailin",color:"#8e4ac3"},coach:{name:"Coach Daeng",color:"#c98a5a"},nar:{name:""},me:{name:"(You)"}};
-const HONOR_LABEL={local:"Subdistrict round champion",district:"District round champion",province:"Provincial champion",belt:"Tha Phae Stadium champion",defense:"Tha Phae Stadium title defense",dm:"Death Match champion"};
+  ploy:{name:"Ploy",color:"#9b62e0"},fah:{name:"Fah",color:"#e7b443"},pailin:{name:"Pailin",color:"#8e4ac3"},baibua:{name:"Baibua",color:"#e86fa0"},tabtim:{name:"Tubtim",color:"#d23246"},alicia:{name:"Alicia",color:"#2f62c8"},chaba:{name:"Chaba",color:"#1f9a7a"},coach:{name:"Coach Daeng",color:"#c98a5a"},nar:{name:""},me:{name:"(You)"}};
+const HONOR_LABEL={local:"Subdistrict round champion",district:"District round champion",province:"Provincial champion",belt:"Tha Phae Stadium champion",defense:"Tha Phae Stadium title defense",dm:"Death Match champion",rg_north:"Northern Regional Cup",rg_isan:"Isan Regional Cup",rg_central:"Central Regional Cup",rg_south:"Southern Regional Cup"};
 function honorLabel(kind,venue){if(venue&&typeof STADIUMS!=="undefined"&&STADIUMS[venue]&&(kind==="belt"||kind==="defense"))return (kind==="belt"?"Champion of ":"Defended title at ")+STADIUMS[venue].name;return HONOR_LABEL[kind]||"Champion";}
 function honorSteps(G,h){const f=G.F[h.id],label=honorLabel(h.kind,h.venue),ranked=h.kind==="local"||h.kind==="district";
   return [{n:"nar",t:ranked?`The ${h.kind==="local"?"subdistrict":"district"} standings are final. ${f.name} takes first place, and the referee calls her back to center ring.`:`The final bell rings. The referee raises ${f.name}'s arm in center ring as the crowd roars.`},
@@ -5138,6 +5143,8 @@ const TH_LABEL=String.fromCharCode(3652,3607,3618);
 function langSwitch(cls){return `<div class="langsw ${cls||""}" role="group" aria-label="Language">${[["th",TH_LABEL],["en","EN"]].map(([k,l])=>`<button class="lsb ${CUR_LANG===k?"on":""}" data-act="setlang" data-v="${k}" aria-pressed="${CUR_LANG===k}">${l}</button>`).join("")}</div>`;}
 const SAVE_KEY="mtm-save-v13";
 const CANON_IDS=["kati","mali","rin","ploy","fah"];
+const CHAMP_IDS=["baibua","tabtim","alicia","chaba"]; /* v1.90 (hidden): the four regional champions — full portraits in scenes like the heroines */
+const castId=id=>CANON_IDS.includes(id)||CHAMP_IDS.includes(id);
 let G=null;
 const UI={tab:"home",scene:null,fight:null,modal:null,creator:null,ending:null,montage:null,speed:1,title:"tap",fsub:"offers",rdiv:"A",ptab:"over",tipIdx:0,advCache:{},toast:null,look:"fight"};
 const $app=document.getElementById("app");
@@ -5781,7 +5788,8 @@ function trophySVG(kind,pal,dim){const rows=TROPHY_PX[kind],w=Math.max(...rows.m
   rows.forEach((row,y)=>[...row].forEach((ch,x)=>{if(ch!==".")r+=`<rect x="${x}" y="${y}" width="1" height="1" fill="${dim?"#3a3150":pal[ch]||"#fff"}"/>`;}));
   return `<svg viewBox="0 0 ${w} ${h}" shape-rendering="crispEdges" aria-hidden="true">${r}</svg>`;}
 const BELT_PAL={tha:{a:"#2a1d10",b:"#f1c232",c:"#c8283c",d:"#c8283c"},ping:{a:"#10202a",b:"#f1c232",c:"#2c5fb3",d:"#2c5fb3"},lanna:{a:"#14261a",b:"#f1c232",c:"#2f8a4f",d:"#2f8a4f"}};
-const CUP_PAL={province:{a:"#7a5a10",b:"#f1c232",c:"#5a3a2a"},district:{a:"#5d6168",b:"#d7dde4",c:"#4a3a2a"},local:{a:"#6b3d1c",b:"#d08a4a",c:"#4a3a2a"}};
+const CUP_PAL={province:{a:"#7a5a10",b:"#f1c232",c:"#5a3a2a"},district:{a:"#5d6168",b:"#d7dde4",c:"#4a3a2a"},local:{a:"#6b3d1c",b:"#d08a4a",c:"#4a3a2a"},
+  rg_north:{a:"#7a2a4e",b:"#f2a2c4",c:"#4a2a3a"},rg_isan:{a:"#6a1420",b:"#e8505e",c:"#3a1a1a"},rg_central:{a:"#14306a",b:"#f1c232",c:"#1a2a4a"},rg_south:{a:"#0c4a3a",b:"#5fd0b0",c:"#1a3a2a"}};
 function trophyItems(){const H=G.honors||[],items=[];
   for(const h of H){const who=esc(G.F[h.id]?.name||h.id),when=h.season?`Year ${h.season} week ${h.week}`:"Before update";
     if(h.kind==="belt"||h.kind==="defense"){const v=h.venue||"tha";items.push({kind:"belt",pal:BELT_PAL[v]||BELT_PAL.tha,title:honorLabel(h.kind,h.venue),sub:`${who} · Div ${h.div}`,when,shelf:"belt"});}
@@ -5851,8 +5859,8 @@ function campHTML(){const inc=classIncome(G),up=upkeep(G),wg=wages(G),lv=campLev
      ${G.fac.daeng<3?`<button class="btn sm gold" data-act="daeng" ${G.cash<DAENG_COST[G.fac.daeng]?"disabled":""}>Train up ${fmt(DAENG_COST[G.fac.daeng])}</button>`:"<span class=\"pill green\">Max</span>"}</div>
     ${staffHTML()}</section>
    </div>
-   <section class="px card cpane ${cs==="fac"?"on":""}"><h3>Facilities</h3><div class="facs">${(()=>{const E=Object.entries(FACILITIES),lk=E.filter(([k])=>facLocked(G,k));return [...E.filter(([k])=>!facLocked(G,k)),...lk.slice(0,1)];})().map(([k,F])=>{const l=G.fac[k]||0,m=F.cost.length,lk=facLocked(G,k);
-     return `<div class="item fac ${lk?"locked":""}"><div><div class="t">${F.name} ${dots(l,m)}${F.req&&!l&&!lk?" <span class=\"newb sm\">New</span>":""}</div><div class="meta">${F.desc}</div></div>${lk?`<span class="pill">Unlocks: ${lk}</span>`:l<m?`<button class="btn sm gold" data-act="buyfac" data-v="${k}" ${G.cash<F.cost[l]?"disabled":""}>${fmt(F.cost[l])}</button>`:"<span class=\"pill green\">Max</span>"}</div>`;}).join("")}</div></section>
+   <section class="px card cpane ${cs==="fac"?"on":""}"><h3>Facilities</h3><div class="facs">${(()=>{const E=Object.entries(FACILITIES),lk=E.filter(([k])=>facLocked(G,k));return [...E.filter(([k])=>!facLocked(G,k)),...lk.slice(0,1)];})().map(([k,F])=>{const l=G.fac[k]||0,m=facMax(G,k),lk=facLocked(G,k);
+     return `<div class="item fac ${lk?"locked":""}"><div><div class="t">${F.name} ${dots(l,m)}${F.req&&!l&&!lk?" <span class=\"newb sm\">New</span>":""}</div><div class="meta">${F.desc}${k==="dorm"&&G.region?` · main-character rooms ${dormRooms(G)} rooms`:""}</div></div>${lk?`<span class="pill">Unlocks: ${lk}</span>`:l<m?`<button class="btn sm gold" data-act="buyfac" data-v="${k}" ${G.cash<F.cost[l]?"disabled":""}>${fmt(F.cost[l])}</button>`:"<span class=\"pill green\">Max</span>"}</div>`;}).join("")}</div></section>
    <section class="px card cpane ${cs==="fac"?"on":""}"><h3>Special investments</h3>
     <div class="item nw"><div><div class="t">Invite an old-school master to teach</div><div class="meta">${fmt(18000)} · fighter gains +1 skill point and school stats · once per fighter per season · opens week 16</div></div><button class="btn sm gold" data-act="mastersOpen" ${G.week<16?"disabled":""}>Choose</button></div>
     <div class="item nw"><div><div class="t">Host a fight night at Sirichai</div><div class="meta">${fmt(SHOW_COST)} · fame +3, camp looks better, everyone's morale +8 · once per round</div></div><button class="btn sm gold" data-act="hostshow" ${G.cash<SHOW_COST||G.week<10||G.flags["show_"+stageOf(G.week)]?"disabled":""}>${G.flags["show_"+stageOf(G.week)]?"Hosted":"Host"}</button></div>
@@ -6195,7 +6203,7 @@ function montageHTML(){const M=UI.montage;
 // ---------- VN scene ----------
 // v1.8: warm portraits before they are needed so scenes don't pop in late
 const WARMED={};function warm(src){if(!src||WARMED[src])return;const i=new Image();i.src=src;WARMED[src]=i;}
-function warmChar(id,look){if(id==="coach"){warm(`${ASSET}coach.webp`);return;}if(!CANON_IDS.includes(id)&&id!=="pailin")return;
+function warmChar(id,look){if(id==="coach"){warm(`${ASSET}coach.webp`);return;}if(!castId(id)&&id!=="pailin")return;
   (look==="casual"||look==="thai"?["happy","flustered","pout"]:["happy","sad","surprised","angry"]).forEach(m=>warm(stand(id,look,m)));}
 function warmSteps(steps,look){const walk=list=>(list||[]).forEach(st=>{if(!st)return;const n=typeof st.n==="function"?null:st.n;if(n)warmChar(n,st.l==="casual"||st.l==="thai"?st.l:(look==="casual"||look==="thai")&&!st.l?look:"fight");
   if(st.with)warmChar(st.with,look==="casual"||look==="thai"?look:"fight");if(st.bg&&BGIMG[st.bg])warm(ASSET+BGIMG[st.bg]);if(st.choice)st.choice.forEach(c=>walk(c.then));});walk(steps);}
@@ -6210,12 +6218,12 @@ function sceneNext(){const S=UI.scene;if(!S)return;
     if(st.choice||st.choiceFn){S.cur={choice:(st.choice||st.choiceFn(G))};render();return;}
     const n=val(st.n);S.lookOf=S.lookOf||{};
     // v1.8: each character keeps one outfit for the whole scene
-    const look=CANON_IDS.includes(n)?(S.lookOf[n]=S.lookOf[n]||(st.l==="train"?"fight":st.l)||S.look):(st.l||S.look);
+    const look=castId(n)?(S.lookOf[n]=S.lookOf[n]||(st.l==="train"?"fight":st.l)||S.look):(st.l||S.look);
     S.cur={n,f:val(st.f)||"happy",t:nameCall(n,val(st.t)),look,who:st.who,tel:n==="coach"&&!S.coachOK&&!!(G&&G.coachAwayAbs&&gameWeek(G)<G.coachAwayAbs)};
     if(st.show)S.cast=st.show.map(x=>({id:x.id,f:x.f||"happy",look:S.lookOf[x.id]||x.l||look,back:!!x.back}));
     if(n==="npc"){const im=npcImg(st);if(im)S.cast=[{id:"npc:"+im,f:"happy",look}];}
     if(n==="coach"){S.cast=[{id:"coach",f:"happy",look}];}           // the coach always stands alone
-    else if(CANON_IDS.includes(n)||n==="pailin"){const w=st.with&&st.with!=="coach"?st.with:null;let cast=S.cast.filter(c=>c.id!==n&&c.id!=="coach");
+    else if(castId(n)||n==="pailin"){const w=st.with&&st.with!=="coach"?st.with:null;let cast=S.cast.filter(c=>c.id!==n&&c.id!=="coach");
       if(w){cast=cast.filter(c=>c.id===w);if(!cast.length)cast=[{id:w,f:"happy",look:S.lookOf[w]||look}];}
       else if(cast.length>1)cast=cast.slice(-1);
       cast.push({id:n,f:S.cur.f,look});S.cast=cast.slice(-2);}
