@@ -729,7 +729,7 @@ function mountWaiKhru(){document.querySelectorAll("canvas[data-waikhru]").forEac
 /* v1.89.24: Loy Krathong night — the five girls float their krathongs off the pier, lanterns rise; then the player makes a wish */
 const LW_TL=n=>{const k0=1400,gap=650;return {k0,gap,stand:k0+n*gap+900,cheer:k0+n*gap+2200,end:k0+n*gap+3000};};
 function drawLoyWish(ctx,t,ids){const S=2,W=320,H=180,P=(x,y,w,h,c)=>{ctx.fillStyle=c;ctx.fillRect(Math.round(x*S),Math.round(y*S),Math.max(1,Math.round(w*S)),Math.max(1,Math.round(h*S)));};
-  const n=ids.length,T=LW_TL(n),bg=img("bg_loy_night.webp");
+  const n=ids.length,T=LW_TL(n),bg=img("bg_loy_pier.webp");
   ctx.imageSmoothingEnabled=true;if(bg.complete&&bg.naturalWidth)ctx.drawImage(bg,0,0,W*S,H*S);else P(0,0,W,H,"#1a1640");ctx.imageSmoothingEnabled=false;
   ctx.globalAlpha=Math.max(0,.55-t/2600);P(0,0,W,H,"#05040f");ctx.globalAlpha=1;
   // sky lanterns drifting up
@@ -737,14 +737,12 @@ function drawLoyWish(ctx,t,ids){const S=2,W=320,H=180,P=(x,y,w,h,c)=>{ctx.fillSt
   // the krathongs (drawn before the pier so they sit out on the water)
   const pos=i=>W*(.12+(n>1?i*.76/(n-1):.38));
   ids.forEach((id,i)=>{const sp=T.k0+i*T.gap+250;if(t<sp)return;const d=t-sp,x0=pos(i)+10,slide=Math.min(1,d/700),drift=Math.max(0,d-700)/1000;
-    const y=140-slide*8-Math.min(26,drift*5),x=x0+slide*8+drift*6+Math.sin(drift*1.6+i)*2,sc=2.1*Math.max(.5,1-drift*.09);
+    const y=128-slide*6-Math.min(24,drift*5),x=x0+slide*8+drift*6+Math.sin(drift*1.6+i)*2,sc=2.1*Math.max(.5,1-drift*.09);
     const w=12*sc,h=3*sc,fl=Math.floor(t/110+i)%2;
     ctx.globalAlpha=.18;P(x-1,y+h,2,8*sc,"#ffcf6b");{const g=ctx.createRadialGradient(x*S,(y-5*sc)*S,0,x*S,(y-5*sc)*S,9*sc*S);g.addColorStop(0,"rgba(255,190,90,.45)");g.addColorStop(1,"rgba(255,160,60,0)");ctx.globalAlpha=1;ctx.fillStyle=g;ctx.fillRect((x-9*sc)*S,(y-14*sc)*S,18*sc*S,18*sc*S);}ctx.globalAlpha=1;
     P(x-w/2,y,w,h,"#2f8f4a");P(x-w/2+1,y+h-1,w-2,1,"#1d6a36");
     for(let k=-1;k<=1;k++)P(x+k*4*sc-1.5*sc,y-3*sc+Math.abs(k)*sc,3*sc,3*sc,k?"#f06aa0":"#ff8fbd");
     P(x-.5,y-6*sc,1,3*sc,"#f4ead2");P(x-.5,y-7*sc-fl,1,1+fl,"#ffd36b");});
-  // the wooden pier
-  P(0,146,W,34,"#4a2e1c");P(0,146,W,2,"#7a4e30");for(let i=0;i<6;i++)P(0,152+i*5,W,1,"rgba(0,0,0,.22)");for(let i=0;i<9;i++)P(i*38+10,148,3,32,"rgba(0,0,0,.15)");
   // the girls: walk-in done, each kneels in turn, sets her krathong down, stands; all cheer at the end
   ids.forEach((id,i)=>{const sh=img(id+"_loykrathong_sheet.webp"),x=pos(i),h=H*.44,kA=T.k0+i*T.gap,kneel=t>=kA&&t<T.stand;
     let row="idle",foot=H*.97;if(kneel){row="guard";foot+=h*.08;}if(t>=T.cheer)row="win";
