@@ -1512,7 +1512,10 @@ button.goal.ov.mini{right:auto;padding:3px 10px;opacity:.85}
 .awardname{position:absolute;top:calc(4% + 78px);left:50%;transform:translateX(-50%);padding:7px 14px;background:#1c1129dd;border:2px solid #e0b64c;color:#ffeb9d;font-weight:700;text-align:center;white-space:nowrap;text-shadow:0 2px #5a3311;animation:awardRaise 1.2s cubic-bezier(.2,.8,.2,1) both}
 @keyframes awardRaise{from{opacity:0;translate:0 130px;scale:.65}to{opacity:1;translate:0 0;scale:1}}
 @keyframes awardFall{to{transform:translateY(105dvh) rotate(600deg)}}
-@media(prefers-reduced-motion:reduce){.awardfx>i,.awardbelt,.awardname{animation:none}.awardfx>i{display:none}}
+.awardfx .fw{position:absolute;left:var(--x);top:var(--y);width:0;height:0}
+.awardfx .fw b{position:absolute;left:-3px;top:-3px;width:6px;height:6px;background:var(--c);box-shadow:0 0 8px var(--c);opacity:0;animation:fwSpark 2.6s ease-out infinite;animation-delay:var(--d)}
+@keyframes fwSpark{0%,6%{transform:rotate(calc(var(--a)*30deg)) translateY(0);opacity:0}10%{opacity:1}55%{transform:rotate(calc(var(--a)*30deg)) translateY(-48px);opacity:1}85%,100%{transform:rotate(calc(var(--a)*30deg)) translateY(-60px);opacity:0}}
+@media(prefers-reduced-motion:reduce){.awardfx>i,.awardbelt,.awardname{animation:none}.awardfx>i,.awardfx .fw{display:none}}
 
 .evrep{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin-top:8px}
 .mail .btn.sm[aria-pressed="true"],.btn.sm[aria-pressed="true"]{box-shadow:inset 0 0 0 2px var(--gold)}
@@ -4601,14 +4604,76 @@ const ME=G=>G.player.name,
  CALL=(G,id)=>{const f=G.F[id],b=f?f.bond||0:0;if(isLov(G,id)||b>=75)return G.player.name;if(b>=40&&Math.random()<.35)return G.player.name;return "ผู้จัดการ";}, PR=G=>G.player.gender==="m"?"ผม":"ฉัน", PA=G=>G.player.gender==="m"?"ครับ":"ค่ะ";
 const SPK={kati:{name:"กะทิ",color:"#e23b4e"},mali:{name:"มะลิ",color:"#4a7fe0"},rin:{name:"ริน",color:"#3fae6a"},
   ploy:{name:"พลอย",color:"#9b62e0"},fah:{name:"ฟ้า",color:"#e7b443"},pailin:{name:"ไพลิน",color:"#8e4ac3"},baibua:{name:"ใบบัว",color:"#e86fa0"},tabtim:{name:"ทับทิม",color:"#d23246"},alicia:{name:"อลิเซีย",color:"#2f62c8"},chaba:{name:"ชบา",color:"#1f9a7a"},lada:{name:"ลดา",color:"#d8263a"},coach:{name:"ครูแดง",color:"#c98a5a"},nar:{name:""},me:{name:"(คุณ)"}};
-const HONOR_LABEL={local:"แชมป์รอบตำบล",district:"แชมป์รอบอำเภอ",province:"แชมป์จังหวัด",belt:"แชมป์เวทีท่าแพ",defense:"ป้องกันแชมป์เวทีท่าแพ",dm:"แชมป์ Death Match",rg_north:"ถ้วยเจ้าภาคเหนือ",rg_isan:"ถ้วยเจ้าภาคอีสาน",rg_central:"ถ้วยเจ้าภาคกลาง",rg_south:"ถ้วยเจ้าภาคใต้"};
-function honorLabel(kind,venue){if(venue&&typeof STADIUMS!=="undefined"&&STADIUMS[venue]&&(kind==="belt"||kind==="defense"))return (kind==="belt"?"แชมป์":"ป้องกันแชมป์")+STADIUMS[venue].name;return HONOR_LABEL[kind]||"แชมป์";}
-function honorSteps(G,h){const f=G.F[h.id],label=honorLabel(h.kind,h.venue),ranked=h.kind==="local"||h.kind==="district";
-  return [{n:"nar",t:ranked?`คะแนนตลอดรอบ${h.kind==="local"?"ตำบล":"อำเภอ"}สรุปแล้ว ${f.name}ขึ้นอันดับหนึ่ง กรรมการเรียกเธอกลับมากลางเวที`:`เสียงระฆังจบ กรรมการชูแขน${f.name}ขึ้นกลางเวที เสียงเชียร์ดังกลบทุกอย่าง`},
-    {n:"npc",who:"โฆษกสนาม",t:`ท่านผู้ชมครับ! ${label} รุ่น ${h.div} ได้แก่… ${f.name} จากค่ายศิริชัย!`},
-    {n:"nar",t:`กรรมการส่งเข็มขัดให้ ${f.name} ชูขึ้นเหนือศีรษะใต้แสงไฟ กระดาษสีทองโปรยลงมารอบเวที`},
-    {n:h.id,f:"happy",l:"fight",t:h.kind==="defense"?"เข็มขัดยังอยู่กับค่ายเรา! ครั้งหน้าก็มาเจอกันได้เลยค่ะ!":"เราเอาเข็มขัดกลับค่ายแล้ว! ขอบคุณทุกคนที่เชียร์นะคะ!"},
-    {n:"coach",t:`จำคืนนี้ไว้ ${f.name} ชัยชนะครั้งนี้อยู่ในเกียรติประวัติค่ายศิริชัยแล้ว`}];}
+const HONOR_LABEL={local:"แชมป์รอบตำบล",district:"แชมป์รอบอำเภอ",province:"แชมป์จังหวัด",belt:"แชมป์เวทีท่าแพ",defense:"ป้องกันแชมป์เวทีท่าแพ",dm:"แชมป์ Death Match",rg_north:"ถ้วยเจ้าภาคเหนือ",rg_isan:"ถ้วยเจ้าภาคอีสาน",rg_central:"ถ้วยเจ้าภาคกลาง",rg_south:"ถ้วยเจ้าภาคใต้",rgbelt:"เข็มขัดแชมป์จังหวัด"};
+function honorLabel(kind,venue){if(kind==="rgbelt"&&venue&&typeof ROAD_DEST!=="undefined"&&ROAD_DEST[venue])return "เข็มขัดแชมป์จังหวัด"+ROAD_DEST[venue].name;if(venue&&typeof STADIUMS!=="undefined"&&STADIUMS[venue]&&(kind==="belt"||kind==="defense"))return (kind==="belt"?"แชมป์":"ป้องกันแชมป์")+STADIUMS[venue].name;return HONOR_LABEL[kind]||"แชมป์";}
+/* v1.91.14 (Man): a real award ceremony — the commentator calls the name, fireworks, the celebration song, and lines that change with
+   the fighter, the kind of win and how many times she has done it. Picks are fixed per award (same save, same lines) */
+const HON_GIRLS=["kati","mali","rin","ploy","fah"];
+const HON_CALL={
+ title:[(N,L,D)=>`เข้าแล้วครับท่านผู้ชม! ${N}! ${N} จากค่ายศิริชัย! ${L} รุ่น ${D} คนใหม่ ชื่อนี้ต้องจำไว้ให้ดีครับ!`,
+  (N,L,D)=>`จบแล้วครับ! คืนนี้ไม่มีใครหยุดเธอได้! ขอเสียงปรบมือดัง ๆ ให้ ${N} ${L} รุ่น ${D}!`,
+  (N,L,D)=>`ท่านผู้ชมครับ ประวัติศาสตร์เกิดขึ้นตรงหน้าเราแล้ว! ${N}! ค่ายศิริชัย! ${L}!`,
+  (N,L,D)=>`เสียงเชียร์ดังไปถึงหลังสนามแล้วครับ! ${N} คว้า${L} รุ่น ${D} ไปครองได้สำเร็จ!`,
+  (N,L,D)=>`ใครยังไม่รู้จักชื่อนี้ จำไว้เลยครับ… ${N}! ${L} รุ่น ${D} จากค่ายเล็ก ๆ ที่ชื่อศิริชัย!`],
+ defense:[(N,L,D,k,V)=>`ยังเป็นของเธอครับท่านผู้ชม! ${N} ป้องกันแชมป์${V}ได้เป็นครั้งที่ ${k}! เข็มขัดเส้นนี้ยังไม่ยอมไปไหน!`,
+  (N,L,D,k)=>`ใครคิดจะมาเอาเข็มขัดไปจากเธอ คืนนี้ได้คำตอบแล้วครับ! ${N} ป้องกันสำเร็จครั้งที่ ${k}!`,
+  (N,L,D,k,V)=>`แชมป์ก็คือแชมป์ครับ! ${N} ยังยืนอยู่บนจุดสูงสุดของ${V} ป้องกันได้ ${k} ครั้งแล้ว!`],
+ ranked:[(N,L,D,k,V,R)=>`สรุปคะแนนทั้งรอบ${R}ครับ อันดับหนึ่งได้แก่… ${N} จากค่ายศิริชัย!`,
+  (N,L,D)=>`ชกมาทั้งรอบ ไม่มีใครเก็บคะแนนได้มากกว่าเธอครับ! ${N}! ${L} รุ่น ${D}!`]};
+const HON_FX={title:["พลุดอกแรกพุ่งขึ้นฟ้าเหนือเวที แตกเป็นดอกสีทองดังสนั่น ตามมาอีกสาม สี่ ห้าดอก",
+  "วงปี่กลองเปลี่ยนเป็นเพลงฉลอง พลุสีแดงทองแตกเหนือหลังคาสนาม คนดูลุกขึ้นยืนทั้งอัฒจันทร์",
+  "กระดาษสีทองโปรยลงมาพร้อมพลุชุดใหญ่ เด็ก ๆ ขอบเวทีกรี๊ดตามทุกดอกที่แตก"],
+ ranked:["ไฟเย็นจุดขึ้นรอบเวที กลองยาวตีรับ คนในตลาดหยุดเดินมามุงดู",
+  "พลุลูกเล็กสองสามลูกดังป้อกแป้กหลังสนาม วงกลองยาวบรรเลงเพลงฉลองให้"]};
+const HON_GIVE={belt:(N)=>`กรรมการคาดเข็มขัดให้${N}ใต้แสงไฟ เธอยกมันขึ้นเหนือศีรษะทั้งสองมือ`,cup:(N)=>`ประธานยื่นถ้วยให้${N} เธอชูถ้วยขึ้นสุดแขนให้คนดูทุกฝั่ง`};
+const HON_SAY={
+ kati:{first:["ปู่คะ… หนูได้เข็มขัดแล้วนะคะ! หนูจะเอาไปวางไว้หน้ารูปปู่เลย!","หนูทำได้แล้วค่ะ! ทุกคนช่วยหนูมาตลอด เข็มขัดเส้นนี้เป็นของทั้งค่ายนะคะ!"],
+  def:["ยังไม่ปล่อยค่ะ! ใครอยากได้ต้องผ่านหนูไปก่อน!","เข็มขัดของปู่ยังอยู่ที่ค่ายเราค่ะ! ครั้งหน้าก็จะเหมือนเดิม!"],
+  rank:["อันดับหนึ่งเลยเหรอคะ! หนูนึกว่ากรรมการอ่านชื่อผิด!"]},
+ mali:{first:["ได้แล้วค่ะ~! แม่ต้องดูไลฟ์อยู่แน่เลย มะลิจะโทรไปอวดยายด้วย~","เข็มขัดหนักกว่าที่คิดอีกค่ะ~ แต่มะลิจะไม่วางลงเลยคืนนี้~"],
+  def:["ยังเป็นของมะลิอยู่ค่ะ~ หายใจทันทุกยกเลย~","ใครท้ามาอีกก็ได้นะคะ~ มะลิเต้นรอบเวทีรอแล้ว~"],
+  rank:["อันดับหนึ่งเหรอคะ~ งั้นคืนนี้ขอขนมครกสองถาดนะคะ~"]},
+ rin:{first:["ตามที่คำนวณไว้ค่ะ… ไม่สิ ดีกว่าที่คำนวณไว้ 12 เปอร์เซ็นต์ ขอบคุณทุกคนนะคะ","ข้อมูลไม่เคยบอกฉันว่าตรงนี้จะรู้สึกแบบนี้… ขอบคุณค่ะ"],
+  def:["ป้องกันสำเร็จค่ะ สถิติตอนนี้ดีขึ้นอีกหนึ่งบรรทัดแล้ว","ฉันอ่านเกมเขาขาดตั้งแต่ยกสองค่ะ เข็มขัดเลยยังอยู่ที่เดิม"],
+  rank:["คะแนนรวมสูงสุดค่ะ ฉันจดไว้ทุกยก ตรงกับกรรมการทุกแต้ม"]},
+ ploy:{first:["…หนักดีนะ เข็มขัดในนามค่ายศิริชัย พี่จะใส่ให้สมชื่อ","เคยได้มาหลายเส้น แต่เส้นนี้ได้มากับคนที่ชอบ… มันไม่เหมือนกันเลย"],
+  def:["ยังไม่ถึงเวลาส่งต่อหรอก ใครอยากได้ก็ซ้อมมาใหม่","ป้องกันได้อีกครั้ง… เถ้าแก่เสือคงดูอยู่ล่ะมั้ง"],
+  rank:["อันดับหนึ่งก็ดี แต่ฉันอยากได้เข็มขัดมากกว่านะ"]},
+ fah:{first:["ฟ้าทำได้แล้ว!! ทุกคนเห็นไหม! ฟ้าบอกแล้วว่าฟ้าทำได้!","เย้!! ฟ้าจะใส่เข็มขัดนี้นอนคืนนี้เลย! ห้ามใครแย่ง!"],
+  def:["ยังเป็นของฟ้า!! มาอีกกี่คนก็ไม่ให้!","ฟ้ายังเป็นแชมป์! พรุ่งนี้ฟ้าจะไปวิ่งอวดทั้งตำบล!"],
+  rank:["ที่หนึ่ง!! ฟ้าที่หนึ่ง!! ใครจดไว้ให้ฟ้าด้วย!"]},
+ _:{first:["เราเอาเข็มขัดกลับค่ายแล้ว! ขอบคุณทุกคนที่เชียร์นะคะ!"],def:["เข็มขัดยังอยู่กับค่ายเรา! ครั้งหน้าก็มาเจอกันได้เลยค่ะ!"],rank:["อันดับหนึ่ง! ขอบคุณทุกคนที่เชียร์นะคะ!"]}};
+const HON_CHEER={kati:["ยินดีด้วยนะ! หนูตะโกนจนเสียงแหบไปหมดแล้ว!","ไปเลย! ชูให้สูงอีก! หนูถ่ายรูปไว้ให้แล้ว!"],
+ mali:["ยินดีด้วยค่ะ~ มะลิกระโดดจนรองเท้าหลุดไปข้างนึงเลย~","ชูให้สูงอีกค่ะ~ มะลิอยากได้รูปสวย ๆ~"],
+ rin:["ยินดีด้วยค่ะ ฉันบันทึกไฟต์นี้เป็นแฟ้มสีทองแล้ว","ตามสถิติ… ช่างมันเถอะ ยินดีด้วยนะคะ"],
+ ploy:["ไม่เลวเลยนะ… รอบหน้าพี่จะคว้าเส้นถัดไปบ้าง","ยินดีด้วย ชูให้สูงกว่านี้หน่อย คนข้างหลังยังมองไม่เห็น"],
+ fah:["เก่งมาก!! ฟ้าก็จะเอามาให้ได้บ้าง!","ฟ้าขอจับเข็มขัดหน่อย! แค่แป๊บเดียว! นะ ๆ"]};
+const HON_COACH=[N=>`จำคืนนี้ไว้ ${N} ชัยชนะครั้งนี้อยู่ในเกียรติประวัติค่ายศิริชัยแล้ว`,
+ (N,n)=>`ของในมุมเกียรติยศของค่ายเรามี ${n} ชิ้นแล้ว ปู่ชัยคงยิ้มไม่หุบ`,
+ N=>`ฉลองให้เต็มที่คืนนี้ พรุ่งนี้เช้าตีห้าเหมือนเดิมนะ ${N}`,
+ N=>`ข้าซ้อมนักมวยมาทั้งชีวิต คืนแบบนี้ไม่เคยชินสักที… เก่งมาก ${N}`];
+const RG_BELT_MC={chiangrai:"ปี้น้องเชียงรายเจ้า! เข็มขัดเส้นนี้ไปอยู่ค่ายศิริชัยแล้วเน้อ ปรบมือดัง ๆ เจ้า!",nan:"ชาวน่านขอแสดงความยินดีครับ! แข่งเรือก็ต้องชนะ ชกมวยก็ต้องชนะแบบนี้!",
+ uttaradit:"เมืองพระยาพิชัยดาบหักขอคารวะครับ! ใจสู้แบบนี้ ท่านพระยาเห็นคงชอบใจ!",lampang:"รถม้าลำปางพร้อมแห่รอบเมืองแล้วครับ! แชมป์คนใหม่ขึ้นรถม้าได้เลย!",
+ udon:"ทะเลบัวแดงบานรับแชมป์คนใหม่แล้วเด้อพี่น้อง!",khonkaen:"ขอนแก่นยกนิ้วให้เลยเด้อ! หมัดนี่แน่นยิ่งกว่าผ้าไหมทอมือ!",
+ buriram:"บุรีรัมย์เสียงดังที่สุดในอีสานเด้อ! ส่งเสียงให้แชมป์คนใหม่หน่อย!",ubon:"แสงเทียนพรรษาขอส่องทางให้แชมป์คนใหม่เด้อพี่น้องชาวอุบล!",
+ lopburi:"ระวังลิงแย่งเข็มขัดด้วยนะครับแชมป์! ลพบุรีขอแสดงความยินดี!",suphan:"สุพรรณฯ ขอปรบมือดังกว่าเสียงเพลงลูกทุ่งเลยครับ!",
+ phetchaburi:"ขนมหม้อแกงเมืองเพชรรอแชมป์อยู่หลังเวทีแล้วครับ!",chanthaburi:"มังคุดกี่ลูกก็หวานไม่เท่าชัยชนะคืนนี้ครับ จันทบุรีขอแสดงความยินดี!",
+ chumphon:"ชาวชุมพรขอแหลงดัง ๆ ว่า หรอยแรง! แชมป์คนใหม่ของเรา!",surat:"สุราษฎร์ฯ ขอยกหอยนางรมดอนสักให้แชมป์ทั้งกระบะเลย!",
+ nakhonsi:"เมืองคอนขอแหลงให้ชัด ๆ แชมป์คนนี้เก่งจริง ไม่ใช่หนังตะลุง!",songkhla:"นางเงือกสมิหลาโบกมือให้แล้วครับ! สงขลาขอแสดงความยินดีกับแชมป์คนใหม่!"};
+function honorSteps(G,h){const f=G.F[h.id],N=f.name,label=honorLabel(h.kind,h.venue),ranked=h.kind==="local"||h.kind==="district",def=h.kind==="defense";
+  let seed=0;for(const c of String(h.key||h.id+h.week))seed=(seed*31+c.charCodeAt(0))>>>0;const pick=(a,k)=>a[(seed+(k||0)*7)%a.length];
+  const V=h.venue&&typeof STADIUMS!=="undefined"&&STADIUMS[h.venue]?STADIUMS[h.venue].name:(typeof STADIUMS!=="undefined"&&STADIUMS.tha?STADIUMS.tha.name:"เวทีท่าแพ");
+  const k=(G.honors||[]).filter(x=>x.kind==="defense"&&x.id===h.id&&x.div===h.div&&(x.venue||null)===(h.venue||null)).length;
+  const grp=ranked?"ranked":def?"defense":"title",R=h.kind==="local"?"ตำบล":"อำเภอ";
+  const S=[{n:"nar",t:ranked?`คะแนนตลอดรอบ${R}สรุปแล้ว ${N}ขึ้นอันดับหนึ่ง กรรมการเรียกเธอกลับมากลางเวที`:`เสียงระฆังจบ กรรมการชูแขน${N}ขึ้นกลางเวที เสียงเชียร์ดังกลบทุกอย่าง`},
+    {n:"npc",who:"นักพากย์",t:pick(HON_CALL[grp])(N,label,h.div,k,V,R)}];
+  if(h.kind==="rgbelt"&&RG_BELT_MC[h.venue])S.push({n:"npc",who:"พิธีกรท้องถิ่น",t:RG_BELT_MC[h.venue]});
+  S.push({n:"nar",t:pick(HON_FX[ranked?"ranked":"title"],1)},{n:"nar",t:(ranked||h.kind==="province"||h.kind==="dm"?HON_GIVE.cup:HON_GIVE.belt)(N)});
+  const L=HON_SAY[h.id]||HON_SAY._;S.push({n:h.id,f:"happy",l:"fight",t:pick(ranked?L.rank:def?L.def:L.first,2)});
+  const fan=HON_GIRLS.filter(id=>id!==h.id&&G.F[id]&&G.F[id].camp==="player"&&(G.F[id].bond||0)>=40).sort((a,b)=>(G.F[b].bond||0)-(G.F[a].bond||0))[0];
+  if(fan)S.push({n:fan,f:"happy",l:"casual",t:pick(HON_CHEER[fan],3)});
+  const n=(G.honors||[]).filter(x=>G.F[x.id]&&G.F[x.id].camp==="player").length;S.push({n:"coach",t:pick(HON_COACH,4)(N,n)});
+  return S;}
 // v1.7: bonds deepen by chapter — the ceiling rises as the season's story moves on
 const bondCap=G=>100;
 // v1.44: bond grows a bit faster, and the girls who join later catch up while still distant
@@ -8294,7 +8359,7 @@ AU.gsfx=function(kind,a){if(!this.init()||this.muted||!SETTINGS.sfx)return;const
   if(kind==="shimmer")for(let i=0;i<6;i++)T(i*.05,{f:1400+Math.random()*1400,type:"sine",dur:.12,peak:.06});};
 
 // ================= MUAY THAI MOE v1.3 — UI =================
-const VERSION="1.91.14";
+const VERSION="1.91.15";
 const CUR_LANG=(typeof window!=="undefined"&&window.LANG)||"th";
 const TH_LABEL=String.fromCharCode(3652,3607,3618);
 function langSwitch(cls){return `<div class="langsw ${cls||""}" role="group" aria-label="Language">${[["th",TH_LABEL],["en","EN"]].map(([k,l])=>`<button class="lsb ${CUR_LANG===k?"on":""}" data-act="setlang" data-v="${k}" aria-pressed="${CUR_LANG===k}">${l}</button>`).join("")}</div>`;}
@@ -8956,6 +9021,7 @@ const CUP_PAL={province:{a:"#7a5a10",b:"#f1c232",c:"#5a3a2a"},district:{a:"#5d61
   rg_north:{a:"#7a2a4e",b:"#f2a2c4",c:"#4a2a3a"},rg_isan:{a:"#6a1420",b:"#e8505e",c:"#3a1a1a"},rg_central:{a:"#14306a",b:"#f1c232",c:"#1a2a4a"},rg_south:{a:"#0c4a3a",b:"#5fd0b0",c:"#1a3a2a"}};
 function trophyItems(){const H=G.honors||[],items=[];
   for(const h of H){const who=esc(G.F[h.id]?.name||h.id),when=h.season?`ปีที่ ${h.season} สัปดาห์ ${h.week}`:"ก่อนอัปเดต";
+    if(h.kind==="rgbelt"){const D=typeof ROAD_DEST!=="undefined"&&ROAD_DEST[h.venue],col=D&&typeof RG!=="undefined"&&RG[D.r]?RG[D.r].col:"#c8283c";items.push({kind:"belt",pal:{a:"#2a1d10",b:"#f1c232",c:col,d:col},title:honorLabel(h.kind,h.venue),sub:`${who} · รุ่น ${h.div}`,when,shelf:"belt"});continue;}
     if(h.kind==="belt"||h.kind==="defense"){const v=h.venue||"tha";items.push({kind:"belt",pal:BELT_PAL[v]||BELT_PAL.tha,title:honorLabel(h.kind,h.venue),sub:`${who} · รุ่น ${h.div}`,when,shelf:"belt"});}
     else if(h.kind==="dm")items.push({kind:"medal",pal:{a:"#5a1a22",b:"#d23246",d:"#3a6fd0"},title:"แชมป์ Death Match",sub:`${who} · รุ่น ${h.div}`,when,shelf:"cup"});
     else items.push({kind:"cup",pal:CUP_PAL[h.kind]||CUP_PAL.local,title:honorLabel(h.kind,h.venue),sub:`${who} · รุ่น ${h.div}`,when,shelf:"cup"});}
@@ -9397,7 +9463,8 @@ function warmSteps(steps,look){const walk=list=>(list||[]).forEach(st=>{if(!st)r
   if(st.with)warmChar(st.with,look==="casual"||look==="thai"?look:"fight");if(st.bg&&BGIMG[st.bg])warm(ASSET+BGIMG[st.bg]);if(st.choice)st.choice.forEach(c=>walk(c.then));});walk(steps);}
 function playScene(steps,done,opts={}){warmSteps(steps,opts.look||"fight");if(opts.bg&&BGIMG[opts.bg])warm(ASSET+BGIMG[opts.bg]);UI.scene={steps:[...steps],i:0,done,bg:opts.bg||"night",look:opts.look||"fight",cur:null,cast:[],coachOK:!!opts.coachOK,award:opts.award||null};sceneNext();}
 function playHonorQueue(done){while((G.awards||[]).length&&!(G.F[G.awards[0].id]))G.awards.shift();const h=(G.awards||[])[0];if(!h){AU.startMusic("hub");if(done)done();return;}AU.startMusic("victory");AU.sfx("champ");
-  playScene(honorSteps(G,h),()=>{G.awards.shift();save();playHonorQueue(done);},{bg:"hall",look:"fight",award:h});}
+  playScene(honorSteps(G,h),()=>{G.awards.shift();save();playHonorQueue(done);},{bg:h.kind==="rgbelt"&&BGIMG["rgring_"+h.venue]?"rgring_"+h.venue:"hall",look:"fight",award:h});
+  [500,1100,1900,2900,4200,5600].forEach(ms=>setTimeout(()=>{if(UI.scene&&UI.scene.award===h)AU.sfx("pop");},ms));} /* v1.91.14: fireworks pop over the ceremony */
 function sceneNext(){const S=UI.scene;if(!S)return;
   while(S.i<S.steps.length){const st=S.steps[S.i];
     if(st.inject){let more=[];try{more=st.inject(G)||[];}catch(e){console.error("scene inject",e);}S.steps.splice(S.i,1,...more);continue;}/* v1.81.1: a broken step never freezes the week */
@@ -9432,7 +9499,7 @@ function sceneHTML(){const S=UI.scene,c=S.cur||{};const sp=c.n==="coach"?{name:c
   const tag="";
   return `<div class="vn" role="dialog" aria-label="ฉากเนื้อเรื่อง"><div class="vbg bg-${S.bg==="camp"?"gym":S.bg}" ${bgKey?`style="background-image:url(${ASSET}${bgKey})"`:""}></div>
    <div class="cast ${(S.cast||[]).length>1?"duo":""}">${cast}</div>
-   ${S.award?`<div class="awardfx" aria-hidden="true">${Array.from({length:24},(_,i)=>`<i style="--i:${i}"></i>`).join("")}<div class="awardbelt"><span class="strap"></span><span class="seal">★</span><span class="strap"></span></div><div class="awardname">${esc(honorLabel(S.award.kind,S.award.venue))}</div></div>`:""}
+   ${S.award?`<div class="awardfx" aria-hidden="true">${Array.from({length:24},(_,i)=>`<i style="--i:${i}"></i>`).join("")}${[["14%","22%","0s","#ffd45a"],["78%","16%","-.8s","#ff6b6b"],["50%","30%","-1.6s","#8fd3ff"],["30%","12%","-1.2s","#c785e6"],["66%","34%","-.4s","#9dffb0"]].map(([x,y,d,c])=>`<span class="fw" style="--x:${x};--y:${y};--d:${d};--c:${c}">${Array.from({length:12},(_,a)=>`<b style="--a:${a}"></b>`).join("")}</span>`).join("")}<div class="awardbelt"><span class="strap"></span><span class="seal">★</span><span class="strap"></span></div><div class="awardname">${esc(honorLabel(S.award.kind,S.award.venue))}</div></div>`:""}
    ${c.choice?"":`<button class="vtap" data-act="vnext" aria-label="ไปต่อ"></button>`}
    <div class="vbox px" data-act="${c.choice?"":"vnext"}" style="--c:${sp.color||"var(--gold)"}">
     ${c.choice?`<div class="choices">${(UI._ck!==c?(UI._ck=c,UI._ct=Date.now()):0,"")}${c.choice.map((o,i)=>{const t=val(o.t),m0=t.match(/^(.*?)\s*\(([^()]*)\)\s*$/),m=m0&&m0[1].trim()?m0:null,act=m0&&!m0[1].trim();return `<button data-act="vchoose" data-v="${i}" ${act?'class="cact"':""}>${esc(act?m0[2]:m?m[1]:t)}${m?`<small class="cfx">${esc(m[2])}</small>`:""}</button>`;}).join("")}</div>`:
@@ -12583,7 +12650,7 @@ CHAT.fah.push(
 <script>
 (function(){
 /* v1.87: Thai code ships inside index.html; English code (en.js) and the dictionary (i18n.js) load only when needed */
-var B="bc9bdd7e72";
+var B="3c5854f667";
 var L="";try{L=localStorage.getItem("mtm_lang")||"";}catch(e){}
 try{var h=(location.hash||"").match(/lang=(th|en)/);if(h)L=h[1];}catch(e){}
 if(L!=="th"&&L!=="en")L="th";

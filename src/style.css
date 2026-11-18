@@ -1507,7 +1507,10 @@ button.goal.ov.mini{right:auto;padding:3px 10px;opacity:.85}
 .awardname{position:absolute;top:calc(4% + 78px);left:50%;transform:translateX(-50%);padding:7px 14px;background:#1c1129dd;border:2px solid #e0b64c;color:#ffeb9d;font-weight:700;text-align:center;white-space:nowrap;text-shadow:0 2px #5a3311;animation:awardRaise 1.2s cubic-bezier(.2,.8,.2,1) both}
 @keyframes awardRaise{from{opacity:0;translate:0 130px;scale:.65}to{opacity:1;translate:0 0;scale:1}}
 @keyframes awardFall{to{transform:translateY(105dvh) rotate(600deg)}}
-@media(prefers-reduced-motion:reduce){.awardfx>i,.awardbelt,.awardname{animation:none}.awardfx>i{display:none}}
+.awardfx .fw{position:absolute;left:var(--x);top:var(--y);width:0;height:0}
+.awardfx .fw b{position:absolute;left:-3px;top:-3px;width:6px;height:6px;background:var(--c);box-shadow:0 0 8px var(--c);opacity:0;animation:fwSpark 2.6s ease-out infinite;animation-delay:var(--d)}
+@keyframes fwSpark{0%,6%{transform:rotate(calc(var(--a)*30deg)) translateY(0);opacity:0}10%{opacity:1}55%{transform:rotate(calc(var(--a)*30deg)) translateY(-48px);opacity:1}85%,100%{transform:rotate(calc(var(--a)*30deg)) translateY(-60px);opacity:0}}
+@media(prefers-reduced-motion:reduce){.awardfx>i,.awardbelt,.awardname{animation:none}.awardfx>i,.awardfx .fw{display:none}}
 
 .evrep{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin-top:8px}
 .mail .btn.sm[aria-pressed="true"],.btn.sm[aria-pressed="true"]{box-shadow:inset 0 0 0 2px var(--gold)}

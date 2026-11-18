@@ -8,14 +8,76 @@ const ME=G=>G.player.name,
  CALL=(G,id)=>{const f=G.F[id],b=f?f.bond||0:0;if(isLov(G,id)||b>=75)return G.player.name;if(b>=40&&Math.random()<.35)return G.player.name;return "Manager";}, PR=G=>G.player.gender==="m"?"":"", PA=G=>G.player.gender==="m"?"":"It is";
 const SPK={kati:{name:"Kati",color:"#e23b4e"},mali:{name:"Mali",color:"#4a7fe0"},rin:{name:"Rin",color:"#3fae6a"},
   ploy:{name:"Ploy",color:"#9b62e0"},fah:{name:"Fah",color:"#e7b443"},pailin:{name:"Pailin",color:"#8e4ac3"},baibua:{name:"Baibua",color:"#e86fa0"},tabtim:{name:"Tubtim",color:"#d23246"},alicia:{name:"Alicia",color:"#2f62c8"},chaba:{name:"Chaba",color:"#1f9a7a"},lada:{name:"Ladda",color:"#d8263a"},coach:{name:"Coach Daeng",color:"#c98a5a"},nar:{name:""},me:{name:"(You)"}};
-const HONOR_LABEL={local:"Subdistrict round champion",district:"District round champion",province:"Provincial champion",belt:"Tha Phae Stadium champion",defense:"Tha Phae Stadium title defense",dm:"Death Match champion",rg_north:"Northern Regional Cup",rg_isan:"Isan Regional Cup",rg_central:"Central Regional Cup",rg_south:"Southern Regional Cup"};
-function honorLabel(kind,venue){if(venue&&typeof STADIUMS!=="undefined"&&STADIUMS[venue]&&(kind==="belt"||kind==="defense"))return (kind==="belt"?"Champion of ":"Defended title at ")+STADIUMS[venue].name;return HONOR_LABEL[kind]||"Champion";}
-function honorSteps(G,h){const f=G.F[h.id],label=honorLabel(h.kind,h.venue),ranked=h.kind==="local"||h.kind==="district";
-  return [{n:"nar",t:ranked?`The ${h.kind==="local"?"subdistrict":"district"} standings are final. ${f.name} takes first place, and the referee calls her back to center ring.`:`The final bell rings. The referee raises ${f.name}'s arm in center ring as the crowd roars.`},
-    {n:"npc",who:"Ring announcer",t:`Ladies and gentlemen! The Division ${h.div} ${label} is… ${f.name} of Sirichai Gym!`},
-    {n:"nar",t:`The referee hands over the belt. ${f.name} lifts it high beneath the spotlights as gold confetti falls across the ring.`},
-    {n:h.id,f:"happy",l:"fight",t:h.kind==="defense"?"The belt stays with our gym! I'll be ready for the next challenger!":"We brought the belt home! Thank you for cheering for us!"},
-    {n:"coach",t:`Remember tonight, ${f.name}. This victory is now part of Sirichai's hall of fame.`}];}
+const HONOR_LABEL={local:"Subdistrict round champion",district:"District round champion",province:"Provincial champion",belt:"Tha Phae Stadium champion",defense:"Tha Phae Stadium title defense",dm:"Death Match champion",rg_north:"Northern Regional Cup",rg_isan:"Isan Regional Cup",rg_central:"Central Regional Cup",rg_south:"Southern Regional Cup",rgbelt:"Province champion belt: "};
+function honorLabel(kind,venue){if(kind==="rgbelt"&&venue&&typeof ROAD_DEST!=="undefined"&&ROAD_DEST[venue])return "Province champion belt: "+ROAD_DEST[venue].name;if(venue&&typeof STADIUMS!=="undefined"&&STADIUMS[venue]&&(kind==="belt"||kind==="defense"))return (kind==="belt"?"Champion":"Defended title at ")+STADIUMS[venue].name;return HONOR_LABEL[kind]||"Champion";}
+/* v1.91.14 (Man): a real award ceremony — the commentator calls the name, fireworks, the celebration song, and lines that change with
+   the fighter, the kind of win and how many times she has done it. Picks are fixed per award (same save, same lines) */
+const HON_GIRLS=["kati","mali","rin","ploy","fah"];
+const HON_CALL={
+ title:[(N,L,D)=>`There it is, ladies and gentlemen! ${N}! ${N} of Sirichai Camp! ${L} Div ${D} — remember this name!`,
+  (N,L,D)=>`It's over! Nobody could stop her tonight! A big round of applause for ${N} ${L} Div ${D}!`,
+  (N,L,D)=>`Ladies and gentlemen, history just happened in front of us! ${N}! Sirichai Camp! ${L}!`,
+  (N,L,D)=>`You can hear the cheers out past the car park! ${N} takes the ${L} Div ${D}!`,
+  (N,L,D)=>`If you don't know this name yet, learn it now… ${N}! ${L} Div ${D} from a little camp called Sirichai!`],
+ defense:[(N,L,D,k,V)=>`It's still hers, ladies and gentlemen! ${N} defends the ${V} title — defense number ${k}! This belt isn't going anywhere!`,
+  (N,L,D,k)=>`Anyone hoping to take that belt got their answer tonight! ${N} defends successfully, number ${k}!`,
+  (N,L,D,k,V)=>`A champion is a champion! ${N} still stands at the top of ${V} — defended ${k} times now!`],
+ ranked:[(N,L,D,k,V,R)=>`Final scores for the ${R} round are in! Number one is… ${N} of Sirichai Gym!`,
+  (N,L,D)=>`Through the whole round, nobody scored more than her! ${N}! ${L} Div ${D}!`]};
+const HON_FX={title:["The first firework shoots up over the ring and bursts gold with a boom, then three, four, five more.",
+  "The ring band switches to a victory song, red-and-gold fireworks burst over the roof, and the whole stand rises.",
+  "Gold confetti rains down with a huge burst of fireworks; the kids at ringside shriek at every bang."],
+ ranked:["Sparklers flare around the ring, the long drums answer, and the market crowd stops to watch.",
+  "A few small fireworks pop behind the venue, and the long-drum band strikes up a celebration."]};
+const HON_GIVE={belt:(N)=>`The referee straps the belt on ${N} under the lights, and she lifts it overhead with both hands.`,cup:(N)=>`The chairman hands the cup to ${N}. She lifts it as high as she can for every side of the crowd.`};
+const HON_SAY={
+ kati:{first:["Grandpa… I won the belt! I'm putting it right in front of your photo!","I did it! You all helped me the whole way. This belt belongs to the whole camp!"],
+  def:["Not letting go! Anyone who wants it has to get past me!","Grandpa's belt stays at our camp! Next time too!"],
+  rank:["Number one? I thought they read the wrong name!"]},
+ mali:{first:["I got it~! Mum must be watching the stream. Mali's calling Grandma to show off~","The belt's heavier than I thought~ but Mali isn't putting it down tonight~"],
+  def:["Still Mali's~ I had breath to spare every round~","Anyone can challenge me~ Mali's already dancing round the ring~"],
+  rank:["Number one~? Then tonight Mali wants two trays of khanom khrok~"]},
+ rin:{first:["Exactly as calculated… no, 12 percent better than calculated. Thank you, everyone.","The data never told me this would feel like this… thank you."],
+  def:["Defense successful. My record just got one line better.","I had her read from round two. So the belt stays where it is."],
+  rank:["Highest total. I scored every round myself, and I matched the judges point for point."]},
+ ploy:{first:["…Nice and heavy. A Sirichai belt. I'll wear it like it deserves.","I've won plenty of belts, but this one I won with people I like… it's not the same at all."],
+  def:["Not time to pass it on yet. Want it? Go train some more.","Defended again… I bet Boss Suea is watching."],
+  rank:["Number one is nice, but I'd rather have a belt."]},
+ fah:{first:["Fah did it!! Did you all see? Fah told you Fah could!","Yay!! Fah's sleeping in this belt tonight! No one take it!"],
+  def:["Still Fah's!! However many come, Fah's not giving it up!","Fah's still champion! Tomorrow Fah runs a victory lap round the whole town!"],
+  rank:["First!! Fah's first!! Someone write it down!"]},
+ _:{first:["We brought the belt home! Thank you for cheering for us!"],def:["The belt stays with our gym! I'll be ready for the next challenger!"],rank:["Number one! Thank you all for cheering!"]}};
+const HON_CHEER={kati:["Congratulations! I've screamed myself hoarse!","Go on! Higher! I've got the photo!"],
+ mali:["Congrats~ Mali jumped so hard one shoe flew off~","Higher~ Mali wants a pretty photo~"],
+ rin:["Congratulations. I've filed this fight in the gold folder.","Statistically… never mind. Congratulations."],
+ ploy:["Not bad at all… next time, I'm taking the next one.","Congrats. Hold it higher, the back rows can't see."],
+ fah:["So good!! Fah's getting one too!","Let Fah hold the belt! Just for a second! Pleeease!"]};
+const HON_COACH=[N=>`Remember tonight, ${N}. This victory is now part of Sirichai's hall of fame.`,
+ (N,n)=>`Our honour corner now holds ${n} pieces now. Grandpa Chai must be grinning ear to ear.`,
+ N=>`Celebrate all you like tonight. Five a.m. tomorrow as usual, ${N}`,
+ N=>`I've trained fighters my whole life and I never get used to nights like this… well done, ${N}`];
+const RG_BELT_MC={chiangrai:"Folks of Chiang Rai! This belt now belongs to Sirichai Camp! Give it a big hand!",nan:"Nan congratulates you! We win the boat races, and we win in the ring like this!",
+ uttaradit:"The town of Phraya Phichai of the Broken Sword salutes you! He'd have loved that fighting heart!",lampang:"Lampang's horse carts are ready for a parade! Hop on, new champion!",
+ udon:"The Red Lotus Sea blooms for our new champion!",khonkaen:"Khon Kaen gives a thumbs-up! Those punches are tighter than hand-woven silk!",
+ buriram:"Buriram is the loudest town in Isan! Let the new champion hear it!",ubon:"May the Candle Festival light the new champion's way, Ubon!",
+ lopburi:"Watch out, champ, the monkeys want that belt! Lopburi congratulates you!",suphan:"Suphan claps louder than its own country songs!",
+ phetchaburi:"Phetchaburi custard cake is waiting for the champion backstage!",chanthaburi:"No mangosteen is as sweet as tonight's win! Chanthaburi congratulates you!",
+ chumphon:"Chumphon shouts it out: magnificent! Our new champion!",surat:"Surat gives the champion a whole truckload of Don Sak oysters!",
+ nakhonsi:"Nakhon says it loud and clear: this champion is the real thing, not a shadow puppet!",songkhla:"The Samila mermaid is waving at you! Songkhla congratulates its new champion!"};
+function honorSteps(G,h){const f=G.F[h.id],N=f.name,label=honorLabel(h.kind,h.venue),ranked=h.kind==="local"||h.kind==="district",def=h.kind==="defense";
+  let seed=0;for(const c of String(h.key||h.id+h.week))seed=(seed*31+c.charCodeAt(0))>>>0;const pick=(a,k)=>a[(seed+(k||0)*7)%a.length];
+  const V=h.venue&&typeof STADIUMS!=="undefined"&&STADIUMS[h.venue]?STADIUMS[h.venue].name:(typeof STADIUMS!=="undefined"&&STADIUMS.tha?STADIUMS.tha.name:"Tha Phae Stadium");
+  const k=(G.honors||[]).filter(x=>x.kind==="defense"&&x.id===h.id&&x.div===h.div&&(x.venue||null)===(h.venue||null)).length;
+  const grp=ranked?"ranked":def?"defense":"title",R=h.kind==="local"?"subdistrict":"district";
+  const S=[{n:"nar",t:ranked?`The standings for the ${R} round are final. ${N} takes first place, and the referee calls her back to center ring.`:`The final bell rings. The referee raises ${N}'s arm in center ring as the crowd roars.`},
+    {n:"npc",who:"Commentator",t:pick(HON_CALL[grp])(N,label,h.div,k,V,R)}];
+  if(h.kind==="rgbelt"&&RG_BELT_MC[h.venue])S.push({n:"npc",who:"Local MC",t:RG_BELT_MC[h.venue]});
+  S.push({n:"nar",t:pick(HON_FX[ranked?"ranked":"title"],1)},{n:"nar",t:(ranked||h.kind==="province"||h.kind==="dm"?HON_GIVE.cup:HON_GIVE.belt)(N)});
+  const L=HON_SAY[h.id]||HON_SAY._;S.push({n:h.id,f:"happy",l:"fight",t:pick(ranked?L.rank:def?L.def:L.first,2)});
+  const fan=HON_GIRLS.filter(id=>id!==h.id&&G.F[id]&&G.F[id].camp==="player"&&(G.F[id].bond||0)>=40).sort((a,b)=>(G.F[b].bond||0)-(G.F[a].bond||0))[0];
+  if(fan)S.push({n:fan,f:"happy",l:"casual",t:pick(HON_CHEER[fan],3)});
+  const n=(G.honors||[]).filter(x=>G.F[x.id]&&G.F[x.id].camp==="player").length;S.push({n:"coach",t:pick(HON_COACH,4)(N,n)});
+  return S;}
 // v1.7: bonds deepen by chapter — the ceiling rises as the season's story moves on
 const bondCap=G=>100;
 // v1.44: bond grows a bit faster, and the girls who join later catch up while still distant
