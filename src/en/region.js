@@ -225,7 +225,7 @@ const RG_CID={north:"baibua",isan:"tabtim",central:"alicia",south:"chaba"};
 const rgIn=(G,id)=>!!(G.F[id]&&G.F[id].camp==="player");
 const rgIf=(ok,steps)=>ok?steps:[];
 function rgGala(G){const top=rgTopGirl(G),fah=rgIn(G,"fah"),ploy=rgIn(G,"ploy"),R=G.region,meet=(id,v)=>G2=>rgMeet(G2,id,v);return [
- {n:"nar",bg:"gala",t:"The camp's van pulls up in front of a hotel in the middle of Bangkok. A Naga Energy Drink banner three storeys high hangs above, a green-gold naga in boxing gloves raising its fist at the centre."},
+ {n:"nar",bg:"gala",t:"The camp's van pulls up in front of a hotel in the middle of Bangkok. A Naga Energy Drink banner three storeys high hangs above, a green-gold naga coiled at the centre, head raised high."},
  {n:"nar",t:"A life-size naga mascot waves at the door. Every time a guest walks past, it throws two punches at the air."},
  {n:"coach",t:"The last time I wore a suit was my nephew's ordination… This collar's strangling me."},
  ...rgIf(fah,[{n:"fah",f:"flustered",l:"casual",t:"You said it was a party! Why is everyone dressed for a wedding? Fah came in a tracksuit!"}]),
