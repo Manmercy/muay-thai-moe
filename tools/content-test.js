@@ -125,6 +125,13 @@ const chrome=process.env.CHROME_PATH||'/Applications/Google Chrome.app/Contents/
     g.F.kati.bond=100;g.F.kati.bondX=2000;g.lastBeat=-99;const top=EVENTS.find(e=>e.id==='hs_kati_30');if(top.when(g))throw Error('top scene still on');
     g.week+=9;for(const k of [1,2,3]){if(!ev('lv_hm'+k).when(g))throw Error('hm'+k);walkL(g,ev('lv_hm'+k).steps);}
     g.season=2;g.week=38;if(ev('lv_val').when(g)||!ev('lv_valh').when(g))throw Error('harem valentine');walkL(g,ev('lv_valh').steps);return haremYearEnd(g).length===3;});
+  test('trip souvenirs: only owned ones show, free to give, worth more than a normal gift, own line',()=>{const g=fresh();G=g;const f=g.F.kati;f.met=true;f.bond=60;
+    if(giftsFor('kati').some(k=>GIFTS[k].souv))throw Error('souvenir in shop list');if(giveGift(g,'kati','c_khon'))throw Error('gave without owning');
+    if(/souvh/.test(giftHTML('kati')))throw Error('section shown with none');g.souv={c_khon:2,s_talung:1};const h=giftHTML('kati');if(!/souvh/.test(h)||!/c_khon/.test(h)||/n_jok/.test(h))throw Error('section');
+    const cash=g.cash,r=giveGift(g,'kati','c_khon');if(!r||r.t!=='love'||g.souv.c_khon!==1||g.cash!==cash)throw Error('give '+JSON.stringify(r));
+    const g2=fresh();g2.F.kati.met=true;g2.F.kati.bond=60;g2.cash=99999;const n=giveGift(g2,'kati','stickers');if(!(r.gain>=n.gain*2))throw Error('gain '+r.gain+' vs '+n.gain);
+    g.week++;const r2=giveGift(g,'kati','s_talung');if(!r2||r2.t!=='like'||g.souv.s_talung!==0)throw Error('like');
+    return /ปู่|Grandpa/.test(souvLine('kati','c_khon','love'))&&/ภาคใต้|the South/.test(souvLine('kati','s_talung','like'));});
   test('old single-lover saves become a one-item list',()=>{const g=fresh();delete g.lovers;delete g.lovWk;g.romance='rin';g.romWk=30;g.timeV=3;fixSave(g);return g.lovers.length===1&&g.lovers[0]==='rin'&&g.lovWk.rin===30&&isLov(g,'rin');});
   test('chat with a lover always opens and its menu leads to a confirmed breakup scene',()=>{const g=fresh();G=g;lovUp(g,['kati','mali']);UI.tab='people';render();
     const btn=document.querySelector('.chatb[data-id="mali"]');if(!btn||btn.disabled)throw Error('chat btn');ACT.chat({id:'mali'});render();

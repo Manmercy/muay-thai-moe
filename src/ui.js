@@ -1,5 +1,5 @@
 // ================= MUAY THAI MOE v1.3 — UI =================
-const VERSION="1.89.20";
+const VERSION="1.89.23";
 const CUR_LANG=(typeof window!=="undefined"&&window.LANG)||"th";
 const TH_LABEL=String.fromCharCode(3652,3607,3618);
 function langSwitch(cls){return `<div class="langsw ${cls||""}" role="group" aria-label="Language">${[["th",TH_LABEL],["en","EN"]].map(([k,l])=>`<button class="lsb ${CUR_LANG===k?"on":""}" data-act="setlang" data-v="${k}" aria-pressed="${CUR_LANG===k}">${l}</button>`).join("")}</div>`;}
@@ -901,11 +901,14 @@ function relLadderHTML(f){const H=heartLv(f).lv,cur=relLabel(G,f,H),k=relKind(G,
 function giftHTML(id){const f=G.F[id];
   const E=giftsFor(id).map(k=>[k,{...GIFTS[k],bond:giftBond(id,k)}]).sort((x,y)=>(x[1].bond||0)-(y[1].bond||0)||(x[1].only?1:0)-(y[1].only?1:0));
   {const lk=E.filter(([k,g])=>(g.bond||0)>(f.bond||0));const nx=lk[0];const hid=lk.length-(nx?1:0);E.splice(0,E.length,...E.filter(([k,g])=>(g.bond||0)<=(f.bond||0)),...(nx?[nx]:[]));E.hidden=hid;}
-  return `<h2>ของขวัญให้${esc(f.name)}</h2><p class="meta">ซื้อแล้วให้ทันที · คนละ 1 ชิ้นต่อสัปดาห์ · ยิ่งสนิทยิ่งมีของให้เลือก${E.hidden?` (ยังซ่อนอีก ${E.hidden} ชิ้น)`:""} · เงินสด ${fmt(G.cash)}</p><div class="gifts">${E.map(([k,g])=>{const kn=f.know["gift_"+k],lk=(g.bond||0)>(f.bond||0);
+  return `<h2>ของขวัญให้${esc(f.name)}</h2><p class="meta">ซื้อแล้วให้ทันที · คนละ 1 ชิ้นต่อสัปดาห์ · ยิ่งสนิทยิ่งมีของให้เลือก${E.hidden?` (ยังซ่อนอีก ${E.hidden} ชิ้น)`:""} · เงินสด ${fmt(G.cash)}</p>${souvHTML(id)}<div class="gifts">${E.map(([k,g])=>{const kn=f.know["gift_"+k],lk=(g.bond||0)>(f.bond||0);
    if(lk)return `<div class="giftbtn lockg"><b>???</b><small>ปลดล็อกเมื่อ ♥ Lv.${1+Math.floor(Math.min(100,g.bond)/10)}</small></div>`;
    const lw=f.giftL&&f.giftL[k],cd=lw&&gameWeek(G)-lw<6&&(f.giftN||{})[k]?6-(gameWeek(G)-lw):0;
    return `<button class="giftbtn" data-act="give" data-id="${id}" data-v="${k}" ${G.cash<g.price?"disabled":""}><b>${g.name}</b><small>${fmt(g.price)}${cd?` · เพิ่งให้ไป`:""}</small></button>`;}).join("")}</div>
    <p class="meta glegend">สังเกตท่าทีตอนให้ หรือดูในประวัติว่าเคยให้อะไรไปแล้วบ้าง</p>`;}
+/* v1.89.23: souvenirs bought on regional trips — free to give, one gift a week like the rest */
+function souvHTML(id){const S=G.souv||{},L=SOUV_IDS.filter(k=>S[k]>0);if(!L.length)return "";
+  return `<h3 class="souvh">ของฝากที่ซื้อมาจากทริป</h3><div class="gifts souvg">${L.map(k=>`<button class="giftbtn souv" data-act="give" data-id="${id}" data-v="${k}"><b>${esc(GIFTS[k].name)}</b><small>ของฝาก${SOUV_RN[GIFTS[k].souv]} · มี ${S[k]} ชิ้น</small></button>`).join("")}</div>`;}
 function considerHTML(o){const me=G.F[o.a],op=G.F[o.b];const A=adviseCached(o.a,o.b,o.rounds||3);const pct=x=>Math.round(x*100);const v=verdictOf(A.bestRate);const sc=scouted(op.id);const P=personaOf(op);
   return `<h2>ข้อมูลไฟต์</h2><div class="vsrow"><div class="vsc">${faceImg(me)}<b>${esc(me.name)}</b><span class="meta">${styleOf(me.a)}</span></div><span class="vs">VS</span><div class="vsc">${faceImg(op)}<b>${esc(op.name)}</b><span class="meta">${styleOf(op.a)} · ${rec(op)}</span></div></div>
    ${P?`<p class="quote">“${esc(P.line)}” <span class="meta">— ${esc(P.tag)}</span></p>`:""}${h2hText(op)?`<p class="meta goldt">${h2hText(op)}</p>`:""}
@@ -1627,7 +1630,7 @@ function fightEnd(){const U=UI.fight;if(U.brawl){brawlEnd();return;}U.stage="don
 
 // ---------- actions ----------
 function giftScene(id,res){const f=G.F[id];const mood=res.t==="dislike"?"pout":res.t==="love"?"flustered":"happy";
-  playScene([{n:id,f:mood,l:"casual",t:(res.n&&res.t!=="dislike"&&giftAgainLine(id,res.t,res.n,res.g))||(GIFT_TALK_PERSONAL[id]&&GIFT_TALK_PERSONAL[id][res.g])||((GIFT_TALK[id]&&GIFT_TALK[id][res.g])||GIFT_LINES[id][res.t])},{n:"nar",t:res.gain>0?(res.n>=2?`ความสนิทกับ${f.name} +${res.gain} · ได้บ่อยไปนิด เลยขึ้นน้อยลง`:`ความสนิทกับ${f.name} +${res.gain}`)
+  playScene([{n:id,f:mood,l:"casual",t:(res.n&&res.t!=="dislike"&&giftAgainLine(id,res.t,res.n,res.g))||(GIFTS[res.g].souv&&souvLine(id,res.g,res.t))||(GIFT_TALK_PERSONAL[id]&&GIFT_TALK_PERSONAL[id][res.g])||((GIFT_TALK[id]&&GIFT_TALK[id][res.g])||GIFT_LINES[id][res.t])},{n:"nar",t:res.gain>0?(res.n>=2?`ความสนิทกับ${f.name} +${res.gain} · ได้บ่อยไปนิด เลยขึ้นน้อยลง`:`ความสนิทกับ${f.name} +${res.gain}`)
       :res.t==="dislike"?`${f.name}รับไว้ด้วยรอยยิ้ม แต่อาจยังไม่ใช่ของโปรด · ความสนิทไม่เปลี่ยน`:heartCapped(G,f)?`${f.name}ดีใจมาก · หัวใจเต็มขั้นของบทนี้แล้ว`:f.bond>=100?`${f.name}ดีใจมาก · ความสนิทเต็มหลอดแล้ว`:`${f.name}ดีใจ แต่ช่วงนี้ได้ของชิ้นนี้บ่อยไปนิด ลองสลับของดูนะ`},
     ...((()=>{const k=f.giftTot===5?0:f.giftTot===10?1:-1;if(k<0||!GIFT_FREQ[id]||(f.giftFreq||0)>k)return [];f.giftFreq=k+1;
       return [...GIFT_FREQ[id][k].map(s=>({...s,l:"casual"})),k===1?{inject:G2=>{add(G2,id,"bond",3);G2.F[id].morale=Math.min(100,G2.F[id].morale+8);return [{n:"nar",t:`ได้ของตอบแทนจาก${f.name} · ความสนิท +3 · กำลังใจ${f.name} +8`}];}}:{inject:()=>[]}];})())],()=>{AU.startMusic("hub");render();},{bg:f.camp==="player"?"gym":"fair",look:"casual"});}

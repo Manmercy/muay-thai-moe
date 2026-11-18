@@ -901,11 +901,14 @@ function relLadderHTML(f){const H=heartLv(f).lv,cur=relLabel(G,f,H),k=relKind(G,
 function giftHTML(id){const f=G.F[id];
   const E=giftsFor(id).map(k=>[k,{...GIFTS[k],bond:giftBond(id,k)}]).sort((x,y)=>(x[1].bond||0)-(y[1].bond||0)||(x[1].only?1:0)-(y[1].only?1:0));
   {const lk=E.filter(([k,g])=>(g.bond||0)>(f.bond||0));const nx=lk[0];const hid=lk.length-(nx?1:0);E.splice(0,E.length,...E.filter(([k,g])=>(g.bond||0)<=(f.bond||0)),...(nx?[nx]:[]));E.hidden=hid;}
-  return `<h2>A gift for ${esc(f.name)}</h2><p class="meta">Bought and given right away · 1 per person per week · the closer you are, the more to choose ${E.hidden?` (${E.hidden} more hidden)`:""} · cash ${fmt(G.cash)}</p><div class="gifts">${E.map(([k,g])=>{const kn=f.know["gift_"+k],lk=(g.bond||0)>(f.bond||0);
+  return `<h2>A gift for ${esc(f.name)}</h2><p class="meta">Bought and given right away · 1 per person per week · the closer you are, the more to choose ${E.hidden?` (${E.hidden} more hidden)`:""} · cash ${fmt(G.cash)}</p>${souvHTML(id)}<div class="gifts">${E.map(([k,g])=>{const kn=f.know["gift_"+k],lk=(g.bond||0)>(f.bond||0);
    if(lk)return `<div class="giftbtn lockg"><b>???</b><small>Unlocks at ♥ Lv.${1+Math.floor(Math.min(100,g.bond)/10)}</small></div>`;
    const lw=f.giftL&&f.giftL[k],cd=lw&&gameWeek(G)-lw<6&&(f.giftN||{})[k]?6-(gameWeek(G)-lw):0;
    return `<button class="giftbtn" data-act="give" data-id="${id}" data-v="${k}" ${G.cash<g.price?"disabled":""}><b>${g.name}</b><small>${fmt(g.price)}${cd?` · given recently`:""}</small></button>`;}).join("")}</div>
    <p class="meta glegend">Watch how she reacts when you give it, or check her profile for what you've given before</p>`;}
+/* v1.89.23: souvenirs bought on regional trips — free to give, one gift a week like the rest */
+function souvHTML(id){const S=G.souv||{},L=SOUV_IDS.filter(k=>S[k]>0);if(!L.length)return "";
+  return `<h3 class="souvh">Souvenirs from your trips</h3><div class="gifts souvg">${L.map(k=>`<button class="giftbtn souv" data-act="give" data-id="${id}" data-v="${k}"><b>${esc(GIFTS[k].name)}</b><small>Souvenir from ${SOUV_RN[GIFTS[k].souv]} · ×${S[k]}</small></button>`).join("")}</div>`;}
 function considerHTML(o){const me=G.F[o.a],op=G.F[o.b];const A=adviseCached(o.a,o.b,o.rounds||3);const pct=x=>Math.round(x*100);const v=verdictOf(A.bestRate);const sc=scouted(op.id);const P=personaOf(op);
   return `<h2>Fight info</h2><div class="vsrow"><div class="vsc">${faceImg(me)}<b>${esc(me.name)}</b><span class="meta">${styleOf(me.a)}</span></div><span class="vs">VS</span><div class="vsc">${faceImg(op)}<b>${esc(op.name)}</b><span class="meta">${styleOf(op.a)} · ${rec(op)}</span></div></div>
    ${P?`<p class="quote">“${esc(P.line)}” <span class="meta">— ${esc(P.tag)}</span></p>`:""}${h2hText(op)?`<p class="meta goldt">${h2hText(op)}</p>`:""}
@@ -1627,7 +1630,7 @@ function fightEnd(){const U=UI.fight;if(U.brawl){brawlEnd();return;}U.stage="don
 
 // ---------- actions ----------
 function giftScene(id,res){const f=G.F[id];const mood=res.t==="dislike"?"pout":res.t==="love"?"flustered":"happy";
-  playScene([{n:id,f:mood,l:"casual",t:(res.n&&res.t!=="dislike"&&giftAgainLine(id,res.t,res.n,res.g))||(GIFT_TALK_PERSONAL[id]&&GIFT_TALK_PERSONAL[id][res.g])||((GIFT_TALK[id]&&GIFT_TALK[id][res.g])||GIFT_LINES[id][res.t])},{n:"nar",t:res.gain>0?(res.n>=2?`Bond with ${f.name} +${res.gain} · a bit too often, so it rises less`:`Bond with ${f.name} +${res.gain}`)
+  playScene([{n:id,f:mood,l:"casual",t:(res.n&&res.t!=="dislike"&&giftAgainLine(id,res.t,res.n,res.g))||(GIFTS[res.g].souv&&souvLine(id,res.g,res.t))||(GIFT_TALK_PERSONAL[id]&&GIFT_TALK_PERSONAL[id][res.g])||((GIFT_TALK[id]&&GIFT_TALK[id][res.g])||GIFT_LINES[id][res.t])},{n:"nar",t:res.gain>0?(res.n>=2?`Bond with ${f.name} +${res.gain} · a bit too often, so it rises less`:`Bond with ${f.name} +${res.gain}`)
       :res.t==="dislike"?`${f.name} accepts it with a smile, but it may not be a favorite · Bond unchanged`:heartCapped(G,f)?`${f.name} is delighted · hearts are full for this chapter`:f.bond>=100?`${f.name} is thrilled · Bond is already maxed`:`${f.name} is happy, but has been getting this a lot lately. Try mixing it up.`},
     ...((()=>{const k=f.giftTot===5?0:f.giftTot===10?1:-1;if(k<0||!GIFT_FREQ[id]||(f.giftFreq||0)>k)return [];f.giftFreq=k+1;
       return [...GIFT_FREQ[id][k].map(s=>({...s,l:"casual"})),k===1?{inject:G2=>{add(G2,id,"bond",3);G2.F[id].morale=Math.min(100,G2.F[id].morale+8);return [{n:"nar",t:`A gift in return from ${f.name} · Bond +3 · Morale: ${f.name} +8`}];}}:{inject:()=>[]}];})())],()=>{AU.startMusic("hub");render();},{bg:f.camp==="player"?"gym":"fair",look:"casual"});}
