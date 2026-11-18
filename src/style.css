@@ -2156,3 +2156,6 @@ html[lang=en] .fight .fctl2 .skbtn2 b{font-size:11px;display:-webkit-box;-webkit
 .lbcard h4{margin:0 0 4px;color:#ffe28a}.lbcard p{margin:4px 0}.lbcard .btn{margin-top:6px}
 
 .set.comm{cursor:default}.set.comm .obtns{flex:none}.set.comm a.btn{text-decoration:none}
+
+/* v1.90.2: stats / history / training tabs scroll as one page too — on iPhone Safari the flex-column body would not take a touch scroll, so the detailed stats under the radar could not be reached */
+.modal.fpm.t-over .fp-body,.modal.fpm.t-rel .fp-body,.modal.fpm.t-train .fp-body{display:block;overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;touch-action:pan-y}
