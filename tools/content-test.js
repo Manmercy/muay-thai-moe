@@ -101,6 +101,14 @@ const chrome=process.env.CHROME_PATH||'/Applications/Google Chrome.app/Contents/
     g.week=38;sendAway(g,'kati',2,'cheat');if(!/งอน|Sulking/.test(relLabel(g,g.F.kati)))throw Error('sulk');
     UI.modal={type:'fighter',id:'mali'};UI.ptab='rel';render();const on=document.querySelector('.rlad .rbranch span.on');const lab=document.querySelector('.rlad > b');UI.modal=null;render();
     if(!on||!lab)throw Error('ladder dom');return on.textContent===relBase(g,f)&&lab.textContent===relLabel(g,f);});
+  test('Lv.30 tops out at 1,000 points',()=>heartAt(30)===1000&&heartAt(20)===365&&heartLv({bond:100,bondX:900}).lv===30&&heartLv({bond:100,bondX:5000}).total===1000&&heartLv({bond:100,bondX:899}).lv===29);
+  test('hearts stop at the chapter cap (province Lv.20, regional Lv.25) and never drop',()=>{const g=fresh();G=g;const f=g.F.kati;f.bond=100;f.bondX=heartAt(20)-100;add(g,'kati','bond',8);if(f.bondX!==heartAt(20)-100)throw Error('over cap '+f.bondX);
+    if(!heartCapped(g,f))throw Error('capped');f.bondX=heartAt(24)-100;add(g,'kati','bond',8);if(f.bondX!==heartAt(24)-100)throw Error('old save dropped');
+    g.region={};f.bondX=heartAt(20)-100;add(g,'kati','bond',8);if(!(f.bondX>heartAt(20)-100))throw Error('regional opens');f.bondX=heartAt(25)-110;for(let i=0;i<20;i++)add(g,'kati','bond',8);return f.bond+f.bondX===heartAt(25);});
+  test('while she is away the hearts show the short word; the profile ladder shows it in full',()=>{const g=fresh();G=g;lovUp(g,['kati','mali']);g.week=20;walkL(g,breakSteps(g,'mali'));UI.tab='people';render();
+    const card=[...document.querySelectorAll('.pcard')].find(c=>c.querySelector('[data-id="mali"]'));const sm=card.querySelector('.hearts small').textContent;
+    UI.modal={type:'fighter',id:'mali'};UI.ptab='rel';render();const head=document.querySelector('.rlad > b').textContent;const cap=document.querySelector('.rlad .rcap');UI.modal=null;render();
+    return /^(อกหัก|Heartbroken)$/.test(sm.trim())&&head.length>sm.length&&!!cap;});
   test('only one partner: no Valentine scene',()=>{const g=fresh();G=g;lovUp(g,['kati']);g.week=38;return !ev('lv_val').when(g);});
   test('a girl who left camp skips training, gets no offers, cannot be booked, and comes back',()=>{const g=fresh();G=g;lovUp(g,['kati','mali']);sendAway(g,'kati',2,'cheat');
     const lv=g.F.kati.a.power;weekTrain(g);if(g.F.kati.a.power!==lv)throw Error('trained');genOffers(g);if(g.offers.some(o=>o.a==='kati'))throw Error('offer');

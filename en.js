@@ -2273,16 +2273,26 @@ const BOND_MUL=.3,BOND_LATE=["mali","rin"];
 const absWeek=G=>((G.season||1)-1)*52+G.week;
 const add=(G,id,k,v)=>{const f=G.F[id];if(!f)return;if(k==="bond"&&v>0&&typeof partners==="function"&&LOVE_IDS.includes(id)&&!isPartner(G,id)){const n=partners(G).length;if(n)v*=n>=2?.6:.75;}/* v1.89.11: courting while taken is slower */if(k==="bond"&&v>0)f.lastTouch=absWeek(G);if(k==="bond"&&v>0)v=Math.max(.5,Math.round(v*BOND_MUL*(BOND_LATE.includes(id)&&(f.bond||0)<50?1.6:1)*2)/2);
   if(k==="bond"){const lv0=heartLv(f).lv;/* v1.86: affection past 100 keeps counting as heart levels (bond itself stays 0–100 for every existing check) */
-    if(v>=0){const t=(f.bond||0)+v;f.bond=Math.min(100,t);if(t>100)f.bondX=(f.bondX||0)+(t-100);}
+    if(v>=0){const tot=(f.bond||0)+(f.bondX||0),cap=heartAt(heartCapLv(G));v=tot>=cap?0:Math.min(v,cap-tot);/* v1.89.11: chapter cap, never takes away what she already has */
+      const t=(f.bond||0)+v;f.bond=Math.min(100,t);if(t>100)f.bondX=(f.bondX||0)+(t-100);}
     else{let d=-v;const x=Math.min(f.bondX||0,d);if(x>0){f.bondX-=x;d-=x;}if(d>0)f.bond=Math.max(0,(f.bond||0)-d);}
     const lv1=heartLv(f).lv;if(lv1>lv0&&G.F[id].met)G.heartNews=(G.heartNews||[]).concat([{id,lv:lv1,week:G.week}]).slice(-8);return;}
   f[k]=Math.max(0,Math.min(100,f[k]+v));};
 /* v1.86: heart levels — Lv.1–10 are the first 100 points (10 per level); past that each level asks a little more, with no ceiling */
 const HEART_TIERS=[[1,"Acquaintance"],[3,"Getting familiar"],[5,"Friends"],[7,"Close"],[9,"Deeply bonded"],[15,"Kindred"],[20,"Inseparable"]];
-const heartStep=n=>15+(n-11)*5; // points from Lv.n to Lv.n+1, for n ≥ 11
+/* v1.89.11: Lv.30 is the top at 1,000 points — each step past 100 asks a little more (15 → 80) */
+const HEART_STEPS=[15,20,20,25,30,35,35,40,45,45,50,55,60,60,65,70,75,75,80],HEART_MAX=30,HEART_TOP=1000;
+const heartStep=n=>HEART_STEPS[n-11]||0; // points from Lv.n to Lv.n+1, for 11 ≤ n < 30
+const heartAt=lv=>lv<=10?(lv-1)*10:100+HEART_STEPS.slice(0,lv-11).reduce((a,b)=>a+b,0);
 function heartLv(f){const b=Math.max(0,Math.min(100,(f&&f.bond)||0)),x=Math.max(0,(f&&f.bondX)||0);
   if(b<100){const lv=1+Math.floor(b/10);return {lv,into:b-(lv-1)*10,need:10,total:b};}
-  let lv=11,left=x;while(left>=heartStep(lv)){left-=heartStep(lv);lv++;}return {lv,into:left,need:heartStep(lv),total:100+x};}
+  let lv=11,left=x;while(lv<HEART_MAX&&left>=heartStep(lv)){left-=heartStep(lv);lv++;}
+  if(lv>=HEART_MAX)return {lv:HEART_MAX,into:1,need:1,total:Math.min(HEART_TOP,100+x),max:true};
+  return {lv,into:left,need:heartStep(lv),total:100+x};}
+/* v1.89.11: how far hearts can go in each chapter — province Lv.20 · regional Lv.25 · national Lv.28 · international Lv.30 */
+const heartCapLv=G=>G&&G.flags&&G.flags.intl?30:G&&G.flags&&G.flags.national?28:G&&G.region?25:20;
+const heartCapped=(G,f)=>!!(G&&f)&&(f.bond||0)+(f.bondX||0)>=heartAt(heartCapLv(G));
+const HEART_NEXT={20:"up to Lv.25 in the regional chapter",25:"up to Lv.28 in the national chapter",28:"up to Lv.30 in the international chapter",30:""};
 const heartTier=lv=>{let n=HEART_TIERS[0][1];for(const [m,t] of HEART_TIERS)if(lv>=m)n=t;return n;};
 
 const EVENTS=[
@@ -2649,8 +2659,8 @@ const lovFinal=G=>{for(const id of lovList(G)){if(!romOf(G,id)||!LOVER_FINAL[id]
 function befriend(G,id){G.friendz=G.friendz||{};G.friendz[id]=true;}
 const isFriendz=(G,id)=>!!(G.friendz&&G.friendz[id]);
 const awayWord=(G,id)=>G.F[id].camp==="player"?"Left camp":"Not in touch";
-function relLabel(G,f,lv){const id=f&&f.id;if(G&&id&&G.F&&G.F[id]){
-    if(isAway(G,id))return `${G.F[id].awayWhy==="break"?"Heartbroken":"Sulking"} · ${awayWord(G,id)} (back in ${awayLeft(G,id)} wk)`;
+function relLabel(G,f,lv,short){const id=f&&f.id;if(G&&id&&G.F&&G.F[id]){
+    if(isAway(G,id)){const w=G.F[id].awayWhy==="break"?"Heartbroken":"Sulking";return short?w:`${w} · ${awayWord(G,id)} (back in ${awayLeft(G,id)} wk)`;}
     if(isLov(G,id))return G.harem?"Sweetheart ♥ (harem)":"Sweetheart ♥";if(isProm(G,id))return "Promised ♡";if(isEx(G,id))return "Ex";
     if(isFriendz(G,id)&&(G.F[id].bond||0)>=40)return "Close friend";}
   return heartTier(lv!=null?lv:heartLv(f||{}).lv);}
@@ -2904,7 +2914,7 @@ function dateScene(G,id,act){
       const tier=gain>=5?"great":gain>=2?"ok":"meh";
       f.closed=f.closed||{};const firstClose=!f.closed[tier];f.closed[tier]=true;
       const out=[...(firstClose?[{n:id,f:tier==="meh"?"sad":"happy",l:look,t:DATE_CLOSE[tier][id]}]:[]),
-        {n:"nar",t:`Bond with ${f.name} ${(real>=0?"+":"")+real}${pref==="like"?" · it's an activity she likes!":pref==="dislike"?" · she doesn't seem to like it here":""}${D.facts.length?" · new profile info: "+D.facts.join(" / "):D.missed?" · she seems to have more she wants to share, if you say the right thing":""}`}];
+        {n:"nar",t:`Bond with ${f.name} ${(real>=0?"+":"")+real}${real<=0&&heartCapped(G2,f)?" · hearts are full for this chapter":""}${pref==="like"?" · it's an activity she likes!":pref==="dislike"?" · she doesn't seem to like it here":""}${D.facts.length?" · new profile info: "+D.facts.join(" / "):D.missed?" · she seems to have more she wants to share, if you say the right thing":""}`}];
       if(typeof hasSignature!=="undefined"&&hasSignature(f)&&!G2.seen["sig_"+id]){G2.seen["sig_"+id]=true;out.push({n:"nar",t:`✦ The bond unlocked the signature move of ${f.name}: "${SIGNATURE[id].name}" — ${SIGNATURE[id].desc}`});}
       if(f.bond>=40&&!G2.seen["b1_"+id]){G2.seen["b1_"+id]=true;out.push(...BOND_EVENTS[id].lv1.map(x=>({l:look,...x})));}
       if(f.bond>=75&&f.trust>=40&&RIVAL_LOVE.includes(id)&&f.camp==="player"&&(G2.season||1)>=2&&!isLov(G2,id)&&!exWait(G2,id)&&!G2.seen["love2_"+id]){G2.seen["love2_"+id]=true;
@@ -5566,8 +5576,8 @@ function slotsHTML(mode){const rows=[];for(let i=1;i<=SLOTS;i++){const s=loadSlo
 function faceImg(f,cls=""){return f.canon||f.id==="pailin"?`<img class="face ${cls}" style="--c:${f.color}" src="${faceSrc(f.id,"happy")}" alt="${esc(f.name)}">`:
   `<canvas class="face npcface ${cls}" width="96" height="96" data-sprite="${f.id}" data-mode="guard" style="--c:${f.color}" aria-label="${esc(f.name)}"></canvas>`;}
 // v1.86: heart level — one heart, the level number, a gauge to the next level
-function hearts(b,f){f=f||{bond:b};const H=heartLv(f),pct=Math.round(H.into/H.need*100),left=Math.max(0,Math.ceil((H.need-H.into)*2)/2);
-  return `<span class="hearts hlv" title="Bond ${Math.round(H.total)} · ${left} to Lv.${H.lv+1}"><i class="hp" style="--p:1"></i><b class="hlvn">Lv.${H.lv}</b><i class="hgauge"><i style="width:${pct}%"></i></i><small class="${G&&f.id&&relIsStatus(G,f)?"hstat":""}">${G&&f.id?relLabel(G,f,H.lv):heartTier(H.lv)}</small></span>`;}
+function hearts(b,f){f=f||{bond:b};const H=heartLv(f),cap=!H.max&&!!(G&&f.id&&heartCapped(G,f)),pct=H.max||cap?100:Math.round(H.into/H.need*100),left=Math.max(0,Math.ceil((H.need-H.into)*2)/2);
+  return `<span class="hearts hlv${cap?" hcap":""}" title="Bond ${Math.round(H.total)} · ${H.max?"maxed":cap?`hearts full for this chapter (cap Lv.${heartCapLv(G)})`:`${left} to Lv.${H.lv+1}`}"><i class="hp" style="--p:1"></i><b class="hlvn">Lv.${H.lv}</b><i class="hgauge"><i style="width:${pct}%"></i></i><small class="${G&&f.id&&relIsStatus(G,f)?"hstat":""}">${G&&f.id?relLabel(G,f,H.lv,true):heartTier(H.lv)}</small></span>`;}
 function bar(label,v,color,txt){return `<div class="bar"><span>${label}</span><i style="--v:${clamp(v,0,100)}%;--bc:${color}"></i><b class="num">${txt??Math.round(v)}</b></div>`;}
 function mini(v,color){return `<i class="mini" style="--v:${clamp(v,0,100)}%;--bc:${color}"></i>`;}
 /* v1.88: an opponent shows her strength level, coloured against our best fighter in her division (red = stronger) */
@@ -6333,7 +6343,7 @@ function relHTML(f){const P=PROFILES[f.id],b=f.bond;
   const gifts=Object.entries(f.know).filter(([k])=>k.startsWith("gift_")).map(([k,v])=>`<span class="tchip ${v}">${GIFTS[k.slice(5)].name}${v==="love"?" ♥♥":v==="like"?" ♥":v==="dislike"?" ✕":""}</span>`).join("");
   const looks=[["fight","Fight gear"],["train","Training gear"],["casual","Casual"],...(typeof loyThaiLook==="function"&&loyThaiLook(G)&&THAI_IDS.includes(f.id)?[["thai","Thai Dress"]]:[])];
   return `<div class="pf2"><div class="pf-art"><img src="${UI.look==="train"?`${ASSET}${f.id}_train.webp`:stand(f.id,UI.look,"happy")}" alt=""><div class="seg sm">${looks.map(([k,t])=>`<button data-act="plook" data-v="${k}" aria-pressed="${UI.look===k}">${t}</button>`).join("")}</div></div>
-   <div class="pf-side">${hearts(b,f)}${typeof missGap==="function"&&missGap(G,f.id)>=3?`<div class="missb">💭 Missing you · haven't met in ${missGap(G,f.id)} weeks ${!(f.bondX>0)&&f.bond>(REL_FLOOR[(G.relT||{})[f.id]||0]||0)?" · bond starting to fade":""}</div>`:""}${relLadderHTML(f)}<div class="bars">${(()=>{const H=heartLv(f);return bar("Friends",H.into/H.need*100,"var(--red)",`${Math.round(H.total)}`);})()}${bar("Trust",f.trust,"var(--gold)")}</div>${f.camp==="player"?`<p class="meta trustx">${trustText(f)}</p>`:""}
+   <div class="pf-side">${hearts(b,f)}${typeof missGap==="function"&&missGap(G,f.id)>=3?`<div class="missb">💭 Missing you · haven't met in ${missGap(G,f.id)} weeks ${!(f.bondX>0)&&f.bond>(REL_FLOOR[(G.relT||{})[f.id]||0]||0)?" · bond starting to fade":""}</div>`:""}${relLadderHTML(f)}<div class="bars">${(()=>{const H=heartLv(f);return bar("Friends",H.max||heartCapped(G,f)?100:H.into/H.need*100,H.max||heartCapped(G,f)?"var(--gold)":"var(--red)",`${Math.round(H.total)}`);})()}${bar("Trust",f.trust,"var(--gold)")}</div>${f.camp==="player"?`<p class="meta trustx">${trustText(f)}</p>`:""}
     <div class="info"><div><span>Height</span><b>${P.height}</b></div><div><span>Blood type</span><b>${L(b>=UNLOCK.blood||f.know.blood,UNLOCK.blood,P.blood)}</b></div>
      <div><span>Birthday</span><b>${L(b>=UNLOCK.bday||f.know.bday,UNLOCK.bday,P.bday)}</b></div><div><span>Style</span><b>${esc(P.heritage)}</b></div></div></div></div>
    <div class="pf-sec"><h4>Personality</h4><p>${L(b>=UNLOCK.personality,UNLOCK.personality,P.personality)}</p></div>
@@ -6346,6 +6356,7 @@ function relHTML(f){const P=PROFILES[f.id],b=f.bond;
 function relLadderHTML(f){const H=heartLv(f).lv,cur=relLabel(G,f,H),base=relBase(G,f,H),st=REL_BRANCH(G).includes(base),away=isAway(G,f.id);
   return `<div class="reltier rlad"><b class="${relIsStatus(G,f)?"hstat":""}">${esc(cur)}</b><small>${esc(away?"The label goes back once she returns":REL_DESC[base]||"")}</small>
    <ol class="rsteps">${REL_STEPS.map(([lv,n])=>`<li class="${!st&&n===base?"on":H>=lv?"done":""}"><i>Lv.${lv}</i>${esc(n)}</li>`).join("")}</ol>
+   <p class="meta rcap">This chapter's heart cap: Lv.${heartCapLv(G)}${HEART_NEXT[heartCapLv(G)]?` · ${HEART_NEXT[heartCapLv(G)]}`:""}</p>
    <div class="rbranch"><small>At the confession (bond 75 + trust 40)</small><div>${REL_BRANCH(G).map(n=>`<span class="${n===base?"on":""}">${esc(n)}</span>`).join("")}</div></div></div>`;}
 function giftHTML(id){const f=G.F[id];
   const E=giftsFor(id).map(k=>[k,{...GIFTS[k],bond:giftBond(id,k)}]).sort((x,y)=>(x[1].bond||0)-(y[1].bond||0)||(x[1].only?1:0)-(y[1].only?1:0));
@@ -6389,7 +6400,7 @@ function reportHTML(){const r=G.lastReport;const ann=[];
   const cut=r.stage==="local"?4:r.stage==="district"?4:0;
   const tu=(r.tierUp||[]).filter(x=>G.F[x.id]),hu=(r.heartUp||[]).filter(x=>G.F[x.id]);
   return `<h2>Week ${r.week}</h2><p class="goal">${goalText()}</p>
-   ${hu.length?`<div class="heartup">${hu.map(x=>`<div class="hu">${faceImg(G.F[x.id],"sm")}<span>Bond with <b>${esc(G.F[x.id].name)}</b> rose to <b class="hlvn">♥ Lv.${x.lv}</b><small class="meta">${relLabel(G,G.F[x.id],x.lv)}</small></span></div>`).join("")}</div>`:""}
+   ${hu.length?`<div class="heartup">${hu.map(x=>`<div class="hu">${faceImg(G.F[x.id],"sm")}<span>Bond with <b>${esc(G.F[x.id].name)}</b> rose to <b class="hlvn">♥ Lv.${x.lv}</b><small class="meta">${relLabel(G,G.F[x.id],x.lv,true)}</small></span></div>`).join("")}</div>`:""}
    ${tu.length?`<div class="tierup">${tu.map(x=>{const f=G.F[x.id],a=TIER_BY[x.from],b=TIER_BY[x.to],up=b.i>a.i;return `<div class="tu ${up?"up":"down"}">${faceImg(f,"sm")}<span><b>${esc(f.name)}</b> ${up?"moved up to":"dropped to"} <b>${b.ic} ${b.n}</b><small class="meta">from ${a.ic} ${a.n}</small></span></div>`;}).join("")}</div>`:""}
    ${ann.length&&cut?`<div class="announce"><div class="ann-h">Rankings · ${STAGE_NAME[r.stage]}</div>${ann.map(a=>`<div class="ann ${a.f.camp==="player"?"me":""}">${faceImg(a.f,"sm")}<b>${esc(a.f.name)}</b><span class="meta">Div ${a.d}</span><span class="rk">Rank ${a.pos}</span>${moveIcon(a.m)}${cut?`<span class="pill ${a.pos<=cut?"green":"red"}">${a.pos<=cut?"In the qualifying zone":"Outside the zone"}</span>`:""}</div>`).join("")}</div>`:""}
    ${r.prog?`<details class="prog"><summary class="ann-h">4-week progress chart (tap to view)</summary><div class="progrow">${r.prog.filter(p=>G.F[p.id]).map(p=>{const f=G.F[p.id];const sum=Object.keys(p.before).reduce((s,k)=>s+(f.a[k]-p.before[k]),0);
@@ -7074,7 +7085,7 @@ function fightEnd(){const U=UI.fight;if(U.brawl){brawlEnd();return;}U.stage="don
 // ---------- actions ----------
 function giftScene(id,res){const f=G.F[id];const mood=res.t==="dislike"?"pout":res.t==="love"?"flustered":"happy";
   playScene([{n:id,f:mood,l:"casual",t:(res.n&&res.t!=="dislike"&&giftAgainLine(id,res.t,res.n,res.g))||(GIFT_TALK_PERSONAL[id]&&GIFT_TALK_PERSONAL[id][res.g])||((GIFT_TALK[id]&&GIFT_TALK[id][res.g])||GIFT_LINES[id][res.t])},{n:"nar",t:res.gain>0?(res.n>=2?`Bond with ${f.name} +${res.gain} · a bit too often, so it rises less`:`Bond with ${f.name} +${res.gain}`)
-      :res.t==="dislike"?`${f.name} accepts it with a smile, but it may not be a favorite · Bond unchanged`:f.bond>=100?`${f.name} is thrilled · Bond is already maxed`:`${f.name} is happy, but has been getting this a lot lately. Try mixing it up.`},
+      :res.t==="dislike"?`${f.name} accepts it with a smile, but it may not be a favorite · Bond unchanged`:heartCapped(G,f)?`${f.name} is delighted · hearts are full for this chapter`:f.bond>=100?`${f.name} is thrilled · Bond is already maxed`:`${f.name} is happy, but has been getting this a lot lately. Try mixing it up.`},
     ...((()=>{const k=f.giftTot===5?0:f.giftTot===10?1:-1;if(k<0||!GIFT_FREQ[id]||(f.giftFreq||0)>k)return [];f.giftFreq=k+1;
       return [...GIFT_FREQ[id][k].map(s=>({...s,l:"casual"})),k===1?{inject:G2=>{add(G2,id,"bond",3);G2.F[id].morale=Math.min(100,G2.F[id].morale+8);return [{n:"nar",t:`A gift in return from ${f.name} · Bond +3 · Morale: ${f.name} +8`}];}}:{inject:()=>[]}];})())],()=>{AU.startMusic("hub");render();},{bg:f.camp==="player"?"gym":"fair",look:"casual"});}
 function goalHidden(){try{return localStorage.getItem("mtm-goalhide")==="1"}catch(e){return !!UI.goalHide}}
