@@ -83,7 +83,7 @@ const chrome=process.env.CHROME_PATH||'/Applications/Google Chrome.app/Contents/
   test('courting someone else is slower while you see someone',()=>{const g=fresh();G=g;g.F.rin.met=true;g.F.rin.bond=20;add(g,'rin','bond',8);const solo=g.F.rin.bond-20;
     const h=fresh();G=h;lovUp(h,['kati']);h.F.rin.met=true;h.F.rin.bond=20;add(h,'rin','bond',8);const taken=h.F.rin.bond-20;
     const k=fresh();G=k;lovUp(k,['kati','mali']);k.F.rin.met=true;k.F.rin.bond=20;add(k,'rin','bond',8);const two=k.F.rin.bond-20;
-    const base=fresh();G=base;base.F.kati.bond=50;add(base,'kati','bond',8);const own=fresh();G=own;lovUp(own,['kati']);own.F.kati.bond=50;add(own,'kati','bond',8);return taken<solo&&two<taken&&own.F.kati.bond===base.F.kati.bond;});
+    const base=fresh();G=base;base.F.kati.bond=50;add(base,'kati','bond',8);const own=fresh();G=own;lovUp(own,['kati']);own.F.kati.bond=50;add(own,'kati','bond',8);return taken<solo&&two<taken&&Math.abs(taken-solo*.85)<.6&&Math.abs(two-solo*.7)<.6&&own.F.kati.bond===base.F.kati.bond;});
   test('lover bonus only while there is one; a second yes is warned and the top heart scene closes',()=>{const g=fresh();G=g;g.F.kati.met=true;g.F.kati.bond=90;g.F.kati.trust=60;const m0=g.F.kati.morale;takeLover(g,'kati');if(g.F.kati.morale!==Math.min(100,m0+15))throw Error('solo morale');if(!lovSolo(g))throw Error('solo');
     g.F.mali.met=true;g.F.mali.camp='player';g.F.mali.bond=80;g.F.mali.trust=60;if(!cheatWarn(g,'mali').length||!/คบซ้อน|two-timing/.test(yesTxt(g,'mali','x')))throw Error('warn');if(cheatWarn(g,'kati').length)throw Error('no self warn');
     const mm=g.F.mali.morale;takeLover(g,'mali');if(g.F.mali.morale!==mm)throw Error('no morale for a second');if(lovSolo(g))throw Error('not solo');
@@ -177,9 +177,62 @@ const chrome=process.env.CHROME_PATH||'/Applications/Google Chrome.app/Contents/
     {const PS=playScene,OF=openFight2,SV=save;try{playScene=(s,cb)=>cb&&cb();save=()=>{};const run=(tuy,win,ko,yr)=>{const h=mk();h.season=yr;h.F.kati.camp='player';UI.thiefK=tuy?'tuy':'tum';openFight2=(bk,cb)=>{LASTF={result:{win:win?'A':'B',type:ko?'KO':'คะแนน'}};cb();};const c0=h.cash;thiefGo('kati');return h.cash-c0;};
       const r=[run(true,true,false,1),run(true,true,true,3),run(true,false,false,3),run(false,true,false,3),run(false,false,false,3)].join(',');if(r!=='3000,7500,0,200,0')throw Error('cash '+r);}finally{playScene=PS;openFight2=OF;save=SV;}}
     }finally{todayStr=T0;}return true;});
+  test('harem scenes: everyone twice + pair talk + a choice, the yearly loop fires in its weeks, a member with no lines is skipped (no undefined)',()=>{
+    const run=st=>{const L=[];playScene(st,()=>{},{bg:'camp',look:'casual'});let n=0;while(UI.scene&&n++<400){const c=UI.scene.cur;if(!c){sceneNext();continue;}if(c.choice){sceneChoose(0);continue;}L.push(String(c.t));sceneNext();}return L;};
+    for(const ids of [['kati','mali'],['kati','mali','rin','ploy','fah'],['kati','mali','rin','ploy','fah','nA0']]){const g=fresh();G=g;g.season=2;g.week=30;for(const id of ids){g.F[id].met=true;if(g.F[id].camp!=='rival')g.F[id].camp='player';}
+      g.lovers=[...ids];g.romance=ids[0];g.harem=true;g.haremAbs=absWeek(g)-20;const all=[...[0,1,2].map(i=>HAREM_SCENES[i]),...HAREM_YEAR.flatMap(Y=>Y.v)];
+      for(const S of all){const L=run(hmSteps(g,S));if(L.some(l=>/undefined|^null$/.test(l)))throw Error('undefined line, '+ids.length+' members');if(L.length<(ids.length>=5?18:9))throw Error('short scene '+L.length);}}
+    const g=fresh();G=g;g.season=3;for(const id of ['kati','mali']){g.F[id].met=true;g.F[id].camp='player';}g.lovers=['kati','mali'];g.harem=true;g.haremAbs=absWeek(g)-60;const hit=[];
+    for(let w=1;w<=52;w++){g.week=w;for(const e of pendingEvents().filter(e=>/^lv_hy_/.test(e.id))){hit.push(e.id+'@'+w);g.seenY=g.seenY||{};g.seenY[e.id]=g.season;}}
+    if(hit.join()!=='lv_hy_sports@25,lv_hy_loy@27,lv_hy_newyear@33,lv_hy_songkran@48')throw Error(hit.join());return true;});
   test('a no late in the year does not block her second ask next year (old week-of-year saves too)',()=>{const act=Object.keys(ACTIVITIES)[0];const asks=g=>{const s=JSON.stringify(dateScene(g,'mali',act).flatMap(x=>x.inject?x.inject(g):[x]));return /คบซ้อน|two-timing/i.test(s);};
     for(const old of [false,true]){const g=fresh();G=g;for(const id of ['kati','mali']){g.F[id].met=true;g.F[id].camp='player';}g.F.kati.bond=90;g.F.kati.trust=60;takeLover(g,'kati');g.F.mali.bond=89.5;g.F.mali.trust=50;g.seen.love_mali=true;g.week=50;
       if(old){g.loveNo={mali:50};}else noteNo(g,'mali');newSeason(g);g.week=5;g.confTry={mali:2};if(!asks(g))throw Error((old?'old save':'new')+' blocked');}return true;});
+  /* v1.90.17: route rewards */
+  const txtOf=(g,L)=>{const out=[];const go=A=>{for(const x of A||[]){if(x.inject){go(x.inject(g)||[]);continue;}if(x.fx&&!x.choice&&!x.n){x.fx(g);continue;}
+      if(x.choice){for(const c of x.choice)out.push(String(c.t));const c=x.choice[0];if(c.fx)c.fx(g);go(c.then||[]);continue;}if(x.n){out.push(String(x.t));if(x.who)out.push(String(x.who));}}};go(L);return out;};
+  const isEN=(window.LANG||'th')==='en',badTxt=L=>L.some(l=>/undefined|^null$|^$/.test(l)||(isEN&&/[฀-๿]/.test(l)));
+  const solo=(g,id,ago)=>{const f=g.F[id];f.met=true;f.bond=90;f.trust=60;f.camp='player';takeLover(g,id);g.mono.abs=absWeek(g)-ago;};
+  test('one love: private festival loop + her own Valentine in their weeks, with a line about last year from the second time',()=>{
+    for(const id of LOVE_IDS){const g=fresh();G=g;g.season=2;solo(g,id,10);const hit=[];
+      for(let w=1;w<=52;w++){g.week=w;for(const e of pendingEvents().filter(e=>/^lv_(mf_|valm)/.test(e.id))){hit.push(e.id+'@'+w);const L=txtOf(g,e.steps);if(badTxt(L)||L.length<(e.id==='lv_valm'?4:9))throw Error(id+' '+e.id+' '+L.length);g.seenY=g.seenY||{};g.seenY[e.id]=g.season;}}
+      if(hit.join()!=='lv_mf_sports@25,lv_mf_loy@27,lv_mf_newyear@33,lv_valm@38,lv_mf_songkran@48')throw Error(id+' '+hit.join());
+      const again=txtOf(g,monoFestSteps(g,'loy'));if(again[1]!==MONO_AGAIN[id].loy)throw Error('again line '+id);}
+    const g=fresh();G=g;g.season=2;solo(g,'kati',10);lovUp(g,['mali']);g.week=27;if(monoOf(g)||pendingEvents().some(e=>/^lv_(mf_|valm|ma)/.test(e.id)))throw Error('two-timer got one-love scenes');return true;});
+  test('one love: anniversaries in real time from the day you got together (3 m, 6 m, every year), story scenes in order then a yearly scene; a late save gets the latest only if recent',()=>{
+    const adv=g=>{g.week++;if(g.week>52){g.week=1;g.season++;}};
+    const runFrom=(id,ago,weeks)=>{const g=fresh();G=g;g.season=3;g.week=10;const f=g.F[id];f.met=true;f.camp='player';g.lovers=[id];g.romance=id;g.lovWk={[id]:absWeek(g)-ago};delete g.monoInit;delete g.mono;monoFix(g);const got=[];
+      for(let i=0;i<=weeks;i++){const e=ev('lv_ma');if(e.when(g)){const r=annRel(g,id),m=annDue(g),L=txtOf(g,e.steps);if(badTxt(L)||L.length<6||L[0]!==ANNIV_LBL[m])throw Error(id+' r'+r+' '+L.length);got.push(m+'@'+r);}adv(g);}return {g,got};};
+    for(const id of LOVE_IDS){const {g,got}=runFrom(id,0,330);const lab=got.map(x=>x.split('@')[0]).join();if(lab!=='13,26,52,104,156,208,260,312')throw Error(id+' '+got.join());
+      if(got.some(x=>{const [m,r]=x.split('@');return +r-(+m)>=3;}))throw Error('late '+got.join());
+      const T=loveTitle(g,g.F[id]);if(!T||T.k!=='mono'||lovePerk(g.F[id]).prep!==.025||lovePerk(g.F[id]).brk!==4)throw Error('title/perk '+id);if(g.flags.mono1y[id]==null)throw Error('card flag');}
+    {const {got}=runFrom('kati',6*52+30,60);if(got.join().replace(/@\d+/g,'')!=='364')throw Error('year 7 load: '+got.join());}
+    {const {g,got}=runFrom('mali',2*52+4,60);if(got.join().replace(/@\d+/g,'')!=='104,156')throw Error('recent catch-up: '+got.join());if(g.flags.mono1y.mali==null)throw Error('title on the first one');}
+    {const {got}=runFrom('rin',30,30);if(got.join().replace(/@\d+/g,'')!=='26,52')throw Error('under a year: '+got.join());}
+    const g=fresh();G=g;g.season=2;g.week=20;solo(g,'rin',20);g.lovWk.rin=absWeek(g)-14;if(annDue(g)!==13)throw Error('due');lovUp(g,['kati']);if(g.mono||annDue(g)!=null||loveTitle(g,g.F.rin))throw Error('two-timing kept the clock');
+    doBreak(g,'kati');g.F.kati.awayAbs=null;if(!monoOf(g)||monoWk(g)!==0)throw Error('clock did not restart');return true;});
+  test('harem: first-anniversary photo + all five together, team title and a perk that grows with the team',()=>{const g=fresh();G=g;g.season=3;g.week=10;
+    for(const id of LOVE_IDS){g.F[id].met=true;g.F[id].camp='player';}g.lovers=[...LOVE_IDS];g.romance='kati';g.harem=true;g.haremAbs=absWeek(g)-40;
+    if(ev('lv_hann').when(g))throw Error('too early');g.haremAbs=absWeek(g)-60;if(!ev('lv_hann').when(g))throw Error('no anniversary');let L=txtOf(g,ev('lv_hann').steps);if(badTxt(L)||L.length<14)throw Error('hann '+L.length);
+    if(g.flags.harem1y==null||loveTitle(g,g.F.mali).k!=='harem')throw Error('team title');const p5=lovePerk(g.F.mali).prep;if(Math.abs(p5-.02)>1e-9||lovePerk(g.F.mali).brk!==5)throw Error('perk '+p5);
+    if(!ev('lv_hfull').when(g))throw Error('no full five');L=txtOf(g,ev('lv_hfull').steps);if(badTxt(L)||L.length<14)throw Error('hfull '+L.length);
+    g.lovers=['kati','mali'];if(Math.abs(lovePerk(g.F.kati).prep-.0125)>1e-9)throw Error('perk with two');
+    if(monoOf(g)||loveTitle(g,g.F.rin))throw Error('mono on harem');return true;});
+  test('harem: the 3 group scenes loop — one at random every 13 weeks after the third, not the same twice in a row, pairs rotate',()=>{const g=fresh();G=g;g.season=3;g.week=5;
+    for(const id of LOVE_IDS){g.F[id].met=true;g.F[id].camp='player';}g.lovers=[...LOVE_IDS];g.romance='kati';g.harem=true;g.haremAbs=absWeek(g)-4;const e=ev('lv_hmr');if(e.when(g))throw Error('before hm3');
+    g.seen.lv_hm1=g.seen.lv_hm2=g.seen.lv_hm3=true;g.haremAbs=absWeek(g)-30;const got=[],first=[];for(let i=0;i<60;i++){g.week++;if(g.week>52){g.week=1;g.season++;}if(e.when(g)){const L=txtOf(g,e.steps);if(badTxt(L)||L.length<18)throw Error('short '+L.length);got.push(g.hmLoopLast+'@'+absWeek(g));first.push(L[11]);}}
+    const at=got.map(x=>+x.split('@')[1]),ix=got.map(x=>+x.split('@')[0]);if(got.length<4||at.some((w,i)=>i&&w-at[i-1]!==13))throw Error('timing '+got.join());if(ix.some((x,i)=>i&&x===ix[i-1]))throw Error('repeat '+got.join());
+    return true;});
+  test('route endings from year 5 (once), her line every year; Ploy & Fah now have lover dates, a pre-final scene, a year-end line and chats',()=>{
+    const end=g=>txtOf(g,endingScene(g).steps).join('\n');
+    let g=fresh();G=g;g.season=5;solo(g,'ploy',80);g.flags.mono1y={ploy:absWeek(g)-20};let t=end(g);if(/แต่งงาน|marry/i.test(t))throw Error('proposal');if(!/พลอย · คู่ใจ|Ploy · Soulmate/.test(t))throw Error('no mono ending');if(g.flags.loveEnd!=='mono_ploy')throw Error('flag');
+    t=end(g);if(/· คู่ใจ —|· Soulmate —/.test(t)||!t.includes(LOVER_END.ploy[0].t))throw Error('ending twice / no year-end line');
+    g=fresh();G=g;g.season=4;solo(g,'fah',80);g.flags.mono1y={fah:1};if(/· คู่ใจ —|· Soulmate —/.test(end(g)))throw Error('ending before year 5');
+    g=fresh();G=g;g.season=6;for(const id of ['kati','mali','rin']){g.F[id].met=true;g.F[id].camp='player';}g.lovers=['kati','mali','rin'];g.harem=true;g.haremAbs=absWeek(g)-80;g.flags.harem1y=1;t=end(g);if(!/ทีมผู้จัดการ · ครอบครัว|Team Manager · The Sirichai/.test(t)||/แต่งงาน|marry/i.test(t))throw Error('no harem ending');
+    g=fresh();G=g;g.season=6;lovUp(g,['kati','mali']);g.flags.mono1y={kati:1};if(/· คู่ใจ —|· Soulmate —|ครอบครัวศิริชัย|Sirichai Family/.test(end(g)))throw Error('two-timer got an ending');
+    for(const id of ['ploy','fah']){if((LOVER_DATES[id]||[]).length!==3||!LOVER_FINAL[id]||!LOVER_END[id])throw Error('content '+id);const gg=fresh();G=gg;gg.season=2;solo(gg,id,0);gg.lovWk[id]=absWeek(gg)-1;
+      const s=JSON.stringify(txtOf(gg,dateScene(gg,id,Object.keys(ACTIVITIES)[0])));if(!s.includes(LOVER_DATES[id][0][1].t))throw Error('date '+id);if(!CHAT[id].some(c=>c.id===id[0]+'_lv1'&&c.need(gg)))throw Error('chat '+id);}
+    return true;});
   test('skip scene stops at a choice instead of picking the first option',()=>{const g=fresh();G=g;let picked=0,done=0;
     playScene([{n:'nar',t:'a'},{n:'nar',t:'b'},{choice:[{t:'yes',fx:()=>{picked=1;}},{t:'no',fx:()=>{picked=2;}}]},{n:'nar',t:'c'}],()=>{done=1;},{bg:'camp'});
     sceneSkip();if(picked||!UI.scene||!UI.scene.cur||!UI.scene.cur.choice)throw Error('did not stop at the choice');sceneChoose(1);sceneSkip();if(picked!==2||!done)throw Error('after choosing '+picked+' '+done);return true;});

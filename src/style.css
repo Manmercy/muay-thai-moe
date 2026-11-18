@@ -2164,3 +2164,6 @@ html[lang=en] .fight .fctl2 .skbtn2 b{font-size:11px;display:-webkit-box;-webkit
 .kvd>summary{list-style:none;cursor:pointer}.kvd>summary::-webkit-details-marker{display:none}
 .kvd>summary small.meta{font-size:11px;opacity:.7}.kvd[open]>summary small.meta{display:none}
 .kv-sub{padding:2px 0 6px 12px;font-size:12px;color:var(--muted,#b9b0d8)}.kv-sub>div{display:flex;justify-content:space-between;gap:10px;padding:2px 0}
+
+/* v1.90.17: route title on her profile */
+.ltitle{margin:6px 0 2px;padding:6px 8px;border:1px solid #f2c94c;border-radius:6px;background:rgba(242,201,76,.10)}.ltitle b{display:block;color:#f2c94c}.ltitle small{display:block;opacity:.85}
