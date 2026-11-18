@@ -2029,8 +2029,8 @@ function giveGift(G,id,g){const f=G.F[id],it=GIFTS[g];if(G.cash<it.price||f.gift
   // v1.16: the same gift again means less (and she says so)
   f.giftN=f.giftN||{};f.giftL=f.giftL||{};if(f.giftL[g]&&gameWeek(G)-f.giftL[g]>=6)f.giftN[g]=0;const n=f.giftN[g]||0;f.giftN[g]=n+1;f.giftL[g]=gameWeek(G);f.giftTot=(f.giftTot||0)+1;
   const t=giftTier(id,g),base=Math.round({love:6,like:4,ok:2,dislike:0}[t]*(it.bond&&t!=="dislike"?1.5:1)),gain=base>0?Math.max(1,Math.round(base*(n===0?1:t==="love"?(n===1?.6:.4):(n===1?.5:.25)))):base;
-  const before=f.bond;add(G,id,"bond",gain);if(t==="love")add(G,id,"morale",n<2?6:4);
-  f.know["gift_"+g]=t;return {t,gain:Math.round((f.bond-before)*10)/10,g,n};}
+  const before=(f.bond||0)+(f.bondX||0);add(G,id,"bond",gain);if(t==="love")add(G,id,"morale",n<2?6:4);
+  f.know["gift_"+g]=t;return {t,gain:Math.round(((f.bond||0)+(f.bondX||0)-before)*10)/10,g,n};}
 // v1.21: repeat-gift lines follow what the gift is (food / something to wear / a keepsake / an outing) so they always fit
 const GIFT_AGAIN={
  kati:{food:["{g} again! I finished the last one already, I'm so happy","Got {g} again~ This time I'll share with Coach Daeng"],
@@ -2277,12 +2277,19 @@ const add=(G,id,k,v)=>{const f=G.F[id];if(!f)return;if(k==="bond"&&v>0)f.lastTou
     const lv1=heartLv(f).lv;if(lv1>lv0&&G.F[id].met)G.heartNews=(G.heartNews||[]).concat([{id,lv:lv1,week:G.week}]).slice(-8);return;}
   f[k]=Math.max(0,Math.min(100,f[k]+v));};
 /* v1.86: heart levels — Lv.1–10 are the first 100 points (10 per level); past that each level asks a little more, with no ceiling */
-const HEART_TIERS=[[1,"Acquaintance"],[3,"Getting familiar"],[5,"Friends"],[7,"Close"],[9,"Deeply bonded"],[15,"Kindred"],[20,"Inseparable"]];
+/* v1.90: one ladder — the same names as the relationship tiers (คนรู้จัก / เพื่อนร่วมค่าย / คนสนิท / คนพิเศษ), carried on to ♥30; lovers climb their own ladder */
+const HEART_TIERS=[[1,"Acquaintance"],[3,"Teammate"],[5,"Close"],[8,"Special"],[10,"Deeply bonded"],[15,"Kindred"],[20,"Inseparable"],[25,"Most important person"],[30,"Partner in the ring"]];
+const LOVER_TIERS=[[1,"Lover"],[15,"Kindred sweetheart"],[20,"Inseparable pair"],[25,"Soon-to-be partner"],[30,"Life partner"]];
+const hTot=f=>((f&&f.bond)||0)+((f&&f.bondX)||0);
+// relationship state, written to work with a single romance (G.romance) and with several lovers / promises / exes (G.lovers, G.promise, G.exAbs)
+function relState(G,id){if(!G||!id)return null;const L=Array.isArray(G.lovers)?G.lovers:(G.romance?[G.romance]:[]);if(L.includes(id))return "lover";
+  if(G.promise&&G.promise[id]!=null)return "promise";if(G.exAbs&&G.exAbs[id]!=null)return "ex";return null;}
 const heartStep=n=>15+(n-11)*5; // points from Lv.n to Lv.n+1, for n ≥ 11
 function heartLv(f){const b=Math.max(0,Math.min(100,(f&&f.bond)||0)),x=Math.max(0,(f&&f.bondX)||0);
   if(b<100){const lv=1+Math.floor(b/10);return {lv,into:b-(lv-1)*10,need:10,total:b};}
   let lv=11,left=x;while(left>=heartStep(lv)){left-=heartStep(lv);lv++;}return {lv,into:left,need:heartStep(lv),total:100+x};}
-const heartTier=lv=>{let n=HEART_TIERS[0][1];for(const [m,t] of HEART_TIERS)if(lv>=m)n=t;return n;};
+const heartTier=(lv,id)=>{const st=typeof G!=="undefined"&&G?relState(G,id):null;if(st==="ex")return "Ex";const T=st==="lover"?LOVER_TIERS:HEART_TIERS;
+  let n=T[0][1];for(const [m,t] of T)if(lv>=m)n=t;return st==="promise"&&lv>=8&&lv<15?"Promised":n;};
 
 const EVENTS=[
  {id:"prologue",look:"train",bg:"bus",steps:[
@@ -2676,12 +2683,12 @@ function dateScene(G,id,act){
   const intro=freshOnce(f,"in_"+act,A.intro,rng),opener=freshOnce(f,"op_"+pref,OPENERS[id][pref],rng);
   const steps=[{n:"nar",bg:A.bg,t:intro||`${A.name}`},...(opener?[{n:id,f:pref==="dislike"?"sad":"happy",l:look,t:opener}]:[]),
     ...spotSteps(f,act),...mid,...dateTwist(G,f,D,look),
-    {inject:G2=>{const gain=Math.max(0,1+Math.round(D.score*.7));const capped=false,b0=f.bond;add(G2,id,"bond",gain);const real=Math.round(f.bond-b0);if(gain>=4)add(G2,id,"morale",4);
+    {inject:G2=>{const gain=Math.max(0,1+Math.round(D.score*.7));const capped=false,b0=hTot(f);add(G2,id,"bond",gain);const real=Math.round((hTot(f)-b0)*2)/2,HL=heartLv(f),hleft=Math.max(0,Math.ceil((HL.need-HL.into)*2)/2);if(gain>=4)add(G2,id,"morale",4);
       if(act==="spar"){f.a.iq=Math.min(20,f.a.iq+.3);f.a.guard=Math.min(20,f.a.guard+.3);f.fatigue=Math.min(100,f.fatigue+4);}
       const tier=gain>=5?"great":gain>=2?"ok":"meh";
       f.closed=f.closed||{};const firstClose=!f.closed[tier];f.closed[tier]=true;
       const out=[...(firstClose?[{n:id,f:tier==="meh"?"sad":"happy",l:look,t:DATE_CLOSE[tier][id]}]:[]),
-        {n:"nar",t:`Bond with ${f.name} ${(real>=0?"+":"")+real}${pref==="like"?" · it's an activity she likes!":pref==="dislike"?" · she doesn't seem to like it here":""}${D.facts.length?" · new profile info: "+D.facts.join(" / "):D.missed?" · she seems to have more she wants to share, if you say the right thing":""}`}];
+        {n:"nar",t:`Bond with ${f.name} ${(real>=0?"+":"")+real} · ${hleft} to ♥${HL.lv+1}${pref==="like"?" · it's an activity she likes!":pref==="dislike"?" · she doesn't seem to like it here":""}${D.facts.length?" · new profile info: "+D.facts.join(" / "):D.missed?" · she seems to have more she wants to share, if you say the right thing":""}`}];
       if(typeof hasSignature!=="undefined"&&hasSignature(f)&&!G2.seen["sig_"+id]){G2.seen["sig_"+id]=true;out.push({n:"nar",t:`✦ The bond unlocked the signature move of ${f.name}: "${SIGNATURE[id].name}" — ${SIGNATURE[id].desc}`});}
       if(f.bond>=40&&!G2.seen["b1_"+id]){G2.seen["b1_"+id]=true;out.push(...BOND_EVENTS[id].lv1.map(x=>({l:look,...x})));}
       if(f.bond>=75&&f.trust>=40&&RIVAL_LOVE.includes(id)&&f.camp==="player"&&(G2.season||1)>=2&&!G2.romance&&!G2.seen["love2_"+id]){G2.seen["love2_"+id]=true;
@@ -5228,7 +5235,7 @@ AU.gsfx=function(kind,a){if(!this.init()||this.muted||!SETTINGS.sfx)return;const
   if(kind==="shimmer")for(let i=0;i<6;i++)T(i*.05,{f:1400+Math.random()*1400,type:"sine",dur:.12,peak:.06});};
 
 // ================= MUAY THAI MOE v1.3 — UI =================
-const VERSION="1.89.10";
+const VERSION="1.89.15";
 const CUR_LANG=(typeof window!=="undefined"&&window.LANG)||"th";
 const TH_LABEL=String.fromCharCode(3652,3607,3618);
 function langSwitch(cls){return `<div class="langsw ${cls||""}" role="group" aria-label="Language">${[["th",TH_LABEL],["en","EN"]].map(([k,l])=>`<button class="lsb ${CUR_LANG===k?"on":""}" data-act="setlang" data-v="${k}" aria-pressed="${CUR_LANG===k}">${l}</button>`).join("")}</div>`;}
@@ -5346,7 +5353,7 @@ function faceImg(f,cls=""){return f.canon||f.id==="pailin"?`<img class="face ${c
   `<canvas class="face npcface ${cls}" width="96" height="96" data-sprite="${f.id}" data-mode="guard" style="--c:${f.color}" aria-label="${esc(f.name)}"></canvas>`;}
 // v1.86: heart level — one heart, the level number, a gauge to the next level
 function hearts(b,f){f=f||{bond:b};const H=heartLv(f),pct=Math.round(H.into/H.need*100),left=Math.max(0,Math.ceil((H.need-H.into)*2)/2);
-  return `<span class="hearts hlv" title="Bond ${Math.round(H.total)} · ${left} to Lv.${H.lv+1}"><i class="hp" style="--p:1"></i><b class="hlvn">Lv.${H.lv}</b><i class="hgauge"><i style="width:${pct}%"></i></i><small>${heartTier(H.lv)}</small></span>`;}
+  return `<span class="hearts hlv" title="Bond ${Math.round(H.total)} · ${left} to Lv.${H.lv+1}"><i class="hp" style="--p:1"></i><b class="hlvn">Lv.${H.lv}</b><i class="hgauge"><i style="width:${pct}%"></i></i><small>${heartTier(H.lv,f.id)}</small></span>`;}
 function bar(label,v,color,txt){return `<div class="bar"><span>${label}</span><i style="--v:${clamp(v,0,100)}%;--bc:${color}"></i><b class="num">${txt??Math.round(v)}</b></div>`;}
 function mini(v,color){return `<i class="mini" style="--v:${clamp(v,0,100)}%;--bc:${color}"></i>`;}
 /* v1.88: an opponent shows her strength level, coloured against our best fighter in her division (red = stronger) */
@@ -6162,7 +6169,7 @@ function reportHTML(){const r=G.lastReport;const ann=[];
   const cut=r.stage==="local"?4:r.stage==="district"?4:0;
   const tu=(r.tierUp||[]).filter(x=>G.F[x.id]),hu=(r.heartUp||[]).filter(x=>G.F[x.id]);
   return `<h2>Week ${r.week}</h2><p class="goal">${goalText()}</p>
-   ${hu.length?`<div class="heartup">${hu.map(x=>`<div class="hu">${faceImg(G.F[x.id],"sm")}<span>Bond with <b>${esc(G.F[x.id].name)}</b> rose to <b class="hlvn">♥ Lv.${x.lv}</b><small class="meta">${heartTier(x.lv)}</small></span></div>`).join("")}</div>`:""}
+   ${hu.length?`<div class="heartup">${hu.map(x=>`<div class="hu">${faceImg(G.F[x.id],"sm")}<span>Bond with <b>${esc(G.F[x.id].name)}</b> rose to <b class="hlvn">♥ Lv.${x.lv}</b><small class="meta">${heartTier(x.lv,x.id)}</small></span></div>`).join("")}</div>`:""}
    ${tu.length?`<div class="tierup">${tu.map(x=>{const f=G.F[x.id],a=TIER_BY[x.from],b=TIER_BY[x.to],up=b.i>a.i;return `<div class="tu ${up?"up":"down"}">${faceImg(f,"sm")}<span><b>${esc(f.name)}</b> ${up?"moved up to":"dropped to"} <b>${b.ic} ${b.n}</b><small class="meta">from ${a.ic} ${a.n}</small></span></div>`;}).join("")}</div>`:""}
    ${ann.length&&cut?`<div class="announce"><div class="ann-h">Rankings · ${STAGE_NAME[r.stage]}</div>${ann.map(a=>`<div class="ann ${a.f.camp==="player"?"me":""}">${faceImg(a.f,"sm")}<b>${esc(a.f.name)}</b><span class="meta">Div ${a.d}</span><span class="rk">Rank ${a.pos}</span>${moveIcon(a.m)}${cut?`<span class="pill ${a.pos<=cut?"green":"red"}">${a.pos<=cut?"In the qualifying zone":"Outside the zone"}</span>`:""}</div>`).join("")}</div>`:""}
    ${r.prog?`<details class="prog"><summary class="ann-h">4-week progress chart (tap to view)</summary><div class="progrow">${r.prog.filter(p=>G.F[p.id]).map(p=>{const f=G.F[p.id];const sum=Object.keys(p.before).reduce((s,k)=>s+(f.a[k]-p.before[k]),0);
