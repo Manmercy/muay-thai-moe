@@ -563,10 +563,10 @@ const LINE_STYLE={thasao:["pressure","inside","counter"],chaiya:["pressure","foo
 const HOME_STYLE={kati:"inside",mali:"footwork",rin:"counter",ploy:"power",fah:"pressure"};
 const STAT_STYLE={punch:"power",kick:"footwork",knee:"inside",elbow:"pressure",defense:"counter"};
 /* v1.91.0 tuning (Man: Ploy strongest, Kati next, Mali/Rin/Fah level; each beats and loses to someone; any of them can win with the right build).
-   Equal builds at Lv.18/25 (stats 20, home-line skills, 400 bouts each): Ploy 57% vs the other four, Kati 52–53, Mali 48–49, Rin 45–46, Fah 46–48.
+   Equal builds at Lv.18/25 (stats 20, home-line skills, 400 bouts each), v1.91.1: Ploy ~57% vs the other four, Kati and Rin ~50–52, Mali and Fah ~47.
    STY_K: the style-wheel edge · MDEF: Rin's defense mastery (was .04/.06/.25 — it guarded every attack and made her win 78%) · MWPN: weapon mastery
    HERO_K: heroine kit offset on landing (player camp) · HERO_D: Ploy hits harder rather than more often, so a counter-puncher can still read her */
-let STY_POW=0,STY_K=.06,MDEF={ev:.015,ctr:.025,cd:.1},MWPN={hit:.05,dmg:.2},HERO_K={kati:.08,fah:.06,rin:-.02,mali:.01},HERO_D={ploy:.27};
+let STY_POW=0,STY_K=.06,MDEF={ev:.015,ctr:.025,cd:.1},MWPN={hit:.05,dmg:.2},HERO_K={kati:.09,fah:.075,rin:.035,mali:.035},HERO_D={ploy:.3}; /* v1.91.1 (Man): Rin back up to about Kati's level */
 function fightStyle(f){if(!f)return "power";if(f.fstyle)return f.fstyle;const home=HOME_STYLE[f.id];
   if(home){const sc={},eq=f.skills?equipped(f):[];for(const s of skillList(f.id)){const r=(f.skills&&f.skills[s.id])||0;if(!r||!s.school||s.school==="build"||s.line>2)continue;const st=(LINE_STYLE[s.school]||[])[s.line];if(!st)continue;sc[st]=(sc[st]||0)+r+(eq.includes(s.id)?1:0);}
     let best=home,bv=sc[home]||0;for(const k in sc)if(sc[k]>bv){best=k;bv=sc[k];}return best;}
@@ -7247,13 +7247,13 @@ function cheerLines(f){return CHEER[f.id]||[["You can do it!","Yes!",1],["Follow
 function openFight2(b,done){UI.fight={b,done,stage:"pre",plan:b.plan||"balanced",tac:{focus:"auto",pace:"steady",target:(b.tac&&b.tac.target)||"body"},F:null,shown:[],pending:[],timer:null,res:null,caption:null};render();}
 // v1.46: side-by-side numbers before the bell (opponent hidden until scouted)
 /* v1.91.0: the fighter's style and the wheel, on her profile — the main heroines can change it with the school line they build */
-function styleCardHTML(f){const st=fightStyle(f),home=HOME_STYLE[f.id],B=FSTYLE_BEATS[st],L=Object.keys(FSTYLE).filter(k=>FSTYLE_BEATS[k].includes(st));
-  return `<p class="meta styline">Fight style <b>${FSTYLE[st]}</b>${home&&home!==st?` · home style ${FSTYLE[home]}`:""} · strong against ${B.map(k=>FSTYLE[k]).join("/")} · weak against ${L.map(k=>FSTYLE[k]).join("/")}${home?" · changes with the school line you build most":""}</p>`;}
+function styleCardHTML(f){const st=fightStyle(f),home=HOME_STYLE[f.id];
+  return `<p class="meta styline">Fight style <b>${FSTYLE[st]}</b>${home&&home!==st?` · home style ${FSTYLE[home]}`:""}${home?" · changes with the school line you build most":""}</p>`;}
 function preCompare(me,op,b){const sc=scouted(op.id)||op.camp==="player";const v=verdictOf(adviseCached(me.id,op.id,b.rounds||3).bestRate);
   const rows=[["Punch",a=>a.punch],["Kick",a=>a.kick],["Knee/Elbow",a=>(a.knee+a.elbow)/2],["Guard",a=>(a.guard+a.counter)/2],["Stamina",a=>(a.stamina+a.dur)/2]];
   /* v1.91.0 style wheel line — your build decides your style; the opponent's comes from her best weapon */
-  const s1=fightStyle(me),s2=fightStyle(op),se=styleEdge(s1,s2);
-  const sty=`<p class="meta center styline">Style <b>${FSTYLE[s1]}</b> vs <b>${FSTYLE[s2]}</b> · ${se>0?`<span class="greent">${esc(me.name)} has the style edge</span>`:se<0?`<span class="redt">${esc(me.name)} is at a style disadvantage</span>`:"no style edge either way"}</p>`;
+  const s1=fightStyle(me),s2=fightStyle(op);
+  const sty=`<p class="meta center styline">Style <b>${FSTYLE[s1]}</b> vs <b>${FSTYLE[s2]}</b></p>`; /* v1.91.1 (Man): styles only — who beats whom is for the player to find out */
   return sty+`<div class="pcmp"><div class="pcmp-h"><span class="pill dtag ${v.c}">${v.t}</span>${sc?"":`<small class="mutt">Not scouted · opponent stats hidden</small>`}</div>${rows.map(([n,g])=>{const x=g(me.a),y=g(op.a);
     return `<div class="pcr"><b class="num ${sc&&x>y+.4?"goldt":""}">${x.toFixed(1)}</b><i class="pb l" style="--v:${clamp(x/20*100,0,100)}%"></i><span>${n}</span><i class="pb r" style="--v:${sc?clamp(y/20*100,0,100):0}%"></i><b class="num ${sc&&y>x+.4?"redt":""}">${sc?y.toFixed(1):"?"}</b></div>`;}).join("")}</div>`;}
 function fightHTML(){const U=UI.fight,b=U.b,me=G.F[b.a],op=G.F[b.b],F=U.F;

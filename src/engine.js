@@ -562,10 +562,10 @@ const LINE_STYLE={thasao:["pressure","inside","counter"],chaiya:["pressure","foo
 const HOME_STYLE={kati:"inside",mali:"footwork",rin:"counter",ploy:"power",fah:"pressure"};
 const STAT_STYLE={punch:"power",kick:"footwork",knee:"inside",elbow:"pressure",defense:"counter"};
 /* v1.91.0 tuning (Man: Ploy strongest, Kati next, Mali/Rin/Fah level; each beats and loses to someone; any of them can win with the right build).
-   Equal builds at Lv.18/25 (stats 20, home-line skills, 400 bouts each): Ploy 57% vs the other four, Kati 52–53, Mali 48–49, Rin 45–46, Fah 46–48.
+   Equal builds at Lv.18/25 (stats 20, home-line skills, 400 bouts each), v1.91.1: Ploy ~57% vs the other four, Kati and Rin ~50–52, Mali and Fah ~47.
    STY_K: the style-wheel edge · MDEF: Rin's defense mastery (was .04/.06/.25 — it guarded every attack and made her win 78%) · MWPN: weapon mastery
    HERO_K: heroine kit offset on landing (player camp) · HERO_D: Ploy hits harder rather than more often, so a counter-puncher can still read her */
-let STY_POW=0,STY_K=.06,MDEF={ev:.015,ctr:.025,cd:.1},MWPN={hit:.05,dmg:.2},HERO_K={kati:.08,fah:.06,rin:-.02,mali:.01},HERO_D={ploy:.27};
+let STY_POW=0,STY_K=.06,MDEF={ev:.015,ctr:.025,cd:.1},MWPN={hit:.05,dmg:.2},HERO_K={kati:.09,fah:.075,rin:.035,mali:.035},HERO_D={ploy:.3}; /* v1.91.1 (Man): Rin back up to about Kati's level */
 function fightStyle(f){if(!f)return "power";if(f.fstyle)return f.fstyle;const home=HOME_STYLE[f.id];
   if(home){const sc={},eq=f.skills?equipped(f):[];for(const s of skillList(f.id)){const r=(f.skills&&f.skills[s.id])||0;if(!r||!s.school||s.school==="build"||s.line>2)continue;const st=(LINE_STYLE[s.school]||[])[s.line];if(!st)continue;sc[st]=(sc[st]||0)+r+(eq.includes(s.id)?1:0);}
     let best=home,bv=sc[home]||0;for(const k in sc)if(sc[k]>bv){best=k;bv=sc[k];}return best;}
