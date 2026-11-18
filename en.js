@@ -2938,7 +2938,7 @@ EVENTS.push(
  {id:"lv_spat",look:"casual",bg:"camp",when:G=>lvPresent(G).length>=2&&!lvBusyWeek(G)&&absWeek(G)-(G.spatAbs??-99)>=4&&!!spatPair(G)&&lvRoll(G,5)<(G.harem?.06:.2),
   steps:[{inject:G=>{G.lvEvAbs=absWeek(G);return spatSteps(G);}},{fx:G=>{delete G.seen.lv_spat;}}]});
 // warn before a second "yes"
-const cheatWarn=(G,id)=>partners(G).some(k=>k!==id)?[{n:"nar",t:"⚠ You're already seeing someone. Saying yes means two-timing · the sweetheart bonus is lost at once · top heart scenes won't play · more double-bookings and fights · Valentine's Day will catch you out"}]:[];
+const cheatWarn=(G,id)=>partners(G).some(k=>k!==id)?[{n:"nar",t:"⚠ You already have someone. Say yes and you'll be two-timing… and secrets like this never stay hidden for long."}]:[];
 const yesTxt=(G,id,t)=>partners(G).some(k=>k!==id)?t+" (two-timing)":t;
 const lovSolo=G=>partners(G).length===1;
 const topLock=(G,id)=>isPartner(G,id)&&partners(G).length>1; /* the top heart scene and the Lv.27/30 chats wait while you see more than one person (harem too) */ /* the lover bonus only holds while you see one person */
@@ -5800,7 +5800,7 @@ AU.gsfx=function(kind,a){if(!this.init()||this.muted||!SETTINGS.sfx)return;const
   if(kind==="shimmer")for(let i=0;i<6;i++)T(i*.05,{f:1400+Math.random()*1400,type:"sine",dur:.12,peak:.06});};
 
 // ================= MUAY THAI MOE v1.3 — UI =================
-const VERSION="1.90.10";
+const VERSION="1.90.11";
 const CUR_LANG=(typeof window!=="undefined"&&window.LANG)||"th";
 const TH_LABEL=String.fromCharCode(3652,3607,3618);
 function langSwitch(cls){return `<div class="langsw ${cls||""}" role="group" aria-label="Language">${[["th",TH_LABEL],["en","EN"]].map(([k,l])=>`<button class="lsb ${CUR_LANG===k?"on":""}" data-act="setlang" data-v="${k}" aria-pressed="${CUR_LANG===k}">${l}</button>`).join("")}</div>`;}

@@ -628,7 +628,7 @@ EVENTS.push(
  {id:"lv_spat",look:"casual",bg:"camp",when:G=>lvPresent(G).length>=2&&!lvBusyWeek(G)&&absWeek(G)-(G.spatAbs??-99)>=4&&!!spatPair(G)&&lvRoll(G,5)<(G.harem?.06:.2),
   steps:[{inject:G=>{G.lvEvAbs=absWeek(G);return spatSteps(G);}},{fx:G=>{delete G.seen.lv_spat;}}]});
 // warn before a second "yes"
-const cheatWarn=(G,id)=>partners(G).some(k=>k!==id)?[{n:"nar",t:"⚠ คุณมีคนรักอยู่แล้ว ถ้าตอบรับจะกลายเป็นคบซ้อน · โบนัสคนรักหายทันที · ฉากหัวใจขั้นสูงสุดจะไม่ขึ้น · นัดชนและทะเลาะกันบ่อยขึ้น · วันวาเลนไทน์จะโดนจับได้"}]:[];
+const cheatWarn=(G,id)=>partners(G).some(k=>k!==id)?[{n:"nar",t:"⚠ คุณมีคนรักอยู่แล้ว ถ้าตอบรับจะกลายเป็นคบซ้อน… เรื่องแบบนี้ปิดไม่มิดไปตลอดหรอกนะ"}]:[];
 const yesTxt=(G,id,t)=>partners(G).some(k=>k!==id)?t+" (คบซ้อน)":t;
 const lovSolo=G=>partners(G).length===1;
 const topLock=(G,id)=>isPartner(G,id)&&partners(G).length>1; /* the top heart scene and the Lv.27/30 chats wait while you see more than one person (harem too) */ /* the lover bonus only holds while you see one person */

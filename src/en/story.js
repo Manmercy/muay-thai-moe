@@ -628,7 +628,7 @@ EVENTS.push(
  {id:"lv_spat",look:"casual",bg:"camp",when:G=>lvPresent(G).length>=2&&!lvBusyWeek(G)&&absWeek(G)-(G.spatAbs??-99)>=4&&!!spatPair(G)&&lvRoll(G,5)<(G.harem?.06:.2),
   steps:[{inject:G=>{G.lvEvAbs=absWeek(G);return spatSteps(G);}},{fx:G=>{delete G.seen.lv_spat;}}]});
 // warn before a second "yes"
-const cheatWarn=(G,id)=>partners(G).some(k=>k!==id)?[{n:"nar",t:"⚠ You're already seeing someone. Saying yes means two-timing · the sweetheart bonus is lost at once · top heart scenes won't play · more double-bookings and fights · Valentine's Day will catch you out"}]:[];
+const cheatWarn=(G,id)=>partners(G).some(k=>k!==id)?[{n:"nar",t:"⚠ You already have someone. Say yes and you'll be two-timing… and secrets like this never stay hidden for long."}]:[];
 const yesTxt=(G,id,t)=>partners(G).some(k=>k!==id)?t+" (two-timing)":t;
 const lovSolo=G=>partners(G).length===1;
 const topLock=(G,id)=>isPartner(G,id)&&partners(G).length>1; /* the top heart scene and the Lv.27/30 chats wait while you see more than one person (harem too) */ /* the lover bonus only holds while you see one person */

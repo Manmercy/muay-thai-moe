@@ -9858,7 +9858,6 @@
  "ปีนี้พี่ไม่ต้องแอบไปไหนแล้ว อยู่ค่ายเดียวกันนี่เอง": "This year I don't have to sneak anywhere. We're in the same camp",
  "ไม่มีใครขึ้นเวที แต่ละคนแยกย้ายกลับไปเงียบ ๆ ซึ่งแย่กว่าการทะเลาะกันเสียอีก": "Nobody steps into a ring. Everyone just leaves in silence, which is worse than a fight",
  " (คบซ้อน)": " (two-timing)",
- "⚠ คุณมีคนรักอยู่แล้ว ถ้าตอบรับจะกลายเป็นคบซ้อน · โบนัสคนรักหายทันที · ฉากหัวใจขั้นสูงสุดจะไม่ขึ้น · นัดชนและทะเลาะกันบ่อยขึ้น · วันวาเลนไทน์จะโดนจับได้": "⚠ You're already seeing someone. Saying yes means two-timing · the sweetheart bonus is lost at once · top heart scenes won't play · more double-bookings and fights · Valentine's Day will catch you out",
  "นัดชนกัน: คนที่ได้ไป ความสนิท +3 · อีกคน −5": "Double-booked: the one you went with +3 bond · the other −5",
  "คุณนั่งดูเพดานอยู่คนเดียวทั้งคืน ไม่มีใครได้อะไรเลย": "You spend the night alone staring at the ceiling. Nobody wins",
  "ขอโทษทั้งคู่ คืนนี้ไม่ไปไหน": "Sorry to both, I'm staying in tonight",
@@ -11466,5 +11465,6 @@
  "<p class=\"meta center\">ไล่จับไอ้ตุ๋ยแล้ว</p>": "<p class=\"meta center\">Tuy caught</p>",
  "น้องชายไอ้ตุ่ม มาทางจดหมายป้าแต๋ววันละครั้งเฉพาะ 20–23 พ.ย. 2569 (วันจริง) ไฟต์ 3 ยก เก่งกว่าไอ้ตุ่ม ได้ EXP กับเศษดาวมากกว่า ชนะได้เงินค่าน้ำร้อนน้ำชาจากชาวบ้านด้วย แพ้ก็ได้เศษดาวปลอบใจ ถ้าช่วงไหนไอ้ตุ่มมาด้วยก็จับได้ทั้งสองตัว": "Tum's younger brother. Arrives by Auntie Taew's letter once a day on 20–23 Nov 2026 (real days) only. A 3-round bout, tougher than Tum, with more EXP and stardust, plus a cash thank-you from the villagers when you win; a little stardust even if you lose. When Tum is around too, you can catch both.",
  "ชาวบ้านฝากค่าน้ำร้อนน้ำชามาให้ค่ายด้วยนะลูก รับไว้เถอะ": "The villagers sent a little something for the camp too, dear. Go on, take it.",
- "เงิน +": "Cash +"
+ "เงิน +": "Cash +",
+ "⚠ คุณมีคนรักอยู่แล้ว ถ้าตอบรับจะกลายเป็นคบซ้อน… เรื่องแบบนี้ปิดไม่มิดไปตลอดหรอกนะ": "⚠ You already have someone. Say yes and you'll be two-timing… and secrets like this never stay hidden for long."
 }
