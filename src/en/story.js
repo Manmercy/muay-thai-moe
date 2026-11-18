@@ -7,7 +7,7 @@ const ME=G=>G.player.name,
  MEM=(G,k)=>{G.mem=G.mem||{};G.mem[k]=absWeek(G);}, HAS=(G,k,gap)=>G.mem&&G.mem[k]!==undefined&&absWeek(G)-G.mem[k]>=(gap||0),
  CALL=(G,id)=>{const f=G.F[id],b=f?f.bond||0:0;if(isLov(G,id)||b>=75)return G.player.name;if(b>=40&&Math.random()<.35)return G.player.name;return "Manager";}, PR=G=>G.player.gender==="m"?"":"", PA=G=>G.player.gender==="m"?"":"It is";
 const SPK={kati:{name:"Kati",color:"#e23b4e"},mali:{name:"Mali",color:"#4a7fe0"},rin:{name:"Rin",color:"#3fae6a"},
-  ploy:{name:"Ploy",color:"#9b62e0"},fah:{name:"Fah",color:"#e7b443"},pailin:{name:"Pailin",color:"#8e4ac3"},baibua:{name:"Baibua",color:"#e86fa0"},tabtim:{name:"Tubtim",color:"#d23246"},alicia:{name:"Alicia",color:"#2f62c8"},chaba:{name:"Chaba",color:"#1f9a7a"},coach:{name:"Coach Daeng",color:"#c98a5a"},nar:{name:""},me:{name:"(You)"}};
+  ploy:{name:"Ploy",color:"#9b62e0"},fah:{name:"Fah",color:"#e7b443"},pailin:{name:"Pailin",color:"#8e4ac3"},baibua:{name:"Baibua",color:"#e86fa0"},tabtim:{name:"Tubtim",color:"#d23246"},alicia:{name:"Alicia",color:"#2f62c8"},chaba:{name:"Chaba",color:"#1f9a7a"},lada:{name:"Ladda",color:"#d8263a"},coach:{name:"Coach Daeng",color:"#c98a5a"},nar:{name:""},me:{name:"(You)"}};
 const HONOR_LABEL={local:"Subdistrict round champion",district:"District round champion",province:"Provincial champion",belt:"Tha Phae Stadium champion",defense:"Tha Phae Stadium title defense",dm:"Death Match champion",rg_north:"Northern Regional Cup",rg_isan:"Isan Regional Cup",rg_central:"Central Regional Cup",rg_south:"Southern Regional Cup"};
 function honorLabel(kind,venue){if(venue&&typeof STADIUMS!=="undefined"&&STADIUMS[venue]&&(kind==="belt"||kind==="defense"))return (kind==="belt"?"Champion of ":"Defended title at ")+STADIUMS[venue].name;return HONOR_LABEL[kind]||"Champion";}
 function honorSteps(G,h){const f=G.F[h.id],label=honorLabel(h.kind,h.venue),ranked=h.kind==="local"||h.kind==="district";
@@ -29,7 +29,13 @@ const add=(G,id,k,v)=>{const f=G.F[id];if(!f)return;if(k==="bond"&&v>0&&typeof p
     const lv1=heartLv(f).lv;if(lv1>lv0&&G.F[id].met)G.heartNews=(G.heartNews||[]).concat([{id,lv:lv1,week:G.week}]).slice(-8);return;}
   f[k]=Math.max(0,Math.min(100,f[k]+v));};
 /* v1.86: heart levels — Lv.1–10 are the first 100 points (10 per level); past that each level asks a little more, with no ceiling */
-const HEART_TIERS=[[1,"Acquaintance"],[3,"Getting familiar"],[5,"Friends"],[7,"Close"],[9,"Deeply bonded"],[15,"Kindred"],[20,"Inseparable"]];
+/* v1.90: one ladder — the same names as the relationship tiers (คนรู้จัก / เพื่อนร่วมค่าย / คนสนิท / คนพิเศษ), carried on to ♥30; lovers climb their own ladder */
+const HEART_TIERS=[[1,"Acquaintance"],[3,"Teammate"],[5,"Close"],[8,"Special"],[10,"Deeply bonded"],[15,"Kindred"],[20,"Inseparable"],[25,"Most important person"],[30,"Partner in the ring"]];
+const LOVER_TIERS=[[1,"Lover"],[15,"Kindred sweetheart"],[20,"Inseparable pair"],[25,"Soon-to-be partner"],[30,"Life partner"]];
+const hTot=f=>((f&&f.bond)||0)+((f&&f.bondX)||0);
+// relationship state, written to work with a single romance (G.romance) and with several lovers / promises / exes (G.lovers, G.promise, G.exAbs)
+function relState(G,id){if(!G||!id)return null;const L=Array.isArray(G.lovers)?G.lovers:(G.romance?[G.romance]:[]);if(L.includes(id))return "lover";
+  if(G.promise&&G.promise[id]!=null)return "promise";if(G.exAbs&&G.exAbs[id]!=null)return "ex";return null;}
 /* v1.89.11: Lv.30 is the top at 1,000 points — each step past 100 asks a little more (15 → 80) */
 const HEART_STEPS=[15,20,20,25,30,35,35,40,45,45,50,55,60,60,65,70,75,75,80],HEART_MAX=30,HEART_TOP=1000;
 const heartStep=n=>HEART_STEPS[n-11]||0; // points from Lv.n to Lv.n+1, for 11 ≤ n < 30
@@ -43,7 +49,8 @@ function heartLv(f){const b=Math.max(0,Math.min(100,(f&&f.bond)||0)),x=Math.max(
 const heartCapLv=G=>G&&G.flags&&G.flags.intl?30:G&&G.flags&&G.flags.national?28:G&&G.region?25:20;
 const heartCapped=(G,f)=>!!(G&&f)&&(f.bond||0)+(f.bondX||0)>=heartAt(heartCapLv(G));
 const HEART_NEXT={20:"up to Lv.25 in the regional chapter",25:"up to Lv.28 in the national chapter",28:"up to Lv.30 in the international chapter",30:""};
-const heartTier=lv=>{let n=HEART_TIERS[0][1];for(const [m,t] of HEART_TIERS)if(lv>=m)n=t;return n;};
+const heartTier=(lv,id)=>{const st=typeof G!=="undefined"&&G?relState(G,id):null;if(st==="ex")return "Ex";const T=st==="lover"?LOVER_TIERS:HEART_TIERS;
+  let n=T[0][1];for(const [m,t] of T)if(lv>=m)n=t;return st==="promise"&&lv>=8&&lv<15?"Promised":n;};
 
 const EVENTS=[
  {id:"prologue",look:"train",bg:"bus",steps:[
@@ -409,19 +416,19 @@ const lovFinal=G=>{for(const id of lovList(G)){if(!romOf(G,id)||!LOVER_FINAL[id]
 function befriend(G,id){G.friendz=G.friendz||{};G.friendz[id]=true;}
 const isFriendz=(G,id)=>!!(G.friendz&&G.friendz[id]);
 const awayWord=(G,id)=>G.F[id].camp==="player"?"Left camp":"Not in touch";
-function relLabel(G,f,lv,short){const id=f&&f.id;if(G&&id&&G.F&&G.F[id]){
-    if(isAway(G,id)){const w=G.F[id].awayWhy==="break"?"Heartbroken":"Sulking";return short?w:`${w} · ${awayWord(G,id)} (back in ${awayLeft(G,id)} wk)`;}
-    if(isLov(G,id))return G.harem?"Sweetheart ♥ (harem)":"Sweetheart ♥";if(isProm(G,id))return "Promised ♡";if(isEx(G,id))return "Ex";
-    if(isFriendz(G,id)&&(G.F[id].bond||0)>=40)return "Close friend";}
-  return heartTier(lv!=null?lv:heartLv(f||{}).lv);}
-/* the ladder shown in her profile: the same labels, the current one lit */
-const REL_DESC={"Acquaintance":"Still calls you \"Manager\", a bit stiffly","Getting familiar":"Jokes around, texts about everyday things","Friends":"Sometimes lets your name slip · shares personal stories","Close":"Always calls you by name",
-  "Deeply bonded":"On the same page about almost everything","Kindred":"One look and she knows what you're thinking","Inseparable":"Misses you after a single week apart",
-  "Sweetheart ♥":"Together","Sweetheart ♥ (harem)":"Everyone agreed to be together","Promised ♡":"A promise made, waiting for the day you're in the same camp","Close friend":"You said no once, but you still matter to each other","Ex":"You used to date. Still a little awkward"};
-const REL_STEPS=[[1,"Acquaintance"],[3,"Getting familiar"],[5,"Friends"],[7,"Close"],[9,"Deeply bonded"],[15,"Kindred"],[20,"Inseparable"]];
-const REL_BRANCH=G=>["Sweetheart ♥",...(G&&G.harem?["Sweetheart ♥ (harem)"]:[]),"Promised ♡","Close friend","Ex"];
-const relBase=(G,f,lv)=>{const id=f&&f.id;if(G&&id&&G.F&&G.F[id]){if(isLov(G,id))return G.harem?"Sweetheart ♥ (harem)":"Sweetheart ♥";if(isProm(G,id))return "Promised ♡";if(isEx(G,id))return "Ex";if(isFriendz(G,id)&&(G.F[id].bond||0)>=40)return "Close friend";}return heartTier(lv!=null?lv:heartLv(f||{}).lv);};
-const relIsStatus=(G,f)=>!!(G&&f&&f.id&&G.F&&G.F[f.id]&&relLabel(G,f)!==heartTier(heartLv(f).lv));
+function relLabel(G,f,lv,short){const id=f&&f.id;if(G&&id&&G.F&&G.F[id]&&isAway(G,id)){const w=G.F[id].awayWhy==="break"?"Heartbroken":"Sulking";return short?w:`${w} · ${awayWord(G,id)} (back in ${awayLeft(G,id)} wk)`;}
+  return relBase(G,f,lv);}
+/* the ladder shown in her profile: the same labels, the current step lit — lovers climb their own ladder (LOVER_TIERS) */
+const REL_DESC={"Acquaintance":"Still calls you \"Manager\", a bit stiffly","Teammate":"Jokes around, texts about everyday things","Close":"Sometimes lets your name slip · shares personal stories","Special":"Always calls you by name",
+  "Deeply bonded":"On the same page about almost everything","Kindred":"One look and she knows what you're thinking","Inseparable":"Misses you after a single week apart","Most important person":"You're the first person she thinks of","Partner in the ring":"In the same corner, in the ring and out of it",
+  "Lover":"Together","Kindred sweetheart":"Together long enough to know each other's every thought","Inseparable pair":"Can't be apart anymore","Soon-to-be partner":"Starting to talk about the future","Life partner":"Walking the whole road together",
+  "Promised":"A promise made, waiting for the day you're in the same camp","Close friend":"You said no once, but you still matter to each other","Ex":"You used to date. Still a little awkward"};
+const REL_BRANCH=[["lover","Lover"],["promise","Promised"],["friend","Close friend"],["ex","Ex"]];
+/* what she is to you: lover / promise / ex (relState) or a close friend after you said no */
+const relKind=(G,f)=>{const id=f&&f.id;if(!G||!id||!G.F||!G.F[id])return null;const st=relState(G,id);if(st)return st;return isFriendz(G,id)&&(G.F[id].bond||0)>=40?"friend":null;};
+function relBase(G,f,lv){lv=lv!=null?lv:heartLv(f||{}).lv;const k=relKind(G,f);
+  if(k==="lover")return heartTier(lv,f.id)+" ♥"+(G.harem?" (harem)":"");if(k==="friend")return "Close friend";if(k)return heartTier(lv,f.id);return heartTier(lv);}
+const relIsStatus=(G,f)=>!!relKind(G,f)||!!(G&&f&&f.id&&isAway(G,f.id));
 /* beside the name: only where she is right now */
 function relTag(G,f){return "";} /* v1.89.11: everything about the relationship now sits in the one label under the hearts */
 // she confesses while you are already with someone — you can tell her the truth
@@ -659,12 +666,12 @@ function dateScene(G,id,act){
   const intro=freshOnce(f,"in_"+act,A.intro,rng),opener=freshOnce(f,"op_"+pref,OPENERS[id][pref],rng);
   const steps=[{n:"nar",bg:A.bg,t:intro||`${A.name}`},...(opener?[{n:id,f:pref==="dislike"?"sad":"happy",l:look,t:opener}]:[]),
     ...spotSteps(f,act),...mid,...dateTwist(G,f,D,look),
-    {inject:G2=>{const gain=Math.max(0,1+Math.round(D.score*.7));const capped=false,b0=f.bond;add(G2,id,"bond",gain);const real=Math.round(f.bond-b0);if(gain>=4)add(G2,id,"morale",4);
+    {inject:G2=>{const gain=Math.max(0,1+Math.round(D.score*.7));const capped=false,b0=hTot(f);add(G2,id,"bond",gain);const real=Math.round((hTot(f)-b0)*2)/2,HL=heartLv(f),hleft=Math.max(0,Math.ceil((HL.need-HL.into)*2)/2);if(gain>=4)add(G2,id,"morale",4);
       if(act==="spar"){f.a.iq=Math.min(20,f.a.iq+.3);f.a.guard=Math.min(20,f.a.guard+.3);f.fatigue=Math.min(100,f.fatigue+4);}
       const tier=gain>=5?"great":gain>=2?"ok":"meh";
       f.closed=f.closed||{};const firstClose=!f.closed[tier];f.closed[tier]=true;
       const out=[...(firstClose?[{n:id,f:tier==="meh"?"sad":"happy",l:look,t:DATE_CLOSE[tier][id]}]:[]),
-        {n:"nar",t:`Bond with ${f.name} ${(real>=0?"+":"")+real}${real<=0&&heartCapped(G2,f)?" · hearts are full for this chapter":""}${pref==="like"?" · it's an activity she likes!":pref==="dislike"?" · she doesn't seem to like it here":""}${D.facts.length?" · new profile info: "+D.facts.join(" / "):D.missed?" · she seems to have more she wants to share, if you say the right thing":""}`}];
+        {n:"nar",t:`Bond with ${f.name} ${(real>=0?"+":"")+real}${HL.max?" · hearts maxed":heartCapped(G2,f)?" · hearts are full for this chapter":` · ${hleft} to ♥${HL.lv+1}`}${pref==="like"?" · it's an activity she likes!":pref==="dislike"?" · she doesn't seem to like it here":""}${D.facts.length?" · new profile info: "+D.facts.join(" / "):D.missed?" · she seems to have more she wants to share, if you say the right thing":""}`}];
       if(typeof hasSignature!=="undefined"&&hasSignature(f)&&!G2.seen["sig_"+id]){G2.seen["sig_"+id]=true;out.push({n:"nar",t:`✦ The bond unlocked the signature move of ${f.name}: "${SIGNATURE[id].name}" — ${SIGNATURE[id].desc}`});}
       if(f.bond>=40&&!G2.seen["b1_"+id]){G2.seen["b1_"+id]=true;out.push(...BOND_EVENTS[id].lv1.map(x=>({l:look,...x})));}
       if(f.bond>=75&&f.trust>=40&&RIVAL_LOVE.includes(id)&&f.camp==="player"&&(G2.season||1)>=2&&!isLov(G2,id)&&!exWait(G2,id)&&!G2.seen["love2_"+id]){G2.seen["love2_"+id]=true;
@@ -904,7 +911,7 @@ EVENTS.push(
     {t:"Let me think about it (everyone's trust −6)",fx:G=>{G.cash+=10000;R_ALL(G,f=>f.trust=Math.max(0,f.trust-6));},
       then:[{n:"kati",f:"sad",t:"…Boss, are you really going to sell Grandpa's camp?"},{n:"nar",t:"You return the envelope the next day, but the silence in camp lingers for days"}]}]}]},
 
- {id:"songkran",look:"casual",when:G=>G.week>=47&&(G.season||1)===1,bg:"gym",steps:[
+ {id:"songkran",look:"casual",when:G=>G.week>=47&&(G.season||1)===1,bg:"songkran",steps:[
   {n:"nar",t:"Songkran arrives. The camp stops training for half a day; everyone pours fragrant Thai scented water over Coach Daeng's hands"},
   {n:"coach",t:"May everyone be strong, free of injury and illness, and fight with the honor of Sirichai…"},
   {n:"kati",f:"happy",t:"The ceremony's over! Now— water fight!!!"},
@@ -992,7 +999,7 @@ EVENTS.push(
   {n:"rin",f:"sad",l:"casual",t:G=>`Dad says boxing has nothing worth analyzing. ${CALL(G,"rin")}, do you think… he's right?`},
   {choice:[{t:"Send your dad your fight stats. Let the numbers speak",fx:G=>{add(G,"rin","trust",5);add(G,"rin","bond",3);},then:[{n:"nar",t:"Rin types for twenty minutes, attaches three files, and hits send"},{n:"nar",t:"Ten minutes later, the reply: 'Table three has the SD wrong, but… interesting. I'd like to watch the next fight live'"},{n:"rin",f:"flustered",l:"casual",t:"…Dad's going to watch the livestream. He's never watched anything of mine"}]},
    {t:"You don't have to prove anything to anyone. Being here is enough",fx:G=>{add(G,"rin","morale",8);add(G,"rin","bond",4);},then:[{n:"rin",f:"flustered",l:"casual",t:"…There's no variable in that sentence to analyze. But I understand"}]}]}]},
- {id:"rin_cook",look:"casual",when:G=>G.week>=33&&inCamp(G,"rin")&&inCamp(G,"mali"),bg:"camp",steps:[
+ {id:"rin_cook",look:"casual",when:G=>G.week>=33&&inCamp(G,"rin")&&inCamp(G,"mali"),bg:"kitchen",steps:[
   {n:"nar",t:"The camp kitchen: a digital scale, beakers and a thermometer lined up beside the som tam mortar"},
   {n:"rin",f:"happy",l:"casual",t:"Today I'm making pad kra pao. Fish sauce 12.5 ml, sugar 4 g, high heat 3 minutes 20 seconds"},
   {n:"mali",f:"happy",l:"casual",t:"Rin, you don't weigh basil stir-fry. You use your heart… and your hands, like this~ (pours fish sauce freely)"},
@@ -1001,13 +1008,13 @@ EVENTS.push(
    {t:"Taste Mali's first",fx:G=>{add(G,"mali","bond",3);add(G,"rin","bond",1);},then:[{n:"nar",t:"So salty your eyes cross, but weirdly delicious"},{n:"rin",f:"happy",l:"casual",t:"…Noted. 'Heart and hands' is a variable I can't measure yet"}]}]}]});
 // v1.37: when the camp is flush, bad luck comes for the money (students stay home, repairs cost)
 EVENTS.push(
- {id:"dis_storm",pri:1,look:"casual",when:G=>G.week>=14&&G.week<=30&&G.cash>=45000,bg:"camp",steps:[
+ {id:"dis_storm",pri:1,look:"casual",when:G=>G.week>=14&&G.week<=30&&G.cash>=45000,bg:"camp_rain",steps:[
   {n:"nar",t:"A summer storm hits at 2 a.m.; sheets of tin roofing fly off and slam into the mango tree next door"},
   {n:"kati",f:"surprised",l:"casual",t:G=>`${CALL(G,"kati")}! Half the training room roof is gone! The rain's soaking all the sandbags!`},
   {n:"coach",t:"Kids can't train in a room with no roof. How do we fix it?"},
   {choice:[{t:"Repair it properly, fast (฿25,000)",fx:G=>{G.cash-=25000;},then:[{n:"nar",t:"A full crew arrives and finishes in two days; a shiny new roof, and classes carry on without a hitch"}]},
    {t:"Patch it up for now (฿8,000)",fx:G=>{G.cash-=8000;G.disaster={name:"The temporary roof",untilAbs:absWeek(G)+3,inc:.5};roster(G).forEach(f=>f.morale=Math.max(0,f.morale-3));},then:[{n:"nar",t:"A blue tarp covers the roof. Every time it rains, water drips onto the middle of the ring; only half the students come for three weeks"}]}]}]},
- {id:"dis_flood",pri:1,look:"casual",when:G=>G.week>=30&&G.week<=44&&G.cash>=40000&&ytKey(G)!=="flood",bg:"camp",steps:[
+ {id:"dis_flood",pri:1,look:"casual",when:G=>G.week>=30&&G.week<=44&&G.cash>=40000&&ytKey(G)!=="flood",bg:"camp_rain",steps:[
   {n:"nar",t:"Three days and nights of heavy rain. The river bursts its banks and floods the whole subdistrict; knee-deep water in camp, training mats drifting against the door"},
   {n:"mali",f:"sad",l:"casual",t:"Mali's gloves floated away! …Oh, there's a fish swimming into the camp!"},
   {n:"rin",f:"sad",l:"casual",t:"The road into the subdistrict is cut off. Students definitely can't come for at least three weeks. The generator and mats need replacing"},
@@ -1312,7 +1319,7 @@ DILEMMAS.push(
 
 // ---------- two of them want the same evening (the one you don't pick drops a little) ----------
 DILEMMAS.push(
- {id:"j_loykrathong",from:30,to:40,need:G=>inCamp(G,"kati")&&inCamp(G,"mali"),bg:"river",look:"casual",steps:[
+ {id:"j_loykrathong",from:30,to:40,need:G=>inCamp(G,"kati")&&inCamp(G,"mali"),bg:"loy_night",look:"casual",steps:[
   {n:"nar",t:"Loy Krathong night. Lights twinkle along the Ping River"},
   {n:"kati",f:"flustered",t:"Manager… would you float a krathong with me tonight? I made one from banana leaves",with:"mali"},
   {n:"mali",f:"happy",t:"Oh! Mali was going to invite you too~ Mali made a bread krathong for the fish to eat!"},
@@ -1631,7 +1638,7 @@ EVENTS.push(
    if(FIN(G,"rin"))S.push({n:"rin",f:"pout",l:"casual",t:"…I made a list. Twelve items. The cart now has twenty-seven. Who put in the chicken balloon?"});
    if(FIN(G,"fah"))S.push({n:"fah",f:"flustered",l:"casual",t:"Fireworks! We need fireworks! I only bought… three bags. That's not a lot!"});
    if(FIN(G,"ploy"))S.push({n:"ploy",f:"happy",l:"casual",t:"Fah, put two bags back… I'll carry the rest myself. It's safer."});
-   S.push({n:"nar",bg:"camp",t:"That night the yard becomes a party. A jim jum hot pot sits in the middle, and Coach Daeng brings out Grandpa Chai's old chair for the head of the table. Nobody sits in it."});
+   S.push({n:"nar",bg:"camp_night",t:"That night the yard becomes a party. A jim jum hot pot sits in the middle, and Coach Daeng brings out Grandpa Chai's old chair for the head of the table. Nobody sits in it."});
    S.push({n:"coach",t:"Grandpa sat in this chair every New Year's Eve… I'll leave it right here so he can celebrate too."});
    const dog=petOf(G,"dog"),cat=petOf(G,"cat"),roo=petOf(G,"rooster");
    if(dog)S.push({n:"nar",t:`${dog.name} guards the hot pot without moving a step, tail sweeping the yard half clean.`});
@@ -1644,7 +1651,7 @@ EVENTS.push(
    if(FIN(G,"fah"))S.push({n:"fah",f:"happy",l:"casual",t:"I want the whole country to see me fight my way! And… I want khao soi at the same shop with everyone every week."});
    if(FIN(G,"ploy"))S.push({n:"ploy",f:"sad",l:"casual",t:"I want to live one year without having to be a genius… Here, I think I can."});
    S.push({n:"coach",t:"All I ask is that next year nobody wrecks a knee and nobody breaks a wrist. That's enough. The rest you can do yourselves."});
-   S.push({n:"nar",bg:"night",t:"11:50 p.m. Everyone climbs onto the tin roof. The city lights of Chiang Mai sparkle far away, and Doi Suthep is pitch dark behind them."});
+   S.push({n:"nar",bg:"newyear",t:"11:50 p.m. Everyone climbs onto the tin roof. The city lights of Chiang Mai sparkle far away, and Doi Suthep is pitch dark behind them."});
    S.push({n:T.id,f:"happy",l:"casual",t:"Ten! Nine! Eight!… Three! Two! One! Happy New Year!"});
    S.push({n:"nar",t:"Fireworks from the city burst into gold across the sky."+(FIN(G,"fah")?" As for Fah's three bags of fireworks, only one lit, but it was the loudest in the whole street.":"")});
    if(dog)S.push({n:"nar",t:`${dog.name} dove under Coach Daeng's bed at the first firework and won't come out until morning.`});
@@ -1684,7 +1691,7 @@ EVENTS.push(
    S.push({n:"nar",t:"Songkran again. On the morning of the thirteenth the whole camp puts on floral shirts and goes to make merit at the temple, building sand pagodas in a row."});
    if(FIN(G,"rin"))S.push({n:"rin",f:"pout",l:"casual",t:"My sand pagoda is forty-two centimeters tall. The strongest structure here. …Fah's has collapsed twice."});
    if(FIN(G,"fah"))S.push({n:"fah",f:"angry",l:"casual",t:"It didn't fall down by itself! The dog bumped it! …Right, dog?"});
-   S.push({n:"nar",bg:"camp",t:"Back at camp, everyone lines up to pour water over Coach Daeng's hands. The manager gets the front of the line."});
+   S.push({n:"nar",bg:"songkran",t:"Back at camp, everyone lines up to pour water over Coach Daeng's hands. The manager gets the front of the line."});
    S.push({n:"coach",t:G2=>`This camp has had ${yr(G2)} years with this manager… I wish for next year, and the year after, and on and on.`});
    if(FIN(G,"kati"))S.push({n:"kati",f:"sad",l:"casual",t:"(Kati pours slower than anyone) Coach… thank you for staying with Grandpa's camp all this time."});
    if(FIN(G,"ploy"))S.push({n:"ploy",f:"happy",l:"casual",t:"Coach Daeng, may I? …At Golden Tiger I never once got to pour water for a coach like this."});
@@ -2071,6 +2078,26 @@ Object.assign(CARDS,{
  x_ploy_r2:{c:"ploy",r:"R",t:"I Wasn't Nervous",hint:"Ploy wins a title fight for Sirichai",bg:"final",need:G=>(G.cal||[]).some(c=>c.a==="ploy"&&c.tier==="final"&&c.res==="W"),steps:[{"n":"nar","t":"The belt goes around Ploy's waist. The crowd stands to applaud; Ploy stands still, expressionless."},{"n":"ploy","f":"happy","l":"fight","t":"I'm not excited. I've won like this plenty of times."},{"n":"nar","t":"On the way down, though, she walks into a corner post, and quietly apologises to it."},{"n":"ploy","f":"flustered","l":"fight","t":"…You didn't see anything. Understood?"}]},
  x_fah_n1:{c:"fah",r:"N",t:"Nobody Won, Fah's Furious",hint:"Fah fights to a draw for Sirichai",bg:"local",need:G=>funCount(G,"fah","D")>=1,steps:[{"n":"nar","t":"The referee raises both hands. A draw. Fah stomps in the middle of the ring."},{"n":"fah","f":"angry","l":"fight","t":"What's a draw!? I don't get it! Then who gets the medal! Who gets the grilled chicken!"},{"n":"coach","t":"Half a chicken each."},{"n":"fah","f":"happy","l":"fight","t":"…Half is fine. But I want the drumstick!"}]},
  x_fah_r1:{c:"fah",r:"R",t:"Fah Isn't Crying",hint:"Fah loses 3 fights in a row",bg:"night",need:G=>funStreak(G,"fah","L")>=3,steps:[{"n":"nar","t":"Three losses in a row. Fah vanishes all evening, until you find her behind the heavy bag, face buried in her knees."},{"n":"fah","f":"sad","l":"casual","t":"I'm not crying! It's dust! This camp is dusty!"},{"n":"nar","t":"You sit down beside her without a word. Slowly, Fah leans her head on your shoulder."},{"n":"fah","f":"flustered","l":"casual","t":"…Can we train extra tomorrow? Double. And don't tell anyone I sat here."}]}});
+// v1.90 (hidden): regional champions — an R card the first time the camp beats each of them in the visit duel
+const RG_DUEL_W=(G,c)=>!!(G.region&&(G.region.duelWon||{})[c]);
+Object.assign(CARDS,{
+ rg_baibua_r:{c:"baibua",r:"R",rg:1,t:"The Last Plate",hint:"Win the duel against Baibua when she visits the camp",bg:"kitchen",need:G=>RG_DUEL_W(G,"baibua"),steps:[
+  {n:"nar",t:"It's late and everyone has gone to bed, but water is still running in the kitchen. Baibua is washing the last pile of dishes alone."},
+  {n:"baibua",f:"happy",l:"casual",t:"You don't have to help. I like washing up… at my camp it's only two of us at dinner, me and my dad."},
+  {n:"baibua",f:"flustered",l:"casual",t:"So many plates means lots of people living together here… I don't want to go home."}]},
+ rg_tabtim_r:{c:"tabtim",r:"R",rg:1,t:"Consolation Prize",hint:"Win the duel against Tabtim when she visits the camp",bg:"night",need:G=>RG_DUEL_W(G,"tabtim"),steps:[
+  {n:"tabtim",f:"happy",l:"casual",t:"Losers get a consolation prize! Tonight you're taking Tabtim out for moo kratha!"},
+  {n:"nar",t:"That night the whole camp sits around the moo kratha grill. Tabtim puts the most perfectly cooked piece on the Manager's plate before anyone else's."},
+  {n:"tabtim",f:"flustered",l:"casual",t:"…Don't read into it! That piece was a little burnt, that's all, haha."}]},
+ rg_alicia_r:{c:"alicia",r:"R",rg:1,t:"Five Minutes Off Camera",hint:"Win the duel against Alicia when she visits the camp",bg:"night",need:G=>RG_DUEL_W(G,"alicia"),steps:[
+  {n:"nar",t:"The sponsor's camera crew follows her to the camp gate. Alicia grabs the Manager's wrist, pulls them into the office and locks the door."},
+  {n:"alicia",f:"flustered",l:"casual",t:"Shh! …Five minutes. Five minutes where nobody's filming."},
+  {n:"alicia",f:"happy",l:"casual",t:"First time in my life I've lost a duel to a small camp. Strange… it doesn't sting at all. …Don't get the wrong idea."}]},
+ rg_chaba_r:{c:"chaba",r:"R",rg:1,t:"The Mended Fence",hint:"Win the duel against Chaba when she visits the camp",bg:"gymdusk",need:G=>RG_DUEL_W(G,"chaba"),steps:[
+  {n:"nar",t:"The sun sets behind the fence Chaba fixed from end to end. She sits on a pile of planks, saying nothing."},
+  {n:"nar",t:"The Manager sits down beside her. Chaba slides a bottle of water over without looking."},
+  {n:"chaba",f:"happy",l:"casual",t:"…Fast runners, this camp."},
+  {n:"chaba",f:"flustered",l:"casual",t:"This fence will last another ten years. …Come and see if I'm right."}]}});
 function cardCheck(G){G.cards=G.cards||{};const got=[];for(const id in CARDS){if(G.cards[id])continue;const C=CARDS[id];if(C.g)continue;try{if(C.need(G)){G.cards[id]={n:1,lv:1,wk:absWeek(G),seen:false};got.push(id);G.dust=(G.dust||0)+5;}}catch(e){}}return got;}
 
 

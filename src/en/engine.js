@@ -979,6 +979,7 @@ const CAMP_ACTIONS={
   somtam:{name:"Help at Auntie Taew's som tam stall",desc:"Rhythm minigame · pay, fame, stardust",skip:"Earn ฿550 · morale +3 · ✦ +1",cost:0,mg:"somtam",hidden:true},/* v1.69: now arrives as a job letter; kept so old saves still resolve its name */
   class:{name:"Special Sunday class",desc:"+฿1,000 but fighters help teach, fatigue +6",cost:0},
   promo:{name:"Promote the camp online",desc:"Fame +0.6",cost:1000},
+  run:{name:"Camp 100 m sprint",desc:"Running minigame · speed/stamina, morale, stardust",skip:"Speed +0.05 · morale +3 · ✦ +1",cost:0,mg:"run"},
   live:{name:"Camp Merch Live",desc:"Live minigame · profit from sales, fame, stardust",skip:"Earn ฿600 · ✦ +1",cost:0,mg:"live"},
   repair:{name:"Fix up the camp together",desc:"Camp looks better, morale +3",cost:1500},
   merit:{name:"Morning alms offering",desc:"Everyone's morale +5, trust +1",cost:300},
@@ -1004,6 +1005,7 @@ function doCampAction(G,k){const A=CAMP_ACTIONS[k];if(!A||G.campUsed||G.cash<A.c
   if(k==="rest"){R.forEach(f=>f.fatigue=clamp(f.fatigue-4,0,100));note="Everyone gets a breather, fatigue drops a little";}
   if(k==="class"){G.cash+=1000;R.forEach(f=>f.fatigue=clamp(f.fatigue+6,0,100));note="Extra ฿1,000, fighters a little more tired";}
   if(k==="promo"){G.rep+=.6;note="Fame +0.6";}
+  if(k==="run"){const f=R.slice().sort((a,b)=>(b.bond||0)-(a.bond||0))[0];if(f)f.a.speed=Math.min(20,f.a.speed+.05);R.forEach(x=>x.morale=clamp(x.morale+3,0,100));G.dust=(G.dust||0)+1;note="A race around the camp yard · speed +0.05 · ✦ +1";}
   if(k==="live"){G.cash+=600;G.dust=(G.dust||0)+1;note="A short live sold a few shirts: ฿600 · ✦ +1";}
   if(k==="drum"){const f=R.slice().sort((a,b)=>(b.bond||0)-(a.bond||0))[0];if(f){f.a.kick=Math.min(20,f.a.kick+.1);f.a.punch=Math.min(20,f.a.punch+.1);}R.forEach(x=>x.morale=clamp(x.morale+3,0,100));G.dust=(G.dust||0)+2;note="Light drills to the khong khaek drum: kick/punch +0.1 · ✦ +2";}
   if(k==="somtam"){G.cash+=550;R.forEach(x=>x.morale=clamp(x.morale+3,0,100));G.dust=(G.dust||0)+1;note="Helped Auntie Taew pound som tam: ฿550 · ✦ +1";}

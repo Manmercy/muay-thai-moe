@@ -7,7 +7,7 @@ const ME=G=>G.player.name,
  MEM=(G,k)=>{G.mem=G.mem||{};G.mem[k]=absWeek(G);}, HAS=(G,k,gap)=>G.mem&&G.mem[k]!==undefined&&absWeek(G)-G.mem[k]>=(gap||0),
  CALL=(G,id)=>{const f=G.F[id],b=f?f.bond||0:0;if(isLov(G,id)||b>=75)return G.player.name;if(b>=40&&Math.random()<.35)return G.player.name;return "ผู้จัดการ";}, PR=G=>G.player.gender==="m"?"ผม":"ฉัน", PA=G=>G.player.gender==="m"?"ครับ":"ค่ะ";
 const SPK={kati:{name:"กะทิ",color:"#e23b4e"},mali:{name:"มะลิ",color:"#4a7fe0"},rin:{name:"ริน",color:"#3fae6a"},
-  ploy:{name:"พลอย",color:"#9b62e0"},fah:{name:"ฟ้า",color:"#e7b443"},pailin:{name:"ไพลิน",color:"#8e4ac3"},baibua:{name:"ใบบัว",color:"#e86fa0"},tabtim:{name:"ทับทิม",color:"#d23246"},alicia:{name:"อลิเซีย",color:"#2f62c8"},chaba:{name:"ชบา",color:"#1f9a7a"},coach:{name:"ครูแดง",color:"#c98a5a"},nar:{name:""},me:{name:"(คุณ)"}};
+  ploy:{name:"พลอย",color:"#9b62e0"},fah:{name:"ฟ้า",color:"#e7b443"},pailin:{name:"ไพลิน",color:"#8e4ac3"},baibua:{name:"ใบบัว",color:"#e86fa0"},tabtim:{name:"ทับทิม",color:"#d23246"},alicia:{name:"อลิเซีย",color:"#2f62c8"},chaba:{name:"ชบา",color:"#1f9a7a"},lada:{name:"ลดา",color:"#d8263a"},coach:{name:"ครูแดง",color:"#c98a5a"},nar:{name:""},me:{name:"(คุณ)"}};
 const HONOR_LABEL={local:"แชมป์รอบตำบล",district:"แชมป์รอบอำเภอ",province:"แชมป์จังหวัด",belt:"แชมป์เวทีท่าแพ",defense:"ป้องกันแชมป์เวทีท่าแพ",dm:"แชมป์ Death Match",rg_north:"ถ้วยเจ้าภาคเหนือ",rg_isan:"ถ้วยเจ้าภาคอีสาน",rg_central:"ถ้วยเจ้าภาคกลาง",rg_south:"ถ้วยเจ้าภาคใต้"};
 function honorLabel(kind,venue){if(venue&&typeof STADIUMS!=="undefined"&&STADIUMS[venue]&&(kind==="belt"||kind==="defense"))return (kind==="belt"?"แชมป์":"ป้องกันแชมป์")+STADIUMS[venue].name;return HONOR_LABEL[kind]||"แชมป์";}
 function honorSteps(G,h){const f=G.F[h.id],label=honorLabel(h.kind,h.venue),ranked=h.kind==="local"||h.kind==="district";
@@ -29,7 +29,13 @@ const add=(G,id,k,v)=>{const f=G.F[id];if(!f)return;if(k==="bond"&&v>0&&typeof p
     const lv1=heartLv(f).lv;if(lv1>lv0&&G.F[id].met)G.heartNews=(G.heartNews||[]).concat([{id,lv:lv1,week:G.week}]).slice(-8);return;}
   f[k]=Math.max(0,Math.min(100,f[k]+v));};
 /* v1.86: heart levels — Lv.1–10 are the first 100 points (10 per level); past that each level asks a little more, with no ceiling */
-const HEART_TIERS=[[1,"คนรู้จัก"],[3,"เริ่มคุ้น"],[5,"สนิท"],[7,"ใกล้ชิด"],[9,"ผูกพันลึก"],[15,"รู้ใจ"],[20,"ขาดกันไม่ได้"]];
+/* v1.90: one ladder — the same names as the relationship tiers (คนรู้จัก / เพื่อนร่วมค่าย / คนสนิท / คนพิเศษ), carried on to ♥30; lovers climb their own ladder */
+const HEART_TIERS=[[1,"คนรู้จัก"],[3,"เพื่อนร่วมค่าย"],[5,"คนสนิท"],[8,"คนพิเศษ"],[10,"ผูกพันลึก"],[15,"รู้ใจ"],[20,"ขาดกันไม่ได้"],[25,"คนสำคัญที่สุด"],[30,"คู่ใจในสังเวียน"]];
+const LOVER_TIERS=[[1,"คนรัก"],[15,"แฟนที่รู้ใจ"],[20,"คู่ที่ขาดกันไม่ได้"],[25,"ว่าที่คู่ชีวิต"],[30,"คู่ชีวิต"]];
+const hTot=f=>((f&&f.bond)||0)+((f&&f.bondX)||0);
+// relationship state, written to work with a single romance (G.romance) and with several lovers / promises / exes (G.lovers, G.promise, G.exAbs)
+function relState(G,id){if(!G||!id)return null;const L=Array.isArray(G.lovers)?G.lovers:(G.romance?[G.romance]:[]);if(L.includes(id))return "lover";
+  if(G.promise&&G.promise[id]!=null)return "promise";if(G.exAbs&&G.exAbs[id]!=null)return "ex";return null;}
 /* v1.89.11: Lv.30 is the top at 1,000 points — each step past 100 asks a little more (15 → 80) */
 const HEART_STEPS=[15,20,20,25,30,35,35,40,45,45,50,55,60,60,65,70,75,75,80],HEART_MAX=30,HEART_TOP=1000;
 const heartStep=n=>HEART_STEPS[n-11]||0; // points from Lv.n to Lv.n+1, for 11 ≤ n < 30
@@ -43,7 +49,8 @@ function heartLv(f){const b=Math.max(0,Math.min(100,(f&&f.bond)||0)),x=Math.max(
 const heartCapLv=G=>G&&G.flags&&G.flags.intl?30:G&&G.flags&&G.flags.national?28:G&&G.region?25:20;
 const heartCapped=(G,f)=>!!(G&&f)&&(f.bond||0)+(f.bondX||0)>=heartAt(heartCapLv(G));
 const HEART_NEXT={20:"ปลดถึง Lv.25 ในบทภาค",25:"ปลดถึง Lv.28 ในบทประเทศ",28:"ปลดถึง Lv.30 ในบทอินเตอร์",30:""};
-const heartTier=lv=>{let n=HEART_TIERS[0][1];for(const [m,t] of HEART_TIERS)if(lv>=m)n=t;return n;};
+const heartTier=(lv,id)=>{const st=typeof G!=="undefined"&&G?relState(G,id):null;if(st==="ex")return "เคยคบ";const T=st==="lover"?LOVER_TIERS:HEART_TIERS;
+  let n=T[0][1];for(const [m,t] of T)if(lv>=m)n=t;return st==="promise"&&lv>=8&&lv<15?"คนที่สัญญากันไว้":n;};
 
 const EVENTS=[
  {id:"prologue",look:"train",bg:"bus",steps:[
@@ -409,19 +416,19 @@ const lovFinal=G=>{for(const id of lovList(G)){if(!romOf(G,id)||!LOVER_FINAL[id]
 function befriend(G,id){G.friendz=G.friendz||{};G.friendz[id]=true;}
 const isFriendz=(G,id)=>!!(G.friendz&&G.friendz[id]);
 const awayWord=(G,id)=>G.F[id].camp==="player"?"หนีไปจากค่าย":"ไม่ติดต่อมา";
-function relLabel(G,f,lv,short){const id=f&&f.id;if(G&&id&&G.F&&G.F[id]){
-    if(isAway(G,id)){const w=G.F[id].awayWhy==="break"?"อกหัก":"งอน";return short?w:`${w} · ${awayWord(G,id)} (อีก ${awayLeft(G,id)} สัปดาห์)`;}
-    if(isLov(G,id))return G.harem?"คนรัก ♥ (ฮาเร็ม)":"คนรัก ♥";if(isProm(G,id))return "สัญญาไว้ ♡";if(isEx(G,id))return "เคยคบ";
-    if(isFriendz(G,id)&&(G.F[id].bond||0)>=40)return "เพื่อนสนิท";}
-  return heartTier(lv!=null?lv:heartLv(f||{}).lv);}
-/* the ladder shown in her profile: the same labels, the current one lit */
-const REL_DESC={"คนรู้จัก":"ยังเรียกคุณว่าผู้จัดการแบบเกร็ง ๆ","เริ่มคุ้น":"เริ่มคุยเล่น ทักแชตเรื่องทั่วไป","สนิท":"บางทีก็หลุดเรียกชื่อคุณ · มีเรื่องส่วนตัวมาเล่า","ใกล้ชิด":"เรียกชื่อคุณตลอด",
-  "ผูกพันลึก":"ใจตรงกันแทบทุกเรื่อง","รู้ใจ":"แค่มองหน้าก็รู้ว่าคิดอะไร","ขาดกันไม่ได้":"ไม่เจอกันสัปดาห์เดียวก็คิดถึง",
-  "คนรัก ♥":"คบกันอยู่","คนรัก ♥ (ฮาเร็ม)":"ทุกคนตกลงอยู่ด้วยกัน","สัญญาไว้ ♡":"สัญญากันไว้แล้ว รอวันที่ได้อยู่ค่ายเดียวกัน","เพื่อนสนิท":"เคยปฏิเสธไปแล้ว แต่ยังเป็นคนสำคัญของกันและกัน","เคยคบ":"เคยคบกัน ตอนนี้ยังอึดอัดกันอยู่บ้าง"};
-const REL_STEPS=[[1,"คนรู้จัก"],[3,"เริ่มคุ้น"],[5,"สนิท"],[7,"ใกล้ชิด"],[9,"ผูกพันลึก"],[15,"รู้ใจ"],[20,"ขาดกันไม่ได้"]];
-const REL_BRANCH=G=>["คนรัก ♥",...(G&&G.harem?["คนรัก ♥ (ฮาเร็ม)"]:[]),"สัญญาไว้ ♡","เพื่อนสนิท","เคยคบ"];
-const relBase=(G,f,lv)=>{const id=f&&f.id;if(G&&id&&G.F&&G.F[id]){if(isLov(G,id))return G.harem?"คนรัก ♥ (ฮาเร็ม)":"คนรัก ♥";if(isProm(G,id))return "สัญญาไว้ ♡";if(isEx(G,id))return "เคยคบ";if(isFriendz(G,id)&&(G.F[id].bond||0)>=40)return "เพื่อนสนิท";}return heartTier(lv!=null?lv:heartLv(f||{}).lv);};
-const relIsStatus=(G,f)=>!!(G&&f&&f.id&&G.F&&G.F[f.id]&&relLabel(G,f)!==heartTier(heartLv(f).lv));
+function relLabel(G,f,lv,short){const id=f&&f.id;if(G&&id&&G.F&&G.F[id]&&isAway(G,id)){const w=G.F[id].awayWhy==="break"?"อกหัก":"งอน";return short?w:`${w} · ${awayWord(G,id)} (อีก ${awayLeft(G,id)} สัปดาห์)`;}
+  return relBase(G,f,lv);}
+/* the ladder shown in her profile: the same labels, the current step lit — lovers climb their own ladder (LOVER_TIERS) */
+const REL_DESC={"คนรู้จัก":"ยังเรียกคุณว่าผู้จัดการแบบเกร็ง ๆ","เพื่อนร่วมค่าย":"เริ่มคุยเล่น ทักแชตเรื่องทั่วไป","คนสนิท":"บางทีก็หลุดเรียกชื่อคุณ · มีเรื่องส่วนตัวมาเล่า","คนพิเศษ":"เรียกชื่อคุณตลอด",
+  "ผูกพันลึก":"ใจตรงกันแทบทุกเรื่อง","รู้ใจ":"แค่มองหน้าก็รู้ว่าคิดอะไร","ขาดกันไม่ได้":"ไม่เจอกันสัปดาห์เดียวก็คิดถึง","คนสำคัญที่สุด":"คุณคือคนที่เธอนึกถึงเป็นคนแรก","คู่ใจในสังเวียน":"ยืนมุมเดียวกันทั้งบนเวทีและนอกเวที",
+  "คนรัก":"คบกันอยู่","แฟนที่รู้ใจ":"คบกันมาจนรู้ใจกันทุกเรื่อง","คู่ที่ขาดกันไม่ได้":"อยู่ห่างกันไม่ได้แล้ว","ว่าที่คู่ชีวิต":"เริ่มคุยกันเรื่องอนาคต","คู่ชีวิต":"เดินไปด้วยกันตลอดทาง",
+  "คนที่สัญญากันไว้":"สัญญากันไว้แล้ว รอวันที่ได้อยู่ค่ายเดียวกัน","เพื่อนสนิท":"เคยปฏิเสธไปแล้ว แต่ยังเป็นคนสำคัญของกันและกัน","เคยคบ":"เคยคบกัน ตอนนี้ยังอึดอัดกันอยู่บ้าง"};
+const REL_BRANCH=[["lover","คนรัก"],["promise","คนที่สัญญากันไว้"],["friend","เพื่อนสนิท"],["ex","เคยคบ"]];
+/* what she is to you: lover / promise / ex (relState) or a close friend after you said no */
+const relKind=(G,f)=>{const id=f&&f.id;if(!G||!id||!G.F||!G.F[id])return null;const st=relState(G,id);if(st)return st;return isFriendz(G,id)&&(G.F[id].bond||0)>=40?"friend":null;};
+function relBase(G,f,lv){lv=lv!=null?lv:heartLv(f||{}).lv;const k=relKind(G,f);
+  if(k==="lover")return heartTier(lv,f.id)+" ♥"+(G.harem?" (ฮาเร็ม)":"");if(k==="friend")return "เพื่อนสนิท";if(k)return heartTier(lv,f.id);return heartTier(lv);}
+const relIsStatus=(G,f)=>!!relKind(G,f)||!!(G&&f&&f.id&&isAway(G,f.id));
 /* beside the name: only where she is right now */
 function relTag(G,f){return "";} /* v1.89.11: everything about the relationship now sits in the one label under the hearts */
 // she confesses while you are already with someone — you can tell her the truth
@@ -659,12 +666,12 @@ function dateScene(G,id,act){
   const intro=freshOnce(f,"in_"+act,A.intro,rng),opener=freshOnce(f,"op_"+pref,OPENERS[id][pref],rng);
   const steps=[{n:"nar",bg:A.bg,t:intro||`${A.name}`},...(opener?[{n:id,f:pref==="dislike"?"sad":"happy",l:look,t:opener}]:[]),
     ...spotSteps(f,act),...mid,...dateTwist(G,f,D,look),
-    {inject:G2=>{const gain=Math.max(0,1+Math.round(D.score*.7));const capped=false,b0=f.bond;add(G2,id,"bond",gain);const real=Math.round(f.bond-b0);if(gain>=4)add(G2,id,"morale",4);
+    {inject:G2=>{const gain=Math.max(0,1+Math.round(D.score*.7));const capped=false,b0=hTot(f);add(G2,id,"bond",gain);const real=Math.round((hTot(f)-b0)*2)/2,HL=heartLv(f),hleft=Math.max(0,Math.ceil((HL.need-HL.into)*2)/2);if(gain>=4)add(G2,id,"morale",4);
       if(act==="spar"){f.a.iq=Math.min(20,f.a.iq+.3);f.a.guard=Math.min(20,f.a.guard+.3);f.fatigue=Math.min(100,f.fatigue+4);}
       const tier=gain>=5?"great":gain>=2?"ok":"meh";
       f.closed=f.closed||{};const firstClose=!f.closed[tier];f.closed[tier]=true;
       const out=[...(firstClose?[{n:id,f:tier==="meh"?"sad":"happy",l:look,t:DATE_CLOSE[tier][id]}]:[]),
-        {n:"nar",t:`ความสนิทกับ${f.name} ${(real>=0?"+":"")+real}${real<=0&&heartCapped(G2,f)?" · หัวใจเต็มขั้นของบทนี้แล้ว":""}${pref==="like"?" · เป็นกิจกรรมที่เธอชอบ!":pref==="dislike"?" · ดูเหมือนเธอจะไม่ค่อยชอบที่นี่":""}${D.facts.length?" · ข้อมูลใหม่ในโปรไฟล์: "+D.facts.join(" / "):D.missed?" · ดูเหมือนเธอยังมีเรื่องอยากเล่ามากกว่านี้ ถ้าตอบให้ตรงใจ":""}`}];
+        {n:"nar",t:`ความสนิทกับ${f.name} ${(real>=0?"+":"")+real}${HL.max?" · หัวใจเต็มแล้ว":heartCapped(G2,f)?" · หัวใจเต็มขั้นของบทนี้แล้ว":` · อีก ${hleft} ถึง ♥${HL.lv+1}`}${pref==="like"?" · เป็นกิจกรรมที่เธอชอบ!":pref==="dislike"?" · ดูเหมือนเธอจะไม่ค่อยชอบที่นี่":""}${D.facts.length?" · ข้อมูลใหม่ในโปรไฟล์: "+D.facts.join(" / "):D.missed?" · ดูเหมือนเธอยังมีเรื่องอยากเล่ามากกว่านี้ ถ้าตอบให้ตรงใจ":""}`}];
       if(typeof hasSignature!=="undefined"&&hasSignature(f)&&!G2.seen["sig_"+id]){G2.seen["sig_"+id]=true;out.push({n:"nar",t:`✦ ความผูกพันปลดล็อกท่าไม้ตายของ${f.name}: "${SIGNATURE[id].name}" — ${SIGNATURE[id].desc}`});}
       if(f.bond>=40&&!G2.seen["b1_"+id]){G2.seen["b1_"+id]=true;out.push(...BOND_EVENTS[id].lv1.map(x=>({l:look,...x})));}
       if(f.bond>=75&&f.trust>=40&&RIVAL_LOVE.includes(id)&&f.camp==="player"&&(G2.season||1)>=2&&!isLov(G2,id)&&!exWait(G2,id)&&!G2.seen["love2_"+id]){G2.seen["love2_"+id]=true;
@@ -904,7 +911,7 @@ EVENTS.push(
     {t:"ขอคิดดูก่อน (ได้ ฿10,000 ค่าเสียเวลา · ความเชื่อใจทุกคน −6)",fx:G=>{G.cash+=10000;R_ALL(G,f=>f.trust=Math.max(0,f.trust-6));},
       then:[{n:"kati",f:"sad",t:"…เจ้าของค่ายจะขายค่ายของคุณปู่จริง ๆ เหรอคะ"},{n:"nar",t:"คุณคืนซองในวันรุ่งขึ้น แต่ความเงียบในค่ายยังอยู่ไปอีกหลายวัน"}]}]}]},
 
- {id:"songkran",look:"casual",when:G=>G.week>=47&&(G.season||1)===1,bg:"gym",steps:[
+ {id:"songkran",look:"casual",when:G=>G.week>=47&&(G.season||1)===1,bg:"songkran",steps:[
   {n:"nar",t:"สงกรานต์มาถึง ค่ายหยุดซ้อมครึ่งวัน ทุกคนรดน้ำดำหัวครูแดงด้วยน้ำอบไทยหอม ๆ"},
   {n:"coach",t:"ขอให้ทุกคนแข็งแรง ไม่เจ็บไม่ป่วย ชกให้สมศักดิ์ศรีค่ายศิริชัย…"},
   {n:"kati",f:"happy",t:"พิธีจบแล้วนะคะ ทีนี้ก็— สาดน้ำ!!!"},
@@ -992,7 +999,7 @@ EVENTS.push(
   {n:"rin",f:"sad",l:"casual",t:G=>`พ่อบอกว่ามวยไม่มีอะไรให้วิเคราะห์ ${CALL(G,"rin")}คิดว่า… พ่อพูดถูกไหมคะ`},
   {choice:[{t:"ส่งสถิติไฟต์ของเธอให้พ่อดูสิ ให้ตัวเลขพูดแทน",fx:G=>{add(G,"rin","trust",5);add(G,"rin","bond",3);},then:[{n:"nar",t:"รินพิมพ์อยู่ยี่สิบนาที แนบไฟล์ไปสามไฟล์ แล้วกดส่ง"},{n:"nar",t:"สิบนาทีต่อมา ข้อความตอบกลับ: 'ตารางที่สามคำนวณ SD ผิด แต่… น่าสนใจ ไฟต์หน้าพ่อขอดูไลฟ์'"},{n:"rin",f:"flustered",l:"casual",t:"…พ่อจะดูไลฟ์ค่ะ พ่อไม่เคยดูอะไรของฉันเลย"}]},
    {t:"ไม่ต้องพิสูจน์อะไรกับใคร เธออยู่ตรงนี้ก็พอ",fx:G=>{add(G,"rin","morale",8);add(G,"rin","bond",4);},then:[{n:"rin",f:"flustered",l:"casual",t:"…ประโยคนี้ ไม่มีตัวแปรให้วิเคราะห์เลย แต่ฉันเข้าใจค่ะ"}]}]}]},
- {id:"rin_cook",look:"casual",when:G=>G.week>=33&&inCamp(G,"rin")&&inCamp(G,"mali"),bg:"camp",steps:[
+ {id:"rin_cook",look:"casual",when:G=>G.week>=33&&inCamp(G,"rin")&&inCamp(G,"mali"),bg:"kitchen",steps:[
   {n:"nar",t:"ครัวค่าย ตาชั่งดิจิทัล บีกเกอร์ และเทอร์โมมิเตอร์วางเรียงข้างครกส้มตำ"},
   {n:"rin",f:"happy",l:"casual",t:"วันนี้ฉันจะทำผัดกะเพรา น้ำปลา 12.5 มล. น้ำตาล 4 กรัม ไฟแรง 3 นาที 20 วินาที"},
   {n:"mali",f:"happy",l:"casual",t:"พี่รินคะ กะเพราเขาไม่ชั่งกันค่ะ เขาใช้ใจ… กับมือ แบบนี้~ (เทน้ำปลาไม่ยั้ง)"},
@@ -1001,13 +1008,13 @@ EVENTS.push(
    {t:"ชิมของมะลิก่อน",fx:G=>{add(G,"mali","bond",3);add(G,"rin","bond",1);},then:[{n:"nar",t:"เค็มจนตาเหล่ แต่อร่อยแบบแปลก ๆ"},{n:"rin",f:"happy",l:"casual",t:"…จดไว้ค่ะ 'ใจกับมือ' เป็นตัวแปรที่ฉันยังวัดไม่ได้"}]}]}]});
 // v1.37: when the camp is flush, bad luck comes for the money (students stay home, repairs cost)
 EVENTS.push(
- {id:"dis_storm",pri:1,look:"casual",when:G=>G.week>=14&&G.week<=30&&G.cash>=45000,bg:"camp",steps:[
+ {id:"dis_storm",pri:1,look:"casual",when:G=>G.week>=14&&G.week<=30&&G.cash>=45000,bg:"camp_rain",steps:[
   {n:"nar",t:"พายุฤดูร้อนพัดมาตอนตีสอง เสียงสังกะสีหลังคาค่ายปลิวไปกระแทกต้นมะม่วงข้างบ้าน"},
   {n:"kati",f:"surprised",l:"casual",t:G=>`${CALL(G,"kati")}คะ! หลังคาห้องซ้อมหายไปครึ่งนึง! ฝนตกใส่กระสอบทรายหมดเลย!`},
   {n:"coach",t:"เด็ก ๆ จะมาเรียนในห้องที่ไม่มีหลังคาไม่ได้ จะซ่อมแบบไหนดี"},
   {choice:[{t:"ซ่อมแบบดีให้เสร็จเร็ว (฿25,000)",fx:G=>{G.cash-=25000;},then:[{n:"nar",t:"ช่างมาครบทีมในสองวัน หลังคาใหม่เงาวับ คลาสเปิดต่อได้ไม่สะดุด"}]},
    {t:"ซ่อมชั่วคราวไปก่อน (฿8,000)",fx:G=>{G.cash-=8000;G.disaster={name:"หลังคาที่ซ่อมชั่วคราว",untilAbs:absWeek(G)+3,inc:.5};roster(G).forEach(f=>f.morale=Math.max(0,f.morale-3));},then:[{n:"nar",t:"ผ้าใบสีฟ้าคลุมหลังคาไว้ ฝนตกทีไรน้ำหยดลงกลางเวที นักเรียนมาครึ่งเดียวไปอีกสามสัปดาห์"}]}]}]},
- {id:"dis_flood",pri:1,look:"casual",when:G=>G.week>=30&&G.week<=44&&G.cash>=40000&&ytKey(G)!=="flood",bg:"camp",steps:[
+ {id:"dis_flood",pri:1,look:"casual",when:G=>G.week>=30&&G.week<=44&&G.cash>=40000&&ytKey(G)!=="flood",bg:"camp_rain",steps:[
   {n:"nar",t:"ฝนตกหนักสามวันสามคืน แม่น้ำล้นตลิ่ง น้ำท่วมทั้งตำบล ในค่ายน้ำสูงถึงเข่า เบาะซ้อมลอยไปติดประตู"},
   {n:"mali",f:"sad",l:"casual",t:"นวมของมะลิลอยไปแล้วค่ะ! …อ๊ะ มีปลาว่ายเข้ามาในค่ายด้วย!"},
   {n:"rin",f:"sad",l:"casual",t:"ถนนเข้าตำบลถูกตัดขาดค่ะ นักเรียนมาไม่ได้แน่นอน อย่างน้อยสามสัปดาห์ เครื่องปั่นไฟกับเบาะต้องซื้อใหม่"},
@@ -1312,7 +1319,7 @@ DILEMMAS.push(
 
 // ---------- two of them want the same evening (the one you don't pick drops a little) ----------
 DILEMMAS.push(
- {id:"j_loykrathong",from:30,to:40,need:G=>inCamp(G,"kati")&&inCamp(G,"mali"),bg:"river",look:"casual",steps:[
+ {id:"j_loykrathong",from:30,to:40,need:G=>inCamp(G,"kati")&&inCamp(G,"mali"),bg:"loy_night",look:"casual",steps:[
   {n:"nar",t:"คืนลอยกระทง ริมแม่น้ำปิงแสงไฟวิบวับ"},
   {n:"kati",f:"flustered",t:"ผู้จัดการคะ… คืนนี้ไปลอยกระทงด้วยกันไหมคะ หนูทำกระทงใบตองไว้แล้ว",with:"mali"},
   {n:"mali",f:"happy",t:"อ้าว! มะลิก็จะชวนเหมือนกัน~ มะลิทำกระทงขนมปังไว้ให้ปลากินด้วยนะ!"},
@@ -1631,7 +1638,7 @@ EVENTS.push(
    if(FIN(G,"rin"))S.push({n:"rin",f:"pout",l:"casual",t:"…ฉันจดรายการมาแล้ว สิบสองอย่าง ตอนนี้รถเข็นมียี่สิบเจ็ดอย่าง ใครใส่ลูกโป่งไก่ลงมา"});
    if(FIN(G,"fah"))S.push({n:"fah",f:"flustered",l:"casual",t:"พลุ! ต้องมีพลุ! ฟ้าซื้อมาแค่… สามถุงเอง ไม่ได้เยอะนะ!"});
    if(FIN(G,"ploy"))S.push({n:"ploy",f:"happy",l:"casual",t:"ฟ้า เอาคืนไปสองถุง …พี่จะถือถุงที่เหลือเอง ปลอดภัยกว่า"});
-   S.push({n:"nar",bg:"camp",t:"ค่ำนั้นลานค่ายกลายเป็นงานเลี้ยง หม้อจิ้มจุ่มตั้งกลางลาน ครูแดงยกเก้าอี้ตัวเก่าของปู่ชัยมาตั้งไว้หัวโต๊ะ ไม่มีใครนั่ง"});
+   S.push({n:"nar",bg:"camp_night",t:"ค่ำนั้นลานค่ายกลายเป็นงานเลี้ยง หม้อจิ้มจุ่มตั้งกลางลาน ครูแดงยกเก้าอี้ตัวเก่าของปู่ชัยมาตั้งไว้หัวโต๊ะ ไม่มีใครนั่ง"});
    S.push({n:"coach",t:"เก้าอี้ตัวนี้ปู่แกนั่งทุกคืนข้ามปี …วางไว้ตรงนี้แหละ ให้แกได้ฉลองด้วย"});
    const dog=petOf(G,"dog"),cat=petOf(G,"cat"),roo=petOf(G,"rooster");
    if(dog)S.push({n:"nar",t:`${dog.name}นั่งเฝ้าหม้อจิ้มจุ่มไม่ห่างแม้แต่ก้าวเดียว หางกวาดฝุ่นจนลานสะอาดไปครึ่งหนึ่ง`});
@@ -1644,7 +1651,7 @@ EVENTS.push(
    if(FIN(G,"fah"))S.push({n:"fah",f:"happy",l:"casual",t:"ฟ้าอยากชกแบบฟ้าให้ทั้งประเทศเห็น! แล้วก็… อยากกินข้าวซอยร้านเดิมกับทุกคนทุกอาทิตย์"});
    if(FIN(G,"ploy"))S.push({n:"ploy",f:"sad",l:"casual",t:"พี่อยากใช้ชีวิตแบบไม่ต้องเป็นอัจฉริยะสักปี …อยู่ที่นี่ น่าจะทำได้"});
    S.push({n:"coach",t:"ครูขอแค่ปีหน้าไม่มีใครเข่าพัง ไม่มีใครข้อมือหัก แค่นั้นพอ ที่เหลือพวกเอ็งทำได้เองอยู่แล้ว"});
-   S.push({n:"nar",bg:"night",t:"ห้าทุ่มห้าสิบ ทุกคนปีนขึ้นหลังคาสังกะสี ไฟในเมืองเชียงใหม่ระยิบอยู่ไกล ๆ ดอยสุเทพมืดสนิทอยู่ด้านหลัง"});
+   S.push({n:"nar",bg:"newyear",t:"ห้าทุ่มห้าสิบ ทุกคนปีนขึ้นหลังคาสังกะสี ไฟในเมืองเชียงใหม่ระยิบอยู่ไกล ๆ ดอยสุเทพมืดสนิทอยู่ด้านหลัง"});
    S.push({n:T.id,f:"happy",l:"casual",t:"สิบ! เก้า! แปด!… สาม! สอง! หนึ่ง! สวัสดีปีใหม่ค่าาา!"});
    S.push({n:"nar",t:"พลุจากตัวเมืองแตกเป็นดอกสีทองเต็มฟ้า"+(FIN(G,"fah")?" ส่วนพลุสามถุงของฟ้า จุดติดแค่ดอกเดียว แต่ดังที่สุดในซอย":"")});
    if(dog)S.push({n:"nar",t:`${dog.name}มุดเข้าใต้เตียงครูแดงตั้งแต่ดอกแรก ไม่ยอมออกมาจนเช้า`});
@@ -1684,7 +1691,7 @@ EVENTS.push(
    S.push({n:"nar",t:"สงกรานต์อีกปี เช้าวันที่สิบสาม ทั้งค่ายแต่งชุดลายดอก ไปทำบุญที่วัดก่อน ก่อเจดีย์ทรายเป็นแถว"});
    if(FIN(G,"rin"))S.push({n:"rin",f:"pout",l:"casual",t:"เจดีย์ทรายของฉันสูงสี่สิบสองเซนติเมตร โครงสร้างแข็งแรงที่สุด …ของฟ้าพังไปสองรอบแล้ว"});
    if(FIN(G,"fah"))S.push({n:"fah",f:"angry",l:"casual",t:"ไม่ได้พังเอง! หมาเดินชน! …ใช่ไหม หมา?"});
-   S.push({n:"nar",bg:"camp",t:"กลับถึงค่าย ทุกคนเรียงแถวรดน้ำดำหัวครูแดง ผู้จัดการได้ยืนแถวหน้าสุด"});
+   S.push({n:"nar",bg:"songkran",t:"กลับถึงค่าย ทุกคนเรียงแถวรดน้ำดำหัวครูแดง ผู้จัดการได้ยืนแถวหน้าสุด"});
    S.push({n:"coach",t:G2=>`ค่ายนี้อยู่มา ${yr(G2)} ปีแล้วกับผู้จัดการคนนี้ …ครูขอให้มีปีหน้า ปีโน้น ต่อไปเรื่อย ๆ`});
    if(FIN(G,"kati"))S.push({n:"kati",f:"sad",l:"casual",t:"(กะทิรดน้ำช้ากว่าใคร) ครูคะ …ขอบคุณที่อยู่กับค่ายปู่มาตลอดนะคะ"});
    if(FIN(G,"ploy"))S.push({n:"ploy",f:"happy",l:"casual",t:"ครูแดง ขออนุญาตค่ะ …สมัยอยู่พยัคฆ์ทอง พี่ไม่เคยได้รดน้ำครูคนไหนแบบนี้เลย"});
@@ -2071,6 +2078,26 @@ Object.assign(CARDS,{
  x_ploy_r2:{c:"ploy",r:"R",t:"พี่ไม่ได้ตื่นเต้น",hint:"พลอยชนะไฟต์ชิงแชมป์ในนามค่ายศิริชัย",bg:"final",need:G=>(G.cal||[]).some(c=>c.a==="ploy"&&c.tier==="final"&&c.res==="W"),steps:[{"n":"nar","t":"เข็มขัดคาดเอวพลอยแล้ว คนดูลุกขึ้นปรบมือ พลอยยืนนิ่งหน้าตาเฉย"},{"n":"ploy","f":"happy","l":"fight","t":"ไม่ได้ตื่นเต้นหรอก ชนะแบบนี้มาเยอะแล้ว"},{"n":"nar","t":"แต่ตอนลงจากเวที พลอยเดินชนเสามุมไปหนึ่งที แล้วขอโทษเสาเบา ๆ"},{"n":"ploy","f":"flustered","l":"fight","t":"…เธอไม่เห็นอะไรทั้งนั้น เข้าใจนะ"}]},
  x_fah_n1:{c:"fah",r:"N",t:"ไม่มีใครชนะ ฟ้าโมโห",hint:"ฟ้าชกเสมอในนามค่ายศิริชัย",bg:"local",need:G=>funCount(G,"fah","D")>=1,steps:[{"n":"nar","t":"กรรมการยกมือทั้งสองคน เสมอ ฟ้ายืนกระทืบเท้าอยู่กลางเวที"},{"n":"fah","f":"angry","l":"fight","t":"เสมอคืออะไร!? ฟ้าไม่เข้าใจ! งั้นใครได้เหรียญ! ใครได้ไก่ย่าง!"},{"n":"coach","t":"แบ่งกันคนละครึ่งไก่"},{"n":"fah","f":"happy","l":"fight","t":"…ครึ่งตัวก็ได้ แต่ฟ้าขอน่องนะ!"}]},
  x_fah_r1:{c:"fah",r:"R",t:"ฟ้าไม่ได้ร้องไห้",hint:"ฟ้าแพ้ติดกัน 3 ไฟต์",bg:"night",need:G=>funStreak(G,"fah","L")>=3,steps:[{"n":"nar","t":"แพ้สามไฟต์ติด ฟ้าหายไปทั้งเย็น จนเจอนั่งอยู่หลังกระสอบทราย หน้าซุกเข่า"},{"n":"fah","f":"sad","l":"casual","t":"ฟ้าไม่ได้ร้องไห้! ฝุ่นเข้าตา! ค่ายนี้ฝุ่นเยอะ!"},{"n":"nar","t":"คุณนั่งลงข้าง ๆ ไม่พูดอะไร ฟ้าเอนหัวมาพิงไหล่ช้า ๆ"},{"n":"fah","f":"flustered","l":"casual","t":"…พรุ่งนี้ซ้อมเพิ่มได้ไหม สองเท่าเลย แล้วอย่าบอกใครนะว่าฟ้านั่งตรงนี้"}]}});
+// v1.90 (hidden): regional champions — an R card the first time the camp beats each of them in the visit duel
+const RG_DUEL_W=(G,c)=>!!(G.region&&(G.region.duelWon||{})[c]);
+Object.assign(CARDS,{
+ rg_baibua_r:{c:"baibua",r:"R",rg:1,t:"จานใบสุดท้าย",hint:"ชนะดวลกับใบบัวตอนเธอแวะมาค่าย",bg:"kitchen",need:G=>RG_DUEL_W(G,"baibua"),steps:[
+  {n:"nar",t:"ดึกแล้ว ทุกคนแยกย้ายเข้านอน ในครัวยังมีเสียงน้ำไหล ใบบัวยืนล้างจานกองสุดท้ายอยู่คนเดียว"},
+  {n:"baibua",f:"happy",l:"casual",t:"บ่ต้องช่วยก็ได้เจ้า หนูล้างเพลินดี… ที่ค่ายหนู กิ๋นข้าวกันแค่สองคน หนูกับพ่อ"},
+  {n:"baibua",f:"flustered",l:"casual",t:"จานเยอะขนาดนี้ แปลว่าค่ายนี้มีคนอยู่ด้วยกันเยอะเนาะเจ้า… หนูบ่อยากกลับเลย"}]},
+ rg_tabtim_r:{c:"tabtim",r:"R",rg:1,t:"รางวัลปลอบใจ",hint:"ชนะดวลกับทับทิมตอนเธอแวะมาค่าย",bg:"night",need:G=>RG_DUEL_W(G,"tabtim"),steps:[
+  {n:"tabtim",f:"happy",l:"casual",t:"แพ้แล้วก็ต้องมีรางวัลปลอบใจเด้อ! คืนนี้พี่ผู้จัดการพาไปกินหมูกระทะเลย"},
+  {n:"nar",t:"คืนนั้นทั้งค่ายนั่งล้อมเตาหมูกระทะ ทับทิมคีบหมูชิ้นที่สุกพอดีที่สุดใส่จานผู้จัดการก่อนใคร"},
+  {n:"tabtim",f:"flustered",l:"casual",t:"…อย่าคิดหลายเด้อ ชิ้นนั้นมันไหม้นิดนึงแค่นั้นแหละ ฮ่า ๆ"}]},
+ rg_alicia_r:{c:"alicia",r:"R",rg:1,t:"ห้านาทีไม่มีกล้อง",hint:"ชนะดวลกับอลิเซียตอนเธอแวะมาค่าย",bg:"night",need:G=>RG_DUEL_W(G,"alicia"),steps:[
+  {n:"nar",t:"ทีมกล้องของสปอนเซอร์ตามมาถึงหน้าค่าย อลิเซียคว้าข้อมือผู้จัดการ ดึงเข้าห้องทำงานแล้วล็อกประตู"},
+  {n:"alicia",f:"flustered",l:"casual",t:"ชู่ว! …ขอห้านาที ห้านาทีที่ไม่มีใครถ่าย"},
+  {n:"alicia",f:"happy",l:"casual",t:"แพ้ดวลให้ค่ายเล็กครั้งแรกในชีวิต แปลกดีนะ ไม่เจ็บใจเลยสักนิด …อย่าเข้าใจผิดล่ะ"}]},
+ rg_chaba_r:{c:"chaba",r:"R",rg:1,t:"รั้วที่ซ่อมเสร็จ",hint:"ชนะดวลกับชบาตอนเธอแวะมาค่าย",bg:"gymdusk",need:G=>RG_DUEL_W(G,"chaba"),steps:[
+  {n:"nar",t:"พระอาทิตย์ตกหลังรั้วที่ชบาซ่อมเสร็จทั้งแนว ชบานั่งพักบนกองไม้ ไม่พูดอะไร"},
+  {n:"nar",t:"ผู้จัดการนั่งลงข้าง ๆ ชบาเลื่อนขวดน้ำมาให้โดยไม่หันมามอง"},
+  {n:"chaba",f:"happy",l:"casual",t:"…วิ่งเร็ว ค่ายนี้"},
+  {n:"chaba",f:"flustered",l:"casual",t:"รั้วนี้อยู่ได้อีกสิบปี …มาดูได้ ว่าจริงไหม"}]}});
 function cardCheck(G){G.cards=G.cards||{};const got=[];for(const id in CARDS){if(G.cards[id])continue;const C=CARDS[id];if(C.g)continue;try{if(C.need(G)){G.cards[id]={n:1,lv:1,wk:absWeek(G),seen:false};got.push(id);G.dust=(G.dust||0)+5;}}catch(e){}}return got;}
 
 

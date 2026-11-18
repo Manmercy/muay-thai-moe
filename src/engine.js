@@ -970,6 +970,7 @@ const CAMP_ACTIONS={
   somtam:{name:"ช่วยร้านส้มตำป้าแต๋ว",desc:"มินิเกมจังหวะ · ค่าจ้าง ชื่อเสียง เศษดาว",skip:"ได้ ฿550 · กำลังใจ +3 · ✦ +1",cost:0,mg:"somtam",hidden:true},/* v1.69: now arrives as a job letter; kept so old saves still resolve its name */
   class:{name:"สอนคลาสพิเศษวันอาทิตย์",desc:"ได้ ฿1,000 แต่นักมวยต้องช่วยสอน ความล้า +6",cost:0},
   promo:{name:"โปรโมทค่ายออนไลน์",desc:"ชื่อเสียง +0.6",cost:1000},
+  run:{name:"วิ่งแข่ง 100 เมตรในค่าย",desc:"มินิเกมวิ่ง · ความเร็ว/ความอึด กำลังใจ เศษดาว",skip:"ความเร็ว +0.05 · กำลังใจ +3 · ✦ +1",cost:0,mg:"run"},
   live:{name:"ไลฟ์ขายของค่าย",desc:"มินิเกมไลฟ์ · กำไรจากยอดขาย ชื่อเสียง เศษดาว",skip:"ขายได้ ฿600 · ✦ +1",cost:0,mg:"live"},
   repair:{name:"ซ่อมแซมค่ายด้วยกัน",desc:"ค่ายสวยขึ้น กำลังใจ +3",cost:1500},
   merit:{name:"ทำบุญตักบาตรเช้า",desc:"กำลังใจทุกคน +5 ความเชื่อใจ +1",cost:300},
@@ -995,6 +996,7 @@ function doCampAction(G,k){const A=CAMP_ACTIONS[k];if(!A||G.campUsed||G.cash<A.c
   if(k==="rest"){R.forEach(f=>f.fatigue=clamp(f.fatigue-4,0,100));note="ทุกคนได้พักหายใจ ความล้าลดลงนิดหน่อย";}
   if(k==="class"){G.cash+=1000;R.forEach(f=>f.fatigue=clamp(f.fatigue+6,0,100));note="ได้เงินเพิ่ม ฿1,000 นักมวยเหนื่อยขึ้นนิดหน่อย";}
   if(k==="promo"){G.rep+=.6;note="ชื่อเสียง +0.6";}
+  if(k==="run"){const f=R.slice().sort((a,b)=>(b.bond||0)-(a.bond||0))[0];if(f)f.a.speed=Math.min(20,f.a.speed+.05);R.forEach(x=>x.morale=clamp(x.morale+3,0,100));G.dust=(G.dust||0)+1;note="วิ่งแข่งกันรอบลานค่าย ความเร็ว +0.05 · ✦ +1";}
   if(k==="live"){G.cash+=600;G.dust=(G.dust||0)+1;note="ไลฟ์สั้น ๆ ขายเสื้อได้ไม่กี่ตัว ได้ ฿600 · ✦ +1";}
   if(k==="drum"){const f=R.slice().sort((a,b)=>(b.bond||0)-(a.bond||0))[0];if(f){f.a.kick=Math.min(20,f.a.kick+.1);f.a.punch=Math.min(20,f.a.punch+.1);}R.forEach(x=>x.morale=clamp(x.morale+3,0,100));G.dust=(G.dust||0)+2;note="ซ้อมตามกลองแขกกันเบา ๆ ค่าเตะ/หมัด +0.1 · ✦ +2";}
   if(k==="somtam"){G.cash+=550;R.forEach(x=>x.morale=clamp(x.morale+3,0,100));G.dust=(G.dust||0)+1;note="ช่วยป้าแต๋วตำส้มตำ ได้ ฿550 · ✦ +1";}

@@ -210,7 +210,7 @@ function chatOpen(id){const f=G.F[id];UI.lvMenu=false;if(f&&!canChat(f)&&canChat
   UI.chat={id,x,i:0,log:[{w:"them",t:x[0][0]}],gain:0,typing:false};UI.modal={type:"chat"};save();render();}
 function chatPick(k){const C=UI.chat;if(!C||C.typing||C.i>=C.x.length)return;const e=C.x[C.i],o=e[1][k];if(!o)return;
   C.log.push({w:"me",t:o[0]});C.typing=true;AU.sfx("tick");render();
-  setTimeout(()=>{if(UI.chat!==C)return;C.typing=false;C.log.push({w:"them",t:o[2],s:o[1]});if(o[1]>0){add(G,C.id,"bond",o[1]);C.gain+=o[1];}if(o[1]===2)AU.sfx("level");
+  setTimeout(()=>{if(UI.chat!==C)return;C.typing=false;C.log.push({w:"them",t:o[2],s:o[1]});if(o[1]>0){add(G,C.id,"bond",o[1]);C.gain+=o[1];if(G.region&&typeof rgMeet==="function"&&CHAMP_IDS.includes(C.id))rgMeet(G,C.id,o[1]*.5);}if(o[1]===2)AU.sfx("level");
     C.i++;if(C.i<C.x.length){C.typing=true;render();setTimeout(()=>{if(UI.chat!==C)return;C.typing=false;C.log.push({w:"them",t:C.x[C.i][0]});render();},700);}
     else{C.done=true;G.chatLog=G.chatLog||{};G.chatLog[C.id]=(G.chatLog[C.id]||0)+1;save();}render();},800);}
 const CHAT_PX=pxIcon(["kkkkkkkkk.","kwwwwwwwk.","kwkwkwkwk.","kwwwwwwwk.","kkkwkkkkk.","..kk......"],{k:"#1b1230",w:"#f4f1ea"});

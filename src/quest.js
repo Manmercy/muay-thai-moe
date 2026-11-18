@@ -453,16 +453,17 @@ const BAG={st:null,
     const pick=(G.mini&&G.mini.bagLast&&F.find(f=>f.id===G.mini.bagLast))||F.slice().sort((a,b)=>(b.bond||0)-(a.bond||0))[0];
     this.st={phase:"hub",mode:"bag",id:pick.id,dk:(G.mini&&G.mini.bagDk)||"normal",practice:false};this.mount();this.draw();},
   openMode(m,act,mail){const F=bagFighters(G);if(!F.length){toast("ไม่มีนักมวยที่พร้อมซ้อม");return;}const pick=(G.mini&&G.mini.bagLast&&F.find(f=>f.id===G.mini.bagLast))||F.slice().sort((a,b)=>(b.bond||0)-(a.bond||0))[0];
-    this.st={phase:"pick",mode:m,act,mail,id:pick.id,dk:(G.mini&&G.mini.bagDk)||"normal",practice:false};this.mount();if(m==="live"){LIVE.pick();LIVE.st.practice=false;LIVE.st.act=act;LIVE.draw();}else this.draw();},
+    this.st={phase:"pick",mode:m,act,mail,id:pick.id,dk:(G.mini&&G.mini.bagDk)||"normal",practice:false};this.mount();if(m==="live"){LIVE.pick();LIVE.st.practice=false;LIVE.st.act=act;LIVE.draw();}else if(m==="run"){RUN.pick();RUN.st.practice=false;RUN.st.act=act;RUN.draw();}else this.draw();},
   mount(){let el=document.getElementById("minibag");if(!el){el=document.createElement("div");el.id="minibag";el.className="mgame";document.body.appendChild(el);}
-    el.onclick=e=>{const lv=e.target.closest("[data-lv]");if(lv&&typeof LIVE!=="undefined"){LIVE.act(lv.dataset.lv,lv.dataset.v);return;}const b=e.target.closest("[data-mb]");if(!b)return;const a=b.dataset.mb,v=b.dataset.v;
-      if(a==="mode"&&MG_MODES[v]&&MG_MODES[v].custom){this.st.mode=v;LIVE.pick();}else if(a==="mode"){this.st.mode=v;this.st.phase="pick";this.st.practice=mgPlayed(G,v);this.draw();}else if(a==="hub"){this.st.phase="hub";this.draw();}else if(a==="pick"){this.st.id=v;this.draw();}else if(a==="dk"){this.st.dk=v;this.draw();}else if(a==="go")this.start();else if(a==="close")this.close();else if(a==="claim")this.claim();else if(a==="again"){this.st.phase="pick";this.st.practice=true;this.draw();}};
-    if(!this.keyH){this.keyH=e=>{if(typeof LIVE!=="undefined"&&LIVE.st&&LIVE.st.phase==="play"&&/^[123]$/.test(e.key)){const d=LIVE.st.cur;if(d){e.preventDefault();LIVE.answer(d.ord[+e.key-1]);}return;}if(!this.st||this.st.phase!=="play")return;const k=e.key.toLowerCase();if(e.repeat)return;
+    el.onclick=e=>{const lv=e.target.closest("[data-lv]");if(lv&&typeof LIVE!=="undefined"){LIVE.act(lv.dataset.lv,lv.dataset.v);return;}const rn=e.target.closest("[data-rn]");if(rn&&typeof RUN!=="undefined"){if(rn.dataset.rn!=="L"&&rn.dataset.rn!=="R")RUN.act(rn.dataset.rn,rn.dataset.v);return;}const sp=e.target.closest("[data-sp]");if(sp&&typeof SPORTS!=="undefined"){SPORTS.act(sp.dataset.sp);return;}const du=e.target.closest("[data-du]");if(du&&typeof DUEL!=="undefined"){DUEL.act(du.dataset.du,du.dataset.v);return;}const b=e.target.closest("[data-mb]");if(!b)return;const a=b.dataset.mb,v=b.dataset.v;
+      if(a==="mode"&&MG_MODES[v]&&MG_MODES[v].custom){this.st.mode=v;if(v==="run")RUN.pick();else LIVE.pick();}else if(a==="mode"){this.st.mode=v;this.st.phase="pick";this.st.practice=mgPlayed(G,v);this.draw();}else if(a==="hub"){this.st.phase="hub";this.draw();}else if(a==="pick"){this.st.id=v;this.draw();}else if(a==="dk"){this.st.dk=v;this.draw();}else if(a==="go")this.start();else if(a==="close")this.close();else if(a==="claim")this.claim();else if(a==="again"){this.st.phase="pick";this.st.practice=true;this.draw();}};
+    if(!this.keyH){this.keyH=e=>{if(!e.repeat&&typeof TUG!=="undefined"&&TUG.st&&!TUG.st.done){const k=e.key.toLowerCase();if(k==="f"||k==="d"||k==="arrowleft"){e.preventDefault();TUG.tap();return;}if(k==="j"||k==="k"||k==="arrowright"||k===" "){e.preventDefault();TUG.heave();return;}}if(!e.repeat&&typeof RELAY!=="undefined"&&RELAY.st&&(e.key===" "||/^[jk]$/i.test(e.key)||e.key==="ArrowRight")){e.preventDefault();RELAY.pass();return;}if(typeof LIVE!=="undefined"&&LIVE.st&&LIVE.st.phase==="play"&&/^[123]$/.test(e.key)){const d=LIVE.st.cur;if(d){e.preventDefault();LIVE.answer(d.ord[+e.key-1]);}return;}if(typeof RUN!=="undefined"&&RUN.st&&(RUN.st.phase==="race"||RUN.st.phase==="set")){const k=e.key.toLowerCase();if(e.repeat)return;if(k==="f"||k==="d"||k==="arrowleft"){e.preventDefault();RUN.tap("L");}else if(k==="j"||k==="k"||k==="arrowright"){e.preventDefault();RUN.tap("R");}return;}
+      if(!this.st||this.st.phase!=="play")return;const k=e.key.toLowerCase();if(e.repeat)return;
       if(k==="f"||k==="d"||k==="arrowleft"){e.preventDefault();this.hit("L");}else if(k==="j"||k==="k"||k==="arrowright"){e.preventDefault();this.hit("R");}else if(k==="escape")this.close();};
       document.addEventListener("keydown",this.keyH);
-      document.addEventListener("visibilitychange",()=>{if(document.hidden&&typeof LIVE!=="undefined"&&LIVE.st&&LIVE.st.phase==="play"){LIVE.st.dur=0;}if(document.hidden&&this.st&&this.st.phase==="play"){this.st.phase="abort";cancelAnimationFrame(this.raf);this.draw();}});}},
-  close(){cancelAnimationFrame(this.raf);if(typeof LIVE!=="undefined"&&LIVE.st){cancelAnimationFrame(LIVE.raf);LIVE.st=null;}const el=document.getElementById("minibag");if(el)el.remove();this.st=null;try{AU.startMusic("hub");}catch(e){}if((G.cardPend||[]).length&&!UI.modal)UI.modal={type:"cardnew"};render();},
-  draw(){const S=this.st,el=document.getElementById("minibag");if(!S||!el)return;if(S.phase==="live")return LIVE.draw();const F=bagFighters(G),f=G.F[S.id];
+      document.addEventListener("visibilitychange",()=>{if(document.hidden&&typeof LIVE!=="undefined"&&LIVE.st&&LIVE.st.phase==="play"){LIVE.st.dur=0;}if(document.hidden&&this.st&&this.st.phase==="play"){this.st.phase="abort";cancelAnimationFrame(this.raf);this.draw();}if(document.hidden&&typeof RUN!=="undefined"&&RUN.st&&(RUN.st.phase==="race"||RUN.st.phase==="set")){RUN.stop();RUN.st.phase="pick";RUN.draw();}});}},
+  close(){cancelAnimationFrame(this.raf);if(typeof LIVE!=="undefined"&&LIVE.st){cancelAnimationFrame(LIVE.raf);LIVE.st=null;}if(typeof SPORTS!=="undefined"&&SPORTS.st){SPORTS.close();return;}if(typeof RUN!=="undefined"&&RUN.st){RUN.stop();RUN.st=null;}const dz=typeof DUEL!=="undefined"&&DUEL.st;if(dz){DUEL.abort();}const el=document.getElementById("minibag");if(el)el.remove();this.st=null;try{AU.startMusic("hub");}catch(e){}if((G.cardPend||[]).length&&!UI.modal)UI.modal={type:"cardnew"};render();},
+  draw(){const S=this.st,el=document.getElementById("minibag");if(!S||!el)return;if(S.phase==="live")return LIVE.draw();if(S.phase==="run")return RUN.draw();if(S.phase==="duel"&&typeof DUEL!=="undefined")return DUEL.draw();if(S.phase==="sports"&&typeof SPORTS!=="undefined")return SPORTS.draw();const F=bagFighters(G),f=G.F[S.id];
     const M=MG_MODES[S.mode];
     if(S.phase==="hub"){el.innerHTML=`<div class="mbox px"><h2>${JOY_PX}มินิเกม</h2><p class="meta center">แต่ละเกมได้รางวัลสัปดาห์ละครั้ง · เล่นซ้ำเป็นโหมดซ้อมได้ไม่จำกัด</p>
        <div class="mghub">${Object.entries(MG_MODES).map(([k,X])=>{const op=X.open(G),pl=mgPlayed(G,k);return `<button class="mgitem ${pl?"done":""}" data-mb="mode" data-v="${k}" ${op?"":"disabled"}><span class="mi">${X.icon}</span><span><b>${X.title}</b><small>${op?(pl?"รับรางวัลแล้วสัปดาห์นี้ ✓":X.note):"ยังไม่เปิด"}</small></span><span class="chev">▸</span></button>`;}).join("")}</div>
@@ -487,7 +488,7 @@ const BAG={st:null,
        <div class="mfoot roadbtns"><button class="btn" data-mb="again">เล่นอีกรอบ (ซ้อม)</button><button class="btn primary" data-mb="close">กลับค่าย</button></div></div>`;}},
   start(){const S=this.st;AU.resume&&AU.resume();try{AU.stopMusic();}catch(e){}
     G.mini=G.mini||{};G.mini.bagLast=S.id;G.mini.bagDk=S.dk;
-    const C=bagChart(G,S.dk,S.mode==="somtam"?5000:0);S.notes=C.notes;S.end=C.end;S.beat=C.beat;S.phase="play";S.score=0;S.combo=0;S.maxc=0;S.c={perfect:0,great:0,ok:0,miss:0};S.fx=[];S.hitT=-9;S.hitK="L";
+    const C=bagChart(G,S.dk,S.mode==="somtam"?5000:0);if(S.duel){const cut=C.beat*4*(1+S.duel.bars);C.notes=C.notes.filter(n=>n.t<cut);C.end=cut+C.beat;}S.notes=C.notes;S.end=C.end;S.beat=C.beat;S.phase="play";S.score=0;S.combo=0;S.maxc=0;S.c={perfect:0,great:0,ok:0,miss:0};S.fx=[];S.hitT=-9;S.hitK="L";
     this.draw();S.t0=this.clock()+.6;const nb=Math.round(S.end/S.beat);for(let i=0;i<nb;i++)this.ching(S.t0+i*S.beat,i%2===0);
     const cv=document.getElementById("mbcv");S.x=cv.getContext("2d");S.x.imageSmoothingEnabled=false;const loop=()=>{if(!this.st||this.st.phase!=="play")return;this.frame();this.raf=requestAnimationFrame(loop);};this.raf=requestAnimationFrame(loop);},
   now(){return this.clock()-this.st.t0;},
@@ -532,6 +533,7 @@ const BAG={st:null,
     x.fillStyle="#2c2448";x.fillRect(0,H-4,W,4);x.fillStyle="#ffd34a";x.fillRect(0,H-4,W*Math.min(1,Math.max(0,t/S.end)),4);},
   finish(){const S=this.st;cancelAnimationFrame(this.raf);S.phase="result";const n=S.notes.length,c=S.c;
     const acc=(c.perfect+c.great*.75+c.ok*.4)/Math.max(1,n);const grade=acc>=.92&&c.miss===0?"S":acc>=.78?"A":acc>=.6?"B":"C";
+    if(S.duel&&typeof DUEL!=="undefined"){S.res={acc,grade,score:S.score,maxc:S.maxc,c,best:false,rw:""};DUEL.done({score:acc,win:null},S);return;}
     G.mini=G.mini||{};G.mini.best=G.mini.best||{};if(typeof G.mini.best.easy==="number"){G.mini.best={bag:G.mini.best};}const B=G.mini.best[S.mode]=G.mini.best[S.mode]||{};const isBest=S.score>(B[S.dk]||0);if(isBest)B[S.dk]=S.score;
     S.res={acc,grade,score:S.score,maxc:S.maxc,c,best:isBest,rw:""};
     if(!S.practice)S.res.rw=this.reward(grade,acc);save();this.draw();AU.sfx&&AU.sfx(grade==="S"||grade==="A"?"level":"ui");},
@@ -641,7 +643,7 @@ const LIVE={st:null,
   start(){const S=this.st;AU.resume&&AU.resume();G.mini=G.mini||{};G.mini.liveHost=S.host;G.mini.liveItem=S.item;
     const pool=LIVE_POOL.filter(c=>!c.need||c.need(G));const R=(i)=>srand(G,3100+i*17+(G.mini.liveN||0)*7);
     S.deck=[];for(let i=0;i<40;i++){const c=pool[Math.floor(R(i)*pool.length)];const ord=[0,1,2].sort((a,b)=>R(i*3+a+50)-R(i*3+b+50));S.deck.push({c,ord,who:LIVE_NAMES[Math.floor(R(i+200)*LIVE_NAMES.length)]});}
-    S.i=0;S.view=Math.round(25+(G.rep||5)*3)*(S.host==="fah"?1.4:1);S.peak=S.view;S.sold=0;S.good=0;S.asked=0;S.feed=[];S.cur=null;S.phase="play";S.t0=performance.now();S.dur=45000;
+    S.i=0;S.view=Math.round(25+(G.rep||5)*3)*(S.host==="fah"?1.4:1);S.peak=S.view;S.sold=0;S.good=0;S.asked=0;S.feed=[];S.cur=null;S.phase="play";S.t0=performance.now();S.dur=S.duel?30000:45000;
     this.draw();const loop=()=>{if(!this.st||this.st.phase!=="play")return;this.tick();this.raf=requestAnimationFrame(loop);};this.raf=requestAnimationFrame(loop);},
   qTime(){return (this.st.host==="rin"?6000:4500);},
   showQ(){const S=this.st;const q=document.getElementById("lvq");if(!q)return;if(!S.cur){q.innerHTML=`<p class="meta center">รอคอมเมนต์ถัดไป…</p>`;return;}
@@ -668,6 +670,7 @@ const LIVE={st:null,
     S.peak=Math.max(S.peak,S.view);
     const v=document.getElementById("lvv"),s=document.getElementById("lvs"),t=document.getElementById("lvt");if(v)v.textContent=Math.round(S.view);if(s)s.textContent=S.sold;if(t)t.textContent=Math.max(0,Math.ceil((S.dur-el)/1000));},
   finish(){const S=this.st;cancelAnimationFrame(this.raf);S.phase="result";const acc=S.good/Math.max(1,S.asked);
+    if(S.duel&&typeof DUEL!=="undefined"){S.res={grade:"",best:false,rw:""};DUEL.done({score:S.sold+acc,win:null},S);return;}
     const grade=S.sold>=30&&acc>=.85?"S":S.sold>=20&&acc>=.7?"A":S.sold>=10?"B":"C";
     G.mini=G.mini||{};G.mini.best=G.mini.best||{};if(typeof G.mini.best.easy==="number")G.mini.best={bag:G.mini.best};G.mini.liveN=(G.mini.liveN||0)+1;
     const isBest=S.sold>(G.mini.best.live||0);if(isBest)G.mini.best.live=S.sold;
@@ -682,6 +685,227 @@ const LIVE={st:null,
     if(typeof cardCheck==="function"){const got=cardCheck(G);if(got.length){G.cardPend=(G.cardPend||[]).concat(got);out.push(`🃏 การ์ดใหม่ ×${got.length}`);}}
     return `<span class="rwl">${out.map(x=>`<span class="rwi">${x}</span>`).join("")}</span>`;}};
 MG_MODES.live={icon:"📱",title:"ไลฟ์ขายของค่าย",note:"ตอบคอมเมนต์ให้ทัน · ได้กำไรจากยอดขาย ชื่อเสียง",open:G=>G.week>=8||(G.season||1)>=2,custom:true};
+
+// ===== v1.89.13: MINIGAME — 1:1 sprint, 100 m (also the regional champions' duel and, later, the district sports day) =====
+/* Drag the runner into the blocks, wait for the gun, then alternate left/right as fast as you can.
+   Same side twice = a stumble · tapping before the gun = a false start (the second one loses the race). */
+const RUN_LEN=100,RUN_STRIDE=1.1;
+const runMult=f=>f?1+((f.a.speed||10)-10)*.012+((f.a.stamina||10)-10)*.006:1;
+const RUN_LINE={S:"ครูแดงกดนาฬิกาจับเวลาแล้วเงียบไปสองวินาที \"…ลมส่งหรือเปล่าวะเนี่ย\"",A:"ครูแดงพยักหน้า \"ขาดีวันนี้ ไปเตะกระสอบต่อได้แล้ว\"",B:"\"วิ่งได้ แต่อย่าสะดุดเท้าตัวเองบ่อยนัก\" ครูแดงหัวเราะ",C:"\"ซ้ายขวา ซ้ายขวา! ไม่ใช่ซ้ายซ้ายขวา!\" ครูแดงตะโกนจากข้างลู่"};
+const RUN={st:null,
+  el(){return document.getElementById("minibag");},
+  played(G){return mgPlayed(G,"run");},
+  /* opts.duel = {opp:{id,name,face,pace}, label} from the regional duel */
+  pick(opts){const F=bagFighters(G);const me=(G.mini&&G.mini.runLast&&F.find(f=>f.id===G.mini.runLast))||F[0];
+    const S={phase:"pick",id:me?me.id:null,opp:null,practice:this.played(G),duel:null,act:null,...(opts||{})};
+    if(!S.duel){const o=F.find(f=>f.id!==S.id);S.opp=o?o.id:null;}
+    this.st=S;if(BAG.st)BAG.st.phase="run";this.draw();},
+  act(a,v){const S=this.st;if(!S)return;
+    if(a==="me"){S.id=v;if(S.opp===v)S.opp=(bagFighters(G).find(f=>f.id!==v)||{}).id||null;this.draw();}
+    else if(a==="opp"){S.opp=v;this.draw();}
+    else if(a==="go")this.set();
+    else if(a==="L"||a==="R")this.tap(a);
+    else if(a==="again"){S.phase="pick";S.practice=true;this.draw();}
+    else if(a==="next"&&S.duel){if(S.duel.next)S.duel.next();else if(typeof DUEL!=="undefined")DUEL.next();}
+    else if(a==="hub"){this.stop();this.st=null;BAG.st.phase="hub";BAG.draw();}},
+  stop(){cancelAnimationFrame(this.raf);clearTimeout(this.to);},
+  runner(){return G.F[this.st.id];},
+  oppInfo(){const S=this.st;if(S.duel)return S.duel.opp;const o=G.F[S.opp];return o?{id:o.id,name:o.name,f:o,pace:6.1+((o.a.speed||10)-10)*.1}:{id:null,name:"เงาของตัวเอง",pace:6.6};},
+  draw(){const S=this.st,el=this.el();if(!S||!el)return;const F=bagFighters(G),me=this.runner(),O=this.oppInfo();
+    const face=x=>x&&x.id?`<img src="${faceSrc(x.id,"happy")}" alt="">`:"";
+    if(S.phase==="pick"){const best=((G.mini&&G.mini.best)||{}).run;
+      el.innerHTML=`<div class="mbox px"><h2>🏃 วิ่งแข่ง 100 เมตร${S.duel?` · ${esc(S.duel.label||"")}`:""}</h2>
+       <p class="meta">ลากนักวิ่งเข้าเส้นเตรียม รอเสียงปืน แล้วกด <b class="mbL">ซ้าย</b>/<b class="mbR">ขวา</b> สลับกันให้เร็วที่สุด (F / J ก็ได้) · กดซ้ำข้างเดิม = สะดุด · ออกตัวก่อนเสียงปืน = ฟาวล์</p>
+       <b class="meta">ใครวิ่ง</b><div class="mbpick">${F.map(x=>`<button class="mbf ${x.id===S.id?"on":""}" data-rn="me" data-v="${x.id}"><img src="${faceSrc(x.id,"happy")}" alt=""><small>${esc(x.name)}</small></button>`).join("")}</div>
+       ${S.duel?`<p class="meta center">คู่แข่ง: <b>${esc(O.name)}</b></p>`:`<b class="meta">วิ่งกับใคร</b><div class="mbpick">${F.filter(x=>x.id!==S.id).map(x=>`<button class="mbf ${x.id===S.opp?"on":""}" data-rn="opp" data-v="${x.id}"><img src="${faceSrc(x.id,"happy")}" alt=""><small>${esc(x.name)}</small></button>`).join("")||`<p class="meta">วิ่งแข่งกับเวลาของตัวเอง</p>`}</div>`}
+       <p class="meta center">${S.duel?(S.duel.note||"ดวลกับแชมป์ภาค · ชนะ 2 ใน 3"):S.practice?"สัปดาห์นี้เล่นไปแล้ว · รอบนี้เป็นโหมดซ้อม ไม่มีรางวัล":`รางวัลสัปดาห์ละครั้ง: ความเร็ว/ความอึด · กำลังใจ · เศษดาว ✦${best?` · สถิติ ${best.toFixed(2)} วิ`:""}`}</p>
+       <div class="mfoot roadbtns"><button class="btn" data-mb="close">ไว้ก่อน</button><button class="btn primary" data-rn="go" ${me?"":"disabled"}>ไปที่เส้นเริ่ม ▸</button></div></div>`;return;}
+    if(S.phase==="set"||S.phase==="race"){
+      el.innerHTML=`<div class="mplay rn"><div class="mhud"><b>${esc(me.name)}</b><span id="rnmsg">${S.phase==="set"?"ลากเข้าเส้นเตรียม":""}</span><span><b id="rnt">0.00</b> วิ</span><button class="xbtn" data-mb="close" aria-label="ออก">✕</button></div>
+       <canvas id="rncv" width="360" height="230"></canvas>
+       <div class="rnset ${S.phase==="set"&&!S.armed?"":"off"}" id="rnset"><div class="rnzone"></div><div class="rnknob" id="rnknob">${face(me)}</div></div>
+       <div class="mbtns"><button class="mbtn L run" id="rnL"><b>ซ้าย</b><small>F</small></button><button class="mbtn R run" id="rnR"><b>ขวา</b><small>J</small></button></div></div>`;
+      const pd=k=>e=>{e.preventDefault();this.tap(k);};document.getElementById("rnL").addEventListener("pointerdown",pd("L"));document.getElementById("rnR").addEventListener("pointerdown",pd("R"));
+      if(S.phase==="set"&&!S.armed)this.dragSetup();this.paint();return;}
+    if(S.phase==="result"){const R=S.res;
+      el.innerHTML=`<div class="mbox px"><h2>${R.win?"เข้าเส้นก่อน!":"แพ้ไปนิดเดียว"}</h2>${R.grade?`<div class="mgrade g${R.grade}">${R.grade}</div>`:""}
+       <p class="center">${esc(me.name)} <b>${R.dq?"ฟาวล์":R.t.toFixed(2)+" วิ"}</b> · ${esc(O.name)} <b>${R.ot.toFixed(2)} วิ</b>${R.best?` · <b class="goldt">สถิติใหม่!</b>`:""}</p>
+       <p class="center meta">สะดุด ${R.st} ครั้ง${R.fs?` · ฟาวล์ ${R.fs} ครั้ง`:""} · ออกตัว ${R.react.toFixed(2)} วิ</p>
+       ${S.duel?"":S.practice?`<p class="center meta">โหมดซ้อม · ไม่มีรางวัล</p>`:`<p class="center">${R.rw}</p>`}
+       <div class="mfoot roadbtns">${S.duel?`<button class="btn primary" data-rn="next">ต่อไป ▸</button>`:`<button class="btn" data-rn="again">วิ่งอีกรอบ (ซ้อม)</button><button class="btn primary" data-mb="close">กลับค่าย</button>`}</div></div>`;}},
+  /* the blocks: drag the knob into the green zone and let go */
+  dragSetup(){const S=this.st,box=document.getElementById("rnset"),k=document.getElementById("rnknob");if(!box||!k)return;let drag=false;
+    const pos=e=>{const r=box.getBoundingClientRect();return Math.max(0,Math.min(1,(e.clientX-r.left)/r.width));};
+    const place=p=>{k.style.left=(p*100)+"%";};place(.04);
+    k.addEventListener("pointerdown",e=>{e.preventDefault();drag=true;k.setPointerCapture&&k.setPointerCapture(e.pointerId);});
+    k.addEventListener("pointermove",e=>{if(drag)place(pos(e));});
+    k.addEventListener("pointerup",e=>{if(!drag)return;drag=false;const p=pos(e);if(p>=.78&&p<=.97)this.arm();else{place(.04);const m=document.getElementById("rnmsg");if(m)m.textContent="ยังไม่ถึงเส้น ลากอีกนิด";}});},
+  set(){const S=this.st,me=this.runner();if(!me)return;AU.resume&&AU.resume();try{AU.stopMusic();}catch(e){}G.mini=G.mini||{};G.mini.runLast=S.id;
+    const O=this.oppInfo();Object.assign(S,{phase:"set",armed:false,gun:0,fs:S.fs||0,x:0,v:0,rate:0,last:null,lastT:0,st:0,stumble:0,ox:0,ov:0,oReact:.14+Math.random()*.12,
+      oPace:O.pace*(1+(Math.random()-.5)*.05),done:false,t:0,ot:0,react:0,mult:runMult(me),started:false});this.draw();this.loop();},
+  arm(){const S=this.st;if(!S||S.phase!=="set")return;S.armed=true;const box=document.getElementById("rnset");if(box)box.classList.add("off");
+    const m=document.getElementById("rnmsg");if(m)m.textContent="เข้าที่…";AU.sfx&&AU.sfx("ui");
+    this.to=setTimeout(()=>{if(!this.st||this.st.phase!=="set")return;const mm=document.getElementById("rnmsg");if(mm)mm.textContent="ระวัง…";
+      this.to=setTimeout(()=>{if(!this.st||this.st.phase!=="set")return;S.phase="race";S.gun=performance.now();S.started=true;const m3=document.getElementById("rnmsg");if(m3)m3.textContent="ไป!";AU.sfx&&AU.sfx("bell");},900+Math.random()*1500);},700);},
+  tap(k){const S=this.st;if(!S)return;const b=document.getElementById(k==="L"?"rnL":"rnR");if(b){b.classList.remove("hit");void b.offsetWidth;b.classList.add("hit");}
+    if(S.phase==="set"){if(!S.armed)return;S.fs++;clearTimeout(this.to);AU.sfx&&AU.sfx("ui");
+      if(S.fs>=2){this.finish(true);return;}
+      S.armed=false;const m=document.getElementById("rnmsg");if(m)m.textContent="ฟาวล์! ออกตัวก่อนเสียงปืน · อีกครั้งเดียว";this.draw();const mm=document.getElementById("rnmsg");if(mm)mm.textContent="ฟาวล์! อีกครั้งเดียวนะ";return;}
+    if(S.phase!=="race"||S.done)return;const now=performance.now();
+    if(!S.react)S.react=(now-S.gun)/1000;
+    if(S.last===k){S.st++;S.stumble=now+350;S.v*=.55;S.rate*=.6;S.last=null;return;}
+    const dt=S.lastT?(now-S.lastT)/1000:.25;S.lastT=now;S.last=k;S.rate=Math.min(12,S.rate*.65+(1/Math.max(.06,dt))*.35);},
+  loop(){const step=()=>{if(!this.st||(this.st.phase!=="set"&&this.st.phase!=="race"))return;this.tick();this.paint();this.raf=requestAnimationFrame(step);};cancelAnimationFrame(this.raf);this.raf=requestAnimationFrame(step);},
+  tick(){const S=this.st,now=performance.now();if(S.phase!=="race")return;const el=(now-S.gun)/1000,dt=Math.min(.05,S.prev?(now-S.prev)/1000:.016);S.prev=now;
+    if(!S.done){if(S.lastT&&now-S.lastT>350)S.rate*=Math.pow(.2,dt);const target=now<S.stumble?0:S.rate*RUN_STRIDE*S.mult;S.v+=(target-S.v)*Math.min(1,dt*4);S.x+=S.v*dt;S.t=el;
+      if(S.x>=RUN_LEN){S.x=RUN_LEN;S.done=true;S.t=el;}}
+    /* the other runner: reacts, accelerates and holds a pace with a little sway */
+    if(S.ox<RUN_LEN){const oe=el-S.oReact;if(oe>0){const tv=S.oPace*RUN_STRIDE*(1+.04*Math.sin(el*2.3));S.ov+=(tv-S.ov)*Math.min(1,dt*3);S.ox+=S.ov*dt;}if(S.ox>=RUN_LEN){S.ox=RUN_LEN;S.ot=el;}}
+    const t=document.getElementById("rnt");if(t)t.textContent=el.toFixed(2);
+    if(S.done&&S.ox>=RUN_LEN)this.finish(false);
+    else if(S.done&&el>S.t+2.5){S.ot=S.ot||el+((RUN_LEN-S.ox)/Math.max(1,S.ov));this.finish(false);}
+    else if(S.ox>=RUN_LEN&&el>S.ot+4){S.t=el+(RUN_LEN-S.x)/Math.max(1,S.v||1);this.finish(false);}},
+  paint(){const S=this.st,cv=document.getElementById("rncv");if(!S||!cv)return;const x=cv.getContext("2d");x.imageSmoothingEnabled=false;const W=cv.width,H=cv.height,now=performance.now();
+    const bg=img("bg_sportsday.webp");if(bg.complete&&bg.naturalWidth){const sw=bg.naturalWidth,sh=bg.naturalHeight*.55;x.drawImage(bg,0,0,sw,sh,0,0,W,H*.55);}else{x.fillStyle="#7fb6e6";x.fillRect(0,0,W,H*.55);}
+    x.fillStyle="#c8553d";x.fillRect(0,H*.55,W,H*.45);x.fillStyle="#b4482f";x.fillRect(0,H*.55,W,4);
+    const lead=Math.max(S.x,S.ox),cam=Math.max(0,Math.min(RUN_LEN-28,lead-14)),px=m=>(m-cam)*(W/36)+40;
+    x.fillStyle="#fff";for(let m=0;m<=RUN_LEN;m+=10){const X=px(m);if(X<-10||X>W+10)continue;x.fillRect(X,H*.58,2,H*.4);x.font="bold 10px sans-serif";x.fillText(m+"",X+3,H*.62);}
+    x.fillRect(0,H*.77,W,2);const fx=px(RUN_LEN);if(fx<W+10){for(let i=0;i<10;i++){x.fillStyle=i%2?"#000":"#fff";x.fillRect(fx,H*.57+i*9.5,6,9.5);}}
+    const fr=(v,s)=>v>.5?Math.floor(now/Math.max(70,260-v*18))%4:0;
+    const O=this.oppInfo(),me=this.runner(),oF=O.f||(O.id&&G.F[O.id]);
+    const drawR=(f,m,v,footY,stum)=>{if(!f)return;const sh=sheetFor(f);if(!sh||!(sh.complete||sh.width))return;const bob=v>.5?Math.abs(Math.sin(now/90))*3:0;drawFrame(x,sh,stum?ROW.guard:ROW.walk,fr(v),px(m),footY-bob,62,false,1);};
+    drawR(oF,S.ox,S.ov,H*.76,false);drawR(me,S.x,S.v,H*.99,now<S.stumble);
+    if(now<S.stumble){x.fillStyle="#fff";x.font="bold 14px sans-serif";x.fillText("สะดุด!",px(S.x)-18,H*.62);}
+    x.fillStyle="rgba(0,0,0,.45)";x.fillRect(0,0,W,18);x.fillStyle="#fff";x.font="11px sans-serif";x.fillText(`${(this.runner()||{}).name||""} ${S.x.toFixed(0)} ม. · ${O.name} ${S.ox.toFixed(0)} ม.`,6,13);},
+  finish(dq){const S=this.st;this.stop();if(S.phase==="result")return;S.phase="result";const O=this.oppInfo();
+    const t=dq?99:S.t,ot=S.ot||((RUN_LEN-S.ox)/Math.max(1,S.ov||6)+S.t),win=!dq&&t<=ot;
+    const grade=dq?"C":t<11?"S":t<12.5?"A":t<14?"B":"C";
+    G.mini=G.mini||{};G.mini.best=G.mini.best||{};const isBest=!dq&&!S.duel&&(!G.mini.best.run||t<G.mini.best.run);if(isBest)G.mini.best.run=Math.round(t*100)/100;
+    S.res={win,t,ot,dq,st:S.st,fs:S.fs,react:S.react||0,grade:S.duel?null:grade,best:isBest,rw:""};
+    if(S.duel&&S.duel.cb){S.duel.cb({win,t,ot,dq});}
+    else if(S.duel&&typeof DUEL!=="undefined"){DUEL.done({win,score:t},S);}
+    else if(!S.practice)S.res.rw=this.reward(grade,win);
+    save();this.draw();AU.sfx&&AU.sfx(win?"level":"ui");},
+  reward(grade,win){const S=this.st,f=this.runner(),out=[];G.campUsed=S.act||"run";G.campNote=`${CAMP_ACTIONS.run.name} · เกรด ${grade}`;
+    const g={S:.16,A:.12,B:.08,C:.04}[grade],cap=Math.min(20,(f.potential||14)+1.5);
+    const up=k=>{const b=f.a[k];f.a[k]=Math.min(cap,Math.round((f.a[k]+g)*100)/100);return f.a[k]>b;};
+    if(up("speed")|up("stamina"))out.push(`ความเร็ว/ความอึด +${g}`);else out.push("ความเร็ว/ความอึดเต็มศักยภาพแล้ว");
+    const mo=win?6:3;f.morale=Math.min(100,(f.morale||0)+mo);out.push(`กำลังใจ +${mo}`);f.fatigue=Math.min(100,(f.fatigue||0)+5);out.push("ล้า +5");
+    const o=S.opp&&G.F[S.opp];if(o){o.fatigue=Math.min(100,(o.fatigue||0)+3);if(Math.abs(S.res.t-S.res.ot)<.3){add(G,o.id,"bond",1);add(G,f.id,"bond",1);out.push("สูสีจนหัวเราะกันทั้งคู่");}}
+    const du={S:5,A:3,B:2,C:1}[grade];G.dust=(G.dust||0)+du;out.push(`<b class="goldt">✦ +${du}</b>`);out.push(esc(RUN_LINE[grade]));
+    G.flags.runN=(G.flags.runN||0)+1;if(grade==="S")G.flags.runS=(G.flags.runS||0)+1;
+    if(typeof cardCheck==="function"){const got=cardCheck(G);if(got.length){G.cardPend=(G.cardPend||[]).concat(got);out.push(`🃏 การ์ดใหม่ ×${got.length}`);}}
+    return `<span class="rwl">${out.map(x=>`<span class="rwi">${x}</span>`).join("")}</span>`;}};
+MG_MODES.run={icon:"🏃",title:"วิ่งแข่ง 100 เมตร",note:"กดซ้าย-ขวาสลับให้ไว · ได้ความเร็ว/ความอึด เศษดาว",open:G=>(G.week>=6||(G.season||1)>=2)&&bagFighters(G).length>=1,custom:true};
+MG_ACT.run="run";
+/* v1.90: district sports day — once a year from week 24: 100 m sprint, tug of war and a 3-leg relay against the other colours; points per event */
+const SPORTS_WK=24;
+const SP_TEAMS=[{k:"me",n:"สีแดง · ค่ายศิริชัย",c:"#d9473b"},{k:"tiger",n:"สีเหลือง · ค่ายพยัคฆ์ทอง",c:"#e2b23a"},{k:"teach",n:"สีฟ้า · ทีมครูโรงเรียนอำเภอ",c:"#3a86d9"},{k:"obt",n:"สีเขียว · ทีม อบต.",c:"#3aa65a"}];
+const SP_EV=[{k:"run",n:"วิ่ง 100 เมตร",ic:"🏃",d:"เลือกนักวิ่ง 1 คน ลงแข่งกับตัวแทนพยัคฆ์ทอง"},{k:"tug",n:"ชักเย่อ",ic:"🪢",d:"ทั้งค่ายช่วยกันดึง · กดดึงรัว ๆ แล้วกด ฮึบ! ตอนเข็มอยู่ช่องเขียว"},{k:"relay",n:"วิ่งผลัด 3 คน",ic:"🏅",d:"3 คนที่วิ่งเร็วที่สุดในค่ายลงวิ่ง · กดส่งไม้ให้ตรงจังหวะ"}];
+function sportsDue(G){return !G.ended&&G.week>=SPORTS_WK&&G.week<=SPORTS_WK+4&&!(G.sports||{})[G.season||1]&&roster(G).length>=1;}
+function sportsDayYear(done){if(!sportsDue(G)){done();return;}SPORTS.open(done);}
+const SPORTS={st:null,
+  el(){return document.getElementById("minibag");},
+  open(done){BAG.st={phase:"sports",mode:"run",practice:true};BAG.mount();this.st={ph:"intro",ev:0,pts:{me:0,tiger:0,teach:0,obt:0},log:[],done};this.draw();},
+  rivals(){return Object.values(G.F).filter(f=>f.camp==="rival"&&!f.retired).sort((a,b)=>(b.a.speed||0)-(a.a.speed||0));},
+  /* the camp and the Golden Tiger fight for first; the teachers and the district office fill in behind */
+  rank(win,none){const S=this.st,r=mulberry32((G.seed||1)+(G.season||1)*97+S.ev*13),o=r()<.5?["teach","obt"]:["obt","teach"];
+    const order=none?["tiger",...o,"me"]:win?["me","tiger",...o]:["tiger","me",...o];[3,2,1,0].forEach((p,i)=>S.pts[order[i]]+=p);S.log.push({ev:S.ev,win:!!win,none:!!none});},
+  act(a){const S=this.st;if(!S)return;
+    if(a==="go"){S.ph="ev";this.draw();}
+    else if(a==="start")this.startEv();
+    else if(a==="next"){S.ev++;if(S.ev>=SP_EV.length){this.finish();return;}S.ph="ev";this.draw();}
+    else if(a==="tap")TUG.tap();else if(a==="heave")TUG.heave();else if(a==="pass")RELAY.pass();
+    else if(a==="end")this.close();},
+  startEv(){const S=this.st,E=SP_EV[S.ev];
+    if(E.k==="run"){const t=this.rivals()[0],pace=t?6.3+((t.a.speed||10)-10)*.1:6.6;
+      RUN.pick({duel:{opp:{id:t?t.id:null,name:t?t.name:"นักวิ่งพยัคฆ์ทอง",f:t||null,pace},label:"งานกีฬาสี",note:"งานกีฬาสีอำเภอ · เข้าเส้นก่อน = สีแดงได้ที่ 1",
+        cb:res=>{this.rank(res.win);S.res=res;},next:()=>{RUN.stop();RUN.st=null;BAG.st.phase="sports";S.ph="res";this.draw();}}});return;}
+    if(E.k==="tug"){S.ph="tug";TUG.start(res=>{if(!this.st)return;this.rank(res.win);S.res=res;S.ph="res";this.draw();});return;}
+    const R=roster(G).slice().sort((a,b)=>(b.a.speed||0)-(a.a.speed||0)).slice(0,3);
+    if(R.length<3){this.rank(false,true);S.res={none:true};S.ph="res";this.draw();return;}
+    S.ph="relay";RELAY.start(R,res=>{if(!this.st)return;this.rank(res.win);S.res=res;S.ph="res";this.draw();});},
+  table(){const S=this.st;return `<div class="sp-tab">${SP_TEAMS.slice().sort((a,b)=>S.pts[b.k]-S.pts[a.k]).map(T=>`<div class="sp-row${T.k==="me"?" me":""}" style="--tc:${T.c}"><i></i><span>${esc(T.n)}</span><b>${S.pts[T.k]}</b></div>`).join("")}</div>`;},
+  finish(){const S=this.st,order=SP_TEAMS.map(t=>t.k).sort((a,b)=>S.pts[b]-S.pts[a]||(a==="me"?-1:b==="me"?1:0)),place=order.indexOf("me")+1,y=G.season||1;
+    const mo=place===1?6:place===2?4:2,du=place===1?6:place===2?4:2,out=[];
+    for(const f of roster(G))f.morale=Math.min(100,(f.morale||0)+mo);out.push(`กำลังใจทุกคน +${mo}`);G.dust=(G.dust||0)+du;out.push(`<b class="goldt">✦ +${du}</b>`);
+    if(place===1){G.rep=(G.rep||0)+1;out.push("ชื่อเสียง +1");G.flags.sportsWin=(G.flags.sportsWin||0)+1;}
+    G.sports=G.sports||{};G.sports[y]={place,pts:{...S.pts}};
+    if(typeof cardCheck==="function"){const got=cardCheck(G);if(got.length){G.cardPend=(G.cardPend||[]).concat(got);out.push(`🃏 การ์ดใหม่ ×${got.length}`);}}
+    S.place=place;S.out=out;S.ph="final";save();this.draw();AU.sfx&&AU.sfx(place===1?"champ":"level");},
+  close(){const S=this.st;if(!S)return;this.st=null;TUG.stop();RELAY.stop();if(RUN.st){RUN.stop();RUN.st=null;}
+    const y=G.season||1;if(!(G.sports||{})[y]){G.sports=G.sports||{};G.sports[y]={place:0,pts:{...S.pts},left:1};}
+    const el=this.el();if(el)el.remove();BAG.st=null;save();try{AU.startMusic("hub");}catch(e){}render();if(S.done)S.done();},
+  draw(){const S=this.st,el=this.el();if(!S||!el)return;const E=SP_EV[S.ev];
+    if(S.ph==="intro"){el.innerHTML=`<div class="mbox px sp"><h2>🎌 งานกีฬาสีอำเภอ ประจำปี ${G.season||1}</h2>
+       <div class="ctip"><img src="${faceSrc("coach")}" alt=""><span>ทางอำเภอชวนค่ายเราลงแข่งกีฬาสีอีกแล้ว ปีนี้เราได้สีแดง ค่ายพยัคฆ์ทองได้สีเหลือง… ห้ามแพ้มันนะ!</span></div>
+       ${this.table()}<p class="meta">3 รายการ: ${SP_EV.map(e=>e.ic+" "+e.n).join(" · ")} · ที่ 1 ได้ 3 คะแนน ที่ 2 ได้ 2 · รวมคะแนนสีชนะ = ชื่อเสียง +1 · กำลังใจทุกคน · เศษดาว</p>
+       <div class="mfoot roadbtns"><button class="btn" data-sp="end">ไม่ไปปีนี้</button><button class="btn primary" data-sp="go">ไปสนามกีฬา ▸</button></div></div>`;return;}
+    if(S.ph==="ev"){el.innerHTML=`<div class="mbox px sp"><h2>${E.ic} รายการที่ ${S.ev+1}: ${E.n}</h2><p class="meta">${E.d}</p>${this.table()}
+       <div class="mfoot roadbtns"><button class="btn primary" data-sp="start">เริ่ม ▸</button></div></div>`;return;}
+    if(S.ph==="tug"){TUG.draw();return;}
+    if(S.ph==="relay"){RELAY.draw();return;}
+    if(S.ph==="res"){const R=S.res||{},L=S.log[S.log.length-1]||{};
+      const line=R.none?"ค่ายมีนักมวยไม่ถึง 3 คน ลงวิ่งผลัดไม่ได้ ปีนี้ยกให้สีอื่นไปก่อน":L.win?(E.k==="run"?"สีแดงเข้าเส้นเป็นคนแรก! กองเชียร์ค่ายศิริชัยตีกลองลั่นสนาม":E.k==="tug"?"เชือกไหลมาฝั่งสีแดงทั้งเส้น! สีเหลืองล้มกองกันกลางสนาม":"ไม้สุดท้ายเข้าเส้นก่อน! ทั้งค่ายวิ่งลงไปกอดกันกลางลู่")
+        :(E.k==="run"?"สีเหลืองเข้าเส้นก่อนไปนิดเดียว":E.k==="tug"?"สีเหลืองลากเชือกไปได้ทั้งเส้น… ครูแดงบอกว่าปีหน้าต้องกินข้าวเพิ่ม":"ไม้สุดท้ายตามไม่ทัน สีเหลืองเข้าเส้นก่อน");
+      const extra=E.k==="relay"&&R.t?`<p class="center meta">เวลารวม สีแดง ${R.t.toFixed(2)} วิ · สีเหลือง ${R.ot.toFixed(2)} วิ</p>`:"";
+      el.innerHTML=`<div class="mbox px sp"><h2>${E.ic} ${E.n} · ${R.none?"ไม่ได้ลงแข่ง":L.win?"สีแดงได้ที่ 1!":"สีแดงได้ที่ 2"}</h2><p class="center">${line}</p>${extra}${this.table()}
+       <div class="mfoot roadbtns"><button class="btn primary" data-sp="next">${S.ev+1<SP_EV.length?"รายการต่อไป ▸":"ดูผลรวม ▸"}</button></div></div>`;return;}
+    if(S.ph==="final"){const P=S.place,T=SP_TEAMS.find(t=>t.k==="me");
+      el.innerHTML=`<div class="mbox px sp"><h2>${P===1?"🏆 สีแดงคว้าแชมป์กีฬาสี!":`สีแดงได้อันดับ ${P}`}</h2>${this.table()}
+       <p class="center"><span class="rwl">${S.out.map(x=>`<span class="rwi">${x}</span>`).join("")}</span></p>
+       <div class="ctip"><img src="${faceSrc("coach")}" alt=""><span>${P===1?"ถ้วยกีฬาสีใบนี้ ปู่ชัยเคยได้ครั้งเดียวตอนค่ายยังมีคนสิบห้าคน… วันนี้เราทำได้อีกแล้ว":"แพ้กีฬาสีไม่เป็นไร แพ้บนเวทีน่ะห้าม! กลับไปซ้อม"}</span></div>
+       <div class="mfoot roadbtns"><button class="btn primary" data-sp="end">กลับค่าย</button></div></div>`;}}};
+/* tug of war: tap to pull, heave when the needle sits in the green */
+const TUG={st:null,
+  start(cb){const R=roster(G),pw=R.length?R.reduce((s,f)=>s+(f.a.power||10)+(f.a.stamina||10),0)/R.length/20:1;
+    this.st={p:0,t0:performance.now(),prev:0,cb,pw:Math.max(.8,Math.min(1.5,pw)),mk:0,dir:1,done:false,opp:Math.min(.11,.08+.005*(G.season||1)),msgT:0};this.draw();this.loop();},
+  stop(){cancelAnimationFrame(this.raf);clearTimeout(this.to);this.st=null;},
+  tap(){const S=this.st;if(!S||S.done)return;S.p+=.012*S.pw;this.bump("tgL");},
+  heave(){const S=this.st;if(!S||S.done)return;const ok=S.mk>.4&&S.mk<.6;S.p+=ok?.09*S.pw:-.03;this.say(ok?"ฮึบ!! ดึงพร้อมกัน":"จังหวะหลุด!");this.bump("tgR");AU.sfx&&AU.sfx(ok?"hit":"ui");},
+  bump(id){const b=document.getElementById(id);if(b){b.classList.remove("hit");void b.offsetWidth;b.classList.add("hit");}},
+  say(t){const m=document.getElementById("tgmsg");if(m)m.textContent=t;},
+  loop(){const step=()=>{const S=this.st;if(!S||S.done)return;const now=performance.now(),dt=Math.min(.05,S.prev?(now-S.prev)/1000:.016),el=(now-S.t0)/1000;S.prev=now;
+      S.mk+=S.dir*dt*1.15;if(S.mk>1){S.mk=1;S.dir=-1;}if(S.mk<0){S.mk=0;S.dir=1;}
+      if(el>1)S.p-=S.opp*dt*(1+.3*Math.sin(el*1.7));
+      const f=document.getElementById("tgflag"),k=document.getElementById("tgmk"),t=document.getElementById("tgt");if(f)f.style.left=(50-Math.max(-1,Math.min(1,S.p))*42)+"%";if(k)k.style.left=(S.mk*100)+"%";if(t)t.textContent=Math.max(0,20-el).toFixed(1);
+      if(S.p>=1||S.p<=-1||el>=20){this.end(S.p>0);return;}this.raf=requestAnimationFrame(step);};this.raf=requestAnimationFrame(step);},
+  end(win){const S=this.st;S.done=true;this.say(win?"สีแดงชนะ!":"สีเหลืองชนะ…");AU.sfx&&AU.sfx(win?"level":"ui");const cb=S.cb,p=S.p;this.to=setTimeout(()=>{this.st=null;cb({win,p});},900);},
+  draw(){const el=document.getElementById("minibag");if(!el||!this.st)return;
+    el.innerHTML=`<div class="mplay tug"><div class="mhud"><b>🪢 ชักเย่อ</b><span id="tgmsg">กดดึงรัว ๆ แล้วกด ฮึบ! ตอนเข็มอยู่ช่องเขียว</span><span><b id="tgt">20.0</b> วิ</span></div>
+     <div class="tug-field"><span class="tug-team r">สีแดง</span><div class="tug-rope"><i class="tug-mid"></i><b id="tgflag" class="tug-flag"></b></div><span class="tug-team y">สีเหลือง</span></div>
+     <div class="tug-meter"><i class="tug-zone"></i><b id="tgmk"></b></div>
+     <div class="mbtns"><button class="mbtn L" id="tgL"><b>ดึง!</b><small>F</small></button><button class="mbtn R" id="tgR"><b>ฮึบ!</b><small>J</small></button></div></div>`;
+    const pd=f=>e=>{e.preventDefault();f();};document.getElementById("tgL").addEventListener("pointerdown",pd(()=>this.tap()));document.getElementById("tgR").addEventListener("pointerdown",pd(()=>this.heave()));}};
+/* relay: three legs; hand the baton over (and dip at the line) when the runner reaches the zone */
+const RELAY={st:null,
+  start(R,cb){this.st={R,leg:0,cb,adj:[],msg:""};this.legStart();},
+  stop(){cancelAnimationFrame(this.raf);clearTimeout(this.to);this.st=null;},
+  legStart(){const S=this.st;S.t0=performance.now();S.dur=1.5+Math.random()*.5;S.pressed=false;this.draw();this.loop();},
+  label(){const S=this.st;return S.leg<2?`ส่งไม้ให้${S.R[S.leg+1].name}`:"โถมตัวเข้าเส้น!";},
+  loop(){const step=()=>{const S=this.st;if(!S||S.pressed)return;const x=(performance.now()-S.t0)/(S.dur*1000),k=document.getElementById("rlmk");if(k)k.style.left=Math.min(100,x*100)+"%";
+      if(x>=1.12){this.judge(x);return;}this.raf=requestAnimationFrame(step);};this.raf=requestAnimationFrame(step);},
+  pass(){const S=this.st;if(!S||S.pressed)return;this.judge((performance.now()-S.t0)/(S.dur*1000));},
+  judge(x){const S=this.st;S.pressed=true;cancelAnimationFrame(this.raf);const q=x<.72?"early":x<=.9?"good":x<=1?"ok":x<1.12?"late":"miss";
+    S.adj.push({early:.8,good:-.3,ok:0,late:.6,miss:1.2}[q]);S.msg={early:"เร็วไป! ไม้เกือบหล่น",good:"ส่งไม้เนียนกริบ!",ok:"ส่งได้",late:"ช้าไปนิด",miss:"ไม่ได้ส่ง ไม้หลุดมือ!"}[q];
+    const m=document.getElementById("rlmsg");if(m)m.textContent=S.msg;AU.sfx&&AU.sfx(q==="good"?"hit":"ui");
+    this.to=setTimeout(()=>{if(!this.st)return;S.leg++;if(S.leg>=3)this.end();else this.legStart();},650);},
+  legT:f=>12.9-((f.a.speed||10)-10)*.12-((f.a.stamina||10)-10)*.04,
+  end(){const S=this.st,me=S.R.reduce((s,f)=>s+this.legT(f),0)+S.adj.reduce((a,b)=>a+b,0),T=SPORTS.rivals().slice(0,3),r=mulberry32((G.seed||1)*7+(G.season||1)),
+      ot=(T.length===3?T.reduce((s,f)=>s+this.legT(f),0):38.4)+(r()-.5)*.6-.1;const cb=S.cb;this.st=null;cb({win:me<=ot,t:me,ot});},
+  draw(){const S=this.st,el=document.getElementById("minibag");if(!S||!el)return;const f=S.R[S.leg];
+    el.innerHTML=`<div class="mplay relay"><div class="mhud"><b>🏅 วิ่งผลัด · ไม้ที่ ${S.leg+1}/3</b><span id="rlmsg">${esc(S.msg||"")}</span></div>
+     <div class="rl-legs">${S.R.map((x,i)=>`<span class="${i===S.leg?"on":i<S.leg?"done":""}"><img src="${faceSrc(x.id,"happy")}" alt=""><small>${esc(x.name)}</small></span>`).join("")}</div>
+     <div class="rl-bar"><i class="rl-zone"></i><b id="rlmk"><img src="${faceSrc(f.id,"happy")}" alt=""></b></div>
+     <div class="mbtns"><button class="mbtn R run" id="rlgo" style="grid-column:1/-1"><b>${esc(this.label())}</b><small>ตอนวิ่งถึงช่องเขียว · J</small></button></div></div>`;
+    document.getElementById("rlgo").addEventListener("pointerdown",e=>{e.preventDefault();this.pass();});}};
+Object.assign(CARDS,{
+ sp_team_r:{c:"kati",r:"R",t:"ถ้วยกีฬาสีใบที่สอง",hint:"ชนะงานกีฬาสีอำเภอ",bg:"sportsday",need:G=>(G.flags.sportsWin||0)>0,steps:[
+  {n:"nar",t:"สนามโรงเรียนอำเภอตอนบ่ายแก่ กองเชียร์สีแดงตีกลองไม่หยุด ผอ.โรงเรียนยื่นถ้วยพลาสติกสีทองให้ค่ายศิริชัย"},
+  {n:"coach",t:"ถ้วยใบแรกปู่ชัยได้ตอนค่ายยังมีคนสิบห้าคน ใบนี้เป็นใบที่สอง… ตั้งไว้ข้างกันเลย"},
+  {n:"kati",f:"happy",l:"casual",t:"ทุกคนมาถ่ายรูปกันค่ะ! ครูแดงยืนตรงกลาง ห้ามหลบนะคะ"},
+  {n:"nar",t:"รูปออกมาเบลอทั้งใบเพราะไม่มีใครยืนนิ่ง แต่มันถูกใส่กรอบแขวนไว้ในห้องทำงานจนทุกวันนี้"}]}});
+
 Object.assign(CARDS,{
  m_live:{c:"kati",r:"R",t:"ไลฟ์แรกของค่าย",hint:"ไลฟ์ขายของค่ายครั้งแรก",bg:"camp",need:G=>(G.flags.liveN||0)>=1,steps:[
   {n:"nar",t:"มือถือตั้งบนกองกระสอบทราย กะทิกับเสื้อค่ายตัวเดียวที่รีดเรียบที่สุด กล้องหน้าเปิดอยู่ คนดู 3 คน"},
@@ -722,7 +946,7 @@ function evMailAct(m){const L=loyOf(G);if(!L)return "";const tr=loyTier(L.best,L
   ${L.intro?`<div class="evrep"><button class="btn sm" data-act="loyintro">ดูฉากเปิดอีกครั้ง</button>${ends}</div>`:""}
   ${T.gold?`<div class="evrep"><button class="btn sm" data-act="loydress" aria-pressed="${!!L.dressOn}">ชุดไทยนอกเวที: ${L.dressOn?"เปิด":"ปิด"}</button></div>`:""}`;}
 function loyIntro(G){const S=[
-  {n:"nar",bg:"river",t:"คืนวันเพ็ญเดือนสิบสอง ตลาดน้ำริมปิงคึกคักกว่าทุกปี เรือขายกระทงจอดเรียงริมตลิ่ง แสงเทียนสะท้อนน้ำวิบวับ"},
+  {n:"nar",bg:"loy_night",t:"คืนวันเพ็ญเดือนสิบสอง ตลาดน้ำริมปิงคึกคักกว่าทุกปี เรือขายกระทงจอดเรียงริมตลิ่ง แสงเทียนสะท้อนน้ำวิบวับ"},
   {n:"npc",who:"ป้าแต๋ว",t:"มาแล้วเหรอผู้จัดการ! ป้าขนชุดไทยของลูกสาวป้ามาให้เด็ก ๆ ใส่เที่ยวงาน ไปเปลี่ยนเร็ว ๆ!"},
   {n:"nar",t:"สิบนาทีต่อมา"},
   {n:"kati",f:"flustered",l:"thai",t:"ผู้จัดการ… ชุดนี้รัดเอวจังเลยค่ะ หนูดูแปลกไหม …อย่ามองนานสิคะ!"}];
@@ -735,32 +959,32 @@ function loyIntro(G){const S=[
   {n:"kati",f:"happy",l:"thai",t:"รับคำท้าค่ะ! ป้าแต๋วบอกว่าผ้าถุงนี้ยืดได้ ใส่ต่อยก็ไม่ขาด! ผู้จัดการเลือกคนเลยค่ะ"});
   return S;}
 const LOY_END={
- bronze:{t:"แก๊งหมวกถอยทัพ",steps:[{n:"nar",bg:"river",t:"ลูกน้องแก๊งหมวกถอยไปยืนออกันฝั่งตรงข้าม ยังไม่ยอมแพ้ แต่ก็ไม่กล้าเข้าใกล้แผงป้าแต๋วอีก"},
+ bronze:{t:"แก๊งหมวกถอยทัพ",steps:[{n:"nar",bg:"loy_night",t:"ลูกน้องแก๊งหมวกถอยไปยืนออกันฝั่งตรงข้าม ยังไม่ยอมแพ้ แต่ก็ไม่กล้าเข้าใกล้แผงป้าแต๋วอีก"},
   {n:"npc",who:"ป้าแต๋ว",t:"เก่งมากลูก ๆ! ป้าขายกระทงได้อีกตั้งเยอะ เอาไปเลย ค่าขนมของทุกคน"},
   {n:"kati",f:"happy",l:"thai",t:"ปีหน้าพวกนั้นมาอีกแน่ค่ะ หนูจะซ้อมให้หนักกว่านี้!"},
   {n:"nar",t:"เสียงจี๊ด ๆ ดังมาจากใต้ท่าเรือ ลูกนากตัวเล็กติดเชือกกระทงอยู่ กะทิก้มลงแกะให้ทั้งที่ชายผ้าถุงเปียก"},
   {n:"kati",f:"flustered",l:"thai",t:"มันเดินตามหนูมาค่ะ ผู้จัดการ… ไม่ยอมไปเลย เลี้ยงที่ค่ายได้ไหมคะ ได้นะคะ"}]},
- silver:{t:"ทั้งตลาดเชียร์",steps:[{n:"nar",bg:"river",t:"คนทั้งตลาดน้ำมายืนล้อมเวทีชั่วคราว เสียงเชียร์ดังกลบเสียงพลุ"},
+ silver:{t:"ทั้งตลาดเชียร์",steps:[{n:"nar",bg:"loy_night",t:"คนทั้งตลาดน้ำมายืนล้อมเวทีชั่วคราว เสียงเชียร์ดังกลบเสียงพลุ"},
   {n:"coach",t:"ไม่เลวนี่หว่า… แต่ยังไม่ถึงตัวเสี่ยเลยนะเว้ย ปีนี้ยังมีเวลา"},
   {n:"npc",who:"ป้าแต๋ว",t:"ชุดไทยพวกนั้น ป้ายกให้เลย ใส่ไปไหนก็ได้ ป้าดีใจที่มันได้ใส่ไปทำเรื่องดี ๆ"},
   {n:"kati",f:"flustered",l:"thai",t:"ผู้จัดการคะ… ป้าแต๋วให้กระทงมาใบนึง ไปลอยด้วยกันไหมคะ …ใบเดียวค่ะ ป้าให้มาแค่ใบเดียว"}]},
- gold:{t:"หมวกทองลอยน้ำ",steps:[{n:"nar",bg:"river",t:"เสี่ยหมวกทองคำล้มลงบนท่าเรือ หมวกทองกลิ้งตกน้ำ ลอยไปพร้อมกระทงอีกร้อยใบ"},
+ gold:{t:"หมวกทองลอยน้ำ",steps:[{n:"nar",bg:"loy_night",t:"เสี่ยหมวกทองคำล้มลงบนท่าเรือ หมวกทองกลิ้งตกน้ำ ลอยไปพร้อมกระทงอีกร้อยใบ"},
   {n:"npc",who:"เสี่ยหมวกทองคำ",t:"หมวกข้า!! …ก็ได้ ๆ ตลาดน้ำนี้ข้าไม่มาอีกแล้ว ปีนี้นะ! ปีนี้!"},
   {n:"npc",who:"ป้าแต๋ว",t:"ป้าตัดชุดไทยเพิ่มให้ทุกคนแล้ว ใส่ไปเที่ยว ไปเดท ไปไหนก็ได้!"},
   {n:"kati",f:"flustered",l:"thai",t:"…ผู้จัดการ หนูใส่ชุดนี้ไปเดทได้ไหมคะ …ไม่ใช่เดท! ไปเที่ยว! ไปเที่ยวค่ะ!"},
   {n:"nar",t:"ชื่อค่ายศิริชัยถูกพูดถึงทั่วตลาดน้ำทั้งคืน และอีกหลายคืนหลังจากนั้น"}]}};
 const LOY_THIEF={name:"ไอ้ตุ่ม โจรงมกระทง",
  line:{kati:"ขอคืนเดี๋ยวนี้ค่ะ! กระทงใบนั้นของยายบ้านข้าง ๆ หนู!",mali:"กระทงใบนั้นมะลิช่วยป้าพับนะคะ! เอาคืนมา!",rin:"ฉันนับไว้แล้ว นายเอาไปสิบเจ็ดใบ คืนมาให้ครบ",ploy:"ชุดนี้แพงนะ แต่ถ้าต้องลงไปงมเอง ฉันก็ไม่ลังเล",fah:"ฟ้าเห็นนายตั้งแต่ปีที่แล้ว! คราวนี้ไม่รอดแน่!"},
- pre:[{n:"nar",bg:"river",t:"ตูม! มีคนกระโดดลงน้ำ งมเหรียญจากกระทงของชาวบ้านใส่ถุงพลาสติกเต็มมือ"},
+ pre:[{n:"nar",bg:"loy_night",t:"ตูม! มีคนกระโดดลงน้ำ งมเหรียญจากกระทงของชาวบ้านใส่ถุงพลาสติกเต็มมือ"},
   {n:"npc",who:"ป้าแต๋ว",t:"ไอ้ตุ่มอีกแล้ว! งมเหรียญจากกระทงคนอื่นทุกปี ปีนี้หอบไปทั้งกระทงเลย!"},
   {n:"npc",who:"ไอ้ตุ่ม โจรงมกระทง",t:"กระทงลอยมาหาข้าเอง ข้าก็เก็บสิ! อยากได้คืนก็ขึ้นมาบนท่าเรือนี่!"}],
- win:[{n:"nar",bg:"river",t:"ไอ้ตุ่มตกน้ำดังตูม ถุงเหรียญลอยเท้งเต้ง ชาวบ้านช่วยกันเก็บไปคืนวัด"},
+ win:[{n:"nar",bg:"loy_night",t:"ไอ้ตุ่มตกน้ำดังตูม ถุงเหรียญลอยเท้งเต้ง ชาวบ้านช่วยกันเก็บไปคืนวัด"},
   {n:"npc",who:"ป้าแต๋ว",t:"เก่งมากลูก! ป้าแบ่งค่ากระทงคืนนี้ให้ เอาไปซื้อนมให้เด็ก ๆ ในค่าย"}],
- lose:[{n:"nar",bg:"river",t:"ไอ้ตุ่มหัวเราะแล้วกระโดดน้ำหนีพร้อมถุงเหรียญ… แต่ถุงขาดกลางน้ำ เหรียญจมหมด"},
+ lose:[{n:"nar",bg:"loy_night",t:"ไอ้ตุ่มหัวเราะแล้วกระโดดน้ำหนีพร้อมถุงเหรียญ… แต่ถุงขาดกลางน้ำ เหรียญจมหมด"},
   {n:"npc",who:"ไอ้ตุ่ม โจรงมกระทง",t:"เฮ้ย! เหรียญข้า!! …ปีหน้าเจอกันใหม่!"},{n:"npc",who:"ป้าแต๋ว",t:"ช่างมันลูก อย่างน้อยมันก็ไม่ได้อะไรไป"}]};
 function evStartLoy(){const L=loyOf(G);if(!L)return;UI.modal=null;
   const open=()=>{L.run=null;L.pick=[];UI.modal={type:"gaunt"};render();};
-  if(!L.intro){L.intro=1;save();playScene(loyIntro(G),open,{bg:"river",look:"thai"});}else open();}
+  if(!L.intro){L.intro=1;save();playScene(loyIntro(G),open,{bg:"loy_night",look:"thai"});}else open();}
 function gauntPool(){const R=roster(G).filter(f=>!f.injury);return R.length?R:roster(G);}
 // v1.82.4: the five riverside SR cards as a collection row — owned cards in colour, missing ones dark, with a "play again" nudge
 function loyCardRow(after){const own=G.cards||{},got=LOY_CARDS.filter(k=>own[k]).length,left=LOY_CARDS.length-got;
@@ -811,7 +1035,7 @@ Object.assign(ACT,{
   gstart:()=>{const L=loyOf(G);if(!L)return;const P=L.pick||[];if(!P.length)return;const order=[0,1,2].map(i=>P[i%P.length]);
     L.run={order,slot:0,j:0,k:0,hp:100,sta:100,score:0,log:[],boss:0};save();render();},
   gfight:()=>{const L=loyOf(G),R=L&&L.run;if(!R||R.done)return;const f=G.F[R.order[R.slot]];const qid=evGang(G,R.k,f);
-    const bk={id:"bev"+R.k,a:f.id,b:qid,week:G.week,tier:"evloy",rounds:R.k===8?3:2,ev:1,carry:{hp:R.hp,sta:R.sta},bg:"bg_river.webp"};
+    const bk={id:"bev"+R.k,a:f.id,b:qid,week:G.week,tier:"evloy",rounds:R.k===8?3:2,ev:1,carry:{hp:R.hp,sta:R.sta},bg:"bg_loy_night.webp"};
     UI.modal=null;openFight2(bk,gauntAfter);},
   gquit:()=>{const L=loyOf(G),R=L&&L.run;if(!R||R.done)return;gauntFinish(R);render();},
   gretry:()=>{const L=loyOf(G);if(!L)return;L.run=null;L.pick=[];render();},
@@ -823,7 +1047,7 @@ const LOY_CARDS=["lk_kati","lk_mali","lk_rin","lk_ploy","lk_fah"];
 const LOY_HINT="อีเวนต์ลอยกระทง 2569 · ได้จากศึกริมน้ำ",LG_HINT="ตู้กาชาลอยกระทง · เปิดเฉพาะช่วงเทศกาล 18 พ.ย.–7 ธ.ค.";
 const T=(n,f,t)=>({n,f,l:"thai",t}),N=t=>({n:"nar",t}),P=(who,t)=>({n:"npc",who,t});
 Object.assign(CARDS,{
- lk_kati:{c:"kati",r:"SR",ev:1,t:"เด็กหลงในงานลอยกระทง",hint:LOY_HINT,bg:"river",need:()=>false,steps:[
+ lk_kati:{c:"kati",r:"SR",ev:1,t:"เด็กหลงในงานลอยกระทง",hint:LOY_HINT,bg:"loy_night",need:()=>false,steps:[
   N("เสียงพลุดังสลับเสียงเพลงลูกทุ่งจากเวทีรำวง เด็กชายตัวเล็กยืนร้องไห้ข้างแผงลูกชิ้น มือกำกระทงขนมปังที่แหลกไปครึ่งใบ"),
   T("kati","sad","ผู้จัดการคะ เด็กคนนั้นยืนอยู่ตรงนั้นมาสิบนาทีแล้ว ไม่มีใครเข้าไปถามเลย"),
   N("ยังไม่ทันได้ตอบ กะทิก็เดินแหวกคนไปนั่งยอง ๆ ตรงหน้าเด็กแล้ว ชายผ้าถุงลากพื้นไปครึ่งศอก"),
@@ -837,7 +1061,7 @@ Object.assign(CARDS,{
   T("kati","flustered","ฮะ!? ไม่ใช่! เขาเป็นผู้จัดการ! …ยัง ไม่ใช่ …ไม่ใช่ค่ะ! ไปกับแม่ได้แล้ว!"),
   N("เด็กชายโบกมือลา ทิ้งกะทิหน้าแดงไว้กลางงาน ข้าง ๆ คุณ ขนมครกในมือยังอุ่นอยู่"),
   T("kati","flustered","…แบ่งกันคนละถุงนะคะ แล้วก็… ที่หนูพูดเมื่อกี้ อย่าเก็บไปคิดนะ หนูพูดผิดแค่คำเดียวเอง")]},
- lk_mali:{c:"mali",r:"SR",ev:1,t:"นางนพมาศจำเป็น",hint:LOY_HINT,bg:"river",need:()=>false,steps:[
+ lk_mali:{c:"mali",r:"SR",ev:1,t:"นางนพมาศจำเป็น",hint:LOY_HINT,bg:"loy_night",need:()=>false,steps:[
   N("ประกาศเรียกผู้เข้าประกวดนางนพมาศดังซ้ำเป็นรอบที่สาม หมายเลขเจ็ดไม่มาเพราะป่วยกะทันหัน"),
   N("ป้าแต๋วซึ่งนั่งเป็นกรรมการอยู่ หันมามองมะลิในชุดไทยสีฟ้า แล้วยิ้มแบบที่ทุกคนในตลาดรู้ว่าหนีไม่พ้น"),
   P("ป้าแต๋ว","มะลิ! หนูนั่นแหละ ชุดก็ใส่อยู่แล้ว ผมก็เกล้าแล้ว ขึ้นเวทีเลยลูก!"),
@@ -852,7 +1076,7 @@ Object.assign(CARDS,{
   N("หลังเวที มะลิกอดช่อดอกไม้ไว้แน่น นั่งลงข้างคุณบนบันไดท่าเรือ"),
   T("mali","flustered","…ผู้จัดการคะ บนเวทีหนูไม่ได้มองกรรมการเลยสักคน มองอยู่คนเดียวตลอด"),
   T("mali","flustered","ห้ามถามว่าใคร! …ถามได้ปีหน้า ถ้ามะลิได้ขึ้นเวทีอีก")]},
- lk_rin:{c:"rin",r:"SR",ev:1,t:"ดวงสมพงศ์ริมท่าน้ำ",hint:LOY_HINT,bg:"river",need:()=>false,steps:[
+ lk_rin:{c:"rin",r:"SR",ev:1,t:"ดวงสมพงศ์ริมท่าน้ำ",hint:LOY_HINT,bg:"loy_night",need:()=>false,steps:[
   N("หมอดูริมท่าเรือกวักมือเรียกริน ป้ายเขียนว่า \"ดูลายมือ แม่นจนขนลุก สามสิบบาท\""),
   T("rin","happy","ฉันจะจ่ายสามสิบบาทเพื่อทดสอบความแม่นยำค่ะ ผู้จัดการช่วยจดบันทึกด้วย ข้อไหนถูกให้ติ๊กถูก"),
   P("หมอดูริมท่าน้ำ","หนูเป็นคนคิดเยอะ นอนดึก ชอบตัวเลข ไม่ค่อยบอกใครว่ารู้สึกอะไร"),
@@ -865,7 +1089,7 @@ Object.assign(CARDS,{
   T("rin","flustered","…ข้อมูลไม่พอค่ะ ต้องเก็บตัวอย่างเพิ่ม ปีหน้ามาดูกับฉันอีกรอบได้ไหม เพื่อทดสอบซ้ำ"),
   N("รินพับใบทำนายใส่กระเป๋าอย่างเรียบร้อย ทั้งที่ปกติเธอทิ้งใบเสร็จทุกใบลงถังขยะทันที"),
   T("rin","happy","อีกอย่าง ผู้จัดการจดผิดข้อหนึ่งค่ะ ข้อสุดท้ายต้องติ๊กถูก ไม่ใช่เครื่องหมายคำถาม")]},
- lk_ploy:{c:"ploy",r:"SR",ev:1,t:"หนีงานพรีเซนเตอร์",hint:LOY_HINT,bg:"river",need:()=>false,steps:[
+ lk_ploy:{c:"ploy",r:"SR",ev:1,t:"หนีงานพรีเซนเตอร์",hint:LOY_HINT,bg:"loy_night",need:()=>false,steps:[
   N("ใครบางคนในชุดไทยสีม่วงวิ่งมาหลบหลังคุณที่ท่าเรือ ช่างภาพสามคนวิ่งผ่านไปอีกทาง"),
   T("ploy","flustered","ชู่ว์! ยืนนิ่ง ๆ แบบนั้นแหละ สปอนเซอร์ให้ฉันยืนถือกระทงยิ้มมาสองชั่วโมงแล้ว"),
   T("ploy","happy","ยิ้มสองชั่วโมงติดนี่เจ็บแก้มกว่าโดนเตะอีกนะ รู้ไหม"),
@@ -877,7 +1101,7 @@ Object.assign(CARDS,{
   N("เธอพนมมืออยู่นาน นานจนกระทงลอยไปไกลกว่าสิบเมตร"),
   T("ploy","flustered","…อย่าบอกใครนะว่าฉันอธิษฐานนานขนาดนี้ และอย่าถามว่าขออะไร"),
   T("ploy","happy","ถ้าคำขอเป็นจริง ปีหน้าเธอจะรู้เอง …ไปได้แล้ว เดี๋ยวช่างภาพวนกลับมา")]},
- lk_fah:{c:"fah",r:"SR",ev:1,t:"ศึกโคมลอย",hint:LOY_HINT,bg:"river",need:()=>false,steps:[
+ lk_fah:{c:"fah",r:"SR",ev:1,t:"ศึกโคมลอย",hint:LOY_HINT,bg:"loy_night",need:()=>false,steps:[
   N("ฟ้ากับมะลิยืนจุดโคมลอยคนละใบที่ลานริมน้ำ ตกลงกันไว้ว่าโคมใครลอยสูงกว่า คนนั้นได้ยืนข้างผู้จัดการตอนดูพลุ"),
   T("fah","angry","โคมฟ้าใหญ่กว่า ไส้ก็หนากว่า! ชนะขาดแน่! มะลิยอมแพ้ตอนนี้ยังทันนะ!"),
   T("mali","happy","ของมะลิเขียนคำอธิษฐานไว้ด้วยนะ~ โคมที่มีคำอธิษฐานลอยสูงกว่าเสมอ ป้าแต๋วบอก"),

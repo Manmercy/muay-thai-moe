@@ -453,16 +453,17 @@ const BAG={st:null,
     const pick=(G.mini&&G.mini.bagLast&&F.find(f=>f.id===G.mini.bagLast))||F.slice().sort((a,b)=>(b.bond||0)-(a.bond||0))[0];
     this.st={phase:"hub",mode:"bag",id:pick.id,dk:(G.mini&&G.mini.bagDk)||"normal",practice:false};this.mount();this.draw();},
   openMode(m,act,mail){const F=bagFighters(G);if(!F.length){toast("No fighter is fit to train");return;}const pick=(G.mini&&G.mini.bagLast&&F.find(f=>f.id===G.mini.bagLast))||F.slice().sort((a,b)=>(b.bond||0)-(a.bond||0))[0];
-    this.st={phase:"pick",mode:m,act,mail,id:pick.id,dk:(G.mini&&G.mini.bagDk)||"normal",practice:false};this.mount();if(m==="live"){LIVE.pick();LIVE.st.practice=false;LIVE.st.act=act;LIVE.draw();}else this.draw();},
+    this.st={phase:"pick",mode:m,act,mail,id:pick.id,dk:(G.mini&&G.mini.bagDk)||"normal",practice:false};this.mount();if(m==="live"){LIVE.pick();LIVE.st.practice=false;LIVE.st.act=act;LIVE.draw();}else if(m==="run"){RUN.pick();RUN.st.practice=false;RUN.st.act=act;RUN.draw();}else this.draw();},
   mount(){let el=document.getElementById("minibag");if(!el){el=document.createElement("div");el.id="minibag";el.className="mgame";document.body.appendChild(el);}
-    el.onclick=e=>{const lv=e.target.closest("[data-lv]");if(lv&&typeof LIVE!=="undefined"){LIVE.act(lv.dataset.lv,lv.dataset.v);return;}const b=e.target.closest("[data-mb]");if(!b)return;const a=b.dataset.mb,v=b.dataset.v;
-      if(a==="mode"&&MG_MODES[v]&&MG_MODES[v].custom){this.st.mode=v;LIVE.pick();}else if(a==="mode"){this.st.mode=v;this.st.phase="pick";this.st.practice=mgPlayed(G,v);this.draw();}else if(a==="hub"){this.st.phase="hub";this.draw();}else if(a==="pick"){this.st.id=v;this.draw();}else if(a==="dk"){this.st.dk=v;this.draw();}else if(a==="go")this.start();else if(a==="close")this.close();else if(a==="claim")this.claim();else if(a==="again"){this.st.phase="pick";this.st.practice=true;this.draw();}};
-    if(!this.keyH){this.keyH=e=>{if(typeof LIVE!=="undefined"&&LIVE.st&&LIVE.st.phase==="play"&&/^[123]$/.test(e.key)){const d=LIVE.st.cur;if(d){e.preventDefault();LIVE.answer(d.ord[+e.key-1]);}return;}if(!this.st||this.st.phase!=="play")return;const k=e.key.toLowerCase();if(e.repeat)return;
+    el.onclick=e=>{const lv=e.target.closest("[data-lv]");if(lv&&typeof LIVE!=="undefined"){LIVE.act(lv.dataset.lv,lv.dataset.v);return;}const rn=e.target.closest("[data-rn]");if(rn&&typeof RUN!=="undefined"){if(rn.dataset.rn!=="L"&&rn.dataset.rn!=="R")RUN.act(rn.dataset.rn,rn.dataset.v);return;}const sp=e.target.closest("[data-sp]");if(sp&&typeof SPORTS!=="undefined"){SPORTS.act(sp.dataset.sp);return;}const du=e.target.closest("[data-du]");if(du&&typeof DUEL!=="undefined"){DUEL.act(du.dataset.du,du.dataset.v);return;}const b=e.target.closest("[data-mb]");if(!b)return;const a=b.dataset.mb,v=b.dataset.v;
+      if(a==="mode"&&MG_MODES[v]&&MG_MODES[v].custom){this.st.mode=v;if(v==="run")RUN.pick();else LIVE.pick();}else if(a==="mode"){this.st.mode=v;this.st.phase="pick";this.st.practice=mgPlayed(G,v);this.draw();}else if(a==="hub"){this.st.phase="hub";this.draw();}else if(a==="pick"){this.st.id=v;this.draw();}else if(a==="dk"){this.st.dk=v;this.draw();}else if(a==="go")this.start();else if(a==="close")this.close();else if(a==="claim")this.claim();else if(a==="again"){this.st.phase="pick";this.st.practice=true;this.draw();}};
+    if(!this.keyH){this.keyH=e=>{if(!e.repeat&&typeof TUG!=="undefined"&&TUG.st&&!TUG.st.done){const k=e.key.toLowerCase();if(k==="f"||k==="d"||k==="arrowleft"){e.preventDefault();TUG.tap();return;}if(k==="j"||k==="k"||k==="arrowright"||k===" "){e.preventDefault();TUG.heave();return;}}if(!e.repeat&&typeof RELAY!=="undefined"&&RELAY.st&&(e.key===" "||/^[jk]$/i.test(e.key)||e.key==="ArrowRight")){e.preventDefault();RELAY.pass();return;}if(typeof LIVE!=="undefined"&&LIVE.st&&LIVE.st.phase==="play"&&/^[123]$/.test(e.key)){const d=LIVE.st.cur;if(d){e.preventDefault();LIVE.answer(d.ord[+e.key-1]);}return;}if(typeof RUN!=="undefined"&&RUN.st&&(RUN.st.phase==="race"||RUN.st.phase==="set")){const k=e.key.toLowerCase();if(e.repeat)return;if(k==="f"||k==="d"||k==="arrowleft"){e.preventDefault();RUN.tap("L");}else if(k==="j"||k==="k"||k==="arrowright"){e.preventDefault();RUN.tap("R");}return;}
+      if(!this.st||this.st.phase!=="play")return;const k=e.key.toLowerCase();if(e.repeat)return;
       if(k==="f"||k==="d"||k==="arrowleft"){e.preventDefault();this.hit("L");}else if(k==="j"||k==="k"||k==="arrowright"){e.preventDefault();this.hit("R");}else if(k==="escape")this.close();};
       document.addEventListener("keydown",this.keyH);
-      document.addEventListener("visibilitychange",()=>{if(document.hidden&&typeof LIVE!=="undefined"&&LIVE.st&&LIVE.st.phase==="play"){LIVE.st.dur=0;}if(document.hidden&&this.st&&this.st.phase==="play"){this.st.phase="abort";cancelAnimationFrame(this.raf);this.draw();}});}},
-  close(){cancelAnimationFrame(this.raf);if(typeof LIVE!=="undefined"&&LIVE.st){cancelAnimationFrame(LIVE.raf);LIVE.st=null;}const el=document.getElementById("minibag");if(el)el.remove();this.st=null;try{AU.startMusic("hub");}catch(e){}if((G.cardPend||[]).length&&!UI.modal)UI.modal={type:"cardnew"};render();},
-  draw(){const S=this.st,el=document.getElementById("minibag");if(!S||!el)return;if(S.phase==="live")return LIVE.draw();const F=bagFighters(G),f=G.F[S.id];
+      document.addEventListener("visibilitychange",()=>{if(document.hidden&&typeof LIVE!=="undefined"&&LIVE.st&&LIVE.st.phase==="play"){LIVE.st.dur=0;}if(document.hidden&&this.st&&this.st.phase==="play"){this.st.phase="abort";cancelAnimationFrame(this.raf);this.draw();}if(document.hidden&&typeof RUN!=="undefined"&&RUN.st&&(RUN.st.phase==="race"||RUN.st.phase==="set")){RUN.stop();RUN.st.phase="pick";RUN.draw();}});}},
+  close(){cancelAnimationFrame(this.raf);if(typeof LIVE!=="undefined"&&LIVE.st){cancelAnimationFrame(LIVE.raf);LIVE.st=null;}if(typeof SPORTS!=="undefined"&&SPORTS.st){SPORTS.close();return;}if(typeof RUN!=="undefined"&&RUN.st){RUN.stop();RUN.st=null;}const dz=typeof DUEL!=="undefined"&&DUEL.st;if(dz){DUEL.abort();}const el=document.getElementById("minibag");if(el)el.remove();this.st=null;try{AU.startMusic("hub");}catch(e){}if((G.cardPend||[]).length&&!UI.modal)UI.modal={type:"cardnew"};render();},
+  draw(){const S=this.st,el=document.getElementById("minibag");if(!S||!el)return;if(S.phase==="live")return LIVE.draw();if(S.phase==="run")return RUN.draw();if(S.phase==="duel"&&typeof DUEL!=="undefined")return DUEL.draw();if(S.phase==="sports"&&typeof SPORTS!=="undefined")return SPORTS.draw();const F=bagFighters(G),f=G.F[S.id];
     const M=MG_MODES[S.mode];
     if(S.phase==="hub"){el.innerHTML=`<div class="mbox px"><h2>${JOY_PX} Minigames</h2><p class="meta center">Each game gives a reward once a week · replay as practice anytime</p>
        <div class="mghub">${Object.entries(MG_MODES).map(([k,X])=>{const op=X.open(G),pl=mgPlayed(G,k);return `<button class="mgitem ${pl?"done":""}" data-mb="mode" data-v="${k}" ${op?"":"disabled"}><span class="mi">${X.icon}</span><span><b>${X.title}</b><small>${op?(pl?"Reward claimed this week ✓":X.note):"Not open yet"}</small></span><span class="chev">▸</span></button>`;}).join("")}</div>
@@ -487,7 +488,7 @@ const BAG={st:null,
        <div class="mfoot roadbtns"><button class="btn" data-mb="again">Play again (practice)</button><button class="btn primary" data-mb="close">Back to camp</button></div></div>`;}},
   start(){const S=this.st;AU.resume&&AU.resume();try{AU.stopMusic();}catch(e){}
     G.mini=G.mini||{};G.mini.bagLast=S.id;G.mini.bagDk=S.dk;
-    const C=bagChart(G,S.dk,S.mode==="somtam"?5000:0);S.notes=C.notes;S.end=C.end;S.beat=C.beat;S.phase="play";S.score=0;S.combo=0;S.maxc=0;S.c={perfect:0,great:0,ok:0,miss:0};S.fx=[];S.hitT=-9;S.hitK="L";
+    const C=bagChart(G,S.dk,S.mode==="somtam"?5000:0);if(S.duel){const cut=C.beat*4*(1+S.duel.bars);C.notes=C.notes.filter(n=>n.t<cut);C.end=cut+C.beat;}S.notes=C.notes;S.end=C.end;S.beat=C.beat;S.phase="play";S.score=0;S.combo=0;S.maxc=0;S.c={perfect:0,great:0,ok:0,miss:0};S.fx=[];S.hitT=-9;S.hitK="L";
     this.draw();S.t0=this.clock()+.6;const nb=Math.round(S.end/S.beat);for(let i=0;i<nb;i++)this.ching(S.t0+i*S.beat,i%2===0);
     const cv=document.getElementById("mbcv");S.x=cv.getContext("2d");S.x.imageSmoothingEnabled=false;const loop=()=>{if(!this.st||this.st.phase!=="play")return;this.frame();this.raf=requestAnimationFrame(loop);};this.raf=requestAnimationFrame(loop);},
   now(){return this.clock()-this.st.t0;},
@@ -532,6 +533,7 @@ const BAG={st:null,
     x.fillStyle="#2c2448";x.fillRect(0,H-4,W,4);x.fillStyle="#ffd34a";x.fillRect(0,H-4,W*Math.min(1,Math.max(0,t/S.end)),4);},
   finish(){const S=this.st;cancelAnimationFrame(this.raf);S.phase="result";const n=S.notes.length,c=S.c;
     const acc=(c.perfect+c.great*.75+c.ok*.4)/Math.max(1,n);const grade=acc>=.92&&c.miss===0?"S":acc>=.78?"A":acc>=.6?"B":"C";
+    if(S.duel&&typeof DUEL!=="undefined"){S.res={acc,grade,score:S.score,maxc:S.maxc,c,best:false,rw:""};DUEL.done({score:acc,win:null},S);return;}
     G.mini=G.mini||{};G.mini.best=G.mini.best||{};if(typeof G.mini.best.easy==="number"){G.mini.best={bag:G.mini.best};}const B=G.mini.best[S.mode]=G.mini.best[S.mode]||{};const isBest=S.score>(B[S.dk]||0);if(isBest)B[S.dk]=S.score;
     S.res={acc,grade,score:S.score,maxc:S.maxc,c,best:isBest,rw:""};
     if(!S.practice)S.res.rw=this.reward(grade,acc);save();this.draw();AU.sfx&&AU.sfx(grade==="S"||grade==="A"?"level":"ui");},
@@ -641,7 +643,7 @@ const LIVE={st:null,
   start(){const S=this.st;AU.resume&&AU.resume();G.mini=G.mini||{};G.mini.liveHost=S.host;G.mini.liveItem=S.item;
     const pool=LIVE_POOL.filter(c=>!c.need||c.need(G));const R=(i)=>srand(G,3100+i*17+(G.mini.liveN||0)*7);
     S.deck=[];for(let i=0;i<40;i++){const c=pool[Math.floor(R(i)*pool.length)];const ord=[0,1,2].sort((a,b)=>R(i*3+a+50)-R(i*3+b+50));S.deck.push({c,ord,who:LIVE_NAMES[Math.floor(R(i+200)*LIVE_NAMES.length)]});}
-    S.i=0;S.view=Math.round(25+(G.rep||5)*3)*(S.host==="fah"?1.4:1);S.peak=S.view;S.sold=0;S.good=0;S.asked=0;S.feed=[];S.cur=null;S.phase="play";S.t0=performance.now();S.dur=45000;
+    S.i=0;S.view=Math.round(25+(G.rep||5)*3)*(S.host==="fah"?1.4:1);S.peak=S.view;S.sold=0;S.good=0;S.asked=0;S.feed=[];S.cur=null;S.phase="play";S.t0=performance.now();S.dur=S.duel?30000:45000;
     this.draw();const loop=()=>{if(!this.st||this.st.phase!=="play")return;this.tick();this.raf=requestAnimationFrame(loop);};this.raf=requestAnimationFrame(loop);},
   qTime(){return (this.st.host==="rin"?6000:4500);},
   showQ(){const S=this.st;const q=document.getElementById("lvq");if(!q)return;if(!S.cur){q.innerHTML=`<p class="meta center">Waiting for the next comment…</p>`;return;}
@@ -668,6 +670,7 @@ const LIVE={st:null,
     S.peak=Math.max(S.peak,S.view);
     const v=document.getElementById("lvv"),s=document.getElementById("lvs"),t=document.getElementById("lvt");if(v)v.textContent=Math.round(S.view);if(s)s.textContent=S.sold;if(t)t.textContent=Math.max(0,Math.ceil((S.dur-el)/1000));},
   finish(){const S=this.st;cancelAnimationFrame(this.raf);S.phase="result";const acc=S.good/Math.max(1,S.asked);
+    if(S.duel&&typeof DUEL!=="undefined"){S.res={grade:"",best:false,rw:""};DUEL.done({score:S.sold+acc,win:null},S);return;}
     const grade=S.sold>=30&&acc>=.85?"S":S.sold>=20&&acc>=.7?"A":S.sold>=10?"B":"C";
     G.mini=G.mini||{};G.mini.best=G.mini.best||{};if(typeof G.mini.best.easy==="number")G.mini.best={bag:G.mini.best};G.mini.liveN=(G.mini.liveN||0)+1;
     const isBest=S.sold>(G.mini.best.live||0);if(isBest)G.mini.best.live=S.sold;
@@ -682,6 +685,227 @@ const LIVE={st:null,
     if(typeof cardCheck==="function"){const got=cardCheck(G);if(got.length){G.cardPend=(G.cardPend||[]).concat(got);out.push(`🃏 New card ×${got.length}`);}}
     return `<span class="rwl">${out.map(x=>`<span class="rwi">${x}</span>`).join("")}</span>`;}};
 MG_MODES.live={icon:"📱",title:"Camp Merch Live",note:"Answer comments in time · earn profit from sales, fame",open:G=>G.week>=8||(G.season||1)>=2,custom:true};
+
+// ===== v1.89.13: MINIGAME — 1:1 sprint, 100 m (also the regional champions' duel and, later, the district sports day) =====
+/* Drag the runner into the blocks, wait for the gun, then alternate left/right as fast as you can.
+   Same side twice = a stumble · tapping before the gun = a false start (the second one loses the race). */
+const RUN_LEN=100,RUN_STRIDE=1.1;
+const runMult=f=>f?1+((f.a.speed||10)-10)*.012+((f.a.stamina||10)-10)*.006:1;
+const RUN_LINE={S:"Kru Daeng stops the watch and goes quiet for two seconds. \"…Was there a tailwind or what?\"",A:"Kru Daeng nods. \"Good legs today. Now go kick the bag.\"",B:"\"You can run, just stop tripping over your own feet,\" Kru Daeng laughs",C:"\"Left right, left right! Not left left right!\" Kru Daeng yells from the trackside"};
+const RUN={st:null,
+  el(){return document.getElementById("minibag");},
+  played(G){return mgPlayed(G,"run");},
+  /* opts.duel = {opp:{id,name,face,pace}, label} from the regional duel */
+  pick(opts){const F=bagFighters(G);const me=(G.mini&&G.mini.runLast&&F.find(f=>f.id===G.mini.runLast))||F[0];
+    const S={phase:"pick",id:me?me.id:null,opp:null,practice:this.played(G),duel:null,act:null,...(opts||{})};
+    if(!S.duel){const o=F.find(f=>f.id!==S.id);S.opp=o?o.id:null;}
+    this.st=S;if(BAG.st)BAG.st.phase="run";this.draw();},
+  act(a,v){const S=this.st;if(!S)return;
+    if(a==="me"){S.id=v;if(S.opp===v)S.opp=(bagFighters(G).find(f=>f.id!==v)||{}).id||null;this.draw();}
+    else if(a==="opp"){S.opp=v;this.draw();}
+    else if(a==="go")this.set();
+    else if(a==="L"||a==="R")this.tap(a);
+    else if(a==="again"){S.phase="pick";S.practice=true;this.draw();}
+    else if(a==="next"&&S.duel){if(S.duel.next)S.duel.next();else if(typeof DUEL!=="undefined")DUEL.next();}
+    else if(a==="hub"){this.stop();this.st=null;BAG.st.phase="hub";BAG.draw();}},
+  stop(){cancelAnimationFrame(this.raf);clearTimeout(this.to);},
+  runner(){return G.F[this.st.id];},
+  oppInfo(){const S=this.st;if(S.duel)return S.duel.opp;const o=G.F[S.opp];return o?{id:o.id,name:o.name,f:o,pace:6.1+((o.a.speed||10)-10)*.1}:{id:null,name:"Your own shadow",pace:6.6};},
+  draw(){const S=this.st,el=this.el();if(!S||!el)return;const F=bagFighters(G),me=this.runner(),O=this.oppInfo();
+    const face=x=>x&&x.id?`<img src="${faceSrc(x.id,"happy")}" alt="">`:"";
+    if(S.phase==="pick"){const best=((G.mini&&G.mini.best)||{}).run;
+      el.innerHTML=`<div class="mbox px"><h2>🏃 100 m sprint ${S.duel?` · ${esc(S.duel.label||"")}`:""}</h2>
+       <p class="meta">Drag the runner into the blocks, wait for the gun, then tap <b class="mbL">Left</b>/<b class="mbR">Right</b> alternately as fast as you can (F / J works too) · same side twice = stumble · moving before the gun = false start</p>
+       <b class="meta">Who runs</b><div class="mbpick">${F.map(x=>`<button class="mbf ${x.id===S.id?"on":""}" data-rn="me" data-v="${x.id}"><img src="${faceSrc(x.id,"happy")}" alt=""><small>${esc(x.name)}</small></button>`).join("")}</div>
+       ${S.duel?`<p class="meta center">Opponent: <b>${esc(O.name)}</b></p>`:`<b class="meta">Race against</b><div class="mbpick">${F.filter(x=>x.id!==S.id).map(x=>`<button class="mbf ${x.id===S.opp?"on":""}" data-rn="opp" data-v="${x.id}"><img src="${faceSrc(x.id,"happy")}" alt=""><small>${esc(x.name)}</small></button>`).join("")||`<p class="meta">Race against your own time</p>`}</div>`}
+       <p class="meta center">${S.duel?(S.duel.note||"Duel with a regional champion · best of 3"):S.practice?"Already played this week · this run is practice, no rewards":`Weekly reward: speed/stamina · morale · stardust ✦${best?` · record ${best.toFixed(2)} s`:""}`}</p>
+       <div class="mfoot roadbtns"><button class="btn" data-mb="close">Not now</button><button class="btn primary" data-rn="go" ${me?"":"disabled"}>To the start line ▸</button></div></div>`;return;}
+    if(S.phase==="set"||S.phase==="race"){
+      el.innerHTML=`<div class="mplay rn"><div class="mhud"><b>${esc(me.name)}</b><span id="rnmsg">${S.phase==="set"?"Drag into the blocks":""}</span><span><b id="rnt">0.00</b> s</span><button class="xbtn" data-mb="close" aria-label="Exit">✕</button></div>
+       <canvas id="rncv" width="360" height="230"></canvas>
+       <div class="rnset ${S.phase==="set"&&!S.armed?"":"off"}" id="rnset"><div class="rnzone"></div><div class="rnknob" id="rnknob">${face(me)}</div></div>
+       <div class="mbtns"><button class="mbtn L run" id="rnL"><b>Left</b><small>F</small></button><button class="mbtn R run" id="rnR"><b>Right</b><small>J</small></button></div></div>`;
+      const pd=k=>e=>{e.preventDefault();this.tap(k);};document.getElementById("rnL").addEventListener("pointerdown",pd("L"));document.getElementById("rnR").addEventListener("pointerdown",pd("R"));
+      if(S.phase==="set"&&!S.armed)this.dragSetup();this.paint();return;}
+    if(S.phase==="result"){const R=S.res;
+      el.innerHTML=`<div class="mbox px"><h2>${R.win?"First across the line!":"Lost by a hair"}</h2>${R.grade?`<div class="mgrade g${R.grade}">${R.grade}</div>`:""}
+       <p class="center">${esc(me.name)} <b>${R.dq?"False start":R.t.toFixed(2)+" s"}</b> · ${esc(O.name)} <b>${R.ot.toFixed(2)} s</b>${R.best?` · <b class="goldt">New record!</b>`:""}</p>
+       <p class="center meta">Stumbles ${R.st} times ${R.fs?` · false starts ${R.fs} times`:""} · reaction ${R.react.toFixed(2)} s</p>
+       ${S.duel?"":S.practice?`<p class="center meta">Practice mode · no rewards</p>`:`<p class="center">${R.rw}</p>`}
+       <div class="mfoot roadbtns">${S.duel?`<button class="btn primary" data-rn="next">Next ▸</button>`:`<button class="btn" data-rn="again">Race again (practice)</button><button class="btn primary" data-mb="close">Back to camp</button>`}</div></div>`;}},
+  /* the blocks: drag the knob into the green zone and let go */
+  dragSetup(){const S=this.st,box=document.getElementById("rnset"),k=document.getElementById("rnknob");if(!box||!k)return;let drag=false;
+    const pos=e=>{const r=box.getBoundingClientRect();return Math.max(0,Math.min(1,(e.clientX-r.left)/r.width));};
+    const place=p=>{k.style.left=(p*100)+"%";};place(.04);
+    k.addEventListener("pointerdown",e=>{e.preventDefault();drag=true;k.setPointerCapture&&k.setPointerCapture(e.pointerId);});
+    k.addEventListener("pointermove",e=>{if(drag)place(pos(e));});
+    k.addEventListener("pointerup",e=>{if(!drag)return;drag=false;const p=pos(e);if(p>=.78&&p<=.97)this.arm();else{place(.04);const m=document.getElementById("rnmsg");if(m)m.textContent="Not on the line yet, drag a bit further";}});},
+  set(){const S=this.st,me=this.runner();if(!me)return;AU.resume&&AU.resume();try{AU.stopMusic();}catch(e){}G.mini=G.mini||{};G.mini.runLast=S.id;
+    const O=this.oppInfo();Object.assign(S,{phase:"set",armed:false,gun:0,fs:S.fs||0,x:0,v:0,rate:0,last:null,lastT:0,st:0,stumble:0,ox:0,ov:0,oReact:.14+Math.random()*.12,
+      oPace:O.pace*(1+(Math.random()-.5)*.05),done:false,t:0,ot:0,react:0,mult:runMult(me),started:false});this.draw();this.loop();},
+  arm(){const S=this.st;if(!S||S.phase!=="set")return;S.armed=true;const box=document.getElementById("rnset");if(box)box.classList.add("off");
+    const m=document.getElementById("rnmsg");if(m)m.textContent="On your marks…";AU.sfx&&AU.sfx("ui");
+    this.to=setTimeout(()=>{if(!this.st||this.st.phase!=="set")return;const mm=document.getElementById("rnmsg");if(mm)mm.textContent="Set…";
+      this.to=setTimeout(()=>{if(!this.st||this.st.phase!=="set")return;S.phase="race";S.gun=performance.now();S.started=true;const m3=document.getElementById("rnmsg");if(m3)m3.textContent="Go!";AU.sfx&&AU.sfx("bell");},900+Math.random()*1500);},700);},
+  tap(k){const S=this.st;if(!S)return;const b=document.getElementById(k==="L"?"rnL":"rnR");if(b){b.classList.remove("hit");void b.offsetWidth;b.classList.add("hit");}
+    if(S.phase==="set"){if(!S.armed)return;S.fs++;clearTimeout(this.to);AU.sfx&&AU.sfx("ui");
+      if(S.fs>=2){this.finish(true);return;}
+      S.armed=false;const m=document.getElementById("rnmsg");if(m)m.textContent="False start! You moved before the gun · one more chance";this.draw();const mm=document.getElementById("rnmsg");if(mm)mm.textContent="False start! One more chance";return;}
+    if(S.phase!=="race"||S.done)return;const now=performance.now();
+    if(!S.react)S.react=(now-S.gun)/1000;
+    if(S.last===k){S.st++;S.stumble=now+350;S.v*=.55;S.rate*=.6;S.last=null;return;}
+    const dt=S.lastT?(now-S.lastT)/1000:.25;S.lastT=now;S.last=k;S.rate=Math.min(12,S.rate*.65+(1/Math.max(.06,dt))*.35);},
+  loop(){const step=()=>{if(!this.st||(this.st.phase!=="set"&&this.st.phase!=="race"))return;this.tick();this.paint();this.raf=requestAnimationFrame(step);};cancelAnimationFrame(this.raf);this.raf=requestAnimationFrame(step);},
+  tick(){const S=this.st,now=performance.now();if(S.phase!=="race")return;const el=(now-S.gun)/1000,dt=Math.min(.05,S.prev?(now-S.prev)/1000:.016);S.prev=now;
+    if(!S.done){if(S.lastT&&now-S.lastT>350)S.rate*=Math.pow(.2,dt);const target=now<S.stumble?0:S.rate*RUN_STRIDE*S.mult;S.v+=(target-S.v)*Math.min(1,dt*4);S.x+=S.v*dt;S.t=el;
+      if(S.x>=RUN_LEN){S.x=RUN_LEN;S.done=true;S.t=el;}}
+    /* the other runner: reacts, accelerates and holds a pace with a little sway */
+    if(S.ox<RUN_LEN){const oe=el-S.oReact;if(oe>0){const tv=S.oPace*RUN_STRIDE*(1+.04*Math.sin(el*2.3));S.ov+=(tv-S.ov)*Math.min(1,dt*3);S.ox+=S.ov*dt;}if(S.ox>=RUN_LEN){S.ox=RUN_LEN;S.ot=el;}}
+    const t=document.getElementById("rnt");if(t)t.textContent=el.toFixed(2);
+    if(S.done&&S.ox>=RUN_LEN)this.finish(false);
+    else if(S.done&&el>S.t+2.5){S.ot=S.ot||el+((RUN_LEN-S.ox)/Math.max(1,S.ov));this.finish(false);}
+    else if(S.ox>=RUN_LEN&&el>S.ot+4){S.t=el+(RUN_LEN-S.x)/Math.max(1,S.v||1);this.finish(false);}},
+  paint(){const S=this.st,cv=document.getElementById("rncv");if(!S||!cv)return;const x=cv.getContext("2d");x.imageSmoothingEnabled=false;const W=cv.width,H=cv.height,now=performance.now();
+    const bg=img("bg_sportsday.webp");if(bg.complete&&bg.naturalWidth){const sw=bg.naturalWidth,sh=bg.naturalHeight*.55;x.drawImage(bg,0,0,sw,sh,0,0,W,H*.55);}else{x.fillStyle="#7fb6e6";x.fillRect(0,0,W,H*.55);}
+    x.fillStyle="#c8553d";x.fillRect(0,H*.55,W,H*.45);x.fillStyle="#b4482f";x.fillRect(0,H*.55,W,4);
+    const lead=Math.max(S.x,S.ox),cam=Math.max(0,Math.min(RUN_LEN-28,lead-14)),px=m=>(m-cam)*(W/36)+40;
+    x.fillStyle="#fff";for(let m=0;m<=RUN_LEN;m+=10){const X=px(m);if(X<-10||X>W+10)continue;x.fillRect(X,H*.58,2,H*.4);x.font="bold 10px sans-serif";x.fillText(m+"",X+3,H*.62);}
+    x.fillRect(0,H*.77,W,2);const fx=px(RUN_LEN);if(fx<W+10){for(let i=0;i<10;i++){x.fillStyle=i%2?"#000":"#fff";x.fillRect(fx,H*.57+i*9.5,6,9.5);}}
+    const fr=(v,s)=>v>.5?Math.floor(now/Math.max(70,260-v*18))%4:0;
+    const O=this.oppInfo(),me=this.runner(),oF=O.f||(O.id&&G.F[O.id]);
+    const drawR=(f,m,v,footY,stum)=>{if(!f)return;const sh=sheetFor(f);if(!sh||!(sh.complete||sh.width))return;const bob=v>.5?Math.abs(Math.sin(now/90))*3:0;drawFrame(x,sh,stum?ROW.guard:ROW.walk,fr(v),px(m),footY-bob,62,false,1);};
+    drawR(oF,S.ox,S.ov,H*.76,false);drawR(me,S.x,S.v,H*.99,now<S.stumble);
+    if(now<S.stumble){x.fillStyle="#fff";x.font="bold 14px sans-serif";x.fillText("Stumble!",px(S.x)-18,H*.62);}
+    x.fillStyle="rgba(0,0,0,.45)";x.fillRect(0,0,W,18);x.fillStyle="#fff";x.font="11px sans-serif";x.fillText(`${(this.runner()||{}).name||""} ${S.x.toFixed(0)} m · ${O.name} ${S.ox.toFixed(0)} m`,6,13);},
+  finish(dq){const S=this.st;this.stop();if(S.phase==="result")return;S.phase="result";const O=this.oppInfo();
+    const t=dq?99:S.t,ot=S.ot||((RUN_LEN-S.ox)/Math.max(1,S.ov||6)+S.t),win=!dq&&t<=ot;
+    const grade=dq?"C":t<11?"S":t<12.5?"A":t<14?"B":"C";
+    G.mini=G.mini||{};G.mini.best=G.mini.best||{};const isBest=!dq&&!S.duel&&(!G.mini.best.run||t<G.mini.best.run);if(isBest)G.mini.best.run=Math.round(t*100)/100;
+    S.res={win,t,ot,dq,st:S.st,fs:S.fs,react:S.react||0,grade:S.duel?null:grade,best:isBest,rw:""};
+    if(S.duel&&S.duel.cb){S.duel.cb({win,t,ot,dq});}
+    else if(S.duel&&typeof DUEL!=="undefined"){DUEL.done({win,score:t},S);}
+    else if(!S.practice)S.res.rw=this.reward(grade,win);
+    save();this.draw();AU.sfx&&AU.sfx(win?"level":"ui");},
+  reward(grade,win){const S=this.st,f=this.runner(),out=[];G.campUsed=S.act||"run";G.campNote=`${CAMP_ACTIONS.run.name} · grade ${grade}`;
+    const g={S:.16,A:.12,B:.08,C:.04}[grade],cap=Math.min(20,(f.potential||14)+1.5);
+    const up=k=>{const b=f.a[k];f.a[k]=Math.min(cap,Math.round((f.a[k]+g)*100)/100);return f.a[k]>b;};
+    if(up("speed")|up("stamina"))out.push(`Speed/stamina +${g}`);else out.push("Speed/stamina already at potential");
+    const mo=win?6:3;f.morale=Math.min(100,(f.morale||0)+mo);out.push(`Morale +${mo}`);f.fatigue=Math.min(100,(f.fatigue||0)+5);out.push("Fatigue +5");
+    const o=S.opp&&G.F[S.opp];if(o){o.fatigue=Math.min(100,(o.fatigue||0)+3);if(Math.abs(S.res.t-S.res.ot)<.3){add(G,o.id,"bond",1);add(G,f.id,"bond",1);out.push("So close they both burst out laughing");}}
+    const du={S:5,A:3,B:2,C:1}[grade];G.dust=(G.dust||0)+du;out.push(`<b class="goldt">✦ +${du}</b>`);out.push(esc(RUN_LINE[grade]));
+    G.flags.runN=(G.flags.runN||0)+1;if(grade==="S")G.flags.runS=(G.flags.runS||0)+1;
+    if(typeof cardCheck==="function"){const got=cardCheck(G);if(got.length){G.cardPend=(G.cardPend||[]).concat(got);out.push(`🃏 New card ×${got.length}`);}}
+    return `<span class="rwl">${out.map(x=>`<span class="rwi">${x}</span>`).join("")}</span>`;}};
+MG_MODES.run={icon:"🏃",title:"100 m sprint",note:"Alternate left and right fast · speed/stamina, stardust",open:G=>(G.week>=6||(G.season||1)>=2)&&bagFighters(G).length>=1,custom:true};
+MG_ACT.run="run";
+/* v1.90: district sports day — once a year from week 24: 100 m sprint, tug of war and a 3-leg relay against the other colours; points per event */
+const SPORTS_WK=24;
+const SP_TEAMS=[{k:"me",n:"Red · Sirichai Camp",c:"#d9473b"},{k:"tiger",n:"Yellow · Golden Tiger Camp",c:"#e2b23a"},{k:"teach",n:"Blue · District School teachers",c:"#3a86d9"},{k:"obt",n:"Green · District Office team",c:"#3aa65a"}];
+const SP_EV=[{k:"run",n:"100 m sprint",ic:"🏃",d:"Pick one runner to race the Golden Tiger's best"},{k:"tug",n:"Tug of war",ic:"🪢",d:"The whole camp pulls together · tap Pull fast, then hit Heave! when the needle is in the green"},{k:"relay",n:"3-person relay",ic:"🏅",d:"The camp's 3 fastest runners · time the baton hand-offs"}];
+function sportsDue(G){return !G.ended&&G.week>=SPORTS_WK&&G.week<=SPORTS_WK+4&&!(G.sports||{})[G.season||1]&&roster(G).length>=1;}
+function sportsDayYear(done){if(!sportsDue(G)){done();return;}SPORTS.open(done);}
+const SPORTS={st:null,
+  el(){return document.getElementById("minibag");},
+  open(done){BAG.st={phase:"sports",mode:"run",practice:true};BAG.mount();this.st={ph:"intro",ev:0,pts:{me:0,tiger:0,teach:0,obt:0},log:[],done};this.draw();},
+  rivals(){return Object.values(G.F).filter(f=>f.camp==="rival"&&!f.retired).sort((a,b)=>(b.a.speed||0)-(a.a.speed||0));},
+  /* the camp and the Golden Tiger fight for first; the teachers and the district office fill in behind */
+  rank(win,none){const S=this.st,r=mulberry32((G.seed||1)+(G.season||1)*97+S.ev*13),o=r()<.5?["teach","obt"]:["obt","teach"];
+    const order=none?["tiger",...o,"me"]:win?["me","tiger",...o]:["tiger","me",...o];[3,2,1,0].forEach((p,i)=>S.pts[order[i]]+=p);S.log.push({ev:S.ev,win:!!win,none:!!none});},
+  act(a){const S=this.st;if(!S)return;
+    if(a==="go"){S.ph="ev";this.draw();}
+    else if(a==="start")this.startEv();
+    else if(a==="next"){S.ev++;if(S.ev>=SP_EV.length){this.finish();return;}S.ph="ev";this.draw();}
+    else if(a==="tap")TUG.tap();else if(a==="heave")TUG.heave();else if(a==="pass")RELAY.pass();
+    else if(a==="end")this.close();},
+  startEv(){const S=this.st,E=SP_EV[S.ev];
+    if(E.k==="run"){const t=this.rivals()[0],pace=t?6.3+((t.a.speed||10)-10)*.1:6.6;
+      RUN.pick({duel:{opp:{id:t?t.id:null,name:t?t.name:"Golden Tiger runner",f:t||null,pace},label:"Sports day",note:"District sports day · cross the line first = Red takes 1st",
+        cb:res=>{this.rank(res.win);S.res=res;},next:()=>{RUN.stop();RUN.st=null;BAG.st.phase="sports";S.ph="res";this.draw();}}});return;}
+    if(E.k==="tug"){S.ph="tug";TUG.start(res=>{if(!this.st)return;this.rank(res.win);S.res=res;S.ph="res";this.draw();});return;}
+    const R=roster(G).slice().sort((a,b)=>(b.a.speed||0)-(a.a.speed||0)).slice(0,3);
+    if(R.length<3){this.rank(false,true);S.res={none:true};S.ph="res";this.draw();return;}
+    S.ph="relay";RELAY.start(R,res=>{if(!this.st)return;this.rank(res.win);S.res=res;S.ph="res";this.draw();});},
+  table(){const S=this.st;return `<div class="sp-tab">${SP_TEAMS.slice().sort((a,b)=>S.pts[b.k]-S.pts[a.k]).map(T=>`<div class="sp-row${T.k==="me"?" me":""}" style="--tc:${T.c}"><i></i><span>${esc(T.n)}</span><b>${S.pts[T.k]}</b></div>`).join("")}</div>`;},
+  finish(){const S=this.st,order=SP_TEAMS.map(t=>t.k).sort((a,b)=>S.pts[b]-S.pts[a]||(a==="me"?-1:b==="me"?1:0)),place=order.indexOf("me")+1,y=G.season||1;
+    const mo=place===1?6:place===2?4:2,du=place===1?6:place===2?4:2,out=[];
+    for(const f of roster(G))f.morale=Math.min(100,(f.morale||0)+mo);out.push(`Morale for everyone +${mo}`);G.dust=(G.dust||0)+du;out.push(`<b class="goldt">✦ +${du}</b>`);
+    if(place===1){G.rep=(G.rep||0)+1;out.push("Fame +1");G.flags.sportsWin=(G.flags.sportsWin||0)+1;}
+    G.sports=G.sports||{};G.sports[y]={place,pts:{...S.pts}};
+    if(typeof cardCheck==="function"){const got=cardCheck(G);if(got.length){G.cardPend=(G.cardPend||[]).concat(got);out.push(`🃏 New card ×${got.length}`);}}
+    S.place=place;S.out=out;S.ph="final";save();this.draw();AU.sfx&&AU.sfx(place===1?"champ":"level");},
+  close(){const S=this.st;if(!S)return;this.st=null;TUG.stop();RELAY.stop();if(RUN.st){RUN.stop();RUN.st=null;}
+    const y=G.season||1;if(!(G.sports||{})[y]){G.sports=G.sports||{};G.sports[y]={place:0,pts:{...S.pts},left:1};}
+    const el=this.el();if(el)el.remove();BAG.st=null;save();try{AU.startMusic("hub");}catch(e){}render();if(S.done)S.done();},
+  draw(){const S=this.st,el=this.el();if(!S||!el)return;const E=SP_EV[S.ev];
+    if(S.ph==="intro"){el.innerHTML=`<div class="mbox px sp"><h2>🎌 District sports day, year ${G.season||1}</h2>
+       <div class="ctip"><img src="${faceSrc("coach")}" alt=""><span>The district has invited us to sports day again. This year we're Red, and the Golden Tiger camp is Yellow… don't you dare lose to them!</span></div>
+       ${this.table()}<p class="meta">3 events: ${SP_EV.map(e=>e.ic+" "+e.n).join(" · ")} · 1st place scores 3 points, 2nd scores 2 · win on total points = fame +1 · everyone's morale · stardust</p>
+       <div class="mfoot roadbtns"><button class="btn" data-sp="end">Skip this year</button><button class="btn primary" data-sp="go">To the sports field ▸</button></div></div>`;return;}
+    if(S.ph==="ev"){el.innerHTML=`<div class="mbox px sp"><h2>${E.ic} Event ${S.ev+1}: ${E.n}</h2><p class="meta">${E.d}</p>${this.table()}
+       <div class="mfoot roadbtns"><button class="btn primary" data-sp="start">Start ▸</button></div></div>`;return;}
+    if(S.ph==="tug"){TUG.draw();return;}
+    if(S.ph==="relay"){RELAY.draw();return;}
+    if(S.ph==="res"){const R=S.res||{},L=S.log[S.log.length-1]||{};
+      const line=R.none?"The camp has fewer than 3 fighters, so it can't enter the relay. The other colours take it this year.":L.win?(E.k==="run"?"Red crosses the line first! Sirichai's cheering squad drums the whole field down.":E.k==="tug"?"The rope slides all the way to Red! Yellow ends up in a heap in the middle of the field.":"The anchor crosses first! The whole camp runs onto the track for a group hug.")
+        :(E.k==="run"?"Yellow crosses the line just ahead.":E.k==="tug"?"Yellow drags the rope all the way… Kru Daeng says everyone needs to eat more next year.":"The anchor couldn't catch up. Yellow crosses first.");
+      const extra=E.k==="relay"&&R.t?`<p class="center meta">Total time: Red ${R.t.toFixed(2)} s · Yellow ${R.ot.toFixed(2)} s</p>`:"";
+      el.innerHTML=`<div class="mbox px sp"><h2>${E.ic} ${E.n} · ${R.none?"Did not compete":L.win?"Red takes 1st!":"Red takes 2nd"}</h2><p class="center">${line}</p>${extra}${this.table()}
+       <div class="mfoot roadbtns"><button class="btn primary" data-sp="next">${S.ev+1<SP_EV.length?"Next event ▸":"See the totals ▸"}</button></div></div>`;return;}
+    if(S.ph==="final"){const P=S.place,T=SP_TEAMS.find(t=>t.k==="me");
+      el.innerHTML=`<div class="mbox px sp"><h2>${P===1?"🏆 Red wins sports day!":`Red finishes in place ${P}`}</h2>${this.table()}
+       <p class="center"><span class="rwl">${S.out.map(x=>`<span class="rwi">${x}</span>`).join("")}</span></p>
+       <div class="ctip"><img src="${faceSrc("coach")}" alt=""><span>${P===1?"Grandpa Chai won the sports day cup only once, back when the camp had fifteen people… and today we did it again.":"Losing at sports day is fine. Losing in the ring is not! Back to training."}</span></div>
+       <div class="mfoot roadbtns"><button class="btn primary" data-sp="end">Back to camp</button></div></div>`;}}};
+/* tug of war: tap to pull, heave when the needle sits in the green */
+const TUG={st:null,
+  start(cb){const R=roster(G),pw=R.length?R.reduce((s,f)=>s+(f.a.power||10)+(f.a.stamina||10),0)/R.length/20:1;
+    this.st={p:0,t0:performance.now(),prev:0,cb,pw:Math.max(.8,Math.min(1.5,pw)),mk:0,dir:1,done:false,opp:Math.min(.11,.08+.005*(G.season||1)),msgT:0};this.draw();this.loop();},
+  stop(){cancelAnimationFrame(this.raf);clearTimeout(this.to);this.st=null;},
+  tap(){const S=this.st;if(!S||S.done)return;S.p+=.012*S.pw;this.bump("tgL");},
+  heave(){const S=this.st;if(!S||S.done)return;const ok=S.mk>.4&&S.mk<.6;S.p+=ok?.09*S.pw:-.03;this.say(ok?"Heave!! All together!":"Out of rhythm!");this.bump("tgR");AU.sfx&&AU.sfx(ok?"hit":"ui");},
+  bump(id){const b=document.getElementById(id);if(b){b.classList.remove("hit");void b.offsetWidth;b.classList.add("hit");}},
+  say(t){const m=document.getElementById("tgmsg");if(m)m.textContent=t;},
+  loop(){const step=()=>{const S=this.st;if(!S||S.done)return;const now=performance.now(),dt=Math.min(.05,S.prev?(now-S.prev)/1000:.016),el=(now-S.t0)/1000;S.prev=now;
+      S.mk+=S.dir*dt*1.15;if(S.mk>1){S.mk=1;S.dir=-1;}if(S.mk<0){S.mk=0;S.dir=1;}
+      if(el>1)S.p-=S.opp*dt*(1+.3*Math.sin(el*1.7));
+      const f=document.getElementById("tgflag"),k=document.getElementById("tgmk"),t=document.getElementById("tgt");if(f)f.style.left=(50-Math.max(-1,Math.min(1,S.p))*42)+"%";if(k)k.style.left=(S.mk*100)+"%";if(t)t.textContent=Math.max(0,20-el).toFixed(1);
+      if(S.p>=1||S.p<=-1||el>=20){this.end(S.p>0);return;}this.raf=requestAnimationFrame(step);};this.raf=requestAnimationFrame(step);},
+  end(win){const S=this.st;S.done=true;this.say(win?"Red wins!":"Yellow wins…");AU.sfx&&AU.sfx(win?"level":"ui");const cb=S.cb,p=S.p;this.to=setTimeout(()=>{this.st=null;cb({win,p});},900);},
+  draw(){const el=document.getElementById("minibag");if(!el||!this.st)return;
+    el.innerHTML=`<div class="mplay tug"><div class="mhud"><b>🪢 Tug of war</b><span id="tgmsg">Tap Pull fast, then hit Heave! when the needle is in the green</span><span><b id="tgt">20.0</b> s</span></div>
+     <div class="tug-field"><span class="tug-team r">Red</span><div class="tug-rope"><i class="tug-mid"></i><b id="tgflag" class="tug-flag"></b></div><span class="tug-team y">Yellow</span></div>
+     <div class="tug-meter"><i class="tug-zone"></i><b id="tgmk"></b></div>
+     <div class="mbtns"><button class="mbtn L" id="tgL"><b>Pull!</b><small>F</small></button><button class="mbtn R" id="tgR"><b>Heave!</b><small>J</small></button></div></div>`;
+    const pd=f=>e=>{e.preventDefault();f();};document.getElementById("tgL").addEventListener("pointerdown",pd(()=>this.tap()));document.getElementById("tgR").addEventListener("pointerdown",pd(()=>this.heave()));}};
+/* relay: three legs; hand the baton over (and dip at the line) when the runner reaches the zone */
+const RELAY={st:null,
+  start(R,cb){this.st={R,leg:0,cb,adj:[],msg:""};this.legStart();},
+  stop(){cancelAnimationFrame(this.raf);clearTimeout(this.to);this.st=null;},
+  legStart(){const S=this.st;S.t0=performance.now();S.dur=1.5+Math.random()*.5;S.pressed=false;this.draw();this.loop();},
+  label(){const S=this.st;return S.leg<2?`Hand the baton to ${S.R[S.leg+1].name}`:"Dive for the line!";},
+  loop(){const step=()=>{const S=this.st;if(!S||S.pressed)return;const x=(performance.now()-S.t0)/(S.dur*1000),k=document.getElementById("rlmk");if(k)k.style.left=Math.min(100,x*100)+"%";
+      if(x>=1.12){this.judge(x);return;}this.raf=requestAnimationFrame(step);};this.raf=requestAnimationFrame(step);},
+  pass(){const S=this.st;if(!S||S.pressed)return;this.judge((performance.now()-S.t0)/(S.dur*1000));},
+  judge(x){const S=this.st;S.pressed=true;cancelAnimationFrame(this.raf);const q=x<.72?"early":x<=.9?"good":x<=1?"ok":x<1.12?"late":"miss";
+    S.adj.push({early:.8,good:-.3,ok:0,late:.6,miss:1.2}[q]);S.msg={early:"Too early! Nearly dropped it",good:"Smooth hand-off!",ok:"Passed",late:"A little late",miss:"No pass, the baton slipped!"}[q];
+    const m=document.getElementById("rlmsg");if(m)m.textContent=S.msg;AU.sfx&&AU.sfx(q==="good"?"hit":"ui");
+    this.to=setTimeout(()=>{if(!this.st)return;S.leg++;if(S.leg>=3)this.end();else this.legStart();},650);},
+  legT:f=>12.9-((f.a.speed||10)-10)*.12-((f.a.stamina||10)-10)*.04,
+  end(){const S=this.st,me=S.R.reduce((s,f)=>s+this.legT(f),0)+S.adj.reduce((a,b)=>a+b,0),T=SPORTS.rivals().slice(0,3),r=mulberry32((G.seed||1)*7+(G.season||1)),
+      ot=(T.length===3?T.reduce((s,f)=>s+this.legT(f),0):38.4)+(r()-.5)*.6-.1;const cb=S.cb;this.st=null;cb({win:me<=ot,t:me,ot});},
+  draw(){const S=this.st,el=document.getElementById("minibag");if(!S||!el)return;const f=S.R[S.leg];
+    el.innerHTML=`<div class="mplay relay"><div class="mhud"><b>🏅 Relay · leg ${S.leg+1}/3</b><span id="rlmsg">${esc(S.msg||"")}</span></div>
+     <div class="rl-legs">${S.R.map((x,i)=>`<span class="${i===S.leg?"on":i<S.leg?"done":""}"><img src="${faceSrc(x.id,"happy")}" alt=""><small>${esc(x.name)}</small></span>`).join("")}</div>
+     <div class="rl-bar"><i class="rl-zone"></i><b id="rlmk"><img src="${faceSrc(f.id,"happy")}" alt=""></b></div>
+     <div class="mbtns"><button class="mbtn R run" id="rlgo" style="grid-column:1/-1"><b>${esc(this.label())}</b><small>when the runner reaches the green · J</small></button></div></div>`;
+    document.getElementById("rlgo").addEventListener("pointerdown",e=>{e.preventDefault();this.pass();});}};
+Object.assign(CARDS,{
+ sp_team_r:{c:"kati",r:"R",t:"The Second Sports Day Cup",hint:"Win the district sports day",bg:"sportsday",need:G=>(G.flags.sportsWin||0)>0,steps:[
+  {n:"nar",t:"Late afternoon at the district school field. The red cheering squad won't stop drumming as the headmaster hands Sirichai Camp a gold plastic cup."},
+  {n:"coach",t:"Grandpa Chai won the first cup back when the camp had fifteen people. This is the second one… put them side by side."},
+  {n:"kati",f:"happy",l:"casual",t:"Everyone, photo time! Kru Daeng in the middle, no hiding!"},
+  {n:"nar",t:"The photo comes out blurry because nobody stood still, but it's framed and still hangs in the office today."}]}});
+
 Object.assign(CARDS,{
  m_live:{c:"kati",r:"R",t:"The Camp's First Live",hint:"Stream the camp's merch for the first time",bg:"camp",need:G=>(G.flags.liveN||0)>=1,steps:[
   {n:"nar",t:"A phone propped on a stack of sandbags. Kati in the one camp shirt she ironed flattest. Front camera on. Three viewers."},
@@ -722,7 +946,7 @@ function evMailAct(m){const L=loyOf(G);if(!L)return "";const tr=loyTier(L.best,L
   ${L.intro?`<div class="evrep"><button class="btn sm" data-act="loyintro">Replay the opening</button>${ends}</div>`:""}
   ${T.gold?`<div class="evrep"><button class="btn sm" data-act="loydress" aria-pressed="${!!L.dressOn}">Thai dress off-stage: ${L.dressOn?"On":"Close"}</button></div>`:""}`;}
 function loyIntro(G){const S=[
-  {n:"nar",bg:"river",t:"The full moon of the twelfth month. The floating market by the Ping is busier than ever, krathong boats lined along the bank, candlelight glittering on the water."},
+  {n:"nar",bg:"loy_night",t:"The full moon of the twelfth month. The floating market by the Ping is busier than ever, krathong boats lined along the bank, candlelight glittering on the water."},
   {n:"npc",who:"Auntie Taew",t:"You made it, Manager! Auntie brought her daughter's Thai dresses for the kids to wear at the fair. Go change, quick!"},
   {n:"nar",t:"Ten minutes later"},
   {n:"kati",f:"flustered",l:"thai",t:"Manager… this dress is so tight at the waist. Do I look weird? …Don't stare so long!"}];
@@ -735,32 +959,32 @@ function loyIntro(G){const S=[
   {n:"kati",f:"happy",l:"thai",t:"I accept the challenge! Auntie Taew says this pha sin stretches, so it won't rip in a fight! Pick who goes, Manager!"});
   return S;}
 const LOY_END={
- bronze:{t:"The Helmet Gang Retreats",steps:[{n:"nar",bg:"river",t:"The helmet gang's goons retreat to the far bank. They haven't given up, but they won't come near Auntie Taew's stall again."},
+ bronze:{t:"The Helmet Gang Retreats",steps:[{n:"nar",bg:"loy_night",t:"The helmet gang's goons retreat to the far bank. They haven't given up, but they won't come near Auntie Taew's stall again."},
   {n:"npc",who:"Auntie Taew",t:"Well done, kids! Auntie sold so many more krathongs. Here, pocket money for everyone."},
   {n:"kati",f:"happy",l:"thai",t:"They'll be back next year for sure. I'll train even harder!"},
   {n:"nar",t:"Squeaking comes from under the pier. A tiny otter is tangled in krathong string. Kati kneels to free it, the hem of her pha sin soaking wet."},
   {n:"kati",f:"flustered",l:"thai",t:"It followed me, Manager… it won't leave. Can we keep it at camp? We can, right?"}]},
- silver:{t:"The Whole Market Cheers",steps:[{n:"nar",bg:"river",t:"The whole floating market crowds around the makeshift ring. The cheers drown out the fireworks."},
+ silver:{t:"The Whole Market Cheers",steps:[{n:"nar",bg:"loy_night",t:"The whole floating market crowds around the makeshift ring. The cheers drown out the fireworks."},
   {n:"coach",t:"Not bad… but you haven't reached the boss yet. There's still time this year."},
   {n:"npc",who:"Auntie Taew",t:"Those Thai dresses are yours to keep. Wear them anywhere. Auntie's happy they got worn for something good."},
   {n:"kati",f:"flustered",l:"thai",t:"Manager… Auntie Taew gave me a krathong. Want to float it together? …Just one. She only gave me one."}]},
- gold:{t:"The Golden Helmet Floats Away",steps:[{n:"nar",bg:"river",t:"Big Boss Golden Helmet crashes onto the pier. His golden helmet rolls into the river and floats off with a hundred krathongs."},
+ gold:{t:"The Golden Helmet Floats Away",steps:[{n:"nar",bg:"loy_night",t:"Big Boss Golden Helmet crashes onto the pier. His golden helmet rolls into the river and floats off with a hundred krathongs."},
   {n:"npc",who:"Big Boss Golden Helmet",t:"My helmet!! …Fine, fine! I won't come to this market again. This year! Just this year!"},
   {n:"npc",who:"Auntie Taew",t:"Auntie's sewn extra Thai dresses for all of you. Wear them on outings, dates, anywhere!"},
   {n:"kati",f:"flustered",l:"thai",t:"…Manager, can I wear this on a date? …Not a date! An outing! An outing!"},
   {n:"nar",t:"The name Sirichai Gym echoes across the floating market all night, and for many nights after."}]}};
 const LOY_THIEF={name:"Tum the Krathong Thief",
  line:{kati:"Give it back right now! That krathong belongs to the grandma next door to me!",mali:"Mali helped Auntie fold that krathong! Give it back!",rin:"I counted. You took seventeen. Return every one of them.",ploy:"This dress is expensive. But if I have to dive in for them myself, I won't hesitate.",fah:"Fah's seen you since last year! You're not getting away this time!"},
- pre:[{n:"nar",bg:"river",t:"Splash! Someone dives in, fishing coins out of the villagers' krathongs by the plastic-bagful."},
+ pre:[{n:"nar",bg:"loy_night",t:"Splash! Someone dives in, fishing coins out of the villagers' krathongs by the plastic-bagful."},
   {n:"npc",who:"Auntie Taew",t:"Tum again! He fishes coins out of people's krathongs every year. This year he took the whole krathongs!"},
   {n:"npc",who:"Tum the Krathong Thief",t:"The krathongs floated to me, so I took 'em! Want 'em back? Come up on the pier!"}],
- win:[{n:"nar",bg:"river",t:"Tum hits the water with a splash. The coin bag bobs on the surface, and the villagers fish it out for the temple."},
+ win:[{n:"nar",bg:"loy_night",t:"Tum hits the water with a splash. The coin bag bobs on the surface, and the villagers fish it out for the temple."},
   {n:"npc",who:"Auntie Taew",t:"Well done, dear! Here's a share of tonight's krathong sales. Buy the kids at camp some milk."}],
- lose:[{n:"nar",bg:"river",t:"Tum laughs and dives in with the bag of coins… but the bag rips mid-river and every coin sinks."},
+ lose:[{n:"nar",bg:"loy_night",t:"Tum laughs and dives in with the bag of coins… but the bag rips mid-river and every coin sinks."},
   {n:"npc",who:"Tum the Krathong Thief",t:"Hey! My coins!! …See you next year!"},{n:"npc",who:"Auntie Taew",t:"Never mind, dear. At least he didn't get anything."}]};
 function evStartLoy(){const L=loyOf(G);if(!L)return;UI.modal=null;
   const open=()=>{L.run=null;L.pick=[];UI.modal={type:"gaunt"};render();};
-  if(!L.intro){L.intro=1;save();playScene(loyIntro(G),open,{bg:"river",look:"thai"});}else open();}
+  if(!L.intro){L.intro=1;save();playScene(loyIntro(G),open,{bg:"loy_night",look:"thai"});}else open();}
 function gauntPool(){const R=roster(G).filter(f=>!f.injury);return R.length?R:roster(G);}
 // v1.82.4: the five riverside SR cards as a collection row — owned cards in colour, missing ones dark, with a "play again" nudge
 function loyCardRow(after){const own=G.cards||{},got=LOY_CARDS.filter(k=>own[k]).length,left=LOY_CARDS.length-got;
@@ -811,7 +1035,7 @@ Object.assign(ACT,{
   gstart:()=>{const L=loyOf(G);if(!L)return;const P=L.pick||[];if(!P.length)return;const order=[0,1,2].map(i=>P[i%P.length]);
     L.run={order,slot:0,j:0,k:0,hp:100,sta:100,score:0,log:[],boss:0};save();render();},
   gfight:()=>{const L=loyOf(G),R=L&&L.run;if(!R||R.done)return;const f=G.F[R.order[R.slot]];const qid=evGang(G,R.k,f);
-    const bk={id:"bev"+R.k,a:f.id,b:qid,week:G.week,tier:"evloy",rounds:R.k===8?3:2,ev:1,carry:{hp:R.hp,sta:R.sta},bg:"bg_river.webp"};
+    const bk={id:"bev"+R.k,a:f.id,b:qid,week:G.week,tier:"evloy",rounds:R.k===8?3:2,ev:1,carry:{hp:R.hp,sta:R.sta},bg:"bg_loy_night.webp"};
     UI.modal=null;openFight2(bk,gauntAfter);},
   gquit:()=>{const L=loyOf(G),R=L&&L.run;if(!R||R.done)return;gauntFinish(R);render();},
   gretry:()=>{const L=loyOf(G);if(!L)return;L.run=null;L.pick=[];render();},
@@ -823,7 +1047,7 @@ const LOY_CARDS=["lk_kati","lk_mali","lk_rin","lk_ploy","lk_fah"];
 const LOY_HINT="Loy Krathong 2026 event · from the Riverside Brawl",LG_HINT="Loy Krathong gacha · festival only, Nov 18 – Dec 7";
 const T=(n,f,t)=>({n,f,l:"thai",t}),N=t=>({n:"nar",t}),P=(who,t)=>({n:"npc",who,t});
 Object.assign(CARDS,{
- lk_kati:{c:"kati",r:"SR",ev:1,t:"Lost at Loy Krathong",hint:LOY_HINT,bg:"river",need:()=>false,steps:[
+ lk_kati:{c:"kati",r:"SR",ev:1,t:"Lost at Loy Krathong",hint:LOY_HINT,bg:"loy_night",need:()=>false,steps:[
   N("Fireworks crack between luk thung songs from the ramwong stage. A little boy stands crying by a meatball stall, clutching a half-crumbled bread krathong."),
   T("kati","sad","Manager, that boy's been standing there for ten minutes. No one's even asked him."),
   N("Before you can answer, Kati is already weaving through the crowd to crouch in front of the boy, the hem of her pha sin dragging on the ground."),
@@ -837,7 +1061,7 @@ Object.assign(CARDS,{
   T("kati","flustered","Huh!? No! He's the manager! …Not yet— no… No! Go with your mom already!"),
   N("The boy waves goodbye, leaving a red-faced Kati in the middle of the fair beside you, the khanom khrok still warm in her hands."),
   T("kati","flustered","…Let's take one bag each. And… what I said just now, don't think about it. I only got one word wrong.")]},
- lk_mali:{c:"mali",r:"SR",ev:1,t:"Pageant Stand-In",hint:LOY_HINT,bg:"river",need:()=>false,steps:[
+ lk_mali:{c:"mali",r:"SR",ev:1,t:"Pageant Stand-In",hint:LOY_HINT,bg:"loy_night",need:()=>false,steps:[
   N("The call for Nang Noppamas contestants rings out for the third time. Number seven isn't coming; she suddenly fell ill."),
   N("Auntie Taew, sitting as a judge, turns to look at Mali in her blue Thai dress and smiles the smile everyone at the market knows you can't escape."),
   P("Auntie Taew","Mali! Yes, you. You're already dressed, hair's already up. Get on stage, dear!"),
@@ -852,7 +1076,7 @@ Object.assign(CARDS,{
   N("Backstage, Mali hugs her bouquet tight and sits down beside you on the pier steps."),
   T("mali","flustered","…Manager, on stage I didn't look at a single judge. I was only looking at one person the whole time."),
   T("mali","flustered","Don't ask who! …You can ask next year, if Mali gets on stage again.")]},
- lk_rin:{c:"rin",r:"SR",ev:1,t:"Destined Match by the River",hint:LOY_HINT,bg:"river",need:()=>false,steps:[
+ lk_rin:{c:"rin",r:"SR",ev:1,t:"Destined Match by the River",hint:LOY_HINT,bg:"loy_night",need:()=>false,steps:[
   N("A fortune teller by the pier beckons Rin over. Her sign says: \"Palm reading, so accurate it's spooky, thirty baht.\""),
   T("rin","happy","I'll pay thirty baht to test its accuracy. Manager, please take notes. Check off whatever's right."),
   P("Pier Fortune Teller","You overthink, stay up late, love numbers, and rarely tell anyone how you feel."),
@@ -865,7 +1089,7 @@ Object.assign(CARDS,{
   T("rin","flustered","…Not enough data. We need more samples. Will you come get a reading with me again next year? To retest."),
   N("Rin folds the fortune neatly into her pocket, though she normally throws every receipt away immediately."),
   T("rin","happy","Also, you marked one wrong, Manager. The last one should be a check, not a question mark.")]},
- lk_ploy:{c:"ploy",r:"SR",ev:1,t:"Ditching the Photo Shoot",hint:LOY_HINT,bg:"river",need:()=>false,steps:[
+ lk_ploy:{c:"ploy",r:"SR",ev:1,t:"Ditching the Photo Shoot",hint:LOY_HINT,bg:"loy_night",need:()=>false,steps:[
   N("Someone in a purple Thai dress dashes behind you at the pier. Three photographers run past the other way."),
   T("ploy","flustered","Shh! Stand still like that. The sponsor's had me holding a krathong and smiling for two hours."),
   T("ploy","happy","Smiling for two hours straight hurts the cheeks more than getting kicked, you know."),
@@ -877,7 +1101,7 @@ Object.assign(CARDS,{
   N("She keeps her palms pressed together for a long time, until the krathong is more than ten meters away."),
   T("ploy","flustered","…Don't tell anyone I wished for that long. And don't ask what I wished for."),
   T("ploy","happy","If the wish comes true, you'll know next year. …Go on now, before the photographers circle back.")]},
- lk_fah:{c:"fah",r:"SR",ev:1,t:"Lantern Showdown",hint:LOY_HINT,bg:"river",need:()=>false,steps:[
+ lk_fah:{c:"fah",r:"SR",ev:1,t:"Lantern Showdown",hint:LOY_HINT,bg:"loy_night",need:()=>false,steps:[
   N("Fah and Mali each light a sky lantern on the riverside lawn. Whoever's flies higher gets to stand next to the manager for the fireworks."),
   T("fah","angry","Fah's lantern is bigger, the wick's thicker! Easy win! Give up now while you can, Mali!"),
   T("mali","happy","Mali wrote a wish on hers~ Lanterns with wishes always fly higher, Auntie Taew said."),
