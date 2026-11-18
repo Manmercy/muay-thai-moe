@@ -574,7 +574,12 @@ function heroLine(f){if(!HOME_STYLE[f.id])return -1;const sc=[0,0,0],eq=f.skills
   const h=HOME_LINE[f.id];let best=h,bv=sc[h];for(let i=0;i<3;i++)if(sc[i]>bv){best=i;bv=sc[i];}return best;}
 function fightStyle(f){if(!f)return "power";if(f.fstyle)return f.fstyle;const home=HOME_STYLE[f.id];
   if(home){const L=heroLine(f),sch=(skillList(f.id).find(s=>s.school&&s.school!=="build")||{}).school;return (LINE_STYLE[sch]||[])[L]||home;}
-  return STAT_STYLE[Object.keys(STYLE_ATTRS).sort((x,y)=>styleVal(f,y)-styleVal(f,x))[0]]||"power";}
+  const statStyle=STAT_STYLE[Object.keys(STYLE_ATTRS).sort((x,y)=>styleVal(f,y)-styleVal(f,x))[0]]||"power";
+  if(f.camp==="player")return statStyle; /* your own non-heroine fighters follow their training */
+  /* v1.91.7 (Man): every other fighter keeps one style for life, set the first time she is seen — her best weapon counts double, so the field spreads
+     across all five (before, late-game NPCs drifted to ~half power punchers as punching became their best stat) */
+  if(!f.fstyleN){const K=Object.keys(FSTYLE),w=K.map(k=>k===statStyle?2:1),tot=w.reduce((a,b)=>a+b,0);let r=((stableHash(String(f.id))>>>0)%1000)/1000*tot,pick=K[0];for(let i=0;i<K.length;i++){r-=w[i];if(r<0){pick=K[i];break;}}f.fstyleN=pick;}
+  return f.fstyleN;}
 /* v1.91.5 (Man) hot-form titles: win HOT_AT in a row and the fighter earns her title until she loses or draws. Each is worth roughly +3–5% to win */
 const HOT_AT=5;
 const HOT_TITLES={ploy:{name:"อัจฉริยะไร้พ่าย",desc:"แม่นขึ้น หลบดีขึ้นนิดหน่อย",prep:.028,ev:.012},kati:{name:"ใจเหล็กท่าเสา",desc:"เลือดเริ่มต้นมากขึ้น ยืนระยะได้นานขึ้น",hp:14,prep:.012},
