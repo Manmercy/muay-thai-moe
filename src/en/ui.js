@@ -5,7 +5,7 @@ const TH_LABEL=String.fromCharCode(3652,3607,3618);
 function langSwitch(cls){return `<div class="langsw ${cls||""}" role="group" aria-label="Language">${[["th",TH_LABEL],["en","EN"]].map(([k,l])=>`<button class="lsb ${CUR_LANG===k?"on":""}" data-act="setlang" data-v="${k}" aria-pressed="${CUR_LANG===k}">${l}</button>`).join("")}</div>`;}
 const SAVE_KEY="mtm-save-v13";
 const CANON_IDS=["kati","mali","rin","ploy","fah"];
-const CHAMP_IDS=["baibua","tabtim","alicia","chaba"]; /* v1.90 (hidden): the four regional champions — full portraits in scenes like the heroines */
+const CHAMP_IDS=["baibua","tabtim","alicia","chaba","lada"];/* v1.89.14: Lada (Naka) joins the scene cast */ /* v1.90 (hidden): the four regional champions — full portraits in scenes like the heroines */
 const castId=id=>CANON_IDS.includes(id)||CHAMP_IDS.includes(id);
 let G=null;
 const UI={tab:"home",scene:null,fight:null,modal:null,creator:null,ending:null,montage:null,speed:1,title:"tap",fsub:"offers",rdiv:"A",ptab:"over",tipIdx:0,advCache:{},toast:null,look:"fight"};
@@ -38,7 +38,7 @@ const cardFaceSrc=C=>{if(C.face)return `${ASSET}${C.face}.webp`;const scene=(C.s
   return `${ASSET}${C.c}_casual${suffix}_face.webp`;};
 const cardArtHTML=(C,lazy=false)=>`<span class="card-art" style="--card-scene:url('${ASSET}${BGIMG[C.bg]||BGIMG.camp}')"><img src="${cardFaceSrc(C)}" alt="" ${lazy?'loading="lazy" decoding="async"':""}></span>`;
 // v1.34: portraits for the market and helmet-gang side characters (matched by speaker name, or st.img)
-const NPC_IMG=[[/นายอำเภอ|District Chief/,"nai"],[/แม่ค้า|ป้าศรี|Auntie Sri|vendor/,"vendor_green"],[/ป้าแต๋ว|เจ๊หมวย|ป้าขาย|Auntie Taew|Jae Muay/,"vendor_red"],[/เสี่ยหมวกทองคำ|Big Boss Golden Helmet/,"gang_boss"],[/หมวก|แจ็กเก็ต|Helmet|Jacket/,"gang_group"],[/ยาย|Grandma/,"grandma"]];
+const NPC_IMG=[[/เกริก|Krerk/,"krerk"],[/นายอำเภอ|District Chief/,"nai"],[/แม่ค้า|ป้าศรี|Auntie Sri|vendor/,"vendor_green"],[/ป้าแต๋ว|เจ๊หมวย|ป้าขาย|Auntie Taew|Jae Muay/,"vendor_red"],[/เสี่ยหมวกทองคำ|Big Boss Golden Helmet/,"gang_boss"],[/หมวก|แจ็กเก็ต|Helmet|Jacket/,"gang_group"],[/ยาย|Grandma/,"grandma"]];
 const npcImg=st=>st.img||(st.who&&(NPC_IMG.find(([r])=>r.test(st.who))||[])[1])||null;
 const TIER_BG={evloy:"bg_river.webp",pro:"bg_fair.webp",semi:"bg_hall.webp",local:"bg_local.webp",district:"bg_district.webp",final:"bg_final.webp",exhibition:"bg_fair.webp",special:"bg_district.webp",lab:"bg_hall.webp",quest:"bg_food.webp",beast:"bg_fair.webp",dm:"bg_hall.webp"};
 const gymBg=()=>`gym${G?campLevel(G):1}.webp`;
@@ -1161,7 +1161,9 @@ function afterWeekFlow(){playHonorQueue(afterWeekFlowMain);}
 function afterWeekFlowMain(){if(typeof cardCheck==="function"){const got=cardCheck(G);if(got.length){G.cardPend=(G.cardPend||[]).concat(got);}}if(typeof mailWeekly==="function"&&!G.ended)mailWeekly(G);if(typeof chatWeekly==="function"&&!G.ended)chatWeekly(G);runEvents(played=>{const fin=()=>{if(G.ended){startEnding();return;}
     if(typeof cardCheck==="function"){const g2=cardCheck(G);if(g2.length)G.cardPend=(G.cardPend||[]).concat(g2);}relTierCheck();if((G.newCerts||[]).length){const n=G.newCerts.map(k=>CAMP_AWARDS[k]?CAMP_AWARDS[k].name:k);G.newCerts=[];setTimeout(()=>toast(`📜 Certificate received: ${n.join(", ")} · see them in the Trophy Room`),600);}if(typeof OUTFITS!=="undefined"){G.outSeen=G.outSeen||{};const nu=Object.keys(OUTFITS).filter(k=>k!=="base"&&k!=="heart"&&!G.outSeen[k]&&outfitOk(G,null,k));nu.forEach(k=>G.outSeen[k]=1);if(nu.length)setTimeout(()=>toast(`New outfit unlocked: ${nu.map(k=>OUTFITS[k].name).join(", ")} · change it in the fighter profile, "Outfit" tab`),400);}if(UI.relUp&&UI.relUp.length){const m=UI.relUp.join(" / ");UI.relUp=[];setTimeout(()=>toast("♥ "+m),300);}
     if(G.levelUps&&G.levelUps.length){const ids=[...new Set(G.levelUps)];G.levelUps=[];AU.sfx("level");UI.modal={type:"levelup",ids};}else if((G.cardPend||[]).length){AU.sfx&&AU.sfx("level");UI.modal={type:"cardnew"};}render();};
-    const go=()=>coachBackScene(()=>aftermathScene(()=>tiredScene(()=>rinScene(()=>contestScene(()=>waiKhruYear(fin))))));if(played)go();else weeklyExtra(go);});}
+    const go=()=>coachBackScene(()=>aftermathScene(()=>tiredScene(()=>rinScene(()=>contestScene(()=>regionScenes(()=>waiKhruYear(fin)))))));if(played)go();else weeklyExtra(go);});}
+// v1.90 (hidden): regional chapter story beats that land at the end of a week (gala, contract…) — region.js loads on demand
+function regionScenes(done){if(G.ended||!G.region||!regionOn()){done();return;}regionLoad().then(R=>{if(R.weekScene)R.weekScene(G,done);else done();},()=>done());}
 // v1.90: week 37 — the camp's annual wai kru; pick the offering, then watch the rite
 function waiKhruYear(done){const S=G.season||1;if(G.ended||G.week<WAIKHRU_WEEK||G.week>48||(G.waikhru||{})[S]||!roster(G).length){done();return;}
   UI.wkDone=done;UI.wkSkip=false;UI.modal={type:"waikhru",ph:"pick"};AU.startMusic&&AU.startMusic("waikhru");render();}

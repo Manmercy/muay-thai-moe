@@ -461,7 +461,93 @@ const DUEL={st:null,
        <p class="center"><i>${esc(champ)}: "${esc(won?T.win:T.lose)}"</i></p>${S.out&&S.out.length?`<p class="center"><span class="rwl">${S.out.map(x=>`<span class="rwi">${x}</span>`).join("")}</span></p>`:""}
        <div class="mfoot roadbtns"><button class="btn primary" data-du="end">กลับค่าย</button></div></div>`;}}};
 
+/* v1.90 round 5: the opening gala (the week after the invitation) and the story beat after the first cup — the green-gold contract */
+const RG_CID={north:"baibua",isan:"tabtim",central:"alicia",south:"chaba"};
+const rgIn=(G,id)=>!!(G.F[id]&&G.F[id].camp==="player");
+const rgIf=(ok,steps)=>ok?steps:[];
+function rgGala(G){const top=rgTopGirl(G),fah=rgIn(G,"fah"),ploy=rgIn(G,"ploy"),R=G.region,meet=(id,v)=>G2=>rgMeet(G2,id,v);return [
+ {n:"nar",bg:"gala",t:"รถของค่ายจอดหน้าโรงแรมกลางกรุงเทพฯ ป้ายนาคาเอเนอร์จี้ดริงค์สูงเท่าตึกสามชั้น พญานาคสีเขียวทองสวมนวมชูกำปั้นอยู่กลางป้าย"},
+ {n:"nar",t:"มาสคอตพญานาคตัวเท่าคนยืนโบกมืออยู่หน้าประตู ทุกครั้งที่มีแขกเดินผ่าน มันจะชกลมให้ดูสองที"},
+ {n:"coach",t:"ครูใส่สูทครั้งล่าสุดตอนงานบวชหลานชาย… คอเสื้อมันรัดชะมัด"},
+ ...rgIf(fah,[{n:"fah",f:"flustered",l:"casual",t:"ไหนบอกว่างานเลี้ยงไง! ทำไมทุกคนแต่งตัวเหมือนไปงานแต่งงาน ฟ้าใส่ชุดวอร์มมานะ!"}]),
+ ...rgIf(fah&&rgIn(G,"kati"),[{n:"kati",f:"happy",l:"casual",t:"หนูบอกแล้วนะคะว่าบัตรเชิญเขียนว่า \"แต่งกายสุภาพ\"… ฟ้าตอบว่า \"ชุดวอร์มก็สุภาพ\""}]),
+ {n:"nar",show:[],t:"ไฟในห้องบอลรูมหรี่ลง เสียงกลองยาวรัวขึ้น พิธีกรเดินออกมากลางเวที"},
+ {n:"npc",who:"พิธีกร",t:"ขอต้อนรับทุกท่านสู่ศึกชิงเจ้าสี่ภาค ครั้งแรกของประเทศไทย! ขอเชิญประธานนาคาเอเนอร์จี้ดริงค์ อดีตความหวังเหรียญโอลิมปิกของชาติ… คุณเกริกครับ!"},
+ {n:"nar",show:[{id:"npc:krerk"}],t:"ชายในสูทเขียวเข้มปักลายนาคสีทองเดินขึ้นเวที ยิ้มกว้าง แล้วยกมือห้ามเสียงปรบมือเบา ๆ"},
+ {n:"npc",who:"คุณเกริก",t:"เรื่องโอลิมปิกมันนานมาแล้วครับ วันนี้เป็นวันของน้อง ๆ นักมวย ไม่ใช่ของคนแก่ที่ชกไม่ได้แล้ว"},
+ {n:"npc",who:"คุณเกริก",t:"กติกาง่าย ๆ ครับ ภาคละสี่จังหวัด เก็บเข็มขัดแชมป์ประจำจังหวัดให้ครบสี่เส้น แล้วจะได้สิทธิ์ท้าแชมป์ประจำภาค ชกสามนัด ชนะสองได้ถ้วย"},
+ {n:"npc",who:"คุณเกริก",t:"ค่าเดินทางตอนเก็บเข็มขัด ค่ายจ่ายกันเองนะครับ ส่วนศึกชิงถ้วย นาคาเอเนอร์จี้ออกให้หมด… ดื่มนาคา ชกไม่มีหมด!"},
+ {n:"nar",show:[],t:"เสียงหัวเราะดังทั่วห้อง สปอตไลต์สี่ดวงส่องลงมาบนเวที พิธีกรอ่านชื่อแชมป์ประจำภาคทีละคน"},
+ {n:"npc",who:"พิธีกร",show:[{id:"baibua",l:"casual"}],t:"แชมป์ภาคเหนือ ดอกบัวซ่อนหนามแห่งล้านนา… ใบบัว!"},
+ {n:"baibua",f:"happy",l:"casual",t:"สวัสดีเจ้า… หนูใบบัว มาจากค่ายบัวท่าเสา เชียงใหม่เจ้า"},
+ {n:"nar",t:"เสียงเบาจนพิธีกรต้องยื่นไมค์เข้าไปใกล้ ๆ ใบบัวยิ้มหวาน"},
+ {n:"baibua",f:"happy",l:"casual",t:"ศอกของหนูบ่ได้แรงหยังหรอกเจ้า… แค่คู่ชกมักจะลุกบ่ขึ้นเท่านั้นเอง"},
+ {n:"npc",who:"พิธีกร",show:[{id:"tabtim",l:"casual"}],t:"แชมป์ภาคอีสาน ทับทิมเอกเซียนอีสาน… ทับทิม!"},
+ {n:"tabtim",f:"happy",l:"casual",t:"สวัสดีพี่น้องทั้งห้องเด้อ! แอร์เย็นคักแท้ หนาวกว่าโคราชหน้าหนาวอีก ฮ่า ๆ ๆ"},
+ {n:"nar",t:"ทับทิมหัวเราะลั่นจนทั้งห้องหัวเราะตาม แต่ระหว่างนั้นเธอแอบก้าวยาว ๆ วัดความกว้างของเวทีไปด้วย"},
+ {n:"npc",who:"พิธีกร",show:[{id:"alicia",l:"casual"}],t:"แชมป์ภาคกลาง เจ้าหญิงแห่งวงการมวยไทย… อลิเซีย!"},
+ {n:"nar",t:"แฟลชกล้องรัวจนห้องสว่างวาบ อลิเซียหันยิ้มให้กล้องทีละตัวแบบไม่พลาดสักตัว"},
+ {n:"alicia",f:"happy",l:"casual",t:"ขอบคุณค่ะ Thank you, everyone. ปีนี้ฉันไม่ได้มาถ่ายรูปนะคะ ฉันมาเพื่อชนะ"},
+ {n:"npc",who:"พิธีกร",show:[{id:"chaba",l:"casual"}],t:"และแชมป์ภาคใต้ หมัดพายุสยบคลื่น… ชบา!"},
+ {n:"chaba",f:"happy",l:"casual",t:"…มาชก ไม่ได้มาแหลง"},
+ {n:"nar",t:"ห้องเงียบไปสามวินาที แล้วพิธีกรก็รีบชวนทุกคนปรบมือ"},
+ {n:"nar",t:"พอพิธีเปิดจบ แชมป์ทั้งสี่เดินลงจากเวที แล้วตรงมาที่โต๊ะของค่ายศิริชัย",choice:[
+   {t:"ทักใบบัวก่อน",fx:meet("baibua",1),then:[{n:"baibua",f:"flustered",l:"casual",t:"ผู้จัดการค่ายศิริชัยตัวจริงแท้ ๆ… หนูดูไลฟ์ไฟต์ค่ายนี้ทุกนัดเลยเจ้า"}]},
+   {t:"ทักทับทิมก่อน",fx:meet("tabtim",1),then:[{n:"tabtim",f:"happy",l:"casual",t:"พี่ผู้จัดการ! ทับทิมจำหน้าได้ ไลฟ์ค่ายพี่ม่วนคักแท้เด้อ"}]},
+   {t:"ทักอลิเซียก่อน",fx:meet("alicia",1),then:[{n:"alicia",f:"happy",l:"casual",t:"Oh ค่ายที่ใคร ๆ ก็พูดถึง ตัวจริงดูธรรมดากว่าในคลิปนะคะ …ฉันชมนะ"}]},
+   {t:"ทักชบาก่อน",fx:meet("chaba",1),then:[{n:"chaba",f:"happy",l:"casual",t:"…ชบา"},{n:"nar",t:"ชบาพยักหน้าครั้งเดียว แต่ยืนอยู่ตรงนั้นนานกว่าที่จำเป็น"}]}]},
+ ...rgIf(rgIn(G,"kati"),[{n:"baibua",f:"happy",l:"casual",t:"กะทิใช่ก่เจ้า ท่าเสาเหมือนกันเจ้า… หนูได้ยินชื่อมาตั้งนานแล้ว"},{n:"kati",f:"flustered",l:"casual",t:"ห-หนูก็ได้ยินชื่อพี่ใบบัวค่ะ! ศอกบัวบานกลับหลังที่ลือกันนั่น…"}]),
+ ...rgIf(ploy,[{n:"tabtim",f:"happy",l:"casual",t:"อ้อ! นี่เองหมัดโคราชของคนกรุงเทพฯ ทับทิมอยากลองโดนสักหมัดเด้อ"},{n:"ploy",f:"happy",l:"casual",t:"…อยากลองก็ขึ้นเวทีมาสิ"}]),
+ ...rgIf(rgIn(G,"rin"),[{n:"alicia",f:"happy",l:"casual",t:"เธอคือคนที่อ่านสัญญาสิบสี่หน้าก่อนเซ็นใช่ไหม? คลิปนั้นยอดวิวเยอะกว่าคลิปไฟต์ฉันอีกนะ"},{n:"rin",f:"happy",l:"casual",t:"ก็ต้องอ่านสิคะ ตัวหนังสือเล็ก ๆ ท้ายสัญญามักเป็นส่วนที่แพงที่สุด"}]),
+ ...rgIf(rgIn(G,"mali"),[{n:"mali",f:"surprised",l:"casual",t:"พี่ชบา!! พี่ชบาใช่ไหมคะ! มะลิเองไง มะลิตัวเล็กที่ไชยา!"},{n:"chaba",f:"happy",l:"casual",t:"…จำผิดคนแล้ว"},
+   {n:"nar",t:"ชบาหันหลังเดินไป แต่มะลิทันเห็นว่าหูของเธอแดงไปถึงต้นคอ"},{n:"mali",f:"sad",l:"casual",t:"…ไม่ผิดคนหรอก มะลิจำได้"}]),
+ ...rgIf(fah,[{n:"fah",f:"pout",l:"casual",t:"เดี๋ยวนะ! ใบบัวมีกะทิ ทับทิมมีพลอย อลิเซียมีริน ชบามีมะลิ… แล้วฟ้าล่ะ! ทำไมฟ้าไม่มีพี่น้องร่วมสายเลยสักคน!"},
+   {n:"coach",t:"สายของฟ้ายังไม่มีชื่อ ก็ตั้งชื่อเองสิ"}]),
+ ...(top?[{n:top.id,f:"pout",l:"casual",t:rgJeal(top.id,"แชมป์ทั้งสี่")}]:[]),
+ {n:"npc",who:"พิธีกร",show:[],t:"และอีกหนึ่งข่าวใหญ่! นาคาเอเนอร์จี้ขอแนะนำค่ายรับเชิญพิเศษ ที่จะร่วมชกในทุกภาค… ค่ายเวกเตอร์ กรุงเทพฯ!"},
+ {n:"nar",t:ploy?"ไพลินเดินขึ้นเวทีในชุดสูทขาว สายตากวาดไปทั่วห้อง แล้วหยุดอยู่ที่พลอยนานกว่าคนอื่น":"ไพลินเดินขึ้นเวทีในชุดสูทขาว สายตากวาดไปทั่วห้อง แล้วหยุดอยู่ที่โต๊ะค่ายศิริชัย"},
+ {n:"pailin",f:"happy",t:"ข้อมูลของทุกค่ายในห้องนี้อยู่ในแท็บเล็ตของฉันหมดแล้วค่ะ …ขอให้สนุกกับการเดินทางนะคะ"},
+ {n:"nar",show:[{id:"pailin"},{id:"npc:krerk"}],t:"คุณเกริกเดินเข้าไปจับมือไพลิน ตบไหล่เบา ๆ สองที ท่าทางเหมือนคนที่รู้จักกันมานานกว่าที่ใครในห้องรู้"},
+ {n:"nar",show:[],t:"ช่างภาพเรียกทุกค่ายขึ้นถ่ายรูปหมู่หน้าป้ายพญานาค"},
+ {n:"nar",show:[{id:"lada",l:"casual"}],t:"มุมห้องข้างคุณเกริก มีผู้หญิงใส่ฮู้ดสีขาวยืนนิ่งอยู่คนเดียว ปอยผมสีขาวปลายแดงโผล่ออกมาจากฮู้ด ไม่มีใครแนะนำเธอ"},
+ {n:"nar",show:[{id:"lada",l:"casual"}],t:"ข้อนิ้วของเธอพันเทปแบบนักสู้ MMA ไม่ใช่ผ้าพันมือแบบมวยไทย"},
+ fah?{n:"fah",f:"flustered",l:"casual",t:"…ผู้จัดการ คนใส่ฮู้ดตรงนั้นมองฟ้าอยู่ ขนลุกไปทั้งตัวเลย"}:{n:"coach",t:"คนใส่ฮู้ดตรงนั้น… ยืนเหมือนคนที่พร้อมจะชกได้ตลอดเวลา"},
+ {n:"nar",show:[],t:"แฟลชกล้องวาบขึ้น พอแสงจางลง มุมห้องตรงนั้นก็ว่างเปล่า"},
+ {n:"coach",t:"เอาล่ะ กลับไปซ้อมกัน เข็มขัดสิบหกเส้นไม่ได้มาเพราะใส่สูทหล่อหรอก"}];}
+/* the week after the first cup: the green-gold contract */
+const RG_C1_CALL={
+ north:["ผู้จัดการได้ซองเขียวเหมือนกันก่เจ้า… ข้อสิบสี่จุดสาม หนูก่สะดุดตรงนั้นเหมือนกัน","ตอนเวกเตอร์มาขอซื้อค่ายหนู สัญญาของเขาก่มีข้อแบบนี้ ตัวหนังสือเหมือนกันเปี๊ยบเลยเจ้า"],
+ isan:["พี่ผู้จัดการ ได้ซองเขียวคือกันบ่! ทับทิมอ่านบ่จบดอก แต่น้องชายเรียนนิติฯ บอกว่าข้อสิบสี่มันแปลก ๆ","แล้วฮู้บ่ เวกเตอร์เคยส่งสัญญามาให้ทับทิมตอนต้นปี ข้อเดียวกันเป๊ะเลยเด้อ"],
+ central:["ซองเขียวทองมาถึงหรือยังคะ? ผู้จัดการส่วนตัวของฉันบอกให้เซ็น แต่ฉันอ่านข้อ 14.3 แล้ว…","ฉันคุ้นประโยคนั้น เวกเตอร์ส่งข้อเสนอมาให้ฉันก่อนทัวร์ ใช้คำเดียวกันทุกตัวอักษรเลยค่ะ"],
+ south:["…ซองเขียวมาแล้วใช่ไหม","เวกเตอร์ส่งสัญญามาให้ก่อนทัวร์ ข้อเดียวกัน คำเดียวกัน …ไม่ใช่เรื่องบังเอิญ"]};
+function rgCup1(G,r){const cid=RG_CID[r],rin=rgIn(G,"rin"),R=G.region,L=RG_C1_CALL[r];return [
+ {n:"nar",bg:"camp",t:"จดหมายปิดผนึกสีเขียวทองมาถึงค่าย ตราพญานาคประทับครั่งไว้กลางซอง"},
+ {n:"nar",t:"\"สัญญาเจ้าของถ้วย ศึกชิงเจ้าสี่ภาค\" นาคาเอเนอร์จี้ขอให้ค่ายที่ได้ถ้วยเซ็นรับสิทธิ์ร่วมงานโปรโมต แนบสำเนาเช็คค่าตัวมาให้ดูก่อน ฿30,000"},
+ {n:"coach",t:"สามหมื่นแค่ถ่ายโฆษณาเนี่ยนะ? เซ็นเลยสิ… ว่าแต่ตัวหนังสือมันเล็กชะมัด"},
+ ...(rin?[{n:"rin",f:"happy",l:"casual",t:"เดี๋ยวก่อนค่ะ ขอสิบห้านาที"},
+   {n:"nar",t:"สิบห้านาทีกลายเป็นหนึ่งชั่วโมง รินอ่านครบทั้งยี่สิบสองหน้า ขีดปากกาแดงไปเจ็ดจุด"},
+   {n:"rin",f:"sad",l:"casual",t:"หน้า 19 ข้อ 14.3 ค่ะ \"ข้อมูลการชก ภาพ และเสียงของนักมวยในสังกัด ให้ตกเป็นสิทธิ์ของบริษัทและบริษัทในเครือ โดยไม่มีกำหนดเวลา\""},
+   {n:"rin",f:"sad",l:"casual",t:"ไม่มีกำหนดเวลา แปลว่าตลอดไปค่ะ แล้วก็ไม่ได้เขียนไว้เลยว่า \"บริษัทในเครือ\" คือใคร"},
+   {n:"rin",f:"happy",l:"casual",t:"สามหมื่นแลกข้อมูลทุกไฟต์ของทุกคนในค่ายไปตลอดชีวิต… หารต่อไฟต์แล้วถูกกว่าค่ากาแฟอีกค่ะ"}]
+  :[{n:"coach",t:"…เดี๋ยวนะ หน้า 19 ข้อ 14.3 \"ข้อมูลการชก ภาพ และเสียงของนักมวยในสังกัด ให้ตกเป็นสิทธิ์ของบริษัทและบริษัทในเครือ โดยไม่มีกำหนดเวลา\""},
+   {n:"coach",t:"ไม่มีกำหนดเวลา… ครูอ่านหนังสือไม่เก่ง แต่คำนี้ครูรู้ว่าแปลว่าตลอดไป"}]),
+ {n:"nar",t:`คืนนั้นโทรศัพท์ของค่ายดังขึ้น ปลายสายคือ${RG[r].champ}`},
+ {n:cid,f:"sad",l:"casual",t:L[0]},{n:cid,f:"sad",l:"casual",t:L[1]},
+ rin?{n:"rin",f:"sad",l:"casual",t:"สัญญาของเวกเตอร์กับของผู้จัดงาน ร่างมาจากคนคนเดียวกันค่ะ"}:{n:"coach",t:"สัญญาของเวกเตอร์กับของผู้จัดงานหน้าตาเหมือนกันเปี๊ยบ… ครูไม่ชอบกลิ่นมันเลย"},
+ {n:"nar",t:"ซองเขียวทองวางอยู่บนโต๊ะทำงาน จะเอายังไงกับมันดี",choice:[
+   {t:"ส่งกลับไป ขีดฆ่าข้อ 14.3 ทิ้ง",fx:()=>{R.c1="edit";},then:[
+     rin?{n:"rin",f:"happy",l:"casual",t:"เดี๋ยวรินเขียนหมายเหตุแนบไปให้ค่ะ สุภาพ แต่ชัดเจน"}:{n:"coach",t:"เอาปากกาแดงมา ครูขีดเอง"},
+     {n:"nar",t:"สามวันต่อมา นาคาเอเนอร์จี้โทรมาขอบคุณ น้ำเสียงยังยิ้มเหมือนเดิม แต่ไม่มีใครพูดถึงเช็คอีกเลย"}]},
+   {t:"เก็บไว้ก่อน ยังไม่เซ็นอะไรทั้งนั้น",fx:()=>{R.c1="hold";},then:[
+     {n:"coach",t:"ดีแล้ว ของฟรีไม่มีในโลก ยิ่งของที่มีคนยิ้มให้ตลอดเวลายิ่งไม่ฟรี"}]}]},
+ {n:"nar",t:"ซองเขียวทองถูกเก็บไว้ในลิ้นชักห้องทำงาน ข้าง ๆ สัญญาเงินกู้ของเสี่ยหมวกทองฉบับเก่า"}];}
 const REGION={
+  /* end of week (after the weekly events): the gala the week after the invitation, the contract beat the week after the first cup */
+  weekScene(G,done){const R=G.region;if(!R){done();return;}const now=gameWeek(G);
+    if(!R.gala){if(R.galaAbs==null)R.galaAbs=now+1;if(now>=R.galaAbs){R.gala=1;AU.startMusic&&AU.startMusic("hub");playScene(rgGala(G),()=>{save();done();},{bg:"gala",look:"casual"});return;}}
+    const r=(R.cups||[])[0],c=r&&R.champ[r];
+    if(r&&!R.c1&&c&&now>=(c.wonAbs||0)+1){R.c1="seen";playScene(rgCup1(G,r),()=>{save();done();},{bg:"camp",look:"casual"});return;}
+    done();},
   /* ---------- state helpers ---------- */
   base(G){return ((G.season||1)-1)*52;},
   beltCount(G,r){const b=(G.region.belts||{})[r]||{};return RG[r].prov.filter(p=>b[p]).length;},
@@ -480,7 +566,7 @@ const REGION={
     const f=baseFighter(id,mkNPC(id,RG_OPP[dest]||"แชมป์ประจำจังหวัด","X",Math.round(target-1),rng,RG_ORDER.indexOf(r)+2));
     for(const [k,v] of Object.entries(tilt))f.a[k]=Math.min(20,f.a[k]+v);
     liftOpponent(f,target,20);
-    for(let i=0;i<60&&ovr(f.a)>target+.05;i++)for(const k in f.a)if(!(k in tilt))f.a[k]=Math.max(1,f.a[k]-.15);f.camp="quest";f.div="X";f.rg=dest;f.color=RG[r].col;f.lvl=me.lvl||1;f.fatigue=0;f.morale=70;
+    for(let i=0;i<60&&ovr(f.a)>target+.05;i++)for(const k in f.a)if(!(k in tilt))f.a[k]=Math.max(1,f.a[k]-.15);f.camp="quest";f.div="X";f.rg=dest;f.sprite="rgp_"+dest;/* v1.89.14: high-level sheet dyed in the province colour */f.color=RG[r].col;f.lvl=me.lvl||1;f.fatigue=0;f.morale=70;
     G.F[id]=f;syncFighterAges(G);return id;},
   purse(G){const n=this.beltTotal(G),w=Math.round((10000+n*800)*(1+Math.min(G.rep,50)/100)/100)*100;return {win:w,lose:Math.round(w*.4/100)*100};},
   book(G,dest,fid){const R=G.region,D=ROAD_DEST[dest],me=G.F[fid];if(!R||!D||!me)return {ok:false,why:"ข้อมูลไม่ครบ"};
@@ -688,6 +774,7 @@ const REGION={
       return `<section class="px card rg-reg" style="--rc:${C.col}"><h3>${esc(C.name)}</h3><div class="rg-champ">แชมป์ภาค: <b>${esc(C.champ)}</b> · ${esc(C.nick)}</div>${rows}${fin}</section>`;}).join("");
     return `<section class="px card rg-head"><div><h3>ศึกชิงเจ้าสี่ภาค</h3><span class="meta">ครั้งที่ ${R.edition||1}</span></div>
        <div class="rg-stats"><span class="pill gold">ถ้วย ${cups}/4</span><span class="pill">เข็มขัด ${belts}/16</span><span class="pill ${T?"red":nx?"green":""}">${T?`ทริป: ${esc(ROAD_DEST[T.dest].name)} · สัปดาห์ ${T.wk}`:nx?`เดินทางได้สัปดาห์ ${nx}`:"ปีนี้เดินทางไม่ได้แล้ว"}</span></div></section>
+     ${!R.gala?`<p class="meta rg-gala">🎉 งานเปิดตัวศึกชิงเจ้าสี่ภาคที่กรุงเทพฯ ${R.galaAbs!=null&&gameWeek(G)<R.galaAbs?"จัดปลายสัปดาห์หน้า":"จัดปลายสัปดาห์นี้"} · ทั้งค่ายได้รับเชิญ</p>`:""}${!REGION_LIVE?`<p class="meta">โหมดทดสอบ: <button class="btn sm" data-act="rggala" data-v="gala">ดูงานเปิดตัว</button>${(R.cups||[]).length?` <button class="btn sm" data-act="rggala" data-v="c1">ดูฉากซองเขียว</button>`:""}</p>`:""}
      ${tripCard}${this.fuelLine(G)}<div class="rg-grid">${regs}</div>`;},
   planHTML(dest){const D=ROAD_DEST[dest],C=RG[D.r],wk=this.tripWeek(G);if(!wk)return `<h2>${esc(D.name)}</h2><p>ปีนี้ไม่มีสัปดาห์ว่างให้เดินทางแล้ว</p>`;
     const abs=this.base(G)+wk,P=roadPlan(G,dest,null,abs),R=this.riders(G,wk);if(!UI.rgFid||!R.some(f=>f.id===UI.rgFid))UI.rgFid=R[0]?R[0].id:null;
@@ -715,6 +802,8 @@ if(typeof ACT!=="undefined")Object.assign(ACT,{
   rgsfid:d=>{UI.rgFid=d.v;render();},
   rgsgo:d=>{const x=REGION.startSeries(G,d.v,UI.rgFid);if(!x.ok){toast(x.why);return;}UI.modal=null;AU.sfx&&AU.sfx("level");toast(`รับคำท้าแล้ว · นัดที่ 1 สัปดาห์ ${x.s.wk}${x.s.season!==(G.season||1)?" ปีหน้า":""}`);save();render();},
   rgcancel:()=>{if(REGION.cancel(G)){toast("ยกเลิกทริปแล้ว ได้เงินค่าเดินทางคืน");save();render();}},
-  rgdevstart:()=>{if(REGION_LIVE)return;regionStart(G);save();render();}});
+  rgdevstart:()=>{if(REGION_LIVE)return;regionStart(G);save();render();},
+  rggala:d=>{if(REGION_LIVE)return;const R=G.region;if(d.v==="c1"){const r=R.cups[0];playScene(rgCup1(G,r),()=>{R.c1=R.c1||"seen";save();render();},{bg:"camp",look:"casual"});return;}
+    playScene(rgGala(G),()=>{R.gala=1;save();render();},{bg:"gala",look:"casual"});}});
 if(typeof G!=="undefined"&&G&&G.region)REGION.flush(G);
 

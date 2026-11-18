@@ -2256,7 +2256,7 @@ const ME=G=>G.player.name,
  MEM=(G,k)=>{G.mem=G.mem||{};G.mem[k]=absWeek(G);}, HAS=(G,k,gap)=>G.mem&&G.mem[k]!==undefined&&absWeek(G)-G.mem[k]>=(gap||0),
  CALL=(G,id)=>{const f=G.F[id],b=f?f.bond||0:0;if(G.romance===id||b>=75)return G.player.name;if(b>=40&&Math.random()<.35)return G.player.name;return "Manager";}, PR=G=>G.player.gender==="m"?"":"", PA=G=>G.player.gender==="m"?"":"It is";
 const SPK={kati:{name:"Kati",color:"#e23b4e"},mali:{name:"Mali",color:"#4a7fe0"},rin:{name:"Rin",color:"#3fae6a"},
-  ploy:{name:"Ploy",color:"#9b62e0"},fah:{name:"Fah",color:"#e7b443"},pailin:{name:"Pailin",color:"#8e4ac3"},baibua:{name:"Baibua",color:"#e86fa0"},tabtim:{name:"Tubtim",color:"#d23246"},alicia:{name:"Alicia",color:"#2f62c8"},chaba:{name:"Chaba",color:"#1f9a7a"},coach:{name:"Coach Daeng",color:"#c98a5a"},nar:{name:""},me:{name:"(You)"}};
+  ploy:{name:"Ploy",color:"#9b62e0"},fah:{name:"Fah",color:"#e7b443"},pailin:{name:"Pailin",color:"#8e4ac3"},baibua:{name:"Baibua",color:"#e86fa0"},tabtim:{name:"Tubtim",color:"#d23246"},alicia:{name:"Alicia",color:"#2f62c8"},chaba:{name:"Chaba",color:"#1f9a7a"},lada:{name:"Ladda",color:"#d8263a"},coach:{name:"Coach Daeng",color:"#c98a5a"},nar:{name:""},me:{name:"(You)"}};
 const HONOR_LABEL={local:"Subdistrict round champion",district:"District round champion",province:"Provincial champion",belt:"Tha Phae Stadium champion",defense:"Tha Phae Stadium title defense",dm:"Death Match champion",rg_north:"Northern Regional Cup",rg_isan:"Isan Regional Cup",rg_central:"Central Regional Cup",rg_south:"Southern Regional Cup"};
 function honorLabel(kind,venue){if(venue&&typeof STADIUMS!=="undefined"&&STADIUMS[venue]&&(kind==="belt"||kind==="defense"))return (kind==="belt"?"Champion of ":"Defended title at ")+STADIUMS[venue].name;return HONOR_LABEL[kind]||"Champion";}
 function honorSteps(G,h){const f=G.F[h.id],label=honorLabel(h.kind,h.venue),ranked=h.kind==="local"||h.kind==="district";
@@ -4315,7 +4315,9 @@ const TINTS={};
 function hashStr(s){let h=2166136261;for(const c of s){h^=c.charCodeAt(0);h=Math.imul(h,16777619);}return h>>>0;}
 // v1.16: extras use their own 5 base sheets; only the outfit/gloves (red or blue) are re-dyed per fighter
 const NPC_HUES=[0,215,130,45,280,22,180,330,95,255];
-function npcBase(id){const h=hashStr(id);return {base:"npc"+(1+h%5),hue:NPC_HUES[(h>>>5)%NPC_HUES.length],dark:((h>>>9)%7)===0};}
+/* v1.89.14: five more base sheets (green, blue, purple, gold, red) — each re-dyes its own kit colour */
+const NPC_KIT={npc6:(h,l,s)=>h>.2&&h<.46&&s>.25&&l>.1,npc8:(h,l,s)=>h>.7&&h<.9&&s>.22&&l>.1,npc9:(h,l,s)=>h>.088&&h<.19&&s>.4&&l>.15&&l<.85};
+function npcBase(id){const h=hashStr(id);return {base:"npc"+(1+h%10),hue:NPC_HUES[(h>>>5)%NPC_HUES.length],dark:((h>>>9)%7)===0};}
 // v1.70: pixel outfits — recolour only the kit (gloves, top, shorts, shoes) of a canon sheet; skin and hair stay
 const OUTFITS={
  base:{name:"Signature Kit",sw:null,hint:""},
@@ -4351,7 +4353,7 @@ function sheetFor(f){
     for(let i=0;i<p.length;i+=4){if(p[i+3]<10)continue;let r=p[i]/255,g=p[i+1]/255,b=p[i+2]/255;const mx=Math.max(r,g,b),mn=Math.min(r,g,b);let l=(mx+mn)/2;const gold=()=>{const L2=Math.min(.86,l*1.45+.3),S2=.07,H2=.66;const q2=L2<.5?L2*(1+S2):L2+S2-L2*S2,p2=2*L2-q2;const f2=t=>{t=(t+1)%1;return t<1/6?p2+(q2-p2)*6*t:t<1/2?q2:t<2/3?p2+(q2-p2)*(2/3-t)*6:p2;};p[i]=f2(H2+1/3)*255;p[i+1]=f2(H2)*255;p[i+2]=f2(H2-1/3)*255;};if(mx===mn){if(blonde&&l>.07&&l<.42)gold();continue;}
       const dd=mx-mn;let s=l>.5?dd/(2-mx-mn):dd/(mx+mn);let h=mx===r?(g-b)/dd+(g<b?6:0):mx===g?(b-r)/dd+2:(r-g)/dd+4;h/=6;
       if(blonde&&l>.07&&l<.42&&!(h>.53&&h<.74&&s>.25)&&!((h<.035||h>.93)&&s>.38)&&(s<.45||(h>.02&&h<.16))){gold();continue;}
-      const red=(h<.035||h>.93)&&s>.38&&l>.12&&l<.8,blue=h>.53&&h<.74&&s>.25&&l>.1;if(!red&&!blue)continue; // outfit only: skin & hair stay
+      const red=(h<.035||h>.93)&&s>.38&&l>.12&&l<.8,blue=h>.53&&h<.74&&s>.25&&l>.1,kit=NPC_KIT[base]&&NPC_KIT[base](h,l,s);if(!red&&!blue&&!kit)continue; // outfit only: skin & hair stay
       h=th;if(dark){s*=.15;l*=.55;}else if(lab){if(l<.5){s*=.35;l*=.3;}else{s=Math.min(.8,Math.max(s,.55));l=Math.min(.5,l*.6);}} /* black kit, purple highlights */
       const q=l<.5?l*(1+s):l+s-l*s,pp=2*l-q;const fn=t=>{t=(t+1)%1;return t<1/6?pp+(q-pp)*6*t:t<1/2?q:t<2/3?pp+(q-pp)*(2/3-t)*6:pp;};
       p[i]=fn(h+1/3)*255;p[i+1]=fn(h)*255;p[i+2]=fn(h-1/3)*255;}
@@ -5232,7 +5234,7 @@ const TH_LABEL=String.fromCharCode(3652,3607,3618);
 function langSwitch(cls){return `<div class="langsw ${cls||""}" role="group" aria-label="Language">${[["th",TH_LABEL],["en","EN"]].map(([k,l])=>`<button class="lsb ${CUR_LANG===k?"on":""}" data-act="setlang" data-v="${k}" aria-pressed="${CUR_LANG===k}">${l}</button>`).join("")}</div>`;}
 const SAVE_KEY="mtm-save-v13";
 const CANON_IDS=["kati","mali","rin","ploy","fah"];
-const CHAMP_IDS=["baibua","tabtim","alicia","chaba"]; /* v1.90 (hidden): the four regional champions — full portraits in scenes like the heroines */
+const CHAMP_IDS=["baibua","tabtim","alicia","chaba","lada"];/* v1.89.14: Lada (Naka) joins the scene cast */ /* v1.90 (hidden): the four regional champions — full portraits in scenes like the heroines */
 const castId=id=>CANON_IDS.includes(id)||CHAMP_IDS.includes(id);
 let G=null;
 const UI={tab:"home",scene:null,fight:null,modal:null,creator:null,ending:null,montage:null,speed:1,title:"tap",fsub:"offers",rdiv:"A",ptab:"over",tipIdx:0,advCache:{},toast:null,look:"fight"};
@@ -5265,7 +5267,7 @@ const cardFaceSrc=C=>{if(C.face)return `${ASSET}${C.face}.webp`;const scene=(C.s
   return `${ASSET}${C.c}_casual${suffix}_face.webp`;};
 const cardArtHTML=(C,lazy=false)=>`<span class="card-art" style="--card-scene:url('${ASSET}${BGIMG[C.bg]||BGIMG.camp}')"><img src="${cardFaceSrc(C)}" alt="" ${lazy?'loading="lazy" decoding="async"':""}></span>`;
 // v1.34: portraits for the market and helmet-gang side characters (matched by speaker name, or st.img)
-const NPC_IMG=[[/นายอำเภอ|District Chief/,"nai"],[/แม่ค้า|ป้าศรี|Auntie Sri|vendor/,"vendor_green"],[/ป้าแต๋ว|เจ๊หมวย|ป้าขาย|Auntie Taew|Jae Muay/,"vendor_red"],[/เสี่ยหมวกทองคำ|Big Boss Golden Helmet/,"gang_boss"],[/หมวก|แจ็กเก็ต|Helmet|Jacket/,"gang_group"],[/ยาย|Grandma/,"grandma"]];
+const NPC_IMG=[[/เกริก|Krerk/,"krerk"],[/นายอำเภอ|District Chief/,"nai"],[/แม่ค้า|ป้าศรี|Auntie Sri|vendor/,"vendor_green"],[/ป้าแต๋ว|เจ๊หมวย|ป้าขาย|Auntie Taew|Jae Muay/,"vendor_red"],[/เสี่ยหมวกทองคำ|Big Boss Golden Helmet/,"gang_boss"],[/หมวก|แจ็กเก็ต|Helmet|Jacket/,"gang_group"],[/ยาย|Grandma/,"grandma"]];
 const npcImg=st=>st.img||(st.who&&(NPC_IMG.find(([r])=>r.test(st.who))||[])[1])||null;
 const TIER_BG={evloy:"bg_river.webp",pro:"bg_fair.webp",semi:"bg_hall.webp",local:"bg_local.webp",district:"bg_district.webp",final:"bg_final.webp",exhibition:"bg_fair.webp",special:"bg_district.webp",lab:"bg_hall.webp",quest:"bg_food.webp",beast:"bg_fair.webp",dm:"bg_hall.webp"};
 const gymBg=()=>`gym${G?campLevel(G):1}.webp`;
@@ -6388,7 +6390,9 @@ function afterWeekFlow(){playHonorQueue(afterWeekFlowMain);}
 function afterWeekFlowMain(){if(typeof cardCheck==="function"){const got=cardCheck(G);if(got.length){G.cardPend=(G.cardPend||[]).concat(got);}}if(typeof mailWeekly==="function"&&!G.ended)mailWeekly(G);if(typeof chatWeekly==="function"&&!G.ended)chatWeekly(G);runEvents(played=>{const fin=()=>{if(G.ended){startEnding();return;}
     if(typeof cardCheck==="function"){const g2=cardCheck(G);if(g2.length)G.cardPend=(G.cardPend||[]).concat(g2);}relTierCheck();if((G.newCerts||[]).length){const n=G.newCerts.map(k=>CAMP_AWARDS[k]?CAMP_AWARDS[k].name:k);G.newCerts=[];setTimeout(()=>toast(`📜 Certificate received: ${n.join(", ")} · see them in the Trophy Room`),600);}if(typeof OUTFITS!=="undefined"){G.outSeen=G.outSeen||{};const nu=Object.keys(OUTFITS).filter(k=>k!=="base"&&k!=="heart"&&!G.outSeen[k]&&outfitOk(G,null,k));nu.forEach(k=>G.outSeen[k]=1);if(nu.length)setTimeout(()=>toast(`New outfit unlocked: ${nu.map(k=>OUTFITS[k].name).join(", ")} · change it in the fighter profile, "Outfit" tab`),400);}if(UI.relUp&&UI.relUp.length){const m=UI.relUp.join(" / ");UI.relUp=[];setTimeout(()=>toast("♥ "+m),300);}
     if(G.levelUps&&G.levelUps.length){const ids=[...new Set(G.levelUps)];G.levelUps=[];AU.sfx("level");UI.modal={type:"levelup",ids};}else if((G.cardPend||[]).length){AU.sfx&&AU.sfx("level");UI.modal={type:"cardnew"};}render();};
-    const go=()=>coachBackScene(()=>aftermathScene(()=>tiredScene(()=>rinScene(()=>contestScene(()=>waiKhruYear(fin))))));if(played)go();else weeklyExtra(go);});}
+    const go=()=>coachBackScene(()=>aftermathScene(()=>tiredScene(()=>rinScene(()=>contestScene(()=>regionScenes(()=>waiKhruYear(fin)))))));if(played)go();else weeklyExtra(go);});}
+// v1.90 (hidden): regional chapter story beats that land at the end of a week (gala, contract…) — region.js loads on demand
+function regionScenes(done){if(G.ended||!G.region||!regionOn()){done();return;}regionLoad().then(R=>{if(R.weekScene)R.weekScene(G,done);else done();},()=>done());}
 // v1.90: week 37 — the camp's annual wai kru; pick the offering, then watch the rite
 function waiKhruYear(done){const S=G.season||1;if(G.ended||G.week<WAIKHRU_WEEK||G.week>48||(G.waikhru||{})[S]||!roster(G).length){done();return;}
   UI.wkDone=done;UI.wkSkip=false;UI.modal={type:"waikhru",ph:"pick"};AU.startMusic&&AU.startMusic("waikhru");render();}
