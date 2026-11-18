@@ -1060,6 +1060,8 @@ function evStartLoy(){const L=loyOf(G);if(!L)return;loyPreload();UI.modal=null;
 const LOY_GUESTS=["ploy","fah"];
 const loyGuests=G=>LOY_GUESTS.map(id=>G.F[id]).filter(f=>f&&f.camp!=="player");
 const isLoyGuest=f=>f&&LOY_GUESTS.includes(f.id)&&f.camp!=="player";
+/* v1.90.4: a guest (Ploy / Fah not yet in the camp) fights at about the camp's top-three level in the event — a copy for the bout only, her real stats stay untouched */
+function loyBoost(f){if(!isLoyGuest(f))return f;const d=campPow(G)-ovr(f.a);if(d<=0)return f;const a={};for(const k in f.a)a[k]=typeof f.a[k]==="number"?Math.max(3,Math.min(19.5,f.a[k]+d)):f.a[k];return {...f,a,lvl:Math.max(f.lvl||1,campLv(G))};}
 function gauntPool(){const R=roster(G).filter(f=>!f.injury);return (R.length?R:roster(G)).concat(loyGuests(G));}
 // v1.82.4: the five riverside SR cards as a collection row — owned cards in colour, missing ones dark, with a "play again" nudge
 function loyCardRow(after){const own=G.cards||{},got=LOY_CARDS.filter(k=>own[k]).length,left=LOY_CARDS.length-got;
@@ -1172,7 +1174,7 @@ Object.assign(ACT,{
   gpick:d=>{const L=loyOf(G);if(!L)return;L.pick=L.pick||[];const i=L.pick.indexOf(d.v);if(i>=0)L.pick.splice(i,1);else if(L.pick.length<Math.min(3,gauntPool().length))L.pick.push(d.v);render();},
   gstart:()=>{const L=loyOf(G);if(!L)return;const P=L.pick||[];if(!P.length)return;const order=[0,1,2].map(i=>P[i%P.length]);
     L.run={order,slot:0,j:0,k:0,hp:100,sta:100,score:0,log:[],boss:0};save();render();},
-  gfight:()=>{const L=loyOf(G),R=L&&L.run;if(!R||R.done)return;const f=G.F[R.order[R.slot]];const qid=evGang(G,R.k,f);
+  gfight:()=>{const L=loyOf(G),R=L&&L.run;if(!R||R.done)return;const f=G.F[R.order[R.slot]];const qid=evGang(G,R.k,loyBoost(f));
     const bk={id:"bev"+R.k,a:f.id,b:qid,week:G.week,tier:"evloy",rounds:R.k===8?3:2,ev:1,carry:{hp:R.hp,sta:R.sta},bg:"bg_loy_ring.webp"};
     UI.modal=null;const go=()=>openFight2(bk,gauntAfter),S=loyBanter(R,f);save();if(S.length)playScene(S,go,{bg:"loy_night",look:"thai"});else go();},
   gquit:()=>{const L=loyOf(G),R=L&&L.run;if(!R||R.done)return;gauntFinish(R);render();},
