@@ -12714,5 +12714,17 @@
  " · แพ้หรือเสมอเมื่อไรฉายาหาย</p>": " · a loss or draw ends it</p>",
  " ไฟต์ · ": " in a row · ",
  "</b> · ชนะติดกัน ": "</b> · won ",
- "<p class=\"meta hotl\">🔥 ฉายา <b>": "<p class=\"meta hotl\">🔥 Title <b>"
+ "<p class=\"meta hotl\">🔥 ฉายา <b>": "<p class=\"meta hotl\">🔥 Title <b>",
+ "ไม่ออก!": "!",
+ "ไม่ได้อยู่ตรงนั้น — ข้อมูลอ่าน": " isn't there — the data can't read ",
+ "ขยับไปดักตามข้อมูล… แต่": " moves to cut off where the data says… but ",
+ "มาก่อนแล้ว": "'s game already.",
+ "กวาดตามองแค่ครั้งเดียว แล้วเปลี่ยนจังหวะทันที… เหมือนรู้ทางของ": " glances once and switches rhythm at once… as if she knew ",
+ "เปลี่ยนร่างระหว่างไฟต์ · ยก 1–2 คลุมฮู้ดหนักแน่น · ยก 3–4 ถอดฮู้ดเร็วมาก · ยก 5 โหมดเลือดเดือด": "Changes form mid-fight · rounds 1–2 hooded, heavy and steady · rounds 3–4 hood off, very fast · round 5 blood mode",
+ "นัดสุดท้าย \"ท่าดีไชยา\" จะให้ดู ม่ายมีใครถอย": "Last bout. I'll show you \"Chaiya's fine stance\". Nobody backs down.",
+ " เข้ามาก่อนเลย": ". You come first.",
+ "นัดตัดสิน… ฉันจะเข้าไปชกถึงตัวเธอเอง บอกไว้ก่อน ฉันไม่ได้ดังเพราะหน้าตา": "The decider… I'll come right in and fight you up close. And for the record, I'm not famous for my face.",
+ "นัดนี้ไม่มีโชว์แล้วนะ ฉันจะรอให้เธอเข้ามาก่อน แล้วสวนด้วยหมัดที่ซ้อมมาเพื่อเธอโดยเฉพาะ": "No show this time. I'll let you come in first, then answer with the punch I drilled just for you.",
+ "นัดสุดท้ายแล้ว… พ่อบ่เคยมาเบิ่งทับทิมชกจักเทื่อ มื้อนี้ทับทิมสิใช้หมัดหนักโคราชของบ้านเฮา ให้พ่อเห็นว่าทับทิมกะเป็นลูกหลานหมัดหนัก": "Last bout… Dad has never once come to watch me fight. Today I'm using our family's heavy Korat fists — so he sees I'm a Mat Nak too.",
+ "นัดสุดท้ายแล้วเจ้า… \"ไวกว่าลมท่าเสา\" หนูจะชกให้สมคำนี้ หนูแบกชื่อค่ายบัวท่าเสามาทั้งหมด จะยอมแพ้บ่ได้": "Last bout… \"Faster than the wind, Tha Sao\" — I'll fight up to those words. I carry the whole Bua Tha Sao camp on my back; I can't lose."
 }

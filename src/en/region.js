@@ -40,6 +40,10 @@ const RG_OPP={chiangrai:"Kaewkan Sor Mae Sai",nan:"Namphueng Luk Muang Nan",utta
  udon:"Buadaeng Nong Han",khonkaen:"Maikaew Luk Chonnabot",buriram:"Saifah Phanom Rung",ubon:"Thianthong Rim Khong",
  lopburi:"Jo Thong Sor Phra Prang",suphan:"Maemai Bang Pla Ma",phetchaburi:"Mokaeng Muang Phet",chanthaburi:"Mangkhut Luk Chan",
  chumphon:"Nangnuan Paknam",surat:"Nangrom Don Sak",nakhonsi:"Talung Sor Muang Khon",songkhla:"Samila Luk Songkhla"};
+/* v1.91.9: province champions lean to their region's style (Tha Sao elbows and speed · Korat heavy hands · Lopburi craft · Chaiya stance) — a lean, not a rule */
+const RG_BSTY={north:{inside:3,footwork:3,counter:1,power:1,pressure:1},isan:{power:4,footwork:2,inside:1,pressure:1,counter:1},
+ central:{counter:3,footwork:2,inside:2,power:1,pressure:1},south:{pressure:3,footwork:3,counter:1,power:1,inside:1}};
+function rgBeltSty(r,id){const W=RG_BSTY[r],K=Object.keys(W),tot=K.reduce((a,k)=>a+W[k],0);let x=((stableHash(id+"|sty")>>>0)%1000)/1000*tot;for(const k of K){x-=W[k];if(x<0)return k;}return K[0];}
 const RG_LAST_WK=50; /* trips run until week 50; the last two weeks of the year are the holidays */
 const RG_CUP_PRIZE=50000;
 const RG_TITLE={north:"Northern title series",isan:"Isan title series",central:"Central title series",south:"Southern title series"};
@@ -51,7 +55,8 @@ const RG_CH={
   letter:"Dear Manager of Sirichai Camp,\n\nThis is Baibua. I heard your camp has won all four belts of the North. Congratulations.\n\nThe Lanna Temple Ring in Chiang Mai is waiting. The title series is three bouts; whoever wins two first takes the cup. I'd like you to choose one fighter to face me through all three bouts.\n\nPick at Fights › Four Regions Cup\n\nBaibua · Bua Tha Sao Camp",
   again:"Manager,\n\nI'm still waiting in Chiang Mai. Whenever Sirichai Camp is ready, send a fighter again. The same one or a new one, either is fine.\n\nI'll keep training while I wait.\n\nBaibua",
   wait:"It's all right. I can wait. Take care of your fighter first. — Baibua",
-  pre:[n=>`${n}… It's an honour to fight you. I won't hold back. Tha Sao elbows never hold back for anyone.`,n=>`I'll counter harder this time. Watch out for the back elbow.`,n=>`The last bout… I carry the whole name of Bua Tha Sao Camp. I can't lose.`],
+  pre:[n=>`${n}… It's an honour to fight you. I won't hold back. Tha Sao elbows never hold back for anyone.`,n=>`I'll counter harder this time. Watch out for the back elbow.`,n=>`Last bout… "Faster than the wind, Tha Sao" — I'll fight up to those words. I carry the whole Bua Tha Sao camp on my back; I can't lose.`],
+  sty:["inside","counter","footwork"], /* v1.91.9 (Man): each bout has its own style, hinted in the line before it */
   reply:"Bring it. I came ready.",pairLine:"Tha Sao, same as you… but today I want to be the one who wins.",
   win:["Thank you for fighting me. I'll be waiting for the next bout.","It's not over. I know what I have to fix now.","…"],
   lose:["You're really good. I got careless. See you next bout.","You read my elbows completely… I won't give in easily in the last bout.","…"],
@@ -82,7 +87,8 @@ const RG_CH={
   letter:"To the Manager of Sirichai Camp\n\nAwesome! All four Isan belts, done! Tabtim's been watching since the first province.\n\nCome fight for the cup at the Phimai Stone Castle Ring in Korat. Three bouts, whoever wins two first takes the cup. Send one fighter to finish all of it, okay? No swapping.\n\nPick at Fights › Four Regions Cup\n\nTabtim · Mat Nak Phimai Camp (but I kick, haha)",
   again:"Manager!\n\nThe cup's still in Korat, okay? Tabtim isn't going anywhere. When you're ready, send a fighter again, old or new, either's fine.\n\nDon't be shy. Come on!\n\nTabtim",
   wait:"No worries, okay? Tabtim can wait. Whoever's hurt, rest first. — Tabtim",
-  pre:[n=>`${n}! Come on! Tabtim's been waiting ages. Nobody's ever seen a Korat kicker before, haha!`,n=>`Tabtim's for real this time. Watch out for the leaping kick, okay?`,n=>`Last bout… Dad never once came to watch Tabtim fight. Today's the same. But Tabtim's going to win anyway.`],
+  pre:[n=>`${n}! Come on! Tabtim's been waiting ages. Nobody's ever seen a Korat kicker before, haha!`,n=>`Tabtim's for real this time. Watch out for the leaping kick, okay?`,n=>`Last bout… Dad has never once come to watch me fight. Today I'm using our family's heavy Korat fists — so he sees I'm a Mat Nak too.`],
+  sty:["footwork","footwork","power"],
   reply:"I'm not giving in either.",pairLine:"Korat punches from a Bangkok girl. Real or not? See for yourself.",
   win:["Haha, awesome! But Tabtim takes the first one!","Just one more, okay? Tabtim's keeping the cup in Korat.","…"],
   lose:["Ow, that hurt a lot! You're really good. Tabtim'll get it back next time.","Haha… not funny any more. See you in the last bout.","…"],
@@ -110,7 +116,8 @@ const RG_CH={
   letter:"Dear Manager of Sirichai Camp,\n\nAll four central belts, congratulations. I watched every fight live. …Not on purpose. It was in my feed.\n\nThe title series is at the Riverside Ring in Ayutthaya, best of three. Send one fighter for the whole series, please. I don't like switching co-stars mid-story.\n\nPick at Fights › Four Regions Cup\n\nAlicia · Hanuman Lopburi Camp",
   again:"Manager,\n\nThe cup's still with me. But our fight clips are still climbing. People want a rematch.\n\nSend a fighter whenever you're ready. I can wait. …Not because of you.\n\nAlicia",
   wait:"It's fine. A fighter's health matters more than content. — Alicia",
-  pre:[n=>`${n}, right? Nice to meet you. The cameras are on, so fight like everyone's watching.`,n=>`No show this time. I'll use the punches I trained just for you.`,n=>`The decider… Let me say it first: I'm not famous because of my face.`],
+  pre:[n=>`${n}, right? Nice to meet you. The cameras are on, so fight like everyone's watching.`,n=>`No show this time. I'll let you come in first, then answer with the punch I drilled just for you.`,n=>`The decider… I'll come right in and fight you up close. And for the record, I'm not famous for my face.`],
+  sty:["footwork","counter","inside"],
   reply:"I'm here to fight, not to be on camera.",pairLine:"I've read all your punch stats. Every percentage.",
   win:["Thank you. This clip's views will explode… but don't give up next time.","One more and the cup stays in Lopburi.","…"],
   lose:["…Okay, I admit it. You're good. But don't get the wrong idea, I'm not done.","I won't delete this clip. I'll keep it to see where I slipped. See you in the last bout.","…"],
@@ -137,7 +144,8 @@ const RG_CH={
   letter:"To the Manager of Sirichai Camp\n\nAll four southern belts. Done.\n\nCome to Phuket. Three bouts, win two, take the cup. Send one fighter.\n\nPick at Fights › Four Regions Cup\n\nChaba\n\nP.S. Tell Mali that… nothing.",
   again:"Manager\n\nThe cup is still in Phuket.\n\nCome when you're ready.\n\nChaba",
   wait:"I can wait. — Chaba",
-  pre:[n=>`…${n}`,n=>`No dodging this time.`,n=>`Last bout. Nobody backs down.`],
+  pre:[n=>`…${n}. You come first.`,n=>`No dodging this time.`,n=>`Last bout. I'll show you "Chaiya's fine stance". Nobody backs down.`],
+  sty:["counter","pressure","footwork"],
   reply:"…Not backing down either.",pairLine:"Big sis Chaba… This time Mali won't cry.",
   win:["…Tasty.","One more.","…"],
   lose:["…Good.","…Last one.","…"],
@@ -667,45 +675,45 @@ function lbWeek(G,done){const R=roster(G).concat(Object.values(G.F).filter(f=>f.
    shape = stat offsets from the fitted level · grap/sub = takedown / submission game (0–20) · nlsk = the three skills the AI fires
    spl = special sheets (code effects if none) · td:1 = the throw sheet that plays on a takedown */
 const NL={
- nia:{name:"Nia Okafor",nick:"Black Drum Rhythm",art:"Boxing",col:"#3a7bd5",sprite:"nl_nia",
+ nia:{name:"Nia Okafor",nick:"Black Drum Rhythm",art:"Boxing",col:"#3a7bd5",sprite:"nl_nia",sty:"pressure",
   shape:{punch:3,kick:-6,knee:-5,elbow:-5,clinch:-4,guard:2,foot:3,counter:3,speed:2,iq:1},grap:0,sub:0,pfx:{dmg:{punch:.12},ctr:.04,evade:.02},
   nlsk:[{id:"nl_peek",name:"Peek-a-Boo",k:"def"},{id:"nl_liver",name:"Liver Shot",k:"atk",w:"punch"},{id:"nl_dempsey",name:"Dempsey Roll",k:"atk",w:"punch"}],
   spl:[{img:"nl_nia_special",w:"punch",def:"Dempsey Roll",npc:1,p:.5}],tip:"Fast hands and great counters, but she's never had to take kicks or knees"},
- varya:{name:"Varya Sokolova",nick:"Red Bear",art:"Sambo + MMA",col:"#d43a3a",sprite:"nl_varya",
+ varya:{name:"Varya Sokolova",nick:"Red Bear",art:"Sambo + MMA",col:"#d43a3a",sprite:"nl_varya",sty:"inside",
   shape:{clinch:3,power:3,dur:2,stamina:1,kick:-3,foot:-2,speed:-1},grap:18,sub:15,tdName:["Double Leg","Hip Throw","Suplex"],subName:["Heel Hook","Kneebar"],pfx:{gnp:.25},
   nlsk:[{id:"nl_double",name:"Double Leg",k:"td"},{id:"nl_suplex",name:"Suplex",k:"td"},{id:"nl_heelhook",name:"Heel Hook",k:"sub"}],
   spl:[{img:"nl_varya_special",def:"Suplex",td:1}],tip:"Big throws and leg locks · once she drags you down she never stops pounding"},
- meili:{name:"Meili Sae-Tang",nick:"Dragon of Yaowarat",art:"Kung Fu",col:"#e0662a",sprite:"nl_meili",
+ meili:{name:"Meili Sae-Tang",nick:"Dragon of Yaowarat",art:"Kung Fu",col:"#e0662a",sprite:"nl_meili",sty:"footwork",
   shape:{kick:4,speed:3,foot:2,punch:1,clinch:-4,knee:-3,dur:-2},grap:0,sub:0,pfx:{dmg:{kick:.12},evade:.02},
   nlsk:[{id:"nl_shadowless",name:"Shadowless Kick",k:"atk",w:"kick"},{id:"nl_inch",name:"One-Inch Punch",k:"atk",w:"punch"},{id:"nl_crane",name:"Crane Stance",k:"def"}],
   spl:[{img:"nl_meili_kick",w:"kick",def:"Shadowless Kick",npc:1,p:.5},{img:"nl_meili_special",w:"punch",def:"One-Inch Punch",npc:1,p:.5}],tip:"Fast, long kicks · in close she's only half the fighter"},
- rosa:{name:"Corazón Rosa",nick:"Pink Heart",art:"Lucha Libre",col:"#ea5aa0",sprite:"nl_rosa",
+ rosa:{name:"Corazón Rosa",nick:"Pink Heart",art:"Lucha Libre",col:"#ea5aa0",sprite:"nl_rosa",sty:"power",
   shape:{clinch:3,stamina:3,dur:3,power:1,guard:-2,counter:-2,iq:-1},grap:15,sub:10,tdName:["Hurricanrana","DDT"],subName:["La Mística"],pfx:{regen:.05,dmg:{elbow:.08}},
   nlsk:[{id:"nl_hurricanrana",name:"Hurricanrana",k:"td"},{id:"nl_mistica",name:"La Mística",k:"sub"},{id:"nl_moonsault",name:"Moonsault",k:"atk",w:"elbow"}],
   spl:[{img:"nl_rosa_special",def:"Hurricanrana",td:1}],tip:"Tireless and tough, loves a showy throw for the crowd · leaves her guard open a lot"},
  /* boss: three forms, one per round (Man 18 Nov 2026) — 1 hood: heavy · 2 hood off: fast and sharp · 3 blood mode: the Naka family's sports medicine,
     she punches herself to boil the blood — red skin, red eyes, furious, very fast */
- ladda:{name:"Ladda",nick:"The Killing Machine of Women's Muay Thai",art:"MMA + Modern Muay Thai",col:"#f2f2f2",sprite:"nl_ladda_hood",rounds:3,hpX:45,hurt:{def:.4,ev:.1,sta:.5,rec:1.1,rnd:14},
+ ladda:{name:"Ladda",nick:"The Killing Machine of Women's Muay Thai",art:"MMA + Modern Muay Thai",col:"#f2f2f2",sprite:"nl_ladda_hood",phR:[1,1,2,2,3]/* v1.91.9 (Man): 5 rounds — hood 1–2 · no hood 3–4 · blood mode 5 */,hpX:45,hurt:{def:.4,ev:.1,sta:.5,rec:1.1,rnd:14},
   shape:{elbow:2,knee:1,clinch:2,iq:2,comp:2},grap:16,sub:16,tdName:["Double Leg","Leg Grab"],subName:["Rear-Naked Choke","Guillotine"],pfx:{dmg:{elbow:.1},gnp:.15},
   nlsk:[{id:"nl_ld_double",name:"Double Leg",k:"td"},{id:"nl_ld_superman",name:"Superman Punch",k:"atk",w:"punch"},{id:"nl_ld_rnc",name:"Rear-Naked Choke",k:"sub"}],
-  phases:[{n:1,sprite:"nl_ladda_hood",dmg:1.18,hit:-.01,ini:-1,say:"Ladda pulls the hood down over half her face and stands still… every punch lands like a hammer"},
-   {n:2,sprite:"nl_ladda",dmg:1,hit:.05,ini:3,ev:.04,say:"Ladda flings the hood away, white hair with red tips spilling out — her speed changes in an instant!"},
-   {n:3,lvUp:1,sprite:"nl_ladda_blood",dmg:1.3,hit:.08,ini:4,ev:.03,self:5,blood:1,say:"Ladda punches herself in the face twice — the Naka family's sports medicine wakes the blood! Red skin, red eyes… blood mode!"}],
+  phases:[{n:1,fst:"power",sprite:"nl_ladda_hood",dmg:1.18,hit:-.01,ini:-1,say:"Ladda pulls the hood down over half her face and stands still… every punch lands like a hammer"},
+   {n:2,fst:"read",fall:"footwork",sprite:"nl_ladda",dmg:1,hit:.05,ini:3,ev:.04,say:"Ladda flings the hood away, white hair with red tips spilling out — her speed changes in an instant!"},
+   {n:3,fst:"pressure",lvUp:1,sprite:"nl_ladda_blood",dmg:1.3,hit:.08,ini:4,ev:.03,self:5,blood:1,say:"Ladda punches herself in the face twice — the Naka family's sports medicine wakes the blood! Red skin, red eyes… blood mode!"}],
   spl:[{img:"nl_ladda_sp_superman",w:"punch",def:"Superman Punch",npc:1,p:.55,ph:1},{img:"nl_ladda_sp_headkick",w:"kick",def:"Head Kick",npc:1,p:.55,ph:1},
    {img:"nl_ladda_sp_spinkick",w:"kick",def:"Spinning Back Kick",npc:1,p:.55,ph:2},{img:"nl_ladda_sp_backfist",w:"punch",def:"Spinning Back Fist",npc:1,p:.55,ph:2},
    {img:"nl_ladda_sp_bloodfist",w:"punch",def:"Naka Blood Fist",npc:1,p:.6,ph:3},{img:"nl_ladda_sp_bloodkick",w:"kick",def:"Spinning Wheel Kick",npc:1,p:.6,ph:3},{img:"nl_ladda_sp_bloodslam",def:"Blood Boil Slam",td:1,ph:3},{img:"nl_ladda_sp_awaken",def:"Blood-boil mode",awaken:1,ph:3}],
-  tip:"A new form each round · R1 hooded, heavy and solid · R2 hood off, very fast · R3 blood mode"}};
+  tip:"Changes form mid-fight · rounds 1–2 hooded, heavy and steady · rounds 3–4 hood off, very fast · round 5 blood mode"}};
 const NL_ORDER=["nia","varya","meili","rosa","ladda"];
 /* build (or refresh) a team member sized against `me`: she wins about `p` of 5-round bouts, never above the ceiling `ceil` */
 function nlFighter(G,k,me,p,ceil){const D=NL[k],id="nl_"+k;let f=G.F[id];
   if(!f){f=baseFighter(id,mkNPC(id,D.name,"X",14,mulberry32(hashStr(id)),2));f.camp="quest";f.div="X";G.F[id]=f;}
-  Object.assign(f,{name:D.name,full:D.name,color:D.col,grap:D.grap,sub:D.sub,tdName:D.tdName,subName:D.subName,pfx:D.pfx,nlsk:D.nlsk,spl:D.spl.length?D.spl:null,nl:k,lvUpd:0,phases:D.phases||null,hpX:D.hpX||0,hurt:D.hurt||null});
+  Object.assign(f,{name:D.name,full:D.name,color:D.col,grap:D.grap,sub:D.sub,tdName:D.tdName,subName:D.subName,pfx:D.pfx,nlsk:D.nlsk,spl:D.spl.length?D.spl:null,nl:k,lvUpd:0,phases:D.phases||null,phR:D.phR||null,rgSty:D.sty||null,hpX:D.hpX||0,hurt:D.hurt||null});
   if(D.sprite)f.sprite=D.sprite;f.fatigue=0;f.injury=0;f.morale=75;f.lvl=Math.max(me&&me.lvl||1,1)+(k==="ladda"?9:NL_ORDER.indexOf(k)<2?7:8)/* v1.90.20 (Man): members +7–8, Ladda +9 (+10 in blood mode) — the label only, strength comes from the fit */;
   const setT=T=>{f.vet=0;for(const [a] of ATTRS)f.a[a]=Math.max(1,Math.min(20,T-.6+(D.shape[a]||0)));liftOpponent(f,T,20);};
   {const T=RG_FIX.nl[k];setT(T);f.nlT=T;}return f;} /* v1.90.21: fixed strength (p and ceil kept only for the old dev calls) */
 function nlTest(k){const me=roster(G).filter(f=>!isAway(G,f.id)).sort((a,b)=>effOvr(G,b)-effOvr(G,a))[0];if(!me)return;
   const o=nlFighter(G,k,me,k==="ladda"?.25:.4,RG_LADDER.champ(3,0)+(k==="ladda"?.5:0));
-  const b={id:"nltest"+Date.now(),a:me.id,b:o.id,week:G.week,tier:"exhibition",rounds:NL[k].rounds||3,win:0,lose:0,bg:"bg_naka_underground.webp",nltest:1};G.bookings.push(b);save();openFight(b,()=>{G.bookings=G.bookings.filter(x=>x.id!==b.id);save();render();});}
+  const b={id:"nltest"+Date.now(),a:me.id,b:o.id,week:G.week,tier:"exhibition",rounds:5,win:0,lose:0,bg:"bg_naka_underground.webp",nltest:1};G.bookings.push(b);save();openFight(b,()=>{G.bookings=G.bookings.filter(x=>x.id!==b.id);save();render();});}
 const REGION={
   /* end of week (after the weekly events): the gala the week after the invitation, the contract beat the week after the first cup */
   weekScene(G,done){const R=G.region;if(!R){done();return;}const now=gameWeek(G);if(lbWeek(G,done))return;
@@ -725,13 +733,13 @@ const REGION={
   riders(G,wk){return roster(G).filter(f=>!f.injury&&!G.bookings.some(b=>b.week===wk&&(b.a===f.id||b.b===f.id)));},
 
   /* ---------- booking a belt trip ---------- */
-  makeOpp(G,dest,me,abs){const r=ROAD_DEST[dest].r,id=`rg_${dest}_${abs}`;if(G.F[id])return id;
+  makeOpp(G,dest,me,abs){const r=ROAD_DEST[dest].r,id=`rg_${dest}_${abs}`;if(G.F[id]){G.F[id].rgSty=G.F[id].rgSty||rgBeltSty(r,id);return id;}
     /* a little under your fighter at the first belt, a little over by the sixteenth; the regional style (tilt) is part of that budget, not on top of it */
     const n=this.beltTotal(G),target=RG_LADDER.belt(n),rng=mulberry32((G.seed||1)+stableHash(id)),tilt=RG[r].tilt;
     const f=baseFighter(id,mkNPC(id,RG_OPP[dest]||"Provincial champion","X",Math.min(19,Math.round(target-1)),rng,RG_ORDER.indexOf(r)+2)),base={...f.a};
     const setT=T=>{f.a={...base};f.vet=0;for(const [k,v] of Object.entries(tilt))f.a[k]=Math.min(20,f.a[k]+v);liftOpponent(f,T,20);
       for(let i=0;i<80&&ovr(f.a)>T+.05;i++)for(const k in f.a)if(!(k in tilt))f.a[k]=Math.max(1,f.a[k]-.15);};
-    f.rg=dest;rgDress(f);f.lvl=(me.lvl||1)+(n<8?1:2);/* v1.90.20 (Man): province champions 1–2 levels above */f.fatigue=0;f.morale=70;setT(RG_FIX.belt(n));f.rgT=+RG_FIX.belt(n).toFixed(2);f.camp="quest";f.div="X";f.rg=dest;rgDress(f);f.sprite="rgp_"+dest;/* v1.89.14: high-level sheet dyed in the province colour */f.color=RG[r].col;f.lvl=(me.lvl||1)+(n<8?1:2);/* v1.90.20 (Man): province champions 1–2 levels above */f.fatigue=0;f.morale=70;
+    f.rg=dest;rgDress(f);f.lvl=(me.lvl||1)+(n<8?1:2);/* v1.90.20 (Man): province champions 1–2 levels above */f.fatigue=0;f.morale=70;setT(RG_FIX.belt(n));f.rgT=+RG_FIX.belt(n).toFixed(2);f.camp="quest";f.div="X";f.rg=dest;f.rgSty=rgBeltSty(r,id);rgDress(f);f.sprite="rgp_"+dest;/* v1.89.14: high-level sheet dyed in the province colour */f.color=RG[r].col;f.lvl=(me.lvl||1)+(n<8?1:2);/* v1.90.20 (Man): province champions 1–2 levels above */f.fatigue=0;f.morale=70;
     G.F[id]=f;syncFighterAges(G);return id;},
   purse(G){const n=this.beltTotal(G),w=Math.round((10000+n*800)*(1+Math.min(G.rep,50)/100)/100)*100;return {win:w,lose:Math.round(w*.4/100)*100};},
   book(G,dest,fid){const R=G.region,D=ROAD_DEST[dest],me=G.F[fid];if(!R||!D||!me)return {ok:false,why:"Missing data"};
@@ -853,7 +861,7 @@ const REGION={
       return {abs,season,wk};}return null;},
   schedule(G,r,from){const c=G.region.champ[r],s=this.spot(G,r,from);if(!s){c.next=null;return null;}
     c.next={...s,bid:`rgc_${r}_${s.abs}`,n:(c.n||0)+1};this.ensureBooking(G,r);return c.next;},
-  ensureBooking(G,r){const c=G.region.champ[r],x=c.next;if(!x||x.season!==(G.season||1)||x.wk<G.week||G.bookings.some(b=>b.id===x.bid))return;
+  ensureBooking(G,r){const c=G.region.champ[r],x=c.next;{const cf=G.F[this.champId[r]];if(x&&cf&&RG_CH[r].sty)cf.rgSty=RG_CH[r].sty[Math.min(2,Math.max(1,x.n||1)-1)];}if(!x||x.season!==(G.season||1)||x.wk<G.week||G.bookings.some(b=>b.id===x.bid))return;
     const me=G.F[c.fid];if(!me||me.camp!=="player")return;const cid=this.champId[r];this.champFighter(G,r,me);const pay=this.seriesPurse(G);
     G.bookings.push({id:x.bid,a:c.fid,b:cid,week:x.wk,tier:"region",rounds:5,win:pay.win,lose:pay.lose,region:{r,dest:RG[r].fin,series:x.n},bg:`bg_region_${RG_CH[r].ring}.webp`});
     G.offers=(G.offers||[]).filter(o=>o.week!==x.wk);},

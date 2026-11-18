@@ -573,7 +573,7 @@ let STY_POW=0,STY_K=.11,MDEF={ev:.015,ctr:.025,cd:.1},MWPN={hit:.05,dmg:.2},HERO
 /* the school line a main heroine has built most (skill ranks + skills carried into the ring); -1 = none yet → her home line */
 function heroLine(f){if(!HOME_STYLE[f.id])return -1;const sc=[0,0,0],eq=f.skills?equipped(f):[];for(const s of skillList(f.id)){const r=(f.skills&&f.skills[s.id])||0;if(!r||!s.school||s.school==="build"||s.line>2)continue;sc[s.line]+=r+(eq.includes(s.id)?1:0);}
   const h=HOME_LINE[f.id];let best=h,bv=sc[h];for(let i=0;i<3;i++)if(sc[i]>bv){best=i;bv=sc[i];}return best;}
-function fightStyle(f){if(!f)return "power";if(f.fstyle)return f.fstyle;const home=HOME_STYLE[f.id];
+function fightStyle(f){if(!f)return "power";if(f.fstyle)return f.fstyle;if(f.rgSty&&f.camp!=="player")return f.rgSty; /* v1.91.9: regional opponents fight in a style their story sets */const home=HOME_STYLE[f.id];
   if(home){const L=heroLine(f),sch=(skillList(f.id).find(s=>s.school&&s.school!=="build")||{}).school;return (LINE_STYLE[sch]||[])[L]||home;}
   const statStyle=STAT_STYLE[Object.keys(STYLE_ATTRS).sort((x,y)=>styleVal(f,y)-styleVal(f,x))[0]]||"power";
   if(f.camp==="player")return statStyle; /* your own non-heroine fighters follow their training */
@@ -589,6 +589,14 @@ const HOT_TITLES={ploy:{name:"Undefeated Genius",desc:"more accurate, slips a li
 const hotForm=f=>!!f&&f.camp==="player"&&(f.wst||0)>=HOT_AT;
 const hotTitle=f=>HOT_TITLES[f&&f.id]||HOT_TITLES._;
 function styleEdge(a,b){return FSTYLE_BEATS[a].includes(b)?1:FSTYLE_BEATS[b].includes(a)?-1:0;}
+/* v1.91.9: the style-wheel edge, kept as a removable bonus so a fighter can switch style mid-fight (Ladda's forms) */
+function styleApply(SA,SB){for(const S of [SA,SB])if(S.styB){S.prep-=S.styB.p;S.sk.evade-=S.styB.e;S.sk.ctr-=S.styB.c;S.styB=null;S.styleUp=0;}
+  const e=styleEdge(SA.fst,SB.fst),W=e>0?SA:e<0?SB:null;if(!W)return;const L=W===SA?SB:SA,k=STY_K*(STY_PAIR[W.fst+">"+L.fst]||1);
+  W.styleUp=1;W.styB={p:k*.6,e:k*.4,c:W.fst==="counter"?k*.5:0};W.prep+=W.styB.p;W.sk.evade+=W.styB.e;W.sk.ctr+=W.styB.c;}
+/* Ladda's "read": a form that switches to the style beating yours — more likely the more fights of yours are on tape; Fah's instinct can't be read */
+const READ_K=60,READ_MAX=.85;
+function readStyle(F,S,O,fall){if(S.readSty)return S.readSty;const n=O.f.rec?(O.f.rec.w||0)+(O.f.rec.l||0)+(O.f.rec.d||0):0,p=O.f.id==="fah"?0:Math.min(READ_MAX,n/READ_K),r=mulberry32((F.seed||1)+911);
+  const beat=Object.keys(FSTYLE_BEATS).filter(k=>FSTYLE_BEATS[k].includes(O.fst));S.readHit=r()<p;const lose=(FSTYLE_BEATS[O.fst]||[]);S.readSty=S.readHit?beat[Math.floor(r()*beat.length)]:lose.length?lose[Math.floor(r()*lose.length)]:fall||S.fst; /* a wrong read leaves her in a style yours beats */return S.readSty;}
 function mastery(f){if(f.camp!=="player")return 0;const v=styleVal(f,mainStyle(f));return v<MASTERY_AT?0:.3+.7*clamp((v-MASTERY_AT)/4,0,1);}
 /* v1.83.3: veterans past the stat ceiling (20) keep improving through ring craft instead — f.vet is measured in stat points */
 const VET_FX={hit:.08,dmg:.25,ev:.06}; // calibrated: vet 1 ≈ +1 stat point
@@ -610,7 +618,7 @@ function newFight(fa,fb,o){
   /* v1.87: counter-training reads the opponent's best weapon — it lands less often on fight night */
   if(SA.counterPrep){SA.ctrW=oppTop(fb);SB.prep-=CTR_READ;}if(SB.counterPrep){SB.ctrW=oppTop(fa);SA.prep-=CTR_READ;}
   for(const S of [SA,SB])if(hotForm(S.f)){const T=hotTitle(S.f);S.hot=1;S.prep+=T.prep||0;S.sk.evade+=T.ev||0;S.sk.ctr+=T.ctr||0;S.titleD=T.dmg||0;if(T.hp){S.hp+=T.hp;S.hp0+=T.hp;}} /* v1.91.5 hot-form title */
-  {SA.fst=fightStyle(fa);SB.fst=fightStyle(fb);const e=styleEdge(SA.fst,SB.fst),W=e>0?SA:e<0?SB:null;if(W){const L=W===SA?SB:SA,k=STY_K*(STY_PAIR[W.fst+">"+L.fst]||1);W.styleUp=1;W.prep+=k*.6;W.sk.evade+=k*.4;if(W.fst==="counter")W.sk.ctr+=k*.5;}}
+  SA.fst=fightStyle(fa);SB.fst=fightStyle(fb);styleApply(SA,SB);
   for(const [S,O] of [[SA,SB],[SB,SA]])if(S.fst==="power")O.sk.ctr+=STY_POW; /* big swings leave openings: everyone counters a power puncher a little more, a counter-puncher most of all */ /* v1.91.0 style wheel: the favoured side lands cleaner, slips more, and a counter-puncher counters more */
   /* v1.87 traits: Rin's library needs a scouted or counter-trained opponent */
   const scout=(me,op)=>me.counterPrep||!!(me.f.camp==="player"&&typeof G!=="undefined"&&G&&G.scoutAbs&&G.scoutAbs[op.id]!=null&&gameWeek(G)-G.scoutAbs[op.id]<=8);
@@ -648,7 +656,9 @@ function effA(s,k){const a=s.f.a,o=s.ov!=null?s.ov:(s.ov=ovr(a)),v=a[k],c=o+BAL.
 const EX_PER_ROUND=12;
 function roundBegin(F){F.round++;F.gnd=null;
   /* v1.90: a boss changes form every round (Ladda: hood → no hood → blood mode) */
-  for(const s of [F.A,F.B])if(s.f.phases){const P=s.f.phases[Math.min(F.round,s.f.phases.length)-1];s.phNew=!s.ph||s.ph.n!==P.n;s.ph=P;}F.A.rpts=0;F.B.rpts=0;F.kd0={A:F.A.kd,B:F.B.kd};F.ex=0;F.rlog=[];
+  for(const s of [F.A,F.B])if(s.f.phases){const P=s.f.phases[(s.f.phR?s.f.phR[Math.min(F.round,s.f.phR.length)-1]:Math.min(F.round,s.f.phases.length))-1];s.phNew=!s.ph||s.ph.n!==P.n;s.ph=P;
+    if(s.phNew&&P.fst){const o=s===F.A?F.B:F.A;s.fst=P.fst==="read"?readStyle(F,s,o,P.fall):P.fst;styleApply(F.A,F.B);}
+    if(P.fst==="read"&&s.readSty&&!s.readHit)s.ph={...P,hit:0,ev:0,ini:0};} /* a wrong read also takes the edge off her fast form: she was fast because she knew */ /* v1.91.9: 5-round bosses hold a form over several rounds (phR) and each form can fight in its own style */F.A.rpts=0;F.B.rpts=0;F.kd0={A:F.A.kd,B:F.B.kd};F.ex=0;F.rlog=[];
   F.mA=mods(F.A,F);F.mB=mods(F.B,F);for(const s of [F.A,F.B]){s.rw={punch:0,kick:0,knee:0,elbow:0};s.rtw={punch:0,kick:0,knee:0,elbow:0};s.rdmg=0;s.rthrown=0;s.rlanded=0;s.skRound=false;}}
 const roundDone=F=>F.over||F.ex>=EX_PER_ROUND;
 function fightRound(F){roundBegin(F);while(!roundDone(F))fightEx(F);return roundFinish(F);}
@@ -735,7 +745,9 @@ function fightEx(F){const rng=F.rng,log=[],ex=F.ex,mA=F.mA,mB=F.mB;
       const need=(s.hp<62&&behind)||s.hp<45||(F.round>=2&&behind&&s.hp<75);
       if(forced||(need&&rng()<(s.f.camp==="player"?.03+(s.f.bond||0)/1500+(s.f.morale||60)/2400:.08))){s.rageUsed=true;s.rage=4;log.push({ha:F.A.hp,hb:F.B.hp,sa:F.A.sta,sb:F.B.sta,s:s===F.A?"A":"B",t:`${s.name} — the eyes change! Blood-boil mode!`,k:"big",ev:"rage",rid:s.f.id,an:s.name,dn:o.name});}}}}
     for(const s of [F.A,F.B])if(s.phNew&&!F.over){s.phNew=false;const P=s.ph,o=s===F.A?F.B:F.A;if(P.self){s.hp-=P.self;s.rage=Math.max(s.rage||0,5);}
-      if(P.say)log.push({ha:F.A.hp,hb:F.B.hp,sa:F.A.sta,sb:F.B.sta,s:s===F.A?"A":"B",t:P.say,k:"big",ev:"phase",ph:P.n,an:s.name,dn:o.name});}
+      if(P.say)log.push({ha:F.A.hp,hb:F.B.hp,sa:F.A.sta,sb:F.B.sta,s:s===F.A?"A":"B",t:P.say,k:"big",ev:"phase",ph:P.n,an:s.name,dn:o.name});
+      if(P.fst==="read"&&s.readSty)log.push({ha:F.A.hp,hb:F.B.hp,sa:F.A.sta,sb:F.B.sta,s:s===F.A?"A":"B",k:"big",an:s.name,dn:o.name,
+        t:s.readHit?`${s.name} glances once and switches rhythm at once… as if she knew ${o.name}'s game already.`:`${s.name} moves to cut off where the data says… but ${o.name} isn't there — the data can't read ${o.name}!`});}
     const ini=s=>{const a=s.f.a,m=s===F.A?mA:mB;return (s.ph&&s.ph.ini||0)-s.legs/12+effA(s,"speed")*.3+a.foot*.15+a.iq*.2+a.comp*.1+m.aggr*10+rng()*9+(s.sta-60)/12;};
     const [at,df]=ini(F.A)>=ini(F.B)?[F.A,F.B]:[F.B,F.A];const ma=at===F.A?mA:mB,md=at===F.A?mB:mA;
     const a=at.f.a,d=df.f.a;
@@ -6020,7 +6032,7 @@ AU.gsfx=function(kind,a){if(!this.init()||this.muted||!SETTINGS.sfx)return;const
   if(kind==="shimmer")for(let i=0;i<6;i++)T(i*.05,{f:1400+Math.random()*1400,type:"sine",dur:.12,peak:.06});};
 
 // ================= MUAY THAI MOE v1.3 — UI =================
-const VERSION="1.91.7";
+const VERSION="1.91.9";
 const CUR_LANG=(typeof window!=="undefined"&&window.LANG)||"th";
 const TH_LABEL=String.fromCharCode(3652,3607,3618);
 function langSwitch(cls){return `<div class="langsw ${cls||""}" role="group" aria-label="Language">${[["th",TH_LABEL],["en","EN"]].map(([k,l])=>`<button class="lsb ${CUR_LANG===k?"on":""}" data-act="setlang" data-v="${k}" aria-pressed="${CUR_LANG===k}">${l}</button>`).join("")}</div>`;}
