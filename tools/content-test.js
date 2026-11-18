@@ -156,6 +156,10 @@ const chrome=process.env.CHROME_PATH||'/Applications/Google Chrome.app/Contents/
       if(ev('lv_silly').when(g)){const b0=g.F.kati.bond+g.F.mali.bond;const st=sillySteps(g);seen.add(st[0].t);const ch=st.find(x=>x.choice).choice;if(ch.length!==3)throw Error('3 options');ch[silly%3].fx(g);if(g.F.kati.bond+g.F.mali.bond<b0)throw Error('lost bond');g.lvEvAbs=absWeek(g);silly++;}}
     if(silly<8||silly>20||seen.size!==6)throw Error('count '+silly+' topics '+seen.size);
     const o=fresh();G=o;lovUp(o,['kati','mali']);return sillyPairs(o).length===0;});
+  test('later years: team festivals and yearly anniversaries rotate over 3, team line counts the years',()=>{if(!HAREM_YEAR.every(Y=>Y.v.length===3))throw Error('harem 3');if(!LOVE_IDS.every(id=>MONO_YEARLY[id].length===3))throw Error('yearly 3');
+    const g=fresh();G=g;g.season=2;lovUp(g,['kati','mali','rin']);hmSet(g,['kati','mali','rin']);g.haremAbs=absWeek(g)-60;g.season=3;
+    for(const Y of HAREM_YEAR){const L=walkL(g,hmSteps(g,Y.v[2]));if(L<10)throw Error('h3 '+Y.k+L);}
+    const e=EVENTS.find(x=>x.id==='lv_hy_loy');const st=e.steps[0].inject(g);return st[0].t===MEM_LINE.team.replace('{n}',Math.floor((absWeek(g)-g.haremAbs)/52));});
   test('pair talks: 10 pairs × 3 stages, both answers, TH/EN lines filled',()=>{for(const k of Object.keys(PAIR_TALK)){const [a,b]=k.split('_');if(pairKey(a,b)!==k)throw Error('key '+k);if(PAIR_TALK[k].length!==3)throw Error('stages '+k);
       if(PAIR_TALK[k].filter(x=>x.bold).length!==1)throw Error('bold '+k);for(const st of [0,1,2])for(const pick of (PAIR_TALK[k][st].bold?[0,1,2]:[0,1])){const g=fresh();G=g;g.season=2;for(const id of [a,b])g.F[id].camp='player';lovUp(g,[a,b]);for(const id of [a,b]){g.F[id].camp='player';g.F[id].awayAbs=null;}
         g.pairSt={[k]:st};g.pairU={[k]:80};g.pairV={[k]:2};g.pairF={[k]:2};const n=walkL(g,ptSteps(g),ch=>ch.findIndex(c=>pick===0?c.ok:pick===1?(!c.ok&&!c.bold):c.bold));if(n<5)throw Error('short '+k+st);}}
@@ -232,7 +236,9 @@ const chrome=process.env.CHROME_PATH||'/Applications/Google Chrome.app/Contents/
     for(const id of LOVE_IDS){const g=fresh();G=g;g.season=2;solo(g,id,10);const hit=[];
       for(let w=1;w<=52;w++){g.week=w;for(const e of pendingEvents().filter(e=>/^lv_(mf_|valm)/.test(e.id))){hit.push(e.id+'@'+w);const L=txtOf(g,e.steps);if(badTxt(L)||L.length<(e.id==='lv_valm'?4:9))throw Error(id+' '+e.id+' '+L.length);g.seenY=g.seenY||{};g.seenY[e.id]=g.season;}}
       if(hit.join()!=='lv_mf_sports@25,lv_mf_loy@27,lv_mf_newyear@33,lv_valm@38,lv_mf_songkran@48')throw Error(id+' '+hit.join());
-      const again=txtOf(g,monoFestSteps(g,'loy'));if(again[1]!==MONO_AGAIN[id].loy)throw Error('again line '+id);}
+      const alt=txtOf(g,monoFestSteps(g,'loy'));if(alt[0]!==MONO_FEST2[id].loy[0].t||badTxt(alt))throw Error('second year scene '+id);
+      for(const k of ['sports','newyear','songkran']){const L=txtOf(g,rwSteps(MONO_FEST2[id][k],id));if(badTxt(L)||L.length<6)throw Error('fest2 '+id+k);}
+      g.season=4;const again=txtOf(g,monoFestSteps(g,'loy'));if(again[1]!==MONO_AGAIN[id].loy)throw Error('again line '+id);if(!again.some(t=>/\d/.test(t)&&(Object.values(MEM_LINE.years).some(x=>t===x.replace('{n}',Math.floor(monoWk(g)/52)))||Object.values(MEM_LINE.belts).some(x=>x.split('{n}')[0]&&t.startsWith(x.split('{n}')[0])))))throw Error('memory line '+id+' '+again.join('|'));}
     const g=fresh();G=g;g.season=2;solo(g,'kati',10);lovUp(g,['mali']);g.week=27;if(monoOf(g)||pendingEvents().some(e=>/^lv_(mf_|valm|ma)/.test(e.id)))throw Error('two-timer got one-love scenes');return true;});
   test('one love: anniversaries in real time from the day you got together (3 m, 6 m, every year), story scenes in order then a yearly scene; a late save gets the latest only if recent',()=>{
     const adv=g=>{g.week++;if(g.week>52){g.week=1;g.season++;}};

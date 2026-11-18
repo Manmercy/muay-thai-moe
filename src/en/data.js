@@ -33,7 +33,7 @@ const PROFILES={
   likes:["Isan sausage","Grandma's old motorbike","Turning everything into a contest"],
   dislikes:["Being pitied","Lots of rules","Places where you must be prim, like temples"],
   hobby:"Draws tiger tattoo designs in her sketchbook",
-  story:"Raised by her grandma alone. Grandma gave her a leaping-tiger sak yant before she passed, saying tigers mean protection, not ferocity",
+  story:"Raised by her grandma alone. Grandma took her to get a leaping-tiger sak yant at fifteen, saying tigers mean protection, not ferocity",
   secret:"Terrified of thunder, even though her name means 'sky'"},
 };
 const COACH={name:"Coach Daeng",color:"#c98a5a"};
