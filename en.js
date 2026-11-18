@@ -1195,7 +1195,7 @@ function applyResult(G,F,booking){
     if(r.towel&&side==="A"){if(s.hp<20&&!off)me.injury=Math.max(me.injury,1);me.morale=clamp(me.morale-8,0,100);} /* v1.88: the towel spares her — at most a week off, but it stings */
     else if(s.hp<40&&!off&&mulberry32(F.seed+(side==="A"?1:2))()<.45)me.injury=Math.max(me.injury,2+(s.hp<15?2:0));
     if(res==="L"&&/KO|TKO/.test(r.type)&&!booking.pro&&!booking.ev)me.injury=Math.max(me.injury,booking.dm?1:3); // v1.37.1: a Death Match KO costs one week, not three
-    const pmods=passiveMods(me);if(isLov(G,me.id))pmods.moraleLoss+=.3;if(me.camp==="player"&&me.trust>=60)pmods.moraleLoss+=.25;me.morale=clamp(me.morale+(res==="W"?10:res==="L"?-10*(1-Math.min(.9,pmods.moraleLoss)):2),0,100);
+    const pmods=passiveMods(me);if(isLov(G,me.id)&&lovSolo(G))pmods.moraleLoss+=.3;if(me.camp==="player"&&me.trust>=60)pmods.moraleLoss+=.25;me.morale=clamp(me.morale+(res==="W"?10:res==="L"?-10*(1-Math.min(.9,pmods.moraleLoss)):2),0,100);
     // v1.21: beating someone stronger is worth more (ranking point, fame, EXP) — a reason to take the hard offers
     const gapR=effGap(G,me,op),upset=res==="W"&&gapR>.4;
     if(!off&&booking.tier!=="exhibition"&&booking.tier!=="special"&&booking.tier!=="lab"&&booking.tier!=="final"){const rk=G.rank[me.div][me.id];if(rk){rk.pts+=res==="W"?(gapR<-.6?2:3)+(upset?1:0):res==="D"?1:0;/* v1.47: farming weaker fighters earns fewer ranking points */rk[res==="W"?"w":res==="L"?"l":"d"]++;}}
@@ -2271,7 +2271,7 @@ const bondCap=G=>100;
 // v1.44: bond grows a bit faster, and the girls who join later catch up while still distant
 const BOND_MUL=.3,BOND_LATE=["mali","rin"];
 const absWeek=G=>((G.season||1)-1)*52+G.week;
-const add=(G,id,k,v)=>{const f=G.F[id];if(!f)return;if(k==="bond"&&v>0)f.lastTouch=absWeek(G);if(k==="bond"&&v>0)v=Math.max(.5,Math.round(v*BOND_MUL*(BOND_LATE.includes(id)&&(f.bond||0)<50?1.6:1)*2)/2);
+const add=(G,id,k,v)=>{const f=G.F[id];if(!f)return;if(k==="bond"&&v>0&&typeof partners==="function"&&LOVE_IDS.includes(id)&&!isPartner(G,id)){const n=partners(G).length;if(n)v*=n>=2?.6:.75;}/* v1.89.11: courting while taken is slower */if(k==="bond"&&v>0)f.lastTouch=absWeek(G);if(k==="bond"&&v>0)v=Math.max(.5,Math.round(v*BOND_MUL*(BOND_LATE.includes(id)&&(f.bond||0)<50?1.6:1)*2)/2);
   if(k==="bond"){const lv0=heartLv(f).lv;/* v1.86: affection past 100 keeps counting as heart levels (bond itself stays 0–100 for every existing check) */
     if(v>=0){const t=(f.bond||0)+v;f.bond=Math.min(100,t);if(t>100)f.bondX=(f.bondX||0)+(t-100);}
     else{let d=-v;const x=Math.min(f.bondX||0,d);if(x>0){f.bondX-=x;d-=x;}if(d>0)f.bond=Math.max(0,(f.bond||0)-d);}
@@ -2514,7 +2514,7 @@ const EVENTS=[
   {n:"kati",f:"flustered",t:"Manager… thank you for not selling the camp on day one"},
   {choice:[{t:"Thank you for waiting here for me, training",fx:G=>{for(const f of roster(G)){add(G,f.id,"morale",10);add(G,f.id,"bond",3);}},then:[{n:"kati",f:"happy",t:"Tomorrow we go get that belt!"}]}]}]},
  {id:"lover_final",look:"fight",when:G=>G.week>=48&&!!lovFinal(G),bg:"ring",
-  steps:[{inject:G2=>{const L=lovFinal(G2);if(!L)return [];add(G2,L.b.a,"morale",8);return LOVER_FINAL[L.id]||[];}}]},
+  steps:[{inject:G2=>{const L=lovFinal(G2);if(!L)return [];if(lovSolo(G2))add(G2,L.b.a,"morale",8);return LOVER_FINAL[L.id]||[];}}]},
  // v1.32 fame milestones: something visible happens when the camp's name grows
  // v1.33: the camp itself nudges you toward upgrades, and the coach sits down to talk money
  {id:"up_rope",look:"train",when:G=>G.week>=7&&facTotal(G)<3,bg:"gym",steps:[
@@ -2639,13 +2639,13 @@ const isPartner=(G,id)=>partners(G).includes(id);
 const romOf=(G,id)=>isLov(G,id)&&!G.harem; // lover-only scenes; on the harem route the top scenes give way to group ones
 const romFirst=G=>G.harem?null:(lovList(G)[0]||null);
 function setLovers(G,L){G.lovers=[...new Set(L)];G.romance=G.lovers[0]||null;G.romWk=G.romance?((G.lovWk||{})[G.romance]??null):null;}
-function takeLover(G,id){G.lovWk=G.lovWk||{};G.lovWk[id]=absWeek(G);if(G.promise)delete G.promise[id];if(G.exAbs)delete G.exAbs[id];setLovers(G,[...lovList(G),id]);add(G,id,"morale",15);}
+function takeLover(G,id){const solo=!partners(G).some(k=>k!==id);G.lovWk=G.lovWk||{};G.lovWk[id]=absWeek(G);if(G.promise)delete G.promise[id];if(G.exAbs)delete G.exAbs[id];setLovers(G,[...lovList(G),id]);if(solo)add(G,id,"morale",15);}
 const isAway=(G,id)=>{const f=G&&G.F&&G.F[id];return !!(f&&f.awayAbs!=null&&absWeek(G)<f.awayAbs);};
 const awayLeft=(G,id)=>isAway(G,id)?G.F[id].awayAbs-absWeek(G):0;
 const awaySpeaks=(G,steps)=>(steps||[]).some(x=>x&&typeof x.n==="string"&&isAway(G,x.n));
 function sendAway(G,id,wk,why){const f=G.F[id];if(!f)return;const now=absWeek(G);f.awayAbs=Math.max(isAway(G,id)?f.awayAbs:0,now+wk);f.awayWhy=why;f.awayBack=false;}
 const lovFinal=G=>{for(const id of lovList(G)){if(!romOf(G,id)||!LOVER_FINAL[id])continue;const b=G.bookings.find(b=>b.tier==="final"&&G.F[b.a].camp==="player"&&(b.a===id||id==="rin"));if(b)return {id,b};}return null;};
-function relTag(G,f){const id=f.id;let t=isLov(G,id)?" · Sweetheart ♥":isProm(G,id)?" · Promised ♡":isEx(G,id)?" · Ex":"";
+function relTag(G,f){const id=f.id;let t=isLov(G,id)?(G.harem?" · Sweetheart ♥ (harem)":" · Sweetheart ♥"):isProm(G,id)?" · Promised ♡":isEx(G,id)?" · Ex":"";
   if(isAway(G,id))t+=f.camp==="player"?` · Away from camp (${awayLeft(G,id)} wk)`:` · Not in touch (${awayLeft(G,id)} wk)`;return t;}
 // she confesses while you are already with someone — you can tell her the truth
 const LOVE_TAKEN={kati:"…I see. Sorry I said anything. Please forget it",mali:"Oh… you already have someone. It's okay, Mali's happy for you",
@@ -2694,7 +2694,7 @@ function runAway(G,id,wk){const f=G.F[id];sendAway(G,id,wk,"cheat");const mine=f
 function ringSteps(G,a,b,hard){const A=G.F[a].name,B=G.F[b].name;
   return [{fx:()=>{if(typeof UI!=="undefined"&&UI.scene)UI.scene.lookOf={};}},/* into fight gear for the ring */
     {n:"nar",bg:"gym",t:`${A} and ${B} lock eyes for one second, then climb into the ring together without a word`},
-    {n:a,f:"angry",l:"fight",t:vx(G,a,FIGHT_TAUNT),with:b},{n:b,f:"angry",l:"fight",t:vx(G,b,FIGHT_TAUNT),with:a},
+    {n:a,f:"angry",l:"fight",t:ringTaunt(G,a,b),with:b},{n:b,f:"angry",l:"fight",t:ringTaunt(G,b,a),with:a},
     {n:"nar",t:"All you can do is stand at ringside and shout at the right moment"},
     {brawl:{a,b,hard},after:(G2,res)=>ringAfter(G2,a,b,hard,res||{sc:0})}];}
 function ringAfter(G,a,b,hard,res){const A=G.F[a].name,B=G.F[b].name,ok=res.sc>=5,r=[];
@@ -2771,6 +2771,65 @@ EVENTS.push(
    return [...((f.awayWhy==="break"?BREAK_BACK:RUN_BACK)[id]||[]).map(x=>({l:"casual",...x})),{fx:G2=>{delete G2.seen.lv_back;}}];}}]},
  ...HAREM_SCENES.map((S,i)=>({id:"lv_hm"+(i+1),look:"casual",bg:S.bg,when:G=>!!G.harem&&G.haremAbs!=null&&absWeek(G)-G.haremAbs>=S.wk&&partners(G).length>=2&&!partners(G).some(k=>isAway(G,k)),
    steps:[{inject:G=>[{n:"nar",t:S.open},...partners(G).map(k=>({n:k,f:"happy",l:"casual",t:vx(G,k,S.say)})),{n:"nar",t:S.close}]}]})));
+// --- v1.89.11: every pair has its own quarrel — in the Valentine ring and in the spats while you see more than one ---
+const pairKey=(a,b)=>[a,b].sort((x,y)=>LOVE_IDS.indexOf(x)-LOVE_IDS.indexOf(y)).join("_");
+const PAIR={
+ kati_mali:{ring:{kati:"Mali, I could give you my mango sticky rice, but not this!",mali:"You don't have to give it, Kati! Mali will win it herself!"},
+  spat:[["mali","pout","Kati's sat next to the manager at dinner three days in a row! Today it's Mali's turn!"],["kati","angry","Because I was here first! I was at this camp before you!"],["mali","angry","Being first doesn't mean you get dibs for life!"]]},
+ kati_rin:{ring:{kati:"Rin, you can calculate anything, but not the manager's heart!",rin:"I can. The result says you're at a disadvantage"},
+  spat:[["rin","pout","Kati, yesterday the manager talked to you for forty minutes and to me for twenty. I wrote it down"],["kati","angry","Why write that down! Who are you telling!"],["rin","pout","Not tell. The data's unbalanced, and I don't like unbalanced data"]]},
+ kati_ploy:{ring:{kati:"You've always taught me, Ploy. Today I'll show you I've graduated!",ploy:"Ten years too early, Kati"},
+  spat:[["ploy","happy","Kati, I'm borrowing the manager for the fights at the district stadium on Saturday"],["kati","angry","He's not something to borrow, Ploy! And on Saturday he has a date with me!"],["ploy","flustered","Then the three of us go… kidding. I'll go alone"]]},
+ kati_fah:{ring:{kati:"Fah! This ring isn't a playground!",fah:"Fah's not playing! Fah's here for payback!"},
+  spat:[["fah","pout","Kati! Who gave Grandma's sausages to the manager yesterday!"],["kati","pout","I gave him Grandpa's favourite pastries. I never touched your sausages!"],["fah","angry","…So you give him things too! Not okay!"]]},
+ mali_rin:{ring:{mali:"Rin! Mali's name isn't anywhere on your date schedule!",rin:"Because I made it before I knew you were a rival"},
+  spat:[["mali","pout","Rin, you fixed the schedule so you get every Sunday, didn't you!"],["rin","flustered","…Sunday is when everyone's most free. It was a data-driven decision"],["mali","angry","What data! The data that Rin wants to go herself!"]]},
+ mali_ploy:{ring:{mali:"Ploy's good at everything, but Mali won't give in on this!",ploy:"Don't give in. I never asked you to"},
+  spat:[["mali","sad","Ploy, you're prettier and stronger, and you want the manager too…"],["ploy","sad","…I don't want to beat you at this, Mali"],["mali","pout","But you won't give up either, will you!"]]},
+ mali_fah:{ring:{mali:"Fah! At karaoke that night, the manager sang a duet with Mali!",fah:"So what! He's ridden on Fah's bike three times!"},
+  spat:[["fah","angry","Mali! Ten heart stickers a day to the manager? Are you nuts!"],["mali","happy","Fah sends twenty cat stickers a day too~"],["fah","flustered","Th-those are cats! It's not the same!"]]},
+ rin_ploy:{ring:{rin:"I've analysed your fights for three years. Today I finally use it",ploy:"Three years at ringside isn't the same as three minutes in the ring"},
+  spat:[["rin","pout","Ploy, the stats say the manager smiles at your chats 1.4 times more than at mine"],["ploy","happy","You count while he reads his chats? That's scary"],["rin","angry","…I don't count. I observe. And I'd like to change the subject"]]},
+ rin_fah:{ring:{rin:"You fight with no plan. I read you from the first step",fah:"What plan! Wherever Fah's heart goes, her fists follow!"},
+  spat:[["fah","angry","Rin! Your binder says 'Fah: high risk'. What's that supposed to mean!"],["rin","happy","It means you're high risk. In the ring, and in the manager's heart"],["fah","flustered","…H-huh!? Was that last part a compliment or an insult!"]]},
+ ploy_fah:{ring:{ploy:"We've sparred for years, Fah. You've never beaten me",fah:"Today's the day! Fah beats you, in the ring and in this!"},
+  spat:[["fah","pout","Ploy! You sat by the river with the manager yesterday, didn't you! That's Fah's spot!"],["ploy","happy","The Ping riverside goes on for kilometres. You reserved all of it?"],["fah","angry","Yes! The whole river! Nobody else sits there!"]]}};
+const pairOf=(a,b)=>PAIR[pairKey(a,b)];
+const ringTaunt=(G,me,other)=>{const P=pairOf(me,other);return (P&&P.ring[me])||vx(G,me,FIGHT_TAUNT);};
+// a pair already argued once — later spats use a short line each
+const SPAT_AGAIN={kati:"This again! I'm not giving in!",mali:"Mali asked nicely! Nobody listens!",rin:"I've logged this as the third time this month",
+  ploy:"I don't want to fight, but I won't back down either",fah:"Again!? Fah's tired of arguing! …But she'll keep going!"};
+const SIDE_WIN={kati:"…See? The manager's on my side",mali:"Yay! The manager gets Mali the most~",rin:"Thank you. My data was right again",ploy:"Thanks… I didn't ask you to take my side, but I'm glad",fah:"Ha! We all know who was right!"};
+const SIDE_LOSE={kati:"…Okay. I understand",mali:"Oh… okay. It's Mali's fault, then",rin:"Noted. I won't bring it up again",ploy:"I see. I'll remember that",fah:"Hmph! Fine! I'm not upset!"};
+const CLASH_ASK={kati:"Come to the temple with me tonight? The lights are beautiful",mali:"Karaoke's half price tonight! Come with me~",rin:"I've booked a table at the tea house tonight. 7 p.m. sharp",
+  ploy:"I'm free tonight. Walk by the river?",fah:"Tonight, hop on the bike, we're getting sausages! No saying no!"};
+const CLASH_YES={kati:"You really came! …I thought you'd go somewhere else",mali:"Yay! First song is a duet!",rin:"Right on time. I like that",ploy:"I'm glad you chose me",fah:"Ha! I knew you'd pick Fah!"};
+const CLASH_NO={kati:"It's okay. I'll go to the temple by myself",mali:"Oh… you're busy? Then Mali will sing alone",rin:"Reservation cancelled.",ploy:"I see.",fah:"Hmph! Busy, then!"};
+const lvRoll=(G,salt)=>mulberry32(((G.seed||1)*7+absWeek(G)*131+salt)>>>0)();
+const lvPresent=G=>partners(G).filter(k=>!isAway(G,k));
+/* one spat pair: the two who are not both very close to you — the lowest pair first */
+const spatPair=G=>{const P=lvPresent(G);let best=null;for(let i=0;i<P.length;i++)for(let j=i+1;j<P.length;j++){const a=P[i],b=P[j],ta=bondTot(G.F[a]),tb=bondTot(G.F[b]);if(ta>=100&&tb>=100)continue;if(!best||ta+tb<best.s)best={a,b,s:ta+tb};}return best;};
+const sideOpts=(a,b,G)=>[{t:`Side with ${G.F[a].name}`,fx:G2=>{add(G2,a,"bond",3);add(G2,b,"bond",-5);},then:[{n:a,f:"happy",l:"casual",t:SIDE_WIN[a],with:b},{n:b,f:"sad",l:"casual",t:SIDE_LOSE[b],with:a}]},
+  {t:`Side with ${G.F[b].name}`,fx:G2=>{add(G2,b,"bond",3);add(G2,a,"bond",-5);},then:[{n:b,f:"happy",l:"casual",t:SIDE_WIN[b],with:a},{n:a,f:"sad",l:"casual",t:SIDE_LOSE[a],with:b}]},
+  {t:"Stop them both, take no side",fx:G2=>{add(G2,a,"bond",-2);add(G2,b,"bond",-2);},then:[{n:"nar",t:"They stop arguing, but neither of them is happy with you"}]}];
+function spatSteps(G){const p=spatPair(G);if(!p)return [];const {a,b}=p,k=pairKey(a,b);G.spatDone=G.spatDone||{};const first=!G.spatDone[k];G.spatDone[k]=(G.spatDone[k]||0)+1;G.spatAbs=absWeek(G);
+  const lines=first&&pairOf(a,b)?pairOf(a,b).spat.map(([n,f,t])=>({n,f,l:"casual",t,with:n===a?b:a})):[{n:a,f:"angry",l:"casual",t:SPAT_AGAIN[a],with:b},{n:b,f:"angry",l:"casual",t:SPAT_AGAIN[b],with:a}];
+  return [{n:"nar",bg:"camp",t:`Raised voices behind the camp. ${G.F[a].name} and ${G.F[b].name} turn and see you`},...lines,{choice:sideOpts(a,b,G)},{n:"nar",t:"Whoever you side with +3 bond, the other −5 · Stopping both: −2 each"}];}
+function clashSteps(G){const P=lvPresent(G),r=lvRoll(G,9),i=Math.floor(r*P.length),a=P[i],b=P[(i+1+Math.floor(lvRoll(G,11)*(P.length-1)))%P.length];G.clashAbs=absWeek(G);
+  const go=(x,y)=>({t:`Out with ${G.F[x].name}`,fx:G2=>{add(G2,x,"bond",3);add(G2,y,"bond",-5);},then:[{n:x,f:"happy",l:"casual",t:CLASH_YES[x]},{n:"nar",t:`Message from ${G.F[y].name}: "${CLASH_NO[y]}"`}]});
+  return [{n:"nar",bg:"night",t:"Friday evening. Two chats pop up at once, asking for the exact same time"},{n:a,f:"happy",l:"casual",t:CLASH_ASK[a]},{n:b,f:"happy",l:"casual",t:CLASH_ASK[b]},
+    {choice:[go(a,b),go(b,a),{t:"Sorry to both, I'm staying in tonight",fx:G2=>{add(G2,a,"bond",-1);add(G2,b,"bond",-1);},then:[{n:"nar",t:"You spend the night alone staring at the ceiling. Nobody wins"}]}]},
+    {n:"nar",t:"Double-booked: the one you went with +3 bond · the other −5"}];}
+const lvBusyWeek=G=>G.lvEvAbs===absWeek(G);
+EVENTS.push(
+ {id:"lv_clash",look:"casual",bg:"night",when:G=>!G.harem&&lvPresent(G).length>=2&&!lvBusyWeek(G)&&absWeek(G)-(G.clashAbs??-99)>=3&&lvRoll(G,3)<.25,
+  steps:[{inject:G=>{G.lvEvAbs=absWeek(G);return clashSteps(G);}},{fx:G=>{delete G.seen.lv_clash;}}]},
+ {id:"lv_spat",look:"casual",bg:"camp",when:G=>lvPresent(G).length>=2&&!lvBusyWeek(G)&&absWeek(G)-(G.spatAbs??-99)>=4&&!!spatPair(G)&&lvRoll(G,5)<(G.harem?.06:.2),
+  steps:[{inject:G=>{G.lvEvAbs=absWeek(G);return spatSteps(G);}},{fx:G=>{delete G.seen.lv_spat;}}]});
+// warn before a second "yes"
+const cheatWarn=(G,id)=>partners(G).some(k=>k!==id)?[{n:"nar",t:"⚠ You're already seeing someone. Saying yes means two-timing · the sweetheart bonus is lost at once · top heart scenes won't play · more double-bookings and fights · Valentine's Day will catch you out"}]:[];
+const yesTxt=(G,id,t)=>partners(G).some(k=>k!==id)?t+" (two-timing)":t;
+const lovSolo=G=>partners(G).length===1; /* the lover bonus only holds while you see one person */
 // v1.30: lovers get their own dates/scenes; Ploy & Fah make a promise instead (romance with them waits for season 2)
 const RIVAL_LOVE=["ploy","fah"];
 const LOVER_DATES={"kati": [[{"n": "nar", "t": "Sunday morning. Kati takes you to the temple at the edge of the village, carrying a garland and the pastries Grandpa loved", "bg": "camp"}, {"n": "kati", "t": "Grandpa, this is the person I always tell you about. …Today I'm bringing them as my partner", "f": "happy", "l": "casual"}, {"n": "kati", "t": "He's definitely laughing. He used to tease that no one would date me because I kick too hard", "f": "flustered", "l": "casual"}, {"choice": [{"t": "I'll take good care of your granddaughter", "sc": 3, "then": [{"n": "kati", "t": "…You said that to Grandpa for real. He heard you. No breaking it", "f": "flustered", "l": "casual"}]}, {"t": "Kicking hard is good. Very safe", "sc": 2, "then": [{"n": "kati", "t": "Haha, Grandpa would've liked you", "f": "happy", "l": "casual"}]}]}], [{"n": "nar", "t": "10 p.m. One light still on in the gym. Kati is kicking the bag alone", "bg": "gym"}, {"n": "kati", "t": "Manager… I mean, darling… I'm not used to it yet. What should I call you?", "f": "flustered", "l": "casual", "bg": "casual"}, {"choice": [{"t": "Whatever feels right to you", "sc": 3, "then": [{"n": "kati", "t": "Then 'manager' inside the gym, 'darling' outside it. Work and heart, kept separate", "f": "happy", "l": "casual"}]}, {"t": "Darling sounds nice", "sc": 2, "then": [{"n": "kati", "t": "…Not so loud! Mali's still awake!", "f": "flustered", "l": "casual"}, {"n": "nar", "t": "Giggling drifts out of Mali's bedroom window"}]}]}], [{"n": "nar", "t": "Kati takes you to the old ring by the market, where Grandpa Chai fought forty years ago. It's abandoned now", "bg": "ring"}, {"n": "kati", "t": "Grandpa said this is where he proposed to Grandma. In front of the whole crowd", "f": "happy", "l": "casual"}, {"n": "kati", "t": "…I don't mean anything by it! Just telling you!", "f": "flustered", "l": "casual"}, {"choice": [{"t": "Then let's come back here together someday", "sc": 3, "then": [{"n": "kati", "t": "…Okay. That's a promise. I'll remember today", "f": "flustered", "l": "casual"}]}, {"t": "Grandpa was brave", "sc": 2, "then": [{"n": "kati", "t": "He was. Grandma said she was so embarrassed she wanted to crawl under the ring, haha", "f": "happy", "l": "casual"}]}]}]], "mali": [[{"n": "nar", "t": "Mali hands you her phone: a video call from Isan, a woman beaming with a huge buffalo behind her", "bg": "camp"}, {"n": "mali", "t": "Mom, this is… Mali's partner! And that's Thongkham behind Mom. Say hi", "f": "flustered", "l": "casual"}, {"n": "nar", "t": "Mali's mom speaks Isan dialect so fast you only catch 'Have you eaten yet?'"}, {"choice": [{"t": "I have! Thank you for raising Mali so well", "sc": 3, "then": [{"n": "mali", "t": "Mom's crying! She says you have to come home for New Year", "f": "happy", "l": "casual"}]}, {"t": "Wave at Thongkham", "sc": 2, "then": [{"n": "mali", "t": "Thongkham wagged his tail! He likes you. First test passed!", "f": "happy", "l": "casual"}]}]}], [{"n": "nar", "t": "Mali booked the biggest karaoke room, just like she said. But it's only the two of you", "bg": "night"}, {"n": "mali", "t": "Duet! No skipping the high notes!", "f": "happy", "l": "casual"}, {"choice": [{"t": "Sing at full volume", "sc": 3, "then": [{"n": "nar", "t": "You both belt out luk thung until staff knock three times asking you to keep it down"}, {"n": "mali", "t": "This is the best night of Mali's life!", "f": "happy", "l": "casual"}]}, {"t": "I'd rather just listen to you", "sc": 2, "then": [{"n": "mali", "t": "Then Mali's singing this one just for you. …Listen carefully", "f": "flustered", "l": "casual"}]}]}], [{"n": "nar", "t": "Mali brings you to a little khanom khrok stall behind the market, the kind she says she'll open someday", "bg": "food"}, {"n": "mali", "t": "Mali has a new shop name. Instead of 'Champion Khanom Khrok', maybe 'Our Khanom Khrok'", "f": "happy", "l": "casual"}, {"n": "mali", "t": "…'Our' meaning you and Mali. If you don't mind", "f": "flustered", "l": "casual"}, {"choice": [{"t": "I'll be the one washing the pans", "sc": 3, "then": [{"n": "mali", "t": "Deal! You promised. Washing pans for life!", "f": "happy", "l": "casual"}]}, {"t": "The old name was nice too", "sc": 2, "then": [{"n": "mali", "t": "Then 'Our Champion Khanom Khrok'. Both names~", "f": "happy", "l": "casual"}]}]}]], "rin": [[{"n": "nar", "t": "Rin sent a schedule three days early, titled 'Date No. 1 (Official)', planned down to the minute", "bg": "cafe"}, {"n": "rin", "t": "14:00 tea. 14:20 small talk. 14:35 hold hands (if appropriate). …I left a ten-minute buffer", "f": "flustered", "l": "casual"}, {"choice": [{"t": "What time is it now?", "sc": 3, "then": [{"n": "rin", "t": "…Exactly 14:35", "f": "flustered", "l": "casual"}, {"n": "nar", "t": "Rin rests her hand on the table, right on schedule"}]}, {"t": "Want to ditch the schedule for a day?", "sc": 2, "then": [{"n": "rin", "t": "No schedule… fine, I'll try. If my heart rate goes over plan, that's on you", "f": "flustered", "l": "casual"}]}]}], [{"n": "nar", "t": "Rin shows up to morning training in round glasses. The whole camp goes silent for five seconds", "bg": "camp"}, {"n": "rin", "t": "…No need to stare. I chose based on data I collected, that a certain someone likes round frames", "f": "flustered", "l": "casual"}, {"choice": [{"t": "They suit you perfectly", "sc": 3, "then": [{"n": "rin", "t": "Recorded. 100% satisfaction. …Mine too", "f": "happy", "l": "casual"}]}, {"t": "Who likes round frames, I wonder", "sc": 2, "then": [{"n": "rin", "t": "…Don't pretend you forgot. That data came from you", "f": "flustered", "l": "casual"}]}]}], [{"n": "nar", "t": "Friday night. Rin sits at the computer in the analysis room, drawing some kind of graph", "bg": "night"}, {"n": "rin", "t": "This is my happiness graph since joining Sirichai. Vertical axis, happiness. Horizontal, weeks", "f": "happy", "l": "casual"}, {"n": "rin", "t": "The highest spike… is the week you said yes. Data doesn't lie", "f": "flustered", "l": "casual"}, {"choice": [{"t": "Then let's keep it climbing", "sc": 3, "then": [{"n": "rin", "t": "A good objective. I'll track it weekly", "f": "happy", "l": "casual"}]}, {"t": "That's a beautiful graph", "sc": 2, "then": [{"n": "rin", "t": "…Are you complimenting the graph or me? Please specify", "f": "flustered", "l": "casual"}]}]}]]};
@@ -2831,18 +2890,18 @@ function dateScene(G,id,act){
       if(typeof hasSignature!=="undefined"&&hasSignature(f)&&!G2.seen["sig_"+id]){G2.seen["sig_"+id]=true;out.push({n:"nar",t:`✦ The bond unlocked the signature move of ${f.name}: "${SIGNATURE[id].name}" — ${SIGNATURE[id].desc}`});}
       if(f.bond>=40&&!G2.seen["b1_"+id]){G2.seen["b1_"+id]=true;out.push(...BOND_EVENTS[id].lv1.map(x=>({l:look,...x})));}
       if(f.bond>=75&&f.trust>=40&&RIVAL_LOVE.includes(id)&&f.camp==="player"&&(G2.season||1)>=2&&!isLov(G2,id)&&!exWait(G2,id)&&!G2.seen["love2_"+id]){G2.seen["love2_"+id]=true;
-        out.push(...LOVE_EVENTS[id].map(x=>({l:"casual",...x})),{choice:[
-          {t:"I feel the same way",fx:G3=>takeLover(G3,id),then:[{n:id,f:"flustered",l:"casual",t:LOVE_YES[id]}]},
+        out.push(...LOVE_EVENTS[id].map(x=>({l:"casual",...x})),...cheatWarn(G2,id),{choice:[
+          {t:yesTxt(G2,id,"I feel the same way"),fx:G3=>takeLover(G3,id),then:[{n:id,f:"flustered",l:"casual",t:LOVE_YES[id]}]},
           {t:"Thank you, but I want to keep being the one beside you like this",fx:G3=>{add(G3,id,"trust",5);},then:[{n:id,f:"sad",l:"casual",t:LOVE_NO[id]||"…Got it."}]},...takenOpt(G2,id)]});}
-      else if(f.bond>=75&&f.trust>=40&&RIVAL_LOVE.includes(id)&&f.camp==="rival"&&!G2.seen["love_"+id]){G2.seen["love_"+id]=true;out.push(...lvSteps(PROMISE_EVENTS[id],null,G2,id,true).map(x=>x.choice?{choice:[...x.choice,...takenOpt(G2,id)]}:{l:"casual",...x}),{inject:G3=>isProm(G3,id)?[{n:"nar",t:`Relationship with ${f.name}: Promised ♡ · this story continues in season two`}]:[]});}
+      else if(f.bond>=75&&f.trust>=40&&RIVAL_LOVE.includes(id)&&f.camp==="rival"&&!G2.seen["love_"+id]){G2.seen["love_"+id]=true;out.push(...lvSteps(PROMISE_EVENTS[id],null,G2,id,true).flatMap(x=>x.choice?[...cheatWarn(G2,id),{choice:[...x.choice,...takenOpt(G2,id)]}]:[{l:"casual",...x}]),{inject:G3=>isProm(G3,id)?[{n:"nar",t:`Relationship with ${f.name}: Promised ♡ · this story continues in season two`}]:[]});}
       else if(f.bond>=75&&f.trust>=40&&!isLov(G2,id)&&!RIVAL_LOVE.includes(id)&&!G2.seen["love_"+id]){G2.seen["love_"+id]=true;
-        out.push(...LOVE_EVENTS[id].map(x=>({l:"casual",...x})),{choice:[
-          {t:"I feel the same way",fx:G3=>takeLover(G3,id),then:[{n:id,f:"flustered",l:"casual",t:LOVE_YES[id]}]},
+        out.push(...LOVE_EVENTS[id].map(x=>({l:"casual",...x})),...cheatWarn(G2,id),{choice:[
+          {t:yesTxt(G2,id,"I feel the same way"),fx:G3=>takeLover(G3,id),then:[{n:id,f:"flustered",l:"casual",t:LOVE_YES[id]}]},
           {t:"Thank you, but I want to keep being the one beside you like this",fx:G3=>{add(G3,id,"trust",5);G3.loveNo=G3.loveNo||{};G3.loveNo[id]=G3.week;},then:[{n:id,f:"sad",l:"casual",t:LOVE_NO[id]}]},...takenOpt(G2,id)]});}
       // v1.29.3: a second chance — she won't ask twice, but after a while she lets you know the door is still open
       else if(f.bond>=75&&f.trust>=40&&!isLov(G2,id)&&!exWait(G2,id)&&!RIVAL_LOVE.includes(id)&&G2.seen["love_"+id]&&G2.week-((G2.loveNo&&G2.loveNo[id])||-99)>=2){G2.loveNo=G2.loveNo||{};G2.loveNo[id]=G2.week;
-        out.push({n:id,f:"flustered",l:"casual",t:isEx(G2,id)?LOVE_EX[id]:LOVE_AGAIN[id]},{choice:[
-          {t:isEx(G2,id)?"I still miss you too. Let's get back together":"I answered too fast that day. I feel the same way",fx:G3=>takeLover(G3,id),then:[{n:id,f:"flustered",l:"casual",t:LOVE_YES[id]}]},
+        out.push({n:id,f:"flustered",l:"casual",t:isEx(G2,id)?LOVE_EX[id]:LOVE_AGAIN[id]},...cheatWarn(G2,id),{choice:[
+          {t:yesTxt(G2,id,isEx(G2,id)?"I still miss you too. Let's get back together":"I answered too fast that day. I feel the same way"),fx:G3=>takeLover(G3,id),then:[{n:id,f:"flustered",l:"casual",t:LOVE_YES[id]}]},
           {t:"I'd like to stay by your side, just like this",fx:G3=>add(G3,id,"trust",2),then:[{n:"nar",t:`${f.name} smiles and nods, and says nothing more`}]}]});}
       return out;}}];
   if(romOf(G,id)&&LOVER_DATES[id]){f.lovIdx=f.lovIdx||0;const lw=(G.lovWk||{})[id],since=absWeek(G)-(lw!=null?lw:absWeek(G)-1);
@@ -3555,7 +3614,7 @@ const HEART_SCENES={
  30:{bg:"river",need:G=>!!G.F.fah.met,steps:[{n:"nar",t:"Fah's birthday, October 31. She's dressed as the silver-haired witch as always, but this year Grandma's house is packed"},{n:"nar",t:"Neighbourhood kids come for candy, market vendors bring sausages, tattoo clients bring cake. Nobody goes to any other Halloween party"},{n:"fah",f:"flustered",l:"casual",t:"…Why is everyone here? Nobody ever comes to my birthday"},{n:"nar",t:"Grandma whispers, 'Someone went door to door inviting the whole street last week,' and looks at you"},{n:"fah",f:"sad",l:"casual",t:"…You. Why would you do this? I said I didn't want a present. Just you there till the candles went out"},{choice:[{t:"I'm staying till the candles go out. And after that too",fx:G=>add(G,"fah","bond",3),then:[{inject:G=>romOf(G,"fah")?[{n:"nar",t:"Fah blows out the last candle, then tugs your sleeve out to the pier behind the house"},{n:"fah",f:"flustered",l:"casual",t:"…Darling. I can say it now. Every day. From now on I won't fear you leaving, because you promised. No take-backs. For life!"}]:[{n:"fah",f:"happy",l:"casual",t:"…You!! Fine! Best birthday of my life! Happy now?! …Thank you"}]}]},{t:"Your birthday should've always been like this",fx:G=>add(G,"fah","trust",4),then:[{n:"fah",f:"happy",l:"casual",t:"…It wasn't from the start. But from now on it is. That's enough"}]}]},{n:"fah",f:"happy",l:"casual",t:"Come on! I'm giving the kids every last candy. This year the silver-haired witch is the kindest one!"}]}}};
 for(const id in HEART_SCENES)for(const lv in HEART_SCENES[id]){const S=HEART_SCENES[id][lv];
   EVENTS.push({id:`hs_${id}_${lv}`,look:"casual",bg:S.bg,
-    when:G=>{const f=G.F[id];return !!(f&&f.met&&hAt(G,id)>=+lv&&(S.need?S.need(G):f.camp==="player")&&!isAway(G,id)&&!(+lv>=30&&G.harem&&isPartner(G,id))&&absWeek(G)-(G.lastBeat||0)>=2);},/* v1.89.11: on the harem route the top scene gives way to the group ones */
+    when:G=>{const f=G.F[id];return !!(f&&f.met&&hAt(G,id)>=+lv&&(S.need?S.need(G):f.camp==="player")&&!isAway(G,id)&&!(+lv>=30&&isPartner(G,id)&&partners(G).length>1)&&absWeek(G)-(G.lastBeat||0)>=2);},/* v1.89.11: on the harem route the top scene gives way to the group ones */
     steps:[{fx:G=>{G.lastBeat=absWeek(G);}},...S.steps]});}
 
 // ---------- sportsmanship ----------

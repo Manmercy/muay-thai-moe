@@ -21,7 +21,7 @@ const bondCap=G=>100;
 // v1.44: bond grows a bit faster, and the girls who join later catch up while still distant
 const BOND_MUL=.3,BOND_LATE=["mali","rin"];
 const absWeek=G=>((G.season||1)-1)*52+G.week;
-const add=(G,id,k,v)=>{const f=G.F[id];if(!f)return;if(k==="bond"&&v>0)f.lastTouch=absWeek(G);if(k==="bond"&&v>0)v=Math.max(.5,Math.round(v*BOND_MUL*(BOND_LATE.includes(id)&&(f.bond||0)<50?1.6:1)*2)/2);
+const add=(G,id,k,v)=>{const f=G.F[id];if(!f)return;if(k==="bond"&&v>0&&typeof partners==="function"&&LOVE_IDS.includes(id)&&!isPartner(G,id)){const n=partners(G).length;if(n)v*=n>=2?.6:.75;}/* v1.89.11: courting while taken is slower */if(k==="bond"&&v>0)f.lastTouch=absWeek(G);if(k==="bond"&&v>0)v=Math.max(.5,Math.round(v*BOND_MUL*(BOND_LATE.includes(id)&&(f.bond||0)<50?1.6:1)*2)/2);
   if(k==="bond"){const lv0=heartLv(f).lv;/* v1.86: affection past 100 keeps counting as heart levels (bond itself stays 0–100 for every existing check) */
     if(v>=0){const t=(f.bond||0)+v;f.bond=Math.min(100,t);if(t>100)f.bondX=(f.bondX||0)+(t-100);}
     else{let d=-v;const x=Math.min(f.bondX||0,d);if(x>0){f.bondX-=x;d-=x;}if(d>0)f.bond=Math.max(0,(f.bond||0)-d);}
@@ -264,7 +264,7 @@ const EVENTS=[
   {n:"kati",f:"flustered",t:"ผู้จัดการคะ… ขอบคุณที่ไม่ขายค่ายตั้งแต่วันแรกนะคะ"},
   {choice:[{t:"ขอบคุณที่ซ้อมรอฉันอยู่ตรงนี้",fx:G=>{for(const f of roster(G)){add(G,f.id,"morale",10);add(G,f.id,"bond",3);}},then:[{n:"kati",f:"happy",t:"พรุ่งนี้เราไปเอาเข็มขัดกันค่ะ!"}]}]}]},
  {id:"lover_final",look:"fight",when:G=>G.week>=48&&!!lovFinal(G),bg:"ring",
-  steps:[{inject:G2=>{const L=lovFinal(G2);if(!L)return [];add(G2,L.b.a,"morale",8);return LOVER_FINAL[L.id]||[];}}]},
+  steps:[{inject:G2=>{const L=lovFinal(G2);if(!L)return [];if(lovSolo(G2))add(G2,L.b.a,"morale",8);return LOVER_FINAL[L.id]||[];}}]},
  // v1.32 fame milestones: something visible happens when the camp's name grows
  // v1.33: the camp itself nudges you toward upgrades, and the coach sits down to talk money
  {id:"up_rope",look:"train",when:G=>G.week>=7&&facTotal(G)<3,bg:"gym",steps:[
@@ -389,13 +389,13 @@ const isPartner=(G,id)=>partners(G).includes(id);
 const romOf=(G,id)=>isLov(G,id)&&!G.harem; // lover-only scenes; on the harem route the top scenes give way to group ones
 const romFirst=G=>G.harem?null:(lovList(G)[0]||null);
 function setLovers(G,L){G.lovers=[...new Set(L)];G.romance=G.lovers[0]||null;G.romWk=G.romance?((G.lovWk||{})[G.romance]??null):null;}
-function takeLover(G,id){G.lovWk=G.lovWk||{};G.lovWk[id]=absWeek(G);if(G.promise)delete G.promise[id];if(G.exAbs)delete G.exAbs[id];setLovers(G,[...lovList(G),id]);add(G,id,"morale",15);}
+function takeLover(G,id){const solo=!partners(G).some(k=>k!==id);G.lovWk=G.lovWk||{};G.lovWk[id]=absWeek(G);if(G.promise)delete G.promise[id];if(G.exAbs)delete G.exAbs[id];setLovers(G,[...lovList(G),id]);if(solo)add(G,id,"morale",15);}
 const isAway=(G,id)=>{const f=G&&G.F&&G.F[id];return !!(f&&f.awayAbs!=null&&absWeek(G)<f.awayAbs);};
 const awayLeft=(G,id)=>isAway(G,id)?G.F[id].awayAbs-absWeek(G):0;
 const awaySpeaks=(G,steps)=>(steps||[]).some(x=>x&&typeof x.n==="string"&&isAway(G,x.n));
 function sendAway(G,id,wk,why){const f=G.F[id];if(!f)return;const now=absWeek(G);f.awayAbs=Math.max(isAway(G,id)?f.awayAbs:0,now+wk);f.awayWhy=why;f.awayBack=false;}
 const lovFinal=G=>{for(const id of lovList(G)){if(!romOf(G,id)||!LOVER_FINAL[id])continue;const b=G.bookings.find(b=>b.tier==="final"&&G.F[b.a].camp==="player"&&(b.a===id||id==="rin"));if(b)return {id,b};}return null;};
-function relTag(G,f){const id=f.id;let t=isLov(G,id)?" · คนรัก ♥":isProm(G,id)?" · สัญญาไว้ ♡":isEx(G,id)?" · เคยคบ":"";
+function relTag(G,f){const id=f.id;let t=isLov(G,id)?(G.harem?" · คนรัก ♥ (ฮาเร็ม)":" · คนรัก ♥"):isProm(G,id)?" · สัญญาไว้ ♡":isEx(G,id)?" · เคยคบ":"";
   if(isAway(G,id))t+=f.camp==="player"?` · ไม่อยู่ค่าย (อีก ${awayLeft(G,id)} สัปดาห์)`:` · ไม่ติดต่อมา (อีก ${awayLeft(G,id)} สัปดาห์)`;return t;}
 // she confesses while you are already with someone — you can tell her the truth
 const LOVE_TAKEN={kati:"…อย่างนั้นเองเหรอคะ หนูขอโทษที่พูดออกไป ลืมมันไปนะคะ",mali:"อ๋อ… มีแล้วนี่เอง ไม่เป็นไรค่ะ มะลิยินดีด้วยนะ",
@@ -444,7 +444,7 @@ function runAway(G,id,wk){const f=G.F[id];sendAway(G,id,wk,"cheat");const mine=f
 function ringSteps(G,a,b,hard){const A=G.F[a].name,B=G.F[b].name;
   return [{fx:()=>{if(typeof UI!=="undefined"&&UI.scene)UI.scene.lookOf={};}},/* into fight gear for the ring */
     {n:"nar",bg:"gym",t:`${A}กับ${B}มองหน้ากันแค่วินาทีเดียว แล้วเดินขึ้นเวทีพร้อมกันโดยไม่มีใครสั่ง`},
-    {n:a,f:"angry",l:"fight",t:vx(G,a,FIGHT_TAUNT),with:b},{n:b,f:"angry",l:"fight",t:vx(G,b,FIGHT_TAUNT),with:a},
+    {n:a,f:"angry",l:"fight",t:ringTaunt(G,a,b),with:b},{n:b,f:"angry",l:"fight",t:ringTaunt(G,b,a),with:a},
     {n:"nar",t:"คุณทำได้แค่ยืนข้างเวที แล้วตะโกนห้ามให้ถูกจังหวะ"},
     {brawl:{a,b,hard},after:(G2,res)=>ringAfter(G2,a,b,hard,res||{sc:0})}];}
 function ringAfter(G,a,b,hard,res){const A=G.F[a].name,B=G.F[b].name,ok=res.sc>=5,r=[];
@@ -521,6 +521,65 @@ EVENTS.push(
    return [...((f.awayWhy==="break"?BREAK_BACK:RUN_BACK)[id]||[]).map(x=>({l:"casual",...x})),{fx:G2=>{delete G2.seen.lv_back;}}];}}]},
  ...HAREM_SCENES.map((S,i)=>({id:"lv_hm"+(i+1),look:"casual",bg:S.bg,when:G=>!!G.harem&&G.haremAbs!=null&&absWeek(G)-G.haremAbs>=S.wk&&partners(G).length>=2&&!partners(G).some(k=>isAway(G,k)),
    steps:[{inject:G=>[{n:"nar",t:S.open},...partners(G).map(k=>({n:k,f:"happy",l:"casual",t:vx(G,k,S.say)})),{n:"nar",t:S.close}]}]})));
+// --- v1.89.11: every pair has its own quarrel — in the Valentine ring and in the spats while you see more than one ---
+const pairKey=(a,b)=>[a,b].sort((x,y)=>LOVE_IDS.indexOf(x)-LOVE_IDS.indexOf(y)).join("_");
+const PAIR={
+ kati_mali:{ring:{kati:"มะลิ พี่เคยยกข้าวเหนียวมะม่วงให้ได้ แต่อันนี้ไม่ยกให้นะ!",mali:"พี่กะทิไม่ต้องยก! มะลิจะชนะเอาเอง!"},
+  spat:[["mali","pout","พี่กะทิได้นั่งข้างผู้จัดการตอนกินข้าวสามวันติดแล้วนะ วันนี้ตามะลิ!"],["kati","angry","ก็หนูมาก่อน! หนูอยู่ค่ายนี้ก่อนมะลิอีก!"],["mali","angry","มาก่อนไม่ได้แปลว่าจองได้ตลอดชีวิตนะคะ!"]]},
+ kati_rin:{ring:{kati:"รินคำนวณได้ทุกอย่าง แต่คำนวณใจผู้จัดการไม่ได้หรอก!",rin:"คำนวณได้ค่ะ ผลออกมาว่าเธอเสียเปรียบ"},
+  spat:[["rin","pout","กะทิ เมื่อวานผู้จัดการคุยกับเธอสี่สิบนาที กับฉันยี่สิบนาที ฉันจดไว้"],["kati","angry","จดทำไมเล่า! จะเอาไปฟ้องใคร!"],["rin","pout","ไม่ได้ฟ้อง แค่ข้อมูลไม่สมดุล และฉันไม่ชอบข้อมูลที่ไม่สมดุล"]]},
+ kati_ploy:{ring:{kati:"พี่พลอยสอนหนูมาตลอด วันนี้หนูจะให้ดูว่าเรียนจบแล้ว!",ploy:"ยังเร็วไปสิบปีนะ น้องกะทิ"},
+  spat:[["ploy","happy","น้องกะทิ พี่ขอยืมผู้จัดการไปดูไฟต์ที่สนามอำเภอวันเสาร์นะ"],["kati","angry","ไม่ใช่ของให้ยืมนะคะพี่พลอย! แล้ววันเสาร์เขามีนัดกับหนู!"],["ploy","flustered","งั้นไปกันสามคน …ล้อเล่น พี่ไปคนเดียวก็ได้"]]},
+ kati_fah:{ring:{kati:"ฟ้า! เวทีนี้ไม่ใช่ที่ให้มาเล่นนะ!",fah:"ฟ้าไม่ได้มาเล่น! ฟ้ามาเอาคืน!"},
+  spat:[["fah","pout","กะทิ! เมื่อวานใครเอาไส้กรอกยายฟ้าไปให้ผู้จัดการ!"],["kati","pout","หนูให้ขนมเปี๊ยะร้านปู่ต่างหาก ไม่ได้แตะไส้กรอกเธอเลย!"],["fah","angry","…งั้นแปลว่าเธอก็ให้ของเขาเหมือนกันสินะ! ไม่ยอม!"]]},
+ mali_rin:{ring:{mali:"ริน! ตารางเดตของรินไม่มีชื่อมะลิเลยนะ!",rin:"เพราะตารางนั้นทำไว้ก่อนฉันรู้ว่าเธอเป็นคู่แข่งค่ะ"},
+  spat:[["mali","pout","รินแอบแก้ตารางให้ตัวเองได้วันอาทิตย์ทุกอาทิตย์ใช่ไหม!"],["rin","flustered","…วันอาทิตย์เป็นวันที่ทุกคนว่างที่สุด เป็นการตัดสินใจเชิงข้อมูลค่ะ"],["mali","angry","ข้อมูลอะไรล่ะ! ข้อมูลว่ารินอยากไปเองต่างหาก!"]]},
+ mali_ploy:{ring:{mali:"พี่พลอยเก่งทุกอย่าง แต่เรื่องนี้มะลิไม่ยอม!",ploy:"ไม่ต้องยอม พี่ก็ไม่ได้ขอ"},
+  spat:[["mali","sad","พี่พลอยสวยกว่า เก่งกว่า แล้วยังจะเอาผู้จัดการไปอีกเหรอคะ…"],["ploy","sad","…พี่ไม่ได้อยากชนะเธอเรื่องนี้นะมะลิ"],["mali","pout","แต่พี่ก็ไม่ยอมแพ้ใช่ไหมล่ะ!"]]},
+ mali_fah:{ring:{mali:"ฟ้า! คาราโอเกะคืนนั้นผู้จัดการร้องคู่กับมะลินะ!",fah:"แล้วไง! เขาซ้อนมอเตอร์ไซค์ฟ้ามาตั้งสามรอบ!"},
+  spat:[["fah","angry","มะลิ! ส่งสติกเกอร์หัวใจให้ผู้จัดการวันละสิบอัน บ้ารึเปล่า!"],["mali","happy","ฟ้าก็ส่งสติกเกอร์แมววันละยี่สิบอันเหมือนกันนี่นา~"],["fah","flustered","น-นั่นมันแมว! ไม่เหมือนกัน!"]]},
+ rin_ploy:{ring:{rin:"ฉันวิเคราะห์ไฟต์ของพี่มาสามปีแล้วค่ะ วันนี้ได้ใช้สักที",ploy:"สามปีข้างเวที กับสามนาทีบนเวที ไม่เหมือนกันนะ"},
+  spat:[["rin","pout","พลอย สถิติบอกว่าผู้จัดการยิ้มตอนอ่านแชทเธอบ่อยกว่าแชทฉัน 1.4 เท่า"],["ploy","happy","เธอนั่งนับตอนเขาอ่านแชทด้วยเหรอ น่ากลัวนะเนี่ย"],["rin","angry","…ไม่ได้นับ แค่สังเกต และฉันขอเปลี่ยนเรื่องค่ะ"]]},
+ rin_fah:{ring:{rin:"เธอต่อยแบบไม่มีแผน ฉันอ่านขาดตั้งแต่ก้าวแรก",fah:"แผนอะไร! ใจไปทางไหน หมัดฟ้าก็ไปทางนั้น!"},
+  spat:[["fah","angry","ริน! เขียนในแฟ้มว่า 'ฟ้า: ความเสี่ยงสูง' หมายความว่าไง!"],["rin","happy","หมายความว่าเธอเป็นความเสี่ยงสูงค่ะ ทั้งบนเวที และในใจผู้จัดการ"],["fah","flustered","…ห-หา!? อันหลังนั่นชมหรือด่ากันแน่!"]]},
+ ploy_fah:{ring:{ploy:"ซ้อมเจอกันมาตั้งหลายปี ฟ้ายังไม่เคยชนะพี่เลยนะ",fah:"วันนี้แหละ! ฟ้าจะชนะพี่ ทั้งบนเวที ทั้งเรื่องนี้!"},
+  spat:[["fah","pout","พี่พลอย! เมื่อวานไปนั่งริมน้ำกับผู้จัดการใช่ไหม! ตรงนั้นที่ของฟ้านะ!"],["ploy","happy","ริมน้ำปิงยาวตั้งหลายกิโล ฟ้าจองไว้หมดเลยเหรอ"],["fah","angry","ใช่! ทั้งสาย! ห้ามใครไปนั่ง!"]]}};
+const pairOf=(a,b)=>PAIR[pairKey(a,b)];
+const ringTaunt=(G,me,other)=>{const P=pairOf(me,other);return (P&&P.ring[me])||vx(G,me,FIGHT_TAUNT);};
+// a pair already argued once — later spats use a short line each
+const SPAT_AGAIN={kati:"เรื่องเดิมอีกแล้ว! หนูไม่ยอมหรอกนะคะ!",mali:"มะลิพูดดี ๆ แล้วนะ! แต่ไม่มีใครฟังเลย!",rin:"ฉันบันทึกไว้แล้วว่านี่เป็นครั้งที่สามในเดือนนี้",
+  ploy:"พี่ไม่อยากทะเลาะ แต่จะไม่ถอยด้วย",fah:"อีกแล้วเหรอ! ฟ้าเบื่อจะเถียงแล้วนะ! …แต่จะเถียงต่อ!"};
+const SIDE_WIN={kati:"…เห็นไหม ผู้จัดการเข้าข้างหนู",mali:"เย้! ผู้จัดการเข้าใจมะลิที่สุด~",rin:"ขอบคุณค่ะ ข้อมูลของฉันถูกต้องอีกแล้ว",ploy:"ขอบใจนะ …พี่ไม่ได้ขอให้เข้าข้างหรอก แต่ก็ดีใจ",fah:"ฮ่า! ใครถูกก็รู้ ๆ กันอยู่!"};
+const SIDE_LOSE={kati:"…ค่ะ หนูเข้าใจแล้ว",mali:"อ๋อ… ค่ะ มะลิผิดเองแหละ",rin:"รับทราบค่ะ ฉันจะไม่พูดเรื่องนี้อีก",ploy:"อย่างนั้นเอง พี่จำไว้แล้ว",fah:"ฮึ! ก็ได้! ไม่ได้เสียใจหรอก!"};
+const CLASH_ASK={kati:"คืนนี้ไปไหว้พระที่วัดกับหนูไหมคะ ไฟประดับสวยมาก",mali:"คืนนี้คาราโอเกะลดครึ่งราคา! ไปด้วยกันนะคะ~",rin:"คืนนี้ฉันจองโต๊ะร้านชาไว้แล้วค่ะ หนึ่งทุ่มตรง",
+  ploy:"คืนนี้พี่ว่าง ไปเดินริมน้ำกันไหม",fah:"คืนนี้ซ้อนมอเตอร์ไซค์ไปกินไส้กรอกกัน! ห้ามปฏิเสธ!"};
+const CLASH_YES={kati:"มาจริง ๆ ด้วย! …หนูนึกว่าคุณจะไปที่อื่นซะอีก",mali:"เย้! เพลงแรกเพลงคู่นะคะ!",rin:"ตรงเวลาพอดีค่ะ ฉันชอบ",ploy:"ดีใจที่เลือกพี่นะ",fah:"ฮ่า! รู้อยู่แล้วว่านายต้องเลือกฟ้า!"};
+const CLASH_NO={kati:"ไม่เป็นไรค่ะ หนูไปไหว้พระคนเดียวก็ได้",mali:"อ๋อ… ไม่ว่างเหรอคะ งั้นมะลิร้องคนเดียวก็ได้",rin:"ยกเลิกการจองแล้วค่ะ",ploy:"เข้าใจแล้ว",fah:"ฮึ! ไม่ว่างก็ไม่ว่างสิ!"};
+const lvRoll=(G,salt)=>mulberry32(((G.seed||1)*7+absWeek(G)*131+salt)>>>0)();
+const lvPresent=G=>partners(G).filter(k=>!isAway(G,k));
+/* one spat pair: the two who are not both very close to you — the lowest pair first */
+const spatPair=G=>{const P=lvPresent(G);let best=null;for(let i=0;i<P.length;i++)for(let j=i+1;j<P.length;j++){const a=P[i],b=P[j],ta=bondTot(G.F[a]),tb=bondTot(G.F[b]);if(ta>=100&&tb>=100)continue;if(!best||ta+tb<best.s)best={a,b,s:ta+tb};}return best;};
+const sideOpts=(a,b,G)=>[{t:`เข้าข้าง${G.F[a].name}`,fx:G2=>{add(G2,a,"bond",3);add(G2,b,"bond",-5);},then:[{n:a,f:"happy",l:"casual",t:SIDE_WIN[a],with:b},{n:b,f:"sad",l:"casual",t:SIDE_LOSE[b],with:a}]},
+  {t:`เข้าข้าง${G.F[b].name}`,fx:G2=>{add(G2,b,"bond",3);add(G2,a,"bond",-5);},then:[{n:b,f:"happy",l:"casual",t:SIDE_WIN[b],with:a},{n:a,f:"sad",l:"casual",t:SIDE_LOSE[a],with:b}]},
+  {t:"ห้ามทั้งคู่ ไม่เข้าข้างใคร",fx:G2=>{add(G2,a,"bond",-2);add(G2,b,"bond",-2);},then:[{n:"nar",t:"ทั้งคู่หยุดเถียง แต่ไม่มีใครพอใจคุณเลยสักคน"}]}];
+function spatSteps(G){const p=spatPair(G);if(!p)return [];const {a,b}=p,k=pairKey(a,b);G.spatDone=G.spatDone||{};const first=!G.spatDone[k];G.spatDone[k]=(G.spatDone[k]||0)+1;G.spatAbs=absWeek(G);
+  const lines=first&&pairOf(a,b)?pairOf(a,b).spat.map(([n,f,t])=>({n,f,l:"casual",t,with:n===a?b:a})):[{n:a,f:"angry",l:"casual",t:SPAT_AGAIN[a],with:b},{n:b,f:"angry",l:"casual",t:SPAT_AGAIN[b],with:a}];
+  return [{n:"nar",bg:"camp",t:`เสียงเถียงกันดังมาจากหลังค่าย ${G.F[a].name}กับ${G.F[b].name}หันมาเห็นคุณพอดี`},...lines,{choice:sideOpts(a,b,G)},{n:"nar",t:"เข้าข้างคนไหน คนนั้นความสนิท +3 อีกคน −5 · ห้ามทั้งคู่ −2 ทั้งคู่"}];}
+function clashSteps(G){const P=lvPresent(G),r=lvRoll(G,9),i=Math.floor(r*P.length),a=P[i],b=P[(i+1+Math.floor(lvRoll(G,11)*(P.length-1)))%P.length];G.clashAbs=absWeek(G);
+  const go=(x,y)=>({t:`ไปกับ${G.F[x].name}`,fx:G2=>{add(G2,x,"bond",3);add(G2,y,"bond",-5);},then:[{n:x,f:"happy",l:"casual",t:CLASH_YES[x]},{n:"nar",t:`ข้อความจาก${G.F[y].name}: "${CLASH_NO[y]}"`}]});
+  return [{n:"nar",bg:"night",t:"เย็นวันศุกร์ แชทสองห้องเด้งขึ้นมาพร้อมกัน นัดเวลาเดียวกันเป๊ะ"},{n:a,f:"happy",l:"casual",t:CLASH_ASK[a]},{n:b,f:"happy",l:"casual",t:CLASH_ASK[b]},
+    {choice:[go(a,b),go(b,a),{t:"ขอโทษทั้งคู่ คืนนี้ไม่ไปไหน",fx:G2=>{add(G2,a,"bond",-1);add(G2,b,"bond",-1);},then:[{n:"nar",t:"คุณนั่งดูเพดานอยู่คนเดียวทั้งคืน ไม่มีใครได้อะไรเลย"}]}]},
+    {n:"nar",t:"นัดชนกัน: คนที่ได้ไป ความสนิท +3 · อีกคน −5"}];}
+const lvBusyWeek=G=>G.lvEvAbs===absWeek(G);
+EVENTS.push(
+ {id:"lv_clash",look:"casual",bg:"night",when:G=>!G.harem&&lvPresent(G).length>=2&&!lvBusyWeek(G)&&absWeek(G)-(G.clashAbs??-99)>=3&&lvRoll(G,3)<.25,
+  steps:[{inject:G=>{G.lvEvAbs=absWeek(G);return clashSteps(G);}},{fx:G=>{delete G.seen.lv_clash;}}]},
+ {id:"lv_spat",look:"casual",bg:"camp",when:G=>lvPresent(G).length>=2&&!lvBusyWeek(G)&&absWeek(G)-(G.spatAbs??-99)>=4&&!!spatPair(G)&&lvRoll(G,5)<(G.harem?.06:.2),
+  steps:[{inject:G=>{G.lvEvAbs=absWeek(G);return spatSteps(G);}},{fx:G=>{delete G.seen.lv_spat;}}]});
+// warn before a second "yes"
+const cheatWarn=(G,id)=>partners(G).some(k=>k!==id)?[{n:"nar",t:"⚠ คุณมีคนรักอยู่แล้ว ถ้าตอบรับจะกลายเป็นคบซ้อน · โบนัสคนรักหายทันที · ฉากหัวใจขั้นสูงสุดจะไม่ขึ้น · นัดชนและทะเลาะกันบ่อยขึ้น · วันวาเลนไทน์จะโดนจับได้"}]:[];
+const yesTxt=(G,id,t)=>partners(G).some(k=>k!==id)?t+" (คบซ้อน)":t;
+const lovSolo=G=>partners(G).length===1; /* the lover bonus only holds while you see one person */
 // v1.30: lovers get their own dates/scenes; Ploy & Fah make a promise instead (romance with them waits for season 2)
 const RIVAL_LOVE=["ploy","fah"];
 const LOVER_DATES={"kati": [[{"n": "nar", "t": "เช้าวันอาทิตย์ กะทิพาคุณไปวัดท้ายหมู่บ้าน ถือพวงมาลัยกับขนมเปี๊ยะที่ปู่ชอบ", "bg": "camp"}, {"n": "kati", "t": "ปู่คะ นี่คือคนที่หนูเล่าให้ฟังบ่อย ๆ ค่ะ …วันนี้มาแบบแฟนแล้วนะคะ", "f": "happy", "l": "casual"}, {"n": "kati", "t": "ปู่คงหัวเราะอยู่แน่ ๆ ปู่ชอบแซวว่าหนูจะไม่มีแฟนเพราะเตะแรงเกิน", "f": "flustered", "l": "casual"}, {"choice": [{"t": "ฉันจะดูแลหลานปู่อย่างดี", "sc": 3, "then": [{"n": "kati", "t": "…พูดกับปู่จริงจังเลยนะคะ ปู่ได้ยินแล้ว ห้ามผิดสัญญา", "f": "flustered", "l": "casual"}]}, {"t": "เตะแรงก็ดีแล้ว ปลอดภัยดี", "sc": 2, "then": [{"n": "kati", "t": "ฮ่า ๆ ปู่ต้องชอบคุณแน่เลยค่ะ", "f": "happy", "l": "casual"}]}]}], [{"n": "nar", "t": "สี่ทุ่ม ไฟยิมยังเปิดอยู่ดวงเดียว กะทิซ้อมเตะกระสอบอยู่คนเดียว", "bg": "gym"}, {"n": "kati", "t": "ผู้จัดการ… เอ๊ย ที่รัก… ยังไม่ชินเลยค่ะ เรียกแบบไหนดี", "f": "flustered", "l": "casual", "bg": "casual"}, {"choice": [{"t": "เรียกแบบที่เธอสบายใจ", "sc": 3, "then": [{"n": "kati", "t": "งั้นในยิมเรียกผู้จัดการ นอกยิมเรียกที่รักนะคะ แยกงานแยกใจ", "f": "happy", "l": "casual"}]}, {"t": "ที่รักก็ดีนะ", "sc": 2, "then": [{"n": "kati", "t": "…อย่าพูดดังสิคะ! มะลิยังไม่นอน!", "f": "flustered", "l": "casual"}, {"n": "nar", "t": "เสียงหัวเราะคิกคักดังมาจากหน้าต่างห้องนอนมะลิ"}]}]}], [{"n": "nar", "t": "กะทิพาคุณไปเวทีมวยเก่าข้างตลาด เวทีที่ปู่ชัยเคยชกเมื่อสี่สิบปีก่อน ตอนนี้ร้างแล้ว", "bg": "ring"}, {"n": "kati", "t": "ปู่เล่าว่าที่นี่คือที่ที่ปู่ขอย่าแต่งงาน ต่อหน้าคนดูทั้งสนามเลยค่ะ", "f": "happy", "l": "casual"}, {"n": "kati", "t": "…หนูไม่ได้หมายความว่าอะไรนะคะ! แค่เล่าเฉย ๆ!", "f": "flustered", "l": "casual"}, {"choice": [{"t": "งั้นวันหนึ่งเรามาที่นี่ด้วยกันอีกนะ", "sc": 3, "then": [{"n": "kati", "t": "…ค่ะ สัญญานะ หนูจะจำวันนี้ไว้", "f": "flustered", "l": "casual"}]}, {"t": "ปู่ใจกล้ามากเลยนะ", "sc": 2, "then": [{"n": "kati", "t": "ใช่ค่ะ ย่าเล่าว่าตอนนั้นอายจนอยากมุดเวทีหนี ฮ่า ๆ", "f": "happy", "l": "casual"}]}]}]], "mali": [[{"n": "nar", "t": "มะลิยื่นโทรศัพท์มาให้ หน้าจอเป็นวิดีโอคอลจากอีสาน มีผู้หญิงยิ้มกว้างกับควายตัวใหญ่อยู่ด้านหลัง", "bg": "camp"}, {"n": "mali", "t": "แม่คะ นี่… แฟนมะลิค่ะ! แล้วข้างหลังแม่คือทองคำค่ะ ทักทายสิ", "f": "flustered", "l": "casual"}, {"n": "nar", "t": "แม่ของมะลิพูดภาษาอีสานรัวจนจับใจความได้แค่คำว่า 'กินข้าวหรือยัง'"}, {"choice": [{"t": "กินแล้ว! ขอบคุณที่เลี้ยงมะลิมาดีขนาดนี้", "sc": 3, "then": [{"n": "mali", "t": "แม่ร้องไห้แล้วค่ะ! แม่บอกว่าปีใหม่ต้องมาบ้านให้ได้", "f": "happy", "l": "casual"}]}, {"t": "โบกมือให้ทองคำ", "sc": 2, "then": [{"n": "mali", "t": "ทองคำส่ายหาง! เขาชอบคุณแล้วค่ะ ผ่านด่านแรก!", "f": "happy", "l": "casual"}]}]}], [{"n": "nar", "t": "มะลิจองห้องคาราโอเกะห้องใหญ่ที่สุดตามที่เคยพูดไว้ แต่มากันแค่สองคน", "bg": "night"}, {"n": "mali", "t": "เพลงคู่นะคะ! ห้ามหนีเสียงสูง!", "f": "happy", "l": "casual"}, {"choice": [{"t": "ร้องเต็มเสียงไปเลย", "sc": 3, "then": [{"n": "nar", "t": "ทั้งคู่ร้องลูกทุ่งจนพนักงานมาเคาะประตูขอให้เบาลงสามรอบ"}, {"n": "mali", "t": "นี่คือคืนที่ดีที่สุดในชีวิตมะลิเลยค่ะ!", "f": "happy", "l": "casual"}]}, {"t": "ขอนั่งฟังเธอร้องดีกว่า", "sc": 2, "then": [{"n": "mali", "t": "งั้นเพลงนี้มะลิร้องให้คนเดียวนะคะ …ตั้งใจฟังด้วย", "f": "flustered", "l": "casual"}]}]}], [{"n": "nar", "t": "มะลิพาคุณมาร้านขนมครกเล็ก ๆ หลังตลาด ร้านแบบที่เธอบอกว่าจะเปิดเองสักวัน", "bg": "food"}, {"n": "mali", "t": "มะลิคิดชื่อร้านใหม่แล้วค่ะ จาก 'ขนมครกแชมป์' อยากเปลี่ยนเป็น 'ขนมครกของเรา'", "f": "happy", "l": "casual"}, {"n": "mali", "t": "…เราในที่นี้ หมายถึงคุณกับมะลินะคะ ถ้าคุณไม่ว่าอะไร", "f": "flustered", "l": "casual"}, {"choice": [{"t": "ฉันจะเป็นคนล้างครกเอง", "sc": 3, "then": [{"n": "mali", "t": "ตกลงค่ะ! สัญญาแล้วนะ ล้างครกตลอดชีวิตเลย!", "f": "happy", "l": "casual"}]}, {"t": "ชื่อเดิมก็ดีนะ", "sc": 2, "then": [{"n": "mali", "t": "งั้น 'ขนมครกแชมป์ของเรา' รวมสองชื่อเลย~", "f": "happy", "l": "casual"}]}]}]], "rin": [[{"n": "nar", "t": "รินส่งไฟล์ตารางมาให้ล่วงหน้าสามวัน หัวข้อ 'เดตครั้งที่ 1 (ทางการ)' ละเอียดถึงระดับนาที", "bg": "cafe"}, {"n": "rin", "t": "14:00 ดื่มชา 14:20 คุยเรื่องทั่วไป 14:35 จับมือ (ถ้าเหมาะสม) …ฉันเผื่อเวลาไว้สิบนาที", "f": "flustered", "l": "casual"}, {"choice": [{"t": "ตอนนี้กี่โมงแล้วนะ", "sc": 3, "then": [{"n": "rin", "t": "…14:35 พอดีค่ะ", "f": "flustered", "l": "casual"}, {"n": "nar", "t": "รินวางมือบนโต๊ะ ตรงเวลาเป๊ะ"}]}, {"t": "ทิ้งตารางสักวันไหม", "sc": 2, "then": [{"n": "rin", "t": "ไม่มีตาราง… ก็ได้ค่ะ ฉันจะลอง ถ้าใจเต้นเกินกำหนด ถือเป็นความผิดคุณนะคะ", "f": "flustered", "l": "casual"}]}]}], [{"n": "nar", "t": "รินมาซ้อมเช้าด้วยแว่นกรอบกลม ทั้งค่ายเงียบไปห้าวินาที", "bg": "camp"}, {"n": "rin", "t": "…ไม่ต้องมองขนาดนั้นค่ะ ฉันแค่เลือกตามข้อมูลที่เคยเก็บไว้ ว่ามีคนหนึ่งชอบกรอบกลม", "f": "flustered", "l": "casual"}, {"choice": [{"t": "เหมาะกับเธอที่สุด", "sc": 3, "then": [{"n": "rin", "t": "บันทึกแล้วค่ะ ความพึงพอใจ 100% …ของฉันเองด้วย", "f": "happy", "l": "casual"}]}, {"t": "ใครชอบกรอบกลมนะ", "sc": 2, "then": [{"n": "rin", "t": "…อย่าทำเป็นจำไม่ได้ค่ะ ข้อมูลชุดนี้มาจากคุณ", "f": "flustered", "l": "casual"}]}]}], [{"n": "nar", "t": "คืนวันศุกร์ รินนั่งหน้าคอมในห้องวิเคราะห์ วาดกราฟอะไรบางอย่างอยู่", "bg": "night"}, {"n": "rin", "t": "นี่คือกราฟความสุขของฉันตั้งแต่ย้ายมาศิริชัยค่ะ แกนตั้งคือความสุข แกนนอนคือสัปดาห์", "f": "happy", "l": "casual"}, {"n": "rin", "t": "จุดที่กราฟพุ่งที่สุด… คือสัปดาห์ที่คุณตอบรับฉัน ข้อมูลไม่โกหกค่ะ", "f": "flustered", "l": "casual"}, {"choice": [{"t": "งั้นเราทำให้มันพุ่งต่อไปเรื่อย ๆ", "sc": 3, "then": [{"n": "rin", "t": "เป็นเป้าหมายที่ดีค่ะ ฉันจะติดตามผลทุกสัปดาห์", "f": "happy", "l": "casual"}]}, {"t": "กราฟสวยมาก", "sc": 2, "then": [{"n": "rin", "t": "…คุณชมกราฟหรือชมฉันคะ ช่วยระบุให้ชัดเจนด้วย", "f": "flustered", "l": "casual"}]}]}]]};
@@ -581,18 +640,18 @@ function dateScene(G,id,act){
       if(typeof hasSignature!=="undefined"&&hasSignature(f)&&!G2.seen["sig_"+id]){G2.seen["sig_"+id]=true;out.push({n:"nar",t:`✦ ความผูกพันปลดล็อกท่าไม้ตายของ${f.name}: "${SIGNATURE[id].name}" — ${SIGNATURE[id].desc}`});}
       if(f.bond>=40&&!G2.seen["b1_"+id]){G2.seen["b1_"+id]=true;out.push(...BOND_EVENTS[id].lv1.map(x=>({l:look,...x})));}
       if(f.bond>=75&&f.trust>=40&&RIVAL_LOVE.includes(id)&&f.camp==="player"&&(G2.season||1)>=2&&!isLov(G2,id)&&!exWait(G2,id)&&!G2.seen["love2_"+id]){G2.seen["love2_"+id]=true;
-        out.push(...LOVE_EVENTS[id].map(x=>({l:"casual",...x})),{choice:[
-          {t:"ฉันก็รู้สึกแบบเดียวกัน",fx:G3=>takeLover(G3,id),then:[{n:id,f:"flustered",l:"casual",t:LOVE_YES[id]}]},
+        out.push(...LOVE_EVENTS[id].map(x=>({l:"casual",...x})),...cheatWarn(G2,id),{choice:[
+          {t:yesTxt(G2,id,"ฉันก็รู้สึกแบบเดียวกัน"),fx:G3=>takeLover(G3,id),then:[{n:id,f:"flustered",l:"casual",t:LOVE_YES[id]}]},
           {t:"ขอบคุณ แต่ฉันอยากเป็นคนที่คอยอยู่ข้าง ๆ แบบนี้ต่อไป",fx:G3=>{add(G3,id,"trust",5);},then:[{n:id,f:"sad",l:"casual",t:LOVE_NO[id]||"…เข้าใจแล้ว"}]},...takenOpt(G2,id)]});}
-      else if(f.bond>=75&&f.trust>=40&&RIVAL_LOVE.includes(id)&&f.camp==="rival"&&!G2.seen["love_"+id]){G2.seen["love_"+id]=true;out.push(...lvSteps(PROMISE_EVENTS[id],null,G2,id,true).map(x=>x.choice?{choice:[...x.choice,...takenOpt(G2,id)]}:{l:"casual",...x}),{inject:G3=>isProm(G3,id)?[{n:"nar",t:`ความสัมพันธ์กับ${f.name}: สัญญาไว้ ♡ · เรื่องนี้จะไปต่อในฤดูกาลที่สอง`}]:[]});}
+      else if(f.bond>=75&&f.trust>=40&&RIVAL_LOVE.includes(id)&&f.camp==="rival"&&!G2.seen["love_"+id]){G2.seen["love_"+id]=true;out.push(...lvSteps(PROMISE_EVENTS[id],null,G2,id,true).flatMap(x=>x.choice?[...cheatWarn(G2,id),{choice:[...x.choice,...takenOpt(G2,id)]}]:[{l:"casual",...x}]),{inject:G3=>isProm(G3,id)?[{n:"nar",t:`ความสัมพันธ์กับ${f.name}: สัญญาไว้ ♡ · เรื่องนี้จะไปต่อในฤดูกาลที่สอง`}]:[]});}
       else if(f.bond>=75&&f.trust>=40&&!isLov(G2,id)&&!RIVAL_LOVE.includes(id)&&!G2.seen["love_"+id]){G2.seen["love_"+id]=true;
-        out.push(...LOVE_EVENTS[id].map(x=>({l:"casual",...x})),{choice:[
-          {t:"ฉันก็รู้สึกแบบเดียวกัน",fx:G3=>takeLover(G3,id),then:[{n:id,f:"flustered",l:"casual",t:LOVE_YES[id]}]},
+        out.push(...LOVE_EVENTS[id].map(x=>({l:"casual",...x})),...cheatWarn(G2,id),{choice:[
+          {t:yesTxt(G2,id,"ฉันก็รู้สึกแบบเดียวกัน"),fx:G3=>takeLover(G3,id),then:[{n:id,f:"flustered",l:"casual",t:LOVE_YES[id]}]},
           {t:"ขอบคุณ แต่ฉันอยากเป็นคนที่คอยอยู่ข้าง ๆ แบบนี้ต่อไป",fx:G3=>{add(G3,id,"trust",5);G3.loveNo=G3.loveNo||{};G3.loveNo[id]=G3.week;},then:[{n:id,f:"sad",l:"casual",t:LOVE_NO[id]}]},...takenOpt(G2,id)]});}
       // v1.29.3: a second chance — she won't ask twice, but after a while she lets you know the door is still open
       else if(f.bond>=75&&f.trust>=40&&!isLov(G2,id)&&!exWait(G2,id)&&!RIVAL_LOVE.includes(id)&&G2.seen["love_"+id]&&G2.week-((G2.loveNo&&G2.loveNo[id])||-99)>=2){G2.loveNo=G2.loveNo||{};G2.loveNo[id]=G2.week;
-        out.push({n:id,f:"flustered",l:"casual",t:isEx(G2,id)?LOVE_EX[id]:LOVE_AGAIN[id]},{choice:[
-          {t:isEx(G2,id)?"ฉันก็ยังคิดถึงเธอ กลับมาคบกันนะ":"วันนั้นฉันตอบเร็วไป ฉันก็รู้สึกเหมือนเธอ",fx:G3=>takeLover(G3,id),then:[{n:id,f:"flustered",l:"casual",t:LOVE_YES[id]}]},
+        out.push({n:id,f:"flustered",l:"casual",t:isEx(G2,id)?LOVE_EX[id]:LOVE_AGAIN[id]},...cheatWarn(G2,id),{choice:[
+          {t:yesTxt(G2,id,isEx(G2,id)?"ฉันก็ยังคิดถึงเธอ กลับมาคบกันนะ":"วันนั้นฉันตอบเร็วไป ฉันก็รู้สึกเหมือนเธอ"),fx:G3=>takeLover(G3,id),then:[{n:id,f:"flustered",l:"casual",t:LOVE_YES[id]}]},
           {t:"ขออยู่ข้าง ๆ แบบนี้ต่อไปนะ",fx:G3=>add(G3,id,"trust",2),then:[{n:"nar",t:`${f.name}ยิ้มแล้วพยักหน้า ไม่ได้พูดอะไรต่อ`}]}]});}
       return out;}}];
   if(romOf(G,id)&&LOVER_DATES[id]){f.lovIdx=f.lovIdx||0;const lw=(G.lovWk||{})[id],since=absWeek(G)-(lw!=null?lw:absWeek(G)-1);
@@ -1305,7 +1364,7 @@ const HEART_SCENES={
  30:{bg:"river",need:G=>!!G.F.fah.met,steps:[{n:"nar",t:"วันเกิดฟ้า 31 ตุลาคม ฟ้าแต่งเป็นแม่มดผมสีเงินเหมือนทุกปี แต่ปีนี้บ้านยายเต็มไปด้วยคน"},{n:"nar",t:"เด็ก ๆ ในซอยมาขอลูกอม แม่ค้าในตลาดมาพร้อมไส้กรอก ลูกค้าร้านสักมาพร้อมเค้ก ไม่มีใครไปปาร์ตี้ฮาโลวีนที่อื่นเลย"},{n:"fah",f:"flustered",l:"casual",t:"…ทำไมทุกคนมาที่นี่ ปกติไม่มีใครมาวันเกิดฟ้าเลยนะ"},{n:"nar",t:"ยายกระซิบ 'มีคนไปเคาะประตูชวนทุกบ้านในซอยตั้งแต่อาทิตย์ก่อน' แล้วมองมาทางคุณ"},{n:"fah",f:"sad",l:"casual",t:"…นาย นายทำแบบนี้ทำไม ฟ้าบอกแล้วว่าไม่ได้อยากได้ของขวัญ แค่อยากให้นายอยู่จนเทียนดับ"},{choice:[{t:"ฉันอยู่จนเทียนดับ แล้วก็อยู่ต่อหลังจากนั้นด้วย",fx:G=>add(G,"fah","bond",3),then:[{inject:G=>romOf(G,"fah")?[{n:"nar",t:"ฟ้าเป่าเทียนเล่มสุดท้าย แล้วดึงแขนเสื้อคุณออกไปที่ท่าน้ำหลังบ้าน"},{n:"fah",f:"flustered",l:"casual",t:"…ที่รัก ฟ้าพูดได้แล้ว พูดได้ทุกวันด้วย ต่อจากนี้ฟ้าจะไม่กลัวว่านายจะไป เพราะนายสัญญาแล้ว ห้ามคืนคำ ตลอดชีวิต!"}]:[{n:"fah",f:"happy",l:"casual",t:"…นายนี่มัน!! โอเค! วันเกิดที่ดีที่สุดในชีวิต! พอใจยัง!! …ขอบคุณนะ"}]}]},{t:"วันเกิดเธอควรมีคนมาเยอะแบบนี้ตั้งแต่แรก",fx:G=>add(G,"fah","trust",4),then:[{n:"fah",f:"happy",l:"casual",t:"…ตั้งแต่แรกไม่มี แต่ตั้งแต่นี้ไปมีแล้ว นั่นก็พอ"}]}]},{n:"fah",f:"happy",l:"casual",t:"ไปค่ะ! เอ้ย ไป! ฟ้าจะแจกลูกอมให้เด็กให้หมดถุง ปีนี้แม่มดผมสีเงินใจดีที่สุด!"}]}}};
 for(const id in HEART_SCENES)for(const lv in HEART_SCENES[id]){const S=HEART_SCENES[id][lv];
   EVENTS.push({id:`hs_${id}_${lv}`,look:"casual",bg:S.bg,
-    when:G=>{const f=G.F[id];return !!(f&&f.met&&hAt(G,id)>=+lv&&(S.need?S.need(G):f.camp==="player")&&!isAway(G,id)&&!(+lv>=30&&G.harem&&isPartner(G,id))&&absWeek(G)-(G.lastBeat||0)>=2);},/* v1.89.11: on the harem route the top scene gives way to the group ones */
+    when:G=>{const f=G.F[id];return !!(f&&f.met&&hAt(G,id)>=+lv&&(S.need?S.need(G):f.camp==="player")&&!isAway(G,id)&&!(+lv>=30&&isPartner(G,id)&&partners(G).length>1)&&absWeek(G)-(G.lastBeat||0)>=2);},/* v1.89.11: on the harem route the top scene gives way to the group ones */
     steps:[{fx:G=>{G.lastBeat=absWeek(G);}},...S.steps]});}
 
 // ---------- sportsmanship ----------
