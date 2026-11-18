@@ -148,6 +148,13 @@ const chrome=process.env.CHROME_PATH||'/Applications/Google Chrome.app/Contents/
     const g2=fresh();g2.F.kati.met=true;g2.F.kati.bond=60;g2.cash=99999;const n=giveGift(g2,'kati','stickers');if(!(r.gain>=n.gain*2))throw Error('gain '+r.gain+' vs '+n.gain);
     g.week++;const r2=giveGift(g,'kati','s_talung');if(!r2||r2.t!=='like'||g.souv.s_talung!==0)throw Error('like');
     return /ปู่|Grandpa/.test(souvLine('kati','c_khon','love'))&&/ภาคใต้|the South/.test(souvLine('kati','s_talung','like'));});
+  test('Petchara: captain loop visits + yearly letter to Kati; rivals catch up mid/late year but stay a step below a maxed camp',()=>{const g=fresh();G=g;g.season=3;g.week=10;
+    joinCamp(g,'ploy',2000);g.flags.ployW=absWeek(g)-20;const a=makeProdigy(g,'A','ploy');const ev=EVENTS.find(e=>e.id==='pc_visit');const seen=[];
+    for(let i=0;i<7;i++){g.week+=12;if(g.week>46){g.week-=40;g.season++;}if(!ev.when(g))throw Error('pc visit '+i);const st=ev.steps[0].inject(g);seen.push(JSON.stringify(st).slice(0,50));walkL(g,st);delete g.seen.pc_visit;if(i===1)prodigyResultScene(g,{a:'kati',b:'prod_A'},'A');}
+    if(new Set(seen).size<5)throw Error('pc visits repeat');g.week=12;g.offers=[];genOffers(g);if(!g.offers.some(o=>o.a==='kati'&&o.b==='prod_A'&&o.pc))throw Error('pc letter');
+    const me=g.F.ploy;for(const k in me.a)me.a[k]=20;const b0=effOvr(g,a);g.week=24;g.flags.rcWk=null;weekTrain(g);const b1=effOvr(g,a);
+    const best=Math.max(...roster(g).filter(f=>f.div==='A').map(f=>effOvr(g,f)));if(!(b1>b0))throw Error('no mid-year lift '+b0+' '+b1);
+    for(const w of [40]){g.week=w;weekTrain(g);}return effOvr(g,a)<best;});
   test('old single-lover saves become a one-item list',()=>{const g=fresh();delete g.lovers;delete g.lovWk;g.romance='rin';g.romWk=30;g.timeV=3;fixSave(g);return g.lovers.length===1&&g.lovers[0]==='rin'&&g.lovWk.rin===30&&isLov(g,'rin');});
   test('chat with a lover always opens and its menu leads to a confirmed breakup scene',()=>{const g=fresh();G=g;lovUp(g,['kati','mali']);UI.tab='people';render();
     const btn=document.querySelector('.chatb[data-id="mali"]');if(!btn||btn.disabled)throw Error('chat btn');ACT.chat({id:'mali'});render();

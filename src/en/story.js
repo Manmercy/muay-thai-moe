@@ -2049,6 +2049,48 @@ EVENTS.push(
  {id:"by_visit",pri:2,look:"casual",bg:"gym",when:G=>byFree(G)&&!!(G.prodigy&&G.F[G.prodigy.B])&&absWeek(G)>=(G.flags.byNext!=null?G.flags.byNext:G.flags.byFree+BY_GAP[0])&&!(G.F[G.prodigy.B].injury>0),
   steps:[{inject:G=>byVisitSteps(G)},{fx:G=>{delete G.seen.by_visit;}}]});
 
+/* v1.89.27: Petchara stays Golden Tiger — she becomes its captain, keeps an eye on Kati, takes the boss's anger, and sends Kati a challenge letter every year */
+const PC_GAP=[0,6,7,8],PC_DROP_GAP=11;
+function pcVisitSteps(G){const F=G.flags,kati=inCamp(G,"kati"),ploy=inCamp(G,"ploy");
+  const V=[
+   ()=>[{n:"nar",bg:"market",t:"A brand-new banner hangs at Golden Tiger's gate — a huge picture of Petcha in the middle, and beneath it: 'Golden Tiger Captain.'"},
+     {n:"npc",who:"Boss Suea",t:"(Announcing in the market) Who comes and who goes doesn't matter! Golden Tiger needs only Petcha!"},
+     {n:"nar",t:"Petcha stands beside the boss and smiles for the cameras as ordered — but her wrapped hands are clenched white at the knuckles."},
+     ...(kati?[{n:"kati",f:"sad",l:"casual",t:"Petcha can't even smile… just like Ploy in her first year."}]:[]),
+     ...(ploy?[{n:"ploy",f:"sad",l:"casual",t:"…My face used to be on that banner. It's heavier than it looks."}]:[]),
+     {choice:[{t:"Send Petcha a cold drink after the event",then:[{n:"nar",t:"Petcha takes the water bottle and stares at the Sirichai logo for a long time, then hides it in her glove bag before the boss turns around."},{n:"npc",who:"Petcha",t:"…Thanks. Don't tell anyone."}]},
+       {t:"Leave it — that's their camp's business",then:[{n:"coach",t:"Good. Each camp minds its own… but I won't forget that girl's face."}]}]}],
+   ()=>kati&&[{n:"nar",bg:"camp",t:"Before dawn, someone crouches behind the bushes on the hill behind camp with a small notebook — a black-and-gold kit half in view."},
+     {n:"kati",f:"surprised",l:"train",t:"Petcha!? Are you spying on my training?"},{n:"npc",who:"Petcha",t:"The boss told me to write down what you train."},
+     {n:"kati",f:"happy",l:"train",t:"Then come down and watch up close! You can't see the footwork from up there."},
+     {n:"nar",t:"Petcha hesitates a long time, then comes down to stand by the ring, noting every kick Kati throws — until Kati slips and falls, and she laughs despite herself."},
+     {n:"npc",who:"Petcha",t:"…You train like this every day? And when you fall, people laugh?"},
+     {choice:[{t:"Invite Petcha to kick pads together for a round",fx:G2=>{const k=G2.F.kati;k.morale=Math.min(100,(k.morale||0)+3);},then:[{n:"nar",t:"The two take turns kicking the pads Kru Daeng holds until they're drenched. Kru Daeng complains his arms will fall off, but won't put the pads down."},{n:"npc",who:"Petcha",t:"Don't tell the boss I trained with the enemy."},{n:"kati",f:"happy",l:"train",t:"I'm not your enemy! I'm your rival!"}]},
+       {t:"Tell Petcha to write down whatever she likes — we have no secrets",then:[{n:"npc",who:"Petcha",t:"A camp with no secrets… At mine I need permission just to eat."}]}]}],
+   ()=>prodN(G,"kati")>=1&&[{n:"nar",bg:"market",t:"Monday morning market: Boss Suea is yelling at Petcha in front of the coffee shop, loud enough for the whole market to turn and look."},
+     {n:"npc",who:"Boss Suea",t:"Lost to the little camp again! Ploy's gone, Baiyok's gone — are you next?!"},{n:"npc",who:"Petcha",t:"I'm not going anywhere, Boss."},
+     ...(kati?[{n:"kati",f:"angry",l:"casual",t:"Boss! Petcha fought really well! I nearly lost!"}]:[]),
+     {choice:[{t:"Step in and say winning and losing are just part of the ring",then:[{n:"npc",who:"Boss Suea",t:"Don't you lecture me, Sirichai!"},{n:"nar",t:"The boss stomps off. Petcha stands still for a moment, then gives you a small bow."}]},
+       {t:"Invite Petcha to breakfast",then:[{n:"nar",t:"Petcha shakes her head, but her stomach growls exactly like Baiyok's did. Kati laughs so hard she has to crouch down."},{n:"npc",who:"Petcha",t:"…Does Golden Tiger just not let anyone eat breakfast?"}]}]}],
+   ()=>(ploy||kati)&&[{n:"nar",bg:"river",t:ploy?"By the river after the temple fair, Petcha waits for Ploy under the rain tree.":"By the river after the temple fair, Petcha waits for Kati under the rain tree."},
+     ...(ploy?[{n:"npc",who:"Petcha",t:"Ploy… now that you're out, are you happy?"},{n:"ploy",f:"sad",l:"casual",t:"Happy, but it hurts. Everyone there used to be my team."},
+         {n:"npc",who:"Petcha",t:"I can't leave. Eleven trainees at the camp still need someone to take them running every morning. If I go, no one looks after them."},{n:"ploy",f:"happy",l:"casual",t:"Then you're already a better captain than I was. I never once counted how many trainees we had."}]
+       :[{n:"npc",who:"Petcha",t:"Have you ever thought about switching camps?"},{n:"kati",f:"happy",l:"casual",t:"Never! My grandpa built this camp."},
+         {n:"npc",who:"Petcha",t:"I'm not moving either. Eleven trainees still need someone to lead the morning run."},{n:"kati",f:"happy",l:"casual",t:"Then you're your camp's Grandpa Chai!"}]),
+     {n:"nar",t:"(Petcha stays at Golden Tiger as captain · she'll send Kati a challenge letter every year)"}]];
+  const D=[
+   ()=>kati&&[{n:"nar",bg:"camp",t:"A note is tucked into the camp gate: 'Next time I've got an answer for your spinning kick — Petcha.' In the corner, a child's handwriting adds: 'Petcha trained all night.'"},{n:"kati",f:"happy",l:"casual",t:"Their trainees are snitching again!"}],
+   ()=>[{n:"nar",bg:"fair",t:"Saturday night at the temple fair: Petcha brings a dozen Golden Tiger trainees and queues to buy each of them a snack. When she spots Sirichai people she puts on a scowl — still holding cotton candy."}],
+   ()=>byFree(G)&&[{n:"nar",bg:"market",t:"Word in the market says Petcha and Baiyok secretly meet to train at the riverside temple yard — even though one of them has left the camp."},{n:"coach",t:"The boss probably doesn't know yet. Don't tell him."}]];
+  let k=F.pcV||0;
+  if(k<V.length){while(k<V.length){const s=V[k]();k++;if(s){F.pcV=k;F.pcNext=absWeek(G)+(PC_GAP[k]||PC_DROP_GAP);return s;}}}
+  const d=F.pcD||0;for(let i=0;i<D.length;i++){const s=D[(d+i)%D.length]();if(s){F.pcV=Math.max(k,V.length);F.pcD=d+i+1;F.pcNext=absWeek(G)+PC_DROP_GAP;return s;}}
+  F.pcNext=absWeek(G)+PC_DROP_GAP;return [{n:"nar",t:"A whistle rings out from Golden Tiger at five a.m. — Petcha is leading the trainees on a run past Sirichai's gate again."}];}
+EVENTS.push(
+ {id:"pc_visit",pri:2,look:"casual",bg:"market",when:G=>{const id=G.prodigy&&G.prodigy.A,f=id&&G.F[id];if(!f||f.camp!=="rival"||(G.season||1)<2)return false;G.flags=G.flags||{};
+    if(G.flags.pcNext==null)G.flags.pcNext=absWeek(G)+(G.flags.ployW!=null&&absWeek(G)-G.flags.ployW>6?0:6);return absWeek(G)>=G.flags.pcNext&&!(f.injury>0);},
+  steps:[{inject:G=>pcVisitSteps(G)},{fx:G=>{delete G.seen.pc_visit;}}]});
+
 // Year 4: Pailin, Ploy's older sister, brings Vector Gym to the province.
 // Year 5 closes the main story. From year 6 Pailin returns every year (free mode) and her lines follow the year and the record.
 const vecRec=(G,s)=>((G.vecRec||{})[s==null?(G.season||1):s])||{w:0,l:0};
