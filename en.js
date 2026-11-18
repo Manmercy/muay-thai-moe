@@ -2023,13 +2023,29 @@ const GIFTS={
   p_teaset:{name:"Dan Kwian clay tea set",price:950,bond:16,only:"ploy",cat:"keep"},p_silk:{name:"Small Pak Thong Chai silk scarf",price:1700,bond:36,only:"ploy",cat:"wear"},
   f_buds:{name:"Lightning-pattern wireless earbuds",price:1200,bond:22,only:"fah",cat:"keep"},f_jacket:{name:"Bomber jacket embroidered FAH",price:1900,bond:40,only:"fah",cat:"wear"},
 };
+// v1.89.23: regional souvenirs — bought only at the shop before the bus leaves a trip city, kept in G.souv, given later for free (no cash at the gift screen)
+const SOUV_RN={north:"the North",isan:"Isan",central:"the Central Plains",south:"the South"};
+Object.assign(GIFTS,{
+  n_umbrella:{name:"Hand-painted Bo Sang umbrella",price:2400,souv:"north",cat:"keep"},n_jok:{name:"Mae Chaem teen jok sarong",price:5800,souv:"north",cat:"wear"},
+  i_pillow:{name:"Khit-cloth triangle pillow",price:2200,souv:"isan",cat:"keep"},i_praewa:{name:"Kalasin Praewa silk",price:6500,souv:"isan",cat:"wear"},
+  c_khon:{name:"Handcrafted Khon mask",price:3600,souv:"central",cat:"keep"},c_bencharong:{name:"Benjarong tea set",price:4800,souv:"central",cat:"keep"},
+  s_talung:{name:"Hand-carved shadow puppet",price:2600,souv:"south",cat:"keep"},s_pearl:{name:"Phuket pearl necklace",price:6800,souv:"south",cat:"wear"}});
+const SOUV_IDS=Object.keys(GIFTS).filter(g=>GIFTS[g].souv);
+const SOUV_LOVE={kati:["c_khon","n_umbrella"],mali:["s_talung","s_pearl"],rin:["c_bencharong","n_jok"],ploy:["i_praewa","c_bencharong"],fah:["i_pillow","s_pearl"]};
+const SOUV_TALK={
+ kati:{c_khon:"A Khon mask! Grandpa Chai took me to see Khon only once when I was little… I'll put it right next to his photo.",n_umbrella:"A flower umbrella… it's too pretty to open! I'll hang it up in my room.",like:"{g}, all the way from {r}… I'll keep it to remember this trip!"},
+ mali:{s_talung:"Nang talung! As a kid I'd sneak behind the screen to watch the puppeteer at every temple fair~ I miss home.",s_pearl:"Pearls… really, for me? I'll wear them when I visit Mom. She's going to be so surprised~",like:"A souvenir from {r}~ I'm so happy you thought of me on the trip!"},
+ rin:{c_bencharong:"Hand-painted in five colours… I'll only brew coffee in these on days we win.",n_jok:"A pattern like this takes months to weave… I'll save it for the most important day.",like:"{g}… the real thing doesn't come cheap. Thank you for choosing it so carefully."},
+ ploy:{i_praewa:"Praewa silk… My mother had exactly one piece. She kept it in a chest and let no one touch it. Thank you. I'll take care of it.",c_bencharong:"Tea in Benjarong cups… Want to brew some together? Just the two of us.",like:"{g}, from {r}… It's beautiful. Thanks."},
+ fah:{i_pillow:"A triangle pillow! It's for my naps after training. Nobody gets to borrow it. Ever!",s_pearl:"Pearls!? Won't I look like some rich girl in these… Don't you dare laugh!",like:"A souvenir from {r}! It's… not bad. I'll take good care of it."}};
+const souvLine=(id,g,t)=>{const L=SOUV_TALK[id];if(!L)return null;return t==="love"&&L[g]?L[g]:(L.like||"").replace("{g}",GIFTS[g].name).replace("{r}",SOUV_RN[GIFTS[g].souv]);};
 const GIFT_CAT={khanom:"food",sausage:"food",coffee:"food",tea:"food",wrap:"wear",shorts:"wear",prajiad:"wear",bracelet:"wear",mongkhon:"wear",stickers:"keep",photo:"keep",doll:"keep",sketch:"keep",book:"keep",malai:"keep",spa:"exp"};
 const giftCat=g=>GIFTS[g].cat||GIFT_CAT[g]||"keep";
 // shared bond gifts open at a different closeness for each girl
 const GIFT_UNLOCK={kati:{shorts:12,prajiad:20,photo:26,spa:34,bracelet:40,mongkhon:46},mali:{spa:12,photo:18,bracelet:24,shorts:30,prajiad:38,mongkhon:44},
   rin:{bracelet:14,spa:20,prajiad:28,photo:34,shorts:40,mongkhon:48},ploy:{prajiad:12,mongkhon:22,spa:28,bracelet:34,shorts:40,photo:46},fah:{shorts:10,bracelet:18,photo:26,prajiad:32,spa:38,mongkhon:44}};
 const giftBond=(id,g)=>(GIFT_UNLOCK[id]&&GIFT_UNLOCK[id][g])||GIFTS[g].bond||0;
-const giftsFor=id=>Object.keys(GIFTS).filter(g=>!GIFTS[g].only||GIFTS[g].only===id);
+const giftsFor=id=>Object.keys(GIFTS).filter(g=>!GIFTS[g].souv&&(!GIFTS[g].only||GIFTS[g].only===id));
 const GIFT_PREF={kati:{love:["stickers","mongkhon","k_album","k_glove","prajiad"],like:["wrap","khanom","shorts","photo","sausage","malai","doll"],dislike:["coffee"]},
   mali:{love:["khanom","spa","m_pan","m_ticket","photo"],like:["malai","doll","bracelet","stickers","shorts","sausage","tea"],dislike:["book"]},
   rin:{love:["coffee","bracelet","r_drip","r_watch","book"],like:["tea","spa","sketch","shorts","mongkhon"],dislike:["sausage"]},
@@ -2042,11 +2058,11 @@ const GIFT_LINES={
  ploy:{love:"…I've loved this shop's tea since I was little. Truly, thank you",like:"This works well. Thank you",ok:"Thanks",dislike:"A plushie… I'm not a child. I'll give it to my juniors"},
  fah:{love:"Huh! A big set of sausage! You know Fah best!",like:"Well… not bad. Thanks",ok:"Mm, thanks",dislike:"Tea? Fah's not a grandma!"},
 };
-function giftTier(id,g){const P=GIFT_PREF[id];return P.love.includes(g)?"love":P.like.includes(g)?"like":P.dislike.includes(g)?"dislike":"ok";}
-function giveGift(G,id,g){const f=G.F[id],it=GIFTS[g];if(G.cash<it.price||f.giftWeek===gameWeek(G))return null;G.cash-=it.price;f.giftWeek=gameWeek(G);if(typeof absWeek==="function")f.lastTouch=absWeek(G);
+function giftTier(id,g){if(GIFTS[g]&&GIFTS[g].souv)return (SOUV_LOVE[id]||[]).includes(g)?"love":"like";const P=GIFT_PREF[id];return P.love.includes(g)?"love":P.like.includes(g)?"like":P.dislike.includes(g)?"dislike":"ok";}
+function giveGift(G,id,g){const f=G.F[id],it=GIFTS[g],sv=!!it.souv;if(sv?!((G.souv||{})[g]>0):G.cash<it.price)return null;if(f.giftWeek===gameWeek(G))return null;if(sv)G.souv[g]--;else G.cash-=it.price;f.giftWeek=gameWeek(G);if(typeof absWeek==="function")f.lastTouch=absWeek(G);
   // v1.16: the same gift again means less (and she says so)
   f.giftN=f.giftN||{};f.giftL=f.giftL||{};if(f.giftL[g]&&gameWeek(G)-f.giftL[g]>=6)f.giftN[g]=0;const n=f.giftN[g]||0;f.giftN[g]=n+1;f.giftL[g]=gameWeek(G);f.giftTot=(f.giftTot||0)+1;
-  const t=giftTier(id,g),base=Math.round({love:6,like:4,ok:2,dislike:0}[t]*(it.bond&&t!=="dislike"?1.5:1)),gain=base>0?Math.max(1,Math.round(base*(n===0?1:t==="love"?(n===1?.6:.4):(n===1?.5:.25)))):base;
+  const t=giftTier(id,g),base=sv?{love:24,like:15}[t]:Math.round({love:6,like:4,ok:2,dislike:0}[t]*(it.bond&&t!=="dislike"?1.5:1)),gain=base>0?Math.max(1,Math.round(base*(n===0?1:t==="love"?(n===1?.6:.4):(n===1?.5:.25)))):base;
   const before=(f.bond||0)+(f.bondX||0);add(G,id,"bond",gain);if(t==="love")add(G,id,"morale",n<2?6:4);
   f.know["gift_"+g]=t;return {t,gain:Math.round(((f.bond||0)+(f.bondX||0)-before)*10)/10,g,n};}
 // v1.21: repeat-gift lines follow what the gift is (food / something to wear / a keepsake / an outing) so they always fit
@@ -6575,11 +6591,14 @@ function relLadderHTML(f){const H=heartLv(f).lv,cur=relLabel(G,f,H),k=relKind(G,
 function giftHTML(id){const f=G.F[id];
   const E=giftsFor(id).map(k=>[k,{...GIFTS[k],bond:giftBond(id,k)}]).sort((x,y)=>(x[1].bond||0)-(y[1].bond||0)||(x[1].only?1:0)-(y[1].only?1:0));
   {const lk=E.filter(([k,g])=>(g.bond||0)>(f.bond||0));const nx=lk[0];const hid=lk.length-(nx?1:0);E.splice(0,E.length,...E.filter(([k,g])=>(g.bond||0)<=(f.bond||0)),...(nx?[nx]:[]));E.hidden=hid;}
-  return `<h2>A gift for ${esc(f.name)}</h2><p class="meta">Bought and given right away · 1 per person per week · the closer you are, the more to choose ${E.hidden?` (${E.hidden} more hidden)`:""} · cash ${fmt(G.cash)}</p><div class="gifts">${E.map(([k,g])=>{const kn=f.know["gift_"+k],lk=(g.bond||0)>(f.bond||0);
+  return `<h2>A gift for ${esc(f.name)}</h2><p class="meta">Bought and given right away · 1 per person per week · the closer you are, the more to choose ${E.hidden?` (${E.hidden} more hidden)`:""} · cash ${fmt(G.cash)}</p>${souvHTML(id)}<div class="gifts">${E.map(([k,g])=>{const kn=f.know["gift_"+k],lk=(g.bond||0)>(f.bond||0);
    if(lk)return `<div class="giftbtn lockg"><b>???</b><small>Unlocks at ♥ Lv.${1+Math.floor(Math.min(100,g.bond)/10)}</small></div>`;
    const lw=f.giftL&&f.giftL[k],cd=lw&&gameWeek(G)-lw<6&&(f.giftN||{})[k]?6-(gameWeek(G)-lw):0;
    return `<button class="giftbtn" data-act="give" data-id="${id}" data-v="${k}" ${G.cash<g.price?"disabled":""}><b>${g.name}</b><small>${fmt(g.price)}${cd?` · given recently`:""}</small></button>`;}).join("")}</div>
    <p class="meta glegend">Watch how she reacts when you give it, or check her profile for what you've given before</p>`;}
+/* v1.89.23: souvenirs bought on regional trips — free to give, one gift a week like the rest */
+function souvHTML(id){const S=G.souv||{},L=SOUV_IDS.filter(k=>S[k]>0);if(!L.length)return "";
+  return `<h3 class="souvh">Souvenirs from your trips</h3><div class="gifts souvg">${L.map(k=>`<button class="giftbtn souv" data-act="give" data-id="${id}" data-v="${k}"><b>${esc(GIFTS[k].name)}</b><small>Souvenir from ${SOUV_RN[GIFTS[k].souv]} · ×${S[k]}</small></button>`).join("")}</div>`;}
 function considerHTML(o){const me=G.F[o.a],op=G.F[o.b];const A=adviseCached(o.a,o.b,o.rounds||3);const pct=x=>Math.round(x*100);const v=verdictOf(A.bestRate);const sc=scouted(op.id);const P=personaOf(op);
   return `<h2>Fight info</h2><div class="vsrow"><div class="vsc">${faceImg(me)}<b>${esc(me.name)}</b><span class="meta">${styleOf(me.a)}</span></div><span class="vs">VS</span><div class="vsc">${faceImg(op)}<b>${esc(op.name)}</b><span class="meta">${styleOf(op.a)} · ${rec(op)}</span></div></div>
    ${P?`<p class="quote">“${esc(P.line)}” <span class="meta">— ${esc(P.tag)}</span></p>`:""}${h2hText(op)?`<p class="meta goldt">${h2hText(op)}</p>`:""}
@@ -7301,7 +7320,7 @@ function fightEnd(){const U=UI.fight;if(U.brawl){brawlEnd();return;}U.stage="don
 
 // ---------- actions ----------
 function giftScene(id,res){const f=G.F[id];const mood=res.t==="dislike"?"pout":res.t==="love"?"flustered":"happy";
-  playScene([{n:id,f:mood,l:"casual",t:(res.n&&res.t!=="dislike"&&giftAgainLine(id,res.t,res.n,res.g))||(GIFT_TALK_PERSONAL[id]&&GIFT_TALK_PERSONAL[id][res.g])||((GIFT_TALK[id]&&GIFT_TALK[id][res.g])||GIFT_LINES[id][res.t])},{n:"nar",t:res.gain>0?(res.n>=2?`Bond with ${f.name} +${res.gain} · a bit too often, so it rises less`:`Bond with ${f.name} +${res.gain}`)
+  playScene([{n:id,f:mood,l:"casual",t:(res.n&&res.t!=="dislike"&&giftAgainLine(id,res.t,res.n,res.g))||(GIFTS[res.g].souv&&souvLine(id,res.g,res.t))||(GIFT_TALK_PERSONAL[id]&&GIFT_TALK_PERSONAL[id][res.g])||((GIFT_TALK[id]&&GIFT_TALK[id][res.g])||GIFT_LINES[id][res.t])},{n:"nar",t:res.gain>0?(res.n>=2?`Bond with ${f.name} +${res.gain} · a bit too often, so it rises less`:`Bond with ${f.name} +${res.gain}`)
       :res.t==="dislike"?`${f.name} accepts it with a smile, but it may not be a favorite · Bond unchanged`:heartCapped(G,f)?`${f.name} is delighted · hearts are full for this chapter`:f.bond>=100?`${f.name} is thrilled · Bond is already maxed`:`${f.name} is happy, but has been getting this a lot lately. Try mixing it up.`},
     ...((()=>{const k=f.giftTot===5?0:f.giftTot===10?1:-1;if(k<0||!GIFT_FREQ[id]||(f.giftFreq||0)>k)return [];f.giftFreq=k+1;
       return [...GIFT_FREQ[id][k].map(s=>({...s,l:"casual"})),k===1?{inject:G2=>{add(G2,id,"bond",3);G2.F[id].morale=Math.min(100,G2.F[id].morale+8);return [{n:"nar",t:`A gift in return from ${f.name} · Bond +3 · Morale: ${f.name} +8`}];}}:{inject:()=>[]}];})())],()=>{AU.startMusic("hub");render();},{bg:f.camp==="player"?"gym":"fair",look:"casual"});}
