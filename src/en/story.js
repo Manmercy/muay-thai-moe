@@ -692,6 +692,9 @@ function dateScene(G,id,act){
         out.push({n:id,f:"flustered",l:"casual",t:isEx(G2,id)?LOVE_EX[id]:LOVE_AGAIN[id]},...cheatWarn(G2,id),{choice:[
           {t:yesTxt(G2,id,isEx(G2,id)?"I still miss you too. Let's get back together":"I answered too fast that day. I feel the same way"),fx:G3=>takeLover(G3,id),then:[{n:id,f:"flustered",l:"casual",t:LOVE_YES[id]}]},
           {t:"I'd like to stay by your side, just like this",fx:G3=>{befriend(G3,id);add(G3,id,"trust",2);},then:[{n:"nar",t:`${f.name} smiles and nods, and says nothing more`}]}]});}
+      /* v1.90.3: hearts are there but trust is not — say so, players could not tell why nobody confessed */
+      else if(f.bond>=75&&(f.trust||0)<40&&!isLov(G2,id)&&!exWait(G2,id)&&LOVE_IDS.includes(id)&&(!RIVAL_LOVE.includes(id)||(f.camp==="rival"?!G2.seen["love_"+id]:(G2.season||1)>=2&&!G2.seen["love2_"+id])))
+        out.push({n:"nar",t:`${f.name} seems to be holding something back · Trust ${Math.floor(f.trust||0)}/40`});
       return out;}}];
   if(romOf(G,id)&&LOVER_DATES[id]){f.lovIdx=f.lovIdx||0;const lw=(G.lovWk||{})[id],since=absWeek(G)-(lw!=null?lw:absWeek(G)-1);
     if(f.lovIdx<LOVER_DATES[id].length&&since>=LOVER_WK[f.lovIdx]){const sc=lvSteps(LOVER_DATES[id][f.lovIdx++],D,G,id,false);D.score+=2;return [...sc,steps[steps.length-1]];}}
