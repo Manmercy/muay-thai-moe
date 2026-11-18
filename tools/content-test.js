@@ -69,8 +69,9 @@ const chrome=process.env.CHROME_PATH||'/Applications/Google Chrome.app/Contents/
     lovUp(g,['kati','mali','rin','ploy','fah']);for(const id of ['ploy','fah'])g.F[id].camp='player';g.week=38;if(partners(g).length!==5)throw Error('five');
     const L=[];const n=walkL(g,ev('lv_val').steps.map(x=>x),ch=>Math.max(0,ch.findIndex(c=>/รักทุกคน|love all/i.test(c.t))));
     const txt=JSON.stringify(valSteps({...g,valCaught:0,F:g.F,promise:g.promise,lovers:g.lovers}).filter(x=>x.n==='ploy'));if(!/ค่ายเดียวกับคุณ|same camp/i.test(txt))throw Error('ploy camp line '+txt);
-    if(!g.haremOK)throw Error('honest');for(const id of partners(g)){g.F[id].bond=95;g.F[id].awayAbs=null;}g.week=42;if(!ev('lv_harem').when(g))throw Error('harem');walkL(g,ev('lv_harem').steps);
-    if(!g.harem)throw Error('harem flag');return partners(g).every(id=>/♥ \((ฮาเร็ม|harem)\)/.test(relLabel(g,g.F[id])));});
+    if(!g.haremOK)throw Error('honest');if(g.harem)throw Error('no Valentine shortcut any more');for(const id of partners(g)){g.F[id].bond=95;g.F[id].awayAbs=null;}g.week=42;
+    g.pairSt={};const P=partners(g);for(const x of P)for(const y of P)if(x<y)g.pairSt[pairKey(x,y)]=3;let k=0;while(hmList(g).length<5&&k++<6){g.week++;if(!ev('lv_hjoin').when(g))throw Error('join '+hmList(g).length);walkL(g,ev('lv_hjoin').steps);}
+    if(!g.harem||hmList(g).length!==5)throw Error('harem flag');return partners(g).every(id=>/♥ \((ฮาเร็ม|harem)\)/.test(relLabel(g,g.F[id])));});
   test('the ring pair follows the bond, whichever camp they train at',()=>{const pairOf=g=>{const st=valSteps(g);const r=st.find(x=>x.brawl);return r?[r.brawl.a,r.brawl.b].sort().join('+'):'none';};
     let g=fresh();G=g;lovUp(g,['mali','rin']);g.F.rin.bond=99;g.week=38;if(pairOf(g)!=='mali+rin')throw Error('mali rin '+pairOf(g));
     g=fresh();G=g;lovUp(g,['kati']);const f=g.F.fah;f.met=true;f.bond=90;g.promise={fah:10};g.week=38;if(pairOf(g)!=='fah+kati')throw Error('rival fah fights too '+pairOf(g));
@@ -91,7 +92,7 @@ const chrome=process.env.CHROME_PATH||'/Applications/Google Chrome.app/Contents/
   test('one ladder: tier popup names match the heart-level names',()=>REL_TIERS.every(([b,n])=>n===heartTier(Math.min(10,1+Math.floor(b/10)))));
   test('two-timing brings clashes and spats (very close pairs do not spat) and they repeat',()=>{const g=fresh();G=g;lovUp(g,['kati','mali','rin']);let clash=0,spat=0;
     for(let w=1;w<=40;w++){g.week=w;if(ev('lv_clash').when(g)){walkL(g,ev('lv_clash').steps);clash++;}else if(ev('lv_spat').when(g)){walkL(g,ev('lv_spat').steps,ch=>2);spat++;}for(const k of ['kati','mali','rin'])g.F[k].bond=90;}
-    if(clash<3||spat<2)throw Error('counts '+clash+' '+spat);for(const k of ['kati','mali','rin']){g.F[k].bond=100;g.F[k].bondX=30;}g.spatAbs=-99;g.lvEvAbs=-1;
+    if(clash<3||spat<2)throw Error('counts '+clash+' '+spat);for(const k of ['kati','mali','rin']){g.F[k].bond=100;g.F[k].bondX=30;}g.spatAbs=-99;g.lvEvAbs=-1;for(const x of ['kati','mali','rin'])for(const y of ['kati','mali','rin'])if(x<y){g.pairF=g.pairF||{};g.pairF[pairKey(x,y)]=2;}
     for(let w=1;w<=40;w++){g.week=w;if(ev('lv_spat').when(g))throw Error('close pair spat');}return true;});
   test('a spat: side with one (+3 / −5) or stop both (−2 each)',()=>{const g=fresh();G=g;lovUp(g,['kati','mali']);g.F.kati.bond=80;g.F.mali.bond=80;const st=spatSteps(g);const ch=st.find(x=>x.choice).choice;ch[0].fx(g);return g.F.kati.bond>80&&g.F.mali.bond===75&&st.filter(x=>x.n&&x.n!=='nar').length===3;});
   test('one label: closeness name until together, then the status, shown under the hearts',()=>{const g=fresh();G=g;const f=g.F.rin;f.met=true;f.bond=80;if(relLabel(g,f)!==heartTier(9))throw Error('closeness');lovUp(g,['rin']);if(!/♥/.test(relLabel(g,f)))throw Error('lover');
@@ -119,12 +120,46 @@ const chrome=process.env.CHROME_PATH||'/Applications/Google Chrome.app/Contents/
     g.week+=4;walkL(g,ev('lv_back').steps);if(isAway(g,'mali'))throw Error('still away');g.F.mali.bond=90;g.week+=12;g.seen.love_mali=true;g.loveNo={};g.confTry={mali:2};
     const D=dateScene(g,'mali','cafe');let back=false;walkL(g,D,ch=>{const i=ch.findIndex(c=>/กลับมาคบ|back together/.test(c.t));if(i>=0)back=true;return i>=0?i:0;});return back&&isLov(g,'mali');});
   test('breaking a promise with a rival works the same way',()=>{const g=fresh();G=g;const f=g.F.ploy;f.met=true;f.bond=90;g.promise={ploy:10};walkL(g,breakSteps(g,'ploy'));return !isProm(g,'ploy')&&isEx(g,'ploy')&&isAway(g,'ploy');});
-  test('harem: honest at Valentine, win everyone back, then group scenes replace the top heart scene',()=>{const g=fresh();G=g;lovUp(g,['kati','mali']);g.week=38;walkL(g,ev('lv_val').steps,ch=>Math.max(0,ch.findIndex(c=>/รักทุกคน|love all/i.test(c.t))));
-    if(!g.haremOK)throw Error('ok flag');g.F.kati.awayAbs=null;g.F.mali.awayAbs=null;if(ev('lv_harem').when(g))throw Error('too early');g.week+=3;if(ev('lv_harem').when(g))throw Error('not won back yet');g.F.kati.bond=86;g.F.mali.bond=86;if(!ev('lv_harem').when(g))throw Error('no harem');
-    walkL(g,ev('lv_harem').steps);if(!g.harem||romOf(g,'kati'))throw Error('harem state');if(!/♥ \((ฮาเร็ม|harem)\)/.test(relLabel(g,g.F.kati)))throw Error('tag');
+  const ptRun=(g,bad)=>{if(!ev('lv_pt').when(g))throw Error('no pair talk '+JSON.stringify(g.pairU)+JSON.stringify(g.pairSt));walkL(g,ev('lv_pt').steps,ch=>{const i=ch.findIndex(c=>c.ok);return i<0?0:bad?ch.findIndex(c=>!c.ok&&!c.bold):i;});g.week+=3;};
+  const ptAccept=(g,a,b)=>{const k=pairKey(a,b);for(const need of [15,45,75]){g.pairU=g.pairU||{};g.pairU[k]=Math.max(g.pairU[k]||0,need);if(need===75){g.pairV=g.pairV||{};g.pairV[k]=2;g.pairF=g.pairF||{};g.pairF[k]=Math.max(g.pairF[k]||0,2);}ptRun(g);}if(pairSt(g,a,b)!==3)throw Error('not accepted '+k);};
+  test('harem: honest at Valentine is only a start; one pair clears 3 talks, forms the team, then group scenes replace the top heart scene',()=>{const g=fresh();G=g;lovUp(g,['kati','mali']);g.week=38;walkL(g,ev('lv_val').steps,ch=>Math.max(0,ch.findIndex(c=>/รักทุกคน|love all/i.test(c.t))));
+    if(!g.haremOK||g.harem||ev('lv_harem'))throw Error('shortcut');if(pairU(g,'kati','mali')<10)throw Error('start push '+pairU(g,'kati','mali'));g.F.kati.awayAbs=null;g.F.mali.awayAbs=null;g.week+=3;
+    if(ev('lv_hjoin').when(g))throw Error('too early');ptAccept(g,'kati','mali');if(!ev('lv_hjoin').when(g))throw Error('no form');
+    walkL(g,ev('lv_hjoin').steps);if(!g.harem||romOf(g,'kati'))throw Error('harem state');if(!/♥ \((ฮาเร็ม|harem)\)/.test(relLabel(g,g.F.kati)))throw Error('tag');if(ev('lv_pt').when(g))throw Error('members need no talks');
     g.F.kati.bond=100;g.F.kati.bondX=2000;g.lastBeat=-99;const top=EVENTS.find(e=>e.id==='hs_kati_30');if(top.when(g))throw Error('top scene still on');
     g.week+=9;for(const k of [1,2,3]){if(!ev('lv_hm'+k).when(g))throw Error('hm'+k);walkL(g,ev('lv_hm'+k).steps);}
     g.season=2;g.week=38;if(ev('lv_val').when(g)||!ev('lv_valh').when(g))throw Error('harem valentine');walkL(g,ev('lv_valh').steps);return haremYearEnd(g).length===3;});
+  test('two-timing route: wrong answer at the last talk costs −25, an outsider joins only when every member accepts, 2→3',()=>{const g=fresh();G=g;lovUp(g,['kati','mali','rin']);g.week=10;
+    for(const id of ['kati','mali','rin'])g.F[id].bond=80;
+    if(ev('lv_pt').when(g))throw Error('talk with no understanding');g.pairU={[pairKey('kati','mali')]:75};g.pairSt={[pairKey('kati','mali')]:2};if(ev('lv_pt').when(g))throw Error('last talk before Valentine and fights');g.pairV={[pairKey('kati','mali')]:1};g.pairF={[pairKey('kati','mali')]:2};if(ev('lv_pt').when(g))throw Error('one Valentine is not enough');g.pairV[pairKey('kati','mali')]=2;g.pairF[pairKey('kati','mali')]=1;if(ev('lv_pt').when(g))throw Error('one fight is not enough');g.pairF[pairKey('kati','mali')]=2;
+    ptRun(g,true);if(pairSt(g,'kati','mali')!==2||pairU(g,'kati','mali')!==50)throw Error('bad answer '+pairU(g,'kati','mali'));
+    g.pairU[pairKey('kati','mali')]=75;ptRun(g);if(pairSt(g,'kati','mali')!==3)throw Error('accept');walkL(g,ev('lv_hjoin').steps,ch=>ch.length-1);if(g.harem||ev('lv_hjoin').when(g))throw Error('said not yet');g.week+=13;if(!ev('lv_hjoin').when(g))throw Error('asks again');walkL(g,ev('lv_hjoin').steps);if(hmList(g).join()!=='kati,mali')throw Error('form '+hmList(g));
+    if(!romOf(g,'rin')||romOf(g,'mali'))throw Error('rin still two-timing');
+    const sp=spatPair(g);if(!sp||sp.inner)throw Error('spat should hit the outsider pair');
+    g.week+=4;if(!ev('lv_val').when({...g,week:38})||ev('lv_valh').when({...g,week:38}))throw Error('mixed valentine');
+    ptAccept(g,'kati','rin');g.week++;if(ev('lv_hjoin').when(g))throw Error('rin joined without mali');ptAccept(g,'mali','rin');g.week++;if(!ev('lv_hjoin').when(g))throw Error('rin cannot join');
+    walkL(g,ev('lv_hjoin').steps);if(hmList(g).length!==3||romOf(g,'rin'))throw Error('three '+hmList(g));
+    doBreak(g,'mali');if(!g.harem||hmList(g).join()!=='kati,rin')throw Error('team after a break '+hmList(g));doBreak(g,'rin');if(g.harem||hmList(g).length)throw Error('a team of one');
+    const o=fresh();G=o;lovUp(o,['kati','mali']);o.harem=true;o.haremAbs=absWeek(o);delete o.hm;delete o.hmInit;fixSave(o);return hmList(o).length===2&&pairSt(o,'kati','mali')===3;});
+  test('one love: 5 stories each from year 2, 10 weeks apart, all three answers play',()=>{for(const id of ['kati','mali','rin','ploy','fah']){const g=fresh();G=g;g.season=1;g.week=10;for(const k of ['ploy','fah'])g.F[k].camp='player';lovUp(g,[id]);g.F[id].camp='player';
+      g.week=40;if(ev('lv_ms').when(g))throw Error('year one '+id);g.season=2;g.week=1;let n=0;for(let w=0;w<80&&n<5;w++){g.week++;if(ev('lv_ms').when(g)){walkL(g,ev('lv_ms').steps,ch=>n%3===0?ch.findIndex(c=>c.ok):n%3===1?ch.findIndex(c=>c.bold):ch.findIndex(c=>!c.ok&&!c.bold));n++;g.week+=1;}}
+      if(n!==5||g.msN[id]!==5||ev('lv_ms').when(g))throw Error('five '+id+' '+n);
+      for(const D of MONO_STORY[id])for(const part of [D.good.then,D.bad.then,D.bold.win,D.bold.lose,D.lines])if(!part.length||part.some(x=>!x.t))throw Error('empty '+id);}
+    const g=fresh();G=g;lovUp(g,['kati','mali']);g.season=2;g.week=30;return !ev('lv_ms').when(g);});
+  test('old saves: past spats/Valentines count once, +10 for "love everyone", clash and spat lines rotate',()=>{const g=fresh();G=g;lovUp(g,['kati','mali','rin']);g.spatDone={[pairKey('kati','mali')]:3};g.valCaught=3;g.haremOK=true;
+    delete g.ptInit;delete g.hmInit;delete g.pairF;delete g.pairU;delete g.pairV;fixSave(g);const km=pairKey('kati','mali'),kr=pairKey('kati','rin');
+    if(g.pairF[km]!==3||g.pairV[km]!==2||g.pairV[kr]!==2||g.pairU[km]!==60||g.pairU[kr]!==30)throw Error(JSON.stringify([g.pairF,g.pairV,g.pairU]));g.pairU[km]=61;delete g.ptInit;fixSave(g);if(g.pairU[km]!==61)throw Error('ran twice');
+    const asks=new Set(),again=new Set();for(let i=0;i<5;i++){const st=clashSteps(g);asks.add(st[1].t);}for(let i=0;i<6;i++){g.spatAbs=-99;const st=spatSteps(g);again.add(JSON.stringify(st.slice(1,3).map(x=>x.t)));}
+    return asks.size===5&&again.size>=4;});
+  test('silly squabbles: team pairs get them instead of real spats, 6 topics rotate, nobody loses closeness',()=>{const g=fresh();G=g;lovUp(g,['kati','mali']);hmSet(g,['kati','mali']);g.pairSt={[pairKey('kati','mali')]:3};
+    let silly=0;const seen=new Set();for(let w=1;w<=52*3;w++){g.week=(w-1)%52+1;g.season=1+Math.floor((w-1)/52);if(ev('lv_spat').when(g))throw Error('real spat in team');
+      if(ev('lv_silly').when(g)){const b0=g.F.kati.bond+g.F.mali.bond;const st=sillySteps(g);seen.add(st[0].t);const ch=st.find(x=>x.choice).choice;if(ch.length!==3)throw Error('3 options');ch[silly%3].fx(g);if(g.F.kati.bond+g.F.mali.bond<b0)throw Error('lost bond');g.lvEvAbs=absWeek(g);silly++;}}
+    if(silly<8||silly>20||seen.size!==6)throw Error('count '+silly+' topics '+seen.size);
+    const o=fresh();G=o;lovUp(o,['kati','mali']);return sillyPairs(o).length===0;});
+  test('pair talks: 10 pairs × 3 stages, both answers, TH/EN lines filled',()=>{for(const k of Object.keys(PAIR_TALK)){const [a,b]=k.split('_');if(pairKey(a,b)!==k)throw Error('key '+k);if(PAIR_TALK[k].length!==3)throw Error('stages '+k);
+      if(PAIR_TALK[k].filter(x=>x.bold).length!==1)throw Error('bold '+k);for(const st of [0,1,2])for(const pick of (PAIR_TALK[k][st].bold?[0,1,2]:[0,1])){const g=fresh();G=g;g.season=2;for(const id of [a,b])g.F[id].camp='player';lovUp(g,[a,b]);for(const id of [a,b]){g.F[id].camp='player';g.F[id].awayAbs=null;}
+        g.pairSt={[k]:st};g.pairU={[k]:80};g.pairV={[k]:2};g.pairF={[k]:2};const n=walkL(g,ptSteps(g),ch=>ch.findIndex(c=>pick===0?c.ok:pick===1?(!c.ok&&!c.bold):c.bold));if(n<5)throw Error('short '+k+st);}}
+    return Object.keys(PAIR_TALK).length===10&&['kati','mali','rin','ploy','fah'].every(id=>HM_FORM.say[id]&&HM_JOIN.newbie[id]&&[3,4,5].every(n=>HM_JOIN.welcome[n][id]));});
   test('Baiyok: own sprites + camp-suffixed names, leaves Golden Tiger in white, then visits on a loop',()=>{const g=fresh();G=g;g.season=2;g.week=12;
     joinCamp(g,'fah',1800);joinCamp(g,'mali',1200);g.flags.fahJoinedAbs=absWeek(g)-1;const b=makeProdigy(g,'B','fah'),a=makeProdigy(g,'A','ploy');
     if(b.sprite!=='baiyok'||a.sprite!=='petchara'||!/พยัคฆ์ทอง|Golden Tiger/.test(b.full)||!/พยัคฆ์ทอง|Golden Tiger/.test(a.full))throw Error('names/sprites');

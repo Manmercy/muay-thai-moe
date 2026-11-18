@@ -1003,7 +1003,7 @@ const hasStaff=(G,k)=>(G.staff||[]).includes(k);
 const staffLocked=(G,k)=>{const r=STAFF[k].req;if(!r)return "";if(r.lv&&campLevel(G)<r.lv)return `Camp Lv.${r.lv}`;if(r.rep&&G.rep<r.rep)return `Fame ${r.rep}`;return "";};
 function hireStaff(G,k){const S=STAFF[k];G.staff=G.staff||[];if(!S||hasStaff(G,k)||G.staff.length>=staffSlots(G)||staffLocked(G,k)||G.cash<S.fee)return false;G.cash-=S.fee;G.staff.push(k);G.fac.assistants=G.staff.length;return true;}
 function fireStaff(G,k){G.staff=(G.staff||[]).filter(x=>x!==k);G.fac.assistants=G.staff.length;return true;}
-function fixSave(G){if(G&&G.F&&typeof monoFix==="function")monoFix(G);if(G&&G.ev&&G.ev.loy&&typeof thiefFix==="function")thiefFix(G);if(G&&G.F&&G.prodigy)fixProdigies(G);if(G&&G.flags&&G.flags.beat_ploy&&G.flags.beatS_ploy==null)G.flags.beatS_ploy=G.season||1;
+function fixSave(G){if(G&&G.F&&typeof hmFix==="function")hmFix(G);if(G&&G.F&&typeof monoFix==="function")monoFix(G);if(G&&G.ev&&G.ev.loy&&typeof thiefFix==="function")thiefFix(G);if(G&&G.F&&G.prodigy)fixProdigies(G);if(G&&G.flags&&G.flags.beat_ploy&&G.flags.beatS_ploy==null)G.flags.beatS_ploy=G.season||1;
   // Legacy saves used week-of-season values. Infer only short, plausible effects;
   // otherwise expire them instead of resurrecting an old effect after New Year.
   const now=gameWeek(G),base=now-G.week;
