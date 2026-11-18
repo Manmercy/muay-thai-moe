@@ -465,6 +465,10 @@ function fatigueAfter(G,f,preset,intensity){const fx=G.fac,clin=fx.clinic||0,hil
 /* v1.90 limit break: a fighter's stat ceiling (20; 25 after the regional limit break, 30 later at national level).
    Past 20 a stat grows at LB_RATE of the normal pace, so the extra five points take years, not weeks. */
 const stCap=f=>f&&f.cap>20?f.cap:20,LB_RATE=.6;
+/* v1.91.12 (Man): past the 20 ceiling a point counts only LB_FIGHT in the ring (limit break still grows a fighter, but no longer runs away with fights) */
+let LB_FIGHT=.35;const lbV=v=>v>20?20+(v-20)*LB_FIGHT:v;
+function lbA(a){let o=null;for(const k in a)if(a[k]>20){o=o||{...a};o[k]=lbV(a[k]);}return o||a;}
+function lbView(f){if(!f||!f.a)return f;const a=lbA(f.a);if(a===f.a)return f;const v=Object.create(f);v.a=a;v.__base=f;return v;}
 function trainWeek(G,f,rng){
   const p=PRESETS[f.plan.preset],it=INTENSITY[f.plan.intensity];f.gains={};
   f.xpGain=0;
@@ -610,7 +614,7 @@ function aiPlan(f,opp,rng){
   const a=f.a;const opts=[["balanced",1],["pressure",(a.punch+a.elbow+a.power)/30],["counter",(a.counter+a.iq)/22],["outside",(a.kick+a.foot)/22],["clinch",(a.knee+a.clinch)/22]];
   return pickW(rng,opts.map(([k,v])=>[k,Math.pow(v,3)]));
 }
-function newFight(fa,fb,o){
+function newFight(fa,fb,o){fa=lbView(fa);fb=lbView(fb);
   const rng=mulberry32(o.seed);const SA=fightSide(fa,o.planA||aiPlan(fa,fb,rng),rng),SB=fightSide(fb,o.planB||aiPlan(fb,fa,rng),rng);
   // v1.20: a canon rival fights a level above herself on final night
   if(o.tier==="final"){for(const S of [SA,SB])if(S.f.canon&&S.f.camp==="rival")S.prep+=.05;}
@@ -1174,7 +1178,7 @@ function hiddenEdge(f){if(!f||f.camp!=="player")return 0;const key=(traitOf(f)||
     while(!F.over){F.A.instr=aiCorner(F,F.A,F.B);F.B.instr=aiCorner(F,F.B,F.A);fightRound(F);}w+=F.result.win==="A"?1:F.result.win==="D"?.5:0;}best=Math.max(best,w/n);}
   const r=clamp(best,.03,.97),v=Math.max(0,OFF+Math.log(r/(1-r))/.9);_edge[f.id]={k:key,v};return v;}
 const edgeOf=(G,f)=>f&&f.camp!=="player"?(f.vet||0):(G&&(G.season||1)>=2)?hiddenEdge(f):0;
-const effOvr=(G,f)=>ovr(f.a)+edgeOf(G,f);
+const effOvr=(G,f)=>ovr(lbA(f.a))+edgeOf(G,f);
 /* how much harder `op` is than `me` once the hidden edge is counted (positive = tougher) */
 /* v1.88: like an RPG enemy level, an opponent's level follows her real strength (stats + ring craft),
    on the same scale our own fighters reach (fitted from long bot runs: our Lv 8 ≈ 12, Lv 15 ≈ 17 effective).
@@ -1193,7 +1197,7 @@ function lvInfo(f){if(!f)return {lv:1,rate:null};if(f.camp==="player"||f.canon)r
   if(me){rate=lvRate(g,me,f);if(rate>=0){const r=clamp(rate,.03,.97);v=clamp(Math.round((me.lvl||1)-Math.log(r/(1-r))/LV_LOGIT),1,MAX_LV);}else rate=null;}
   if(f.plv&&f.plv>v)v=f.plv;f.plv=v;return {lv:v,rate,me};}
 function lvOf(f){return lvInfo(f).lv;}
-const effGap=(G,me,op)=>ovr(op.a)-ovr(me.a)+((op.lvl||1)-(me.lvl||1))*.15-edgeOf(G,me)+edgeOf(G,op);
+const effGap=(G,me,op)=>ovr(lbA(op.a))-ovr(lbA(me.a))+((op.lvl||1)-(me.lvl||1))*.15-edgeOf(G,me)+edgeOf(G,op);
 function genOffers(G,opt){
   const rng=mulberry32(G.seed+G.week*7919+11);G.snub=G.snub||{};const ignored=new Set();
   /* v1.82.3: only offers the NPC really sent and the player let lapse at week end count as a snub — not temple-fair or Vector bookings, not a mid-week refresh */
@@ -1290,7 +1294,7 @@ function tierMoves(G){if(!G.tierStart||G.tierStart.season!==(G.season||1))snapTi
   for(const [id,k] of Object.entries(G.tierStart.t)){const f=G.F[id];if(!f)continue;const t=tierOf(f),d=t.i-TIER_BY[k].i;if(d)out.push({f,from:TIER_BY[k],to:t,up:d>0});}
   return out.sort((x,y)=>(y.f.camp==="player")-(x.f.camp==="player")||y.to.i-x.to.i||ratingOf(y.f)-ratingOf(x.f));}
 function applyResult(G,F,booking){
-  const {A,B}=F;const fa=A.f,fb=B.f,r=F.result,tier=TIER[booking.tier];
+  const {A,B}=F;const fa=A.f.__base||A.f,fb=B.f.__base||B.f,r=F.result,tier=TIER[booking.tier];
   if(!tier.off&&!booking.beast){if(!G.tierStart||G.tierStart.season!==(G.season||1))snapTiers(G);rateBout(G,fa,fb,r.win==="D"?"D":r.win==="A"?"W":"L",booking.tier);}
   let ret=null;
   for(const [me,op,side] of [[fa,fb,"A"],[fb,fa,"B"]]){
