@@ -5878,7 +5878,7 @@ AU.gsfx=function(kind,a){if(!this.init()||this.muted||!SETTINGS.sfx)return;const
   if(kind==="shimmer")for(let i=0;i<6;i++)T(i*.05,{f:1400+Math.random()*1400,type:"sine",dur:.12,peak:.06});};
 
 // ================= MUAY THAI MOE v1.3 — UI =================
-const VERSION="1.90.11";
+const VERSION="1.90.15";
 const CUR_LANG=(typeof window!=="undefined"&&window.LANG)||"th";
 const TH_LABEL=String.fromCharCode(3652,3607,3618);
 function langSwitch(cls){return `<div class="langsw ${cls||""}" role="group" aria-label="Language">${[["th",TH_LABEL],["en","EN"]].map(([k,l])=>`<button class="lsb ${CUR_LANG===k?"on":""}" data-act="setlang" data-v="${k}" aria-pressed="${CUR_LANG===k}">${l}</button>`).join("")}</div>`;}
@@ -7020,7 +7020,7 @@ function sceneHTML(){const S=UI.scene,c=S.cur||{};const sp=c.n==="coach"?{name:c
     ${c.choice?`<div class="choices">${(UI._ck!==c?(UI._ck=c,UI._ct=Date.now()):0,"")}${c.choice.map((o,i)=>{const t=val(o.t),m0=t.match(/^(.*?)\s*\(([^()]*)\)\s*$/),m=m0&&m0[1].trim()?m0:null,act=m0&&!m0[1].trim();return `<button data-act="vchoose" data-v="${i}" ${act?'class="cact"':""}>${esc(act?m0[2]:m?m[1]:t)}${m?`<small class="cfx">${esc(m[2])}</small>`:""}</button>`;}).join("")}</div>`:
      `${who?`<div class="who">${tag}<b>${who}</b></div>`:""}<div class="txt ${c.n==="nar"?"nar":""}">${esc(c.t||"")}</div><div class="nextc">Tap to continue ▸</div>`}
    </div><button class="btn sm vskip" data-act="vskip">Skip scene</button></div>`;}
-function sceneSkip(){let g=0;while(UI.scene&&g++<300){const s=UI.scene;if(s.cur&&s.cur.choice)sceneChoose(0);else sceneNext();}}
+function sceneSkip(){let g=0;while(UI.scene&&g++<300){const s=UI.scene;if(s.cur&&s.cur.choice){render();return;}sceneNext();}} /* v1.90.15: skip fast-forwards to the next choice and stops there — it used to pick the first option for you (a skipped confession meant yes) */
 
 // ---------- week-1 guide ----------
 const TUTORIAL=()=>[
