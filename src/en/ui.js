@@ -1,5 +1,5 @@
 // ================= MUAY THAI MOE v1.3 — UI =================
-const VERSION="1.90.7";
+const VERSION="1.90.8";
 const CUR_LANG=(typeof window!=="undefined"&&window.LANG)||"th";
 const TH_LABEL=String.fromCharCode(3652,3607,3618);
 function langSwitch(cls){return `<div class="langsw ${cls||""}" role="group" aria-label="Language">${[["th",TH_LABEL],["en","EN"]].map(([k,l])=>`<button class="lsb ${CUR_LANG===k?"on":""}" data-act="setlang" data-v="${k}" aria-pressed="${CUR_LANG===k}">${l}</button>`).join("")}</div>`;}
@@ -1002,7 +1002,7 @@ const PATCH={id:"1.90.0",ver:"Muay Thai Moe v1.90",title:"Loy Krathong Night at 
  ["🏮","Loy Krathong Riverside Brawl","Enter LOYKRATHONG69 in Settings (works any time). Send 3 girls through 9 non-stop bouts against the helmet gang; 3 endings by score (bronze 400 · silver 800 · gold 1,200 + beat the boss). Everyone fights in pixel Thai dress, there are lines between bouts, and Ploy and Fah can join as guests. No injuries and nothing counts toward your record."],
  ["👘","Thai dress you can wear","Any girl who wins a riverside bout gets her Thai dress from Auntie Taew by letter. Claim it and pick it in her wardrobe — she wears it at camp, in training and in the ring (looks only, no stat effect)."],
  ["🪷","Floating krathongs with 5 girls","After the ending, the five girls float krathongs at the pier. The manager can make one of 4 wishes, each girl answers differently… and the next morning, check the mailbox."],
- ["🦝","Tum the Krathong Thief","Arrives by Auntie Taew's letter every in-game Loy Krathong (weeks 24–28 each year). Catch him for EXP and stardust; he gets tougher as your camp does. The Loy otter now eases fatigue when you play with it."],
+ ["🦝","Tum the Krathong Thief","Arrives by Auntie Taew's letter at three times: once a day from 20–23 Nov 2026 (real days) · every week for the first 4 weeks after you start the riverside brawl · every in-game Loy Krathong (weeks 24–27 each year). Catch him for EXP and stardust; he gets tougher as your camp does. The Loy otter now eases fatigue when you play with it."],
  ["🪖","The helmet gang, renewed","The Silver Helmet Chief has his own sprite, the Gold-Black Helmet right hand appears from year 2, every helmet has scene art — and beat the gang three times and they'll challenge you to fight at their warehouse, for a fee."],
  ["🙏","Annual wai kru","Week 37 (Muay Thai Day) every year: pick the offering set, the whole camp kneels and bows to the teachers three times, Kru Daeng places the mongkol and new fighters are initiated. Morale up, and the teachers' blessing cuts injuries for a while."],
  ["🥁","Livelier ring","The pi-and-drum music speeds up round by round, fastest in the deciding round; 115+ new commentary lines; skills that match a classic mae mai now carry its real name, and the booth calls it out."],

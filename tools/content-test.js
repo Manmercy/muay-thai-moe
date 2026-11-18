@@ -165,6 +165,14 @@ const chrome=process.env.CHROME_PATH||'/Applications/Google Chrome.app/Contents/
     {const g=mk();const s=JSON.stringify(dateScene(g,'kati',act).flatMap(x=>x.inject?x.inject(g):[x]));if(!/เปลี่ยนเรื่อง|changes the subject/.test(s)||g.seen.love_kati)throw Error('almost first');}
     const g=mk();g.confTry={kati:3};said(g,'kati');if(!g.seen.love_kati)throw Error('kati');for(let w=0;w<3;w++){g.week++;g.confTry={mali:5};if(said(g,'mali'))throw Error('mali too soon week +'+(w+1));}
     g.week++;g.confTry={mali:3};if(!said(g,'mali'))throw Error('mali after 4 weeks');return true;});
+  test('Tum the thief: once a real day 20-23 Nov, 4 weeks after the first brawl (old saves from now), weeks 24-27 every year',()=>{const T0=todayStr;let day='2026-11-18';todayStr=()=>day;{const g=fresh();G=g;g.ev={loy:{got:46,season:1,best:0,tiers:{},runs:0}};g.week=46;if(thiefOn(g))throw Error('18 Nov is off now');}day='2026-11-20';try{
+    const mk=()=>{const g=fresh();G=g;g.ev={loy:{got:46,season:1,best:0,tiers:{},runs:0}};g.week=46;g.mail=[];return g;};const caught=g=>{const L=g.ev.loy;L.thiefWk=absWeek(g);L.thiefDay=todayStr();};
+    let g=mk();if(!thiefReady(g))throw Error('daily off');caught(g);if(thiefReady(g))throw Error('twice a day');day='2026-11-23';if(!thiefReady(g))throw Error('next day');
+    day='2026-11-24';g=mk();if(thiefOn(g))throw Error('on after the real window');evStartLoy();UI.modal=null;if(!thiefReady(g)||!g.mail.some(m=>m.ev==='thief'))throw Error('first brawl window/mail');
+    const w0=g.ev.loy.thiefFrom;caught(g);if(thiefReady(g))throw Error('twice a week');for(let k=1;k<4;k++){g.week++;if(!thiefReady(g))throw Error('week +'+k);caught(g);}g.week++;if(thiefOn(g))throw Error('5th week');
+    g=mk();g.ev.loy.runs=2;fixSave(g);if(g.ev.loy.thiefFrom!==absWeek(g)||!thiefReady(g)||!g.mail.some(m=>m.ev==='thief'))throw Error('old save migration');
+    g=mk();g.ev.loy.runs=2;g.ev.loy.thiefWk=10;fixSave(g);if(thiefOn(g))throw Error('already met: no new window');g.week=25;if(!thiefReady(g))throw Error('week 25');g.week=28;if(thiefOn(g))throw Error('week 28 is off now');
+    }finally{todayStr=T0;}return true;});
   test('a no late in the year does not block her second ask next year (old week-of-year saves too)',()=>{const act=Object.keys(ACTIVITIES)[0];const asks=g=>{const s=JSON.stringify(dateScene(g,'mali',act).flatMap(x=>x.inject?x.inject(g):[x]));return /คบซ้อน|two-timing/i.test(s);};
     for(const old of [false,true]){const g=fresh();G=g;for(const id of ['kati','mali']){g.F[id].met=true;g.F[id].camp='player';}g.F.kati.bond=90;g.F.kati.trust=60;takeLover(g,'kati');g.F.mali.bond=89.5;g.F.mali.trust=50;g.seen.love_mali=true;g.week=50;
       if(old){g.loveNo={mali:50};}else noteNo(g,'mali');newSeason(g);g.week=5;g.confTry={mali:2};if(!asks(g))throw Error((old?'old save':'new')+' blocked');}return true;});

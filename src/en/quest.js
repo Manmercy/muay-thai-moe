@@ -961,12 +961,12 @@ function loyPreload(){if(loyPreload.done)return;loyPreload.done=1;try{
 function evMailAct(m){loyPreload();if(m.ev==="dress"){const f=G.F[m.fid],L=loyOf(G);if(!f||!L)return "";const has=L.dress&&L.dress[f.id];
     return has?(f.camp==="player"?`<p class="meta center">Dress received</p><button class="btn" data-act="loydresswear" data-v="${f.id}">${f.outfit==="loy"?"Wearing":`Dress ${esc(f.name)}`}</button>`:`<p class="meta center">Dress received · can be worn once ${esc(f.name)} joins the camp</p>`)
       :`<button class="btn primary" data-act="loydress1" data-v="${m.id}">Claim Thai dress: ${esc(f.name)}</button>`;}
-  if(m.ev==="thief"){const L=loyOf(G);return m.done||!L||L.thiefWk===absWeek(G)?`<p class="meta center">Tum caught</p>`:m.expired?"":`<button class="btn primary" data-act="thief">Go catch Tum</button>`;}
+  if(m.ev==="thief"){const L=loyOf(G);return m.done||!L||!thiefReady(G)?`<p class="meta center">Tum caught</p>`:m.expired?"":`<button class="btn primary" data-act="thief">Go catch Tum</button>`;}
   if(m.ev==="kongka"){const B=KONGKA[m.wish];return B?(m.done?`<p class="meta center">Blessing received · ${B.n}</p>`:`<button class="btn primary" data-act="kongka" data-v="${m.id}">Receive blessing · ${B.d}</button>`):"";}
   const L=loyOf(G);if(!L)return "";const tr=loyTier(L.best,L.boss);const T=L.tiers||{};
   const ends=["bronze","silver","gold"].filter(k=>T[k]).map(k=>`<button class="btn sm" data-act="loyend" data-v="${k}">Ending: ${LOY_TIERS.find(x=>x[0]===k)[1]} · ${LOY_END[k].t}</button>`).join("");
   return `${L.runs?`<p class="meta center">Best score <b class="goldt num">${L.best}</b>${tr?` · Reward tier: <b>${tr.n}</b>`:""}</p>`:""}<button class="btn primary" data-act="evloy">${L.runs?"Take on the Riverside Brawl again":"Go to the Loy Krathong fair"}</button>
-  ${thiefOn(G)?`<button class="btn" data-act="thief" ${L.thiefWk===absWeek(G)?"disabled":""}>${L.thiefWk===absWeek(G)?"Tum caught (back next week)":"Catch Tum the Krathong Thief"}</button>`:`<p class="meta center">Tum returns during the in-game Loy Krathong (weeks ${THIEF_WK[0]}–${THIEF_WK[1]} every year) — Auntie Taew will send a letter</p>`}
+  ${thiefOn(G)?`<button class="btn" data-act="thief" ${!thiefReady(G)?"disabled":""}>${!thiefReady(G)?`Tum caught (${thiefAgain(G)})`:"Catch Tum the Krathong Thief"}</button>`:`<p class="meta center">Tum returns during the in-game Loy Krathong (weeks ${THIEF_WK[0]}–${THIEF_WK[1]} every year) — Auntie Taew will send a letter</p>`}
   ${L.intro?`<div class="evrep"><button class="btn sm" data-act="loyintro">Replay the opening</button>${ends}${loyCanFloat(L)?`<button class="btn sm gold" data-act="loywishopen">🪷 Float krathongs with the girls</button>`:""}</div>`:""}
   ${L.wish?`<p class="meta center">Your wish: "${esc((LOY_WISH.find(w=>w.k===L.wish)||{}).t||"")}"</p>`:""}
   ${T.gold?`<div class="evrep"><button class="btn sm" data-act="loydress" aria-pressed="${!!L.dressOn}">Thai dress off-stage: ${L.dressOn?"On":"Close"}</button></div>`:""}`;}
@@ -1053,7 +1053,7 @@ const LOY_THIEF={name:"Tum the Krathong Thief",
   {n:"npc",who:"Auntie Taew",t:"Well done, dear! Auntie's frying khanom krok for the whole team. Eat up before you go home!"}],
  lose:[{n:"nar",bg:"loy_night",t:"Tum laughs and dives in with the bag of coins… but the bag rips mid-river and every coin sinks."},
   {n:"npc",who:"Tum the Krathong Thief",t:"Hey! My coins!! …See you next year!"},{n:"npc",who:"Auntie Taew",t:"Never mind, dear. At least he didn't get anything."}]};
-function evStartLoy(){const L=loyOf(G);if(!L)return;loyPreload();UI.modal=null;
+function evStartLoy(){const L=loyOf(G);if(!L)return;if(L.thiefFrom==null){L.thiefFrom=absWeek(G);thiefMail(G);}loyPreload();UI.modal=null;
   const open=()=>{L.run=null;L.pick=[];UI.modal={type:L.rulesSeen?"gaunt":"loyrules"};render();};
   if(!L.intro){L.intro=1;save();playScene(loyIntro(G),open,{bg:"loy_night",look:"thai"});}else open();}
 /* v1.89.24: Ploy / Fah join as guests when they are not in the camp yet — event-only, nothing carries back */
@@ -1381,11 +1381,19 @@ function loyCardDrop(G,order){G.cards=G.cards||{};const left=LOY_CARDS.filter(k=
 function loyGold(G){const L=loyOf(G);if(!L)return null;L.dressOn=1;return "Thai dress off-stage unlocked: the girls wear Thai dress in outings and dates (toggle it in Auntie Taew's letter)";}
 const loyThaiLook=G=>!!(G&&G.ev&&G.ev.loy&&G.ev.loy.tiers&&G.ev.loy.tiers.silver);
 /* v1.89.25: Tum comes back every in-game Loy Krathong (weeks 24–28) by letter — the event's stardust giver; he scales a little above the camp's top three */
-const THIEF_WK=[24,28];
-const thiefOn=G=>!!loyOf(G)&&G.week>=THIEF_WK[0]&&G.week<=THIEF_WK[1];
+const THIEF_WK=[24,27];
+/* v1.90.8 (Man): Tum comes (1) once a real day 20–23 Nov 2026, (2) every week for the 4 game weeks after you first start the riverside brawl —
+   saves that already played it without meeting him get those 4 weeks from now — and (3) game weeks 24–27 every year (was 24–28) */
+const THIEF_DAYS=["2026-11-20","2026-11-23"];
+const thiefDaily=()=>{const t=todayStr();return t>=THIEF_DAYS[0]&&t<=THIEF_DAYS[1];};
+const thiefWin=G=>{const L=loyOf(G);if(!L)return false;const w=absWeek(G);return (G.week>=THIEF_WK[0]&&G.week<=THIEF_WK[1])||(L.thiefFrom!=null&&w>=L.thiefFrom&&w<L.thiefFrom+4);};
+const thiefOn=G=>!!loyOf(G)&&(thiefDaily()||thiefWin(G));
+const thiefReady=G=>{const L=loyOf(G);return thiefOn(G)&&((thiefDaily()&&L.thiefDay!==todayStr())||(thiefWin(G)&&L.thiefWk!==absWeek(G)));};
+const thiefAgain=G=>thiefWin(G)?"back next week":"back tomorrow";
+function thiefFix(G){const L=loyOf(G);if(!L)return;if(L.thiefFrom==null&&L.runs>0&&L.thiefWk==null)L.thiefFrom=absWeek(G);thiefMail(G);}
 const campPow=G=>{const R=roster(G).map(f=>ovr(f.a)).sort((a,b)=>b-a).slice(0,3);return R.length?R.reduce((s,x)=>s+x,0)/R.length:8;};
 const campLv=G=>{const R=roster(G).map(f=>f.lvl||1).sort((a,b)=>b-a).slice(0,3);return R.length?Math.round(R.reduce((s,x)=>s+x,0)/R.length):1;};
-function thiefMail(G){if(!thiefOn(G))return;const L=loyOf(G),wk=absWeek(G);if(L.thiefWk===wk||(G.mail||[]).some(m=>m.ev==="thief"&&!m.done&&!m.expired))return;
+function thiefMail(G){if(!thiefReady(G))return;if((G.mail||[]).some(m=>m.ev==="thief"&&!m.done&&!m.expired))return;
   addMail(G,{kind:"event",ev:"thief",from:"Auntie Taew, som tam stall by the temple",title:"Tum Is Back!",exp:G.week+1,
     body:"Manager dear, every Loy Krathong that Tum the krathong thief shows up. Last night he hauled off a sack full of coins from people's krathongs again. Send the girls to help catch him — Auntie's frying khanom krok for you."});}
 function evThief(G,f){const K=QK.gang1,t=Math.min(19.2,Math.max(6,campPow(G)*1.08)),rng=mulberry32((G.seed^0x7a1)+absWeek(G)*17);const a={};
@@ -1398,7 +1406,7 @@ function thiefHTML(){const pool=gauntPool();return `<h2>Catch the Krathong Thief
 function thiefGo(fid){const L=loyOf(G);if(!L)return;const f=G.F[fid];if(!f)return;UI.modal=null;
   const pre=[...LOY_THIEF.pre,f.canon&&LOY_THIEF.line[fid]?{n:fid,f:"angry",l:"thai",t:LOY_THIEF.line[fid]}:{n:"nar",t:`${f.name} steps onto the pier and rolls up their sleeves`}];
   playScene(pre,()=>{const qid=evThief(G,f);const bk={id:"bthief",a:fid,b:qid,week:G.week,tier:"evloy",rounds:2,ev:1,bg:"bg_loy_ring.webp"};
-    openFight2(bk,()=>{const F=LASTF,win=F&&F.result&&F.result.win==="A",ko=win&&/KO|น็อก/.test(F.result.type||"");L.thiefWk=absWeek(G);delete G.F.q_evthief;
+    openFight2(bk,()=>{const F=LASTF,win=F&&F.result&&F.result.win==="A",ko=win&&/KO|น็อก/.test(F.result.type||"");L.thiefWk=absWeek(G);L.thiefDay=todayStr();delete G.F.q_evthief;
       for(const m of G.mail||[])if(m.ev==="thief"&&!m.done)m.done=true;
       const yr=G.season||1,xp=win?30+10*yr:10,du=win?(ko?5:4):1;if(f.camp==="player")gainXP(G,f,xp);G.dust=(G.dust||0)+du;
       const rw=[f.camp==="player"?`${f.name} EXP +${xp}`:"",`Stardust ✦ +${du}`].filter(Boolean).join(" · ");
@@ -1415,7 +1423,7 @@ Object.assign(ACT,{
   lwclose:()=>{if(UI.lwGo){UI.lwGo();return;}UI.modal=null;const d=UI.lwDone;UI.lwDone=null;AU.startMusic("hub");if(d)d();else render();},
   loywishopen:()=>{const L=loyOf(G);if(!loyCanFloat(L))return;loyWishOpen(()=>{UI.modal=null;render();});},
   loyfloat:()=>{const L=loyOf(G);if(!loyCanFloat(L))return;loyWishOpen(()=>{UI.modal=L.run&&L.run.done?{type:"gaunt"}:null;render();});},
-  thief:()=>{const L=loyOf(G);if(!L||!thiefOn(G)||L.thiefWk===absWeek(G))return;UI.modal={type:"thief"};render();},
+  thief:()=>{const L=loyOf(G);if(!L||!thiefReady(G))return;UI.modal={type:"thief"};render();},
   thiefgo:d=>thiefGo(d.v),
   loydress:()=>{const L=loyOf(G);if(!L||!L.tiers.gold)return;L.dressOn=L.dressOn?0:1;save();render();},
 });
