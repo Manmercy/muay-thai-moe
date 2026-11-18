@@ -11408,5 +11408,16 @@
  "คืนลอยกระทงที่ค่ายศิริชัย": "Loy Krathong Night at Sirichai Camp",
  "<div class=\"set comm\"><span><b>ชุมชนของเกม</b><small>ข่าวอัปเดต โค้ดอีเวนต์ แจ้งบั๊ก คุยกับผู้เล่นคนอื่น</small></span><span class=\"obtns\"><a class=\"btn sm\" href=\"": "<div class=\"set comm\"><span><b>Community</b><small>Update news, event codes, bug reports, chat with other players</small></span><span class=\"obtns\"><a class=\"btn sm\" href=\"",
  "<div class=\"set\"><span><b>ใส่โค้ด</b><small>รับโค้ดอีเวนต์ได้ใน Discord ของเกม (ปุ่มด้านล่าง)</small></span><span class=\"obtns redeem\"><input id=\"redeemcode\" maxlength=\"24\" autocomplete=\"off\" autocapitalize=\"characters\" spellcheck=\"false\" placeholder=\"โค้ด\" aria-label=\"โค้ด\"><button class=\"btn sm primary\" data-act=\"redeem\">ใช้โค้ด</button></span></div>": "<div class=\"set\"><span><b>Enter code</b><small>Get event codes in the game's Discord (button below)</small></span><span class=\"obtns redeem\"><input id=\"redeemcode\" maxlength=\"24\" autocomplete=\"off\" autocapitalize=\"characters\" spellcheck=\"false\" placeholder=\"Code\" aria-label=\"Code\"><button class=\"btn sm primary\" data-act=\"redeem\">Redeem</button></span></div>",
- "ดูเหมือนยังไม่กล้าพูดอะไรบางอย่าง · ความเชื่อใจ ": " seems to be holding something back · Trust "
+ "ดูเหมือนยังไม่กล้าพูดอะไรบางอย่าง · ความเชื่อใจ ": " seems to be holding something back · Trust ",
+ "หลบตา แล้วเปลี่ยนเรื่องไปเฉยเลย": " looks away and changes the subject, just like that",
+ "…ไม่มีอะไร! อย่ามองหน้าฟ้าแบบนั้นสิ!": "…Nothing! Don't look at me like that!",
+ "นี่! ฟ้ามีเรื่องจะบอก… คือ… ฟ้า…": "Hey! I've got something to tell you… it's… I…",
+ "…ช่างเถอะ ไว้วันที่ฉันพร้อมกว่านี้ก่อน": "…Never mind. Some other day, when I'm more ready.",
+ "คุณ… ฉันมีอะไรอยากพูดมาสักพักแล้ว…": "You… there's something I've wanted to say for a while…",
+ "…ไม่สิ ข้อมูลยังไม่พอ ขอเก็บไว้ก่อนค่ะ": "…No. Not enough data yet. I'll keep it to myself for now.",
+ "ผู้จัดการ ฉันมีข้อสรุปเรื่องหนึ่งที่อยากแจ้งให้ทราบ…": "Manager, I've reached a conclusion I'd like to share…",
+ "…อยากกินขนมครกอีกถาดค่ะ! ใช่ ๆ ขนมครก!": "…that I want another tray of khanom khrok! Yes, yes, khanom khrok!",
+ "เอ่อ… คือมะลิ… มะลิอยากจะบอกว่า…": "Um… so, I… I wanted to say…",
+ "…ไม่มีอะไรค่ะ! ลืมไปเถอะนะคะ กลับค่ายกันเถอะ": "…It's nothing! Please forget it. Let's head back to camp.",
+ "ผู้จัดการคะ… หนูมีเรื่องอยากบอกมานานแล้ว คือว่า…": "Manager… there's something I've wanted to tell you for a long time. It's…"
 }

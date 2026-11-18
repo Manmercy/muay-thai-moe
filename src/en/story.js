@@ -438,6 +438,19 @@ const LOVE_TAKEN={kati:"…I see. Sorry I said anything. Please forget it",mali:
 /* v1.90.3: when you last said no — counted in absolute weeks so a "no" late in the year does not block her second ask for most of the next year (old saves kept G.loveNo as the week of the year) */
 function noteNo(G,id){G.loveNoAbs=G.loveNoAbs||{};G.loveNoAbs[id]=absWeek(G);if(G.loveNo)delete G.loveNo[id];}
 const loveNoGap=(G,id)=>{const a=(G.loveNoAbs||{})[id];if(a!=null)return absWeek(G)-a;const w=(G.loveNo||{})[id];if(w==null)return 99;const d=G.week-w;return d<0?99:d;};
+/* v1.90.4: confessions are no longer a sure thing on the next date — once she is ready each date has a 40% chance (the 3rd is certain),
+   and after anyone confesses the others wait 4 weeks, so they do not come one a week like clockwork. Only rolled when everything else already says yes. */
+const CONF_GAP=4,CONF_P=.4,CONF_MAX=3;
+/* the first time she is ready she almost says it and backs off (G._almost) — the real confession comes on a later date: 40% each, certain on the 3rd after */
+function confGo(G,id,first){if(absWeek(G)-(G.lastConfAbs??-99)<CONF_GAP)return false;G.confTry=G.confTry||{};const n=(G.confTry[id]||0)+1;G.confTry[id]=n;
+  if(first&&n===1){G._almost=id;return false;}const k=first?n-1:n;
+  if(k>=CONF_MAX||Math.random()<CONF_P){G.lastConfAbs=absWeek(G);delete G.confTry[id];return true;}return false;}
+const LOVE_ALMOST={kati:[["flustered","Manager… there's something I've wanted to tell you for a long time. It's…"],["happy","…It's nothing! Please forget it. Let's head back to camp."]],
+  mali:[["flustered","Um… so, I… I wanted to say…"],["happy","…that I want another tray of khanom khrok! Yes, yes, khanom khrok!"]],
+  rin:[["flustered","Manager, I've reached a conclusion I'd like to share…"],["pout","…No. Not enough data yet. I'll keep it to myself for now."]],
+  ploy:[["flustered","You… there's something I've wanted to say for a while…"],["sad","…Never mind. Some other day, when I'm more ready."]],
+  fah:[["flustered","Hey! I've got something to tell you… it's… I…"],["angry","…Nothing! Don't look at me like that!"]]};
+const almostSteps=(G,f)=>{const L=LOVE_ALMOST[f.id];if(!L)return [];return [...L.map(([fc,t])=>({n:f.id,f:fc,l:"casual",t})),{n:"nar",t:`${f.name} looks away and changes the subject, just like that`}];};
 const takenOpt=(G,id)=>partners(G).some(k=>k!==id)?[{t:"I'm sorry. I'm already with someone",fx:G3=>{befriend(G3,id);add(G3,id,"trust",3);noteNo(G3,id);},then:[{n:id,f:"sad",l:"casual",t:LOVE_TAKEN[id]}]}]:[];
 // an ex who still feels the same, once she has had time
 const LOVE_EX={kati:"Manager… I tried. I tried being just your fighter, but I can't",
@@ -678,23 +691,24 @@ function dateScene(G,id,act){
         {n:"nar",t:`Bond with ${f.name} ${(real>=0?"+":"")+real}${HL.max?" · hearts maxed":heartCapped(G2,f)?" · hearts are full for this chapter":` · ${hleft} to ♥${HL.lv+1}`}${pref==="like"?" · it's an activity she likes!":pref==="dislike"?" · she doesn't seem to like it here":""}${D.facts.length?" · new profile info: "+D.facts.join(" / "):D.missed?" · she seems to have more she wants to share, if you say the right thing":""}`}];
       if(typeof hasSignature!=="undefined"&&hasSignature(f)&&!G2.seen["sig_"+id]){G2.seen["sig_"+id]=true;out.push({n:"nar",t:`✦ The bond unlocked the signature move of ${f.name}: "${SIGNATURE[id].name}" — ${SIGNATURE[id].desc}`});}
       if(f.bond>=40&&!G2.seen["b1_"+id]){G2.seen["b1_"+id]=true;out.push(...BOND_EVENTS[id].lv1.map(x=>({l:look,...x})));}
-      if(f.bond>=75&&f.trust>=40&&RIVAL_LOVE.includes(id)&&f.camp==="player"&&(G2.season||1)>=2&&!isLov(G2,id)&&!exWait(G2,id)&&!G2.seen["love2_"+id]){G2.seen["love2_"+id]=true;
+      if(f.bond>=75&&f.trust>=40&&RIVAL_LOVE.includes(id)&&f.camp==="player"&&(G2.season||1)>=2&&!isLov(G2,id)&&!exWait(G2,id)&&!G2.seen["love2_"+id]&&confGo(G2,id,1)){G2.seen["love2_"+id]=true;
         out.push(...LOVE_EVENTS[id].map(x=>({l:"casual",...x})),...cheatWarn(G2,id),{choice:[
           {t:yesTxt(G2,id,"I feel the same way"),fx:G3=>takeLover(G3,id),then:[{n:id,f:"flustered",l:"casual",t:LOVE_YES[id]}]},
           {t:"Thank you, but I want to keep being the one beside you like this",fx:G3=>{befriend(G3,id);add(G3,id,"trust",5);},then:[{n:id,f:"sad",l:"casual",t:LOVE_NO[id]||"…Got it."}]},...takenOpt(G2,id)]});}
-      else if(f.bond>=75&&f.trust>=40&&RIVAL_LOVE.includes(id)&&f.camp==="rival"&&!G2.seen["love_"+id]){G2.seen["love_"+id]=true;out.push(...lvSteps(PROMISE_EVENTS[id],null,G2,id,true).flatMap(x=>x.choice?[...cheatWarn(G2,id),{choice:[...x.choice,...takenOpt(G2,id)]}]:[{l:"casual",...x}]),{inject:G3=>isProm(G3,id)?[{n:"nar",t:`Relationship with ${f.name}: Promised ♡ · this story continues in season two`}]:[]});}
-      else if(f.bond>=75&&f.trust>=40&&!isLov(G2,id)&&!RIVAL_LOVE.includes(id)&&!G2.seen["love_"+id]){G2.seen["love_"+id]=true;
+      else if(f.bond>=75&&f.trust>=40&&RIVAL_LOVE.includes(id)&&f.camp==="rival"&&!G2.seen["love_"+id]&&confGo(G2,id,1)){G2.seen["love_"+id]=true;out.push(...lvSteps(PROMISE_EVENTS[id],null,G2,id,true).flatMap(x=>x.choice?[...cheatWarn(G2,id),{choice:[...x.choice,...takenOpt(G2,id)]}]:[{l:"casual",...x}]),{inject:G3=>isProm(G3,id)?[{n:"nar",t:`Relationship with ${f.name}: Promised ♡ · this story continues in season two`}]:[]});}
+      else if(f.bond>=75&&f.trust>=40&&!isLov(G2,id)&&!RIVAL_LOVE.includes(id)&&!G2.seen["love_"+id]&&confGo(G2,id,1)){G2.seen["love_"+id]=true;
         out.push(...LOVE_EVENTS[id].map(x=>({l:"casual",...x})),...cheatWarn(G2,id),{choice:[
           {t:yesTxt(G2,id,"I feel the same way"),fx:G3=>takeLover(G3,id),then:[{n:id,f:"flustered",l:"casual",t:LOVE_YES[id]}]},
           {t:"Thank you, but I want to keep being the one beside you like this",fx:G3=>{befriend(G3,id);add(G3,id,"trust",5);noteNo(G3,id);},then:[{n:id,f:"sad",l:"casual",t:LOVE_NO[id]}]},...takenOpt(G2,id)]});}
       // v1.29.3: a second chance — she won't ask twice, but after a while she lets you know the door is still open
-      else if(f.bond>=75&&f.trust>=40&&!isLov(G2,id)&&!exWait(G2,id)&&!RIVAL_LOVE.includes(id)&&G2.seen["love_"+id]&&loveNoGap(G2,id)>=2){noteNo(G2,id);
+      else if(f.bond>=75&&f.trust>=40&&!isLov(G2,id)&&!exWait(G2,id)&&!RIVAL_LOVE.includes(id)&&G2.seen["love_"+id]&&loveNoGap(G2,id)>=2&&confGo(G2,id)){noteNo(G2,id);
         out.push({n:id,f:"flustered",l:"casual",t:isEx(G2,id)?LOVE_EX[id]:LOVE_AGAIN[id]},...cheatWarn(G2,id),{choice:[
           {t:yesTxt(G2,id,isEx(G2,id)?"I still miss you too. Let's get back together":"I answered too fast that day. I feel the same way"),fx:G3=>takeLover(G3,id),then:[{n:id,f:"flustered",l:"casual",t:LOVE_YES[id]}]},
           {t:"I'd like to stay by your side, just like this",fx:G3=>{befriend(G3,id);add(G3,id,"trust",2);},then:[{n:"nar",t:`${f.name} smiles and nods, and says nothing more`}]}]});}
       /* v1.90.3: hearts are there but trust is not — say so, players could not tell why nobody confessed */
       else if(f.bond>=75&&(f.trust||0)<40&&!isLov(G2,id)&&!exWait(G2,id)&&LOVE_IDS.includes(id)&&(!RIVAL_LOVE.includes(id)||(f.camp==="rival"?!G2.seen["love_"+id]:(G2.season||1)>=2&&!G2.seen["love2_"+id])))
         out.push({n:"nar",t:`${f.name} seems to be holding something back · Trust ${Math.floor(f.trust||0)}/40`});
+      if(G2._almost===id){delete G2._almost;out.push(...almostSteps(G2,f));}
       return out;}}];
   if(romOf(G,id)&&LOVER_DATES[id]){f.lovIdx=f.lovIdx||0;const lw=(G.lovWk||{})[id],since=absWeek(G)-(lw!=null?lw:absWeek(G)-1);
     if(f.lovIdx<LOVER_DATES[id].length&&since>=LOVER_WK[f.lovIdx]){const sc=lvSteps(LOVER_DATES[id][f.lovIdx++],D,G,id,false);D.score+=2;return [...sc,steps[steps.length-1]];}}
