@@ -188,7 +188,7 @@ const ROAD={st:null,
     if(a==="front"){S.front=S.front===v?null:v;return this.draw();}
     if(a==="region"){S.region=v;return this.draw();}if(a==="time"){S.time=v;return this.draw();}if(a==="wet"){S.wet=!S.wet;return this.draw();}if(a==="car"){S.car=v;return this.draw();}
     if(a==="go"){if(S.demo){const dk=Object.keys(ROAD_DEST).find(k=>ROAD_DEST[k].r===S.region&&ROAD_DEST[k].final);return this.drive(roadPlan(G,dk,S.car),S.time,S.wet);}
-      const P=roadPlan(G,S.dest,S.car);if(S.opts.charge!==false){if(G.cash<P.total){toast("เงินไม่พอค่าเดินทาง");return;}G.cash-=P.total;}
+      const P=S.opts.plan||roadPlan(G,S.dest,S.car);if(S.opts.charge!==false&&!S.opts.paid){if(G.cash<P.total){toast("เงินไม่พอค่าเดินทาง");return;}G.cash-=P.total;}
       const w=G?gameWeek(G):1,rr=mulberry32((G.seed||1)+w*13)(),D=P.D,wetW=((w-1)%52)+1>=20&&((w-1)%52)+1<=40;
       return this.drive(P,D.km>=700?"night":D.km>=400?"dusk":"day",wetW&&rr<(D.r==="south"?.5:.3));}},
   sheetHTML(P,S){const band={cheap:["ถูก","cheap"],mid:["ปกติ","mid"],high:["แพง","high"]}[P.band],pos=Math.max(4,Math.min(96,50+(P.price/ROAD_FUEL_BASE-1)*250));
@@ -203,10 +203,11 @@ const ROAD={st:null,
   frontHTML(S){const ids=S.riders.filter(id=>ROAD_SHOTGUN[id]);if(!ids.length||(S.car==="none"))return "";
     return `<p class="meta center">ใครนั่งข้างคนขับ?</p><div class="mbpick">${ids.map(id=>`<button class="mbf ${S.front===id?"on":""}" data-rd="front" data-v="${id}"><img src="${faceSrc(id,"happy","casual")}" alt=""><small>${esc(G&&G.F[id]?G.F[id].name:id)}</small></button>`).join("")}</div>`;},
   draw(){const S=this.st,el=this.el();if(!S)return;
-    if(S.phase==="sheet"){const P=roadPlan(G,S.dest,S.car),D=P.D,poor=S.opts.charge!==false&&G.cash<P.total;
+    if(S.phase==="sheet"){const P=S.opts.plan||roadPlan(G,S.dest,S.car),D=P.D,poor=!S.opts.paid&&S.opts.charge!==false&&G.cash<P.total;
       el.innerHTML=`<div class="mbox px"><h2>🚐 เดินทางไป${esc(D.name)}</h2><p class="meta center">${ROAD_REGION[D.r].name} · ${D.km} กม.${D.final?" · เวทีชิงแชมป์ภาค":""}</p>
        ${this.sheetHTML(P,S)}${this.frontHTML(S)}
-       <div class="mfoot roadbtns"><button class="btn" data-rd="close">ไว้ก่อน</button><button class="btn primary" data-rd="go" ${poor?"disabled":""}>${poor?"เงินไม่พอ":`ออกเดินทาง · ${fmt(P.total)}`}</button></div></div>`;return;}
+       ${S.opts.paid?`<p class="meta center">จ่ายค่าเดินทางไว้แล้วตอนวางแผน</p><div class="mfoot roadbtns"><button class="btn primary" data-rd="go">ออกเดินทาง ▸</button></div></div>`
+        :`<div class="mfoot roadbtns"><button class="btn" data-rd="close">ไว้ก่อน</button><button class="btn primary" data-rd="go" ${poor?"disabled":""}>${poor?"เงินไม่พอ":`ออกเดินทาง · ${fmt(P.total)}`}</button></div></div>`}`;return;}
     if(S.phase==="demo"){const cars=["none",...Object.keys(CAMP_DECOR.vehicle.items).filter(k=>k!=="none"&&ROAD_CAR[k])];
       const dk=Object.keys(ROAD_DEST).find(k=>ROAD_DEST[k].r===S.region&&ROAD_DEST[k].final),P=roadPlan(G,dk,S.car);
       const seg=(a,list,cur)=>`<div class="rd-seg">${list.map(([k,n])=>`<button class="btn sm ${k===cur?"primary":""}" data-rd="${a}" data-v="${k}">${n}</button>`).join("")}</div>`;
@@ -234,6 +235,6 @@ const ROAD={st:null,
   next(){const S=this.st;if(!S||S.phase!=="drive")return;if(S.i>=S.lines.length-1)return this.finish();S.i++;S.lineAt=performance.now();
     if(S.lines[S.i].sign&&S.signAt==null)S.signAt=performance.now()-S.t0;this.draw();},
   finish(){const S=this.st;if(!S)return;cancelAnimationFrame(this.raf);const P=S.plan,cb=S.opts&&S.opts.onArrive;
-    if(S.demo){S.phase="demo";this.draw();return;}this.close();if(cb&&P)cb(P);},
-  close(){cancelAnimationFrame(this.raf);const el=document.getElementById("roadtrip");if(el)el.remove();this.st=null;try{AU.startMusic&&AU.startMusic("hub");}catch(e){}if(typeof render==="function"&&G)render();}};
+    if(S.demo){S.phase="demo";this.draw();return;}const front=S.front;this.close(true);if(cb&&P)cb(P,front);},
+  close(quiet){cancelAnimationFrame(this.raf);const el=document.getElementById("roadtrip");if(el)el.remove();this.st=null;if(quiet)return;try{AU.startMusic&&AU.startMusic("hub");}catch(e){}if(typeof render==="function"&&G)render();}};
 try{if(/roaddemo/.test(location.hash||""))setTimeout(()=>ROAD.demo(),600);}catch(e){}

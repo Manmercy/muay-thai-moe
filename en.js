@@ -6334,7 +6334,9 @@ function endWeek(){if(UI.scene||UI.fight||UI.montage)return;AU.resume();UI.tipId
   const queue=G.bookings.filter(b=>b.week===G.week&&!b.npc);
   UI.montage={week:G.week,items:roster(G).map(f=>({id:f.id,gains:{...f.gains},xp:f.xpGain||0,preset:f.plan.preset,injury:f.injury})),fights:queue.length,queue};if(SETTINGS.quick){montageDone();return;}render();}
 function montageDoneQuick(){return SETTINGS.quick;}
-function montageDone(){const q=[...UI.montage.queue];UI.montage=null;const next=()=>{const b=q.shift();if(!b){finishWeek();return;}openFight(b,next);};next();}
+function montageDone(){const q=[...UI.montage.queue];UI.montage=null;const next=()=>{const b=q.shift();if(!b){finishWeek();return;}
+  if(b.region&&typeof REGION!=="undefined"&&REGION.trip){REGION.trip(b,next);return;} /* v1.90 (hidden): regional trip = drive → bout → hotel */
+  openFight(b,next);};next();}
 function finishWeek(){G.bookings=G.bookings.filter(b=>b.week!==G.week);weekFinish(G);G.campNote=null;save();
   if(G.ended){startEnding();return;}UI.modal={type:"report",after:afterWeekFlow};render();}
 function startEnding(){const E=endingScene(G);UI.modal=null;UI.fight=null;UI.montage=null;playScene(E.steps,()=>{UI.ending=E;if(G.ended==="bankrupt"||DEMO)clearSave();else save();render();},{bg:E.steps[0].bg||"camp",look:"casual"});}
