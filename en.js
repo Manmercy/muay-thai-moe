@@ -5385,7 +5385,7 @@ const FS={cv:null,ctx:null,bg:null,A:null,B:null,fx:[],shake:0,
     if(e.ev==="cut"){this.fx.push({x:def.x,y:250,t0:now,txt:"Crack!",cut:true});}
     /* v1.90 open rules: on the ground the bottom fighter lies flat, the top one kneels over her */
     /* v1.90: a boss changes form — new sheet, and the blood-mode awakening plays its own sheet */
-    if(e.ev==="phase"){const P=(atk.f.phases||[])[(e.ph||1)-1];if(P){atk.f={...atk.f,sprite:P.sprite,blood:P.blood||0};const keep={...this.spR};
+    if(e.ev==="phase"){const P=(atk.f.phases||[])[(e.ph||1)-1];if(P){if(P.lvUp&&typeof G!=="undefined"&&G.F[atk.f.id]&&!G.F[atk.f.id].lvUpd){G.F[atk.f.id].lvl+=P.lvUp;G.F[atk.f.id].lvUpd=1;}/* v1.90.20: Ladda +1 level in blood mode */atk.f={...atk.f,sprite:P.sprite,blood:P.blood||0};const keep={...this.spR};
       if(P.n===3){const mv=(atk.f.spl||[]).find(m=>m.awaken);this.special({side:atk.side,mv,head:"TRANSFORM!",name:mv?mv.def:"Blood-boil mode"},0,now);}
       else if(P.n===2)this.special({side:atk.side,mv:null,kind:"def",col:"#ff5a6e",head:"TRANSFORM!",name:"Hood Off"},0,now);this.spR=keep;this.shake=P.n===3?18:10;}}
     if(e.ev==="takedown"){def.gnd=true;def.down=0;atk.top=true;atk.anim="punch";atk.t0=now;this.shake=14;this.fx.push({x:def.x,y:300,t0:now,txt:"THROW!",big:true});}
