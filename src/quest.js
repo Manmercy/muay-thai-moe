@@ -938,8 +938,8 @@ const LOY_LADDER=["gang1","gang1","gang2","gang2","gang3","gang3","gang4","gang6
 const LOY_TIERS=[["gold","ทอง",1500],["silver","เงิน",1000],["bronze","ทองแดง",450]];
 const loyOf=G=>(G.ev||{}).loy||null;
 function loyTier(sc,boss){for(const [k,n,min] of LOY_TIERS)if(sc>=min&&(k!=="gold"||boss))return {k,n};return null;}
-/* v1.89.24: Man's target — the gang is 20% stronger than the fighter sent at the first bout, rising to 30% at the boss (a year 2–5 camp averages ovr ~15) */
-function evGang(G,k,f){const kind=LOY_LADDER[k],K=QK[kind],t=Math.min(19.2,ovr(f.a)*(1.2+.1*k/8)),rng=mulberry32((G.seed^0x10e)+k*131);const a={};
+/* v1.89.24: the gang is 15% stronger than the fighter sent at the first bout, rising to 25% at the boss (a year 2–5 camp averages ovr ~15) */
+function evGang(G,k,f){const kind=LOY_LADDER[k],K=QK[kind],t=Math.min(19.2,ovr(f.a)*(1.15+.1*k/8)),rng=mulberry32((G.seed^0x10e)+k*131);const a={};
   for(const [x] of ATTRS)a[x]=clamp(t+(K.tilt[x]||0)+(rng()*1.2-.6),3,19.5);const d=t-ovr(a);for(const [x] of ATTRS)a[x]=clamp(a[x]+d,3,19.5);
   const id="q_evloy_"+k;const o=baseFighter(id,{name:K.name,full:K.name,div:"X",camp:"quest",color:K.color,potential:t+2,a});
   o.sprite=K.sprite;o.kind=kind;o.grp="gang";o.lvl=(f.lvl||1)+2+Math.floor(k/3);o.fatigue=0;o.morale=75;G.F[id]=o;syncFighterAges(G);return id;}
@@ -980,6 +980,8 @@ function loyIntro(G){const S=[
   if(gs.some(f=>f.id==="ploy"))S.push({n:"ploy",f:"angry",l:"thai",t:"พี่ไม่ใช่คนค่ายคุณ …แต่ตลาดนี้พี่มาซื้อของทุกปี ถ้าขาดคน พี่ขึ้นให้"});
   if(gs.some(f=>f.id==="fah"))S.push({n:"fah",f:"happy",l:"thai",t:"ฟ้าด้วย! ต่อยแก๊งหมวกฟรี ไม่คิดค่าตัว! …ขอขนมครกสักถาดก็พอ"});
   if(gs.length)S.push({n:"nar",t:`${gs.map(f=>f.name).join("กับ")}มาช่วยในฐานะแขกรับเชิญ เลือกลงชกในศึกริมน้ำได้ ไม่มีผลกับค่ายจริง`});
+  S.push({n:"coach",t:"ฟังนะ ทำคะแนนให้ถึงสี่ร้อยห้าสิบ แผงป้าแต๋วรอด ถึงพันนึง ทั้งตลาดจะเชียร์ ถ้าถึงพันห้าแล้วล้มเสี่ยได้ แก๊งนี้จบ …แพ้ก็ไม่เป็นไร มาท้าใหม่ได้ทุกเมื่อ"},
+   {n:"nar",t:"ศึกนี้มีฉากจบ 3 แบบตามคะแนน (ทองแดง 450 · เงิน 1,000 · ทอง 1,500 + ล้มบอส) เล่นซ้ำได้ไม่จำกัด ฉากจบที่ปลดแล้วดูซ้ำได้ในจดหมายเชิญ"});
   return S;}
 const LOY_END={
  bronze:{t:"แก๊งหมวกถอยทัพ",steps:[{n:"nar",bg:"loy_night",t:"ลูกน้องแก๊งหมวกถอยไปยืนออกันฝั่งตรงข้าม ยังไม่ยอมแพ้ แต่ก็ไม่กล้าเข้าใกล้แผงป้าแต๋วอีก"},
@@ -1047,7 +1049,7 @@ function loyCardRow(after){const own=G.cards||{},got=LOY_CARDS.filter(k=>own[k])
     :`<b>การ์ด SR ชุดไทย ${got}/${LOY_CARDS.length}</b> · จบศึกระดับทองแดงได้ 1 ใบ เงิน 2 ใบ ทอง 3 ใบ · ส่งสาวคนไหนลงชกก่อน จะได้การ์ดของคนนั้นก่อน · เล่นซ้ำได้จนครบ`;
   return `<div class="lkrow"><div class="lkcards">${row}</div><p class="meta">🎴 ${msg}</p></div>`;}
 function gauntHTML(){const L=loyOf(G);if(!L){UI.modal=null;return "";}const R=L.run;
-  const head=`<h2>ศึกริมน้ำคืนลอยกระทง</h2><p class="meta">สามคน คนละสามไฟต์ติด พลังไม่ฟื้นเต็มระหว่างไฟต์ แพ้เมื่อไหร่คนถัดไปขึ้นแทน · ไฟต์สุดท้ายคือเสี่ยหมวกทองคำ</p>${!R?loyCardRow():""}`;
+  const head=`<h2>ศึกริมน้ำคืนลอยกระทง</h2><p class="meta">สามคน คนละสามไฟต์ติด พลังไม่ฟื้นเต็มระหว่างไฟต์ แพ้เมื่อไหร่คนถัดไปขึ้นแทน · ไฟต์สุดท้ายคือเสี่ยหมวกทองคำ · ฉากจบ 3 แบบตามคะแนน เล่นซ้ำได้ไม่จำกัด</p>${!R?loyCardRow():""}`;
   const ladder=(cur)=>`<div class="gl">${LOY_LADDER.map((k,i)=>{const lg=R&&R.log[i];const st=lg?(lg.res==="W"?"ok":lg.res==="D"?"dr":"ng"):R&&i===cur?"now":"";
     return `<div class="glr ${st}"><canvas width="40" height="40" data-qsprite="${QK[k].sprite}"></canvas><span><b>${i+1}. ${esc(QK[k].name)}</b><small>${lg?lg.txt:R&&(R.done||i<cur)?"ข้าม (คนก่อนหน้าแพ้)":i===8?"บอส · 3 ยก":"2 ยก"}</small></span><i>${lg?(lg.res==="W"?"+"+lg.pts:lg.res==="D"?"+"+lg.pts:"✕"):""}</i></div>`;}).join("")}</div>`;
   if(!R){const pool=gauntPool(),P=L.pick||[];const need=Math.min(3,pool.length);
@@ -1338,7 +1340,7 @@ function loyCardDrop(G,order){G.cards=G.cards||{};const left=LOY_CARDS.filter(k=
   return `การ์ด SR ใหม่: "${CARDS[id].t}" (ดูได้ในอัลบั้ม)`;}
 function loyGold(G){const L=loyOf(G);if(!L)return null;L.dressOn=1;return "ปลดล็อกชุดไทยนอกเวที: สาว ๆ ใส่ชุดไทยในฉากเที่ยวและเดท (เปิด/ปิดได้ในจดหมายของป้าแต๋ว)";}
 const loyThaiLook=G=>!!(G&&G.ev&&G.ev.loy&&G.ev.loy.tiers&&G.ev.loy.tiers.silver);
-function evThief(G,f){const K=QK.gang1,t=Math.min(19.2,Math.max(6,ovr(f.a)*1.2)),rng=mulberry32((G.seed^0x7a1)+absWeek(G)*17);const a={};
+function evThief(G,f){const K=QK.gang1,t=Math.min(19.2,Math.max(6,ovr(f.a)*1.15)),rng=mulberry32((G.seed^0x7a1)+absWeek(G)*17);const a={};
   for(const [x] of ATTRS)a[x]=clamp(t+(K.tilt[x]||0)+(rng()*1.2-.6),3,19.5);const id="q_evthief";
   const o=baseFighter(id,{name:LOY_THIEF.name,full:LOY_THIEF.name,div:"X",camp:"quest",color:"#6b7a2e",potential:t+2,a});
   o.sprite="thief";o.kind="gang1";o.grp="gang";o.lvl=(f.lvl||1)+1;o.fatigue=0;o.morale=70;G.F[id]=o;return id;}
