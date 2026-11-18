@@ -185,7 +185,9 @@ const RG_VISIT={
   {n:"nar",t:"Over lunch Tabtim tells joke after joke, until one thing slips out before she can stop it."},
   {n:"tabtim",f:"sad",l:"casual",t:"…Nobody from home has ever come to watch Tabtim fight. Not once, haha… Hey, why's everyone gone quiet?"},{n:"tabtim",f:"happy",l:"casual",t:DUEL_TALK.isan.intro}],
  central:G=>[{n:"nar",t:"A white van stops outside the camp. Alicia steps out alone in sunglasses and a cap."},{n:"alicia",f:"happy",l:"casual",t:"The sponsor's team has followed me with cameras all week. Let me hide here for a day. …Not to see anyone in particular."},
-  ...(G.F.rin&&G.F.rin.camp==="player"?[{n:"rin",f:"happy",l:"casual",with:"alicia",t:"Views on the bout 1 clip are up 340%. I have a graph."}]:[]),{n:"alicia",f:"flustered",l:"casual",t:DUEL_TALK.central.intro}],
+  ...(G.F.rin&&G.F.rin.camp==="player"?[{n:"rin",f:"happy",l:"casual",with:"alicia",t:"Views on the bout 1 clip are up 340%. I have a graph."}]:[]),
+  {n:"nar",t:"Alicia says she came to film \"A Day in a Small Camp\" but never turns the camera on once all day. She just sits folding hand wraps with everyone until evening."},
+  {n:"alicia",f:"sad",l:"casual",t:"…Nobody here asks me to smile. It's strange."},{n:"alicia",f:"flustered",l:"casual",t:DUEL_TALK.central.intro}],
  south:G=>[{n:"nar",t:"Chaba arrives without telling anyone and has fixed half the back fence before anyone notices."},{n:"chaba",f:"happy",l:"casual",t:"…Fence wobbles"},
   ...(G.F.mali&&G.F.mali.camp==="player"?[{n:"mali",f:"happy",l:"casual",with:"chaba",t:"Big sis Chaba! Why didn't you tell Mali you were coming~ Mali would've made snacks"}]:[]),
   {n:"nar",t:(G.pets||[]).length?"At lunch everyone sees Chaba quietly stroking the camp's pet until it falls asleep in her lap. She doesn't move her legs for half an hour.":"At lunch everyone catches Chaba sneaking rice to the sparrows outside the camp, then quickly putting on a blank face when she realises she's been seen."},
@@ -514,6 +516,79 @@ RG_CHAT.chaba=[
   ["Khun Krerk smiles all the time. …Don't like it.",[["People who smile all the time are the scariest.",2,"…You think so too."],["He seems kind.",0,"…No."],["Be careful.",1,"Being careful."]]],
   ["…Talked to you. Now I can sleep.",[["Then message me every night.",2,"…Fine"],["What a lovely dream",1,"Mm. Good night."],["Go to sleep.",0,"…"]]]]}];
 CHAT.chaba=RG_CHAT.chaba;
+/* v1.90 round 9: the Central Plains in full — Alicia's live stream on the first trip, Lopburi's monkeys, the draft Naka League contract (Rin's story) at Suphan, a richer visit, her post after the cup and Alicia's chats. */
+RG_ARRIVE.central=(G,D)=>{const top=rgTopGirl(G),rin=rgIn(G,"rin"),me=G.F[(G.region.trip||{}).fid];return [
+  {n:"nar",bg:"camp_hanuman",t:`On the way to ${D.name}, Alicia sends a pin asking the camp to stop by Hanuman camp in Lopburi first. "Just on the way. Not an invitation."`},
+  {n:"nar",t:"The van door isn't even fully open when a phone on a selfie stick pokes in, ring light blazing."},
+  {n:"alicia",f:"happy",l:"casual",t:"Hi everyone~ We have a special guest today! This is the camp everyone in the comments has been talking about… Sirichai camp!"},
+  {n:"nar",t:"Alicia sweeps the camera across the van, then holds it on the Manager's face several seconds too long. The live comments pour in.",choice:[
+    {t:"Wave at the camera",fx:G2=>rgMeet(G2,"alicia",1),then:[{n:"alicia",f:"happy",l:"casual",t:"See, everyone? The real manager smiles even better than in the clips. …That's what the comments say, I mean. Not me."}]},
+    {t:"\"The camera's been stuck on me for a while.\"",fx:G2=>rgMeet(G2,"alicia",2),then:[{n:"alicia",f:"flustered",l:"casual",t:"…! The signal's lagging! Lopburi internet is bad, I didn't do it on purpose!"}]},
+    {t:"Cover the camera with your hand",fx:G2=>rgMeet(G2,"alicia",1),then:[{n:"alicia",f:"pout",l:"casual",t:"Hey! Three hundred viewers just left! …Fine. I'll stop filming."}]}]},
+  ...(top?[{n:top.id,f:"pout",l:"casual",t:rgJeal(top.id,"Alicia")}]:[]),
+  ...rgIf(rin,[{n:"rin",f:"happy",l:"casual",with:"alicia",t:"4,812 viewers on the live right now. Comments per minute are 2.3 times higher than your usual lives."},
+    {n:"alicia",f:"happy",l:"casual",t:"…How did you count that since getting off the van? I'm starting to like you."}]),
+  {n:"alicia",f:"happy",l:"casual",t:`This province's champion trained at my camp before. She's good with straight punches but hates low kicks. …I didn't tell you that. You guessed.`},
+  {fx:G2=>{if(me)me.morale=Math.min(100,(me.morale||0)+3);}},
+  {n:"nar",t:me?`${me.name} remembers Alicia's advice · Morale +3`:"Everyone remembers Alicia's advice"},
+  {n:"coach",t:"Is the live over? Then Kru can take off the sunglasses."}];};
+RG_TRIPX.lopburi={bg:"lopburi_monkeys",steps:G=>{const top=rgTopGirl(G),fah=rgIn(G,"fah");return [
+  {n:"nar",t:"That evening the whole camp stops at Phra Prang Sam Yot to buy souvenirs. Before anyone's out of the van, a troop of monkeys leaps onto the roof, a dozen of them."},
+  {n:"nar",t:"The biggest monkey snatches the whole bag of souvenir snacks, then sits on a lamppost unwrapping them in front of everyone."},
+  fah?{n:"fah",f:"angry",l:"casual",t:"Hey! That's Fah's snack! Get down here right now, Fah'll kick you off that pole!"}:{n:"coach",t:"Don't try to get it back. It'll call fifty more of its friends."},
+  {n:"nar",t:"Another monkey grabs the hand wraps drying behind the van, wraps them round its head like a fighter, and squares up at everyone."},
+  ...(fah?[{n:"fah",f:"surprised",l:"casual",t:"…Its guard is better than the new kids at camp."}]:[]),
+  ...(top?[{n:top.id,f:"happy",l:"casual",t:"Take a photo first! This clip is going straight on the camp page."}]:[]),
+  {n:"coach",t:"Forget it… we'll come back for the wraps next year. It'll probably be Lopburi's champion by then."},
+  {fx:G2=>{for(const f of roadRiders(G2))f.morale=Math.min(100,(f.morale||0)+2);}},
+  {n:"nar",t:"Everyone laughs until their stomachs hurt · Everyone's morale +2 · One pair of hand wraps lost"}];}};
+RG_TRIPX.suphan={bg:"hotel_room",steps:G=>{const rin=rgIn(G,"rin");return rin?[
+  {n:"nar",t:"Ten at night, someone knocks on the hotel room door. Alicia stands outside, hood pulled over her head, a thick folder in her hands."},
+  {n:"alicia",f:"sad",l:"casual",t:"Sorry for coming so late… Could I borrow Rin? Just for an hour."},
+  {n:"alicia",f:"sad",l:"casual",with:"rin",t:"This is the draft Naka League contract. My personal manager says it's great and wants me to sign this week. You're good at reading contracts, right? Please take a look."},
+  {n:"rin",f:"happy",l:"casual",t:"Sure. I'll need a red pen and a coffee."},
+  {n:"nar",t:"One hour becomes three. Forty pages cover the bed. Rin marks twenty-three spots in red."},
+  {n:"rin",f:"sad",l:"casual",t:"Clause 9. Of income from the fighter's image and content, the company gets seventy percent and the fighter thirty, for the entire contract."},
+  {n:"rin",f:"sad",l:"casual",t:"Clause 21. The contract runs ten years and renews automatically. Cancelling costs a penalty equal to three years of past income."},
+  {n:"rin",f:"sad",l:"casual",t:"And clause 14.3… the same sentence as in the green envelope, word for word. Fight data, image and voice belong to the affiliated company forever."},
+  {n:"alicia",f:"sad",l:"casual",t:"…Thirty percent, ten years, forever. My manager called it \"industry standard\"."},
+  {n:"rin",f:"happy",l:"casual",t:"I can read numbers. But I don't know if people in the industry really sign things like this. You know better than I do."},
+  {n:"alicia",f:"happy",l:"casual",t:"…Nobody signs like this. Good camps give fighters at least half, and nobody dares write \"forever\" into an athlete's contract."},
+  {n:"nar",t:"Alicia takes the red pen from Rin's hand and circles clauses 9, 21 and 14.3 again herself.",choice:[
+    {t:"\"Together you two are the best contract readers in the country.\"",fx:G2=>{add(G2,"rin","bond",2);rgMeet(G2,"alicia",1);},then:[{n:"rin",f:"flustered",l:"casual",t:"…There isn't enough data to conclude that. But I won't argue."}]},
+    {t:"\"Alicia, what will you do with it now?\"",fx:G2=>{rgMeet(G2,"alicia",2);add(G2,"rin","bond",1);},then:[{n:"alicia",f:"happy",l:"casual",t:"I'll send it back with these red marks. And… I might need a new personal manager."}]}]},
+  {n:"alicia",f:"flustered",l:"casual",with:"rin",t:"Rin… thank you. I've never had a friend this smart. Everyone around me is only smart about view counts."},
+  {n:"rin",f:"flustered",l:"casual",t:"Friend… Noted."},
+  {fx:G2=>{add(G2,"rin","bond",2);const r=G2.F.rin;if(r)r.morale=Math.min(100,(r.morale||0)+5);rgMeet(G2,"alicia",2);G2.flags.rinAlicia=1;}},
+  {n:"nar",t:"Rin, morale +5 · Rin and Alicia have become friends"}]
+ :[{n:"nar",t:"Ten at night, Alicia knocks on the hotel room door, holding a thick contract folder."},
+  {n:"alicia",f:"sad",l:"casual",t:"The Naka League contract. My personal manager says to sign it this week. …Could you read clause 14.3 to me? My hands shake when I read it."},
+  {n:"nar",t:"The Manager reads it aloud slowly: the same sentence as in the green envelope, word for word. Alicia quietly closes the folder."},
+  {n:"alicia",f:"happy",l:"casual",t:"…Thank you. I know what to do with it now."},
+  {fx:G2=>rgMeet(G2,"alicia",2)}];}};
+RG_POST.central="📱 Notification: Alicia (@alicia.hanuman) posted\n\n\"Thank you everyone for cheering on the Central Championship. The cup now belongs to Sirichai camp, and they earned every punch of it.\n\nThere are rumours that I've signed with a new league. Let me answer right here: I haven't signed with anyone.\n\nAnd I will never sign anything with the word 'forever' in it.\"\n\n— 48,000 likes within an hour\n\n📩 One private message follows: \"You saw the post, right? …You don't have to reply. I just wanted you to see it before anyone else.\"";
+RG_CHAT.alicia=[
+ {id:"al_live",x:[
+  ["Twenty thousand watched my live last night, but half the comments asked \"where's the Sirichai manager?\"",[["Tell them I'm working.",1,"…Already did. The viewers spammed the sad reaction."],["Then invite me on your next live.",2,"No way! …The viewers would get ideas about us… No, no."],["Forget the comments.",0,"Can't. That's my job."]]],
+  ["The sponsor team makes me smile at the camera three hours a day.",[["Sounds exhausting. Take a break.",2,"…You're the first person who's told me to rest instead of telling me to smile more."],["Your smile is pretty anyway.",1,"I know. …But thank you."],["Work is work.",0,"…Yes, work is work."]]],
+  ["Off to train. Real training, not training for a clip.",[["Train well.",1,"Of course."],["Send me a clip of the real training.",2,"…A clip no one's ever seen. Just for you."],["OK",0,"Bye"]]]]},
+ {id:"al_rin",x:[
+  ["Rin sent me a seventeen-page analysis of my punches.",[["Rin likes you, that's why she did that much.",2,"…Really? Then I'll read all seventeen pages."],["Can you read all that?",1,"Read two pages, then called Rin to ask about the rest."],["Isn't that a lot?",0,"Rin says this is the short version."]]],
+  ["I took Rin to a buffet. She counted the calories on every plate.",[["That's Rin for you.",1,"Yes. And she still ate more than me."],["You two get along well.",2,"…I've never had a friend who doesn't care about view counts. It's comfortable."],["Was it good?",0,"It was delicious."]]],
+  ["Don't tell Rin I told you.",[["I definitely won't.",1,"Promise"],["Too late. Rin knows everything.",2,"…True. Rin probably calculated it from the start."],["Already told her",0,"Manager!!"]]]]},
+ {id:"al_hanuman",x:[
+  ["Monkeys steal gloves from Hanuman camp every day. Today they took a whole pair.",[["Lopburi's monkeys stole our camp's hand wraps too.",2,"Haha, then the monkeys there could start their own boxing camp by now."],["A camp called Hanuman deserves it.",1,"…Funny. I actually laughed out loud."],["Why not chase them off?",0,"Can't. The monkeys here own the town."]]],
+  ["Our camp's Hanuman Offers the Ring move. Kru says mine is the most beautiful in ten years.",[["Pretty, and powerful too.",2,"…You said strong before pretty. I'll remember that."],["Kru has a good eye.",1,"Kru has a good eye."],["Pretty alone doesn't win fights.",0,"…I know. No need to rub it in."]]],
+  ["Come visit Hanuman camp sometime. I'll show you around. …Just as the host.",[["Definitely",2,"…I won't tell my team, so there'll be no cameras."],["Can I bring the whole camp?",1,"Sure. But the monkeys will like you more than me, for sure."],["If I'm free",0,"…Fine"]]]]},
+ {id:"al_mgr",x:[
+  ["I fired my personal manager. The one who told me to sign the Naka League contract.",[["You made the right call.",2,"…I was so scared. But hearing you say that helps."],["Who'll handle your work now?",1,"I handle it myself now. Rin checks the contracts for me."],["That took guts",1,"Right?!"]]],
+  ["…Does the Sirichai camp manager ever look after fighters from outside the camp? Just asking, as a joke.",[["If it's you, always.",2,"…It was a joke question! Don't get the wrong idea! …But I'll remember that."],["Our camp is small, you know.",1,"The small camp that beat me."],["No.",0,"…It was just a joke question."]]],
+  ["Forget I asked!",[["Too late to forget now.",2,"…Then remember it, fine."],["Okay, forgotten.",0,"…You forget fast."],["Forgot it, but wrote it down.",1,"Manager!"]]]]},
+ {id:"al_night",x:[
+  ["No live stream tonight. Just sitting alone by the river watching fireflies.",[["Just like the night on the boat.",2,"…You still remember. I thought I was the only one."],["Not streaming is nice.",1,"Yes. It's quiet."],["Watch out for mosquitoes.",1,"Already put on bug spray, haha."]]],
+  ["If one day nobody watches my lives anymore, would you still watch?",[["Of course. Even if I'm your only viewer.",2,"…One viewer is enough."],["Your viewers won't disappear.",1,"Dodging the question. But thanks anyway."],["I don't know",0,"…That's a bit too honest."]]],
+  ["Going to bed. Don't reply with a sticker, so I don't have to answer back.",[["(Send a sticker)",1,"…Replied. Happy? (heart sticker)"],["What a lovely dream",2,"…Sweet dreams, Manager."],["OK",0,"Good night."]]]]}];
+CHAT.alicia=RG_CHAT.alicia;
 const REGION={
   /* end of week (after the weekly events): the gala the week after the invitation, the contract beat the week after the first cup */
   weekScene(G,done){const R=G.region;if(!R){done();return;}const now=gameWeek(G);
