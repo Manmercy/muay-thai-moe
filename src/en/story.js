@@ -236,8 +236,8 @@ const EVENTS=[
   {n:"rin",f:"sad",t:"My plan failed again. The data said the opponent would retreat, but she came forward"},
   {n:"rin",f:"sad",t:"If I can't calculate it, I don't know what to believe"},
   {choice:[
-   {t:"Sometimes you have to trust your instincts",fx:G=>{add(G,"rin","bond",8);G.F.rin.a.comp=Math.min(20,G.F.rin.a.comp+1);},then:[{n:"rin",f:"flustered",t:"Instincts… I'll try. If it goes wrong, you're responsible too (composure +1)"}]},
-   {t:"Then build a backup plan, two layers deep",fx:G=>{add(G,"rin","trust",6);G.F.rin.a.iq=Math.min(20,G.F.rin.a.iq+1);},then:[{n:"rin",f:"happy",t:"Plan B… of course. I like the way you think (fight IQ +1)"}]}]}]},
+   {t:"Sometimes you have to trust your instincts",fx:G=>{add(G,"rin","bond",8);G.F.rin.a.comp=Math.min(stCap(G.F.rin),G.F.rin.a.comp+1);},then:[{n:"rin",f:"flustered",t:"Instincts… I'll try. If it goes wrong, you're responsible too (composure +1)"}]},
+   {t:"Then build a backup plan, two layers deep",fx:G=>{add(G,"rin","trust",6);G.F.rin.a.iq=Math.min(stCap(G.F.rin),G.F.rin.a.iq+1);},then:[{n:"rin",f:"happy",t:"Plan B… of course. I like the way you think (fight IQ +1)"}]}]}]},
 
  {id:"final_result",look:"fight",when:G=>G.week>=41,bg:"hall",steps:[
   {n:"nar",t:"The provincial hall is decked in flags; the list of each division's final four hangs in front of the stage"},
@@ -263,7 +263,7 @@ const EVENTS=[
   {n:"fah",f:"happy",t:"Heard Sirichai has new heavy bags. Lend me your ring for training… and Kati too"},
   {n:"kati",f:"flustered",t:"Huh! Training at a rival camp?!",with:"fah"},
   {choice:[
-   {t:"Sure. Light sparring, three rounds, nothing serious",fx:G=>{G.F.kati.a.guard=Math.min(20,G.F.kati.a.guard+.5);G.F.kati.a.counter=Math.min(20,G.F.kati.a.counter+.3);add(G,"fah","bond",5);G.F.kati.fatigue=Math.min(100,G.F.kati.fatigue+6);},
+   {t:"Sure. Light sparring, three rounds, nothing serious",fx:G=>{G.F.kati.a.guard=Math.min(stCap(G.F.kati),G.F.kati.a.guard+.5);G.F.kati.a.counter=Math.min(stCap(G.F.kati),G.F.kati.a.counter+.3);add(G,"fah","bond",5);G.F.kati.fatigue=Math.min(100,G.F.kati.fatigue+6);},
     then:[{n:"nar",t:"Three rounds become six. Both collapse in the middle of the ring, gasping"},{n:"fah",f:"happy",t:"…Not bad, Kati. You've improved (Kati's guard and counter improve)"}]},
    {t:"No. Save it for the real ring",fx:G=>{add(G,"kati","morale",5);add(G,"fah","bond",2);},then:[{n:"fah",f:"happy",t:"Ha! Possessive. Fine, see you in the ring"}]}]}]},
  {id:"pre_qual",look:"train",when:G=>G.week>=17,bg:"night",steps:[
@@ -416,7 +416,8 @@ const lovFinal=G=>{for(const id of lovList(G)){if(!romOf(G,id)||!LOVER_FINAL[id]
 function befriend(G,id){G.friendz=G.friendz||{};G.friendz[id]=true;}
 const isFriendz=(G,id)=>!!(G.friendz&&G.friendz[id]);
 const awayWord=(G,id)=>G.F[id].camp==="player"?"Left camp":"Not in touch";
-function relLabel(G,f,lv,short){const id=f&&f.id;if(G&&id&&G.F&&G.F[id]&&isAway(G,id)){const w=G.F[id].awayWhy==="break"?"Heartbroken":"Sulking";return short?w:`${w} · ${awayWord(G,id)} (back in ${awayLeft(G,id)} wk)`;}
+function relLabel(G,f,lv,short){const id=f&&f.id;if(G&&id&&G.F&&G.F[id]&&isAway(G,id)&&G.F[id].awayWhy==="train"){const n=awayLeft(G,id);return short?"Training away":`Away training (${n} wk)`;}
+  if(G&&id&&G.F&&G.F[id]&&isAway(G,id)){const w=G.F[id].awayWhy==="break"?"Heartbroken":"Sulking";return short?w:`${w} · ${awayWord(G,id)} (back in ${awayLeft(G,id)} wk)`;}
   return relBase(G,f,lv);}
 /* the ladder shown in her profile: the same labels, the current step lit — lovers climb their own ladder (LOVER_TIERS) */
 const REL_DESC={"Acquaintance":"Still calls you \"Manager\", a bit stiffly","Teammate":"Jokes around, texts about everyday things","Close":"Sometimes lets your name slip · shares personal stories","Special":"Always calls you by name",
@@ -499,7 +500,7 @@ function valSteps(G){const P=partners(G),hard=(G.valCaught||0)>=1,drop=hard?25:1
       {t:"Calm down, let me explain",then:[{n:"nar",t:"Before you get a word out, a bag of sweets hits you in the face"}]}]},
     {fx:G2=>{P.forEach(k=>add(G2,k,"bond",-drop));G2.valAbs=absWeek(G2);G2.valFloor=Object.fromEntries(P.map(k=>[k,bondTot(G2.F[k])]));}},{n:"nar",t:`Bond with everyone you're seeing −${drop}`},
     ...(two.length>=2?ringSteps(G,two[0],two[1],hard):[{n:"nar",t:"Nobody steps into a ring. Everyone just leaves in silence, which is worse than a fight"},{inject:G2=>runAway(G2,byBond[0],hard?3:2)}])];}
-const backDue=(G,id)=>{const f=G.F[id];return !!(f&&f.met&&f.awayAbs!=null&&!f.awayBack&&absWeek(G)>=f.awayAbs);};
+const backDue=(G,id)=>{const f=G.F[id];return !!(f&&f.met&&f.awayAbs!=null&&!f.awayBack&&f.awayWhy!=="train"&&absWeek(G)>=f.awayAbs);}; /* v1.90: the limit-break trip has its own homecoming (region.js) */
 // --- breakup (from the chat menu) ---
 const BREAK={kati:[{n:"nar",t:"You ask Kati to talk at the edge of the ring, the same spot where she confessed"},{n:"kati",f:"surprised",t:"…Break up?"},{n:"kati",f:"sad",t:"I'm not crying. Grandpa taught me a fighter never cries in the ring"},{n:"kati",f:"sad",t:"Give me a little time. Then I'll come back as your fighter, same as before"}],
   mali:[{n:"nar",t:"Mali listens in silence, when she usually never stops talking"},{n:"mali",f:"sad",t:"Oh… okay. Mali understands. Mali can smile, see? Smiling"},{n:"nar",t:"The smile wobbles for a moment, then the tears come on their own"},{n:"mali",f:"sad",t:"Mali's going home to Mom for a bit"}],
@@ -667,7 +668,7 @@ function dateScene(G,id,act){
   const steps=[{n:"nar",bg:A.bg,t:intro||`${A.name}`},...(opener?[{n:id,f:pref==="dislike"?"sad":"happy",l:look,t:opener}]:[]),
     ...spotSteps(f,act),...mid,...dateTwist(G,f,D,look),
     {inject:G2=>{const gain=Math.max(0,1+Math.round(D.score*.7));const capped=false,b0=hTot(f);add(G2,id,"bond",gain);const real=Math.round((hTot(f)-b0)*2)/2,HL=heartLv(f),hleft=Math.max(0,Math.ceil((HL.need-HL.into)*2)/2);if(gain>=4)add(G2,id,"morale",4);
-      if(act==="spar"){f.a.iq=Math.min(20,f.a.iq+.3);f.a.guard=Math.min(20,f.a.guard+.3);f.fatigue=Math.min(100,f.fatigue+4);}
+      if(act==="spar"){f.a.iq=Math.min(stCap(f),f.a.iq+.3);f.a.guard=Math.min(stCap(f),f.a.guard+.3);f.fatigue=Math.min(100,f.fatigue+4);}
       const tier=gain>=5?"great":gain>=2?"ok":"meh";
       f.closed=f.closed||{};const firstClose=!f.closed[tier];f.closed[tier]=true;
       const out=[...(firstClose?[{n:id,f:tier==="meh"?"sad":"happy",l:look,t:DATE_CLOSE[tier][id]}]:[]),
@@ -975,7 +976,7 @@ EVENTS.push(
   {n:"rin",f:"happy",l:"casual",t:G=>`${CALL(G,"rin")}, I made a three-page fight plan myself, the first one Coach Daeng hasn't checked. Will you let me use it?`},
   {n:"nar",t:"The pages are full of arrows, numbers, and doodles of round fighters that look like steamed buns"},
   {choice:[{t:"I trust your plan. Use it",fx:G=>{add(G,"rin","trust",8);add(G,"rin","morale",5);},then:[{n:"rin",f:"flustered",l:"casual",t:"…I can't measure 'trust', but I can feel it. Thank you"}]},
-   {t:"Let Coach Daeng look it over first",fx:G=>{add(G,"rin","trust",1);G.F.rin.a.iq=Math.min(20,G.F.rin.a.iq+.2);},then:[{n:"rin",f:"sad",l:"casual",t:"Understood. Caution makes sense… I'll do better"},{n:"nar",t:"(Coach Daeng fixes two spots; Rin writes down every word. Her ring IQ improves a little)"}]}]}]});
+   {t:"Let Coach Daeng look it over first",fx:G=>{add(G,"rin","trust",1);G.F.rin.a.iq=Math.min(stCap(G.F.rin),G.F.rin.a.iq+.2);},then:[{n:"rin",f:"sad",l:"casual",t:"Understood. Caution makes sense… I'll do better"},{n:"nar",t:"(Coach Daeng fixes two spots; Rin writes down every word. Her ring IQ improves a little)"}]}]}]});
 // v1.37: more of Rin between joining and the late-season arc
 EVENTS.push(
  {id:"rin_sheet",look:"train",when:G=>G.week>=18&&inCamp(G,"rin"),bg:"gym",steps:[
@@ -984,7 +985,7 @@ EVENTS.push(
   {n:"rin",f:"happy",l:"train",t:"Kati's left elbow drops when she's tired, three times a round on average. I drew one arrow for every time she got countered"},
   {n:"coach",t:"Twenty years teaching Muay Thai and I only just learned a dropped elbow can have a graph"},
   {n:"rin",f:"flustered",l:"train",t:G=>`${CALL(G,"rin")}, am I overdoing it? At my old camp they used these sheets to wrap fried bananas`},
-  {choice:[{t:"Keep going, our camp needs this",fx:G=>{add(G,"rin","trust",4);add(G,"rin","bond",3);G.F.kati.a.guard=Math.min(20,G.F.kati.a.guard+.3);},then:[{n:"rin",f:"happy",l:"train",t:"…Thank you. I'll make a color version too"},{n:"nar",t:"(Kati's guard improved a little)"}]},
+  {choice:[{t:"Keep going, our camp needs this",fx:G=>{add(G,"rin","trust",4);add(G,"rin","bond",3);G.F.kati.a.guard=Math.min(stCap(G.F.kati),G.F.kati.a.guard+.3);},then:[{n:"rin",f:"happy",l:"train",t:"…Thank you. I'll make a color version too"},{n:"nar",t:"(Kati's guard improved a little)"}]},
    {t:"Can we cut it to ten sheets? The wall's about to collapse",fx:G=>{add(G,"rin","bond",2);},then:[{n:"rin",f:"pout",l:"train",t:"Ten sheets… the font will be a little smaller"},{n:"nar",t:"The next day there are ten sheets, the text the size of ants"}]}]}]},
  {id:"rin_glasses",look:"train",when:G=>G.week>=22&&inCamp(G,"rin"),bg:"gym",steps:[
   {n:"nar",t:"Crack! Rin's glasses fly off and land under Mali's foot during pad work; the left lens shatters like a spiderweb"},
@@ -992,7 +993,7 @@ EVENTS.push(
   {n:"mali",f:"flustered",l:"train",t:"That's the sandbag, Rin! Mali's over here!"},
   {n:"rin",f:"flustered",l:"train",t:G=>`${CALL(G,"rin")}… Fine, I'll confess. I'm quite nearsighted. I take my glasses off to fight, so I have to memorize everything before I step in the ring. That's where all the data comes from`},
   {choice:[{t:"(Take her to an optician in town and pay, ฿1,500)",fx:G=>{G.cash-=1500;add(G,"rin","bond",5);add(G,"rin","trust",4);MEM(G,"rin_glasses");},then:[{n:"rin",f:"flustered",l:"casual",t:"…This frame is half the weight of the old one. I'll pay you back. Can I pay in installments?"},{n:"nar",t:"On the way back Rin walks closer than usual, because her eyes haven't adjusted yet… probably"}]},
-   {t:"That makes you even better. You fight from memory",fx:G=>{add(G,"rin","morale",6);G.F.rin.a.iq=Math.min(20,G.F.rin.a.iq+.3);MEM(G,"rin_memory");},then:[{n:"rin",f:"happy",l:"train",t:"…Nobody's ever seen it that way. Thank you. I'll remember that too"},{n:"nar",t:"(Rin's ring IQ improved a little)"}]}]}]},
+   {t:"That makes you even better. You fight from memory",fx:G=>{add(G,"rin","morale",6);G.F.rin.a.iq=Math.min(stCap(G.F.rin),G.F.rin.a.iq+.3);MEM(G,"rin_memory");},then:[{n:"rin",f:"happy",l:"train",t:"…Nobody's ever seen it that way. Thank you. I'll remember that too"},{n:"nar",t:"(Rin's ring IQ improved a little)"}]}]}]},
  {id:"rin_dad",look:"casual",when:G=>G.week>=26&&inCamp(G,"rin"),bg:"night",steps:[
   {n:"nar",t:"9 p.m. Rin sits outside the camp, her phone buzzing nonstop. The screen reads 'Dad (Prof. Dr.)'"},
   {n:"rin",f:"sad",l:"casual",t:"My dad is a university professor. He wants me to do a PhD, not box out in the provinces"},
@@ -1196,7 +1197,7 @@ EVENTS.push(
   {n:"nar",t:"After training, Rin stares at her wrapped hands for a long time"},
   {n:"rin",f:"sad",l:"fight",t:"Manager… everyone calls me 'the glasses analyst'. Am I really a fighter, or just someone who likes numbers?"},
   {choice:[{t:"You're the best game-reader I've ever seen in a ring",fx:G=>{add(G,"rin","morale",8);add(G,"rin","bond",4);},then:[{n:"rin",f:"flustered",l:"fight",t:"…I'm writing that sentence on the first page"}]},
-   {t:"Next fight, try fighting without looking at your notes",fx:G=>{const f=G.F.rin;f.a.comp=Math.min(20,f.a.comp+.5);f.a.iq=Math.min(20,f.a.iq+.3);add(G,"rin","trust",4);},then:[{n:"rin",f:"angry",l:"fight",t:"Without notes… scary, but worth trying. Okay!"},{n:"nar",t:"(Rin's composure and fight IQ improve)"}]}]}]});
+   {t:"Next fight, try fighting without looking at your notes",fx:G=>{const f=G.F.rin;f.a.comp=Math.min(stCap(f),f.a.comp+.5);f.a.iq=Math.min(stCap(f),f.a.iq+.3);add(G,"rin","trust",4);},then:[{n:"rin",f:"angry",l:"fight",t:"Without notes… scary, but worth trying. Okay!"},{n:"nar",t:"(Rin's composure and fight IQ improve)"}]}]}]});
 
 // ---------- v1.21: opponent's parting words, shown in a bubble over her head after the bell ----------
 const POST_BUBBLE={
@@ -1534,7 +1535,7 @@ EVENTS.push(
  {id:"mem_rin_memory",look:"train",when:G=>HAS(G,"rin_memory",10)&&inCamp(G,"rin"),bg:"gym",steps:[
   {n:"rin",f:"happy",l:"train",t:G=>`${CALL(G,"rin")} once said I fight with my memory. Now I remember everything: every fight our camp has had, who threw what, in which round.`},
   {n:"rin",f:"flustered",l:"train",t:"…including what you said that day."},
-  {fx:G=>{add(G,"rin","bond",3);G.F.rin.a.iq=Math.min(20,G.F.rin.a.iq+.2);}},{n:"nar",t:"(Rin still remembers what you said · Fight IQ up a little)"}]},
+  {fx:G=>{add(G,"rin","bond",3);G.F.rin.a.iq=Math.min(stCap(G.F.rin),G.F.rin.a.iq+.2);}},{n:"nar",t:"(Rin still remembers what you said · Fight IQ up a little)"}]},
  {id:"mem_kati_promise",look:"casual",when:G=>G.week>=44&&HAS(G,"kati_promise")&&inCamp(G,"kati"),bg:"night",steps:[
   {n:"nar",t:"The night before the big bout, Kati sits outside the camp, slowly wrapping her hands."},
   {n:"kati",f:"flustered",l:"casual",t:G=>`${CALL(G,"kati")}, remember? My second week here, you told me you'd never let me down.`},

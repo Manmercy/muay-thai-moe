@@ -83,11 +83,11 @@ const RADAR_AX=[["Punch",a=>(a.punch*2+a.power)/3],["Kick",a=>(a.kick*2+a.foot)/
   ["Defense",a=>(a.guard+a.counter+a.foot)/3],["Body",a=>(a.speed+a.stamina+a.dur+a.power)/4],["Mind",a=>(a.iq+a.comp)/2]];
 function radarSVG(f,size=220,prev){
   const c=size/2,R=size*.34,col=f.color||"#e23b4e";const pt=(i,v)=>{const ang=-Math.PI/2+i*Math.PI/3;return [c+Math.cos(ang)*R*v,c+Math.sin(ang)*R*v];};
-  const vals=RADAR_AX.map(([,fn])=>clamp(fn(f.a)/20,0,1));
+  const cap=typeof stCap==="function"?stCap(f):20,vals=RADAR_AX.map(([,fn])=>clamp(fn(f.a)/cap,0,1)); /* v1.90: scaled to the fighter's ceiling (25 after a limit break) */
   const ring=k=>RADAR_AX.map((_,i)=>pt(i,k).join(",")).join(" ");
   const poly=vals.map((v,i)=>pt(i,v).join(",")).join(" ");
-  const pot=RADAR_AX.map((_,i)=>pt(i,clamp(f.potential/20,0,1)).join(",")).join(" ");
-  const labels=RADAR_AX.map(([n,fn],i)=>{const [x,y]=pt(i,1.24);const v=(vals[i]*20).toFixed(1);const dl=prev?fn(f.a)-fn(prev):0;
+  const pot=RADAR_AX.map((_,i)=>pt(i,clamp(f.potential/cap,0,1)).join(",")).join(" ");
+  const labels=RADAR_AX.map(([n,fn],i)=>{const [x,y]=pt(i,1.24);const v=(vals[i]*cap).toFixed(1);const dl=prev?fn(f.a)-fn(prev):0;
     return `<text x="${x}" y="${y}" text-anchor="middle" dominant-baseline="middle" class="rl">${n}</text><text x="${x}" y="${y+13}" text-anchor="middle" class="rv">${v}${dl>=.05?`<tspan class="rup"> +${dl.toFixed(1)}</tspan>`:""}</text>`;}).join("");
   const id="rg"+Math.random().toString(36).slice(2,7);
   return `<svg class="radar" viewBox="0 0 ${size} ${size+10}" role="img" aria-label="Stat hexagon chart of ${f.name}">

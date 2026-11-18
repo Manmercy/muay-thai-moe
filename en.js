@@ -463,6 +463,9 @@ function fatigueAfter(G,f,preset,intensity){const fx=G.fac,clin=fx.clinic||0,hil
   const p=PRESETS[preset],it=INTENSITY[intensity]||INTENSITY.normal;let load=p.load*it.l*7*(preset==="cond"?1-hill*.08-(st.includes("tong")?.1:0):1);
   {const pm=passiveMods(f);load*=clamp(1-pm.fatAll-(preset==="kick"?pm.fatKick:0),.4,1);}
   return clamp(v+load-(10+fx.recovery*5+fx.kitchen*2+clin*3)-(preset==="rest"?22:0),0,100);}
+/* v1.90 limit break: a fighter's stat ceiling (20; 25 after the regional limit break, 30 later at national level).
+   Past 20 a stat grows at LB_RATE of the normal pace, so the extra five points take years, not weeks. */
+const stCap=f=>f&&f.cap>20?f.cap:20,LB_RATE=.6;
 function trainWeek(G,f,rng){
   const p=PRESETS[f.plan.preset],it=INTENSITY[f.plan.intensity];f.gains={};
   f.xpGain=0;
@@ -485,7 +488,7 @@ function trainWeek(G,f,rng){
     // v1.18: training your own style's core weapons fights diminishing returns less (style mastery path)
     const dim=1-Math.pow(f.a[k]/(f.potential+(core.includes(k)?CK:1.5)),2.2);
     const g=.5*w*it.g*coach*fac*ready*mot*clamp(dim,.04,1)*(.75+rng()*.5)*(traitOf(f)==="surge"?1.15:traitOf(f)==="talent"?1.1:1)*(1+(f.drillBonus||0))*ytTrainMul(G,f);
-    if(g>0){f.a[k]=Math.min(20,f.a[k]+g);f.gains[k]=g;}
+    if(g>0){const g2=f.a[k]>=20?g*LB_RATE:g,b4=f.a[k];f.a[k]=Math.max(b4,Math.min(stCap(f),b4+g2));f.gains[k]=f.a[k]-b4;}
   }
   f.drillBonus=0;
   let load=p.load*it.l*7*(pr==="cond"?1-hill*.08-(st.includes("tong")?.1:0):1);{const pm=passiveMods(f);load*=clamp(1-pm.fatAll-(pr==="kick"?pm.fatKick:0),.4,1);}{const tr=traitOf(f);if(tr==="surge")load*=1.05;if(tr==="talent")load*=.95;}
@@ -1006,9 +1009,9 @@ function doCampAction(G,k){const A=CAMP_ACTIONS[k];if(!A||G.campUsed||G.cash<A.c
   if(k==="rest"){R.forEach(f=>f.fatigue=clamp(f.fatigue-4,0,100));note="Everyone gets a breather, fatigue drops a little";}
   if(k==="class"){G.cash+=1000;R.forEach(f=>f.fatigue=clamp(f.fatigue+6,0,100));note="Extra ฿1,000, fighters a little more tired";}
   if(k==="promo"){G.rep+=.6;note="Fame +0.6";}
-  if(k==="run"){const f=R.slice().sort((a,b)=>(b.bond||0)-(a.bond||0))[0];if(f)f.a.speed=Math.min(20,f.a.speed+.05);R.forEach(x=>x.morale=clamp(x.morale+3,0,100));G.dust=(G.dust||0)+1;note="A race around the camp yard · speed +0.05 · ✦ +1";}
+  if(k==="run"){const f=R.slice().sort((a,b)=>(b.bond||0)-(a.bond||0))[0];if(f)f.a.speed=Math.min(stCap(f),f.a.speed+.05);R.forEach(x=>x.morale=clamp(x.morale+3,0,100));G.dust=(G.dust||0)+1;note="A race around the camp yard · speed +0.05 · ✦ +1";}
   if(k==="live"){G.cash+=600;G.dust=(G.dust||0)+1;note="A short live sold a few shirts: ฿600 · ✦ +1";}
-  if(k==="drum"){const f=R.slice().sort((a,b)=>(b.bond||0)-(a.bond||0))[0];if(f){f.a.kick=Math.min(20,f.a.kick+.1);f.a.punch=Math.min(20,f.a.punch+.1);}R.forEach(x=>x.morale=clamp(x.morale+3,0,100));G.dust=(G.dust||0)+2;note="Light drills to the khong khaek drum: kick/punch +0.1 · ✦ +2";}
+  if(k==="drum"){const f=R.slice().sort((a,b)=>(b.bond||0)-(a.bond||0))[0];if(f){f.a.kick=Math.min(stCap(f),f.a.kick+.1);f.a.punch=Math.min(stCap(f),f.a.punch+.1);}R.forEach(x=>x.morale=clamp(x.morale+3,0,100));G.dust=(G.dust||0)+2;note="Light drills to the khong khaek drum: kick/punch +0.1 · ✦ +2";}
   if(k==="somtam"){G.cash+=550;R.forEach(x=>x.morale=clamp(x.morale+3,0,100));G.dust=(G.dust||0)+1;note="Helped Auntie Taew pound som tam: ฿550 · ✦ +1";}
   if(k==="repair"){G.camp.beauty=Math.min(10,G.camp.beauty+1);R.forEach(f=>f.morale=clamp(f.morale+3,0,100));note=`Camp looks nicer (level ${G.camp.beauty}/10)`;}
   if(k==="clip"){G.rep+=.9;R.forEach(f=>f.fatigue=clamp(f.fatigue+3,0,100));note="The clip got shared, fame +0.9";}
@@ -1020,7 +1023,7 @@ function doCampAction(G,k){const A=CAMP_ACTIONS[k];if(!A||G.campUsed||G.cash<A.c
   if(k==="kids"){G.cash+=1800;G.rep+=.4;R.forEach(f=>f.fatigue=clamp(f.fatigue+3,0,100));note="The kids' wai khru was adorable, +฿1,800";}
   if(k==="stall"){G.cash+=1500;G.rep+=.3;R.forEach(f=>f.morale=clamp(f.morale+2,0,100));note="Khanom khrok sold out, +฿1,500";}
   if(k==="tourist"){G.cash+=3500;R.forEach(f=>f.fatigue=clamp(f.fatigue+7,0,100));note="The tourists loved it, +฿3,500, but the fighters are pretty worn out";}
-  if(k==="trail"){R.forEach(f=>{f.a.stamina=Math.min(20,f.a.stamina+.2);f.fatigue=clamp(f.fatigue+5,0,100);f.morale=clamp(f.morale+2,0,100);});note="The view from the mountain was gorgeous, stamina +0.2";}
+  if(k==="trail"){R.forEach(f=>{f.a.stamina=Math.min(stCap(f),f.a.stamina+.2);f.fatigue=clamp(f.fatigue+5,0,100);f.morale=clamp(f.morale+2,0,100);});note="The view from the mountain was gorgeous, stamina +0.2";}
   if(k==="tape"){R.forEach(f=>gainXP(G,f,15));G.scoutAbs=G.scoutAbs||{};for(const b of G.bookings)if(G.F[b.a].camp==="player")G.scoutAbs[b.b]=gameWeek(G);note="Watched tapes of every booked opponent, EXP +15";}
   if(k==="fightnight"){G.cash+=4000;G.rep+=1;R.forEach(f=>f.fatigue=clamp(f.fatigue+6,0,100));note="Tickets sold out, packed ringside, +฿4,000";}
   if(k==="clinicday"){R.forEach(f=>{f.fatigue=clamp(f.fatigue-15,0,100);if(f.injury>0)f.injury--;});note="Everyone feels lighter, fatigue −15";}
@@ -1419,7 +1422,7 @@ function liftOpponent(f,target,maxGain){const delta=Math.min(maxGain,Math.max(0,
   const want=ovr(f.a)+(f.vet||0)+delta,goal=Math.min(19.7,want);for(let n=0;n<4;n++){const gap=goal-ovr(f.a),room=ATTRS.filter(([k])=>f.a[k]<19.95);if(gap<=.01||!room.length)break;
     const each=gap*ATTRS.length/room.length;for(const [k] of room)f.a[k]=Math.min(20,f.a[k]+each);}
   f.potential=Math.max(f.potential||14,Math.min(20,goal));
-  /* v1.83.3: whatever the stat ceiling cannot hold becomes ring craft */const short=want-ovr(f.a)-(f.vet||0);if(short>.05)f.vet=+Math.min(8,(f.vet||0)+short).toFixed(2);}
+  /* v1.83.3: whatever the stat ceiling cannot hold becomes ring craft */const short=want-ovr(f.a)-(f.vet||0);if(short>.05)f.vet=+Math.min(12,(f.vet||0)+short).toFixed(2);} /* v1.90: 12 (was 8) so the field keeps up with limit-broken fighters */
 function lowerOpponent(f,target,maxDrop){let drop=Math.min(maxDrop,ovr(f.a)+(f.vet||0)-target);if(drop<=.05)return;
   const v=Math.min(f.vet||0,drop);if(v>0){f.vet=+((f.vet||0)-v).toFixed(2);drop-=v;}if(drop<=.05)return;
   for(const [k] of ATTRS)f.a[k]=Math.max(3,f.a[k]-drop);}
@@ -1508,7 +1511,7 @@ function newSeason(G){
 const MASTERS={thasao:{name:"Tha Sao master",cost:18000,attrs:["speed","foot"]},chaiya:{name:"Chaiya master",cost:18000,attrs:["guard","counter"]},
   lopburi:{name:"Lopburi master",cost:18000,attrs:["iq","counter"]},korat:{name:"Korat master",cost:18000,attrs:["punch","power"]}};
 function hireMaster(G,fid,school){const f=G.F[fid],M=MASTERS[school];if(!f||!M||G.cash<M.cost||G.week<16||f.masterSeason===(G.season||1))return false;
-  G.cash-=M.cost;f.masterSeason=G.season||1;f.sp=(f.sp||0)+1;M.attrs.forEach(k=>f.a[k]=Math.min(20,f.a[k]+.6));f.morale=Math.min(100,f.morale+6);return true;}
+  G.cash-=M.cost;f.masterSeason=G.season||1;f.sp=(f.sp||0)+1;M.attrs.forEach(k=>f.a[k]=Math.max(f.a[k],Math.min(stCap(f),f.a[k]+(f.a[k]>=20?.6*LB_RATE:.6))));f.morale=Math.min(100,f.morale+6);return true;}
 const SHOW_COST=25000;
 function hostShow(G){const st=stageOf(G.week);if(G.cash<SHOW_COST||G.week<10||G.flags["show_"+st])return false;G.cash-=SHOW_COST;G.flags["show_"+st]=true;
   G.rep+=3;G.camp.beauty=Math.min(10,G.camp.beauty+1);roster(G).forEach(f=>f.morale=Math.min(100,f.morale+8));return true;}
@@ -2543,8 +2546,8 @@ const EVENTS=[
   {n:"rin",f:"sad",t:"My plan failed again. The data said the opponent would retreat, but she came forward"},
   {n:"rin",f:"sad",t:"If I can't calculate it, I don't know what to believe"},
   {choice:[
-   {t:"Sometimes you have to trust your instincts",fx:G=>{add(G,"rin","bond",8);G.F.rin.a.comp=Math.min(20,G.F.rin.a.comp+1);},then:[{n:"rin",f:"flustered",t:"Instincts… I'll try. If it goes wrong, you're responsible too (composure +1)"}]},
-   {t:"Then build a backup plan, two layers deep",fx:G=>{add(G,"rin","trust",6);G.F.rin.a.iq=Math.min(20,G.F.rin.a.iq+1);},then:[{n:"rin",f:"happy",t:"Plan B… of course. I like the way you think (fight IQ +1)"}]}]}]},
+   {t:"Sometimes you have to trust your instincts",fx:G=>{add(G,"rin","bond",8);G.F.rin.a.comp=Math.min(stCap(G.F.rin),G.F.rin.a.comp+1);},then:[{n:"rin",f:"flustered",t:"Instincts… I'll try. If it goes wrong, you're responsible too (composure +1)"}]},
+   {t:"Then build a backup plan, two layers deep",fx:G=>{add(G,"rin","trust",6);G.F.rin.a.iq=Math.min(stCap(G.F.rin),G.F.rin.a.iq+1);},then:[{n:"rin",f:"happy",t:"Plan B… of course. I like the way you think (fight IQ +1)"}]}]}]},
 
  {id:"final_result",look:"fight",when:G=>G.week>=41,bg:"hall",steps:[
   {n:"nar",t:"The provincial hall is decked in flags; the list of each division's final four hangs in front of the stage"},
@@ -2570,7 +2573,7 @@ const EVENTS=[
   {n:"fah",f:"happy",t:"Heard Sirichai has new heavy bags. Lend me your ring for training… and Kati too"},
   {n:"kati",f:"flustered",t:"Huh! Training at a rival camp?!",with:"fah"},
   {choice:[
-   {t:"Sure. Light sparring, three rounds, nothing serious",fx:G=>{G.F.kati.a.guard=Math.min(20,G.F.kati.a.guard+.5);G.F.kati.a.counter=Math.min(20,G.F.kati.a.counter+.3);add(G,"fah","bond",5);G.F.kati.fatigue=Math.min(100,G.F.kati.fatigue+6);},
+   {t:"Sure. Light sparring, three rounds, nothing serious",fx:G=>{G.F.kati.a.guard=Math.min(stCap(G.F.kati),G.F.kati.a.guard+.5);G.F.kati.a.counter=Math.min(stCap(G.F.kati),G.F.kati.a.counter+.3);add(G,"fah","bond",5);G.F.kati.fatigue=Math.min(100,G.F.kati.fatigue+6);},
     then:[{n:"nar",t:"Three rounds become six. Both collapse in the middle of the ring, gasping"},{n:"fah",f:"happy",t:"…Not bad, Kati. You've improved (Kati's guard and counter improve)"}]},
    {t:"No. Save it for the real ring",fx:G=>{add(G,"kati","morale",5);add(G,"fah","bond",2);},then:[{n:"fah",f:"happy",t:"Ha! Possessive. Fine, see you in the ring"}]}]}]},
  {id:"pre_qual",look:"train",when:G=>G.week>=17,bg:"night",steps:[
@@ -2723,7 +2726,8 @@ const lovFinal=G=>{for(const id of lovList(G)){if(!romOf(G,id)||!LOVER_FINAL[id]
 function befriend(G,id){G.friendz=G.friendz||{};G.friendz[id]=true;}
 const isFriendz=(G,id)=>!!(G.friendz&&G.friendz[id]);
 const awayWord=(G,id)=>G.F[id].camp==="player"?"Left camp":"Not in touch";
-function relLabel(G,f,lv,short){const id=f&&f.id;if(G&&id&&G.F&&G.F[id]&&isAway(G,id)){const w=G.F[id].awayWhy==="break"?"Heartbroken":"Sulking";return short?w:`${w} · ${awayWord(G,id)} (back in ${awayLeft(G,id)} wk)`;}
+function relLabel(G,f,lv,short){const id=f&&f.id;if(G&&id&&G.F&&G.F[id]&&isAway(G,id)&&G.F[id].awayWhy==="train"){const n=awayLeft(G,id);return short?"Training away":`Away training (${n} wk)`;}
+  if(G&&id&&G.F&&G.F[id]&&isAway(G,id)){const w=G.F[id].awayWhy==="break"?"Heartbroken":"Sulking";return short?w:`${w} · ${awayWord(G,id)} (back in ${awayLeft(G,id)} wk)`;}
   return relBase(G,f,lv);}
 /* the ladder shown in her profile: the same labels, the current step lit — lovers climb their own ladder (LOVER_TIERS) */
 const REL_DESC={"Acquaintance":"Still calls you \"Manager\", a bit stiffly","Teammate":"Jokes around, texts about everyday things","Close":"Sometimes lets your name slip · shares personal stories","Special":"Always calls you by name",
@@ -2806,7 +2810,7 @@ function valSteps(G){const P=partners(G),hard=(G.valCaught||0)>=1,drop=hard?25:1
       {t:"Calm down, let me explain",then:[{n:"nar",t:"Before you get a word out, a bag of sweets hits you in the face"}]}]},
     {fx:G2=>{P.forEach(k=>add(G2,k,"bond",-drop));G2.valAbs=absWeek(G2);G2.valFloor=Object.fromEntries(P.map(k=>[k,bondTot(G2.F[k])]));}},{n:"nar",t:`Bond with everyone you're seeing −${drop}`},
     ...(two.length>=2?ringSteps(G,two[0],two[1],hard):[{n:"nar",t:"Nobody steps into a ring. Everyone just leaves in silence, which is worse than a fight"},{inject:G2=>runAway(G2,byBond[0],hard?3:2)}])];}
-const backDue=(G,id)=>{const f=G.F[id];return !!(f&&f.met&&f.awayAbs!=null&&!f.awayBack&&absWeek(G)>=f.awayAbs);};
+const backDue=(G,id)=>{const f=G.F[id];return !!(f&&f.met&&f.awayAbs!=null&&!f.awayBack&&f.awayWhy!=="train"&&absWeek(G)>=f.awayAbs);}; /* v1.90: the limit-break trip has its own homecoming (region.js) */
 // --- breakup (from the chat menu) ---
 const BREAK={kati:[{n:"nar",t:"You ask Kati to talk at the edge of the ring, the same spot where she confessed"},{n:"kati",f:"surprised",t:"…Break up?"},{n:"kati",f:"sad",t:"I'm not crying. Grandpa taught me a fighter never cries in the ring"},{n:"kati",f:"sad",t:"Give me a little time. Then I'll come back as your fighter, same as before"}],
   mali:[{n:"nar",t:"Mali listens in silence, when she usually never stops talking"},{n:"mali",f:"sad",t:"Oh… okay. Mali understands. Mali can smile, see? Smiling"},{n:"nar",t:"The smile wobbles for a moment, then the tears come on their own"},{n:"mali",f:"sad",t:"Mali's going home to Mom for a bit"}],
@@ -2974,7 +2978,7 @@ function dateScene(G,id,act){
   const steps=[{n:"nar",bg:A.bg,t:intro||`${A.name}`},...(opener?[{n:id,f:pref==="dislike"?"sad":"happy",l:look,t:opener}]:[]),
     ...spotSteps(f,act),...mid,...dateTwist(G,f,D,look),
     {inject:G2=>{const gain=Math.max(0,1+Math.round(D.score*.7));const capped=false,b0=hTot(f);add(G2,id,"bond",gain);const real=Math.round((hTot(f)-b0)*2)/2,HL=heartLv(f),hleft=Math.max(0,Math.ceil((HL.need-HL.into)*2)/2);if(gain>=4)add(G2,id,"morale",4);
-      if(act==="spar"){f.a.iq=Math.min(20,f.a.iq+.3);f.a.guard=Math.min(20,f.a.guard+.3);f.fatigue=Math.min(100,f.fatigue+4);}
+      if(act==="spar"){f.a.iq=Math.min(stCap(f),f.a.iq+.3);f.a.guard=Math.min(stCap(f),f.a.guard+.3);f.fatigue=Math.min(100,f.fatigue+4);}
       const tier=gain>=5?"great":gain>=2?"ok":"meh";
       f.closed=f.closed||{};const firstClose=!f.closed[tier];f.closed[tier]=true;
       const out=[...(firstClose?[{n:id,f:tier==="meh"?"sad":"happy",l:look,t:DATE_CLOSE[tier][id]}]:[]),
@@ -3282,7 +3286,7 @@ EVENTS.push(
   {n:"rin",f:"happy",l:"casual",t:G=>`${CALL(G,"rin")}, I made a three-page fight plan myself, the first one Coach Daeng hasn't checked. Will you let me use it?`},
   {n:"nar",t:"The pages are full of arrows, numbers, and doodles of round fighters that look like steamed buns"},
   {choice:[{t:"I trust your plan. Use it",fx:G=>{add(G,"rin","trust",8);add(G,"rin","morale",5);},then:[{n:"rin",f:"flustered",l:"casual",t:"…I can't measure 'trust', but I can feel it. Thank you"}]},
-   {t:"Let Coach Daeng look it over first",fx:G=>{add(G,"rin","trust",1);G.F.rin.a.iq=Math.min(20,G.F.rin.a.iq+.2);},then:[{n:"rin",f:"sad",l:"casual",t:"Understood. Caution makes sense… I'll do better"},{n:"nar",t:"(Coach Daeng fixes two spots; Rin writes down every word. Her ring IQ improves a little)"}]}]}]});
+   {t:"Let Coach Daeng look it over first",fx:G=>{add(G,"rin","trust",1);G.F.rin.a.iq=Math.min(stCap(G.F.rin),G.F.rin.a.iq+.2);},then:[{n:"rin",f:"sad",l:"casual",t:"Understood. Caution makes sense… I'll do better"},{n:"nar",t:"(Coach Daeng fixes two spots; Rin writes down every word. Her ring IQ improves a little)"}]}]}]});
 // v1.37: more of Rin between joining and the late-season arc
 EVENTS.push(
  {id:"rin_sheet",look:"train",when:G=>G.week>=18&&inCamp(G,"rin"),bg:"gym",steps:[
@@ -3291,7 +3295,7 @@ EVENTS.push(
   {n:"rin",f:"happy",l:"train",t:"Kati's left elbow drops when she's tired, three times a round on average. I drew one arrow for every time she got countered"},
   {n:"coach",t:"Twenty years teaching Muay Thai and I only just learned a dropped elbow can have a graph"},
   {n:"rin",f:"flustered",l:"train",t:G=>`${CALL(G,"rin")}, am I overdoing it? At my old camp they used these sheets to wrap fried bananas`},
-  {choice:[{t:"Keep going, our camp needs this",fx:G=>{add(G,"rin","trust",4);add(G,"rin","bond",3);G.F.kati.a.guard=Math.min(20,G.F.kati.a.guard+.3);},then:[{n:"rin",f:"happy",l:"train",t:"…Thank you. I'll make a color version too"},{n:"nar",t:"(Kati's guard improved a little)"}]},
+  {choice:[{t:"Keep going, our camp needs this",fx:G=>{add(G,"rin","trust",4);add(G,"rin","bond",3);G.F.kati.a.guard=Math.min(stCap(G.F.kati),G.F.kati.a.guard+.3);},then:[{n:"rin",f:"happy",l:"train",t:"…Thank you. I'll make a color version too"},{n:"nar",t:"(Kati's guard improved a little)"}]},
    {t:"Can we cut it to ten sheets? The wall's about to collapse",fx:G=>{add(G,"rin","bond",2);},then:[{n:"rin",f:"pout",l:"train",t:"Ten sheets… the font will be a little smaller"},{n:"nar",t:"The next day there are ten sheets, the text the size of ants"}]}]}]},
  {id:"rin_glasses",look:"train",when:G=>G.week>=22&&inCamp(G,"rin"),bg:"gym",steps:[
   {n:"nar",t:"Crack! Rin's glasses fly off and land under Mali's foot during pad work; the left lens shatters like a spiderweb"},
@@ -3299,7 +3303,7 @@ EVENTS.push(
   {n:"mali",f:"flustered",l:"train",t:"That's the sandbag, Rin! Mali's over here!"},
   {n:"rin",f:"flustered",l:"train",t:G=>`${CALL(G,"rin")}… Fine, I'll confess. I'm quite nearsighted. I take my glasses off to fight, so I have to memorize everything before I step in the ring. That's where all the data comes from`},
   {choice:[{t:"(Take her to an optician in town and pay, ฿1,500)",fx:G=>{G.cash-=1500;add(G,"rin","bond",5);add(G,"rin","trust",4);MEM(G,"rin_glasses");},then:[{n:"rin",f:"flustered",l:"casual",t:"…This frame is half the weight of the old one. I'll pay you back. Can I pay in installments?"},{n:"nar",t:"On the way back Rin walks closer than usual, because her eyes haven't adjusted yet… probably"}]},
-   {t:"That makes you even better. You fight from memory",fx:G=>{add(G,"rin","morale",6);G.F.rin.a.iq=Math.min(20,G.F.rin.a.iq+.3);MEM(G,"rin_memory");},then:[{n:"rin",f:"happy",l:"train",t:"…Nobody's ever seen it that way. Thank you. I'll remember that too"},{n:"nar",t:"(Rin's ring IQ improved a little)"}]}]}]},
+   {t:"That makes you even better. You fight from memory",fx:G=>{add(G,"rin","morale",6);G.F.rin.a.iq=Math.min(stCap(G.F.rin),G.F.rin.a.iq+.3);MEM(G,"rin_memory");},then:[{n:"rin",f:"happy",l:"train",t:"…Nobody's ever seen it that way. Thank you. I'll remember that too"},{n:"nar",t:"(Rin's ring IQ improved a little)"}]}]}]},
  {id:"rin_dad",look:"casual",when:G=>G.week>=26&&inCamp(G,"rin"),bg:"night",steps:[
   {n:"nar",t:"9 p.m. Rin sits outside the camp, her phone buzzing nonstop. The screen reads 'Dad (Prof. Dr.)'"},
   {n:"rin",f:"sad",l:"casual",t:"My dad is a university professor. He wants me to do a PhD, not box out in the provinces"},
@@ -3503,7 +3507,7 @@ EVENTS.push(
   {n:"nar",t:"After training, Rin stares at her wrapped hands for a long time"},
   {n:"rin",f:"sad",l:"fight",t:"Manager… everyone calls me 'the glasses analyst'. Am I really a fighter, or just someone who likes numbers?"},
   {choice:[{t:"You're the best game-reader I've ever seen in a ring",fx:G=>{add(G,"rin","morale",8);add(G,"rin","bond",4);},then:[{n:"rin",f:"flustered",l:"fight",t:"…I'm writing that sentence on the first page"}]},
-   {t:"Next fight, try fighting without looking at your notes",fx:G=>{const f=G.F.rin;f.a.comp=Math.min(20,f.a.comp+.5);f.a.iq=Math.min(20,f.a.iq+.3);add(G,"rin","trust",4);},then:[{n:"rin",f:"angry",l:"fight",t:"Without notes… scary, but worth trying. Okay!"},{n:"nar",t:"(Rin's composure and fight IQ improve)"}]}]}]});
+   {t:"Next fight, try fighting without looking at your notes",fx:G=>{const f=G.F.rin;f.a.comp=Math.min(stCap(f),f.a.comp+.5);f.a.iq=Math.min(stCap(f),f.a.iq+.3);add(G,"rin","trust",4);},then:[{n:"rin",f:"angry",l:"fight",t:"Without notes… scary, but worth trying. Okay!"},{n:"nar",t:"(Rin's composure and fight IQ improve)"}]}]}]});
 
 // ---------- v1.21: opponent's parting words, shown in a bubble over her head after the bell ----------
 const POST_BUBBLE={
@@ -3841,7 +3845,7 @@ EVENTS.push(
  {id:"mem_rin_memory",look:"train",when:G=>HAS(G,"rin_memory",10)&&inCamp(G,"rin"),bg:"gym",steps:[
   {n:"rin",f:"happy",l:"train",t:G=>`${CALL(G,"rin")} once said I fight with my memory. Now I remember everything: every fight our camp has had, who threw what, in which round.`},
   {n:"rin",f:"flustered",l:"train",t:"…including what you said that day."},
-  {fx:G=>{add(G,"rin","bond",3);G.F.rin.a.iq=Math.min(20,G.F.rin.a.iq+.2);}},{n:"nar",t:"(Rin still remembers what you said · Fight IQ up a little)"}]},
+  {fx:G=>{add(G,"rin","bond",3);G.F.rin.a.iq=Math.min(stCap(G.F.rin),G.F.rin.a.iq+.2);}},{n:"nar",t:"(Rin still remembers what you said · Fight IQ up a little)"}]},
  {id:"mem_kati_promise",look:"casual",when:G=>G.week>=44&&HAS(G,"kati_promise")&&inCamp(G,"kati"),bg:"night",steps:[
   {n:"nar",t:"The night before the big bout, Kati sits outside the camp, slowly wrapping her hands."},
   {n:"kati",f:"flustered",l:"casual",t:G=>`${CALL(G,"kati")}, remember? My second week here, you told me you'd never let me down.`},
@@ -4867,11 +4871,11 @@ const RADAR_AX=[["Punch",a=>(a.punch*2+a.power)/3],["Kick",a=>(a.kick*2+a.foot)/
   ["Defense",a=>(a.guard+a.counter+a.foot)/3],["Body",a=>(a.speed+a.stamina+a.dur+a.power)/4],["Mind",a=>(a.iq+a.comp)/2]];
 function radarSVG(f,size=220,prev){
   const c=size/2,R=size*.34,col=f.color||"#e23b4e";const pt=(i,v)=>{const ang=-Math.PI/2+i*Math.PI/3;return [c+Math.cos(ang)*R*v,c+Math.sin(ang)*R*v];};
-  const vals=RADAR_AX.map(([,fn])=>clamp(fn(f.a)/20,0,1));
+  const cap=typeof stCap==="function"?stCap(f):20,vals=RADAR_AX.map(([,fn])=>clamp(fn(f.a)/cap,0,1)); /* v1.90: scaled to the fighter's ceiling (25 after a limit break) */
   const ring=k=>RADAR_AX.map((_,i)=>pt(i,k).join(",")).join(" ");
   const poly=vals.map((v,i)=>pt(i,v).join(",")).join(" ");
-  const pot=RADAR_AX.map((_,i)=>pt(i,clamp(f.potential/20,0,1)).join(",")).join(" ");
-  const labels=RADAR_AX.map(([n,fn],i)=>{const [x,y]=pt(i,1.24);const v=(vals[i]*20).toFixed(1);const dl=prev?fn(f.a)-fn(prev):0;
+  const pot=RADAR_AX.map((_,i)=>pt(i,clamp(f.potential/cap,0,1)).join(",")).join(" ");
+  const labels=RADAR_AX.map(([n,fn],i)=>{const [x,y]=pt(i,1.24);const v=(vals[i]*cap).toFixed(1);const dl=prev?fn(f.a)-fn(prev):0;
     return `<text x="${x}" y="${y}" text-anchor="middle" dominant-baseline="middle" class="rl">${n}</text><text x="${x}" y="${y+13}" text-anchor="middle" class="rv">${v}${dl>=.05?`<tspan class="rup"> +${dl.toFixed(1)}</tspan>`:""}</text>`;}).join("");
   const id="rg"+Math.random().toString(36).slice(2,7);
   return `<svg class="radar" viewBox="0 0 ${size} ${size+10}" role="img" aria-label="Stat hexagon chart of ${f.name}">
@@ -6212,8 +6216,8 @@ function fighterChip(f){const c=condition(f);const nb=G.bookings.find(b=>b.a===f
     <div class="meta">${nb?`Fight wk ${nb.week} vs ${esc(G.F[nb.b].name)}`:"No fight yet"}</div></div></button>`;}
 
 function projFatigue(f){return fatigueAfter(G,f,f.plan.preset,f.plan.intensity);}
-function attrsHTML(f,showGain){return `<div class="attrs">${ATTR_GROUPS.map(([g,ks])=>`<h4>${g}</h4>`+ks.map(k=>{const v=f.a[k],gn=f.gains&&f.gains[k];
-  return `<div class="attr"><span>${ATTR_LABEL[k]}</span><i style="--v:${v/20*100}%"></i><b class="num">${v.toFixed(1)}${showGain&&gn>=.05?`<span class="up">+${gn.toFixed(1)}</span>`:""}</b></div>`;}).join("")).join("")}</div>`;}
+function attrsHTML(f,showGain){const cap=stCap(f);return `<div class="attrs">${cap>20?`<p class="meta goldt lbcap">Stat ceiling ${cap} · the part past 20 is gold</p>`:""}${ATTR_GROUPS.map(([g,ks])=>`<h4>${g}</h4>`+ks.map(k=>{const v=f.a[k],gn=f.gains&&f.gains[k];
+  return `<div class="attr${cap>20?" lb":""}"><span>${ATTR_LABEL[k]}</span><i style="--v:${v/cap*100}%;--m:${20/cap*100}%;--c:${v>20?20/v*100:100}%"></i><b class="num">${v.toFixed(1)}${showGain&&gn>=.05?`<span class="up">+${gn.toFixed(1)}</span>`:""}</b></div>`;}).join("")).join("")}</div>`;}
 function presetPicker(f){return `<div class="tgrid">${Object.entries(PRESETS).map(([k,p])=>`<button data-act="preset" data-f="${f.id}" data-v="${k}" ${trLocked(f)?"disabled":""} aria-pressed="${f.plan.preset===k}" title="${p.desc}">${p.name}</button>`).join("")}</div>
   <div class="tgrid three" role="group" aria-label="Intensity">${Object.entries(INTENSITY).map(([k,i])=>`<button data-act="intensity" data-f="${f.id}" data-v="${k}" aria-pressed="${f.plan.intensity===k}">${i.name}</button>`).join("")}</div>`;}
 const AX_PRESET={"Punch":"punch","Kick":"kick","Knee-Elbow":"knee","Defense":"defense","Body":"cond","Mind":"defense"};
@@ -6540,7 +6544,7 @@ function fighterHTML(f){const mine=f.camp==="player";const P=PROFILES[f.id];
       return `<button class="obtn ${cur===k?"on":""}" data-act="outfit" data-id="${f.id}" data-v="${k}" ${ok?"":"disabled"}><i style="background:${O.sw||"transparent"}" class="${O.sw?"":"base"}"></i><span><b>${ok?esc(O.name):"???"}</b><small>${cur===k?"Wearing":ok?"Tap to wear":"Unlocks: "+esc(O.hint)}</small></span></button>`;}).join("")}</div></div>
       <p class="meta center">Outfits only change the pixel sprite in camp, training and fights · no effect on stats</p>`;}
   if(t==="over"){const c=condition(f);const nb=G.bookings.find(b=>b.a===f.id||b.b===f.id);
-    body=`<div class="fp-over">${radarSVG(f,240)}<div><div class="bars">${bar("Readiness",c,condColor(c))}${bar("Fatigue",f.fatigue,"var(--warn)")}${bar("Morale",f.morale,"var(--blue)")}</div>
+    body=`${mine&&typeof lbCardHTML==="function"?lbCardHTML(f):""}<div class="fp-over">${radarSVG(f,240)}<div><div class="bars">${bar("Readiness",c,condColor(c))}${bar("Fatigue",f.fatigue,"var(--warn)")}${bar("Morale",f.morale,"var(--blue)")}</div>
       ${mine?`<p class="meta goldt">${masteryLine(f)}</p>`:""}${TRAITS[f.id]?`<p class="meta trov">${TRAIT_PX[traitOf(f)]||""} Hidden power: <b>${TRAITS[f.id].find(t=>t.id===traitOf(f)).name}</b></p>`:""}<p class="meta">Form ${formHTML(f)}${nb?` · next fight week ${nb.week}`:""}</p><details><summary>Detailed stats</summary>${attrsHTML(f,mine)}</details></div></div>`;}
   if(t==="train"){body=`<div class="fp-train"><div class="tr-anim big" style="background-image:url(${ASSET}${gymBg()})"><canvas width="260" height="200" data-sprite="${f.id}" data-floor="1"></canvas><span class="tr-tag">${PRESETS[f.plan.preset].name}</span></div>
      <div><p class="meta">${PRESETS[f.plan.preset].desc} · fatigue next week ${Math.round(projFatigue(f))}</p>${presetPicker(f)}${radarSVG(f,200)}</div></div>`;}
@@ -8213,7 +8217,7 @@ const BAG={st:null,
     if(typeof cardCheck==="function"){const got=cardCheck(G);if(got.length){G.cardPend=(G.cardPend||[]).concat(got);out.push(`🃏 New card ×${got.length}`);}}
     return `<span class="rwl">${out.map(x=>`<span class="rwi">${x}</span>`).join("")}</span>`;},
   rewardBag(grade,acc){const S=this.st,f=G.F[S.id],D=BAG_DIFF[S.dk],out=[];
-    const g=Math.round(acc*.3*D.mul*100)/100;const up=k=>{const cap=Math.min(20,(f.potential||14)+1.5);const before=f.a[k];f.a[k]=Math.min(cap,Math.round((f.a[k]+g/2)*100)/100);return f.a[k]>before;};
+    const g=Math.round(acc*.3*D.mul*100)/100;const up=k=>{const cap=Math.min(stCap(f),(f.potential||14)+1.5);const before=f.a[k];f.a[k]=Math.min(cap,Math.round((f.a[k]+g/2)*100)/100);return f.a[k]>before;};
     if(g>0){const a=up("kick"),b=up("punch");if(a||b)out.push(`Kick/punch +${(g/2).toFixed(2)}`);else out.push("Kick/punch already at potential");}
     const mo={S:8,A:5,B:3,C:1}[grade];f.morale=Math.min(100,(f.morale||0)+mo);out.push(`Morale +${mo}`);
     f.fatigue=Math.min(100,(f.fatigue||0)+4);out.push("Fatigue +4");
@@ -8449,7 +8453,7 @@ const RUN={st:null,
     else if(!S.practice)S.res.rw=this.reward(grade,win);
     save();this.draw();AU.sfx&&AU.sfx(win?"level":"ui");},
   reward(grade,win){const S=this.st,f=this.runner(),out=[];G.campUsed=S.act||"run";G.campNote=`${CAMP_ACTIONS.run.name} · grade ${grade}`;
-    const g={S:.16,A:.12,B:.08,C:.04}[grade],cap=Math.min(20,(f.potential||14)+1.5);
+    const g={S:.16,A:.12,B:.08,C:.04}[grade],cap=Math.min(stCap(f),(f.potential||14)+1.5);
     const up=k=>{const b=f.a[k];f.a[k]=Math.min(cap,Math.round((f.a[k]+g)*100)/100);return f.a[k]>b;};
     if(up("speed")|up("stamina"))out.push(`Speed/stamina +${g}`);else out.push("Speed/stamina already at potential");
     const mo=win?6:3;f.morale=Math.min(100,(f.morale||0)+mo);out.push(`Morale +${mo}`);f.fatigue=Math.min(100,(f.fatigue||0)+5);out.push("Fatigue +5");

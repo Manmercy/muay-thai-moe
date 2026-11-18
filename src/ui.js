@@ -435,8 +435,8 @@ function fighterChip(f){const c=condition(f);const nb=G.bookings.find(b=>b.a===f
     <div class="meta">${nb?`ไฟต์ สด.${nb.week} vs ${esc(G.F[nb.b].name)}`:"ยังไม่มีไฟต์"}</div></div></button>`;}
 
 function projFatigue(f){return fatigueAfter(G,f,f.plan.preset,f.plan.intensity);}
-function attrsHTML(f,showGain){return `<div class="attrs">${ATTR_GROUPS.map(([g,ks])=>`<h4>${g}</h4>`+ks.map(k=>{const v=f.a[k],gn=f.gains&&f.gains[k];
-  return `<div class="attr"><span>${ATTR_LABEL[k]}</span><i style="--v:${v/20*100}%"></i><b class="num">${v.toFixed(1)}${showGain&&gn>=.05?`<span class="up">+${gn.toFixed(1)}</span>`:""}</b></div>`;}).join("")).join("")}</div>`;}
+function attrsHTML(f,showGain){const cap=stCap(f);return `<div class="attrs">${cap>20?`<p class="meta goldt lbcap">ขีดจำกัดค่าพลัง ${cap} · ส่วนที่เกิน 20 เป็นสีทอง</p>`:""}${ATTR_GROUPS.map(([g,ks])=>`<h4>${g}</h4>`+ks.map(k=>{const v=f.a[k],gn=f.gains&&f.gains[k];
+  return `<div class="attr${cap>20?" lb":""}"><span>${ATTR_LABEL[k]}</span><i style="--v:${v/cap*100}%;--m:${20/cap*100}%;--c:${v>20?20/v*100:100}%"></i><b class="num">${v.toFixed(1)}${showGain&&gn>=.05?`<span class="up">+${gn.toFixed(1)}</span>`:""}</b></div>`;}).join("")).join("")}</div>`;}
 function presetPicker(f){return `<div class="tgrid">${Object.entries(PRESETS).map(([k,p])=>`<button data-act="preset" data-f="${f.id}" data-v="${k}" ${trLocked(f)?"disabled":""} aria-pressed="${f.plan.preset===k}" title="${p.desc}">${p.name}</button>`).join("")}</div>
   <div class="tgrid three" role="group" aria-label="ความหนัก">${Object.entries(INTENSITY).map(([k,i])=>`<button data-act="intensity" data-f="${f.id}" data-v="${k}" aria-pressed="${f.plan.intensity===k}">${i.name}</button>`).join("")}</div>`;}
 const AX_PRESET={"หมัด":"punch","เตะ":"kick","เข่า-ศอก":"knee","ป้องกัน":"defense","ร่างกาย":"cond","จิตใจ":"defense"};
@@ -763,7 +763,7 @@ function fighterHTML(f){const mine=f.camp==="player";const P=PROFILES[f.id];
       return `<button class="obtn ${cur===k?"on":""}" data-act="outfit" data-id="${f.id}" data-v="${k}" ${ok?"":"disabled"}><i style="background:${O.sw||"transparent"}" class="${O.sw?"":"base"}"></i><span><b>${ok?esc(O.name):"???"}</b><small>${cur===k?"ใส่อยู่":ok?"แตะเพื่อใส่":"ปลดล็อก: "+esc(O.hint)}</small></span></button>`;}).join("")}</div></div>
       <p class="meta center">ชุดเปลี่ยนแค่ตัวพิกเซลในค่าย ตอนซ้อม และตอนชก · ไม่มีผลกับค่าพลัง</p>`;}
   if(t==="over"){const c=condition(f);const nb=G.bookings.find(b=>b.a===f.id||b.b===f.id);
-    body=`<div class="fp-over">${radarSVG(f,240)}<div><div class="bars">${bar("ความพร้อม",c,condColor(c))}${bar("ความล้า",f.fatigue,"var(--warn)")}${bar("กำลังใจ",f.morale,"var(--blue)")}</div>
+    body=`${mine&&typeof lbCardHTML==="function"?lbCardHTML(f):""}<div class="fp-over">${radarSVG(f,240)}<div><div class="bars">${bar("ความพร้อม",c,condColor(c))}${bar("ความล้า",f.fatigue,"var(--warn)")}${bar("กำลังใจ",f.morale,"var(--blue)")}</div>
       ${mine?`<p class="meta goldt">${masteryLine(f)}</p>`:""}${TRAITS[f.id]?`<p class="meta trov">${TRAIT_PX[traitOf(f)]||""} พลังแฝง: <b>${TRAITS[f.id].find(t=>t.id===traitOf(f)).name}</b></p>`:""}<p class="meta">ฟอร์ม ${formHTML(f)}${nb?` · ไฟต์ถัดไปสัปดาห์ ${nb.week}`:""}</p><details><summary>ค่าสถานะละเอียด</summary>${attrsHTML(f,mine)}</details></div></div>`;}
   if(t==="train"){body=`<div class="fp-train"><div class="tr-anim big" style="background-image:url(${ASSET}${gymBg()})"><canvas width="260" height="200" data-sprite="${f.id}" data-floor="1"></canvas><span class="tr-tag">${PRESETS[f.plan.preset].name}</span></div>
      <div><p class="meta">${PRESETS[f.plan.preset].desc} · ความล้าสัปดาห์หน้า ${Math.round(projFatigue(f))}</p>${presetPicker(f)}${radarSVG(f,200)}</div></div>`;}
