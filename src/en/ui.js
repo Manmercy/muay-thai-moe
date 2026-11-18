@@ -871,7 +871,8 @@ function skillGrid(f,mine){if(hasTree(f.id))return skillTree(f,mine);const L=SKI
    <div class="sklist">${op.map(row).join("")||`<p class="meta">No moves unlocked yet</p>`}</div>
    ${lk.length?`<details class="sklock"><summary>Locked moves ${lk.length} · next Lv.${lk[0].lv}</summary>${lk.map(s=>`<div class="sklk"><span>Lv.${s.lv}</span><b>${s.name}</b><small>${s.desc}</small></div>`).join("")}</details>`:""}`;}
 // v1.41: visible relationship stages — each one changes how she treats you
-const REL_TIERS=[[0,"Acquaintance","Still calls you \"Manager\", a bit stiffly"],[20,"Teammate","Jokes around, texts about everyday things"],[40,"Close","Sometimes lets your name slip · shares personal stories"],[75,"Special","Always calls you by name"]];
+/* v1.89.11: one ladder — these names are the heart-level names at the same points (Lv.1 / Lv.3 / Lv.5 / Lv.8) */
+const REL_TIERS=[[0,"Acquaintance","Still calls you \"Manager\", a bit stiffly"],[20,"Getting familiar","Jokes around, texts about everyday things"],[40,"Friends","Sometimes lets your name slip · shares personal stories"],[75,"Close","Always calls you by name"]];
 const relTier=b=>{let i=0;REL_TIERS.forEach((t,k)=>{if((b||0)>=t[0])i=k;});return i;};
 function relTierCheck(){if(!G)return;G.relT=G.relT||{};for(const f of Object.values(G.F)){if(!(f.camp==="player"||f.met))continue;const t=relTier(f.bond),o=G.relT[f.id];if(o===undefined){G.relT[f.id]=t;continue;}
   if(t>o){G.relT[f.id]=t;UI.relUp=UI.relUp||[];UI.relUp.push(`${f.name} · ${REL_TIERS[t][1]} — ${REL_TIERS[t][2]}`);}}}

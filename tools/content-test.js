@@ -87,7 +87,8 @@ const chrome=process.env.CHROME_PATH||'/Applications/Google Chrome.app/Contents/
   test('lover bonus only while there is one; a second yes is warned and the top heart scene closes',()=>{const g=fresh();G=g;g.F.kati.met=true;g.F.kati.bond=90;g.F.kati.trust=60;const m0=g.F.kati.morale;takeLover(g,'kati');if(g.F.kati.morale!==Math.min(100,m0+15))throw Error('solo morale');if(!lovSolo(g))throw Error('solo');
     g.F.mali.met=true;g.F.mali.camp='player';g.F.mali.bond=80;g.F.mali.trust=60;if(!cheatWarn(g,'mali').length||!/คบซ้อน|two-timing/.test(yesTxt(g,'mali','x')))throw Error('warn');if(cheatWarn(g,'kati').length)throw Error('no self warn');
     const mm=g.F.mali.morale;takeLover(g,'mali');if(g.F.mali.morale!==mm)throw Error('no morale for a second');if(lovSolo(g))throw Error('not solo');
-    g.F.kati.bond=100;g.F.kati.bondX=2000;g.lastBeat=-99;return !EVENTS.find(e=>e.id==='hs_kati_30').when(g);});
+    g.F.kati.bond=100;g.F.kati.bondX=2000;g.lastBeat=-99;if(EVENTS.find(e=>e.id==='hs_kati_30').when(g))throw Error('scene');const top=CHAT.kati.filter(t=>/_h(27|30)$/.test(t.id));if(top.length!==2||top.some(t=>t.need(g)))throw Error('top chats');doBreak(g,'mali');return top.every(t=>t.need(g));});
+  test('one ladder: tier popup names match the heart-level names',()=>REL_TIERS.every(([b,n])=>n===heartTier(Math.min(10,1+Math.floor(b/10)))));
   test('two-timing brings clashes and spats (very close pairs do not spat) and they repeat',()=>{const g=fresh();G=g;lovUp(g,['kati','mali','rin']);let clash=0,spat=0;
     for(let w=1;w<=40;w++){g.week=w;if(ev('lv_clash').when(g)){walkL(g,ev('lv_clash').steps);clash++;}else if(ev('lv_spat').when(g)){walkL(g,ev('lv_spat').steps,ch=>2);spat++;}for(const k of ['kati','mali','rin'])g.F[k].bond=90;}
     if(clash<3||spat<2)throw Error('counts '+clash+' '+spat);for(const k of ['kati','mali','rin']){g.F[k].bond=100;g.F[k].bondX=30;}g.spatAbs=-99;g.lvEvAbs=-1;

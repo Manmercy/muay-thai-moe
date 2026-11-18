@@ -871,7 +871,8 @@ function skillGrid(f,mine){if(hasTree(f.id))return skillTree(f,mine);const L=SKI
    <div class="sklist">${op.map(row).join("")||`<p class="meta">ยังไม่มีท่าที่ปลดล็อก</p>`}</div>
    ${lk.length?`<details class="sklock"><summary>ท่าที่ยังล็อก ${lk.length} ท่า · ถัดไป Lv.${lk[0].lv}</summary>${lk.map(s=>`<div class="sklk"><span>Lv.${s.lv}</span><b>${s.name}</b><small>${s.desc}</small></div>`).join("")}</details>`:""}`;}
 // v1.41: visible relationship stages — each one changes how she treats you
-const REL_TIERS=[[0,"คนรู้จัก","ยังเรียกคุณว่าผู้จัดการแบบเกร็ง ๆ"],[20,"เพื่อนร่วมค่าย","เริ่มคุยเล่น ทักแชตเรื่องทั่วไป"],[40,"คนสนิท","บางทีก็หลุดเรียกชื่อคุณ · มีเรื่องส่วนตัวมาเล่า"],[75,"คนพิเศษ","เรียกชื่อคุณตลอด"]];
+/* v1.89.11: one ladder — these names are the heart-level names at the same points (Lv.1 / Lv.3 / Lv.5 / Lv.8) */
+const REL_TIERS=[[0,"คนรู้จัก","ยังเรียกคุณว่าผู้จัดการแบบเกร็ง ๆ"],[20,"เริ่มคุ้น","เริ่มคุยเล่น ทักแชตเรื่องทั่วไป"],[40,"สนิท","บางทีก็หลุดเรียกชื่อคุณ · มีเรื่องส่วนตัวมาเล่า"],[75,"ใกล้ชิด","เรียกชื่อคุณตลอด"]];
 const relTier=b=>{let i=0;REL_TIERS.forEach((t,k)=>{if((b||0)>=t[0])i=k;});return i;};
 function relTierCheck(){if(!G)return;G.relT=G.relT||{};for(const f of Object.values(G.F)){if(!(f.camp==="player"||f.met))continue;const t=relTier(f.bond),o=G.relT[f.id];if(o===undefined){G.relT[f.id]=t;continue;}
   if(t>o){G.relT[f.id]=t;UI.relUp=UI.relUp||[];UI.relUp.push(`${f.name} · ${REL_TIERS[t][1]} — ${REL_TIERS[t][2]}`);}}}
