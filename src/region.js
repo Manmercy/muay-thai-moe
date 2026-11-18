@@ -677,7 +677,7 @@ const NL={
   spl:[{img:"nl_rosa_special",def:"เฮอริคานรานา",td:1}],tip:"อึดและทนมาก ชอบทุ่มโชว์คนดู · การ์ดเปิดบ่อย"},
  /* boss: three forms, one per round (Man 18 Nov 2026) — 1 hood: heavy · 2 hood off: fast and sharp · 3 blood mode: the Naka family's sports medicine,
     she punches herself to boil the blood — red skin, red eyes, furious, very fast */
- ladda:{name:"ลดา",nick:"เครื่องจักรสังหารแห่งมวยหญิง",art:"MMA + มวยไทยสมัยใหม่",col:"#f2f2f2",sprite:"nl_ladda_hood",rounds:3,
+ ladda:{name:"ลดา",nick:"เครื่องจักรสังหารแห่งมวยหญิง",art:"MMA + มวยไทยสมัยใหม่",col:"#f2f2f2",sprite:"nl_ladda_hood",rounds:3,hpX:45,hurt:{def:.4,ev:.1,sta:.5,rec:1.1,rnd:14},
   shape:{elbow:2,knee:1,clinch:2,iq:2,comp:2},grap:16,sub:16,tdName:["ดับเบิลเลก","จับขาล้ม"],subName:["รัดคอจากด้านหลัง","กิโยติน"],pfx:{dmg:{elbow:.1},gnp:.15},
   nlsk:[{id:"nl_ld_double",name:"ดับเบิลเลก",k:"td"},{id:"nl_ld_superman",name:"ซูเปอร์แมนพันช์",k:"atk",w:"punch"},{id:"nl_ld_rnc",name:"รัดคอจากด้านหลัง",k:"sub"}],
   phases:[{n:1,sprite:"nl_ladda_hood",dmg:1.18,hit:-.01,ini:-1,say:"ลดาดึงฮู้ดลงปิดครึ่งหน้า ยืนนิ่งไม่ขยับ… ทุกหมัดที่ออกมาหนักเหมือนค้อน"},
@@ -691,7 +691,7 @@ const NL_ORDER=["nia","varya","meili","rosa","ladda"];
 /* build (or refresh) a team member sized against `me`: she wins about `p` of 5-round bouts, never above the ceiling `ceil` */
 function nlFighter(G,k,me,p,ceil){const D=NL[k],id="nl_"+k;let f=G.F[id];
   if(!f){f=baseFighter(id,mkNPC(id,D.name,"X",14,mulberry32(hashStr(id)),2));f.camp="quest";f.div="X";G.F[id]=f;}
-  Object.assign(f,{name:D.name,full:D.name,color:D.col,grap:D.grap,sub:D.sub,tdName:D.tdName,subName:D.subName,pfx:D.pfx,nlsk:D.nlsk,spl:D.spl.length?D.spl:null,nl:k,phases:D.phases||null});
+  Object.assign(f,{name:D.name,full:D.name,color:D.col,grap:D.grap,sub:D.sub,tdName:D.tdName,subName:D.subName,pfx:D.pfx,nlsk:D.nlsk,spl:D.spl.length?D.spl:null,nl:k,phases:D.phases||null,hpX:D.hpX||0,hurt:D.hurt||null});
   if(D.sprite)f.sprite=D.sprite;f.fatigue=0;f.injury=0;f.morale=75;f.lvl=Math.max(me&&me.lvl||1,1)+(k==="ladda"?3:1);
   const setT=T=>{f.vet=0;for(const [a] of ATTRS)f.a[a]=Math.max(1,Math.min(20,T-.6+(D.shape[a]||0)));liftOpponent(f,T,20);};
   f.nlT=me?+rgFit(me,f,setT,p,ceil,D.rounds||3).toFixed(2):(setT(ceil),ceil);return f;}

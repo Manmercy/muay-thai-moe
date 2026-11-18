@@ -557,8 +557,10 @@ const MASTERY_AT=13,MK=2,CK=3.5;
 function mastery(f){if(f.camp!=="player")return 0;const v=styleVal(f,mainStyle(f));return v<MASTERY_AT?0:.3+.7*clamp((v-MASTERY_AT)/4,0,1);}
 /* v1.83.3: veterans past the stat ceiling (20) keep improving through ring craft instead — f.vet is measured in stat points */
 const VET_FX={hit:.08,dmg:.25,ev:.06}; // calibrated: vet 1 ≈ +1 stat point
+/* v1.90.13 "the more she bleeds, the harder she gets" (Ladda): f.hpX adds starting hp; f.hurt={def,ev,sta,rec,rnd} scale with how much hp is gone (0 fresh → 1 empty) */
+const hurtW=s=>s&&s.f.hurt?clamp(1-s.hp/(s.hp0||100),0,1):0;
 function fightSide(f,plan,rng){const sk=skillMods(f);{const m=mastery(f)*MK,s=mainStyle(f);if(m){if(s==="defense"){sk.evade+=.04*m;sk.ctr+=.06*m;sk.ctrDmg+=.25*m;}else{const w=s;sk.hit[w]=(sk.hit[w]||0)+.05*m;sk.dmg[w]=(sk.dmg[w]||0)+.2*m;sk.pts[w]=(sk.pts[w]||0)+.1*m;}}}if(f.aura)sk.evade+=f.aura*.5;if(f.vet>0){const v=f.vet;for(const w of ["punch","kick","knee","elbow"]){sk.hit[w]=(sk.hit[w]||0)+VET_FX.hit*v;sk.dmg[w]=(sk.dmg[w]||0)+VET_FX.dmg*v;}sk.evade+=VET_FX.ev*v;}const gr=f.id==="kati"&&traitOf(f)!=="grit"?0:(f.grit||0);if(gr)sk.evade+=gr*.4;
-  const hp0=100-(f.injury?15:0)+Math.round(gr*30),tl=f.trainLog||[];const brk=STA.brk+f.a.stamina*STA.brkK+(tl[tl.length-1]==="prep"?STA.prep:0)+(tl.slice(-2).includes("cond")?STA.cond:0)+(f.id==="fah"?STA.fah:0); /* Fah: hot-blooded and tireless, gets her breath back faster */
+  const hp0=100-(f.injury?15:0)+Math.round(gr*30)+(f.hpX||0),tl=f.trainLog||[];const brk=STA.brk+f.a.stamina*STA.brkK+(tl[tl.length-1]==="prep"?STA.prep:0)+(tl.slice(-2).includes("cond")?STA.cond:0)+(f.id==="fah"?STA.fah:0); /* Fah: hot-blooded and tireless, gets her breath back faster */
   return {f,id:f.id,name:f.name,plan,instr:"none",hp:hp0,hp0,brk,sta:clamp(100-f.fatigue*.4,40,100),pts:0,rpts:0,kd:0,cuts:0,
     thrown:0,landed:0,dmgDealt:0,legs:0,tac:{focus:"auto",pace:"steady",target:"head"},sk,prep:(f.prepBonus?.04:0)+(f.counterPrep?.05:0)+sk.prep+(f.aura||0)+gr+(f.labPrep||0)+(f.camp==="player"?(f.facPrep||0):0),counterPrep:!!f.counterPrep,trait:traitOf(f),mor:(f.morale-60)/400+sk.mor,wl:{punch:0,kick:0,knee:0,elbow:0}};
 }
@@ -684,6 +686,8 @@ function grapEx(F,at,df,rng,log,md){const nm=v=>Array.isArray(v)?v[Math.floor(rn
   else L(df,`${df.name} sprawls, stopping ${at.name}'s takedown!`,"miss","sprawl",{an:at.name,dn:df.name});
   return true;}
 function fightEx(F){const rng=F.rng,log=[],ex=F.ex,mA=F.mA,mB=F.mB;
+  for(const s of [F.A,F.B])if(s.f.hurt&&!F.over&&s.hp>0){const w=hurtW(s),H=s.f.hurt;s.hp=Math.min(s.hp0,s.hp+H.rec*w);s.sta=clamp(s.sta+H.rec*w*1.5,0,100);
+    if(w>.45&&!s.hurtSaid){s.hurtSaid=1;log.push({ha:F.A.hp,hb:F.B.hp,sa:F.A.sta,sb:F.B.sta,s:s===F.A?"A":"B",t:`${s.name} only grows calmer as she bleeds — tighter guard, sharper slips, and her breath comes back unnaturally fast`,k:"big",ev:"wake",an:s.name,dn:s.name});}}
   for(const s of [F.A,F.B])if(s.autoSkill!==false){const e=aiSkill(F,s,rng);if(e)log.push(e);}
   {
     // v1.5 "blood boiling" mode: a canon fighter who is hurt and behind can snap once per fight
@@ -717,7 +721,7 @@ function fightEx(F){const rng=F.rng,log=[],ex=F.ex,mA=F.mA,mB=F.mB;
     /* v1.87.4 balance: one weapon thrown again and again gets read inside the round, and a kick can be checked by a tight guard and good feet */
     const rtw=at.rtw||(at.rtw={punch:0,kick:0,knee:0,elbow:0}),rep=at.rthrown>=3?Math.max(0,(rtw[wpn]||0)/at.rthrown-BAL.repFree)*BAL.repPen:0;
     const chkP=wpn==="kick"&&!clinch?clamp((d.guard*.55+d.foot*.45-effA(at,"speed")*.3-BAL.chkBase)*BAL.chkK+rep*.6,0,BAL.chkMax):0;
-    const hitP=clamp(.42-rep+fury*.04+(atk-def)*.03+at.prep+at.mor+(at.careMor||0)-fatA+fatD-md.evade-md.guard-df.sk.evade-(df.ctrW===wpn?CTR_W:0)+(at.sk.hit[wpn]||0)+(at.hp<45?at.sk.clutch:0)+(at.rage?.1:0)+(at.gprep==="strike"&&F.open?.04:0)+(at.ph&&at.ph.hit||0)-(df.ph&&df.ph.ev||0)-(at.tac.target==="head"?.015:0)+df.legs/400+(bA&&bA.w===wpn?.12*bA.pw:0)-(bD?.12*bD.pw:0),.12,.9)*(at.trait==="flow"?TRV.flowAtk:1)*(df.trait==="flow"?TRV.flowDef:1)*(df.witsOn?TRV.wits:1)*(df.trait==="eye"?TRV.eyeDef:1)*(1+fury*TRV.furyHit)*(at.libOn?TRV.libHit:1);
+    const hitP=clamp(.42-rep+fury*.04+(atk-def)*.03+at.prep+at.mor+(at.careMor||0)-fatA+fatD-md.evade-md.guard-df.sk.evade-(df.ctrW===wpn?CTR_W:0)+(at.sk.hit[wpn]||0)+(at.hp<45?at.sk.clutch:0)+(at.rage?.1:0)+(at.gprep==="strike"&&F.open?.04:0)+(at.ph&&at.ph.hit||0)-(df.ph&&df.ph.ev||0)-(df.f.hurt?df.f.hurt.ev*hurtW(df):0)-(at.tac.target==="head"?.015:0)+df.legs/400+(bA&&bA.w===wpn?.12*bA.pw:0)-(bD?.12*bD.pw:0),.12,.9)*(at.trait==="flow"?TRV.flowAtk:1)*(df.trait==="flow"?TRV.flowDef:1)*(df.witsOn?TRV.wits:1)*(df.trait==="eye"?TRV.eyeDef:1)*(1+fury*TRV.furyHit)*(at.libOn?TRV.libHit:1);
     at.thrown++;at.rthrown++;rtw[wpn]=(rtw[wpn]||0)+1;at.sta=clamp(at.sta-STA.drain*W_INFO[wpn].cost*(STA.cA-a.stamina/STA.cB)*ma.sta*(1+Math.max(0,ma.aggr))*(1-at.sk.staSave),0,100);
     const tx=TXT[wpn][Math.floor(rng()*TXT[wpn].length)];
     const checked=chkP>0&&rng()<chkP;
@@ -725,12 +729,12 @@ function fightEx(F){const rng=F.rng,log=[],ex=F.ex,mA=F.mA,mB=F.mB;
       log.push({ha:F.A.hp,hb:F.B.hp,sa:F.A.sta,sb:F.B.sta,s:df===F.A?"A":"B",t:`${df.name} checks the kick from ${at.name}. Shin meets shin!`,k:"miss",ev:"miss",w:wpn,cl:clinch,mside:at===F.A?"A":"B",an:at.name,dn:df.name});}
     else if(rng()<hitP){
       const crit=rng()<(at.rage?.35:.07);const q=crit?1.6:.6+rng()*.6;if(at.rage)at.rage--;
-      let dmg=1.35*W_INFO[wpn].imp*q*(.6+(BAL.specPow?effA(at,"power"):a.power)/25)*(1-d.guard/70)*(1.25-d.dur/40)*(1+(at.sk.dmg[wpn]||0))*(bA&&bA.w===wpn?1+.3*bA.pw:1)*(1+fury*TRV.furyDmg)*(at.libOn?TRV.lib:1)*(at.trait==="rock"?TRV.rockAtk:1)*(df.trait==="rock"?TRV.rockDef:1)*(at.ph&&at.ph.dmg||1);const tg=at.tac.target;
+      let dmg=1.35*W_INFO[wpn].imp*q*(.6+(BAL.specPow?effA(at,"power"):a.power)/25)*(1-d.guard/70)*(1.25-d.dur/40)*(1+(at.sk.dmg[wpn]||0))*(bA&&bA.w===wpn?1+.3*bA.pw:1)*(1+fury*TRV.furyDmg)*(at.libOn?TRV.lib:1)*(at.trait==="rock"?TRV.rockAtk:1)*(df.trait==="rock"?TRV.rockDef:1)*(at.ph&&at.ph.dmg||1)*(df.f.hurt?1-df.f.hurt.def*hurtW(df):1);const tg=at.tac.target;
       if(tg==="head")dmg*=1.1;if(tg==="body"){dmg*=.9;df.sta=clamp(df.sta-dmg*.9,0,100);}if(tg==="legs"&&(wpn==="kick"||wpn==="knee")){dmg*=.85;df.legs=Math.min(60,df.legs+dmg*.8);}
       // v1.32 "flash knockout": a clean crit to the head can drop anyone early — rarer for durable/guarded fighters, likelier when the attacker clearly outclasses
       if(crit&&tg!=="body"&&(wpn!=="punch"||a.power>=10)&&rng()<clamp(.16+(ovr(a)-ovr(d))*.06-(d.dur-8)*.012+Math.max(0,a.power-12)*BAL.flashPow,.05,.45)){dmg+=10+rng()*8;at.flash=1;}
       at.rw[wpn]++;at.rdmg+=dmg;at.rlanded++;
-      df.hp-=dmg;df.sta=clamp(df.sta-dmg*STA.hit,0,100);at.landed++;at.wl[wpn]++;at.dmgDealt+=dmg;const p=W_INFO[wpn].pts*q*(1+(at.sk.pts[wpn]||0))*(df.trait==="rock"?TRV.rockPts:1);at.pts+=p;at.rpts+=p;
+      df.hp-=dmg;df.sta=clamp(df.sta-dmg*STA.hit*(df.f.hurt?1-df.f.hurt.sta*hurtW(df):1),0,100);at.landed++;at.wl[wpn]++;at.dmgDealt+=dmg;const p=W_INFO[wpn].pts*q*(1+(at.sk.pts[wpn]||0))*(df.trait==="rock"?TRV.rockPts:1);at.pts+=p;at.rpts+=p;
       log.push({ha:F.A.hp,hb:F.B.hp,sa:F.A.sta,sb:F.B.sta,s:at===F.A?"A":"B",t:`${at.name} ${tx}${crit?" — clean hit!":""}`,k:crit?"big":"hit",ev:"hit",w:wpn,cl:clinch,crit,an:at.name,dn:df.name});
       if(wpn==="elbow"&&q>1.3&&rng()<.25){df.cuts++;log.push({ha:F.A.hp,hb:F.B.hp,sa:F.A.sta,sb:F.B.sta,s:"x",t:`${df.name} is cut by an elbow, bleeding over the eyebrow`,k:"warn",ev:"cut",an:at.name,dn:df.name});
         if(df.cuts>=2&&rng()<.5){F.over=true;F.result={win:at===F.A?"A":"B",type:"TKO (doctor stoppage)",round:F.round};}}
@@ -768,7 +772,7 @@ function roundFinish(F){const log=F.rlog,kd0=F.kd0;for(const s of [F.A,F.B])s.bu
   /* v1.87.2: a fighter gets her breath back between rounds — tougher fighters recover more — so long bouts are not just a slow knockout
      v1.88: stamina no longer refills by itself. A break gives back a little (conditioning, last week's fight prep), the corner does the rest:
      the player's corner mini-game in a live fight, an average corner for everyone else. */
-  for(const s of [F.A,F.B]){s.sta=clamp(s.sta+(s.brk||0),0,100);s.hp=clamp(s.hp+(F.ev?RND_REC_EV:RND_REC).b+s.f.a.dur*(F.ev?RND_REC_EV:RND_REC).d,0,Math.max(100,s.hp0||100));
+  for(const s of [F.A,F.B]){s.sta=clamp(s.sta+(s.brk||0),0,100);if(s.f.hurt)s.hp+=s.f.hurt.rnd*hurtW(s);s.hp=clamp(s.hp+(F.ev?RND_REC_EV:RND_REC).b+s.f.a.dur*(F.ev?RND_REC_EV:RND_REC).d,0,Math.max(100,s.hp0||100));
     } /* v1.89.1: corner mini-games are off — everyone gets her breath back between rounds again (16 + stamina×0.8, plus conditioning / fight prep / Fah's bonus); careSide/applyCare stay for a mini-game later */
   if(!F.over&&F.round>=F.rounds){F.over=true;const tA=F.cards.reduce((x,c)=>x+c[0],0),tB=F.cards.reduce((x,c)=>x+c[1],0);
     const pd=F.A.pts-F.B.pts;const tie=tA===tB;
@@ -7230,7 +7234,8 @@ function fightHTML(){const U=UI.fight,b=U.b,me=G.F[b.a],op=G.F[b.b],F=U.F;
   const last=U.shown.filter(x=>x.ha!=null).slice(-1)[0];const sv=(s,k)=>F?(last?last[k]:s):100;
   const side=(f,cls,hp,sta)=>`<div class="fside ${cls}"><div class="fn">${f.canon||f.id==="pailin"?`<img class="face sm" src="${faceSrc(f.id,"happy")}" alt="">`:""}<b>${esc(f.name)}</b><span class="meta">Lv.${f.lvl}</span></div>
     <div class="meter"><i style="--v:${clamp(hp,0,100)}%;--bc:${hp>50?"var(--green)":hp>25?"var(--warn)":"var(--red)"}"></i></div><div class="meter thin"><i style="--v:${clamp(sta,0,100)}%;--bc:var(--gold)"></i></div></div>`;
-  const hpA=F?sv(F.A.hp,"ha"):100,hpB=F?sv(F.B.hp,"hb"):100,stA=F?sv(F.A.sta,"sa"):100,stB=F?sv(F.B.sta,"sb"):100;
+  const hpN=(S,v)=>S&&S.f.hpX?v*100/(S.hp0||100):v; /* v1.90.13: a boss with extra hp shows her bar as a share of her own max */
+  const hpA=F?hpN(F.A,sv(F.A.hp,"ha")):100,hpB=F?hpN(F.B,sv(F.B.hp,"hb")):100,stA=F?sv(F.A.sta,"sa"):100,stB=F?sv(F.B.sta,"sb"):100;
   let mid="";
   if(U.stage==="pre"){const c=condition(me);const P=personaOf(op);
     mid=`<div class="pre px"><div class="vsrow"><div class="vsc">${faceImg(me)}<b>${esc(me.name)}</b><span class="meta">${styleOf(me.a)}</span></div><span class="vs">VS</span><div class="vsc">${faceImg(op)}<b>${esc(op.name)}</b><span class="meta">${styleOf(op.a)} · ${rec(op)}</span></div></div>
