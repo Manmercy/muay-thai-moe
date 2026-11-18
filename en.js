@@ -5780,7 +5780,7 @@ AU.gsfx=function(kind,a){if(!this.init()||this.muted||!SETTINGS.sfx)return;const
   if(kind==="shimmer")for(let i=0;i<6;i++)T(i*.05,{f:1400+Math.random()*1400,type:"sine",dur:.12,peak:.06});};
 
 // ================= MUAY THAI MOE v1.3 — UI =================
-const VERSION="1.89.35";
+const VERSION="1.90.0";
 const CUR_LANG=(typeof window!=="undefined"&&window.LANG)||"th";
 const TH_LABEL=String.fromCharCode(3652,3607,3618);
 function langSwitch(cls){return `<div class="langsw ${cls||""}" role="group" aria-label="Language">${[["th",TH_LABEL],["en","EN"]].map(([k,l])=>`<button class="lsb ${CUR_LANG===k?"on":""}" data-act="setlang" data-v="${k}" aria-pressed="${CUR_LANG===k}">${l}</button>`).join("")}</div>`;}
@@ -6771,20 +6771,23 @@ function gboxHTML(){const loy=GB.box==="loy",s=GB.st,cost=gbCost(),ok=(G.dust||0
      <p>${loy?"This machine is only open during Loy Krathong. ":""} Cards you already own are kept as spares. Use them to level up the card or break them into stardust on the card page.</p>
      <button class="btn" data-act="gboxq">Close</button></div></div>`:""}
   </div>`;}
-const PATCH={id:"1.88.3",ver:"Muay Thai Moe v1.88.3",title:"News from Sirichai Camp",lead:"Past heart Lv.10 the story now runs to ♥30, with 7 new date spots, drawn signature moves, new corner breaks and a theme for every year at camp.",items:[
- ["💗","Past heart Lv.10, the story goes on","Everyone has special scenes at ♥12, 15, 20, 25 and 30, and the ♥30 ending changes if you're dating. It's all story: relationships don't change anyone's stats in the ring."],
- ["🗺️","7 new date spots","They open with the heart level: night temple fair, sunset boat ride, Bang Saen, the rice fields, Khao Yai, Ayutthaya and Amphawa. Every heroine has her own scene at each one. Locked spots start showing from ♥Lv.10."],
- ["💬","Over 120 new chats","Chats that unlock with the heart level, chats for the rainy, cool and hot seasons, and plenty of everyday small talk, so conversations won't repeat so soon."],
- ["✨","Signature moves, now drawn","Kati's spinning elbow, Mali's three-height kicks, Rin's flying knee, Ploy's buffalo hooks and Fah's lightning punch. They fire on their own at big moments once unlocked, and when you use a Lv.14 / Lv.22 skill."],
- ["🧺","New corner breaks","Stamina no longer refills by itself between rounds; the corner is where you earn it back, with the item puzzle, a 5-card pick or an oil massage. When she's badly hurt, Kru Daeng will ask whether to throw in the towel."],
- ["🥊","All-in builds can win","Maxing power or kicks now clearly pays off, and heavy hitters can land one-punch knockouts. Opponents also check repeated kicks better, so a balanced build is still the steadiest path."],
- ["✅","Keep this programme","A tick box in the training sheet repeats her programme for 4 weeks, with Kru Daeng's fight plan filled in. You can open it to change things or untick any time."],
- ["🌧️","A theme every year","From year 2, each year brings something: a flood, a sponsor, PM2.5 haze, a tourist boom or a TV crew. Details are on the camp page and the calendar."],
- ["🎫","Camp lottery with Kru Daeng","Three draws a year: Kru Daeng asks you to pick a ticket for 80 baht, and two weeks later Auntie Jan's letter brings the results."],
- ["🎴","10 quirky new cards","Unlocked by odd moments in the ring, like a first-round KO, beating the same opponent five times, a losing streak, winning by a single point or a draw. See how many you can find."],
- ["💰","The Gold Helmet's business card","Whenever camp cash drops below 8,000, a loan offer arrives in the mail. Borrow if you must, but Kru Daeng says try the odd jobs first."],
- ["🩶","Fah's hair is silver","Lines that called Fah blonde now say silver, to match the real her."]],
- foot:"Hope you get to see the ♥30 scene with your favourite ✦"};
+const PATCH={id:"1.90.0",ver:"Muay Thai Moe v1.90",title:"Loy Krathong Night at Sirichai Camp",lead:"The Riverside Loy Krathong brawl, the renewed helmet gang, wearable Thai dress, the annual wai kru — and everything that quietly updated since v1.88.",items:[
+ ["🏮","Loy Krathong Riverside Brawl","Enter LOYKRATHONG69 in Settings (works any time). Send 3 girls through 9 non-stop bouts against the helmet gang; 3 endings by score (bronze 400 · silver 800 · gold 1,200 + beat the boss). Everyone fights in pixel Thai dress, there are lines between bouts, and Ploy and Fah can join as guests. No injuries and nothing counts toward your record."],
+ ["👘","Thai dress you can wear","Any girl who wins a riverside bout gets her Thai dress from Auntie Taew by letter. Claim it and pick it in her wardrobe — she wears it at camp, in training and in the ring (looks only, no stat effect)."],
+ ["🪷","Floating krathongs with 5 girls","After the ending, the five girls float krathongs at the pier. The manager can make one of 4 wishes, each girl answers differently… and the next morning, check the mailbox."],
+ ["🦝","Tum the Krathong Thief","Arrives by Auntie Taew's letter every in-game Loy Krathong (weeks 24–28 each year). Catch him for EXP and stardust; he gets tougher as your camp does. The Loy otter now eases fatigue when you play with it."],
+ ["🪖","The helmet gang, renewed","The Silver Helmet Chief has his own sprite, the Gold-Black Helmet right hand appears from year 2, every helmet has scene art — and beat the gang three times and they'll challenge you to fight at their warehouse, for a fee."],
+ ["🙏","Annual wai kru","Week 37 (Muay Thai Day) every year: pick the offering set, the whole camp kneels and bows to the teachers three times, Kru Daeng places the mongkol and new fighters are initiated. Morale up, and the teachers' blessing cuts injuries for a while."],
+ ["🥁","Livelier ring","The pi-and-drum music speeds up round by round, fastest in the deciding round; 115+ new commentary lines; skills that match a classic mae mai now carry its real name, and the booth calls it out."],
+ ["🌳","Skill roots","Every skill line splits into 2 roots after Lv.22 (school) and Lv.10 (build), 5 steps each; some passives feed other lines. See it as a tree in the Skills tab."],
+ ["💞","One relationship ladder","The same tier names everywhere: Acquaintance → Camp mate → Close friend → Someone special, all the way to ♥30. Once you're together there's a separate sweetheart ladder, plus Valentine's, two-timing, breakups and a harem route. The +0 bond bug after ♥10 is fixed."],
+ ["🏃","District sports day","Every year from week 24: 100 m sprint, tug of war and a relay against the district's other colours."],
+ ["🐯","Baiyok and Petchara","The two Golden Tiger prodigies have new art. Baiyok has left Golden Tiger and now fights in white, dropping by again and again. Story rivals check on your camp at the start, middle and end of each year."],
+ ["📜","Plan before letter fights","Belt fights, challenges, the helmet gang and odd jobs from letters now open the fight-plan sheet before the bell."],
+ ["🖼️","Nearly 60 new backgrounds","49 new story scenes, plus the morning market, the gang warehouse, the moonlit river ring and the camp pier at dawn."],
+ ["📱","Full screen","Turn on full screen in Settings (Android/desktop), or use 'Add to Home Screen' so the game opens like an app."],
+ ["🛠️","Other fixes","The between-round corner is back to the original order puzzle, the skill tab scrolls as one page on phones, scene backgrounds no longer repeat on tall screens, event art preloads so it appears faster, and characters keep their mood while choices are on screen."]],
+ foot:"May everyone's krathong float to where they hope it will ✦"};
 function maybeWhatsNew(){if(!G||G.ended||UI.scene)return;if(G.newsSeen===PATCH.id)return;UI.modal={type:"whatsnew"};}
 function whatsNewHTML(){return `<div class="wnew"><span class="pill gold">Update · ${esc(PATCH.ver)}</span><h2>🥊 ${esc(PATCH.title)}</h2><p class="lead">${esc(PATCH.lead)}</p>
   <div class="wnlist">${PATCH.items.map(([ic,t,b])=>`<details class="wnitem"><summary><span class="wnic">${ic}</span><b>${esc(t)}</b><i>▸</i></summary><p>${esc(b)}</p></details>`).join("")}</div><p class="meta wnhint">Tap a topic to read more</p>
