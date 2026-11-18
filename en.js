@@ -1277,6 +1277,10 @@ const leadRival=(G,div)=>{const p=G.prodigy&&G.prodigy[div];if(p&&G.F[p]&&G.F[p]
 const PROD_SPRITE={A:"petchara",B:"baiyok"};
 const byFree=G=>!!(G&&G.flags&&G.flags.byFree!=null);
 function fixProdigies(G){const P=G.prodigy||{};
+  /* saves from before v1.89.25: count the meetings already fought, so a long rivalry doesn't restart at "first meeting" */
+  if(G.flags&&!G.flags.prodN){const PP={fah:"prod_B",mali:"prod_B",ploy:"prod_A",kati:"prod_A"},N={};let last=0;
+    for(const c of G.cal||[])if(PP[c.a]&&PP[c.a]===c.b){N[c.a]=(N[c.a]||0)+1;last=Math.max(last,c.absWeek||0);}
+    if(Object.keys(N).length){G.flags.prodN=N;G.flags.prodLast=last;}}
   if(P.A&&G.F[P.A]){const f=G.F[P.A];f.sprite="petchara";f.full="Petcha Golden Tiger";}
   if(P.B&&G.F[P.B]){const f=G.F[P.B],fr=byFree(G);f.sprite=fr?"baiyok_white":"baiyok";f.full=fr?"Baiyok":"Baiyok Golden Tiger";f.indie=fr;}}
 function makeProdigy(G,div,from){G.prodigy=G.prodigy||{};if(G.prodigy[div])return G.F[G.prodigy[div]];const id="prod_"+div,src=G.F[from];

@@ -138,6 +138,9 @@ const chrome=process.env.CHROME_PATH||'/Applications/Google Chrome.app/Contents/
     if(new Set(seen).size<7)throw Error('visits repeat too soon');
     g.week=14;g.offers=[];genOffers(g);if(!g.offers.some(o=>o.a==='fah'&&o.b==='prod_B'&&o.by))throw Error('rematch letter');
     const k=prodigyFightScene(g,{a:'kati',b:'prod_A'}),kr=prodigyResultScene(g,{a:'kati',b:'prod_A'},'B');return !!k&&!!kr&&fixSave(g)!==false&&b.sprite==='baiyok_white';});
+  test('old saves: past prodigy bouts count, so Mali does not get first-meeting lines again',()=>{const g=fresh();G=g;g.season=3;joinCamp(g,'mali',1200);joinCamp(g,'fah',1800);makeProdigy(g,'B','fah');
+    g.cal=[{a:'mali',b:'prod_B',absWeek:60,res:'W'},{a:'mali',b:'prod_B',absWeek:70,res:'L'},{a:'mali',b:'pX',absWeek:71}];delete g.flags.prodN;fixSave(g);
+    const s=JSON.stringify(prodigyFightScene(g,{a:'mali',b:'prod_B'}));return prodN(g,'mali')===2&&!/ครั้งแรก|first time/.test(s);});
   test('old single-lover saves become a one-item list',()=>{const g=fresh();delete g.lovers;delete g.lovWk;g.romance='rin';g.romWk=30;g.timeV=3;fixSave(g);return g.lovers.length===1&&g.lovers[0]==='rin'&&g.lovWk.rin===30&&isLov(g,'rin');});
   test('chat with a lover always opens and its menu leads to a confirmed breakup scene',()=>{const g=fresh();G=g;lovUp(g,['kati','mali']);UI.tab='people';render();
     const btn=document.querySelector('.chatb[data-id="mali"]');if(!btn||btn.disabled)throw Error('chat btn');ACT.chat({id:'mali'});render();
