@@ -763,7 +763,7 @@ function fighterHTML(f){const mine=f.camp==="player";const P=PROFILES[f.id];
       return `<button class="obtn ${cur===k?"on":""}" data-act="outfit" data-id="${f.id}" data-v="${k}" ${ok?"":"disabled"}><i style="background:${O.sw||"transparent"}" class="${O.sw?"":"base"}"></i><span><b>${ok?esc(O.name):"???"}</b><small>${cur===k?"ใส่อยู่":ok?"แตะเพื่อใส่":"ปลดล็อก: "+esc(O.hint)}</small></span></button>`;}).join("")}</div></div>
       <p class="meta center">ชุดเปลี่ยนแค่ตัวพิกเซลในค่าย ตอนซ้อม และตอนชก · ไม่มีผลกับค่าพลัง</p>`;}
   if(t==="over"){const c=condition(f);const nb=G.bookings.find(b=>b.a===f.id||b.b===f.id);
-    body=`${mine&&typeof lbCardHTML==="function"?lbCardHTML(f):""}<div class="fp-over">${radarSVG(f,240)}<div><div class="bars">${bar("ความพร้อม",c,condColor(c))}${bar("ความล้า",f.fatigue,"var(--warn)")}${bar("กำลังใจ",f.morale,"var(--blue)")}</div>
+    body=`${mine&&typeof lbCardHTML==="function"?lbCardHTML(f):""}${styleCardHTML(f)}<div class="fp-over">${radarSVG(f,240)}<div><div class="bars">${bar("ความพร้อม",c,condColor(c))}${bar("ความล้า",f.fatigue,"var(--warn)")}${bar("กำลังใจ",f.morale,"var(--blue)")}</div>
       ${mine?`<p class="meta goldt">${masteryLine(f)}</p>`:""}${TRAITS[f.id]?`<p class="meta trov">${TRAIT_PX[traitOf(f)]||""} พลังแฝง: <b>${TRAITS[f.id].find(t=>t.id===traitOf(f)).name}</b></p>`:""}<p class="meta">ฟอร์ม ${formHTML(f)}${nb?` · ไฟต์ถัดไปสัปดาห์ ${nb.week}`:""}</p><details><summary>ค่าสถานะละเอียด</summary>${attrsHTML(f,mine)}</details></div></div>`;}
   if(t==="train"){body=`<div class="fp-train"><div class="tr-anim big" style="background-image:url(${ASSET}${gymBg()})"><canvas width="260" height="200" data-sprite="${f.id}" data-floor="1"></canvas><span class="tr-tag">${PRESETS[f.plan.preset].name}</span></div>
      <div><p class="meta">${PRESETS[f.plan.preset].desc} · ความล้าสัปดาห์หน้า ${Math.round(projFatigue(f))}</p>${presetPicker(f)}${radarSVG(f,200)}</div></div>`;}
@@ -1347,9 +1347,15 @@ const CHEER={kati:[["ปู่ชัยดูอยู่นะ ชกให้�
 function cheerLines(f){return CHEER[f.id]||[["เธอทำได้!","ค่ะ!",1],["ตามแผนนะ","รับทราบ",0],["อย่าเจ็บตัวล่ะ","ค่ะ",0]];}
 function openFight2(b,done){UI.fight={b,done,stage:"pre",plan:b.plan||"balanced",tac:{focus:"auto",pace:"steady",target:(b.tac&&b.tac.target)||"body"},F:null,shown:[],pending:[],timer:null,res:null,caption:null};render();}
 // v1.46: side-by-side numbers before the bell (opponent hidden until scouted)
+/* v1.91.0: the fighter's style and the wheel, on her profile — the main heroines can change it with the school line they build */
+function styleCardHTML(f){const st=fightStyle(f),home=HOME_STYLE[f.id],B=FSTYLE_BEATS[st],L=Object.keys(FSTYLE).filter(k=>FSTYLE_BEATS[k].includes(st));
+  return `<p class="meta styline">สไตล์ในไฟต์ <b>${FSTYLE[st]}</b>${home&&home!==st?` · ตัวตนเดิม ${FSTYLE[home]}`:""} · ได้เปรียบ ${B.map(k=>FSTYLE[k]).join("/")} · แพ้ทาง ${L.map(k=>FSTYLE[k]).join("/")}${home?" · เปลี่ยนได้ด้วยสายสำนักที่อัปมากที่สุด":""}</p>`;}
 function preCompare(me,op,b){const sc=scouted(op.id)||op.camp==="player";const v=verdictOf(adviseCached(me.id,op.id,b.rounds||3).bestRate);
   const rows=[["หมัด",a=>a.punch],["เตะ",a=>a.kick],["เข่า/ศอก",a=>(a.knee+a.elbow)/2],["การ์ด",a=>(a.guard+a.counter)/2],["แรง",a=>(a.stamina+a.dur)/2]];
-  return `<div class="pcmp"><div class="pcmp-h"><span class="pill dtag ${v.c}">${v.t}</span>${sc?"":`<small class="mutt">ยังไม่ได้ดูเทป · ไม่เห็นค่าพลังคู่ชก</small>`}</div>${rows.map(([n,g])=>{const x=g(me.a),y=g(op.a);
+  /* v1.91.0 style wheel line — your build decides your style; the opponent's comes from her best weapon */
+  const s1=fightStyle(me),s2=fightStyle(op),se=styleEdge(s1,s2);
+  const sty=`<p class="meta center styline">สไตล์ <b>${FSTYLE[s1]}</b> vs <b>${FSTYLE[s2]}</b> · ${se>0?`<span class="greent">${esc(me.name)}ได้เปรียบทาง</span>`:se<0?`<span class="redt">${esc(me.name)}แพ้ทาง</span>`:"ไม่มีใครได้เปรียบทาง"}</p>`;
+  return sty+`<div class="pcmp"><div class="pcmp-h"><span class="pill dtag ${v.c}">${v.t}</span>${sc?"":`<small class="mutt">ยังไม่ได้ดูเทป · ไม่เห็นค่าพลังคู่ชก</small>`}</div>${rows.map(([n,g])=>{const x=g(me.a),y=g(op.a);
     return `<div class="pcr"><b class="num ${sc&&x>y+.4?"goldt":""}">${x.toFixed(1)}</b><i class="pb l" style="--v:${clamp(x/20*100,0,100)}%"></i><span>${n}</span><i class="pb r" style="--v:${sc?clamp(y/20*100,0,100):0}%"></i><b class="num ${sc&&y>x+.4?"redt":""}">${sc?y.toFixed(1):"?"}</b></div>`;}).join("")}</div>`;}
 function fightHTML(){const U=UI.fight,b=U.b,me=G.F[b.a],op=G.F[b.b],F=U.F;
   const last=U.shown.filter(x=>x.ha!=null).slice(-1)[0];const sv=(s,k)=>F?(last?last[k]:s):100;

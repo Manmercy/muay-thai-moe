@@ -763,7 +763,7 @@ function fighterHTML(f){const mine=f.camp==="player";const P=PROFILES[f.id];
       return `<button class="obtn ${cur===k?"on":""}" data-act="outfit" data-id="${f.id}" data-v="${k}" ${ok?"":"disabled"}><i style="background:${O.sw||"transparent"}" class="${O.sw?"":"base"}"></i><span><b>${ok?esc(O.name):"???"}</b><small>${cur===k?"Wearing":ok?"Tap to wear":"Unlocks: "+esc(O.hint)}</small></span></button>`;}).join("")}</div></div>
       <p class="meta center">Outfits only change the pixel sprite in camp, training and fights · no effect on stats</p>`;}
   if(t==="over"){const c=condition(f);const nb=G.bookings.find(b=>b.a===f.id||b.b===f.id);
-    body=`${mine&&typeof lbCardHTML==="function"?lbCardHTML(f):""}<div class="fp-over">${radarSVG(f,240)}<div><div class="bars">${bar("Readiness",c,condColor(c))}${bar("Fatigue",f.fatigue,"var(--warn)")}${bar("Morale",f.morale,"var(--blue)")}</div>
+    body=`${mine&&typeof lbCardHTML==="function"?lbCardHTML(f):""}${styleCardHTML(f)}<div class="fp-over">${radarSVG(f,240)}<div><div class="bars">${bar("Readiness",c,condColor(c))}${bar("Fatigue",f.fatigue,"var(--warn)")}${bar("Morale",f.morale,"var(--blue)")}</div>
       ${mine?`<p class="meta goldt">${masteryLine(f)}</p>`:""}${TRAITS[f.id]?`<p class="meta trov">${TRAIT_PX[traitOf(f)]||""} Hidden power: <b>${TRAITS[f.id].find(t=>t.id===traitOf(f)).name}</b></p>`:""}<p class="meta">Form ${formHTML(f)}${nb?` · next fight week ${nb.week}`:""}</p><details><summary>Detailed stats</summary>${attrsHTML(f,mine)}</details></div></div>`;}
   if(t==="train"){body=`<div class="fp-train"><div class="tr-anim big" style="background-image:url(${ASSET}${gymBg()})"><canvas width="260" height="200" data-sprite="${f.id}" data-floor="1"></canvas><span class="tr-tag">${PRESETS[f.plan.preset].name}</span></div>
      <div><p class="meta">${PRESETS[f.plan.preset].desc} · fatigue next week ${Math.round(projFatigue(f))}</p>${presetPicker(f)}${radarSVG(f,200)}</div></div>`;}
@@ -1347,9 +1347,15 @@ const CHEER={kati:[["Grandpa Chai is watching. Make him proud","…Yes! I'll fig
 function cheerLines(f){return CHEER[f.id]||[["You can do it!","Yes!",1],["Follow the plan","Noted",0],["Don't get hurt","It is",0]];}
 function openFight2(b,done){UI.fight={b,done,stage:"pre",plan:b.plan||"balanced",tac:{focus:"auto",pace:"steady",target:(b.tac&&b.tac.target)||"body"},F:null,shown:[],pending:[],timer:null,res:null,caption:null};render();}
 // v1.46: side-by-side numbers before the bell (opponent hidden until scouted)
+/* v1.91.0: the fighter's style and the wheel, on her profile — the main heroines can change it with the school line they build */
+function styleCardHTML(f){const st=fightStyle(f),home=HOME_STYLE[f.id],B=FSTYLE_BEATS[st],L=Object.keys(FSTYLE).filter(k=>FSTYLE_BEATS[k].includes(st));
+  return `<p class="meta styline">Fight style <b>${FSTYLE[st]}</b>${home&&home!==st?` · home style ${FSTYLE[home]}`:""} · strong against ${B.map(k=>FSTYLE[k]).join("/")} · weak against ${L.map(k=>FSTYLE[k]).join("/")}${home?" · changes with the school line you build most":""}</p>`;}
 function preCompare(me,op,b){const sc=scouted(op.id)||op.camp==="player";const v=verdictOf(adviseCached(me.id,op.id,b.rounds||3).bestRate);
   const rows=[["Punch",a=>a.punch],["Kick",a=>a.kick],["Knee/Elbow",a=>(a.knee+a.elbow)/2],["Guard",a=>(a.guard+a.counter)/2],["Stamina",a=>(a.stamina+a.dur)/2]];
-  return `<div class="pcmp"><div class="pcmp-h"><span class="pill dtag ${v.c}">${v.t}</span>${sc?"":`<small class="mutt">Not scouted · opponent stats hidden</small>`}</div>${rows.map(([n,g])=>{const x=g(me.a),y=g(op.a);
+  /* v1.91.0 style wheel line — your build decides your style; the opponent's comes from her best weapon */
+  const s1=fightStyle(me),s2=fightStyle(op),se=styleEdge(s1,s2);
+  const sty=`<p class="meta center styline">Style <b>${FSTYLE[s1]}</b> vs <b>${FSTYLE[s2]}</b> · ${se>0?`<span class="greent">${esc(me.name)} has the style edge</span>`:se<0?`<span class="redt">${esc(me.name)} is at a style disadvantage</span>`:"no style edge either way"}</p>`;
+  return sty+`<div class="pcmp"><div class="pcmp-h"><span class="pill dtag ${v.c}">${v.t}</span>${sc?"":`<small class="mutt">Not scouted · opponent stats hidden</small>`}</div>${rows.map(([n,g])=>{const x=g(me.a),y=g(op.a);
     return `<div class="pcr"><b class="num ${sc&&x>y+.4?"goldt":""}">${x.toFixed(1)}</b><i class="pb l" style="--v:${clamp(x/20*100,0,100)}%"></i><span>${n}</span><i class="pb r" style="--v:${sc?clamp(y/20*100,0,100):0}%"></i><b class="num ${sc&&y>x+.4?"redt":""}">${sc?y.toFixed(1):"?"}</b></div>`;}).join("")}</div>`;}
 function fightHTML(){const U=UI.fight,b=U.b,me=G.F[b.a],op=G.F[b.b],F=U.F;
   const last=U.shown.filter(x=>x.ha!=null).slice(-1)[0];const sv=(s,k)=>F?(last?last[k]:s):100;

@@ -11566,5 +11566,16 @@
  " ครั้ง · ทีมเรารู้ทางแชมป์คนนี้มากขึ้น</b></div>": " · the camp knows this champion's game better now</b></div>",
  "<div class=\"kv-row\"><span>นัดล้างตา</span><b class=\"goldt\">แพ้ซีรีส์มาแล้ว ": "<div class=\"kv-row\"><span>Rematch</span><b class=\"goldt\">Series lost so far: ",
  "</p>\n     <div class=\"kv-row\"><span>รูปแบบ</span><b>3 นัด ชนะ 2 · นัดละ 5 ยก · ห่างกันราว 2 สัปดาห์</b></div>": "</p>\n     <div class=\"kv-row\"><span>Format</span><b>Best of 3 · 5 rounds each · about 2 weeks apart</b></div>",
- " · นัดต่อไปอีกราว 2 สัปดาห์": " · next bout in about 2 weeks"
+ " · นัดต่อไปอีกราว 2 สัปดาห์": " · next bout in about 2 weeks",
+ "วงใน": "Inside",
+ "หมัดหนัก": "Power punch",
+ "ไม่มีใครได้เปรียบทาง": "no style edge either way",
+ "แพ้ทาง</span>": " is at a style disadvantage</span>",
+ "ได้เปรียบทาง</span>": " has the style edge</span>",
+ "<p class=\"meta center styline\">สไตล์ <b>": "<p class=\"meta center styline\">Style <b>",
+ " · เปลี่ยนได้ด้วยสายสำนักที่อัปมากที่สุด": " · changes with the school line you build most",
+ " · แพ้ทาง ": " · weak against ",
+ " · ได้เปรียบ ": " · strong against ",
+ " · ตัวตนเดิม ": " · home style ",
+ "<p class=\"meta styline\">สไตล์ในไฟต์ <b>": "<p class=\"meta styline\">Fight style <b>"
 }
