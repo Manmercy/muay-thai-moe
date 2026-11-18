@@ -11220,5 +11220,20 @@
  "ไล่จับไอ้ตุ่ม โจรงมกระทง": "Catch Tum the Krathong Thief",
  "ไล่จับไอ้ตุ่มแล้ว (สัปดาห์หน้ามาอีก)": "Tum caught (back next week)",
  "<button class=\"btn primary\" data-act=\"thief\">ไปไล่จับไอ้ตุ่ม</button>": "<button class=\"btn primary\" data-act=\"thief\">Go catch Tum</button>",
- "<p class=\"meta center\">ไล่จับไอ้ตุ่มแล้ว</p>": "<p class=\"meta center\">Tum caught</p>"
+ "<p class=\"meta center\">ไล่จับไอ้ตุ่มแล้ว</p>": "<p class=\"meta center\">Tum caught</p>",
+ "ชนะในศึกริมน้ำคืนลอยกระทง แล้วรับชุดจากจดหมายป้าแต๋ว": "Win a bout in the Loy Krathong riverside brawl, then claim it from Auntie Taew's letter",
+ "ชุดไทยคืนลอยกระทง": "Loy Krathong Thai Dress",
+ "ได้รับชุดไทยคืนลอยกระทงของ": "Received Loy Krathong Thai dress: ",
+ " · ใส่เป็นชุดพิกเซลในค่าย ตอนซ้อม และบนเวทีได้ เลือกได้ที่ตู้เสื้อผ้าของ": " · Wear it as her pixel outfit at camp, in training and in the ring. Pick it in the wardrobe of ",
+ "ชุดไทยของ": "Thai Dress for ",
+ "ชุดทองดำของฟ้า ป้าเย็บดิ้นทองเพิ่มให้ ฟ้าบอกว่าอยากให้คนดูกรี๊ดตอนออกศอก": "Fah's black-and-gold set. Auntie added gold thread — Fah said she wants the crowd to scream when she throws an elbow.",
+ "ชุดม่วงของพลอย ป้าตั้งใจตัดให้ตั้งแต่ปีที่แล้ว เพิ่งได้ให้ เก็บไว้ใส่ตอนไม่ต้องถ่ายรูปให้ใครนะลูก": "Ploy's purple set. Auntie meant to make it for you last year and only now got to give it. Keep it for days you don't have to pose for anyone, dear.",
+ "ชุดเขียวของริน ป้าวัดให้ใหม่ตามที่หนูจดมาเป๊ะ ๆ ก้าวขาได้กว้างขึ้นสิบสองเซนติเมตร": "Rin's green set. Auntie re-measured it exactly to your notes — your stride is now twelve centimetres wider.",
+ "ชุดฟ้าของมะลิ ป้าเห็นหนูแอบซ่อมชายผ้าเองตอนพักยก เลยเย็บซับในให้อีกชั้น": "Mali's blue set. Auntie saw you mending your own hem between rounds, so she sewed in an extra lining.",
+ "ชุดสีแดงของกะทิ ป้าเย็บตะเข็บผ้าถุงใหม่ให้สองชั้นแล้ว คราวนี้ใส่ต่อยยังไงก็ไม่ขาดแน่นอน": "Kati's red set. Auntie double-stitched the pha sin seams — this time it won't tear, however you fight.",
+ "\">รับชุดไทยของ": "\">Claim Thai dress: ",
+ "เข้าค่าย</p>": " joins the camp</p>",
+ "<p class=\"meta center\">รับชุดแล้ว · ใส่ได้เมื่อ": "<p class=\"meta center\">Dress received · can be worn once ",
+ "ใส่ชุดนี้ให้": "Dress ",
+ "<p class=\"meta center\">รับชุดแล้ว</p><button class=\"btn\" data-act=\"loydresswear\" data-v=\"": "<p class=\"meta center\">Dress received</p><button class=\"btn\" data-act=\"loydresswear\" data-v=\""
 }

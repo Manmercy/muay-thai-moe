@@ -27,7 +27,8 @@ const OUTFITS={
  live:{name:"Bestseller Mint Kit",h:.47,s:.72,lm:1.05,sw:"#2fc4b2",hint:"Get an S on the merch live stream",need:G=>(G.flags.liveS||0)>0},
  tiger:{name:"Tiger-Hunter Black Kit",h:.08,s:.06,lm:.42,sw:"#2a2630",hint:"Beat Ploy in an official fight",need:G=>(G.flags.beat_ploy||0)>0},
  heart:{name:"Pink Heart Kit",h:.95,s:.55,lm:1.35,sw:"#f59cc4",hint:"Bond with this fighter reaches ♥ Lv.11",need:(G,f)=>(f.bond||0)>=100},
- champ:{name:"Gold Champion Kit",h:.14,s:.95,lm:1.3,sw:"#ffd34a",hint:"Win the provincial championship",need:G=>Object.values(G.champ||{}).some(id=>G.F[id]&&G.F[id].camp==="player")||(G.titles||[]).some(t=>Object.values(t.champ||{}).some(id=>G.F[id]&&G.F[id].camp==="player"))}};
+ champ:{name:"Gold Champion Kit",h:.14,s:.95,lm:1.3,sw:"#ffd34a",hint:"Win the provincial championship",need:G=>Object.values(G.champ||{}).some(id=>G.F[id]&&G.F[id].camp==="player")||(G.titles||[]).some(t=>Object.values(t.champ||{}).some(id=>G.F[id]&&G.F[id].camp==="player"))},
+ loy:{name:"Loy Krathong Thai Dress",sheet:1,sw:"#2f8f4a",hint:"Win a bout in the Loy Krathong riverside brawl, then claim it from Auntie Taew's letter",need:(G,f)=>!!(G&&G.ev&&G.ev.loy&&G.ev.loy.dress&&G.ev.loy.dress[f.id])}}; /* v1.89.27: the real Thai-dress pixel sheet, one girl at a time */
 const KIT_MASK={kati:(h,l,s)=>(h<.035||h>.93)&&s>.38&&l>.12&&l<.8,mali:(h,l,s)=>h>.53&&h<.74&&s>.25&&l>.1,rin:(h,l,s)=>h>.2&&h<.45&&s>.25&&l>.08,
  ploy:(h,l,s,fy,fx)=>h>.68&&h<.9&&s>.2&&l>.1&&fy>.4&&fx>.3,fah:(h,l,s,fy)=>h>.088&&h<.17&&l>.1&&((s>.5&&fy>.33)||(s>.22&&l<.55&&fy>.55))};
 function outfitOk(G,f,k){const O=OUTFITS[k];return !!O&&(!O.need||O.need(G,f));}
@@ -45,10 +46,10 @@ function outfitSheet(f,k){const key=f.id+"|"+k;if(TINTS[key])return TINTS[key];c
 /* v1.89.24: Loy Krathong pixel outfits — every event bout, and off-stage when the gold-tier "Thai dress" toggle is on */
 const LOY_SP=["kati","mali","rin","ploy","fah"];
 function loyLookNow(){try{if(typeof UI!=="undefined"&&UI.fight&&UI.fight.b)return !!UI.fight.b.ev;const L=typeof G!=="undefined"&&G&&G.ev&&G.ev.loy;return !!(L&&L.dressOn&&L.tiers&&L.tiers.gold);}catch(e){return false;}}
-const loyImg=(id,name)=>LOY_SP.includes(id)&&loyLookNow()?name.replace(id+"_",id+"_loykrathong_"):name;
+const loyImg=(id,name,f)=>LOY_SP.includes(id)&&(loyLookNow()||(f&&f.outfit==="loy"&&f.camp==="player"))?name.replace(id+"_",id+"_loykrathong_"):name;
 function sheetFor(f){
   if(f.canon&&LOY_SP.includes(f.id)&&loyLookNow())return img(f.id+"_loykrathong_sheet.webp");
-  if(f.canon){if(f.outfit&&f.outfit!=="base"&&f.camp==="player"&&OUTFITS[f.outfit])return outfitSheet(f,f.outfit);return img(f.id+"_sheet.webp");}
+  if(f.canon){if(f.outfit==="loy"&&f.camp==="player"&&LOY_SP.includes(f.id))return img(f.id+"_loykrathong_sheet.webp");if(f.outfit&&f.outfit!=="base"&&f.camp==="player"&&OUTFITS[f.outfit])return outfitSheet(f,f.outfit);return img(f.id+"_sheet.webp");}
   if(f.sprite)return f.tintHue!=null?spriteTint(f.sprite,f.tintHue):img(f.sprite+"_sheet.webp"); // v1.23: gang, roosters, bulls · v1.89.24: tintHue re-dyes the red kit (the krathong thief)
   if(TINTS[f.id])return TINTS[f.id];
   const nb=npcBase(f.id),base=nb.base,blonde=!!(f.prodigy||(f.id||"").startsWith("prod_")),lab=!!f.lab&&!blonde,hue=blonde?42:lab?276:nb.hue,dark=blonde?true:lab?false:nb.dark; /* v1.88: Vector camp fighters wear their black-purple kit */const src=img(base+"_sheet.webp"); /* v1.56: Golden Tiger prodigies: black-gold kit; v1.88: hair dyed silver like Fah */if(!src.complete||!src.naturalWidth)return src;
@@ -500,7 +501,7 @@ const FS={cv:null,ctx:null,bg:null,A:null,B:null,fx:[],shake:0,
   init(cv,bgName,fa,fb){this.cv=cv;this.ctx=cv?cv.getContext("2d"):null;this.bg=img(bgName);
     const mk=(f,side)=>({f,side,x:side==="A"?370:590,base:side==="A"?370:590,anim:"guard",t0:0,flash:0,down:0,ko:false,win:false});
     this.A=mk(fa,"A");this.B=mk(fb,"B");this.fx=[];this.shake=0;this.spR={A:-1,B:-1};this.banner=null;
-    for(const f of [fa,fb])if(f&&f.canon&&SPECIALS[f.id])SPECIALS[f.id].forEach(m=>img(loyImg(f.id,m.img)+".webp"));},
+    for(const f of [fa,fb])if(f&&f.canon&&SPECIALS[f.id])SPECIALS[f.id].forEach(m=>img(loyImg(f.id,m.img,f)+".webp"));},
   attach(cv){if(!cv)return;this.cv=cv;this.ctx=cv.getContext("2d");},
   play(e,now){const at=e.at||(e.ev==="counter"?(e.mside?e.mside:null):null);
     const atk=this[e.side==="A"?"A":"B"],def=this[e.side==="A"?"B":"A"];if(!atk)return;
@@ -514,7 +515,7 @@ const FS={cv:null,ctx:null,bg:null,A:null,B:null,fx:[],shake:0,
     if(e.ev==="cut"){this.fx.push({x:def.x,y:250,t0:now,txt:"Crack!",cut:true});}
   },
   special(sp,round,now){const s=this[sp.side];if(!s)return;this.spR[sp.side]=round;this.banner={txt:sp.name,side:sp.side,t0:now};
-    if(sp.mv){s.anim="special";s.sp={im:img(loyImg(s.f.id,sp.mv.img)+".webp"),t0:now};this.shake=sp.mv.dodge?6:14;return;}
+    if(sp.mv){s.anim="special";s.sp={im:img(loyImg(s.f.id,sp.mv.img,s.f)+".webp"),t0:now};this.shake=sp.mv.dodge?6:14;return;}
     /* no drawn sheet for this move: the normal row, dressed up in code — aura, afterimages, speed lines, a dash and an impact ring */
     const kind=sp.kind||"atk",row=kind==="def"?"guard":kind==="rec"?"win":(sp.w==="kick"||sp.w==="knee")?"knee":"punch";
     s.anim="fx";s.fx={t0:now,row,kind,col:kind==="def"?"#5ab0ff":kind==="rec"?"#4fe08a":(s.f&&s.f.color)||"#ffd34a",hit:false};if(kind==="atk")s.x+=s.side==="A"?40:-40;this.shake=kind==="atk"?8:4;},
