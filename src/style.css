@@ -2154,3 +2154,5 @@ html[lang=en] .fight .fctl2 .skbtn2 b{font-size:11px;display:-webkit-box;-webkit
 .attr.lb i::before{content:"";position:absolute;top:-2px;bottom:-2px;left:var(--m);width:2px;background:#ffe28a;opacity:.7;z-index:1}
 .lbcard{border:2px solid #f2b632;background:linear-gradient(135deg,rgba(242,182,50,.16),rgba(120,60,200,.12));padding:10px 12px;margin:0 0 10px}
 .lbcard h4{margin:0 0 4px;color:#ffe28a}.lbcard p{margin:4px 0}.lbcard .btn{margin-top:6px}
+
+.set.comm{cursor:default}.set.comm .obtns{flex:none}.set.comm a.btn{text-decoration:none}
