@@ -8337,10 +8337,11 @@ const LOY_LADDER=["gang1","gang1","gang2","gang2","gang3","gang3","gang4","gang6
 const LOY_TIERS=[["gold","Gold",1500],["silver","Silver",1000],["bronze","Bronze",450]];
 const loyOf=G=>(G.ev||{}).loy||null;
 function loyTier(sc,boss){for(const [k,n,min] of LOY_TIERS)if(sc>=min&&(k!=="gold"||boss))return {k,n};return null;}
-function evGang(G,k,f){const kind=LOY_LADDER[k],K=QK[kind],t=ovr(f.a)+.4+k*.1+(k===8?.3:0),rng=mulberry32((G.seed^0x10e)+k*131);const a={};
+/* v1.89.24: Man's target — the gang is 20% stronger than the fighter sent at the first bout, rising to 30% at the boss (a year 2–5 camp averages ovr ~15) */
+function evGang(G,k,f){const kind=LOY_LADDER[k],K=QK[kind],t=Math.min(19.2,ovr(f.a)*(1.2+.1*k/8)),rng=mulberry32((G.seed^0x10e)+k*131);const a={};
   for(const [x] of ATTRS)a[x]=clamp(t+(K.tilt[x]||0)+(rng()*1.2-.6),3,19.5);const d=t-ovr(a);for(const [x] of ATTRS)a[x]=clamp(a[x]+d,3,19.5);
   const id="q_evloy_"+k;const o=baseFighter(id,{name:K.name,full:K.name,div:"X",camp:"quest",color:K.color,potential:t+2,a});
-  o.sprite=K.sprite;o.kind=kind;o.grp="gang";o.lvl=(f.lvl||1)+1+Math.floor(k/3);o.fatigue=0;o.morale=75;G.F[id]=o;syncFighterAges(G);return id;}
+  o.sprite=K.sprite;o.kind=kind;o.grp="gang";o.lvl=(f.lvl||1)+2+Math.floor(k/3);o.fatigue=0;o.morale=75;G.F[id]=o;syncFighterAges(G);return id;}
 function redeemCode(raw){const v=(raw||"").toUpperCase().replace(/\s+/g,"");if(!v)return;let key="";try{key=btoa(v);}catch(e){}const R=REDEEM[key];
   if(!R){AU.sfx("miss");toast("Code not found. Check the spelling and try again");return;}
   if(R.k==="gate"){G.unlocked=true;try{localStorage.setItem(GATE.key,"1");}catch(e){}save();AU.sfx("level");toast("Year 2 unlocked!");return;}
@@ -8371,8 +8372,8 @@ function loyIntro(G){const S=[
     else S.push({n:"fah",f:"happy",l:"thai",t:"Oh, Sirichai camp! Fah just happened to be walking the fair! Auntie Taew dressed Fah up in Thai dress too, haha — pretty, right?!"});}
   S.push({n:"npc",who:"Auntie Taew",t:"Everyone looks lovely! …But look over there. The helmet gang is back."},
   {n:"npc",who:"Big Boss Golden Helmet",t:"Everyone in this market pays us for their spot! Don't pay, pack up and go home, som tam lady!"},
-  {n:"coach",t:"Easy now, no trouble… wait, they're challenging us to the makeshift ring by the pier?"},
-  {n:"npc",who:"Big Boss Golden Helmet",t:"Send three. I've got nine boys. No breaks, no mercy. If your camp wins, my gang never sets foot in this market again!"},
+  {n:"coach",t:"Easy now, don't start a fight in the middle of the festival… this market is full of kids and old folks."},
+  {n:"npc",who:"Big Boss Golden Helmet",t:"Don't want trouble? Then get up on that ring by the pier! Send three. My side is eight men and me. No breaks, no mercy. If your camp wins, my gang never comes to this market again!"},
   {n:"kati",f:"happy",l:"thai",t:"I accept the challenge! Auntie Taew says this pha sin stretches, so it won't rip in a fight! Pick who goes, Manager!"});
   const gs=loyGuests(G);
   if(gs.some(f=>f.id==="ploy"))S.push({n:"ploy",f:"angry",l:"thai",t:"I'm not from your camp … but I shop at this market every year. If you're short a fighter, I'll step in."});
@@ -8421,7 +8422,7 @@ function loyEndSteps(k,cast){const E=LOY_END[k],ids=loyCastOf(cast),lead=ids[0],
     if(L.length===3&&i===(guest?1:2))return;S.push({n:lead,f:x[0],l:"thai",t:x[1]});});
   return S.concat(E.tail||[]);}
 const LOY_THIEF={name:"Tum the Krathong Thief",
- line:{kati:"Give it back right now! That krathong belongs to the grandma next door to me!",mali:"Mali helped Auntie fold that krathong! Give it back!",rin:"I counted. You took seventeen. Return every one of them.",ploy:"This dress is expensive. But if I have to dive in for them myself, I won't hesitate.",fah:"Fah's seen you since last year! You're not getting away this time!"},
+ line:{kati:"Give it back right now! That krathong belongs to the grandma next door to me!",mali:"Mali helped Auntie fold that krathong! Give it back!",rin:"I counted. You took seventeen. Return every one of them.",ploy:"Auntie gave me this outfit — it can't get wet … but if I have to dive in after it myself, I won't hesitate.",fah:"Fah's seen you since last year! You're not getting away this time!"},
  pre:[{n:"nar",bg:"loy_night",t:"Splash! Someone dives in, fishing coins out of the villagers' krathongs by the plastic-bagful."},
   {n:"npc",who:"Auntie Taew",t:"Tum again! He fishes coins out of people's krathongs every year. This year he took the whole krathongs!"},
   {n:"npc",who:"Tum the Krathong Thief",t:"The krathongs floated to me, so I took 'em! Want 'em back? Come up on the pier!"}],
@@ -8736,7 +8737,7 @@ function loyCardDrop(G,order){G.cards=G.cards||{};const left=LOY_CARDS.filter(k=
   return `New SR card: "${CARDS[id].t}" (see it in the album)`;}
 function loyGold(G){const L=loyOf(G);if(!L)return null;L.dressOn=1;return "Thai dress off-stage unlocked: the girls wear Thai dress in outings and dates (toggle it in Auntie Taew's letter)";}
 const loyThaiLook=G=>!!(G&&G.ev&&G.ev.loy&&G.ev.loy.tiers&&G.ev.loy.tiers.silver);
-function evThief(G,f){const K=QK.gang1,t=Math.max(6,ovr(f.a)+.6),rng=mulberry32((G.seed^0x7a1)+absWeek(G)*17);const a={};
+function evThief(G,f){const K=QK.gang1,t=Math.min(19.2,Math.max(6,ovr(f.a)*1.2)),rng=mulberry32((G.seed^0x7a1)+absWeek(G)*17);const a={};
   for(const [x] of ATTRS)a[x]=clamp(t+(K.tilt[x]||0)+(rng()*1.2-.6),3,19.5);const id="q_evthief";
   const o=baseFighter(id,{name:LOY_THIEF.name,full:LOY_THIEF.name,div:"X",camp:"quest",color:"#6b7a2e",potential:t+2,a});
   o.sprite="thief";o.kind="gang1";o.grp="gang";o.lvl=(f.lvl||1)+1;o.fatigue=0;o.morale=70;G.F[id]=o;return id;}

@@ -938,10 +938,11 @@ const LOY_LADDER=["gang1","gang1","gang2","gang2","gang3","gang3","gang4","gang6
 const LOY_TIERS=[["gold","ทอง",1500],["silver","เงิน",1000],["bronze","ทองแดง",450]];
 const loyOf=G=>(G.ev||{}).loy||null;
 function loyTier(sc,boss){for(const [k,n,min] of LOY_TIERS)if(sc>=min&&(k!=="gold"||boss))return {k,n};return null;}
-function evGang(G,k,f){const kind=LOY_LADDER[k],K=QK[kind],t=ovr(f.a)+.4+k*.1+(k===8?.3:0),rng=mulberry32((G.seed^0x10e)+k*131);const a={};
+/* v1.89.24: Man's target — the gang is 20% stronger than the fighter sent at the first bout, rising to 30% at the boss (a year 2–5 camp averages ovr ~15) */
+function evGang(G,k,f){const kind=LOY_LADDER[k],K=QK[kind],t=Math.min(19.2,ovr(f.a)*(1.2+.1*k/8)),rng=mulberry32((G.seed^0x10e)+k*131);const a={};
   for(const [x] of ATTRS)a[x]=clamp(t+(K.tilt[x]||0)+(rng()*1.2-.6),3,19.5);const d=t-ovr(a);for(const [x] of ATTRS)a[x]=clamp(a[x]+d,3,19.5);
   const id="q_evloy_"+k;const o=baseFighter(id,{name:K.name,full:K.name,div:"X",camp:"quest",color:K.color,potential:t+2,a});
-  o.sprite=K.sprite;o.kind=kind;o.grp="gang";o.lvl=(f.lvl||1)+1+Math.floor(k/3);o.fatigue=0;o.morale=75;G.F[id]=o;syncFighterAges(G);return id;}
+  o.sprite=K.sprite;o.kind=kind;o.grp="gang";o.lvl=(f.lvl||1)+2+Math.floor(k/3);o.fatigue=0;o.morale=75;G.F[id]=o;syncFighterAges(G);return id;}
 function redeemCode(raw){const v=(raw||"").toUpperCase().replace(/\s+/g,"");if(!v)return;let key="";try{key=btoa(v);}catch(e){}const R=REDEEM[key];
   if(!R){AU.sfx("miss");toast("ไม่พบโค้ดนี้ ลองเช็กตัวสะกดอีกครั้ง");return;}
   if(R.k==="gate"){G.unlocked=true;try{localStorage.setItem(GATE.key,"1");}catch(e){}save();AU.sfx("level");toast("ปลดล็อกปีที่ 2 แล้ว!");return;}
@@ -972,8 +973,8 @@ function loyIntro(G){const S=[
     else S.push({n:"fah",f:"happy",l:"thai",t:"อ้าว ค่ายศิริชัย! ฟ้ามาเดินงานพอดีเลย ป้าแต๋วจับฟ้าแต่งชุดไทยด้วย ฮ่า ๆ สวยไหม!"});}
   S.push({n:"npc",who:"ป้าแต๋ว",t:"สวยกันทุกคนเลย! …แต่ดูนั่นสิ พวกหมวกกันน็อกมาอีกแล้ว"},
   {n:"npc",who:"เสี่ยหมวกทองคำ",t:"ตลาดน้ำนี้ต้องจ่ายค่าที่ให้พวกเรา! ไม่จ่ายก็เก็บแผงกลับบ้านไปซะ ป้าส้มตำ!"},
-  {n:"coach",t:"ใจเย็นก่อน อย่าเพิ่งมีเรื่อง… เดี๋ยวนะ พวกมันท้าให้ขึ้นเวทีชั่วคราวข้างท่าเรือแทนเหรอ"},
-  {n:"npc",who:"เสี่ยหมวกทองคำ",t:"ส่งมาสามคน ลูกน้องฉันเก้าคน สู้ไม่ยั้ง ไม่มีพัก ถ้าค่ายแกชนะ แก๊งเราไม่มาตลาดนี้อีก!"},
+  {n:"coach",t:"ใจเย็นก่อน อย่าเพิ่งมีเรื่องกลางงานวัด… ตลาดนี้มีเด็กกับคนแก่เต็มไปหมด"},
+  {n:"npc",who:"เสี่ยหมวกทองคำ",t:"ไม่อยากมีเรื่องก็ขึ้นเวทีข้างท่าเรือนั่น! ส่งมาสามคน ฝั่งข้าแปดคนกับตัวข้าเอง สู้ไม่ยั้ง ไม่มีพัก ถ้าค่ายแกชนะ แก๊งข้าไม่มาตลาดนี้อีก!"},
   {n:"kati",f:"happy",l:"thai",t:"รับคำท้าค่ะ! ป้าแต๋วบอกว่าผ้าถุงนี้ยืดได้ ใส่ต่อยก็ไม่ขาด! ผู้จัดการเลือกคนเลยค่ะ"});
   const gs=loyGuests(G);
   if(gs.some(f=>f.id==="ploy"))S.push({n:"ploy",f:"angry",l:"thai",t:"พี่ไม่ใช่คนค่ายคุณ …แต่ตลาดนี้พี่มาซื้อของทุกปี ถ้าขาดคน พี่ขึ้นให้"});
@@ -987,7 +988,7 @@ const LOY_END={
   {n:"coach",t:"ไม่เลวนี่หว่า… แต่ยังไม่ถึงตัวเสี่ยเลยนะเว้ย ปีนี้ยังมีเวลา"},
   {n:"npc",who:"ป้าแต๋ว",t:"ชุดไทยพวกนั้น ป้ายกให้เลย ใส่ไปไหนก็ได้ ป้าดีใจที่มันได้ใส่ไปทำเรื่องดี ๆ"}]},
  gold:{t:"หมวกทองลอยน้ำ",steps:[{n:"nar",bg:"loy_night",t:"เสี่ยหมวกทองคำล้มลงบนท่าเรือ หมวกทองกลิ้งตกน้ำ ลอยไปพร้อมกระทงอีกร้อยใบ"},
-  {n:"nar",t:"ใต้หมวกทองคือลุงผมเสยทองใส่แว่นดำ คาบซิการ์ ทั้งตลาดเพิ่งเคยเห็นหน้าจริงของเสี่ยเป็นครั้งแรก"},
+  {n:"nar",t:"ใต้หมวกทองคือชายผมเสยทองใส่แว่นดำ คาบซิการ์ ทั้งตลาดเพิ่งเคยเห็นหน้าจริงของเสี่ยเป็นครั้งแรก"},
   {n:"npc",who:"เสี่ยหมวกทองคำ",img:"gang_boss_face",t:"หมวกข้า!! …อย่ามองหน้าข้า! ก็ได้ ๆ ตลาดน้ำนี้ข้าไม่มาอีกแล้ว ปีนี้นะ! ปีนี้!"},
   {n:"npc",who:"ป้าแต๋ว",t:"ป้าตัดชุดไทยเพิ่มให้ทุกคนแล้ว ใส่ไปเที่ยว ไปเดท ไปไหนก็ได้!"}],
   tail:[{n:"nar",t:"ชื่อค่ายศิริชัยถูกพูดถึงทั่วตลาดน้ำทั้งคืน และอีกหลายคืนหลังจากนั้น"}]}};
@@ -1022,7 +1023,7 @@ function loyEndSteps(k,cast){const E=LOY_END[k],ids=loyCastOf(cast),lead=ids[0],
     if(L.length===3&&i===(guest?1:2))return;S.push({n:lead,f:x[0],l:"thai",t:x[1]});});
   return S.concat(E.tail||[]);}
 const LOY_THIEF={name:"ไอ้ตุ่ม โจรงมกระทง",
- line:{kati:"ขอคืนเดี๋ยวนี้ค่ะ! กระทงใบนั้นของยายบ้านข้าง ๆ หนู!",mali:"กระทงใบนั้นมะลิช่วยป้าพับนะคะ! เอาคืนมา!",rin:"ฉันนับไว้แล้ว นายเอาไปสิบเจ็ดใบ คืนมาให้ครบ",ploy:"ชุดนี้แพงนะ แต่ถ้าต้องลงไปงมเอง ฉันก็ไม่ลังเล",fah:"ฟ้าเห็นนายตั้งแต่ปีที่แล้ว! คราวนี้ไม่รอดแน่!"},
+ line:{kati:"ขอคืนเดี๋ยวนี้ค่ะ! กระทงใบนั้นของยายบ้านข้าง ๆ หนู!",mali:"กระทงใบนั้นมะลิช่วยป้าพับนะคะ! เอาคืนมา!",rin:"ฉันนับไว้แล้ว นายเอาไปสิบเจ็ดใบ คืนมาให้ครบ",ploy:"ชุดนี้ป้าให้มา เปียกไม่ได้ …แต่ถ้าต้องลงไปงมเอง พี่ก็ไม่ลังเล",fah:"ฟ้าเห็นนายตั้งแต่ปีที่แล้ว! คราวนี้ไม่รอดแน่!"},
  pre:[{n:"nar",bg:"loy_night",t:"ตูม! มีคนกระโดดลงน้ำ งมเหรียญจากกระทงของชาวบ้านใส่ถุงพลาสติกเต็มมือ"},
   {n:"npc",who:"ป้าแต๋ว",t:"ไอ้ตุ่มอีกแล้ว! งมเหรียญจากกระทงคนอื่นทุกปี ปีนี้หอบไปทั้งกระทงเลย!"},
   {n:"npc",who:"ไอ้ตุ่ม โจรงมกระทง",t:"กระทงลอยมาหาข้าเอง ข้าก็เก็บสิ! อยากได้คืนก็ขึ้นมาบนท่าเรือนี่!"}],
@@ -1337,7 +1338,7 @@ function loyCardDrop(G,order){G.cards=G.cards||{};const left=LOY_CARDS.filter(k=
   return `การ์ด SR ใหม่: "${CARDS[id].t}" (ดูได้ในอัลบั้ม)`;}
 function loyGold(G){const L=loyOf(G);if(!L)return null;L.dressOn=1;return "ปลดล็อกชุดไทยนอกเวที: สาว ๆ ใส่ชุดไทยในฉากเที่ยวและเดท (เปิด/ปิดได้ในจดหมายของป้าแต๋ว)";}
 const loyThaiLook=G=>!!(G&&G.ev&&G.ev.loy&&G.ev.loy.tiers&&G.ev.loy.tiers.silver);
-function evThief(G,f){const K=QK.gang1,t=Math.max(6,ovr(f.a)+.6),rng=mulberry32((G.seed^0x7a1)+absWeek(G)*17);const a={};
+function evThief(G,f){const K=QK.gang1,t=Math.min(19.2,Math.max(6,ovr(f.a)*1.2)),rng=mulberry32((G.seed^0x7a1)+absWeek(G)*17);const a={};
   for(const [x] of ATTRS)a[x]=clamp(t+(K.tilt[x]||0)+(rng()*1.2-.6),3,19.5);const id="q_evthief";
   const o=baseFighter(id,{name:LOY_THIEF.name,full:LOY_THIEF.name,div:"X",camp:"quest",color:"#6b7a2e",potential:t+2,a});
   o.sprite="thief";o.kind="gang1";o.grp="gang";o.lvl=(f.lvl||1)+1;o.fatigue=0;o.morale=70;G.F[id]=o;return id;}
