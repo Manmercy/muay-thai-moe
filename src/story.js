@@ -435,7 +435,10 @@ function relTag(G,f){return "";} /* v1.89.11: everything about the relationship 
 // she confesses while you are already with someone — you can tell her the truth
 const LOVE_TAKEN={kati:"…อย่างนั้นเองเหรอคะ หนูขอโทษที่พูดออกไป ลืมมันไปนะคะ",mali:"อ๋อ… มีแล้วนี่เอง ไม่เป็นไรค่ะ มะลิยินดีด้วยนะ",
   rin:"ขอบคุณที่บอกตรง ๆ ค่ะ ฉันจะปรับข้อมูลใหม่",ploy:"งั้นพี่จะเก็บคำพูดวันนี้ไว้คนเดียวนะ",fah:"ห้ะ! ทำไมไม่บอกก่อน! …ช่างเถอะ ลืมที่ฟ้าพูดไปซะ!"};
-const takenOpt=(G,id)=>partners(G).some(k=>k!==id)?[{t:"ขอโทษนะ ฉันมีคนที่รักอยู่แล้ว",fx:G3=>{befriend(G3,id);add(G3,id,"trust",3);G3.loveNo=G3.loveNo||{};G3.loveNo[id]=G3.week;},then:[{n:id,f:"sad",l:"casual",t:LOVE_TAKEN[id]}]}]:[];
+/* v1.90.3: when you last said no — counted in absolute weeks so a "no" late in the year does not block her second ask for most of the next year (old saves kept G.loveNo as the week of the year) */
+function noteNo(G,id){G.loveNoAbs=G.loveNoAbs||{};G.loveNoAbs[id]=absWeek(G);if(G.loveNo)delete G.loveNo[id];}
+const loveNoGap=(G,id)=>{const a=(G.loveNoAbs||{})[id];if(a!=null)return absWeek(G)-a;const w=(G.loveNo||{})[id];if(w==null)return 99;const d=G.week-w;return d<0?99:d;};
+const takenOpt=(G,id)=>partners(G).some(k=>k!==id)?[{t:"ขอโทษนะ ฉันมีคนที่รักอยู่แล้ว",fx:G3=>{befriend(G3,id);add(G3,id,"trust",3);noteNo(G3,id);},then:[{n:id,f:"sad",l:"casual",t:LOVE_TAKEN[id]}]}]:[];
 // an ex who still feels the same, once she has had time
 const LOVE_EX={kati:"ผู้จัดการคะ… หนูลองแล้ว ลองเป็นแค่นักมวยของคุณแล้ว แต่หนูทำไม่ได้ค่ะ",
   mali:"มะลิพยายามลืมแล้วนะคะ แต่ทุกครั้งที่ทำขนมครก มะลิก็นึกถึงคุณอยู่ดี",
@@ -683,12 +686,15 @@ function dateScene(G,id,act){
       else if(f.bond>=75&&f.trust>=40&&!isLov(G2,id)&&!RIVAL_LOVE.includes(id)&&!G2.seen["love_"+id]){G2.seen["love_"+id]=true;
         out.push(...LOVE_EVENTS[id].map(x=>({l:"casual",...x})),...cheatWarn(G2,id),{choice:[
           {t:yesTxt(G2,id,"ฉันก็รู้สึกแบบเดียวกัน"),fx:G3=>takeLover(G3,id),then:[{n:id,f:"flustered",l:"casual",t:LOVE_YES[id]}]},
-          {t:"ขอบคุณ แต่ฉันอยากเป็นคนที่คอยอยู่ข้าง ๆ แบบนี้ต่อไป",fx:G3=>{befriend(G3,id);add(G3,id,"trust",5);G3.loveNo=G3.loveNo||{};G3.loveNo[id]=G3.week;},then:[{n:id,f:"sad",l:"casual",t:LOVE_NO[id]}]},...takenOpt(G2,id)]});}
+          {t:"ขอบคุณ แต่ฉันอยากเป็นคนที่คอยอยู่ข้าง ๆ แบบนี้ต่อไป",fx:G3=>{befriend(G3,id);add(G3,id,"trust",5);noteNo(G3,id);},then:[{n:id,f:"sad",l:"casual",t:LOVE_NO[id]}]},...takenOpt(G2,id)]});}
       // v1.29.3: a second chance — she won't ask twice, but after a while she lets you know the door is still open
-      else if(f.bond>=75&&f.trust>=40&&!isLov(G2,id)&&!exWait(G2,id)&&!RIVAL_LOVE.includes(id)&&G2.seen["love_"+id]&&G2.week-((G2.loveNo&&G2.loveNo[id])||-99)>=2){G2.loveNo=G2.loveNo||{};G2.loveNo[id]=G2.week;
+      else if(f.bond>=75&&f.trust>=40&&!isLov(G2,id)&&!exWait(G2,id)&&!RIVAL_LOVE.includes(id)&&G2.seen["love_"+id]&&loveNoGap(G2,id)>=2){noteNo(G2,id);
         out.push({n:id,f:"flustered",l:"casual",t:isEx(G2,id)?LOVE_EX[id]:LOVE_AGAIN[id]},...cheatWarn(G2,id),{choice:[
           {t:yesTxt(G2,id,isEx(G2,id)?"ฉันก็ยังคิดถึงเธอ กลับมาคบกันนะ":"วันนั้นฉันตอบเร็วไป ฉันก็รู้สึกเหมือนเธอ"),fx:G3=>takeLover(G3,id),then:[{n:id,f:"flustered",l:"casual",t:LOVE_YES[id]}]},
           {t:"ขออยู่ข้าง ๆ แบบนี้ต่อไปนะ",fx:G3=>{befriend(G3,id);add(G3,id,"trust",2);},then:[{n:"nar",t:`${f.name}ยิ้มแล้วพยักหน้า ไม่ได้พูดอะไรต่อ`}]}]});}
+      /* v1.90.3: hearts are there but trust is not — say so, players could not tell why nobody confessed */
+      else if(f.bond>=75&&(f.trust||0)<40&&!isLov(G2,id)&&!exWait(G2,id)&&LOVE_IDS.includes(id)&&(!RIVAL_LOVE.includes(id)||(f.camp==="rival"?!G2.seen["love_"+id]:(G2.season||1)>=2&&!G2.seen["love2_"+id])))
+        out.push({n:"nar",t:`${f.name}ดูเหมือนยังไม่กล้าพูดอะไรบางอย่าง · ความเชื่อใจ ${Math.floor(f.trust||0)}/40`});
       return out;}}];
   if(romOf(G,id)&&LOVER_DATES[id]){f.lovIdx=f.lovIdx||0;const lw=(G.lovWk||{})[id],since=absWeek(G)-(lw!=null?lw:absWeek(G)-1);
     if(f.lovIdx<LOVER_DATES[id].length&&since>=LOVER_WK[f.lovIdx]){const sc=lvSteps(LOVER_DATES[id][f.lovIdx++],D,G,id,false);D.score+=2;return [...sc,steps[steps.length-1]];}}

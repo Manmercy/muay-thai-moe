@@ -702,7 +702,7 @@ function fightEx(F){const rng=F.rng,log=[],ex=F.ex,mA=F.mA,mB=F.mB;
     for(const s of [F.A,F.B])if(s.burst&&--s.burst.left<=0)s.burst=null;
   }
   F.ex++;F.rlog.push(...log);return log;}
-let RND_REC={b:5,d:.3},RND_REC_EV={b:8,d:.4}; /* v1.90.4: about a third less HP back between rounds (KOs 26% → 37% in sims); event bouts keep the old rate so the Loy brawl plays as it launched */
+let RND_REC={b:6,d:.3},RND_REC_EV=RND_REC; /* v1.90.4: HP back between rounds is 3/4 of the old amount (KOs ~25% → ~31% in sims) — the Loy brawl uses the same rate and gets a little more back between bouts instead */
 const STA={cNorm:.6,cMin:.6,cBonus:.5,qf:.4,fah:7,hit:.25,drain:1.15,cA:1.15,cB:70,ex:0,exK:1/120,brk:16,brkK:.8,prep:4,cond:3,care:20,careHp:5,ai:.3};
 function careSide(s,q){s.sta=clamp(s.sta+q*STA.care,0,100);s.hp=clamp(s.hp+q*STA.careHp,0,Math.max(100,s.hp0||100));}
 function roundFinish(F){const log=F.rlog,kd0=F.kd0;for(const s of [F.A,F.B])s.burst=null;

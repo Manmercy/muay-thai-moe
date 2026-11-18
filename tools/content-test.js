@@ -155,6 +155,12 @@ const chrome=process.env.CHROME_PATH||'/Applications/Google Chrome.app/Contents/
     const me=g.F.ploy;for(const k in me.a)me.a[k]=20;const b0=effOvr(g,a);g.week=24;g.flags.rcWk=null;weekTrain(g);const b1=effOvr(g,a);
     const best=Math.max(...roster(g).filter(f=>f.div==='A').map(f=>effOvr(g,f)));if(!(b1>b0))throw Error('no mid-year lift '+b0+' '+b1);
     for(const w of [40]){g.week=w;weekTrain(g);}return effOvr(g,a)<best;});
+  test('hearts there but trust short: the date ends with a trust hint, gone once trust is 40',()=>{const act=Object.keys(ACTIVITIES)[0];const g=fresh();G=g;g.F.mali.met=true;g.F.mali.camp='player';g.F.mali.bond=89.5;g.F.mali.trust=31;
+    const txt=()=>JSON.stringify(dateScene(g,'mali',act).flatMap(x=>x.inject?x.inject(g):[x]));if(!/31\/40/.test(txt()))throw Error('no hint');g.F.mali.trust=45;delete g.seen.love_mali;if(/\/40/.test(txt()))throw Error('hint at 45');
+    const h=fresh();G=h;h.F.ploy.met=true;h.F.ploy.camp='player';h.F.ploy.bond=89.5;h.F.ploy.trust=20;G=h;if(/\/40/.test(JSON.stringify(dateScene(h,'ploy',act).flatMap(x=>x.inject?x.inject(h):[x]))))throw Error('ploy year 1 hint');return true;});
+  test('a no late in the year does not block her second ask next year (old week-of-year saves too)',()=>{const act=Object.keys(ACTIVITIES)[0];const asks=g=>{const s=JSON.stringify(dateScene(g,'mali',act).flatMap(x=>x.inject?x.inject(g):[x]));return /คบซ้อน|two-timing/i.test(s);};
+    for(const old of [false,true]){const g=fresh();G=g;for(const id of ['kati','mali']){g.F[id].met=true;g.F[id].camp='player';}g.F.kati.bond=90;g.F.kati.trust=60;takeLover(g,'kati');g.F.mali.bond=89.5;g.F.mali.trust=50;g.seen.love_mali=true;g.week=50;
+      if(old){g.loveNo={mali:50};}else noteNo(g,'mali');newSeason(g);g.week=5;if(!asks(g))throw Error((old?'old save':'new')+' blocked');}return true;});
   test('old single-lover saves become a one-item list',()=>{const g=fresh();delete g.lovers;delete g.lovWk;g.romance='rin';g.romWk=30;g.timeV=3;fixSave(g);return g.lovers.length===1&&g.lovers[0]==='rin'&&g.lovWk.rin===30&&isLov(g,'rin');});
   test('chat with a lover always opens and its menu leads to a confirmed breakup scene',()=>{const g=fresh();G=g;lovUp(g,['kati','mali']);UI.tab='people';render();
     const btn=document.querySelector('.chatb[data-id="mali"]');if(!btn||btn.disabled)throw Error('chat btn');ACT.chat({id:'mali'});render();
