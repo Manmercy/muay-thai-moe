@@ -7965,7 +7965,7 @@ AU.gsfx=function(kind,a){if(!this.init()||this.muted||!SETTINGS.sfx)return;const
   if(kind==="shimmer")for(let i=0;i<6;i++)T(i*.05,{f:1400+Math.random()*1400,type:"sine",dur:.12,peak:.06});};
 
 // ================= MUAY THAI MOE v1.3 — UI =================
-const VERSION="1.90.8";
+const VERSION="1.90.9";
 const CUR_LANG=(typeof window!=="undefined"&&window.LANG)||"th";
 const TH_LABEL=String.fromCharCode(3652,3607,3618);
 function langSwitch(cls){return `<div class="langsw ${cls||""}" role="group" aria-label="Language">${[["th",TH_LABEL],["en","EN"]].map(([k,l])=>`<button class="lsb ${CUR_LANG===k?"on":""}" data-act="setlang" data-v="${k}" aria-pressed="${CUR_LANG===k}">${l}</button>`).join("")}</div>`;}
@@ -8004,7 +8004,7 @@ const cardFaceSrc=C=>{if(C.face)return `${ASSET}${C.face}.webp`;const scene=(C.s
   return `${ASSET}${C.c}_casual${suffix}_face.webp`;};
 const cardArtHTML=(C,lazy=false)=>`<span class="card-art" style="--card-scene:url('${ASSET}${BGIMG[C.bg]||BGIMG.camp}')"><img src="${cardFaceSrc(C)}" alt="" ${lazy?'loading="lazy" decoding="async"':""}></span>`;
 // v1.34: portraits for the market and helmet-gang side characters (matched by speaker name, or st.img)
-const NPC_IMG=[[/ใบหยก|Baiyok/,()=>typeof byFree==="function"&&byFree(G)?"baiyok":"baiyok_black"],[/เพชรา|Petcha/,"petchara"],[/เถ้าแก่เสือ|เถ้าแก่พยัคฆ์ทอง|Boss Suea|Golden Tiger owner/,"tiger_boss"],[/เกริก|Krerk/,"krerk"],[/นายอำเภอ|District Chief/,"nai"],[/แม่ค้า|ป้าศรี|Auntie Sri|vendor/,"vendor_green"],[/ป้าแต๋ว|เจ๊หมวย|ป้าขาย|Auntie Taew|Jae Muay/,"vendor_red"],[/ไอ้ตุ่ม|โจรงมกระทง|Krathong Thief/,"thief"],[/เสี่ยหมวกทองคำ|Big Boss Golden Helmet/,"gang_boss"],[/หมวกเงิน|Silver Helmet/,"gang_silver"],[/หมวกทองดำ|ลูกน้องหมวกทอง|Gold-Black Helmet|Golden Helmet's (man|men)|Gold Helmet/,"gang_goldblack"],[/หมวก|แจ็กเก็ต|Helmet|Jacket/,"gang_group"],[/ยาย|Grandma/,"grandma"]];
+const NPC_IMG=[[/ใบหยก|Baiyok/,()=>typeof byFree==="function"&&byFree(G)?"baiyok":"baiyok_black"],[/เพชรา|Petcha/,"petchara"],[/เถ้าแก่เสือ|เถ้าแก่พยัคฆ์ทอง|Boss Suea|Golden Tiger owner/,"tiger_boss"],[/เกริก|Krerk/,"krerk"],[/นายอำเภอ|District Chief/,"nai"],[/แม่ค้า|ป้าศรี|Auntie Sri|vendor/,"vendor_green"],[/ป้าแต๋ว|เจ๊หมวย|ป้าขาย|Auntie Taew|Jae Muay/,"vendor_red"],[/ไอ้ตุ๋ย|Tuy the Red Mask/,"thief2"],[/ไอ้ตุ่ม|โจรงมกระทง|Krathong Thief/,"thief"],[/เสี่ยหมวกทองคำ|Big Boss Golden Helmet/,"gang_boss"],[/หมวกเงิน|Silver Helmet/,"gang_silver"],[/หมวกทองดำ|ลูกน้องหมวกทอง|Gold-Black Helmet|Golden Helmet's (man|men)|Gold Helmet/,"gang_goldblack"],[/หมวก|แจ็กเก็ต|Helmet|Jacket/,"gang_group"],[/ยาย|Grandma/,"grandma"]];
 const npcImg=st=>{const v=st.img||(st.who&&(NPC_IMG.find(([r])=>r.test(st.who))||[])[1])||null;return typeof v==="function"?v():v;};
 const TIER_BG={evloy:"bg_river.webp",pro:"bg_fair.webp",semi:"bg_hall.webp",local:"bg_local.webp",district:"bg_district.webp",final:"bg_final.webp",exhibition:"bg_fair.webp",special:"bg_district.webp",lab:"bg_hall.webp",quest:"bg_food.webp",beast:"bg_fair.webp",dm:"bg_hall.webp"};
 const gymBg=()=>`gym${G?campLevel(G):1}.webp`;
@@ -8968,7 +8968,8 @@ const PATCH={id:"1.90.0",ver:"Muay Thai Moe v1.90",title:"คืนลอยก�
  ["🏮","ศึกริมน้ำคืนลอยกระทง","ใส่โค้ด LOYKRATHONG69 ในหน้าตั้งค่า (ใส่ได้ตลอด) ส่งสาว 3 คนชกแก๊งหมวก 9 ไฟต์ไม่มีพัก ฉากจบ 3 แบบตามคะแนน (ทองแดง 400 · เงิน 800 · ทอง 1,200 + ล้มเสี่ย) ทุกคนชกในชุดลอยกระทงพิกเซล มีบทระหว่างไฟต์ และพลอยกับฟ้ามาเป็นแขกรับเชิญได้ ไฟต์ในศึกนี้ไม่บาดเจ็บ ไม่นับสถิติ"],
  ["👘","ชุดไทยใส่ได้จริง","สาวคนไหนชนะในศึกริมน้ำได้ ป้าแต๋วจะส่งชุดไทยของเธอมาทางจดหมาย กดรับแล้วเลือกใส่ได้ที่ตู้เสื้อผ้า ใส่ในค่าย ตอนซ้อม และบนเวทีจริง (เป็นแค่หน้าตา ไม่มีผลกับค่าพลัง)"],
  ["🪷","ลอยกระทงกับ 5 สาว","หลังดูฉากจบ ห้าสาวลอยกระทงที่ท่าน้ำ ผู้จัดการอธิษฐานได้ 4 แบบ แต่ละคนตอบไม่เหมือนกัน แล้วเช้าวันรุ่งขึ้น… ลองดูตู้จดหมาย"],
- ["🦝","ไอ้ตุ่ม โจรงมกระทง","มาทางจดหมายป้าแต๋ว 3 ช่วง: วันละครั้งระหว่าง 20–23 พ.ย. 2569 (วันจริง) · ทุกสัปดาห์ 4 สัปดาห์แรกหลังเริ่มศึกริมน้ำ · ช่วงลอยกระทงในเกม (สัปดาห์ 24–27 ทุกปี) จับได้ได้ EXP กับเศษดาว ยิ่งค่ายเก่ง ไอ้ตุ่มก็เก่งตาม ส่วนลูกนากจากงานลอยกระทงช่วยลดความล้าตอนเล่นด้วย"],
+ ["🦝","ไอ้ตุ่ม โจรงมกระทง","มาทางจดหมายป้าแต๋ว 2 ช่วง: ทุกสัปดาห์ 4 สัปดาห์แรกหลังเริ่มศึกริมน้ำ · ช่วงลอยกระทงในเกม (สัปดาห์ 24–27 ทุกปี) จับได้ได้ EXP กับเศษดาว ยิ่งค่ายเก่ง ไอ้ตุ่มก็เก่งตาม ส่วนลูกนากจากงานลอยกระทงช่วยลดความล้าตอนเล่นด้วย"],
+ ["🎭","ไอ้ตุ๋ย หน้ากากแดง","น้องชายไอ้ตุ่ม มาทางจดหมายป้าแต๋ววันละครั้งเฉพาะ 20–23 พ.ย. 2569 (วันจริง) ไฟต์ 3 ยก เก่งกว่าไอ้ตุ่ม ได้ EXP กับเศษดาวมากกว่า แพ้ก็ได้เศษดาวปลอบใจ ถ้าช่วงไหนไอ้ตุ่มมาด้วยก็จับได้ทั้งสองตัว"],
  ["🪖","แก๊งหมวกโฉมใหม่","หัวหน้าหมวกเงินมีสไปร์ตของตัวเอง มือขวาหมวกทองดำโผล่ตั้งแต่ปี 2 ทุกหมวกมีภาพในฉาก และชนะแก๊งครบ 3 ครั้งจะมีจดหมายท้าให้ไปชกที่โกดังของมัน ชนะได้ค่าเหนื่อย"],
  ["🙏","ไหว้ครูประจำปี","สัปดาห์ 37 (วันมวยไทย) ทุกปี เลือกชุดเครื่องไหว้ ทั้งค่ายคุกเข่ากราบครูสามครั้ง ครูแดงสวมมงคล คนใหม่ได้ครอบครู ได้กำลังใจและพรครูลดการบาดเจ็บช่วงหนึ่ง"],
  ["🥁","เวทีคึกขึ้น","ดนตรีปี่กลองเร่งตามยก ยกตัดสินเร็วสุด มีบทพากย์ใหม่กว่า 115 บรรทัด และสกิลที่ตรงกับแม่ไม้มวยไทยใช้ชื่อแม่ไม้จริง โฆษกเรียกชื่อท่าตอนออก"],
@@ -9892,7 +9893,7 @@ function qCleanup(G){const keep=new Set([...G.bookings.map(b=>b.b),...G.offers.m
 // ---------- mail ----------
 let MAILN=0;
 function addMail(G,m){G.mail=G.mail||[];m.id="m"+G.week+"_"+(++MAILN)+"_"+Math.floor(Math.random()*1e4);m.wk=G.week;m.season=G.season||1;if(m.exp!=null)m.expAbs=gameWeek(G)+(m.exp-G.week);m.read=false;G.mail.unshift(m);G.mail=G.mail.slice(0,40);return m;}
-const mailOpen=m=>!m.done&&!m.expired&&(["take","pay","quiz","quest"].includes(m.kind)||(m.kind==="event"&&(m.ev==="kongka"||m.ev==="thief"||m.ev==="dress")));
+const mailOpen=m=>!m.done&&!m.expired&&(["take","pay","quiz","quest"].includes(m.kind)||(m.kind==="event"&&(m.ev==="kongka"||m.ev==="thief"||m.ev==="tuy"||m.ev==="dress")));
 function mailBadge(){if(!G||!G.mail)return 0;return G.mail.filter(m=>!m.read||mailOpen(m)).length;}
 const MAILBOX_PX=pxIcon(["....kkkk....","...kffffk...","..krrrrrrk..",".krrrrrrrrk.",".krwwwwwwrk.",".krwkkkkwrk.",".krwwwwwwrk.",".krrrrrrrrk.",".kkkkkkkkkk.",".....kk.....",".....kk.....","....kkkk...."],{k:"#2a1a10",r:"#c8283c",w:"#f4ead8",f:"#f7d24a"});
 const BILLS=[["เทศบาลตำบล","ค่าปรับ: ไก่ของค่ายขันเสียงดังเกินเกณฑ์ตอนตีสี่ (ร้องเรียน 14 ราย)",300],
@@ -9965,7 +9966,7 @@ const LOAN_MAIL=[
  ["ลูกน้องหมวกทอง","ฝากถึงผู้จัดการค่ายศิริชัย","ซองสีน้ำตาลมีคราบน้ำมันเครื่อง \"รู้นะว่าค่าไฟเดือนนี้ยังไม่จ่าย เรามีเงินสองหมื่น ไม่ต้องค้ำ ไม่ถามเยอะ ถามแค่ว่าจะคืนเมื่อไหร่\""],
  ["ลูกน้องหมวกทอง","คูปองเงินกู้ (ตัดเก็บไว้)","กระดาษตัดเป็นรูปคูปอง ขอบหยัก ๆ เหมือนตัดด้วยกรรไกรตัดเล็บ \"แลกเงินสด ฿20,000 ได้ทันที ไม่มีวันหมดอายุ แต่ดอกมีวันขึ้น\""]];
 const LOAN_COACH=["อย่าเพิ่ง ลองดูจดหมายงานจ้างกับไฟต์งานวัดก่อน","ปู่ชัยก็เคยได้นามบัตรใบนี้ ใบเดียวกันเป๊ะ","ถ้าจำเป็นจริง ๆ ก็กู้ แต่รีบคืน ดอกมันโตเร็วกว่ากะทิอีก","ครูเก็บไว้ให้ดู ไม่ได้บอกให้โทรนะ","อ่านตัวเล็ก ๆ ตรงดอกจันด้วย"];
-function mailWeekly(G){G.mail=G.mail||[];if(typeof thiefMail==="function")thiefMail(G);if(typeof regionWeek==="function")regionWeek(G);G.gang=G.gang||{st:0,next:0};G.mailSeen=G.mailSeen||{};const rng=mulberry32(G.seed+G.week*4441);
+function mailWeekly(G){G.mail=G.mail||[];if(typeof thiefMail==="function"){thiefMail(G);tuyMail(G);}if(typeof regionWeek==="function")regionWeek(G);G.gang=G.gang||{st:0,next:0};G.mailSeen=G.mailSeen||{};const rng=mulberry32(G.seed+G.week*4441);
   if(typeof lottoWeekly==="function")lottoWeekly(G);
   for(const m of G.mail)if(m.expAbs!=null&&gameWeek(G)>m.expAbs&&!m.done)m.expired=true;
   // v1.88: every time cash dips low, the helmet gang slips a gold card into the mailbox
@@ -10078,7 +10079,7 @@ function questExtra(done,rng){if(!G||G.ended)return false;G.gang=G.gang||{st:0,n
 
 // ---------- modals ----------
 /* v1.89.24: the Loy Krathong invitation glows green until it is read and the gauntlet has been played once */
-function loyMailHot(m){if(m.kind==="event"&&(m.ev==="kongka"||m.ev==="thief"||m.ev==="dress"))return !m.done&&!m.expired;return m.kind==="event"&&m.ev==="loy";} /* v1.90.4: the Loy invitation always glows green so it is easy to find again */
+function loyMailHot(m){if(m.kind==="event"&&(m.ev==="kongka"||m.ev==="thief"||m.ev==="tuy"||m.ev==="dress"))return !m.done&&!m.expired;return m.kind==="event"&&m.ev==="loy";} /* v1.90.4: the Loy invitation always glows green so it is easy to find again */
 function mailListHTML(){const L=G.mail||[];
   return `<h2 class="mailh">${MAILBOX_PX}ตู้จดหมาย</h2>${L.length?`<div class="mlist2">${L.map(m=>`<button class="mrow2 ${m.read?"":"unread"} ${mailOpen(m)?"act":""} ${m.done||m.expired?"old":""} ${loyMailHot(m)?"loyev":""}" data-act="mopen" data-v="${m.id}"><span class="mk ${m.kind}">${{letter:"จดหมาย",take:"เงินเข้า",pay:"ใบแจ้งหนี้",quiz:"ตอบคำถาม",quest:"ขอความช่วยเหลือ",job:"งานจ้าง",event:"อีเวนต์",loan:"เงินกู้"}[m.kind]}</span><span class="mt"><b>${esc(m.title)}</b><small>${esc(m.from)} · สด.${m.wk}${m.expired?" · หมดเวลา":m.done?" · จัดการแล้ว":m.expAbs!=null?` · ภายใน สด.${((m.expAbs-1)%52)+1}`:""}</small></span>${mailOpen(m)?'<i class="dot"></i>':""}</button>`).join("")}</div>`:`<p class="lead">ยังไม่มีจดหมาย</p>`}`;}
 function letterHTML(m){m.read=true;let act="";
@@ -10808,17 +10809,19 @@ function redeemCode(raw){const v=(raw||"").toUpperCase().replace(/\s+/g,"");if(!
 /* v1.89.26: fetch the event's art up front (sprites, specials, ring art, portraits) so the first scene and bout don't pop in */
 function loyPreload(){if(loyPreload.done)return;loyPreload.done=1;try{
   for(const id of ["kati","mali","rin","ploy","fah"]){img(id+"_loykrathong_sheet.webp");img(id+"_loykrathong_special.webp");for(const m of ["happy","flustered","angry","sad"])warm(stand(id,"thai",m));}
-  img("mali_loykrathong_dodge.webp");for(const s of ["gang1","gang2","gang3","gangsilver","gang4","gang5","thief"])img(s+"_sheet.webp");
+  img("mali_loykrathong_dodge.webp");for(const s of ["gang1","gang2","gang3","gangsilver","gang4","gang5","thief","thief2"])img(s+"_sheet.webp");
   for(const b of ["bg_loy_ring.webp","bg_loy_night.webp","bg_river.webp","bg_river_dawn.webp"])img(b);
-  for(const n of ["gang_group","gang_silver","gang_goldblack","gang_boss","gang_boss_face","thief","vendor_red"])warm(`${ASSET}npc_${n}.webp`);}catch(e){}}
+  for(const n of ["gang_group","gang_silver","gang_goldblack","gang_boss","gang_boss_face","thief","thief2","vendor_red"])warm(`${ASSET}npc_${n}.webp`);}catch(e){}}
 function evMailAct(m){loyPreload();if(m.ev==="dress"){const f=G.F[m.fid],L=loyOf(G);if(!f||!L)return "";const has=L.dress&&L.dress[f.id];
     return has?(f.camp==="player"?`<p class="meta center">รับชุดแล้ว</p><button class="btn" data-act="loydresswear" data-v="${f.id}">${f.outfit==="loy"?"ใส่อยู่":`ใส่ชุดนี้ให้${esc(f.name)}`}</button>`:`<p class="meta center">รับชุดแล้ว · ใส่ได้เมื่อ${esc(f.name)}เข้าค่าย</p>`)
       :`<button class="btn primary" data-act="loydress1" data-v="${m.id}">รับชุดไทยของ${esc(f.name)}</button>`;}
+  if(m.ev==="tuy"){const L=loyOf(G);return m.done||!L||!tuyReady(G)?`<p class="meta center">ไล่จับไอ้ตุ๋ยแล้ว</p>`:m.expired?"":`<button class="btn primary" data-act="tuy">ไปไล่จับไอ้ตุ๋ย</button>`;}
   if(m.ev==="thief"){const L=loyOf(G);return m.done||!L||!thiefReady(G)?`<p class="meta center">ไล่จับไอ้ตุ่มแล้ว</p>`:m.expired?"":`<button class="btn primary" data-act="thief">ไปไล่จับไอ้ตุ่ม</button>`;}
   if(m.ev==="kongka"){const B=KONGKA[m.wish];return B?(m.done?`<p class="meta center">รับพรแล้ว · ${B.n}</p>`:`<button class="btn primary" data-act="kongka" data-v="${m.id}">รับพร · ${B.d}</button>`):"";}
   const L=loyOf(G);if(!L)return "";const tr=loyTier(L.best,L.boss);const T=L.tiers||{};
   const ends=["bronze","silver","gold"].filter(k=>T[k]).map(k=>`<button class="btn sm" data-act="loyend" data-v="${k}">ฉากจบ${LOY_TIERS.find(x=>x[0]===k)[1]} · ${LOY_END[k].t}</button>`).join("");
   return `${L.runs?`<p class="meta center">คะแนนดีที่สุด <b class="goldt num">${L.best}</b>${tr?` · รางวัลระดับ<b>${tr.n}</b>`:""}</p>`:""}<button class="btn primary" data-act="evloy">${L.runs?"ท้าศึกริมน้ำอีกรอบ":"ไปงานลอยกระทง"}</button>
+  ${tuyOn(G)?`<button class="btn gold" data-act="tuy" ${!tuyReady(G)?"disabled":""}>${!tuyReady(G)?"ไล่จับไอ้ตุ๋ยแล้ว (พรุ่งนี้มาอีก)":"ไล่จับไอ้ตุ๋ย หน้ากากแดง"}</button>`:""}
   ${thiefOn(G)?`<button class="btn" data-act="thief" ${!thiefReady(G)?"disabled":""}>${!thiefReady(G)?`ไล่จับไอ้ตุ่มแล้ว (${thiefAgain(G)})`:"ไล่จับไอ้ตุ่ม โจรงมกระทง"}</button>`:`<p class="meta center">ไอ้ตุ่มจะกลับมาช่วงลอยกระทงในเกม (สัปดาห์ ${THIEF_WK[0]}–${THIEF_WK[1]} ทุกปี) ป้าแต๋วจะส่งจดหมายมาบอก</p>`}
   ${L.intro?`<div class="evrep"><button class="btn sm" data-act="loyintro">ดูฉากเปิดอีกครั้ง</button>${ends}${loyCanFloat(L)?`<button class="btn sm gold" data-act="loywishopen">🪷 ไปลอยกระทงกับสาว ๆ</button>`:""}</div>`:""}
   ${L.wish?`<p class="meta center">คำอธิษฐานของผู้จัดการ: "${esc((LOY_WISH.find(w=>w.k===L.wish)||{}).t||"")}"</p>`:""}
@@ -10906,6 +10909,15 @@ const LOY_THIEF={name:"ไอ้ตุ่ม โจรงมกระทง",
   {n:"npc",who:"ป้าแต๋ว",t:"เก่งมากลูก! ป้าทอดขนมครกให้ทั้งทีมเลย กินให้อิ่มก่อนกลับนะ"}],
  lose:[{n:"nar",bg:"loy_night",t:"ไอ้ตุ่มหัวเราะแล้วกระโดดน้ำหนีพร้อมถุงเหรียญ… แต่ถุงขาดกลางน้ำ เหรียญจมหมด"},
   {n:"npc",who:"ไอ้ตุ่ม โจรงมกระทง",t:"เฮ้ย! เหรียญข้า!! …ปีหน้าเจอกันใหม่!"},{n:"npc",who:"ป้าแต๋ว",t:"ช่างมันลูก อย่างน้อยมันก็ไม่ได้อะไรไป"}]};
+const LOY_TUY={name:"ไอ้ตุ๋ย หน้ากากแดง",
+ pre:[{n:"nar",bg:"loy_night",t:"กลางดึก มีเงาคนคลุมหน้าด้วยหมวกไหมพรมสีแดง แบกกระสอบกระทงทั้งใบวิ่งเลาะริมตลิ่ง"},
+  {n:"npc",who:"ป้าแต๋ว",t:"นั่นไอ้ตุ๋ย น้องไอ้ตุ่ม! พี่มันโดนจับบ่อยเลยส่งน้องมาแทน คราวนี้เอาไปทั้งกระสอบเลย!"},
+  {n:"npc",who:"ไอ้ตุ๋ย หน้ากากแดง",t:"พี่ตุ่มมันอ่อน ข้าไม่เหมือนพี่หรอก ใครแน่ก็ขึ้นมาเอาคืนบนท่าเรือนี่สิ!"}],
+ win:[{n:"nar",bg:"loy_night",t:"ไอ้ตุ๋ยล้มหงายกลางท่าเรือ หมวกไหมพรมเลื่อนลงมาปิดตา กระสอบกระทงกลิ้งคืนมาทั้งใบ"},
+  {n:"npc",who:"ไอ้ตุ๋ย หน้ากากแดง",t:"…อย่าบอกพี่ตุ่มนะว่าข้าแพ้!"},
+  {n:"npc",who:"ป้าแต๋ว",t:"สองพี่น้องนี่เหมือนกันจริง ๆ เก่งมากลูก ขนมครกถาดใหญ่เลย!"}],
+ lose:[{n:"nar",bg:"loy_night",t:"ไอ้ตุ๋ยดีดเหรียญขึ้นฟ้า รับไว้ได้พอดี แล้วหายไปในความมืดพร้อมกระสอบ"},
+  {n:"npc",who:"ไอ้ตุ๋ย หน้ากากแดง",t:"พรุ่งนี้ข้ามาอีก! ไปซ้อมมาใหม่นะ!"},{n:"npc",who:"ป้าแต๋ว",t:"ไม่เป็นไรลูก พรุ่งนี้มันมาอีกแน่ ป้าจะรอดู"}]};
 function evStartLoy(){const L=loyOf(G);if(!L)return;if(L.thiefFrom==null){L.thiefFrom=absWeek(G);thiefMail(G);}loyPreload();UI.modal=null;
   const open=()=>{L.run=null;L.pick=[];UI.modal={type:L.rulesSeen?"gaunt":"loyrules"};render();};
   if(!L.intro){L.intro=1;save();playScene(loyIntro(G),open,{bg:"loy_night",look:"thai"});}else open();}
@@ -11240,31 +11252,38 @@ const THIEF_WK=[24,27];
 const THIEF_DAYS=["2026-11-20","2026-11-23"];
 const thiefDaily=()=>{const t=todayStr();return t>=THIEF_DAYS[0]&&t<=THIEF_DAYS[1];};
 const thiefWin=G=>{const L=loyOf(G);if(!L)return false;const w=absWeek(G);return (G.week>=THIEF_WK[0]&&G.week<=THIEF_WK[1])||(L.thiefFrom!=null&&w>=L.thiefFrom&&w<L.thiefFrom+4);};
-const thiefOn=G=>!!loyOf(G)&&(thiefDaily()||thiefWin(G));
-const thiefReady=G=>{const L=loyOf(G);return thiefOn(G)&&((thiefDaily()&&L.thiefDay!==todayStr())||(thiefWin(G)&&L.thiefWk!==absWeek(G)));};
-const thiefAgain=G=>thiefWin(G)?"สัปดาห์หน้ามาอีก":"พรุ่งนี้มาอีก";
-function thiefFix(G){const L=loyOf(G);if(!L)return;if(L.thiefFrom==null&&L.runs>0&&L.thiefWk==null)L.thiefFrom=absWeek(G);thiefMail(G);}
+/* v1.90.9 (Man): the real-day visits go to Tuy, Tum's younger brother (red mask, own sprite + portrait) — stronger, 3 rounds, bigger reward, once a real day.
+   Tum keeps the game-week windows. Each has his own once-per-day/once-per-week clock, so when windows overlap both can be caught. */
+const thiefOn=G=>!!loyOf(G)&&thiefWin(G);
+const thiefReady=G=>{const L=loyOf(G);return thiefOn(G)&&L.thiefWk!==absWeek(G);};
+const thiefAgain=G=>"สัปดาห์หน้ามาอีก";
+const tuyOn=G=>!!loyOf(G)&&thiefDaily();
+const tuyReady=G=>{const L=loyOf(G);return tuyOn(G)&&L.tuyDay!==todayStr();};
+function thiefFix(G){const L=loyOf(G);if(!L)return;if(L.thiefFrom==null&&L.runs>0&&L.thiefWk==null)L.thiefFrom=absWeek(G);thiefMail(G);tuyMail(G);}
+function tuyMail(G){if(!tuyReady(G))return;if((G.mail||[]).some(m=>m.ev==="tuy"&&!m.done&&!m.expired))return;
+  addMail(G,{kind:"event",ev:"tuy",from:"ป้าแต๋ว ร้านส้มตำหน้าวัด",title:"ไอ้ตุ๋ยน้องไอ้ตุ่มโผล่มาแล้ว!",exp:G.week+1,
+    body:"ผู้จัดการจ๋า คราวนี้ไม่ใช่ไอ้ตุ่มนะ เป็นน้องชายมัน ไอ้ตุ๋ยหน้ากากแดง ร้ายกว่าพี่มันอีก แบกกระทงไปทั้งกระสอบ ป้าเห็นมันโผล่มาแค่ช่วงนี้แหละ ส่งเด็ก ๆ ที่เก่ง ๆ มาช่วยหน่อยนะ"});}
 const campPow=G=>{const R=roster(G).map(f=>ovr(f.a)).sort((a,b)=>b-a).slice(0,3);return R.length?R.reduce((s,x)=>s+x,0)/R.length:8;};
 const campLv=G=>{const R=roster(G).map(f=>f.lvl||1).sort((a,b)=>b-a).slice(0,3);return R.length?Math.round(R.reduce((s,x)=>s+x,0)/R.length):1;};
 function thiefMail(G){if(!thiefReady(G))return;if((G.mail||[]).some(m=>m.ev==="thief"&&!m.done&&!m.expired))return;
   addMail(G,{kind:"event",ev:"thief",from:"ป้าแต๋ว ร้านส้มตำหน้าวัด",title:"ไอ้ตุ่มมาอีกแล้ว!",exp:G.week+1,
     body:"ผู้จัดการจ๋า เทศกาลลอยกระทงทีไร ไอ้ตุ่มโจรงมกระทงโผล่มาทุกที เมื่อคืนมันหอบเหรียญจากกระทงชาวบ้านไปเต็มกระสอบอีกแล้ว ส่งเด็ก ๆ มาช่วยจับหน่อยนะ ป้าทอดขนมครกรอ"});}
-function evThief(G,f){const K=QK.gang1,t=Math.min(19.2,Math.max(6,campPow(G)*1.08)),rng=mulberry32((G.seed^0x7a1)+absWeek(G)*17);const a={};
+function evThief(G,f,tuy){const K=QK.gang1,t=Math.min(tuy?19.5:19.2,Math.max(6,campPow(G)*(tuy?1.11:1.08))),rng=mulberry32((G.seed^(tuy?0x7b3:0x7a1))+absWeek(G)*17);const a={};
   for(const [x] of ATTRS)a[x]=clamp(t+(K.tilt[x]||0)+(rng()*1.2-.6),3,19.5);const id="q_evthief";
-  const o=baseFighter(id,{name:LOY_THIEF.name,full:LOY_THIEF.name,div:"X",camp:"quest",color:"#6b7a2e",potential:t+2,a});
-  o.sprite="thief";o.kind="gang1";o.grp="gang";o.lvl=campLv(G)+1;o.fatigue=0;o.morale=70;G.F[id]=o;return id;}
-function thiefHTML(){const pool=gauntPool();return `<h2>ไล่จับโจรงมกระทง</h2><p class="meta">ไฟต์ 2 ยก ไม่บาดเจ็บ · ชนะได้ EXP กับเศษดาว ✦ (แพ้ก็ได้เศษดาวปลอบใจ) · ไอ้ตุ่มเก่งขึ้นตามค่าย · มาเฉพาะช่วงลอยกระทง สัปดาห์ละครั้ง</p>
+  const nm=tuy?LOY_TUY.name:LOY_THIEF.name;const o=baseFighter(id,{name:nm,full:nm,div:"X",camp:"quest",color:tuy?"#a8202c":"#6b7a2e",potential:t+2,a});
+  o.sprite=tuy?"thief2":"thief";o.kind="gang1";o.grp="gang";o.lvl=campLv(G)+(tuy?2:1);o.fatigue=0;o.morale=70;G.F[id]=o;return id;}
+function thiefHTML(){const pool=gauntPool(),tuy=UI.thiefK==="tuy";return `${tuy?`<h2>ไล่จับไอ้ตุ๋ย หน้ากากแดง</h2><p class="meta">ไฟต์ 3 ยก ไม่บาดเจ็บ · เก่งกว่าไอ้ตุ่ม รางวัลก็มากกว่า · ชนะได้ EXP กับเศษดาว ✦ (แพ้ก็ได้เศษดาวปลอบใจ) · มาเฉพาะ 20–23 พ.ย. วันละครั้ง</p>`:`<h2>ไล่จับโจรงมกระทง</h2><p class="meta">ไฟต์ 2 ยก ไม่บาดเจ็บ · ชนะได้ EXP กับเศษดาว ✦ (แพ้ก็ได้เศษดาวปลอบใจ) · ไอ้ตุ่มเก่งขึ้นตามค่าย · มาเฉพาะช่วงลอยกระทง สัปดาห์ละครั้ง</p>`}
   <div class="gpick">${pool.map(f=>`<button class="gpk" data-act="thiefgo" data-v="${f.id}">${faceImg(f)}<span><b>${esc(f.name)}</b><small>${isLoyGuest(f)?"แขกรับเชิญ · ":""}Lv.${f.lvl}</small></span></button>`).join("")}</div>
   <div class="center endbtns"><button class="btn" data-act="closeModal">ไว้ก่อน</button></div>`;}
-function thiefGo(fid){const L=loyOf(G);if(!L)return;const f=G.F[fid];if(!f)return;UI.modal=null;
-  const pre=[...LOY_THIEF.pre,f.canon&&LOY_THIEF.line[fid]?{n:fid,f:"angry",l:"thai",t:LOY_THIEF.line[fid]}:{n:"nar",t:`${f.name}ก้าวขึ้นท่าเรือ ถกแขนเสื้อพร้อมลุย`}];
-  playScene(pre,()=>{const qid=evThief(G,f);const bk={id:"bthief",a:fid,b:qid,week:G.week,tier:"evloy",rounds:2,ev:1,bg:"bg_loy_ring.webp"};
-    openFight2(bk,()=>{const F=LASTF,win=F&&F.result&&F.result.win==="A",ko=win&&/KO|น็อก/.test(F.result.type||"");L.thiefWk=absWeek(G);L.thiefDay=todayStr();delete G.F.q_evthief;
-      for(const m of G.mail||[])if(m.ev==="thief"&&!m.done)m.done=true;
-      const yr=G.season||1,xp=win?30+10*yr:10,du=win?(ko?5:4):1;if(f.camp==="player")gainXP(G,f,xp);G.dust=(G.dust||0)+du;
+function thiefGo(fid){const L=loyOf(G);if(!L)return;const f=G.F[fid];if(!f)return;UI.modal=null;const tuy=UI.thiefK==="tuy",X=tuy?LOY_TUY:LOY_THIEF;
+  const pre=[...X.pre,f.canon&&LOY_THIEF.line[fid]?{n:fid,f:"angry",l:"thai",t:LOY_THIEF.line[fid]}:{n:"nar",t:`${f.name}ก้าวขึ้นท่าเรือ ถกแขนเสื้อพร้อมลุย`}];
+  playScene(pre,()=>{const qid=evThief(G,f,tuy);const bk={id:"bthief",a:fid,b:qid,week:G.week,tier:"evloy",rounds:tuy?3:2,ev:1,bg:"bg_loy_ring.webp"};
+    openFight2(bk,()=>{const F=LASTF,win=F&&F.result&&F.result.win==="A",ko=win&&/KO|น็อก/.test(F.result.type||"");if(tuy)L.tuyDay=todayStr();else L.thiefWk=absWeek(G);delete G.F.q_evthief;
+      for(const m of G.mail||[])if(m.ev===(tuy?"tuy":"thief")&&!m.done)m.done=true;
+      const yr=G.season||1,xp=Math.round((win?30+10*yr:10)*(tuy?1.5:1)),du=tuy?(win?(ko?8:6):2):(win?(ko?5:4):1);if(f.camp==="player")gainXP(G,f,xp);G.dust=(G.dust||0)+du;
       const rw=[f.camp==="player"?`${f.name} EXP +${xp}`:"",`เศษดาว ✦ +${du}`].filter(Boolean).join(" · ");
-      if(win){L.thiefN=(L.thiefN||0)+1;}save();
-      playScene(win?[...LOY_THIEF.win,{n:"nar",t:`จับไอ้ตุ่มได้แล้ว ${L.thiefN} ครั้ง · ${rw}`}]:[...LOY_THIEF.lose,{n:"nar",t:`ไม่เป็นไร ประสบการณ์ก็คือประสบการณ์ · ${rw}`}],()=>{AU.startMusic("hub");UI.tab="home";save();render();},{bg:"river",look:"thai"});});},{bg:"river",look:"thai"});}
+      if(win){if(tuy)L.tuyN=(L.tuyN||0)+1;else L.thiefN=(L.thiefN||0)+1;}save();
+      playScene(win?[...X.win,{n:"nar",t:tuy?`จับไอ้ตุ๋ยได้แล้ว ${L.tuyN} ครั้ง · ${rw}`:`จับไอ้ตุ่มได้แล้ว ${L.thiefN} ครั้ง · ${rw}`}]:[...X.lose,{n:"nar",t:`ไม่เป็นไร ประสบการณ์ก็คือประสบการณ์ · ${rw}`}],()=>{AU.startMusic("hub");UI.tab="home";save();render();},{bg:"river",look:"thai"});});},{bg:"river",look:"thai"});}
 Object.assign(ACT,{
   loyintro:()=>{UI.modal=null;playScene(loyIntro(G),()=>{AU.startMusic("hub");render();},{bg:"river",look:"thai"});},
   loyend:d=>{const E=LOY_END[d.v];if(!E)return;const L=loyOf(G);if(L&&L.run&&L.run.newEnd===d.v)L.run.newEnd=null;UI.modal=null;
@@ -11276,7 +11295,8 @@ Object.assign(ACT,{
   lwclose:()=>{if(UI.lwGo){UI.lwGo();return;}UI.modal=null;const d=UI.lwDone;UI.lwDone=null;AU.startMusic("hub");if(d)d();else render();},
   loywishopen:()=>{const L=loyOf(G);if(!loyCanFloat(L))return;loyWishOpen(()=>{UI.modal=null;render();});},
   loyfloat:()=>{const L=loyOf(G);if(!loyCanFloat(L))return;loyWishOpen(()=>{UI.modal=L.run&&L.run.done?{type:"gaunt"}:null;render();});},
-  thief:()=>{const L=loyOf(G);if(!L||!thiefReady(G))return;UI.modal={type:"thief"};render();},
+  tuy:()=>{const L=loyOf(G);if(!L||!tuyReady(G))return;UI.thiefK="tuy";UI.modal={type:"thief"};render();},
+  thief:()=>{const L=loyOf(G);if(!L||!thiefReady(G))return;UI.thiefK="tum";UI.modal={type:"thief"};render();},
   thiefgo:d=>thiefGo(d.v),
   loydress:()=>{const L=loyOf(G);if(!L||!L.tiers.gold)return;L.dressOn=L.dressOn?0:1;save();render();},
 });
@@ -12212,7 +12232,7 @@ CHAT.fah.push(
 <script>
 (function(){
 /* v1.87: Thai code ships inside index.html; English code (en.js) and the dictionary (i18n.js) load only when needed */
-var B="d41804b944";
+var B="ba9428efef";
 var L="";try{L=localStorage.getItem("mtm_lang")||"";}catch(e){}
 try{var h=(location.hash||"").match(/lang=(th|en)/);if(h)L=h[1];}catch(e){}
 if(L!=="th"&&L!=="en")L="th";

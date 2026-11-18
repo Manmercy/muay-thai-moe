@@ -1,5 +1,5 @@
 // ================= MUAY THAI MOE v1.3 — UI =================
-const VERSION="1.90.8";
+const VERSION="1.90.9";
 const CUR_LANG=(typeof window!=="undefined"&&window.LANG)||"th";
 const TH_LABEL=String.fromCharCode(3652,3607,3618);
 function langSwitch(cls){return `<div class="langsw ${cls||""}" role="group" aria-label="Language">${[["th",TH_LABEL],["en","EN"]].map(([k,l])=>`<button class="lsb ${CUR_LANG===k?"on":""}" data-act="setlang" data-v="${k}" aria-pressed="${CUR_LANG===k}">${l}</button>`).join("")}</div>`;}
@@ -38,7 +38,7 @@ const cardFaceSrc=C=>{if(C.face)return `${ASSET}${C.face}.webp`;const scene=(C.s
   return `${ASSET}${C.c}_casual${suffix}_face.webp`;};
 const cardArtHTML=(C,lazy=false)=>`<span class="card-art" style="--card-scene:url('${ASSET}${BGIMG[C.bg]||BGIMG.camp}')"><img src="${cardFaceSrc(C)}" alt="" ${lazy?'loading="lazy" decoding="async"':""}></span>`;
 // v1.34: portraits for the market and helmet-gang side characters (matched by speaker name, or st.img)
-const NPC_IMG=[[/ใบหยก|Baiyok/,()=>typeof byFree==="function"&&byFree(G)?"baiyok":"baiyok_black"],[/เพชรา|Petcha/,"petchara"],[/เถ้าแก่เสือ|เถ้าแก่พยัคฆ์ทอง|Boss Suea|Golden Tiger owner/,"tiger_boss"],[/เกริก|Krerk/,"krerk"],[/นายอำเภอ|District Chief/,"nai"],[/แม่ค้า|ป้าศรี|Auntie Sri|vendor/,"vendor_green"],[/ป้าแต๋ว|เจ๊หมวย|ป้าขาย|Auntie Taew|Jae Muay/,"vendor_red"],[/ไอ้ตุ่ม|โจรงมกระทง|Krathong Thief/,"thief"],[/เสี่ยหมวกทองคำ|Big Boss Golden Helmet/,"gang_boss"],[/หมวกเงิน|Silver Helmet/,"gang_silver"],[/หมวกทองดำ|ลูกน้องหมวกทอง|Gold-Black Helmet|Golden Helmet's (man|men)|Gold Helmet/,"gang_goldblack"],[/หมวก|แจ็กเก็ต|Helmet|Jacket/,"gang_group"],[/ยาย|Grandma/,"grandma"]];
+const NPC_IMG=[[/ใบหยก|Baiyok/,()=>typeof byFree==="function"&&byFree(G)?"baiyok":"baiyok_black"],[/เพชรา|Petcha/,"petchara"],[/เถ้าแก่เสือ|เถ้าแก่พยัคฆ์ทอง|Boss Suea|Golden Tiger owner/,"tiger_boss"],[/เกริก|Krerk/,"krerk"],[/นายอำเภอ|District Chief/,"nai"],[/แม่ค้า|ป้าศรี|Auntie Sri|vendor/,"vendor_green"],[/ป้าแต๋ว|เจ๊หมวย|ป้าขาย|Auntie Taew|Jae Muay/,"vendor_red"],[/ไอ้ตุ๋ย|Tuy the Red Mask/,"thief2"],[/ไอ้ตุ่ม|โจรงมกระทง|Krathong Thief/,"thief"],[/เสี่ยหมวกทองคำ|Big Boss Golden Helmet/,"gang_boss"],[/หมวกเงิน|Silver Helmet/,"gang_silver"],[/หมวกทองดำ|ลูกน้องหมวกทอง|Gold-Black Helmet|Golden Helmet's (man|men)|Gold Helmet/,"gang_goldblack"],[/หมวก|แจ็กเก็ต|Helmet|Jacket/,"gang_group"],[/ยาย|Grandma/,"grandma"]];
 const npcImg=st=>{const v=st.img||(st.who&&(NPC_IMG.find(([r])=>r.test(st.who))||[])[1])||null;return typeof v==="function"?v():v;};
 const TIER_BG={evloy:"bg_river.webp",pro:"bg_fair.webp",semi:"bg_hall.webp",local:"bg_local.webp",district:"bg_district.webp",final:"bg_final.webp",exhibition:"bg_fair.webp",special:"bg_district.webp",lab:"bg_hall.webp",quest:"bg_food.webp",beast:"bg_fair.webp",dm:"bg_hall.webp"};
 const gymBg=()=>`gym${G?campLevel(G):1}.webp`;
@@ -1002,7 +1002,8 @@ const PATCH={id:"1.90.0",ver:"Muay Thai Moe v1.90",title:"คืนลอยก�
  ["🏮","ศึกริมน้ำคืนลอยกระทง","ใส่โค้ด LOYKRATHONG69 ในหน้าตั้งค่า (ใส่ได้ตลอด) ส่งสาว 3 คนชกแก๊งหมวก 9 ไฟต์ไม่มีพัก ฉากจบ 3 แบบตามคะแนน (ทองแดง 400 · เงิน 800 · ทอง 1,200 + ล้มเสี่ย) ทุกคนชกในชุดลอยกระทงพิกเซล มีบทระหว่างไฟต์ และพลอยกับฟ้ามาเป็นแขกรับเชิญได้ ไฟต์ในศึกนี้ไม่บาดเจ็บ ไม่นับสถิติ"],
  ["👘","ชุดไทยใส่ได้จริง","สาวคนไหนชนะในศึกริมน้ำได้ ป้าแต๋วจะส่งชุดไทยของเธอมาทางจดหมาย กดรับแล้วเลือกใส่ได้ที่ตู้เสื้อผ้า ใส่ในค่าย ตอนซ้อม และบนเวทีจริง (เป็นแค่หน้าตา ไม่มีผลกับค่าพลัง)"],
  ["🪷","ลอยกระทงกับ 5 สาว","หลังดูฉากจบ ห้าสาวลอยกระทงที่ท่าน้ำ ผู้จัดการอธิษฐานได้ 4 แบบ แต่ละคนตอบไม่เหมือนกัน แล้วเช้าวันรุ่งขึ้น… ลองดูตู้จดหมาย"],
- ["🦝","ไอ้ตุ่ม โจรงมกระทง","มาทางจดหมายป้าแต๋ว 3 ช่วง: วันละครั้งระหว่าง 20–23 พ.ย. 2569 (วันจริง) · ทุกสัปดาห์ 4 สัปดาห์แรกหลังเริ่มศึกริมน้ำ · ช่วงลอยกระทงในเกม (สัปดาห์ 24–27 ทุกปี) จับได้ได้ EXP กับเศษดาว ยิ่งค่ายเก่ง ไอ้ตุ่มก็เก่งตาม ส่วนลูกนากจากงานลอยกระทงช่วยลดความล้าตอนเล่นด้วย"],
+ ["🦝","ไอ้ตุ่ม โจรงมกระทง","มาทางจดหมายป้าแต๋ว 2 ช่วง: ทุกสัปดาห์ 4 สัปดาห์แรกหลังเริ่มศึกริมน้ำ · ช่วงลอยกระทงในเกม (สัปดาห์ 24–27 ทุกปี) จับได้ได้ EXP กับเศษดาว ยิ่งค่ายเก่ง ไอ้ตุ่มก็เก่งตาม ส่วนลูกนากจากงานลอยกระทงช่วยลดความล้าตอนเล่นด้วย"],
+ ["🎭","ไอ้ตุ๋ย หน้ากากแดง","น้องชายไอ้ตุ่ม มาทางจดหมายป้าแต๋ววันละครั้งเฉพาะ 20–23 พ.ย. 2569 (วันจริง) ไฟต์ 3 ยก เก่งกว่าไอ้ตุ่ม ได้ EXP กับเศษดาวมากกว่า แพ้ก็ได้เศษดาวปลอบใจ ถ้าช่วงไหนไอ้ตุ่มมาด้วยก็จับได้ทั้งสองตัว"],
  ["🪖","แก๊งหมวกโฉมใหม่","หัวหน้าหมวกเงินมีสไปร์ตของตัวเอง มือขวาหมวกทองดำโผล่ตั้งแต่ปี 2 ทุกหมวกมีภาพในฉาก และชนะแก๊งครบ 3 ครั้งจะมีจดหมายท้าให้ไปชกที่โกดังของมัน ชนะได้ค่าเหนื่อย"],
  ["🙏","ไหว้ครูประจำปี","สัปดาห์ 37 (วันมวยไทย) ทุกปี เลือกชุดเครื่องไหว้ ทั้งค่ายคุกเข่ากราบครูสามครั้ง ครูแดงสวมมงคล คนใหม่ได้ครอบครู ได้กำลังใจและพรครูลดการบาดเจ็บช่วงหนึ่ง"],
  ["🥁","เวทีคึกขึ้น","ดนตรีปี่กลองเร่งตามยก ยกตัดสินเร็วสุด มีบทพากย์ใหม่กว่า 115 บรรทัด และสกิลที่ตรงกับแม่ไม้มวยไทยใช้ชื่อแม่ไม้จริง โฆษกเรียกชื่อท่าตอนออก"],

@@ -5800,7 +5800,7 @@ AU.gsfx=function(kind,a){if(!this.init()||this.muted||!SETTINGS.sfx)return;const
   if(kind==="shimmer")for(let i=0;i<6;i++)T(i*.05,{f:1400+Math.random()*1400,type:"sine",dur:.12,peak:.06});};
 
 // ================= MUAY THAI MOE v1.3 — UI =================
-const VERSION="1.90.8";
+const VERSION="1.90.9";
 const CUR_LANG=(typeof window!=="undefined"&&window.LANG)||"th";
 const TH_LABEL=String.fromCharCode(3652,3607,3618);
 function langSwitch(cls){return `<div class="langsw ${cls||""}" role="group" aria-label="Language">${[["th",TH_LABEL],["en","EN"]].map(([k,l])=>`<button class="lsb ${CUR_LANG===k?"on":""}" data-act="setlang" data-v="${k}" aria-pressed="${CUR_LANG===k}">${l}</button>`).join("")}</div>`;}
@@ -5839,7 +5839,7 @@ const cardFaceSrc=C=>{if(C.face)return `${ASSET}${C.face}.webp`;const scene=(C.s
   return `${ASSET}${C.c}_casual${suffix}_face.webp`;};
 const cardArtHTML=(C,lazy=false)=>`<span class="card-art" style="--card-scene:url('${ASSET}${BGIMG[C.bg]||BGIMG.camp}')"><img src="${cardFaceSrc(C)}" alt="" ${lazy?'loading="lazy" decoding="async"':""}></span>`;
 // v1.34: portraits for the market and helmet-gang side characters (matched by speaker name, or st.img)
-const NPC_IMG=[[/ใบหยก|Baiyok/,()=>typeof byFree==="function"&&byFree(G)?"baiyok":"baiyok_black"],[/เพชรา|Petcha/,"petchara"],[/เถ้าแก่เสือ|เถ้าแก่พยัคฆ์ทอง|Boss Suea|Golden Tiger owner/,"tiger_boss"],[/เกริก|Krerk/,"krerk"],[/นายอำเภอ|District Chief/,"nai"],[/แม่ค้า|ป้าศรี|Auntie Sri|vendor/,"vendor_green"],[/ป้าแต๋ว|เจ๊หมวย|ป้าขาย|Auntie Taew|Jae Muay/,"vendor_red"],[/ไอ้ตุ่ม|โจรงมกระทง|Krathong Thief/,"thief"],[/เสี่ยหมวกทองคำ|Big Boss Golden Helmet/,"gang_boss"],[/หมวกเงิน|Silver Helmet/,"gang_silver"],[/หมวกทองดำ|ลูกน้องหมวกทอง|Gold-Black Helmet|Golden Helmet's (man|men)|Gold Helmet/,"gang_goldblack"],[/หมวก|แจ็กเก็ต|Helmet|Jacket/,"gang_group"],[/ยาย|Grandma/,"grandma"]];
+const NPC_IMG=[[/ใบหยก|Baiyok/,()=>typeof byFree==="function"&&byFree(G)?"baiyok":"baiyok_black"],[/เพชรา|Petcha/,"petchara"],[/เถ้าแก่เสือ|เถ้าแก่พยัคฆ์ทอง|Boss Suea|Golden Tiger owner/,"tiger_boss"],[/เกริก|Krerk/,"krerk"],[/นายอำเภอ|District Chief/,"nai"],[/แม่ค้า|ป้าศรี|Auntie Sri|vendor/,"vendor_green"],[/ป้าแต๋ว|เจ๊หมวย|ป้าขาย|Auntie Taew|Jae Muay/,"vendor_red"],[/ไอ้ตุ๋ย|Tuy the Red Mask/,"thief2"],[/ไอ้ตุ่ม|โจรงมกระทง|Krathong Thief/,"thief"],[/เสี่ยหมวกทองคำ|Big Boss Golden Helmet/,"gang_boss"],[/หมวกเงิน|Silver Helmet/,"gang_silver"],[/หมวกทองดำ|ลูกน้องหมวกทอง|Gold-Black Helmet|Golden Helmet's (man|men)|Gold Helmet/,"gang_goldblack"],[/หมวก|แจ็กเก็ต|Helmet|Jacket/,"gang_group"],[/ยาย|Grandma/,"grandma"]];
 const npcImg=st=>{const v=st.img||(st.who&&(NPC_IMG.find(([r])=>r.test(st.who))||[])[1])||null;return typeof v==="function"?v():v;};
 const TIER_BG={evloy:"bg_river.webp",pro:"bg_fair.webp",semi:"bg_hall.webp",local:"bg_local.webp",district:"bg_district.webp",final:"bg_final.webp",exhibition:"bg_fair.webp",special:"bg_district.webp",lab:"bg_hall.webp",quest:"bg_food.webp",beast:"bg_fair.webp",dm:"bg_hall.webp"};
 const gymBg=()=>`gym${G?campLevel(G):1}.webp`;
@@ -6803,7 +6803,8 @@ const PATCH={id:"1.90.0",ver:"Muay Thai Moe v1.90",title:"Loy Krathong Night at 
  ["🏮","Loy Krathong Riverside Brawl","Enter LOYKRATHONG69 in Settings (works any time). Send 3 girls through 9 non-stop bouts against the helmet gang; 3 endings by score (bronze 400 · silver 800 · gold 1,200 + beat the boss). Everyone fights in pixel Thai dress, there are lines between bouts, and Ploy and Fah can join as guests. No injuries and nothing counts toward your record."],
  ["👘","Thai dress you can wear","Any girl who wins a riverside bout gets her Thai dress from Auntie Taew by letter. Claim it and pick it in her wardrobe — she wears it at camp, in training and in the ring (looks only, no stat effect)."],
  ["🪷","Floating krathongs with 5 girls","After the ending, the five girls float krathongs at the pier. The manager can make one of 4 wishes, each girl answers differently… and the next morning, check the mailbox."],
- ["🦝","Tum the Krathong Thief","Arrives by Auntie Taew's letter at three times: once a day from 20–23 Nov 2026 (real days) · every week for the first 4 weeks after you start the riverside brawl · every in-game Loy Krathong (weeks 24–27 each year). Catch him for EXP and stardust; he gets tougher as your camp does. The Loy otter now eases fatigue when you play with it."],
+ ["🦝","Tum the Krathong Thief","Arrives by Auntie Taew's letter at two times: every week for the first 4 weeks after you start the riverside brawl · every in-game Loy Krathong (weeks 24–27 each year). Catch him for EXP and stardust; he gets tougher as your camp does. The Loy otter now eases fatigue when you play with it."],
+ ["🎭","Tuy the Red Mask","Tum's younger brother. Arrives by Auntie Taew's letter once a day on 20–23 Nov 2026 (real days) only. A 3-round bout, tougher than Tum, with more EXP and stardust; a little stardust even if you lose. When Tum is around too, you can catch both."],
  ["🪖","The helmet gang, renewed","The Silver Helmet Chief has his own sprite, the Gold-Black Helmet right hand appears from year 2, every helmet has scene art — and beat the gang three times and they'll challenge you to fight at their warehouse, for a fee."],
  ["🙏","Annual wai kru","Week 37 (Muay Thai Day) every year: pick the offering set, the whole camp kneels and bows to the teachers three times, Kru Daeng places the mongkol and new fighters are initiated. Morale up, and the teachers' blessing cuts injuries for a while."],
  ["🥁","Livelier ring","The pi-and-drum music speeds up round by round, fastest in the deciding round; 115+ new commentary lines; skills that match a classic mae mai now carry its real name, and the booth calls it out."],
@@ -7727,7 +7728,7 @@ function qCleanup(G){const keep=new Set([...G.bookings.map(b=>b.b),...G.offers.m
 // ---------- mail ----------
 let MAILN=0;
 function addMail(G,m){G.mail=G.mail||[];m.id="m"+G.week+"_"+(++MAILN)+"_"+Math.floor(Math.random()*1e4);m.wk=G.week;m.season=G.season||1;if(m.exp!=null)m.expAbs=gameWeek(G)+(m.exp-G.week);m.read=false;G.mail.unshift(m);G.mail=G.mail.slice(0,40);return m;}
-const mailOpen=m=>!m.done&&!m.expired&&(["take","pay","quiz","quest"].includes(m.kind)||(m.kind==="event"&&(m.ev==="kongka"||m.ev==="thief"||m.ev==="dress")));
+const mailOpen=m=>!m.done&&!m.expired&&(["take","pay","quiz","quest"].includes(m.kind)||(m.kind==="event"&&(m.ev==="kongka"||m.ev==="thief"||m.ev==="tuy"||m.ev==="dress")));
 function mailBadge(){if(!G||!G.mail)return 0;return G.mail.filter(m=>!m.read||mailOpen(m)).length;}
 const MAILBOX_PX=pxIcon(["....kkkk....","...kffffk...","..krrrrrrk..",".krrrrrrrrk.",".krwwwwwwrk.",".krwkkkkwrk.",".krwwwwwwrk.",".krrrrrrrrk.",".kkkkkkkkkk.",".....kk.....",".....kk.....","....kkkk...."],{k:"#2a1a10",r:"#c8283c",w:"#f4ead8",f:"#f7d24a"});
 const BILLS=[["Subdistrict Municipality","Fine: your camp's rooster crows above the legal limit at 4 a.m. (14 complaints)",300],
@@ -7800,7 +7801,7 @@ const LOAN_MAIL=[
  ["Gold Helmet's goon","For the manager of Sirichai Camp","A brown envelope with engine-oil stains. \"We know the power bill isn't paid this month. We've got twenty thousand. No guarantor, no questions. Just one: when do you pay it back?\""],
  ["Gold Helmet's goon","Loan coupon (cut and keep)","Paper cut into a coupon, the edges jagged like it was done with nail clippers. \"Redeem for ฿20,000 cash, instantly. Never expires. The interest, however, goes up.\""]];
 const LOAN_COACH=["Not yet. Check the job letters and temple-fair fights first.","Grandpa Chai got this exact same card once.","If you really must, borrow. But pay it back fast. The interest grows faster than Kati did.","I kept it so you could see it. Not so you'd call.","Read the small print by the asterisk."];
-function mailWeekly(G){G.mail=G.mail||[];if(typeof thiefMail==="function")thiefMail(G);if(typeof regionWeek==="function")regionWeek(G);G.gang=G.gang||{st:0,next:0};G.mailSeen=G.mailSeen||{};const rng=mulberry32(G.seed+G.week*4441);
+function mailWeekly(G){G.mail=G.mail||[];if(typeof thiefMail==="function"){thiefMail(G);tuyMail(G);}if(typeof regionWeek==="function")regionWeek(G);G.gang=G.gang||{st:0,next:0};G.mailSeen=G.mailSeen||{};const rng=mulberry32(G.seed+G.week*4441);
   if(typeof lottoWeekly==="function")lottoWeekly(G);
   for(const m of G.mail)if(m.expAbs!=null&&gameWeek(G)>m.expAbs&&!m.done)m.expired=true;
   // v1.88: every time cash dips low, the helmet gang slips a gold card into the mailbox
@@ -7913,7 +7914,7 @@ function questExtra(done,rng){if(!G||G.ended)return false;G.gang=G.gang||{st:0,n
 
 // ---------- modals ----------
 /* v1.89.24: the Loy Krathong invitation glows green until it is read and the gauntlet has been played once */
-function loyMailHot(m){if(m.kind==="event"&&(m.ev==="kongka"||m.ev==="thief"||m.ev==="dress"))return !m.done&&!m.expired;return m.kind==="event"&&m.ev==="loy";} /* v1.90.4: the Loy invitation always glows green so it is easy to find again */
+function loyMailHot(m){if(m.kind==="event"&&(m.ev==="kongka"||m.ev==="thief"||m.ev==="tuy"||m.ev==="dress"))return !m.done&&!m.expired;return m.kind==="event"&&m.ev==="loy";} /* v1.90.4: the Loy invitation always glows green so it is easy to find again */
 function mailListHTML(){const L=G.mail||[];
   return `<h2 class="mailh">${MAILBOX_PX} Mailbox</h2>${L.length?`<div class="mlist2">${L.map(m=>`<button class="mrow2 ${m.read?"":"unread"} ${mailOpen(m)?"act":""} ${m.done||m.expired?"old":""} ${loyMailHot(m)?"loyev":""}" data-act="mopen" data-v="${m.id}"><span class="mk ${m.kind}">${{letter:"Letter",take:"Money",pay:"Invoice",quiz:"Quiz",quest:"Request",job:"Job",event:"Event",loan:"Loan"}[m.kind]}</span><span class="mt"><b>${esc(m.title)}</b><small>${esc(m.from)} · wk ${m.wk}${m.expired?" · expired":m.done?" · handled":m.expAbs!=null?` · by wk ${((m.expAbs-1)%52)+1}`:""}</small></span>${mailOpen(m)?'<i class="dot"></i>':""}</button>`).join("")}</div>`:`<p class="lead">No mail yet</p>`}`;}
 function letterHTML(m){m.read=true;let act="";
@@ -8643,17 +8644,19 @@ function redeemCode(raw){const v=(raw||"").toUpperCase().replace(/\s+/g,"");if(!
 /* v1.89.26: fetch the event's art up front (sprites, specials, ring art, portraits) so the first scene and bout don't pop in */
 function loyPreload(){if(loyPreload.done)return;loyPreload.done=1;try{
   for(const id of ["kati","mali","rin","ploy","fah"]){img(id+"_loykrathong_sheet.webp");img(id+"_loykrathong_special.webp");for(const m of ["happy","flustered","angry","sad"])warm(stand(id,"thai",m));}
-  img("mali_loykrathong_dodge.webp");for(const s of ["gang1","gang2","gang3","gangsilver","gang4","gang5","thief"])img(s+"_sheet.webp");
+  img("mali_loykrathong_dodge.webp");for(const s of ["gang1","gang2","gang3","gangsilver","gang4","gang5","thief","thief2"])img(s+"_sheet.webp");
   for(const b of ["bg_loy_ring.webp","bg_loy_night.webp","bg_river.webp","bg_river_dawn.webp"])img(b);
-  for(const n of ["gang_group","gang_silver","gang_goldblack","gang_boss","gang_boss_face","thief","vendor_red"])warm(`${ASSET}npc_${n}.webp`);}catch(e){}}
+  for(const n of ["gang_group","gang_silver","gang_goldblack","gang_boss","gang_boss_face","thief","thief2","vendor_red"])warm(`${ASSET}npc_${n}.webp`);}catch(e){}}
 function evMailAct(m){loyPreload();if(m.ev==="dress"){const f=G.F[m.fid],L=loyOf(G);if(!f||!L)return "";const has=L.dress&&L.dress[f.id];
     return has?(f.camp==="player"?`<p class="meta center">Dress received</p><button class="btn" data-act="loydresswear" data-v="${f.id}">${f.outfit==="loy"?"Wearing":`Dress ${esc(f.name)}`}</button>`:`<p class="meta center">Dress received · can be worn once ${esc(f.name)} joins the camp</p>`)
       :`<button class="btn primary" data-act="loydress1" data-v="${m.id}">Claim Thai dress: ${esc(f.name)}</button>`;}
+  if(m.ev==="tuy"){const L=loyOf(G);return m.done||!L||!tuyReady(G)?`<p class="meta center">Tuy caught</p>`:m.expired?"":`<button class="btn primary" data-act="tuy">Go catch Tuy</button>`;}
   if(m.ev==="thief"){const L=loyOf(G);return m.done||!L||!thiefReady(G)?`<p class="meta center">Tum caught</p>`:m.expired?"":`<button class="btn primary" data-act="thief">Go catch Tum</button>`;}
   if(m.ev==="kongka"){const B=KONGKA[m.wish];return B?(m.done?`<p class="meta center">Blessing received · ${B.n}</p>`:`<button class="btn primary" data-act="kongka" data-v="${m.id}">Receive blessing · ${B.d}</button>`):"";}
   const L=loyOf(G);if(!L)return "";const tr=loyTier(L.best,L.boss);const T=L.tiers||{};
   const ends=["bronze","silver","gold"].filter(k=>T[k]).map(k=>`<button class="btn sm" data-act="loyend" data-v="${k}">Ending: ${LOY_TIERS.find(x=>x[0]===k)[1]} · ${LOY_END[k].t}</button>`).join("");
   return `${L.runs?`<p class="meta center">Best score <b class="goldt num">${L.best}</b>${tr?` · Reward tier: <b>${tr.n}</b>`:""}</p>`:""}<button class="btn primary" data-act="evloy">${L.runs?"Take on the Riverside Brawl again":"Go to the Loy Krathong fair"}</button>
+  ${tuyOn(G)?`<button class="btn gold" data-act="tuy" ${!tuyReady(G)?"disabled":""}>${!tuyReady(G)?"Tuy caught (back tomorrow)":"Catch Tuy the Red Mask"}</button>`:""}
   ${thiefOn(G)?`<button class="btn" data-act="thief" ${!thiefReady(G)?"disabled":""}>${!thiefReady(G)?`Tum caught (${thiefAgain(G)})`:"Catch Tum the Krathong Thief"}</button>`:`<p class="meta center">Tum returns during the in-game Loy Krathong (weeks ${THIEF_WK[0]}–${THIEF_WK[1]} every year) — Auntie Taew will send a letter</p>`}
   ${L.intro?`<div class="evrep"><button class="btn sm" data-act="loyintro">Replay the opening</button>${ends}${loyCanFloat(L)?`<button class="btn sm gold" data-act="loywishopen">🪷 Float krathongs with the girls</button>`:""}</div>`:""}
   ${L.wish?`<p class="meta center">Your wish: "${esc((LOY_WISH.find(w=>w.k===L.wish)||{}).t||"")}"</p>`:""}
@@ -8741,6 +8744,15 @@ const LOY_THIEF={name:"Tum the Krathong Thief",
   {n:"npc",who:"Auntie Taew",t:"Well done, dear! Auntie's frying khanom krok for the whole team. Eat up before you go home!"}],
  lose:[{n:"nar",bg:"loy_night",t:"Tum laughs and dives in with the bag of coins… but the bag rips mid-river and every coin sinks."},
   {n:"npc",who:"Tum the Krathong Thief",t:"Hey! My coins!! …See you next year!"},{n:"npc",who:"Auntie Taew",t:"Never mind, dear. At least he didn't get anything."}]};
+const LOY_TUY={name:"Tuy the Red Mask",
+ pre:[{n:"nar",bg:"loy_night",t:"Late at night, a figure in a red knit mask runs along the riverbank with a whole sack of krathongs over his shoulder."},
+  {n:"npc",who:"Auntie Taew",t:"That's Tuy, Tum's little brother! His brother got caught so often he sent the younger one instead. This time he took a whole sack!"},
+  {n:"npc",who:"Tuy the Red Mask",t:"My brother Tum's soft. I'm nothing like him. If you're tough, come up on the pier and take them back!"}],
+ win:[{n:"nar",bg:"loy_night",t:"Tuy goes flat on his back in the middle of the pier, his knit mask slipping over his eyes. The sack of krathongs rolls back, every one of them."},
+  {n:"npc",who:"Tuy the Red Mask",t:"…Don't tell my brother Tum I lost!"},
+  {n:"npc",who:"Auntie Taew",t:"Those two brothers really are the same. Well done, dear! A big tray of khanom khrok for you!"}],
+ lose:[{n:"nar",bg:"loy_night",t:"Tuy flips a coin into the air, catches it neatly, and vanishes into the dark with his sack."},
+  {n:"npc",who:"Tuy the Red Mask",t:"I'll be back tomorrow! Go train some more!"},{n:"npc",who:"Auntie Taew",t:"Never mind, dear. He'll be back tomorrow for sure. Auntie will be watching."}]};
 function evStartLoy(){const L=loyOf(G);if(!L)return;if(L.thiefFrom==null){L.thiefFrom=absWeek(G);thiefMail(G);}loyPreload();UI.modal=null;
   const open=()=>{L.run=null;L.pick=[];UI.modal={type:L.rulesSeen?"gaunt":"loyrules"};render();};
   if(!L.intro){L.intro=1;save();playScene(loyIntro(G),open,{bg:"loy_night",look:"thai"});}else open();}
@@ -9075,31 +9087,38 @@ const THIEF_WK=[24,27];
 const THIEF_DAYS=["2026-11-20","2026-11-23"];
 const thiefDaily=()=>{const t=todayStr();return t>=THIEF_DAYS[0]&&t<=THIEF_DAYS[1];};
 const thiefWin=G=>{const L=loyOf(G);if(!L)return false;const w=absWeek(G);return (G.week>=THIEF_WK[0]&&G.week<=THIEF_WK[1])||(L.thiefFrom!=null&&w>=L.thiefFrom&&w<L.thiefFrom+4);};
-const thiefOn=G=>!!loyOf(G)&&(thiefDaily()||thiefWin(G));
-const thiefReady=G=>{const L=loyOf(G);return thiefOn(G)&&((thiefDaily()&&L.thiefDay!==todayStr())||(thiefWin(G)&&L.thiefWk!==absWeek(G)));};
-const thiefAgain=G=>thiefWin(G)?"back next week":"back tomorrow";
-function thiefFix(G){const L=loyOf(G);if(!L)return;if(L.thiefFrom==null&&L.runs>0&&L.thiefWk==null)L.thiefFrom=absWeek(G);thiefMail(G);}
+/* v1.90.9 (Man): the real-day visits go to Tuy, Tum's younger brother (red mask, own sprite + portrait) — stronger, 3 rounds, bigger reward, once a real day.
+   Tum keeps the game-week windows. Each has his own once-per-day/once-per-week clock, so when windows overlap both can be caught. */
+const thiefOn=G=>!!loyOf(G)&&thiefWin(G);
+const thiefReady=G=>{const L=loyOf(G);return thiefOn(G)&&L.thiefWk!==absWeek(G);};
+const thiefAgain=G=>"back next week";
+const tuyOn=G=>!!loyOf(G)&&thiefDaily();
+const tuyReady=G=>{const L=loyOf(G);return tuyOn(G)&&L.tuyDay!==todayStr();};
+function thiefFix(G){const L=loyOf(G);if(!L)return;if(L.thiefFrom==null&&L.runs>0&&L.thiefWk==null)L.thiefFrom=absWeek(G);thiefMail(G);tuyMail(G);}
+function tuyMail(G){if(!tuyReady(G))return;if((G.mail||[]).some(m=>m.ev==="tuy"&&!m.done&&!m.expired))return;
+  addMail(G,{kind:"event",ev:"tuy",from:"Auntie Taew, som tam stall by the temple",title:"Tum's little brother Tuy is here!",exp:G.week+1,
+    body:"Manager dear, it's not Tum this time. It's his little brother, Tuy the Red Mask, and he's worse than his brother. Carried off a whole sack of krathongs. Auntie only ever sees him around these few days. Send your best kids to help, would you?"});}
 const campPow=G=>{const R=roster(G).map(f=>ovr(f.a)).sort((a,b)=>b-a).slice(0,3);return R.length?R.reduce((s,x)=>s+x,0)/R.length:8;};
 const campLv=G=>{const R=roster(G).map(f=>f.lvl||1).sort((a,b)=>b-a).slice(0,3);return R.length?Math.round(R.reduce((s,x)=>s+x,0)/R.length):1;};
 function thiefMail(G){if(!thiefReady(G))return;if((G.mail||[]).some(m=>m.ev==="thief"&&!m.done&&!m.expired))return;
   addMail(G,{kind:"event",ev:"thief",from:"Auntie Taew, som tam stall by the temple",title:"Tum Is Back!",exp:G.week+1,
     body:"Manager dear, every Loy Krathong that Tum the krathong thief shows up. Last night he hauled off a sack full of coins from people's krathongs again. Send the girls to help catch him — Auntie's frying khanom krok for you."});}
-function evThief(G,f){const K=QK.gang1,t=Math.min(19.2,Math.max(6,campPow(G)*1.08)),rng=mulberry32((G.seed^0x7a1)+absWeek(G)*17);const a={};
+function evThief(G,f,tuy){const K=QK.gang1,t=Math.min(tuy?19.5:19.2,Math.max(6,campPow(G)*(tuy?1.15:1.08))),rng=mulberry32((G.seed^(tuy?0x7b3:0x7a1))+absWeek(G)*17);const a={};
   for(const [x] of ATTRS)a[x]=clamp(t+(K.tilt[x]||0)+(rng()*1.2-.6),3,19.5);const id="q_evthief";
-  const o=baseFighter(id,{name:LOY_THIEF.name,full:LOY_THIEF.name,div:"X",camp:"quest",color:"#6b7a2e",potential:t+2,a});
-  o.sprite="thief";o.kind="gang1";o.grp="gang";o.lvl=campLv(G)+1;o.fatigue=0;o.morale=70;G.F[id]=o;return id;}
-function thiefHTML(){const pool=gauntPool();return `<h2>Catch the Krathong Thief</h2><p class="meta">A 2-round bout, no injuries · win for EXP and stardust ✦ (a little stardust even if you lose) · Tum gets tougher as your camp does · only during Loy Krathong, once a week</p>
+  const nm=tuy?LOY_TUY.name:LOY_THIEF.name;const o=baseFighter(id,{name:nm,full:nm,div:"X",camp:"quest",color:tuy?"#a8202c":"#6b7a2e",potential:t+2,a});
+  o.sprite=tuy?"thief2":"thief";o.kind="gang1";o.grp="gang";o.lvl=campLv(G)+(tuy?2:1);o.fatigue=0;o.morale=70;G.F[id]=o;return id;}
+function thiefHTML(){const pool=gauntPool(),tuy=UI.thiefK==="tuy";return `${tuy?`<h2>Catch Tuy the Red Mask</h2><p class="meta">A 3-round bout, no injuries · tougher than Tum, bigger rewards · win for EXP and stardust ✦ (a little stardust even if you lose) · only on 20–23 Nov, once a day</p>`:`<h2>Catch the Krathong Thief</h2><p class="meta">A 2-round bout, no injuries · win for EXP and stardust ✦ (a little stardust even if you lose) · Tum gets tougher as your camp does · only during Loy Krathong, once a week</p>`}
   <div class="gpick">${pool.map(f=>`<button class="gpk" data-act="thiefgo" data-v="${f.id}">${faceImg(f)}<span><b>${esc(f.name)}</b><small>${isLoyGuest(f)?"Guest · ":""}Lv.${f.lvl}</small></span></button>`).join("")}</div>
   <div class="center endbtns"><button class="btn" data-act="closeModal">Later</button></div>`;}
-function thiefGo(fid){const L=loyOf(G);if(!L)return;const f=G.F[fid];if(!f)return;UI.modal=null;
-  const pre=[...LOY_THIEF.pre,f.canon&&LOY_THIEF.line[fid]?{n:fid,f:"angry",l:"thai",t:LOY_THIEF.line[fid]}:{n:"nar",t:`${f.name} steps onto the pier and rolls up their sleeves`}];
-  playScene(pre,()=>{const qid=evThief(G,f);const bk={id:"bthief",a:fid,b:qid,week:G.week,tier:"evloy",rounds:2,ev:1,bg:"bg_loy_ring.webp"};
-    openFight2(bk,()=>{const F=LASTF,win=F&&F.result&&F.result.win==="A",ko=win&&/KO|น็อก/.test(F.result.type||"");L.thiefWk=absWeek(G);L.thiefDay=todayStr();delete G.F.q_evthief;
-      for(const m of G.mail||[])if(m.ev==="thief"&&!m.done)m.done=true;
-      const yr=G.season||1,xp=win?30+10*yr:10,du=win?(ko?5:4):1;if(f.camp==="player")gainXP(G,f,xp);G.dust=(G.dust||0)+du;
+function thiefGo(fid){const L=loyOf(G);if(!L)return;const f=G.F[fid];if(!f)return;UI.modal=null;const tuy=UI.thiefK==="tuy",X=tuy?LOY_TUY:LOY_THIEF;
+  const pre=[...X.pre,f.canon&&LOY_THIEF.line[fid]?{n:fid,f:"angry",l:"thai",t:LOY_THIEF.line[fid]}:{n:"nar",t:`${f.name} steps onto the pier and rolls up their sleeves`}];
+  playScene(pre,()=>{const qid=evThief(G,f,tuy);const bk={id:"bthief",a:fid,b:qid,week:G.week,tier:"evloy",rounds:tuy?3:2,ev:1,bg:"bg_loy_ring.webp"};
+    openFight2(bk,()=>{const F=LASTF,win=F&&F.result&&F.result.win==="A",ko=win&&/KO|น็อก/.test(F.result.type||"");if(tuy)L.tuyDay=todayStr();else L.thiefWk=absWeek(G);delete G.F.q_evthief;
+      for(const m of G.mail||[])if(m.ev===(tuy?"tuy":"thief")&&!m.done)m.done=true;
+      const yr=G.season||1,xp=Math.round((win?30+10*yr:10)*(tuy?1.5:1)),du=tuy?(win?(ko?8:6):2):(win?(ko?5:4):1);if(f.camp==="player")gainXP(G,f,xp);G.dust=(G.dust||0)+du;
       const rw=[f.camp==="player"?`${f.name} EXP +${xp}`:"",`Stardust ✦ +${du}`].filter(Boolean).join(" · ");
-      if(win){L.thiefN=(L.thiefN||0)+1;}save();
-      playScene(win?[...LOY_THIEF.win,{n:"nar",t:`Times Tum has been caught: ${L.thiefN} · ${rw}`}]:[...LOY_THIEF.lose,{n:"nar",t:`Never mind — experience is experience · ${rw}`}],()=>{AU.startMusic("hub");UI.tab="home";save();render();},{bg:"river",look:"thai"});});},{bg:"river",look:"thai"});}
+      if(win){if(tuy)L.tuyN=(L.tuyN||0)+1;else L.thiefN=(L.thiefN||0)+1;}save();
+      playScene(win?[...X.win,{n:"nar",t:tuy?`Tuy caught ${L.tuyN} · ${rw}`:`Times Tum has been caught: ${L.thiefN} · ${rw}`}]:[...X.lose,{n:"nar",t:`Never mind — experience is experience · ${rw}`}],()=>{AU.startMusic("hub");UI.tab="home";save();render();},{bg:"river",look:"thai"});});},{bg:"river",look:"thai"});}
 Object.assign(ACT,{
   loyintro:()=>{UI.modal=null;playScene(loyIntro(G),()=>{AU.startMusic("hub");render();},{bg:"river",look:"thai"});},
   loyend:d=>{const E=LOY_END[d.v];if(!E)return;const L=loyOf(G);if(L&&L.run&&L.run.newEnd===d.v)L.run.newEnd=null;UI.modal=null;
@@ -9111,7 +9130,8 @@ Object.assign(ACT,{
   lwclose:()=>{if(UI.lwGo){UI.lwGo();return;}UI.modal=null;const d=UI.lwDone;UI.lwDone=null;AU.startMusic("hub");if(d)d();else render();},
   loywishopen:()=>{const L=loyOf(G);if(!loyCanFloat(L))return;loyWishOpen(()=>{UI.modal=null;render();});},
   loyfloat:()=>{const L=loyOf(G);if(!loyCanFloat(L))return;loyWishOpen(()=>{UI.modal=L.run&&L.run.done?{type:"gaunt"}:null;render();});},
-  thief:()=>{const L=loyOf(G);if(!L||!thiefReady(G))return;UI.modal={type:"thief"};render();},
+  tuy:()=>{const L=loyOf(G);if(!L||!tuyReady(G))return;UI.thiefK="tuy";UI.modal={type:"thief"};render();},
+  thief:()=>{const L=loyOf(G);if(!L||!thiefReady(G))return;UI.thiefK="tum";UI.modal={type:"thief"};render();},
   thiefgo:d=>thiefGo(d.v),
   loydress:()=>{const L=loyOf(G);if(!L||!L.tiers.gold)return;L.dressOn=L.dressOn?0:1;save();render();},
 });

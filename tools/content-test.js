@@ -165,13 +165,15 @@ const chrome=process.env.CHROME_PATH||'/Applications/Google Chrome.app/Contents/
     {const g=mk();const s=JSON.stringify(dateScene(g,'kati',act).flatMap(x=>x.inject?x.inject(g):[x]));if(!/เปลี่ยนเรื่อง|changes the subject/.test(s)||g.seen.love_kati)throw Error('almost first');}
     const g=mk();g.confTry={kati:3};said(g,'kati');if(!g.seen.love_kati)throw Error('kati');for(let w=0;w<3;w++){g.week++;g.confTry={mali:5};if(said(g,'mali'))throw Error('mali too soon week +'+(w+1));}
     g.week++;g.confTry={mali:3};if(!said(g,'mali'))throw Error('mali after 4 weeks');return true;});
-  test('Tum the thief: once a real day 20-23 Nov, 4 weeks after the first brawl (old saves from now), weeks 24-27 every year',()=>{const T0=todayStr;let day='2026-11-18';todayStr=()=>day;{const g=fresh();G=g;g.ev={loy:{got:46,season:1,best:0,tiers:{},runs:0}};g.week=46;if(thiefOn(g))throw Error('18 Nov is off now');}day='2026-11-20';try{
-    const mk=()=>{const g=fresh();G=g;g.ev={loy:{got:46,season:1,best:0,tiers:{},runs:0}};g.week=46;g.mail=[];return g;};const caught=g=>{const L=g.ev.loy;L.thiefWk=absWeek(g);L.thiefDay=todayStr();};
-    let g=mk();if(!thiefReady(g))throw Error('daily off');caught(g);if(thiefReady(g))throw Error('twice a day');day='2026-11-23';if(!thiefReady(g))throw Error('next day');
-    day='2026-11-24';g=mk();if(thiefOn(g))throw Error('on after the real window');evStartLoy();UI.modal=null;if(!thiefReady(g)||!g.mail.some(m=>m.ev==='thief'))throw Error('first brawl window/mail');
-    const w0=g.ev.loy.thiefFrom;caught(g);if(thiefReady(g))throw Error('twice a week');for(let k=1;k<4;k++){g.week++;if(!thiefReady(g))throw Error('week +'+k);caught(g);}g.week++;if(thiefOn(g))throw Error('5th week');
-    g=mk();g.ev.loy.runs=2;fixSave(g);if(g.ev.loy.thiefFrom!==absWeek(g)||!thiefReady(g)||!g.mail.some(m=>m.ev==='thief'))throw Error('old save migration');
-    g=mk();g.ev.loy.runs=2;g.ev.loy.thiefWk=10;fixSave(g);if(thiefOn(g))throw Error('already met: no new window');g.week=25;if(!thiefReady(g))throw Error('week 25');g.week=28;if(thiefOn(g))throw Error('week 28 is off now');
+  test('Tum and Tuy: Tuy once a real day 20-23 Nov, Tum 4 weeks after the first brawl (old saves from now) and weeks 24-27, both when they overlap',()=>{const T0=todayStr;let day='2026-11-18';todayStr=()=>day;try{
+    const mk=()=>{const g=fresh();G=g;g.ev={loy:{got:46,season:1,best:0,tiers:{},runs:0}};g.week=46;g.mail=[];return g;};
+    let g=mk();if(tuyOn(g)||thiefOn(g))throw Error('18 Nov: nobody');day='2026-11-20';if(!tuyReady(g)||thiefOn(g))throw Error('20 Nov: Tuy only');
+    tuyMail(g);if(!g.mail.some(m=>m.ev==='tuy'))throw Error('tuy mail');g.ev.loy.tuyDay=todayStr();if(tuyReady(g))throw Error('Tuy twice a day');day='2026-11-23';if(!tuyReady(g))throw Error('next day');
+    evStartLoy();UI.modal=null;if(!thiefReady(g)||!tuyReady(g))throw Error('overlap: both');if(!g.mail.some(m=>m.ev==='thief'))throw Error('tum mail');
+    day='2026-11-24';if(tuyOn(g))throw Error('24 Nov off');g.ev.loy.thiefWk=absWeek(g);if(thiefReady(g))throw Error('Tum twice a week');for(let k=1;k<4;k++){g.week++;if(!thiefReady(g))throw Error('week +'+k);g.ev.loy.thiefWk=absWeek(g);}g.week++;if(thiefOn(g))throw Error('5th week');
+    g=mk();g.ev.loy.runs=2;fixSave(g);if(g.ev.loy.thiefFrom!==absWeek(g)||!thiefReady(g))throw Error('old save migration');
+    g=mk();g.ev.loy.runs=2;g.ev.loy.thiefWk=10;fixSave(g);if(thiefOn(g))throw Error('already met: no new window');g.week=25;if(!thiefReady(g))throw Error('week 25');g.week=28;if(thiefOn(g))throw Error('week 28 off');
+    const f=g.F.kati;const t1=evThief(g,f,false),A=ovr(g.F[t1].a),L1=g.F[t1].lvl;const t2=evThief(g,f,true),B=ovr(g.F[t2].a);if(!(B>A)||g.F[t2].lvl!==L1+1||g.F[t2].sprite!=='thief2')throw Error('Tuy stronger '+A+' '+B);
     }finally{todayStr=T0;}return true;});
   test('a no late in the year does not block her second ask next year (old week-of-year saves too)',()=>{const act=Object.keys(ACTIVITIES)[0];const asks=g=>{const s=JSON.stringify(dateScene(g,'mali',act).flatMap(x=>x.inject?x.inject(g):[x]));return /คบซ้อน|two-timing/i.test(s);};
     for(const old of [false,true]){const g=fresh();G=g;for(const id of ['kati','mali']){g.F[id].met=true;g.F[id].camp='player';}g.F.kati.bond=90;g.F.kati.trust=60;takeLover(g,'kati');g.F.mali.bond=89.5;g.F.mali.trust=50;g.seen.love_mali=true;g.week=50;
