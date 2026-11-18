@@ -1075,7 +1075,7 @@ const REGION={
       const key=[me.id,ovr(me.a).toFixed(2),me.lvl,Object.values(me.skills||{}).reduce((s,v)=>s+v,0),(me.equip||[]).join(),cups,c.tries||0].join("|");
       if(f.rgKey!==key){const setT=T=>{f.vet=0;for(const k in f.a)f.a[k]=Math.max(1,Math.min(20,T-.6));for(const [k,v] of Object.entries(tilt))f.a[k]=Math.min(20,f.a[k]+v);
           liftOpponent(f,T,20);for(let i=0;i<80&&ovr(f.a)>T+.05;i++)for(const k in f.a)if(!(k in tilt))f.a[k]=Math.max(1,f.a[k]-.12);};
-        const t=RG_ODDS.bout(RG_ODDS.series(cups))-Math.min(2,c.tries||0)*.02;f.rgT=+rgFit(me,f,setT,t,ceil).toFixed(2);f.rgKey=key;}}
+        const t=RG_ODDS.bout(RG_ODDS.series(cups))+Math.min(2,c.tries||0)*.03; /* v1.90.14: a lost series makes the rematch a little easier (was a minus — it got harder) */f.rgT=+rgFit(me,f,setT,t,ceil).toFixed(2);f.rgKey=key;}}
     return f;},
   seriesPurse(G){const cups=(G.region.cups||[]).length,w=Math.round((30000+cups*6000)*(1+Math.min(G.rep,50)/100)/100)*100;return {win:w,lose:Math.round(w*.4/100)*100};},
   /* the first week from `from` that suits a championship bout: weeks 1–50, the camp home and rested, no other trip next to it */
