@@ -455,15 +455,15 @@ const BAG={st:null,
   openMode(m,act,mail){const F=bagFighters(G);if(!F.length){toast("No fighter is fit to train");return;}const pick=(G.mini&&G.mini.bagLast&&F.find(f=>f.id===G.mini.bagLast))||F.slice().sort((a,b)=>(b.bond||0)-(a.bond||0))[0];
     this.st={phase:"pick",mode:m,act,mail,id:pick.id,dk:(G.mini&&G.mini.bagDk)||"normal",practice:false};this.mount();if(m==="live"){LIVE.pick();LIVE.st.practice=false;LIVE.st.act=act;LIVE.draw();}else if(m==="run"){RUN.pick();RUN.st.practice=false;RUN.st.act=act;RUN.draw();}else this.draw();},
   mount(){let el=document.getElementById("minibag");if(!el){el=document.createElement("div");el.id="minibag";el.className="mgame";document.body.appendChild(el);}
-    el.onclick=e=>{const lv=e.target.closest("[data-lv]");if(lv&&typeof LIVE!=="undefined"){LIVE.act(lv.dataset.lv,lv.dataset.v);return;}const rn=e.target.closest("[data-rn]");if(rn&&typeof RUN!=="undefined"){if(rn.dataset.rn!=="L"&&rn.dataset.rn!=="R")RUN.act(rn.dataset.rn,rn.dataset.v);return;}const du=e.target.closest("[data-du]");if(du&&typeof DUEL!=="undefined"){DUEL.act(du.dataset.du,du.dataset.v);return;}const b=e.target.closest("[data-mb]");if(!b)return;const a=b.dataset.mb,v=b.dataset.v;
+    el.onclick=e=>{const lv=e.target.closest("[data-lv]");if(lv&&typeof LIVE!=="undefined"){LIVE.act(lv.dataset.lv,lv.dataset.v);return;}const rn=e.target.closest("[data-rn]");if(rn&&typeof RUN!=="undefined"){if(rn.dataset.rn!=="L"&&rn.dataset.rn!=="R")RUN.act(rn.dataset.rn,rn.dataset.v);return;}const sp=e.target.closest("[data-sp]");if(sp&&typeof SPORTS!=="undefined"){SPORTS.act(sp.dataset.sp);return;}const du=e.target.closest("[data-du]");if(du&&typeof DUEL!=="undefined"){DUEL.act(du.dataset.du,du.dataset.v);return;}const b=e.target.closest("[data-mb]");if(!b)return;const a=b.dataset.mb,v=b.dataset.v;
       if(a==="mode"&&MG_MODES[v]&&MG_MODES[v].custom){this.st.mode=v;if(v==="run")RUN.pick();else LIVE.pick();}else if(a==="mode"){this.st.mode=v;this.st.phase="pick";this.st.practice=mgPlayed(G,v);this.draw();}else if(a==="hub"){this.st.phase="hub";this.draw();}else if(a==="pick"){this.st.id=v;this.draw();}else if(a==="dk"){this.st.dk=v;this.draw();}else if(a==="go")this.start();else if(a==="close")this.close();else if(a==="claim")this.claim();else if(a==="again"){this.st.phase="pick";this.st.practice=true;this.draw();}};
-    if(!this.keyH){this.keyH=e=>{if(typeof LIVE!=="undefined"&&LIVE.st&&LIVE.st.phase==="play"&&/^[123]$/.test(e.key)){const d=LIVE.st.cur;if(d){e.preventDefault();LIVE.answer(d.ord[+e.key-1]);}return;}if(typeof RUN!=="undefined"&&RUN.st&&(RUN.st.phase==="race"||RUN.st.phase==="set")){const k=e.key.toLowerCase();if(e.repeat)return;if(k==="f"||k==="d"||k==="arrowleft"){e.preventDefault();RUN.tap("L");}else if(k==="j"||k==="k"||k==="arrowright"){e.preventDefault();RUN.tap("R");}return;}
+    if(!this.keyH){this.keyH=e=>{if(!e.repeat&&typeof TUG!=="undefined"&&TUG.st&&!TUG.st.done){const k=e.key.toLowerCase();if(k==="f"||k==="d"||k==="arrowleft"){e.preventDefault();TUG.tap();return;}if(k==="j"||k==="k"||k==="arrowright"||k===" "){e.preventDefault();TUG.heave();return;}}if(!e.repeat&&typeof RELAY!=="undefined"&&RELAY.st&&(e.key===" "||/^[jk]$/i.test(e.key)||e.key==="ArrowRight")){e.preventDefault();RELAY.pass();return;}if(typeof LIVE!=="undefined"&&LIVE.st&&LIVE.st.phase==="play"&&/^[123]$/.test(e.key)){const d=LIVE.st.cur;if(d){e.preventDefault();LIVE.answer(d.ord[+e.key-1]);}return;}if(typeof RUN!=="undefined"&&RUN.st&&(RUN.st.phase==="race"||RUN.st.phase==="set")){const k=e.key.toLowerCase();if(e.repeat)return;if(k==="f"||k==="d"||k==="arrowleft"){e.preventDefault();RUN.tap("L");}else if(k==="j"||k==="k"||k==="arrowright"){e.preventDefault();RUN.tap("R");}return;}
       if(!this.st||this.st.phase!=="play")return;const k=e.key.toLowerCase();if(e.repeat)return;
       if(k==="f"||k==="d"||k==="arrowleft"){e.preventDefault();this.hit("L");}else if(k==="j"||k==="k"||k==="arrowright"){e.preventDefault();this.hit("R");}else if(k==="escape")this.close();};
       document.addEventListener("keydown",this.keyH);
       document.addEventListener("visibilitychange",()=>{if(document.hidden&&typeof LIVE!=="undefined"&&LIVE.st&&LIVE.st.phase==="play"){LIVE.st.dur=0;}if(document.hidden&&this.st&&this.st.phase==="play"){this.st.phase="abort";cancelAnimationFrame(this.raf);this.draw();}if(document.hidden&&typeof RUN!=="undefined"&&RUN.st&&(RUN.st.phase==="race"||RUN.st.phase==="set")){RUN.stop();RUN.st.phase="pick";RUN.draw();}});}},
-  close(){cancelAnimationFrame(this.raf);if(typeof LIVE!=="undefined"&&LIVE.st){cancelAnimationFrame(LIVE.raf);LIVE.st=null;}if(typeof RUN!=="undefined"&&RUN.st){RUN.stop();RUN.st=null;}const dz=typeof DUEL!=="undefined"&&DUEL.st;if(dz){DUEL.abort();}const el=document.getElementById("minibag");if(el)el.remove();this.st=null;try{AU.startMusic("hub");}catch(e){}if((G.cardPend||[]).length&&!UI.modal)UI.modal={type:"cardnew"};render();},
-  draw(){const S=this.st,el=document.getElementById("minibag");if(!S||!el)return;if(S.phase==="live")return LIVE.draw();if(S.phase==="run")return RUN.draw();if(S.phase==="duel"&&typeof DUEL!=="undefined")return DUEL.draw();const F=bagFighters(G),f=G.F[S.id];
+  close(){cancelAnimationFrame(this.raf);if(typeof LIVE!=="undefined"&&LIVE.st){cancelAnimationFrame(LIVE.raf);LIVE.st=null;}if(typeof SPORTS!=="undefined"&&SPORTS.st){SPORTS.close();return;}if(typeof RUN!=="undefined"&&RUN.st){RUN.stop();RUN.st=null;}const dz=typeof DUEL!=="undefined"&&DUEL.st;if(dz){DUEL.abort();}const el=document.getElementById("minibag");if(el)el.remove();this.st=null;try{AU.startMusic("hub");}catch(e){}if((G.cardPend||[]).length&&!UI.modal)UI.modal={type:"cardnew"};render();},
+  draw(){const S=this.st,el=document.getElementById("minibag");if(!S||!el)return;if(S.phase==="live")return LIVE.draw();if(S.phase==="run")return RUN.draw();if(S.phase==="duel"&&typeof DUEL!=="undefined")return DUEL.draw();if(S.phase==="sports"&&typeof SPORTS!=="undefined")return SPORTS.draw();const F=bagFighters(G),f=G.F[S.id];
     const M=MG_MODES[S.mode];
     if(S.phase==="hub"){el.innerHTML=`<div class="mbox px"><h2>${JOY_PX} Minigames</h2><p class="meta center">Each game gives a reward once a week · replay as practice anytime</p>
        <div class="mghub">${Object.entries(MG_MODES).map(([k,X])=>{const op=X.open(G),pl=mgPlayed(G,k);return `<button class="mgitem ${pl?"done":""}" data-mb="mode" data-v="${k}" ${op?"":"disabled"}><span class="mi">${X.icon}</span><span><b>${X.title}</b><small>${op?(pl?"Reward claimed this week ✓":X.note):"Not open yet"}</small></span><span class="chev">▸</span></button>`;}).join("")}</div>
@@ -706,7 +706,7 @@ const RUN={st:null,
     else if(a==="go")this.set();
     else if(a==="L"||a==="R")this.tap(a);
     else if(a==="again"){S.phase="pick";S.practice=true;this.draw();}
-    else if(a==="next"&&S.duel&&typeof DUEL!=="undefined")DUEL.next();
+    else if(a==="next"&&S.duel){if(S.duel.next)S.duel.next();else if(typeof DUEL!=="undefined")DUEL.next();}
     else if(a==="hub"){this.stop();this.st=null;BAG.st.phase="hub";BAG.draw();}},
   stop(){cancelAnimationFrame(this.raf);clearTimeout(this.to);},
   runner(){return G.F[this.st.id];},
@@ -718,7 +718,7 @@ const RUN={st:null,
        <p class="meta">Drag the runner into the blocks, wait for the gun, then tap <b class="mbL">Left</b>/<b class="mbR">Right</b> alternately as fast as you can (F / J works too) · same side twice = stumble · moving before the gun = false start</p>
        <b class="meta">Who runs</b><div class="mbpick">${F.map(x=>`<button class="mbf ${x.id===S.id?"on":""}" data-rn="me" data-v="${x.id}"><img src="${faceSrc(x.id,"happy")}" alt=""><small>${esc(x.name)}</small></button>`).join("")}</div>
        ${S.duel?`<p class="meta center">Opponent: <b>${esc(O.name)}</b></p>`:`<b class="meta">Race against</b><div class="mbpick">${F.filter(x=>x.id!==S.id).map(x=>`<button class="mbf ${x.id===S.opp?"on":""}" data-rn="opp" data-v="${x.id}"><img src="${faceSrc(x.id,"happy")}" alt=""><small>${esc(x.name)}</small></button>`).join("")||`<p class="meta">Race against your own time</p>`}</div>`}
-       <p class="meta center">${S.duel?"Duel with a regional champion · best of 3":S.practice?"Already played this week · this run is practice, no rewards":`Weekly reward: speed/stamina · morale · stardust ✦${best?` · record ${best.toFixed(2)} s`:""}`}</p>
+       <p class="meta center">${S.duel?(S.duel.note||"Duel with a regional champion · best of 3"):S.practice?"Already played this week · this run is practice, no rewards":`Weekly reward: speed/stamina · morale · stardust ✦${best?` · record ${best.toFixed(2)} s`:""}`}</p>
        <div class="mfoot roadbtns"><button class="btn" data-mb="close">Not now</button><button class="btn primary" data-rn="go" ${me?"":"disabled"}>To the start line ▸</button></div></div>`;return;}
     if(S.phase==="set"||S.phase==="race"){
       el.innerHTML=`<div class="mplay rn"><div class="mhud"><b>${esc(me.name)}</b><span id="rnmsg">${S.phase==="set"?"Drag into the blocks":""}</span><span><b id="rnt">0.00</b> s</span><button class="xbtn" data-mb="close" aria-label="Exit">✕</button></div>
@@ -782,7 +782,8 @@ const RUN={st:null,
     const grade=dq?"C":t<11?"S":t<12.5?"A":t<14?"B":"C";
     G.mini=G.mini||{};G.mini.best=G.mini.best||{};const isBest=!dq&&!S.duel&&(!G.mini.best.run||t<G.mini.best.run);if(isBest)G.mini.best.run=Math.round(t*100)/100;
     S.res={win,t,ot,dq,st:S.st,fs:S.fs,react:S.react||0,grade:S.duel?null:grade,best:isBest,rw:""};
-    if(S.duel&&typeof DUEL!=="undefined"){DUEL.done({win,score:t},S);}
+    if(S.duel&&S.duel.cb){S.duel.cb({win,t,ot,dq});}
+    else if(S.duel&&typeof DUEL!=="undefined"){DUEL.done({win,score:t},S);}
     else if(!S.practice)S.res.rw=this.reward(grade,win);
     save();this.draw();AU.sfx&&AU.sfx(win?"level":"ui");},
   reward(grade,win){const S=this.st,f=this.runner(),out=[];G.campUsed=S.act||"run";G.campNote=`${CAMP_ACTIONS.run.name} · grade ${grade}`;
@@ -797,6 +798,114 @@ const RUN={st:null,
     return `<span class="rwl">${out.map(x=>`<span class="rwi">${x}</span>`).join("")}</span>`;}};
 MG_MODES.run={icon:"🏃",title:"100 m sprint",note:"Alternate left and right fast · speed/stamina, stardust",open:G=>(G.week>=6||(G.season||1)>=2)&&bagFighters(G).length>=1,custom:true};
 MG_ACT.run="run";
+/* v1.90: district sports day — once a year from week 24: 100 m sprint, tug of war and a 3-leg relay against the other colours; points per event */
+const SPORTS_WK=24;
+const SP_TEAMS=[{k:"me",n:"Red · Sirichai Camp",c:"#d9473b"},{k:"tiger",n:"Yellow · Golden Tiger Camp",c:"#e2b23a"},{k:"teach",n:"Blue · District School teachers",c:"#3a86d9"},{k:"obt",n:"Green · District Office team",c:"#3aa65a"}];
+const SP_EV=[{k:"run",n:"100 m sprint",ic:"🏃",d:"Pick one runner to race the Golden Tiger's best"},{k:"tug",n:"Tug of war",ic:"🪢",d:"The whole camp pulls together · tap Pull fast, then hit Heave! when the needle is in the green"},{k:"relay",n:"3-person relay",ic:"🏅",d:"The camp's 3 fastest runners · time the baton hand-offs"}];
+function sportsDue(G){return !G.ended&&G.week>=SPORTS_WK&&G.week<=SPORTS_WK+4&&!(G.sports||{})[G.season||1]&&roster(G).length>=1;}
+function sportsDayYear(done){if(!sportsDue(G)){done();return;}SPORTS.open(done);}
+const SPORTS={st:null,
+  el(){return document.getElementById("minibag");},
+  open(done){BAG.st={phase:"sports",mode:"run",practice:true};BAG.mount();this.st={ph:"intro",ev:0,pts:{me:0,tiger:0,teach:0,obt:0},log:[],done};this.draw();},
+  rivals(){return Object.values(G.F).filter(f=>f.camp==="rival"&&!f.retired).sort((a,b)=>(b.a.speed||0)-(a.a.speed||0));},
+  /* the camp and the Golden Tiger fight for first; the teachers and the district office fill in behind */
+  rank(win,none){const S=this.st,r=mulberry32((G.seed||1)+(G.season||1)*97+S.ev*13),o=r()<.5?["teach","obt"]:["obt","teach"];
+    const order=none?["tiger",...o,"me"]:win?["me","tiger",...o]:["tiger","me",...o];[3,2,1,0].forEach((p,i)=>S.pts[order[i]]+=p);S.log.push({ev:S.ev,win:!!win,none:!!none});},
+  act(a){const S=this.st;if(!S)return;
+    if(a==="go"){S.ph="ev";this.draw();}
+    else if(a==="start")this.startEv();
+    else if(a==="next"){S.ev++;if(S.ev>=SP_EV.length){this.finish();return;}S.ph="ev";this.draw();}
+    else if(a==="tap")TUG.tap();else if(a==="heave")TUG.heave();else if(a==="pass")RELAY.pass();
+    else if(a==="end")this.close();},
+  startEv(){const S=this.st,E=SP_EV[S.ev];
+    if(E.k==="run"){const t=this.rivals()[0],pace=t?6.3+((t.a.speed||10)-10)*.1:6.6;
+      RUN.pick({duel:{opp:{id:t?t.id:null,name:t?t.name:"Golden Tiger runner",f:t||null,pace},label:"Sports day",note:"District sports day · cross the line first = Red takes 1st",
+        cb:res=>{this.rank(res.win);S.res=res;},next:()=>{RUN.stop();RUN.st=null;BAG.st.phase="sports";S.ph="res";this.draw();}}});return;}
+    if(E.k==="tug"){S.ph="tug";TUG.start(res=>{if(!this.st)return;this.rank(res.win);S.res=res;S.ph="res";this.draw();});return;}
+    const R=roster(G).slice().sort((a,b)=>(b.a.speed||0)-(a.a.speed||0)).slice(0,3);
+    if(R.length<3){this.rank(false,true);S.res={none:true};S.ph="res";this.draw();return;}
+    S.ph="relay";RELAY.start(R,res=>{if(!this.st)return;this.rank(res.win);S.res=res;S.ph="res";this.draw();});},
+  table(){const S=this.st;return `<div class="sp-tab">${SP_TEAMS.slice().sort((a,b)=>S.pts[b.k]-S.pts[a.k]).map(T=>`<div class="sp-row${T.k==="me"?" me":""}" style="--tc:${T.c}"><i></i><span>${esc(T.n)}</span><b>${S.pts[T.k]}</b></div>`).join("")}</div>`;},
+  finish(){const S=this.st,order=SP_TEAMS.map(t=>t.k).sort((a,b)=>S.pts[b]-S.pts[a]||(a==="me"?-1:b==="me"?1:0)),place=order.indexOf("me")+1,y=G.season||1;
+    const mo=place===1?6:place===2?4:2,du=place===1?6:place===2?4:2,out=[];
+    for(const f of roster(G))f.morale=Math.min(100,(f.morale||0)+mo);out.push(`Morale for everyone +${mo}`);G.dust=(G.dust||0)+du;out.push(`<b class="goldt">✦ +${du}</b>`);
+    if(place===1){G.rep=(G.rep||0)+1;out.push("Fame +1");G.flags.sportsWin=(G.flags.sportsWin||0)+1;}
+    G.sports=G.sports||{};G.sports[y]={place,pts:{...S.pts}};
+    if(typeof cardCheck==="function"){const got=cardCheck(G);if(got.length){G.cardPend=(G.cardPend||[]).concat(got);out.push(`🃏 New card ×${got.length}`);}}
+    S.place=place;S.out=out;S.ph="final";save();this.draw();AU.sfx&&AU.sfx(place===1?"champ":"level");},
+  close(){const S=this.st;if(!S)return;this.st=null;TUG.stop();RELAY.stop();if(RUN.st){RUN.stop();RUN.st=null;}
+    const y=G.season||1;if(!(G.sports||{})[y]){G.sports=G.sports||{};G.sports[y]={place:0,pts:{...S.pts},left:1};}
+    const el=this.el();if(el)el.remove();BAG.st=null;save();try{AU.startMusic("hub");}catch(e){}render();if(S.done)S.done();},
+  draw(){const S=this.st,el=this.el();if(!S||!el)return;const E=SP_EV[S.ev];
+    if(S.ph==="intro"){el.innerHTML=`<div class="mbox px sp"><h2>🎌 District sports day, year ${G.season||1}</h2>
+       <div class="ctip"><img src="${faceSrc("coach")}" alt=""><span>The district has invited us to sports day again. This year we're Red, and the Golden Tiger camp is Yellow… don't you dare lose to them!</span></div>
+       ${this.table()}<p class="meta">3 events: ${SP_EV.map(e=>e.ic+" "+e.n).join(" · ")} · 1st place scores 3 points, 2nd scores 2 · win on total points = fame +1 · everyone's morale · stardust</p>
+       <div class="mfoot roadbtns"><button class="btn" data-sp="end">Skip this year</button><button class="btn primary" data-sp="go">To the sports field ▸</button></div></div>`;return;}
+    if(S.ph==="ev"){el.innerHTML=`<div class="mbox px sp"><h2>${E.ic} Event ${S.ev+1}: ${E.n}</h2><p class="meta">${E.d}</p>${this.table()}
+       <div class="mfoot roadbtns"><button class="btn primary" data-sp="start">Start ▸</button></div></div>`;return;}
+    if(S.ph==="tug"){TUG.draw();return;}
+    if(S.ph==="relay"){RELAY.draw();return;}
+    if(S.ph==="res"){const R=S.res||{},L=S.log[S.log.length-1]||{};
+      const line=R.none?"The camp has fewer than 3 fighters, so it can't enter the relay. The other colours take it this year.":L.win?(E.k==="run"?"Red crosses the line first! Sirichai's cheering squad drums the whole field down.":E.k==="tug"?"The rope slides all the way to Red! Yellow ends up in a heap in the middle of the field.":"The anchor crosses first! The whole camp runs onto the track for a group hug.")
+        :(E.k==="run"?"Yellow crosses the line just ahead.":E.k==="tug"?"Yellow drags the rope all the way… Kru Daeng says everyone needs to eat more next year.":"The anchor couldn't catch up. Yellow crosses first.");
+      const extra=E.k==="relay"&&R.t?`<p class="center meta">Total time: Red ${R.t.toFixed(2)} s · Yellow ${R.ot.toFixed(2)} s</p>`:"";
+      el.innerHTML=`<div class="mbox px sp"><h2>${E.ic} ${E.n} · ${R.none?"Did not compete":L.win?"Red takes 1st!":"Red takes 2nd"}</h2><p class="center">${line}</p>${extra}${this.table()}
+       <div class="mfoot roadbtns"><button class="btn primary" data-sp="next">${S.ev+1<SP_EV.length?"Next event ▸":"See the totals ▸"}</button></div></div>`;return;}
+    if(S.ph==="final"){const P=S.place,T=SP_TEAMS.find(t=>t.k==="me");
+      el.innerHTML=`<div class="mbox px sp"><h2>${P===1?"🏆 Red wins sports day!":`Red finishes in place ${P}`}</h2>${this.table()}
+       <p class="center"><span class="rwl">${S.out.map(x=>`<span class="rwi">${x}</span>`).join("")}</span></p>
+       <div class="ctip"><img src="${faceSrc("coach")}" alt=""><span>${P===1?"Grandpa Chai won the sports day cup only once, back when the camp had fifteen people… and today we did it again.":"Losing at sports day is fine. Losing in the ring is not! Back to training."}</span></div>
+       <div class="mfoot roadbtns"><button class="btn primary" data-sp="end">Back to camp</button></div></div>`;}}};
+/* tug of war: tap to pull, heave when the needle sits in the green */
+const TUG={st:null,
+  start(cb){const R=roster(G),pw=R.length?R.reduce((s,f)=>s+(f.a.power||10)+(f.a.stamina||10),0)/R.length/20:1;
+    this.st={p:0,t0:performance.now(),prev:0,cb,pw:Math.max(.8,Math.min(1.5,pw)),mk:0,dir:1,done:false,opp:Math.min(.11,.08+.005*(G.season||1)),msgT:0};this.draw();this.loop();},
+  stop(){cancelAnimationFrame(this.raf);clearTimeout(this.to);this.st=null;},
+  tap(){const S=this.st;if(!S||S.done)return;S.p+=.012*S.pw;this.bump("tgL");},
+  heave(){const S=this.st;if(!S||S.done)return;const ok=S.mk>.4&&S.mk<.6;S.p+=ok?.09*S.pw:-.03;this.say(ok?"Heave!! All together!":"Out of rhythm!");this.bump("tgR");AU.sfx&&AU.sfx(ok?"hit":"ui");},
+  bump(id){const b=document.getElementById(id);if(b){b.classList.remove("hit");void b.offsetWidth;b.classList.add("hit");}},
+  say(t){const m=document.getElementById("tgmsg");if(m)m.textContent=t;},
+  loop(){const step=()=>{const S=this.st;if(!S||S.done)return;const now=performance.now(),dt=Math.min(.05,S.prev?(now-S.prev)/1000:.016),el=(now-S.t0)/1000;S.prev=now;
+      S.mk+=S.dir*dt*1.15;if(S.mk>1){S.mk=1;S.dir=-1;}if(S.mk<0){S.mk=0;S.dir=1;}
+      if(el>1)S.p-=S.opp*dt*(1+.3*Math.sin(el*1.7));
+      const f=document.getElementById("tgflag"),k=document.getElementById("tgmk"),t=document.getElementById("tgt");if(f)f.style.left=(50-Math.max(-1,Math.min(1,S.p))*42)+"%";if(k)k.style.left=(S.mk*100)+"%";if(t)t.textContent=Math.max(0,20-el).toFixed(1);
+      if(S.p>=1||S.p<=-1||el>=20){this.end(S.p>0);return;}this.raf=requestAnimationFrame(step);};this.raf=requestAnimationFrame(step);},
+  end(win){const S=this.st;S.done=true;this.say(win?"Red wins!":"Yellow wins…");AU.sfx&&AU.sfx(win?"level":"ui");const cb=S.cb,p=S.p;this.to=setTimeout(()=>{this.st=null;cb({win,p});},900);},
+  draw(){const el=document.getElementById("minibag");if(!el||!this.st)return;
+    el.innerHTML=`<div class="mplay tug"><div class="mhud"><b>🪢 Tug of war</b><span id="tgmsg">Tap Pull fast, then hit Heave! when the needle is in the green</span><span><b id="tgt">20.0</b> s</span></div>
+     <div class="tug-field"><span class="tug-team r">Red</span><div class="tug-rope"><i class="tug-mid"></i><b id="tgflag" class="tug-flag"></b></div><span class="tug-team y">Yellow</span></div>
+     <div class="tug-meter"><i class="tug-zone"></i><b id="tgmk"></b></div>
+     <div class="mbtns"><button class="mbtn L" id="tgL"><b>Pull!</b><small>F</small></button><button class="mbtn R" id="tgR"><b>Heave!</b><small>J</small></button></div></div>`;
+    const pd=f=>e=>{e.preventDefault();f();};document.getElementById("tgL").addEventListener("pointerdown",pd(()=>this.tap()));document.getElementById("tgR").addEventListener("pointerdown",pd(()=>this.heave()));}};
+/* relay: three legs; hand the baton over (and dip at the line) when the runner reaches the zone */
+const RELAY={st:null,
+  start(R,cb){this.st={R,leg:0,cb,adj:[],msg:""};this.legStart();},
+  stop(){cancelAnimationFrame(this.raf);clearTimeout(this.to);this.st=null;},
+  legStart(){const S=this.st;S.t0=performance.now();S.dur=1.5+Math.random()*.5;S.pressed=false;this.draw();this.loop();},
+  label(){const S=this.st;return S.leg<2?`Hand the baton to ${S.R[S.leg+1].name}`:"Dive for the line!";},
+  loop(){const step=()=>{const S=this.st;if(!S||S.pressed)return;const x=(performance.now()-S.t0)/(S.dur*1000),k=document.getElementById("rlmk");if(k)k.style.left=Math.min(100,x*100)+"%";
+      if(x>=1.12){this.judge(x);return;}this.raf=requestAnimationFrame(step);};this.raf=requestAnimationFrame(step);},
+  pass(){const S=this.st;if(!S||S.pressed)return;this.judge((performance.now()-S.t0)/(S.dur*1000));},
+  judge(x){const S=this.st;S.pressed=true;cancelAnimationFrame(this.raf);const q=x<.72?"early":x<=.9?"good":x<=1?"ok":x<1.12?"late":"miss";
+    S.adj.push({early:.8,good:-.3,ok:0,late:.6,miss:1.2}[q]);S.msg={early:"Too early! Nearly dropped it",good:"Smooth hand-off!",ok:"Passed",late:"A little late",miss:"No pass, the baton slipped!"}[q];
+    const m=document.getElementById("rlmsg");if(m)m.textContent=S.msg;AU.sfx&&AU.sfx(q==="good"?"hit":"ui");
+    this.to=setTimeout(()=>{if(!this.st)return;S.leg++;if(S.leg>=3)this.end();else this.legStart();},650);},
+  legT:f=>12.9-((f.a.speed||10)-10)*.12-((f.a.stamina||10)-10)*.04,
+  end(){const S=this.st,me=S.R.reduce((s,f)=>s+this.legT(f),0)+S.adj.reduce((a,b)=>a+b,0),T=SPORTS.rivals().slice(0,3),r=mulberry32((G.seed||1)*7+(G.season||1)),
+      ot=(T.length===3?T.reduce((s,f)=>s+this.legT(f),0):38.4)+(r()-.5)*.6-.1;const cb=S.cb;this.st=null;cb({win:me<=ot,t:me,ot});},
+  draw(){const S=this.st,el=document.getElementById("minibag");if(!S||!el)return;const f=S.R[S.leg];
+    el.innerHTML=`<div class="mplay relay"><div class="mhud"><b>🏅 Relay · leg ${S.leg+1}/3</b><span id="rlmsg">${esc(S.msg||"")}</span></div>
+     <div class="rl-legs">${S.R.map((x,i)=>`<span class="${i===S.leg?"on":i<S.leg?"done":""}"><img src="${faceSrc(x.id,"happy")}" alt=""><small>${esc(x.name)}</small></span>`).join("")}</div>
+     <div class="rl-bar"><i class="rl-zone"></i><b id="rlmk"><img src="${faceSrc(f.id,"happy")}" alt=""></b></div>
+     <div class="mbtns"><button class="mbtn R run" id="rlgo" style="grid-column:1/-1"><b>${esc(this.label())}</b><small>when the runner reaches the green · J</small></button></div></div>`;
+    document.getElementById("rlgo").addEventListener("pointerdown",e=>{e.preventDefault();this.pass();});}};
+Object.assign(CARDS,{
+ sp_team_r:{c:"kati",r:"R",t:"The Second Sports Day Cup",hint:"Win the district sports day",bg:"sportsday",need:G=>(G.flags.sportsWin||0)>0,steps:[
+  {n:"nar",t:"Late afternoon at the district school field. The red cheering squad won't stop drumming as the headmaster hands Sirichai Camp a gold plastic cup."},
+  {n:"coach",t:"Grandpa Chai won the first cup back when the camp had fifteen people. This is the second one… put them side by side."},
+  {n:"kati",f:"happy",l:"casual",t:"Everyone, photo time! Kru Daeng in the middle, no hiding!"},
+  {n:"nar",t:"The photo comes out blurry because nobody stood still, but it's framed and still hangs in the office today."}]}});
+
 Object.assign(CARDS,{
  m_live:{c:"kati",r:"R",t:"The Camp's First Live",hint:"Stream the camp's merch for the first time",bg:"camp",need:G=>(G.flags.liveN||0)>=1,steps:[
   {n:"nar",t:"A phone propped on a stack of sandbags. Kati in the one camp shirt she ironed flattest. Front camera on. Three viewers."},

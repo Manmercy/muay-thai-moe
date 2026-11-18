@@ -1845,6 +1845,26 @@ Object.assign(CARDS,{
  x_ploy_r2:{c:"ploy",r:"R",t:"I Wasn't Nervous",hint:"Ploy wins a title fight for Sirichai",bg:"final",need:G=>(G.cal||[]).some(c=>c.a==="ploy"&&c.tier==="final"&&c.res==="W"),steps:[{"n":"nar","t":"The belt goes around Ploy's waist. The crowd stands to applaud; Ploy stands still, expressionless."},{"n":"ploy","f":"happy","l":"fight","t":"I'm not excited. I've won like this plenty of times."},{"n":"nar","t":"On the way down, though, she walks into a corner post, and quietly apologises to it."},{"n":"ploy","f":"flustered","l":"fight","t":"…You didn't see anything. Understood?"}]},
  x_fah_n1:{c:"fah",r:"N",t:"Nobody Won, Fah's Furious",hint:"Fah fights to a draw for Sirichai",bg:"local",need:G=>funCount(G,"fah","D")>=1,steps:[{"n":"nar","t":"The referee raises both hands. A draw. Fah stomps in the middle of the ring."},{"n":"fah","f":"angry","l":"fight","t":"What's a draw!? I don't get it! Then who gets the medal! Who gets the grilled chicken!"},{"n":"coach","t":"Half a chicken each."},{"n":"fah","f":"happy","l":"fight","t":"…Half is fine. But I want the drumstick!"}]},
  x_fah_r1:{c:"fah",r:"R",t:"Fah Isn't Crying",hint:"Fah loses 3 fights in a row",bg:"night",need:G=>funStreak(G,"fah","L")>=3,steps:[{"n":"nar","t":"Three losses in a row. Fah vanishes all evening, until you find her behind the heavy bag, face buried in her knees."},{"n":"fah","f":"sad","l":"casual","t":"I'm not crying! It's dust! This camp is dusty!"},{"n":"nar","t":"You sit down beside her without a word. Slowly, Fah leans her head on your shoulder."},{"n":"fah","f":"flustered","l":"casual","t":"…Can we train extra tomorrow? Double. And don't tell anyone I sat here."}]}});
+// v1.90 (hidden): regional champions — an R card the first time the camp beats each of them in the visit duel
+const RG_DUEL_W=(G,c)=>!!(G.region&&(G.region.duelWon||{})[c]);
+Object.assign(CARDS,{
+ rg_baibua_r:{c:"baibua",r:"R",rg:1,t:"The Last Plate",hint:"Win the duel against Baibua when she visits the camp",bg:"kitchen",need:G=>RG_DUEL_W(G,"baibua"),steps:[
+  {n:"nar",t:"It's late and everyone has gone to bed, but water is still running in the kitchen. Baibua is washing the last pile of dishes alone."},
+  {n:"baibua",f:"happy",l:"casual",t:"You don't have to help. I like washing up… at my camp it's only two of us at dinner, me and my dad."},
+  {n:"baibua",f:"flustered",l:"casual",t:"So many plates means lots of people living together here… I don't want to go home."}]},
+ rg_tabtim_r:{c:"tabtim",r:"R",rg:1,t:"Consolation Prize",hint:"Win the duel against Tabtim when she visits the camp",bg:"night",need:G=>RG_DUEL_W(G,"tabtim"),steps:[
+  {n:"tabtim",f:"happy",l:"casual",t:"Losers get a consolation prize! Tonight you're taking Tabtim out for moo kratha!"},
+  {n:"nar",t:"That night the whole camp sits around the moo kratha grill. Tabtim puts the most perfectly cooked piece on the Manager's plate before anyone else's."},
+  {n:"tabtim",f:"flustered",l:"casual",t:"…Don't read into it! That piece was a little burnt, that's all, haha."}]},
+ rg_alicia_r:{c:"alicia",r:"R",rg:1,t:"Five Minutes Off Camera",hint:"Win the duel against Alicia when she visits the camp",bg:"night",need:G=>RG_DUEL_W(G,"alicia"),steps:[
+  {n:"nar",t:"The sponsor's camera crew follows her to the camp gate. Alicia grabs the Manager's wrist, pulls them into the office and locks the door."},
+  {n:"alicia",f:"flustered",l:"casual",t:"Shh! …Five minutes. Five minutes where nobody's filming."},
+  {n:"alicia",f:"happy",l:"casual",t:"First time in my life I've lost a duel to a small camp. Strange… it doesn't sting at all. …Don't get the wrong idea."}]},
+ rg_chaba_r:{c:"chaba",r:"R",rg:1,t:"The Mended Fence",hint:"Win the duel against Chaba when she visits the camp",bg:"gymdusk",need:G=>RG_DUEL_W(G,"chaba"),steps:[
+  {n:"nar",t:"The sun sets behind the fence Chaba fixed from end to end. She sits on a pile of planks, saying nothing."},
+  {n:"nar",t:"The Manager sits down beside her. Chaba slides a bottle of water over without looking."},
+  {n:"chaba",f:"happy",l:"casual",t:"…Fast runners, this camp."},
+  {n:"chaba",f:"flustered",l:"casual",t:"This fence will last another ten years. …Come and see if I'm right."}]}});
 function cardCheck(G){G.cards=G.cards||{};const got=[];for(const id in CARDS){if(G.cards[id])continue;const C=CARDS[id];if(C.g)continue;try{if(C.need(G)){G.cards[id]={n:1,lv:1,wk:absWeek(G),seen:false};got.push(id);G.dust=(G.dust||0)+5;}}catch(e){}}return got;}
 
 
