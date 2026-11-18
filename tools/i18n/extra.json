@@ -11444,7 +11444,6 @@
  "สัปดาห์หน้ามาอีก": "back next week",
  "ไล่จับไอ้ตุ่มแล้ว (": "Tum caught (",
  "มาทางจดหมายป้าแต๋ว 3 ช่วง: วันละครั้งระหว่าง 20–23 พ.ย. 2569 (วันจริง) · ทุกสัปดาห์ 4 สัปดาห์แรกหลังเริ่มศึกริมน้ำ · ช่วงลอยกระทงในเกม (สัปดาห์ 24–27 ทุกปี) จับได้ได้ EXP กับเศษดาว ยิ่งค่ายเก่ง ไอ้ตุ่มก็เก่งตาม ส่วนลูกนากจากงานลอยกระทงช่วยลดความล้าตอนเล่นด้วย": "Arrives by Auntie Taew's letter at three times: once a day from 20–23 Nov 2026 (real days) · every week for the first 4 weeks after you start the riverside brawl · every in-game Loy Krathong (weeks 24–27 each year). Catch him for EXP and stardust; he gets tougher as your camp does. The Loy otter now eases fatigue when you play with it.",
- "น้องชายไอ้ตุ่ม มาทางจดหมายป้าแต๋ววันละครั้งเฉพาะ 20–23 พ.ย. 2569 (วันจริง) ไฟต์ 3 ยก เก่งกว่าไอ้ตุ่ม ได้ EXP กับเศษดาวมากกว่า แพ้ก็ได้เศษดาวปลอบใจ ถ้าช่วงไหนไอ้ตุ่มมาด้วยก็จับได้ทั้งสองตัว": "Tum's younger brother. Arrives by Auntie Taew's letter once a day on 20–23 Nov 2026 (real days) only. A 3-round bout, tougher than Tum, with more EXP and stardust; a little stardust even if you lose. When Tum is around too, you can catch both.",
  "ไอ้ตุ๋ย หน้ากากแดง": "Tuy the Red Mask",
  "มาทางจดหมายป้าแต๋ว 2 ช่วง: ทุกสัปดาห์ 4 สัปดาห์แรกหลังเริ่มศึกริมน้ำ · ช่วงลอยกระทงในเกม (สัปดาห์ 24–27 ทุกปี) จับได้ได้ EXP กับเศษดาว ยิ่งค่ายเก่ง ไอ้ตุ่มก็เก่งตาม ส่วนลูกนากจากงานลอยกระทงช่วยลดความล้าตอนเล่นด้วย": "Arrives by Auntie Taew's letter at two times: every week for the first 4 weeks after you start the riverside brawl · every in-game Loy Krathong (weeks 24–27 each year). Catch him for EXP and stardust; he gets tougher as your camp does. The Loy otter now eases fatigue when you play with it.",
  "จับไอ้ตุ๋ยได้แล้ว ": "Tuy caught ",
@@ -11464,5 +11463,8 @@
  "ไล่จับไอ้ตุ๋ย หน้ากากแดง": "Catch Tuy the Red Mask",
  "ไล่จับไอ้ตุ๋ยแล้ว (พรุ่งนี้มาอีก)": "Tuy caught (back tomorrow)",
  "<button class=\"btn primary\" data-act=\"tuy\">ไปไล่จับไอ้ตุ๋ย</button>": "<button class=\"btn primary\" data-act=\"tuy\">Go catch Tuy</button>",
- "<p class=\"meta center\">ไล่จับไอ้ตุ๋ยแล้ว</p>": "<p class=\"meta center\">Tuy caught</p>"
+ "<p class=\"meta center\">ไล่จับไอ้ตุ๋ยแล้ว</p>": "<p class=\"meta center\">Tuy caught</p>",
+ "น้องชายไอ้ตุ่ม มาทางจดหมายป้าแต๋ววันละครั้งเฉพาะ 20–23 พ.ย. 2569 (วันจริง) ไฟต์ 3 ยก เก่งกว่าไอ้ตุ่ม ได้ EXP กับเศษดาวมากกว่า ชนะได้เงินค่าน้ำร้อนน้ำชาจากชาวบ้านด้วย แพ้ก็ได้เศษดาวปลอบใจ ถ้าช่วงไหนไอ้ตุ่มมาด้วยก็จับได้ทั้งสองตัว": "Tum's younger brother. Arrives by Auntie Taew's letter once a day on 20–23 Nov 2026 (real days) only. A 3-round bout, tougher than Tum, with more EXP and stardust, plus a cash thank-you from the villagers when you win; a little stardust even if you lose. When Tum is around too, you can catch both.",
+ "ชาวบ้านฝากค่าน้ำร้อนน้ำชามาให้ค่ายด้วยนะลูก รับไว้เถอะ": "The villagers sent a little something for the camp too, dear. Go on, take it.",
+ "เงิน +": "Cash +"
 }

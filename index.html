@@ -7965,7 +7965,7 @@ AU.gsfx=function(kind,a){if(!this.init()||this.muted||!SETTINGS.sfx)return;const
   if(kind==="shimmer")for(let i=0;i<6;i++)T(i*.05,{f:1400+Math.random()*1400,type:"sine",dur:.12,peak:.06});};
 
 // ================= MUAY THAI MOE v1.3 — UI =================
-const VERSION="1.90.9";
+const VERSION="1.90.10";
 const CUR_LANG=(typeof window!=="undefined"&&window.LANG)||"th";
 const TH_LABEL=String.fromCharCode(3652,3607,3618);
 function langSwitch(cls){return `<div class="langsw ${cls||""}" role="group" aria-label="Language">${[["th",TH_LABEL],["en","EN"]].map(([k,l])=>`<button class="lsb ${CUR_LANG===k?"on":""}" data-act="setlang" data-v="${k}" aria-pressed="${CUR_LANG===k}">${l}</button>`).join("")}</div>`;}
@@ -8969,7 +8969,7 @@ const PATCH={id:"1.90.0",ver:"Muay Thai Moe v1.90",title:"คืนลอยก�
  ["👘","ชุดไทยใส่ได้จริง","สาวคนไหนชนะในศึกริมน้ำได้ ป้าแต๋วจะส่งชุดไทยของเธอมาทางจดหมาย กดรับแล้วเลือกใส่ได้ที่ตู้เสื้อผ้า ใส่ในค่าย ตอนซ้อม และบนเวทีจริง (เป็นแค่หน้าตา ไม่มีผลกับค่าพลัง)"],
  ["🪷","ลอยกระทงกับ 5 สาว","หลังดูฉากจบ ห้าสาวลอยกระทงที่ท่าน้ำ ผู้จัดการอธิษฐานได้ 4 แบบ แต่ละคนตอบไม่เหมือนกัน แล้วเช้าวันรุ่งขึ้น… ลองดูตู้จดหมาย"],
  ["🦝","ไอ้ตุ่ม โจรงมกระทง","มาทางจดหมายป้าแต๋ว 2 ช่วง: ทุกสัปดาห์ 4 สัปดาห์แรกหลังเริ่มศึกริมน้ำ · ช่วงลอยกระทงในเกม (สัปดาห์ 24–27 ทุกปี) จับได้ได้ EXP กับเศษดาว ยิ่งค่ายเก่ง ไอ้ตุ่มก็เก่งตาม ส่วนลูกนากจากงานลอยกระทงช่วยลดความล้าตอนเล่นด้วย"],
- ["🎭","ไอ้ตุ๋ย หน้ากากแดง","น้องชายไอ้ตุ่ม มาทางจดหมายป้าแต๋ววันละครั้งเฉพาะ 20–23 พ.ย. 2569 (วันจริง) ไฟต์ 3 ยก เก่งกว่าไอ้ตุ่ม ได้ EXP กับเศษดาวมากกว่า แพ้ก็ได้เศษดาวปลอบใจ ถ้าช่วงไหนไอ้ตุ่มมาด้วยก็จับได้ทั้งสองตัว"],
+ ["🎭","ไอ้ตุ๋ย หน้ากากแดง","น้องชายไอ้ตุ่ม มาทางจดหมายป้าแต๋ววันละครั้งเฉพาะ 20–23 พ.ย. 2569 (วันจริง) ไฟต์ 3 ยก เก่งกว่าไอ้ตุ่ม ได้ EXP กับเศษดาวมากกว่า ชนะได้เงินค่าน้ำร้อนน้ำชาจากชาวบ้านด้วย แพ้ก็ได้เศษดาวปลอบใจ ถ้าช่วงไหนไอ้ตุ่มมาด้วยก็จับได้ทั้งสองตัว"],
  ["🪖","แก๊งหมวกโฉมใหม่","หัวหน้าหมวกเงินมีสไปร์ตของตัวเอง มือขวาหมวกทองดำโผล่ตั้งแต่ปี 2 ทุกหมวกมีภาพในฉาก และชนะแก๊งครบ 3 ครั้งจะมีจดหมายท้าให้ไปชกที่โกดังของมัน ชนะได้ค่าเหนื่อย"],
  ["🙏","ไหว้ครูประจำปี","สัปดาห์ 37 (วันมวยไทย) ทุกปี เลือกชุดเครื่องไหว้ ทั้งค่ายคุกเข่ากราบครูสามครั้ง ครูแดงสวมมงคล คนใหม่ได้ครอบครู ได้กำลังใจและพรครูลดการบาดเจ็บช่วงหนึ่ง"],
  ["🥁","เวทีคึกขึ้น","ดนตรีปี่กลองเร่งตามยก ยกตัดสินเร็วสุด มีบทพากย์ใหม่กว่า 115 บรรทัด และสกิลที่ตรงกับแม่ไม้มวยไทยใช้ชื่อแม่ไม้จริง โฆษกเรียกชื่อท่าตอนออก"],
@@ -10915,7 +10915,7 @@ const LOY_TUY={name:"ไอ้ตุ๋ย หน้ากากแดง",
   {n:"npc",who:"ไอ้ตุ๋ย หน้ากากแดง",t:"พี่ตุ่มมันอ่อน ข้าไม่เหมือนพี่หรอก ใครแน่ก็ขึ้นมาเอาคืนบนท่าเรือนี่สิ!"}],
  win:[{n:"nar",bg:"loy_night",t:"ไอ้ตุ๋ยล้มหงายกลางท่าเรือ หมวกไหมพรมเลื่อนลงมาปิดตา กระสอบกระทงกลิ้งคืนมาทั้งใบ"},
   {n:"npc",who:"ไอ้ตุ๋ย หน้ากากแดง",t:"…อย่าบอกพี่ตุ่มนะว่าข้าแพ้!"},
-  {n:"npc",who:"ป้าแต๋ว",t:"สองพี่น้องนี่เหมือนกันจริง ๆ เก่งมากลูก ขนมครกถาดใหญ่เลย!"}],
+  {n:"npc",who:"ป้าแต๋ว",t:"สองพี่น้องนี่เหมือนกันจริง ๆ เก่งมากลูก ขนมครกถาดใหญ่เลย!"},{n:"npc",who:"ป้าแต๋ว",t:"ชาวบ้านฝากค่าน้ำร้อนน้ำชามาให้ค่ายด้วยนะลูก รับไว้เถอะ"}],
  lose:[{n:"nar",bg:"loy_night",t:"ไอ้ตุ๋ยดีดเหรียญขึ้นฟ้า รับไว้ได้พอดี แล้วหายไปในความมืดพร้อมกระสอบ"},
   {n:"npc",who:"ไอ้ตุ๋ย หน้ากากแดง",t:"พรุ่งนี้ข้ามาอีก! ไปซ้อมมาใหม่นะ!"},{n:"npc",who:"ป้าแต๋ว",t:"ไม่เป็นไรลูก พรุ่งนี้มันมาอีกแน่ ป้าจะรอดู"}]};
 function evStartLoy(){const L=loyOf(G);if(!L)return;if(L.thiefFrom==null){L.thiefFrom=absWeek(G);thiefMail(G);}loyPreload();UI.modal=null;
@@ -11281,7 +11281,8 @@ function thiefGo(fid){const L=loyOf(G);if(!L)return;const f=G.F[fid];if(!f)retur
     openFight2(bk,()=>{const F=LASTF,win=F&&F.result&&F.result.win==="A",ko=win&&/KO|น็อก/.test(F.result.type||"");if(tuy)L.tuyDay=todayStr();else L.thiefWk=absWeek(G);delete G.F.q_evthief;
       for(const m of G.mail||[])if(m.ev===(tuy?"tuy":"thief")&&!m.done)m.done=true;
       const yr=G.season||1,xp=Math.round((win?30+10*yr:10)*(tuy?1.5:1)),du=tuy?(win?(ko?8:6):2):(win?(ko?5:4):1);if(f.camp==="player")gainXP(G,f,xp);G.dust=(G.dust||0)+du;
-      const rw=[f.camp==="player"?`${f.name} EXP +${xp}`:"",`เศษดาว ✦ +${du}`].filter(Boolean).join(" · ");
+      /* v1.90.10 (Man): the villagers chip in when you win — Tuy ฿2,000 + ฿1,000 a year (KO +50%), Tum ฿200 */const cash=win?(tuy?Math.round((2000+1000*yr)*(ko?1.5:1)/100)*100:200):0;if(cash)G.cash+=cash;
+      const rw=[cash?`เงิน +${fmt(cash)}`:"",f.camp==="player"?`${f.name} EXP +${xp}`:"",`เศษดาว ✦ +${du}`].filter(Boolean).join(" · ");
       if(win){if(tuy)L.tuyN=(L.tuyN||0)+1;else L.thiefN=(L.thiefN||0)+1;}save();
       playScene(win?[...X.win,{n:"nar",t:tuy?`จับไอ้ตุ๋ยได้แล้ว ${L.tuyN} ครั้ง · ${rw}`:`จับไอ้ตุ่มได้แล้ว ${L.thiefN} ครั้ง · ${rw}`}]:[...X.lose,{n:"nar",t:`ไม่เป็นไร ประสบการณ์ก็คือประสบการณ์ · ${rw}`}],()=>{AU.startMusic("hub");UI.tab="home";save();render();},{bg:"river",look:"thai"});});},{bg:"river",look:"thai"});}
 Object.assign(ACT,{
@@ -12232,7 +12233,7 @@ CHAT.fah.push(
 <script>
 (function(){
 /* v1.87: Thai code ships inside index.html; English code (en.js) and the dictionary (i18n.js) load only when needed */
-var B="ba9428efef";
+var B="fa4a667422";
 var L="";try{L=localStorage.getItem("mtm_lang")||"";}catch(e){}
 try{var h=(location.hash||"").match(/lang=(th|en)/);if(h)L=h[1];}catch(e){}
 if(L!=="th"&&L!=="en")L="th";

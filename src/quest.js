@@ -1061,7 +1061,7 @@ const LOY_TUY={name:"ไอ้ตุ๋ย หน้ากากแดง",
   {n:"npc",who:"ไอ้ตุ๋ย หน้ากากแดง",t:"พี่ตุ่มมันอ่อน ข้าไม่เหมือนพี่หรอก ใครแน่ก็ขึ้นมาเอาคืนบนท่าเรือนี่สิ!"}],
  win:[{n:"nar",bg:"loy_night",t:"ไอ้ตุ๋ยล้มหงายกลางท่าเรือ หมวกไหมพรมเลื่อนลงมาปิดตา กระสอบกระทงกลิ้งคืนมาทั้งใบ"},
   {n:"npc",who:"ไอ้ตุ๋ย หน้ากากแดง",t:"…อย่าบอกพี่ตุ่มนะว่าข้าแพ้!"},
-  {n:"npc",who:"ป้าแต๋ว",t:"สองพี่น้องนี่เหมือนกันจริง ๆ เก่งมากลูก ขนมครกถาดใหญ่เลย!"}],
+  {n:"npc",who:"ป้าแต๋ว",t:"สองพี่น้องนี่เหมือนกันจริง ๆ เก่งมากลูก ขนมครกถาดใหญ่เลย!"},{n:"npc",who:"ป้าแต๋ว",t:"ชาวบ้านฝากค่าน้ำร้อนน้ำชามาให้ค่ายด้วยนะลูก รับไว้เถอะ"}],
  lose:[{n:"nar",bg:"loy_night",t:"ไอ้ตุ๋ยดีดเหรียญขึ้นฟ้า รับไว้ได้พอดี แล้วหายไปในความมืดพร้อมกระสอบ"},
   {n:"npc",who:"ไอ้ตุ๋ย หน้ากากแดง",t:"พรุ่งนี้ข้ามาอีก! ไปซ้อมมาใหม่นะ!"},{n:"npc",who:"ป้าแต๋ว",t:"ไม่เป็นไรลูก พรุ่งนี้มันมาอีกแน่ ป้าจะรอดู"}]};
 function evStartLoy(){const L=loyOf(G);if(!L)return;if(L.thiefFrom==null){L.thiefFrom=absWeek(G);thiefMail(G);}loyPreload();UI.modal=null;
@@ -1427,7 +1427,8 @@ function thiefGo(fid){const L=loyOf(G);if(!L)return;const f=G.F[fid];if(!f)retur
     openFight2(bk,()=>{const F=LASTF,win=F&&F.result&&F.result.win==="A",ko=win&&/KO|น็อก/.test(F.result.type||"");if(tuy)L.tuyDay=todayStr();else L.thiefWk=absWeek(G);delete G.F.q_evthief;
       for(const m of G.mail||[])if(m.ev===(tuy?"tuy":"thief")&&!m.done)m.done=true;
       const yr=G.season||1,xp=Math.round((win?30+10*yr:10)*(tuy?1.5:1)),du=tuy?(win?(ko?8:6):2):(win?(ko?5:4):1);if(f.camp==="player")gainXP(G,f,xp);G.dust=(G.dust||0)+du;
-      const rw=[f.camp==="player"?`${f.name} EXP +${xp}`:"",`เศษดาว ✦ +${du}`].filter(Boolean).join(" · ");
+      /* v1.90.10 (Man): the villagers chip in when you win — Tuy ฿2,000 + ฿1,000 a year (KO +50%), Tum ฿200 */const cash=win?(tuy?Math.round((2000+1000*yr)*(ko?1.5:1)/100)*100:200):0;if(cash)G.cash+=cash;
+      const rw=[cash?`เงิน +${fmt(cash)}`:"",f.camp==="player"?`${f.name} EXP +${xp}`:"",`เศษดาว ✦ +${du}`].filter(Boolean).join(" · ");
       if(win){if(tuy)L.tuyN=(L.tuyN||0)+1;else L.thiefN=(L.thiefN||0)+1;}save();
       playScene(win?[...X.win,{n:"nar",t:tuy?`จับไอ้ตุ๋ยได้แล้ว ${L.tuyN} ครั้ง · ${rw}`:`จับไอ้ตุ่มได้แล้ว ${L.thiefN} ครั้ง · ${rw}`}]:[...X.lose,{n:"nar",t:`ไม่เป็นไร ประสบการณ์ก็คือประสบการณ์ · ${rw}`}],()=>{AU.startMusic("hub");UI.tab="home";save();render();},{bg:"river",look:"thai"});});},{bg:"river",look:"thai"});}
 Object.assign(ACT,{

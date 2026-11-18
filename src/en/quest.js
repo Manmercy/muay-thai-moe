@@ -1061,7 +1061,7 @@ const LOY_TUY={name:"Tuy the Red Mask",
   {n:"npc",who:"Tuy the Red Mask",t:"My brother Tum's soft. I'm nothing like him. If you're tough, come up on the pier and take them back!"}],
  win:[{n:"nar",bg:"loy_night",t:"Tuy goes flat on his back in the middle of the pier, his knit mask slipping over his eyes. The sack of krathongs rolls back, every one of them."},
   {n:"npc",who:"Tuy the Red Mask",t:"…Don't tell my brother Tum I lost!"},
-  {n:"npc",who:"Auntie Taew",t:"Those two brothers really are the same. Well done, dear! A big tray of khanom khrok for you!"}],
+  {n:"npc",who:"Auntie Taew",t:"Those two brothers really are the same. Well done, dear! A big tray of khanom khrok for you!"},{n:"npc",who:"Auntie Taew",t:"The villagers sent a little something for the camp too, dear. Go on, take it."}],
  lose:[{n:"nar",bg:"loy_night",t:"Tuy flips a coin into the air, catches it neatly, and vanishes into the dark with his sack."},
   {n:"npc",who:"Tuy the Red Mask",t:"I'll be back tomorrow! Go train some more!"},{n:"npc",who:"Auntie Taew",t:"Never mind, dear. He'll be back tomorrow for sure. Auntie will be watching."}]};
 function evStartLoy(){const L=loyOf(G);if(!L)return;if(L.thiefFrom==null){L.thiefFrom=absWeek(G);thiefMail(G);}loyPreload();UI.modal=null;
@@ -1414,7 +1414,7 @@ const campLv=G=>{const R=roster(G).map(f=>f.lvl||1).sort((a,b)=>b-a).slice(0,3);
 function thiefMail(G){if(!thiefReady(G))return;if((G.mail||[]).some(m=>m.ev==="thief"&&!m.done&&!m.expired))return;
   addMail(G,{kind:"event",ev:"thief",from:"Auntie Taew, som tam stall by the temple",title:"Tum Is Back!",exp:G.week+1,
     body:"Manager dear, every Loy Krathong that Tum the krathong thief shows up. Last night he hauled off a sack full of coins from people's krathongs again. Send the girls to help catch him — Auntie's frying khanom krok for you."});}
-function evThief(G,f,tuy){const K=QK.gang1,t=Math.min(tuy?19.5:19.2,Math.max(6,campPow(G)*(tuy?1.15:1.08))),rng=mulberry32((G.seed^(tuy?0x7b3:0x7a1))+absWeek(G)*17);const a={};
+function evThief(G,f,tuy){const K=QK.gang1,t=Math.min(tuy?19.5:19.2,Math.max(6,campPow(G)*(tuy?1.11:1.08))),rng=mulberry32((G.seed^(tuy?0x7b3:0x7a1))+absWeek(G)*17);const a={};
   for(const [x] of ATTRS)a[x]=clamp(t+(K.tilt[x]||0)+(rng()*1.2-.6),3,19.5);const id="q_evthief";
   const nm=tuy?LOY_TUY.name:LOY_THIEF.name;const o=baseFighter(id,{name:nm,full:nm,div:"X",camp:"quest",color:tuy?"#a8202c":"#6b7a2e",potential:t+2,a});
   o.sprite=tuy?"thief2":"thief";o.kind="gang1";o.grp="gang";o.lvl=campLv(G)+(tuy?2:1);o.fatigue=0;o.morale=70;G.F[id]=o;return id;}
@@ -1427,7 +1427,8 @@ function thiefGo(fid){const L=loyOf(G);if(!L)return;const f=G.F[fid];if(!f)retur
     openFight2(bk,()=>{const F=LASTF,win=F&&F.result&&F.result.win==="A",ko=win&&/KO|น็อก/.test(F.result.type||"");if(tuy)L.tuyDay=todayStr();else L.thiefWk=absWeek(G);delete G.F.q_evthief;
       for(const m of G.mail||[])if(m.ev===(tuy?"tuy":"thief")&&!m.done)m.done=true;
       const yr=G.season||1,xp=Math.round((win?30+10*yr:10)*(tuy?1.5:1)),du=tuy?(win?(ko?8:6):2):(win?(ko?5:4):1);if(f.camp==="player")gainXP(G,f,xp);G.dust=(G.dust||0)+du;
-      const rw=[f.camp==="player"?`${f.name} EXP +${xp}`:"",`Stardust ✦ +${du}`].filter(Boolean).join(" · ");
+      /* v1.90.10 (Man): the villagers chip in when you win — Tuy ฿2,000 + ฿1,000 a year (KO +50%), Tum ฿200 */const cash=win?(tuy?Math.round((2000+1000*yr)*(ko?1.5:1)/100)*100:200):0;if(cash)G.cash+=cash;
+      const rw=[cash?`Cash +${fmt(cash)}`:"",f.camp==="player"?`${f.name} EXP +${xp}`:"",`Stardust ✦ +${du}`].filter(Boolean).join(" · ");
       if(win){if(tuy)L.tuyN=(L.tuyN||0)+1;else L.thiefN=(L.thiefN||0)+1;}save();
       playScene(win?[...X.win,{n:"nar",t:tuy?`Tuy caught ${L.tuyN} · ${rw}`:`Times Tum has been caught: ${L.thiefN} · ${rw}`}]:[...X.lose,{n:"nar",t:`Never mind — experience is experience · ${rw}`}],()=>{AU.startMusic("hub");UI.tab="home";save();render();},{bg:"river",look:"thai"});});},{bg:"river",look:"thai"});}
 Object.assign(ACT,{
