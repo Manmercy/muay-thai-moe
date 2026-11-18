@@ -894,7 +894,7 @@ const hasStaff=(G,k)=>(G.staff||[]).includes(k);
 const staffLocked=(G,k)=>{const r=STAFF[k].req;if(!r)return "";if(r.lv&&campLevel(G)<r.lv)return `Camp Lv.${r.lv}`;if(r.rep&&G.rep<r.rep)return `Fame ${r.rep}`;return "";};
 function hireStaff(G,k){const S=STAFF[k];G.staff=G.staff||[];if(!S||hasStaff(G,k)||G.staff.length>=staffSlots(G)||staffLocked(G,k)||G.cash<S.fee)return false;G.cash-=S.fee;G.staff.push(k);G.fac.assistants=G.staff.length;return true;}
 function fireStaff(G,k){G.staff=(G.staff||[]).filter(x=>x!==k);G.fac.assistants=G.staff.length;return true;}
-function fixSave(G){if(G&&G.flags&&G.flags.beat_ploy&&G.flags.beatS_ploy==null)G.flags.beatS_ploy=G.season||1;
+function fixSave(G){if(G&&G.F&&G.prodigy)fixProdigies(G);if(G&&G.flags&&G.flags.beat_ploy&&G.flags.beatS_ploy==null)G.flags.beatS_ploy=G.season||1;
   // Legacy saves used week-of-season values. Infer only short, plausible effects;
   // otherwise expire them instead of resurrecting an old effect after New Year.
   const now=gameWeek(G),base=now-G.week;
@@ -1139,6 +1139,10 @@ function genOffers(G,opt){
     const fighters=roster(G).filter(f=>f.div===op.div&&f.injury===0).sort((a,b)=>ovr(b.a)-ovr(a.a));
     for(const f of fighters){const wk=[G.week+2,G.week+3,G.week+4].find(w=>w<=48&&!isBooked(G,op.id,w)&&!G.bookings.some(b=>b.a===f.id&&Math.abs(b.week-w)<=1));
       if(wk&&!G.offers.some(o=>o.a===f.id&&o.b===op.id)){G.offers.push({id:`o${G.week}_${f.id}_${op.id}`,a:f.id,b:op.id,week:wk,tier:"lab",lab:1,win:TIER.lab.win,lose:TIER.lab.lose});break;}}}
+  // v1.89.25: Baiyok's rematch letters to Fah — twice a year from her second season on, before and after she leaves Golden Tiger
+  {const pb=G.prodigy&&G.prodigy.B,o=pb&&G.F[pb],fah=G.F.fah;if(o&&fah&&fah.camp==="player"&&(G.season||1)>=2&&[14,30].includes(G.week)&&!o.injury&&!fah.injury&&!(typeof isAway==="function"&&isAway(G,"fah"))){
+    const wk=[G.week+3,G.week+4,G.week+2].find(w=>w<=48&&!isBooked(G,o.id,w)&&!G.bookings.some(b=>b.a==="fah"&&Math.abs(b.week-w)<=1));
+    if(wk&&!G.offers.some(x=>x.a==="fah"&&x.b===o.id))G.offers.push({id:`o${G.week}_fah_by`,a:"fah",b:o.id,week:wk,tier:"special",rv:1,by:1,win:Math.round(TIER.special.win*1.6/100)*100,lose:Math.round(TIER.special.lose*1.4/100)*100});}}
   // v1.33: temple-fair bouts every other week: off the ranking, paid later by mail, now and then a cross-division star
   if(G.week>=4&&G.week<=46&&G.week%2===0){const R=roster(G).filter(f=>!f.injury);if(R.length){const f=R[Math.floor(rng()*R.length)];
     const myB=G.bookings.filter(b=>b.a===f.id).map(b=>b.week);const wk=[G.week+1,G.week+2,G.week+3].find(w=>!myB.some(x=>Math.abs(x-w)<=1)&&!G.offers.some(x=>x.a===f.id&&x.week===w));
@@ -1269,10 +1273,20 @@ function stageTransition(G){ // called after week's results, before week++
 const LEADS={A:["kati","ploy"],B:["mali","fah"]};
 // v1.53: when a Golden Tiger star joins us, their camp's new prodigy takes over as the division's top rival
 const leadRival=(G,div)=>{const p=G.prodigy&&G.prodigy[div];if(p&&G.F[p]&&G.F[p].camp==="rival")return p;return LEADS[div][1];};
+/* v1.89.25: the prodigies have their own art (Man) — Petchara stays Golden Tiger; Baiyok leaves and fights unattached in white */
+const PROD_SPRITE={A:"petchara",B:"baiyok"};
+const byFree=G=>!!(G&&G.flags&&G.flags.byFree!=null);
+function fixProdigies(G){const P=G.prodigy||{};
+  /* saves from before v1.89.25: count the meetings already fought, so a long rivalry doesn't restart at "first meeting" */
+  if(G.flags&&!G.flags.prodN){const PP={fah:"prod_B",mali:"prod_B",ploy:"prod_A",kati:"prod_A"},N={};let last=0;
+    for(const c of G.cal||[])if(PP[c.a]&&PP[c.a]===c.b){N[c.a]=(N[c.a]||0)+1;last=Math.max(last,c.absWeek||0);}
+    if(Object.keys(N).length){G.flags.prodN=N;G.flags.prodLast=last;}}
+  if(P.A&&G.F[P.A]){const f=G.F[P.A];f.sprite="petchara";f.full="Petcha Golden Tiger";}
+  if(P.B&&G.F[P.B]){const f=G.F[P.B],fr=byFree(G);f.sprite=fr?"baiyok_white":"baiyok";f.full=fr?"Baiyok":"Baiyok Golden Tiger";f.indie=fr;}}
 function makeProdigy(G,div,from){G.prodigy=G.prodigy||{};if(G.prodigy[div])return G.F[G.prodigy[div]];const id="prod_"+div,src=G.F[from];
-  const names={A:["Petcha, Golden Tiger disciple","Petcha"],B:["Baiyok, Golden Tiger disciple","Baiyok"]};
+  const names={A:["Petcha Golden Tiger","Petcha"],B:["Baiyok Golden Tiger","Baiyok"]};
   const f=baseFighter(id,{name:names[div][1],full:names[div][0],div,camp:"rival",color:"#3b3f8f",potential:Math.min(20,(src?src.potential:17)+2),a:{}});
-  for(const k in src.a)f.a[k]=Math.min(20,src.a[k]+.8);f.lvl=Math.max(1,(src.lvl||5));f.xp=0;f.canon=false;f.prodigy=true;f.met=true;f.skills={...(src.skills||{})};
+  for(const k in src.a)f.a[k]=Math.min(20,src.a[k]+.8);f.lvl=Math.max(1,(src.lvl||5));f.xp=0;f.canon=false;f.prodigy=true;f.met=true;f.sprite=PROD_SPRITE[div];f.skills={...(src.skills||{})};
   G.F[id]=f;syncFighterAges(G);G.prodigy[div]=id;G.rank=G.rank||{A:{},B:{}};G.rank[div][id]={pts:0,w:0,l:0,d:0};return f;}
 function joinCamp(G,id,wage){const f=G.F[id];if(!f)return;G.joinLog=(G.joinLog||[]).filter(x=>x.id!==id).concat([{id,season:G.season||1,wk:G.week}]);f.camp="player";f.wage=wage;f.met=true;G.bookings=G.bookings.filter(b=>!(b.b===id&&G.F[b.a]&&G.F[b.a].camp==="player"));
   if(id==="mali"){G.flags.maliIn=G.week;G.flags.maliInAbs=gameWeek(G);}
@@ -1318,7 +1332,7 @@ function weekTrain(G){
     // v1.15: rivals and NPCs level up too, so the opposition visibly gets stronger over the season
     if(f.camp==="rival"||f.camp==="npc"){f.xp=(f.xp||0)+(f.camp==="rival"?30:18)+Math.floor(rng()*10);
       while(f.lvl<MAX_LV&&f.xp>=xpNeed(f.lvl)){f.xp-=xpNeed(f.lvl);f.lvl++;lvBeyond(f);if(f.camp==="rival"){const ks=Object.keys(f.a).sort((x,y)=>f.a[y]-f.a[x]).slice(0,2);ks.forEach(k=>f.a[k]=Math.min(20,f.a[k]+.2));}
-        if(f.camp==="rival")G.lvNews=(G.lvNews||[]).concat([`${f.name} ${f.lab?"Vector Gym":"Golden Tiger Camp"} leveled up to Lv.${f.lvl}`]).slice(-3);}}}
+        if(f.camp==="rival")G.lvNews=(G.lvNews||[]).concat([`${f.name} ${f.lab?"Vector Gym":f.indie?"Free agent":"Golden Tiger Camp"} leveled up to Lv.${f.lvl}`]).slice(-3);}}}
 }
 // week phase 3: npc sim, economy, transitions, advance
 function rankSnapshot(G){const o={};for(const d of ["A","B"]){o[d]={};standings(G,d).forEach((r,i)=>o[d][r.id]=i+1);}return o;}
@@ -2009,13 +2023,29 @@ const GIFTS={
   p_teaset:{name:"Dan Kwian clay tea set",price:950,bond:16,only:"ploy",cat:"keep"},p_silk:{name:"Small Pak Thong Chai silk scarf",price:1700,bond:36,only:"ploy",cat:"wear"},
   f_buds:{name:"Lightning-pattern wireless earbuds",price:1200,bond:22,only:"fah",cat:"keep"},f_jacket:{name:"Bomber jacket embroidered FAH",price:1900,bond:40,only:"fah",cat:"wear"},
 };
+// v1.89.23: regional souvenirs — bought only at the shop before the bus leaves a trip city, kept in G.souv, given later for free (no cash at the gift screen)
+const SOUV_RN={north:"the North",isan:"Isan",central:"the Central Plains",south:"the South"};
+Object.assign(GIFTS,{
+  n_umbrella:{name:"Hand-painted Bo Sang umbrella",price:2400,souv:"north",cat:"keep"},n_jok:{name:"Mae Chaem teen jok sarong",price:5800,souv:"north",cat:"wear"},
+  i_pillow:{name:"Khit-cloth triangle pillow",price:2200,souv:"isan",cat:"keep"},i_praewa:{name:"Kalasin Praewa silk",price:6500,souv:"isan",cat:"wear"},
+  c_khon:{name:"Handcrafted Khon mask",price:3600,souv:"central",cat:"keep"},c_bencharong:{name:"Benjarong tea set",price:4800,souv:"central",cat:"keep"},
+  s_talung:{name:"Hand-carved shadow puppet",price:2600,souv:"south",cat:"keep"},s_pearl:{name:"Phuket pearl necklace",price:6800,souv:"south",cat:"wear"}});
+const SOUV_IDS=Object.keys(GIFTS).filter(g=>GIFTS[g].souv);
+const SOUV_LOVE={kati:["c_khon","n_umbrella"],mali:["s_talung","s_pearl"],rin:["c_bencharong","n_jok"],ploy:["i_praewa","c_bencharong"],fah:["i_pillow","s_pearl"]};
+const SOUV_TALK={
+ kati:{c_khon:"A Khon mask! Grandpa Chai took me to see Khon only once when I was little… I'll put it right next to his photo.",n_umbrella:"A flower umbrella… it's too pretty to open! I'll hang it up in my room.",like:"{g}, all the way from {r}… I'll keep it to remember this trip!"},
+ mali:{s_talung:"Nang talung! As a kid I'd sneak behind the screen to watch the puppeteer at every temple fair~ I miss home.",s_pearl:"Pearls… really, for me? I'll wear them when I visit Mom. She's going to be so surprised~",like:"A souvenir from {r}~ I'm so happy you thought of me on the trip!"},
+ rin:{c_bencharong:"Hand-painted in five colours… I'll only brew coffee in these on days we win.",n_jok:"A pattern like this takes months to weave… I'll save it for the most important day.",like:"{g}… the real thing doesn't come cheap. Thank you for choosing it so carefully."},
+ ploy:{i_praewa:"Praewa silk… My mother had exactly one piece. She kept it in a chest and let no one touch it. Thank you. I'll take care of it.",c_bencharong:"Tea in Benjarong cups… Want to brew some together? Just the two of us.",like:"{g}, from {r}… It's beautiful. Thanks."},
+ fah:{i_pillow:"A triangle pillow! It's for my naps after training. Nobody gets to borrow it. Ever!",s_pearl:"Pearls!? Won't I look like some rich girl in these… Don't you dare laugh!",like:"A souvenir from {r}! It's… not bad. I'll take good care of it."}};
+const souvLine=(id,g,t)=>{const L=SOUV_TALK[id];if(!L)return null;return t==="love"&&L[g]?L[g]:(L.like||"").replace("{g}",GIFTS[g].name).replace("{r}",SOUV_RN[GIFTS[g].souv]);};
 const GIFT_CAT={khanom:"food",sausage:"food",coffee:"food",tea:"food",wrap:"wear",shorts:"wear",prajiad:"wear",bracelet:"wear",mongkhon:"wear",stickers:"keep",photo:"keep",doll:"keep",sketch:"keep",book:"keep",malai:"keep",spa:"exp"};
 const giftCat=g=>GIFTS[g].cat||GIFT_CAT[g]||"keep";
 // shared bond gifts open at a different closeness for each girl
 const GIFT_UNLOCK={kati:{shorts:12,prajiad:20,photo:26,spa:34,bracelet:40,mongkhon:46},mali:{spa:12,photo:18,bracelet:24,shorts:30,prajiad:38,mongkhon:44},
   rin:{bracelet:14,spa:20,prajiad:28,photo:34,shorts:40,mongkhon:48},ploy:{prajiad:12,mongkhon:22,spa:28,bracelet:34,shorts:40,photo:46},fah:{shorts:10,bracelet:18,photo:26,prajiad:32,spa:38,mongkhon:44}};
 const giftBond=(id,g)=>(GIFT_UNLOCK[id]&&GIFT_UNLOCK[id][g])||GIFTS[g].bond||0;
-const giftsFor=id=>Object.keys(GIFTS).filter(g=>!GIFTS[g].only||GIFTS[g].only===id);
+const giftsFor=id=>Object.keys(GIFTS).filter(g=>!GIFTS[g].souv&&(!GIFTS[g].only||GIFTS[g].only===id));
 const GIFT_PREF={kati:{love:["stickers","mongkhon","k_album","k_glove","prajiad"],like:["wrap","khanom","shorts","photo","sausage","malai","doll"],dislike:["coffee"]},
   mali:{love:["khanom","spa","m_pan","m_ticket","photo"],like:["malai","doll","bracelet","stickers","shorts","sausage","tea"],dislike:["book"]},
   rin:{love:["coffee","bracelet","r_drip","r_watch","book"],like:["tea","spa","sketch","shorts","mongkhon"],dislike:["sausage"]},
@@ -2028,11 +2058,11 @@ const GIFT_LINES={
  ploy:{love:"…I've loved this shop's tea since I was little. Truly, thank you",like:"This works well. Thank you",ok:"Thanks",dislike:"A plushie… I'm not a child. I'll give it to my juniors"},
  fah:{love:"Huh! A big set of sausage! You know Fah best!",like:"Well… not bad. Thanks",ok:"Mm, thanks",dislike:"Tea? Fah's not a grandma!"},
 };
-function giftTier(id,g){const P=GIFT_PREF[id];return P.love.includes(g)?"love":P.like.includes(g)?"like":P.dislike.includes(g)?"dislike":"ok";}
-function giveGift(G,id,g){const f=G.F[id],it=GIFTS[g];if(G.cash<it.price||f.giftWeek===gameWeek(G))return null;G.cash-=it.price;f.giftWeek=gameWeek(G);if(typeof absWeek==="function")f.lastTouch=absWeek(G);
+function giftTier(id,g){if(GIFTS[g]&&GIFTS[g].souv)return (SOUV_LOVE[id]||[]).includes(g)?"love":"like";const P=GIFT_PREF[id];return P.love.includes(g)?"love":P.like.includes(g)?"like":P.dislike.includes(g)?"dislike":"ok";}
+function giveGift(G,id,g){const f=G.F[id],it=GIFTS[g],sv=!!it.souv;if(sv?!((G.souv||{})[g]>0):G.cash<it.price)return null;if(f.giftWeek===gameWeek(G))return null;if(sv)G.souv[g]--;else G.cash-=it.price;f.giftWeek=gameWeek(G);if(typeof absWeek==="function")f.lastTouch=absWeek(G);
   // v1.16: the same gift again means less (and she says so)
   f.giftN=f.giftN||{};f.giftL=f.giftL||{};if(f.giftL[g]&&gameWeek(G)-f.giftL[g]>=6)f.giftN[g]=0;const n=f.giftN[g]||0;f.giftN[g]=n+1;f.giftL[g]=gameWeek(G);f.giftTot=(f.giftTot||0)+1;
-  const t=giftTier(id,g),base=Math.round({love:6,like:4,ok:2,dislike:0}[t]*(it.bond&&t!=="dislike"?1.5:1)),gain=base>0?Math.max(1,Math.round(base*(n===0?1:t==="love"?(n===1?.6:.4):(n===1?.5:.25)))):base;
+  const t=giftTier(id,g),base=sv?{love:24,like:15}[t]:Math.round({love:6,like:4,ok:2,dislike:0}[t]*(it.bond&&t!=="dislike"?1.5:1)),gain=base>0?Math.max(1,Math.round(base*(n===0?1:t==="love"?(n===1?.6:.4):(n===1?.5:.25)))):base;
   const before=(f.bond||0)+(f.bondX||0);add(G,id,"bond",gain);if(t==="love")add(G,id,"morale",n<2?6:4);
   f.know["gift_"+g]=t;return {t,gain:Math.round(((f.bond||0)+(f.bondX||0)-before)*10)/10,g,n};}
 // v1.21: repeat-gift lines follow what the gift is (food / something to wear / a keepsake / an outing) so they always fit
@@ -3156,7 +3186,7 @@ EVENTS.push(
     {t:"Ask Coach to keep the mongkhon for whoever fights for the title (everyone's trust +4)",fx:G=>R_ALL(G,f=>f.trust=Math.min(100,f.trust+4)),then:[{n:"coach",t:"…All right. If one of ours makes the final this year, I'll put it on them with these hands"}]}]}]},
 
  {id:"buyout",look:"fight",when:G=>G.week>=37,bg:"gym",steps:[
-  {n:"nar",t:"A gold sedan stops at the gate. The Golden Tiger boss walks in with a thick brown envelope"},
+  {n:"nar",show:[{id:"npc:tiger_boss"}],t:"A gold sedan stops at the gate. The Golden Tiger boss walks in with a thick brown envelope"},
   {n:"nar",t:"\"Five hundred thousand. I buy this camp's name, the fighters move to my camp at double pay, you clear your debt, everyone's happy\""},
   {n:"kati",f:"angry",t:"…"},
   {choice:[{t:"This camp isn't for sale (everyone's morale +10 · trust +5)",fx:G=>R_ALL(G,f=>{f.morale=Math.min(100,f.morale+10);f.trust=Math.min(100,f.trust+5);}),
@@ -3832,7 +3862,7 @@ EVENTS.push(
  {id:"poach",pri:1,look:"casual",when:G=>G.week>=24&&G.week<=34&&!!poachTarget(G),bg:"camp",steps:[
   // v1.57: the girls are loyal — the offer comes, and she turns it down on her own
   {inject:G=>{const id=poachTarget(G),f=G.F[id];return [
-   {n:"nar",t:`Saturday afternoon, the Golden Tiger owner parks his luxury car at the gate and hands a gold tiger-seal envelope to ${f.name} in front of everyone.`},
+   {n:"nar",show:[{id:"npc:tiger_boss"}],t:`Saturday afternoon, the Golden Tiger owner parks his luxury car at the gate and hands a gold tiger-seal envelope to ${f.name} in front of everyone.`},
    {n:"nar",t:`${f.name} reads a single line, tears the envelope in half, and hands it back to the owner with both hands.`},
    {n:id,f:"happy",l:"casual",t:POACH_REFUSE[id]},
    {n:"npc",who:"Golden Tiger owner",t:"…How does Sirichai Camp raise its people?"},
@@ -4159,8 +4189,8 @@ EVENTS.push(
 );
 
 // The replacement bouts have their own exchange, including a first-fight aftermath.
-const prodigyMatch=(G,b)=>G.season>=2&&((b.a==="fah"&&b.b==="prod_B")||(b.a==="ploy"&&b.b==="prod_A"))&&inCamp(G,b.a)&&G.F[b.b];
-function prodigyFightScene(G,b){if(!prodigyMatch(G,b))return null;const fah=b.a==="fah",key=`prod_face_${b.a}`;const first=!G.seen[key];G.seen[key]=true;
+const prodigyMatch=(G,b)=>G.season>=2&&PROD_PAIRS[b.a]===b.b&&inCamp(G,b.a)&&G.F[b.b];
+function prodigyFightScene(G,b){if(!prodigyMatch(G,b))return null;if(b.a==="mali"||b.a==="kati"||(b.a==="fah"&&byFree(G))){if(b.a==="fah")G.seen.prod_face_fah=true;return byFightScene(G,b);}const fah=b.a==="fah",key=`prod_face_${b.a}`;const first=!G.seen[key];G.seen[key]=true;
  return fah?[
   {n:"nar",t:first?"Fah enters from Sirichai's corner. Baiyok wears Fah's old colors in Golden Tiger's corner while Coach Kriangkrai watches.":"Fah and Baiyok meet again. This time, each knows the other's moves."},
   {n:"npc",who:"Baiyok",t:first?"Coach says I have to fight like you to earn my place in the ring.":"Today I'll fight in my own style, not the coach's."},
@@ -4168,7 +4198,7 @@ function prodigyFightScene(G,b){if(!prodigyMatch(G,b))return null;const fah=b.a=
   {n:"nar",t:first?"Ploy enters the ring on her healed knee. Petchara stands in the corner that used to be hers.":"Ploy and Petchara face each other in the middle of the ring again."},
   {n:"npc",who:"Petcha",t:first?"They told me to replace you, but never asked who I wanted to be.":"I remember everything you said after our last fight. I'm ready this time."},
   {n:"ploy",f:"angry",l:"fight",t:first?"You don't have to replace anyone. Show me your own style.":"Then show me again that you're fighting for yourself."}];}
-function prodigyResultScene(G,b,win){if(!prodigyMatch(G,b))return null;const key=`prod_result_${b.a}`;if(G.seen[key])return null;G.seen[key]=true;const fah=b.a==="fah";
+function prodigyResultScene(G,b,win){if(!prodigyMatch(G,b))return null;const key=`prod_result_${b.a}`;if(b.a==="mali"||b.a==="kati"||G.seen[key]){const r=byResultScene(G,b,win);prodCount(G,b.a);return r;}G.seen[key]=true;prodCount(G,b.a);const fah=b.a==="fah";
  return fah?[
   {n:"nar",t:"After the bell, Fah and Baiyok stand panting in opposite corners, then meet to touch gloves."},
   {n:"fah",f:win==="A"?"happy":"sad",l:"fight",t:win==="A"?"See? Fah won without giving up her smile! Get me next time, Baiyok.":"You were better today. Fah will train and see you again!"},
@@ -4178,6 +4208,129 @@ function prodigyResultScene(G,b,win){if(!prodigyMatch(G,b))return null;const key
   {n:"ploy",f:win==="A"?"happy":"sad",l:"fight",t:win==="A"?"I'm back, but you fought well. You don't have to be my shadow.":"I lost today, but my knee is no excuse. You won on your own skill."},
   {n:"npc",who:"Petcha",t:"I thought there would be no place for me when you came back... Now I know there is room for both of us."},
   {n:"ploy",f:"happy",l:"fight",t:"Remember, we're still rivals in the next match. We can talk after we leave the ring."}];}
+
+// ===== v1.89.25: Baiyok leaves Golden Tiger and fights in white, unattached — she keeps coming back (visits, Fah's rematch letters, Mali's yearly grudge) · Petchara stays Golden Tiger and gets her own exchanges with Kati =====
+const PROD_PAIRS={fah:"prod_B",mali:"prod_B",ploy:"prod_A",kati:"prod_A"};
+const prodN=(G,a)=>((G.flags||{}).prodN||{})[a]||0;
+const byPick=(G,L)=>L[((G.season||1)*3+prodN(G,"fah")+prodN(G,"mali"))%L.length];
+function byFightScene(G,b){const free=byFree(G),n=prodN(G,b.a),me=b.a;G.flags=G.flags||{};
+  if(me==="mali"){
+    if(n===0)return free?[{n:"nar",t:"Mali meets Baiyok in white for the first time. The whole crowd turns to look at a kit with no tiger stripes."},
+        {n:"mali",f:"happy",l:"fight",t:"Baiyok in white! That's so cool! …But I'm not losing just because your kit is pretty!"},{n:"npc",who:"Baiyok",t:"No need to give in. Fight me all-out."}]
+      :[{n:"nar",t:"Mali and Baiyok meet for the first time mid-ring. Baiyok doesn't look at her opponent at all — her eyes stay fixed on Coach Kraingkrai's corner."},
+        {n:"mali",f:"angry",l:"fight",t:"I'm right here! Look at me! I'm your opponent, not your coach!"},{n:"npc",who:"Baiyok",t:"…Coach says you throw a lot of low kicks. Told me to cut your legs out."}];
+    if(n===1)return [{n:"mali",f:"happy",l:"fight",t:"You still didn't smile last time! I'll try again this time!"},{n:"npc",who:"Baiyok",t:free?"…Try it.":"Smiling in the ring isn't in the textbook."}];
+    if(n===2)return [{n:"npc",who:"Baiyok",t:"I watch your tapes every night… not because anyone told me to. I want to."},{n:"mali",f:"flustered",l:"fight",t:"Y-you watch them every night!? That's embarrassing!"}];
+    return byPick(G,[
+      [{n:"mali",f:"happy",l:"fight",t:"We meet again! I've got a new low kick this year!"},{n:"npc",who:"Baiyok",t:free?"I know. I saw you training at your camp on Sunday.":"I know. I watched the tape."},{n:"mali",f:"pout",l:"fight",t:"Ah! Cheater!"}],
+      free?[{n:"npc",who:"Baiyok",t:"Mali… win or lose, want to get dinner together today?"},{n:"mali",f:"happy",l:"fight",t:"Yes! Loser pays!"}]
+        :[{n:"npc",who:"Baiyok",t:"Coach didn't come today, so I don't know where to look."},{n:"mali",f:"happy",l:"fight",t:"Then look at me! Easy!"}],
+      [{n:"mali",f:"angry",l:"fight",t:"Baiyok, no holding back today!"},{n:"npc",who:"Baiyok",t:"I never hold back."}]]);}
+  if(me==="fah"){
+    if(free&&!G.flags.byWhite){G.flags.byWhite=1;return [{n:"nar",t:"Baiyok enters the ring all in white — no tiger stripes, no camp logo. Her corner has a single towel."},
+        {n:"npc",who:"Baiyok",t:"This is my kit, Fah. Take a good look."},{n:"fah",f:"happy",l:"fight",t:"Way prettier than the black! But I'm not holding back!"}];}
+    if(!free)return null;
+    return byPick(G,[
+      [{n:"npc",who:"Baiyok",t:"I added a hundred left kicks a day. Because of you."},{n:"fah",f:"angry",l:"fight",t:"Then I'll add two hundred a day!"}],
+      [{n:"npc",who:"Baiyok",t:"My grandma's here today, front row… Don't embarrass me."},{n:"fah",f:"happy",l:"fight",t:"I'll give your grandma the best fight she's ever seen!"}],
+      [{n:"npc",who:"Baiyok",t:"I never get tired of fighting you."},{n:"fah",f:"happy",l:"fight",t:"Because you have fun! You caught it from me!"}]]);}
+  if(me==="kati"){
+    if(n===0)return [{n:"nar",t:"Petcha steps into the ring in the same black-and-gold kit Ploy once wore. Boss Suea sits front row, an unlit cigar in his teeth."},
+      {n:"npc",who:"Petcha",t:"So you're Ploy's rival… I'm supposed to replace everything of hers. Her rival too."},{n:"kati",f:"angry",l:"fight",t:"I'm not a position for someone to fill! Fight under your own name!"}];
+    const L=[[{n:"npc",who:"Petcha",t:"The boss says if I lose to you again, I have to cut my hair."},{n:"kati",f:"surprised",l:"fight",t:"Eh! Then… I'll fight all-out, but after the fight I'll put in a word with your boss!"}],
+      [{n:"npc",who:"Petcha",t:"I've fought twenty bouts this year. Every one, I thought I might meet you."},{n:"kati",f:"happy",l:"fight",t:"I've been waiting too!"}]];
+    if(free)L.push([{n:"npc",who:"Petcha",t:"I saw Baiyok going to train at your camp… What's it like there?"},{n:"kati",f:"happy",l:"fight",t:"Beat me first, then I'll tell you!"}]);
+    return L[n%L.length];}
+  return null;}
+function byResultScene(G,b,win){const me=b.a,W=win==="A",n=prodN(G,me),free=byFree(G);
+  if(me==="mali"){
+    if(n===0)return W?[{n:"npc",who:"Baiyok",t:"…You laughed while you fought, even taking counters to the face. I don't get it."},{n:"mali",f:"happy",l:"fight",t:"Because it's fun! Next time, try laughing with me!"}]
+      :[{n:"mali",f:"sad",l:"fight",t:"I lost… but you're really good, Baiyok! I'll get you back next time!"},{n:"npc",who:"Baiyok",t:"Next time… I'll be waiting."}];
+    return W?(n%2?[{n:"npc",who:"Baiyok",t:"That low kick. By next year I'll have an answer for it."},{n:"mali",f:"happy",l:"fight",t:"Then I'll find a way around your way around it!"}]
+        :[{n:"npc",who:"Baiyok",t:free?"…Thanks for winning without looking down on me.":"Lost again. Coach won't be happy."},{n:"mali",f:"happy",l:"fight",t:free?"I'd never look down on you!":"Then come train at my camp! Nobody yells there!"}])
+      :(n%2?[{n:"mali",f:"happy",l:"fight",t:"You smiled! I saw it, when the ref raised the hand!"},{n:"npc",who:"Baiyok",t:"…I didn't smile."}]
+        :[{n:"mali",f:"sad",l:"fight",t:"Lost again, but I got two new moves off you!"},{n:"npc",who:"Baiyok",t:"Use them better than I did."}]);}
+  if(me==="fah"){if(!free)return null;
+    return W?[{n:"fah",f:"happy",l:"fight",t:"I win! Loser buys moo ping!"},{n:"npc",who:"Baiyok",t:"Ten sticks… and then I'll train ten extra rounds."}]
+      :[{n:"fah",f:"sad",l:"fight",t:"You were better today… but I'm not sad! I'm going back to train!"},{n:"npc",who:"Baiyok",t:"You taught me to have fun. Today I really did, Fah."}];}
+  if(me==="kati")return W?[{n:"npc",who:"Petcha",t:"…Golden Tiger doesn't lose twice. Remember that."},{n:"kati",f:"happy",l:"fight",t:"I'll remember. And I'll be waiting every time."}]
+    :[{n:"kati",f:"sad",l:"fight",t:"Petcha gets better every time!"},{n:"npc",who:"Petcha",t:"Because I've been chasing you the whole time."}];
+  return null;}
+const prodCount=(G,a)=>{G.flags=G.flags||{};const P=G.flags.prodN=G.flags.prodN||{};P[a]=(P[a]||0)+1;G.flags.prodLast=absWeek(G);};
+
+/* the night she leaves: after she has met our camp twice (or the first Fah bout), or a season after she appeared */
+const byMet=G=>prodN(G,"fah")+prodN(G,"mali");
+EVENTS.push(
+ {id:"by_leave",pri:3,look:"casual",bg:"night",when:G=>!!(G.prodigy&&G.prodigy.B&&G.F[G.prodigy.B])&&!byFree(G)&&(G.season||1)>=2&&G.flags.fahJoinedAbs!=null
+    &&((byMet(G)>=2||G.seen.prod_result_fah)&&absWeek(G)>=((G.flags.prodLast||0)+2)||absWeek(G)>=G.flags.fahJoinedAbs+40),steps:[
+  {n:"nar",t:"The news is all over the market by morning: Baiyok walked out of Golden Tiger mid-training, leaving her black-and-gold kit folded on the ring."},
+  {n:"npc",who:"Boss Suea, Golden Tiger Camp",t:"(Interviewed outside the camp) A kid I raised with my own hands… She walks out, she doesn't use the Golden Tiger name again. No camp will dare take her."},
+  {n:"nar",t:"That night, in a light drizzle, someone stands under the light at Sirichai's gate: silver hair tied high, dressed all in white, carrying a single glove bag."},
+  {fx:G=>{G.flags.byFree=absWeek(G);fixProdigies(G);}},
+  {n:"npc",who:"Baiyok",t:"I didn't come to ask to join… I just wanted to tell someone that I walked out today."},
+  {inject:G=>inCamp(G,"fah")?[{n:"fah",f:"surprised",l:"casual",t:"Baiyok!? White… no tiger stripes at all!"},{n:"npc",who:"Baiyok",t:"The first kit I ever chose myself. No one told me to."},{n:"fah",f:"happy",l:"casual",t:"Suits you way better than the black!"}]:[]},
+  {n:"coach",t:"So where will you train, kid? No camp, no trainer, no ring."},
+  {n:"npc",who:"Baiyok",t:"The temple yard by the river. I have one bag and a skipping rope. That's enough."},
+  {choice:[
+   {t:"Tell her the ring here is free every Sunday morning — she can use it",fx:G=>{G.flags.byRing=1;},then:[{n:"npc",who:"Baiyok",t:"…I'll come before anyone wakes, and leave the ring cleaner than I found it."},{n:"coach",t:"That girl says little, but she means it. I like her."}]},
+   {t:"Invite her to join Sirichai",fx:G=>{G.flags.byAsked=1;},then:[{n:"npc",who:"Baiyok",t:"Thank you… but if I joined any camp now, I'd just be changing who gives the orders. First I want to find out what my own boxing really looks like."}]},
+   {t:"(Hand her an umbrella without a word)",then:[{n:"nar",t:"Baiyok takes the umbrella, looks at it for a long time, then bows slightly before walking off into the rain."}]}]},
+  {n:"nar",t:"(Baiyok has left Golden Tiger · from now on she fights as an independent with no camp · you can still meet her in the ring)"}]});
+
+/* visits: five story beats, then short drop-ins every ~10 weeks for as long as the save runs */
+const BY_GAP=[3,6,7,8,9],BY_DROP_GAP=10;
+function byVisitSteps(G){const F=G.flags,fah=inCamp(G,"fah"),mali=inCamp(G,"mali");
+  const V=[
+   ()=>fah&&[{n:"nar",bg:"gym",t:"Five-thirty a.m. The thud of kicks echoes from the gym. Baiyok has been training alone for an hour; her shoes sit neatly against the wall."},
+     {n:"fah",f:"surprised",l:"casual",t:"Baiyok! Training before breakfast again? Golden Tiger was like that. Here we eat first!"},{n:"npc",who:"Baiyok",t:"I'm not hungry."},
+     {n:"nar",t:"Baiyok's stomach growls loud enough to fill the gym."},{n:"fah",f:"happy",l:"casual",t:"See? Let's go! Auntie Taew's porridge is waiting."},
+     ...(inCamp(G,"kati")?[{n:"kati",f:"happy",l:"casual",t:"I scooped you extra century egg! Anyone who trains here has to eat their fill!"}]:[]),
+     {n:"nar",t:"Baiyok eats her porridge sitting bolt upright, as if waiting for orders. Fah taps her head lightly with a spoon to make her relax."},{n:"npc",who:"Baiyok",t:"…At my old camp, breakfast was ten minutes. No talking."},
+     {choice:[{t:"You can talk here. Eat slowly.",fx:G2=>{G2.F.fah.morale=Math.min(100,(G2.F.fah.morale||0)+3);},then:[{n:"npc",who:"Baiyok",t:"Slowly… I don't know how slow is slow."},{n:"fah",f:"happy",l:"casual",t:"As slowly as you feel like talking!"}]},
+       {t:"Tell me, what did you train this morning?",then:[{n:"npc",who:"Baiyok",t:"Three hundred left kicks, three hundred right… No one counts for me, so I count myself."},{n:"coach",t:"Tomorrow I'll count for you."}]}]}],
+   ()=>mali&&[{n:"nar",bg:"ring",t:"After practice, Mali stands hands on hips in the middle of the ring. Baiyok stands across from her. The whole camp gathers to watch."},
+     {n:"mali",f:"angry",l:"train",t:"Baiyok! We've fought so many times and you've never smiled in the ring once. Today I'm going to make you smile!"},
+     {n:"npc",who:"Baiyok",t:"Does smiling win fights?"},{n:"mali",f:"happy",l:"train",t:"I don't know! But you can lose and still have fun! I've lost to Fah lots of times and it's fun every time!"},
+     ...(fah?[{n:"fah",f:"pout",l:"casual",t:"Hey, hey, why drag me into this!"}]:[]),
+     {n:"nar",t:"Three rounds of sparring in big gloves. Mali laughs every time she eats a counter. Baiyok freezes again and again, like she doesn't know what face to make."},
+     {choice:[{t:"Have Baiyok try a wai khru dance of her own",then:[{n:"nar",t:"Baiyok stands still for a long time, then slowly raises her hands in a wai… a form unlike Golden Tiger's, unlike Fah's. Mali claps the loudest."},{n:"npc",who:"Baiyok",t:"…My grandma taught me this one. Before I ever joined a camp."}]},
+       {t:"Have them race on the bags until somebody laughs",fx:G2=>{G2.F.mali.morale=Math.min(100,(G2.F.mali.morale||0)+5);},then:[{n:"nar",t:"Round five, Mali trips on her own rope and lands on her bottom. Baiyok laughs out loud for the first time — then quickly covers her mouth."},{n:"mali",f:"happy",l:"train",t:"I saw it! I saw it! Baiyok smiled!"}]}]}],
+   ()=>[{n:"nar",bg:"camp",t:"Two days before Baiyok's bout at the district ring, she's waiting at the camp gate, holding an entry form with the 'cornerman' box still empty."},
+     {n:"npc",who:"Baiyok",t:"The rules say someone has to be in my corner. I have no one… Could I borrow someone? They can just stand there."},
+     {choice:[{t:"Send Kru Daeng to work her corner",then:[{n:"coach",t:"Just stand there? Can't do it. Shouting is all I know."},{n:"nar",t:"Fight night, Kru Daeng shouts himself hoarse. Baiyok wins on points, then turns and bows to her own corner for the first time in her life."}]},
+       ...(fah?[{t:"Send Fah to work her corner",fx:G2=>add(G2,"fah","bond",3),then:[{n:"fah",f:"happy",l:"casual",t:"Sure thing! I'll hold the cold towel and dance when you win!"},{n:"nar",t:"Fah really does dance — even though Baiyok loses on points."},{n:"npc",who:"Baiyok",t:"Lost, and someone still danced for me… Strange."}]}]:[]),
+       {t:"Work her corner yourself",then:[{n:"nar",t:"You stand in the red corner beside a fighter from outside the camp. Between rounds Baiyok asks one thing: 'What do I do?' You answer just as short: 'Fight your way.' Last round, she wins by knockout."},{n:"npc",who:"Baiyok",t:"That one sentence… I waited my whole life for it."}]}]}],
+   ()=>[{n:"nar",bg:"camp",show:[{id:"npc:tiger_boss"}],t:"A gold sedan blocks the camp gate. Boss Suea climbs out with a fat envelope. Baiyok, holding pads for practice, freezes."},
+     {n:"npc",who:"Boss Suea",t:"Come home, Baiyok. Triple pay. A new black kit's already tailored for you. I even fired Coach Kraingkrai."},
+     {n:"npc",who:"Baiyok",t:"You didn't fire the coach because of me, Boss. You fired him because he lost."},
+     {n:"npc",who:"Boss Suea",t:"Sirichai sure loves picking up my leftovers. Ploy, Fah, and now you want Baiyok too."},
+     ...(fah?[{n:"fah",f:"angry",l:"casual",t:"Fah's not a leftover! Neither is Baiyok!"}]:[]),...(inCamp(G,"ploy")?[{n:"ploy",f:"angry",l:"casual",t:"You haven't changed a bit, Boss."}]:[]),
+     {choice:[{t:"Baiyok belongs to no one. She decides for herself",then:[{n:"npc",who:"Baiyok",t:"I'm not going back. I fight as Baiyok, not as a tiger."},{n:"nar",t:"Boss Suea roars with laughter, tosses the envelope into the car, and drives off in a cloud of dust."},{n:"npc",who:"Boss Suea",t:"Fine! Then I'll see you in the ring. Every Golden Tiger kid will be waiting to drop you!"}]},
+       {t:"If you want her back, beat her in the ring first",then:[{n:"npc",who:"Boss Suea",t:"Ha! Petcha, you hear that? You've got work this year!"},{n:"npc",who:"Baiyok",t:"Petcha isn't my enemy… but if we meet in the ring, I won't back down."}]}]},
+     {n:"npc",who:"Baiyok",t:"…Sorry for bringing trouble to your camp."},{n:"coach",t:"This camp has dealt with that man since year one. We're used to it."}],
+   ()=>fah&&[{n:"nar",bg:"river",t:"Behind the camp by the river, Baiyok sits wrapping her hands with white wraps worn to threads. Fah sits beside her holding a paper bag."},
+     {n:"fah",f:"flustered",l:"casual",t:"Hey! I didn't buy it for you, okay? It was just… on sale."},
+     {n:"nar",t:"Inside is a new roll of white hand wraps with gold trim. Tiny letters stitched at the end read: Baiyok."},
+     {n:"npc",who:"Baiyok",t:"…Why is my name on it?"},{n:"fah",f:"happy",l:"casual",t:"Because I don't want anyone calling you 'the new Fah' anymore. There's only one Baiyok."},
+     {n:"npc",who:"Baiyok",t:"I picked white because it has no pattern at all. I thought one day I'd draw my own on it… Now it has its first one."},
+     {choice:[{t:"(Sit and listen; let the two of them talk)",fx:G2=>add(G2,"fah","bond",3),then:[{n:"nar",t:"Fah and Baiyok sit arguing until the dew falls about who kicked faster as trainees."}]},
+       {t:"Ask who she most wants to fight next year",then:[{n:"npc",who:"Baiyok",t:"Fah… and Mali, and everyone in this camp. I want to lose to this camp one by one, then win it back one by one."},{n:"fah",f:"angry",l:"casual",t:"No winning them back!"}]}]},
+     {n:"nar",t:"(Baiyok will drop by the camp now and then, and send Fah a rematch letter twice a year)"}]];
+  const D=[
+   ()=>[{n:"nar",bg:"camp",t:"A bag of mangoes sits at the camp gate, with a note in neat handwriting: 'From the riverside temple yard. Baiyok.'"},{n:"coach",t:"That girl never knocks. Leaves something and goes, every time."},{fx:G2=>{for(const f of roster(G2))f.morale=Math.min(100,(f.morale||0)+2);}},{n:"nar",t:"(Everyone's morale +2)"}],
+   ()=>[{n:"nar",bg:"camp",t:"The local paper runs a story: 'Unattached Fighter in White Wins Again.' The photo shows Baiyok by the ring — with a blurry Sirichai sign behind her."},
+     ...(fah?[{n:"fah",f:"happy",l:"casual",t:"We're famous! Wait, why is our camp sign in the photo… oh, right, she trains here every week."}]:[]),{fx:G2=>{G2.rep+=.5;}},{n:"nar",t:"(Camp fame +0.5)"}],
+   ()=>fah&&[{n:"nar",bg:"gym",t:"Heavy rain all night. Baiyok sheltered in the gym, so everyone watched old fight tapes together — including one from when Fah and Baiyok were still trainees."},
+     {n:"npc",who:"Baiyok",t:"I lost that fight… but I remember it was the first time anyone shouted my name. That was Fah."},{n:"fah",f:"flustered",l:"casual",t:"I don't remember that at all!"}],
+   ()=>[{n:"nar",bg:"gym",t:"Baiyok dropped by in the evening to spar, went three full rounds with the camp, and put every pad back in its place before she left."},{n:"npc",who:"Baiyok",t:"Thanks for lending me the ring. Next time I'll bring the ice myself."},
+     ...(mali?[{n:"mali",f:"happy",l:"train",t:"Bring ice cream next time!"}]:[])]];
+  let k=F.byV||0;
+  if(k<V.length){while(k<V.length){const s=V[k]();k++;if(s){F.byV=k;F.byNext=absWeek(G)+(BY_GAP[k]||BY_DROP_GAP);return s;}}}
+  const d=F.byD||0;for(let i=0;i<D.length;i++){const s=D[(d+i)%D.length]();if(s){F.byV=Math.max(k,V.length);F.byD=d+i+1;F.byNext=absWeek(G)+BY_DROP_GAP;return s;}}
+  F.byNext=absWeek(G)+BY_DROP_GAP;return [{n:"nar",t:"Baiyok used the ring before dawn and was gone before anyone woke up."}];}
+EVENTS.push(
+ {id:"by_visit",pri:2,look:"casual",bg:"gym",when:G=>byFree(G)&&!!(G.prodigy&&G.F[G.prodigy.B])&&absWeek(G)>=(G.flags.byNext!=null?G.flags.byNext:G.flags.byFree+BY_GAP[0])&&!(G.F[G.prodigy.B].injury>0),
+  steps:[{inject:G=>byVisitSteps(G)},{fx:G=>{delete G.seen.by_visit;}}]});
 
 // Year 4: Pailin, Ploy's older sister, brings Vector Gym to the province.
 // Year 5 closes the main story. From year 6 Pailin returns every year (free mode) and her lines follow the year and the record.
@@ -5552,7 +5705,7 @@ AU.gsfx=function(kind,a){if(!this.init()||this.muted||!SETTINGS.sfx)return;const
   if(kind==="shimmer")for(let i=0;i<6;i++)T(i*.05,{f:1400+Math.random()*1400,type:"sine",dur:.12,peak:.06});};
 
 // ================= MUAY THAI MOE v1.3 — UI =================
-const VERSION="1.89.25";
+const VERSION="1.89.26";
 const CUR_LANG=(typeof window!=="undefined"&&window.LANG)||"th";
 const TH_LABEL=String.fromCharCode(3652,3607,3618);
 function langSwitch(cls){return `<div class="langsw ${cls||""}" role="group" aria-label="Language">${[["th",TH_LABEL],["en","EN"]].map(([k,l])=>`<button class="lsb ${CUR_LANG===k?"on":""}" data-act="setlang" data-v="${k}" aria-pressed="${CUR_LANG===k}">${l}</button>`).join("")}</div>`;}
@@ -5591,8 +5744,8 @@ const cardFaceSrc=C=>{if(C.face)return `${ASSET}${C.face}.webp`;const scene=(C.s
   return `${ASSET}${C.c}_casual${suffix}_face.webp`;};
 const cardArtHTML=(C,lazy=false)=>`<span class="card-art" style="--card-scene:url('${ASSET}${BGIMG[C.bg]||BGIMG.camp}')"><img src="${cardFaceSrc(C)}" alt="" ${lazy?'loading="lazy" decoding="async"':""}></span>`;
 // v1.34: portraits for the market and helmet-gang side characters (matched by speaker name, or st.img)
-const NPC_IMG=[[/เกริก|Krerk/,"krerk"],[/นายอำเภอ|District Chief/,"nai"],[/แม่ค้า|ป้าศรี|Auntie Sri|vendor/,"vendor_green"],[/ป้าแต๋ว|เจ๊หมวย|ป้าขาย|Auntie Taew|Jae Muay/,"vendor_red"],[/ไอ้ตุ่ม|โจรงมกระทง|Krathong Thief/,"thief"],[/เสี่ยหมวกทองคำ|Big Boss Golden Helmet/,"gang_boss"],[/หมวกเงิน|Silver Helmet/,"gang_silver"],[/หมวกทองดำ|ลูกน้องหมวกทอง|Gold-Black Helmet|Golden Helmet's (man|men)|Gold Helmet/,"gang_goldblack"],[/หมวก|แจ็กเก็ต|Helmet|Jacket/,"gang_group"],[/ยาย|Grandma/,"grandma"]];
-const npcImg=st=>st.img||(st.who&&(NPC_IMG.find(([r])=>r.test(st.who))||[])[1])||null;
+const NPC_IMG=[[/ใบหยก|Baiyok/,()=>typeof byFree==="function"&&byFree(G)?"baiyok":"baiyok_black"],[/เพชรา|Petcha/,"petchara"],[/เถ้าแก่เสือ|เถ้าแก่พยัคฆ์ทอง|Boss Suea|Golden Tiger owner/,"tiger_boss"],[/เกริก|Krerk/,"krerk"],[/นายอำเภอ|District Chief/,"nai"],[/แม่ค้า|ป้าศรี|Auntie Sri|vendor/,"vendor_green"],[/ป้าแต๋ว|เจ๊หมวย|ป้าขาย|Auntie Taew|Jae Muay/,"vendor_red"],[/ไอ้ตุ่ม|โจรงมกระทง|Krathong Thief/,"thief"],[/เสี่ยหมวกทองคำ|Big Boss Golden Helmet/,"gang_boss"],[/หมวกเงิน|Silver Helmet/,"gang_silver"],[/หมวกทองดำ|ลูกน้องหมวกทอง|Gold-Black Helmet|Golden Helmet's (man|men)|Gold Helmet/,"gang_goldblack"],[/หมวก|แจ็กเก็ต|Helmet|Jacket/,"gang_group"],[/ยาย|Grandma/,"grandma"]];
+const npcImg=st=>{const v=st.img||(st.who&&(NPC_IMG.find(([r])=>r.test(st.who))||[])[1])||null;return typeof v==="function"?v():v;};
 const TIER_BG={evloy:"bg_river.webp",pro:"bg_fair.webp",semi:"bg_hall.webp",local:"bg_local.webp",district:"bg_district.webp",final:"bg_final.webp",exhibition:"bg_fair.webp",special:"bg_district.webp",lab:"bg_hall.webp",quest:"bg_food.webp",beast:"bg_fair.webp",dm:"bg_hall.webp"};
 const gymBg=()=>`gym${G?campLevel(G):1}.webp`;
 // v1.13 pixel icons — no emoji in the fight UI
@@ -5843,7 +5996,7 @@ const FUNNY_NEWS=["Uncle Wang the motorbike taxi announces 'Cut the queue, meet 
 function funnyNews(n){const o=[];for(let i=0;i<n;i++)o.push(FUNNY_NEWS[(G.week*7+i*5+(G.seed%11))%FUNNY_NEWS.length]);return o;}
 function newsItems(){const N=[...(G.lvNews||[]).slice(0,1)],st=standings(G,"A").slice(0,3),R=roster(G);
   if(st[0])N.push(`Div A table: ${G.F[st[0].id].name} leads in 1st place`);
-  const rv=Object.values(G.F).filter(f=>f.camp==="rival"&&!f.lab);if(rv.length)N.push(`Golden Tiger enters ${rv.length} fighters. The boss declares "This year the title is ours"`);
+  const rv=Object.values(G.F).filter(f=>f.camp==="rival"&&!f.lab&&!f.indie);if(rv.length)N.push(`Golden Tiger enters ${rv.length} fighters. The boss declares "This year the title is ours"`);
   if((G.season||1)>=4&&G.F.pailin)N.push((G.season||1)>=5?"Pailin brings Vector Gym from Bangkok, along with Night and Vega, into the ring.":"Pailin, Ploy's older sister, brings Vector Gym to challenge Sirichai.");
   for(const f of R){const h=f.rec||{w:0,l:0};if(h.w>=3)N.push(`${f.name} of Sirichai is on fire, already won ${h.w} fights`);}
   if(G.rep>=10)N.push(`Sirichai Muay Thai Camp is being talked about again after years of silence`);
@@ -5927,7 +6080,7 @@ function offerTipHTML(o){const me=G.F[o.a],op=G.F[o.b];const A=adviseCached(o.a,
   const pf=Math.round(projFatigue(me));if(me.injury)L.push(`${me.name} is still injured for ${me.injury} weeks, risk of re-injury`);else if(pf>55)L.push(`Fatigue is around ${pf}. If you accept, ease off training before fight day`);
   const near=G.bookings.find(b=>b.a===me.id&&Math.abs(b.week-o.week)<=2);if(near)L.push(`Already has a fight in wk ${near.week}. Fighting too often, the body won't recover`);
   if(!scouted(op.id)&&op.camp!=="quest")L.push(`Tape not scouted, weakness unknown ${op.name}`);
-  if(op.camp==="rival")L.push(op.lab?"Beat a Vector fighter for a big reputation boost.":"Beating a Golden Tiger fighter brings big fame");
+  if(op.camp==="rival")L.push(op.lab?"Beat a Vector fighter for a big reputation boost.":op.indie?"Beat Baiyok, the independent the whole scene is watching — fame up a lot":"Beating a Golden Tiger fighter brings big fame");
   if(G.cash<8000)L.push(`Money is tight. The purse of ${fmt(o.lose)} is guaranteed, even in a loss`);
   // v1.82.6: the verdict now weighs why; a much weaker opponent is never "wait for the next one" without saying why
   const r=A.bestRate,gap=near?Math.abs(near.week-o.week):9,sc=scouted(op.id)||op.camp==="quest";
@@ -6126,10 +6279,10 @@ function offersHTML(){const mine=G.bookings.filter(b=>G.F[b.a].camp==="player").
        <span class="pill ${b.week===G.week?"red":"gold"}">${b.week===G.week?"This week":`${b.week-G.week} wk`}</span>${(()=>{const v=verdictOf(adviseCached(me.id,o.id,b.rounds||3).bestRate);return `<span class="pill dtag ${v.c}">${v.t}</span>`;})()}</div><div class="bk-btns">${b.planSet?`<button class="btn sm done" data-act="fplan" data-id="${b.id}">✓ Plan: ${PLANS[b.plan||"balanced"].name}</button>`:`<button class="btn sm red" data-act="fplan" data-id="${b.id}">Set fight plan</button>`}${scouted(o.id)?`<button class="btn sm done" disabled>${G.F.rin.camp==="player"?"✓ Rin analyzed":"✓ Scouted"}</button>`:`<button class="btn sm" data-act="scout" data-v="${o.id}" ${G.cash<scoutCost()?"disabled":""}>${scoutLabel()}</button>`}</div></div>`;}).join("")}</div></section>`:""}
    ${dmCardHTML()}<section class="px card"><div class="card-h"><h3>This week's offers</h3>${G.losses&&G.losses.length?`<button class="btn sm" data-act="lossrev">Review the loss</button>`:`<span class="legend"><i class="dot green"></i>Weaker <i class="dot gold"></i>Even <i class="dot red"></i>Stronger</span>`}</div><div class="list">${
      [...G.offers].sort((x,y)=>(y.rv||y.beast||y.hard||y.tier==="special"?1:0)-(x.rv||x.beast||x.hard||x.tier==="special"?1:0)).map(o=>{const op=G.F[o.b],me=G.F[o.a];const A=adviseCached(o.a,o.b,o.rounds||3);const v=verdictOf(A.bestRate);
-       const sp=o.rv?["rv","Grudge match · the whole province is watching"]:o.beast?["beast",QK[o.beast].grp==="rooster"?"Wild bout · Human vs fighting rooster":"Wild bout · Bull wrestling, Muay Thai edition"]:o.tier==="special"?["sp","Special cross-division bout"]:o.hard?["hard","Punch up · purse ×1.5"]:o.fair?["fair",o.cross?"Temple fair · cross-division star!":"Temple fair bout · not ranked"]:null;
+       const sp=o.by?["rv","Baiyok's rematch letter"]:o.rv?["rv","Grudge match · the whole province is watching"]:o.beast?["beast",QK[o.beast].grp==="rooster"?"Wild bout · Human vs fighting rooster":"Wild bout · Bull wrestling, Muay Thai edition"]:o.tier==="special"?["sp","Special cross-division bout"]:o.hard?["hard","Punch up · purse ×1.5"]:o.fair?["fair",o.cross?"Temple fair · cross-division star!":"Temple fair bout · not ranked"]:null;
        return `<div class="item offer ${v.c} ${sp?"spx "+sp[0]:""}">${sp?`<span class="ribbon">${sp[1]}</span>`:""}<button class="oxbtn" data-act="declo" data-v="${o.id}" aria-label="Decline this offer">✕</button><div class="l"><span class="vdot ${v.c}" aria-label="${v.t}"></span>${faceImg(op,"sm")}<div>
        <div class="t">${esc(me.name)} vs ${esc(op.name)} ${tierChip(op,1)}</div>
-       <div class="meta">Wk ${o.week} · ${TIER[o.tier].name}${o.beast?" · off the record":""}${o.fair?" · not ranked · purse paid by mail":""}${o.tier==="lab"?" · Unranked bout":""} · ${styleOf(op.a)}${op.camp==="rival"?op.lab?" · Vector Gym, Bangkok":" · Golden Tiger":""}${personaOf(op)?` · ${personaOf(op).tag}`:""}</div>${h2hText(op)?`<div class="meta goldt">${h2hText(op)}</div>`:""}
+       <div class="meta">Wk ${o.week} · ${TIER[o.tier].name}${o.beast?" · off the record":""}${o.fair?" · not ranked · purse paid by mail":""}${o.tier==="lab"?" · Unranked bout":""} · ${styleOf(op.a)}${op.camp==="rival"?op.lab?" · Vector Gym, Bangkok":op.indie?" · Independent":" · Golden Tiger":""}${personaOf(op)?` · ${personaOf(op).tag}`:""}</div>${h2hText(op)?`<div class="meta goldt">${h2hText(op)}</div>`:""}
        <div class="meta">Purse ${fmt(o.lose)} · <b class="goldt">win +${fmt(o.win-o.lose)}</b> · <b class="${v.c}t">${v.t}</b>${effGap(G,me,op)>.4?` · <b class="goldt">Win for bonus points/fame</b>`:effGap(G,me,op)<-.6?` · <span class="mutt">Beating a weaker fighter earns little fame</span>`:""}</div>
        </div></div>
        <div class="obtns3"><button class="btn sm" data-act="consider" data-v="${o.id}">${scouted(o.b)?"Opponent info":"Scout"}</button>${coachOn()?`<button class="btn sm" data-act="otip" data-v="${o.id}">Coach's advice</button>`:""}<button class="btn sm gold" data-act="accept" data-v="${o.id}" ${o.status==="conflict"?"disabled title=\""+esc(o.reason)+"\"":""}>Accept</button></div></div>`;}).join("")||`<p class="lead">${G.bookings.length?"Fight booked. New offers arrive next week":"No offers (injured, or season over)"}</p>`}</div></section>`;}
@@ -6182,7 +6335,7 @@ function rankHTML(){const st=stageOf(G.week),cut=st==="local"?4:st==="district"?
 function peopleHTML(){const met=CANON_IDS.map(id=>G.F[id]).filter(f=>f.met);
   return `<div class="card-h"><p class="meta">Spend time with one person per week · Once you are close, they will sometimes text you first</p><button class="btn sm gold albbtn" data-act="album">🃏 Card album ${Object.keys(G.cards||{}).length}/${Object.keys(CARDS).length}${Object.entries(G.cards||{}).some(([k,c])=>cardFresh(k,c)||cardCanUp(k,c))?'<i class="ndot"></i>':""}</button>${G.freeUsed?"<span class=\"pill\">Free time: used</span>":"<span class=\"pill gold\">Free time: 1 left</span>"}</div>
    <div class="plist">${met.map(f=>`<section class="px pcard"><button class="pthumb" data-act="fighter" data-id="${f.id}" data-v="rel" aria-label="View profile of ${esc(f.name)}"><img src="${stand(f.id,"casual")}" alt="" loading="lazy"></button>
-     <div class="pbody"><div class="pnm"><b class="nm">${esc(f.name)}</b><span class="meta">${f.camp==="player"?"Sirichai Camp":f.camp==="rival"?"Golden Tiger":"Independent"}${relTag(G,f)}</span></div>${hearts(f.bond,f)}
+     <div class="pbody"><div class="pnm"><b class="nm">${esc(f.name)}</b><span class="meta">${f.camp==="player"?"Sirichai Camp":f.camp==="rival"&&!f.indie?"Golden Tiger":"Independent"}${relTag(G,f)}</span></div>${hearts(f.bond,f)}
       <div class="pbtns"><button class="btn sm" data-act="fighter" data-id="${f.id}" data-v="rel">Profile</button><button class="btn sm primary" data-act="hang" data-id="${f.id}" ${G.freeUsed||isAway(G,f.id)?"disabled":""}>${isAway(G,f.id)?"Away":"Hang out"}</button><button class="btn sm gold giftb" data-act="giftpick" data-id="${f.id}" ${f.giftWeek===gameWeek(G)||isAway(G,f.id)?"disabled":""}>${PIX.gift}<span>${f.giftWeek===gameWeek(G)?"Given":"Gift"}</span></button><button class="btn sm chatb" data-act="chat" data-id="${f.id}" ${canChat(f)||canChatLov(f)?"":"disabled"}>${CHAT_PX}<span>${canChat(f)?"New chat":isAway(G,f.id)?"Not answering":canChatLov(f)?"Chat":(f.bond||0)<CHAT_BOND?"Not close yet":"No messages"}</span>${canChat(f)?'<i class="dot"></i>':""}</button></div></div></section>`).join("")}</div>`;}
 function hangHTML(id){const f=G.F[id],hlv=heartLv(f).lv;const pref=k=>f.know["act_"+k]==="like"?"<i class=\"likeb\">Likes</i>":f.know["act_"+k]==="dislike"?"<i class=\"disb\">Dislikes</i>":"";
   return `<h2>Time with ${esc(f.name)}</h2><p class="meta">Choose where to go together</p><div class="acts">${Object.entries(ACTIVITIES).filter(([k,a])=>(!a.campOnly||f.camp==="player")&&(!a.heart||hlv>=10)).map(([k,a])=>{const lock=a.heart&&hlv<a.heart;return `<button class="actbtn${lock?" lockd":a.heart?" hspot":""}" data-act="date" data-id="${f.id}" data-v="${k}" ${lock||G.freeUsed||G.cash<a.cost?"disabled":""}><b>${a.heart?"♥ ":""}${a.name}${lock?"":pref(k)}</b><small>${lock?`🔒 Unlocks at ♥Lv.${a.heart}`:a.cost?fmt(a.cost):"Free"}</small></button>`;}).join("")}</div>`;}
@@ -6302,7 +6455,7 @@ function recruitHTML(recs){if(!recs.length)return "";
 function fighterHTML(f){const mine=f.camp==="player";const P=PROFILES[f.id];
   const tabs=mine?[["rel","Profile"],["over","Stats"],["skill","Skills"]].concat(f.canon&&KIT_MASK[f.id]?[["look","Outfit"]]:[]):[["rel","Profile"],["over","Stats"]];
   let t=UI.ptab;if(!tabs.some(x=>x[0]===t))t="over";
-  const head=`<div class="fp-head">${faceImg(f)}<div><h2>${esc(f.full)}</h2><div class="meta">${f.age!=null?f.age+" yrs · ":""}${f.camp==="player"?"Sirichai Camp":f.lab?"Vector Gym, Bangkok":f.camp==="rival"?"Golden Tiger Camp":"Free agent"} · Div ${f.div} · ${styleOf(f.a)} · ${rec(f)}</div>${G.belt&&Object.values(G.belt).some(x=>x.id===f.id)?`<div class="beltb">🏆 Tha Phae Stadium champion</div>`:Object.entries(G.venueBelts||{}).some(([v,ds])=>Object.values(ds).some(b=>b.id===f.id))?`<div class="beltb">🏆 ${STADIUMS[Object.entries(G.venueBelts).find(([v,ds])=>Object.values(ds).some(b=>b.id===f.id))[0]].name}</div>`:f.belts?`<div class="beltb old">Former stadium champion</div>`:""}<div class="tierline">${tierChip(f,1)}<span class="meta">Rating <b>${ratingOf(f)}</b></span>${tierYearNote(f)}</div>${xpBar(f)}</div></div>
+  const head=`<div class="fp-head">${faceImg(f)}<div><h2>${esc(f.full)}</h2><div class="meta">${f.age!=null?f.age+" yrs · ":""}${f.camp==="player"?"Sirichai Camp":f.lab?"Vector Gym, Bangkok":f.camp==="rival"&&!f.indie?"Golden Tiger Camp":"Free agent"} · Div ${f.div} · ${styleOf(f.a)} · ${rec(f)}</div>${G.belt&&Object.values(G.belt).some(x=>x.id===f.id)?`<div class="beltb">🏆 Tha Phae Stadium champion</div>`:Object.entries(G.venueBelts||{}).some(([v,ds])=>Object.values(ds).some(b=>b.id===f.id))?`<div class="beltb">🏆 ${STADIUMS[Object.entries(G.venueBelts).find(([v,ds])=>Object.values(ds).some(b=>b.id===f.id))[0]].name}</div>`:f.belts?`<div class="beltb old">Former stadium champion</div>`:""}<div class="tierline">${tierChip(f,1)}<span class="meta">Rating <b>${ratingOf(f)}</b></span>${tierYearNote(f)}</div>${xpBar(f)}</div></div>
    <div class="seg ptabs">${tabs.map(([k,n])=>`<button data-act="ptab" data-v="${k}" aria-pressed="${t===k}">${n}${k==="skill"&&skReady(f)?'<i class="tdot2"></i>':""}</button>`).join("")}</div>`;
   let body="";
   if(t==="look"){const cur=f.outfit||"base";
@@ -6454,11 +6607,14 @@ function relLadderHTML(f){const H=heartLv(f).lv,cur=relLabel(G,f,H),k=relKind(G,
 function giftHTML(id){const f=G.F[id];
   const E=giftsFor(id).map(k=>[k,{...GIFTS[k],bond:giftBond(id,k)}]).sort((x,y)=>(x[1].bond||0)-(y[1].bond||0)||(x[1].only?1:0)-(y[1].only?1:0));
   {const lk=E.filter(([k,g])=>(g.bond||0)>(f.bond||0));const nx=lk[0];const hid=lk.length-(nx?1:0);E.splice(0,E.length,...E.filter(([k,g])=>(g.bond||0)<=(f.bond||0)),...(nx?[nx]:[]));E.hidden=hid;}
-  return `<h2>A gift for ${esc(f.name)}</h2><p class="meta">Bought and given right away · 1 per person per week · the closer you are, the more to choose ${E.hidden?` (${E.hidden} more hidden)`:""} · cash ${fmt(G.cash)}</p><div class="gifts">${E.map(([k,g])=>{const kn=f.know["gift_"+k],lk=(g.bond||0)>(f.bond||0);
+  return `<h2>A gift for ${esc(f.name)}</h2><p class="meta">Bought and given right away · 1 per person per week · the closer you are, the more to choose ${E.hidden?` (${E.hidden} more hidden)`:""} · cash ${fmt(G.cash)}</p>${souvHTML(id)}<div class="gifts">${E.map(([k,g])=>{const kn=f.know["gift_"+k],lk=(g.bond||0)>(f.bond||0);
    if(lk)return `<div class="giftbtn lockg"><b>???</b><small>Unlocks at ♥ Lv.${1+Math.floor(Math.min(100,g.bond)/10)}</small></div>`;
    const lw=f.giftL&&f.giftL[k],cd=lw&&gameWeek(G)-lw<6&&(f.giftN||{})[k]?6-(gameWeek(G)-lw):0;
    return `<button class="giftbtn" data-act="give" data-id="${id}" data-v="${k}" ${G.cash<g.price?"disabled":""}><b>${g.name}</b><small>${fmt(g.price)}${cd?` · given recently`:""}</small></button>`;}).join("")}</div>
    <p class="meta glegend">Watch how she reacts when you give it, or check her profile for what you've given before</p>`;}
+/* v1.89.23: souvenirs bought on regional trips — free to give, one gift a week like the rest */
+function souvHTML(id){const S=G.souv||{},L=SOUV_IDS.filter(k=>S[k]>0);if(!L.length)return "";
+  return `<h3 class="souvh">Souvenirs from your trips</h3><div class="gifts souvg">${L.map(k=>`<button class="giftbtn souv" data-act="give" data-id="${id}" data-v="${k}"><b>${esc(GIFTS[k].name)}</b><small>Souvenir from ${SOUV_RN[GIFTS[k].souv]} · ×${S[k]}</small></button>`).join("")}</div>`;}
 function considerHTML(o){const me=G.F[o.a],op=G.F[o.b];const A=adviseCached(o.a,o.b,o.rounds||3);const pct=x=>Math.round(x*100);const v=verdictOf(A.bestRate);const sc=scouted(op.id);const P=personaOf(op);
   return `<h2>Fight info</h2><div class="vsrow"><div class="vsc">${faceImg(me)}<b>${esc(me.name)}</b><span class="meta">${styleOf(me.a)}</span></div><span class="vs">VS</span><div class="vsc">${faceImg(op)}<b>${esc(op.name)}</b><span class="meta">${styleOf(op.a)} · ${rec(op)}</span></div></div>
    ${P?`<p class="quote">“${esc(P.line)}” <span class="meta">— ${esc(P.tag)}</span></p>`:""}${h2hText(op)?`<p class="meta goldt">${h2hText(op)}</p>`:""}
@@ -7180,7 +7336,7 @@ function fightEnd(){const U=UI.fight;if(U.brawl){brawlEnd();return;}U.stage="don
 
 // ---------- actions ----------
 function giftScene(id,res){const f=G.F[id];const mood=res.t==="dislike"?"pout":res.t==="love"?"flustered":"happy";
-  playScene([{n:id,f:mood,l:"casual",t:(res.n&&res.t!=="dislike"&&giftAgainLine(id,res.t,res.n,res.g))||(GIFT_TALK_PERSONAL[id]&&GIFT_TALK_PERSONAL[id][res.g])||((GIFT_TALK[id]&&GIFT_TALK[id][res.g])||GIFT_LINES[id][res.t])},{n:"nar",t:res.gain>0?(res.n>=2?`Bond with ${f.name} +${res.gain} · a bit too often, so it rises less`:`Bond with ${f.name} +${res.gain}`)
+  playScene([{n:id,f:mood,l:"casual",t:(res.n&&res.t!=="dislike"&&giftAgainLine(id,res.t,res.n,res.g))||(GIFTS[res.g].souv&&souvLine(id,res.g,res.t))||(GIFT_TALK_PERSONAL[id]&&GIFT_TALK_PERSONAL[id][res.g])||((GIFT_TALK[id]&&GIFT_TALK[id][res.g])||GIFT_LINES[id][res.t])},{n:"nar",t:res.gain>0?(res.n>=2?`Bond with ${f.name} +${res.gain} · a bit too often, so it rises less`:`Bond with ${f.name} +${res.gain}`)
       :res.t==="dislike"?`${f.name} accepts it with a smile, but it may not be a favorite · Bond unchanged`:heartCapped(G,f)?`${f.name} is delighted · hearts are full for this chapter`:f.bond>=100?`${f.name} is thrilled · Bond is already maxed`:`${f.name} is happy, but has been getting this a lot lately. Try mixing it up.`},
     ...((()=>{const k=f.giftTot===5?0:f.giftTot===10?1:-1;if(k<0||!GIFT_FREQ[id]||(f.giftFreq||0)>k)return [];f.giftFreq=k+1;
       return [...GIFT_FREQ[id][k].map(s=>({...s,l:"casual"})),k===1?{inject:G2=>{add(G2,id,"bond",3);G2.F[id].morale=Math.min(100,G2.F[id].morale+8);return [{n:"nar",t:`A gift in return from ${f.name} · Bond +3 · Morale: ${f.name} +8`}];}}:{inject:()=>[]}];})())],()=>{AU.startMusic("hub");render();},{bg:f.camp==="player"?"gym":"fair",look:"casual"});}

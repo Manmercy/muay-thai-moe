@@ -903,7 +903,7 @@ EVENTS.push(
     {t:"Ask Coach to keep the mongkhon for whoever fights for the title (everyone's trust +4)",fx:G=>R_ALL(G,f=>f.trust=Math.min(100,f.trust+4)),then:[{n:"coach",t:"…All right. If one of ours makes the final this year, I'll put it on them with these hands"}]}]}]},
 
  {id:"buyout",look:"fight",when:G=>G.week>=37,bg:"gym",steps:[
-  {n:"nar",t:"A gold sedan stops at the gate. The Golden Tiger boss walks in with a thick brown envelope"},
+  {n:"nar",show:[{id:"npc:tiger_boss"}],t:"A gold sedan stops at the gate. The Golden Tiger boss walks in with a thick brown envelope"},
   {n:"nar",t:"\"Five hundred thousand. I buy this camp's name, the fighters move to my camp at double pay, you clear your debt, everyone's happy\""},
   {n:"kati",f:"angry",t:"…"},
   {choice:[{t:"This camp isn't for sale (everyone's morale +10 · trust +5)",fx:G=>R_ALL(G,f=>{f.morale=Math.min(100,f.morale+10);f.trust=Math.min(100,f.trust+5);}),
@@ -1579,7 +1579,7 @@ EVENTS.push(
  {id:"poach",pri:1,look:"casual",when:G=>G.week>=24&&G.week<=34&&!!poachTarget(G),bg:"camp",steps:[
   // v1.57: the girls are loyal — the offer comes, and she turns it down on her own
   {inject:G=>{const id=poachTarget(G),f=G.F[id];return [
-   {n:"nar",t:`Saturday afternoon, the Golden Tiger owner parks his luxury car at the gate and hands a gold tiger-seal envelope to ${f.name} in front of everyone.`},
+   {n:"nar",show:[{id:"npc:tiger_boss"}],t:`Saturday afternoon, the Golden Tiger owner parks his luxury car at the gate and hands a gold tiger-seal envelope to ${f.name} in front of everyone.`},
    {n:"nar",t:`${f.name} reads a single line, tears the envelope in half, and hands it back to the owner with both hands.`},
    {n:id,f:"happy",l:"casual",t:POACH_REFUSE[id]},
    {n:"npc",who:"Golden Tiger owner",t:"…How does Sirichai Camp raise its people?"},
@@ -1906,8 +1906,8 @@ EVENTS.push(
 );
 
 // The replacement bouts have their own exchange, including a first-fight aftermath.
-const prodigyMatch=(G,b)=>G.season>=2&&((b.a==="fah"&&b.b==="prod_B")||(b.a==="ploy"&&b.b==="prod_A"))&&inCamp(G,b.a)&&G.F[b.b];
-function prodigyFightScene(G,b){if(!prodigyMatch(G,b))return null;const fah=b.a==="fah",key=`prod_face_${b.a}`;const first=!G.seen[key];G.seen[key]=true;
+const prodigyMatch=(G,b)=>G.season>=2&&PROD_PAIRS[b.a]===b.b&&inCamp(G,b.a)&&G.F[b.b];
+function prodigyFightScene(G,b){if(!prodigyMatch(G,b))return null;if(b.a==="mali"||b.a==="kati"||(b.a==="fah"&&byFree(G))){if(b.a==="fah")G.seen.prod_face_fah=true;return byFightScene(G,b);}const fah=b.a==="fah",key=`prod_face_${b.a}`;const first=!G.seen[key];G.seen[key]=true;
  return fah?[
   {n:"nar",t:first?"Fah enters from Sirichai's corner. Baiyok wears Fah's old colors in Golden Tiger's corner while Coach Kriangkrai watches.":"Fah and Baiyok meet again. This time, each knows the other's moves."},
   {n:"npc",who:"Baiyok",t:first?"Coach says I have to fight like you to earn my place in the ring.":"Today I'll fight in my own style, not the coach's."},
@@ -1915,7 +1915,7 @@ function prodigyFightScene(G,b){if(!prodigyMatch(G,b))return null;const fah=b.a=
   {n:"nar",t:first?"Ploy enters the ring on her healed knee. Petchara stands in the corner that used to be hers.":"Ploy and Petchara face each other in the middle of the ring again."},
   {n:"npc",who:"Petcha",t:first?"They told me to replace you, but never asked who I wanted to be.":"I remember everything you said after our last fight. I'm ready this time."},
   {n:"ploy",f:"angry",l:"fight",t:first?"You don't have to replace anyone. Show me your own style.":"Then show me again that you're fighting for yourself."}];}
-function prodigyResultScene(G,b,win){if(!prodigyMatch(G,b))return null;const key=`prod_result_${b.a}`;if(G.seen[key])return null;G.seen[key]=true;const fah=b.a==="fah";
+function prodigyResultScene(G,b,win){if(!prodigyMatch(G,b))return null;const key=`prod_result_${b.a}`;if(b.a==="mali"||b.a==="kati"||G.seen[key]){const r=byResultScene(G,b,win);prodCount(G,b.a);return r;}G.seen[key]=true;prodCount(G,b.a);const fah=b.a==="fah";
  return fah?[
   {n:"nar",t:"After the bell, Fah and Baiyok stand panting in opposite corners, then meet to touch gloves."},
   {n:"fah",f:win==="A"?"happy":"sad",l:"fight",t:win==="A"?"See? Fah won without giving up her smile! Get me next time, Baiyok.":"You were better today. Fah will train and see you again!"},
@@ -1925,6 +1925,129 @@ function prodigyResultScene(G,b,win){if(!prodigyMatch(G,b))return null;const key
   {n:"ploy",f:win==="A"?"happy":"sad",l:"fight",t:win==="A"?"I'm back, but you fought well. You don't have to be my shadow.":"I lost today, but my knee is no excuse. You won on your own skill."},
   {n:"npc",who:"Petcha",t:"I thought there would be no place for me when you came back... Now I know there is room for both of us."},
   {n:"ploy",f:"happy",l:"fight",t:"Remember, we're still rivals in the next match. We can talk after we leave the ring."}];}
+
+// ===== v1.89.25: Baiyok leaves Golden Tiger and fights in white, unattached — she keeps coming back (visits, Fah's rematch letters, Mali's yearly grudge) · Petchara stays Golden Tiger and gets her own exchanges with Kati =====
+const PROD_PAIRS={fah:"prod_B",mali:"prod_B",ploy:"prod_A",kati:"prod_A"};
+const prodN=(G,a)=>((G.flags||{}).prodN||{})[a]||0;
+const byPick=(G,L)=>L[((G.season||1)*3+prodN(G,"fah")+prodN(G,"mali"))%L.length];
+function byFightScene(G,b){const free=byFree(G),n=prodN(G,b.a),me=b.a;G.flags=G.flags||{};
+  if(me==="mali"){
+    if(n===0)return free?[{n:"nar",t:"Mali meets Baiyok in white for the first time. The whole crowd turns to look at a kit with no tiger stripes."},
+        {n:"mali",f:"happy",l:"fight",t:"Baiyok in white! That's so cool! …But I'm not losing just because your kit is pretty!"},{n:"npc",who:"Baiyok",t:"No need to give in. Fight me all-out."}]
+      :[{n:"nar",t:"Mali and Baiyok meet for the first time mid-ring. Baiyok doesn't look at her opponent at all — her eyes stay fixed on Coach Kraingkrai's corner."},
+        {n:"mali",f:"angry",l:"fight",t:"I'm right here! Look at me! I'm your opponent, not your coach!"},{n:"npc",who:"Baiyok",t:"…Coach says you throw a lot of low kicks. Told me to cut your legs out."}];
+    if(n===1)return [{n:"mali",f:"happy",l:"fight",t:"You still didn't smile last time! I'll try again this time!"},{n:"npc",who:"Baiyok",t:free?"…Try it.":"Smiling in the ring isn't in the textbook."}];
+    if(n===2)return [{n:"npc",who:"Baiyok",t:"I watch your tapes every night… not because anyone told me to. I want to."},{n:"mali",f:"flustered",l:"fight",t:"Y-you watch them every night!? That's embarrassing!"}];
+    return byPick(G,[
+      [{n:"mali",f:"happy",l:"fight",t:"We meet again! I've got a new low kick this year!"},{n:"npc",who:"Baiyok",t:free?"I know. I saw you training at your camp on Sunday.":"I know. I watched the tape."},{n:"mali",f:"pout",l:"fight",t:"Ah! Cheater!"}],
+      free?[{n:"npc",who:"Baiyok",t:"Mali… win or lose, want to get dinner together today?"},{n:"mali",f:"happy",l:"fight",t:"Yes! Loser pays!"}]
+        :[{n:"npc",who:"Baiyok",t:"Coach didn't come today, so I don't know where to look."},{n:"mali",f:"happy",l:"fight",t:"Then look at me! Easy!"}],
+      [{n:"mali",f:"angry",l:"fight",t:"Baiyok, no holding back today!"},{n:"npc",who:"Baiyok",t:"I never hold back."}]]);}
+  if(me==="fah"){
+    if(free&&!G.flags.byWhite){G.flags.byWhite=1;return [{n:"nar",t:"Baiyok enters the ring all in white — no tiger stripes, no camp logo. Her corner has a single towel."},
+        {n:"npc",who:"Baiyok",t:"This is my kit, Fah. Take a good look."},{n:"fah",f:"happy",l:"fight",t:"Way prettier than the black! But I'm not holding back!"}];}
+    if(!free)return null;
+    return byPick(G,[
+      [{n:"npc",who:"Baiyok",t:"I added a hundred left kicks a day. Because of you."},{n:"fah",f:"angry",l:"fight",t:"Then I'll add two hundred a day!"}],
+      [{n:"npc",who:"Baiyok",t:"My grandma's here today, front row… Don't embarrass me."},{n:"fah",f:"happy",l:"fight",t:"I'll give your grandma the best fight she's ever seen!"}],
+      [{n:"npc",who:"Baiyok",t:"I never get tired of fighting you."},{n:"fah",f:"happy",l:"fight",t:"Because you have fun! You caught it from me!"}]]);}
+  if(me==="kati"){
+    if(n===0)return [{n:"nar",t:"Petcha steps into the ring in the same black-and-gold kit Ploy once wore. Boss Suea sits front row, an unlit cigar in his teeth."},
+      {n:"npc",who:"Petcha",t:"So you're Ploy's rival… I'm supposed to replace everything of hers. Her rival too."},{n:"kati",f:"angry",l:"fight",t:"I'm not a position for someone to fill! Fight under your own name!"}];
+    const L=[[{n:"npc",who:"Petcha",t:"The boss says if I lose to you again, I have to cut my hair."},{n:"kati",f:"surprised",l:"fight",t:"Eh! Then… I'll fight all-out, but after the fight I'll put in a word with your boss!"}],
+      [{n:"npc",who:"Petcha",t:"I've fought twenty bouts this year. Every one, I thought I might meet you."},{n:"kati",f:"happy",l:"fight",t:"I've been waiting too!"}]];
+    if(free)L.push([{n:"npc",who:"Petcha",t:"I saw Baiyok going to train at your camp… What's it like there?"},{n:"kati",f:"happy",l:"fight",t:"Beat me first, then I'll tell you!"}]);
+    return L[n%L.length];}
+  return null;}
+function byResultScene(G,b,win){const me=b.a,W=win==="A",n=prodN(G,me),free=byFree(G);
+  if(me==="mali"){
+    if(n===0)return W?[{n:"npc",who:"Baiyok",t:"…You laughed while you fought, even taking counters to the face. I don't get it."},{n:"mali",f:"happy",l:"fight",t:"Because it's fun! Next time, try laughing with me!"}]
+      :[{n:"mali",f:"sad",l:"fight",t:"I lost… but you're really good, Baiyok! I'll get you back next time!"},{n:"npc",who:"Baiyok",t:"Next time… I'll be waiting."}];
+    return W?(n%2?[{n:"npc",who:"Baiyok",t:"That low kick. By next year I'll have an answer for it."},{n:"mali",f:"happy",l:"fight",t:"Then I'll find a way around your way around it!"}]
+        :[{n:"npc",who:"Baiyok",t:free?"…Thanks for winning without looking down on me.":"Lost again. Coach won't be happy."},{n:"mali",f:"happy",l:"fight",t:free?"I'd never look down on you!":"Then come train at my camp! Nobody yells there!"}])
+      :(n%2?[{n:"mali",f:"happy",l:"fight",t:"You smiled! I saw it, when the ref raised the hand!"},{n:"npc",who:"Baiyok",t:"…I didn't smile."}]
+        :[{n:"mali",f:"sad",l:"fight",t:"Lost again, but I got two new moves off you!"},{n:"npc",who:"Baiyok",t:"Use them better than I did."}]);}
+  if(me==="fah"){if(!free)return null;
+    return W?[{n:"fah",f:"happy",l:"fight",t:"I win! Loser buys moo ping!"},{n:"npc",who:"Baiyok",t:"Ten sticks… and then I'll train ten extra rounds."}]
+      :[{n:"fah",f:"sad",l:"fight",t:"You were better today… but I'm not sad! I'm going back to train!"},{n:"npc",who:"Baiyok",t:"You taught me to have fun. Today I really did, Fah."}];}
+  if(me==="kati")return W?[{n:"npc",who:"Petcha",t:"…Golden Tiger doesn't lose twice. Remember that."},{n:"kati",f:"happy",l:"fight",t:"I'll remember. And I'll be waiting every time."}]
+    :[{n:"kati",f:"sad",l:"fight",t:"Petcha gets better every time!"},{n:"npc",who:"Petcha",t:"Because I've been chasing you the whole time."}];
+  return null;}
+const prodCount=(G,a)=>{G.flags=G.flags||{};const P=G.flags.prodN=G.flags.prodN||{};P[a]=(P[a]||0)+1;G.flags.prodLast=absWeek(G);};
+
+/* the night she leaves: after she has met our camp twice (or the first Fah bout), or a season after she appeared */
+const byMet=G=>prodN(G,"fah")+prodN(G,"mali");
+EVENTS.push(
+ {id:"by_leave",pri:3,look:"casual",bg:"night",when:G=>!!(G.prodigy&&G.prodigy.B&&G.F[G.prodigy.B])&&!byFree(G)&&(G.season||1)>=2&&G.flags.fahJoinedAbs!=null
+    &&((byMet(G)>=2||G.seen.prod_result_fah)&&absWeek(G)>=((G.flags.prodLast||0)+2)||absWeek(G)>=G.flags.fahJoinedAbs+40),steps:[
+  {n:"nar",t:"The news is all over the market by morning: Baiyok walked out of Golden Tiger mid-training, leaving her black-and-gold kit folded on the ring."},
+  {n:"npc",who:"Boss Suea, Golden Tiger Camp",t:"(Interviewed outside the camp) A kid I raised with my own hands… She walks out, she doesn't use the Golden Tiger name again. No camp will dare take her."},
+  {n:"nar",t:"That night, in a light drizzle, someone stands under the light at Sirichai's gate: silver hair tied high, dressed all in white, carrying a single glove bag."},
+  {fx:G=>{G.flags.byFree=absWeek(G);fixProdigies(G);}},
+  {n:"npc",who:"Baiyok",t:"I didn't come to ask to join… I just wanted to tell someone that I walked out today."},
+  {inject:G=>inCamp(G,"fah")?[{n:"fah",f:"surprised",l:"casual",t:"Baiyok!? White… no tiger stripes at all!"},{n:"npc",who:"Baiyok",t:"The first kit I ever chose myself. No one told me to."},{n:"fah",f:"happy",l:"casual",t:"Suits you way better than the black!"}]:[]},
+  {n:"coach",t:"So where will you train, kid? No camp, no trainer, no ring."},
+  {n:"npc",who:"Baiyok",t:"The temple yard by the river. I have one bag and a skipping rope. That's enough."},
+  {choice:[
+   {t:"Tell her the ring here is free every Sunday morning — she can use it",fx:G=>{G.flags.byRing=1;},then:[{n:"npc",who:"Baiyok",t:"…I'll come before anyone wakes, and leave the ring cleaner than I found it."},{n:"coach",t:"That girl says little, but she means it. I like her."}]},
+   {t:"Invite her to join Sirichai",fx:G=>{G.flags.byAsked=1;},then:[{n:"npc",who:"Baiyok",t:"Thank you… but if I joined any camp now, I'd just be changing who gives the orders. First I want to find out what my own boxing really looks like."}]},
+   {t:"(Hand her an umbrella without a word)",then:[{n:"nar",t:"Baiyok takes the umbrella, looks at it for a long time, then bows slightly before walking off into the rain."}]}]},
+  {n:"nar",t:"(Baiyok has left Golden Tiger · from now on she fights as an independent with no camp · you can still meet her in the ring)"}]});
+
+/* visits: five story beats, then short drop-ins every ~10 weeks for as long as the save runs */
+const BY_GAP=[3,6,7,8,9],BY_DROP_GAP=10;
+function byVisitSteps(G){const F=G.flags,fah=inCamp(G,"fah"),mali=inCamp(G,"mali");
+  const V=[
+   ()=>fah&&[{n:"nar",bg:"gym",t:"Five-thirty a.m. The thud of kicks echoes from the gym. Baiyok has been training alone for an hour; her shoes sit neatly against the wall."},
+     {n:"fah",f:"surprised",l:"casual",t:"Baiyok! Training before breakfast again? Golden Tiger was like that. Here we eat first!"},{n:"npc",who:"Baiyok",t:"I'm not hungry."},
+     {n:"nar",t:"Baiyok's stomach growls loud enough to fill the gym."},{n:"fah",f:"happy",l:"casual",t:"See? Let's go! Auntie Taew's porridge is waiting."},
+     ...(inCamp(G,"kati")?[{n:"kati",f:"happy",l:"casual",t:"I scooped you extra century egg! Anyone who trains here has to eat their fill!"}]:[]),
+     {n:"nar",t:"Baiyok eats her porridge sitting bolt upright, as if waiting for orders. Fah taps her head lightly with a spoon to make her relax."},{n:"npc",who:"Baiyok",t:"…At my old camp, breakfast was ten minutes. No talking."},
+     {choice:[{t:"You can talk here. Eat slowly.",fx:G2=>{G2.F.fah.morale=Math.min(100,(G2.F.fah.morale||0)+3);},then:[{n:"npc",who:"Baiyok",t:"Slowly… I don't know how slow is slow."},{n:"fah",f:"happy",l:"casual",t:"As slowly as you feel like talking!"}]},
+       {t:"Tell me, what did you train this morning?",then:[{n:"npc",who:"Baiyok",t:"Three hundred left kicks, three hundred right… No one counts for me, so I count myself."},{n:"coach",t:"Tomorrow I'll count for you."}]}]}],
+   ()=>mali&&[{n:"nar",bg:"ring",t:"After practice, Mali stands hands on hips in the middle of the ring. Baiyok stands across from her. The whole camp gathers to watch."},
+     {n:"mali",f:"angry",l:"train",t:"Baiyok! We've fought so many times and you've never smiled in the ring once. Today I'm going to make you smile!"},
+     {n:"npc",who:"Baiyok",t:"Does smiling win fights?"},{n:"mali",f:"happy",l:"train",t:"I don't know! But you can lose and still have fun! I've lost to Fah lots of times and it's fun every time!"},
+     ...(fah?[{n:"fah",f:"pout",l:"casual",t:"Hey, hey, why drag me into this!"}]:[]),
+     {n:"nar",t:"Three rounds of sparring in big gloves. Mali laughs every time she eats a counter. Baiyok freezes again and again, like she doesn't know what face to make."},
+     {choice:[{t:"Have Baiyok try a wai khru dance of her own",then:[{n:"nar",t:"Baiyok stands still for a long time, then slowly raises her hands in a wai… a form unlike Golden Tiger's, unlike Fah's. Mali claps the loudest."},{n:"npc",who:"Baiyok",t:"…My grandma taught me this one. Before I ever joined a camp."}]},
+       {t:"Have them race on the bags until somebody laughs",fx:G2=>{G2.F.mali.morale=Math.min(100,(G2.F.mali.morale||0)+5);},then:[{n:"nar",t:"Round five, Mali trips on her own rope and lands on her bottom. Baiyok laughs out loud for the first time — then quickly covers her mouth."},{n:"mali",f:"happy",l:"train",t:"I saw it! I saw it! Baiyok smiled!"}]}]}],
+   ()=>[{n:"nar",bg:"camp",t:"Two days before Baiyok's bout at the district ring, she's waiting at the camp gate, holding an entry form with the 'cornerman' box still empty."},
+     {n:"npc",who:"Baiyok",t:"The rules say someone has to be in my corner. I have no one… Could I borrow someone? They can just stand there."},
+     {choice:[{t:"Send Kru Daeng to work her corner",then:[{n:"coach",t:"Just stand there? Can't do it. Shouting is all I know."},{n:"nar",t:"Fight night, Kru Daeng shouts himself hoarse. Baiyok wins on points, then turns and bows to her own corner for the first time in her life."}]},
+       ...(fah?[{t:"Send Fah to work her corner",fx:G2=>add(G2,"fah","bond",3),then:[{n:"fah",f:"happy",l:"casual",t:"Sure thing! I'll hold the cold towel and dance when you win!"},{n:"nar",t:"Fah really does dance — even though Baiyok loses on points."},{n:"npc",who:"Baiyok",t:"Lost, and someone still danced for me… Strange."}]}]:[]),
+       {t:"Work her corner yourself",then:[{n:"nar",t:"You stand in the red corner beside a fighter from outside the camp. Between rounds Baiyok asks one thing: 'What do I do?' You answer just as short: 'Fight your way.' Last round, she wins by knockout."},{n:"npc",who:"Baiyok",t:"That one sentence… I waited my whole life for it."}]}]}],
+   ()=>[{n:"nar",bg:"camp",show:[{id:"npc:tiger_boss"}],t:"A gold sedan blocks the camp gate. Boss Suea climbs out with a fat envelope. Baiyok, holding pads for practice, freezes."},
+     {n:"npc",who:"Boss Suea",t:"Come home, Baiyok. Triple pay. A new black kit's already tailored for you. I even fired Coach Kraingkrai."},
+     {n:"npc",who:"Baiyok",t:"You didn't fire the coach because of me, Boss. You fired him because he lost."},
+     {n:"npc",who:"Boss Suea",t:"Sirichai sure loves picking up my leftovers. Ploy, Fah, and now you want Baiyok too."},
+     ...(fah?[{n:"fah",f:"angry",l:"casual",t:"Fah's not a leftover! Neither is Baiyok!"}]:[]),...(inCamp(G,"ploy")?[{n:"ploy",f:"angry",l:"casual",t:"You haven't changed a bit, Boss."}]:[]),
+     {choice:[{t:"Baiyok belongs to no one. She decides for herself",then:[{n:"npc",who:"Baiyok",t:"I'm not going back. I fight as Baiyok, not as a tiger."},{n:"nar",t:"Boss Suea roars with laughter, tosses the envelope into the car, and drives off in a cloud of dust."},{n:"npc",who:"Boss Suea",t:"Fine! Then I'll see you in the ring. Every Golden Tiger kid will be waiting to drop you!"}]},
+       {t:"If you want her back, beat her in the ring first",then:[{n:"npc",who:"Boss Suea",t:"Ha! Petcha, you hear that? You've got work this year!"},{n:"npc",who:"Baiyok",t:"Petcha isn't my enemy… but if we meet in the ring, I won't back down."}]}]},
+     {n:"npc",who:"Baiyok",t:"…Sorry for bringing trouble to your camp."},{n:"coach",t:"This camp has dealt with that man since year one. We're used to it."}],
+   ()=>fah&&[{n:"nar",bg:"river",t:"Behind the camp by the river, Baiyok sits wrapping her hands with white wraps worn to threads. Fah sits beside her holding a paper bag."},
+     {n:"fah",f:"flustered",l:"casual",t:"Hey! I didn't buy it for you, okay? It was just… on sale."},
+     {n:"nar",t:"Inside is a new roll of white hand wraps with gold trim. Tiny letters stitched at the end read: Baiyok."},
+     {n:"npc",who:"Baiyok",t:"…Why is my name on it?"},{n:"fah",f:"happy",l:"casual",t:"Because I don't want anyone calling you 'the new Fah' anymore. There's only one Baiyok."},
+     {n:"npc",who:"Baiyok",t:"I picked white because it has no pattern at all. I thought one day I'd draw my own on it… Now it has its first one."},
+     {choice:[{t:"(Sit and listen; let the two of them talk)",fx:G2=>add(G2,"fah","bond",3),then:[{n:"nar",t:"Fah and Baiyok sit arguing until the dew falls about who kicked faster as trainees."}]},
+       {t:"Ask who she most wants to fight next year",then:[{n:"npc",who:"Baiyok",t:"Fah… and Mali, and everyone in this camp. I want to lose to this camp one by one, then win it back one by one."},{n:"fah",f:"angry",l:"casual",t:"No winning them back!"}]}]},
+     {n:"nar",t:"(Baiyok will drop by the camp now and then, and send Fah a rematch letter twice a year)"}]];
+  const D=[
+   ()=>[{n:"nar",bg:"camp",t:"A bag of mangoes sits at the camp gate, with a note in neat handwriting: 'From the riverside temple yard. Baiyok.'"},{n:"coach",t:"That girl never knocks. Leaves something and goes, every time."},{fx:G2=>{for(const f of roster(G2))f.morale=Math.min(100,(f.morale||0)+2);}},{n:"nar",t:"(Everyone's morale +2)"}],
+   ()=>[{n:"nar",bg:"camp",t:"The local paper runs a story: 'Unattached Fighter in White Wins Again.' The photo shows Baiyok by the ring — with a blurry Sirichai sign behind her."},
+     ...(fah?[{n:"fah",f:"happy",l:"casual",t:"We're famous! Wait, why is our camp sign in the photo… oh, right, she trains here every week."}]:[]),{fx:G2=>{G2.rep+=.5;}},{n:"nar",t:"(Camp fame +0.5)"}],
+   ()=>fah&&[{n:"nar",bg:"gym",t:"Heavy rain all night. Baiyok sheltered in the gym, so everyone watched old fight tapes together — including one from when Fah and Baiyok were still trainees."},
+     {n:"npc",who:"Baiyok",t:"I lost that fight… but I remember it was the first time anyone shouted my name. That was Fah."},{n:"fah",f:"flustered",l:"casual",t:"I don't remember that at all!"}],
+   ()=>[{n:"nar",bg:"gym",t:"Baiyok dropped by in the evening to spar, went three full rounds with the camp, and put every pad back in its place before she left."},{n:"npc",who:"Baiyok",t:"Thanks for lending me the ring. Next time I'll bring the ice myself."},
+     ...(mali?[{n:"mali",f:"happy",l:"train",t:"Bring ice cream next time!"}]:[])]];
+  let k=F.byV||0;
+  if(k<V.length){while(k<V.length){const s=V[k]();k++;if(s){F.byV=k;F.byNext=absWeek(G)+(BY_GAP[k]||BY_DROP_GAP);return s;}}}
+  const d=F.byD||0;for(let i=0;i<D.length;i++){const s=D[(d+i)%D.length]();if(s){F.byV=Math.max(k,V.length);F.byD=d+i+1;F.byNext=absWeek(G)+BY_DROP_GAP;return s;}}
+  F.byNext=absWeek(G)+BY_DROP_GAP;return [{n:"nar",t:"Baiyok used the ring before dawn and was gone before anyone woke up."}];}
+EVENTS.push(
+ {id:"by_visit",pri:2,look:"casual",bg:"gym",when:G=>byFree(G)&&!!(G.prodigy&&G.F[G.prodigy.B])&&absWeek(G)>=(G.flags.byNext!=null?G.flags.byNext:G.flags.byFree+BY_GAP[0])&&!(G.F[G.prodigy.B].injury>0),
+  steps:[{inject:G=>byVisitSteps(G)},{fx:G=>{delete G.seen.by_visit;}}]});
 
 // Year 4: Pailin, Ploy's older sister, brings Vector Gym to the province.
 // Year 5 closes the main story. From year 6 Pailin returns every year (free mode) and her lines follow the year and the record.

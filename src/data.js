@@ -364,13 +364,29 @@ const GIFTS={
   p_teaset:{name:"ชุดชงชาดินเผาด่านเกวียน",price:950,bond:16,only:"ploy",cat:"keep"},p_silk:{name:"ผ้าไหมปักธงชัยผืนเล็ก",price:1700,bond:36,only:"ploy",cat:"wear"},
   f_buds:{name:"หูฟังไร้สายลายสายฟ้า",price:1200,bond:22,only:"fah",cat:"keep"},f_jacket:{name:"แจ็กเก็ตบอมเบอร์ปักชื่อ FAH",price:1900,bond:40,only:"fah",cat:"wear"},
 };
+// v1.89.23: regional souvenirs — bought only at the shop before the bus leaves a trip city, kept in G.souv, given later for free (no cash at the gift screen)
+const SOUV_RN={north:"ภาคเหนือ",isan:"ภาคอีสาน",central:"ภาคกลาง",south:"ภาคใต้"};
+Object.assign(GIFTS,{
+  n_umbrella:{name:"ร่มกระดาษสาบ่อสร้างเพ้นต์มือ",price:2400,souv:"north",cat:"keep"},n_jok:{name:"ผ้าซิ่นตีนจกแม่แจ่ม",price:5800,souv:"north",cat:"wear"},
+  i_pillow:{name:"หมอนขวานผ้าขิด",price:2200,souv:"isan",cat:"keep"},i_praewa:{name:"ผ้าไหมแพรวากาฬสินธุ์",price:6500,souv:"isan",cat:"wear"},
+  c_khon:{name:"หัวโขนจำลองงานช่างฝีมือ",price:3600,souv:"central",cat:"keep"},c_bencharong:{name:"ชุดถ้วยชาเบญจรงค์",price:4800,souv:"central",cat:"keep"},
+  s_talung:{name:"รูปหนังตะลุงแกะมือ",price:2600,souv:"south",cat:"keep"},s_pearl:{name:"สร้อยไข่มุกภูเก็ต",price:6800,souv:"south",cat:"wear"}});
+const SOUV_IDS=Object.keys(GIFTS).filter(g=>GIFTS[g].souv);
+const SOUV_LOVE={kati:["c_khon","n_umbrella"],mali:["s_talung","s_pearl"],rin:["c_bencharong","n_jok"],ploy:["i_praewa","c_bencharong"],fah:["i_pillow","s_pearl"]};
+const SOUV_TALK={
+ kati:{c_khon:"หัวโขน! ปู่ชัยเคยพาหนูไปดูโขนตอนเด็กแค่ครั้งเดียว… หนูจะวางไว้ข้างรูปปู่เลยค่ะ",n_umbrella:"ร่มลายดอกไม้… สวยจนไม่กล้ากางเลยค่ะ หนูจะแขวนไว้ในห้องนะคะ",like:"{g}จาก{r}… หนูจะเก็บไว้เป็นที่ระลึกทริปนี้เลยค่ะ"},
+ mali:{s_talung:"หนังตะลุง! ตอนเด็กมะลิแอบมุดไปดูนายหนังหลังจอทุกงานวัดเลย~ คิดถึงบ้านจัง",s_pearl:"ไข่มุก… ให้มะลิจริงเหรอคะ? จะใส่ตอนกลับไปหาแม่ แม่ต้องตกใจแน่ ๆ~",like:"ของฝากจาก{r}~ มะลิดีใจที่คุณยังนึกถึงมะลิตอนไปเที่ยวนะคะ"},
+ rin:{c_bencharong:"เบญจรงค์ลายนี้เขียนมือห้าสี… ฉันจะใช้ชงกาแฟเฉพาะวันที่ชนะเท่านั้นค่ะ",n_jok:"ตีนจกลายนี้ต้องทอกันเป็นเดือน… ฉันจะเก็บไว้ใส่วันที่สำคัญที่สุดค่ะ",like:"{g}… ของแท้ราคาไม่ใช่น้อยนะคะ ขอบคุณที่ตั้งใจเลือกมาค่ะ"},
+ ploy:{i_praewa:"แพรวา… แม่ฉันเคยมีอยู่ผืนเดียว เก็บไว้ในหีบไม่ให้ใครแตะ ขอบคุณ ฉันจะดูแลอย่างดี",c_bencharong:"ชงชาในถ้วยเบญจรงค์… มาชงด้วยกันไหม แค่สองคน",like:"{g}จาก{r}… สวยดี ขอบใจนะ"},
+ fah:{i_pillow:"หมอนขวาน! ฟ้าจะเอาไว้นอนกลางวันหลังซ้อม ห้ามใครยืมเด็ดขาด!",s_pearl:"ไข่มุก!? ฟ้าใส่แล้วจะดูเหมือนคุณหนูไหมเนี่ย… ห้ามหัวเราะนะ!",like:"ของฝากจาก{r}! ก็…ไม่เลวนี่ ฟ้าจะเก็บไว้ดี ๆ"}};
+const souvLine=(id,g,t)=>{const L=SOUV_TALK[id];if(!L)return null;return t==="love"&&L[g]?L[g]:(L.like||"").replace("{g}",GIFTS[g].name).replace("{r}",SOUV_RN[GIFTS[g].souv]);};
 const GIFT_CAT={khanom:"food",sausage:"food",coffee:"food",tea:"food",wrap:"wear",shorts:"wear",prajiad:"wear",bracelet:"wear",mongkhon:"wear",stickers:"keep",photo:"keep",doll:"keep",sketch:"keep",book:"keep",malai:"keep",spa:"exp"};
 const giftCat=g=>GIFTS[g].cat||GIFT_CAT[g]||"keep";
 // shared bond gifts open at a different closeness for each girl
 const GIFT_UNLOCK={kati:{shorts:12,prajiad:20,photo:26,spa:34,bracelet:40,mongkhon:46},mali:{spa:12,photo:18,bracelet:24,shorts:30,prajiad:38,mongkhon:44},
   rin:{bracelet:14,spa:20,prajiad:28,photo:34,shorts:40,mongkhon:48},ploy:{prajiad:12,mongkhon:22,spa:28,bracelet:34,shorts:40,photo:46},fah:{shorts:10,bracelet:18,photo:26,prajiad:32,spa:38,mongkhon:44}};
 const giftBond=(id,g)=>(GIFT_UNLOCK[id]&&GIFT_UNLOCK[id][g])||GIFTS[g].bond||0;
-const giftsFor=id=>Object.keys(GIFTS).filter(g=>!GIFTS[g].only||GIFTS[g].only===id);
+const giftsFor=id=>Object.keys(GIFTS).filter(g=>!GIFTS[g].souv&&(!GIFTS[g].only||GIFTS[g].only===id));
 const GIFT_PREF={kati:{love:["stickers","mongkhon","k_album","k_glove","prajiad"],like:["wrap","khanom","shorts","photo","sausage","malai","doll"],dislike:["coffee"]},
   mali:{love:["khanom","spa","m_pan","m_ticket","photo"],like:["malai","doll","bracelet","stickers","shorts","sausage","tea"],dislike:["book"]},
   rin:{love:["coffee","bracelet","r_drip","r_watch","book"],like:["tea","spa","sketch","shorts","mongkhon"],dislike:["sausage"]},
@@ -383,11 +399,11 @@ const GIFT_LINES={
  ploy:{love:"…ชาร้านนี้ ฉันชอบมาตั้งแต่เด็ก ขอบคุณจริง ๆ",like:"ใช้ได้ดี ขอบคุณ",ok:"ขอบใจนะ",dislike:"ตุ๊กตา… ฉันไม่ใช่เด็กนะ แต่จะเอาไปให้รุ่นน้องก็แล้วกัน"},
  fah:{love:"ห้ะ! ไส้กรอกชุดใหญ่! นายนี่รู้ใจฟ้าที่สุดเลย!",like:"ก็… ไม่เลวนี่ ขอบใจ",ok:"อือ ขอบใจ",dislike:"ชา? ฟ้าไม่ใช่คุณยายนะ!"},
 };
-function giftTier(id,g){const P=GIFT_PREF[id];return P.love.includes(g)?"love":P.like.includes(g)?"like":P.dislike.includes(g)?"dislike":"ok";}
-function giveGift(G,id,g){const f=G.F[id],it=GIFTS[g];if(G.cash<it.price||f.giftWeek===gameWeek(G))return null;G.cash-=it.price;f.giftWeek=gameWeek(G);if(typeof absWeek==="function")f.lastTouch=absWeek(G);
+function giftTier(id,g){if(GIFTS[g]&&GIFTS[g].souv)return (SOUV_LOVE[id]||[]).includes(g)?"love":"like";const P=GIFT_PREF[id];return P.love.includes(g)?"love":P.like.includes(g)?"like":P.dislike.includes(g)?"dislike":"ok";}
+function giveGift(G,id,g){const f=G.F[id],it=GIFTS[g],sv=!!it.souv;if(sv?!((G.souv||{})[g]>0):G.cash<it.price)return null;if(f.giftWeek===gameWeek(G))return null;if(sv)G.souv[g]--;else G.cash-=it.price;f.giftWeek=gameWeek(G);if(typeof absWeek==="function")f.lastTouch=absWeek(G);
   // v1.16: the same gift again means less (and she says so)
   f.giftN=f.giftN||{};f.giftL=f.giftL||{};if(f.giftL[g]&&gameWeek(G)-f.giftL[g]>=6)f.giftN[g]=0;const n=f.giftN[g]||0;f.giftN[g]=n+1;f.giftL[g]=gameWeek(G);f.giftTot=(f.giftTot||0)+1;
-  const t=giftTier(id,g),base=Math.round({love:6,like:4,ok:2,dislike:0}[t]*(it.bond&&t!=="dislike"?1.5:1)),gain=base>0?Math.max(1,Math.round(base*(n===0?1:t==="love"?(n===1?.6:.4):(n===1?.5:.25)))):base;
+  const t=giftTier(id,g),base=sv?{love:24,like:15}[t]:Math.round({love:6,like:4,ok:2,dislike:0}[t]*(it.bond&&t!=="dislike"?1.5:1)),gain=base>0?Math.max(1,Math.round(base*(n===0?1:t==="love"?(n===1?.6:.4):(n===1?.5:.25)))):base;
   const before=(f.bond||0)+(f.bondX||0);add(G,id,"bond",gain);if(t==="love")add(G,id,"morale",n<2?6:4);
   f.know["gift_"+g]=t;return {t,gain:Math.round(((f.bond||0)+(f.bondX||0)-before)*10)/10,g,n};}
 // v1.21: repeat-gift lines follow what the gift is (food / something to wear / a keepsake / an outing) so they always fit

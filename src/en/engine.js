@@ -893,7 +893,7 @@ const hasStaff=(G,k)=>(G.staff||[]).includes(k);
 const staffLocked=(G,k)=>{const r=STAFF[k].req;if(!r)return "";if(r.lv&&campLevel(G)<r.lv)return `Camp Lv.${r.lv}`;if(r.rep&&G.rep<r.rep)return `Fame ${r.rep}`;return "";};
 function hireStaff(G,k){const S=STAFF[k];G.staff=G.staff||[];if(!S||hasStaff(G,k)||G.staff.length>=staffSlots(G)||staffLocked(G,k)||G.cash<S.fee)return false;G.cash-=S.fee;G.staff.push(k);G.fac.assistants=G.staff.length;return true;}
 function fireStaff(G,k){G.staff=(G.staff||[]).filter(x=>x!==k);G.fac.assistants=G.staff.length;return true;}
-function fixSave(G){if(G&&G.flags&&G.flags.beat_ploy&&G.flags.beatS_ploy==null)G.flags.beatS_ploy=G.season||1;
+function fixSave(G){if(G&&G.F&&G.prodigy)fixProdigies(G);if(G&&G.flags&&G.flags.beat_ploy&&G.flags.beatS_ploy==null)G.flags.beatS_ploy=G.season||1;
   // Legacy saves used week-of-season values. Infer only short, plausible effects;
   // otherwise expire them instead of resurrecting an old effect after New Year.
   const now=gameWeek(G),base=now-G.week;
@@ -1138,6 +1138,10 @@ function genOffers(G,opt){
     const fighters=roster(G).filter(f=>f.div===op.div&&f.injury===0).sort((a,b)=>ovr(b.a)-ovr(a.a));
     for(const f of fighters){const wk=[G.week+2,G.week+3,G.week+4].find(w=>w<=48&&!isBooked(G,op.id,w)&&!G.bookings.some(b=>b.a===f.id&&Math.abs(b.week-w)<=1));
       if(wk&&!G.offers.some(o=>o.a===f.id&&o.b===op.id)){G.offers.push({id:`o${G.week}_${f.id}_${op.id}`,a:f.id,b:op.id,week:wk,tier:"lab",lab:1,win:TIER.lab.win,lose:TIER.lab.lose});break;}}}
+  // v1.89.25: Baiyok's rematch letters to Fah — twice a year from her second season on, before and after she leaves Golden Tiger
+  {const pb=G.prodigy&&G.prodigy.B,o=pb&&G.F[pb],fah=G.F.fah;if(o&&fah&&fah.camp==="player"&&(G.season||1)>=2&&[14,30].includes(G.week)&&!o.injury&&!fah.injury&&!(typeof isAway==="function"&&isAway(G,"fah"))){
+    const wk=[G.week+3,G.week+4,G.week+2].find(w=>w<=48&&!isBooked(G,o.id,w)&&!G.bookings.some(b=>b.a==="fah"&&Math.abs(b.week-w)<=1));
+    if(wk&&!G.offers.some(x=>x.a==="fah"&&x.b===o.id))G.offers.push({id:`o${G.week}_fah_by`,a:"fah",b:o.id,week:wk,tier:"special",rv:1,by:1,win:Math.round(TIER.special.win*1.6/100)*100,lose:Math.round(TIER.special.lose*1.4/100)*100});}}
   // v1.33: temple-fair bouts every other week: off the ranking, paid later by mail, now and then a cross-division star
   if(G.week>=4&&G.week<=46&&G.week%2===0){const R=roster(G).filter(f=>!f.injury);if(R.length){const f=R[Math.floor(rng()*R.length)];
     const myB=G.bookings.filter(b=>b.a===f.id).map(b=>b.week);const wk=[G.week+1,G.week+2,G.week+3].find(w=>!myB.some(x=>Math.abs(x-w)<=1)&&!G.offers.some(x=>x.a===f.id&&x.week===w));
@@ -1268,10 +1272,20 @@ function stageTransition(G){ // called after week's results, before week++
 const LEADS={A:["kati","ploy"],B:["mali","fah"]};
 // v1.53: when a Golden Tiger star joins us, their camp's new prodigy takes over as the division's top rival
 const leadRival=(G,div)=>{const p=G.prodigy&&G.prodigy[div];if(p&&G.F[p]&&G.F[p].camp==="rival")return p;return LEADS[div][1];};
+/* v1.89.25: the prodigies have their own art (Man) — Petchara stays Golden Tiger; Baiyok leaves and fights unattached in white */
+const PROD_SPRITE={A:"petchara",B:"baiyok"};
+const byFree=G=>!!(G&&G.flags&&G.flags.byFree!=null);
+function fixProdigies(G){const P=G.prodigy||{};
+  /* saves from before v1.89.25: count the meetings already fought, so a long rivalry doesn't restart at "first meeting" */
+  if(G.flags&&!G.flags.prodN){const PP={fah:"prod_B",mali:"prod_B",ploy:"prod_A",kati:"prod_A"},N={};let last=0;
+    for(const c of G.cal||[])if(PP[c.a]&&PP[c.a]===c.b){N[c.a]=(N[c.a]||0)+1;last=Math.max(last,c.absWeek||0);}
+    if(Object.keys(N).length){G.flags.prodN=N;G.flags.prodLast=last;}}
+  if(P.A&&G.F[P.A]){const f=G.F[P.A];f.sprite="petchara";f.full="Petcha Golden Tiger";}
+  if(P.B&&G.F[P.B]){const f=G.F[P.B],fr=byFree(G);f.sprite=fr?"baiyok_white":"baiyok";f.full=fr?"Baiyok":"Baiyok Golden Tiger";f.indie=fr;}}
 function makeProdigy(G,div,from){G.prodigy=G.prodigy||{};if(G.prodigy[div])return G.F[G.prodigy[div]];const id="prod_"+div,src=G.F[from];
-  const names={A:["Petcha, Golden Tiger disciple","Petcha"],B:["Baiyok, Golden Tiger disciple","Baiyok"]};
+  const names={A:["Petcha Golden Tiger","Petcha"],B:["Baiyok Golden Tiger","Baiyok"]};
   const f=baseFighter(id,{name:names[div][1],full:names[div][0],div,camp:"rival",color:"#3b3f8f",potential:Math.min(20,(src?src.potential:17)+2),a:{}});
-  for(const k in src.a)f.a[k]=Math.min(20,src.a[k]+.8);f.lvl=Math.max(1,(src.lvl||5));f.xp=0;f.canon=false;f.prodigy=true;f.met=true;f.skills={...(src.skills||{})};
+  for(const k in src.a)f.a[k]=Math.min(20,src.a[k]+.8);f.lvl=Math.max(1,(src.lvl||5));f.xp=0;f.canon=false;f.prodigy=true;f.met=true;f.sprite=PROD_SPRITE[div];f.skills={...(src.skills||{})};
   G.F[id]=f;syncFighterAges(G);G.prodigy[div]=id;G.rank=G.rank||{A:{},B:{}};G.rank[div][id]={pts:0,w:0,l:0,d:0};return f;}
 function joinCamp(G,id,wage){const f=G.F[id];if(!f)return;G.joinLog=(G.joinLog||[]).filter(x=>x.id!==id).concat([{id,season:G.season||1,wk:G.week}]);f.camp="player";f.wage=wage;f.met=true;G.bookings=G.bookings.filter(b=>!(b.b===id&&G.F[b.a]&&G.F[b.a].camp==="player"));
   if(id==="mali"){G.flags.maliIn=G.week;G.flags.maliInAbs=gameWeek(G);}
@@ -1317,7 +1331,7 @@ function weekTrain(G){
     // v1.15: rivals and NPCs level up too, so the opposition visibly gets stronger over the season
     if(f.camp==="rival"||f.camp==="npc"){f.xp=(f.xp||0)+(f.camp==="rival"?30:18)+Math.floor(rng()*10);
       while(f.lvl<MAX_LV&&f.xp>=xpNeed(f.lvl)){f.xp-=xpNeed(f.lvl);f.lvl++;lvBeyond(f);if(f.camp==="rival"){const ks=Object.keys(f.a).sort((x,y)=>f.a[y]-f.a[x]).slice(0,2);ks.forEach(k=>f.a[k]=Math.min(20,f.a[k]+.2));}
-        if(f.camp==="rival")G.lvNews=(G.lvNews||[]).concat([`${f.name} ${f.lab?"Vector Gym":"Golden Tiger Camp"} leveled up to Lv.${f.lvl}`]).slice(-3);}}}
+        if(f.camp==="rival")G.lvNews=(G.lvNews||[]).concat([`${f.name} ${f.lab?"Vector Gym":f.indie?"Free agent":"Golden Tiger Camp"} leveled up to Lv.${f.lvl}`]).slice(-3);}}}
 }
 // week phase 3: npc sim, economy, transitions, advance
 function rankSnapshot(G){const o={};for(const d of ["A","B"]){o[d]={};standings(G,d).forEach((r,i)=>o[d][r.id]=i+1);}return o;}
