@@ -882,7 +882,7 @@ function relHTML(f){const P=PROFILES[f.id],b=f.bond;
   const gifts=Object.entries(f.know).filter(([k])=>k.startsWith("gift_")).map(([k,v])=>`<span class="tchip ${v}">${GIFTS[k.slice(5)].name}${v==="love"?" ♥♥":v==="like"?" ♥":v==="dislike"?" ✕":""}</span>`).join("");
   const looks=[["fight","ชุดชก"],["train","ชุดซ้อม"],["casual","ลำลอง"],...(typeof loyThaiLook==="function"&&loyThaiLook(G)&&THAI_IDS.includes(f.id)?[["thai","ชุดไทย"]]:[])];
   return `<div class="pf2"><div class="pf-art"><img src="${UI.look==="train"?`${ASSET}${f.id}_train.webp`:stand(f.id,UI.look,"happy")}" alt=""><div class="seg sm">${looks.map(([k,t])=>`<button data-act="plook" data-v="${k}" aria-pressed="${UI.look===k}">${t}</button>`).join("")}</div></div>
-   <div class="pf-side">${hearts(b,f)}${typeof missGap==="function"&&missGap(G,f.id)>=3?`<div class="missb">💭 คิดถึง · ไม่ได้เจอกัน ${missGap(G,f.id)} สัปดาห์${!(f.bondX>0)&&f.bond>(REL_FLOOR[(G.relT||{})[f.id]||0]||0)?" · ความสนิทเริ่มจางลง":""}</div>`:""}<div class="reltier"><b>${REL_TIERS[relTier(b)][1]}</b><small>${REL_TIERS[relTier(b)][2]}</small></div><div class="bars">${(()=>{const H=heartLv(f);return bar("สนิท",H.into/H.need*100,"var(--red)",`${Math.round(H.total)}`);})()}${bar("เชื่อใจ",f.trust,"var(--gold)")}</div>${f.camp==="player"?`<p class="meta trustx">${trustText(f)}</p>`:""}
+   <div class="pf-side">${hearts(b,f)}${typeof missGap==="function"&&missGap(G,f.id)>=3?`<div class="missb">💭 คิดถึง · ไม่ได้เจอกัน ${missGap(G,f.id)} สัปดาห์${!(f.bondX>0)&&f.bond>(REL_FLOOR[(G.relT||{})[f.id]||0]||0)?" · ความสนิทเริ่มจางลง":""}</div>`:""}${relLadderHTML(f)}<div class="bars">${(()=>{const H=heartLv(f);return bar("สนิท",H.into/H.need*100,"var(--red)",`${Math.round(H.total)}`);})()}${bar("เชื่อใจ",f.trust,"var(--gold)")}</div>${f.camp==="player"?`<p class="meta trustx">${trustText(f)}</p>`:""}
     <div class="info"><div><span>ส่วนสูง</span><b>${P.height}</b></div><div><span>กรุ๊ปเลือด</span><b>${L(b>=UNLOCK.blood||f.know.blood,UNLOCK.blood,P.blood)}</b></div>
      <div><span>วันเกิด</span><b>${L(b>=UNLOCK.bday||f.know.bday,UNLOCK.bday,P.bday)}</b></div><div><span>สายมวย</span><b>${esc(P.heritage)}</b></div></div></div></div>
    <div class="pf-sec"><h4>นิสัย</h4><p>${L(b>=UNLOCK.personality,UNLOCK.personality,P.personality)}</p></div>
@@ -891,6 +891,11 @@ function relHTML(f){const P=PROFILES[f.id],b=f.bond;
    ${gifts?`<div class="pf-sec"><h4>ของขวัญที่รู้แล้ว</h4><div class="tchips">${gifts}</div></div>`:""}
    <div class="pf-two"><div class="pf-sec"><h4>บ้านเกิด</h4><p>${esc(P.home)}</p></div><div class="pf-sec"><h4>งานอดิเรก</h4><p>${L(b>=UNLOCK.hobby||f.know.hobby,UNLOCK.hobby,P.hobby)}</p></div></div>
    <details class="pf-sec"><summary>เรื่องราว & ความลับ</summary><h4>เรื่องราว</h4><p>${L(b>=UNLOCK.story,UNLOCK.story,P.story)}</p><h4>ความลับ</h4><p>${L(b>=UNLOCK.secret,UNLOCK.secret,P.secret)}</p></details>`;}
+/* v1.89.11: the relationship ladder — the same label as under the hearts, the current step lit */
+function relLadderHTML(f){const H=heartLv(f).lv,cur=relLabel(G,f,H),base=relBase(G,f,H),st=REL_BRANCH(G).includes(base),away=isAway(G,f.id);
+  return `<div class="reltier rlad"><b class="${relIsStatus(G,f)?"hstat":""}">${esc(cur)}</b><small>${esc(away?"กลับมาแล้วป้ายจะเปลี่ยนกลับเอง":REL_DESC[base]||"")}</small>
+   <ol class="rsteps">${REL_STEPS.map(([lv,n])=>`<li class="${!st&&n===base?"on":H>=lv?"done":""}"><i>Lv.${lv}</i>${esc(n)}</li>`).join("")}</ol>
+   <div class="rbranch"><small>ตอนสารภาพรัก (สนิท 75 + เชื่อใจ 40)</small><div>${REL_BRANCH(G).map(n=>`<span class="${n===base?"on":""}">${esc(n)}</span>`).join("")}</div></div></div>`;}
 function giftHTML(id){const f=G.F[id];
   const E=giftsFor(id).map(k=>[k,{...GIFTS[k],bond:giftBond(id,k)}]).sort((x,y)=>(x[1].bond||0)-(y[1].bond||0)||(x[1].only?1:0)-(y[1].only?1:0));
   {const lk=E.filter(([k,g])=>(g.bond||0)>(f.bond||0));const nx=lk[0];const hid=lk.length-(nx?1:0);E.splice(0,E.length,...E.filter(([k,g])=>(g.bond||0)<=(f.bond||0)),...(nx?[nx]:[]));E.hidden=hid;}

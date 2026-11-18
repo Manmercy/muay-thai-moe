@@ -2639,22 +2639,35 @@ const isPartner=(G,id)=>partners(G).includes(id);
 const romOf=(G,id)=>isLov(G,id)&&!G.harem; // lover-only scenes; on the harem route the top scenes give way to group ones
 const romFirst=G=>G.harem?null:(lovList(G)[0]||null);
 function setLovers(G,L){G.lovers=[...new Set(L)];G.romance=G.lovers[0]||null;G.romWk=G.romance?((G.lovWk||{})[G.romance]??null):null;}
-function takeLover(G,id){const solo=!partners(G).some(k=>k!==id);G.lovWk=G.lovWk||{};G.lovWk[id]=absWeek(G);if(G.promise)delete G.promise[id];if(G.exAbs)delete G.exAbs[id];setLovers(G,[...lovList(G),id]);if(solo)add(G,id,"morale",15);}
+function takeLover(G,id){const solo=!partners(G).some(k=>k!==id);if(G.friendz)delete G.friendz[id];G.lovWk=G.lovWk||{};G.lovWk[id]=absWeek(G);if(G.promise)delete G.promise[id];if(G.exAbs)delete G.exAbs[id];setLovers(G,[...lovList(G),id]);if(solo)add(G,id,"morale",15);}
 const isAway=(G,id)=>{const f=G&&G.F&&G.F[id];return !!(f&&f.awayAbs!=null&&absWeek(G)<f.awayAbs);};
 const awayLeft=(G,id)=>isAway(G,id)?G.F[id].awayAbs-absWeek(G):0;
 const awaySpeaks=(G,steps)=>(steps||[]).some(x=>x&&typeof x.n==="string"&&isAway(G,x.n));
 function sendAway(G,id,wk,why){const f=G.F[id];if(!f)return;const now=absWeek(G);f.awayAbs=Math.max(isAway(G,id)?f.awayAbs:0,now+wk);f.awayWhy=why;f.awayBack=false;}
 const lovFinal=G=>{for(const id of lovList(G)){if(!romOf(G,id)||!LOVER_FINAL[id])continue;const b=G.bookings.find(b=>b.tier==="final"&&G.F[b.a].camp==="player"&&(b.a===id||id==="rin"));if(b)return {id,b};}return null;};
 /* v1.89.11: one label — the closeness name until you are together, then what you are to each other (shown under the hearts) */
-function relLabel(G,f,lv){const id=f&&f.id;if(G&&id&&G.F&&G.F[id]){if(isLov(G,id))return G.harem?"Sweetheart ♥ (harem)":"Sweetheart ♥";if(isProm(G,id))return "Promised ♡";if(isEx(G,id))return "Ex";}return heartTier(lv!=null?lv:heartLv(f||{}).lv);}
-const relIsStatus=(G,f)=>!!(G&&f&&f.id&&G.F&&G.F[f.id]&&(isLov(G,f.id)||isProm(G,f.id)||isEx(G,f.id)));
+function befriend(G,id){G.friendz=G.friendz||{};G.friendz[id]=true;}
+const isFriendz=(G,id)=>!!(G.friendz&&G.friendz[id]);
+const awayWord=(G,id)=>G.F[id].camp==="player"?"Left camp":"Not in touch";
+function relLabel(G,f,lv){const id=f&&f.id;if(G&&id&&G.F&&G.F[id]){
+    if(isAway(G,id))return `${G.F[id].awayWhy==="break"?"Heartbroken":"Sulking"} · ${awayWord(G,id)} (back in ${awayLeft(G,id)} wk)`;
+    if(isLov(G,id))return G.harem?"Sweetheart ♥ (harem)":"Sweetheart ♥";if(isProm(G,id))return "Promised ♡";if(isEx(G,id))return "Ex";
+    if(isFriendz(G,id)&&(G.F[id].bond||0)>=40)return "Close friend";}
+  return heartTier(lv!=null?lv:heartLv(f||{}).lv);}
+/* the ladder shown in her profile: the same labels, the current one lit */
+const REL_DESC={"Acquaintance":"Still calls you \"Manager\", a bit stiffly","Getting familiar":"Jokes around, texts about everyday things","Friends":"Sometimes lets your name slip · shares personal stories","Close":"Always calls you by name",
+  "Deeply bonded":"On the same page about almost everything","Kindred":"One look and she knows what you're thinking","Inseparable":"Misses you after a single week apart",
+  "Sweetheart ♥":"Together","Sweetheart ♥ (harem)":"Everyone agreed to be together","Promised ♡":"A promise made, waiting for the day you're in the same camp","Close friend":"You said no once, but you still matter to each other","Ex":"You used to date. Still a little awkward"};
+const REL_STEPS=[[1,"Acquaintance"],[3,"Getting familiar"],[5,"Friends"],[7,"Close"],[9,"Deeply bonded"],[15,"Kindred"],[20,"Inseparable"]];
+const REL_BRANCH=G=>["Sweetheart ♥",...(G&&G.harem?["Sweetheart ♥ (harem)"]:[]),"Promised ♡","Close friend","Ex"];
+const relBase=(G,f,lv)=>{const id=f&&f.id;if(G&&id&&G.F&&G.F[id]){if(isLov(G,id))return G.harem?"Sweetheart ♥ (harem)":"Sweetheart ♥";if(isProm(G,id))return "Promised ♡";if(isEx(G,id))return "Ex";if(isFriendz(G,id)&&(G.F[id].bond||0)>=40)return "Close friend";}return heartTier(lv!=null?lv:heartLv(f||{}).lv);};
+const relIsStatus=(G,f)=>!!(G&&f&&f.id&&G.F&&G.F[f.id]&&relLabel(G,f)!==heartTier(heartLv(f).lv));
 /* beside the name: only where she is right now */
-function relTag(G,f){const id=f.id;let t="";
-  if(isAway(G,id))t+=f.camp==="player"?` · Away from camp (${awayLeft(G,id)} wk)`:` · Not in touch (${awayLeft(G,id)} wk)`;return t;}
+function relTag(G,f){return "";} /* v1.89.11: everything about the relationship now sits in the one label under the hearts */
 // she confesses while you are already with someone — you can tell her the truth
 const LOVE_TAKEN={kati:"…I see. Sorry I said anything. Please forget it",mali:"Oh… you already have someone. It's okay, Mali's happy for you",
   rin:"Thank you for being honest. I'll update my data",ploy:"Then I'll keep what I said today to myself",fah:"Huh! Why didn't you say so! …Whatever. Forget what Fah said!"};
-const takenOpt=(G,id)=>partners(G).some(k=>k!==id)?[{t:"I'm sorry. I'm already with someone",fx:G3=>{add(G3,id,"trust",3);G3.loveNo=G3.loveNo||{};G3.loveNo[id]=G3.week;},then:[{n:id,f:"sad",l:"casual",t:LOVE_TAKEN[id]}]}]:[];
+const takenOpt=(G,id)=>partners(G).some(k=>k!==id)?[{t:"I'm sorry. I'm already with someone",fx:G3=>{befriend(G3,id);add(G3,id,"trust",3);G3.loveNo=G3.loveNo||{};G3.loveNo[id]=G3.week;},then:[{n:id,f:"sad",l:"casual",t:LOVE_TAKEN[id]}]}]:[];
 // an ex who still feels the same, once she has had time
 const LOVE_EX={kati:"Manager… I tried. I tried being just your fighter, but I can't",
   mali:"Mali tried to forget. But every time she makes khanom khrok, she still thinks of you",
@@ -2897,17 +2910,17 @@ function dateScene(G,id,act){
       if(f.bond>=75&&f.trust>=40&&RIVAL_LOVE.includes(id)&&f.camp==="player"&&(G2.season||1)>=2&&!isLov(G2,id)&&!exWait(G2,id)&&!G2.seen["love2_"+id]){G2.seen["love2_"+id]=true;
         out.push(...LOVE_EVENTS[id].map(x=>({l:"casual",...x})),...cheatWarn(G2,id),{choice:[
           {t:yesTxt(G2,id,"I feel the same way"),fx:G3=>takeLover(G3,id),then:[{n:id,f:"flustered",l:"casual",t:LOVE_YES[id]}]},
-          {t:"Thank you, but I want to keep being the one beside you like this",fx:G3=>{add(G3,id,"trust",5);},then:[{n:id,f:"sad",l:"casual",t:LOVE_NO[id]||"…Got it."}]},...takenOpt(G2,id)]});}
+          {t:"Thank you, but I want to keep being the one beside you like this",fx:G3=>{befriend(G3,id);add(G3,id,"trust",5);},then:[{n:id,f:"sad",l:"casual",t:LOVE_NO[id]||"…Got it."}]},...takenOpt(G2,id)]});}
       else if(f.bond>=75&&f.trust>=40&&RIVAL_LOVE.includes(id)&&f.camp==="rival"&&!G2.seen["love_"+id]){G2.seen["love_"+id]=true;out.push(...lvSteps(PROMISE_EVENTS[id],null,G2,id,true).flatMap(x=>x.choice?[...cheatWarn(G2,id),{choice:[...x.choice,...takenOpt(G2,id)]}]:[{l:"casual",...x}]),{inject:G3=>isProm(G3,id)?[{n:"nar",t:`Relationship with ${f.name}: Promised ♡ · this story continues in season two`}]:[]});}
       else if(f.bond>=75&&f.trust>=40&&!isLov(G2,id)&&!RIVAL_LOVE.includes(id)&&!G2.seen["love_"+id]){G2.seen["love_"+id]=true;
         out.push(...LOVE_EVENTS[id].map(x=>({l:"casual",...x})),...cheatWarn(G2,id),{choice:[
           {t:yesTxt(G2,id,"I feel the same way"),fx:G3=>takeLover(G3,id),then:[{n:id,f:"flustered",l:"casual",t:LOVE_YES[id]}]},
-          {t:"Thank you, but I want to keep being the one beside you like this",fx:G3=>{add(G3,id,"trust",5);G3.loveNo=G3.loveNo||{};G3.loveNo[id]=G3.week;},then:[{n:id,f:"sad",l:"casual",t:LOVE_NO[id]}]},...takenOpt(G2,id)]});}
+          {t:"Thank you, but I want to keep being the one beside you like this",fx:G3=>{befriend(G3,id);add(G3,id,"trust",5);G3.loveNo=G3.loveNo||{};G3.loveNo[id]=G3.week;},then:[{n:id,f:"sad",l:"casual",t:LOVE_NO[id]}]},...takenOpt(G2,id)]});}
       // v1.29.3: a second chance — she won't ask twice, but after a while she lets you know the door is still open
       else if(f.bond>=75&&f.trust>=40&&!isLov(G2,id)&&!exWait(G2,id)&&!RIVAL_LOVE.includes(id)&&G2.seen["love_"+id]&&G2.week-((G2.loveNo&&G2.loveNo[id])||-99)>=2){G2.loveNo=G2.loveNo||{};G2.loveNo[id]=G2.week;
         out.push({n:id,f:"flustered",l:"casual",t:isEx(G2,id)?LOVE_EX[id]:LOVE_AGAIN[id]},...cheatWarn(G2,id),{choice:[
           {t:yesTxt(G2,id,isEx(G2,id)?"I still miss you too. Let's get back together":"I answered too fast that day. I feel the same way"),fx:G3=>takeLover(G3,id),then:[{n:id,f:"flustered",l:"casual",t:LOVE_YES[id]}]},
-          {t:"I'd like to stay by your side, just like this",fx:G3=>add(G3,id,"trust",2),then:[{n:"nar",t:`${f.name} smiles and nods, and says nothing more`}]}]});}
+          {t:"I'd like to stay by your side, just like this",fx:G3=>{befriend(G3,id);add(G3,id,"trust",2);},then:[{n:"nar",t:`${f.name} smiles and nods, and says nothing more`}]}]});}
       return out;}}];
   if(romOf(G,id)&&LOVER_DATES[id]){f.lovIdx=f.lovIdx||0;const lw=(G.lovWk||{})[id],since=absWeek(G)-(lw!=null?lw:absWeek(G)-1);
     if(f.lovIdx<LOVER_DATES[id].length&&since>=LOVER_WK[f.lovIdx]){const sc=lvSteps(LOVER_DATES[id][f.lovIdx++],D,G,id,false);D.score+=2;return [...sc,steps[steps.length-1]];}}
@@ -6320,7 +6333,7 @@ function relHTML(f){const P=PROFILES[f.id],b=f.bond;
   const gifts=Object.entries(f.know).filter(([k])=>k.startsWith("gift_")).map(([k,v])=>`<span class="tchip ${v}">${GIFTS[k.slice(5)].name}${v==="love"?" ♥♥":v==="like"?" ♥":v==="dislike"?" ✕":""}</span>`).join("");
   const looks=[["fight","Fight gear"],["train","Training gear"],["casual","Casual"],...(typeof loyThaiLook==="function"&&loyThaiLook(G)&&THAI_IDS.includes(f.id)?[["thai","Thai Dress"]]:[])];
   return `<div class="pf2"><div class="pf-art"><img src="${UI.look==="train"?`${ASSET}${f.id}_train.webp`:stand(f.id,UI.look,"happy")}" alt=""><div class="seg sm">${looks.map(([k,t])=>`<button data-act="plook" data-v="${k}" aria-pressed="${UI.look===k}">${t}</button>`).join("")}</div></div>
-   <div class="pf-side">${hearts(b,f)}${typeof missGap==="function"&&missGap(G,f.id)>=3?`<div class="missb">💭 Missing you · haven't met in ${missGap(G,f.id)} weeks ${!(f.bondX>0)&&f.bond>(REL_FLOOR[(G.relT||{})[f.id]||0]||0)?" · bond starting to fade":""}</div>`:""}<div class="reltier"><b>${REL_TIERS[relTier(b)][1]}</b><small>${REL_TIERS[relTier(b)][2]}</small></div><div class="bars">${(()=>{const H=heartLv(f);return bar("Friends",H.into/H.need*100,"var(--red)",`${Math.round(H.total)}`);})()}${bar("Trust",f.trust,"var(--gold)")}</div>${f.camp==="player"?`<p class="meta trustx">${trustText(f)}</p>`:""}
+   <div class="pf-side">${hearts(b,f)}${typeof missGap==="function"&&missGap(G,f.id)>=3?`<div class="missb">💭 Missing you · haven't met in ${missGap(G,f.id)} weeks ${!(f.bondX>0)&&f.bond>(REL_FLOOR[(G.relT||{})[f.id]||0]||0)?" · bond starting to fade":""}</div>`:""}${relLadderHTML(f)}<div class="bars">${(()=>{const H=heartLv(f);return bar("Friends",H.into/H.need*100,"var(--red)",`${Math.round(H.total)}`);})()}${bar("Trust",f.trust,"var(--gold)")}</div>${f.camp==="player"?`<p class="meta trustx">${trustText(f)}</p>`:""}
     <div class="info"><div><span>Height</span><b>${P.height}</b></div><div><span>Blood type</span><b>${L(b>=UNLOCK.blood||f.know.blood,UNLOCK.blood,P.blood)}</b></div>
      <div><span>Birthday</span><b>${L(b>=UNLOCK.bday||f.know.bday,UNLOCK.bday,P.bday)}</b></div><div><span>Style</span><b>${esc(P.heritage)}</b></div></div></div></div>
    <div class="pf-sec"><h4>Personality</h4><p>${L(b>=UNLOCK.personality,UNLOCK.personality,P.personality)}</p></div>
@@ -6329,6 +6342,11 @@ function relHTML(f){const P=PROFILES[f.id],b=f.bond;
    ${gifts?`<div class="pf-sec"><h4>Known gifts</h4><div class="tchips">${gifts}</div></div>`:""}
    <div class="pf-two"><div class="pf-sec"><h4>Hometown</h4><p>${esc(P.home)}</p></div><div class="pf-sec"><h4>Hobby</h4><p>${L(b>=UNLOCK.hobby||f.know.hobby,UNLOCK.hobby,P.hobby)}</p></div></div>
    <details class="pf-sec"><summary>Story & secrets</summary><h4>Story</h4><p>${L(b>=UNLOCK.story,UNLOCK.story,P.story)}</p><h4>Secret</h4><p>${L(b>=UNLOCK.secret,UNLOCK.secret,P.secret)}</p></details>`;}
+/* v1.89.11: the relationship ladder — the same label as under the hearts, the current step lit */
+function relLadderHTML(f){const H=heartLv(f).lv,cur=relLabel(G,f,H),base=relBase(G,f,H),st=REL_BRANCH(G).includes(base),away=isAway(G,f.id);
+  return `<div class="reltier rlad"><b class="${relIsStatus(G,f)?"hstat":""}">${esc(cur)}</b><small>${esc(away?"The label goes back once she returns":REL_DESC[base]||"")}</small>
+   <ol class="rsteps">${REL_STEPS.map(([lv,n])=>`<li class="${!st&&n===base?"on":H>=lv?"done":""}"><i>Lv.${lv}</i>${esc(n)}</li>`).join("")}</ol>
+   <div class="rbranch"><small>At the confession (bond 75 + trust 40)</small><div>${REL_BRANCH(G).map(n=>`<span class="${n===base?"on":""}">${esc(n)}</span>`).join("")}</div></div></div>`;}
 function giftHTML(id){const f=G.F[id];
   const E=giftsFor(id).map(k=>[k,{...GIFTS[k],bond:giftBond(id,k)}]).sort((x,y)=>(x[1].bond||0)-(y[1].bond||0)||(x[1].only?1:0)-(y[1].only?1:0));
   {const lk=E.filter(([k,g])=>(g.bond||0)>(f.bond||0));const nx=lk[0];const hid=lk.length-(nx?1:0);E.splice(0,E.length,...E.filter(([k,g])=>(g.bond||0)<=(f.bond||0)),...(nx?[nx]:[]));E.hidden=hid;}

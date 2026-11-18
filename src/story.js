@@ -389,22 +389,35 @@ const isPartner=(G,id)=>partners(G).includes(id);
 const romOf=(G,id)=>isLov(G,id)&&!G.harem; // lover-only scenes; on the harem route the top scenes give way to group ones
 const romFirst=G=>G.harem?null:(lovList(G)[0]||null);
 function setLovers(G,L){G.lovers=[...new Set(L)];G.romance=G.lovers[0]||null;G.romWk=G.romance?((G.lovWk||{})[G.romance]??null):null;}
-function takeLover(G,id){const solo=!partners(G).some(k=>k!==id);G.lovWk=G.lovWk||{};G.lovWk[id]=absWeek(G);if(G.promise)delete G.promise[id];if(G.exAbs)delete G.exAbs[id];setLovers(G,[...lovList(G),id]);if(solo)add(G,id,"morale",15);}
+function takeLover(G,id){const solo=!partners(G).some(k=>k!==id);if(G.friendz)delete G.friendz[id];G.lovWk=G.lovWk||{};G.lovWk[id]=absWeek(G);if(G.promise)delete G.promise[id];if(G.exAbs)delete G.exAbs[id];setLovers(G,[...lovList(G),id]);if(solo)add(G,id,"morale",15);}
 const isAway=(G,id)=>{const f=G&&G.F&&G.F[id];return !!(f&&f.awayAbs!=null&&absWeek(G)<f.awayAbs);};
 const awayLeft=(G,id)=>isAway(G,id)?G.F[id].awayAbs-absWeek(G):0;
 const awaySpeaks=(G,steps)=>(steps||[]).some(x=>x&&typeof x.n==="string"&&isAway(G,x.n));
 function sendAway(G,id,wk,why){const f=G.F[id];if(!f)return;const now=absWeek(G);f.awayAbs=Math.max(isAway(G,id)?f.awayAbs:0,now+wk);f.awayWhy=why;f.awayBack=false;}
 const lovFinal=G=>{for(const id of lovList(G)){if(!romOf(G,id)||!LOVER_FINAL[id])continue;const b=G.bookings.find(b=>b.tier==="final"&&G.F[b.a].camp==="player"&&(b.a===id||id==="rin"));if(b)return {id,b};}return null;};
 /* v1.89.11: one label — the closeness name until you are together, then what you are to each other (shown under the hearts) */
-function relLabel(G,f,lv){const id=f&&f.id;if(G&&id&&G.F&&G.F[id]){if(isLov(G,id))return G.harem?"คนรัก ♥ (ฮาเร็ม)":"คนรัก ♥";if(isProm(G,id))return "สัญญาไว้ ♡";if(isEx(G,id))return "เคยคบ";}return heartTier(lv!=null?lv:heartLv(f||{}).lv);}
-const relIsStatus=(G,f)=>!!(G&&f&&f.id&&G.F&&G.F[f.id]&&(isLov(G,f.id)||isProm(G,f.id)||isEx(G,f.id)));
+function befriend(G,id){G.friendz=G.friendz||{};G.friendz[id]=true;}
+const isFriendz=(G,id)=>!!(G.friendz&&G.friendz[id]);
+const awayWord=(G,id)=>G.F[id].camp==="player"?"หนีไปจากค่าย":"ไม่ติดต่อมา";
+function relLabel(G,f,lv){const id=f&&f.id;if(G&&id&&G.F&&G.F[id]){
+    if(isAway(G,id))return `${G.F[id].awayWhy==="break"?"อกหัก":"งอน"} · ${awayWord(G,id)} (อีก ${awayLeft(G,id)} สัปดาห์)`;
+    if(isLov(G,id))return G.harem?"คนรัก ♥ (ฮาเร็ม)":"คนรัก ♥";if(isProm(G,id))return "สัญญาไว้ ♡";if(isEx(G,id))return "เคยคบ";
+    if(isFriendz(G,id)&&(G.F[id].bond||0)>=40)return "เพื่อนสนิท";}
+  return heartTier(lv!=null?lv:heartLv(f||{}).lv);}
+/* the ladder shown in her profile: the same labels, the current one lit */
+const REL_DESC={"คนรู้จัก":"ยังเรียกคุณว่าผู้จัดการแบบเกร็ง ๆ","เริ่มคุ้น":"เริ่มคุยเล่น ทักแชตเรื่องทั่วไป","สนิท":"บางทีก็หลุดเรียกชื่อคุณ · มีเรื่องส่วนตัวมาเล่า","ใกล้ชิด":"เรียกชื่อคุณตลอด",
+  "ผูกพันลึก":"ใจตรงกันแทบทุกเรื่อง","รู้ใจ":"แค่มองหน้าก็รู้ว่าคิดอะไร","ขาดกันไม่ได้":"ไม่เจอกันสัปดาห์เดียวก็คิดถึง",
+  "คนรัก ♥":"คบกันอยู่","คนรัก ♥ (ฮาเร็ม)":"ทุกคนตกลงอยู่ด้วยกัน","สัญญาไว้ ♡":"สัญญากันไว้แล้ว รอวันที่ได้อยู่ค่ายเดียวกัน","เพื่อนสนิท":"เคยปฏิเสธไปแล้ว แต่ยังเป็นคนสำคัญของกันและกัน","เคยคบ":"เคยคบกัน ตอนนี้ยังอึดอัดกันอยู่บ้าง"};
+const REL_STEPS=[[1,"คนรู้จัก"],[3,"เริ่มคุ้น"],[5,"สนิท"],[7,"ใกล้ชิด"],[9,"ผูกพันลึก"],[15,"รู้ใจ"],[20,"ขาดกันไม่ได้"]];
+const REL_BRANCH=G=>["คนรัก ♥",...(G&&G.harem?["คนรัก ♥ (ฮาเร็ม)"]:[]),"สัญญาไว้ ♡","เพื่อนสนิท","เคยคบ"];
+const relBase=(G,f,lv)=>{const id=f&&f.id;if(G&&id&&G.F&&G.F[id]){if(isLov(G,id))return G.harem?"คนรัก ♥ (ฮาเร็ม)":"คนรัก ♥";if(isProm(G,id))return "สัญญาไว้ ♡";if(isEx(G,id))return "เคยคบ";if(isFriendz(G,id)&&(G.F[id].bond||0)>=40)return "เพื่อนสนิท";}return heartTier(lv!=null?lv:heartLv(f||{}).lv);};
+const relIsStatus=(G,f)=>!!(G&&f&&f.id&&G.F&&G.F[f.id]&&relLabel(G,f)!==heartTier(heartLv(f).lv));
 /* beside the name: only where she is right now */
-function relTag(G,f){const id=f.id;let t="";
-  if(isAway(G,id))t+=f.camp==="player"?` · ไม่อยู่ค่าย (อีก ${awayLeft(G,id)} สัปดาห์)`:` · ไม่ติดต่อมา (อีก ${awayLeft(G,id)} สัปดาห์)`;return t;}
+function relTag(G,f){return "";} /* v1.89.11: everything about the relationship now sits in the one label under the hearts */
 // she confesses while you are already with someone — you can tell her the truth
 const LOVE_TAKEN={kati:"…อย่างนั้นเองเหรอคะ หนูขอโทษที่พูดออกไป ลืมมันไปนะคะ",mali:"อ๋อ… มีแล้วนี่เอง ไม่เป็นไรค่ะ มะลิยินดีด้วยนะ",
   rin:"ขอบคุณที่บอกตรง ๆ ค่ะ ฉันจะปรับข้อมูลใหม่",ploy:"งั้นพี่จะเก็บคำพูดวันนี้ไว้คนเดียวนะ",fah:"ห้ะ! ทำไมไม่บอกก่อน! …ช่างเถอะ ลืมที่ฟ้าพูดไปซะ!"};
-const takenOpt=(G,id)=>partners(G).some(k=>k!==id)?[{t:"ขอโทษนะ ฉันมีคนที่รักอยู่แล้ว",fx:G3=>{add(G3,id,"trust",3);G3.loveNo=G3.loveNo||{};G3.loveNo[id]=G3.week;},then:[{n:id,f:"sad",l:"casual",t:LOVE_TAKEN[id]}]}]:[];
+const takenOpt=(G,id)=>partners(G).some(k=>k!==id)?[{t:"ขอโทษนะ ฉันมีคนที่รักอยู่แล้ว",fx:G3=>{befriend(G3,id);add(G3,id,"trust",3);G3.loveNo=G3.loveNo||{};G3.loveNo[id]=G3.week;},then:[{n:id,f:"sad",l:"casual",t:LOVE_TAKEN[id]}]}]:[];
 // an ex who still feels the same, once she has had time
 const LOVE_EX={kati:"ผู้จัดการคะ… หนูลองแล้ว ลองเป็นแค่นักมวยของคุณแล้ว แต่หนูทำไม่ได้ค่ะ",
   mali:"มะลิพยายามลืมแล้วนะคะ แต่ทุกครั้งที่ทำขนมครก มะลิก็นึกถึงคุณอยู่ดี",
@@ -647,17 +660,17 @@ function dateScene(G,id,act){
       if(f.bond>=75&&f.trust>=40&&RIVAL_LOVE.includes(id)&&f.camp==="player"&&(G2.season||1)>=2&&!isLov(G2,id)&&!exWait(G2,id)&&!G2.seen["love2_"+id]){G2.seen["love2_"+id]=true;
         out.push(...LOVE_EVENTS[id].map(x=>({l:"casual",...x})),...cheatWarn(G2,id),{choice:[
           {t:yesTxt(G2,id,"ฉันก็รู้สึกแบบเดียวกัน"),fx:G3=>takeLover(G3,id),then:[{n:id,f:"flustered",l:"casual",t:LOVE_YES[id]}]},
-          {t:"ขอบคุณ แต่ฉันอยากเป็นคนที่คอยอยู่ข้าง ๆ แบบนี้ต่อไป",fx:G3=>{add(G3,id,"trust",5);},then:[{n:id,f:"sad",l:"casual",t:LOVE_NO[id]||"…เข้าใจแล้ว"}]},...takenOpt(G2,id)]});}
+          {t:"ขอบคุณ แต่ฉันอยากเป็นคนที่คอยอยู่ข้าง ๆ แบบนี้ต่อไป",fx:G3=>{befriend(G3,id);add(G3,id,"trust",5);},then:[{n:id,f:"sad",l:"casual",t:LOVE_NO[id]||"…เข้าใจแล้ว"}]},...takenOpt(G2,id)]});}
       else if(f.bond>=75&&f.trust>=40&&RIVAL_LOVE.includes(id)&&f.camp==="rival"&&!G2.seen["love_"+id]){G2.seen["love_"+id]=true;out.push(...lvSteps(PROMISE_EVENTS[id],null,G2,id,true).flatMap(x=>x.choice?[...cheatWarn(G2,id),{choice:[...x.choice,...takenOpt(G2,id)]}]:[{l:"casual",...x}]),{inject:G3=>isProm(G3,id)?[{n:"nar",t:`ความสัมพันธ์กับ${f.name}: สัญญาไว้ ♡ · เรื่องนี้จะไปต่อในฤดูกาลที่สอง`}]:[]});}
       else if(f.bond>=75&&f.trust>=40&&!isLov(G2,id)&&!RIVAL_LOVE.includes(id)&&!G2.seen["love_"+id]){G2.seen["love_"+id]=true;
         out.push(...LOVE_EVENTS[id].map(x=>({l:"casual",...x})),...cheatWarn(G2,id),{choice:[
           {t:yesTxt(G2,id,"ฉันก็รู้สึกแบบเดียวกัน"),fx:G3=>takeLover(G3,id),then:[{n:id,f:"flustered",l:"casual",t:LOVE_YES[id]}]},
-          {t:"ขอบคุณ แต่ฉันอยากเป็นคนที่คอยอยู่ข้าง ๆ แบบนี้ต่อไป",fx:G3=>{add(G3,id,"trust",5);G3.loveNo=G3.loveNo||{};G3.loveNo[id]=G3.week;},then:[{n:id,f:"sad",l:"casual",t:LOVE_NO[id]}]},...takenOpt(G2,id)]});}
+          {t:"ขอบคุณ แต่ฉันอยากเป็นคนที่คอยอยู่ข้าง ๆ แบบนี้ต่อไป",fx:G3=>{befriend(G3,id);add(G3,id,"trust",5);G3.loveNo=G3.loveNo||{};G3.loveNo[id]=G3.week;},then:[{n:id,f:"sad",l:"casual",t:LOVE_NO[id]}]},...takenOpt(G2,id)]});}
       // v1.29.3: a second chance — she won't ask twice, but after a while she lets you know the door is still open
       else if(f.bond>=75&&f.trust>=40&&!isLov(G2,id)&&!exWait(G2,id)&&!RIVAL_LOVE.includes(id)&&G2.seen["love_"+id]&&G2.week-((G2.loveNo&&G2.loveNo[id])||-99)>=2){G2.loveNo=G2.loveNo||{};G2.loveNo[id]=G2.week;
         out.push({n:id,f:"flustered",l:"casual",t:isEx(G2,id)?LOVE_EX[id]:LOVE_AGAIN[id]},...cheatWarn(G2,id),{choice:[
           {t:yesTxt(G2,id,isEx(G2,id)?"ฉันก็ยังคิดถึงเธอ กลับมาคบกันนะ":"วันนั้นฉันตอบเร็วไป ฉันก็รู้สึกเหมือนเธอ"),fx:G3=>takeLover(G3,id),then:[{n:id,f:"flustered",l:"casual",t:LOVE_YES[id]}]},
-          {t:"ขออยู่ข้าง ๆ แบบนี้ต่อไปนะ",fx:G3=>add(G3,id,"trust",2),then:[{n:"nar",t:`${f.name}ยิ้มแล้วพยักหน้า ไม่ได้พูดอะไรต่อ`}]}]});}
+          {t:"ขออยู่ข้าง ๆ แบบนี้ต่อไปนะ",fx:G3=>{befriend(G3,id);add(G3,id,"trust",2);},then:[{n:"nar",t:`${f.name}ยิ้มแล้วพยักหน้า ไม่ได้พูดอะไรต่อ`}]}]});}
       return out;}}];
   if(romOf(G,id)&&LOVER_DATES[id]){f.lovIdx=f.lovIdx||0;const lw=(G.lovWk||{})[id],since=absWeek(G)-(lw!=null?lw:absWeek(G)-1);
     if(f.lovIdx<LOVER_DATES[id].length&&since>=LOVER_WK[f.lovIdx]){const sc=lvSteps(LOVER_DATES[id][f.lovIdx++],D,G,id,false);D.score+=2;return [...sc,steps[steps.length-1]];}}
