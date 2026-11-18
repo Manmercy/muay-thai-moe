@@ -378,7 +378,7 @@ const SIGNATURE={kati:{name:"Sirichai Heart Spinning Elbow",desc:"Bond ♥ Lv.7+
   ploy:{name:"Tiger Wall",desc:"Bond ♥ Lv.7+ · Evade/block +2% · inside defense +1",fx:{evade:.02,clDef:1}},
   fah:{name:"Thundering Sky Storm",desc:"Bond ♥ Lv.7+ · Punch power +12% · 6% less energy",fx:{dmg:{punch:.12},staSave:.06}}};
 const hasSignature=f=>!!SIGNATURE[f.id]&&f.camp==="player"&&(f.bond||0)>=60;
-function skillMods(f){const m={hit:{},pts:{},dmg:{},ctr:0,ctrDmg:0,clutch:0,regen:0,mor:0,evade:0,corner:0,prep:0,clDef:0,staSave:0};
+function skillMods(f){const m={hit:{},pts:{},dmg:{},ctr:0,ctrDmg:0,clutch:0,regen:0,mor:0,evade:0,corner:0,prep:0,clDef:0,staSave:0,sprawl:0,tdTry:0,gnp:0,sub:0};
   if(hasSignature(f)){const e=SIGNATURE[f.id].fx;for(const k in e){if(typeof e[k]==="object")for(const w in e[k])m[k][w]=(m[k][w]||0)+e[k][w];else m[k]+=e[k];}}
   if(f.pfx)for(const k in f.pfx){const e=f.pfx;if(typeof e[k]==="object")for(const w in e[k])m[k][w]=(m[k][w]||0)+e[k][w];else m[k]+=e[k];} /* v1.90: a regional champion's own perk */
   const list=skillList(f.id);if(!list.length||!f.skills)return m;const eq=equipped(f);
@@ -575,7 +575,8 @@ function newFight(fa,fb,o){
   const scout=(me,op)=>me.counterPrep||!!(me.f.camp==="player"&&typeof G!=="undefined"&&G&&G.scoutAbs&&G.scoutAbs[op.id]!=null&&gameWeek(G)-G.scoutAbs[op.id]<=8);
   for(const [S1,S2] of [[SA,SB],[SB,SA]])if(S1.trait==="lib"&&scout(S1,S2.f))S1.libOn=1;
   if(fa.ployNotes&&fb.id==="ploy")SA.prep+=.025;if(fb.ployNotes&&fa.id==="ploy")SB.prep+=.025; // Rin's notebook on Ploy
-  return {seed:o.seed,rng,rounds:o.rounds,round:0,tier:o.tier,A:SA,B:SB,
+  if(o.gprepA)SA.gprep=o.gprepA;
+  return {seed:o.seed,rng,rounds:o.rounds,round:0,tier:o.tier,A:SA,B:SB,open:!!(fa.grap||fb.grap),
     cards:[],logs:[],over:false,result:null,forceRage:!!o.forceRage};
 }
 function setTactics(F,tA){F.A.tac={focus:"auto",pace:"steady",target:"body",...(tA||{})};F.B.tac=aiTac(F.B.f,F.rng);}
@@ -604,7 +605,9 @@ function aiCorner(F,me,op){ if(F.round===0)return "none";
 const BAL={flashPow:.025,specPow:0,wdef:.15,spec:4,specK:.4,clGap:9,clK:.03,repFree:.5,repPen:.7,chkBase:5,chkK:.016,chkMax:.3,chkLegs:4,chkSta:5,chkHp:1.2};
 function effA(s,k){const a=s.f.a,o=s.ov!=null?s.ov:(s.ov=ovr(a)),v=a[k],c=o+BAL.spec;return v>c?c+(v-c)*BAL.specK:v;}
 const EX_PER_ROUND=12;
-function roundBegin(F){F.round++;F.A.rpts=0;F.B.rpts=0;F.kd0={A:F.A.kd,B:F.B.kd};F.ex=0;F.rlog=[];
+function roundBegin(F){F.round++;F.gnd=null;
+  /* v1.90: a boss changes form every round (Ladda: hood → no hood → blood mode) */
+  for(const s of [F.A,F.B])if(s.f.phases){const P=s.f.phases[Math.min(F.round,s.f.phases.length)-1];s.phNew=!s.ph||s.ph.n!==P.n;s.ph=P;}F.A.rpts=0;F.B.rpts=0;F.kd0={A:F.A.kd,B:F.B.kd};F.ex=0;F.rlog=[];
   F.mA=mods(F.A,F);F.mB=mods(F.B,F);for(const s of [F.A,F.B]){s.rw={punch:0,kick:0,knee:0,elbow:0};s.rtw={punch:0,kick:0,knee:0,elbow:0};s.rdmg=0;s.rthrown=0;s.rlanded=0;s.skRound=false;}}
 const roundDone=F=>F.over||F.ex>=EX_PER_ROUND;
 function fightRound(F){roundBegin(F);while(!roundDone(F))fightEx(F);return roundFinish(F);}
@@ -612,7 +615,7 @@ function fightRound(F){roundBegin(F);while(!roundDone(F))fightEx(F);return round
 // every learned school skill can be fired once per fight (max one per round): attack burst, guard burst or second wind
 function skillKind(sk){const e=sk.fx(1);const wk=e.hit||e.pts||e.dmg;if(wk)return {k:"atk",w:Object.keys(wk)[0]};if(e.evade||e.ctr||e.clDef||e.ctrDmg)return {k:"def"};return {k:"rec"};}
 const SKILL_KIND_NAME={atk:"Finishing attack",def:"Defend & counter",rec:"Recover energy"};
-function fightSkills(s){const L=skillList(s.f.id),eq=equipped(s.f);return L.filter(k=>eq.includes(k.id)).map(k=>({...k,r:s.f.skills[k.id],...skillKind(k)}));}
+function fightSkills(s){if(s.f.nlsk)return s.f.nlsk.map(k=>({...k,r:3}));const L=skillList(s.f.id),eq=equipped(s.f);return L.filter(k=>eq.includes(k.id)).map(k=>({...k,r:s.f.skills[k.id],...skillKind(k)}));}
 // v1.89.6: classic mae mai / look mai techniques get called by name from the booth (keyed by skill id so it works in every language)
 const MAEMAI={"ts_low":"l","ts_croc":"m","ts_ring":"l","ts_trunk":"m","kati_1a1":"l","kati_2b1":"m","kati_2b3":"m","cy_spin":"l","cy_erawan":"m","cy_gate":"l","mali_2a3":"m","lb_jab":"l","lb_kris":"m","lb_feint":"m","lb_giant":"m","lb_teep":"m","lb_fold":"l","rin_0b1":"m","rin_2b3":"m","kr_thunder":"m","kr_sweep":"l","p_wall":"l","ploy_1a3":"l","ploy_2a3":"m"};
 function skillCall(F,s,sk){const k=MAEMAI[sk.id];if(!k)return `${s.name} uses "${sk.name}"!`;const kn=k==="m"?"Mae mai Muay Thai":"Look mai Muay Thai";
@@ -623,6 +626,7 @@ function useSkill(F,s,id){const o=s===F.A?F.B:F.A;s.skUsed=s.skUsed||{};if(F.ove
   if(sk.k==="atk"){s.burst={k:"atk",w:sk.w,left:4,pw};s.sta=clamp(s.sta-6,0,100);}
   if(sk.k==="def")s.burst={k:"def",left:4,pw};
   if(sk.k==="rec"){s.sta=clamp(s.sta+22*pw,0,100);s.hp=clamp(s.hp+6*pw,0,100);s.mor+=.01;s.burst=null;}
+  if(sk.k==="td"||sk.k==="sub"){s.burst={k:sk.k,left:sk.k==="td"?3:4,pw};s.sta=clamp(s.sta-5,0,100);} /* v1.90: grappling bursts (Naka League) */
   return {ha:F.A.hp,hb:F.B.hp,sa:F.A.sta,sb:F.B.sta,s:s===F.A?"A":"B",t:skillCall(F,s,sk),k:"big",ev:"skill",rid:s.f.id,an:s.name,dn:o.name,skn:sk.name,skk:sk.k,w:sk.w,skid:sk.id,skrow:sk.row};}
 function aiSkill(F,s,rng){if(s.skRound||F.over)return null;const L=fightSkills(s).filter(k=>!(s.skUsed&&s.skUsed[k.id]));if(!L.length)return null;
   const o=s===F.A?F.B:F.A,ex=F.ex,last=F.round>=F.rounds;const behind=F.cards.reduce((x,c)=>x+(s===F.A?c[0]-c[1]:c[1]-c[0]),0)<0;
@@ -631,8 +635,53 @@ function aiSkill(F,s,rng){if(s.skRound||F.over)return null;const L=fightSkills(s
   if(def&&o.burst&&o.burst.k==="atk"&&rng()<.5)return useSkill(F,s,def.id);
   if(ex<3)return null;
   const p=(last?.3:.1)+(behind?.12:0)+(F.round>=2?.05:0);
-  if(rng()<p){const k=atk||def||rec;return useSkill(F,s,k.id);}
+  const gk=L.find(k=>k.k==="sub"&&F.gnd&&F.gnd.top===s)||L.find(k=>k.k==="td"&&!F.gnd);if(gk&&rng()<(gk.k==="sub"?.6:p*2.5))return useSkill(F,s,gk.id);
+  if(rng()<p){const k=atk||def||rec;if(k)return useSkill(F,s,k.id);}
   return null;}
+/* ---------- v1.90 open rules (Naka League underground): takedowns, ground-and-pound, submissions ----------
+   Only a fighter with f.grap (takedown skill 0–20) shoots; f.sub (0–20) is her submission game. Muay Thai answers with
+   the clinch, footwork, power and knees — no new stats for our fighters. A tap ends the bout like a knockout.
+   s.gprep: the underground training plan ("sprawl" | "escape" | "strike"). */
+const GR={tdTry:.16,tdK:.012,tdMax:.5,tdBase:.38,tdD:.035,escBase:.2,escK:.03,subTry:.3,subBase:.06,subK:.022,reset:4,gnp:1.1,knee:.2};
+function grapEx(F,at,df,rng,log,md){const nm=v=>Array.isArray(v)?v[Math.floor(rng()*v.length)]:v;
+  const L=(s,t,k,ev,x)=>log.push({ha:F.A.hp,hb:F.B.hp,sa:F.A.sta,sb:F.B.sta,s:s===F.A?"A":s===F.B?"B":"x",t,k,ev,...x});
+  const g=F.gnd;
+  if(g){const T=g.top,B=g.bot,ta=T.f.a,ba=B.f.a;g.t++;
+    const bS=T.burst&&T.burst.k==="sub"?T.burst:null;
+    const esc=ba.power*.3+ba.clinch*.25+ba.iq*.2+ba.foot*.15+ba.stamina*.1+(B.gprep==="escape"?3:0),ctl=(T.f.grap||ta.clinch)*.8+ta.power*.2;
+    const escP=clamp(GR.escBase+(esc-ctl)*GR.escK+(B.sta-T.sta)/400-(bS?.08:0),.06,.6);
+    if(rng()<escP){F.gnd=null;B.sta=clamp(B.sta-3,0,100);L(B,`${B.name} pushes free and gets back up!`,"hit","standup",{an:B.name,dn:T.name});return true;}
+    if(g.t>=GR.reset){F.gnd=null;L(null,`They stall on the ground too long — the referee stands them up`,"miss","reset",{an:T.name,dn:B.name});return true;}
+    T.sta=clamp(T.sta-2,0,100);B.sta=clamp(B.sta-4,0,100);
+    if(T.f.sub&&rng()<GR.subTry+(B.hp<40?.1:0)+(bS?.3:0)){const def=ba.iq*.4+ba.power*.3+ba.stamina*.3+(B.gprep==="escape"?3:0);
+      const p=clamp(GR.subBase+(T.f.sub-def)*GR.subK+(100-B.sta)/600+(B.hp<40?.06:0)+(T.sk.sub||0)+(bS?.12*bS.pw:0),.02,.45);
+      if(rng()<p){F.over=true;F.gnd=null;F.result={win:T===F.A?"A":"B",type:"Submission (tap out)",round:F.round,sub:true};
+        L(T,`${T.name} ${g.sub=nm(T.f.subName)||"Arm lock"} locked in! ${B.name} taps out!`,"big","tap",{an:T.name,dn:B.name});return true;}
+      B.sta=clamp(B.sta-6,0,100);T.sta=clamp(T.sta-4,0,100);T.pts+=.5;T.rpts+=.5;
+      L(T,`${T.name} hunts for the ${nm(T.f.subName)||"Arm lock"} — ${B.name} twists free!`,"hit","subtry",{an:T.name,dn:B.name});return true;}
+    const dmg=GR.gnp*(.6+ta.power/25)*(1.25-ba.dur/40)*(.7+rng()*.6)*(1+(T.sk.gnp||0));
+    B.hp-=dmg;B.sta=clamp(B.sta-dmg*STA.hit,0,100);T.pts+=.7;T.rpts+=.7;T.landed++;T.thrown++;T.dmgDealt+=dmg;T.rdmg+=dmg;T.rlanded++;T.rthrown++;
+    L(T,`${T.name} climbs on top and pounds down!`,"hit","gnp",{an:T.name,dn:B.name,w:"punch"});
+    if(B.hp<=0){F.over=true;F.gnd=null;F.result={win:T===F.A?"A":"B",type:"TKO (ground and pound)",round:F.round};L(T,`${B.name} can't defend herself any more — the referee steps in!`,"big","ko",{an:T.name,dn:B.name});}
+    return true;}
+  if(!at.f.grap)return false;
+  const a=at.f.a,d=df.f.a,bT=at.burst&&at.burst.k==="td"?at.burst:null;
+  if(rng()>=clamp(GR.tdTry+at.f.grap*GR.tdK+(at.sk.tdTry||0)+(bT?.35:0),0,bT?.85:GR.tdMax))return false;
+  const defv=d.clinch*.35+d.foot*.25+d.power*.2+d.iq*.2+(df.gprep==="sprawl"?3:0)+(df.sk.sprawl||0);
+  const p=clamp(GR.tdBase+(at.f.grap-defv)*GR.tdD-(100-at.sta)/400+(100-df.sta)/500-(md.evade||0)+(bT?.12*bT.pw:0),.08,.85);
+  at.sta=clamp(at.sta-4,0,100);at.thrown++;at.rthrown++;
+  if(rng()<p){F.gnd={top:at,bot:df,t:0};const dmg=2+a.power*.15;df.hp-=dmg;df.sta=clamp(df.sta-5,0,100);at.pts+=1.5;at.rpts+=1.5;at.landed++;at.rlanded++;at.dmgDealt+=dmg;at.rdmg+=dmg;
+    L(at,`${at.name} ${nm(at.f.tdName)||"Shoots for the legs"} — slams ${df.name} to the mat!`,"big","takedown",{an:at.name,dn:df.name});
+    if(df.hp<=0){F.over=true;F.gnd=null;F.result={win:at===F.A?"A":"B",type:"KO",round:F.round};L(at,`${df.name} hits the mat and can't get up!`,"big","ko",{an:at.name,dn:df.name});}
+    return true;}
+  /* the sprawl — and Muay Thai's answer: grab the neck and knee the shooter */
+  const kneeP=clamp(GR.knee+(d.knee+d.clinch-a.clinch*1.2)*.015+(df.gprep==="sprawl"?.08:0),.05,.5);
+  if(rng()<kneeP){const dmg=1.3*W_INFO.knee.imp*(.7+rng()*.5)*(.6+d.power/25)*(1.25-a.dur/40)*(1+(df.sk.dmg.knee||0));at.hp-=dmg;at.sta=clamp(at.sta-dmg*STA.hit,0,100);
+    df.pts+=1;df.rpts+=1;df.landed++;df.thrown++;df.wl.knee++;df.dmgDealt+=dmg;df.rw.knee++;df.rdmg+=dmg;df.rlanded++;df.rthrown++;
+    L(df,`${at.name} shoots in — ${df.name} grabs the neck and knees her full!`,"hit","counter",{an:df.name,dn:at.name,w:"knee",mw:"knee"});
+    if(at.hp<=0){F.over=true;F.result={win:df===F.A?"A":"B",type:"KO",round:F.round};L(df,`${at.name} goes down and stays down! A Muay Thai knee ends it`,"big","ko",{an:df.name,dn:at.name,koSide:df===F.A?"A":"B"});}}
+  else L(df,`${df.name} sprawls, stopping ${at.name}'s takedown!`,"miss","sprawl",{an:at.name,dn:df.name});
+  return true;}
 function fightEx(F){const rng=F.rng,log=[],ex=F.ex,mA=F.mA,mB=F.mB;
   for(const s of [F.A,F.B])if(s.autoSkill!==false){const e=aiSkill(F,s,rng);if(e)log.push(e);}
   {
@@ -642,9 +691,13 @@ function fightEx(F){const rng=F.rng,log=[],ex=F.ex,mA=F.mA,mB=F.mB;
       const forced=F.forceRage&&s===F.A&&s.f.camp==="player"&&F.round>=2&&ex>=4;
       const need=(s.hp<62&&behind)||s.hp<45||(F.round>=2&&behind&&s.hp<75);
       if(forced||(need&&rng()<(s.f.camp==="player"?.03+(s.f.bond||0)/1500+(s.f.morale||60)/2400:.08))){s.rageUsed=true;s.rage=4;log.push({ha:F.A.hp,hb:F.B.hp,sa:F.A.sta,sb:F.B.sta,s:s===F.A?"A":"B",t:`${s.name} — the eyes change! Blood-boil mode!`,k:"big",ev:"rage",rid:s.f.id,an:s.name,dn:o.name});}}}}
-    const ini=s=>{const a=s.f.a,m=s===F.A?mA:mB;return -s.legs/12+effA(s,"speed")*.3+a.foot*.15+a.iq*.2+a.comp*.1+m.aggr*10+rng()*9+(s.sta-60)/12;};
+    for(const s of [F.A,F.B])if(s.phNew&&!F.over){s.phNew=false;const P=s.ph,o=s===F.A?F.B:F.A;if(P.self){s.hp-=P.self;s.rage=Math.max(s.rage||0,5);}
+      if(P.say)log.push({ha:F.A.hp,hb:F.B.hp,sa:F.A.sta,sb:F.B.sta,s:s===F.A?"A":"B",t:P.say,k:"big",ev:"phase",ph:P.n,an:s.name,dn:o.name});}
+    const ini=s=>{const a=s.f.a,m=s===F.A?mA:mB;return (s.ph&&s.ph.ini||0)-s.legs/12+effA(s,"speed")*.3+a.foot*.15+a.iq*.2+a.comp*.1+m.aggr*10+rng()*9+(s.sta-60)/12;};
     const [at,df]=ini(F.A)>=ini(F.B)?[F.A,F.B]:[F.B,F.A];const ma=at===F.A?mA:mB,md=at===F.A?mB:mA;
     const a=at.f.a,d=df.f.a;
+    if(F.gnd||at.f.grap){if(grapEx(F,at,df,rng,log,md)){for(const s of [F.A,F.B])s.sta=clamp(s.sta+STA.ex+s.f.a.stamina*STA.exK+s.sk.regen,0,100);
+      for(const s of [F.A,F.B])if(s.burst&&--s.burst.left<=0)s.burst=null;F.ex++;F.rlog.push(...log);return log;}}
     // clinch?
     const clinch=rng()<clamp(.12+ma.cl+(a.clinch-d.foot)*.02+Math.max(0,BAL.clGap-d.clinch)*BAL.clK,.03,.55); // v1.87.4: a fighter who never trained the clinch gets tied up more
     const items=clinch?[["knee",a.knee*ma.w.knee],["elbow",a.elbow*ma.w.elbow*.8]]:
@@ -663,7 +716,7 @@ function fightEx(F){const rng=F.rng,log=[],ex=F.ex,mA=F.mA,mB=F.mB;
     /* v1.87.4 balance: one weapon thrown again and again gets read inside the round, and a kick can be checked by a tight guard and good feet */
     const rtw=at.rtw||(at.rtw={punch:0,kick:0,knee:0,elbow:0}),rep=at.rthrown>=3?Math.max(0,(rtw[wpn]||0)/at.rthrown-BAL.repFree)*BAL.repPen:0;
     const chkP=wpn==="kick"&&!clinch?clamp((d.guard*.55+d.foot*.45-effA(at,"speed")*.3-BAL.chkBase)*BAL.chkK+rep*.6,0,BAL.chkMax):0;
-    const hitP=clamp(.42-rep+fury*.04+(atk-def)*.03+at.prep+at.mor+(at.careMor||0)-fatA+fatD-md.evade-md.guard-df.sk.evade-(df.ctrW===wpn?CTR_W:0)+(at.sk.hit[wpn]||0)+(at.hp<45?at.sk.clutch:0)+(at.rage?.1:0)-(at.tac.target==="head"?.015:0)+df.legs/400+(bA&&bA.w===wpn?.12*bA.pw:0)-(bD?.12*bD.pw:0),.12,.9)*(at.trait==="flow"?TRV.flowAtk:1)*(df.trait==="flow"?TRV.flowDef:1)*(df.witsOn?TRV.wits:1)*(df.trait==="eye"?TRV.eyeDef:1)*(1+fury*TRV.furyHit)*(at.libOn?TRV.libHit:1);
+    const hitP=clamp(.42-rep+fury*.04+(atk-def)*.03+at.prep+at.mor+(at.careMor||0)-fatA+fatD-md.evade-md.guard-df.sk.evade-(df.ctrW===wpn?CTR_W:0)+(at.sk.hit[wpn]||0)+(at.hp<45?at.sk.clutch:0)+(at.rage?.1:0)+(at.gprep==="strike"&&F.open?.04:0)+(at.ph&&at.ph.hit||0)-(df.ph&&df.ph.ev||0)-(at.tac.target==="head"?.015:0)+df.legs/400+(bA&&bA.w===wpn?.12*bA.pw:0)-(bD?.12*bD.pw:0),.12,.9)*(at.trait==="flow"?TRV.flowAtk:1)*(df.trait==="flow"?TRV.flowDef:1)*(df.witsOn?TRV.wits:1)*(df.trait==="eye"?TRV.eyeDef:1)*(1+fury*TRV.furyHit)*(at.libOn?TRV.libHit:1);
     at.thrown++;at.rthrown++;rtw[wpn]=(rtw[wpn]||0)+1;at.sta=clamp(at.sta-STA.drain*W_INFO[wpn].cost*(STA.cA-a.stamina/STA.cB)*ma.sta*(1+Math.max(0,ma.aggr))*(1-at.sk.staSave),0,100);
     const tx=TXT[wpn][Math.floor(rng()*TXT[wpn].length)];
     const checked=chkP>0&&rng()<chkP;
@@ -671,7 +724,7 @@ function fightEx(F){const rng=F.rng,log=[],ex=F.ex,mA=F.mA,mB=F.mB;
       log.push({ha:F.A.hp,hb:F.B.hp,sa:F.A.sta,sb:F.B.sta,s:df===F.A?"A":"B",t:`${df.name} checks the kick from ${at.name}. Shin meets shin!`,k:"miss",ev:"miss",w:wpn,cl:clinch,mside:at===F.A?"A":"B",an:at.name,dn:df.name});}
     else if(rng()<hitP){
       const crit=rng()<(at.rage?.35:.07);const q=crit?1.6:.6+rng()*.6;if(at.rage)at.rage--;
-      let dmg=1.35*W_INFO[wpn].imp*q*(.6+(BAL.specPow?effA(at,"power"):a.power)/25)*(1-d.guard/70)*(1.25-d.dur/40)*(1+(at.sk.dmg[wpn]||0))*(bA&&bA.w===wpn?1+.3*bA.pw:1)*(1+fury*TRV.furyDmg)*(at.libOn?TRV.lib:1)*(at.trait==="rock"?TRV.rockAtk:1)*(df.trait==="rock"?TRV.rockDef:1);const tg=at.tac.target;
+      let dmg=1.35*W_INFO[wpn].imp*q*(.6+(BAL.specPow?effA(at,"power"):a.power)/25)*(1-d.guard/70)*(1.25-d.dur/40)*(1+(at.sk.dmg[wpn]||0))*(bA&&bA.w===wpn?1+.3*bA.pw:1)*(1+fury*TRV.furyDmg)*(at.libOn?TRV.lib:1)*(at.trait==="rock"?TRV.rockAtk:1)*(df.trait==="rock"?TRV.rockDef:1)*(at.ph&&at.ph.dmg||1);const tg=at.tac.target;
       if(tg==="head")dmg*=1.1;if(tg==="body"){dmg*=.9;df.sta=clamp(df.sta-dmg*.9,0,100);}if(tg==="legs"&&(wpn==="kick"||wpn==="knee")){dmg*=.85;df.legs=Math.min(60,df.legs+dmg*.8);}
       // v1.32 "flash knockout": a clean crit to the head can drop anyone early — rarer for durable/guarded fighters, likelier when the attacker clearly outclasses
       if(crit&&tg!=="body"&&(wpn!=="punch"||a.power>=10)&&rng()<clamp(.16+(ovr(a)-ovr(d))*.06-(d.dur-8)*.012+Math.max(0,a.power-12)*BAL.flashPow,.05,.45)){dmg+=10+rng()*8;at.flash=1;}
