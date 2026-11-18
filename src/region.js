@@ -10,6 +10,16 @@ const RG={
  south:{name:"ภาคใต้",champ:"ชบา",nick:"หมัดพายุสยบคลื่น",col:"#1f9a7a",prov:["chumphon","surat","nakhonsi","songkhla"],fin:"phuket",tilt:{speed:2,foot:1.5,punch:1}}};
 const RG_ORDER=["north","isan","central","south"];
 /* the local belt holder waiting in each province */
+/* v1.90: each province champion's own move — a named finisher (code effects in her province colour) plus a small edge on that weapon */
+const RG_PSP={chiangrai:["ศอกวัดร่องขุ่น","elbow",{dmg:{elbow:.10}}],nan:["เข่าเรือแข่งน่าน","knee",{dmg:{knee:.10}}],uttaradit:["ศอกดาบหักพระยาพิชัย","elbow",{dmg:{elbow:.08},ctr:.02}],lampang:["ถีบม้าเหล็กลำปาง","kick",{dmg:{kick:.08},hit:{kick:.02}}],
+ udon:["เตะบัวแดงบาน","kick",{dmg:{kick:.10}}],khonkaen:["เข่าทอไหมขอนแก่น","knee",{dmg:{knee:.08},regen:.06}],buriram:["หมัดสายฟ้าพนมรุ้ง","punch",{dmg:{punch:.10}}],ubon:["ศอกเทียนพรรษา","elbow",{dmg:{elbow:.08},hit:{elbow:.02}}],
+ lopburi:["หมัดลิงหลอกเจ้า","punch",{dmg:{punch:.08},evade:.01}],suphan:["เตะแม่ไม้สุพรรณ","kick",{dmg:{kick:.10}}],phetchaburi:["เข่าเขาวังเมืองเพชร","knee",{dmg:{knee:.10}}],chanthaburi:["หมัดเปลือกมังคุด","punch",{dmg:{punch:.08},clDef:1}],
+ chumphon:["เตะนางนวลโฉบ","kick",{dmg:{kick:.08},evade:.01}],surat:["ศอกเปลือกหอยดอนสัก","elbow",{dmg:{elbow:.10}}],nakhonsi:["หมัดหนังตะลุง","punch",{dmg:{punch:.10}}],songkhla:["เตะนางเงือกสมิหลา","kick",{dmg:{kick:.08},regen:.06}]};
+function rgDress(f){const P=f&&f.rg&&RG_PSP[f.rg];if(!P)return f;f.spl=[{w:P[1],def:P[0],npc:1,p:.45}];f.pfx=P[2];return f;}
+/* v1.90 difficulty ladder (fixed, not sized to your fighter): opponent strength in stat points + ring craft.
+   Tuned (18 Nov 2026, 200 bouts each) so a fully built Ploy (stats 20, Lv.23, full skills) wins belt 1 ~39% → belt 16 ~27% and a championship series 20% (cup 1) → 10% (cup 4).
+   A casual build (stats 20, Lv.18) wins ~5% / ~0% — the limit break is meant to be the way past it. */
+const RG_LADDER={belt:n=>RG_LADDER.b0+n*RG_LADDER.bs,champ:(cups,tries)=>RG_LADDER.c0+cups*RG_LADDER.cs-Math.min(2,tries||0)*.15,b0:23.9,bs:.027,c0:23.8,cs:.15};
 const RG_OPP={chiangrai:"แก้วกาญจน์ ส.แม่สาย",nan:"น้ำผึ้ง ลูกเมืองน่าน",uttaradit:"ทองดี ศิษย์ดาบหัก",lampang:"ม้าเหล็ก ลูกรถม้า",
  udon:"บัวแดง หนองหาน",khonkaen:"ไหมแก้ว ลูกชนบท",buriram:"สายฟ้า พนมรุ้ง",ubon:"เทียนทอง ริมโขง",
  lopburi:"จ๋อทอง ศ.พระปรางค์",suphan:"แม่ไม้ บางปลาม้า",phetchaburi:"หม้อแกง เมืองเพชร",chanthaburi:"มังคุด ลูกจันท์",
@@ -610,11 +620,11 @@ const REGION={
   /* ---------- booking a belt trip ---------- */
   makeOpp(G,dest,me,abs){const r=ROAD_DEST[dest].r,id=`rg_${dest}_${abs}`;if(G.F[id])return id;
     /* a little under your fighter at the first belt, a little over by the sixteenth; the regional style (tilt) is part of that budget, not on top of it */
-    const n=this.beltTotal(G),target=Math.min(20,ovr(me.a)-.7+n*.06),rng=mulberry32((G.seed||1)+stableHash(id)),tilt=RG[r].tilt;
-    const f=baseFighter(id,mkNPC(id,RG_OPP[dest]||"แชมป์ประจำจังหวัด","X",Math.round(target-1),rng,RG_ORDER.indexOf(r)+2));
+    const n=this.beltTotal(G),target=RG_LADDER.belt(n),rng=mulberry32((G.seed||1)+stableHash(id)),tilt=RG[r].tilt;
+    const f=baseFighter(id,mkNPC(id,RG_OPP[dest]||"แชมป์ประจำจังหวัด","X",Math.min(19,Math.round(target-1)),rng,RG_ORDER.indexOf(r)+2));
     for(const [k,v] of Object.entries(tilt))f.a[k]=Math.min(20,f.a[k]+v);
     liftOpponent(f,target,20);
-    for(let i=0;i<60&&ovr(f.a)>target+.05;i++)for(const k in f.a)if(!(k in tilt))f.a[k]=Math.max(1,f.a[k]-.15);f.camp="quest";f.div="X";f.rg=dest;f.sprite="rgp_"+dest;/* v1.89.14: high-level sheet dyed in the province colour */f.color=RG[r].col;f.lvl=me.lvl||1;f.fatigue=0;f.morale=70;
+    for(let i=0;i<60&&ovr(f.a)>target+.05;i++)for(const k in f.a)if(!(k in tilt))f.a[k]=Math.max(1,f.a[k]-.15);f.camp="quest";f.div="X";f.rg=dest;rgDress(f);f.sprite="rgp_"+dest;/* v1.89.14: high-level sheet dyed in the province colour */f.color=RG[r].col;f.lvl=me.lvl||1;f.fatigue=0;f.morale=70;
     G.F[id]=f;syncFighterAges(G);return id;},
   purse(G){const n=this.beltTotal(G),w=Math.round((10000+n*800)*(1+Math.min(G.rep,50)/100)/100)*100;return {win:w,lose:Math.round(w*.4/100)*100};},
   book(G,dest,fid){const R=G.region,D=ROAD_DEST[dest],me=G.F[fid];if(!R||!D||!me)return {ok:false,why:"ข้อมูลไม่ครบ"};
@@ -658,7 +668,7 @@ const REGION={
   champId:{north:"baibua",isan:"tabtim",central:"alicia",south:"chaba"},
   hotelBg:{north:"night_north",isan:"night_isan",central:"night_central",south:"night_south"},
   trip(b,done){if(b.region&&b.region.series){this.seriesTrip(b,done);return;}
-    const R=G.region,T=R&&R.trip&&R.trip.bid===b.id?{...R.trip}:null,dest=b.region&&b.region.dest;
+    const R=G.region,T=R&&R.trip&&R.trip.bid===b.id?{...R.trip}:null,dest=b.region&&b.region.dest;rgDress(G.F[b.b]);
     if(!T||!ROAD_DEST[dest]||typeof ROAD==="undefined"){openFight(b,done);return;}
     this.css();const P=roadPlan(G,dest,T.car||null,T.abs);
     ROAD.open(dest,{paid:true,plan:P,onArrive:(P2,front)=>{this.arrive(G,T,P2||P,front);const go=()=>openFight(b,()=>this.night(T,P2||P,1,done)),A=this.firstArrive(G,ROAD_DEST[dest].r,dest);
@@ -719,7 +729,7 @@ const REGION={
     if(!f){const rng=mulberry32((G.seed||1)+stableHash(id));f=baseFighter(id,mkNPC(id,C.champ,"X",14,rng,RG_ORDER.indexOf(r)+2));
       Object.assign(f,{name:C.champ,nick:C.nick,color:C.col,canon:true,camp:"region",div:"X",fatigue:0,injury:0,morale:75});G.F[id]=f;syncFighterAges(G);}
     f.pfx=H.perk.fx;f.canon=true;f.camp="region";
-    if(me){const cups=(G.region.cups||[]).length,c=G.region.champ[r],target=Math.min(20.5,ovr(me.a)-.45+cups*.1-Math.min(2,c.tries||0)*.15),tilt=C.tilt;
+    if(me){const cups=(G.region.cups||[]).length,c=G.region.champ[r],target=RG_LADDER.champ(cups,c.tries),tilt=C.tilt;f.vet=0;
       for(const k in f.a)f.a[k]=Math.max(1,Math.min(20,target-.6));for(const [k,v] of Object.entries(tilt))f.a[k]=Math.min(20,f.a[k]+v);
       liftOpponent(f,target,20);for(let i=0;i<80&&ovr(f.a)>target+.05;i++)for(const k in f.a)if(!(k in tilt))f.a[k]=Math.max(1,f.a[k]-.12);
       f.lvl=Math.max(me.lvl||1,1)+1;f.fatigue=0;f.injury=0;f.morale=75;}

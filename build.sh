@@ -10,6 +10,7 @@ js(){ d=$1; echo 'window.__MTM_RAN=1;'; for f in $FILES; do if [ -f "src/$d$f.js
 {
 echo '<!doctype html><html lang="th"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">'
 echo '<title>Muay Thai Moe Demo</title>'
+echo '<link rel="manifest" href="manifest.webmanifest"><meta name="theme-color" content="#141020"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="apple-mobile-web-app-title" content="Muay Thai Moe"><link rel="apple-touch-icon" href="a/icon-180.png">'
 echo '<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600;700&family=IBM+Plex+Sans+Thai:wght@400;500;600;700&family=Pixelify+Sans:wght@500;700&display=swap">'
 echo '<style>'; cat src/style.css; echo '</style></head><body>'
 echo '<div id="app"></div><div id="live" aria-live="polite" role="status"></div>'

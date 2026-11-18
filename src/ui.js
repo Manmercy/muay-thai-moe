@@ -1,5 +1,5 @@
 // ================= MUAY THAI MOE v1.3 — UI =================
-const VERSION="1.89.28";
+const VERSION="1.89.32";
 const CUR_LANG=(typeof window!=="undefined"&&window.LANG)||"th";
 const TH_LABEL=String.fromCharCode(3652,3607,3618);
 function langSwitch(cls){return `<div class="langsw ${cls||""}" role="group" aria-label="Language">${[["th",TH_LABEL],["en","EN"]].map(([k,l])=>`<button class="lsb ${CUR_LANG===k?"on":""}" data-act="setlang" data-v="${k}" aria-pressed="${CUR_LANG===k}">${l}</button>`).join("")}</div>`;}
@@ -239,12 +239,18 @@ function titleHTML(){const sv=loadSave();
 // v1.48: shareable world seeds — digits are used as-is, words are hashed
 function seedFrom(v){v=String(v||"").trim();if(!v)return undefined;if(/^\d{1,10}$/.test(v))return Number(v)>>>0;let h=2166136261;for(const ch of v.toLowerCase()){h^=ch.codePointAt(0);h=Math.imul(h,16777619);}return h>>>0;}
 function crSeed(){const e=document.getElementById("pseed");if(e&&UI.creator)UI.creator.seed=e.value.trim();}
-const seedHTML=()=>G?`<div class="set"><span><b>Seed ของโลกนี้</b><small>แชร์ให้เพื่อนใส่ตอนสร้างตัว จะได้โลกเดียวกัน · แจ้งบั๊กพร้อม seed กับสัปดาห์ได้เลย</small></span><span class="obtns"><code class="seedv">${esc(G.seedText||String(G.seed))}</code><button class="btn sm" data-act="copyseed">คัดลอก</button></span></div>`:"";
+/* v1.89.28: full screen — Android/desktop get a button; iPhone Safari can't do page full screen, so it gets the Home-screen tip (manifest.webmanifest opens the installed game full screen) */
+const fsOn=()=>typeof document!=="undefined"&&!!(document.fullscreenElement||document.webkitFullscreenElement);
+const fsCan=()=>typeof document!=="undefined"&&!!(document.fullscreenEnabled||document.webkitFullscreenEnabled);
+const fsApp=()=>{try{return matchMedia("(display-mode: fullscreen)").matches||matchMedia("(display-mode: standalone)").matches||navigator.standalone===true;}catch(e){return false;}};
+function fsHTML(){if(fsApp())return "";
+  if(fsCan())return `<label class="set"><span><b>เต็มจอ</b><small>ซ่อนแถบเบราว์เซอร์ · อยากเปิดเต็มจอทุกครั้ง กด ⋮ ของเบราว์เซอร์ แล้ว "เพิ่มลงในหน้าจอหลัก"</small></span><input type="checkbox" data-act="fullscreen" ${fsOn()?"checked":""}></label>`;
+  return `<div class="set"><span><b>เต็มจอ</b><small>iPhone: กดปุ่มแชร์ แล้ว "เพิ่มไปยังหน้าจอโฮม" เปิดเกมจากไอคอนนั้นจะไม่มีแถบเบราว์เซอร์ · เซฟใน Safari ไม่ตามไปเอง ส่งออกเซฟก่อนแล้วนำเข้าในไอคอนใหม่</small></span></div>`;}
+if(typeof document!=="undefined")["fullscreenchange","webkitfullscreenchange"].forEach(ev=>document.addEventListener(ev,()=>{if(UI.modal&&UI.modal.type==="settings")render();}));
 function settingsHTML(){const t=(k,label,desc)=>`<label class="set"><span><b>${label}</b><small>${desc}</small></span><input type="checkbox" data-act="setopt" data-k="${k}" ${SETTINGS[k]?"checked":""}></label>`;
-  return `<h2>ตั้งค่า</h2><div class="sets"><div class="set"><span><b>ภาษา · Language</b><small>สลับแล้วเกมจะโหลดใหม่ เซฟยังอยู่</small></span>${langSwitch()}</div>${t("music","เพลงประกอบ","ปี่ชวา กลองแขก ฉิ่ง ระหว่างชก")}${t("sfx","เอฟเฟกต์เสียง","เสียงต่อย เตะ ระฆัง เสียงเชียร์")}${t("coach","ครูแดงแนะนำ","ครูคอยไกด์ในหน้าค่าย ข้อเสนอไฟต์ และช่วงพักยก")+t("askEnd","ถามก่อนจบสัปดาห์","เตือนเมื่อยังมีสิ่งที่ยังไม่ได้ทำในสัปดาห์นี้")}${t("quick","เล่นเร็ว","ข้ามฉากฝึกซ้อมตอนจบสัปดาห์ ไปสรุปผลทันที")}${seedHTML()}</div>
+  return `<h2>ตั้งค่า</h2><div class="sets"><div class="set"><span><b>ภาษา · Language</b><small>สลับแล้วเกมจะโหลดใหม่ เซฟยังอยู่</small></span>${langSwitch()}</div>${fsHTML()}${G?`<div class="set"><span><b>ใส่โค้ด</b><small>โค้ดอีเวนต์หรือโค้ดเล่นต่อ จากเพจและ Discord ของเกม</small></span><span class="obtns redeem"><input id="redeemcode" maxlength="24" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="โค้ด" aria-label="โค้ด"><button class="btn sm primary" data-act="redeem">ใช้โค้ด</button></span></div>${typeof codeContentHTML==="function"?codeContentHTML():""}`:""}${t("music","เพลงประกอบ","ปี่ชวา กลองแขก ฉิ่ง ระหว่างชก")}${t("sfx","เอฟเฟกต์เสียง","เสียงต่อย เตะ ระฆัง เสียงเชียร์")}${t("coach","ครูแดงแนะนำ","ครูคอยไกด์ในหน้าค่าย ข้อเสนอไฟต์ และช่วงพักยก")+t("askEnd","ถามก่อนจบสัปดาห์","เตือนเมื่อยังมีสิ่งที่ยังไม่ได้ทำในสัปดาห์นี้")}${t("quick","เล่นเร็ว","ข้ามฉากฝึกซ้อมตอนจบสัปดาห์ ไปสรุปผลทันที")}</div>
    ${!G&&loadSave()?`<div class="set danger"><span><b>จัดการช่องเซฟ</b><small>ดู โหลด หรือลบเซฟแต่ละช่อง</small></span><button class="btn sm" data-act="openload">เปิด</button></div>`:""}${G?`<p class="meta">กำลังเล่นช่องเซฟ ${UI.slot} · บันทึกอัตโนมัติทุกครั้งที่มีความคืบหน้า${CLOUD.ready?" · สำรองบนคลาวด์แล้ว":" · ยังไม่ได้เชื่อมคลาวด์ (เซฟอยู่ในเบราว์เซอร์นี้เท่านั้น)"}</p>
    ${G&&UI.slot&&bakInfo(UI.slot)?`<div class="set"><span><b>เซฟก่อนอัปเดต</b><small>เก็บไว้ตอนเกมอัปเดต · v${esc(String(bakInfo(UI.slot).ver))} สัปดาห์ ${bakInfo(UI.slot).week}</small></span><button class="btn sm" data-act="bakrestore">กู้คืน</button></div>`:""}
-   <div class="set"><span><b>ใส่โค้ด</b><small>โค้ดอีเวนต์หรือโค้ดเล่นต่อ จากเพจและ Discord ของเกม</small></span><span class="obtns redeem"><input id="redeemcode" maxlength="24" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="โค้ด" aria-label="โค้ด"><button class="btn sm primary" data-act="redeem">ใช้โค้ด</button></span></div>${typeof codeContentHTML==="function"?codeContentHTML():""}
    <div class="set"><span><b>สำรองเซฟเป็นไฟล์</b><small>เก็บไฟล์ไว้เอง ย้ายเครื่องหรือเบราว์เซอร์ก็นำเข้าได้</small></span><span class="obtns"><button class="btn sm" data-act="exportsave">ส่งออก</button><label class="btn sm">นำเข้า<input type="file" accept=".json,application/json" data-act="importsave" hidden></label></span></div>`:`<div class="set"><span><b>นำเข้าเซฟจากไฟล์</b><small>ไฟล์ที่เคยส่งออกไว้ จะลงช่อง 1</small></span><label class="btn sm">นำเข้า<input type="file" accept=".json,application/json" data-act="importsave" hidden></label></div>`}
    <div class="set"><span><b>ย้ายรหัสเซฟ</b><small>ย้ายเซฟระหว่าง Facebook กับ Safari</small></span><a class="btn sm" href="./rescue-save.html">ย้ายรหัสเซฟ</a></div>
    <details class="gloss"><summary><b>คำศัพท์ในเกม</b></summary><dl>${GLOSS.map(([k,v])=>`<dt>${k}</dt><dd>${v}</dd>`).join("")}</dl></details>
@@ -1653,6 +1659,8 @@ const ACT={
   askdelslot:d=>{UI.delSlot=+d.v;render();},canceldel:()=>{UI.delSlot=null;render();},
   delslot:()=>{clearSave(UI.delSlot);UI.delSlot=null;if(!loadSave())UI.modal=null;render();},
   beginNew:i=>{UI.slot=i;UI.modal=null;AU.startMusic("hub");UI.creator={name:"",...CHIBI.randomManager(Math.random),gender:"m",diff:"normal",outfit:"tee",hat:"none",glasses:"none"};UI.modal=null;render();},
+  fullscreen:()=>{const d=document,e=d.documentElement,no=()=>toast("เบราว์เซอร์นี้เปิดเต็มจอไม่ได้ ลองเพิ่มเกมลงหน้าจอหลักแทน");
+    try{if(fsOn()){(d.exitFullscreen||d.webkitExitFullscreen).call(d);}else{const r=(e.requestFullscreen||e.webkitRequestFullscreen).call(e,{navigationUI:"hide"});if(r&&r.catch)r.catch(no);}}catch(x){no();}},
   copyseed:()=>{const v=G.seedText||String(G.seed);const ok=()=>toast("คัดลอก seed แล้ว: "+v);try{navigator.clipboard.writeText(v).then(ok,()=>toast("seed: "+v));}catch(e){toast("seed: "+v);}},
   petplay:d=>{const i=+d.v,p=(G.pets||[])[i];if(!p||!petPlay(G,i))return;AU.sfx&&AU.sfx("ui");const PL={cat:"นอนหงายให้เกาพุง",dog:"วิ่งไล่ลูกบอลรอบเวที",rooster:"ขันโชว์จนทุกคนหัวเราะ",turtle:"ยื่นหัวออกมาให้ลูบช้า ๆ"};
     toast(`${p.name} ${PL[p.k]} · ${PETS[p.k].eff}`);save();render();},

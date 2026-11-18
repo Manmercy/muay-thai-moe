@@ -39,7 +39,7 @@ function qCleanup(G){const keep=new Set([...G.bookings.map(b=>b.b),...G.offers.m
 // ---------- mail ----------
 let MAILN=0;
 function addMail(G,m){G.mail=G.mail||[];m.id="m"+G.week+"_"+(++MAILN)+"_"+Math.floor(Math.random()*1e4);m.wk=G.week;m.season=G.season||1;if(m.exp!=null)m.expAbs=gameWeek(G)+(m.exp-G.week);m.read=false;G.mail.unshift(m);G.mail=G.mail.slice(0,40);return m;}
-const mailOpen=m=>!m.done&&!m.expired&&(["take","pay","quiz","quest"].includes(m.kind)||(m.kind==="event"&&(m.ev==="kongka"||m.ev==="thief")));
+const mailOpen=m=>!m.done&&!m.expired&&(["take","pay","quiz","quest"].includes(m.kind)||(m.kind==="event"&&(m.ev==="kongka"||m.ev==="thief"||m.ev==="dress")));
 function mailBadge(){if(!G||!G.mail)return 0;return G.mail.filter(m=>!m.read||mailOpen(m)).length;}
 const MAILBOX_PX=pxIcon(["....kkkk....","...kffffk...","..krrrrrrk..",".krrrrrrrrk.",".krwwwwwwrk.",".krwkkkkwrk.",".krwwwwwwrk.",".krrrrrrrrk.",".kkkkkkkkkk.",".....kk.....",".....kk.....","....kkkk...."],{k:"#2a1a10",r:"#c8283c",w:"#f4ead8",f:"#f7d24a"});
 const BILLS=[["Subdistrict Municipality","Fine: your camp's rooster crows above the legal limit at 4 a.m. (14 complaints)",300],
@@ -225,7 +225,7 @@ function questExtra(done,rng){if(!G||G.ended)return false;G.gang=G.gang||{st:0,n
 
 // ---------- modals ----------
 /* v1.89.24: the Loy Krathong invitation glows green until it is read and the gauntlet has been played once */
-function loyMailHot(m){if(m.kind==="event"&&(m.ev==="kongka"||m.ev==="thief"))return !m.done&&!m.expired;if(m.kind!=="event"||m.ev!=="loy")return false;const L=loyOf(G);return !m.read||!(L&&L.runs);}
+function loyMailHot(m){if(m.kind==="event"&&(m.ev==="kongka"||m.ev==="thief"||m.ev==="dress"))return !m.done&&!m.expired;if(m.kind!=="event"||m.ev!=="loy")return false;const L=loyOf(G);return !m.read||!(L&&L.runs);}
 function mailListHTML(){const L=G.mail||[];
   return `<h2 class="mailh">${MAILBOX_PX} Mailbox</h2>${L.length?`<div class="mlist2">${L.map(m=>`<button class="mrow2 ${m.read?"":"unread"} ${mailOpen(m)?"act":""} ${m.done||m.expired?"old":""} ${loyMailHot(m)?"loyev":""}" data-act="mopen" data-v="${m.id}"><span class="mk ${m.kind}">${{letter:"Letter",take:"Money",pay:"Invoice",quiz:"Quiz",quest:"Request",job:"Job",event:"Event",loan:"Loan"}[m.kind]}</span><span class="mt"><b>${esc(m.title)}</b><small>${esc(m.from)} · wk ${m.wk}${m.expired?" · expired":m.done?" · handled":m.expAbs!=null?` · by wk ${((m.expAbs-1)%52)+1}`:""}</small></span>${mailOpen(m)?'<i class="dot"></i>':""}</button>`).join("")}</div>`:`<p class="lead">No mail yet</p>`}`;}
 function letterHTML(m){m.read=true;let act="";
@@ -958,7 +958,10 @@ function loyPreload(){if(loyPreload.done)return;loyPreload.done=1;try{
   img("mali_loykrathong_dodge.webp");for(const s of ["gang1","gang2","gang3","gangsilver","gang4","gang5","thief"])img(s+"_sheet.webp");
   for(const b of ["bg_loy_ring.webp","bg_loy_night.webp","bg_river.webp","bg_river_dawn.webp"])img(b);
   for(const n of ["gang_group","gang_silver","gang_goldblack","gang_boss","gang_boss_face","thief","vendor_red"])warm(`${ASSET}npc_${n}.webp`);}catch(e){}}
-function evMailAct(m){loyPreload();if(m.ev==="thief"){const L=loyOf(G);return m.done||!L||L.thiefWk===absWeek(G)?`<p class="meta center">Tum caught</p>`:m.expired?"":`<button class="btn primary" data-act="thief">Go catch Tum</button>`;}
+function evMailAct(m){loyPreload();if(m.ev==="dress"){const f=G.F[m.fid],L=loyOf(G);if(!f||!L)return "";const has=L.dress&&L.dress[f.id];
+    return has?(f.camp==="player"?`<p class="meta center">Dress received</p><button class="btn" data-act="loydresswear" data-v="${f.id}">${f.outfit==="loy"?"Wearing":`Dress ${esc(f.name)}`}</button>`:`<p class="meta center">Dress received · can be worn once ${esc(f.name)} joins the camp</p>`)
+      :`<button class="btn primary" data-act="loydress1" data-v="${m.id}">Claim Thai dress: ${esc(f.name)}</button>`;}
+  if(m.ev==="thief"){const L=loyOf(G);return m.done||!L||L.thiefWk===absWeek(G)?`<p class="meta center">Tum caught</p>`:m.expired?"":`<button class="btn primary" data-act="thief">Go catch Tum</button>`;}
   if(m.ev==="kongka"){const B=KONGKA[m.wish];return B?(m.done?`<p class="meta center">Blessing received · ${B.n}</p>`:`<button class="btn primary" data-act="kongka" data-v="${m.id}">Receive blessing · ${B.d}</button>`):"";}
   const L=loyOf(G);if(!L)return "";const tr=loyTier(L.best,L.boss);const T=L.tiers||{};
   const ends=["bronze","silver","gold"].filter(k=>T[k]).map(k=>`<button class="btn sm" data-act="loyend" data-v="${k}">Ending: ${LOY_TIERS.find(x=>x[0]===k)[1]} · ${LOY_END[k].t}</button>`).join("");
@@ -1141,11 +1144,17 @@ function loyReward(k,R0){const out=[];
   if(k==="silver"){out.push("Thai dress unlocked on character profiles");}
   if(k==="gold"){out.push("\"Floating Market Champ\" name tag on the event page");if(typeof loyGold==="function"){const c=loyGold(G);if(c)out.push(c);}}
   return out;}
+/* v1.89.27: the first bout a girl wins on the river ring, Auntie Taew sends her Thai dress by letter — a wearable pixel outfit for the main game (looks only) */
+const LOY_DRESS_NOTE={kati:"Kati's red set. Auntie double-stitched the pha sin seams — this time it won't tear, however you fight.",mali:"Mali's blue set. Auntie saw you mending your own hem between rounds, so she sewed in an extra lining.",
+ rin:"Rin's green set. Auntie re-measured it exactly to your notes — your stride is now twelve centimetres wider.",ploy:"Ploy's purple set. Auntie meant to make it for you last year and only now got to give it. Keep it for days you don't have to pose for anyone, dear.",
+ fah:"Fah's black-and-gold set. Auntie added gold thread — Fah said she wants the crowd to scream when she throws an elbow."};
+function loyDressMail(G,f){const L=loyOf(G);if(!L||!f||!LOY_DRESS_NOTE[f.id])return;L.dress=L.dress||{};L.dressMail=L.dressMail||{};if(L.dress[f.id]||L.dressMail[f.id])return;L.dressMail[f.id]=1;
+  addMail(G,{kind:"event",ev:"dress",fid:f.id,from:"Auntie Taew, som tam stall by the temple",title:`Thai Dress for ${f.name}`,body:`${LOY_DRESS_NOTE[f.id]} · Wear it as her pixel outfit at camp, in training and in the ring. Pick it in the wardrobe of ${f.name}`});}
 function gauntAfter(){const L=loyOf(G),R=L&&L.run,F=LASTF;if(!R||!F){UI.modal={type:"gaunt"};render();return;}
   const r=F.result,res=r.win==="D"?"D":r.win==="A"?"W":"L",rds=R.k===8?3:2;let pts=0,txt="";
   if(res==="W"){pts=100+(/KO|น็อก/.test(r.type||"")?60:0)+Math.max(0,rds-F.round)*30+Math.round(Math.max(0,F.A.hp)*.6);txt=/KO|น็อก/.test(r.type||"")?`Won by KO, round ${F.round}`:"Decision win";if(R.k===8)R.boss=1;}
   else if(res==="D"){pts=30;txt="Draw";}else txt=/KO|น็อก/.test(r.type||"")?`Lost by KO, round ${F.round}`:"Lost on points";
-  R.log[R.k]={res,pts,txt};R.score+=pts;
+  R.log[R.k]={res,pts,txt};R.score+=pts;if(res==="W")loyDressMail(G,G.F[R.order[R.slot]]);
   if(res==="L")gauntNextSlot(R);
   else{R.hp=Math.min(100,Math.max(0,F.A.hp)+15);R.sta=Math.min(100,Math.max(0,F.A.sta)+20);R.j++;R.k++;if(R.j>=3)gauntNextSlot(R);else if(R.k>=9)gauntFinish(R);}
   save();UI.modal={type:"gaunt"};render();}
@@ -1161,6 +1170,8 @@ Object.assign(ACT,{
     const bk={id:"bev"+R.k,a:f.id,b:qid,week:G.week,tier:"evloy",rounds:R.k===8?3:2,ev:1,carry:{hp:R.hp,sta:R.sta},bg:"bg_loy_ring.webp"};
     UI.modal=null;const go=()=>openFight2(bk,gauntAfter),S=loyBanter(R,f);save();if(S.length)playScene(S,go,{bg:"loy_night",look:"thai"});else go();},
   gquit:()=>{const L=loyOf(G),R=L&&L.run;if(!R||R.done)return;gauntFinish(R);render();},
+  loydress1:d=>{const m=(G.mail||[]).find(x=>x.id===d.v),L=loyOf(G);if(!m||!L)return;L.dress=L.dress||{};L.dress[m.fid]=1;m.done=true;AU.sfx&&AU.sfx("level");toast(`Received Loy Krathong Thai dress: ${G.F[m.fid].name}`);save();render();},
+  loydresswear:d=>{const f=G.F[d.v];if(!f||f.camp!=="player")return;f.outfit="loy";AU.sfx&&AU.sfx("ui");save();render();},
   loyrulesok:()=>{const L=loyOf(G);if(L)L.rulesSeen=1;save();UI.modal={type:"gaunt"};render();},
   loyrules:()=>{UI.modal={type:"loyrules"};render();},
   gretry:()=>{const L=loyOf(G);if(!L)return;L.run=null;L.pick=[];render();},

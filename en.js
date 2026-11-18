@@ -4811,7 +4811,8 @@ const OUTFITS={
  live:{name:"Bestseller Mint Kit",h:.47,s:.72,lm:1.05,sw:"#2fc4b2",hint:"Get an S on the merch live stream",need:G=>(G.flags.liveS||0)>0},
  tiger:{name:"Tiger-Hunter Black Kit",h:.08,s:.06,lm:.42,sw:"#2a2630",hint:"Beat Ploy in an official fight",need:G=>(G.flags.beat_ploy||0)>0},
  heart:{name:"Pink Heart Kit",h:.95,s:.55,lm:1.35,sw:"#f59cc4",hint:"Bond with this fighter reaches ♥ Lv.11",need:(G,f)=>(f.bond||0)>=100},
- champ:{name:"Gold Champion Kit",h:.14,s:.95,lm:1.3,sw:"#ffd34a",hint:"Win the provincial championship",need:G=>Object.values(G.champ||{}).some(id=>G.F[id]&&G.F[id].camp==="player")||(G.titles||[]).some(t=>Object.values(t.champ||{}).some(id=>G.F[id]&&G.F[id].camp==="player"))}};
+ champ:{name:"Gold Champion Kit",h:.14,s:.95,lm:1.3,sw:"#ffd34a",hint:"Win the provincial championship",need:G=>Object.values(G.champ||{}).some(id=>G.F[id]&&G.F[id].camp==="player")||(G.titles||[]).some(t=>Object.values(t.champ||{}).some(id=>G.F[id]&&G.F[id].camp==="player"))},
+ loy:{name:"Loy Krathong Thai Dress",sheet:1,sw:"#2f8f4a",hint:"Win a bout in the Loy Krathong riverside brawl, then claim it from Auntie Taew's letter",need:(G,f)=>!!(G&&G.ev&&G.ev.loy&&G.ev.loy.dress&&G.ev.loy.dress[f.id])}}; /* v1.89.27: the real Thai-dress pixel sheet, one girl at a time */
 const KIT_MASK={kati:(h,l,s)=>(h<.035||h>.93)&&s>.38&&l>.12&&l<.8,mali:(h,l,s)=>h>.53&&h<.74&&s>.25&&l>.1,rin:(h,l,s)=>h>.2&&h<.45&&s>.25&&l>.08,
  ploy:(h,l,s,fy,fx)=>h>.68&&h<.9&&s>.2&&l>.1&&fy>.4&&fx>.3,fah:(h,l,s,fy)=>h>.088&&h<.17&&l>.1&&((s>.5&&fy>.33)||(s>.22&&l<.55&&fy>.55))};
 function outfitOk(G,f,k){const O=OUTFITS[k];return !!O&&(!O.need||O.need(G,f));}
@@ -4829,10 +4830,10 @@ function outfitSheet(f,k){const key=f.id+"|"+k;if(TINTS[key])return TINTS[key];c
 /* v1.89.24: Loy Krathong pixel outfits — every event bout, and off-stage when the gold-tier "Thai dress" toggle is on */
 const LOY_SP=["kati","mali","rin","ploy","fah"];
 function loyLookNow(){try{if(typeof UI!=="undefined"&&UI.fight&&UI.fight.b)return !!UI.fight.b.ev;const L=typeof G!=="undefined"&&G&&G.ev&&G.ev.loy;return !!(L&&L.dressOn&&L.tiers&&L.tiers.gold);}catch(e){return false;}}
-const loyImg=(id,name)=>LOY_SP.includes(id)&&loyLookNow()?name.replace(id+"_",id+"_loykrathong_"):name;
+const loyImg=(id,name,f)=>LOY_SP.includes(id)&&(loyLookNow()||(f&&f.outfit==="loy"&&f.camp==="player"))?name.replace(id+"_",id+"_loykrathong_"):name;
 function sheetFor(f){
   if(f.canon&&LOY_SP.includes(f.id)&&loyLookNow())return img(f.id+"_loykrathong_sheet.webp");
-  if(f.canon){if(f.outfit&&f.outfit!=="base"&&f.camp==="player"&&OUTFITS[f.outfit])return outfitSheet(f,f.outfit);return img(f.id+"_sheet.webp");}
+  if(f.canon){if(f.outfit==="loy"&&f.camp==="player"&&LOY_SP.includes(f.id))return img(f.id+"_loykrathong_sheet.webp");if(f.outfit&&f.outfit!=="base"&&f.camp==="player"&&OUTFITS[f.outfit])return outfitSheet(f,f.outfit);return img(f.id+"_sheet.webp");}
   if(f.sprite)return f.tintHue!=null?spriteTint(f.sprite,f.tintHue):img(f.sprite+"_sheet.webp"); // v1.23: gang, roosters, bulls · v1.89.24: tintHue re-dyes the red kit (the krathong thief)
   if(TINTS[f.id])return TINTS[f.id];
   const nb=npcBase(f.id),base=nb.base,blonde=!!(f.prodigy||(f.id||"").startsWith("prod_")),lab=!!f.lab&&!blonde,hue=blonde?42:lab?276:nb.hue,dark=blonde?true:lab?false:nb.dark; /* v1.88: Vector camp fighters wear their black-purple kit */const src=img(base+"_sheet.webp"); /* v1.56: Golden Tiger prodigies: black-gold kit; v1.88: hair dyed silver like Fah */if(!src.complete||!src.naturalWidth)return src;
@@ -5265,26 +5266,30 @@ const SP_FRAME=150,SP_LEN=SP_FRAME*8+200,FX_LEN=1250;
 const SIL=new WeakMap();
 function silFrame(sheet,row,col,color){if(!sheet||!(sheet.width||sheet.naturalWidth))return null;let m=SIL.get(sheet);if(!m){m={};SIL.set(sheet,m);}const k=row+"_"+col+color;if(m[k])return m[k];
   const c=document.createElement("canvas");c.width=CELL;c.height=CELL;const x=c.getContext("2d");x.drawImage(sheet,col*CELL,row*CELL,CELL,CELL,0,0,CELL,CELL);x.globalCompositeOperation="source-in";x.fillStyle=color;x.fillRect(0,0,CELL,CELL);return m[k]=c;}
-function spSheet(id,w,kind){const L=SPECIALS[id]||[];if(kind==="def")return L.find(m=>m.dodge)||null;return L.find(m=>!m.dodge&&m.w===w)||null;}
-function spOpen(f){if(!f||!f.canon||!SPECIALS[f.id])return false;if(f.camp!=="player")return true;
+/* v1.90: a fighter may carry her own move list (f.spl — the province champions' moves, code effects only) */
+const spList=f=>f?(SPECIALS[f.id]||f.spl||null):null;
+function spSheet(id,w,kind,f){const L=SPECIALS[id]||(f&&f.spl)||[];if(kind==="def")return L.find(m=>m.dodge)||null;return L.find(m=>!m.dodge&&m.w===w)||null;}
+function spOpen(f){if(!f||!spList(f)||(!f.canon&&!f.spl))return false;if(f.camp!=="player")return true;
   return hasSignature(f)||skillList(f.id).some(k=>k.row===4&&((f.skills||{})[k.id]||0)>0);}
 function spName(f,mv){const k=mv.sk&&skillList(f.id).find(x=>x.id===mv.sk);return k&&((f.skills||{})[k.id]||0)>0?k.name:mv.def;}
 /* which special (if any) this fight event sets off: {side, mv, name} */
 function spPick(e,side,F,rng){if(!e||!e.ev||!F||!F.A||!F.B)return null;const R=F.round||1;FS.spR=FS.spR||{A:-1,B:-1};
   const ok=(sd,s)=>FS.spR[sd]!==R&&spOpen(s.f);
-  if(e.ev==="miss"){const ds=side==="A"?"B":"A",d=F[ds],mv=(SPECIALS[d.f.id]||[]).find(m=>m.dodge);
+  if(e.ev==="miss"){const ds=side==="A"?"B":"A",d=F[ds],mv=(spList(d.f)||[]).find(m=>m.dodge);
     if(mv&&d.f.camp==="player"&&ok(ds,d)&&rng()<mv.p)return {side:ds,mv,name:spName(d.f,mv)};return null;}
-  const me=F[side];if(!me||!SPECIALS[me.f.id]||!ok(side,me))return null;
+  const me=F[side];if(!me||!spList(me.f)||!ok(side,me))return null;
   const big=e.ev==="ko"||(e.ev==="kd"&&rng()<.6),hp=100*(side==="A"?(e.ha??me.hp):(e.hb??me.hp))/(me.hp0||100);
-  for(const mv of SPECIALS[me.f.id]){if(mv.dodge)continue;
-    if(me.f.camp==="player"&&mv.when&&mv.when(e,hp)&&(!mv.p||rng()<mv.p))return {side,mv,name:spName(me.f,mv)};}
-  if(big){const mv=spSheet(me.f.id,e.w),m0=SPECIALS[me.f.id].find(m=>!m.dodge);return {side,mv,w:e.w,name:spName(me.f,mv||m0)};}
+  for(const mv of spList(me.f)){if(mv.dodge)continue;
+    if(me.f.camp==="player"&&mv.when&&mv.when(e,hp)&&(!mv.p||rng()<mv.p))return {side,mv,name:spName(me.f,mv)};
+    /* v1.90: a province champion's move — her weapon landing clean, or a big hit when she's hurt */
+    if(mv.npc&&(e.ev==="hit"||e.ev==="counter")&&e.w===mv.w&&(e.crit||hp<40)&&rng()<mv.p)return {side,mv,w:mv.w,name:mv.def};}
+  if(big){const mv=spSheet(me.f.id,e.w,null,me.f),m0=spList(me.f).find(m=>!m.dodge);return {side,mv,w:e.w,name:spName(me.f,mv||m0)};}
   return null;}
 const FS={cv:null,ctx:null,bg:null,A:null,B:null,fx:[],shake:0,
   init(cv,bgName,fa,fb){this.cv=cv;this.ctx=cv?cv.getContext("2d"):null;this.bg=img(bgName);
     const mk=(f,side)=>({f,side,x:side==="A"?370:590,base:side==="A"?370:590,anim:"guard",t0:0,flash:0,down:0,ko:false,win:false});
     this.A=mk(fa,"A");this.B=mk(fb,"B");this.fx=[];this.shake=0;this.spR={A:-1,B:-1};this.banner=null;
-    for(const f of [fa,fb])if(f&&f.canon&&SPECIALS[f.id])SPECIALS[f.id].forEach(m=>img(loyImg(f.id,m.img)+".webp"));},
+    for(const f of [fa,fb])if(f&&f.canon&&SPECIALS[f.id])SPECIALS[f.id].forEach(m=>m.img&&img(loyImg(f.id,m.img,f)+".webp"));},
   attach(cv){if(!cv)return;this.cv=cv;this.ctx=cv.getContext("2d");},
   play(e,now){const at=e.at||(e.ev==="counter"?(e.mside?e.mside:null):null);
     const atk=this[e.side==="A"?"A":"B"],def=this[e.side==="A"?"B":"A"];if(!atk)return;
@@ -5298,7 +5303,7 @@ const FS={cv:null,ctx:null,bg:null,A:null,B:null,fx:[],shake:0,
     if(e.ev==="cut"){this.fx.push({x:def.x,y:250,t0:now,txt:"Crack!",cut:true});}
   },
   special(sp,round,now){const s=this[sp.side];if(!s)return;this.spR[sp.side]=round;this.banner={txt:sp.name,side:sp.side,t0:now};
-    if(sp.mv){s.anim="special";s.sp={im:img(loyImg(s.f.id,sp.mv.img)+".webp"),t0:now};this.shake=sp.mv.dodge?6:14;return;}
+    if(sp.mv&&sp.mv.img){s.anim="special";s.sp={im:img(loyImg(s.f.id,sp.mv.img,s.f)+".webp"),t0:now};this.shake=sp.mv.dodge?6:14;return;}
     /* no drawn sheet for this move: the normal row, dressed up in code — aura, afterimages, speed lines, a dash and an impact ring */
     const kind=sp.kind||"atk",row=kind==="def"?"guard":kind==="rec"?"win":(sp.w==="kick"||sp.w==="knee")?"knee":"punch";
     s.anim="fx";s.fx={t0:now,row,kind,col:kind==="def"?"#5ab0ff":kind==="rec"?"#4fe08a":(s.f&&s.f.color)||"#ffd34a",hit:false};if(kind==="atk")s.x+=s.side==="A"?40:-40;this.shake=kind==="atk"?8:4;},
@@ -5771,7 +5776,7 @@ AU.gsfx=function(kind,a){if(!this.init()||this.muted||!SETTINGS.sfx)return;const
   if(kind==="shimmer")for(let i=0;i<6;i++)T(i*.05,{f:1400+Math.random()*1400,type:"sine",dur:.12,peak:.06});};
 
 // ================= MUAY THAI MOE v1.3 — UI =================
-const VERSION="1.89.28";
+const VERSION="1.89.32";
 const CUR_LANG=(typeof window!=="undefined"&&window.LANG)||"th";
 const TH_LABEL=String.fromCharCode(3652,3607,3618);
 function langSwitch(cls){return `<div class="langsw ${cls||""}" role="group" aria-label="Language">${[["th",TH_LABEL],["en","EN"]].map(([k,l])=>`<button class="lsb ${CUR_LANG===k?"on":""}" data-act="setlang" data-v="${k}" aria-pressed="${CUR_LANG===k}">${l}</button>`).join("")}</div>`;}
@@ -6011,12 +6016,18 @@ function titleHTML(){const sv=loadSave();
 // v1.48: shareable world seeds — digits are used as-is, words are hashed
 function seedFrom(v){v=String(v||"").trim();if(!v)return undefined;if(/^\d{1,10}$/.test(v))return Number(v)>>>0;let h=2166136261;for(const ch of v.toLowerCase()){h^=ch.codePointAt(0);h=Math.imul(h,16777619);}return h>>>0;}
 function crSeed(){const e=document.getElementById("pseed");if(e&&UI.creator)UI.creator.seed=e.value.trim();}
-const seedHTML=()=>G?`<div class="set"><span><b>This world's seed</b><small>Share it so friends get the same world · include it (with the week) when reporting bugs</small></span><span class="obtns"><code class="seedv">${esc(G.seedText||String(G.seed))}</code><button class="btn sm" data-act="copyseed">Copy</button></span></div>`:"";
+/* v1.89.28: full screen — Android/desktop get a button; iPhone Safari can't do page full screen, so it gets the Home-screen tip (manifest.webmanifest opens the installed game full screen) */
+const fsOn=()=>typeof document!=="undefined"&&!!(document.fullscreenElement||document.webkitFullscreenElement);
+const fsCan=()=>typeof document!=="undefined"&&!!(document.fullscreenEnabled||document.webkitFullscreenEnabled);
+const fsApp=()=>{try{return matchMedia("(display-mode: fullscreen)").matches||matchMedia("(display-mode: standalone)").matches||navigator.standalone===true;}catch(e){return false;}};
+function fsHTML(){if(fsApp())return "";
+  if(fsCan())return `<label class="set"><span><b>Full screen</b><small>Hides the browser bars · To open full screen every time, tap the browser's ⋮ menu, then "Add to Home screen"</small></span><input type="checkbox" data-act="fullscreen" ${fsOn()?"checked":""}></label>`;
+  return `<div class="set"><span><b>Full screen</b><small>iPhone: tap Share, then "Add to Home Screen" — the game opens from that icon without the browser bars · Safari saves don't carry over, so export your save first and import it in the new icon</small></span></div>`;}
+if(typeof document!=="undefined")["fullscreenchange","webkitfullscreenchange"].forEach(ev=>document.addEventListener(ev,()=>{if(UI.modal&&UI.modal.type==="settings")render();}));
 function settingsHTML(){const t=(k,label,desc)=>`<label class="set"><span><b>${label}</b><small>${desc}</small></span><input type="checkbox" data-act="setopt" data-k="${k}" ${SETTINGS[k]?"checked":""}></label>`;
-  return `<h2>Settings</h2><div class="sets"><div class="set"><span><b>Language · ภาษา</b><small>Switching reloads the game. Your saves are kept</small></span>${langSwitch()}</div>${t("music","Music","Pi chawa, khaek drums and ching during fights")}${t("sfx","Sound effects","Punches, kicks, bells, cheering")}${t("coach","Coach Daeng's tips","Coach guides you on the camp screen, fight offers and between rounds")+t("askEnd","Ask before ending the week","Warn me when something is still left to do this week")}${t("quick","Fast mode","Skip the training scenes at week's end and go straight to the summary")}${seedHTML()}</div>
+  return `<h2>Settings</h2><div class="sets"><div class="set"><span><b>Language · ภาษา</b><small>Switching reloads the game. Your saves are kept</small></span>${langSwitch()}</div>${fsHTML()}${G?`<div class="set"><span><b>Enter code</b><small>Event or continue codes from the game page and Discord</small></span><span class="obtns redeem"><input id="redeemcode" maxlength="24" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="Code" aria-label="Code"><button class="btn sm primary" data-act="redeem">Redeem</button></span></div>${typeof codeContentHTML==="function"?codeContentHTML():""}`:""}${t("music","Music","Pi chawa, khaek drums and ching during fights")}${t("sfx","Sound effects","Punches, kicks, bells, cheering")}${t("coach","Coach Daeng's tips","Coach guides you on the camp screen, fight offers and between rounds")+t("askEnd","Ask before ending the week","Warn me when something is still left to do this week")}${t("quick","Fast mode","Skip the training scenes at week's end and go straight to the summary")}</div>
    ${!G&&loadSave()?`<div class="set danger"><span><b>Manage save slots</b><small>View, load or delete each slot</small></span><button class="btn sm" data-act="openload">Open</button></div>`:""}${G?`<p class="meta">Playing save slot ${UI.slot} · autosaves whenever you make progress ${CLOUD.ready?" · backed up to the cloud":" · not connected to the cloud (saved in this browser only)"}</p>
    ${G&&UI.slot&&bakInfo(UI.slot)?`<div class="set"><span><b>Pre-update save</b><small>Kept when the game updated · v${esc(String(bakInfo(UI.slot).ver))} week ${bakInfo(UI.slot).week}</small></span><button class="btn sm" data-act="bakrestore">Restore</button></div>`:""}
-   <div class="set"><span><b>Enter code</b><small>Event or continue codes from the game page and Discord</small></span><span class="obtns redeem"><input id="redeemcode" maxlength="24" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="Code" aria-label="Code"><button class="btn sm primary" data-act="redeem">Redeem</button></span></div>${typeof codeContentHTML==="function"?codeContentHTML():""}
    <div class="set"><span><b>Back up save to file</b><small>Keep the file yourself; import it on another device or browser</small></span><span class="obtns"><button class="btn sm" data-act="exportsave">Export</button><label class="btn sm">Import<input type="file" accept=".json,application/json" data-act="importsave" hidden></label></span></div>`:`<div class="set"><span><b>Import a save file</b><small>A previously exported file goes into slot 1</small></span><label class="btn sm">Import<input type="file" accept=".json,application/json" data-act="importsave" hidden></label></div>`}
    <div class="set"><span><b>Transfer save code</b><small>Move a save between Facebook and Safari</small></span><a class="btn sm" href="./rescue-save.html">Transfer save code</a></div>
    <details class="gloss"><summary><b>Game glossary</b></summary><dl>${GLOSS.map(([k,v])=>`<dt>${k}</dt><dd>${v}</dd>`).join("")}</dl></details>
@@ -7425,6 +7436,8 @@ const ACT={
   askdelslot:d=>{UI.delSlot=+d.v;render();},canceldel:()=>{UI.delSlot=null;render();},
   delslot:()=>{clearSave(UI.delSlot);UI.delSlot=null;if(!loadSave())UI.modal=null;render();},
   beginNew:i=>{UI.slot=i;UI.modal=null;AU.startMusic("hub");UI.creator={name:"",...CHIBI.randomManager(Math.random),gender:"m",diff:"normal",outfit:"tee",hat:"none",glasses:"none"};UI.modal=null;render();},
+  fullscreen:()=>{const d=document,e=d.documentElement,no=()=>toast("This browser can't go full screen — try adding the game to your Home screen instead");
+    try{if(fsOn()){(d.exitFullscreen||d.webkitExitFullscreen).call(d);}else{const r=(e.requestFullscreen||e.webkitRequestFullscreen).call(e,{navigationUI:"hide"});if(r&&r.catch)r.catch(no);}}catch(x){no();}},
   copyseed:()=>{const v=G.seedText||String(G.seed);const ok=()=>toast("Seed copied: "+v);try{navigator.clipboard.writeText(v).then(ok,()=>toast("seed: "+v));}catch(e){toast("seed: "+v);}},
   petplay:d=>{const i=+d.v,p=(G.pets||[])[i];if(!p||!petPlay(G,i))return;AU.sfx&&AU.sfx("ui");const PL={cat:"rolls over for belly rubs",dog:"chases a ball around the ring",rooster:"crows a show-off crow and makes everyone laugh",turtle:"pokes its head out for a slow pat"};
     toast(`${p.name} ${PL[p.k]} · ${PETS[p.k].eff}`);save();render();},
@@ -7676,7 +7689,7 @@ function qCleanup(G){const keep=new Set([...G.bookings.map(b=>b.b),...G.offers.m
 // ---------- mail ----------
 let MAILN=0;
 function addMail(G,m){G.mail=G.mail||[];m.id="m"+G.week+"_"+(++MAILN)+"_"+Math.floor(Math.random()*1e4);m.wk=G.week;m.season=G.season||1;if(m.exp!=null)m.expAbs=gameWeek(G)+(m.exp-G.week);m.read=false;G.mail.unshift(m);G.mail=G.mail.slice(0,40);return m;}
-const mailOpen=m=>!m.done&&!m.expired&&(["take","pay","quiz","quest"].includes(m.kind)||(m.kind==="event"&&(m.ev==="kongka"||m.ev==="thief")));
+const mailOpen=m=>!m.done&&!m.expired&&(["take","pay","quiz","quest"].includes(m.kind)||(m.kind==="event"&&(m.ev==="kongka"||m.ev==="thief"||m.ev==="dress")));
 function mailBadge(){if(!G||!G.mail)return 0;return G.mail.filter(m=>!m.read||mailOpen(m)).length;}
 const MAILBOX_PX=pxIcon(["....kkkk....","...kffffk...","..krrrrrrk..",".krrrrrrrrk.",".krwwwwwwrk.",".krwkkkkwrk.",".krwwwwwwrk.",".krrrrrrrrk.",".kkkkkkkkkk.",".....kk.....",".....kk.....","....kkkk...."],{k:"#2a1a10",r:"#c8283c",w:"#f4ead8",f:"#f7d24a"});
 const BILLS=[["Subdistrict Municipality","Fine: your camp's rooster crows above the legal limit at 4 a.m. (14 complaints)",300],
@@ -7862,7 +7875,7 @@ function questExtra(done,rng){if(!G||G.ended)return false;G.gang=G.gang||{st:0,n
 
 // ---------- modals ----------
 /* v1.89.24: the Loy Krathong invitation glows green until it is read and the gauntlet has been played once */
-function loyMailHot(m){if(m.kind==="event"&&(m.ev==="kongka"||m.ev==="thief"))return !m.done&&!m.expired;if(m.kind!=="event"||m.ev!=="loy")return false;const L=loyOf(G);return !m.read||!(L&&L.runs);}
+function loyMailHot(m){if(m.kind==="event"&&(m.ev==="kongka"||m.ev==="thief"||m.ev==="dress"))return !m.done&&!m.expired;if(m.kind!=="event"||m.ev!=="loy")return false;const L=loyOf(G);return !m.read||!(L&&L.runs);}
 function mailListHTML(){const L=G.mail||[];
   return `<h2 class="mailh">${MAILBOX_PX} Mailbox</h2>${L.length?`<div class="mlist2">${L.map(m=>`<button class="mrow2 ${m.read?"":"unread"} ${mailOpen(m)?"act":""} ${m.done||m.expired?"old":""} ${loyMailHot(m)?"loyev":""}" data-act="mopen" data-v="${m.id}"><span class="mk ${m.kind}">${{letter:"Letter",take:"Money",pay:"Invoice",quiz:"Quiz",quest:"Request",job:"Job",event:"Event",loan:"Loan"}[m.kind]}</span><span class="mt"><b>${esc(m.title)}</b><small>${esc(m.from)} · wk ${m.wk}${m.expired?" · expired":m.done?" · handled":m.expAbs!=null?` · by wk ${((m.expAbs-1)%52)+1}`:""}</small></span>${mailOpen(m)?'<i class="dot"></i>':""}</button>`).join("")}</div>`:`<p class="lead">No mail yet</p>`}`;}
 function letterHTML(m){m.read=true;let act="";
@@ -8595,7 +8608,10 @@ function loyPreload(){if(loyPreload.done)return;loyPreload.done=1;try{
   img("mali_loykrathong_dodge.webp");for(const s of ["gang1","gang2","gang3","gangsilver","gang4","gang5","thief"])img(s+"_sheet.webp");
   for(const b of ["bg_loy_ring.webp","bg_loy_night.webp","bg_river.webp","bg_river_dawn.webp"])img(b);
   for(const n of ["gang_group","gang_silver","gang_goldblack","gang_boss","gang_boss_face","thief","vendor_red"])warm(`${ASSET}npc_${n}.webp`);}catch(e){}}
-function evMailAct(m){loyPreload();if(m.ev==="thief"){const L=loyOf(G);return m.done||!L||L.thiefWk===absWeek(G)?`<p class="meta center">Tum caught</p>`:m.expired?"":`<button class="btn primary" data-act="thief">Go catch Tum</button>`;}
+function evMailAct(m){loyPreload();if(m.ev==="dress"){const f=G.F[m.fid],L=loyOf(G);if(!f||!L)return "";const has=L.dress&&L.dress[f.id];
+    return has?(f.camp==="player"?`<p class="meta center">Dress received</p><button class="btn" data-act="loydresswear" data-v="${f.id}">${f.outfit==="loy"?"Wearing":`Dress ${esc(f.name)}`}</button>`:`<p class="meta center">Dress received · can be worn once ${esc(f.name)} joins the camp</p>`)
+      :`<button class="btn primary" data-act="loydress1" data-v="${m.id}">Claim Thai dress: ${esc(f.name)}</button>`;}
+  if(m.ev==="thief"){const L=loyOf(G);return m.done||!L||L.thiefWk===absWeek(G)?`<p class="meta center">Tum caught</p>`:m.expired?"":`<button class="btn primary" data-act="thief">Go catch Tum</button>`;}
   if(m.ev==="kongka"){const B=KONGKA[m.wish];return B?(m.done?`<p class="meta center">Blessing received · ${B.n}</p>`:`<button class="btn primary" data-act="kongka" data-v="${m.id}">Receive blessing · ${B.d}</button>`):"";}
   const L=loyOf(G);if(!L)return "";const tr=loyTier(L.best,L.boss);const T=L.tiers||{};
   const ends=["bronze","silver","gold"].filter(k=>T[k]).map(k=>`<button class="btn sm" data-act="loyend" data-v="${k}">Ending: ${LOY_TIERS.find(x=>x[0]===k)[1]} · ${LOY_END[k].t}</button>`).join("");
@@ -8778,11 +8794,17 @@ function loyReward(k,R0){const out=[];
   if(k==="silver"){out.push("Thai dress unlocked on character profiles");}
   if(k==="gold"){out.push("\"Floating Market Champ\" name tag on the event page");if(typeof loyGold==="function"){const c=loyGold(G);if(c)out.push(c);}}
   return out;}
+/* v1.89.27: the first bout a girl wins on the river ring, Auntie Taew sends her Thai dress by letter — a wearable pixel outfit for the main game (looks only) */
+const LOY_DRESS_NOTE={kati:"Kati's red set. Auntie double-stitched the pha sin seams — this time it won't tear, however you fight.",mali:"Mali's blue set. Auntie saw you mending your own hem between rounds, so she sewed in an extra lining.",
+ rin:"Rin's green set. Auntie re-measured it exactly to your notes — your stride is now twelve centimetres wider.",ploy:"Ploy's purple set. Auntie meant to make it for you last year and only now got to give it. Keep it for days you don't have to pose for anyone, dear.",
+ fah:"Fah's black-and-gold set. Auntie added gold thread — Fah said she wants the crowd to scream when she throws an elbow."};
+function loyDressMail(G,f){const L=loyOf(G);if(!L||!f||!LOY_DRESS_NOTE[f.id])return;L.dress=L.dress||{};L.dressMail=L.dressMail||{};if(L.dress[f.id]||L.dressMail[f.id])return;L.dressMail[f.id]=1;
+  addMail(G,{kind:"event",ev:"dress",fid:f.id,from:"Auntie Taew, som tam stall by the temple",title:`Thai Dress for ${f.name}`,body:`${LOY_DRESS_NOTE[f.id]} · Wear it as her pixel outfit at camp, in training and in the ring. Pick it in the wardrobe of ${f.name}`});}
 function gauntAfter(){const L=loyOf(G),R=L&&L.run,F=LASTF;if(!R||!F){UI.modal={type:"gaunt"};render();return;}
   const r=F.result,res=r.win==="D"?"D":r.win==="A"?"W":"L",rds=R.k===8?3:2;let pts=0,txt="";
   if(res==="W"){pts=100+(/KO|น็อก/.test(r.type||"")?60:0)+Math.max(0,rds-F.round)*30+Math.round(Math.max(0,F.A.hp)*.6);txt=/KO|น็อก/.test(r.type||"")?`Won by KO, round ${F.round}`:"Decision win";if(R.k===8)R.boss=1;}
   else if(res==="D"){pts=30;txt="Draw";}else txt=/KO|น็อก/.test(r.type||"")?`Lost by KO, round ${F.round}`:"Lost on points";
-  R.log[R.k]={res,pts,txt};R.score+=pts;
+  R.log[R.k]={res,pts,txt};R.score+=pts;if(res==="W")loyDressMail(G,G.F[R.order[R.slot]]);
   if(res==="L")gauntNextSlot(R);
   else{R.hp=Math.min(100,Math.max(0,F.A.hp)+15);R.sta=Math.min(100,Math.max(0,F.A.sta)+20);R.j++;R.k++;if(R.j>=3)gauntNextSlot(R);else if(R.k>=9)gauntFinish(R);}
   save();UI.modal={type:"gaunt"};render();}
@@ -8798,6 +8820,8 @@ Object.assign(ACT,{
     const bk={id:"bev"+R.k,a:f.id,b:qid,week:G.week,tier:"evloy",rounds:R.k===8?3:2,ev:1,carry:{hp:R.hp,sta:R.sta},bg:"bg_loy_ring.webp"};
     UI.modal=null;const go=()=>openFight2(bk,gauntAfter),S=loyBanter(R,f);save();if(S.length)playScene(S,go,{bg:"loy_night",look:"thai"});else go();},
   gquit:()=>{const L=loyOf(G),R=L&&L.run;if(!R||R.done)return;gauntFinish(R);render();},
+  loydress1:d=>{const m=(G.mail||[]).find(x=>x.id===d.v),L=loyOf(G);if(!m||!L)return;L.dress=L.dress||{};L.dress[m.fid]=1;m.done=true;AU.sfx&&AU.sfx("level");toast(`Received Loy Krathong Thai dress: ${G.F[m.fid].name}`);save();render();},
+  loydresswear:d=>{const f=G.F[d.v];if(!f||f.camp!=="player")return;f.outfit="loy";AU.sfx&&AU.sfx("ui");save();render();},
   loyrulesok:()=>{const L=loyOf(G);if(L)L.rulesSeen=1;save();UI.modal={type:"gaunt"};render();},
   loyrules:()=>{UI.modal={type:"loyrules"};render();},
   gretry:()=>{const L=loyOf(G);if(!L)return;L.run=null;L.pick=[];render();},
