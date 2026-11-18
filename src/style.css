@@ -2087,3 +2087,12 @@ html[lang=en] .fight .fctl2 .skbtn2 b{font-size:11px;display:-webkit-box;-webkit
 .wkrow{grid-template-columns:1fr}
 .mfoot .btn.wkgo{opacity:0;animation:ctin .35s ease-out var(--d) forwards}.mfoot .btn.wkgo.now{animation-delay:0s}
 @media (prefers-reduced-motion:reduce){.wkgo{animation-duration:.01s}}
+
+/* v1.89.11: chat ⋯ menu (break up) */
+.chead{position:relative}
+.chead .cmenu{margin-left:6px;min-width:40px;min-height:40px;border:0;background:rgba(255,255,255,.08);color:inherit;font:700 20px/1 var(--px,inherit);cursor:pointer;box-shadow:inset 0 0 0 2px rgba(255,255,255,.18)}
+.chead .cmenu:hover,.chead .cmenu:focus-visible{background:rgba(255,255,255,.16)}
+.cmenupop{position:absolute;right:8px;top:calc(100% + 4px);z-index:6;padding:6px;background:#1b1530;box-shadow:inset 0 0 0 3px var(--line),0 6px 0 rgba(0,0,0,.35)}
+.cmenupop .btn{min-width:120px;min-height:44px}
+.btn.danger{background:#7a1f2b;color:#ffe3e6;box-shadow:inset 0 0 0 2px #e23b4e}
+.btn.danger:hover{background:#952636}

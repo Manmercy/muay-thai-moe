@@ -762,7 +762,7 @@ function newGame(opts){
   const seed=(opts.seed??Math.floor(Math.random()*1e9))>>>0;const rng=mulberry32(seed);
   const G={v:1,timeV:3,snubV:2,dmSeenSeason:1,dmSeen:{},seed,week:1,diff:opts.diff||"normal",player:{name:opts.name||"ต้น",gender:opts.gender||"m"},cash:60000,debt:120000,rep:5,
     fac:{gym:0,airgym:0,recovery:0,classroom:0,brand:0,dorm:0,kitchen:0,hill:0,video:0,ring:0,clinic:0,shrine:0,van:0,sauna:0,lights:0,hall:0,daeng:1,assistants:0},stu:1,staff:[],rankMove:{A:{},B:{}},camp:{beauty:0},campUsed:null,levelUps:[],avatar:opts.avatar||null,F:{},rank:{A:{},B:{}},qual:{A:[],B:[]},finalists:{A:[],B:[]},semis:{A:[],B:[]},champ:{},
-    bookings:[],offers:[],log:[],flags:{},seen:{},freeUsed:false,negWeeks:0,history:[],honors:[],awards:[],ended:null,lastReport:null,romance:null};
+    bookings:[],offers:[],log:[],flags:{},seen:{},freeUsed:false,negWeeks:0,history:[],honors:[],awards:[],ended:null,lastReport:null,romance:null,lovers:[],lovWk:{}};
   for(const [id,d] of Object.entries(CANON))G.F[id]=baseFighter(id,d);
   for(const div of ["A","B"])NPC_NAMES[div].forEach(([n,l],i)=>{const id=`n${div}${i}`;G.F[id]=baseFighter(id,mkNPC(id,n,div,l,rng,i));});
   for(const f of Object.values(G.F))startLv(f);
@@ -927,6 +927,8 @@ function fixSave(G){if(G&&G.flags&&G.flags.beat_ploy&&G.flags.beatS_ploy==null)G
     if(G.flags?.maliIn!=null&&G.flags.maliInAbs==null)G.flags.maliInAbs=oldPast(G.flags.maliIn,52);
     if(G.dm?.wk!=null&&G.dm.absWeek==null)G.dm.absWeek=oldPast(G.dm.wk,2);
     G.timeV=3;}
+  /* v1.89.11: one lover became a list (several at once, Valentine can catch you) */
+  if(!Array.isArray(G.lovers)){G.lovers=G.romance?[G.romance]:[];G.lovWk={};if(G.romance&&G.romWk!=null)G.lovWk[G.romance]=G.romWk;}
   if(!G.snubV){G.snub={};G.declineReason={};G.snubV=2;}
   if(G.dmSeenSeason==null){const played=G.dm&&G.dm.wk===G.week;G.dmSeen=(G.season||1)>1?{}:G.dmSeen||{};if(played)G.dmSeen[G.week]=1;G.dmSeenSeason=G.season||1;}
   syncFighterAges(G);
@@ -1088,7 +1090,7 @@ function genOffers(G,opt){
   G.offers=[];const st=stageOf(G.week);
   const stageEnd=st==="local"?20:st==="district"?40:0;const nOff=G.week<=8?1:(2+(G.rep>=30?1:0)); // v1.32: one offer per fighter early, a third only once the camp is famous
   for(const f of roster(G)){
-    if(f.injury>0)continue;
+    if(f.injury>0||(typeof isAway==="function"&&isAway(G,f.id)))continue;
     const ranked=(st==="local"||st==="district")&&eligible(G,f);
     const myB=G.bookings.filter(b=>b.a===f.id).map(b=>b.week);
     const weeks=[];for(let wk=G.week+2;wk<=Math.min(48,G.week+5);wk++)if(!myB.some(x=>Math.abs(x-wk)<=1))weeks.push(wk);
@@ -1137,6 +1139,7 @@ function genOffers(G,opt){
 function acceptOffer(G,oid){const o=G.offers.find(x=>x.id===oid);
   if(!o)return {ok:false,reason:"ข้อเสนอนี้ไม่มีแล้ว"};
   if(regionBlock(G,o.week))return {ok:false,reason:"สัปดาห์นี้ทั้งค่ายเดินทางไปศึกชิงเจ้าสี่ภาค"};
+  if(typeof isAway==="function"&&isAway(G,o.a)&&G.F[o.a].awayAbs>absWeek(G)+(o.week-G.week))return {ok:false,reason:`${G.F[o.a].name}ยังไม่กลับค่าย รับไฟต์สัปดาห์นั้นไม่ได้`};
   if(o.status==="conflict")return {ok:false,reason:o.reason};
   const clash=(G.bookings||[]).find(b=>b.week===o.week&&[o.a,o.b].some(id=>id===b.a||id===b.b));
   const duplicate=(G.bookings||[]).some(b=>b.id==="b"+oid);
@@ -1182,7 +1185,7 @@ function applyResult(G,F,booking){
     if(r.towel&&side==="A"){if(s.hp<20&&!off)me.injury=Math.max(me.injury,1);me.morale=clamp(me.morale-8,0,100);} /* v1.88: the towel spares her — at most a week off, but it stings */
     else if(s.hp<40&&!off&&mulberry32(F.seed+(side==="A"?1:2))()<.45)me.injury=Math.max(me.injury,2+(s.hp<15?2:0));
     if(res==="L"&&/KO|TKO/.test(r.type)&&!booking.pro&&!booking.ev)me.injury=Math.max(me.injury,booking.dm?1:3); // v1.37.1: a Death Match KO costs one week, not three
-    const pmods=passiveMods(me);if(G.romance===me.id)pmods.moraleLoss+=.3;if(me.camp==="player"&&me.trust>=60)pmods.moraleLoss+=.25;me.morale=clamp(me.morale+(res==="W"?10:res==="L"?-10*(1-Math.min(.9,pmods.moraleLoss)):2),0,100);
+    const pmods=passiveMods(me);if(isLov(G,me.id))pmods.moraleLoss+=.3;if(me.camp==="player"&&me.trust>=60)pmods.moraleLoss+=.25;me.morale=clamp(me.morale+(res==="W"?10:res==="L"?-10*(1-Math.min(.9,pmods.moraleLoss)):2),0,100);
     // v1.21: beating someone stronger is worth more (ranking point, fame, EXP) — a reason to take the hard offers
     const gapR=effGap(G,me,op),upset=res==="W"&&gapR>.4;
     if(!off&&booking.tier!=="exhibition"&&booking.tier!=="special"&&booking.tier!=="lab"&&booking.tier!=="final"){const rk=G.rank[me.div][me.id];if(rk){rk.pts+=res==="W"?(gapR<-.6?2:3)+(upset?1:0):res==="D"?1:0;/* v1.47: farming weaker fighters earns fewer ranking points */rk[res==="W"?"w":res==="L"?"l":"d"]++;}}
@@ -1291,7 +1294,7 @@ function finishFinal(G,booking,F){const div=G.F[booking.a].div;const w=F.result.
 // week phase 1: training & upkeep (before fights)
 function weekTrain(G){
   const rng=mulberry32(G.seed+G.week*977);G.log=[];
-  for(const f of roster(G))trainWeek(G,f,rng);
+  for(const f of roster(G)){if(typeof isAway==="function"&&isAway(G,f.id)){/* v1.89.11: she left camp for a while — no training, just rest */f.gains={};f.xpGain=0;f.fatigue=clamp(f.fatigue-10,0,100);if(f.injury>0)f.injury--;continue;}trainWeek(G,f,rng);}
   // v1.15: Ploy's raw talent makes her near-untouchable early; the edge fades by the district round
   if(G.F.ploy)G.F.ploy.aura=ployAura(G.week,G);
   for(const f of Object.values(G.F)){if(f.camp==="player")continue;

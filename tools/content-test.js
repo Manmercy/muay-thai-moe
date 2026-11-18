@@ -43,6 +43,41 @@ const chrome=process.env.CHROME_PATH||'/Applications/Google Chrome.app/Contents/
     const n=document.querySelectorAll('.sktree .skn2').length;if(n<15)throw Error('nodes '+n);if(!document.querySelector('.sksplit .rt.b'))throw Error('split');
     if(document.querySelectorAll('.skn2 .skds').length!==n)throw Error('desc');f.skills.ts_fast=1;f.equip=[];UI.skLine={id:'kati',li:0};render();const b=document.querySelector('.skn2 .skeq');if(!b)throw Error('equip btn');b.click();if(!equipped(f).includes('ts_fast'))throw Error('equip');UI.modal=null;render();return true;});
   test('every heart spot plays and has its background',()=>{const g=fresh();G=g;atHeart(g,20);for(const k in ACTIVITIES){const A=ACTIVITIES[k];if(!A.heart)continue;if(!BGIMG[A.bg])throw Error('no bg '+k);g.freeUsed=false;for(const id of ['kati','mali','rin','ploy','fah']){const f=g.F[id];f.met=true;f.bond=100;f.bondX=g.F.kati.bondX;for(let i=0;i<3;i++){g.freeUsed=false;const st=dateScene(g,id,k);if(st.length<4)throw Error('short '+id+k);}}}return true;});
+  /* v1.89.11: lovers — several at once, Valentine, the ring, breakup, harem */
+  const walkL=(g,L,pick)=>{let n=0;const go=A=>{for(const x of A){if(x.inject){go(x.inject(g)||[]);continue;}if(x.fx&&!x.choice&&!x.n){x.fx(g);continue;}
+      if(x.choice){const c=x.choice[pick?pick(x.choice):0];if(c.fx)c.fx(g);go(c.then||[]);continue;}if(x.n&&typeof x.t!=='string')throw Error('text '+x.n);if(x.n&&!x.t)throw Error('empty '+x.n);n++;}};go(L);return n;};
+  const ev=id=>EVENTS.find(e=>e.id===id);
+  const lovUp=(g,ids)=>{for(const id of ids){const f=g.F[id];f.met=true;f.bond=90;f.trust=60;if(id!=='ploy'&&id!=='fah')f.camp='player';takeLover(g,id);}};
+  test('a second lover can be taken; both are lovers and status tags read right',()=>{const g=fresh();G=g;lovUp(g,['kati','mali']);if(!isLov(g,'kati')||!isLov(g,'mali')||g.romance!=='kati')return false;
+    return relTag(g,g.F.mali).includes(' ♥')&&partners(g).length===2&&romOf(g,'mali');});
+  test('confession offers "I am with someone" only when you already have someone',()=>{const g=fresh();G=g;return takenOpt(g,'mali').length===0&&(lovUp(g,['kati']),takenOpt(g,'mali').length===1)&&takenOpt(g,'kati').length===0;});
+  test('Valentine catches two lovers: bonds drop, ring scene plays, someone may leave',()=>{for(const pickFn of [()=>0,ch=>ch.length-1,null]){const g=fresh();G=g;lovUp(g,['kati','mali','rin']);g.week=38;
+      if(!ev('lv_val').when(g)||ev('lv_valh').when(g))throw Error('when');const b0=g.F.rin.bond;const n=walkL(g,ev('lv_val').steps,pickFn||(ch=>Math.max(0,ch.findIndex(c=>/รักทุกคน|love all/i.test(c.t)))));if(n<12)throw Error('short '+n);
+      if(g.F.rin.bond!==b0-15)throw Error('drop '+g.F.rin.bond);if(g.valCaught!==1)throw Error('count');}
+    const g=fresh();G=g;lovUp(g,['kati','mali']);g.week=38;g.valCaught=1;walkL(g,ev('lv_val').steps,ch=>ch.length-1);return g.F.kati.bond===65&&(isAway(g,'kati')||isAway(g,'mali'));});
+  test('only one partner: no Valentine scene',()=>{const g=fresh();G=g;lovUp(g,['kati']);g.week=38;return !ev('lv_val').when(g);});
+  test('a girl who left camp skips training, gets no offers, cannot be booked, and comes back',()=>{const g=fresh();G=g;lovUp(g,['kati','mali']);sendAway(g,'kati',2,'cheat');
+    const lv=g.F.kati.a.power;weekTrain(g);if(g.F.kati.a.power!==lv)throw Error('trained');genOffers(g);if(g.offers.some(o=>o.a==='kati'))throw Error('offer');
+    g.offers=[{id:'x',a:'kati',b:'nA0',week:g.week+1,tier:'exhibition',win:1,lose:1}];if(acceptOffer(g,'x').ok)throw Error('booked');
+    if(ev('lv_back').when(g))throw Error('early');g.week+=2;if(!ev('lv_back').when(g))throw Error('no return');walkL(g,ev('lv_back').steps);return !isAway(g,'kati')&&g.F.kati.awayBack&&!g.seen.lv_back;});
+  test('breaking up: no longer a lover, ex, big bond drop, away 4 weeks, she may come back later',()=>{const g=fresh();G=g;lovUp(g,['kati','mali']);const n=walkL(g,breakSteps(g,'mali'));if(n<4)throw Error('short');
+    if(isLov(g,'mali')||!isEx(g,'mali')||g.F.mali.bond!==55||awayLeft(g,'mali')!==4)return false;if(relTag(g,g.F.mali).indexOf('4')<0)throw Error('tag');
+    g.week+=4;walkL(g,ev('lv_back').steps);if(isAway(g,'mali'))throw Error('still away');g.F.mali.bond=90;g.week+=12;g.seen.love_mali=true;g.loveNo={};
+    const D=dateScene(g,'mali','cafe');let back=false;walkL(g,D,ch=>{const i=ch.findIndex(c=>/กลับมาคบ|back together/.test(c.t));if(i>=0)back=true;return i>=0?i:0;});return back&&isLov(g,'mali');});
+  test('breaking a promise with a rival works the same way',()=>{const g=fresh();G=g;const f=g.F.ploy;f.met=true;f.bond=90;g.promise={ploy:10};walkL(g,breakSteps(g,'ploy'));return !isProm(g,'ploy')&&isEx(g,'ploy')&&isAway(g,'ploy');});
+  test('harem: honest at Valentine, win everyone back, then group scenes replace the top heart scene',()=>{const g=fresh();G=g;lovUp(g,['kati','mali']);g.week=38;walkL(g,ev('lv_val').steps,ch=>Math.max(0,ch.findIndex(c=>/รักทุกคน|love all/i.test(c.t))));
+    if(!g.haremOK)throw Error('ok flag');g.F.kati.awayAbs=null;g.F.mali.awayAbs=null;if(ev('lv_harem').when(g))throw Error('too early');g.week+=3;if(ev('lv_harem').when(g))throw Error('not won back yet');g.F.kati.bond=86;g.F.mali.bond=86;if(!ev('lv_harem').when(g))throw Error('no harem');
+    walkL(g,ev('lv_harem').steps);if(!g.harem||romOf(g,'kati'))throw Error('harem state');if(!relTag(g,g.F.kati).includes('♥'))throw Error('tag');
+    g.F.kati.bond=100;g.F.kati.bondX=2000;g.lastBeat=-99;const top=EVENTS.find(e=>e.id==='hs_kati_30');if(top.when(g))throw Error('top scene still on');
+    g.week+=9;for(const k of [1,2,3]){if(!ev('lv_hm'+k).when(g))throw Error('hm'+k);walkL(g,ev('lv_hm'+k).steps);}
+    g.season=2;g.week=38;if(ev('lv_val').when(g)||!ev('lv_valh').when(g))throw Error('harem valentine');walkL(g,ev('lv_valh').steps);return haremYearEnd(g).length===3;});
+  test('old single-lover saves become a one-item list',()=>{const g=fresh();delete g.lovers;delete g.lovWk;g.romance='rin';g.romWk=30;g.timeV=3;fixSave(g);return g.lovers.length===1&&g.lovers[0]==='rin'&&g.lovWk.rin===30&&isLov(g,'rin');});
+  test('chat with a lover always opens and its menu leads to a confirmed breakup scene',()=>{const g=fresh();G=g;lovUp(g,['kati','mali']);UI.tab='people';render();
+    const btn=document.querySelector('.chatb[data-id="mali"]');if(!btn||btn.disabled)throw Error('chat btn');ACT.chat({id:'mali'});render();
+    const m=document.querySelector('.cmenu');if(!m)throw Error('menu');ACT.lvmenu();render();if(!document.querySelector('[data-act="lvask"]'))throw Error('ask');ACT.lvask();render();
+    if(UI.modal.type!=='confirm')throw Error('confirm');ACT.lvno();if(UI.modal.type!=='chat')throw Error('back to chat');ACT.lvask();ACT.lvbreak();if(!UI.scene)throw Error('scene');
+    let guard=0;while(UI.scene&&guard++<40){if(UI.scene.cur&&UI.scene.cur.choice)sceneChoose(0);else sceneNext();}UI.modal=null;render();
+    const card=[...document.querySelectorAll('.pcard')].find(c=>c.querySelector('.chatb[data-id="mali"]'));return !isLov(g,'mali')&&isAway(g,'mali')&&!!card&&card.querySelector('.chatb').disabled&&card.querySelector('[data-act="hang"]').disabled;});
   return R;});for(const [name,ok,err] of out){console.log(ok?'OK  ':'FAIL',lang,name,err||'');if(!ok)failed++;}for(const e of errors){console.log('PAGE ERROR',lang,e);failed++;}await p.close();}
  await browser.close();process.exit(failed?1:0);
 })().catch(e=>{console.error(e);process.exit(1)});

@@ -1,5 +1,5 @@
 // ================= MUAY THAI MOE v1.3 — UI =================
-const VERSION="1.89.10";
+const VERSION="1.89.11";
 const CUR_LANG=(typeof window!=="undefined"&&window.LANG)||"th";
 const TH_LABEL=String.fromCharCode(3652,3607,3618);
 function langSwitch(cls){return `<div class="langsw ${cls||""}" role="group" aria-label="Language">${[["th",TH_LABEL],["en","EN"]].map(([k,l])=>`<button class="lsb ${CUR_LANG===k?"on":""}" data-act="setlang" data-v="${k}" aria-pressed="${CUR_LANG===k}">${l}</button>`).join("")}</div>`;}
@@ -495,7 +495,7 @@ function adviceHTML(id){const f=G.F[id],A=trainAdvice(f);const same=f.plan.prese
    and her fight plan is filled with the coach's pick, so nothing asks to be confirmed. Untick any time. */
 const autoOn=f=>!!(f&&f.autoTr&&gameWeek(G)<=f.autoTr);
 const autoLeft=f=>autoOn(f)?f.autoTr-gameWeek(G)+1:0;
-const trLocked=f=>f?(f.lockWeek===gameWeek(G)||autoOn(f)):false;
+const trLocked=f=>f?(f.lockWeek===gameWeek(G)||autoOn(f)||isAway(G,f.id)):false;
 const handLocked=f=>!!f&&f.lockWeek===gameWeek(G)&&!autoOn(f);
 function autoPlans(){if(!G||!G.bookings)return;for(const b of G.bookings){const f=G.F[b.a];if(!f||f.camp!=="player"||b.planSet||!autoOn(f))continue;
   let pl="balanced";try{if(scouted(b.b))pl=adviseCached(b.a,b.b,b.rounds||3).best||"balanced";}catch(e){}b.plan=pl;b.planSet=true;b.autoPlan=true;}}
@@ -505,13 +505,13 @@ function trainHTML(){const R=roster(G);if(!R.length)return "";
   return `<div class="tcards">${R.map(f=>tcard(f,trLocked(f))).join("")}</div>`;}
 function tcard(f,L){const pf=projFatigue(f),rest=f.plan.preset==="rest";const tired=!f.injury&&f.fatigue>=55&&!rest;
   return `<section class="px tcard ${L?"locked":""}">${!L&&!f.injury?"<i class=\"tdot\" aria-label=\"Program not confirmed\"></i>":""}<div class="tc-anim" role="button" tabindex="0" data-act="fighter" data-id="${f.id}" data-v="train" aria-label="Info ${esc(f.name)}" style="background-image:url(${ASSET}${gymBg()})"><canvas width="220" height="190" data-sprite="${f.id}" data-floor="1"></canvas>
-     <span class="tr-pre">${f.injury?"Recovering":PRESETS[f.plan.preset].name}</span></div>
+     <span class="tr-pre">${isAway(G,f.id)?"Away":f.injury?"Recovering":PRESETS[f.plan.preset].name}</span></div>
    <div class="tc-body"><div class="tc-h"><b class="nm">${esc(f.name)}</b><span class="lv">Lv.${f.lvl}</span>${prepLine(f)}</div>
     <div class="fatg"><span>Fatigue <b class="num">${Math.round(f.fatigue)}</b> → <b class="num">${Math.round(pf)}</b></span><i class="fgbar" style="--now:${clamp(f.fatigue,0,100)}%;--next:${clamp(pf,0,100)}%;--bc:${pf>70?"var(--red)":pf>55?"var(--warn)":"var(--green)"}"><s></s></i></div>
     ${tired?`<p class="warnchip">Very tired, should recover this week</p>`:""}
-    ${skReady(f)?`<button class="spchip" data-act="fighter" data-id="${f.id}" data-v="skill">★ Skills ready</button>`:""}<div class="tc-prog"><span class="pill ${L?"":"gold"}">${f.injury?"Recovering":PRESETS[f.plan.preset].name+(rest?"":" · "+INTENSITY[f.plan.intensity].name)}</span></div>
+    ${skReady(f)?`<button class="spchip" data-act="fighter" data-id="${f.id}" data-v="skill">★ Skills ready</button>`:""}<div class="tc-prog"><span class="pill ${L?"":"gold"}">${isAway(G,f.id)?`Away from camp · back in ${awayLeft(G,f.id)} weeks`:f.injury?"Recovering":PRESETS[f.plan.preset].name+(rest?"":" · "+INTENSITY[f.plan.intensity].name)}</span></div>
     ${f.injury?"":`<div class="tc-btns">${L&&!autoOn(f)?"":`<button class="btn sm" data-act="tpick" data-id="${f.id}">Program</button>`}${coachOn()&&!L?`<button class="btn sm" data-act="advice" data-id="${f.id}">Coach's advice</button>`:""}
-     ${autoOn(f)?`<span class="tc-ok auto">↻ Same programme for ${autoLeft(f)} more weeks</span>`:L?`<span class="tc-ok">✓ Program confirmed</span>`:`<button class="btn sm gold tc-go" data-act="tlock" data-id="${f.id}">Confirm program</button>`}</div>`}
+     ${isAway(G,f.id)?`<span class="tc-ok auto">Away from camp · no training</span>`:autoOn(f)?`<span class="tc-ok auto">↻ Same programme for ${autoLeft(f)} more weeks</span>`:L?`<span class="tc-ok">✓ Program confirmed</span>`:`<button class="btn sm gold tc-go" data-act="tlock" data-id="${f.id}">Confirm program</button>`}</div>`}
 </div></section>`;}
 // programme sheet: 4 columns, intensity hidden for rest
 function tpickHTML(id){const f=G.F[id],rest=f.plan.preset==="rest";
@@ -628,8 +628,8 @@ function rankHTML(){const st=stageOf(G.week),cut=st==="local"?4:st==="district"?
 function peopleHTML(){const met=CANON_IDS.map(id=>G.F[id]).filter(f=>f.met);
   return `<div class="card-h"><p class="meta">Spend time with one person per week · Once you are close, they will sometimes text you first</p><button class="btn sm gold albbtn" data-act="album">🃏 Card album ${Object.keys(G.cards||{}).length}/${Object.keys(CARDS).length}${Object.entries(G.cards||{}).some(([k,c])=>cardFresh(k,c)||cardCanUp(k,c))?'<i class="ndot"></i>':""}</button>${G.freeUsed?"<span class=\"pill\">Free time: used</span>":"<span class=\"pill gold\">Free time: 1 left</span>"}</div>
    <div class="plist">${met.map(f=>`<section class="px pcard"><button class="pthumb" data-act="fighter" data-id="${f.id}" data-v="rel" aria-label="View profile of ${esc(f.name)}"><img src="${stand(f.id,"casual")}" alt="" loading="lazy"></button>
-     <div class="pbody"><div class="pnm"><b class="nm">${esc(f.name)}</b><span class="meta">${f.camp==="player"?"Sirichai Camp":f.camp==="rival"?"Golden Tiger":"Independent"}${G.romance===f.id?" · Sweetheart ♥":G.promise&&G.promise[f.id]!=null?" · Promised ♡":""}</span></div>${hearts(f.bond,f)}
-      <div class="pbtns"><button class="btn sm" data-act="fighter" data-id="${f.id}" data-v="rel">Profile</button><button class="btn sm primary" data-act="hang" data-id="${f.id}" ${G.freeUsed?"disabled":""}>Hang out</button><button class="btn sm gold giftb" data-act="giftpick" data-id="${f.id}" ${f.giftWeek===gameWeek(G)?"disabled":""}>${PIX.gift}<span>${f.giftWeek===gameWeek(G)?"Given":"Gift"}</span></button><button class="btn sm chatb" data-act="chat" data-id="${f.id}" ${canChat(f)?"":"disabled"}>${CHAT_PX}<span>${canChat(f)?"New chat":(f.bond||0)<CHAT_BOND?"Not close yet":"No messages"}</span>${canChat(f)?'<i class="dot"></i>':""}</button></div></div></section>`).join("")}</div>`;}
+     <div class="pbody"><div class="pnm"><b class="nm">${esc(f.name)}</b><span class="meta">${f.camp==="player"?"Sirichai Camp":f.camp==="rival"?"Golden Tiger":"Independent"}${relTag(G,f)}</span></div>${hearts(f.bond,f)}
+      <div class="pbtns"><button class="btn sm" data-act="fighter" data-id="${f.id}" data-v="rel">Profile</button><button class="btn sm primary" data-act="hang" data-id="${f.id}" ${G.freeUsed||isAway(G,f.id)?"disabled":""}>${isAway(G,f.id)?"Away":"Hang out"}</button><button class="btn sm gold giftb" data-act="giftpick" data-id="${f.id}" ${f.giftWeek===gameWeek(G)||isAway(G,f.id)?"disabled":""}>${PIX.gift}<span>${f.giftWeek===gameWeek(G)?"Given":"Gift"}</span></button><button class="btn sm chatb" data-act="chat" data-id="${f.id}" ${canChat(f)||canChatLov(f)?"":"disabled"}>${CHAT_PX}<span>${canChat(f)?"New chat":isAway(G,f.id)?"Not answering":canChatLov(f)?"Chat":(f.bond||0)<CHAT_BOND?"Not close yet":"No messages"}</span>${canChat(f)?'<i class="dot"></i>':""}</button></div></div></section>`).join("")}</div>`;}
 function hangHTML(id){const f=G.F[id],hlv=heartLv(f).lv;const pref=k=>f.know["act_"+k]==="like"?"<i class=\"likeb\">Likes</i>":f.know["act_"+k]==="dislike"?"<i class=\"disb\">Dislikes</i>":"";
   return `<h2>Time with ${esc(f.name)}</h2><p class="meta">Choose where to go together</p><div class="acts">${Object.entries(ACTIVITIES).filter(([k,a])=>(!a.campOnly||f.camp==="player")&&(!a.heart||hlv>=10)).map(([k,a])=>{const lock=a.heart&&hlv<a.heart;return `<button class="actbtn${lock?" lockd":a.heart?" hspot":""}" data-act="date" data-id="${f.id}" data-v="${k}" ${lock||G.freeUsed||G.cash<a.cost?"disabled":""}><b>${a.heart?"♥ ":""}${a.name}${lock?"":pref(k)}</b><small>${lock?`🔒 Unlocks at ♥Lv.${a.heart}`:a.cost?fmt(a.cost):"Free"}</small></button>`;}).join("")}</div>`;}
 // v1.33: what each camp level brings, so upgrades feel like a goal
@@ -1140,20 +1140,21 @@ function goalText(){const st=stageOf(G.week),me=roster(G);const best=d=>{const r
 const evSeen=e=>e.annual?((G.seenY||{})[e.id]===(G.season||1)):!!G.seen[e.id];
 function pendingEvents(){return EVENTS.filter(e=>{try{return e.when&&!evSeen(e)&&e.when(G);}catch(err){console.error("event when",e.id,err);return false;}});}
 // v1.41: at most two optional story scenes a week — the rest wait for next week (main story / finals always play)
-const EV_MUST=/^(prologue|daeng_leave|pre_qual|qual_result|final_result|semi_result|night_final|lover_final|ploy_prefinal|fah_prefinal|first_win|first_loss)/,EV_CAP=2;
+const EV_MUST=/^(lv_val|lv_harem|lv_back|prologue|daeng_leave|pre_qual|qual_result|final_result|semi_result|night_final|lover_final|ploy_prefinal|fah_prefinal|first_win|first_loss)/,EV_CAP=2;
 function runEvents(done){const list=pendingEvents().sort((a,b)=>(b.pri||0)-(a.pri||0));let played=0,opt=0;/* time-limited scenes go first */
   const step=()=>{const e=list.shift();if(!e||G.ended){done&&done(played);return;}if(evSeen(e)||!(()=>{try{return e.when(G);}catch(x){return false;}})()){step();return;}
     if(G.coachAwayAbs&&gameWeek(G)<G.coachAwayAbs&&!EV_MUST.test(e.id)&&!/daeng|coach/.test(e.id)&&e.steps.some(x=>x.n==="coach")){step();return;}/* v1.60: scenes where Kru Daeng talks wait until he is back */
+    if(!EV_MUST.test(e.id)&&!/^lv_/.test(e.id)&&awaySpeaks(G,e.steps)){step();return;}/* v1.89.11: scenes with a girl who left camp wait until she is back */
     if(!EV_MUST.test(e.id)){if(opt>=((G.season||1)>=2&&(G.week===44||G.week===49)?0:EV_CAP)){step();return;}opt++;}
     if(e.annual){G.seenY=G.seenY||{};G.seenY[e.id]=G.season||1;}else G.seen[e.id]=true;G.seenWk=G.seenWk||{};G.seenWk[e.id]=G.week;G.seenAbs=G.seenAbs||{};G.seenAbs[e.id]=gameWeek(G);played++;playScene(e.steps,step,{bg:e.bg,look:e.look,coachOK:/daeng|coach/.test(e.id)});};step();}
 function weeklyExtra(done){const rng=mulberry32(G.seed+G.week*313);if(typeof questExtra==="function"&&questExtra(done,mulberry32(G.seed+G.week*59)))return;
-  const dil=(typeof DILEMMAS!=="undefined"?DILEMMAS:[]).filter(d=>!G.seen[d.id]&&G.week>=d.from&&G.week<=d.to&&d.need(G));
+  const dil=(typeof DILEMMAS!=="undefined"?DILEMMAS:[]).filter(d=>!G.seen[d.id]&&G.week>=d.from&&G.week<=d.to&&d.need(G)&&!awaySpeaks(G,d.steps));
   const sinceD=gameWeek(G)-(G.lastDilemma||0);
   // v1.21: something happens most weeks — a decision every couple of weeks, chatter or a happening in between
   if(dil.length&&sinceD>=2&&rng()<.62){const d=dil[Math.floor(rng()*dil.length)];G.seen[d.id]=true;G.lastDilemma=gameWeek(G);
     playScene([{n:"nar",t:"— Decisions to make —"},...d.steps],done,{bg:d.bg==="camp"?"gym":d.bg,look:d.look||"train"});return;}
   const chats=CHATTER.filter(c=>!G.seen[c.id]&&c.need(G));const haps=HAPPENINGS.filter(h=>!G.seen[h.id]);
-  const chats2=chats.filter(c=>!c.need2||c.need2(G)),haps2=haps.filter(h=>!h.need||h.need(G));
+  const chats2=chats.filter(c=>(!c.need2||c.need2(G))&&!awaySpeaks(G,c.steps)),haps2=haps.filter(h=>(!h.need||h.need(G))&&!awaySpeaks(G,h.steps));
   let pick=null;if(chats2.length&&rng()<.6)pick=chats2[Math.floor(rng()*chats2.length)];else if(haps2.length&&rng()<.7)pick=haps2[Math.floor(rng()*haps2.length)];
   if(!pick){done();return;}G.seen[pick.id]=true;playScene(pick.steps,done,{bg:pick.bg==="camp"?"gym":pick.bg,look:pick.look||"train"});}
 function afterWeekFlow(){playHonorQueue(afterWeekFlowMain);}
@@ -1263,7 +1264,7 @@ function endingHTML(){const E=UI.ending,all=roster(G),res=seasonResult();
    <section class="px card"><h3>This year's results</h3>${res.length?res.map(r=>`<div class="kv-row"><span>${faceImg(r.f,"sm")} ${esc(r.f.name)} · Div ${r.d}</span><span class="pill ${r.c}">${r.t}</span></div>`).join(""):"<p class=\"meta\">No fighter passed the subdistrict round this year</p>"}</section>
    <div class="grid g3"><section class="px card"><h3>Camp</h3><div class="kv-row"><span>Camp level</span><b>Lv.${campLevel(G)} ${CAMP_LV_NAME[campLevel(G)]}</b></div><div class="kv-row"><span>Cash</span><b class="num">${fmt(G.cash)}</b></div><div class="kv-row"><span>Remaining debt</span><b class="num">${fmt(G.debt)}</b></div><div class="kv-row"><span>Students</span><b class="num">${students(G)}</b></div><div class="kv-row"><span>Fame</span><b class="num">${G.rep.toFixed(1)}</b></div></section>
    <section class="px card"><h3>Camp fighters</h3>${all.map(f=>`<div class="kv-row"><span>${esc(f.name)} Lv.${f.lvl}</span><span class="num">${rec(f)}</span></div>`).join("")}</section>
-   <section class="px card"><h3>Relationships</h3>${CANON_IDS.map(id=>G.F[id]).filter(f=>f.met).map(f=>`<div class="kv-row"><span>${esc(f.name)}${G.romance===f.id?" ♥ Sweetheart":G.promise&&G.promise[f.id]!=null?" ♡ Promised":""}</span>${hearts(f.bond,f)}</div>`).join("")}</section></div>
+   <section class="px card"><h3>Relationships</h3>${CANON_IDS.map(id=>G.F[id]).filter(f=>f.met).map(f=>`<div class="kv-row"><span>${esc(f.name)}${relTag(G,f).replace(/^ · /," ")}</span>${hearts(f.bond,f)}</div>`).join("")}</section></div>
    ${endTeaserHTML()}
    <p class="meta center">Seed ${esc(G.seedText||String(G.seed))} · Year ${G.season||1}</p>${!DEMO&&G.ended==="season"&&!gateOpen()?gateHTML():""}<div class="center endbtns">${!DEMO&&G.ended==="season"&&gateOpen()?`<button class="btn primary" data-act="newseason">Continue to Year ${(G.season||1)+1} ▸</button><p class="meta center">The camp, fighters and relationships all carry over · the rivals trained harder too</p>`:""}<button class="btn primary" data-act="replay">Play again</button><button class="btn" data-act="restart">Back to title</button></div></main>`;}
 

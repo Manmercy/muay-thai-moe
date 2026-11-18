@@ -5,7 +5,7 @@ const recentRes=(G,id,res)=>{const c=lastFight(G,id);return !!(c&&c.res===res&&c
 const nearFinal=G=>G.week>=42&&G.week<=49;
 const CHAT={
  kati:[
-  {id:"k_lv1",need:G=>G.romance==="kati",x:[
+  {id:"k_lv1",need:G=>romOf(G,"kati"),x:[
    ["Darling… I mean, Manager! Typo! …Not really a typo",[["Feel free to make that typo often",2,"…Then I'll make it every day"],["That made me smile",1,"How big? Send a photo"],["Focus on training",0,"Yes… Mister Manager"]]],
    ["Mali teased me all day about walking around smiling to myself",[["Well, it's a nice smile",2,"…Now you're doing it! No teasing after Mali!"],["Mali knows?",1,"The whole camp knows. Even Coach Daeng nodded at me"],["Try to play it cool",0,"I tried. It won't go away"]]]]},
   {id:"k_student",need:G=>G.seen&&G.seen.first_student,x:[
@@ -41,7 +41,7 @@ const CHAT={
    ["I'm bad at resting. I feel guilty every time I don't train",[["Rest is a kind of training too",2,"Rest is training… I'll remember that"],["You'll get used to it",1,"Yeah, I hope so"],["Then go train",0,"Coach Daeng will scold you, Manager, haha"]]],
    ["Thanks for messaging me. I'm not lonely today",[["Message me anytime",2,"Then I'll message you a lot. No getting annoyed!"],["No problem",1,"Okay, good night"],["Mm",0,"…Okay"]]]]}],
  mali:[
-  {id:"m_lv1",need:G=>G.romance==="mali",x:[
+  {id:"m_lv1",need:G=>romOf(G,"mali"),x:[
    ["Manager~ Mali saved your name in her phone as 'Mali's Khanom Khrok'",[["Then you're 'My Som Tam'",2,"Hehe, spicy, just like the name!"],["That's cute",1,"Right!? Mali thought for three days"],["Use my normal name",0,"No! It's permanent now!"]]],
    ["If Mali wins next fight, can she have one reward?",[["Sure, what do you want?",2,"Go to the night market together and hold hands the whole way! So everyone sees!"],["Win first, then we'll talk",1,"Then Mali's finishing it in round one!"],["You'll ask for a lot",0,"Just a tiny bit!"]]]]},
   {id:"m_join",need:G=>G.F.mali&&G.F.mali.camp==="player",x:[
@@ -73,7 +73,7 @@ const CHAT={
    ["Mali secretly practices jumping high kicks every night, didn't tell anyone",[["Can I see?",2,"Sure! But don't laugh if Mali falls!"],["Don't train till you get hurt",1,"Yes, yes, Coach Daeng says that too"],["If it's a secret, why tell me?",0,"Because I'm only telling you!"]]],
    ["Thank you for taking Mali into the camp. Nowhere else would",[["We're lucky to have you",2,"…Waah, don't say that late at night, Mali's crying"],["Our camp welcomes everyone",1,"Yes, this camp is the best!"],["Don't forget to pay rent",0,"Haha, way to ruin the mood!"]]]]}],
  rin:[
-  {id:"r_lv1",need:G=>G.romance==="rin",x:[
+  {id:"r_lv1",need:G=>romOf(G,"rin"),x:[
    ["Since we started dating, my work efficiency has dropped 8% from daydreaming",[["Worth it for the happiness",2,"…I ran the numbers. Very worth it"],["Daydreaming about who?",1,"That question has one answer. I don't need to say it"],["Then stop daydreaming",0,"…I can't. I tried"]]],
    ["No spreadsheet tonight. I just wanted to type that I miss you. End of message",[["I miss you too",2,"…Saved. I've reread it four times"],["Shortest message you've ever sent",1,"Yes. Some things need no appendix"],["What time is training tomorrow?",0,"…Six"]]]]},
   {id:"r_join",need:G=>G.F.rin&&G.F.rin.camp==="player",x:[
@@ -195,13 +195,15 @@ function bondFade(G){G.relT=G.relT||{};for(const id of CANON_IDS){const f=G.F[id
   const gap=absWeek(G)-f.lastTouch;if(gap<4)continue;const mine=f.camp==="player",rate=mine?.5:.25,floor=REL_FLOOR[G.relT[id]||0]||0;
   if((f.bondX||0)>0)continue;/* v1.86: past the first 100 the bond no longer fades */if(f.bond>floor)f.bond=Math.max(floor,Math.round((f.bond-rate)*100)/100);}}
 function chatWeekly(G){bondFade(G);G.chatIn=G.chatIn||{};G.chatLast=G.chatLast||{};const rng=mulberry32(G.seed*31+G.week*7+3);
-  for(const id of CANON_IDS){const f=G.F[id];if(!f||!f.met||G.chatIn[id])continue;
+  for(const id of CANON_IDS){const f=G.F[id];if(!f||!f.met||G.chatIn[id]||isAway(G,id))continue;
     {const L=CHAT[id]||[],seen=(G.chatSeen||{})[id]||[],W=G.chatWkAbs||{};if((f.bond||0)>=8&&gameWeek(G)-(G.chatLastAbs?.[id]??-999)>=1&&L.some(t=>t.need&&/_(lost|won|dm|flood|loan|miss|loy|loyw)$/.test(t.id)&&t.need(G)&&(!seen.includes(t.id)||(t.rep&&gameWeek(G)-(W[id+":"+t.id]??-999)>=t.rep)))){G.chatIn[id]=G.week;continue;}}
     if((f.bond||0)<CHAT_BOND)continue;
     if(gameWeek(G)-(G.chatLastAbs?.[id]??-999)<3)continue;if(rng()<.3+((f.bond||0)>=50?.1:0))G.chatIn[id]=G.week;}}
 const chatLen=f=>3+((f.bond||0)>=40?1:0)+((f.bond||0)>=70?1:0);
-const canChat=f=>!!(f&&f.met&&G.chatIn&&G.chatIn[f.id]);
-function chatOpen(id){const f=G.F[id];if(!f||!canChat(f))return;f.lastTouch=absWeek(G);delete G.chatIn[id];G.chatLast=G.chatLast||{};G.chatLast[id]=G.week;G.chatLastAbs=G.chatLastAbs||{};G.chatLastAbs[id]=gameWeek(G);const T=chatTopic(G,id);
+const canChat=f=>!!(f&&f.met&&G.chatIn&&G.chatIn[f.id]&&!isAway(G,f.id));
+/* v1.89.11: you can always open a chat with someone you are seeing (the ⋯ menu holds "break up") */
+const canChatLov=f=>!!(f&&f.met&&isPartner(G,f.id)&&!isAway(G,f.id));
+function chatOpen(id){const f=G.F[id];UI.lvMenu=false;if(f&&!canChat(f)&&canChatLov(f)){UI.chat={id,x:[],i:0,log:[],gain:0,typing:false,done:true,idle:true};UI.modal={type:"chat"};render();return;}if(!f||!canChat(f))return;f.lastTouch=absWeek(G);delete G.chatIn[id];G.chatLast=G.chatLast||{};G.chatLast[id]=G.week;G.chatLastAbs=G.chatLastAbs||{};G.chatLastAbs[id]=gameWeek(G);const T=chatTopic(G,id);
   G.chatSeen=G.chatSeen||{};G.chatSeen[id]=(G.chatSeen[id]||[]).filter(x=>x!==T.id).concat([T.id]);G.chatWk=G.chatWk||{};G.chatWk[id+":"+T.id]=G.week;G.chatWkAbs=G.chatWkAbs||{};G.chatWkAbs[id+":"+T.id]=gameWeek(G);
   const x=[...T.x];const ex=CHAT_X[id]||[];G.chatX=G.chatX||{};const xs=G.chatX[id]=G.chatX[id]||[];const extra=Math.min(1,chatLen(f)-3);for(let i=0;i<ex.length&&extra>0;i++)if(!xs.includes(i)&&(i===0||(f.bond||0)>=70)){x.push(ex[i]);xs.push(i);break;}
   const rng=mulberry32(G.seed+G.week*17+id.length);x.forEach(e=>{e.ord=[0,1,2].sort(()=>rng()-.5);});
@@ -216,12 +218,20 @@ const HEART_PX=pxIcon([".kk.kk.","krrkrrk","krwrrrk","krrrrrk",".krrrk.","..krk.
 function chatHTML(){const C=UI.chat;if(!C)return {body:"",foot:true};const f=G.F[C.id];
   const msgs=C.log.map(m=>`<div class="cmsg ${m.w}">${m.w==="them"?`<img class="cav" src="${faceSrc(f.id,"happy","casual")}" alt="">`:""}<p>${esc(m.w==="them"&&typeof nameCall==="function"?nameCall(C.id,m.t):m.t)}${m.s===2?`<i class="chrt">${HEART_PX}</i>`:""}</p></div>`).join("");
   const e=!C.done&&!C.typing&&C.x[C.i];
-  return {foot:false,body:`<div class="chatw px"><div class="chead"><img src="${faceSrc(f.id,"happy","casual")}" alt=""><span><b>${esc(f.name)}</b><small>${C.typing?"typing…":"online"}</small></span><span class="cbond">${HEART_PX}<b class="num">${Math.round(f.bond||0)}</b></span></div>
+  return {foot:false,body:`<div class="chatw px"><div class="chead"><img src="${faceSrc(f.id,"happy","casual")}" alt=""><span><b>${esc(f.name)}</b><small>${C.typing?"typing…":"online"}</small></span><span class="cbond">${HEART_PX}<b class="num">${Math.round(f.bond||0)}</b></span>${isPartner(G,f.id)?`<button class="cmenu" data-act="lvmenu" aria-label="Options" aria-expanded="${!!UI.lvMenu}">⋯</button>`:""}${UI.lvMenu&&isPartner(G,f.id)?`<div class="cmenupop px"><button class="btn sm danger" data-act="lvask">${isLov(G,f.id)?"Break up":"Call off the promise"}</button></div>`:""}</div>
    <div class="cbody pxscroll" data-sk="chat">${msgs}${C.typing?`<div class="cmsg them typing"><img class="cav" src="${faceSrc(f.id,"happy","casual")}" alt=""><p><i></i><i></i><i></i></p></div>`:""}</div>
    <div class="cfoot2">${e?`<small class="meta">Choose a message to send (${C.i+1}/${C.x.length})</small>${e.ord.map(k=>`<button class="copt" data-act="chatpick" data-v="${k}">${esc(e[1][k][0])}</button>`).join("")}`
-     :C.done?`<p class="cend">${C.gain?`Great conversation · bond increased`:"A short chat today. She'll text again sometime"}</p><button class="btn primary" data-act="closeModal">Close chat</button>`:`<small class="meta">…</small>`}</div></div>`};}
+     :C.idle?`<p class="cend">No new messages from ${esc(f.name)}</p><button class="btn primary" data-act="closeModal">Close chat</button>`:C.done?`<p class="cend">${C.gain?`Great conversation · bond increased`:"A short chat today. She'll text again sometime"}</p><button class="btn primary" data-act="closeModal">Close chat</button>`:`<small class="meta">…</small>`}</div></div>`};}
 XMODAL.chat=()=>chatHTML();
-Object.assign(ACT,{chat:d=>chatOpen(d.id),chatpick:d=>chatPick(+d.v)});
+Object.assign(ACT,{chat:d=>chatOpen(d.id),chatpick:d=>chatPick(+d.v),
+  lvmenu:()=>{const C=UI.chat;if(!C)return;UI.lvMenu=!UI.lvMenu;render();},
+  lvask:()=>{const C=UI.chat;if(!C)return;const f=G.F[C.id],lov=isLov(G,f.id),mine=f.camp==="player";UI.lvMenu=false;UI.lvBreak=f.id;
+    UI.modal={type:"confirm",title:lov?`Break up with ${esc(f.name)}?`:`Call off the promise with ${esc(f.name)}?`,
+      text:`${esc(f.name)} will be heartbroken. Bond −35, ${mine?"and she'll leave camp for about 4 weeks — no training and no new fights meanwhile":"and she won't be in touch for about 4 weeks"} · This can't be undone`,
+      no:"Not now",noAct:"lvno",ok:lov?"Break up":"Call off the promise",yes:"lvbreak"};render();},
+  lvno:()=>{UI.lvBreak=null;UI.modal={type:"chat"};render();},
+  lvbreak:()=>{const id=UI.lvBreak;UI.lvBreak=null;UI.chat=null;UI.modal=null;if(!id||!isPartner(G,id)){render();return;}AU.sfx("ui");
+    playScene(breakSteps(G,id),()=>{save();render();},{bg:G.F[id].camp==="player"?"gym":"night",look:"casual"});}});
 XMODAL.confirm=m=>({body:`<h2>${m.title}</h2>${m.html||`<p>${m.text}</p>`}<div class="mfoot"><button class="btn ghost" data-act="${m.noAct||"closeModal"}" ${m.noV?`data-v="${m.noV}"`:""}>${m.no||"No"}</button><button class="btn primary" data-act="${m.yes}">${m.ok||"Confirm"}</button></div>`,foot:false});
 
 // v1.52: "haven't seen you in a while" texts — she reaches out before the bond starts to fade
@@ -303,11 +313,11 @@ CHAT.kati.push(
    ["Manager, there's something I want to say, but I've typed and deleted it five times",[["Take your time. I'll wait",2,"…Thank you for not leaving. When I lost, when the camp was broke, when I was stubborn"],["Typos are fine",1,"It's not about typos! …I'm just embarrassed"],["Want to just call?",0,"No!! If I hear your voice I won't get a word out"]]],
    ["Grandpa taught me to fight. You taught me that even when I lose, someone's still waiting",[["You taught me too, what never giving up looks like",2,"…Now I'm crying on my phone screen"],["You're worth waiting for",2,"…!! (ten blushing red-glove stickers in a row)"],["That's a manager's job",0,"Okay… a job's a job"]]],
    ["Whatever happens from here, I'm staying. This camp. This person",[["Same here",2,"Then it's settled! …I'm going for a run. My face is burning"],["Glad to hear it",1,"It is"],["You make it sound like you're going somewhere",0,"I'm not going anywhere! That's what I'm trying to say!"]]]]},
-  {id:"k_hr13",need:G=>G.romance==="kati"&&hAt(G,"kati")>=13,x:[
+  {id:"k_hr13",need:G=>romOf(G,"kati")&&hAt(G,"kati")>=13,x:[
    ["Manager, next time can we go out and not talk about muay thai at all?",[["Sure. That day we're just two ordinary people",2,"…Two ordinary people. I like that"],["Can you actually manage that?",1,"Not sure. I might kick a lamppost by accident"],["Then what would we talk about?",0,"…Good question. I don't know either"]]],
    ["Mali says when I talk about you, I look like I just won by KO",[["I want to see that face more often",2,"Then stay close. That face is only visible at clinch range"],["Mali's exaggerating",1,"She isn't… I checked in the mirror"],["What do you look like after a KO?",0,"Like… grinning like an idiot! Don't ask!"]]],
    ["Sweet dreams… darling. Another typo. I'm not deleting it this time",[["Sweet dreams to you too, darling",2,"…!! I'm definitely not sleeping tonight"],["You make that typo a lot",1,"My fingers are used to it now"],["Night",0,"…That's it?"]]]]},
-  {id:"k_hr16",need:G=>G.romance==="kati"&&hAt(G,"kati")>=16,x:[
+  {id:"k_hr16",need:G=>romOf(G,"kati")&&hAt(G,"kati")>=16,x:[
    ["Auntie Taew asked me in the middle of the market, 'When's the wedding?' The whole market turned to look",[["What did you say?",2,"I said 'Ask the manager!' and ran"],["Auntie Taew doesn't hold back",1,"Straighter than my jab"],["Just ignore her",0,"Can't. She's followed me to the camp"]]],
    ["But… have you ever thought about it? Just asking. You don't have to answer",[["I have. But I want you to win the belt first",2,"…Then I'll hurry up and become champion. Not for the belt. For something else"],["One step at a time",1,"I'm not in a rush… much"],["Never crossed my mind",0,"…Oh. I was just kidding anyway"]]],
    ["Forget I asked! Going to train!",[["I'm not forgetting",2,"…You're such a cheat"],["Train well",1,"Yes!"],["Already forgotten",0,"…That was fast"]]]]},
@@ -416,11 +426,11 @@ CHAT.mali.push(
    ["Manager… I just realised I haven't cried after a fight in a while",[["Why do you think?",2,"Because every time I come down from the ring, someone's already waiting. I don't need to wish anyone could see"],["I'm glad",1,"Mm~"],["Crying's okay too",1,"I know. I'll cry if I need to. I just don't anymore"]]],
    ["When I first came here I thought boxing was a job. Fight, send money home",[["And now?",2,"Now I fight because I love it. Money still matters, but it's not the only reason anymore"],["A job's not a bad thing",1,"No, but a job you love is better~"],["Your purse went up too",0,"Ha! That too"]]],
    ["Thank you for never calling me a kid. And for never letting me smile alone",[["You're one of the fighters I'm proudest of",2,"…'One of'? Then I'll work on becoming 'the' proudest!"],["Let's keep smiling together",2,"Yes! On the good days and the bad ones"],["No need to thank me",0,"I do! Take it!"]]]]},
-  {id:"m_hr13",need:G=>G.romance==="mali"&&hAt(G,"mali")>=13,x:[
+  {id:"m_hr13",need:G=>romOf(G,"mali")&&hAt(G,"mali")>=13,x:[
    ["Darling~ I slipped a plumeria into your bag. Go look",[["Smells lovely. Thank you",2,"Every day from now on! No throwing them out"],["When did you do that?",1,"Secret~"],["My papers are all wet",0,"…Sorry. The flowers were still damp"]]],
    ["Mom asked what you like to eat. She wants to send southern food",[["Anything she makes",2,"She'll be thrilled! Expect a huge box"],["Southern curry with rice noodles",1,"Spoken like a southerner~"],["She doesn't have to",0,"You can't refuse Mom!"]]],
    ["Sweet dreams. Tonight I'm dreaming of the sea and you",[["Sweet dreams to you too",2,"~~~ (ten plumeria stickers)"],["Your home sea?",1,"Yep. One day I'll take you for real"],["Night",0,"…So short"]]]]},
-  {id:"m_hr16",need:G=>G.romance==="mali"&&hAt(G,"mali")>=16,x:[
+  {id:"m_hr16",need:G=>romOf(G,"mali")&&hAt(G,"mali")>=16,x:[
    ["The kids at home really want to meet you. Every day they ask, 'When's our brother-in-law coming?'",[["I'll visit this school break",2,"Really?! I'll tell them now! No… better not yet, they'd be too excited to sleep"],["Brother-in-law already?",1,"I didn't teach them that! They came up with it!"],["That's a bit soon",0,"…That's what I told them too"]]],
    ["But I'm a bit nervous. Our house is small and old. Will you be okay?",[["The house you grew up in is the one I most want to see",2,"…Now I'm crying again. And I didn't even win anything"],["Of course I'll be okay",1,"Really?"],["I can sleep on a mat",1,"Ha! You really will"]]],
    ["Then get ready. Mom will feed you until you can't walk",[["Very ready",2,"Good~ future… uh, Manager!"],["I can handle it",1,"You can't. Nobody can"],["Better diet first",0,"No dieting! Go get fattened by Mom!"]]]]},
@@ -509,11 +519,11 @@ CHAT.rin.push(
    ["Manager, I have the most important analysis of my life to report",[["Go ahead. I'm listening",2,"The variable with the biggest effect on my happiness isn't wins or losses or stats. …It's you"],["Is it long?",1,"Short. But it took three years"],["Just send the file",0,"…This one has to be said, not sent"]]],
    ["I've tried to put you into a formula all along. Nothing explains you",[["Then stop calculating and use instinct",2,"…Instinct says stay right here. For good. I trust it now"],["Some things don't need explaining",1,"A concept I'm learning to accept"],["Try another formula?",0,"I've tried forty-seven"]]],
    ["Thank you for being the variable I can't calculate. I only just realised how good that is",[["Thank you for letting me into your spreadsheet",2,"Not a part of it. You're the first sheet"],["Let's keep going together",2,"Confirmed. Saved"],["I'm just doing my job",0,"…I don't believe that data"]]]]},
-  {id:"r_hr13",need:G=>G.romance==="rin"&&hAt(G,"rin")>=13,x:[
+  {id:"r_hr13",need:G=>romOf(G,"rin")&&hAt(G,"rin")>=13,x:[
    ["I've planned our next date. With three backup plans",[["No plan this time. Anywhere with you",2,"…No plan? That scares me a little. But I'll try. Because it's you"],["Which one's best?",1,"Plan B. Bookshop, then café"],["Three's a lot",0,"If anything it's too few"]]],
    ["When we walk together, I counted: you slow down for me every time",[["I want more time walking beside you",2,"…That answer just spiked my heart-rate graph"],["You counted?",1,"I count everything. You know that"],["I'm just lazy",0,"The data doesn't support that"]]],
    ["Good night… darling. That took three minutes of typing and deleting",[["Worth every minute. Good night",2,"…Timestamp saved. 23:47"],["Three whole minutes?",1,"Three minutes twelve seconds"],["Night",0,"…Okay"]]]]},
-  {id:"r_hr16",need:G=>G.romance==="rin"&&hAt(G,"rin")>=16,x:[
+  {id:"r_hr16",need:G=>romOf(G,"rin")&&hAt(G,"rin")>=16,x:[
    ["My mother asked, 'Who's the person in your spreadsheet?' I don't know how she saw it",[["What did you say?",2,"I said, 'The one I can't calculate.' She laughed for a long time"],["Maybe you left it open on a video call",1,"…That's the most probable explanation"],["Say I'm a client",0,"I can't lie to my mother"]]],
    ["She wants to meet you, next time I go to Bangkok",[["Happy to. She can prepare questions",2,"She already has twenty. You can guess where I get it from"],["Do I wear a suit?",1,"She likes tidy, but not a suit"],["Can it wait?",0,"…Sure. I'll tell her you're not ready"]]],
    ["I made a new folder on my laptop called 'Future'. It's still empty",[["We'll fill it together, bit by bit",2,"…The first file will be a photo of us. Decided"],["Good folder name",1,"Took me two days"],["Why make an empty one?",0,"So there's somewhere waiting"]]]]},
@@ -602,11 +612,11 @@ CHAT.ploy.push(
    ["I used to think strength meant never needing anyone",[["And now?",2,"Now I think strength is daring to tell someone you need them. …You"],["You're already strong",1,"Strong enough to be lonely"],["That's right. Self-reliance is best",0,"…I used to believe that"]]],
    ["Grandpa Chai once wrote to me, 'Our camp has no money, but it has people who'll stand by you.' I never believed it until I met you",[["Grandpa would be glad it came true",2,"…I think he'd smile the way Kati describes. Smile, then buy pa thong ko"],["I'll keep standing by you",2,"Stand up straight then. I'll be checking your posture daily"],["Just doing my part",0,"…It's more than that"]]],
    ["I don't say things like this, so listen. Thank you. For teaching me losing is okay, as long as someone's waiting",[["I'll always be waiting",2,"…I'll be on time, as always. You won't wait long"],["I'm listening",1,"Good"],["You've never even lost",0,"That doesn't matter anymore"]]]]},
-  {id:"p_hr13",need:G=>G.romance==="ploy"&&hAt(G,"ploy")>=13,x:[
+  {id:"p_hr13",need:G=>romOf(G,"ploy")&&hAt(G,"ploy")>=13,x:[
    ["I've never dated anyone. Are there rules I should know?",[["Just one: be yourself, on time",2,"…The simplest rule I've ever heard. I can do that"],["There aren't any",1,"Without rules how do I know I'm doing it right?"],["Take turns paying",0,"Noted"]]],
    ["I booked dinner for six sharp. I'll be there at 5:50",[["I'll be there at 5:45, waiting for you",2,"…You lose to me at everything except this"],["I'll be on time",1,"Good"],["Six-oh-five okay?",0,"No"]]],
    ["Good night. I don't say that to many people",[["Good night, Ploy",2,"…Just my name like that. Better than I expected"],["Night, captain",1,"Don't call me captain"],["Go to sleep",0,"I'm going"]]]]},
-  {id:"p_hr16",need:G=>G.romance==="ploy"&&hAt(G,"ploy")>=16,x:[
+  {id:"p_hr16",need:G=>romOf(G,"ploy")&&hAt(G,"ploy")>=16,x:[
    ["My mother asked why I smile more these days. I didn't know I did",[["I've noticed. You smile whenever you read my messages",2,"…How would you know? You're not there when I read them. …Or you just know"],["What did you tell her?",1,"Said the weather's nice"],["You don't smile more",0,"Mother says I do"]]],
    ["Mother wants me to bring you to Korat for New Year. I haven't answered yet",[["Let's go. It's your birthday too. We'll celebrate at your home",2,"…A birthday at home, with Mother, with you. I never dared ask for that"],["If you're ready",1,"Not sure I'm ready. But I want to"],["Maybe next year?",0,"…Fine"]]],
    ["If we go, I'll show you the flower fields I ran through as a kid. Only my father and I know the spot",[["Thank you for letting me know it too",2,"…Three people now"],["No running. Walking's fine",1,"Light jog"],["Is it far?",0,"Ten kilometres. We run"]]]]},
@@ -695,11 +705,11 @@ CHAT.fah.push(
    ["Hey. I'm saying this once. No repeats. Read carefully",[["Reading carefully",2,"…Thanks for not leaving. When I was sharp with you, when I ran home, when I said I hated you. I was lying"],["Ready",1,"Good"],["Can't you send a voice note?",0,"No!! My voice would shake!"]]],
    ["I've never told anyone I'm glad they're around. You're the first. Count it as bonus points",[["I'm keeping those points forever",2,"…Forever? Then I'll keep giving more, so they never run out"],["I'm glad you're here too",2,"…!!! Enough!! That's all for today!!"],["What do points get me?",0,"One free pass from getting kicked"]]],
    ["Tomorrow I'll pretend I never typed any of this. Don't bring it up!",[["I won't mention it. I won't forget it either",2,"…Me neither"],["Deal",1,"Good"],["Already screenshotted",0,"DELETE IT NOW!!!"]]]]},
-  {id:"f_hr13",need:G=>G.romance==="fah"&&hAt(G,"fah")>=13,x:[
+  {id:"f_hr13",need:G=>romOf(G,"fah")&&hAt(G,"fah")>=13,x:[
    ["Hey, dar… dar… I can't! I can't type it! You say it first!",[["Darling",2,"…!!!!! I just rolled off the bed. You're responsible!!"],["No rush",1,"I'm not! …Next month maybe"],["Dar-what?",0,"Nothing!! Forget it!!"]]],
    ["Mali says when I talk to you I grin like a cat with a fish",[["I'd like to see that face",2,"You can't!! …Sent you a photo. Don't save it"],["Mali's a tease",1,"I'm getting her back tomorrow"],["You don't smile at me",0,"…I smile when you're not looking"]]],
    ["Good night. No dreaming about anyone else. Just me",[["You're the only one in them already",2,"…Good. I'll dream of you too. But in my dream I win the sausage contest"],["I'll try",1,"You'd better!"],["Can't control dreams",0,"Then don't sleep!"]]]]},
-  {id:"f_hr16",need:G=>G.romance==="fah"&&hAt(G,"fah")>=16,x:[
+  {id:"f_hr16",need:G=>romOf(G,"fah")&&hAt(G,"fah")>=16,x:[
    ["Grandma asked when you're staying over. She's already made up a room!",[["This Saturday",2,"…!!! She'll cook all night. I'll be pounding nam prik num. You have to finish it all"],["Which room?",1,"My old one. I'm sleeping in Grandma's"],["Might be awkward",0,"…Grandma will be sad"]]],
    ["Grandma told me, 'This one won't leave, dear.' I cried in front of her for the first time in ten years",[["She's right",2,"…She's right about everything. Except that I'm soft"],["It's okay to cry",1,"I know!"],["She was just comforting you",0,"…Then prove her right"]]],
    ["Hey. When I get the tiger, I'm putting the date we met next to it. Don't laugh",[["I won't. I remember that day",2,"…You actually remember!! You're… why are you this good?"],["That'll hurt",1,"I'm not scared of pain"],["What if we break up?",0,"…Why would you say that!!"]]]]},
