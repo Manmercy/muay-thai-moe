@@ -8438,6 +8438,7 @@ function sceneNext(){const S=UI.scene;if(!S)return;
     if(st.inject){let more=[];try{more=st.inject(G)||[];}catch(e){console.error("scene inject",e);}S.steps.splice(S.i,1,...more);continue;}/* v1.81.1: a broken step never freezes the week */
     if(st.bg)S.bg=st.bg;
     if(st.fx&&!st.n&&!st.choice&&!st.choiceFn){try{st.fx(G);}catch(e){console.error("scene fx",e);}S.i++;continue;}
+    if((st.choice||st.choiceFn)&&st.t!=null&&!st._ask){const {choice,choiceFn,...line}=st;S.steps.splice(S.i,1,line,{choice,choiceFn,_ask:1});continue;} /* v1.90: a line that carries a choice is shown first, then the options */
     if(st.choice||st.choiceFn){S.cur={choice:(st.choice||st.choiceFn(G))};render();return;}
     const n=val(st.n);S.lookOf=S.lookOf||{};
     // v1.8: each character keeps one outfit for the whole scene
@@ -10806,7 +10807,7 @@ function chatOpen(id){const f=G.F[id];if(!f||!canChat(f))return;f.lastTouch=absW
   UI.chat={id,x,i:0,log:[{w:"them",t:x[0][0]}],gain:0,typing:false};UI.modal={type:"chat"};save();render();}
 function chatPick(k){const C=UI.chat;if(!C||C.typing||C.i>=C.x.length)return;const e=C.x[C.i],o=e[1][k];if(!o)return;
   C.log.push({w:"me",t:o[0]});C.typing=true;AU.sfx("tick");render();
-  setTimeout(()=>{if(UI.chat!==C)return;C.typing=false;C.log.push({w:"them",t:o[2],s:o[1]});if(o[1]>0){add(G,C.id,"bond",o[1]);C.gain+=o[1];}if(o[1]===2)AU.sfx("level");
+  setTimeout(()=>{if(UI.chat!==C)return;C.typing=false;C.log.push({w:"them",t:o[2],s:o[1]});if(o[1]>0){add(G,C.id,"bond",o[1]);C.gain+=o[1];if(G.region&&typeof rgMeet==="function"&&CHAMP_IDS.includes(C.id))rgMeet(G,C.id,o[1]*.5);}if(o[1]===2)AU.sfx("level");
     C.i++;if(C.i<C.x.length){C.typing=true;render();setTimeout(()=>{if(UI.chat!==C)return;C.typing=false;C.log.push({w:"them",t:C.x[C.i][0]});render();},700);}
     else{C.done=true;G.chatLog=G.chatLog||{};G.chatLog[C.id]=(G.chatLog[C.id]||0)+1;save();}render();},800);}
 const CHAT_PX=pxIcon(["kkkkkkkkk.","kwwwwwwwk.","kwkwkwkwk.","kwwwwwwwk.","kkkwkkkkk.","..kk......"],{k:"#1b1230",w:"#f4f1ea"});
@@ -11362,7 +11363,7 @@ CHAT.fah.push(
 <script>
 (function(){
 /* v1.87: Thai code ships inside index.html; English code (en.js) and the dictionary (i18n.js) load only when needed */
-var B="085e0245f3";
+var B="5cd35222b4";
 var L="";try{L=localStorage.getItem("mtm_lang")||"";}catch(e){}
 try{var h=(location.hash||"").match(/lang=(th|en)/);if(h)L=h[1];}catch(e){}
 if(L!=="th"&&L!=="en")L="th";
