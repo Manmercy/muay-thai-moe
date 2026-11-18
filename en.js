@@ -5132,7 +5132,7 @@ AU.gsfx=function(kind,a){if(!this.init()||this.muted||!SETTINGS.sfx)return;const
   if(kind==="shimmer")for(let i=0;i<6;i++)T(i*.05,{f:1400+Math.random()*1400,type:"sine",dur:.12,peak:.06});};
 
 // ================= MUAY THAI MOE v1.3 — UI =================
-const VERSION="1.89.3";
+const VERSION="1.89.5";
 const CUR_LANG=(typeof window!=="undefined"&&window.LANG)||"th";
 const TH_LABEL=String.fromCharCode(3652,3607,3618);
 function langSwitch(cls){return `<div class="langsw ${cls||""}" role="group" aria-label="Language">${[["th",TH_LABEL],["en","EN"]].map(([k,l])=>`<button class="lsb ${CUR_LANG===k?"on":""}" data-act="setlang" data-v="${k}" aria-pressed="${CUR_LANG===k}">${l}</button>`).join("")}</div>`;}
@@ -5656,14 +5656,20 @@ function nextBooking(f){return G.bookings.filter(b=>b.a===f.id).sort((x,y)=>x.we
 // fight plan folds to one line; the sheet holds the choices and a confirm
 function prepLine(f){const b=nextBooking(f);if(!b||f.injury)return "";const op=G.F[b.b];
   return `<button class="fpbtn ${b.planSet?"set":""}" data-act="fplan" data-id="${b.id}" aria-label="Fight plan week ${b.week} vs ${esc(op.name)}"><b>${b.planSet?"✓ Fight plan":"Set fight plan"}</b><small>wk ${b.week}</small></button>`;}
-function fplanHTML(bid){const b=G.bookings.find(x=>x.id===bid);if(!b)return "";const f=G.F[b.a],op=G.F[b.b];const pl=UI.fpDraft.plan,tg=UI.fpDraft.target;const cp=scouted(op.id)?counterPreset(op):null;
+/* v1.89.5: fights that come by letter (belts, challenges, gang, odd jobs) start the same day — set the plan first, like a booked fight */
+function questPlan(b,go){let best="balanced";try{if(scouted(b.b))best=adviseCached(b.a,b.b,b.rounds||3).best||"balanced";}catch(e){}
+  UI.qb=b;UI.fpDraft={plan:best,target:"body"};
+  UI.modal={type:"fplan",id:b.id,after:()=>{if(!b.planSet){b.plan=UI.fpDraft.plan;b.tac={...(b.tac||{}),target:UI.fpDraft.target};b.planSet=true;}UI.qb=null;go();}};render();}
+const fpBooking=id=>(G.bookings||[]).find(x=>x.id===id)||(UI.qb&&UI.qb.id===id?UI.qb:null);
+function fplanHTML(bid){const b=fpBooking(bid);if(!b)return "";const q=b===UI.qb;const f=G.F[b.a],op=G.F[b.b];const pl=UI.fpDraft.plan,tg=UI.fpDraft.target;const cp=scouted(op.id)?counterPreset(op):null;
   return `<h2>Fight plan · ${esc(f.name)} vs ${esc(op.name)}</h2>
    <div class="fp-h">${scouted(op.id)?`<span class="pill">${styleOf(op.a)}</span>${(()=>{const I=oppIntel(op);return `<span class="meta">Favors ${I.top}</span>`;})()}`:`<button class="btn sm" data-act="scout" data-v="${op.id}" ${G.cash<scoutCost()?"disabled":""}>Scout ${fmt(scoutCost())}</button><span class="meta">Scout to learn the weak spot</span>`}</div>
    ${(()=>{if(!scouted(op.id))return "";const A=adviseCached(f.id,op.id,b.rounds||3);return `<div class="ctip"><img src="${faceSrc("coach")}" alt=""><span><b>Kru suggests:</b> plan "${PLANS[A.best].name}", win chance about ${Math.round(A.bestRate*20)*5}%${A.best!=="balanced"&&A.rates.balanced<A.bestRate-.05?` (Balanced about ${Math.round(A.rates.balanced*20)*5}%)`:""}</span></div>`;})()}
    <h3>Plan</h3><div class="tgrid three">${Object.entries(PLANS).map(([k,p])=>{const rec=scouted(op.id)&&adviseCached(f.id,op.id,b.rounds||3).best===k;return `<button data-act="fpd" data-k="plan" data-v="${k}" aria-pressed="${pl===k}">${rec?"★ ":""}${p.name}</button>`;}).join("")}</div><p class="meta tdesc">${esc(PLANS[pl].desc)}</p>
    <h3>Target</h3><div class="tgrid three">${Object.entries(TGT).map(([k,t])=>`<button data-act="fpd" data-k="target" data-v="${k}" aria-pressed="${tg===k}">${t}</button>`).join("")}</div>
-   ${cp&&!trLocked(f)?`<button class="cprep ${f.plan.preset===cp?"on":""}" data-act="preset" data-f="${f.id}" data-v="${cp}">${f.plan.preset===cp?"✓ Counter-training this week":"💡 Counter-train: "+PRESETS[cp].name}<small>${op.name}${COUNTER_WHY[cp]}</small></button>`:""}
-   <div class="mfoot"><button class="btn ghost" data-act="closeModal">Cancel</button><button class="btn primary" data-act="fpok" data-id="${b.id}">Confirm plan</button></div>`;}
+   ${cp&&!q&&!trLocked(f)?`<button class="cprep ${f.plan.preset===cp?"on":""}" data-act="preset" data-f="${f.id}" data-v="${cp}">${f.plan.preset===cp?"✓ Counter-training this week":"💡 Counter-train: "+PRESETS[cp].name}<small>${op.name}${COUNTER_WHY[cp]}</small></button>`:""}
+   ${q?`<p class="meta center">Letter fights start right away. Set the plan, then go.</p>`:""}
+   <div class="mfoot">${q?(scouted(op.id)?`<button class="btn ghost" data-act="fpbest" data-id="${b.id}">Use coach's plan</button>`:""):`<button class="btn ghost" data-act="closeModal">Cancel</button>`}<button class="btn primary" data-act="fpok" data-id="${b.id}">${q?"Confirm plan · Fight":"Confirm plan"}</button></div>`;}
 function fightsHTML(){
   const sub=UI.fsub;
   const rg=regionOn()&&(!!G.region||REGION_LIVE===false); /* v1.90 (hidden): the regional chapter tab — players see it once the letter came; testers (#regiondev) always */
@@ -6869,7 +6875,8 @@ const ACT={
   dskip:()=>{UI.drill=null;UI.modal=null;render();},
   fplan:d=>{const b=G.bookings.find(x=>x.id===d.id);if(!b)return;UI.fpDraft={plan:b.plan||"balanced",target:(b.tac&&b.tac.target)||"body"};UI.modal={type:"fplan",id:d.id};render();},
   fpd:d=>{UI.fpDraft[d.k]=d.v;render();},
-  fpok:d=>{const b=G.bookings.find(x=>x.id===d.id);if(b){b.plan=UI.fpDraft.plan;b.tac={...(b.tac||{}),target:UI.fpDraft.target};b.planSet=true;save();}UI.modal=null;render();},
+  fpok:d=>{const b=fpBooking(d.id);if(b){b.plan=UI.fpDraft.plan;b.tac={...(b.tac||{}),target:UI.fpDraft.target};b.planSet=true;if(b!==UI.qb)save();}const m=UI.modal;UI.modal=null;render();if(m&&m.after)m.after();},
+  fpbest:d=>{const b=fpBooking(d.id);if(!b)return;try{UI.fpDraft.plan=adviseCached(b.a,b.b,b.rounds||3).best||"balanced";}catch(e){}ACT.fpok(d);},
   bplanb:d=>{const b=G.bookings.find(x=>x.id===d.id);if(!b)return;b.plan=d.v;save();render();},
   btgt:d=>{const b=G.bookings.find(x=>x.id===d.id);if(!b)return;b.tac={...(b.tac||{}),target:d.v};save();render();},ctac:d=>{UI.fight.F.A.tac[d.k]=d.v;render();},
   scout:d=>{if(G.cash<scoutCost()||scouted(d.v))return;const free=rinFree();G.cash-=scoutCost();G.scoutAbs=G.scoutAbs||{};G.scoutAbs[d.v]=gameWeek(G);if(free)G.rinTapeAbs=gameWeek(G);save();if(free){toast(`Rin scouted ${G.F[d.v].name} (next free tape: week ${((G.week+RIN_GAP-1)%52)+1})`);render();return;}toast("Tape scouted, Coach has noted the weak spots");render();},
@@ -7105,6 +7112,7 @@ function startQuest(spec,fid,done){const f=G.F[fid];if(!f){done&&done();return;}
   const opp=spec.npc||makeQ(G,spec.qk,fid,spec.tag||("w"+G.week));const tier="quest";
   const b={id:"q"+G.week+"_"+fid+"_"+Math.floor(Math.random()*1e4),a:fid,b:opp,week:G.week,tier,rounds:spec.rounds||3,win:spec.purse||0,lose:0,quest:spec};
   b.bg=spec.bg||(spec.q==="belt"?"bg_district.webp":spec.npc?"bg_food.webp":QGRP_BG[QK[spec.qk].grp]);
+  if(typeof questPlan==="function"){questPlan(b,()=>openFight(b,()=>questAfter(b,done)));return;}
   openFight(b,()=>questAfter(b,done));}
 function questAfter(b,done){const S=b.quest,res=(G.cal||[]).slice(-1)[0];const win=res&&res.b===b.b&&res.res==="W";const me=G.F[b.a],op=G.F[b.b]||{name:"Opponent"};
   const fin=()=>{save();render();done&&done();};
