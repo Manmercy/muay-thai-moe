@@ -474,7 +474,7 @@ const SPECIALS={
  ploy:[{img:"ploy_special",w:"punch",def:"หมัดเหวี่ยงควาย",sk:"kr_thunder",when:e=>e.ev==="hit"&&e.w==="punch"&&e.crit,p:.6}],
  fah:[{img:"fah_special",w:"punch",def:"พายุฟ้าคำราม",sk:"f_hurricane",when:(e,hp)=>(e.ev==="hit"||e.ev==="counter")&&e.w==="punch"&&hp<50,p:.5}]};
 /* v1.89.24: arena art with the ring in the middle distance — zoom in so the fighters' feet (80% down the stage) land on the canvas (fy = that spot in the art) */
-const BG_FIT={"bg_loy_ring.webp":{z:1.5,fy:.71}};
+const BG_FIT={"bg_loy_ring.webp":{z:1.6,fy:.655}};
 const SP_FRAME=150,SP_LEN=SP_FRAME*8+200,FX_LEN=1250;
 /* the drawn sheet that fits a move: a guard move → the dodge sheet; otherwise the sheet for that weapon. None → the plain row + code effects */
 /* one sprite frame as a flat colour silhouette (glow outline, afterimages) — cached per sheet/frame/colour */
