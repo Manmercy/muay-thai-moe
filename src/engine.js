@@ -1032,13 +1032,13 @@ function advise(G,a,b,rounds,n=40){const fa=G.F[a],fb=G.F[b];const res={};
     while(!F.over){F.A.instr=aiCorner(F,F.A,F.B);F.B.instr=aiCorner(F,F.B,F.A);fightRound(F);}if(F.result.win==="A")w++;else if(F.result.win==="D")w+=.5;}res[plan]=w/n;}
   const best=Object.entries(res).sort((x,y)=>y[1]-x[1])[0];return {rates:res,best:best[0],bestRate:best[1],base:res.balanced};}
 // v1.51: camp pets — they join through little stories, wander the yard, and cheer the team up once a week
-const PETS={cat:{name:"แมวส้ม",food:150,eff:"ทุกคนกำลังใจ +2"},dog:{name:"หมาไทยหลังอาน",food:250,eff:"ทุกคนความล้า −3"},rooster:{name:"ไก่ชนปลดระวาง",food:100,eff:"ทุกคนกำลังใจ +1 · ความล้า −1"},turtle:{name:"เต่าวัด",food:80,eff:"ทุกคนกำลังใจ +3 (ใจเย็นลง)"},otter:{name:"ลูกนากริมน้ำ",food:0,eff:"เพื่อนตัวน้อยจากงานลอยกระทง · ไม่มีผลกับการซ้อม"}};
+const PETS={cat:{name:"แมวส้ม",food:150,eff:"ทุกคนกำลังใจ +2"},dog:{name:"หมาไทยหลังอาน",food:250,eff:"ทุกคนความล้า −3"},rooster:{name:"ไก่ชนปลดระวาง",food:100,eff:"ทุกคนกำลังใจ +1 · ความล้า −1"},turtle:{name:"เต่าวัด",food:80,eff:"ทุกคนกำลังใจ +3 (ใจเย็นลง)"},otter:{name:"ลูกนากริมน้ำ",food:0,eff:"ว่ายน้ำเป็นเพื่อนคนซ้อม · ทุกคนความล้า −1"}};
 const PET_NAMES={cat:["ส้มโอ","ขนมปัง","ตูบตู่"],dog:["เจ้าดำ","ไอ้ทอง","ข้าวตู"],rooster:["เจ้าเขียว","พญาไก่","โก๊ะ"],turtle:["ช้า ๆ","โมจิ","หลวงปู่"],otter:["น้ำปิง","กระทง","ข้าวเหนียว"]};
 const petFood=G=>(G&&G.pets||[]).reduce((s,p)=>s+(PETS[p.k]?PETS[p.k].food:0),0);
 function petPlay(G,i){const p=(G.pets||[])[i];if(!p||p.wk===gameWeek(G))return false;p.wk=gameWeek(G);p.joy=Math.min(100,(p.joy||50)+10);const R=roster(G);
   if(p.k==="cat")R.forEach(f=>f.morale=Math.min(100,f.morale+2));if(p.k==="dog")R.forEach(f=>f.fatigue=Math.max(0,f.fatigue-3));
   if(p.k==="rooster")R.forEach(f=>{f.morale=Math.min(100,f.morale+1);f.fatigue=Math.max(0,f.fatigue-1);});if(p.k==="turtle")R.forEach(f=>f.morale=Math.min(100,f.morale+3));
-  /* v1.89.24: the Loy Krathong otter is a companion only — event rewards stay out of the real game */
+  if(p.k==="otter")R.forEach(f=>f.fatigue=Math.max(0,f.fatigue-1)); /* v1.89.25: the Loy Krathong otter helps a little (Man's call) */
   const fav=p.fav&&G.F[p.fav];if(fav&&fav.camp==="player")fav.morale=Math.min(100,fav.morale+3);return true;}
 const upkeep=G=>1800+(G?facTotal(G)*220+[0,0,800,1800][campLevel(G)]+petFood(G):0); // v1.43: a bigger camp costs more to run
 function weeklyNet(G){return classIncome(G)-upkeep(G)-wages(G);}

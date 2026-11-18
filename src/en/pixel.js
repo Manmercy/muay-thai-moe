@@ -731,7 +731,7 @@ function mountWaiKhru(){document.querySelectorAll("canvas[data-waikhru]").forEac
   LOOPS.add(t=>{if(!cv.isConnected||!G)return;const R=(G.waikhru||{})[G.season||1];if(!R)return;let tt=t-(UI.wkT0||t);if(UI.wkSkip)tt+=60000;x.clearRect(0,0,cv.width,cv.height);drawWaiKhru(x,G,tt,R);});});}
 /* v1.89.24: Loy Krathong night — the five girls float their krathongs off the pier, lanterns rise; then the player makes a wish */
 const LW_TL=n=>{const k0=1400,gap=650;return {k0,gap,stand:k0+n*gap+900,cheer:k0+n*gap+2200,end:k0+n*gap+3000};};
-function drawLoyWish(ctx,t,ids){const S=2,W=320,H=180,P=(x,y,w,h,c)=>{ctx.fillStyle=c;ctx.fillRect(Math.round(x*S),Math.round(y*S),Math.max(1,Math.round(w*S)),Math.max(1,Math.round(h*S)));};
+function drawLoyWish(ctx,t,ids,tf){const S=2,W=320,H=180,P=(x,y,w,h,c)=>{ctx.fillStyle=c;ctx.fillRect(Math.round(x*S),Math.round(y*S),Math.max(1,Math.round(w*S)),Math.max(1,Math.round(h*S)));};
   const n=ids.length,T=LW_TL(n),bg=img("bg_loy_night.webp");
   ctx.imageSmoothingEnabled=true;if(bg.complete&&bg.naturalWidth)ctx.drawImage(bg,0,0,W*S,H*S);else P(0,0,W,H,"#1a1640");ctx.imageSmoothingEnabled=false;
   ctx.globalAlpha=Math.max(0,.55-t/2600);P(0,0,W,H,"#05040f");ctx.globalAlpha=1;
@@ -751,11 +751,27 @@ function drawLoyWish(ctx,t,ids){const S=2,W=320,H=180,P=(x,y,w,h,c)=>{ctx.fillSt
   // the girls: walk-in done, each kneels in turn, sets her krathong down, stands; all cheer at the end
   ids.forEach((id,i)=>{const sh=img(id+"_loykrathong_sheet.webp"),x=pos(i),h=H*.44,kA=T.k0+i*T.gap,kneel=t>=kA&&t<T.stand;
     let row="idle",foot=H*.97;if(kneel){row="guard";foot+=h*.08;}if(t>=T.cheer)row="win";
-    drawFrame(ctx,sh,ROW[row],Math.floor(t/(row==="idle"?280:row==="win"?200:400))%4,x*S,foot*S,h*S,false);
+    drawFrame(ctx,sh,ROW[row],Math.floor(t/(row==="idle"?280:row==="win"?200:400))%4,x*S,foot*S,h*S,false,tf>=0?Math.max(0,1-tf/500):1);
     if(t>=T.cheer&&Math.floor((t-T.cheer)/400)%2===0)P(x+6,foot-h-6+((i%2)*2),3,3,"#ff8fbd");});
+  // v1.89.25: after the wish — the manager's own krathong floats away under fireworks
+  if(tf>=0){const k=Math.min(1,tf/3600),x=W*.5+k*16+Math.sin(tf/500)*2,y=166-k*52,u=Math.max(.9,2.2-k*1.3),fl=Math.floor(tf/110)%2;
+    {const g=ctx.createRadialGradient(x*S,(y-9*u)*S,0,x*S,(y-9*u)*S,16*u*S);g.addColorStop(0,"rgba(255,205,110,.55)");g.addColorStop(1,"rgba(255,160,60,0)");ctx.fillStyle=g;ctx.fillRect((x-16*u)*S,(y-25*u)*S,32*u*S,32*u*S);}
+    ctx.globalAlpha=.3;P(x-1*u,y+2*u,2*u,12*u,"#ffcf6b");P(x-3*u,y+4*u,6*u,1*u,"#ffcf6b");ctx.globalAlpha=1;
+    P(x-8*u,y,16*u,2*u,"#1d6a36");P(x-7*u,y-1*u,14*u,1*u,"#2f8f4a");for(let i=-3;i<=3;i++)P(x+i*2*u-.5*u,y-2*u-(Math.abs(i)%2)*u,1*u,2*u,"#3fae5c");
+    for(const [dx,dy,c] of [[-5,-3,"#f06aa0"],[4,-3,"#f06aa0"],[-3,-5,"#ff8fbd"],[2,-5,"#ff8fbd"],[-1,-6,"#ffc0dc"]])P(x+dx*u,y+dy*u,2.4*u,3*u,c);
+    P(x-.6*u,y-5*u,1.2*u,1.2*u,"#ffd36b");P(x-.5*u,y-10*u,1*u,4*u,"#f4ead2");P(x+2.4*u,y-11*u,.5*u,5*u,"#8a5a32");P(x-2.9*u,y-11*u,.5*u,5*u,"#8a5a32");
+    P(x-.6*u,y-12*u-fl*u*.5,1.2*u,2*u,"#ffd36b");P(x-.3*u,y-12.6*u-fl*u*.5,.6*u,1*u,"#fff3c4");
+    const FW=[[200,.24,.2,"#ff8fbd"],[650,.74,.15,"#ffd36b"],[1100,.46,.09,"#7cc0ff"],[1550,.16,.13,"#8fe3a8"],[2000,.82,.22,"#e39bff"],[2450,.56,.16,"#ffd36b"],[2900,.32,.1,"#ff8fbd"],[3300,.68,.08,"#7cc0ff"]];
+    ctx.save();ctx.globalCompositeOperation="lighter";
+    for(const [st,fx,fy,c] of FW){const d=tf-st;if(d<0||d>1400)continue;const cx=W*fx,cy=H*fy;
+      if(d<260){P(cx-.5,cy+(1-d/260)*60,2,5,"#fff3c4");continue;}const e=(d-260)/1140,r=10+e*44;
+      if(e<.2){ctx.globalAlpha=(.2-e)*3;const g=ctx.createRadialGradient(cx*S,cy*S,0,cx*S,cy*S,30*S);g.addColorStop(0,"rgba(255,245,210,1)");g.addColorStop(1,"rgba(255,245,210,0)");ctx.fillStyle=g;ctx.fillRect((cx-30)*S,(cy-30)*S,60*S,60*S);}
+      ctx.globalAlpha=Math.max(0,1-e*e);
+      for(let i=0;i<24;i++){const a=i/24*Math.PI*2,px=cx+Math.cos(a)*r,py=cy+Math.sin(a)*r+e*e*12;P(px-1.5,py-1.5,3,3,c);P(cx+Math.cos(a)*r*.82-1,cy+Math.sin(a)*r*.82+e*e*10-1,2,2,c);if(i%2)P(cx+Math.cos(a)*r*.55,cy+Math.sin(a)*r*.55+e*e*7,2,2,"#fff3c4");}}
+    ctx.restore();ctx.globalAlpha=1;}
   ctx.globalAlpha=.25;P(0,0,W,8,"#000");P(0,H-8,W,8,"#000");ctx.globalAlpha=1;}
 function mountLoyWish(){document.querySelectorAll("canvas[data-loywish]").forEach(cv=>{const x=cv.getContext("2d"),ids=(cv.dataset.loywish||"").split(",").filter(Boolean);
-  LOOPS.add(t=>{if(!cv.isConnected)return;let tt=t-(UI.lwT0||t);if(UI.lwSkip)tt+=60000;x.clearRect(0,0,cv.width,cv.height);drawLoyWish(x,tt,ids);});});}
+  LOOPS.add(t=>{if(!cv.isConnected)return;let tt=t-(UI.lwT0||t);if(UI.lwSkip)tt+=60000;x.clearRect(0,0,cv.width,cv.height);drawLoyWish(x,tt,ids,UI.lwF0?t-UI.lwF0:-1);});});}
 function mountContest(){document.querySelectorAll("canvas[data-contest]").forEach(cv=>{const x=cv.getContext("2d"),k=cv.dataset.contest;
   LOOPS.add(t=>{if(!cv.isConnected||!G)return;const R=(G.contests||{})[G.season||1];if(!R)return;let tt=t-(UI.ctT0||t);if(UI.ctSkip)tt+=60000;x.clearRect(0,0,cv.width,cv.height);
     if(k==="walk")drawContestWalk(x,G,tt,R);else drawContestAward(x,G,tt,R);});});}

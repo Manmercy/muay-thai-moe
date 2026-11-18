@@ -1,5 +1,5 @@
 // ================= MUAY THAI MOE v1.3 — UI =================
-const VERSION="1.89.24";
+const VERSION="1.89.25";
 const CUR_LANG=(typeof window!=="undefined"&&window.LANG)||"th";
 const TH_LABEL=String.fromCharCode(3652,3607,3618);
 function langSwitch(cls){return `<div class="langsw ${cls||""}" role="group" aria-label="Language">${[["th",TH_LABEL],["en","EN"]].map(([k,l])=>`<button class="lsb ${CUR_LANG===k?"on":""}" data-act="setlang" data-v="${k}" aria-pressed="${CUR_LANG===k}">${l}</button>`).join("")}</div>`;}
@@ -1012,7 +1012,7 @@ function modalHTML(){const m=UI.modal;let body="",foot=true;
   if(m.type==="repinfo")body=repInfoHTML();
   if(m.type==="otip"){const o=G.offers.find(x=>x.id===m.id);if(!o){UI.modal=null;return "";}body=offerTipHTML(o);foot=false;}
   if(m.type==="lossrev")body=lossRevHTML();
-  if(m.type==="settings")body=settingsHTML();if(m.type==="gaunt"){body=gauntHTML();foot=false;}if(m.type==="thief"){body=thiefHTML();foot=false;}if(m.type==="loywish"){body=loyWishHTML();foot=false;}if(m.type==="loyhub"){body=loyHubHTML();}
+  if(m.type==="settings")body=settingsHTML();if(m.type==="gaunt"){body=gauntHTML();foot=false;}if(m.type==="thief"){body=thiefHTML();foot=false;}if(m.type==="loywish"){body=loyWishHTML();foot=false;}if(m.type==="loyrules"){body=loyRulesHTML();foot=false;}if(m.type==="loyhub"){body=loyHubHTML();}
   if(m.type==="slots")body=slotsHTML(m.mode);
   if(m.type==="campacts"){body=campActsHTML();foot=!m.pick;}
   if(m.type==="studinfo"){body=studInfoHTML();}

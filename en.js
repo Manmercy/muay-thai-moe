@@ -1042,13 +1042,13 @@ function advise(G,a,b,rounds,n=40){const fa=G.F[a],fb=G.F[b];const res={};
     while(!F.over){F.A.instr=aiCorner(F,F.A,F.B);F.B.instr=aiCorner(F,F.B,F.A);fightRound(F);}if(F.result.win==="A")w++;else if(F.result.win==="D")w+=.5;}res[plan]=w/n;}
   const best=Object.entries(res).sort((x,y)=>y[1]-x[1])[0];return {rates:res,best:best[0],bestRate:best[1],base:res.balanced};}
 // v1.51: camp pets — they join through little stories, wander the yard, and cheer the team up once a week
-const PETS={cat:{name:"Orange cat",food:150,eff:"Everyone: morale +2"},dog:{name:"Thai Ridgeback",food:250,eff:"Everyone: fatigue −3"},rooster:{name:"Retired fighting rooster",food:100,eff:"Everyone: morale +1 · fatigue −1"},turtle:{name:"Temple turtle",food:80,eff:"Everyone: morale +3 (calmer minds)"},otter:{name:"Riverside Otter",food:0,eff:"A little friend from the Loy Krathong fair · no effect on training"}};
+const PETS={cat:{name:"Orange cat",food:150,eff:"Everyone: morale +2"},dog:{name:"Thai Ridgeback",food:250,eff:"Everyone: fatigue −3"},rooster:{name:"Retired fighting rooster",food:100,eff:"Everyone: morale +1 · fatigue −1"},turtle:{name:"Temple turtle",food:80,eff:"Everyone: morale +3 (calmer minds)"},otter:{name:"Riverside Otter",food:0,eff:"Swims alongside whoever is training · everyone's fatigue −1"}};
 const PET_NAMES={cat:["Pomelo","Bread","Chubbs"],dog:["Blackie","Goldie","Khao Tu"],rooster:["Greenie","King Cluck","Goofy"],turtle:["Slowpoke","Mochi","Abbot"],otter:["Nam Ping","Krathong","Khao Niao"]};
 const petFood=G=>(G&&G.pets||[]).reduce((s,p)=>s+(PETS[p.k]?PETS[p.k].food:0),0);
 function petPlay(G,i){const p=(G.pets||[])[i];if(!p||p.wk===gameWeek(G))return false;p.wk=gameWeek(G);p.joy=Math.min(100,(p.joy||50)+10);const R=roster(G);
   if(p.k==="cat")R.forEach(f=>f.morale=Math.min(100,f.morale+2));if(p.k==="dog")R.forEach(f=>f.fatigue=Math.max(0,f.fatigue-3));
   if(p.k==="rooster")R.forEach(f=>{f.morale=Math.min(100,f.morale+1);f.fatigue=Math.max(0,f.fatigue-1);});if(p.k==="turtle")R.forEach(f=>f.morale=Math.min(100,f.morale+3));
-  /* v1.89.24: the Loy Krathong otter is a companion only — event rewards stay out of the real game */
+  if(p.k==="otter")R.forEach(f=>f.fatigue=Math.max(0,f.fatigue-1)); /* v1.89.25: the Loy Krathong otter helps a little (Man's call) */
   const fav=p.fav&&G.F[p.fav];if(fav&&fav.camp==="player")fav.morale=Math.min(100,fav.morale+3);return true;}
 const upkeep=G=>1800+(G?facTotal(G)*220+[0,0,800,1800][campLevel(G)]+petFood(G):0); // v1.43: a bigger camp costs more to run
 function weeklyNet(G){return classIncome(G)-upkeep(G)-wages(G);}
@@ -5296,7 +5296,7 @@ function mountWaiKhru(){document.querySelectorAll("canvas[data-waikhru]").forEac
   LOOPS.add(t=>{if(!cv.isConnected||!G)return;const R=(G.waikhru||{})[G.season||1];if(!R)return;let tt=t-(UI.wkT0||t);if(UI.wkSkip)tt+=60000;x.clearRect(0,0,cv.width,cv.height);drawWaiKhru(x,G,tt,R);});});}
 /* v1.89.24: Loy Krathong night — the five girls float their krathongs off the pier, lanterns rise; then the player makes a wish */
 const LW_TL=n=>{const k0=1400,gap=650;return {k0,gap,stand:k0+n*gap+900,cheer:k0+n*gap+2200,end:k0+n*gap+3000};};
-function drawLoyWish(ctx,t,ids){const S=2,W=320,H=180,P=(x,y,w,h,c)=>{ctx.fillStyle=c;ctx.fillRect(Math.round(x*S),Math.round(y*S),Math.max(1,Math.round(w*S)),Math.max(1,Math.round(h*S)));};
+function drawLoyWish(ctx,t,ids,tf){const S=2,W=320,H=180,P=(x,y,w,h,c)=>{ctx.fillStyle=c;ctx.fillRect(Math.round(x*S),Math.round(y*S),Math.max(1,Math.round(w*S)),Math.max(1,Math.round(h*S)));};
   const n=ids.length,T=LW_TL(n),bg=img("bg_loy_night.webp");
   ctx.imageSmoothingEnabled=true;if(bg.complete&&bg.naturalWidth)ctx.drawImage(bg,0,0,W*S,H*S);else P(0,0,W,H,"#1a1640");ctx.imageSmoothingEnabled=false;
   ctx.globalAlpha=Math.max(0,.55-t/2600);P(0,0,W,H,"#05040f");ctx.globalAlpha=1;
@@ -5316,11 +5316,27 @@ function drawLoyWish(ctx,t,ids){const S=2,W=320,H=180,P=(x,y,w,h,c)=>{ctx.fillSt
   // the girls: walk-in done, each kneels in turn, sets her krathong down, stands; all cheer at the end
   ids.forEach((id,i)=>{const sh=img(id+"_loykrathong_sheet.webp"),x=pos(i),h=H*.44,kA=T.k0+i*T.gap,kneel=t>=kA&&t<T.stand;
     let row="idle",foot=H*.97;if(kneel){row="guard";foot+=h*.08;}if(t>=T.cheer)row="win";
-    drawFrame(ctx,sh,ROW[row],Math.floor(t/(row==="idle"?280:row==="win"?200:400))%4,x*S,foot*S,h*S,false);
+    drawFrame(ctx,sh,ROW[row],Math.floor(t/(row==="idle"?280:row==="win"?200:400))%4,x*S,foot*S,h*S,false,tf>=0?Math.max(0,1-tf/500):1);
     if(t>=T.cheer&&Math.floor((t-T.cheer)/400)%2===0)P(x+6,foot-h-6+((i%2)*2),3,3,"#ff8fbd");});
+  // v1.89.25: after the wish — the manager's own krathong floats away under fireworks
+  if(tf>=0){const k=Math.min(1,tf/3600),x=W*.5+k*16+Math.sin(tf/500)*2,y=166-k*52,u=Math.max(.9,2.2-k*1.3),fl=Math.floor(tf/110)%2;
+    {const g=ctx.createRadialGradient(x*S,(y-9*u)*S,0,x*S,(y-9*u)*S,16*u*S);g.addColorStop(0,"rgba(255,205,110,.55)");g.addColorStop(1,"rgba(255,160,60,0)");ctx.fillStyle=g;ctx.fillRect((x-16*u)*S,(y-25*u)*S,32*u*S,32*u*S);}
+    ctx.globalAlpha=.3;P(x-1*u,y+2*u,2*u,12*u,"#ffcf6b");P(x-3*u,y+4*u,6*u,1*u,"#ffcf6b");ctx.globalAlpha=1;
+    P(x-8*u,y,16*u,2*u,"#1d6a36");P(x-7*u,y-1*u,14*u,1*u,"#2f8f4a");for(let i=-3;i<=3;i++)P(x+i*2*u-.5*u,y-2*u-(Math.abs(i)%2)*u,1*u,2*u,"#3fae5c");
+    for(const [dx,dy,c] of [[-5,-3,"#f06aa0"],[4,-3,"#f06aa0"],[-3,-5,"#ff8fbd"],[2,-5,"#ff8fbd"],[-1,-6,"#ffc0dc"]])P(x+dx*u,y+dy*u,2.4*u,3*u,c);
+    P(x-.6*u,y-5*u,1.2*u,1.2*u,"#ffd36b");P(x-.5*u,y-10*u,1*u,4*u,"#f4ead2");P(x+2.4*u,y-11*u,.5*u,5*u,"#8a5a32");P(x-2.9*u,y-11*u,.5*u,5*u,"#8a5a32");
+    P(x-.6*u,y-12*u-fl*u*.5,1.2*u,2*u,"#ffd36b");P(x-.3*u,y-12.6*u-fl*u*.5,.6*u,1*u,"#fff3c4");
+    const FW=[[200,.24,.2,"#ff8fbd"],[650,.74,.15,"#ffd36b"],[1100,.46,.09,"#7cc0ff"],[1550,.16,.13,"#8fe3a8"],[2000,.82,.22,"#e39bff"],[2450,.56,.16,"#ffd36b"],[2900,.32,.1,"#ff8fbd"],[3300,.68,.08,"#7cc0ff"]];
+    ctx.save();ctx.globalCompositeOperation="lighter";
+    for(const [st,fx,fy,c] of FW){const d=tf-st;if(d<0||d>1400)continue;const cx=W*fx,cy=H*fy;
+      if(d<260){P(cx-.5,cy+(1-d/260)*60,2,5,"#fff3c4");continue;}const e=(d-260)/1140,r=10+e*44;
+      if(e<.2){ctx.globalAlpha=(.2-e)*3;const g=ctx.createRadialGradient(cx*S,cy*S,0,cx*S,cy*S,30*S);g.addColorStop(0,"rgba(255,245,210,1)");g.addColorStop(1,"rgba(255,245,210,0)");ctx.fillStyle=g;ctx.fillRect((cx-30)*S,(cy-30)*S,60*S,60*S);}
+      ctx.globalAlpha=Math.max(0,1-e*e);
+      for(let i=0;i<24;i++){const a=i/24*Math.PI*2,px=cx+Math.cos(a)*r,py=cy+Math.sin(a)*r+e*e*12;P(px-1.5,py-1.5,3,3,c);P(cx+Math.cos(a)*r*.82-1,cy+Math.sin(a)*r*.82+e*e*10-1,2,2,c);if(i%2)P(cx+Math.cos(a)*r*.55,cy+Math.sin(a)*r*.55+e*e*7,2,2,"#fff3c4");}}
+    ctx.restore();ctx.globalAlpha=1;}
   ctx.globalAlpha=.25;P(0,0,W,8,"#000");P(0,H-8,W,8,"#000");ctx.globalAlpha=1;}
 function mountLoyWish(){document.querySelectorAll("canvas[data-loywish]").forEach(cv=>{const x=cv.getContext("2d"),ids=(cv.dataset.loywish||"").split(",").filter(Boolean);
-  LOOPS.add(t=>{if(!cv.isConnected)return;let tt=t-(UI.lwT0||t);if(UI.lwSkip)tt+=60000;x.clearRect(0,0,cv.width,cv.height);drawLoyWish(x,tt,ids);});});}
+  LOOPS.add(t=>{if(!cv.isConnected)return;let tt=t-(UI.lwT0||t);if(UI.lwSkip)tt+=60000;x.clearRect(0,0,cv.width,cv.height);drawLoyWish(x,tt,ids,UI.lwF0?t-UI.lwF0:-1);});});}
 function mountContest(){document.querySelectorAll("canvas[data-contest]").forEach(cv=>{const x=cv.getContext("2d"),k=cv.dataset.contest;
   LOOPS.add(t=>{if(!cv.isConnected||!G)return;const R=(G.contests||{})[G.season||1];if(!R)return;let tt=t-(UI.ctT0||t);if(UI.ctSkip)tt+=60000;x.clearRect(0,0,cv.width,cv.height);
     if(k==="walk")drawContestWalk(x,G,tt,R);else drawContestAward(x,G,tt,R);});});}
@@ -5536,7 +5552,7 @@ AU.gsfx=function(kind,a){if(!this.init()||this.muted||!SETTINGS.sfx)return;const
   if(kind==="shimmer")for(let i=0;i<6;i++)T(i*.05,{f:1400+Math.random()*1400,type:"sine",dur:.12,peak:.06});};
 
 // ================= MUAY THAI MOE v1.3 — UI =================
-const VERSION="1.89.24";
+const VERSION="1.89.25";
 const CUR_LANG=(typeof window!=="undefined"&&window.LANG)||"th";
 const TH_LABEL=String.fromCharCode(3652,3607,3618);
 function langSwitch(cls){return `<div class="langsw ${cls||""}" role="group" aria-label="Language">${[["th",TH_LABEL],["en","EN"]].map(([k,l])=>`<button class="lsb ${CUR_LANG===k?"on":""}" data-act="setlang" data-v="${k}" aria-pressed="${CUR_LANG===k}">${l}</button>`).join("")}</div>`;}
@@ -6549,7 +6565,7 @@ function modalHTML(){const m=UI.modal;let body="",foot=true;
   if(m.type==="repinfo")body=repInfoHTML();
   if(m.type==="otip"){const o=G.offers.find(x=>x.id===m.id);if(!o){UI.modal=null;return "";}body=offerTipHTML(o);foot=false;}
   if(m.type==="lossrev")body=lossRevHTML();
-  if(m.type==="settings")body=settingsHTML();if(m.type==="gaunt"){body=gauntHTML();foot=false;}if(m.type==="thief"){body=thiefHTML();foot=false;}if(m.type==="loywish"){body=loyWishHTML();foot=false;}if(m.type==="loyhub"){body=loyHubHTML();}
+  if(m.type==="settings")body=settingsHTML();if(m.type==="gaunt"){body=gauntHTML();foot=false;}if(m.type==="thief"){body=thiefHTML();foot=false;}if(m.type==="loywish"){body=loyWishHTML();foot=false;}if(m.type==="loyrules"){body=loyRulesHTML();foot=false;}if(m.type==="loyhub"){body=loyHubHTML();}
   if(m.type==="slots")body=slotsHTML(m.mode);
   if(m.type==="campacts"){body=campActsHTML();foot=!m.pick;}
   if(m.type==="studinfo"){body=studInfoHTML();}
@@ -6912,7 +6928,7 @@ function cardSeq(C){const live=()=>UI.fight&&UI.fight.care===C;const q=s=>docume
         const ka=C.pos.indexOf(a),kb=C.pos.indexOf(b);C.pos[ka]=b;C.pos[kb]=a;for(const k of [ka,kb]){const e=q(`.cshc[data-k="${k}"]`);if(e)e.style.left=(C.pos[k]*20)+"%";}AU.sfx("miss");setTimeout(swap,320);};swap();},500);},2300);}
 /* oil massage, two steps: slide the bottle all the way to pour the boxing oil, then tap the button as fast as you can before time runs out */
 function careOilHTML(A,C){const left=C.done?0:C.t0?Math.max(0,Math.ceil(C.secs-(performance.now()-C.t0)/1000)):C.secs;const pour=C.phase==="pour";
-  return `<div class="care"><div class="need"><img class="face sm" src="${faceSrc(A.f.id,"happy")}" alt=""><span>${C.done?`Massaged ${C.taps} strokes · ${careSum(C)}`:pour?"Drag the bottle right to pour the boxing oil":"Tap fast to massage before time runs out!"}</span><div class="cslots"><span class="cslot oilcombo"><b class="num">${C.taps}</b></span><span class="cslot oiltime"><b class="num">${left}</b><small>s</small></span></div></div>
+  return `<div class="care"><div class="need"><img class="face sm" src="${faceSrc(A.f.id,"happy")}" alt=""><span>${C.done?`Massaged ${C.taps} · ${careSum(C)}`:pour?"Drag the bottle right to pour the boxing oil":"Tap fast to massage before time runs out!"}</span><div class="cslots"><span class="cslot oilcombo"><b class="num">${C.taps}</b></span><span class="cslot oiltime"><b class="num">${left}</b><small>s</small></span></div></div>
   ${pour?`<div class="oiltrack" data-oil="1"><span class="oilhint">▸ ▸ ▸</span><i class="oilend r">${PIX.water}</i><button class="oilknob" aria-label="Drag to pour the boxing oil">${PIX.rub}</button></div>`
    :`<div class="carebtns one"><button class="oilrub ${C.done?"":"go"}" data-act="coil" ${C.done?"disabled":""}>${PIX.oilhand}<small>${C.done?`Massaged ${C.taps} times`:"Rub!"}</small></button></div>`}</div>`;}
 /* apply a corner result and remember how much it gave back, for the summary line */
@@ -7438,7 +7454,7 @@ function qCleanup(G){const keep=new Set([...G.bookings.map(b=>b.b),...G.offers.m
 // ---------- mail ----------
 let MAILN=0;
 function addMail(G,m){G.mail=G.mail||[];m.id="m"+G.week+"_"+(++MAILN)+"_"+Math.floor(Math.random()*1e4);m.wk=G.week;m.season=G.season||1;if(m.exp!=null)m.expAbs=gameWeek(G)+(m.exp-G.week);m.read=false;G.mail.unshift(m);G.mail=G.mail.slice(0,40);return m;}
-const mailOpen=m=>!m.done&&!m.expired&&(["take","pay","quiz","quest"].includes(m.kind)||(m.kind==="event"&&m.ev==="kongka"));
+const mailOpen=m=>!m.done&&!m.expired&&(["take","pay","quiz","quest"].includes(m.kind)||(m.kind==="event"&&(m.ev==="kongka"||m.ev==="thief")));
 function mailBadge(){if(!G||!G.mail)return 0;return G.mail.filter(m=>!m.read||mailOpen(m)).length;}
 const MAILBOX_PX=pxIcon(["....kkkk....","...kffffk...","..krrrrrrk..",".krrrrrrrrk.",".krwwwwwwrk.",".krwkkkkwrk.",".krwwwwwwrk.",".krrrrrrrrk.",".kkkkkkkkkk.",".....kk.....",".....kk.....","....kkkk...."],{k:"#2a1a10",r:"#c8283c",w:"#f4ead8",f:"#f7d24a"});
 const BILLS=[["Subdistrict Municipality","Fine: your camp's rooster crows above the legal limit at 4 a.m. (14 complaints)",300],
@@ -7511,7 +7527,7 @@ const LOAN_MAIL=[
  ["Gold Helmet's goon","For the manager of Sirichai Camp","A brown envelope with engine-oil stains. \"We know the power bill isn't paid this month. We've got twenty thousand. No guarantor, no questions. Just one: when do you pay it back?\""],
  ["Gold Helmet's goon","Loan coupon (cut and keep)","Paper cut into a coupon, the edges jagged like it was done with nail clippers. \"Redeem for ฿20,000 cash, instantly. Never expires. The interest, however, goes up.\""]];
 const LOAN_COACH=["Not yet. Check the job letters and temple-fair fights first.","Grandpa Chai got this exact same card once.","If you really must, borrow. But pay it back fast. The interest grows faster than Kati did.","I kept it so you could see it. Not so you'd call.","Read the small print by the asterisk."];
-function mailWeekly(G){G.mail=G.mail||[];if(typeof regionWeek==="function")regionWeek(G);G.gang=G.gang||{st:0,next:0};G.mailSeen=G.mailSeen||{};const rng=mulberry32(G.seed+G.week*4441);
+function mailWeekly(G){G.mail=G.mail||[];if(typeof thiefMail==="function")thiefMail(G);if(typeof regionWeek==="function")regionWeek(G);G.gang=G.gang||{st:0,next:0};G.mailSeen=G.mailSeen||{};const rng=mulberry32(G.seed+G.week*4441);
   if(typeof lottoWeekly==="function")lottoWeekly(G);
   for(const m of G.mail)if(m.expAbs!=null&&gameWeek(G)>m.expAbs&&!m.done)m.expired=true;
   // v1.88: every time cash dips low, the helmet gang slips a gold card into the mailbox
@@ -7624,7 +7640,7 @@ function questExtra(done,rng){if(!G||G.ended)return false;G.gang=G.gang||{st:0,n
 
 // ---------- modals ----------
 /* v1.89.24: the Loy Krathong invitation glows green until it is read and the gauntlet has been played once */
-function loyMailHot(m){if(m.kind==="event"&&m.ev==="kongka")return !m.done;if(m.kind!=="event"||m.ev!=="loy")return false;const L=loyOf(G);return !m.read||!(L&&L.runs);}
+function loyMailHot(m){if(m.kind==="event"&&(m.ev==="kongka"||m.ev==="thief"))return !m.done&&!m.expired;if(m.kind!=="event"||m.ev!=="loy")return false;const L=loyOf(G);return !m.read||!(L&&L.runs);}
 function mailListHTML(){const L=G.mail||[];
   return `<h2 class="mailh">${MAILBOX_PX} Mailbox</h2>${L.length?`<div class="mlist2">${L.map(m=>`<button class="mrow2 ${m.read?"":"unread"} ${mailOpen(m)?"act":""} ${m.done||m.expired?"old":""} ${loyMailHot(m)?"loyev":""}" data-act="mopen" data-v="${m.id}"><span class="mk ${m.kind}">${{letter:"Letter",take:"Money",pay:"Invoice",quiz:"Quiz",quest:"Request",job:"Job",event:"Event",loan:"Loan"}[m.kind]}</span><span class="mt"><b>${esc(m.title)}</b><small>${esc(m.from)} · wk ${m.wk}${m.expired?" · expired":m.done?" · handled":m.expAbs!=null?` · by wk ${((m.expAbs-1)%52)+1}`:""}</small></span>${mailOpen(m)?'<i class="dot"></i>':""}</button>`).join("")}</div>`:`<p class="lead">No mail yet</p>`}`;}
 function letterHTML(m){m.read=true;let act="";
@@ -8351,11 +8367,12 @@ function redeemCode(raw){const v=(raw||"").toUpperCase().replace(/\s+/g,"");if(!
     addMail(G,{kind:"event",ev:"loy",from:"Auntie Taew, som tam stall by the temple",title:"Loy Krathong at the floating market tonight!",body:"Manager dear, tonight I'm selling krathong at the floating-market fair. Bring the girls! Lots of food, and the som tam's on me! But I hear the helmet gang plans to make trouble… I'd feel much safer with you all there."});
     G.chatIn=G.chatIn||{};for(const id of CANON_IDS){const f=G.F[id];if(f&&f.met&&(f.bond||0)>=8&&!G.chatIn[id])G.chatIn[id]=G.week;}
     save();AU.sfx("level");toast("You got a Loy Krathong event invitation! Check your mailbox");}}
-function evMailAct(m){if(m.ev==="kongka"){const B=KONGKA[m.wish];return B?(m.done?`<p class="meta center">Blessing received · ${B.n}</p>`:`<button class="btn primary" data-act="kongka" data-v="${m.id}">Receive blessing · ${B.d}</button>`):"";}
+function evMailAct(m){if(m.ev==="thief"){const L=loyOf(G);return m.done||!L||L.thiefWk===absWeek(G)?`<p class="meta center">Tum caught</p>`:m.expired?"":`<button class="btn primary" data-act="thief">Go catch Tum</button>`;}
+  if(m.ev==="kongka"){const B=KONGKA[m.wish];return B?(m.done?`<p class="meta center">Blessing received · ${B.n}</p>`:`<button class="btn primary" data-act="kongka" data-v="${m.id}">Receive blessing · ${B.d}</button>`):"";}
   const L=loyOf(G);if(!L)return "";const tr=loyTier(L.best,L.boss);const T=L.tiers||{};
   const ends=["bronze","silver","gold"].filter(k=>T[k]).map(k=>`<button class="btn sm" data-act="loyend" data-v="${k}">Ending: ${LOY_TIERS.find(x=>x[0]===k)[1]} · ${LOY_END[k].t}</button>`).join("");
   return `${L.runs?`<p class="meta center">Best score <b class="goldt num">${L.best}</b>${tr?` · Reward tier: <b>${tr.n}</b>`:""}</p>`:""}<button class="btn primary" data-act="evloy">${L.runs?"Take on the Riverside Brawl again":"Go to the Loy Krathong fair"}</button>
-  ${L.runs?`<button class="btn" data-act="thief" ${L.thiefWk===absWeek(G)?"disabled":""}>${L.thiefWk===absWeek(G)?"Thief caught (back next week)":"Catch the Krathong Thief"}</button>`:""}
+  ${thiefOn(G)?`<button class="btn" data-act="thief" ${L.thiefWk===absWeek(G)?"disabled":""}>${L.thiefWk===absWeek(G)?"Tum caught (back next week)":"Catch Tum the Krathong Thief"}</button>`:`<p class="meta center">Tum returns during the in-game Loy Krathong (weeks ${THIEF_WK[0]}–${THIEF_WK[1]} every year) — Auntie Taew will send a letter</p>`}
   ${L.intro?`<div class="evrep"><button class="btn sm" data-act="loyintro">Replay the opening</button>${ends}${L.wish?`<button class="btn sm" data-act="loywishopen">Float krathongs with the girls again</button>`:""}</div>`:""}
   ${L.wish?`<p class="meta center">Your wish: "${esc((LOY_WISH.find(w=>w.k===L.wish)||{}).t||"")}"</p>`:""}
   ${T.gold?`<div class="evrep"><button class="btn sm" data-act="loydress" aria-pressed="${!!L.dressOn}">Thai dress off-stage: ${L.dressOn?"On":"Close"}</button></div>`:""}`;}
@@ -8367,7 +8384,7 @@ function loyIntro(G){const S=[
   if(inCamp(G,"mali"))S.push({n:"mali",f:"happy",l:"thai",t:"Kati looks gorgeous! Mali pinned her sabai herself~ And Mali's… looks pretty too, right, Manager?"});
   if(inCamp(G,"rin"))S.push({n:"rin",f:"flustered",l:"thai",t:"This pha sin limits my stride to about forty centimeters. Not ideal for fighting… but not bad either."});
   if(G.F.ploy){if(inCamp(G,"ploy"))S.push({n:"ploy",f:"flustered",l:"thai",t:"…Auntie Taew said purple suits me. I'm not sure, but I'm not taking it off now."});
-    else S.push({n:"nar",t:"In the crowd, a woman in a purple Thai dress stands still in front of a banana-leaf krathong stall — Ploy, from the rival camp."},{n:"ploy",f:"flustered",l:"thai",t:"…Coincidence. I came to float a krathong alone. Auntie Taew got me into this outfit before I could say no."});}
+    else S.push({n:"nar",t:"In the crowd, a woman in a purple Thai dress stands still in front of a banana-leaf krathong stall — Ploy, from the rival camp."},{n:"ploy",f:"flustered",l:"thai",t:"…Coincidence. I slipped away from a sponsor photo shoot for a walk, and Auntie Taew got me into this outfit before I could say no."});}
   if(G.F.fah){if(inCamp(G,"fah"))S.push({n:"fah",f:"happy",l:"thai",t:"Look at Fah! Thai dress on and the elbows still flow! Somebody take Fah's picture!"});
     else S.push({n:"fah",f:"happy",l:"thai",t:"Oh, Sirichai camp! Fah just happened to be walking the fair! Auntie Taew dressed Fah up in Thai dress too, haha — pretty, right?!"});}
   S.push({n:"npc",who:"Auntie Taew",t:"Everyone looks lovely! …But look over there. The helmet gang is back."},
@@ -8379,9 +8396,14 @@ function loyIntro(G){const S=[
   if(gs.some(f=>f.id==="ploy"))S.push({n:"ploy",f:"angry",l:"thai",t:"I'm not from your camp … but I shop at this market every year. If you're short a fighter, I'll step in."});
   if(gs.some(f=>f.id==="fah"))S.push({n:"fah",f:"happy",l:"thai",t:"Fah too! Punching the helmet gang for free, no fee! …A tray of khanom krok is enough."});
   if(gs.length)S.push({n:"nar",t:`${gs.map(f=>f.name).join(" and ")} are here to help as guests — pick them for the riverside gauntlet. No effect on your real camp.`});
-  S.push({n:"coach",t:"Listen. Reach four hundred fifty and Auntie Taew's stall is safe. A thousand, and the whole market cheers. Fifteen hundred and the boss on the canvas — that gang is finished … Lose, and that's fine. Come back and challenge them any time."},
-   {n:"nar",t:"This gauntlet has 3 endings by score (bronze 450 · silver 1,000 · gold 1,500 + beat the boss). Replay as often as you like; endings you unlock can be rewatched from the invitation letter."});
   return S;}
+/* v1.89.25: the rules as a popup (first time, and from the gauntlet header) */
+function loyRulesHTML(){const T=LOY_TIERS,E=LOY_END;return `<h2>Riverside Brawl · Rules</h2>
+  <ul class="glist lrules"><li>Send 3 girls, 3 bouts each in a row. HP barely recovers between bouts; lose and the next girl steps in</li><li>Bout 9 is Big Boss Golden Helmet (3 rounds)</li>
+  <li><b>3 endings by score</b><div class="lrtier"><span class="pill">Bronze ${T[2][2]}</span>${E.bronze.t}</div><div class="lrtier"><span class="pill">Silver ${fmtN(T[1][2])}</span>${E.silver.t}</div><div class="lrtier"><span class="pill gold">Gold ${fmtN(T[0][2])} + beat the boss</span>${E.gold.t}</div></li>
+  <li>Thai-dress SR cards: bronze 1 · silver 2 · gold 3</li><li>Losing is fine — replay as often as you like; unlocked endings can be rewatched from the invitation letter</li><li>No injuries in this brawl, and nothing counts toward your main-game record</li></ul>
+  <div class="center endbtns"><button class="btn primary" data-act="loyrulesok">Got it</button></div>`;}
+const fmtN=n=>Number(n).toLocaleString("en-US");
 const LOY_END={
  bronze:{t:"The Helmet Gang Retreats",steps:[{n:"nar",bg:"loy_night",t:"The helmet gang's goons retreat to the far bank. They haven't given up, but they won't come near Auntie Taew's stall again."},
   {n:"npc",who:"Auntie Taew",t:"Well done, kids! Auntie sold so many more krathongs. Khanom krok's on me tonight!"}]},
@@ -8433,7 +8455,7 @@ const LOY_THIEF={name:"Tum the Krathong Thief",
  lose:[{n:"nar",bg:"loy_night",t:"Tum laughs and dives in with the bag of coins… but the bag rips mid-river and every coin sinks."},
   {n:"npc",who:"Tum the Krathong Thief",t:"Hey! My coins!! …See you next year!"},{n:"npc",who:"Auntie Taew",t:"Never mind, dear. At least he didn't get anything."}]};
 function evStartLoy(){const L=loyOf(G);if(!L)return;UI.modal=null;
-  const open=()=>{L.run=null;L.pick=[];UI.modal={type:"gaunt"};render();};
+  const open=()=>{L.run=null;L.pick=[];UI.modal={type:L.rulesSeen?"gaunt":"loyrules"};render();};
   if(!L.intro){L.intro=1;save();playScene(loyIntro(G),open,{bg:"loy_night",look:"thai"});}else open();}
 /* v1.89.24: Ploy / Fah join as guests when they are not in the camp yet — event-only, nothing carries back */
 const LOY_GUESTS=["ploy","fah"];
@@ -8448,7 +8470,7 @@ function loyCardRow(after){const own=G.cards||{},got=LOY_CARDS.filter(k=>own[k])
     :`<b>Thai-dress SR cards ${got}/${LOY_CARDS.length}</b> · Bronze finish gives 1 card, Silver 2, Gold 3 · whoever fights first gets her card first · replay until you have them all`;
   return `<div class="lkrow"><div class="lkcards">${row}</div><p class="meta">🎴 ${msg}</p></div>`;}
 function gauntHTML(){const L=loyOf(G);if(!L){UI.modal=null;return "";}const R=L.run;
-  const head=`<h2>Loy Krathong Riverside Brawl</h2><p class="meta">Three fighters, three bouts each in a row. HP barely recovers between bouts; lose and the next fighter steps in · The last bout is Boss Golden Helmet · 3 endings by score, replay as often as you like</p>${!R?loyCardRow():""}`;
+  const head=`<h2>Loy Krathong Riverside Brawl</h2><p class="meta">Three fighters, three bouts each in a row. HP barely recovers between bouts; lose and the next fighter steps in · The last bout is Boss Golden Helmet · 3 endings by score, replay as often as you like <button class="btn sm ghost" data-act="loyrules">Rules</button></p>${!R?loyCardRow():""}`;
   const ladder=(cur)=>`<div class="gl">${LOY_LADDER.map((k,i)=>{const lg=R&&R.log[i];const st=lg?(lg.res==="W"?"ok":lg.res==="D"?"dr":"ng"):R&&i===cur?"now":"";
     return `<div class="glr ${st}"><canvas width="40" height="40" data-qsprite="${QK[k].sprite}"></canvas><span><b>${i+1}. ${esc(QK[k].name)}</b><small>${lg?lg.txt:R&&(R.done||i<cur)?"Skipped (previous fighter lost)":i===8?"Boss · 3 rounds":"2 rounds"}</small></span><i>${lg?(lg.res==="W"?"+"+lg.pts:lg.res==="D"?"+"+lg.pts:"✕"):""}</i></div>`;}).join("")}</div>`;
   if(!R){const pool=gauntPool(),P=L.pick||[];const need=Math.min(3,pool.length);
@@ -8500,12 +8522,16 @@ const kongkaReady=G=>{const L=loyOf(G);return !!L&&L.kongkaS!==(G.season||1);};
 const loyWishIds=()=>["kati","mali","rin","ploy","fah"].filter(id=>G.F[id]);
 function loyWishOpen(done){const L=loyOf(G);if(!L){done&&done();return;}UI.lwDone=done||null;UI.lwSkip=false;UI.lwT0=performance.now();UI.modal={type:"loywish"};AU.startMusic&&AU.startMusic("date");render();}
 function loyWishHTML(){const ids=loyWishIds(),T=LW_TL(ids.length),now=UI.lwSkip?" now":"",L=loyOf(G),prev=L&&L.wish&&LOY_WISH.find(w=>w.k===L.wish);
+  if(UI.modal.ph==="float")return `<h2>Floating Krathongs</h2><div class="cfxwrap ctwrap" data-act="lwfloatdone" role="button" aria-label="Continue"><canvas class="campcv" width="640" height="360" data-loywish="${ids.join(",")}"></canvas></div><p class="meta center">The manager's krathong drifts slowly out onto the river, just as a big round of fireworks goes up.</p>`;
   return `<h2>Floating Krathongs</h2><div class="cfxwrap ctwrap" data-act="lwskip" role="button" aria-label="Skip scene"><canvas class="campcv" width="640" height="360" data-loywish="${ids.join(",")}"></canvas></div>
    <p class="meta center lwq wkgo${now}" style="${"--d:"+T.end+"ms"}">Five krathongs float out onto the river. Now it's the manager's turn to make a wish.${prev?` · Last time you wished: "${esc(prev.t)}"`:""}</p>
    <div class="lwopts">${LOY_WISH.map(w=>`<button class="btn wkgo${now}" style="${"--d:"+T.end+"ms"}" data-act="loywish" data-v="${w.k}">${esc(w.t)}</button>`).join("")}</div>
 
    <div class="mfoot"><button class="btn wkgo${now}" style="${"--d:"+T.end+"ms"}" data-act="lwclose">Later</button></div>`;}
-function loyWishPick(k){const W=LOY_WISH.find(w=>w.k===k),L=loyOf(G);if(!W||!L)return;L.wish=k;L.wishN=(L.wishN||0)+1;const bless=kongkaReady(G);UI.modal=null;
+function loyWishPick(k){const W=LOY_WISH.find(w=>w.k===k),L=loyOf(G);if(!W||!L)return;L.wish=k;L.wishN=(L.wishN||0)+1;const bless=kongkaReady(G);
+  UI.modal={type:"loywish",ph:"float"};UI.lwSkip=true;UI.lwF0=performance.now();AU.sfx&&AU.sfx("level");render();
+  UI.lwGo=()=>{UI.lwGo=null;UI.lwF0=0;UI.modal=null;loyWishScene(W,L,bless,k);};setTimeout(()=>{if(UI.lwGo)UI.lwGo();},3800);}
+function loyWishScene(W,L,bless,k){
   const S=[{n:"nar",bg:"loy_night",t:`You close your eyes, press your palms together and wish: "${W.t}"`}];let hid=null;
   if(W.heart){const ids=loyWishIds();const top=(G.romance&&ids.includes(G.romance)?G.romance:null)||ids.slice().sort((a,b)=>((G.F[b].bond||0)+(G.F[b].bondX||0))-((G.F[a].bond||0)+(G.F[a].bondX||0)))[0];
     hid=top;S[0].t="You close your eyes, press your palms together and make a silent wish. All five turn to look at you at once.";S.push({n:top,f:"flustered",l:"thai",t:LOY_WISH_HEART[top]});}
@@ -8544,6 +8570,8 @@ Object.assign(ACT,{
     const bk={id:"bev"+R.k,a:f.id,b:qid,week:G.week,tier:"evloy",rounds:R.k===8?3:2,ev:1,carry:{hp:R.hp,sta:R.sta},bg:"bg_loy_ring.webp"};
     UI.modal=null;const go=()=>openFight2(bk,gauntAfter),S=loyBanter(R,f);save();if(S.length)playScene(S,go,{bg:"loy_night",look:"thai"});else go();},
   gquit:()=>{const L=loyOf(G),R=L&&L.run;if(!R||R.done)return;gauntFinish(R);render();},
+  loyrulesok:()=>{const L=loyOf(G);if(L)L.rulesSeen=1;save();UI.modal={type:"gaunt"};render();},
+  loyrules:()=>{UI.modal={type:"loyrules"};render();},
   gretry:()=>{const L=loyOf(G);if(!L)return;L.run=null;L.pick=[];render();},
 });
 
@@ -8561,7 +8589,7 @@ Object.assign(CARDS,{
   P("Little Boy","Mom told me to wait here… but someone stepped on my krathong. Mom's gonna be mad."),
   {choice:[{t:"\"I'll buy you a new krathong.\"",fx:G=>{G.cash-=40;add(G,"kati","bond",2);},then:[N("You buy a banana-leaf krathong from the next stall. The boy stops crying instantly, like someone hit a switch."),T("kati","flustered","…You know, Manager, Grandpa bought me a krathong just like that once, when I got lost at a temple fair.")]},
    {t:"\"Ride on Kati's shoulders so you can see your mom.\"",fx:G=>add(G,"kati","bond",3),then:[N("Kati hoists him onto her shoulders without a second thought. Her pha sin has to hitch up a little, but she doesn't care."),T("kati","happy","High enough? Look for your mom! Your eyes might be sharper than a boxer's!")]}]},
-  P("Little Boy","There's Mom! She's by the khanom khrok boat!"),
+  P("Little Boy","Wait… you're the one who punched the helmet gang on the river ring, right?! So cool! …Oh, there's Mom! She's by the khanom krok boat!"),
   N("The boy's mother runs over, thanks them again and again, then presses two bags of khanom khrok into Kati's hands."),
   P("Little Boy","Kati… is that guy your boyfriend?"),
   T("kati","flustered","Huh!? No! He's the manager! …Not yet— no… No! Go with your mom already!"),
@@ -8739,30 +8767,41 @@ function loyCardDrop(G,order){G.cards=G.cards||{};const left=LOY_CARDS.filter(k=
   return `New SR card: "${CARDS[id].t}" (see it in the album)`;}
 function loyGold(G){const L=loyOf(G);if(!L)return null;L.dressOn=1;return "Thai dress off-stage unlocked: the girls wear Thai dress in outings and dates (toggle it in Auntie Taew's letter)";}
 const loyThaiLook=G=>!!(G&&G.ev&&G.ev.loy&&G.ev.loy.tiers&&G.ev.loy.tiers.silver);
-function evThief(G,f){const K=QK.gang1,t=Math.min(19.2,Math.max(6,ovr(f.a)*1.15)),rng=mulberry32((G.seed^0x7a1)+absWeek(G)*17);const a={};
+/* v1.89.25: Tum comes back every in-game Loy Krathong (weeks 24–28) by letter — the event's stardust giver; he scales a little above the camp's top three */
+const THIEF_WK=[24,28];
+const thiefOn=G=>!!loyOf(G)&&G.week>=THIEF_WK[0]&&G.week<=THIEF_WK[1];
+const campPow=G=>{const R=roster(G).map(f=>ovr(f.a)).sort((a,b)=>b-a).slice(0,3);return R.length?R.reduce((s,x)=>s+x,0)/R.length:8;};
+const campLv=G=>{const R=roster(G).map(f=>f.lvl||1).sort((a,b)=>b-a).slice(0,3);return R.length?Math.round(R.reduce((s,x)=>s+x,0)/R.length):1;};
+function thiefMail(G){if(!thiefOn(G))return;const L=loyOf(G),wk=absWeek(G);if(L.thiefWk===wk||(G.mail||[]).some(m=>m.ev==="thief"&&!m.done&&!m.expired))return;
+  addMail(G,{kind:"event",ev:"thief",from:"Auntie Taew, som tam stall by the temple",title:"Tum Is Back!",exp:G.week+1,
+    body:"Manager dear, every Loy Krathong that Tum the krathong thief shows up. Last night he hauled off a sack full of coins from people's krathongs again. Send the girls to help catch him — Auntie's frying khanom krok for you."});}
+function evThief(G,f){const K=QK.gang1,t=Math.min(19.2,Math.max(6,campPow(G)*1.08)),rng=mulberry32((G.seed^0x7a1)+absWeek(G)*17);const a={};
   for(const [x] of ATTRS)a[x]=clamp(t+(K.tilt[x]||0)+(rng()*1.2-.6),3,19.5);const id="q_evthief";
   const o=baseFighter(id,{name:LOY_THIEF.name,full:LOY_THIEF.name,div:"X",camp:"quest",color:"#6b7a2e",potential:t+2,a});
-  o.sprite="thief";o.kind="gang1";o.grp="gang";o.lvl=(f.lvl||1)+1;o.fatigue=0;o.morale=70;G.F[id]=o;return id;}
-function thiefHTML(){const pool=gauntPool();return `<h2>Catch the Krathong Thief</h2><p class="meta">A silly 2-round bout · no injuries, no effect on the main game · win and Auntie Taew fries khanom krok for the team · once per week</p>
+  o.sprite="thief";o.kind="gang1";o.grp="gang";o.lvl=campLv(G)+1;o.fatigue=0;o.morale=70;G.F[id]=o;return id;}
+function thiefHTML(){const pool=gauntPool();return `<h2>Catch the Krathong Thief</h2><p class="meta">A 2-round bout, no injuries · win for EXP and stardust ✦ (a little stardust even if you lose) · Tum gets tougher as your camp does · only during Loy Krathong, once a week</p>
   <div class="gpick">${pool.map(f=>`<button class="gpk" data-act="thiefgo" data-v="${f.id}">${faceImg(f)}<span><b>${esc(f.name)}</b><small>${isLoyGuest(f)?"Guest · ":""}Lv.${f.lvl} · Fatigue ${Math.round(f.fatigue)}</small></span></button>`).join("")}</div>
   <div class="center endbtns"><button class="btn" data-act="closeModal">Later</button></div>`;}
 function thiefGo(fid){const L=loyOf(G);if(!L)return;const f=G.F[fid];if(!f)return;UI.modal=null;
   const pre=[...LOY_THIEF.pre,f.canon&&LOY_THIEF.line[fid]?{n:fid,f:"angry",l:"thai",t:LOY_THIEF.line[fid]}:{n:"nar",t:`${f.name} steps onto the pier and rolls up their sleeves`}];
   playScene(pre,()=>{const qid=evThief(G,f);const bk={id:"bthief",a:fid,b:qid,week:G.week,tier:"evloy",rounds:2,ev:1,bg:"bg_loy_ring.webp"};
-    openFight2(bk,()=>{const F=LASTF,win=F&&F.result&&F.result.win==="A";L.thiefWk=absWeek(G);delete G.F.q_evthief;
+    openFight2(bk,()=>{const F=LASTF,win=F&&F.result&&F.result.win==="A",ko=win&&/KO|น็อก/.test(F.result.type||"");L.thiefWk=absWeek(G);delete G.F.q_evthief;
+      for(const m of G.mail||[])if(m.ev==="thief"&&!m.done)m.done=true;
+      const yr=G.season||1,xp=win?30+10*yr:10,du=win?(ko?5:4):1;if(f.camp==="player")gainXP(G,f,xp);G.dust=(G.dust||0)+du;
+      const rw=[f.camp==="player"?`${f.name} EXP +${xp}`:"",`Stardust ✦ +${du}`].filter(Boolean).join(" · ");
       if(win){L.thiefN=(L.thiefN||0)+1;}save();
-      playScene(win?[...LOY_THIEF.win,{n:"nar",t:`Caught Ai Tum ${L.thiefN} times`}]:LOY_THIEF.lose,()=>{AU.startMusic("hub");UI.tab="home";save();render();},{bg:"river",look:"thai"});});},{bg:"river",look:"thai"});}
+      playScene(win?[...LOY_THIEF.win,{n:"nar",t:`Times Tum has been caught: ${L.thiefN} · ${rw}`}]:[...LOY_THIEF.lose,{n:"nar",t:`Never mind — experience is experience · ${rw}`}],()=>{AU.startMusic("hub");UI.tab="home";save();render();},{bg:"river",look:"thai"});});},{bg:"river",look:"thai"});}
 Object.assign(ACT,{
   loyintro:()=>{UI.modal=null;playScene(loyIntro(G),()=>{AU.startMusic("hub");render();},{bg:"river",look:"thai"});},
   loyend:d=>{const E=LOY_END[d.v];if(!E)return;const L=loyOf(G);if(L&&L.run&&L.run.newEnd===d.v)L.run.newEnd=null;UI.modal=null;
     playScene(loyEndSteps(d.v,L&&L.endCast&&L.endCast[d.v]),()=>{AU.startMusic("hub");const back=()=>{if(L&&L.run&&L.run.done)UI.modal={type:"gaunt"};render();};
       if(L&&!L.wish)loyWishOpen(back);else back();},{bg:"river",look:"thai"});},
-  loywish:d=>loyWishPick(d.v),
+  loywish:d=>loyWishPick(d.v),lwfloatdone:()=>{if(UI.lwGo)UI.lwGo();},
   kongka:d=>{const m=(G.mail||[]).find(x=>x.id===d.v);if(!m||m.done)return;const B=KONGKA[m.wish];if(!B)return;m.done=true;B.fx(G,m);save();UI.modal=null;
     playScene([{n:"nar",bg:"river_dawn",t:"The manager walks down to the pier in front of the camp. The morning mist hasn't lifted; last night's krathongs have drifted back to the bank, candles long out, but the jasmine scent lingers."},{n:"nar",t:`The manager presses palms together and thanks the river · Received ${B.n} · ${B.d}`}],()=>{AU.sfx&&AU.sfx("level");render();},{bg:"river_dawn",look:"casual"});},lwskip:()=>{UI.lwSkip=true;render();},
-  lwclose:()=>{UI.modal=null;const d=UI.lwDone;UI.lwDone=null;AU.startMusic("hub");if(d)d();else render();},
+  lwclose:()=>{if(UI.lwGo){UI.lwGo();return;}UI.modal=null;const d=UI.lwDone;UI.lwDone=null;AU.startMusic("hub");if(d)d();else render();},
   loywishopen:()=>loyWishOpen(()=>{UI.modal=null;render();}),
-  thief:()=>{const L=loyOf(G);if(!L||L.thiefWk===absWeek(G))return;UI.modal={type:"thief"};render();},
+  thief:()=>{const L=loyOf(G);if(!L||!thiefOn(G)||L.thiefWk===absWeek(G))return;UI.modal={type:"thief"};render();},
   thiefgo:d=>thiefGo(d.v),
   loydress:()=>{const L=loyOf(G);if(!L||!L.tiers.gold)return;L.dressOn=L.dressOn?0:1;save();render();},
 });

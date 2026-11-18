@@ -2144,3 +2144,5 @@ html[lang=en] .fight .fctl2 .skbtn2 b{font-size:11px;display:-webkit-box;-webkit
 .lwopts .btn{display:flex;flex-direction:column;align-items:center;gap:2px;line-height:1.35}.lwopts .btn small{font-weight:400}
 /* v1.89.24: the .bg-food/.bg-temple/.bg-cafe/.bg-river fallbacks use the background shorthand, which reset background-size to auto — the scene art tiled and its bottom edge showed again at the top of tall phones */
 .vbg[class*="bg-"]{background-size:cover;background-repeat:no-repeat}
+
+.lrules li{margin:6px 0;line-height:1.5}.lrtier{display:flex;gap:8px;align-items:center;margin:4px 0 0 4px}.lrtier .pill{min-width:116px;text-align:center}
