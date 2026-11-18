@@ -155,6 +155,9 @@ const chrome=process.env.CHROME_PATH||'/Applications/Google Chrome.app/Contents/
     const me=g.F.ploy;for(const k in me.a)me.a[k]=20;const b0=effOvr(g,a);g.week=24;g.flags.rcWk=null;weekTrain(g);const b1=effOvr(g,a);
     const best=Math.max(...roster(g).filter(f=>f.div==='A').map(f=>effOvr(g,f)));if(!(b1>b0))throw Error('no mid-year lift '+b0+' '+b1);
     for(const w of [40]){g.week=w;weekTrain(g);}return effOvr(g,a)<best;});
+  test('a no late in the year does not block her second ask next year (old week-of-year saves too)',()=>{const act=Object.keys(ACTIVITIES)[0];const asks=g=>{const s=JSON.stringify(dateScene(g,'mali',act).flatMap(x=>x.inject?x.inject(g):[x]));return /คบซ้อน|two-timing/i.test(s);};
+    for(const old of [false,true]){const g=fresh();G=g;for(const id of ['kati','mali']){g.F[id].met=true;g.F[id].camp='player';}g.F.kati.bond=90;g.F.kati.trust=60;takeLover(g,'kati');g.F.mali.bond=89.5;g.F.mali.trust=50;g.seen.love_mali=true;g.week=50;
+      if(old){g.loveNo={mali:50};}else noteNo(g,'mali');newSeason(g);g.week=5;if(!asks(g))throw Error((old?'old save':'new')+' blocked');}return true;});
   test('old single-lover saves become a one-item list',()=>{const g=fresh();delete g.lovers;delete g.lovWk;g.romance='rin';g.romWk=30;g.timeV=3;fixSave(g);return g.lovers.length===1&&g.lovers[0]==='rin'&&g.lovWk.rin===30&&isLov(g,'rin');});
   test('chat with a lover always opens and its menu leads to a confirmed breakup scene',()=>{const g=fresh();G=g;lovUp(g,['kati','mali']);UI.tab='people';render();
     const btn=document.querySelector('.chatb[data-id="mali"]');if(!btn||btn.disabled)throw Error('chat btn');ACT.chat({id:'mali'});render();

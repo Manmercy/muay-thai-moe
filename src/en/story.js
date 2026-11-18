@@ -435,7 +435,10 @@ function relTag(G,f){return "";} /* v1.89.11: everything about the relationship 
 // she confesses while you are already with someone — you can tell her the truth
 const LOVE_TAKEN={kati:"…I see. Sorry I said anything. Please forget it",mali:"Oh… you already have someone. It's okay, Mali's happy for you",
   rin:"Thank you for being honest. I'll update my data",ploy:"Then I'll keep what I said today to myself",fah:"Huh! Why didn't you say so! …Whatever. Forget what Fah said!"};
-const takenOpt=(G,id)=>partners(G).some(k=>k!==id)?[{t:"I'm sorry. I'm already with someone",fx:G3=>{befriend(G3,id);add(G3,id,"trust",3);G3.loveNo=G3.loveNo||{};G3.loveNo[id]=G3.week;},then:[{n:id,f:"sad",l:"casual",t:LOVE_TAKEN[id]}]}]:[];
+/* v1.90.3: when you last said no — counted in absolute weeks so a "no" late in the year does not block her second ask for most of the next year (old saves kept G.loveNo as the week of the year) */
+function noteNo(G,id){G.loveNoAbs=G.loveNoAbs||{};G.loveNoAbs[id]=absWeek(G);if(G.loveNo)delete G.loveNo[id];}
+const loveNoGap=(G,id)=>{const a=(G.loveNoAbs||{})[id];if(a!=null)return absWeek(G)-a;const w=(G.loveNo||{})[id];if(w==null)return 99;const d=G.week-w;return d<0?99:d;};
+const takenOpt=(G,id)=>partners(G).some(k=>k!==id)?[{t:"I'm sorry. I'm already with someone",fx:G3=>{befriend(G3,id);add(G3,id,"trust",3);noteNo(G3,id);},then:[{n:id,f:"sad",l:"casual",t:LOVE_TAKEN[id]}]}]:[];
 // an ex who still feels the same, once she has had time
 const LOVE_EX={kati:"Manager… I tried. I tried being just your fighter, but I can't",
   mali:"Mali tried to forget. But every time she makes khanom khrok, she still thinks of you",
@@ -683,9 +686,9 @@ function dateScene(G,id,act){
       else if(f.bond>=75&&f.trust>=40&&!isLov(G2,id)&&!RIVAL_LOVE.includes(id)&&!G2.seen["love_"+id]){G2.seen["love_"+id]=true;
         out.push(...LOVE_EVENTS[id].map(x=>({l:"casual",...x})),...cheatWarn(G2,id),{choice:[
           {t:yesTxt(G2,id,"I feel the same way"),fx:G3=>takeLover(G3,id),then:[{n:id,f:"flustered",l:"casual",t:LOVE_YES[id]}]},
-          {t:"Thank you, but I want to keep being the one beside you like this",fx:G3=>{befriend(G3,id);add(G3,id,"trust",5);G3.loveNo=G3.loveNo||{};G3.loveNo[id]=G3.week;},then:[{n:id,f:"sad",l:"casual",t:LOVE_NO[id]}]},...takenOpt(G2,id)]});}
+          {t:"Thank you, but I want to keep being the one beside you like this",fx:G3=>{befriend(G3,id);add(G3,id,"trust",5);noteNo(G3,id);},then:[{n:id,f:"sad",l:"casual",t:LOVE_NO[id]}]},...takenOpt(G2,id)]});}
       // v1.29.3: a second chance — she won't ask twice, but after a while she lets you know the door is still open
-      else if(f.bond>=75&&f.trust>=40&&!isLov(G2,id)&&!exWait(G2,id)&&!RIVAL_LOVE.includes(id)&&G2.seen["love_"+id]&&G2.week-((G2.loveNo&&G2.loveNo[id])||-99)>=2){G2.loveNo=G2.loveNo||{};G2.loveNo[id]=G2.week;
+      else if(f.bond>=75&&f.trust>=40&&!isLov(G2,id)&&!exWait(G2,id)&&!RIVAL_LOVE.includes(id)&&G2.seen["love_"+id]&&loveNoGap(G2,id)>=2){noteNo(G2,id);
         out.push({n:id,f:"flustered",l:"casual",t:isEx(G2,id)?LOVE_EX[id]:LOVE_AGAIN[id]},...cheatWarn(G2,id),{choice:[
           {t:yesTxt(G2,id,isEx(G2,id)?"I still miss you too. Let's get back together":"I answered too fast that day. I feel the same way"),fx:G3=>takeLover(G3,id),then:[{n:id,f:"flustered",l:"casual",t:LOVE_YES[id]}]},
           {t:"I'd like to stay by your side, just like this",fx:G3=>{befriend(G3,id);add(G3,id,"trust",2);},then:[{n:"nar",t:`${f.name} smiles and nods, and says nothing more`}]}]});}
