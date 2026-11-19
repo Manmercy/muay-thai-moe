@@ -16017,5 +16017,15 @@
  "โหลดเซฟทดสอบไม่ได้": "Couldn't load the test save",
  "\" ลงช่อง 3 แล้ว": "\" into slot 3",
  "โหลดเซฟทดสอบ \"": "Loaded test save \"",
- "\" ลงช่องเซฟ 3?\nเซฟเดิมในช่อง 3 (ถ้ามี) จะถูกแทนที่": "\" into save slot 3?\nAnything in slot 3 will be replaced"
+ "\" ลงช่องเซฟ 3?\nเซฟเดิมในช่อง 3 (ถ้ามี) จะถูกแทนที่": "\" into save slot 3?\nAnything in slot 3 will be replaced",
+ "ตอนนี้คุณแต่งตัวเองได้แล้ว ทั้งตัวพิกเซลและรูปอนิเมะครึ่งตัว เข้าไปเลือกได้ที่ ตั้งค่า → แก้ไขตัวละคร": "You can dress yourself now, both the pixel you and a half-body anime portrait. Go to Settings → Edit character",
+ "รูปอนิเมะของคุณ": "Your anime portrait",
+ "ผู้จัดการมีรูปครึ่งตัวสไตล์เดียวกับสาว ๆ เปลี่ยนตามที่เลือกทุกอย่าง ทั้งเพศ ทรงผม หมวก สีผม สีผิว สีตา ชุด สีชุด กางเกง และแว่น ลองสีหน้าได้ 6 แบบ": "The manager has a half-body portrait in the same style as the girls, following every choice: gender, hairstyle, hat, hair colour, skin, eyes, outfit and its colour, trousers and glasses. Try 6 expressions",
+ "แก้ไขตัวละครได้ตลอด": "Edit your character any time",
+ "ตั้งค่า → แก้ไขตัวละคร เปลี่ยนชื่อ หน้าตา และชุดได้ทุกเมื่อ ความยากกับ Seed ไม่เปลี่ยน เปลี่ยนใจกด 'คืนค่าเดิม' ได้": "Settings → Edit character changes your name, look and outfit whenever you like. Difficulty and seed stay the same. Changed your mind? Tap 'Revert'",
+ "สุ่มปุ่มเดียวครบ": "One dice for everything",
+ "ปุ่มสุ่มทั้งหมดสุ่มให้ทั้งชื่อเล่น เพศ หน้าตา ชุด และของเสริม ใช้ได้ทั้งตอนเริ่มเกมใหม่และตอนแก้ไขตัวละคร": "Shuffle all rolls a nickname, gender, face, outfit and extras, both when starting a new game and in the editor",
+ "ยืนคู่กับสาว ๆ ในฉาก": "Stand with the girls in scenes",
+ "กด 'ลองดูในฉาก' ดูตัวเองยืนคุยกับกะทิ ไม่อยากเห็นตัวเองก็ปิดได้ที่ 'แสดงตัวคุณในฉากสนทนา' ในตั้งค่า": "Tap 'Try in a scene' to see yourself talking with Kati. Rather not see yourself? Turn off 'Show yourself in scenes' in Settings",
+ "ผู้จัดการคะ วันนี้แต่งตัวดีจัง มีนัดกับใครหรือเปล่าคะ ✦": "Manager, you look sharp today. Meeting someone? ✦"
 }

@@ -1080,25 +1080,13 @@ function gboxHTML(){const loy=GB.box==="loy",s=GB.st,cost=gbCost(),ok=(G.dust||0
      <p>${loy?"This machine is only open during Loy Krathong. ":""} Cards you already own are kept as spares. Use them to level up the card or break them into stardust on the card page.</p>
      <button class="btn" data-act="gboxq">Close</button></div></div>`:""}
   </div>`;}
-const PATCH={id:"1.90.0",ver:"Muay Thai Moe v1.90",title:"Loy Krathong Night at Sirichai Camp",lead:"The Riverside Loy Krathong brawl, the renewed helmet gang, wearable Thai dress, the annual wai kru — and everything that quietly updated since v1.88.",items:[
- ["🏮","Loy Krathong Riverside Brawl","Enter LOYKRATHONG69 in Settings (works any time). Send 3 girls through 9 non-stop bouts against the helmet gang; 3 endings by score (bronze 400 · silver 800 · gold 1,200 + beat the boss). Everyone fights in pixel Thai dress, there are lines between bouts, and Ploy and Fah can join as guests. No injuries and nothing counts toward your record."],
- ["👘","Thai dress you can wear","Any girl who wins a riverside bout gets her Thai dress from Auntie Taew by letter. Claim it and pick it in her wardrobe — she wears it at camp, in training and in the ring (looks only, no stat effect)."],
- ["🪷","Floating krathongs with 5 girls","After the ending, the five girls float krathongs at the pier. The manager can make one of 4 wishes, each girl answers differently… and the next morning, check the mailbox."],
- ["🦝","Tum the Krathong Thief","Arrives by Auntie Taew's letter at two times: every week for the first 4 weeks after you start the riverside brawl · every in-game Loy Krathong (weeks 24–27 each year). Catch him for EXP and stardust; he gets tougher as your camp does. The Loy otter now eases fatigue when you play with it."],
- ["🎭","Tuy the Red Mask","Tum's younger brother. Arrives by Auntie Taew's letter once a day on 20–23 Nov 2026 (real days) only. A 3-round bout, tougher than Tum, with more EXP and stardust, plus a cash thank-you from the villagers when you win; a little stardust even if you lose. When Tum is around too, you can catch both."],
- ["🪖","The helmet gang, renewed","The Silver Helmet Chief has his own sprite, the Gold-Black Helmet right hand appears from year 2, every helmet has scene art — and beat the gang three times and they'll challenge you to fight at their warehouse, for a fee."],
- ["🙏","Annual wai kru","Week 37 (Muay Thai Day) every year: pick the offering set, the whole camp kneels and bows to the teachers three times, Kru Daeng places the mongkol and new fighters are initiated. Morale up, and the teachers' blessing cuts injuries for a while."],
- ["🥁","Livelier ring","The pi-and-drum music speeds up round by round, fastest in the deciding round; 115+ new commentary lines; skills that match a classic mae mai now carry its real name, and the booth calls it out."],
- ["🌳","Skill roots","Every skill line splits into 2 roots after Lv.22 (school) and Lv.10 (build), 5 steps each; some passives feed other lines. See it as a tree in the Skills tab."],
- ["💞","One relationship ladder","The same tier names everywhere: Acquaintance → Camp mate → Close friend → Someone special, all the way to ♥30. Once you're together there's a separate sweetheart ladder, plus Valentine's, two-timing, breakups and a harem route. The +0 bond bug after ♥10 is fixed."],
- ["🏃","District sports day","Every year from week 24: 100 m sprint, tug of war and a relay against the district's other colours."],
- ["🐯","Baiyok and Petchara","The two Golden Tiger prodigies have new art. Baiyok has left Golden Tiger and now fights in white, dropping by again and again. Story rivals check on your camp at the start, middle and end of each year."],
- ["📜","Plan before letter fights","Belt fights, challenges, the helmet gang and odd jobs from letters now open the fight-plan sheet before the bell."],
- ["🖼️","Nearly 60 new backgrounds","49 new story scenes, plus the morning market, the gang warehouse, the moonlit river ring and the camp pier at dawn."],
- ["📱","Full screen","Turn on full screen in Settings (Android/desktop), or use 'Add to Home Screen' so the game opens like an app."],
- ["🛠️","Other fixes","The between-round corner is back to the original order puzzle, the skill tab scrolls as one page on phones, scene backgrounds no longer repeat on tall screens, event art preloads so it appears faster, and characters keep their mood while choices are on screen."],
- ["🧑‍💼","The manager gets a face","Settings → Edit character: change your name, gender, hair, hat, outfit and glasses any time. You now have a half-body anime portrait that follows your choices, with 6 expressions to try. Shuffle all rolls everything, name and outfit included. Tap 'Try in a scene' to stand next to Kati (you can hide yourself in scenes in Settings)"]],
- foot:"May everyone's krathong float to where they hope it will ✦"};
+/* v1.91.71 (Man): a fresh popup for the manager's face only — the v1.90 Loy Krathong list is retired */
+const PATCH={id:"1.91.71",ver:"Muay Thai Moe v1.91",title:"The manager gets a face",lead:"You can dress yourself now, both the pixel you and a half-body anime portrait. Go to Settings → Edit character",items:[
+ ["🧑‍💼","Your anime portrait","The manager has a half-body portrait in the same style as the girls, following every choice: gender, hairstyle, hat, hair colour, skin, eyes, outfit and its colour, trousers and glasses. Try 6 expressions"],
+ ["✏️","Edit your character any time","Settings → Edit character changes your name, look and outfit whenever you like. Difficulty and seed stay the same. Changed your mind? Tap 'Revert'"],
+ ["🎲","One dice for everything","Shuffle all rolls a nickname, gender, face, outfit and extras, both when starting a new game and in the editor"],
+ ["🎬","Stand with the girls in scenes","Tap 'Try in a scene' to see yourself talking with Kati. Rather not see yourself? Turn off 'Show yourself in scenes' in Settings"]],
+ foot:"Manager, you look sharp today. Meeting someone? ✦"};
 function maybeWhatsNew(){if(!G||G.ended||UI.scene)return;if(G.newsSeen===PATCH.id)return;UI.modal={type:"whatsnew"};}
 function whatsNewHTML(){return `<div class="wnew"><span class="pill gold">Update · ${esc(PATCH.ver)}</span><h2>🥊 ${esc(PATCH.title)}</h2><p class="lead">${esc(PATCH.lead)}</p>
   <div class="wnlist">${PATCH.items.map(([ic,t,b])=>`<details class="wnitem"><summary><span class="wnic">${ic}</span><b>${esc(t)}</b><i>▸</i></summary><p>${esc(b)}</p></details>`).join("")}</div><p class="meta wnhint">Tap a topic to read more</p>
