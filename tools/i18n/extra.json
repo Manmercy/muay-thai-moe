@@ -14878,5 +14878,20 @@
  "รถเก๋งสีทองถอยออกไปช้า ๆ เป็นครั้งแรกที่ไม่บีบแตรใส่หน้าค่าย": "The gold sedan backs out slowly. For the first time, it doesn't honk at the camp gate.",
  "เถ้าแก่เสือหยิบซิการ์ออกมาจะจุด แล้วมันก็หล่นจากมือ เขาเอามือกุมหัว ร้องไห้ออกมาตรงหน้าประตูค่าย": "Boss Suea pulls out his cigar to light it, and it slips from his fingers. He clutches his head and breaks down crying right there at the camp gate.",
  "เถ้าแก่เสือเช็ดหน้าด้วยแขนเสื้อ มองมือนั้นนานจนคิดว่าจะไม่จับ แล้วก็จับ แน่นกว่าที่คิด": "Boss Suea wipes his face on his sleeve and looks at the hand so long you think he won't take it. Then he does, firmer than you expected.",
- "เถ้าแก่เสือเก็บซิการ์ขึ้นมาจากพื้น พยักหน้าตอบ แล้วหันหลังเดินไปที่รถ": "Boss Suea picks his cigar up off the ground, nods back, then turns and walks to his car."
+ "เถ้าแก่เสือเก็บซิการ์ขึ้นมาจากพื้น พยักหน้าตอบ แล้วหันหลังเดินไปที่รถ": "Boss Suea picks his cigar up off the ground, nods back, then turns and walks to his car.",
+ " แล้วซ้อมแก้ทางให้ตรงกับที่เห็น สัปดาห์ชกค่อยเปลี่ยนเป็นเตรียมไฟต์ ซ้อมมาแบบนี้ ขึ้นเวทีไปจะได้เปรียบตั้งแต่ยกแรก": ", then train the counter to match what you saw. Switch to fight prep in fight week. Train like that and you'll have the edge from the first round",
+ "ดูเทปเขาก่อน": "Watch her tape first",
+ "เทปก็ดูแล้ว": "You've seen the tape",
+ "แชมป์ภาคไม่ใช่คู่ชกงานวัด ": "A regional champion isn't a temple-fair opponent. ",
+ " แล้วซ้อมแก้ทางให้ตรง สัปดาห์ชกค่อยเปลี่ยนเป็นเตรียมไฟต์": ", then train the right counter. Switch to fight prep in fight week",
+ "ไปดูเทปนัดล่าสุดของเขาก่อน": "Go watch her latest bout first",
+ "เทปที่ดูไว้ยังใช้ได้ แต่ต้องซ้อมให้ตรงกับที่เห็น": "The tape you watched still counts, but your training has to match it",
+ "แชมป์ภาคไม่ชกแบบเดิมสองนัดหรอก ": "Regional champions never fight the same way twice. ",
+ "ออกไปฝึกวิชานอกค่าย 2 สัปดาห์ · จ่าย ": " left camp for 2 weeks of training · paid ",
+ "ไปเถอะ ค่ายรอได้ (": "Go. The camp can wait (",
+ "</b></p>\n    <p class=\"meta\">ส่วนที่เกิน 20 โตช้ากว่าปกติ ต้องซ้อมกันอีกนาน</p>": "</b></p>\n    <p class=\"meta\">Stats above 20 grow slower than usual. It takes a long time</p>",
+ "</p>\n    <p class=\"meta\">ค่าครู ค่าที่พัก ค่ากิน ค่าเดินทาง รวม <b class=\"goldt\">": "</p>\n    <p class=\"meta\">Teacher, lodging, food and travel, total <b class=\"goldt\">",
+ "เงินไม่พอ · ต้องใช้ ": "Not enough cash · needs ",
+ "นัดชิงแชมป์ภาคอีก ": "Regional title bout in ",
+ " สัปดาห์ข้างหน้า: ": " weeks: "
 }
