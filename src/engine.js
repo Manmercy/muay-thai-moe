@@ -358,9 +358,9 @@ SHARED_SKILLS.push(SKX("sh5b5",5,8,"sh5b4",["dur", "guard"],"build","ภูเ�
 const skillList=fid=>(SKILLS[fid]||[]).concat(SKILLS[fid]&&SKILLS[fid][0]&&SKILLS[fid][0].line!=null?SHARED_SKILLS:[]);
 const sharedPathOf=f=>{for(const s of SHARED_SKILLS)if((f.skills&&f.skills[s.id])>0)return s.line;return null;};
 // v1.83: full skill reset — every point spent comes back so a fighter can move to another line. First reset per fighter is free.
-const skPointsSpent=f=>Object.values(f.skills||{}).reduce((a,b)=>a+(b||0),0);
+const skPointsSpent=f=>Object.values(f.skills||{}).reduce((a,b)=>a+(b||0),0)+Math.max(0,((f&&f.trLv)||1)-1);
 const skResetCost=f=>Math.min(3,f.skReset||0)*10000;
-function resetAllSkills(G,id){const f=G.F[id];if(!f||!f.skills)return 0;const n=skPointsSpent(f);if(!n)return 0;f.skills={};f.sp=(f.sp||0)+n;f.equip=[];f.skReset=(f.skReset||0)+1;return n;}
+function resetAllSkills(G,id){const f=G.F[id];if(!f||!f.skills)return 0;const n=skPointsSpent(f);if(!n)return 0;f.skills={};if(f.trLv)f.trLv=1;f.sp=(f.sp||0)+n;f.equip=[];f.skReset=(f.skReset||0)+1;return n;}
 function resetSharedPath(G,id){const f=G.F[id];if(!f||!f.skills)return false;let n=0;for(const s of SHARED_SKILLS){n+=f.skills[s.id]||0;delete f.skills[s.id];}if(!n)return false;f.sp+=n;if(Array.isArray(f.equip))f.equip=f.equip.filter(k=>!k.startsWith("sh_"));return n;}
 // v1.12: a deep bond unlocks each heroine's signature move (bond 60+, player's camp only)
 /* v1.87: every girl has two innate traits — the player picks one on the skill page */
@@ -372,6 +372,13 @@ const TRAITS={
  ploy:[{id:"talent",name:"พรสวรรค์",desc:"ซ้อมได้ผลเร็วขึ้น 10% และล้าช้าลง 5%"},{id:"tempo",name:"จังหวะเทพ",desc:"ยกสุดท้าย หรือเมื่อเลือดต่ำกว่า 50% พลอยจะปรับจังหวะแก้ทางคู่ชกเองกลางไฟต์ อาวุธหลักของคู่ชกโดนยากขึ้น และอ่านเกมเขาขาด"}]};
 let TRV={flowAtk:.95,flowDef:.85,wits:.7,witsHp:45,eyeDef:1.05,eyeCtr:1.3,lib:1.1,libHit:1.08,furyHit:.15,furyDmg:.2,rockAtk:.95,rockDef:.9,rockPts:.6};
 const traitOf=f=>{const L=f&&TRAITS[f.id];if(!L)return null;return L.find(t=>t.id===f.trait)?f.trait:L[0].id;};
+/* v1.91.45 (Man): hidden power has 10 levels, 1 skill point each — Lv.10 = the old full strength. Old saves start at Lv.1. Rivals (not in our camp) always fight at full strength */
+const TR_MAX=10,TR_K0=.3;
+const traitLv=f=>clamp(Math.round((f&&f.trLv)||1),1,TR_MAX);
+const traitK=f=>!f||f.camp!=="player"?1:TR_K0+(1-TR_K0)*(traitLv(f)-1)/(TR_MAX-1);
+const trm=(m,S)=>1+(m-1)*(S&&S.trk!=null?S.trk:1);
+function traitBlock(f){if(!f||!TRAITS[f.id]||f.camp!=="player")return "none";if(traitLv(f)>=TR_MAX)return "max";if((f.sp||0)<1)return "sp";return "";}
+function traitUp(G,id){const f=G.F[id];if(traitBlock(f))return false;f.trLv=traitLv(f)+1;f.sp--;return true;}
 const SIGNATURE={kati:{name:"ศอกกลับใจศิริชัย",desc:"ความสนิท ♥ Lv.7+ · ศอกแรง +15% · ตอนเลือดต่ำแม่นขึ้นอีก 3%",fx:{dmg:{elbow:.15},clutch:.03}},
   mali:{name:"เตะดอกมะลิบาน",desc:"ความสนิท ♥ Lv.7+ · เตะแม่น +3% · ฟื้นแรงระหว่างยก +15%",fx:{hit:{kick:.03},regen:.15}},
   rin:{name:"สมการชนะ",desc:"ความสนิท ♥ Lv.7+ · คำสั่งพักยกได้ผล +30% · สวนกลับ +3%",fx:{corner:.3,ctr:.03}},
@@ -490,11 +497,11 @@ function trainWeek(G,f,rng){
   for(const [k,w] of Object.entries(p.w)){
     // v1.18: training your own style's core weapons fights diminishing returns less (style mastery path)
     const dim=1-Math.pow(f.a[k]/(f.potential+(core.includes(k)?CK:1.5)),2.2);
-    const g=.5*w*it.g*coach*fac*ready*mot*clamp(dim,.04,1)*(.75+rng()*.5)*(traitOf(f)==="surge"?1.15:traitOf(f)==="talent"?1.1:1)*(1+(f.drillBonus||0))*ytTrainMul(G,f);
+    const g=.5*w*it.g*coach*fac*ready*mot*clamp(dim,.04,1)*(.75+rng()*.5)*(traitOf(f)==="surge"?1+.15*traitK(f):traitOf(f)==="talent"?1+.1*traitK(f):1)*(1+(f.drillBonus||0))*ytTrainMul(G,f);
     if(g>0){const g2=f.a[k]>=20?g*LB_RATE:g,b4=f.a[k];f.a[k]=Math.max(b4,Math.min(stCap(f),b4+g2));f.gains[k]=f.a[k]-b4;}
   }
   f.drillBonus=0;
-  let load=p.load*it.l*7*(pr==="cond"?1-hill*.08-(st.includes("tong")?.1:0):1);{const pm=passiveMods(f);load*=clamp(1-pm.fatAll-(pr==="kick"?pm.fatKick:0),.4,1);}{const tr=traitOf(f);if(tr==="surge")load*=1.05;if(tr==="talent")load*=.95;}
+  let load=p.load*it.l*7*(pr==="cond"?1-hill*.08-(st.includes("tong")?.1:0):1);{const pm=passiveMods(f);load*=clamp(1-pm.fatAll-(pr==="kick"?pm.fatKick:0),.4,1);}{const tr=traitOf(f);if(tr==="surge")load*=1+.05*traitK(f);if(tr==="talent")load*=1-.05*traitK(f);}
   f.fatigue=clamp(f.fatigue+load-(10+G.fac.recovery*5+G.fac.kitchen*2+clin*3)-(f.plan.preset==="rest"?22:0),0,100);
   if(f.plan.preset==="rest")f.morale=clamp(f.morale+3,0,100);
   // v1.38: a rest week is one week: once recovered she goes back to what she was training before
@@ -605,10 +612,10 @@ function mastery(f){if(f.camp!=="player")return 0;const v=styleVal(f,mainStyle(f
 const VET_FX={hit:.08,dmg:.25,ev:.06}; // calibrated: vet 1 ≈ +1 stat point
 /* v1.90.13 "the more she bleeds, the harder she gets" (Ladda): f.hpX adds starting hp; f.hurt={def,ev,sta,rec,rnd} scale with how much hp is gone (0 fresh → 1 empty) */
 const hurtW=s=>s&&s.f.hurt?clamp(1-s.hp/(s.hp0||100),0,1):0;
-function fightSide(f,plan,rng){const sk=skillMods(f);{const m=mastery(f)*MK,s=mainStyle(f);if(m){if(s==="defense"){sk.evade+=MDEF.ev*m;sk.ctr+=MDEF.ctr*m;sk.ctrDmg+=MDEF.cd*m;}else{const w=s;sk.hit[w]=(sk.hit[w]||0)+MWPN.hit*m;sk.dmg[w]=(sk.dmg[w]||0)+MWPN.dmg*m;sk.pts[w]=(sk.pts[w]||0)+.1*m;}}}if(f.aura)sk.evade+=f.aura*.5;if(f.vet>0){const v=f.vet;for(const w of ["punch","kick","knee","elbow"]){sk.hit[w]=(sk.hit[w]||0)+VET_FX.hit*v;sk.dmg[w]=(sk.dmg[w]||0)+VET_FX.dmg*v;}sk.evade+=VET_FX.ev*v;}const gr=f.id==="kati"&&traitOf(f)!=="grit"?0:(f.grit||0);if(gr)sk.evade+=gr*.4;
+function fightSide(f,plan,rng){const sk=skillMods(f);{const m=mastery(f)*MK,s=mainStyle(f);if(m){if(s==="defense"){sk.evade+=MDEF.ev*m;sk.ctr+=MDEF.ctr*m;sk.ctrDmg+=MDEF.cd*m;}else{const w=s;sk.hit[w]=(sk.hit[w]||0)+MWPN.hit*m;sk.dmg[w]=(sk.dmg[w]||0)+MWPN.dmg*m;sk.pts[w]=(sk.pts[w]||0)+.1*m;}}}if(f.aura)sk.evade+=f.aura*.5;if(f.vet>0){const v=f.vet;for(const w of ["punch","kick","knee","elbow"]){sk.hit[w]=(sk.hit[w]||0)+VET_FX.hit*v;sk.dmg[w]=(sk.dmg[w]||0)+VET_FX.dmg*v;}sk.evade+=VET_FX.ev*v;}const gr=f.id==="kati"&&traitOf(f)!=="grit"?0:(f.grit||0)*(f.id==="kati"?traitK(f):1);if(gr)sk.evade+=gr*.4;
   const hp0=100-(f.injury?15:0)+Math.round(gr*30)+(f.hpX||0),tl=f.trainLog||[];const brk=STA.brk+f.a.stamina*STA.brkK+(tl[tl.length-1]==="prep"?STA.prep:0)+(tl.slice(-2).includes("cond")?STA.cond:0)+(f.id==="fah"?STA.fah:0)+(f.camp==="player"&&typeof lovePerk==="function"?lovePerk(f).brk:0); /* Fah: hot-blooded and tireless, gets her breath back faster */
   return {f,id:f.id,name:f.name,plan,instr:"none",hp:hp0,hp0,brk,sta:clamp(100-f.fatigue*.4,40,100),pts:0,rpts:0,kd:0,cuts:0,
-    thrown:0,landed:0,dmgDealt:0,legs:0,tac:{focus:"auto",pace:"steady",target:"head"},sk,prep:(f.camp==="player"?(HERO_K[f.id]||0)+(LINE_K[f.id]?LINE_K[f.id][heroLine(f)]||0:0):0)+(f.prepBonus?.04:0)+(f.counterPrep?.05:0)+sk.prep+(f.aura||0)+gr+(f.labPrep||0)+(f.camp==="player"?(f.facPrep||0):0)+(f.camp==="player"&&typeof lovePerk==="function"?lovePerk(f).prep:0),counterPrep:!!f.counterPrep,trait:traitOf(f),mor:(f.morale-60)/400+sk.mor,wl:{punch:0,kick:0,knee:0,elbow:0}};
+    thrown:0,landed:0,dmgDealt:0,legs:0,tac:{focus:"auto",pace:"steady",target:"head"},sk,prep:(f.camp==="player"?(HERO_K[f.id]||0)+(LINE_K[f.id]?LINE_K[f.id][heroLine(f)]||0:0):0)+(f.prepBonus?.04:0)+(f.counterPrep?.05:0)+sk.prep+(f.aura||0)+gr+(f.labPrep||0)+(f.camp==="player"?(f.facPrep||0):0)+(f.camp==="player"&&typeof lovePerk==="function"?lovePerk(f).prep:0),counterPrep:!!f.counterPrep,trait:traitOf(f),trk:traitK(f),mor:(f.morale-60)/400+sk.mor,wl:{punch:0,kick:0,knee:0,elbow:0}};
 }
 function aiPlan(f,opp,rng){
   const a=f.a;const opts=[["balanced",1],["pressure",(a.punch+a.elbow+a.power)/30],["counter",(a.counter+a.iq)/22],["outside",(a.kick+a.foot)/22],["clinch",(a.knee+a.clinch)/22]];
@@ -766,15 +773,15 @@ function fightEx(F){const rng=F.rng,log=[],ex=F.ex,mA=F.mA,mB=F.mB;
     // v1.87.4: knowing a weapon helps to defend it, so dumping punches/knees/elbows leaves a hole
     const def=clinch?((d.clinch+df.sk.clDef)*.5+d.guard*.3+d.iq*.2):(d.guard*.42+d.foot*.25+d.iq*.18+d[wpn]*BAL.wdef);
     const fatA=(100-at.sta)/100*.22,fatD=(100-df.sta)/100*.12;
-    const fury=at.trait==="fury"?clamp((70-at.hp)/50,0,1):0; // v1.38 → v1.87 trait: the more she is hurt, the more dangerous
+    const fury=at.trait==="fury"?clamp((70-at.hp)/50,0,1)*(at.trk!=null?at.trk:1):0; // v1.38 → v1.87 trait: the more she is hurt, the more dangerous
     /* v1.87 traits that fire mid-fight */
     if(df.trait==="wits"&&df.hp<TRV.witsHp&&!df.witsOn){df.witsOn=1;log.push({ha:F.A.hp,hb:F.B.hp,sa:F.A.sta,sb:F.B.sta,s:df===F.A?"A":"B",t:`${df.name}ตั้งสติได้ทั้งที่เจ็บหนัก ไหวพริบพิเศษ! หลบพลิ้วกว่าเดิม`,k:"big",ev:"wake",an:df.name,dn:at.name});}
-    for(const S of [at,df])if(S.trait==="tempo"&&!S.tempoOn&&(F.round>=F.rounds||S.hp<50)){S.tempoOn=1;const O=S===at?df:at;if(!S.ctrW){S.ctrW=oppTop(O.f);O.prep-=CTR_READ;}log.push({ha:F.A.hp,hb:F.B.hp,sa:F.A.sta,sb:F.B.sta,s:S===F.A?"A":"B",t:`${S.name}เปลี่ยนจังหวะ! จังหวะเทพ อ่านทาง${O.name}ขาดแล้ว`,k:"big",ev:"wake",an:S.name,dn:O.name});}
+    for(const S of [at,df])if(S.trait==="tempo"&&!S.tempoOn&&(F.round>=F.rounds||S.hp<50)){S.tempoOn=1;const O=S===at?df:at;if(!S.ctrW){S.ctrW=oppTop(O.f);S.ctrK=S.trk;O.prep-=CTR_READ*(S.trk!=null?S.trk:1);}log.push({ha:F.A.hp,hb:F.B.hp,sa:F.A.sta,sb:F.B.sta,s:S===F.A?"A":"B",t:`${S.name}เปลี่ยนจังหวะ! จังหวะเทพ อ่านทาง${O.name}ขาดแล้ว`,k:"big",ev:"wake",an:S.name,dn:O.name});}
     if(fury>.4&&!at.wake){at.wake=1;log.push({ha:F.A.hp,hb:F.B.hp,sa:F.A.sta,sb:F.B.sta,s:at===F.A?"A":"B",t:`${at.name}ยิ้มทั้งที่เลือดออก… ยิ่งเจ็บยิ่งดุ! สายตาเปลี่ยนไปแล้ว!`,k:"big",ev:"wake",an:at.name,dn:df.name});}
     /* v1.87.4 balance: one weapon thrown again and again gets read inside the round, and a kick can be checked by a tight guard and good feet */
     const rtw=at.rtw||(at.rtw={punch:0,kick:0,knee:0,elbow:0}),rep=at.rthrown>=3?Math.max(0,(rtw[wpn]||0)/at.rthrown-BAL.repFree)*BAL.repPen:0;
     const chkP=wpn==="kick"&&!clinch?clamp((d.guard*.55+d.foot*.45-effA(at,"speed")*.3-BAL.chkBase)*BAL.chkK+rep*.6,0,BAL.chkMax):0;
-    const hitP=clamp(.42-rep+fury*.04+(atk-def)*.03+at.prep+at.mor+(at.careMor||0)-fatA+fatD-md.evade-md.guard-df.sk.evade-(df.ctrW===wpn?CTR_W:0)+(at.sk.hit[wpn]||0)+(at.hp<45?at.sk.clutch:0)+(at.rage?.1:0)+(at.gprep==="strike"&&F.open?.04:0)+(at.ph&&at.ph.hit||0)-(df.ph&&df.ph.ev||0)-(df.f.hurt?df.f.hurt.ev*hurtW(df):0)-(at.tac.target==="head"?.015:0)+df.legs/400+(bA&&bA.w===wpn?.12*bA.pw:0)-(bD?.12*bD.pw:0),.12,.9)*(at.trait==="flow"?TRV.flowAtk:1)*(df.trait==="flow"?TRV.flowDef:1)*(df.witsOn?TRV.wits:1)*(df.trait==="eye"?TRV.eyeDef:1)*(1+fury*TRV.furyHit)*(at.libOn?TRV.libHit:1);
+    const hitP=clamp(.42-rep+fury*.04+(atk-def)*.03+at.prep+at.mor+(at.careMor||0)-fatA+fatD-md.evade-md.guard-df.sk.evade-(df.ctrW===wpn?CTR_W*(df.ctrK!=null?df.ctrK:1):0)+(at.sk.hit[wpn]||0)+(at.hp<45?at.sk.clutch:0)+(at.rage?.1:0)+(at.gprep==="strike"&&F.open?.04:0)+(at.ph&&at.ph.hit||0)-(df.ph&&df.ph.ev||0)-(df.f.hurt?df.f.hurt.ev*hurtW(df):0)-(at.tac.target==="head"?.015:0)+df.legs/400+(bA&&bA.w===wpn?.12*bA.pw:0)-(bD?.12*bD.pw:0),.12,.9)*(at.trait==="flow"?trm(TRV.flowAtk,at):1)*(df.trait==="flow"?trm(TRV.flowDef,df):1)*(df.witsOn?trm(TRV.wits,df):1)*(df.trait==="eye"?trm(TRV.eyeDef,df):1)*(1+fury*TRV.furyHit)*(at.libOn?trm(TRV.libHit,at):1);
     at.thrown++;at.rthrown++;rtw[wpn]=(rtw[wpn]||0)+1;at.sta=clamp(at.sta-STA.drain*W_INFO[wpn].cost*(STA.cA-a.stamina/STA.cB)*ma.sta*(1+Math.max(0,ma.aggr))*(1-at.sk.staSave),0,100);
     const tx=TXT[wpn][Math.floor(rng()*TXT[wpn].length)];
     const checked=chkP>0&&rng()<chkP;
@@ -782,12 +789,12 @@ function fightEx(F){const rng=F.rng,log=[],ex=F.ex,mA=F.mA,mB=F.mB;
       log.push({ha:F.A.hp,hb:F.B.hp,sa:F.A.sta,sb:F.B.sta,s:df===F.A?"A":"B",t:`${df.name} ยกแข้งรับลูกเตะของ${at.name}ไว้ได้ แข้งปะทะแข้ง!`,k:"miss",ev:"miss",w:wpn,cl:clinch,mside:at===F.A?"A":"B",an:at.name,dn:df.name});}
     else if(rng()<hitP){
       const crit=rng()<(at.rage?.35:.07);const q=crit?1.6:.6+rng()*.6;if(at.rage)at.rage--;
-      let dmg=1.35*W_INFO[wpn].imp*q*(.6+(BAL.specPow?effA(at,"power"):a.power)/25)*(1-d.guard/70)*(1.25-d.dur/40)*(1+(at.sk.dmg[wpn]||0))*(bA&&bA.w===wpn?1+.3*bA.pw:1)*(1+fury*TRV.furyDmg)*(at.libOn?TRV.lib:1)*(at.trait==="rock"?TRV.rockAtk:1)*(df.trait==="rock"?TRV.rockDef:1)*(at.ph&&at.ph.dmg||1)*(at.f.camp==="player"?1+(HERO_D[at.f.id]||0):1)*(1+(at.titleD||0))*(df.f.hurt?1-df.f.hurt.def*hurtW(df):1);const tg=at.tac.target;
+      let dmg=1.35*W_INFO[wpn].imp*q*(.6+(BAL.specPow?effA(at,"power"):a.power)/25)*(1-d.guard/70)*(1.25-d.dur/40)*(1+(at.sk.dmg[wpn]||0))*(bA&&bA.w===wpn?1+.3*bA.pw:1)*(1+fury*TRV.furyDmg)*(at.libOn?trm(TRV.lib,at):1)*(at.trait==="rock"?trm(TRV.rockAtk,at):1)*(df.trait==="rock"?trm(TRV.rockDef,df):1)*(at.ph&&at.ph.dmg||1)*(at.f.camp==="player"?1+(HERO_D[at.f.id]||0):1)*(1+(at.titleD||0))*(df.f.hurt?1-df.f.hurt.def*hurtW(df):1);const tg=at.tac.target;
       if(tg==="head")dmg*=1.1;if(tg==="body"){dmg*=.9;df.sta=clamp(df.sta-dmg*.9,0,100);}if(tg==="legs"&&(wpn==="kick"||wpn==="knee")){dmg*=.85;df.legs=Math.min(60,df.legs+dmg*.8);}
       // v1.32 "flash knockout": a clean crit to the head can drop anyone early — rarer for durable/guarded fighters, likelier when the attacker clearly outclasses
       if(crit&&tg!=="body"&&(wpn!=="punch"||a.power>=10)&&rng()<clamp(.16+(ovr(a)-ovr(d))*.06-(d.dur-8)*.012+Math.max(0,a.power-12)*BAL.flashPow,.05,.45)){dmg+=10+rng()*8;at.flash=1;}
       at.rw[wpn]++;at.rdmg+=dmg;at.rlanded++;
-      df.hp-=dmg;df.sta=clamp(df.sta-dmg*STA.hit*(df.f.hurt?1-df.f.hurt.sta*hurtW(df):1),0,100);at.landed++;at.wl[wpn]++;at.dmgDealt+=dmg;const p=W_INFO[wpn].pts*q*(1+(at.sk.pts[wpn]||0))*(df.trait==="rock"?TRV.rockPts:1);at.pts+=p;at.rpts+=p;
+      df.hp-=dmg;df.sta=clamp(df.sta-dmg*STA.hit*(df.f.hurt?1-df.f.hurt.sta*hurtW(df):1),0,100);at.landed++;at.wl[wpn]++;at.dmgDealt+=dmg;const p=W_INFO[wpn].pts*q*(1+(at.sk.pts[wpn]||0))*(df.trait==="rock"?trm(TRV.rockPts,df):1);at.pts+=p;at.rpts+=p;
       log.push({ha:F.A.hp,hb:F.B.hp,sa:F.A.sta,sb:F.B.sta,s:at===F.A?"A":"B",t:`${at.name} ${tx}${crit?" — เข้าเต็ม ๆ!":""}`,k:crit?"big":"hit",ev:"hit",w:wpn,cl:clinch,crit,an:at.name,dn:df.name});
       if(wpn==="elbow"&&q>1.3&&rng()<.25){df.cuts++;log.push({ha:F.A.hp,hb:F.B.hp,sa:F.A.sta,sb:F.B.sta,s:"x",t:`${df.name} โดนศอกแตก เลือดออกที่คิ้ว`,k:"warn",ev:"cut",an:at.name,dn:df.name});
         if(df.cuts>=2&&rng()<.5){F.over=true;F.result={win:at===F.A?"A":"B",type:"TKO (แพทย์สั่งยุติ)",round:F.round};}}
@@ -801,9 +808,9 @@ function fightEx(F){const rng=F.rng,log=[],ex=F.ex,mA=F.mA,mB=F.mB;
         log.push({ha:F.A.hp,hb:F.B.hp,sa:F.A.sta,sb:F.B.sta,s:at===F.A?"A":"B",t:`${df.name} ล้มลง! กรรมการเริ่มนับ… ลุกขึ้นมาได้`,k:"big",ev:"kd",an:at.name,dn:df.name});
         if(df.kd>=3){F.over=true;F.result={win:at===F.A?"A":"B",type:"TKO (ล้ม 3 ครั้ง)",round:F.round};}}
     } else {
-      const ctrP=clamp(d.counter/20*.32+md.ctr-fatD+df.sk.ctr+(df.rage?.2:0)+(bD?.18*bD.pw:0),0,.8)*(df.trait==="eye"?TRV.eyeCtr:1);
+      const ctrP=clamp(d.counter/20*.32+md.ctr-fatD+df.sk.ctr+(df.rage?.2:0)+(bD?.18*bD.pw:0),0,.8)*(df.trait==="eye"?trm(TRV.eyeCtr,df):1);
       if(rng()<ctrP){const cw=d.kick>d.punch&&!clinch?"kick":"punch";
-        const rc=!!df.rage;if(df.rage)df.rage--;const dmg=1.3*W_INFO[cw].imp*(rc?1.5:.7+rng()*.5)*(.6+(BAL.specPow?effA(df,"power"):d.power)/25)*(1-a.guard/70)*(1.25-a.dur/40)*(1+df.sk.ctrDmg)*(df.libOn?TRV.lib:1)*(df.trait==="rock"?TRV.rockAtk:1)*(at.trait==="rock"?TRV.rockDef:1);
+        const rc=!!df.rage;if(df.rage)df.rage--;const dmg=1.3*W_INFO[cw].imp*(rc?1.5:.7+rng()*.5)*(.6+(BAL.specPow?effA(df,"power"):d.power)/25)*(1-a.guard/70)*(1.25-a.dur/40)*(1+df.sk.ctrDmg)*(df.libOn?trm(TRV.lib,df):1)*(df.trait==="rock"?trm(TRV.rockAtk,df):1)*(at.trait==="rock"?trm(TRV.rockDef,at):1);
         at.hp-=dmg;at.sta=clamp(at.sta-dmg*STA.hit,0,100);df.landed++;df.thrown++;df.wl[cw]++;df.dmgDealt+=dmg;df.rw[cw]++;df.rdmg+=dmg;df.rlanded++;df.rthrown++;const p=W_INFO[cw].pts*.9;df.pts+=p;df.rpts+=p;
         log.push({ha:F.A.hp,hb:F.B.hp,sa:F.A.sta,sb:F.B.sta,s:df===F.A?"A":"B",t:`${at.name} พลาดเป้า — ${df.name} สวนกลับด้วย${cw==="kick"?"ลูกเตะ":"หมัด"}เข้าเต็ม!${rc?" คริติคอล!":""}`,k:rc?"big":"hit",ev:"counter",crit:rc,w:cw,mw:wpn,an:df.name,dn:at.name});
         if(at.hp<=0){F.over=true;F.result={win:df===F.A?"A":"B",type:"KO",round:F.round};log.push({ha:F.A.hp,hb:F.B.hp,sa:F.A.sta,sb:F.B.sta,s:"x",t:`${at.name} ล้มลงไม่ลุก! ชนะน็อก`,k:"big",ev:"ko",an:df.name,dn:at.name,koSide:df===F.A?"A":"B"});}
@@ -1171,7 +1178,7 @@ const OFFER_BANDS=[-.7,.45,1.4,.9],EFF_BANDS=[-.9,-.1,.8,.3];
 /* v1.83.1: our fighters are stronger than their stats show — skills, mastery, aura, grit, facilities and the corner picking the right plan.
    Measure that edge (in stat points) by sparring a mirror with none of it but a known ring-craft lead; from year 2 matchmaking, the field and rewards all use it. */
 const _edge={};
-function hiddenEdge(f){if(!f||f.camp!=="player")return 0;const key=(traitOf(f)||"")+":"+(f.lvl||1)+":"+Object.values(f.skills||{}).reduce((s,v)=>s+v,0)+":"+(f.equip||[]).join()+":"+ovr(f.a).toFixed(1)+":"+(f.aura||0)+":"+(f.grit||0)+":"+(f.facPrep||0)+":"+hasSignature(f);
+function hiddenEdge(f){if(!f||f.camp!=="player")return 0;const key=(traitOf(f)||"")+traitLv(f)+":"+(f.lvl||1)+":"+Object.values(f.skills||{}).reduce((s,v)=>s+v,0)+":"+(f.equip||[]).join()+":"+ovr(f.a).toFixed(1)+":"+(f.aura||0)+":"+(f.grit||0)+":"+(f.facPrep||0)+":"+hasSignature(f);
   if(_edge[f.id]&&_edge[f.id].k===key)return _edge[f.id].v;
   const me={...f,a:{...f.a},morale:65,fatigue:0,injury:0},OFF=3,o=ovr(f.a),mir={...f,id:"_mirror",camp:"npc",canon:false,trait:null,vet:OFF,a:Object.fromEntries(Object.keys(f.a).map(k=>[k,o])),skills:{},aura:0,grit:0,counterPrep:false,prepBonus:false,ployNotes:false,labPrep:0,morale:65,fatigue:0,injury:0};
   let best=0;for(const plan of Object.keys(PLANS)){let w=0;const n=16;for(let i=0;i<n;i++){const F=newFight(me,mir,{seed:7001+i*13,rounds:3,planA:plan});

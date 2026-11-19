@@ -1,5 +1,5 @@
 // ================= MUAY THAI MOE v1.3 — UI =================
-const VERSION="1.91.44";
+const VERSION="1.91.45";
 const CUR_LANG=(typeof window!=="undefined"&&window.LANG)||"th";
 const TH_LABEL=String.fromCharCode(3652,3607,3618);
 function langSwitch(cls){return `<div class="langsw ${cls||""}" role="group" aria-label="Language">${[["th",TH_LABEL],["en","EN"]].map(([k,l])=>`<button class="lsb ${CUR_LANG===k?"on":""}" data-act="setlang" data-v="${k}" aria-pressed="${CUR_LANG===k}">${l}</button>`).join("")}</div>`;}
@@ -285,7 +285,7 @@ function settingsHTML(){const t=(k,label,desc)=>`<label class="set"><span><b>${l
 const GLOSS=[["ความพร้อม","สภาพร่างกายวันชก ยิ่งสูงยิ่งชกได้เต็มที่ ลดลงเมื่อล้าหรือบาดเจ็บ"],["ความล้า","สะสมจากการซ้อม เกิน 65 เริ่มเสี่ยงบาดเจ็บ ลดได้ด้วยพักฟื้น ห้องฟื้นฟู ครัว"],
  ["กำลังใจ","ยิ่งสูงยิ่งชกแม่น ขึ้นจากชนะ เดต ทำบุญ ลดเมื่อแพ้หรือซ้อมหนักเกิน"],["ความสนิท","ความผูกพันกับคุณ ปลดฉากพิเศษ ท่าไม้ตายที่ 60 และเพิ่มโอกาสโหมดเลือดเดือด"],
  ["ความเชื่อใจ","นักมวยเชื่อคำสั่งของคุณแค่ไหน ยิ่งสูง คำสั่งจากมุมเวทีได้ผลดีขึ้น (สูงสุด +4% ความแม่น) ถึง 60 แพ้แล้วกำลังใจลดน้อยลง และมีผลกับฉากสารภาพใจ · เพิ่มได้จากฉากทำบุญ ไหว้ครู ไม่ซ้อมหนักเกินไป และค่ายที่ไม่ติดหนี้"],["ชื่อเสียง","คนรู้จักค่ายแค่ไหน ยิ่งสูงนักเรียนยิ่งมาเรียน"],
- ["แต้มสกิล","ได้ทุกเลเวลอัป ใช้อัปท่ามวยโบราณตามสำนักของนักมวย"],["ฝึกแก้ทาง","ดูเทปคู่ชกแล้ว ฝึกโปรแกรมที่แก้อาวุธหลักของคู่ชกในสัปดาห์ก่อนชก วันชกอาวุธหลักของเขาจะโดนยากขึ้น และเราอ่านเกมเขาขาดกว่า"],
+ ["แต้มสกิล","ได้ทุกเลเวลอัป ใช้อัปท่ามวยโบราณตามสำนักของนักมวย และอัปพลังแฝง (Lv.1–10)"],["ฝึกแก้ทาง","ดูเทปคู่ชกแล้ว ฝึกโปรแกรมที่แก้อาวุธหลักของคู่ชกในสัปดาห์ก่อนชก วันชกอาวุธหลักของเขาจะโดนยากขึ้น และเราอ่านเกมเขาขาดกว่า"],
  ["โหมดเลือดเดือด","เมื่อเจ็บหนักหรือตามคะแนน นักมวยอาจ 'ตาเปลี่ยน' ชั่วครู่ สวนแรงและคริติคอลง่าย ไฟต์ละครั้ง"],["ไหว้ครูรำมวย","พิธีก่อนชกไฟท์แรก ไฟท์กับตัวละครหลัก และไฟท์สำคัญ เลือกท่ารำได้ แต่ละท่าให้ผลต่างกัน"]];
 
 // ---------- creator (manager look) ----------
@@ -809,7 +809,7 @@ const SK_AN=Object.fromEntries(ATTRS);
 const SK_LINES={kati:["สายแข้ง","สายหมัดศอก","สายการ์ดและใจ"],mali:["สายศอก","สายเตะและความไว","สายป้องกัน"],rin:["สายสวนกลับ","สายอ่านเกม","สายคุมระยะ"],ploy:["สายหมัดโคราช","สายเตะคอขาด","สายกำแพงพยัคฆ์"],fah:["สายศอกพยัคฆ์","สายบุกบ้าบิ่น","สายยิ้มเยาะ"]};
 const SK_SHARED=["ปั้นนักน็อก","ปั้นเก็บแต้ม","ปั้นถึกอึด"];const SK_RESET_COST=10000;
 const SK_ROWN=["พื้นฐาน","ระดับกลาง","ระดับกลาง · ติดตัว","ระดับสูง","ท่าไม้ตาย · Lv.14","ขั้นปรมาจารย์ · Lv.22"];
-const skReady=f=>f.sp>0&&(hasTree(f.id)?skillList(f.id).some(k=>!skillBlock(f,k.id).length):true);
+const skReady=f=>f.sp>0&&(hasTree(f.id)?(!traitBlock(f)||skillList(f.id).some(k=>!skillBlock(f,k.id).length)):true);
 const fmtA=v=>(Math.floor(v*10)/10).toFixed(1).replace(/\.0$/,"");
 // v1.31: skill screen — points up top, one line (สาย) at a time, a scrollable list of pixel cards with the upgrade button on each card
 const skState=(f,s,mine)=>{const r=(f.skills&&f.skills[s.id])||0;if(!mine)return {r,st:r?"has":"lock"};const B=skillBlock(f,s.id);
@@ -896,7 +896,10 @@ function skTreeHTML(f,li,mine,lines,path){const L=skillList(f.id).filter(s=>s.li
 function traitHTML(f,mine){const L=TRAITS[f.id];if(!L)return "";const cur=traitOf(f),T=L.find(t=>t.id===cur);
   const extra=cur==="grit"&&f.grit?` <span class="goldt">· สะสมแล้ว +${Math.round(f.grit*100)}%</span>`:"";
   return `<div class="trbox"><div class="trh"><b>พลังแฝง</b>${mine?`<div class="seg trseg" role="group" aria-label="เลือกพลังแฝง">${L.map(t=>`<button data-act="trait" data-id="${f.id}" data-v="${t.id}" aria-pressed="${cur===t.id}">${TRAIT_PX[t.id]||""}<span>${t.name}</span></button>`).join("")}</div>`:`<span class="trone">${TRAIT_PX[T.id]||""}${T.name}</span>`}</div>
-   <div class="trdesc">${L.map(t=>`<p class="${t.id===cur?"on":""}" ${t.id===cur?"":`aria-hidden="true"`}>${t.desc}${t.id===cur?extra:""}</p>`).join("")}</div></div>`;}
+   <div class="trdesc">${L.map(t=>`<p class="${t.id===cur?"on":""}" ${t.id===cur?"":`aria-hidden="true"`}>${t.desc}${t.id===cur?extra:""}</p>`).join("")}</div>${f.camp==="player"?traitLvRow(f,mine):""}</div>`;}
+/* v1.91.45: hidden power Lv.1–10 · 1 skill point a level · the numbers above are Lv.10 */
+function traitLvRow(f,mine){const lv=traitLv(f),k=Math.round(traitK(f)*100),b=traitBlock(f);
+  return `<div class="trlv"><span class="trlvt">Lv.<b>${lv}</b>/${TR_MAX}</span><span class="trbar" aria-hidden="true">${Array.from({length:TR_MAX},(_,i)=>`<i class="${i<lv?"on":""}"></i>`).join("")}</span><small class="trk">${lv>=TR_MAX?"แรงเต็มที่":`ได้ผล ${k}% ของที่เขียนไว้`}</small>${mine&&!b?`<button class="skplus" data-act="trup" data-id="${f.id}" aria-label="อัปพลังแฝง ใช้ 1 แต้มสกิล">+</button>`:""}</div>`;}
 function skResetBtn(f){const n=skPointsSpent(f);if(!n)return "";const c=skResetCost(f);
   return `<button class="btn sm skrbtn" data-act="skresetask" data-id="${f.id}" ${c&&G.cash<c?"disabled":""} aria-label="รีเซ็ตสกิล คืน ${n} แต้ม" title="รีเซ็ตสกิล · คืน ${n} แต้ม · ${c?fmt(c):"ครั้งแรกฟรี"}">↺ รีเซ็ต</button>`;}
 function skResetRow(f){const n=skPointsSpent(f);if(!n)return "";const c=skResetCost(f);
@@ -1807,6 +1810,7 @@ const ACT={
   skpopbg:(d,e)=>{if(e.target.classList.contains("skpop-ov")){UI.skSel=null;render();}},
   newsok:()=>{G.newsSeen=PATCH.id;UI.modal=null;save();render();},
   closeModal:()=>{const m=UI.modal;if(m&&m.type==="loywish"){ACT.lwclose();return;}if(m&&m.type==="waikhru"){if(m.ph==="pick")runWaiKhru(G,"s");ACT.waidone();return;}if(m&&m.type==="lotto"&&typeof ACT.lottoskip==="function"){ACT.lottoskip();return;} /* closing the ticket sheet skips the draw */if(m&&m.back==="album"&&G){ACT.album();return;}if(m&&m.type==="contest"){ACT.contestdone();return;}if(m&&m.type==="whatsnew"&&G){G.newsSeen=PATCH.id;save();}UI.modal=null;render();if(m&&m.after)m.after();},
+  trup:d=>{const f=G.F[d.id];if(!f)return;const sl=document.querySelector(".sklist"),y=sl?sl.scrollTop:0;if(!traitUp(G,d.id))return;AU.sfx("level");save();render();const n=document.querySelector(".sklist");if(n)n.scrollTop=y;},
   trait:d=>{const f=G.F[d.id],L=TRAITS[d.id];if(!f||!L||f.camp!=="player")return;const t=L.find(x=>x.id===d.v);if(!t||traitOf(f)===t.id)return;f.trait=t.id;save();render();toast(`${f.name}ใช้พลังแฝง "${t.name}"`);},
   gopen:d=>{GB.box=d.v==="loy"?"loy":"n";if(GB.box==="loy"&&!loyFest()){toast(loySoon()?"ตู้ลอยกระทงเปิด 18 พ.ย. เวลา 00:00":"ตู้ลอยกระทงปิดแล้ว ไว้เจอกันเทศกาลหน้า");return;}const fromAlb=UI.modal&&UI.modal.type==="album";if(fromAlb)albKeep();GB.st=null;GB.ps=[];UI.gq=false;UI.modal={type:"gbox",back:fromAlb?"album":null};render();gbPreload();},
   gpull:()=>{if(GB.st)return;const cost=gbCost();if((G.dust||0)<cost){AU.sfx("ui");toast(`เศษดาวไม่พอ ต้องใช้ ${cost}✦ · ได้จากชนะไฟต์ การ์ดใหม่ และย่อยใบซ้ำ`);return;}

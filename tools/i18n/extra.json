@@ -15459,5 +15459,10 @@
  "เจ้าหญิงบนบัลลังก์": "Princess on the Throne",
  "แม่นขึ้น ออกอาวุธหนักขึ้นนิดหน่อย": "more accurate, slightly heavier strikes",
  "พายุไม่หยุดพัด": "The Storm Never Stops",
- "หลบดีขึ้น สวนกลับบ่อยขึ้นนิดหน่อย": "better evasion, counters slightly more often"
+ "หลบดีขึ้น สวนกลับบ่อยขึ้นนิดหน่อย": "better evasion, counters slightly more often",
+ "\" aria-label=\"อัปพลังแฝง ใช้ 1 แต้มสกิล\">+</button>": "\" aria-label=\"Level up hidden power (1 skill point)\">+</button>",
+ "% ของที่เขียนไว้": "% of the listed effect",
+ "ได้ผล ": "Works at ",
+ "แรงเต็มที่": "Full strength",
+ "ได้ทุกเลเวลอัป ใช้อัปท่ามวยโบราณตามสำนักของนักมวย และอัปพลังแฝง (Lv.1–10)": "Earned every level-up. Spend them on old-school moves from the fighter's school, and on hidden power (Lv.1–10)"
 }
