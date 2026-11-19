@@ -617,7 +617,7 @@ const VET_FX={hit:.08,dmg:.25,ev:.06}; // calibrated: vet 1 ≈ +1 stat point
 const hurtW=s=>s&&s.f.hurt?clamp(1-s.hp/(s.hp0||100),0,1):0;
 function fightSide(f,plan,rng){const sk=skillMods(f);{const m=mastery(f)*MK,s=mainStyle(f);if(m){if(s==="defense"){sk.evade+=MDEF.ev*m;sk.ctr+=MDEF.ctr*m;sk.ctrDmg+=MDEF.cd*m;}else{const w=s;sk.hit[w]=(sk.hit[w]||0)+MWPN.hit*m;sk.dmg[w]=(sk.dmg[w]||0)+MWPN.dmg*m;sk.pts[w]=(sk.pts[w]||0)+.1*m;}}}if(f.aura)sk.evade+=f.aura*.5;if(f.vet>0){const v=f.vet;for(const w of ["punch","kick","knee","elbow"]){sk.hit[w]=(sk.hit[w]||0)+VET_FX.hit*v;sk.dmg[w]=(sk.dmg[w]||0)+VET_FX.dmg*v;}sk.evade+=VET_FX.ev*v;}const gr=f.id==="kati"&&traitOf(f)!=="grit"?0:(f.grit||0)*(f.id==="kati"?traitK(f):1);if(gr)sk.evade+=gr*.4;
   const hp0=100-(f.injury?15:0)+Math.round(gr*30)+(f.hpX||0),tl=f.trainLog||[];const brk=STA.brk+f.a.stamina*STA.brkK+(tl[tl.length-1]==="prep"?STA.prep:0)+(tl.slice(-2).includes("cond")?STA.cond:0)+(f.id==="fah"?STA.fah:0)+(f.camp==="player"&&typeof lovePerk==="function"?lovePerk(f).brk:0); /* Fah: hot-blooded and tireless, gets her breath back faster */
-  return {f,id:f.id,name:f.name,plan,instr:"none",hp:hp0,hp0,brk,sta:clamp(100-f.fatigue*.4,40,100),pts:0,rpts:0,kd:0,cuts:0,
+  return {f,id:f.id,name:f.name,plan,instr:"none",hp:hp0,hp0,brk,staMax:STA_TANK(f),sta:clamp(100-f.fatigue*.4,40,100),pts:0,rpts:0,kd:0,cuts:0,
     thrown:0,landed:0,dmgDealt:0,legs:0,tac:{focus:"auto",pace:"steady",target:"head"},sk,prep:(f.camp==="player"?(HERO_K[f.id]||0)+(LINE_K[f.id]?(LINE_K[f.id][heroLine(f)]||0)+(LINE_KR[f.id]?(LINE_KR[f.id][heroLine(f)]||0)*clamp(((f.lvl||1)-25)/7,0,1):0):0):0)+(f.prepBonus?.04:0)+(f.counterPrep?.05:0)+sk.prep+(f.aura||0)+gr+(f.labPrep||0)+(f.camp==="player"?(f.facPrep||0):0)+(f.camp==="player"&&typeof lovePerk==="function"?lovePerk(f).prep:0),counterPrep:!!f.counterPrep,trait:traitOf(f),trk:traitK(f),mor:(f.morale-60)/400+sk.mor,wl:{punch:0,kick:0,knee:0,elbow:0}};
 }
 function aiPlan(f,opp,rng){
@@ -658,7 +658,7 @@ function careNeeds(F){const A=F.A,B=F.B,r=mulberry32(F.seed+F.round*977);const s
 // a great mini-game is a small bonus on top (not the thing that decides the fight)
 const careMult=q=>q<=1?STA.cNorm*(STA.cMin+(1-STA.cMin)*Math.max(0,q)):STA.cNorm*(1+(q-1)*STA.cBonus);
 const CARE_STA=20; /* v1.91.60: the corner refills the skill "mana" — perfect +20, two of three +10 (was +9/+4.5) */
-function applyCare(F,q){const A=F.A;A.sta=clamp(A.sta+q*CARE_STA,0,100);A.hp=clamp(A.hp+q*4,0,Math.max(100,A.hp0||100));A.careMor=q>=1?.02:0;return q;} /* v1.89.1: back to the single order puzzle — a small bonus on top of the normal between-round recovery (as in v1.87.5) */
+function applyCare(F,q){const A=F.A;staAddPts(A,q*CARE_STA);A.hp=clamp(A.hp+q*4,0,Math.max(100,A.hp0||100));A.careMor=q>=1?.02:0;return q;} /* v1.89.1: back to the single order puzzle — a small bonus on top of the normal between-round recovery (as in v1.87.5) */
 function throwTowel(F){if(F.over)return;F.over=true;F.result={win:"B",type:"มุมโยนผ้ายอมแพ้",round:F.round,towel:true};}
 function aiCorner(F,me,op){ if(F.round===0)return "none";
   const lead=me.pts-op.pts;if(me.sta<35)return "defend";if(lead>4)return "defend";if(lead<-3)return "push";
@@ -689,13 +689,17 @@ function skillCall(F,s,sk){const k=MAEMAI[sk.id];if(!k)return `${s.name} ใช�
 /* v1.91.60 (Man): skills cost stamina like mana — the higher the rank the more it costs; not enough stamina, no skill. The corner mini-game between rounds is how it comes back */
 const SK_COST={atk:[8,11,14],td:[8,11,14],sub:[8,11,14],def:[5,7,9],rec:[0,0,0]}; /* sims (5 girls × 4 player tiers, live fight with a perfect corner): main-game/belt bouts within 1–4 pts of v1.91.55, champions and Naka about level — 10/14/18 cost ~5 more */
 const skCost=sk=>{const c=SK_COST[sk.k]||SK_COST.atk;return c[clamp((sk.r||1)-1,0,2)];};
-const skAfford=(s,sk)=>s.sta>=skCost(sk);
+/* v1.91.64 (Man): the stamina tank grows with the stamina stat — a fitter fighter (or a stronger NPC) has more "mana" for skills.
+   The bar itself stays 0–100% (fatigue effects read it as a share); skill costs, the corner refill and the AI corner are in points of the tank */
+const STA_TANK=f=>Math.round(clamp(100+(((f&&f.a&&f.a.stamina)||0)+((f&&f.vet)||0)-15)*2,100,140)); /* stamina stat + ring craft (strength above the stat ceiling, how the strong NPCs carry their edge) */
+const staMaxOf=s=>s.staMax||100,staPts=s=>s.sta*staMaxOf(s)/100,staAddPts=(s,v)=>{s.sta=clamp(s.sta+v*100/staMaxOf(s),0,100);};
+const skAfford=(s,sk)=>staPts(s)>=skCost(sk)-1e-9;
 const AI_CORNER_BACK=.6; /* a side without the player's corner mini-game gets this share of the stamina it spent on skills back between rounds (an average corner) */
-function aiCornerBack(s){const b=(s.skSpent||0)*AI_CORNER_BACK;s.skSpent=0;s.sta=clamp(s.sta+b,0,100);}
+function aiCornerBack(s){const b=(s.skSpent||0)*AI_CORNER_BACK;s.skSpent=0;staAddPts(s,b);}
 /* v1.91.60 (Man): no more "once per fight" — a skill rests one round after use (cooldown), then can fire again if the stamina is there. Still one skill per round */
 const SK_CD=1;const skCdLeft=(F,s,id)=>{const r=s.skUsed&&s.skUsed[id];return r==null||r===true?(r===true?99:0):Math.max(0,r+SK_CD+1-F.round);};
 function useSkill(F,s,id){const o=s===F.A?F.B:F.A;s.skUsed=s.skUsed||{};if(F.over||s.skRound||skCdLeft(F,s,id))return null;const sk=fightSkills(s).find(k=>k.id===id);if(!sk||!skAfford(s,sk))return null;
-  s.skUsed[id]=F.round;s.skRound=true;const pw=(.7+.15*sk.r)*(s.f.camp==="player"?1.1:F.dai||.8);{const c=skCost(sk);s.sta=clamp(s.sta-c,0,100);s.skSpent=(s.skSpent||0)+c;}
+  s.skUsed[id]=F.round;s.skRound=true;const pw=(.7+.15*sk.r)*(s.f.camp==="player"?1.1:F.dai||.8);{const c=skCost(sk);staAddPts(s,-c);s.skSpent=(s.skSpent||0)+c;}
   if(sk.k==="atk")s.burst={k:"atk",w:sk.w,left:4,pw};
   if(sk.k==="def")s.burst={k:"def",left:4,pw};
   if(sk.k==="rec"){s.sta=clamp(s.sta+22*pw,0,100);s.hp=clamp(s.hp+6*pw,0,100);s.mor+=.01;s.burst=null;}
@@ -1644,4 +1648,4 @@ const loanOk=G=>!(G.loan>0)&&G.cash<LOAN_LOW&&!G.ended;
 function takeLoan(G){if(!loanOk(G))return false;G.loan=LOAN_AMT;G.cash+=LOAN_AMT;G.loanN=(G.loanN||0)+1;G.gang=G.gang||{st:0,next:0};G.gang.nextAbs=Math.min(G.gang.nextAbs||Infinity,gameWeek(G)+2);return true;}
 function repayLoan(G){if(!(G.loan>0)||G.cash<G.loan)return false;G.cash-=G.loan;G.loan=0;return true;}
 function clearDebt(G){if(G.debt<=0||G.cash<G.debt)return false;G.cash-=G.debt;G.debt=0;G.flags.debtCleared=true;G.rep+=2;return true;}
-if(typeof module!=="undefined")module.exports={skCost,SK_COST,CARE_STA,takeLoan,repayLoan,loanOk,LOAN_AMT,LOAN_LOW,cornerOdds,cloneFight,trainWeek,passiveMods,skillReqs,skillBlock,hasTree,DIFF,studentCap,studentDemand,studentFee,growStudents,storyTop4,RIVAL_OF,LEADS,upkeep,campActLocked,equipped,toggleEquip,MAX_EQUIP,roundBegin,fightEx,roundDone,roundFinish,useSkill,fightSkills,SKILL_KIND_NAME,fixSave,STAFF,hireStaff,fireStaff,staffSlots,staffLocked,facLocked,mainStyle,mastery,styleVal,STYLE_NAME,STYLE_ATTRS,MASTERY_AT,aiCorner,FACILITIES,SIGNATURE,hasSignature,counterPreset,oppTop,careNeeds,applyCare,throwTowel,CARE,MASTERS,hireMaster,hostShow,clearDebt,SHOW_COST,TAC,setTactics,finishBracket,mulberry32,newGame,weekTrain,weekFinish,genOffers,acceptOffer,buyFacility,upgradeDaeng,students,campLevel,newFight,fightRound,quickFight,applyResult,standings,roster,ovr,styleOf,stageOf,finishFinal,condition,ATTRS,isBooked,PRESETS,CANON,advise,doCampAction,learnSkill,SKILLS,SCHOOLS,campLook,newSeason};
+if(typeof module!=="undefined")module.exports={STA_TANK,staPts,skCost,SK_COST,CARE_STA,takeLoan,repayLoan,loanOk,LOAN_AMT,LOAN_LOW,cornerOdds,cloneFight,trainWeek,passiveMods,skillReqs,skillBlock,hasTree,DIFF,studentCap,studentDemand,studentFee,growStudents,storyTop4,RIVAL_OF,LEADS,upkeep,campActLocked,equipped,toggleEquip,MAX_EQUIP,roundBegin,fightEx,roundDone,roundFinish,useSkill,fightSkills,SKILL_KIND_NAME,fixSave,STAFF,hireStaff,fireStaff,staffSlots,staffLocked,facLocked,mainStyle,mastery,styleVal,STYLE_NAME,STYLE_ATTRS,MASTERY_AT,aiCorner,FACILITIES,SIGNATURE,hasSignature,counterPreset,oppTop,careNeeds,applyCare,throwTowel,CARE,MASTERS,hireMaster,hostShow,clearDebt,SHOW_COST,TAC,setTactics,finishBracket,mulberry32,newGame,weekTrain,weekFinish,genOffers,acceptOffer,buyFacility,upgradeDaeng,students,campLevel,newFight,fightRound,quickFight,applyResult,standings,roster,ovr,styleOf,stageOf,finishFinal,condition,ATTRS,isBooked,PRESETS,CANON,advise,doCampAction,learnSkill,SKILLS,SCHOOLS,campLook,newSeason};

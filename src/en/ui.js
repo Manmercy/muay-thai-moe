@@ -1,5 +1,5 @@
 // ================= MUAY THAI MOE v1.3 — UI =================
-const VERSION="1.91.63";
+const VERSION="1.91.64";
 const CUR_LANG=(typeof window!=="undefined"&&window.LANG)||"th";
 const TH_LABEL=String.fromCharCode(3652,3607,3618);
 function langSwitch(cls){return `<div class="langsw ${cls||""}" role="group" aria-label="Language">${[["th",TH_LABEL],["en","EN"]].map(([k,l])=>`<button class="lsb ${CUR_LANG===k?"on":""}" data-act="setlang" data-v="${k}" aria-pressed="${CUR_LANG===k}">${l}</button>`).join("")}</div>`;}
@@ -288,7 +288,7 @@ const GLOSS=[["Readiness","Condition on fight day. The higher, the better she fi
  ["Morale","Higher morale means sharper strikes. Rises with wins, dates, merit-making; drops with losses or overtraining"],["Bond","Her closeness to you. Unlocks special scenes, the signature move at 60, and raises the chance of blood-boil mode"],
  ["Trust","How much a fighter trusts your orders. Higher trust makes corner orders work better (up to +4% accuracy); at 60 losses hurt morale less, and it affects confession scenes · raise it with merit-making scenes, wai khru, not overtraining, and a camp out of debt"],["Fame","How well-known the camp is. The higher, the more students come"],
  ["Skill points","Earned every level-up. Spend them on old-school moves from the fighter's school, and on hidden power (Lv.1–10 · 5 points a level)"],["Counter-training","Scout the opponent, then train the program that counters their main weapon the week before the fight. On fight night their main weapon lands less often and you read their game better"],
- ["Stamina (gold bar in fights)","Using a skill in a fight costs stamina, more at higher ranks (attack 8/11/14 · guard 5/7/9 · second wind is free). Not enough stamina, no skill · one skill per round, and a skill rests one round after use · some stamina comes back between rounds, and the corner mini-game adds more (all correct +20 · two of three +10)"],
+ ["Stamina (gold bar in fights)","Fight stamina tank = 100 + 2 per point of stamina above 15 (max 140) · using a skill in a fight costs stamina, more at higher ranks (attack 8/11/14 · guard 5/7/9 · second wind is free). Not enough stamina, no skill · one skill per round, and a skill rests one round after use · some stamina comes back between rounds, and the corner mini-game adds more (all correct +20 · two of three +10)"],
  ["Blood-boil mode","When badly hurt or behind on points, a fighter may 'change eyes' for a moment: stronger counters, easier criticals. Once per fight"],["Wai khru ram muay","Ritual before the first fight, canon matchups, and major bouts. Choose a dance; each gives a different effect"]];
 
 // ---------- creator (manager look) ----------
@@ -478,7 +478,7 @@ function fighterChip(f){const c=condition(f);const nb=G.bookings.find(b=>b.a===f
 
 function projFatigue(f){return fatigueAfter(G,f,f.plan.preset,f.plan.intensity);}
 function attrsHTML(f,showGain){const cap=stCap(f);return `<div class="attrs">${cap>20?`<p class="meta goldt lbcap">Stat ceiling ${cap} · the part past 20 is gold</p>`:""}${ATTR_GROUPS.map(([g,ks])=>`<h4>${g}</h4>`+ks.map(k=>{const v=f.a[k],gn=f.gains&&f.gains[k];
-  return `<div class="attr${cap>20?" lb":""}"><span>${ATTR_LABEL[k]}</span><i style="--v:${v/cap*100}%;--m:${20/cap*100}%;--c:${v>20?20/v*100:100}%"></i><b class="num">${v.toFixed(1)}${showGain&&gn>=.05?`<span class="up">+${gn.toFixed(1)}</span>`:""}</b></div>`;}).join("")).join("")}</div>`;}
+  return `<div class="attr${cap>20?" lb":""}"><span>${ATTR_LABEL[k]}</span><i style="--v:${v/cap*100}%;--m:${20/cap*100}%;--c:${v>20?20/v*100:100}%"></i><b class="num">${v.toFixed(1)}${showGain&&gn>=.05?`<span class="up">+${gn.toFixed(1)}</span>`:""}</b></div>${k==="stamina"?`<p class="meta statank">⚡ Fight stamina tank ${STA_TANK(f)} · +2 for each point of stamina above 15</p>`:""}`;}).join("")).join("")}</div>`;}
 function presetPicker(f){return `<div class="tgrid">${Object.entries(PRESETS).map(([k,p])=>`<button data-act="preset" data-f="${f.id}" data-v="${k}" ${trLocked(f)?"disabled":""} aria-pressed="${f.plan.preset===k}" title="${p.desc}">${p.name}</button>`).join("")}</div>
   <div class="tgrid three" role="group" aria-label="Intensity">${Object.entries(INTENSITY).map(([k,i])=>`<button data-act="intensity" data-f="${f.id}" data-v="${k}" aria-pressed="${f.plan.intensity===k}">${i.name}</button>`).join("")}</div>`;}
 const AX_PRESET={"Punch":"punch","Kick":"kick","Knee-Elbow":"knee","Defense":"defense","Body":"cond","Mind":"defense"};
@@ -1441,7 +1441,7 @@ function preCompare(me,op,b){const sc=scouted(op.id)||op.camp==="player";const v
 function fightHTML(){const U=UI.fight,b=U.b,me=G.F[b.a],op=G.F[b.b],F=U.F;
   const last=U.shown.filter(x=>x.ha!=null).slice(-1)[0];const sv=(s,k)=>F?(last?last[k]:s):100;
   const side=(f,cls,hp,sta)=>`<div class="fside ${cls}"><div class="fn">${f.canon||f.id==="pailin"?`<img class="face sm" src="${faceSrc(f.id,"happy")}" alt="">`:""}<b>${esc(f.name)}</b><span class="meta">Lv.${f.lvl}</span>${hotBadge(f,1)}</div>
-    <div class="meter"><i style="--v:${clamp(hp,0,100)}%;--bc:${hp>50?"var(--green)":hp>25?"var(--warn)":"var(--red)"}"></i></div><div class="meter thin"><i style="--v:${clamp(sta,0,100)}%;--bc:var(--gold)"></i></div></div>`;
+    <div class="meter"><i style="--v:${clamp(hp,0,100)}%;--bc:${hp>50?"var(--green)":hp>25?"var(--warn)":"var(--red)"}"></i></div><div class="meter thin"><i style="--v:${clamp(sta,0,100)}%;--bc:var(--gold)"></i></div>${cls==="a"&&UI.fight&&UI.fight.F?`<small class="stanum">⚡ ${Math.round(sta*UI.fight.F.A.staMax/100)}/${UI.fight.F.A.staMax}</small>`:""}</div>`;
   const hpN=(S,v)=>S&&S.f.hpX?v*100/(S.hp0||100):v; /* v1.90.13: a boss with extra hp shows her bar as a share of her own max */
   const hpA=F?hpN(F.A,sv(F.A.hp,"ha")):100,hpB=F?hpN(F.B,sv(F.B.hp,"hb")):100,stA=F?sv(F.A.sta,"sa"):100,stB=F?sv(F.B.sta,"sb"):100;
   let mid="";
@@ -1491,7 +1491,7 @@ function careOilHTML(A,C){const left=C.done?0:C.t0?Math.max(0,Math.ceil(C.secs-(
   ${pour?`<div class="oiltrack" data-oil="1"><span class="oilhint">▸ ▸ ▸</span><i class="oilend r">${PIX.water}</i><button class="oilknob" aria-label="Drag to pour the boxing oil">${PIX.rub}</button></div>`
    :`<div class="carebtns one"><button class="oilrub ${C.done?"":"go"}" data-act="coil" ${C.done?"disabled":""}>${PIX.oilhand}<small>${C.done?`Massaged ${C.taps} times`:"Rub!"}</small></button></div>`}</div>`;}
 /* apply a corner result and remember how much it gave back, for the summary line */
-function careApply(U,C){const A=U.F.A,s0=A.sta,h0=A.hp;applyCare(U.F,C.q);setTimeout(()=>staPop(Math.round(A.sta-s0)),60);C.gain={sta:Math.round(A.sta-s0),hp:Math.round(A.hp-h0)};if(C.q>=1)U.careOK=(U.careOK||0)+1;}
+function careApply(U,C){const A=U.F.A,s0=A.sta,p0=staPts(A),h0=A.hp;applyCare(U.F,C.q);setTimeout(()=>staPop(Math.round(staPts(A)-p0)),60);C.gain={sta:Math.round(staPts(A)-p0),hp:Math.round(A.hp-h0)};if(C.q>=1)U.careOK=(U.careOK||0)+1;}
 function oilFinish(){const U=UI.fight,C=U&&U.care;if(!C||C.mode!=="oil"||C.done)return;C.done=true;const target=C.secs*2.6;C.q=Math.max(.15,Math.min(1.3,C.taps/target));careApply(U,C);AU.sfx(C.q>=1?"level":"ui");render();}
 function oilTick(){const U=UI.fight,C=U&&U.care;if(!C||C.mode!=="oil"||C.done||!C.t0)return;const left=Math.max(0,Math.ceil(C.secs-(performance.now()-C.t0)/1000));const el=document.querySelector(".oiltime b");if(el)el.textContent=left;if(left<=0){oilFinish();return;}setTimeout(oilTick,150);}
 function oilPoured(C){C.phase="rub";C.t0=performance.now();AU.sfx("level");render();setTimeout(oilTick,150);}
@@ -1658,13 +1658,13 @@ function feedRound(){const U=UI.fight,F=U.F;
   while(!U.pending.length&&!roundDone(F)){U.pending.push(...fightEx(F));
     if(!U.tiredShown&&F.ex>=8){for(const s of [F.A,F.B])if(s.sta<30){U.pending.push({tired:true,cap:{text:COM.tired[Math.floor(U.rng()*2)].replace("{x}",s.name),side:""}});U.tiredShown=true;}}}
   return U.pending.length>0;}
-function fskill(id){const U=UI.fight;if(!U||U.stage!=="playing")return;const s0=U.F.A.sta;const e=useSkill(U.F,U.F.A,id);if(!e)return;staPop(Math.round(U.F.A.sta-s0));U.pending.unshift(e);clearTimeout(U.timer);tick();}
+function fskill(id){const U=UI.fight;if(!U||U.stage!=="playing")return;const s0=staPts(U.F.A);const e=useSkill(U.F,U.F.A,id);if(!e)return;staPop(Math.round(staPts(U.F.A)-s0));U.pending.unshift(e);clearTimeout(U.timer);tick();}
 /* v1.91.60: what each rank of an active skill costs in stamina (the in-fight "mana") */
 /* v1.91.60: a "−14" floats off the gold stamina bar when the player fires a skill, so the cost is seen */
 function staPop(d){if(!d||typeof document==="undefined")return;const m=document.querySelector(".fside.a .meter.thin");if(!m)return;const r=m.getBoundingClientRect(),el=document.createElement("b");el.className="stapop "+(d<0?"neg":"pos");el.textContent=`${d<0?"−":"+"}${Math.abs(d)} ⚡`;el.style.left=(r.left+r.width*.5+scrollX)+"px";el.style.top=(r.top+scrollY-4)+"px";document.body.appendChild(el);setTimeout(()=>el.remove(),1300);}
 function skCostLine(sk,r){const k=skillKind(sk).k,c=SK_COST[k]||SK_COST.atk;if(!c[2])return `<p class="skcost-l">⚡ No stamina cost · restores stamina</p>`;return `<p class="skcost-l">⚡ Stamina cost in fights: ${c.map((v,i)=>`<span class="${i+1===r?"on":""}">Rank ${i+1} · ${v}</span>`).join("")}</p>`;}
 function skillBarHTML(){const U=UI.fight,F=U.F;const L=fightSkills(F.A);if(!L.length)return `<span class="meta skhint">No skills yet · level up, then upgrade skills in the fighter info</span>`;const slots=[0,1,2].map(i=>L[i]);
-  return `<div class="skbar2" role="group" aria-label="Skills ${F.A.skRound?" (used this round)":""}">${slots.map(k=>{if(!k)return `<span class="skbtn2 empty">Empty</span>`;const c=skCost(k),cd=skCdLeft(F,F.A,k.id),poor=!cd&&F.A.sta<c;return `<button class="skbtn2 ${k.k}${poor?" poor":""}${cd?" cd":""}" data-act="fskill" data-v="${k.id}" ${cd||F.A.skRound||F.over||poor?"disabled":""} title="${esc(k.name)} · ${esc(SKILL_KIND_NAME[k.k])}${c?` · costs stamina ${c}`:""}${poor?" · not enough stamina":""}${cd?" · rests 1 round":""}">${PIX["sk_"+k.k]}<b>${esc(k.name)}</b><i class="skcost">${cd?"Rest 1 rd":c?`⚡${c}`:"⚡+"}</i></button>`;}).join("")}</div>`;}function sideOf(e,F){if(e.s==="A"||e.s==="B")return e.s;if(e.mside)return e.mside;return e.an===F.A.name?"A":"B";}
+  return `<div class="skbar2" role="group" aria-label="Skills ${F.A.skRound?" (used this round)":""}">${slots.map(k=>{if(!k)return `<span class="skbtn2 empty">Empty</span>`;const c=skCost(k),cd=skCdLeft(F,F.A,k.id),poor=!cd&&staPts(F.A)<c-1e-9;return `<button class="skbtn2 ${k.k}${poor?" poor":""}${cd?" cd":""}" data-act="fskill" data-v="${k.id}" ${cd||F.A.skRound||F.over||poor?"disabled":""} title="${esc(k.name)} · ${esc(SKILL_KIND_NAME[k.k])}${c?` · costs stamina ${c}`:""}${poor?" · not enough stamina":""}${cd?" · rests 1 round":""}">${PIX["sk_"+k.k]}<b>${esc(k.name)}</b><i class="skcost">${cd?"Rest 1 rd":c?`⚡${c}`:"⚡+"}</i></button>`;}).join("")}</div>`;}function sideOf(e,F){if(e.s==="A"||e.s==="B")return e.s;if(e.mside)return e.mside;return e.an===F.A.name?"A":"B";}
 /* v1.89.8: sarama follows the fight — slow feeling-out in round 1, fastest in the deciding round, a surge late in each round and after a knockdown.
    5-round bouts keep the stadium shape: 3–4 hottest, 5 eases off when someone is clearly ahead (dancing the round out). */
 function fightMusic(F,surge){if(!F||!AU.setTempo)return;const R=Math.max(1,F.rounds||3),r=Math.min(F.round||1,R);
@@ -1958,7 +1958,7 @@ const ACT={
     const b=document.querySelector(".oilcombo b");if(b){b.textContent=C.taps;const p=b.parentElement;p.classList.remove("pop");void p.offsetWidth;p.classList.add("pop");}},
   ccard:d=>{const U=UI.fight,C=U.care;if(!C||C.mode!=="card"||C.done)return;const i=+d.v;C.flip=i;C.q=C.deck[i];C.done=true;careApply(U,C);AU.sfx(C.q>1?"level":C.q<0?"miss":"ui");render();},
   care:d=>{const U=UI.fight,C=U.care;if(!C||C.done)return;const i=C.got.length;C.got.push(d.v);const ok=C.need[i]===d.v;AU.sfx(ok?"ui":"miss");
-    if(C.got.length>=C.need.length){C.done=true;const n=C.got.filter((g,k)=>g===C.need[k]).length;C.q=n===3?1:n===2?.5:0;if(C.q>=1)U.careOK=(U.careOK||0)+1;{const s0=U.F.A.sta;applyCare(U.F,C.q);setTimeout(()=>staPop(Math.round(U.F.A.sta-s0)),60);}if(C.q>=1){AU.sfx("level");const me=G.F[U.b.a];popToast({kati:"So refreshing!",mali:"Not tired anymore! Let's go!",rin:"Body back to 90%",ploy:"Thank you, my heart's in it",fah:"Okay! Ready to go hard!"}[me.id]||"Refreshed!","good");}}render();},
+    if(C.got.length>=C.need.length){C.done=true;const n=C.got.filter((g,k)=>g===C.need[k]).length;C.q=n===3?1:n===2?.5:0;if(C.q>=1)U.careOK=(U.careOK||0)+1;{const s0=staPts(U.F.A);applyCare(U.F,C.q);setTimeout(()=>staPop(Math.round(staPts(U.F.A)-s0)),60);}if(C.q>=1){AU.sfx("level");const me=G.F[U.b.a];popToast({kati:"So refreshing!",mali:"Not tired anymore! Let's go!",rin:"Body back to 90%",ploy:"Thank you, my heart's in it",fah:"Okay! Ready to go hard!"}[me.id]||"Refreshed!","good");}}render();},
   towel:()=>{UI.confirmTowel=true;render();},
   towelno:()=>{UI.confirmTowel=false;UI.towelCoach=false;render();},
   towelyes:()=>{UI.confirmTowel=false;UI.towelCoach=false;const U=UI.fight;throwTowel(U.F);U.shown.push({s:"x",t:`${G.F[U.b.a].name}'s corner throws in the towel`});fightEnd();},
