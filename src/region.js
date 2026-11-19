@@ -822,7 +822,7 @@ function rgFinalLose(G,w,l){return [
  {n:"coach",t:"เจ็บแล้วจำ แล้วกลับมาใหม่"}];}
 const REGION={
   /* end of week (after the weekly events): the gala the week after the invitation, the contract beat the week after the first cup */
-  weekScene(G,done){const R=G.region;if(!R){done();return;}const now=gameWeek(G);if(lbWeek(G,done))return;
+  weekScene(G,done){const R=G.region;if(!R){done();return;}rgApply(G);const now=gameWeek(G);if(lbWeek(G,done))return;
     /* v1.91.26 (Man): Kru Daeng reminds you to watch tape and train the counter before each regional title bout — no new buttons */
     for(const r of RG_ORDER){const c=R.champ[r],x=c&&c.next;if(!c||c.state!=="series"||!x||x.warned)continue;const left=x.abs-now;if(left<1||left>2)continue;
       const me=G.F[c.fid],cf=G.F[this.champId[r]];if(!me||!cf)continue;const tape=G.scoutAbs&&G.scoutAbs[cf.id]!=null&&now-G.scoutAbs[cf.id]<=8,ok=tape&&me.plan&&me.plan.preset===counterPreset(cf);x.warned=1;if(ok)continue;
@@ -857,10 +857,10 @@ const REGION={
   makeOpp(G,dest,me,abs){const r=ROAD_DEST[dest].r,id=`rg_${dest}_${abs}`;if(G.F[id]){G.F[id].rgSty=G.F[id].rgSty||rgBeltSty(r,id);return id;}
     /* a little under your fighter at the first belt, a little over by the sixteenth; the regional style (tilt) is part of that budget, not on top of it */
     const n=this.beltTotal(G),target=RG_LADDER.belt(n),rng=mulberry32((G.seed||1)+stableHash(id)),tilt=RG[r].tilt;
-    const f=baseFighter(id,mkNPC(id,RG_OPP[dest]||"แชมป์ประจำจังหวัด","X",Math.min(19,Math.round(target-1)),rng,RG_ORDER.indexOf(r)+2)),base={...f.a};
+    const f=baseFighter(id,mkNPC(id,this.oppName(G,dest),"X",Math.min(19,Math.round(target-1)),rng,RG_ORDER.indexOf(r)+2)),base={...f.a};
     const setT=T=>{f.a={...base};f.vet=0;for(const [k,v] of Object.entries(tilt))f.a[k]=Math.min(20,f.a[k]+v);liftOpponent(f,T,20);
       for(let i=0;i<80&&ovr(f.a)>T+.05;i++)for(const k in f.a)if(!(k in tilt))f.a[k]=Math.max(1,f.a[k]-.15);};
-    f.rg=dest;rgDress(f);f.lvl=(me.lvl||1)+(n<8?1:2);/* v1.90.20 (Man): province champions 1–2 levels above */f.fatigue=0;f.morale=70;setT(RG_FIX.belt(n));f.rgT=+RG_FIX.belt(n).toFixed(2);f.camp="quest";f.div="X";f.rg=dest;f.rgSty=rgBeltSty(r,id);rgDress(f);f.sprite="rgp_"+dest;/* v1.89.14: high-level sheet dyed in the province colour */f.color=RG[r].col;f.lvl=(me.lvl||1)+(n<8?1:2);/* v1.90.20 (Man): province champions 1–2 levels above */f.fatigue=0;f.morale=70;
+    f.rg=dest;rgDress(f);f.lvl=(me.lvl||1)+(n<8?1:2);/* v1.90.20 (Man): province champions 1–2 levels above */f.fatigue=0;f.morale=70;setT(RG_FIX.belt(n)+rgEdB(G,"eb"));f.rgT=+(RG_FIX.belt(n)+rgEdB(G,"eb")).toFixed(2);f.camp="quest";f.div="X";f.rg=dest;f.rgSty=rgBeltSty(r,id);rgDress(f);f.sprite="rgp_"+dest;/* v1.89.14: high-level sheet dyed in the province colour */f.color=RG[r].col;f.lvl=(me.lvl||1)+(n<8?1:2);/* v1.90.20 (Man): province champions 1–2 levels above */f.fatigue=0;f.morale=70;
     G.F[id]=f;syncFighterAges(G);return id;},
   purse(G){const n=this.beltTotal(G),w=Math.round((10000+n*800)*(1+Math.min(G.rep,50)/100)/100)*100;return {win:w,lose:Math.round(w*.4/100)*100};},
   book(G,dest,fid){const R=G.region,D=ROAD_DEST[dest],me=G.F[fid];if(!R||!D||!me)return {ok:false,why:"ข้อมูลไม่ครบ"};
@@ -877,7 +877,7 @@ const REGION={
     (R.gc=R.gc||[]).push(T.opp);R.trip=null;return true;},
 
   /* ---------- results + weekly upkeep ---------- */
-  flush(G){const R=G.region;if(R&&R.joined)this.joinSkills(G);if(R)this.bondSync(G);if(!R||!R.pend||!R.pend.length)return;const done=R.pend.splice(0);
+  flush(G){const R=G.region;if(R)rgApply(G);if(R&&R.joined)this.joinSkills(G);if(R)this.bondSync(G);if(!R||!R.pend||!R.pend.length)return;const done=R.pend.splice(0);
     for(const p of done){const rg=p.region||{},r=rg.r,dest=rg.dest,D=ROAD_DEST[dest];if(rg.nlfinal){if(R.final){R.final.cur=R.final.cur||{};R.final.cur[rg.nlfinal]=p.res||"L";}continue;}if(rg.nlleg){this.legResult(G,rg.nlleg,p);continue;}if(!D||!RG[r])continue;
       if(rg.series){this.seriesResult(G,r,p);continue;}
       rgTouch(G,RG_CID[r]);const T=R.trip,abs=T&&T.bid===p.bid?T.abs:gameWeek(G);
@@ -888,14 +888,14 @@ const REGION={
   /* weekly: post-cup letters and champion chats */
   letters(G){const R=G.region,now=gameWeek(G);R.postDone=R.postDone||{};
     for(const r of RG_ORDER){if(R.post&&R.post[r]!=null&&now>=R.post[r]&&!R.postDone[r]&&RG_POST[r]){R.postDone[r]=1;addMail(G,{kind:"letter",from:`${RG[r].champ} · แชมป์${RG[r].name}`,title:`จดหมายจาก${RG[r].champ}`,body:RG_POST[r]});}
-      const cid=RG_CID[r],c=R.champ[r]||{},open=RG_CHAT[cid]&&G.F[cid]&&(c.visit==="done"||c.state==="won");G.chatIn=G.chatIn||{};
+      const cid=RG_CID0[r],c=R.champ[r]||{},open=RG_CHAT[cid]&&G.F[cid]&&((R.joined&&R.joined[cid])||c.visit==="done"||c.state==="won"||rgEd(G)>=2);G.chatIn=G.chatIn||{};
       if(open&&!G.chatIn[cid]&&now-((G.chatLastAbs||{})[cid]??-999)>=2&&mulberry32((G.seed||1)+now*31+cid.length)()<.45)G.chatIn[cid]=G.week;}},
   fade(G){const R=G.region,now=gameWeek(G),m=R.meet||{};R.meetT=R.meetT||{};R.miss=R.miss||{};
-    for(const r of RG_ORDER){const cid=RG_CID[r];if(!(m[cid]>0))continue;if(R.meetT[cid]==null){R.meetT[cid]=now;continue;}if(R.joined&&R.joined[cid])continue;
+    for(const r of RG_ORDER){const cid=RG_CID0[r];if(!(m[cid]>0))continue;if(R.meetT[cid]==null){R.meetT[cid]=now;continue;}if(R.joined&&R.joined[cid])continue;
       const gap=now-R.meetT[cid];
       if(gap>=3&&!R.miss[cid]){R.miss[cid]=1;addMail(G,{kind:"letter",from:`${RG[r].champ} · แชมป์${RG[r].name}`,title:`จดหมายจาก${RG[r].champ}`,body:RG_MISS[r]});}
       if(gap>=4){const pk=(R.meetPk||{})[cid]||m[cid],fl=RG_FLOOR.find(t=>pk>=t)||0;if(m[cid]>fl)m[cid]=Math.max(fl,Math.round((m[cid]-.25)*100)/100);}}},
-  weekly(G){const R=G.region;this.flush(G);this.seriesWeekly(G);this.fade(G);this.letters(G);this.finalWeekly(G);this.joinWeekly(G);this.joinPerks(G);const T=R.trip;
+  weekly(G){const R=G.region;rgApply(G);this.flush(G);this.seriesWeekly(G);this.fade(G);this.letters(G);this.finalWeekly(G);this.joinWeekly(G);this.joinPerks(G);this.loopWeekly(G);const T=R.trip;
     /* a trip whose bout vanished (the week went by, the booking was dropped) is let go */
     if(T&&gameWeek(G)>T.abs&&!G.bookings.some(b=>b.id===T.bid)){(R.gc=R.gc||[]).push(T.opp);R.trip=null;R.nextTripAbs=Math.max(R.nextTripAbs||0,T.abs+1);}
     const keep=new Set(G.bookings.map(b=>b.b));R.gc=(R.gc||[]).filter(id=>{if(keep.has(id))return true;if(G.F[id]&&G.F[id].rg)delete G.F[id];return false;});},
@@ -964,14 +964,14 @@ const REGION={
   champFighter(G,r,me){const C=RG[r],H=RG_CH[r],id=this.champId[r];let f=G.F[id];
     if(!f){const rng=mulberry32((G.seed||1)+stableHash(id));f=baseFighter(id,mkNPC(id,C.champ,"X",14,rng,RG_ORDER.indexOf(r)+2));
       Object.assign(f,{name:C.champ,nick:C.nick,color:C.col,canon:true,camp:"region",div:"X",fatigue:0,injury:0,morale:75});G.F[id]=f;syncFighterAges(G);}
-    f.pfx=H.perk.fx;f.canon=true;f.camp="region";
+    const NC=G.region.nc&&G.region.nc[r];f.pfx=H.perk.fx;f.canon=!NC;f.camp="region";if(NC){f.sprite="rgp_"+NC.home;f.color=C.col;f.name=C.champ;}
     if(me){const cups=(G.region.cups||[]).length,c=G.region.champ[r],ceil=RG_LADDER.champ(cups,c.tries),tilt=C.tilt;
       f.lvl=Math.max(me.lvl||1,1)+3+Math.min(2,cups)/* v1.90.20 (Man): regional champions 3–5 levels above */;f.fatigue=0;f.injury=0;f.morale=75;
       /* re-fit only when your fighter or the stakes changed (this runs before every bout) */
-      const key=[cups,c.tries||0].join("|");
+      const key=[cups,c.tries||0,rgEd(G)].join("|");
       if(f.rgKey!==key){const setT=T=>{f.vet=0;for(const k in f.a)f.a[k]=Math.max(1,Math.min(20,T-.6));for(const [k,v] of Object.entries(tilt))f.a[k]=Math.min(20,f.a[k]+v);
           liftOpponent(f,T,20);for(let i=0;i<80&&ovr(f.a)>T+.05;i++)for(const k in f.a)if(!(k in tilt))f.a[k]=Math.max(1,f.a[k]-.12);};
-        const T=RG_FIX.champ(cups,c.tries); /* a lost series makes the rematch a little easier (v1.90.14) */setT(T);f.rgT=+T.toFixed(2);f.rgKey=key;}}
+        const T=RG_FIX.champ(cups,c.tries)+rgEdB(G,G.region.nc&&G.region.nc[r]?"nb":"cb"); /* a lost series makes the rematch a little easier (v1.90.14) */setT(T);f.rgT=+T.toFixed(2);f.rgKey=key;}}
     return f;},
   seriesPurse(G){const cups=(G.region.cups||[]).length,w=Math.round((30000+cups*6000)*(1+Math.min(G.rep,50)/100)/100)*100;return {win:w,lose:Math.round(w*.4/100)*100};},
   /* the first week from `from` that suits a championship bout: weeks 1–50, the camp home and rested, no other trip next to it */
@@ -1030,14 +1030,14 @@ const REGION={
   preBout(r,b){const c=G.region.champ[r],H=RG_CH[r],cid=this.champId[r],me=G.F[b.a],n=b.region.series,sc=`${c.w}-${c.l}`;
     const head={n:"nar",t:`${H.venue} · ${RG_TITLE[r]} นัดที่ ${n}${n>1?` · สกอร์ ${me.name} ${sc} ${RG[r].champ}`:""}`};
     const line=n===1?H.pre[0]:c.w===1&&c.l===1?H.pre[2]:H.pre[1];
-    const mine=CANON_IDS.includes(me.id)?[{n:me.id,f:"angry",l:"fight",with:cid,t:me.id===H.pair?H.pairLine:H.reply}]:[{n:"nar",t:`${me.name}พยักหน้ารับ แล้วเดินกลับมุมแดง`}];
-    return [head,{n:cid,f:n===1?"happy":"angry",l:"fight",t:line(me.name)},...mine];},
+    const NC=G.region.nc&&G.region.nc[r];const mine=CANON_IDS.includes(me.id)?[{n:me.id,f:"angry",l:"fight",...(NC?{}:{with:cid}),t:me.id===H.pair?H.pairLine:H.reply}]:[{n:"nar",t:`${me.name}พยักหน้ารับ แล้วเดินกลับมุมแดง`}];
+    return [head,...(rgEd(G)>=2&&n===1&&!NC?[{n:"nar",t:`${RG[r].champ}ป้องกันแชมป์ภาคมาได้อีกสมัย และเก่งกว่าเมื่อสามปีก่อน`}]:[]),{...this.spk(r,n===1?"happy":"angry","fight"),t:line(me.name)},...mine];},
   afterBout(T,P,done){const R=G.region,J=R.just;R.just=null;const r=ROAD_DEST[T.dest].r,H=RG_CH[r],cid=this.champId[r];
     if(!J){this.home(T,done);return;}
     if(J.kind==="cup"){AU.startMusic&&AU.startMusic("victory");AU.sfx&&AU.sfx("champ");
-      {const aw={kind:"rg_"+r,key:"cup"+r};AU.startMusic("victory");AU.sfx("champ");playScene(H.cup(G,J),()=>{AU.startMusic("hub");T.cupNight=1;this.night(T,P,1,done);},{bg:"rg_"+H.ring,look:"fight",award:aw});
+      {const aw={kind:"rg_"+r,key:"cup"+r};AU.startMusic("victory");AU.sfx("champ");playScene(H.cup(G,J),()=>{AU.startMusic("hub");T.cupNight=rgEd(G)===1?1:0;this.night(T,P,1,done);},{bg:"rg_"+H.ring,look:"fight",award:aw});
         [600,1300,2200,3300,4700,6200].forEach(ms=>setTimeout(()=>{if(UI.scene&&UI.scene.award===aw)AU.sfx("pop");},ms));}return;} /* v1.91.14: the cup gets the ceremony overlay, fireworks and the victory song */
-    const steps=J.kind==="lost"?H.lost(G,J):[{n:cid,f:J.res==="W"?"sad":"happy",l:"fight",t:(J.res==="W"?H.lose:H.win)[Math.min(2,(J.n||1)-1)]},
+    const steps=J.kind==="lost"?H.lost(G,J):[{...this.spk(r,J.res==="W"?"sad":"happy","fight"),t:(J.res==="W"?H.lose:H.win)[Math.min(2,(J.n||1)-1)]},
       {n:"nar",t:`สกอร์ตอนนี้ ${J.w}-${J.l} · นัดต่อไปอีกราว 2 สัปดาห์`}];
     playScene(steps,()=>this.night(T,P,1,done),{bg:"rg_"+H.ring,look:"fight"});},
   /* the series fighter picker (modal) */
@@ -1089,16 +1089,16 @@ const REGION={
       return `<section class="px card"><h3>ศึกชิงเจ้าสี่ภาค</h3><p>ทัวร์นาเมนต์ระดับภาคจะส่งจดหมายเชิญมา เมื่อจบปีที่ 5 และค่ายได้แชมป์จังหวัดครบ 3 ครั้ง</p>
        <div class="kv-row"><span>ปีที่</span><b>${G.season||1} / 6</b></div><div class="kv-row"><span>แชมป์จังหวัด</span><b>${t} / 3</b></div>
        ${!REGION_LIVE?`<div class="mfoot"><button class="btn gold" data-act="rgdevstart">เปิดบทเลย (โหมดทดสอบ)</button></div>`:""}</section>`;}
-    const R=G.region,T=R.trip,cups=(R.cups||[]).length,belts=this.beltTotal(G),nx=T?null:this.tripWeek(G);
+    rgApply(G);const R=G.region,T=R.trip,cups=(R.cups||[]).length,belts=this.beltTotal(G),nx=T?null:this.tripWeek(G);
     const tripCard=T?`<section class="px card rg-trip"><h3>ทริปที่นัดไว้</h3><div class="kv-row"><span>${esc(ROAD_DEST[T.dest].name)} · ${esc(RG[ROAD_DEST[T.dest].r].name)}</span><b>สัปดาห์ ${T.wk}</b></div>
        <div class="kv-row"><span>นักมวย</span><b>${G.F[T.fid]?esc(G.F[T.fid].name):"-"}</b></div><div class="kv-row"><span>คู่ชก</span><b>${G.F[T.opp]?esc(G.F[T.opp].name):"-"}</b></div>
        <div class="kv-row"><span>ค่าเดินทาง (จ่ายแล้ว)</span><b class="num">${fmt(T.cost)}</b></div>
        <p class="meta">สัปดาห์นั้นทั้งค่ายไปด้วยกัน จึงไม่รับไฟต์อื่น</p><div class="mfoot"><button class="btn" data-act="rgcancel">ยกเลิกทริป (คืนเงิน)</button></div></section>`:"";
     const regs=RG_ORDER.map(r=>{const C=RG[r],b=R.belts[r]||{},n=this.beltCount(G,r),ch=R.champ[r]||{},F=ROAD_DEST[C.fin];
       const rows=C.prov.map(p=>{const D=ROAD_DEST[p],got=b[p],nights=roadNights(D.km);
-        return `<div class="rg-prov"><span><b>${esc(D.name)}</b> <small>${D.km} กม. · ${nights?`ค้าง ${nights} คืน`:"ไปกลับวันเดียว"}</small></span>${got?`<span class="rg-belt">🏅 ได้เข็มขัด</span>`:`<button class="btn sm${T||!nx?"":" primary"}" data-act="rgplan" data-v="${p}" ${T||!nx?"disabled":""}>วางแผน</button>`}</div>`;}).join("");
+        const P=R.pc&&R.pc[p];return `<div class="rg-prov"><span><b>${esc(D.name)}</b> <small>${D.km} กม. · ${nights?`ค้าง ${nights} คืน`:"ไปกลับวันเดียว"}</small>${P?this.histHTML(P,p,`แชมป์จังหวัด: ${rgNm(P,p)}`):""}</span>${got?`<span class="rg-belt">🏅 ได้เข็มขัด</span>`:`<button class="btn sm${T||!nx?"":" primary"}" data-act="rgplan" data-v="${p}" ${T||!nx?"disabled":""}>วางแผน</button>`}</div>`;}).join("");
       const fin=this.finRow(r);
-      return `<section class="px card rg-reg" style="--rc:${C.col}"><h3>${esc(C.name)}</h3><div class="rg-champ">แชมป์ภาค: <b>${esc(C.champ)}</b> · ${esc(C.nick)}</div>${rows}${fin}</section>`;}).join("");
+      return `<section class="px card rg-reg" style="--rc:${C.col}"><h3>${esc(C.name)}</h3><div class="rg-champ">แชมป์ภาค: <b>${esc(C.champ)}</b> · ${esc(C.nick)}${R.nc&&R.nc[r]?this.histHTML(R.nc[r],R.nc[r].home,"ประวัติแชมป์ภาคคนใหม่"):""}</div>${rows}${fin}</section>`;}).join("");
     return `<section class="px card rg-head"><div><h3>ศึกชิงเจ้าสี่ภาค</h3><span class="meta">ครั้งที่ ${R.edition||1}</span></div>
        <div class="rg-stats"><span class="pill gold">ถ้วย ${cups}/4</span><span class="pill">เข็มขัด ${belts}/16</span><span class="pill ${T?"red":nx?"green":""}">${T?`ทริป: ${esc(ROAD_DEST[T.dest].name)} · สัปดาห์ ${T.wk}`:nx?`เดินทางได้สัปดาห์ ${nx}`:"ปีนี้เดินทางไม่ได้แล้ว"}</span></div></section>
      ${!R.gala?`<p class="meta rg-gala">🎉 งานเปิดตัวศึกชิงเจ้าสี่ภาคที่กรุงเทพฯ ${R.galaAbs!=null&&gameWeek(G)<R.galaAbs?"จัดปลายสัปดาห์หน้า":"จัดปลายสัปดาห์นี้"} · ทั้งค่ายได้รับเชิญ</p>`:""}${!REGION_LIVE?`<p class="meta">โหมดทดสอบ: <button class="btn sm" data-act="rggala" data-v="gala">ดูงานเปิดตัว</button> ไฟต์ใต้ดินทดสอบ (กติกาเปิด): ${NL_ORDER.map(k=>`<button class="btn sm" data-act="nltest" data-v="${k}">${esc(NL[k].name)}</button>`).join(" ")}${(R.cups||[]).length?` <button class="btn sm" data-act="rggala" data-v="c1">ดูฉากซองเขียว</button>`:""}</p>`:""}
@@ -1107,7 +1107,7 @@ const REGION={
     const abs=this.base(G)+wk,P=roadPlan(G,dest,null,abs),R=this.riders(G,wk);if(!UI.rgFid||!R.some(f=>f.id===UI.rgFid))UI.rgFid=R[0]?R[0].id:null;
     const me=UI.rgFid&&G.F[UI.rgFid],poor=G.cash<P.total,line=(k,v)=>v?`<div class="kv-row"><span>${k}</span><b class="num">${fmt(v)}</b></div>`:"";
     return `<h2>${esc(D.name)} <small class="meta">· ${esc(C.name)}</small></h2>
-     <p class="meta">เดินทางสัปดาห์ <b>${wk}</b> · ${D.km} กม. · ${P.nights?`ค้าง ${P.nights} คืน`:"ไปกลับวันเดียว"} · คู่ชก: <b>${esc(RG_OPP[dest]||"แชมป์ประจำจังหวัด")}</b> แชมป์ประจำจังหวัด</p>
+     <p class="meta">เดินทางสัปดาห์ <b>${wk}</b> · ${D.km} กม. · ${P.nights?`ค้าง ${P.nights} คืน`:"ไปกลับวันเดียว"} · คู่ชก: <b>${esc(this.oppName(G,dest))}</b> แชมป์ประจำจังหวัด</p>
      <h3>ใครขึ้นชก</h3>${R.length?`<div class="rg-pick">${R.map(f=>`<button class="btn sm" data-act="rgfid" data-v="${f.id}" aria-pressed="${f.id===UI.rgFid}">${faceImg(f,"sm")}${esc(f.name)} <small>Lv.${f.lvl||1}</small></button>`).join("")}</div>`:`<p class="redt">ไม่มีนักมวยที่พร้อมเดินทางสัปดาห์นี้</p>`}
      <h3>ค่าเดินทาง ไป-กลับ</h3><div class="rg-bill"><div class="kv-row"><span>รถ</span><b>${esc(roadCarName(P.car))}</b></div>
       ${line(`น้ำมัน ${Math.round(P.litres)} ลิตร × ฿${P.price.toFixed(2)}`,P.fuel)}${line("ทางด่วน",P.toll)}${line(`ตั๋วรถทัวร์ × ${P.onBus}`,P.bus)}${line(`ที่พัก ${P.nights} คืน`,P.lodge)}${line(`ค่ากิน × ${P.people}`,P.food)}
@@ -1363,11 +1363,11 @@ Object.assign(REGION,{
   /* the champion's skill tree is her lineage's — the partner girl's tree (Tha Sao / Korat / Lopburi / Chaiya) */
   joinSkills(G){const J=(G.region&&G.region.joined)||{};for(const r of RG_ORDER){const cid=RG_CID0[r];if(J[cid]&&!SKILLS[cid]&&SKILLS[RG_CH[r].pair])SKILLS[cid]=SKILLS[RG_CH[r].pair];}},
   joinWeekly(G){const R=G.region,F=R.final,now=gameWeek(G);if(!F||!F.won||now<(F.wonAbs||0)+3)return;R.joined=R.joined||{};R.offers=R.offers||[];R.joinQ=R.joinQ||[];
-    const m=R.meet||{};for(const r of RG_ORDER){const cid=RG_CID0[r];if(!R.joined[cid]&&!R.offers.includes(cid)&&!R.joinQ.includes(cid)&&!(R.joinGone||{})[cid]&&(m[cid]||0)>=RG_JOIN_MIN)R.joinQ.push(cid);}
+    const m=R.meet||{};for(const r of RG_ORDER){const cid=RG_CID0[r];if(rgEd(G)>=2&&!(R.nc&&R.nc[r])&&!(R.champ[r]&&R.champ[r].state==="won"))continue;if(!R.joined[cid]&&!R.offers.includes(cid)&&!R.joinQ.includes(cid)&&!(R.joinGone||{})[cid]&&(m[cid]||0)>=RG_JOIN_MIN)R.joinQ.push(cid);}
     R.joinQ.sort((a,b)=>(m[b]||0)-(m[a]||0));
     if(R.joinQ.length&&now>=(R.joinNext||0)){const cid=R.joinQ.shift(),r=RG_ORDER.find(x=>RG_CID0[x]===cid);R.offers.push(cid);R.joinNext=now+RG_JOIN_GAP;
       addMail(G,{kind:"letter",from:`${RG[r].champ} · แชมป์${RG[r].name}`,title:`ใบสมัครจาก${RG[r].champ}`,body:RG_JOIN[cid].letter+`\n\n(สัญญา: ค่าเซ็น ${fmt(RG_JOIN_FEE)} · ค่าจ้าง ${fmt(RG_JOIN_WAGE)}/สัปดาห์ · ลักษณะพิเศษ: ${RG_TRAIT[cid].name} · ดูสัญญาที่หน้าค่าย › ครู & นักมวย)`});}},
-  joinOk(G,cid){const R=G.region;if(!R.offers||!R.offers.includes(cid))return "ไม่มีสัญญานี้";if(R.joinPend)return "รอคนที่ตอบรับไปก่อนหน้าย้ายมาก่อน";
+  joinOk(G,cid){const R=G.region;if(!R.offers||!R.offers.includes(cid))return "ไม่มีสัญญานี้";if(R.joinPend)return "รอคนที่ตอบรับไปก่อนหน้าย้ายมาก่อน";{const r=RG_ORDER.find(x=>RG_CID0[x]===cid);if(rgEd(G)>=2&&!(R.nc&&R.nc[r])&&R.champ[r]&&R.champ[r].state!=="won")return "เธอกำลังป้องกันแชมป์ภาค · ชนะถ้วยครั้งนี้ก่อน";}
     if(this.joinRooms(G)>=dormRooms(G))return `ห้องพักเต็ม (${dormRooms(G)} ห้อง) · อัปเกรดหอพักก่อน`;if(G.cash<RG_JOIN_FEE)return `เงินไม่พอ · ค่าเซ็น ${fmt(RG_JOIN_FEE)}`;return "";},
   joinAccept(G,cid){const why=this.joinOk(G,cid);if(why){toast(why);return;}const R=G.region;G.cash-=RG_JOIN_FEE;R.offers=R.offers.filter(x=>x!==cid);R.joinPend={cid,abs:gameWeek(G)+1};
     G.log=G.log||[];G.log.push(`เซ็นสัญญากับ${G.F[cid]?G.F[cid].name:cid} · ค่าเซ็น ${fmt(RG_JOIN_FEE)} · ย้ายมาสัปดาห์หน้า`);toast(`เซ็นสัญญาแล้ว · ${G.F[cid]?G.F[cid].name:""}ย้ายมาสัปดาห์หน้า`);},
@@ -1429,4 +1429,105 @@ if(typeof ACT!=="undefined")Object.assign(ACT,{
     playScene([{n:cid,f:"sad",l:"casual",t:J.bye},{n:"nar",t:`${G.F[cid].name}กับผู้จัดการเลิกกันแล้ว · เธอยังอยู่ค่ายต่อ`}],()=>{save();render();},{bg:"camp_night",look:"casual"});},
 });
 if(typeof XMODAL!=="undefined")XMODAL.rgbreak=m=>({body:`<h2>ขอเลิกกับ${esc(G.F[m.cid].name)}?</h2><p>ความสนิทจะลดลงมาก · เธอยังอยู่ค่ายต่อ แต่จะไม่สารภาพรักอีก</p><div class="mfoot"><button class="btn" data-act="closeModal">ไม่ใช่ตอนนี้</button><button class="btn primary" data-act="rgbreakgo" data-v="${m.cid}">ขอเลิก</button></div>`,foot:false});
+/* ---------- v1.91.34 the Four Regions every 3 years (Man) ----------
+   · a new edition opens 3 years after the last one began (the first needs its underground final won), never mid-trip or mid-series
+   · province champions are decided by the bots: a 4-woman bracket per province (last edition's holder + 3 challengers), real quick fights — whoever wins holds the belt, each with her own history
+   · a regional champion still at her own camp returns stronger; one who moved in to Sirichai is replaced by a new champion (a bracket of the four province runners-up)
+   · regional champion data is swapped into the shared tables (RG / RG_CID / champId / RG_CH) per save by rgApply */
+const RG_LOOP={wk:156,rest:26,eb:.2,cb:.3,nb:.15,cap:3};
+const RG_CH0={...RG_CH};
+const RG_FN=["ดาวเรือง","แพรวา","ขวัญใจ","นิลุบล","อำพัน","รุ้งนภา","จันทร์เพ็ญ","บุษบา","ลำดวน","ประกาย","มุกดา","ทองกวาว","พิกุล","กาหลง","ลีลาวดี","เกดแก้ว","สายไหม","น้ำค้าง","แก้วตา","ใบเตย","มะปราง","ส้มโอ","บัวผัน","จำปา","ชมพู่","ผกากรอง","เรไร","ปาริชาติ","บุหงา","อัญชัน","ดาหลา","ราตรี","เฟื่องฟ้า","พุดซ้อน","ยี่หุบ","การะเกด","สร้อยทอง","นวลจันทร์"];
+const RG_PRE=["ส.","ศิษย์","ลูก"];
+const RG_PL={chiangrai:["เชียงแสน","ดอยตุง","แม่จัน"],nan:["ปัว","บ่อเกลือ","เวียงสา"],uttaradit:["ลับแล","ท่าปลา","พิชัย"],lampang:["เกาะคา","แจ้ห่ม","เถิน"],
+ udon:["กุมภวาปี","บ้านเชียง","หนองหาน"],khonkaen:["ภูเวียง","ชุมแพ","น้ำพอง"],buriram:["นางรอง","ประโคนชัย","ลำปลายมาศ"],ubon:["พิบูลฯ","โขงเจียม","วารินฯ"],
+ lopburi:["บ้านหมี่","ท่าวุ้ง","โคกสำโรง"],suphan:["อู่ทอง","สองพี่น้อง","บางปลาม้า"],phetchaburi:["ชะอำ","บ้านลาด","ท่ายาง"],chanthaburi:["ท่าใหม่","ขลุง","แหลมสิงห์"],
+ chumphon:["หลังสวน","ปากน้ำ","ท่าแซะ"],surat:["ดอนสัก","เกาะสมุย","พุนพิน"],nakhonsi:["ปากพนัง","ทุ่งสง","ขนอม"],songkhla:["สทิงพระ","ระโนด","จะนะ"]};
+const RG_FN_EN=["Daoruang", "Praewa", "Khwanjai", "Nilubon", "Amphan", "Rungnapha", "Janpen", "Butsaba", "Lamduan", "Prakai", "Mukda", "Thongkwao", "Phikun", "Kalong", "Leelawadee", "Ketkaew", "Saimai", "Namkhang", "Kaewta", "Baitoey", "Maprang", "Som-o", "Buaphan", "Champa", "Chomphu", "Phakakrong", "Rerai", "Parichat", "Bunga", "Anchan", "Dala", "Ratri", "Fueangfa", "Phutson", "Yihup", "Karaket", "Soithong", "Nuanchan"],RG_PRE_EN=["Sor.","Sit ","Luk "],RG_PL_EN={chiangrai: ["Chiang Saen", "Doi Tung", "Mae Chan"], "nan": ["Pua", "Bo Kluea", "Wiang Sa"], "uttaradit": ["Laplae", "Tha Pla", "Phichai"], "lampang": ["Ko Kha", "Chae Hom", "Thoen"], "udon": ["Kumphawapi", "Ban Chiang", "Nong Han"], "khonkaen": ["Phu Wiang", "Chum Phae", "Nam Phong"], "buriram": ["Nang Rong", "Prakhon Chai", "Lam Plai Mat"], "ubon": ["Phibun", "Khong Chiam", "Warin"], "lopburi": ["Ban Mi", "Tha Wung", "Khok Samrong"], "suphan": ["U Thong", "Song Phi Nong", "Bang Pla Ma"], "phetchaburi": ["Cha-am", "Ban Lat", "Tha Yang"], "chanthaburi": ["Tha Mai", "Khlung", "Laem Sing"], "chumphon": ["Lang Suan", "Pak Nam", "Tha Sae"], "surat": ["Don Sak", "Ko Samui", "Phunphin"], "nakhonsi": ["Pak Phanang", "Thung Song", "Khanom"], "songkhla": ["Sathing Phra", "Ranot", "Chana"]};
+const RG_TR=["ลูกสาวชาวนา ซ้อมเตะกับกระสอบข้าวเปลือกในยุ้งฉาง","เคยเป็นนักกรีฑาโรงเรียน เปลี่ยนมาชกมวยตอนสิบหก","พ่อเป็นกรรมการมวยงานวัด ดูไฟต์มาตั้งแต่จำความได้",
+ "ขายลูกชิ้นหน้าเวทีมวยทุกคืน จนเจ้าของค่ายชวนลองขึ้นชก","ชกเพื่อส่งน้องสองคนเรียน","อดีตนักเทควันโดทีมจังหวัด เตะหนักแต่ยังคุมระยะไม่นิ่ง",
+ "วิ่งขึ้นบันไดวัดสามร้อยขั้นทุกเช้า","ขับรถส่งของตอนกลางวัน ซ้อมตอนกลางคืน","หลานครูมวยรุ่นเก่า ได้มงคลของตามาใส่ขึ้นชก",
+ "แพ้น็อกยกแรกในไฟต์แรก แล้วไม่เคยแพ้น็อกอีกเลย","นักศึกษาพยาบาล ลาเรียนครึ่งปีเพื่อลองชิงเข็มขัด","ซ้อมกับพี่สาวฝาแฝดที่ชกรุ่นเดียวกัน",
+ "ไลฟ์ซ้อมทุกวัน มีคนดูประจำห้าสิบคน","หัดมวยจากคลิปในโทรศัพท์ก่อนมีค่ายรับ","ทำงานโรงงานกะดึก แล้วไปซ้อมตอนเช้า","เคยเป็นคู่ซ้อมของแชมป์ภาคคนก่อน"];
+const RG_NK={north:["ราชินีศอกล้านนา","เสือดาวดอย","ดาบคู่ลับแล"],isan:["พายุลูกเตะอีสาน","ราชินีทุ่งกุลา","ไหมทองหมัดหนัก"],
+ central:["นางพญาเจ้าพระยา","เพชรเมืองเพชร","ลิงทองลพบุรี"],south:["คลื่นยักษ์อันดามัน","เหยี่ยวทะเลใต้","พายุเกาะสมุย"]};
+const RG_NFX={north:{name:"ศอกแห่งขุนเขา",desc:"สวนกลับบ่อยขึ้น 4% · ศอกแรงขึ้น 10%",fx:{ctr:.04,dmg:{elbow:.1}}},isan:{name:"เตะเปิดทุ่ง",desc:"เตะแม่นขึ้น 3% · เตะแรงขึ้น 8%",fx:{hit:{kick:.03},dmg:{kick:.08}}},
+ central:{name:"หมัดเจ้าพระยา",desc:"หมัดแรงขึ้น 10% · กันวงในดีขึ้น",fx:{dmg:{punch:.1},clDef:1}},south:{name:"คลื่นซัดฝั่ง",desc:"หลบได้ดีขึ้น 1.5% · ฟื้นแรงเร็วขึ้น 10%",fx:{evade:.015,regen:.1}}};
+/* a returning champion writes again */
+const RG_RET={baibua:"ผู้จัดการเจ้า\n\nศึกชิงเจ้าสี่ภาคเวียนมาอีกรอบแล้วเจ้า หนูยังเป็นแชมป์ภาคเหนืออยู่เน้อ\n\nสามปีนี้หนูซ้อมศอกทุกเช้า บ่ได้ขาดสักวัน คราวนี้หนูบ่ยอมง่าย ๆ แล้วเจ้า\n\nรอที่เชียงใหม่เน้อ\n— ใบบัว",
+ tabtim:"ผู้จัดการเด้อ!\n\nทับทิมกลับมาแล้ว! ถ้วยอีสานยังอยู่โคราชเด้อ ไผอยากได้กะมาเอาเอง\n\nสามปีนี้ข้อยเตะต้นกล้วยล้มไปหลายต้นแล้ว ฮ่า ๆ มาเบิ่งกันเด้อ\n\n— ทับทิม",
+ alicia:"ถึงผู้จัดการ\n\nถ้วยภาคกลางยังเป็นของฉัน ไม่ต้องแปลกใจ\n\nสามปีที่ผ่านมาฉันซ้อมโดยไม่เปิดกล้องเลยสักครั้ง ครั้งนี้ไม่ใช่คอนเทนต์ Bring your best.\n\n— Alicia",
+ chaba:"ผู้จัดการ\n\nถ้วยยังอยู่ภูเก็ต\n\nซ้อมมาสามปี ม่ายได้หยุด\n\nมาเลย\n— ชบา"};
+const rgEd=G=>(G.region&&G.region.edition)||1;
+const rgEdB=(G,k)=>RG_LOOP[k]*Math.min(RG_LOOP.cap,rgEd(G)-1);
+const rgEN=()=>typeof CUR_LANG!=="undefined"&&CUR_LANG==="en"; /* names and places are spelled, not translated */
+const rgNm=(o,dest)=>{if(!o)return "";const e=rgEN(),N=e?RG_FN_EN:RG_FN,P=e?RG_PRE_EN:RG_PRE,L=e?RG_PL_EN:RG_PL;return `${N[o.f%N.length]} ${P[o.k%P.length]}${(L[dest]||L.chiangrai)[o.p%3]}`;};
+/* swap this save's regional champions into the shared tables (idempotent) */
+function rgApply(G){const R=G&&G.region,key=R?`${rgEd(G)}|${JSON.stringify(R.nc||{})}`:"-";if(rgApply.k===key&&rgApply.g===G)return;rgApply.k=key;rgApply.g=G;
+  for(const r of RG_ORDER){const N=R&&R.nc&&R.nc[r],ret=!N&&rgEd(G)>=2;
+    RG[r].champ=N?rgNm(N,N.home):RG0[r].champ;RG[r].nick=N?RG_NK[r][N.nk%3]:RG0[r].nick;
+    RG_CID[r]=REGION.champId[r]=N?N.id:RG_CID0[r];
+    RG_CH[r]=N?REGION.genH(r,N):ret?Object.assign({},RG_CH0[r],{letter:RG_RET[RG_CID0[r]]||RG_CH0[r].letter,cup:(G2,J)=>REGION.genCup(G2,r,J)}):RG_CH0[r];}}
+Object.assign(REGION,{
+  spk(r,f,l){const N=G.region&&G.region.nc&&G.region.nc[r];return N?{n:"npc",who:RG[r].champ}:{n:this.champId[r],f,l};},
+  /* a new champion who has no art of her own speaks as an NPC */
+  genH(r,N){const H0=RG_CH0[r],nm=rgNm(N,N.home),S=(t)=>({n:"npc",who:nm,t}),P=RG_NFX[r];
+    return {ring:H0.ring,venue:H0.venue,pair:null,nightBg:H0.nightBg,perk:P,sty:H0.sty,reply:H0.reply,pairLine:H0.reply,
+      letter:`เรียน ผู้จัดการค่ายศิริชัย\n\nฉัน${nm} แชมป์${RG0[r].name}คนใหม่ ได้ข่าวว่าค่ายของคุณเก็บเข็มขัดครบสี่จังหวัดแล้ว\n\nแชมป์คนก่อนย้ายไปอยู่ค่ายคุณ ฉันอยากรู้ว่าเธอเลือกถูกหรือเปล่า\n\nรอที่${H0.venue}\n— ${nm}`,
+      again:`ผู้จัดการ\n\nถ้วยยังอยู่กับฉัน พร้อมเมื่อไหร่ก็ส่งนักมวยมาอีก\n\n— ${nm}`,wait:`ไม่เป็นไร พักให้หายก่อน — ${nm}`,
+      pre:[n=>`${n}… ฉันดูเทปค่ายคุณมาทุกไฟต์ วันนี้ไม่มีอะไรเซอร์ไพรส์ฉันได้`,n=>`นัดนี้ฉันเปลี่ยนแผนแล้ว ลองตามให้ทันสิ`,n=>`นัดสุดท้าย ใครอยากได้ถ้วยมากกว่ากัน`],
+      win:["ขอบคุณที่ชกด้วยกัน นัดหน้าฉันจะไม่พลาดอีก","ยังไม่จบ","…"],lose:["เก่งสมคำลือ","นัดสุดท้ายฉันจะไม่ยอมง่าย ๆ","…"],
+      lost:()=>[S("ถ้วยยังอยู่กับฉัน… แต่ค่ายคุณทำให้ฉันต้องซ้อมหนักขึ้นอีกเยอะ"),{n:"coach",t:"ยังไม่จบหรอก รอจดหมายท้าครั้งหน้า"}],
+      cup:(G2,J)=>this.genCup(G2,r,J),night:()=>[]};},
+  genCup(G2,r,J){const R=G2.region,me=G2.F[R.champ[r].fid],ed=rgEd(G2),n=(R.hall||[]).filter(h=>h.k==="cup"&&h.r===r).length+1,top=typeof rgTopGirl==="function"?rgTopGirl(G2):null;
+    const who=this.spk(r,"happy","fight");
+    return [{n:"nar",t:`ระฆังยกสุดท้ายดังขึ้น กรรมการชูแขน${me?me.name:""}`},{n:"nar",t:`${RG_TITLE[r]} ครั้งที่ ${ed} · ${J.w}-${J.l}`},
+      {n:"npc",who:"พิธีกร",t:`ท่านผู้ชมครับ! ถ้วยเจ้า${RG0[r].name} ครั้งที่ ${ed} ได้แก่… ${me?me.name:""} จากค่ายศิริชัย!`},
+      {...who,t:R.nc&&R.nc[r]?"ยินดีด้วย ค่ายศิริชัยแข็งแกร่งสมคำร่ำลือจริง ๆ":"…แพ้อีกแล้ว แต่ครั้งนี้หนูไปได้ไกลกว่าเดิม ยินดีด้วยนะ"},
+      ...(top?[{n:top.id,f:"happy",l:"fight",t:"เก่งที่สุดเลย! ค่ายเราได้ถ้วยอีกใบแล้ว!"}]:[]),
+      {n:"coach",t:`ถ้วยภาคนี้ใบที่ ${n} ของค่าย… ปู่ชัยคงไม่เชื่อสายตาตัวเอง`}];},
+  /* the bots' own tournament for one province: 4 entrants, semis + final, real quick fights */
+  bracket(G,seed,ents,tag){const rng=mulberry32(seed),mk=(e,i)=>{const id=`rgb_${tag}_${i}`,f=baseFighter(id,mkNPC(id,"x","X",Math.round(14+e.s*3),mulberry32(seed+i*977),1+i%5));f.lvl=18+Math.round(e.s*6);return f;};
+    const F=ents.map(mk),bout=(a,b,k)=>{const Q=quickFight(F[a],F[b],seed+k*131,3),w=Q.result.win==="A"?a:Q.result.win==="B"?b:(rng()<.5?a:b),rt=Q.result.type||"";
+      return {w,l:w===a?b:a,m:Q.result.win==="D"||!(/KO|TKO/.test(rt)||Q.result.sub||Q.result.towel)?"pts":"ko",rd:Q.result.round||3};};
+    const s1=bout(0,3,1),s2=bout(1,2,2),fi=bout(s1.w,s2.w,3);return {win:fi.w,ru:fi.l,path:[{o:s1.w===fi.w?s1.l:s2.l,m:(s1.w===fi.w?s1:s2).m,rd:(s1.w===fi.w?s1:s2).rd},{o:fi.l,m:fi.m,rd:fi.rd}]};},
+  newEnt(rng,used,dest){let f;if(used.size>=RG_FN.length)used.clear();for(let i=0;i<80;i++){f=Math.floor(rng()*RG_FN.length);if(!used.has(f))break;}used.add(f);return {f,k:Math.floor(rng()*3),p:Math.floor(rng()*3),age:18+Math.floor(rng()*9),tr:Math.floor(rng()*RG_TR.length),s:rng()};},
+  provTourney(G,ed){const R=G.region,out={},ru={},seed=(G.seed||1)*31+ed*7919;
+    const used=new Set();for(const r of RG_ORDER)for(const dest of RG[r].prov){const rng=mulberry32(seed+stableHash(dest)),prev=R.pc&&R.pc[dest];
+      const ents=[prev?{...prev,s:Math.min(1,.55+rng()*.4),def:1,age:(prev.age||22)+3}:null].filter(Boolean);if(prev)used.add(prev.f);while(ents.length<4)ents.push(this.newEnt(rng,used,dest));
+      const B=this.bracket(G,seed+stableHash(dest),ents,dest),W=ents[B.win],L=ents[B.ru];
+      out[dest]={f:W.f,k:W.k,p:W.p,age:W.age,tr:W.tr,ed,reign:W.def?(prev.reign||1)+1:1,prev:prev&&!W.def?{f:prev.f,k:prev.k,p:prev.p}:null,
+        path:B.path.map(x=>({o:{f:ents[x.o].f,k:ents[x.o].k,p:ents[x.o].p},m:x.m,rd:x.rd}))};
+      ru[dest]={...L,s:L.s};}
+    return {pc:out,ru};},
+  /* the regional title left vacant by a champion who moved in: the four province runners-up fight for it */
+  genChamp(G,r,ed,ru){const seed=(G.seed||1)*17+ed*104729+stableHash(r),ents=RG[r].prov.map(d=>({...ru[d],home:d}));
+    const B=this.bracket(G,seed,ents,"c"+r),W=ents[B.win];
+    return {id:`rgc_${r}_${ed}`,f:W.f,k:W.k,p:W.p,age:W.age,tr:W.tr,home:W.home,nk:Math.floor(mulberry32(seed)()*3),ed,
+      path:B.path.map(x=>({o:{f:ents[x.o].f,k:ents[x.o].k,p:ents[x.o].p,home:ents[x.o].home},m:x.m,rd:x.rd}))};},
+  oppName(G,dest){const P=G.region&&G.region.pc&&G.region.pc[dest];return P?rgNm(P,dest):RG_OPP[dest]||"แชมป์ประจำจังหวัด";},
+  mtxt(x){return x.m==="ko"?`ชนะก่อนครบยก (ยก ${x.rd})`:"ชนะคะแนน";},
+  histHTML(P,dest,title){const L=[`อายุ ${P.age} ปี · ${RG_TR[P.tr%RG_TR.length]}`,
+      ...P.path.map((x,i)=>`${i?"รอบชิง":"รอบรอง"}: ${rgNm(x.o,x.o.home||dest)} · ${this.mtxt(x)}`),
+      P.reign>1?`ป้องกันแชมป์ได้ · สมัยที่ ${P.reign}`:P.prev?`โค่นแชมป์เก่า ${rgNm(P.prev,dest)}`:""].filter(Boolean);
+    return `<details class="rg-hist"><summary>${esc(title)}</summary>${L.map(t=>`<p class="meta">${esc(t)}</p>`).join("")}</details>`;},
+  loopWeekly(G){const R=G.region,now=gameWeek(G),ed=rgEd(G);
+    if(ed===1&&!(R.final&&R.final.won))return;
+    const doneAbs=ed===1?(R.final.wonAbs||now):R.edDone;
+    if(ed>=2&&(R.cups||[]).length>=4&&!R.edDone){R.edDone=now;G.rep+=2;(R.hall=R.hall||[]).push({k:"ed",ed,season:G.season||1});G.log=G.log||[];G.log.push(`ศึกชิงเจ้าสี่ภาค ครั้งที่ ${ed}: ครบ 4 ถ้วย · ชื่อเสียง +2`);}
+    if(now<(R.startAbs||0)+RG_LOOP.wk||(doneAbs!=null&&now<doneAbs+RG_LOOP.rest))return;
+    if(R.trip||RG_ORDER.some(r=>R.champ[r]&&R.champ[r].state==="series")||R.joinPend)return;
+    this.newEdition(G);},
+  newEdition(G){const R=G.region,ed=rgEd(G)+1,now=gameWeek(G);
+    for(const r of RG_ORDER)if((R.cups||[]).includes(r))(R.hall=R.hall||[]).push({k:"cup",r,ed:ed-1,season:G.season||1});
+    const T=this.provTourney(G,ed);R.pc=T.pc;R.nc=R.nc||{};
+    Object.assign(R,{edition:ed,startAbs:now,edDone:null,belts:Object.fromEntries(RG_ORDER.map(r=>[r,{}])),cups:[],trip:null,nextTripAbs:now+1});
+    for(const r of RG_ORDER){const c0=RG_CID0[r],gone=R.joined&&R.joined[c0];
+      if(gone)R.nc[r]=this.genChamp(G,r,ed,T.ru);else delete R.nc[r];
+      R.champ[r]={state:"locked",fid:null,w:0,l:0,tries:0,visit:gone?"none":"done"};}
+    rgApply.k=null;rgApply(G);
+    const lines=RG_ORDER.map(r=>{const N=R.nc[r];return N?`${RG0[r].name}: ${rgNm(N,N.home)} "${RG_NK[r][N.nk%3]}" แชมป์คนใหม่ (${RG0[r].champ}ย้ายมาอยู่ค่ายศิริชัยแล้ว)`:`${RG0[r].name}: ${RG0[r].champ} แชมป์เดิม กลับมาเก่งกว่าเดิม`;}).join("\n");
+    addMail(G,{kind:"letter",from:"นาคาเอเนอร์จี้ดริงค์",title:`จดหมายเชิญ: ศึกชิงเจ้าสี่ภาค ครั้งที่ ${ed}`,
+      body:`เรียน ผู้จัดการค่ายศิริชัย\n\nศึกชิงเจ้าสี่ภาค ครั้งที่ ${ed} เปิดแล้ว · เข็มขัดจังหวัดทั้ง 16 เส้นตัดสินใหม่ด้วยศึกคัดเลือกในแต่ละจังหวัด ผู้ชนะคือแชมป์จังหวัดคนใหม่ที่รอค่ายของท่านอยู่\n\nแชมป์ภาค\n${lines}\n\nเก็บเข็มขัดให้ครบสี่จังหวัด แล้วท้าชิงถ้วยเหมือนเดิม`});
+    G.log=G.log||[];G.log.push(`ศึกชิงเจ้าสี่ภาค ครั้งที่ ${ed} เริ่มแล้ว`);},
+});
 if(typeof G!=="undefined"&&G&&G.region)REGION.flush(G);
