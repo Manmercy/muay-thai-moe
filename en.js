@@ -6458,7 +6458,7 @@ AU.gsfx=function(kind,a){if(!this.init()||this.muted||!SETTINGS.sfx)return;const
   if(kind==="shimmer")for(let i=0;i<6;i++)T(i*.05,{f:1400+Math.random()*1400,type:"sine",dur:.12,peak:.06});};
 
 // ================= MUAY THAI MOE v1.3 — UI =================
-const VERSION="1.91.70";
+const VERSION="1.91.71";
 const CUR_LANG=(typeof window!=="undefined"&&window.LANG)||"th";
 const TH_LABEL=String.fromCharCode(3652,3607,3618);
 function langSwitch(cls){return `<div class="langsw ${cls||""}" role="group" aria-label="Language">${[["th",TH_LABEL],["en","EN"]].map(([k,l])=>`<button class="lsb ${CUR_LANG===k?"on":""}" data-act="setlang" data-v="${k}" aria-pressed="${CUR_LANG===k}">${l}</button>`).join("")}</div>`;}
@@ -8484,6 +8484,13 @@ document.addEventListener("keydown",e=>{
   if(UI.scene&&!(UI.scene.cur&&UI.scene.cur.choice)&&(e.key===" "||e.key==="Enter")){e.preventDefault();sceneNext();return;}
   if(e.key==="Enter"&&e.target&&e.target.id){const b={petname:"petnamebtn",redeemcode:null,gatecode:null}[e.target.id];const el=b?document.getElementById(b):e.target.id==="redeemcode"?document.querySelector("[data-act=redeem]"):e.target.id==="gatecode"?document.querySelector("[data-act=gatego]"):null;if(el){e.preventDefault();el.click();}}});
 preloadCore();setTimeout(()=>{if(!G){["happy","surprised","sad"].forEach(m=>warm(stand("kati","fight",m)));warm(`${ASSET}coach.webp`);}},4000);render();
+/* v1.91.71 (dev): "#demo=<name>" loads a prepared test save from saves/<name>.json into slot 3 (asks first) — for Man to play a scene without replaying the whole chapter */
+(function(){const m=typeof location!=="undefined"&&(location.hash||"").match(/demo=([a-z0-9_]+)/);if(!m)return;const name=m[1];
+  setTimeout(()=>{if(!window.confirm(`Loaded test save "${name}" into save slot 3?
+Anything in slot 3 will be replaced`))return;
+    fetch(`saves/${name}.json?v=${Date.now()}`).then(r=>{if(!r.ok)throw 0;return r.json();}).then(s=>{if(!s||!s.F||!s.week)throw 0;if(typeof I18N_FIX==="function")s=I18N_FIX(s);fixSave(s);G=s;UI.slot=3;save();UI.modal=null;UI.title=null;UI.tab="home";
+      try{history.replaceState(null,"",location.pathname+location.search+(/regiondev/.test(location.hash)?"#regiondev":""));}catch(e){}
+      AU.startMusic&&AU.startMusic("hub");render();toast(`Loaded test save "${name}" into slot 3`);}).catch(()=>toast("Couldn't load the test save"));},1800);})();
 
 // ================= MUAY THAI MOE v1.23 — MAILBOX, SIDE QUESTS, ODD FIGHTS, CALENDAR, GRAPHS, NEWS BAR =================
 // ---------- odd opponents (sprite sheets in a/<sprite>_sheet.webp, same 6-row layout as the girls) ----------

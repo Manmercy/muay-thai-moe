@@ -16013,5 +16013,9 @@
  "รับทราบค่ะ ดาดฟ้า สามทุ่มตรง ฉันจะไม่สาย": "Noted. The rooftop, nine o'clock sharp. I won't be late.",
  "ได้สิคะ~ ริมน้ำหลังค่ายนะ มะลิจะไปก่อนเลย!": "Sure~ The riverside behind the camp. Mali's going early!",
  "ได้ค่ะ! …มีเรื่องอะไรเหรอคะ หนูจะไปรอที่ลานซ้อมนะคะ": "Okay! …What's it about? I'll wait at the training yard.",
- "คืนนี้ว่างไหม มีเรื่องอยากคุยด้วย ขอเจอหน่อยได้ไหม": "Are you free tonight? There's something I want to talk about. Can we meet?"
+ "คืนนี้ว่างไหม มีเรื่องอยากคุยด้วย ขอเจอหน่อยได้ไหม": "Are you free tonight? There's something I want to talk about. Can we meet?",
+ "โหลดเซฟทดสอบไม่ได้": "Couldn't load the test save",
+ "\" ลงช่อง 3 แล้ว": "\" into slot 3",
+ "โหลดเซฟทดสอบ \"": "Loaded test save \"",
+ "\" ลงช่องเซฟ 3?\nเซฟเดิมในช่อง 3 (ถ้ามี) จะถูกแทนที่": "\" into save slot 3?\nAnything in slot 3 will be replaced"
 }
