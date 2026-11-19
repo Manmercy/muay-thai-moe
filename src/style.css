@@ -2269,3 +2269,6 @@ div.mdelask{margin:2px 0 8px;padding:8px;box-shadow:inset 0 0 0 2px var(--line);
 .ccard.big>.card-art.body img[src*="_casual_pout"],.ccard.big>.card-art.body img[src*="_casual_flustered"]{top:8%;height:122%}
 /* no shine sweeps over the pictures on high-rarity cards — the frame colour carries the rarity */
 .ccard[data-rarity="SR"]>.card-art::before,.ccard[data-rarity="SSR"]>.card-art::before,.ccard[data-rarity="SSR"] .card-art.art::before{content:none!important;animation:none!important}
+
+/* v1.91.51: the creator inside the settings modal */
+.creator.cr-edit{min-height:0;padding:0;background:none}.creator.cr-edit .cr-top{margin-top:4px}.creator.cr-edit .cr-stage canvas{max-height:220px;width:auto}

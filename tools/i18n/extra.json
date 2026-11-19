@@ -15650,5 +15650,12 @@
  " · พักที่โรงแรม ": " · rested at the hotel ",
  "แล้ว · เข้าทางที่สุด ": " · best match: ",
  " หรือ ": " or ",
- " · ยังไม่ควรส่ง ": " · not yet: "
+ " · ยังไม่ควรส่ง ": " · not yet: ",
+ "บันทึกตัวละครแล้ว": "Character saved",
+ "</div>\n   <p class=\"meta\">ชื่อใหม่จะใช้ในบทพูดตั้งแต่ตอนนี้ไป ความยากและ Seed ของเกมไม่เปลี่ยน</p>\n   <div class=\"mfoot\"><button class=\"btn ghost\" data-act=\"avcancel\">ยกเลิก</button><button class=\"btn primary\" data-act=\"avsave\">บันทึก</button></div></div>": "</div>\n   <p class=\"meta\">Your new name is used in dialogue from now on. Difficulty and the game seed stay the same.</p>\n   <div class=\"mfoot\"><button class=\"btn ghost\" data-act=\"avcancel\">Cancel</button><button class=\"btn primary\" data-act=\"avsave\">Save</button></div></div>",
+ "เพศ": "Gender",
+ "\"></div>\n      <button class=\"btn sm\" data-act=\"crand\">สุ่มหน้าตา</button></div></div>\n   <div class=\"seg cr-tabs\" role=\"tablist\">": "\"></div>\n      <button class=\"btn sm\" data-act=\"crand\">Randomize look</button></div></div>\n   <div class=\"seg cr-tabs\" role=\"tablist\">",
+ "<h2>แก้ไขตัวละครของคุณ</h2><div class=\"creator v2 cr-edit\"><div class=\"px cr-top\"><div class=\"cr-stage\"><canvas width=\"240\" height=\"320\" data-chibi=\"creator\" aria-label=\"ตัวอย่างตัวละคร\"></canvas></div>\n     <div class=\"cr-id\"><div class=\"field\"><label for=\"pname\">ชื่อ</label><input id=\"pname\" maxlength=\"14\" value=\"": "<h2>Edit your character</h2><div class=\"creator v2 cr-edit\"><div class=\"px cr-top\"><div class=\"cr-stage\"><canvas width=\"240\" height=\"320\" data-chibi=\"creator\" aria-label=\"Character preview\"></canvas></div>\n     <div class=\"cr-id\"><div class=\"field\"><label for=\"pname\">Name</label><input id=\"pname\" maxlength=\"14\" value=\"",
+ " · เปลี่ยนชื่อ หน้าตา และชุดได้ตลอด</small></span><button class=\"btn sm\" data-act=\"avedit\">แก้ไขตัวละคร</button></div>": " · change your name, look and outfit any time</small></span><button class=\"btn sm\" data-act=\"avedit\">Edit character</button></div>",
+ "<div class=\"set\"><span><b>ตัวละครของคุณ</b><small>": "<div class=\"set\"><span><b>Your character</b><small>"
 }
