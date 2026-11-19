@@ -7582,8 +7582,9 @@ function spriteTint(sp,hue){const key=sp+"|h"+hue;if(TINTS[key])return TINTS[key
   TINTS[key]=c;return c;}
 function drawFrame(ctx,sheet,row,col,cx,footY,h,flip,alpha){
   if(!sheet||(sheet.complete===false)||(!sheet.width&&!sheet.naturalWidth))return;
-  const sc=h/CELL*1.0,w=CELL*sc;ctx.save();ctx.globalAlpha=alpha??1;ctx.translate(cx,footY);if(flip)ctx.scale(-1,1);
-  ctx.drawImage(sheet,col*CELL,row*CELL,CELL,CELL,-w/2,-h*0.94,w,h);ctx.restore();}
+  const sc=h/CELL,wide=(sheet.naturalWidth||sheet.width)===1536,cw=wide?384:CELL,ch=wide?192:CELL,fy=wide?184:CELL*.94; /* v1.91.62: wide 384×192 cells (foot at 184) for specials whose dashes/trails don't fit a 128 cell */
+  ctx.save();ctx.globalAlpha=alpha??1;ctx.translate(cx,footY);if(flip)ctx.scale(-1,1);
+  ctx.drawImage(sheet,col*cw,row*ch,cw,ch,-cw*sc/2,-fy*sc,cw*sc,ch*sc);ctx.restore();}
 
 // ---------- RADAR (Nen-style hexagon) ----------
 const RADAR_AX=[["หมัด",a=>(a.punch*2+a.power)/3],["เตะ",a=>(a.kick*2+a.foot)/3],["เข่า-ศอก",a=>(a.knee+a.elbow+a.clinch)/3],
@@ -8523,7 +8524,7 @@ AU.gsfx=function(kind,a){if(!this.init()||this.muted||!SETTINGS.sfx)return;const
   if(kind==="shimmer")for(let i=0;i<6;i++)T(i*.05,{f:1400+Math.random()*1400,type:"sine",dur:.12,peak:.06});};
 
 // ================= MUAY THAI MOE v1.3 — UI =================
-const VERSION="1.91.61";
+const VERSION="1.91.62";
 const CUR_LANG=(typeof window!=="undefined"&&window.LANG)||"th";
 const TH_LABEL=String.fromCharCode(3652,3607,3618);
 function langSwitch(cls){return `<div class="langsw ${cls||""}" role="group" aria-label="Language">${[["th",TH_LABEL],["en","EN"]].map(([k,l])=>`<button class="lsb ${CUR_LANG===k?"on":""}" data-act="setlang" data-v="${k}" aria-pressed="${CUR_LANG===k}">${l}</button>`).join("")}</div>`;}
@@ -12910,7 +12911,7 @@ CHAT.fah.push(
 <script>
 (function(){
 /* v1.87: Thai code ships inside index.html; English code (en.js) and the dictionary (i18n.js) load only when needed */
-var B="d464af5df8";
+var B="118d65213f";
 var L="";try{L=localStorage.getItem("mtm_lang")||"";}catch(e){}
 try{var h=(location.hash||"").match(/lang=(th|en)/);if(h)L=h[1];}catch(e){}
 if(L!=="th"&&L!=="en")L="th";

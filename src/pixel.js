@@ -78,8 +78,9 @@ function spriteTint(sp,hue){const key=sp+"|h"+hue;if(TINTS[key])return TINTS[key
   TINTS[key]=c;return c;}
 function drawFrame(ctx,sheet,row,col,cx,footY,h,flip,alpha){
   if(!sheet||(sheet.complete===false)||(!sheet.width&&!sheet.naturalWidth))return;
-  const sc=h/CELL*1.0,w=CELL*sc;ctx.save();ctx.globalAlpha=alpha??1;ctx.translate(cx,footY);if(flip)ctx.scale(-1,1);
-  ctx.drawImage(sheet,col*CELL,row*CELL,CELL,CELL,-w/2,-h*0.94,w,h);ctx.restore();}
+  const sc=h/CELL,wide=(sheet.naturalWidth||sheet.width)===1536,cw=wide?384:CELL,ch=wide?192:CELL,fy=wide?184:CELL*.94; /* v1.91.62: wide 384×192 cells (foot at 184) for specials whose dashes/trails don't fit a 128 cell */
+  ctx.save();ctx.globalAlpha=alpha??1;ctx.translate(cx,footY);if(flip)ctx.scale(-1,1);
+  ctx.drawImage(sheet,col*cw,row*ch,cw,ch,-cw*sc/2,-fy*sc,cw*sc,ch*sc);ctx.restore();}
 
 // ---------- RADAR (Nen-style hexagon) ----------
 const RADAR_AX=[["หมัด",a=>(a.punch*2+a.power)/3],["เตะ",a=>(a.kick*2+a.foot)/3],["เข่า-ศอก",a=>(a.knee+a.elbow+a.clinch)/3],
