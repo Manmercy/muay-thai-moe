@@ -1615,7 +1615,7 @@ Object.assign(REGION,{
   joinApply(G,cid){if(G.region.joined&&G.region.joined[cid])return; /* v1.91.35: never twice */const R=G.region,r=RG_ORDER.find(x=>RG_CID0[x]===cid),f=G.F[cid]||this.champFighter(G,r),pair=G.F[RG_CH[r].pair],now=gameWeek(G);
     f.camp="player";f.canon=true;f.met=true;f.div=(pair&&(pair.div==="A"||pair.div==="B"))?pair.div:"A";
     f.lvl=Math.max(12,(f.lvl||14)-2);for(const k in f.a)f.a[k]=Math.max(12,Math.min(20,Math.round(f.a[k]*.92*10)/10));f.vet=0; /* v1.91.30 (Man): a small drop from her rival form, not 30% */
-    f.sp=(f.sp||0)+f.lvl;f.xp=0;f.skills=f.skills||{};f.wage=RG_JOIN_WAGE;f.fee=0;f.potential=20;f.fatigue=0;f.injury=0;f.morale=80;f.trust=Math.max(f.trust||0,50);
+    f.sp=(f.sp||0)+3*Math.max(0,f.lvl-1);f.spv=2; /* v1.91.36: the same 3 points a level the main cast earns on a tree */f.xp=0;f.skills=f.skills||{};f.wage=RG_JOIN_WAGE;f.fee=0;f.potential=20;f.fatigue=0;f.injury=0;f.morale=80;f.trust=Math.max(f.trust||0,50);
     f.bond=Math.max(f.bond||0,Math.max(30,rgBondOf(R.meet[cid])));f.joinAbs=now;f.lastTouch=absWeek(G);delete f.rgKey;delete f.rgT;delete f.rgSty;
     G.rank=G.rank||{A:{},B:{}};G.rank[f.div]=G.rank[f.div]||{};if(!G.rank[f.div][f.id])G.rank[f.div][f.id]={pts:0,w:0,l:0,d:0};
     (R.joined=R.joined||{})[cid]=now;this.joinSkills(G);if(typeof syncFighterAges==="function")syncFighterAges(G);
