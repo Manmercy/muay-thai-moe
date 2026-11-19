@@ -1,5 +1,5 @@
 // ================= MUAY THAI MOE v1.3 — UI =================
-const VERSION="1.91.46";
+const VERSION="1.91.47";
 const CUR_LANG=(typeof window!=="undefined"&&window.LANG)||"th";
 const TH_LABEL=String.fromCharCode(3652,3607,3618);
 function langSwitch(cls){return `<div class="langsw ${cls||""}" role="group" aria-label="Language">${[["th",TH_LABEL],["en","EN"]].map(([k,l])=>`<button class="lsb ${CUR_LANG===k?"on":""}" data-act="setlang" data-v="${k}" aria-pressed="${CUR_LANG===k}">${l}</button>`).join("")}</div>`;}
@@ -20,7 +20,7 @@ const moodFor=(mood,look,text)=>{if(look==="thai")return mood;if(mood==="surpris
 const FMOOD=m=>m==="surprised"?"flustered":m==="pout"?"sad":["happy","sad","angry"].includes(m)?m:"happy";
 const stand=(id,look,mood)=>{if(id==="coach")return `${ASSET}coach.webp`;
   // v1.81: Loy Krathong Thai dress — happy + flustered art only; gold-tier players can dress the girls in it off-stage
-  if(look==="casual"&&THAI_IDS.includes(id)&&typeof G!=="undefined"&&G&&G.ev&&G.ev.loy&&G.ev.loy.dressOn&&G.ev.loy.tiers&&G.ev.loy.tiers.gold)look="thai";
+  if(look==="casual"&&THAI_IDS.includes(id)&&!(UI.scene?UI.scene.noThai:THAI_HOLD)&&typeof G!=="undefined"&&G&&G.ev&&G.ev.loy&&G.ev.loy.dressOn&&G.ev.loy.tiers&&G.ev.loy.tiers.gold)look="thai";
   if(look==="thai"&&THAI_IDS.includes(id))return `${ASSET}${id}_thai${["flustered","surprised","pout","sad","angry"].includes(mood)?"_fl":""}.webp`;
 if(id==="pailin")return `${ASSET}pailin_fight_${mood==="surprised"||mood==="flustered"?"surprised":FMOOD(mood)}.webp`;
   if(look==="casual"){const v=mood==="flustered"?"_flustered":["pout","angry","sad"].includes(mood)?"_pout":"";return `${ASSET}${id}_casual${v}.webp`;}
@@ -1138,8 +1138,11 @@ function warmChar(id,look){if(id==="coach"){warm(`${ASSET}coach.webp`);return;}i
   (look==="casual"||look==="thai"?["happy","flustered","pout"]:["happy","sad","surprised","angry"]).forEach(m=>warm(stand(id,look,m)));}
 function warmSteps(steps,look){const walk=list=>(list||[]).forEach(st=>{if(!st)return;const n=typeof st.n==="function"?null:st.n;if(n==="npc"){const im=npcImg(st);if(im)warm(`${ASSET}npc_${im}.webp`);}else if(n)warmChar(n,st.l==="casual"||st.l==="thai"?st.l:(look==="casual"||look==="thai")&&!st.l?look:"fight");
   if(st.with)warmChar(st.with,look==="casual"||look==="thai"?look:"fight");if(st.bg&&BGIMG[st.bg])warm(ASSET+BGIMG[st.bg]);if(st.choice)st.choice.forEach(c=>walk(c.then));});walk(steps);}
-function playScene(steps,done,opts={}){WARM_NEED=[];try{warmSteps(steps,opts.look||"fight");if(opts.bg&&BGIMG[opts.bg])warm(ASSET+BGIMG[opts.bg]);}finally{}const need=[...new Set(WARM_NEED)];WARM_NEED=null;
-  const S=UI.scene={steps:[...steps],i:0,done,bg:opts.bg||"night",look:opts.look||"fight",cur:null,cast:[],coachOK:!!opts.coachOK,award:opts.award||null};
+/* v1.91.47 (Man): the Thai dress has only happy/flustered art — a scene with a sad, angry or pouting line keeps the casual clothes all the way through */
+let THAI_HOLD=false;const sceneNoThai=(steps,look)=>{const seen=new Set();const walk=(x,d)=>{if(!x||typeof x!=="object"||d>6||seen.has(x))return false;seen.add(x);if(Array.isArray(x))return x.some(y=>walk(y,d+1));
+  if(THAI_IDS.includes(x.n)&&["sad","angry","pout"].includes(x.f)&&(x.l||look)==="casual")return true;return Object.values(x).some(y=>walk(y,d+1));};return walk(steps,0);}; /* choices hide their follow-up lines inside the step, so look all the way down */
+function playScene(steps,done,opts={}){WARM_NEED=[];const noThai=sceneNoThai(steps,opts.look||"fight");THAI_HOLD=noThai;try{warmSteps(steps,opts.look||"fight");if(opts.bg&&BGIMG[opts.bg])warm(ASSET+BGIMG[opts.bg]);}finally{}const need=[...new Set(WARM_NEED)];WARM_NEED=null;
+  THAI_HOLD=false;const S=UI.scene={steps:[...steps],i:0,done,bg:opts.bg||"night",look:opts.look||"fight",cur:null,cast:[],coachOK:!!opts.coachOK,award:opts.award||null,noThai};
   /* v1.91.30 (Man): if the scene's art isn't on the device yet, show the loading screen (bar + tip) until it is — at most 8 s, so nothing ever hangs.
      A scene whose art is already here starts at once; a short wait (<0.2 s) never flashes the loading screen. */
   const wait=need.map(u=>WARMED[u]).filter(i=>i&&!(i.complete&&i.naturalWidth));if(!wait.length){sceneNext();return;}
