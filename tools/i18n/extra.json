@@ -14384,5 +14384,20 @@
  "ได้ถ้วยสองใบในศึกเดียว ค่ายเล็กแบบนี้ผมไม่เห็นมานานแล้วครับ": "Two cups in a single tournament. I haven't seen a small camp like yours in a long time",
  "โต๊ะยาวนั่งได้ยี่สิบคน แต่วางจานไว้แค่สองชุด กระจกรอบห้องมองเห็นกรุงเทพฯ ทั้งเมือง": "A long table for twenty, but only two place settings. Glass all around, with all of Bangkok in view",
  "บัตรเชิญสีทองมาถึงค่าย คุณเกริกขอเลี้ยงข้าวผู้จัดการแบบสองต่อสอง ที่ห้องอาหารชั้นบนสุดของตึกนาคาเอเนอร์จี้": "A gold invitation arrives at the camp. Khun Krerk invites the manager to a one-on-one dinner at the top-floor restaurant of the Naga Energy tower",
- "พี่น้องขอนแก่นเอ้ย! ไดโนเสาร์ภูเวียงยังต้องเงยหน้าเบิ่ง แชมป์คนใหม่หมัดหนักปานตีนไดโนเสาร์ คักอีหลี!": "Khon Kaen, everybody! Even the Phu Wiang dinosaurs are looking up! Our new champion punches like a dinosaur stomp. Brilliant!"
+ "พี่น้องขอนแก่นเอ้ย! ไดโนเสาร์ภูเวียงยังต้องเงยหน้าเบิ่ง แชมป์คนใหม่หมัดหนักปานตีนไดโนเสาร์ คักอีหลี!": "Khon Kaen, everybody! Even the Phu Wiang dinosaurs are looking up! Our new champion punches like a dinosaur stomp. Brilliant!",
+ "<button class=\"btn primary\" data-act=\"rgfend\">ดูผลไฟต์ใต้ดิน ▸</button>": "<button class=\"btn primary\" data-act=\"rgfend\">See the result ▸</button>",
+ " ก่อน": " first",
+ "เลือกนักมวยนัด ": "Pick a fighter for bout ",
+ "ชกนัด ": "Fight bout ",
+ "<button class=\"btn\" data-act=\"closeModal\">ไว้ก่อน</button>": "<button class=\"btn\" data-act=\"closeModal\">Not yet</button>",
+ "</b><span class=\"vs-tr\">ค่ายศิริชัย</span></div>\n      <p class=\"meta vs-sub\">ห้าต่อห้า · ชนะสามได้ไป · แตะช่องสีน้ำเงินเพื่อเลือกนักมวย · ไม่มีบาดเจ็บค้างหลังไฟต์</p>\n      <div class=\"vs-rows\">": "</b><span class=\"vs-tr\">Sirichai Camp</span></div>\n      <p class=\"meta vs-sub\">Five on five · first to three · tap a blue slot to pick a fighter · no injuries carry over after the fight</p>\n      <div class=\"vs-rows\">",
+ "<div class=\"vsb\"><div class=\"vs-head\"><span class=\"vs-tl\">นาคาลีก</span><b class=\"vs-sc\">": "<div class=\"vsb\"><div class=\"vs-head\"><span class=\"vs-tl\">Naka League</span><b class=\"vs-sc\">",
+ "<span class=\"vs-tx vs-empty\"><b>+ เลือกนักมวย</b></span>": "<span class=\"vs-tx vs-empty\"><b>+ Pick a fighter</b></span>",
+ "</small></span></div>\n        <div class=\"vs-mid\">VS<small>นัด ": "</small></span></div>\n        <div class=\"vs-mid\">VS<small>Bout ",
+ "\n        <div class=\"mfoot\"><button class=\"btn\" data-act=\"rgfpickx\">กลับ</button></div></div>": "\n        <div class=\"mfoot\"><button class=\"btn\" data-act=\"rgfpickx\">Back</button></div></div>",
+ " · อยู่นัด ": " · in bout ",
+ " · ชกไปแล้ว": " · already fought",
+ " · ใครจะขึ้นชกกับ": " · Who fights ",
+ "<div class=\"vsb\"><h2>นัด ": "<div class=\"vsb\"><h2>Bout ",
+ "กลับเข้าโกดัง ชกต่อ ▸": "Back into the warehouse ▸"
 }

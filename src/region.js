@@ -1047,7 +1047,7 @@ const REGION={
   /* ---------- screens ---------- */
   css(){if(typeof document==="undefined"||document.getElementById("rg-css"))return;const st=document.createElement("style");st.id="rg-css";
     st.textContent=`.rg-head{display:flex;flex-wrap:wrap;gap:.5rem 1rem;align-items:center;justify-content:space-between}.rg-head h3{margin:0}
-.rg-stats{display:flex;gap:.4rem;flex-wrap:wrap}.rg-final{border-top:6px solid #1a1a1a;background:linear-gradient(180deg,#2a1414 0,#160c0c 100%);color:#f3e6e6}.rg-final h3,.rg-final h4{color:#ff5a5a}.rg-final .meta{color:#d9bcbc}.rg-final.won{border-top-color:#d4a52a}.rg-fprep button{display:flex;flex-direction:column;align-items:flex-start;text-align:left;width:100%;max-width:22rem}.rg-fprep small{opacity:.8;font-size:.72rem;white-space:normal}.rg-fprep button,.rg-fprep button *{text-align:left!important;align-self:stretch}.rg-nl .kv-row{border-bottom:1px dashed rgba(255,255,255,.15)}.rg-slot{margin:.4rem 0 .7rem;padding:0 .9rem .4rem 0;border-bottom:1px dashed rgba(0,0,0,.2)}.rg-slot .kv-row{flex-wrap:wrap;gap:4px 12px}.rg-slot .kv-row small{margin-left:auto}.rg-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:.75rem}
+.rg-stats{display:flex;gap:.4rem;flex-wrap:wrap}.rg-final{border-top:6px solid #1a1a1a;background:linear-gradient(180deg,#2a1414 0,#160c0c 100%);color:#f3e6e6}.rg-final h3,.rg-final h4{color:#ff5a5a}.rg-final .meta{color:#d9bcbc}.rg-final.won{border-top-color:#d4a52a}.rg-fprep button{display:flex;flex-direction:column;align-items:flex-start;text-align:left;width:100%;max-width:22rem}.rg-fprep small{opacity:.8;font-size:.72rem;white-space:normal}.rg-fprep button,.rg-fprep button *{text-align:left!important;align-self:stretch}.rg-nl .kv-row{border-bottom:1px dashed rgba(255,255,255,.15)}.rg-slot{margin:.4rem 0 .7rem;padding:0 .9rem .4rem 0;border-bottom:1px dashed rgba(0,0,0,.2)}.rg-slot .kv-row{flex-wrap:wrap;gap:4px 12px}.rg-slot .kv-row small{margin-left:auto}.m-rgfline{max-width:580px;background:linear-gradient(180deg,#120a1e,#0b0812);color:#fff}.m-rgfline .meta{color:#c9c0dc}.vs-head{display:flex;align-items:center;justify-content:center;gap:.6rem;margin:.2rem 0 .3rem;font-weight:900;letter-spacing:.02em}.vs-tl,.vs-tr{flex:1;padding:.35rem .6rem;font-size:1.05rem;color:#fff;text-shadow:0 2px 0 rgba(0,0,0,.5)}.vs-tl{text-align:right;background:linear-gradient(90deg,transparent,#c0182a);clip-path:polygon(0 0,100% 0,92% 100%,0 100%)}.vs-tr{text-align:left;background:linear-gradient(90deg,#1d4fe0,transparent);clip-path:polygon(8% 0,100% 0,100% 100%,0 100%)}.vs-sc{font-size:1.7rem;min-width:3.4rem;text-align:center;color:#ffd84a;text-shadow:0 0 12px rgba(255,216,74,.5)}.vs-sub{text-align:center;font-size:.72rem;margin:0 0 .5rem}.vs-rows{display:flex;flex-direction:column;gap:6px}.vs-row{display:grid;grid-template-columns:1fr 46px 1fr;align-items:stretch;height:84px;position:relative}.vs-l,.vs-r{position:relative;display:flex;align-items:center;gap:.4rem;overflow:hidden;color:#fff;border:0;font:inherit;min-width:0}.vs-l{justify-content:flex-start;background:linear-gradient(90deg,#4a0710,#d01d2c 70%,#ff3b47);clip-path:polygon(0 0,100% 0,88% 100%,0 100%);padding-right:12%}.vs-r{justify-content:flex-end;background:linear-gradient(90deg,#3f7bff,#1d4fe0 30%,#0a1f6b);clip-path:polygon(12% 0,100% 0,100% 100%,0 100%);padding-left:12%;cursor:pointer;text-align:right}.vs-r:not([disabled]):hover{filter:brightness(1.15)}.vs-row.next .vs-r{box-shadow:inset 0 0 0 3px #ffd84a}.vs-row.next .vs-r:not(:has(.vs-art)){animation:vsPulse 1.2s ease-in-out infinite}@keyframes vsPulse{50%{filter:brightness(1.35)}}.vs-mid{display:flex;flex-direction:column;align-items:center;justify-content:center;font-weight:900;font-size:1.35rem;font-style:italic;color:#fff;  text-shadow:-2px 0 0 #d01d2c,2px 0 0 #1d4fe0,0 0 10px rgba(255,255,255,.4);z-index:2}.vs-mid small{font-size:.58rem;font-style:normal;text-shadow:none;color:#c9c0dc}.vs-art{position:relative;flex:0 0 74px;height:84px;overflow:hidden}.vs-art img{position:absolute;left:50%;top:2px;height:235%;transform:translateX(-50%);max-width:none}.vs-art canvas{position:absolute;left:50%;top:-4px;width:150px;height:150px;transform:translateX(-50%);image-rendering:auto}.vs-tx{display:flex;flex-direction:column;min-width:0;line-height:1.15}.vs-tx b{font-size:.88rem;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;text-shadow:0 2px 0 rgba(0,0,0,.45)}.vs-tx small{font-size:.64rem;opacity:.85;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}.vs-empty b{font-size:.85rem;opacity:.95}.vs-row.done .vs-l,.vs-row.done .vs-r{filter:grayscale(1) brightness(.78);cursor:default}.vs-st{position:absolute;top:50%;transform:translate(-50%,-50%) rotate(-10deg);pointer-events:none;box-shadow:0 2px 8px rgba(0,0,0,.6);font-style:normal;font-weight:900;font-size:1.05rem;letter-spacing:.06em;  padding:.05rem .45rem;border:3px solid currentColor;border-radius:4px;background:rgba(0,0,0,.55);z-index:3}.vs-st.vsl{left:11%}.vs-st.vsr{left:89%}.vs-st.w{color:#ffd84a}.vs-st.l{color:#ff6a6a}.vs-st.d{color:#d8d8d8}.vs-pick{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:8px;margin:.5rem 0}.vs-pc{display:flex;flex-direction:column;align-items:center;gap:2px;padding:0 0 .4rem;border:0;color:#fff;font:inherit;cursor:pointer;  background:linear-gradient(180deg,#2a5bf0,#0d2478);box-shadow:inset 0 0 0 2px rgba(255,255,255,.15)}.vs-pc.on{box-shadow:inset 0 0 0 3px #ffd84a}.vs-pc[disabled]{filter:grayscale(1) brightness(.55);cursor:default}.vs-pc .vs-art{flex:none;width:100%;height:96px}.vs-pc small{font-size:.66rem;opacity:.85}@media (prefers-reduced-motion:reduce){.vs-row.next .vs-r{animation:none}}.rg-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:.75rem}
 .rg-reg{border-top:6px solid var(--rc);position:relative}.rg-reg h3{margin:.1rem 0 0}.rg-reg h3::first-letter{text-transform:uppercase}.rg-champ{font-size:.85rem;opacity:.85;margin-bottom:.5rem}
 .rg-prov{display:flex;align-items:center;justify-content:space-between;gap:.5rem;padding:.35rem 0;border-bottom:1px dashed rgba(0,0,0,.15)}
 .rg-prov:last-child{border-bottom:0}.rg-prov small{opacity:.7}.rg-fin{opacity:.9}.rg-miss{display:block;color:#d4688f;opacity:1!important}.rg-belt{color:#b8860b;font-weight:700}
@@ -1119,29 +1119,44 @@ Object.assign(REGION,{
       <p class="meta">ห้าต่อห้า · ชนะสามได้ไป · กติกาเปิด ทุ่มได้ ล็อกได้ · ไม่มีรางวัล${F.tries?` · เคยไปแล้ว ${F.tries} ครั้ง`:""}</p>
       <h4>แผนซ้อมใต้ดิน</h4><div class="rg-pick rg-fprep">${plans}</div>
       <h4>ทีมนาคาลีก</h4>${team}
-      <div class="mfoot">${ready?`<button class="btn primary" data-act="rgfline" ${F.prep?"":"disabled"}>${F.prep?"ไปโกดังใต้ดิน ▸":"เลือกแผนซ้อมก่อน"}</button>`:`<span class="meta">ไปได้ตั้งแต่สัปดาห์ ${wk} · ซ้อมอีก ${F.abs-now} สัปดาห์</span>`}</div></section>`;},
+      <div class="mfoot">${ready?`<button class="btn primary" data-act="rgfline" ${F.prep?"":"disabled"}>${!F.prep?"เลือกแผนซ้อมก่อน":F.live?"กลับเข้าโกดัง ชกต่อ ▸":"ไปโกดังใต้ดิน ▸"}</button>`:`<span class="meta">ไปได้ตั้งแต่สัปดาห์ ${wk} · ซ้อมอีก ${F.abs-now} สัปดาห์</span>`}</div></section>`;},
   finalPool(G){return roster(G).filter(f=>!f.injury&&!isAway(G,f.id));},
-  lineHTML(){const R=G.region,F=R.final,pool=this.finalPool(G),L=UI.rgLine=UI.rgLine||{};
-    for(const k of NL_ORDER)if(L[k]&&!pool.some(f=>f.id===L[k]))delete L[k];
-    if(!Object.keys(L).length){const used=new Set();for(const k of NL_ORDER){const f=pool.filter(x=>!used.has(x.id)).sort((a,b)=>effOvr(G,b)-effOvr(G,a))[0];if(f){L[k]=f.id;used.add(f.id);}}}
-    const full=NL_ORDER.every(k=>L[k]);
-    return `<h2>จัดคู่ ห้าต่อห้า</h2><p class="meta">แต่ละคนชกนัดเดียว · ชนะสามนัดได้ไป · ลดาชกนัดสุดท้ายเสมอ · ไม่มีบาดเจ็บค้างหลังไฟต์</p>
-      ${NL_ORDER.map((k,i)=>`<div class="rg-slot"><div class="kv-row"><span>นัด ${i+1} · <b>${esc(NL[k].name)}</b></span><small>${esc(NL[k].art)}</small></div>
-       <div class="rg-pick">${pool.map(f=>`<button class="btn sm" data-act="rgfpick" data-v="${k}|${f.id}" aria-pressed="${L[k]===f.id}">${faceImg(f,"sm")}${esc(f.name)}</button>`).join("")}</div></div>`).join("")}
-      ${pool.length<5?`<p class="redt">ต้องมีนักมวยพร้อมชกอย่างน้อย 5 คน (ตอนนี้ ${pool.length} คน)</p>`:""}
-      <div class="mfoot"><button class="btn" data-act="closeModal">ไว้ก่อน</button><button class="btn primary" data-act="rgfgo" ${full?"":"disabled"}>เริ่มไฟนอล ▸</button></div>`;},
-  finalGo(){const R=G.region,F=R.final,L={...UI.rgLine};UI.modal=null;F.cur={};F.line=L;AU.startMusic&&AU.startMusic("hub");
-    playScene(rgFinalIntro(G),()=>this.finalBout(0),{bg:"naka_underground",look:"casual"});},
-  finalBout(i){const R=G.region,F=R.final;
-    if(i>=NL_ORDER.length){this.finalEnd();return;}
-    const k=NL_ORDER[i],me=G.F[F.line[k]];if(!me){F.cur[k]="L";this.finalBout(i+1);return;}
+  vsArt(f,side){const A={kati:1,mali:1,rin:1,ploy:1,fah:1,baibua:1,tabtim:1,alicia:1,chaba:1,pailin:1};
+    if(f.nl==="ladda")return `<img src="${ASSET}lada_fight_angry.webp" alt="">`;
+    if(A[f.id])return `<img src="${ASSET}${f.id}_fight_happy.webp" alt="">`;
+    return `<canvas width="128" height="128" data-sprite="${f.id}" data-mode="guard" ${side==="r"?'data-flip="1"':""}></canvas>`;},
+  boardHTML(){const R=G.region,F=R.final,pool=this.finalPool(G),L=F.line=F.line||{},C=F.cur=F.cur||{};
+    for(const k of NL_ORDER)if(!C[k]&&L[k]&&!pool.some(f=>f.id===L[k]))delete L[k];
+    if(!F.live&&!NL_ORDER.some(k=>L[k])){const used=new Set();for(const k of NL_ORDER){const f=pool.filter(x=>!used.has(x.id)).sort((a,b)=>effOvr(G,b)-effOvr(G,a))[0];if(f){L[k]=f.id;used.add(f.id);}}}
+    const ref=pool[0]||roster(G)[0];for(const k of NL_ORDER)if(!G.F["nl_"+k]&&ref)nlFighter(G,k,ref);
+    const v=Object.values(C),w=v.filter(x=>x==="W").length,l=v.filter(x=>x==="L").length,next=NL_ORDER.find(k=>!C[k]);
+    if(UI.rgPick&&!C[UI.rgPick]){const k=UI.rgPick,o=G.F["nl_"+k],at=id=>NL_ORDER.find(x=>L[x]===id);
+      return `<div class="vsb"><h2>นัด ${NL_ORDER.indexOf(k)+1} · ใครจะขึ้นชกกับ${esc(NL[k].name)}</h2><p class="meta">${esc(NL[k].art)}</p>
+        <div class="vs-pick">${pool.map(f=>{const x=at(f.id),done=x&&C[x];return `<button class="vs-pc ${L[k]===f.id?"on":""}" data-act="rgfset" data-v="${k}|${f.id}" ${done?"disabled":""}>
+          <span class="vs-art">${this.vsArt(f,"r")}</span><b>${esc(f.name)}</b><small>Lv.${f.lvl||1}${done?" · ชกไปแล้ว":x&&x!==k?` · อยู่นัด ${NL_ORDER.indexOf(x)+1}`:""}</small></button>`;}).join("")}</div>
+        ${pool.length<5?`<p class="redt">ต้องมีนักมวยพร้อมชกอย่างน้อย 5 คน (ตอนนี้ ${pool.length} คน)</p>`:""}
+        <div class="mfoot"><button class="btn" data-act="rgfpickx">กลับ</button></div></div>`;}
+    const stamp=(r,sd)=>r?`<i class="vs-st ${sd} ${r==="W"?"w":r==="L"?"l":"d"}">${r==="W"?"WIN":r==="L"?"LOSE":"DRAW"}</i>`:"";
+    const rows=NL_ORDER.map((k,i)=>{const o=G.F["nl_"+k],me=L[k]&&G.F[L[k]],r=C[k],their=r==="W"?"L":r==="L"?"W":r;
+      return `<div class="vs-row ${r?"done":""} ${k===next?"next":""}">
+        <div class="vs-l"><span class="vs-art">${o?this.vsArt(o,"l"):""}</span><span class="vs-tx"><b>${esc(NL[k].name)}</b><small>${esc(NL[k].art)}</small></span></div>
+        <div class="vs-mid">VS<small>นัด ${i+1}</small></div>
+        <button class="vs-r" data-act="rgfslot" data-v="${k}" ${r?"disabled":""}>${me?`<span class="vs-tx"><b>${esc(me.name)}</b><small>Lv.${me.lvl||1}</small></span><span class="vs-art">${this.vsArt(me,"r")}</span>`:`<span class="vs-tx vs-empty"><b>+ เลือกนักมวย</b></span>`}</button>${stamp(their,"vsl")}${stamp(r,"vsr")}</div>`;}).join("");
+    const nk=next&&NL_ORDER.indexOf(next)+1,ok=next&&L[next];
+    return `<div class="vsb"><div class="vs-head"><span class="vs-tl">นาคาลีก</span><b class="vs-sc">${w>0||l>0?`${l} – ${w}`:"VS"}</b><span class="vs-tr">ค่ายศิริชัย</span></div>
+      <p class="meta vs-sub">ห้าต่อห้า · ชนะสามได้ไป · แตะช่องสีน้ำเงินเพื่อเลือกนักมวย · ไม่มีบาดเจ็บค้างหลังไฟต์</p>
+      <div class="vs-rows">${rows}</div>
+      <div class="mfoot">${next?`${F.live?"":`<button class="btn" data-act="closeModal">ไว้ก่อน</button>`}<button class="btn primary" data-act="rgfgo" ${ok?"":"disabled"}>${ok?`ชกนัด ${nk} ▸`:`เลือกนักมวยนัด ${nk} ก่อน`}</button>`:`<button class="btn primary" data-act="rgfend">ดูผลไฟต์ใต้ดิน ▸</button>`}</div></div>`;},
+  finalNext(){const R=G.region,F=R.final,C=F.cur=F.cur||{},k=NL_ORDER.find(x=>!C[x]);if(!k||!(F.line||{})[k])return;UI.modal=null;UI.rgPick=null;
+    if(!F.live){F.live=true;save();AU.startMusic&&AU.startMusic("hub");playScene(rgFinalIntro(G),()=>this.finalBout(k),{bg:"naka_underground",look:"casual"});return;}
+    this.finalBout(k);},
+  finalBout(k){const R=G.region,F=R.final,i=NL_ORDER.indexOf(k),me=G.F[F.line[k]];if(!me)return;
     const keep={injury:me.injury||0,fatigue:me.fatigue||0},o=nlFighter(G,k,me);
     const b={id:`nlf${F.tries||0}_${i}_${gameWeek(G)}`,a:me.id,b:o.id,week:G.week,tier:"exhibition",rounds:5,win:0,lose:0,bg:"bg_naka_underground.webp",gprep:F.prep,region:{nlfinal:k}};
     G.bookings.push(b);save();
     openFight(b,()=>{G.bookings=G.bookings.filter(x=>x.id!==b.id);me.injury=keep.injury;me.fatigue=keep.fatigue;this.flush(G);
-      const res=F.cur[k]||"L",w=Object.values(F.cur).filter(x=>x==="W").length,l=Object.values(F.cur).filter(x=>x==="L").length;save();
-      if(i<NL_ORDER.length-1)playScene(rgFinalBetween(G,i,me,o,res,w,l),()=>this.finalBout(i+1),{bg:"naka_underground",look:"casual"});else this.finalBout(i+1);});},
-  finalEnd(){const R=G.region,F=R.final,v=Object.values(F.cur),w=v.filter(x=>x==="W").length,l=v.filter(x=>x==="L").length,beat=F.cur.ladda==="W";F.tries=(F.tries||0)+1;
+      if(!F.cur[k])F.cur[k]="L";save();UI.modal={type:"rgfline"};render();});},
+  finalEnd(){const R=G.region,F=R.final,v=Object.values(F.cur||{}),w=v.filter(x=>x==="W").length,l=v.filter(x=>x==="L").length,beat=(F.cur||{}).ladda==="W";F.tries=(F.tries||0)+1;F.live=false;UI.modal=null;
     if(w>=3){F.won=true;F.stage="done";F.wonAbs=gameWeek(G);F.score=`${w}–${l}`;F.beatLadda=beat;R.hall=R.hall||[];R.hall.push({k:"naka",season:G.season||1,score:F.score,ladda:beat});
       for(const r of RG_ORDER)rgTouch(G,RG_CID[r]);G.rep+=3;
       AU.startMusic&&AU.startMusic("victory");playScene(rgFinalWin(G,w,l,beat,F.line.ladda),()=>{AU.startMusic&&AU.startMusic("hub");save();render();},{bg:"naka_underground",look:"casual"});return;}
@@ -1149,13 +1164,17 @@ Object.assign(REGION,{
 });
 if(typeof ACT!=="undefined")Object.assign(ACT,{
   rgfprep:d=>{const F=G.region&&G.region.final;if(!F||F.won)return;F.prep=d.v;save();render();},
-  rgfline:()=>{const F=G.region&&G.region.final;if(!F||F.won||!F.prep||gameWeek(G)<F.abs)return;UI.rgLine={};UI.modal={type:"rgfline"};render();},
-  rgfpick:d=>{const [k,id]=d.v.split("|"),L=UI.rgLine=UI.rgLine||{};for(const x of NL_ORDER)if(L[x]===id)delete L[x];L[k]=id;render();},
-  rgfgo:()=>{if(!NL_ORDER.every(k=>(UI.rgLine||{})[k]))return;REGION.finalGo();},
-  rgfagain:()=>{UI.rgLine={};UI.modal={type:"rgfline"};render();},
+  rgfline:()=>{const F=G.region&&G.region.final;if(!F||F.won||!F.prep||gameWeek(G)<F.abs)return;UI.rgPick=null;UI.modal={type:"rgfline"};render();},
+  rgfslot:d=>{const F=G.region.final;if((F.cur||{})[d.v])return;UI.rgPick=d.v;render();},
+  rgfpickx:()=>{UI.rgPick=null;render();},
+  rgfset:d=>{const [k,id]=d.v.split("|"),F=G.region.final,L=F.line=F.line||{},C=F.cur||{};if(C[k])return;
+    const was=NL_ORDER.find(x=>L[x]===id);if(was&&C[was])return;if(was&&was!==k){if(L[k])L[was]=L[k];else delete L[was];}L[k]=id;UI.rgPick=null;save();render();},
+  rgfgo:()=>REGION.finalNext(),
+  rgfend:()=>{const F=G.region.final;if(NL_ORDER.every(k=>(F.cur||{})[k]))REGION.finalEnd();},
+  rgfagain:()=>{const F=G.region.final;F.cur={};F.live=false;UI.rgPick=null;UI.modal={type:"rgfline"};render();},
   rgfhome:()=>{const F=G.region.final;F.abs=gameWeek(G)+1;UI.modal=null;addMail(G,{kind:"letter",from:"(ไม่มีชื่อผู้ส่ง)",title:"การ์ดสีดำใบใหม่",body:"ประตูยังเปิดอยู่\n— ล."});save();render();},
 });
-if(typeof XMODAL!=="undefined"){XMODAL.rgfline=()=>({body:REGION.lineHTML(),foot:false});
+if(typeof XMODAL!=="undefined"){XMODAL.rgfline=()=>({body:REGION.boardHTML(),foot:false});
   XMODAL.rgflost=()=>({body:`<h2>แพ้ไฟต์ใต้ดิน</h2><p>จะเอายังไงต่อ</p><div class="mfoot"><button class="btn" data-act="rgfhome">กลับไปซ้อมก่อน (มาใหม่สัปดาห์หน้า)</button><button class="btn primary" data-act="rgfagain">จัดคู่ใหม่ แล้วสู้ต่อเลย</button></div>`,foot:false});}
 if(typeof XMODAL!=="undefined"){XMODAL.rgplan=m=>({body:REGION.planHTML(m.dest),foot:false});XMODAL.rgser=m=>({body:REGION.seriesHTML(m.r),foot:false});}
 if(typeof ACT!=="undefined")Object.assign(ACT,{
