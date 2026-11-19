@@ -292,21 +292,30 @@ const DUEL={st:null,
 /* v1.90 round 5: the opening gala (the week after the invitation) and the story beat after the first cup — the green-gold contract */
 /* v1.91.56 (Man): a rematch series gets its own lines — the champion remembers the last time, and each bout still hints at her style (bout 1 / bout 2 / the decider) */
 const RG_PRE2={
- baibua:[[n=>`Back again, jao… I'm glad you don't give up. I've drilled extra elbows every morning too. Come in close.`,n=>`${n}… I remember every punch from last time, jao. Today I'll wait at elbow range again.`],
-   [n=>`Bout two, jao… Last time I countered you. This time I'll counter again. Watch the spinning elbow.`],
-   [n=>`The decider again, jao… I'm not faster by luck. I've run up the mountain every morning since last time.`]],
- tabtim:[[n=>`Back again, der! Tabtim's been counting, ha ha. Tabtim's feet are as light as ever. Catch me first.`,n=>`${n}! Tabtim missed you so much… no, no, missed the fight, ha ha. Today Tabtim will run circles round the ring till you're dizzy.`],
-   [n=>`Tabtim jumps a hand higher than last time. Mind your head, der.`],
-   [n=>`The last bout again… This time Tabtim isn't running. Pure Korat heavy hands, for Dad to see one more time.`]],
- alicia:[[n=>`Back again? My stream viewers are starting to know your face… I'll dance around you like last time. Keep up.`,n=>`${n} again… Don't get the wrong idea. I'm not happy to see you, the camera is. Try to keep up with me today.`],
-   [n=>`Same as before. I wait, you come in, I counter… only this time the counter is faster.`],
-   [n=>`The decider again. I'll come right in and fight you up close, same as before. No camera will keep up.`]],
- chaba:[[n=>`…Back again. Good. You come in first.`,n=>`…Still waiting right here. ${n}, come in.`],
-   [n=>`…No dodging. Same as before. Harder than before.`],
-   [n=>`…Tha Dee Chaiya, once more. Nobody backs off.`]],
- _nc:[[n=>`${n} again? I watched the last fight over and over. I know every beat of it.`,n=>`Back again… good. I want to beat someone who doesn't give up.`],
-   [n=>`Bout two again. I've changed my plan again.`],
-   [n=>`The decider again. Today we find out who trained harder.`]]};
+ baibua:[[n=>`Back again, jao… I'm glad you don't give up. I've drilled extra elbows every morning too. Come in close.`,n=>`${n}… I remember every punch from last time, jao. Today I'll wait at elbow range again.`,
+     n=>`I watched the last tape with Dad all night, jao. He says wait even closer for the elbow.`,n=>`This khao tom mat is for after the fight, jao… elbows first. Come in close.`],
+   [n=>`Bout two, jao… Last time I countered you. This time I'll counter again. Watch the spinning elbow.`,n=>`Last time my counter was half a beat late. Not this time, jao.`,n=>`The harder you come in, the harder I counter, jao.`],
+   [n=>`The decider again, jao… I'm not faster by luck. I've run up the mountain every morning since last time.`,n=>`The decider with Sirichai again… I never get tired of it, jao. But my feet will be faster.`,n=>`The Tha Sao wind blows harder than last time, jao. Keep up.`]],
+ tabtim:[[n=>`Back again, der! Tabtim's been counting, ha ha. Tabtim's feet are as light as ever. Catch me first.`,n=>`${n}! Tabtim missed you so much… no, no, missed the fight, ha ha. Today Tabtim will run circles round the ring till you're dizzy.`,
+     n=>`The village asked when Sirichai was coming back. Tabtim said today, ha ha. Light feet ready, der.`,n=>`My little brother wrote me a fight plan. One word: "Run." Ha ha.`],
+   [n=>`Tabtim jumps a hand higher than last time. Mind your head, der.`,n=>`Watch your feet, Tabtim's jumping over your head again.`,n=>`The new Red Ruby jumping kick, trained just for today, der.`],
+   [n=>`The last bout again… This time Tabtim isn't running. Pure Korat heavy hands, for Dad to see one more time.`,n=>`Dad's in the front row again… Tabtim will stand and trade heavy for him, like before.`,n=>`No running this bout. Heavy hands only, like Dad taught.`]],
+ alicia:[[n=>`Back again? My stream viewers are starting to know your face… I'll dance around you like last time. Keep up.`,n=>`${n} again… Don't get the wrong idea. I'm not happy to see you, the camera is. Try to keep up with me today.`,
+     n=>`My team already titled the clip "The Rematch"… I hope the winner in it is me. Keep up with my feet.`,n=>`I rebuilt my footwork since last time. Don't think it was because of you.`],
+   [n=>`Same as before. I wait, you come in, I counter… only this time the counter is faster.`,n=>`The stats say you come in after the second punch. That's where I'll be waiting.`,n=>`I'll wait like before. Come in and you get countered.`],
+   [n=>`The decider again. I'll come right in and fight you up close, same as before. No camera will keep up.`,n=>`No show in the decider. I'm coming to you.`,n=>`Turn the cameras off. This bout I fight up close to the end.`]],
+ chaba:[[n=>`…Back again. Good. You come in first.`,n=>`…Still waiting right here. ${n}, come in.`,n=>`…Come in. I can wait longer this time.`,n=>`…My brother says fight hard. …Both of us.`],
+   [n=>`…No dodging. Same as before. Harder than before.`,n=>`…Forward. Only forward.`,n=>`…No backing off.`],
+   [n=>`…Tha Dee Chaiya, once more. Nobody backs off.`,n=>`…Chaiya. Fast feet.`,n=>`…It ends this bout.`]],
+ _nc:[[n=>`${n} again? I watched the last fight over and over. I know every beat of it.`,n=>`Back again… good. I want to beat someone who doesn't give up.`,n=>`The whole region talks about Sirichai. I want to win in front of them again.`],
+   [n=>`Bout two again. I've changed my plan again.`,n=>`You remember my plan, right? I've changed it.`],
+   [n=>`The decider again. Today we find out who trained harder.`,n=>`The last bout again. I don't give the cup away easily.`]]};
+/* after a rematch bout: the champion's line when she wins / loses it */
+const RG_POST2={baibua:{win:["Once more, jao… I'm glad we met again, but the cup stays with me.","My elbow still knows the way, jao… but you nearly had it."],lose:["…This time Sirichai read me even better, jao.","You get better every time, jao. I need to go train more."]},
+ tabtim:{win:["Ha ha, Tabtim again! But that was way more tiring this time, der.","Not yet! Come again, Tabtim loves fighting this camp."],lose:["Ow, that hurt more than last time! Who taught you to kick like that!","Ha ha… not funny any more. Tabtim's getting it back."]},
+ alicia:{win:["This clip will beat last time's views… because I won, not because of you.","Not your day yet. But close… that wasn't a compliment."],lose:["…Cameras off. Give me five minutes.","You really have got better… don't you dare post that."]},
+ chaba:{win:["…Not yet.","…Come again."],lose:["…Better.","…That hurt. Good."]},
+ _nc:{win:["I held on, but it was harder this time."],lose:["You've got a lot better since last time."]}};
 /* your fighter, walking out for a rematch */
 const RG_REPLY2={kati:"I've watched the tape until I know it by heart. I won't lose twice.",mali:"Last time Mali cried. This time Mali's going to smile.",rin:"I have all the data from last time. This time the numbers are on our side.",ploy:"I can't lose to the same person twice.",fah:"This time Fah gets it back. Watch!"};
 const RG_CID={north:"baibua",isan:"tabtim",central:"alicia",south:"chaba"};
@@ -1123,7 +1132,8 @@ Welcome her at Fights › Four Regions Cup`});}
     if(J.kind==="cup"){AU.startMusic&&AU.startMusic("victory");AU.sfx&&AU.sfx("champ");
       {const aw={kind:"rg_"+r,key:"cup"+r};AU.startMusic("victory");AU.sfx("champ");playScene(H.cup(G,J),()=>{AU.startMusic("hub");T.cupNight=rgEd(G)===1?1:0;this.night(T,P,1,done);},{bg:"rg_"+H.ring,look:"fight",award:aw});
         [600,1300,2200,3300,4700,6200].forEach(ms=>setTimeout(()=>{if(UI.scene&&UI.scene.award===aw)AU.sfx("pop");},ms));}return;} /* v1.91.14: the cup gets the ceremony overlay, fireworks and the victory song */
-    const steps=J.kind==="lost"?H.lost(G,J):[{...this.spk(r,J.res==="W"?"sad":"happy","fight"),t:(J.res==="W"?H.lose:H.win)[Math.min(2,(J.n||1)-1)]},
+    const t2=(R.champ[r]||{}).tries||0,P2=t2?((R.nc&&R.nc[r])?RG_POST2._nc:RG_POST2[cid]):null,L2=P2&&(J.res==="W"?P2.lose:P2.win);
+    const steps=J.kind==="lost"?H.lost(G,J):[{...this.spk(r,J.res==="W"?"sad":"happy","fight"),t:L2&&L2.length?L2[(t2+(J.n||1))%L2.length]:(J.res==="W"?H.lose:H.win)[Math.min(2,(J.n||1)-1)]},
       {n:"nar",t:`Score now ${J.w}-${J.l} · next bout in about 2 weeks`}];
     playScene(steps,()=>this.night(T,P,1,done),{bg:"rg_"+H.ring,look:"fight"});},
   /* the series fighter picker (modal) */
