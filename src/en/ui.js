@@ -1,5 +1,5 @@
 // ================= MUAY THAI MOE v1.3 — UI =================
-const VERSION="1.91.67";
+const VERSION="1.91.68";
 const CUR_LANG=(typeof window!=="undefined"&&window.LANG)||"th";
 const TH_LABEL=String.fromCharCode(3652,3607,3618);
 function langSwitch(cls){return `<div class="langsw ${cls||""}" role="group" aria-label="Language">${[["th",TH_LABEL],["en","EN"]].map(([k,l])=>`<button class="lsb ${CUR_LANG===k?"on":""}" data-act="setlang" data-v="${k}" aria-pressed="${CUR_LANG===k}">${l}</button>`).join("")}</div>`;}
@@ -191,7 +191,9 @@ function prefetchArt(){if(PREF||!G)return;PREF=true;const c=navigator.connection
   const slow=/3g/.test(c.effectiveType||"");(window.__MTM_ART||[]).forEach(n=>{if(!slow||G&&Object.values(G.F||{}).some(f=>n.startsWith((f.sprite||f.id||"")+"_")))S.add(ASSET+n);});
   const q=[...S].filter(u=>!WARMED[u]&&!IMGS[u.slice(ASSET.length)]);let busy=0;const next=()=>{if(UI.loadScr&&UI.loadScr.scene){setTimeout(next,400);return;}while(busy<2&&q.length){const u=q.shift();busy++;const i=new Image();i.decoding="async";i.onload=i.onerror=()=>{busy--;setTimeout(next,60);};i.src=u;WARMED[u]=i;}};
   (window.requestIdleCallback||((f)=>setTimeout(f,300)))(next);}
+let MGRP_W=0;
 function render(){
+  try{if(!MGRP_W&&typeof G!=="undefined"&&G&&G.avatar&&typeof MGRP!=="undefined"){MGRP_W=1;setTimeout(()=>{try{MGRP.warm(G.avatar);}catch(e){}},2500);}}catch(e){} /* v1.91.68 */
   try{if(typeof G!=="undefined"&&G&&!G.ended)autoPlans();}catch(e){}
   try{if(typeof G!=="undefined"&&G&&G.region&&typeof REGION==="undefined"&&regionOn())regionLoad().then(R=>{if(R.flush&&G)R.flush(G);render();}).catch(()=>{});}catch(e){}
   document.documentElement.classList.toggle("vnopen",!!(UI&&(UI.scene||UI.fight)));
@@ -277,7 +279,7 @@ function fsHTML(){if(fsApp())return "";
   return `<div class="set"><span><b>Full screen</b><small>iPhone: tap Share, then "Add to Home Screen" — the game opens from that icon without the browser bars · Safari saves don't carry over, so export your save first and import it in the new icon</small></span></div>`;}
 if(typeof document!=="undefined")["fullscreenchange","webkitfullscreenchange"].forEach(ev=>document.addEventListener(ev,()=>{if(UI.modal&&UI.modal.type==="settings")render();}));
 function settingsHTML(){const t=(k,label,desc)=>`<label class="set"><span><b>${label}</b><small>${desc}</small></span><input type="checkbox" data-act="setopt" data-k="${k}" ${SETTINGS[k]?"checked":""}></label>`;
-  return `<h2>Settings</h2><div class="sets"><div class="set"><span><b>Language · ภาษา</b><small>Switching reloads the game. Your saves are kept</small></span>${langSwitch()}</div>${G&&G.avatar?`<div class="set"><span><b>Your character</b><small>${esc(G.player.name)} · change your name, look and outfit any time</small></span><button class="btn sm" data-act="avedit">Edit character</button></div>`:""}${fsHTML()}${G?`<div class="set"><span><b>Enter code</b><small>Get event codes in the game's Discord (button below)</small></span><span class="obtns redeem"><input id="redeemcode" maxlength="24" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="Code" aria-label="Code"><button class="btn sm primary" data-act="redeem">Redeem</button></span></div>${commHTML()}${typeof codeContentHTML==="function"?codeContentHTML():""}`:commHTML()}${t("music","Music","Pi chawa, khaek drums and ching during fights")}${t("sfx","Sound effects","Punches, kicks, bells, cheering")}${t("coach","Coach Daeng's tips","Coach guides you on the camp screen, fight offers and between rounds")+t("askEnd","Ask before ending the week","Warn me when something is still left to do this week")}${t("quick","Fast mode","Skip the training scenes at week's end and go straight to the summary")}</div>
+  return `<h2>Settings</h2><div class="sets"><div class="set"><span><b>Language · ภาษา</b><small>Switching reloads the game. Your saves are kept</small></span>${langSwitch()}</div>${G&&G.avatar?`<div class="set setav"><span class="setav-pic"><canvas width="48" height="64" data-chibi="player" aria-hidden="true"></canvas></span><span><b>Your character</b><small>${esc(G.player.name)} · change your name, look and outfit any time</small></span><button class="btn sm" data-act="avedit">Edit character</button></div>${t("mgrShow","Show yourself in scenes","Your anime portrait stands beside the girls when you speak · turn it off if you'd rather not see yourself")}`:""}${fsHTML()}${G?`<div class="set"><span><b>Enter code</b><small>Get event codes in the game's Discord (button below)</small></span><span class="obtns redeem"><input id="redeemcode" maxlength="24" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="Code" aria-label="Code"><button class="btn sm primary" data-act="redeem">Redeem</button></span></div>${commHTML()}${typeof codeContentHTML==="function"?codeContentHTML():""}`:commHTML()}${t("music","Music","Pi chawa, khaek drums and ching during fights")}${t("sfx","Sound effects","Punches, kicks, bells, cheering")}${t("coach","Coach Daeng's tips","Coach guides you on the camp screen, fight offers and between rounds")+t("askEnd","Ask before ending the week","Warn me when something is still left to do this week")}${t("quick","Fast mode","Skip the training scenes at week's end and go straight to the summary")}</div>
    ${!G&&loadSave()?`<div class="set danger"><span><b>Manage save slots</b><small>View, load or delete each slot</small></span><button class="btn sm" data-act="openload">Open</button></div>`:""}${G?`<p class="meta">Playing save slot ${UI.slot} · autosaves whenever you make progress ${CLOUD.ready?" · backed up to the cloud":" · not connected to the cloud (saved in this browser only)"}</p>
    ${G&&UI.slot&&bakInfo(UI.slot)?`<div class="set"><span><b>Pre-update save</b><small>Kept when the game updated · v${esc(String(bakInfo(UI.slot).ver))} week ${bakInfo(UI.slot).week}</small></span><button class="btn sm" data-act="bakrestore">Restore</button></div>`:""}
    <div class="set"><span><b>Back up save to file</b><small>Keep the file yourself; import it on another device or browser</small></span><span class="obtns"><button class="btn sm" data-act="exportsave">Export</button><label class="btn sm">Import<input type="file" accept=".json,application/json" data-act="importsave" hidden></label></span></div>`:`<div class="set"><span><b>Import a save file</b><small>A previously exported file goes into slot 1</small></span><label class="btn sm">Import<input type="file" accept=".json,application/json" data-act="importsave" hidden></label></div>`}
@@ -292,32 +294,54 @@ const GLOSS=[["Readiness","Condition on fight day. The higher, the better she fi
  ["Blood-boil mode","When badly hurt or behind on points, a fighter may 'change eyes' for a moment: stronger counters, easier criticals. Once per fight"],["Wai khru ram muay","Ritual before the first fight, canon matchups, and major bouts. Choose a dance; each gives a different effect"]];
 
 // ---------- creator (manager look) ----------
+/* v1.91.68 (Man): random Thai nicknames for the manager (none clash with the girls) and dice per section */
+const MGR_NAMES={m:["Ton","Phum","Ek","Boss","Kong","Oat","Non","Pond","Tae","Tum","Phai","James"],f:["Dao","Mint","Praew","Prang","Fern","Khaohom","Kaem","Namwan","Puifai","Belle","June","Prae"]};
+function crRandName(g,not){const L=MGR_NAMES[g==="f"?"f":"m"].filter(x=>x!==not);return L[Math.floor(Math.random()*L.length)];}
+function crRoll(c,part){const O=CHIBI.OPT,p=a=>a[Math.floor(Math.random()*a.length)];
+  if(part==="face"){c.hairStyle=p(O.hairStyle)[0];c.hair=p(Math.random()<.75?O.hair.slice(0,5):O.hair);c.skin=p(O.mskin);c.eyes=p(O.eyes);}
+  if(part==="wear"){c.outfit=p(["tee","polo","suit","hoodie"]);c.outfitColor=p(O.cloth);c.pants=p(["long","long","shorts"]);c.pantsColor=p(["#1f1f24","#2c3e6b","#5a4a3a","#8a8f99","#e8dcc0"]);}
+  if(part==="acc"){c.hat=p(["none","none","cap","bucket"]);c.hatColor=p(O.cloth);c.glasses=p(["none","none","glasses","sun"]);}}
+const crName=()=>{const e=document.getElementById("pname");if(e&&UI.creator)UI.creator.name=e.value;};
 function crPanels(c){const O=CHIBI.OPT;
   const sw=(prop,list)=>`<div class="sw">${list.map(v=>`<button style="background:${v}" aria-label="${v}" aria-pressed="${c[prop]===v}" data-act="cset" data-k="${prop}" data-v="${v}"></button>`).join("")}</div>`;
   const seg=(prop,list)=>`<div class="seg">${list.map(([v,t])=>`<button data-act="cset" data-k="${prop}" data-v="${v}" aria-pressed="${c[prop]===v}">${t}</button>`).join("")}</div>`;
   const F=(label,inner)=>`<div class="field"><span class="lb">${label}</span>${inner}</div>`;
   const tab=c.tab||(c.edit?"face":"base");
   const T={base:F("Gender (affects dialogue)",seg("gender",[["m","Male"],["f","Female"]]))+F("Difficulty",seg("diff",[["easy","Easy"],["normal","Normal"],["hard","It is"]]))+`<p class="meta">${{easy:"Rivals grow slower, more class income. For players who want the story",normal:"Balanced as designed",hard:"Ploy and Fah are tougher, use stronger skills, money is tighter"}[c.diff||"normal"]}</p>`+F("Seed (optional)",`<input id="pseed" maxlength="20" value="${esc(c.seed||"")}" autocomplete="off" placeholder="Leave blank = random world">`)+`<p class="meta">Use the same seed as a friend to get the same world: rival fighters, fight offers and random events all match. Numbers or words both work.</p>`,
-   face:F("Hairstyle",seg("hairStyle",O.hairStyle))+F("Hair color",sw("hair",O.hair))+`<div class="two">${F("Skin tone",sw("skin",O.skin))}${F("Eye color",sw("eyes",O.eyes))}</div>`,
+   face:F("Hairstyle",seg("hairStyle",O.hairStyle))+F("Hair color",sw("hair",O.hair))+`<div class="two">${F("Skin tone",sw("skin",O.mskin))}${F("Eye color",sw("eyes",O.eyes))}</div>`,
    wear:F("Outfit",seg("outfit",[["tee","T-shirt"],["polo","Polo"],["suit","Suit"],["hoodie","Hoodie"]])+sw("outfitColor",O.cloth))+F("Pants",seg("pants",[["long","Long"],["shorts","Shorts"]])+sw("pantsColor",["#1f1f24","#2c3e6b","#5a4a3a","#8a8f99","#e8dcc0"])),
    acc:F("Hat",seg("hat",[["none","None"],["cap","Cap"],["bucket","Bucket"]]))+(c.hat!=="none"?F("Hat color",sw("hatColor",O.cloth)):"")+F("Glasses",seg("glasses",[["none","None"],["glasses","Prescription"],["sun","Sunglasses"]]))};
   if(c.edit)T.base=F("Gender (affects dialogue)",seg("gender",[["m","Male"],["f","Female"]]));
   return {tab,T};}
+/* v1.91.68 (prototype): the manager's expressions (anime portrait) */
+const MGRP_E=[["normal","Normal"],["smile","Smile"],["sad","Sad"],["serious","Serious"],["surprised","Surprised"],["flustered","Flustered"]];
 /* v1.91.51: change your name and look mid-game (Settings → แก้ไขตัวละคร) — difficulty and seed stay as they were */
-function avEditHTML(){const c=UI.creator;if(!c)return "";const {tab,T}=crPanels(c);
-  return `<h2>Edit your character</h2><div class="creator v2 cr-edit"><div class="px cr-top"><div class="cr-stage"><canvas width="240" height="320" data-chibi="creator" aria-label="Character preview"></canvas></div>
-     <div class="cr-id"><div class="field"><label for="pname">Name</label><input id="pname" maxlength="14" value="${esc(c.name||"")}" autocomplete="off" placeholder="${esc(G.player.name)}"></div>
-      <button class="btn sm" data-act="crand">Randomize look</button></div></div>
-   <div class="seg cr-tabs" role="tablist">${[["base","Gender"],["face","Hair · Face"],["wear","Outfit"],["acc","Extras"]].map(([k,t])=>`<button role="tab" data-act="ctab" data-v="${k}" aria-pressed="${tab===k}">${t}</button>`).join("")}</div>
-   <div class="px cr-opts">${T[tab]}</div>
-   <p class="meta">Your new name is used in dialogue from now on. Difficulty and the game seed stay the same.</p>
-   <div class="mfoot"><button class="btn ghost" data-act="avcancel">Cancel</button><button class="btn primary" data-act="avsave">Save</button></div></div>`;}
+/* v1.91.68 (Man): a cleaner editor — the anime portrait is the hero (pixel self in its corner), name + dice and gender beside it,
+   three tabs (hair·face / outfit / extras) each with its own dice, and Cancel/Save always in reach at the bottom */
+/* v1.91.68: the portrait for the creator/editor — while a new look is being drawn the last one stays up (no blank box) */
+function mgrU(c,e){const u=typeof MGRP!=="undefined"?MGRP.url(c,e||"normal",()=>render()):"";if(u)UI.mgrLastU=u;return u||UI.mgrLastU||"";}
+function avEditHTML(){const c=UI.creator;if(!c)return "";const {T}=crPanels(c);const tab=["face","wear","acc"].includes(c.tab)?c.tab:"face";
+  const TABS=[["face","Hair · Face"],["wear","Outfit"],["acc","Extras"]];const u=mgrU(c,UI.mgrE);
+  return `<h2>Edit your character</h2><div class="creator cr-edit ae">
+   <div class="ae-hero">
+    <div class="ae-port px">${u?`<img src="${u}" alt="Manager portrait">`:`<div class="cr-portload">Drawing…</div>`}
+     <div class="ae-chibi"><canvas width="240" height="320" data-chibi="creator" aria-label="Pixel character"></canvas></div></div>
+    <div class="ae-side">
+     <div class="field"><label for="pname">Name</label><input id="pname" maxlength="14" value="${esc(c.name||"")}" autocomplete="off" placeholder="${esc(G.player.name)}"></div>
+     <div class="field"><span class="lb">Gender <small>· changes dialogue</small></span><div class="seg">${[["m","Male"],["f","Female"]].map(([v,t])=>`<button data-act="cset" data-k="gender" data-v="${v}" aria-pressed="${c.gender===v}">${t}</button>`).join("")}</div></div>
+     <div class="ae-acts"><button class="btn sm" data-act="crand">🎲 Shuffle all</button><label class="ae-chk"><input type="checkbox" data-act="mgrshow" ${SETTINGS.mgrShow!==false?"checked":""}><span>Show yourself in scenes</span></label><button class="btn sm ghost" data-act="crreset">↺ Revert</button><button class="btn sm ghost" data-act="mgrtest">▶ Try in a scene</button></div>
+    </div>
+    <div class="ae-expr" role="group" aria-label="Try expressions">${MGRP_E.map(([k,t])=>`<button data-act="mgre" data-v="${k}" aria-pressed="${(UI.mgrE||"normal")===k}">${t}</button>`).join("")}</div>
+   </div>
+   <div class="seg cr-tabs ae-tabs" role="tablist">${TABS.map(([k,t])=>`<button role="tab" data-act="ctab" data-v="${k}" aria-pressed="${tab===k}">${t}</button>`).join("")}</div>
+   <div class="px cr-opts ae-opts">${T[tab]}</div>
+   <div class="ae-foot"><small>Difficulty and seed stay the same</small><button class="btn ghost" data-act="avcancel">Cancel</button><button class="btn primary" data-act="avsave">Save</button></div></div>`;}
 function creatorHTML(){const c=UI.creator;const {tab,T}=crPanels(c);
   return `<div class="creator v2"><div class="cr-in">
    <header class="cr-head"><h1>The new camp owner</h1><p class="lead">You are Grandpa Chai's grandchild, heir to Sirichai Camp</p></header>
-   <div class="px cr-top"><div class="cr-stage"><canvas width="240" height="320" data-chibi="creator" aria-label="Character preview"></canvas></div>
+   <div class="px cr-top">${(u=>`<div class="ae-port nc-port">${u?`<img src="${u}" alt="Manager portrait">`:`<div class="cr-portload">Drawing…</div>`}<div class="ae-chibi"><canvas width="240" height="320" data-chibi="creator" aria-label="Character preview"></canvas></div></div>`)(mgrU(c))}
      <div class="cr-id"><div class="field"><label for="pname">Name</label><input id="pname" maxlength="14" value="${esc(c.name||"")}" autocomplete="off" placeholder="${c.gender==="m"?"Ton":"Dao"}"></div>
-      <button class="btn sm" data-act="crand">Randomize all</button></div></div>
+      <button class="btn sm" data-act="crand">🎲 Shuffle all</button><label class="ae-chk"><input type="checkbox" data-act="mgrshow" ${SETTINGS.mgrShow!==false?"checked":""}><span>Show yourself in scenes</span></label></div></div>
    <div class="seg cr-tabs" role="tablist">${[["base","Basics"],["face","Hair · Face"],["wear","Outfit"],["acc","Extras"]].map(([k,t])=>`<button role="tab" data-act="ctab" data-v="${k}" aria-pressed="${tab===k}">${t}</button>`).join("")}</div>
    <div class="px cr-opts">${T[tab]}</div>
    <div class="cr-foot"><button class="btn ghost" data-act="cancelCreate">Back</button><button class="btn primary" data-act="startGame">Inherit the camp ▸</button></div>
@@ -1072,7 +1096,8 @@ const PATCH={id:"1.90.0",ver:"Muay Thai Moe v1.90",title:"Loy Krathong Night at 
  ["📜","Plan before letter fights","Belt fights, challenges, the helmet gang and odd jobs from letters now open the fight-plan sheet before the bell."],
  ["🖼️","Nearly 60 new backgrounds","49 new story scenes, plus the morning market, the gang warehouse, the moonlit river ring and the camp pier at dawn."],
  ["📱","Full screen","Turn on full screen in Settings (Android/desktop), or use 'Add to Home Screen' so the game opens like an app."],
- ["🛠️","Other fixes","The between-round corner is back to the original order puzzle, the skill tab scrolls as one page on phones, scene backgrounds no longer repeat on tall screens, event art preloads so it appears faster, and characters keep their mood while choices are on screen."]],
+ ["🛠️","Other fixes","The between-round corner is back to the original order puzzle, the skill tab scrolls as one page on phones, scene backgrounds no longer repeat on tall screens, event art preloads so it appears faster, and characters keep their mood while choices are on screen."],
+ ["🧑‍💼","The manager gets a face","Settings → Edit character: change your name, gender, hair, hat, outfit and glasses any time. You now have a half-body anime portrait that follows your choices, with 6 expressions to try. Shuffle all rolls everything, name and outfit included. Tap 'Try in a scene' to stand next to Kati (you can hide yourself in scenes in Settings)"]],
  foot:"May everyone's krathong float to where they hope it will ✦"};
 function maybeWhatsNew(){if(!G||G.ended||UI.scene)return;if(G.newsSeen===PATCH.id)return;UI.modal={type:"whatsnew"};}
 function whatsNewHTML(){return `<div class="wnew"><span class="pill gold">Update · ${esc(PATCH.ver)}</span><h2>🥊 ${esc(PATCH.title)}</h2><p class="lead">${esc(PATCH.lead)}</p>
@@ -1163,7 +1188,7 @@ function warmSteps(steps,look){const walk=list=>(list||[]).forEach(st=>{if(!st)r
 let THAI_HOLD=false;const sceneNoThai=(steps,look)=>{if(THAI_XP)return false;const seen=new Set();const walk=(x,d)=>{if(!x||typeof x!=="object"||d>6||seen.has(x))return false;seen.add(x);if(Array.isArray(x))return x.some(y=>walk(y,d+1));
   if(THAI_IDS.includes(x.n)&&["sad","angry","pout"].includes(x.f)&&(x.l||look)==="casual")return true;return Object.values(x).some(y=>walk(y,d+1));};return walk(steps,0);}; /* choices hide their follow-up lines inside the step, so look all the way down */
 function playScene(steps,done,opts={}){WARM_NEED=[];const noThai=sceneNoThai(steps,opts.look||"fight");THAI_HOLD=noThai;try{warmSteps(steps,opts.look||"fight");if(opts.bg&&BGIMG[opts.bg])warm(ASSET+BGIMG[opts.bg]);}finally{}const need=[...new Set(WARM_NEED)];WARM_NEED=null;
-  THAI_HOLD=false;const S=UI.scene={steps:[...steps],i:0,done,bg:opts.bg||"night",look:opts.look||"fight",cur:null,cast:[],coachOK:!!opts.coachOK,award:opts.award||null,noThai};
+  THAI_HOLD=false;const S=UI.scene={steps:[...steps],i:0,done,mlook:opts.mlook||null,bg:opts.bg||"night",look:opts.look||"fight",cur:null,cast:[],coachOK:!!opts.coachOK,award:opts.award||null,noThai};
   /* v1.91.30 (Man): if the scene's art isn't on the device yet, show the loading screen (bar + tip) until it is — at most 8 s, so nothing ever hangs.
      A scene whose art is already here starts at once; a short wait (<0.2 s) never flashes the loading screen. */
   const wait=need.map(u=>WARMED[u]).filter(i=>i&&!(i.complete&&i.naturalWidth));if(!wait.length){sceneNext();return;}
@@ -1187,7 +1212,8 @@ function sceneNext(){const S=UI.scene;if(!S)return;
     const n=val(st.n);S.lookOf=S.lookOf||{};
     // v1.8: each character keeps one outfit for the whole scene
     const look=castId(n)?(S.lookOf[n]=S.lookOf[n]||(st.l==="train"?"fight":st.l)||S.look):(st.l||S.look);
-    S.cur={n,f:val(st.f)||"happy",t:nameCall(n,val(st.t)),look,who:st.who,cg:st.cg||null,tel:n==="coach"&&!S.coachOK&&!!(G&&G.coachAwayAbs&&gameWeek(G)<G.coachAwayAbs)};
+    if(n==="me"&&st.mf){S.mgr=true;S.mf=st.mf;}
+    S.cur={n,f:val(st.f)||"happy",t:nameCall(n,val(st.t)),look,who:st.who,mf:st.mf||null,cg:st.cg||null,tel:n==="coach"&&!S.coachOK&&!!(G&&G.coachAwayAbs&&gameWeek(G)<G.coachAwayAbs)};
     if(st.show)S.cast=st.show.map(x=>({id:x.id,f:x.f||"happy",look:S.lookOf[x.id]||x.l||look,back:!!x.back}));
     if(n==="npc"){const im=npcImg(st);if(im)S.cast=[{id:"npc:"+im,f:"happy",look}];}
     if(n==="coach"){S.cast=[{id:"coach",f:"happy",look}];}           // the coach always stands alone
@@ -1204,11 +1230,17 @@ function sceneHTML(){const S=UI.scene,c=S.cur||{};const sp=c.n==="coach"?{name:c
   const who=c.n==="me"?esc(G.player.name):c.n==="nar"?"":esc(sp.name||"");
   const spk=c.n||S.lastN;if(c.n)S.lastN=c.n;
   const bgKey=(S.bg==="gym"||S.bg==="camp")?gymBg():BGIMG[S.bg];
-  const cast=S.cast.map((m,i)=>{const active=m.id===spk||(c.choice&&i===S.cast.length-1);const pos=S.cast.length===1?"c":i===0?"l":"r";
+  /* v1.91.68 (Man): the manager stands on stage at the girls' scale once he has a face line (left, the girl moves right) */
+  /* v1.91.68 (Man): players can hide him (Settings) — the "try in a scene" preview always shows him */
+  const mOn=S.mgr&&(S.mlook||SETTINGS.mgrShow!==false);
+  const mu=mOn&&typeof MGRP!=="undefined"&&(S.mlook||(G&&G.avatar))?MGRP.url(S.mlook||G.avatar,S.mf||"normal",()=>render()):"";
+  const girls=mOn?S.cast.slice(-1):S.cast,nOn=girls.length+(mOn?1:0);
+  const mst=mOn&&!c.cg?(mu?`<img class="stand mgrst ${girls.length?"l":"c"} ${spk==="me"&&!c.choice?"on":"off"}" src="${mu}" alt="">`:""):"";
+  const cast=mst+girls.map((m,i)=>{const active=m.id===spk||(c.choice&&i===girls.length-1);const pos=nOn===1?"c":mOn?"r":i===0?"l":"r";
     return `<img class="stand ${pos} ${active&&!m.back?"on":"off"}${m.back?" back":""}" src="${m.id.startsWith("npc:")?(m.id.slice(4).startsWith("nl_")?`${ASSET}${m.id.slice(4)}.webp`:`${ASSET}npc_${m.id.slice(4)}.webp`):m.back?`${ASSET}${m.id}_back.webp`:stand(m.id,m.look,active&&!c.choice?moodFor(c.f,m.look,c.t):moodFor(m.f,m.look,""))}" alt="">`;}).join("");
   const tag="";
   return `<div class="vn" role="dialog" aria-label="Story scene"><div class="vbg bg-${S.bg==="camp"?"gym":S.bg}" ${bgKey?`style="background-image:url(${ASSET}${bgKey})"`:""}></div>
-   ${c.cg?`<div class="vcg" style="--cg:url(${ASSET}${c.cg}.webp)"><img src="${ASSET}${c.cg}.webp" alt=""></div>`:`<div class="cast ${(S.cast||[]).length>1?"duo":""}">${cast}</div>`}
+   ${c.cg?`<div class="vcg" style="--cg:url(${ASSET}${c.cg}.webp)"><img src="${ASSET}${c.cg}.webp" alt=""></div>`:`<div class="cast ${nOn>1?"duo":""}">${cast}</div>`}
    ${S.award?`<div class="awardfx" aria-hidden="true">${Array.from({length:24},(_,i)=>`<i style="--i:${i}"></i>`).join("")}${[["14%","22%","0s","#ffd45a"],["78%","16%","-.8s","#ff6b6b"],["50%","30%","-1.6s","#8fd3ff"],["30%","12%","-1.2s","#c785e6"],["66%","34%","-.4s","#9dffb0"]].map(([x,y,d,c])=>`<span class="fw" style="--x:${x};--y:${y};--d:${d};--c:${c}">${Array.from({length:12},(_,a)=>`<b style="--a:${a}"></b>`).join("")}</span>`).join("")}<div class="awardbelt"><span class="strap"></span><span class="seal">★</span><span class="strap"></span></div><div class="awardname">${esc(honorLabel(S.award.kind,S.award.venue))}</div></div>`:""}
    ${c.choice?"":`<button class="vtap" data-act="vnext" aria-label="Continue"></button>`}
    <div class="vbox px" data-act="${c.choice?"":"vnext"}" style="--c:${sp.color||"var(--gold)"}">
@@ -1765,7 +1797,7 @@ const ACT={
   loadslot:d=>{backupSlot(+d.v);const s0=loadSlot(+d.v);if(!s0)return;const s=safeFix(s0);if(!s){toast("This save can't be opened in this version. Nothing was deleted");return;}G=s;const pk=G.F.ploy&&G.F.ploy.skills;if(pk&&pk.korat){G.F.ploy.skills={kr_swing:2,captain:1};}UI.slot=+d.v;UI.tab="home";UI.modal=null;UI.advCache={};withArt(()=>{AU.startMusic("hub");if(G.ended){UI.ending=endingScene(G);}maybeWhatsNew();render();});},
   askdelslot:d=>{UI.delSlot=+d.v;render();},canceldel:()=>{UI.delSlot=null;render();},
   delslot:()=>{clearSave(UI.delSlot);UI.delSlot=null;if(!loadSave())UI.modal=null;render();},
-  beginNew:i=>{UI.slot=i;UI.modal=null;AU.startMusic("hub");UI.creator={name:"",...CHIBI.randomManager(Math.random),gender:"m",diff:"normal",outfit:"tee",hat:"none",glasses:"none"};UI.modal=null;render();},
+  beginNew:i=>{try{MGRP.warm({gender:"m"});MGRP.warm({gender:"f"});}catch(e){}UI.slot=i;UI.modal=null;AU.startMusic("hub");UI.creator={name:"",...CHIBI.randomManager(Math.random),gender:"m",diff:"normal",outfit:"tee",hat:"none",glasses:"none"};UI.modal=null;render();},
   fullscreen:()=>{const d=document,e=d.documentElement,no=()=>toast("This browser can't go full screen — try adding the game to your Home screen instead");
     try{if(fsOn()){(d.exitFullscreen||d.webkitExitFullscreen).call(d);}else{const r=(e.requestFullscreen||e.webkitRequestFullscreen).call(e,{navigationUI:"hide"});if(r&&r.catch)r.catch(no);}}catch(x){no();}},
   copyseed:()=>{const v=G.seedText||String(G.seed);const ok=()=>toast("Seed copied: "+v);try{navigator.clipboard.writeText(v).then(ok,()=>toast("seed: "+v));}catch(e){toast("seed: "+v);}},
@@ -1798,14 +1830,20 @@ const ACT={
   cardspecial:d=>{const C=CARDS[d.v],o=(G.cards||{})[d.v];if(!C||!o||!C.lv3||(o.lv||1)<3)return;const bk=UI.modal&&UI.modal.back;o.lvSeen=3;save();UI.modal=null;playScene([{n:"nar",t:`✦ Special scene · ${C.lv3t||""}`}].concat(C.lv3),()=>{UI.modal={type:"card",id:d.v,back:bk};render();},{bg:C.bg,look:"casual"});},
   cardmg:d=>{const C=CARDS[d.v],o=(G.cards||{})[d.v];if(!C||!o||!C.mg||(o.lv||1)<3)return;BAG.openCard(C.mg,d.v);},
   cardlater:()=>{(G.cardPend||[]).shift();save();UI.modal=(G.cardPend||[]).length?{type:"cardnew"}:null;render();},
-  avedit:()=>{UI.creator={...G.avatar,name:G.player.name,gender:G.player.gender||G.avatar.gender||"m",edit:1,tab:"face"};UI.modal={type:"avedit"};render();},
+  avedit:()=>{try{MGRP.warm(G.avatar);}catch(e){}UI.mgrLastU="";const o={...G.avatar,name:G.player.name,gender:G.player.gender||G.avatar.gender||"m"};UI.creator={...o,orig:o,edit:1,tab:"face"};UI.modal={type:"avedit"};render();},
+  mgre:d=>{UI.mgrE=d.v;render();},
+  mgrtest:()=>{const c=UI.creator;if(!c)return;c.name=((document.getElementById("pname")||{}).value||c.name||"").trim();const nm=c.name||G.player.name;const look={...c};UI.modal=null;
+    playScene([{n:"kati",f:"happy",t:"Manager! I ran all ten laps today!"},{n:"me",mf:"smile",t:"Great work, Kati. Twelve laps tomorrow."},{n:"kati",f:"sad",t:"…Twelve?"},{n:"me",mf:"serious",t:"Your next opponent has the longer reach. You need gas for round five."},{n:"kati",f:"angry",t:"Then you run with me, Manager!"},{n:"me",mf:"surprised",t:"Wait — me too?"},{n:"kati",f:"happy",t:"Yes! Five a.m. at the gate, ${nm}!"},{n:"me",mf:"flustered",t:"…Fine. Five a.m. it is."},{n:"me",mf:"sad",t:"(Farewell, sleeping in.)"}],
+      ()=>{UI.modal={type:"avedit"};render();},{bg:"gym",mlook:look,look:"casual"});},
   avcancel:()=>{UI.creator=null;UI.modal={type:"settings"};render();},
   avsave:()=>{const c=UI.creator;if(!c||!G)return;const nm=((document.getElementById("pname")||{}).value||"").trim();
-    const {name,diff,seed,tab,edit,...look}=c;G.avatar=look;G.player.gender=c.gender||G.player.gender;if(nm)G.player.name=nm.slice(0,14);
+    const {name,diff,seed,tab,edit,orig,...look}=c;G.avatar=look;G.player.gender=c.gender||G.player.gender;if(nm)G.player.name=nm.slice(0,14);
     UI.creator=null;UI.modal={type:"settings"};save();render();toast("Character saved");},
   cancelCreate:()=>{AU.startMusic("title");UI.creator=null;render();},
   cset:d=>{UI.creator.name=(document.getElementById("pname")||{}).value||UI.creator.name;crSeed();UI.creator[d.k]=d.v;render();},
-  crand:()=>{const n=(document.getElementById("pname")||{}).value||"",o=UI.creator||{};crSeed();UI.creator={...CHIBI.randomManager(Math.random),name:n,diff:o.diff||"normal",gender:o.gender||"m",tab:o.tab,seed:o.seed,edit:o.edit};render();},
+  crand:()=>{const o=UI.creator||{};crName();crSeed();const c={...o};c.gender=Math.random()<.5?"m":"f";["face","wear","acc"].forEach(k=>crRoll(c,k));c.name=crRandName(c.gender,(o.name||"").trim());UI.creator=c;render();}, /* v1.91.68 (Man): one dice for everything — name, gender, face, outfit, extras */
+  mgrshow:()=>{crName();crSeed();SETTINGS.mgrShow=SETTINGS.mgrShow===false;saveSettings();render();}, /* v1.91.68 (Man): the same switch as Settings, right under the dice */
+  crreset:()=>{const c=UI.creator;if(!c||!c.orig)return;UI.creator={...c.orig,orig:c.orig,edit:1,tab:c.tab};render();},
   ctab:d=>{UI.creator.name=(document.getElementById("pname")||{}).value||UI.creator.name;crSeed();UI.creator.tab=d.v;render();},
   startGame:()=>{const c=UI.creator;c.name=((document.getElementById("pname")||{}).value||"").trim()||(c.gender==="m"?"Ton":"Dao");
     crSeed();const {name,diff,seed,...look}=c;G=newGame({name,gender:c.gender,diff:diff||"normal",avatar:look,seed:seedFrom(seed)});if(seed&&!/^\d{1,10}$/.test(seed))G.seedText=seed;G.newsSeen=PATCH.id;genOffers(G);UI.creator=null;UI.tab="home";G.seen.prologue=true;AU.resume();AU.startMusic("date");

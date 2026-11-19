@@ -144,7 +144,7 @@ function drawLayer(ctx,layer,frame,ox=0){
 }
 function drawChar(ctx,st,frame,ox=0,gray=false){for(const l of (st.kind==='manager'?managerLayers(st):layerList(st,gray)))drawLayer(ctx,l,frame,ox);}
 const FRAMES=[{dy:0},{dy:0},{dy:1},{dy:1}];
-const OPT={skin:["#f6d7c3","#eec1a0","#d9a27b","#b97d55","#8d5a3b","#5e3a26"],
+const OPT={skin:["#f6d7c3","#eec1a0","#d9a27b","#b97d55","#8d5a3b","#5e3a26"],mskin:["#f6d7c3","#eec1a0","#d9a27b","#b97d55"], /* mskin v1.91.68 (Man): the manager picks from the four lighter tones */
   hair:["#2b2530","#5a3a2a","#a0663a","#d8b26a","#c9ced8","#6b3fa0","#c8283c","#2f6fb0"],
   eyes:["#3a2a24","#6a4a2a","#2f6fb0","#3f8a5a","#8a3fa0","#b0302f"],
   cloth:["#c8283c","#2c5fb3","#1f1f24","#2f8a4f","#6a3fa0","#e07aa0","#e0a91b","#f2f2f2"],
@@ -155,6 +155,6 @@ function random(rng){const p=a=>a[Math.floor(rng()*a.length)];const g=rng()<.5?"
   return {gender:g,hairStyle:p(OPT.hairStyle)[0],hair:p(OPT.hair.slice(0,5)),skin:p(OPT.skin),eyes:p(OPT.eyes),top:g==="f"?p(["bra","tank"]):p(["tank","none"]),
     topColor:p(OPT.cloth),shorts:p(OPT.cloth),gloves:p(OPT.cloth),mongkol:rng()<.3,prajioud:rng()<.3};}
 function randomManager(rng){const p=a=>a[Math.floor(rng()*a.length)];const g=rng()<.5?"m":"f";
-  return {kind:"manager",gender:g,hairStyle:p(OPT.hairStyle)[0],hair:p(OPT.hair.slice(0,5)),skin:p(OPT.skin),eyes:p(OPT.eyes),outfit:p(["tee","polo","suit","hoodie"]),outfitColor:p(OPT.cloth),pants:"long",pantsColor:p(["#1f1f24","#2c3e6b","#5a4a3a"]),hat:p(["none","none","cap","bucket"]),hatColor:p(OPT.cloth),glasses:p(["none","none","glasses","sun"])};}
+  return {kind:"manager",gender:g,hairStyle:p(OPT.hairStyle)[0],hair:p(OPT.hair.slice(0,5)),skin:p(OPT.mskin),eyes:p(OPT.eyes),outfit:p(["tee","polo","suit","hoodie"]),outfitColor:p(OPT.cloth),pants:"long",pantsColor:p(["#1f1f24","#2c3e6b","#5a4a3a"]),hat:p(["none","none","cap","bucket"]),hatColor:p(OPT.cloth),glasses:p(["none","none","glasses","sun"])};}
 return {W,H,drawChar,randomManager,drawLayer,layerList,canvasFor,random,OPT,FRAMES};
 })();

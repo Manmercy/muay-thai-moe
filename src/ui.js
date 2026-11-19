@@ -1,5 +1,5 @@
 // ================= MUAY THAI MOE v1.3 — UI =================
-const VERSION="1.91.67";
+const VERSION="1.91.68";
 const CUR_LANG=(typeof window!=="undefined"&&window.LANG)||"th";
 const TH_LABEL=String.fromCharCode(3652,3607,3618);
 function langSwitch(cls){return `<div class="langsw ${cls||""}" role="group" aria-label="Language">${[["th",TH_LABEL],["en","EN"]].map(([k,l])=>`<button class="lsb ${CUR_LANG===k?"on":""}" data-act="setlang" data-v="${k}" aria-pressed="${CUR_LANG===k}">${l}</button>`).join("")}</div>`;}
@@ -191,7 +191,9 @@ function prefetchArt(){if(PREF||!G)return;PREF=true;const c=navigator.connection
   const slow=/3g/.test(c.effectiveType||"");(window.__MTM_ART||[]).forEach(n=>{if(!slow||G&&Object.values(G.F||{}).some(f=>n.startsWith((f.sprite||f.id||"")+"_")))S.add(ASSET+n);});
   const q=[...S].filter(u=>!WARMED[u]&&!IMGS[u.slice(ASSET.length)]);let busy=0;const next=()=>{if(UI.loadScr&&UI.loadScr.scene){setTimeout(next,400);return;}while(busy<2&&q.length){const u=q.shift();busy++;const i=new Image();i.decoding="async";i.onload=i.onerror=()=>{busy--;setTimeout(next,60);};i.src=u;WARMED[u]=i;}};
   (window.requestIdleCallback||((f)=>setTimeout(f,300)))(next);}
+let MGRP_W=0;
 function render(){
+  try{if(!MGRP_W&&typeof G!=="undefined"&&G&&G.avatar&&typeof MGRP!=="undefined"){MGRP_W=1;setTimeout(()=>{try{MGRP.warm(G.avatar);}catch(e){}},2500);}}catch(e){} /* v1.91.68 */
   try{if(typeof G!=="undefined"&&G&&!G.ended)autoPlans();}catch(e){}
   try{if(typeof G!=="undefined"&&G&&G.region&&typeof REGION==="undefined"&&regionOn())regionLoad().then(R=>{if(R.flush&&G)R.flush(G);render();}).catch(()=>{});}catch(e){}
   document.documentElement.classList.toggle("vnopen",!!(UI&&(UI.scene||UI.fight)));
@@ -277,7 +279,7 @@ function fsHTML(){if(fsApp())return "";
   return `<div class="set"><span><b>เต็มจอ</b><small>iPhone: กดปุ่มแชร์ แล้ว "เพิ่มไปยังหน้าจอโฮม" เปิดเกมจากไอคอนนั้นจะไม่มีแถบเบราว์เซอร์ · เซฟใน Safari ไม่ตามไปเอง ส่งออกเซฟก่อนแล้วนำเข้าในไอคอนใหม่</small></span></div>`;}
 if(typeof document!=="undefined")["fullscreenchange","webkitfullscreenchange"].forEach(ev=>document.addEventListener(ev,()=>{if(UI.modal&&UI.modal.type==="settings")render();}));
 function settingsHTML(){const t=(k,label,desc)=>`<label class="set"><span><b>${label}</b><small>${desc}</small></span><input type="checkbox" data-act="setopt" data-k="${k}" ${SETTINGS[k]?"checked":""}></label>`;
-  return `<h2>ตั้งค่า</h2><div class="sets"><div class="set"><span><b>ภาษา · Language</b><small>สลับแล้วเกมจะโหลดใหม่ เซฟยังอยู่</small></span>${langSwitch()}</div>${G&&G.avatar?`<div class="set"><span><b>ตัวละครของคุณ</b><small>${esc(G.player.name)} · เปลี่ยนชื่อ หน้าตา และชุดได้ตลอด</small></span><button class="btn sm" data-act="avedit">แก้ไขตัวละคร</button></div>`:""}${fsHTML()}${G?`<div class="set"><span><b>ใส่โค้ด</b><small>รับโค้ดอีเวนต์ได้ใน Discord ของเกม (ปุ่มด้านล่าง)</small></span><span class="obtns redeem"><input id="redeemcode" maxlength="24" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="โค้ด" aria-label="โค้ด"><button class="btn sm primary" data-act="redeem">ใช้โค้ด</button></span></div>${commHTML()}${typeof codeContentHTML==="function"?codeContentHTML():""}`:commHTML()}${t("music","เพลงประกอบ","ปี่ชวา กลองแขก ฉิ่ง ระหว่างชก")}${t("sfx","เอฟเฟกต์เสียง","เสียงต่อย เตะ ระฆัง เสียงเชียร์")}${t("coach","ครูแดงแนะนำ","ครูคอยไกด์ในหน้าค่าย ข้อเสนอไฟต์ และช่วงพักยก")+t("askEnd","ถามก่อนจบสัปดาห์","เตือนเมื่อยังมีสิ่งที่ยังไม่ได้ทำในสัปดาห์นี้")}${t("quick","เล่นเร็ว","ข้ามฉากฝึกซ้อมตอนจบสัปดาห์ ไปสรุปผลทันที")}</div>
+  return `<h2>ตั้งค่า</h2><div class="sets"><div class="set"><span><b>ภาษา · Language</b><small>สลับแล้วเกมจะโหลดใหม่ เซฟยังอยู่</small></span>${langSwitch()}</div>${G&&G.avatar?`<div class="set setav"><span class="setav-pic"><canvas width="48" height="64" data-chibi="player" aria-hidden="true"></canvas></span><span><b>ตัวละครของคุณ</b><small>${esc(G.player.name)} · เปลี่ยนชื่อ หน้าตา และชุดได้ตลอด</small></span><button class="btn sm" data-act="avedit">แก้ไขตัวละคร</button></div>${t("mgrShow","แสดงตัวคุณในฉากสนทนา","ภาพอนิเมะของคุณยืนคู่กับสาว ๆ ตอนคุณพูด · ปิดได้ถ้าไม่อยากเห็นตัวเอง")}`:""}${fsHTML()}${G?`<div class="set"><span><b>ใส่โค้ด</b><small>รับโค้ดอีเวนต์ได้ใน Discord ของเกม (ปุ่มด้านล่าง)</small></span><span class="obtns redeem"><input id="redeemcode" maxlength="24" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="โค้ด" aria-label="โค้ด"><button class="btn sm primary" data-act="redeem">ใช้โค้ด</button></span></div>${commHTML()}${typeof codeContentHTML==="function"?codeContentHTML():""}`:commHTML()}${t("music","เพลงประกอบ","ปี่ชวา กลองแขก ฉิ่ง ระหว่างชก")}${t("sfx","เอฟเฟกต์เสียง","เสียงต่อย เตะ ระฆัง เสียงเชียร์")}${t("coach","ครูแดงแนะนำ","ครูคอยไกด์ในหน้าค่าย ข้อเสนอไฟต์ และช่วงพักยก")+t("askEnd","ถามก่อนจบสัปดาห์","เตือนเมื่อยังมีสิ่งที่ยังไม่ได้ทำในสัปดาห์นี้")}${t("quick","เล่นเร็ว","ข้ามฉากฝึกซ้อมตอนจบสัปดาห์ ไปสรุปผลทันที")}</div>
    ${!G&&loadSave()?`<div class="set danger"><span><b>จัดการช่องเซฟ</b><small>ดู โหลด หรือลบเซฟแต่ละช่อง</small></span><button class="btn sm" data-act="openload">เปิด</button></div>`:""}${G?`<p class="meta">กำลังเล่นช่องเซฟ ${UI.slot} · บันทึกอัตโนมัติทุกครั้งที่มีความคืบหน้า${CLOUD.ready?" · สำรองบนคลาวด์แล้ว":" · ยังไม่ได้เชื่อมคลาวด์ (เซฟอยู่ในเบราว์เซอร์นี้เท่านั้น)"}</p>
    ${G&&UI.slot&&bakInfo(UI.slot)?`<div class="set"><span><b>เซฟก่อนอัปเดต</b><small>เก็บไว้ตอนเกมอัปเดต · v${esc(String(bakInfo(UI.slot).ver))} สัปดาห์ ${bakInfo(UI.slot).week}</small></span><button class="btn sm" data-act="bakrestore">กู้คืน</button></div>`:""}
    <div class="set"><span><b>สำรองเซฟเป็นไฟล์</b><small>เก็บไฟล์ไว้เอง ย้ายเครื่องหรือเบราว์เซอร์ก็นำเข้าได้</small></span><span class="obtns"><button class="btn sm" data-act="exportsave">ส่งออก</button><label class="btn sm">นำเข้า<input type="file" accept=".json,application/json" data-act="importsave" hidden></label></span></div>`:`<div class="set"><span><b>นำเข้าเซฟจากไฟล์</b><small>ไฟล์ที่เคยส่งออกไว้ จะลงช่อง 1</small></span><label class="btn sm">นำเข้า<input type="file" accept=".json,application/json" data-act="importsave" hidden></label></div>`}
@@ -292,32 +294,54 @@ const GLOSS=[["ความพร้อม","สภาพร่างกาย�
  ["โหมดเลือดเดือด","เมื่อเจ็บหนักหรือตามคะแนน นักมวยอาจ 'ตาเปลี่ยน' ชั่วครู่ สวนแรงและคริติคอลง่าย ไฟต์ละครั้ง"],["ไหว้ครูรำมวย","พิธีก่อนชกไฟท์แรก ไฟท์กับตัวละครหลัก และไฟท์สำคัญ เลือกท่ารำได้ แต่ละท่าให้ผลต่างกัน"]];
 
 // ---------- creator (manager look) ----------
+/* v1.91.68 (Man): random Thai nicknames for the manager (none clash with the girls) and dice per section */
+const MGR_NAMES={m:["ต้น","ภูมิ","เอก","บอส","ก้อง","โอ๊ต","นนท์","ปอนด์","เต้","ตั้ม","ไผ่","เจมส์"],f:["ดาว","มิ้นท์","แพรว","ปราง","เฟิร์น","ข้าวหอม","แก้ม","น้ำหวาน","ปุยฝ้าย","เบล","จูน","แพร"]};
+function crRandName(g,not){const L=MGR_NAMES[g==="f"?"f":"m"].filter(x=>x!==not);return L[Math.floor(Math.random()*L.length)];}
+function crRoll(c,part){const O=CHIBI.OPT,p=a=>a[Math.floor(Math.random()*a.length)];
+  if(part==="face"){c.hairStyle=p(O.hairStyle)[0];c.hair=p(Math.random()<.75?O.hair.slice(0,5):O.hair);c.skin=p(O.mskin);c.eyes=p(O.eyes);}
+  if(part==="wear"){c.outfit=p(["tee","polo","suit","hoodie"]);c.outfitColor=p(O.cloth);c.pants=p(["long","long","shorts"]);c.pantsColor=p(["#1f1f24","#2c3e6b","#5a4a3a","#8a8f99","#e8dcc0"]);}
+  if(part==="acc"){c.hat=p(["none","none","cap","bucket"]);c.hatColor=p(O.cloth);c.glasses=p(["none","none","glasses","sun"]);}}
+const crName=()=>{const e=document.getElementById("pname");if(e&&UI.creator)UI.creator.name=e.value;};
 function crPanels(c){const O=CHIBI.OPT;
   const sw=(prop,list)=>`<div class="sw">${list.map(v=>`<button style="background:${v}" aria-label="${v}" aria-pressed="${c[prop]===v}" data-act="cset" data-k="${prop}" data-v="${v}"></button>`).join("")}</div>`;
   const seg=(prop,list)=>`<div class="seg">${list.map(([v,t])=>`<button data-act="cset" data-k="${prop}" data-v="${v}" aria-pressed="${c[prop]===v}">${t}</button>`).join("")}</div>`;
   const F=(label,inner)=>`<div class="field"><span class="lb">${label}</span>${inner}</div>`;
   const tab=c.tab||(c.edit?"face":"base");
   const T={base:F("เพศ (มีผลกับบทพูด)",seg("gender",[["m","ชาย"],["f","หญิง"]]))+F("ความยาก",seg("diff",[["easy","ง่าย"],["normal","ปกติ"],["hard","ยาก"]]))+`<p class="meta">${{easy:"คู่แข่งพัฒนาช้าลง รายได้คลาสมากขึ้น เหมาะกับคนอยากเล่นเนื้อเรื่อง",normal:"สมดุลตามที่ออกแบบไว้",hard:"พลอยกับฟ้าโหดขึ้น ใช้สกิลแรงขึ้น เงินตึงขึ้น"}[c.diff||"normal"]}</p>`+F("Seed (ไม่บังคับ)",`<input id="pseed" maxlength="20" value="${esc(c.seed||"")}" autocomplete="off" placeholder="เว้นว่าง = สุ่มโลกใหม่">`)+`<p class="meta">ใส่ seed เดียวกับเพื่อน จะได้โลกเดียวกัน: นักมวยคู่แข่ง ข้อเสนอไฟต์ และเหตุการณ์สุ่มตรงกัน ใส่เป็นตัวเลขหรือคำก็ได้</p>`,
-   face:F("ทรงผม",seg("hairStyle",O.hairStyle))+F("สีผม",sw("hair",O.hair))+`<div class="two">${F("สีผิว",sw("skin",O.skin))}${F("สีตา",sw("eyes",O.eyes))}</div>`,
+   face:F("ทรงผม",seg("hairStyle",O.hairStyle))+F("สีผม",sw("hair",O.hair))+`<div class="two">${F("สีผิว",sw("skin",O.mskin))}${F("สีตา",sw("eyes",O.eyes))}</div>`,
    wear:F("ชุด",seg("outfit",[["tee","เสื้อยืด"],["polo","โปโล"],["suit","สูท"],["hoodie","ฮู้ด"]])+sw("outfitColor",O.cloth))+F("กางเกง",seg("pants",[["long","ขายาว"],["shorts","ขาสั้น"]])+sw("pantsColor",["#1f1f24","#2c3e6b","#5a4a3a","#8a8f99","#e8dcc0"])),
    acc:F("หมวก",seg("hat",[["none","ไม่ใส่"],["cap","แก๊ป"],["bucket","บักเก็ต"]]))+(c.hat!=="none"?F("สีหมวก",sw("hatColor",O.cloth)):"")+F("แว่น",seg("glasses",[["none","ไม่ใส่"],["glasses","สายตา"],["sun","กันแดด"]]))};
   if(c.edit)T.base=F("เพศ (มีผลกับบทพูด)",seg("gender",[["m","ชาย"],["f","หญิง"]]));
   return {tab,T};}
+/* v1.91.68 (prototype): the manager's expressions (anime portrait) */
+const MGRP_E=[["normal","ปกติ"],["smile","ยิ้ม"],["sad","เศร้า"],["serious","จริงจัง"],["surprised","ตกใจ"],["flustered","เขิน"]];
 /* v1.91.51: change your name and look mid-game (Settings → แก้ไขตัวละคร) — difficulty and seed stay as they were */
-function avEditHTML(){const c=UI.creator;if(!c)return "";const {tab,T}=crPanels(c);
-  return `<h2>แก้ไขตัวละครของคุณ</h2><div class="creator v2 cr-edit"><div class="px cr-top"><div class="cr-stage"><canvas width="240" height="320" data-chibi="creator" aria-label="ตัวอย่างตัวละคร"></canvas></div>
-     <div class="cr-id"><div class="field"><label for="pname">ชื่อ</label><input id="pname" maxlength="14" value="${esc(c.name||"")}" autocomplete="off" placeholder="${esc(G.player.name)}"></div>
-      <button class="btn sm" data-act="crand">สุ่มหน้าตา</button></div></div>
-   <div class="seg cr-tabs" role="tablist">${[["base","เพศ"],["face","ผม · หน้า"],["wear","ชุด"],["acc","ของเสริม"]].map(([k,t])=>`<button role="tab" data-act="ctab" data-v="${k}" aria-pressed="${tab===k}">${t}</button>`).join("")}</div>
-   <div class="px cr-opts">${T[tab]}</div>
-   <p class="meta">ชื่อใหม่จะใช้ในบทพูดตั้งแต่ตอนนี้ไป ความยากและ Seed ของเกมไม่เปลี่ยน</p>
-   <div class="mfoot"><button class="btn ghost" data-act="avcancel">ยกเลิก</button><button class="btn primary" data-act="avsave">บันทึก</button></div></div>`;}
+/* v1.91.68 (Man): a cleaner editor — the anime portrait is the hero (pixel self in its corner), name + dice and gender beside it,
+   three tabs (hair·face / outfit / extras) each with its own dice, and Cancel/Save always in reach at the bottom */
+/* v1.91.68: the portrait for the creator/editor — while a new look is being drawn the last one stays up (no blank box) */
+function mgrU(c,e){const u=typeof MGRP!=="undefined"?MGRP.url(c,e||"normal",()=>render()):"";if(u)UI.mgrLastU=u;return u||UI.mgrLastU||"";}
+function avEditHTML(){const c=UI.creator;if(!c)return "";const {T}=crPanels(c);const tab=["face","wear","acc"].includes(c.tab)?c.tab:"face";
+  const TABS=[["face","ผม · หน้า"],["wear","ชุด"],["acc","ของเสริม"]];const u=mgrU(c,UI.mgrE);
+  return `<h2>แก้ไขตัวละครของคุณ</h2><div class="creator cr-edit ae">
+   <div class="ae-hero">
+    <div class="ae-port px">${u?`<img src="${u}" alt="ภาพผู้จัดการ">`:`<div class="cr-portload">กำลังวาด…</div>`}
+     <div class="ae-chibi"><canvas width="240" height="320" data-chibi="creator" aria-label="ตัวละครแบบพิกเซล"></canvas></div></div>
+    <div class="ae-side">
+     <div class="field"><label for="pname">ชื่อ</label><input id="pname" maxlength="14" value="${esc(c.name||"")}" autocomplete="off" placeholder="${esc(G.player.name)}"></div>
+     <div class="field"><span class="lb">เพศ <small>· มีผลกับบทพูด</small></span><div class="seg">${[["m","ชาย"],["f","หญิง"]].map(([v,t])=>`<button data-act="cset" data-k="gender" data-v="${v}" aria-pressed="${c.gender===v}">${t}</button>`).join("")}</div></div>
+     <div class="ae-acts"><button class="btn sm" data-act="crand">🎲 สุ่มทั้งหมด</button><label class="ae-chk"><input type="checkbox" data-act="mgrshow" ${SETTINGS.mgrShow!==false?"checked":""}><span>แสดงตัวคุณในฉากสนทนา</span></label><button class="btn sm ghost" data-act="crreset">↺ คืนค่าเดิม</button><button class="btn sm ghost" data-act="mgrtest">▶ ลองดูในฉาก</button></div>
+    </div>
+    <div class="ae-expr" role="group" aria-label="ลองสีหน้า">${MGRP_E.map(([k,t])=>`<button data-act="mgre" data-v="${k}" aria-pressed="${(UI.mgrE||"normal")===k}">${t}</button>`).join("")}</div>
+   </div>
+   <div class="seg cr-tabs ae-tabs" role="tablist">${TABS.map(([k,t])=>`<button role="tab" data-act="ctab" data-v="${k}" aria-pressed="${tab===k}">${t}</button>`).join("")}</div>
+   <div class="px cr-opts ae-opts">${T[tab]}</div>
+   <div class="ae-foot"><small>ความยากและ Seed ไม่เปลี่ยน</small><button class="btn ghost" data-act="avcancel">ยกเลิก</button><button class="btn primary" data-act="avsave">บันทึก</button></div></div>`;}
 function creatorHTML(){const c=UI.creator;const {tab,T}=crPanels(c);
   return `<div class="creator v2"><div class="cr-in">
    <header class="cr-head"><h1>เจ้าของค่ายคนใหม่</h1><p class="lead">คุณคือหลานของปู่ชัย ผู้รับช่วงค่ายมวยศิริชัย</p></header>
-   <div class="px cr-top"><div class="cr-stage"><canvas width="240" height="320" data-chibi="creator" aria-label="ตัวอย่างตัวละคร"></canvas></div>
+   <div class="px cr-top">${(u=>`<div class="ae-port nc-port">${u?`<img src="${u}" alt="ภาพผู้จัดการ">`:`<div class="cr-portload">กำลังวาด…</div>`}<div class="ae-chibi"><canvas width="240" height="320" data-chibi="creator" aria-label="ตัวอย่างตัวละคร"></canvas></div></div>`)(mgrU(c))}
      <div class="cr-id"><div class="field"><label for="pname">ชื่อ</label><input id="pname" maxlength="14" value="${esc(c.name||"")}" autocomplete="off" placeholder="${c.gender==="m"?"ต้น":"ดาว"}"></div>
-      <button class="btn sm" data-act="crand">สุ่มทั้งหมด</button></div></div>
+      <button class="btn sm" data-act="crand">🎲 สุ่มทั้งหมด</button><label class="ae-chk"><input type="checkbox" data-act="mgrshow" ${SETTINGS.mgrShow!==false?"checked":""}><span>แสดงตัวคุณในฉากสนทนา</span></label></div></div>
    <div class="seg cr-tabs" role="tablist">${[["base","พื้นฐาน"],["face","ผม · หน้า"],["wear","ชุด"],["acc","ของเสริม"]].map(([k,t])=>`<button role="tab" data-act="ctab" data-v="${k}" aria-pressed="${tab===k}">${t}</button>`).join("")}</div>
    <div class="px cr-opts">${T[tab]}</div>
    <div class="cr-foot"><button class="btn ghost" data-act="cancelCreate">ย้อนกลับ</button><button class="btn primary" data-act="startGame">รับมรดกค่าย ▸</button></div>
@@ -1072,7 +1096,8 @@ const PATCH={id:"1.90.0",ver:"Muay Thai Moe v1.90",title:"คืนลอยก�
  ["📜","วางแผนก่อนไฟต์จดหมาย","ไฟต์ชิงเข็มขัด คำท้า แก๊งหมวก และงานแปลก ๆ จากจดหมาย เปิดหน้าแผนชกได้ก่อนระฆังแล้ว"],
  ["🖼️","ฉากใหม่เกือบ 60 ฉาก","ฉากเนื้อเรื่องใหม่ 49 ภาพ ตลาดเช้า โกดังแก๊ง เวทีริมน้ำกลางคืน และท่าน้ำยามเช้า"],
  ["📱","เล่นเต็มจอ","เปิดโหมดเต็มจอได้ในตั้งค่า (Android/คอม) หรือกด 'เพิ่มไปยังหน้าจอโฮม' ให้เกมเปิดแบบแอป"],
- ["🛠️","แก้ไขอื่น ๆ","มุมพักยกกลับเป็นเรียงลำดับแบบเดิม แท็บสกิลบนมือถือเลื่อนได้ทั้งหน้า พื้นหลังฉากไม่ลูปซ้อนบนจอสูง รูปอีเวนต์โหลดล่วงหน้าให้ขึ้นเร็วขึ้น อารมณ์ตัวละครไม่เปลี่ยนเองตอนมีตัวเลือก"]],
+ ["🛠️","แก้ไขอื่น ๆ","มุมพักยกกลับเป็นเรียงลำดับแบบเดิม แท็บสกิลบนมือถือเลื่อนได้ทั้งหน้า พื้นหลังฉากไม่ลูปซ้อนบนจอสูง รูปอีเวนต์โหลดล่วงหน้าให้ขึ้นเร็วขึ้น อารมณ์ตัวละครไม่เปลี่ยนเองตอนมีตัวเลือก"],
+ ["🧑‍💼","ผู้จัดการมีหน้าตาแล้ว","ตั้งค่า → แก้ไขตัวละคร เปลี่ยนชื่อ เพศ ทรงผม หมวก ชุด และแว่นได้ตลอดเกม มีรูปอนิเมะครึ่งตัวตามที่เลือก ลองสีหน้าได้ 6 แบบ ปุ่มสุ่มทั้งหมดสุ่มให้ครบทั้งชื่อและชุด กด 'ลองดูในฉาก' ดูตัวเองยืนคู่กับกะทิ (ปิดการแสดงตัวในฉากได้ในตั้งค่า)"]],
  foot:"ขอให้กระทงของทุกคนลอยไปถึงที่ที่อยากให้ไปนะคะ ✦"};
 function maybeWhatsNew(){if(!G||G.ended||UI.scene)return;if(G.newsSeen===PATCH.id)return;UI.modal={type:"whatsnew"};}
 function whatsNewHTML(){return `<div class="wnew"><span class="pill gold">อัปเดต · ${esc(PATCH.ver)}</span><h2>🥊 ${esc(PATCH.title)}</h2><p class="lead">${esc(PATCH.lead)}</p>
@@ -1163,7 +1188,7 @@ function warmSteps(steps,look){const walk=list=>(list||[]).forEach(st=>{if(!st)r
 let THAI_HOLD=false;const sceneNoThai=(steps,look)=>{if(THAI_XP)return false;const seen=new Set();const walk=(x,d)=>{if(!x||typeof x!=="object"||d>6||seen.has(x))return false;seen.add(x);if(Array.isArray(x))return x.some(y=>walk(y,d+1));
   if(THAI_IDS.includes(x.n)&&["sad","angry","pout"].includes(x.f)&&(x.l||look)==="casual")return true;return Object.values(x).some(y=>walk(y,d+1));};return walk(steps,0);}; /* choices hide their follow-up lines inside the step, so look all the way down */
 function playScene(steps,done,opts={}){WARM_NEED=[];const noThai=sceneNoThai(steps,opts.look||"fight");THAI_HOLD=noThai;try{warmSteps(steps,opts.look||"fight");if(opts.bg&&BGIMG[opts.bg])warm(ASSET+BGIMG[opts.bg]);}finally{}const need=[...new Set(WARM_NEED)];WARM_NEED=null;
-  THAI_HOLD=false;const S=UI.scene={steps:[...steps],i:0,done,bg:opts.bg||"night",look:opts.look||"fight",cur:null,cast:[],coachOK:!!opts.coachOK,award:opts.award||null,noThai};
+  THAI_HOLD=false;const S=UI.scene={steps:[...steps],i:0,done,mlook:opts.mlook||null,bg:opts.bg||"night",look:opts.look||"fight",cur:null,cast:[],coachOK:!!opts.coachOK,award:opts.award||null,noThai};
   /* v1.91.30 (Man): if the scene's art isn't on the device yet, show the loading screen (bar + tip) until it is — at most 8 s, so nothing ever hangs.
      A scene whose art is already here starts at once; a short wait (<0.2 s) never flashes the loading screen. */
   const wait=need.map(u=>WARMED[u]).filter(i=>i&&!(i.complete&&i.naturalWidth));if(!wait.length){sceneNext();return;}
@@ -1187,7 +1212,8 @@ function sceneNext(){const S=UI.scene;if(!S)return;
     const n=val(st.n);S.lookOf=S.lookOf||{};
     // v1.8: each character keeps one outfit for the whole scene
     const look=castId(n)?(S.lookOf[n]=S.lookOf[n]||(st.l==="train"?"fight":st.l)||S.look):(st.l||S.look);
-    S.cur={n,f:val(st.f)||"happy",t:nameCall(n,val(st.t)),look,who:st.who,cg:st.cg||null,tel:n==="coach"&&!S.coachOK&&!!(G&&G.coachAwayAbs&&gameWeek(G)<G.coachAwayAbs)};
+    if(n==="me"&&st.mf){S.mgr=true;S.mf=st.mf;}
+    S.cur={n,f:val(st.f)||"happy",t:nameCall(n,val(st.t)),look,who:st.who,mf:st.mf||null,cg:st.cg||null,tel:n==="coach"&&!S.coachOK&&!!(G&&G.coachAwayAbs&&gameWeek(G)<G.coachAwayAbs)};
     if(st.show)S.cast=st.show.map(x=>({id:x.id,f:x.f||"happy",look:S.lookOf[x.id]||x.l||look,back:!!x.back}));
     if(n==="npc"){const im=npcImg(st);if(im)S.cast=[{id:"npc:"+im,f:"happy",look}];}
     if(n==="coach"){S.cast=[{id:"coach",f:"happy",look}];}           // the coach always stands alone
@@ -1204,11 +1230,17 @@ function sceneHTML(){const S=UI.scene,c=S.cur||{};const sp=c.n==="coach"?{name:c
   const who=c.n==="me"?esc(G.player.name):c.n==="nar"?"":esc(sp.name||"");
   const spk=c.n||S.lastN;if(c.n)S.lastN=c.n;
   const bgKey=(S.bg==="gym"||S.bg==="camp")?gymBg():BGIMG[S.bg];
-  const cast=S.cast.map((m,i)=>{const active=m.id===spk||(c.choice&&i===S.cast.length-1);const pos=S.cast.length===1?"c":i===0?"l":"r";
+  /* v1.91.68 (Man): the manager stands on stage at the girls' scale once he has a face line (left, the girl moves right) */
+  /* v1.91.68 (Man): players can hide him (Settings) — the "try in a scene" preview always shows him */
+  const mOn=S.mgr&&(S.mlook||SETTINGS.mgrShow!==false);
+  const mu=mOn&&typeof MGRP!=="undefined"&&(S.mlook||(G&&G.avatar))?MGRP.url(S.mlook||G.avatar,S.mf||"normal",()=>render()):"";
+  const girls=mOn?S.cast.slice(-1):S.cast,nOn=girls.length+(mOn?1:0);
+  const mst=mOn&&!c.cg?(mu?`<img class="stand mgrst ${girls.length?"l":"c"} ${spk==="me"&&!c.choice?"on":"off"}" src="${mu}" alt="">`:""):"";
+  const cast=mst+girls.map((m,i)=>{const active=m.id===spk||(c.choice&&i===girls.length-1);const pos=nOn===1?"c":mOn?"r":i===0?"l":"r";
     return `<img class="stand ${pos} ${active&&!m.back?"on":"off"}${m.back?" back":""}" src="${m.id.startsWith("npc:")?(m.id.slice(4).startsWith("nl_")?`${ASSET}${m.id.slice(4)}.webp`:`${ASSET}npc_${m.id.slice(4)}.webp`):m.back?`${ASSET}${m.id}_back.webp`:stand(m.id,m.look,active&&!c.choice?moodFor(c.f,m.look,c.t):moodFor(m.f,m.look,""))}" alt="">`;}).join("");
   const tag="";
   return `<div class="vn" role="dialog" aria-label="ฉากเนื้อเรื่อง"><div class="vbg bg-${S.bg==="camp"?"gym":S.bg}" ${bgKey?`style="background-image:url(${ASSET}${bgKey})"`:""}></div>
-   ${c.cg?`<div class="vcg" style="--cg:url(${ASSET}${c.cg}.webp)"><img src="${ASSET}${c.cg}.webp" alt=""></div>`:`<div class="cast ${(S.cast||[]).length>1?"duo":""}">${cast}</div>`}
+   ${c.cg?`<div class="vcg" style="--cg:url(${ASSET}${c.cg}.webp)"><img src="${ASSET}${c.cg}.webp" alt=""></div>`:`<div class="cast ${nOn>1?"duo":""}">${cast}</div>`}
    ${S.award?`<div class="awardfx" aria-hidden="true">${Array.from({length:24},(_,i)=>`<i style="--i:${i}"></i>`).join("")}${[["14%","22%","0s","#ffd45a"],["78%","16%","-.8s","#ff6b6b"],["50%","30%","-1.6s","#8fd3ff"],["30%","12%","-1.2s","#c785e6"],["66%","34%","-.4s","#9dffb0"]].map(([x,y,d,c])=>`<span class="fw" style="--x:${x};--y:${y};--d:${d};--c:${c}">${Array.from({length:12},(_,a)=>`<b style="--a:${a}"></b>`).join("")}</span>`).join("")}<div class="awardbelt"><span class="strap"></span><span class="seal">★</span><span class="strap"></span></div><div class="awardname">${esc(honorLabel(S.award.kind,S.award.venue))}</div></div>`:""}
    ${c.choice?"":`<button class="vtap" data-act="vnext" aria-label="ไปต่อ"></button>`}
    <div class="vbox px" data-act="${c.choice?"":"vnext"}" style="--c:${sp.color||"var(--gold)"}">
@@ -1765,7 +1797,7 @@ const ACT={
   loadslot:d=>{backupSlot(+d.v);const s0=loadSlot(+d.v);if(!s0)return;const s=safeFix(s0);if(!s){toast("เซฟนี้เปิดกับเวอร์ชันนี้ไม่ได้ ข้อมูลยังอยู่ครบ ไม่ถูกลบ");return;}G=s;const pk=G.F.ploy&&G.F.ploy.skills;if(pk&&pk.korat){G.F.ploy.skills={kr_swing:2,captain:1};}UI.slot=+d.v;UI.tab="home";UI.modal=null;UI.advCache={};withArt(()=>{AU.startMusic("hub");if(G.ended){UI.ending=endingScene(G);}maybeWhatsNew();render();});},
   askdelslot:d=>{UI.delSlot=+d.v;render();},canceldel:()=>{UI.delSlot=null;render();},
   delslot:()=>{clearSave(UI.delSlot);UI.delSlot=null;if(!loadSave())UI.modal=null;render();},
-  beginNew:i=>{UI.slot=i;UI.modal=null;AU.startMusic("hub");UI.creator={name:"",...CHIBI.randomManager(Math.random),gender:"m",diff:"normal",outfit:"tee",hat:"none",glasses:"none"};UI.modal=null;render();},
+  beginNew:i=>{try{MGRP.warm({gender:"m"});MGRP.warm({gender:"f"});}catch(e){}UI.slot=i;UI.modal=null;AU.startMusic("hub");UI.creator={name:"",...CHIBI.randomManager(Math.random),gender:"m",diff:"normal",outfit:"tee",hat:"none",glasses:"none"};UI.modal=null;render();},
   fullscreen:()=>{const d=document,e=d.documentElement,no=()=>toast("เบราว์เซอร์นี้เปิดเต็มจอไม่ได้ ลองเพิ่มเกมลงหน้าจอหลักแทน");
     try{if(fsOn()){(d.exitFullscreen||d.webkitExitFullscreen).call(d);}else{const r=(e.requestFullscreen||e.webkitRequestFullscreen).call(e,{navigationUI:"hide"});if(r&&r.catch)r.catch(no);}}catch(x){no();}},
   copyseed:()=>{const v=G.seedText||String(G.seed);const ok=()=>toast("คัดลอก seed แล้ว: "+v);try{navigator.clipboard.writeText(v).then(ok,()=>toast("seed: "+v));}catch(e){toast("seed: "+v);}},
@@ -1798,14 +1830,20 @@ const ACT={
   cardspecial:d=>{const C=CARDS[d.v],o=(G.cards||{})[d.v];if(!C||!o||!C.lv3||(o.lv||1)<3)return;const bk=UI.modal&&UI.modal.back;o.lvSeen=3;save();UI.modal=null;playScene([{n:"nar",t:`✦ ฉากพิเศษ · ${C.lv3t||""}`}].concat(C.lv3),()=>{UI.modal={type:"card",id:d.v,back:bk};render();},{bg:C.bg,look:"casual"});},
   cardmg:d=>{const C=CARDS[d.v],o=(G.cards||{})[d.v];if(!C||!o||!C.mg||(o.lv||1)<3)return;BAG.openCard(C.mg,d.v);},
   cardlater:()=>{(G.cardPend||[]).shift();save();UI.modal=(G.cardPend||[]).length?{type:"cardnew"}:null;render();},
-  avedit:()=>{UI.creator={...G.avatar,name:G.player.name,gender:G.player.gender||G.avatar.gender||"m",edit:1,tab:"face"};UI.modal={type:"avedit"};render();},
+  avedit:()=>{try{MGRP.warm(G.avatar);}catch(e){}UI.mgrLastU="";const o={...G.avatar,name:G.player.name,gender:G.player.gender||G.avatar.gender||"m"};UI.creator={...o,orig:o,edit:1,tab:"face"};UI.modal={type:"avedit"};render();},
+  mgre:d=>{UI.mgrE=d.v;render();},
+  mgrtest:()=>{const c=UI.creator;if(!c)return;c.name=((document.getElementById("pname")||{}).value||c.name||"").trim();const nm=c.name||G.player.name;const look={...c};UI.modal=null;
+    playScene([{n:"kati",f:"happy",t:"ผู้จัดการคะ! วันนี้หนูวิ่งครบสิบรอบแล้วนะ!"},{n:"me",mf:"smile",t:"เก่งมาก กะทิ พรุ่งนี้เพิ่มเป็นสิบสองรอบ"},{n:"kati",f:"sad",t:"…สิบสองเลยเหรอคะ"},{n:"me",mf:"serious",t:"ไฟต์หน้าคู่ชกยาวกว่าเรา ต้องมีแรงถึงยกห้า"},{n:"kati",f:"angry",t:"งั้นผู้จัดการวิ่งด้วยกันสิคะ!"},{n:"me",mf:"surprised",t:"เอ๊ะ ฉันด้วยเหรอ"},{n:"kati",f:"happy",t:"ใช่ค่ะ! ตีห้าเจอกันหน้าค่ายนะคะ ${nm}!"},{n:"me",mf:"flustered",t:"…ได้ ตีห้าก็ตีห้า"},{n:"me",mf:"sad",t:"(ลาก่อน การนอนตื่นสาย)"}],
+      ()=>{UI.modal={type:"avedit"};render();},{bg:"gym",mlook:look,look:"casual"});},
   avcancel:()=>{UI.creator=null;UI.modal={type:"settings"};render();},
   avsave:()=>{const c=UI.creator;if(!c||!G)return;const nm=((document.getElementById("pname")||{}).value||"").trim();
-    const {name,diff,seed,tab,edit,...look}=c;G.avatar=look;G.player.gender=c.gender||G.player.gender;if(nm)G.player.name=nm.slice(0,14);
+    const {name,diff,seed,tab,edit,orig,...look}=c;G.avatar=look;G.player.gender=c.gender||G.player.gender;if(nm)G.player.name=nm.slice(0,14);
     UI.creator=null;UI.modal={type:"settings"};save();render();toast("บันทึกตัวละครแล้ว");},
   cancelCreate:()=>{AU.startMusic("title");UI.creator=null;render();},
   cset:d=>{UI.creator.name=(document.getElementById("pname")||{}).value||UI.creator.name;crSeed();UI.creator[d.k]=d.v;render();},
-  crand:()=>{const n=(document.getElementById("pname")||{}).value||"",o=UI.creator||{};crSeed();UI.creator={...CHIBI.randomManager(Math.random),name:n,diff:o.diff||"normal",gender:o.gender||"m",tab:o.tab,seed:o.seed,edit:o.edit};render();},
+  crand:()=>{const o=UI.creator||{};crName();crSeed();const c={...o};c.gender=Math.random()<.5?"m":"f";["face","wear","acc"].forEach(k=>crRoll(c,k));c.name=crRandName(c.gender,(o.name||"").trim());UI.creator=c;render();}, /* v1.91.68 (Man): one dice for everything — name, gender, face, outfit, extras */
+  mgrshow:()=>{crName();crSeed();SETTINGS.mgrShow=SETTINGS.mgrShow===false;saveSettings();render();}, /* v1.91.68 (Man): the same switch as Settings, right under the dice */
+  crreset:()=>{const c=UI.creator;if(!c||!c.orig)return;UI.creator={...c.orig,orig:c.orig,edit:1,tab:c.tab};render();},
   ctab:d=>{UI.creator.name=(document.getElementById("pname")||{}).value||UI.creator.name;crSeed();UI.creator.tab=d.v;render();},
   startGame:()=>{const c=UI.creator;c.name=((document.getElementById("pname")||{}).value||"").trim()||(c.gender==="m"?"ต้น":"ดาว");
     crSeed();const {name,diff,seed,...look}=c;G=newGame({name,gender:c.gender,diff:diff||"normal",avatar:look,seed:seedFrom(seed)});if(seed&&!/^\d{1,10}$/.test(seed))G.seedText=seed;G.newsSeen=PATCH.id;genOffers(G);UI.creator=null;UI.tab="home";G.seen.prologue=true;AU.resume();AU.startMusic("date");

@@ -991,3 +991,51 @@ function gbCutin(stage,s){const el=stage&&stage.querySelector(".gbcut");if(!el)r
 function gbReveal(stage,s,anim){if(!stage)return;const c=stage.querySelector(".gbcut");if(c)c.classList.remove("on");stage.classList.remove("shake");const h=stage.querySelector(".gbhint");if(h)h.style.display="none";
   const r=stage.querySelector(".gbrev");if(!r)return;r.innerHTML=gbRevealHTML(s);r.className="gbrev on"+(anim?"":" still");
   if(anim){const n=CARD_R[s.r].s;for(let i=0;i<n;i++)setTimeout(()=>AU.gsfx("star",i),450+i*140);}}
+
+/* v1.91.68 (prototype, Man 19 พ.ย.): the manager's layered anime portrait — built from the pixel look and tinted in a canvas.
+   Layers (bottom → top): body with the chosen hair style (hats come with their own hair) → clothes → expression patch → [tint skin, clothes, pants, eyes] → hair/hat (tinted) → glasses.
+   Art lives in a/mgr/ (Magnific variants of one base per gender, cut with SAM masks — see work/mgr/build.py). */
+const MGRP=(()=>{const W=640,H=960,IM={},MK={},CACHE={},WAIT={};const SKIN0={m:[227,179,155],f:[230,182,162]};
+  const EXPR=["normal","smile","sad","serious","surprised","flustered"];
+  const hex=h=>{h=String(h||"#888").replace("#","");if(h.length===3)h=h.split("").map(c=>c+c).join("");const n=parseInt(h,16)||0;return [(n>>16&255)/255,(n>>8&255)/255,(n&255)/255];};
+  const im=n=>{if(!IM[n]){const i=new Image();i.decoding="async";i.src=ASSET+"mgr/"+n;IM[n]=i;}return IM[n];};
+  const ok=i=>i&&i.complete&&i.naturalWidth>0;
+  const maskOf=n=>{if(MK[n])return MK[n];const i=im(n);if(!ok(i))return null;const c=document.createElement("canvas");c.width=W;c.height=H;const x=c.getContext("2d");x.drawImage(i,0,0,W,H);const d=x.getImageData(0,0,W,H).data,a=new Uint8Array(W*H);for(let p=0;p<W*H;p++)a[p]=d[p*4];return MK[n]=a;};
+  const tint=(C,k,o,j,sp=1.6,cap=1)=>{for(let c=0;c<3;c++){const v=k<=1?C[c]*k:C[c]+(1-C[c])*Math.min(cap,(k-1)*sp);o[j+c]=v*255;}};
+  function parts(L){const g=L.gender==="f"?"f":"m",hat=L.hat==="cap"||L.hat==="bucket"?L.hat:null,hs=hat||(["crop","bob","pony","buns","long"].includes(L.hairStyle)?L.hairStyle:(g==="f"?"bob":"crop")),o=["tee","polo","suit","hoodie"].includes(L.outfit)?L.outfit:"tee",gl=L.glasses==="glasses"||L.glasses==="sun"?L.glasses:null;return {g,hat,hs,o,gl};}
+  function files(L,e){const P=parts(L),g=P.g;const f=[`${g}_${P.hs}.webp`,`${g}_${P.hs}_hair.webp`,`${g}_cloth_${P.o}.webp`,`${g}_cloth_${P.o}_m.png`,`${g}_skin.png`,`${g}_eyes.png`,`${g}_pants.png`];
+    if(e&&e!=="normal")f.push(`${g}_face_${e}.webp`);if(P.gl)f.push(`${g}_gl_${P.gl}.webp`);if(P.hat)f.push(`${g}_${P.hs}_hat.png`);if(P.o!=="tee")f.push(`${g}_tee_cut.png`);return f;}
+  function lref(d,m,lo){let s=0,n=0;for(let p=0;p<W*H;p+=3)if(m[p]>150){const j=p*4,l=(.299*d[j]+.587*d[j+1]+.114*d[j+2])/255;if(l>lo){s+=l;n++;}}return n?s/n:.6;}
+  function compose(L,e){const P=parts(L),g=P.g,F=n=>im(n);
+    const c=document.createElement("canvas");c.width=W;c.height=H;const x=c.getContext("2d",{willReadFrequently:true});
+    x.drawImage(F(`${g}_${P.hs}.webp`),0,0,W,H);if(P.o!=="tee"){x.globalCompositeOperation="destination-out";x.drawImage(F(`${g}_tee_cut.png`),0,0,W,H);x.globalCompositeOperation="source-over";}x.drawImage(F(`${g}_cloth_${P.o}.webp`),0,0,W,H);if(e&&e!=="normal")x.drawImage(F(`${g}_face_${e}.webp`),0,0,W,H);
+    const id=x.getImageData(0,0,W,H),d=id.data,sk=maskOf(`${g}_skin.png`),cm=maskOf(`${g}_cloth_${P.o}_m.png`),pm=maskOf(`${g}_pants.png`),em=maskOf(`${g}_eyes.png`);
+    const S0=SKIN0[g],S1=hex(L.skin||"#eec1a0").map(v=>v*255),rr=S1.map((v,i)=>v/S0[i]),CC=hex(L.outfitColor||"#f2f2f2"),CP=hex(L.pantsColor||"#1f1f24"),CE=hex(L.eyes||"#3a2a24");
+    const lc=lref(d,cm,.15),lp=lref(d,pm,.05),o=[0,0,0];
+    for(let p=0;p<W*H;p++){const j=p*4;if(!d[j+3])continue;const r=d[j],gg=d[j+1],b=d[j+2],mx=Math.max(r,gg,b),mn=Math.min(r,gg,b),sat=mx?(mx-mn)/mx:0,l=(.299*r+.587*gg+.114*b)/255;
+      const we=em[p]/255;
+      if(sk[p]>8&&we<.5){const w=sk[p]/255*Math.min(1,sat*6);if(w>0){d[j]=r+(Math.min(255,r*rr[0])-r)*w;d[j+1]=gg+(Math.min(255,gg*rr[1])-gg)*w;d[j+2]=b+(Math.min(255,b*rr[2])-b)*w;}}
+      if(cm[p]>8){const w=cm[p]/255;tint(CC,l/lc,o,0);d[j]=r+(o[0]-r)*w;d[j+1]=gg+(o[1]-gg)*w;d[j+2]=b+(o[2]-b)*w;continue;}
+      if(pm[p]>8){const w=pm[p]/255;tint(CP,l/lp,o,0);d[j]=r+(o[0]-r)*w;d[j+1]=gg+(o[1]-gg)*w;d[j+2]=b+(o[2]-b)*w;continue;}
+      if(we>.3&&sat>.12&&l<.62){const w=we*.9;tint(CE,l/.36,o,0);d[j]=r+(o[0]-r)*w;d[j+1]=gg+(o[1]-gg)*w;d[j+2]=b+(o[2]-b)*w;}}
+    x.putImageData(id,0,0);
+    // hair (and the hat that comes with it), dyed on its own layer, then laid on top
+    const h=document.createElement("canvas");h.width=W;h.height=H;const y=h.getContext("2d",{willReadFrequently:true});y.drawImage(F(`${g}_${P.hs}_hair.webp`),0,0,W,H);
+    const hd=y.getImageData(0,0,W,H),q=hd.data,hm=P.hat?maskOf(`${g}_${P.hs}_hat.png`):null,CH=hex(L.hair||"#2b2530"),CT=hex(L.hatColor||L.outfitColor||"#c8283c");
+    let s=0,n=0,s2=0,n2=0;for(let p=0;p<W*H;p+=2){const j=p*4;if(q[j+3]<150)continue;const l=(.299*q[j]+.587*q[j+1]+.114*q[j+2])/255;if(l<.2)continue;if(hm&&hm[p]>128){s2+=l;n2++;}else{s+=l;n++;}}
+    const lh=n?s/n:.6,lt=n2?s2/n2:.7;
+    for(let p=0;p<W*H;p++){const j=p*4;if(!q[j+3])continue;const l=(.299*q[j]+.587*q[j+1]+.114*q[j+2])/255,isHat=hm&&hm[p]>128;if(isHat)tint(CT,l/lt,o,0);else tint(CH,l/lh,o,0,.9,.55);q[j]=o[0];q[j+1]=o[1];q[j+2]=o[2];}
+    y.putImageData(hd,0,0);x.drawImage(h,0,0);
+    if(P.gl)x.drawImage(F(`${g}_gl_${P.gl}.webp`),0,0,W,H);
+    return c;}
+  const key=(L,e)=>JSON.stringify([L.gender,L.hairStyle,L.hair,L.skin,L.eyes,L.outfit,L.outfitColor,L.pantsColor,L.hat,L.hatColor,L.glasses,e||"normal"]);
+  /* returns a data: URL, or "" while the art loads (then calls back once it is ready) */
+  function url(L,e,cb){if(!L||typeof document==="undefined")return "";e=EXPR.includes(e)?e:"normal";const k=key(L,e);if(CACHE[k])return CACHE[k];
+    const fs=files(L,e),miss=fs.map(im).filter(i=>!ok(i));
+    if(miss.length){if(cb&&!WAIT[k]){WAIT[k]=1;let left=miss.length;const one=()=>{if(--left<=0){WAIT[k]=0;cb();}};miss.forEach(i=>{i.addEventListener("load",one,{once:true});i.addEventListener("error",one,{once:true});});}return "";}
+    try{const c=compose(L,e);CACHE[k]=c.toDataURL("image/webp",.9);const ks=Object.keys(CACHE);if(ks.length>40)delete CACHE[ks[0]];return CACHE[k];}catch(err){return "";}}
+  /* v1.91.68 (Man): fetch every layer of a gender in the background, so the editor and scenes never wait */
+  function warm(L){const g=(L&&L.gender)==="f"?"f":"m";const f=[`${g}_skin.png`,`${g}_eyes.png`,`${g}_pants.png`,`${g}_tee_cut.png`,`${g}_cap_hat.png`,`${g}_bucket_hat.png`];
+    ["crop","bob","pony","buns","long","cap","bucket"].forEach(h=>f.push(`${g}_${h}.webp`,`${g}_${h}_hair.webp`));["tee","polo","suit","hoodie"].forEach(o=>f.push(`${g}_cloth_${o}.webp`,`${g}_cloth_${o}_m.png`));
+    EXPR.slice(1).forEach(e=>f.push(`${g}_face_${e}.webp`));["glasses","sun"].forEach(k=>f.push(`${g}_gl_${k}.webp`));f.forEach(im);}
+  return {url,EXPR,parts,warm};})();
