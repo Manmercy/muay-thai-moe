@@ -516,6 +516,7 @@ const DUEL={st:null,
 
 /* v1.90 round 5: the opening gala (the week after the invitation) and the story beat after the first cup — the green-gold contract */
 const RG_CID={north:"baibua",isan:"tabtim",central:"alicia",south:"chaba"};
+const RG_CID0={...RG_CID}; /* v1.91.30: the four first champions — fixed, even when a later edition crowns someone new */
 const rgIn=(G,id)=>!!(G.F[id]&&G.F[id].camp==="player");
 const rgIf=(ok,steps)=>ok?steps:[];
 function rgGala(G){const top=rgTopGirl(G),fah=rgIn(G,"fah"),ploy=rgIn(G,"ploy"),R=G.region,meet=(id,v)=>G2=>rgMeet(G2,id,v);return [
@@ -1117,7 +1118,7 @@ const REGION={
     (R.gc=R.gc||[]).push(T.opp);R.trip=null;return true;},
 
   /* ---------- results + weekly upkeep ---------- */
-  flush(G){const R=G.region;if(R&&R.joined)this.joinSkills(G);if(!R||!R.pend||!R.pend.length)return;const done=R.pend.splice(0);
+  flush(G){const R=G.region;if(R&&R.joined)this.joinSkills(G);if(R)this.bondSync(G);if(!R||!R.pend||!R.pend.length)return;const done=R.pend.splice(0);
     for(const p of done){const rg=p.region||{},r=rg.r,dest=rg.dest,D=ROAD_DEST[dest];if(rg.nlfinal){if(R.final){R.final.cur=R.final.cur||{};R.final.cur[rg.nlfinal]=p.res||"L";}continue;}if(rg.nlleg){this.legResult(G,rg.nlleg,p);continue;}if(!D||!RG[r])continue;
       if(rg.series){this.seriesResult(G,r,p);continue;}
       rgTouch(G,RG_CID[r]);const T=R.trip,abs=T&&T.bid===p.bid?T.abs:gameWeek(G);
@@ -1135,7 +1136,7 @@ const REGION={
       const gap=now-R.meetT[cid];
       if(gap>=3&&!R.miss[cid]){R.miss[cid]=1;addMail(G,{kind:"letter",from:`${RG[r].champ} · Champion of ${RG[r].name}`,title:`A letter from ${RG[r].champ}`,body:RG_MISS[r]});}
       if(gap>=4){const pk=(R.meetPk||{})[cid]||m[cid],fl=RG_FLOOR.find(t=>pk>=t)||0;if(m[cid]>fl)m[cid]=Math.max(fl,Math.round((m[cid]-.25)*100)/100);}}},
-  weekly(G){const R=G.region;this.flush(G);this.seriesWeekly(G);this.fade(G);this.letters(G);this.finalWeekly(G);this.joinWeekly(G);const T=R.trip;
+  weekly(G){const R=G.region;this.flush(G);this.seriesWeekly(G);this.fade(G);this.letters(G);this.finalWeekly(G);this.joinWeekly(G);this.joinPerks(G);const T=R.trip;
     /* a trip whose bout vanished (the week went by, the booking was dropped) is let go */
     if(T&&gameWeek(G)>T.abs&&!G.bookings.some(b=>b.id===T.bid)){(R.gc=R.gc||[]).push(T.opp);R.trip=null;R.nextTripAbs=Math.max(R.nextTripAbs||0,T.abs+1);}
     const keep=new Set(G.bookings.map(b=>b.b));R.gc=(R.gc||[]).filter(id=>{if(keep.has(id))return true;if(G.F[id]&&G.F[id].rg)delete G.F[id];return false;});},
@@ -1490,7 +1491,15 @@ if(typeof ACT!=="undefined")Object.assign(ACT,{
    hidden bar: closeness (R.meet) ≥ RG_JOIN_MIN · offers come in order of closeness, 4 weeks apart · accepting needs a free room (5 + dorm level) and the signing fee
    she arrives the next week (leaving her old camp + arriving at Sirichai) at ~70% of her champion level/stats, with skill points for her lineage's tree (the partner girl's)
    romance (Man): one-love or two-timing only — never the harem team. Kept on its own track (R.lov / R.ex), shown through relState */
-const RG_JOIN_MIN=12,RG_JOIN_GAP=4,RG_JOIN_FEE=60000,RG_JOIN_WAGE=3000;
+const rgBondOf=m=>Math.min(70,Math.round((m||0)*3));
+const RG0=Object.fromEntries(Object.entries(RG).map(([r,C])=>[r,{name:C.name,champ:C.champ,nick:C.nick}]));
+const RG_JOIN_MIN=12,RG_JOIN_GAP=4,RG_JOIN_FEE=350000,RG_JOIN_WAGE=5000; /* v1.91.30 (Man): a regional champion costs a fortune, and is worth it */
+/* v1.91.30 (Man): every champion brings something the camp wants — her ring perk stays, plus a camp-wide gift */
+const RG_TRAIT={
+ baibua:{name:"Tha Sao Elbow Teacher",desc:"Tha Sao counter elbows (counter +5%, elbow +12%) · teaches elbows to the camp: every fighter's elbow and counter grow a little each week"},
+ tabtim:{name:"Isan Laughter",desc:"Accurate kicks and quick evasion · wherever she is, it's lively: every fighter in camp +2 morale each week"},
+ alicia:{name:"Live Star",desc:"Heavy hands and inside defence · streams training with the camp: ad income every week (grows with camp fame) and fame slowly rises"},
+ chaba:{name:"Silent Fixer",desc:"Quick evasion and fast recovery · looks after the injured like she looks after her brother: injured fighters heal one extra week each week"}};
 const RG_JOIN={
  baibua:{letter:"Manager\n\nI've been thinking since the night of the cup. I want to train at Sirichai Camp. I want to fight beside Kati, not against her\n\nMy father says the Tha Sao teachers taught us to go where our fists get better, not to stay in one place forever\n\nIf the camp has a free room, I'd like to apply\n— Baibua",
   leave:[{n:"nar",t:"Moving day. The morning mist hasn't lifted. Baibua bows to her teacher at the wooden shrine in front of her old camp"},{n:"baibua",f:"sad",l:"casual",t:"Teacher, I'm going to another camp… I'm not leaving Tha Sao behind. I'm taking it with me"},
@@ -1522,7 +1531,7 @@ const RG_JOIN={
    [{n:"nar",t:"Tabtim plays mor lam on her phone and dances alone in the middle of the camp yard"},{n:"tabtim",f:"happy",l:"casual",t:"Come dance, manager! These are the feet I kick with",choice:[
      {t:"Get up and dance with her",b:5,then:[{n:"nar",t:"The whole camp comes out to watch. Tabtim spins you three times by the hand and laughs until she sits on the ground"}]},
      {t:"Clap along to the beat",b:4,then:[{n:"tabtim",f:"flustered",l:"casual",t:"…You're staring a lot. I get shy too, you know"}]}]}],
-   [{n:"nar",t:"After training, Tabtim sits unusually quiet, looking at a kids' football team photo on her phone"},{n:"tabtim",f:"sad",l:"casual",t:"My little brother… I fight to pay for his school. He says he wants to be a doctor",choice:[
+   [{n:"nar",t:"After training, Tabtim sits unusually quiet, looking at a photo of her brother in his student uniform"},{n:"tabtim",f:"sad",l:"casual",t:"My little brother… he got into law school. I fight to see him through",choice:[
      {t:"\"He's lucky to have a sister like you\"",b:5,then:[{n:"tabtim",f:"flustered",l:"casual",t:"…Don't say that. I cry easily. I'm not joking"}]},
      {t:"\"This camp can help you put him through school\"",b:4,then:[{n:"tabtim",f:"happy",l:"casual",t:"This camp's so kind… I'll fight harder than before"}]}]}]],
   love:[{n:"nar",t:"The Mekong at dusk. Tabtim is quiet for longer than ever"},{n:"tabtim",f:"flustered",l:"casual",t:"I used to think happiness was winning… now it's sitting here with you"},{n:"tabtim",f:"happy",l:"casual",t:"Don't tell anyone I can talk sweet!"}],
@@ -1564,34 +1573,66 @@ const RG_JOIN={
   love:[{n:"nar",t:"Chaba asks you out to the sea at night. She rides the sidecar bike over herself, even though you have a car"},{n:"chaba",f:"flustered",l:"casual",t:"You ride first, same as always"},{n:"chaba",f:"happy",l:"casual",t:"…Can you stay one more day? Same question as before"}],
   conf:()=>[{n:"nar",t:"Chaba knocks three times, then stands so still for so long that you open the door yourself"},{n:"chaba",f:"flustered",l:"casual",t:"Manager"},{n:"nar",t:"The wind passes once"},{n:"chaba",f:"flustered",l:"casual",t:"…Like you. That's all. Can't talk long"}],
   yes:()=>"…Mm. (She squeezes your hand tight, then just walks back to her room)",no:"…It's fine. We can still fix fences together",bye:"…Got it. No need to say more"}};
+/* v1.91.30: champions who move in get a profile, gift tastes and gift lines like the main cast */
+const RG_PROF={
+ baibua:{height:"165 cm",blood:"A",bday:"12 November (Yi Peng)",home:"Chiang Mai · a wooden house behind her father's small camp",heritage:"Muay Tha Sao (same lineage as Kati)",
+  personality:"Shy, reserved, soft-spoken, apologises before every counter elbow, yet never backs down in the ring",likes:["Khao soi from a hidden stall behind the market","Mist before dawn","Teen chok embroidery"],
+  dislikes:["Being stared at while she talks","Cameras","Food that isn't spicy"],hobby:"Embroiders teen chok for the people who matter, slowly, so it finishes later",
+  story:"Carried her father's small camp alone since his knee went: training, dishes, accounts, until she saw Sirichai Camp where everyone helps",secret:"Her first contract letter had one sentence she wrote and erased, erased until the paper wore thin"},
+ tabtim:{height:"168 cm",blood:"B",bday:"14 April",home:"Korat · a rice-field house where her father once boxed at temple fairs",heritage:"Muay Korat (same lineage as Ploy)",
+  personality:"Loud, laughs easily, cries even more easily. Wild outside the ring, calculates every step inside it",likes:["Som tam with ten chillies","Mor lam sing","Grilled chicken with hot sticky rice"],
+  dislikes:["Long silences","Eating alone","People who look down on country kids"],hobby:"Dancing alone in the middle of the yard when nobody's watching (everyone is)",
+  story:"Fights to put her younger brother through law school. Her father, a temple-fair boxer, never came to watch her fight until the day she won the Isan cup",secret:"Practised saying 'I like you' in Isan in the mirror for three weeks before saying it"},
+ alicia:{height:"170 cm",blood:"AB",bday:"January 1",home:"Bangkok · a condo the sponsor rented (moved out)",heritage:"Muay Lopburi (same lineage as Rin)",
+  personality:"Tsundere, stubborn, works harder than she lets anyone see, slips into English when flustered",likes:["Royal Thai sweets","Boat rides at night","Contracts you can read in five minutes"],
+  dislikes:["The words 'famous for her face'","Contracts with the word forever","Being told to smile"],hobby:"Edits her training clips at 2 a.m. and never posts them",
+  story:"Famous since her first fight for her looks, so she trained harder than anyone so people would remember her fists, not her face",secret:"The first hand wraps she bought herself at fifteen are still in her bag, though half of them are torn"},
+ chaba:{height:"160 cm",blood:"O",bday:"5 October",home:"Born in Chaiya next door to Mali · grew up in Phuket",heritage:"Muay Chaiya (same lineage as Mali)",
+  personality:"Still, quiet, deadpan funny, weak to anything cute",likes:["Khao yam","Stray cats","The sea at night"],
+  dislikes:["People who talk too long","Cameras pointed at her brother","Being asked if she's tired"],hobby:"Fixing things that aren't broken",
+  story:"Her brother's boat capsized and left him in a wheelchair. Chaba has fought in his place since that night, and moved from Chaiya to Phuket without saying goodbye to Mali",secret:"Eleven letters to Mali she never sent. She still remembers every line"}};
+const RG_GPREF={baibua:{love:["malai","tea","n_umbrella"],like:["sketch","wrap","khanom","photo"],dislike:["coffee"]},
+ tabtim:{love:["sausage","i_pillow","photo"],like:["khanom","stickers","shorts","doll"],dislike:["book"]},
+ alicia:{love:["bracelet","c_khon","spa"],like:["tea","sketch","photo","coffee"],dislike:["sausage"]},
+ chaba:{love:["doll","s_talung","s_pearl"],like:["khanom","wrap","photo"],dislike:["stickers"]}};
+const RG_GLINES={baibua:{love:"…This is really for me? I'll take good care of it",like:"Thank you, it's lovely",ok:"Thank you",dislike:"…I'll give it a try"},
+ tabtim:{love:"Oh! This is exactly what I wanted! Love it!",like:"Thanks! I'll use it every meal",ok:"Thanks a lot!",dislike:"…This one makes me sleepy. Thanks though"},
+ alicia:{love:"…How did you know I like this? I'm not happy or anything. Just… thank you",like:"Not bad taste. Acceptable",ok:"Thank you",dislike:"I don't eat much of that. …But thanks"},
+ chaba:{love:"……(She hugs it tight and looks away)",like:"…Like it",ok:"Thank you",dislike:"…Just leave it there"}};
+for(const cid of Object.keys(RG_PROF)){RG_PROF[cid].age=18+stableHash(cid+"age")%13; /* the age she always had */if(typeof PROFILES!=="undefined"&&!PROFILES[cid])PROFILES[cid]=RG_PROF[cid];if(typeof GIFT_PREF!=="undefined"&&!GIFT_PREF[cid])GIFT_PREF[cid]=RG_GPREF[cid];
+  if(typeof GIFT_LINES!=="undefined"&&!GIFT_LINES[cid])GIFT_LINES[cid]=RG_GLINES[cid];if(typeof SOUV_LOVE!=="undefined"&&!SOUV_LOVE[cid])SOUV_LOVE[cid]=RG_GPREF[cid].love.filter(g=>GIFTS[g]&&GIFTS[g].souv);}
 /* the girl closest to you who notices a champion lover while you are with her */
 const RG_TWO={kati:"Coach… I've heard already. I don't have to ask, but it's not like I don't know",mali:"Mali saw who was holding whose hand last night… Mali isn't crying. Not crying",
  baibua:"…I've seen it. I don't have to ask, but my heart isn't blind",tabtim:"Manager… I'm not stupid, you know. I see it. I just don't say it",alicia:"I'm not blind. …I just haven't decided how angry to be",chaba:"…Seen it",
  rin:"Lately the hours you disappear don't match the schedule. I've logged it. I don't need an explanation, I just want you to know that I know",ploy:"…Don't say it. I've seen it",fah:"Hey! You think Fah's blind?! …Don't answer. Fah's going to train"};
 Object.assign(REGION,{
+  /* v1.91.30 (Man): champions you know show in the Characters tab — before she moves in, her hearts follow your closeness with her */
+  bondSync(G){const R=G.region;if(!R)return;for(const cid of Object.values(RG_CID0)){const f=G.F[cid];if(f&&!Number.isFinite(f.age)){delete f.ageAnchorWeek;delete f.age;if(typeof syncFighterAges==="function")syncFighterAges(G);}}for(const r of RG_ORDER){const cid=RG_CID0[r],f=G.F[cid];if(!f||(R.joined&&R.joined[cid]))continue;f.bond=rgBondOf((R.meet||{})[cid]);f.bondX=0;}},
+  peopleIds(G){const R=G.region;if(!R)return [];return RG_ORDER.map(r=>RG_CID0[r]).filter(cid=>{const f=G.F[cid];return f&&((R.joined&&R.joined[cid]&&f.camp==="player")||f.met||((R.meet||{})[cid]>0));});},
+  campOf(cid){const r=RG_ORDER.find(x=>RG_CID0[x]===cid);return r?{north:"Champion of the North",isan:"Champion of Isan",central:"Champion of the Central Plains",south:"Champion of the South"}[r]:"";},
   joinRooms(G){const R=G.region,J=R.joined||{};return CANON_IDS.filter(id=>G.F[id]&&G.F[id].camp==="player").length+Object.keys(J).filter(c=>G.F[c]&&G.F[c].camp==="player").length;},
   /* the champion's skill tree is her lineage's — the partner girl's tree (Tha Sao / Korat / Lopburi / Chaiya) */
-  joinSkills(G){const J=(G.region&&G.region.joined)||{};for(const r of RG_ORDER){const cid=RG_CID[r];if(J[cid]&&!SKILLS[cid]&&SKILLS[RG_CH[r].pair])SKILLS[cid]=SKILLS[RG_CH[r].pair];}},
+  joinSkills(G){const J=(G.region&&G.region.joined)||{};for(const r of RG_ORDER){const cid=RG_CID0[r];if(J[cid]&&!SKILLS[cid]&&SKILLS[RG_CH[r].pair])SKILLS[cid]=SKILLS[RG_CH[r].pair];}},
   joinWeekly(G){const R=G.region,F=R.final,now=gameWeek(G);if(!F||!F.won||now<(F.wonAbs||0)+3)return;R.joined=R.joined||{};R.offers=R.offers||[];R.joinQ=R.joinQ||[];
-    const m=R.meet||{};for(const r of RG_ORDER){const cid=RG_CID[r];if(!R.joined[cid]&&!R.offers.includes(cid)&&!R.joinQ.includes(cid)&&!(R.joinGone||{})[cid]&&(m[cid]||0)>=RG_JOIN_MIN)R.joinQ.push(cid);}
+    const m=R.meet||{};for(const r of RG_ORDER){const cid=RG_CID0[r];if(!R.joined[cid]&&!R.offers.includes(cid)&&!R.joinQ.includes(cid)&&!(R.joinGone||{})[cid]&&(m[cid]||0)>=RG_JOIN_MIN)R.joinQ.push(cid);}
     R.joinQ.sort((a,b)=>(m[b]||0)-(m[a]||0));
-    if(R.joinQ.length&&now>=(R.joinNext||0)){const cid=R.joinQ.shift(),r=RG_ORDER.find(x=>RG_CID[x]===cid);R.offers.push(cid);R.joinNext=now+RG_JOIN_GAP;
+    if(R.joinQ.length&&now>=(R.joinNext||0)){const cid=R.joinQ.shift(),r=RG_ORDER.find(x=>RG_CID0[x]===cid);R.offers.push(cid);R.joinNext=now+RG_JOIN_GAP;
       addMail(G,{kind:"letter",from:`${RG[r].champ} · Champion of ${RG[r].name}`,title:`Application from ${RG[r].champ}`,body:RG_JOIN[cid].letter+`
 
-(Contract: signing fee ${fmt(RG_JOIN_FEE)} · wage ${fmt(RG_JOIN_WAGE)}/week · answer on the Battle of the Four Regions page)`});}},
+(Contract: signing fee ${fmt(RG_JOIN_FEE)} · wage ${fmt(RG_JOIN_WAGE)}/week · trait: ${RG_TRAIT[cid].name} · see the contract on Camp › Trainers & fighters)`});}},
   joinOk(G,cid){const R=G.region;if(!R.offers||!R.offers.includes(cid))return "No such contract";if(R.joinPend)return "Wait for the one who already said yes to move in first";
     if(this.joinRooms(G)>=dormRooms(G))return `Rooms full (${dormRooms(G)} rooms) · upgrade the dorm first`;if(G.cash<RG_JOIN_FEE)return `Not enough cash · signing fee ${fmt(RG_JOIN_FEE)}`;return "";},
   joinAccept(G,cid){const why=this.joinOk(G,cid);if(why){toast(why);return;}const R=G.region;G.cash-=RG_JOIN_FEE;R.offers=R.offers.filter(x=>x!==cid);R.joinPend={cid,abs:gameWeek(G)+1};
     G.log=G.log||[];G.log.push(`Signed a contract with ${G.F[cid]?G.F[cid].name:cid} · signing fee ${fmt(RG_JOIN_FEE)} · moves in next week`);toast(`Contract signed · ${G.F[cid]?G.F[cid].name:""} moves in next week`);},
-  joinApply(G,cid){const R=G.region,r=RG_ORDER.find(x=>RG_CID[x]===cid),f=G.F[cid]||this.champFighter(G,r),pair=G.F[RG_CH[r].pair],now=gameWeek(G);
+  joinApply(G,cid){const R=G.region,r=RG_ORDER.find(x=>RG_CID0[x]===cid),f=G.F[cid]||this.champFighter(G,r),pair=G.F[RG_CH[r].pair],now=gameWeek(G);
     f.camp="player";f.canon=true;f.met=true;f.div=(pair&&(pair.div==="A"||pair.div==="B"))?pair.div:"A";
-    f.lvl=Math.max(8,Math.round((f.lvl||14)*.7));for(const k in f.a)f.a[k]=Math.max(6,Math.round(f.a[k]*.7*10)/10);
+    f.lvl=Math.max(12,(f.lvl||14)-2);for(const k in f.a)f.a[k]=Math.max(12,Math.min(20,Math.round(f.a[k]*.92*10)/10));f.vet=0; /* v1.91.30 (Man): a small drop from her rival form, not 30% */
     f.sp=(f.sp||0)+f.lvl;f.xp=0;f.skills=f.skills||{};f.wage=RG_JOIN_WAGE;f.fee=0;f.potential=20;f.fatigue=0;f.injury=0;f.morale=80;f.trust=Math.max(f.trust||0,50);
-    f.bond=Math.max(f.bond||0,Math.min(70,Math.max(30,25+(R.meet[cid]||0)*2)));f.joinAbs=now;f.lastTouch=absWeek(G);delete f.rgKey;delete f.rgT;delete f.rgSty;
+    f.bond=Math.max(f.bond||0,Math.max(30,rgBondOf(R.meet[cid])));f.joinAbs=now;f.lastTouch=absWeek(G);delete f.rgKey;delete f.rgT;delete f.rgSty;
     G.rank=G.rank||{A:{},B:{}};G.rank[f.div]=G.rank[f.div]||{};if(!G.rank[f.div][f.id])G.rank[f.div][f.id]={pts:0,w:0,l:0,d:0};
     (R.joined=R.joined||{})[cid]=now;this.joinSkills(G);if(typeof syncFighterAges==="function")syncFighterAges(G);
     G.log=G.log||[];G.log.push(`${f.name} moves into Sirichai Camp · Lv.${f.lvl} · skill points ${f.sp}`);},
-  joinSteps(G,cid){const r=RG_ORDER.find(x=>RG_CID[x]===cid),J=RG_JOIN[cid],pid=RG_CH[r].pair,pf=G.F[pid],top=typeof rgTopGirl==="function"?rgTopGirl(G):null;
+  joinSteps(G,cid){const r=RG_ORDER.find(x=>RG_CID0[x]===cid),J=RG_JOIN[cid],pid=RG_CH[r].pair,pf=G.F[pid],top=typeof rgTopGirl==="function"?rgTopGirl(G):null;
     const S=[...J.leave,{n:"nar",t:"This week, Sirichai Camp has a new member"},...J.arrive];
     if(pf&&pf.camp==="player")S.push({n:pid,f:"happy",l:"casual",t:J.pair},{n:cid,f:"happy",l:"casual",t:J.pairBack});
     else S.push({n:"coach",t:`The room at the end of the hall is free. ${RG[r].champ} takes that room. Dinner at six sharp. Late means no side dishes`});
@@ -1616,14 +1657,22 @@ Object.assign(REGION,{
     const S=P.map(x=>x.choice?{...x,choice:x.choice.map(o=>({t:o.t,fx:G2=>{add(G2,cid,"bond",o.b);add(G2,cid,"morale",3);},then:o.then}))}:{...x});
     if(!S.some(x=>x.choice))S.push({fx:G2=>{add(G2,cid,"bond",5);add(G2,cid,"morale",3);}});
     save();playScene(S,()=>{save();render();},{bg:"camp",look:"casual"});},
-  joinCard(G){const R=G.region,F=R.final;if(!F||!F.won)return "";const offers=R.offers||[],J=R.joined||{},ids=Object.keys(J).filter(c=>G.F[c]);
-    if(!offers.length&&!ids.length&&!R.joinPend)return "";
-    const off=offers.map(cid=>{const r=RG_ORDER.find(x=>RG_CID[x]===cid),why=this.joinOk(G,cid);return `<div class="kv-row"><span><b>${esc(RG[r].champ)}</b> <small>Champion of the ${esc(RG[r].name)} · signing fee ${fmt(RG_JOIN_FEE)} · wage ${fmt(RG_JOIN_WAGE)}/week</small>${why?`<small class="redt"> · ${esc(why)}</small>`:""}</span><button class="btn sm primary" data-act="rgjoin" data-v="${cid}" ${why?"disabled":""}>Sign</button></div>`;}).join("");
-    const pend=R.joinPend&&G.F[R.joinPend.cid]?`<p class="meta">${esc(G.F[R.joinPend.cid].name)} is on her way · arrives at camp next week</p>`:"";
-    const mine=ids.map(cid=>{const f=G.F[cid],lov=this.isLovC(G,cid),away=isAway(G,cid);return `<div class="rg-mem"><div class="kv-row"><span><b>${esc(f.name)}</b> <small>Lv.${f.lvl}</small></span><span>
-      <button class="btn sm chatb" data-act="rgchat" data-v="${cid}">Chat</button> <button class="btn sm primary" data-act="rghang" data-v="${cid}" ${G.freeUsed||away?"disabled":""}>${away?"Away":"Hang out"}</button>${lov?` <button class="btn sm" data-act="rgbreak" data-v="${cid}">Break up</button>`:""}</span></div>${hearts(f.bond,f)}</div>`;}).join("");
-    return `<section class="px card rg-join"><h3>🏠 Regional champions moving in</h3><p class="meta">Main-cast rooms ${this.joinRooms(G)}/${dormRooms(G)} rooms ${G.freeUsed?" · Free time used this week":""}</p>
-      ${off?`<h4>Contracts waiting for an answer</h4><div class="rg-nl">${off}</div><p class="meta">No need to answer now. The contract waits here</p>`:""}${pend}${mine?`<h4>Already at our camp</h4>${mine}`:""}</section>`;},
+  /* v1.91.30 (Man): contracts show where every contract shows (camp › trainers & fighters); the champions who moved in live in the Characters tab */
+  joinCard(G){const R=G.region;return R&&R.joinPend&&G.F[R.joinPend.cid]?`<section class="px card rg-join"><p class="meta">🏠 ${esc(G.F[R.joinPend.cid].name)} is on her way · arrives at camp next week</p></section>`:"";},
+  recruitHTML(G){const R=G.region,offers=(R&&R.offers||[]).filter(cid=>G.F[cid]);if(!offers.length)return "";
+    return `<section class="px card recruit rg-recruit"><h3><span class="newb">NEW!</span> A regional champion wants to join</h3>${offers.map(cid=>{const f=G.F[cid],r=RG_ORDER.find(x=>RG_CID0[x]===cid),T=RG_TRAIT[cid],why=this.joinOk(G,cid);
+      return `<div class="rcard"><button class="rface" data-act="fighter" data-id="${cid}" aria-label="View info ${esc(f.name)}"><img src="${faceSrc(cid,"happy")}" alt=""></button>
+       <div class="rinfo"><b>${esc(f.name)} <small>Champion of ${esc(RG[r].name)}</small></b><span class="meta">Trait <b class="goldt">${esc(T.name)}</b> · ${esc(T.desc)}</span><span class="meta">Signing fee ${fmt(RG_JOIN_FEE)} · wage ${fmt(RG_JOIN_WAGE)}/week · rooms ${this.joinRooms(G)}/${dormRooms(G)}</span>${why?`<span class="meta redt">${esc(why)}</span>`:""}</div>
+       <div class="rbtns"><button class="btn sm" data-act="fighter" data-id="${cid}">Details</button><button class="btn sm gold" data-act="rgjoin" data-v="${cid}" ${why?"disabled":""}>Sign</button></div></div>`;}).join("")}
+     <p class="meta">She drops only a little from her champion form · no need to answer now, the contract waits</p></section>`;},
+  /* the camp-wide side of each champion's trait, once a week */
+  joinPerks(G){const J=(G.region&&G.region.joined)||{},mine=roster(G);
+    for(const cid of Object.keys(J)){const f=G.F[cid];if(!f||f.camp!=="player"||isAway(G,cid))continue;
+      if(cid==="baibua")for(const x of mine)if(x.id!==cid){const cap=stCap(x);for(const k of ["elbow","counter"])x.a[k]=Math.min(cap,Math.round((x.a[k]+.04)*100)/100);}
+      if(cid==="tabtim")for(const x of mine)x.morale=Math.min(100,(x.morale||0)+2);
+      if(cid==="alicia"){const v=Math.round((1500+Math.min(G.rep||0,60)*60)/100)*100;G.cash+=v;G.rep=Math.round(((G.rep||0)+.05)*100)/100;G.log=G.log||[];G.log.push(`Alicia streams training with the camp · ad income ${fmt(v)}`);}
+      if(cid==="chaba")for(const x of mine)if(x.injury>0)x.injury=Math.max(0,x.injury-1);}},
+
 });
 if(typeof ACT!=="undefined")Object.assign(ACT,{
   rgjoin:d=>{REGION.joinAccept(G,d.v);save();render();},

@@ -275,6 +275,7 @@ const DUEL={st:null,
 
 /* v1.90 round 5: the opening gala (the week after the invitation) and the story beat after the first cup — the green-gold contract */
 const RG_CID={north:"baibua",isan:"tabtim",central:"alicia",south:"chaba"};
+const RG_CID0={...RG_CID}; /* v1.91.30: the four first champions — fixed, even when a later edition crowns someone new */
 const rgIn=(G,id)=>!!(G.F[id]&&G.F[id].camp==="player");
 const rgIf=(ok,steps)=>ok?steps:[];
 function rgGala(G){const top=rgTopGirl(G),fah=rgIn(G,"fah"),ploy=rgIn(G,"ploy"),R=G.region,meet=(id,v)=>G2=>rgMeet(G2,id,v);return [
@@ -876,7 +877,7 @@ const REGION={
     (R.gc=R.gc||[]).push(T.opp);R.trip=null;return true;},
 
   /* ---------- results + weekly upkeep ---------- */
-  flush(G){const R=G.region;if(R&&R.joined)this.joinSkills(G);if(!R||!R.pend||!R.pend.length)return;const done=R.pend.splice(0);
+  flush(G){const R=G.region;if(R&&R.joined)this.joinSkills(G);if(R)this.bondSync(G);if(!R||!R.pend||!R.pend.length)return;const done=R.pend.splice(0);
     for(const p of done){const rg=p.region||{},r=rg.r,dest=rg.dest,D=ROAD_DEST[dest];if(rg.nlfinal){if(R.final){R.final.cur=R.final.cur||{};R.final.cur[rg.nlfinal]=p.res||"L";}continue;}if(rg.nlleg){this.legResult(G,rg.nlleg,p);continue;}if(!D||!RG[r])continue;
       if(rg.series){this.seriesResult(G,r,p);continue;}
       rgTouch(G,RG_CID[r]);const T=R.trip,abs=T&&T.bid===p.bid?T.abs:gameWeek(G);
@@ -894,7 +895,7 @@ const REGION={
       const gap=now-R.meetT[cid];
       if(gap>=3&&!R.miss[cid]){R.miss[cid]=1;addMail(G,{kind:"letter",from:`${RG[r].champ} · แชมป์${RG[r].name}`,title:`จดหมายจาก${RG[r].champ}`,body:RG_MISS[r]});}
       if(gap>=4){const pk=(R.meetPk||{})[cid]||m[cid],fl=RG_FLOOR.find(t=>pk>=t)||0;if(m[cid]>fl)m[cid]=Math.max(fl,Math.round((m[cid]-.25)*100)/100);}}},
-  weekly(G){const R=G.region;this.flush(G);this.seriesWeekly(G);this.fade(G);this.letters(G);this.finalWeekly(G);this.joinWeekly(G);const T=R.trip;
+  weekly(G){const R=G.region;this.flush(G);this.seriesWeekly(G);this.fade(G);this.letters(G);this.finalWeekly(G);this.joinWeekly(G);this.joinPerks(G);const T=R.trip;
     /* a trip whose bout vanished (the week went by, the booking was dropped) is let go */
     if(T&&gameWeek(G)>T.abs&&!G.bookings.some(b=>b.id===T.bid)){(R.gc=R.gc||[]).push(T.opp);R.trip=null;R.nextTripAbs=Math.max(R.nextTripAbs||0,T.abs+1);}
     const keep=new Set(G.bookings.map(b=>b.b));R.gc=(R.gc||[]).filter(id=>{if(keep.has(id))return true;if(G.F[id]&&G.F[id].rg)delete G.F[id];return false;});},
@@ -1239,7 +1240,15 @@ if(typeof ACT!=="undefined")Object.assign(ACT,{
    hidden bar: closeness (R.meet) ≥ RG_JOIN_MIN · offers come in order of closeness, 4 weeks apart · accepting needs a free room (5 + dorm level) and the signing fee
    she arrives the next week (leaving her old camp + arriving at Sirichai) at ~70% of her champion level/stats, with skill points for her lineage's tree (the partner girl's)
    romance (Man): one-love or two-timing only — never the harem team. Kept on its own track (R.lov / R.ex), shown through relState */
-const RG_JOIN_MIN=12,RG_JOIN_GAP=4,RG_JOIN_FEE=60000,RG_JOIN_WAGE=3000;
+const rgBondOf=m=>Math.min(70,Math.round((m||0)*3));
+const RG0=Object.fromEntries(Object.entries(RG).map(([r,C])=>[r,{name:C.name,champ:C.champ,nick:C.nick}]));
+const RG_JOIN_MIN=12,RG_JOIN_GAP=4,RG_JOIN_FEE=350000,RG_JOIN_WAGE=5000; /* v1.91.30 (Man): a regional champion costs a fortune, and is worth it */
+/* v1.91.30 (Man): every champion brings something the camp wants — her ring perk stays, plus a camp-wide gift */
+const RG_TRAIT={
+ baibua:{name:"ครูศอกท่าเสา",desc:"ศอกสวนแบบท่าเสาติดตัว (สวน +5% ศอก +12%) · สอนศอกให้ทั้งค่าย: นักมวยในค่ายศอกและการสวนขึ้นเองทุกสัปดาห์"},
+ tabtim:{name:"เสียงหัวเราะอีสาน",desc:"เตะแม่น หลบไว ติดตัว · อยู่ที่ไหนที่นั่นครึกครื้น: กำลังใจทุกคนในค่าย +2 ทุกสัปดาห์"},
+ alicia:{name:"ดาวไลฟ์",desc:"หมัดหนักและกันวงในติดตัว · ไลฟ์ซ้อมกับค่าย: ได้ค่าโฆษณาทุกสัปดาห์ (ขึ้นกับชื่อเสียงค่าย) และชื่อเสียงค่อย ๆ ขึ้น"},
+ chaba:{name:"มือซ่อมเงียบ",desc:"หลบไวและฟื้นแรงเร็วติดตัว · ดูแลคนเจ็บเหมือนดูแลพี่ชาย: นักมวยที่บาดเจ็บหายเร็วขึ้นสัปดาห์ละ 1 สัปดาห์"}};
 const RG_JOIN={
  baibua:{letter:"ผู้จัดการเจ้า\n\nหนูคิดมาตั้งแต่คืนที่ได้ถ้วยแล้ว ว่าอยากซ้อมที่ค่ายศิริชัยเจ้า อยากชกข้าง ๆ กะทิ บ่ใช่ชกกับกะทิ\n\nพ่อบอกว่าครูมวยท่าเสาสอนให้ไปหาคนที่ทำให้หมัดเราดีขึ้น บ่ใช่อยู่ที่เดิมตลอด\n\nถ้าค่ายมีห้องว่าง หนูขอสมัครเน้อเจ้า\n— ใบบัว",
   leave:[{n:"nar",t:"เช้าวันย้ายค่าย หมอกยังไม่จาง ใบบัวกราบครูที่ศาลไม้หน้าค่ายเดิม"},{n:"baibua",f:"sad",l:"casual",t:"ครูเจ้า หนูไปอยู่ค่ายอื่นแล้วเน้อ… บ่ได้ทิ้งท่าเสาเจ้า หนูจะเอาไปด้วย"},
@@ -1271,7 +1280,7 @@ const RG_JOIN={
    [{n:"nar",t:"ทับทิมเปิดหมอลำจากโทรศัพท์ แล้วฟ้อนอยู่กลางลานค่ายคนเดียว"},{n:"tabtim",f:"happy",l:"casual",t:"มาฟ้อนนำกันเด้อผู้จัดการ! เท้าแบบนี้แหละที่ใช้เตะ",choice:[
      {t:"ลุกไปฟ้อนด้วย",b:5,then:[{n:"nar",t:"ทั้งค่ายออกมายืนดู ทับทิมจับมือคุณหมุนสามรอบแล้วหัวเราะจนนั่งลงกับพื้น"}]},
      {t:"นั่งตบมือให้จังหวะ",b:4,then:[{n:"tabtim",f:"flustered",l:"casual",t:"…มองนานคักเด้อ ข้อยเขินเป็นเหมือนกันเด้อ"}]}]}],
-   [{n:"nar",t:"หลังซ้อม ทับทิมนั่งเงียบผิดปกติ มองรูปทีมฟุตบอลเด็กในโทรศัพท์"},{n:"tabtim",f:"sad",l:"casual",t:"น้องชายข้อยเอง… ข้อยชกเพื่อส่งมันเรียน มันบอกว่าอยากเป็นหมอ",choice:[
+   [{n:"nar",t:"หลังซ้อม ทับทิมนั่งเงียบผิดปกติ มองรูปน้องชายในชุดนักศึกษาในโทรศัพท์"},{n:"tabtim",f:"sad",l:"casual",t:"น้องชายข้อยเอง… สอบติดนิติฯ แล้ว ข้อยชกเพื่อส่งมันเรียนให้จบ",choice:[
      {t:"\"เขาโชคดีที่มีพี่แบบเธอ\"",b:5,then:[{n:"tabtim",f:"flustered",l:"casual",t:"…อย่าเว้าแบบนี้ ข้อยฮ้องไห้ง่ายเด้อ บ่ได้เว้าหยอก"}]},
      {t:"\"ค่ายนี้ช่วยเธอส่งเขาได้\"",b:4,then:[{n:"tabtim",f:"happy",l:"casual",t:"ค่ายนี้ใจดีแท้… ข้อยสิชกให้หนักกว่าเก่าเด้อ"}]}]}]],
   love:[{n:"nar",t:"ริมโขงตอนพลบค่ำ ทับทิมเงียบไปนานกว่าทุกครั้ง"},{n:"tabtim",f:"flustered",l:"casual",t:"แต่ก่อนข้อยคิดว่าความสุขคือชนะ… ตอนนี้คือได้นั่งตรงนี้นำเจ้า"},{n:"tabtim",f:"happy",l:"casual",t:"อย่าบอกไผเด้อว่าข้อยเว้าหวานเป็น!"}],
@@ -1313,32 +1322,64 @@ const RG_JOIN={
   love:[{n:"nar",t:"ชบาชวนออกไปทะเลตอนกลางคืน ขี่มอไซค์พ่วงข้างมาเอง ทั้งที่คุณมีรถ"},{n:"chaba",f:"flustered",l:"casual",t:"ให้นั่งคนแรกเหมือนเดิม"},{n:"chaba",f:"happy",l:"casual",t:"…อยู่ต่ออีกวันได้ไหม ไซ ถามเหมือนเดิม"}],
   conf:()=>[{n:"nar",t:"ชบาเคาะประตูสามที แล้วยืนนิ่งอยู่นานจนคุณต้องเปิดเอง"},{n:"chaba",f:"flustered",l:"casual",t:"ผู้จัดการ"},{n:"nar",t:"ลมพัดผ่านไปหนึ่งรอบ"},{n:"chaba",f:"flustered",l:"casual",t:"…ชอบ แค่นั้น แหลงยาวม่ายเป็น"}],
   yes:()=>"…อืม (เธอจับมือคุณแน่น แล้วเดินกลับห้องไปเฉย ๆ)",no:"…ม่ายเป็นไร ยังซ่อมรั้วด้วยกันได้",bye:"…รู้แล้ว ม่ายต้องแหลงต่อ"}};
+/* v1.91.30: champions who move in get a profile, gift tastes and gift lines like the main cast */
+const RG_PROF={
+ baibua:{height:"165 ซม.",blood:"A",bday:"12 พฤศจิกายน (ยี่เป็ง)",home:"เชียงใหม่ · บ้านไม้หลังค่ายเล็กของพ่อ",heritage:"มวยท่าเสา (สายเดียวกับกะทิ)",
+  personality:"ขี้อาย สำรวม พูดเสียงเบา ขอโทษก่อนสวนศอกทุกครั้ง แต่บนเวทีไม่เคยถอย",likes:["ข้าวซอยร้านลับหลังตลาด","หมอกตอนเช้ามืด","ปักผ้าลายตีนจก"],
+  dislikes:["ถูกจ้องหน้าตอนพูด","กล้องถ่ายรูป","อาหารที่ไม่เผ็ด"],hobby:"ปักผ้าตีนจกให้คนที่สำคัญ ปักช้าเพราะอยากให้เสร็จทีหลัง",
+  story:"แบกค่ายเล็กของพ่อมาคนเดียวตั้งแต่พ่อเข่าเจ็บ ทั้งซ้อม ทั้งล้างจาน ทั้งทำบัญชี จนมาเห็นค่ายศิริชัยที่ทุกคนช่วยกัน",secret:"จดหมายสัญญาฉบับแรกมีประโยคหนึ่งที่เขียนแล้วลบ ลบจนกระดาษบาง"},
+ tabtim:{height:"168 ซม.",blood:"B",bday:"14 เมษายน",home:"โคราช · บ้านทุ่งนาที่พ่อเคยชกมวยงานวัด",heritage:"มวยโคราช (สายเดียวกับพลอย)",
+  personality:"เสียงดัง หัวเราะง่าย ร้องไห้ง่ายกว่า นอกเวทีบ้า ๆ บนเวทีคำนวณทุกก้าว",likes:["ส้มตำพริกสิบเม็ด","หมอลำซิ่ง","ไก่ย่างกับข้าวเหนียวร้อน ๆ"],
+  dislikes:["ความเงียบนาน ๆ","กินข้าวคนเดียว","คนที่ดูถูกเด็กบ้านนอก"],hobby:"ฟ้อนอยู่คนเดียวกลางลานตอนไม่มีใครดู (ทุกคนดูอยู่)",
+  story:"ชกเพื่อส่งน้องชายเรียนนิติฯ พ่อเป็นนักมวยงานวัดที่ไม่เคยมาดูเธอชก จนวันที่เธอได้ถ้วยภาคอีสาน",secret:"ซ้อมพูดคำว่า \"มัก\" หน้ากระจกมาสามอาทิตย์ก่อนพูดจริง"},
+ alicia:{height:"170 ซม.",blood:"AB",bday:"1 มกราคม",home:"กรุงเทพฯ · คอนโดที่สปอนเซอร์เช่าให้ (ย้ายออกแล้ว)",heritage:"มวยลพบุรี (สายเดียวกับริน)",
+  personality:"ซึนเดเระ ปากแข็ง ทำงานหนักกว่าที่ยอมให้ใครเห็น พูดไทยปนอังกฤษเวลาเขิน",likes:["ขนมไทยชาววัง","ล่องเรือตอนกลางคืน","สัญญาที่อ่านจบในห้านาที"],
+  dislikes:["คำว่า 'ดังเพราะหน้าตา'","สัญญาที่มีคำว่าตลอดไป","ถูกสั่งให้ยิ้ม"],hobby:"ตัดต่อคลิปซ้อมของตัวเองตอนตีสอง แต่ไม่เคยโพสต์",
+  story:"ดังตั้งแต่ไฟต์แรกเพราะหน้าตา เลยซ้อมหนักกว่าทุกคนเพื่อให้คนจำหมัด ไม่ใช่หน้า",secret:"ผ้าพันมือคู่แรกที่ซื้อเองตอนสิบห้ายังพกติดกระเป๋า ทั้งที่ขาดไปครึ่งหนึ่งแล้ว"},
+ chaba:{height:"160 ซม.",blood:"O",bday:"5 ตุลาคม",home:"เกิดที่ไชยา ข้างบ้านมะลิ · โตที่ภูเก็ต",heritage:"มวยไชยา (สายเดียวกับมะลิ)",
+  personality:"นิ่ง พูดน้อย ตลกหน้าตาย แพ้ของน่ารักทุกชนิด",likes:["ข้าวยำ","แมวจร","ทะเลตอนกลางคืน"],
+  dislikes:["คนพูดยาว","กล้องที่ถ่ายพี่ชาย","ถูกถามว่าเหนื่อยไหม"],hobby:"ซ่อมของที่ไม่ได้พัง",
+  story:"พี่ชายเรือคว่ำจนต้องนั่งรถเข็น ชบาชกแทนตั้งแต่คืนนั้น และย้ายจากไชยาไปภูเก็ตโดยไม่ได้ลามะลิ",secret:"จดหมายถึงมะลิ 11 ฉบับที่ไม่เคยส่ง เธอยังจำได้ทุกบรรทัด"}};
+const RG_GPREF={baibua:{love:["malai","tea","n_umbrella"],like:["sketch","wrap","khanom","photo"],dislike:["coffee"]},
+ tabtim:{love:["sausage","i_pillow","photo"],like:["khanom","stickers","shorts","doll"],dislike:["book"]},
+ alicia:{love:["bracelet","c_khon","spa"],like:["tea","sketch","photo","coffee"],dislike:["sausage"]},
+ chaba:{love:["doll","s_talung","s_pearl"],like:["khanom","wrap","photo"],dislike:["stickers"]}};
+const RG_GLINES={baibua:{love:"…ของหนูแท้ ๆ ก่อเจ้า หนูจะเก็บไว้ดี ๆ เน้อ",like:"ขอบใจเจ้า น่ารักแท้",ok:"ขอบใจเจ้า",dislike:"…หนูจะลองดูเน้อเจ้า"},
+ tabtim:{love:"โอ๊ย! อันนี้แหละที่ข้อยอยากได้! มักหลายเด้อ!",like:"ขอบใจเด้อ! ข้อยสิใช้ทุกมื้อเลย",ok:"ขอบใจหลายเด้อ",dislike:"…อันนี้ข้อยอ่านแล้วง่วงเด้อ แต่ขอบใจ"},
+ alicia:{love:"…รู้ได้ไงว่าฉันชอบ ไม่ได้ดีใจนะ แค่… thank you",like:"รสนิยมไม่แย่ ใช้ได้",ok:"ขอบคุณ",dislike:"ฉันไม่กินของมันเยอะ ๆ หรอก …แต่ขอบคุณ"},
+ chaba:{love:"……(กอดไว้แน่นแล้วหันหน้าหนี)",like:"…ชอบ",ok:"ขอบคุณ",dislike:"…วางไว้ตรงนั้นแหละ"}};
+for(const cid of Object.keys(RG_PROF)){RG_PROF[cid].age=18+stableHash(cid+"age")%13; /* the age she always had */if(typeof PROFILES!=="undefined"&&!PROFILES[cid])PROFILES[cid]=RG_PROF[cid];if(typeof GIFT_PREF!=="undefined"&&!GIFT_PREF[cid])GIFT_PREF[cid]=RG_GPREF[cid];
+  if(typeof GIFT_LINES!=="undefined"&&!GIFT_LINES[cid])GIFT_LINES[cid]=RG_GLINES[cid];if(typeof SOUV_LOVE!=="undefined"&&!SOUV_LOVE[cid])SOUV_LOVE[cid]=RG_GPREF[cid].love.filter(g=>GIFTS[g]&&GIFTS[g].souv);}
 /* the girl closest to you who notices a champion lover while you are with her */
 const RG_TWO={kati:"ครูคะ… หนูได้ยินมาแล้วค่ะ หนูไม่ถามก็ได้ แต่หนูไม่ได้ไม่รู้นะคะ",mali:"มะลิเห็นนะคะว่าใครเดินจับมือใครเมื่อคืน… มะลิไม่ร้องไห้หรอก ไม่ร้องหรอก",
  baibua:"…หนูเห็นแล้วเจ้า หนูบ่ถามก็ได้ แต่ใจมันบ่ได้บ่รู้เจ้า",tabtim:"ผู้จัดการ… ข้อยบ่ได้โง่เด้อ ข้อยเห็นอยู่ ข้อยแค่บ่เว้า",alicia:"I'm not blind. …ฉันแค่ยังไม่ตัดสินใจว่าจะโกรธแค่ไหน",chaba:"…เห็นแล้ว",
  rin:"ช่วงนี้เวลาที่คุณหายไปไม่ตรงกับตารางค่ะ ฉันบันทึกไว้แล้ว ไม่ได้ต้องการคำอธิบาย แค่อยากให้รู้ว่าฉันรู้",ploy:"…ไม่ต้องพูด ฉันเห็นแล้ว",fah:"นี่! คิดว่าฟ้าตาบอดเหรอ! …ไม่ต้องตอบ ฟ้าไปซ้อมก่อน"};
 Object.assign(REGION,{
+  /* v1.91.30 (Man): champions you know show in the Characters tab — before she moves in, her hearts follow your closeness with her */
+  bondSync(G){const R=G.region;if(!R)return;for(const cid of Object.values(RG_CID0)){const f=G.F[cid];if(f&&!Number.isFinite(f.age)){delete f.ageAnchorWeek;delete f.age;if(typeof syncFighterAges==="function")syncFighterAges(G);}}for(const r of RG_ORDER){const cid=RG_CID0[r],f=G.F[cid];if(!f||(R.joined&&R.joined[cid]))continue;f.bond=rgBondOf((R.meet||{})[cid]);f.bondX=0;}},
+  peopleIds(G){const R=G.region;if(!R)return [];return RG_ORDER.map(r=>RG_CID0[r]).filter(cid=>{const f=G.F[cid];return f&&((R.joined&&R.joined[cid]&&f.camp==="player")||f.met||((R.meet||{})[cid]>0));});},
+  campOf(cid){const r=RG_ORDER.find(x=>RG_CID0[x]===cid);return r?{north:"แชมป์ภาคเหนือ",isan:"แชมป์ภาคอีสาน",central:"แชมป์ภาคกลาง",south:"แชมป์ภาคใต้"}[r]:"";},
   joinRooms(G){const R=G.region,J=R.joined||{};return CANON_IDS.filter(id=>G.F[id]&&G.F[id].camp==="player").length+Object.keys(J).filter(c=>G.F[c]&&G.F[c].camp==="player").length;},
   /* the champion's skill tree is her lineage's — the partner girl's tree (Tha Sao / Korat / Lopburi / Chaiya) */
-  joinSkills(G){const J=(G.region&&G.region.joined)||{};for(const r of RG_ORDER){const cid=RG_CID[r];if(J[cid]&&!SKILLS[cid]&&SKILLS[RG_CH[r].pair])SKILLS[cid]=SKILLS[RG_CH[r].pair];}},
+  joinSkills(G){const J=(G.region&&G.region.joined)||{};for(const r of RG_ORDER){const cid=RG_CID0[r];if(J[cid]&&!SKILLS[cid]&&SKILLS[RG_CH[r].pair])SKILLS[cid]=SKILLS[RG_CH[r].pair];}},
   joinWeekly(G){const R=G.region,F=R.final,now=gameWeek(G);if(!F||!F.won||now<(F.wonAbs||0)+3)return;R.joined=R.joined||{};R.offers=R.offers||[];R.joinQ=R.joinQ||[];
-    const m=R.meet||{};for(const r of RG_ORDER){const cid=RG_CID[r];if(!R.joined[cid]&&!R.offers.includes(cid)&&!R.joinQ.includes(cid)&&!(R.joinGone||{})[cid]&&(m[cid]||0)>=RG_JOIN_MIN)R.joinQ.push(cid);}
+    const m=R.meet||{};for(const r of RG_ORDER){const cid=RG_CID0[r];if(!R.joined[cid]&&!R.offers.includes(cid)&&!R.joinQ.includes(cid)&&!(R.joinGone||{})[cid]&&(m[cid]||0)>=RG_JOIN_MIN)R.joinQ.push(cid);}
     R.joinQ.sort((a,b)=>(m[b]||0)-(m[a]||0));
-    if(R.joinQ.length&&now>=(R.joinNext||0)){const cid=R.joinQ.shift(),r=RG_ORDER.find(x=>RG_CID[x]===cid);R.offers.push(cid);R.joinNext=now+RG_JOIN_GAP;
-      addMail(G,{kind:"letter",from:`${RG[r].champ} · แชมป์${RG[r].name}`,title:`ใบสมัครจาก${RG[r].champ}`,body:RG_JOIN[cid].letter+`\n\n(สัญญา: ค่าเซ็น ${fmt(RG_JOIN_FEE)} · ค่าจ้าง ${fmt(RG_JOIN_WAGE)}/สัปดาห์ · ตอบได้ที่หน้าศึกชิงเจ้าสี่ภาค)`});}},
+    if(R.joinQ.length&&now>=(R.joinNext||0)){const cid=R.joinQ.shift(),r=RG_ORDER.find(x=>RG_CID0[x]===cid);R.offers.push(cid);R.joinNext=now+RG_JOIN_GAP;
+      addMail(G,{kind:"letter",from:`${RG[r].champ} · แชมป์${RG[r].name}`,title:`ใบสมัครจาก${RG[r].champ}`,body:RG_JOIN[cid].letter+`\n\n(สัญญา: ค่าเซ็น ${fmt(RG_JOIN_FEE)} · ค่าจ้าง ${fmt(RG_JOIN_WAGE)}/สัปดาห์ · ลักษณะพิเศษ: ${RG_TRAIT[cid].name} · ดูสัญญาที่หน้าค่าย › ครู & นักมวย)`});}},
   joinOk(G,cid){const R=G.region;if(!R.offers||!R.offers.includes(cid))return "ไม่มีสัญญานี้";if(R.joinPend)return "รอคนที่ตอบรับไปก่อนหน้าย้ายมาก่อน";
     if(this.joinRooms(G)>=dormRooms(G))return `ห้องพักเต็ม (${dormRooms(G)} ห้อง) · อัปเกรดหอพักก่อน`;if(G.cash<RG_JOIN_FEE)return `เงินไม่พอ · ค่าเซ็น ${fmt(RG_JOIN_FEE)}`;return "";},
   joinAccept(G,cid){const why=this.joinOk(G,cid);if(why){toast(why);return;}const R=G.region;G.cash-=RG_JOIN_FEE;R.offers=R.offers.filter(x=>x!==cid);R.joinPend={cid,abs:gameWeek(G)+1};
     G.log=G.log||[];G.log.push(`เซ็นสัญญากับ${G.F[cid]?G.F[cid].name:cid} · ค่าเซ็น ${fmt(RG_JOIN_FEE)} · ย้ายมาสัปดาห์หน้า`);toast(`เซ็นสัญญาแล้ว · ${G.F[cid]?G.F[cid].name:""}ย้ายมาสัปดาห์หน้า`);},
-  joinApply(G,cid){const R=G.region,r=RG_ORDER.find(x=>RG_CID[x]===cid),f=G.F[cid]||this.champFighter(G,r),pair=G.F[RG_CH[r].pair],now=gameWeek(G);
+  joinApply(G,cid){const R=G.region,r=RG_ORDER.find(x=>RG_CID0[x]===cid),f=G.F[cid]||this.champFighter(G,r),pair=G.F[RG_CH[r].pair],now=gameWeek(G);
     f.camp="player";f.canon=true;f.met=true;f.div=(pair&&(pair.div==="A"||pair.div==="B"))?pair.div:"A";
-    f.lvl=Math.max(8,Math.round((f.lvl||14)*.7));for(const k in f.a)f.a[k]=Math.max(6,Math.round(f.a[k]*.7*10)/10);
+    f.lvl=Math.max(12,(f.lvl||14)-2);for(const k in f.a)f.a[k]=Math.max(12,Math.min(20,Math.round(f.a[k]*.92*10)/10));f.vet=0; /* v1.91.30 (Man): a small drop from her rival form, not 30% */
     f.sp=(f.sp||0)+f.lvl;f.xp=0;f.skills=f.skills||{};f.wage=RG_JOIN_WAGE;f.fee=0;f.potential=20;f.fatigue=0;f.injury=0;f.morale=80;f.trust=Math.max(f.trust||0,50);
-    f.bond=Math.max(f.bond||0,Math.min(70,Math.max(30,25+(R.meet[cid]||0)*2)));f.joinAbs=now;f.lastTouch=absWeek(G);delete f.rgKey;delete f.rgT;delete f.rgSty;
+    f.bond=Math.max(f.bond||0,Math.max(30,rgBondOf(R.meet[cid])));f.joinAbs=now;f.lastTouch=absWeek(G);delete f.rgKey;delete f.rgT;delete f.rgSty;
     G.rank=G.rank||{A:{},B:{}};G.rank[f.div]=G.rank[f.div]||{};if(!G.rank[f.div][f.id])G.rank[f.div][f.id]={pts:0,w:0,l:0,d:0};
     (R.joined=R.joined||{})[cid]=now;this.joinSkills(G);if(typeof syncFighterAges==="function")syncFighterAges(G);
     G.log=G.log||[];G.log.push(`${f.name}ย้ายเข้าค่ายศิริชัย · Lv.${f.lvl} · แต้มสกิล ${f.sp}`);},
-  joinSteps(G,cid){const r=RG_ORDER.find(x=>RG_CID[x]===cid),J=RG_JOIN[cid],pid=RG_CH[r].pair,pf=G.F[pid],top=typeof rgTopGirl==="function"?rgTopGirl(G):null;
+  joinSteps(G,cid){const r=RG_ORDER.find(x=>RG_CID0[x]===cid),J=RG_JOIN[cid],pid=RG_CH[r].pair,pf=G.F[pid],top=typeof rgTopGirl==="function"?rgTopGirl(G):null;
     const S=[...J.leave,{n:"nar",t:"สัปดาห์นี้ ค่ายศิริชัยมีสมาชิกใหม่"},...J.arrive];
     if(pf&&pf.camp==="player")S.push({n:pid,f:"happy",l:"casual",t:J.pair},{n:cid,f:"happy",l:"casual",t:J.pairBack});
     else S.push({n:"coach",t:`ห้องปลายทางเดินว่างอยู่ ${RG[r].champ} เอาห้องนั้นไป ข้าวเย็นหกโมงตรง มาสายไม่มีกับข้าว`});
@@ -1363,14 +1404,22 @@ Object.assign(REGION,{
     const S=P.map(x=>x.choice?{...x,choice:x.choice.map(o=>({t:o.t,fx:G2=>{add(G2,cid,"bond",o.b);add(G2,cid,"morale",3);},then:o.then}))}:{...x});
     if(!S.some(x=>x.choice))S.push({fx:G2=>{add(G2,cid,"bond",5);add(G2,cid,"morale",3);}});
     save();playScene(S,()=>{save();render();},{bg:"camp",look:"casual"});},
-  joinCard(G){const R=G.region,F=R.final;if(!F||!F.won)return "";const offers=R.offers||[],J=R.joined||{},ids=Object.keys(J).filter(c=>G.F[c]);
-    if(!offers.length&&!ids.length&&!R.joinPend)return "";
-    const off=offers.map(cid=>{const r=RG_ORDER.find(x=>RG_CID[x]===cid),why=this.joinOk(G,cid);return `<div class="kv-row"><span><b>${esc(RG[r].champ)}</b> <small>แชมป์${esc(RG[r].name)} · ค่าเซ็น ${fmt(RG_JOIN_FEE)} · ค่าจ้าง ${fmt(RG_JOIN_WAGE)}/สัปดาห์</small>${why?`<small class="redt"> · ${esc(why)}</small>`:""}</span><button class="btn sm primary" data-act="rgjoin" data-v="${cid}" ${why?"disabled":""}>เซ็นสัญญา</button></div>`;}).join("");
-    const pend=R.joinPend&&G.F[R.joinPend.cid]?`<p class="meta">${esc(G.F[R.joinPend.cid].name)}กำลังย้ายมา · ถึงค่ายสัปดาห์หน้า</p>`:"";
-    const mine=ids.map(cid=>{const f=G.F[cid],lov=this.isLovC(G,cid),away=isAway(G,cid);return `<div class="rg-mem"><div class="kv-row"><span><b>${esc(f.name)}</b> <small>Lv.${f.lvl}</small></span><span>
-      <button class="btn sm chatb" data-act="rgchat" data-v="${cid}">แชต</button> <button class="btn sm primary" data-act="rghang" data-v="${cid}" ${G.freeUsed||away?"disabled":""}>${away?"ไม่อยู่":"ใช้เวลาด้วยกัน"}</button>${lov?` <button class="btn sm" data-act="rgbreak" data-v="${cid}">ขอเลิก</button>`:""}</span></div>${hearts(f.bond,f)}</div>`;}).join("");
-    return `<section class="px card rg-join"><h3>🏠 แชมป์ภาคย้ายเข้าค่าย</h3><p class="meta">ห้องพักตัวละครหลัก ${this.joinRooms(G)}/${dormRooms(G)} ห้อง${G.freeUsed?" · เวลาว่างสัปดาห์นี้ใช้แล้ว":""}</p>
-      ${off?`<h4>สัญญาที่รอตอบ</h4><div class="rg-nl">${off}</div><p class="meta">ไม่ตอบก็ได้ สัญญายังรออยู่ตรงนี้</p>`:""}${pend}${mine?`<h4>อยู่ค่ายเราแล้ว</h4>${mine}`:""}</section>`;},
+  /* v1.91.30 (Man): contracts show where every contract shows (camp › trainers & fighters); the champions who moved in live in the Characters tab */
+  joinCard(G){const R=G.region;return R&&R.joinPend&&G.F[R.joinPend.cid]?`<section class="px card rg-join"><p class="meta">🏠 ${esc(G.F[R.joinPend.cid].name)}กำลังย้ายมา · ถึงค่ายสัปดาห์หน้า</p></section>`:"";},
+  recruitHTML(G){const R=G.region,offers=(R&&R.offers||[]).filter(cid=>G.F[cid]);if(!offers.length)return "";
+    return `<section class="px card recruit rg-recruit"><h3><span class="newb">NEW!</span> แชมป์ภาคอยากเข้าค่าย</h3>${offers.map(cid=>{const f=G.F[cid],r=RG_ORDER.find(x=>RG_CID0[x]===cid),T=RG_TRAIT[cid],why=this.joinOk(G,cid);
+      return `<div class="rcard"><button class="rface" data-act="fighter" data-id="${cid}" aria-label="ดูข้อมูล ${esc(f.name)}"><img src="${faceSrc(cid,"happy")}" alt=""></button>
+       <div class="rinfo"><b>${esc(f.name)} <small>แชมป์${esc(RG[r].name)}</small></b><span class="meta">ลักษณะพิเศษ <b class="goldt">${esc(T.name)}</b> · ${esc(T.desc)}</span><span class="meta">ค่าเซ็น ${fmt(RG_JOIN_FEE)} · ค่าจ้าง ${fmt(RG_JOIN_WAGE)}/สัปดาห์ · ห้องพัก ${this.joinRooms(G)}/${dormRooms(G)}</span>${why?`<span class="meta redt">${esc(why)}</span>`:""}</div>
+       <div class="rbtns"><button class="btn sm" data-act="fighter" data-id="${cid}">ดูข้อมูล</button><button class="btn sm gold" data-act="rgjoin" data-v="${cid}" ${why?"disabled":""}>เซ็นสัญญา</button></div></div>`;}).join("")}
+     <p class="meta">ฝีมือลดจากตอนเป็นแชมป์แค่นิดเดียว · ไม่ตอบก็ได้ สัญญายังรออยู่</p></section>`;},
+  /* the camp-wide side of each champion's trait, once a week */
+  joinPerks(G){const J=(G.region&&G.region.joined)||{},mine=roster(G);
+    for(const cid of Object.keys(J)){const f=G.F[cid];if(!f||f.camp!=="player"||isAway(G,cid))continue;
+      if(cid==="baibua")for(const x of mine)if(x.id!==cid){const cap=stCap(x);for(const k of ["elbow","counter"])x.a[k]=Math.min(cap,Math.round((x.a[k]+.04)*100)/100);}
+      if(cid==="tabtim")for(const x of mine)x.morale=Math.min(100,(x.morale||0)+2);
+      if(cid==="alicia"){const v=Math.round((1500+Math.min(G.rep||0,60)*60)/100)*100;G.cash+=v;G.rep=Math.round(((G.rep||0)+.05)*100)/100;G.log=G.log||[];G.log.push(`อลิเซียไลฟ์ซ้อมกับค่าย · ค่าโฆษณา ${fmt(v)}`);}
+      if(cid==="chaba")for(const x of mine)if(x.injury>0)x.injury=Math.max(0,x.injury-1);}},
+
 });
 if(typeof ACT!=="undefined")Object.assign(ACT,{
   rgjoin:d=>{REGION.joinAccept(G,d.v);save();render();},
