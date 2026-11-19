@@ -6210,7 +6210,7 @@ AU.gsfx=function(kind,a){if(!this.init()||this.muted||!SETTINGS.sfx)return;const
   if(kind==="shimmer")for(let i=0;i<6;i++)T(i*.05,{f:1400+Math.random()*1400,type:"sine",dur:.12,peak:.06});};
 
 // ================= MUAY THAI MOE v1.3 — UI =================
-const VERSION="1.91.39";
+const VERSION="1.91.40";
 const CUR_LANG=(typeof window!=="undefined"&&window.LANG)||"th";
 const TH_LABEL=String.fromCharCode(3652,3607,3618);
 function langSwitch(cls){return `<div class="langsw ${cls||""}" role="group" aria-label="Language">${[["th",TH_LABEL],["en","EN"]].map(([k,l])=>`<button class="lsb ${CUR_LANG===k?"on":""}" data-act="setlang" data-v="${k}" aria-pressed="${CUR_LANG===k}">${l}</button>`).join("")}</div>`;}
@@ -6252,8 +6252,8 @@ function cardArtOf(id){const A=CARD_ART[id];return A&&CARDS[id]?A:null;}
 /* the hidden art: box cards open it at card Lv.3 (spare copies) · story cards can't be duplicated, so theirs opens a year after you got the card */
 const ART2_WK=52;
 function art2Open(id,o){const A=cardArtOf(id),C=CARDS[id];if(!A||!A.f2||!o)return false;if(C.g||C.lg)return (o.lv||1)>=3;return absWeek(G)-(o.wk??-999)>=ART2_WK;}
-/* v1.91.38 (Man): an SR from a box shows its picture from card Lv.2 (one spare copy) · story SR cards and every SSR show it at once */
-function art1Open(id,o){const C=CARDS[id];if(!o||!C)return false;if(C.r==="SR"&&(C.g||C.lg))return (o.lv||1)>=2;return true;}
+/* v1.91.40 (Man): every SR/SSR shows its first picture as soon as you own the card (SR spares are rare) */
+function art1Open(id,o){return !!(o&&CARDS[id]);}
 function art2Hint(id,o){const C=CARDS[id];if(C.g||C.lg)return "Upgrade card to Lv.3";const left=ART2_WK-(absWeek(G)-(o.wk??0));return `${Math.max(1,left)} weeks`;}
 function cardArtSteps(id,steps){const A=cardArtOf(id);if(!A||!art1Open(id,(G.cards||{})[id]))return steps;const out=steps.map(x=>x),k=A.at,x=out[k];/* at = index of the story step it shows on */
   if(!x||!("t" in x)||x.choice)return steps;out[k]={...x,cg:A.f};const nx=out[k+1];if(nx&&("t" in nx)&&!nx.choice)out[k+1]={...nx,cg:A.f};return out;}
