@@ -1406,10 +1406,10 @@ Object.assign(REGION,{
   campOf(cid){const r=RG_ORDER.find(x=>RG_CID0[x]===cid);return r?{north:"แชมป์ภาคเหนือ",isan:"แชมป์ภาคอีสาน",central:"แชมป์ภาคกลาง",south:"แชมป์ภาคใต้"}[r]:"";},
   /* her move from her champion days, shown in the skill tab like a signature */
   perkCard(f){const r=f&&RG_ORDER.find(x=>RG_CID0[x]===f.id),R=G.region;if(!r||!R||!R.joined||!R.joined[f.id])return "";const P=RG_CH0[r].perk;
-    return `<div class="sigcard on rg-perk"><b>✦ ท่าประจำตัว: ${esc(P.name)}</b><p class="meta">${esc(P.desc)} · ติดตัวมาตั้งแต่เป็นแชมป์${esc(RG0[r].name)} มีผลทุกไฟต์ ไม่ต้องใส่ช่องสกิล</p></div>`;},
+    return `<div class="sigcard on rg-perk"><b>✦ ท่าประจำตัว: ${esc(P.name)}</b><p class="meta">${esc(P.desc)} · ติดตัวมาตั้งแต่เป็นแชมป์${esc(RG0[r].name)} มีผลทุกไฟต์ ไม่ต้องใส่ช่องสกิล</p>${typeof traitLvRow==="function"&&G.F[f.id]&&G.F[f.id].camp==="player"?traitLvRow(f,true):""}</div>`;},
   joinRooms(G){const R=G.region,J=R.joined||{};return CANON_IDS.filter(id=>G.F[id]&&G.F[id].camp==="player").length+Object.keys(J).filter(c=>G.F[c]&&G.F[c].camp==="player").length;},
   /* the champion's skill tree is her lineage's — the partner girl's tree (Tha Sao / Korat / Lopburi / Chaiya) */
-  joinSkills(G){const J=(G.region&&G.region.joined)||{};for(const r of RG_ORDER){const cid=RG_CID0[r],pr=RG_CH0[r].pair;if(!J[cid])continue;
+  joinSkills(G){const J=(G.region&&G.region.joined)||{};for(const r of RG_ORDER){const cid=RG_CID0[r],pr=RG_CH0[r].pair;if(!J[cid])continue;if(typeof REQ_ALIAS!=="undefined")REQ_ALIAS[cid]=pr;
     /* v1.91.43 (Man): same roots as her lineage partner, but the Lv.42 legend tips are her own — new name, her story, plus a small signature bonus */
     if((!SKILLS[cid]||SKILLS[cid]===SKILLS[pr])&&SKILLS[pr]){const C=RG_CAP[cid]||{};SKILLS[cid]=SKILLS[pr].map(s=>{const c=C[s.id];if(!c)return s;const [id,name,desc,ad]=c;return {...s,id,name,desc,fx:r=>rgFxAdd(s.fx(r),ad(r))};});}
     {const f=G.F&&G.F[cid],C=RG_CAP[cid]||{};if(f)for(const o in C){const n=C[o][0];if(f.skills&&f.skills[o]){f.skills[n]=(f.skills[n]||0)+f.skills[o];delete f.skills[o];}if(Array.isArray(f.equip))f.equip=f.equip.map(x=>x===o?n:x);}}

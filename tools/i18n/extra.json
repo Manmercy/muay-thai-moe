@@ -15470,5 +15470,6 @@
  "\" aria-label=\"อัปพลังแฝง ใช้ 5 แต้มสกิล\">+</button>": "\" aria-label=\"Level up hidden power (5 skill points)\">+</button>",
  " แต้ม": " pts",
  "% ของที่เขียนไว้ · อัปใช้ ": "% of the listed effect · next level costs ",
- "ได้ทุกเลเวลอัป ใช้อัปท่ามวยโบราณตามสำนักของนักมวย และอัปพลังแฝง (Lv.1–10 · ใช้เลเวลละ 5 แต้ม)": "Earned every level-up. Spend them on old-school moves from the fighter's school, and on hidden power (Lv.1–10 · 5 points a level)"
+ "ได้ทุกเลเวลอัป ใช้อัปท่ามวยโบราณตามสำนักของนักมวย และอัปพลังแฝง (Lv.1–10 · ใช้เลเวลละ 5 แต้ม)": "Earned every level-up. Spend them on old-school moves from the fighter's school, and on hidden power (Lv.1–10 · 5 points a level)",
+ " มีผลทุกไฟต์ ไม่ต้องใส่ช่องสกิล</p>": " · works in every fight, no skill slot needed</p>"
 }

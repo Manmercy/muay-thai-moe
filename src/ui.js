@@ -815,7 +815,7 @@ const fmtA=v=>(Math.floor(v*10)/10).toFixed(1).replace(/\.0$/,"");
 const skState=(f,s,mine)=>{const r=(f.skills&&f.skills[s.id])||0;if(!mine)return {r,st:r?"has":"lock"};const B=skillBlock(f,s.id);
   if(r>=3)return {r,st:"max"};if(!B.length)return {r,st:"can"};const nb=B.filter(b=>b.t!=="sp");if(!nb.length)return {r,st:"nosp"};return {r,st:"lock",B:nb};};
 function skillTree(f,mine){const L=skillList(f.id),eqd=equipped(f),sc=SCHOOLS[L[0].school]||{name:""};
-  const lines=(SK_LINES[f.id]||["สาย 1","สาย 2","สาย 3"]).concat(SK_SHARED);const can=li=>mine&&L.some(s=>s.line===li&&skState(f,s,mine).st==="can");
+  const lines=(SK_LINES[f.id]||SK_LINES[REQ_ALIAS[f.id]]||["สาย 1","สาย 2","สาย 3"]).concat(SK_SHARED);const can=li=>mine&&L.some(s=>s.line===li&&skState(f,s,mine).st==="can");
   let li=UI.skLine&&UI.skLine.id===f.id?UI.skLine.li:[0,1,2,3,4,5].find(can);if(li==null)li=0;const path=null; /* v1.91.45: build lines are open to mix */
   const nCan=L.filter(s=>skState(f,s,mine).st==="can").length;
   const why=st=>st.B.map(b=>b.t==="pre"?`ต้องมี "${skillDef(f.id,b.id).name}" ก่อน`:b.t==="lv"?`ต้อง Lv.${b.v}`:b.t==="stat"?`${SK_AN[b.k]} ${fmtA(b.have)}/${fmtA(b.v)}`:b.t==="path"?`เลือก "${SK_SHARED[path-3]}" ไปแล้ว (ปั้นได้ทีละสาย)`:"").filter(Boolean).join(" · ");

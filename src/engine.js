@@ -377,7 +377,8 @@ const TR_MAX=10,TR_COST=5,TR_K=[.6,.8,1,1.05,1.1,1.15,1.2,1.25,1.3,1.35];
 const traitLv=f=>clamp(Math.round((f&&f.trLv)||1),1,TR_MAX);
 const traitK=f=>!f||f.camp!=="player"?1:TR_K[traitLv(f)-1];
 const trm=(m,S)=>1+(m-1)*(S&&S.trk!=null?S.trk:1);
-function traitBlock(f){if(!f||!TRAITS[f.id]||f.camp!=="player")return "none";if(traitLv(f)>=TR_MAX)return "max";if((f.sp||0)<TR_COST)return "sp";return "";}
+const isLvPerk=f=>!!(f&&f.pfx&&f.camp==="player"&&!TRAITS[f.id]&&hasTree(f.id)); /* a joined regional champion's signature perk levels like a hidden power */
+function traitBlock(f){if(!f||!(TRAITS[f.id]||isLvPerk(f))||f.camp!=="player")return "none";if(traitLv(f)>=TR_MAX)return "max";if((f.sp||0)<TR_COST)return "sp";return "";}
 function traitUp(G,id){const f=G.F[id];if(traitBlock(f))return false;f.trLv=traitLv(f)+1;f.sp-=TR_COST;return true;}
 const SIGNATURE={kati:{name:"ศอกกลับใจศิริชัย",desc:"ความสนิท ♥ Lv.7+ · ศอกแรง +15% · ตอนเลือดต่ำแม่นขึ้นอีก 3%",fx:{dmg:{elbow:.15},clutch:.03}},
   mali:{name:"เตะดอกมะลิบาน",desc:"ความสนิท ♥ Lv.7+ · เตะแม่น +3% · ฟื้นแรงระหว่างยก +15%",fx:{hit:{kick:.03},regen:.15}},
@@ -387,7 +388,7 @@ const SIGNATURE={kati:{name:"ศอกกลับใจศิริชัย",d
 const hasSignature=f=>!!SIGNATURE[f.id]&&f.camp==="player"&&(f.bond||0)>=60;
 function skillMods(f){const m={hit:{},pts:{},dmg:{},ctr:0,ctrDmg:0,clutch:0,regen:0,mor:0,evade:0,corner:0,prep:0,clDef:0,staSave:0,sprawl:0,tdTry:0,gnp:0,sub:0};
   if(hasSignature(f)){const e=SIGNATURE[f.id].fx;for(const k in e){if(typeof e[k]==="object")for(const w in e[k])m[k][w]=(m[k][w]||0)+e[k][w];else m[k]+=e[k];}}
-  if(f.pfx)for(const k in f.pfx){const e=f.pfx;if(typeof e[k]==="object")for(const w in e[k])m[k][w]=(m[k][w]||0)+e[k][w];else m[k]+=e[k];} /* v1.90: a regional champion's own perk */
+  if(f.pfx){const e=f.pfx,pk=f.camp==="player"?traitK(f):1;for(const k in e){if(typeof e[k]==="object")for(const w in e[k])m[k][w]=(m[k][w]||0)+e[k][w]*pk;else m[k]+=e[k]*pk;}} /* v1.90: a regional champion's own perk */
   const list=skillList(f.id);if(!list.length||!f.skills)return m;const eq=equipped(f);
   for(const sk of list){if(!sk.passive&&!eq.includes(sk.id))continue;const r=f.skills[sk.id]||0;if(!r)continue;const e=sk.fx(r);
     for(const k in e){if(typeof e[k]==="object")for(const w in e[k])m[k][w]=(m[k][w]||0)+e[k][w];else m[k]+=e[k];}}
@@ -406,8 +407,9 @@ const GROW={"kati":{"punch":[3.1,4.8],"counter":[2.6,4.5],"power":[1.8,3.2],"spe
 const REQ_WK={main:[[0,2,4],[3,5,7],[3,5,7],[6,8,10],[8,10,12],[10,12,14],[11,12,13],[11,12,13],[12,13,14],[12,13,14],[13,14,15]],cross:[[0,0,0],[1,2,3],[0,0,0],[2,3,4],[3,4,5],[4,5,6],[4,5,6],[4,5,6],[5,6,7],[5,6,7],[6,7,8]],scale:{kati:1,mali:.85,rin:.7,ploy:.75,fah:.8}};
 const REQ_EASE=.75; /* v1.91.45 (Man): stat gates ask for 25% less training, so skill points stop piling up */
 GROW.ploy=GROW.ploy||GROW.kati;GROW.fah=GROW.fah||GROW.mali;
-function skillReqs(fid,sk,rank){const d=skillDef(fid,sk);if(!d||!d.req||!CANON[fid]||!GROW[fid])return [];const base=CANON[fid].a,r=clamp(rank,1,3)-1,sc=REQ_WK.scale[fid]||1;
-  return d.req.map((k,i)=>{const w=(i?REQ_WK.cross:REQ_WK.main)[d.row][r]*sc*REQ_EASE,g=GROW[fid][k]||[2,3.2];const up=w<=8?g[0]*w/8:g[0]+(g[1]-g[0])*(w-8)/6;return {k,v:Math.min(19.5,Math.floor((base[k]+up)*2)/2)};});} // v1.89: roots (rows 6-10) never ask for more than 19.5
+const REQ_ALIAS={}; /* v1.91.45: a joined champion is gated like her lineage partner (set by region.js) */
+function skillReqs(fid,sk,rank){const d=skillDef(fid,sk),gid=REQ_ALIAS[fid]||fid;if(!d||!d.req||!CANON[gid]||!GROW[gid])return [];const base=CANON[gid].a,r=clamp(rank,1,3)-1,sc=REQ_WK.scale[gid]||1;
+  return d.req.map((k,i)=>{const w=(i?REQ_WK.cross:REQ_WK.main)[d.row][r]*sc*REQ_EASE,g=GROW[gid][k]||[2,3.2];const up=w<=8?g[0]*w/8:g[0]+(g[1]-g[0])*(w-8)/6;return {k,v:Math.min(19.5,Math.floor((base[k]+up)*2)/2)};});} // v1.89: roots (rows 6-10) never ask for more than 19.5
 // why a skill can't be raised right now ([] = ok). Each entry: {t:"sp"|"max"|"lv"|"pre"|"stat", ...}
 function skillBlock(f,sk){const d=skillDef(f.id,sk),r=(f.skills&&f.skills[sk])||0,B=[];if(!d)return [{t:"none"}];
   if(r>=3)return [{t:"max"}];if((d.lv||1)>f.lvl)B.push({t:"lv",v:d.lv});
