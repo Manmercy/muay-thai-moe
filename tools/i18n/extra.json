@@ -14399,5 +14399,8 @@
  " · ชกไปแล้ว": " · already fought",
  " · ใครจะขึ้นชกกับ": " · Who fights ",
  "<div class=\"vsb\"><h2>นัด ": "<div class=\"vsb\"><h2>Bout ",
- "กลับเข้าโกดัง ชกต่อ ▸": "Back into the warehouse ▸"
+ "กลับเข้าโกดัง ชกต่อ ▸": "Back into the warehouse ▸",
+ "<h2>แพ้ไฟต์ใต้ดิน</h2><p>นัดที่ชนะแล้วนับไว้ให้ ครั้งหน้าชกแค่นัดที่เหลือ · จะเอายังไงต่อ</p><div class=\"mfoot\"><button class=\"btn\" data-act=\"rgfhome\">กลับไปซ้อมก่อน (มาใหม่สัปดาห์หน้า)</button><button class=\"btn primary\" data-act=\"rgfagain\">จัดคู่ใหม่ แล้วสู้ต่อเลย</button></div>": "<h2>Lost the underground fight</h2><p>Bouts you already won stay won; next time you only fight the rest · What now?</p><div class=\"mfoot\"><button class=\"btn\" data-act=\"rgfhome\">Train first (come back next week)</button><button class=\"btn primary\" data-act=\"rgfagain\">New lineup, fight on now</button></div>",
+ "</b><span class=\"vs-tr\">ค่ายศิริชัย</span></div>\n      <p class=\"meta vs-sub\">ห้าต่อห้า · ชนะสามได้ไป · แตะช่องสีน้ำเงินเพื่อเลือกนักมวย · นัดที่ชนะแล้วนับไว้ให้ ครั้งหน้าชกแค่นัดที่เหลือ · ไม่มีบาดเจ็บค้างหลังไฟต์</p>\n      <div class=\"vs-rows\">": "</b><span class=\"vs-tr\">Sirichai Camp</span></div>\n      <p class=\"meta vs-sub\">Five on five · first to three · tap a blue slot to pick a fighter · bouts you already won stay won · no injuries carry over after the fight</p>\n      <div class=\"vs-rows\">",
+ "ชนะไว้ครั้งก่อน": "Won last time"
 }

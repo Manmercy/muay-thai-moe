@@ -1367,9 +1367,11 @@ Object.assign(REGION,{
     if(f.nl)return `<img src="${ASSET}nl_${f.nl}${f.nl==="rosa"&&win?"_win":""}_por.webp" alt="">`; /* v1.91.23: Man's Naka League portraits */
     if(A[f.id])return `<img src="${ASSET}${f.id}_fight_happy.webp" alt="">`;
     return `<canvas width="128" height="128" data-sprite="${f.id}" data-mode="guard" ${side==="r"?'data-flip="1"':""}></canvas>`;},
-  boardHTML(){const R=G.region,F=R.final,pool=this.finalPool(G),L=F.line=F.line||{},C=F.cur=F.cur||{};
+  boardHTML(){const R=G.region,F=R.final,pool=this.finalPool(G),L=F.line=F.line||{},K=F.clear=F.clear||{};
+    if(!F.live){F.cur={};for(const k in K){F.cur[k]="W";delete L[k];}} /* v1.91.24 (Man, option 1): bouts already won stay won */
+    const C=F.cur;
     for(const k of NL_ORDER)if(!C[k]&&L[k]&&!pool.some(f=>f.id===L[k]))delete L[k];
-    if(!F.live&&!NL_ORDER.some(k=>L[k])){const used=new Set();for(const k of NL_ORDER){const f=pool.filter(x=>!used.has(x.id)).sort((a,b)=>effOvr(G,b)-effOvr(G,a))[0];if(f){L[k]=f.id;used.add(f.id);}}}
+    if(!F.live&&!NL_ORDER.some(k=>!C[k]&&L[k])){const used=new Set();for(const k of NL_ORDER){if(C[k])continue;const f=pool.filter(x=>!used.has(x.id)).sort((a,b)=>effOvr(G,b)-effOvr(G,a))[0];if(f){L[k]=f.id;used.add(f.id);}}}
     const ref=pool[0]||roster(G)[0];for(const k of NL_ORDER)if(!G.F["nl_"+k]&&ref)nlFighter(G,k,ref);
     const v=Object.values(C),w=v.filter(x=>x==="W").length,l=v.filter(x=>x==="L").length,next=NL_ORDER.find(k=>!C[k]);
     if(UI.rgPick&&!C[UI.rgPick]){const k=UI.rgPick,o=G.F["nl_"+k],at=id=>NL_ORDER.find(x=>L[x]===id);
@@ -1379,14 +1381,14 @@ Object.assign(REGION,{
         ${pool.length<5?`<p class="redt">ต้องมีนักมวยพร้อมชกอย่างน้อย 5 คน (ตอนนี้ ${pool.length} คน)</p>`:""}
         <div class="mfoot"><button class="btn" data-act="rgfpickx">กลับ</button></div></div>`;}
     const stamp=(r,sd)=>r?`<i class="vs-st ${sd} ${r==="W"?"w":r==="L"?"l":"d"}">${r==="W"?"WIN":r==="L"?"LOSE":"DRAW"}</i>`:"";
-    const rows=NL_ORDER.map((k,i)=>{const o=G.F["nl_"+k],me=L[k]&&G.F[L[k]],r=C[k],their=r==="W"?"L":r==="L"?"W":r;
-      return `<div class="vs-row ${r?"done":""} ${k===next?"next":""}">
+    const rows=NL_ORDER.map((k,i)=>{const o=G.F["nl_"+k],kept=!!(K[k]&&!L[k]),me=kept?G.F[K[k]]:L[k]&&G.F[L[k]],r=C[k],their=r==="W"?"L":r==="L"?"W":r;
+      return `<div class="vs-row ${r?"done":""} ${kept?"kept":""} ${k===next?"next":""}">
         <div class="vs-l"><span class="vs-art">${o?this.vsArt(o,"l",their==="W"):""}</span><span class="vs-tx">${(n=>`<b>${esc(n[0])}</b>${n[1]?`<em>${esc(n.slice(1).join(" "))}</em>`:""}`)(NL[k].name.split(" "))}<small>${esc(NL[k].art)}</small></span></div>
         <div class="vs-mid">VS<small>นัด ${i+1}</small></div>
-        <button class="vs-r" data-act="rgfslot" data-v="${k}" ${r?"disabled":""}>${me?`<span class="vs-tx"><b>${esc(me.name)}</b><small>Lv.${me.lvl||1}</small></span><span class="vs-art">${this.vsArt(me,"r")}</span>`:`<span class="vs-tx vs-empty"><b>+ เลือกนักมวย</b></span>`}</button>${stamp(their,"vsl")}${stamp(r,"vsr")}</div>`;}).join("");
+        <button class="vs-r" data-act="rgfslot" data-v="${k}" ${r?"disabled":""}>${me?`<span class="vs-tx"><b>${esc(me.name)}</b><small>${kept?"ชนะไว้ครั้งก่อน":`Lv.${me.lvl||1}`}</small></span><span class="vs-art">${this.vsArt(me,"r")}</span>`:`<span class="vs-tx vs-empty"><b>+ เลือกนักมวย</b></span>`}</button>${stamp(their,"vsl")}${stamp(r,"vsr")}</div>`;}).join("");
     const nk=next&&NL_ORDER.indexOf(next)+1,ok=next&&L[next];
     return `<div class="vsb"><div class="vs-head"><span class="vs-tl">นาคาลีก</span><b class="vs-sc">${w>0||l>0?`${l} – ${w}`:"VS"}</b><span class="vs-tr">ค่ายศิริชัย</span></div>
-      <p class="meta vs-sub">ห้าต่อห้า · ชนะสามได้ไป · แตะช่องสีน้ำเงินเพื่อเลือกนักมวย · ไม่มีบาดเจ็บค้างหลังไฟต์</p>
+      <p class="meta vs-sub">ห้าต่อห้า · ชนะสามได้ไป · แตะช่องสีน้ำเงินเพื่อเลือกนักมวย · นัดที่ชนะแล้วนับไว้ให้ ครั้งหน้าชกแค่นัดที่เหลือ · ไม่มีบาดเจ็บค้างหลังไฟต์</p>
       <div class="vs-rows">${rows}</div>
       <div class="mfoot">${next?`${F.live?"":`<button class="btn" data-act="closeModal">ไว้ก่อน</button>`}<button class="btn primary" data-act="rgfgo" ${ok?"":"disabled"}>${ok?`ชกนัด ${nk} ▸`:`เลือกนักมวยนัด ${nk} ก่อน`}</button>`:`<button class="btn primary" data-act="rgfend">ดูผลไฟต์ใต้ดิน ▸</button>`}</div></div>`;},
   finalNext(){const R=G.region,F=R.final,C=F.cur=F.cur||{},k=NL_ORDER.find(x=>!C[x]);if(!k||!(F.line||{})[k])return;UI.modal=null;UI.rgPick=null;
@@ -1397,7 +1399,7 @@ Object.assign(REGION,{
     const b={id:`nlf${F.tries||0}_${i}_${gameWeek(G)}`,a:me.id,b:o.id,week:G.week,tier:"exhibition",rounds:5,win:0,lose:0,bg:"bg_naka_underground.webp",gprep:F.prep,region:{nlfinal:k}};
     G.bookings.push(b);save();
     openFight(b,()=>{G.bookings=G.bookings.filter(x=>x.id!==b.id);me.injury=keep.injury;me.fatigue=keep.fatigue;this.flush(G);
-      if(!F.cur[k])F.cur[k]="L";save();UI.modal={type:"rgfline"};render();});},
+      if(!F.cur[k])F.cur[k]="L";if(F.cur[k]==="W"){F.clear=F.clear||{};F.clear[k]=me.id;}save();UI.modal={type:"rgfline"};render();});},
   finalEnd(){const R=G.region,F=R.final,v=Object.values(F.cur||{}),w=v.filter(x=>x==="W").length,l=v.filter(x=>x==="L").length,beat=(F.cur||{}).ladda==="W";F.tries=(F.tries||0)+1;F.live=false;UI.modal=null;
     if(w>=3){F.won=true;F.stage="done";F.wonAbs=gameWeek(G);F.score=`${w}–${l}`;F.beatLadda=beat;R.hall=R.hall||[];R.hall.push({k:"naka",season:G.season||1,score:F.score,ladda:beat});
       for(const r of RG_ORDER)rgTouch(G,RG_CID[r]);G.rep+=3;
@@ -1417,7 +1419,7 @@ if(typeof ACT!=="undefined")Object.assign(ACT,{
   rgfhome:()=>{const F=G.region.final;F.abs=gameWeek(G)+1;UI.modal=null;addMail(G,{kind:"letter",from:"(ไม่มีชื่อผู้ส่ง)",title:"การ์ดสีดำใบใหม่",body:"ประตูยังเปิดอยู่\n— ล."});save();render();},
 });
 if(typeof XMODAL!=="undefined"){XMODAL.rgfline=()=>({body:REGION.boardHTML(),foot:false});
-  XMODAL.rgflost=()=>({body:`<h2>แพ้ไฟต์ใต้ดิน</h2><p>จะเอายังไงต่อ</p><div class="mfoot"><button class="btn" data-act="rgfhome">กลับไปซ้อมก่อน (มาใหม่สัปดาห์หน้า)</button><button class="btn primary" data-act="rgfagain">จัดคู่ใหม่ แล้วสู้ต่อเลย</button></div>`,foot:false});}
+  XMODAL.rgflost=()=>({body:`<h2>แพ้ไฟต์ใต้ดิน</h2><p>นัดที่ชนะแล้วนับไว้ให้ ครั้งหน้าชกแค่นัดที่เหลือ · จะเอายังไงต่อ</p><div class="mfoot"><button class="btn" data-act="rgfhome">กลับไปซ้อมก่อน (มาใหม่สัปดาห์หน้า)</button><button class="btn primary" data-act="rgfagain">จัดคู่ใหม่ แล้วสู้ต่อเลย</button></div>`,foot:false});}
 if(typeof XMODAL!=="undefined"){XMODAL.rgplan=m=>({body:REGION.planHTML(m.dest),foot:false});XMODAL.rgser=m=>({body:REGION.seriesHTML(m.r),foot:false});}
 if(typeof ACT!=="undefined")Object.assign(ACT,{
   lbgo:d=>{UI.modal=null;lbStart(G,d.v);},
