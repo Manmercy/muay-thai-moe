@@ -2480,7 +2480,7 @@ const HON_COACH=[N=>`Remember tonight, ${N}. This victory is now part of Siricha
  N=>`I've trained fighters my whole life and I never get used to nights like this… well done, ${N}`];
 const RG_BELT_MC={chiangrai:"Folks of Chiang Rai! This belt now belongs to Sirichai Camp! Give it a big hand!",nan:"Here we go! Folks of Nan! We win the boat races, and we win in the ring just like this!",
  uttaradit:"Folks! The town of Phraya Phichai of the Broken Sword salutes you! He'd have loved a fighting heart like that!",lampang:"Here we go, folks! Lampang's horse carts are ready to parade round town! Hop on, new champion!",
- udon:"Udon, everyone! The Red Lotus Sea is blooming for our new champion! What a night!",khonkaen:"Khon Kaen gives a thumbs-up, everyone! Punches as tight as hand-woven silk. Brilliant!",
+ udon:"Udon, everyone! The Red Lotus Sea is blooming for our new champion! What a night!",khonkaen:"Khon Kaen, everybody! Even the Phu Wiang dinosaurs are looking up! Our new champion punches like a dinosaur stomp. Brilliant!",
  buriram:"Buriram is the loudest town in Isan! Let the new champion hear it, everyone!",ubon:"May the Candle Festival light the new champion's way, Ubon! What a beautiful night!",
  lopburi:"Watch out, champ, the monkeys want that belt! Lopburi congratulates you!",suphan:"Suphan claps louder than its own country songs!",
  phetchaburi:"Phetchaburi custard cake is waiting for the champion backstage!",chanthaburi:"No mangosteen is as sweet as tonight's win! Chanthaburi congratulates you!",
@@ -6186,7 +6186,7 @@ AU.gsfx=function(kind,a){if(!this.init()||this.muted||!SETTINGS.sfx)return;const
   if(kind==="shimmer")for(let i=0;i<6;i++)T(i*.05,{f:1400+Math.random()*1400,type:"sine",dur:.12,peak:.06});};
 
 // ================= MUAY THAI MOE v1.3 — UI =================
-const VERSION="1.91.20";
+const VERSION="1.91.21";
 const CUR_LANG=(typeof window!=="undefined"&&window.LANG)||"th";
 const TH_LABEL=String.fromCharCode(3652,3607,3618);
 function langSwitch(cls){return `<div class="langsw ${cls||""}" role="group" aria-label="Language">${[["th",TH_LABEL],["en","EN"]].map(([k,l])=>`<button class="lsb ${CUR_LANG===k?"on":""}" data-act="setlang" data-v="${k}" aria-pressed="${CUR_LANG===k}">${l}</button>`).join("")}</div>`;}
