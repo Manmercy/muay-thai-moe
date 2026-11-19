@@ -1773,7 +1773,7 @@ Object.assign(REGION,{
       T.push(setTimeout(()=>{FS.init(cv,"bg_closing_ceremony.webp",champ(B.cid),L);FS.A.x=FS.A.base=330;FS.B.x=FS.B.base=630;if(bi===0){LOOPS.add(FS.render);startLoops();}AU.sfx&&AU.sfx("bell");},t0));
       B.steps.forEach(st=>T.push(setTimeout(()=>{const now=performance.now();
         if(st[1]==="cap")cap.textContent=st[2];
-        else if(st[1]==="sp"){FS.special({side:st[2],mv:{img:st[3]},name:st[4],head:st[2]==="B"?"ลดา":RG[RG_ORDER.find(r=>RG_CID0[r]===B.cid)].champ},0,now);AU.sfx&&AU.sfx(st[2]==="B"?"kd":"elbow");}
+        else if(st[1]==="sp"){FS.special({side:st[2],mv:{img:st[3],noHit:st[2]==="A"}, /* v1.91.63: the champions' specials miss Ladda — no impact burst on her */name:st[4],head:st[2]==="B"?"ลดา":RG[RG_ORDER.find(r=>RG_CID0[r]===B.cid)].champ},0,now);AU.sfx&&AU.sfx(st[2]==="B"?"kd":"elbow");}
         else if(st[1]==="play"){FS.play({ev:st[2],side:st[3],w:st[4],crit:true},now);AU.sfx&&AU.sfx(st[2]==="miss"?"miss":st[2]==="ko"?"kd":st[4]||"punch");}},t0+st[0])));
       at+=B.end;});
     T.push(setTimeout(()=>{const now=performance.now();FS.init(cv,"bg_closing_ceremony.webp",champ("chaba"),L);FS.A.ko=true;FS.A.down=now-2000;FS.B.win=true;FS.B.anim="win";FS.B.x=FS.B.base=560;cap.textContent="ลดายืนอยู่คนเดียวกลางเวที ฮู้ดสีขาวไม่เลื่อนหลุดเลยสักครั้ง";},at));
