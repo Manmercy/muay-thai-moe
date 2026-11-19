@@ -15399,5 +15399,6 @@
  "ภาพพิเศษ": "Special art",
  "ภาพลับ": "Secret art",
  "อัปการ์ดถึง Lv.3": "Upgrade card to Lv.3",
- "<div class=\"cdart\"><div class=\"cdartrow\"><div class=\"cdartimg lock\"><b>🔒</b><span>ภาพพิเศษ · อัปการ์ดถึง Lv.2</span></div></div></div>": "<div class=\"cdart\"><div class=\"cdartrow\"><div class=\"cdartimg lock\"><b>🔒</b><span>Special art · Upgrade card to Lv.2</span></div></div></div>"
+ "<div class=\"cdart\"><div class=\"cdartrow\"><div class=\"cdartimg lock\"><b>🔒</b><span>ภาพพิเศษ · อัปการ์ดถึง Lv.2</span></div></div></div>": "<div class=\"cdart\"><div class=\"cdartrow\"><div class=\"cdartimg lock\"><b>🔒</b><span>Special art · Upgrade card to Lv.2</span></div></div></div>",
+ "\"><b>🔒</b><span>อ่านเรื่องราวการ์ดเพื่อปลดภาพ</span></button></div></div>": "\"><b>🔒</b><span>Read the card story to unlock</span></button></div></div>"
 }

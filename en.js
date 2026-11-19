@@ -886,7 +886,7 @@ function newGame(opts){
   const seed=(opts.seed??Math.floor(Math.random()*1e9))>>>0;const rng=mulberry32(seed);
   const G={v:1,timeV:3,snubV:2,dmSeenSeason:1,dmSeen:{},seed,week:1,diff:opts.diff||"normal",player:{name:opts.name||"Ton",gender:opts.gender||"m"},cash:60000,debt:120000,rep:5,
     fac:{gym:0,airgym:0,recovery:0,classroom:0,brand:0,dorm:0,kitchen:0,hill:0,video:0,ring:0,clinic:0,shrine:0,van:0,sauna:0,lights:0,hall:0,daeng:1,assistants:0},stu:1,staff:[],rankMove:{A:{},B:{}},camp:{beauty:0},campUsed:null,levelUps:[],avatar:opts.avatar||null,F:{},rank:{A:{},B:{}},qual:{A:[],B:[]},finalists:{A:[],B:[]},semis:{A:[],B:[]},champ:{},
-    bookings:[],offers:[],log:[],flags:{},seen:{},freeUsed:false,negWeeks:0,history:[],honors:[],awards:[],ended:null,lastReport:null,romance:null,lovers:[],lovWk:{}};
+    bookings:[],offers:[],log:[],flags:{},seen:{},freeUsed:false,negWeeks:0,history:[],honors:[],awards:[],ended:null,lastReport:null,romance:null,lovers:[],lovWk:{},cardRd:1};
   for(const [id,d] of Object.entries(CANON))G.F[id]=baseFighter(id,d);
   for(const div of ["A","B"])NPC_NAMES[div].forEach(([n,l],i)=>{const id=`n${div}${i}`;G.F[id]=baseFighter(id,mkNPC(id,n,div,l,rng,i));});
   for(const f of Object.values(G.F))startLv(f);
@@ -1008,7 +1008,7 @@ const hasStaff=(G,k)=>(G.staff||[]).includes(k);
 const staffLocked=(G,k)=>{const r=STAFF[k].req;if(!r)return "";if(r.lv&&campLevel(G)<r.lv)return `Camp Lv.${r.lv}`;if(r.rep&&G.rep<r.rep)return `Fame ${r.rep}`;return "";};
 function hireStaff(G,k){const S=STAFF[k];G.staff=G.staff||[];if(!S||hasStaff(G,k)||G.staff.length>=staffSlots(G)||staffLocked(G,k)||G.cash<S.fee)return false;G.cash-=S.fee;G.staff.push(k);G.fac.assistants=G.staff.length;return true;}
 function fireStaff(G,k){G.staff=(G.staff||[]).filter(x=>x!==k);G.fac.assistants=G.staff.length;return true;}
-function fixSave(G){if(G&&G.F&&typeof hmFix==="function")hmFix(G);if(G&&G.F&&typeof monoFix==="function")monoFix(G);if(G&&G.ev&&G.ev.loy&&typeof thiefFix==="function")thiefFix(G);if(G&&G.F&&G.prodigy)fixProdigies(G);if(G&&G.flags&&G.flags.beat_ploy&&G.flags.beatS_ploy==null)G.flags.beatS_ploy=G.season||1;
+function fixSave(G){/* v1.91.41: cards already owned count as read, so their pictures stay unlocked */if(G&&!G.cardRd){for(const k in (G.cards||{}))G.cards[k].rd=1;G.cardRd=1;}if(G&&G.F&&typeof hmFix==="function")hmFix(G);if(G&&G.F&&typeof monoFix==="function")monoFix(G);if(G&&G.ev&&G.ev.loy&&typeof thiefFix==="function")thiefFix(G);if(G&&G.F&&G.prodigy)fixProdigies(G);if(G&&G.flags&&G.flags.beat_ploy&&G.flags.beatS_ploy==null)G.flags.beatS_ploy=G.season||1;
   // Legacy saves used week-of-season values. Infer only short, plausible effects;
   // otherwise expire them instead of resurrecting an old effect after New Year.
   const now=gameWeek(G),base=now-G.week;
@@ -6210,7 +6210,7 @@ AU.gsfx=function(kind,a){if(!this.init()||this.muted||!SETTINGS.sfx)return;const
   if(kind==="shimmer")for(let i=0;i<6;i++)T(i*.05,{f:1400+Math.random()*1400,type:"sine",dur:.12,peak:.06});};
 
 // ================= MUAY THAI MOE v1.3 — UI =================
-const VERSION="1.91.40";
+const VERSION="1.91.41";
 const CUR_LANG=(typeof window!=="undefined"&&window.LANG)||"th";
 const TH_LABEL=String.fromCharCode(3652,3607,3618);
 function langSwitch(cls){return `<div class="langsw ${cls||""}" role="group" aria-label="Language">${[["th",TH_LABEL],["en","EN"]].map(([k,l])=>`<button class="lsb ${CUR_LANG===k?"on":""}" data-act="setlang" data-v="${k}" aria-pressed="${CUR_LANG===k}">${l}</button>`).join("")}</div>`;}
@@ -6251,11 +6251,11 @@ const CARD_ART={e_champ:{f:"ssr_e_champ",f2:"ssr_e_champ_2",at:1},g_kati_ssr:{f:
 function cardArtOf(id){const A=CARD_ART[id];return A&&CARDS[id]?A:null;}
 /* the hidden art: box cards open it at card Lv.3 (spare copies) · story cards can't be duplicated, so theirs opens a year after you got the card */
 const ART2_WK=52;
-function art2Open(id,o){const A=cardArtOf(id),C=CARDS[id];if(!A||!A.f2||!o)return false;if(C.g||C.lg)return (o.lv||1)>=3;return absWeek(G)-(o.wk??-999)>=ART2_WK;}
-/* v1.91.40 (Man): every SR/SSR shows its first picture as soon as you own the card (SR spares are rare) */
-function art1Open(id,o){return !!(o&&CARDS[id]);}
+function art2Open(id,o){const A=cardArtOf(id),C=CARDS[id];if(!A||!A.f2||!o||!o.rd)return false;if(C.g||C.lg)return (o.lv||1)>=3;return absWeek(G)-(o.wk??-999)>=ART2_WK;}
+/* v1.91.41 (Man): a card's picture unlocks once you've read its story to the end (it shows up mid-story first) */
+function art1Open(id,o){return !!(o&&CARDS[id]&&o.rd);}
 function art2Hint(id,o){const C=CARDS[id];if(C.g||C.lg)return "Upgrade card to Lv.3";const left=ART2_WK-(absWeek(G)-(o.wk??0));return `${Math.max(1,left)} weeks`;}
-function cardArtSteps(id,steps){const A=cardArtOf(id);if(!A||!art1Open(id,(G.cards||{})[id]))return steps;const out=steps.map(x=>x),k=A.at,x=out[k];/* at = index of the story step it shows on */
+function cardArtSteps(id,steps){const A=cardArtOf(id);if(!A)return steps;const out=steps.map(x=>x),k=A.at,x=out[k];/* at = index of the story step it shows on */
   if(!x||!("t" in x)||x.choice)return steps;out[k]={...x,cg:A.f};const nx=out[k+1];if(nx&&("t" in nx)&&!nx.choice)out[k+1]={...nx,cg:A.f};return out;}
 function cardArtInit(){if(cardArtInit.ok)return;cardArtInit.ok=1;for(const k in CARD_ART)if(CARDS[k])CARDS[k]._art={id:k,f:CARD_ART[k].f,f2:CARD_ART[k].f2||null};}
 const cardFaceArt=C=>{cardArtInit();const A=C._art;if(!A||!G||!G.cardArt)return null;const w=G.cardArt[A.id],o=(G.cards||{})[A.id];if(!w||!o||!art1Open(A.id,o))return null;
@@ -6847,7 +6847,7 @@ function cardLinkHTML(id){const own=G.cards||{},out=[];const pv=CARD_SEQ[id];if(
 function albKeep(){try{const o=document.querySelector(".overlay");if(UI.modal&&UI.modal.type==="album"&&o)UI.albY=o.scrollTop;}catch(e){}}
 function albRestore(){const y=UI.albY||0;if(!y)return;const go=()=>{const o=document.querySelector(".overlay");if(o)o.scrollTop=y;};go();requestAnimationFrame(go);}
 function cardArtPanel(id){const A=cardArtOf(id);if(!A)return "";const o=(G.cards||{})[id]||{},w=(G.cardArt||{})[id]||0,open2=art2Open(id,o);
-  if(!art1Open(id,o))return `<div class="cdart"><div class="cdartrow"><div class="cdartimg lock"><b>🔒</b><span>Special art · Upgrade card to Lv.2</span></div></div></div>`;
+  if(!art1Open(id,o))return `<div class="cdart"><div class="cdartrow"><button class="cdartimg lock" data-act="cardplay" data-v="${id}"><b>🔒</b><span>Read the card story to unlock</span></button></div></div>`;
   const lab=w===2&&open2?"Secret art":w?"Special art":"Portrait";
   return `<div class="cdart"><div class="cdartrow"><button class="cdartimg" data-act="cardart" data-v="${id}" aria-label="View full art"><img src="${ASSET}${A.f}.webp" alt="" loading="lazy"><span>🔍 Special art</span></button>
     ${A.f2?(open2?`<button class="cdartimg s2" data-act="cardart2" data-v="${id}" aria-label="View secret art"><img src="${ASSET}${A.f2}.webp" alt="" loading="lazy"><span>✦ Secret art</span></button>`:`<div class="cdartimg lock"><b>🔒</b><span>Secret art · ${art2Hint(id,o)}</span></div>`):""}</div>
@@ -7973,9 +7973,9 @@ const ACT={
   cardart:d=>{if(!cardArtOf(d.v)||!art1Open(d.v,(G.cards||{})[d.v]))return;UI.modal={type:"cardart",id:d.v,back:UI.modal&&UI.modal.back};render();},
   cardface:d=>{const A=cardArtOf(d.v),o=(G.cards||{})[d.v];if(!A||!o||!art1Open(d.v,o))return;G.cardArt=G.cardArt||{};const max=art2Open(d.v,o)?2:1,n=((G.cardArt[d.v]||0)+1)%(max+1);if(n)G.cardArt[d.v]=n;else delete G.cardArt[d.v];save();UI.modal={type:"card",id:d.v,back:UI.modal&&UI.modal.back};render();},
   cardart2:d=>{const A=cardArtOf(d.v),o=(G.cards||{})[d.v];if(!art2Open(d.v,o))return;UI.modal={type:"cardart",id:d.v,w:2,back:UI.modal&&UI.modal.back};render();},
-  cardplay:d=>{const C=CARDS[d.v],o=(G.cards||{})[d.v];if(!C||!o)return;o.seen=true;o.rev=C.rev||0;const ep=(o.lv||1)>=2&&C.lv2;if(ep)o.lvSeen=Math.max(o.lvSeen||1,2);G.cardPend=(G.cardPend||[]).filter(x=>x!==d.v);save();UI.modal=null;const nw=d.from==="new";
-    playScene(ep?cardArtSteps(d.v,C.steps).concat([{n:"nar",t:"✦ Epilogue · Lv.2"}],C.lv2):cardArtSteps(d.v,C.steps),()=>{UI.modal=nw?((G.cardPend||[]).length?{type:"cardnew"}:null):{type:"card",id:d.v};render();},{bg:C.bg,look:"casual"});},
-  cardspecial:d=>{const C=CARDS[d.v],o=(G.cards||{})[d.v];if(!C||!o||!C.lv3||(o.lv||1)<3)return;o.lvSeen=3;save();UI.modal=null;playScene([{n:"nar",t:`✦ Special scene · ${C.lv3t||""}`}].concat(C.lv3),()=>{UI.modal={type:"card",id:d.v};render();},{bg:C.bg,look:"casual"});},
+  cardplay:d=>{const C=CARDS[d.v],o=(G.cards||{})[d.v];if(!C||!o)return;const bk=UI.modal&&(UI.modal.back||(UI.modal.type==="album"?"album":null));o.seen=true;o.rev=C.rev||0;const ep=(o.lv||1)>=2&&C.lv2;if(ep)o.lvSeen=Math.max(o.lvSeen||1,2);G.cardPend=(G.cardPend||[]).filter(x=>x!==d.v);save();UI.modal=null;const nw=d.from==="new";
+    playScene(ep?cardArtSteps(d.v,C.steps).concat([{n:"nar",t:"✦ Epilogue · Lv.2"}],C.lv2):cardArtSteps(d.v,C.steps),()=>{const o2=(G.cards||{})[d.v];if(o2&&!o2.rd){o2.rd=1;save();}UI.modal=nw?((G.cardPend||[]).length?{type:"cardnew"}:null):{type:"card",id:d.v,back:bk};render();},{bg:C.bg,look:"casual"});},
+  cardspecial:d=>{const C=CARDS[d.v],o=(G.cards||{})[d.v];if(!C||!o||!C.lv3||(o.lv||1)<3)return;const bk=UI.modal&&UI.modal.back;o.lvSeen=3;save();UI.modal=null;playScene([{n:"nar",t:`✦ Special scene · ${C.lv3t||""}`}].concat(C.lv3),()=>{UI.modal={type:"card",id:d.v,back:bk};render();},{bg:C.bg,look:"casual"});},
   cardmg:d=>{const C=CARDS[d.v],o=(G.cards||{})[d.v];if(!C||!o||!C.mg||(o.lv||1)<3)return;BAG.openCard(C.mg,d.v);},
   cardlater:()=>{(G.cardPend||[]).shift();save();UI.modal=(G.cardPend||[]).length?{type:"cardnew"}:null;render();},
   cancelCreate:()=>{AU.startMusic("title");UI.creator=null;render();},

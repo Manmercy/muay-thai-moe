@@ -1,5 +1,5 @@
 // ================= MUAY THAI MOE v1.3 — UI =================
-const VERSION="1.91.40";
+const VERSION="1.91.41";
 const CUR_LANG=(typeof window!=="undefined"&&window.LANG)||"th";
 const TH_LABEL=String.fromCharCode(3652,3607,3618);
 function langSwitch(cls){return `<div class="langsw ${cls||""}" role="group" aria-label="Language">${[["th",TH_LABEL],["en","EN"]].map(([k,l])=>`<button class="lsb ${CUR_LANG===k?"on":""}" data-act="setlang" data-v="${k}" aria-pressed="${CUR_LANG===k}">${l}</button>`).join("")}</div>`;}
@@ -40,11 +40,11 @@ const CARD_ART={e_champ:{f:"ssr_e_champ",f2:"ssr_e_champ_2",at:1},g_kati_ssr:{f:
 function cardArtOf(id){const A=CARD_ART[id];return A&&CARDS[id]?A:null;}
 /* the hidden art: box cards open it at card Lv.3 (spare copies) · story cards can't be duplicated, so theirs opens a year after you got the card */
 const ART2_WK=52;
-function art2Open(id,o){const A=cardArtOf(id),C=CARDS[id];if(!A||!A.f2||!o)return false;if(C.g||C.lg)return (o.lv||1)>=3;return absWeek(G)-(o.wk??-999)>=ART2_WK;}
-/* v1.91.40 (Man): every SR/SSR shows its first picture as soon as you own the card (SR spares are rare) */
-function art1Open(id,o){return !!(o&&CARDS[id]);}
+function art2Open(id,o){const A=cardArtOf(id),C=CARDS[id];if(!A||!A.f2||!o||!o.rd)return false;if(C.g||C.lg)return (o.lv||1)>=3;return absWeek(G)-(o.wk??-999)>=ART2_WK;}
+/* v1.91.41 (Man): a card's picture unlocks once you've read its story to the end (it shows up mid-story first) */
+function art1Open(id,o){return !!(o&&CARDS[id]&&o.rd);}
 function art2Hint(id,o){const C=CARDS[id];if(C.g||C.lg)return "อัปการ์ดถึง Lv.3";const left=ART2_WK-(absWeek(G)-(o.wk??0));return `อีก ${Math.max(1,left)} สัปดาห์`;}
-function cardArtSteps(id,steps){const A=cardArtOf(id);if(!A||!art1Open(id,(G.cards||{})[id]))return steps;const out=steps.map(x=>x),k=A.at,x=out[k];/* at = index of the story step it shows on */
+function cardArtSteps(id,steps){const A=cardArtOf(id);if(!A)return steps;const out=steps.map(x=>x),k=A.at,x=out[k];/* at = index of the story step it shows on */
   if(!x||!("t" in x)||x.choice)return steps;out[k]={...x,cg:A.f};const nx=out[k+1];if(nx&&("t" in nx)&&!nx.choice)out[k+1]={...nx,cg:A.f};return out;}
 function cardArtInit(){if(cardArtInit.ok)return;cardArtInit.ok=1;for(const k in CARD_ART)if(CARDS[k])CARDS[k]._art={id:k,f:CARD_ART[k].f,f2:CARD_ART[k].f2||null};}
 const cardFaceArt=C=>{cardArtInit();const A=C._art;if(!A||!G||!G.cardArt)return null;const w=G.cardArt[A.id],o=(G.cards||{})[A.id];if(!w||!o||!art1Open(A.id,o))return null;
@@ -636,7 +636,7 @@ function cardLinkHTML(id){const own=G.cards||{},out=[];const pv=CARD_SEQ[id];if(
 function albKeep(){try{const o=document.querySelector(".overlay");if(UI.modal&&UI.modal.type==="album"&&o)UI.albY=o.scrollTop;}catch(e){}}
 function albRestore(){const y=UI.albY||0;if(!y)return;const go=()=>{const o=document.querySelector(".overlay");if(o)o.scrollTop=y;};go();requestAnimationFrame(go);}
 function cardArtPanel(id){const A=cardArtOf(id);if(!A)return "";const o=(G.cards||{})[id]||{},w=(G.cardArt||{})[id]||0,open2=art2Open(id,o);
-  if(!art1Open(id,o))return `<div class="cdart"><div class="cdartrow"><div class="cdartimg lock"><b>🔒</b><span>ภาพพิเศษ · อัปการ์ดถึง Lv.2</span></div></div></div>`;
+  if(!art1Open(id,o))return `<div class="cdart"><div class="cdartrow"><button class="cdartimg lock" data-act="cardplay" data-v="${id}"><b>🔒</b><span>อ่านเรื่องราวการ์ดเพื่อปลดภาพ</span></button></div></div>`;
   const lab=w===2&&open2?"ภาพลับ":w?"ภาพพิเศษ":"หน้าตัวละคร";
   return `<div class="cdart"><div class="cdartrow"><button class="cdartimg" data-act="cardart" data-v="${id}" aria-label="ดูภาพเต็ม"><img src="${ASSET}${A.f}.webp" alt="" loading="lazy"><span>🔍 ภาพพิเศษ</span></button>
     ${A.f2?(open2?`<button class="cdartimg s2" data-act="cardart2" data-v="${id}" aria-label="ดูภาพลับ"><img src="${ASSET}${A.f2}.webp" alt="" loading="lazy"><span>✦ ภาพลับ</span></button>`:`<div class="cdartimg lock"><b>🔒</b><span>ภาพลับ · ${art2Hint(id,o)}</span></div>`):""}</div>
@@ -1762,9 +1762,9 @@ const ACT={
   cardart:d=>{if(!cardArtOf(d.v)||!art1Open(d.v,(G.cards||{})[d.v]))return;UI.modal={type:"cardart",id:d.v,back:UI.modal&&UI.modal.back};render();},
   cardface:d=>{const A=cardArtOf(d.v),o=(G.cards||{})[d.v];if(!A||!o||!art1Open(d.v,o))return;G.cardArt=G.cardArt||{};const max=art2Open(d.v,o)?2:1,n=((G.cardArt[d.v]||0)+1)%(max+1);if(n)G.cardArt[d.v]=n;else delete G.cardArt[d.v];save();UI.modal={type:"card",id:d.v,back:UI.modal&&UI.modal.back};render();},
   cardart2:d=>{const A=cardArtOf(d.v),o=(G.cards||{})[d.v];if(!art2Open(d.v,o))return;UI.modal={type:"cardart",id:d.v,w:2,back:UI.modal&&UI.modal.back};render();},
-  cardplay:d=>{const C=CARDS[d.v],o=(G.cards||{})[d.v];if(!C||!o)return;o.seen=true;o.rev=C.rev||0;const ep=(o.lv||1)>=2&&C.lv2;if(ep)o.lvSeen=Math.max(o.lvSeen||1,2);G.cardPend=(G.cardPend||[]).filter(x=>x!==d.v);save();UI.modal=null;const nw=d.from==="new";
-    playScene(ep?cardArtSteps(d.v,C.steps).concat([{n:"nar",t:"✦ บทส่งท้าย · Lv.2"}],C.lv2):cardArtSteps(d.v,C.steps),()=>{UI.modal=nw?((G.cardPend||[]).length?{type:"cardnew"}:null):{type:"card",id:d.v};render();},{bg:C.bg,look:"casual"});},
-  cardspecial:d=>{const C=CARDS[d.v],o=(G.cards||{})[d.v];if(!C||!o||!C.lv3||(o.lv||1)<3)return;o.lvSeen=3;save();UI.modal=null;playScene([{n:"nar",t:`✦ ฉากพิเศษ · ${C.lv3t||""}`}].concat(C.lv3),()=>{UI.modal={type:"card",id:d.v};render();},{bg:C.bg,look:"casual"});},
+  cardplay:d=>{const C=CARDS[d.v],o=(G.cards||{})[d.v];if(!C||!o)return;const bk=UI.modal&&(UI.modal.back||(UI.modal.type==="album"?"album":null));o.seen=true;o.rev=C.rev||0;const ep=(o.lv||1)>=2&&C.lv2;if(ep)o.lvSeen=Math.max(o.lvSeen||1,2);G.cardPend=(G.cardPend||[]).filter(x=>x!==d.v);save();UI.modal=null;const nw=d.from==="new";
+    playScene(ep?cardArtSteps(d.v,C.steps).concat([{n:"nar",t:"✦ บทส่งท้าย · Lv.2"}],C.lv2):cardArtSteps(d.v,C.steps),()=>{const o2=(G.cards||{})[d.v];if(o2&&!o2.rd){o2.rd=1;save();}UI.modal=nw?((G.cardPend||[]).length?{type:"cardnew"}:null):{type:"card",id:d.v,back:bk};render();},{bg:C.bg,look:"casual"});},
+  cardspecial:d=>{const C=CARDS[d.v],o=(G.cards||{})[d.v];if(!C||!o||!C.lv3||(o.lv||1)<3)return;const bk=UI.modal&&UI.modal.back;o.lvSeen=3;save();UI.modal=null;playScene([{n:"nar",t:`✦ ฉากพิเศษ · ${C.lv3t||""}`}].concat(C.lv3),()=>{UI.modal={type:"card",id:d.v,back:bk};render();},{bg:C.bg,look:"casual"});},
   cardmg:d=>{const C=CARDS[d.v],o=(G.cards||{})[d.v];if(!C||!o||!C.mg||(o.lv||1)<3)return;BAG.openCard(C.mg,d.v);},
   cardlater:()=>{(G.cardPend||[]).shift();save();UI.modal=(G.cardPend||[]).length?{type:"cardnew"}:null;render();},
   cancelCreate:()=>{AU.startMusic("title");UI.creator=null;render();},
