@@ -287,7 +287,11 @@ function fightHeat(F){const base=TIER_HEAT[F.tier]??0;const sc=F.cards.reduce((x
   return Math.max(0,Math.min(4,base-(F.round<=1&&base>=2?1:0)+(F.round>=F.rounds&&F.rounds>1?1:0)+(Math.abs(sc)<=1&&F.round>=3?1:0)+((F.A.kd+F.B.kd)>0?1:0)+(F.week>=40&&base>0?0:0)));}
 function startLine(F,rng){const R=a=>a[Math.floor(rng()*a.length)];const h=fightHeat(F);const sc=F.cards.reduce((x,c)=>x+c[0]-c[1],0);
   let t=F.round>=F.rounds&&F.rounds>1&&TIER_HEAT[F.tier]>=1?R(START_HOT.last):START_HOT[F.tier]?R(START_HOT[F.tier]):R(COM.start);
-  if(F.round>=3&&Math.abs(sc)<=1&&TIER_HEAT[F.tier]>=1)t+=" "+R(START_HOT.close);return {text:t.replace("{r}",F.round),heat:h};}
+  if(F.round>=3&&Math.abs(sc)<=1&&TIER_HEAT[F.tier]>=1)t+=" "+R(START_HOT.close);
+  if(F.round===1&&typeof isMonoT==="function"&&typeof G!=="undefined"&&G&&F.A&&F.A.f&&isMonoT(G,G.F[F.A.f.id]))t=R(MONO_CALL).replace(/\{n\}/g,F.A.f.name)+" "+t;
+  return {text:t.replace("{r}",F.round),heat:h};}
+/* v1.91.31: the ring call for the one you chose */
+const MONO_CALL=["In the red corner tonight, {n}! The soulmate of Sirichai's own manager, ladies and gentlemen!","Make some noise for {n}! Word is there's one person ringside who has never missed a single fight of hers!","{n} steps into the ring! The manager's soulmate — and she's brought her own personal cheering section!"];
 // v1.23: a funnier, louder booth — two commentators who can't help themselves, plus lines for the odd opponents
 // classic ringside catchphrases (homage to Thai TV commentary), tied to what just happened
 const SIG={"punch": ["One punch is all it takes for a thrill!", "Her head snaps back like a folk dancer's!", "One punch, the whole arena felt it!"], "kickHead": ["Aiming high. Going for the neck!", "May I borrow your chin to rest my foot!"], "kick": ["That's her body, not a place to park your shin!", "Shins sweet enough to eat!"], "knee": ["Eat lime and your belly burns. Eat a knee and your whole body aches!"], "hot": ["Pile it on! Pile it on!", "It's so wild the monks' robes are flying!", "A heart bigger than her liver!", "The arena's full, folks. Don't bother coming!", "Come on, fight! Get in there!", "Seven Mortars Fight Night, pounding out the action!"], "kd": ["Heaven help us!", "Counted out. That's a knockout!"]};

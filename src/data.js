@@ -287,7 +287,11 @@ function fightHeat(F){const base=TIER_HEAT[F.tier]??0;const sc=F.cards.reduce((x
   return Math.max(0,Math.min(4,base-(F.round<=1&&base>=2?1:0)+(F.round>=F.rounds&&F.rounds>1?1:0)+(Math.abs(sc)<=1&&F.round>=3?1:0)+((F.A.kd+F.B.kd)>0?1:0)+(F.week>=40&&base>0?0:0)));}
 function startLine(F,rng){const R=a=>a[Math.floor(rng()*a.length)];const h=fightHeat(F);const sc=F.cards.reduce((x,c)=>x+c[0]-c[1],0);
   let t=F.round>=F.rounds&&F.rounds>1&&TIER_HEAT[F.tier]>=1?R(START_HOT.last):START_HOT[F.tier]?R(START_HOT[F.tier]):R(COM.start);
-  if(F.round>=3&&Math.abs(sc)<=1&&TIER_HEAT[F.tier]>=1)t+=" "+R(START_HOT.close);return {text:t.replace("{r}",F.round),heat:h};}
+  if(F.round>=3&&Math.abs(sc)<=1&&TIER_HEAT[F.tier]>=1)t+=" "+R(START_HOT.close);
+  if(F.round===1&&typeof isMonoT==="function"&&typeof G!=="undefined"&&G&&F.A&&F.A.f&&isMonoT(G,G.F[F.A.f.id]))t=R(MONO_CALL).replace(/\{n\}/g,F.A.f.name)+" "+t;
+  return {text:t.replace("{r}",F.round),heat:h};}
+/* v1.91.31: the ring call for the one you chose */
+const MONO_CALL=["มุมแดงคืนนี้ {n}! คู่ใจของผู้จัดการค่ายศิริชัยครับท่านผู้ชม!","ขอเสียงให้ {n}! ข่าวว่าทุกไฟต์มีคนหนึ่งยืนลุ้นอยู่ข้างเวทีไม่เคยขาด!","{n} ขึ้นเวทีแล้วครับ! คู่ใจของผู้จัดการ วันนี้มีคนเชียร์ส่วนตัวมาด้วย!"];
 // v1.23: a funnier, louder booth — two commentators who can't help themselves, plus lines for the odd opponents
 // classic ringside catchphrases (homage to Thai TV commentary), tied to what just happened
 const SIG={"punch": ["หมัดเดียวก็เสียวได้!", "หน้าลอยเป็นลำตัดเลยครับ!", "หมัดเดียวเจ็บทั้งสนาม!"], "kickHead": ["ใฝ่สูงครับ เล่นก้านคอ!", "ขอยืมปลายคางไว้วางเท้า!"], "kick": ["ลำตัวไม่ใช่ลำตะคอง จะได้พักพิงแข้ง!", "แข้งเชื่อมขนมกินได้เลยครับ!"], "knee": ["กินปูนร้อนท้อง กินเข่าร้าวทั้งร่าง!"], "hot": ["ใส่กันเข้าไป! ใส่กันเข้าไป!", "จีวรปลิวหมดแล้วครับ!", "หัวใจใหญ่กว่าตับ!", "คนเต็มสนามแล้วครับ ไม่ต้องมา!", "มา ๆ สู้กัน! เข้ามา ๆ!", "ตำทุกความมัน มวยเด็ด 7 ครก!"], "kd": ["คุณพระคุณเจ้าช่วย!", "คนได้นับ ถูกน็อก!"]};

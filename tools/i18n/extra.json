@@ -15105,5 +15105,12 @@
  "รู้เรื่องของคุณกับ": " now knows about you and ",
  "ต้น": "Ton",
  "กำลังเตรียมค่าย…": "Getting the camp ready…",
- "กำลังโหลดฉาก…": "Loading scene…"
+ "กำลังโหลดฉาก…": "Loading scene…",
+ "{n} ขึ้นเวทีแล้วครับ! คู่ใจของผู้จัดการ วันนี้มีคนเชียร์ส่วนตัวมาด้วย!": "{n} steps into the ring! The manager's soulmate — and she's brought her own personal cheering section!",
+ "ขอเสียงให้ {n}! ข่าวว่าทุกไฟต์มีคนหนึ่งยืนลุ้นอยู่ข้างเวทีไม่เคยขาด!": "Make some noise for {n}! Word is there's one person ringside who has never missed a single fight of hers!",
+ "มุมแดงคืนนี้ {n}! คู่ใจของผู้จัดการค่ายศิริชัยครับท่านผู้ชม!": "In the red corner tonight, {n}! The soulmate of Sirichai's own manager, ladies and gentlemen!",
+ "💍 ฉายาใหม่: คู่ใจ · เมื่อคู่ใจขึ้นชก เข้าเป้า +3% และฟื้นแรงระหว่างยก +5 · ป้ายและกรอบรูปของเธอเปลี่ยนเป็นสีคู่ใจ": "💍 New title: Soulmate · when your soulmate fights, hit chance +3% and recovery between rounds +5 · her label and portrait frame now wear soulmate colors",
+ "เมื่อคนในทีมขึ้นชก เข้าเป้า +0.75% และฟื้นแรงระหว่างยก +1 · เพิ่มอีกตามจำนวนคนในทีมที่อยู่ในค่าย (สูงสุด +1.75% · +3)": "When a team member fights: hit chance +0.75% and recovery between rounds +1 · more for each team member in camp (up to +1.75% · +3)",
+ "เมื่อคู่ใจขึ้นชก เข้าเป้า +3% · ฟื้นแรงระหว่างยก +5": "When your soulmate fights: hit chance +3% · recovery between rounds +5",
+ "💍 คู่ใจ": "💍 Soulmate"
 }

@@ -255,7 +255,7 @@ const chrome=process.env.CHROME_PATH||'/Applications/Google Chrome.app/Contents/
       for(let i=0;i<=weeks;i++){const e=ev('lv_ma');if(e.when(g)){const r=annRel(g,id),m=annDue(g),L=txtOf(g,e.steps);if(badTxt(L)||L.length<6||L[0]!==ANNIV_LBL[m])throw Error(id+' r'+r+' '+L.length);got.push(m+'@'+r);}adv(g);}return {g,got};};
     for(const id of LOVE_IDS){const {g,got}=runFrom(id,0,330);const lab=got.map(x=>x.split('@')[0]).join();if(lab!=='13,26,52,104,156,208,260,312')throw Error(id+' '+got.join());
       if(got.some(x=>{const [m,r]=x.split('@');return +r-(+m)>=3;}))throw Error('late '+got.join());
-      const T=loveTitle(g,g.F[id]);if(!T||T.k!=='mono'||lovePerk(g.F[id]).prep!==.025||lovePerk(g.F[id]).brk!==4)throw Error('title/perk '+id);if(g.flags.mono1y[id]==null)throw Error('card flag');}
+      const T=loveTitle(g,g.F[id]);if(!T||T.k!=='mono'||lovePerk(g.F[id]).prep!==.03||lovePerk(g.F[id]).brk!==5)throw Error('title/perk '+id);if(g.flags.mono1y[id]==null)throw Error('card flag');}
     {const {got}=runFrom('kati',6*52+30,60);if(got.join().replace(/@\d+/g,'')!=='364')throw Error('year 7 load: '+got.join());}
     {const {g,got}=runFrom('mali',2*52+4,60);if(got.join().replace(/@\d+/g,'')!=='104,156')throw Error('recent catch-up: '+got.join());if(g.flags.mono1y.mali==null)throw Error('title on the first one');}
     {const {got}=runFrom('rin',30,30);if(got.join().replace(/@\d+/g,'')!=='26,52')throw Error('under a year: '+got.join());}
@@ -264,9 +264,9 @@ const chrome=process.env.CHROME_PATH||'/Applications/Google Chrome.app/Contents/
   test('harem: first-anniversary photo + all five together, team title and a perk that grows with the team',()=>{const g=fresh();G=g;g.season=3;g.week=10;
     for(const id of LOVE_IDS){g.F[id].met=true;g.F[id].camp='player';}g.lovers=[...LOVE_IDS];g.romance='kati';g.harem=true;g.haremAbs=absWeek(g)-40;
     if(ev('lv_hann').when(g))throw Error('too early');g.haremAbs=absWeek(g)-60;if(!ev('lv_hann').when(g))throw Error('no anniversary');let L=txtOf(g,ev('lv_hann').steps);if(badTxt(L)||L.length<14)throw Error('hann '+L.length);
-    if(g.flags.harem1y==null||loveTitle(g,g.F.mali).k!=='harem')throw Error('team title');const p5=lovePerk(g.F.mali).prep;if(Math.abs(p5-.02)>1e-9||lovePerk(g.F.mali).brk!==5)throw Error('perk '+p5);
+    if(g.flags.harem1y==null||loveTitle(g,g.F.mali).k!=='harem')throw Error('team title');const p5=lovePerk(g.F.mali).prep;if(Math.abs(p5-.0175)>1e-9||lovePerk(g.F.mali).brk!==3)throw Error('perk '+p5);if(p5>=.03)throw Error('team perk must stay below one love');
     if(!ev('lv_hfull').when(g))throw Error('no full five');L=txtOf(g,ev('lv_hfull').steps);if(badTxt(L)||L.length<14)throw Error('hfull '+L.length);
-    g.lovers=['kati','mali'];if(Math.abs(lovePerk(g.F.kati).prep-.0125)>1e-9)throw Error('perk with two');
+    g.lovers=['kati','mali'];if(Math.abs(lovePerk(g.F.kati).prep-.01)>1e-9)throw Error('perk with two');
     if(monoOf(g)||loveTitle(g,g.F.rin))throw Error('mono on harem');return true;});
   test('harem: the 3 group scenes loop — one at random every 13 weeks after the third, not the same twice in a row, pairs rotate',()=>{const g=fresh();G=g;g.season=3;g.week=5;
     for(const id of LOVE_IDS){g.F[id].met=true;g.F[id].camp='player';}g.lovers=[...LOVE_IDS];g.romance='kati';g.harem=true;g.haremAbs=absWeek(g)-4;const e=ev('lv_hmr');if(e.when(g))throw Error('before hm3');
