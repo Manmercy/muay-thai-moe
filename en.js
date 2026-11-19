@@ -6226,7 +6226,7 @@ AU.gsfx=function(kind,a){if(!this.init()||this.muted||!SETTINGS.sfx)return;const
   if(kind==="shimmer")for(let i=0;i<6;i++)T(i*.05,{f:1400+Math.random()*1400,type:"sine",dur:.12,peak:.06});};
 
 // ================= MUAY THAI MOE v1.3 — UI =================
-const VERSION="1.91.53";
+const VERSION="1.91.55";
 const CUR_LANG=(typeof window!=="undefined"&&window.LANG)||"th";
 const TH_LABEL=String.fromCharCode(3652,3607,3618);
 function langSwitch(cls){return `<div class="langsw ${cls||""}" role="group" aria-label="Language">${[["th",TH_LABEL],["en","EN"]].map(([k,l])=>`<button class="lsb ${CUR_LANG===k?"on":""}" data-act="setlang" data-v="${k}" aria-pressed="${CUR_LANG===k}">${l}</button>`).join("")}</div>`;}
@@ -7027,10 +7027,15 @@ function recruitHTML(recs){if(!recs.length)return "";
      <div class="rbtns"><button class="btn sm" data-act="fighter" data-id="${id}">Info</button><button class="btn sm gold" data-act="sign" data-v="${id}" ${G.cash<f.fee?"disabled":""}>Sign</button></div></div>`;}).join("")}
    <p class="meta">Wages are a weekly expense. Make sure the cash can handle it before signing</p></section>`;}
 // ---------- fighter popup (tabs) ----------
+/* v1.91.55: the profile remembers the outfit picked for each girl, and the small face in the header follows it (profile only) */
+function pLooks(f){return [["fight","Fight gear"],...(CHAMP_IDS.includes(f.id)?[]:[["train","Training gear"]]),["casual","Casual"],...(typeof loyThaiLook==="function"&&loyThaiLook(G)&&THAI_IDS.includes(f.id)?[["thai","Thai Dress"]]:[])];}
+function pLookOf(f){const def=f.camp==="player"?"train":"fight";if(f.camp!=="player"||!(f.canon||CHAMP_IDS.includes(f.id)))return def;const v=(G.pLook||{})[f.id];return v&&pLooks(f).some(x=>x[0]===v)?v:def;}
+function pArtSrc(f){if(UI.look==="train"&&!CHAMP_IDS.includes(f.id))return `${ASSET}${f.id}_train.webp`;const h=THAI_HOLD;THAI_HOLD=true;try{return stand(f.id,UI.look==="train"?"casual":UI.look,"happy");}finally{THAI_HOLD=h;}} /* "ลำลอง" stays casual here even with the Thai dress worn day to day — the dress has its own button */
+function pFace(f){if(UI.look==="fight"||!(f.canon||CHAMP_IDS.includes(f.id))||!pLooks(f).some(x=>x[0]===UI.look))return faceImg(f);const src=pArtSrc(f);return /_(train|casual|thai)\.webp$/.test(src)?faceImg(f).replace(faceSrc(f.id,"happy"),src.replace(/\.webp$/,"_face.webp")):faceImg(f);}
 function fighterHTML(f){const mine=f.camp==="player";const P=PROFILES[f.id];
   const tabs=mine?[["rel","Profile"],["over","Stats"],["skill","Skills"]].concat(f.canon&&KIT_MASK[f.id]?[["look","Outfit"]]:[]):[["rel","Profile"],["over","Stats"]].concat(f.camp==="region"&&hasTree(f.id)?[["skill","Skills"]]:[]); /* v1.91.45: a regional champion's tree can be looked at while she is still a rival */
   let t=UI.ptab;if(!tabs.some(x=>x[0]===t))t="over";
-  const head=`<div class="fp-head">${faceImg(f)}<div><h2>${esc(f.full)}</h2><div class="meta">${f.age!=null?f.age+" yrs · ":""}${f.camp==="player"?"Sirichai Camp":f.lab?"Vector Gym, Bangkok":f.camp==="rival"&&!f.indie?"Golden Tiger Camp":"Free agent"} · Div ${f.div} · ${styleOf(f.a)} · ${rec(f)}</div>${G.belt&&Object.values(G.belt).some(x=>x.id===f.id)?`<div class="beltb">🏆 Tha Phae Stadium champion</div>`:Object.entries(G.venueBelts||{}).some(([v,ds])=>Object.values(ds).some(b=>b.id===f.id))?`<div class="beltb">🏆 ${STADIUMS[Object.entries(G.venueBelts).find(([v,ds])=>Object.values(ds).some(b=>b.id===f.id))[0]].name}</div>`:f.belts?`<div class="beltb old">Former stadium champion</div>`:""}<div class="tierline">${tierChip(f,1)}<span class="meta">Rating <b>${ratingOf(f)}</b></span>${tierYearNote(f)}</div>${xpBar(f)}</div></div>
+  const head=`<div class="fp-head">${pFace(f)}<div><h2>${esc(f.full)}</h2><div class="meta">${f.age!=null?f.age+" yrs · ":""}${f.camp==="player"?"Sirichai Camp":f.lab?"Vector Gym, Bangkok":f.camp==="rival"&&!f.indie?"Golden Tiger Camp":"Free agent"} · Div ${f.div} · ${styleOf(f.a)} · ${rec(f)}</div>${G.belt&&Object.values(G.belt).some(x=>x.id===f.id)?`<div class="beltb">🏆 Tha Phae Stadium champion</div>`:Object.entries(G.venueBelts||{}).some(([v,ds])=>Object.values(ds).some(b=>b.id===f.id))?`<div class="beltb">🏆 ${STADIUMS[Object.entries(G.venueBelts).find(([v,ds])=>Object.values(ds).some(b=>b.id===f.id))[0]].name}</div>`:f.belts?`<div class="beltb old">Former stadium champion</div>`:""}<div class="tierline">${tierChip(f,1)}<span class="meta">Rating <b>${ratingOf(f)}</b></span>${tierYearNote(f)}</div>${xpBar(f)}</div></div>
    <div class="seg ptabs">${tabs.map(([k,n])=>`<button data-act="ptab" data-v="${k}" aria-pressed="${t===k}">${n}${k==="skill"&&skReady(f)?'<i class="tdot2"></i>':""}</button>`).join("")}</div>`;
   let body="";
   if(t==="look"){const cur=f.outfit||"base";
@@ -7164,8 +7169,8 @@ function relHTML(f){const P=PROFILES[f.id],b=f.bond;
   const L=(ok,need,v)=>ok?esc(v):`<span class="lock">🔒 ♥ Lv.${1+Math.floor(Math.min(100,need)/10)}</span>`;
   const chips=(arr,pre,all)=>arr.map((x,i)=>f.know[pre+i]||b>=all?`<span class="tchip">${esc(x)}</span>`:`<span class="tchip lock">???</span>`).join("");
   const gifts=Object.entries(f.know).filter(([k])=>k.startsWith("gift_")).map(([k,v])=>`<span class="tchip ${v}">${GIFTS[k.slice(5)].name}${v==="love"?" ♥♥":v==="like"?" ♥":v==="dislike"?" ✕":""}</span>`).join("");
-  const looks=[["fight","Fight gear"],...(CHAMP_IDS.includes(f.id)?[]:[["train","Training gear"]]),["casual","Casual"],...(typeof loyThaiLook==="function"&&loyThaiLook(G)&&THAI_IDS.includes(f.id)?[["thai","Thai Dress"]]:[])];
-  return `<div class="pf2"><div class="pf-art"><img src="${UI.look==="train"&&!CHAMP_IDS.includes(f.id)?`${ASSET}${f.id}_train.webp`:stand(f.id,UI.look==="train"?"casual":UI.look,"happy")}" alt=""><div class="seg sm">${looks.map(([k,t])=>`<button data-act="plook" data-v="${k}" aria-pressed="${UI.look===k}">${t}</button>`).join("")}</div></div>
+  const looks=pLooks(f);
+  return `<div class="pf2"><div class="pf-art"><img src="${pArtSrc(f)}" alt=""><div class="seg sm">${looks.map(([k,t])=>`<button data-act="plook" data-v="${k}" aria-pressed="${UI.look===k}">${t}</button>`).join("")}</div></div>
    <div class="pf-side">${hearts(b,f)}${typeof missGap==="function"&&missGap(G,f.id)>=3?`<div class="missb">💭 Missing you · haven't met in ${missGap(G,f.id)} weeks ${!(f.bondX>0)&&f.bond>(REL_FLOOR[(G.relT||{})[f.id]||0]||0)?" · bond starting to fade":""}</div>`:""}${relLadderHTML(f)}<div class="bars">${(()=>{const H=heartLv(f);return bar("Friends",H.max||heartCapped(G,f)?100:H.into/H.need*100,H.max||heartCapped(G,f)?"var(--gold)":"var(--red)",`${Math.round(H.total)}`);})()}${bar("Trust",f.trust,"var(--gold)")}</div>${f.camp==="player"?`<p class="meta trustx">${trustText(f)}</p>`:""}
     <div class="info"><div><span>Height</span><b>${P.height}</b></div><div><span>Blood type</span><b>${L(b>=UNLOCK.blood||f.know.blood,UNLOCK.blood,P.blood)}</b></div>
      <div><span>Birthday</span><b>${L(b>=UNLOCK.bday||f.know.bday,UNLOCK.bday,P.bday)}</b></div><div><span>Style</span><b>${esc(P.heritage)}</b></div></div></div></div>
@@ -8042,9 +8047,9 @@ const ACT={
     if(todo.length&&!UI.skipWarn&&SETTINGS.askEnd!==false){UI.modal={type:"endwarn",todo};render();return;}UI.skipWarn=false;endWeek();},
   endgo:()=>{UI.modal=null;UI.skipWarn=true;ACT.endweek();},
   noaskend:d=>{const el=document.querySelector("[data-act=noaskend]");SETTINGS.askEnd=!(el&&el.checked);saveSettings();},
-  fighter:d=>{UI.ptab=d.v||"over";UI.look=G.F[d.id].camp==="player"?"train":"fight";UI.modal={type:"fighter",id:d.id};render();},
+  fighter:d=>{UI.ptab=d.v||"over";UI.look=pLookOf(G.F[d.id]);UI.modal={type:"fighter",id:d.id};render();},
   ptab:d=>{UI.ptab=d.v;render();},
-  plook:d=>{UI.look=d.v;render();},
+  plook:d=>{UI.look=d.v;const id=UI.modal&&UI.modal.id,f=id&&G.F[id];if(f&&f.camp==="player"&&(f.canon||CHAMP_IDS.includes(f.id))){G.pLook=G.pLook||{};G.pLook[id]=d.v;save();}render();},
   albtog:()=>{UI.albAll=!UI.albAll;render();},
   learn:d=>{const sl=document.querySelector(".sklist"),y=sl?sl.scrollTop:0;if(learnSkill(G,d.id,d.v)){AU.sfx("level");save();render();const n=document.querySelector(".sklist");if(n)n.scrollTop=y;}},
   rinread:()=>{const n=G.rinNote;if(!n)return;G.rinNote=null;save();playScene(n.steps,()=>{save();render();},{bg:"gym",look:"casual"});},
