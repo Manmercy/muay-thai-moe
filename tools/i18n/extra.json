@@ -15640,5 +15640,15 @@
  "ศึกชิงเจ้าสี่ภาคครั้งนี้หมดเวลาแล้ว · ชิงใหม่ได้ในครั้งหน้า": "This Clash of the Four Regions is over · challenge again in the next edition",
  "นักมวยพร้อมชกไม่ครบ": "Not enough fit fighters",
  "เลือกนักมวยให้ครบทุกนัดก่อน": "Pick a fighter for every bout first",
- "ค่ายเล็ก ๆ จากเชียงใหม่ ชกถึงระดับภาคได้ ผมไม่เห็นมานานแล้วครับ": "A small camp from Chiang Mai fighting at regional level. I haven't seen that in a long time"
+ "ค่ายเล็ก ๆ จากเชียงใหม่ ชกถึงระดับภาคได้ ผมไม่เห็นมานานแล้วครับ": "A small camp from Chiang Mai fighting at regional level. I haven't seen that in a long time",
+ "\n     <div class=\"mfoot\"><button class=\"btn\" data-act=\"closeModal\">ไว้ก่อน</button><button class=\"btn primary\" data-act=\"rggo\" data-v=\"": "\n     <div class=\"mfoot\"><button class=\"btn\" data-act=\"closeModal\">Not now</button><button class=\"btn primary\" data-act=\"rggo\" data-v=\"",
+ "> ไปแบบรวบรัด <small class=\"meta\">ข้ามฉากขับรถ คืนที่โรงแรม และร้านของฝาก · คืนที่ค้างนับเป็นพักผ่อน</small></label>": "> Quick trip <small class=\"meta\">skip the drive, the hotel nights and the souvenir shop · nights away count as rest</small></label>",
+ "</b></div><div class=\"kv-row\"><span>เงินค่ายหลังจ่าย</span><b class=\"num ": "</b></div><div class=\"kv-row\"><span>Camp cash after paying</span><b class=\"num ",
+ "มาเยือนค่าย</b><small>แตะเพื่อต้อนรับ · มาได้ถึงก่อนนัดที่ 2 เท่านั้น</small></span><span class=\"chev\">▸</span></button>": " is visiting the camp</b><small>Tap to welcome her · only until bout 2</small></span><span class=\"chev\">▸</span></button>",
+ "ครูแดงดูเทป": "Coach Daeng watched the tapes of ",
+ " คืน ความล้า −": " night(s), fatigue −",
+ " · พักที่โรงแรม ": " · rested at the hotel ",
+ "แล้ว · เข้าทางที่สุด ": " · best match: ",
+ " หรือ ": " or ",
+ " · ยังไม่ควรส่ง ": " · not yet: "
 }

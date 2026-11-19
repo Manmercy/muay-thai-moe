@@ -917,7 +917,7 @@ const REGION={
     const opp=this.makeOpp(G,dest,me,abs),pay=this.purse(G),bid=`rg${abs}_${dest}`;
     G.bookings.push({id:bid,a:fid,b:opp,week:wk,tier:"region",rounds:3,win:pay.win,lose:pay.lose,region:{r:D.r,dest},bg:dest==="chanthaburi"?"bg_region_east.webp":`bg_ring_${dest}.webp`});
     G.cash-=P.total;G.offers=(G.offers||[]).filter(o=>o.week!==wk);
-    R.trip={abs,season:G.season||1,wk,dest,fid,opp,bid,cost:P.total,car:P.car,fat:P.fat};
+    R.trip={abs,season:G.season||1,wk,dest,fid,opp,bid,cost:P.total,car:P.car,fat:P.fat,quick:this.canQuick(G,dest)&&!!R.quickPref};
     G.log=G.log||[];G.log.push(`Trip planned to ${D.name} week ${wk} · travel cost ${fmt(P.total)}`);return {ok:true,wk,cost:P.total};},
   cancel(G){const R=G.region,T=R&&R.trip;if(!T)return false;G.bookings=G.bookings.filter(b=>b.id!==T.bid);G.cash+=T.cost;
     (R.gc=R.gc||[]).push(T.opp);R.trip=null;return true;},
@@ -929,7 +929,7 @@ const REGION={
       rgTouch(G,RG_CID[r]);const T=R.trip,abs=T&&T.bid===p.bid?T.abs:gameWeek(G);
       if(p.res==="W"){R.belts[r]=R.belts[r]||{};R.belts[r][dest]=1;G.log=G.log||[];G.log.push(`${G.F[p.a]?G.F[p.a].name:""} wins the provincial belt of ${D.name}!`);if(G.F[p.a])recordHonor(G,"rgbelt",p.a,G.F[p.a].div,G.week,dest); /* v1.91.14 (Man): a province belt gets the same ceremony as the main game */
         if(this.beltCount(G,r)===4&&R.champ[r].state==="locked"){R.champ[r].state="letter";this.champFighter(G,r);
-          addMail(G,{kind:"letter",from:`${RG[r].champ} · Champion of ${RG[r].name}`,title:`${RG_TITLE[r]}: all four belts won`,body:RG_CH[r].letter});}}
+          addMail(G,{kind:"letter",from:`${RG[r].champ} · Champion of ${RG[r].name}`,title:`${RG_TITLE[r]}: all four belts won`,body:RG_CH[r].letter+((t=>t?`\n\n(${t})`:"")(this.tipText(G,r)))});}}
       R.trip=null;R.nextTripAbs=Math.max(R.nextTripAbs||0,abs+RG_TRIP_GAP);(R.gc=R.gc||[]).push(p.b);}},
   /* weekly: post-cup letters and champion chats */
   letters(G){const R=G.region,now=gameWeek(G);R.postDone=R.postDone||{};
@@ -953,6 +953,9 @@ const REGION={
     const R=G.region,T=R&&R.trip&&R.trip.bid===b.id?{...R.trip}:null,dest=b.region&&b.region.dest;rgDress(G.F[b.b]);
     if(!T||!ROAD_DEST[dest]||typeof ROAD==="undefined"){openFight(b,done);return;}
     this.css();const P=roadPlan(G,dest,T.car||null,T.abs);
+    /* v1.91.50 (playtest): a quick trip to a region you know — no drive, no hotel menu, no shop; the nights are rest */
+    if(T.quick&&this.canQuick(G,dest)){this.arrive(G,T,P,null);openFight(b,()=>{const n=P.nights||0;if(n){for(const f of roadRiders(G))f.fatigue=Math.max(0,(f.fatigue||0)-10*n);}
+      G.log=G.log||[];G.log.push(`Back at camp from ${ROAD_DEST[dest].name}${n?` · rested at the hotel ${n} night(s), fatigue −${10*n}`:""}`);save();done();});return;}
     ROAD.open(dest,{paid:true,plan:P,onArrive:(P2,front)=>{this.arrive(G,T,P2||P,front);const go=()=>openFight(b,()=>this.night(T,P2||P,1,done)),A=this.firstArrive(G,ROAD_DEST[dest].r,dest);
       if(A){playScene(A,go,{bg:"gas_station",look:"casual"});}else go();}});},
   /* the first trip into a region: its champion comes to meet the camp on the way in */
@@ -1062,7 +1065,7 @@ Welcome her at Fights › Four Regions Cup`});}
       addMail(G,{kind:"letter",from:"NAGA Energy Drink",title:"Clash of the Four Regions: about half a year left",body:"Dear Manager of Sirichai Camp,\n\nThis Clash of the Four Regions closes in about half a year. After that there will be no new challenges to the regional champions. Any series still under way will be fought to the end, and then comes the closing ceremony in Bangkok.\n\nIf there are cups left to win, win them before time runs out.\n\nNaka Energy Drink · Drink Naka, fight without end!"});}}
     for(const r of RG_ORDER){const c=R.champ[r];if(!c)continue;
       if(c.state==="lost"&&now>=(c.letterAbs||0)&&!this.overTime(G)){c.state="letter";c.fid=null;c.w=0;c.l=0;c.n=0;
-        addMail(G,{kind:"letter",from:`${RG[r].champ} · Champion of ${RG[r].name}`,title:`${RG_TITLE[r]}: a new challenge`,body:RG_CH[r].again});continue;}
+        addMail(G,{kind:"letter",from:`${RG[r].champ} · Champion of ${RG[r].name}`,title:`${RG_TITLE[r]}: a new challenge`,body:RG_CH[r].again+((t=>t?`\n\n(${t})`:"")((this.tipFor(G,r,true),this.tipText(G,r))))});continue;}
       if(c.state!=="series")continue;const me=G.F[c.fid];
       if(!me||me.camp!=="player"){G.bookings=G.bookings.filter(b=>!(c.next&&b.id===c.next.bid));Object.assign(c,{state:"letter",fid:null,w:0,l:0,n:0,next:null});continue;}
       const x=c.next;
@@ -1094,10 +1097,19 @@ Welcome her at Fights › Four Regions Cup`});}
       {n:"nar",t:`Score now ${J.w}-${J.l} · next bout in about 2 weeks`}];
     playScene(steps,()=>this.night(T,P,1,done),{bg:"rg_"+H.ring,look:"fight"});},
   /* the series fighter picker (modal) */
+  /* v1.91.50 (playtest): Daeng watches the champion's tapes and says who fits — a player sending the wrong girl lost a series ten times without knowing why */
+  tipFor(G,r,force){const R=G.region,c=R&&R.champ[r];if(!c)return null;const now=gameWeek(G);if(!force&&c.tip&&now-(c.tip.abs||0)<8)return c.tip;
+    const pool=roster(G).filter(f=>f.camp==="player").sort((a,b)=>effOvr(G,b)-effOvr(G,a)).slice(0,6);if(pool.length<2)return null;
+    const sc=pool.map(me=>{const o=this.champFighter(G,r,me);let w=0;const N=16;for(let i=1;i<=N;i++){const x=quickFight(me,o,stableHash(me.id+r)+i*977,5);if((x.result||x).win==="A")w++;}return [me.id,w/N];}).sort((a,b)=>b[1]-a[1]);
+    const top=sc[0][1],good=sc.filter(x=>x[1]>=top*.8).slice(0,2).map(x=>x[0]),bad=sc.filter(x=>x[1]<=top*.45).slice(-2).map(x=>x[0]);
+    c.tip={abs:now,good,bad};return c.tip;},
+  tipText(G,r){const t=this.tipFor(G,r);if(!t||!t.good.length)return "";const nm=(ids,j)=>ids.filter(id=>G.F[id]).map(id=>G.F[id].name).join(j);
+    return `Coach Daeng watched the tapes of ${RG[r].champ} · best match: ${nm(t.good," or ")}${t.bad.length?` · not yet: ${nm(t.bad,", ")}`:""}`;},
   seriesHTML(r){const C=RG[r],H=RG_CH[r],c=G.region.champ[r],R=roster(G).filter(f=>!f.injury);if(!UI.rgFid||!R.some(f=>f.id===UI.rgFid))UI.rgFid=R[0]?R[0].id:null;
     const pay=this.seriesPurse(G);
     return `<h2>${esc(RG_TITLE[r])}</h2><p class="meta">${esc(C.champ)} · ${esc(C.nick)} · venue ${esc(ROAD_DEST[C.fin].name)}</p>
      <div class="kv-row"><span>Format</span><b>Best of 3 · 5 rounds each · about 2 weeks apart</b></div>${(G.region.champ[r].tries||0)?`<div class="kv-row"><span>Rematch</span><b class="goldt">Series lost so far: ${G.region.champ[r].tries} · the camp knows this champion's game better now</b></div>`:""}
+     ${(t=>t?`<p class="goldt rg-tip">📼 ${esc(t)}</p>`:"")(this.tipText(G,r))}
      <div class="kv-row"><span>Strength of ${esc(C.champ)}</span><b>${esc(H.perk.name)}</b></div><p class="meta">${esc(H.perk.desc)}</p>
      <div class="kv-row"><span>Purse per bout</span><b class="num">${fmt(pay.win)} / loss ${fmt(pay.lose)}</b></div><div class="kv-row"><span>Cup prize</span><b class="num">${fmt(RG_CUP_PRIZE)}</b></div>
      <h3>Who fights the whole series</h3>${R.length?`<div class="rg-pick">${R.map(f=>`<button class="btn sm" data-act="rgsfid" data-v="${f.id}" aria-pressed="${f.id===UI.rgFid}">${faceImg(f,"sm")}${esc(f.name)} <small>Lv.${f.lvl||1}</small></button>`).join("")}</div>`:`<p class="redt">Nobody is fit to fight</p>`}
@@ -1119,7 +1131,7 @@ Welcome her at Fights › Four Regions Cup`});}
 .rg-reg{border-top:6px solid var(--rc);position:relative}.rg-reg h3{margin:.1rem 0 0}.rg-reg h3::first-letter{text-transform:uppercase}.rg-champ{font-size:.85rem;opacity:.85;margin-bottom:.5rem}
 .rg-prov{display:flex;align-items:center;justify-content:space-between;gap:.5rem;padding:.35rem 0;border-bottom:1px dashed rgba(0,0,0,.15)}
 .rg-prov:last-child{border-bottom:0}.rg-prov small{opacity:.7}.rg-fin{opacity:.9}.rg-miss{display:block;color:#d4688f;opacity:1!important}.rg-belt{color:#b8860b;font-weight:700}
-.rg-trip{border-left:6px solid var(--gold,#d9a21b)}.rg-pick{display:flex;flex-wrap:wrap;gap:.4rem;margin:.4rem 0}
+.rg-trip{border-left:6px solid var(--gold,#d9a21b)}.rg-quick{display:grid;grid-template-columns:auto 1fr;column-gap:.5rem;align-items:center;margin:.6rem 0;cursor:pointer}.rg-quick small{grid-column:2}.rg-pick{display:flex;flex-wrap:wrap;gap:.4rem;margin:.4rem 0}
 .rg-pick button{display:flex;align-items:center;gap:.35rem}.rg-pick button[aria-pressed="true"]{outline:3px solid var(--gold,#d9a21b)}
 .rg-bill .kv-row{padding:.15rem 0}.rg-fuel.cheap{color:#2f8a50}.rg-fuel.high{color:#c8283c}
 #rdcv{width:100%;height:auto;image-rendering:pixelated;background:#1b1530;box-shadow:inset 0 0 0 2px var(--line)}
@@ -1156,6 +1168,11 @@ Welcome her at Fights › Four Regions Cup`});}
        <div class="rg-stats"><span class="pill gold">Cups ${cups}/4</span><span class="pill">Belts ${belts}/16</span><span class="pill ${T?"red":nx?"green":""}">${T?`Trip: ${esc(ROAD_DEST[T.dest].name)} · Week ${T.wk}`:nx?`Can travel week ${nx}`:"No more trips this year"}</span></div></section>
      ${!R.gala?`<p class="meta rg-gala">🎉 The Four Regions Cup opening gala in Bangkok ${R.galaAbs!=null&&gameWeek(G)<R.galaAbs?"is held at the end of next week":"is held at the end of this week"} · the whole camp is invited</p>`:""}${!REGION_LIVE?`<p class="meta">Test mode: <button class="btn sm" data-act="rggala" data-v="gala">Watch the gala</button> Underground test fight (open rules): ${NL_ORDER.map(k=>`<button class="btn sm" data-act="nltest" data-v="${k}">${esc(NL[k].name)}</button>`).join(" ")}${(R.cups||[]).length?` <button class="btn sm" data-act="rggala" data-v="c1">Watch the green envelope scene</button>`:""}</p>`:""}
      ${this.finalCard(G)}${this.legendCard(G)}${this.joinCard(G)}${tripCard}${this.fuelLine(G)}<div class="rg-grid">${regs}</div>`;},
+  /* quick trips: only once the region's first meeting and this province's own story have been seen */
+  /* v1.91.50 (playtest): a champion coming to visit shows on the home screen too — it was easy to miss on the regional tab */
+  visitBanner(G){const R=G.region;if(!R||!R.champ)return "";const r=RG_ORDER.find(x=>R.champ[x]&&R.champ[x].visit==="due");if(!r)return "";const cid=this.champId[r];
+    return `<button class="px newfighter" data-act="rgvisit" data-v="${r}"><span class="newb">NEW!</span>${G.F[cid]?`<img src="${faceSrc(cid,"happy")}" alt="">`:""}<span><b>${esc(RG[r].champ)} is visiting the camp</b><small>Tap to welcome her · only until bout 2</small></span><span class="chev">▸</span></button>`;},
+  canQuick(G,dest){const R=G.region,D=ROAD_DEST[dest];if(!R||!D)return false;return !!((R.arrived||{})[D.r])&&!(RG_TRIPX[dest]&&!((R.tx||{})[dest]));},
   planHTML(dest){const D=ROAD_DEST[dest],C=RG[D.r],wk=this.tripWeek(G);if(!wk)return `<h2>${esc(D.name)}</h2><p>No free week left to travel this year</p>`;
     const abs=this.base(G)+wk,P=roadPlan(G,dest,null,abs),R=this.riders(G,wk);if(!UI.rgFid||!R.some(f=>f.id===UI.rgFid))UI.rgFid=R[0]?R[0].id:null;
     const me=UI.rgFid&&G.F[UI.rgFid],poor=G.cash<P.total,line=(k,v)=>v?`<div class="kv-row"><span>${k}</span><b class="num">${fmt(v)}</b></div>`:"";
@@ -1164,8 +1181,9 @@ Welcome her at Fights › Four Regions Cup`});}
      <h3>Who fights?</h3>${R.length?`<div class="rg-pick">${R.map(f=>`<button class="btn sm" data-act="rgfid" data-v="${f.id}" aria-pressed="${f.id===UI.rgFid}">${faceImg(f,"sm")}${esc(f.name)} <small>Lv.${f.lvl||1}</small></button>`).join("")}</div>`:`<p class="redt">Nobody is fit to travel that week</p>`}
      <h3>Round-trip travel cost</h3><div class="rg-bill"><div class="kv-row"><span>Vehicle</span><b>${esc(roadCarName(P.car))}</b></div>
       ${line(`Fuel ${Math.round(P.litres)} L × ฿${P.price.toFixed(2)}`,P.fuel)}${line("Tolls",P.toll)}${line(`Bus tickets × ${P.onBus}`,P.bus)}${line(`Lodging ${P.nights} night(s)`,P.lodge)}${line(`Food × ${P.people}`,P.food)}
-      <div class="kv-row"><span><b>Total</b></span><b class="num ${poor?"redt":"goldt"}">${fmt(P.total)}</b></div></div>
+      <div class="kv-row"><span><b>Total</b></span><b class="num ${poor?"redt":"goldt"}">${fmt(P.total)}</b></div><div class="kv-row"><span>Camp cash after paying</span><b class="num ${poor?"redt":""}">${fmt(G.cash-P.total)}</b></div></div>
      <p class="meta">The whole camp: ${P.people} people travel together; no other bouts that week · road fatigue about +${P.fat} each ${P.car==="none"?" · the camp has no vehicle yet, so it's the bus (pricier and more tiring)":""}</p>
+     ${this.canQuick(G,dest)?`<label class="rg-quick"><input type="checkbox" data-act="rgquick" ${G.region.quickPref?"checked":""}> Quick trip <small class="meta">skip the drive, the hotel nights and the souvenir shop · nights away count as rest</small></label>`:""}
      <div class="mfoot"><button class="btn" data-act="closeModal">Not now</button><button class="btn primary" data-act="rggo" data-v="${dest}" ${me&&!poor?"":"disabled"}>${poor?"Not enough money":"Confirm the trip"}</button></div>`;}
 };
 
@@ -1286,6 +1304,7 @@ if(typeof ACT!=="undefined")Object.assign(ACT,{
   nltest:d=>{if(REGION_LIVE)return;nlTest(d.v);},
   rgplan:d=>{UI.rgFid=null;UI.modal={type:"rgplan",dest:d.v};render();},
   rgfid:d=>{UI.rgFid=d.v;render();},
+  rgquick:()=>{G.region.quickPref=!G.region.quickPref;save();render();},
   rggo:d=>{const r=REGION.book(G,d.v,UI.rgFid);if(!r.ok){toast(r.why);return;}UI.modal=null;AU.sfx&&AU.sfx("level");toast(`Trip booked for week ${r.wk} · travel cost paid ${fmt(r.cost)}`);save();render();},
   rgvisit:d=>{const r=d.v,c=G.region.champ[r],cid=REGION.champId[r];if(!c||c.visit!=="due")return;
     playScene(RG_VISIT[r](G),()=>DUEL.open(r,false,res=>{if(!res){render();return;}c.visit="done";const T=DUEL_TALK[r];

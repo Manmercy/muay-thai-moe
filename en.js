@@ -6226,7 +6226,7 @@ AU.gsfx=function(kind,a){if(!this.init()||this.muted||!SETTINGS.sfx)return;const
   if(kind==="shimmer")for(let i=0;i<6;i++)T(i*.05,{f:1400+Math.random()*1400,type:"sine",dur:.12,peak:.06});};
 
 // ================= MUAY THAI MOE v1.3 — UI =================
-const VERSION="1.91.49";
+const VERSION="1.91.50";
 const CUR_LANG=(typeof window!=="undefined"&&window.LANG)||"th";
 const TH_LABEL=String.fromCharCode(3652,3607,3618);
 function langSwitch(cls){return `<div class="langsw ${cls||""}" role="group" aria-label="Language">${[["th",TH_LABEL],["en","EN"]].map(([k,l])=>`<button class="lsb ${CUR_LANG===k?"on":""}" data-act="setlang" data-v="${k}" aria-pressed="${CUR_LANG===k}">${l}</button>`).join("")}</div>`;}
@@ -6673,7 +6673,7 @@ function homeHTML(){const R=roster(G);
     guide=`<section class="px guide away"><img class="gface" src="${faceSrc("kati","happy")}" alt="Kati"><div class="gtxt"><b>Kati (acting coach · Coach Daeng back in week ${((G.coachAwayAbs-1)%52)+1})</b><p>${esc(KS[G.week%KS.length])}</p><p class="meta">No coach advice for now; you make every call yourself</p></div><button class="xbtn" data-act="hideguide" aria-label="Close">✕</button></section>`;}
   const lv=campLevel(G);
   return `${rinNoteHTML()}<div class="homegrid">${(()=>{const r=[["mali",G.flags.maliRecruit],["rin",G.flags.rinRecruit]].filter(([id,ok])=>ok&&G.F[id].camp==="free").concat(G.region&&G.region.offers?G.region.offers.filter(id=>G.F[id]).map(id=>[id,1]):[]); /* v1.91.30: regional champions asking to join */
-     return r.length?`<button class="px newfighter" data-act="tab" data-v="camp" data-sub="staff"><span class="newb">NEW!</span>${r.map(([id])=>`<img src="${faceSrc(id,"happy")}" alt="">`).join("")}<span><b>${r.map(([id])=>esc(G.F[id].name)).join(" and ")} wants to join</b><small>Tap to see the contract</small></span><span class="chev">▸</span></button>`:"";})()}<section class="px camp-wrap"><div class="cvbox"><canvas class="campcv" width="640" height="360" data-camp="1" aria-label="Sirichai Gym overview"></canvas>
+     return r.length?`<button class="px newfighter" data-act="tab" data-v="camp" data-sub="staff"><span class="newb">NEW!</span>${r.map(([id])=>`<img src="${faceSrc(id,"happy")}" alt="">`).join("")}<span><b>${r.map(([id])=>esc(G.F[id].name)).join(" and ")} wants to join</b><small>Tap to see the contract</small></span><span class="chev">▸</span></button>`:"";})()}${typeof REGION!=="undefined"&&REGION.visitBanner&&G.region?REGION.visitBanner(G):""}<section class="px camp-wrap"><div class="cvbox"><canvas class="campcv" width="640" height="360" data-camp="1" aria-label="Sirichai Gym overview"></canvas>
     ${goalHidden()?`<button class="goal ov mini" data-act="goaltog" aria-label="Show goal">Goal ▾</button>`:`<button class="goal ov" data-act="goaltog" aria-label="Hide goal">${goalText()}<span class="gx">▴ Hide</span></button>`}</div>
     ${G.campUsed?`<button class="campact done" data-act="campacts"><span class="ci">✓</span><span><small>This week's camp activity</small><b>${esc(CAMP_ACTIONS[G.campUsed].name)}</b></span></button>`
       :`<button class="campact" data-act="campacts"><span class="ci"></span><span><small>This week's camp activity · not chosen</small><b>Choose a camp activity</b></span><span class="chev">▸</span></button>`}
