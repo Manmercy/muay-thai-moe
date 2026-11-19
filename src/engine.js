@@ -1326,7 +1326,7 @@ function applyResult(G,F,booking){
     const gapR=effGap(G,me,op),upset=res==="W"&&gapR>.4;
     if(!off&&booking.tier!=="exhibition"&&booking.tier!=="special"&&booking.tier!=="lab"&&booking.tier!=="final"){const rk=G.rank[me.div][me.id];if(rk){rk.pts+=res==="W"?(gapR<-.6?2:3)+(upset?1:0):res==="D"?1:0;/* v1.47: farming weaker fighters earns fewer ranking points */rk[res==="W"?"w":res==="L"?"l":"d"]++;}}
     if(me.camp==="player"){
-      const W=booking.win||tier.win,Lo=booking.lose||tier.lose;const pay=res==="W"?W:res==="D"?(W+Lo)/2:Lo;if(booking.fair){G.fairPay=G.fairPay||[];G.fairPay.push({amt:pay,op:op.name,res});}else{G.cash+=pay;G.wkFight=(G.wkFight||0)+pay;}
+      const nopay=!!(booking.region&&(booking.region.nlfinal||booking.region.nlleg))||!!booking.nltest; /* v1.91.47 (playtest): underground/legend bouts pay nothing (win:0 fell back to the exhibition purse) */const W=nopay?0:booking.win||tier.win,Lo=nopay?0:booking.lose||tier.lose;const pay=res==="W"?W:res==="D"?(W+Lo)/2:Lo;if(booking.fair){G.fairPay=G.fairPay||[];G.fairPay.push({amt:pay,op:op.name,res});}else{G.cash+=pay;G.wkFight=(G.wkFight||0)+pay;}
       G.rep=Math.max(0,G.rep+(res==="W"?tier.rep*clamp(1+gapR*.5,.35,1.6)*(ytKey(G)==="tv"?1.4:1):res==="L"?(ytKey(G)==="tv"?-.4:0):.5)/(1+Math.max(0,G.rep-25)/25));
       /* v1.83.1: promoters read the record — a winning streak brings tougher offers, a loss brings them back down (settles near 2 wins in 3) */
       if(!off)me.mmOff=clamp((me.mmOff||0)+(res==="W"?.2:res==="L"?-.45:0),-1,2);

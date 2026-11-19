@@ -984,7 +984,7 @@ const RG_DEAL_CASH=200000;
 function rgCup2(G){const R=G.region,rin=rgIn(G,"rin");return [
  {n:"nar",bg:"camp",t:"บัตรเชิญสีทองมาถึงค่าย คุณเกริกขอเลี้ยงข้าวผู้จัดการแบบสองต่อสอง ที่ห้องอาหารชั้นบนสุดของตึกนาคาเอเนอร์จี้"},
  {n:"nar",bg:"krerk_dinner",show:[{id:"npc:krerk"}],t:"โต๊ะยาวนั่งได้ยี่สิบคน แต่วางจานไว้แค่สองชุด กระจกรอบห้องมองเห็นกรุงเทพฯ ทั้งเมือง"},
- {n:"npc",who:"คุณเกริก",t:"ได้ถ้วยสองใบในศึกเดียว ค่ายเล็กแบบนี้ผมไม่เห็นมานานแล้วครับ"},
+ {n:"npc",who:"คุณเกริก",t:(R.cups||[]).length>=2?"ได้ถ้วยสองใบในศึกเดียว ค่ายเล็กแบบนี้ผมไม่เห็นมานานแล้วครับ":"ค่ายเล็ก ๆ จากเชียงใหม่ ชกถึงระดับภาคได้ ผมไม่เห็นมานานแล้วครับ"},
  {n:"npc",who:"คุณเกริก",t:"ผมเองก็เคยชกครับ ทีมชาติ ปีนั้นตั๋วโอลิมปิกอยู่ในมือแล้ว"},
  {n:"npc",who:"คุณเกริก",t:"สามสัปดาห์ก่อนเดินทาง รถตู้ของทีมเสียหลักกลางถนน เข่าผมแตกสามชิ้น หมอบอกว่าเดินได้ก็บุญแล้ว"},
  {n:"npc",who:"คุณเกริก",t:"ไม่มีใครผิดครับ ฝนตก ถนนลื่น… มันคือโชค แค่นั้นเอง"},
@@ -1127,6 +1127,9 @@ const REGION={
     {const r2=(R.cups||[])[1],c2=r2&&R.champ[r2];if(r2&&!R.c2&&c2&&now>=(c2.wonAbs||0)+1){R.c2="later";playScene(rgCup2(G),()=>{save();done();},{bg:"camp",look:"casual"});return;}}
     {const r3=(R.cups||[])[2],c3=r3&&R.champ[r3];if(r3&&!R.c3&&c3&&now>=(c3.wonAbs||0)+1){R.c3="seen";playScene(rgCup3(G),()=>{save();done();},{bg:"camp",look:"casual"});return;}}
     {const F=R.final;if(F&&F.won&&!G.tigerRev&&now>=(F.wonAbs||0)+1){G.tigerRev=1;playScene(rgTiger(G),()=>{save();done();},{bg:"camp",look:"casual"});return;}}
+    /* v1.91.47 (playtest): a camp that reaches the closing ceremony on the time limit with only one or two cups still gets Krerk's dinner and Pailin's tablet first — the ceremony and the reveal lean on them */
+    if(this.closeDue(G)&&!R.c2){R.c2="later";playScene(rgCup2(G),()=>{save();done();},{bg:"camp",look:"casual"});return;}
+    if(this.closeDue(G)&&!R.c3){R.c3="seen";playScene(rgCup3(G),()=>{save();done();},{bg:"camp",look:"casual"});return;}
     if(this.closeDue(G)){this.openFinal(G);playScene(rgClose(G),()=>{save();done();},{bg:"closing_ceremony",look:"casual"});return;} /* v1.91.20 round 11 */
     done();},
   /* ---------- state helpers ---------- */
@@ -1277,6 +1280,7 @@ const REGION={
     G.offers=(G.offers||[]).filter(o=>o.week!==x.wk);},
   /* the letter came: pick the fighter who carries the whole series */
   startSeries(G,r,fid){const c=G.region.champ[r],me=G.F[fid];if(!c||c.state!=="letter"||!me||me.camp!=="player")return {ok:false,why:"เลือกนักมวยไม่ได้"};
+    if(this.overTime(G))return {ok:false,why:"ศึกชิงเจ้าสี่ภาคครั้งนี้หมดเวลาแล้ว · ชิงใหม่ได้ในครั้งหน้า"};
     Object.assign(c,{state:"series",fid,w:0,l:0,n:0,next:null});this.champFighter(G,r,me);
     const s=this.schedule(G,r,gameWeek(G)+1);if(!s){c.state="letter";c.fid=null;return {ok:false,why:"ปีนี้ไม่มีสัปดาห์ว่างพอสำหรับศึกแชมป์แล้ว"};}
     G.log=G.log||[];G.log.push(`${RG_TITLE[r]}: ${me.name} vs ${RG[r].champ} · นัดที่ 1 สัปดาห์ ${s.wk}${s.season!==(G.season||1)?` (ปีหน้า)`:""}`);
@@ -1296,8 +1300,10 @@ const REGION={
     G.log.push(`${RG_TITLE[r]} นัดที่ ${c.n}: ${p.res==="W"?"ชนะ":p.res==="L"?"แพ้":"เสมอ"} · สกอร์ ${c.w}-${c.l}${s?` · นัดต่อไปสัปดาห์ ${s.wk}`:""}`);},
   /* weekly: a hurt fighter gets the bout moved, a dropped bout is rescheduled, a lost series sends a new letter later */
   seriesWeekly(G){const R=G.region,now=gameWeek(G);
+    {const n=(R.cups||[]).length;if(!R.close&&!R.endWarn&&n>=1&&n<4&&now>=(R.startAbs||0)+130){R.endWarn=1; /* v1.91.47: half a year of warning before the time limit */
+      addMail(G,{kind:"letter",from:"นาคาเอเนอร์จี้ดริงค์",title:"ศึกชิงเจ้าสี่ภาค: เหลือเวลาอีกราวครึ่งปี",body:"เรียน ผู้จัดการค่ายศิริชัย\n\nศึกชิงเจ้าสี่ภาคครั้งนี้จะปิดฉากในอีกราวครึ่งปี หลังจากนั้นจะไม่มีจดหมายท้าแชมป์ภาคครั้งใหม่ นัดที่ยังชกค้างอยู่จะชกต่อจนจบ แล้วจึงเข้าสู่พิธีปิดที่กรุงเทพฯ\n\nถ้วยที่ยังเหลือ ขอให้รีบเก็บก่อนหมดเวลา\n\nนาคาเอเนอร์จี้ดริงค์ · ดื่มนาคา ชกไม่มีหมด!"});}}
     for(const r of RG_ORDER){const c=R.champ[r];if(!c)continue;
-      if(c.state==="lost"&&now>=(c.letterAbs||0)){c.state="letter";c.fid=null;c.w=0;c.l=0;c.n=0;
+      if(c.state==="lost"&&now>=(c.letterAbs||0)&&!this.overTime(G)){c.state="letter";c.fid=null;c.w=0;c.l=0;c.n=0;
         addMail(G,{kind:"letter",from:`${RG[r].champ} · แชมป์${RG[r].name}`,title:`${RG_TITLE[r]}: คำท้าครั้งใหม่`,body:RG_CH[r].again});continue;}
       if(c.state!=="series")continue;const me=G.F[c.fid];
       if(!me||me.camp!=="player"){G.bookings=G.bookings.filter(b=>!(c.next&&b.id===c.next.bid));Object.assign(c,{state:"letter",fid:null,w:0,l:0,n:0,next:null});continue;}
@@ -1343,7 +1349,7 @@ const REGION={
     const st=c.state==="won"?`<span class="rg-belt">🏆 ได้ถ้วย</span>`:n<4?`<span class="meta">🔒 ครบ 4 เข็มขัดก่อน (${n}/4)</span>`
       :c.state==="letter"?`<button class="btn sm gold" data-act="rgser" data-v="${r}">เลือกนักมวยชิงแชมป์</button>`
       :c.state==="series"?`<span class="meta">${me?esc(me.name):""} ${c.w}-${c.l}${c.next?` · นัด ${c.next.n} สัปดาห์ ${c.next.wk}${c.next.season!==(G.season||1)?` (ปีหน้า)`:""}`:""}</span>${c.visit==="due"?`<button class="btn sm gold" data-act="rgvisit" data-v="${r}">ต้อนรับ${esc(C.champ)}ที่ค่าย</button>`:c.visit==="done"?`<button class="btn sm" data-act="rgduel" data-v="${r}">ดวลซ้อม</button>`:""}`
-      :c.state==="lost"?`<span class="meta">${esc(C.champ)}ป้องกันแชมป์ไว้ได้ · รอจดหมายท้าครั้งใหม่</span>`:`<span class="meta">✉️ รอจดหมายนัดจากแชมป์</span>`;
+      :c.state==="lost"?`<span class="meta">${esc(C.champ)}ป้องกันแชมป์ไว้ได้ · ${this.overTime(G)?"ศึกครั้งนี้หมดเวลาแล้ว":"รอจดหมายท้าครั้งใหม่"}</span>`:`<span class="meta">✉️ รอจดหมายนัดจากแชมป์</span>`;
     const chat=G.chatIn&&G.chatIn[RG_CID[r]]&&G.F[RG_CID[r]]?`<button class="btn sm gold" data-act="rgchat" data-v="${RG_CID[r]}">💬 ${esc(C.champ)}ทักแชตมา</button>`:"";
     const R=G.region,cid=RG_CID[r],gap=(R.meet||{})[cid]>0&&(R.meetT||{})[cid]!=null?gameWeek(G)-R.meetT[cid]:0;
     return `<div class="rg-prov rg-fin"><span><b>${esc(F.name)}</b> <small>เวทีชิงแชมป์ภาค</small>${gap>=3?`<small class="rg-miss">💭 ${gap} สัปดาห์แล้วที่ไม่ได้เจอ${esc(C.champ)}</small>`:""}</span>${chat}${st}</div>`;},
@@ -1407,6 +1413,8 @@ const REGION={
 
 /* round 11: the underground final — state, the region-page card, the line-up and the five bouts */
 Object.assign(REGION,{
+  /* v1.91.47 (playtest): three years in with a cup, no new challenge letters — the series in progress ends, then the closing ceremony comes (before, a player who always re-accepted at once never reached it) */
+  overTime(G){const R=G.region;if(!R||(R.cups||[]).length>=4||rgEd(G)>=2)return false; /* later editions have no time limit */return R.close!=null||((R.cups||[]).length>=1&&gameWeek(G)>=(R.startAbs||0)+156);},
   closeDue(G){const R=G.region,now=gameWeek(G),cups=R.cups||[];if(R.close)return false;
     if(cups.length>=4){const last=R.champ[cups[3]];return now>=((last&&last.wonAbs)||0)+2;}
     /* the tournament runs its course without four cups: three years in, nothing in progress */
@@ -1449,11 +1457,11 @@ Object.assign(REGION,{
         <div class="vs-l ${r&&their!=="W"?"lost":""}"><span class="vs-art">${o?this.vsArt(o,"l",their==="W"):""}</span><span class="vs-tx">${(n=>`<b>${esc(n[0])}</b>${n[1]?`<em>${esc(n.slice(1).join(" "))}</em>`:""}`)(NL[k].name.split(" "))}<small>${esc(NL[k].art)}</small></span></div>
         <div class="vs-mid">VS<small>นัด ${i+1}</small></div>
         <button class="vs-r ${r&&r!=="W"?"lost":""}" data-act="rgfslot" data-v="${k}" ${r?"disabled":""}>${me?`<span class="vs-tx"><b>${esc(me.name)}</b><small>${kept?"ชนะไว้ครั้งก่อน":`Lv.${me.lvl||1}`}</small></span><span class="vs-art">${this.vsArt(me,"r")}</span>`:`<span class="vs-tx vs-empty"><b>+ เลือกนักมวย</b></span>`}</button>${stamp(their,"vsl")}${stamp(r,"vsr")}</div>`;}).join("");
-    const nk=next&&NL_ORDER.indexOf(next)+1,ok=next&&L[next];
+    const nk=next&&NL_ORDER.indexOf(next)+1,full=NL_ORDER.every(k=>C[k]||L[k]),ok=next&&L[next]&&(F.live||full); /* v1.91.47 (playtest): every bout needs a fighter before the first bell — an injured fifth fighter left the night stuck at bout 5 */
     return `<div class="vsb"><div class="vs-head"><span class="vs-tl">นาคาลีก</span><b class="vs-sc">${w>0||l>0?`${l} – ${w}`:"VS"}</b><span class="vs-tr">ค่ายศิริชัย</span></div>
       <p class="meta vs-sub">ห้าต่อห้า · ชนะสามได้ไป · แตะช่องสีน้ำเงินเพื่อเลือกนักมวย · นัดที่ชนะแล้วนับไว้ให้ ครั้งหน้าชกแค่นัดที่เหลือ · ไม่มีบาดเจ็บค้างหลังไฟต์</p>
       <div class="vs-rows">${rows}</div>
-      <div class="mfoot">${next?`${F.live?"":`<button class="btn" data-act="closeModal">ไว้ก่อน</button>`}<button class="btn primary" data-act="rgfgo" ${ok?"":"disabled"}>${ok?`ชกนัด ${nk} ▸`:`เลือกนักมวยนัด ${nk} ก่อน`}</button>`:`<button class="btn primary" data-act="rgfend">ดูผลไฟต์ใต้ดิน ▸</button>`}</div></div>`;},
+      <div class="mfoot">${next?`${F.live?"":`<button class="btn" data-act="closeModal">ไว้ก่อน</button>`}<button class="btn primary" data-act="rgfgo" ${ok?"":"disabled"}>${ok?`ชกนัด ${nk} ▸`:L[next]&&!full?(pool.length<NL_ORDER.filter(k=>!C[k]).length?"นักมวยพร้อมชกไม่ครบ":"เลือกนักมวยให้ครบทุกนัดก่อน"):`เลือกนักมวยนัด ${nk} ก่อน`}</button>`:`<button class="btn primary" data-act="rgfend">ดูผลไฟต์ใต้ดิน ▸</button>`}</div></div>`;},
   finalNext(){const R=G.region,F=R.final,C=F.cur=F.cur||{},k=NL_ORDER.find(x=>!C[x]);if(!k||!(F.line||{})[k])return;UI.modal=null;UI.rgPick=null;
     if(!F.live){F.live=true;save();AU.startMusic&&AU.startMusic("hub");playScene(rgFinalIntro(G),()=>this.finalBout(k),{bg:"naka_underground",look:"casual"});return;}
     this.finalBout(k);},
@@ -1849,4 +1857,6 @@ Object.assign(REGION,{
     G.log=G.log||[];G.log.push(`ศึกชิงเจ้าสี่ภาค ครั้งที่ ${ed} เริ่มแล้ว`);},
 });
 if(typeof G!=="undefined"&&G&&G.region)REGION.flush(G);
+/* v1.91.47 (playtest): styles go in as soon as the chapter loads — the underground board opened before the regional tab was visited showed full-size portraits */
+try{REGION.css();}catch(e){}
 

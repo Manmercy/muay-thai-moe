@@ -3607,7 +3607,7 @@ function applyResult(G,F,booking){
     const gapR=effGap(G,me,op),upset=res==="W"&&gapR>.4;
     if(!off&&booking.tier!=="exhibition"&&booking.tier!=="special"&&booking.tier!=="lab"&&booking.tier!=="final"){const rk=G.rank[me.div][me.id];if(rk){rk.pts+=res==="W"?(gapR<-.6?2:3)+(upset?1:0):res==="D"?1:0;/* v1.47: farming weaker fighters earns fewer ranking points */rk[res==="W"?"w":res==="L"?"l":"d"]++;}}
     if(me.camp==="player"){
-      const W=booking.win||tier.win,Lo=booking.lose||tier.lose;const pay=res==="W"?W:res==="D"?(W+Lo)/2:Lo;if(booking.fair){G.fairPay=G.fairPay||[];G.fairPay.push({amt:pay,op:op.name,res});}else{G.cash+=pay;G.wkFight=(G.wkFight||0)+pay;}
+      const nopay=!!(booking.region&&(booking.region.nlfinal||booking.region.nlleg))||!!booking.nltest; /* v1.91.47 (playtest): underground/legend bouts pay nothing (win:0 fell back to the exhibition purse) */const W=nopay?0:booking.win||tier.win,Lo=nopay?0:booking.lose||tier.lose;const pay=res==="W"?W:res==="D"?(W+Lo)/2:Lo;if(booking.fair){G.fairPay=G.fairPay||[];G.fairPay.push({amt:pay,op:op.name,res});}else{G.cash+=pay;G.wkFight=(G.wkFight||0)+pay;}
       G.rep=Math.max(0,G.rep+(res==="W"?tier.rep*clamp(1+gapR*.5,.35,1.6)*(ytKey(G)==="tv"?1.4:1):res==="L"?(ytKey(G)==="tv"?-.4:0):.5)/(1+Math.max(0,G.rep-25)/25));
       /* v1.83.1: promoters read the record — a winning streak brings tougher offers, a loss brings them back down (settles near 2 wins in 3) */
       if(!off)me.mmOff=clamp((me.mmOff||0)+(res==="W"?.2:res==="L"?-.45:0),-1,2);
@@ -8497,7 +8497,7 @@ AU.gsfx=function(kind,a){if(!this.init()||this.muted||!SETTINGS.sfx)return;const
   if(kind==="shimmer")for(let i=0;i<6;i++)T(i*.05,{f:1400+Math.random()*1400,type:"sine",dur:.12,peak:.06});};
 
 // ================= MUAY THAI MOE v1.3 — UI =================
-const VERSION="1.91.48";
+const VERSION="1.91.49";
 const CUR_LANG=(typeof window!=="undefined"&&window.LANG)||"th";
 const TH_LABEL=String.fromCharCode(3652,3607,3618);
 function langSwitch(cls){return `<div class="langsw ${cls||""}" role="group" aria-label="Language">${[["th",TH_LABEL],["en","EN"]].map(([k,l])=>`<button class="lsb ${CUR_LANG===k?"on":""}" data-act="setlang" data-v="${k}" aria-pressed="${CUR_LANG===k}">${l}</button>`).join("")}</div>`;}
@@ -10124,7 +10124,7 @@ function coachNote(F,me){const A=F.A,B=F.B,r=F.result,w=r.win==="A",d=r.win==="D
 function rinNote(F){const A=F.A;const best=Object.entries(A.wl).sort((a,b)=>b[1]-a[1])[0];return `เข้าเป้า ${A.landed}/${A.thrown} ครั้ง อาวุธที่ได้ผลที่สุดคือ${WNAME[best[0]]} (${best[1]} ครั้ง)`;}
 let LASTF=null; /* v1.80: the last fight, read by the gauntlet to carry HP between bouts */
 function fightStart(quick){const U=UI.fight,b=U.b;AU.resume();
-  U.F=newFight(b.ev&&typeof loyBoost==="function"?loyBoost(G.F[b.a]):G.F[b.a],G.F[b.b],{seed:(G.seed+G.week*131+b.b.length*7)>>>0,rounds:b.rounds,tier:b.tier,planA:U.plan,gprepA:b.gprep||null,forceRage:!quick&&!(G.flags&&G.flags.rageShown)});U.F.dai=(DIFF[G.diff||"normal"]||DIFF.normal).ai;if(b.ev)U.F.ev=1;U.F.live=!quick;
+  U.F=newFight(b.ev&&typeof loyBoost==="function"?loyBoost(G.F[b.a]):G.F[b.a],G.F[b.b],{seed:(G.seed+G.week*131+b.b.length*7+(b.region?stableHash(b.id):0))>>>0, /* v1.91.47 (playtest): a regional bout fought again in the same week (underground retry) is a new fight, not a replay */rounds:b.rounds,tier:b.tier,planA:U.plan,gprepA:b.gprep||null,forceRage:!quick&&!(G.flags&&G.flags.rageShown)});U.F.dai=(DIFF[G.diff||"normal"]||DIFF.normal).ai;if(b.ev)U.F.ev=1;U.F.live=!quick;
   if(b.wai==="phrom")U.F.A.careMor=.02;if(b.wai==="phra")U.F.A.careMor=.01;if(b.cheer)U.F.A.mor+=b.cheer*.01;U.F.A.mor+=trustBonus(G.F[b.a]);{const fam=(G.fam||{})[b.b]||0;if(fam)U.F.A.mor+=fam*.015;}setTactics(U.F,U.tac);if(b.ev)U.F.A.sta=100; /* v1.89.31: event bouts ignore camp fatigue — the ladder shows full stamina, so start from it */if(b.carry){U.F.A.hp=Math.min(U.F.A.hp,b.carry.hp);U.F.A.sta=Math.min(U.F.A.sta,b.carry.sta);}LASTF=U.F;
   if(quick){FS.init(null,b.bg||TIER_BG[b.tier]||"bg_local.webp",G.F[b.a],G.F[b.b]);const F=U.F;while(!F.over){F.A.instr=aiCorner(F,F.A,F.B);F.B.instr=aiCorner(F,F.B,F.A);const lg=fightRound(F);U.shown.push({rd:`ยกที่ ${F.round}`},...lg);}fightEnd();return;}
   FS.init(null,b.bg||TIER_BG[b.tier]||"bg_local.webp",G.F[b.a],G.F[b.b]);AU.setTempo(104);AU.setHeat&&AU.setHeat(0);AU.startMusic();playRound();}
@@ -12856,7 +12856,7 @@ CHAT.fah.push(
 <script>
 (function(){
 /* v1.87: Thai code ships inside index.html; English code (en.js) and the dictionary (i18n.js) load only when needed */
-var B="315888c66e";
+var B="93ecc0ca21";
 var L="";try{L=localStorage.getItem("mtm_lang")||"";}catch(e){}
 try{var h=(location.hash||"").match(/lang=(th|en)/);if(h)L=h[1];}catch(e){}
 if(L!=="th"&&L!=="en")L="th";
