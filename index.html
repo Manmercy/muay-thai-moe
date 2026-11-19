@@ -1893,12 +1893,12 @@ body.hasnews main>h1.sr+.homegrid,body.hasnews main>h1.sr+.rinnote{margin-top:46
 
 /* v1.88 corner care variants */
 .ccards{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:6px}
-.ccard{aspect-ratio:3/4;border:0;cursor:pointer;font:inherit;color:#fff;display:grid;place-items:center;align-content:center;gap:4px;padding:6px;
+.ccards .ccard{aspect-ratio:3/4;border:0;cursor:pointer;font:inherit;color:#fff;display:grid;place-items:center;align-content:center;gap:4px;padding:6px;
   background:repeating-linear-gradient(45deg,#3b2c63 0 6px,#2a2150 6px 12px);box-shadow:inset 0 0 0 3px #c8963c,0 3px 0 #120d22;image-rendering:pixelated}
-.ccard i{width:22px;height:22px;background:#c8963c;clip-path:polygon(50% 0,100% 50%,50% 100%,0 50%)}
-.ccard.open{background:#f4ead8;color:#2a1d2e;box-shadow:inset 0 0 0 3px #8a6a4a}.ccard.open.good{background:#fff3c4}.ccard.open.bad{background:#e9d3d3}
-.ccard.open:not(.mine){opacity:.45}.ccard.mine{transform:translateY(-4px);box-shadow:inset 0 0 0 3px var(--gold,#f2c94c),0 0 0 3px #f2c94c}
-.ccard b{font-size:26px;line-height:1}.ccard small{font-size:12px;font-weight:700;text-align:center}
+.ccards .ccard i{width:22px;height:22px;background:#c8963c;clip-path:polygon(50% 0,100% 50%,50% 100%,0 50%)}
+.ccards .ccard.open{background:#f4ead8;color:#2a1d2e;box-shadow:inset 0 0 0 3px #8a6a4a}.ccards .ccard.open.good{background:#fff3c4}.ccards .ccard.open.bad{background:#e9d3d3}
+.ccards .ccard.open:not(.mine){opacity:.45}.ccards .ccard.mine{transform:translateY(-4px);box-shadow:inset 0 0 0 3px var(--gold,#f2c94c),0 0 0 3px #f2c94c}
+.ccards .ccard b{font-size:26px;line-height:1}.ccards .ccard small{font-size:12px;font-weight:700;text-align:center}
 .oil{display:grid;gap:8px;margin-top:6px}.oilbar{display:block;height:12px;background:#1b1530;box-shadow:inset 0 0 0 2px var(--line,#4a3f6b);position:relative}
 .oilbar s{position:absolute;left:0;top:0;bottom:0;width:var(--v,0%);background:linear-gradient(90deg,#c8963c,#f2c94c);transition:width .08s}
 .oilbtn{min-height:64px;font-size:20px;touch-action:manipulation;user-select:none}
@@ -2194,6 +2194,83 @@ html[lang=en] .fight .fctl2 .skbtn2 b{font-size:11px;display:-webkit-box;-webkit
 div.mdelask{margin:2px 0 8px;padding:8px;box-shadow:inset 0 0 0 2px var(--line);background:var(--raise)}
 .mdelrow{display:flex;justify-content:flex-start;margin-top:10px;padding-top:8px;border-top:1px dashed var(--line)}.mdelrow .mdelask{justify-content:flex-start}
 .mlock{color:var(--dim);font-size:12px}
+/* v1.91.26: SSR illustrations — full-screen in the card story, a panel in the card details, a full view */
+.vcg{position:absolute;inset:0;bottom:var(--vb);overflow:hidden;background:#0c0816;display:flex;align-items:center;justify-content:center;animation:vcgIn .5s ease-out}
+.vcg::before{content:"";position:absolute;inset:-20px;background:var(--cg) center/cover;filter:blur(18px) brightness(.45)}
+.vcg img{position:relative;max-width:100%;max-height:100%;object-fit:contain;box-shadow:0 0 0 2px rgba(255,215,120,.55),0 8px 30px rgba(0,0,0,.6)}
+@keyframes vcgIn{from{opacity:0;transform:scale(1.03)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion:reduce){.vcg{animation:none}}
+.cdart{display:flex;flex-direction:column;gap:.4rem;margin:.6rem 0}
+.cdartrow{display:flex;gap:.5rem}
+.cdartimg{position:relative;display:block;padding:0;border:2px solid var(--rc,#ffd45a);background:#120c1e;cursor:pointer;width:46%;max-width:200px}
+.cdartimg.lock{display:flex;flex-direction:column;align-items:center;justify-content:center;aspect-ratio:3/4;cursor:default;border-style:dashed;opacity:.8}.cdartimg.lock b{font-size:1.6rem}.cdartimg.lock span{position:static;background:none;text-align:center}
+.cdartimg.s2{border-color:#ffd45a;box-shadow:0 0 12px rgba(255,212,90,.5)}
+.cdartimg img{display:block;width:100%;aspect-ratio:3/4;object-fit:cover}
+.cdartimg span{position:absolute;left:0;right:0;bottom:0;padding:.3rem .4rem;font-size:.75rem;background:linear-gradient(transparent,rgba(0,0,0,.75));color:#fff;text-align:left}
+.cdart .btn{align-self:flex-start}
+.cdfull{cursor:pointer;text-align:center}.cdfull img{max-width:100%;max-height:78dvh;object-fit:contain;border:2px solid #ffd45a}
+.ccard[data-rarity="SSR"] .card-art.art{box-shadow:0 0 0 2px #ffd45a,0 0 10px rgba(255,212,90,.6)}
+.ccard[data-rarity="SSR"] .card-art.art::before{content:"";position:absolute;inset:0;z-index:2;pointer-events:none;background:linear-gradient(115deg,transparent 30%,rgba(255,240,180,.55) 45%,transparent 60%);background-size:250% 100%;animation:ssrShine 3.2s ease-in-out infinite}
+@keyframes ssrShine{0%{background-position:130% 0}60%,100%{background-position:-60% 0}}
+@media (prefers-reduced-motion:reduce){.ccard[data-rarity="SSR"] .card-art.art::before{animation:none;opacity:0}}
+/* v1.91.26 (Man): one card layout for every collectible card — the picture (character face over its scene, or the
+   card's illustration) fills the whole card, a dark fade at the bottom carries stars + title; chips sit in the corners. */
+.ccard.pxc,.ccard.big{display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:1px;aspect-ratio:3/4;padding:0 5px 6px;overflow:hidden;isolation:isolate}
+.ccard.pxc>.card-art,.ccard.big>.card-art{position:absolute;inset:0;width:100%!important;height:100%;aspect-ratio:auto;border:0;box-shadow:none;z-index:0}
+.ccard.pxc>.card-art::after,.ccard.big>.card-art::after{box-shadow:none;background:linear-gradient(0deg,rgba(6,4,14,.9) 0%,rgba(6,4,14,.55) 18%,rgba(6,4,14,0) 34%)}
+.ccard.pxc>.card-art:not(.art) img,.ccard.big>.card-art:not(.art) img{height:84%;object-fit:cover;object-position:center 18%;-webkit-mask-image:linear-gradient(180deg,#000 88%,transparent);mask-image:linear-gradient(180deg,#000 88%,transparent)}
+.ccard.pxc>:not(.card-art),.ccard.big>:not(.card-art){position:relative;z-index:3}
+.ccard.pxc b,.ccard.big b{color:#fff;text-shadow:0 1px 2px #000,0 0 6px rgba(0,0,0,.8);white-space:normal;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;text-align:center;width:100%}
+.ccard.pxc b{font-size:10.5px;line-height:1.25}
+.ccard.pxc small,.ccard.big small{color:#d9d2e8;text-shadow:0 1px 2px #000}
+.ccard.pxc .tstar,.ccard.big .tstar{text-shadow:0 1px 2px #000}
+.ccard.pxc .rr,.ccard.pxc .cnew,.ccard.pxc .ndot,.ccard.pxc .cdup{position:absolute;z-index:4}
+.ccard.pxc .rr{top:4px;left:4px}
+.ccard.pxc .cnew{top:4px;right:4px;font-size:9px;line-height:13px;padding:0 3px}
+.ccard.pxc .cdup{top:auto;bottom:auto;right:4px;top:21px;font-size:10px}
+.ccard.pxc.lock>.card-art::after{background:none}
+.ccard.big{padding:0 8px 10px}
+.ccard[data-rarity="SSR"]:has(>.card-art.art){border-color:#ffd45a}
+/* the shine is a thin sweep that passes over the picture, never a band that sits on the face */
+.ccard[data-rarity="SR"]:not(.lock)>.card-art::before{background:linear-gradient(115deg,transparent 44%,rgba(255,255,255,.22) 50%,transparent 56%);background-size:250% 100%;animation:cardGlint 4.5s linear infinite}
+.ccard[data-rarity="SSR"]:not(.lock)>.card-art::before{background:linear-gradient(115deg,transparent 40%,rgba(255,244,184,.4) 50%,transparent 60%);background-size:250% 100%}
+@media (prefers-reduced-motion:reduce){.ccard[data-rarity="SR"]:not(.lock)>.card-art::before{animation:none;opacity:0}}
+/* album: 4 cards a row on phones (5 on wide screens), cards a little taller so the rarity chip sits above the face
+   and the title has its own room at the bottom; the pixel frame stays, the glow is kept tight */
+.albg{grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+@media (min-width:700px){.albg{grid-template-columns:repeat(5,minmax(0,1fr))}}
+.ccard.pxc{aspect-ratio:5/8}
+.ccard[data-rarity="R"]:not(.lock){box-shadow:inset 0 0 0 2px rgba(169,219,255,.28),0 0 4px rgba(74,155,224,.25),3px 3px 0 #0f0c17}
+.ccard[data-rarity="SR"]:not(.lock){box-shadow:inset 0 0 0 2px rgba(246,207,255,.36),0 0 5px rgba(196,107,224,.3),3px 3px 0 #0f0c17}
+@keyframes cardAura{0%,100%{box-shadow:inset 0 0 0 2px #fff0b0,0 0 4px rgba(242,201,76,.35),3px 3px 0 #0f0c17}50%{box-shadow:inset 0 0 0 2px #fff8d8,0 0 8px rgba(242,201,76,.55),3px 3px 0 #0f0c17}}
+/* title over stars on a solid dark bar that fades up into the picture; rarity chip reads as a small pixel button;
+   character faces pulled back so the whole head sits in the frame with the scene around it */
+.ccard.pxc b{order:1}.ccard.pxc .tstar{order:2;margin-top:1px}
+.ccard.pxc{padding:0 5px 7px}
+.ccard.pxc>.card-art::after{background:linear-gradient(0deg,#0c0818 0%,#0c0818 23%,rgba(12,8,24,.7) 30%,rgba(12,8,24,0) 42%)}
+.ccard.pxc>.card-art:not(.art) img{position:absolute;left:7%;top:7%;width:86%;height:auto;aspect-ratio:1;object-fit:cover;object-position:center top;
+  -webkit-mask-image:linear-gradient(180deg,#000 78%,transparent);mask-image:linear-gradient(180deg,#000 78%,transparent)}
+.ccard.pxc .rr{top:5px;left:5px;padding:1px 5px 2px;border:1px solid #0f0c17;box-shadow:inset 0 1px 0 rgba(255,255,255,.55),inset 0 -2px 0 rgba(0,0,0,.28),1px 1px 0 #0f0c17;font-size:10px;line-height:13px}
+.ccard.pxc.lock .rr{box-shadow:inset 0 1px 0 rgba(255,255,255,.3),inset 0 -2px 0 rgba(0,0,0,.28),1px 1px 0 #0f0c17}
+/* body sprite: fills the card from the top, the dark bar covers below the waist */
+.ccard.pxc>.card-art.body img,.ccard.big>.card-art.body img{position:static;width:100%;height:100%;aspect-ratio:auto;object-fit:cover;object-position:center 4%;-webkit-mask-image:none;mask-image:none}
+.ccard.big>.card-art.body img{object-position:center 6%}
+.ccard.pxc>.card-art.body img{object-position:center top;transform:translateY(7%) scale(1.25);transform-origin:50% 0}
+.ccard.big>.card-art.body img{object-position:center top;transform:translateY(4%) scale(1.2);transform-origin:50% 0}
+.ccard.big b{order:1}.ccard.big .tstar{order:2}.ccard.big small{order:3}
+.ccard.big>.card-art::after{background:linear-gradient(0deg,#0c0818 0%,#0c0818 20%,rgba(12,8,24,.7) 27%,rgba(12,8,24,0) 40%)}
+/* half body, about chest-up to the waist */
+.ccard.pxc>.card-art.body img{transform:translateY(5%) scale(1.65)}
+.ccard.big>.card-art.body img{transform:translateY(4%) scale(1.55)}
+/* sprites are all cropped head-to-toe at the same height but differ in width, so size them by height (not cover),
+   which frames every card the same way: head near the top, cut around the waist by the title bar */
+.ccard.pxc>.card-art.body img,.ccard.big>.card-art.body img{position:absolute;top:7%;left:50%;width:auto;height:150%;max-width:none;object-fit:contain;transform:translateX(-50%)}
+.ccard.big>.card-art.body img{top:6%;height:140%}
+/* the pouting / flustered casual poses read closer than the others — pull them back a little */
+.ccard.pxc>.card-art.body img[src*="_casual_pout"],.ccard.pxc>.card-art.body img[src*="_casual_flustered"]{top:9%;height:128%}
+.ccard.big>.card-art.body img[src*="_casual_pout"],.ccard.big>.card-art.body img[src*="_casual_flustered"]{top:8%;height:122%}
+/* no shine sweeps over the pictures on high-rarity cards — the frame colour carries the rarity */
+.ccard[data-rarity="SR"]>.card-art::before,.ccard[data-rarity="SSR"]>.card-art::before,.ccard[data-rarity="SSR"] .card-art.art::before{content:none!important;animation:none!important}
 </style></head><body>
 <script>window.__MTM_ART=["alicia_sheet.webp","alicia_special.webp","baibua_sheet.webp","baibua_special.webp","baiyok_sheet.webp","baiyok_white_sheet.webp","bull1_sheet.webp","bull2_sheet.webp","bull3_sheet.webp","chaba_sheet.webp","chaba_special.webp","fah_loykrathong_sheet.webp","fah_loykrathong_special.webp","fah_sheet.webp","fah_special.webp","gang1_sheet.webp","gang2_sheet.webp","gang3_sheet.webp","gang4_sheet.webp","gang5_sheet.webp","gangsilver_sheet.webp","kati_loykrathong_sheet.webp","kati_loykrathong_special.webp","kati_sheet.webp","kati_special.webp","mali_loykrathong_sheet.webp","mali_loykrathong_special.webp","mali_sheet.webp","mali_special.webp","nl_ladda_blood_sheet.webp","nl_ladda_hood_sheet.webp","nl_ladda_sheet.webp","nl_meili_sheet.webp","nl_meili_special.webp","nl_nia_sheet.webp","nl_nia_special.webp","nl_rosa_sheet.webp","nl_rosa_special.webp","nl_varya_sheet.webp","nl_varya_special.webp","npc10_sheet.webp","npc1_sheet.webp","npc2_sheet.webp","npc3_sheet.webp","npc4_sheet.webp","npc5_sheet.webp","npc6_sheet.webp","npc7_sheet.webp","npc8_sheet.webp","npc9_sheet.webp","npc_baiyok.webp","npc_baiyok_black.webp","npc_gang_boss.webp","npc_gang_boss_face.webp","npc_gang_goldblack.webp","npc_gang_group.webp","npc_gang_silver.webp","npc_grandma.webp","npc_krerk.webp","npc_krerk_face.webp","npc_nai.webp","npc_petchara.webp","npc_thief.webp","npc_thief2.webp","npc_tiger_boss.webp","npc_vendor_green.webp","npc_vendor_red.webp","pailin_sheet.webp","petchara_sheet.webp","ploy_loykrathong_sheet.webp","ploy_loykrathong_special.webp","ploy_sheet.webp","ploy_special.webp","rgp_buriram_sheet.webp","rgp_chanthaburi_sheet.webp","rgp_chiangrai_sheet.webp","rgp_chumphon_sheet.webp","rgp_khonkaen_sheet.webp","rgp_lampang_sheet.webp","rgp_lopburi_sheet.webp","rgp_nakhonsi_sheet.webp","rgp_nan_sheet.webp","rgp_phetchaburi_sheet.webp","rgp_songkhla_sheet.webp","rgp_suphan_sheet.webp","rgp_surat_sheet.webp","rgp_ubon_sheet.webp","rgp_udon_sheet.webp","rgp_uttaradit_sheet.webp","rin_loykrathong_sheet.webp","rin_loykrathong_special.webp","rin_sheet.webp","rin_special.webp","rooster1_sheet.webp","rooster2_sheet.webp","rooster3_sheet.webp","rooster4_sheet.webp","rooster5_sheet.webp","tabtim_sheet.webp","tabtim_special.webp","thief2_sheet.webp","thief_sheet.webp"];</script>
 <div id="app"></div><div id="live" aria-live="polite" role="status"></div>
@@ -5305,10 +5382,14 @@ const LV_CARE={"kati":{"bg":"night","open":"คุณไข้ขึ้นจน
 const MS_NOTE={"win":"กล้าดี! ได้ผล","lose":"กล้าไปหน่อย… ไม่ได้ผลคราวนี้"};
 /* v1.91.4 two-timing route: G.hm = members of the harem (a team where every pair accepted each other) · everyone else you see is still two-timing
    pair understanding G.pairU[pairKey] 0–100 grows through spats, clashes and the Valentine ring · G.pairSt[pairKey] 0..3 (3 = accepted) */
-const hmList=G=>{const P=partners(G);if(G.hm)return G.hm.filter(k=>P.includes(k));return G.harem?P:[];};
+/* v1.91.26 (Man): the harem team is capped to the first five heroines. Anyone who joins the camp later (the regional champions)
+   can be loved one-on-one, or seen alongside the team (two-timing), but never joins the team itself. */
+const HM_IDS=["kati","mali","rin","ploy","fah"];
+const hmOK=k=>HM_IDS.includes(k);
+const hmList=G=>{const P=partners(G).filter(hmOK);if(G.hm)return G.hm.filter(k=>P.includes(k));return G.harem?P:[];};
 const inHm=(G,id)=>hmList(G).includes(id);
 const hmOut=G=>{const H=hmList(G);return partners(G).filter(k=>!H.includes(k));};
-function hmSet(G,L){L=[...new Set(L)].filter(k=>isPartner(G,k));if(L.length>=2){if(!G.harem||G.haremAbs==null)G.haremAbs=absWeek(G);G.hm=L;G.harem=true;}else{G.hm=[];G.harem=false;}}
+function hmSet(G,L){L=[...new Set(L)].filter(k=>hmOK(k)&&isPartner(G,k));if(L.length>=2){if(!G.harem||G.haremAbs==null)G.haremAbs=absWeek(G);G.hm=L;G.harem=true;}else{G.hm=[];G.harem=false;}}
 const pairU=(G,a,b)=>(G.pairU||{})[pairKey(a,b)]||0;
 const pairSt=(G,a,b)=>(G.pairSt||{})[pairKey(a,b)]||0;
 function addU(G,a,b,n){if(!a||!b||a===b)return;const k=pairKey(a,b);G.pairU=G.pairU||{};G.pairU[k]=Math.max(0,Math.min(100,(G.pairU[k]||0)+n));}
@@ -5332,7 +5413,7 @@ function ptSteps(G){const [a,b]=ptPairs(G)[0]||[];if(!a)return [];const k=pairKe
   good.ok=1;const O=[good,bad,...(bold?[bold]:[])],r=lvRoll(G,17),sh=O.map((o,i)=>[o,(i*7+Math.floor(r*97))%O.length]).sort((x,y)=>x[1]-y[1]||O.indexOf(x[0])-O.indexOf(y[0])).map(x=>x[0]);
   return [{n:"nar",bg:"camp",t:D.open},...D.lines.map(L),{n:"nar",t:D.q},{choice:sh},...(D.close?[{n:"nar",t:D.close}]:[])];}
 /* who can join: with no team yet, an accepted pair forms it · otherwise someone accepted by every member */
-const hmJoinable=G=>{if(absWeek(G)-(G.hjNo??-99)<((G.hjNoN||0)>=2?26:13))return null;const H=hmList(G),O=hmOut(G).filter(k=>!isAway(G,k));if(H.length<2){for(let i=0;i<O.length;i++)for(let j=i+1;j<O.length;j++)if(pairSt(G,O[i],O[j])>=3)return {form:[O[i],O[j]]};return null;}
+const hmJoinable=G=>{if(absWeek(G)-(G.hjNo??-99)<((G.hjNoN||0)>=2?26:13))return null;const H=hmList(G),O=hmOut(G).filter(k=>hmOK(k)&&!isAway(G,k));if(H.length<2){for(let i=0;i<O.length;i++)for(let j=i+1;j<O.length;j++)if(pairSt(G,O[i],O[j])>=3)return {form:[O[i],O[j]]};return null;}
   if(H.some(k=>isAway(G,k)))return null;const n=O.find(k=>H.every(h=>pairSt(G,k,h)>=3));return n?{join:n}:null;};
 function hmJoinSteps(G){const J=hmJoinable(G);if(!J)return [];const no=(F)=>({t:F.no,fx:G2=>{G2.hjNo=absWeek(G2);G2.hjNoN=(G2.hjNoN||0)+1;},then:[{n:"nar",t:F.no_r},{n:"nar",t:F.no_note}]});
   if(J.form){const [a,b]=J.form,F=HM_FORM,ok=G2=>{hmSet(G2,[a,b]);};return [{n:"nar",bg:"market",t:F.open},{n:a,f:"flustered",l:"casual",t:F.say[a],with:b},{n:b,f:"flustered",l:"casual",t:F.say[b],with:a},{n:"nar",t:F.q},
@@ -7378,9 +7459,9 @@ EVENTS.push(
   steps:[{inject:G=>[...hmSteps(G,HAREM_FULL),{fx:G2=>{G2.flags.harem5=G2.flags.harem5||absWeek(G2);}}]}]});
 /* SSR cards for the two routes (5 soulmates + the team) — the stories are written; Man is drawing the art, so they stay out of the game,
    the album and the gacha until LOVE_SSR_LIVE is true. The conditions are already saved (flags.mono1y / flags.harem1y), so they arrive at once. */
-const LOVE_SSR_LIVE=false;
+const LOVE_SSR_LIVE=true; /* v1.91.26: art is in (a/ssr_love_*.webp) */
 if(LOVE_SSR_LIVE)for(const k in LOVE_SSR_TXT){const C=LOVE_SSR_TXT[k];
-  CARDS["lv_ssr_"+k]={c:k==="team"?"kati":k,r:"SSR",t:C.t,hint:C.hint,bg:C.bg,ci:"ssr_love_"+k,need:k==="team"?(G=>(G.flags||{}).harem1y!=null):(G=>((G.flags||{}).mono1y||{})[k]!=null),steps:C.steps};}
+  CARDS["lv_ssr_"+k]={c:k==="team"?"kati":k,r:"SSR",t:C.t,hint:C.hint,bg:C.bg,need:k==="team"?(G=>(G.flags||{}).harem1y!=null):(G=>((G.flags||{}).mono1y||{})[k]!=null),steps:C.steps};}
 
 // ================= MUAY THAI MOE v1.2 — PIXEL SYSTEMS =================
 const ASSET="a/";
@@ -8397,7 +8478,7 @@ AU.gsfx=function(kind,a){if(!this.init()||this.muted||!SETTINGS.sfx)return;const
   if(kind==="shimmer")for(let i=0;i<6;i++)T(i*.05,{f:1400+Math.random()*1400,type:"sine",dur:.12,peak:.06});};
 
 // ================= MUAY THAI MOE v1.3 — UI =================
-const VERSION="1.91.35";
+const VERSION="1.91.36";
 const CUR_LANG=(typeof window!=="undefined"&&window.LANG)||"th";
 const TH_LABEL=String.fromCharCode(3652,3607,3618);
 function langSwitch(cls){return `<div class="langsw ${cls||""}" role="group" aria-label="Language">${[["th",TH_LABEL],["en","EN"]].map(([k,l])=>`<button class="lsb ${CUR_LANG===k?"on":""}" data-act="setlang" data-v="${k}" aria-pressed="${CUR_LANG===k}">${l}</button>`).join("")}</div>`;}
@@ -8428,13 +8509,34 @@ const THAI_IDS=["kati","mali","rin","ploy","fah"];
 const faceSrc=(id,mood,look)=>id==="coach"?`${ASSET}coach_face.webp`:id==="pailin"?`${ASSET}pailin_face.webp`:look&&look!=="fight"&&look!=="thai"?`${ASSET}${id}_${look}_face.webp`:`${ASSET}${id}_${["happy","sad","flustered"].includes(mood)?mood:"happy"}_face.webp`;
 const BGIMG={river_dawn:"bg_river_dawn.webp",gang_hq:"bg_gang_hq.webp",gang_hideout:"bg_gang_hideout.webp",loy_ring:"bg_loy_ring.webp",market_morning:"bg_market_morning.webp",camp:"bg_camp.webp",night:"bg_camp_night.webp",bus:"bg_bus_rain.webp",letter:"bg_grandpa_letter.webp",fair:"bg_fair.webp",local:"bg_local.webp",district:"bg_district.webp",ring:"bg_local.webp",final:"bg_final.webp",hall:"bg_hall.webp",gym:null,gymdusk:"gym1.webp",food:"bg_food.webp",temple:"bg_temple.webp",cafe:"bg_cafe.webp",river:"bg_river.webp",market:"bg_market.webp",rooster:"bg_rooster.webp",farm:"bg_farm.webp",sea:"bg_sea.webp",mountain:"bg_mountain.webp",ayutthaya:"bg_ayutthaya.webp",amphawa:"bg_amphawa.webp",
   /* v1.89.7: new scenes, ready to use */camp_night:"bg_camp_night.webp",camp_rain:"bg_camp_rain.webp",songkran:"bg_songkran.webp",newyear:"bg_newyear.webp",kitchen:"bg_kitchen.webp",hill:"bg_hill.webp",tvstudio:"bg_tvstudio.webp",live_corner:"bg_live_corner.webp",hospital:"bg_hospital.webp",vector_lab:"bg_vector_lab.webp",loy_night:"bg_loy_night.webp",sportsday:"bg_sportsday.webp",dorm_room:"bg_dorm_room.webp"};
-const cardFaceSrc=C=>{if(C.face)return `${ASSET}${C.face}.webp`;const scene=(C.steps||[]).find(s=>s.n===C.c)||{},mood=scene.f||"happy",look=scene.l||"casual";
+/* v1.91.26 (Man): every SSR card has its own illustration — shown full-screen at its moment in the card story, viewable in the card's
+   details once owned, and usable as the card face (G.cardArt[id]=1). at = the story line it appears on (it stays for the next line too). */
+const CARD_ART={e_champ:{f:"ssr_e_champ",f2:"ssr_e_champ_2",at:1},g_kati_ssr:{f:"ssr_g_kati",f2:"ssr_g_kati_2",at:5},g_mali_ssr:{f:"ssr_g_mali",f2:"ssr_g_mali_2",at:5},g_rin_ssr:{f:"ssr_g_rin",f2:"ssr_g_rin_2",at:4},g_ploy_ssr:{f:"ssr_g_ploy",f2:"ssr_g_ploy_2",at:5},
+  g_fah_ssr:{f:"ssr_g_fah",f2:"ssr_g_fah_2",at:3},g_team_ssr:{f:"ssr_g_team",f2:"ssr_g_team_2",at:3},lg_team_ssr:{f:"ssr_lg_team",f2:"ssr_lg_team_2",at:0},
+  lv_ssr_kati:{f:"ssr_love_kati",f2:"ssr_love_kati_2",at:0},lv_ssr_mali:{f:"ssr_love_mali",f2:"ssr_love_mali_2",at:0},lv_ssr_rin:{f:"ssr_love_rin",f2:"ssr_love_rin_2",at:0},lv_ssr_ploy:{f:"ssr_love_ploy",f2:"ssr_love_ploy_2",at:0},lv_ssr_fah:{f:"ssr_love_fah",f2:"ssr_love_fah_2",at:0},lv_ssr_team:{f:"ssr_love_team",f2:"ssr_love_team_2",at:0},
+  /* SR cards: one illustration each, no secret art */
+  x_kati_sr1:{f:"sr_x_kati_sr1",at:1},x_rin_sr1:{f:"sr_x_rin_sr1",at:1},e_beatploy:{f:"sr_e_beatploy",at:8},e_fahjoin:{f:"sr_e_fahjoin",at:1},e_ployjoin:{f:"sr_e_ployjoin",at:1},h_kati:{f:"sr_h_kati",at:5},h_mali:{f:"sr_h_mali",at:6},h_rin:{f:"sr_h_rin",at:4},h_ploy:{f:"sr_h_ploy",at:0},h_fah:{f:"sr_h_fah",at:7},g_kati_sr:{f:"sr_g_kati_sr",at:0},g_mali_sr:{f:"sr_g_mali_sr",at:0},g_rin_sr:{f:"sr_g_rin_sr",at:3},g_ploy_sr:{f:"sr_g_ploy_sr",at:1},g_fah_sr:{f:"sr_g_fah_sr",at:0},m_baghard:{f:"sr_m_baghard",at:2},m_livehot:{f:"sr_m_livehot",at:6},lk_kati:{f:"sr_lk_kati",at:3},lk_mali:{f:"sr_lk_mali",at:8},lk_rin:{f:"sr_lk_rin",at:5},lk_ploy:{f:"sr_lk_ploy",at:6},lk_fah:{f:"sr_lk_fah",at:5},lg_kati_sr:{f:"sr_lg_kati_sr",at:4},lg_mali_sr:{f:"sr_lg_mali_sr",at:1},lg_rin_sr:{f:"sr_lg_rin_sr",at:1},lg_ploy_sr:{f:"sr_lg_ploy_sr",at:2},lg_fah_sr:{f:"sr_lg_fah_sr",at:1}};
+function cardArtOf(id){const A=CARD_ART[id];return A&&CARDS[id]?A:null;}
+/* the hidden art: box cards open it at card Lv.3 (spare copies) · story cards can't be duplicated, so theirs opens a year after you got the card */
+const ART2_WK=52;
+function art2Open(id,o){const A=cardArtOf(id),C=CARDS[id];if(!A||!A.f2||!o)return false;if(C.g||C.lg)return (o.lv||1)>=3;return absWeek(G)-(o.wk??-999)>=ART2_WK;}
+function art2Hint(id,o){const C=CARDS[id];if(C.g||C.lg)return "อัปการ์ดถึง Lv.3";const left=ART2_WK-(absWeek(G)-(o.wk??0));return `อีก ${Math.max(1,left)} สัปดาห์`;}
+function cardArtSteps(id,steps){const A=cardArtOf(id);if(!A)return steps;const out=steps.map(x=>x),k=A.at,x=out[k];/* at = index of the story step it shows on */
+  if(!x||!("t" in x)||x.choice)return steps;out[k]={...x,cg:A.f};const nx=out[k+1];if(nx&&("t" in nx)&&!nx.choice)out[k+1]={...nx,cg:A.f};return out;}
+function cardArtInit(){if(cardArtInit.ok)return;cardArtInit.ok=1;for(const k in CARD_ART)if(CARDS[k])CARDS[k]._art={id:k,f:CARD_ART[k].f,f2:CARD_ART[k].f2||null};}
+const cardFaceArt=C=>{cardArtInit();const A=C._art;if(!A||!G||!G.cardArt)return null;const w=G.cardArt[A.id],o=(G.cards||{})[A.id];if(!w||!o)return null;
+  if(w===2&&art2Open(A.id,o))return A.f2;return A.f;};
+const cardFaceSrc=C=>{const fa=cardFaceArt(C);if(fa)return `${ASSET}${fa}.webp`;if(C.face)return `${ASSET}${C.face}.webp`;const scene=(C.steps||[]).find(s=>s.n===C.c)||{},mood=scene.f||"happy",look=scene.l||"casual";
   if(look==="train")return `${ASSET}${C.c}_train_face.webp`;
   if(look==="thai"&&THAI_IDS.includes(C.c))return `${ASSET}${C.c}_thai${["flustered","surprised","pout","sad","angry"].includes(mood)?"_fl":""}_face.webp`;
   if(look==="fight")return `${ASSET}${C.c}_${["happy","sad","flustered","angry"].includes(mood)?mood:"happy"}_face.webp`;
   const suffix=["pout","sad","angry"].includes(mood)?"_pout":["flustered","surprised"].includes(mood)?"_flustered":"";
   return `${ASSET}${C.c}_casual${suffix}_face.webp`;};
-const cardArtHTML=(C,lazy=false)=>`<span class="card-art" style="--card-scene:url('${ASSET}${BGIMG[C.bg]||BGIMG.camp}')"><img src="${cardFaceSrc(C)}" alt="" ${lazy?'loading="lazy" decoding="async"':""}></span>`;
+/* v1.91.26 (Man): the card shows the same character picture as the dialogue (the body sprite), not the cropped face;
+   falls back to the face crop if a sprite doesn't exist */
+const cardBodySrc=src=>src.replace(/\/([a-z]+)_(happy|sad|flustered|angry)_face\.webp$/,"/$1_fight_$2.webp").replace(/_face\.webp$/,".webp");
+const cardArtHTML=(C,lazy=false)=>{const art=cardFaceArt(C),f=cardFaceSrc(C),src=art?f:cardBodySrc(f);
+  return `<span class="card-art${art?" art":" body"}" style="--card-scene:url('${ASSET}${BGIMG[C.bg]||BGIMG.camp}')"><img src="${src}" alt="" ${src!==f?`onerror="this.onerror=null;this.src='${f}';this.parentNode.classList.remove('body')"`:""} ${lazy?'loading="lazy" decoding="async"':""}></span>`;};
 // v1.34: portraits for the market and helmet-gang side characters (matched by speaker name, or st.img)
 const NPC_IMG=[[/ใบหยก|Baiyok/,()=>typeof byFree==="function"&&byFree(G)?"baiyok":"baiyok_black"],[/เพชรา|Petcha/,"petchara"],[/เถ้าแก่เสือ|เถ้าแก่พยัคฆ์ทอง|Boss Suea|Golden Tiger owner/,"tiger_boss"],[/เกริก|Krerk/,"krerk"],[/นายอำเภอ|District Chief/,"nai"],[/แม่ค้า|ป้าศรี|Auntie Sri|vendor/,"vendor_green"],[/ป้าแต๋ว|เจ๊หมวย|ป้าขาย|Auntie Taew|Jae Muay/,"vendor_red"],[/ไอ้ตุ๋ย|Tuy the Red Mask/,"thief2"],[/ไอ้ตุ่ม|โจรงมกระทง|Krathong Thief/,"thief"],[/เสี่ยหมวกทองคำ|Big Boss Golden Helmet/,"gang_boss"],[/หมวกเงิน|Silver Helmet/,"gang_silver"],[/หมวกทองดำ|ลูกน้องหมวกทอง|Gold-Black Helmet|Golden Helmet's (man|men)|Gold Helmet/,"gang_goldblack"],[/หมวก|แจ็กเก็ต|Helmet|Jacket/,"gang_group"],[/ยาย|Grandma/,"grandma"]];
 const npcImg=st=>{const v=st.img||(st.who&&(NPC_IMG.find(([r])=>r.test(st.who))||[])[1])||null;return typeof v==="function"?v():v;};
@@ -9008,6 +9110,11 @@ function cardLinkHTML(id){const own=G.cards||{},out=[];const pv=CARD_SEQ[id];if(
 // v1.87.2: the album keeps its scroll position when a card or the gacha is opened from it and closed again
 function albKeep(){try{const o=document.querySelector(".overlay");if(UI.modal&&UI.modal.type==="album"&&o)UI.albY=o.scrollTop;}catch(e){}}
 function albRestore(){const y=UI.albY||0;if(!y)return;const go=()=>{const o=document.querySelector(".overlay");if(o)o.scrollTop=y;};go();requestAnimationFrame(go);}
+function cardArtPanel(id){const A=cardArtOf(id);if(!A)return "";const o=(G.cards||{})[id]||{},w=(G.cardArt||{})[id]||0,open2=art2Open(id,o);
+  const lab=w===2&&open2?"ภาพลับ":w?"ภาพพิเศษ":"หน้าตัวละคร";
+  return `<div class="cdart"><div class="cdartrow"><button class="cdartimg" data-act="cardart" data-v="${id}" aria-label="ดูภาพเต็ม"><img src="${ASSET}${A.f}.webp" alt="" loading="lazy"><span>🔍 ภาพพิเศษ</span></button>
+    ${A.f2?(open2?`<button class="cdartimg s2" data-act="cardart2" data-v="${id}" aria-label="ดูภาพลับ"><img src="${ASSET}${A.f2}.webp" alt="" loading="lazy"><span>✦ ภาพลับ</span></button>`:`<div class="cdartimg lock"><b>🔒</b><span>ภาพลับ · ${art2Hint(id,o)}</span></div>`):""}</div>
+    <button class="btn sm ${w?"gold":""}" data-act="cardface" data-v="${id}">หน้าการ์ด: ${lab} ⟳</button></div>`;}
 function cardInfoHTML(id){const C=CARDS[id];if(!C)return "";const o=(G.cards||{})[id],R=CARD_R[C.r],who=G.F[C.c]?G.F[C.c].name:"",src=C.lg?"ตู้ลอยกระทง (ช่วงเทศกาล)":C.g?"ตู้สุ่มการ์ด":`${C.hint||"ติดตามเนื้อเรื่องไปเรื่อย ๆ"}`;
   if(!o)return `<h2>การ์ดที่ยังไม่ได้</h2><div class="cdet" style="--rc:#77747d"><div class="ccard big lock" data-rarity="${C.r}">${cardArtHTML(C,true)}<span class="tstar">${"★".repeat(R.s)}</span><b>???</b><small>${C.r}</small></div>
     <div class="cdinfo"><div class="cdtop"><span class="pill">${C.r} ${"★".repeat(R.s)}</span><span class="meta">${esc(who)}</span></div><p class="meta"><b>วิธีได้:</b> ${esc(src)}</p></div></div>
@@ -9015,7 +9122,7 @@ function cardInfoHTML(id){const C=CARDS[id];if(!C)return "";const o=(G.cards||{}
   const sp=o.spare||0,per=DUST_OF[C.r],fresh=cardFresh(id,o),lv=o.lv||1,up=cardCanUp(id,o),fx=UI.cardFx===id;UI.cardFx=null;
   return `<h2>${esc(C.t)}</h2><div class="cdet" style="--rc:${R.c}"><div class="ccard big ${fx?"lvfx":""}" data-rarity="${C.r}" style="--rc:${R.c}">${cardArtHTML(C)}<span class="tstar">${"★".repeat(R.s)}</span><b>${esc(C.t)}</b><small>${C.r} · Lv.${lv}</small></div>
     <div class="cdinfo"><div class="cdtop"><span class="pill" style="box-shadow:inset 0 0 0 2px ${R.c};color:${R.c}">${C.r} ${"★".repeat(R.s)}</span><span class="meta">${esc(who)}</span>${fresh&&o.seen?'<span class="cnew">✦ ใหม่ในอัปเดตนี้</span>':""}</div>
-    ${cardBlurb(C)?`<p class="cblurb">“${esc(cardBlurb(C))}”</p>`:""}${cardLinkHTML(id)}
+    ${cardBlurb(C)?`<p class="cblurb">“${esc(cardBlurb(C))}”</p>`:""}${cardLinkHTML(id)}${cardArtPanel(id)}
     <div class="kv-row"><span>ขั้นการ์ด</span><b>${"◆".repeat(lv)}${"◇".repeat(CARD_MAX_LV-lv)} Lv.${lv}/${CARD_MAX_LV}</b></div><div class="kv-row"><span>ได้มาทั้งหมด</span><b>${o.n||1} ใบ</b></div><div class="kv-row"><span>ใบซ้ำที่เก็บไว้</span><b>${sp} ใบ</b></div>
     ${C.lv2?`<div class="cdlv"><span class="${lv>=2?"on":""}">${lv>=2?"✓":"🔒"} ◆◆ Lv.2 · บทส่งท้าย</span><span class="${lv>=3?"on":""}">${lv>=3?"✓":"🔒"} ◆◆◆ Lv.3 · ฉากพิเศษ "${esc(C.lv3t||"")}"${C.mg?" + มินิเกม":""}</span></div>`:""}
     <p class="meta">ได้จาก: ${esc(src)}</p><p class="meta">ใบซ้ำใช้อัปขั้นการ์ด (สูงสุด Lv.${CARD_MAX_LV} · ความสนิทกับ${esc(who)}เพิ่มทุกขั้น) หรือย่อยเป็นเศษดาว ใบละ ✦ ${per}</p></div></div>
@@ -9442,6 +9549,7 @@ function modalHTML(){const m=UI.modal;let body="",foot=true;
   if(m.type==="gift")body=giftHTML(m.id);
   if(m.type==="petname"){const p=(G.pets||[])[m.i];if(!p){UI.modal=null;return "";}body=`<h2>ตั้งชื่อ${esc(PETS[p.k].name)}</h2><div class="petnm"><img class="peti" src="${petIcon(p.k)}" alt=""><input id="petname" maxlength="12" value="${esc(p.name)}" autocomplete="off"></div><p class="meta">ชื่อนี้จะโผล่ในฉากต่าง ๆ ของค่าย</p><button class="btn primary" id="petnamebtn" data-act="petnamesave" data-v="${m.i}">ตั้งชื่อ</button>`;}
   if(m.type==="card"){body=cardInfoHTML(m.id);foot=false;}
+  if(m.type==="cardart"){const A=cardArtOf(m.id),C=CARDS[m.id];if(!A||!C){UI.modal=null;return "";}body=`<div class="cdfull" data-act="cardinfo" data-v="${m.id}"><img src="${ASSET}${m.w===2&&A.f2?A.f2:A.f}.webp" alt=""><p class="meta center">${esc(C.t)} · แตะเพื่อกลับ</p></div>`;foot=false;}
   if(m.type==="contest"){body=contestHTML();foot=false;}
   if(m.type==="waikhru"){body=waiKhruHTML();foot=false;}
   if(m.type==="gbox"){body=gboxHTML();foot=false;}
@@ -9526,7 +9634,7 @@ function sceneNext(){const S=UI.scene;if(!S)return;
     const n=val(st.n);S.lookOf=S.lookOf||{};
     // v1.8: each character keeps one outfit for the whole scene
     const look=castId(n)?(S.lookOf[n]=S.lookOf[n]||(st.l==="train"?"fight":st.l)||S.look):(st.l||S.look);
-    S.cur={n,f:val(st.f)||"happy",t:nameCall(n,val(st.t)),look,who:st.who,tel:n==="coach"&&!S.coachOK&&!!(G&&G.coachAwayAbs&&gameWeek(G)<G.coachAwayAbs)};
+    S.cur={n,f:val(st.f)||"happy",t:nameCall(n,val(st.t)),look,who:st.who,cg:st.cg||null,tel:n==="coach"&&!S.coachOK&&!!(G&&G.coachAwayAbs&&gameWeek(G)<G.coachAwayAbs)};
     if(st.show)S.cast=st.show.map(x=>({id:x.id,f:x.f||"happy",look:S.lookOf[x.id]||x.l||look,back:!!x.back}));
     if(n==="npc"){const im=npcImg(st);if(im)S.cast=[{id:"npc:"+im,f:"happy",look}];}
     if(n==="coach"){S.cast=[{id:"coach",f:"happy",look}];}           // the coach always stands alone
@@ -9547,7 +9655,7 @@ function sceneHTML(){const S=UI.scene,c=S.cur||{};const sp=c.n==="coach"?{name:c
     return `<img class="stand ${pos} ${active&&!m.back?"on":"off"}${m.back?" back":""}" src="${m.id.startsWith("npc:")?`${ASSET}npc_${m.id.slice(4)}.webp`:m.back?`${ASSET}${m.id}_back.webp`:stand(m.id,m.look,active&&!c.choice?moodFor(c.f,m.look,c.t):moodFor(m.f,m.look,""))}" alt="">`;}).join("");
   const tag="";
   return `<div class="vn" role="dialog" aria-label="ฉากเนื้อเรื่อง"><div class="vbg bg-${S.bg==="camp"?"gym":S.bg}" ${bgKey?`style="background-image:url(${ASSET}${bgKey})"`:""}></div>
-   <div class="cast ${(S.cast||[]).length>1?"duo":""}">${cast}</div>
+   ${c.cg?`<div class="vcg" style="--cg:url(${ASSET}${c.cg}.webp)"><img src="${ASSET}${c.cg}.webp" alt=""></div>`:`<div class="cast ${(S.cast||[]).length>1?"duo":""}">${cast}</div>`}
    ${S.award?`<div class="awardfx" aria-hidden="true">${Array.from({length:24},(_,i)=>`<i style="--i:${i}"></i>`).join("")}${[["14%","22%","0s","#ffd45a"],["78%","16%","-.8s","#ff6b6b"],["50%","30%","-1.6s","#8fd3ff"],["30%","12%","-1.2s","#c785e6"],["66%","34%","-.4s","#9dffb0"]].map(([x,y,d,c])=>`<span class="fw" style="--x:${x};--y:${y};--d:${d};--c:${c}">${Array.from({length:12},(_,a)=>`<b style="--a:${a}"></b>`).join("")}</span>`).join("")}<div class="awardbelt"><span class="strap"></span><span class="seal">★</span><span class="strap"></span></div><div class="awardname">${esc(honorLabel(S.award.kind,S.award.venue))}</div></div>`:""}
    ${c.choice?"":`<button class="vtap" data-act="vnext" aria-label="ไปต่อ"></button>`}
    <div class="vbox px" data-act="${c.choice?"":"vnext"}" style="--c:${sp.color||"var(--gold)"}">
@@ -10125,8 +10233,11 @@ const ACT={
       html:`<div class="px confirm"><b>${esc(C.t)} ×${k}</b><p class="meta">ได้เศษดาว ✦ ${DUST_OF[C.r]*k} · ใบซ้ำเหลือ ${(o.spare||0)-k} ใบ</p><p class="meta">การ์ดใบหลัก ขั้นการ์ด และเรื่องราวยังอยู่ครบ ย่อยแล้วเอาคืนไม่ได้</p>${(o.lv||1)<CARD_MAX_LV?`<p class="meta goldt">การ์ดนี้ยังอัปขั้นได้อีก ${CARD_MAX_LV-(o.lv||1)} ขั้น ด้วยใบซ้ำ</p>`:""}</div>`};render();},
   cardup:d=>{const C=CARDS[d.v],F=G.F[C.c],b0=F?F.bond||0:0;const lv=levelCard(G,d.v);if(!lv)return;const db=F?Math.round(((F.bond||0)-b0)*10)/10:0;AU.sfx&&AU.sfx("level");save();UI.cardFx=d.v;toast(`${C.t} อัปเป็น Lv.${lv}${db>0?` · ${F.name} ความสนิท +${db}`:""}`);UI.modal={type:"card",id:d.v};render();},
   carddustok:()=>{const m=UI.modal;if(!m||m.yes!=="carddustok")return;const d=dustCard(G,m.id,m.k);if(d){AU.sfx&&AU.sfx("level");save();toast(`ได้เศษดาว ✦ ${d}`);}UI.modal={type:"card",id:m.id};render();},
+  cardart:d=>{if(!cardArtOf(d.v)||!(G.cards||{})[d.v])return;UI.modal={type:"cardart",id:d.v};render();},
+  cardface:d=>{const A=cardArtOf(d.v),o=(G.cards||{})[d.v];if(!A||!o)return;G.cardArt=G.cardArt||{};const max=art2Open(d.v,o)?2:1,n=((G.cardArt[d.v]||0)+1)%(max+1);if(n)G.cardArt[d.v]=n;else delete G.cardArt[d.v];save();UI.modal={type:"card",id:d.v};render();},
+  cardart2:d=>{const A=cardArtOf(d.v),o=(G.cards||{})[d.v];if(!art2Open(d.v,o))return;UI.modal={type:"cardart",id:d.v,w:2};render();},
   cardplay:d=>{const C=CARDS[d.v],o=(G.cards||{})[d.v];if(!C||!o)return;o.seen=true;o.rev=C.rev||0;const ep=(o.lv||1)>=2&&C.lv2;if(ep)o.lvSeen=Math.max(o.lvSeen||1,2);G.cardPend=(G.cardPend||[]).filter(x=>x!==d.v);save();UI.modal=null;const nw=d.from==="new";
-    playScene(ep?C.steps.concat([{n:"nar",t:"✦ บทส่งท้าย · Lv.2"}],C.lv2):C.steps,()=>{UI.modal=nw?((G.cardPend||[]).length?{type:"cardnew"}:null):{type:"card",id:d.v};render();},{bg:C.bg,look:"casual"});},
+    playScene(ep?cardArtSteps(d.v,C.steps).concat([{n:"nar",t:"✦ บทส่งท้าย · Lv.2"}],C.lv2):cardArtSteps(d.v,C.steps),()=>{UI.modal=nw?((G.cardPend||[]).length?{type:"cardnew"}:null):{type:"card",id:d.v};render();},{bg:C.bg,look:"casual"});},
   cardspecial:d=>{const C=CARDS[d.v],o=(G.cards||{})[d.v];if(!C||!o||!C.lv3||(o.lv||1)<3)return;o.lvSeen=3;save();UI.modal=null;playScene([{n:"nar",t:`✦ ฉากพิเศษ · ${C.lv3t||""}`}].concat(C.lv3),()=>{UI.modal={type:"card",id:d.v};render();},{bg:C.bg,look:"casual"});},
   cardmg:d=>{const C=CARDS[d.v],o=(G.cards||{})[d.v];if(!C||!o||!C.mg||(o.lv||1)<3)return;BAG.openCard(C.mg,d.v);},
   cardlater:()=>{(G.cardPend||[]).shift();save();UI.modal=(G.cardPend||[]).length?{type:"cardnew"}:null;render();},
@@ -12712,7 +12823,7 @@ CHAT.fah.push(
 <script>
 (function(){
 /* v1.87: Thai code ships inside index.html; English code (en.js) and the dictionary (i18n.js) load only when needed */
-var B="19d5fea003";
+var B="1232e87fe3";
 var L="";try{L=localStorage.getItem("mtm_lang")||"";}catch(e){}
 try{var h=(location.hash||"").match(/lang=(th|en)/);if(h)L=h[1];}catch(e){}
 if(L!=="th"&&L!=="en")L="th";

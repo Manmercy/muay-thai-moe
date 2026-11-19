@@ -688,10 +688,14 @@ const LV_CARE={"kati":{"bg":"night","open":"คุณไข้ขึ้นจน
 const MS_NOTE={"win":"กล้าดี! ได้ผล","lose":"กล้าไปหน่อย… ไม่ได้ผลคราวนี้"};
 /* v1.91.4 two-timing route: G.hm = members of the harem (a team where every pair accepted each other) · everyone else you see is still two-timing
    pair understanding G.pairU[pairKey] 0–100 grows through spats, clashes and the Valentine ring · G.pairSt[pairKey] 0..3 (3 = accepted) */
-const hmList=G=>{const P=partners(G);if(G.hm)return G.hm.filter(k=>P.includes(k));return G.harem?P:[];};
+/* v1.91.26 (Man): the harem team is capped to the first five heroines. Anyone who joins the camp later (the regional champions)
+   can be loved one-on-one, or seen alongside the team (two-timing), but never joins the team itself. */
+const HM_IDS=["kati","mali","rin","ploy","fah"];
+const hmOK=k=>HM_IDS.includes(k);
+const hmList=G=>{const P=partners(G).filter(hmOK);if(G.hm)return G.hm.filter(k=>P.includes(k));return G.harem?P:[];};
 const inHm=(G,id)=>hmList(G).includes(id);
 const hmOut=G=>{const H=hmList(G);return partners(G).filter(k=>!H.includes(k));};
-function hmSet(G,L){L=[...new Set(L)].filter(k=>isPartner(G,k));if(L.length>=2){if(!G.harem||G.haremAbs==null)G.haremAbs=absWeek(G);G.hm=L;G.harem=true;}else{G.hm=[];G.harem=false;}}
+function hmSet(G,L){L=[...new Set(L)].filter(k=>hmOK(k)&&isPartner(G,k));if(L.length>=2){if(!G.harem||G.haremAbs==null)G.haremAbs=absWeek(G);G.hm=L;G.harem=true;}else{G.hm=[];G.harem=false;}}
 const pairU=(G,a,b)=>(G.pairU||{})[pairKey(a,b)]||0;
 const pairSt=(G,a,b)=>(G.pairSt||{})[pairKey(a,b)]||0;
 function addU(G,a,b,n){if(!a||!b||a===b)return;const k=pairKey(a,b);G.pairU=G.pairU||{};G.pairU[k]=Math.max(0,Math.min(100,(G.pairU[k]||0)+n));}
@@ -715,7 +719,7 @@ function ptSteps(G){const [a,b]=ptPairs(G)[0]||[];if(!a)return [];const k=pairKe
   good.ok=1;const O=[good,bad,...(bold?[bold]:[])],r=lvRoll(G,17),sh=O.map((o,i)=>[o,(i*7+Math.floor(r*97))%O.length]).sort((x,y)=>x[1]-y[1]||O.indexOf(x[0])-O.indexOf(y[0])).map(x=>x[0]);
   return [{n:"nar",bg:"camp",t:D.open},...D.lines.map(L),{n:"nar",t:D.q},{choice:sh},...(D.close?[{n:"nar",t:D.close}]:[])];}
 /* who can join: with no team yet, an accepted pair forms it · otherwise someone accepted by every member */
-const hmJoinable=G=>{if(absWeek(G)-(G.hjNo??-99)<((G.hjNoN||0)>=2?26:13))return null;const H=hmList(G),O=hmOut(G).filter(k=>!isAway(G,k));if(H.length<2){for(let i=0;i<O.length;i++)for(let j=i+1;j<O.length;j++)if(pairSt(G,O[i],O[j])>=3)return {form:[O[i],O[j]]};return null;}
+const hmJoinable=G=>{if(absWeek(G)-(G.hjNo??-99)<((G.hjNoN||0)>=2?26:13))return null;const H=hmList(G),O=hmOut(G).filter(k=>hmOK(k)&&!isAway(G,k));if(H.length<2){for(let i=0;i<O.length;i++)for(let j=i+1;j<O.length;j++)if(pairSt(G,O[i],O[j])>=3)return {form:[O[i],O[j]]};return null;}
   if(H.some(k=>isAway(G,k)))return null;const n=O.find(k=>H.every(h=>pairSt(G,k,h)>=3));return n?{join:n}:null;};
 function hmJoinSteps(G){const J=hmJoinable(G);if(!J)return [];const no=(F)=>({t:F.no,fx:G2=>{G2.hjNo=absWeek(G2);G2.hjNoN=(G2.hjNoN||0)+1;},then:[{n:"nar",t:F.no_r},{n:"nar",t:F.no_note}]});
   if(J.form){const [a,b]=J.form,F=HM_FORM,ok=G2=>{hmSet(G2,[a,b]);};return [{n:"nar",bg:"market",t:F.open},{n:a,f:"flustered",l:"casual",t:F.say[a],with:b},{n:b,f:"flustered",l:"casual",t:F.say[b],with:a},{n:"nar",t:F.q},
@@ -2761,6 +2765,6 @@ EVENTS.push(
   steps:[{inject:G=>[...hmSteps(G,HAREM_FULL),{fx:G2=>{G2.flags.harem5=G2.flags.harem5||absWeek(G2);}}]}]});
 /* SSR cards for the two routes (5 soulmates + the team) — the stories are written; Man is drawing the art, so they stay out of the game,
    the album and the gacha until LOVE_SSR_LIVE is true. The conditions are already saved (flags.mono1y / flags.harem1y), so they arrive at once. */
-const LOVE_SSR_LIVE=false;
+const LOVE_SSR_LIVE=true; /* v1.91.26: art is in (a/ssr_love_*.webp) */
 if(LOVE_SSR_LIVE)for(const k in LOVE_SSR_TXT){const C=LOVE_SSR_TXT[k];
-  CARDS["lv_ssr_"+k]={c:k==="team"?"kati":k,r:"SSR",t:C.t,hint:C.hint,bg:C.bg,ci:"ssr_love_"+k,need:k==="team"?(G=>(G.flags||{}).harem1y!=null):(G=>((G.flags||{}).mono1y||{})[k]!=null),steps:C.steps};}
+  CARDS["lv_ssr_"+k]={c:k==="team"?"kati":k,r:"SSR",t:C.t,hint:C.hint,bg:C.bg,need:k==="team"?(G=>(G.flags||{}).harem1y!=null):(G=>((G.flags||{}).mono1y||{})[k]!=null),steps:C.steps};}

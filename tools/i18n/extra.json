@@ -15384,5 +15384,19 @@
  "ป้องกันแชมป์ภาคมาได้อีกสมัย และเก่งกว่าเมื่อสามปีก่อน": " kept the regional title for another reign, and is stronger than three years ago",
  "ถ้วยภาคนี้ใบที่ ": "This region's cup no. ",
  "ศอกสวนแบบท่าเสาติดตัว (สวน +5% ศอก +12%) · สอนศอกให้ทั้งค่าย: นักมวยที่ศอก/การสวนยังไม่ถึง 17 ขึ้นเองทุกสัปดาห์": "Tha Sao counter elbows (counter +5%, elbow +12%) · teaches elbows to the camp: fighters whose elbow/counter is under 17 improve a little each week",
- " · ครั้งต่อไป ปีที่ ": " · next edition: year "
+ " · ครั้งต่อไป ปีที่ ": " · next edition: year ",
+ " · แตะเพื่อกลับ</p></div>": " · tap to go back</p></div>",
+ "ใช้ภาพพิเศษเป็นหน้าการ์ด": "Use the special art as the card face",
+ "✓ ใช้ภาพพิเศษเป็นหน้าการ์ด": "✓ Using the special art as the card face",
+ ".webp\" alt=\"\" loading=\"lazy\"><span>🔍 ภาพพิเศษ SSR · แตะดูเต็ม</span></button>\n    <button class=\"btn sm ": ".webp\" alt=\"\" loading=\"lazy\"><span>🔍 SSR special art · tap to view</span></button>\n    <button class=\"btn sm ",
+ "\" aria-label=\"ดูภาพเต็ม\"><img src=\"": "\" aria-label=\"View full art\"><img src=\"",
+ "\">หน้าการ์ด: ": "\">Card face: ",
+ "<div class=\"cdartimg lock\"><b>🔒</b><span>ภาพลับ · ": "<div class=\"cdartimg lock\"><b>🔒</b><span>Secret art · ",
+ ".webp\" alt=\"\" loading=\"lazy\"><span>✦ ภาพลับ</span></button>": ".webp\" alt=\"\" loading=\"lazy\"><span>✦ Secret art</span></button>",
+ "\" aria-label=\"ดูภาพลับ\"><img src=\"": "\" aria-label=\"View secret art\"><img src=\"",
+ ".webp\" alt=\"\" loading=\"lazy\"><span>🔍 ภาพพิเศษ</span></button>\n    ": ".webp\" alt=\"\" loading=\"lazy\"><span>🔍 Special art</span></button>\n    ",
+ "หน้าตัวละคร": "Portrait",
+ "ภาพพิเศษ": "Special art",
+ "ภาพลับ": "Secret art",
+ "อัปการ์ดถึง Lv.3": "Upgrade card to Lv.3"
 }

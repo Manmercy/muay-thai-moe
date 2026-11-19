@@ -1,5 +1,5 @@
 // ================= MUAY THAI MOE v1.3 — UI =================
-const VERSION="1.91.34";
+const VERSION="1.91.36";
 const CUR_LANG=(typeof window!=="undefined"&&window.LANG)||"th";
 const TH_LABEL=String.fromCharCode(3652,3607,3618);
 function langSwitch(cls){return `<div class="langsw ${cls||""}" role="group" aria-label="Language">${[["th",TH_LABEL],["en","EN"]].map(([k,l])=>`<button class="lsb ${CUR_LANG===k?"on":""}" data-act="setlang" data-v="${k}" aria-pressed="${CUR_LANG===k}">${l}</button>`).join("")}</div>`;}
@@ -30,13 +30,34 @@ const THAI_IDS=["kati","mali","rin","ploy","fah"];
 const faceSrc=(id,mood,look)=>id==="coach"?`${ASSET}coach_face.webp`:id==="pailin"?`${ASSET}pailin_face.webp`:look&&look!=="fight"&&look!=="thai"?`${ASSET}${id}_${look}_face.webp`:`${ASSET}${id}_${["happy","sad","flustered"].includes(mood)?mood:"happy"}_face.webp`;
 const BGIMG={river_dawn:"bg_river_dawn.webp",gang_hq:"bg_gang_hq.webp",gang_hideout:"bg_gang_hideout.webp",loy_ring:"bg_loy_ring.webp",market_morning:"bg_market_morning.webp",camp:"bg_camp.webp",night:"bg_camp_night.webp",bus:"bg_bus_rain.webp",letter:"bg_grandpa_letter.webp",fair:"bg_fair.webp",local:"bg_local.webp",district:"bg_district.webp",ring:"bg_local.webp",final:"bg_final.webp",hall:"bg_hall.webp",gym:null,gymdusk:"gym1.webp",food:"bg_food.webp",temple:"bg_temple.webp",cafe:"bg_cafe.webp",river:"bg_river.webp",market:"bg_market.webp",rooster:"bg_rooster.webp",farm:"bg_farm.webp",sea:"bg_sea.webp",mountain:"bg_mountain.webp",ayutthaya:"bg_ayutthaya.webp",amphawa:"bg_amphawa.webp",
   /* v1.89.7: new scenes, ready to use */camp_night:"bg_camp_night.webp",camp_rain:"bg_camp_rain.webp",songkran:"bg_songkran.webp",newyear:"bg_newyear.webp",kitchen:"bg_kitchen.webp",hill:"bg_hill.webp",tvstudio:"bg_tvstudio.webp",live_corner:"bg_live_corner.webp",hospital:"bg_hospital.webp",vector_lab:"bg_vector_lab.webp",loy_night:"bg_loy_night.webp",sportsday:"bg_sportsday.webp",dorm_room:"bg_dorm_room.webp"};
-const cardFaceSrc=C=>{if(C.face)return `${ASSET}${C.face}.webp`;const scene=(C.steps||[]).find(s=>s.n===C.c)||{},mood=scene.f||"happy",look=scene.l||"casual";
+/* v1.91.26 (Man): every SSR card has its own illustration — shown full-screen at its moment in the card story, viewable in the card's
+   details once owned, and usable as the card face (G.cardArt[id]=1). at = the story line it appears on (it stays for the next line too). */
+const CARD_ART={e_champ:{f:"ssr_e_champ",f2:"ssr_e_champ_2",at:1},g_kati_ssr:{f:"ssr_g_kati",f2:"ssr_g_kati_2",at:5},g_mali_ssr:{f:"ssr_g_mali",f2:"ssr_g_mali_2",at:5},g_rin_ssr:{f:"ssr_g_rin",f2:"ssr_g_rin_2",at:4},g_ploy_ssr:{f:"ssr_g_ploy",f2:"ssr_g_ploy_2",at:5},
+  g_fah_ssr:{f:"ssr_g_fah",f2:"ssr_g_fah_2",at:3},g_team_ssr:{f:"ssr_g_team",f2:"ssr_g_team_2",at:3},lg_team_ssr:{f:"ssr_lg_team",f2:"ssr_lg_team_2",at:0},
+  lv_ssr_kati:{f:"ssr_love_kati",f2:"ssr_love_kati_2",at:0},lv_ssr_mali:{f:"ssr_love_mali",f2:"ssr_love_mali_2",at:0},lv_ssr_rin:{f:"ssr_love_rin",f2:"ssr_love_rin_2",at:0},lv_ssr_ploy:{f:"ssr_love_ploy",f2:"ssr_love_ploy_2",at:0},lv_ssr_fah:{f:"ssr_love_fah",f2:"ssr_love_fah_2",at:0},lv_ssr_team:{f:"ssr_love_team",f2:"ssr_love_team_2",at:0},
+  /* SR cards: one illustration each, no secret art */
+  x_kati_sr1:{f:"sr_x_kati_sr1",at:1},x_rin_sr1:{f:"sr_x_rin_sr1",at:1},e_beatploy:{f:"sr_e_beatploy",at:8},e_fahjoin:{f:"sr_e_fahjoin",at:1},e_ployjoin:{f:"sr_e_ployjoin",at:1},h_kati:{f:"sr_h_kati",at:5},h_mali:{f:"sr_h_mali",at:6},h_rin:{f:"sr_h_rin",at:4},h_ploy:{f:"sr_h_ploy",at:0},h_fah:{f:"sr_h_fah",at:7},g_kati_sr:{f:"sr_g_kati_sr",at:0},g_mali_sr:{f:"sr_g_mali_sr",at:0},g_rin_sr:{f:"sr_g_rin_sr",at:3},g_ploy_sr:{f:"sr_g_ploy_sr",at:1},g_fah_sr:{f:"sr_g_fah_sr",at:0},m_baghard:{f:"sr_m_baghard",at:2},m_livehot:{f:"sr_m_livehot",at:6},lk_kati:{f:"sr_lk_kati",at:3},lk_mali:{f:"sr_lk_mali",at:8},lk_rin:{f:"sr_lk_rin",at:5},lk_ploy:{f:"sr_lk_ploy",at:6},lk_fah:{f:"sr_lk_fah",at:5},lg_kati_sr:{f:"sr_lg_kati_sr",at:4},lg_mali_sr:{f:"sr_lg_mali_sr",at:1},lg_rin_sr:{f:"sr_lg_rin_sr",at:1},lg_ploy_sr:{f:"sr_lg_ploy_sr",at:2},lg_fah_sr:{f:"sr_lg_fah_sr",at:1}};
+function cardArtOf(id){const A=CARD_ART[id];return A&&CARDS[id]?A:null;}
+/* the hidden art: box cards open it at card Lv.3 (spare copies) · story cards can't be duplicated, so theirs opens a year after you got the card */
+const ART2_WK=52;
+function art2Open(id,o){const A=cardArtOf(id),C=CARDS[id];if(!A||!A.f2||!o)return false;if(C.g||C.lg)return (o.lv||1)>=3;return absWeek(G)-(o.wk??-999)>=ART2_WK;}
+function art2Hint(id,o){const C=CARDS[id];if(C.g||C.lg)return "Upgrade card to Lv.3";const left=ART2_WK-(absWeek(G)-(o.wk??0));return `${Math.max(1,left)} weeks`;}
+function cardArtSteps(id,steps){const A=cardArtOf(id);if(!A)return steps;const out=steps.map(x=>x),k=A.at,x=out[k];/* at = index of the story step it shows on */
+  if(!x||!("t" in x)||x.choice)return steps;out[k]={...x,cg:A.f};const nx=out[k+1];if(nx&&("t" in nx)&&!nx.choice)out[k+1]={...nx,cg:A.f};return out;}
+function cardArtInit(){if(cardArtInit.ok)return;cardArtInit.ok=1;for(const k in CARD_ART)if(CARDS[k])CARDS[k]._art={id:k,f:CARD_ART[k].f,f2:CARD_ART[k].f2||null};}
+const cardFaceArt=C=>{cardArtInit();const A=C._art;if(!A||!G||!G.cardArt)return null;const w=G.cardArt[A.id],o=(G.cards||{})[A.id];if(!w||!o)return null;
+  if(w===2&&art2Open(A.id,o))return A.f2;return A.f;};
+const cardFaceSrc=C=>{const fa=cardFaceArt(C);if(fa)return `${ASSET}${fa}.webp`;if(C.face)return `${ASSET}${C.face}.webp`;const scene=(C.steps||[]).find(s=>s.n===C.c)||{},mood=scene.f||"happy",look=scene.l||"casual";
   if(look==="train")return `${ASSET}${C.c}_train_face.webp`;
   if(look==="thai"&&THAI_IDS.includes(C.c))return `${ASSET}${C.c}_thai${["flustered","surprised","pout","sad","angry"].includes(mood)?"_fl":""}_face.webp`;
   if(look==="fight")return `${ASSET}${C.c}_${["happy","sad","flustered","angry"].includes(mood)?mood:"happy"}_face.webp`;
   const suffix=["pout","sad","angry"].includes(mood)?"_pout":["flustered","surprised"].includes(mood)?"_flustered":"";
   return `${ASSET}${C.c}_casual${suffix}_face.webp`;};
-const cardArtHTML=(C,lazy=false)=>`<span class="card-art" style="--card-scene:url('${ASSET}${BGIMG[C.bg]||BGIMG.camp}')"><img src="${cardFaceSrc(C)}" alt="" ${lazy?'loading="lazy" decoding="async"':""}></span>`;
+/* v1.91.26 (Man): the card shows the same character picture as the dialogue (the body sprite), not the cropped face;
+   falls back to the face crop if a sprite doesn't exist */
+const cardBodySrc=src=>src.replace(/\/([a-z]+)_(happy|sad|flustered|angry)_face\.webp$/,"/$1_fight_$2.webp").replace(/_face\.webp$/,".webp");
+const cardArtHTML=(C,lazy=false)=>{const art=cardFaceArt(C),f=cardFaceSrc(C),src=art?f:cardBodySrc(f);
+  return `<span class="card-art${art?" art":" body"}" style="--card-scene:url('${ASSET}${BGIMG[C.bg]||BGIMG.camp}')"><img src="${src}" alt="" ${src!==f?`onerror="this.onerror=null;this.src='${f}';this.parentNode.classList.remove('body')"`:""} ${lazy?'loading="lazy" decoding="async"':""}></span>`;};
 // v1.34: portraits for the market and helmet-gang side characters (matched by speaker name, or st.img)
 const NPC_IMG=[[/ใบหยก|Baiyok/,()=>typeof byFree==="function"&&byFree(G)?"baiyok":"baiyok_black"],[/เพชรา|Petcha/,"petchara"],[/เถ้าแก่เสือ|เถ้าแก่พยัคฆ์ทอง|Boss Suea|Golden Tiger owner/,"tiger_boss"],[/เกริก|Krerk/,"krerk"],[/นายอำเภอ|District Chief/,"nai"],[/แม่ค้า|ป้าศรี|Auntie Sri|vendor/,"vendor_green"],[/ป้าแต๋ว|เจ๊หมวย|ป้าขาย|Auntie Taew|Jae Muay/,"vendor_red"],[/ไอ้ตุ๋ย|Tuy the Red Mask/,"thief2"],[/ไอ้ตุ่ม|โจรงมกระทง|Krathong Thief/,"thief"],[/เสี่ยหมวกทองคำ|Big Boss Golden Helmet/,"gang_boss"],[/หมวกเงิน|Silver Helmet/,"gang_silver"],[/หมวกทองดำ|ลูกน้องหมวกทอง|Gold-Black Helmet|Golden Helmet's (man|men)|Gold Helmet/,"gang_goldblack"],[/หมวก|แจ็กเก็ต|Helmet|Jacket/,"gang_group"],[/ยาย|Grandma/,"grandma"]];
 const npcImg=st=>{const v=st.img||(st.who&&(NPC_IMG.find(([r])=>r.test(st.who))||[])[1])||null;return typeof v==="function"?v():v;};
@@ -610,6 +631,11 @@ function cardLinkHTML(id){const own=G.cards||{},out=[];const pv=CARD_SEQ[id];if(
 // v1.87.2: the album keeps its scroll position when a card or the gacha is opened from it and closed again
 function albKeep(){try{const o=document.querySelector(".overlay");if(UI.modal&&UI.modal.type==="album"&&o)UI.albY=o.scrollTop;}catch(e){}}
 function albRestore(){const y=UI.albY||0;if(!y)return;const go=()=>{const o=document.querySelector(".overlay");if(o)o.scrollTop=y;};go();requestAnimationFrame(go);}
+function cardArtPanel(id){const A=cardArtOf(id);if(!A)return "";const o=(G.cards||{})[id]||{},w=(G.cardArt||{})[id]||0,open2=art2Open(id,o);
+  const lab=w===2&&open2?"Secret art":w?"Special art":"Portrait";
+  return `<div class="cdart"><div class="cdartrow"><button class="cdartimg" data-act="cardart" data-v="${id}" aria-label="View full art"><img src="${ASSET}${A.f}.webp" alt="" loading="lazy"><span>🔍 Special art</span></button>
+    ${A.f2?(open2?`<button class="cdartimg s2" data-act="cardart2" data-v="${id}" aria-label="View secret art"><img src="${ASSET}${A.f2}.webp" alt="" loading="lazy"><span>✦ Secret art</span></button>`:`<div class="cdartimg lock"><b>🔒</b><span>Secret art · ${art2Hint(id,o)}</span></div>`):""}</div>
+    <button class="btn sm ${w?"gold":""}" data-act="cardface" data-v="${id}">Card face: ${lab} ⟳</button></div>`;}
 function cardInfoHTML(id){const C=CARDS[id];if(!C)return "";const o=(G.cards||{})[id],R=CARD_R[C.r],who=G.F[C.c]?G.F[C.c].name:"",src=C.lg?"the Loy Krathong gacha (festival only)":C.g?"the card gacha":`${C.hint||"keep following the story"}`;
   if(!o)return `<h2>Not collected yet</h2><div class="cdet" style="--rc:#77747d"><div class="ccard big lock" data-rarity="${C.r}">${cardArtHTML(C,true)}<span class="tstar">${"★".repeat(R.s)}</span><b>???</b><small>${C.r}</small></div>
     <div class="cdinfo"><div class="cdtop"><span class="pill">${C.r} ${"★".repeat(R.s)}</span><span class="meta">${esc(who)}</span></div><p class="meta"><b>How to get:</b> ${esc(src)}</p></div></div>
@@ -617,7 +643,7 @@ function cardInfoHTML(id){const C=CARDS[id];if(!C)return "";const o=(G.cards||{}
   const sp=o.spare||0,per=DUST_OF[C.r],fresh=cardFresh(id,o),lv=o.lv||1,up=cardCanUp(id,o),fx=UI.cardFx===id;UI.cardFx=null;
   return `<h2>${esc(C.t)}</h2><div class="cdet" style="--rc:${R.c}"><div class="ccard big ${fx?"lvfx":""}" data-rarity="${C.r}" style="--rc:${R.c}">${cardArtHTML(C)}<span class="tstar">${"★".repeat(R.s)}</span><b>${esc(C.t)}</b><small>${C.r} · Lv.${lv}</small></div>
     <div class="cdinfo"><div class="cdtop"><span class="pill" style="box-shadow:inset 0 0 0 2px ${R.c};color:${R.c}">${C.r} ${"★".repeat(R.s)}</span><span class="meta">${esc(who)}</span>${fresh&&o.seen?"<span class=\"cnew\">✦ New in this update</span>":""}</div>
-    ${cardBlurb(C)?`<p class="cblurb">“${esc(cardBlurb(C))}”</p>`:""}${cardLinkHTML(id)}
+    ${cardBlurb(C)?`<p class="cblurb">“${esc(cardBlurb(C))}”</p>`:""}${cardLinkHTML(id)}${cardArtPanel(id)}
     <div class="kv-row"><span>Card level</span><b>${"◆".repeat(lv)}${"◇".repeat(CARD_MAX_LV-lv)} Lv.${lv}/${CARD_MAX_LV}</b></div><div class="kv-row"><span>Copies collected</span><b>${o.n||1}</b></div><div class="kv-row"><span>Spare copies</span><b>${sp}</b></div>
     ${C.lv2?`<div class="cdlv"><span class="${lv>=2?"on":""}">${lv>=2?"✓":"🔒"} ◆◆ Lv.2 · epilogue</span><span class="${lv>=3?"on":""}">${lv>=3?"✓":"🔒"} ◆◆◆ Lv.3 · special scene "${esc(C.lv3t||"")}"${C.mg?" + minigame":""}</span></div>`:""}
     <p class="meta">From: ${esc(src)}</p><p class="meta">Spare copies level the card up (max Lv.${CARD_MAX_LV} · bond with ${esc(who)} grows each level) or break them into stardust at ✦ ${per}</p></div></div>
@@ -1044,6 +1070,7 @@ function modalHTML(){const m=UI.modal;let body="",foot=true;
   if(m.type==="gift")body=giftHTML(m.id);
   if(m.type==="petname"){const p=(G.pets||[])[m.i];if(!p){UI.modal=null;return "";}body=`<h2>Name the ${esc(PETS[p.k].name)}</h2><div class="petnm"><img class="peti" src="${petIcon(p.k)}" alt=""><input id="petname" maxlength="12" value="${esc(p.name)}" autocomplete="off"></div><p class="meta">This name shows up in camp scenes</p><button class="btn primary" id="petnamebtn" data-act="petnamesave" data-v="${m.i}">Name</button>`;}
   if(m.type==="card"){body=cardInfoHTML(m.id);foot=false;}
+  if(m.type==="cardart"){const A=cardArtOf(m.id),C=CARDS[m.id];if(!A||!C){UI.modal=null;return "";}body=`<div class="cdfull" data-act="cardinfo" data-v="${m.id}"><img src="${ASSET}${m.w===2&&A.f2?A.f2:A.f}.webp" alt=""><p class="meta center">${esc(C.t)} · tap to go back</p></div>`;foot=false;}
   if(m.type==="contest"){body=contestHTML();foot=false;}
   if(m.type==="waikhru"){body=waiKhruHTML();foot=false;}
   if(m.type==="gbox"){body=gboxHTML();foot=false;}
@@ -1128,7 +1155,7 @@ function sceneNext(){const S=UI.scene;if(!S)return;
     const n=val(st.n);S.lookOf=S.lookOf||{};
     // v1.8: each character keeps one outfit for the whole scene
     const look=castId(n)?(S.lookOf[n]=S.lookOf[n]||(st.l==="train"?"fight":st.l)||S.look):(st.l||S.look);
-    S.cur={n,f:val(st.f)||"happy",t:nameCall(n,val(st.t)),look,who:st.who,tel:n==="coach"&&!S.coachOK&&!!(G&&G.coachAwayAbs&&gameWeek(G)<G.coachAwayAbs)};
+    S.cur={n,f:val(st.f)||"happy",t:nameCall(n,val(st.t)),look,who:st.who,cg:st.cg||null,tel:n==="coach"&&!S.coachOK&&!!(G&&G.coachAwayAbs&&gameWeek(G)<G.coachAwayAbs)};
     if(st.show)S.cast=st.show.map(x=>({id:x.id,f:x.f||"happy",look:S.lookOf[x.id]||x.l||look,back:!!x.back}));
     if(n==="npc"){const im=npcImg(st);if(im)S.cast=[{id:"npc:"+im,f:"happy",look}];}
     if(n==="coach"){S.cast=[{id:"coach",f:"happy",look}];}           // the coach always stands alone
@@ -1149,7 +1176,7 @@ function sceneHTML(){const S=UI.scene,c=S.cur||{};const sp=c.n==="coach"?{name:c
     return `<img class="stand ${pos} ${active&&!m.back?"on":"off"}${m.back?" back":""}" src="${m.id.startsWith("npc:")?`${ASSET}npc_${m.id.slice(4)}.webp`:m.back?`${ASSET}${m.id}_back.webp`:stand(m.id,m.look,active&&!c.choice?moodFor(c.f,m.look,c.t):moodFor(m.f,m.look,""))}" alt="">`;}).join("");
   const tag="";
   return `<div class="vn" role="dialog" aria-label="Story scene"><div class="vbg bg-${S.bg==="camp"?"gym":S.bg}" ${bgKey?`style="background-image:url(${ASSET}${bgKey})"`:""}></div>
-   <div class="cast ${(S.cast||[]).length>1?"duo":""}">${cast}</div>
+   ${c.cg?`<div class="vcg" style="--cg:url(${ASSET}${c.cg}.webp)"><img src="${ASSET}${c.cg}.webp" alt=""></div>`:`<div class="cast ${(S.cast||[]).length>1?"duo":""}">${cast}</div>`}
    ${S.award?`<div class="awardfx" aria-hidden="true">${Array.from({length:24},(_,i)=>`<i style="--i:${i}"></i>`).join("")}${[["14%","22%","0s","#ffd45a"],["78%","16%","-.8s","#ff6b6b"],["50%","30%","-1.6s","#8fd3ff"],["30%","12%","-1.2s","#c785e6"],["66%","34%","-.4s","#9dffb0"]].map(([x,y,d,c])=>`<span class="fw" style="--x:${x};--y:${y};--d:${d};--c:${c}">${Array.from({length:12},(_,a)=>`<b style="--a:${a}"></b>`).join("")}</span>`).join("")}<div class="awardbelt"><span class="strap"></span><span class="seal">★</span><span class="strap"></span></div><div class="awardname">${esc(honorLabel(S.award.kind,S.award.venue))}</div></div>`:""}
    ${c.choice?"":`<button class="vtap" data-act="vnext" aria-label="Continue"></button>`}
    <div class="vbox px" data-act="${c.choice?"":"vnext"}" style="--c:${sp.color||"var(--gold)"}">
@@ -1727,8 +1754,11 @@ const ACT={
       html:`<div class="px confirm"><b>${esc(C.t)} ×${k}</b><p class="meta">Stardust +✦ ${DUST_OF[C.r]*k} · spare copies: ${(o.spare||0)-k} left</p><p class="meta">The card itself, its level and its story stay. This can't be undone</p>${(o.lv||1)<CARD_MAX_LV?`<p class="meta goldt">This card can still go up ${CARD_MAX_LV-(o.lv||1)} more level(s) with spares</p>`:""}</div>`};render();},
   cardup:d=>{const C=CARDS[d.v],F=G.F[C.c],b0=F?F.bond||0:0;const lv=levelCard(G,d.v);if(!lv)return;const db=F?Math.round(((F.bond||0)-b0)*10)/10:0;AU.sfx&&AU.sfx("level");save();UI.cardFx=d.v;toast(`${C.t} is now Lv.${lv}${db>0?` · ${F.name} bond +${db}`:""}`);UI.modal={type:"card",id:d.v};render();},
   carddustok:()=>{const m=UI.modal;if(!m||m.yes!=="carddustok")return;const d=dustCard(G,m.id,m.k);if(d){AU.sfx&&AU.sfx("level");save();toast(`Stardust +✦ ${d}`);}UI.modal={type:"card",id:m.id};render();},
+  cardart:d=>{if(!cardArtOf(d.v)||!(G.cards||{})[d.v])return;UI.modal={type:"cardart",id:d.v};render();},
+  cardface:d=>{const A=cardArtOf(d.v),o=(G.cards||{})[d.v];if(!A||!o)return;G.cardArt=G.cardArt||{};const max=art2Open(d.v,o)?2:1,n=((G.cardArt[d.v]||0)+1)%(max+1);if(n)G.cardArt[d.v]=n;else delete G.cardArt[d.v];save();UI.modal={type:"card",id:d.v};render();},
+  cardart2:d=>{const A=cardArtOf(d.v),o=(G.cards||{})[d.v];if(!art2Open(d.v,o))return;UI.modal={type:"cardart",id:d.v,w:2};render();},
   cardplay:d=>{const C=CARDS[d.v],o=(G.cards||{})[d.v];if(!C||!o)return;o.seen=true;o.rev=C.rev||0;const ep=(o.lv||1)>=2&&C.lv2;if(ep)o.lvSeen=Math.max(o.lvSeen||1,2);G.cardPend=(G.cardPend||[]).filter(x=>x!==d.v);save();UI.modal=null;const nw=d.from==="new";
-    playScene(ep?C.steps.concat([{n:"nar",t:"✦ Epilogue · Lv.2"}],C.lv2):C.steps,()=>{UI.modal=nw?((G.cardPend||[]).length?{type:"cardnew"}:null):{type:"card",id:d.v};render();},{bg:C.bg,look:"casual"});},
+    playScene(ep?cardArtSteps(d.v,C.steps).concat([{n:"nar",t:"✦ Epilogue · Lv.2"}],C.lv2):cardArtSteps(d.v,C.steps),()=>{UI.modal=nw?((G.cardPend||[]).length?{type:"cardnew"}:null):{type:"card",id:d.v};render();},{bg:C.bg,look:"casual"});},
   cardspecial:d=>{const C=CARDS[d.v],o=(G.cards||{})[d.v];if(!C||!o||!C.lv3||(o.lv||1)<3)return;o.lvSeen=3;save();UI.modal=null;playScene([{n:"nar",t:`✦ Special scene · ${C.lv3t||""}`}].concat(C.lv3),()=>{UI.modal={type:"card",id:d.v};render();},{bg:C.bg,look:"casual"});},
   cardmg:d=>{const C=CARDS[d.v],o=(G.cards||{})[d.v];if(!C||!o||!C.mg||(o.lv||1)<3)return;BAG.openCard(C.mg,d.v);},
   cardlater:()=>{(G.cardPend||[]).shift();save();UI.modal=(G.cardPend||[]).length?{type:"cardnew"}:null;render();},
