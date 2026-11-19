@@ -9,29 +9,26 @@ const ROAD_FUEL_BASE=35; // ฿ per litre at an average week
 /* kmL = km per litre (rises with price) · seats = riders who fit (the rest ride the public bus) · fat = fatigue multiplier on the road */
 const ROAD_CAR={
  none:{name:"Intercity bus",kmL:0,seats:0,fat:1.25},
- songthaew:{kmL:10.5,seats:10,fat:1.15},
- yellowthaew:{kmL:11,seats:10,fat:1.15},
- rotdaeng:{kmL:11,seats:10,fat:1.12},
- tuktuk:{kmL:12,seats:3,fat:1.3},
- minibus:{kmL:13.5,seats:12,fat:1},
- bluevan:{kmL:15,seats:12,fat:.95},
- pinkvan:{kmL:16,seats:12,fat:.95},
- tourbus:{kmL:16.5,seats:30,fat:.85},
- limo:{kmL:18,seats:8,fat:.75},
- goldvan:{kmL:21,seats:12,fat:.8}};
+ songthaew:{kmL:7,seats:10,fat:1.15},
+ yellowthaew:{kmL:7.5,seats:10,fat:1.15},
+ rotdaeng:{kmL:7.5,seats:10,fat:1.12},
+ tuktuk:{kmL:8,seats:3,fat:1.3},
+ minibus:{kmL:9,seats:12,fat:1},
+ bluevan:{kmL:10,seats:12,fat:.95},
+ pinkvan:{kmL:10.5,seats:12,fat:.95},
+ tourbus:{kmL:11,seats:30,fat:.85},
+ limo:{kmL:12,seats:8,fat:.75},
+ goldvan:{kmL:14,seats:12,fat:.8}};
 const ROAD_BUS_PER_KM=1.1,ROAD_TOLL_PER_KM=.35,ROAD_ROOM=650,ROAD_FOOD=180; // per person per km / per km / per room per night / per person per day
 
 const ROAD_REGION={north:{name:"the North",tag:"North"},isan:{name:"Isan",tag:"Isan"},central:{name:"the Central Plains",tag:"Central"},south:{name:"the South",tag:"South"}};
-/* v1.91.16 (Man): the camp is in Chiang Mai, so these are rough road distances from Chiang Mai. final:1 = the regional title ring.
-   Real distances are longer overall, so ROAD_KM_K scales the per-km costs and road fatigue to keep a full regional run about as dear as before
-   (the north is now the cheap starter region and the south the long haul). Fuel stays honest: litres = km ÷ km/L, with km/L raised to match. */
+/* game distances from the camp (a made-up province in the upper central plain). final:1 = the regional title ring */
 const ROAD_DEST={
- chiangrai:{name:"Chiang Rai",r:"north",km:190},nan:{name:"Nan",r:"north",km:320},uttaradit:{name:"Uttaradit",r:"north",km:290},lampang:{name:"Lampang",r:"north",km:100},chiangmai:{name:"Chiang Mai",r:"north",km:15,final:1},
- udon:{name:"Udon Thani",r:"isan",km:700},khonkaen:{name:"Khon Kaen",r:"isan",km:680},buriram:{name:"Buriram",r:"isan",km:880},ubon:{name:"Ubon Ratchathani",r:"isan",km:1030},korat:{name:"Nakhon Ratchasima",r:"isan",km:750,final:1},
- lopburi:{name:"Lopburi",r:"central",km:590},suphan:{name:"Suphan Buri",r:"central",km:600},phetchaburi:{name:"Phetchaburi",r:"central",km:800},chanthaburi:{name:"Chanthaburi",r:"central",km:920},ayutthaya:{name:"Ayutthaya",r:"central",km:620,final:1},
- chumphon:{name:"Chumphon",r:"south",km:1150},surat:{name:"Surat Thani",r:"south",km:1330},nakhonsi:{name:"Nakhon Si Thammarat",r:"south",km:1450},songkhla:{name:"Songkhla",r:"south",km:1650},phuket:{name:"Phuket",r:"south",km:1550,final:1}};
-const ROAD_KM_K=.65;
-const roadNights=km=>km<600?0:km<1200?1:2;
+ chiangrai:{name:"Chiang Rai",r:"north",km:780},nan:{name:"Nan",r:"north",km:640},uttaradit:{name:"Uttaradit",r:"north",km:430},lampang:{name:"Lampang",r:"north",km:560},chiangmai:{name:"Chiang Mai",r:"north",km:650,final:1},
+ udon:{name:"Udon Thani",r:"isan",km:520},khonkaen:{name:"Khon Kaen",r:"isan",km:430},buriram:{name:"Buriram",r:"isan",km:390},ubon:{name:"Ubon Ratchathani",r:"isan",km:610},korat:{name:"Nakhon Ratchasima",r:"isan",km:250,final:1},
+ lopburi:{name:"Lopburi",r:"central",km:120},suphan:{name:"Suphan Buri",r:"central",km:130},phetchaburi:{name:"Phetchaburi",r:"central",km:230},chanthaburi:{name:"Chanthaburi",r:"central",km:330},ayutthaya:{name:"Ayutthaya",r:"central",km:90,final:1},
+ chumphon:{name:"Chumphon",r:"south",km:500},surat:{name:"Surat Thani",r:"south",km:640},nakhonsi:{name:"Nakhon Si Thammarat",r:"south",km:760},songkhla:{name:"Songkhla",r:"south",km:950},phuket:{name:"Phuket",r:"south",km:860,final:1}};
+const roadNights=km=>km<300?0:km<700?1:2;
 
 // ---------- fuel: changes every week, cheap and dear weeks come in turns, holidays push it up ----------
 function roadFuel(G,wk){const w=wk!=null?wk:(G?gameWeek(G):1),s=((G&&G.seed)||1)%997,r=mulberry32(s*131+w*7919)();
@@ -50,14 +47,14 @@ function roadRiders(G){return G?roster(G).filter(f=>!f.injury||f.injury<3):[];}
 function roadPlan(G,destKey,carKey,wk){const D=ROAD_DEST[destKey],k=carKey||roadCarKey(G),C=ROAD_CAR[k]||ROAD_CAR.none,price=roadFuel(G,wk);
   const people=Math.max(1,roadRiders(G).length)+1/* the manager */,nights=roadNights(D.km),rt=D.km*2;
   const inCar=k==="none"?0:Math.min(people,C.seats),onBus=people-inCar;
-  const litres=C.kmL?rt/C.kmL:0,fuel=Math.round(litres*price),toll=k==="none"?0:Math.round(rt*ROAD_TOLL_PER_KM*ROAD_KM_K),bus=Math.round(onBus*rt*ROAD_BUS_PER_KM*ROAD_KM_K);
+  const litres=C.kmL?rt/C.kmL:0,fuel=Math.round(litres*price),toll=k==="none"?0:Math.round(rt*ROAD_TOLL_PER_KM),bus=Math.round(onBus*rt*ROAD_BUS_PER_KM);
   const rooms=Math.ceil(people/2),lodge=nights*rooms*ROAD_ROOM,food=(nights+1)*people*ROAD_FOOD;
-  const fat=Math.round(D.km/100*C.fat*1.2*ROAD_KM_K); // fatigue every traveller picks up on the way
+  const fat=Math.round(D.km/100*C.fat*1.2); // fatigue every traveller picks up on the way
   return {dest:destKey,D,car:k,C,price,band:roadFuelBand(price),people,inCar,onBus,nights,rt,litres,fuel,toll,bus,lodge,food,fat,total:fuel+toll+bus+lodge+food};}
 
 // ---------- driving scene: lines ----------
 const ROAD_SCENERY={
- north:["The road starts winding up the mountain. Thin mist hangs over the pine tops, cold enough that we close the windows.","Terraced fields step down into the valley, the road signs carrying the Lanna script everyone at camp is used to by now."],
+ north:["The road starts winding up the mountain. Thin mist hangs over the pine tops, cold enough that we close the windows.","Terraced fields step down into the valley, and the road signs start carrying Lanna script too."],
  isan:["Rice fields stretch to the horizon, sugar palms standing far apart. The sky is so wide you can see every whole cloud.","Smoke billows from a roadside grilled-chicken stall, and the smell of sticky rice drifts in through the window."],
  central:["Green rice paddies on both sides, an irrigation canal running beside the road as far as the eye can see.","We pass roadside temples with orange-and-green roofs shining in the sun, souvenir stalls lined up out front."],
  south:["Limestone hills stand in a row, and a jade-green sea peeks out now and then between the rubber trees.","Palm plantations and rubber groves take turns forever. It drizzles for a minute, then the sun comes back out."]};
@@ -193,7 +190,7 @@ const ROAD={st:null,
     if(a==="go"){if(S.demo){const dk=Object.keys(ROAD_DEST).find(k=>ROAD_DEST[k].r===S.region&&ROAD_DEST[k].final);return this.drive(roadPlan(G,dk,S.car),S.time,S.wet);}
       const P=S.opts.plan||roadPlan(G,S.dest,S.car);if(S.opts.charge!==false&&!S.opts.paid){if(G.cash<P.total){toast("Not enough money for the trip");return;}G.cash-=P.total;}
       const w=G?gameWeek(G):1,rr=mulberry32((G.seed||1)+w*13)(),D=P.D,wetW=((w-1)%52)+1>=20&&((w-1)%52)+1<=40;
-      return this.drive(P,D.km>=1100?"night":D.km>=600?"dusk":"day",wetW&&rr<(D.r==="south"?.5:.3));}},
+      return this.drive(P,D.km>=700?"night":D.km>=400?"dusk":"day",wetW&&rr<(D.r==="south"?.5:.3));}},
   sheetHTML(P,S){const band={cheap:["cheap","cheap"],mid:["Normal","mid"],high:["pricey","high"]}[P.band],pos=Math.max(4,Math.min(96,50+(P.price/ROAD_FUEL_BASE-1)*250));
     const row=(a,b)=>`<div class="kv-row"><span>${a}</span><span>${b}</span></div>`;
     return `<div class="rd-car"><b>${esc(roadCarName(P.car))}</b><small>${P.car==="none"?"The camp has no vehicle yet · everyone buys a bus ticket":`Economy ${P.C.kmL} km/L · seats ${P.C.seats} fighters in camp`}</small></div>

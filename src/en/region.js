@@ -89,7 +89,7 @@ const RG_CH={
   wait:"No worries, okay? Tabtim can wait. Whoever's hurt, rest first. — Tabtim",
   pre:[n=>`${n}! Come on! Tabtim's been waiting ages. Nobody's ever seen a Korat kicker before, haha!`,n=>`Tabtim's for real this time. Watch out for the leaping kick, okay?`,n=>`Last bout… Dad has never once come to watch me fight. Today I'm using our family's heavy Korat fists — so he sees I'm a Mat Nak too.`],
   sty:["footwork","footwork","power"],
-  reply:"I'm not giving in either.",pairLine:"Whether a Korat punch is still the real thing after years away from home — see for yourself.",
+  reply:"I'm not giving in either.",pairLine:"Korat punches from a Bangkok girl. Real or not? See for yourself.",
   win:["Haha, awesome! But Tabtim takes the first one!","Just one more, okay? Tabtim's keeping the cup in Korat.","…"],
   lose:["Ow, that hurt a lot! You're really good. Tabtim'll get it back next time.","Haha… not funny any more. See you in the last bout.","…"],
   lost:(G,J)=>[{n:"tabtim",f:"happy",l:"fight",t:"Haha, the cup's still in Korat! But Sirichai Camp is fierce. Tabtim hurts all over."},{n:"tabtim",f:"flustered",l:"fight",t:"Come again, okay? Tabtim'll wait… Not missing you or anything. Just want to fight again."},{n:"nar",t:"Tabtim waves so loudly the MC has to move the mic away."}],
@@ -102,7 +102,7 @@ const RG_CH={
    {n:"tabtim",f:"flustered",l:"fight",t:"…Dad? Dad came to watch…"},
    ...(top?[{n:top.id,f:"pout",l:"fight",t:rgJeal(top.id,"Tubtim")}]:[])]},
   night:(G,T)=>[
-   {n:"nar",t:"That night the rocket festival along the Mun River is still going. Tabtim leads the manager away from the crowds down to the landing."},
+   {n:"nar",t:"That night the rocket festival by the Mekong is still going. Tabtim leads the Manager away from the crowd to the pier."},
    {n:"tabtim",f:"happy",l:"casual",t:"Tabtim's sat here since she was tiny, watching the rockets go up, thinking one day she'd kick that high."},
    {n:"nar",t:"The last rocket shoots into the sky. For the first time since you met, Tabtim goes quiet."},
    {n:"tabtim",f:"sad",l:"casual",t:"Tabtim pays for her three little siblings' school, you know… But Dad never accepted that kicking can be Korat boxing."},
@@ -175,7 +175,7 @@ function rgMeet(G,cid,v){const R=G.region,m=R.meet;m[cid]=(m[cid]||0)+v;rgTouch(
 function rgTouch(G,cid){const R=G.region;if(!R)return;(R.meetT=R.meetT||{})[cid]=gameWeek(G);if(R.miss)delete R.miss[cid];}
 /* three weeks apart: she writes · four or more: the bond fades a little each week (outside-camp rate), never below the level she reached */
 const RG_MISS={
- north:"Dear Manager,\n\nIt's getting cold in Chiang Mai, with mist every morning… I don't have any news, really. I just miss Sirichai Camp a little.\n\nWe live in the same city, after all. Drop by my camp when you're free.\n— Baibua",
+ north:"Dear Manager,\n\nIt's getting cold in Chiang Mai, with mist every morning… I don't have any news, really. I just miss Sirichai Camp a little.\n\nCome up for a visit when you're free.\n— Baibua",
  isan:"Manager!\n\nWhere did you disappear to? Tabtim watches your camp's lives every day, but you're never on camera.\n\nMiss you! (Miss the camp, I mean, not you, haha)\n— Tabtim",
  central:"Hi,\n\nYour camp's clip views dropped a little. I checked for you. Not on purpose, it just came up.\n\nIf anything's going on… you could tell me sometimes.\n— Alicia",
  south:"…The waves are rough lately.\n\nNothing else.\n\n— Chaba"};
@@ -204,7 +204,7 @@ const DUEL_TALK={
  north:{intro:"Play the drum for me… I can kick to every single beat.",rw:"Amazing… you picked a really good fighter, Manager.",rl:"Sorry, I got a little too serious.",
   win:"I lost… but that was the most fun I've had since I started fighting.",lose:"I win… Come back for a rematch, I'll be waiting."},
  isan:{intro:"A som tam contest against an Isan girl? Awesome! Tabtim won't lose at this one, okay?",rw:"Hey! How is your som tam tastier than Tabtim's!",rl:"Haha, som tam is Tabtim's home turf, okay?",
-  win:"Ha ha ha, Tabtim lost to Sirichai Camp at som tam! Don't tell my mom… Can I get a consolation prize?",lose:"Tabtim wins! Tonight Tabtim makes som tam for the whole camp."},
+  win:"Hahaha, Tabtim lost to a Bangkok girl at som tam! Don't tell my mum… Can I get a consolation prize?",lose:"Tabtim wins! Tonight Tabtim makes som tam for the whole camp."},
  central:{intro:"Live-stream battle? Thirty seconds each, whoever sells more wins. …I won't go easy on you.",rw:"…How did I lose on sales to a small camp?",rl:"That's what a professional looks like.",
   win:"Okay, I admit it. Your camp really knows its audience. …Don't get the wrong idea, that wasn't praise.",lose:"I won, but your live was more fun to watch than I expected."},
  south:{intro:"…Running. Hundred metres.",rw:"…Fast.",rl:"…",
@@ -309,7 +309,7 @@ function rgGala(G){const top=rgTopGirl(G),fah=rgIn(G,"fah"),ploy=rgIn(G,"ploy"),
    {t:"Greet Alicia first",fx:meet("alicia",1),then:[{n:"alicia",f:"happy",l:"casual",t:"Oh, the camp everyone talks about. You look more ordinary than in the clips. …That's a compliment."}]},
    {t:"Greet Chaba first",fx:meet("chaba",1),then:[{n:"chaba",f:"happy",l:"casual",t:"…Chaba."},{n:"nar",t:"Chaba nods once, then stays standing there longer than she needs to."}]}]},
  ...rgIf(rgIn(G,"kati"),[{n:"baibua",with:"kati",f:"happy",l:"casual",t:"You're Kati, aren't you? Tha Sao, same as me… I've heard your name for a long time."},{n:"kati",f:"flustered",l:"casual",t:"I-I've heard of you too, Big sis Baibua! That reverse spinning elbow everyone talks about…"}]),
- ...rgIf(ploy,[{n:"tabtim",with:"ploy",f:"happy",l:"casual",t:"Oh! So this is Ploy of the Korat punch — one of our own who made her name at a Chiang Mai camp. Tabtim wants to take one of those punches!"},{n:"ploy",f:"happy",l:"casual",t:"…If you want to try, get in the ring."}]),
+ ...rgIf(ploy,[{n:"tabtim",with:"ploy",f:"happy",l:"casual",t:"Oh! So this is the Korat fist from a Bangkok girl. Tabtim wants to take one, just to see!"},{n:"ploy",f:"happy",l:"casual",t:"…If you want to try, get in the ring."}]),
  ...rgIf(rgIn(G,"rin"),[{n:"alicia",with:"rin",f:"happy",l:"casual",t:"You're the one who read a fourteen-page contract before signing, right? That clip got more views than my fight clips."},{n:"rin",f:"happy",l:"casual",t:"Of course I read it. The small print at the end of a contract is usually the most expensive part."}]),
  ...rgIf(rgIn(G,"mali"),[{n:"mali",with:"chaba",f:"surprised",l:"casual",t:"Big sis Chaba!! It's you, isn't it! It's Mali! Little Mali from Chaiya!"},{n:"chaba",f:"happy",l:"casual",t:"…Wrong person."},
    {n:"nar",t:"Chaba turns and walks off, but Mali catches her ears turning red all the way down her neck."},{n:"mali",f:"sad",l:"casual",t:"…It's not the wrong person. Mali remembers."}]),
@@ -359,7 +359,7 @@ const RG_ARRIVE={
  north:(G,D)=>{const top=rgTopGirl(G),kati=rgIn(G,"kati"),me=G.F[(G.region.trip||{}).fid];return [
   {n:"nar",bg:"gas_station",t:`The camp's van stops for fuel at the last petrol station before ${D.name}. Mist still hangs low over the mountains.`},
   {n:"nar",t:"An old motorbike is parked in front of the coffee kiosk. A pink-haired girl stands hugging a big rattan basket."},
-  {n:"baibua",f:"happy",l:"casual",t:"You're here, jao! I heard Sirichai Camp was coming to collect the northern belts, so I rode out to wait for you."},
+  {n:"baibua",f:"happy",l:"casual",t:"You're here, jao! I heard Sirichai Camp was coming up to collect the northern belts, so I rode out to wait for you."},
   {n:"baibua",f:"happy",l:"casual",t:"Khao tom mat, jao. I wrapped them myself at four this morning. There's enough for everyone."},
   {n:"nar",t:"Everyone gets a khao tom mat, each tied neatly with the same bamboo strip, except the Manager's, which is tied in a little bow.",choice:[
     {t:"Ask why this one has a bow",fx:G2=>rgMeet(G2,"baibua",2),then:[{n:"baibua",f:"flustered",l:"casual",t:"N-no reason, jao! My hands just tied it that way… eat, jao, it's really good."}]},
@@ -371,7 +371,7 @@ const RG_ARRIVE={
   {fx:G2=>{if(me)me.morale=Math.min(100,(me.morale||0)+3);}},
   {n:"nar",t:me?`${me.name} notes down Baibua's tips on her phone · morale +3`:"Everyone notes down Baibua's tips."},
   ...(top&&top.id!=="kati"?[{n:top.id,f:"pout",l:"casual",t:rgJeal(top.id,"Baibua")}]:[]),
-  {n:"coach",t:"The khao tom mat is better than the shop by the camp… don't tell Auntie Daeng."},
+  {n:"coach",t:"The khao tom mat is better than the shop by the camp… don't tell Auntie Taew."},
   {n:"nar",t:"Baibua waves the van out of the petrol station, then follows on her motorbike all the way to the arena."}];}};
 /* a scene on the first night of a particular trip */
 const RG_TRIPX={
@@ -406,7 +406,7 @@ const RG_CHAT={
  baibua:[
   {id:"bb_mist",x:[
    ["The mist is so thick this morning, jao. Are you up yet, Manager?",[["Up already, about to watch the kids train.",1,"So hard-working, jao. I'm about to go train too."],["Not yet. I'm typing this with my eyes closed.",2,"Hehe, eyes closed and every word spelled right. Impressive, jao."],["Drive carefully in fog like this.",2,"…I'll be careful. Thank you for worrying about me."]]],
-   ["Dad asked me to ask how long Sirichai Camp has been open, jao.",[["Since Grandpa Chai's day — over forty years.",1,"Oh, Dad says that's older than Bua Tha Sao Camp, jao."],["I'll show you the old photos at the camp sometime.",2,"Really? I'll be waiting!"],["Why do you ask?",0,"Nothing, jao. Dad was just curious."]]],
+   ["Dad asked me to ask how long Sirichai Camp has been open, jao.",[["Since Grandpa Chai's time. Almost fifty years.",1,"Oh, Dad says that's older than Bua Tha Sao Camp, jao."],["I'll show you the old photos at the camp sometime.",2,"Really? I'll be waiting!"],["Why do you ask?",0,"Nothing, jao. Dad was just curious."]]],
    ["I have to go train now, jao… let's leave it here for now.",[["Go on, we'll talk after training.",2,"Yes! I'll message you as soon as I'm done."],["Don't overdo it.",1,"Yes, I always stretch first."],["OK",0,""]]]]},
   {id:"bb_dad",x:[
    ["Dad walked around the camp twice today, jao! The doctor says his knee is getting better.",[["That's great news!",1,"Thank you, jao. I was so happy I cried."],["Tell him the whole of Sirichai is cheering for him.",2,"I told him, jao. He smiled and said that camp has a kind heart."],["Don't let him overdo it.",1,"Yes. I walk right beside him the whole time."]]],
@@ -415,7 +415,7 @@ const RG_CHAT={
   {id:"bb_food",x:[
    ["I made a huge pot of gaeng hung lay, jao. Dad and I can't finish it.",[["Send some to the camp!",2,"Sure! I'll post it… can you post curry, jao?"],["That sounds delicious.",1,"It's so good, jao. My mum's recipe."],["Put it in the fridge.",0,"Yes, I was going to put it in there."]]],
    ["What's your favourite food, Manager?",[["Baibua's khao tom mat.",2,"…If you say that, I'll wrap them for you every week, jao."],["The chicken rice by the market.",1,"The one Kati likes? I'll go try it too."],["Anything",0,"Eating anything is good too, jao."]]],
-   ["We both live in Chiang Mai and you've never eaten at my secret khao soi place. I'll take you one day.",[["Promise",2,"Promise! I've never taken anyone there."],["Bring the whole camp.",1,"Sure! But the shop only has two tables, hehe."],["If I'm free",0,"Yes, if you're free."]]]]},
+   ["Next time you come up to Chiang Mai, I'll take you to a secret khao soi place.",[["Promise",2,"Promise! I've never taken anyone there."],["Bring the whole camp.",1,"Sure! But the shop only has two tables, hehe."],["If I'm free",0,"Yes, if you're free."]]]]},
   {id:"bb_elbow",x:[
    ["I practised the reverse spinning lotus elbow a hundred times today, jao. My arm's about to fall off.",[["Great work, but rest a little too.",2,"Yes… if someone tells me to rest, I'll rest, jao."],["Could you teach Kati too?",1,"Sure! But Kati has to teach me her moves too."],["A hundred isn't many.",0,"…You're stricter than my own teacher, jao."]]],
    ["Did you know, Manager? Dad came up with this elbow when he saw a lotus blooming in the temple pond.",[["Beautiful, just like Tha Sao boxing.",2,"Yes… Dad's boxing is truly beautiful. I want the whole country to see it."],["Do lotuses even have thorns?",1,"They don't! Other people started calling me that, I didn't choose it, hehe."],["Lotus flowers are nice.",0,""]]],
@@ -435,7 +435,7 @@ RG_ARRIVE.isan=(G,D)=>{const top=rgTopGirl(G),ploy=rgIn(G,"ploy"),me=G.F[(G.regi
     {t:"Laugh and keep driving",fx:G2=>rgMeet(G2,"tabtim",1),then:[{n:"tabtim",f:"happy",l:"casual",t:"Haha, you're so calm. Tabtim likes calm people."}]},
     {t:"\"Put your seatbelt on.\"",fx:G2=>rgMeet(G2,"tabtim",1),then:[{n:"tabtim",f:"pout",l:"casual",t:"Okay, okay… geez, Manager, you're so serious."}]}]},
   ...(top?[{n:top.id,f:"pout",l:"casual",t:rgJeal(top.id,"Tubtim")}]:[]),
-  ...rgIf(ploy,[{n:"tabtim",f:"happy",l:"casual",t:"Eh! Is that Ploy in the back? Ploy of the Korat punch, from our own home turf! Tabtim's been wanting to take one of those since the launch party!"},
+  ...rgIf(ploy,[{n:"tabtim",f:"happy",l:"casual",t:"Hey! Is that Ploy in the back? The Korat fist from Bangkok! Tabtim's been wanting to take one since the gala!"},
     {n:"ploy",f:"pout",l:"casual",t:"…Face the front. You'll hurt your neck."}]),
   {n:"nar",bg:"somtam_stall",t:"Tabtim talks the whole way, then makes them stop at a roadside som tam stall. \"Best in the region, and Tabtim's paying!\""},
   {n:"tabtim",f:"happy",l:"casual",t:`The champion of ${D.name} is from near Tabtim's home. She kicks hard but drops her left guard, so counter with a left kick.`},
@@ -447,9 +447,9 @@ RG_TRIPX.buriram={bg:"night_isan",steps:G=>{const ploy=rgIn(G,"ploy");return [
   {n:"nar",t:"Same night, same ring: on the undercard before our bout, a Vector Camp fighter wins by knockout in round two."},
   {n:"npc",who:"Vega",t:"The data said he'd raise his guard late in round two. …Data never lies."},
   ...(ploy?[
-   {n:"npc",who:"Ringside gambler",t:"That Korat girl — she's been at a Chiang Mai camp so long. Is her Korat punch still the real thing, or just the name?"},
+   {n:"npc",who:"Ringside gambler",t:"That Bangkok girl they say throws the Korat punch… is it real, or a copy?"},
    {n:"nar",t:"The people around them laugh. Ploy hears every word, but doesn't turn around."},
-   {n:"pailin",f:"happy",t:"Ploy, come to Vector with me. Nobody here sees you as Korat boxing. At Vector, you're the best data I've ever had."},
+   {n:"pailin",f:"happy",t:"Ploy, come back to Vector. Nobody here sees you as Korat boxing. At Vector, you're the best data I've ever had."},
    {n:"npc",who:"Vega",t:"Big sis Ploy… your training room is still empty. Nobody dares use it."},
    {n:"ploy",f:"angry",l:"casual",with:"pailin",t:"Pailin, I'm not answering with words."},
    {n:"nar",t:"Ploy walks to the warm-up corner, picks up a pair of pads and hands them to Tabtim, who's been watching."},
@@ -506,8 +506,8 @@ RG_ARRIVE.south=(G,D)=>{const top=rgTopGirl(G),mali=rgIn(G,"mali"),me=G.F[(G.reg
   {n:"coach",t:"She really doesn't talk much… but every word counts."}];};
 RG_TRIPX.surat={bg:"mali_home",steps:G=>{const mali=rgIn(G,"mali");return mali?[
   {n:"nar",t:"The morning after the bout, Mali asks to stop in Chaiya. \"Mali's house is right on the way!\" In fact it's a forty-kilometre detour."},
-  {n:"nar",t:"At Mali's mother's house, her three younger siblings run out to hug her, and her mother sets out khao yam until the bench is full."},
-  {n:"npc",who:"Mali's mom",t:"You're here! Eat first, all of you… Oh? And why is that girl standing out in front of the house?"},
+  {n:"nar",t:"A two-storey wooden house by the sea. Three little siblings run out to hug Mali, and Mali's mum fills the platform with khao yam."},
+  {n:"npc",who:"Mali's mom",t:"You're here! Eat first, my dear, everyone… oh, and why is that girl standing out front?"},
   {n:"nar",show:[{id:"chaba",l:"casual"}],t:"Chaba leans against her motorbike outside the gate and won't come in, even when Mali's mum calls her twice."},
   {n:"mali",f:"sad",l:"casual",with:"chaba",t:"Big sis Chaba… when Mali was six, you just disappeared without saying goodbye. Mali waited for you in front of the house every evening."},
   {n:"chaba",f:"sad",l:"casual",t:"…"},
@@ -543,7 +543,7 @@ RG_CHAT.chaba=[
   ["The kopi shop by my house. Best hot tea there is.",[["I'd love to sit there with you.",2,"…There's a free seat. One. Next to me."],["Hot tea in the morning is nice.",1,"Mm. Every morning."],["I prefer coffee.",0,"…Fine"]]],
   ["Hungry. Going to eat.",[["Eat lots.",1,"Mm."],["Send me a photo.",2,"…(sends one photo of chicken rice, no text)"],["OK",0,"…"]]]]},
  {id:"cb_mali",x:[
-  ["Mali sends twenty messages a day.",[["Do you reply?",1,"I reply. …One a day."],["Mali waited for you for more than ten years, you know.",2,"…I know. I'll reply more. Two messages."],["Isn't that a lot?",0,"…Not too many."]]],
+  ["Mali sends twenty messages a day.",[["Do you reply?",1,"I reply. …One a day."],["Mali waited ten years for you.",2,"…I know. I'll reply more. Two messages."],["Isn't that a lot?",0,"…Not too many."]]],
   ["Mali fights much better now. You teach well.",[["Mali's the talented one.",2,"…Same thing Mali says about you."],["Kru Daeng teaches her.",1,"Kru Daeng too."],["Thanks for the compliment.",0,"Mm."]]],
   ["Look after Mali.",[["I already am.",2,"…Trust you."],["Come and see her yourself sometimes.",1,"…Will come."],["Mali's grown up now.",0,"…Still a kid."]]]]},
  {id:"cb_naka",x:[
@@ -740,7 +740,7 @@ function rgCup2(G){const R=G.region,rin=rgIn(G,"rin");return [
  {n:"nar",t:"While you wait for the elevator down, the doors of the one across are closing. Inside stands a lone woman with white hair, red at the tips. The doors shut before you can see her face"},
  {fx:()=>{R.c2=R.c2||"later";}}];}
 /* the week after the third cup: Pailin "forgets" a tablet */
-function rgCup3(G){const R=G.region,rin=rgIn(G,"rin"),ploy=rgIn(G,"ploy"),kati=rgIn(G,"kati");return [
+function rgCup3(G){const R=G.region,rin=rgIn(G,"rin"),ploy=rgIn(G,"ploy");return [
  {n:"nar",bg:"camp",t:"A rainy night. Pailin stands at the camp gate without an umbrella"},
  {n:"pailin",f:"sad",t:"I didn't come to see anyone. I was just passing by"},
  {n:"nar",t:"She hands over Vector's tablet, three files left open on the screen"},
@@ -751,16 +751,6 @@ function rgCup3(G){const R=G.region,rin=rgIn(G,"rin"),ploy=rgIn(G,"ploy"),kati=r
  ...rgIf(ploy,[{n:"ploy",f:"sad",l:"casual",t:"Sis…"},{n:"pailin",f:"sad",t:"Don't say anything, Ploy. I know I was stupid"},{n:"ploy",l:"casual",t:"You weren't stupid. You just trusted the wrong person… once"}]),
  rin?{n:"rin",f:"sad",l:"casual",t:"Clause 14.3 of the Naka League contract covers data obtained from Vector too. That means data from every camp Vector has ever fought"}:{n:"coach",t:"Data from every camp Vector has ever fought… it's all in Naka's hands now"},
  {n:"coach",bg:"camp",t:"Including our camp"},
- /* v1.91.23 (Man): the money behind Phayak Thong is Krerk's — revealed on the same tablet */
- {n:"nar",t:"At the end of the draft there's one more page, an appendix headed \"Naka Energy Affiliated Camps\". The first name is Vector. The second is Phayak Thong Camp, Chiang Mai."},
- {n:"nar",t:"The date Naka took its stake in Phayak Thong falls in the same month Grandpa Chai passed away."},
- {n:"pailin",f:"sad",t:"I never opened this page… I only signed the ones with Vector's name on them."},
- ...rgIf(ploy,[{n:"ploy",f:"angry",l:"casual",t:"The sponsor hand wraps the camp always made me use… that pattern at the wrist is a naga's tail."}]),
- ...rgIf(rin,[{n:"rin",f:"sad",l:"casual",t:"The year the boss sent an injured junior into the ring… the results targets he pushed on everyone were handed to him by someone else."}]),
- {n:"coach",t:"Once Grandpa Chai was gone, every one of our kids moved to Phayak Thong within a year… I always thought it was just money."},
- ...rgIf(kati,[{n:"kati",f:"sad",l:"casual",t:"I thought everyone just didn't want to stay at an empty camp… but someone wanted Grandpa's camp empty from the start."}]),
- {n:"nar",t:"The manager remembers what was said at the top-floor dinner in the Naka tower: \"I haven't seen a small camp like this in a long time.\" …He'd been watching all along."},
- R.c2==="deal"?{n:"coach",t:"And the green-and-gold folder we signed… our camp's name is on that page now too."}:{n:"coach",t:"That green-and-gold folder he slid across to you… it was the same move, second time round."},
  {n:"pailin",t:"I didn't come to warn you. I just forgot my tablet here. You can send it back tomorrow"},
  {n:"nar",t:"Pailin walks back into the rain and never looks back"},
  {fx:()=>{R.c3="seen";}}];}
@@ -827,22 +817,6 @@ function rgFinalLose(G,w,l){return [
  {n:"npc",who:"Khun Krerk",t:"It's all right. The door is still open. Come back whenever you like"},
  {n:"lada",l:"casual",t:"…not enough yet"},
  {n:"coach",t:"Get hurt, remember it, and come back"}];}
-/* v1.91.23 (Man): the week after the underground final — Tiger Boss comes without an envelope (once per save) */
-function rgTiger(G){const kati=rgIn(G,"kati"),ploy=rgIn(G,"ploy");return [
- {n:"nar",bg:"camp",show:[{id:"npc:tiger_boss"}],t:"The gold sedan pulls up at the camp like always, but this time Boss Suea gets out alone. No envelope, no entourage. He doesn't even take the cigar out of his shirt pocket."},
- {n:"npc",who:"Boss Suea",t:"No need to put your guard up. I'm not here to buy anyone today."},
- {n:"npc",who:"Boss Suea",t:"Naka sent a letter this morning. Every baht to Phayak Thong, cut. The one job Khun Krerk ever gave me was to get Sirichai Camp shut down… and I couldn't do it."},
- {n:"npc",who:"Boss Suea",t:"Every baht since the month Grandpa Chai passed was his. This car too. I was just the man standing in front of the sign."},
- {n:"coach",t:"And when you took our kids away from this camp back then?"},
- {n:"nar",show:[{id:"npc:tiger_boss_cry"}],t:"Boss Suea pulls out his cigar to light it, and it slips from his fingers. He clutches his head and breaks down crying right there at the camp gate."},
- {n:"npc",who:"Boss Suea",img:"tiger_boss_cry",t:"…He gave the order, I did it. I thought I was the tiger. Turns out I was just the nameplate."},
- ...rgIf(kati,[{n:"kati",f:"sad",l:"casual",t:"Boss… the older kids who moved over back then, are they still fighting?"},{n:"npc",who:"Boss Suea",img:"tiger_boss_cry",t:"Every one of them. I'm no good at raising kids, but I never dropped a single one."}]),
- ...rgIf(ploy,[{n:"ploy",l:"casual",t:"So what happens to Phayak Thong now?"},{n:"npc",who:"Boss Suea",img:"tiger_boss_cry",t:"From now on it runs on my own money. A bit smaller… but finally actually mine."},{n:"ploy",f:"happy",l:"casual",t:"…I'll tell the juniors myself that the boss didn't run off."}]),
- {n:"npc",who:"Boss Suea",img:"tiger_boss_cry",t:"Grandpa Chai told me when I was young: a good punch has to land in the right place. …I never listened.",choice:[
-   {t:"Offer your hand",then:[{n:"nar",show:[{id:"npc:tiger_boss"}],t:"Boss Suea wipes his face on his sleeve and looks at the hand so long you think he won't take it. Then he does, firmer than you expected."}]},
-   {t:"\"See you in the ring.\"",then:[{n:"npc",who:"Boss Suea",t:"Ha! Deal. Phayak Thong's kids will be waiting… on my own money this time."}]},
-   {t:"Nod quietly",then:[{n:"nar",t:"Boss Suea picks his cigar up off the ground, nods back, then turns and walks to his car."}]}]},
- {n:"nar",t:"The gold sedan backs out slowly. For the first time, it doesn't honk at the camp gate."}];}
 const REGION={
   /* end of week (after the weekly events): the gala the week after the invitation, the contract beat the week after the first cup */
   weekScene(G,done){const R=G.region;if(!R){done();return;}const now=gameWeek(G);if(lbWeek(G,done))return;
@@ -851,7 +825,6 @@ const REGION={
     if(r&&!R.c1&&c&&now>=(c.wonAbs||0)+1){R.c1="seen";playScene(rgCup1(G,r),()=>{save();done();},{bg:"camp",look:"casual"});return;}
     {const r2=(R.cups||[])[1],c2=r2&&R.champ[r2];if(r2&&!R.c2&&c2&&now>=(c2.wonAbs||0)+1){R.c2="later";playScene(rgCup2(G),()=>{save();done();},{bg:"camp",look:"casual"});return;}}
     {const r3=(R.cups||[])[2],c3=r3&&R.champ[r3];if(r3&&!R.c3&&c3&&now>=(c3.wonAbs||0)+1){R.c3="seen";playScene(rgCup3(G),()=>{save();done();},{bg:"camp",look:"casual"});return;}}
-    {const F=R.final;if(F&&F.won&&!G.tigerRev&&now>=(F.wonAbs||0)+1){G.tigerRev=1;playScene(rgTiger(G),()=>{save();done();},{bg:"camp",look:"casual"});return;}}
     if(this.closeDue(G)){this.openFinal(G);playScene(rgClose(G),()=>{save();done();},{bg:"closing_ceremony",look:"casual"});return;} /* v1.91.20 round 11 */
     done();},
   /* ---------- state helpers ---------- */
@@ -948,7 +921,7 @@ const REGION={
     playScene([{n:"nar",t:nights>1?`Night ${n} in ${D.name}`:`The whole camp stays the night in ${D.name}`},{n:"nar",t:"What shall we do tonight?",choice}],()=>this.night(T,P,n+1,done),{bg:this.hotelBg[r],look:"casual"});},
   home(T,done){if(!T.shopDone){T.shopDone=1;this.shop(T,()=>this.home(T,done),1);return;}G.log=G.log||[];G.log.push(`Back at camp from ${ROAD_DEST[T.dest].name}`);save();done();},
   /* v1.89.23: the souvenir shop on the way out of town — the only place regional souvenirs are sold; keep buying until you get back on the bus */
-  shopIntro:{north:"On the way home the bus stops at a roadside souvenir shop. Paper umbrellas hang in rows; fine handwoven cloth lies folded on a wooden table.",
+  shopIntro:{north:"On the way out of town the bus stops at a roadside souvenir shop. Paper umbrellas hang in rows; fine handwoven cloth lies folded on a wooden table.",
     isan:"On the way out of town the bus stops at the provincial silk centre. Triangle pillows are piled like a mountain; Praewa silk hangs behind glass.",
     central:"Before heading home the bus stops at a roadside Thai crafts shop. Khon masks stare down from the walls; Benjarong cups line the shelves.",
     south:"On the way out of town the bus stops at a seaside souvenir shop. Shadow puppets glow in the shopfront; pearls sit in a glass case."},
