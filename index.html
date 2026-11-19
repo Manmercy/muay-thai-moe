@@ -2179,7 +2179,7 @@ html[lang=en] .fight .fctl2 .skbtn2 b{font-size:11px;display:-webkit-box;-webkit
 /* v1.91.5 hot-form title */
 .pill.hotb{background:linear-gradient(90deg,#ff7a1a,#ff3d5a);color:#fff;border:0;font-weight:700;white-space:nowrap}.pill.hotb.sm{font-size:10px;padding:1px 6px;margin-left:4px}.hotl{color:#ffb070}
 
-/* v1.91.31: one love — her label, ladder and portrait frame */
+/* v1.91.32: one love — her label, ladder and portrait frame */
 .hearts.hmono small{color:#ffd27a;font-weight:700;text-shadow:0 0 6px rgba(255,140,190,.55)}
 .reltier.rmono{border-color:#f4b6cf;background:linear-gradient(135deg,rgba(255,150,190,.14),rgba(255,210,120,.12))}
 .reltier.rmono>b{color:#ffd27a;text-shadow:0 0 8px rgba(255,140,190,.6)}
@@ -2187,6 +2187,13 @@ html[lang=en] .fight .fctl2 .skbtn2 b{font-size:11px;display:-webkit-box;-webkit
 @keyframes monoglow{50%{box-shadow:inset 0 0 0 3px #f48fb8,0 0 0 2px #ffd27a,0 0 18px rgba(255,200,120,.75)}}
 @media (prefers-reduced-motion:reduce){.face.monoav{animation:none}}
 .ltitle.lmono{border-color:#f4b6cf;background:linear-gradient(135deg,rgba(255,150,190,.16),rgba(255,210,120,.14))}
+
+/* v1.91.32: deleting letters */
+.mdelbar{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:2px 0 8px;flex-wrap:wrap}.mdelbar small{color:var(--dim);font-size:12px}
+.mdelask{display:flex;align-items:center;gap:6px;flex-wrap:wrap;justify-content:flex-end}.mdelask>span{font-size:13px;color:var(--fg)}
+div.mdelask{margin:2px 0 8px;padding:8px;box-shadow:inset 0 0 0 2px var(--line);background:var(--raise)}
+.mdelrow{display:flex;justify-content:flex-start;margin-top:10px;padding-top:8px;border-top:1px dashed var(--line)}.mdelrow .mdelask{justify-content:flex-start}
+.mlock{color:var(--dim);font-size:12px}
 </style></head><body>
 <script>window.__MTM_ART=["alicia_sheet.webp","alicia_special.webp","baibua_sheet.webp","baibua_special.webp","baiyok_sheet.webp","baiyok_white_sheet.webp","bull1_sheet.webp","bull2_sheet.webp","bull3_sheet.webp","chaba_sheet.webp","chaba_special.webp","fah_loykrathong_sheet.webp","fah_loykrathong_special.webp","fah_sheet.webp","fah_special.webp","gang1_sheet.webp","gang2_sheet.webp","gang3_sheet.webp","gang4_sheet.webp","gang5_sheet.webp","gangsilver_sheet.webp","kati_loykrathong_sheet.webp","kati_loykrathong_special.webp","kati_sheet.webp","kati_special.webp","mali_loykrathong_sheet.webp","mali_loykrathong_special.webp","mali_sheet.webp","mali_special.webp","nl_ladda_blood_sheet.webp","nl_ladda_hood_sheet.webp","nl_ladda_sheet.webp","nl_meili_sheet.webp","nl_meili_special.webp","nl_nia_sheet.webp","nl_nia_special.webp","nl_rosa_sheet.webp","nl_rosa_special.webp","nl_varya_sheet.webp","nl_varya_special.webp","npc10_sheet.webp","npc1_sheet.webp","npc2_sheet.webp","npc3_sheet.webp","npc4_sheet.webp","npc5_sheet.webp","npc6_sheet.webp","npc7_sheet.webp","npc8_sheet.webp","npc9_sheet.webp","npc_baiyok.webp","npc_baiyok_black.webp","npc_gang_boss.webp","npc_gang_boss_face.webp","npc_gang_goldblack.webp","npc_gang_group.webp","npc_gang_silver.webp","npc_grandma.webp","npc_krerk.webp","npc_krerk_face.webp","npc_nai.webp","npc_petchara.webp","npc_thief.webp","npc_thief2.webp","npc_tiger_boss.webp","npc_vendor_green.webp","npc_vendor_red.webp","pailin_sheet.webp","petchara_sheet.webp","ploy_loykrathong_sheet.webp","ploy_loykrathong_special.webp","ploy_sheet.webp","ploy_special.webp","rgp_buriram_sheet.webp","rgp_chanthaburi_sheet.webp","rgp_chiangrai_sheet.webp","rgp_chumphon_sheet.webp","rgp_khonkaen_sheet.webp","rgp_lampang_sheet.webp","rgp_lopburi_sheet.webp","rgp_nakhonsi_sheet.webp","rgp_nan_sheet.webp","rgp_phetchaburi_sheet.webp","rgp_songkhla_sheet.webp","rgp_suphan_sheet.webp","rgp_surat_sheet.webp","rgp_ubon_sheet.webp","rgp_udon_sheet.webp","rgp_uttaradit_sheet.webp","rin_loykrathong_sheet.webp","rin_loykrathong_special.webp","rin_sheet.webp","rin_special.webp","rooster1_sheet.webp","rooster2_sheet.webp","rooster3_sheet.webp","rooster4_sheet.webp","rooster5_sheet.webp","tabtim_sheet.webp","tabtim_special.webp","thief2_sheet.webp","thief_sheet.webp"];</script>
 <div id="app"></div><div id="live" aria-live="polite" role="status"></div>
@@ -4272,7 +4279,7 @@ function startLine(F,rng){const R=a=>a[Math.floor(rng()*a.length)];const h=fight
   if(F.round>=3&&Math.abs(sc)<=1&&TIER_HEAT[F.tier]>=1)t+=" "+R(START_HOT.close);
   if(F.round===1&&typeof isMonoT==="function"&&typeof G!=="undefined"&&G&&F.A&&F.A.f&&isMonoT(G,G.F[F.A.f.id]))t=R(MONO_CALL).replace(/\{n\}/g,F.A.f.name)+" "+t;
   return {text:t.replace("{r}",F.round),heat:h};}
-/* v1.91.31: the ring call for the one you chose */
+/* v1.91.32: the ring call for the one you chose */
 const MONO_CALL=["มุมแดงคืนนี้ {n}! คู่ใจของผู้จัดการค่ายศิริชัยครับท่านผู้ชม!","ขอเสียงให้ {n}! ข่าวว่าทุกไฟต์มีคนหนึ่งยืนลุ้นอยู่ข้างเวทีไม่เคยขาด!","{n} ขึ้นเวทีแล้วครับ! คู่ใจของผู้จัดการ วันนี้มีคนเชียร์ส่วนตัวมาด้วย!"];
 // v1.23: a funnier, louder booth — two commentators who can't help themselves, plus lines for the odd opponents
 // classic ringside catchphrases (homage to Thai TV commentary), tied to what just happened
@@ -4708,7 +4715,7 @@ const LOVER_TIERS=[[1,"คนรัก"],[15,"แฟนที่รู้ใจ"
 const hTot=f=>((f&&f.bond)||0)+((f&&f.bondX)||0);
 // relationship state, written to work with a single romance (G.romance) and with several lovers / promises / exes (G.lovers, G.promise, G.exAbs)
 function relState(G,id){if(!G||!id)return null;const L=Array.isArray(G.lovers)?G.lovers:(G.romance?[G.romance]:[]);if(L.includes(id))return "lover";
-  if(G.promise&&G.promise[id]!=null)return "promise";if(G.exAbs&&G.exAbs[id]!=null)return "ex";const R=G.region;if(R&&R.lov&&R.lov[id]!=null)return "lover";if(R&&R.ex&&R.ex[id]!=null)return "ex";return null;} /* v1.91.31: regional champions keep their own romance track (G.region.lov / .ex) */
+  if(G.promise&&G.promise[id]!=null)return "promise";if(G.exAbs&&G.exAbs[id]!=null)return "ex";const R=G.region;if(R&&R.lov&&R.lov[id]!=null)return "lover";if(R&&R.ex&&R.ex[id]!=null)return "ex";return null;} /* v1.91.28: regional champions keep their own romance track (G.region.lov / .ex) */
 /* v1.89.11: Lv.30 is the top at 1,000 points — each step past 100 asks a little more (15 → 80) */
 const HEART_STEPS=[15,20,20,25,30,35,35,40,45,45,50,55,60,60,65,70,75,75,80],HEART_MAX=30,HEART_TOP=1000;
 const heartStep=n=>HEART_STEPS[n-11]||0; // points from Lv.n to Lv.n+1, for 11 ≤ n < 30
@@ -5100,7 +5107,7 @@ const REL_DESC={"คนรู้จัก":"ยังเรียกคุณว
 const REL_BRANCH=[["lover","คนรัก"],["promise","คนที่สัญญากันไว้"],["friend","เพื่อนสนิท"],["ex","เคยคบ"]];
 /* what she is to you: lover / promise / ex (relState) or a close friend after you said no */
 const relKind=(G,f)=>{const id=f&&f.id;if(!G||!id||!G.F||!G.F[id])return null;const st=relState(G,id);if(st)return st;return isFriendz(G,id)&&(G.F[id].bond||0)>=40?"friend":null;};
-const isMonoT=(G,f)=>{try{const T=G&&f&&typeof loveTitle==="function"?loveTitle(G,f):null;return !!T&&T.k==="mono";}catch(e){return false;}}; /* v1.91.31: one love after a year — her own label, frame and ring call */
+const isMonoT=(G,f)=>{try{const T=G&&f&&typeof loveTitle==="function"?loveTitle(G,f):null;return !!T&&T.k==="mono";}catch(e){return false;}}; /* v1.91.32: one love after a year — her own label, frame and ring call */
 function relBase(G,f,lv){lv=lv!=null?lv:heartLv(f||{}).lv;const k=relKind(G,f);
   if(k==="lover"&&isMonoT(G,f))return "💍 คู่ใจ";
   if(k==="lover")return heartTier(lv,f.id)+" ♥"+(inHm(G,f.id)?" (ฮาเร็ม)":"");if(k==="friend")return "เพื่อนสนิท";if(k)return heartTier(lv,f.id);return heartTier(lv);}
@@ -5416,7 +5423,7 @@ EVENTS.push(
 // warn before a second "yes"
 const cheatWarn=(G,id)=>(partners(G).some(k=>k!==id)||rgLovN(G)>0)?[{n:"nar",t:"⚠ คุณมีคนรักอยู่แล้ว ถ้าตอบรับจะกลายเป็นคบซ้อน… เรื่องแบบนี้ปิดไม่มิดไปตลอดหรอกนะ"}]:[];
 const yesTxt=(G,id,t)=>(partners(G).some(k=>k!==id)||rgLovN(G)>0)?t+" (คบซ้อน)":t;
-const rgLovN=G=>G&&G.region&&G.region.lov?Object.keys(G.region.lov).length:0; /* v1.91.31: a regional champion you are seeing counts as someone else */
+const rgLovN=G=>G&&G.region&&G.region.lov?Object.keys(G.region.lov).length:0; /* v1.91.28: a regional champion you are seeing counts as someone else */
 const lovSolo=G=>partners(G).length===1&&!rgLovN(G);
 const topLock=(G,id)=>isPartner(G,id)&&partners(G).length+rgLovN(G)>1; /* the top heart scene and the Lv.27/30 chats wait while you see more than one person (harem too) */ /* the lover bonus only holds while you see one person */
 // v1.30: lovers get their own dates/scenes; Ploy & Fah make a promise instead (romance with them waits for season 2)
@@ -7348,7 +7355,7 @@ function loveTitle(G,f){if(!G||!f||!f.id)return null;const fl=G.flags||{};
   if(G.harem&&fl.harem1y&&inHm(G,f.id))return {k:"harem",t:LOVE_TITLE.harem_t,d:LOVE_TITLE.harem_d};return null;}
 function lovePerk(f){const z={prep:0,brk:0};if(typeof G==="undefined"||!G||!G.F||!f||f.camp!=="player")return z;const T=loveTitle(G,f);if(!T)return z;
   if(T.k==="mono"){z.prep=.03;z.brk=5;return z;}
-  const o=hmList(G).filter(k=>k!==f.id&&G.F[k]&&G.F[k].camp==="player"&&!isAway(G,k)).length;z.prep=.0075+.0025*o;z.brk=1+.5*o;return z;} /* v1.91.31 (Man): the team perk stays below one love even with all five (1.75% / +3 vs 3% / +5) */
+  const o=hmList(G).filter(k=>k!==f.id&&G.F[k]&&G.F[k].camp==="player"&&!isAway(G,k)).length;z.prep=.0075+.0025*o;z.brk=1+.5*o;return z;} /* v1.91.32 (Man): the team perk stays below one love even with all five (1.75% / +3 vs 3% / +5) */
 /* year end: her line every year (one love) · the group's lines (harem) · from year 5, the route's ending once (after a year on the route) */
 function loveYearEnd(G,y){const fl=G.flags||{},id=monoOf(G);
   if(y>=5&&!fl.loveEnd){
@@ -8390,7 +8397,7 @@ AU.gsfx=function(kind,a){if(!this.init()||this.muted||!SETTINGS.sfx)return;const
   if(kind==="shimmer")for(let i=0;i<6;i++)T(i*.05,{f:1400+Math.random()*1400,type:"sine",dur:.12,peak:.06});};
 
 // ================= MUAY THAI MOE v1.3 — UI =================
-const VERSION="1.91.31";
+const VERSION="1.91.32";
 const CUR_LANG=(typeof window!=="undefined"&&window.LANG)||"th";
 const TH_LABEL=String.fromCharCode(3652,3607,3618);
 function langSwitch(cls){return `<div class="langsw ${cls||""}" role="group" aria-label="Language">${[["th",TH_LABEL],["en","EN"]].map(([k,l])=>`<button class="lsb ${CUR_LANG===k?"on":""}" data-act="setlang" data-v="${k}" aria-pressed="${CUR_LANG===k}">${l}</button>`).join("")}</div>`;}
@@ -10346,8 +10353,14 @@ function qCleanup(G){const keep=new Set([...G.bookings.map(b=>b.b),...G.offers.m
 
 // ---------- mail ----------
 let MAILN=0;
-function addMail(G,m){G.mail=G.mail||[];m.id="m"+G.week+"_"+(++MAILN)+"_"+Math.floor(Math.random()*1e4);m.wk=G.week;m.season=G.season||1;if(m.exp!=null)m.expAbs=gameWeek(G)+(m.exp-G.week);m.read=false;G.mail.unshift(m);G.mail=G.mail.slice(0,40);return m;}
+function addMail(G,m){G.mail=G.mail||[];m.id="m"+G.week+"_"+(++MAILN)+"_"+Math.floor(Math.random()*1e4);m.wk=G.week;m.season=G.season||1;if(m.exp!=null)m.expAbs=gameWeek(G)+(m.exp-G.week);m.read=false;G.mail.unshift(m);for(let i=G.mail.length-1;G.mail.length>40&&i>=0;i--)if(!mailKeep(G.mail[i]))G.mail.splice(i,1);if(G.mail.length>60)G.mail=G.mail.slice(0,60);return m;}
 const mailOpen=m=>!m.done&&!m.expired&&(["take","pay","quiz","quest"].includes(m.kind)||(m.kind==="event"&&(m.ev==="kongka"||m.ev==="thief"||m.ev==="tuy"||m.ev==="dress")));
+/* v1.91.32: the player may delete letters — never an event invitation, and only once a letter no longer waits on an answer */
+function mailKeep(m){if(!m)return "";if(m.kind==="event"&&m.ev==="loy")return "event";if(m.done||m.expired)return "";if(mailOpen(m))return "act";
+  if(m.kind==="lotto"){try{const [s,i]=String(m.draw).split("_").map(Number),d=lottoSt(G).draws.find(x=>x.season===s&&x.i===i);return d&&d.res&&!d.done?"act":"";}catch(e){return "";}}
+  if(m.kind==="loan")return typeof loanOk==="function"&&loanOk(G)?"act":"";if(m.kind==="job"||m.kind==="event")return "act";return "";}
+const mailDelN=()=>(G.mail||[]).filter(m=>m.read&&!mailKeep(m)).length;
+function mailDel(ids){const S=new Set(ids);const n0=(G.mail||[]).length;G.mail=(G.mail||[]).filter(m=>!S.has(m.id)||mailKeep(m));return n0-G.mail.length;}
 function mailBadge(){if(!G||!G.mail)return 0;return G.mail.filter(m=>!m.read||mailOpen(m)).length;}
 const MAILBOX_PX=pxIcon(["....kkkk....","...kffffk...","..krrrrrrk..",".krrrrrrrrk.",".krwwwwwwrk.",".krwkkkkwrk.",".krwwwwwwrk.",".krrrrrrrrk.",".kkkkkkkkkk.",".....kk.....",".....kk.....","....kkkk...."],{k:"#2a1a10",r:"#c8283c",w:"#f4ead8",f:"#f7d24a"});
 const BILLS=[["เทศบาลตำบล","ค่าปรับ: ไก่ของค่ายขันเสียงดังเกินเกณฑ์ตอนตีสี่ (ร้องเรียน 14 ราย)",300],
@@ -10535,7 +10548,8 @@ function questExtra(done,rng){if(!G||G.ended)return false;G.gang=G.gang||{st:0,n
 /* v1.89.24: the Loy Krathong invitation glows green until it is read and the gauntlet has been played once */
 function loyMailHot(m){if(m.kind==="event"&&(m.ev==="kongka"||m.ev==="thief"||m.ev==="tuy"||m.ev==="dress"))return !m.done&&!m.expired;return m.kind==="event"&&m.ev==="loy";} /* v1.90.4: the Loy invitation always glows green so it is easy to find again */
 function mailListHTML(){const L=G.mail||[];
-  return `<h2 class="mailh">${MAILBOX_PX}ตู้จดหมาย</h2>${L.length?`<div class="mlist2">${L.map(m=>`<button class="mrow2 ${m.read?"":"unread"} ${mailOpen(m)?"act":""} ${m.done||m.expired?"old":""} ${loyMailHot(m)?"loyev":""}" data-act="mopen" data-v="${m.id}"><span class="mk ${m.kind}">${{letter:"จดหมาย",take:"เงินเข้า",pay:"ใบแจ้งหนี้",quiz:"ตอบคำถาม",quest:"ขอความช่วยเหลือ",job:"งานจ้าง",event:"อีเวนต์",loan:"เงินกู้"}[m.kind]}</span><span class="mt"><b>${esc(m.title)}</b><small>${esc(m.from)} · สด.${m.wk}${m.expired?" · หมดเวลา":m.done?" · จัดการแล้ว":m.expAbs!=null?` · ภายใน สด.${((m.expAbs-1)%52)+1}`:""}</small></span>${mailOpen(m)?'<i class="dot"></i>':""}</button>`).join("")}</div>`:`<p class="lead">ยังไม่มีจดหมาย</p>`}`;}
+  const nd=mailDelN();const bulk=!nd?"":UI.mdelAll?`<div class="mdelask"><span>ลบจดหมายที่อ่านแล้ว ${nd} ฉบับ? กู้คืนไม่ได้</span><button class="btn sm" data-act="mdelno">ไม่ลบ</button><button class="btn sm red" data-act="mdelallok">ลบ ${nd} ฉบับ</button></div>`:`<div class="mdelbar"><small>🔒 จดหมายอีเวนต์และจดหมายที่ยังไม่ได้ตอบจะไม่ถูกลบ</small><button class="btn sm ghost" data-act="mdelall">🗑 ลบที่อ่านแล้ว (${nd})</button></div>`;
+  return `<h2 class="mailh">${MAILBOX_PX}ตู้จดหมาย</h2>${bulk}${L.length?`<div class="mlist2">${L.map(m=>`<button class="mrow2 ${m.read?"":"unread"} ${mailOpen(m)?"act":""} ${m.done||m.expired?"old":""} ${loyMailHot(m)?"loyev":""}" data-act="mopen" data-v="${m.id}"><span class="mk ${m.kind}">${{letter:"จดหมาย",take:"เงินเข้า",pay:"ใบแจ้งหนี้",quiz:"ตอบคำถาม",quest:"ขอความช่วยเหลือ",job:"งานจ้าง",event:"อีเวนต์",loan:"เงินกู้",lotto:"สลาก"}[m.kind]||"จดหมาย"}</span><span class="mt"><b>${esc(m.title)}</b><small>${esc(m.from)} · สด.${m.wk}${m.expired?" · หมดเวลา":m.done?" · จัดการแล้ว":m.expAbs!=null?` · ภายใน สด.${((m.expAbs-1)%52)+1}`:""}</small></span>${mailOpen(m)?'<i class="dot"></i>':""}</button>`).join("")}</div>`:`<p class="lead">ยังไม่มีจดหมาย</p>`}`;}
 function letterHTML(m){m.read=true;let act="";
   if(m.kind==="take")act=m.done?`<p class="meta center">รับแล้ว ${fmt(m.amt)}</p>`:`<button class="btn primary" data-act="mtake" data-v="${m.id}">รับเงิน ${fmt(m.amt)}</button>`;
   if(m.kind==="pay")act=m.done?`<p class="meta center">${m.paid?"จ่ายแล้ว":"ไม่จ่าย (ชื่อเสียง −0.3)"}</p>`:m.expired?"":`<button class="btn" data-act="mskip" data-v="${m.id}">ไม่จ่าย (ชื่อเสียง −0.3)</button><button class="btn primary" data-act="mpay" data-v="${m.id}" ${G.cash<m.amt?"disabled":""}>จ่าย ${fmt(m.amt)}</button>`;
@@ -10546,10 +10560,11 @@ function letterHTML(m){m.read=true;let act="";
   if(m.kind==="lotto")act=lottoLetterAct(m);
   if(m.kind==="quest")act=m.done?`<p class="meta center">${m.declined?"ปฏิเสธแล้ว":"ส่งนักมวยไปแล้ว"}</p>`:m.expired?`<p class="meta center">หมดเวลาแล้ว</p>`:`<button class="btn" data-act="mdecl" data-v="${m.id}">ไม่ไป</button><button class="btn primary" data-act="macc" data-v="${m.id}">รับงาน · เลือกนักมวย</button>`;
   const opp=m.qk?QK[m.qk]:m.npc?G.F[m.npc]:null;
+  const kp=mailKeep(m);const del=UI.mdelAsk===m.id?`<span class="mdelask"><span>ลบฉบับนี้? กู้คืนไม่ได้</span><button class="btn sm" data-act="mdelno">ไม่ลบ</button><button class="btn sm red" data-act="mdelok" data-v="${m.id}">ลบ</button></span>`:kp?`<small class="mlock">🔒 ${kp==="event"?"จดหมายอีเวนต์ ลบไม่ได้":"ลบได้หลังจัดการจดหมายนี้แล้ว"}</small>`:`<button class="btn sm ghost" data-act="mdel" data-v="${m.id}">🗑 ลบ</button>`;
   return `<button class="btn sm ghost mback" data-act="mail">◂ ตู้จดหมาย</button><div class="letter px"><div class="lhead"><small>จาก</small><b>${esc(m.from)}</b><small>สัปดาห์ ${m.wk}</small></div><h3>${esc(m.title)}</h3><p>${esc(m.body)}</p>
    ${m.kind==="take"||m.kind==="pay"?`<p class="lamt ${m.kind}">${m.kind==="take"?"+":"−"}${fmt(m.amt)}</p>`:""}
    ${opp&&m.kind==="quest"?`<div class="qopp">${m.qk?`<canvas width="96" height="96" data-qsprite="${QK[m.qk].sprite}"></canvas>`:faceImg(opp)}<span><b>${esc(opp.name)}</b><small>${m.q==="belt"?`ห้ายก · พลังคู่ชก ${ovr(opp.a).toFixed(1)}`:m.q==="challenge"?"ไฟต์โชว์ ไม่นับสถิติ":"ชกทันที · ไม่นับสถิติและอันดับ · นักมวยล้าเพิ่ม"}${m.pay?` · ค่าเหนื่อย ${fmt(m.pay)}`:m.q==="gang"?" · ค่าตอบแทนมาทางตู้จดหมาย":""}</small></span></div>`:""}</div>
-   <div class="mfoot lact">${act}</div>`;}
+   <div class="mfoot lact">${act}</div><div class="mdelrow">${del}</div>`;}
 function qpickHTML(mid){const m=(G.mail||[]).find(x=>x.id===mid);const R=roster(G);
   return `<h2>ส่งใครไป?</h2><p class="meta">${m?esc(m.title):""} · ชกทันทีสัปดาห์นี้ ล้าเพิ่ม ไม่นับสถิติ</p><div class="qpick">${R.map(f=>`<button class="qpf px" data-act="qsend" data-id="${f.id}" data-v="${mid}" ${f.injury?"disabled":""}>${faceImg(f,"sm")}<span><b>${esc(f.name)} Lv.${f.lvl}</b><small>${f.injury?`บาดเจ็บ ${f.injury} สด.`:`ล้า ${Math.round(f.fatigue)} · ความพร้อม ${condition(f)}`}</small></span></button>`).join("")}</div>`;}
 // cash flow & fame graphs
@@ -10607,8 +10622,13 @@ const XMODAL={
   rankhelp:()=>({body:`<h2>อันดับมีผลยังไง?</h2><div class="ctip big"><img src="${faceSrc("coach")}" alt=""><span><b>ครูแดง:</b> เป้าหมายฤดูกาลนี้คือพากะทิ${G.F.mali.camp==="player"?"กับมะลิ":""}ขึ้นไป<b>ท็อป 4</b> ของรุ่น ผ่านสองด่านให้ได้ แล้วไปเจอพยัคฆ์ทองที่นัดชิง</span></div>${RANK_HELP}`,foot:true}),
   declo:m=>{const o=G.offers.find(x=>x.id===m.id);if(!o)return {body:"",foot:true};return {body:`<h2>ปฏิเสธข้อเสนอนี้?</h2><p>${esc(G.F[o.a].name)} vs ${esc(G.F[o.b].name)} · สด.${o.week} · ${TIER[o.tier].name}</p><p class="meta">ข้อเสนอจะหายไปจากรายการ (ถ้าปฏิเสธคนเดิมบ่อย ๆ เขาอาจเขียนจดหมายมาท้า)</p><div class="mfoot"><button class="btn ghost" data-act="closeModal">ไม่ใช่</button><button class="btn primary" data-act="declyes" data-v="${o.id}">ปฏิเสธเลย</button></div>`,foot:false};}};
 Object.assign(ACT,{
-  mail:()=>{UI.modal={type:"mail"};render();},
-  mopen:d=>{UI.modal={type:"letter",id:d.v};render();save();},
+  mail:()=>{UI.mdelAsk=null;UI.mdelAll=0;UI.modal={type:"mail"};render();},
+  mopen:d=>{UI.mdelAsk=null;UI.mdelAll=0;UI.modal={type:"letter",id:d.v};render();save();},
+  mdel:d=>{UI.mdelAsk=d.v;render();},
+  mdelno:()=>{UI.mdelAsk=null;UI.mdelAll=0;render();},
+  mdelok:d=>{UI.mdelAsk=null;if(mailDel([d.v])){toast("ลบจดหมายแล้ว");}UI.modal={type:"mail"};render();save();},
+  mdelall:()=>{UI.mdelAll=1;render();},
+  mdelallok:()=>{UI.mdelAll=0;const n=mailDel((G.mail||[]).filter(m=>m.read).map(m=>m.id));toast(`ลบจดหมายแล้ว ${n} ฉบับ`);render();save();},
   mtake:d=>{const m=G.mail.find(x=>x.id===d.v);if(!m||m.done)return;G.cash+=m.amt;m.done=true;AU.sfx("level");toast(`ได้รับ ${fmt(m.amt)}`);save();render();},
   mpay:d=>{const m=G.mail.find(x=>x.id===d.v);if(!m||m.done||G.cash<m.amt)return;G.cash-=m.amt;m.done=true;m.paid=true;AU.sfx("ui");save();render();},
   mskip:d=>{const m=G.mail.find(x=>x.id===d.v);if(!m||m.done)return;G.rep=Math.max(0,G.rep-.3);m.done=true;save();render();},
@@ -12692,7 +12712,7 @@ CHAT.fah.push(
 <script>
 (function(){
 /* v1.87: Thai code ships inside index.html; English code (en.js) and the dictionary (i18n.js) load only when needed */
-var B="cb98c0dd19";
+var B="11da2d3ec5";
 var L="";try{L=localStorage.getItem("mtm_lang")||"";}catch(e){}
 try{var h=(location.hash||"").match(/lang=(th|en)/);if(h)L=h[1];}catch(e){}
 if(L!=="th"&&L!=="en")L="th";

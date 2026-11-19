@@ -38,8 +38,14 @@ function qCleanup(G){const keep=new Set([...G.bookings.map(b=>b.b),...G.offers.m
 
 // ---------- mail ----------
 let MAILN=0;
-function addMail(G,m){G.mail=G.mail||[];m.id="m"+G.week+"_"+(++MAILN)+"_"+Math.floor(Math.random()*1e4);m.wk=G.week;m.season=G.season||1;if(m.exp!=null)m.expAbs=gameWeek(G)+(m.exp-G.week);m.read=false;G.mail.unshift(m);G.mail=G.mail.slice(0,40);return m;}
+function addMail(G,m){G.mail=G.mail||[];m.id="m"+G.week+"_"+(++MAILN)+"_"+Math.floor(Math.random()*1e4);m.wk=G.week;m.season=G.season||1;if(m.exp!=null)m.expAbs=gameWeek(G)+(m.exp-G.week);m.read=false;G.mail.unshift(m);for(let i=G.mail.length-1;G.mail.length>40&&i>=0;i--)if(!mailKeep(G.mail[i]))G.mail.splice(i,1);if(G.mail.length>60)G.mail=G.mail.slice(0,60);return m;}
 const mailOpen=m=>!m.done&&!m.expired&&(["take","pay","quiz","quest"].includes(m.kind)||(m.kind==="event"&&(m.ev==="kongka"||m.ev==="thief"||m.ev==="tuy"||m.ev==="dress")));
+/* v1.91.32: the player may delete letters — never an event invitation, and only once a letter no longer waits on an answer */
+function mailKeep(m){if(!m)return "";if(m.kind==="event"&&m.ev==="loy")return "event";if(m.done||m.expired)return "";if(mailOpen(m))return "act";
+  if(m.kind==="lotto"){try{const [s,i]=String(m.draw).split("_").map(Number),d=lottoSt(G).draws.find(x=>x.season===s&&x.i===i);return d&&d.res&&!d.done?"act":"";}catch(e){return "";}}
+  if(m.kind==="loan")return typeof loanOk==="function"&&loanOk(G)?"act":"";if(m.kind==="job"||m.kind==="event")return "act";return "";}
+const mailDelN=()=>(G.mail||[]).filter(m=>m.read&&!mailKeep(m)).length;
+function mailDel(ids){const S=new Set(ids);const n0=(G.mail||[]).length;G.mail=(G.mail||[]).filter(m=>!S.has(m.id)||mailKeep(m));return n0-G.mail.length;}
 function mailBadge(){if(!G||!G.mail)return 0;return G.mail.filter(m=>!m.read||mailOpen(m)).length;}
 const MAILBOX_PX=pxIcon(["....kkkk....","...kffffk...","..krrrrrrk..",".krrrrrrrrk.",".krwwwwwwrk.",".krwkkkkwrk.",".krwwwwwwrk.",".krrrrrrrrk.",".kkkkkkkkkk.",".....kk.....",".....kk.....","....kkkk...."],{k:"#2a1a10",r:"#c8283c",w:"#f4ead8",f:"#f7d24a"});
 const BILLS=[["เทศบาลตำบล","ค่าปรับ: ไก่ของค่ายขันเสียงดังเกินเกณฑ์ตอนตีสี่ (ร้องเรียน 14 ราย)",300],
@@ -227,7 +233,8 @@ function questExtra(done,rng){if(!G||G.ended)return false;G.gang=G.gang||{st:0,n
 /* v1.89.24: the Loy Krathong invitation glows green until it is read and the gauntlet has been played once */
 function loyMailHot(m){if(m.kind==="event"&&(m.ev==="kongka"||m.ev==="thief"||m.ev==="tuy"||m.ev==="dress"))return !m.done&&!m.expired;return m.kind==="event"&&m.ev==="loy";} /* v1.90.4: the Loy invitation always glows green so it is easy to find again */
 function mailListHTML(){const L=G.mail||[];
-  return `<h2 class="mailh">${MAILBOX_PX}ตู้จดหมาย</h2>${L.length?`<div class="mlist2">${L.map(m=>`<button class="mrow2 ${m.read?"":"unread"} ${mailOpen(m)?"act":""} ${m.done||m.expired?"old":""} ${loyMailHot(m)?"loyev":""}" data-act="mopen" data-v="${m.id}"><span class="mk ${m.kind}">${{letter:"จดหมาย",take:"เงินเข้า",pay:"ใบแจ้งหนี้",quiz:"ตอบคำถาม",quest:"ขอความช่วยเหลือ",job:"งานจ้าง",event:"อีเวนต์",loan:"เงินกู้"}[m.kind]}</span><span class="mt"><b>${esc(m.title)}</b><small>${esc(m.from)} · สด.${m.wk}${m.expired?" · หมดเวลา":m.done?" · จัดการแล้ว":m.expAbs!=null?` · ภายใน สด.${((m.expAbs-1)%52)+1}`:""}</small></span>${mailOpen(m)?'<i class="dot"></i>':""}</button>`).join("")}</div>`:`<p class="lead">ยังไม่มีจดหมาย</p>`}`;}
+  const nd=mailDelN();const bulk=!nd?"":UI.mdelAll?`<div class="mdelask"><span>ลบจดหมายที่อ่านแล้ว ${nd} ฉบับ? กู้คืนไม่ได้</span><button class="btn sm" data-act="mdelno">ไม่ลบ</button><button class="btn sm red" data-act="mdelallok">ลบ ${nd} ฉบับ</button></div>`:`<div class="mdelbar"><small>🔒 จดหมายอีเวนต์และจดหมายที่ยังไม่ได้ตอบจะไม่ถูกลบ</small><button class="btn sm ghost" data-act="mdelall">🗑 ลบที่อ่านแล้ว (${nd})</button></div>`;
+  return `<h2 class="mailh">${MAILBOX_PX}ตู้จดหมาย</h2>${bulk}${L.length?`<div class="mlist2">${L.map(m=>`<button class="mrow2 ${m.read?"":"unread"} ${mailOpen(m)?"act":""} ${m.done||m.expired?"old":""} ${loyMailHot(m)?"loyev":""}" data-act="mopen" data-v="${m.id}"><span class="mk ${m.kind}">${{letter:"จดหมาย",take:"เงินเข้า",pay:"ใบแจ้งหนี้",quiz:"ตอบคำถาม",quest:"ขอความช่วยเหลือ",job:"งานจ้าง",event:"อีเวนต์",loan:"เงินกู้",lotto:"สลาก"}[m.kind]||"จดหมาย"}</span><span class="mt"><b>${esc(m.title)}</b><small>${esc(m.from)} · สด.${m.wk}${m.expired?" · หมดเวลา":m.done?" · จัดการแล้ว":m.expAbs!=null?` · ภายใน สด.${((m.expAbs-1)%52)+1}`:""}</small></span>${mailOpen(m)?'<i class="dot"></i>':""}</button>`).join("")}</div>`:`<p class="lead">ยังไม่มีจดหมาย</p>`}`;}
 function letterHTML(m){m.read=true;let act="";
   if(m.kind==="take")act=m.done?`<p class="meta center">รับแล้ว ${fmt(m.amt)}</p>`:`<button class="btn primary" data-act="mtake" data-v="${m.id}">รับเงิน ${fmt(m.amt)}</button>`;
   if(m.kind==="pay")act=m.done?`<p class="meta center">${m.paid?"จ่ายแล้ว":"ไม่จ่าย (ชื่อเสียง −0.3)"}</p>`:m.expired?"":`<button class="btn" data-act="mskip" data-v="${m.id}">ไม่จ่าย (ชื่อเสียง −0.3)</button><button class="btn primary" data-act="mpay" data-v="${m.id}" ${G.cash<m.amt?"disabled":""}>จ่าย ${fmt(m.amt)}</button>`;
@@ -238,10 +245,11 @@ function letterHTML(m){m.read=true;let act="";
   if(m.kind==="lotto")act=lottoLetterAct(m);
   if(m.kind==="quest")act=m.done?`<p class="meta center">${m.declined?"ปฏิเสธแล้ว":"ส่งนักมวยไปแล้ว"}</p>`:m.expired?`<p class="meta center">หมดเวลาแล้ว</p>`:`<button class="btn" data-act="mdecl" data-v="${m.id}">ไม่ไป</button><button class="btn primary" data-act="macc" data-v="${m.id}">รับงาน · เลือกนักมวย</button>`;
   const opp=m.qk?QK[m.qk]:m.npc?G.F[m.npc]:null;
+  const kp=mailKeep(m);const del=UI.mdelAsk===m.id?`<span class="mdelask"><span>ลบฉบับนี้? กู้คืนไม่ได้</span><button class="btn sm" data-act="mdelno">ไม่ลบ</button><button class="btn sm red" data-act="mdelok" data-v="${m.id}">ลบ</button></span>`:kp?`<small class="mlock">🔒 ${kp==="event"?"จดหมายอีเวนต์ ลบไม่ได้":"ลบได้หลังจัดการจดหมายนี้แล้ว"}</small>`:`<button class="btn sm ghost" data-act="mdel" data-v="${m.id}">🗑 ลบ</button>`;
   return `<button class="btn sm ghost mback" data-act="mail">◂ ตู้จดหมาย</button><div class="letter px"><div class="lhead"><small>จาก</small><b>${esc(m.from)}</b><small>สัปดาห์ ${m.wk}</small></div><h3>${esc(m.title)}</h3><p>${esc(m.body)}</p>
    ${m.kind==="take"||m.kind==="pay"?`<p class="lamt ${m.kind}">${m.kind==="take"?"+":"−"}${fmt(m.amt)}</p>`:""}
    ${opp&&m.kind==="quest"?`<div class="qopp">${m.qk?`<canvas width="96" height="96" data-qsprite="${QK[m.qk].sprite}"></canvas>`:faceImg(opp)}<span><b>${esc(opp.name)}</b><small>${m.q==="belt"?`ห้ายก · พลังคู่ชก ${ovr(opp.a).toFixed(1)}`:m.q==="challenge"?"ไฟต์โชว์ ไม่นับสถิติ":"ชกทันที · ไม่นับสถิติและอันดับ · นักมวยล้าเพิ่ม"}${m.pay?` · ค่าเหนื่อย ${fmt(m.pay)}`:m.q==="gang"?" · ค่าตอบแทนมาทางตู้จดหมาย":""}</small></span></div>`:""}</div>
-   <div class="mfoot lact">${act}</div>`;}
+   <div class="mfoot lact">${act}</div><div class="mdelrow">${del}</div>`;}
 function qpickHTML(mid){const m=(G.mail||[]).find(x=>x.id===mid);const R=roster(G);
   return `<h2>ส่งใครไป?</h2><p class="meta">${m?esc(m.title):""} · ชกทันทีสัปดาห์นี้ ล้าเพิ่ม ไม่นับสถิติ</p><div class="qpick">${R.map(f=>`<button class="qpf px" data-act="qsend" data-id="${f.id}" data-v="${mid}" ${f.injury?"disabled":""}>${faceImg(f,"sm")}<span><b>${esc(f.name)} Lv.${f.lvl}</b><small>${f.injury?`บาดเจ็บ ${f.injury} สด.`:`ล้า ${Math.round(f.fatigue)} · ความพร้อม ${condition(f)}`}</small></span></button>`).join("")}</div>`;}
 // cash flow & fame graphs
@@ -299,8 +307,13 @@ const XMODAL={
   rankhelp:()=>({body:`<h2>อันดับมีผลยังไง?</h2><div class="ctip big"><img src="${faceSrc("coach")}" alt=""><span><b>ครูแดง:</b> เป้าหมายฤดูกาลนี้คือพากะทิ${G.F.mali.camp==="player"?"กับมะลิ":""}ขึ้นไป<b>ท็อป 4</b> ของรุ่น ผ่านสองด่านให้ได้ แล้วไปเจอพยัคฆ์ทองที่นัดชิง</span></div>${RANK_HELP}`,foot:true}),
   declo:m=>{const o=G.offers.find(x=>x.id===m.id);if(!o)return {body:"",foot:true};return {body:`<h2>ปฏิเสธข้อเสนอนี้?</h2><p>${esc(G.F[o.a].name)} vs ${esc(G.F[o.b].name)} · สด.${o.week} · ${TIER[o.tier].name}</p><p class="meta">ข้อเสนอจะหายไปจากรายการ (ถ้าปฏิเสธคนเดิมบ่อย ๆ เขาอาจเขียนจดหมายมาท้า)</p><div class="mfoot"><button class="btn ghost" data-act="closeModal">ไม่ใช่</button><button class="btn primary" data-act="declyes" data-v="${o.id}">ปฏิเสธเลย</button></div>`,foot:false};}};
 Object.assign(ACT,{
-  mail:()=>{UI.modal={type:"mail"};render();},
-  mopen:d=>{UI.modal={type:"letter",id:d.v};render();save();},
+  mail:()=>{UI.mdelAsk=null;UI.mdelAll=0;UI.modal={type:"mail"};render();},
+  mopen:d=>{UI.mdelAsk=null;UI.mdelAll=0;UI.modal={type:"letter",id:d.v};render();save();},
+  mdel:d=>{UI.mdelAsk=d.v;render();},
+  mdelno:()=>{UI.mdelAsk=null;UI.mdelAll=0;render();},
+  mdelok:d=>{UI.mdelAsk=null;if(mailDel([d.v])){toast("ลบจดหมายแล้ว");}UI.modal={type:"mail"};render();save();},
+  mdelall:()=>{UI.mdelAll=1;render();},
+  mdelallok:()=>{UI.mdelAll=0;const n=mailDel((G.mail||[]).filter(m=>m.read).map(m=>m.id));toast(`ลบจดหมายแล้ว ${n} ฉบับ`);render();save();},
   mtake:d=>{const m=G.mail.find(x=>x.id===d.v);if(!m||m.done)return;G.cash+=m.amt;m.done=true;AU.sfx("level");toast(`ได้รับ ${fmt(m.amt)}`);save();render();},
   mpay:d=>{const m=G.mail.find(x=>x.id===d.v);if(!m||m.done||G.cash<m.amt)return;G.cash-=m.amt;m.done=true;m.paid=true;AU.sfx("ui");save();render();},
   mskip:d=>{const m=G.mail.find(x=>x.id===d.v);if(!m||m.done)return;G.rep=Math.max(0,G.rep-.3);m.done=true;save();render();},

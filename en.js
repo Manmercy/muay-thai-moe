@@ -2088,7 +2088,7 @@ function startLine(F,rng){const R=a=>a[Math.floor(rng()*a.length)];const h=fight
   if(F.round>=3&&Math.abs(sc)<=1&&TIER_HEAT[F.tier]>=1)t+=" "+R(START_HOT.close);
   if(F.round===1&&typeof isMonoT==="function"&&typeof G!=="undefined"&&G&&F.A&&F.A.f&&isMonoT(G,G.F[F.A.f.id]))t=R(MONO_CALL).replace(/\{n\}/g,F.A.f.name)+" "+t;
   return {text:t.replace("{r}",F.round),heat:h};}
-/* v1.91.31: the ring call for the one you chose */
+/* v1.91.32: the ring call for the one you chose */
 const MONO_CALL=["In the red corner tonight, {n}! The soulmate of Sirichai's own manager, ladies and gentlemen!","Make some noise for {n}! Word is there's one person ringside who has never missed a single fight of hers!","{n} steps into the ring! The manager's soulmate — and she's brought her own personal cheering section!"];
 // v1.23: a funnier, louder booth — two commentators who can't help themselves, plus lines for the odd opponents
 // classic ringside catchphrases (homage to Thai TV commentary), tied to what just happened
@@ -2524,7 +2524,7 @@ const LOVER_TIERS=[[1,"Lover"],[15,"Kindred sweetheart"],[20,"Inseparable pair"]
 const hTot=f=>((f&&f.bond)||0)+((f&&f.bondX)||0);
 // relationship state, written to work with a single romance (G.romance) and with several lovers / promises / exes (G.lovers, G.promise, G.exAbs)
 function relState(G,id){if(!G||!id)return null;const L=Array.isArray(G.lovers)?G.lovers:(G.romance?[G.romance]:[]);if(L.includes(id))return "lover";
-  if(G.promise&&G.promise[id]!=null)return "promise";if(G.exAbs&&G.exAbs[id]!=null)return "ex";const R=G.region;if(R&&R.lov&&R.lov[id]!=null)return "lover";if(R&&R.ex&&R.ex[id]!=null)return "ex";return null;} /* v1.91.31: regional champions keep their own romance track (G.region.lov / .ex) */
+  if(G.promise&&G.promise[id]!=null)return "promise";if(G.exAbs&&G.exAbs[id]!=null)return "ex";const R=G.region;if(R&&R.lov&&R.lov[id]!=null)return "lover";if(R&&R.ex&&R.ex[id]!=null)return "ex";return null;} /* v1.91.32: regional champions keep their own romance track (G.region.lov / .ex) */
 /* v1.89.11: Lv.30 is the top at 1,000 points — each step past 100 asks a little more (15 → 80) */
 const HEART_STEPS=[15,20,20,25,30,35,35,40,45,45,50,55,60,60,65,70,75,75,80],HEART_MAX=30,HEART_TOP=1000;
 const heartStep=n=>HEART_STEPS[n-11]||0; // points from Lv.n to Lv.n+1, for 11 ≤ n < 30
@@ -2916,7 +2916,7 @@ const REL_DESC={"Acquaintance":"Still calls you \"Manager\", a bit stiffly","Tea
 const REL_BRANCH=[["lover","Lover"],["promise","Promised"],["friend","Close friend"],["ex","Ex"]];
 /* what she is to you: lover / promise / ex (relState) or a close friend after you said no */
 const relKind=(G,f)=>{const id=f&&f.id;if(!G||!id||!G.F||!G.F[id])return null;const st=relState(G,id);if(st)return st;return isFriendz(G,id)&&(G.F[id].bond||0)>=40?"friend":null;};
-const isMonoT=(G,f)=>{try{const T=G&&f&&typeof loveTitle==="function"?loveTitle(G,f):null;return !!T&&T.k==="mono";}catch(e){return false;}}; /* v1.91.31: one love after a year — her own label, frame and ring call */
+const isMonoT=(G,f)=>{try{const T=G&&f&&typeof loveTitle==="function"?loveTitle(G,f):null;return !!T&&T.k==="mono";}catch(e){return false;}}; /* v1.91.32: one love after a year — her own label, frame and ring call */
 function relBase(G,f,lv){lv=lv!=null?lv:heartLv(f||{}).lv;const k=relKind(G,f);
   if(k==="lover"&&isMonoT(G,f))return "💍 Soulmate";
   if(k==="lover")return heartTier(lv,f.id)+" ♥"+(inHm(G,f.id)?" (harem)":"");if(k==="friend")return "Close friend";if(k)return heartTier(lv,f.id);return heartTier(lv);}
@@ -3232,7 +3232,7 @@ EVENTS.push(
 // warn before a second "yes"
 const cheatWarn=(G,id)=>(partners(G).some(k=>k!==id)||rgLovN(G)>0)?[{n:"nar",t:"⚠ You already have someone. Say yes and you'll be two-timing… and secrets like this never stay hidden for long."}]:[];
 const yesTxt=(G,id,t)=>(partners(G).some(k=>k!==id)||rgLovN(G)>0)?t+" (two-timing)":t;
-const rgLovN=G=>G&&G.region&&G.region.lov?Object.keys(G.region.lov).length:0; /* v1.91.31: a regional champion you are seeing counts as someone else */
+const rgLovN=G=>G&&G.region&&G.region.lov?Object.keys(G.region.lov).length:0; /* v1.91.32: a regional champion you are seeing counts as someone else */
 const lovSolo=G=>partners(G).length===1&&!rgLovN(G);
 const topLock=(G,id)=>isPartner(G,id)&&partners(G).length+rgLovN(G)>1; /* the top heart scene and the Lv.27/30 chats wait while you see more than one person (harem too) */ /* the lover bonus only holds while you see one person */
 // v1.30: lovers get their own dates/scenes; Ploy & Fah make a promise instead (romance with them waits for season 2)
@@ -5164,7 +5164,7 @@ function loveTitle(G,f){if(!G||!f||!f.id)return null;const fl=G.flags||{};
   if(G.harem&&fl.harem1y&&inHm(G,f.id))return {k:"harem",t:LOVE_TITLE.harem_t,d:LOVE_TITLE.harem_d};return null;}
 function lovePerk(f){const z={prep:0,brk:0};if(typeof G==="undefined"||!G||!G.F||!f||f.camp!=="player")return z;const T=loveTitle(G,f);if(!T)return z;
   if(T.k==="mono"){z.prep=.03;z.brk=5;return z;}
-  const o=hmList(G).filter(k=>k!==f.id&&G.F[k]&&G.F[k].camp==="player"&&!isAway(G,k)).length;z.prep=.0075+.0025*o;z.brk=1+.5*o;return z;} /* v1.91.31 (Man): the team perk stays below one love even with all five (1.75% / +3 vs 3% / +5) */
+  const o=hmList(G).filter(k=>k!==f.id&&G.F[k]&&G.F[k].camp==="player"&&!isAway(G,k)).length;z.prep=.0075+.0025*o;z.brk=1+.5*o;return z;} /* v1.91.32 (Man): the team perk stays below one love even with all five (1.75% / +3 vs 3% / +5) */
 /* year end: her line every year (one love) · the group's lines (harem) · from year 5, the route's ending once (after a year on the route) */
 function loveYearEnd(G,y){const fl=G.flags||{},id=monoOf(G);
   if(y>=5&&!fl.loveEnd){
@@ -6206,7 +6206,7 @@ AU.gsfx=function(kind,a){if(!this.init()||this.muted||!SETTINGS.sfx)return;const
   if(kind==="shimmer")for(let i=0;i<6;i++)T(i*.05,{f:1400+Math.random()*1400,type:"sine",dur:.12,peak:.06});};
 
 // ================= MUAY THAI MOE v1.3 — UI =================
-const VERSION="1.91.31";
+const VERSION="1.91.32";
 const CUR_LANG=(typeof window!=="undefined"&&window.LANG)||"th";
 const TH_LABEL=String.fromCharCode(3652,3607,3618);
 function langSwitch(cls){return `<div class="langsw ${cls||""}" role="group" aria-label="Language">${[["th",TH_LABEL],["en","EN"]].map(([k,l])=>`<button class="lsb ${CUR_LANG===k?"on":""}" data-act="setlang" data-v="${k}" aria-pressed="${CUR_LANG===k}">${l}</button>`).join("")}</div>`;}
@@ -8162,8 +8162,14 @@ function qCleanup(G){const keep=new Set([...G.bookings.map(b=>b.b),...G.offers.m
 
 // ---------- mail ----------
 let MAILN=0;
-function addMail(G,m){G.mail=G.mail||[];m.id="m"+G.week+"_"+(++MAILN)+"_"+Math.floor(Math.random()*1e4);m.wk=G.week;m.season=G.season||1;if(m.exp!=null)m.expAbs=gameWeek(G)+(m.exp-G.week);m.read=false;G.mail.unshift(m);G.mail=G.mail.slice(0,40);return m;}
+function addMail(G,m){G.mail=G.mail||[];m.id="m"+G.week+"_"+(++MAILN)+"_"+Math.floor(Math.random()*1e4);m.wk=G.week;m.season=G.season||1;if(m.exp!=null)m.expAbs=gameWeek(G)+(m.exp-G.week);m.read=false;G.mail.unshift(m);for(let i=G.mail.length-1;G.mail.length>40&&i>=0;i--)if(!mailKeep(G.mail[i]))G.mail.splice(i,1);if(G.mail.length>60)G.mail=G.mail.slice(0,60);return m;}
 const mailOpen=m=>!m.done&&!m.expired&&(["take","pay","quiz","quest"].includes(m.kind)||(m.kind==="event"&&(m.ev==="kongka"||m.ev==="thief"||m.ev==="tuy"||m.ev==="dress")));
+/* v1.91.32: the player may delete letters — never an event invitation, and only once a letter no longer waits on an answer */
+function mailKeep(m){if(!m)return "";if(m.kind==="event"&&m.ev==="loy")return "event";if(m.done||m.expired)return "";if(mailOpen(m))return "act";
+  if(m.kind==="lotto"){try{const [s,i]=String(m.draw).split("_").map(Number),d=lottoSt(G).draws.find(x=>x.season===s&&x.i===i);return d&&d.res&&!d.done?"act":"";}catch(e){return "";}}
+  if(m.kind==="loan")return typeof loanOk==="function"&&loanOk(G)?"act":"";if(m.kind==="job"||m.kind==="event")return "act";return "";}
+const mailDelN=()=>(G.mail||[]).filter(m=>m.read&&!mailKeep(m)).length;
+function mailDel(ids){const S=new Set(ids);const n0=(G.mail||[]).length;G.mail=(G.mail||[]).filter(m=>!S.has(m.id)||mailKeep(m));return n0-G.mail.length;}
 function mailBadge(){if(!G||!G.mail)return 0;return G.mail.filter(m=>!m.read||mailOpen(m)).length;}
 const MAILBOX_PX=pxIcon(["....kkkk....","...kffffk...","..krrrrrrk..",".krrrrrrrrk.",".krwwwwwwrk.",".krwkkkkwrk.",".krwwwwwwrk.",".krrrrrrrrk.",".kkkkkkkkkk.",".....kk.....",".....kk.....","....kkkk...."],{k:"#2a1a10",r:"#c8283c",w:"#f4ead8",f:"#f7d24a"});
 const BILLS=[["Subdistrict Municipality","Fine: your camp's rooster crows above the legal limit at 4 a.m. (14 complaints)",300],
@@ -8351,7 +8357,8 @@ function questExtra(done,rng){if(!G||G.ended)return false;G.gang=G.gang||{st:0,n
 /* v1.89.24: the Loy Krathong invitation glows green until it is read and the gauntlet has been played once */
 function loyMailHot(m){if(m.kind==="event"&&(m.ev==="kongka"||m.ev==="thief"||m.ev==="tuy"||m.ev==="dress"))return !m.done&&!m.expired;return m.kind==="event"&&m.ev==="loy";} /* v1.90.4: the Loy invitation always glows green so it is easy to find again */
 function mailListHTML(){const L=G.mail||[];
-  return `<h2 class="mailh">${MAILBOX_PX} Mailbox</h2>${L.length?`<div class="mlist2">${L.map(m=>`<button class="mrow2 ${m.read?"":"unread"} ${mailOpen(m)?"act":""} ${m.done||m.expired?"old":""} ${loyMailHot(m)?"loyev":""}" data-act="mopen" data-v="${m.id}"><span class="mk ${m.kind}">${{letter:"Letter",take:"Money",pay:"Invoice",quiz:"Quiz",quest:"Request",job:"Job",event:"Event",loan:"Loan"}[m.kind]}</span><span class="mt"><b>${esc(m.title)}</b><small>${esc(m.from)} · wk ${m.wk}${m.expired?" · expired":m.done?" · handled":m.expAbs!=null?` · by wk ${((m.expAbs-1)%52)+1}`:""}</small></span>${mailOpen(m)?'<i class="dot"></i>':""}</button>`).join("")}</div>`:`<p class="lead">No mail yet</p>`}`;}
+  const nd=mailDelN();const bulk=!nd?"":UI.mdelAll?`<div class="mdelask"><span>Delete ${nd} letters? This can't be undone</span><button class="btn sm" data-act="mdelno">Keep</button><button class="btn sm red" data-act="mdelallok">Delete ${nd} letters</button></div>`:`<div class="mdelbar"><small>🔒 Event letters and letters still waiting on an answer are never deleted</small><button class="btn sm ghost" data-act="mdelall">🗑 Delete read (${nd})</button></div>`;
+  return `<h2 class="mailh">${MAILBOX_PX} Mailbox</h2>${bulk}${L.length?`<div class="mlist2">${L.map(m=>`<button class="mrow2 ${m.read?"":"unread"} ${mailOpen(m)?"act":""} ${m.done||m.expired?"old":""} ${loyMailHot(m)?"loyev":""}" data-act="mopen" data-v="${m.id}"><span class="mk ${m.kind}">${{letter:"Letter",take:"Money",pay:"Invoice",quiz:"Quiz",quest:"Request",job:"Job",event:"Event",loan:"Loan",lotto:"Lottery"}[m.kind]||"Letter"}</span><span class="mt"><b>${esc(m.title)}</b><small>${esc(m.from)} · wk ${m.wk}${m.expired?" · expired":m.done?" · handled":m.expAbs!=null?` · by wk ${((m.expAbs-1)%52)+1}`:""}</small></span>${mailOpen(m)?'<i class="dot"></i>':""}</button>`).join("")}</div>`:`<p class="lead">No mail yet</p>`}`;}
 function letterHTML(m){m.read=true;let act="";
   if(m.kind==="take")act=m.done?`<p class="meta center">Received ${fmt(m.amt)}</p>`:`<button class="btn primary" data-act="mtake" data-v="${m.id}">Collect ${fmt(m.amt)}</button>`;
   if(m.kind==="pay")act=m.done?`<p class="meta center">${m.paid?"Paid":"Didn't pay (fame −0.3)"}</p>`:m.expired?"":`<button class="btn" data-act="mskip" data-v="${m.id}">Don't pay (fame −0.3)</button><button class="btn primary" data-act="mpay" data-v="${m.id}" ${G.cash<m.amt?"disabled":""}>Pay ${fmt(m.amt)}</button>`;
@@ -8362,10 +8369,11 @@ function letterHTML(m){m.read=true;let act="";
   if(m.kind==="lotto")act=lottoLetterAct(m);
   if(m.kind==="quest")act=m.done?`<p class="meta center">${m.declined?"Declined":"Fighter sent"}</p>`:m.expired?`<p class="meta center">Expired</p>`:`<button class="btn" data-act="mdecl" data-v="${m.id}">Not going</button><button class="btn primary" data-act="macc" data-v="${m.id}">Take the job · choose a fighter</button>`;
   const opp=m.qk?QK[m.qk]:m.npc?G.F[m.npc]:null;
+  const kp=mailKeep(m);const del=UI.mdelAsk===m.id?`<span class="mdelask"><span>Delete this letter? This can't be undone</span><button class="btn sm" data-act="mdelno">Keep</button><button class="btn sm red" data-act="mdelok" data-v="${m.id}">Delete</button></span>`:kp?`<small class="mlock">🔒 ${kp==="event"?"Event letter — can't be deleted":"Can be deleted once this letter is dealt with"}</small>`:`<button class="btn sm ghost" data-act="mdel" data-v="${m.id}">🗑 Delete</button>`;
   return `<button class="btn sm ghost mback" data-act="mail">◂ Mailbox</button><div class="letter px"><div class="lhead"><small>From</small><b>${esc(m.from)}</b><small>Week ${m.wk}</small></div><h3>${esc(m.title)}</h3><p>${esc(m.body)}</p>
    ${m.kind==="take"||m.kind==="pay"?`<p class="lamt ${m.kind}">${m.kind==="take"?"+":"−"}${fmt(m.amt)}</p>`:""}
    ${opp&&m.kind==="quest"?`<div class="qopp">${m.qk?`<canvas width="96" height="96" data-qsprite="${QK[m.qk].sprite}"></canvas>`:faceImg(opp)}<span><b>${esc(opp.name)}</b><small>${m.q==="belt"?`5 rounds · opponent power ${ovr(opp.a).toFixed(1)}`:m.q==="challenge"?"Exhibition, off the record":"Fight now · off the record and rankings · extra fatigue"}${m.pay?` · fee ${fmt(m.pay)}`:m.q==="gang"?" · reward arrives by mail":""}</small></span></div>`:""}</div>
-   <div class="mfoot lact">${act}</div>`;}
+   <div class="mfoot lact">${act}</div><div class="mdelrow">${del}</div>`;}
 function qpickHTML(mid){const m=(G.mail||[]).find(x=>x.id===mid);const R=roster(G);
   return `<h2>Who will you send?</h2><p class="meta">${m?esc(m.title):""} · fight right now, extra fatigue, off the record</p><div class="qpick">${R.map(f=>`<button class="qpf px" data-act="qsend" data-id="${f.id}" data-v="${mid}" ${f.injury?"disabled":""}>${faceImg(f,"sm")}<span><b>${esc(f.name)} Lv.${f.lvl}</b><small>${f.injury?`Injured ${f.injury} wk`:`Fatigue ${Math.round(f.fatigue)} · readiness ${condition(f)}`}</small></span></button>`).join("")}</div>`;}
 // cash flow & fame graphs
@@ -8423,8 +8431,13 @@ const XMODAL={
   rankhelp:()=>({body:`<h2>How do rankings work?</h2><div class="ctip big"><img src="${faceSrc("coach")}" alt=""><span><b>Coach Daeng:</b> This season's goal is to get Kati ${G.F.mali.camp==="player"?" and Mali":""} into the division's <b>top 4</b>, clear both stages, then face Golden Tiger in the final</span></div>${RANK_HELP}`,foot:true}),
   declo:m=>{const o=G.offers.find(x=>x.id===m.id);if(!o)return {body:"",foot:true};return {body:`<h2>Decline this offer?</h2><p>${esc(G.F[o.a].name)} vs ${esc(G.F[o.b].name)} · wk ${o.week} · ${TIER[o.tier].name}</p><p class="meta">The offer will disappear from the list (decline the same person often and they may write you a challenge)</p><div class="mfoot"><button class="btn ghost" data-act="closeModal">No</button><button class="btn primary" data-act="declyes" data-v="${o.id}">Decline</button></div>`,foot:false};}};
 Object.assign(ACT,{
-  mail:()=>{UI.modal={type:"mail"};render();},
-  mopen:d=>{UI.modal={type:"letter",id:d.v};render();save();},
+  mail:()=>{UI.mdelAsk=null;UI.mdelAll=0;UI.modal={type:"mail"};render();},
+  mopen:d=>{UI.mdelAsk=null;UI.mdelAll=0;UI.modal={type:"letter",id:d.v};render();save();},
+  mdel:d=>{UI.mdelAsk=d.v;render();},
+  mdelno:()=>{UI.mdelAsk=null;UI.mdelAll=0;render();},
+  mdelok:d=>{UI.mdelAsk=null;if(mailDel([d.v])){toast("Letter deleted");}UI.modal={type:"mail"};render();save();},
+  mdelall:()=>{UI.mdelAll=1;render();},
+  mdelallok:()=>{UI.mdelAll=0;const n=mailDel((G.mail||[]).filter(m=>m.read).map(m=>m.id));toast(`Deleted ${n} letters`);render();save();},
   mtake:d=>{const m=G.mail.find(x=>x.id===d.v);if(!m||m.done)return;G.cash+=m.amt;m.done=true;AU.sfx("level");toast(`Received ${fmt(m.amt)}`);save();render();},
   mpay:d=>{const m=G.mail.find(x=>x.id===d.v);if(!m||m.done||G.cash<m.amt)return;G.cash-=m.amt;m.done=true;m.paid=true;AU.sfx("ui");save();render();},
   mskip:d=>{const m=G.mail.find(x=>x.id===d.v);if(!m||m.done)return;G.rep=Math.max(0,G.rep-.3);m.done=true;save();render();},

@@ -15112,5 +15112,20 @@
  "💍 ฉายาใหม่: คู่ใจ · เมื่อคู่ใจขึ้นชก เข้าเป้า +3% และฟื้นแรงระหว่างยก +5 · ป้ายและกรอบรูปของเธอเปลี่ยนเป็นสีคู่ใจ": "💍 New title: Soulmate · when your soulmate fights, hit chance +3% and recovery between rounds +5 · her label and portrait frame now wear soulmate colors",
  "เมื่อคนในทีมขึ้นชก เข้าเป้า +0.75% และฟื้นแรงระหว่างยก +1 · เพิ่มอีกตามจำนวนคนในทีมที่อยู่ในค่าย (สูงสุด +1.75% · +3)": "When a team member fights: hit chance +0.75% and recovery between rounds +1 · more for each team member in camp (up to +1.75% · +3)",
  "เมื่อคู่ใจขึ้นชก เข้าเป้า +3% · ฟื้นแรงระหว่างยก +5": "When your soulmate fights: hit chance +3% · recovery between rounds +5",
- "💍 คู่ใจ": "💍 Soulmate"
+ "💍 คู่ใจ": "💍 Soulmate",
+ " ฉบับ": " letters",
+ "ลบจดหมายแล้ว ": "Deleted ",
+ "ลบจดหมายแล้ว": "Letter deleted",
+ "</div><div class=\"letter px\"><div class=\"lhead\"><small>จาก</small><b>": "</div><div class=\"letter px\"><div class=\"lhead\"><small>From</small><b>",
+ "<div class=\"mtop\"><button class=\"btn sm ghost mback\" data-act=\"mail\">◂ ตู้จดหมาย</button>": "<div class=\"mtop\"><button class=\"btn sm ghost mback\" data-act=\"mail\">◂ Mailbox</button>",
+ "\">🗑 ลบ</button>": "\">🗑 Delete</button>",
+ "ลบได้หลังจัดการจดหมายนี้แล้ว": "Can be deleted once this letter is dealt with",
+ "จดหมายอีเวนต์ ลบไม่ได้": "Event letter — can't be deleted",
+ "\">ลบ</button></span>": "\">Delete</button></span>",
+ "<span class=\"mdelask\"><span>ลบฉบับนี้? กู้คืนไม่ได้</span><button class=\"btn sm\" data-act=\"mdelno\">ไม่ลบ</button><button class=\"btn sm red\" data-act=\"mdelok\" data-v=\"": "<span class=\"mdelask\"><span>Delete this letter? This can't be undone</span><button class=\"btn sm\" data-act=\"mdelno\">Keep</button><button class=\"btn sm red\" data-act=\"mdelok\" data-v=\"",
+ "สลาก": "Lottery",
+ "<div class=\"mdelbar\"><small>🔒 จดหมายอีเวนต์และจดหมายที่ยังไม่ได้ตอบจะไม่ถูกลบ</small><button class=\"btn sm ghost\" data-act=\"mdelall\">🗑 ลบที่อ่านแล้ว (": "<div class=\"mdelbar\"><small>🔒 Event letters and letters still waiting on an answer are never deleted</small><button class=\"btn sm ghost\" data-act=\"mdelall\">🗑 Delete read (",
+ " ฉบับ</button></div>": " letters</button></div>",
+ " ฉบับ? กู้คืนไม่ได้</span><button class=\"btn sm\" data-act=\"mdelno\">ไม่ลบ</button><button class=\"btn sm red\" data-act=\"mdelallok\">ลบ ": " letters? This can't be undone</span><button class=\"btn sm\" data-act=\"mdelno\">Keep</button><button class=\"btn sm red\" data-act=\"mdelallok\">Delete ",
+ "<div class=\"mdelask\"><span>ลบจดหมายที่อ่านแล้ว ": "<div class=\"mdelask\"><span>Delete "
 }

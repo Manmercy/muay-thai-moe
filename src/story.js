@@ -98,7 +98,7 @@ const LOVER_TIERS=[[1,"คนรัก"],[15,"แฟนที่รู้ใจ"
 const hTot=f=>((f&&f.bond)||0)+((f&&f.bondX)||0);
 // relationship state, written to work with a single romance (G.romance) and with several lovers / promises / exes (G.lovers, G.promise, G.exAbs)
 function relState(G,id){if(!G||!id)return null;const L=Array.isArray(G.lovers)?G.lovers:(G.romance?[G.romance]:[]);if(L.includes(id))return "lover";
-  if(G.promise&&G.promise[id]!=null)return "promise";if(G.exAbs&&G.exAbs[id]!=null)return "ex";const R=G.region;if(R&&R.lov&&R.lov[id]!=null)return "lover";if(R&&R.ex&&R.ex[id]!=null)return "ex";return null;} /* v1.91.31: regional champions keep their own romance track (G.region.lov / .ex) */
+  if(G.promise&&G.promise[id]!=null)return "promise";if(G.exAbs&&G.exAbs[id]!=null)return "ex";const R=G.region;if(R&&R.lov&&R.lov[id]!=null)return "lover";if(R&&R.ex&&R.ex[id]!=null)return "ex";return null;} /* v1.91.28: regional champions keep their own romance track (G.region.lov / .ex) */
 /* v1.89.11: Lv.30 is the top at 1,000 points — each step past 100 asks a little more (15 → 80) */
 const HEART_STEPS=[15,20,20,25,30,35,35,40,45,45,50,55,60,60,65,70,75,75,80],HEART_MAX=30,HEART_TOP=1000;
 const heartStep=n=>HEART_STEPS[n-11]||0; // points from Lv.n to Lv.n+1, for 11 ≤ n < 30
@@ -490,7 +490,7 @@ const REL_DESC={"คนรู้จัก":"ยังเรียกคุณว
 const REL_BRANCH=[["lover","คนรัก"],["promise","คนที่สัญญากันไว้"],["friend","เพื่อนสนิท"],["ex","เคยคบ"]];
 /* what she is to you: lover / promise / ex (relState) or a close friend after you said no */
 const relKind=(G,f)=>{const id=f&&f.id;if(!G||!id||!G.F||!G.F[id])return null;const st=relState(G,id);if(st)return st;return isFriendz(G,id)&&(G.F[id].bond||0)>=40?"friend":null;};
-const isMonoT=(G,f)=>{try{const T=G&&f&&typeof loveTitle==="function"?loveTitle(G,f):null;return !!T&&T.k==="mono";}catch(e){return false;}}; /* v1.91.31: one love after a year — her own label, frame and ring call */
+const isMonoT=(G,f)=>{try{const T=G&&f&&typeof loveTitle==="function"?loveTitle(G,f):null;return !!T&&T.k==="mono";}catch(e){return false;}}; /* v1.91.32: one love after a year — her own label, frame and ring call */
 function relBase(G,f,lv){lv=lv!=null?lv:heartLv(f||{}).lv;const k=relKind(G,f);
   if(k==="lover"&&isMonoT(G,f))return "💍 คู่ใจ";
   if(k==="lover")return heartTier(lv,f.id)+" ♥"+(inHm(G,f.id)?" (ฮาเร็ม)":"");if(k==="friend")return "เพื่อนสนิท";if(k)return heartTier(lv,f.id);return heartTier(lv);}
@@ -806,7 +806,7 @@ EVENTS.push(
 // warn before a second "yes"
 const cheatWarn=(G,id)=>(partners(G).some(k=>k!==id)||rgLovN(G)>0)?[{n:"nar",t:"⚠ คุณมีคนรักอยู่แล้ว ถ้าตอบรับจะกลายเป็นคบซ้อน… เรื่องแบบนี้ปิดไม่มิดไปตลอดหรอกนะ"}]:[];
 const yesTxt=(G,id,t)=>(partners(G).some(k=>k!==id)||rgLovN(G)>0)?t+" (คบซ้อน)":t;
-const rgLovN=G=>G&&G.region&&G.region.lov?Object.keys(G.region.lov).length:0; /* v1.91.31: a regional champion you are seeing counts as someone else */
+const rgLovN=G=>G&&G.region&&G.region.lov?Object.keys(G.region.lov).length:0; /* v1.91.28: a regional champion you are seeing counts as someone else */
 const lovSolo=G=>partners(G).length===1&&!rgLovN(G);
 const topLock=(G,id)=>isPartner(G,id)&&partners(G).length+rgLovN(G)>1; /* the top heart scene and the Lv.27/30 chats wait while you see more than one person (harem too) */ /* the lover bonus only holds while you see one person */
 // v1.30: lovers get their own dates/scenes; Ploy & Fah make a promise instead (romance with them waits for season 2)
@@ -2738,7 +2738,7 @@ function loveTitle(G,f){if(!G||!f||!f.id)return null;const fl=G.flags||{};
   if(G.harem&&fl.harem1y&&inHm(G,f.id))return {k:"harem",t:LOVE_TITLE.harem_t,d:LOVE_TITLE.harem_d};return null;}
 function lovePerk(f){const z={prep:0,brk:0};if(typeof G==="undefined"||!G||!G.F||!f||f.camp!=="player")return z;const T=loveTitle(G,f);if(!T)return z;
   if(T.k==="mono"){z.prep=.03;z.brk=5;return z;}
-  const o=hmList(G).filter(k=>k!==f.id&&G.F[k]&&G.F[k].camp==="player"&&!isAway(G,k)).length;z.prep=.0075+.0025*o;z.brk=1+.5*o;return z;} /* v1.91.31 (Man): the team perk stays below one love even with all five (1.75% / +3 vs 3% / +5) */
+  const o=hmList(G).filter(k=>k!==f.id&&G.F[k]&&G.F[k].camp==="player"&&!isAway(G,k)).length;z.prep=.0075+.0025*o;z.brk=1+.5*o;return z;} /* v1.91.32 (Man): the team perk stays below one love even with all five (1.75% / +3 vs 3% / +5) */
 /* year end: her line every year (one love) · the group's lines (harem) · from year 5, the route's ending once (after a year on the route) */
 function loveYearEnd(G,y){const fl=G.flags||{},id=monoOf(G);
   if(y>=5&&!fl.loveEnd){

@@ -290,7 +290,7 @@ function startLine(F,rng){const R=a=>a[Math.floor(rng()*a.length)];const h=fight
   if(F.round>=3&&Math.abs(sc)<=1&&TIER_HEAT[F.tier]>=1)t+=" "+R(START_HOT.close);
   if(F.round===1&&typeof isMonoT==="function"&&typeof G!=="undefined"&&G&&F.A&&F.A.f&&isMonoT(G,G.F[F.A.f.id]))t=R(MONO_CALL).replace(/\{n\}/g,F.A.f.name)+" "+t;
   return {text:t.replace("{r}",F.round),heat:h};}
-/* v1.91.31: the ring call for the one you chose */
+/* v1.91.32: the ring call for the one you chose */
 const MONO_CALL=["In the red corner tonight, {n}! The soulmate of Sirichai's own manager, ladies and gentlemen!","Make some noise for {n}! Word is there's one person ringside who has never missed a single fight of hers!","{n} steps into the ring! The manager's soulmate — and she's brought her own personal cheering section!"];
 // v1.23: a funnier, louder booth — two commentators who can't help themselves, plus lines for the odd opponents
 // classic ringside catchphrases (homage to Thai TV commentary), tied to what just happened
