@@ -58,12 +58,12 @@ const HON_COACH=[N=>`Remember tonight, ${N}. This victory is now part of Siricha
  N=>`I've trained fighters my whole life and I never get used to nights like this… well done, ${N}`];
 const RG_BELT_MC={chiangrai:"Folks of Chiang Rai! This belt now belongs to Sirichai Camp! Give it a big hand!",nan:"Here we go! Folks of Nan! We win the boat races, and we win in the ring just like this!",
  uttaradit:"Folks! The town of Phraya Phichai of the Broken Sword salutes you! He'd have loved a fighting heart like that!",lampang:"Here we go, folks! Lampang's horse carts are ready to parade round town! Hop on, new champion!",
- udon:"The Red Lotus Sea blooms for our new champion!",khonkaen:"Khon Kaen gives a thumbs-up! Those punches are tighter than hand-woven silk!",
- buriram:"Buriram is the loudest town in Isan! Let the new champion hear it!",ubon:"May the Candle Festival light the new champion's way, Ubon!",
+ udon:"Udon, everyone! The Red Lotus Sea is blooming for our new champion! What a night!",khonkaen:"Khon Kaen gives a thumbs-up, everyone! Punches as tight as hand-woven silk. Brilliant!",
+ buriram:"Buriram is the loudest town in Isan! Let the new champion hear it, everyone!",ubon:"May the Candle Festival light the new champion's way, Ubon! What a beautiful night!",
  lopburi:"Watch out, champ, the monkeys want that belt! Lopburi congratulates you!",suphan:"Suphan claps louder than its own country songs!",
  phetchaburi:"Phetchaburi custard cake is waiting for the champion backstage!",chanthaburi:"No mangosteen is as sweet as tonight's win! Chanthaburi congratulates you!",
- chumphon:"Chumphon shouts it out: magnificent! Our new champion!",surat:"Surat gives the champion a whole truckload of Don Sak oysters!",
- nakhonsi:"Nakhon says it loud and clear: this champion is the real thing, not a shadow puppet!",songkhla:"The Samila mermaid is waving at you! Songkhla congratulates its new champion!"};
+ chumphon:"Chumphon says it loud: magnificent! This belt has a new owner!",surat:"All of us in Surat give the champion a whole truckload of Don Sak oysters! What a fight!",
+ nakhonsi:"Nakhon says it loud and clear: this champion is the real thing, not a shadow puppet!",songkhla:"The Samila mermaid is waving at you! All of us in Songkhla congratulate our new champion!"};
 const RG_MC_F={chiangrai:1}; /* Man: เจ้า is a woman's particle, so the Chiang Rai MC is a woman */
 function honorSteps(G,h){const f=G.F[h.id],N=f.name,label=honorLabel(h.kind,h.venue),ranked=h.kind==="local"||h.kind==="district",def=h.kind==="defense";
   let seed=0;for(const c of String(h.key||h.id+h.week))seed=(seed*31+c.charCodeAt(0))>>>0;const pick=(a,k)=>a[(seed+(k||0)*7)%a.length];
