@@ -260,7 +260,7 @@ const RG_PSP={chiangrai:["ศอกวัดร่องขุ่น","elbow",{d
  lopburi:["หมัดลิงหลอกเจ้า","punch",{dmg:{punch:.08},evade:.01}],suphan:["เตะแม่ไม้สุพรรณ","kick",{dmg:{kick:.10}}],phetchaburi:["เข่าเขาวังเมืองเพชร","knee",{dmg:{knee:.10}}],chanthaburi:["หมัดเปลือกมังคุด","punch",{dmg:{punch:.08},clDef:1}],
  chumphon:["เตะนางนวลโฉบ","kick",{dmg:{kick:.08},evade:.01}],surat:["ศอกเปลือกหอยดอนสัก","elbow",{dmg:{elbow:.10}}],nakhonsi:["หมัดหนังตะลุง","punch",{dmg:{punch:.10}}],songkhla:["เตะนางเงือกสมิหลา","kick",{dmg:{kick:.08},regen:.06}]};
 const RG_JOIN_LVDROP=5,RG_JOIN_STAT=.9;
-const RG_SK_ADJ={north:1.65,isan:.75,central:.7,south:.85},RG_CH_SKLV=35; /* v1.91.45: champions now fight with a learned tree — their raw strength comes down by this much so the win rates stay where Man set them */
+const RG_SK_ADJ={north:1.75,isan:.75,central:.72,south:.85},RG_SK_CUP={north:.015,isan:.03,central:.08,south:.065},RG_CH_SKLV=35; /* her tree grows with each cup (Lv.35→37), so the raw strength gives a little back per cup */ /* v1.91.45: champions now fight with a learned tree — their raw strength comes down by this much so the win rates stay where Man set them */
 const RG_TRAIT2={baibua:{name:"ใจนิ่งดั่งบึงบัว",desc:"ฟื้นแรงระหว่างยกเร็วขึ้น 10% · เลือดต่ำกว่า 45% แม่นขึ้น 4%",fx:{regen:.1,clutch:.04}},
   tabtim:{name:"หัวเราะสู้",desc:"ใช้แรงออกอาวุธน้อยลง 6% · กำลังใจมีผลในไฟต์มากขึ้น 2%",fx:{staSave:.06,mor:.02}},
   alicia:{name:"ต่อหน้ากล้อง",desc:"ความแม่นพื้นฐาน +1.5% · หมัดได้คะแนนเพิ่ม 10%",fx:{prep:.015,pts:{punch:.1}}},
@@ -1258,7 +1258,7 @@ const REGION={
       const key=[cups,c.tries||0,rgEd(G)].join("|");
       if(f.rgKey!==key){const setT=T=>{f.vet=0;for(const k in f.a)f.a[k]=Math.max(1,Math.min(20,T-.6));for(const [k,v] of Object.entries(tilt))f.a[k]=Math.min(20,f.a[k]+v);
           liftOpponent(f,T,20);for(let i=0;i<80&&ovr(f.a)>T+.05;i++)for(const k in f.a)if(!(k in tilt))f.a[k]=Math.max(1,f.a[k]-.12);};
-        const T=RG_FIX.champ(cups,c.tries)+rgEdB(G,G.region.nc&&G.region.nc[r]?"nb":"cb")-(RG_SK_ADJ[r]||0); /* a lost series makes the rematch a little easier (v1.90.14) */setT(T);f.rgT=+T.toFixed(2);f.rgKey=key;}
+        const T=RG_FIX.champ(cups,c.tries)+rgEdB(G,G.region.nc&&G.region.nc[r]?"nb":"cb")-(RG_SK_ADJ[r]||0)-(RG_SK_CUP[r]||0)*Math.min(3,cups); /* a lost series makes the rematch a little easier (v1.90.14) */setT(T);f.rgT=+T.toFixed(2);f.rgKey=key;}
       /* her tree is built at a fixed level (35 + cups, max 37) — never from your fighter's level, so heavy and casual players meet the same champion (v1.90.21 rule) */
       {const tl=RG_CH_SKLV+Math.min(2,cups);if(f.rgSkLv!==tl&&hasTree(id)){const lv=f.lvl;f.lvl=tl;this.autoLearn(G,id);f.lvl=lv;f.rgSkLv=tl;}}}
     return f;},

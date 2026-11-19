@@ -2857,7 +2857,7 @@ const LINE_STYLE={thasao:["footwork","inside","counter"],chaiya:["pressure","foo
 const HOME_STYLE={kati:"inside",mali:"footwork",rin:"counter",ploy:"power",fah:"pressure"};
 const HOME_LINE={kati:1,mali:1,rin:0,ploy:0,fah:1};
 /* v1.91.2: per-line kit offset so every line of every heroine stands about level (some lines' skills were much weaker or stronger than others) */
-let LINE_K={kati:[.085,.045,-.09],mali:[.09,-.015,.065],rin:[-.045,0,.185],ploy:[.005,.15,.01],fah:[-.1,.04,0]},STY_PAIR={"inside>power":1.8}; /* v1.91.4: the heroine offset now lives here per line (HERO_K emptied) */
+let LINE_KR={kati:[.052,.048,-.036],mali:[.091,-.081,.004],rin:[-.033,.011,-.022],ploy:[.07,-.037,-.033],fah:[.064,-.025,-.039],baibua:[-.006,.085,-.046],tabtim:[.086,-.021,-.033],alicia:[-.015,.025,-.029],chaba:[.036,-.112,.01]},LINE_K={kati:[.158,.088,.032],mali:[.018,.025,.031],rin:[.059,.08,.198],ploy:[-.103,.132,.038],fah:[-.134,-.139,-.061],baibua:[.131,.057,.016],tabtim:[-.066,.148,.048],alicia:[.022,.129,.15],chaba:[.054,.081,.003]}, /* v1.91.45 (Man: five equal, the build decides): retuned per line with all 27 builds (5 heroines + 4 joined champions × 3 school lines) fighting each other — LINE_KR fades in from Lv.25 to Lv.32 as the roots open */STY_PAIR={"inside>power":1.8}; /* v1.91.4: the heroine offset now lives here per line (HERO_K emptied) */
 const STAT_STYLE={punch:"power",kick:"footwork",knee:"inside",elbow:"pressure",defense:"counter"};
 /* v1.91.0 tuning (Man: Ploy strongest, Kati next, Mali/Rin/Fah level; each beats and loses to someone; any of them can win with the right build).
    Equal builds at Lv.18/25 (stats 20, home-line skills, 300 bouts each), v1.91.2: all five 48–53% vs the other four; vs any rival's home build each heroine has a line that wins 55–76%.
@@ -2899,7 +2899,7 @@ const hurtW=s=>s&&s.f.hurt?clamp(1-s.hp/(s.hp0||100),0,1):0;
 function fightSide(f,plan,rng){const sk=skillMods(f);{const m=mastery(f)*MK,s=mainStyle(f);if(m){if(s==="defense"){sk.evade+=MDEF.ev*m;sk.ctr+=MDEF.ctr*m;sk.ctrDmg+=MDEF.cd*m;}else{const w=s;sk.hit[w]=(sk.hit[w]||0)+MWPN.hit*m;sk.dmg[w]=(sk.dmg[w]||0)+MWPN.dmg*m;sk.pts[w]=(sk.pts[w]||0)+.1*m;}}}if(f.aura)sk.evade+=f.aura*.5;if(f.vet>0){const v=f.vet;for(const w of ["punch","kick","knee","elbow"]){sk.hit[w]=(sk.hit[w]||0)+VET_FX.hit*v;sk.dmg[w]=(sk.dmg[w]||0)+VET_FX.dmg*v;}sk.evade+=VET_FX.ev*v;}const gr=f.id==="kati"&&traitOf(f)!=="grit"?0:(f.grit||0)*(f.id==="kati"?traitK(f):1);if(gr)sk.evade+=gr*.4;
   const hp0=100-(f.injury?15:0)+Math.round(gr*30)+(f.hpX||0),tl=f.trainLog||[];const brk=STA.brk+f.a.stamina*STA.brkK+(tl[tl.length-1]==="prep"?STA.prep:0)+(tl.slice(-2).includes("cond")?STA.cond:0)+(f.id==="fah"?STA.fah:0)+(f.camp==="player"&&typeof lovePerk==="function"?lovePerk(f).brk:0); /* Fah: hot-blooded and tireless, gets her breath back faster */
   return {f,id:f.id,name:f.name,plan,instr:"none",hp:hp0,hp0,brk,sta:clamp(100-f.fatigue*.4,40,100),pts:0,rpts:0,kd:0,cuts:0,
-    thrown:0,landed:0,dmgDealt:0,legs:0,tac:{focus:"auto",pace:"steady",target:"head"},sk,prep:(f.camp==="player"?(HERO_K[f.id]||0)+(LINE_K[f.id]?LINE_K[f.id][heroLine(f)]||0:0):0)+(f.prepBonus?.04:0)+(f.counterPrep?.05:0)+sk.prep+(f.aura||0)+gr+(f.labPrep||0)+(f.camp==="player"?(f.facPrep||0):0)+(f.camp==="player"&&typeof lovePerk==="function"?lovePerk(f).prep:0),counterPrep:!!f.counterPrep,trait:traitOf(f),trk:traitK(f),mor:(f.morale-60)/400+sk.mor,wl:{punch:0,kick:0,knee:0,elbow:0}};
+    thrown:0,landed:0,dmgDealt:0,legs:0,tac:{focus:"auto",pace:"steady",target:"head"},sk,prep:(f.camp==="player"?(HERO_K[f.id]||0)+(LINE_K[f.id]?(LINE_K[f.id][heroLine(f)]||0)+(LINE_KR[f.id]?(LINE_KR[f.id][heroLine(f)]||0)*clamp(((f.lvl||1)-25)/7,0,1):0):0):0)+(f.prepBonus?.04:0)+(f.counterPrep?.05:0)+sk.prep+(f.aura||0)+gr+(f.labPrep||0)+(f.camp==="player"?(f.facPrep||0):0)+(f.camp==="player"&&typeof lovePerk==="function"?lovePerk(f).prep:0),counterPrep:!!f.counterPrep,trait:traitOf(f),trk:traitK(f),mor:(f.morale-60)/400+sk.mor,wl:{punch:0,kick:0,knee:0,elbow:0}};
 }
 function aiPlan(f,opp,rng){
   const a=f.a;const opts=[["balanced",1],["pressure",(a.punch+a.elbow+a.power)/30],["counter",(a.counter+a.iq)/22],["outside",(a.kick+a.foot)/22],["clinch",(a.knee+a.clinch)/22]];
@@ -12851,7 +12851,7 @@ CHAT.fah.push(
 <script>
 (function(){
 /* v1.87: Thai code ships inside index.html; English code (en.js) and the dictionary (i18n.js) load only when needed */
-var B="9f68649eaf";
+var B="408d1ab5e2";
 var L="";try{L=localStorage.getItem("mtm_lang")||"";}catch(e){}
 try{var h=(location.hash||"").match(/lang=(th|en)/);if(h)L=h[1];}catch(e){}
 if(L!=="th"&&L!=="en")L="th";
