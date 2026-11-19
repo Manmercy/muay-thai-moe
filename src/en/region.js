@@ -1223,7 +1223,7 @@ I just want to know how well your small Muay Thai camp handles the real world.
     if(A[f.id])return `<img src="${ASSET}${f.id}_fight_happy.webp" alt="">`;
     return `<canvas width="128" height="128" data-sprite="${f.id}" data-mode="guard" ${side==="r"?'data-flip="1"':""}></canvas>`;},
   boardHTML(){const R=G.region,F=R.final,pool=this.finalPool(G),L=F.line=F.line||{},K=F.clear=F.clear||{};
-    if(!F.live){F.cur={};for(const k in K){F.cur[k]="W";delete L[k];}} /* v1.91.24 (Man, option 1): bouts already won stay won */
+    if(!F.live){F.cur={};F.clear={};for(const k in K)delete K[k];} /* v1.91.53 (Man): a lost night starts again from bout 1 (v1.91.24 kept the bouts already won) */
     const C=F.cur;
     for(const k of NL_ORDER)if(!C[k]&&L[k]&&!pool.some(f=>f.id===L[k]))delete L[k];
     if(!F.live&&!NL_ORDER.some(k=>!C[k]&&L[k])){const used=new Set();for(const k of NL_ORDER){if(C[k])continue;const f=pool.filter(x=>!used.has(x.id)).sort((a,b)=>effOvr(G,b)-effOvr(G,a))[0];if(f){L[k]=f.id;used.add(f.id);}}}
@@ -1243,7 +1243,7 @@ I just want to know how well your small Muay Thai camp handles the real world.
         <button class="vs-r ${r&&r!=="W"?"lost":""}" data-act="rgfslot" data-v="${k}" ${r?"disabled":""}>${me?`<span class="vs-tx"><b>${esc(me.name)}</b><small>${kept?"Won last time":`Lv.${me.lvl||1}`}</small></span><span class="vs-art">${this.vsArt(me,"r")}</span>`:`<span class="vs-tx vs-empty"><b>+ Pick a fighter</b></span>`}</button>${stamp(their,"vsl")}${stamp(r,"vsr")}</div>`;}).join("");
     const nk=next&&NL_ORDER.indexOf(next)+1,full=NL_ORDER.every(k=>C[k]||L[k]),ok=next&&L[next]&&(F.live||full); /* v1.91.47 (playtest): every bout needs a fighter before the first bell — an injured fifth fighter left the night stuck at bout 5 */
     return `<div class="vsb"><div class="vs-head"><span class="vs-tl">Naka League</span><b class="vs-sc">${w>0||l>0?`${l} – ${w}`:"VS"}</b><span class="vs-tr">Sirichai Camp</span></div>
-      <p class="meta vs-sub">Five on five · first to three · tap a blue slot to pick a fighter · bouts you already won stay won · no injuries carry over after the fight</p>
+      <p class="meta vs-sub">Five on five · first to three · tap a blue slot to pick a fighter · lose and it starts over from bout 1, new line-up from next week · no injuries carry over after the fight</p>
       <div class="vs-rows">${rows}</div>
       <div class="mfoot">${next?`${F.live?"":`<button class="btn" data-act="closeModal">Not yet</button>`}<button class="btn primary" data-act="rgfgo" ${ok?"":"disabled"}>${ok?`Fight bout ${nk} ▸`:L[next]&&!full?(pool.length<NL_ORDER.filter(k=>!C[k]).length?"Not enough fit fighters":"Pick a fighter for every bout first"):`Pick a fighter for bout ${nk} first`}</button>`:`<button class="btn primary" data-act="rgfend">See the result ▸</button>`}</div></div>`;},
   finalNext(){const R=G.region,F=R.final,C=F.cur=F.cur||{},k=NL_ORDER.find(x=>!C[x]);if(!k||!(F.line||{})[k])return;UI.modal=null;UI.rgPick=null;
@@ -1254,11 +1254,12 @@ I just want to know how well your small Muay Thai camp handles the real world.
     const b={id:`nlf${F.tries||0}_${i}_${gameWeek(G)}`,a:me.id,b:o.id,week:G.week,tier:"exhibition",rounds:5,win:0,lose:0,bg:"bg_naka_underground.webp",gprep:F.prep,region:{nlfinal:k}};
     G.bookings.push(b);save();
     openFight(b,()=>{G.bookings=G.bookings.filter(x=>x.id!==b.id);me.injury=keep.injury;me.fatigue=keep.fatigue;this.flush(G);
-      if(!F.cur[k])F.cur[k]="L";if(F.cur[k]==="W"){F.clear=F.clear||{};F.clear[k]=me.id;}save();UI.modal={type:"rgfline"};render();});},
+      if(!F.cur[k])F.cur[k]="L";save();UI.modal={type:"rgfline"};render();});},
   finalEnd(){const R=G.region,F=R.final,v=Object.values(F.cur||{}),w=v.filter(x=>x==="W").length,l=v.filter(x=>x==="L").length,beat=(F.cur||{}).ladda==="W";F.tries=(F.tries||0)+1;F.live=false;UI.modal=null;
     if(w>=3){F.won=true;F.stage="done";F.wonAbs=gameWeek(G);F.score=`${w}–${l}`;F.beatLadda=beat;R.hall=R.hall||[];R.hall.push({k:"naka",season:G.season||1,score:F.score,ladda:beat});
       for(const r of RG_ORDER)rgTouch(G,RG_CID[r]);G.rep+=3;
       AU.startMusic&&AU.startMusic("victory");playScene(rgFinalWin(G,w,l,beat,F.line.ladda),()=>{AU.startMusic&&AU.startMusic("hub");save();render();},{bg:"naka_underground",look:"casual"});return;}
+    F.abs=gameWeek(G)+1;F.cur={};F.clear={}; /* v1.91.53 (Man): back next week at the earliest, from bout 1 */
     playScene(rgFinalLose(G,w,l),()=>{save();UI.modal={type:"rgflost"};render();},{bg:"naka_underground",look:"casual"});},
 });
 /* v1.91.27 (Man): legend mode — optional, after the underground final. Stars: ★ win · ★★ win without going down · ★★★ that, and inside the distance */
@@ -1293,11 +1294,11 @@ if(typeof ACT!=="undefined")Object.assign(ACT,{
     const was=NL_ORDER.find(x=>L[x]===id);if(was&&C[was])return;if(was&&was!==k){if(L[k])L[was]=L[k];else delete L[was];}L[k]=id;UI.rgPick=null;save();render();},
   rgfgo:()=>REGION.finalNext(),
   rgfend:()=>{const F=G.region.final;if(NL_ORDER.every(k=>(F.cur||{})[k]))REGION.finalEnd();},
-  rgfagain:()=>{const F=G.region.final;F.cur={};F.live=false;UI.rgPick=null;UI.modal={type:"rgfline"};render();},
+  rgfagain:()=>{const F=G.region.final;if(gameWeek(G)<F.abs){UI.modal=null;render();return;}F.cur={};F.live=false;UI.rgPick=null;UI.modal={type:"rgfline"};render();},
   rgfhome:()=>{const F=G.region.final;F.abs=gameWeek(G)+1;UI.modal=null;addMail(G,{kind:"letter",from:"(no sender)",title:"A new black card",body:"The door is still open\n— L."});save();render();},
 });
 if(typeof XMODAL!=="undefined"){XMODAL.rgfline=()=>({body:REGION.boardHTML(),foot:false});XMODAL.rgleg=m=>({body:REGION.legPickHTML(m.k),foot:false});
-  XMODAL.rgflost=()=>({body:`<h2>Lost the underground fight</h2><p>Bouts you already won stay won; next time you only fight the rest · What now?</p><div class="mfoot"><button class="btn" data-act="rgfhome">Train first (come back next week)</button><button class="btn primary" data-act="rgfagain">New lineup, fight on now</button></div>`,foot:false});}
+  XMODAL.rgflost=()=>({body:`<h2>Lost the underground fight</h2><p>Next time all five bouts start again from bout 1 · go back and train, then set a new line-up from next week, or wait until you're ready</p><div class="mfoot"><button class="btn primary" data-act="rgfhome">Back to training</button></div>`,foot:false});}
 if(typeof XMODAL!=="undefined"){XMODAL.rgplan=m=>({body:REGION.planHTML(m.dest),foot:false});XMODAL.rgser=m=>({body:REGION.seriesHTML(m.r),foot:false});}
 if(typeof ACT!=="undefined")Object.assign(ACT,{
   lbgo:d=>{UI.modal=null;lbStart(G,d.v);},
