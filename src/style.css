@@ -2272,3 +2272,16 @@ div.mdelask{margin:2px 0 8px;padding:8px;box-shadow:inset 0 0 0 2px var(--line);
 
 /* v1.91.51: the creator inside the settings modal */
 .creator.cr-edit{min-height:0;padding:0;background:none}.creator.cr-edit .cr-top{margin-top:4px}.creator.cr-edit .cr-stage canvas{max-height:220px;width:auto}
+/* v1.91.60: skill stamina cost — badge on the fight button, rank list in the skill popup */
+.skbtn2{position:relative}
+.skbtn2 .skcost{position:absolute;right:3px;top:2px;font-style:normal;font-size:9px;line-height:1;color:var(--gold);opacity:.95}
+.skbtn2.poor{opacity:.45}
+.skbtn2.poor .skcost{color:var(--red)}
+.skcost-l{margin:6px 0 0;font-size:12px;color:var(--gold);display:flex;flex-wrap:wrap;gap:4px 8px;align-items:center}
+.skcost-l span{color:var(--dim,#9a90b8)}
+.skcost-l span.on{color:#fff;font-weight:700}
+.skbtn2 b{padding-right:16px}
+.stapop{position:absolute;z-index:60;transform:translate(-50%,0);font:700 15px/1 inherit;color:var(--gold);text-shadow:0 2px 0 #120d1f,0 0 6px #000;pointer-events:none;animation:stapop 1.3s ease-out forwards}
+.stapop.neg{color:#ffcf5a}
+@keyframes stapop{0%{opacity:0;transform:translate(-50%,4px) scale(.8)}15%{opacity:1;transform:translate(-50%,0) scale(1.15)}100%{opacity:0;transform:translate(-50%,22px) scale(1)}}
+@media (prefers-reduced-motion:reduce){.stapop{animation:none;opacity:1}}

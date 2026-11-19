@@ -1,5 +1,5 @@
 // ================= MUAY THAI MOE v1.3 — UI =================
-const VERSION="1.91.58";
+const VERSION="1.91.60";
 const CUR_LANG=(typeof window!=="undefined"&&window.LANG)||"th";
 const TH_LABEL=String.fromCharCode(3652,3607,3618);
 function langSwitch(cls){return `<div class="langsw ${cls||""}" role="group" aria-label="Language">${[["th",TH_LABEL],["en","EN"]].map(([k,l])=>`<button class="lsb ${CUR_LANG===k?"on":""}" data-act="setlang" data-v="${k}" aria-pressed="${CUR_LANG===k}">${l}</button>`).join("")}</div>`;}
@@ -288,6 +288,7 @@ const GLOSS=[["Readiness","Condition on fight day. The higher, the better she fi
  ["Morale","Higher morale means sharper strikes. Rises with wins, dates, merit-making; drops with losses or overtraining"],["Bond","Her closeness to you. Unlocks special scenes, the signature move at 60, and raises the chance of blood-boil mode"],
  ["Trust","How much a fighter trusts your orders. Higher trust makes corner orders work better (up to +4% accuracy); at 60 losses hurt morale less, and it affects confession scenes · raise it with merit-making scenes, wai khru, not overtraining, and a camp out of debt"],["Fame","How well-known the camp is. The higher, the more students come"],
  ["Skill points","Earned every level-up. Spend them on old-school moves from the fighter's school, and on hidden power (Lv.1–10 · 5 points a level)"],["Counter-training","Scout the opponent, then train the program that counters their main weapon the week before the fight. On fight night their main weapon lands less often and you read their game better"],
+ ["Stamina (gold bar in fights)","Using a skill in a fight costs stamina, more at higher ranks (attack 8/11/14 · guard 5/7/9 · second wind is free). Not enough stamina, no skill · one skill per round, and a skill rests one round after use · some stamina comes back between rounds, and the corner mini-game adds more (all correct +20 · two of three +10)"],
  ["Blood-boil mode","When badly hurt or behind on points, a fighter may 'change eyes' for a moment: stronger counters, easier criticals. Once per fight"],["Wai khru ram muay","Ritual before the first fight, canon matchups, and major bouts. Choose a dance; each gives a different effect"]];
 
 // ---------- creator (manager look) ----------
@@ -896,7 +897,7 @@ function skTreeHTML(f,li,mine,lines,path){const L=skillList(f.id).filter(s=>s.li
     const cls=t.st==="lock"&&t.r?"has":t.st;
     return `<div class="skn2 ${cls}${s.passive?" pas":""}${s.feed!=null?" feed":""}${s.nd===5?" leg":""}${eq?" eq":""}${cn?" "+cn:""}" style="grid-row:${r};grid-column:${c}">
       ${skIcon(s,f.id)}<b class="nm">${s.name}${s.br==null?`<small class="tier">${skKindTag(s)}</small>`:""}<span class="pips" aria-label="Rank ${t.r}/3">${[1,2,3].map(i=>`<i class="${i<=t.r?"on":""}"></i>`).join("")}</span></b>
-      <div class="sktx"><p class="skds">${sdesc(s)}</p>${lockTxt}</div>
+      <div class="sktx"><p class="skds">${sdesc(s)}</p>${s.passive?"":skCostLine(s,t.r)}${lockTxt}</div>
       <span class="ctl">${mine&&t.r&&!s.passive?`<button class="skeq${eq?" on":""}" data-act="equip" data-id="${f.id}" data-v="${s.id}" aria-pressed="${eq}" aria-label="${eq?"Remove":"Equip"} ${s.name}">${eq?"Remove":"Equip"}</button>`:""}${mine&&t.st==="can"?`<button class="skplus" data-act="learn" data-id="${f.id}" data-v="${s.id}" aria-label="Upgrade ${s.name} to rank ${t.r+1}">+</button>`:""}</span>${tag(s)}${eq?'<i class="eqm" aria-hidden="true">E</i>':""}</div>`;};
   const split=R&&L.some(s=>s.br!=null)?`<div class="sksplit" style="grid-row:${last+1}" aria-hidden="false"><svg viewBox="0 0 300 20" preserveAspectRatio="none" aria-hidden="true"><path d="M150 0V8H73V20M150 8H227V20"/></svg>
     <span class="rt a"><b>${R[0].n}</b><small>${R[0].m}</small></span><span class="rt b"><b>${R[1].n}</b><small>${R[1].m}</small></span></div>`:"";
@@ -906,7 +907,7 @@ function skTreeHTML(f,li,mine,lines,path){const L=skillList(f.id).filter(s=>s.li
     // v1.89.1: details open as a popup in the middle of the screen; upgrading stays on the + of each row
     det=`<div class="skpop-ov" data-act="skpopbg"><div class="px skpop" role="dialog" aria-modal="true" aria-label="${sel.name}"><div class="skdet-h">${skIcon(sel,f.id)}<div><b>${sel.name}</b><small>${skKindTag(sel)} · ${sel.passive?"Always on, uses no slot":eq?"<span class=\"goldt\">Equipped</span>":"Active, can be equipped"}</small></div><button class="skx" data-act="skselx" aria-label="Close details">✕</button></div>
       <div class="skpop-r"><span class="pips">${[1,2,3].map(i=>`<i class="${i<=t.r?"on":""}"></i>`).join("")}</span><small>Rank ${t.r}/3</small></div>
-      <p class="skc-d">${sel.desc}</p>${ftxt}
+      <p class="skc-d">${sel.desc}</p>${sel.passive?"":skCostLine(sel,t.r)}${ftxt}
       <p class="skc-s">${t.st==="can"?`<span class="ok">Ready · tap + on the skill row</span>`:t.st==="max"?"<span class=\"goldt\">Maxed out</span>":t.st==="nosp"?"<span class=\"dim\">No skill points · wait for a level up</span>":t.st==="has"?"":t.B?`<span class="no">Can't upgrade yet: ${why(t)}</span>`:""}</p>
       ${mine&&t.r&&!sel.passive?`<div class="skdet-b"><button class="btn eqbtn ${eq?"on":""}" data-act="equip" data-id="${f.id}" data-v="${sel.id}" ${!eq&&eqd.length>=MAX_EQUIP?"disabled":""}>${eq?"Remove from fight slots":"Equip"}</button></div>`:""}</div></div>`;}
   const sig=SIGNATURE[f.id]?`<div class="skc sig ${hasSignature(f)?"has":"lock"}"><div class="skc-m"><div class="skc-h"><b>✦ Signature: ${SIGNATURE[f.id].name}</b></div><p class="skc-d">${SIGNATURE[f.id].desc}${hasSignature(f)?"":` · unlocks at bond 60 (now ${Math.round(f.bond||0)})`}</p></div></div>`:"";
@@ -1490,7 +1491,7 @@ function careOilHTML(A,C){const left=C.done?0:C.t0?Math.max(0,Math.ceil(C.secs-(
   ${pour?`<div class="oiltrack" data-oil="1"><span class="oilhint">▸ ▸ ▸</span><i class="oilend r">${PIX.water}</i><button class="oilknob" aria-label="Drag to pour the boxing oil">${PIX.rub}</button></div>`
    :`<div class="carebtns one"><button class="oilrub ${C.done?"":"go"}" data-act="coil" ${C.done?"disabled":""}>${PIX.oilhand}<small>${C.done?`Massaged ${C.taps} times`:"Rub!"}</small></button></div>`}</div>`;}
 /* apply a corner result and remember how much it gave back, for the summary line */
-function careApply(U,C){const A=U.F.A,s0=A.sta,h0=A.hp;applyCare(U.F,C.q);C.gain={sta:Math.round(A.sta-s0),hp:Math.round(A.hp-h0)};if(C.q>=1)U.careOK=(U.careOK||0)+1;}
+function careApply(U,C){const A=U.F.A,s0=A.sta,h0=A.hp;applyCare(U.F,C.q);setTimeout(()=>staPop(Math.round(A.sta-s0)),60);C.gain={sta:Math.round(A.sta-s0),hp:Math.round(A.hp-h0)};if(C.q>=1)U.careOK=(U.careOK||0)+1;}
 function oilFinish(){const U=UI.fight,C=U&&U.care;if(!C||C.mode!=="oil"||C.done)return;C.done=true;const target=C.secs*2.6;C.q=Math.max(.15,Math.min(1.3,C.taps/target));careApply(U,C);AU.sfx(C.q>=1?"level":"ui");render();}
 function oilTick(){const U=UI.fight,C=U&&U.care;if(!C||C.mode!=="oil"||C.done||!C.t0)return;const left=Math.max(0,Math.ceil(C.secs-(performance.now()-C.t0)/1000));const el=document.querySelector(".oiltime b");if(el)el.textContent=left;if(left<=0){oilFinish();return;}setTimeout(oilTick,150);}
 function oilPoured(C){C.phase="rub";C.t0=performance.now();AU.sfx("level");render();setTimeout(oilTick,150);}
@@ -1657,9 +1658,13 @@ function feedRound(){const U=UI.fight,F=U.F;
   while(!U.pending.length&&!roundDone(F)){U.pending.push(...fightEx(F));
     if(!U.tiredShown&&F.ex>=8){for(const s of [F.A,F.B])if(s.sta<30){U.pending.push({tired:true,cap:{text:COM.tired[Math.floor(U.rng()*2)].replace("{x}",s.name),side:""}});U.tiredShown=true;}}}
   return U.pending.length>0;}
-function fskill(id){const U=UI.fight;if(!U||U.stage!=="playing")return;const e=useSkill(U.F,U.F.A,id);if(!e)return;U.pending.unshift(e);clearTimeout(U.timer);tick();}
-function skillBarHTML(){const U=UI.fight,F=U.F;const L=fightSkills(F.A);const used=F.A.skUsed||{};if(!L.length)return `<span class="meta skhint">No skills yet · level up, then upgrade skills in the fighter info</span>`;const slots=[0,1,2].map(i=>L[i]);
-  return `<div class="skbar2" role="group" aria-label="Skills ${F.A.skRound?" (used this round)":""}">${slots.map(k=>k?`<button class="skbtn2 ${k.k}" data-act="fskill" data-v="${k.id}" ${used[k.id]||F.A.skRound||F.over?"disabled":""} title="${esc(k.name)} · ${esc(SKILL_KIND_NAME[k.k])}">${PIX["sk_"+k.k]}<b>${esc(k.name)}</b></button>`:`<span class="skbtn2 empty">Empty</span>`).join("")}</div>`;}function sideOf(e,F){if(e.s==="A"||e.s==="B")return e.s;if(e.mside)return e.mside;return e.an===F.A.name?"A":"B";}
+function fskill(id){const U=UI.fight;if(!U||U.stage!=="playing")return;const s0=U.F.A.sta;const e=useSkill(U.F,U.F.A,id);if(!e)return;staPop(Math.round(U.F.A.sta-s0));U.pending.unshift(e);clearTimeout(U.timer);tick();}
+/* v1.91.60: what each rank of an active skill costs in stamina (the in-fight "mana") */
+/* v1.91.60: a "−14" floats off the gold stamina bar when the player fires a skill, so the cost is seen */
+function staPop(d){if(!d||typeof document==="undefined")return;const m=document.querySelector(".fside.a .meter.thin");if(!m)return;const r=m.getBoundingClientRect(),el=document.createElement("b");el.className="stapop "+(d<0?"neg":"pos");el.textContent=`${d<0?"−":"+"}${Math.abs(d)} ⚡`;el.style.left=(r.left+r.width*.5+scrollX)+"px";el.style.top=(r.top+scrollY-4)+"px";document.body.appendChild(el);setTimeout(()=>el.remove(),1300);}
+function skCostLine(sk,r){const k=skillKind(sk).k,c=SK_COST[k]||SK_COST.atk;if(!c[2])return `<p class="skcost-l">⚡ No stamina cost · restores stamina</p>`;return `<p class="skcost-l">⚡ Stamina cost in fights: ${c.map((v,i)=>`<span class="${i+1===r?"on":""}">Rank ${i+1} · ${v}</span>`).join("")}</p>`;}
+function skillBarHTML(){const U=UI.fight,F=U.F;const L=fightSkills(F.A);if(!L.length)return `<span class="meta skhint">No skills yet · level up, then upgrade skills in the fighter info</span>`;const slots=[0,1,2].map(i=>L[i]);
+  return `<div class="skbar2" role="group" aria-label="Skills ${F.A.skRound?" (used this round)":""}">${slots.map(k=>{if(!k)return `<span class="skbtn2 empty">Empty</span>`;const c=skCost(k),cd=skCdLeft(F,F.A,k.id),poor=!cd&&F.A.sta<c;return `<button class="skbtn2 ${k.k}${poor?" poor":""}${cd?" cd":""}" data-act="fskill" data-v="${k.id}" ${cd||F.A.skRound||F.over||poor?"disabled":""} title="${esc(k.name)} · ${esc(SKILL_KIND_NAME[k.k])}${c?` · costs stamina ${c}`:""}${poor?" · not enough stamina":""}${cd?" · rests 1 round":""}">${PIX["sk_"+k.k]}<b>${esc(k.name)}</b><i class="skcost">${cd?"Rest 1 rd":c?`⚡${c}`:"⚡+"}</i></button>`;}).join("")}</div>`;}function sideOf(e,F){if(e.s==="A"||e.s==="B")return e.s;if(e.mside)return e.mside;return e.an===F.A.name?"A":"B";}
 /* v1.89.8: sarama follows the fight — slow feeling-out in round 1, fastest in the deciding round, a surge late in each round and after a knockdown.
    5-round bouts keep the stadium shape: 3–4 hottest, 5 eases off when someone is clearly ahead (dancing the round out). */
 function fightMusic(F,surge){if(!F||!AU.setTempo)return;const R=Math.max(1,F.rounds||3),r=Math.min(F.round||1,R);
@@ -1953,7 +1958,7 @@ const ACT={
     const b=document.querySelector(".oilcombo b");if(b){b.textContent=C.taps;const p=b.parentElement;p.classList.remove("pop");void p.offsetWidth;p.classList.add("pop");}},
   ccard:d=>{const U=UI.fight,C=U.care;if(!C||C.mode!=="card"||C.done)return;const i=+d.v;C.flip=i;C.q=C.deck[i];C.done=true;careApply(U,C);AU.sfx(C.q>1?"level":C.q<0?"miss":"ui");render();},
   care:d=>{const U=UI.fight,C=U.care;if(!C||C.done)return;const i=C.got.length;C.got.push(d.v);const ok=C.need[i]===d.v;AU.sfx(ok?"ui":"miss");
-    if(C.got.length>=C.need.length){C.done=true;const n=C.got.filter((g,k)=>g===C.need[k]).length;C.q=n===3?1:n===2?.5:0;if(C.q>=1)U.careOK=(U.careOK||0)+1;applyCare(U.F,C.q);if(C.q>=1){AU.sfx("level");const me=G.F[U.b.a];popToast({kati:"So refreshing!",mali:"Not tired anymore! Let's go!",rin:"Body back to 90%",ploy:"Thank you, my heart's in it",fah:"Okay! Ready to go hard!"}[me.id]||"Refreshed!","good");}}render();},
+    if(C.got.length>=C.need.length){C.done=true;const n=C.got.filter((g,k)=>g===C.need[k]).length;C.q=n===3?1:n===2?.5:0;if(C.q>=1)U.careOK=(U.careOK||0)+1;{const s0=U.F.A.sta;applyCare(U.F,C.q);setTimeout(()=>staPop(Math.round(U.F.A.sta-s0)),60);}if(C.q>=1){AU.sfx("level");const me=G.F[U.b.a];popToast({kati:"So refreshing!",mali:"Not tired anymore! Let's go!",rin:"Body back to 90%",ploy:"Thank you, my heart's in it",fah:"Okay! Ready to go hard!"}[me.id]||"Refreshed!","good");}}render();},
   towel:()=>{UI.confirmTowel=true;render();},
   towelno:()=>{UI.confirmTowel=false;UI.towelCoach=false;render();},
   towelyes:()=>{UI.confirmTowel=false;UI.towelCoach=false;const U=UI.fight;throwTowel(U.F);U.shown.push({s:"x",t:`${G.F[U.b.a].name}'s corner throws in the towel`});fightEnd();},

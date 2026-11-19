@@ -657,7 +657,8 @@ function careNeeds(F){const A=F.A,B=F.B,r=mulberry32(F.seed+F.round*977);const s
 // v1.89.1: corner care on one scale — a missed mini-game still gives 60% of a normal corner, coach Daeng / quick fights give a normal corner,
 // a great mini-game is a small bonus on top (not the thing that decides the fight)
 const careMult=q=>q<=1?STA.cNorm*(STA.cMin+(1-STA.cMin)*Math.max(0,q)):STA.cNorm*(1+(q-1)*STA.cBonus);
-function applyCare(F,q){const A=F.A;A.sta=clamp(A.sta+q*9,0,100);A.hp=clamp(A.hp+q*4,0,Math.max(100,A.hp0||100));A.careMor=q>=1?.02:0;return q;} /* v1.89.1: back to the single order puzzle — a small bonus on top of the normal between-round recovery (as in v1.87.5) */
+const CARE_STA=20; /* v1.91.60: the corner refills the skill "mana" — perfect +20, two of three +10 (was +9/+4.5) */
+function applyCare(F,q){const A=F.A;A.sta=clamp(A.sta+q*CARE_STA,0,100);A.hp=clamp(A.hp+q*4,0,Math.max(100,A.hp0||100));A.careMor=q>=1?.02:0;return q;} /* v1.89.1: back to the single order puzzle — a small bonus on top of the normal between-round recovery (as in v1.87.5) */
 function throwTowel(F){if(F.over)return;F.over=true;F.result={win:"B",type:"มุมโยนผ้ายอมแพ้",round:F.round,towel:true};}
 function aiCorner(F,me,op){ if(F.round===0)return "none";
   const lead=me.pts-op.pts;if(me.sta<35)return "defend";if(lead>4)return "defend";if(lead<-3)return "push";
@@ -676,7 +677,7 @@ function roundBegin(F){F.round++;F.gnd=null;
 const roundDone=F=>F.over||F.ex>=EX_PER_ROUND;
 function fightRound(F){roundBegin(F);while(!roundDone(F))fightEx(F);return roundFinish(F);}
 // ---------- active skills (v1.19) ----------
-// every learned school skill can be fired once per fight (max one per round): attack burst, guard burst or second wind
+// every learned school skill: attack burst, guard burst or second wind — max one per round; since v1.91.60 a skill rests one round after use and costs stamina
 function skillKind(sk){const e=sk.fx(1);const wk=e.hit||e.pts||e.dmg;if(wk)return {k:"atk",w:Object.keys(wk)[0]};if(e.evade||e.ctr||e.clDef||e.ctrDmg)return {k:"def"};return {k:"rec"};}
 const SKILL_KIND_NAME={atk:"ไม้เด็ดโจมตี",def:"ตั้งรับสวนกลับ",rec:"เรียกแรงคืน"};
 function fightSkills(s){if(s.f.nlsk)return s.f.nlsk.map(k=>({...k,r:3}));const L=skillList(s.f.id),eq=equipped(s.f);return L.filter(k=>eq.includes(k.id)).map(k=>({...k,r:s.f.skills[k.id],...skillKind(k)}));}
@@ -685,14 +686,22 @@ const MAEMAI={"ts_low":"l","ts_croc":"m","ts_ring":"l","ts_trunk":"m","kati_1a1"
 function skillCall(F,s,sk){const k=MAEMAI[sk.id];if(!k)return `${s.name} ใช้ "${sk.name}"!`;const kn=k==="m"?"แม่ไม้มวยไทย":"ลูกไม้มวยไทย";
   const L=[`${kn}! ${s.name} ออกท่า "${sk.name}"!`,`"${sk.name}"! ${kn}แท้ ๆ จาก${s.name}!`,`${s.name} งัด${kn} "${sk.name}" ออกมาแล้วครับท่านผู้ชม!`];
   return L[((F.round||1)+(F.ex||0))%L.length];}
-function useSkill(F,s,id){const o=s===F.A?F.B:F.A;s.skUsed=s.skUsed||{};if(F.over||s.skRound||s.skUsed[id])return null;const sk=fightSkills(s).find(k=>k.id===id);if(!sk)return null;
-  s.skUsed[id]=true;s.skRound=true;const pw=(.7+.15*sk.r)*(s.f.camp==="player"?1.1:F.dai||.8);
-  if(sk.k==="atk"){s.burst={k:"atk",w:sk.w,left:4,pw};s.sta=clamp(s.sta-6,0,100);}
+/* v1.91.60 (Man): skills cost stamina like mana — the higher the rank the more it costs; not enough stamina, no skill. The corner mini-game between rounds is how it comes back */
+const SK_COST={atk:[8,11,14],td:[8,11,14],sub:[8,11,14],def:[5,7,9],rec:[0,0,0]}; /* sims (5 girls × 4 player tiers, live fight with a perfect corner): main-game/belt bouts within 1–4 pts of v1.91.55, champions and Naka about level — 10/14/18 cost ~5 more */
+const skCost=sk=>{const c=SK_COST[sk.k]||SK_COST.atk;return c[clamp((sk.r||1)-1,0,2)];};
+const skAfford=(s,sk)=>s.sta>=skCost(sk);
+const AI_CORNER_BACK=.6; /* a side without the player's corner mini-game gets this share of the stamina it spent on skills back between rounds (an average corner) */
+function aiCornerBack(s){const b=(s.skSpent||0)*AI_CORNER_BACK;s.skSpent=0;s.sta=clamp(s.sta+b,0,100);}
+/* v1.91.60 (Man): no more "once per fight" — a skill rests one round after use (cooldown), then can fire again if the stamina is there. Still one skill per round */
+const SK_CD=1;const skCdLeft=(F,s,id)=>{const r=s.skUsed&&s.skUsed[id];return r==null||r===true?(r===true?99:0):Math.max(0,r+SK_CD+1-F.round);};
+function useSkill(F,s,id){const o=s===F.A?F.B:F.A;s.skUsed=s.skUsed||{};if(F.over||s.skRound||skCdLeft(F,s,id))return null;const sk=fightSkills(s).find(k=>k.id===id);if(!sk||!skAfford(s,sk))return null;
+  s.skUsed[id]=F.round;s.skRound=true;const pw=(.7+.15*sk.r)*(s.f.camp==="player"?1.1:F.dai||.8);{const c=skCost(sk);s.sta=clamp(s.sta-c,0,100);s.skSpent=(s.skSpent||0)+c;}
+  if(sk.k==="atk")s.burst={k:"atk",w:sk.w,left:4,pw};
   if(sk.k==="def")s.burst={k:"def",left:4,pw};
   if(sk.k==="rec"){s.sta=clamp(s.sta+22*pw,0,100);s.hp=clamp(s.hp+6*pw,0,100);s.mor+=.01;s.burst=null;}
-  if(sk.k==="td"||sk.k==="sub"){s.burst={k:sk.k,left:sk.k==="td"?3:4,pw};s.sta=clamp(s.sta-5,0,100);} /* v1.90: grappling bursts (Naka League) */
+  if(sk.k==="td"||sk.k==="sub")s.burst={k:sk.k,left:sk.k==="td"?3:4,pw}; /* v1.90: grappling bursts (Naka League) */
   return {ha:F.A.hp,hb:F.B.hp,sa:F.A.sta,sb:F.B.sta,s:s===F.A?"A":"B",t:skillCall(F,s,sk),k:"big",ev:"skill",rid:s.f.id,an:s.name,dn:o.name,skn:sk.name,skk:sk.k,w:sk.w,skid:sk.id,skrow:sk.row};}
-function aiSkill(F,s,rng){if(s.skRound||F.over)return null;const L=fightSkills(s).filter(k=>!(s.skUsed&&s.skUsed[k.id]));if(!L.length)return null;
+function aiSkill(F,s,rng){if(s.skRound||F.over)return null;const L=fightSkills(s).filter(k=>!skCdLeft(F,s,k.id)&&skAfford(s,k));if(!L.length)return null;
   const o=s===F.A?F.B:F.A,ex=F.ex,last=F.round>=F.rounds;const behind=F.cards.reduce((x,c)=>x+(s===F.A?c[0]-c[1]:c[1]-c[0]),0)<0;
   const rec=L.find(k=>k.k==="rec"),atk=L.find(k=>k.k==="atk"),def=L.find(k=>k.k==="def");
   if(rec&&s.sta<38&&ex>=2)return useSkill(F,s,rec.id);
@@ -835,6 +844,7 @@ function roundFinish(F){const log=F.rlog,kd0=F.kd0;for(const s of [F.A,F.B])s.bu
   /* v1.87.2: a fighter gets her breath back between rounds — tougher fighters recover more — so long bouts are not just a slow knockout
      v1.88: stamina no longer refills by itself. A break gives back a little (conditioning, last week's fight prep), the corner does the rest:
      the player's corner mini-game in a live fight, an average corner for everyone else. */
+  if(!F.over){aiCornerBack(F.B);if(!F.live)aiCornerBack(F.A);else F.A.skSpent=0;}
   for(const s of [F.A,F.B]){s.sta=clamp(s.sta+(s.brk||0),0,100);if(s.f.hurt)s.hp+=s.f.hurt.rnd*hurtW(s);s.hp=clamp(s.hp+(F.ev?RND_REC_EV:RND_REC).b+s.f.a.dur*(F.ev?RND_REC_EV:RND_REC).d,0,Math.max(100,s.hp0||100));
     } /* v1.89.1: corner mini-games are off — everyone gets her breath back between rounds again (16 + stamina×0.8, plus conditioning / fight prep / Fah's bonus); careSide/applyCare stay for a mini-game later */
   if(!F.over&&F.round>=F.rounds){F.over=true;const tA=F.cards.reduce((x,c)=>x+c[0],0),tB=F.cards.reduce((x,c)=>x+c[1],0);
@@ -1634,4 +1644,4 @@ const loanOk=G=>!(G.loan>0)&&G.cash<LOAN_LOW&&!G.ended;
 function takeLoan(G){if(!loanOk(G))return false;G.loan=LOAN_AMT;G.cash+=LOAN_AMT;G.loanN=(G.loanN||0)+1;G.gang=G.gang||{st:0,next:0};G.gang.nextAbs=Math.min(G.gang.nextAbs||Infinity,gameWeek(G)+2);return true;}
 function repayLoan(G){if(!(G.loan>0)||G.cash<G.loan)return false;G.cash-=G.loan;G.loan=0;return true;}
 function clearDebt(G){if(G.debt<=0||G.cash<G.debt)return false;G.cash-=G.debt;G.debt=0;G.flags.debtCleared=true;G.rep+=2;return true;}
-if(typeof module!=="undefined")module.exports={takeLoan,repayLoan,loanOk,LOAN_AMT,LOAN_LOW,cornerOdds,cloneFight,trainWeek,passiveMods,skillReqs,skillBlock,hasTree,DIFF,studentCap,studentDemand,studentFee,growStudents,storyTop4,RIVAL_OF,LEADS,upkeep,campActLocked,equipped,toggleEquip,MAX_EQUIP,roundBegin,fightEx,roundDone,roundFinish,useSkill,fightSkills,SKILL_KIND_NAME,fixSave,STAFF,hireStaff,fireStaff,staffSlots,staffLocked,facLocked,mainStyle,mastery,styleVal,STYLE_NAME,STYLE_ATTRS,MASTERY_AT,aiCorner,FACILITIES,SIGNATURE,hasSignature,counterPreset,oppTop,careNeeds,applyCare,throwTowel,CARE,MASTERS,hireMaster,hostShow,clearDebt,SHOW_COST,TAC,setTactics,finishBracket,mulberry32,newGame,weekTrain,weekFinish,genOffers,acceptOffer,buyFacility,upgradeDaeng,students,campLevel,newFight,fightRound,quickFight,applyResult,standings,roster,ovr,styleOf,stageOf,finishFinal,condition,ATTRS,isBooked,PRESETS,CANON,advise,doCampAction,learnSkill,SKILLS,SCHOOLS,campLook,newSeason};
+if(typeof module!=="undefined")module.exports={skCost,SK_COST,CARE_STA,takeLoan,repayLoan,loanOk,LOAN_AMT,LOAN_LOW,cornerOdds,cloneFight,trainWeek,passiveMods,skillReqs,skillBlock,hasTree,DIFF,studentCap,studentDemand,studentFee,growStudents,storyTop4,RIVAL_OF,LEADS,upkeep,campActLocked,equipped,toggleEquip,MAX_EQUIP,roundBegin,fightEx,roundDone,roundFinish,useSkill,fightSkills,SKILL_KIND_NAME,fixSave,STAFF,hireStaff,fireStaff,staffSlots,staffLocked,facLocked,mainStyle,mastery,styleVal,STYLE_NAME,STYLE_ATTRS,MASTERY_AT,aiCorner,FACILITIES,SIGNATURE,hasSignature,counterPreset,oppTop,careNeeds,applyCare,throwTowel,CARE,MASTERS,hireMaster,hostShow,clearDebt,SHOW_COST,TAC,setTactics,finishBracket,mulberry32,newGame,weekTrain,weekFinish,genOffers,acceptOffer,buyFacility,upgradeDaeng,students,campLevel,newFight,fightRound,quickFight,applyResult,standings,roster,ovr,styleOf,stageOf,finishFinal,condition,ATTRS,isBooked,PRESETS,CANON,advise,doCampAction,learnSkill,SKILLS,SCHOOLS,campLook,newSeason};

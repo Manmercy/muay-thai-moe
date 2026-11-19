@@ -15817,5 +15817,14 @@
  "{g}ยืนทำท่าเหมือนภาพกระซิบรักแล้วกระซิบว่า \"พรุ่งนี้กินอะไรดี\" ทั้งกลุ่มหัวเราะจนยามมาดู": "{g} copies the Whispering Lovers mural and whispers, \"What shall we eat tomorrow?\" The group laughs until a guard comes over.",
  "ไปนั่งริมกำแพงเมืองดูภาพกระซิบรัก": "See the Whispering Lovers mural by the old wall",
  "ทุกคนยืนถ่ายรูปกับวัดสีขาวจนแบตหมด {g}ถ่ายเซลฟี่ไปสี่สิบรูป ใช้ได้รูปเดียว": "Everyone shoots the White Temple until their batteries die. {g} takes forty selfies; one is usable.",
- "ไปดูวัดร่องขุ่นตอนเปิดไฟกลางคืน": "See Wat Rong Khun lit up at night"
+ "ไปดูวัดร่องขุ่นตอนเปิดไฟกลางคืน": "See Wat Rong Khun lit up at night",
+ " · แรงไม่พอ": " · not enough stamina",
+ " · ใช้แรง ": " · costs stamina ",
+ "\">ขั้น ": "\">Rank ",
+ "<p class=\"skcost-l\">⚡ ใช้แรงตอนชก: ": "<p class=\"skcost-l\">⚡ Stamina cost in fights: ",
+ "<p class=\"skcost-l\">⚡ ไม่ใช้แรง · เติมแรงคืนเอง</p>": "<p class=\"skcost-l\">⚡ No stamina cost · restores stamina</p>",
+ "แรง (หลอดทองตอนชก)": "Stamina (gold bar in fights)",
+ "พัก 1 ยก": "Rest 1 rd",
+ " · พัก 1 ยก": " · rests 1 round",
+ "ออกสกิลตอนชกต้องใช้แรง ขั้นสูงใช้มากขึ้น (โจมตี 8/11/14 · ตั้งรับ 5/7/9 · เรียกแรงคืนไม่ใช้) แรงไม่พอกดไม่ได้ · ยกละ 1 สกิล ใช้แล้วสกิลนั้นพัก 1 ยก · ระหว่างยกได้แรงคืนเอง และมินิเกมนวดมุมเติมเพิ่ม (ถูกครบ +20 · ถูก 2 ใน 3 +10)": "Using a skill in a fight costs stamina, more at higher ranks (attack 8/11/14 · guard 5/7/9 · second wind is free). Not enough stamina, no skill · one skill per round, and a skill rests one round after use · some stamina comes back between rounds, and the corner mini-game adds more (all correct +20 · two of three +10)"
 }

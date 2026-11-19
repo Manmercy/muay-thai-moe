@@ -658,7 +658,8 @@ function careNeeds(F){const A=F.A,B=F.B,r=mulberry32(F.seed+F.round*977);const s
 // v1.89.1: corner care on one scale — a missed mini-game still gives 60% of a normal corner, coach Daeng / quick fights give a normal corner,
 // a great mini-game is a small bonus on top (not the thing that decides the fight)
 const careMult=q=>q<=1?STA.cNorm*(STA.cMin+(1-STA.cMin)*Math.max(0,q)):STA.cNorm*(1+(q-1)*STA.cBonus);
-function applyCare(F,q){const A=F.A;A.sta=clamp(A.sta+q*9,0,100);A.hp=clamp(A.hp+q*4,0,Math.max(100,A.hp0||100));A.careMor=q>=1?.02:0;return q;} /* v1.89.1: back to the single order puzzle — a small bonus on top of the normal between-round recovery (as in v1.87.5) */
+const CARE_STA=20; /* v1.91.60: the corner refills the skill "mana" — perfect +20, two of three +10 (was +9/+4.5) */
+function applyCare(F,q){const A=F.A;A.sta=clamp(A.sta+q*CARE_STA,0,100);A.hp=clamp(A.hp+q*4,0,Math.max(100,A.hp0||100));A.careMor=q>=1?.02:0;return q;} /* v1.89.1: back to the single order puzzle — a small bonus on top of the normal between-round recovery (as in v1.87.5) */
 function throwTowel(F){if(F.over)return;F.over=true;F.result={win:"B",type:"Corner throws in the towel",round:F.round,towel:true};}
 function aiCorner(F,me,op){ if(F.round===0)return "none";
   const lead=me.pts-op.pts;if(me.sta<35)return "defend";if(lead>4)return "defend";if(lead<-3)return "push";
@@ -677,7 +678,7 @@ function roundBegin(F){F.round++;F.gnd=null;
 const roundDone=F=>F.over||F.ex>=EX_PER_ROUND;
 function fightRound(F){roundBegin(F);while(!roundDone(F))fightEx(F);return roundFinish(F);}
 // ---------- active skills (v1.19) ----------
-// every learned school skill can be fired once per fight (max one per round): attack burst, guard burst or second wind
+// every learned school skill: attack burst, guard burst or second wind — max one per round; since v1.91.60 a skill rests one round after use and costs stamina
 function skillKind(sk){const e=sk.fx(1);const wk=e.hit||e.pts||e.dmg;if(wk)return {k:"atk",w:Object.keys(wk)[0]};if(e.evade||e.ctr||e.clDef||e.ctrDmg)return {k:"def"};return {k:"rec"};}
 const SKILL_KIND_NAME={atk:"Finishing attack",def:"Defend & counter",rec:"Recover energy"};
 function fightSkills(s){if(s.f.nlsk)return s.f.nlsk.map(k=>({...k,r:3}));const L=skillList(s.f.id),eq=equipped(s.f);return L.filter(k=>eq.includes(k.id)).map(k=>({...k,r:s.f.skills[k.id],...skillKind(k)}));}
@@ -686,14 +687,22 @@ const MAEMAI={"ts_low":"l","ts_croc":"m","ts_ring":"l","ts_trunk":"m","kati_1a1"
 function skillCall(F,s,sk){const k=MAEMAI[sk.id];if(!k)return `${s.name} uses "${sk.name}"!`;const kn=k==="m"?"Mae mai Muay Thai":"Look mai Muay Thai";
   const L=[`${kn}! ${s.name} goes for "${sk.name}"!`,`"${sk.name}"! ${kn}, the real thing, from ${s.name}!`,`${s.name} pulls out ${kn} "${sk.name}" — there it is, folks!`];
   return L[((F.round||1)+(F.ex||0))%L.length];}
-function useSkill(F,s,id){const o=s===F.A?F.B:F.A;s.skUsed=s.skUsed||{};if(F.over||s.skRound||s.skUsed[id])return null;const sk=fightSkills(s).find(k=>k.id===id);if(!sk)return null;
-  s.skUsed[id]=true;s.skRound=true;const pw=(.7+.15*sk.r)*(s.f.camp==="player"?1.1:F.dai||.8);
-  if(sk.k==="atk"){s.burst={k:"atk",w:sk.w,left:4,pw};s.sta=clamp(s.sta-6,0,100);}
+/* v1.91.60 (Man): skills cost stamina like mana — the higher the rank the more it costs; not enough stamina, no skill. The corner mini-game between rounds is how it comes back */
+const SK_COST={atk:[8,11,14],td:[8,11,14],sub:[8,11,14],def:[5,7,9],rec:[0,0,0]}; /* sims (5 girls × 4 player tiers, live fight with a perfect corner): main-game/belt bouts within 1–4 pts of v1.91.55, champions and Naka about level — 10/14/18 cost ~5 more */
+const skCost=sk=>{const c=SK_COST[sk.k]||SK_COST.atk;return c[clamp((sk.r||1)-1,0,2)];};
+const skAfford=(s,sk)=>s.sta>=skCost(sk);
+const AI_CORNER_BACK=.6; /* a side without the player's corner mini-game gets this share of the stamina it spent on skills back between rounds (an average corner) */
+function aiCornerBack(s){const b=(s.skSpent||0)*AI_CORNER_BACK;s.skSpent=0;s.sta=clamp(s.sta+b,0,100);}
+/* v1.91.60 (Man): no more "once per fight" — a skill rests one round after use (cooldown), then can fire again if the stamina is there. Still one skill per round */
+const SK_CD=1;const skCdLeft=(F,s,id)=>{const r=s.skUsed&&s.skUsed[id];return r==null||r===true?(r===true?99:0):Math.max(0,r+SK_CD+1-F.round);};
+function useSkill(F,s,id){const o=s===F.A?F.B:F.A;s.skUsed=s.skUsed||{};if(F.over||s.skRound||skCdLeft(F,s,id))return null;const sk=fightSkills(s).find(k=>k.id===id);if(!sk||!skAfford(s,sk))return null;
+  s.skUsed[id]=F.round;s.skRound=true;const pw=(.7+.15*sk.r)*(s.f.camp==="player"?1.1:F.dai||.8);{const c=skCost(sk);s.sta=clamp(s.sta-c,0,100);s.skSpent=(s.skSpent||0)+c;}
+  if(sk.k==="atk")s.burst={k:"atk",w:sk.w,left:4,pw};
   if(sk.k==="def")s.burst={k:"def",left:4,pw};
   if(sk.k==="rec"){s.sta=clamp(s.sta+22*pw,0,100);s.hp=clamp(s.hp+6*pw,0,100);s.mor+=.01;s.burst=null;}
-  if(sk.k==="td"||sk.k==="sub"){s.burst={k:sk.k,left:sk.k==="td"?3:4,pw};s.sta=clamp(s.sta-5,0,100);} /* v1.90: grappling bursts (Naka League) */
+  if(sk.k==="td"||sk.k==="sub")s.burst={k:sk.k,left:sk.k==="td"?3:4,pw}; /* v1.90: grappling bursts (Naka League) */
   return {ha:F.A.hp,hb:F.B.hp,sa:F.A.sta,sb:F.B.sta,s:s===F.A?"A":"B",t:skillCall(F,s,sk),k:"big",ev:"skill",rid:s.f.id,an:s.name,dn:o.name,skn:sk.name,skk:sk.k,w:sk.w,skid:sk.id,skrow:sk.row};}
-function aiSkill(F,s,rng){if(s.skRound||F.over)return null;const L=fightSkills(s).filter(k=>!(s.skUsed&&s.skUsed[k.id]));if(!L.length)return null;
+function aiSkill(F,s,rng){if(s.skRound||F.over)return null;const L=fightSkills(s).filter(k=>!skCdLeft(F,s,k.id)&&skAfford(s,k));if(!L.length)return null;
   const o=s===F.A?F.B:F.A,ex=F.ex,last=F.round>=F.rounds;const behind=F.cards.reduce((x,c)=>x+(s===F.A?c[0]-c[1]:c[1]-c[0]),0)<0;
   const rec=L.find(k=>k.k==="rec"),atk=L.find(k=>k.k==="atk"),def=L.find(k=>k.k==="def");
   if(rec&&s.sta<38&&ex>=2)return useSkill(F,s,rec.id);
@@ -836,6 +845,7 @@ function roundFinish(F){const log=F.rlog,kd0=F.kd0;for(const s of [F.A,F.B])s.bu
   /* v1.87.2: a fighter gets her breath back between rounds — tougher fighters recover more — so long bouts are not just a slow knockout
      v1.88: stamina no longer refills by itself. A break gives back a little (conditioning, last week's fight prep), the corner does the rest:
      the player's corner mini-game in a live fight, an average corner for everyone else. */
+  if(!F.over){aiCornerBack(F.B);if(!F.live)aiCornerBack(F.A);else F.A.skSpent=0;}
   for(const s of [F.A,F.B]){s.sta=clamp(s.sta+(s.brk||0),0,100);if(s.f.hurt)s.hp+=s.f.hurt.rnd*hurtW(s);s.hp=clamp(s.hp+(F.ev?RND_REC_EV:RND_REC).b+s.f.a.dur*(F.ev?RND_REC_EV:RND_REC).d,0,Math.max(100,s.hp0||100));
     } /* v1.89.1: corner mini-games are off — everyone gets her breath back between rounds again (16 + stamina×0.8, plus conditioning / fight prep / Fah's bonus); careSide/applyCare stay for a mini-game later */
   if(!F.over&&F.round>=F.rounds){F.over=true;const tA=F.cards.reduce((x,c)=>x+c[0],0),tB=F.cards.reduce((x,c)=>x+c[1],0);
@@ -6226,7 +6236,7 @@ AU.gsfx=function(kind,a){if(!this.init()||this.muted||!SETTINGS.sfx)return;const
   if(kind==="shimmer")for(let i=0;i<6;i++)T(i*.05,{f:1400+Math.random()*1400,type:"sine",dur:.12,peak:.06});};
 
 // ================= MUAY THAI MOE v1.3 — UI =================
-const VERSION="1.91.58";
+const VERSION="1.91.60";
 const CUR_LANG=(typeof window!=="undefined"&&window.LANG)||"th";
 const TH_LABEL=String.fromCharCode(3652,3607,3618);
 function langSwitch(cls){return `<div class="langsw ${cls||""}" role="group" aria-label="Language">${[["th",TH_LABEL],["en","EN"]].map(([k,l])=>`<button class="lsb ${CUR_LANG===k?"on":""}" data-act="setlang" data-v="${k}" aria-pressed="${CUR_LANG===k}">${l}</button>`).join("")}</div>`;}
@@ -6515,6 +6525,7 @@ const GLOSS=[["Readiness","Condition on fight day. The higher, the better she fi
  ["Morale","Higher morale means sharper strikes. Rises with wins, dates, merit-making; drops with losses or overtraining"],["Bond","Her closeness to you. Unlocks special scenes, the signature move at 60, and raises the chance of blood-boil mode"],
  ["Trust","How much a fighter trusts your orders. Higher trust makes corner orders work better (up to +4% accuracy); at 60 losses hurt morale less, and it affects confession scenes · raise it with merit-making scenes, wai khru, not overtraining, and a camp out of debt"],["Fame","How well-known the camp is. The higher, the more students come"],
  ["Skill points","Earned every level-up. Spend them on old-school moves from the fighter's school, and on hidden power (Lv.1–10 · 5 points a level)"],["Counter-training","Scout the opponent, then train the program that counters their main weapon the week before the fight. On fight night their main weapon lands less often and you read their game better"],
+ ["Stamina (gold bar in fights)","Using a skill in a fight costs stamina, more at higher ranks (attack 8/11/14 · guard 5/7/9 · second wind is free). Not enough stamina, no skill · one skill per round, and a skill rests one round after use · some stamina comes back between rounds, and the corner mini-game adds more (all correct +20 · two of three +10)"],
  ["Blood-boil mode","When badly hurt or behind on points, a fighter may 'change eyes' for a moment: stronger counters, easier criticals. Once per fight"],["Wai khru ram muay","Ritual before the first fight, canon matchups, and major bouts. Choose a dance; each gives a different effect"]];
 
 // ---------- creator (manager look) ----------
@@ -7123,7 +7134,7 @@ function skTreeHTML(f,li,mine,lines,path){const L=skillList(f.id).filter(s=>s.li
     const cls=t.st==="lock"&&t.r?"has":t.st;
     return `<div class="skn2 ${cls}${s.passive?" pas":""}${s.feed!=null?" feed":""}${s.nd===5?" leg":""}${eq?" eq":""}${cn?" "+cn:""}" style="grid-row:${r};grid-column:${c}">
       ${skIcon(s,f.id)}<b class="nm">${s.name}${s.br==null?`<small class="tier">${skKindTag(s)}</small>`:""}<span class="pips" aria-label="Rank ${t.r}/3">${[1,2,3].map(i=>`<i class="${i<=t.r?"on":""}"></i>`).join("")}</span></b>
-      <div class="sktx"><p class="skds">${sdesc(s)}</p>${lockTxt}</div>
+      <div class="sktx"><p class="skds">${sdesc(s)}</p>${s.passive?"":skCostLine(s,t.r)}${lockTxt}</div>
       <span class="ctl">${mine&&t.r&&!s.passive?`<button class="skeq${eq?" on":""}" data-act="equip" data-id="${f.id}" data-v="${s.id}" aria-pressed="${eq}" aria-label="${eq?"Remove":"Equip"} ${s.name}">${eq?"Remove":"Equip"}</button>`:""}${mine&&t.st==="can"?`<button class="skplus" data-act="learn" data-id="${f.id}" data-v="${s.id}" aria-label="Upgrade ${s.name} to rank ${t.r+1}">+</button>`:""}</span>${tag(s)}${eq?'<i class="eqm" aria-hidden="true">E</i>':""}</div>`;};
   const split=R&&L.some(s=>s.br!=null)?`<div class="sksplit" style="grid-row:${last+1}" aria-hidden="false"><svg viewBox="0 0 300 20" preserveAspectRatio="none" aria-hidden="true"><path d="M150 0V8H73V20M150 8H227V20"/></svg>
     <span class="rt a"><b>${R[0].n}</b><small>${R[0].m}</small></span><span class="rt b"><b>${R[1].n}</b><small>${R[1].m}</small></span></div>`:"";
@@ -7133,7 +7144,7 @@ function skTreeHTML(f,li,mine,lines,path){const L=skillList(f.id).filter(s=>s.li
     // v1.89.1: details open as a popup in the middle of the screen; upgrading stays on the + of each row
     det=`<div class="skpop-ov" data-act="skpopbg"><div class="px skpop" role="dialog" aria-modal="true" aria-label="${sel.name}"><div class="skdet-h">${skIcon(sel,f.id)}<div><b>${sel.name}</b><small>${skKindTag(sel)} · ${sel.passive?"Always on, uses no slot":eq?"<span class=\"goldt\">Equipped</span>":"Active, can be equipped"}</small></div><button class="skx" data-act="skselx" aria-label="Close details">✕</button></div>
       <div class="skpop-r"><span class="pips">${[1,2,3].map(i=>`<i class="${i<=t.r?"on":""}"></i>`).join("")}</span><small>Rank ${t.r}/3</small></div>
-      <p class="skc-d">${sel.desc}</p>${ftxt}
+      <p class="skc-d">${sel.desc}</p>${sel.passive?"":skCostLine(sel,t.r)}${ftxt}
       <p class="skc-s">${t.st==="can"?`<span class="ok">Ready · tap + on the skill row</span>`:t.st==="max"?"<span class=\"goldt\">Maxed out</span>":t.st==="nosp"?"<span class=\"dim\">No skill points · wait for a level up</span>":t.st==="has"?"":t.B?`<span class="no">Can't upgrade yet: ${why(t)}</span>`:""}</p>
       ${mine&&t.r&&!sel.passive?`<div class="skdet-b"><button class="btn eqbtn ${eq?"on":""}" data-act="equip" data-id="${f.id}" data-v="${sel.id}" ${!eq&&eqd.length>=MAX_EQUIP?"disabled":""}>${eq?"Remove from fight slots":"Equip"}</button></div>`:""}</div></div>`;}
   const sig=SIGNATURE[f.id]?`<div class="skc sig ${hasSignature(f)?"has":"lock"}"><div class="skc-m"><div class="skc-h"><b>✦ Signature: ${SIGNATURE[f.id].name}</b></div><p class="skc-d">${SIGNATURE[f.id].desc}${hasSignature(f)?"":` · unlocks at bond 60 (now ${Math.round(f.bond||0)})`}</p></div></div>`:"";
@@ -7717,7 +7728,7 @@ function careOilHTML(A,C){const left=C.done?0:C.t0?Math.max(0,Math.ceil(C.secs-(
   ${pour?`<div class="oiltrack" data-oil="1"><span class="oilhint">▸ ▸ ▸</span><i class="oilend r">${PIX.water}</i><button class="oilknob" aria-label="Drag to pour the boxing oil">${PIX.rub}</button></div>`
    :`<div class="carebtns one"><button class="oilrub ${C.done?"":"go"}" data-act="coil" ${C.done?"disabled":""}>${PIX.oilhand}<small>${C.done?`Massaged ${C.taps} times`:"Rub!"}</small></button></div>`}</div>`;}
 /* apply a corner result and remember how much it gave back, for the summary line */
-function careApply(U,C){const A=U.F.A,s0=A.sta,h0=A.hp;applyCare(U.F,C.q);C.gain={sta:Math.round(A.sta-s0),hp:Math.round(A.hp-h0)};if(C.q>=1)U.careOK=(U.careOK||0)+1;}
+function careApply(U,C){const A=U.F.A,s0=A.sta,h0=A.hp;applyCare(U.F,C.q);setTimeout(()=>staPop(Math.round(A.sta-s0)),60);C.gain={sta:Math.round(A.sta-s0),hp:Math.round(A.hp-h0)};if(C.q>=1)U.careOK=(U.careOK||0)+1;}
 function oilFinish(){const U=UI.fight,C=U&&U.care;if(!C||C.mode!=="oil"||C.done)return;C.done=true;const target=C.secs*2.6;C.q=Math.max(.15,Math.min(1.3,C.taps/target));careApply(U,C);AU.sfx(C.q>=1?"level":"ui");render();}
 function oilTick(){const U=UI.fight,C=U&&U.care;if(!C||C.mode!=="oil"||C.done||!C.t0)return;const left=Math.max(0,Math.ceil(C.secs-(performance.now()-C.t0)/1000));const el=document.querySelector(".oiltime b");if(el)el.textContent=left;if(left<=0){oilFinish();return;}setTimeout(oilTick,150);}
 function oilPoured(C){C.phase="rub";C.t0=performance.now();AU.sfx("level");render();setTimeout(oilTick,150);}
@@ -7884,9 +7895,13 @@ function feedRound(){const U=UI.fight,F=U.F;
   while(!U.pending.length&&!roundDone(F)){U.pending.push(...fightEx(F));
     if(!U.tiredShown&&F.ex>=8){for(const s of [F.A,F.B])if(s.sta<30){U.pending.push({tired:true,cap:{text:COM.tired[Math.floor(U.rng()*2)].replace("{x}",s.name),side:""}});U.tiredShown=true;}}}
   return U.pending.length>0;}
-function fskill(id){const U=UI.fight;if(!U||U.stage!=="playing")return;const e=useSkill(U.F,U.F.A,id);if(!e)return;U.pending.unshift(e);clearTimeout(U.timer);tick();}
-function skillBarHTML(){const U=UI.fight,F=U.F;const L=fightSkills(F.A);const used=F.A.skUsed||{};if(!L.length)return `<span class="meta skhint">No skills yet · level up, then upgrade skills in the fighter info</span>`;const slots=[0,1,2].map(i=>L[i]);
-  return `<div class="skbar2" role="group" aria-label="Skills ${F.A.skRound?" (used this round)":""}">${slots.map(k=>k?`<button class="skbtn2 ${k.k}" data-act="fskill" data-v="${k.id}" ${used[k.id]||F.A.skRound||F.over?"disabled":""} title="${esc(k.name)} · ${esc(SKILL_KIND_NAME[k.k])}">${PIX["sk_"+k.k]}<b>${esc(k.name)}</b></button>`:`<span class="skbtn2 empty">Empty</span>`).join("")}</div>`;}function sideOf(e,F){if(e.s==="A"||e.s==="B")return e.s;if(e.mside)return e.mside;return e.an===F.A.name?"A":"B";}
+function fskill(id){const U=UI.fight;if(!U||U.stage!=="playing")return;const s0=U.F.A.sta;const e=useSkill(U.F,U.F.A,id);if(!e)return;staPop(Math.round(U.F.A.sta-s0));U.pending.unshift(e);clearTimeout(U.timer);tick();}
+/* v1.91.60: what each rank of an active skill costs in stamina (the in-fight "mana") */
+/* v1.91.60: a "−14" floats off the gold stamina bar when the player fires a skill, so the cost is seen */
+function staPop(d){if(!d||typeof document==="undefined")return;const m=document.querySelector(".fside.a .meter.thin");if(!m)return;const r=m.getBoundingClientRect(),el=document.createElement("b");el.className="stapop "+(d<0?"neg":"pos");el.textContent=`${d<0?"−":"+"}${Math.abs(d)} ⚡`;el.style.left=(r.left+r.width*.5+scrollX)+"px";el.style.top=(r.top+scrollY-4)+"px";document.body.appendChild(el);setTimeout(()=>el.remove(),1300);}
+function skCostLine(sk,r){const k=skillKind(sk).k,c=SK_COST[k]||SK_COST.atk;if(!c[2])return `<p class="skcost-l">⚡ No stamina cost · restores stamina</p>`;return `<p class="skcost-l">⚡ Stamina cost in fights: ${c.map((v,i)=>`<span class="${i+1===r?"on":""}">Rank ${i+1} · ${v}</span>`).join("")}</p>`;}
+function skillBarHTML(){const U=UI.fight,F=U.F;const L=fightSkills(F.A);if(!L.length)return `<span class="meta skhint">No skills yet · level up, then upgrade skills in the fighter info</span>`;const slots=[0,1,2].map(i=>L[i]);
+  return `<div class="skbar2" role="group" aria-label="Skills ${F.A.skRound?" (used this round)":""}">${slots.map(k=>{if(!k)return `<span class="skbtn2 empty">Empty</span>`;const c=skCost(k),cd=skCdLeft(F,F.A,k.id),poor=!cd&&F.A.sta<c;return `<button class="skbtn2 ${k.k}${poor?" poor":""}${cd?" cd":""}" data-act="fskill" data-v="${k.id}" ${cd||F.A.skRound||F.over||poor?"disabled":""} title="${esc(k.name)} · ${esc(SKILL_KIND_NAME[k.k])}${c?` · costs stamina ${c}`:""}${poor?" · not enough stamina":""}${cd?" · rests 1 round":""}">${PIX["sk_"+k.k]}<b>${esc(k.name)}</b><i class="skcost">${cd?"Rest 1 rd":c?`⚡${c}`:"⚡+"}</i></button>`;}).join("")}</div>`;}function sideOf(e,F){if(e.s==="A"||e.s==="B")return e.s;if(e.mside)return e.mside;return e.an===F.A.name?"A":"B";}
 /* v1.89.8: sarama follows the fight — slow feeling-out in round 1, fastest in the deciding round, a surge late in each round and after a knockdown.
    5-round bouts keep the stadium shape: 3–4 hottest, 5 eases off when someone is clearly ahead (dancing the round out). */
 function fightMusic(F,surge){if(!F||!AU.setTempo)return;const R=Math.max(1,F.rounds||3),r=Math.min(F.round||1,R);
@@ -8180,7 +8195,7 @@ const ACT={
     const b=document.querySelector(".oilcombo b");if(b){b.textContent=C.taps;const p=b.parentElement;p.classList.remove("pop");void p.offsetWidth;p.classList.add("pop");}},
   ccard:d=>{const U=UI.fight,C=U.care;if(!C||C.mode!=="card"||C.done)return;const i=+d.v;C.flip=i;C.q=C.deck[i];C.done=true;careApply(U,C);AU.sfx(C.q>1?"level":C.q<0?"miss":"ui");render();},
   care:d=>{const U=UI.fight,C=U.care;if(!C||C.done)return;const i=C.got.length;C.got.push(d.v);const ok=C.need[i]===d.v;AU.sfx(ok?"ui":"miss");
-    if(C.got.length>=C.need.length){C.done=true;const n=C.got.filter((g,k)=>g===C.need[k]).length;C.q=n===3?1:n===2?.5:0;if(C.q>=1)U.careOK=(U.careOK||0)+1;applyCare(U.F,C.q);if(C.q>=1){AU.sfx("level");const me=G.F[U.b.a];popToast({kati:"So refreshing!",mali:"Not tired anymore! Let's go!",rin:"Body back to 90%",ploy:"Thank you, my heart's in it",fah:"Okay! Ready to go hard!"}[me.id]||"Refreshed!","good");}}render();},
+    if(C.got.length>=C.need.length){C.done=true;const n=C.got.filter((g,k)=>g===C.need[k]).length;C.q=n===3?1:n===2?.5:0;if(C.q>=1)U.careOK=(U.careOK||0)+1;{const s0=U.F.A.sta;applyCare(U.F,C.q);setTimeout(()=>staPop(Math.round(U.F.A.sta-s0)),60);}if(C.q>=1){AU.sfx("level");const me=G.F[U.b.a];popToast({kati:"So refreshing!",mali:"Not tired anymore! Let's go!",rin:"Body back to 90%",ploy:"Thank you, my heart's in it",fah:"Okay! Ready to go hard!"}[me.id]||"Refreshed!","good");}}render();},
   towel:()=>{UI.confirmTowel=true;render();},
   towelno:()=>{UI.confirmTowel=false;UI.towelCoach=false;render();},
   towelyes:()=>{UI.confirmTowel=false;UI.towelCoach=false;const U=UI.fight;throwTowel(U.F);U.shown.push({s:"x",t:`${G.F[U.b.a].name}'s corner throws in the towel`});fightEnd();},
