@@ -1097,9 +1097,9 @@ const REGION={
   /* the series fighter picker (modal) */
   /* v1.91.50 (playtest): Daeng watches the champion's tapes and says who fits — a player sending the wrong girl lost a series ten times without knowing why */
   tipFor(G,r,force){const R=G.region,c=R&&R.champ[r];if(!c)return null;const now=gameWeek(G);if(!force&&c.tip&&now-(c.tip.abs||0)<8)return c.tip;
-    const pool=roster(G).filter(f=>f.camp==="player").sort((a,b)=>effOvr(G,b)-effOvr(G,a)).slice(0,6);if(pool.length<2)return null;
-    const sc=pool.map(me=>{const o=this.champFighter(G,r,me);let w=0;const N=16;for(let i=1;i<=N;i++){const x=quickFight(me,o,stableHash(me.id+r)+i*977,5);if((x.result||x).win==="A")w++;}return [me.id,w/N];}).sort((a,b)=>b[1]-a[1]);
-    const top=sc[0][1],good=sc.filter(x=>x[1]>=top*.8).slice(0,2).map(x=>x[0]),bad=sc.filter(x=>x[1]<=top*.45).slice(-2).map(x=>x[0]);
+    const pool=roster(G).filter(f=>f.camp==="player").sort((a,b)=>effOvr(G,b)-effOvr(G,a)).slice(0,5);if(pool.length<2)return null;
+    const base=stableHash(r+(G.season||1)),N=200,sc=pool.map(me=>{const o=this.champFighter(G,r,me);let w=0;for(let i=1;i<=N;i++){const x=quickFight(me,o,base+i*977,5);if((x.result||x).win==="A")w++;}return [me.id,w/N];}).sort((a,b)=>b[1]-a[1]); /* same seeds for everyone, 200 bouts each (~1 s, once per letter) — 16 and 80 were too noisy to trust */
+    const top=sc[0][1],good=sc.filter(x=>x[1]>=top-.04).slice(0,2).map(x=>x[0]),bad=sc.filter(x=>x[1]<=top*.5).slice(-2).map(x=>x[0]);
     c.tip={abs:now,good,bad};return c.tip;},
   tipText(G,r){const t=this.tipFor(G,r);if(!t||!t.good.length)return "";const nm=(ids,j)=>ids.filter(id=>G.F[id]).map(id=>G.F[id].name).join(j);
     return `ครูแดงดูเทป${RG[r].champ}แล้ว · เข้าทางที่สุด ${nm(t.good," หรือ ")}${t.bad.length?` · ยังไม่ควรส่ง ${nm(t.bad,", ")}`:""}`;},
