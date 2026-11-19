@@ -285,7 +285,7 @@ function settingsHTML(){const t=(k,label,desc)=>`<label class="set"><span><b>${l
 const GLOSS=[["ความพร้อม","สภาพร่างกายวันชก ยิ่งสูงยิ่งชกได้เต็มที่ ลดลงเมื่อล้าหรือบาดเจ็บ"],["ความล้า","สะสมจากการซ้อม เกิน 65 เริ่มเสี่ยงบาดเจ็บ ลดได้ด้วยพักฟื้น ห้องฟื้นฟู ครัว"],
  ["กำลังใจ","ยิ่งสูงยิ่งชกแม่น ขึ้นจากชนะ เดต ทำบุญ ลดเมื่อแพ้หรือซ้อมหนักเกิน"],["ความสนิท","ความผูกพันกับคุณ ปลดฉากพิเศษ ท่าไม้ตายที่ 60 และเพิ่มโอกาสโหมดเลือดเดือด"],
  ["ความเชื่อใจ","นักมวยเชื่อคำสั่งของคุณแค่ไหน ยิ่งสูง คำสั่งจากมุมเวทีได้ผลดีขึ้น (สูงสุด +4% ความแม่น) ถึง 60 แพ้แล้วกำลังใจลดน้อยลง และมีผลกับฉากสารภาพใจ · เพิ่มได้จากฉากทำบุญ ไหว้ครู ไม่ซ้อมหนักเกินไป และค่ายที่ไม่ติดหนี้"],["ชื่อเสียง","คนรู้จักค่ายแค่ไหน ยิ่งสูงนักเรียนยิ่งมาเรียน"],
- ["แต้มสกิล","ได้ทุกเลเวลอัป ใช้อัปท่ามวยโบราณตามสำนักของนักมวย และอัปพลังแฝง (Lv.1–10)"],["ฝึกแก้ทาง","ดูเทปคู่ชกแล้ว ฝึกโปรแกรมที่แก้อาวุธหลักของคู่ชกในสัปดาห์ก่อนชก วันชกอาวุธหลักของเขาจะโดนยากขึ้น และเราอ่านเกมเขาขาดกว่า"],
+ ["แต้มสกิล","ได้ทุกเลเวลอัป ใช้อัปท่ามวยโบราณตามสำนักของนักมวย และอัปพลังแฝง (Lv.1–10 · ใช้เลเวลละ 5 แต้ม)"],["ฝึกแก้ทาง","ดูเทปคู่ชกแล้ว ฝึกโปรแกรมที่แก้อาวุธหลักของคู่ชกในสัปดาห์ก่อนชก วันชกอาวุธหลักของเขาจะโดนยากขึ้น และเราอ่านเกมเขาขาดกว่า"],
  ["โหมดเลือดเดือด","เมื่อเจ็บหนักหรือตามคะแนน นักมวยอาจ 'ตาเปลี่ยน' ชั่วครู่ สวนแรงและคริติคอลง่าย ไฟต์ละครั้ง"],["ไหว้ครูรำมวย","พิธีก่อนชกไฟท์แรก ไฟท์กับตัวละครหลัก และไฟท์สำคัญ เลือกท่ารำได้ แต่ละท่าให้ผลต่างกัน"]];
 
 // ---------- creator (manager look) ----------
@@ -897,9 +897,9 @@ function traitHTML(f,mine){const L=TRAITS[f.id];if(!L)return "";const cur=traitO
   const extra=cur==="grit"&&f.grit?` <span class="goldt">· สะสมแล้ว +${Math.round(f.grit*100)}%</span>`:"";
   return `<div class="trbox"><div class="trh"><b>พลังแฝง</b>${mine?`<div class="seg trseg" role="group" aria-label="เลือกพลังแฝง">${L.map(t=>`<button data-act="trait" data-id="${f.id}" data-v="${t.id}" aria-pressed="${cur===t.id}">${TRAIT_PX[t.id]||""}<span>${t.name}</span></button>`).join("")}</div>`:`<span class="trone">${TRAIT_PX[T.id]||""}${T.name}</span>`}</div>
    <div class="trdesc">${L.map(t=>`<p class="${t.id===cur?"on":""}" ${t.id===cur?"":`aria-hidden="true"`}>${t.desc}${t.id===cur?extra:""}</p>`).join("")}</div>${f.camp==="player"?traitLvRow(f,mine):""}</div>`;}
-/* v1.91.45: hidden power Lv.1–10 · 1 skill point a level · the numbers above are Lv.3 (100%) */
+/* v1.91.45: hidden power Lv.1–10 · 5 skill points a level · the numbers above are Lv.3 (100%) */
 function traitLvRow(f,mine){const lv=traitLv(f),k=Math.round(traitK(f)*100),b=traitBlock(f);
-  return `<div class="trlv"><span class="trlvt">Lv.<b>${lv}</b>/${TR_MAX}</span><span class="trbar" aria-hidden="true">${Array.from({length:TR_MAX},(_,i)=>`<i class="${i<lv?"on":""}"></i>`).join("")}</span><small class="trk">${lv>=TR_MAX?`แรงสุดแล้ว · ได้ผล ${k}%`:`ได้ผล ${k}% ของที่เขียนไว้`}</small>${mine&&!b?`<button class="skplus" data-act="trup" data-id="${f.id}" aria-label="อัปพลังแฝง ใช้ 1 แต้มสกิล">+</button>`:""}</div>`;}
+  return `<div class="trlv"><span class="trlvt">Lv.<b>${lv}</b>/${TR_MAX}</span><span class="trbar" aria-hidden="true">${Array.from({length:TR_MAX},(_,i)=>`<i class="${i<lv?"on":""}"></i>`).join("")}</span><small class="trk">${lv>=TR_MAX?`แรงสุดแล้ว · ได้ผล ${k}%`:`ได้ผล ${k}% ของที่เขียนไว้ · อัปใช้ ${TR_COST} แต้ม`}</small>${mine&&!b?`<button class="skplus" data-act="trup" data-id="${f.id}" aria-label="อัปพลังแฝง ใช้ 5 แต้มสกิล">+</button>`:""}</div>`;}
 function skResetBtn(f){const n=skPointsSpent(f);if(!n)return "";const c=skResetCost(f);
   return `<button class="btn sm skrbtn" data-act="skresetask" data-id="${f.id}" ${c&&G.cash<c?"disabled":""} aria-label="รีเซ็ตสกิล คืน ${n} แต้ม" title="รีเซ็ตสกิล · คืน ${n} แต้ม · ${c?fmt(c):"ครั้งแรกฟรี"}">↺ รีเซ็ต</button>`;}
 function skResetRow(f){const n=skPointsSpent(f);if(!n)return "";const c=skResetCost(f);

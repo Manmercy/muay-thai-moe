@@ -359,7 +359,7 @@ SHARED_SKILLS.push(SKX("sh5b5",5,8,"sh5b4",["dur", "guard"],"build","Mountain Do
 const skillList=fid=>(SKILLS[fid]||[]).concat(SKILLS[fid]&&SKILLS[fid][0]&&SKILLS[fid][0].line!=null?SHARED_SKILLS:[]);
 const sharedPathOf=f=>{for(const s of SHARED_SKILLS)if((f.skills&&f.skills[s.id])>0)return s.line;return null;};
 // v1.83: full skill reset — every point spent comes back so a fighter can move to another line. First reset per fighter is free.
-const skPointsSpent=f=>Object.values(f.skills||{}).reduce((a,b)=>a+(b||0),0)+Math.max(0,((f&&f.trLv)||1)-1);
+const skPointsSpent=f=>Object.values(f.skills||{}).reduce((a,b)=>a+(b||0),0)+Math.max(0,((f&&f.trLv)||1)-1)*TR_COST;
 const skResetCost=f=>Math.min(3,f.skReset||0)*10000;
 function resetAllSkills(G,id){const f=G.F[id];if(!f||!f.skills)return 0;const n=skPointsSpent(f);if(!n)return 0;f.skills={};if(f.trLv)f.trLv=1;f.sp=(f.sp||0)+n;f.equip=[];f.skReset=(f.skReset||0)+1;return n;}
 function resetSharedPath(G,id){const f=G.F[id];if(!f||!f.skills)return false;let n=0;for(const s of SHARED_SKILLS){n+=f.skills[s.id]||0;delete f.skills[s.id];}if(!n)return false;f.sp+=n;if(Array.isArray(f.equip))f.equip=f.equip.filter(k=>!k.startsWith("sh_"));return n;}
@@ -373,13 +373,13 @@ const TRAITS={
  ploy:[{id:"talent",name:"Natural Talent",desc:"Training works 10% faster and builds 5% less fatigue"},{id:"tempo",name:"Godlike Timing",desc:"In the last round, or when her HP drops below 50%, Ploy adjusts mid-fight to counter her opponent: their main weapon lands less often and she reads their game"}]};
 let TRV={flowAtk:.95,flowDef:.85,wits:.7,witsHp:45,eyeDef:1.05,eyeCtr:1.3,lib:1.1,libHit:1.08,furyHit:.15,furyDmg:.2,rockAtk:.95,rockDef:.9,rockPts:.6};
 const traitOf=f=>{const L=f&&TRAITS[f.id];if(!L)return null;return L.find(t=>t.id===f.trait)?f.trait:L[0].id;};
-/* v1.91.45 (Man): hidden power has 10 levels, 1 skill point each — Lv.3 = the old full strength, then a little more each level (Lv.10 = 135%). Old saves start at Lv.1. Rivals (not in our camp) fight at the old strength */
-const TR_MAX=10,TR_K=[.6,.8,1,1.05,1.1,1.15,1.2,1.25,1.3,1.35];
+/* v1.91.45 (Man): hidden power has 10 levels, 5 skill points each — Lv.3 = the old full strength, then a little more each level (Lv.10 = 135%). Old saves start at Lv.1. Rivals (not in our camp) fight at the old strength */
+const TR_MAX=10,TR_COST=5,TR_K=[.6,.8,1,1.05,1.1,1.15,1.2,1.25,1.3,1.35];
 const traitLv=f=>clamp(Math.round((f&&f.trLv)||1),1,TR_MAX);
 const traitK=f=>!f||f.camp!=="player"?1:TR_K[traitLv(f)-1];
 const trm=(m,S)=>1+(m-1)*(S&&S.trk!=null?S.trk:1);
-function traitBlock(f){if(!f||!TRAITS[f.id]||f.camp!=="player")return "none";if(traitLv(f)>=TR_MAX)return "max";if((f.sp||0)<1)return "sp";return "";}
-function traitUp(G,id){const f=G.F[id];if(traitBlock(f))return false;f.trLv=traitLv(f)+1;f.sp--;return true;}
+function traitBlock(f){if(!f||!TRAITS[f.id]||f.camp!=="player")return "none";if(traitLv(f)>=TR_MAX)return "max";if((f.sp||0)<TR_COST)return "sp";return "";}
+function traitUp(G,id){const f=G.F[id];if(traitBlock(f))return false;f.trLv=traitLv(f)+1;f.sp-=TR_COST;return true;}
 const SIGNATURE={kati:{name:"Sirichai Heart Spinning Elbow",desc:"Bond ♥ Lv.7+ · Elbow power +15% · extra 3% accuracy when hurt",fx:{dmg:{elbow:.15},clutch:.03}},
   mali:{name:"Jasmine Bloom Kick",desc:"Bond ♥ Lv.7+ · Kick accuracy +3% · between-round recovery +15%",fx:{hit:{kick:.03},regen:.15}},
   rin:{name:"The Winning Equation",desc:"Bond ♥ Lv.7+ · Corner orders +30% · counter +3%",fx:{corner:.3,ctr:.03}},
@@ -6507,7 +6507,7 @@ function settingsHTML(){const t=(k,label,desc)=>`<label class="set"><span><b>${l
 const GLOSS=[["Readiness","Condition on fight day. The higher, the better she fights. Drops with fatigue or injury"],["Fatigue","Builds up from training. Over 65 risks injury. Reduce with recovery, the recovery room, the kitchen"],
  ["Morale","Higher morale means sharper strikes. Rises with wins, dates, merit-making; drops with losses or overtraining"],["Bond","Her closeness to you. Unlocks special scenes, the signature move at 60, and raises the chance of blood-boil mode"],
  ["Trust","How much a fighter trusts your orders. Higher trust makes corner orders work better (up to +4% accuracy); at 60 losses hurt morale less, and it affects confession scenes · raise it with merit-making scenes, wai khru, not overtraining, and a camp out of debt"],["Fame","How well-known the camp is. The higher, the more students come"],
- ["Skill points","Earned every level-up. Spend them on old-school moves from the fighter's school, and on hidden power (Lv.1–10)"],["Counter-training","Scout the opponent, then train the program that counters their main weapon the week before the fight. On fight night their main weapon lands less often and you read their game better"],
+ ["Skill points","Earned every level-up. Spend them on old-school moves from the fighter's school, and on hidden power (Lv.1–10 · 5 points a level)"],["Counter-training","Scout the opponent, then train the program that counters their main weapon the week before the fight. On fight night their main weapon lands less often and you read their game better"],
  ["Blood-boil mode","When badly hurt or behind on points, a fighter may 'change eyes' for a moment: stronger counters, easier criticals. Once per fight"],["Wai khru ram muay","Ritual before the first fight, canon matchups, and major bouts. Choose a dance; each gives a different effect"]];
 
 // ---------- creator (manager look) ----------
@@ -7119,9 +7119,9 @@ function traitHTML(f,mine){const L=TRAITS[f.id];if(!L)return "";const cur=traitO
   const extra=cur==="grit"&&f.grit?` <span class="goldt">· stored so far +${Math.round(f.grit*100)}%</span>`:"";
   return `<div class="trbox"><div class="trh"><b>Hidden power</b>${mine?`<div class="seg trseg" role="group" aria-label="Choose a hidden power">${L.map(t=>`<button data-act="trait" data-id="${f.id}" data-v="${t.id}" aria-pressed="${cur===t.id}">${TRAIT_PX[t.id]||""}<span>${t.name}</span></button>`).join("")}</div>`:`<span class="trone">${TRAIT_PX[T.id]||""}${T.name}</span>`}</div>
    <div class="trdesc">${L.map(t=>`<p class="${t.id===cur?"on":""}" ${t.id===cur?"":`aria-hidden="true"`}>${t.desc}${t.id===cur?extra:""}</p>`).join("")}</div>${f.camp==="player"?traitLvRow(f,mine):""}</div>`;}
-/* v1.91.45: hidden power Lv.1–10 · 1 skill point a level · the numbers above are Lv.3 (100%) */
+/* v1.91.45: hidden power Lv.1–10 · 5 skill points a level · the numbers above are Lv.3 (100%) */
 function traitLvRow(f,mine){const lv=traitLv(f),k=Math.round(traitK(f)*100),b=traitBlock(f);
-  return `<div class="trlv"><span class="trlvt">Lv.<b>${lv}</b>/${TR_MAX}</span><span class="trbar" aria-hidden="true">${Array.from({length:TR_MAX},(_,i)=>`<i class="${i<lv?"on":""}"></i>`).join("")}</span><small class="trk">${lv>=TR_MAX?`Maxed · works at ${k}%`:`Works at ${k}% of the listed effect`}</small>${mine&&!b?`<button class="skplus" data-act="trup" data-id="${f.id}" aria-label="Level up hidden power (1 skill point)">+</button>`:""}</div>`;}
+  return `<div class="trlv"><span class="trlvt">Lv.<b>${lv}</b>/${TR_MAX}</span><span class="trbar" aria-hidden="true">${Array.from({length:TR_MAX},(_,i)=>`<i class="${i<lv?"on":""}"></i>`).join("")}</span><small class="trk">${lv>=TR_MAX?`Maxed · works at ${k}%`:`Works at ${k}% of the listed effect · next level costs ${TR_COST} pts`}</small>${mine&&!b?`<button class="skplus" data-act="trup" data-id="${f.id}" aria-label="Level up hidden power (5 skill points)">+</button>`:""}</div>`;}
 function skResetBtn(f){const n=skPointsSpent(f);if(!n)return "";const c=skResetCost(f);
   return `<button class="btn sm skrbtn" data-act="skresetask" data-id="${f.id}" ${c&&G.cash<c?"disabled":""} aria-label="Reset skills, refunds ${n} points" title="Reset skills · refunds ${n} points · ${c?fmt(c):"first reset is free"}">↺ Reset</button>`;}
 function skResetRow(f){const n=skPointsSpent(f);if(!n)return "";const c=skResetCost(f);

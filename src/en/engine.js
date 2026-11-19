@@ -358,7 +358,7 @@ SHARED_SKILLS.push(SKX("sh5b5",5,8,"sh5b4",["dur", "guard"],"build","Mountain Do
 const skillList=fid=>(SKILLS[fid]||[]).concat(SKILLS[fid]&&SKILLS[fid][0]&&SKILLS[fid][0].line!=null?SHARED_SKILLS:[]);
 const sharedPathOf=f=>{for(const s of SHARED_SKILLS)if((f.skills&&f.skills[s.id])>0)return s.line;return null;};
 // v1.83: full skill reset — every point spent comes back so a fighter can move to another line. First reset per fighter is free.
-const skPointsSpent=f=>Object.values(f.skills||{}).reduce((a,b)=>a+(b||0),0)+Math.max(0,((f&&f.trLv)||1)-1);
+const skPointsSpent=f=>Object.values(f.skills||{}).reduce((a,b)=>a+(b||0),0)+Math.max(0,((f&&f.trLv)||1)-1)*TR_COST;
 const skResetCost=f=>Math.min(3,f.skReset||0)*10000;
 function resetAllSkills(G,id){const f=G.F[id];if(!f||!f.skills)return 0;const n=skPointsSpent(f);if(!n)return 0;f.skills={};if(f.trLv)f.trLv=1;f.sp=(f.sp||0)+n;f.equip=[];f.skReset=(f.skReset||0)+1;return n;}
 function resetSharedPath(G,id){const f=G.F[id];if(!f||!f.skills)return false;let n=0;for(const s of SHARED_SKILLS){n+=f.skills[s.id]||0;delete f.skills[s.id];}if(!n)return false;f.sp+=n;if(Array.isArray(f.equip))f.equip=f.equip.filter(k=>!k.startsWith("sh_"));return n;}
@@ -372,13 +372,13 @@ const TRAITS={
  ploy:[{id:"talent",name:"Natural Talent",desc:"Training works 10% faster and builds 5% less fatigue"},{id:"tempo",name:"Godlike Timing",desc:"In the last round, or when her HP drops below 50%, Ploy adjusts mid-fight to counter her opponent: their main weapon lands less often and she reads their game"}]};
 let TRV={flowAtk:.95,flowDef:.85,wits:.7,witsHp:45,eyeDef:1.05,eyeCtr:1.3,lib:1.1,libHit:1.08,furyHit:.15,furyDmg:.2,rockAtk:.95,rockDef:.9,rockPts:.6};
 const traitOf=f=>{const L=f&&TRAITS[f.id];if(!L)return null;return L.find(t=>t.id===f.trait)?f.trait:L[0].id;};
-/* v1.91.45 (Man): hidden power has 10 levels, 1 skill point each — Lv.3 = the old full strength, then a little more each level (Lv.10 = 135%). Old saves start at Lv.1. Rivals (not in our camp) fight at the old strength */
-const TR_MAX=10,TR_K=[.6,.8,1,1.05,1.1,1.15,1.2,1.25,1.3,1.35];
+/* v1.91.45 (Man): hidden power has 10 levels, 5 skill points each — Lv.3 = the old full strength, then a little more each level (Lv.10 = 135%). Old saves start at Lv.1. Rivals (not in our camp) fight at the old strength */
+const TR_MAX=10,TR_COST=5,TR_K=[.6,.8,1,1.05,1.1,1.15,1.2,1.25,1.3,1.35];
 const traitLv=f=>clamp(Math.round((f&&f.trLv)||1),1,TR_MAX);
 const traitK=f=>!f||f.camp!=="player"?1:TR_K[traitLv(f)-1];
 const trm=(m,S)=>1+(m-1)*(S&&S.trk!=null?S.trk:1);
-function traitBlock(f){if(!f||!TRAITS[f.id]||f.camp!=="player")return "none";if(traitLv(f)>=TR_MAX)return "max";if((f.sp||0)<1)return "sp";return "";}
-function traitUp(G,id){const f=G.F[id];if(traitBlock(f))return false;f.trLv=traitLv(f)+1;f.sp--;return true;}
+function traitBlock(f){if(!f||!TRAITS[f.id]||f.camp!=="player")return "none";if(traitLv(f)>=TR_MAX)return "max";if((f.sp||0)<TR_COST)return "sp";return "";}
+function traitUp(G,id){const f=G.F[id];if(traitBlock(f))return false;f.trLv=traitLv(f)+1;f.sp-=TR_COST;return true;}
 const SIGNATURE={kati:{name:"Sirichai Heart Spinning Elbow",desc:"Bond ♥ Lv.7+ · Elbow power +15% · extra 3% accuracy when hurt",fx:{dmg:{elbow:.15},clutch:.03}},
   mali:{name:"Jasmine Bloom Kick",desc:"Bond ♥ Lv.7+ · Kick accuracy +3% · between-round recovery +15%",fx:{hit:{kick:.03},regen:.15}},
   rin:{name:"The Winning Equation",desc:"Bond ♥ Lv.7+ · Corner orders +30% · counter +3%",fx:{corner:.3,ctr:.03}},
