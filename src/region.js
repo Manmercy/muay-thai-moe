@@ -1361,6 +1361,9 @@ Object.assign(REGION,{
   bondSync(G){const R=G.region;if(!R)return;for(const cid of Object.values(RG_CID0)){const f=G.F[cid];if(f&&!Number.isFinite(f.age)){delete f.ageAnchorWeek;delete f.age;if(typeof syncFighterAges==="function")syncFighterAges(G);}}for(const r of RG_ORDER){const cid=RG_CID0[r],f=G.F[cid];if(!f||(R.joined&&R.joined[cid]))continue;f.bond=rgBondOf((R.meet||{})[cid]);f.bondX=0;}},
   peopleIds(G){const R=G.region;if(!R)return [];return RG_ORDER.map(r=>RG_CID0[r]).filter(cid=>{const f=G.F[cid];return f&&((R.joined&&R.joined[cid]&&f.camp==="player")||f.met||((R.meet||{})[cid]>0));});},
   campOf(cid){const r=RG_ORDER.find(x=>RG_CID0[x]===cid);return r?{north:"แชมป์ภาคเหนือ",isan:"แชมป์ภาคอีสาน",central:"แชมป์ภาคกลาง",south:"แชมป์ภาคใต้"}[r]:"";},
+  /* her move from her champion days, shown in the skill tab like a signature */
+  perkCard(f){const r=f&&RG_ORDER.find(x=>RG_CID0[x]===f.id),R=G.region;if(!r||!R||!R.joined||!R.joined[f.id])return "";const P=RG_CH0[r].perk;
+    return `<div class="sigcard on rg-perk"><b>✦ ท่าประจำตัว: ${esc(P.name)}</b><p class="meta">${esc(P.desc)} · ติดตัวมาตั้งแต่เป็นแชมป์${esc(RG0[r].name)} มีผลทุกไฟต์ ไม่ต้องใส่ช่องสกิล</p></div>`;},
   joinRooms(G){const R=G.region,J=R.joined||{};return CANON_IDS.filter(id=>G.F[id]&&G.F[id].camp==="player").length+Object.keys(J).filter(c=>G.F[c]&&G.F[c].camp==="player").length;},
   /* the champion's skill tree is her lineage's — the partner girl's tree (Tha Sao / Korat / Lopburi / Chaiya) */
   joinSkills(G){const J=(G.region&&G.region.joined)||{};for(const r of RG_ORDER){const cid=RG_CID0[r],pr=RG_CH0[r].pair;if(!J[cid])continue;if(!SKILLS[cid]&&SKILLS[pr])SKILLS[cid]=SKILLS[pr];
@@ -1377,11 +1380,13 @@ Object.assign(REGION,{
     G.log=G.log||[];G.log.push(`เซ็นสัญญากับ${G.F[cid]?G.F[cid].name:cid} · ค่าเซ็น ${fmt(RG_JOIN_FEE)} · ย้ายมาสัปดาห์หน้า`);toast(`เซ็นสัญญาแล้ว · ${G.F[cid]?G.F[cid].name:""}ย้ายมาสัปดาห์หน้า`);},
   joinApply(G,cid){if(G.region.joined&&G.region.joined[cid])return; /* v1.91.35: never twice */const R=G.region,r=RG_ORDER.find(x=>RG_CID0[x]===cid),f=G.F[cid]||this.champFighter(G,r),pair=G.F[RG_CH[r].pair],now=gameWeek(G);
     f.camp="player";f.canon=true;f.met=true;f.div=(pair&&(pair.div==="A"||pair.div==="B"))?pair.div:"A";
-    f.lvl=Math.max(12,(f.lvl||14)-2);for(const k in f.a)f.a[k]=Math.max(12,Math.min(20,Math.round(f.a[k]*.92*10)/10));f.vet=0; /* v1.91.30 (Man): a small drop from her rival form, not 30% */
+    f.lvl=Math.max(12,(f.lvl||14)-4);for(const k in f.a)f.a[k]=Math.min(20,f.a[k]);f.vet=0; /* v1.91.39 (Man): she keeps her stats from her champion days, only her level rolls back 4 (her ring craft stays behind) */
     f.sp=(f.sp||0)+3*Math.max(0,f.lvl-1);f.spv=2; /* v1.91.36: the same 3 points a level the main cast earns on a tree */f.xp=0;f.skills=f.skills||{};f.wage=RG_JOIN_WAGE;f.fee=0;f.potential=20;f.fatigue=0;f.injury=0;f.morale=80;f.trust=Math.max(f.trust||0,50);
     f.bond=Math.max(f.bond||0,Math.max(30,rgBondOf(R.meet[cid])));f.joinAbs=now;f.lastTouch=absWeek(G);delete f.rgKey;delete f.rgT;delete f.rgSty;
     G.rank=G.rank||{A:{},B:{}};G.rank[f.div]=G.rank[f.div]||{};if(!G.rank[f.div][f.id])G.rank[f.div][f.id]={pts:0,w:0,l:0,d:0};
-    (R.joined=R.joined||{})[cid]=now;this.joinSkills(G);if(typeof syncFighterAges==="function")syncFighterAges(G);
+    (R.joined=R.joined||{})[cid]=now;this.joinSkills(G);
+    /* v1.91.39 (Man): she arrives with her skills already learned along her own line, like a fighter who has been building for years — the player can look and reset */
+    {const L=RG_HOME_LINE[cid],ord=[...skillList(cid)].sort((x,y)=>((x.line===L?0:x.school==="build"?1:2)-(y.line===L?0:y.school==="build"?1:2)));let go=true;for(let i=0;go&&f.sp>0&&i<400;i++){go=false;for(const sk of ord){if(f.sp>0&&learnSkill(G,cid,sk.id)){go=true;break;}}}}if(typeof syncFighterAges==="function")syncFighterAges(G);
     G.log=G.log||[];G.log.push(`${f.name}ย้ายเข้าค่ายศิริชัย · Lv.${f.lvl} · แต้มสกิล ${f.sp}`);},
   joinSteps(G,cid){const r=RG_ORDER.find(x=>RG_CID0[x]===cid),J=RG_JOIN[cid],pid=RG_CH[r].pair,pf=G.F[pid],top=typeof rgTopGirl==="function"?rgTopGirl(G):null;
     const S=[...J.leave,{n:"nar",t:"สัปดาห์นี้ ค่ายศิริชัยมีสมาชิกใหม่"},...J.arrive];
