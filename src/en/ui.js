@@ -1,5 +1,5 @@
 // ================= MUAY THAI MOE v1.3 — UI =================
-const VERSION="1.91.29";
+const VERSION="1.91.30";
 const CUR_LANG=(typeof window!=="undefined"&&window.LANG)||"th";
 const TH_LABEL=String.fromCharCode(3652,3607,3618);
 function langSwitch(cls){return `<div class="langsw ${cls||""}" role="group" aria-label="Language">${[["th",TH_LABEL],["en","EN"]].map(([k,l])=>`<button class="lsb ${CUR_LANG===k?"on":""}" data-act="setlang" data-v="${k}" aria-pressed="${CUR_LANG===k}">${l}</button>`).join("")}</div>`;}
@@ -147,7 +147,7 @@ function saveArt(){const S=new Set(),add=u=>{if(u)S.add(u);};
   for(const id of CANON_IDS){const f=G.F[id];if(!f||!(f.camp==="player"||f.met))continue;add(`${ASSET}${id}_happy_face.webp`);add(`${ASSET}${id}_casual_face.webp`);if(f.camp==="player")add(`${ASSET}${id}_sheet.webp`);}
   return [...S];}
 function loadScrHTML(){const L=UI.loadScr,pc=L.total?Math.round(L.n/L.total*100):100;
-  const lg=WARMED[`${ASSET}logo.webp`]||IMGS["logo.webp"];return `<div class="ldscr"><div class="ldbox">${lg&&lg.complete&&lg.naturalWidth?`<img src="${ASSET}logo.webp" alt="Muay Thai Moe">`:`<h2>MUAY THAI MOE</h2>`}<div class="ldbar"><i style="width:${pc}%"></i></div><p class="ldn">Getting the camp ready… <span>${L.n}/${L.total}</span></p><p class="ldtip">💡 ${esc(L.tip)}</p></div></div>`;}
+  const lg=WARMED[`${ASSET}logo.webp`]||IMGS["logo.webp"];return `<div class="ldscr"><div class="ldbox">${lg&&lg.complete&&lg.naturalWidth?`<img src="${ASSET}logo.webp" alt="Muay Thai Moe">`:`<h2>MUAY THAI MOE</h2>`}<div class="ldbar"><i style="width:${pc}%"></i></div><p class="ldn">${L.scene?"Loading scene…":"Getting the camp ready…"} <span>${L.n}/${L.total}</span></p><p class="ldtip">💡 ${esc(L.tip)}</p></div></div>`;}
 function withArt(done){warm(`${ASSET}logo.webp`);const list=saveArt(),total=list.length;let n=0,fin=false;
   const finish=()=>{if(fin)return;fin=true;clearTimeout(to);clearTimeout(sh);UI.loadScr=null;done();setTimeout(prefetchArt,1500);};
   const sh=setTimeout(()=>{if(fin)return;UI.loadScr={n,total,tip:LOAD_TIPS[Math.floor(Math.random()*LOAD_TIPS.length)]};render();},150);
@@ -162,7 +162,7 @@ function prefetchArt(){if(PREF||!G)return;PREF=true;const c=navigator.connection
   SHEET_IDS.forEach(id=>S.add(`${ASSET}${id}_sheet.webp`));S.add(`${ASSET}coach.webp`);for(const id of CANON_IDS){const f=G.F[id];if(!f||!(f.camp==="player"||f.met))continue;for(const l of ["casual","fight","train"])for(const m of ["happy","flustered","pout","sad"])S.add(stand(id,l,m));}
   /* v1.91.28: then every fight sprite, special move and NPC portrait (one-time — the service worker keeps them), so bouts and scenes don't pop in */
   const slow=/3g/.test(c.effectiveType||"");(window.__MTM_ART||[]).forEach(n=>{if(!slow||G&&Object.values(G.F||{}).some(f=>n.startsWith((f.sprite||f.id||"")+"_")))S.add(ASSET+n);});
-  const q=[...S].filter(u=>!WARMED[u]&&!IMGS[u.slice(ASSET.length)]);let busy=0;const next=()=>{while(busy<2&&q.length){const u=q.shift();busy++;const i=new Image();i.decoding="async";i.onload=i.onerror=()=>{busy--;setTimeout(next,60);};i.src=u;WARMED[u]=i;}};
+  const q=[...S].filter(u=>!WARMED[u]&&!IMGS[u.slice(ASSET.length)]);let busy=0;const next=()=>{if(UI.loadScr&&UI.loadScr.scene){setTimeout(next,400);return;}while(busy<2&&q.length){const u=q.shift();busy++;const i=new Image();i.decoding="async";i.onload=i.onerror=()=>{busy--;setTimeout(next,60);};i.src=u;WARMED[u]=i;}};
   (window.requestIdleCallback||((f)=>setTimeout(f,300)))(next);}
 function render(){
   try{if(typeof G!=="undefined"&&G&&!G.ended)autoPlans();}catch(e){}
@@ -1103,12 +1103,16 @@ function warmChar(id,look){if(id==="coach"){warm(`${ASSET}coach.webp`);return;}i
   (look==="casual"||look==="thai"?["happy","flustered","pout"]:["happy","sad","surprised","angry"]).forEach(m=>warm(stand(id,look,m)));}
 function warmSteps(steps,look){const walk=list=>(list||[]).forEach(st=>{if(!st)return;const n=typeof st.n==="function"?null:st.n;if(n==="npc"){const im=npcImg(st);if(im)warm(`${ASSET}npc_${im}.webp`);}else if(n)warmChar(n,st.l==="casual"||st.l==="thai"?st.l:(look==="casual"||look==="thai")&&!st.l?look:"fight");
   if(st.with)warmChar(st.with,look==="casual"||look==="thai"?look:"fight");if(st.bg&&BGIMG[st.bg])warm(ASSET+BGIMG[st.bg]);if(st.choice)st.choice.forEach(c=>walk(c.then));});walk(steps);}
-function playScene(steps,done,opts={}){WARM_NEED=[];try{warmSteps(steps,opts.look||"fight");if(opts.bg&&BGIMG[opts.bg])warm(ASSET+BGIMG[opts.bg]);}finally{}const need=WARM_NEED.slice(0,4);WARM_NEED=null;
+function playScene(steps,done,opts={}){WARM_NEED=[];try{warmSteps(steps,opts.look||"fight");if(opts.bg&&BGIMG[opts.bg])warm(ASSET+BGIMG[opts.bg]);}finally{}const need=[...new Set(WARM_NEED)];WARM_NEED=null;
   const S=UI.scene={steps:[...steps],i:0,done,bg:opts.bg||"night",look:opts.look||"fight",cur:null,cast:[],coachOK:!!opts.coachOK,award:opts.award||null};
-  /* v1.91.28: if the scene's backdrop and first faces aren't on the device yet, give them up to ~0.9 s before the first line (never longer, so nothing stalls) */
+  /* v1.91.30 (Man): if the scene's art isn't on the device yet, show the loading screen (bar + tip) until it is — at most 8 s, so nothing ever hangs.
+     A scene whose art is already here starts at once; a short wait (<0.2 s) never flashes the loading screen. */
   const wait=need.map(u=>WARMED[u]).filter(i=>i&&!(i.complete&&i.naturalWidth));if(!wait.length){sceneNext();return;}
-  let go=false;const start=()=>{if(go)return;go=true;if(UI.scene===S&&S.i===0&&!S.cur)sceneNext();render();};
-  let left=wait.length;wait.forEach(i=>{const f=()=>{if(--left<=0)setTimeout(start,30);};i.addEventListener("load",f,{once:true});i.addEventListener("error",f,{once:true});});setTimeout(start,900);}
+  const total=need.length;let n=total-wait.length,go=false;
+  const start=()=>{if(go)return;go=true;clearTimeout(sh);clearTimeout(cap);const had=!!(UI.loadScr&&UI.loadScr.scene);if(had)UI.loadScr=null;if(UI.scene===S&&S.i===0&&!S.cur)sceneNext();render();};
+  const sh=setTimeout(()=>{if(go||UI.loadScr)return;UI.loadScr={n,total,scene:true,tip:LOAD_TIPS[Math.floor(Math.random()*LOAD_TIPS.length)]};render();},180),cap=setTimeout(start,8000);
+  wait.forEach(i=>{const f=()=>{n++;if(UI.loadScr&&UI.loadScr.scene){UI.loadScr.n=n;const b=document.querySelector(".ldbar i"),c=document.querySelector(".ldn span");if(b)b.style.width=Math.round(n/total*100)+"%";if(c)c.textContent=`${n}/${total}`;}if(n>=total)setTimeout(start,UI.loadScr?200:0);};
+    i.addEventListener("load",f,{once:true});i.addEventListener("error",f,{once:true});});}
 function playHonorQueue(done){while((G.awards||[]).length&&!(G.F[G.awards[0].id]))G.awards.shift();const h=(G.awards||[])[0];if(!h){AU.startMusic("hub");if(done)done();return;}AU.startMusic("victory");AU.sfx("champ");
   playScene(honorSteps(G,h),()=>{G.awards.shift();save();playHonorQueue(done);},{bg:h.kind==="rgbelt"&&BGIMG["rgring_"+h.venue]?"rgring_"+h.venue:"hall",look:"fight",award:h});
   [500,1100,1900,2900,4200,5600].forEach(ms=>setTimeout(()=>{if(UI.scene&&UI.scene.award===h)AU.sfx("pop");},ms));} /* v1.91.14: fireworks pop over the ceremony */
