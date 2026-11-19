@@ -318,6 +318,51 @@ const RG_POST2={baibua:{win:["Once more, jao… I'm glad we met again, but the c
  _nc:{win:["I held on, but it was harder this time."],lose:["You've got a lot better since last time."]}};
 /* your fighter, walking out for a rematch */
 const RG_REPLY2={kati:"I've watched the tape until I know it by heart. I won't lose twice.",mali:"Last time Mali cried. This time Mali's going to smile.",rin:"I have all the data from last time. This time the numbers are on our side.",ploy:"I can't lose to the same person twice.",fah:"This time Fah gets it back. Watch!"};
+/* v1.91.59 (Man): the hotel night changes with the province — a local outing in the menu, and now and then something silly happens first */
+const RG_OUT={
+ chiangrai:{t:"See Wat Rong Khun lit up at night",l:"Everyone shoots the White Temple until their batteries die. {g} takes forty selfies; one is usable."},
+ nan:{t:"See the Whispering Lovers mural by the old wall",l:"{g} copies the Whispering Lovers mural and whispers, \"What shall we eat tomorrow?\" The group laughs until a guard comes over."},
+ uttaradit:{t:"Pay respects at the Phraya Phichai Broken Sword monument",l:"Everyone wais together. {g} prays for elbows as strong as the sword, then quickly adds, \"but please not broken.\""},
+ lampang:{t:"A horse-cart ride round town",l:"The horse stops to graze three times. The driver says it likes {g}, so {g} hand-feeds it grass for the rest of the ride."},
+ udon:{t:"Night market by Nong Prajak",l:"{g} buys ten Isan sausage skewers to share. One makes it back to the hotel."},
+ khonkaen:{t:"Eat the famous Khao Suan Kwang grilled chicken",l:"Three grilled chickens gone. {g} swears she only had a drumstick, but the bone pile is all in front of {g}."},
+ buriram:{t:"See Phanom Rung lit up at dusk",l:"Everyone goes quiet when the lights come on. {g} whispers, \"If I could fight on a ring right here, just once…\""},
+ ubon:{t:"See the candle carvings at Thung Si Mueang",l:"{g} tries to look as tall as the candle tower in photos, lying on the ground until her clothes are filthy."},
+ lopburi:{t:"Walk by Phra Prang Sam Yot while the monkeys sleep",l:"The monkeys were not asleep. The whole troop is up, and one wears {g}'s sunglasses on the shrine roof."},
+ suphan:{t:"Dinner by the Suphan river",l:"The place plays luk thung all night. {g} knows every song and the next table asks for an encore."},
+ phetchaburi:{t:"Buy the famous khanom mo kaeng",l:"Ten boxes bought, all gone before the hotel. {g} insists the ants ate half."},
+ chanthaburi:{t:"Walk the night gem market",l:"{g} haggles a tiny gem down until the seller gives up, then can't buy it: her wallet's at the hotel."},
+ chumphon:{t:"Coffee on Thung Wua Laen beach",l:"Chumphon coffee is so strong everyone's awake till 3 a.m. {g} counts two hundred stars and starts over."},
+ surat:{t:"Eat fresh oysters at the pier",l:"{g} eats her first oyster with a face like she took an elbow, then orders a second plate."},
+ nakhonsi:{t:"Watch the shadow puppets by the temple",l:"The puppeteer spots a fight camp in the crowd and has two puppets box mid-story. {g} cheers louder than the whole temple."},
+ songkhla:{t:"Walk Samila Beach at night",l:"{g} holds the mermaid statue's hand and swears it smiled at her. Nobody believes her."}};
+const RG_ODD={
+ north:[{t:"At 2 a.m. the next room won't stop singing northern karaoke. {g} goes to knock and gets pulled in to sing until dawn.",fx:"tired"},
+   {t:"A swarm of flying termites pours in after the rain. {g} swats until 1 a.m. and wakes up with strangely stronger arms.",fx:"exp"},
+   {t:"The housekeeper recognises {g} from the camp's live stream and brings mango sticky rice for everyone.",fx:"morale"},
+   {t:"The hot water runs out at nine. {g} showers in mountain-cold water and screams so loud the owner runs upstairs.",fx:"none"},
+   {t:"The fog is so thick {g} knocks on two wrong doors before finding her own room.",fx:"none"},
+   {t:"The khao soi shop throws an extra egg in every bowl. The owner's a Muay Thai fan.",fx:"morale"}],
+ isan:[{t:"At 1 a.m. a mor lam band starts up next door. {g} sneaks out to dance until the band pulls her on stage.",fx:"tired"},
+   {t:"The air-con dies. Everyone drags their mattresses in front of one fan. {g} talks about som tam in her sleep all night.",fx:"tired"},
+   {t:"The hotel auntie brings a jar of pla ra bong: \"Eat this and you punch harder.\"",fx:"morale"},
+   {t:"A gecko drops from the ceiling into {g}'s sticky rice. {g} kicks the table over in fright, but the rice doesn't spill.",fx:"exp"},
+   {t:"There's an ordination party next door and the whole camp gets fed until they can't move.",fx:"morale"},
+   {t:"{g} sings karaoke in the lobby and scores a perfect 100. The owner offers a free beer… {g} asks for red soda instead.",fx:"none"}],
+ central:[{t:"A monkey climbs into {g}'s window at midnight, steals a bunch of bananas and leaves the peels on her pillow.",fx:"none"},
+   {t:"A coconut ice-cream cart circles the hotel all night playing its jingle. {g} buys one every lap.",fx:"tired"},
+   {t:"The lane floods after the rain and everyone wades back. {g} calls it water running practice.",fx:"exp"},
+   {t:"The hotel owner was a fighter once and tells Rajadamnern stories late into the night.",fx:"exp"},
+   {t:"The all-night rice soup place recognises Sirichai and knocks half off the bill.",fx:"morale"},
+   {t:"{g} locks the key in the room and has to climb the balcony to get in, the whole camp cheering below.",fx:"none"}],
+ south:[{t:"It pours all night and the roof leaks right over {g}'s bed. {g} sleeps under an umbrella till morning.",fx:"tired"},
+   {t:"The roti stall outside is open till 2 a.m. {g} orders six banana rotis and calls it athlete food.",fx:"morale"},
+   {t:"Ghost crabs run in from the beach. {g} chases them until she drops. The crabs get away.",fx:"exp"},
+   {t:"A fisherman sees the camp's sign on the van and brings grilled squid for everyone, free.",fx:"morale"},
+   {t:"A town-wide blackout. Everyone tells ghost stories by torchlight on the balcony. {g} refuses to go to the bathroom alone.",fx:"none"},
+   {t:"{g} tried ordering in the southern dialect. The vendor answered at such length that {g} ended up with three plates of rice.",fx:"none"}]};
+const RG_ODD_FX={tired:["nobody slept much · fatigue +4",G=>{for(const f of roadRiders(G))f.fatigue=Math.min(100,(f.fatigue||0)+4);}],exp:["accidental training · experience +3",G=>{for(const f of roadRiders(G))f.exp=(f.exp||0)+3;}],
+  morale:["the whole camp's in a good mood · morale +3",G=>{for(const f of roadRiders(G))f.morale=Math.min(100,(f.morale||0)+3);}],none:[null,()=>{}]};
 const RG_CID={north:"baibua",isan:"tabtim",central:"alicia",south:"chaba"};
 const RG_CID0={...RG_CID}; /* v1.91.30: the four first champions — fixed, even when a later edition crowns someone new */
 const rgIn=(G,id)=>!!(G.F[id]&&G.F[id].camp==="player");
@@ -1019,9 +1064,12 @@ const REGION={
     const choice=[{t:`Go for a walk with ${C.champ} (champion of ${C.name})`,fx:G2=>{rgMeet(G2,cid,3);if(jeal)jeal.morale=Math.max(0,(jeal.morale||0)-3);},
         then:[...this.dateLines(cid,D),...(jeal?[{n:jeal.id,f:"pout",l:"casual",t:this.jealLine(jeal.id,C.champ)}]:[])]},
       ...girls.map(g=>({t:`Take ${g.name} around ${D.name}`,fx:G2=>{add(G2,g.id,"bond",2);g.morale=Math.min(100,(g.morale||0)+4);},then:[{n:g.id,f:"happy",l:"casual",t:this.girlLine(g.id,D.name)}]})),
+      ...(RG_OUT[T.dest]&&girls.length?[{t:RG_OUT[T.dest].t,fx:G2=>{for(const f of roadRiders(G2))f.morale=Math.min(100,(f.morale||0)+3);add(G2,girls[0].id,"bond",1);},then:[{n:"nar",t:RG_OUT[T.dest].l.replace(/\{g\}/g,girls[n%girls.length].name)+" · morale +3"}]}]:[]),
       {t:"Rest and recover",fx:G2=>{for(const f of roadRiders(G2))f.fatigue=Math.max(0,(f.fatigue||0)-10);},then:[{n:"nar",t:"Everyone turns in early and wakes up fresh · fatigue −10"}]},
       {t:"Light training in the hotel parking lot",fx:G2=>{for(const f of roadRiders(G2)){f.exp=(f.exp||0)+6;f.fatigue=Math.min(100,(f.fatigue||0)+2);}},then:[{n:"nar",t:"Pad work under the parking-lot lights until the hotel guard comes to watch · EXP +6"}]}];
-    playScene([{n:"nar",t:nights>1?`Night ${n} in ${D.name}`:`The whole camp stays the night in ${D.name}`},{n:"nar",t:"What shall we do tonight?",choice}],()=>this.night(T,P,n+1,done),{bg:this.hotelBg[r],look:"casual"});},
+    const oddL=RG_ODD[r]||[],oddOn=oddL.length&&girls.length&&Math.random()<.4,odd=oddOn?oddL[Math.floor(Math.random()*oddL.length)]:null,og=girls.length?girls[Math.floor(Math.random()*girls.length)]:null,
+      oddStep=odd&&og?[{inject:G2=>{const X=RG_ODD_FX[odd.fx]||RG_ODD_FX.none;X[1](G2);return [{n:"nar",t:odd.t.replace(/\{g\}/g,og.name)+(X[0]?` · ${X[0]}`:"")}];}}]:[];
+    playScene([{n:"nar",t:nights>1?`Night ${n} in ${D.name}`:`The whole camp stays the night in ${D.name}`},...oddStep,{n:"nar",t:"What shall we do tonight?",choice}],()=>this.night(T,P,n+1,done),{bg:this.hotelBg[r],look:"casual"});},
   home(T,done){if(!T.shopDone){T.shopDone=1;this.shop(T,()=>this.home(T,done),1);return;}G.log=G.log||[];G.log.push(`Back at camp from ${ROAD_DEST[T.dest].name}`);save();done();},
   /* v1.89.23: the souvenir shop on the way out of town — the only place regional souvenirs are sold; keep buying until you get back on the bus */
   shopIntro:{north:"On the way home the bus stops at a roadside souvenir shop. Paper umbrellas hang in rows; fine handwoven cloth lies folded on a wooden table.",
