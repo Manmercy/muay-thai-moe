@@ -2811,18 +2811,17 @@ function doorSteps(G){const id=doorWho(G);if(!id)return [];const f=G.F[id],two=t
 EVENTS.push({id:"lv_door",look:"casual",bg:"camp",pri:70,when:G=>!!doorWho(G),steps:[{inject:G=>doorSteps(G)}]});
 /* the button in the Characters tab */
 function tellState(G,f){const id=f&&f.id;if(!id||!G.F[id])return null;const champ=isChampLove(G,id);
-  if(!(LOVE_IDS.includes(id)||champ)||f.camp!=="player"||!f.met&&!champ||isLovAny(G,id)||(f.bond||0)<60)return null;
-  if(isAway(G,id))return {ok:false,why:"Away"};
-  if(champ?(G.region.ex&&G.region.ex[id]!=null&&gameWeek(G)-G.region.ex[id]<12):exWait(G,id))return {ok:false,why:"Just broke up"};
-  const off=loveOffLeft(G,id);if(off)return {ok:false,why:`Needs time (${off} wk)`};
-  const t=G.tellAbs&&G.tellAbs[id];if(t!=null&&absWeek(G)-t<LOVE_TELL_CD)return {ok:false,why:`Just told her (${LOVE_TELL_CD-(absWeek(G)-t)} wk)`};
+  /* v1.91.70 (Man): the button is not always there — it shows only once the hearts are really there (closeness 75), and stays hidden while she is away, just broken up, stepping back, or after a "not yet" until the 13 weeks are up */
+  if(!(LOVE_IDS.includes(id)||champ)||f.camp!=="player"||!f.met&&!champ||isLovAny(G,id)||(f.bond||0)<75)return null;
+  if(isAway(G,id)||(champ?(G.region.ex&&G.region.ex[id]!=null&&gameWeek(G)-G.region.ex[id]<12):exWait(G,id))||loveOffLeft(G,id))return null;
+  const t=G.tellAbs&&G.tellAbs[id];if(t!=null&&absWeek(G)-t<LOVE_TELL_CD)return null;
   return {ok:true};}
 function tellReady(G,f){const id=f.id;if(isChampLove(G,id)){const J=G.region.joined||{};return (f.bond||0)>=75&&gameWeek(G)-(J[id]||gameWeek(G))>=6;}return (f.bond||0)>=75&&(f.trust||0)>=40;}
 function tellSteps(G,id){const f=G.F[id],two=twoFor(G,id),ready=tellReady(G,f);
   const yes=[{fx:G2=>takeAny(G2,id)},{n:id,f:"flustered",l:"casual",t:yesLine(G,id)},{n:"nar",t:`Relationship with ${f.name}: lovers ♥`}];
   const wait=[{fx:G2=>{(G2.tellAbs=G2.tellAbs||{})[id]=absWeek(G2);add(G2,id,"bond",1);}},{n:id,f:"flustered",l:"casual",t:loveLine(TELL_WAIT,G,id)},
     {n:"nar",t:`${f.name} isn't ready yet · you need to grow closer ${!isChampLove(G,id)&&(f.trust||0)<40?` · trust ${Math.floor(f.trust||0)}/40`:""}${isChampLove(G,id)&&(f.bond||0)>=75?" · give her a little more time at the camp":""} · you can tell her again in ${LOVE_TELL_CD} weeks`}];
-  const spot=(typeof TELL_SPOT!=="undefined"&&TELL_SPOT[id])||"back of the camp",open=[{n:"nar",t:`That night you go to meet her at the ${spot} ${f.name} is already waiting.`},{n:"nar",t:"You tell her plainly how you feel."}];
+  const spot=(typeof TELL_SPOT!=="undefined"&&TELL_SPOT[id])||"back of the camp",open=[{n:"nar",t:`That night you go to meet her at the ${spot} · ${f.name} is already waiting.`},{n:"nar",t:"You tell her plainly how you feel."}];
   if(!ready)return [...open,...wait];
   if(two)return [open[0],{n:"nar",t:"⚠ You're already with someone. Saying it would make this two-timing.",choice:[{t:"Tell her honestly (two-timing)",then:[open[1],...yes]},{t:"Better not say it",then:[{n:"nar",t:"You keep the words to yourself and talk about training instead."}]}]}];
   return [...open,...yes];}

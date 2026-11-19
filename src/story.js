@@ -2811,11 +2811,10 @@ function doorSteps(G){const id=doorWho(G);if(!id)return [];const f=G.F[id],two=t
 EVENTS.push({id:"lv_door",look:"casual",bg:"camp",pri:70,when:G=>!!doorWho(G),steps:[{inject:G=>doorSteps(G)}]});
 /* the button in the Characters tab */
 function tellState(G,f){const id=f&&f.id;if(!id||!G.F[id])return null;const champ=isChampLove(G,id);
-  if(!(LOVE_IDS.includes(id)||champ)||f.camp!=="player"||!f.met&&!champ||isLovAny(G,id)||(f.bond||0)<60)return null;
-  if(isAway(G,id))return {ok:false,why:"ไม่อยู่"};
-  if(champ?(G.region.ex&&G.region.ex[id]!=null&&gameWeek(G)-G.region.ex[id]<12):exWait(G,id))return {ok:false,why:"เพิ่งเลิกกัน"};
-  const off=loveOffLeft(G,id);if(off)return {ok:false,why:`ขอเวลาทำใจ (อีก ${off} สัปดาห์)`};
-  const t=G.tellAbs&&G.tellAbs[id];if(t!=null&&absWeek(G)-t<LOVE_TELL_CD)return {ok:false,why:`เพิ่งบอกไป (อีก ${LOVE_TELL_CD-(absWeek(G)-t)} สัปดาห์)`};
+  /* v1.91.70 (Man): the button is not always there — it shows only once the hearts are really there (closeness 75), and stays hidden while she is away, just broken up, stepping back, or after a "not yet" until the 13 weeks are up */
+  if(!(LOVE_IDS.includes(id)||champ)||f.camp!=="player"||!f.met&&!champ||isLovAny(G,id)||(f.bond||0)<75)return null;
+  if(isAway(G,id)||(champ?(G.region.ex&&G.region.ex[id]!=null&&gameWeek(G)-G.region.ex[id]<12):exWait(G,id))||loveOffLeft(G,id))return null;
+  const t=G.tellAbs&&G.tellAbs[id];if(t!=null&&absWeek(G)-t<LOVE_TELL_CD)return null;
   return {ok:true};}
 function tellReady(G,f){const id=f.id;if(isChampLove(G,id)){const J=G.region.joined||{};return (f.bond||0)>=75&&gameWeek(G)-(J[id]||gameWeek(G))>=6;}return (f.bond||0)>=75&&(f.trust||0)>=40;}
 function tellSteps(G,id){const f=G.F[id],two=twoFor(G,id),ready=tellReady(G,f);
