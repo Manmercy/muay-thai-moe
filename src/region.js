@@ -290,6 +290,25 @@ const DUEL={st:null,
        <div class="mfoot roadbtns"><button class="btn primary" data-du="end">กลับค่าย</button></div></div>`;}}};
 
 /* v1.90 round 5: the opening gala (the week after the invitation) and the story beat after the first cup — the green-gold contract */
+/* v1.91.56 (Man): a rematch series gets its own lines — the champion remembers the last time, and each bout still hints at her style (bout 1 / bout 2 / the decider) */
+const RG_PRE2={
+ baibua:[[n=>`มาอีกแล้วเหรอเจ้า… ดีใจนะที่ไม่ยอมแพ้ หนูก็ซ้อมศอกเพิ่มทุกเช้าเหมือนกัน เข้ามาใกล้ ๆ ได้เลย`,n=>`${n}… หนูจำได้ทุกหมัดของครั้งก่อนเจ้า วันนี้หนูจะรอในระยะศอกเหมือนเดิม`],
+   [n=>`นัดสองแล้วเจ้า… คราวก่อนหนูสวนได้ คราวนี้ก็จะสวนอีก ระวังศอกกลับหลังนะ`],
+   [n=>`นัดตัดสินอีกแล้วเจ้า… หนูไม่ได้ไวขึ้นเพราะโชคนะ หนูวิ่งขึ้นดอยทุกเช้าตั้งแต่ครั้งที่แล้ว`]],
+ tabtim:[[n=>`มาอีกแล้วเด้อ! ทับทิมนับไว้ตลอดนะ ฮ่า ๆ ขาทับทิมยังเบาเหมือนเดิม จับให้ได้ก่อนเถอะ`,n=>`${n}! ทับทิมคิดถึงจะแย่… ไม่ใช่ ๆ คิดถึงไฟต์ ฮ่า ๆ วันนี้ทับทิมจะวิ่งรอบเวทีให้เวียนหัวเลย`],
+   [n=>`นัดนี้ทับทิมกระโดดได้สูงกว่าครั้งก่อนอีกคืบ ระวังหัวไว้เด้อ`],
+   [n=>`นัดสุดท้ายอีกแล้ว… ครั้งนี้ทับทิมไม่วิ่งแล้ว หมัดหนักโคราชล้วน ๆ ให้พ่อดูอีกรอบ`]],
+ alicia:[[n=>`กลับมาอีกแล้วเหรอคะ คนดูไลฟ์เริ่มจำหน้าคุณได้แล้วนะ… ฉันจะเต้นรอบเธอเหมือนเดิม ตามให้ทันสิ`,n=>`${n} อีกแล้ว… อย่าเข้าใจผิดนะ ฉันไม่ได้ดีใจที่เห็นหน้า กล้องต่างหากที่ดีใจ วันนี้ก็วิ่งตามฉันให้ทันละกัน`],
+   [n=>`รอบนี้ก็เหมือนเดิมค่ะ ฉันรอ เธอเข้ามา ฉันสวน… แต่คราวนี้หมัดสวนเร็วกว่าเดิม`],
+   [n=>`นัดตัดสินอีกแล้ว ฉันจะเข้าไปชกถึงตัวเธอเองเหมือนเดิม ไม่มีกล้องไหนถ่ายทันหรอก`]],
+ chaba:[[n=>`…มาอีก ดี เข้ามาก่อน`,n=>`…ยังรออยู่ตรงนี้ ${n} เข้ามาเลย`],
+   [n=>`…ไม่หลบ เหมือนเดิม แรงกว่าเดิม`],
+   [n=>`…ท่าดีไชยา อีกรอบ ม่ายมีใครถอย`]],
+ _nc:[[n=>`${n} อีกแล้วเหรอ ฉันดูเทปไฟต์ที่แล้วซ้ำจนจำได้ทุกจังหวะ`,n=>`มาอีกแล้ว… ดี ฉันอยากชนะคนที่ไม่ยอมแพ้`],
+   [n=>`นัดสองอีกแล้ว คราวนี้ฉันเปลี่ยนแผนอีกแบบ`],
+   [n=>`นัดตัดสินอีกรอบ ใครซ้อมมามากกว่ากันก็รู้กันวันนี้`]]};
+/* your fighter, walking out for a rematch */
+const RG_REPLY2={kati:"ครั้งนี้หนูดูเทปมาจนจำได้หมดแล้วค่ะ ไม่แพ้ซ้ำแน่",mali:"ครั้งก่อนมะลิร้องไห้ ครั้งนี้มะลิจะยิ้มนะคะ",rin:"ข้อมูลจากครั้งก่อนครบแล้วค่ะ ครั้งนี้ตัวเลขอยู่ข้างเรา",ploy:"แพ้คนเดิมสองครั้งไม่ได้",fah:"คราวนี้ฟ้าเอาคืนแน่ ดูไว้เลย!"};
 const RG_CID={north:"baibua",isan:"tabtim",central:"alicia",south:"chaba"};
 const RG_CID0={...RG_CID}; /* v1.91.30: the four first champions — fixed, even when a later edition crowns someone new */
 const rgIn=(G,id)=>!!(G.F[id]&&G.F[id].camp==="player");
@@ -1082,9 +1101,9 @@ const REGION={
     ROAD.open(dest,{paid:true,sponsor:true,plan:P,onArrive:(P2,front)=>{const PP=P2||P;this.arrive(G,T,PP,front);
       playScene(this.preBout(r,b),()=>openFight2(b,()=>this.afterBout(T,PP,done)),{bg:"rg_"+RG_CH[r].ring,look:"fight"});}});},
   preBout(r,b){const c=G.region.champ[r],H=RG_CH[r],cid=this.champId[r],me=G.F[b.a],n=b.region.series,sc=`${c.w}-${c.l}`;
-    const head={n:"nar",t:`${H.venue} · ${RG_TITLE[r]} นัดที่ ${n}${n>1?` · สกอร์ ${me.name} ${sc} ${RG[r].champ}`:""}`};
-    const line=n===1?H.pre[0]:c.w===1&&c.l===1?H.pre[2]:H.pre[1];
-    const NC=G.region.nc&&G.region.nc[r];const mine=CANON_IDS.includes(me.id)?[{n:me.id,f:"angry",l:"fight",...(NC?{}:{with:cid}),t:me.id===H.pair?H.pairLine:H.reply}]:[{n:"nar",t:`${me.name}พยักหน้ารับ แล้วเดินกลับมุมแดง`}];
+    const t=c.tries||0,head={n:"nar",t:`${H.venue} · ${RG_TITLE[r]} นัดที่ ${n}${n>1?` · สกอร์ ${me.name} ${sc} ${RG[r].champ}`:""}${t?` · นัดล้างตาครั้งที่ ${t}`:""}`};
+    const NC=G.region.nc&&G.region.nc[r],bi=n===1?0:c.w===1&&c.l===1?2:1,P2=t?(NC?RG_PRE2._nc:RG_PRE2[cid]):null,line=P2&&P2[bi]?P2[bi][(t-1)%P2[bi].length]:H.pre[bi];
+    const mine=CANON_IDS.includes(me.id)?[{n:me.id,f:"angry",l:"fight",...(NC?{}:{with:cid}),t:t&&n===1&&RG_REPLY2[me.id]?RG_REPLY2[me.id]:me.id===H.pair?H.pairLine:H.reply}]:[{n:"nar",t:`${me.name}พยักหน้ารับ แล้วเดินกลับมุมแดง`}];
     return [head,...(rgEd(G)>=2&&n===1&&!NC?[{n:"nar",t:`${RG[r].champ}ป้องกันแชมป์ภาคมาได้อีกสมัย และเก่งกว่าเมื่อสามปีก่อน`}]:[]),{...this.spk(r,n===1?"happy":"angry","fight"),t:line(me.name)},...mine];},
   afterBout(T,P,done){const R=G.region,J=R.just;R.just=null;const r=ROAD_DEST[T.dest].r,H=RG_CH[r],cid=this.champId[r];
     if(!J){this.home(T,done);return;}

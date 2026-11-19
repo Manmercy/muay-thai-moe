@@ -277,7 +277,7 @@ const RG_RETRY={bout:.03,sMax:2};
 /* v1.90.21 (Man): one bar for everyone — opponent strength is fixed, not fitted to your fighter. It climbs with progress (later belts and champions have studied the tapes of earlier fights).
    Set from a "casual" fighter (stats 20, Lv.18, every skill she can learn, morale 70, no fight prep): the middle of the five heroines wins belts 48% → 32%,
    championship series 22% → 12%, the Naka members 45/40/35/30% and Ladda 20%. Morale, fight prep, the camp and limit-break growth all push past that */
-const RG_FIX={belt:n=>22.25+.65*Math.min(15,n)/15,champ:(cups,tries)=>23.41+.1067*Math.min(3,cups)-.15*Math.min(2,tries||0),nl:{nia:24.21,varya:25.6,meili:24.37,rosa:25.91,ladda:24.0}}; /* v1.91.38 (Man): champions a little harder (+.3 → maxed series ~56→45%), the Naka members harder (+.5 → ~40%), Ladda a brutal final (+1.3 → ~18%) */ /* v1.91.13 (Man): set for a maxed fighter (Lv.32, every bonus, stat 20) — belts ~80% · series ~60% · Naka ~50% · Ladda ~40% */ /* v1.91.6: re-set after the heroine rebalance (v1.91.0–1.91.5), same targets, middle of the five home-line builds · v1.91.7: champions −0.35 after opponents got fixed styles */
+const RG_FIX={belt:n=>22.25+.65*Math.min(15,n)/15,champ:(cups,tries)=>23.41+.1067*Math.min(3,cups)-.15*Math.min(2,tries||0),nl:{nia:23.81,varya:25.2,meili:23.97,rosa:25.51,ladda:24.0}} /* v1.91.54 (Man, option B): the four members −0.4 now that a lost night starts over (about level with the regional champions; Ladda unchanged) */; /* v1.91.38 (Man): champions a little harder (+.3 → maxed series ~56→45%), the Naka members harder (+.5 → ~40%), Ladda a brutal final (+1.3 → ~18%) */ /* v1.91.13 (Man): set for a maxed fighter (Lv.32, every bonus, stat 20) — belts ~80% · series ~60% · Naka ~50% · Ladda ~40% */ /* v1.91.6: re-set after the heroine rebalance (v1.91.0–1.91.5), same targets, middle of the five home-line builds · v1.91.7: champions −0.35 after opponents got fixed styles */
 /* v1.90.18 (Man): belts 40% every time, championship series 20% → 12% — the chapter in about 3 years for a fighter who never outgrows the fit */
 const RG_ODDS={belt:n=>.40,series:cups=>.20-.08*Math.min(3,cups)/3,bout:s=>{let lo=0,hi=1;for(let i=0;i<30;i++){const m=(lo+hi)/2;m*m*(3-2*m)<s?lo=m:hi=m;}return (lo+hi)/2;}};
 /* the opponent strength (≤ ceil) at which `me` wins about `p` of 5-round bouts. setT(T) rebuilds the opponent at strength T. */
@@ -534,6 +534,25 @@ const DUEL={st:null,
        <div class="mfoot roadbtns"><button class="btn primary" data-du="end">Back to camp</button></div></div>`;}}};
 
 /* v1.90 round 5: the opening gala (the week after the invitation) and the story beat after the first cup — the green-gold contract */
+/* v1.91.55 (Man): a rematch series gets its own lines — the champion remembers the last time, and each bout still hints at her style (bout 1 / bout 2 / the decider) */
+const RG_PRE2={
+ baibua:[[n=>`Back again, jao… I'm glad you don't give up. I've drilled extra elbows every morning too. Come in close.`,n=>`${n}… I remember every punch from last time, jao. Today I'll wait at elbow range again.`],
+   [n=>`Bout two, jao… Last time I countered you. This time I'll counter again. Watch the spinning elbow.`],
+   [n=>`The decider again, jao… I'm not faster by luck. I've run up the mountain every morning since last time.`]],
+ tabtim:[[n=>`Back again, der! Tabtim's been counting, ha ha. Tabtim's feet are as light as ever. Catch me first.`,n=>`${n}! Tabtim missed you so much… no, no, missed the fight, ha ha. Today Tabtim will run circles round the ring till you're dizzy.`],
+   [n=>`Tabtim jumps a hand higher than last time. Mind your head, der.`],
+   [n=>`The last bout again… This time Tabtim isn't running. Pure Korat heavy hands, for Dad to see one more time.`]],
+ alicia:[[n=>`Back again? My stream viewers are starting to know your face… I'll dance around you like last time. Keep up.`,n=>`${n} again… Don't get the wrong idea. I'm not happy to see you, the camera is. Try to keep up with me today.`],
+   [n=>`Same as before. I wait, you come in, I counter… only this time the counter is faster.`],
+   [n=>`The decider again. I'll come right in and fight you up close, same as before. No camera will keep up.`]],
+ chaba:[[n=>`…Back again. Good. You come in first.`,n=>`…Still waiting right here. ${n}, come in.`],
+   [n=>`…No dodging. Same as before. Harder than before.`],
+   [n=>`…Tha Dee Chaiya, once more. Nobody backs off.`]],
+ _nc:[[n=>`${n} again? I watched the last fight over and over. I know every beat of it.`,n=>`Back again… good. I want to beat someone who doesn't give up.`],
+   [n=>`Bout two again. I've changed my plan again.`],
+   [n=>`The decider again. Today we find out who trained harder.`]]};
+/* your fighter, walking out for a rematch */
+const RG_REPLY2={kati:"I've watched the tape until I know it by heart. I won't lose twice.",mali:"Last time Mali cried. This time Mali's going to smile.",rin:"I have all the data from last time. This time the numbers are on our side.",ploy:"I can't lose to the same person twice.",fah:"This time Fah gets it back. Watch!"};
 const RG_CID={north:"baibua",isan:"tabtim",central:"alicia",south:"chaba"};
 const RG_CID0={...RG_CID}; /* v1.91.30: the four first champions — fixed, even when a later edition crowns someone new */
 const rgIn=(G,id)=>!!(G.F[id]&&G.F[id].camp==="player");
@@ -1328,9 +1347,9 @@ Welcome her at Fights › Four Regions Cup`});}
     ROAD.open(dest,{paid:true,sponsor:true,plan:P,onArrive:(P2,front)=>{const PP=P2||P;this.arrive(G,T,PP,front);
       playScene(this.preBout(r,b),()=>openFight2(b,()=>this.afterBout(T,PP,done)),{bg:"rg_"+RG_CH[r].ring,look:"fight"});}});},
   preBout(r,b){const c=G.region.champ[r],H=RG_CH[r],cid=this.champId[r],me=G.F[b.a],n=b.region.series,sc=`${c.w}-${c.l}`;
-    const head={n:"nar",t:`${H.venue} · ${RG_TITLE[r]} bout ${n}${n>1?` · score ${me.name} ${sc} ${RG[r].champ}`:""}`};
-    const line=n===1?H.pre[0]:c.w===1&&c.l===1?H.pre[2]:H.pre[1];
-    const NC=G.region.nc&&G.region.nc[r];const mine=CANON_IDS.includes(me.id)?[{n:me.id,f:"angry",l:"fight",...(NC?{}:{with:cid}),t:me.id===H.pair?H.pairLine:H.reply}]:[{n:"nar",t:`${me.name} nods and walks back to the red corner`}];
+    const t=c.tries||0,head={n:"nar",t:`${H.venue} · ${RG_TITLE[r]} bout ${n}${n>1?` · score ${me.name} ${sc} ${RG[r].champ}`:""}${t?` · rematch no. ${t}`:""}`};
+    const NC=G.region.nc&&G.region.nc[r],bi=n===1?0:c.w===1&&c.l===1?2:1,P2=t?(NC?RG_PRE2._nc:RG_PRE2[cid]):null,line=P2&&P2[bi]?P2[bi][(t-1)%P2[bi].length]:H.pre[bi];
+    const mine=CANON_IDS.includes(me.id)?[{n:me.id,f:"angry",l:"fight",...(NC?{}:{with:cid}),t:t&&n===1&&RG_REPLY2[me.id]?RG_REPLY2[me.id]:me.id===H.pair?H.pairLine:H.reply}]:[{n:"nar",t:`${me.name} nods and walks back to the red corner`}];
     return [head,...(rgEd(G)>=2&&n===1&&!NC?[{n:"nar",t:`${RG[r].champ} kept the regional title for another reign, and is stronger than three years ago`}]:[]),{...this.spk(r,n===1?"happy":"angry","fight"),t:line(me.name)},...mine];},
   afterBout(T,P,done){const R=G.region,J=R.just;R.just=null;const r=ROAD_DEST[T.dest].r,H=RG_CH[r],cid=this.champId[r];
     if(!J){this.home(T,done);return;}
@@ -1507,7 +1526,7 @@ I just want to know how well your small Muay Thai camp handles the real world.
     playScene(rgFinalLose(G,w,l),()=>{save();UI.modal={type:"rgflost"};render();},{bg:"naka_underground",look:"casual"});},
 });
 /* v1.91.27 (Man): legend mode — optional, after the underground final. Stars: ★ win · ★★ win without going down · ★★★ that, and inside the distance */
-const LEG_UP={n:.65,l:.6}, /* v1.91.38: the final got harder — legend members stay where they were (~29%), legend Ladda stays above the final */LEG_DUST=4;
+const LEG_UP={n:1.05,l:.6}, /* v1.91.38: the final got harder — legend members stay where they were (~29%), legend Ladda stays above the final */LEG_DUST=4;
 Object.assign(REGION,{
   legStars(n){return `<span class="rg-stars">${[1,2,3].map(i=>`<i class="${i<=n?"on":""}">★</i>`).join("")}</span>`;},
   legendCard(G){const R=G.region,F=R.final;if(!F||!F.won)return "";const L=R.legend=R.legend||{},tot=NL_ORDER.reduce((a,k)=>a+(L[k]||0),0),used=R.legWk===gameWeek(G);
