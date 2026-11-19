@@ -484,7 +484,10 @@ const SP_FRAME=150,SP_LEN=SP_FRAME*8+200,FX_LEN=1250;
 /* v1.91.63 (Man): special-move heat tiers — the five girls as before (1) · regional champions + Naka League "hot" (2) · Ladda far beyond (3).
    Hotter tiers play faster and freeze on the impact frame (hit-stop) so the blow lands hard */
 const SP_TIER={1:{fr:150,hold:0},2:{fr:92,hold:150},3:{fr:70,hold:260}};
-const SP_HIT={nl_ladda_sp_superman:5,nl_ladda_sp_headkick:3,nl_ladda_sp_spinkick:6,nl_ladda_sp_backfist:5,nl_ladda_sp_bloodfist:5,nl_ladda_sp_bloodkick:5,nl_ladda_sp_bloodslam:6,nl_ladda_sp_awaken:3};
+const SP_HIT={nl_ladda_sp_superman:5,nl_ladda_sp_headkick:3,nl_ladda_sp_spinkick:6,nl_ladda_sp_backfist:5,nl_ladda_sp_bloodfist:5,nl_ladda_sp_bloodkick:5,nl_ladda_sp_bloodslam:6,nl_ladda_sp_awaken:3,nl_varya_special:4,nl_rosa_special:6};
+/* v1.91.64 (Man): how the thrown fighter moves, matched to the thrower — leg = driven back onto her back (shoot/double-leg) · rana = flipped forward head over heels · slam = hoisted overhead and spiked straight down · hip = carried over the hip in an arc */
+const TH_STY={nl_varya:"leg",nl_rosa:"rana",nl_ladda:"slam",nl_nia:"hip",nl_meili:"hip"},TH_GRAB={nl_varya_special:2,nl_rosa_special:4,nl_ladda_sp_bloodslam:3};
+function thStyle(f){const id=String((f&&f.id)||"");for(const k in TH_STY)if(id.startsWith(k))return TH_STY[k];return "hip";}
 const SP_HOT=["baibua","tabtim","alicia","chaba","nl_nia","nl_varya","nl_meili","nl_rosa"];
 function spTier(f){if(!f)return 1;const id=String(f.id||""),sp=String(f.sprite||"");if(id.startsWith("nl_ladda")||sp.startsWith("nl_ladda"))return 3;if(SP_HOT.includes(id)||f.rgHot)return 2;return 1;}
 function spK(se,sp){const fr=sp.fr,hi=sp.hi,hold=sp.hold;if(se<hi*fr)return Math.floor(se/fr);if(se<(hi+1)*fr+hold)return hi;return Math.min(7,hi+1+Math.floor((se-(hi+1)*fr-hold)/fr));}
@@ -541,7 +544,7 @@ const FS={cv:null,ctx:null,bg:null,A:null,B:null,fx:[],shake:0,
     if(e.ev==="phase"){const P=(atk.f.phases||[])[(e.ph||1)-1];if(P){if(P.lvUp&&typeof G!=="undefined"&&G.F[atk.f.id]&&!G.F[atk.f.id].lvUpd){G.F[atk.f.id].lvl+=P.lvUp;G.F[atk.f.id].lvUpd=1;}/* v1.90.20: Ladda +1 level in blood mode */atk.f={...atk.f,sprite:P.sprite,blood:P.blood||0};const keep={...this.spR};
       if(P.n===3){const mv=(atk.f.spl||[]).find(m=>m.awaken);this.special({side:atk.side,mv,head:"TRANSFORM!",name:mv?mv.def:"Blood-boil mode"},0,now);}
       else if(P.n===2)this.special({side:atk.side,mv:null,kind:"def",col:"#ff5a6e",head:"TRANSFORM!",name:"Hood Off"},0,now);this.spR=keep;this.shake=P.n===3?18:10;}}
-    if(e.ev==="takedown"){def.gnd=true;def.down=0;def.throwT=now;def.thrownBy=spTier(atk.f);def.slam=false;atk.top=true;atk.anim="punch";atk.t0=now;this.shake=8;this.fx.push({x:def.x,y:300,t0:now,txt:"THROW!",big:true});}
+    if(e.ev==="takedown"){def.gnd=true;def.down=0;def.throwT=now;def.thrownBy=spTier(atk.f);def.slam=false;{const st=thStyle(atk.f);def.th={st,grab:0,imp:st==="slam"?440:st==="rana"?420:st==="leg"?300:380};}atk.top=true;atk.anim="punch";atk.t0=now;this.shake=8;this.fx.push({x:def.x,y:300,t0:now,txt:"THROW!",big:true});}
     if(e.ev==="gnp"){atk.anim="punch";atk.t0=now;def.flash=now;this.shake=6;this.fx.push({x:def.x,y:320,t0:now,txt:["Thud!","Thwack!","SLAM!"][Math.floor(Math.random()*3)]});}
     if(e.ev==="subtry"){this.shake=4;this.fx.push({x:(atk.x+def.x)/2,y:300,t0:now,txt:"LOCK!",miss:true});}
     if(e.ev==="tap"){def.tap=now;atk.win=true;this.shake=10;this.fx.push({x:def.x,y:300,t0:now,txt:"TAP OUT!",big:true,cut:true});}
@@ -552,7 +555,8 @@ const FS={cv:null,ctx:null,bg:null,A:null,B:null,fx:[],shake:0,
   ground(){for(const q of [this.A,this.B])if(q){q.gnd=false;q.top=false;q.tap=0;}},
   special(sp,round,now){const s=this[sp.side];if(!s)return;this.spN=this.spN||{A:0,B:0};this.spN[sp.side]=this.spR[sp.side]===round?(this.spN[sp.side]||0)+1:1;this.spR[sp.side]=round;this.banner={txt:sp.name,side:sp.side,t0:now,head:sp.head,tier:spTier(s.f)};
     const tier=spTier(s.f),T=SP_TIER[tier];
-    if(sp.mv&&sp.mv.img){s.anim="special";const hi=SP_HIT[sp.mv.img]??5;s.sp={im:img(loyImg(s.f.id,sp.mv.img,s.f)+".webp"),t0:now,tier,fr:T.fr,hold:T.hold,hi,len:T.fr*8+T.hold+200,hit:false,dodge:!!(sp.mv.dodge||sp.mv.noHit),col:SP_COL[s.f.id]||(s.f&&s.f.color)||"#ffd34a"};this.shake=sp.mv.dodge?6:tier===3?20:tier===2?16:14;if(tier>1){this.heat={tier,t0:now,side:sp.side,len:s.sp.len};}return;}
+    if(sp.mv&&sp.mv.img){s.anim="special";const hi=SP_HIT[sp.mv.img]??5;s.sp={im:img(loyImg(s.f.id,sp.mv.img,s.f)+".webp"),t0:now,tier,fr:T.fr,hold:T.hold,hi,len:T.fr*8+T.hold+200,hit:false,dodge:!!(sp.mv.dodge||sp.mv.noHit),col:SP_COL[s.f.id]||(s.f&&s.f.color)||"#ffd34a"};this.shake=sp.mv.dodge?6:tier===3?20:tier===2?16:14;if(tier>1){this.heat={tier,t0:now,side:sp.side,len:s.sp.len};}
+      if(sp.mv.td){const o=s===this.A?this.B:this.A,P=s.sp,g=(TH_GRAB[sp.mv.img]??2);if(o&&o.gnd){o.throwT=now;o.slam=false;o.th={st:thStyle(s.f),grab:g*P.fr,imp:P.hi*P.fr};P.td={o,gap:o.th.st==="slam"?70:88};}}return;}
     if(tier>1)this.heat={tier,t0:now,side:sp.side,len:FX_LEN};
     /* no drawn sheet for this move: the normal row, dressed up in code — aura, afterimages, speed lines, a dash and an impact ring */
     const kind=sp.kind||"atk",row=kind==="def"?"guard":kind==="rec"?"win":(sp.w==="kick"||sp.w==="knee")?"knee":"punch";
@@ -589,6 +593,7 @@ const FS={cv:null,ctx:null,bg:null,A:null,B:null,fx:[],shake:0,
           continue;}}
       if(s.anim==="special"){const P=s.sp,se=t-P.t0,im=P.im,len=P.len||SP_LEN;if(se>len||!im||!im.naturalWidth){s.anim=s.win?"win":"guard";}
         else{const k=P.fr?spK(se,P):Math.min(7,Math.floor(se/SP_FRAME)),foot=H*.8,h=H*.5,flip=s.side==="B",dir=flip?-1:1,tier=P.tier||1,col=P.col||"#ffd34a",o=s===S.A?S.B:S.A;
+          if(P.td&&P.td.o){/* the thrower closes the distance — she has to get her hands on her */const tx=P.td.o.x+(s.side==="A"?-1:1)*P.td.gap;s.x+=(tx-s.x)*.3;}
           if(tier>1){/* aura + flames behind her */const pu=.65+.35*Math.sin(se/45),cy=foot-h*.42;x.save();x.globalCompositeOperation="lighter";
             const g=x.createRadialGradient(s.x,cy,6,s.x,cy,h*(tier===3?1.05:.78));g.addColorStop(0,(tier===3?"#ff2030":col)+"cc");g.addColorStop(.55,(tier===3?"#a00010":col)+"55");g.addColorStop(1,"#00000000");x.globalAlpha=pu;x.fillStyle=g;x.fillRect(s.x-h*1.2,foot-h*1.6,h*2.4,h*1.8);
             for(let i=0;i<(tier===3?22:12);i++){const ph=((se*(tier===3?.0032:.0022))+i*.137)%1,fx=s.x+Math.sin(i*12.9+se/120)*h*(.18+.12*(i%3)),fy=foot-ph*h*(tier===3?1.25:.95);x.globalAlpha=(1-ph)*.9;x.fillStyle=tier===3?(i%3?"#ff3040":"#ffd0d0"):(i%2?col:"#fff6c8");const sz=(tier===3?9:7)*(1-ph)+2;x.fillRect(fx-sz/2,fy-sz/2,sz,sz*1.6);}
@@ -615,9 +620,15 @@ const FS={cv:null,ctx:null,bg:null,A:null,B:null,fx:[],shake:0,
       if(s.top){const o=s===S.A?S.B:S.A;s.x+=((o.x+(s.side==="A"?-46:46))-s.x)*.2;}
       x.save();
       if(s.gnd&&!s.ko){/* v1.91.63 (Man): a real throw — she is lifted off her feet, flipped through the air and slammed down (dust, shake, thud) */
-        const TH=s.thrownBy===3?300:380,te=s.throwT?t-s.throwT:TH+1,p=Math.min(1,te/TH),fin=(flip?1:-1)*Math.PI/2;
-        if(te<TH){const o=s===S.A?S.B:S.A,ease=p*p*(3-2*p),lift=Math.sin(p*Math.PI)*h*(s.thrownBy===3?.75:.55),dx=o?(o.x-s.x)*.55*Math.sin(p*Math.PI):0;
-          x.translate(s.x+dx,foot-lift);x.rotate(fin*ease*(s.thrownBy===3?1:1)+(flip?1:-1)*Math.PI*2*(s.thrownBy===3?ease:0));x.translate(-s.x,-foot+h*.02*ease);}
+        const TH0=s.th||{st:"hip",grab:0,imp:380},te=s.throwT?t-s.throwT:1e9,sg=flip?1:-1,fin=sg*Math.PI/2,big=s.thrownBy===3;
+        if(te<TH0.imp){const o=s===S.A?S.B:S.A,tw=o?Math.sign(o.x-s.x)||-sg:-sg,gap=o?Math.abs(o.x-s.x):200;
+          if(te<TH0.grab){/* still on her feet until the thrower's hands land */x.translate(s.x+tw*Math.min(14,te/20),foot);x.translate(-s.x,-foot);}
+          else{const p=Math.min(1,(te-TH0.grab)/Math.max(60,TH0.imp-TH0.grab)),ease=p*p*(3-2*p),st=TH0.st;let dx=0,lift=0,ang=0;
+            if(st==="leg"){ang=fin*p*p;lift=Math.sin(p*Math.PI)*h*.12;dx=-tw*(30*p)*(1-p)*4*.5;}
+            else if(st==="rana"){ang=-sg*Math.PI*1.5*ease;lift=Math.sin(p*Math.PI)*h*.6;dx=tw*gap*.35*Math.sin(p*Math.PI);}
+            else if(st==="slam"){/* up overhead (first 60%), a beat at the top, then spiked straight down */const up=Math.min(1,p/.6),dn=p<.6?0:(p-.6)/.4;lift=h*(big?.95:.8)*(Math.sin(up*Math.PI/2))*(1-dn*dn);ang=fin*Math.min(1,up*1.1)+(big?sg*Math.PI*2*dn:0);dx=tw*gap*.3*(1-dn)*up;}
+            else{ang=fin*ease+(big?sg*Math.PI*2*ease:0);lift=Math.sin(p*Math.PI)*h*(big?.75:.55);dx=tw*gap*.55*Math.sin(p*Math.PI);}
+            x.translate(s.x+dx,foot-lift);x.rotate(ang);x.translate(-s.x,-foot+h*.02*Math.min(1,p*1.5));}}
         else{if(!s.slam&&s.throwT){s.slam=true;const big=s.thrownBy===3;S.shake=big?28:18;S.fx.push({dust:1,x:s.x,y:foot,t0:t,big});S.fx.push({x:s.x,y:foot-h*.35,t0:t,txt:big?"SLAM!!":"SLAM!",big:true});if(big){S.flashAt=t;S.flashCol="#ff2040";S.fx.push({crack:1,x:s.x,y:foot,t0:t,seed:Math.random()*99});}if(typeof AU!=="undefined"&&AU.sfx)AU.sfx("kd");}
           x.translate(s.x,foot);x.rotate(fin);x.translate(-s.x,-foot+h*.02);}}
       else if(s.top&&!s.win){x.translate(0,h*.13);}
