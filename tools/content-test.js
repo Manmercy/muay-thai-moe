@@ -141,11 +141,20 @@ const chrome=process.env.CHROME_PATH||'/Applications/Google Chrome.app/Contents/
     walkL(g,ev('lv_hjoin').steps);if(hmList(g).length!==3||romOf(g,'rin'))throw Error('three '+hmList(g));
     doBreak(g,'mali');if(!g.harem||hmList(g).join()!=='kati,rin')throw Error('team after a break '+hmList(g));doBreak(g,'rin');if(g.harem||hmList(g).length)throw Error('a team of one');
     const o=fresh();G=o;lovUp(o,['kati','mali']);o.harem=true;o.haremAbs=absWeek(o);delete o.hm;delete o.hmInit;fixSave(o);return hmList(o).length===2&&pairSt(o,'kati','mali')===3;});
-  test('one love: 5 stories each from year 2, 10 weeks apart, all three answers play',()=>{for(const id of ['kati','mali','rin','ploy','fah']){const g=fresh();G=g;g.season=1;g.week=10;for(const k of ['ploy','fah'])g.F[k].camp='player';lovUp(g,[id]);g.F[id].camp='player';
-      g.week=40;if(ev('lv_ms').when(g))throw Error('year one '+id);g.season=2;g.week=1;let n=0;for(let w=0;w<80&&n<5;w++){g.week++;if(ev('lv_ms').when(g)){walkL(g,ev('lv_ms').steps,ch=>n%3===0?ch.findIndex(c=>c.ok):n%3===1?ch.findIndex(c=>c.bold):ch.findIndex(c=>!c.ok&&!c.bold));n++;g.week+=1;}}
-      if(n!==5||g.msN[id]!==5||ev('lv_ms').when(g))throw Error('five '+id+' '+n);
+  test('one love: 7 stories each (2 are small spats, played 3rd and 6th) from year 2, 10 weeks apart, all three answers play; old saves keep their place',()=>{for(const id of ['kati','mali','rin','ploy','fah']){const g=fresh();G=g;g.season=1;g.week=10;for(const k of ['ploy','fah'])g.F[k].camp='player';lovUp(g,[id]);g.F[id].camp='player';
+      g.week=40;if(ev('lv_ms').when(g))throw Error('year one '+id);g.season=2;g.week=1;let n=0;for(let w=0;w<140&&n<7;w++){g.week++;if(ev('lv_ms').when(g)){walkL(g,ev('lv_ms').steps,ch=>n%3===0?ch.findIndex(c=>c.ok):n%3===1?ch.findIndex(c=>c.bold):ch.findIndex(c=>!c.ok&&!c.bold));n++;g.week+=1;}}
+      if(n!==7||g.msN[id]!==7||g.msDone[id].join()!==MS_ORDER.join()||ev('lv_ms').when(g))throw Error('seven '+id+' '+n+' '+(g.msDone[id]||[]).join());
+      const o=fresh();o.msN={[id]:3};if(msNext(o,id)!==5||o.msDone[id].join()!=='0,1,2')throw Error('old save order '+id);o.msDone[id].push(5);if(msNext(o,id)!==3)throw Error('old save next '+id);
       for(const D of MONO_STORY[id])for(const part of [D.good.then,D.bad.then,D.bold.win,D.bold.lose,D.lines])if(!part.length||part.some(x=>!x.t))throw Error('empty '+id);}
     const g=fresh();G=g;lovUp(g,['kati','mali']);g.season=2;g.week=30;return !ev('lv_ms').when(g);});
+  test('care scenes: once per lover on any route, 8+ weeks after she became a lover, both answers end kindly',()=>{
+    for(const route of [['kati'],['mali','rin'],['kati','mali','rin','ploy','fah']]){const g=fresh();G=g;g.season=1;g.week=5;for(const k of ['ploy','fah'])g.F[k].camp='player';lovUp(g,route);
+      if(careCand(g).length)throw Error('too soon '+route);const seen=[];for(let w=0;w<200&&seen.length<route.length;w++){g.week++;if(g.week>52){g.week=1;g.season++;}
+        if(ev('lv_care').when(g)){const b0=route.map(x=>bondTot(g.F[x]));walkL(g,ev('lv_care').steps,ch=>seen.length%2);const got=route.filter(x=>(g.careDone||{})[x]&&!seen.includes(x));
+          if(got.length!==1)throw Error('one at a time '+got);seen.push(got[0]);g.week++;}}
+      if(seen.length!==route.length||careCand(g).length||ev('lv_care').when(g))throw Error('all once '+route+' '+seen);}
+    for(const id of LOVE_IDS){const D=LV_CARE[id];for(const part of [D.lines,D.a.then,D.b.then])if(!part.length||part.some(x=>!x.t))throw Error('empty care '+id);}
+    return true;});
   test('old saves: past spats/Valentines count once, +10 for "love everyone", clash and spat lines rotate',()=>{const g=fresh();G=g;lovUp(g,['kati','mali','rin']);g.spatDone={[pairKey('kati','mali')]:3};g.valCaught=3;g.haremOK=true;
     delete g.ptInit;delete g.hmInit;delete g.pairF;delete g.pairU;delete g.pairV;fixSave(g);const km=pairKey('kati','mali'),kr=pairKey('kati','rin');
     if(g.pairF[km]!==3||g.pairV[km]!==2||g.pairV[kr]!==2||g.pairU[km]!==60||g.pairU[kr]!==30)throw Error(JSON.stringify([g.pairF,g.pairV,g.pairU]));g.pairU[km]=61;delete g.ptInit;fixSave(g);if(g.pairU[km]!==61)throw Error('ran twice');

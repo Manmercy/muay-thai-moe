@@ -1,5 +1,5 @@
 // ================= MUAY THAI MOE v1.3 — UI =================
-const VERSION="1.91.24";
+const VERSION="1.91.25";
 const CUR_LANG=(typeof window!=="undefined"&&window.LANG)||"th";
 const TH_LABEL=String.fromCharCode(3652,3607,3618);
 function langSwitch(cls){return `<div class="langsw ${cls||""}" role="group" aria-label="Language">${[["th",TH_LABEL],["en","EN"]].map(([k,l])=>`<button class="lsb ${CUR_LANG===k?"on":""}" data-act="setlang" data-v="${k}" aria-pressed="${CUR_LANG===k}">${l}</button>`).join("")}</div>`;}
@@ -1232,7 +1232,7 @@ function tiredScene(done){G.tiredAt=G.tiredAt||{};const f=roster(G).find(x=>!x.i
   G.tiredAt[f.id]=gameWeek(G);const ask=vary("tired_"+f.id,({kati:["Coach… my legs feel so heavy. Can I rest for a week?","My run this morning was even slower than yesterday… can I rest a little?","My shoulders won't lift anymore, Coach… I can still go, but…"],mali:["Waah… Mali can't lift her kicks anymore. Let me sleep for a whole week~","Mali fell asleep twice while stretching… can I rest?","Mali's legs are wobbling like jelly~ can I sleep today?"],rin:["My morning heart rate is abnormally high… my body needs rest","My fatigue graph has shot past the red line. I need a week off","I made three typos in my spreadsheet this morning… my body is warning me"]})[f.id]||["Can I rest a little?"]);
   playScene([{n:f.id,f:"sad",l:"fight",t:ask},...(coachOn()?[{n:"coach",t:`Fatigue ${Math.round(f.fatigue)} already. Pushing on risks injury, Coach says recover this week`}]:[]),
     {choice:[{t:"Rest this week",fx:()=>{if(!trLocked(f))f.plan.preset="rest";f.morale=Math.min(100,f.morale+4);},then:[{n:f.id,f:"happy",l:"fight",t:{kati:"Thank you! Next week I'll be back at a hundred percent",mali:"Yay~ hugging Little Coach in bed all day!",rin:"Thank you. I'll use the rest day to review tapes"}[f.id]||"Thank you!"}]},
-     {t:"Hang in there a bit longer, the fight is close",fx:()=>{f.morale=Math.max(0,f.morale-5);},then:[{n:f.id,f:"sad",l:"fight",t:{kati:"…Okay. I'll try",mali:"Waah… okay, but don't scold Mali if she's slow",rin:"…Understood. I'll note down why we're pushing through"}[f.id]||"…Okay"}]}]}],()=>{AU.startMusic("hub");save();done();},{bg:"gym",look:"fight"});}
+     {t:"Hang in there a bit longer, the fight is close",fx:()=>{f.morale=Math.max(0,f.morale-5);},then:[{n:f.id,f:"sad",l:"fight",t:{kati:"…Okay. I'll try",mali:"Waah… okay, but don't scold Mali if she's slow",rin:"…Understood. I'll note down why we're pushing through"}[f.id]||"…Okay."}]}]}],()=>{AU.startMusic("hub");save();done();},{bg:"gym",look:"fight"});}
 function aftermathScene(done){const L=G.lastBig;if(!L||L.shown||L.absWeek==null||gameWeek(G)-L.absWeek>1){done();return;}L.shown=true;const me=G.F[L.a];if(!me||me.camp!=="player"){done();return;}
   playScene(aftermathSteps(G,L),()=>{AU.startMusic("hub");save();done();},{bg:"gym",look:"train"});}
 // v1.15: Kru Daeng comes back from his leave and checks on everyone

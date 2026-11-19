@@ -5,7 +5,7 @@ const PROFILES={
   likes:["Chicken khao soi from Auntie Daeng's","Training before dawn, before the roosters crow","The sound of the pi chawa during wai khru"],
   dislikes:["Giving up halfway","Cilantro","Quiet cafes where you have to sit still"],
   hobby:"Collects a sticker from every venue she fights at and sticks them on her glove box",
-  story:"An orphan Grandpa Chai took in at 12 after he saw her fighting boys who were bullying her friend. He told her: 'Good fists, but use them in the right place.'",
+  story:"An orphan Grandpa Chai took in at 8 after he saw her fighting boys who were bullying her friend. He told her: 'Good fists, but use them in the right place.'",
   secret:"Still keeps the first gloves Grandpa bought her under her pillow, and talks to them every night before bed"},
  mali:{age:20,height:"152 cm",blood:"B",bday:"May 2",home:"A seaside province in the south",heritage:"Chaiya style (suggested)",
   personality:"Warm, easy to get along with, chatty, but keeps her family worries to herself",
