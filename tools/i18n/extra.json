@@ -15464,5 +15464,7 @@
  "% ของที่เขียนไว้": "% of the listed effect",
  "ได้ผล ": "Works at ",
  "แรงเต็มที่": "Full strength",
- "ได้ทุกเลเวลอัป ใช้อัปท่ามวยโบราณตามสำนักของนักมวย และอัปพลังแฝง (Lv.1–10)": "Earned every level-up. Spend them on old-school moves from the fighter's school, and on hidden power (Lv.1–10)"
+ "ได้ทุกเลเวลอัป ใช้อัปท่ามวยโบราณตามสำนักของนักมวย และอัปพลังแฝง (Lv.1–10)": "Earned every level-up. Spend them on old-school moves from the fighter's school, and on hidden power (Lv.1–10)",
+ "แรงสุดแล้ว · ได้ผล ": "Maxed · works at ",
+ "</div>\n   <div class=\"seg sklines shared\"><span class=\"sklbl\" title=\"อัปได้ทุกสาย เลือกผสมเองได้\">สายปั้น</span>": "</div>\n   <div class=\"seg sklines shared\"><span class=\"sklbl\" title=\"All build paths are open — mix them as you like\">Build</span>"
 }

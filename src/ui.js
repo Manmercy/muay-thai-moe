@@ -816,7 +816,7 @@ const skState=(f,s,mine)=>{const r=(f.skills&&f.skills[s.id])||0;if(!mine)return
   if(r>=3)return {r,st:"max"};if(!B.length)return {r,st:"can"};const nb=B.filter(b=>b.t!=="sp");if(!nb.length)return {r,st:"nosp"};return {r,st:"lock",B:nb};};
 function skillTree(f,mine){const L=skillList(f.id),eqd=equipped(f),sc=SCHOOLS[L[0].school]||{name:""};
   const lines=(SK_LINES[f.id]||["สาย 1","สาย 2","สาย 3"]).concat(SK_SHARED);const can=li=>mine&&L.some(s=>s.line===li&&skState(f,s,mine).st==="can");
-  let li=UI.skLine&&UI.skLine.id===f.id?UI.skLine.li:[0,1,2,3,4,5].find(can);if(li==null)li=0;const path=sharedPathOf(f);
+  let li=UI.skLine&&UI.skLine.id===f.id?UI.skLine.li:[0,1,2,3,4,5].find(can);if(li==null)li=0;const path=null; /* v1.91.45: build lines are open to mix */
   const nCan=L.filter(s=>skState(f,s,mine).st==="can").length;
   const why=st=>st.B.map(b=>b.t==="pre"?`ต้องมี "${skillDef(f.id,b.id).name}" ก่อน`:b.t==="lv"?`ต้อง Lv.${b.v}`:b.t==="stat"?`${SK_AN[b.k]} ${fmtA(b.have)}/${fmtA(b.v)}`:b.t==="path"?`เลือก "${SK_SHARED[path-3]}" ไปแล้ว (ปั้นได้ทีละสาย)`:"").filter(Boolean).join(" · ");
   const card=s=>{const st=skState(f,s,mine),eq=eqd.includes(s.id),k=skillKind(s);
@@ -830,8 +830,8 @@ function skillTree(f,mine){const L=skillList(f.id),eqd=equipped(f),sc=SCHOOLS[L[
      ${skResetBtn(f)}<div class="sk-info"><span>${f.sp?nCan?`อัปได้ตอนนี้ <b class="ok">${nCan}</b> ท่า`:"ยังไม่มีท่าที่อัปได้ ฝึกค่าพลังเพิ่ม":"ได้ 3 แต้มทุกเลเวลอัป"}</span>
       <span class="sk-eq">ใช้ขึ้นชก ${[0,1,2].map(i=>{const s=eqd[i]&&skillDef(f.id,eqd[i]);return `<i class="${s?"on":""}" title="${s?s.name:"ว่าง"}">${s?skIcon(s,f.id):""}</i>`;}).join("")}</span></div></div>`:""}
    <div class="sknav"><div class="seg sklines"><span class="sklbl">สายสำนัก</span>${lines.slice(0,3).map((n,i)=>`<button data-act="skline" data-id="${f.id}" data-v="${i}" aria-pressed="${li===i}" aria-label="${n}" class="${skShort(n).length>10?"lng":""}">${skShort(n)}${can(i)?'<i class="tdot2"></i>':""}</button>`).join("")}</div>
-   <div class="seg sklines shared"><span class="sklbl" title="เลือกปั้นได้ทีละ 1 สาย">สายปั้น</span>${lines.slice(3).map((n,j)=>{const i=j+3;return `<button data-act="skline" data-id="${f.id}" data-v="${i}" aria-pressed="${li===i}" aria-label="${n}" class="${path!=null&&path!==i?"off":""}">${path===i?"✓ ":""}${skShort(n)}${can(i)?'<i class="tdot2"></i>':""}</button>`;}).join("")}</div>
-   ${li>=3&&path==null?`<p class="meta skpath">เลือกปั้นได้ 1 สาย · อัปสกิลแรกของสายไหน อีก 2 สายจะปิดจนกว่าจะรีเซ็ตสกิล</p>`:li>=3&&path!==li?`<p class="meta skpath">ดูได้ แต่อัปไม่ได้ · ตอนนี้ปั้น "${SK_SHARED[path-3]}" อยู่ รีเซ็ตสกิลก่อนถึงจะเปลี่ยนสายปั้นได้</p>`:""}</div>
+   <div class="seg sklines shared"><span class="sklbl" title="อัปได้ทุกสาย เลือกผสมเองได้">สายปั้น</span>${lines.slice(3).map((n,j)=>{const i=j+3;return `<button data-act="skline" data-id="${f.id}" data-v="${i}" aria-pressed="${li===i}" aria-label="${n}" class="${path!=null&&path!==i?"off":""}">${path===i?"✓ ":""}${skShort(n)}${can(i)?'<i class="tdot2"></i>':""}</button>`;}).join("")}</div>
+   </div>
    ${skTreeHTML(f,li,mine,lines,path)}</div>`;}
 // v1.89: the skill tab is a tree — small nodes in three columns (trunk in the middle, the two roots split left and right);
 // tapping a node opens its details in the panel pinned to the bottom, where the upgrade and equip buttons live
@@ -897,9 +897,9 @@ function traitHTML(f,mine){const L=TRAITS[f.id];if(!L)return "";const cur=traitO
   const extra=cur==="grit"&&f.grit?` <span class="goldt">· สะสมแล้ว +${Math.round(f.grit*100)}%</span>`:"";
   return `<div class="trbox"><div class="trh"><b>พลังแฝง</b>${mine?`<div class="seg trseg" role="group" aria-label="เลือกพลังแฝง">${L.map(t=>`<button data-act="trait" data-id="${f.id}" data-v="${t.id}" aria-pressed="${cur===t.id}">${TRAIT_PX[t.id]||""}<span>${t.name}</span></button>`).join("")}</div>`:`<span class="trone">${TRAIT_PX[T.id]||""}${T.name}</span>`}</div>
    <div class="trdesc">${L.map(t=>`<p class="${t.id===cur?"on":""}" ${t.id===cur?"":`aria-hidden="true"`}>${t.desc}${t.id===cur?extra:""}</p>`).join("")}</div>${f.camp==="player"?traitLvRow(f,mine):""}</div>`;}
-/* v1.91.45: hidden power Lv.1–10 · 1 skill point a level · the numbers above are Lv.10 */
+/* v1.91.45: hidden power Lv.1–10 · 1 skill point a level · the numbers above are Lv.3 (100%) */
 function traitLvRow(f,mine){const lv=traitLv(f),k=Math.round(traitK(f)*100),b=traitBlock(f);
-  return `<div class="trlv"><span class="trlvt">Lv.<b>${lv}</b>/${TR_MAX}</span><span class="trbar" aria-hidden="true">${Array.from({length:TR_MAX},(_,i)=>`<i class="${i<lv?"on":""}"></i>`).join("")}</span><small class="trk">${lv>=TR_MAX?"แรงเต็มที่":`ได้ผล ${k}% ของที่เขียนไว้`}</small>${mine&&!b?`<button class="skplus" data-act="trup" data-id="${f.id}" aria-label="อัปพลังแฝง ใช้ 1 แต้มสกิล">+</button>`:""}</div>`;}
+  return `<div class="trlv"><span class="trlvt">Lv.<b>${lv}</b>/${TR_MAX}</span><span class="trbar" aria-hidden="true">${Array.from({length:TR_MAX},(_,i)=>`<i class="${i<lv?"on":""}"></i>`).join("")}</span><small class="trk">${lv>=TR_MAX?`แรงสุดแล้ว · ได้ผล ${k}%`:`ได้ผล ${k}% ของที่เขียนไว้`}</small>${mine&&!b?`<button class="skplus" data-act="trup" data-id="${f.id}" aria-label="อัปพลังแฝง ใช้ 1 แต้มสกิล">+</button>`:""}</div>`;}
 function skResetBtn(f){const n=skPointsSpent(f);if(!n)return "";const c=skResetCost(f);
   return `<button class="btn sm skrbtn" data-act="skresetask" data-id="${f.id}" ${c&&G.cash<c?"disabled":""} aria-label="รีเซ็ตสกิล คืน ${n} แต้ม" title="รีเซ็ตสกิล · คืน ${n} แต้ม · ${c?fmt(c):"ครั้งแรกฟรี"}">↺ รีเซ็ต</button>`;}
 function skResetRow(f){const n=skPointsSpent(f);if(!n)return "";const c=skResetCost(f);

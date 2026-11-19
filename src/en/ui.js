@@ -1,5 +1,5 @@
 // ================= MUAY THAI MOE v1.3 — UI =================
-const VERSION="1.91.44";
+const VERSION="1.91.45";
 const CUR_LANG=(typeof window!=="undefined"&&window.LANG)||"th";
 const TH_LABEL=String.fromCharCode(3652,3607,3618);
 function langSwitch(cls){return `<div class="langsw ${cls||""}" role="group" aria-label="Language">${[["th",TH_LABEL],["en","EN"]].map(([k,l])=>`<button class="lsb ${CUR_LANG===k?"on":""}" data-act="setlang" data-v="${k}" aria-pressed="${CUR_LANG===k}">${l}</button>`).join("")}</div>`;}
@@ -816,7 +816,7 @@ const skState=(f,s,mine)=>{const r=(f.skills&&f.skills[s.id])||0;if(!mine)return
   if(r>=3)return {r,st:"max"};if(!B.length)return {r,st:"can"};const nb=B.filter(b=>b.t!=="sp");if(!nb.length)return {r,st:"nosp"};return {r,st:"lock",B:nb};};
 function skillTree(f,mine){const L=skillList(f.id),eqd=equipped(f),sc=SCHOOLS[L[0].school]||{name:""};
   const lines=(SK_LINES[f.id]||["Line 1","Line 2","Line 3"]).concat(SK_SHARED);const can=li=>mine&&L.some(s=>s.line===li&&skState(f,s,mine).st==="can");
-  let li=UI.skLine&&UI.skLine.id===f.id?UI.skLine.li:[0,1,2,3,4,5].find(can);if(li==null)li=0;const path=sharedPathOf(f);
+  let li=UI.skLine&&UI.skLine.id===f.id?UI.skLine.li:[0,1,2,3,4,5].find(can);if(li==null)li=0;const path=null; /* v1.91.45: build lines are open to mix */
   const nCan=L.filter(s=>skState(f,s,mine).st==="can").length;
   const why=st=>st.B.map(b=>b.t==="pre"?`Needs "${skillDef(f.id,b.id).name}" first`:b.t==="lv"?`Needs Lv.${b.v}`:b.t==="stat"?`${SK_AN[b.k]} ${fmtA(b.have)}/${fmtA(b.v)}`:b.t==="path"?`Picked "${SK_SHARED[path-3]}" already (one build at a time)`:"").filter(Boolean).join(" · ");
   const card=s=>{const st=skState(f,s,mine),eq=eqd.includes(s.id),k=skillKind(s);
@@ -830,8 +830,8 @@ function skillTree(f,mine){const L=skillList(f.id),eqd=equipped(f),sc=SCHOOLS[L[
      ${skResetBtn(f)}<div class="sk-info"><span>${f.sp?nCan?`Can upgrade now: <b class="ok">${nCan}</b> moves`:"Nothing to upgrade yet. Train stats higher":"3 points every level up"}</span>
       <span class="sk-eq">Equipped ${[0,1,2].map(i=>{const s=eqd[i]&&skillDef(f.id,eqd[i]);return `<i class="${s?"on":""}" title="${s?s.name:"Empty"}">${s?skIcon(s,f.id):""}</i>`;}).join("")}</span></div></div>`:""}
    <div class="sknav"><div class="seg sklines"><span class="sklbl">School</span>${lines.slice(0,3).map((n,i)=>`<button data-act="skline" data-id="${f.id}" data-v="${i}" aria-pressed="${li===i}" aria-label="${n}" class="${skShort(n).length>10?"lng":""}">${skShort(n)}${can(i)?'<i class="tdot2"></i>':""}</button>`).join("")}</div>
-   <div class="seg sklines shared"><span class="sklbl" title="Pick one build path at a time">Build</span>${lines.slice(3).map((n,j)=>{const i=j+3;return `<button data-act="skline" data-id="${f.id}" data-v="${i}" aria-pressed="${li===i}" aria-label="${n}" class="${path!=null&&path!==i?"off":""}">${path===i?"✓ ":""}${skShort(n)}${can(i)?'<i class="tdot2"></i>':""}</button>`;}).join("")}</div>
-   ${li>=3&&path==null?`<p class="meta skpath">Pick one build path · once you learn its first skill, the other two lock until you reset skills</p>`:li>=3&&path!==li?`<p class="meta skpath">View only · she is on "${SK_SHARED[path-3]}" right now · reset skills to switch build paths</p>`:""}</div>
+   <div class="seg sklines shared"><span class="sklbl" title="All build paths are open — mix them as you like">Build</span>${lines.slice(3).map((n,j)=>{const i=j+3;return `<button data-act="skline" data-id="${f.id}" data-v="${i}" aria-pressed="${li===i}" aria-label="${n}" class="${path!=null&&path!==i?"off":""}">${path===i?"✓ ":""}${skShort(n)}${can(i)?'<i class="tdot2"></i>':""}</button>`;}).join("")}</div>
+   </div>
    ${skTreeHTML(f,li,mine,lines,path)}</div>`;}
 // v1.89: the skill tab is a tree — small nodes in three columns (trunk in the middle, the two roots split left and right);
 // tapping a node opens its details in the panel pinned to the bottom, where the upgrade and equip buttons live
@@ -897,9 +897,9 @@ function traitHTML(f,mine){const L=TRAITS[f.id];if(!L)return "";const cur=traitO
   const extra=cur==="grit"&&f.grit?` <span class="goldt">· stored so far +${Math.round(f.grit*100)}%</span>`:"";
   return `<div class="trbox"><div class="trh"><b>Hidden power</b>${mine?`<div class="seg trseg" role="group" aria-label="Choose a hidden power">${L.map(t=>`<button data-act="trait" data-id="${f.id}" data-v="${t.id}" aria-pressed="${cur===t.id}">${TRAIT_PX[t.id]||""}<span>${t.name}</span></button>`).join("")}</div>`:`<span class="trone">${TRAIT_PX[T.id]||""}${T.name}</span>`}</div>
    <div class="trdesc">${L.map(t=>`<p class="${t.id===cur?"on":""}" ${t.id===cur?"":`aria-hidden="true"`}>${t.desc}${t.id===cur?extra:""}</p>`).join("")}</div>${f.camp==="player"?traitLvRow(f,mine):""}</div>`;}
-/* v1.91.45: hidden power Lv.1–10 · 1 skill point a level · the numbers above are Lv.10 */
+/* v1.91.45: hidden power Lv.1–10 · 1 skill point a level · the numbers above are Lv.3 (100%) */
 function traitLvRow(f,mine){const lv=traitLv(f),k=Math.round(traitK(f)*100),b=traitBlock(f);
-  return `<div class="trlv"><span class="trlvt">Lv.<b>${lv}</b>/${TR_MAX}</span><span class="trbar" aria-hidden="true">${Array.from({length:TR_MAX},(_,i)=>`<i class="${i<lv?"on":""}"></i>`).join("")}</span><small class="trk">${lv>=TR_MAX?"Full strength":`Works at ${k}% of the listed effect`}</small>${mine&&!b?`<button class="skplus" data-act="trup" data-id="${f.id}" aria-label="Level up hidden power (1 skill point)">+</button>`:""}</div>`;}
+  return `<div class="trlv"><span class="trlvt">Lv.<b>${lv}</b>/${TR_MAX}</span><span class="trbar" aria-hidden="true">${Array.from({length:TR_MAX},(_,i)=>`<i class="${i<lv?"on":""}"></i>`).join("")}</span><small class="trk">${lv>=TR_MAX?`Maxed · works at ${k}%`:`Works at ${k}% of the listed effect`}</small>${mine&&!b?`<button class="skplus" data-act="trup" data-id="${f.id}" aria-label="Level up hidden power (1 skill point)">+</button>`:""}</div>`;}
 function skResetBtn(f){const n=skPointsSpent(f);if(!n)return "";const c=skResetCost(f);
   return `<button class="btn sm skrbtn" data-act="skresetask" data-id="${f.id}" ${c&&G.cash<c?"disabled":""} aria-label="Reset skills, refunds ${n} points" title="Reset skills · refunds ${n} points · ${c?fmt(c):"first reset is free"}">↺ Reset</button>`;}
 function skResetRow(f){const n=skPointsSpent(f);if(!n)return "";const c=skResetCost(f);

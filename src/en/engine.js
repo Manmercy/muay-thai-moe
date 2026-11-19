@@ -372,10 +372,10 @@ const TRAITS={
  ploy:[{id:"talent",name:"Natural Talent",desc:"Training works 10% faster and builds 5% less fatigue"},{id:"tempo",name:"Godlike Timing",desc:"In the last round, or when her HP drops below 50%, Ploy adjusts mid-fight to counter her opponent: their main weapon lands less often and she reads their game"}]};
 let TRV={flowAtk:.95,flowDef:.85,wits:.7,witsHp:45,eyeDef:1.05,eyeCtr:1.3,lib:1.1,libHit:1.08,furyHit:.15,furyDmg:.2,rockAtk:.95,rockDef:.9,rockPts:.6};
 const traitOf=f=>{const L=f&&TRAITS[f.id];if(!L)return null;return L.find(t=>t.id===f.trait)?f.trait:L[0].id;};
-/* v1.91.45 (Man): hidden power has 10 levels, 1 skill point each — Lv.10 = the old full strength. Old saves start at Lv.1. Rivals (not in our camp) always fight at full strength */
-const TR_MAX=10,TR_K0=.3;
+/* v1.91.45 (Man): hidden power has 10 levels, 1 skill point each — Lv.3 = the old full strength, then a little more each level (Lv.10 = 135%). Old saves start at Lv.1. Rivals (not in our camp) fight at the old strength */
+const TR_MAX=10,TR_K=[.6,.8,1,1.05,1.1,1.15,1.2,1.25,1.3,1.35];
 const traitLv=f=>clamp(Math.round((f&&f.trLv)||1),1,TR_MAX);
-const traitK=f=>!f||f.camp!=="player"?1:TR_K0+(1-TR_K0)*(traitLv(f)-1)/(TR_MAX-1);
+const traitK=f=>!f||f.camp!=="player"?1:TR_K[traitLv(f)-1];
 const trm=(m,S)=>1+(m-1)*(S&&S.trk!=null?S.trk:1);
 function traitBlock(f){if(!f||!TRAITS[f.id]||f.camp!=="player")return "none";if(traitLv(f)>=TR_MAX)return "max";if((f.sp||0)<1)return "sp";return "";}
 function traitUp(G,id){const f=G.F[id];if(traitBlock(f))return false;f.trLv=traitLv(f)+1;f.sp--;return true;}
@@ -404,14 +404,15 @@ const SP_PER_LV=f=>hasTree(f.id)?3:1;
 // thresholds are written in "weeks of focused training" and converted with each fighter's measured growth (8 / 14 weeks of the best programme)
 const GROW={"kati":{"punch":[3.1,4.8],"counter":[2.6,4.5],"power":[1.8,3.2],"speed":[1.7,2.7],"kick":[3.5,5.6],"foot":[2.1,3.3],"knee":[3.5,5.9],"clinch":[3.7,5.9],"stamina":[3.2,5],"elbow":[3.7,6.1],"guard":[3.9,6.2],"iq":[2.6,4.2],"comp":[1.3,2.2],"dur":[1.7,2.8]},"mali":{"punch":[2.9,4.6],"counter":[2.3,4.1],"power":[1.5,2.7],"speed":[1.4,2.3],"kick":[2.3,3.7],"foot":[1.6,2.5],"knee":[2.8,4.8],"clinch":[3.2,5],"stamina":[2,3.1],"elbow":[3.1,5.2],"guard":[3,4.8],"iq":[2,3.2],"comp":[1,1.7],"dur":[1.4,2.3]},"rin":{"punch":[2.7,4.3],"counter":[1.7,3.1],"power":[1.5,2.8],"speed":[1.6,2.6],"kick":[2.6,4.2],"foot":[1.4,2.2],"knee":[2.8,4.7],"clinch":[2.9,4.5],"stamina":[2.5,4],"elbow":[2.8,4.7],"guard":[2.6,4.1],"iq":[1.1,1.7],"comp":[0.8,1.3],"dur":[1.4,2.3]}};
 const REQ_WK={main:[[0,2,4],[3,5,7],[3,5,7],[6,8,10],[8,10,12],[10,12,14],[11,12,13],[11,12,13],[12,13,14],[12,13,14],[13,14,15]],cross:[[0,0,0],[1,2,3],[0,0,0],[2,3,4],[3,4,5],[4,5,6],[4,5,6],[4,5,6],[5,6,7],[5,6,7],[6,7,8]],scale:{kati:1,mali:.85,rin:.7,ploy:.75,fah:.8}};
+const REQ_EASE=.75; /* v1.91.45 (Man): stat gates ask for 25% less training, so skill points stop piling up */
 GROW.ploy=GROW.ploy||GROW.kati;GROW.fah=GROW.fah||GROW.mali;
 function skillReqs(fid,sk,rank){const d=skillDef(fid,sk);if(!d||!d.req||!CANON[fid]||!GROW[fid])return [];const base=CANON[fid].a,r=clamp(rank,1,3)-1,sc=REQ_WK.scale[fid]||1;
-  return d.req.map((k,i)=>{const w=(i?REQ_WK.cross:REQ_WK.main)[d.row][r]*sc,g=GROW[fid][k]||[2,3.2];const up=w<=8?g[0]*w/8:g[0]+(g[1]-g[0])*(w-8)/6;return {k,v:Math.min(19.5,Math.floor((base[k]+up)*2)/2)};});} // v1.89: roots (rows 6-10) never ask for more than 19.5
+  return d.req.map((k,i)=>{const w=(i?REQ_WK.cross:REQ_WK.main)[d.row][r]*sc*REQ_EASE,g=GROW[fid][k]||[2,3.2];const up=w<=8?g[0]*w/8:g[0]+(g[1]-g[0])*(w-8)/6;return {k,v:Math.min(19.5,Math.floor((base[k]+up)*2)/2)};});} // v1.89: roots (rows 6-10) never ask for more than 19.5
 // why a skill can't be raised right now ([] = ok). Each entry: {t:"sp"|"max"|"lv"|"pre"|"stat", ...}
 function skillBlock(f,sk){const d=skillDef(f.id,sk),r=(f.skills&&f.skills[sk])||0,B=[];if(!d)return [{t:"none"}];
   if(r>=3)return [{t:"max"}];if((d.lv||1)>f.lvl)B.push({t:"lv",v:d.lv});
   if(d.pre&&!((f.skills[d.pre]||0)>0))B.push({t:"pre",id:d.pre});
-  if(d.shared){const p=sharedPathOf(f);if(p!=null&&p!==d.line)B.push({t:"path"});}
+  /* v1.91.45 (Man): build lines are no longer locked to one — the player mixes them freely */
   for(const q of skillReqs(f.id,sk,r+1))if(f.a[q.k]+1e-6<q.v)B.push({t:"stat",k:q.k,v:q.v,have:f.a[q.k]});
   if(f.sp<1)B.push({t:"sp"});return B;}
 function learnSkill(G,id,sk){const f=G.F[id],d=skillDef(id,sk);if(!d||skillBlock(f,sk).length)return false;f.skills[sk]=(f.skills[sk]||0)+1;f.sp--;
