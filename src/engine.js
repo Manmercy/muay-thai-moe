@@ -876,7 +876,7 @@ function newGame(opts){
   const seed=(opts.seed??Math.floor(Math.random()*1e9))>>>0;const rng=mulberry32(seed);
   const G={v:1,timeV:3,snubV:2,dmSeenSeason:1,dmSeen:{},seed,week:1,diff:opts.diff||"normal",player:{name:opts.name||"ต้น",gender:opts.gender||"m"},cash:60000,debt:120000,rep:5,
     fac:{gym:0,airgym:0,recovery:0,classroom:0,brand:0,dorm:0,kitchen:0,hill:0,video:0,ring:0,clinic:0,shrine:0,van:0,sauna:0,lights:0,hall:0,daeng:1,assistants:0},stu:1,staff:[],rankMove:{A:{},B:{}},camp:{beauty:0},campUsed:null,levelUps:[],avatar:opts.avatar||null,F:{},rank:{A:{},B:{}},qual:{A:[],B:[]},finalists:{A:[],B:[]},semis:{A:[],B:[]},champ:{},
-    bookings:[],offers:[],log:[],flags:{},seen:{},freeUsed:false,negWeeks:0,history:[],honors:[],awards:[],ended:null,lastReport:null,romance:null,lovers:[],lovWk:{},cardRd:1};
+    bookings:[],offers:[],log:[],flags:{},seen:{},freeUsed:false,negWeeks:0,history:[],honors:[],awards:[],ended:null,lastReport:null,romance:null,lovers:[],lovWk:{},cardRd:2};
   for(const [id,d] of Object.entries(CANON))G.F[id]=baseFighter(id,d);
   for(const div of ["A","B"])NPC_NAMES[div].forEach(([n,l],i)=>{const id=`n${div}${i}`;G.F[id]=baseFighter(id,mkNPC(id,n,div,l,rng,i));});
   for(const f of Object.values(G.F))startLv(f);
@@ -998,7 +998,7 @@ const hasStaff=(G,k)=>(G.staff||[]).includes(k);
 const staffLocked=(G,k)=>{const r=STAFF[k].req;if(!r)return "";if(r.lv&&campLevel(G)<r.lv)return `ค่าย Lv.${r.lv}`;if(r.rep&&G.rep<r.rep)return `ชื่อเสียง ${r.rep}`;return "";};
 function hireStaff(G,k){const S=STAFF[k];G.staff=G.staff||[];if(!S||hasStaff(G,k)||G.staff.length>=staffSlots(G)||staffLocked(G,k)||G.cash<S.fee)return false;G.cash-=S.fee;G.staff.push(k);G.fac.assistants=G.staff.length;return true;}
 function fireStaff(G,k){G.staff=(G.staff||[]).filter(x=>x!==k);G.fac.assistants=G.staff.length;return true;}
-function fixSave(G){/* v1.91.41: cards already owned count as read, so their pictures stay unlocked */if(G&&!G.cardRd){for(const k in (G.cards||{}))G.cards[k].rd=1;G.cardRd=1;}if(G&&G.F&&typeof hmFix==="function")hmFix(G);if(G&&G.F&&typeof monoFix==="function")monoFix(G);if(G&&G.ev&&G.ev.loy&&typeof thiefFix==="function")thiefFix(G);if(G&&G.F&&G.prodigy)fixProdigies(G);if(G&&G.flags&&G.flags.beat_ploy&&G.flags.beatS_ploy==null)G.flags.beatS_ploy=G.season||1;
+function fixSave(G){/* v1.91.42: a card counts as read only if its story was ever opened (o.seen is set only there) — v1.91.41 wrongly marked every owned card read */if(G&&(G.cardRd||0)<2){for(const k in (G.cards||{})){const o=G.cards[k];o.rd=o.seen?1:0;}G.cardRd=2;}if(G&&G.F&&typeof hmFix==="function")hmFix(G);if(G&&G.F&&typeof monoFix==="function")monoFix(G);if(G&&G.ev&&G.ev.loy&&typeof thiefFix==="function")thiefFix(G);if(G&&G.F&&G.prodigy)fixProdigies(G);if(G&&G.flags&&G.flags.beat_ploy&&G.flags.beatS_ploy==null)G.flags.beatS_ploy=G.season||1;
   // Legacy saves used week-of-season values. Infer only short, plausible effects;
   // otherwise expire them instead of resurrecting an old effect after New Year.
   const now=gameWeek(G),base=now-G.week;
