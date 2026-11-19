@@ -358,9 +358,9 @@ SHARED_SKILLS.push(SKX("sh5b5",5,8,"sh5b4",["dur", "guard"],"build","Mountain Do
 const skillList=fid=>(SKILLS[fid]||[]).concat(SKILLS[fid]&&SKILLS[fid][0]&&SKILLS[fid][0].line!=null?SHARED_SKILLS:[]);
 const sharedPathOf=f=>{for(const s of SHARED_SKILLS)if((f.skills&&f.skills[s.id])>0)return s.line;return null;};
 // v1.83: full skill reset — every point spent comes back so a fighter can move to another line. First reset per fighter is free.
-const skPointsSpent=f=>Object.values(f.skills||{}).reduce((a,b)=>a+(b||0),0)+Math.max(0,((f&&f.trLv)||1)-1)*TR_COST;
+const skPointsSpent=f=>Object.values(f.skills||{}).reduce((a,b)=>a+(b||0),0)+Math.max(0,((f&&f.trLv)||1)-((f&&f.trBase)||1))*TR_COST;
 const skResetCost=f=>Math.min(3,f.skReset||0)*10000;
-function resetAllSkills(G,id){const f=G.F[id];if(!f||!f.skills)return 0;const n=skPointsSpent(f);if(!n)return 0;f.skills={};if(f.trLv)f.trLv=1;f.sp=(f.sp||0)+n;f.equip=[];f.skReset=(f.skReset||0)+1;return n;}
+function resetAllSkills(G,id){const f=G.F[id];if(!f||!f.skills)return 0;const n=skPointsSpent(f);if(!n)return 0;f.skills={};if(f.trLv)f.trLv=f.trBase||1;f.sp=(f.sp||0)+n;f.equip=[];f.skReset=(f.skReset||0)+1;return n;}
 function resetSharedPath(G,id){const f=G.F[id];if(!f||!f.skills)return false;let n=0;for(const s of SHARED_SKILLS){n+=f.skills[s.id]||0;delete f.skills[s.id];}if(!n)return false;f.sp+=n;if(Array.isArray(f.equip))f.equip=f.equip.filter(k=>!k.startsWith("sh_"));return n;}
 // v1.12: a deep bond unlocks each heroine's signature move (bond 60+, player's camp only)
 /* v1.87: every girl has two innate traits — the player picks one on the skill page */
@@ -378,7 +378,7 @@ const traitLv=f=>clamp(Math.round((f&&f.trLv)||1),1,TR_MAX);
 const traitK=f=>!f||f.camp!=="player"?1:TR_K[traitLv(f)-1];
 const trm=(m,S)=>1+(m-1)*(S&&S.trk!=null?S.trk:1);
 const isLvPerk=f=>!!(f&&f.pfx&&f.camp==="player"&&!TRAITS[f.id]&&hasTree(f.id)); /* a joined regional champion's signature perk levels like a hidden power */
-function traitBlock(f){if(!f||!(TRAITS[f.id]||isLvPerk(f))||f.camp!=="player")return "none";if(traitLv(f)>=TR_MAX)return "max";if((f.sp||0)<TR_COST)return "sp";return "";}
+function traitBlock(f){if(!f||!TRAITS[f.id]||f.camp!=="player")return "none";if(traitLv(f)>=TR_MAX)return "max";if((f.sp||0)<TR_COST)return "sp";return "";}
 function traitUp(G,id){const f=G.F[id];if(traitBlock(f))return false;f.trLv=traitLv(f)+1;f.sp-=TR_COST;return true;}
 const SIGNATURE={kati:{name:"Sirichai Heart Spinning Elbow",desc:"Bond ♥ Lv.7+ · Elbow power +15% · extra 3% accuracy when hurt",fx:{dmg:{elbow:.15},clutch:.03}},
   mali:{name:"Jasmine Bloom Kick",desc:"Bond ♥ Lv.7+ · Kick accuracy +3% · between-round recovery +15%",fx:{hit:{kick:.03},regen:.15}},
@@ -388,7 +388,7 @@ const SIGNATURE={kati:{name:"Sirichai Heart Spinning Elbow",desc:"Bond ♥ Lv.7+
 const hasSignature=f=>!!SIGNATURE[f.id]&&f.camp==="player"&&(f.bond||0)>=60;
 function skillMods(f){const m={hit:{},pts:{},dmg:{},ctr:0,ctrDmg:0,clutch:0,regen:0,mor:0,evade:0,corner:0,prep:0,clDef:0,staSave:0,sprawl:0,tdTry:0,gnp:0,sub:0};
   if(hasSignature(f)){const e=SIGNATURE[f.id].fx;for(const k in e){if(typeof e[k]==="object")for(const w in e[k])m[k][w]=(m[k][w]||0)+e[k][w];else m[k]+=e[k];}}
-  if(f.pfx){const e=f.pfx,pk=f.camp==="player"?traitK(f):1;for(const k in e){if(typeof e[k]==="object")for(const w in e[k])m[k][w]=(m[k][w]||0)+e[k][w]*pk;else m[k]+=e[k]*pk;}} /* v1.90: a regional champion's own perk */
+  {const T=f.camp==="player"&&TRAITS[f.id]&&TRAITS[f.id][0].fx?TRAITS[f.id].find(t=>t.id===traitOf(f)):null;const e=T?T.fx:f.pfx,pk=T?traitK(f):1;if(e){for(const k in e){if(typeof e[k]==="object")for(const w in e[k])m[k][w]=(m[k][w]||0)+e[k][w]*pk;else m[k]+=e[k]*pk;}}} /* v1.90: a regional champion's own perk */
   const list=skillList(f.id);if(!list.length||!f.skills)return m;const eq=equipped(f);
   for(const sk of list){if(!sk.passive&&!eq.includes(sk.id))continue;const r=f.skills[sk.id]||0;if(!r)continue;const e=sk.fx(r);
     for(const k in e){if(typeof e[k]==="object")for(const w in e[k])m[k][w]=(m[k][w]||0)+e[k][w];else m[k]+=e[k];}}

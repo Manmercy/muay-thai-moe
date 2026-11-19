@@ -359,9 +359,9 @@ SHARED_SKILLS.push(SKX("sh5b5",5,8,"sh5b4",["dur", "guard"],"build","Mountain Do
 const skillList=fid=>(SKILLS[fid]||[]).concat(SKILLS[fid]&&SKILLS[fid][0]&&SKILLS[fid][0].line!=null?SHARED_SKILLS:[]);
 const sharedPathOf=f=>{for(const s of SHARED_SKILLS)if((f.skills&&f.skills[s.id])>0)return s.line;return null;};
 // v1.83: full skill reset — every point spent comes back so a fighter can move to another line. First reset per fighter is free.
-const skPointsSpent=f=>Object.values(f.skills||{}).reduce((a,b)=>a+(b||0),0)+Math.max(0,((f&&f.trLv)||1)-1)*TR_COST;
+const skPointsSpent=f=>Object.values(f.skills||{}).reduce((a,b)=>a+(b||0),0)+Math.max(0,((f&&f.trLv)||1)-((f&&f.trBase)||1))*TR_COST;
 const skResetCost=f=>Math.min(3,f.skReset||0)*10000;
-function resetAllSkills(G,id){const f=G.F[id];if(!f||!f.skills)return 0;const n=skPointsSpent(f);if(!n)return 0;f.skills={};if(f.trLv)f.trLv=1;f.sp=(f.sp||0)+n;f.equip=[];f.skReset=(f.skReset||0)+1;return n;}
+function resetAllSkills(G,id){const f=G.F[id];if(!f||!f.skills)return 0;const n=skPointsSpent(f);if(!n)return 0;f.skills={};if(f.trLv)f.trLv=f.trBase||1;f.sp=(f.sp||0)+n;f.equip=[];f.skReset=(f.skReset||0)+1;return n;}
 function resetSharedPath(G,id){const f=G.F[id];if(!f||!f.skills)return false;let n=0;for(const s of SHARED_SKILLS){n+=f.skills[s.id]||0;delete f.skills[s.id];}if(!n)return false;f.sp+=n;if(Array.isArray(f.equip))f.equip=f.equip.filter(k=>!k.startsWith("sh_"));return n;}
 // v1.12: a deep bond unlocks each heroine's signature move (bond 60+, player's camp only)
 /* v1.87: every girl has two innate traits — the player picks one on the skill page */
@@ -379,7 +379,7 @@ const traitLv=f=>clamp(Math.round((f&&f.trLv)||1),1,TR_MAX);
 const traitK=f=>!f||f.camp!=="player"?1:TR_K[traitLv(f)-1];
 const trm=(m,S)=>1+(m-1)*(S&&S.trk!=null?S.trk:1);
 const isLvPerk=f=>!!(f&&f.pfx&&f.camp==="player"&&!TRAITS[f.id]&&hasTree(f.id)); /* a joined regional champion's signature perk levels like a hidden power */
-function traitBlock(f){if(!f||!(TRAITS[f.id]||isLvPerk(f))||f.camp!=="player")return "none";if(traitLv(f)>=TR_MAX)return "max";if((f.sp||0)<TR_COST)return "sp";return "";}
+function traitBlock(f){if(!f||!TRAITS[f.id]||f.camp!=="player")return "none";if(traitLv(f)>=TR_MAX)return "max";if((f.sp||0)<TR_COST)return "sp";return "";}
 function traitUp(G,id){const f=G.F[id];if(traitBlock(f))return false;f.trLv=traitLv(f)+1;f.sp-=TR_COST;return true;}
 const SIGNATURE={kati:{name:"Sirichai Heart Spinning Elbow",desc:"Bond ♥ Lv.7+ · Elbow power +15% · extra 3% accuracy when hurt",fx:{dmg:{elbow:.15},clutch:.03}},
   mali:{name:"Jasmine Bloom Kick",desc:"Bond ♥ Lv.7+ · Kick accuracy +3% · between-round recovery +15%",fx:{hit:{kick:.03},regen:.15}},
@@ -389,7 +389,7 @@ const SIGNATURE={kati:{name:"Sirichai Heart Spinning Elbow",desc:"Bond ♥ Lv.7+
 const hasSignature=f=>!!SIGNATURE[f.id]&&f.camp==="player"&&(f.bond||0)>=60;
 function skillMods(f){const m={hit:{},pts:{},dmg:{},ctr:0,ctrDmg:0,clutch:0,regen:0,mor:0,evade:0,corner:0,prep:0,clDef:0,staSave:0,sprawl:0,tdTry:0,gnp:0,sub:0};
   if(hasSignature(f)){const e=SIGNATURE[f.id].fx;for(const k in e){if(typeof e[k]==="object")for(const w in e[k])m[k][w]=(m[k][w]||0)+e[k][w];else m[k]+=e[k];}}
-  if(f.pfx){const e=f.pfx,pk=f.camp==="player"?traitK(f):1;for(const k in e){if(typeof e[k]==="object")for(const w in e[k])m[k][w]=(m[k][w]||0)+e[k][w]*pk;else m[k]+=e[k]*pk;}} /* v1.90: a regional champion's own perk */
+  {const T=f.camp==="player"&&TRAITS[f.id]&&TRAITS[f.id][0].fx?TRAITS[f.id].find(t=>t.id===traitOf(f)):null;const e=T?T.fx:f.pfx,pk=T?traitK(f):1;if(e){for(const k in e){if(typeof e[k]==="object")for(const w in e[k])m[k][w]=(m[k][w]||0)+e[k][w]*pk;else m[k]+=e[k]*pk;}}} /* v1.90: a regional champion's own perk */
   const list=skillList(f.id);if(!list.length||!f.skills)return m;const eq=equipped(f);
   for(const sk of list){if(!sk.passive&&!eq.includes(sk.id))continue;const r=f.skills[sk.id]||0;if(!r)continue;const e=sk.fx(r);
     for(const k in e){if(typeof e[k]==="object")for(const w in e[k])m[k][w]=(m[k][w]||0)+e[k][w];else m[k]+=e[k];}}
@@ -5237,7 +5237,10 @@ const OUTFITS={
  champ:{name:"Gold Champion Kit",h:.14,s:.95,lm:1.3,sw:"#ffd34a",hint:"Win the provincial championship",need:G=>Object.values(G.champ||{}).some(id=>G.F[id]&&G.F[id].camp==="player")||(G.titles||[]).some(t=>Object.values(t.champ||{}).some(id=>G.F[id]&&G.F[id].camp==="player"))},
  loy:{name:"Loy Krathong Thai Dress",sheet:1,sw:"#2f8f4a",hint:"Win a bout in the Loy Krathong riverside brawl, then claim it from Auntie Taew's letter",need:(G,f)=>!!(G&&G.ev&&G.ev.loy&&G.ev.loy.dress&&G.ev.loy.dress[f.id])}}; /* v1.89.27: the real Thai-dress pixel sheet, one girl at a time */
 const KIT_MASK={kati:(h,l,s)=>(h<.035||h>.93)&&s>.38&&l>.12&&l<.8,mali:(h,l,s)=>h>.53&&h<.74&&s>.25&&l>.1,rin:(h,l,s)=>h>.2&&h<.45&&s>.25&&l>.08,
- ploy:(h,l,s,fy,fx)=>h>.68&&h<.9&&s>.2&&l>.1&&fy>.4&&fx>.3,fah:(h,l,s,fy)=>h>.088&&h<.17&&l>.1&&((s>.5&&fy>.33)||(s>.22&&l<.55&&fy>.55))};
+ ploy:(h,l,s,fy,fx)=>h>.68&&h<.9&&s>.2&&l>.1&&fy>.4&&fx>.3,fah:(h,l,s,fy)=>h>.088&&h<.17&&l>.1&&((s>.5&&fy>.33)||(s>.22&&l<.55&&fy>.55)),
+ /* v1.91.45: the joined regional champions re-dye their kit like the main cast (hair of the same hue is kept out by height/side) */
+ baibua:(h,l,s,fy,fx)=>h>.9&&s>.3&&l>.1&&l<.76&&fy>.47&&!(fx<.38&&fy<.66),tabtim:(h,l,s,fy,fx)=>h>.89&&s>.3&&l>.1&&l<.7&&fy>.47&&!(fx<.36&&fy<.52),
+ alicia:(h,l,s,fy)=>h>.55&&h<.74&&s>.2&&l>.08&&fy>.46,chaba:(h,l,s,fy,fx)=>h>.42&&h<.6&&s>.15&&l>.05&&fy>.47&&!(fx<.38&&fy<.62)};
 function outfitOk(G,f,k){const O=OUTFITS[k];return !!O&&(!O.need||O.need(G,f));}
 function outfitSheet(f,k){const key=f.id+"|"+k;if(TINTS[key])return TINTS[key];const O=OUTFITS[k],M=KIT_MASK[f.id],src=img(f.id+"_sheet.webp");if(!O||!M||!src.complete||!src.naturalWidth)return src;
   const c=document.createElement("canvas");c.width=src.naturalWidth;c.height=src.naturalHeight;const x=c.getContext("2d",{willReadFrequently:true});x.drawImage(src,0,0);const FW=c.width/4,FH=c.height/6;
@@ -7017,7 +7020,7 @@ function fighterHTML(f){const mine=f.camp==="player";const P=PROFILES[f.id];
    <div class="seg ptabs">${tabs.map(([k,n])=>`<button data-act="ptab" data-v="${k}" aria-pressed="${t===k}">${n}${k==="skill"&&skReady(f)?'<i class="tdot2"></i>':""}</button>`).join("")}</div>`;
   let body="";
   if(t==="look"){const cur=f.outfit||"base";
-    body=`<div class="olook"><canvas width="170" height="160" data-sprite="${f.id}" data-floor="1" data-mode="guard" aria-label="${esc(f.name)}"></canvas><div class="olist">${Object.entries(OUTFITS).map(([k,O])=>{const ok=k==="base"||outfitOk(G,f,k);
+    body=`<div class="olook"><canvas width="170" height="160" data-sprite="${f.id}" data-floor="1" data-mode="guard" aria-label="${esc(f.name)}"></canvas><div class="olist">${Object.entries(OUTFITS).filter(([k])=>k!=="loy"||(typeof LOY_SP!=="undefined"&&LOY_SP.includes(f.id))).map(([k,O])=>{const ok=k==="base"||outfitOk(G,f,k);
       return `<button class="obtn ${cur===k?"on":""}" data-act="outfit" data-id="${f.id}" data-v="${k}" ${ok?"":"disabled"}><i style="background:${O.sw||"transparent"}" class="${O.sw?"":"base"}"></i><span><b>${ok?esc(O.name):"???"}</b><small>${cur===k?"Wearing":ok?"Tap to wear":"Unlocks: "+esc(O.hint)}</small></span></button>`;}).join("")}</div></div>
       <p class="meta center">Outfits only change the pixel sprite in camp, training and fights · no effect on stats</p>`;}
   if(t==="over"){const c=condition(f);const nb=G.bookings.find(b=>b.a===f.id||b.b===f.id);
@@ -7123,7 +7126,7 @@ function traitHTML(f,mine){const L=TRAITS[f.id];if(!L)return "";const cur=traitO
    <div class="trdesc">${L.map(t=>`<p class="${t.id===cur?"on":""}" ${t.id===cur?"":`aria-hidden="true"`}>${t.desc}${t.id===cur?extra:""}</p>`).join("")}</div>${f.camp==="player"?traitLvRow(f,mine):""}</div>`;}
 /* v1.91.45: hidden power Lv.1–10 · 5 skill points a level · the numbers above are Lv.3 (100%) */
 function traitLvRow(f,mine){const lv=traitLv(f),k=Math.round(traitK(f)*100),b=traitBlock(f);
-  return `<div class="trlv"><span class="trlvt">Lv.<b>${lv}</b>/${TR_MAX}</span><span class="trbar" aria-hidden="true">${Array.from({length:TR_MAX},(_,i)=>`<i class="${i<lv?"on":""}"></i>`).join("")}</span><small class="trk">${lv>=TR_MAX?`Maxed · works at ${k}%`:`Works at ${k}% of the listed effect · next level costs ${TR_COST} pts`}</small>${mine&&!b?`<button class="skplus" data-act="trup" data-id="${f.id}" aria-label="Level up hidden power (5 skill points)">+</button>`:""}</div>`;}
+  return `<div class="trlv"><span class="trlvt">Lv.<b>${lv}</b>/${TR_MAX}</span><span class="trbar" aria-hidden="true">${Array.from({length:TR_MAX},(_,i)=>`<i class="${i<lv?"on":""}"></i>`).join("")}</span><small class="trk">${lv>=TR_MAX?`Maxed · works at ${k}%`:`Works at ${k}% of the listed effect · next level costs ${TR_COST} pts`}</small>${mine&&b!=="max"&&b!=="none"?`<button class="skplus" data-act="trup" data-id="${f.id}" aria-label="Level up hidden power (5 skill points)" ${b?"disabled":""}>+</button>`:""}</div>`;}
 function skResetBtn(f){const n=skPointsSpent(f);if(!n)return "";const c=skResetCost(f);
   return `<button class="btn sm skrbtn" data-act="skresetask" data-id="${f.id}" ${c&&G.cash<c?"disabled":""} aria-label="Reset skills, refunds ${n} points" title="Reset skills · refunds ${n} points · ${c?fmt(c):"first reset is free"}">↺ Reset</button>`;}
 function skResetRow(f){const n=skPointsSpent(f);if(!n)return "";const c=skResetCost(f);

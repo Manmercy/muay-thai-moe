@@ -15471,5 +15471,14 @@
  " แต้ม": " pts",
  "% ของที่เขียนไว้ · อัปใช้ ": "% of the listed effect · next level costs ",
  "ได้ทุกเลเวลอัป ใช้อัปท่ามวยโบราณตามสำนักของนักมวย และอัปพลังแฝง (Lv.1–10 · ใช้เลเวลละ 5 แต้ม)": "Earned every level-up. Spend them on old-school moves from the fighter's school, and on hidden power (Lv.1–10 · 5 points a level)",
- " มีผลทุกไฟต์ ไม่ต้องใส่ช่องสกิล</p>": " · works in every fight, no skill slot needed</p>"
+ " มีผลทุกไฟต์ ไม่ต้องใส่ช่องสกิล</p>": " · works in every fight, no skill slot needed</p>",
+ "\" aria-label=\"อัปพลังแฝง ใช้ 5 แต้มสกิล\" ": "\" aria-label=\"Level up hidden power (5 skill points)\" ",
+ "สวนกลับบ่อยขึ้น 4% · สวนกลับแรงขึ้น 12%": "Counters 4% more often · counters hit 12% harder",
+ "คลื่นใต้น้ำ": "Undertow",
+ "ความแม่นพื้นฐาน +1.5% · หมัดได้คะแนนเพิ่ม 10%": "Base accuracy +1.5% · punches score 10% more",
+ "ต่อหน้ากล้อง": "On Camera",
+ "ใช้แรงออกอาวุธน้อยลง 6% · กำลังใจมีผลในไฟต์มากขึ้น 2%": "Strikes cost 6% less stamina · morale counts 2% more in fights",
+ "หัวเราะสู้": "Laugh It Off",
+ "ฟื้นแรงระหว่างยกเร็วขึ้น 10% · เลือดต่ำกว่า 45% แม่นขึ้น 4%": "Recovers 10% more between rounds · 4% more accurate below 45% HP",
+ "ใจนิ่งดั่งบึงบัว": "Still as the Lotus Pond"
 }

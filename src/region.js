@@ -15,6 +15,10 @@ const RG_PSP={chiangrai:["ศอกวัดร่องขุ่น","elbow",{d
  udon:["เตะบัวแดงบาน","kick",{dmg:{kick:.10}}],khonkaen:["เข่าทอไหมขอนแก่น","knee",{dmg:{knee:.08},regen:.06}],buriram:["หมัดสายฟ้าพนมรุ้ง","punch",{dmg:{punch:.10}}],ubon:["ศอกเทียนพรรษา","elbow",{dmg:{elbow:.08},hit:{elbow:.02}}],
  lopburi:["หมัดลิงหลอกเจ้า","punch",{dmg:{punch:.08},evade:.01}],suphan:["เตะแม่ไม้สุพรรณ","kick",{dmg:{kick:.10}}],phetchaburi:["เข่าเขาวังเมืองเพชร","knee",{dmg:{knee:.10}}],chanthaburi:["หมัดเปลือกมังคุด","punch",{dmg:{punch:.08},clDef:1}],
  chumphon:["เตะนางนวลโฉบ","kick",{dmg:{kick:.08},evade:.01}],surat:["ศอกเปลือกหอยดอนสัก","elbow",{dmg:{elbow:.10}}],nakhonsi:["หมัดหนังตะลุง","punch",{dmg:{punch:.10}}],songkhla:["เตะนางเงือกสมิหลา","kick",{dmg:{kick:.08},regen:.06}]};
+const RG_TRAIT2={baibua:{name:"ใจนิ่งดั่งบึงบัว",desc:"ฟื้นแรงระหว่างยกเร็วขึ้น 10% · เลือดต่ำกว่า 45% แม่นขึ้น 4%",fx:{regen:.1,clutch:.04}},
+  tabtim:{name:"หัวเราะสู้",desc:"ใช้แรงออกอาวุธน้อยลง 6% · กำลังใจมีผลในไฟต์มากขึ้น 2%",fx:{staSave:.06,mor:.02}},
+  alicia:{name:"ต่อหน้ากล้อง",desc:"ความแม่นพื้นฐาน +1.5% · หมัดได้คะแนนเพิ่ม 10%",fx:{prep:.015,pts:{punch:.1}}},
+  chaba:{name:"คลื่นใต้น้ำ",desc:"สวนกลับบ่อยขึ้น 4% · สวนกลับแรงขึ้น 12%",fx:{ctr:.04,ctrDmg:.12}}};
 function rgDress(f){const P=f&&f.rg&&RG_PSP[f.rg];if(!P)return f;f.spl=[{w:P[1],def:P[0],npc:1,p:.45}];f.pfx=P[2];return f;}
 /* v1.90 difficulty (18 Nov 2026, Man): every fighter gets a fair-but-hard bout — belts ~38% → 30%, a championship series ~18% → 10% —
    found by sparring her against the opponent at a few strengths (rgFit). The ladder below is the CEILING: past it the opponent stops
@@ -1405,11 +1409,13 @@ Object.assign(REGION,{
   peopleIds(G){const R=G.region;if(!R)return [];return RG_ORDER.map(r=>RG_CID0[r]).filter(cid=>{const f=G.F[cid];return f&&((R.joined&&R.joined[cid]&&f.camp==="player")||f.met||((R.meet||{})[cid]>0));});},
   campOf(cid){const r=RG_ORDER.find(x=>RG_CID0[x]===cid);return r?{north:"แชมป์ภาคเหนือ",isan:"แชมป์ภาคอีสาน",central:"แชมป์ภาคกลาง",south:"แชมป์ภาคใต้"}[r]:"";},
   /* her move from her champion days, shown in the skill tab like a signature */
-  perkCard(f){const r=f&&RG_ORDER.find(x=>RG_CID0[x]===f.id),R=G.region;if(!r||!R||!R.joined||!R.joined[f.id])return "";const P=RG_CH0[r].perk;
+  perkCard(f){const r=f&&RG_ORDER.find(x=>RG_CID0[x]===f.id),R=G.region;if(!r||!R||!R.joined||!R.joined[f.id])return "";if(typeof TRAITS!=="undefined"&&TRAITS[f.id])return ""; /* v1.91.45: shown in the hidden-power box now */const P=RG_CH0[r].perk;
     return `<div class="sigcard on rg-perk"><b>✦ ท่าประจำตัว: ${esc(P.name)}</b><p class="meta">${esc(P.desc)} · ติดตัวมาตั้งแต่เป็นแชมป์${esc(RG0[r].name)} มีผลทุกไฟต์ ไม่ต้องใส่ช่องสกิล</p>${typeof traitLvRow==="function"&&G.F[f.id]&&G.F[f.id].camp==="player"?traitLvRow(f,true):""}</div>`;},
   joinRooms(G){const R=G.region,J=R.joined||{};return CANON_IDS.filter(id=>G.F[id]&&G.F[id].camp==="player").length+Object.keys(J).filter(c=>G.F[c]&&G.F[c].camp==="player").length;},
   /* the champion's skill tree is her lineage's — the partner girl's tree (Tha Sao / Korat / Lopburi / Chaiya) */
-  joinSkills(G){const J=(G.region&&G.region.joined)||{};for(const r of RG_ORDER){const cid=RG_CID0[r],pr=RG_CH0[r].pair;if(!J[cid])continue;if(typeof REQ_ALIAS!=="undefined")REQ_ALIAS[cid]=pr;
+  /* v1.91.45: each champion's second hidden power (the first is the signature perk she brought as a champion) */
+  joinSkills(G){const J=(G.region&&G.region.joined)||{};for(const r of RG_ORDER){const cid=RG_CID0[r],pr=RG_CH0[r].pair;if(!J[cid])continue;if(typeof REQ_ALIAS!=="undefined")REQ_ALIAS[cid]=pr;{const P=RG_CH0[r].perk,T2=RG_TRAIT2[cid];if(typeof TRAITS!=="undefined"&&P&&T2)TRAITS[cid]=[{id:"rgp_"+cid,name:P.name,desc:P.desc,fx:P.fx},{id:"rg2_"+cid,...T2}];
+      const g=G.F&&G.F[cid];if(g&&g.trLv==null){g.trLv=3;g.trBase=3;}} /* v1.91.45 (Man): same standard as the main five — two hidden powers to switch, 10 levels at 5 points; a champion arrives at Lv.3 (her full champion strength) */
     /* v1.91.43 (Man): same roots as her lineage partner, but the Lv.42 legend tips are her own — new name, her story, plus a small signature bonus */
     if((!SKILLS[cid]||SKILLS[cid]===SKILLS[pr])&&SKILLS[pr]){const C=RG_CAP[cid]||{};SKILLS[cid]=SKILLS[pr].map(s=>{const c=C[s.id];if(!c)return s;const [id,name,desc,ad]=c;return {...s,id,name,desc,fx:r=>rgFxAdd(s.fx(r),ad(r))};});}
     {const f=G.F&&G.F[cid],C=RG_CAP[cid]||{};if(f)for(const o in C){const n=C[o][0];if(f.skills&&f.skills[o]){f.skills[n]=(f.skills[n]||0)+f.skills[o];delete f.skills[o];}if(Array.isArray(f.equip))f.equip=f.equip.map(x=>x===o?n:x);}}

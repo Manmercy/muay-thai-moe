@@ -30,7 +30,10 @@ const OUTFITS={
  champ:{name:"ชุดแชมป์ทองคำ",h:.14,s:.95,lm:1.3,sw:"#ffd34a",hint:"คว้าแชมป์จังหวัด",need:G=>Object.values(G.champ||{}).some(id=>G.F[id]&&G.F[id].camp==="player")||(G.titles||[]).some(t=>Object.values(t.champ||{}).some(id=>G.F[id]&&G.F[id].camp==="player"))},
  loy:{name:"ชุดไทยคืนลอยกระทง",sheet:1,sw:"#2f8f4a",hint:"ชนะในศึกริมน้ำคืนลอยกระทง แล้วรับชุดจากจดหมายป้าแต๋ว",need:(G,f)=>!!(G&&G.ev&&G.ev.loy&&G.ev.loy.dress&&G.ev.loy.dress[f.id])}}; /* v1.89.27: the real Thai-dress pixel sheet, one girl at a time */
 const KIT_MASK={kati:(h,l,s)=>(h<.035||h>.93)&&s>.38&&l>.12&&l<.8,mali:(h,l,s)=>h>.53&&h<.74&&s>.25&&l>.1,rin:(h,l,s)=>h>.2&&h<.45&&s>.25&&l>.08,
- ploy:(h,l,s,fy,fx)=>h>.68&&h<.9&&s>.2&&l>.1&&fy>.4&&fx>.3,fah:(h,l,s,fy)=>h>.088&&h<.17&&l>.1&&((s>.5&&fy>.33)||(s>.22&&l<.55&&fy>.55))};
+ ploy:(h,l,s,fy,fx)=>h>.68&&h<.9&&s>.2&&l>.1&&fy>.4&&fx>.3,fah:(h,l,s,fy)=>h>.088&&h<.17&&l>.1&&((s>.5&&fy>.33)||(s>.22&&l<.55&&fy>.55)),
+ /* v1.91.45: the joined regional champions re-dye their kit like the main cast (hair of the same hue is kept out by height/side) */
+ baibua:(h,l,s,fy,fx)=>h>.9&&s>.3&&l>.1&&l<.76&&fy>.47&&!(fx<.38&&fy<.66),tabtim:(h,l,s,fy,fx)=>h>.89&&s>.3&&l>.1&&l<.7&&fy>.47&&!(fx<.36&&fy<.52),
+ alicia:(h,l,s,fy)=>h>.55&&h<.74&&s>.2&&l>.08&&fy>.46,chaba:(h,l,s,fy,fx)=>h>.42&&h<.6&&s>.15&&l>.05&&fy>.47&&!(fx<.38&&fy<.62)};
 function outfitOk(G,f,k){const O=OUTFITS[k];return !!O&&(!O.need||O.need(G,f));}
 function outfitSheet(f,k){const key=f.id+"|"+k;if(TINTS[key])return TINTS[key];const O=OUTFITS[k],M=KIT_MASK[f.id],src=img(f.id+"_sheet.webp");if(!O||!M||!src.complete||!src.naturalWidth)return src;
   const c=document.createElement("canvas");c.width=src.naturalWidth;c.height=src.naturalHeight;const x=c.getContext("2d",{willReadFrequently:true});x.drawImage(src,0,0);const FW=c.width/4,FH=c.height/6;
