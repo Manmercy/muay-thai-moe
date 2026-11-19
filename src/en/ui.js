@@ -787,7 +787,7 @@ function recruitHTML(recs){if(!recs.length)return "";
    <p class="meta">Wages are a weekly expense. Make sure the cash can handle it before signing</p></section>`;}
 // ---------- fighter popup (tabs) ----------
 function fighterHTML(f){const mine=f.camp==="player";const P=PROFILES[f.id];
-  const tabs=mine?[["rel","Profile"],["over","Stats"],["skill","Skills"]].concat(f.canon&&KIT_MASK[f.id]?[["look","Outfit"]]:[]):[["rel","Profile"],["over","Stats"]];
+  const tabs=mine?[["rel","Profile"],["over","Stats"],["skill","Skills"]].concat(f.canon&&KIT_MASK[f.id]?[["look","Outfit"]]:[]):[["rel","Profile"],["over","Stats"]].concat(f.camp==="region"&&hasTree(f.id)?[["skill","Skills"]]:[]); /* v1.91.45: a regional champion's tree can be looked at while she is still a rival */
   let t=UI.ptab;if(!tabs.some(x=>x[0]===t))t="over";
   const head=`<div class="fp-head">${faceImg(f)}<div><h2>${esc(f.full)}</h2><div class="meta">${f.age!=null?f.age+" yrs · ":""}${f.camp==="player"?"Sirichai Camp":f.lab?"Vector Gym, Bangkok":f.camp==="rival"&&!f.indie?"Golden Tiger Camp":"Free agent"} · Div ${f.div} · ${styleOf(f.a)} · ${rec(f)}</div>${G.belt&&Object.values(G.belt).some(x=>x.id===f.id)?`<div class="beltb">🏆 Tha Phae Stadium champion</div>`:Object.entries(G.venueBelts||{}).some(([v,ds])=>Object.values(ds).some(b=>b.id===f.id))?`<div class="beltb">🏆 ${STADIUMS[Object.entries(G.venueBelts).find(([v,ds])=>Object.values(ds).some(b=>b.id===f.id))[0]].name}</div>`:f.belts?`<div class="beltb old">Former stadium champion</div>`:""}<div class="tierline">${tierChip(f,1)}<span class="meta">Rating <b>${ratingOf(f)}</b></span>${tierYearNote(f)}</div>${xpBar(f)}</div></div>
    <div class="seg ptabs">${tabs.map(([k,n])=>`<button data-act="ptab" data-v="${k}" aria-pressed="${t===k}">${n}${k==="skill"&&skReady(f)?'<i class="tdot2"></i>':""}</button>`).join("")}</div>`;
@@ -816,7 +816,7 @@ const skState=(f,s,mine)=>{const r=(f.skills&&f.skills[s.id])||0;if(!mine)return
   if(r>=3)return {r,st:"max"};if(!B.length)return {r,st:"can"};const nb=B.filter(b=>b.t!=="sp");if(!nb.length)return {r,st:"nosp"};return {r,st:"lock",B:nb};};
 function skillTree(f,mine){const L=skillList(f.id),eqd=equipped(f),sc=SCHOOLS[L[0].school]||{name:""};
   const lines=(SK_LINES[f.id]||SK_LINES[REQ_ALIAS[f.id]]||["Line 1","Line 2","Line 3"]).concat(SK_SHARED);const can=li=>mine&&L.some(s=>s.line===li&&skState(f,s,mine).st==="can");
-  let li=UI.skLine&&UI.skLine.id===f.id?UI.skLine.li:[0,1,2,3,4,5].find(can);if(li==null)li=0;const path=null; /* v1.91.45: build lines are open to mix */
+  let li=UI.skLine&&UI.skLine.id===f.id?UI.skLine.li:[0,1,2,3,4,5].find(can);if(li==null){const pts=[0,1,2,3,4,5].map(i=>L.filter(s=>s.line===i).reduce((a,s)=>a+((f.skills&&f.skills[s.id])||0),0));li=pts.indexOf(Math.max(...pts));} /* nothing to raise: open the line she has built most */const path=null; /* v1.91.45: build lines are open to mix */
   const nCan=L.filter(s=>skState(f,s,mine).st==="can").length;
   const why=st=>st.B.map(b=>b.t==="pre"?`Needs "${skillDef(f.id,b.id).name}" first`:b.t==="lv"?`Needs Lv.${b.v}`:b.t==="stat"?`${SK_AN[b.k]} ${fmtA(b.have)}/${fmtA(b.v)}`:b.t==="path"?`Picked "${SK_SHARED[path-3]}" already (one build at a time)`:"").filter(Boolean).join(" · ");
   const card=s=>{const st=skState(f,s,mine),eq=eqd.includes(s.id),k=skillKind(s);
