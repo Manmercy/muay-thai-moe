@@ -1121,20 +1121,41 @@ function rgClose(G){const R=G.region,fah=rgIn(G,"fah"),rin=rgIn(G,"rin");
  {n:"pailin",t:"และค่ายเวกเตอร์ขอถอนตัวจากการเป็นพันธมิตรนาคาลีก ตั้งแต่วินาทีนี้ค่ะ"},
  {n:"nar",show:[{id:"npc:krerk"}],t:"ทั้งห้องเงียบ ทุกสายตาหันไปที่คุณเกริก"},
  {n:"npc",who:"คุณเกริก",t:"…ไม่เป็นไรครับ งั้นให้ลูกสาวผมแนะนำตัวเองแทนก็แล้วกัน"},
- {n:"nar",show:[{id:"lada",l:"casual"}],t:"ผู้หญิงใส่ฮู้ดขาวเดินขึ้นเวที ถอดฮู้ดออก ผมยาวสีขาวปลายแดงตกลงกลางหลัง"},
+ {n:"nar",show:[{id:"lada",l:"casual"}],t:"ผู้หญิงใส่ฮู้ดขาวเดินขึ้นเวทีจากมุมห้อง ฮู้ดยังคลุมครึ่งหน้า ปอยผมสีขาวปลายแดงโผล่ออกมาข้างแก้ม"},
+ {n:"npc",who:"คุณเกริก",t:"ลดา… แสดงให้ทุกคนเห็นหน่อย ว่าเวทีงานวัดกับโลกจริงต่างกันแค่ไหน"},
  {n:"lada",l:"casual",t:"ลดา นาคา"},
- {n:"lada",l:"casual",t:"อยากรู้ว่าแชมป์สี่ภาคเก่งแค่ไหน ขึ้นมาทีละคน ตรงนี้ เดี๋ยวนี้"},
- {n:"nar",show:[{id:"lada",l:"casual"},{id:"baibua",l:"fight"}],t:"ไม่มีใครทันห้าม ใบบัวเข้าไปก่อน ศอกกลับหลังของเธอเฉียดคางลดาไปไม่กี่มิล ลดาสวนศอกแล้วรวบเอวทุ่มลงพื้นเวทีในจังหวะเดียว"},
- {n:"nar",show:[{id:"lada",l:"casual"},{id:"tabtim",l:"fight"}],t:"ทับทิมกระโดดเตะ ลดาปิดระยะก่อนขาจะเหยียดสุด คว้าขาข้างที่ยืนแล้วดึงล้ม"},
- {n:"nar",show:[{id:"lada",l:"casual"},{id:"alicia",l:"fight"}],t:"อลิเซียออกหมัดชุด ลดาก้มหลบทุกหมัด อ้อมไปด้านหลังแล้วรัดคอ อลิเซียตบพื้นในห้าวินาที"},
- {n:"nar",show:[{id:"lada",l:"casual"},{id:"chaba",l:"fight"}],t:"ชบาบุกกดดันไม่ถอยเลยสักก้าว ลดาปล่อยให้ดันเข้ามาจนติดเชือก แล้วใช้แรงนั้นเองดึงชบาลงพื้น"},
- {n:"nar",show:[{id:"lada",l:"casual"}],t:"เลือดซึมจากมุมปากลดา ตรงที่ศอกใบบัวเฉียด เธอแตะมันด้วยปลายนิ้ว แล้วยิ้มเป็นครั้งแรก"},
+ {n:"lada",l:"casual",t:"แชมป์สี่ภาค ขึ้นมาทีละคน ตรงนี้ เดี๋ยวนี้"},
+ rin?{n:"rin",f:"surprised",l:"casual",t:"ผู้จัดการคะ อย่าให้พวกเธอขึ้น… นี่ไม่ใช่ไฟต์ ไม่มีกรรมการ ไม่มีหมอ"}:{n:"coach",t:"อย่าขึ้นไป! นั่นไม่ใช่ไฟต์ ไม่มีกรรมการ ไม่มีหมอ"},
+ {n:"nar",t:"สายไปแล้ว ใบบัวก้าวลอดเชือกขึ้นไปก่อนใคร",cut:"ladda"},
+ {n:"nar",show:[{id:"lada",l:"casual"}],t:"เวทีเงียบกริบ แชมป์สี่ภาคนอนอยู่คนละมุม เลือดซึมจากมุมปากลดาตรงที่ศอกใบบัวเฉียด เธอแตะมันด้วยปลายนิ้ว แล้วยิ้มเป็นครั้งแรก"},
  {n:"lada",l:"casual",t:"…สนุกดี"},
+ {n:"nar",show:[{id:"baibua",l:"fight",f:"sad"},{id:"chaba",l:"fight",f:"sad"}],t:"ใบบัวไอจนตัวงอ ทับทิมกุมเข่า อลิเซียหายใจไม่ทัน ชบาพยายามลุกขึ้นเป็นครั้งที่สาม แล้วทรุดลงอีก",
+  choice:[{t:"วิ่งขึ้นเวทีไปพยุงแชมป์ลงมา",fx:G2=>{for(const c of ["baibua","tabtim","alicia","chaba"])rgMeet(G2,c,2);},then:[
+    {n:"nar",show:[{id:"baibua",l:"fight",f:"sad"}],t:"คุณลอดเชือกขึ้นไปพยุงใบบัว พาดแขนเธอไว้บนบ่า สาว ๆ ในค่ายตามขึ้นมาช่วยพยุงอีกสามคนลงจากเวที"},
+    {n:"baibua",f:"sad",l:"fight",t:"…ขอบคุณเจ้า หนูยังลุกไหวเจ้า… ยังไหว"}]},
+   {t:"ก้าวขึ้นไปยืนขวางหน้าลดา",fx:G2=>{rgMeet(G2,"chaba",3);for(const c of ["baibua","tabtim","alicia"])rgMeet(G2,c,1);R.closeFace=1;},then:[
+    {n:"nar",show:[{id:"lada",l:"casual"}],t:"คุณก้าวขึ้นไปยืนระหว่างลดากับชบา ลดาหันมามอง ตาสีแดงนิ่งสนิท"},
+    {n:"lada",l:"casual",t:"…คุณไม่ใช่นักมวย"},
+    {n:"lada",l:"casual",t:"แต่ไม่ถอยเหมือนกัน"},
+    {n:"chaba",f:"sad",l:"fight",t:"…ไม่ต้อง ฉันลุกเองได้"}]},
+   ...(fah?[{t:"คว้าแขนฟ้าไว้ ไม่ให้ขึ้นเวที",fx:G2=>{add(G2,"fah","trust",3);for(const c of ["baibua","tabtim","alicia","chaba"])rgMeet(G2,c,1);},then:[
+    {n:"fah",f:"angry",l:"casual",t:"ปล่อยฟ้า! ฟ้าจะขึ้นไปต่อยมันให้—"},
+    {n:"nar",t:"คุณไม่ปล่อย ฟ้าดึงสุดแรงอยู่สามที แล้วหยุด มือที่กำแน่นค่อย ๆ คลายลง"},
+    {n:"fah",f:"sad",l:"casual",t:"…ไม่ใช่วันนี้ใช่ไหม ฟ้ารู้ ฟ้ารู้แล้ว"}]}]:[])]},
+ {n:"npc",who:"คุณเกริก",t:"เห็นไหมครับ ศึกชิงเจ้าสี่ภาคคือเวทีงานวัด นาคาลีกต่างหากคือโลกจริง ถ้าพวกเธอเซ็นสัญญาไว้ คืนนี้จะไม่มีใครต้องเจ็บ"},
+ {n:"nar",show:[{id:"npc:krerk"}],t:"ทั้งห้องหันมามองคุณ",choice:[
+   {t:"\"นี่ไม่ใช่การแข่ง นี่คือการทำร้ายคนที่ไม่ได้เตรียมตัว\"",then:[{n:"npc",who:"คุณเกริก",t:"โลกจริงไม่เคยรอให้ใครเตรียมตัวครับ ผมเรียนเรื่องนี้จากรถตู้คันนั้น"}]},
+   {t:"\"อยากรู้ว่าโลกจริงเป็นยังไง ก็ส่งนักมวยของคุณมาเจอค่ายผม\"",fx:G2=>{R.closeDare=1;},then:[{n:"npc",who:"คุณเกริก",t:"…ผมก็หวังไว้แบบนั้นเหมือนกันครับ ผู้จัดการ"}]},
+   {t:"(ไม่ตอบ หันหลังพาแชมป์ลงจากเวที)",then:[{n:"nar",t:"คุณหันหลังให้คุณเกริก ทั้งห้องยังเงียบ มีแต่เสียงฝีเท้าของคนจากค่ายศิริชัยลงบันได"}]}]},
+ rin?{n:"rin",f:"angry",l:"casual",t:"ถ้าเซ็นไป ข้อ 14.3 ทุกท่าที่พวกเธอเคยชกจะเป็นของนาคา… ลดาไม่ต้องเดาเลยสักหมัด เพราะมีเทปของทุกคนอยู่ในมือแล้ว"}:{n:"coach",t:"ถ้าเซ็นไป ทุกท่าที่พวกเธอเคยชกจะเป็นของนาคา ลดาจะไม่ต้องเดาเลยสักหมัด"},
+ {n:"alicia",f:"sad",l:"fight",t:rin?"ถ้าไม่ได้รินกับค่ายคุณช่วยอ่านสัญญาให้… ป่านนี้ฉันคงยืนอยู่ข้างเขาบนเวทีนั้นแล้ว":"ถ้าไม่ได้ค่ายคุณ… ป่านนี้ฉันคงยืนอยู่ข้างเขาบนเวทีนั้นแล้ว"},
+ {n:"nar",show:[{id:"lada",l:"casual"}],t:"ลดาดึงฮู้ดขึ้นคลุมหัว เดินผ่านคุณไปโดยไม่หยุด แต่พูดเบา ๆ ตอนเดินสวน"},
+ {n:"lada",l:"casual",t:"…พวกเธอไม่เซ็นเพราะค่ายคุณ ฉันอยากรู้ว่าค่ายคุณมีอะไร"},
  fah?{n:"fah",f:"sad",l:"casual",t:"นั่นมัน… มวยสมัยใหม่ เหมือนฟ้าเลย"}:{n:"coach",t:"นั่นไม่ใช่มวยไทยอย่างเดียว… นั่นมันทุกอย่างรวมกัน"},
  {n:"npc",who:"คุณเกริก",t:"ขอบคุณที่มาร่วมงานครับทุกท่าน"},
  {n:"nar",bg:"camp",show:[],t:"สามวันต่อมา การ์ดสีดำไม่มีโลโก้มาถึงค่าย"},
  {n:"nar",t:"\"ขอเชิญค่ายศิริชัย ห้าต่อห้า · โกดังโรงงานเครื่องดื่มเก่า ท่าเรือคลองเตย · กติกาเปิด ทุ่มได้ ล็อกได้ · ไม่มีรางวัล ไม่มีสื่อ\""},
- {n:"nar",t:"ด้านหลังการ์ดเขียนด้วยลายมือ: \"แค่อยากรู้ว่ามวยไทยค่ายเล็กของคุณรับมือโลกจริงได้แค่ไหน — ล.\""},
+ {inject:()=>[{n:"nar",t:R.closeDare?"ด้านหลังการ์ดเขียนด้วยลายมือ: \"คุณบอกให้ส่งนักมวยมาเจอค่ายคุณ… ส่งมาแล้ว ห้าคน — ล.\"":R.closeFace?"ด้านหลังการ์ดเขียนด้วยลายมือ: \"คนที่ไม่ใช่นักมวยแต่ไม่ถอย… อยากเห็นนักมวยของคุณบ้าง — ล.\"":"ด้านหลังการ์ดเขียนด้วยลายมือ: \"แค่อยากรู้ว่ามวยไทยค่ายเล็กของคุณรับมือโลกจริงได้แค่ไหน — ล.\""}]},
  ...rgIf(R.c2==="deal",[rin?{n:"rin",f:"flustered",l:"casual",t:"ผู้จัดการคะ สัญญาพันธมิตรที่เรารับเงินมา ข้อ 30 เขียนว่า \"หากนาคาลีกแพ้ให้แก่ค่ายคู่สัญญา ให้สัญญานี้สิ้นสุดทันที\""}:{n:"coach",t:"สัญญาพันธมิตรที่เรารับเงินมา ข้อ 30 เขียนว่าถ้านาคาลีกแพ้ค่ายเรา สัญญาจบทันที…"},
    {n:"coach",t:"เขามั่นใจขนาดนั้นเชียว ถึงกล้าเขียนข้อนี้ไว้"}]),
  {n:"coach",t:"ทุ่มได้ ล็อกได้… พวกเราไม่เคยซ้อมเรื่องพวกนี้เลยสักวัน"},
@@ -1214,7 +1235,7 @@ const REGION={
     /* v1.91.47 (playtest): a camp that reaches the closing ceremony on the time limit with only one or two cups still gets Krerk's dinner and Pailin's tablet first — the ceremony and the reveal lean on them */
     if(this.closeDue(G)&&!R.c2){R.c2="later";playScene(rgCup2(G),()=>{save();done();},{bg:"camp",look:"casual"});return;}
     if(this.closeDue(G)&&!R.c3){R.c3="seen";playScene(rgCup3(G),()=>{save();done();},{bg:"camp",look:"casual"});return;}
-    if(this.closeDue(G)){this.openFinal(G);playScene(rgClose(G),()=>{save();done();},{bg:"closing_ceremony",look:"casual"});return;} /* v1.91.20 round 11 */
+    if(this.closeDue(G)){this.openFinal(G);this.playClose(()=>{save();done();});return;} /* v1.91.20 round 11 */
     done();},
   /* ---------- state helpers ---------- */
   base(G){return ((G.season||1)-1)*52;},
@@ -1459,7 +1480,7 @@ const REGION={
 .rg-reg{border-top:6px solid var(--rc);position:relative}.rg-reg h3{margin:.1rem 0 0}.rg-reg h3::first-letter{text-transform:uppercase}.rg-champ{font-size:.85rem;opacity:.85;margin-bottom:.5rem}
 .rg-prov{display:flex;align-items:center;justify-content:space-between;gap:.5rem;padding:.35rem 0;border-bottom:1px dashed rgba(0,0,0,.15)}
 .rg-prov:last-child{border-bottom:0}.rg-prov small{opacity:.7}.rg-fin{opacity:.9}.rg-miss{display:block;color:#d4688f;opacity:1!important}.rg-belt{color:#b8860b;font-weight:700}
-.rg-trip{border-left:6px solid var(--gold,#d9a21b)}.rg-quick{display:grid;grid-template-columns:auto 1fr;column-gap:.5rem;align-items:center;margin:.6rem 0;cursor:pointer}.rg-quick small{grid-column:2}.rg-pick{display:flex;flex-wrap:wrap;gap:.4rem;margin:.4rem 0}
+.rg-trip{border-left:6px solid var(--gold,#d9a21b)}.rg-show{position:fixed;inset:0;z-index:9000;background:#07040c;display:flex;align-items:center;justify-content:center}.rgs-in{position:relative;width:min(100vw,960px)}.rg-show canvas{width:100%;height:auto;display:block;image-rendering:auto}.rgs-cap{min-height:3.2em;padding:.7rem 1rem;color:#f3e9ff;font-size:1.05rem;line-height:1.5;background:linear-gradient(180deg,#1a1028,#0d0815);border-top:3px solid #ff4d6d}.rgs-skip{position:absolute;top:.5rem;right:.5rem}.rg-quick{display:grid;grid-template-columns:auto 1fr;column-gap:.5rem;align-items:center;margin:.6rem 0;cursor:pointer}.rg-quick small{grid-column:2}.rg-pick{display:flex;flex-wrap:wrap;gap:.4rem;margin:.4rem 0}
 .rg-pick button{display:flex;align-items:center;gap:.35rem}.rg-pick button[aria-pressed="true"]{outline:3px solid var(--gold,#d9a21b)}
 .rg-bill .kv-row{padding:.15rem 0}.rg-fuel.cheap{color:#2f8a50}.rg-fuel.high{color:#c8283c}
 #rdcv{width:100%;height:auto;image-rendering:pixelated;background:#1b1530;box-shadow:inset 0 0 0 2px var(--line)}
@@ -1494,7 +1515,7 @@ const REGION={
       return `<section class="px card rg-reg" style="--rc:${C.col}"><h3>${esc(C.name)}</h3><div class="rg-champ">แชมป์ภาค: <b>${esc(C.champ)}</b> · ${esc(C.nick)}${R.nc&&R.nc[r]?this.histHTML(R.nc[r],R.nc[r].home,"ประวัติแชมป์ภาคคนใหม่"):""}</div>${rows}${fin}</section>`;}).join("");
     return `<section class="px card rg-head"><div><h3>ศึกชิงเจ้าสี่ภาค</h3><span class="meta">ครั้งที่ ${R.edition||1}${this.nextEdTxt(G)}</span></div>
        <div class="rg-stats"><span class="pill gold">ถ้วย ${cups}/4</span><span class="pill">เข็มขัด ${belts}/16</span><span class="pill ${T?"red":nx?"green":""}">${T?`ทริป: ${esc(ROAD_DEST[T.dest].name)} · สัปดาห์ ${T.wk}`:nx?`เดินทางได้สัปดาห์ ${nx}`:"ปีนี้เดินทางไม่ได้แล้ว"}</span></div></section>
-     ${!R.gala?`<p class="meta rg-gala">🎉 งานเปิดตัวศึกชิงเจ้าสี่ภาคที่กรุงเทพฯ ${R.galaAbs!=null&&gameWeek(G)<R.galaAbs?"จัดปลายสัปดาห์หน้า":"จัดปลายสัปดาห์นี้"} · ทั้งค่ายได้รับเชิญ</p>`:""}${!REGION_LIVE?`<p class="meta">โหมดทดสอบ: <button class="btn sm" data-act="rggala" data-v="gala">ดูงานเปิดตัว</button> ไฟต์ใต้ดินทดสอบ (กติกาเปิด): ${NL_ORDER.map(k=>`<button class="btn sm" data-act="nltest" data-v="${k}">${esc(NL[k].name)}</button>`).join(" ")}${(R.cups||[]).length?` <button class="btn sm" data-act="rggala" data-v="c1">ดูฉากซองเขียว</button>`:""}</p>`:""}
+     ${!R.gala?`<p class="meta rg-gala">🎉 งานเปิดตัวศึกชิงเจ้าสี่ภาคที่กรุงเทพฯ ${R.galaAbs!=null&&gameWeek(G)<R.galaAbs?"จัดปลายสัปดาห์หน้า":"จัดปลายสัปดาห์นี้"} · ทั้งค่ายได้รับเชิญ</p>`:""}${!REGION_LIVE?`<p class="meta">โหมดทดสอบ: <button class="btn sm" data-act="rggala" data-v="gala">ดูงานเปิดตัว</button> <button class="btn sm" data-act="rgclosetest">ดูพิธีปิด</button> ไฟต์ใต้ดินทดสอบ (กติกาเปิด): ${NL_ORDER.map(k=>`<button class="btn sm" data-act="nltest" data-v="${k}">${esc(NL[k].name)}</button>`).join(" ")}${(R.cups||[]).length?` <button class="btn sm" data-act="rggala" data-v="c1">ดูฉากซองเขียว</button>`:""}</p>`:""}
      ${this.finalCard(G)}${this.legendCard(G)}${this.joinCard(G)}${tripCard}${this.fuelLine(G)}<div class="rg-grid">${regs}</div>`;},
   /* quick trips: only once the region's first meeting and this province's own story have been seen */
   /* v1.91.50 (playtest): a champion coming to visit shows on the home screen too — it was easy to miss on the regional tab */
@@ -1629,6 +1650,7 @@ if(typeof ACT!=="undefined")Object.assign(ACT,{
   nltest:d=>{if(REGION_LIVE)return;nlTest(d.v);},
   rgplan:d=>{UI.rgFid=null;UI.modal={type:"rgplan",dest:d.v};render();},
   rgfid:d=>{UI.rgFid=d.v;render();},
+  rgclosetest:()=>{REGION.playClose(()=>render());},
   rgquick:()=>{G.region.quickPref=!G.region.quickPref;save();render();},
   rggo:d=>{const r=REGION.book(G,d.v,UI.rgFid);if(!r.ok){toast(r.why);return;}UI.modal=null;AU.sfx&&AU.sfx("level");toast(`นัดเดินทางสัปดาห์ ${r.wk} แล้ว · จ่ายค่าเดินทาง ${fmt(r.cost)}`);save();render();},
   rgvisit:d=>{const r=d.v,c=G.region.champ[r],cid=REGION.champId[r];if(!c||c.visit!=="due")return;
@@ -1967,6 +1989,40 @@ Object.assign(REGION,{
     G.log=G.log||[];G.log.push(`ศึกชิงเจ้าสี่ภาค ครั้งที่ ${ed} เริ่มแล้ว`);},
 });
 if(typeof G!=="undefined"&&G&&G.region)REGION.flush(G);
+/* v1.91.60 (Man): the closing ceremony's climax is a real cutscene — the hooded Ladda takes the four regional champions apart one by one on the ring (sprites, specials, effects), then the dialogue picks up */
+const RG_SHOW=[
+ {cid:"baibua",steps:[[200,"cap","ใบบัวขึ้นเวทีเป็นคนแรก ยกศอกตั้งการ์ดแบบท่าเสา"],[900,"sp","A","baibua_special","ศอกบัวบานกลับหลัง"],[2400,"play","miss","A","elbow"],[2500,"cap","ลดาเอียงหน้าหลบ ศอกเฉียดคางไปไม่กี่มิล"],
+   [3100,"sp","B","nl_ladda_sp_superman","ซูเปอร์แมนพันช์"],[4500,"play","ko","B","punch"],[4600,"cap","ใบบัวล้มลงกลางเวที ไม่ทันได้ยกการ์ด"]],end:6200},
+ {cid:"tabtim",steps:[[200,"cap","ทับทิมกระโดดข้ามเชือกเข้ามา ไม่รอให้ใครห้าม"],[800,"sp","A","tabtim_special","เตะกระโดดทับทิมแดง"],[2300,"play","miss","A","kick"],[2400,"cap","ลดาก้าวเข้าใต้ลูกเตะก่อนขาจะเหยียดสุด"],
+   [3000,"sp","B","nl_ladda_sp_headkick","เตะก้านคอ"],[4400,"play","ko","B","kick"],[4500,"cap","ทับทิมหมุนกลางอากาศแล้วตกลงไปกองที่มุมเวที"]],end:6000},
+ {cid:"alicia",steps:[[200,"cap","อลิเซียตั้งการ์ดสูง ไม่มีกล้องตัวไหนกล้ากดถ่าย"],[800,"sp","A","alicia_special","อัปเปอร์คัตเจ้าหญิง"],[2300,"play","miss","A","punch"],[2700,"play","miss","A","punch"],[3000,"cap","ลดาก้มหลบทุกหมัด แล้วหายไปด้านหลัง"],
+   [3600,"play","takedown","B","punch"],[4500,"play","tap","B","punch"],[4700,"cap","รัดคอจากด้านหลัง… อลิเซียตบพื้นในห้าวินาที"]],end:6300},
+ {cid:"chaba",steps:[[200,"cap","ชบาบุกเข้ามาไม่ถอยเลยสักก้าว"],[700,"play","hit","A","punch"],[1100,"play","hit","A","punch"],[1500,"play","hit","A","elbow"],[1700,"cap","ลดาปล่อยให้โดนสามหมัด ถอยจนหลังติดเชือก…"],
+   [2600,"sp","B","nl_ladda_sp_superman","ซูเปอร์แมนพันช์"],[3900,"play","takedown","B","punch"],[4400,"play","gnp","B","punch"],[4800,"play","gnp","B","punch"],[5200,"play","ko","B","punch"],[5300,"cap","…แล้วใช้แรงนั้นเองดึงชบาลงพื้น"]],end:6800}];
+Object.assign(REGION,{
+  playClose(done){if(G.region){delete G.region.closeDare;delete G.region.closeFace;}const S=rgClose(G),i=S.findIndex(x=>x&&x.cut==="ladda"),a=i<0?S:S.slice(0,i+1),b=i<0?[]:S.slice(i+1),opt={bg:"closing_ceremony",look:"casual"};
+    playScene(a,()=>{if(i<0){done();return;}this.laddaShow(()=>playScene(b,done,opt));},opt);},
+  laddaShow(done){if(typeof document==="undefined"||typeof FS==="undefined"){done();return;}
+    const old=document.getElementById("rg-show");if(old)old.remove();
+    const el=document.createElement("div");el.id="rg-show";el.className="rg-show";
+    el.innerHTML=`<div class="rgs-in"><canvas width="960" height="540"></canvas><div class="rgs-cap"></div><button class="btn sm rgs-skip">ข้ามฉาก ▸</button></div>`;document.body.appendChild(el);
+    const cv=el.querySelector("canvas"),cap=el.querySelector(".rgs-cap"),T=[];let fin=false;
+    const L={id:"nl_ladda_show",name:"ลดา",sprite:"nl_ladda_hood",canon:false,color:"#f2f2f7"};
+    const end=()=>{if(fin)return;fin=true;T.forEach(clearTimeout);LOOPS.delete&&LOOPS.delete(FS.render);el.remove();FS.cv=null;done();};
+    el.querySelector(".rgs-skip").onclick=()=>{AU.sfx&&AU.sfx("ui");end();};
+    const champ=cid=>{const f=G.F[cid];return f?{...f,camp:f.camp==="player"?"rival":f.camp}:{id:cid,name:cid,canon:true};};
+    ["nl_ladda_sp_superman","nl_ladda_sp_headkick"].forEach(n=>img(n+".webp"));
+    let at=300;
+    RG_SHOW.forEach((B,bi)=>{const t0=at;
+      T.push(setTimeout(()=>{FS.init(cv,"bg_closing_ceremony.webp",champ(B.cid),L);FS.A.x=FS.A.base=330;FS.B.x=FS.B.base=630;if(bi===0){LOOPS.add(FS.render);startLoops();}AU.sfx&&AU.sfx("bell");},t0));
+      B.steps.forEach(st=>T.push(setTimeout(()=>{const now=performance.now();
+        if(st[1]==="cap")cap.textContent=st[2];
+        else if(st[1]==="sp"){FS.special({side:st[2],mv:{img:st[3]},name:st[4],head:st[2]==="B"?"ลดา":RG[RG_ORDER.find(r=>RG_CID0[r]===B.cid)].champ},0,now);AU.sfx&&AU.sfx(st[2]==="B"?"kd":"elbow");}
+        else if(st[1]==="play"){FS.play({ev:st[2],side:st[3],w:st[4],crit:true},now);AU.sfx&&AU.sfx(st[2]==="miss"?"miss":st[2]==="ko"?"kd":st[4]||"punch");}},t0+st[0])));
+      at+=B.end;});
+    T.push(setTimeout(()=>{const now=performance.now();FS.init(cv,"bg_closing_ceremony.webp",champ("chaba"),L);FS.A.ko=true;FS.A.down=now-2000;FS.B.win=true;FS.B.anim="win";FS.B.x=FS.B.base=560;cap.textContent="ลดายืนอยู่คนเดียวกลางเวที ฮู้ดสีขาวไม่เลื่อนหลุดเลยสักครั้ง";},at));
+    T.push(setTimeout(end,at+3200));}});
+
 /* v1.91.47 (playtest): styles go in as soon as the chapter loads — the underground board opened before the regional tab was visited showed full-size portraits */
 try{REGION.css();}catch(e){}
 

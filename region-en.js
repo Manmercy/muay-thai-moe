@@ -1121,20 +1121,41 @@ function rgClose(G){const R=G.region,fah=rgIn(G,"fah"),rin=rgIn(G,"rin");
  {n:"pailin",t:"And Vector Gym withdraws from the Naka League partnership, as of this second"},
  {n:"nar",show:[{id:"npc:krerk"}],t:"The whole room goes silent. Every eye turns to Khun Krerk"},
  {n:"npc",who:"Khun Krerk",t:"…No matter. Then let my daughter introduce herself instead"},
- {n:"nar",show:[{id:"lada",l:"casual"}],t:"A woman in a white hood steps into the ring and pulls the hood off. Long white hair with red tips falls down her back"},
+ {n:"nar",show:[{id:"lada",l:"casual"}],t:"A woman in a white hood walks up to the ring from the corner of the hall. The hood still covers half her face; a lock of white, red-tipped hair hangs by her cheek."},
+ {n:"npc",who:"Khun Krerk",t:"Ladda… show everyone the difference between a temple-fair ring and the real world."},
  {n:"lada",l:"casual",t:"Ladda Naka"},
- {n:"lada",l:"casual",t:"I want to know how good the four regional champions are. Come up one at a time. Here. Now"},
- {n:"nar",show:[{id:"lada",l:"casual"},{id:"baibua",l:"fight"}],t:"Before anyone can stop her, Baibua steps in first. Her spinning elbow misses Ladda's chin by millimetres. Ladda answers with an elbow, wraps her waist and throws her to the canvas in a single motion"},
- {n:"nar",show:[{id:"lada",l:"casual"},{id:"tabtim",l:"fight"}],t:"Tabtim leaps into a kick. Ladda closes the distance before the leg can fully extend, grabs the standing leg and pulls her down"},
- {n:"nar",show:[{id:"lada",l:"casual"},{id:"alicia",l:"fight"}],t:"Alicia throws a combination. Ladda ducks every punch, slips around behind her and locks in a choke. Alicia taps within five seconds"},
- {n:"nar",show:[{id:"lada",l:"casual"},{id:"chaba",l:"fight"}],t:"Chaba presses forward and never takes a step back. Ladda lets her drive all the way to the ropes, then uses that same force to drag Chaba to the mat"},
- {n:"nar",show:[{id:"lada",l:"casual"}],t:"Blood seeps from the corner of Ladda's mouth, where Baibua's elbow grazed her. She touches it with a fingertip, and smiles for the first time"},
+ {n:"lada",l:"casual",t:"Four regional champions. Come up one at a time. Here. Now."},
+ rin?{n:"rin",f:"surprised",l:"casual",t:"Manager, don't let them go up… This isn't a fight. No referee, no doctor."}:{n:"coach",t:"Don't go up! That's not a fight. No referee, no doctor."},
+ {n:"nar",t:"Too late. Baibua is through the ropes before anyone.",cut:"ladda"},
+ {n:"nar",show:[{id:"lada",l:"casual"}],t:"The ring is dead silent, the four champions down in four corners. Blood seeps from the corner of Ladda's mouth where Baibua's elbow grazed her. She touches it with a fingertip, and smiles for the first time."},
  {n:"lada",l:"casual",t:"…that was fun"},
+ {n:"nar",show:[{id:"baibua",l:"fight",f:"sad"},{id:"chaba",l:"fight",f:"sad"}],t:"Baibua coughs, doubled over. Tabtim clutches her knee. Alicia can't catch her breath. Chaba tries to rise a third time and sinks back down.",
+  choice:[{t:"Run up and help the champions down",fx:G2=>{for(const c of ["baibua","tabtim","alicia","chaba"])rgMeet(G2,c,2);},then:[
+    {n:"nar",show:[{id:"baibua",l:"fight",f:"sad"}],t:"You duck through the ropes and lift Baibua, her arm over your shoulder. The girls from your camp follow to help the other three down."},
+    {n:"baibua",f:"sad",l:"fight",t:"…Thank you. I can still stand… I still can."}]},
+   {t:"Step up and stand in front of Ladda",fx:G2=>{rgMeet(G2,"chaba",3);for(const c of ["baibua","tabtim","alicia"])rgMeet(G2,c,1);R.closeFace=1;},then:[
+    {n:"nar",show:[{id:"lada",l:"casual"}],t:"You step up between Ladda and Chaba. Ladda turns to look at you, red eyes perfectly still."},
+    {n:"lada",l:"casual",t:"…You're not a fighter."},
+    {n:"lada",l:"casual",t:"But you don't back down either."},
+    {n:"chaba",f:"sad",l:"fight",t:"…Don't. I can get up myself."}]},
+   ...(fah?[{t:"Grab Fah's arm and keep her off the ring",fx:G2=>{add(G2,"fah","trust",3);for(const c of ["baibua","tabtim","alicia","chaba"])rgMeet(G2,c,1);},then:[
+    {n:"fah",f:"angry",l:"casual",t:"Let go of Fah! Fah's going up there to hit her—"},
+    {n:"nar",t:"You don't let go. Fah pulls with everything she has three times, then stops. Her clenched fist slowly opens."},
+    {n:"fah",f:"sad",l:"casual",t:"…Not today, right? Fah knows. Fah knows."}]}]:[])]},
+ {n:"npc",who:"Khun Krerk",t:"You see? The Four Regions is a temple-fair ring. Naka League is the real world. If they'd signed, nobody would have gotten hurt tonight."},
+ {n:"nar",show:[{id:"npc:krerk"}],t:"The whole hall turns to look at you.",choice:[
+   {t:"\"That wasn't a fight. That was hurting people who weren't ready.\"",then:[{n:"npc",who:"Khun Krerk",t:"The real world never waits for anyone to get ready. I learned that from that van."}]},
+   {t:"\"If you want to see the real world, send your fighters to face my camp.\"",fx:G2=>{R.closeDare=1;},then:[{n:"npc",who:"Khun Krerk",t:"…That's exactly what I was hoping for, Manager."}]},
+   {t:"(Say nothing. Turn and lead the champions off the ring.)",then:[{n:"nar",t:"You turn your back on Mr. Krerk. The hall stays silent except for the footsteps of the Sirichai camp going down the steps."}]}]},
+ rin?{n:"rin",f:"angry",l:"casual",t:"If they'd signed, clause 14.3 hands every move they ever threw to Naka… Ladda wouldn't have to guess a single punch. She already has everyone's tapes."}:{n:"coach",t:"If they'd signed, every move they ever threw would belong to Naka. Ladda wouldn't have to guess a single punch."},
+ {n:"alicia",f:"sad",l:"fight",t:rin?"If Rin and your camp hadn't read that contract for us… I'd be standing beside her on that ring right now.":"If it weren't for your camp… I'd be standing beside her on that ring right now."},
+ {n:"nar",show:[{id:"lada",l:"casual"}],t:"Ladda pulls the hood back over her head and walks past you without stopping, speaking quietly as she passes."},
+ {n:"lada",l:"casual",t:"…They didn't sign because of your camp. I want to know what your camp has."},
  fah?{n:"fah",f:"sad",l:"casual",t:"That's… modern fighting. Just like Fah"}:{n:"coach",t:"That's not just Muay Thai… that's everything combined"},
  {n:"npc",who:"Khun Krerk",t:"Thank you all for coming"},
  {n:"nar",bg:"camp",show:[],t:"Three days later, a black card with no logo arrives at the camp"},
  {n:"nar",t:"\"Sirichai Camp is invited: five on five · the old beverage factory warehouse, Khlong Toei port · open rules, throws and locks allowed · no prize, no press\""},
- {n:"nar",t:"Handwritten on the back: \"I just want to know how well your small Muay Thai camp handles the real world — L.\""},
+ {inject:()=>[{n:"nar",t:R.closeDare?"Handwritten on the back: \"You told me to send fighters to face your camp… Sent. Five of them. — L.\"":R.closeFace?"Handwritten on the back: \"Not a fighter, but didn't back down… Now I want to see your fighters. — L.\"":"Handwritten on the back: \"I just want to know how well your small Muay Thai camp handles the real world — L.\""}]},
  ...rgIf(R.c2==="deal",[rin?{n:"rin",f:"flustered",l:"casual",t:"Manager, the partner contract we took money for. Clause 30 says: \"Should Naka League lose to the partner camp, this contract shall terminate immediately\""}:{n:"coach",t:"The partner contract we took money for. Clause 30 says if Naka League loses to our camp, the contract ends immediately…"},
    {n:"coach",t:"He was that confident, to write this clause in"}]),
  {n:"coach",t:"Throws allowed, locks allowed… we haven't trained for any of that, not even one day"},
@@ -1214,7 +1235,7 @@ const REGION={
     /* v1.91.47 (playtest): a camp that reaches the closing ceremony on the time limit with only one or two cups still gets Krerk's dinner and Pailin's tablet first — the ceremony and the reveal lean on them */
     if(this.closeDue(G)&&!R.c2){R.c2="later";playScene(rgCup2(G),()=>{save();done();},{bg:"camp",look:"casual"});return;}
     if(this.closeDue(G)&&!R.c3){R.c3="seen";playScene(rgCup3(G),()=>{save();done();},{bg:"camp",look:"casual"});return;}
-    if(this.closeDue(G)){this.openFinal(G);playScene(rgClose(G),()=>{save();done();},{bg:"closing_ceremony",look:"casual"});return;} /* v1.91.20 round 11 */
+    if(this.closeDue(G)){this.openFinal(G);this.playClose(()=>{save();done();});return;} /* v1.91.20 round 11 */
     done();},
   /* ---------- state helpers ---------- */
   base(G){return ((G.season||1)-1)*52;},
@@ -1461,7 +1482,7 @@ Welcome her at Fights › Four Regions Cup`});}
 .rg-reg{border-top:6px solid var(--rc);position:relative}.rg-reg h3{margin:.1rem 0 0}.rg-reg h3::first-letter{text-transform:uppercase}.rg-champ{font-size:.85rem;opacity:.85;margin-bottom:.5rem}
 .rg-prov{display:flex;align-items:center;justify-content:space-between;gap:.5rem;padding:.35rem 0;border-bottom:1px dashed rgba(0,0,0,.15)}
 .rg-prov:last-child{border-bottom:0}.rg-prov small{opacity:.7}.rg-fin{opacity:.9}.rg-miss{display:block;color:#d4688f;opacity:1!important}.rg-belt{color:#b8860b;font-weight:700}
-.rg-trip{border-left:6px solid var(--gold,#d9a21b)}.rg-quick{display:grid;grid-template-columns:auto 1fr;column-gap:.5rem;align-items:center;margin:.6rem 0;cursor:pointer}.rg-quick small{grid-column:2}.rg-pick{display:flex;flex-wrap:wrap;gap:.4rem;margin:.4rem 0}
+.rg-trip{border-left:6px solid var(--gold,#d9a21b)}.rg-show{position:fixed;inset:0;z-index:9000;background:#07040c;display:flex;align-items:center;justify-content:center}.rgs-in{position:relative;width:min(100vw,960px)}.rg-show canvas{width:100%;height:auto;display:block;image-rendering:auto}.rgs-cap{min-height:3.2em;padding:.7rem 1rem;color:#f3e9ff;font-size:1.05rem;line-height:1.5;background:linear-gradient(180deg,#1a1028,#0d0815);border-top:3px solid #ff4d6d}.rgs-skip{position:absolute;top:.5rem;right:.5rem}.rg-quick{display:grid;grid-template-columns:auto 1fr;column-gap:.5rem;align-items:center;margin:.6rem 0;cursor:pointer}.rg-quick small{grid-column:2}.rg-pick{display:flex;flex-wrap:wrap;gap:.4rem;margin:.4rem 0}
 .rg-pick button{display:flex;align-items:center;gap:.35rem}.rg-pick button[aria-pressed="true"]{outline:3px solid var(--gold,#d9a21b)}
 .rg-bill .kv-row{padding:.15rem 0}.rg-fuel.cheap{color:#2f8a50}.rg-fuel.high{color:#c8283c}
 #rdcv{width:100%;height:auto;image-rendering:pixelated;background:#1b1530;box-shadow:inset 0 0 0 2px var(--line)}
@@ -1496,7 +1517,7 @@ Welcome her at Fights › Four Regions Cup`});}
       return `<section class="px card rg-reg" style="--rc:${C.col}"><h3>${esc(C.name)}</h3><div class="rg-champ">Regional champion: <b>${esc(C.champ)}</b> · ${esc(C.nick)}${R.nc&&R.nc[r]?this.histHTML(R.nc[r],R.nc[r].home,"The new regional champion's story"):""}</div>${rows}${fin}</section>`;}).join("");
     return `<section class="px card rg-head"><div><h3>Four Regions Championship</h3><span class="meta">Edition ${R.edition||1}${this.nextEdTxt(G)}</span></div>
        <div class="rg-stats"><span class="pill gold">Cups ${cups}/4</span><span class="pill">Belts ${belts}/16</span><span class="pill ${T?"red":nx?"green":""}">${T?`Trip: ${esc(ROAD_DEST[T.dest].name)} · Week ${T.wk}`:nx?`Can travel week ${nx}`:"No more trips this year"}</span></div></section>
-     ${!R.gala?`<p class="meta rg-gala">🎉 The Four Regions Cup opening gala in Bangkok ${R.galaAbs!=null&&gameWeek(G)<R.galaAbs?"is held at the end of next week":"is held at the end of this week"} · the whole camp is invited</p>`:""}${!REGION_LIVE?`<p class="meta">Test mode: <button class="btn sm" data-act="rggala" data-v="gala">Watch the gala</button> Underground test fight (open rules): ${NL_ORDER.map(k=>`<button class="btn sm" data-act="nltest" data-v="${k}">${esc(NL[k].name)}</button>`).join(" ")}${(R.cups||[]).length?` <button class="btn sm" data-act="rggala" data-v="c1">Watch the green envelope scene</button>`:""}</p>`:""}
+     ${!R.gala?`<p class="meta rg-gala">🎉 The Four Regions Cup opening gala in Bangkok ${R.galaAbs!=null&&gameWeek(G)<R.galaAbs?"is held at the end of next week":"is held at the end of this week"} · the whole camp is invited</p>`:""}${!REGION_LIVE?`<p class="meta">Test mode: <button class="btn sm" data-act="rggala" data-v="gala">Watch the gala</button> <button class="btn sm" data-act="rgclosetest">Watch the closing</button> Underground test fight (open rules): ${NL_ORDER.map(k=>`<button class="btn sm" data-act="nltest" data-v="${k}">${esc(NL[k].name)}</button>`).join(" ")}${(R.cups||[]).length?` <button class="btn sm" data-act="rggala" data-v="c1">Watch the green envelope scene</button>`:""}</p>`:""}
      ${this.finalCard(G)}${this.legendCard(G)}${this.joinCard(G)}${tripCard}${this.fuelLine(G)}<div class="rg-grid">${regs}</div>`;},
   /* quick trips: only once the region's first meeting and this province's own story have been seen */
   /* v1.91.50 (playtest): a champion coming to visit shows on the home screen too — it was easy to miss on the regional tab */
@@ -1639,6 +1660,7 @@ if(typeof ACT!=="undefined")Object.assign(ACT,{
   nltest:d=>{if(REGION_LIVE)return;nlTest(d.v);},
   rgplan:d=>{UI.rgFid=null;UI.modal={type:"rgplan",dest:d.v};render();},
   rgfid:d=>{UI.rgFid=d.v;render();},
+  rgclosetest:()=>{REGION.playClose(()=>render());},
   rgquick:()=>{G.region.quickPref=!G.region.quickPref;save();render();},
   rggo:d=>{const r=REGION.book(G,d.v,UI.rgFid);if(!r.ok){toast(r.why);return;}UI.modal=null;AU.sfx&&AU.sfx("level");toast(`Trip booked for week ${r.wk} · travel cost paid ${fmt(r.cost)}`);save();render();},
   rgvisit:d=>{const r=d.v,c=G.region.champ[r],cid=REGION.champId[r];if(!c||c.visit!=="due")return;
@@ -1996,6 +2018,40 @@ Collect all four provincial belts, then challenge for the cup as before`});
     G.log=G.log||[];G.log.push(`Battle of the Four Regions, Edition ${ed} has begun`);},
 });
 if(typeof G!=="undefined"&&G&&G.region)REGION.flush(G);
+/* v1.91.60 (Man): the closing ceremony's climax is a real cutscene — the hooded Ladda takes the four regional champions apart one by one on the ring (sprites, specials, effects), then the dialogue picks up */
+const RG_SHOW=[
+ {cid:"baibua",steps:[[200,"cap","Baibua is first into the ring, elbows up in the Tha Sao guard."],[900,"sp","A","baibua_special","Blooming Lotus Back Elbow"],[2400,"play","miss","A","elbow"],[2500,"cap","Ladda tilts her head. The elbow misses her chin by millimetres."],
+   [3100,"sp","B","nl_ladda_sp_superman","Superman Punch"],[4500,"play","ko","B","punch"],[4600,"cap","Baibua drops in the middle of the ring before her guard comes up."]],end:6200},
+ {cid:"tabtim",steps:[[200,"cap","Tabtim vaults the ropes before anyone can stop her."],[800,"sp","A","tabtim_special","Ruby Leaping Kick"],[2300,"play","miss","A","kick"],[2400,"cap","Ladda steps under the kick before the leg can fully extend."],
+   [3000,"sp","B","nl_ladda_sp_headkick","Neck-Line Kick"],[4400,"play","ko","B","kick"],[4500,"cap","Tabtim spins in mid-air and crashes down in the corner."]],end:6000},
+ {cid:"alicia",steps:[[200,"cap","Alicia raises a high guard. Not one camera dares to click."],[800,"sp","A","alicia_special","Princess Uppercut"],[2300,"play","miss","A","punch"],[2700,"play","miss","A","punch"],[3000,"cap","Ladda slips every punch, then vanishes behind her."],
+   [3600,"play","takedown","B","punch"],[4500,"play","tap","B","punch"],[4700,"cap","A choke from behind… Alicia taps in five seconds."]],end:6300},
+ {cid:"chaba",steps:[[200,"cap","Chaba charges in and never takes a single step back."],[700,"play","hit","A","punch"],[1100,"play","hit","A","punch"],[1500,"play","hit","A","elbow"],[1700,"cap","Ladda lets three shots land, backing up until the ropes are at her back…"],
+   [2600,"sp","B","nl_ladda_sp_superman","Superman Punch"],[3900,"play","takedown","B","punch"],[4400,"play","gnp","B","punch"],[4800,"play","gnp","B","punch"],[5200,"play","ko","B","punch"],[5300,"cap","…then uses that same force to drag Chaba to the canvas."]],end:6800}];
+Object.assign(REGION,{
+  playClose(done){if(G.region){delete G.region.closeDare;delete G.region.closeFace;}const S=rgClose(G),i=S.findIndex(x=>x&&x.cut==="ladda"),a=i<0?S:S.slice(0,i+1),b=i<0?[]:S.slice(i+1),opt={bg:"closing_ceremony",look:"casual"};
+    playScene(a,()=>{if(i<0){done();return;}this.laddaShow(()=>playScene(b,done,opt));},opt);},
+  laddaShow(done){if(typeof document==="undefined"||typeof FS==="undefined"){done();return;}
+    const old=document.getElementById("rg-show");if(old)old.remove();
+    const el=document.createElement("div");el.id="rg-show";el.className="rg-show";
+    el.innerHTML=`<div class="rgs-in"><canvas width="960" height="540"></canvas><div class="rgs-cap"></div><button class="btn sm rgs-skip">Skip scene ▸</button></div>`;document.body.appendChild(el);
+    const cv=el.querySelector("canvas"),cap=el.querySelector(".rgs-cap"),T=[];let fin=false;
+    const L={id:"nl_ladda_show",name:"Ladda",sprite:"nl_ladda_hood",canon:false,color:"#f2f2f7"};
+    const end=()=>{if(fin)return;fin=true;T.forEach(clearTimeout);LOOPS.delete&&LOOPS.delete(FS.render);el.remove();FS.cv=null;done();};
+    el.querySelector(".rgs-skip").onclick=()=>{AU.sfx&&AU.sfx("ui");end();};
+    const champ=cid=>{const f=G.F[cid];return f?{...f,camp:f.camp==="player"?"rival":f.camp}:{id:cid,name:cid,canon:true};};
+    ["nl_ladda_sp_superman","nl_ladda_sp_headkick"].forEach(n=>img(n+".webp"));
+    let at=300;
+    RG_SHOW.forEach((B,bi)=>{const t0=at;
+      T.push(setTimeout(()=>{FS.init(cv,"bg_closing_ceremony.webp",champ(B.cid),L);FS.A.x=FS.A.base=330;FS.B.x=FS.B.base=630;if(bi===0){LOOPS.add(FS.render);startLoops();}AU.sfx&&AU.sfx("bell");},t0));
+      B.steps.forEach(st=>T.push(setTimeout(()=>{const now=performance.now();
+        if(st[1]==="cap")cap.textContent=st[2];
+        else if(st[1]==="sp"){FS.special({side:st[2],mv:{img:st[3]},name:st[4],head:st[2]==="B"?"Ladda":RG[RG_ORDER.find(r=>RG_CID0[r]===B.cid)].champ},0,now);AU.sfx&&AU.sfx(st[2]==="B"?"kd":"elbow");}
+        else if(st[1]==="play"){FS.play({ev:st[2],side:st[3],w:st[4],crit:true},now);AU.sfx&&AU.sfx(st[2]==="miss"?"miss":st[2]==="ko"?"kd":st[4]||"punch");}},t0+st[0])));
+      at+=B.end;});
+    T.push(setTimeout(()=>{const now=performance.now();FS.init(cv,"bg_closing_ceremony.webp",champ("chaba"),L);FS.A.ko=true;FS.A.down=now-2000;FS.B.win=true;FS.B.anim="win";FS.B.x=FS.B.base=560;cap.textContent="Ladda stands alone in the middle of the ring. The white hood never slipped once.";},at));
+    T.push(setTimeout(end,at+3200));}});
+
 /* v1.91.47 (playtest): styles go in as soon as the chapter loads — the underground board opened before the regional tab was visited showed full-size portraits */
 try{REGION.css();}catch(e){}
 
