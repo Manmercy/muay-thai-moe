@@ -4652,7 +4652,7 @@ const HON_COACH=[N=>`จำคืนนี้ไว้ ${N} ชัยชนะ�
  (N,n)=>`ของในมุมเกียรติยศของค่ายเรามี ${n} ชิ้นแล้ว ปู่ชัยคงยิ้มไม่หุบ`,
  N=>`ฉลองให้เต็มที่คืนนี้ พรุ่งนี้เช้าตีห้าเหมือนเดิมนะ ${N}`,
  N=>`ข้าซ้อมนักมวยมาทั้งชีวิต คืนแบบนี้ไม่เคยชินสักที… เก่งมาก ${N}`];
-const RG_BELT_MC={chiangrai:"ปี้น้องเชียงรายเจ้า! เข็มขัดเส้นนี้ไปอยู่ค่ายศิริชัยแล้วเน้อ ปรบมือดัง ๆ เจ้า!",nan:"ชาวน่านขอแสดงความยินดีครับ! แข่งเรือก็ต้องชนะ ชกมวยก็ต้องชนะแบบนี้!",
+const RG_BELT_MC={chiangrai:"ปี้น้องเจียงฮายเจ้า! เข็มขัดเส้นนี้ไปอยู่ค่ายศิริชัยแล้วเน้อ ปรบมือดัง ๆ เจ้า!",nan:"ชาวน่านขอแสดงความยินดีครับ! แข่งเรือก็ต้องชนะ ชกมวยก็ต้องชนะแบบนี้!",
  uttaradit:"เมืองพระยาพิชัยดาบหักขอคารวะครับ! ใจสู้แบบนี้ ท่านพระยาเห็นคงชอบใจ!",lampang:"รถม้าลำปางพร้อมแห่รอบเมืองแล้วครับ! แชมป์คนใหม่ขึ้นรถม้าได้เลย!",
  udon:"ทะเลบัวแดงบานรับแชมป์คนใหม่แล้วเด้อพี่น้อง!",khonkaen:"ขอนแก่นยกนิ้วให้เลยเด้อ! หมัดนี่แน่นยิ่งกว่าผ้าไหมทอมือ!",
  buriram:"บุรีรัมย์เสียงดังที่สุดในอีสานเด้อ! ส่งเสียงให้แชมป์คนใหม่หน่อย!",ubon:"แสงเทียนพรรษาขอส่องทางให้แชมป์คนใหม่เด้อพี่น้องชาวอุบล!",
@@ -8359,7 +8359,7 @@ AU.gsfx=function(kind,a){if(!this.init()||this.muted||!SETTINGS.sfx)return;const
   if(kind==="shimmer")for(let i=0;i<6;i++)T(i*.05,{f:1400+Math.random()*1400,type:"sine",dur:.12,peak:.06});};
 
 // ================= MUAY THAI MOE v1.3 — UI =================
-const VERSION="1.91.15";
+const VERSION="1.91.16";
 const CUR_LANG=(typeof window!=="undefined"&&window.LANG)||"th";
 const TH_LABEL=String.fromCharCode(3652,3607,3618);
 function langSwitch(cls){return `<div class="langsw ${cls||""}" role="group" aria-label="Language">${[["th",TH_LABEL],["en","EN"]].map(([k,l])=>`<button class="lsb ${CUR_LANG===k?"on":""}" data-act="setlang" data-v="${k}" aria-pressed="${CUR_LANG===k}">${l}</button>`).join("")}</div>`;}
@@ -12650,7 +12650,7 @@ CHAT.fah.push(
 <script>
 (function(){
 /* v1.87: Thai code ships inside index.html; English code (en.js) and the dictionary (i18n.js) load only when needed */
-var B="3c5854f667";
+var B="bf63642299";
 var L="";try{L=localStorage.getItem("mtm_lang")||"";}catch(e){}
 try{var h=(location.hash||"").match(/lang=(th|en)/);if(h)L=h[1];}catch(e){}
 if(L!=="th"&&L!=="en")L="th";
