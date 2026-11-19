@@ -14893,5 +14893,16 @@
  "</p>\n    <p class=\"meta\">ค่าครู ค่าที่พัก ค่ากิน ค่าเดินทาง รวม <b class=\"goldt\">": "</p>\n    <p class=\"meta\">Teacher, lodging, food and travel, total <b class=\"goldt\">",
  "เงินไม่พอ · ต้องใช้ ": "Not enough cash · needs ",
  "นัดชิงแชมป์ภาคอีก ": "Regional title bout in ",
- " สัปดาห์ข้างหน้า: ": " weeks: "
+ " สัปดาห์ข้างหน้า: ": " weeks: ",
+ "ระดับตำนานนาคาลีกครบ 15 ดาว · ชื่อเสียง +2": "Naka League legend mode: all 15 stars · fame +2",
+ " · เศษดาว +": " · stardust +",
+ "ระดับตำนาน · ": "Legend · ",
+ "<div class=\"mfoot\"><button class=\"btn\" data-act=\"closeModal\">ไว้ก่อน</button></div>": "<div class=\"mfoot\"><button class=\"btn\" data-act=\"closeModal\">Not yet</button></div>",
+ " · ชก 5 ยก กติกาเปิด</p>\n      <div class=\"vs-pick\">": " · 5 rounds, open rules</p>\n      <div class=\"vs-pick\">",
+ " · ตอนนี้ ": " · now ",
+ "<h2>ระดับตำนาน · ": "<h2>Legend · ",
+ "<p class=\"meta\">สัปดาห์นี้ชกระดับตำนานไปแล้ว</p>": "<p class=\"meta\">Already fought a legend bout this week</p>",
+ ">ท้า ▸</button></span></div>": ">Challenge ▸</button></span></div>",
+ "/15 ดาว</small></h3>\n      <p class=\"meta\">ไม่บังคับ · เก่งกว่าไฟนอลใต้ดิน · สัปดาห์ละ 1 ไฟต์ · บาดเจ็บและความล้าคิดตามจริง · ★ ชนะ · ★★ ชนะโดยไม่ล้มเลย · ★★★ ไม่ล้มและจบก่อนครบยก · ดาวใหม่ดวงละเศษดาว ": "/15 stars</small></h3>\n      <p class=\"meta\">Optional · tougher than the underground final · one bout a week · injuries and fatigue count · ★ win · ★★ win without going down · ★★★ no knockdown and inside the distance · each new star gives stardust ",
+ "\"><h3>✦ ระดับตำนาน · นาคาลีก <small class=\"meta\">": "\"><h3>✦ Legend · Naka League <small class=\"meta\">"
 }

@@ -3044,7 +3044,7 @@ function regionStart(G){if(G.region)return;const now=gameWeek(G),R=["north","isa
 function regionWeek(G){if(!regionOn())return;if(!G.region){if(regionReady(G))regionStart(G);return;}
   if(typeof REGION!=="undefined"&&REGION.weekly)REGION.weekly(G);}
 /* a regional bout just ended: queue it for region.js (it may still be loading) */
-function regionAfterFight(G,b,ret){if(!G.region)return;G.region.pend=G.region.pend||[];G.region.pend.push({bid:b.id,a:b.a,b:b.b,region:b.region,res:ret?ret.res:null});
+function regionAfterFight(G,b,ret,F){if(!G.region)return;G.region.pend=G.region.pend||[];const rt=(F&&F.result&&F.result.type)||"";G.region.pend.push({bid:b.id,a:b.a,b:b.b,region:b.region,res:ret?ret.res:null,kdA:F&&F.A?F.A.kd||0:0,stop:!!rt&&!/^ชนะคะแนน|^เสมอ/.test(rt)});
   if(typeof REGION!=="undefined"&&REGION.flush)REGION.flush(G);}
 function stageOf(w){return w<=20?"local":w<=40?"district":w<=50?"final":"off";}
 const STAGE_NAME={local:"รอบตำบล",district:"รอบอำเภอ",final:"ชิงแชมป์จังหวัด",off:"ปิดปี"};
@@ -3515,7 +3515,7 @@ function applyResult(G,F,booking){
       ret={pay,res,upset};
     }
   }
-  if(booking.region)regionAfterFight(G,booking,ret);
+  if(booking.region)regionAfterFight(G,booking,ret,F);
   return ret;
 }
 // v1.82.3: Kru Daeng's notebook — what we saw of an opponent last time; after a meeting they may go away and add a new weapon
@@ -8373,7 +8373,7 @@ AU.gsfx=function(kind,a){if(!this.init()||this.muted||!SETTINGS.sfx)return;const
   if(kind==="shimmer")for(let i=0;i<6;i++)T(i*.05,{f:1400+Math.random()*1400,type:"sine",dur:.12,peak:.06});};
 
 // ================= MUAY THAI MOE v1.3 — UI =================
-const VERSION="1.91.26";
+const VERSION="1.91.27";
 const CUR_LANG=(typeof window!=="undefined"&&window.LANG)||"th";
 const TH_LABEL=String.fromCharCode(3652,3607,3618);
 function langSwitch(cls){return `<div class="langsw ${cls||""}" role="group" aria-label="Language">${[["th",TH_LABEL],["en","EN"]].map(([k,l])=>`<button class="lsb ${CUR_LANG===k?"on":""}" data-act="setlang" data-v="${k}" aria-pressed="${CUR_LANG===k}">${l}</button>`).join("")}</div>`;}
@@ -12664,7 +12664,7 @@ CHAT.fah.push(
 <script>
 (function(){
 /* v1.87: Thai code ships inside index.html; English code (en.js) and the dictionary (i18n.js) load only when needed */
-var B="427436b881";
+var B="42e4c4c551";
 var L="";try{L=localStorage.getItem("mtm_lang")||"";}catch(e){}
 try{var h=(location.hash||"").match(/lang=(th|en)/);if(h)L=h[1];}catch(e){}
 if(L!=="th"&&L!=="en")L="th";

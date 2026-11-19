@@ -869,7 +869,7 @@ Kerk, Chairman of NAGA Energy Drink`});}
 function regionWeek(G){if(!regionOn())return;if(!G.region){if(regionReady(G))regionStart(G);return;}
   if(typeof REGION!=="undefined"&&REGION.weekly)REGION.weekly(G);}
 /* a regional bout just ended: queue it for region.js (it may still be loading) */
-function regionAfterFight(G,b,ret){if(!G.region)return;G.region.pend=G.region.pend||[];G.region.pend.push({bid:b.id,a:b.a,b:b.b,region:b.region,res:ret?ret.res:null});
+function regionAfterFight(G,b,ret,F){if(!G.region)return;G.region.pend=G.region.pend||[];const rt=(F&&F.result&&F.result.type)||"";G.region.pend.push({bid:b.id,a:b.a,b:b.b,region:b.region,res:ret?ret.res:null,kdA:F&&F.A?F.A.kd||0:0,stop:!!rt&&!/^ชนะคะแนน|^เสมอ/.test(rt)});
   if(typeof REGION!=="undefined"&&REGION.flush)REGION.flush(G);}
 function stageOf(w){return w<=20?"local":w<=40?"district":w<=50?"final":"off";}
 const STAGE_NAME={local:"Subdistrict round",district:"District round",final:"Provincial final",off:"Year end"};
@@ -1340,7 +1340,7 @@ function applyResult(G,F,booking){
       ret={pay,res,upset};
     }
   }
-  if(booking.region)regionAfterFight(G,booking,ret);
+  if(booking.region)regionAfterFight(G,booking,ret,F);
   return ret;
 }
 // v1.82.3: Kru Daeng's notebook — what we saw of an opponent last time; after a meeting they may go away and add a new weapon
