@@ -842,6 +842,17 @@ function rgClose(G){const R=G.region,fah=rgIn(G,"fah"),rin=rgIn(G,"rin");
  {n:"coach",t:"ทุ่มได้ ล็อกได้… พวกเราไม่เคยซ้อมเรื่องพวกนี้เลยสักวัน"},
  {n:"coach",t:"มีเวลาสามสัปดาห์ ต้องเลือกว่าจะซ้อมรับมือแบบไหน เลือกได้ที่หน้าศึกชิงเจ้าสี่ภาค"}];}
 const RG_FPREP={sprawl:{n:"กันทุ่ม",d:"ถีบขาหนีตอนโดนพุ่งจับ และกดคอตีเข่าสวนได้บ่อยขึ้น"},escape:{n:"หนีล็อก",d:"ดันตัวลุกจากพื้นและหลุดจากล็อกได้ดีขึ้น"},strike:{n:"ยืนแลก",d:"ไม่สนการทุ่ม ซ้อมออกอาวุธให้แม่นขึ้น จบก่อนโดนดึงลงพื้น"}};
+/* v1.91.57 (Man): the Naka League talk a little before and after their bouts — an introduction the first night, a jab after; Ladda barely speaks */
+const NL_SAY={
+ nia:{first:"ไนอา โอคาฟอร์ มวยสากล สิบสองไฟต์อาชีพ ไม่เคยแพ้คนที่เตะไม่ถึงหน้า… มาลองดูว่าเธอเตะถึงไหม",again:"กลับมาอีกแล้วเหรอ ฉันนับจังหวะเธอได้ตั้งแต่ครั้งก่อน หนึ่ง สอง… ล้ม",
+   win:"จังหวะของเธอช้ากว่ากลองของฉันครึ่งจังหวะ",lose:"…หมัดฉันไม่ได้ช้า ขาเธอยาวเกินไปต่างหาก"},
+ varya:{first:"วาร์ยา แซมโบ้ ฉันไม่ได้มาชกกับเธอหรอก ฉันจะจับเธอลงพื้นแล้วนั่งทับ",again:"เบาะยังจำหลังเธอได้นะ มานอนอีกรอบสิ",
+   win:"บนพื้นไม่มีมวยไทยหรอก มีแต่ฉัน",lose:"…ศอกนั่นเจ็บ ครั้งหน้าฉันจะจับแขนเธอก่อน"},
+ meili:{first:"เหม่ยลี่ ศิษย์มังกรเยาวราช ขาฉันเร็วกว่าตาเธอ ลองกะพริบตาดูสิ",again:"อ้าว มาอีกแล้ว อาม่าบอกว่าคนดื้อแบบนี้มักจะได้ดี… แต่ไม่ใช่วันนี้",
+   win:"เห็นขาฉันไหม ไม่เห็นใช่ไหมล่ะ",lose:"…ใครสอนให้เข้ามาใกล้ขนาดนั้น ไม่ยุติธรรมเลย"},
+ rosa:{first:"¡Hola, cariño! Corazón Rosa มาแล้ว! คืนนี้เธอจะได้บินครั้งแรกในชีวิต",again:"¡Otra vez! คนดูรักเธอนะ เพราะเธอล้มได้สวยมาก",
+   win:"¡Olé! ล้มได้สวยที่สุดในโกดังนี้เลย",lose:"…ว้าว เธอทำให้หน้ากากฉันเบี้ยว ไม่เคยมีใครทำได้นะ"},
+ ladda:{first:"…เข้ามา",again:"ครั้งที่แล้วเธอหายใจผิดจังหวะตอนยกสาม… ฉันจำได้",win:null,lose:null}};
 function rgFinalIntro(G){const R=G.region,F=R.final;return [
  {n:"nar",bg:"naka_underground",t:F.tries?"โกดังเดิมริมท่าเรือคลองเตย ไฟสลัวเหมือนครั้งก่อน คนดูกลุ่มเดิมยังยืนเงียบอยู่ในเงามืด":"โกดังเก่าริมท่าเรือคลองเตย ไฟสลัว กลิ่นน้ำหวานบูดลอยมาจากถังเก่า กลางห้องมีเวทีเชือกสีดำ พื้นปูเบาะนุ่มแบบเวที MMA"},
  {n:"npc",who:"คุณเกริก",t:F.tries?"กลับมาอีกแล้วนะครับ ผมชอบความดื้อแบบนี้":"ยินดีต้อนรับครับ ไม่มีกล้อง ไม่มีสื่อ ไม่มีเงินรางวัล มีแค่คำถามข้อเดียว"},
@@ -1082,7 +1093,7 @@ const REGION={
       addMail(G,{kind:"letter",from:"นาคาเอเนอร์จี้ดริงค์",title:"ศึกชิงเจ้าสี่ภาค: เหลือเวลาอีกราวครึ่งปี",body:"เรียน ผู้จัดการค่ายศิริชัย\n\nศึกชิงเจ้าสี่ภาคครั้งนี้จะปิดฉากในอีกราวครึ่งปี หลังจากนั้นจะไม่มีจดหมายท้าแชมป์ภาคครั้งใหม่ นัดที่ยังชกค้างอยู่จะชกต่อจนจบ แล้วจึงเข้าสู่พิธีปิดที่กรุงเทพฯ\n\nถ้วยที่ยังเหลือ ขอให้รีบเก็บก่อนหมดเวลา\n\nนาคาเอเนอร์จี้ดริงค์ · ดื่มนาคา ชกไม่มีหมด!"});}}
     for(const r of RG_ORDER){const c=R.champ[r];if(!c)continue;
       if(c.state==="lost"&&now>=(c.letterAbs||0)&&!this.overTime(G)){c.state="letter";c.fid=null;c.w=0;c.l=0;c.n=0;
-        addMail(G,{kind:"letter",from:`${RG[r].champ} · แชมป์${RG[r].name}`,title:`${RG_TITLE[r]}: คำท้าครั้งใหม่`,body:RG_CH[r].again+((t=>t?`\n\n(${t})`:"")((this.tipFor(G,r,true),this.tipText(G,r))))});continue;}
+        addMail(G,{kind:"letter",from:`${RG[r].champ} · แชมป์${RG[r].name}`,title:`${RG_TITLE[r]}: คำท้าครั้งใหม่`,body:RG_CH[r].again+((t=>t?`\n\n(${t})`:"")(this.tipText(G,r)))});continue;}
       if(c.state!=="series")continue;const me=G.F[c.fid];
       if(!me||me.camp!=="player"){G.bookings=G.bookings.filter(b=>!(c.next&&b.id===c.next.bid));Object.assign(c,{state:"letter",fid:null,w:0,l:0,n:0,next:null});continue;}
       const x=c.next;
@@ -1115,13 +1126,11 @@ const REGION={
     playScene(steps,()=>this.night(T,P,1,done),{bg:"rg_"+H.ring,look:"fight"});},
   /* the series fighter picker (modal) */
   /* v1.91.50 (playtest): Daeng watches the champion's tapes and says who fits — a player sending the wrong girl lost a series ten times without knowing why */
-  tipFor(G,r,force){const R=G.region,c=R&&R.champ[r];if(!c)return null;const now=gameWeek(G);if(!force&&c.tip&&now-(c.tip.abs||0)<8)return c.tip;
-    const pool=roster(G).filter(f=>f.camp==="player").sort((a,b)=>effOvr(G,b)-effOvr(G,a)).slice(0,5);if(pool.length<2)return null;
-    const base=stableHash(r+(G.season||1)),N=200,sc=pool.map(me=>{const o=this.champFighter(G,r,me);let w=0;for(let i=1;i<=N;i++){const x=quickFight(me,o,base+i*977,5);if((x.result||x).win==="A")w++;}return [me.id,w/N];}).sort((a,b)=>b[1]-a[1]); /* same seeds for everyone, 200 bouts each (~1 s, once per letter) — 16 and 80 were too noisy to trust */
-    const top=sc[0][1],good=sc.filter(x=>x[1]>=top-.04).slice(0,2).map(x=>x[0]),bad=sc.filter(x=>x[1]<=top*.5).slice(-2).map(x=>x[0]);
-    c.tip={abs:now,good,bad};return c.tip;},
-  tipText(G,r){const t=this.tipFor(G,r);if(!t||!t.good.length)return "";const nm=(ids,j)=>ids.filter(id=>G.F[id]).map(id=>G.F[id].name).join(j);
-    return `ครูแดงดูเทป${RG[r].champ}แล้ว · เข้าทางที่สุด ${nm(t.good," หรือ ")}${t.bad.length?` · ยังไม่ควรส่ง ${nm(t.bad,", ")}`:""}`;},
+  /* v1.91.57 (Man): Daeng names the champion's weak spot, not the girl to send — the player works out who fits (fighter styles show on each fighter's page) */
+  tipFor(G,r){const H=RG_CH[r],S=(H&&H.sty)||[];if(!S.length||typeof FSTYLE_BEATS==="undefined")return null;
+    const sc=Object.keys(FSTYLE_BEATS).map(x=>[x,S.filter(y=>FSTYLE_BEATS[x].includes(y)).length]).sort((a,b)=>b[1]-a[1]);const top=sc[0][1];return top?{weak:sc.filter(x=>x[1]===top).map(x=>x[0]).slice(0,2)}:null;},
+  tipText(G,r){const t=this.tipFor(G,r);if(!t)return "";const D={power:"ยืนแลกหมัดหนัก ๆ",pressure:"บุกกดดันไม่หยุด",counter:"ใจเย็น รอสวน",footwork:"เคลื่อนที่เร็ว ฟุตเวิร์กดี",inside:"เข้าประชิดวงใน"};
+    return `ครูแดงดูเทป${RG[r].champ}แล้ว · จุดอ่อน: ไม่ชอบเจอคนที่${t.weak.map(x=>D[x]).join(" หรือคนที่")}`;},
   seriesHTML(r){const C=RG[r],H=RG_CH[r],c=G.region.champ[r],R=roster(G).filter(f=>!f.injury);if(!UI.rgFid||!R.some(f=>f.id===UI.rgFid))UI.rgFid=R[0]?R[0].id:null;
     const pay=this.seriesPurse(G);
     return `<h2>${esc(RG_TITLE[r])}</h2><p class="meta">${esc(C.champ)} · ${esc(C.nick)} · เวที ${esc(ROAD_DEST[C.fin].name)}</p>
@@ -1262,8 +1271,12 @@ Object.assign(REGION,{
     const keep={injury:me.injury||0,fatigue:me.fatigue||0},o=nlFighter(G,k,me);
     const b={id:`nlf${F.tries||0}_${i}_${gameWeek(G)}`,a:me.id,b:o.id,week:G.week,tier:"exhibition",rounds:5,win:0,lose:0,bg:"bg_naka_underground.webp",gprep:F.prep,region:{nlfinal:k}};
     G.bookings.push(b);save();
-    openFight(b,()=>{G.bookings=G.bookings.filter(x=>x.id!==b.id);me.injury=keep.injury;me.fatigue=keep.fatigue;this.flush(G);
-      if(!F.cur[k])F.cur[k]="L";save();UI.modal={type:"rgfline"};render();});},
+    const S=NL_SAY[k],spk=t=>k==="ladda"?{n:"lada",l:"fight",f:"angry",t}:{n:"npc",who:NL[k].name,t},
+      after=()=>{const res=F.cur[k],t=S&&(res==="W"?S.lose:res==="L"?S.win:null);const fin=()=>{UI.modal={type:"rgfline"};render();};
+        if(t)playScene([spk(t)],fin,{bg:"naka_underground",look:"fight"});else if(k==="ladda"&&res==="L")playScene([{n:"nar",t:"ลดาเดินกลับมุมโดยไม่หันมามองแม้แต่ครั้งเดียว"}],fin,{bg:"naka_underground",look:"fight"});else fin();};
+    const go=()=>openFight(b,()=>{G.bookings=G.bookings.filter(x=>x.id!==b.id);me.injury=keep.injury;me.fatigue=keep.fatigue;this.flush(G);
+      if(!F.cur[k])F.cur[k]="L";save();after();});
+    if(S)playScene([spk(F.tries?S.again:S.first)],go,{bg:"naka_underground",look:"fight"});else go();},
   finalEnd(){const R=G.region,F=R.final,v=Object.values(F.cur||{}),w=v.filter(x=>x==="W").length,l=v.filter(x=>x==="L").length,beat=(F.cur||{}).ladda==="W";F.tries=(F.tries||0)+1;F.live=false;UI.modal=null;
     if(w>=3){F.won=true;F.stage="done";F.wonAbs=gameWeek(G);F.score=`${w}–${l}`;F.beatLadda=beat;R.hall=R.hall||[];R.hall.push({k:"naka",season:G.season||1,score:F.score,ladda:beat});
       for(const r of RG_ORDER)rgTouch(G,RG_CID[r]);G.rep+=3;
