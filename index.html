@@ -2179,6 +2179,7 @@ html[lang=en] .fight .fctl2 .skbtn2 b{font-size:11px;display:-webkit-box;-webkit
 /* v1.91.5 hot-form title */
 .pill.hotb{background:linear-gradient(90deg,#ff7a1a,#ff3d5a);color:#fff;border:0;font-weight:700;white-space:nowrap}.pill.hotb.sm{font-size:10px;padding:1px 6px;margin-left:4px}.hotl{color:#ffb070}
 </style></head><body>
+<script>window.__MTM_ART=["alicia_sheet.webp","alicia_special.webp","baibua_sheet.webp","baibua_special.webp","baiyok_sheet.webp","baiyok_white_sheet.webp","bull1_sheet.webp","bull2_sheet.webp","bull3_sheet.webp","chaba_sheet.webp","chaba_special.webp","fah_loykrathong_sheet.webp","fah_loykrathong_special.webp","fah_sheet.webp","fah_special.webp","gang1_sheet.webp","gang2_sheet.webp","gang3_sheet.webp","gang4_sheet.webp","gang5_sheet.webp","gangsilver_sheet.webp","kati_loykrathong_sheet.webp","kati_loykrathong_special.webp","kati_sheet.webp","kati_special.webp","mali_loykrathong_sheet.webp","mali_loykrathong_special.webp","mali_sheet.webp","mali_special.webp","nl_ladda_blood_sheet.webp","nl_ladda_hood_sheet.webp","nl_ladda_sheet.webp","nl_meili_sheet.webp","nl_meili_special.webp","nl_nia_sheet.webp","nl_nia_special.webp","nl_rosa_sheet.webp","nl_rosa_special.webp","nl_varya_sheet.webp","nl_varya_special.webp","npc10_sheet.webp","npc1_sheet.webp","npc2_sheet.webp","npc3_sheet.webp","npc4_sheet.webp","npc5_sheet.webp","npc6_sheet.webp","npc7_sheet.webp","npc8_sheet.webp","npc9_sheet.webp","npc_baiyok.webp","npc_baiyok_black.webp","npc_gang_boss.webp","npc_gang_boss_face.webp","npc_gang_goldblack.webp","npc_gang_group.webp","npc_gang_silver.webp","npc_grandma.webp","npc_krerk.webp","npc_krerk_face.webp","npc_nai.webp","npc_petchara.webp","npc_thief.webp","npc_thief2.webp","npc_tiger_boss.webp","npc_vendor_green.webp","npc_vendor_red.webp","pailin_sheet.webp","petchara_sheet.webp","ploy_loykrathong_sheet.webp","ploy_loykrathong_special.webp","ploy_sheet.webp","ploy_special.webp","rgp_buriram_sheet.webp","rgp_chanthaburi_sheet.webp","rgp_chiangrai_sheet.webp","rgp_chumphon_sheet.webp","rgp_khonkaen_sheet.webp","rgp_lampang_sheet.webp","rgp_lopburi_sheet.webp","rgp_nakhonsi_sheet.webp","rgp_nan_sheet.webp","rgp_phetchaburi_sheet.webp","rgp_songkhla_sheet.webp","rgp_suphan_sheet.webp","rgp_surat_sheet.webp","rgp_ubon_sheet.webp","rgp_udon_sheet.webp","rgp_uttaradit_sheet.webp","rin_loykrathong_sheet.webp","rin_loykrathong_special.webp","rin_sheet.webp","rin_special.webp","rooster1_sheet.webp","rooster2_sheet.webp","rooster3_sheet.webp","rooster4_sheet.webp","rooster5_sheet.webp","tabtim_sheet.webp","tabtim_special.webp","thief2_sheet.webp","thief_sheet.webp"];</script>
 <div id="app"></div><div id="live" aria-live="polite" role="status"></div>
 <script type="text/plain" id="js-th">
 window.__MTM_RAN=1;
@@ -8373,7 +8374,7 @@ AU.gsfx=function(kind,a){if(!this.init()||this.muted||!SETTINGS.sfx)return;const
   if(kind==="shimmer")for(let i=0;i<6;i++)T(i*.05,{f:1400+Math.random()*1400,type:"sine",dur:.12,peak:.06});};
 
 // ================= MUAY THAI MOE v1.3 — UI =================
-const VERSION="1.91.27";
+const VERSION="1.91.28";
 const CUR_LANG=(typeof window!=="undefined"&&window.LANG)||"th";
 const TH_LABEL=String.fromCharCode(3652,3607,3618);
 function langSwitch(cls){return `<div class="langsw ${cls||""}" role="group" aria-label="Language">${[["th",TH_LABEL],["en","EN"]].map(([k,l])=>`<button class="lsb ${CUR_LANG===k?"on":""}" data-act="setlang" data-v="${k}" aria-pressed="${CUR_LANG===k}">${l}</button>`).join("")}</div>`;}
@@ -8534,7 +8535,9 @@ let PREF=false;
 function prefetchArt(){if(PREF||!G)return;PREF=true;const c=navigator.connection||{};if(c.saveData||/2g/.test(c.effectiveType||""))return;
   const S=new Set();Object.values(BGIMG).forEach(b=>{if(b)S.add(ASSET+b);});
   SHEET_IDS.forEach(id=>S.add(`${ASSET}${id}_sheet.webp`));S.add(`${ASSET}coach.webp`);for(const id of CANON_IDS){const f=G.F[id];if(!f||!(f.camp==="player"||f.met))continue;for(const l of ["casual","fight","train"])for(const m of ["happy","flustered","pout","sad"])S.add(stand(id,l,m));}
-  const q=[...S].filter(u=>!WARMED[u]);let busy=0;const next=()=>{while(busy<2&&q.length){const u=q.shift();busy++;const i=new Image();i.decoding="async";i.onload=i.onerror=()=>{busy--;setTimeout(next,60);};i.src=u;WARMED[u]=i;}};
+  /* v1.91.28: then every fight sprite, special move and NPC portrait (one-time — the service worker keeps them), so bouts and scenes don't pop in */
+  const slow=/3g/.test(c.effectiveType||"");(window.__MTM_ART||[]).forEach(n=>{if(!slow||G&&Object.values(G.F||{}).some(f=>n.startsWith((f.sprite||f.id||"")+"_")))S.add(ASSET+n);});
+  const q=[...S].filter(u=>!WARMED[u]&&!IMGS[u.slice(ASSET.length)]);let busy=0;const next=()=>{while(busy<2&&q.length){const u=q.shift();busy++;const i=new Image();i.decoding="async";i.onload=i.onerror=()=>{busy--;setTimeout(next,60);};i.src=u;WARMED[u]=i;}};
   (window.requestIdleCallback||((f)=>setTimeout(f,300)))(next);}
 function render(){
   try{if(typeof G!=="undefined"&&G&&!G.ended)autoPlans();}catch(e){}
@@ -9470,12 +9473,17 @@ function montageHTML(){const M=UI.montage;
 
 // ---------- VN scene ----------
 // v1.8: warm portraits before they are needed so scenes don't pop in late
-const WARMED={};function warm(src){if(!src||WARMED[src])return;const i=new Image();i.src=src;WARMED[src]=i;}
+const WARMED={};let WARM_NEED=null;function warm(src){if(!src)return;if(WARM_NEED)WARM_NEED.push(src);if(WARMED[src])return;const i=new Image();i.src=src;WARMED[src]=i;}
 function warmChar(id,look){if(id==="coach"){warm(`${ASSET}coach.webp`);return;}if(!castId(id)&&id!=="pailin")return;
   (look==="casual"||look==="thai"?["happy","flustered","pout"]:["happy","sad","surprised","angry"]).forEach(m=>warm(stand(id,look,m)));}
 function warmSteps(steps,look){const walk=list=>(list||[]).forEach(st=>{if(!st)return;const n=typeof st.n==="function"?null:st.n;if(n==="npc"){const im=npcImg(st);if(im)warm(`${ASSET}npc_${im}.webp`);}else if(n)warmChar(n,st.l==="casual"||st.l==="thai"?st.l:(look==="casual"||look==="thai")&&!st.l?look:"fight");
   if(st.with)warmChar(st.with,look==="casual"||look==="thai"?look:"fight");if(st.bg&&BGIMG[st.bg])warm(ASSET+BGIMG[st.bg]);if(st.choice)st.choice.forEach(c=>walk(c.then));});walk(steps);}
-function playScene(steps,done,opts={}){warmSteps(steps,opts.look||"fight");if(opts.bg&&BGIMG[opts.bg])warm(ASSET+BGIMG[opts.bg]);UI.scene={steps:[...steps],i:0,done,bg:opts.bg||"night",look:opts.look||"fight",cur:null,cast:[],coachOK:!!opts.coachOK,award:opts.award||null};sceneNext();}
+function playScene(steps,done,opts={}){WARM_NEED=[];try{warmSteps(steps,opts.look||"fight");if(opts.bg&&BGIMG[opts.bg])warm(ASSET+BGIMG[opts.bg]);}finally{}const need=WARM_NEED.slice(0,4);WARM_NEED=null;
+  const S=UI.scene={steps:[...steps],i:0,done,bg:opts.bg||"night",look:opts.look||"fight",cur:null,cast:[],coachOK:!!opts.coachOK,award:opts.award||null};
+  /* v1.91.28: if the scene's backdrop and first faces aren't on the device yet, give them up to ~0.9 s before the first line (never longer, so nothing stalls) */
+  const wait=need.map(u=>WARMED[u]).filter(i=>i&&!(i.complete&&i.naturalWidth));if(!wait.length){sceneNext();return;}
+  let go=false;const start=()=>{if(go)return;go=true;if(UI.scene===S&&S.i===0&&!S.cur)sceneNext();render();};
+  let left=wait.length;wait.forEach(i=>{const f=()=>{if(--left<=0)setTimeout(start,30);};i.addEventListener("load",f,{once:true});i.addEventListener("error",f,{once:true});});setTimeout(start,900);}
 function playHonorQueue(done){while((G.awards||[]).length&&!(G.F[G.awards[0].id]))G.awards.shift();const h=(G.awards||[])[0];if(!h){AU.startMusic("hub");if(done)done();return;}AU.startMusic("victory");AU.sfx("champ");
   playScene(honorSteps(G,h),()=>{G.awards.shift();save();playHonorQueue(done);},{bg:h.kind==="rgbelt"&&BGIMG["rgring_"+h.venue]?"rgring_"+h.venue:"hall",look:"fight",award:h});
   [500,1100,1900,2900,4200,5600].forEach(ms=>setTimeout(()=>{if(UI.scene&&UI.scene.award===h)AU.sfx("pop");},ms));} /* v1.91.14: fireworks pop over the ceremony */
@@ -12664,7 +12672,7 @@ CHAT.fah.push(
 <script>
 (function(){
 /* v1.87: Thai code ships inside index.html; English code (en.js) and the dictionary (i18n.js) load only when needed */
-var B="42e4c4c551";
+var B="5ec3e6067d";
 var L="";try{L=localStorage.getItem("mtm_lang")||"";}catch(e){}
 try{var h=(location.hash||"").match(/lang=(th|en)/);if(h)L=h[1];}catch(e){}
 if(L!=="th"&&L!=="en")L="th";

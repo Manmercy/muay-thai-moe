@@ -13,6 +13,9 @@ echo '<title>Muay Thai Moe Demo</title>'
 echo '<link rel="manifest" href="manifest.webmanifest"><meta name="theme-color" content="#141020"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="apple-mobile-web-app-title" content="Muay Thai Moe"><link rel="apple-touch-icon" href="a/icon-180.png">'
 echo '<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600;700&family=IBM+Plex+Sans+Thai:wght@400;500;600;700&family=Pixelify+Sans:wght@500;700&display=swap">'
 echo '<style>'; cat src/style.css; echo '</style></head><body>'
+# v1.91.28: sprite sheets, special moves and NPC portraits the game can quietly fetch ahead of time
+ART=$(cd a && ls | grep -E '(_sheet|_special)\.webp$|^npc_.*\.webp$' | sed 's/.*/"&"/' | paste -sd, -)
+echo "<script>window.__MTM_ART=[$ART];</script>"
 echo '<div id="app"></div><div id="live" aria-live="polite" role="status"></div>'
 echo '<script type="text/plain" id="js-th">'; js ""; echo '</script>'
 echo '<script>'; sed "s/__BUILD__/$BUILD/" src/boot.js; echo '</script>'
