@@ -259,7 +259,7 @@ const RG_PSP={chiangrai:["ศอกวัดร่องขุ่น","elbow",{d
  udon:["เตะบัวแดงบาน","kick",{dmg:{kick:.10}}],khonkaen:["เข่าทอไหมขอนแก่น","knee",{dmg:{knee:.08},regen:.06}],buriram:["หมัดสายฟ้าพนมรุ้ง","punch",{dmg:{punch:.10}}],ubon:["ศอกเทียนพรรษา","elbow",{dmg:{elbow:.08},hit:{elbow:.02}}],
  lopburi:["หมัดลิงหลอกเจ้า","punch",{dmg:{punch:.08},evade:.01}],suphan:["เตะแม่ไม้สุพรรณ","kick",{dmg:{kick:.10}}],phetchaburi:["เข่าเขาวังเมืองเพชร","knee",{dmg:{knee:.10}}],chanthaburi:["หมัดเปลือกมังคุด","punch",{dmg:{punch:.08},clDef:1}],
  chumphon:["เตะนางนวลโฉบ","kick",{dmg:{kick:.08},evade:.01}],surat:["ศอกเปลือกหอยดอนสัก","elbow",{dmg:{elbow:.10}}],nakhonsi:["หมัดหนังตะลุง","punch",{dmg:{punch:.10}}],songkhla:["เตะนางเงือกสมิหลา","kick",{dmg:{kick:.08},regen:.06}]};
-const RG_JOIN_LVDROP=10,RG_JOIN_STAT=.9;
+const RG_JOIN_LVDROP=5,RG_JOIN_STAT=.9;
 const RG_SK_ADJ={north:1.65,isan:.75,central:.7,south:.85},RG_CH_SKLV=35; /* v1.91.45: champions now fight with a learned tree — their raw strength comes down by this much so the win rates stay where Man set them */
 const RG_TRAIT2={baibua:{name:"ใจนิ่งดั่งบึงบัว",desc:"ฟื้นแรงระหว่างยกเร็วขึ้น 10% · เลือดต่ำกว่า 45% แม่นขึ้น 4%",fx:{regen:.1,clutch:.04}},
   tabtim:{name:"หัวเราะสู้",desc:"ใช้แรงออกอาวุธน้อยลง 6% · กำลังใจมีผลในไฟต์มากขึ้น 2%",fx:{staSave:.06,mor:.02}},
@@ -1679,14 +1679,14 @@ Object.assign(REGION,{
     const m=R.meet||{};for(const r of RG_ORDER){const cid=RG_CID0[r];if(rgEd(G)>=2&&!(R.nc&&R.nc[r])&&!(R.champ[r]&&R.champ[r].state==="won"))continue;if(!R.joined[cid]&&!(R.joinPend&&R.joinPend.cid===cid)&&!R.offers.includes(cid)&&!R.joinQ.includes(cid)&&!(R.joinGone||{})[cid]&&(m[cid]||0)>=RG_JOIN_MIN)R.joinQ.push(cid);}
     R.joinQ.sort((a,b)=>(m[b]||0)-(m[a]||0));
     if(R.joinQ.length&&now>=(R.joinNext||0)){const cid=R.joinQ.shift(),r=RG_ORDER.find(x=>RG_CID0[x]===cid);R.offers.push(cid);R.joinNext=now+RG_JOIN_GAP;
-      addMail(G,{kind:"letter",from:`${RG[r].champ} · แชมป์${RG[r].name}`,title:`ใบสมัครจาก${RG[r].champ}`,body:RG_JOIN[cid].letter+`\n\n(สัญญา: ค่าเซ็น ${fmt(RG_JOIN_FEE)} · ค่าจ้าง ${fmt(RG_JOIN_WAGE)}/สัปดาห์ · ลักษณะพิเศษ: ${RG_TRAIT[cid].name} · ย้ายมาแล้วต้องปั้นใหม่: เลเวลลดลง 10 ค่าพลังลดลงเล็กน้อย · ดูสัญญาที่หน้าค่าย › ครู & นักมวย)`});}},
+      addMail(G,{kind:"letter",from:`${RG[r].champ} · แชมป์${RG[r].name}`,title:`ใบสมัครจาก${RG[r].champ}`,body:RG_JOIN[cid].letter+`\n\n(สัญญา: ค่าเซ็น ${fmt(RG_JOIN_FEE)} · ค่าจ้าง ${fmt(RG_JOIN_WAGE)}/สัปดาห์ · ลักษณะพิเศษ: ${RG_TRAIT[cid].name} · ย้ายมาแล้วต้องปั้นใหม่: เลเวลลดลง 5 ค่าพลังลดลงเล็กน้อย · ดูสัญญาที่หน้าค่าย › ครู & นักมวย)`});}},
   joinOk(G,cid){const R=G.region;if(!R.offers||!R.offers.includes(cid)||(R.joined&&R.joined[cid]))return "ไม่มีสัญญานี้";if(R.joinPend)return "รอคนที่ตอบรับไปก่อนหน้าย้ายมาก่อน";{const r=RG_ORDER.find(x=>RG_CID0[x]===cid);if(rgEd(G)>=2&&!(R.nc&&R.nc[r])&&R.champ[r]&&R.champ[r].state!=="won")return "เธอกำลังป้องกันแชมป์ภาค · ชนะถ้วยครั้งนี้ก่อน";}
     if(this.joinRooms(G)>=dormRooms(G))return `ห้องพักเต็ม (${dormRooms(G)} ห้อง) · อัปเกรดหอพักก่อน`;if(G.cash<RG_JOIN_FEE)return `เงินไม่พอ · ค่าเซ็น ${fmt(RG_JOIN_FEE)}`;return "";},
   joinAccept(G,cid){const why=this.joinOk(G,cid);if(why){toast(why);return;}const R=G.region;G.cash-=RG_JOIN_FEE;R.offers=R.offers.filter(x=>x!==cid);R.joinPend={cid,abs:gameWeek(G)+1};
     G.log=G.log||[];G.log.push(`เซ็นสัญญากับ${G.F[cid]?G.F[cid].name:cid} · ค่าเซ็น ${fmt(RG_JOIN_FEE)} · ย้ายมาสัปดาห์หน้า`);toast(`เซ็นสัญญาแล้ว · ${G.F[cid]?G.F[cid].name:""}ย้ายมาสัปดาห์หน้า`);},
   joinApply(G,cid){if(G.region.joined&&G.region.joined[cid])return; /* v1.91.35: never twice */const R=G.region,r=RG_ORDER.find(x=>RG_CID0[x]===cid),f=G.F[cid]||this.champFighter(G,r),pair=G.F[RG_CH[r].pair],now=gameWeek(G);
     f.camp="player";f.canon=true;f.met=true;f.div=(pair&&(pair.div==="A"||pair.div==="B"))?pair.div:"A";
-    f.lvl=Math.max(10,(f.rgSkLv||f.lvl||14)-RG_JOIN_LVDROP);for(const k in f.a)f.a[k]=Math.round(Math.min(20,f.a[k])*RG_JOIN_STAT*10)/10;f.vet=0; /* v1.91.45 (Man): she has to be rebuilt — level −10, stats ×0.9, ring craft stays behind */
+    f.lvl=Math.max(10,(f.rgSkLv||f.lvl||14)-RG_JOIN_LVDROP);for(const k in f.a)f.a[k]=Math.round(Math.min(20,f.a[k])*RG_JOIN_STAT*10)/10;f.vet=0; /* v1.91.45 (Man): she has to be rebuilt — level −5, stats ×0.9, ring craft stays behind */
     f.spv=2;f.xp=0;f.wage=RG_JOIN_WAGE;f.fee=0;f.potential=20;f.fatigue=0;f.injury=0;f.morale=80;f.trust=Math.max(f.trust||0,50);
     f.bond=Math.max(f.bond||0,Math.max(30,rgBondOf(R.meet[cid])));f.joinAbs=now;f.lastTouch=absWeek(G);delete f.rgKey;delete f.rgT;delete f.rgSty;
     G.rank=G.rank||{A:{},B:{}};G.rank[f.div]=G.rank[f.div]||{};if(!G.rank[f.div][f.id])G.rank[f.div][f.id]={pts:0,w:0,l:0,d:0};
@@ -1726,7 +1726,7 @@ Object.assign(REGION,{
       return `<div class="rcard"><button class="rface" data-act="fighter" data-id="${cid}" aria-label="ดูข้อมูล ${esc(f.name)}"><img src="${faceSrc(cid,"happy")}" alt=""></button>
        <div class="rinfo"><b>${esc(f.name)} <small>แชมป์${esc(RG[r].name)}</small></b><span class="meta">ลักษณะพิเศษ <b class="goldt">${esc(T.name)}</b> · ${esc(T.desc)}</span><span class="meta">ค่าเซ็น ${fmt(RG_JOIN_FEE)} · ค่าจ้าง ${fmt(RG_JOIN_WAGE)}/สัปดาห์ · ห้องพัก ${this.joinRooms(G)}/${dormRooms(G)}</span>${why?`<span class="meta redt">${esc(why)}</span>`:""}</div>
        <div class="rbtns"><button class="btn sm" data-act="fighter" data-id="${cid}">ดูข้อมูล</button><button class="btn sm gold" data-act="rgjoin" data-v="${cid}" ${why?"disabled":""}>เซ็นสัญญา</button></div></div>`;}).join("")}
-     <p class="meta">ย้ายค่ายแล้วร่างกายยังไม่เข้าที่ · มาถึงเลเวลลดลง 10 ค่าพลังลดลงเล็กน้อย ต้องปั้นต่อในค่ายเรา (พลังแฝงและลักษณะพิเศษติดมาเต็ม) · ไม่ตอบก็ได้ สัญญายังรออยู่</p></section>`;},
+     <p class="meta">ย้ายค่ายแล้วร่างกายยังไม่เข้าที่ · มาถึงเลเวลลดลง 5 ค่าพลังลดลงเล็กน้อย ต้องปั้นต่อในค่ายเรา (พลังแฝงและลักษณะพิเศษติดมาเต็ม) · ไม่ตอบก็ได้ สัญญายังรออยู่</p></section>`;},
   /* the camp-wide side of each champion's trait, once a week */
   joinPerks(G){const J=(G.region&&G.region.joined)||{},mine=roster(G);
     for(const cid of Object.keys(J)){const f=G.F[cid];if(!f||f.camp!=="player"||isAway(G,cid))continue;

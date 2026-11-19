@@ -15,7 +15,7 @@ const RG_PSP={chiangrai:["White Temple Elbow","elbow",{dmg:{elbow:.10}}],nan:["N
  udon:["Red Lotus Bloom Kick","kick",{dmg:{kick:.10}}],khonkaen:["Silk-Weaver Knee of Khon Kaen","knee",{dmg:{knee:.08},regen:.06}],buriram:["Phanom Rung Lightning Punch","punch",{dmg:{punch:.10}}],ubon:["Candle Festival Elbow","elbow",{dmg:{elbow:.08},hit:{elbow:.02}}],
  lopburi:["Monkey Fools the Master Punch","punch",{dmg:{punch:.08},evade:.01}],suphan:["Suphan Master-Move Kick","kick",{dmg:{kick:.10}}],phetchaburi:["Khao Wang Knee of Phetchaburi","knee",{dmg:{knee:.10}}],chanthaburi:["Mangosteen Shell Punch","punch",{dmg:{punch:.08},clDef:1}],
  chumphon:["Swooping Gull Kick","kick",{dmg:{kick:.08},evade:.01}],surat:["Don Sak Oyster Shell Elbow","elbow",{dmg:{elbow:.10}}],nakhonsi:["Shadow Puppet Punch","punch",{dmg:{punch:.10}}],songkhla:["Samila Mermaid Kick","kick",{dmg:{kick:.08},regen:.06}]};
-const RG_JOIN_LVDROP=10,RG_JOIN_STAT=.9;
+const RG_JOIN_LVDROP=5,RG_JOIN_STAT=.9;
 const RG_SK_ADJ={north:1.65,isan:.75,central:.7,south:.85},RG_CH_SKLV=35; /* v1.91.45: champions now fight with a learned tree — their raw strength comes down by this much so the win rates stay where Man set them */
 const RG_TRAIT2={baibua:{name:"Still as the Lotus Pond",desc:"Recovers 10% more between rounds · 4% more accurate below 45% HP",fx:{regen:.1,clutch:.04}},
   tabtim:{name:"Laugh It Off",desc:"Strikes cost 6% less stamina · morale counts 2% more in fights",fx:{staSave:.06,mor:.02}},
@@ -1447,14 +1447,14 @@ Object.assign(REGION,{
     if(R.joinQ.length&&now>=(R.joinNext||0)){const cid=R.joinQ.shift(),r=RG_ORDER.find(x=>RG_CID0[x]===cid);R.offers.push(cid);R.joinNext=now+RG_JOIN_GAP;
       addMail(G,{kind:"letter",from:`${RG[r].champ} · Champion of ${RG[r].name}`,title:`Application from ${RG[r].champ}`,body:RG_JOIN[cid].letter+`
 
-(Contract: signing fee ${fmt(RG_JOIN_FEE)} · wage ${fmt(RG_JOIN_WAGE)}/week · trait: ${RG_TRAIT[cid].name} · she will need rebuilding: 10 levels lower, slightly lower stats · see the contract on the Camp page › Coaches & Fighters)`});}},
+(Contract: signing fee ${fmt(RG_JOIN_FEE)} · wage ${fmt(RG_JOIN_WAGE)}/week · trait: ${RG_TRAIT[cid].name} · she will need rebuilding: 5 levels lower, slightly lower stats · see the contract on the Camp page › Coaches & Fighters)`});}},
   joinOk(G,cid){const R=G.region;if(!R.offers||!R.offers.includes(cid)||(R.joined&&R.joined[cid]))return "No such contract";if(R.joinPend)return "Wait for the one who already said yes to move in first";{const r=RG_ORDER.find(x=>RG_CID0[x]===cid);if(rgEd(G)>=2&&!(R.nc&&R.nc[r])&&R.champ[r]&&R.champ[r].state!=="won")return "She is defending her regional title · win this edition's cup first";}
     if(this.joinRooms(G)>=dormRooms(G))return `Rooms full (${dormRooms(G)} rooms) · upgrade the dorm first`;if(G.cash<RG_JOIN_FEE)return `Not enough cash · signing fee ${fmt(RG_JOIN_FEE)}`;return "";},
   joinAccept(G,cid){const why=this.joinOk(G,cid);if(why){toast(why);return;}const R=G.region;G.cash-=RG_JOIN_FEE;R.offers=R.offers.filter(x=>x!==cid);R.joinPend={cid,abs:gameWeek(G)+1};
     G.log=G.log||[];G.log.push(`Signed a contract with ${G.F[cid]?G.F[cid].name:cid} · signing fee ${fmt(RG_JOIN_FEE)} · moves in next week`);toast(`Contract signed · ${G.F[cid]?G.F[cid].name:""} moves in next week`);},
   joinApply(G,cid){if(G.region.joined&&G.region.joined[cid])return; /* v1.91.35: never twice */const R=G.region,r=RG_ORDER.find(x=>RG_CID0[x]===cid),f=G.F[cid]||this.champFighter(G,r),pair=G.F[RG_CH[r].pair],now=gameWeek(G);
     f.camp="player";f.canon=true;f.met=true;f.div=(pair&&(pair.div==="A"||pair.div==="B"))?pair.div:"A";
-    f.lvl=Math.max(10,(f.rgSkLv||f.lvl||14)-RG_JOIN_LVDROP);for(const k in f.a)f.a[k]=Math.round(Math.min(20,f.a[k])*RG_JOIN_STAT*10)/10;f.vet=0; /* v1.91.45 (Man): she has to be rebuilt — level −10, stats ×0.9, ring craft stays behind */
+    f.lvl=Math.max(10,(f.rgSkLv||f.lvl||14)-RG_JOIN_LVDROP);for(const k in f.a)f.a[k]=Math.round(Math.min(20,f.a[k])*RG_JOIN_STAT*10)/10;f.vet=0; /* v1.91.45 (Man): she has to be rebuilt — level −5, stats ×0.9, ring craft stays behind */
     f.spv=2;f.xp=0;f.wage=RG_JOIN_WAGE;f.fee=0;f.potential=20;f.fatigue=0;f.injury=0;f.morale=80;f.trust=Math.max(f.trust||0,50);
     f.bond=Math.max(f.bond||0,Math.max(30,rgBondOf(R.meet[cid])));f.joinAbs=now;f.lastTouch=absWeek(G);delete f.rgKey;delete f.rgT;delete f.rgSty;
     G.rank=G.rank||{A:{},B:{}};G.rank[f.div]=G.rank[f.div]||{};if(!G.rank[f.div][f.id])G.rank[f.div][f.id]={pts:0,w:0,l:0,d:0};
@@ -1494,7 +1494,7 @@ Object.assign(REGION,{
       return `<div class="rcard"><button class="rface" data-act="fighter" data-id="${cid}" aria-label="View info ${esc(f.name)}"><img src="${faceSrc(cid,"happy")}" alt=""></button>
        <div class="rinfo"><b>${esc(f.name)} <small>Champion of ${esc(RG[r].name)}</small></b><span class="meta">Trait <b class="goldt">${esc(T.name)}</b> · ${esc(T.desc)}</span><span class="meta">Signing fee ${fmt(RG_JOIN_FEE)} · wage ${fmt(RG_JOIN_WAGE)}/week · rooms ${this.joinRooms(G)}/${dormRooms(G)}</span>${why?`<span class="meta redt">${esc(why)}</span>`:""}</div>
        <div class="rbtns"><button class="btn sm" data-act="fighter" data-id="${cid}">Details</button><button class="btn sm gold" data-act="rgjoin" data-v="${cid}" ${why?"disabled":""}>Sign</button></div></div>`;}).join("")}
-     <p class="meta">A new camp takes some settling in · she arrives 10 levels lower with slightly lower stats, to be built up again here (her hidden power and trait come in full) · no need to answer now, the contract will wait</p></section>`;},
+     <p class="meta">A new camp takes some settling in · she arrives 5 levels lower with slightly lower stats, to be built up again here (her hidden power and trait come in full) · no need to answer now, the contract will wait</p></section>`;},
   /* the camp-wide side of each champion's trait, once a week */
   joinPerks(G){const J=(G.region&&G.region.joined)||{},mine=roster(G);
     for(const cid of Object.keys(J)){const f=G.F[cid];if(!f||f.camp!=="player"||isAway(G,cid))continue;
