@@ -1019,7 +1019,7 @@ const NL={
  varya:{name:"Varya Sokolova",nick:"Red Bear",art:"Sambo + MMA",col:"#d43a3a",sprite:"nl_varya",sty:"inside",
   shape:{clinch:3,power:3,dur:2,stamina:1,kick:-3,foot:-2,speed:-1},grap:18,sub:15,tdName:["Double Leg","Hip Throw","Suplex"],tdSty:["leg","hip","suplex"],subName:["Heel Hook","Kneebar"],pfx:{gnp:.25},
   nlsk:[{id:"nl_double",name:"Double Leg",k:"td"},{id:"nl_suplex",name:"Suplex",k:"td"},{id:"nl_heelhook",name:"Heel Hook",k:"sub"}],
-  spl:[{img:"nl_varya_special",def:"Double Leg",td:1}] /* v1.91.65: her drawn throw is a shoot-and-drive, so it is called by that name */,tip:"Big throws and leg locks · once she drags you down she never stops pounding"},
+  spl:[{code:"suplex",def:"Suplex",td:1}] /* v1.91.67 (Man): her signature throw is the suplex — code-animated from her own frames until a drawn suplex sheet arrives (the double-leg sheet nl_varya_special stays in the files) */,tip:"Big throws and leg locks · once she drags you down she never stops pounding"},
  meili:{name:"Meili Sae-Tang",nick:"Dragon of Yaowarat",art:"Kung Fu",col:"#e0662a",sprite:"nl_meili",sty:"footwork",
   shape:{kick:4,speed:3,foot:2,punch:1,clinch:-4,knee:-3,dur:-2},grap:0,sub:0,pfx:{dmg:{kick:.12},evade:.02},
   nlsk:[{id:"nl_shadowless",name:"Shadowless Kick",k:"atk",w:"kick"},{id:"nl_inch",name:"One-Inch Punch",k:"atk",w:"punch"},{id:"nl_crane",name:"Crane Stance",k:"def"}],

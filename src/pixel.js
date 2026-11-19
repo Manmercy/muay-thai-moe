@@ -494,6 +494,9 @@ function spK(se,sp){const fr=sp.fr,hi=sp.hi,hold=sp.hold;if(se<hi*fr)return Math
 const SP_COL={baibua:"#ff7ab8",tabtim:"#ff3b3b",alicia:"#ffd34a",chaba:"#2ee6c8",nl_nia:"#ff8a2a",nl_varya:"#ff3060",nl_meili:"#46d1ff",nl_rosa:"#ff4fd2"};
 /* jagged bolt from (x0,y0) to (x1,y1) */
 /* v1.91.66 (Man): skill effects grow with the skill — grade 1 (row 0–1) … grade 5 (Lv.34–42 roots). Guard skills wear a shield aura while their guard burst lasts; heals glow green */
+const SUP={dash:200,grab:300,imp:780,len:1350};
+/* thrower's arch (radians, 0 = upright) and the hip she pivots on */
+function supArch(e){if(e<SUP.grab)return 0;if(e<SUP.imp){const p=(e-SUP.grab)/(SUP.imp-SUP.grab);return 1.25*p*p*(1.6-.6*p);}if(e<SUP.imp+260)return 1.25;return 1.25*Math.max(0,1-(e-SUP.imp-260)/(SUP.len-SUP.imp-260));}
 const skGrade=row=>row>=8?5:row>=6?4:row>=4?3:row>=2?2:1;
 const SK_KCOL={def:"#5ab8ff",rec:"#4fe08a",td:"#ff9a3c",sub:"#c070ff"};
 function fsAura(x,s,t,H,S){const foot=H*.8,h=H*.5,cy=foot-h*.45;
@@ -567,7 +570,7 @@ const FS={cv:null,ctx:null,bg:null,A:null,B:null,fx:[],shake:0,
     if(e.ev==="gnp"){atk.anim="punch";atk.t0=now;def.flash=now;this.shake=6;this.fx.push({x:def.x,y:320,t0:now,txt:["ตุ้บ!","ปั้ก!","โครม!"][Math.floor(Math.random()*3)]});}
     if(e.ev==="subtry"){this.shake=4;this.fx.push({x:(atk.x+def.x)/2,y:300,t0:now,txt:"ล็อก!",miss:true});}
     if(e.ev==="tap"){def.tap=now;atk.win=true;this.shake=10;this.fx.push({x:def.x,y:300,t0:now,txt:"ตบพื้น!",big:true,cut:true});}
-    if(e.ev==="standup"||e.ev==="reset"){for(const q of [atk,def]){q.gnd=false;q.top=false;q.tap=0;q.anim="guard";}this.fx.push({x:(atk.x+def.x)/2,y:270,t0:now,txt:e.ev==="reset"?"แยก!":"ลุก!",miss:true});}
+    if(e.ev==="standup"||e.ev==="reset"){for(const q of [atk,def]){if(q.base0!=null){q.base=q.base0;q.base0=null;}q.lieAng=null;q.gnd=false;q.top=false;q.tap=0;q.anim="guard";}this.fx.push({x:(atk.x+def.x)/2,y:270,t0:now,txt:e.ev==="reset"?"แยก!":"ลุก!",miss:true});}
     if(e.ev==="sprawl"){def.x+=def.side==="A"?40:-40;atk.anim="guard";this.fx.push({x:atk.x,y:270,t0:now,txt:"หนีทุ่ม!",miss:true});}
     if(e.ev==="ko"&&(def.gnd||atk.top)){def.gnd=false;atk.top=false;}
   },
@@ -584,7 +587,10 @@ const FS={cv:null,ctx:null,bg:null,A:null,B:null,fx:[],shake:0,
     const tier=spTier(s.f),T=SP_TIER[tier];
     if(sp.mv&&sp.mv.img){s.anim="special";const hi=SP_HIT[sp.mv.img]??5;s.sp={im:img(loyImg(s.f.id,sp.mv.img,s.f)+".webp"),t0:now,tier,fr:T.fr,hold:T.hold,hi,len:T.fr*8+T.hold+200,hit:false,dodge:!!(sp.mv.dodge||sp.mv.noHit),col:SP_COL[s.f.id]||(s.f&&s.f.color)||"#ffd34a"};this.shake=sp.mv.dodge?6:tier===3?20:tier===2?16:14;if(tier>1){this.heat={tier,t0:now,side:sp.side,len:s.sp.len};}
       if(sp.mv.td){const o=s===this.A?this.B:this.A,P=s.sp,g=(TH_GRAB[sp.mv.img]??2);if(o&&o.gnd){o.throwT=now;o.slam=false;o.th={st:thStyle(s.f),grab:g*P.fr,imp:P.hi*P.fr,hide:!!TH_HIDE[sp.mv.img]};P.td={o,gap:TH_HIDE[sp.mv.img]?34:o.th.st==="slam"?70:88};}}return;}
-    if(tier>1)this.heat={tier,t0:now,side:sp.side,len:FX_LEN};
+    if(tier>1)this.heat={tier,t0:now,side:sp.side,len:SUP.len};
+    /* v1.91.67 (Man): a real suplex, animated in code from the thrower's own frames until a drawn sheet arrives —
+       she closes in, clinches, arches back into a bridge and carries her opponent over her head, head-first into the mat */
+    if(sp.mv&&sp.mv.code==="suplex"){const o=s===this.A?this.B:this.A;if(o){const dir=Math.sign(o.x-s.x)||1;s.anim="suplex";s.sx={t0:now,dir,ox:o.x,tier};{o.gnd=true;o.throwT=now;o.slam=false;o.thrownBy=tier;o.th={st:"suplex2",grab:SUP.grab,imp:SUP.imp,by:s};}this.shake=6;return;}}
     /* no drawn sheet for this move: the normal row, dressed up in code — aura, afterimages, speed lines, a dash and an impact ring */
     const kind=sp.kind||"atk",row=kind==="def"?"guard":kind==="rec"?"win":(sp.w==="kick"||sp.w==="knee")?"knee":"punch";
     s.anim="fx";s.fx={t0:now,row,kind,col:sp.col||(kind==="def"?"#5ab0ff":kind==="rec"?"#4fe08a":(s.f&&s.f.color)||"#ffd34a"),hit:false};if(kind==="atk")s.x+=s.side==="A"?40:-40;this.shake=kind==="atk"?8:4;},
@@ -620,6 +626,11 @@ const FS={cv:null,ctx:null,bg:null,A:null,B:null,fx:[],shake:0,
           if(atk&&!X.hit&&se>420){X.hit=true;const o=s===S.A?S.B:S.A;S.shake=16;S.fx.push({ring:1,x:o.x,y:foot-h*.5,t0:t,col:X.col});S.flashAt=t;}
           if(X.kind==="rec"&&Math.floor(se/120)%2)for(let i=0;i<5;i++){const a=se/300+i*1.26;x.fillStyle=X.col;x.fillRect(s.x+Math.cos(a)*h*.35-3,foot-h*.5+Math.sin(a)*h*.4-se*.05%40,6,6);}
           continue;}}
+      if(s.anim==="suplex"){const X=s.sx,e=t-X.t0,foot=H*.8,h=H*.5,flip=s.side==="B";if(e>SUP.len){s.anim=s.win?"win":"guard";}
+        else{if(e<SUP.grab){const tx=X.ox-X.dir*h*.24;s.x+=(tx-s.x)*.35;}
+          const ra=-X.dir*supArch(e)*.9,col=e<SUP.dash?1:e<SUP.imp?3:e<SUP.imp+260?3:Math.min(3,Math.floor((e-SUP.imp-260)/120));
+          x.fillStyle="rgba(0,0,0,.3)";x.beginPath();x.ellipse(s.x,foot,h*.25,h*.04,0,0,7);x.fill();
+          x.save();x.translate(s.x,foot);x.rotate(ra);x.translate(-s.x,-foot);x.imageSmoothingEnabled=true;drawFrame(x,sheetFor(s.f),ROW[e<SUP.dash?"walk":"punch"],col,s.x,foot,h,flip);x.restore();continue;}}
       if(s.anim==="special"){const P=s.sp,se=t-P.t0,im=P.im,len=P.len||SP_LEN;if(se>len||!im||!im.naturalWidth){s.anim=s.win?"win":"guard";}
         else{const k=P.fr?spK(se,P):Math.min(7,Math.floor(se/SP_FRAME)),foot=H*.8,h=H*.5,flip=s.side==="B",dir=flip?-1:1,tier=P.tier||1,col=P.col||"#ffd34a",o=s===S.A?S.B:S.A;
           if(P.td&&P.td.o){/* the thrower closes the distance — she has to get her hands on her */const tx=P.td.o.x+(s.side==="A"?-1:1)*P.td.gap;s.x+=(tx-s.x)*.3;}
@@ -649,8 +660,12 @@ const FS={cv:null,ctx:null,bg:null,A:null,B:null,fx:[],shake:0,
       if(s.top){const o=s===S.A?S.B:S.A;s.x+=((o.x+(s.side==="A"?-46:46))-s.x)*.2;}
       x.save();
       if(s.gnd&&!s.ko){/* v1.91.63 (Man): a real throw — she is lifted off her feet, flipped through the air and slammed down (dust, shake, thud) */
-        const TH0=s.th||{st:"hip",grab:0,imp:380},te=s.throwT?t-s.throwT:1e9,sg=flip?1:-1,fin=sg*Math.PI/2,big=s.thrownBy===3;
-        if(te<TH0.imp){const o=s===S.A?S.B:S.A,tw=o?Math.sign(o.x-s.x)||-sg:-sg,gap=o?Math.abs(o.x-s.x):200;
+        const TH0=s.th||{st:"hip",grab:0,imp:380},te=s.throwT?t-s.throwT:1e9,sg=flip?1:-1,fin=s.lieAng??(sg*Math.PI/2),big=s.thrownBy===3;
+        if(TH0.st==="suplex2"&&TH0.by&&te<TH0.imp){const A=TH0.by,X=A.sx||{dir:1},d=X.dir;
+          if(te>=TH0.grab){/* carried: her waist rides the thrower's arms as the thrower arches back */const ra=-d*supArch(te)*.9,r=-d*supArch(te)*1.9,hx=A.x+Math.sin(ra)*h*.3*-1*-1,hy=foot-Math.cos(ra)*h*.3,ox=d*h*.2,oy=-h*.12,px=hx+ox*Math.cos(r)-oy*Math.sin(r),py=hy+ox*Math.sin(r)+oy*Math.cos(r);
+            x.translate(px,py);x.rotate(r);x.translate(-s.x,-(foot-h*.38));}}
+        else if(TH0.st==="suplex2"&&TH0.by&&!s.slam){/* landed behind the thrower, head first */const A=TH0.by,X=A.sx||{dir:1},d=X.dir;s.base0=s.base0??s.base;s.x=A.x-d*h*.42;s.base=s.x;s.lieAng=-d*Math.PI/2;}
+        if(TH0.st==="suplex2"&&TH0.by&&te<TH0.imp){}else if(te<TH0.imp){const o=s===S.A?S.B:S.A,tw=o?Math.sign(o.x-s.x)||-sg:-sg,gap=o?Math.abs(o.x-s.x):200;
           if(TH0.hide&&te>=TH0.grab){x.restore();continue;}
           if(te<TH0.grab){/* still on her feet until the thrower's hands land */x.translate(s.x+tw*Math.min(14,te/20),foot);x.translate(-s.x,-foot);}
           else{const p=Math.min(1,(te-TH0.grab)/Math.max(60,TH0.imp-TH0.grab)),ease=p*p*(3-2*p),st=TH0.st;let dx=0,lift=0,ang=0;

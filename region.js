@@ -1019,7 +1019,7 @@ const NL={
  varya:{name:"วาร์ยา โซโคโลวา",nick:"หมีแดง",art:"แซมโบ้ + MMA",col:"#d43a3a",sprite:"nl_varya",sty:"inside",
   shape:{clinch:3,power:3,dur:2,stamina:1,kick:-3,foot:-2,speed:-1},grap:18,sub:15,tdName:["ดับเบิลเลก","ทุ่มสะโพก","ซูเพล็กซ์"],tdSty:["leg","hip","suplex"],subName:["ฮีลฮุก","นีบาร์"],pfx:{gnp:.25},
   nlsk:[{id:"nl_double",name:"ดับเบิลเลก",k:"td"},{id:"nl_suplex",name:"ซูเพล็กซ์",k:"td"},{id:"nl_heelhook",name:"ฮีลฮุก",k:"sub"}],
-  spl:[{img:"nl_varya_special",def:"ดับเบิลเลก",td:1}] /* v1.91.65: her drawn throw is a shoot-and-drive, so it is called by that name */,tip:"ทุ่มแรงและล็อกขาเก่ง · ถ้าดึงลงพื้นได้จะทุบไม่หยุด"},
+  spl:[{code:"suplex",def:"ซูเพล็กซ์",td:1}] /* v1.91.67 (Man): her signature throw is the suplex — code-animated from her own frames until a drawn suplex sheet arrives (the double-leg sheet nl_varya_special stays in the files) */,tip:"ทุ่มแรงและล็อกขาเก่ง · ถ้าดึงลงพื้นได้จะทุบไม่หยุด"},
  meili:{name:"เหม่ยลี่ แซ่ตั้ง",nick:"มังกรเยาวราช",art:"กังฟู",col:"#e0662a",sprite:"nl_meili",sty:"footwork",
   shape:{kick:4,speed:3,foot:2,punch:1,clinch:-4,knee:-3,dur:-2},grap:0,sub:0,pfx:{dmg:{kick:.12},evade:.02},
   nlsk:[{id:"nl_shadowless",name:"เตะไร้เงา",k:"atk",w:"kick"},{id:"nl_inch",name:"หมัดหนึ่งนิ้ว",k:"atk",w:"punch"},{id:"nl_crane",name:"ท่ากระเรียน",k:"def"}],
