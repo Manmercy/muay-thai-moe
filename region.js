@@ -1340,7 +1340,7 @@ const REGION={
         const P=R.pc&&R.pc[p];return `<div class="rg-prov"><span><b>${esc(D.name)}</b> <small>${D.km} กม. · ${nights?`ค้าง ${nights} คืน`:"ไปกลับวันเดียว"}</small>${P?this.histHTML(P,p,`แชมป์จังหวัด: ${rgNm(P,p)}`):""}</span>${got?`<span class="rg-belt">🏅 ได้เข็มขัด</span>`:`<button class="btn sm${T||!nx?"":" primary"}" data-act="rgplan" data-v="${p}" ${T||!nx?"disabled":""}>วางแผน</button>`}</div>`;}).join("");
       const fin=this.finRow(r);
       return `<section class="px card rg-reg" style="--rc:${C.col}"><h3>${esc(C.name)}</h3><div class="rg-champ">แชมป์ภาค: <b>${esc(C.champ)}</b> · ${esc(C.nick)}${R.nc&&R.nc[r]?this.histHTML(R.nc[r],R.nc[r].home,"ประวัติแชมป์ภาคคนใหม่"):""}</div>${rows}${fin}</section>`;}).join("");
-    return `<section class="px card rg-head"><div><h3>ศึกชิงเจ้าสี่ภาค</h3><span class="meta">ครั้งที่ ${R.edition||1}</span></div>
+    return `<section class="px card rg-head"><div><h3>ศึกชิงเจ้าสี่ภาค</h3><span class="meta">ครั้งที่ ${R.edition||1}${this.nextEdTxt(G)}</span></div>
        <div class="rg-stats"><span class="pill gold">ถ้วย ${cups}/4</span><span class="pill">เข็มขัด ${belts}/16</span><span class="pill ${T?"red":nx?"green":""}">${T?`ทริป: ${esc(ROAD_DEST[T.dest].name)} · สัปดาห์ ${T.wk}`:nx?`เดินทางได้สัปดาห์ ${nx}`:"ปีนี้เดินทางไม่ได้แล้ว"}</span></div></section>
      ${!R.gala?`<p class="meta rg-gala">🎉 งานเปิดตัวศึกชิงเจ้าสี่ภาคที่กรุงเทพฯ ${R.galaAbs!=null&&gameWeek(G)<R.galaAbs?"จัดปลายสัปดาห์หน้า":"จัดปลายสัปดาห์นี้"} · ทั้งค่ายได้รับเชิญ</p>`:""}${!REGION_LIVE?`<p class="meta">โหมดทดสอบ: <button class="btn sm" data-act="rggala" data-v="gala">ดูงานเปิดตัว</button> ไฟต์ใต้ดินทดสอบ (กติกาเปิด): ${NL_ORDER.map(k=>`<button class="btn sm" data-act="nltest" data-v="${k}">${esc(NL[k].name)}</button>`).join(" ")}${(R.cups||[]).length?` <button class="btn sm" data-act="rggala" data-v="c1">ดูฉากซองเขียว</button>`:""}</p>`:""}
      ${this.finalCard(G)}${this.legendCard(G)}${this.joinCard(G)}${tripCard}${this.fuelLine(G)}<div class="rg-grid">${regs}</div>`;},
@@ -1486,7 +1486,7 @@ const RG0=Object.fromEntries(Object.entries(RG).map(([r,C])=>[r,{name:C.name,cha
 const RG_JOIN_MIN=12,RG_JOIN_GAP=4,RG_JOIN_FEE=350000,RG_JOIN_WAGE=5000; /* v1.91.30 (Man): a regional champion costs a fortune, and is worth it */
 /* v1.91.30 (Man): every champion brings something the camp wants — her ring perk stays, plus a camp-wide gift */
 const RG_TRAIT={
- baibua:{name:"ครูศอกท่าเสา",desc:"ศอกสวนแบบท่าเสาติดตัว (สวน +5% ศอก +12%) · สอนศอกให้ทั้งค่าย: นักมวยในค่ายศอกและการสวนขึ้นเองทุกสัปดาห์"},
+ baibua:{name:"ครูศอกท่าเสา",desc:"ศอกสวนแบบท่าเสาติดตัว (สวน +5% ศอก +12%) · สอนศอกให้ทั้งค่าย: นักมวยที่ศอก/การสวนยังไม่ถึง 17 ขึ้นเองทุกสัปดาห์"},
  tabtim:{name:"เสียงหัวเราะอีสาน",desc:"เตะแม่น หลบไว ติดตัว · อยู่ที่ไหนที่นั่นครึกครื้น: กำลังใจทุกคนในค่าย +2 ทุกสัปดาห์"},
  alicia:{name:"ดาวไลฟ์",desc:"หมัดหนักและกันวงในติดตัว · ไลฟ์ซ้อมกับค่าย: ได้ค่าโฆษณาทุกสัปดาห์ (ขึ้นกับชื่อเสียงค่าย) และชื่อเสียงค่อย ๆ ขึ้น"},
  chaba:{name:"มือซ่อมเงียบ",desc:"หลบไวและฟื้นแรงเร็วติดตัว · ดูแลคนเจ็บเหมือนดูแลพี่ชาย: นักมวยที่บาดเจ็บหายเร็วขึ้นสัปดาห์ละ 1 สัปดาห์"}};
@@ -1603,16 +1603,16 @@ Object.assign(REGION,{
   joinRooms(G){const R=G.region,J=R.joined||{};return CANON_IDS.filter(id=>G.F[id]&&G.F[id].camp==="player").length+Object.keys(J).filter(c=>G.F[c]&&G.F[c].camp==="player").length;},
   /* the champion's skill tree is her lineage's — the partner girl's tree (Tha Sao / Korat / Lopburi / Chaiya) */
   joinSkills(G){const J=(G.region&&G.region.joined)||{};for(const r of RG_ORDER){const cid=RG_CID0[r];if(J[cid]&&!SKILLS[cid]&&SKILLS[RG_CH[r].pair])SKILLS[cid]=SKILLS[RG_CH[r].pair];}},
-  joinWeekly(G){const R=G.region,F=R.final,now=gameWeek(G);if(!F||!F.won||now<(F.wonAbs||0)+3)return;R.joined=R.joined||{};R.offers=R.offers||[];R.joinQ=R.joinQ||[];
-    const m=R.meet||{};for(const r of RG_ORDER){const cid=RG_CID0[r];if(rgEd(G)>=2&&!(R.nc&&R.nc[r])&&!(R.champ[r]&&R.champ[r].state==="won"))continue;if(!R.joined[cid]&&!R.offers.includes(cid)&&!R.joinQ.includes(cid)&&!(R.joinGone||{})[cid]&&(m[cid]||0)>=RG_JOIN_MIN)R.joinQ.push(cid);}
+  joinWeekly(G){const R=G.region,F=R.final,now=gameWeek(G);if(!F||!F.won||now<(F.wonAbs||0)+3)return;R.joined=R.joined||{};R.offers=R.offers||[];R.joinQ=R.joinQ||[];R.offers=R.offers.filter(c=>!R.joined[c]);R.joinQ=R.joinQ.filter(c=>!R.joined[c]&&!(R.joinPend&&R.joinPend.cid===c));
+    const m=R.meet||{};for(const r of RG_ORDER){const cid=RG_CID0[r];if(rgEd(G)>=2&&!(R.nc&&R.nc[r])&&!(R.champ[r]&&R.champ[r].state==="won"))continue;if(!R.joined[cid]&&!(R.joinPend&&R.joinPend.cid===cid)&&!R.offers.includes(cid)&&!R.joinQ.includes(cid)&&!(R.joinGone||{})[cid]&&(m[cid]||0)>=RG_JOIN_MIN)R.joinQ.push(cid);}
     R.joinQ.sort((a,b)=>(m[b]||0)-(m[a]||0));
     if(R.joinQ.length&&now>=(R.joinNext||0)){const cid=R.joinQ.shift(),r=RG_ORDER.find(x=>RG_CID0[x]===cid);R.offers.push(cid);R.joinNext=now+RG_JOIN_GAP;
       addMail(G,{kind:"letter",from:`${RG[r].champ} · แชมป์${RG[r].name}`,title:`ใบสมัครจาก${RG[r].champ}`,body:RG_JOIN[cid].letter+`\n\n(สัญญา: ค่าเซ็น ${fmt(RG_JOIN_FEE)} · ค่าจ้าง ${fmt(RG_JOIN_WAGE)}/สัปดาห์ · ลักษณะพิเศษ: ${RG_TRAIT[cid].name} · ดูสัญญาที่หน้าค่าย › ครู & นักมวย)`});}},
-  joinOk(G,cid){const R=G.region;if(!R.offers||!R.offers.includes(cid))return "ไม่มีสัญญานี้";if(R.joinPend)return "รอคนที่ตอบรับไปก่อนหน้าย้ายมาก่อน";{const r=RG_ORDER.find(x=>RG_CID0[x]===cid);if(rgEd(G)>=2&&!(R.nc&&R.nc[r])&&R.champ[r]&&R.champ[r].state!=="won")return "เธอกำลังป้องกันแชมป์ภาค · ชนะถ้วยครั้งนี้ก่อน";}
+  joinOk(G,cid){const R=G.region;if(!R.offers||!R.offers.includes(cid)||(R.joined&&R.joined[cid]))return "ไม่มีสัญญานี้";if(R.joinPend)return "รอคนที่ตอบรับไปก่อนหน้าย้ายมาก่อน";{const r=RG_ORDER.find(x=>RG_CID0[x]===cid);if(rgEd(G)>=2&&!(R.nc&&R.nc[r])&&R.champ[r]&&R.champ[r].state!=="won")return "เธอกำลังป้องกันแชมป์ภาค · ชนะถ้วยครั้งนี้ก่อน";}
     if(this.joinRooms(G)>=dormRooms(G))return `ห้องพักเต็ม (${dormRooms(G)} ห้อง) · อัปเกรดหอพักก่อน`;if(G.cash<RG_JOIN_FEE)return `เงินไม่พอ · ค่าเซ็น ${fmt(RG_JOIN_FEE)}`;return "";},
   joinAccept(G,cid){const why=this.joinOk(G,cid);if(why){toast(why);return;}const R=G.region;G.cash-=RG_JOIN_FEE;R.offers=R.offers.filter(x=>x!==cid);R.joinPend={cid,abs:gameWeek(G)+1};
     G.log=G.log||[];G.log.push(`เซ็นสัญญากับ${G.F[cid]?G.F[cid].name:cid} · ค่าเซ็น ${fmt(RG_JOIN_FEE)} · ย้ายมาสัปดาห์หน้า`);toast(`เซ็นสัญญาแล้ว · ${G.F[cid]?G.F[cid].name:""}ย้ายมาสัปดาห์หน้า`);},
-  joinApply(G,cid){const R=G.region,r=RG_ORDER.find(x=>RG_CID0[x]===cid),f=G.F[cid]||this.champFighter(G,r),pair=G.F[RG_CH[r].pair],now=gameWeek(G);
+  joinApply(G,cid){if(G.region.joined&&G.region.joined[cid])return; /* v1.91.35: never twice */const R=G.region,r=RG_ORDER.find(x=>RG_CID0[x]===cid),f=G.F[cid]||this.champFighter(G,r),pair=G.F[RG_CH[r].pair],now=gameWeek(G);
     f.camp="player";f.canon=true;f.met=true;f.div=(pair&&(pair.div==="A"||pair.div==="B"))?pair.div:"A";
     f.lvl=Math.max(12,(f.lvl||14)-2);for(const k in f.a)f.a[k]=Math.max(12,Math.min(20,Math.round(f.a[k]*.92*10)/10));f.vet=0; /* v1.91.30 (Man): a small drop from her rival form, not 30% */
     f.sp=(f.sp||0)+f.lvl;f.xp=0;f.skills=f.skills||{};f.wage=RG_JOIN_WAGE;f.fee=0;f.potential=20;f.fatigue=0;f.injury=0;f.morale=80;f.trust=Math.max(f.trust||0,50);
@@ -1656,7 +1656,7 @@ Object.assign(REGION,{
   /* the camp-wide side of each champion's trait, once a week */
   joinPerks(G){const J=(G.region&&G.region.joined)||{},mine=roster(G);
     for(const cid of Object.keys(J)){const f=G.F[cid];if(!f||f.camp!=="player"||isAway(G,cid))continue;
-      if(cid==="baibua")for(const x of mine)if(x.id!==cid){const cap=stCap(x);for(const k of ["elbow","counter"])x.a[k]=Math.min(cap,Math.round((x.a[k]+.04)*100)/100);}
+      if(cid==="baibua")for(const x of mine)if(x.id!==cid){const cap=stCap(x);for(const k of ["elbow","counter"])if(x.a[k]<17)x.a[k]=Math.min(cap,Math.round((x.a[k]+.04)*100)/100);} /* she teaches the ones still learning */
       if(cid==="tabtim")for(const x of mine)x.morale=Math.min(100,(x.morale||0)+2);
       if(cid==="alicia"){const v=Math.round((1500+Math.min(G.rep||0,60)*60)/100)*100;G.cash+=v;G.rep=Math.round(((G.rep||0)+.05)*100)/100;G.log=G.log||[];G.log.push(`อลิเซียไลฟ์ซ้อมกับค่าย · ค่าโฆษณา ${fmt(v)}`);}
       if(cid==="chaba")for(const x of mine)if(x.injury>0)x.injury=Math.max(0,x.injury-1);}},
@@ -1751,6 +1751,9 @@ Object.assign(REGION,{
       ...P.path.map((x,i)=>`${i?"รอบชิง":"รอบรอง"}: ${rgNm(x.o,x.o.home||dest)} · ${this.mtxt(x)}`),
       P.reign>1?`ป้องกันแชมป์ได้ · สมัยที่ ${P.reign}`:P.prev?`โค่นแชมป์เก่า ${rgNm(P.prev,dest)}`:""].filter(Boolean);
     return `<details class="rg-hist"><summary>${esc(title)}</summary>${L.map(t=>`<p class="meta">${esc(t)}</p>`).join("")}</details>`;},
+  /* when the next edition opens (shown once this one is done) */
+  nextEdTxt(G){const R=G.region,ed=rgEd(G),done=ed===1?(R.final&&R.final.won?(R.final.wonAbs||gameWeek(G)):null):R.edDone;if(done==null)return "";
+    const abs=Math.max((R.startAbs||0)+RG_LOOP.wk,done+RG_LOOP.rest),y=Math.floor((abs-1)/52)+1,w=((abs-1)%52)+1;return ` · ครั้งต่อไป ปีที่ ${y} สัปดาห์ ${w}`;},
   loopWeekly(G){const R=G.region,now=gameWeek(G),ed=rgEd(G);
     if(ed===1&&!(R.final&&R.final.won))return;
     const doneAbs=ed===1?(R.final.wonAbs||now):R.edDone;

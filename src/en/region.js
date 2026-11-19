@@ -5,7 +5,7 @@
 
 const RG={
  north:{name:"the North",champ:"Baibua",nick:"Thorned Lotus of Lanna",col:"#e86fa0",prov:["chiangrai","nan","uttaradit","lampang"],fin:"chiangmai",tilt:{elbow:2.5,counter:2}},
- isan:{name:"Isan",champ:"Tubtim",nick:"Isan's Ruby Master",col:"#d23246",prov:["udon","khonkaen","buriram","ubon"],fin:"korat",tilt:{kick:2.5,foot:1.5}},
+ isan:{name:"Isan",champ:"Tabtim",nick:"Isan's Ruby Master",col:"#d23246",prov:["udon","khonkaen","buriram","ubon"],fin:"korat",tilt:{kick:2.5,foot:1.5}},
  central:{name:"the Central Plains",champ:"Alicia",nick:"Princess of the Muay Thai World",col:"#2f62c8",prov:["lopburi","suphan","phetchaburi","chanthaburi"],fin:"ayutthaya",tilt:{punch:2.5,clinch:1.5}},
  south:{name:"the South",champ:"Chaba",nick:"Storm Fist That Calms the Waves",col:"#1f9a7a",prov:["chumphon","surat","nakhonsi","songkhla"],fin:"phuket",tilt:{speed:2,foot:1.5,punch:1}}};
 const RG_ORDER=["north","isan","central","south"];
@@ -100,7 +100,7 @@ const RG_CH={
    {n:"tabtim",f:"happy",l:"fight",t:"A loss is a loss! But I'm taking a hug back, okay? Haha… just a bit longer."},
    {n:"nar",t:"At the back, a dark-skinned middle-aged man stands still behind the crowd, nods once to Tabtim, then walks out."},
    {n:"tabtim",f:"flustered",l:"fight",t:"…Dad? Dad came to watch…"},
-   ...(top?[{n:top.id,f:"pout",l:"fight",t:rgJeal(top.id,"Tubtim")}]:[])]},
+   ...(top?[{n:top.id,f:"pout",l:"fight",t:rgJeal(top.id,"Tabtim")}]:[])]},
   night:(G,T)=>[
    {n:"nar",t:"That night the rocket festival by the Mekong is still going. Tabtim leads the Manager away from the crowd to the pier."},
    {n:"tabtim",f:"happy",l:"casual",t:"Tabtim's sat here since she was tiny, watching the rockets go up, thinking one day she'd kick that high."},
@@ -435,7 +435,7 @@ RG_ARRIVE.isan=(G,D)=>{const top=rgTopGirl(G),ploy=rgIn(G,"ploy"),me=G.F[(G.regi
     {t:"\"Joking twice means it's not a joke.\"",fx:G2=>rgMeet(G2,"tabtim",2),then:[{n:"tabtim",f:"flustered",l:"casual",t:"…Whoa! You answered seriously. Tabtim's out of jokes now."}]},
     {t:"Laugh and keep driving",fx:G2=>rgMeet(G2,"tabtim",1),then:[{n:"tabtim",f:"happy",l:"casual",t:"Haha, you're so calm. Tabtim likes calm people."}]},
     {t:"\"Put your seatbelt on.\"",fx:G2=>rgMeet(G2,"tabtim",1),then:[{n:"tabtim",f:"pout",l:"casual",t:"Okay, okay… geez, Manager, you're so serious."}]}]},
-  ...(top?[{n:top.id,f:"pout",l:"casual",t:rgJeal(top.id,"Tubtim")}]:[]),
+  ...(top?[{n:top.id,f:"pout",l:"casual",t:rgJeal(top.id,"Tabtim")}]:[]),
   ...rgIf(ploy,[{n:"tabtim",f:"happy",l:"casual",t:"Hey! Is that Ploy in the back? The Korat fist from Bangkok! Tabtim's been wanting to take one since the gala!"},
     {n:"ploy",f:"pout",l:"casual",t:"…Face the front. You'll hurt your neck."}]),
   {n:"nar",bg:"somtam_stall",t:"Tabtim talks the whole way, then makes them stop at a roadside som tam stall. \"Best in the region, and Tabtim's paying!\""},
@@ -950,7 +950,7 @@ const REGION={
       if(st.end){next();return;}if(st.no)toast("Not enough money");if(st.got)toast(`Bought: ${GIFTS[st.got].name} · give it from the Gift button`);this.shop(T,next,0);},{bg:this.hotelBg[r],look:"casual"});},
   dateLines(cid,D){const L={
     baibua:[{n:"npc",who:"Baibua",t:`The walking street's crowded tonight, jao… if we get separated, you can hold on to my sleeve, jao.`},{n:"nar",t:"Baibua walks slowly so you can keep up. Your hands almost touch a few times, but neither of you says anything."}],
-    tabtim:[{n:"npc",who:"Tubtim",t:"Let's go eat som tam, de! This stall's real spicy… haha, I'm crying already, ai!"},{n:"nar",t:"Tubtim laughs loud enough for the whole stall to hear, but when you hand her a tissue she goes quiet for a moment."}],
+    tabtim:[{n:"npc",who:"Tabtim",t:"Let's go eat som tam, de! This stall's real spicy… haha, I'm crying already, ai!"},{n:"nar",t:"Tabtim laughs loud enough for the whole stall to hear, but when you hand her a tissue she goes quiet for a moment."}],
     alicia:[{n:"npc",who:"Alicia",t:"Don't get the wrong idea. I just wanted someone to walk with. The camera's off tonight…"},{n:"nar",t:"Alicia leaves her phone face down on the table all night. She never picks it up once."}],
     chaba:[{n:"npc",who:"Chaba",t:"…The sea is pretty at night."},{n:"nar",t:"Chaba says nothing more, but she stays beside you until the tide reaches her ankles."}]};
     return L[cid]||[{n:"nar",t:`An evening walk in ${D.name}`}];},
@@ -1101,7 +1101,7 @@ Welcome her at Fights › Four Regions Cup`});}
         const P=R.pc&&R.pc[p];return `<div class="rg-prov"><span><b>${esc(D.name)}</b> <small>${D.km} km · ${nights?`Stay ${nights} night(s)`:"Day trip"}</small>${P?this.histHTML(P,p,`Provincial champion: ${rgNm(P,p)}`):""}</span>${got?`<span class="rg-belt">🏅 Belt won</span>`:`<button class="btn sm${T||!nx?"":" primary"}" data-act="rgplan" data-v="${p}" ${T||!nx?"disabled":""}>Plan</button>`}</div>`;}).join("");
       const fin=this.finRow(r);
       return `<section class="px card rg-reg" style="--rc:${C.col}"><h3>${esc(C.name)}</h3><div class="rg-champ">Regional champion: <b>${esc(C.champ)}</b> · ${esc(C.nick)}${R.nc&&R.nc[r]?this.histHTML(R.nc[r],R.nc[r].home,"The new regional champion's story"):""}</div>${rows}${fin}</section>`;}).join("");
-    return `<section class="px card rg-head"><div><h3>Four Regions Championship</h3><span class="meta">Edition ${R.edition||1}</span></div>
+    return `<section class="px card rg-head"><div><h3>Four Regions Championship</h3><span class="meta">Edition ${R.edition||1}${this.nextEdTxt(G)}</span></div>
        <div class="rg-stats"><span class="pill gold">Cups ${cups}/4</span><span class="pill">Belts ${belts}/16</span><span class="pill ${T?"red":nx?"green":""}">${T?`Trip: ${esc(ROAD_DEST[T.dest].name)} · Week ${T.wk}`:nx?`Can travel week ${nx}`:"No more trips this year"}</span></div></section>
      ${!R.gala?`<p class="meta rg-gala">🎉 The Four Regions Cup opening gala in Bangkok ${R.galaAbs!=null&&gameWeek(G)<R.galaAbs?"is held at the end of next week":"is held at the end of this week"} · the whole camp is invited</p>`:""}${!REGION_LIVE?`<p class="meta">Test mode: <button class="btn sm" data-act="rggala" data-v="gala">Watch the gala</button> Underground test fight (open rules): ${NL_ORDER.map(k=>`<button class="btn sm" data-act="nltest" data-v="${k}">${esc(NL[k].name)}</button>`).join(" ")}${(R.cups||[]).length?` <button class="btn sm" data-act="rggala" data-v="c1">Watch the green envelope scene</button>`:""}</p>`:""}
      ${this.finalCard(G)}${this.legendCard(G)}${this.joinCard(G)}${tripCard}${this.fuelLine(G)}<div class="rg-grid">${regs}</div>`;},
@@ -1255,7 +1255,7 @@ const RG0=Object.fromEntries(Object.entries(RG).map(([r,C])=>[r,{name:C.name,cha
 const RG_JOIN_MIN=12,RG_JOIN_GAP=4,RG_JOIN_FEE=350000,RG_JOIN_WAGE=5000; /* v1.91.30 (Man): a regional champion costs a fortune, and is worth it */
 /* v1.91.30 (Man): every champion brings something the camp wants — her ring perk stays, plus a camp-wide gift */
 const RG_TRAIT={
- baibua:{name:"Tha Sao Elbow Teacher",desc:"Tha Sao counter elbows (counter +5%, elbow +12%) · teaches elbows to the camp: every fighter's elbow and counter grow a little each week"},
+ baibua:{name:"Tha Sao Elbow Teacher",desc:"Tha Sao counter elbows (counter +5%, elbow +12%) · teaches elbows to the camp: fighters whose elbow/counter is under 17 improve a little each week"},
  tabtim:{name:"Isan Laughter",desc:"Accurate kicks and quick evasion · wherever she is, it's lively: every fighter in camp +2 morale each week"},
  alicia:{name:"Live Star",desc:"Heavy hands and inside defence · streams training with the camp: ad income every week (grows with camp fame) and fame slowly rises"},
  chaba:{name:"Silent Fixer",desc:"Quick evasion and fast recovery · looks after the injured like she looks after her brother: injured fighters heal one extra week each week"}};
@@ -1372,18 +1372,18 @@ Object.assign(REGION,{
   joinRooms(G){const R=G.region,J=R.joined||{};return CANON_IDS.filter(id=>G.F[id]&&G.F[id].camp==="player").length+Object.keys(J).filter(c=>G.F[c]&&G.F[c].camp==="player").length;},
   /* the champion's skill tree is her lineage's — the partner girl's tree (Tha Sao / Korat / Lopburi / Chaiya) */
   joinSkills(G){const J=(G.region&&G.region.joined)||{};for(const r of RG_ORDER){const cid=RG_CID0[r];if(J[cid]&&!SKILLS[cid]&&SKILLS[RG_CH[r].pair])SKILLS[cid]=SKILLS[RG_CH[r].pair];}},
-  joinWeekly(G){const R=G.region,F=R.final,now=gameWeek(G);if(!F||!F.won||now<(F.wonAbs||0)+3)return;R.joined=R.joined||{};R.offers=R.offers||[];R.joinQ=R.joinQ||[];
-    const m=R.meet||{};for(const r of RG_ORDER){const cid=RG_CID0[r];if(rgEd(G)>=2&&!(R.nc&&R.nc[r])&&!(R.champ[r]&&R.champ[r].state==="won"))continue;if(!R.joined[cid]&&!R.offers.includes(cid)&&!R.joinQ.includes(cid)&&!(R.joinGone||{})[cid]&&(m[cid]||0)>=RG_JOIN_MIN)R.joinQ.push(cid);}
+  joinWeekly(G){const R=G.region,F=R.final,now=gameWeek(G);if(!F||!F.won||now<(F.wonAbs||0)+3)return;R.joined=R.joined||{};R.offers=R.offers||[];R.joinQ=R.joinQ||[];R.offers=R.offers.filter(c=>!R.joined[c]);R.joinQ=R.joinQ.filter(c=>!R.joined[c]&&!(R.joinPend&&R.joinPend.cid===c));
+    const m=R.meet||{};for(const r of RG_ORDER){const cid=RG_CID0[r];if(rgEd(G)>=2&&!(R.nc&&R.nc[r])&&!(R.champ[r]&&R.champ[r].state==="won"))continue;if(!R.joined[cid]&&!(R.joinPend&&R.joinPend.cid===cid)&&!R.offers.includes(cid)&&!R.joinQ.includes(cid)&&!(R.joinGone||{})[cid]&&(m[cid]||0)>=RG_JOIN_MIN)R.joinQ.push(cid);}
     R.joinQ.sort((a,b)=>(m[b]||0)-(m[a]||0));
     if(R.joinQ.length&&now>=(R.joinNext||0)){const cid=R.joinQ.shift(),r=RG_ORDER.find(x=>RG_CID0[x]===cid);R.offers.push(cid);R.joinNext=now+RG_JOIN_GAP;
       addMail(G,{kind:"letter",from:`${RG[r].champ} · Champion of ${RG[r].name}`,title:`Application from ${RG[r].champ}`,body:RG_JOIN[cid].letter+`
 
 (Contract: signing fee ${fmt(RG_JOIN_FEE)} · wage ${fmt(RG_JOIN_WAGE)}/week · trait: ${RG_TRAIT[cid].name} · see the contract on Camp › Trainers & fighters)`});}},
-  joinOk(G,cid){const R=G.region;if(!R.offers||!R.offers.includes(cid))return "No such contract";if(R.joinPend)return "Wait for the one who already said yes to move in first";{const r=RG_ORDER.find(x=>RG_CID0[x]===cid);if(rgEd(G)>=2&&!(R.nc&&R.nc[r])&&R.champ[r]&&R.champ[r].state!=="won")return "She is defending her regional title · win this edition's cup first";}
+  joinOk(G,cid){const R=G.region;if(!R.offers||!R.offers.includes(cid)||(R.joined&&R.joined[cid]))return "No such contract";if(R.joinPend)return "Wait for the one who already said yes to move in first";{const r=RG_ORDER.find(x=>RG_CID0[x]===cid);if(rgEd(G)>=2&&!(R.nc&&R.nc[r])&&R.champ[r]&&R.champ[r].state!=="won")return "She is defending her regional title · win this edition's cup first";}
     if(this.joinRooms(G)>=dormRooms(G))return `Rooms full (${dormRooms(G)} rooms) · upgrade the dorm first`;if(G.cash<RG_JOIN_FEE)return `Not enough cash · signing fee ${fmt(RG_JOIN_FEE)}`;return "";},
   joinAccept(G,cid){const why=this.joinOk(G,cid);if(why){toast(why);return;}const R=G.region;G.cash-=RG_JOIN_FEE;R.offers=R.offers.filter(x=>x!==cid);R.joinPend={cid,abs:gameWeek(G)+1};
     G.log=G.log||[];G.log.push(`Signed a contract with ${G.F[cid]?G.F[cid].name:cid} · signing fee ${fmt(RG_JOIN_FEE)} · moves in next week`);toast(`Contract signed · ${G.F[cid]?G.F[cid].name:""} moves in next week`);},
-  joinApply(G,cid){const R=G.region,r=RG_ORDER.find(x=>RG_CID0[x]===cid),f=G.F[cid]||this.champFighter(G,r),pair=G.F[RG_CH[r].pair],now=gameWeek(G);
+  joinApply(G,cid){if(G.region.joined&&G.region.joined[cid])return; /* v1.91.35: never twice */const R=G.region,r=RG_ORDER.find(x=>RG_CID0[x]===cid),f=G.F[cid]||this.champFighter(G,r),pair=G.F[RG_CH[r].pair],now=gameWeek(G);
     f.camp="player";f.canon=true;f.met=true;f.div=(pair&&(pair.div==="A"||pair.div==="B"))?pair.div:"A";
     f.lvl=Math.max(12,(f.lvl||14)-2);for(const k in f.a)f.a[k]=Math.max(12,Math.min(20,Math.round(f.a[k]*.92*10)/10));f.vet=0; /* v1.91.30 (Man): a small drop from her rival form, not 30% */
     f.sp=(f.sp||0)+f.lvl;f.xp=0;f.skills=f.skills||{};f.wage=RG_JOIN_WAGE;f.fee=0;f.potential=20;f.fatigue=0;f.injury=0;f.morale=80;f.trust=Math.max(f.trust||0,50);
@@ -1427,7 +1427,7 @@ Object.assign(REGION,{
   /* the camp-wide side of each champion's trait, once a week */
   joinPerks(G){const J=(G.region&&G.region.joined)||{},mine=roster(G);
     for(const cid of Object.keys(J)){const f=G.F[cid];if(!f||f.camp!=="player"||isAway(G,cid))continue;
-      if(cid==="baibua")for(const x of mine)if(x.id!==cid){const cap=stCap(x);for(const k of ["elbow","counter"])x.a[k]=Math.min(cap,Math.round((x.a[k]+.04)*100)/100);}
+      if(cid==="baibua")for(const x of mine)if(x.id!==cid){const cap=stCap(x);for(const k of ["elbow","counter"])if(x.a[k]<17)x.a[k]=Math.min(cap,Math.round((x.a[k]+.04)*100)/100);} /* she teaches the ones still learning */
       if(cid==="tabtim")for(const x of mine)x.morale=Math.min(100,(x.morale||0)+2);
       if(cid==="alicia"){const v=Math.round((1500+Math.min(G.rep||0,60)*60)/100)*100;G.cash+=v;G.rep=Math.round(((G.rep||0)+.05)*100)/100;G.log=G.log||[];G.log.push(`Alicia streams training with the camp · ad income ${fmt(v)}`);}
       if(cid==="chaba")for(const x of mine)if(x.injury>0)x.injury=Math.max(0,x.injury-1);}},
@@ -1532,6 +1532,9 @@ The cup is still mine. Send a fighter again whenever you're ready
       ...P.path.map((x,i)=>`${i?"Final":"Semifinal"}: ${rgNm(x.o,x.o.home||dest)} · ${this.mtxt(x)}`),
       P.reign>1?`Defended the title · reign ${P.reign}`:P.prev?`Dethroned the old champion ${rgNm(P.prev,dest)}`:""].filter(Boolean);
     return `<details class="rg-hist"><summary>${esc(title)}</summary>${L.map(t=>`<p class="meta">${esc(t)}</p>`).join("")}</details>`;},
+  /* when the next edition opens (shown once this one is done) */
+  nextEdTxt(G){const R=G.region,ed=rgEd(G),done=ed===1?(R.final&&R.final.won?(R.final.wonAbs||gameWeek(G)):null):R.edDone;if(done==null)return "";
+    const abs=Math.max((R.startAbs||0)+RG_LOOP.wk,done+RG_LOOP.rest),y=Math.floor((abs-1)/52)+1,w=((abs-1)%52)+1;return ` · next edition: year ${y} week ${w}`;},
   loopWeekly(G){const R=G.region,now=gameWeek(G),ed=rgEd(G);
     if(ed===1&&!(R.final&&R.final.won))return;
     const doneAbs=ed===1?(R.final.wonAbs||now):R.edDone;

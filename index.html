@@ -8397,7 +8397,7 @@ AU.gsfx=function(kind,a){if(!this.init()||this.muted||!SETTINGS.sfx)return;const
   if(kind==="shimmer")for(let i=0;i<6;i++)T(i*.05,{f:1400+Math.random()*1400,type:"sine",dur:.12,peak:.06});};
 
 // ================= MUAY THAI MOE v1.3 — UI =================
-const VERSION="1.91.34";
+const VERSION="1.91.35";
 const CUR_LANG=(typeof window!=="undefined"&&window.LANG)||"th";
 const TH_LABEL=String.fromCharCode(3652,3607,3618);
 function langSwitch(cls){return `<div class="langsw ${cls||""}" role="group" aria-label="Language">${[["th",TH_LABEL],["en","EN"]].map(([k,l])=>`<button class="lsb ${CUR_LANG===k?"on":""}" data-act="setlang" data-v="${k}" aria-pressed="${CUR_LANG===k}">${l}</button>`).join("")}</div>`;}
@@ -9036,7 +9036,7 @@ function peopleHTML(){const rgP=typeof REGION!=="undefined"&&REGION.peopleIds&&G
   return `<div class="card-h"><p class="meta">ใช้เวลาด้วยกันสัปดาห์ละ 1 คน · พอสนิทกัน เธอจะทักแชทมาเองเป็นครั้งคราว</p><button class="btn sm gold albbtn" data-act="album">🃏 อัลบั้มการ์ด ${Object.keys(G.cards||{}).length}/${Object.keys(CARDS).length}${Object.entries(G.cards||{}).some(([k,c])=>cardFresh(k,c)||cardCanUp(k,c))?'<i class="ndot"></i>':""}</button>${G.freeUsed?'<span class="pill">เวลาว่าง: ใช้แล้ว</span>':'<span class="pill gold">เวลาว่าง: เหลือ 1</span>'}</div>
    <div class="plist">${met.map(f=>`<section class="px pcard"><button class="pthumb" data-act="fighter" data-id="${f.id}" data-v="rel" aria-label="ดูโปรไฟล์${esc(f.name)}"><img src="${stand(f.id,"casual")}" alt="" loading="lazy"></button>
      <div class="pbody"><div class="pnm"><b class="nm">${esc(f.name)}</b><span class="meta">${f.camp==="player"?"ค่ายศิริชัย":out(f)?esc(REGION.campOf(f.id)):f.camp==="rival"&&!f.indie?"พยัคฆ์ทอง":"อิสระ"}${relTag(G,f)}</span></div>${hearts(f.bond,f)}
-      <div class="pbtns"><button class="btn sm" data-act="fighter" data-id="${f.id}" data-v="rel">ประวัติ</button><button class="btn sm primary" data-act="${rgc(f)?"rghang":"hang"}" data-id="${f.id}" data-v="${f.id}" ${out(f)||G.freeUsed||isAway(G,f.id)?"disabled":""}>${out(f)?"เจอได้ตอนไปภาคเธอ":isAway(G,f.id)?"ไม่อยู่":"ใช้เวลาด้วยกัน"}</button><button class="btn sm gold giftb" data-act="giftpick" data-id="${f.id}" ${out(f)||f.giftWeek===gameWeek(G)||isAway(G,f.id)?"disabled":""}>${PIX.gift}<span>${f.giftWeek===gameWeek(G)?"ให้แล้ว":"ของขวัญ"}</span></button><button class="btn sm chatb" data-act="${rgc(f)?"rgchat":"chat"}" data-id="${f.id}" data-v="${f.id}" ${rgc(f)?(G.chatIn&&G.chatIn[f.id]?"":"disabled"):canChat(f)||canChatLov(f)?"":"disabled"}>${CHAT_PX}<span>${canChat(f)?"แชทใหม่":isAway(G,f.id)?"ไม่ตอบแชท":canChatLov(f)?"แชท":(f.bond||0)<CHAT_BOND?"ยังไม่สนิท":"ไม่มีข้อความ"}</span>${canChat(f)?'<i class="dot"></i>':""}</button></div></div></section>`).join("")}</div>`;}
+      <div class="pbtns"><button class="btn sm" data-act="fighter" data-id="${f.id}" data-v="rel">ประวัติ</button><button class="btn sm primary" data-act="${rgc(f)?"rghang":"hang"}" data-id="${f.id}" data-v="${f.id}" ${out(f)||G.freeUsed||isAway(G,f.id)?"disabled":""}>${out(f)?"เจอได้ตอนไปภาคเธอ":isAway(G,f.id)?"ไม่อยู่":"ใช้เวลาด้วยกัน"}</button><button class="btn sm gold giftb" data-act="giftpick" data-id="${f.id}" ${out(f)||f.giftWeek===gameWeek(G)||isAway(G,f.id)?"disabled":""}>${PIX.gift}<span>${f.giftWeek===gameWeek(G)?"ให้แล้ว":"ของขวัญ"}</span></button><button class="btn sm chatb" data-act="${rgc(f)?"rgchat":"chat"}" data-id="${f.id}" data-v="${f.id}" ${rgc(f)?(G.chatIn&&G.chatIn[f.id]?"":"disabled"):canChat(f)||canChatLov(f)?"":"disabled"}>${CHAT_PX}<span>${canChat(f)?"แชทใหม่":isAway(G,f.id)?"ไม่ตอบแชท":canChatLov(f)?"แชท":(f.bond||0)<CHAT_BOND?"ยังไม่สนิท":"ไม่มีข้อความ"}</span>${canChat(f)?'<i class="dot"></i>':""}</button>${rgc(f)&&REGION.isLovC&&REGION.isLovC(G,f.id)?`<button class="btn sm" data-act="rgbreak" data-v="${f.id}">ขอเลิก</button>`:""}</div></div></section>`).join("")}</div>`;}
 function hangHTML(id){const f=G.F[id],hlv=heartLv(f).lv;const pref=k=>f.know["act_"+k]==="like"?'<i class="likeb">ชอบ</i>':f.know["act_"+k]==="dislike"?'<i class="disb">ไม่ชอบ</i>':"";
   return `<h2>ใช้เวลากับ${esc(f.name)}</h2><p class="meta">เลือกที่ที่อยากไปด้วยกัน</p><div class="acts">${Object.entries(ACTIVITIES).filter(([k,a])=>(!a.campOnly||f.camp==="player")&&(!a.heart||hlv>=10)).map(([k,a])=>{const lock=a.heart&&hlv<a.heart;return `<button class="actbtn${lock?" lockd":a.heart?" hspot":""}" data-act="date" data-id="${f.id}" data-v="${k}" ${lock||G.freeUsed||G.cash<a.cost?"disabled":""}><b>${a.heart?"♥ ":""}${a.name}${lock?"":pref(k)}</b><small>${lock?`🔒 ปลดที่ ♥Lv.${a.heart}`:a.cost?fmt(a.cost):"ฟรี"}</small></button>`;}).join("")}</div>`;}
 // v1.33: what each camp level brings, so upgrades feel like a goal
@@ -12712,7 +12712,7 @@ CHAT.fah.push(
 <script>
 (function(){
 /* v1.87: Thai code ships inside index.html; English code (en.js) and the dictionary (i18n.js) load only when needed */
-var B="72b1ac5bb1";
+var B="19d5fea003";
 var L="";try{L=localStorage.getItem("mtm_lang")||"";}catch(e){}
 try{var h=(location.hash||"").match(/lang=(th|en)/);if(h)L=h[1];}catch(e){}
 if(L!=="th"&&L!=="en")L="th";
