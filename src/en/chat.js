@@ -206,7 +206,15 @@ const chatLen=f=>3+((f.bond||0)>=40?1:0)+((f.bond||0)>=70?1:0);
 const canChat=f=>!!(f&&f.met&&G.chatIn&&G.chatIn[f.id]&&!isAway(G,f.id));
 /* v1.89.11: you can always open a chat with someone you are seeing (the ⋯ menu holds "break up") */
 const canChatLov=f=>!!(f&&f.met&&isPartner(G,f.id)&&!isAway(G,f.id));
-function chatOpen(id){const f=G.F[id];UI.lvMenu=false;if(f&&!canChat(f)&&canChatLov(f)){UI.chat={id,x:[],i:0,log:[],gain:0,typing:false,done:true,idle:true};UI.modal={type:"chat"};render();return;}if(!f||!canChat(f))return;f.lastTouch=absWeek(G);delete G.chatIn[id];G.chatLast=G.chatLast||{};G.chatLast[id]=G.week;G.chatLastAbs=G.chatLastAbs||{};G.chatLastAbs[id]=gameWeek(G);const T=chatTopic(G,id);
+/* v1.91.69 (Man): telling her how you feel lives in the chat — you text her to meet up, she names the place, the scene plays there */
+const canChatTell=f=>!!(f&&typeof tellState==="function"&&tellState(G,f));
+const TELL_ASK="Are you free tonight? There's something I want to talk about. Can we meet?";
+const TELL_MEET={kati:"Okay! …What's it about? I'll wait at the training yard.",mali:"Sure~ The riverside behind the camp. Mali's going early!",rin:"Noted. The rooftop, nine o'clock sharp. I won't be late.",
+  ploy:"…Okay. The running track behind the camp. I'll be waiting.",fah:"What's with you… Fine. The congee stall at the end of the lane. Fah's hungry.",baibua:"Yes. I'll wait under the mango tree outside the camp.",
+  tabtim:"Sure! Behind the camp! Tabtim's bringing grilled meatballs.",alicia:"…Fine. No cameras. On the rooftop.",chaba:"…Okay. The bench behind the camp."};
+const TELL_SPOT={kati:"training yard",mali:"riverside behind the camp",rin:"rooftop",ploy:"running track behind the camp",fah:"congee stall at the end of the lane",baibua:"mango tree outside the camp",tabtim:"back of the camp",alicia:"rooftop",chaba:"bench behind the camp"};
+function tellBtnHTML(f){const T=canChatTell(f)?tellState(G,f):null;if(!T)return "";return `<button class="btn ${T.ok?"gold":""} tellc" data-act="telldate" ${T.ok?"":"disabled"}>💌 ${T.ok?"Ask to meet — tell her how you feel":esc(T.why)}</button>`;}
+function chatOpen(id){const f=G.F[id];UI.lvMenu=false;if(f&&!canChat(f)&&(canChatLov(f)||canChatTell(f))){UI.chat={id,x:[],i:0,log:[],gain:0,typing:false,done:true,idle:true};UI.modal={type:"chat"};render();return;}if(!f||!canChat(f))return;f.lastTouch=absWeek(G);delete G.chatIn[id];G.chatLast=G.chatLast||{};G.chatLast[id]=G.week;G.chatLastAbs=G.chatLastAbs||{};G.chatLastAbs[id]=gameWeek(G);const T=chatTopic(G,id);
   G.chatSeen=G.chatSeen||{};G.chatSeen[id]=(G.chatSeen[id]||[]).filter(x=>x!==T.id).concat([T.id]);G.chatWk=G.chatWk||{};G.chatWk[id+":"+T.id]=G.week;G.chatWkAbs=G.chatWkAbs||{};G.chatWkAbs[id+":"+T.id]=gameWeek(G);
   const x=[...T.x];const ex=CHAT_X[id]||[];G.chatX=G.chatX||{};const xs=G.chatX[id]=G.chatX[id]||[];const extra=Math.min(1,chatLen(f)-3);for(let i=0;i<ex.length&&extra>0;i++)if(!xs.includes(i)&&(i===0||(f.bond||0)>=70)){x.push(ex[i]);xs.push(i);break;}
   const rng=mulberry32(G.seed+G.week*17+id.length);x.forEach(e=>{e.ord=[0,1,2].sort(()=>rng()-.5);});
@@ -224,9 +232,12 @@ function chatHTML(){const C=UI.chat;if(!C)return {body:"",foot:true};const f=G.F
   return {foot:false,body:`<div class="chatw px"><div class="chead"><img src="${faceSrc(f.id,"happy","casual")}" alt=""><span><b>${esc(f.name)}</b><small>${C.typing?"typing…":"online"}</small></span><span class="cbond">${HEART_PX}<b class="num">${Math.round(f.bond||0)}</b></span>${isPartner(G,f.id)?`<button class="cmenu" data-act="lvmenu" aria-label="Options" aria-expanded="${!!UI.lvMenu}">⋯</button>`:""}${UI.lvMenu&&isPartner(G,f.id)?`<div class="cmenupop px"><button class="btn sm danger" data-act="lvask">${isLov(G,f.id)?"Break up":"Call off the promise"}</button></div>`:""}</div>
    <div class="cbody pxscroll" data-sk="chat">${msgs}${C.typing?`<div class="cmsg them typing"><img class="cav" src="${faceSrc(f.id,"happy","casual")}" alt=""><p><i></i><i></i><i></i></p></div>`:""}</div>
    <div class="cfoot2">${e?`<small class="meta">Choose a message to send (${C.i+1}/${C.x.length})</small>${e.ord.map(k=>`<button class="copt" data-act="chatpick" data-v="${k}">${esc(e[1][k][0])}</button>`).join("")}`
-     :C.idle?`<p class="cend">No new messages from ${esc(f.name)}</p><button class="btn primary" data-act="closeModal">Close chat</button>`:C.done?`<p class="cend">${C.gain?`Great conversation · bond increased`:"A short chat today. She'll text again sometime"}</p><button class="btn primary" data-act="closeModal">Close chat</button>`:`<small class="meta">…</small>`}</div></div>`};}
+     :C.tell?`<small class="meta">…</small>`:C.idle?`<p class="cend">No new messages from ${esc(f.name)}</p>${tellBtnHTML(f)}<button class="btn primary" data-act="closeModal">Close chat</button>`:C.done?`<p class="cend">${C.gain?`Great conversation · bond increased`:"A short chat today. She'll text again sometime"}</p>${tellBtnHTML(f)}<button class="btn primary" data-act="closeModal">Close chat</button>`:`<small class="meta">…</small>`}</div></div>`};}
 XMODAL.chat=()=>chatHTML();
 Object.assign(ACT,{chat:d=>chatOpen(d.id),chatpick:d=>chatPick(+d.v),
+  telldate:()=>{const C=UI.chat;if(!C||C.tell)return;const f=G.F[C.id],T=tellState(G,f);if(!T||!T.ok)return;C.tell=true;C.log.push({w:"me",t:TELL_ASK});C.typing=true;AU.sfx("tick");render();
+    setTimeout(()=>{if(UI.chat!==C)return;C.typing=false;C.log.push({w:"them",t:TELL_MEET[C.id]||"…All right."});AU.sfx("tick");render();
+      setTimeout(()=>{if(UI.chat!==C)return;UI.chat=null;UI.modal=null;tellLove(C.id);},1500);},900);},
   lvmenu:()=>{const C=UI.chat;if(!C)return;UI.lvMenu=!UI.lvMenu;render();},
   lvask:()=>{const C=UI.chat;if(!C)return;const f=G.F[C.id],lov=isLov(G,f.id),mine=f.camp==="player";UI.lvMenu=false;UI.lvBreak=f.id;
     UI.modal={type:"confirm",title:lov?`Break up with ${esc(f.name)}?`:`Call off the promise with ${esc(f.name)}?`,

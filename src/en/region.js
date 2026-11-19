@@ -1612,12 +1612,12 @@ Object.assign(REGION,{
   isLovC(G,cid){const L=G.region&&G.region.lov;return !!(L&&L[cid]!=null);},
   confDue(G){const R=G.region,J=R.joined||{},now=gameWeek(G);R.confN=R.confN||{};R.confNo=R.confNo||{};
     for(const cid of Object.keys(J)){const f=G.F[cid];if(!f||f.camp!=="player"||this.isLovC(G,cid)||(R.ex&&R.ex[cid]!=null)||isAway(G,cid))continue;
-      if((f.bond||0)<75||now-(J[cid]||now)<6||(R.confN[cid]||0)>=3)continue;if(R.confNo[cid]!=null&&now-R.confNo[cid]<13)continue;return cid;}return null;},
+      if((f.bond||0)<75||now-(J[cid]||now)<6||(R.confN[cid]||0)>=3||noCnt(G,cid)>=LOVE_ASK_MAX)continue;if(R.confNo[cid]!=null&&now-R.confNo[cid]<13)continue;return cid;}return null;},
   confSteps(G,cid){const J=RG_JOIN[cid],R=G.region,two=partners(G).length>0||Object.keys(R.lov||{}).some(k=>k!==cid);R.confN[cid]=(R.confN[cid]||0)+1;
     const warn=two?[{n:"nar",t:"⚠ You already have someone. Saying yes means two-timing… a regional champion can't join the harem team"}]:[];
     return [...J.conf(G),...warn,{n:"nar",t:"She waits for your answer",choice:[
       {t:two?"\"I like you too\" (two-timing)":"\"I like you too\"",fx:G2=>REGION.takeC(G2,cid),then:[{n:cid,f:"happy",l:"casual",t:J.yes(G)}]},
-      {t:"\"Let's stay like this for now\"",fx:G2=>{G2.region.confNo[cid]=gameWeek(G2);add(G2,cid,"trust",3);},then:[{n:cid,f:"sad",l:"casual",t:J.no}]}]}];},
+      {t:"\"Let's stay like this for now\"",fx:G2=>{G2.region.confNo[cid]=gameWeek(G2);add(G2,cid,"trust",3);befriend(G2,cid);},then:[{n:cid,f:"sad",l:"casual",t:J.no}]}]}];}, /* v1.91.68: counts toward the one love rule (3 asks → steps back → reaches out once) */
   takeC(G,cid){const R=G.region,now=gameWeek(G);R.lov=R.lov||{};const P=[...partners(G),...Object.keys(R.lov).filter(k=>k!==cid&&G.F[k])];R.lov[cid]=now;if(P.length&&G.mono)delete G.mono;if(R.ex)delete R.ex[cid];const f=G.F[cid];if(f)f.morale=Math.min(100,(f.morale||0)+15);
     if(P.length){const top=P.map(k=>G.F[k]).filter(Boolean).sort((a,b)=>((b.bond||0)+(b.bondX||0))-((a.bond||0)+(a.bondX||0)))[0];if(top)R.twoQ={id:top.id,cid,abs:now+3};}
     G.log=G.log||[];G.log.push(`${f?f.name:cid} and the Manager started dating ${P.length?" (two-timing)":""}`);},

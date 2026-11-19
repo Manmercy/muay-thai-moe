@@ -206,7 +206,15 @@ const chatLen=f=>3+((f.bond||0)>=40?1:0)+((f.bond||0)>=70?1:0);
 const canChat=f=>!!(f&&f.met&&G.chatIn&&G.chatIn[f.id]&&!isAway(G,f.id));
 /* v1.89.11: you can always open a chat with someone you are seeing (the ⋯ menu holds "break up") */
 const canChatLov=f=>!!(f&&f.met&&isPartner(G,f.id)&&!isAway(G,f.id));
-function chatOpen(id){const f=G.F[id];UI.lvMenu=false;if(f&&!canChat(f)&&canChatLov(f)){UI.chat={id,x:[],i:0,log:[],gain:0,typing:false,done:true,idle:true};UI.modal={type:"chat"};render();return;}if(!f||!canChat(f))return;f.lastTouch=absWeek(G);delete G.chatIn[id];G.chatLast=G.chatLast||{};G.chatLast[id]=G.week;G.chatLastAbs=G.chatLastAbs||{};G.chatLastAbs[id]=gameWeek(G);const T=chatTopic(G,id);
+/* v1.91.69 (Man): telling her how you feel lives in the chat — you text her to meet up, she names the place, the scene plays there */
+const canChatTell=f=>!!(f&&typeof tellState==="function"&&tellState(G,f));
+const TELL_ASK="คืนนี้ว่างไหม มีเรื่องอยากคุยด้วย ขอเจอหน่อยได้ไหม";
+const TELL_MEET={kati:"ได้ค่ะ! …มีเรื่องอะไรเหรอคะ หนูจะไปรอที่ลานซ้อมนะคะ",mali:"ได้สิคะ~ ริมน้ำหลังค่ายนะ มะลิจะไปก่อนเลย!",rin:"รับทราบค่ะ ดาดฟ้า สามทุ่มตรง ฉันจะไม่สาย",
+  ploy:"…ได้ ลู่วิ่งหลังค่าย ฉันจะไปรอ",fah:"อะไรของนายเนี่ย… ก็ได้ ร้านโจ๊กปากซอยนะ ฟ้าหิว",baibua:"ได้เจ้า หนูจะไปรอใต้ต้นมะม่วงหน้าค่ายเจ้า",
+  tabtim:"ได้เด้อ! หลังค่ายเด้อ ทับทิมจะเอาลูกชิ้นปิ้งไปด้วย",alicia:"…ก็ได้ ไม่มีกล้องนะ บนดาดฟ้า",chaba:"…ได้ ม้านั่งหลังค่าย"};
+const TELL_SPOT={kati:"ลานซ้อม",mali:"ริมน้ำหลังค่าย",rin:"ดาดฟ้า",ploy:"ลู่วิ่งหลังค่าย",fah:"ร้านโจ๊กปากซอย",baibua:"ใต้ต้นมะม่วงหน้าค่าย",tabtim:"หลังค่าย",alicia:"ดาดฟ้า",chaba:"ม้านั่งหลังค่าย"};
+function tellBtnHTML(f){const T=canChatTell(f)?tellState(G,f):null;if(!T)return "";return `<button class="btn ${T.ok?"gold":""} tellc" data-act="telldate" ${T.ok?"":"disabled"}>💌 ${T.ok?"ชวนออกมาเจอ บอกความรู้สึก":esc(T.why)}</button>`;}
+function chatOpen(id){const f=G.F[id];UI.lvMenu=false;if(f&&!canChat(f)&&(canChatLov(f)||canChatTell(f))){UI.chat={id,x:[],i:0,log:[],gain:0,typing:false,done:true,idle:true};UI.modal={type:"chat"};render();return;}if(!f||!canChat(f))return;f.lastTouch=absWeek(G);delete G.chatIn[id];G.chatLast=G.chatLast||{};G.chatLast[id]=G.week;G.chatLastAbs=G.chatLastAbs||{};G.chatLastAbs[id]=gameWeek(G);const T=chatTopic(G,id);
   G.chatSeen=G.chatSeen||{};G.chatSeen[id]=(G.chatSeen[id]||[]).filter(x=>x!==T.id).concat([T.id]);G.chatWk=G.chatWk||{};G.chatWk[id+":"+T.id]=G.week;G.chatWkAbs=G.chatWkAbs||{};G.chatWkAbs[id+":"+T.id]=gameWeek(G);
   const x=[...T.x];const ex=CHAT_X[id]||[];G.chatX=G.chatX||{};const xs=G.chatX[id]=G.chatX[id]||[];const extra=Math.min(1,chatLen(f)-3);for(let i=0;i<ex.length&&extra>0;i++)if(!xs.includes(i)&&(i===0||(f.bond||0)>=70)){x.push(ex[i]);xs.push(i);break;}
   const rng=mulberry32(G.seed+G.week*17+id.length);x.forEach(e=>{e.ord=[0,1,2].sort(()=>rng()-.5);});
@@ -224,9 +232,12 @@ function chatHTML(){const C=UI.chat;if(!C)return {body:"",foot:true};const f=G.F
   return {foot:false,body:`<div class="chatw px"><div class="chead"><img src="${faceSrc(f.id,"happy","casual")}" alt=""><span><b>${esc(f.name)}</b><small>${C.typing?"กำลังพิมพ์…":"ออนไลน์"}</small></span><span class="cbond">${HEART_PX}<b class="num">${Math.round(f.bond||0)}</b></span>${isPartner(G,f.id)?`<button class="cmenu" data-act="lvmenu" aria-label="ตัวเลือก" aria-expanded="${!!UI.lvMenu}">⋯</button>`:""}${UI.lvMenu&&isPartner(G,f.id)?`<div class="cmenupop px"><button class="btn sm danger" data-act="lvask">${isLov(G,f.id)?"ขอเลิก":"ยกเลิกสัญญา"}</button></div>`:""}</div>
    <div class="cbody pxscroll" data-sk="chat">${msgs}${C.typing?`<div class="cmsg them typing"><img class="cav" src="${faceSrc(f.id,"happy","casual")}" alt=""><p><i></i><i></i><i></i></p></div>`:""}</div>
    <div class="cfoot2">${e?`<small class="meta">เลือกข้อความที่จะพิมพ์ (${C.i+1}/${C.x.length})</small>${e.ord.map(k=>`<button class="copt" data-act="chatpick" data-v="${k}">${esc(e[1][k][0])}</button>`).join("")}`
-     :C.idle?`<p class="cend">ยังไม่มีข้อความใหม่จาก${esc(f.name)}</p><button class="btn primary" data-act="closeModal">ปิดแชท</button>`:C.done?`<p class="cend">${C.gain?`คุยกันถูกคอ · ความสนิทเพิ่มขึ้น`:"คุยกันสั้น ๆ วันนี้ ไว้เธอทักมาใหม่"}</p><button class="btn primary" data-act="closeModal">ปิดแชท</button>`:`<small class="meta">…</small>`}</div></div>`};}
+     :C.tell?`<small class="meta">…</small>`:C.idle?`<p class="cend">ยังไม่มีข้อความใหม่จาก${esc(f.name)}</p>${tellBtnHTML(f)}<button class="btn primary" data-act="closeModal">ปิดแชท</button>`:C.done?`<p class="cend">${C.gain?`คุยกันถูกคอ · ความสนิทเพิ่มขึ้น`:"คุยกันสั้น ๆ วันนี้ ไว้เธอทักมาใหม่"}</p>${tellBtnHTML(f)}<button class="btn primary" data-act="closeModal">ปิดแชท</button>`:`<small class="meta">…</small>`}</div></div>`};}
 XMODAL.chat=()=>chatHTML();
 Object.assign(ACT,{chat:d=>chatOpen(d.id),chatpick:d=>chatPick(+d.v),
+  telldate:()=>{const C=UI.chat;if(!C||C.tell)return;const f=G.F[C.id],T=tellState(G,f);if(!T||!T.ok)return;C.tell=true;C.log.push({w:"me",t:TELL_ASK});C.typing=true;AU.sfx("tick");render();
+    setTimeout(()=>{if(UI.chat!==C)return;C.typing=false;C.log.push({w:"them",t:TELL_MEET[C.id]||"…ได้"});AU.sfx("tick");render();
+      setTimeout(()=>{if(UI.chat!==C)return;UI.chat=null;UI.modal=null;tellLove(C.id);},1500);},900);},
   lvmenu:()=>{const C=UI.chat;if(!C)return;UI.lvMenu=!UI.lvMenu;render();},
   lvask:()=>{const C=UI.chat;if(!C)return;const f=G.F[C.id],lov=isLov(G,f.id),mine=f.camp==="player";UI.lvMenu=false;UI.lvBreak=f.id;
     UI.modal={type:"confirm",title:lov?`ขอเลิกกับ${esc(f.name)}จริงไหม`:`ยกเลิกสัญญากับ${esc(f.name)}จริงไหม`,

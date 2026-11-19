@@ -476,7 +476,13 @@ const awaySpeaks=(G,steps)=>(steps||[]).some(x=>x&&typeof x.n==="string"&&isAway
 function sendAway(G,id,wk,why){const f=G.F[id];if(!f)return;const now=absWeek(G);f.awayAbs=Math.max(isAway(G,id)?f.awayAbs:0,now+wk);f.awayWhy=why;f.awayBack=false;}
 const lovFinal=G=>{for(const id of lovList(G)){if(!romOf(G,id)||!LOVER_FINAL[id])continue;const b=G.bookings.find(b=>b.tier==="final"&&G.F[b.a].camp==="player"&&(b.a===id||id==="rin"));if(b)return {id,b};}return null;};
 /* v1.89.11: one label — the closeness name until you are together, then what you are to each other (shown under the hearts) */
-function befriend(G,id){G.friendz=G.friendz||{};G.friendz[id]=true;}
+/* v1.91.68 (Man): one rule for every love interest — the five girls and the regional champions.
+   She confesses; "not yet" makes you close friends and she asks again later (the girls on a date ≥2 weeks on, the champions every 13 weeks), up to 3 times.
+   After the third "no" she steps back for 6 weeks, then reaches out once herself. And you can always tell her yourself (บอกความรู้สึก): not ready yet → 13 weeks before you can try again */
+const LOVE_ASK_MAX=3,LOVE_OFF_WK=6,LOVE_TELL_CD=13;
+function befriend(G,id){G.friendz=G.friendz||{};G.friendz[id]=true;G.noCnt=G.noCnt||{};G.noCnt[id]=(G.noCnt[id]||0)+1;if(G.noCnt[id]>=LOVE_ASK_MAX){G.loveOff=G.loveOff||{};G.loveOff[id]=absWeek(G);}}
+const noCnt=(G,id)=>(G.noCnt&&G.noCnt[id])||0;
+const loveOffLeft=(G,id)=>{const a=G.loveOff&&G.loveOff[id];return a==null?0:Math.max(0,LOVE_OFF_WK-(absWeek(G)-a));};
 const isFriendz=(G,id)=>!!(G.friendz&&G.friendz[id]);
 const awayWord=(G,id)=>G.F[id].camp==="player"?"Left camp":"Not in touch";
 function relLabel(G,f,lv,short){const id=f&&f.id;if(G&&id&&G.F&&G.F[id]&&isAway(G,id)&&G.F[id].awayWhy==="train"){const n=awayLeft(G,id);return short?"Training away":`Away training (${n} wk)`;}
@@ -882,7 +888,7 @@ function dateScene(G,id,act){
           {t:yesTxt(G2,id,"I feel the same way"),fx:G3=>takeLover(G3,id),then:[{n:id,f:"flustered",l:"casual",t:LOVE_YES[id]}]},
           {t:"Thank you, but I want to keep being the one beside you like this",fx:G3=>{befriend(G3,id);add(G3,id,"trust",5);noteNo(G3,id);},then:[{n:id,f:"sad",l:"casual",t:LOVE_NO[id]}]},...takenOpt(G2,id)]});}
       // v1.29.3: a second chance — she won't ask twice, but after a while she lets you know the door is still open
-      else if(f.bond>=75&&f.trust>=40&&!isLov(G2,id)&&!exWait(G2,id)&&!RIVAL_LOVE.includes(id)&&G2.seen["love_"+id]&&loveNoGap(G2,id)>=2&&confGo(G2,id)){noteNo(G2,id);
+      else if(f.bond>=75&&f.trust>=40&&!isLov(G2,id)&&!exWait(G2,id)&&(RIVAL_LOVE.includes(id)?f.camp==="player"&&G2.seen["love2_"+id]:G2.seen["love_"+id])&&(isEx(G2,id)||noCnt(G2,id)<LOVE_ASK_MAX)&&loveNoGap(G2,id)>=2&&confGo(G2,id)){noteNo(G2,id); /* v1.91.68: Ploy and Fah get their second chances too once they train here (they had none — "close friend" for good) */
         out.push({n:id,f:"flustered",l:"casual",t:isEx(G2,id)?LOVE_EX[id]:LOVE_AGAIN[id]},...cheatWarn(G2,id),{choice:[
           {t:yesTxt(G2,id,isEx(G2,id)?"I still miss you too. Let's get back together":"I answered too fast that day. I feel the same way"),fx:G3=>takeLover(G3,id),then:[{n:id,f:"flustered",l:"casual",t:LOVE_YES[id]}]},
           {t:"I'd like to stay by your side, just like this",fx:G3=>{befriend(G3,id);add(G3,id,"trust",2);},then:[{n:"nar",t:`${f.name} smiles and nods, and says nothing more`}]}]});}
@@ -2768,3 +2774,56 @@ EVENTS.push(
 const LOVE_SSR_LIVE=true; /* v1.91.26: art is in (a/ssr_love_*.webp) */
 if(LOVE_SSR_LIVE)for(const k in LOVE_SSR_TXT){const C=LOVE_SSR_TXT[k];
   CARDS["lv_ssr_"+k]={c:k==="team"?"kati":k,r:"SSR",t:C.t,hint:C.hint,bg:C.bg,need:k==="team"?(G=>(G.flags||{}).harem1y!=null):(G=>((G.flags||{}).mono1y||{})[k]!=null),steps:C.steps};}
+
+/* ---------- v1.91.68: she reaches out once after stepping back · you tell her yourself ---------- */
+const LOVE_DOOR={kati:"Manager… for six weeks I tried not to think about it, but I couldn't. Let me ask one last time, for real.",
+  mali:"Mali typed and deleted this ten times… just sending it! Mali still feels the same. This is the last time, promise~",
+  rin:"Six-week summary: my feelings haven't dropped at all. I'll ask one last time, and accept whatever you answer.",
+  ploy:"I'm not someone who repeats herself… but let this be the last time. I'm still waiting for you.",
+  fah:"Hey! Fah didn't miss you! …That's a lie, Fah did. Last time asking. Answer properly.",
+  baibua:G=>`${G.player.gender==="f"?"You":"You"}… I went to the temple and prayed for a quiet heart, but it won't be quiet. Let me ask just one more time.`,
+  tabtim:"Tabtim pretended to forget for six weeks. Can't forget! Last time I'm asking, okay?",
+  alicia:"Don't think I'm chasing you… I just want your final answer. No cameras, nobody watching. Just us.",
+  chaba:"…Still waiting. Last time."};
+const TELL_WAIT={kati:"Manager… I'm really happy. But give me a little more time, so I can be sure.",
+  mali:"Eh! Really?… Mali's too surprised to think straight. Let me think first, okay? It's not a no!",
+  rin:"I don't have enough data to answer yet… Let me collect a little more.",
+  ploy:"…Thank you for being honest. But I'm not ready. Give me some time.",
+  fah:"Huh?! What are you saying! …Fah doesn't know how to answer yet. Later!",
+  baibua:G=>`${G.player.gender==="f"?"You":"You"}… I'm glad, truly. But let me think it over first.`,
+  tabtim:"Oh! You scared me… Let Tabtim think about it first, okay? That's not a no!",
+  alicia:"…Not now. I'm not ready. Don't get the wrong idea, that isn't a no.",
+  chaba:"…Not yet."};
+const loveLine=(L,G,id)=>{const v=L[id];return typeof v==="function"?v(G):v||"…";};
+const isChampLove=(G,id)=>!LOVE_IDS.includes(id)&&!!(G.region&&G.region.joined&&G.region.joined[id]!=null);
+const isLovAny=(G,id)=>isLov(G,id)||(typeof REGION!=="undefined"&&REGION.isLovC&&REGION.isLovC(G,id));
+const twoFor=(G,id)=>partners(G).some(k=>k!==id)||(G.region&&G.region.lov?Object.keys(G.region.lov).some(k=>k!==id):false);
+function takeAny(G,id){if(G.friendz)delete G.friendz[id];if(isChampLove(G,id)){REGION.takeC(G,id);}else takeLover(G,id);}
+const yesLine=(G,id)=>isChampLove(G,id)?(RG_JOIN[id]&&RG_JOIN[id].yes(G))||"…":LOVE_YES[id];
+/* who is due to reach out (third "no" + 6 weeks, still close, still here) */
+function doorWho(G){const ids=[...LOVE_IDS,...Object.keys((G.region&&G.region.joined)||{})];
+  return ids.find(id=>{const f=G.F[id];return f&&f.camp==="player"&&G.loveOff&&G.loveOff[id]!=null&&!loveOffLeft(G,id)&&!(G.doorDone&&G.doorDone[id])&&!isLovAny(G,id)&&!isAway(G,id)&&(f.bond||0)>=60;})||null;}
+function doorSteps(G){const id=doorWho(G);if(!id)return [];const f=G.F[id],two=twoFor(G,id);
+  return [{n:"nar",t:`📱 A message from ${f.name}`},{n:id,f:"flustered",l:"casual",t:loveLine(LOVE_DOOR,G,id)},...(two?[{n:"nar",t:"⚠ You're already with someone. Saying yes would make this two-timing."}]:[]),
+    {n:"nar",t:"What will you reply?",choice:[{t:two?"\"I feel the same way.\" (two-timing)":"\"I feel the same way.\"",fx:G2=>takeAny(G2,id),then:[{n:id,f:"happy",l:"casual",t:yesLine(G,id)}]},
+      {t:"\"I'm sorry. I still feel the same.\"",then:[{n:"nar",t:`${f.name} replies briefly that she understands and never brings it up again · if you change your mind, you can tell her yourself from the Characters tab`}]}]},
+    {fx:G2=>{(G2.doorDone=G2.doorDone||{})[id]=1;if(G2.seen)delete G2.seen.lv_door;}}];}
+EVENTS.push({id:"lv_door",look:"casual",bg:"camp",pri:70,when:G=>!!doorWho(G),steps:[{inject:G=>doorSteps(G)}]});
+/* the button in the Characters tab */
+function tellState(G,f){const id=f&&f.id;if(!id||!G.F[id])return null;const champ=isChampLove(G,id);
+  if(!(LOVE_IDS.includes(id)||champ)||f.camp!=="player"||!f.met&&!champ||isLovAny(G,id)||(f.bond||0)<60)return null;
+  if(isAway(G,id))return {ok:false,why:"Away"};
+  if(champ?(G.region.ex&&G.region.ex[id]!=null&&gameWeek(G)-G.region.ex[id]<12):exWait(G,id))return {ok:false,why:"Just broke up"};
+  const off=loveOffLeft(G,id);if(off)return {ok:false,why:`Needs time (${off} wk)`};
+  const t=G.tellAbs&&G.tellAbs[id];if(t!=null&&absWeek(G)-t<LOVE_TELL_CD)return {ok:false,why:`Just told her (${LOVE_TELL_CD-(absWeek(G)-t)} wk)`};
+  return {ok:true};}
+function tellReady(G,f){const id=f.id;if(isChampLove(G,id)){const J=G.region.joined||{};return (f.bond||0)>=75&&gameWeek(G)-(J[id]||gameWeek(G))>=6;}return (f.bond||0)>=75&&(f.trust||0)>=40;}
+function tellSteps(G,id){const f=G.F[id],two=twoFor(G,id),ready=tellReady(G,f);
+  const yes=[{fx:G2=>takeAny(G2,id)},{n:id,f:"flustered",l:"casual",t:yesLine(G,id)},{n:"nar",t:`Relationship with ${f.name}: lovers ♥`}];
+  const wait=[{fx:G2=>{(G2.tellAbs=G2.tellAbs||{})[id]=absWeek(G2);add(G2,id,"bond",1);}},{n:id,f:"flustered",l:"casual",t:loveLine(TELL_WAIT,G,id)},
+    {n:"nar",t:`${f.name} isn't ready yet · you need to grow closer ${!isChampLove(G,id)&&(f.trust||0)<40?` · trust ${Math.floor(f.trust||0)}/40`:""}${isChampLove(G,id)&&(f.bond||0)>=75?" · give her a little more time at the camp":""} · you can tell her again in ${LOVE_TELL_CD} weeks`}];
+  const spot=(typeof TELL_SPOT!=="undefined"&&TELL_SPOT[id])||"back of the camp",open=[{n:"nar",t:`That night you go to meet her at the ${spot} ${f.name} is already waiting.`},{n:"nar",t:"You tell her plainly how you feel."}];
+  if(!ready)return [...open,...wait];
+  if(two)return [open[0],{n:"nar",t:"⚠ You're already with someone. Saying it would make this two-timing.",choice:[{t:"Tell her honestly (two-timing)",then:[open[1],...yes]},{t:"Better not say it",then:[{n:"nar",t:"You keep the words to yourself and talk about training instead."}]}]}];
+  return [...open,...yes];}
+function tellLove(id){const f=G.F[id],T=tellState(G,f);if(!T||!T.ok)return;save();playScene(tellSteps(G,id),()=>{save();render();},{bg:"night",look:"casual"});}
