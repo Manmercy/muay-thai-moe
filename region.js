@@ -411,7 +411,7 @@ const RG_CH={
 function rgTopGirl(G){const L=CANON_IDS.map(id=>G.F[id]).filter(f=>f&&f.camp==="player"&&(f.bond||0)>=40).sort((a,b)=>(b.bond||0)-(a.bond||0));return L[0]||null;}
 function rgJeal(id,champ){const L={kati:`ครูคะ… ${champ}ยืนใกล้ไปหรือเปล่า หนูแค่สังเกตเฉย ๆ ค่ะ`,mali:`มะลิก็อยากได้กอดบ้างนะ~ …ล้อเล่นค่ะ (ไม่ได้ล้อเล่น)`,
   rin:`ระยะห่างระหว่างผู้จัดการกับ${champ}เมื่อกี้ น้อยกว่าค่าเฉลี่ยของทั้งคืนค่ะ ข้อมูลเฉย ๆ`,ploy:`ยิ้มอะไรนักหนา …เปล่า ไม่ได้ว่าอะไร`,fah:`เฮ้! ${champ}! ผู้จัดการเป็นของค่ายศิริชัยนะ! …หมายถึงผู้จัดการค่ายน่ะ!`};return L[id]||"…";}
-function rgMeet(G,cid,v){const R=G.region,m=R.meet;m[cid]=(m[cid]||0)+v;rgTouch(G,cid);(R.meetPk=R.meetPk||{})[cid]=Math.max(R.meetPk[cid]||0,m[cid]);}
+function rgMeet(G,cid,v){const R=G.region,m=R.meet;m[cid]=(m[cid]||0)+v;if(v>0&&R.joined&&R.joined[cid]&&G.F[cid])add(G,cid,"bond",v);rgTouch(G,cid);(R.meetPk=R.meetPk||{})[cid]=Math.max(R.meetPk[cid]||0,m[cid]);}
 /* v1.90: any real contact with a champion (a trip to her region, a bout, a visit, a duel, a night out) resets her "haven't seen you" clock */
 function rgTouch(G,cid){const R=G.region;if(!R)return;(R.meetT=R.meetT||{})[cid]=gameWeek(G);if(R.miss)delete R.miss[cid];}
 /* three weeks apart: she writes · four or more: the bond fades a little each week (outside-camp rate), never below the level she reached */
@@ -1069,6 +1069,12 @@ const REGION={
       playScene([{n:"coach",t:`นัดชิงแชมป์ภาคอีก ${left} สัปดาห์ข้างหน้า: ${me.name} ปะทะ ${RG[r].champ} นัดที่ ${x.n||1}`},
         {n:"coach",t:(x.n||1)>1?`แชมป์ภาคไม่ชกแบบเดิมสองนัดหรอก ${tape?"เทปที่ดูไว้ยังใช้ได้ แต่ต้องซ้อมให้ตรงกับที่เห็น":"ไปดูเทปนัดล่าสุดของเขาก่อน"} แล้วซ้อมแก้ทางให้ตรง สัปดาห์ชกค่อยเปลี่ยนเป็นเตรียมไฟต์`
           :`แชมป์ภาคไม่ใช่คู่ชกงานวัด ${tape?"เทปก็ดูแล้ว":"ดูเทปเขาก่อน"} แล้วซ้อมแก้ทางให้ตรงกับที่เห็น สัปดาห์ชกค่อยเปลี่ยนเป็นเตรียมไฟต์ ซ้อมมาแบบนี้ ขึ้นเวทีไปจะได้เปรียบตั้งแต่ยกแรก`}],()=>{save();done();},{bg:"camp",look:"casual"});return;}
+    /* v1.91.28 round 12: a champion moves in · a camp girl notices a two-timing champion romance · a champion confesses */
+    if(R.joinPend&&now>=R.joinPend.abs){const cid=R.joinPend.cid;delete R.joinPend;const S=this.joinSteps(G,cid),k=S.findIndex(x=>x.t==="สัปดาห์นี้ ค่ายศิริชัยมีสมาชิกใหม่");this.joinApply(G,cid);
+      const B={baibua:"temple",tabtim:"night",alicia:"vector_lab",chaba:"sea"};playScene(S.slice(0,k),()=>playScene(S.slice(k),()=>{save();done();},{bg:"camp",look:"casual"}),{bg:B[cid]||"camp",look:"casual"});return;}
+    if(R.twoQ&&now>=R.twoQ.abs){const q=R.twoQ;delete R.twoQ;const g=G.F[q.id];if(g&&g.camp==="player"&&!isAway(G,q.id)&&this.isLovC(G,q.cid)&&RG_TWO[q.id]&&(isPartner(G,q.id)||this.isLovC(G,q.id))){add(G,q.id,"bond",-8);
+      playScene([{n:q.id,f:"sad",l:"casual",t:RG_TWO[q.id]},{n:"nar",t:`${g.name}รู้เรื่องของคุณกับ${G.F[q.cid].name}แล้ว`}],()=>{save();done();},{bg:"camp",look:"casual"});return;}}
+    {const cid=this.confDue(G);if(cid){playScene(this.confSteps(G,cid),()=>{save();done();},{bg:"camp_night",look:"casual"});return;}}
     if(!R.gala){if(R.galaAbs==null)R.galaAbs=now+1;if(now>=R.galaAbs){R.gala=1;AU.startMusic&&AU.startMusic("hub");playScene(rgGala(G),()=>{save();done();},{bg:"gala",look:"casual"});return;}}
     const r=(R.cups||[])[0],c=r&&R.champ[r];
     if(r&&!R.c1&&c&&now>=(c.wonAbs||0)+1){R.c1="seen";playScene(rgCup1(G,r),()=>{save();done();},{bg:"camp",look:"casual"});return;}
@@ -1111,7 +1117,7 @@ const REGION={
     (R.gc=R.gc||[]).push(T.opp);R.trip=null;return true;},
 
   /* ---------- results + weekly upkeep ---------- */
-  flush(G){const R=G.region;if(!R||!R.pend||!R.pend.length)return;const done=R.pend.splice(0);
+  flush(G){const R=G.region;if(R&&R.joined)this.joinSkills(G);if(!R||!R.pend||!R.pend.length)return;const done=R.pend.splice(0);
     for(const p of done){const rg=p.region||{},r=rg.r,dest=rg.dest,D=ROAD_DEST[dest];if(rg.nlfinal){if(R.final){R.final.cur=R.final.cur||{};R.final.cur[rg.nlfinal]=p.res||"L";}continue;}if(rg.nlleg){this.legResult(G,rg.nlleg,p);continue;}if(!D||!RG[r])continue;
       if(rg.series){this.seriesResult(G,r,p);continue;}
       rgTouch(G,RG_CID[r]);const T=R.trip,abs=T&&T.bid===p.bid?T.abs:gameWeek(G);
@@ -1129,7 +1135,7 @@ const REGION={
       const gap=now-R.meetT[cid];
       if(gap>=3&&!R.miss[cid]){R.miss[cid]=1;addMail(G,{kind:"letter",from:`${RG[r].champ} · แชมป์${RG[r].name}`,title:`จดหมายจาก${RG[r].champ}`,body:RG_MISS[r]});}
       if(gap>=4){const pk=(R.meetPk||{})[cid]||m[cid],fl=RG_FLOOR.find(t=>pk>=t)||0;if(m[cid]>fl)m[cid]=Math.max(fl,Math.round((m[cid]-.25)*100)/100);}}},
-  weekly(G){const R=G.region;this.flush(G);this.seriesWeekly(G);this.fade(G);this.letters(G);this.finalWeekly(G);const T=R.trip;
+  weekly(G){const R=G.region;this.flush(G);this.seriesWeekly(G);this.fade(G);this.letters(G);this.finalWeekly(G);this.joinWeekly(G);const T=R.trip;
     /* a trip whose bout vanished (the week went by, the booking was dropped) is let go */
     if(T&&gameWeek(G)>T.abs&&!G.bookings.some(b=>b.id===T.bid)){(R.gc=R.gc||[]).push(T.opp);R.trip=null;R.nextTripAbs=Math.max(R.nextTripAbs||0,T.abs+1);}
     const keep=new Set(G.bookings.map(b=>b.b));R.gc=(R.gc||[]).filter(id=>{if(keep.has(id))return true;if(G.F[id]&&G.F[id].rg)delete G.F[id];return false;});},
@@ -1336,7 +1342,7 @@ const REGION={
     return `<section class="px card rg-head"><div><h3>ศึกชิงเจ้าสี่ภาค</h3><span class="meta">ครั้งที่ ${R.edition||1}</span></div>
        <div class="rg-stats"><span class="pill gold">ถ้วย ${cups}/4</span><span class="pill">เข็มขัด ${belts}/16</span><span class="pill ${T?"red":nx?"green":""}">${T?`ทริป: ${esc(ROAD_DEST[T.dest].name)} · สัปดาห์ ${T.wk}`:nx?`เดินทางได้สัปดาห์ ${nx}`:"ปีนี้เดินทางไม่ได้แล้ว"}</span></div></section>
      ${!R.gala?`<p class="meta rg-gala">🎉 งานเปิดตัวศึกชิงเจ้าสี่ภาคที่กรุงเทพฯ ${R.galaAbs!=null&&gameWeek(G)<R.galaAbs?"จัดปลายสัปดาห์หน้า":"จัดปลายสัปดาห์นี้"} · ทั้งค่ายได้รับเชิญ</p>`:""}${!REGION_LIVE?`<p class="meta">โหมดทดสอบ: <button class="btn sm" data-act="rggala" data-v="gala">ดูงานเปิดตัว</button> ไฟต์ใต้ดินทดสอบ (กติกาเปิด): ${NL_ORDER.map(k=>`<button class="btn sm" data-act="nltest" data-v="${k}">${esc(NL[k].name)}</button>`).join(" ")}${(R.cups||[]).length?` <button class="btn sm" data-act="rggala" data-v="c1">ดูฉากซองเขียว</button>`:""}</p>`:""}
-     ${this.finalCard(G)}${this.legendCard(G)}${tripCard}${this.fuelLine(G)}<div class="rg-grid">${regs}</div>`;},
+     ${this.finalCard(G)}${this.legendCard(G)}${this.joinCard(G)}${tripCard}${this.fuelLine(G)}<div class="rg-grid">${regs}</div>`;},
   planHTML(dest){const D=ROAD_DEST[dest],C=RG[D.r],wk=this.tripWeek(G);if(!wk)return `<h2>${esc(D.name)}</h2><p>ปีนี้ไม่มีสัปดาห์ว่างให้เดินทางแล้ว</p>`;
     const abs=this.base(G)+wk,P=roadPlan(G,dest,null,abs),R=this.riders(G,wk);if(!UI.rgFid||!R.some(f=>f.id===UI.rgFid))UI.rgFid=R[0]?R[0].id:null;
     const me=UI.rgFid&&G.F[UI.rgFid],poor=G.cash<P.total,line=(k,v)=>v?`<div class="kv-row"><span>${k}</span><b class="num">${fmt(v)}</b></div>`:"";
@@ -1470,5 +1476,150 @@ if(typeof ACT!=="undefined")Object.assign(ACT,{
   rgchat:d=>{const f=G.F[d.v];if(!f)return;f.met=true;rgTouch(G,d.v);chatOpen(d.v);},
   rggala:d=>{if(REGION_LIVE)return;const R=G.region;if(d.v==="c1"){const r=R.cups[0];playScene(rgCup1(G,r),()=>{R.c1=R.c1||"seen";save();render();},{bg:"camp",look:"casual"});return;}
     playScene(rgGala(G),()=>{R.gala=1;save();render();},{bg:"gala",look:"casual"});}});
+/* ---------- v1.91.28 round 12 (Man): after the underground final the regional champions ask to join, one at a time ----------
+   hidden bar: closeness (R.meet) ≥ RG_JOIN_MIN · offers come in order of closeness, 4 weeks apart · accepting needs a free room (5 + dorm level) and the signing fee
+   she arrives the next week (leaving her old camp + arriving at Sirichai) at ~70% of her champion level/stats, with skill points for her lineage's tree (the partner girl's)
+   romance (Man): one-love or two-timing only — never the harem team. Kept on its own track (R.lov / R.ex), shown through relState */
+const RG_JOIN_MIN=12,RG_JOIN_GAP=4,RG_JOIN_FEE=60000,RG_JOIN_WAGE=3000;
+const RG_JOIN={
+ baibua:{letter:"ผู้จัดการเจ้า\n\nหนูคิดมาตั้งแต่คืนที่ได้ถ้วยแล้ว ว่าอยากซ้อมที่ค่ายศิริชัยเจ้า อยากชกข้าง ๆ กะทิ บ่ใช่ชกกับกะทิ\n\nพ่อบอกว่าครูมวยท่าเสาสอนให้ไปหาคนที่ทำให้หมัดเราดีขึ้น บ่ใช่อยู่ที่เดิมตลอด\n\nถ้าค่ายมีห้องว่าง หนูขอสมัครเน้อเจ้า\n— ใบบัว",
+  leave:[{n:"nar",t:"เช้าวันย้ายค่าย หมอกยังไม่จาง ใบบัวกราบครูที่ศาลไม้หน้าค่ายเดิม"},{n:"baibua",f:"sad",l:"casual",t:"ครูเจ้า หนูไปอยู่ค่ายอื่นแล้วเน้อ… บ่ได้ทิ้งท่าเสาเจ้า หนูจะเอาไปด้วย"},
+   {n:"nar",t:"ครูผูกด้ายขาวที่ข้อมือให้เธอหนึ่งเส้น แล้วตบหลังเบา ๆ สองที"},{n:"baibua",f:"happy",l:"casual",t:"พ่อฝากไส้อั่วมาให้ทั้งค่ายเจ้า บอกว่าถ้ากินแล้วอร่อย ให้ดูแลลูกสาวพ่อดี ๆ"}],
+  arrive:[{n:"nar",t:"ใบบัวยืนหน้าป้ายค่ายศิริชัย ถือกระเป๋าสองใบกับกล่องไส้อั่วอีกหนึ่งกล่อง"},{n:"baibua",f:"flustered",l:"casual",t:"ผู้จัดการเจ้า… ฝากตัวด้วยเน้อ หนูจะบ่ทำให้ผิดหวังเจ้า"}],
+  pair:"พี่ใบบัว! ห้องอยู่ข้างหนูเลยค่ะ หนูปูที่นอนไว้ให้แล้ว!",pairBack:"…ขอบใจเจ้ากะทิ ท่าเสาสองคนในค่ายเดียว ครูคงยิ้มอยู่เน้อ",
+  hang:[
+   [{n:"nar",t:"ใบบัวชวนไปตลาดเช้า เธอเลือกผักอย่างตั้งใจราวกับเลือกคู่ชก"},{n:"baibua",f:"happy",l:"casual",t:"แกงฮังเลต้องใช้หมูสามชั้นเจ้า… ผู้จัดการกินเผ็ดได้ก่อ",choice:[
+     {t:"\"ได้ เผ็ดแค่ไหนก็กิน\"",b:4,then:[{n:"baibua",f:"flustered",l:"casual",t:"งั้นหนูจะใส่พริกเพิ่มเน้อ… แต่ถ้าน้ำตาไหลห้ามโทษหนูเจ้า"}]},
+     {t:"\"ทำแบบที่บ้านเธอกินเลย\"",b:5,then:[{n:"baibua",f:"happy",l:"casual",t:"…แบบที่พ่อชอบเจ้า หนูบ่ได้ทำให้ใครกินนานแล้ว"}]}]}],
+   [{n:"nar",t:"ค่ำแล้ว ใบบัวนั่งปักผ้าลายตีนจกอยู่หน้าห้อง เข็มเล็กกว่าที่คิด"},{n:"baibua",f:"flustered",l:"casual",t:"ปักให้กะทิเจ้า… บ่ใช่ ปักให้ทั้งค่าย อันนี้ของผู้จัดการ เอ๊ย บ่ใช่ ยังบ่เสร็จเจ้า",choice:[
+     {t:"\"รอได้ ไม่รีบ\"",b:5,then:[{n:"baibua",f:"happy",l:"casual",t:"…งั้นหนูจะปักช้า ๆ เน้อเจ้า"}]},
+     {t:"\"สอนฉันปักบ้างได้ไหม\"",b:4,then:[{n:"nar",t:"ผ่านไปครึ่งชั่วโมง ผ้าของคุณมีดอกบัวหนึ่งดอก หน้าตาเหมือนกะหล่ำ"},{n:"baibua",f:"happy",l:"casual",t:"งามเจ้า… งามแบบกะหล่ำเจ้า"}]}]}],
+   [{n:"nar",t:"เช้ามืด ใบบัวซ้อมศอกกลับหลังกับกระสอบ ไม่ได้ยินเสียงคุณเดินมา"},{n:"baibua",f:"surprised",l:"fight",t:"เอ๊ะ! ผู้จัดการ… ดูอยู่นานแล้วก่อเจ้า",choice:[
+     {t:"\"ศอกนั้นสวยที่สุดที่เคยเห็น\"",b:5,then:[{n:"baibua",f:"flustered",l:"fight",t:"…ห้ามพูดแบบนี้ตอนหนูถือศอกอยู่เจ้า มันจะพลาด"}]},
+     {t:"จับกระสอบให้เธอซ้อมต่อ",b:4,then:[{n:"nar",t:"ศอกต่อไปเบาลงนิดหนึ่ง เธอบอกว่ากลัวคุณเจ็บ"}]}]}]],
+  love:[{n:"nar",t:"เสาร์นี้ใบบัวพาไปถนนคนเดิน มือเธอหาเจอเองในฝูงคน"},{n:"baibua",f:"flustered",l:"casual",t:"ถ้าหลงกัน… ก็จับไว้แบบนี้เน้อ"},{n:"baibua",f:"happy",l:"casual",t:"หนูบ่ได้กลัวหลงหรอกเจ้า"}],
+  conf:G=>[{n:"nar",t:"ดึกแล้ว ใบบัวมาเคาะประตู ถือผ้าคลุมลายตีนจกผืนเดิมจากดอยสุเทพ"},{n:"baibua",f:"flustered",l:"casual",t:"หนูเขียนไว้ในจดหมายสัญญาแล้ว แต่ลบออก… เพราะอยากพูดเอง"},{n:"baibua",f:"flustered",l:"casual",t:G.player.gender==="f"?"หนูฮักปี้เจ้า… ปี้จะตอบเมื่อไหร่ก็ได้เน้อ":"หนูฮักอ้ายเจ้า… อ้ายจะตอบเมื่อไหร่ก็ได้เน้อ"}],
+  yes:G=>G.player.gender==="f"?"…เจ้า หนูจะเรียกปี้แบบนี้ทุกวันเน้อ บ่ต้องแอบเรียกแล้ว":"…เจ้า หนูจะเรียกอ้ายแบบนี้ทุกวันเน้อ บ่ต้องแอบเรียกแล้ว",no:"บ่เป็นหยังเจ้า หนูยังอยู่ค่ายนี้ ยังได้เห็นหน้าทุกวัน ก็พอแล้วเจ้า",bye:"…เจ้า หนูเข้าใจ หนูยังจะชกให้ค่ายนี้เต็มที่เหมือนเดิมเจ้า"},
+ tabtim:{letter:"ผู้จัดการเด้อ\n\nแชมป์ภาคอีสานอย่างข้อยบ่เคยแพ้ใครง่าย ๆ แต่แพ้ค่ายศิริชัยแล้วมันคักหลาย อยากฮู้ว่าค่ายนี้ซ้อมจั่งใด๋\n\nเลยสิย้ายไปซ้อมนำเลย! พลอยบ่ต้องย้านเด้อ ข้อยบ่แย่งที่ ข้อยสิแย่งข้าวเหนียวอย่างเดียว\n\nถ้ามีห้องว่างตอบมาเด้อ\n— ทับทิม",
+  leave:[{n:"nar",t:"คืนสุดท้ายที่ค่ายเก่า รุ่นน้องทั้งค่ายนั่งล้อมวงกินข้าวส่งทับทิม"},{n:"tabtim",f:"happy",l:"casual",t:"บ่ต้องฮ้องไห้เด้อพี่น้อง! ข้อยไปซ้อมเฉย ๆ บ่ได้ไปไส!"},
+   {n:"nar",t:"ครูของเธอยื่นกระติบข้าวเหนียวใบใหญ่ให้ ทับทิมหัวเราะเสียงดัง แต่ตาแดง"},{n:"tabtim",f:"sad",l:"casual",t:"…ครูสอนข้อยตั้งแต่เตะต้นกล้วยบ่ล้ม ผู้จัดการต้องดูแลข้อยดี ๆ เด้อ"}],
+  arrive:[{n:"nar",t:"ทับทิมลงจากรถตู้พร้อมไก่ย่างสามถุงกับปลาร้าบองหนึ่งกระปุก"},{n:"tabtim",f:"happy",l:"casual",t:"ผู้จัดการ! จากนี้ทับทิมเป็นคนของค่ายศิริชัยแล้วเด้อ …หมายถึงนักมวย อย่าคิดหลาย!"}],
+  pair:"ห้องเธออยู่ตรงข้ามฉัน เสียงดังหลังสี่ทุ่มฉันเคาะผนังนะ",pairBack:"ฮ่า ๆ ได้เลยพลอย! เคาะมาข้อยสิเคาะตอบเป็นจังหวะกลองยาวเด้อ",
+  hang:[
+   [{n:"nar",t:"ทับทิมลากคุณไปร้านส้มตำ สั่งเองทั้งโต๊ะโดยไม่เปิดเมนู"},{n:"tabtim",f:"happy",l:"casual",t:"ตำปูปลาร้าพริกสิบเม็ด! ผู้จัดการเอาจั๊กเม็ด?",choice:[
+     {t:"\"สิบเม็ดเหมือนเธอ\"",b:5,then:[{n:"nar",t:"สิบนาทีต่อมาคุณดื่มน้ำแข็งไปสามแก้ว"},{n:"tabtim",f:"happy",l:"casual",t:"ฮ่า ๆ ใจถึงเด้อ! ข้อยมักคนใจถึง …หมายถึงนักกิน!"}]},
+     {t:"\"เม็ดเดียวพอ\"",b:3,then:[{n:"tabtim",f:"pout",l:"casual",t:"เม็ดเดียวคือกินข้าวเปล่าแล้วเด้อ! เอ้า ข้อยแบ่งของข้อยให้คำหนึ่ง"}]}]}],
+   [{n:"nar",t:"ทับทิมเปิดหมอลำจากโทรศัพท์ แล้วฟ้อนอยู่กลางลานค่ายคนเดียว"},{n:"tabtim",f:"happy",l:"casual",t:"มาฟ้อนนำกันเด้อผู้จัดการ! เท้าแบบนี้แหละที่ใช้เตะ",choice:[
+     {t:"ลุกไปฟ้อนด้วย",b:5,then:[{n:"nar",t:"ทั้งค่ายออกมายืนดู ทับทิมจับมือคุณหมุนสามรอบแล้วหัวเราะจนนั่งลงกับพื้น"}]},
+     {t:"นั่งตบมือให้จังหวะ",b:4,then:[{n:"tabtim",f:"flustered",l:"casual",t:"…มองนานคักเด้อ ข้อยเขินเป็นเหมือนกันเด้อ"}]}]}],
+   [{n:"nar",t:"หลังซ้อม ทับทิมนั่งเงียบผิดปกติ มองรูปทีมฟุตบอลเด็กในโทรศัพท์"},{n:"tabtim",f:"sad",l:"casual",t:"น้องชายข้อยเอง… ข้อยชกเพื่อส่งมันเรียน มันบอกว่าอยากเป็นหมอ",choice:[
+     {t:"\"เขาโชคดีที่มีพี่แบบเธอ\"",b:5,then:[{n:"tabtim",f:"flustered",l:"casual",t:"…อย่าเว้าแบบนี้ ข้อยฮ้องไห้ง่ายเด้อ บ่ได้เว้าหยอก"}]},
+     {t:"\"ค่ายนี้ช่วยเธอส่งเขาได้\"",b:4,then:[{n:"tabtim",f:"happy",l:"casual",t:"ค่ายนี้ใจดีแท้… ข้อยสิชกให้หนักกว่าเก่าเด้อ"}]}]}]],
+  love:[{n:"nar",t:"ริมโขงตอนพลบค่ำ ทับทิมเงียบไปนานกว่าทุกครั้ง"},{n:"tabtim",f:"flustered",l:"casual",t:"แต่ก่อนข้อยคิดว่าความสุขคือชนะ… ตอนนี้คือได้นั่งตรงนี้นำเจ้า"},{n:"tabtim",f:"happy",l:"casual",t:"อย่าบอกไผเด้อว่าข้อยเว้าหวานเป็น!"}],
+  conf:()=>[{n:"nar",t:"ทับทิมดึงคุณออกมาหลังค่าย ที่ที่เสียงหมอลำจากห้องเธอไม่ได้ยิน"},{n:"tabtim",f:"flustered",l:"casual",t:"ผู้จัดการ! ข้อยเว้าเทื่อเดียวเด้อ บ่ได้หยอกเล่นคือเทื่อก่อน"},{n:"tabtim",f:"flustered",l:"casual",t:"ข้อยมักเจ้าหลายแท้ …ตอบมาเลย ข้อยบ่ย้านคำตอบ"}],
+  yes:()=>"…แท้บ่! ฮ่า ๆ ข้อยสิเว้าใส่ทั้งค่ายเลยเด้อ! …บ่ ๆ อายอยู่ ไว้ก่อน",no:"บ่เป็นหยังเด้อ ข้อยยังอยู่ค่ายนี้ ยังกินข้าวเหนียวนำกันทุกมื้อคือเก่า",bye:"…เข้าใจแล้วเด้อ ข้อยบ่โกรธ ข้อยแค่ต้องไปเตะกระสอบดัง ๆ จักพัก"},
+ alicia:{letter:"ถึงผู้จัดการ\n\nสัญญากับเวกเตอร์หมดแล้ว ฉันไม่ต่อ และจะไม่เซ็นอะไรที่มีคำว่า \"ตลอดไป\" อย่างที่บอกไว้\n\nรินบอกว่าสัญญาค่ายศิริชัยมีแค่สองหน้า อ่านจบในห้านาที I'm interested. ไม่ได้แปลว่าอยากไปเพราะคุณนะ เพราะสัญญามันสั้นดี\n\nถ้ามีห้อง ส่งสัญญามา\n— Alicia",
+  leave:[{n:"nar",t:"วันสุดท้ายที่ค่ายเวกเตอร์ ทีมสปอนเซอร์ขอให้อลิเซียไลฟ์อำลา"},{n:"alicia",f:"pout",l:"casual",t:"No. วันนี้ไม่ใช่คอนเทนต์"},
+   {n:"nar",t:"เธอวางบัตรผ่านประตูไว้บนโต๊ะ ถอดสายรัดข้อมือของสปอนเซอร์ออก เหลือแค่ผ้าพันมือเก่าที่ซื้อเองตอนอายุสิบห้า"},{n:"alicia",f:"happy",l:"casual",t:"เบาตัวจัง… เรื่องแบบนี้ห้ามบอกใครนะ"}],
+  arrive:[{n:"nar",t:"อลิเซียมาพร้อมกระเป๋าเดินทางห้าใบ สี่ใบเป็นชุด อีกใบเป็นขนมไทยชาววังสำหรับทั้งค่าย"},{n:"alicia",f:"flustered",l:"casual",t:"ไม่ได้ซื้อมาเอาใจใครนะ มือมันหยิบไปเอง"}],
+  pair:"ฉันเตรียมตารางเวรล้างจานไว้แล้วค่ะ คุณอลิเซียได้วันพุธกับวันเสาร์",pairBack:"Fine. …ล้างจานต้องใช้น้ำยาตัวไหน",
+  hang:[
+   [{n:"nar",t:"อลิเซียขอให้ช่วยถือกล้อง แต่พอเปิดกล้องได้ เธอหันเลนส์มาที่คุณ"},{n:"alicia",f:"happy",l:"casual",t:"วันนี้ถ่ายคุณบ้าง คอนเทนต์ชื่อ 'ผู้จัดการที่ไม่ยอมยิ้ม'",choice:[
+     {t:"ยิ้มให้กล้อง",b:5,then:[{n:"alicia",f:"flustered",l:"casual",t:"…ไม่ต้องยิ้มขนาดนั้นก็ได้ ไฟล์นี้ไม่โพสต์ เก็บไว้ดูเอง หมายถึงเก็บไว้ตรวจสอบ"}]},
+     {t:"\"ถ่ายตัวเองดีกว่า สวยกว่า\"",b:4,then:[{n:"alicia",f:"pout",l:"casual",t:"รู้อยู่แล้ว ไม่ต้องบอก …แต่บอกอีกทีก็ได้"}]}]}],
+   [{n:"nar",t:"อลิเซียนั่งอ่านคอมเมนต์ในโทรศัพท์ นิ้วหยุดที่ข้อความหนึ่งนานผิดปกติ"},{n:"alicia",f:"sad",l:"casual",t:"'ดังเพราะหน้าตา' …ยังมีคนพิมพ์มาอยู่ดี ทั้งที่ได้ถ้วยมาแล้ว",choice:[
+     {t:"\"ถ้วยไม่ได้มาเพราะหน้าตา\"",b:5,then:[{n:"alicia",f:"flustered",l:"casual",t:"…I know. แต่พอคุณพูด มันฟังดูจริงกว่าตอนฉันพูดเอง"}]},
+     {t:"ปิดหน้าจอให้เธอ",b:4,then:[{n:"alicia",f:"happy",l:"casual",t:"Rude. …ขอบคุณ"}]}]}],
+   [{n:"nar",t:"รินกับอลิเซียนั่งตรวจสัญญาไฟต์ของค่ายด้วยกัน ปากกาแดงสองด้าม"},{n:"alicia",f:"happy",l:"casual",t:"ข้อ 6 ค่าตัวต่ำไป ผู้จัดการ ต่อรองเป็นไหม",choice:[
+     {t:"\"สอนหน่อยสิ\"",b:5,then:[{n:"alicia",f:"happy",l:"casual",t:"บทเรียนที่หนึ่ง อย่ายิ้มก่อนอีกฝ่ายพูดตัวเลข …คุณยิ้มอยู่นั่นไง fail"}]},
+     {t:"\"มีเธอกับรินอยู่แล้ว\"",b:4,then:[{n:"alicia",f:"flustered",l:"casual",t:"เอาเปรียบกันชัด ๆ …ก็ได้ ฉันทำให้"}]}]}]],
+  love:[{n:"nar",t:"อลิเซียพาไปล่องเรือที่อยุธยาอีกครั้ง โทรศัพท์ของเธอปิดอยู่ในกระเป๋า"},{n:"alicia",f:"flustered",l:"casual",t:"ครั้งก่อนบอกว่าคืนนี้ไม่ใช่คอนเทนต์… ครั้งนี้ก็เหมือนกัน และครั้งหน้าด้วย"},{n:"alicia",f:"happy",l:"casual",t:"Don't get used to it. …ล้อเล่น get used to it"}],
+  conf:()=>[{n:"nar",t:"อลิเซียปิดประตูห้องซ้อม ปิดไฟสปอตไลต์ เหลือแค่ไฟดวงเล็กเหนือกระสอบ"},{n:"alicia",f:"flustered",l:"casual",t:"Listen. ฉันพูดครั้งเดียว ไม่มีรีเทค"},{n:"alicia",f:"flustered",l:"casual",t:"ฉันชอบคุณ ไม่ใช่ในฐานะผู้จัดการ ตอบมาตรง ๆ ฉันไม่ชอบสัญญาที่อ่านไม่ออก"}],
+  yes:()=>"…Deal. สัญญาฉบับนี้ไม่มีวันหมดอายุ แต่ก็ไม่มีคำว่าตลอดไปนะ ต้องต่อทุกวัน",no:"OK. ฉันเคารพคำตอบ …ไม่ได้ร้องไห้ ตาแห้งเฉย ๆ",bye:"…เข้าใจแล้ว ฉันไม่เซ็นอะไรที่อีกฝ่ายไม่อยากเซ็นอยู่แล้ว"},
+ chaba:{letter:"ผู้จัดการ\n\nพี่ชายว่าให้มา\nบอกว่าอยู่ภูเก็ตคนเดียวได้ ดูแลตัวเองได้\n\nมะลิว่าห้องข้าง ๆ ยังว่าง\n\nถ้าม่ายว่างก็ม่ายเป็นไร\n— ชบา",
+  leave:[{n:"nar",t:"ท่าเรือภูเก็ตตอนเช้า พี่ชายของชบาเข็นรถมาส่งถึงหน้าค่ายไชยาอันดามัน"},{n:"nar",t:"เขายื่นเปลือกหอยให้หนึ่งอัน \"เอาไปให้มะลิ บอกว่าพี่ฝาก\""},
+   {n:"chaba",f:"sad",l:"casual",t:"…จะกลับมาทุกชักพระ ม่ายขาด"},{n:"nar",t:"ชบาขึ้นรถโดยไม่หันหลังกลับ จนพ้นโค้งแรกถึงยอมมองกระจก"}],
+  arrive:[{n:"nar",t:"ชบามาถึงพร้อมเป้ใบเดียวกับถุงขนมลา"},{n:"chaba",f:"happy",l:"casual",t:"ผู้จัดการ ฝากด้วย"}],
+  pair:"พี่ชบา! ห้องข้างมะลิค่ะ มะลิปูผ้าปูที่นอนลายดอกชบาไว้ให้ด้วย!",pairBack:"…ม่ายต้องก็ได้ (คืนนั้นทั้งค่ายเห็นว่าเธอนอนกอดหมอนลายเดียวกัน)",
+  hang:[
+   [{n:"nar",t:"ชบาซ่อมรั้วหลังค่ายอีกแล้ว ทั้งที่รั้วไม่ได้พัง"},{n:"chaba",f:"happy",l:"casual",t:"ส่งค้อนมา",choice:[
+     {t:"ส่งค้อนแล้วจับไม้ให้",b:5,then:[{n:"nar",t:"สองชั่วโมงผ่านไปแทบไม่มีใครพูด รั้วแข็งแรงขึ้นกว่าเดิมมาก"},{n:"chaba",f:"happy",l:"casual",t:"…หรอย วันนี้"}]},
+     {t:"\"รั้วไม่ได้พังนะ\"",b:3,then:[{n:"chaba",f:"pout",l:"casual",t:"รู้ อยากตอก"}]}]}],
+   [{n:"nar",t:"แมวจรตัวหนึ่งมานอนบนตักชบา เธอนั่งนิ่งไม่ขยับมาสี่สิบนาทีแล้ว"},{n:"chaba",f:"flustered",l:"casual",t:"…ม่ายได้ชอบ มันมาเอง",choice:[
+     {t:"นั่งลงข้าง ๆ ไม่พูดอะไร",b:5,then:[{n:"nar",t:"แมวย้ายมานอนตักคุณ ชบามองแมวแบบโดนหักหลัง แล้วหัวเราะออกมาเบา ๆ"}]},
+     {t:"\"ตั้งชื่อให้มันไหม\"",b:4,then:[{n:"chaba",f:"happy",l:"casual",t:"…ไข่เค็ม (มะลิได้ยินแล้วดีใจทั้งวัน)"}]}]}],
+   [{n:"nar",t:"เย็นวันอาทิตย์ ชบาวิดีโอคอลกับพี่ชาย แล้วยื่นโทรศัพท์มาให้กลางสาย"},{n:"chaba",f:"flustered",l:"casual",t:"พี่อยากแหลงกับผู้จัดการ",choice:[
+     {t:"\"ฝากน้องสาวไว้กับผมได้\"",b:5,then:[{n:"nar",t:"พี่ชายหัวเราะ ชบาแย่งโทรศัพท์คืนแล้ววางสายทันที หูแดงไปถึงคอ"}]},
+     {t:"เล่าว่าชบาซ้อมหนักแค่ไหน",b:4,then:[{n:"chaba",f:"happy",l:"casual",t:"…ม่ายต้องเล่าทุกเรื่องก็ได้"}]}]}]],
+  love:[{n:"nar",t:"ชบาชวนออกไปทะเลตอนกลางคืน ขี่มอไซค์พ่วงข้างมาเอง ทั้งที่คุณมีรถ"},{n:"chaba",f:"flustered",l:"casual",t:"ให้นั่งคนแรกเหมือนเดิม"},{n:"chaba",f:"happy",l:"casual",t:"…อยู่ต่ออีกวันได้ไหม ไซ ถามเหมือนเดิม"}],
+  conf:()=>[{n:"nar",t:"ชบาเคาะประตูสามที แล้วยืนนิ่งอยู่นานจนคุณต้องเปิดเอง"},{n:"chaba",f:"flustered",l:"casual",t:"ผู้จัดการ"},{n:"nar",t:"ลมพัดผ่านไปหนึ่งรอบ"},{n:"chaba",f:"flustered",l:"casual",t:"…ชอบ แค่นั้น แหลงยาวม่ายเป็น"}],
+  yes:()=>"…อืม (เธอจับมือคุณแน่น แล้วเดินกลับห้องไปเฉย ๆ)",no:"…ม่ายเป็นไร ยังซ่อมรั้วด้วยกันได้",bye:"…รู้แล้ว ม่ายต้องแหลงต่อ"}};
+/* the girl closest to you who notices a champion lover while you are with her */
+const RG_TWO={kati:"ครูคะ… หนูได้ยินมาแล้วค่ะ หนูไม่ถามก็ได้ แต่หนูไม่ได้ไม่รู้นะคะ",mali:"มะลิเห็นนะคะว่าใครเดินจับมือใครเมื่อคืน… มะลิไม่ร้องไห้หรอก ไม่ร้องหรอก",
+ baibua:"…หนูเห็นแล้วเจ้า หนูบ่ถามก็ได้ แต่ใจมันบ่ได้บ่รู้เจ้า",tabtim:"ผู้จัดการ… ข้อยบ่ได้โง่เด้อ ข้อยเห็นอยู่ ข้อยแค่บ่เว้า",alicia:"I'm not blind. …ฉันแค่ยังไม่ตัดสินใจว่าจะโกรธแค่ไหน",chaba:"…เห็นแล้ว",
+ rin:"ช่วงนี้เวลาที่คุณหายไปไม่ตรงกับตารางค่ะ ฉันบันทึกไว้แล้ว ไม่ได้ต้องการคำอธิบาย แค่อยากให้รู้ว่าฉันรู้",ploy:"…ไม่ต้องพูด ฉันเห็นแล้ว",fah:"นี่! คิดว่าฟ้าตาบอดเหรอ! …ไม่ต้องตอบ ฟ้าไปซ้อมก่อน"};
+Object.assign(REGION,{
+  joinRooms(G){const R=G.region,J=R.joined||{};return CANON_IDS.filter(id=>G.F[id]&&G.F[id].camp==="player").length+Object.keys(J).filter(c=>G.F[c]&&G.F[c].camp==="player").length;},
+  /* the champion's skill tree is her lineage's — the partner girl's tree (Tha Sao / Korat / Lopburi / Chaiya) */
+  joinSkills(G){const J=(G.region&&G.region.joined)||{};for(const r of RG_ORDER){const cid=RG_CID[r];if(J[cid]&&!SKILLS[cid]&&SKILLS[RG_CH[r].pair])SKILLS[cid]=SKILLS[RG_CH[r].pair];}},
+  joinWeekly(G){const R=G.region,F=R.final,now=gameWeek(G);if(!F||!F.won||now<(F.wonAbs||0)+3)return;R.joined=R.joined||{};R.offers=R.offers||[];R.joinQ=R.joinQ||[];
+    const m=R.meet||{};for(const r of RG_ORDER){const cid=RG_CID[r];if(!R.joined[cid]&&!R.offers.includes(cid)&&!R.joinQ.includes(cid)&&!(R.joinGone||{})[cid]&&(m[cid]||0)>=RG_JOIN_MIN)R.joinQ.push(cid);}
+    R.joinQ.sort((a,b)=>(m[b]||0)-(m[a]||0));
+    if(R.joinQ.length&&now>=(R.joinNext||0)){const cid=R.joinQ.shift(),r=RG_ORDER.find(x=>RG_CID[x]===cid);R.offers.push(cid);R.joinNext=now+RG_JOIN_GAP;
+      addMail(G,{kind:"letter",from:`${RG[r].champ} · แชมป์${RG[r].name}`,title:`ใบสมัครจาก${RG[r].champ}`,body:RG_JOIN[cid].letter+`\n\n(สัญญา: ค่าเซ็น ${fmt(RG_JOIN_FEE)} · ค่าจ้าง ${fmt(RG_JOIN_WAGE)}/สัปดาห์ · ตอบได้ที่หน้าศึกชิงเจ้าสี่ภาค)`});}},
+  joinOk(G,cid){const R=G.region;if(!R.offers||!R.offers.includes(cid))return "ไม่มีสัญญานี้";if(R.joinPend)return "รอคนที่ตอบรับไปก่อนหน้าย้ายมาก่อน";
+    if(this.joinRooms(G)>=dormRooms(G))return `ห้องพักเต็ม (${dormRooms(G)} ห้อง) · อัปเกรดหอพักก่อน`;if(G.cash<RG_JOIN_FEE)return `เงินไม่พอ · ค่าเซ็น ${fmt(RG_JOIN_FEE)}`;return "";},
+  joinAccept(G,cid){const why=this.joinOk(G,cid);if(why){toast(why);return;}const R=G.region;G.cash-=RG_JOIN_FEE;R.offers=R.offers.filter(x=>x!==cid);R.joinPend={cid,abs:gameWeek(G)+1};
+    G.log=G.log||[];G.log.push(`เซ็นสัญญากับ${G.F[cid]?G.F[cid].name:cid} · ค่าเซ็น ${fmt(RG_JOIN_FEE)} · ย้ายมาสัปดาห์หน้า`);toast(`เซ็นสัญญาแล้ว · ${G.F[cid]?G.F[cid].name:""}ย้ายมาสัปดาห์หน้า`);},
+  joinApply(G,cid){const R=G.region,r=RG_ORDER.find(x=>RG_CID[x]===cid),f=G.F[cid]||this.champFighter(G,r),pair=G.F[RG_CH[r].pair],now=gameWeek(G);
+    f.camp="player";f.canon=true;f.met=true;f.div=(pair&&(pair.div==="A"||pair.div==="B"))?pair.div:"A";
+    f.lvl=Math.max(8,Math.round((f.lvl||14)*.7));for(const k in f.a)f.a[k]=Math.max(6,Math.round(f.a[k]*.7*10)/10);
+    f.sp=(f.sp||0)+f.lvl;f.xp=0;f.skills=f.skills||{};f.wage=RG_JOIN_WAGE;f.fee=0;f.potential=20;f.fatigue=0;f.injury=0;f.morale=80;f.trust=Math.max(f.trust||0,50);
+    f.bond=Math.max(f.bond||0,Math.min(70,Math.max(30,25+(R.meet[cid]||0)*2)));f.joinAbs=now;f.lastTouch=absWeek(G);delete f.rgKey;delete f.rgT;delete f.rgSty;
+    G.rank=G.rank||{A:{},B:{}};G.rank[f.div]=G.rank[f.div]||{};if(!G.rank[f.div][f.id])G.rank[f.div][f.id]={pts:0,w:0,l:0,d:0};
+    (R.joined=R.joined||{})[cid]=now;this.joinSkills(G);if(typeof syncFighterAges==="function")syncFighterAges(G);
+    G.log=G.log||[];G.log.push(`${f.name}ย้ายเข้าค่ายศิริชัย · Lv.${f.lvl} · แต้มสกิล ${f.sp}`);},
+  joinSteps(G,cid){const r=RG_ORDER.find(x=>RG_CID[x]===cid),J=RG_JOIN[cid],pid=RG_CH[r].pair,pf=G.F[pid],top=typeof rgTopGirl==="function"?rgTopGirl(G):null;
+    const S=[...J.leave,{n:"nar",t:"สัปดาห์นี้ ค่ายศิริชัยมีสมาชิกใหม่"},...J.arrive];
+    if(pf&&pf.camp==="player")S.push({n:pid,f:"happy",l:"casual",t:J.pair},{n:cid,f:"happy",l:"casual",t:J.pairBack});
+    else S.push({n:"coach",t:`ห้องปลายทางเดินว่างอยู่ ${RG[r].champ} เอาห้องนั้นไป ข้าวเย็นหกโมงตรง มาสายไม่มีกับข้าว`});
+    if(top&&top.id!==pid)S.push({n:top.id,f:"pout",l:"casual",t:rgJeal(top.id,RG[r].champ)});
+    S.push({n:"nar",t:`${RG[r].champ}เข้าค่ายแล้ว · ซ้อม ชก และใช้เวลาด้วยกันได้จากหน้าศึกชิงเจ้าสี่ภาค · ได้แต้มสกิลสายเดียวกับ${pf?pf.name:"คู่ร่วมสาย"}`});return S;},
+  /* romance: one-love or two-timing, never the harem team */
+  isLovC(G,cid){const L=G.region&&G.region.lov;return !!(L&&L[cid]!=null);},
+  confDue(G){const R=G.region,J=R.joined||{},now=gameWeek(G);R.confN=R.confN||{};R.confNo=R.confNo||{};
+    for(const cid of Object.keys(J)){const f=G.F[cid];if(!f||f.camp!=="player"||this.isLovC(G,cid)||(R.ex&&R.ex[cid]!=null)||isAway(G,cid))continue;
+      if((f.bond||0)<75||now-(J[cid]||now)<6||(R.confN[cid]||0)>=3)continue;if(R.confNo[cid]!=null&&now-R.confNo[cid]<13)continue;return cid;}return null;},
+  confSteps(G,cid){const J=RG_JOIN[cid],R=G.region,two=partners(G).length>0||Object.keys(R.lov||{}).some(k=>k!==cid);R.confN[cid]=(R.confN[cid]||0)+1;
+    const warn=two?[{n:"nar",t:"⚠ คุณมีคนรักอยู่แล้ว ถ้าตอบรับจะกลายเป็นคบซ้อน… แชมป์ภาคเข้าทีมฮาเร็มไม่ได้"}]:[];
+    return [...J.conf(G),...warn,{n:"nar",t:"เธอรอคำตอบ",choice:[
+      {t:two?"\"ฉันก็ชอบเธอ\" (คบซ้อน)":"\"ฉันก็ชอบเธอ\"",fx:G2=>REGION.takeC(G2,cid),then:[{n:cid,f:"happy",l:"casual",t:J.yes(G)}]},
+      {t:"\"ขอเป็นแบบนี้ไปก่อนนะ\"",fx:G2=>{G2.region.confNo[cid]=gameWeek(G2);add(G2,cid,"trust",3);},then:[{n:cid,f:"sad",l:"casual",t:J.no}]}]}];},
+  takeC(G,cid){const R=G.region,now=gameWeek(G);R.lov=R.lov||{};const P=[...partners(G),...Object.keys(R.lov).filter(k=>k!==cid&&G.F[k])];R.lov[cid]=now;if(P.length&&G.mono)delete G.mono;if(R.ex)delete R.ex[cid];const f=G.F[cid];if(f)f.morale=Math.min(100,(f.morale||0)+15);
+    if(P.length){const top=P.map(k=>G.F[k]).filter(Boolean).sort((a,b)=>((b.bond||0)+(b.bondX||0))-((a.bond||0)+(a.bondX||0)))[0];if(top)R.twoQ={id:top.id,cid,abs:now+3};}
+    G.log=G.log||[];G.log.push(`${f?f.name:cid}กับผู้จัดการตกลงคบกัน${P.length?" (คบซ้อน)":""}`);},
+  breakC(G,cid){const R=G.region,f=G.F[cid];if(!this.isLovC(G,cid))return;delete R.lov[cid];(R.ex=R.ex||{})[cid]=gameWeek(G);if(R.twoQ&&R.twoQ.cid===cid)delete R.twoQ;if(f)add(G,cid,"bond",-35);},
+  hangC(G,cid){const f=G.F[cid];if(!f||G.freeUsed||isAway(G,cid))return;const J=RG_JOIN[cid],R=G.region;R.hangI=R.hangI||{};const i=R.hangI[cid]||0,lov=this.isLovC(G,cid);
+    const P=lov&&i%2===1?J.love:J.hang[Math.floor(i/(lov?2:1))%J.hang.length];R.hangI[cid]=i+1;G.freeUsed=true;f.hangWk=G.week;
+    const S=P.map(x=>x.choice?{...x,choice:x.choice.map(o=>({t:o.t,fx:G2=>{add(G2,cid,"bond",o.b);add(G2,cid,"morale",3);},then:o.then}))}:{...x});
+    if(!S.some(x=>x.choice))S.push({fx:G2=>{add(G2,cid,"bond",5);add(G2,cid,"morale",3);}});
+    save();playScene(S,()=>{save();render();},{bg:"camp",look:"casual"});},
+  joinCard(G){const R=G.region,F=R.final;if(!F||!F.won)return "";const offers=R.offers||[],J=R.joined||{},ids=Object.keys(J).filter(c=>G.F[c]);
+    if(!offers.length&&!ids.length&&!R.joinPend)return "";
+    const off=offers.map(cid=>{const r=RG_ORDER.find(x=>RG_CID[x]===cid),why=this.joinOk(G,cid);return `<div class="kv-row"><span><b>${esc(RG[r].champ)}</b> <small>แชมป์${esc(RG[r].name)} · ค่าเซ็น ${fmt(RG_JOIN_FEE)} · ค่าจ้าง ${fmt(RG_JOIN_WAGE)}/สัปดาห์</small>${why?`<small class="redt"> · ${esc(why)}</small>`:""}</span><button class="btn sm primary" data-act="rgjoin" data-v="${cid}" ${why?"disabled":""}>เซ็นสัญญา</button></div>`;}).join("");
+    const pend=R.joinPend&&G.F[R.joinPend.cid]?`<p class="meta">${esc(G.F[R.joinPend.cid].name)}กำลังย้ายมา · ถึงค่ายสัปดาห์หน้า</p>`:"";
+    const mine=ids.map(cid=>{const f=G.F[cid],lov=this.isLovC(G,cid),away=isAway(G,cid);return `<div class="rg-mem"><div class="kv-row"><span><b>${esc(f.name)}</b> <small>Lv.${f.lvl}</small></span><span>
+      <button class="btn sm chatb" data-act="rgchat" data-v="${cid}">แชต</button> <button class="btn sm primary" data-act="rghang" data-v="${cid}" ${G.freeUsed||away?"disabled":""}>${away?"ไม่อยู่":"ใช้เวลาด้วยกัน"}</button>${lov?` <button class="btn sm" data-act="rgbreak" data-v="${cid}">ขอเลิก</button>`:""}</span></div>${hearts(f.bond,f)}</div>`;}).join("");
+    return `<section class="px card rg-join"><h3>🏠 แชมป์ภาคย้ายเข้าค่าย</h3><p class="meta">ห้องพักตัวละครหลัก ${this.joinRooms(G)}/${dormRooms(G)} ห้อง${G.freeUsed?" · เวลาว่างสัปดาห์นี้ใช้แล้ว":""}</p>
+      ${off?`<h4>สัญญาที่รอตอบ</h4><div class="rg-nl">${off}</div><p class="meta">ไม่ตอบก็ได้ สัญญายังรออยู่ตรงนี้</p>`:""}${pend}${mine?`<h4>อยู่ค่ายเราแล้ว</h4>${mine}`:""}</section>`;},
+});
+if(typeof ACT!=="undefined")Object.assign(ACT,{
+  rgjoin:d=>{REGION.joinAccept(G,d.v);save();render();},
+  rghang:d=>REGION.hangC(G,d.v),
+  rgbreak:d=>{if(!REGION.isLovC(G,d.v))return;UI.modal={type:"rgbreak",cid:d.v};render();},
+  rgbreakgo:d=>{const cid=d.v,J=RG_JOIN[cid];UI.modal=null;if(!REGION.isLovC(G,cid))return;REGION.breakC(G,cid);
+    playScene([{n:cid,f:"sad",l:"casual",t:J.bye},{n:"nar",t:`${G.F[cid].name}กับผู้จัดการเลิกกันแล้ว · เธอยังอยู่ค่ายต่อ`}],()=>{save();render();},{bg:"camp_night",look:"casual"});},
+});
+if(typeof XMODAL!=="undefined")XMODAL.rgbreak=m=>({body:`<h2>ขอเลิกกับ${esc(G.F[m.cid].name)}?</h2><p>ความสนิทจะลดลงมาก · เธอยังอยู่ค่ายต่อ แต่จะไม่สารภาพรักอีก</p><div class="mfoot"><button class="btn" data-act="closeModal">ไม่ใช่ตอนนี้</button><button class="btn primary" data-act="rgbreakgo" data-v="${m.cid}">ขอเลิก</button></div>`,foot:false});
 if(typeof G!=="undefined"&&G&&G.region)REGION.flush(G);
 

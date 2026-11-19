@@ -884,7 +884,7 @@ const dif=G=>DIFF[(G&&G.diff)||"normal"]||DIFF.normal;
 function srand(G,salt){return mulberry32((((G&&G.seed)||1)+((G&&G.week)||0)*7919+(salt|0)*104729)>>>0)();}
 function newGame(opts){
   const seed=(opts.seed??Math.floor(Math.random()*1e9))>>>0;const rng=mulberry32(seed);
-  const G={v:1,timeV:3,snubV:2,dmSeenSeason:1,dmSeen:{},seed,week:1,diff:opts.diff||"normal",player:{name:opts.name||"Start",gender:opts.gender||"m"},cash:60000,debt:120000,rep:5,
+  const G={v:1,timeV:3,snubV:2,dmSeenSeason:1,dmSeen:{},seed,week:1,diff:opts.diff||"normal",player:{name:opts.name||"Ton",gender:opts.gender||"m"},cash:60000,debt:120000,rep:5,
     fac:{gym:0,airgym:0,recovery:0,classroom:0,brand:0,dorm:0,kitchen:0,hill:0,video:0,ring:0,clinic:0,shrine:0,van:0,sauna:0,lights:0,hall:0,daeng:1,assistants:0},stu:1,staff:[],rankMove:{A:{},B:{}},camp:{beauty:0},campUsed:null,levelUps:[],avatar:opts.avatar||null,F:{},rank:{A:{},B:{}},qual:{A:[],B:[]},finalists:{A:[],B:[]},semis:{A:[],B:[]},champ:{},
     bookings:[],offers:[],log:[],flags:{},seen:{},freeUsed:false,negWeeks:0,history:[],honors:[],awards:[],ended:null,lastReport:null,romance:null,lovers:[],lovWk:{}};
   for(const [id,d] of Object.entries(CANON))G.F[id]=baseFighter(id,d);
@@ -2520,7 +2520,7 @@ const LOVER_TIERS=[[1,"Lover"],[15,"Kindred sweetheart"],[20,"Inseparable pair"]
 const hTot=f=>((f&&f.bond)||0)+((f&&f.bondX)||0);
 // relationship state, written to work with a single romance (G.romance) and with several lovers / promises / exes (G.lovers, G.promise, G.exAbs)
 function relState(G,id){if(!G||!id)return null;const L=Array.isArray(G.lovers)?G.lovers:(G.romance?[G.romance]:[]);if(L.includes(id))return "lover";
-  if(G.promise&&G.promise[id]!=null)return "promise";if(G.exAbs&&G.exAbs[id]!=null)return "ex";return null;}
+  if(G.promise&&G.promise[id]!=null)return "promise";if(G.exAbs&&G.exAbs[id]!=null)return "ex";const R=G.region;if(R&&R.lov&&R.lov[id]!=null)return "lover";if(R&&R.ex&&R.ex[id]!=null)return "ex";return null;} /* v1.91.28: regional champions keep their own romance track (G.region.lov / .ex) */
 /* v1.89.11: Lv.30 is the top at 1,000 points — each step past 100 asks a little more (15 → 80) */
 const HEART_STEPS=[15,20,20,25,30,35,35,40,45,45,50,55,60,60,65,70,75,75,80],HEART_MAX=30,HEART_TOP=1000;
 const heartStep=n=>HEART_STEPS[n-11]||0; // points from Lv.n to Lv.n+1, for 11 ≤ n < 30
@@ -2891,7 +2891,7 @@ const isPartner=(G,id)=>partners(G).includes(id);
 const romOf=(G,id)=>isLov(G,id)&&!inHm(G,id); // lover-only scenes; on the harem route the top scenes give way to group ones
 const romFirst=G=>G.harem&&!hmOut(G).length?null:(lovList(G).find(k=>!inHm(G,k))||null);
 function setLovers(G,L){G.lovers=[...new Set(L)];G.romance=G.lovers[0]||null;G.romWk=G.romance?((G.lovWk||{})[G.romance]??null):null;}
-function takeLover(G,id){const solo=!partners(G).some(k=>k!==id);if(!solo&&G.mono)delete G.mono;if(G.friendz)delete G.friendz[id];G.lovWk=G.lovWk||{};G.lovWk[id]=absWeek(G);if(G.promise)delete G.promise[id];if(G.exAbs)delete G.exAbs[id];setLovers(G,[...lovList(G),id]);if(solo)add(G,id,"morale",15);if(typeof monoSync==="function")monoSync(G);}
+function takeLover(G,id){const solo=!partners(G).some(k=>k!==id)&&!rgLovN(G);if(!solo&&G.mono)delete G.mono;if(G.friendz)delete G.friendz[id];G.lovWk=G.lovWk||{};G.lovWk[id]=absWeek(G);if(G.promise)delete G.promise[id];if(G.exAbs)delete G.exAbs[id];setLovers(G,[...lovList(G),id]);if(solo)add(G,id,"morale",15);if(typeof monoSync==="function")monoSync(G);}
 const isAway=(G,id)=>{const f=G&&G.F&&G.F[id];return !!(f&&f.awayAbs!=null&&absWeek(G)<f.awayAbs);};
 const awayLeft=(G,id)=>isAway(G,id)?G.F[id].awayAbs-absWeek(G):0;
 const awaySpeaks=(G,steps)=>(steps||[]).some(x=>x&&typeof x.n==="string"&&isAway(G,x.n));
@@ -2936,7 +2936,7 @@ const LOVE_ALMOST={kati:[["flustered","Manager… there's something I've wanted 
   ploy:[["flustered","You… there's something I've wanted to say for a while…"],["sad","…Never mind. Some other day, when I'm more ready."]],
   fah:[["flustered","Hey! I've got something to tell you… it's… I…"],["angry","…Nothing! Don't look at me like that!"]]};
 const almostSteps=(G,f)=>{const L=LOVE_ALMOST[f.id];if(!L)return [];return [...L.map(([fc,t])=>({n:f.id,f:fc,l:"casual",t})),{n:"nar",t:`${f.name} looks away and changes the subject, just like that`}];};
-const takenOpt=(G,id)=>partners(G).some(k=>k!==id)?[{t:"I'm sorry. I'm already with someone",fx:G3=>{befriend(G3,id);add(G3,id,"trust",3);noteNo(G3,id);},then:[{n:id,f:"sad",l:"casual",t:LOVE_TAKEN[id]}]}]:[];
+const takenOpt=(G,id)=>(partners(G).some(k=>k!==id)||rgLovN(G)>0)?[{t:"I'm sorry. I'm already with someone",fx:G3=>{befriend(G3,id);add(G3,id,"trust",3);noteNo(G3,id);},then:[{n:id,f:"sad",l:"casual",t:LOVE_TAKEN[id]}]}]:[];
 // an ex who still feels the same, once she has had time
 const LOVE_EX={kati:"Manager… I tried. I tried being just your fighter, but I can't",
   mali:"Mali tried to forget. But every time she makes khanom khrok, she still thinks of you",
@@ -3224,10 +3224,11 @@ EVENTS.push(
  {id:"lv_hjoin",look:"casual",bg:"food",pri:60,when:G=>!!hmJoinable(G)&&!lvBusyWeek(G),
   steps:[{inject:G=>{G.lvEvAbs=absWeek(G);return hmJoinSteps(G);}},{fx:G=>{delete G.seen.lv_hjoin;}}]});
 // warn before a second "yes"
-const cheatWarn=(G,id)=>partners(G).some(k=>k!==id)?[{n:"nar",t:"⚠ You already have someone. Say yes and you'll be two-timing… and secrets like this never stay hidden for long."}]:[];
-const yesTxt=(G,id,t)=>partners(G).some(k=>k!==id)?t+" (two-timing)":t;
-const lovSolo=G=>partners(G).length===1;
-const topLock=(G,id)=>isPartner(G,id)&&partners(G).length>1; /* the top heart scene and the Lv.27/30 chats wait while you see more than one person (harem too) */ /* the lover bonus only holds while you see one person */
+const cheatWarn=(G,id)=>(partners(G).some(k=>k!==id)||rgLovN(G)>0)?[{n:"nar",t:"⚠ You already have someone. Say yes and you'll be two-timing… and secrets like this never stay hidden for long."}]:[];
+const yesTxt=(G,id,t)=>(partners(G).some(k=>k!==id)||rgLovN(G)>0)?t+" (two-timing)":t;
+const rgLovN=G=>G&&G.region&&G.region.lov?Object.keys(G.region.lov).length:0; /* v1.91.28: a regional champion you are seeing counts as someone else */
+const lovSolo=G=>partners(G).length===1&&!rgLovN(G);
+const topLock=(G,id)=>isPartner(G,id)&&partners(G).length+rgLovN(G)>1; /* the top heart scene and the Lv.27/30 chats wait while you see more than one person (harem too) */ /* the lover bonus only holds while you see one person */
 // v1.30: lovers get their own dates/scenes; Ploy & Fah make a promise instead (romance with them waits for season 2)
 const RIVAL_LOVE=["ploy","fah"];
 const LOVER_DATES={"kati": [[{"n": "nar", "t": "Sunday morning. Kati takes you to the temple at the edge of the village, carrying a garland and the pastries Grandpa loved", "bg": "camp"}, {"n": "kati", "t": "Grandpa, this is the person I always tell you about. …Today I'm bringing them as my partner", "f": "happy", "l": "casual"}, {"n": "kati", "t": "He's definitely laughing. He used to tease that no one would date me because I kick too hard", "f": "flustered", "l": "casual"}, {"choice": [{"t": "I'll take good care of your granddaughter", "sc": 3, "then": [{"n": "kati", "t": "…You said that to Grandpa for real. He heard you. No breaking it", "f": "flustered", "l": "casual"}]}, {"t": "Kicking hard is good. Very safe", "sc": 2, "then": [{"n": "kati", "t": "Haha, Grandpa would've liked you", "f": "happy", "l": "casual"}]}]}], [{"n": "nar", "t": "10 p.m. One light still on in the gym. Kati is kicking the bag alone", "bg": "gym"}, {"n": "kati", "t": "Manager… I mean, darling… I'm not used to it yet. What should I call you?", "f": "flustered", "l": "casual", "bg": "casual"}, {"choice": [{"t": "Whatever feels right to you", "sc": 3, "then": [{"n": "kati", "t": "Then 'manager' inside the gym, 'darling' outside it. Work and heart, kept separate", "f": "happy", "l": "casual"}]}, {"t": "Darling sounds nice", "sc": 2, "then": [{"n": "kati", "t": "…Not so loud! Mali's still awake!", "f": "flustered", "l": "casual"}, {"n": "nar", "t": "Giggling drifts out of Mali's bedroom window"}]}]}], [{"n": "nar", "t": "Kati takes you to the old ring by the market, where Grandpa Chai fought forty years ago. It's abandoned now", "bg": "ring"}, {"n": "kati", "t": "Grandpa said this is where he proposed to Grandma. In front of the whole crowd", "f": "happy", "l": "casual"}, {"n": "kati", "t": "…I don't mean anything by it! Just telling you!", "f": "flustered", "l": "casual"}, {"choice": [{"t": "Then let's come back here together someday", "sc": 3, "then": [{"n": "kati", "t": "…Okay. That's a promise. I'll remember today", "f": "flustered", "l": "casual"}]}, {"t": "Grandpa was brave", "sc": 2, "then": [{"n": "kati", "t": "He was. Grandma said she was so embarrassed she wanted to crawl under the ring, haha", "f": "happy", "l": "casual"}]}]}]], "mali": [[{"n": "nar", "t": "Mali hands you her phone. A video call from Chaiya: a woman with a huge smile, and the sea behind her.", "bg": "camp"}, {"n": "mali", "t": "Mom, this is… Mali's partner! And that's Thongkham behind Mom. Say hi", "f": "flustered", "l": "casual"}, {"n": "nar", "t": "Mali's mother rattles away in southern dialect so fast that all you catch is 'Eaten yet?'"}, {"choice": [{"t": "I have! Thank you for raising Mali so well", "sc": 3, "then": [{"n": "mali", "t": "Mom's crying! She says you have to come home for New Year", "f": "happy", "l": "casual"}]}, {"t": "Wave at Thongkham", "sc": 2, "then": [{"n": "mali", "t": "Thongkham wagged his tail! He likes you. First test passed!", "f": "happy", "l": "casual"}]}]}], [{"n": "nar", "t": "Mali booked the biggest karaoke room, just like she said. But it's only the two of you", "bg": "night"}, {"n": "mali", "t": "Duet! No skipping the high notes!", "f": "happy", "l": "casual"}, {"choice": [{"t": "Sing at full volume", "sc": 3, "then": [{"n": "nar", "t": "You both belt out luk thung until staff knock three times asking you to keep it down"}, {"n": "mali", "t": "This is the best night of Mali's life!", "f": "happy", "l": "casual"}]}, {"t": "I'd rather just listen to you", "sc": 2, "then": [{"n": "mali", "t": "Then Mali's singing this one just for you. …Listen carefully", "f": "flustered", "l": "casual"}]}]}], [{"n": "nar", "t": "Mali brings you to a little khanom khrok stall behind the market, the kind she says she'll open someday", "bg": "food"}, {"n": "mali", "t": "Mali has a new shop name. Instead of 'Champion Khanom Khrok', maybe 'Our Khanom Khrok'", "f": "happy", "l": "casual"}, {"n": "mali", "t": "…'Our' meaning you and Mali. If you don't mind", "f": "flustered", "l": "casual"}, {"choice": [{"t": "I'll be the one washing the pans", "sc": 3, "then": [{"n": "mali", "t": "Deal! You promised. Washing pans for life!", "f": "happy", "l": "casual"}]}, {"t": "The old name was nice too", "sc": 2, "then": [{"n": "mali", "t": "Then 'Our Champion Khanom Khrok'. Both names~", "f": "happy", "l": "casual"}]}]}]], "rin": [[{"n": "nar", "t": "Rin sent a schedule three days early, titled 'Date No. 1 (Official)', planned down to the minute", "bg": "cafe"}, {"n": "rin", "t": "14:00 tea. 14:20 small talk. 14:35 hold hands (if appropriate). …I left a ten-minute buffer", "f": "flustered", "l": "casual"}, {"choice": [{"t": "What time is it now?", "sc": 3, "then": [{"n": "rin", "t": "…Exactly 14:35", "f": "flustered", "l": "casual"}, {"n": "nar", "t": "Rin rests her hand on the table, right on schedule"}]}, {"t": "Want to ditch the schedule for a day?", "sc": 2, "then": [{"n": "rin", "t": "No schedule… fine, I'll try. If my heart rate goes over plan, that's on you", "f": "flustered", "l": "casual"}]}]}], [{"n": "nar", "t": "Rin shows up to morning training in round glasses. The whole camp goes silent for five seconds", "bg": "camp"}, {"n": "rin", "t": "…No need to stare. I chose based on data I collected, that a certain someone likes round frames", "f": "flustered", "l": "casual"}, {"choice": [{"t": "They suit you perfectly", "sc": 3, "then": [{"n": "rin", "t": "Recorded. 100% satisfaction. …Mine too", "f": "happy", "l": "casual"}]}, {"t": "Who likes round frames, I wonder", "sc": 2, "then": [{"n": "rin", "t": "…Don't pretend you forgot. That data came from you", "f": "flustered", "l": "casual"}]}]}], [{"n": "nar", "t": "Friday night. Rin sits at the computer in the analysis room, drawing some kind of graph", "bg": "night"}, {"n": "rin", "t": "This is my happiness graph since joining Sirichai. Vertical axis, happiness. Horizontal, weeks", "f": "happy", "l": "casual"}, {"n": "rin", "t": "The highest spike… is the week you said yes. Data doesn't lie", "f": "flustered", "l": "casual"}, {"choice": [{"t": "Then let's keep it climbing", "sc": 3, "then": [{"n": "rin", "t": "A good objective. I'll track it weekly", "f": "happy", "l": "casual"}]}, {"t": "That's a beautiful graph", "sc": 2, "then": [{"n": "rin", "t": "…Are you complimenting the graph or me? Please specify", "f": "flustered", "l": "casual"}]}]}]]};
@@ -5114,7 +5115,7 @@ const MONO_YEARLY={"kati":[[{"n":"nar","t":"On your anniversary evening, Kati ta
    a title + fight perk at one year and her own ending. Harem = breadth: the group loop, a first-anniversary photo, a scene when all five are
    together, a team title + perk and a group ending. Seeing two people without a harem earns neither.
    "One love" = she has been the only one since a given day (G.mono={id,abs}); the clock restarts if you see someone else in between. */
-function monoSync(G){const P=partners(G);if(G.harem||P.length!==1||!isLov(G,P[0])){if(G.mono)delete G.mono;return null;}
+function monoSync(G){const P=partners(G);if(G.harem||P.length!==1||rgLovN(G)||!isLov(G,P[0])){if(G.mono)delete G.mono;return null;}
   if(!G.mono||G.mono.id!==P[0])G.mono={id:P[0],abs:absWeek(G)};return G.mono;}
 const monoOf=G=>{const m=monoSync(G);return m?m.id:null;};
 const monoWk=G=>{const m=monoSync(G);return m?absWeek(G)-m.abs:-1;};
@@ -6199,7 +6200,7 @@ AU.gsfx=function(kind,a){if(!this.init()||this.muted||!SETTINGS.sfx)return;const
   if(kind==="shimmer")for(let i=0;i<6;i++)T(i*.05,{f:1400+Math.random()*1400,type:"sine",dur:.12,peak:.06});};
 
 // ================= MUAY THAI MOE v1.3 — UI =================
-const VERSION="1.91.28";
+const VERSION="1.91.29";
 const CUR_LANG=(typeof window!=="undefined"&&window.LANG)||"th";
 const TH_LABEL=String.fromCharCode(3652,3607,3618);
 function langSwitch(cls){return `<div class="langsw ${cls||""}" role="group" aria-label="Language">${[["th",TH_LABEL],["en","EN"]].map(([k,l])=>`<button class="lsb ${CUR_LANG===k?"on":""}" data-act="setlang" data-v="${k}" aria-pressed="${CUR_LANG===k}">${l}</button>`).join("")}</div>`;}
@@ -6476,7 +6477,7 @@ function creatorHTML(){const c=UI.creator,O=CHIBI.OPT;
   return `<div class="creator v2"><div class="cr-in">
    <header class="cr-head"><h1>The new camp owner</h1><p class="lead">You are Grandpa Chai's grandchild, heir to Sirichai Camp</p></header>
    <div class="px cr-top"><div class="cr-stage"><canvas width="240" height="320" data-chibi="creator" aria-label="Character preview"></canvas></div>
-     <div class="cr-id"><div class="field"><label for="pname">Name</label><input id="pname" maxlength="14" value="${esc(c.name||"")}" autocomplete="off" placeholder="${c.gender==="m"?"Start":"Dao"}"></div>
+     <div class="cr-id"><div class="field"><label for="pname">Name</label><input id="pname" maxlength="14" value="${esc(c.name||"")}" autocomplete="off" placeholder="${c.gender==="m"?"Ton":"Dao"}"></div>
       <button class="btn sm" data-act="crand">Randomize all</button></div></div>
    <div class="seg cr-tabs" role="tablist">${[["base","Basics"],["face","Hair · Face"],["wear","Outfit"],["acc","Extras"]].map(([k,t])=>`<button role="tab" data-act="ctab" data-v="${k}" aria-pressed="${tab===k}">${t}</button>`).join("")}</div>
    <div class="px cr-opts">${T[tab]}</div>
@@ -7932,7 +7933,7 @@ const ACT={
   cset:d=>{UI.creator.name=(document.getElementById("pname")||{}).value||UI.creator.name;crSeed();UI.creator[d.k]=d.v;render();},
   crand:()=>{const n=(document.getElementById("pname")||{}).value||"",o=UI.creator||{};crSeed();UI.creator={...CHIBI.randomManager(Math.random),name:n,diff:o.diff||"normal",gender:o.gender||"m",tab:o.tab,seed:o.seed};render();},
   ctab:d=>{UI.creator.name=(document.getElementById("pname")||{}).value||UI.creator.name;crSeed();UI.creator.tab=d.v;render();},
-  startGame:()=>{const c=UI.creator;c.name=((document.getElementById("pname")||{}).value||"").trim()||(c.gender==="m"?"Start":"Dao");
+  startGame:()=>{const c=UI.creator;c.name=((document.getElementById("pname")||{}).value||"").trim()||(c.gender==="m"?"Ton":"Dao");
     crSeed();const {name,diff,seed,...look}=c;G=newGame({name,gender:c.gender,diff:diff||"normal",avatar:look,seed:seedFrom(seed)});if(seed&&!/^\d{1,10}$/.test(seed))G.seedText=seed;G.newsSeen=PATCH.id;genOffers(G);UI.creator=null;UI.tab="home";G.seen.prologue=true;AU.resume();AU.startMusic("date");
     playScene(EVENTS[0].steps,()=>{save();UI.tab="home";UI.spot=0;AU.startMusic("hub");render();},{bg:"bus",look:"train"});},
   continue:()=>{let si=0;for(let i=1;i<=SLOTS;i++)if(loadSlot(i)){si=i;break;}if(!si)return;backupSlot(si);const s=safeFix(loadSlot(si));if(!s){toast("This save can't be opened in this version. Nothing was deleted");return;}G=s;UI.slot=si;UI.tab="home";UI.modal=null;withArt(()=>{AU.startMusic("hub");if(G.ended){UI.ending=endingScene(G);}maybeWhatsNew();render();});},

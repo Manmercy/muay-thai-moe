@@ -411,7 +411,7 @@ const RG_CH={
 function rgTopGirl(G){const L=CANON_IDS.map(id=>G.F[id]).filter(f=>f&&f.camp==="player"&&(f.bond||0)>=40).sort((a,b)=>(b.bond||0)-(a.bond||0));return L[0]||null;}
 function rgJeal(id,champ){const L={kati:`Coach… ${champ} was standing a little close, wasn't she? I'm only noticing.`,mali:`Mali wants a hug too~ …Just kidding. (Not kidding.)`,
   rin:`The distance between the Manager and ${champ} just now was below the average for the whole night. Just data.`,ploy:`What's with the smiling… Nothing. I didn't say anything.`,fah:`Hey, ${champ}! The manager belongs to Sirichai Camp! …I mean, he's the camp's manager!`};return L[id]||"…";}
-function rgMeet(G,cid,v){const R=G.region,m=R.meet;m[cid]=(m[cid]||0)+v;rgTouch(G,cid);(R.meetPk=R.meetPk||{})[cid]=Math.max(R.meetPk[cid]||0,m[cid]);}
+function rgMeet(G,cid,v){const R=G.region,m=R.meet;m[cid]=(m[cid]||0)+v;if(v>0&&R.joined&&R.joined[cid]&&G.F[cid])add(G,cid,"bond",v);rgTouch(G,cid);(R.meetPk=R.meetPk||{})[cid]=Math.max(R.meetPk[cid]||0,m[cid]);}
 /* v1.90: any real contact with a champion (a trip to her region, a bout, a visit, a duel, a night out) resets her "haven't seen you" clock */
 function rgTouch(G,cid){const R=G.region;if(!R)return;(R.meetT=R.meetT||{})[cid]=gameWeek(G);if(R.miss)delete R.miss[cid];}
 /* three weeks apart: she writes · four or more: the bond fades a little each week (outside-camp rate), never below the level she reached */
@@ -1069,6 +1069,12 @@ const REGION={
       playScene([{n:"coach",t:`Regional title bout in ${left} weeks: ${me.name} vs ${RG[r].champ} bout ${x.n||1}`},
         {n:"coach",t:(x.n||1)>1?`Regional champions never fight the same way twice. ${tape?"The tape you watched still counts, but your training has to match it":"Go watch her latest bout first"}, then train the right counter. Switch to fight prep in fight week`
           :`A regional champion isn't a temple-fair opponent. ${tape?"You've seen the tape":"Watch her tape first"}, then train the counter to match what you saw. Switch to fight prep in fight week. Train like that and you'll have the edge from the first round`}],()=>{save();done();},{bg:"camp",look:"casual"});return;}
+    /* v1.91.28 round 12: a champion moves in · a camp girl notices a two-timing champion romance · a champion confesses */
+    if(R.joinPend&&now>=R.joinPend.abs){const cid=R.joinPend.cid;delete R.joinPend;const S=this.joinSteps(G,cid),k=S.findIndex(x=>x.t==="This week, Sirichai Camp has a new member");this.joinApply(G,cid);
+      const B={baibua:"temple",tabtim:"night",alicia:"vector_lab",chaba:"sea"};playScene(S.slice(0,k),()=>playScene(S.slice(k),()=>{save();done();},{bg:"camp",look:"casual"}),{bg:B[cid]||"camp",look:"casual"});return;}
+    if(R.twoQ&&now>=R.twoQ.abs){const q=R.twoQ;delete R.twoQ;const g=G.F[q.id];if(g&&g.camp==="player"&&!isAway(G,q.id)&&this.isLovC(G,q.cid)&&RG_TWO[q.id]&&(isPartner(G,q.id)||this.isLovC(G,q.id))){add(G,q.id,"bond",-8);
+      playScene([{n:q.id,f:"sad",l:"casual",t:RG_TWO[q.id]},{n:"nar",t:`${g.name} now knows about you and ${G.F[q.cid].name}`}],()=>{save();done();},{bg:"camp",look:"casual"});return;}}
+    {const cid=this.confDue(G);if(cid){playScene(this.confSteps(G,cid),()=>{save();done();},{bg:"camp_night",look:"casual"});return;}}
     if(!R.gala){if(R.galaAbs==null)R.galaAbs=now+1;if(now>=R.galaAbs){R.gala=1;AU.startMusic&&AU.startMusic("hub");playScene(rgGala(G),()=>{save();done();},{bg:"gala",look:"casual"});return;}}
     const r=(R.cups||[])[0],c=r&&R.champ[r];
     if(r&&!R.c1&&c&&now>=(c.wonAbs||0)+1){R.c1="seen";playScene(rgCup1(G,r),()=>{save();done();},{bg:"camp",look:"casual"});return;}
@@ -1111,7 +1117,7 @@ const REGION={
     (R.gc=R.gc||[]).push(T.opp);R.trip=null;return true;},
 
   /* ---------- results + weekly upkeep ---------- */
-  flush(G){const R=G.region;if(!R||!R.pend||!R.pend.length)return;const done=R.pend.splice(0);
+  flush(G){const R=G.region;if(R&&R.joined)this.joinSkills(G);if(!R||!R.pend||!R.pend.length)return;const done=R.pend.splice(0);
     for(const p of done){const rg=p.region||{},r=rg.r,dest=rg.dest,D=ROAD_DEST[dest];if(rg.nlfinal){if(R.final){R.final.cur=R.final.cur||{};R.final.cur[rg.nlfinal]=p.res||"L";}continue;}if(rg.nlleg){this.legResult(G,rg.nlleg,p);continue;}if(!D||!RG[r])continue;
       if(rg.series){this.seriesResult(G,r,p);continue;}
       rgTouch(G,RG_CID[r]);const T=R.trip,abs=T&&T.bid===p.bid?T.abs:gameWeek(G);
@@ -1129,7 +1135,7 @@ const REGION={
       const gap=now-R.meetT[cid];
       if(gap>=3&&!R.miss[cid]){R.miss[cid]=1;addMail(G,{kind:"letter",from:`${RG[r].champ} · Champion of ${RG[r].name}`,title:`A letter from ${RG[r].champ}`,body:RG_MISS[r]});}
       if(gap>=4){const pk=(R.meetPk||{})[cid]||m[cid],fl=RG_FLOOR.find(t=>pk>=t)||0;if(m[cid]>fl)m[cid]=Math.max(fl,Math.round((m[cid]-.25)*100)/100);}}},
-  weekly(G){const R=G.region;this.flush(G);this.seriesWeekly(G);this.fade(G);this.letters(G);this.finalWeekly(G);const T=R.trip;
+  weekly(G){const R=G.region;this.flush(G);this.seriesWeekly(G);this.fade(G);this.letters(G);this.finalWeekly(G);this.joinWeekly(G);const T=R.trip;
     /* a trip whose bout vanished (the week went by, the booking was dropped) is let go */
     if(T&&gameWeek(G)>T.abs&&!G.bookings.some(b=>b.id===T.bid)){(R.gc=R.gc||[]).push(T.opp);R.trip=null;R.nextTripAbs=Math.max(R.nextTripAbs||0,T.abs+1);}
     const keep=new Set(G.bookings.map(b=>b.b));R.gc=(R.gc||[]).filter(id=>{if(keep.has(id))return true;if(G.F[id]&&G.F[id].rg)delete G.F[id];return false;});},
@@ -1338,7 +1344,7 @@ Welcome her at Fights › Four Regions Cup`});}
     return `<section class="px card rg-head"><div><h3>Four Regions Championship</h3><span class="meta">Edition ${R.edition||1}</span></div>
        <div class="rg-stats"><span class="pill gold">Cups ${cups}/4</span><span class="pill">Belts ${belts}/16</span><span class="pill ${T?"red":nx?"green":""}">${T?`Trip: ${esc(ROAD_DEST[T.dest].name)} · Week ${T.wk}`:nx?`Can travel week ${nx}`:"No more trips this year"}</span></div></section>
      ${!R.gala?`<p class="meta rg-gala">🎉 The Four Regions Cup opening gala in Bangkok ${R.galaAbs!=null&&gameWeek(G)<R.galaAbs?"is held at the end of next week":"is held at the end of this week"} · the whole camp is invited</p>`:""}${!REGION_LIVE?`<p class="meta">Test mode: <button class="btn sm" data-act="rggala" data-v="gala">Watch the gala</button> Underground test fight (open rules): ${NL_ORDER.map(k=>`<button class="btn sm" data-act="nltest" data-v="${k}">${esc(NL[k].name)}</button>`).join(" ")}${(R.cups||[]).length?` <button class="btn sm" data-act="rggala" data-v="c1">Watch the green envelope scene</button>`:""}</p>`:""}
-     ${this.finalCard(G)}${this.legendCard(G)}${tripCard}${this.fuelLine(G)}<div class="rg-grid">${regs}</div>`;},
+     ${this.finalCard(G)}${this.legendCard(G)}${this.joinCard(G)}${tripCard}${this.fuelLine(G)}<div class="rg-grid">${regs}</div>`;},
   planHTML(dest){const D=ROAD_DEST[dest],C=RG[D.r],wk=this.tripWeek(G);if(!wk)return `<h2>${esc(D.name)}</h2><p>No free week left to travel this year</p>`;
     const abs=this.base(G)+wk,P=roadPlan(G,dest,null,abs),R=this.riders(G,wk);if(!UI.rgFid||!R.some(f=>f.id===UI.rgFid))UI.rgFid=R[0]?R[0].id:null;
     const me=UI.rgFid&&G.F[UI.rgFid],poor=G.cash<P.total,line=(k,v)=>v?`<div class="kv-row"><span>${k}</span><b class="num">${fmt(v)}</b></div>`:"";
@@ -1480,5 +1486,152 @@ if(typeof ACT!=="undefined")Object.assign(ACT,{
   rgchat:d=>{const f=G.F[d.v];if(!f)return;f.met=true;rgTouch(G,d.v);chatOpen(d.v);},
   rggala:d=>{if(REGION_LIVE)return;const R=G.region;if(d.v==="c1"){const r=R.cups[0];playScene(rgCup1(G,r),()=>{R.c1=R.c1||"seen";save();render();},{bg:"camp",look:"casual"});return;}
     playScene(rgGala(G),()=>{R.gala=1;save();render();},{bg:"gala",look:"casual"});}});
+/* ---------- v1.91.28 round 12 (Man): after the underground final the regional champions ask to join, one at a time ----------
+   hidden bar: closeness (R.meet) ≥ RG_JOIN_MIN · offers come in order of closeness, 4 weeks apart · accepting needs a free room (5 + dorm level) and the signing fee
+   she arrives the next week (leaving her old camp + arriving at Sirichai) at ~70% of her champion level/stats, with skill points for her lineage's tree (the partner girl's)
+   romance (Man): one-love or two-timing only — never the harem team. Kept on its own track (R.lov / R.ex), shown through relState */
+const RG_JOIN_MIN=12,RG_JOIN_GAP=4,RG_JOIN_FEE=60000,RG_JOIN_WAGE=3000;
+const RG_JOIN={
+ baibua:{letter:"Manager\n\nI've been thinking since the night of the cup. I want to train at Sirichai Camp. I want to fight beside Kati, not against her\n\nMy father says the Tha Sao teachers taught us to go where our fists get better, not to stay in one place forever\n\nIf the camp has a free room, I'd like to apply\n— Baibua",
+  leave:[{n:"nar",t:"Moving day. The morning mist hasn't lifted. Baibua bows to her teacher at the wooden shrine in front of her old camp"},{n:"baibua",f:"sad",l:"casual",t:"Teacher, I'm going to another camp… I'm not leaving Tha Sao behind. I'm taking it with me"},
+   {n:"nar",t:"Her coach ties a white thread around her wrist, then pats her back lightly twice"},{n:"baibua",f:"happy",l:"casual",t:"My father sent sai ua for the whole camp. He says if it tastes good, take good care of his daughter"}],
+  arrive:[{n:"nar",t:"Baibua stands under the Sirichai Camp sign with two bags and one box of sai ua"},{n:"baibua",f:"flustered",l:"casual",t:"Manager… please take care of me. I won't let you down"}],
+  pair:"Pi Baibua! Your room's right next to mine. I already made the bed for you!",pairBack:"…Thank you, Kati. Two Tha Sao fighters in one camp. Our teacher must be smiling",
+  hang:[
+   [{n:"nar",t:"Baibua takes you to the morning market. She picks vegetables as carefully as she picks opponents"},{n:"baibua",f:"happy",l:"casual",t:"Hang lay curry needs pork belly… can you eat spicy food, manager?",choice:[
+     {t:"\"Sure, as spicy as you like\"",b:4,then:[{n:"baibua",f:"flustered",l:"casual",t:"Then I'll add more chillies… but if you cry, don't blame me"}]},
+     {t:"\"Make it the way your family eats it\"",b:5,then:[{n:"baibua",f:"happy",l:"casual",t:"…The way my father likes it. I haven't cooked for anyone in a long time"}]}]}],
+   [{n:"nar",t:"Evening. Baibua sits embroidering teen chok patterns outside her room. The needle is smaller than you'd think"},{n:"baibua",f:"flustered",l:"casual",t:"It's for Kati… no, for the whole camp. This one's the manager's — oh, no, it isn't finished yet",choice:[
+     {t:"\"I can wait. No rush\"",b:5,then:[{n:"baibua",f:"happy",l:"casual",t:"…Then I'll embroider slowly"}]},
+     {t:"\"Can you teach me to embroider?\"",b:4,then:[{n:"nar",t:"Half an hour later your cloth has one lotus on it. It looks like a cabbage"},{n:"baibua",f:"happy",l:"casual",t:"Pretty… pretty like a cabbage"}]}]}],
+   [{n:"nar",t:"Before dawn, Baibua drills spinning elbows on the bag. She doesn't hear you come"},{n:"baibua",f:"surprised",l:"fight",t:"Eh! Manager… have you been watching long?",choice:[
+     {t:"\"That's the most beautiful elbow I've ever seen\"",b:5,then:[{n:"baibua",f:"flustered",l:"fight",t:"…Don't say that while I'm throwing an elbow. It'll miss"}]},
+     {t:"Hold the bag so she can keep training",b:4,then:[{n:"nar",t:"The next elbow is a little softer. She says she was afraid of hurting you"}]}]}]],
+  love:[{n:"nar",t:"This Saturday Baibua takes you to the walking street. Her hand finds yours on its own in the crowd"},{n:"baibua",f:"flustered",l:"casual",t:"If we get separated… hold on like this"},{n:"baibua",f:"happy",l:"casual",t:"I'm not scared of getting lost"}],
+  conf:G=>[{n:"nar",t:"Late at night Baibua knocks on your door, holding the same teen chok shawl from Doi Suthep"},{n:"baibua",f:"flustered",l:"casual",t:"I wrote it in the contract letter, but I erased it… because I wanted to say it myself"},{n:"baibua",f:"flustered",l:"casual",t:G.player.gender==="f"?"I love you… you can answer whenever you like":"I love you… you can answer whenever you like"}],
+  yes:G=>G.player.gender==="f"?"…Yes. I'll call you that every day now. No more saying it in secret":"…Yes. I'll call you that every day now. No more saying it in secret",no:"It's fine. I'm still at this camp, still see your face every day. That's enough",bye:"…Yes. I understand. I'll still fight my best for this camp, same as always"},
+ tabtim:{letter:"Manager\n\nA champion of Isan like me doesn't lose easily, but losing to Sirichai Camp was something else. I want to know how this camp trains\n\nSo I'm moving there to train with you! Ploy, don't worry, I won't take your spot. I'll only take your sticky rice\n\nIf there's a free room, write back\n— Tabtim",
+  leave:[{n:"nar",t:"Her last night at the old camp. All the juniors sit in a circle for a farewell dinner"},{n:"tabtim",f:"happy",l:"casual",t:"No crying, everyone! I'm just going to train, not going anywhere!"},
+   {n:"nar",t:"Her coach hands her a big basket of sticky rice. Tabtim laughs loudly, but her eyes are red"},{n:"tabtim",f:"sad",l:"casual",t:"…My coach taught me since I couldn't even kick a banana tree down. Take good care of me, manager"}],
+  arrive:[{n:"nar",t:"Tabtim steps out of the van with three bags of grilled chicken and a jar of pla ra bong"},{n:"tabtim",f:"happy",l:"casual",t:"Manager! From now on Tabtim belongs to Sirichai Camp …as a fighter. Don't overthink it!"}],
+  pair:"Your room is across from mine. If it's loud after ten, I'll knock on the wall",pairBack:"Haha, sure, Ploy! Knock and I'll knock back in a long-drum rhythm",
+  hang:[
+   [{n:"nar",t:"Tabtim drags you to a som tam stall and orders for the whole table without opening the menu"},{n:"tabtim",f:"happy",l:"casual",t:"Som tam with crab and pla ra, ten chillies! How many for you, manager?",choice:[
+     {t:"\"Ten, same as you\"",b:5,then:[{n:"nar",t:"Ten minutes later you're on your third glass of ice water"},{n:"tabtim",f:"happy",l:"casual",t:"Haha, you've got guts! I like people with guts …I mean eaters!"}]},
+     {t:"\"Just one\"",b:3,then:[{n:"tabtim",f:"pout",l:"casual",t:"One chilli is just plain rice! Here, have a bite of mine"}]}]}],
+   [{n:"nar",t:"Tabtim plays mor lam on her phone and dances alone in the middle of the camp yard"},{n:"tabtim",f:"happy",l:"casual",t:"Come dance, manager! These are the feet I kick with",choice:[
+     {t:"Get up and dance with her",b:5,then:[{n:"nar",t:"The whole camp comes out to watch. Tabtim spins you three times by the hand and laughs until she sits on the ground"}]},
+     {t:"Clap along to the beat",b:4,then:[{n:"tabtim",f:"flustered",l:"casual",t:"…You're staring a lot. I get shy too, you know"}]}]}],
+   [{n:"nar",t:"After training, Tabtim sits unusually quiet, looking at a kids' football team photo on her phone"},{n:"tabtim",f:"sad",l:"casual",t:"My little brother… I fight to pay for his school. He says he wants to be a doctor",choice:[
+     {t:"\"He's lucky to have a sister like you\"",b:5,then:[{n:"tabtim",f:"flustered",l:"casual",t:"…Don't say that. I cry easily. I'm not joking"}]},
+     {t:"\"This camp can help you put him through school\"",b:4,then:[{n:"tabtim",f:"happy",l:"casual",t:"This camp's so kind… I'll fight harder than before"}]}]}]],
+  love:[{n:"nar",t:"The Mekong at dusk. Tabtim is quiet for longer than ever"},{n:"tabtim",f:"flustered",l:"casual",t:"I used to think happiness was winning… now it's sitting here with you"},{n:"tabtim",f:"happy",l:"casual",t:"Don't tell anyone I can talk sweet!"}],
+  conf:()=>[{n:"nar",t:"Tabtim pulls you out behind the camp, where the mor lam from her room can't be heard"},{n:"tabtim",f:"flustered",l:"casual",t:"Manager! I'm saying this once. I'm not joking like before"},{n:"tabtim",f:"flustered",l:"casual",t:"I really, really like you …answer now. I'm not scared of the answer"}],
+  yes:()=>"…Really?! Haha, I'm telling the whole camp! …No, no, too embarrassing. Later",no:"It's fine. I'm still at this camp. We still eat sticky rice together every meal, same as before",bye:"…I get it. I'm not angry. I just need to go kick the bag hard for a while"},
+ alicia:{letter:"To the manager\n\nMy contract with Vector is over. I'm not renewing, and I won't sign anything with the word \"forever\" in it, like I said\n\nRin says Sirichai Camp's contract is only two pages. You can read it in five minutes. I'm interested. That doesn't mean I want to come because of you. It's because the contract is short\n\nIf there's a room, send the contract\n— Alicia",
+  leave:[{n:"nar",t:"Her last day at Vector camp. The sponsor team asks Alicia for a farewell live stream"},{n:"alicia",f:"pout",l:"casual",t:"No. Today isn't content"},
+   {n:"nar",t:"She leaves her pass on the desk and takes off the sponsor's wristband, keeping only the old hand wraps she bought herself at fifteen"},{n:"alicia",f:"happy",l:"casual",t:"I feel so light… don't tell anyone about this"}],
+  arrive:[{n:"nar",t:"Alicia arrives with five suitcases: four of clothes, one of royal Thai sweets for the whole camp"},{n:"alicia",f:"flustered",l:"casual",t:"I didn't buy them to please anyone. My hand just picked them up"}],
+  pair:"I've made a dishwashing roster. Miss Alicia gets Wednesdays and Saturdays",pairBack:"Fine. …Which dish soap do I use?",
+  hang:[
+   [{n:"nar",t:"Alicia asks you to hold the camera, but once it's on she turns the lens on you"},{n:"alicia",f:"happy",l:"casual",t:"Today I'm filming you. The content's called 'The Manager Who Won't Smile'",choice:[
+     {t:"Smile for the camera",b:5,then:[{n:"alicia",f:"flustered",l:"casual",t:"…You don't have to smile that much. This file isn't getting posted. I'm keeping it to watch. I mean, to review"}]},
+     {t:"\"Film yourself instead. You're prettier\"",b:4,then:[{n:"alicia",f:"pout",l:"casual",t:"I know. You don't have to say it. …But you can say it again"}]}]}],
+   [{n:"nar",t:"Alicia is reading comments on her phone. Her finger stops on one for too long"},{n:"alicia",f:"sad",l:"casual",t:"'Famous for her face' …people still type it, even after the cup",choice:[
+     {t:"\"The cup didn't come from your looks\"",b:5,then:[{n:"alicia",f:"flustered",l:"casual",t:"…I know. But when you say it, it sounds truer than when I say it"}]},
+     {t:"Turn her screen off",b:4,then:[{n:"alicia",f:"happy",l:"casual",t:"Rude. …Thank you"}]}]}],
+   [{n:"nar",t:"Rin and Alicia go over the camp's fight contracts together. Two red pens"},{n:"alicia",f:"happy",l:"casual",t:"Clause 6, the purse is too low. Manager, can you negotiate?",choice:[
+     {t:"\"Teach me\"",b:5,then:[{n:"alicia",f:"happy",l:"casual",t:"Lesson one: don't smile before the other side names a number. …You're smiling right now. Fail"}]},
+     {t:"\"I've got you and Rin\"",b:4,then:[{n:"alicia",f:"flustered",l:"casual",t:"Taking advantage, obviously. …Fine, I'll do it"}]}]}]],
+  love:[{n:"nar",t:"Alicia takes you on the Ayutthaya boat again. Her phone stays switched off in her bag"},{n:"alicia",f:"flustered",l:"casual",t:"Last time I said tonight isn't content… this time too, and next time as well"},{n:"alicia",f:"happy",l:"casual",t:"Don't get used to it. …Kidding. Get used to it"}],
+  conf:()=>[{n:"nar",t:"Alicia closes the training room door and turns off the spotlights, leaving only the small bulb above the bag"},{n:"alicia",f:"flustered",l:"casual",t:"Listen. I'm saying this once. No retakes"},{n:"alicia",f:"flustered",l:"casual",t:"I like you. Not as a manager. Answer straight. I don't like contracts I can't read"}],
+  yes:()=>"…Deal. This contract never expires, but it doesn't say forever either. It renews every day",no:"OK. I respect the answer. …Not crying. My eyes are just dry",bye:"…I understand. I don't sign anything the other side doesn't want to sign anyway"},
+ chaba:{letter:"Manager\n\nMy brother says go\nHe says he can live in Phuket alone, he can look after himself\n\nMali says the room next to hers is still free\n\nIf there's no room, that's fine\n— Chaba",
+  leave:[{n:"nar",t:"Phuket pier in the morning. Chaba's brother wheels himself all the way to the gate of the Chaiya Andaman camp to see her off"},{n:"nar",t:"He hands her a seashell. \"Give this to Mali. Say it's from me\""},
+   {n:"chaba",f:"sad",l:"casual",t:"…I'll come home every Chak Phra. Never miss one"},{n:"nar",t:"Chaba gets in the car without looking back, and only checks the mirror after the first bend"}],
+  arrive:[{n:"nar",t:"Chaba arrives with one backpack and a bag of khanom la"},{n:"chaba",f:"happy",l:"casual",t:"Manager. Take care of me"}],
+  pair:"Pi Chaba! Your room's next to Mali's. Mali put on hibiscus sheets for you!",pairBack:"…Didn't have to. (That night the whole camp sees her asleep hugging a pillow with the same print)",
+  hang:[
+   [{n:"nar",t:"Chaba is fixing the fence behind the camp again, though the fence isn't broken"},{n:"chaba",f:"happy",l:"casual",t:"Pass the hammer",choice:[
+     {t:"Pass the hammer and hold the boards",b:5,then:[{n:"nar",t:"Two hours pass with barely a word. The fence is much sturdier than before"},{n:"chaba",f:"happy",l:"casual",t:"…Good, today"}]},
+     {t:"\"The fence isn't broken, you know\"",b:3,then:[{n:"chaba",f:"pout",l:"casual",t:"I know. I want to hammer"}]}]}],
+   [{n:"nar",t:"A stray cat is asleep on Chaba's lap. She hasn't moved for forty minutes"},{n:"chaba",f:"flustered",l:"casual",t:"…Don't like it. It just came",choice:[
+     {t:"Sit down beside her and say nothing",b:5,then:[{n:"nar",t:"The cat moves to your lap. Chaba looks at it like she's been betrayed, then laughs softly"}]},
+     {t:"\"Want to give it a name?\"",b:4,then:[{n:"chaba",f:"happy",l:"casual",t:"…Khai Khem. (Salted Egg — Mali is happy all day when she hears it)"}]}]}],
+   [{n:"nar",t:"Sunday evening, Chaba is on a video call with her brother, and hands you the phone mid-call"},{n:"chaba",f:"flustered",l:"casual",t:"My brother wants to talk to the manager",choice:[
+     {t:"\"You can leave your sister with me\"",b:5,then:[{n:"nar",t:"Her brother laughs. Chaba grabs the phone back and hangs up at once, red all the way down her neck"}]},
+     {t:"Tell him how hard Chaba trains",b:4,then:[{n:"chaba",f:"happy",l:"casual",t:"…You don't have to tell him everything"}]}]}]],
+  love:[{n:"nar",t:"Chaba asks you out to the sea at night. She rides the sidecar bike over herself, even though you have a car"},{n:"chaba",f:"flustered",l:"casual",t:"You ride first, same as always"},{n:"chaba",f:"happy",l:"casual",t:"…Can you stay one more day? Same question as before"}],
+  conf:()=>[{n:"nar",t:"Chaba knocks three times, then stands so still for so long that you open the door yourself"},{n:"chaba",f:"flustered",l:"casual",t:"Manager"},{n:"nar",t:"The wind passes once"},{n:"chaba",f:"flustered",l:"casual",t:"…Like you. That's all. Can't talk long"}],
+  yes:()=>"…Mm. (She squeezes your hand tight, then just walks back to her room)",no:"…It's fine. We can still fix fences together",bye:"…Got it. No need to say more"}};
+/* the girl closest to you who notices a champion lover while you are with her */
+const RG_TWO={kati:"Coach… I've heard already. I don't have to ask, but it's not like I don't know",mali:"Mali saw who was holding whose hand last night… Mali isn't crying. Not crying",
+ baibua:"…I've seen it. I don't have to ask, but my heart isn't blind",tabtim:"Manager… I'm not stupid, you know. I see it. I just don't say it",alicia:"I'm not blind. …I just haven't decided how angry to be",chaba:"…Seen it",
+ rin:"Lately the hours you disappear don't match the schedule. I've logged it. I don't need an explanation, I just want you to know that I know",ploy:"…Don't say it. I've seen it",fah:"Hey! You think Fah's blind?! …Don't answer. Fah's going to train"};
+Object.assign(REGION,{
+  joinRooms(G){const R=G.region,J=R.joined||{};return CANON_IDS.filter(id=>G.F[id]&&G.F[id].camp==="player").length+Object.keys(J).filter(c=>G.F[c]&&G.F[c].camp==="player").length;},
+  /* the champion's skill tree is her lineage's — the partner girl's tree (Tha Sao / Korat / Lopburi / Chaiya) */
+  joinSkills(G){const J=(G.region&&G.region.joined)||{};for(const r of RG_ORDER){const cid=RG_CID[r];if(J[cid]&&!SKILLS[cid]&&SKILLS[RG_CH[r].pair])SKILLS[cid]=SKILLS[RG_CH[r].pair];}},
+  joinWeekly(G){const R=G.region,F=R.final,now=gameWeek(G);if(!F||!F.won||now<(F.wonAbs||0)+3)return;R.joined=R.joined||{};R.offers=R.offers||[];R.joinQ=R.joinQ||[];
+    const m=R.meet||{};for(const r of RG_ORDER){const cid=RG_CID[r];if(!R.joined[cid]&&!R.offers.includes(cid)&&!R.joinQ.includes(cid)&&!(R.joinGone||{})[cid]&&(m[cid]||0)>=RG_JOIN_MIN)R.joinQ.push(cid);}
+    R.joinQ.sort((a,b)=>(m[b]||0)-(m[a]||0));
+    if(R.joinQ.length&&now>=(R.joinNext||0)){const cid=R.joinQ.shift(),r=RG_ORDER.find(x=>RG_CID[x]===cid);R.offers.push(cid);R.joinNext=now+RG_JOIN_GAP;
+      addMail(G,{kind:"letter",from:`${RG[r].champ} · Champion of ${RG[r].name}`,title:`Application from ${RG[r].champ}`,body:RG_JOIN[cid].letter+`
+
+(Contract: signing fee ${fmt(RG_JOIN_FEE)} · wage ${fmt(RG_JOIN_WAGE)}/week · answer on the Battle of the Four Regions page)`});}},
+  joinOk(G,cid){const R=G.region;if(!R.offers||!R.offers.includes(cid))return "No such contract";if(R.joinPend)return "Wait for the one who already said yes to move in first";
+    if(this.joinRooms(G)>=dormRooms(G))return `Rooms full (${dormRooms(G)} rooms) · upgrade the dorm first`;if(G.cash<RG_JOIN_FEE)return `Not enough cash · signing fee ${fmt(RG_JOIN_FEE)}`;return "";},
+  joinAccept(G,cid){const why=this.joinOk(G,cid);if(why){toast(why);return;}const R=G.region;G.cash-=RG_JOIN_FEE;R.offers=R.offers.filter(x=>x!==cid);R.joinPend={cid,abs:gameWeek(G)+1};
+    G.log=G.log||[];G.log.push(`Signed a contract with ${G.F[cid]?G.F[cid].name:cid} · signing fee ${fmt(RG_JOIN_FEE)} · moves in next week`);toast(`Contract signed · ${G.F[cid]?G.F[cid].name:""} moves in next week`);},
+  joinApply(G,cid){const R=G.region,r=RG_ORDER.find(x=>RG_CID[x]===cid),f=G.F[cid]||this.champFighter(G,r),pair=G.F[RG_CH[r].pair],now=gameWeek(G);
+    f.camp="player";f.canon=true;f.met=true;f.div=(pair&&(pair.div==="A"||pair.div==="B"))?pair.div:"A";
+    f.lvl=Math.max(8,Math.round((f.lvl||14)*.7));for(const k in f.a)f.a[k]=Math.max(6,Math.round(f.a[k]*.7*10)/10);
+    f.sp=(f.sp||0)+f.lvl;f.xp=0;f.skills=f.skills||{};f.wage=RG_JOIN_WAGE;f.fee=0;f.potential=20;f.fatigue=0;f.injury=0;f.morale=80;f.trust=Math.max(f.trust||0,50);
+    f.bond=Math.max(f.bond||0,Math.min(70,Math.max(30,25+(R.meet[cid]||0)*2)));f.joinAbs=now;f.lastTouch=absWeek(G);delete f.rgKey;delete f.rgT;delete f.rgSty;
+    G.rank=G.rank||{A:{},B:{}};G.rank[f.div]=G.rank[f.div]||{};if(!G.rank[f.div][f.id])G.rank[f.div][f.id]={pts:0,w:0,l:0,d:0};
+    (R.joined=R.joined||{})[cid]=now;this.joinSkills(G);if(typeof syncFighterAges==="function")syncFighterAges(G);
+    G.log=G.log||[];G.log.push(`${f.name} moves into Sirichai Camp · Lv.${f.lvl} · skill points ${f.sp}`);},
+  joinSteps(G,cid){const r=RG_ORDER.find(x=>RG_CID[x]===cid),J=RG_JOIN[cid],pid=RG_CH[r].pair,pf=G.F[pid],top=typeof rgTopGirl==="function"?rgTopGirl(G):null;
+    const S=[...J.leave,{n:"nar",t:"This week, Sirichai Camp has a new member"},...J.arrive];
+    if(pf&&pf.camp==="player")S.push({n:pid,f:"happy",l:"casual",t:J.pair},{n:cid,f:"happy",l:"casual",t:J.pairBack});
+    else S.push({n:"coach",t:`The room at the end of the hall is free. ${RG[r].champ} takes that room. Dinner at six sharp. Late means no side dishes`});
+    if(top&&top.id!==pid)S.push({n:top.id,f:"pout",l:"casual",t:rgJeal(top.id,RG[r].champ)});
+    S.push({n:"nar",t:`${RG[r].champ} has joined the camp · train, fight and spend time together from the Battle of the Four Regions page · she gets skill points in the same lineage as ${pf?pf.name:"her lineage partner"}`});return S;},
+  /* romance: one-love or two-timing, never the harem team */
+  isLovC(G,cid){const L=G.region&&G.region.lov;return !!(L&&L[cid]!=null);},
+  confDue(G){const R=G.region,J=R.joined||{},now=gameWeek(G);R.confN=R.confN||{};R.confNo=R.confNo||{};
+    for(const cid of Object.keys(J)){const f=G.F[cid];if(!f||f.camp!=="player"||this.isLovC(G,cid)||(R.ex&&R.ex[cid]!=null)||isAway(G,cid))continue;
+      if((f.bond||0)<75||now-(J[cid]||now)<6||(R.confN[cid]||0)>=3)continue;if(R.confNo[cid]!=null&&now-R.confNo[cid]<13)continue;return cid;}return null;},
+  confSteps(G,cid){const J=RG_JOIN[cid],R=G.region,two=partners(G).length>0||Object.keys(R.lov||{}).some(k=>k!==cid);R.confN[cid]=(R.confN[cid]||0)+1;
+    const warn=two?[{n:"nar",t:"⚠ You already have someone. Saying yes means two-timing… a regional champion can't join the harem team"}]:[];
+    return [...J.conf(G),...warn,{n:"nar",t:"She waits for your answer",choice:[
+      {t:two?"\"I like you too\" (two-timing)":"\"I like you too\"",fx:G2=>REGION.takeC(G2,cid),then:[{n:cid,f:"happy",l:"casual",t:J.yes(G)}]},
+      {t:"\"Let's stay like this for now\"",fx:G2=>{G2.region.confNo[cid]=gameWeek(G2);add(G2,cid,"trust",3);},then:[{n:cid,f:"sad",l:"casual",t:J.no}]}]}];},
+  takeC(G,cid){const R=G.region,now=gameWeek(G);R.lov=R.lov||{};const P=[...partners(G),...Object.keys(R.lov).filter(k=>k!==cid&&G.F[k])];R.lov[cid]=now;if(P.length&&G.mono)delete G.mono;if(R.ex)delete R.ex[cid];const f=G.F[cid];if(f)f.morale=Math.min(100,(f.morale||0)+15);
+    if(P.length){const top=P.map(k=>G.F[k]).filter(Boolean).sort((a,b)=>((b.bond||0)+(b.bondX||0))-((a.bond||0)+(a.bondX||0)))[0];if(top)R.twoQ={id:top.id,cid,abs:now+3};}
+    G.log=G.log||[];G.log.push(`${f?f.name:cid} and the Manager started dating ${P.length?" (two-timing)":""}`);},
+  breakC(G,cid){const R=G.region,f=G.F[cid];if(!this.isLovC(G,cid))return;delete R.lov[cid];(R.ex=R.ex||{})[cid]=gameWeek(G);if(R.twoQ&&R.twoQ.cid===cid)delete R.twoQ;if(f)add(G,cid,"bond",-35);},
+  hangC(G,cid){const f=G.F[cid];if(!f||G.freeUsed||isAway(G,cid))return;const J=RG_JOIN[cid],R=G.region;R.hangI=R.hangI||{};const i=R.hangI[cid]||0,lov=this.isLovC(G,cid);
+    const P=lov&&i%2===1?J.love:J.hang[Math.floor(i/(lov?2:1))%J.hang.length];R.hangI[cid]=i+1;G.freeUsed=true;f.hangWk=G.week;
+    const S=P.map(x=>x.choice?{...x,choice:x.choice.map(o=>({t:o.t,fx:G2=>{add(G2,cid,"bond",o.b);add(G2,cid,"morale",3);},then:o.then}))}:{...x});
+    if(!S.some(x=>x.choice))S.push({fx:G2=>{add(G2,cid,"bond",5);add(G2,cid,"morale",3);}});
+    save();playScene(S,()=>{save();render();},{bg:"camp",look:"casual"});},
+  joinCard(G){const R=G.region,F=R.final;if(!F||!F.won)return "";const offers=R.offers||[],J=R.joined||{},ids=Object.keys(J).filter(c=>G.F[c]);
+    if(!offers.length&&!ids.length&&!R.joinPend)return "";
+    const off=offers.map(cid=>{const r=RG_ORDER.find(x=>RG_CID[x]===cid),why=this.joinOk(G,cid);return `<div class="kv-row"><span><b>${esc(RG[r].champ)}</b> <small>Champion of the ${esc(RG[r].name)} · signing fee ${fmt(RG_JOIN_FEE)} · wage ${fmt(RG_JOIN_WAGE)}/week</small>${why?`<small class="redt"> · ${esc(why)}</small>`:""}</span><button class="btn sm primary" data-act="rgjoin" data-v="${cid}" ${why?"disabled":""}>Sign</button></div>`;}).join("");
+    const pend=R.joinPend&&G.F[R.joinPend.cid]?`<p class="meta">${esc(G.F[R.joinPend.cid].name)} is on her way · arrives at camp next week</p>`:"";
+    const mine=ids.map(cid=>{const f=G.F[cid],lov=this.isLovC(G,cid),away=isAway(G,cid);return `<div class="rg-mem"><div class="kv-row"><span><b>${esc(f.name)}</b> <small>Lv.${f.lvl}</small></span><span>
+      <button class="btn sm chatb" data-act="rgchat" data-v="${cid}">Chat</button> <button class="btn sm primary" data-act="rghang" data-v="${cid}" ${G.freeUsed||away?"disabled":""}>${away?"Away":"Hang out"}</button>${lov?` <button class="btn sm" data-act="rgbreak" data-v="${cid}">Break up</button>`:""}</span></div>${hearts(f.bond,f)}</div>`;}).join("");
+    return `<section class="px card rg-join"><h3>🏠 Regional champions moving in</h3><p class="meta">Main-cast rooms ${this.joinRooms(G)}/${dormRooms(G)} rooms ${G.freeUsed?" · Free time used this week":""}</p>
+      ${off?`<h4>Contracts waiting for an answer</h4><div class="rg-nl">${off}</div><p class="meta">No need to answer now. The contract waits here</p>`:""}${pend}${mine?`<h4>Already at our camp</h4>${mine}`:""}</section>`;},
+});
+if(typeof ACT!=="undefined")Object.assign(ACT,{
+  rgjoin:d=>{REGION.joinAccept(G,d.v);save();render();},
+  rghang:d=>REGION.hangC(G,d.v),
+  rgbreak:d=>{if(!REGION.isLovC(G,d.v))return;UI.modal={type:"rgbreak",cid:d.v};render();},
+  rgbreakgo:d=>{const cid=d.v,J=RG_JOIN[cid];UI.modal=null;if(!REGION.isLovC(G,cid))return;REGION.breakC(G,cid);
+    playScene([{n:cid,f:"sad",l:"casual",t:J.bye},{n:"nar",t:`${G.F[cid].name} and the manager have broken up · she stays at the camp`}],()=>{save();render();},{bg:"camp_night",look:"casual"});},
+});
+if(typeof XMODAL!=="undefined")XMODAL.rgbreak=m=>({body:`<h2>Break up with ${esc(G.F[m.cid].name)}?</h2><p>Your closeness drops a lot · she stays at the camp, but she won't confess again</p><div class="mfoot"><button class="btn" data-act="closeModal">Not now</button><button class="btn primary" data-act="rgbreakgo" data-v="${m.cid}">Break up</button></div>`,foot:false});
 if(typeof G!=="undefined"&&G&&G.region)REGION.flush(G);
 
