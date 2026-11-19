@@ -4660,6 +4660,7 @@ const RG_BELT_MC={chiangrai:"ปี้น้องเจียงฮายเจ
  phetchaburi:"ขนมหม้อแกงเมืองเพชรรอแชมป์อยู่หลังเวทีแล้วครับ!",chanthaburi:"มังคุดกี่ลูกก็หวานไม่เท่าชัยชนะคืนนี้ครับ จันทบุรีขอแสดงความยินดี!",
  chumphon:"ชาวชุมพรขอแหลงดัง ๆ ว่า หรอยแรง! แชมป์คนใหม่ของเรา!",surat:"สุราษฎร์ฯ ขอยกหอยนางรมดอนสักให้แชมป์ทั้งกระบะเลย!",
  nakhonsi:"เมืองคอนขอแหลงให้ชัด ๆ แชมป์คนนี้เก่งจริง ไม่ใช่หนังตะลุง!",songkhla:"นางเงือกสมิหลาโบกมือให้แล้วครับ! สงขลาขอแสดงความยินดีกับแชมป์คนใหม่!"};
+const RG_MC_F={chiangrai:1}; /* Man: เจ้า is a woman's particle, so the Chiang Rai MC is a woman */
 function honorSteps(G,h){const f=G.F[h.id],N=f.name,label=honorLabel(h.kind,h.venue),ranked=h.kind==="local"||h.kind==="district",def=h.kind==="defense";
   let seed=0;for(const c of String(h.key||h.id+h.week))seed=(seed*31+c.charCodeAt(0))>>>0;const pick=(a,k)=>a[(seed+(k||0)*7)%a.length];
   const V=h.venue&&typeof STADIUMS!=="undefined"&&STADIUMS[h.venue]?STADIUMS[h.venue].name:(typeof STADIUMS!=="undefined"&&STADIUMS.tha?STADIUMS.tha.name:"เวทีท่าแพ");
@@ -4667,7 +4668,7 @@ function honorSteps(G,h){const f=G.F[h.id],N=f.name,label=honorLabel(h.kind,h.ve
   const grp=ranked?"ranked":def?"defense":"title",R=h.kind==="local"?"ตำบล":"อำเภอ";
   const S=[{n:"nar",t:ranked?`คะแนนตลอดรอบ${R}สรุปแล้ว ${N}ขึ้นอันดับหนึ่ง กรรมการเรียกเธอกลับมากลางเวที`:`เสียงระฆังจบ กรรมการชูแขน${N}ขึ้นกลางเวที เสียงเชียร์ดังกลบทุกอย่าง`},
     {n:"npc",who:"นักพากย์",t:pick(HON_CALL[grp])(N,label,h.div,k,V,R)}];
-  if(h.kind==="rgbelt"&&RG_BELT_MC[h.venue])S.push({n:"npc",who:"พิธีกรท้องถิ่น",t:RG_BELT_MC[h.venue]});
+  if(h.kind==="rgbelt"&&RG_BELT_MC[h.venue])S.push({n:"npc",who:RG_MC_F[h.venue]?"พิธีกรสาวท้องถิ่น":"พิธีกรท้องถิ่น",t:RG_BELT_MC[h.venue]});
   S.push({n:"nar",t:pick(HON_FX[ranked?"ranked":"title"],1)},{n:"nar",t:(ranked||h.kind==="province"||h.kind==="dm"?HON_GIVE.cup:HON_GIVE.belt)(N)});
   const L=HON_SAY[h.id]||HON_SAY._;S.push({n:h.id,f:"happy",l:"fight",t:pick(ranked?L.rank:def?L.def:L.first,2)});
   const fan=HON_GIRLS.filter(id=>id!==h.id&&G.F[id]&&G.F[id].camp==="player"&&(G.F[id].bond||0)>=40).sort((a,b)=>(G.F[b].bond||0)-(G.F[a].bond||0))[0];
@@ -8359,7 +8360,7 @@ AU.gsfx=function(kind,a){if(!this.init()||this.muted||!SETTINGS.sfx)return;const
   if(kind==="shimmer")for(let i=0;i<6;i++)T(i*.05,{f:1400+Math.random()*1400,type:"sine",dur:.12,peak:.06});};
 
 // ================= MUAY THAI MOE v1.3 — UI =================
-const VERSION="1.91.16";
+const VERSION="1.91.17";
 const CUR_LANG=(typeof window!=="undefined"&&window.LANG)||"th";
 const TH_LABEL=String.fromCharCode(3652,3607,3618);
 function langSwitch(cls){return `<div class="langsw ${cls||""}" role="group" aria-label="Language">${[["th",TH_LABEL],["en","EN"]].map(([k,l])=>`<button class="lsb ${CUR_LANG===k?"on":""}" data-act="setlang" data-v="${k}" aria-pressed="${CUR_LANG===k}">${l}</button>`).join("")}</div>`;}
@@ -12650,7 +12651,7 @@ CHAT.fah.push(
 <script>
 (function(){
 /* v1.87: Thai code ships inside index.html; English code (en.js) and the dictionary (i18n.js) load only when needed */
-var B="bf63642299";
+var B="aa5ed21dda";
 var L="";try{L=localStorage.getItem("mtm_lang")||"";}catch(e){}
 try{var h=(location.hash||"").match(/lang=(th|en)/);if(h)L=h[1];}catch(e){}
 if(L!=="th"&&L!=="en")L="th";

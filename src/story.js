@@ -64,6 +64,7 @@ const RG_BELT_MC={chiangrai:"ปี้น้องเจียงฮายเจ
  phetchaburi:"ขนมหม้อแกงเมืองเพชรรอแชมป์อยู่หลังเวทีแล้วครับ!",chanthaburi:"มังคุดกี่ลูกก็หวานไม่เท่าชัยชนะคืนนี้ครับ จันทบุรีขอแสดงความยินดี!",
  chumphon:"ชาวชุมพรขอแหลงดัง ๆ ว่า หรอยแรง! แชมป์คนใหม่ของเรา!",surat:"สุราษฎร์ฯ ขอยกหอยนางรมดอนสักให้แชมป์ทั้งกระบะเลย!",
  nakhonsi:"เมืองคอนขอแหลงให้ชัด ๆ แชมป์คนนี้เก่งจริง ไม่ใช่หนังตะลุง!",songkhla:"นางเงือกสมิหลาโบกมือให้แล้วครับ! สงขลาขอแสดงความยินดีกับแชมป์คนใหม่!"};
+const RG_MC_F={chiangrai:1}; /* Man: เจ้า is a woman's particle, so the Chiang Rai MC is a woman */
 function honorSteps(G,h){const f=G.F[h.id],N=f.name,label=honorLabel(h.kind,h.venue),ranked=h.kind==="local"||h.kind==="district",def=h.kind==="defense";
   let seed=0;for(const c of String(h.key||h.id+h.week))seed=(seed*31+c.charCodeAt(0))>>>0;const pick=(a,k)=>a[(seed+(k||0)*7)%a.length];
   const V=h.venue&&typeof STADIUMS!=="undefined"&&STADIUMS[h.venue]?STADIUMS[h.venue].name:(typeof STADIUMS!=="undefined"&&STADIUMS.tha?STADIUMS.tha.name:"เวทีท่าแพ");
@@ -71,7 +72,7 @@ function honorSteps(G,h){const f=G.F[h.id],N=f.name,label=honorLabel(h.kind,h.ve
   const grp=ranked?"ranked":def?"defense":"title",R=h.kind==="local"?"ตำบล":"อำเภอ";
   const S=[{n:"nar",t:ranked?`คะแนนตลอดรอบ${R}สรุปแล้ว ${N}ขึ้นอันดับหนึ่ง กรรมการเรียกเธอกลับมากลางเวที`:`เสียงระฆังจบ กรรมการชูแขน${N}ขึ้นกลางเวที เสียงเชียร์ดังกลบทุกอย่าง`},
     {n:"npc",who:"นักพากย์",t:pick(HON_CALL[grp])(N,label,h.div,k,V,R)}];
-  if(h.kind==="rgbelt"&&RG_BELT_MC[h.venue])S.push({n:"npc",who:"พิธีกรท้องถิ่น",t:RG_BELT_MC[h.venue]});
+  if(h.kind==="rgbelt"&&RG_BELT_MC[h.venue])S.push({n:"npc",who:RG_MC_F[h.venue]?"พิธีกรสาวท้องถิ่น":"พิธีกรท้องถิ่น",t:RG_BELT_MC[h.venue]});
   S.push({n:"nar",t:pick(HON_FX[ranked?"ranked":"title"],1)},{n:"nar",t:(ranked||h.kind==="province"||h.kind==="dm"?HON_GIVE.cup:HON_GIVE.belt)(N)});
   const L=HON_SAY[h.id]||HON_SAY._;S.push({n:h.id,f:"happy",l:"fight",t:pick(ranked?L.rank:def?L.def:L.first,2)});
   const fan=HON_GIRLS.filter(id=>id!==h.id&&G.F[id]&&G.F[id].camp==="player"&&(G.F[id].bond||0)>=40).sort((a,b)=>(G.F[b].bond||0)-(G.F[a].bond||0))[0];

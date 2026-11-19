@@ -64,6 +64,7 @@ const RG_BELT_MC={chiangrai:"Folks of Chiang Rai! This belt now belongs to Siric
  phetchaburi:"Phetchaburi custard cake is waiting for the champion backstage!",chanthaburi:"No mangosteen is as sweet as tonight's win! Chanthaburi congratulates you!",
  chumphon:"Chumphon shouts it out: magnificent! Our new champion!",surat:"Surat gives the champion a whole truckload of Don Sak oysters!",
  nakhonsi:"Nakhon says it loud and clear: this champion is the real thing, not a shadow puppet!",songkhla:"The Samila mermaid is waving at you! Songkhla congratulates its new champion!"};
+const RG_MC_F={chiangrai:1}; /* Man: เจ้า is a woman's particle, so the Chiang Rai MC is a woman */
 function honorSteps(G,h){const f=G.F[h.id],N=f.name,label=honorLabel(h.kind,h.venue),ranked=h.kind==="local"||h.kind==="district",def=h.kind==="defense";
   let seed=0;for(const c of String(h.key||h.id+h.week))seed=(seed*31+c.charCodeAt(0))>>>0;const pick=(a,k)=>a[(seed+(k||0)*7)%a.length];
   const V=h.venue&&typeof STADIUMS!=="undefined"&&STADIUMS[h.venue]?STADIUMS[h.venue].name:(typeof STADIUMS!=="undefined"&&STADIUMS.tha?STADIUMS.tha.name:"Tha Phae Stadium");
@@ -71,7 +72,7 @@ function honorSteps(G,h){const f=G.F[h.id],N=f.name,label=honorLabel(h.kind,h.ve
   const grp=ranked?"ranked":def?"defense":"title",R=h.kind==="local"?"subdistrict":"district";
   const S=[{n:"nar",t:ranked?`The standings for the ${R} round are final. ${N} takes first place, and the referee calls her back to center ring.`:`The final bell rings. The referee raises ${N}'s arm in center ring as the crowd roars.`},
     {n:"npc",who:"Commentator",t:pick(HON_CALL[grp])(N,label,h.div,k,V,R)}];
-  if(h.kind==="rgbelt"&&RG_BELT_MC[h.venue])S.push({n:"npc",who:"Local MC",t:RG_BELT_MC[h.venue]});
+  if(h.kind==="rgbelt"&&RG_BELT_MC[h.venue])S.push({n:"npc",who:RG_MC_F[h.venue]?"Local MC":"Local MC",t:RG_BELT_MC[h.venue]});
   S.push({n:"nar",t:pick(HON_FX[ranked?"ranked":"title"],1)},{n:"nar",t:(ranked||h.kind==="province"||h.kind==="dm"?HON_GIVE.cup:HON_GIVE.belt)(N)});
   const L=HON_SAY[h.id]||HON_SAY._;S.push({n:h.id,f:"happy",l:"fight",t:pick(ranked?L.rank:def?L.def:L.first,2)});
   const fan=HON_GIRLS.filter(id=>id!==h.id&&G.F[id]&&G.F[id].camp==="player"&&(G.F[id].bond||0)>=40).sort((a,b)=>(G.F[b].bond||0)-(G.F[a].bond||0))[0];
