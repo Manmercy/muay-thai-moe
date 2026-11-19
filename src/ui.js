@@ -1,5 +1,5 @@
 // ================= MUAY THAI MOE v1.3 — UI =================
-const VERSION="1.91.65";
+const VERSION="1.91.66";
 const CUR_LANG=(typeof window!=="undefined"&&window.LANG)||"th";
 const TH_LABEL=String.fromCharCode(3652,3607,3618);
 function langSwitch(cls){return `<div class="langsw ${cls||""}" role="group" aria-label="Language">${[["th",TH_LABEL],["en","EN"]].map(([k,l])=>`<button class="lsb ${CUR_LANG===k?"on":""}" data-act="setlang" data-v="${k}" aria-pressed="${CUR_LANG===k}">${l}</button>`).join("")}</div>`;}
@@ -1655,7 +1655,7 @@ function playRound(){const U=UI.fight,F=U.F;if(FS.ground)FS.ground();fightMusic(
   U.stage="playing";fightMusic(F);render();tick();}
 // v1.19: pull the next exchange only when the last one has been shown, so a skill pressed now shapes what follows
 function feedRound(){const U=UI.fight,F=U.F;
-  while(!U.pending.length&&!roundDone(F)){U.pending.push(...fightEx(F));
+  while(!U.pending.length&&!roundDone(F)){const bA=(F.A.burst&&F.A.burst.k)||null,bB=(F.B.burst&&F.B.burst.k)||null,X=fightEx(F);for(const q of X)if(q&&q.ev){q.bA=bA;q.bB=bB;}U.pending.push(...X); /* v1.91.66: events carry the guard-burst state for the ring aura */
     if(!U.tiredShown&&F.ex>=8){for(const s of [F.A,F.B])if(s.sta<30){U.pending.push({tired:true,cap:{text:COM.tired[Math.floor(U.rng()*2)].replace("{x}",s.name),side:""}});U.tiredShown=true;}}}
   return U.pending.length>0;}
 function fskill(id){const U=UI.fight;if(!U||U.stage!=="playing")return;const s0=staPts(U.F.A);const e=useSkill(U.F,U.F.A,id);if(!e)return;staPop(Math.round(staPts(U.F.A)-s0));U.pending.unshift(e);clearTimeout(U.timer);tick();}
@@ -1677,7 +1677,7 @@ function tick(){const U=UI.fight;if(!U||U.stage!=="playing")return;
   const e=U.pending.shift();U.shown.push(e);const F=U.F;const now=performance.now();let wait=1500;
   if(e.bell){AU.sfx("bell");U.caption=e.cap;}
   else if(e.tired){U.caption=e.cap;wait=1300;}
-  else if(e.ev){const sd=sideOf(e,F);FS.play({...e,side:sd},now);U.caption={text:comLine(e,F,U.rng),side:e.ev==="miss"?"":sd,heat:fightHeat(F)};
+  else if(e.ev){const sd=sideOf(e,F);FS.play({...e,side:sd},now);FS.burst&&FS.burst(e);if(e.ev==="skill"&&FS.skill)FS.skill(sd,e.skrow||0,e.skk,now);U.caption={text:comLine(e,F,U.rng),side:e.ev==="miss"?"":sd,heat:fightHeat(F)};
     if(e.ev!=="skill"){const sp=spPick({...e},sd,F,U.rng);if(sp){FS.special(sp,F.round||1,now);const n=F[sp.side].f.name,R=[`ท่าไม้ตายมาแล้วครับ!! ${sp.name}!!`,`${n} ปล่อย${sp.name}!! คนดูลุกทั้งสนาม!`,`นี่แหละ${sp.name}!! ของจริงครับท่านผู้ชม!!`];
       U.caption={text:R[Math.floor(U.rng()*R.length)],side:sp.side,heat:fightHeat(F)};AU.cheer(1);U.spWait=1900;}}
     if(e.ev==="hit"||e.ev==="counter"){AU.sfx(e.w||"punch");if(e.crit)AU.cheer(.8);}

@@ -748,7 +748,8 @@ function grapEx(F,at,df,rng,log,md){const nm=v=>Array.isArray(v)?v[Math.floor(rn
   const p=clamp(GR.tdBase+(at.f.grap-defv)*GR.tdD-(100-at.sta)/400+(100-df.sta)/500-(md.evade||0)+(bT?.12*bT.pw:0),.08,.85);
   at.sta=clamp(at.sta-4,0,100);at.thrown++;at.rthrown++;
   if(rng()<p){F.gnd={top:at,bot:df,t:0};const dmg=2+a.power*.15;df.hp-=dmg;df.sta=clamp(df.sta-5,0,100);at.pts+=1.5;at.rpts+=1.5;at.landed++;at.rlanded++;at.dmgDealt+=dmg;at.rdmg+=dmg;
-    L(at,`${at.name} ${nm(at.f.tdName)||"Shoots for the legs"} — slams ${df.name} to the mat!`,"big","takedown",{an:at.name,dn:df.name});
+    const TN=at.f.tdName,tdi=Array.isArray(TN)?Math.floor(rng()*TN.length):-1; /* v1.91.65: the throw picked for the commentary also tells the ring how the victim flies */
+    L(at,`${at.name} ${(tdi>=0?TN[tdi]:TN)||"Shoots for the legs"} — slams ${df.name} to the mat!`,"big","takedown",{an:at.name,dn:df.name,tdSt:(at.f.tdSty&&at.f.tdSty[tdi])||null});
     if(df.hp<=0){F.over=true;F.gnd=null;F.result={win:at===F.A?"A":"B",type:"KO",round:F.round};L(at,`${df.name} hits the mat and can't get up!`,"big","ko",{an:at.name,dn:df.name});}
     return true;}
   /* the sprawl — and Muay Thai's answer: grab the neck and knee the shooter */
