@@ -715,12 +715,117 @@ function nlFighter(G,k,me,p,ceil){const D=NL[k],id="nl_"+k;let f=G.F[id];
 function nlTest(k){const me=roster(G).filter(f=>!isAway(G,f.id)).sort((a,b)=>effOvr(G,b)-effOvr(G,a))[0];if(!me)return;
   const o=nlFighter(G,k,me,k==="ladda"?.25:.4,RG_LADDER.champ(3,0)+(k==="ladda"?.5:0));
   const b={id:"nltest"+Date.now(),a:me.id,b:o.id,week:G.week,tier:"exhibition",rounds:5,win:0,lose:0,bg:"bg_naka_underground.webp",nltest:1};G.bookings.push(b);save();openFight(b,()=>{G.bookings=G.bookings.filter(x=>x.id!==b.id);save();render();});}
+/* ===================== round 11: cups 2–3 story, the closing ceremony, the underground final (v1.91.20) ===================== */
+const RG_DEAL_CASH=200000;
+/* the week after the second cup: dinner with Khun Krerk */
+function rgCup2(G){const R=G.region,rin=rgIn(G,"rin");return [
+ {n:"nar",bg:"camp",t:"A gold invitation arrives at the camp. Khun Krerk invites the manager to a one-on-one dinner at the top-floor restaurant of the Naga Energy tower"},
+ {n:"nar",bg:"krerk_dinner",show:[{id:"npc:krerk"}],t:"A long table for twenty, but only two place settings. Glass all around, with all of Bangkok in view"},
+ {n:"npc",who:"Khun Krerk",t:"Two cups in a single tournament. I haven't seen a small camp like yours in a long time"},
+ {n:"npc",who:"Khun Krerk",t:"I used to fight too. National team. That year I already had my Olympic ticket in hand"},
+ {n:"npc",who:"Khun Krerk",t:"Three weeks before we left, the team van skidded on the road. My knee broke in three places. The doctor said I was lucky to walk at all"},
+ {n:"npc",who:"Khun Krerk",t:"Nobody was at fault. It rained, the road was slick… it was luck, that's all"},
+ {n:"npc",who:"Khun Krerk",t:"From that day I promised myself I'd never let luck decide a fighter's life again. Money, data, science, I'll control all of it myself"},
+ {n:"nar",t:"He slides a green-and-gold folder in front of you. The cover reads \"Partner Contract\""},
+ {n:"npc",who:"Khun Krerk",t:`I'd like to partner with Sirichai Camp. ${fmt(RG_DEAL_CASH)} today, in exchange for the right to manage your fighters, from every meal to the data on every punch`},
+ {n:"nar",t:"A green-and-gold folder lies in front of you",choice:[
+   {t:"Accept",fx:G2=>{G2.region.c2="deal";G2.cash+=RG_DEAL_CASH;},then:[
+     {n:"npc",who:"Khun Krerk",t:"A wise decision. I'll take the very best care of Sirichai Camp"},
+     rin?{n:"rin",f:"sad",l:"casual",t:"…Let Rin read the contract before you sign. At least then Rin will know what we just sold"}:{n:"coach",t:"Money this big, I've never seen anyone hand it out for free"}]},
+   {t:"Let me think about it",fx:G2=>{G2.region.c2="later";},then:[
+     {n:"npc",who:"Khun Krerk",t:"Of course. My door is always open"}]},
+   {t:"Decline",fx:G2=>{G2.region.c2="no";},then:[
+     {n:"npc",who:"Khun Krerk",t:"A pity… but I respect that"},
+     {n:"nar",t:"He keeps smiling the same way, but the hand pulling the folder back grips it until his knuckles go white"}]}]},
+ {n:"nar",t:"While you wait for the elevator down, the doors of the one across are closing. Inside stands a lone woman with white hair, red at the tips. The doors shut before you can see her face"},
+ {fx:()=>{R.c2=R.c2||"later";}}];}
+/* the week after the third cup: Pailin "forgets" a tablet */
+function rgCup3(G){const R=G.region,rin=rgIn(G,"rin"),ploy=rgIn(G,"ploy");return [
+ {n:"nar",bg:"camp",t:"A rainy night. Pailin stands at the camp gate without an umbrella"},
+ {n:"pailin",f:"sad",t:"I didn't come to see anyone. I was just passing by"},
+ {n:"nar",t:"She hands over Vector's tablet, three files left open on the screen"},
+ {n:"nar",t:"The first file is the full Naka League contract draft. The second is monthly transfer slips from Naga Energy to Vector since last year. The third is a video clip"},
+ {n:"nar",bg:"naka_lab",t:"In the clip, four women from different disciplines train on the mats: boxing, sambo, kung fu, lucha wrestling. A fifth in a white hood takes them down one at a time"},
+ {n:"pailin",f:"sad",t:"Research funding, lab fees, equipment… I thought he gave it because he believed in sports science like I do"},
+ {n:"pailin",f:"sad",t:"But he used the data from every fight I logged to build that person"},
+ ...rgIf(ploy,[{n:"ploy",f:"sad",l:"casual",t:"Sis…"},{n:"pailin",f:"sad",t:"Don't say anything, Ploy. I know I was stupid"},{n:"ploy",l:"casual",t:"You weren't stupid. You just trusted the wrong person… once"}]),
+ rin?{n:"rin",f:"sad",l:"casual",t:"Clause 14.3 of the Naka League contract covers data obtained from Vector too. That means data from every camp Vector has ever fought"}:{n:"coach",t:"Data from every camp Vector has ever fought… it's all in Naka's hands now"},
+ {n:"coach",bg:"camp",t:"Including our camp"},
+ {n:"pailin",t:"I didn't come to warn you. I just forgot my tablet here. You can send it back tomorrow"},
+ {n:"nar",t:"Pailin walks back into the rain and never looks back"},
+ {fx:()=>{R.c3="seen";}}];}
+/* who in the camp the regional champion likes best: the one who says the camp's name at the ceremony */
+const RG_CLOSE_SAY={baibua:"A small camp can stand tall. I saw it with my own eyes. Sirichai Camp",tabtim:"Sirichai Camp doesn't have much money, but they fight for each other with all their heart. Tabtim has seen it",
+ alicia:"I want to fight the Sirichai way. Where nobody asks me to smile for the camera",chaba:"…I want to stay at a camp that fixes its own fence"};
+/* after the fourth cup (or once the tournament has run its course): Naka League, the refusals, Ladda */
+function rgClose(G){const R=G.region,fah=rgIn(G,"fah"),rin=rgIn(G,"rin");
+ const fav=["baibua","tabtim","alicia","chaba"].sort((a,b)=>((R.meet||{})[b]||0)-((R.meet||{})[a]||0))[0];
+ return [
+ {n:"nar",bg:"closing_ceremony",show:[{id:"npc:krerk"}],t:"The Four Regions Championship closing ceremony is held in Bangkok. The hall glows green and gold. On stage sits a long table with four golden pens laid out in a row"},
+ {n:"npc",who:"Khun Krerk",t:"Thank you, every camp. This tournament convinced me of one thing: Muay Thai has to go further than temple-fair rings"},
+ {n:"npc",who:"Khun Krerk",t:"Introducing… Naka League! The country's first all-round fighting league. Muay Thai, boxing, MMA, every discipline on one stage"},
+ {n:"npc",who:"Khun Krerk",t:"And the first four fighters I'd like to invite are the four regional champions. Please come up and sign on stage"},
+ {n:"nar",show:[{id:"baibua"},{id:"tabtim"},{id:"alicia"},{id:"chaba"}],t:"Baibua, Tabtim, Alicia and Chaba walk up to the stage, but none of them picks up a pen"},
+ {n:"baibua",f:"sad",l:"fight",t:"Thank you… but I won't sign. Bua Tha Sao Camp still has me"},
+ {n:"tabtim",l:"fight",t:"Tabtim won't sign either. My little brother read me clause fourteen"},
+ {n:"alicia",l:"fight",t:"I already said I won't sign anything with the word \"forever\" in it"},
+ {n:"chaba",l:"fight",t:"…not signing"},
+ {n:fav,f:"happy",l:"fight",t:RG_CLOSE_SAY[fav]},
+ fah?{n:"fah",f:"flustered",l:"casual",t:"Hear that, mister?! Nobody wants your league!"}:{n:"coach",t:"Hear that, Khun Krerk? Nobody wants your league"},
+ {n:"pailin",t:"And Vector Gym withdraws from the Naka League partnership, as of this second"},
+ {n:"nar",show:[{id:"npc:krerk"}],t:"The whole room goes silent. Every eye turns to Khun Krerk"},
+ {n:"npc",who:"Khun Krerk",t:"…No matter. Then let my daughter introduce herself instead"},
+ {n:"nar",show:[{id:"lada",l:"casual"}],t:"A woman in a white hood steps into the ring and pulls the hood off. Long white hair with red tips falls down her back"},
+ {n:"lada",l:"casual",t:"Ladda Naka"},
+ {n:"lada",l:"casual",t:"I want to know how good the four regional champions are. Come up one at a time. Here. Now"},
+ {n:"nar",show:[{id:"lada",l:"casual"},{id:"baibua",l:"fight"}],t:"Before anyone can stop her, Baibua steps in first. Her spinning elbow misses Ladda's chin by millimetres. Ladda answers with an elbow, wraps her waist and throws her to the canvas in a single motion"},
+ {n:"nar",show:[{id:"lada",l:"casual"},{id:"tabtim",l:"fight"}],t:"Tabtim leaps into a kick. Ladda closes the distance before the leg can fully extend, grabs the standing leg and pulls her down"},
+ {n:"nar",show:[{id:"lada",l:"casual"},{id:"alicia",l:"fight"}],t:"Alicia throws a combination. Ladda ducks every punch, slips around behind her and locks in a choke. Alicia taps within five seconds"},
+ {n:"nar",show:[{id:"lada",l:"casual"},{id:"chaba",l:"fight"}],t:"Chaba presses forward and never takes a step back. Ladda lets her drive all the way to the ropes, then uses that same force to drag Chaba to the mat"},
+ {n:"nar",show:[{id:"lada",l:"casual"}],t:"Blood seeps from the corner of Ladda's mouth, where Baibua's elbow grazed her. She touches it with a fingertip, and smiles for the first time"},
+ {n:"lada",l:"casual",t:"…that was fun"},
+ fah?{n:"fah",f:"sad",l:"casual",t:"That's… modern fighting. Just like Fah"}:{n:"coach",t:"That's not just Muay Thai… that's everything combined"},
+ {n:"npc",who:"Khun Krerk",t:"Thank you all for coming"},
+ {n:"nar",bg:"camp",show:[],t:"Three days later, a black card with no logo arrives at the camp"},
+ {n:"nar",t:"\"Sirichai Camp is invited: five on five · the old beverage factory warehouse, Khlong Toei port · open rules, throws and locks allowed · no prize, no press\""},
+ {n:"nar",t:"Handwritten on the back: \"I just want to know how well your small Muay Thai camp handles the real world — L.\""},
+ ...rgIf(R.c2==="deal",[rin?{n:"rin",f:"flustered",l:"casual",t:"Manager, the partner contract we took money for. Clause 30 says: \"Should Naka League lose to the partner camp, this contract shall terminate immediately\""}:{n:"coach",t:"The partner contract we took money for. Clause 30 says if Naka League loses to our camp, the contract ends immediately…"},
+   {n:"coach",t:"He was that confident, to write this clause in"}]),
+ {n:"coach",t:"Throws allowed, locks allowed… we haven't trained for any of that, not even one day"},
+ {n:"coach",t:"Three weeks to prepare. Choose how to train for it on the Four Regions Championship page"}];}
+const RG_FPREP={sprawl:{n:"Stop takedowns",d:"Kick them off when they shoot in, and land clinch knees more often"},escape:{n:"Escape locks",d:"Get up off the mat and slip out of locks more often"},strike:{n:"Stand and trade",d:"Ignore the takedowns. Sharpen your strikes and finish it before they drag you down"}};
+function rgFinalIntro(G){const R=G.region,F=R.final;return [
+ {n:"nar",bg:"naka_underground",t:F.tries?"The same warehouse by Khlong Toei port, as dim as last time. The same small crowd stands silent in the shadows":"An old warehouse by Khlong Toei port. Dim lights, the smell of sour syrup drifting from old tanks. In the middle, a ring with black ropes and soft MMA-style mats on the floor"},
+ {n:"npc",who:"Khun Krerk",t:F.tries?"Back again, I see. I like that kind of stubbornness":"Welcome. No cameras, no press, no prize money. Just one question"},
+ {n:"lada",l:"casual",t:"Five bouts, first to three takes it. I fight last"},
+ {n:"coach",t:`Remember, everyone. We trained for ${RG_FPREP[F.prep||"strike"].n} Do what we trained. Don't play their game`}];}
+function rgFinalBetween(G,i,me,o,res,w,l){return [
+ {n:"nar",t:`${res==="W"?`${me.name} Win ${o.name}`:res==="D"?`${me.name} Tied with ${o.name}`:`${o.name} Win ${me.name}`} · Sirichai ${w} – ${l} Naka League`}];}
+function rgFinalWin(G,w,l,beatLadda,ladFid){const R=G.region,fah=rgIn(G,"fah"),rin=rgIn(G,"rin"),looked=ladFid==="fah"&&fah?"Fah":"Manager";return [
+ {n:"nar",bg:"naka_underground",t:`Five bouts done. Sirichai ${w} – ${l} Naka League`},
+ {n:"nar",show:[{id:"npc:krerk"}],t:"Khun Krerk claps slowly from the second-floor balcony. The sound echoes through the whole warehouse"},
+ {n:"npc",who:"Khun Krerk",t:"Congratulations, Sirichai Camp… luck was on your side today"},
+ {n:"npc",who:"Khun Krerk",t:"Then I'll see you at the national level"},
+ ...(beatLadda?[{n:"nar",show:[{id:"lada",l:"casual"}],t:"Ladda rises slowly from the mat and licks the blood from the corner of her mouth"},{n:"lada",l:"casual",t:"…that was fun"}]
+  :[{n:"lada",l:"casual",t:"You beat the team. You haven't beaten me yet"}]),
+ {n:"nar",show:[{id:"lada",l:"casual"}],t:`Before following her father out, Ladda stops and looks ${looked} One beat too long. Then she pulls the hood back over her head`},
+ ...rgIf(R.c2==="deal",[rin?{n:"rin",f:"happy",l:"casual",t:"Clause 30. Naka League lost to its contract partner, so the contract ends immediately. The money is ours. And our data is ours again"}:{n:"coach",t:"Clause 30… Naka League lost to us, the contract's over, and the money's still ours. Ha!"}]),
+ {n:"nar",show:[{id:"baibua"},{id:"tabtim"},{id:"alicia"},{id:"chaba"}],t:"At ringside, the four regional champions have watched since the first bout. No one says a word, but they are all thinking the same thing"},
+ {n:"coach",bg:"camp",show:[],t:"Let's go home. Five a.m. tomorrow, same as always"}];}
+function rgFinalLose(G,w,l){return [
+ {n:"nar",bg:"naka_underground",t:`Five bouts done. Sirichai ${w} – ${l} Naka League`},
+ {n:"npc",who:"Khun Krerk",t:"It's all right. The door is still open. Come back whenever you like"},
+ {n:"lada",l:"casual",t:"…not enough yet"},
+ {n:"coach",t:"Get hurt, remember it, and come back"}];}
 const REGION={
   /* end of week (after the weekly events): the gala the week after the invitation, the contract beat the week after the first cup */
   weekScene(G,done){const R=G.region;if(!R){done();return;}const now=gameWeek(G);if(lbWeek(G,done))return;
     if(!R.gala){if(R.galaAbs==null)R.galaAbs=now+1;if(now>=R.galaAbs){R.gala=1;AU.startMusic&&AU.startMusic("hub");playScene(rgGala(G),()=>{save();done();},{bg:"gala",look:"casual"});return;}}
     const r=(R.cups||[])[0],c=r&&R.champ[r];
     if(r&&!R.c1&&c&&now>=(c.wonAbs||0)+1){R.c1="seen";playScene(rgCup1(G,r),()=>{save();done();},{bg:"camp",look:"casual"});return;}
+    {const r2=(R.cups||[])[1],c2=r2&&R.champ[r2];if(r2&&!R.c2&&c2&&now>=(c2.wonAbs||0)+1){R.c2="later";playScene(rgCup2(G),()=>{save();done();},{bg:"camp",look:"casual"});return;}}
+    {const r3=(R.cups||[])[2],c3=r3&&R.champ[r3];if(r3&&!R.c3&&c3&&now>=(c3.wonAbs||0)+1){R.c3="seen";playScene(rgCup3(G),()=>{save();done();},{bg:"camp",look:"casual"});return;}}
+    if(this.closeDue(G)){this.openFinal(G);playScene(rgClose(G),()=>{save();done();},{bg:"closing_ceremony",look:"casual"});return;} /* v1.91.20 round 11 */
     done();},
   /* ---------- state helpers ---------- */
   base(G){return ((G.season||1)-1)*52;},
@@ -758,7 +863,7 @@ const REGION={
 
   /* ---------- results + weekly upkeep ---------- */
   flush(G){const R=G.region;if(!R||!R.pend||!R.pend.length)return;const done=R.pend.splice(0);
-    for(const p of done){const rg=p.region||{},r=rg.r,dest=rg.dest,D=ROAD_DEST[dest];if(!D||!RG[r])continue;
+    for(const p of done){const rg=p.region||{},r=rg.r,dest=rg.dest,D=ROAD_DEST[dest];if(rg.nlfinal){if(R.final){R.final.cur=R.final.cur||{};R.final.cur[rg.nlfinal]=p.res||"L";}continue;}if(!D||!RG[r])continue;
       if(rg.series){this.seriesResult(G,r,p);continue;}
       rgTouch(G,RG_CID[r]);const T=R.trip,abs=T&&T.bid===p.bid?T.abs:gameWeek(G);
       if(p.res==="W"){R.belts[r]=R.belts[r]||{};R.belts[r][dest]=1;G.log=G.log||[];G.log.push(`${G.F[p.a]?G.F[p.a].name:""} wins the provincial belt of ${D.name}!`);if(G.F[p.a])recordHonor(G,"rgbelt",p.a,G.F[p.a].div,G.week,dest); /* v1.91.14 (Man): a province belt gets the same ceremony as the main game */
@@ -775,7 +880,7 @@ const REGION={
       const gap=now-R.meetT[cid];
       if(gap>=3&&!R.miss[cid]){R.miss[cid]=1;addMail(G,{kind:"letter",from:`${RG[r].champ} · Champion of ${RG[r].name}`,title:`A letter from ${RG[r].champ}`,body:RG_MISS[r]});}
       if(gap>=4){const pk=(R.meetPk||{})[cid]||m[cid],fl=RG_FLOOR.find(t=>pk>=t)||0;if(m[cid]>fl)m[cid]=Math.max(fl,Math.round((m[cid]-.25)*100)/100);}}},
-  weekly(G){const R=G.region;this.flush(G);this.seriesWeekly(G);this.fade(G);this.letters(G);const T=R.trip;
+  weekly(G){const R=G.region;this.flush(G);this.seriesWeekly(G);this.fade(G);this.letters(G);this.finalWeekly(G);const T=R.trip;
     /* a trip whose bout vanished (the week went by, the booking was dropped) is let go */
     if(T&&gameWeek(G)>T.abs&&!G.bookings.some(b=>b.id===T.bid)){(R.gc=R.gc||[]).push(T.opp);R.trip=null;R.nextTripAbs=Math.max(R.nextTripAbs||0,T.abs+1);}
     const keep=new Set(G.bookings.map(b=>b.b));R.gc=(R.gc||[]).filter(id=>{if(keep.has(id))return true;if(G.F[id]&&G.F[id].rg)delete G.F[id];return false;});},
@@ -944,7 +1049,7 @@ Welcome her at Fights › Four Regions Cup`});}
   /* ---------- screens ---------- */
   css(){if(typeof document==="undefined"||document.getElementById("rg-css"))return;const st=document.createElement("style");st.id="rg-css";
     st.textContent=`.rg-head{display:flex;flex-wrap:wrap;gap:.5rem 1rem;align-items:center;justify-content:space-between}.rg-head h3{margin:0}
-.rg-stats{display:flex;gap:.4rem;flex-wrap:wrap}.rg-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:.75rem}
+.rg-stats{display:flex;gap:.4rem;flex-wrap:wrap}.rg-final{border-top:6px solid #1a1a1a;background:linear-gradient(180deg,#2a1414 0,#160c0c 100%);color:#f3e6e6}.rg-final h3,.rg-final h4{color:#ff5a5a}.rg-final .meta{color:#d9bcbc}.rg-final.won{border-top-color:#d4a52a}.rg-fprep button{display:flex;flex-direction:column;align-items:flex-start;text-align:left;width:100%;max-width:22rem}.rg-fprep small{opacity:.8;font-size:.72rem;white-space:normal}.rg-fprep button,.rg-fprep button *{text-align:left!important;align-self:stretch}.rg-nl .kv-row{border-bottom:1px dashed rgba(255,255,255,.15)}.rg-slot{margin:.4rem 0 .7rem;padding:0 .9rem .4rem 0;border-bottom:1px dashed rgba(0,0,0,.2)}.rg-slot .kv-row{flex-wrap:wrap;gap:4px 12px}.rg-slot .kv-row small{margin-left:auto}.rg-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:.75rem}
 .rg-reg{border-top:6px solid var(--rc);position:relative}.rg-reg h3{margin:.1rem 0 0}.rg-reg h3::first-letter{text-transform:uppercase}.rg-champ{font-size:.85rem;opacity:.85;margin-bottom:.5rem}
 .rg-prov{display:flex;align-items:center;justify-content:space-between;gap:.5rem;padding:.35rem 0;border-bottom:1px dashed rgba(0,0,0,.15)}
 .rg-prov:last-child{border-bottom:0}.rg-prov small{opacity:.7}.rg-fin{opacity:.9}.rg-miss{display:block;color:#d4688f;opacity:1!important}.rg-belt{color:#b8860b;font-weight:700}
@@ -984,7 +1089,7 @@ Welcome her at Fights › Four Regions Cup`});}
     return `<section class="px card rg-head"><div><h3>Four Regions Championship</h3><span class="meta">Edition ${R.edition||1}</span></div>
        <div class="rg-stats"><span class="pill gold">Cups ${cups}/4</span><span class="pill">Belts ${belts}/16</span><span class="pill ${T?"red":nx?"green":""}">${T?`Trip: ${esc(ROAD_DEST[T.dest].name)} · Week ${T.wk}`:nx?`Can travel week ${nx}`:"No more trips this year"}</span></div></section>
      ${!R.gala?`<p class="meta rg-gala">🎉 The Four Regions Cup opening gala in Bangkok ${R.galaAbs!=null&&gameWeek(G)<R.galaAbs?"is held at the end of next week":"is held at the end of this week"} · the whole camp is invited</p>`:""}${!REGION_LIVE?`<p class="meta">Test mode: <button class="btn sm" data-act="rggala" data-v="gala">Watch the gala</button> Underground test fight (open rules): ${NL_ORDER.map(k=>`<button class="btn sm" data-act="nltest" data-v="${k}">${esc(NL[k].name)}</button>`).join(" ")}${(R.cups||[]).length?` <button class="btn sm" data-act="rggala" data-v="c1">Watch the green envelope scene</button>`:""}</p>`:""}
-     ${tripCard}${this.fuelLine(G)}<div class="rg-grid">${regs}</div>`;},
+     ${this.finalCard(G)}${tripCard}${this.fuelLine(G)}<div class="rg-grid">${regs}</div>`;},
   planHTML(dest){const D=ROAD_DEST[dest],C=RG[D.r],wk=this.tripWeek(G);if(!wk)return `<h2>${esc(D.name)}</h2><p>No free week left to travel this year</p>`;
     const abs=this.base(G)+wk,P=roadPlan(G,dest,null,abs),R=this.riders(G,wk);if(!UI.rgFid||!R.some(f=>f.id===UI.rgFid))UI.rgFid=R[0]?R[0].id:null;
     const me=UI.rgFid&&G.F[UI.rgFid],poor=G.cash<P.total,line=(k,v)=>v?`<div class="kv-row"><span>${k}</span><b class="num">${fmt(v)}</b></div>`:"";
@@ -998,6 +1103,70 @@ Welcome her at Fights › Four Regions Cup`});}
      <div class="mfoot"><button class="btn" data-act="closeModal">Not now</button><button class="btn primary" data-act="rggo" data-v="${dest}" ${me&&!poor?"":"disabled"}>${poor?"Not enough money":"Confirm the trip"}</button></div>`;}
 };
 
+/* round 11: the underground final — state, the region-page card, the line-up and the five bouts */
+Object.assign(REGION,{
+  closeDue(G){const R=G.region,now=gameWeek(G),cups=R.cups||[];if(R.close)return false;
+    if(cups.length>=4){const last=R.champ[cups[3]];return now>=((last&&last.wonAbs)||0)+2;}
+    /* the tournament runs its course without four cups: three years in, nothing in progress */
+    return cups.length>=1&&now>=(R.startAbs||0)+156&&!RG_ORDER.some(r=>R.champ[r]&&R.champ[r].state==="series")&&!R.trip;},
+  openFinal(G){const R=G.region,now=gameWeek(G);R.close=now;R.final={stage:"prep",abs:now+3,prep:null,tries:0,won:false,intelAbs:now+1};
+    addMail(G,{kind:"letter",from:"(no sender)",title:"Black card",body:`Sirichai Camp is invited: five on five
+The old beverage factory warehouse, Khlong Toei port
+From week ${((R.final.abs-1)%52)+1} onward
+
+Open rules. Throws allowed. Locks allowed.
+No prize. No press.
+
+I just want to know how well your small Muay Thai camp handles the real world.
+— L.`});},
+  finalWeekly(G){const R=G.region,F=R.final,now=gameWeek(G);if(!F||F.intel||now<F.intelAbs)return;F.intel=1;
+    addMail(G,{kind:"letter",from:"(unsigned)",title:"Naka League team intel",body:"Don't ask who sent this\n\n"+NL_ORDER.map(k=>`${NL[k].name} · ${NL[k].art}\n${NL[k].tip||""}`).join("\n\n")+"\n\nLadda looks for old fight tapes of everyone in your camp. The ones she has never seen fight, she can't read.\n\nP.S. No need to return the tablet."});},
+  finalCard(G){const R=G.region,F=R.final;if(!F)return "";const now=gameWeek(G),ready=now>=F.abs,wk=((F.abs-1)%52)+1;
+    const plans=Object.entries(RG_FPREP).map(([k,P])=>`<button class="btn sm ${F.prep===k?"gold":""}" data-act="rgfprep" data-v="${k}" aria-pressed="${F.prep===k}"><b>${esc(P.n)}</b><small>${esc(P.d)}</small></button>`).join("");
+    const team=F.intel?`<div class="rg-nl">${NL_ORDER.map(k=>`<div class="kv-row"><span><b>${esc(NL[k].name)}</b> <small>${esc(NL[k].art)}</small></span><small>${NL[k].nlsk.map(s=>esc(s.name)).join(" · ")}</small></div>`).join("")}</div>`:`<p class="meta">You know nothing about the Naka League team yet</p>`;
+    if(F.won)return `<section class="px card rg-final won"><h3>Underground fight · Naka League</h3><p>Sirichai Camp won ${F.score||""} · ${F.beatLadda?"Ladda went down too":"Ladda is still unbeaten"}</p></section>`;
+    return `<section class="px card rg-final"><h3>🂠 Black card · Naka League underground fight</h3>
+      <p class="meta">Five on five · first to three · open rules, throws and locks allowed · no prize ${F.tries?` · attempts so far: ${F.tries} times`:""}</p>
+      <h4>Underground training plan</h4><div class="rg-pick rg-fprep">${plans}</div>
+      <h4>Naka League team</h4>${team}
+      <div class="mfoot">${ready?`<button class="btn primary" data-act="rgfline" ${F.prep?"":"disabled"}>${F.prep?"Go to the underground warehouse ▸":"Choose a training plan first"}</button>`:`<span class="meta">Available from week ${wk} · trained ${F.abs-now} more weeks</span>`}</div></section>`;},
+  finalPool(G){return roster(G).filter(f=>!f.injury&&!isAway(G,f.id));},
+  lineHTML(){const R=G.region,F=R.final,pool=this.finalPool(G),L=UI.rgLine=UI.rgLine||{};
+    for(const k of NL_ORDER)if(L[k]&&!pool.some(f=>f.id===L[k]))delete L[k];
+    if(!Object.keys(L).length){const used=new Set();for(const k of NL_ORDER){const f=pool.filter(x=>!used.has(x.id)).sort((a,b)=>effOvr(G,b)-effOvr(G,a))[0];if(f){L[k]=f.id;used.add(f.id);}}}
+    const full=NL_ORDER.every(k=>L[k]);
+    return `<h2>Five on five</h2><p class="meta">Each fighter fights once · first to three wins · Ladda always fights last · no injuries carry over after the fight</p>
+      ${NL_ORDER.map((k,i)=>`<div class="rg-slot"><div class="kv-row"><span>Bout ${i+1} · <b>${esc(NL[k].name)}</b></span><small>${esc(NL[k].art)}</small></div>
+       <div class="rg-pick">${pool.map(f=>`<button class="btn sm" data-act="rgfpick" data-v="${k}|${f.id}" aria-pressed="${L[k]===f.id}">${faceImg(f,"sm")}${esc(f.name)}</button>`).join("")}</div></div>`).join("")}
+      ${pool.length<5?`<p class="redt">You need at least 5 fighters ready to fight (right now: ${pool.length})</p>`:""}
+      <div class="mfoot"><button class="btn" data-act="closeModal">Not yet</button><button class="btn primary" data-act="rgfgo" ${full?"":"disabled"}>Start the final ▸</button></div>`;},
+  finalGo(){const R=G.region,F=R.final,L={...UI.rgLine};UI.modal=null;F.cur={};F.line=L;AU.startMusic&&AU.startMusic("hub");
+    playScene(rgFinalIntro(G),()=>this.finalBout(0),{bg:"naka_underground",look:"casual"});},
+  finalBout(i){const R=G.region,F=R.final;
+    if(i>=NL_ORDER.length){this.finalEnd();return;}
+    const k=NL_ORDER[i],me=G.F[F.line[k]];if(!me){F.cur[k]="L";this.finalBout(i+1);return;}
+    const keep={injury:me.injury||0,fatigue:me.fatigue||0},o=nlFighter(G,k,me);
+    const b={id:`nlf${F.tries||0}_${i}_${gameWeek(G)}`,a:me.id,b:o.id,week:G.week,tier:"exhibition",rounds:5,win:0,lose:0,bg:"bg_naka_underground.webp",gprep:F.prep,region:{nlfinal:k}};
+    G.bookings.push(b);save();
+    openFight(b,()=>{G.bookings=G.bookings.filter(x=>x.id!==b.id);me.injury=keep.injury;me.fatigue=keep.fatigue;this.flush(G);
+      const res=F.cur[k]||"L",w=Object.values(F.cur).filter(x=>x==="W").length,l=Object.values(F.cur).filter(x=>x==="L").length;save();
+      if(i<NL_ORDER.length-1)playScene(rgFinalBetween(G,i,me,o,res,w,l),()=>this.finalBout(i+1),{bg:"naka_underground",look:"casual"});else this.finalBout(i+1);});},
+  finalEnd(){const R=G.region,F=R.final,v=Object.values(F.cur),w=v.filter(x=>x==="W").length,l=v.filter(x=>x==="L").length,beat=F.cur.ladda==="W";F.tries=(F.tries||0)+1;
+    if(w>=3){F.won=true;F.stage="done";F.wonAbs=gameWeek(G);F.score=`${w}–${l}`;F.beatLadda=beat;R.hall=R.hall||[];R.hall.push({k:"naka",season:G.season||1,score:F.score,ladda:beat});
+      for(const r of RG_ORDER)rgTouch(G,RG_CID[r]);G.rep+=3;
+      AU.startMusic&&AU.startMusic("victory");playScene(rgFinalWin(G,w,l,beat,F.line.ladda),()=>{AU.startMusic&&AU.startMusic("hub");save();render();},{bg:"naka_underground",look:"casual"});return;}
+    playScene(rgFinalLose(G,w,l),()=>{save();UI.modal={type:"rgflost"};render();},{bg:"naka_underground",look:"casual"});},
+});
+if(typeof ACT!=="undefined")Object.assign(ACT,{
+  rgfprep:d=>{const F=G.region&&G.region.final;if(!F||F.won)return;F.prep=d.v;save();render();},
+  rgfline:()=>{const F=G.region&&G.region.final;if(!F||F.won||!F.prep||gameWeek(G)<F.abs)return;UI.rgLine={};UI.modal={type:"rgfline"};render();},
+  rgfpick:d=>{const [k,id]=d.v.split("|"),L=UI.rgLine=UI.rgLine||{};for(const x of NL_ORDER)if(L[x]===id)delete L[x];L[k]=id;render();},
+  rgfgo:()=>{if(!NL_ORDER.every(k=>(UI.rgLine||{})[k]))return;REGION.finalGo();},
+  rgfagain:()=>{UI.rgLine={};UI.modal={type:"rgfline"};render();},
+  rgfhome:()=>{const F=G.region.final;F.abs=gameWeek(G)+1;UI.modal=null;addMail(G,{kind:"letter",from:"(no sender)",title:"A new black card",body:"The door is still open\n— L."});save();render();},
+});
+if(typeof XMODAL!=="undefined"){XMODAL.rgfline=()=>({body:REGION.lineHTML(),foot:false});
+  XMODAL.rgflost=()=>({body:`<h2>Lost the underground fight</h2><p>What now?</p><div class="mfoot"><button class="btn" data-act="rgfhome">Train first (come back next week)</button><button class="btn primary" data-act="rgfagain">New lineup, fight on now</button></div>`,foot:false});}
 if(typeof XMODAL!=="undefined"){XMODAL.rgplan=m=>({body:REGION.planHTML(m.dest),foot:false});XMODAL.rgser=m=>({body:REGION.seriesHTML(m.r),foot:false});}
 if(typeof ACT!=="undefined")Object.assign(ACT,{
   lbgo:d=>{UI.modal=null;lbStart(G,d.v);},

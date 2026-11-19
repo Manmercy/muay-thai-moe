@@ -627,7 +627,7 @@ function newFight(fa,fb,o){fa=lbView(fa);fb=lbView(fb);
   const scout=(me,op)=>me.counterPrep||!!(me.f.camp==="player"&&typeof G!=="undefined"&&G&&G.scoutAbs&&G.scoutAbs[op.id]!=null&&gameWeek(G)-G.scoutAbs[op.id]<=8);
   for(const [S1,S2] of [[SA,SB],[SB,SA]])if(S1.trait==="lib"&&scout(S1,S2.f))S1.libOn=1;
   if(fa.ployNotes&&fb.id==="ploy")SA.prep+=.025;if(fb.ployNotes&&fa.id==="ploy")SB.prep+=.025; // Rin's notebook on Ploy
-  if(o.gprepA)SA.gprep=o.gprepA;
+  if(o.gprepA){SA.gprep=o.gprepA;if(o.gprepA==="strike")SA.prep+=.03;} /* v1.91.20: the stand-and-trade plan sharpens the strikes instead */
   return {seed:o.seed,rng,rounds:o.rounds,round:0,tier:o.tier,A:SA,B:SB,open:!!(fa.grap||fb.grap),
     cards:[],logs:[],over:false,result:null,forceRage:!!o.forceRage};
 }
