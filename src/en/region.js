@@ -925,6 +925,11 @@ function rgClose(G){const R=G.region,fah=rgIn(G,"fah"),rin=rgIn(G,"rin"),kati=rg
    {n:"coach",t:"He was that confident, to write this clause in"}]),
  {n:"coach",t:"Throws allowed, locks allowed… we haven't trained for any of that, not even one day"},
  {n:"coach",t:"We have three weeks. Drill every counter, then on the night we pick one per bout. The card is in the mailbox."}];}
+/* v1.91.75 (Man): the original champions have phones — personal words go to her chat; a new champion of a later edition still writes letters */
+function rgSay(G,r,title,body){const R=G.region,cid=RG_CID0[r];if(G.F[cid]&&!(R.nc&&R.nc[r])&&typeof chatNote==="function"){chatNote(G,cid,body);return;}
+  addMail(G,{kind:"letter",tone:"region",from:`${RG[r].champ} · Champion of ${RG[r].name}`,title,body});}
+const RG_VISITMSG={baibua:"Before our next bout, may I drop by Sirichai Camp? I'll bring khao tom mat for everyone.",tabtim:"The next bout's not here yet, so Tabtim's dropping by to see your camp first, okay!",alicia:"Before bout two I'll stop by your camp. Not for content. I'm just passing through.",chaba:"…I'll drop by your camp. Before bout two."};
+function rgOrg(G,r,title,body){addMail(G,{kind:"letter",tone:"region",from:"Four Regions Championship organizers",title,body});}
 const RG_FPREP={sprawl:{n:"Stop takedowns",d:"Kick them off when they shoot in, and land clinch knees more often"},escape:{n:"Escape locks",d:"Get up off the mat and slip out of locks more often"},strike:{n:"Stand and trade",d:"Ignore the takedowns. Sharpen your strikes and finish it before they drag you down"}};
 /* v1.91.57 (Man): the Naka League talk a little before and after their bouts — an introduction the first night, a jab after; Ladda barely speaks */
 const NL_SAY={
@@ -1044,17 +1049,21 @@ const REGION={
       rgTouch(G,RG_CID[r]);const T=R.trip,abs=T&&T.bid===p.bid?T.abs:gameWeek(G);
       if(p.res==="W"){R.belts[r]=R.belts[r]||{};R.belts[r][dest]=1;G.log=G.log||[];G.log.push(`${G.F[p.a]?G.F[p.a].name:""} wins the provincial belt of ${D.name}!`);if(G.F[p.a])recordHonor(G,"rgbelt",p.a,G.F[p.a].div,G.week,dest); /* v1.91.14 (Man): a province belt gets the same ceremony as the main game */
         if(this.beltCount(G,r)===4&&R.champ[r].state==="locked"){R.champ[r].state="letter";this.champFighter(G,r);
-          addMail(G,{kind:"letter",tone:"region",from:`${RG[r].champ} · Champion of ${RG[r].name}`,title:`${RG_TITLE[r]}: all four belts won`,body:RG_CH[r].letter+((t=>t?`\n\n(${t})`:"")(this.tipText(G,r)))});}}
+          rgOrg(G,r,`${RG_TITLE[r]}: all four belts won`,`Dear Manager of Sirichai Camp,
+
+Your camp now holds all four belts of the ${RG[r].name}. ${RG[r].champ}, the new champion of ${RG[r].name} challenges you for the regional title. Best 2 of 3; the organizer pays for travel.
+
+Pick your fighter under Fights › Four Regions Championship`+((t=>t?`\n\n(${t})`:"")(this.tipText(G,r))));rgSay(G,r,`${RG_TITLE[r]}: all four belts won`,RG_CH[r].letter);}}
       R.trip=null;R.nextTripAbs=Math.max(R.nextTripAbs||0,abs+RG_TRIP_GAP);(R.gc=R.gc||[]).push(p.b);}},
   /* weekly: post-cup letters and champion chats */
   letters(G){const R=G.region,now=gameWeek(G);R.postDone=R.postDone||{};
-    for(const r of RG_ORDER){if(R.post&&R.post[r]!=null&&now>=R.post[r]&&!R.postDone[r]&&RG_POST[r]){R.postDone[r]=1;addMail(G,{kind:"letter",tone:"region",from:`${RG[r].champ} · Champion of ${RG[r].name}`,title:`A letter from ${RG[r].champ}`,body:RG_POST[r]});}
+    for(const r of RG_ORDER){if(R.post&&R.post[r]!=null&&now>=R.post[r]&&!R.postDone[r]&&RG_POST[r]){R.postDone[r]=1;rgSay(G,r,`A letter from ${RG[r].champ}`,RG_POST[r]);}
       const cid=RG_CID0[r],c=R.champ[r]||{},open=RG_CHAT[cid]&&G.F[cid]&&((R.joined&&R.joined[cid])||c.visit==="done"||c.state==="won"||rgEd(G)>=2);G.chatIn=G.chatIn||{};
       if(open&&!G.chatIn[cid]&&now-((G.chatLastAbs||{})[cid]??-999)>=2&&mulberry32((G.seed||1)+now*31+cid.length)()<.45)G.chatIn[cid]=G.week;}},
   fade(G){const R=G.region,now=gameWeek(G),m=R.meet||{};R.meetT=R.meetT||{};R.miss=R.miss||{};
     for(const r of RG_ORDER){const cid=RG_CID0[r];if(!(m[cid]>0))continue;if(R.meetT[cid]==null){R.meetT[cid]=now;continue;}if(R.joined&&R.joined[cid])continue;
       const gap=now-R.meetT[cid];
-      if(gap>=3&&!R.miss[cid]){R.miss[cid]=1;addMail(G,{kind:"letter",tone:"region",from:`${RG[r].champ} · Champion of ${RG[r].name}`,title:`A letter from ${RG[r].champ}`,body:RG_MISS[r]});}
+      if(gap>=3&&!R.miss[cid]){R.miss[cid]=1;rgSay(G,r,`A letter from ${RG[r].champ}`,RG_MISS[r]);}
       if(gap>=4){const pk=(R.meetPk||{})[cid]||m[cid],fl=RG_FLOOR.find(t=>pk>=t)||0;if(m[cid]>fl)m[cid]=Math.max(fl,Math.round((m[cid]-.25)*100)/100);}}},
   weekly(G){const R=G.region;rgApply(G);this.flush(G);this.seriesWeekly(G);this.fade(G);this.letters(G);this.finalWeekly(G);this.joinWeekly(G);this.joinPerks(G);this.loopWeekly(G);const T=R.trip;
     /* a trip whose bout vanished (the week went by, the booking was dropped) is let go */
@@ -1172,9 +1181,9 @@ const REGION={
       G.log.push(`${RG_TITLE[r]}: ${RG[r].champ} keeps the title ${c.l}-${c.w}`);return;}
     R.just={r,kind:"bout",res:p.res,w:c.w,l:c.l,n:c.n};const s=this.schedule(G,r,abs+2); /* v1.90.17 (Man): bouts two weeks apart */
     /* between bout 1 and bout 2 the champion drops by the camp (round 4) — missed if bout 2 comes first */
-    if(c.n===1&&!c.visit){c.visit="due";addMail(G,{kind:"letter",tone:"region",from:`${RG[r].champ} · Champion of ${RG[r].name}`,title:`${RG[r].champ} is dropping by the camp`,body:`${RG[r].champ} sent word she'll drop by the camp before bout 2
+    if(c.n===1&&!c.visit){c.visit="due";rgSay(G,r,`${RG[r].champ} is dropping by the camp`,(RG_VISITMSG[RG_CID0[r]]&&!(G.region.nc&&G.region.nc[r])?RG_VISITMSG[RG_CID0[r]]:`${RG[r].champ} sent word she'll drop by the camp before bout 2`)+`
 
-Welcome her at Fights › Four Regions Cup`});}
+(Welcome her under Fights › Four Regions Championship · before bout 2)`);}
     else if(c.n>=2&&c.visit==="due")c.visit="missed";
     G.log.push(`${RG_TITLE[r]} bout ${c.n}: ${p.res==="W"?"Win":p.res==="L"?"Loss":"Draw"} · score ${c.w}-${c.l}${s?` · next bout in week ${s.wk}`:""}`);},
   /* weekly: a hurt fighter gets the bout moved, a dropped bout is rescheduled, a lost series sends a new letter later */
@@ -1183,7 +1192,9 @@ Welcome her at Fights › Four Regions Cup`});}
       addMail(G,{kind:"letter",tone:"naka",from:"NAGA Energy Drink",title:"Clash of the Four Regions: about half a year left",body:"Dear Manager of Sirichai Camp,\n\nThis Clash of the Four Regions closes in about half a year. After that there will be no new challenges to the regional champions. Any series still under way will be fought to the end, and then comes the closing ceremony in Bangkok.\n\nIf there are cups left to win, win them before time runs out.\n\nNaka Energy Drink · Drink Naka, fight without end!"});}}
     for(const r of RG_ORDER){const c=R.champ[r];if(!c)continue;
       if(c.state==="lost"&&now>=(c.letterAbs||0)&&!this.overTime(G)){c.state="letter";c.fid=null;c.w=0;c.l=0;c.n=0;
-        addMail(G,{kind:"letter",tone:"region",from:`${RG[r].champ} · Champion of ${RG[r].name}`,title:`${RG_TITLE[r]}: a new challenge`,body:RG_CH[r].again+((t=>t?`\n\n(${t})`:"")(this.tipText(G,r)))});continue;}
+        rgOrg(G,r,`${RG_TITLE[r]}: a new challenge`,`Dear Manager of Sirichai Camp,
+
+${RG[r].champ}, the new champion of ${RG[r].name} is open to a new regional title challenge. Best 2 of 3 · pick your fighter under Fights › Four Regions Championship`+((t=>t?`\n\n(${t})`:"")(this.tipText(G,r))));rgSay(G,r,`${RG_TITLE[r]}: a new challenge`,RG_CH[r].again);continue;}
       if(c.state!=="series")continue;const me=G.F[c.fid];
       if(!me||me.camp!=="player"){G.bookings=G.bookings.filter(b=>!(c.next&&b.id===c.next.bid));Object.assign(c,{state:"letter",fid:null,w:0,l:0,n:0,next:null});continue;}
       const x=c.next;
@@ -1193,8 +1204,7 @@ Welcome her at Fights › Four Regions Cup`});}
       if(x.abs===now&&me.injury>0){G.bookings=G.bookings.filter(b=>b.id!==x.bid);this.postpone(G,r,now+me.injury+1,`${me.name} is still injured`);continue;}
       this.ensureBooking(G,r);}},
   postpone(G,r,from,why){const c=G.region.champ[r];c.next=null;const s=this.schedule(G,r,from);
-    addMail(G,{kind:"letter",tone:"region",from:`${RG[r].champ} · Champion of ${RG[r].name}`,title:`Bout postponed: ${RG_TITLE[r]}`,
-      body:`${why} · the organiser has moved bout ${(c.n||0)+1}${s?` to week ${s.wk}${s.season!==(G.season||1)?` (next year)`:""}`:""}\n\n${RG_CH[r].wait}`});},
+    rgOrg(G,r,`Bout postponed: ${RG_TITLE[r]}`,`${why} · the organiser has moved bout ${(c.n||0)+1}${s?` to week ${s.wk}${s.season!==(G.season||1)?` (next year)`:""}`:""}`);rgSay(G,r,`Bout postponed: ${RG_TITLE[r]}`,RG_CH[r].wait);},
   /* the championship trip: drive (paid by the sponsor) → the champion before the bell → the bout → cup or hotel → home */
   seriesTrip(b,done){const r=b.region.r,c=G.region.champ[r],dest=RG[r].fin;
     if(!c||!ROAD_DEST[dest]||typeof ROAD==="undefined"){openFight(b,done);return;}
@@ -1610,9 +1620,9 @@ Object.assign(REGION,{
     const m=R.meet||{};for(const r of RG_ORDER){const cid=RG_CID0[r];if(rgEd(G)>=2&&!(R.nc&&R.nc[r])&&!(R.champ[r]&&R.champ[r].state==="won"))continue;if(!R.joined[cid]&&!(R.joinPend&&R.joinPend.cid===cid)&&!R.offers.includes(cid)&&!R.joinQ.includes(cid)&&!(R.joinGone||{})[cid]&&(m[cid]||0)>=RG_JOIN_MIN)R.joinQ.push(cid);}
     R.joinQ.sort((a,b)=>(m[b]||0)-(m[a]||0));
     if(R.joinQ.length&&now>=(R.joinNext||0)){const cid=R.joinQ.shift(),r=RG_ORDER.find(x=>RG_CID0[x]===cid);R.offers.push(cid);R.joinNext=now+RG_JOIN_GAP;
-      addMail(G,{kind:"letter",tone:"region",from:`${RG[r].champ} · Champion of ${RG[r].name}`,title:`Application from ${RG[r].champ}`,body:RG_JOIN[cid].letter+`
+      rgSay(G,r,`Application from ${RG[r].champ}`,RG_JOIN[cid].letter+`
 
-(Contract: signing fee ${fmt(RG_JOIN_FEE)} · wage ${fmt(RG_JOIN_WAGE)}/week · trait: ${RG_TRAIT[cid].name} · she will need rebuilding: 5 levels lower, slightly lower stats · see the contract on the Camp page › Coaches & Fighters)`});}},
+(Contract: signing fee ${fmt(RG_JOIN_FEE)} · wage ${fmt(RG_JOIN_WAGE)}/week · trait: ${RG_TRAIT[cid].name} · she will need rebuilding: 5 levels lower, slightly lower stats · see the contract on the Camp page › Coaches & Fighters)`);}},
   joinOk(G,cid){const R=G.region;if(!R.offers||!R.offers.includes(cid)||(R.joined&&R.joined[cid]))return "No such contract";if(R.joinPend)return "Wait for the one who already said yes to move in first";{const r=RG_ORDER.find(x=>RG_CID0[x]===cid);if(rgEd(G)>=2&&!(R.nc&&R.nc[r])&&R.champ[r]&&R.champ[r].state!=="won")return "She is defending her regional title · win this edition's cup first";}
     if(this.joinRooms(G)>=dormRooms(G))return `Rooms full (${dormRooms(G)} rooms) · upgrade the dorm first`;if(G.cash<RG_JOIN_FEE)return `Not enough cash · signing fee ${fmt(RG_JOIN_FEE)}`;return "";},
   joinAccept(G,cid){const why=this.joinOk(G,cid);if(why){toast(why);return;}const R=G.region;G.cash-=RG_JOIN_FEE;R.offers=R.offers.filter(x=>x!==cid);R.joinPend={cid,abs:gameWeek(G)+1};

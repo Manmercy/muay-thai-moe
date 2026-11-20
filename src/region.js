@@ -925,6 +925,11 @@ function rgClose(G){const R=G.region,fah=rgIn(G,"fah"),rin=rgIn(G,"rin"),kati=rg
    {n:"coach",t:"เขามั่นใจขนาดนั้นเชียว ถึงกล้าเขียนข้อนี้ไว้"}]),
  {n:"coach",t:"ทุ่มได้ ล็อกได้… พวกเราไม่เคยซ้อมเรื่องพวกนี้เลยสักวัน"},
  {n:"coach",t:"มีเวลาสามสัปดาห์ ซ้อมรับมือไว้ให้ครบทุกแบบ ถึงคืนนั้นค่อยเลือกทีละนัดว่าจะรับมือยังไง การ์ดอยู่ในกล่องจดหมายแล้ว"}];}
+/* v1.91.75 (Man): the original champions have phones — personal words go to her chat; a new champion of a later edition still writes letters */
+function rgSay(G,r,title,body){const R=G.region,cid=RG_CID0[r];if(G.F[cid]&&!(R.nc&&R.nc[r])&&typeof chatNote==="function"){chatNote(G,cid,body);return;}
+  addMail(G,{kind:"letter",tone:"region",from:`${RG[r].champ} · แชมป์${RG[r].name}`,title,body});}
+const RG_VISITMSG={baibua:"ก่อนนัดหน้า หนูขอแวะไปค่ายศิริชัยหน่อยได้ไหมเจ้า เอาข้าวต้มมัดไปฝากด้วย",tabtim:"นัดหน้ายังบ่ทันมาฮอด ทับทิมขอแวะไปเบิ่งค่ายก่อนเด้อ!",alicia:"ก่อนนัดสอง ฉันจะแวะไปที่ค่ายนะคะ ไม่ใช่ไปถ่ายคอนเทนต์ แค่ผ่านทางเฉย ๆ",chaba:"…จะแวะไปค่าย ก่อนนัดสอง"};
+function rgOrg(G,r,title,body){addMail(G,{kind:"letter",tone:"region",from:"ฝ่ายจัดการแข่งขัน ศึกชิงเจ้าสี่ภาค",title,body});}
 const RG_FPREP={sprawl:{n:"กันทุ่ม",d:"ถีบขาหนีตอนโดนพุ่งจับ และกดคอตีเข่าสวนได้บ่อยขึ้น"},escape:{n:"หนีล็อก",d:"ดันตัวลุกจากพื้นและหลุดจากล็อกได้ดีขึ้น"},strike:{n:"ยืนแลก",d:"ไม่สนการทุ่ม ซ้อมออกอาวุธให้แม่นขึ้น จบก่อนโดนดึงลงพื้น"}};
 /* v1.91.57 (Man): the Naka League talk a little before and after their bouts — an introduction the first night, a jab after; Ladda barely speaks */
 const NL_SAY={
@@ -1044,17 +1049,17 @@ const REGION={
       rgTouch(G,RG_CID[r]);const T=R.trip,abs=T&&T.bid===p.bid?T.abs:gameWeek(G);
       if(p.res==="W"){R.belts[r]=R.belts[r]||{};R.belts[r][dest]=1;G.log=G.log||[];G.log.push(`${G.F[p.a]?G.F[p.a].name:""}คว้าเข็มขัดจังหวัด${D.name}!`);if(G.F[p.a])recordHonor(G,"rgbelt",p.a,G.F[p.a].div,G.week,dest); /* v1.91.14 (Man): a province belt gets the same ceremony as the main game */
         if(this.beltCount(G,r)===4&&R.champ[r].state==="locked"){R.champ[r].state="letter";this.champFighter(G,r);
-          addMail(G,{kind:"letter",tone:"region",from:`${RG[r].champ} · แชมป์${RG[r].name}`,title:`${RG_TITLE[r]}: ครบสี่เข็มขัดแล้ว`,body:RG_CH[r].letter+((t=>t?`\n\n(${t})`:"")(this.tipText(G,r)))});}}
+          rgOrg(G,r,`${RG_TITLE[r]}: ครบสี่เข็มขัดแล้ว`,`เรียน ผู้จัดการค่ายศิริชัย\n\nค่ายของท่านครบสี่เข็มขัดของ${RG[r].name}แล้ว ${RG[r].champ} แชมป์${RG[r].name} ขอท้าชิงแชมป์ภาค ชนะ 2 ใน 3 นัด ผู้จัดออกค่าเดินทาง\n\nเลือกนักมวยได้ที่หน้าไฟต์ › ศึกชิงเจ้าสี่ภาค`+((t=>t?`\n\n(${t})`:"")(this.tipText(G,r))));rgSay(G,r,`${RG_TITLE[r]}: ครบสี่เข็มขัดแล้ว`,RG_CH[r].letter);}}
       R.trip=null;R.nextTripAbs=Math.max(R.nextTripAbs||0,abs+RG_TRIP_GAP);(R.gc=R.gc||[]).push(p.b);}},
   /* weekly: post-cup letters and champion chats */
   letters(G){const R=G.region,now=gameWeek(G);R.postDone=R.postDone||{};
-    for(const r of RG_ORDER){if(R.post&&R.post[r]!=null&&now>=R.post[r]&&!R.postDone[r]&&RG_POST[r]){R.postDone[r]=1;addMail(G,{kind:"letter",tone:"region",from:`${RG[r].champ} · แชมป์${RG[r].name}`,title:`จดหมายจาก${RG[r].champ}`,body:RG_POST[r]});}
+    for(const r of RG_ORDER){if(R.post&&R.post[r]!=null&&now>=R.post[r]&&!R.postDone[r]&&RG_POST[r]){R.postDone[r]=1;rgSay(G,r,`จดหมายจาก${RG[r].champ}`,RG_POST[r]);}
       const cid=RG_CID0[r],c=R.champ[r]||{},open=RG_CHAT[cid]&&G.F[cid]&&((R.joined&&R.joined[cid])||c.visit==="done"||c.state==="won"||rgEd(G)>=2);G.chatIn=G.chatIn||{};
       if(open&&!G.chatIn[cid]&&now-((G.chatLastAbs||{})[cid]??-999)>=2&&mulberry32((G.seed||1)+now*31+cid.length)()<.45)G.chatIn[cid]=G.week;}},
   fade(G){const R=G.region,now=gameWeek(G),m=R.meet||{};R.meetT=R.meetT||{};R.miss=R.miss||{};
     for(const r of RG_ORDER){const cid=RG_CID0[r];if(!(m[cid]>0))continue;if(R.meetT[cid]==null){R.meetT[cid]=now;continue;}if(R.joined&&R.joined[cid])continue;
       const gap=now-R.meetT[cid];
-      if(gap>=3&&!R.miss[cid]){R.miss[cid]=1;addMail(G,{kind:"letter",tone:"region",from:`${RG[r].champ} · แชมป์${RG[r].name}`,title:`จดหมายจาก${RG[r].champ}`,body:RG_MISS[r]});}
+      if(gap>=3&&!R.miss[cid]){R.miss[cid]=1;rgSay(G,r,`จดหมายจาก${RG[r].champ}`,RG_MISS[r]);}
       if(gap>=4){const pk=(R.meetPk||{})[cid]||m[cid],fl=RG_FLOOR.find(t=>pk>=t)||0;if(m[cid]>fl)m[cid]=Math.max(fl,Math.round((m[cid]-.25)*100)/100);}}},
   weekly(G){const R=G.region;rgApply(G);this.flush(G);this.seriesWeekly(G);this.fade(G);this.letters(G);this.finalWeekly(G);this.joinWeekly(G);this.joinPerks(G);this.loopWeekly(G);const T=R.trip;
     /* a trip whose bout vanished (the week went by, the booking was dropped) is let go */
@@ -1172,7 +1177,7 @@ const REGION={
       G.log.push(`${RG_TITLE[r]}: ${RG[r].champ} ป้องกันแชมป์ไว้ได้ ${c.l}-${c.w}`);return;}
     R.just={r,kind:"bout",res:p.res,w:c.w,l:c.l,n:c.n};const s=this.schedule(G,r,abs+2); /* v1.90.17 (Man): bouts two weeks apart */
     /* between bout 1 and bout 2 the champion drops by the camp (round 4) — missed if bout 2 comes first */
-    if(c.n===1&&!c.visit){c.visit="due";addMail(G,{kind:"letter",tone:"region",from:`${RG[r].champ} · แชมป์${RG[r].name}`,title:`${RG[r].champ}จะแวะมาที่ค่าย`,body:`${RG[r].champ}ฝากข่าวมาว่าจะแวะมาเยี่ยมค่ายก่อนนัดที่ 2\n\nไปต้อนรับได้ที่หน้าไฟต์ › ศึกชิงเจ้าสี่ภาค`});}
+    if(c.n===1&&!c.visit){c.visit="due";rgSay(G,r,`${RG[r].champ}จะแวะมาที่ค่าย`,(RG_VISITMSG[RG_CID0[r]]&&!(G.region.nc&&G.region.nc[r])?RG_VISITMSG[RG_CID0[r]]:`${RG[r].champ}ฝากข่าวมาว่าจะแวะมาเยี่ยมค่ายก่อนนัดที่ 2`)+`\n\n(ไปต้อนรับได้ที่หน้าไฟต์ › ศึกชิงเจ้าสี่ภาค · ก่อนนัดที่ 2)`);}
     else if(c.n>=2&&c.visit==="due")c.visit="missed";
     G.log.push(`${RG_TITLE[r]} นัดที่ ${c.n}: ${p.res==="W"?"ชนะ":p.res==="L"?"แพ้":"เสมอ"} · สกอร์ ${c.w}-${c.l}${s?` · นัดต่อไปสัปดาห์ ${s.wk}`:""}`);},
   /* weekly: a hurt fighter gets the bout moved, a dropped bout is rescheduled, a lost series sends a new letter later */
@@ -1181,7 +1186,7 @@ const REGION={
       addMail(G,{kind:"letter",tone:"naka",from:"นาคาเอเนอร์จี้ดริงค์",title:"ศึกชิงเจ้าสี่ภาค: เหลือเวลาอีกราวครึ่งปี",body:"เรียน ผู้จัดการค่ายศิริชัย\n\nศึกชิงเจ้าสี่ภาคครั้งนี้จะปิดฉากในอีกราวครึ่งปี หลังจากนั้นจะไม่มีจดหมายท้าแชมป์ภาคครั้งใหม่ นัดที่ยังชกค้างอยู่จะชกต่อจนจบ แล้วจึงเข้าสู่พิธีปิดที่กรุงเทพฯ\n\nถ้วยที่ยังเหลือ ขอให้รีบเก็บก่อนหมดเวลา\n\nนาคาเอเนอร์จี้ดริงค์ · ดื่มนาคา ชกไม่มีหมด!"});}}
     for(const r of RG_ORDER){const c=R.champ[r];if(!c)continue;
       if(c.state==="lost"&&now>=(c.letterAbs||0)&&!this.overTime(G)){c.state="letter";c.fid=null;c.w=0;c.l=0;c.n=0;
-        addMail(G,{kind:"letter",tone:"region",from:`${RG[r].champ} · แชมป์${RG[r].name}`,title:`${RG_TITLE[r]}: คำท้าครั้งใหม่`,body:RG_CH[r].again+((t=>t?`\n\n(${t})`:"")(this.tipText(G,r)))});continue;}
+        rgOrg(G,r,`${RG_TITLE[r]}: คำท้าครั้งใหม่`,`เรียน ผู้จัดการค่ายศิริชัย\n\n${RG[r].champ} แชมป์${RG[r].name} เปิดรับคำท้าชิงแชมป์ภาคอีกครั้ง ชนะ 2 ใน 3 นัด · เลือกนักมวยได้ที่หน้าไฟต์ › ศึกชิงเจ้าสี่ภาค`+((t=>t?`\n\n(${t})`:"")(this.tipText(G,r))));rgSay(G,r,`${RG_TITLE[r]}: คำท้าครั้งใหม่`,RG_CH[r].again);continue;}
       if(c.state!=="series")continue;const me=G.F[c.fid];
       if(!me||me.camp!=="player"){G.bookings=G.bookings.filter(b=>!(c.next&&b.id===c.next.bid));Object.assign(c,{state:"letter",fid:null,w:0,l:0,n:0,next:null});continue;}
       const x=c.next;
@@ -1191,8 +1196,7 @@ const REGION={
       if(x.abs===now&&me.injury>0){G.bookings=G.bookings.filter(b=>b.id!==x.bid);this.postpone(G,r,now+me.injury+1,`${me.name}ยังเจ็บอยู่`);continue;}
       this.ensureBooking(G,r);}},
   postpone(G,r,from,why){const c=G.region.champ[r];c.next=null;const s=this.schedule(G,r,from);
-    addMail(G,{kind:"letter",tone:"region",from:`${RG[r].champ} · แชมป์${RG[r].name}`,title:`เลื่อนนัด: ${RG_TITLE[r]}`,
-      body:`${why} · ผู้จัดเลื่อนนัดที่ ${(c.n||0)+1}${s?` ไปเป็นสัปดาห์ ${s.wk}${s.season!==(G.season||1)?` (ปีหน้า)`:""}`:""}\n\n${RG_CH[r].wait}`});},
+    rgOrg(G,r,`เลื่อนนัด: ${RG_TITLE[r]}`,`${why} · ผู้จัดเลื่อนนัดที่ ${(c.n||0)+1}${s?` ไปเป็นสัปดาห์ ${s.wk}${s.season!==(G.season||1)?` (ปีหน้า)`:""}`:""}`);rgSay(G,r,`เลื่อนนัด: ${RG_TITLE[r]}`,RG_CH[r].wait);},
   /* the championship trip: drive (paid by the sponsor) → the champion before the bell → the bout → cup or hotel → home */
   seriesTrip(b,done){const r=b.region.r,c=G.region.champ[r],dest=RG[r].fin;
     if(!c||!ROAD_DEST[dest]||typeof ROAD==="undefined"){openFight(b,done);return;}
@@ -1596,7 +1600,7 @@ Object.assign(REGION,{
     const m=R.meet||{};for(const r of RG_ORDER){const cid=RG_CID0[r];if(rgEd(G)>=2&&!(R.nc&&R.nc[r])&&!(R.champ[r]&&R.champ[r].state==="won"))continue;if(!R.joined[cid]&&!(R.joinPend&&R.joinPend.cid===cid)&&!R.offers.includes(cid)&&!R.joinQ.includes(cid)&&!(R.joinGone||{})[cid]&&(m[cid]||0)>=RG_JOIN_MIN)R.joinQ.push(cid);}
     R.joinQ.sort((a,b)=>(m[b]||0)-(m[a]||0));
     if(R.joinQ.length&&now>=(R.joinNext||0)){const cid=R.joinQ.shift(),r=RG_ORDER.find(x=>RG_CID0[x]===cid);R.offers.push(cid);R.joinNext=now+RG_JOIN_GAP;
-      addMail(G,{kind:"letter",tone:"region",from:`${RG[r].champ} · แชมป์${RG[r].name}`,title:`ใบสมัครจาก${RG[r].champ}`,body:RG_JOIN[cid].letter+`\n\n(สัญญา: ค่าเซ็น ${fmt(RG_JOIN_FEE)} · ค่าจ้าง ${fmt(RG_JOIN_WAGE)}/สัปดาห์ · ลักษณะพิเศษ: ${RG_TRAIT[cid].name} · ย้ายมาแล้วต้องปั้นใหม่: เลเวลลดลง 5 ค่าพลังลดลงเล็กน้อย · ดูสัญญาที่หน้าค่าย › ครู & นักมวย)`});}},
+      rgSay(G,r,`ใบสมัครจาก${RG[r].champ}`,RG_JOIN[cid].letter+`\n\n(สัญญา: ค่าเซ็น ${fmt(RG_JOIN_FEE)} · ค่าจ้าง ${fmt(RG_JOIN_WAGE)}/สัปดาห์ · ลักษณะพิเศษ: ${RG_TRAIT[cid].name} · ย้ายมาแล้วต้องปั้นใหม่: เลเวลลดลง 5 ค่าพลังลดลงเล็กน้อย · ดูสัญญาที่หน้าค่าย › ครู & นักมวย)`);}},
   joinOk(G,cid){const R=G.region;if(!R.offers||!R.offers.includes(cid)||(R.joined&&R.joined[cid]))return "ไม่มีสัญญานี้";if(R.joinPend)return "รอคนที่ตอบรับไปก่อนหน้าย้ายมาก่อน";{const r=RG_ORDER.find(x=>RG_CID0[x]===cid);if(rgEd(G)>=2&&!(R.nc&&R.nc[r])&&R.champ[r]&&R.champ[r].state!=="won")return "เธอกำลังป้องกันแชมป์ภาค · ชนะถ้วยครั้งนี้ก่อน";}
     if(this.joinRooms(G)>=dormRooms(G))return `ห้องพักเต็ม (${dormRooms(G)} ห้อง) · อัปเกรดหอพักก่อน`;if(G.cash<RG_JOIN_FEE)return `เงินไม่พอ · ค่าเซ็น ${fmt(RG_JOIN_FEE)}`;return "";},
   joinAccept(G,cid){const why=this.joinOk(G,cid);if(why){toast(why);return;}const R=G.region;G.cash-=RG_JOIN_FEE;R.offers=R.offers.filter(x=>x!==cid);R.joinPend={cid,abs:gameWeek(G)+1};
