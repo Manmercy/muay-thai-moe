@@ -2340,3 +2340,20 @@ div.mdelask{margin:2px 0 8px;padding:8px;box-shadow:inset 0 0 0 2px var(--line);
 /* v1.91.78 souvenir bag */
 .souvbag{display:grid;gap:6px}.sv-item{display:flex;justify-content:space-between;align-items:center;gap:.5rem;padding:.4rem .5rem;background:rgba(0,0,0,.15);box-shadow:inset 0 0 0 1px #3d2f4a}.sv-item span{display:grid}.sv-item small{opacity:.75}
 .sv-who{display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:6px}.sv-pc{display:grid;justify-items:center;gap:2px;padding:.4rem;background:#2a1f33;color:inherit;border:0;box-shadow:inset 0 0 0 2px #3d2f4a;cursor:pointer}.sv-pc:disabled{opacity:.45}.sv-pc small{opacity:.75;font-size:.72rem}.souvn{background:#c8283c;color:#fff;padding:0 .3rem;font-size:.7rem}
+
+/* v1.91.80 (Man): pre-fight compare — estimated numbers show as a range on a hatched bar */
+.pcr{grid-template-columns:34px 1fr 64px 1fr 46px}
+.pcr b.rng{font-size:12px;color:var(--mut,#b9b0c9);white-space:nowrap}
+.pb.est::after{background:repeating-linear-gradient(135deg,rgba(74,144,226,.75) 0 4px,rgba(74,144,226,.3) 4px 8px)!important}
+.pcmp .mutt{font-size:11.5px;text-align:center}
+
+/* v1.91.80: where Coach Daeng's read comes from, and his notes in the fight info */
+.pill.isrc{font-size:10.5px;padding:1px 6px;vertical-align:middle}.pill.isrc.lv0{opacity:.75}.pill.isrc.lv2{background:var(--blue,#4a90e2);color:#fff}
+.ctip.cintel span{display:grid;gap:3px}.ctip.cintel i{font-style:normal;font-size:13px}
+.trk .trnote{display:block;font-style:normal;opacity:.7;font-size:11px}
+/* v1.91.80: Rin's tape analysis */
+.rinbox{margin:10px 0;padding:10px 12px;background:rgba(106,168,255,.08);box-shadow:inset 3px 0 0 #6aa8ff}
+.rinbox b{font-size:13px;color:#9cc4ff}.rinbox p{margin:4px 0 0;font-size:13px}
+.rinsvg{display:block;width:100%;height:auto;margin:6px 0 2px}
+.rinleg{display:flex;gap:10px;flex-wrap:wrap;font-size:11.5px}.rinleg .lg1::before,.rinleg .lg2::before{content:"";display:inline-block;width:12px;height:3px;margin-right:4px;vertical-align:middle;background:#f5cf4f}.rinleg .lg2::before{background:#6aa8ff}.rinleg .mutt{margin-left:auto;opacity:.7}
+.tquip{display:block;font-size:12px;opacity:.8;margin-top:4px}

@@ -373,7 +373,7 @@ const TRAITS={
 let TRV={flowAtk:.95,flowDef:.85,wits:.7,witsHp:45,eyeDef:1.05,eyeCtr:1.3,lib:1.1,libHit:1.08,furyHit:.15,furyDmg:.2,rockAtk:.95,rockDef:.9,rockPts:.6};
 const traitOf=f=>{const L=f&&TRAITS[f.id];if(!L)return null;return L.find(t=>t.id===f.trait)?f.trait:L[0].id;};
 /* v1.91.45 (Man): hidden power has 10 levels, 5 skill points each — Lv.3 = the old full strength, then a little more each level (Lv.10 = 135%). Old saves start at Lv.1. Rivals (not in our camp) fight at the old strength */
-const TR_MAX=10,TR_COST=5,TR_K=[.6,.8,1,1.05,1.1,1.15,1.2,1.25,1.3,1.35];
+const TR_MAX=10,TR_COST=5,TR_K=[.6,.8,1,1.1,1.2,1.3,1.4,1.5,1.6,1.7]; /* v1.91.80 (Man): past Lv.3 each level adds 10% (was 5%) — Lv.10 = 170% — so points there are worth about as much as on moves */
 const traitLv=f=>clamp(Math.round((f&&f.trLv)||1),1,TR_MAX);
 const traitK=f=>!f||f.camp!=="player"?1:TR_K[traitLv(f)-1];
 const trm=(m,S)=>1+(m-1)*(S&&S.trk!=null?S.trk:1);
@@ -404,6 +404,10 @@ const hasTree=fid=>!!(SKILLS[fid]&&SKILLS[fid][0]&&SKILLS[fid][0].line!=null);
 const SP_PER_LV=f=>hasTree(f.id)?3:1;
 /* v1.91.73 (Man): a girl who levelled outside our camp (rival/NPC weeks, Ploy's Lv.5 and Fah's Lv.3 start) never got her skill points —
    make sure every skill-tree fighter has earned at least 3 per level beyond Lv.1 (points she already has or spent are kept) */
+/* v1.91.80 (Man): every 4 weeks a light record of each opponent's numbers (ovr, punch, kick, knee/elbow, guard, endurance x10; 14 points ≈ a year) — Rin reads it with a tape */
+function oppRow(a){return [ovr(a),a.punch,a.kick,(a.knee+a.elbow)/2,(a.guard+a.counter)/2,(a.stamina+a.dur)/2].map(x=>Math.round(x*10));}
+function oppHistTick(G,force){const w=gameWeek(G);if(w%4&&!force)return;G.oppHist=G.oppHist||{};for(const f of Object.values(G.F)){if(f.camp==="player"||!f.a)continue;
+  const H=G.oppHist[f.id]=G.oppHist[f.id]||[];if(H.length&&H[H.length-1][0]===w)continue;H.push([w,...oppRow(f.a)]);if(H.length>14)H.splice(0,H.length-14);}}
 function spFloor(f){if(!f||!hasTree(f.id))return 0;const need=SP_PER_LV(f)*Math.max(0,(f.lvl||1)-1),have=(f.sp||0)+(typeof skPointsSpent==="function"?skPointsSpent(f):0);
   if(have>=need)return 0;f.sp=(f.sp||0)+(need-have);return need-have;}
 // thresholds are written in "weeks of focused training" and converted with each fighter's measured growth (8 / 14 weeks of the best programme)
@@ -1075,7 +1079,7 @@ function fixSave(G){/* v1.91.42: a card counts as read only if its story was eve
   if(!G.snubV){G.snub={};G.declineReason={};G.snubV=2;}
   if(G.dmSeenSeason==null){const played=G.dm&&G.dm.wk===G.week;G.dmSeen=(G.season||1)>1?{}:G.dmSeen||{};if(played)G.dmSeen[G.week]=1;G.dmSeenSeason=G.season||1;}
   syncFighterAges(G);
-if(G.F)for(const id in G.F){const f=G.F[id];if(f&&hasTree(id)&&!f.spv){f.sp=(f.sp||0)+2*Math.max(0,(f.lvl||1)-1);f.spv=2;}if(f)spFloor(f);}G.fac=G.fac||{};for(const k of Object.keys(FACILITIES))G.fac[k]=G.fac[k]||0;G.fac.daeng=G.fac.daeng||1;
+if(G.F)for(const id in G.F){const f=G.F[id];if(f&&hasTree(id)&&!f.spv){f.sp=(f.sp||0)+2*Math.max(0,(f.lvl||1)-1);f.spv=2;}if(f)spFloor(f);}if(!G.oppHist&&G.F)oppHistTick(G,true); /* v1.91.80: start the record */G.fac=G.fac||{};for(const k of Object.keys(FACILITIES))G.fac[k]=G.fac[k]||0;G.fac.daeng=G.fac.daeng||1;
   if(!G.staff){G.staff=["nok","paeng"].slice(0,G.fac.assistants||0);}G.fac.assistants=G.staff.length;
   if(G.stu==null)G.stu=Math.min(studentCap(G),studentDemand(G));G.mail=G.mail||[];G.cal=G.cal||[];if((G.season||1)>=2&&(!G.yt||G.yt.season!==(G.season||1))&&G.week<=3)pickYearTheme(G);
   if(!Array.isArray(G.honors)){G.honors=[];for(const t of G.titles||[])for(const [div,id] of Object.entries(t.champ||{}))if(G.F[id]?.camp==="player")G.honors.push({key:`${t.season}:province:${div}`,season:t.season,week:49,id,div,kind:"province"});
@@ -1368,7 +1372,8 @@ const TRICK_KEYS=["punch","kick","knee","elbow","clinch","counter","guard","foot
 const attrName=k=>(ATTRS.find(x=>x[0]===k)||[k,k])[1];
 const topWeapon=a=>["punch","kick","knee","elbow"].sort((x,y)=>a[y]-a[x])[0];
 function oppRemember(G,me,op,res,type){if(!op||op.camp==="player"||op.camp==="quest"||op.div==="X")return;G.oppBook=G.oppBook||{};
-  const bk=G.oppBook[op.id]=G.oppBook[op.id]||{n:0};bk.n++;bk.last={season:G.season||1,wk:G.week,abs:gameWeek(G),res,type:type||"",top:topWeapon(op.a),cp:counterPreset(op),ovr:+ovr(op.a).toFixed(1),vs:me.id};bk.trick=null;
+  const bk=G.oppBook[op.id]=G.oppBook[op.id]||{n:0};bk.n++;bk.last={season:G.season||1,wk:G.week,abs:gameWeek(G),res,type:type||"",top:topWeapon(op.a),cp:counterPreset(op),ovr:+ovr(op.a).toFixed(1),vs:me.id,
+    v:[op.a.punch,op.a.kick,(op.a.knee+op.a.elbow)/2,(op.a.guard+op.a.counter)/2,(op.a.stamina+op.a.dur)/2].map(x=>Math.round(x*10)/10)}; /* v1.91.80: what she looked like in the ring (pre-fight compare, level 1) */bk.trick=null;
   const rng=mulberry32(G.seed+gameWeek(G)*13+stableHash(op.id));if(rng()<(res==="W"?.55:.3)){const top=bk.last.top,mine=topWeapon(me.a);
     const pool=TRICK_KEYS.filter(k=>k!==top&&op.a[k]<19.5);const k=res==="W"&&rng()<.5?(mine==="kick"||mine==="punch"?"guard":"counter"):pool[Math.floor(rng()*pool.length)];
     if(k&&op.a[k]<19.5){op.a[k]=Math.min(20,op.a[k]+.9);bk.trick={k,abs:gameWeek(G)};}}}
@@ -1462,10 +1467,12 @@ function weekTrain(G){
   /* v1.89.27: rivals re-check our camp mid-year and late-year too (the off-season check is in lateSeasonOpposition) */
   if((G.week===24||G.week===40)&&(G.season||1)>=2){G.flags=G.flags||{};const k=(G.season||1)+"_"+G.week;if(G.flags.rcWk!==k){G.flags.rcWk=k;const mv=rivalCatchUp(G);
     if(mv.length)G.lvNews=(G.lvNews||[]).concat([`${mv.slice(0,3).join(" · ")} เร่งซ้อมหนัก ตามให้ทันค่ายศิริชัย`]).slice(-3);}}
-  for(const f of roster(G)){if(typeof isAway==="function"&&isAway(G,f.id)){/* v1.89.11: she left camp for a while — no training, just rest */f.gains={};f.xpGain=0;f.fatigue=clamp(f.fatigue-10,0,100);if(f.injury>0)f.injury--;continue;}trainWeek(G,f,rng);}
+  for(const f of roster(G)){if(f.id==="rin"&&G.rinSpyAbs===gameWeek(G)){/* v1.91.80: Rin was out spying this week */f.gains={};f.xpGain=0;f.fatigue=clamp(f.fatigue-5,0,100);if(f.injury>0)f.injury--;continue;}
+    if(typeof isAway==="function"&&isAway(G,f.id)){/* v1.89.11: she left camp for a while — no training, just rest */f.gains={};f.xpGain=0;f.fatigue=clamp(f.fatigue-10,0,100);if(f.injury>0)f.injury--;continue;}trainWeek(G,f,rng);}
   // v1.15: Ploy's raw talent makes her near-untouchable early; the edge fades by the district round
   if(G.F.ploy)G.F.ploy.aura=ployAura(G.week,G);
   for(const f of Object.values(G.F))spFloor(f); /* v1.91.73 */
+  oppHistTick(G); /* v1.91.80 */
   for(const f of Object.values(G.F)){if(f.camp==="player")continue;
     if(f.injury>0){f.injury--;}f.fatigue=clamp(f.fatigue-8,0,100);
     // v1.23: the two stars coast until someone beats them — a loss lights a fire (surge) that carries them to the final
