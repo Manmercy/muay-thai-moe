@@ -1060,6 +1060,7 @@ function rgCup2(G){const R=G.region,rin=rgIn(G,"rin");return [
  {n:"npc",who:"คุณเกริก",t:(R.cups||[]).length>=2?"ได้ถ้วยสองใบในศึกเดียว ค่ายเล็กแบบนี้ผมไม่เห็นมานานแล้วครับ":"ค่ายเล็ก ๆ จากเชียงใหม่ ชกถึงระดับภาคได้ ผมไม่เห็นมานานแล้วครับ"},
  {n:"npc",who:"คุณเกริก",t:"ผมเองก็เคยชกครับ ทีมชาติ ปีนั้นตั๋วโอลิมปิกอยู่ในมือแล้ว"},
  {n:"npc",who:"คุณเกริก",t:"สามสัปดาห์ก่อนเดินทาง รถตู้ของทีมเสียหลักกลางถนน เข่าผมแตกสามชิ้น หมอบอกว่าเดินได้ก็บุญแล้ว"},
+ {n:"npc",who:"คุณเกริก",t:"คืนนั้นผมเสียมากกว่าเข่าครับ… แต่เรื่องนั้นไม่ใช่เรื่องที่จะเล่าบนโต๊ะอาหาร"},
  {n:"npc",who:"คุณเกริก",t:"ไม่มีใครผิดครับ ฝนตก ถนนลื่น… มันคือโชค แค่นั้นเอง"},
  {n:"npc",who:"คุณเกริก",t:"ตั้งแต่วันนั้นผมสัญญากับตัวเองว่า จะไม่ยอมให้โชคตัดสินชีวิตนักมวยคนไหนอีก เงิน ข้อมูล วิทยาศาสตร์ ผมจะคุมทุกอย่างเอง"},
  {n:"nar",t:"เขาเลื่อนแฟ้มสีเขียวทองมาตรงหน้า บนปกเขียนว่า \"สัญญาพันธมิตร\""},
@@ -1104,57 +1105,67 @@ function rgCup3(G){const R=G.region,rin=rgIn(G,"rin"),ploy=rgIn(G,"ploy"),kati=r
 const RG_CLOSE_SAY={baibua:"ค่ายเล็กก็ยืนได้เจ้า หนูเห็นมากับตา ค่ายศิริชัยไงเจ้า",tabtim:"ค่ายศิริชัยบ่มีเงินมาก แต่ชกให้กันจนสุดใจ ทับทิมเห็นมาแล้วเด้อ",
  alicia:"ฉันอยากชกแบบค่ายศิริชัยค่ะ ที่ที่ไม่มีใครขอให้ฉันยิ้มให้กล้อง",chaba:"…อยากอยู่ค่ายที่ซ่อมรั้วกันเอง"};
 /* after the fourth cup (or once the tournament has run its course): Naka League, the refusals, Ladda */
-function rgClose(G){const R=G.region,fah=rgIn(G,"fah"),rin=rgIn(G,"rin");
+function rgClose(G){const R=G.region,fah=rgIn(G,"fah"),rin=rgIn(G,"rin"),kati=rgIn(G,"kati");
  const fav=["baibua","tabtim","alicia","chaba"].sort((a,b)=>((R.meet||{})[b]||0)-((R.meet||{})[a]||0))[0];
+ const four=["baibua","tabtim","alicia","chaba"].map(id=>({id,l:"fight",f:"happy"})),tense=["baibua","tabtim","alicia","chaba"].map((id,i)=>({id,l:"fight",f:i%2?"angry":"sad"}));
+ /* v1.91.74 (Man): a real closing ceremony first (many guests, ceremony talk), Krerk as the host who backs the provincial and regional rings —
+    no signing on stage; the four champions walk over afterwards to say no, and Krerk hands it to Ladda. Tense, no smiling faces; the beatings are text only. */
  return [
- {n:"nar",bg:"closing_ceremony",show:[{id:"npc:krerk"}],t:"พิธีปิดศึกชิงเจ้าสี่ภาคจัดที่กรุงเทพฯ ห้องโถงเต็มไปด้วยไฟเขียวทอง บนเวทีมีโต๊ะยาว ปากกาทองวางเรียงไว้สี่ด้าม"},
- {n:"npc",who:"คุณเกริก",t:"ขอบคุณทุกค่ายครับ ศึกครั้งนี้ทำให้ผมมั่นใจเรื่องหนึ่ง มวยไทยต้องไปไกลกว่าเวทีงานวัด"},
- {n:"npc",who:"คุณเกริก",t:"ขอเปิดตัว… นาคาลีก! ลีกต่อสู้ครบวงจรแห่งแรกของประเทศ มวยไทย มวยสากล MMA ทุกศาสตร์บนเวทีเดียว"},
- {n:"npc",who:"คุณเกริก",t:"และนักสู้สี่คนแรกที่ผมอยากเชิญ คือแชมป์ทั้งสี่ภาคครับ เชิญขึ้นมาเซ็นสัญญาบนเวทีเลยครับ"},
- {n:"nar",show:[{id:"baibua"},{id:"tabtim"},{id:"alicia"},{id:"chaba"}],t:"ใบบัว ทับทิม อลิเซีย และชบาเดินขึ้นเวที แต่ไม่มีใครหยิบปากกา"},
- {n:"baibua",f:"sad",l:"fight",t:"ขอบคุณเจ้า… แต่หนูบ่เซ็นเจ้า ค่ายบัวท่าเสายังมีหนูอยู่"},
- {n:"tabtim",l:"fight",t:"ทับทิมกะบ่เซ็นเด้อ น้องชายทับทิมอ่านข้อสิบสี่ให้ฟังแล้ว"},
- {n:"alicia",l:"fight",t:"ฉันบอกไปแล้วว่าจะไม่เซ็นอะไรที่มีคำว่า \"ตลอดไป\" ค่ะ"},
- {n:"chaba",l:"fight",t:"…ม่ายเซ็น"},
- {n:fav,f:"happy",l:"fight",t:RG_CLOSE_SAY[fav]},
- fah?{n:"fah",f:"flustered",l:"casual",t:"ได้ยินไหมลุง! ไม่มีใครเอาลีกของลุงหรอก!"}:{n:"coach",t:"ได้ยินไหมคุณเกริก ไม่มีใครเอาลีกของคุณหรอก"},
- {n:"pailin",t:"และค่ายเวกเตอร์ขอถอนตัวจากการเป็นพันธมิตรนาคาลีก ตั้งแต่วินาทีนี้ค่ะ"},
- {n:"nar",show:[{id:"npc:krerk"}],t:"ทั้งห้องเงียบ ทุกสายตาหันไปที่คุณเกริก"},
- {n:"npc",who:"คุณเกริก",t:"…ไม่เป็นไรครับ งั้นให้ลูกสาวผมแนะนำตัวเองแทนก็แล้วกัน"},
- {n:"nar",show:[{id:"lada",l:"casual"}],t:"ผู้หญิงใส่ฮู้ดขาวเดินขึ้นเวทีจากมุมห้อง ฮู้ดยังคลุมครึ่งหน้า ปอยผมสีขาวปลายแดงโผล่ออกมาข้างแก้ม"},
- {n:"npc",who:"คุณเกริก",t:"ลดา… แสดงให้ทุกคนเห็นหน่อย ว่าเวทีงานวัดกับโลกจริงต่างกันแค่ไหน"},
- {n:"lada",l:"casual",t:"ลดา นาคา"},
- {n:"lada",l:"casual",t:"แชมป์สี่ภาค ขึ้นมาทีละคน ตรงนี้ เดี๋ยวนี้"},
- rin?{n:"rin",f:"surprised",l:"casual",t:"ผู้จัดการคะ อย่าให้พวกเธอขึ้น… นี่ไม่ใช่ไฟต์ ไม่มีกรรมการ ไม่มีหมอ"}:{n:"coach",t:"อย่าขึ้นไป! นั่นไม่ใช่ไฟต์ ไม่มีกรรมการ ไม่มีหมอ"},
- {n:"nar",t:"สายไปแล้ว ใบบัวก้าวลอดเชือกขึ้นไปก่อนใคร",cut:"ladda"},
- {n:"nar",show:[{id:"lada",l:"casual"}],t:"เวทีเงียบกริบ แชมป์สี่ภาคนอนอยู่คนละมุม เลือดซึมจากมุมปากลดาตรงที่ศอกใบบัวเฉียด เธอแตะมันด้วยปลายนิ้ว แล้วยิ้มเป็นครั้งแรก"},
- {n:"lada",l:"casual",t:"…สนุกดี"},
- {n:"nar",show:[{id:"baibua",l:"fight",f:"sad"},{id:"chaba",l:"fight",f:"sad"}],t:"ใบบัวไอจนตัวงอ ทับทิมกุมเข่า อลิเซียหายใจไม่ทัน ชบาพยายามลุกขึ้นเป็นครั้งที่สาม แล้วทรุดลงอีก",
+ {n:"nar",bg:"closing_ceremony",show:[],t:"พิธีปิดศึกชิงเจ้าสี่ภาค ห้องโถงใหญ่กลางกรุงเทพฯ แขกเต็มทุกโต๊ะ ทั้งผู้แทนการกีฬาจังหวัด นายสนามจากสี่ภาค ครูมวยรุ่นเก่า และค่ายที่เข้าร่วมทั้งหมด"},
+ {n:"npc",who:"พิธีกร",t:"ขอเสียงปรบมือให้แชมป์ทั้งสี่ภาคค่ะ! ภาคเหนือ ใบบัว · ภาคอีสาน ทับทิม · ภาคกลาง อลิเซีย · ภาคใต้ ชบา"},
+ {n:"nar",show:four,t:"ทั้งสี่คนขึ้นเวทีรับโล่เกียรติยศพร้อมกัน แสงแฟลชสว่างทั้งห้อง ครูมวยรุ่นเก่าลุกขึ้นปรบมือให้ทีละโต๊ะ"},
+ {n:"npc",who:"ผู้แทนการกีฬา",t:"มวยจังหวัดและมวยภาคคือรากของมวยไทยครับ ขอบคุณค่ายเล็กค่ายใหญ่ทุกค่าย และขอบคุณเจ้าภาพที่สนับสนุนเวทีภูมิภาคมาตลอดสามปี"},
+ {n:"npc",who:"คุณเกริก",t:"ผมเป็นแค่คนจ่ายค่าไฟให้เวทีครับ ส่วนคนที่ทำให้ศึกนี้มีความหมาย คือนักมวยกับครูมวยทุกคนในห้องนี้"},
+ {n:"npc",who:"คุณเกริก",t:"เวทีจังหวัดและเวทีภาคจะยังอยู่ นาคาจะสนับสนุนต่อทุกปีครับ ผมสัญญา"},
+ {n:"npc",who:"คุณเกริก",t:"แต่ผมมีความฝันของผมเองด้วย… นาคาลีก ลีกที่รวมนักสู้ที่แข็งแกร่งที่สุด ทุกศาสตร์ ไว้บนเวทีเดียว"},
+ {n:"npc",who:"คุณเกริก",t:"ผมเชิญแชมป์ทั้งสี่คนไว้แล้ว ไม่ต้องตอบบนเวทีนะครับ คืนนี้เป็นคืนของพวกเธอ"},
+ {n:"nar",show:[],t:"งานเลี้ยงดำเนินต่อไป จนห้องเริ่มบางตา"},
+ {n:"nar",show:tense,t:"แล้วแชมป์ทั้งสี่ก็เดินมาหยุดตรงหน้าโต๊ะของคุณเกริกพร้อมกัน ห้องที่ยังเหลือคนอยู่เงียบลงทีละโต๊ะ"},
+ {n:"baibua",f:"sad",l:"fight",t:"ขอบคุณที่ดูแลเวทีภาคมาตลอดเจ้า… แต่หนูขอไม่เข้าลีกเจ้า ค่ายบัวท่าเสายังมีหนูอยู่"},
+ {n:"tabtim",f:"sad",l:"fight",t:"ทับทิมกะขอบ่เข้าเด้อ น้องชายอ่านสัญญาข้อสิบสี่ให้ฟังแล้ว"},
+ {n:"alicia",f:"angry",l:"fight",t:"ฉันจะไม่เซ็นอะไรที่มีคำว่า \"ตลอดไป\" ค่ะ ไม่ว่าจะเป็นของใคร"},
+ {n:"chaba",f:"angry",l:"fight",t:"…ม่ายเข้า"},
+ {n:fav,f:"sad",l:"fight",t:RG_CLOSE_SAY[fav]},
+ {n:"nar",show:[{id:"npc:krerk"}],t:"คุณเกริกฟังจนจบโดยไม่ขัด แล้ววางแก้วลงบนโต๊ะเบา ๆ"},
+ {n:"npc",who:"คุณเกริก",t:"ผมเคารพการตัดสินใจครับ แต่ลีกของผมต้องแข็งที่สุด และคนจะเชื่อแบบนั้นได้ ก็ต้องเห็นกับตา"},
+ {n:"npc",who:"คุณเกริก",t:"ลดา"},
+ {n:"nar",show:[{id:"lada",l:"casual",f:"angry"}],t:"ผู้หญิงใส่ฮู้ดขาวลุกจากโต๊ะมุมห้อง ฮู้ดคลุมครึ่งหน้า ปอยผมขาวปลายแดงโผล่ข้างแก้ม เธอไม่มองพ่อ ไม่มองใคร"},
+ {n:"npc",who:"คุณเกริก",t:"จัดการ"},
+ {n:"lada",f:"angry",l:"casual",t:"…ขึ้นเวที ทีละคน"},
+ fah?{n:"fah",f:"surprised",l:"fight",t:"เดี๋ยวสิ! นี่มันงานเลี้ยงนะ!"}:{n:"coach",t:"เดี๋ยวก่อน! นี่มันงานเลี้ยง"},
+ rin?{n:"rin",f:"surprised",l:"fight",t:"ผู้จัดการคะ อย่าให้พวกเธอขึ้น… ไม่มีกรรมการ ไม่มีหมอ"}:{n:"coach",t:"อย่าขึ้นไป! ไม่มีกรรมการ ไม่มีหมอ"},
+ {n:"nar",show:[],t:"สายไปแล้ว ใบบัวถอดรองเท้า ลอดเชือกขึ้นไปก่อนใคร",cut:"ladda"},
+ {n:"nar",show:[],t:"เวทีเงียบกริบ แชมป์สี่ภาคนอนอยู่คนละมุม ใบบัวไอจนตัวงอ ทับทิมกุมเข่า อลิเซียหายใจไม่ทัน ชบาพยายามลุกเป็นครั้งที่สาม แล้วทรุดลงอีก"},
+ {n:"nar",show:[],t:"เลือดซึมจากมุมปากลดาตรงที่ศอกใบบัวเฉียด เธอแตะมันด้วยปลายนิ้ว มองนิ่ง ๆ เหมือนกำลังจดตัวเลข",
   choice:[{t:"วิ่งขึ้นเวทีไปพยุงแชมป์ลงมา",fx:G2=>{for(const c of ["baibua","tabtim","alicia","chaba"])rgMeet(G2,c,2);},then:[
-    {n:"nar",show:[{id:"baibua",l:"fight",f:"sad"}],t:"คุณลอดเชือกขึ้นไปพยุงใบบัว พาดแขนเธอไว้บนบ่า สาว ๆ ในค่ายตามขึ้นมาช่วยพยุงอีกสามคนลงจากเวที"},
-    {n:"baibua",f:"sad",l:"fight",t:"…ขอบคุณเจ้า หนูยังลุกไหวเจ้า… ยังไหว"}]},
+    {n:"nar",show:[],t:"คุณลอดเชือกขึ้นไปพยุงใบบัว พาดแขนเธอไว้บนบ่า สาว ๆ ในค่ายตามขึ้นมาช่วยพยุงอีกสามคนลงจากเวที"},
+    {n:"baibua",f:"sad",l:"fight",t:"…หนูยังลุกไหวเจ้า… ยังไหว"}]},
    {t:"ก้าวขึ้นไปยืนขวางหน้าลดา",fx:G2=>{rgMeet(G2,"chaba",3);for(const c of ["baibua","tabtim","alicia"])rgMeet(G2,c,1);R.closeFace=1;},then:[
-    {n:"nar",show:[{id:"lada",l:"casual"}],t:"คุณก้าวขึ้นไปยืนระหว่างลดากับชบา ลดาหันมามอง ตาสีแดงนิ่งสนิท"},
-    {n:"lada",l:"casual",t:"…คุณไม่ใช่นักมวย"},
-    {n:"lada",l:"casual",t:"แต่ไม่ถอยเหมือนกัน"},
+    {n:"nar",show:[{id:"lada",l:"casual",f:"angry"}],t:"คุณก้าวขึ้นไปยืนระหว่างลดากับชบา ลดาหันมามอง ตาสีแดงนิ่งสนิท"},
+    {n:"lada",f:"angry",l:"casual",t:"…คุณไม่ใช่นักมวย"},
+    {n:"lada",f:"angry",l:"casual",t:"แต่ไม่ถอยเหมือนกัน… ชื่ออะไร"},
     {n:"chaba",f:"sad",l:"fight",t:"…ไม่ต้อง ฉันลุกเองได้"}]},
    ...(fah?[{t:"คว้าแขนฟ้าไว้ ไม่ให้ขึ้นเวที",fx:G2=>{add(G2,"fah","trust",3);for(const c of ["baibua","tabtim","alicia","chaba"])rgMeet(G2,c,1);},then:[
-    {n:"fah",f:"angry",l:"casual",t:"ปล่อยฟ้า! ฟ้าจะขึ้นไปต่อยมันให้—"},
-    {n:"nar",t:"คุณไม่ปล่อย ฟ้าดึงสุดแรงอยู่สามที แล้วหยุด มือที่กำแน่นค่อย ๆ คลายลง"},
-    {n:"fah",f:"sad",l:"casual",t:"…ไม่ใช่วันนี้ใช่ไหม ฟ้ารู้ ฟ้ารู้แล้ว"}]}]:[])]},
- {n:"npc",who:"คุณเกริก",t:"เห็นไหมครับ ศึกชิงเจ้าสี่ภาคคือเวทีงานวัด นาคาลีกต่างหากคือโลกจริง ถ้าพวกเธอเซ็นสัญญาไว้ คืนนี้จะไม่มีใครต้องเจ็บ"},
+    {n:"fah",f:"angry",l:"fight",t:"ปล่อยฟ้า! ฟ้าจะขึ้นไปต่อยมันให้—"},
+    {n:"nar",show:[],t:"คุณไม่ปล่อย ฟ้าดึงสุดแรงอยู่สามที แล้วหยุด มือที่กำแน่นค่อย ๆ คลายลง"},
+    {n:"fah",f:"sad",l:"fight",t:"…ไม่ใช่วันนี้ใช่ไหม ฟ้ารู้ ฟ้ารู้แล้ว"}]}]:[])]},
+ {n:"npc",who:"คุณเกริก",t:"ผมไม่ได้ดูถูกเวทีภาคครับ ผมจ่ายให้มันทุกบาท ผมรักมัน… แต่คืนนี้ทุกคนเห็นแล้ว ว่าที่สุดของการต่อสู้หน้าตาเป็นยังไง"},
  {n:"nar",show:[{id:"npc:krerk"}],t:"ทั้งห้องหันมามองคุณ",choice:[
    {t:"\"นี่ไม่ใช่การแข่ง นี่คือการทำร้ายคนที่ไม่ได้เตรียมตัว\"",then:[{n:"npc",who:"คุณเกริก",t:"โลกจริงไม่เคยรอให้ใครเตรียมตัวครับ ผมเรียนเรื่องนี้จากรถตู้คันนั้น"}]},
-   {t:"\"อยากรู้ว่าโลกจริงเป็นยังไง ก็ส่งนักมวยของคุณมาเจอค่ายผม\"",fx:G2=>{R.closeDare=1;},then:[{n:"npc",who:"คุณเกริก",t:"…ผมก็หวังไว้แบบนั้นเหมือนกันครับ ผู้จัดการ"}]},
-   {t:"(ไม่ตอบ หันหลังพาแชมป์ลงจากเวที)",then:[{n:"nar",t:"คุณหันหลังให้คุณเกริก ทั้งห้องยังเงียบ มีแต่เสียงฝีเท้าของคนจากค่ายศิริชัยลงบันได"}]}]},
- rin?{n:"rin",f:"angry",l:"casual",t:"ถ้าเซ็นไป ข้อ 14.3 ทุกท่าที่พวกเธอเคยชกจะเป็นของนาคา… ลดาไม่ต้องเดาเลยสักหมัด เพราะมีเทปของทุกคนอยู่ในมือแล้ว"}:{n:"coach",t:"ถ้าเซ็นไป ทุกท่าที่พวกเธอเคยชกจะเป็นของนาคา ลดาจะไม่ต้องเดาเลยสักหมัด"},
- {n:"alicia",f:"sad",l:"fight",t:rin?"ถ้าไม่ได้รินกับค่ายคุณช่วยอ่านสัญญาให้… ป่านนี้ฉันคงยืนอยู่ข้างเขาบนเวทีนั้นแล้ว":"ถ้าไม่ได้ค่ายคุณ… ป่านนี้ฉันคงยืนอยู่ข้างเขาบนเวทีนั้นแล้ว"},
- {n:"nar",show:[{id:"lada",l:"casual"}],t:"ลดาดึงฮู้ดขึ้นคลุมหัว เดินผ่านคุณไปโดยไม่หยุด แต่พูดเบา ๆ ตอนเดินสวน"},
- {n:"lada",l:"casual",t:"…พวกเธอไม่เซ็นเพราะค่ายคุณ ฉันอยากรู้ว่าค่ายคุณมีอะไร"},
- fah?{n:"fah",f:"sad",l:"casual",t:"นั่นมัน… มวยสมัยใหม่ เหมือนฟ้าเลย"}:{n:"coach",t:"นั่นไม่ใช่มวยไทยอย่างเดียว… นั่นมันทุกอย่างรวมกัน"},
- {n:"npc",who:"คุณเกริก",t:"ขอบคุณที่มาร่วมงานครับทุกท่าน"},
+   {t:"\"อยากรู้ว่าใครแข็งที่สุด ก็ส่งนักมวยของคุณมาเจอค่ายผม\"",fx:G2=>{R.closeDare=1;},then:[{n:"npc",who:"คุณเกริก",t:"…ผมก็หวังไว้แบบนั้นเหมือนกันครับ ผู้จัดการ"}]},
+   {t:"(ไม่ตอบ หันหลังพาแชมป์ลงจากเวที)",then:[{n:"nar",show:[],t:"คุณหันหลังให้คุณเกริก ทั้งห้องยังเงียบ มีแต่เสียงฝีเท้าของคนจากค่ายศิริชัยลงบันได"}]}]},
+ rin?{n:"rin",f:"angry",l:"fight",t:"ถ้าพวกเธอเซ็นไป ข้อ 14.3 ทุกท่าที่เคยชกจะเป็นของนาคา… ลดาไม่ต้องเดาเลยสักหมัด"}:{n:"coach",t:"ถ้าพวกเธอเซ็นไป ทุกท่าที่เคยชกจะเป็นของนาคา ลดาจะไม่ต้องเดาเลยสักหมัด"},
+ {n:"alicia",f:"sad",l:"fight",t:rin?"ถ้าไม่ได้รินกับค่ายคุณช่วยอ่านสัญญา… ป่านนี้ฉันคงยืนอยู่ข้างเขาแล้ว":"ถ้าไม่ได้ค่ายคุณ… ป่านนี้ฉันคงยืนอยู่ข้างเขาแล้ว"},
+ {n:"nar",show:[{id:"lada",l:"casual",f:"sad"}],t:"ลดาดึงฮู้ดคลุมหัว เดินตามหลังพ่อไปโดยไม่หยุด แต่พูดเบา ๆ ตอนเดินสวนคุณ"},
+ {n:"lada",f:"sad",l:"casual",t:"…พวกเธอไม่เซ็นเพราะค่ายคุณ ฉันอยากรู้ว่าค่ายคุณมีอะไร"},
+ fah?{n:"fah",f:"surprised",l:"fight",t:"นั่นมัน… มวยสมัยใหม่ เหมือนฟ้าเลย แต่ไม่มีอะไรเหลือข้างในเลยสักนิด"}:{n:"coach",t:"นั่นไม่ใช่มวยไทยอย่างเดียว… นั่นมันทุกอย่างรวมกัน"},
+ {n:"pailin",f:"sad",t:"ผู้จัดการคะ… ดิฉันรู้จักคุณเกริกมายี่สิบปี ขอเล่าอะไรหน่อยได้ไหมคะ"},
+ {n:"pailin",f:"sad",t:"คืนที่รถตู้ทีมชาติคว่ำ ภรรยาคุณเกริกนั่งไปด้วย เธอไม่ได้กลับบ้าน เขาเสียเข่า เสียโอลิมปิก และเสียเธอ ในคืนเดียว"},
+ {n:"pailin",f:"sad",t:"ลดาตอนนั้นสี่ขวบ ตั้งแต่วันนั้นทุกอย่างที่นาคามี หมอ โค้ช ห้องแล็บ ข้อมูล ถูกเทลงที่เด็กคนเดียว"},
+ {n:"pailin",f:"sad",t:"เขาไม่ได้เลี้ยงลูกค่ะ เขาสร้างคำตอบให้โชคที่พรากทุกอย่างไป… และลดาไม่เคยได้เลือกเลยสักครั้ง"},
+ kati?{n:"kati",f:"sad",l:"fight",t:"…ปู่ชัยสอนหนูชกเพราะหนูอยากชก ไม่ใช่เพราะปู่อยากชนะใคร"}:{n:"coach",t:"…ครูมวยที่ดีไม่ได้สร้างนักมวยไว้ใช้แก้แค้นใคร"},
  {n:"nar",bg:"camp",show:[],t:"สามวันต่อมา ซองสีดำขอบแดงมาถึงค่าย ไม่มีตราประทับ มีแค่ลายเซ็นเดียวที่ทุกคนจำได้ · เกริก นาคา"},
- ...rgIf(R.c2==="deal",[rin?{n:"rin",f:"flustered",l:"casual",t:"ผู้จัดการคะ สัญญาพันธมิตรที่เรารับเงินมา ข้อ 30 เขียนว่า \"หากนาคาลีกแพ้ให้แก่ค่ายคู่สัญญา ให้สัญญานี้สิ้นสุดทันที\""}:{n:"coach",t:"สัญญาพันธมิตรที่เรารับเงินมา ข้อ 30 เขียนว่าถ้านาคาลีกแพ้ค่ายเรา สัญญาจบทันที…"},
+ ...rgIf(R.c2==="deal",[rin?{n:"rin",f:"flustered",l:"fight",t:"ผู้จัดการคะ สัญญาพันธมิตรที่เรารับเงินมา ข้อ 30 เขียนว่า \"หากนาคาลีกแพ้ให้แก่ค่ายคู่สัญญา ให้สัญญานี้สิ้นสุดทันที\""}:{n:"coach",t:"สัญญาพันธมิตรที่เรารับเงินมา ข้อ 30 เขียนว่าถ้านาคาลีกแพ้ค่ายเรา สัญญาจบทันที…"},
    {n:"coach",t:"เขามั่นใจขนาดนั้นเชียว ถึงกล้าเขียนข้อนี้ไว้"}]),
  {n:"coach",t:"ทุ่มได้ ล็อกได้… พวกเราไม่เคยซ้อมเรื่องพวกนี้เลยสักวัน"},
  {n:"coach",t:"มีเวลาสามสัปดาห์ ซ้อมรับมือไว้ให้ครบทุกแบบ ถึงคืนนั้นค่อยเลือกทีละนัดว่าจะรับมือยังไง การ์ดอยู่ในกล่องจดหมายแล้ว"}];}
@@ -1544,7 +1555,7 @@ Object.assign(REGION,{
     /* the tournament runs its course without four cups: three years in, nothing in progress */
     return cups.length>=1&&now>=(R.startAbs||0)+156&&!RG_ORDER.some(r=>R.champ[r]&&R.champ[r].state==="series")&&!R.trip;},
   openFinal(G){const R=G.region,now=gameWeek(G);R.close=now;R.final={stage:"prep",abs:now+3,prep:null,tries:0,won:false,intelAbs:now+1};},
-  /* v1.91.73 (Man): the black card is Krerk's own challenge — a black letter with a blinking red frame that is also the way into the warehouse */
+  /* v1.91.72 (Man): the black card is Krerk's own challenge — a black letter with a blinking red frame that is also the way into the warehouse */
   blackCard(G){const R=G.region,F=R.final;if(!F)return;const wk=((F.abs-1)%52)+1;
     const ps=R.closeDare?"\n\nป.ล. คืนนั้นคุณบอกให้ผมส่งนักมวยไปเจอค่ายคุณ ผมส่งไปห้าคน":R.closeFace?"\n\nป.ล. ลูกสาวผมไม่เคยถามชื่อใคร คืนนั้นเธอถามชื่อคุณ":"";
     addMail(G,{kind:"letter",tone:"black",bk:1,from:"เกริก นาคา",title:"การ์ดสีดำ",body:`ถึง ผู้จัดการค่ายศิริชัย\n\nสามปีที่ผมเป็นเจ้าภาพศึกชิงเจ้าสี่ภาค ผมรอแชมป์ทั้งสี่คนนั้นมาตลอด และคุณคือเหตุผลที่พวกเธอไม่มา\n\nงั้นมาพิสูจน์กันครับ ว่าค่ายที่สอนให้คนกล้าปฏิเสธ ยืนได้นานแค่ไหน\n\nห้าต่อห้า · โกดังโรงงานเครื่องดื่มเก่า ท่าเรือคลองเตย\nตั้งแต่สัปดาห์ที่ ${wk} เป็นต้นไป\nกติกาเปิด ทุ่มได้ ล็อกได้ · ไม่มีรางวัล ไม่มีสื่อ ไม่มีข้ออ้าง\n\nประตูเปิดรอทุกคืน ส่งนักมวยของคุณมา\n\n— เกริก นาคา${ps}`});},
@@ -1560,7 +1571,7 @@ Object.assign(REGION,{
       <h4>ทีมนาคาลีก</h4>${team}
       <div class="mfoot">${ready?`<button class="btn primary" data-act="rgfline">${F.live?"กลับเข้าโกดัง ชกต่อ ▸":"ไปโกดังใต้ดิน ▸"}</button>`:`<span class="meta">ไปได้ตั้งแต่สัปดาห์ ${wk} · ซ้อมอีก ${F.abs-now} สัปดาห์</span>`}</div></section>`;},
   finalPool(G){return roster(G).filter(f=>!f.injury&&!isAway(G,f.id));},
-  /* v1.91.73 (Man): a loading screen on the way in — the board opens only when every portrait and sprite of the night is ready (no blank, stuck cards) */
+  /* v1.91.72 (Man): a loading screen on the way in — the board opens only when every portrait and sprite of the night is ready (no blank, stuck cards) */
   finalLoad(done){if(typeof document==="undefined"){done();return;}const pool=this.finalPool(G),ref=pool[0]||roster(G)[0];for(const k of NL_ORDER)if(!G.F["nl_"+k]&&ref)nlFighter(G,k,ref);
     const L=["bg_naka_underground","lada_fight_happy","lada_fight_angry","nl_rosa_win_por",...NL_ORDER.filter(k=>k!=="ladda").map(k=>`nl_${k}_por`),...NL_ORDER.map(k=>G.F["nl_"+k]&&G.F["nl_"+k].sprite?G.F["nl_"+k].sprite+"_sheet":null).filter(Boolean),"nl_ladda_hood_sheet","nl_ladda_sheet","nl_ladda_blood_sheet",...pool.map(f=>`${f.id}_fight_happy`)];
     const el=document.createElement("div");el.className="rg-load";el.innerHTML=`<div class="rgl-in"><b>🂠 ท่าเรือคลองเตย</b><p>รถค่ายเลี้ยวเข้าซอยโกดังร้าง ไฟหน้ารถส่องประตูเหล็กที่เปิดแง้มไว้รอ…</p><div class="rgl-bar"><i></i></div></div>`;document.body.appendChild(el);
@@ -1575,7 +1586,7 @@ Object.assign(REGION,{
     if(!F.live){F.cur={};F.clear={};for(const k in K)delete K[k];} /* v1.91.53 (Man): a lost night starts again from bout 1 (v1.91.24 kept the bouts already won) */
     const C=F.cur=F.cur||{};
     for(const k of NL_ORDER)if(!C[k]&&L[k]&&!pool.some(f=>f.id===L[k]))delete L[k];
-    for(const k of NL_ORDER)if(!C[k])delete L[k]; /* v1.91.73 (Man): our side starts empty — each bout's fighter is picked when that bout comes up, then the prep screen locks her in */
+    for(const k of NL_ORDER)if(!C[k])delete L[k]; /* v1.91.72 (Man): our side starts empty — each bout's fighter is picked when that bout comes up, then the prep screen locks her in */
     const ref=pool[0]||roster(G)[0];for(const k of NL_ORDER)if(!G.F["nl_"+k]&&ref)nlFighter(G,k,ref);
     const v=Object.values(C),w=v.filter(x=>x==="W").length,l=v.filter(x=>x==="L").length,next=NL_ORDER.find(k=>!C[k]);
     if(UI.rgPick&&!C[UI.rgPick]){const k=UI.rgPick,o=G.F["nl_"+k],at=id=>NL_ORDER.find(x=>L[x]===id);
@@ -2010,7 +2021,7 @@ const RG_SHOW=[
  {cid:"chaba",steps:[[200,"cap","ชบาบุกเข้ามาไม่ถอยเลยสักก้าว"],[700,"play","hit","A","punch"],[1100,"play","hit","A","punch"],[1500,"play","hit","A","elbow"],[1700,"cap","ลดาปล่อยให้โดนสามหมัด ถอยจนหลังติดเชือก…"],
    [2600,"sp","B","nl_ladda_sp_superman","ซูเปอร์แมนพันช์"],[3900,"play","takedown","B","punch"],[4400,"play","gnp","B","punch"],[4800,"play","gnp","B","punch"],[5200,"play","ko","B","punch"],[5300,"cap","…แล้วใช้แรงนั้นเองดึงชบาลงพื้น"]],end:6800}];
 Object.assign(REGION,{
-  playClose(done){if(G.region){delete G.region.closeDare;delete G.region.closeFace;}const S=rgClose(G),i=S.findIndex(x=>x&&x.cut==="ladda"),a=i<0?S:S.slice(0,i+1),b=i<0?[]:S.slice(i+1),opt={bg:"closing_ceremony",look:"casual"};
+  playClose(done){if(G.region){delete G.region.closeDare;delete G.region.closeFace;}const S=rgClose(G),i=S.findIndex(x=>x&&x.cut==="ladda"),a=i<0?S:S.slice(0,i+1),b=i<0?[]:S.slice(i+1),opt={bg:"closing_ceremony",look:"fight"}; /* v1.91.74 (Man): tense faces — the casual art has no shocked/sad face, the ring gear does */
     playScene(a,()=>{if(i<0){done();return;}this.laddaShow(()=>playScene(b,done,opt));},opt);},
   laddaShow(done){if(typeof document==="undefined"||typeof FS==="undefined"){done();return;}
     const old=document.getElementById("rg-show");if(old)old.remove();

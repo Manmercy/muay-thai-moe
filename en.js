@@ -6468,7 +6468,7 @@ AU.gsfx=function(kind,a){if(!this.init()||this.muted||!SETTINGS.sfx)return;const
   if(kind==="shimmer")for(let i=0;i<6;i++)T(i*.05,{f:1400+Math.random()*1400,type:"sine",dur:.12,peak:.06});};
 
 // ================= MUAY THAI MOE v1.3 — UI =================
-const VERSION="1.91.73";
+const VERSION="1.91.74";
 const CUR_LANG=(typeof window!=="undefined"&&window.LANG)||"th";
 const TH_LABEL=String.fromCharCode(3652,3607,3618);
 function langSwitch(cls){return `<div class="langsw ${cls||""}" role="group" aria-label="Language">${[["th",TH_LABEL],["en","EN"]].map(([k,l])=>`<button class="lsb ${CUR_LANG===k?"on":""}" data-act="setlang" data-v="${k}" aria-pressed="${CUR_LANG===k}">${l}</button>`).join("")}</div>`;}
@@ -7693,11 +7693,11 @@ function sceneHTML(){const S=UI.scene,c=S.cur||{};const sp=c.n==="coach"?{name:c
   const mu=mOn&&typeof MGRP!=="undefined"&&(S.mlook||(G&&G.avatar))?MGRP.url(S.mlook||G.avatar,S.mf||"normal",()=>render()):"";
   const girls=mOn?S.cast.slice(-1):S.cast,nOn=girls.length+(mOn?1:0);
   const mst=mOn&&!c.cg?(mu?`<img class="stand mgrst ${girls.length?"l":"c"} ${spk==="me"&&!c.choice?"on":"off"}" src="${mu}" alt="">`:""):"";
-  const cast=mst+girls.map((m,i)=>{const active=m.id===spk||(c.choice&&i===girls.length-1);const pos=nOn===1?"c":mOn?"r":i===0?"l":"r";
-    return `<img class="stand ${pos} ${active&&!m.back?"on":"off"}${m.back?" back":""}" src="${m.id.startsWith("npc:")?(m.id.slice(4).startsWith("nl_")?`${ASSET}${m.id.slice(4)}.webp`:`${ASSET}npc_${m.id.slice(4)}.webp`):m.back?`${ASSET}${m.id}_back.webp`:stand(m.id,m.look,active&&!c.choice?moodFor(c.f,m.look,c.t):moodFor(m.f,m.look,""))}" alt="">`;}).join("");
+  const cast=mst+girls.map((m,i)=>{const active=m.id===spk||(c.choice&&i===girls.length-1);const pos=nOn===1?"c":mOn?"r":nOn>2?"g":i===0?"l":"r",gx=nOn>2?` style="left:${Math.round((i+.5)/nOn*100)}%;z-index:${active?3:1}"`:"";
+    return `<img class="stand ${pos} ${active&&!m.back?"on":"off"}${m.back?" back":""}"${gx} src="${m.id.startsWith("npc:")?(m.id.slice(4).startsWith("nl_")?`${ASSET}${m.id.slice(4)}.webp`:`${ASSET}npc_${m.id.slice(4)}.webp`):m.back?`${ASSET}${m.id}_back.webp`:stand(m.id,m.look,active&&!c.choice?moodFor(c.f,m.look,c.t):moodFor(m.f,m.look,""))}" alt="">`;}).join("");
   const tag="";
   return `<div class="vn" role="dialog" aria-label="Story scene"><div class="vbg bg-${S.bg==="camp"?"gym":S.bg}" ${bgKey?`style="background-image:url(${ASSET}${bgKey})"`:""}></div>
-   ${c.cg?`<div class="vcg" style="--cg:url(${ASSET}${c.cg}.webp)"><img src="${ASSET}${c.cg}.webp" alt=""></div>`:`<div class="cast ${nOn>1?"duo":""}">${cast}</div>`}
+   ${c.cg?`<div class="vcg" style="--cg:url(${ASSET}${c.cg}.webp)"><img src="${ASSET}${c.cg}.webp" alt=""></div>`:`<div class="cast ${nOn>2?"grp":nOn>1?"duo":""}">${cast}</div>`}
    ${S.award?`<div class="awardfx" aria-hidden="true">${Array.from({length:24},(_,i)=>`<i style="--i:${i}"></i>`).join("")}${[["14%","22%","0s","#ffd45a"],["78%","16%","-.8s","#ff6b6b"],["50%","30%","-1.6s","#8fd3ff"],["30%","12%","-1.2s","#c785e6"],["66%","34%","-.4s","#9dffb0"]].map(([x,y,d,c])=>`<span class="fw" style="--x:${x};--y:${y};--d:${d};--c:${c}">${Array.from({length:12},(_,a)=>`<b style="--a:${a}"></b>`).join("")}</span>`).join("")}<div class="awardbelt"><span class="strap"></span><span class="seal">★</span><span class="strap"></span></div><div class="awardname">${esc(honorLabel(S.award.kind,S.award.venue))}</div></div>`:""}
    ${c.choice?"":`<button class="vtap" data-act="vnext" aria-label="Continue"></button>`}
    <div class="vbox px" data-act="${c.choice?"":"vnext"}" style="--c:${sp.color||"var(--gold)"}">
@@ -7941,7 +7941,7 @@ function fightHTML(){const U=UI.fight,b=U.b,me=G.F[b.a],op=G.F[b.b],F=U.F;
      ${me.fatigue>25?`<p class="meta center warnt">Fatigue ${Math.round(me.fatigue)} · entering the ring at ${Math.round(clamp(100-me.fatigue*.4,40,100))}% energy and tiring faster than usual</p>`:""}
      ${preCompare(me,op,b)}
      <p class="meta center">${me.prepBonus?"Plan drilled · ":""}${me.injury?"Injured! · ":""}Change the plan in the Training tab before fight day</p>
-     ${(()=>{const nl=b.region&&b.region.nlfinal;if(!nl||typeof RG_FPREP==="undefined")return "";/* v1.91.73 (Man): the underground bouts add three ways to meet the other martial arts, picked per bout */
+     ${(()=>{const nl=b.region&&b.region.nlfinal;if(!nl||typeof RG_FPREP==="undefined")return "";/* v1.91.72 (Man): the underground bouts add three ways to meet the other martial arts, picked per bout */
        return `<div class="fprep3"><h4>Open-rules counter · pick 1</h4>${Object.entries(RG_FPREP).map(([k,P])=>`<button class="btn ${b.gprep===k?"gold":""}" data-act="rgfp" data-v="${k}" aria-pressed="${b.gprep===k}"><b>${esc(P.n)}</b><small>${esc(P.d)}</small></button>`).join("")}</div>`;})()}
      <div class="ctrl">${me.injury?`<button class="btn" data-act="withdraw">Withdraw</button>`:""}${b.region&&b.region.nlfinal?`<button class="btn" data-act="rgfswap">Swap fighter</button>`:""}<button class="btn primary big" data-act="fstart" ${b.region&&b.region.nlfinal&&!b.gprep?"disabled":""}>${b.region&&b.region.nlfinal&&!b.gprep?"Pick a counter plan first":"Fight! ▸"}</button></div></div>`;}
   else{const cap=U.caption;
@@ -8737,7 +8737,7 @@ function letterHTML(m){m.read=true;let act="";
   if(m.kind==="quiz")act=m.done?`<p class="meta center">${m.ok?`Correct! You won ${fmt(m.amt)}`:`Wrong! The answer was "${esc(m.opts[m.ans])}"`}</p>`:m.expired?"":`<p class="qz"><b>${esc(m.q)}</b></p><div class="qopts">${m.opts.map((o,i)=>`<button class="btn" data-act="mquiz" data-v="${m.id}" data-k="${i}">${esc(o)}</button>`).join("")}</div>`;
   if(m.kind==="job")act=m.done?`<p class="meta center">${m.declined?"Didn't go":m.grade?`Helped out · grade ${m.grade}`:"Sent someone to help: ฿550"}</p>`:m.expired?`<p class="meta center">Expired</p>`:`<span class="mgtag">${JOY_PX}MINIGAME</span><button class="btn" data-act="mjdecl" data-v="${m.id}">Too busy</button><button class="btn" data-act="mjskip" data-v="${m.id}">Send someone (฿550)</button><button class="btn primary" data-act="mjplay" data-v="${m.id}">${JOY_PX} Help in person</button>`;
   if(m.kind==="event")act=evMailAct(m);
-  if(m.bk&&typeof REGION!=="undefined"&&REGION.letterAct)act=REGION.letterAct(m); /* v1.91.73: Krerk's black card is the way into the warehouse */
+  if(m.bk&&typeof REGION!=="undefined"&&REGION.letterAct)act=REGION.letterAct(m); /* v1.91.72: Krerk's black card is the way into the warehouse */
   if(m.kind==="loan")act=m.done?`<p class="meta center">${m.took?"Loan taken":"Card binned"}</p>`:!loanOk(G)?`<p class="meta center">${G.loan>0?"A Gold Helmet loan is still unpaid. You can't borrow again.":"Cash is out of the danger zone. No need for this card."}</p>`:`<button class="btn" data-act="mloanno" data-v="${m.id}">Bin the card</button><button class="btn red" data-act="mloan" data-v="${m.id}">See loan ${fmt(LOAN_AMT)}</button>`;
   if(m.kind==="lotto")act=lottoLetterAct(m);
   if(m.kind==="quest")act=m.done?`<p class="meta center">${m.declined?"Declined":"Fighter sent"}</p>`:m.expired?`<p class="meta center">Expired</p>`:`<button class="btn" data-act="mdecl" data-v="${m.id}">Not going</button><button class="btn primary" data-act="macc" data-v="${m.id}">Take the job · choose a fighter</button>`;

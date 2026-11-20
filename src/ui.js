@@ -1,5 +1,5 @@
 // ================= MUAY THAI MOE v1.3 — UI =================
-const VERSION="1.91.73";
+const VERSION="1.91.74";
 const CUR_LANG=(typeof window!=="undefined"&&window.LANG)||"th";
 const TH_LABEL=String.fromCharCode(3652,3607,3618);
 function langSwitch(cls){return `<div class="langsw ${cls||""}" role="group" aria-label="Language">${[["th",TH_LABEL],["en","EN"]].map(([k,l])=>`<button class="lsb ${CUR_LANG===k?"on":""}" data-act="setlang" data-v="${k}" aria-pressed="${CUR_LANG===k}">${l}</button>`).join("")}</div>`;}
@@ -1224,11 +1224,11 @@ function sceneHTML(){const S=UI.scene,c=S.cur||{};const sp=c.n==="coach"?{name:c
   const mu=mOn&&typeof MGRP!=="undefined"&&(S.mlook||(G&&G.avatar))?MGRP.url(S.mlook||G.avatar,S.mf||"normal",()=>render()):"";
   const girls=mOn?S.cast.slice(-1):S.cast,nOn=girls.length+(mOn?1:0);
   const mst=mOn&&!c.cg?(mu?`<img class="stand mgrst ${girls.length?"l":"c"} ${spk==="me"&&!c.choice?"on":"off"}" src="${mu}" alt="">`:""):"";
-  const cast=mst+girls.map((m,i)=>{const active=m.id===spk||(c.choice&&i===girls.length-1);const pos=nOn===1?"c":mOn?"r":i===0?"l":"r";
-    return `<img class="stand ${pos} ${active&&!m.back?"on":"off"}${m.back?" back":""}" src="${m.id.startsWith("npc:")?(m.id.slice(4).startsWith("nl_")?`${ASSET}${m.id.slice(4)}.webp`:`${ASSET}npc_${m.id.slice(4)}.webp`):m.back?`${ASSET}${m.id}_back.webp`:stand(m.id,m.look,active&&!c.choice?moodFor(c.f,m.look,c.t):moodFor(m.f,m.look,""))}" alt="">`;}).join("");
+  const cast=mst+girls.map((m,i)=>{const active=m.id===spk||(c.choice&&i===girls.length-1);const pos=nOn===1?"c":mOn?"r":nOn>2?"g":i===0?"l":"r",gx=nOn>2?` style="left:${Math.round((i+.5)/nOn*100)}%;z-index:${active?3:1}"`:"";
+    return `<img class="stand ${pos} ${active&&!m.back?"on":"off"}${m.back?" back":""}"${gx} src="${m.id.startsWith("npc:")?(m.id.slice(4).startsWith("nl_")?`${ASSET}${m.id.slice(4)}.webp`:`${ASSET}npc_${m.id.slice(4)}.webp`):m.back?`${ASSET}${m.id}_back.webp`:stand(m.id,m.look,active&&!c.choice?moodFor(c.f,m.look,c.t):moodFor(m.f,m.look,""))}" alt="">`;}).join("");
   const tag="";
   return `<div class="vn" role="dialog" aria-label="ฉากเนื้อเรื่อง"><div class="vbg bg-${S.bg==="camp"?"gym":S.bg}" ${bgKey?`style="background-image:url(${ASSET}${bgKey})"`:""}></div>
-   ${c.cg?`<div class="vcg" style="--cg:url(${ASSET}${c.cg}.webp)"><img src="${ASSET}${c.cg}.webp" alt=""></div>`:`<div class="cast ${nOn>1?"duo":""}">${cast}</div>`}
+   ${c.cg?`<div class="vcg" style="--cg:url(${ASSET}${c.cg}.webp)"><img src="${ASSET}${c.cg}.webp" alt=""></div>`:`<div class="cast ${nOn>2?"grp":nOn>1?"duo":""}">${cast}</div>`}
    ${S.award?`<div class="awardfx" aria-hidden="true">${Array.from({length:24},(_,i)=>`<i style="--i:${i}"></i>`).join("")}${[["14%","22%","0s","#ffd45a"],["78%","16%","-.8s","#ff6b6b"],["50%","30%","-1.6s","#8fd3ff"],["30%","12%","-1.2s","#c785e6"],["66%","34%","-.4s","#9dffb0"]].map(([x,y,d,c])=>`<span class="fw" style="--x:${x};--y:${y};--d:${d};--c:${c}">${Array.from({length:12},(_,a)=>`<b style="--a:${a}"></b>`).join("")}</span>`).join("")}<div class="awardbelt"><span class="strap"></span><span class="seal">★</span><span class="strap"></span></div><div class="awardname">${esc(honorLabel(S.award.kind,S.award.venue))}</div></div>`:""}
    ${c.choice?"":`<button class="vtap" data-act="vnext" aria-label="ไปต่อ"></button>`}
    <div class="vbox px" data-act="${c.choice?"":"vnext"}" style="--c:${sp.color||"var(--gold)"}">
@@ -1472,7 +1472,7 @@ function fightHTML(){const U=UI.fight,b=U.b,me=G.F[b.a],op=G.F[b.b],F=U.F;
      ${me.fatigue>25?`<p class="meta center warnt">ล้า ${Math.round(me.fatigue)} · ขึ้นเวทีด้วยแรง ${Math.round(clamp(100-me.fatigue*.4,40,100))}% และหมดแรงเร็วกว่าปกติ</p>`:""}
      ${preCompare(me,op,b)}
      <p class="meta center">${me.prepBonus?"ซ้อมแผนมาแล้ว · ":""}${me.injury?"บาดเจ็บอยู่! · ":""}เปลี่ยนแผนได้ที่แท็บฝึกก่อนวันชก</p>
-     ${(()=>{const nl=b.region&&b.region.nlfinal;if(!nl||typeof RG_FPREP==="undefined")return "";/* v1.91.73 (Man): the underground bouts add three ways to meet the other martial arts, picked per bout */
+     ${(()=>{const nl=b.region&&b.region.nlfinal;if(!nl||typeof RG_FPREP==="undefined")return "";/* v1.91.72 (Man): the underground bouts add three ways to meet the other martial arts, picked per bout */
        return `<div class="fprep3"><h4>รับมือกติกาเปิด · เลือก 1</h4>${Object.entries(RG_FPREP).map(([k,P])=>`<button class="btn ${b.gprep===k?"gold":""}" data-act="rgfp" data-v="${k}" aria-pressed="${b.gprep===k}"><b>${esc(P.n)}</b><small>${esc(P.d)}</small></button>`).join("")}</div>`;})()}
      <div class="ctrl">${me.injury?`<button class="btn" data-act="withdraw">ถอนตัว</button>`:""}${b.region&&b.region.nlfinal?`<button class="btn" data-act="rgfswap">เปลี่ยนตัว</button>`:""}<button class="btn primary big" data-act="fstart" ${b.region&&b.region.nlfinal&&!b.gprep?"disabled":""}>${b.region&&b.region.nlfinal&&!b.gprep?"เลือกวิธีรับมือก่อน":"ขึ้นชก! ▸"}</button></div></div>`;}
   else{const cap=U.caption;

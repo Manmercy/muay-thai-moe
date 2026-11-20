@@ -1060,6 +1060,7 @@ function rgCup2(G){const R=G.region,rin=rgIn(G,"rin");return [
  {n:"npc",who:"Khun Krerk",t:(R.cups||[]).length>=2?"Two cups in a single tournament. I haven't seen a small camp like yours in a long time":"A small camp from Chiang Mai fighting at regional level. I haven't seen that in a long time"},
  {n:"npc",who:"Khun Krerk",t:"I used to fight too. National team. That year I already had my Olympic ticket in hand"},
  {n:"npc",who:"Khun Krerk",t:"Three weeks before we left, the team van skidded on the road. My knee broke in three places. The doctor said I was lucky to walk at all"},
+ {n:"npc",who:"Khun Krerk",t:"That night I lost more than a knee… but that's not a story for the dinner table."},
  {n:"npc",who:"Khun Krerk",t:"Nobody was at fault. It rained, the road was slick… it was luck, that's all"},
  {n:"npc",who:"Khun Krerk",t:"From that day I promised myself I'd never let luck decide a fighter's life again. Money, data, science, I'll control all of it myself"},
  {n:"nar",t:"He slides a green-and-gold folder in front of you. The cover reads \"Partner Contract\""},
@@ -1104,57 +1105,67 @@ function rgCup3(G){const R=G.region,rin=rgIn(G,"rin"),ploy=rgIn(G,"ploy"),kati=r
 const RG_CLOSE_SAY={baibua:"A small camp can stand tall. I saw it with my own eyes. Sirichai Camp",tabtim:"Sirichai Camp doesn't have much money, but they fight for each other with all their heart. Tabtim has seen it",
  alicia:"I want to fight the Sirichai way. Where nobody asks me to smile for the camera",chaba:"…I want to stay at a camp that fixes its own fence"};
 /* after the fourth cup (or once the tournament has run its course): Naka League, the refusals, Ladda */
-function rgClose(G){const R=G.region,fah=rgIn(G,"fah"),rin=rgIn(G,"rin");
+function rgClose(G){const R=G.region,fah=rgIn(G,"fah"),rin=rgIn(G,"rin"),kati=rgIn(G,"kati");
  const fav=["baibua","tabtim","alicia","chaba"].sort((a,b)=>((R.meet||{})[b]||0)-((R.meet||{})[a]||0))[0];
+ const four=["baibua","tabtim","alicia","chaba"].map(id=>({id,l:"fight",f:"happy"})),tense=["baibua","tabtim","alicia","chaba"].map((id,i)=>({id,l:"fight",f:i%2?"angry":"sad"}));
+ /* v1.91.74 (Man): a real closing ceremony first (many guests, ceremony talk), Krerk as the host who backs the provincial and regional rings —
+    no signing on stage; the four champions walk over afterwards to say no, and Krerk hands it to Ladda. Tense, no smiling faces; the beatings are text only. */
  return [
- {n:"nar",bg:"closing_ceremony",show:[{id:"npc:krerk"}],t:"The Four Regions Championship closing ceremony is held in Bangkok. The hall glows green and gold. On stage sits a long table with four golden pens laid out in a row"},
- {n:"npc",who:"Khun Krerk",t:"Thank you, every camp. This tournament convinced me of one thing: Muay Thai has to go further than temple-fair rings"},
- {n:"npc",who:"Khun Krerk",t:"Introducing… Naka League! The country's first all-round fighting league. Muay Thai, boxing, MMA, every discipline on one stage"},
- {n:"npc",who:"Khun Krerk",t:"And the first four fighters I'd like to invite are the four regional champions. Please come up and sign on stage"},
- {n:"nar",show:[{id:"baibua"},{id:"tabtim"},{id:"alicia"},{id:"chaba"}],t:"Baibua, Tabtim, Alicia and Chaba walk up to the stage, but none of them picks up a pen"},
- {n:"baibua",f:"sad",l:"fight",t:"Thank you… but I won't sign. Bua Tha Sao Camp still has me"},
- {n:"tabtim",l:"fight",t:"Tabtim won't sign either. My little brother read me clause fourteen"},
- {n:"alicia",l:"fight",t:"I already said I won't sign anything with the word \"forever\" in it"},
- {n:"chaba",l:"fight",t:"…not signing"},
- {n:fav,f:"happy",l:"fight",t:RG_CLOSE_SAY[fav]},
- fah?{n:"fah",f:"flustered",l:"casual",t:"Hear that, mister?! Nobody wants your league!"}:{n:"coach",t:"Hear that, Khun Krerk? Nobody wants your league"},
- {n:"pailin",t:"And Vector Gym withdraws from the Naka League partnership, as of this second"},
- {n:"nar",show:[{id:"npc:krerk"}],t:"The whole room goes silent. Every eye turns to Khun Krerk"},
- {n:"npc",who:"Khun Krerk",t:"…No matter. Then let my daughter introduce herself instead"},
- {n:"nar",show:[{id:"lada",l:"casual"}],t:"A woman in a white hood walks up to the ring from the corner of the hall. The hood still covers half her face; a lock of white, red-tipped hair hangs by her cheek."},
- {n:"npc",who:"Khun Krerk",t:"Ladda… show everyone the difference between a temple-fair ring and the real world."},
- {n:"lada",l:"casual",t:"Ladda Naka"},
- {n:"lada",l:"casual",t:"Four regional champions. Come up one at a time. Here. Now."},
- rin?{n:"rin",f:"surprised",l:"casual",t:"Manager, don't let them go up… This isn't a fight. No referee, no doctor."}:{n:"coach",t:"Don't go up! That's not a fight. No referee, no doctor."},
- {n:"nar",t:"Too late. Baibua is through the ropes before anyone.",cut:"ladda"},
- {n:"nar",show:[{id:"lada",l:"casual"}],t:"The ring is dead silent, the four champions down in four corners. Blood seeps from the corner of Ladda's mouth where Baibua's elbow grazed her. She touches it with a fingertip, and smiles for the first time."},
- {n:"lada",l:"casual",t:"…that was fun"},
- {n:"nar",show:[{id:"baibua",l:"fight",f:"sad"},{id:"chaba",l:"fight",f:"sad"}],t:"Baibua coughs, doubled over. Tabtim clutches her knee. Alicia can't catch her breath. Chaba tries to rise a third time and sinks back down.",
+ {n:"nar",bg:"closing_ceremony",show:[],t:"The closing ceremony of the Four Regions Championship. A grand hall in central Bangkok, every table full: provincial sports officials, promoters from all four regions, old-school teachers, and every camp that took part."},
+ {n:"npc",who:"MC",t:"A big round of applause for the four regional champions! North, Baibua · Isan, Tabtim · Central, Alicia · South, Chaba"},
+ {n:"nar",show:four,t:"All four step up together to receive their plaques of honour. Camera flashes light up the hall, and the old-school teachers rise to applaud, table by table."},
+ {n:"npc",who:"Sports official",t:"Provincial and regional boxing are the roots of Muay Thai. Thank you to every camp, big and small, and thank you to our host for backing the regional rings for three years."},
+ {n:"npc",who:"Khun Krerk",t:"I just pay the electricity bill for the ring. The people who gave this tournament meaning are every fighter and every teacher in this room."},
+ {n:"npc",who:"Khun Krerk",t:"The provincial and regional rings will stay. Naka will keep backing them every year. I promise."},
+ {n:"npc",who:"Khun Krerk",t:"But I have a dream of my own too… the Naka League. A league that brings the strongest fighters of every art onto one stage."},
+ {n:"npc",who:"Khun Krerk",t:"I've already invited all four champions. No need to answer on stage. Tonight is their night."},
+ {n:"nar",show:[],t:"The party goes on until the hall starts to thin out."},
+ {n:"nar",show:tense,t:"Then all four champions walk over together and stop in front of Khun Krerk's table. One by one, the tables still occupied fall silent."},
+ {n:"baibua",f:"sad",l:"fight",t:"Thank you for looking after the regional rings all this time… but I won't join the league. Bua Tha Sao camp still has me."},
+ {n:"tabtim",f:"sad",l:"fight",t:"Tabtim's not joining either, okay? My little brother read me clause fourteen."},
+ {n:"alicia",f:"angry",l:"fight",t:"I won't sign anything with the word \"forever\" in it. No matter whose it is."},
+ {n:"chaba",f:"angry",l:"fight",t:"…Not joining."},
+ {n:fav,f:"sad",l:"fight",t:RG_CLOSE_SAY[fav]},
+ {n:"nar",show:[{id:"npc:krerk"}],t:"Khun Krerk hears them out without interrupting, then sets his glass down softly on the table."},
+ {n:"npc",who:"Khun Krerk",t:"I respect your decision. But my league must be the strongest, and for people to believe that, they have to see it with their own eyes."},
+ {n:"npc",who:"Khun Krerk",t:"Ladda"},
+ {n:"nar",show:[{id:"lada",l:"casual",f:"angry"}],t:"A woman in a white hoodie rises from the corner table, the hood over half her face, a lock of white hair tipped in red at her cheek. She doesn't look at her father, or at anyone."},
+ {n:"npc",who:"Khun Krerk",t:"Handle it."},
+ {n:"lada",f:"angry",l:"casual",t:"…Into the ring. One at a time."},
+ fah?{n:"fah",f:"surprised",l:"fight",t:"Wait! This is a party!"}:{n:"coach",t:"Wait! This is a party."},
+ rin?{n:"rin",f:"surprised",l:"fight",t:"Manager, don't let them go up… No referee, no doctor."}:{n:"coach",t:"Don't go up! No referee, no doctor."},
+ {n:"nar",show:[],t:"Too late. Baibua kicks off her shoes and slips through the ropes before anyone else.",cut:"ladda"},
+ {n:"nar",show:[],t:"The ring is dead silent. The four regional champions lie in separate corners. Baibua coughs until she curls up, Tabtim clutches her knee, Alicia can't catch her breath, and Chaba tries to rise a third time before sinking down again."},
+ {n:"nar",show:[],t:"Blood seeps from the corner of Ladda's mouth where Baibua's elbow grazed her. She touches it with a fingertip and stares at it, as if writing down a number.",
   choice:[{t:"Run up and help the champions down",fx:G2=>{for(const c of ["baibua","tabtim","alicia","chaba"])rgMeet(G2,c,2);},then:[
-    {n:"nar",show:[{id:"baibua",l:"fight",f:"sad"}],t:"You duck through the ropes and lift Baibua, her arm over your shoulder. The girls from your camp follow to help the other three down."},
-    {n:"baibua",f:"sad",l:"fight",t:"…Thank you. I can still stand… I still can."}]},
+    {n:"nar",show:[],t:"You duck through the ropes and lift Baibua, her arm over your shoulder. The girls from your camp follow to help the other three down."},
+    {n:"baibua",f:"sad",l:"fight",t:"…I can still stand… I can."}]},
    {t:"Step up and stand in front of Ladda",fx:G2=>{rgMeet(G2,"chaba",3);for(const c of ["baibua","tabtim","alicia"])rgMeet(G2,c,1);R.closeFace=1;},then:[
-    {n:"nar",show:[{id:"lada",l:"casual"}],t:"You step up between Ladda and Chaba. Ladda turns to look at you, red eyes perfectly still."},
-    {n:"lada",l:"casual",t:"…You're not a fighter."},
-    {n:"lada",l:"casual",t:"But you don't back down either."},
+    {n:"nar",show:[{id:"lada",l:"casual",f:"angry"}],t:"You step up between Ladda and Chaba. Ladda turns to look at you, red eyes perfectly still."},
+    {n:"lada",f:"angry",l:"casual",t:"…You're not a fighter."},
+    {n:"lada",f:"angry",l:"casual",t:"But you don't back down either… What's your name?"},
     {n:"chaba",f:"sad",l:"fight",t:"…Don't. I can get up myself."}]},
    ...(fah?[{t:"Grab Fah's arm and keep her off the ring",fx:G2=>{add(G2,"fah","trust",3);for(const c of ["baibua","tabtim","alicia","chaba"])rgMeet(G2,c,1);},then:[
-    {n:"fah",f:"angry",l:"casual",t:"Let go of Fah! Fah's going up there to hit her—"},
-    {n:"nar",t:"You don't let go. Fah pulls with everything she has three times, then stops. Her clenched fist slowly opens."},
-    {n:"fah",f:"sad",l:"casual",t:"…Not today, right? Fah knows. Fah knows."}]}]:[])]},
- {n:"npc",who:"Khun Krerk",t:"You see? The Four Regions is a temple-fair ring. Naka League is the real world. If they'd signed, nobody would have gotten hurt tonight."},
+    {n:"fah",f:"angry",l:"fight",t:"Let go of Fah! Fah's going up there to hit her—"},
+    {n:"nar",show:[],t:"You don't let go. Fah pulls with everything she has three times, then stops. Her clenched fist slowly opens."},
+    {n:"fah",f:"sad",l:"fight",t:"…Not today, right? Fah knows. Fah knows."}]}]:[])]},
+ {n:"npc",who:"Khun Krerk",t:"I don't look down on the regional rings. I paid for every baht of them, and I love them… but tonight everyone saw what the very top of fighting looks like."},
  {n:"nar",show:[{id:"npc:krerk"}],t:"The whole hall turns to look at you.",choice:[
    {t:"\"That wasn't a fight. That was hurting people who weren't ready.\"",then:[{n:"npc",who:"Khun Krerk",t:"The real world never waits for anyone to get ready. I learned that from that van."}]},
-   {t:"\"If you want to see the real world, send your fighters to face my camp.\"",fx:G2=>{R.closeDare=1;},then:[{n:"npc",who:"Khun Krerk",t:"…That's exactly what I was hoping for, Manager."}]},
-   {t:"(Say nothing. Turn and lead the champions off the ring.)",then:[{n:"nar",t:"You turn your back on Mr. Krerk. The hall stays silent except for the footsteps of the Sirichai camp going down the steps."}]}]},
- rin?{n:"rin",f:"angry",l:"casual",t:"If they'd signed, clause 14.3 hands every move they ever threw to Naka… Ladda wouldn't have to guess a single punch. She already has everyone's tapes."}:{n:"coach",t:"If they'd signed, every move they ever threw would belong to Naka. Ladda wouldn't have to guess a single punch."},
- {n:"alicia",f:"sad",l:"fight",t:rin?"If Rin and your camp hadn't read that contract for us… I'd be standing beside her on that ring right now.":"If it weren't for your camp… I'd be standing beside her on that ring right now."},
- {n:"nar",show:[{id:"lada",l:"casual"}],t:"Ladda pulls the hood back over her head and walks past you without stopping, speaking quietly as she passes."},
- {n:"lada",l:"casual",t:"…They didn't sign because of your camp. I want to know what your camp has."},
- fah?{n:"fah",f:"sad",l:"casual",t:"That's… modern fighting. Just like Fah"}:{n:"coach",t:"That's not just Muay Thai… that's everything combined"},
- {n:"npc",who:"Khun Krerk",t:"Thank you all for coming"},
+   {t:"\"If you want to know who's strongest, send your fighters to face my camp.\"",fx:G2=>{R.closeDare=1;},then:[{n:"npc",who:"Khun Krerk",t:"…That's exactly what I was hoping for, Manager."}]},
+   {t:"(Say nothing. Turn and lead the champions off the ring.)",then:[{n:"nar",show:[],t:"You turn your back on Mr. Krerk. The hall stays silent except for the footsteps of the Sirichai camp going down the steps."}]}]},
+ rin?{n:"rin",f:"angry",l:"fight",t:"If they'd signed, clause 14.3 would make every move they've ever thrown Naka's… Ladda wouldn't have to guess a single punch."}:{n:"coach",t:"If they'd signed, every move they've ever thrown would belong to Naka. Ladda wouldn't have to guess a single punch."},
+ {n:"alicia",f:"sad",l:"fight",t:rin?"If Rin and your camp hadn't read that contract for me… I'd be standing next to him by now.":"If it weren't for your camp… I'd be standing next to him by now."},
+ {n:"nar",show:[{id:"lada",l:"casual",f:"sad"}],t:"Ladda pulls her hood up and follows her father without stopping, but says something quietly as she passes you."},
+ {n:"lada",f:"sad",l:"casual",t:"…They didn't sign because of your camp. I want to know what your camp has."},
+ fah?{n:"fah",f:"surprised",l:"fight",t:"That's… modern boxing. Like mine. Except there's nothing left inside it at all."}:{n:"coach",t:"That's not just Muay Thai… that's everything combined"},
+ {n:"pailin",f:"sad",t:"Manager… I've known Khun Krerk for twenty years. May I tell you something?"},
+ {n:"pailin",f:"sad",t:"The night the national-team van overturned, Khun Krerk's wife was riding with them. She never came home. He lost his knee, the Olympics, and her, all in one night."},
+ {n:"pailin",f:"sad",t:"Ladda was four. From that day on, everything the Nakas had, doctors, coaches, labs, data, was poured into one child."},
+ {n:"pailin",f:"sad",t:"He didn't raise a daughter. He built an answer to the luck that took everything from him… and Ladda never got to choose, not once."},
+ kati?{n:"kati",f:"sad",l:"fight",t:"…Grandpa Chai taught me because I wanted to fight, not because he wanted to beat anyone."}:{n:"coach",t:"…A good teacher doesn't build a fighter to take revenge on anyone."},
  {n:"nar",bg:"camp",show:[],t:"Three days later a black envelope edged in red reaches the camp. No stamp, only one signature everyone knows: Krerk Naka."},
- ...rgIf(R.c2==="deal",[rin?{n:"rin",f:"flustered",l:"casual",t:"Manager, the partner contract we took money for. Clause 30 says: \"Should Naka League lose to the partner camp, this contract shall terminate immediately\""}:{n:"coach",t:"The partner contract we took money for. Clause 30 says if Naka League loses to our camp, the contract ends immediately…"},
+ ...rgIf(R.c2==="deal",[rin?{n:"rin",f:"flustered",l:"fight",t:"Manager, the partner contract we took money for. Clause 30 says: \"Should Naka League lose to the partner camp, this contract shall terminate immediately\""}:{n:"coach",t:"The partner contract we took money for. Clause 30 says if Naka League loses to our camp, the contract ends immediately…"},
    {n:"coach",t:"He was that confident, to write this clause in"}]),
  {n:"coach",t:"Throws allowed, locks allowed… we haven't trained for any of that, not even one day"},
  {n:"coach",t:"We have three weeks. Drill every counter, then on the night we pick one per bout. The card is in the mailbox."}];}
@@ -1546,7 +1557,7 @@ Object.assign(REGION,{
     /* the tournament runs its course without four cups: three years in, nothing in progress */
     return cups.length>=1&&now>=(R.startAbs||0)+156&&!RG_ORDER.some(r=>R.champ[r]&&R.champ[r].state==="series")&&!R.trip;},
   openFinal(G){const R=G.region,now=gameWeek(G);R.close=now;R.final={stage:"prep",abs:now+3,prep:null,tries:0,won:false,intelAbs:now+1};},
-  /* v1.91.73 (Man): the black card is Krerk's own challenge — a black letter with a blinking red frame that is also the way into the warehouse */
+  /* v1.91.72 (Man): the black card is Krerk's own challenge — a black letter with a blinking red frame that is also the way into the warehouse */
   blackCard(G){const R=G.region,F=R.final;if(!F)return;const wk=((F.abs-1)%52)+1;
     const ps=R.closeDare?"\n\nP.S. That night you told me to send my fighters to your camp. I am sending five.":R.closeFace?"\n\nP.S. My daughter never asks anyone's name. That night she asked yours.":"";
     addMail(G,{kind:"letter",tone:"black",bk:1,from:"Krerk Naka",title:"Black card",body:`To the manager of Sirichai Camp,
@@ -1574,7 +1585,7 @@ The door is open every night. Send your fighters.
       <h4>Naka League team</h4>${team}
       <div class="mfoot">${ready?`<button class="btn primary" data-act="rgfline">${F.live?"Back into the warehouse ▸":"Go to the underground warehouse ▸"}</button>`:`<span class="meta">Available from week ${wk} · trained ${F.abs-now} more weeks</span>`}</div></section>`;},
   finalPool(G){return roster(G).filter(f=>!f.injury&&!isAway(G,f.id));},
-  /* v1.91.73 (Man): a loading screen on the way in — the board opens only when every portrait and sprite of the night is ready (no blank, stuck cards) */
+  /* v1.91.72 (Man): a loading screen on the way in — the board opens only when every portrait and sprite of the night is ready (no blank, stuck cards) */
   finalLoad(done){if(typeof document==="undefined"){done();return;}const pool=this.finalPool(G),ref=pool[0]||roster(G)[0];for(const k of NL_ORDER)if(!G.F["nl_"+k]&&ref)nlFighter(G,k,ref);
     const L=["bg_naka_underground","lada_fight_happy","lada_fight_angry","nl_rosa_win_por",...NL_ORDER.filter(k=>k!=="ladda").map(k=>`nl_${k}_por`),...NL_ORDER.map(k=>G.F["nl_"+k]&&G.F["nl_"+k].sprite?G.F["nl_"+k].sprite+"_sheet":null).filter(Boolean),"nl_ladda_hood_sheet","nl_ladda_sheet","nl_ladda_blood_sheet",...pool.map(f=>`${f.id}_fight_happy`)];
     const el=document.createElement("div");el.className="rg-load";el.innerHTML=`<div class="rgl-in"><b>🂠 Khlong Toei Port</b><p>The camp van turns into the alley of an abandoned warehouse. Its headlights find a steel door left ajar, waiting…</p><div class="rgl-bar"><i></i></div></div>`;document.body.appendChild(el);
@@ -1589,7 +1600,7 @@ The door is open every night. Send your fighters.
     if(!F.live){F.cur={};F.clear={};for(const k in K)delete K[k];} /* v1.91.53 (Man): a lost night starts again from bout 1 (v1.91.24 kept the bouts already won) */
     const C=F.cur=F.cur||{};
     for(const k of NL_ORDER)if(!C[k]&&L[k]&&!pool.some(f=>f.id===L[k]))delete L[k];
-    for(const k of NL_ORDER)if(!C[k])delete L[k]; /* v1.91.73 (Man): our side starts empty — each bout's fighter is picked when that bout comes up, then the prep screen locks her in */
+    for(const k of NL_ORDER)if(!C[k])delete L[k]; /* v1.91.72 (Man): our side starts empty — each bout's fighter is picked when that bout comes up, then the prep screen locks her in */
     const ref=pool[0]||roster(G)[0];for(const k of NL_ORDER)if(!G.F["nl_"+k]&&ref)nlFighter(G,k,ref);
     const v=Object.values(C),w=v.filter(x=>x==="W").length,l=v.filter(x=>x==="L").length,next=NL_ORDER.find(k=>!C[k]);
     if(UI.rgPick&&!C[UI.rgPick]){const k=UI.rgPick,o=G.F["nl_"+k],at=id=>NL_ORDER.find(x=>L[x]===id);
@@ -2043,7 +2054,7 @@ const RG_SHOW=[
  {cid:"chaba",steps:[[200,"cap","Chaba charges in and never takes a single step back."],[700,"play","hit","A","punch"],[1100,"play","hit","A","punch"],[1500,"play","hit","A","elbow"],[1700,"cap","Ladda lets three shots land, backing up until the ropes are at her back…"],
    [2600,"sp","B","nl_ladda_sp_superman","Superman Punch"],[3900,"play","takedown","B","punch"],[4400,"play","gnp","B","punch"],[4800,"play","gnp","B","punch"],[5200,"play","ko","B","punch"],[5300,"cap","…then uses that same force to drag Chaba to the canvas."]],end:6800}];
 Object.assign(REGION,{
-  playClose(done){if(G.region){delete G.region.closeDare;delete G.region.closeFace;}const S=rgClose(G),i=S.findIndex(x=>x&&x.cut==="ladda"),a=i<0?S:S.slice(0,i+1),b=i<0?[]:S.slice(i+1),opt={bg:"closing_ceremony",look:"casual"};
+  playClose(done){if(G.region){delete G.region.closeDare;delete G.region.closeFace;}const S=rgClose(G),i=S.findIndex(x=>x&&x.cut==="ladda"),a=i<0?S:S.slice(0,i+1),b=i<0?[]:S.slice(i+1),opt={bg:"closing_ceremony",look:"fight"}; /* v1.91.74 (Man): tense faces — the casual art has no shocked/sad face, the ring gear does */
     playScene(a,()=>{if(i<0){done();return;}this.laddaShow(()=>playScene(b,done,opt));},opt);},
   laddaShow(done){if(typeof document==="undefined"||typeof FS==="undefined"){done();return;}
     const old=document.getElementById("rg-show");if(old)old.remove();
