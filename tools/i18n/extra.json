@@ -16686,5 +16686,15 @@
  "<span class=\"rg-nwait\">ไปได้สัปดาห์ ": "<span class=\"rg-nwait\">Open from week ",
  "<button class=\"btn red rg-nbtn\" data-act=\"rgfline\">ไปโกดัง ▸</button>": "<button class=\"btn red rg-nbtn\" data-act=\"rgfline\">To the warehouse ▸</button>",
  " · ท้ามาแล้ว ": " · tried ",
- "<div class=\"px rg-nstrip\"><span class=\"rg-ncard\">🂠</span><span><b>ไฟต์ใต้ดิน 5 ต่อ 5 · นาคาลีก</b><small>โกดังเก่าท่าเรือคลองเตย · กติกาเปิด · ชนะ 3 ใน 5": "<div class=\"px rg-nstrip\"><span class=\"rg-ncard\">🂠</span><span><b>Underground 5 vs 5 · Naga League</b><small>Old Khlong Toei dock warehouse · open rules · best of 5"
+ "<div class=\"px rg-nstrip\"><span class=\"rg-ncard\">🂠</span><span><b>ไฟต์ใต้ดิน 5 ต่อ 5 · นาคาลีก</b><small>โกดังเก่าท่าเรือคลองเตย · กติกาเปิด · ชนะ 3 ใน 5": "<div class=\"px rg-nstrip\"><span class=\"rg-ncard\">🂠</span><span><b>Underground 5 vs 5 · Naga League</b><small>Old Khlong Toei dock warehouse · open rules · best of 5",
+ "<p class=\"meta\">ครูแดงลาอยู่ · ทริปนี้ไม่มีคำแนะนำ</p>": "<p class=\"meta\">Kru Daeng is on leave · no advice this trip</p>",
+ "อยู่ค่าย · ทริปนี้ไม่มีคำแนะนำ": "stays at camp · no advice this trip",
+ "ไปด้วย · ดูเทปให้ แนะนำมุมเวที": "coming · reads tape, advises from the corner",
+ "\" alt=\"\">ครูแดง <small>": "\" alt=\"\">Kru Daeng <small>",
+ "</b> คน · เลือกแล้ว ": "</b> · picked ",
+ ") · นักมวยไปได้ <b>": ") · fighters who fit: <b>",
+ " · ครูแดง 1 ที่": " · Kru Daeng 1 seat",
+ " ที่นั่ง (ผู้จัดการขับ": " seats (the manager drives",
+ "ยังไม่มีรถค่าย · นั่งรถทัวร์ไปกี่คนก็ได้ จ่ายค่าตั๋วรายหัว · เลือกแล้ว ": "No camp vehicle · the bus takes any number, a ticket each · picked ",
+ "<button class=\"tripspot\" data-act=\"rgtravel\" aria-label=\"เดินทางไปชกศึกชิงเจ้าสี่ภาค\"><span class=\"triptag\">🚐 เดินทาง ▸</span></button>": "<button class=\"tripspot\" data-act=\"rgtravel\" aria-label=\"Travel to a Four Regions bout\"><span class=\"triptag\">🚐 Travel ▸</span></button>"
 }

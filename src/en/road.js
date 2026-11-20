@@ -62,8 +62,10 @@ function roadRiders(G){if(!G)return [];const all=roster(G).filter(f=>!f.injury||
   /* v1.91.76 (Man): who travels is limited by the camp vehicle's seats — the trip carries its party (planning uses UI.rgParty) */
   const P=(G.region&&G.region.trip&&G.region.trip.party)||(typeof UI!=="undefined"&&UI.rgParty)||null;return P?all.filter(f=>P.includes(f.id)):all;}
 /* seats left for fighters: the manager drives, Kru Daeng always comes unless he is on leave; no camp vehicle = bus tickets for a small group */
-function roadCoachIn(G){return !(G&&G.coachAwayAbs&&gameWeek(G)<G.coachAwayAbs);}
-function roadSeats(G){const k=roadCarKey(G),C=ROAD_CAR[k]||ROAD_CAR.none;return Math.max(1,(k==="none"?4:C.seats)-1-(roadCoachIn(G)?1:0));}
+/* v1.91.87 (Man): Kru Daeng takes a seat and can be left at camp (then no advice on the trip, like when he is on leave); the bus takes any number, a ticket each */
+function roadCoachAvail(G){return !(G&&G.coachAwayAbs&&gameWeek(G)<G.coachAwayAbs);}
+function roadCoachIn(G){if(!roadCoachAvail(G))return false;const T=G&&G.region&&G.region.trip;if(T&&T.party)return !T.noCoach;return !(typeof UI!=="undefined"&&UI.rgNoCoach);}
+function roadSeats(G){const k=roadCarKey(G),C=ROAD_CAR[k]||ROAD_CAR.none;if(k==="none")return 30;return Math.max(1,C.seats-1-(roadCoachIn(G)?1:0));}
 
 /* the whole bill for one trip, there and back */
 function roadPlan(G,destKey,carKey,wk){const D=ROAD_DEST[destKey],k=carKey||roadCarKey(G),C=ROAD_CAR[k]||ROAD_CAR.none,ft=C.fuel||"diesel",price=roadFuel(G,wk,ft);

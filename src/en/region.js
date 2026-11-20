@@ -1055,7 +1055,7 @@ const REGION={
     const opp=this.makeOpp(G,dest,me,abs),pay=this.purse(G),bid=`rg${abs}_${dest}`;
     G.bookings.push({id:bid,a:fid,b:opp,week:wk,tier:"region",rounds:3,win:pay.win,lose:pay.lose,region:{r:D.r,dest},bg:dest==="chanthaburi"?"bg_region_east.webp":`bg_ring_${dest}.webp`});
     G.cash-=P.total;G.offers=(G.offers||[]).filter(o=>o.week!==wk);
-    R.trip={abs,season:G.season||1,wk,dest,fid,opp,bid,cost:P.total,car:P.car,fat:P.fat,quick:this.canQuick(G,dest)&&!!R.quickPref,party:this.party(G,fid)};
+    R.trip={abs,season:G.season||1,wk,dest,fid,opp,bid,cost:P.total,car:P.car,fat:P.fat,quick:this.canQuick(G,dest)&&!!R.quickPref,party:this.party(G,fid),noCoach:roadCoachAvail(G)&&!roadCoachIn(G)};UI.rgNoCoach=false;
     G.log=G.log||[];G.log.push(`Trip planned to ${D.name} week ${wk} · travel cost ${fmt(P.total)}`);return {ok:true,wk,cost:P.total};},
   /* v1.91.76 (Man): the travelling party — the fighter always, then whoever the player picked, capped by the vehicle's seats */
   pairDue(G,dest){const R=G.region,D=ROAD_DEST[dest];if(!R||!D)return null;const tx=R.tx||{},dfr=R.txDefer||{};
@@ -1401,7 +1401,8 @@ ${RG[r].champ}, the new champion of ${RG[r].name} is open to a new regional titl
      <p class="meta">Travel in week <b>${wk}</b> · ${D.km} km · ${roadNights(D.km)?`Stay ${roadNights(D.km)} night(s)`:"Day trip"} · opponent: <b>${esc(this.oppName(G,dest))}</b>, the provincial champion</p>`;
     if((UI.rgStep||1)===1){const okF=UI.rgParty.some(id=>RD.some(f=>f.id===id));
       return `${head}<p class="rg-step">Step 1/2 · Who comes along</p>
-       <p class="meta">${esc(roadCarName(roadCarKey(G)))} · fighters allowed: <b>${max}</b> · the manager drives ${roadCoachIn(G)?" · Kru Daeng comes along":" · Kru Daeng is on leave"} · picked ${UI.rgParty.length}/${max}</p>
+       <p class="meta">${roadCarKey(G)==="none"?`No camp vehicle · the bus takes any number, a ticket each · picked ${UI.rgParty.length} fighters in camp`:`${esc(roadCarName(roadCarKey(G)))} · ${(ROAD_CAR[roadCarKey(G)]||{}).seats} seats (the manager drives ${roadCoachIn(G)?" · Kru Daeng 1 seat":""}) · fighters who fit: <b>${max}</b> · picked ${UI.rgParty.length}/${max}`}</p>
+       ${roadCoachAvail(G)?`<div class="rg-pick"><button class="btn sm" data-act="rgcoach" aria-pressed="${roadCoachIn(G)}"><img class="face sm" src="${faceSrc("coach","happy")}" alt="">Kru Daeng <small>${roadCoachIn(G)?"coming · reads tape, advises from the corner":"stays at camp · no advice this trip"}</small></button></div>`:`<p class="meta">Kru Daeng is on leave · no advice this trip</p>`}
        <div class="rg-pick">${cand.map(f=>{const on=UI.rgParty.includes(f.id),full=!on&&UI.rgParty.length>=max,pr=this.pairDue(G,dest)===f.id,fit=RD.some(x=>x.id===f.id);
          return `<button class="btn sm${pr?" rg-pairtag":""}" data-act="rgparty" data-v="${f.id}" aria-pressed="${on}" ${full?"disabled":""}>${faceImg(f,"sm")}${esc(f.name)}${fit?"":` <small>can't fight</small>`}${pr?` <small>💬 has a story with ${esc(C.champ)}</small>`:""}</button>`;}).join("")}</div>
        ${okF?"":`<p class="redt">Bring at least one fighter who is fit to fight</p>`}
@@ -1583,6 +1584,7 @@ if(typeof ACT!=="undefined")Object.assign(ACT,{
   rgtravelto:d=>{UI.rgFid=null;UI.rgParty=null;UI.rgNow=true;UI.rgStep=1;UI.modal={type:"rgplan",dest:d.v};render();},
   rgparty:d=>{const P=UI.rgParty=UI.rgParty||[],i=P.indexOf(d.v);if(i>=0)P.splice(i,1);else if(P.length<roadSeats(G))P.push(d.v);render();},
   rgstep:d=>{UI.rgStep=+d.v;render();},
+  rgcoach:()=>{UI.rgNoCoach=!UI.rgNoCoach;if(UI.rgParty)UI.rgParty=UI.rgParty.slice(0,roadSeats(G));render();},
   rgtdev:d=>{if(!G.devTravel)return;const v=d.v,R=G.region;
     if(v.startsWith("car:")){const k=v.slice(4);G.decor=G.decor||{};G.decor.vehicle=k;G.decorUnlocks=G.decorUnlocks||{};G.decorUnlocks.vehicle=[...new Set([...(G.decorUnlocks.vehicle||[]),k])];}
     else if(v==="coach"){G.coachAwayAbs=roadCoachIn(G)?gameWeek(G)+4:0;}
