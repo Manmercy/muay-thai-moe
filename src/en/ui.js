@@ -1,5 +1,5 @@
 // ================= MUAY THAI MOE v1.3 — UI =================
-const VERSION="1.91.80";
+const VERSION="1.91.81";
 const CUR_LANG=(typeof window!=="undefined"&&window.LANG)||"th";
 const TH_LABEL=String.fromCharCode(3652,3607,3618);
 function langSwitch(cls){return `<div class="langsw ${cls||""}" role="group" aria-label="Language">${[["th",TH_LABEL],["en","EN"]].map(([k,l])=>`<button class="lsb ${CUR_LANG===k?"on":""}" data-act="setlang" data-v="${k}" aria-pressed="${CUR_LANG===k}">${l}</button>`).join("")}</div>`;}
@@ -564,7 +564,7 @@ function weakPick(f){const a=f.a;const ax=RADAR_AX.map(([n,fn])=>[n,fn(a)]).sort
   let k=0;const streak=(f.trainLog||[]).slice(-2);if(streak.length===2&&streak.every(x=>x===pre(ax[0][0])))k=1;
   return [ax[k],pre(ax[k][0]),k===1];}
 function planTip(f){const b=nextBooking(f);if(!b||f.injury)return "";const op=G.F[b.b];
-  if(!scouted(op.id)){const bk=oppKnown(G,op.id);return `<div class="kv-row"><span>Fight plan wk ${b.week}</span><b class="dim">${bk?`Last bout, ${op.name} favors ${attrName(bk.last.top)} · watch tape to update`:`Scout ${op.name} first, then I can plan the fight`}</b></div>`;}
+  if(!scouted(op.id)){const bk=oppKnown(G,op.id);return `<div class="kv-row"><span>Fight plan wk ${b.week}</span><b class="dim">${bk?`From the last meeting, ${op.name} favors ${attrName(bk.last.top)} · watch tape to update`:`Scout ${op.name} first, then I can plan the fight`}</b></div>`;}
   const A=adviseCached(f.id,op.id,b.rounds||3);const a=op.a;const tg=a.stamina<=Math.min(a.foot,a.guard)?"body":a.foot<=a.guard?"legs":"head";
   return `<div class="kv-row"><span>Fight plan wk ${b.week}</span><b class="goldt">${PLANS[A.best].name} · ${TGT[tg]}</b></div><p class="meta">${op.name}'s weak spot is ${oppIntel(op).weak} · use "Fight prep" in the fight week for a readiness bonus</p>`;}
 function masteryLine(f){const s=mainStyle(f),v=styleVal(f,s),m=mastery(f);
@@ -1622,7 +1622,7 @@ function preCompare(me,op,b){const R=oppRead(op),v=verdictOf(adviseCached(me.id,
   const rows=CMP_ROWS.map(([n,g],i)=>{const x=g(me.a),y=R.v[i];return R.lv===2?{n,x,y:y+oX}:{n,x,lo:y[0]+oX,hi:y[1]+oX};});
   const S=Math.max(20,...rows.map(r=>Math.ceil(Math.max(r.x,r.y!=null?r.y:r.hi))));
   const bar=(cls,val,on)=>`<i class="pb ${cls}${val>20.05?" ov":""}" style="--v:${on?clamp(val/S*100,0,100):0}%;--g:${clamp(20/Math.max(val,.1)*100,0,100)}%"></i>`;
-  const note=R.lv===0?"No tape · a rough read from her reputation":R.lv===1?(R.k==="tape"?`Old tape · ${R.ago} weeks old · watch again for exact numbers`:`Last bout, ${R.ago} weeks ago · may have changed`):R.ago>=3?`From a tape ${R.ago} weeks ago · she may have improved`:"";
+  const note=R.lv===0?"No tape · a rough read from her reputation":R.lv===1?(R.k==="tape"?`Old tape · ${R.ago} weeks old · watch again for exact numbers`:`From the last meeting, ${R.ago} weeks ago · may have changed`):R.ago>=3?`From a tape ${R.ago} weeks ago · she may have improved`:"";
   return `<div class="pcmp lv${R.lv}"><div class="pcmp-h"><span class="pill dtag ${v.c}">${v.t}</span>${note?`<small class="mutt">${note}</small>`:""}</div>${rows.map(r=>{
     if(r.y!=null)return `<div class="pcr"><b class="num ${r.x>r.y+.4?"goldt":""}">${r.x.toFixed(1)}</b>${bar("l",r.x,1)}<span>${r.n}</span>${bar("r",r.y,1)}<b class="num ${r.y>r.x+.4?"redt":""}">${r.y.toFixed(1)}</b></div>`;
     return `<div class="pcr"><b class="num ${r.x>r.hi?"goldt":""}">${r.x.toFixed(1)}</b>${bar("l",r.x,1)}<span>${r.n}</span>${bar("r est",(r.lo+r.hi)/2,1)}<b class="num rng ${r.lo>r.x?"redt":""}">${r.lo}–${r.hi}</b></div>`;}).join("")}</div>`;}

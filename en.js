@@ -6492,7 +6492,7 @@ AU.gsfx=function(kind,a){if(!this.init()||this.muted||!SETTINGS.sfx)return;const
   if(kind==="shimmer")for(let i=0;i<6;i++)T(i*.05,{f:1400+Math.random()*1400,type:"sine",dur:.12,peak:.06});};
 
 // ================= MUAY THAI MOE v1.3 — UI =================
-const VERSION="1.91.80";
+const VERSION="1.91.81";
 const CUR_LANG=(typeof window!=="undefined"&&window.LANG)||"th";
 const TH_LABEL=String.fromCharCode(3652,3607,3618);
 function langSwitch(cls){return `<div class="langsw ${cls||""}" role="group" aria-label="Language">${[["th",TH_LABEL],["en","EN"]].map(([k,l])=>`<button class="lsb ${CUR_LANG===k?"on":""}" data-act="setlang" data-v="${k}" aria-pressed="${CUR_LANG===k}">${l}</button>`).join("")}</div>`;}
@@ -7057,7 +7057,7 @@ function weakPick(f){const a=f.a;const ax=RADAR_AX.map(([n,fn])=>[n,fn(a)]).sort
   let k=0;const streak=(f.trainLog||[]).slice(-2);if(streak.length===2&&streak.every(x=>x===pre(ax[0][0])))k=1;
   return [ax[k],pre(ax[k][0]),k===1];}
 function planTip(f){const b=nextBooking(f);if(!b||f.injury)return "";const op=G.F[b.b];
-  if(!scouted(op.id)){const bk=oppKnown(G,op.id);return `<div class="kv-row"><span>Fight plan wk ${b.week}</span><b class="dim">${bk?`Last bout, ${op.name} favors ${attrName(bk.last.top)} · watch tape to update`:`Scout ${op.name} first, then I can plan the fight`}</b></div>`;}
+  if(!scouted(op.id)){const bk=oppKnown(G,op.id);return `<div class="kv-row"><span>Fight plan wk ${b.week}</span><b class="dim">${bk?`From the last meeting, ${op.name} favors ${attrName(bk.last.top)} · watch tape to update`:`Scout ${op.name} first, then I can plan the fight`}</b></div>`;}
   const A=adviseCached(f.id,op.id,b.rounds||3);const a=op.a;const tg=a.stamina<=Math.min(a.foot,a.guard)?"body":a.foot<=a.guard?"legs":"head";
   return `<div class="kv-row"><span>Fight plan wk ${b.week}</span><b class="goldt">${PLANS[A.best].name} · ${TGT[tg]}</b></div><p class="meta">${op.name}'s weak spot is ${oppIntel(op).weak} · use "Fight prep" in the fight week for a readiness bonus</p>`;}
 function masteryLine(f){const s=mainStyle(f),v=styleVal(f,s),m=mastery(f);
@@ -8115,7 +8115,7 @@ function preCompare(me,op,b){const R=oppRead(op),v=verdictOf(adviseCached(me.id,
   const rows=CMP_ROWS.map(([n,g],i)=>{const x=g(me.a),y=R.v[i];return R.lv===2?{n,x,y:y+oX}:{n,x,lo:y[0]+oX,hi:y[1]+oX};});
   const S=Math.max(20,...rows.map(r=>Math.ceil(Math.max(r.x,r.y!=null?r.y:r.hi))));
   const bar=(cls,val,on)=>`<i class="pb ${cls}${val>20.05?" ov":""}" style="--v:${on?clamp(val/S*100,0,100):0}%;--g:${clamp(20/Math.max(val,.1)*100,0,100)}%"></i>`;
-  const note=R.lv===0?"No tape · a rough read from her reputation":R.lv===1?(R.k==="tape"?`Old tape · ${R.ago} weeks old · watch again for exact numbers`:`Last bout, ${R.ago} weeks ago · may have changed`):R.ago>=3?`From a tape ${R.ago} weeks ago · she may have improved`:"";
+  const note=R.lv===0?"No tape · a rough read from her reputation":R.lv===1?(R.k==="tape"?`Old tape · ${R.ago} weeks old · watch again for exact numbers`:`From the last meeting, ${R.ago} weeks ago · may have changed`):R.ago>=3?`From a tape ${R.ago} weeks ago · she may have improved`:"";
   return `<div class="pcmp lv${R.lv}"><div class="pcmp-h"><span class="pill dtag ${v.c}">${v.t}</span>${note?`<small class="mutt">${note}</small>`:""}</div>${rows.map(r=>{
     if(r.y!=null)return `<div class="pcr"><b class="num ${r.x>r.y+.4?"goldt":""}">${r.x.toFixed(1)}</b>${bar("l",r.x,1)}<span>${r.n}</span>${bar("r",r.y,1)}<b class="num ${r.y>r.x+.4?"redt":""}">${r.y.toFixed(1)}</b></div>`;
     return `<div class="pcr"><b class="num ${r.x>r.hi?"goldt":""}">${r.x.toFixed(1)}</b>${bar("l",r.x,1)}<span>${r.n}</span>${bar("r est",(r.lo+r.hi)/2,1)}<b class="num rng ${r.lo>r.x?"redt":""}">${r.lo}–${r.hi}</b></div>`;}).join("")}</div>`;}
@@ -10758,7 +10758,7 @@ CHAT.mali.push(
   {id:"m_h18",need:G=>hAt(G,"mali")>=18,x:[
    ["Manager, I have a dream I never told anyone. I want to build Mom a house by the sea",[["What kind of house? Tell me",2,"Two storeys, wooden, a balcony facing the sea. So Mom can thread garlands and watch the sunrise"],["That's a lovely dream",1,"Right~?"],["Beachfront land is pricey",0,"I know… so I need a lot more fights"]]],
    ["I've even drawn it in my notebook. There's a room for you, for visits",[["Where's mine? Sea view please",2,"Sea view, of course! Right next to mine~"],["Thanks for including me",1,"Of course I would"],["Is it a good drawing?",0,"…No. But the heart behind it is"]]],
-   ["Promise. When it's built, you're the first guest",[["Promise. I'll help hammer the nails",2,"You can hammer nails?! …Never mind, I'll teach you"],["Promise",1,"Pinky swear~"],["If I'm free",0,"You'll be free!"]]]]},
+   ["Promise. When it's built, you're the first guest",[["Promise. I'll help hammer the nails",2,"You can hammer nails?! …Never mind, I'll teach you"],["I promise, jao.",1,"Pinky swear~"],["If I'm free",0,"You'll be free!"]]]]},
   {id:"m_h20",need:G=>hAt(G,"mali")>=20,x:[
    ["Manager… I just realised I haven't cried after a fight in a while",[["Why do you think?",2,"Because every time I come down from the ring, someone's already waiting. I don't need to wish anyone could see"],["I'm glad",1,"Mm~"],["Crying's okay too",1,"I know. I'll cry if I need to. I just don't anymore"]]],
    ["When I first came here I thought boxing was a job. Fight, send money home",[["And now?",2,"Now I fight because I love it. Money still matters, but it's not the only reason anymore"],["A job's not a bad thing",1,"No, but a job you love is better~"],["Your purse went up too",0,"Ha! That too"]]],
@@ -11097,7 +11097,7 @@ CHAT.fah.push(
   {id:"f_h24",need:G=>hAt(G,"fah")>=24,x:[
    ["I've thought about it. I want to find my parents. Not to forgive them. Just to know how they are",[["Whatever you find, I'll come with you",2,"…I didn't ask. But… thank you. You always know before I say it"],["What does Grandma say?",1,"She says it's up to me. She'll wait at home"],["You don't have to",0,"I know. I want to"]]],
    ["Grandma has an address from a letter they sent three years ago. I never knew there was a letter",[["She was waiting until you were ready",2,"…That's exactly what she said. Why do you always sound like her?"],["Were you shocked?",1,"A bit. Then a bit angry. Then… I don't know"],["Why didn't she tell you?",0,"She had her reasons. I get it"]]],
-   ["If I cry when we go, no teasing",[["I'll stand in front so no one sees",2,"…Even a tiger needs a bodyguard sometimes, huh"],["I won't",1,"Promise"],["You won't cry",0,"…Maybe I will"]]]]},
+   ["If I cry when we go, no teasing",[["I'll stand in front so no one sees",2,"…Even a tiger needs a bodyguard sometimes, huh"],["I won't",1,"I promise, jao."],["You won't cry",0,"…Maybe I will"]]]]},
   {id:"f_h27",need:G=>hAt(G,"fah")>=27&&!topLock(G,"fah"),x:[
    ["Hey… the day we found my parents, I didn't cry when I saw them. I cried on the ride home",[["I know. I was on the back",2,"…And you held on tighter and didn't say anything. I remember"],["Did crying help?",1,"Yeah. Like throwing another stone in the river"],["Why not when you saw them?",0,"Didn't want them to see"]]],
    ["They have a new family. Two little kids. I'm not angry anymore. Just… letting go",[["You're stronger than anyone knows",2,"…Not strong. I have a home now. So I don't need to chase the old one"],["Letting go is good",1,"Mm"],["That's a shame",0,"Not a shame. I've got Grandma. I've got you"]]],
