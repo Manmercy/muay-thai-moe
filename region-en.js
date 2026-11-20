@@ -107,6 +107,7 @@ const ROAD_SHOTGUN={
  ploy:"Quiet like this is nice. …If you get sleepy, say so. I can take the wheel.",
  fah:"The front seat is Fah's! Got a problem?! …Drive carefully, okay. Not that Fah's scared. Just saying."};
 
+const ROAD_STOP=["A stop at a pump halfway. Everyone stretches their legs and Kru Daeng buys canned coffee for the whole car","A stop for khao man gai by the road. The manager falls asleep at the table for five minutes","A stop at a viewpoint for a group photo. Kru Daeng refuses to smile","A stop at the pump toilets, the queue so long the fighters take turns timing it"];
 function roadLines(S){const P=S.plan,D=P.D,r=D.r,rng=mulberry32(S.seed),pick=a=>a[Math.floor(rng()*a.length)],L=[];
   L.push({n:"nar",t:`${roadCarName(P.car)} of Sirichai Camp sets off in ${S.time==="night"?"the afternoon":"the small hours"}, heading for ${D.name}, ${D.km} km away.`});
   if(P.car!=="none"&&P.band!=="mid")L.push({n:"nar",t:`${P.ft==="ev"?`Stopped to charge, per unit ${fmt(P.price)}`:`Stopped to fill up with ${(ROAD_FUELS[P.ft]||ROAD_FUELS.diesel).n} per litre ${fmt(P.price)}`} ${P.band==="high"?"— so pricey this week the manager lets out a long sigh":P.band==="cheap"?"— cheaper than last week, everyone cheers":"— a normal price, nobody complains"}`});
@@ -115,7 +116,11 @@ function roadLines(S){const P=S.plan,D=P.D,r=D.r,rng=mulberry32(S.seed),pick=a=>
   const ids=S.riders.filter(id=>ROAD_TALK[id]);
   if(S.front&&ROAD_SHOTGUN[S.front])L.push({n:S.front,t:ROAD_SHOTGUN[S.front]});
   const others=ids.filter(id=>id!==S.front);for(let i=others.length-1;i>0;i--){const j=Math.floor(rng()*(i+1));[others[i],others[j]]=[others[j],others[i]];}
-  for(const id of others.slice(0,2)){const T=ROAD_TALK[id],own=T[r];L.push({n:id,t:(own&&rng()<.6?own:pick(T.any)).replace("{km}",D.km)});}
+  /* v1.91.82 (Man): the talk in the car runs as long as the road — a short hop gets one chat, the far south up to four, with a rest stop on the long hauls */
+  const nTalk=D.km<250?1:D.km<700?2:D.km<1200?3:4,hrs=Math.max(1,Math.round(D.km/75));
+  L.push({n:"nar",t:`Distance ${D.km} km · about ${hrs} hours`});
+  others.slice(0,nTalk).forEach((id,i)=>{const T=ROAD_TALK[id],own=T[r],used=L.map(x=>x.t);let t=(own&&i===0&&rng()<.6?own:pick(T.any));if(used.includes(t.replace("{km}",D.km)))t=pick(T.any);L.push({n:id,t:t.replace("{km}",D.km)});
+    if(i===1&&D.km>=700)L.push({n:"nar",t:pick(ROAD_STOP)});if(i===2&&D.km>=1200)L.push({n:"nar",t:pick(ROAD_SCENERY[r])});});
   if(S.wet)L.push({n:"nar",t:"The rain pours so hard the wipers can't keep up. Nobody in the car says a word."});
   L.push({n:"nar",t:S.time==="night"?`The lights of ${D.name} glow up ahead. Only a few more kilometres to the hotel.`:`A "Welcome to ${D.name}" sign slides past on the right. The ring is only a few kilometres away.`,sign:1});
   return L;}
@@ -1077,7 +1082,7 @@ if(typeof POST_BUBBLE!=="undefined")Object.assign(POST_BUBBLE,{
  nl_varya:{win:["On the ground, there's no Muay Thai.","You tapped sooner than I thought, {foe}.","A bear doesn't let go of what it catches."],lose:["…You wouldn't go to the ground. Smart.","Your legs are stronger than the data said.","Next time I'll catch you in the first round."]},
  nl_meili:{win:["Did you see my leg… no, you didn't.","One finger is enough.","Want to come back to Yaowarat for dinner? My treat."],lose:["…Speed alone isn't enough, is it.","My sifu is going to lecture me for ages.","You took my kicks. You've got nerve."]},
  nl_rosa:{win:["¡Olé! Prettiest fall in the whole warehouse!","A pink heart never stops beating!","Don't be sad, give yourself a round of applause!"],lose:["¡Ay! …If you lose, bow beautifully.","My mask stays on, but my heart gives in.","You made the crowd shout for you instead of me. ¡Bravo!"]},
- nl_ladda:{win:["…Noted.","Can you get up?","Weaker than the data said."],lose:["…that was fun","The data… wasn't complete.","Next time I won't miss there."]},
+ nl_ladda:{win:["Weak.","……","A dust mite's bite hurts more.","…Next.","This is the camp that made four regional champions turn my father down?","A waste of time.","Weaker than the data said."],lose:["…that was fun","The data… wasn't complete.","Next time I won't miss there."]},
  baibua:{win:["Thank you for not backing down, {foe}.","The Tha Sao elbow is still sharp.","Come back again next time, jao."],lose:["…I have to go back and train again.","You really have got better.","It's okay. Dad will understand."]},
  tabtim:{win:["Khak thae! Your time hasn't come yet.","Don't cry over a loss. Tabtim's lost too.","Want to get som tam? Tabtim's treat."],lose:["Ow! Hurts, but that was fun.","A loss is a loss. You hit hard, for real.","Next time Tabtim gets it back for sure."]},
  alicia:{win:["You can turn the camera off now. It's over.","I didn't win because of my face.","Thanks for actually fighting me."],lose:["…Cameras off. Give me five minutes.","You really don't care about the camera. Good.","Next time I won't lose."]},
@@ -1330,7 +1335,7 @@ const REGION={
   /* v1.91.76 (Man): the travelling party — the fighter always, then whoever the player picked, capped by the vehicle's seats */
   pairDue(G,dest){const R=G.region,D=ROAD_DEST[dest];if(!R||!D)return null;const tx=R.tx||{},dfr=R.txDefer||{};
     const ds=[dest,...Object.keys(dfr).filter(d=>dfr[d]&&ROAD_DEST[d]&&ROAD_DEST[d].r===D.r)];for(const d of ds)if(RG_PAIR[d]&&RG_TRIPX[d]&&!tx[d]&&rgIn(G,RG_PAIR[d]))return RG_PAIR[d];return null;},
-  party(G,fid){const max=roadSeats(G),pick=(UI.rgParty||[]).filter(id=>id!==fid&&G.F[id]&&G.F[id].camp==="player");return [fid,...pick].slice(0,max);},
+  party(G,fid){const max=roadSeats(G),pick=(UI.rgParty||[]).filter(id=>id!==fid&&G.F[id]&&G.F[id].camp==="player");return [fid,...pick].slice(0,Math.max(max,1));},
   cancel(G){const R=G.region,T=R&&R.trip;if(!T)return false;G.bookings=G.bookings.filter(b=>b.id!==T.bid);G.cash+=T.cost;
     (R.gc=R.gc||[]).push(T.opp);R.trip=null;return true;},
 
@@ -1376,13 +1381,14 @@ Pick your fighter under Fights › Four Regions Championship`+((t=>t?`\n\n(${t})
     ROAD.open(dest,{paid:true,plan:P,onArrive:(P2,front)=>{this.arrive(G,T,P2||P,front);const go=()=>this.hotel(b,T,()=>openFight(b,()=>this.night(T,P2||P,1,done))),A=this.firstArrive(G,ROAD_DEST[dest].r,dest);
       if(A){playScene(A,go,{bg:"gas_station",look:"casual"});}else go();}});},
   /* v1.91.76 (Man): drive → hotel → "head for the ring" → the bout */
-  hotel(b,T,go){const D=ROAD_DEST[T.dest],me=G.F[b.a],op=G.F[b.b];if(!me||!op){go();return;}
-    playScene([{n:"nar",t:`Checked into a hotel in ${D.name}. Everyone drops their bags. ${me.name} sits at the end of the bed, quietly wrapping her hands`},
-      roadCoachIn(G)?{n:"coach",t:`Tonight ${op.name}, the province champion, fights in front of her home crowd tonight. Don't let the cheering rattle you.`}:{n:"nar",t:`Tonight ${op.name}, the province champion, fights in front of her home crowd tonight. Kru Daeng calls briefly: don't let the cheering rattle you.`},
-      {n:"nar",t:"Outside, the pi chawa from the ring starts to carry through the window",choice:[
-        {t:"Head for the ring ▸"},
-        {t:"Stretch before heading out",fx:G2=>{const f=G2.F[b.a];if(f)f.fatigue=Math.max(0,(f.fatigue||0)-5);},then:[{n:"nar",t:`${me.name} stretches until she breaks a sweat, then grabs her robe · fatigue −5`}]}]}],
-      ()=>{save();go();},{bg:"hotel_room",look:"casual"});},
+  hotel(b,T,go,again){const D=ROAD_DEST[T.dest],me=G.F[b.a],op=G.F[b.b];if(!me||!op){go();return;}
+    const girls=roadRiders(G).filter(f=>CANON_IDS.includes(f.id)).sort((a,b2)=>(b2.bond||0)-(a.bond||0)),menu=this.hotelMenu(T,D,girls,1,true);
+    const intro=again?[]:[{n:"nar",t:`Checked into a hotel in ${D.name}. Everyone drops their bags. ${me.name} sits at the end of the bed, quietly wrapping her hands`},
+      roadCoachIn(G)?{n:"coach",t:`Tonight ${op.name}, the province champion, fights in front of her home crowd tonight. Don't let the cheering rattle you.`}:{n:"nar",t:`Tonight ${op.name}, the province champion, fights in front of her home crowd tonight. Kru Daeng calls briefly: don't let the cheering rattle you.`}];
+    playScene([...intro,{n:"nar",t:"There's still time before the bout. What now?",choice:menu}],()=>{save();
+      if(T.goShop){T.goShop=0;this.shop(T,()=>this.hotel(b,T,go,1),1,1);return;}
+      if(T.menuBack){T.menuBack=0;this.hotel(b,T,go,1);return;}
+      T.goRing=0;playScene([{n:"nar",t:"The pi chawa from the ring carries to the hotel door. Everyone grabs their bags and heads for the ring"}],()=>go(),{bg:"hotel_room",look:"casual"});},{bg:"hotel_room",look:"casual"});},
   /* the first trip into a region: its champion comes to meet the camp on the way in */
   firstArrive(G,r,dest){const R=G.region;R.arrived=R.arrived||{};if(R.arrived[r]||!RG_ARRIVE[r])return null;R.arrived[r]=1;rgTouch(G,RG_CID[r]);return RG_ARRIVE[r](G,ROAD_DEST[dest]);},
   /* road fatigue for everyone on board (the fighter only half: the corner keeps her off her feet) · the shotgun seat is a small moment */
@@ -1405,21 +1411,27 @@ Pick your fighter under Fights › Four Regions Championship`+((t=>t?`\n\n(${t})
           {t:`Stay one more night (rooms ${fmt(cost)})`,fx:G2=>{if(G2.cash<cost){T.extraNo=1;return;}G2.cash-=cost;T.extra=1;}}]}],
           ()=>{if(T.extra)this.night(T,{...P,nights:1},1,done);else{if(T.extraNo)toast("Not enough money for the rooms, so back to camp for now");this.home(T,done);}},{bg:this.hotelBg[r],look:"casual"});return;}
       return this.home(T,done);}
-    const cid=this.champId[r],C=RG[r],girls=roadRiders(G).filter(f=>CANON_IDS.includes(f.id)).sort((a,b)=>(b.bond||0)-(a.bond||0)).slice(0,3);
-    const top=girls[0],jeal=top&&(top.bond||0)>=40?top:null;
-    const choice=[{t:`Go for a walk with ${C.champ} (champion of ${C.name})`,fx:G2=>{rgMeet(G2,cid,3);if(jeal)jeal.morale=Math.max(0,(jeal.morale||0)-3);},
-        then:[...this.dateLines(cid,D),...(jeal?[{n:jeal.id,f:"pout",l:"casual",t:this.jealLine(jeal.id,C.champ)}]:[])]},
-      ...girls.map(g=>({t:`Take ${g.name} around ${D.name}`,fx:G2=>{add(G2,g.id,"bond",2);g.morale=Math.min(100,(g.morale||0)+4);},then:[{n:g.id,f:"happy",l:"casual",t:this.girlLine(g.id,D.name)}]})),
-      ...(RG_OUT[T.dest]&&girls.length?[{t:RG_OUT[T.dest].t,fx:G2=>{for(const f of roadRiders(G2))f.morale=Math.min(100,(f.morale||0)+3);add(G2,girls[0].id,"bond",1);},then:[{n:"nar",t:RG_OUT[T.dest].l.replace(/\{g\}/g,girls[n%girls.length].name)+" · morale +3"}]}]:[]),
-      {t:"Rest and recover",fx:G2=>{for(const f of roadRiders(G2))f.fatigue=Math.max(0,(f.fatigue||0)-10);},then:[{n:"nar",t:"Everyone turns in early and wakes up fresh · fatigue −10"}]},
-      {t:`🛍 Buy souvenirs from ${D.name} (doesn't use up the night)`,fx:()=>{T.goShop=1;}},
-      {t:"Light training in the hotel parking lot",fx:G2=>{for(const f of roadRiders(G2)){f.exp=(f.exp||0)+6;f.fatigue=Math.min(100,(f.fatigue||0)+2);}},then:[{n:"nar",t:"Pad work under the parking-lot lights until the hotel guard comes to watch · EXP +6"}]}];
+    const girls=roadRiders(G).filter(f=>CANON_IDS.includes(f.id)).sort((a,b)=>(b.bond||0)-(a.bond||0));
+    const choice=this.hotelMenu(T,D,girls,n,false);
     const oddL=RG_ODD[r]||[],oddOn=!T.backShop&&oddL.length&&girls.length&&Math.random()<.4,odd=oddOn?oddL[Math.floor(Math.random()*oddL.length)]:null,og=girls.length?girls[Math.floor(Math.random()*girls.length)]:null,
       oddStep=odd&&og?[{inject:G2=>{const X=RG_ODD_FX[odd.fx]||RG_ODD_FX.none;X[1](G2);return [{n:"nar",t:odd.t.replace(/\{g\}/g,og.name)+(X[0]?` · ${X[0]}`:"")}];}}]:[];
     const back=T.backShop;T.backShop=0;
     playScene([...(back?[]:[{n:"nar",t:nights>1?`Night ${n} in ${D.name}`:`The whole camp stays the night in ${D.name}`}]),...oddStep,{n:"nar",t:"What shall we do tonight?",choice}],()=>{
       /* v1.91.78 (Man): the hotel souvenir shop — buy as many as you like, the night is still yours */
-      if(T.goShop){T.goShop=0;this.shop(T,()=>{T.backShop=1;this.night(T,P,n,done);},1,1);return;}this.night(T,P,n+1,done);},{bg:this.hotelBg[r],look:"casual"});},
+      if(T.goShop){T.goShop=0;this.shop(T,()=>{T.backShop=1;this.night(T,P,n,done);},1,1);return;}
+      if(T.menuBack){T.menuBack=0;T.backShop=1;this.night(T,P,n,done);return;}this.night(T,P,n+1,done);},{bg:this.hotelBg[r],look:"casual"});},
+  /* v1.91.82 (Man): the hotel menu in layers — go out ▸ pick who · go out with the champion · rest at the hotel · souvenirs · (before the bout) straight to the ring */
+  hotelMenu(T,D,girls,n,pre){const r=D.r,cid=this.champId[r],C=RG[r],top=girls[0],jeal=top&&(top.bond||0)>=40?top:null,back={t:"◂ Back",fx:()=>{T.menuBack=1;}};
+    const outs=[...girls.map(g=>({t:`Out with ${g.name}`,fx:G2=>{add(G2,g.id,"bond",2);g.morale=Math.min(100,(g.morale||0)+4);},then:[{n:g.id,f:"happy",l:"casual",t:this.girlLine(g.id,D.name)}]})),
+      ...(RG_OUT[T.dest]&&girls.length?[{t:`The whole team: ${RG_OUT[T.dest].t}`,fx:G2=>{for(const f of roadRiders(G2))f.morale=Math.min(100,(f.morale||0)+3);add(G2,girls[0].id,"bond",1);},then:[{n:"nar",t:RG_OUT[T.dest].l.replace(/\{g\}/g,girls[n%girls.length].name)+" · morale +3"}]}]:[]),back];
+    return [
+      ...(outs.length>1?[{t:`Go out around ${D.name} ▸`,then:[{n:"nar",t:"Who do you ask out?",choice:outs}]}]:[]),
+      {t:`Go out with ${C.champ} (champion of ${C.name})`,fx:G2=>{rgMeet(G2,cid,3);if(jeal)jeal.morale=Math.max(0,(jeal.morale||0)-3);},
+        then:[...this.dateLines(cid,D),...(jeal?[{n:jeal.id,f:"pout",l:"casual",t:this.jealLine(jeal.id,C.champ)}]:[])]},
+      {t:"Rest at the hotel (fatigue −10)",fx:G2=>{for(const f of roadRiders(G2))f.fatigue=Math.max(0,(f.fatigue||0)-10);},then:[{n:"nar",t:pre?"Everyone rests in the room until it's time to go to the ring · fatigue −10":"Everyone turns in early and wakes up fresh · fatigue −10"}]},
+      ...(pre?[]:[{t:"Light training in the hotel parking lot",fx:G2=>{for(const f of roadRiders(G2)){f.exp=(f.exp||0)+6;f.fatigue=Math.min(100,(f.fatigue||0)+2);}},then:[{n:"nar",t:"Pad work under the parking-lot lights until the hotel guard comes to watch · EXP +6"}]}]),
+      {t:`🛍 Buy souvenirs from ${D.name} (takes no time)`,fx:()=>{T.goShop=1;}},
+      ...(pre?[{t:"Straight to the ring ▸",fx:()=>{T.goRing=1;}}]:[])];},
   home(T,done){if(!T.shopDone){T.shopDone=1;this.shop(T,()=>this.home(T,done),1);return;}G.log=G.log||[];G.log.push(`Back at camp from ${ROAD_DEST[T.dest].name}`);save();done();},
   /* v1.89.23: the souvenir shop on the way out of town — the only place regional souvenirs are sold; keep buying until you get back on the bus */
   shopIntro:{north:"On the way home the bus stops at a roadside souvenir shop. Paper umbrellas hang in rows; fine handwoven cloth lies folded on a wooden table.",
@@ -1568,7 +1580,7 @@ ${RG[r].champ}, the new champion of ${RG[r].name} is open to a new regional titl
 .rg-reg{border-top:6px solid var(--rc);position:relative}.rg-reg h3{margin:.1rem 0 0}.rg-reg h3::first-letter{text-transform:uppercase}.rg-champ{font-size:.85rem;opacity:.85;margin-bottom:.5rem}
 .rg-prov{display:flex;align-items:center;justify-content:space-between;gap:.5rem;padding:.35rem 0;border-bottom:1px dashed rgba(0,0,0,.15)}
 .rg-prov:last-child{border-bottom:0}.rg-prov small{opacity:.7}.rg-fin{opacity:.9}.rg-miss{display:block;color:#d4688f;opacity:1!important}.rg-belt{color:#b8860b;font-weight:700}
-.rg-trip{border-left:6px solid var(--gold,#d9a21b)}.rgt-list{display:grid;gap:.5rem}.rg-finbtn{display:grid;width:100%;margin-top:6px;text-align:left;background:#7a1020;color:#fff;box-shadow:inset 0 0 0 2px #ffcf4a}.rg-finbtn small{opacity:.85}.rg-finbtn.hot{animation:finb 1s steps(2) infinite}@keyframes finb{50%{box-shadow:inset 0 0 0 2px #ffcf4a,0 0 0 4px #ff3b55}}
+.rg-trip{border-left:6px solid var(--gold,#d9a21b)}.rgt-list{display:grid;gap:.5rem}.rg-step{display:inline-block;background:#d9a21b;color:#1b1230;font-weight:700;padding:.1rem .5rem;margin:.2rem 0}.rg-finbtn{display:grid;width:100%;margin-top:6px;text-align:left;background:#7a1020;color:#fff;box-shadow:inset 0 0 0 2px #ffcf4a}.rg-finbtn small{opacity:.85}.rg-finbtn.hot{animation:finb 1s steps(2) infinite}@keyframes finb{50%{box-shadow:inset 0 0 0 2px #ffcf4a,0 0 0 4px #ff3b55}}
 .lb-head,.lb-row{display:grid;grid-template-columns:1.6em 2.6em 1fr auto 2.6em;gap:.4rem;align-items:center}.lb-head{font-size:.75rem;opacity:.7;padding:0 .3rem}.lb-row{padding:.3rem;border-left:4px solid var(--rc);margin:3px 0;background:rgba(0,0,0,.14)}.lb-row.us{background:rgba(255,207,74,.14);box-shadow:inset 0 0 0 1px #ffcf4a}
 .lb-n{font-weight:700;text-align:center}.lb-mv{font-style:normal;font-size:.72rem;opacity:.7}.lb-mv.up{color:#7aff9a;opacity:1}.lb-mv.dn{color:#ff7a6a;opacity:1}.lb-mv.new{color:#ffcf4a;opacity:1}
 .lb-who{display:flex;align-items:center;gap:.35rem;min-width:0}.lb-who>span{display:grid;min-width:0}.lb-who small{opacity:.7;font-size:.72rem}.lb-who img{width:26px;height:26px}
@@ -1650,25 +1662,32 @@ ${RG[r].champ}, the new champion of ${RG[r].name} is open to a new regional titl
   visitBanner(G){const R=G.region;if(!R||!R.champ)return "";const r=RG_ORDER.find(x=>R.champ[x]&&R.champ[x].visit==="due");if(!r)return "";const cid=this.champId[r];
     return `<button class="px newfighter" data-act="rgvisit" data-v="${r}"><span class="newb">NEW!</span>${G.F[cid]?`<img src="${faceSrc(cid,"happy")}" alt="">`:""}<span><b>${esc(RG[r].champ)} is visiting the camp</b><small>Tap to welcome her · only until bout 2</small></span><span class="chev">▸</span></button>`;},
   canQuick(G,dest){const R=G.region,D=ROAD_DEST[dest];if(!R||!D)return false;return !!((R.arrived||{})[D.r])&&!(RG_TRIPX[dest]&&!((R.tx||{})[dest]));},
+  /* v1.91.82 (Man): two popups — first who comes along (seats), then who fights (from those on board) with the bill */
   planHTML(dest){const D=ROAD_DEST[dest],C=RG[D.r],wk=this.tripWeek(G);if(!wk)return `<h2>${esc(D.name)}</h2><p>No free week left to travel this year</p>`;
-    const R=this.riders(G,wk);if(!UI.rgFid||!R.some(f=>f.id===UI.rgFid))UI.rgFid=R[0]?R[0].id:null;
-    /* v1.91.76 (Man): seats decide who comes along — the fighter, then the picked teammates */
-    const max=roadSeats(G),cand=roster(G).filter(f=>!f.injury||f.injury<3);
-    if(!UI.rgParty||UI.rgPartyFor!==UI.rgFid){UI.rgPartyFor=UI.rgFid;UI.rgParty=[UI.rgFid,...cand.filter(f=>f.id!==UI.rgFid).sort((a,b)=>(b.bond||0)-(a.bond||0)).map(f=>f.id)].filter(Boolean).slice(0,max);}
-    if(UI.rgFid&&!UI.rgParty.includes(UI.rgFid))UI.rgParty=[UI.rgFid,...UI.rgParty].slice(0,max);
+    const RD=this.riders(G,wk),max=roadSeats(G),cand=roster(G).filter(f=>!f.injury||f.injury<3);
+    if(!UI.rgParty){const pr=this.pairDue(G,dest);UI.rgParty=[...cand].sort((a,b)=>(b.id===pr)-(a.id===pr)||(b.bond||0)-(a.bond||0)).map(f=>f.id).slice(0,max);}
+    UI.rgParty=UI.rgParty.filter(id=>cand.some(f=>f.id===id)).slice(0,max);
+    const head=`<h2>${esc(D.name)} <small class="meta">· ${esc(C.name)}</small></h2>
+     <p class="meta">Travel in week <b>${wk}</b> · ${D.km} km · ${roadNights(D.km)?`Stay ${roadNights(D.km)} night(s)`:"Day trip"} · opponent: <b>${esc(this.oppName(G,dest))}</b>, the provincial champion</p>`;
+    if((UI.rgStep||1)===1){const okF=UI.rgParty.some(id=>RD.some(f=>f.id===id));
+      return `${head}<p class="rg-step">Step 1/2 · Who comes along</p>
+       <p class="meta">${esc(roadCarName(roadCarKey(G)))} · fighters allowed: <b>${max}</b> · the manager drives ${roadCoachIn(G)?" · Kru Daeng comes along":" · Kru Daeng is on leave"} · picked ${UI.rgParty.length}/${max}</p>
+       <div class="rg-pick">${cand.map(f=>{const on=UI.rgParty.includes(f.id),full=!on&&UI.rgParty.length>=max,pr=this.pairDue(G,dest)===f.id,fit=RD.some(x=>x.id===f.id);
+         return `<button class="btn sm${pr?" rg-pairtag":""}" data-act="rgparty" data-v="${f.id}" aria-pressed="${on}" ${full?"disabled":""}>${faceImg(f,"sm")}${esc(f.name)}${fit?"":` <small>can't fight</small>`}${pr?` <small>💬 has a story with ${esc(C.champ)}</small>`:""}</button>`;}).join("")}</div>
+       ${okF?"":`<p class="redt">Bring at least one fighter who is fit to fight</p>`}
+       <div class="mfoot"><button class="btn" data-act="${UI.rgNow?"rgtravel":"closeModal"}">${UI.rgNow?"◂ Back":"Later"}</button><button class="btn primary" data-act="rgstep" data-v="2" ${okF?"":"disabled"}>Next · pick who fights ▸</button></div>`;}
+    const R=RD.filter(f=>UI.rgParty.includes(f.id));if(!UI.rgFid||!R.some(f=>f.id===UI.rgFid))UI.rgFid=R[0]?R[0].id:null;
     const abs=this.base(G)+wk,P=roadPlan(G,dest,null,abs),now=!!UI.rgNow;
     const me=UI.rgFid&&G.F[UI.rgFid],poor=G.cash<P.total,line=(k,v)=>v?`<div class="kv-row"><span>${k}</span><b class="num">${fmt(v)}</b></div>`:"";
-    return `<h2>${esc(D.name)} <small class="meta">· ${esc(C.name)}</small></h2>
-     <p class="meta">Travel in week <b>${wk}</b> · ${D.km} km · ${P.nights?`Stay ${P.nights} night(s)`:"Day trip"} · opponent: <b>${esc(this.oppName(G,dest))}</b>, the provincial champion</p>
-     <h3>Who fights?</h3>${R.length?`<div class="rg-pick">${R.map(f=>`<button class="btn sm" data-act="rgfid" data-v="${f.id}" aria-pressed="${f.id===UI.rgFid}">${faceImg(f,"sm")}${esc(f.name)} <small>Lv.${f.lvl||1}</small></button>`).join("")}</div>`:`<p class="redt">Nobody is fit to travel that week</p>`}
-     <h3>Who comes along <small class="meta">${esc(roadCarName(roadCarKey(G)))} · fighters allowed: ${max} · the manager drives ${roadCoachIn(G)?" · Kru Daeng comes along":" · Kru Daeng is on leave"}</small></h3>
-     <div class="rg-pick">${cand.map(f=>{const on=UI.rgParty.includes(f.id),lock=f.id===UI.rgFid,full=!on&&UI.rgParty.length>=max;const pr=this.pairDue(G,dest)===f.id;return `<button class="btn sm${pr?" rg-pairtag":""}" data-act="rgparty" data-v="${f.id}" aria-pressed="${on}" ${lock||full?"disabled":""}>${faceImg(f,"sm")}${esc(f.name)}${lock?" <small>fights</small>":""}${pr?` <small>💬 has a story with ${esc(RG[ROAD_DEST[dest].r].champ)}</small>`:""}</button>`;}).join("")}</div>
+    return `${head}<p class="rg-step">Step 2/2 · Who fights</p>
+     ${R.length?`<div class="rg-pick">${R.map(f=>`<button class="btn sm" data-act="rgfid" data-v="${f.id}" aria-pressed="${f.id===UI.rgFid}">${faceImg(f,"sm")}${esc(f.name)} <small>Lv.${f.lvl||1}</small></button>`).join("")}</div>`:`<p class="redt">No one on board is fit to fight</p>`}
+     <p class="meta">Coming along: ${UI.rgParty.map(id=>esc(G.F[id]?G.F[id].name:"")).join(" · ")}</p>
      <h3>Travel cost, round trip</h3><div class="rg-bill"><div class="kv-row"><span>Vehicle</span><b>${esc(roadCarName(P.car))}</b></div>
       ${line(`${P.ft==="ev"?"Electricity":"Fuel"} ${Math.round(P.litres)} ${P.unit||"litre"} × ฿${P.price.toFixed(2)}`,P.fuel)}${line("Tolls",P.toll)}${line(`Bus tickets × ${P.onBus}`,P.bus)}${line(`Lodging ${P.nights} night(s)`,P.lodge)}${line(`Food × ${P.people}`,P.food)}
       <div class="kv-row"><span><b>Total</b></span><b class="num ${poor?"redt":"goldt"}">${fmt(P.total)}</b></div><div class="kv-row"><span>Camp cash after paying</span><b class="num ${poor?"redt":""}">${fmt(G.cash-P.total)}</b></div></div>
      <p class="meta">Travelling together: ${P.people} people (incl. the manager ${roadCoachIn(G)?" and Kru Daeng":""}) · those who stay train as programmed · no other fights that week · travel fatigue about +${P.fat} each ${P.car==="none"?" · the camp has no vehicle yet, so it's the bus (pricier and more tiring)":""}</p>
      ${this.canQuick(G,dest)?`<label class="rg-quick"><input type="checkbox" data-act="rgquick" ${G.region.quickPref?"checked":""}> Quick trip <small class="meta">skip the drive, the hotel nights and the souvenir shop · nights away count as rest</small></label>`:""}
-     <div class="mfoot"><button class="btn" data-act="closeModal">Later</button>${now&&wk===G.week?`<button class="btn primary" data-act="rggonow" data-v="${dest}" ${me&&!poor?"":"disabled"}>${poor?"Not enough money":"Set off now ▸"}</button>`:`<button class="btn primary" data-act="rggo" data-v="${dest}" ${me&&!poor?"":"disabled"}>${poor?"Not enough money":"Confirm the trip"}</button>`}</div>
+     <div class="mfoot"><button class="btn" data-act="rgstep" data-v="1">◂ Who comes along</button>${now&&wk===G.week?`<button class="btn primary" data-act="rggonow" data-v="${dest}" ${me&&!poor?"":"disabled"}>${poor?"Not enough money":"Set off now ▸"}</button>`:`<button class="btn primary" data-act="rggo" data-v="${dest}" ${me&&!poor?"":"disabled"}>${poor?"Not enough money":"Confirm the trip"}</button>`}</div>
      ${now&&wk===G.week?`<p class="meta center">Setting off ends this week right away (training → drive → hotel → ring)</p>`:""}`;},
   /* v1.91.76 (Man): the "travel" button at the camp vehicle — pick a province, then go this week */
   travelOk(G){const R=G.region;return !!(R&&R.belts&&regionOn()&&!R.close&&RG_ORDER.some(r=>this.beltCount(G,r)<4||(R.champ[r]&&R.champ[r].state!=="won")));},
@@ -1827,12 +1846,13 @@ if(typeof XMODAL!=="undefined"){XMODAL.rgplan=m=>({body:REGION.planHTML(m.dest),
 if(typeof ACT!=="undefined")Object.assign(ACT,{
   lbgo:d=>{UI.modal=null;lbStart(G,d.v);},
   nltest:d=>{if(REGION_LIVE)return;nlTest(d.v);},
-  rgplan:d=>{UI.rgFid=null;UI.rgParty=null;UI.rgNow=false;UI.modal={type:"rgplan",dest:d.v};render();},
+  rgplan:d=>{UI.rgFid=null;UI.rgParty=null;UI.rgNow=false;UI.rgStep=1;UI.modal={type:"rgplan",dest:d.v};render();},
   rgfinopen:d=>{UI.modal={type:"rgfin",r:d.v};render();},
   rglegopen:()=>{if(!G.region||!G.region.final||!G.region.final.won)return;REGION.css();UI.modal={type:"rglegend"};render();},
   rgtravel:()=>{if(!REGION.travelOk(G))return;UI.modal={type:"rgtravel"};render();},
-  rgtravelto:d=>{UI.rgFid=null;UI.rgParty=null;UI.rgNow=true;UI.modal={type:"rgplan",dest:d.v};render();},
-  rgparty:d=>{const P=UI.rgParty=UI.rgParty||[],i=P.indexOf(d.v);if(d.v===UI.rgFid)return;if(i>=0)P.splice(i,1);else if(P.length<roadSeats(G))P.push(d.v);render();},
+  rgtravelto:d=>{UI.rgFid=null;UI.rgParty=null;UI.rgNow=true;UI.rgStep=1;UI.modal={type:"rgplan",dest:d.v};render();},
+  rgparty:d=>{const P=UI.rgParty=UI.rgParty||[],i=P.indexOf(d.v);if(i>=0)P.splice(i,1);else if(P.length<roadSeats(G))P.push(d.v);render();},
+  rgstep:d=>{UI.rgStep=+d.v;render();},
   rgtdev:d=>{if(!G.devTravel)return;const v=d.v,R=G.region;
     if(v.startsWith("car:")){const k=v.slice(4);G.decor=G.decor||{};G.decor.vehicle=k;G.decorUnlocks=G.decorUnlocks||{};G.decorUnlocks.vehicle=[...new Set([...(G.decorUnlocks.vehicle||[]),k])];}
     else if(v==="coach"){G.coachAwayAbs=roadCoachIn(G)?gameWeek(G)+4:0;}

@@ -2330,7 +2330,10 @@ div.mdelask{margin:2px 0 8px;padding:8px;box-shadow:inset 0 0 0 2px var(--line);
 .cast .stand.mgrst,.cast.duo .stand.mgrst{height:calc(var(--sh) * .675);bottom:calc(var(--sh) * -.225)}
 .cast .stand.st-low{height:calc(var(--sh) * .5);bottom:calc(var(--sh) * -.1)}
 .cast.grp .stand.off{filter:brightness(.8) saturate(.85)}
-.tripbtn{position:absolute;left:77%;bottom:6%;transform:translateX(-50%);z-index:3;background:#d9a21b;color:#1b1230;border:0;box-shadow:inset 0 0 0 2px #1b1230,0 2px 0 #1b1230;font-weight:700;padding:.3rem .6rem;font-size:.85rem;animation:tripb 1.6s ease-in-out infinite}@keyframes tripb{50%{transform:translateX(-50%) translateY(-3px)}}@media (prefers-reduced-motion:reduce){.tripbtn{animation:none}}
+/* v1.91.82 (Man): the travel button no longer covers the van — the van itself is the button, with a small tag above its roof */
+.tripspot{position:absolute;left:64%;width:28%;bottom:0;height:24%;z-index:3;background:transparent;border:0;padding:0;cursor:pointer}.tripspot:hover,.tripspot:focus-visible{outline:2px dashed #ffcf4a;outline-offset:-2px}
+.triptag{position:absolute;left:50%;bottom:100%;transform:translateX(-50%);white-space:nowrap;background:#d9a21b;color:#1b1230;font-weight:700;font-size:.72rem;padding:.1rem .4rem;box-shadow:inset 0 0 0 2px #1b1230;animation:tripb 1.6s ease-in-out infinite;pointer-events:none}
+@keyframes tripb{50%{transform:translateX(-50%) translateY(-3px)}}@media (prefers-reduced-motion:reduce){.triptag{animation:none}}
 /* v1.91.78 trophy room by level + popup */
 .tshelf .tlbl small{opacity:.65;font-weight:400;margin-left:.3rem}.tshelf>.btn{margin:.2rem 0 0 auto;display:block}
 .tshelf.lv-region .tlbl{color:#ffd36a}.tshelf.lv-province .tlbl{color:#ffb4c0}
@@ -2357,3 +2360,10 @@ div.mdelask{margin:2px 0 8px;padding:8px;box-shadow:inset 0 0 0 2px var(--line);
 .rinsvg{display:block;width:100%;height:auto;margin:6px 0 2px}
 .rinleg{display:flex;gap:10px;flex-wrap:wrap;font-size:11.5px}.rinleg .lg1::before,.rinleg .lg2::before{content:"";display:inline-block;width:12px;height:3px;margin-right:4px;vertical-align:middle;background:#f5cf4f}.rinleg .lg2::before{background:#6aa8ff}.rinleg .mutt{margin-left:auto;opacity:.7}
 .tquip{display:block;font-size:12px;opacity:.8;margin-top:4px}
+/* v1.91.82 winner popup + still belt */
+.awardbelt.settled,.awardname.settled{animation:none}
+.winpop{position:relative}.wincv{width:100%;height:auto;display:block;image-rendering:pixelated;background:#0b0710}
+.wp-lines{padding:.5rem .7rem 0;text-align:center;min-height:6.5em}
+.wp-l,.wp-name{margin:.15rem 0;opacity:0;animation:wpIn .4s ease-out forwards;animation-delay:var(--d)}.wp-l.sm{font-size:.8rem;opacity:0}.wp-name{font-size:1.7rem;font-weight:800;color:#ffd45a;text-shadow:0 2px 0 #5a2a00,0 0 14px rgba(255,212,90,.7);animation-name:wpPop}
+@keyframes wpIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}@keyframes wpPop{0%{opacity:0;transform:scale(.4)}70%{opacity:1;transform:scale(1.15)}100%{opacity:1;transform:scale(1)}}
+@media(prefers-reduced-motion:reduce){.wp-l,.wp-name{animation:none;opacity:1}}

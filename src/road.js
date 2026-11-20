@@ -107,6 +107,7 @@ const ROAD_SHOTGUN={
  ploy:"เงียบ ๆ แบบนี้ก็ดีนะ …ถ้าง่วงก็บอก ฉันขับแทนได้",
  fah:"ที่นั่งหน้าเป็นของฟ้า! ใครจะทำไม! …นายขับดี ๆ ล่ะ ฟ้าไม่ได้กลัวนะ แค่บอกไว้"};
 
+const ROAD_STOP=["แวะปั๊มกลางทาง ทุกคนลงไปยืดขา ครูแดงซื้อกาแฟกระป๋องให้ทั้งรถ","แวะกินข้าวมันไก่ร้านริมทาง ผู้จัดการนั่งหลับคาโต๊ะไปห้านาที","จอดพักที่จุดชมวิว ทุกคนถ่ายรูปหมู่ ครูแดงไม่ยอมยิ้ม","แวะเข้าห้องน้ำปั๊ม คิวยาวจนนักมวยผลัดกันจับเวลา"];
 function roadLines(S){const P=S.plan,D=P.D,r=D.r,rng=mulberry32(S.seed),pick=a=>a[Math.floor(rng()*a.length)],L=[];
   L.push({n:"nar",t:`${roadCarName(P.car)}ของค่ายศิริชัยออกจากค่ายตั้งแต่${S.time==="night"?"บ่าย":"เช้ามืด"} มุ่งหน้าสู่${D.name} ระยะทาง ${D.km} กิโลเมตร`});
   if(P.car!=="none"&&P.band!=="mid")L.push({n:"nar",t:`${P.ft==="ev"?`แวะชาร์จไฟหน่วยละ ${fmt(P.price)}`:`แวะเติม${(ROAD_FUELS[P.ft]||ROAD_FUELS.diesel).n}ลิตรละ ${fmt(P.price)}`} ${P.band==="high"?"สัปดาห์นี้แพงจนผู้จัดการถอนหายใจยาว":P.band==="cheap"?"ถูกกว่าสัปดาห์ก่อน ทุกคนเฮ":"ราคาปกติ ไม่มีใครบ่น"}`});
@@ -115,7 +116,11 @@ function roadLines(S){const P=S.plan,D=P.D,r=D.r,rng=mulberry32(S.seed),pick=a=>
   const ids=S.riders.filter(id=>ROAD_TALK[id]);
   if(S.front&&ROAD_SHOTGUN[S.front])L.push({n:S.front,t:ROAD_SHOTGUN[S.front]});
   const others=ids.filter(id=>id!==S.front);for(let i=others.length-1;i>0;i--){const j=Math.floor(rng()*(i+1));[others[i],others[j]]=[others[j],others[i]];}
-  for(const id of others.slice(0,2)){const T=ROAD_TALK[id],own=T[r];L.push({n:id,t:(own&&rng()<.6?own:pick(T.any)).replace("{km}",D.km)});}
+  /* v1.91.82 (Man): the talk in the car runs as long as the road — a short hop gets one chat, the far south up to four, with a rest stop on the long hauls */
+  const nTalk=D.km<250?1:D.km<700?2:D.km<1200?3:4,hrs=Math.max(1,Math.round(D.km/75));
+  L.push({n:"nar",t:`ระยะทาง ${D.km} กม. · ขับราว ${hrs} ชั่วโมง`});
+  others.slice(0,nTalk).forEach((id,i)=>{const T=ROAD_TALK[id],own=T[r],used=L.map(x=>x.t);let t=(own&&i===0&&rng()<.6?own:pick(T.any));if(used.includes(t.replace("{km}",D.km)))t=pick(T.any);L.push({n:id,t:t.replace("{km}",D.km)});
+    if(i===1&&D.km>=700)L.push({n:"nar",t:pick(ROAD_STOP)});if(i===2&&D.km>=1200)L.push({n:"nar",t:pick(ROAD_SCENERY[r])});});
   if(S.wet)L.push({n:"nar",t:"ฝนเทลงมาหนักจนที่ปัดน้ำฝนปัดไม่ทัน ทุกคนในรถเงียบกริบ"});
   L.push({n:"nar",t:S.time==="night"?`ไฟเมือง${D.name}สว่างอยู่ข้างหน้า อีกไม่กี่กิโลก็ถึงที่พักแล้ว`:`ป้าย "ยินดีต้อนรับสู่${D.name}" ผ่านไปทางขวา อีกไม่กี่กิโลก็ถึงเวทีแล้ว`,sign:1});
   return L;}

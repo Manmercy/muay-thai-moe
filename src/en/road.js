@@ -107,6 +107,7 @@ const ROAD_SHOTGUN={
  ploy:"Quiet like this is nice. …If you get sleepy, say so. I can take the wheel.",
  fah:"The front seat is Fah's! Got a problem?! …Drive carefully, okay. Not that Fah's scared. Just saying."};
 
+const ROAD_STOP=["A stop at a pump halfway. Everyone stretches their legs and Kru Daeng buys canned coffee for the whole car","A stop for khao man gai by the road. The manager falls asleep at the table for five minutes","A stop at a viewpoint for a group photo. Kru Daeng refuses to smile","A stop at the pump toilets, the queue so long the fighters take turns timing it"];
 function roadLines(S){const P=S.plan,D=P.D,r=D.r,rng=mulberry32(S.seed),pick=a=>a[Math.floor(rng()*a.length)],L=[];
   L.push({n:"nar",t:`${roadCarName(P.car)} of Sirichai Camp sets off in ${S.time==="night"?"the afternoon":"the small hours"}, heading for ${D.name}, ${D.km} km away.`});
   if(P.car!=="none"&&P.band!=="mid")L.push({n:"nar",t:`${P.ft==="ev"?`Stopped to charge, per unit ${fmt(P.price)}`:`Stopped to fill up with ${(ROAD_FUELS[P.ft]||ROAD_FUELS.diesel).n} per litre ${fmt(P.price)}`} ${P.band==="high"?"— so pricey this week the manager lets out a long sigh":P.band==="cheap"?"— cheaper than last week, everyone cheers":"— a normal price, nobody complains"}`});
@@ -115,7 +116,11 @@ function roadLines(S){const P=S.plan,D=P.D,r=D.r,rng=mulberry32(S.seed),pick=a=>
   const ids=S.riders.filter(id=>ROAD_TALK[id]);
   if(S.front&&ROAD_SHOTGUN[S.front])L.push({n:S.front,t:ROAD_SHOTGUN[S.front]});
   const others=ids.filter(id=>id!==S.front);for(let i=others.length-1;i>0;i--){const j=Math.floor(rng()*(i+1));[others[i],others[j]]=[others[j],others[i]];}
-  for(const id of others.slice(0,2)){const T=ROAD_TALK[id],own=T[r];L.push({n:id,t:(own&&rng()<.6?own:pick(T.any)).replace("{km}",D.km)});}
+  /* v1.91.82 (Man): the talk in the car runs as long as the road — a short hop gets one chat, the far south up to four, with a rest stop on the long hauls */
+  const nTalk=D.km<250?1:D.km<700?2:D.km<1200?3:4,hrs=Math.max(1,Math.round(D.km/75));
+  L.push({n:"nar",t:`Distance ${D.km} km · about ${hrs} hours`});
+  others.slice(0,nTalk).forEach((id,i)=>{const T=ROAD_TALK[id],own=T[r],used=L.map(x=>x.t);let t=(own&&i===0&&rng()<.6?own:pick(T.any));if(used.includes(t.replace("{km}",D.km)))t=pick(T.any);L.push({n:id,t:t.replace("{km}",D.km)});
+    if(i===1&&D.km>=700)L.push({n:"nar",t:pick(ROAD_STOP)});if(i===2&&D.km>=1200)L.push({n:"nar",t:pick(ROAD_SCENERY[r])});});
   if(S.wet)L.push({n:"nar",t:"The rain pours so hard the wipers can't keep up. Nobody in the car says a word."});
   L.push({n:"nar",t:S.time==="night"?`The lights of ${D.name} glow up ahead. Only a few more kilometres to the hotel.`:`A "Welcome to ${D.name}" sign slides past on the right. The ring is only a few kilometres away.`,sign:1});
   return L;}
