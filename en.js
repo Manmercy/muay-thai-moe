@@ -5896,7 +5896,7 @@ const FS={cv:null,ctx:null,bg:null,A:null,B:null,fx:[],shake:0,
     if(e.ev==="sprawl"){def.x+=def.side==="A"?40:-40;atk.anim="guard";this.fx.push({x:atk.x,y:270,t0:now,txt:"SPRAWL!",miss:true});}
     if(e.ev==="ko"&&(def.gnd||atk.top)){def.gnd=false;atk.top=false;}
   },
-  ground(){for(const q of [this.A,this.B])if(q){q.gnd=false;q.top=false;q.tap=0;}},
+  ground(){for(const q of [this.A,this.B])if(q){if(q.base0!=null){q.base=q.base0;q.base0=null;}q.lieAng=null;q.gnd=false;q.top=false;q.tap=0;q.th=null;q.throwT=0;}}, /* v1.91.94 (Man): a round that starts after a throw puts both back on their own side (a suplex left them crossed over) */
   rage(side,now){const s=this[side];if(s){s.rageT=now;s.rageMs=9000;}},
   skill(side,row,kind,now){const s=this[side];if(!s)return;const g=skGrade(row||0),col=SK_KCOL[kind]||(s.f&&s.f.color)||"#ffd34a",H=this.cv?this.cv.height:540,foot=H*.8,h=H*.5,y=foot-h*.5;
     s.skf={g,t0:now,col,kind};if(kind==="def"){s.bk="def";s.bkK="def";s.bkT=now;}if(kind==="rec"){s.healT=now;this.fx.push({x:s.x,y:foot-h*.95,t0:now,txt:"+",big:true,heal:1});}
@@ -5933,7 +5933,8 @@ const FS={cv:null,ctx:null,bg:null,A:null,B:null,fx:[],shake:0,
     if(S.skHeat){const K=S.skHeat,k=(t-K.t0)/K.len;if(k>1||k<0)S.skHeat=null;else{const a=Math.min(1,k/.12)*(k>.75?(1-k)/.25:1);x.save();x.fillStyle=`rgba(8,4,20,${(K.g>=5?.5:.35)*a})`;x.fillRect(-20,-20,W+40,H+40);
       if(K.g>=5){x.globalCompositeOperation="lighter";for(let i=0;i<7;i++){const bx=W*(i+.5)/7+Math.sin(t/400+i)*20,bw=W*.05;const pg=x.createLinearGradient(bx-bw,0,bx+bw,0);pg.addColorStop(0,K.col+"00");pg.addColorStop(.5,K.col+"44");pg.addColorStop(1,K.col+"00");x.globalAlpha=a*(.5+.5*Math.sin(t/180+i*1.3));x.fillStyle=pg;x.fillRect(bx-bw,0,bw*2,H);}}x.restore();}}
     // approach centre
-    if(!S.A||!S.B){x.restore();return;}for(const s of [S.A,S.B]){s.x+=(s.base-s.x)*.08;if(!(s.th&&s.th.hide&&s.gnd&&s.throwT&&t-s.throwT>=s.th.grab&&t-s.throwT<s.th.imp))fsAura(x,s,t,H,S);x.shadowBlur=0;if(s.rageT&&t-s.rageT<(s.rageMs||9000)){x.shadowColor="rgba(255,24,24,.95)";x.shadowBlur=20+8*Math.sin(t/90);} /* blood rage: the sprite itself glows red */
+    if(!S.A||!S.B){x.restore();return;}if(!S.A.gnd&&!S.B.gnd)for(const q of [S.A,S.B])if(q.base0!=null&&!(q.sx&&t-q.sx.t0<1600)){q.base=q.base0;q.base0=null;q.lieAng=null;} /* nobody on the floor → home corners */
+    for(const s of [S.A,S.B]){s.x+=(s.base-s.x)*.08;if(!(s.th&&s.th.hide&&s.gnd&&s.throwT&&t-s.throwT>=s.th.grab&&t-s.throwT<s.th.imp))fsAura(x,s,t,H,S);x.shadowBlur=0;if(s.rageT&&t-s.rageT<(s.rageMs||9000)){x.shadowColor="rgba(255,24,24,.95)";x.shadowBlur=20+8*Math.sin(t/90);} /* blood rage: the sprite itself glows red */
       if(s.anim==="fx"){const X=s.fx,se=t-X.t0;if(se>FX_LEN){s.anim=s.win?"win":"guard";}
         else{const foot=H*.8,h=H*.5,flip=s.side==="B",dir=flip?-1:1,atk=X.kind==="atk",sh=sheetFor(s.f);
           const col=atk?Math.min(3,Math.floor(se/140)):Math.floor(t/160)%4,pulse=.55+.45*Math.sin(se/70);
@@ -6518,7 +6519,7 @@ AU.gsfx=function(kind,a){if(!this.init()||this.muted||!SETTINGS.sfx)return;const
   if(kind==="shimmer")for(let i=0;i<6;i++)T(i*.05,{f:1400+Math.random()*1400,type:"sine",dur:.12,peak:.06});};
 
 // ================= MUAY THAI MOE v1.3 — UI =================
-const VERSION="1.91.93";
+const VERSION="1.91.94";
 const CUR_LANG=(typeof window!=="undefined"&&window.LANG)||"th";
 const TH_LABEL=String.fromCharCode(3652,3607,3618);
 function langSwitch(cls){return `<div class="langsw ${cls||""}" role="group" aria-label="Language">${[["th",TH_LABEL],["en","EN"]].map(([k,l])=>`<button class="lsb ${CUR_LANG===k?"on":""}" data-act="setlang" data-v="${k}" aria-pressed="${CUR_LANG===k}">${l}</button>`).join("")}</div>`;}
@@ -8388,7 +8389,11 @@ function fskill(id){const U=UI.fight;if(!U||U.stage!=="playing")return;const s0=
 /* v1.91.60: a "−14" floats off the gold stamina bar when the player fires a skill, so the cost is seen */
 function staPop(d){if(!d||typeof document==="undefined")return;const m=document.querySelector(".fside.a .meter.thin");if(!m)return;const r=m.getBoundingClientRect(),el=document.createElement("b");el.className="stapop "+(d<0?"neg":"pos");el.textContent=`${d<0?"−":"+"}${Math.abs(d)} ⚡`;el.style.left=(r.left+r.width*.5+scrollX)+"px";el.style.top=(r.top+scrollY-4)+"px";document.body.appendChild(el);setTimeout(()=>el.remove(),1300);}
 /* v1.91.83: sprite-only fighters (quest foes, Naka League, prodigies) have no cut-in portrait — show the shouting frame of their sheet instead */
-function cutPic(id){const f=typeof G!=="undefined"&&G.F&&G.F[id];if(f&&f.sprite)return `<div class="cut-spr" style="background-image:url('${ASSET}${f.sprite}_sheet.webp')"></div>`;return `<img src="${ASSET}${id}_fight_angry.webp" alt="">`;}
+/* v1.91.94 (Man): the skill cut-in shows the painted portrait whenever one exists (the Naga team, Ladda, the regional champions showed a blown-up sprite) — face framed from the scene-portrait measurements */
+function cutPicArt(id){const f=typeof G!=="undefined"&&G.F&&G.F[id];let k=f&&f.nl?(f.nl==="ladda"?"lada_fight_angry":`nl_${f.nl}_por`):`${id}_fight_angry`;
+  if(typeof STANDFIT==="undefined"||!STANDFIT[k])return "";const fk=STANDFIT[k],d=.235/fk[0],ch=1-(.75-.235-fk[1])/fk[0],cr=ch-d,hp=125/d;
+  return `<img class="cut-art" src="${ASSET}${k}.webp" alt="" style="height:${hp.toFixed(0)}%;top:${(46-(cr+.55*d)*hp).toFixed(0)}%;left:50%;transform:translateX(${(-fk[2]*100).toFixed(1)}%) skewY(4deg)">`;}
+function cutPic(id){const art=cutPicArt(id);if(art)return art;const f=typeof G!=="undefined"&&G.F&&G.F[id];if(f&&f.sprite)return `<div class="cut-spr" style="background-image:url('${ASSET}${f.sprite}_sheet.webp')"></div>`;return `<img src="${ASSET}${id}_fight_angry.webp" alt="">`;}
 function skCostLine(sk,r){const k=skillKind(sk).k,c=SK_COST[k]||SK_COST.atk;if(!c[2])return `<p class="skcost-l">⚡ No stamina cost · restores stamina</p>`;return `<p class="skcost-l">⚡ Stamina cost in fights: ${c.map((v,i)=>`<span class="${i+1===r?"on":""}">Rank ${i+1} · ${v}</span>`).join("")}</p>`;}
 function skillBarHTML(){const U=UI.fight,F=U.F;const L=fightSkills(F.A);if(!L.length)return `<span class="meta skhint">No skills yet · level up, then upgrade skills in the fighter info</span>`;const slots=[0,1,2].map(i=>L[i]);
   return `<div class="skbar2" role="group" aria-label="Skills ${F.A.skRound?" (used this round)":""}">${slots.map(k=>{if(!k)return `<span class="skbtn2 empty">Empty</span>`;const c=skCost(k),cd=skCdLeft(F,F.A,k.id),poor=!cd&&staPts(F.A)<c-1e-9;return `<button class="skbtn2 ${k.k}${poor?" poor":""}${cd?" cd":""}" data-act="fskill" data-v="${k.id}" ${cd||F.A.skRound||F.over||poor?"disabled":""} title="${esc(k.name)} · ${esc(SKILL_KIND_NAME[k.k])}${c?` · costs stamina ${c}`:""}${poor?" · not enough stamina":""}${cd?" · rests 1 round":""}">${PIX["sk_"+k.k]}<b>${esc(k.name)}</b><i class="skcost">${cd?"Rest 1 rd":c?`⚡${c}`:"⚡+"}</i></button>`;}).join("")}</div>`;}function sideOf(e,F){if(e.s==="A"||e.s==="B")return e.s;if(e.mside)return e.mside;return e.an===F.A.name?"A":"B";}

@@ -1,5 +1,5 @@
 // ================= MUAY THAI MOE v1.3 — UI =================
-const VERSION="1.91.93";
+const VERSION="1.91.94";
 const CUR_LANG=(typeof window!=="undefined"&&window.LANG)||"th";
 const TH_LABEL=String.fromCharCode(3652,3607,3618);
 function langSwitch(cls){return `<div class="langsw ${cls||""}" role="group" aria-label="Language">${[["th",TH_LABEL],["en","EN"]].map(([k,l])=>`<button class="lsb ${CUR_LANG===k?"on":""}" data-act="setlang" data-v="${k}" aria-pressed="${CUR_LANG===k}">${l}</button>`).join("")}</div>`;}
@@ -1869,7 +1869,11 @@ function fskill(id){const U=UI.fight;if(!U||U.stage!=="playing")return;const s0=
 /* v1.91.60: a "−14" floats off the gold stamina bar when the player fires a skill, so the cost is seen */
 function staPop(d){if(!d||typeof document==="undefined")return;const m=document.querySelector(".fside.a .meter.thin");if(!m)return;const r=m.getBoundingClientRect(),el=document.createElement("b");el.className="stapop "+(d<0?"neg":"pos");el.textContent=`${d<0?"−":"+"}${Math.abs(d)} ⚡`;el.style.left=(r.left+r.width*.5+scrollX)+"px";el.style.top=(r.top+scrollY-4)+"px";document.body.appendChild(el);setTimeout(()=>el.remove(),1300);}
 /* v1.91.83: sprite-only fighters (quest foes, Naka League, prodigies) have no cut-in portrait — show the shouting frame of their sheet instead */
-function cutPic(id){const f=typeof G!=="undefined"&&G.F&&G.F[id];if(f&&f.sprite)return `<div class="cut-spr" style="background-image:url('${ASSET}${f.sprite}_sheet.webp')"></div>`;return `<img src="${ASSET}${id}_fight_angry.webp" alt="">`;}
+/* v1.91.94 (Man): the skill cut-in shows the painted portrait whenever one exists (the Naga team, Ladda, the regional champions showed a blown-up sprite) — face framed from the scene-portrait measurements */
+function cutPicArt(id){const f=typeof G!=="undefined"&&G.F&&G.F[id];let k=f&&f.nl?(f.nl==="ladda"?"lada_fight_angry":`nl_${f.nl}_por`):`${id}_fight_angry`;
+  if(typeof STANDFIT==="undefined"||!STANDFIT[k])return "";const fk=STANDFIT[k],d=.235/fk[0],ch=1-(.75-.235-fk[1])/fk[0],cr=ch-d,hp=125/d;
+  return `<img class="cut-art" src="${ASSET}${k}.webp" alt="" style="height:${hp.toFixed(0)}%;top:${(46-(cr+.55*d)*hp).toFixed(0)}%;left:50%;transform:translateX(${(-fk[2]*100).toFixed(1)}%) skewY(4deg)">`;}
+function cutPic(id){const art=cutPicArt(id);if(art)return art;const f=typeof G!=="undefined"&&G.F&&G.F[id];if(f&&f.sprite)return `<div class="cut-spr" style="background-image:url('${ASSET}${f.sprite}_sheet.webp')"></div>`;return `<img src="${ASSET}${id}_fight_angry.webp" alt="">`;}
 function skCostLine(sk,r){const k=skillKind(sk).k,c=SK_COST[k]||SK_COST.atk;if(!c[2])return `<p class="skcost-l">⚡ No stamina cost · restores stamina</p>`;return `<p class="skcost-l">⚡ Stamina cost in fights: ${c.map((v,i)=>`<span class="${i+1===r?"on":""}">Rank ${i+1} · ${v}</span>`).join("")}</p>`;}
 function skillBarHTML(){const U=UI.fight,F=U.F;const L=fightSkills(F.A);if(!L.length)return `<span class="meta skhint">No skills yet · level up, then upgrade skills in the fighter info</span>`;const slots=[0,1,2].map(i=>L[i]);
   return `<div class="skbar2" role="group" aria-label="Skills ${F.A.skRound?" (used this round)":""}">${slots.map(k=>{if(!k)return `<span class="skbtn2 empty">Empty</span>`;const c=skCost(k),cd=skCdLeft(F,F.A,k.id),poor=!cd&&staPts(F.A)<c-1e-9;return `<button class="skbtn2 ${k.k}${poor?" poor":""}${cd?" cd":""}" data-act="fskill" data-v="${k.id}" ${cd||F.A.skRound||F.over||poor?"disabled":""} title="${esc(k.name)} · ${esc(SKILL_KIND_NAME[k.k])}${c?` · costs stamina ${c}`:""}${poor?" · not enough stamina":""}${cd?" · rests 1 round":""}">${PIX["sk_"+k.k]}<b>${esc(k.name)}</b><i class="skcost">${cd?"Rest 1 rd":c?`⚡${c}`:"⚡+"}</i></button>`;}).join("")}</div>`;}function sideOf(e,F){if(e.s==="A"||e.s==="B")return e.s;if(e.mside)return e.mside;return e.an===F.A.name?"A":"B";}

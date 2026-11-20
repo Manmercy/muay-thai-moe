@@ -589,7 +589,7 @@ const FS={cv:null,ctx:null,bg:null,A:null,B:null,fx:[],shake:0,
     if(e.ev==="sprawl"){def.x+=def.side==="A"?40:-40;atk.anim="guard";this.fx.push({x:atk.x,y:270,t0:now,txt:"หนีทุ่ม!",miss:true});}
     if(e.ev==="ko"&&(def.gnd||atk.top)){def.gnd=false;atk.top=false;}
   },
-  ground(){for(const q of [this.A,this.B])if(q){q.gnd=false;q.top=false;q.tap=0;}},
+  ground(){for(const q of [this.A,this.B])if(q){if(q.base0!=null){q.base=q.base0;q.base0=null;}q.lieAng=null;q.gnd=false;q.top=false;q.tap=0;q.th=null;q.throwT=0;}}, /* v1.91.94 (Man): a round that starts after a throw puts both back on their own side (a suplex left them crossed over) */
   rage(side,now){const s=this[side];if(s){s.rageT=now;s.rageMs=9000;}},
   skill(side,row,kind,now){const s=this[side];if(!s)return;const g=skGrade(row||0),col=SK_KCOL[kind]||(s.f&&s.f.color)||"#ffd34a",H=this.cv?this.cv.height:540,foot=H*.8,h=H*.5,y=foot-h*.5;
     s.skf={g,t0:now,col,kind};if(kind==="def"){s.bk="def";s.bkK="def";s.bkT=now;}if(kind==="rec"){s.healT=now;this.fx.push({x:s.x,y:foot-h*.95,t0:now,txt:"+",big:true,heal:1});}
@@ -626,7 +626,8 @@ const FS={cv:null,ctx:null,bg:null,A:null,B:null,fx:[],shake:0,
     if(S.skHeat){const K=S.skHeat,k=(t-K.t0)/K.len;if(k>1||k<0)S.skHeat=null;else{const a=Math.min(1,k/.12)*(k>.75?(1-k)/.25:1);x.save();x.fillStyle=`rgba(8,4,20,${(K.g>=5?.5:.35)*a})`;x.fillRect(-20,-20,W+40,H+40);
       if(K.g>=5){x.globalCompositeOperation="lighter";for(let i=0;i<7;i++){const bx=W*(i+.5)/7+Math.sin(t/400+i)*20,bw=W*.05;const pg=x.createLinearGradient(bx-bw,0,bx+bw,0);pg.addColorStop(0,K.col+"00");pg.addColorStop(.5,K.col+"44");pg.addColorStop(1,K.col+"00");x.globalAlpha=a*(.5+.5*Math.sin(t/180+i*1.3));x.fillStyle=pg;x.fillRect(bx-bw,0,bw*2,H);}}x.restore();}}
     // approach centre
-    if(!S.A||!S.B){x.restore();return;}for(const s of [S.A,S.B]){s.x+=(s.base-s.x)*.08;if(!(s.th&&s.th.hide&&s.gnd&&s.throwT&&t-s.throwT>=s.th.grab&&t-s.throwT<s.th.imp))fsAura(x,s,t,H,S);x.shadowBlur=0;if(s.rageT&&t-s.rageT<(s.rageMs||9000)){x.shadowColor="rgba(255,24,24,.95)";x.shadowBlur=20+8*Math.sin(t/90);} /* blood rage: the sprite itself glows red */
+    if(!S.A||!S.B){x.restore();return;}if(!S.A.gnd&&!S.B.gnd)for(const q of [S.A,S.B])if(q.base0!=null&&!(q.sx&&t-q.sx.t0<1600)){q.base=q.base0;q.base0=null;q.lieAng=null;} /* nobody on the floor → home corners */
+    for(const s of [S.A,S.B]){s.x+=(s.base-s.x)*.08;if(!(s.th&&s.th.hide&&s.gnd&&s.throwT&&t-s.throwT>=s.th.grab&&t-s.throwT<s.th.imp))fsAura(x,s,t,H,S);x.shadowBlur=0;if(s.rageT&&t-s.rageT<(s.rageMs||9000)){x.shadowColor="rgba(255,24,24,.95)";x.shadowBlur=20+8*Math.sin(t/90);} /* blood rage: the sprite itself glows red */
       if(s.anim==="fx"){const X=s.fx,se=t-X.t0;if(se>FX_LEN){s.anim=s.win?"win":"guard";}
         else{const foot=H*.8,h=H*.5,flip=s.side==="B",dir=flip?-1:1,atk=X.kind==="atk",sh=sheetFor(s.f);
           const col=atk?Math.min(3,Math.floor(se/140)):Math.floor(t/160)%4,pulse=.55+.45*Math.sin(se/70);
