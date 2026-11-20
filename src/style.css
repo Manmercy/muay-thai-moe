@@ -2337,3 +2337,6 @@ div.mdelask{margin:2px 0 8px;padding:8px;box-shadow:inset 0 0 0 2px var(--line);
 .tpop{display:grid;gap:.45rem;justify-items:stretch}.tpop h2{text-align:center;margin:.2rem 0}.tpop-art{display:flex;justify-content:center}.tpop-art svg{width:96px;height:96px}
 .tpop-who{display:flex;align-items:center;gap:.5rem;justify-content:center}.tpop-who small{opacity:.7}
 .tshelf .trow:has(>.meta:only-child){min-height:30px}
+/* v1.91.78 souvenir bag */
+.souvbag{display:grid;gap:6px}.sv-item{display:flex;justify-content:space-between;align-items:center;gap:.5rem;padding:.4rem .5rem;background:rgba(0,0,0,.15);box-shadow:inset 0 0 0 1px #3d2f4a}.sv-item span{display:grid}.sv-item small{opacity:.75}
+.sv-who{display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:6px}.sv-pc{display:grid;justify-items:center;gap:2px;padding:.4rem;background:#2a1f33;color:inherit;border:0;box-shadow:inset 0 0 0 2px #3d2f4a;cursor:pointer}.sv-pc:disabled{opacity:.45}.sv-pc small{opacity:.75;font-size:.72rem}.souvn{background:#c8283c;color:#fff;padding:0 .3rem;font-size:.7rem}

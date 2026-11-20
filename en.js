@@ -2203,8 +2203,18 @@ Object.assign(GIFTS,{
   i_pillow:{name:"Khit-cloth triangle pillow",price:2200,souv:"isan",cat:"keep"},i_praewa:{name:"Kalasin Praewa silk",price:6500,souv:"isan",cat:"wear"},
   c_khon:{name:"Handcrafted Khon mask",price:3600,souv:"central",cat:"keep"},c_bencharong:{name:"Benjarong tea set",price:4800,souv:"central",cat:"keep"},
   s_talung:{name:"Hand-carved shadow puppet",price:2600,souv:"south",cat:"keep"},s_pearl:{name:"Phuket pearl necklace",price:6800,souv:"south",cat:"wear"}});
+/* v1.91.78 (Man): each province's own souvenir, bought at the hotel of that province — cheaper, a smaller heart than the regional pieces */
+Object.assign(GIFTS,{
+  p_chiangrai:{name:"Doi Mae Salong oolong tea",price:450,souv:"north",pv:"chiangrai",cat:"food"},p_nan:{name:"Nan flowing-water weave",price:1200,souv:"north",pv:"nan",cat:"wear"},
+  p_uttaradit:{name:"Laplae langsat",price:300,souv:"north",pv:"uttaradit",cat:"food"},p_lampang:{name:"Lampang rooster bowl",price:650,souv:"north",pv:"lampang",cat:"keep"},
+  p_udon:{name:"Ban Na Kha mudmee-khit cloth",price:1100,souv:"isan",pv:"udon",cat:"wear"},p_khonkaen:{name:"Khon Kaen Isan sausage",price:350,souv:"isan",pv:"khonkaen",cat:"food"},
+  p_buriram:{name:"Buriram Phu Akhani cloth",price:1300,souv:"isan",pv:"buriram",cat:"wear"},p_ubon:{name:"Candle-festival replica candle",price:800,souv:"isan",pv:"ubon",cat:"keep"},
+  p_lopburi:{name:"Lopburi monkey keychain",price:250,souv:"central",pv:"lopburi",cat:"keep"},p_suphan:{name:"Suphan pears",price:300,souv:"central",pv:"suphan",cat:"food"},
+  p_phetchaburi:{name:"Phetchaburi khanom mo kaeng",price:280,souv:"central",pv:"phetchaburi",cat:"food"},p_chanthaburi:{name:"Small Chanthaburi gem",price:1500,souv:"central",pv:"chanthaburi",cat:"wear"},
+  p_chumphon:{name:"Chumphon finger bananas",price:280,souv:"south",pv:"chumphon",cat:"food"},p_surat:{name:"Chaiya salted eggs",price:300,souv:"south",pv:"surat",cat:"food"},
+  p_nakhonsi:{name:"Nakhon nielloware",price:1400,souv:"south",pv:"nakhonsi",cat:"keep"},p_songkhla:{name:"Songkhla fish crackers",price:300,souv:"south",pv:"songkhla",cat:"food"}});
 const SOUV_IDS=Object.keys(GIFTS).filter(g=>GIFTS[g].souv);
-const SOUV_LOVE={kati:["c_khon","n_umbrella"],mali:["s_talung","s_pearl"],rin:["c_bencharong","n_jok"],ploy:["i_praewa","c_bencharong"],fah:["i_pillow","s_pearl"]};
+const SOUV_LOVE={kati:["c_khon","n_umbrella"],mali:["s_talung","s_pearl","p_surat"],rin:["c_bencharong","n_jok"],ploy:["i_praewa","c_bencharong"],fah:["i_pillow","s_pearl","p_khonkaen"]};
 const SOUV_TALK={
  kati:{c_khon:"A Khon mask! Grandpa Chai took me to see Khon only once when I was little… I'll put it right next to his photo.",n_umbrella:"A flower umbrella… it's too pretty to open! I'll hang it up in my room.",like:"{g}, all the way from {r}… I'll keep it to remember this trip!"},
  mali:{s_talung:"Nang talung! As a kid I'd sneak behind the screen to watch the puppeteer at every temple fair~ I miss home.",s_pearl:"Pearls… really, for me? I'll wear them when I visit Mom. She's going to be so surprised~",like:"A souvenir from {r}~ I'm so happy you thought of me on the trip!"},
@@ -2235,7 +2245,7 @@ function giftTier(id,g){if(GIFTS[g]&&GIFTS[g].souv)return (SOUV_LOVE[id]||[]).in
 function giveGift(G,id,g){const f=G.F[id],it=GIFTS[g],sv=!!it.souv;if(sv?!((G.souv||{})[g]>0):G.cash<it.price)return null;if(f.giftWeek===gameWeek(G))return null;if(sv)G.souv[g]--;else G.cash-=it.price;f.giftWeek=gameWeek(G);if(typeof absWeek==="function")f.lastTouch=absWeek(G);
   // v1.16: the same gift again means less (and she says so)
   f.giftN=f.giftN||{};f.giftL=f.giftL||{};if(f.giftL[g]&&gameWeek(G)-f.giftL[g]>=6)f.giftN[g]=0;const n=f.giftN[g]||0;f.giftN[g]=n+1;f.giftL[g]=gameWeek(G);f.giftTot=(f.giftTot||0)+1;
-  const t=giftTier(id,g),base=sv?{love:24,like:15}[t]:Math.round({love:6,like:4,ok:2,dislike:0}[t]*(it.bond&&t!=="dislike"?1.5:1)),gain=base>0?Math.max(1,Math.round(base*(n===0?1:t==="love"?(n===1?.6:.4):(n===1?.5:.25)))):base;
+  const t=giftTier(id,g),base=sv?(it.pv?{love:10,like:6}:{love:24,like:15})[t]:Math.round({love:6,like:4,ok:2,dislike:0}[t]*(it.bond&&t!=="dislike"?1.5:1)),gain=base>0?Math.max(1,Math.round(base*(n===0?1:t==="love"?(n===1?.6:.4):(n===1?.5:.25)))):base;
   const before=(f.bond||0)+(f.bondX||0);add(G,id,"bond",gain);if(t==="love")add(G,id,"morale",n<2?6:4);
   f.know["gift_"+g]=t;return {t,gain:Math.round(((f.bond||0)+(f.bondX||0)-before)*10)/10,g,n};}
 // v1.21: repeat-gift lines follow what the gift is (food / something to wear / a keepsake / an outing) so they always fit
@@ -6475,7 +6485,7 @@ AU.gsfx=function(kind,a){if(!this.init()||this.muted||!SETTINGS.sfx)return;const
   if(kind==="shimmer")for(let i=0;i<6;i++)T(i*.05,{f:1400+Math.random()*1400,type:"sine",dur:.12,peak:.06});};
 
 // ================= MUAY THAI MOE v1.3 — UI =================
-const VERSION="1.91.77";
+const VERSION="1.91.78";
 const CUR_LANG=(typeof window!=="undefined"&&window.LANG)||"th";
 const TH_LABEL=String.fromCharCode(3652,3607,3618);
 function langSwitch(cls){return `<div class="langsw ${cls||""}" role="group" aria-label="Language">${[["th",TH_LABEL],["en","EN"]].map(([k,l])=>`<button class="lsb ${CUR_LANG===k?"on":""}" data-act="setlang" data-v="${k}" aria-pressed="${CUR_LANG===k}">${l}</button>`).join("")}</div>`;}
@@ -7274,7 +7284,7 @@ function campHTML(){const inc=classIncome(G),up=upkeep(G),wg=wages(G),lv=campLev
   const dots=(n,m)=>`<span class="pips">${Array.from({length:m},(_,i)=>`<i class="${i<n?"on":""}"></i>`).join("")}</span>`;
   return `<section class="px card camphead" style="background-image:linear-gradient(90deg,rgba(20,16,32,.95),rgba(20,16,32,.6)),url(${ASSET}${gymBg()})"><div><button class="pill gold lvbtn" data-act="camplv">Camp Lv.${lv} ▸</button><h3>${CAMP_LV_NAME[lv]}</h3>
     <p class="meta">Total upgrades ${facTotal(G)} levels · ${lv<3?`${lv===1?5-facTotal(G):13-facTotal(G)} levels to reach Lv.${lv+1} · tap to see what you get`:"Max level for the demo"}</p></div></section>
-   <div class="seg subtabs csubs"><button data-act="csub" data-v="money" aria-pressed="${cs==="money"}">Finance</button><button data-act="csub" data-v="staff" aria-pressed="${cs==="staff"}">Coaches & fighters</button><button data-act="csub" data-v="fac" aria-pressed="${cs==="fac"}">Camp upgrades</button><button data-act="csub" data-v="decor" aria-pressed="${cs==="decor"}">Decorations</button><button data-act="csub" data-v="hall" aria-pressed="${cs==="hall"}">Trophies</button></div>
+   <div class="seg subtabs csubs"><button data-act="csub" data-v="money" aria-pressed="${cs==="money"}">Finance</button><button data-act="csub" data-v="staff" aria-pressed="${cs==="staff"}">Coaches & fighters</button><button data-act="csub" data-v="fac" aria-pressed="${cs==="fac"}">Camp upgrades</button><button data-act="csub" data-v="decor" aria-pressed="${cs==="decor"}">Decorations</button><button data-act="csub" data-v="hall" aria-pressed="${cs==="hall"}">Trophies</button>${souvHas()?`<button data-act="csub" data-v="souv" aria-pressed="${cs==="souv"}">Souvenirs ${souvCount()?` <b class="souvn">${souvCount()}</b>`:""}</button>`:""}</div>
    ${recruitHTML(recs)}${typeof REGION!=="undefined"&&REGION.recruitHTML&&G.region?REGION.recruitHTML(G):""}
    <div class="grid g2">
    <section class="px card cpane ${cs==="money"?"on":""}"><h3>Weekly income & expenses</h3>
@@ -7296,7 +7306,7 @@ function campHTML(){const inc=classIncome(G),up=upkeep(G),wg=wages(G),lv=campLev
     <div class="item nw"><div><div class="t">Invite an old-school master to teach</div><div class="meta">${fmt(18000)} · fighter gains +1 skill point and school stats · once per fighter per season · opens week 16</div></div><button class="btn sm gold" data-act="mastersOpen" ${G.week<16?"disabled":""}>Choose</button></div>
     <div class="item nw"><div><div class="t">Host a fight night at Sirichai</div><div class="meta">${fmt(SHOW_COST)} · fame +3, camp looks better, everyone's morale +8 · once per round</div></div><button class="btn sm gold" data-act="hostshow" ${G.cash<SHOW_COST||G.week<10||G.flags["show_"+stageOf(G.week)]?"disabled":""}>${G.flags["show_"+stageOf(G.week)]?"Hosted":"Host"}</button></div>
     <div class="item nw"><div><div class="t">Pay off Grandpa Chai's debt</div><div class="meta">${G.debt>0?`Remaining ${fmt(G.debt)} · paying it off gives fame +2 and a special scene`:"Debt fully paid"}</div></div>${G.debt>0?`<button class="btn sm gold" data-act="cleardebt" ${G.cash<G.debt?"disabled":""}>Pay off</button>`:"<span class=\"pill green\">Done</span>"}</div></section>
-   ${decorHTML()}<section class="px card cpane ${cs==="hall"?"on":""}"><h3>Trophy Room</h3>${hallHTML()}</section>
+   ${decorHTML()}${cs==="souv"?souvBagHTML():""}<section class="px card cpane ${cs==="hall"?"on":""}"><h3>Trophy Room</h3>${hallHTML()}</section>
 `;}
 
 // v1.18: hired trainers with their own pixel sprite
@@ -7483,6 +7493,15 @@ function giftHTML(id){const f=G.F[id];
    const lw=f.giftL&&f.giftL[k],cd=lw&&gameWeek(G)-lw<6&&(f.giftN||{})[k]?6-(gameWeek(G)-lw):0;
    return `<button class="giftbtn" data-act="give" data-id="${id}" data-v="${k}" ${G.cash<g.price?"disabled":""}><b>${g.name}</b><small>${fmt(g.price)}${cd?` · given recently`:""}</small></button>`;}).join("")}</div>
    <p class="meta glegend">Watch how she reacts when you give it, or check her profile for what you've given before</p>`;}
+/* v1.91.78 (Man): the souvenir bag in the camp page — pick a souvenir, pick who gets it, then her reaction scene */
+const souvCount=()=>Object.values(G.souv||{}).reduce((a,b)=>a+(b>0?b:0),0);
+const souvHas=()=>!!(G.souv&&Object.keys(G.souv).length)||!!G.region;
+function souvBagHTML(){const S=G.souv||{},L=SOUV_IDS.filter(k=>S[k]>0);
+  return `<section class="px card cpane on"><h3>Souvenir bag</h3><p class="meta">Bought at souvenir shops on trips (the hotel night menu, or before the bus home) · one gift per person per week, shared with regular gifts</p>
+    ${L.length?`<div class="souvbag">${L.map(k=>`<div class="sv-item"><span><b>${esc(GIFTS[k].name)}</b><small>${GIFTS[k].pv&&typeof ROAD_DEST!=="undefined"&&ROAD_DEST[GIFTS[k].pv]?` famous in ${esc(ROAD_DEST[GIFTS[k].pv].name)}`:`Souvenir · ${SOUV_RN[GIFTS[k].souv]}`} · ×${S[k]} left</small></span><button class="btn sm gold" data-act="souvpick" data-v="${k}">Give to… ▸</button></div>`).join("")}</div>`:`<p class="meta">The bag is empty</p>`}</section>`;}
+function souvGiveHTML(k){const it=GIFTS[k];if(!it)return "";const L=roster(G).filter(f=>GIFT_LINES[f.id]&&!isAway(G,f.id));
+  return `<h2>Give ${esc(it.name)} to?</h2><div class="sv-who">${L.map(f=>{const cd=f.giftWeek===gameWeek(G);return `<button class="sv-pc" data-act="give" data-id="${f.id}" data-v="${k}" ${cd?"disabled":""}>${faceImg(f,"sm")}<b>${esc(f.name)}</b><small>${cd?"Already got a gift this week":`♥Lv.${heartLv(f)}`}</small></button>`;}).join("")}</div>
+    <div class="mfoot"><button class="btn" data-act="closeModal">Later</button></div>`;}
 /* v1.89.23: souvenirs bought on regional trips — free to give, one gift a week like the rest */
 function souvHTML(id){const S=G.souv||{},L=SOUV_IDS.filter(k=>S[k]>0);if(!L.length)return "";
   return `<h3 class="souvh">Souvenirs from your trips</h3><div class="gifts souvg">${L.map(k=>`<button class="giftbtn souv" data-act="give" data-id="${id}" data-v="${k}"><b>${esc(GIFTS[k].name)}</b><small>Souvenir from ${SOUV_RN[GIFTS[k].souv]} · ×${S[k]}</small></button>`).join("")}</div>`;}
@@ -7640,6 +7659,7 @@ function modalHTML(){const m=UI.modal;let body="",foot=true;
   if(m.type==="levelup"){body=`<h2 class="lvup">LEVEL UP!</h2>${m.ids.map(id=>{const f=G.F[id];return `<div class="lvrow"><div class="l">${faceImg(f,"sm")}<b>${esc(f.name)} Lv.${f.lvl}</b></div>${coachOn()&&f.sp>0&&!hasTree(f.id)?`<p class="hinttxt"><img src="${faceSrc("coach")}" alt=""><span>${skillTip(f)}</span></p>`:""}${skillGrid(f,true)}</div>`;}).join("")}`;}
   if(m.type==="ytinfo"){body=ytInfoHTML();foot=true;}
   if(m.type==="trophy"){body=trophyPopHTML(m.i);foot=false;}
+  if(m.type==="souvgive"){body=souvGiveHTML(m.k);foot=false;}
   if(typeof XMODAL!=="undefined"&&XMODAL[m.type]){const r=XMODAL[m.type](m);body=r.body;foot=r.foot;}
   return `<div class="overlay" data-act="closeModalBg" data-sk="ov-${m.type}"><div class="px modal pxscroll m-${m.type}${m.type==="fighter"?" fpm t-"+(UI.ptab||"over"):""}" data-sk="modal-${m.type}" role="dialog" aria-modal="true"><button class="xbtn" data-act="closeModal" aria-label="Close">✕</button>${body}
     ${foot?`<div class="mfoot"><button class="btn primary" data-act="closeModal">${m.type==="report"||m.type==="levelup"?"Continue ▸":"Close"}</button></div>`:""}</div></div>`;}
@@ -8409,6 +8429,7 @@ const ACT={
   campact:d=>{UI.cfxIds=null;const note=doCampAction(G,d.v);if(note==null)return;G.campNote=note;AU.sfx("level");UI.modal={type:"campres",k:d.v,note};save();render();},
   date:d=>{UI.modal=null;UI.tab="people";const steps=dateScene(G,d.id,d.v);AU.startMusic("date");playScene(steps,()=>{AU.startMusic("hub");render();},{bg:ACTIVITIES[d.v].bg==="camp"?"gym":ACTIVITIES[d.v].bg,look:"casual"});},
   giftpick:d=>{UI.modal={type:"gift",id:d.id};render();},
+  souvpick:d=>{UI.modal={type:"souvgive",k:d.v};render();},
   give:d=>{const r=giveGift(G,d.id,d.v);if(!r)return;UI.modal=null;UI.tab="people";save();AU.startMusic("date");giftScene(d.id,r);},
   decor:d=>{if(chooseDecor(G,d.k,d.v)){AU.sfx&&AU.sfx("ui");save();render();}},
   decorbuy:d=>{const c=decorPrice(G,d.k,d.v),it=CAMP_DECOR[d.k]&&CAMP_DECOR[d.k].items[d.v];if(!c||!it)return;AU.sfx&&AU.sfx("ui");

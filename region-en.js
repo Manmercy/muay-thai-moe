@@ -1412,24 +1412,28 @@ Pick your fighter under Fights › Four Regions Championship`+((t=>t?`\n\n(${t})
       ...girls.map(g=>({t:`Take ${g.name} around ${D.name}`,fx:G2=>{add(G2,g.id,"bond",2);g.morale=Math.min(100,(g.morale||0)+4);},then:[{n:g.id,f:"happy",l:"casual",t:this.girlLine(g.id,D.name)}]})),
       ...(RG_OUT[T.dest]&&girls.length?[{t:RG_OUT[T.dest].t,fx:G2=>{for(const f of roadRiders(G2))f.morale=Math.min(100,(f.morale||0)+3);add(G2,girls[0].id,"bond",1);},then:[{n:"nar",t:RG_OUT[T.dest].l.replace(/\{g\}/g,girls[n%girls.length].name)+" · morale +3"}]}]:[]),
       {t:"Rest and recover",fx:G2=>{for(const f of roadRiders(G2))f.fatigue=Math.max(0,(f.fatigue||0)-10);},then:[{n:"nar",t:"Everyone turns in early and wakes up fresh · fatigue −10"}]},
+      {t:`🛍 Buy souvenirs from ${D.name} (doesn't use up the night)`,fx:()=>{T.goShop=1;}},
       {t:"Light training in the hotel parking lot",fx:G2=>{for(const f of roadRiders(G2)){f.exp=(f.exp||0)+6;f.fatigue=Math.min(100,(f.fatigue||0)+2);}},then:[{n:"nar",t:"Pad work under the parking-lot lights until the hotel guard comes to watch · EXP +6"}]}];
-    const oddL=RG_ODD[r]||[],oddOn=oddL.length&&girls.length&&Math.random()<.4,odd=oddOn?oddL[Math.floor(Math.random()*oddL.length)]:null,og=girls.length?girls[Math.floor(Math.random()*girls.length)]:null,
+    const oddL=RG_ODD[r]||[],oddOn=!T.backShop&&oddL.length&&girls.length&&Math.random()<.4,odd=oddOn?oddL[Math.floor(Math.random()*oddL.length)]:null,og=girls.length?girls[Math.floor(Math.random()*girls.length)]:null,
       oddStep=odd&&og?[{inject:G2=>{const X=RG_ODD_FX[odd.fx]||RG_ODD_FX.none;X[1](G2);return [{n:"nar",t:odd.t.replace(/\{g\}/g,og.name)+(X[0]?` · ${X[0]}`:"")}];}}]:[];
-    playScene([{n:"nar",t:nights>1?`Night ${n} in ${D.name}`:`The whole camp stays the night in ${D.name}`},...oddStep,{n:"nar",t:"What shall we do tonight?",choice}],()=>this.night(T,P,n+1,done),{bg:this.hotelBg[r],look:"casual"});},
+    const back=T.backShop;T.backShop=0;
+    playScene([...(back?[]:[{n:"nar",t:nights>1?`Night ${n} in ${D.name}`:`The whole camp stays the night in ${D.name}`}]),...oddStep,{n:"nar",t:"What shall we do tonight?",choice}],()=>{
+      /* v1.91.78 (Man): the hotel souvenir shop — buy as many as you like, the night is still yours */
+      if(T.goShop){T.goShop=0;this.shop(T,()=>{T.backShop=1;this.night(T,P,n,done);},1,1);return;}this.night(T,P,n+1,done);},{bg:this.hotelBg[r],look:"casual"});},
   home(T,done){if(!T.shopDone){T.shopDone=1;this.shop(T,()=>this.home(T,done),1);return;}G.log=G.log||[];G.log.push(`Back at camp from ${ROAD_DEST[T.dest].name}`);save();done();},
   /* v1.89.23: the souvenir shop on the way out of town — the only place regional souvenirs are sold; keep buying until you get back on the bus */
   shopIntro:{north:"On the way home the bus stops at a roadside souvenir shop. Paper umbrellas hang in rows; fine handwoven cloth lies folded on a wooden table.",
     isan:"On the way out of town the bus stops at the provincial silk centre. Triangle pillows are piled like a mountain; Praewa silk hangs behind glass.",
     central:"Before heading home the bus stops at a roadside Thai crafts shop. Khon masks stare down from the walls; Benjarong cups line the shelves.",
     south:"On the way out of town the bus stops at a seaside souvenir shop. Shadow puppets glow in the shopfront; pearls sit in a glass case."},
-  shop(T,next,first){const r=ROAD_DEST[T.dest].r,L=SOUV_IDS.filter(k=>GIFTS[k].souv===r);if(!L.length){next();return;}
+  shop(T,next,first,hotel){const r=ROAD_DEST[T.dest].r,L=SOUV_IDS.filter(k=>GIFTS[k].souv===r&&(!GIFTS[k].pv||GIFTS[k].pv===T.dest)).sort((a,b)=>(GIFTS[b].pv?1:0)-(GIFTS[a].pv?1:0));if(!L.length){next();return;}
     G.souv=G.souv||{};const st={};
     const choice=[...L.map(k=>({t:`Buy ${GIFTS[k].name} (${fmt(GIFTS[k].price)}${G.souv[k]?` · own ${G.souv[k]}`:""})`,
         fx:G2=>{if(G2.cash<GIFTS[k].price){st.no=1;return;}G2.cash-=GIFTS[k].price;G2.souv=G2.souv||{};G2.souv[k]=(G2.souv[k]||0)+1;st.got=k;}})),
-      {t:first?"Nothing today, back on the bus":"That's enough, back on the bus",fx:()=>{st.end=1;}}];
-    const head=first?[{n:"nar",t:this.shopIntro[r]},{n:"nar",t:"Souvenirs aren't cheap, but the girls will love them · buy now, give later (shops like this only on trips)"}]:[];
+      {t:hotel?"Enough, back to the room":first?"Nothing today, back on the bus":"That's enough, back on the bus",fx:()=>{st.end=1;}}];
+    const pv=L.find(k=>GIFTS[k].pv),head=hotel&&first?[{n:"nar",t:`The souvenir shop next to the hotel still has its lights on.${pv?` ${GIFTS[pv].name} famous in ${ROAD_DEST[T.dest].name} is lined up out front`:""}`}]:first?[{n:"nar",t:this.shopIntro[r]},{n:"nar",t:"Souvenirs aren't cheap, but the girls will love them · buy now, give later (shops like this only on trips)"}]:[];
     playScene([...head,{n:"nar",t:first?"Pick up anything to take home?":"Anything else?",choice}],()=>{
-      if(st.end){next();return;}if(st.no)toast("Not enough money");if(st.got)toast(`Bought: ${GIFTS[st.got].name} · give it from the Gift button`);this.shop(T,next,0);},{bg:this.hotelBg[r],look:"casual"});},
+      if(st.end){next();return;}if(st.no)toast("Not enough money");if(st.got)toast(`Bought: ${GIFTS[st.got].name} · give it under Camp › Souvenirs`);this.shop(T,next,0,hotel);},{bg:this.hotelBg[r],look:"casual"});},
   dateLines(cid,D){const L={
     baibua:[{n:"npc",who:"Baibua",t:`The walking street's crowded tonight, jao… if we get separated, you can hold on to my sleeve, jao.`},{n:"nar",t:"Baibua walks slowly so you can keep up. Your hands almost touch a few times, but neither of you says anything."}],
     tabtim:[{n:"npc",who:"Tabtim",t:"Let's go eat som tam, de! This stall's real spicy… haha, I'm crying already, ai!"},{n:"nar",t:"Tabtim laughs loud enough for the whole stall to hear, but when you hand her a tissue she goes quiet for a moment."}],

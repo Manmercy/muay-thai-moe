@@ -1138,24 +1138,28 @@ const REGION={
       ...girls.map(g=>({t:`พา${g.name}ไปเที่ยว${D.name}`,fx:G2=>{add(G2,g.id,"bond",2);g.morale=Math.min(100,(g.morale||0)+4);},then:[{n:g.id,f:"happy",l:"casual",t:this.girlLine(g.id,D.name)}]})),
       ...(RG_OUT[T.dest]&&girls.length?[{t:RG_OUT[T.dest].t,fx:G2=>{for(const f of roadRiders(G2))f.morale=Math.min(100,(f.morale||0)+3);add(G2,girls[0].id,"bond",1);},then:[{n:"nar",t:RG_OUT[T.dest].l.replace(/\{g\}/g,girls[n%girls.length].name)+" · กำลังใจ +3"}]}]:[]),
       {t:"พักผ่อนให้หายล้า",fx:G2=>{for(const f of roadRiders(G2))f.fatigue=Math.max(0,(f.fatigue||0)-10);},then:[{n:"nar",t:"ทุกคนเข้านอนแต่หัวค่ำ เช้ามาร่างกายสดชื่นขึ้น · ความล้า −10"}]},
+      {t:`🛍 ซื้อของฝาก${D.name} (ไม่เสียเวลาคืนนี้)`,fx:()=>{T.goShop=1;}},
       {t:"ซ้อมเบา ๆ ที่ลานจอดรถโรงแรม",fx:G2=>{for(const f of roadRiders(G2)){f.exp=(f.exp||0)+6;f.fatigue=Math.min(100,(f.fatigue||0)+2);}},then:[{n:"nar",t:"เตะเป้าใต้ไฟลานจอดรถจนยามโรงแรมมาดู · ประสบการณ์ +6"}]}];
-    const oddL=RG_ODD[r]||[],oddOn=oddL.length&&girls.length&&Math.random()<.4,odd=oddOn?oddL[Math.floor(Math.random()*oddL.length)]:null,og=girls.length?girls[Math.floor(Math.random()*girls.length)]:null,
+    const oddL=RG_ODD[r]||[],oddOn=!T.backShop&&oddL.length&&girls.length&&Math.random()<.4,odd=oddOn?oddL[Math.floor(Math.random()*oddL.length)]:null,og=girls.length?girls[Math.floor(Math.random()*girls.length)]:null,
       oddStep=odd&&og?[{inject:G2=>{const X=RG_ODD_FX[odd.fx]||RG_ODD_FX.none;X[1](G2);return [{n:"nar",t:odd.t.replace(/\{g\}/g,og.name)+(X[0]?` · ${X[0]}`:"")}];}}]:[];
-    playScene([{n:"nar",t:nights>1?`คืนที่ ${n} ที่${D.name}`:`คืนนี้ทั้งค่ายพักที่${D.name}`},...oddStep,{n:"nar",t:"คืนนี้ทำอะไรดี?",choice}],()=>this.night(T,P,n+1,done),{bg:this.hotelBg[r],look:"casual"});},
+    const back=T.backShop;T.backShop=0;
+    playScene([...(back?[]:[{n:"nar",t:nights>1?`คืนที่ ${n} ที่${D.name}`:`คืนนี้ทั้งค่ายพักที่${D.name}`}]),...oddStep,{n:"nar",t:"คืนนี้ทำอะไรดี?",choice}],()=>{
+      /* v1.91.78 (Man): the hotel souvenir shop — buy as many as you like, the night is still yours */
+      if(T.goShop){T.goShop=0;this.shop(T,()=>{T.backShop=1;this.night(T,P,n,done);},1,1);return;}this.night(T,P,n+1,done);},{bg:this.hotelBg[r],look:"casual"});},
   home(T,done){if(!T.shopDone){T.shopDone=1;this.shop(T,()=>this.home(T,done),1);return;}G.log=G.log||[];G.log.push(`กลับถึงค่ายจาก${ROAD_DEST[T.dest].name}`);save();done();},
   /* v1.89.23: the souvenir shop on the way out of town — the only place regional souvenirs are sold; keep buying until you get back on the bus */
   shopIntro:{north:"ขากลับ รถแวะร้านของฝากริมถนน ร่มกระดาษสาแขวนเรียงเป็นแถว ผ้าทอผืนงามพับวางอยู่บนโต๊ะไม้",
     isan:"ก่อนออกจากเมือง รถแวะศูนย์ผ้าไหมประจำจังหวัด หมอนขวานกองสูงเป็นภูเขา ผ้าไหมแพรวาแขวนอยู่ในตู้กระจก",
     central:"ก่อนกลับ รถแวะร้านงานช่างไทยริมทาง หัวโขนจ้องลงมาจากผนัง ถ้วยเบญจรงค์เรียงอยู่บนชั้น",
     south:"ก่อนออกจากเมือง รถแวะร้านของฝากริมทะเล รูปหนังตะลุงแขวนโปร่งแสงอยู่หน้าร้าน ไข่มุกวางอยู่ในตู้กระจก"},
-  shop(T,next,first){const r=ROAD_DEST[T.dest].r,L=SOUV_IDS.filter(k=>GIFTS[k].souv===r);if(!L.length){next();return;}
+  shop(T,next,first,hotel){const r=ROAD_DEST[T.dest].r,L=SOUV_IDS.filter(k=>GIFTS[k].souv===r&&(!GIFTS[k].pv||GIFTS[k].pv===T.dest)).sort((a,b)=>(GIFTS[b].pv?1:0)-(GIFTS[a].pv?1:0));if(!L.length){next();return;}
     G.souv=G.souv||{};const st={};
     const choice=[...L.map(k=>({t:`ซื้อ${GIFTS[k].name} (${fmt(GIFTS[k].price)}${G.souv[k]?` · มีอยู่ ${G.souv[k]}`:""})`,
         fx:G2=>{if(G2.cash<GIFTS[k].price){st.no=1;return;}G2.cash-=GIFTS[k].price;G2.souv=G2.souv||{};G2.souv[k]=(G2.souv[k]||0)+1;st.got=k;}})),
-      {t:first?"ไม่ซื้อ ขึ้นรถกลับค่าย":"พอแล้ว ขึ้นรถกลับค่าย",fx:()=>{st.end=1;}}];
-    const head=first?[{n:"nar",t:this.shopIntro[r]},{n:"nar",t:"ของฝากแพงหน่อย แต่ได้ใจสาว ๆ มาก · ซื้อเก็บไว้แล้วค่อยให้ทีหลังได้ (ร้านแบบนี้มีแค่ตอนมาทริป)"}]:[];
+      {t:hotel?"พอแล้ว กลับห้อง":first?"ไม่ซื้อ ขึ้นรถกลับค่าย":"พอแล้ว ขึ้นรถกลับค่าย",fx:()=>{st.end=1;}}];
+    const pv=L.find(k=>GIFTS[k].pv),head=hotel&&first?[{n:"nar",t:`ร้านของฝากข้างโรงแรมยังเปิดไฟอยู่${pv?` ${GIFTS[pv].name}ของขึ้นชื่อ${ROAD_DEST[T.dest].name}วางเรียงอยู่หน้าร้าน`:""}`}]:first?[{n:"nar",t:this.shopIntro[r]},{n:"nar",t:"ของฝากแพงหน่อย แต่ได้ใจสาว ๆ มาก · ซื้อเก็บไว้แล้วค่อยให้ทีหลังได้ (ร้านแบบนี้มีแค่ตอนมาทริป)"}]:[];
     playScene([...head,{n:"nar",t:first?"จะซื้ออะไรติดมือกลับไปไหม?":"ซื้ออะไรเพิ่มไหม?",choice}],()=>{
-      if(st.end){next();return;}if(st.no)toast("เงินไม่พอ");if(st.got)toast(`ซื้อแล้ว: ${GIFTS[st.got].name} · ให้ได้จากปุ่มของขวัญ`);this.shop(T,next,0);},{bg:this.hotelBg[r],look:"casual"});},
+      if(st.end){next();return;}if(st.no)toast("เงินไม่พอ");if(st.got)toast(`ซื้อแล้ว: ${GIFTS[st.got].name} · มอบได้ที่จัดการค่าย › ของฝาก`);this.shop(T,next,0,hotel);},{bg:this.hotelBg[r],look:"casual"});},
   dateLines(cid,D){const L={
     baibua:[{n:"npc",who:"ใบบัว",t:`ถนนคนเดินคืนนี้คนเยอะเจ้า… ถ้าหลงกัน จับแขนเสื้อหนูไว้ก็ได้เจ้า`},{n:"nar",t:"ใบบัวเดินช้า ๆ ให้ผู้จัดการเดินทัน มือเกือบชนกันหลายครั้ง แต่ไม่มีใครพูดอะไร"}],
     tabtim:[{n:"npc",who:"ทับทิม",t:"ไปกินส้มตำกันเด้อ! ร้านนี้แซบมาก… ฮ่า ๆ ๆ เผ็ดจนน้ำตาไหลแล้วอ้าย"},{n:"nar",t:"ทับทิมหัวเราะเสียงดังทั้งร้าน แต่พอผู้จัดการยื่นทิชชูให้ เธอเงียบไปครู่หนึ่ง"}],

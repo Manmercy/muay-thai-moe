@@ -375,8 +375,18 @@ Object.assign(GIFTS,{
   i_pillow:{name:"Khit-cloth triangle pillow",price:2200,souv:"isan",cat:"keep"},i_praewa:{name:"Kalasin Praewa silk",price:6500,souv:"isan",cat:"wear"},
   c_khon:{name:"Handcrafted Khon mask",price:3600,souv:"central",cat:"keep"},c_bencharong:{name:"Benjarong tea set",price:4800,souv:"central",cat:"keep"},
   s_talung:{name:"Hand-carved shadow puppet",price:2600,souv:"south",cat:"keep"},s_pearl:{name:"Phuket pearl necklace",price:6800,souv:"south",cat:"wear"}});
+/* v1.91.78 (Man): each province's own souvenir, bought at the hotel of that province — cheaper, a smaller heart than the regional pieces */
+Object.assign(GIFTS,{
+  p_chiangrai:{name:"Doi Mae Salong oolong tea",price:450,souv:"north",pv:"chiangrai",cat:"food"},p_nan:{name:"Nan flowing-water weave",price:1200,souv:"north",pv:"nan",cat:"wear"},
+  p_uttaradit:{name:"Laplae langsat",price:300,souv:"north",pv:"uttaradit",cat:"food"},p_lampang:{name:"Lampang rooster bowl",price:650,souv:"north",pv:"lampang",cat:"keep"},
+  p_udon:{name:"Ban Na Kha mudmee-khit cloth",price:1100,souv:"isan",pv:"udon",cat:"wear"},p_khonkaen:{name:"Khon Kaen Isan sausage",price:350,souv:"isan",pv:"khonkaen",cat:"food"},
+  p_buriram:{name:"Buriram Phu Akhani cloth",price:1300,souv:"isan",pv:"buriram",cat:"wear"},p_ubon:{name:"Candle-festival replica candle",price:800,souv:"isan",pv:"ubon",cat:"keep"},
+  p_lopburi:{name:"Lopburi monkey keychain",price:250,souv:"central",pv:"lopburi",cat:"keep"},p_suphan:{name:"Suphan pears",price:300,souv:"central",pv:"suphan",cat:"food"},
+  p_phetchaburi:{name:"Phetchaburi khanom mo kaeng",price:280,souv:"central",pv:"phetchaburi",cat:"food"},p_chanthaburi:{name:"Small Chanthaburi gem",price:1500,souv:"central",pv:"chanthaburi",cat:"wear"},
+  p_chumphon:{name:"Chumphon finger bananas",price:280,souv:"south",pv:"chumphon",cat:"food"},p_surat:{name:"Chaiya salted eggs",price:300,souv:"south",pv:"surat",cat:"food"},
+  p_nakhonsi:{name:"Nakhon nielloware",price:1400,souv:"south",pv:"nakhonsi",cat:"keep"},p_songkhla:{name:"Songkhla fish crackers",price:300,souv:"south",pv:"songkhla",cat:"food"}});
 const SOUV_IDS=Object.keys(GIFTS).filter(g=>GIFTS[g].souv);
-const SOUV_LOVE={kati:["c_khon","n_umbrella"],mali:["s_talung","s_pearl"],rin:["c_bencharong","n_jok"],ploy:["i_praewa","c_bencharong"],fah:["i_pillow","s_pearl"]};
+const SOUV_LOVE={kati:["c_khon","n_umbrella"],mali:["s_talung","s_pearl","p_surat"],rin:["c_bencharong","n_jok"],ploy:["i_praewa","c_bencharong"],fah:["i_pillow","s_pearl","p_khonkaen"]};
 const SOUV_TALK={
  kati:{c_khon:"A Khon mask! Grandpa Chai took me to see Khon only once when I was little… I'll put it right next to his photo.",n_umbrella:"A flower umbrella… it's too pretty to open! I'll hang it up in my room.",like:"{g}, all the way from {r}… I'll keep it to remember this trip!"},
  mali:{s_talung:"Nang talung! As a kid I'd sneak behind the screen to watch the puppeteer at every temple fair~ I miss home.",s_pearl:"Pearls… really, for me? I'll wear them when I visit Mom. She's going to be so surprised~",like:"A souvenir from {r}~ I'm so happy you thought of me on the trip!"},
@@ -407,7 +417,7 @@ function giftTier(id,g){if(GIFTS[g]&&GIFTS[g].souv)return (SOUV_LOVE[id]||[]).in
 function giveGift(G,id,g){const f=G.F[id],it=GIFTS[g],sv=!!it.souv;if(sv?!((G.souv||{})[g]>0):G.cash<it.price)return null;if(f.giftWeek===gameWeek(G))return null;if(sv)G.souv[g]--;else G.cash-=it.price;f.giftWeek=gameWeek(G);if(typeof absWeek==="function")f.lastTouch=absWeek(G);
   // v1.16: the same gift again means less (and she says so)
   f.giftN=f.giftN||{};f.giftL=f.giftL||{};if(f.giftL[g]&&gameWeek(G)-f.giftL[g]>=6)f.giftN[g]=0;const n=f.giftN[g]||0;f.giftN[g]=n+1;f.giftL[g]=gameWeek(G);f.giftTot=(f.giftTot||0)+1;
-  const t=giftTier(id,g),base=sv?{love:24,like:15}[t]:Math.round({love:6,like:4,ok:2,dislike:0}[t]*(it.bond&&t!=="dislike"?1.5:1)),gain=base>0?Math.max(1,Math.round(base*(n===0?1:t==="love"?(n===1?.6:.4):(n===1?.5:.25)))):base;
+  const t=giftTier(id,g),base=sv?(it.pv?{love:10,like:6}:{love:24,like:15})[t]:Math.round({love:6,like:4,ok:2,dislike:0}[t]*(it.bond&&t!=="dislike"?1.5:1)),gain=base>0?Math.max(1,Math.round(base*(n===0?1:t==="love"?(n===1?.6:.4):(n===1?.5:.25)))):base;
   const before=(f.bond||0)+(f.bondX||0);add(G,id,"bond",gain);if(t==="love")add(G,id,"morale",n<2?6:4);
   f.know["gift_"+g]=t;return {t,gain:Math.round(((f.bond||0)+(f.bondX||0)-before)*10)/10,g,n};}
 // v1.21: repeat-gift lines follow what the gift is (food / something to wear / a keepsake / an outing) so they always fit

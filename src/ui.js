@@ -1,5 +1,5 @@
 // ================= MUAY THAI MOE v1.3 — UI =================
-const VERSION="1.91.78";
+const VERSION="1.91.79";
 const CUR_LANG=(typeof window!=="undefined"&&window.LANG)||"th";
 const TH_LABEL=String.fromCharCode(3652,3607,3618);
 function langSwitch(cls){return `<div class="langsw ${cls||""}" role="group" aria-label="Language">${[["th",TH_LABEL],["en","EN"]].map(([k,l])=>`<button class="lsb ${CUR_LANG===k?"on":""}" data-act="setlang" data-v="${k}" aria-pressed="${CUR_LANG===k}">${l}</button>`).join("")}</div>`;}
@@ -798,7 +798,7 @@ function campHTML(){const inc=classIncome(G),up=upkeep(G),wg=wages(G),lv=campLev
   const dots=(n,m)=>`<span class="pips">${Array.from({length:m},(_,i)=>`<i class="${i<n?"on":""}"></i>`).join("")}</span>`;
   return `<section class="px card camphead" style="background-image:linear-gradient(90deg,rgba(20,16,32,.95),rgba(20,16,32,.6)),url(${ASSET}${gymBg()})"><div><button class="pill gold lvbtn" data-act="camplv">ค่าย Lv.${lv} ▸</button><h3>${CAMP_LV_NAME[lv]}</h3>
     <p class="meta">อัปเกรดรวม ${facTotal(G)} ขั้น · ${lv<3?`อีก ${lv===1?5-facTotal(G):13-facTotal(G)} ขั้นจะเลื่อนเป็น Lv.${lv+1} · กดดูว่าได้อะไร`:"ระดับสูงสุดของเดโม"}</p></div></section>
-   <div class="seg subtabs csubs"><button data-act="csub" data-v="money" aria-pressed="${cs==="money"}">การเงิน</button><button data-act="csub" data-v="staff" aria-pressed="${cs==="staff"}">ครู & นักมวย</button><button data-act="csub" data-v="fac" aria-pressed="${cs==="fac"}">อัปเกรดค่าย</button><button data-act="csub" data-v="decor" aria-pressed="${cs==="decor"}">ตกแต่ง</button><button data-act="csub" data-v="hall" aria-pressed="${cs==="hall"}">ถ้วยรางวัล</button></div>
+   <div class="seg subtabs csubs"><button data-act="csub" data-v="money" aria-pressed="${cs==="money"}">การเงิน</button><button data-act="csub" data-v="staff" aria-pressed="${cs==="staff"}">ครู & นักมวย</button><button data-act="csub" data-v="fac" aria-pressed="${cs==="fac"}">อัปเกรดค่าย</button><button data-act="csub" data-v="decor" aria-pressed="${cs==="decor"}">ตกแต่ง</button><button data-act="csub" data-v="hall" aria-pressed="${cs==="hall"}">ถ้วยรางวัล</button>${souvHas()?`<button data-act="csub" data-v="souv" aria-pressed="${cs==="souv"}">ของฝาก${souvCount()?` <b class="souvn">${souvCount()}</b>`:""}</button>`:""}</div>
    ${recruitHTML(recs)}${typeof REGION!=="undefined"&&REGION.recruitHTML&&G.region?REGION.recruitHTML(G):""}
    <div class="grid g2">
    <section class="px card cpane ${cs==="money"?"on":""}"><h3>รายรับ-รายจ่ายต่อสัปดาห์</h3>
@@ -820,7 +820,7 @@ function campHTML(){const inc=classIncome(G),up=upkeep(G),wg=wages(G),lv=campLev
     <div class="item nw"><div><div class="t">เชิญครูมวยโบราณมาสอน</div><div class="meta">${fmt(18000)} · นักมวยได้แต้มสกิล +1 และค่าสถานะตามสำนัก · คนละครั้งต่อฤดูกาล · เปิดสัปดาห์ 16</div></div><button class="btn sm gold" data-act="mastersOpen" ${G.week<16?"disabled":""}>เลือก</button></div>
     <div class="item nw"><div><div class="t">จัดศึกมวยที่ค่ายศิริชัย</div><div class="meta">${fmt(SHOW_COST)} · ชื่อเสียง +3 ค่ายสวยขึ้น กำลังใจทุกคน +8 · รอบละครั้ง</div></div><button class="btn sm gold" data-act="hostshow" ${G.cash<SHOW_COST||G.week<10||G.flags["show_"+stageOf(G.week)]?"disabled":""}>${G.flags["show_"+stageOf(G.week)]?"จัดแล้ว":"จัดงาน"}</button></div>
     <div class="item nw"><div><div class="t">ปิดหนี้ปู่ชัยทั้งหมด</div><div class="meta">${G.debt>0?`คงเหลือ ${fmt(G.debt)} · ปิดแล้วชื่อเสียง +2 และมีฉากพิเศษ`:"ปิดหนี้เรียบร้อยแล้ว"}</div></div>${G.debt>0?`<button class="btn sm gold" data-act="cleardebt" ${G.cash<G.debt?"disabled":""}>ปิดหนี้</button>`:'<span class="pill green">เรียบร้อย</span>'}</div></section>
-   ${decorHTML()}<section class="px card cpane ${cs==="hall"?"on":""}"><h3>ห้องถ้วยรางวัล</h3>${hallHTML()}</section>
+   ${decorHTML()}${cs==="souv"?souvBagHTML():""}<section class="px card cpane ${cs==="hall"?"on":""}"><h3>ห้องถ้วยรางวัล</h3>${hallHTML()}</section>
 `;}
 
 // v1.18: hired trainers with their own pixel sprite
@@ -1007,6 +1007,15 @@ function giftHTML(id){const f=G.F[id];
    const lw=f.giftL&&f.giftL[k],cd=lw&&gameWeek(G)-lw<6&&(f.giftN||{})[k]?6-(gameWeek(G)-lw):0;
    return `<button class="giftbtn" data-act="give" data-id="${id}" data-v="${k}" ${G.cash<g.price?"disabled":""}><b>${g.name}</b><small>${fmt(g.price)}${cd?` · เพิ่งให้ไป`:""}</small></button>`;}).join("")}</div>
    <p class="meta glegend">สังเกตท่าทีตอนให้ หรือดูในประวัติว่าเคยให้อะไรไปแล้วบ้าง</p>`;}
+/* v1.91.78 (Man): the souvenir bag in the camp page — pick a souvenir, pick who gets it, then her reaction scene */
+const souvCount=()=>Object.values(G.souv||{}).reduce((a,b)=>a+(b>0?b:0),0);
+const souvHas=()=>!!(G.souv&&Object.keys(G.souv).length)||!!G.region;
+function souvBagHTML(){const S=G.souv||{},L=SOUV_IDS.filter(k=>S[k]>0);
+  return `<section class="px card cpane on"><h3>กระเป๋าของฝาก</h3><p class="meta">ซื้อได้ที่ร้านของฝากตอนไปทริปต่างจังหวัด (เมนูคืนที่โรงแรม หรือก่อนขึ้นรถกลับ) · มอบได้คนละ 1 ชิ้นต่อสัปดาห์ รวมกับของขวัญ</p>
+    ${L.length?`<div class="souvbag">${L.map(k=>`<div class="sv-item"><span><b>${esc(GIFTS[k].name)}</b><small>${GIFTS[k].pv&&typeof ROAD_DEST!=="undefined"&&ROAD_DEST[GIFTS[k].pv]?`ของขึ้นชื่อ${esc(ROAD_DEST[GIFTS[k].pv].name)}`:`ของฝาก${SOUV_RN[GIFTS[k].souv]}`} · มี ${S[k]} ชิ้น</small></span><button class="btn sm gold" data-act="souvpick" data-v="${k}">มอบให้… ▸</button></div>`).join("")}</div>`:`<p class="meta">กระเป๋ายังว่าง</p>`}</section>`;}
+function souvGiveHTML(k){const it=GIFTS[k];if(!it)return "";const L=roster(G).filter(f=>GIFT_LINES[f.id]&&!isAway(G,f.id));
+  return `<h2>มอบ${esc(it.name)}ให้ใคร?</h2><div class="sv-who">${L.map(f=>{const cd=f.giftWeek===gameWeek(G);return `<button class="sv-pc" data-act="give" data-id="${f.id}" data-v="${k}" ${cd?"disabled":""}>${faceImg(f,"sm")}<b>${esc(f.name)}</b><small>${cd?"ให้ของไปแล้วสัปดาห์นี้":`♥Lv.${heartLv(f)}`}</small></button>`;}).join("")}</div>
+    <div class="mfoot"><button class="btn" data-act="closeModal">ไว้ก่อน</button></div>`;}
 /* v1.89.23: souvenirs bought on regional trips — free to give, one gift a week like the rest */
 function souvHTML(id){const S=G.souv||{},L=SOUV_IDS.filter(k=>S[k]>0);if(!L.length)return "";
   return `<h3 class="souvh">ของฝากที่ซื้อมาจากทริป</h3><div class="gifts souvg">${L.map(k=>`<button class="giftbtn souv" data-act="give" data-id="${id}" data-v="${k}"><b>${esc(GIFTS[k].name)}</b><small>ของฝาก${SOUV_RN[GIFTS[k].souv]} · มี ${S[k]} ชิ้น</small></button>`).join("")}</div>`;}
@@ -1164,6 +1173,7 @@ function modalHTML(){const m=UI.modal;let body="",foot=true;
   if(m.type==="levelup"){body=`<h2 class="lvup">LEVEL UP!</h2>${m.ids.map(id=>{const f=G.F[id];return `<div class="lvrow"><div class="l">${faceImg(f,"sm")}<b>${esc(f.name)} Lv.${f.lvl}</b></div>${coachOn()&&f.sp>0&&!hasTree(f.id)?`<p class="hinttxt"><img src="${faceSrc("coach")}" alt=""><span>${skillTip(f)}</span></p>`:""}${skillGrid(f,true)}</div>`;}).join("")}`;}
   if(m.type==="ytinfo"){body=ytInfoHTML();foot=true;}
   if(m.type==="trophy"){body=trophyPopHTML(m.i);foot=false;}
+  if(m.type==="souvgive"){body=souvGiveHTML(m.k);foot=false;}
   if(typeof XMODAL!=="undefined"&&XMODAL[m.type]){const r=XMODAL[m.type](m);body=r.body;foot=r.foot;}
   return `<div class="overlay" data-act="closeModalBg" data-sk="ov-${m.type}"><div class="px modal pxscroll m-${m.type}${m.type==="fighter"?" fpm t-"+(UI.ptab||"over"):""}" data-sk="modal-${m.type}" role="dialog" aria-modal="true"><button class="xbtn" data-act="closeModal" aria-label="ปิด">✕</button>${body}
     ${foot?`<div class="mfoot"><button class="btn primary" data-act="closeModal">${m.type==="report"||m.type==="levelup"?"ไปต่อ ▸":"ปิด"}</button></div>`:""}</div></div>`;}
@@ -1933,6 +1943,7 @@ const ACT={
   campact:d=>{UI.cfxIds=null;const note=doCampAction(G,d.v);if(note==null)return;G.campNote=note;AU.sfx("level");UI.modal={type:"campres",k:d.v,note};save();render();},
   date:d=>{UI.modal=null;UI.tab="people";const steps=dateScene(G,d.id,d.v);AU.startMusic("date");playScene(steps,()=>{AU.startMusic("hub");render();},{bg:ACTIVITIES[d.v].bg==="camp"?"gym":ACTIVITIES[d.v].bg,look:"casual"});},
   giftpick:d=>{UI.modal={type:"gift",id:d.id};render();},
+  souvpick:d=>{UI.modal={type:"souvgive",k:d.v};render();},
   give:d=>{const r=giveGift(G,d.id,d.v);if(!r)return;UI.modal=null;UI.tab="people";save();AU.startMusic("date");giftScene(d.id,r);},
   decor:d=>{if(chooseDecor(G,d.k,d.v)){AU.sfx&&AU.sfx("ui");save();render();}},
   decorbuy:d=>{const c=decorPrice(G,d.k,d.v),it=CAMP_DECOR[d.k]&&CAMP_DECOR[d.k].items[d.v];if(!c||!it)return;AU.sfx&&AU.sfx("ui");
