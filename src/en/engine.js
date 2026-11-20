@@ -902,7 +902,7 @@ Kerk, Chairman of NAGA Energy Drink`});}
 function regionWeek(G){if(!regionOn())return;if(!G.region){if(regionReady(G))regionStart(G);return;}
   if(typeof REGION!=="undefined"&&REGION.weekly)REGION.weekly(G);}
 /* a regional bout just ended: queue it for region.js (it may still be loading) */
-function regionAfterFight(G,b,ret,F){if(!G.region)return;G.region.pend=G.region.pend||[];const rt=(F&&F.result&&F.result.type)||"";G.region.pend.push({bid:b.id,a:b.a,b:b.b,region:b.region,res:ret?ret.res:null,kdA:F&&F.A?F.A.kd||0:0,stop:!!rt&&!/^ชนะคะแนน|^เสมอ/.test(rt)});
+function regionAfterFight(G,b,ret,F){if(!G.region)return;G.region.pend=G.region.pend||[];G.region.lastRes={bid:b.id,res:ret?ret.res:null}; /* v1.91.93: the local-ring knockout reads the result straight after the bout */const rt=(F&&F.result&&F.result.type)||"";G.region.pend.push({bid:b.id,a:b.a,b:b.b,region:b.region,res:ret?ret.res:null,kdA:F&&F.A?F.A.kd||0:0,stop:!!rt&&!/^ชนะคะแนน|^เสมอ/.test(rt)});
   if(typeof REGION!=="undefined"&&REGION.flush)REGION.flush(G);}
 function stageOf(w){return w<=20?"local":w<=40?"district":w<=50?"final":"off";}
 const STAGE_NAME={local:"Subdistrict round",district:"District round",final:"Provincial final",off:"Year end"};

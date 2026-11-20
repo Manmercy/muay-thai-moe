@@ -1325,14 +1325,14 @@ const REGION={
     G.F[id]=f;syncFighterAges(G);return id;},
   purse(G){const n=this.beltTotal(G),w=Math.round((10000+n*800)*(1+Math.min(G.rep,50)/100)/100)*100;return {win:w,lose:Math.round(w*.4/100)*100};},
   book(G,dest,fid,now){const R=G.region,D=ROAD_DEST[dest],me=G.F[fid];if(!R||!D||!me)return {ok:false,why:"ข้อมูลไม่ครบ"};
-    if(R.trip)return {ok:false,why:"มีทริปที่นัดไว้แล้ว"};if((R.belts[D.r]||{})[dest])return {ok:false,why:"ได้เข็มขัดจังหวัดนี้แล้ว"};
+    if(R.trip)return {ok:false,why:"มีทริปที่นัดไว้แล้ว"};const local=!!(R.belts[D.r]||{})[dest];
     const wk=this.tripWeek(G);if(!wk)return {ok:false,why:"ปีนี้ไม่มีสัปดาห์ว่างให้เดินทางแล้ว"};if(now&&wk!==G.week)return {ok:false,why:`สัปดาห์นี้ยังออกเดินทางไม่ได้ · ไปได้สัปดาห์ ${wk}`};
     if(!this.riders(G,wk).some(f=>f.id===fid))return {ok:false,why:`${me.name}ไม่พร้อมเดินทาง`};
     const abs=this.base(G)+wk,P=roadPlan(G,dest,null,abs);if(G.cash<P.total)return {ok:false,why:"เงินไม่พอค่าเดินทาง"};
-    const opp=this.makeOpp(G,dest,me,abs),pay=this.purse(G),bid=`rg${abs}_${dest}`;
-    G.bookings.push({id:bid,a:fid,b:opp,week:wk,tier:"region",rounds:3,win:pay.win,lose:pay.lose,region:{r:D.r,dest},bg:dest==="chanthaburi"?"bg_region_east.webp":`bg_ring_${dest}.webp`});
+    const opp=local?this.localOpp(G,dest,me,abs,1):this.makeOpp(G,dest,me,abs),pay=local?this.localPurse(G,1):this.purse(G),bid=`rg${abs}_${dest}`;
+    G.bookings.push({id:bid,a:fid,b:opp,week:wk,tier:"region",rounds:3,win:pay.win,lose:pay.lose,region:local?{r:D.r,dest,local:1,lr:1}:{r:D.r,dest},bg:dest==="chanthaburi"?"bg_region_east.webp":`bg_ring_${dest}.webp`});
     G.cash-=P.total;G.offers=(G.offers||[]).filter(o=>o.week!==wk);
-    R.trip={abs,season:G.season||1,wk,dest,fid,opp,bid,cost:P.total,car:P.car,fat:P.fat,quick:this.canQuick(G,dest)&&!!R.quickPref,party:this.party(G,fid),noCoach:roadCoachAvail(G)&&!roadCoachIn(G)};UI.rgNoCoach=false;
+    R.trip={abs,season:G.season||1,wk,dest,fid,opp,bid,cost:P.total,car:P.car,fat:P.fat,quick:this.canQuick(G,dest)&&!!R.quickPref,party:this.party(G,fid),noCoach:roadCoachAvail(G)&&!roadCoachIn(G),local:local?1:0};UI.rgNoCoach=false;
     G.log=G.log||[];G.log.push(`วางแผนเดินทางไป${D.name} สัปดาห์ ${wk} · ค่าเดินทาง ${fmt(P.total)}`);return {ok:true,wk,cost:P.total};},
   /* v1.91.76 (Man): the travelling party — the fighter always, then whoever the player picked, capped by the vehicle's seats */
   pairDue(G,dest){const R=G.region,D=ROAD_DEST[dest];if(!R||!D)return null;const tx=R.tx||{},dfr=R.txDefer||{};
@@ -1345,6 +1345,7 @@ const REGION={
   flush(G){const R=G.region;if(R)rgApply(G);if(R&&R.joined)this.joinSkills(G);if(R)this.bondSync(G);if(!R||!R.pend||!R.pend.length)return;const done=R.pend.splice(0);
     for(const p of done){const rg=p.region||{},r=rg.r,dest=rg.dest,D=ROAD_DEST[dest];if(rg.nlfinal){if(R.final){R.final.cur=R.final.cur||{};R.final.cur[rg.nlfinal]=p.res||"L";}continue;}if(rg.nlleg){this.legResult(G,rg.nlleg,p);continue;}if(!D||!RG[r])continue;
       if(rg.series){this.lbAdd(G,p.a,"rc:"+r,p.res,p.stop);this.seriesResult(G,r,p);continue;}
+      if(rg.local){const T=R.trip,abs=T&&T.abs!=null?T.abs:gameWeek(G);R.trip=null;R.nextTripAbs=Math.max(R.nextTripAbs||0,abs+RG_TRIP_GAP);(R.gc=R.gc||[]).push(p.b);continue;} /* v1.91.93: the local ring pays a purse, no belt */
       this.lbAdd(G,p.a,"pc:"+dest,p.res,p.stop);
       rgTouch(G,RG_CID[r]);const T=R.trip,abs=T&&T.bid===p.bid?T.abs:gameWeek(G);
       if(p.res==="W"){R.belts[r]=R.belts[r]||{};R.belts[r][dest]=1;G.log=G.log||[];G.log.push(`${G.F[p.a]?G.F[p.a].name:""}คว้าเข็มขัดจังหวัด${D.name}!`);if(G.F[p.a])recordHonor(G,"rgbelt",p.a,G.F[p.a].div,G.week,dest,G.F[p.b]?G.F[p.b].name:this.oppName(G,dest)); /* v1.91.14 (Man): a province belt gets the same ceremony as the main game */
@@ -1364,24 +1365,40 @@ const REGION={
   weekly(G){const R=G.region;rgApply(G);this.lbWeek(G);this.flush(G);this.legendMail(G);this.seriesWeekly(G);this.fade(G);this.letters(G);this.finalWeekly(G);this.joinWeekly(G);this.joinPerks(G);this.loopWeekly(G);const T=R.trip;
     /* a trip whose bout vanished (the week went by, the booking was dropped) is let go */
     if(T&&gameWeek(G)>T.abs&&!G.bookings.some(b=>b.id===T.bid)){(R.gc=R.gc||[]).push(T.opp);R.trip=null;R.nextTripAbs=Math.max(R.nextTripAbs||0,T.abs+RG_TRIP_GAP);}
-    const keep=new Set(G.bookings.map(b=>b.b));R.gc=(R.gc||[]).filter(id=>{if(keep.has(id))return true;if(G.F[id]&&G.F[id].rg)delete G.F[id];return false;});},
+    const keep=new Set(G.bookings.map(b=>b.b));R.gc=(R.gc||[]).filter(id=>{if(keep.has(id))return true;if(G.F[id]&&(G.F[id].rg||G.F[id].rgLocal))delete G.F[id];return false;});},
 
   /* ---------- the trip week: drive → bout → hotel → home (round 2) ---------- */
   champId:{north:"baibua",isan:"tabtim",central:"alicia",south:"chaba"},
   hotelBg:{north:"night_north",isan:"night_isan",central:"night_central",south:"night_south"},
+  /* v1.91.93 (Man): the local ring — a one-night knockout of up to three local fighters (random names, generic sprites), each a little better, purse per win, a small honour for the night's champion */
+  localOpp(G,dest,me,abs,k){const id=`rgl_${dest}_${abs}_${k}`;if(G.F[id])return id;const rng=mulberry32((G.seed||1)+stableHash(id)),T=21.0+.45*(k-1);
+    const nm=rgNm({f:Math.floor(rng()*997),k:Math.floor(rng()*97),p:Math.floor(rng()*3)},dest);
+    const f=baseFighter(id,mkNPC(id,nm,"X",Math.min(18,Math.round(T-2)),rng,Math.floor(rng()*9)));liftOpponent(f,T,20);
+    f.camp="quest";f.div="X";f.rgLocal=1;f.lvl=Math.max(1,(me.lvl||1)-2+k);f.fatigue=0;f.morale=70;G.F[id]=f;syncFighterAges(G);return id;},
+  localPurse(G,k){const w=Math.round(2500*k*(1+Math.min(G.rep||0,50)/100)/100)*100;return {win:w,lose:500};},
+  localRun(b,T,cb){const D=ROAD_DEST[T.dest],k=(b.region&&b.region.lr)||1,RND=["รอบแรก","รอบรองชนะเลิศ","รอบชิงชนะเลิศ"];
+    openFight(b,()=>{const R=G.region,L=R.lastRes,res=L&&L.bid===b.id?L.res:null,me=G.F[b.a],bg=b.bg?b.bg.replace(/\.webp$/,"").replace(/^bg_/,""):"camp";
+      if(res==="W"&&k<3&&me&&!(me.injury>0)){const opp=this.localOpp(G,T.dest,me,T.abs,k+1),pay=this.localPurse(G,k+1),b2={...b,id:`${b.id}_r${k+1}`,b:opp,win:pay.win,lose:pay.lose,region:{...b.region,lr:k+1}};G.bookings.push(b2);save();
+        playScene([{n:"nar",t:`ชนะ${RND[k-1]}! โฆษกเวที${D.name}ประกาศชื่อ${me.name}เข้า${RND[k]}`},{n:"nar",t:`พักสิบห้านาที คู่ต่อไป ${G.F[opp].name} ${k===1?"ชนะรอบแรกมาเหมือนกัน":"เต็งหนึ่งของเวทีคืนนี้"} · รางวัลรอบนี้ ${fmt(pay.win)}`}],()=>this.localRun(b2,T,cb),{bg,look:"fight"});return;}
+      const champ=res==="W"&&k===3;
+      if(champ){G.rep=(G.rep||0)+1;R.localWins=R.localWins||{};R.localWins[T.dest]=(R.localWins[T.dest]||0)+1;G.log=G.log||[];G.log.push(`${me?me.name:""}คว้าแชมป์ศึกเวทีท้องถิ่น${D.name} ชนะสามไฟต์รวด · ชื่อเสียง +1`);save();}
+      playScene([{n:"nar",t:champ?`${me.name}ชนะสามไฟต์รวด! คว้าแชมป์ศึกเวทีท้องถิ่น${D.name} คนดูโยนพวงมาลัยขึ้นเวที · ชื่อเสียง +1`:
+        res==="W"?`${me.name}ชนะ${RND[k-1]} แต่เจ็บจนครูสั่งพอแค่นี้ เก็บเงินรางวัลกลับโรงแรม`:`${me.name}ตกรอบใน${RND[k-1]} ได้ค่าขึ้นเวทีกับเสียงปรบมือจากคนท้องถิ่น`}],cb,{bg,look:"fight"});});},
   trip(b,done){if(b.region&&b.region.series){this.seriesTrip(b,done);return;}
     const R=G.region,T=R&&R.trip&&R.trip.bid===b.id?{...R.trip}:null,dest=b.region&&b.region.dest;rgDress(G.F[b.b]);
     if(!T||!ROAD_DEST[dest]||typeof ROAD==="undefined"){openFight(b,done);return;}
     this.css();const P=roadPlan(G,dest,T.car||null,T.abs);
     /* v1.91.50 (playtest): a quick trip to a region you know — no drive, no hotel menu, no shop; the nights are rest */
-    if(T.quick&&this.canQuick(G,dest)){this.arrive(G,T,P,null);openFight(b,()=>{const n=P.nights||0;if(n){for(const f of roadRiders(G))f.fatigue=Math.max(0,(f.fatigue||0)-10*n);}
+    const fight=(cb)=>T.local?this.localRun(b,T,cb):openFight(b,cb);
+    if(T.quick&&this.canQuick(G,dest)){this.arrive(G,T,P,null);fight(()=>{const n=P.nights||0;if(n){for(const f of roadRiders(G))f.fatigue=Math.max(0,(f.fatigue||0)-10*n);}
       G.log=G.log||[];G.log.push(`กลับถึงค่ายจาก${ROAD_DEST[dest].name}${n?` · พักที่โรงแรม ${n} คืน ความล้า −${10*n}`:""}`);save();done();});return;}
-    ROAD.open(dest,{paid:true,plan:P,onArrive:(P2,front)=>{this.arrive(G,T,P2||P,front);const go=()=>this.hotel(b,T,()=>openFight(b,()=>this.night(T,P2||P,1,done))),A=this.firstArrive(G,ROAD_DEST[dest].r,dest);
+    ROAD.open(dest,{paid:true,plan:P,onArrive:(P2,front)=>{this.arrive(G,T,P2||P,front);const go=()=>this.hotel(b,T,()=>fight(()=>this.night(T,P2||P,1,done))),A=this.firstArrive(G,ROAD_DEST[dest].r,dest);
       if(A){playScene(A,go,{bg:"gas_station",look:"casual"});}else go();}});},
   /* v1.91.76 (Man): drive → hotel → "head for the ring" → the bout */
   hotel(b,T,go,again){const D=ROAD_DEST[T.dest],me=G.F[b.a],op=G.F[b.b];if(!me||!op){go();return;}
     const girls=roadRiders(G).filter(f=>CANON_IDS.includes(f.id)).sort((a,b2)=>(b2.bond||0)-(a.bond||0)),menu=this.hotelMenu(T,D,girls,1,true);
     const intro=again?[]:[{n:"nar",t:`เช็กอินโรงแรมใน${D.name} ทุกคนวางกระเป๋า ${me.name}นั่งพันมืออยู่ปลายเตียงเงียบ ๆ`},
+      T.local?{n:"nar",t:`ทริปนี้มาเที่ยว แต่คืนนี้เวทีท้องถิ่น${D.name}จัดศึกน็อกเอาต์ คนท้องถิ่นแปดคน ใครชนะสามไฟต์รวดคือแชมป์ประจำคืน ${me.name}ลงชื่อไว้แล้ว`}:
       roadCoachIn(G)?{n:"coach",t:`คืนนี้${op.name} แชมป์ประจำจังหวัด ชกต่อหน้าคนบ้านเขา อย่าตื่นเสียงเชียร์`}:{n:"nar",t:`คืนนี้${op.name} แชมป์ประจำจังหวัด ชกต่อหน้าคนบ้านเขา ครูแดงโทรมาสั้น ๆ ว่าอย่าตื่นเสียงเชียร์`}];
     playScene([...intro,{n:"nar",t:"ยังมีเวลาก่อนขึ้นชก ทำอะไรดี?",choice:menu}],()=>{save();
       if(T.goShop){T.goShop=0;this.shop(T,()=>this.hotel(b,T,go,1),1,1);return;}
@@ -1667,7 +1684,7 @@ const REGION={
     if(!UI.rgParty){const pr=this.pairDue(G,dest);UI.rgParty=[...cand].sort((a,b)=>(b.id===pr)-(a.id===pr)||(b.bond||0)-(a.bond||0)).map(f=>f.id).slice(0,max);}
     UI.rgParty=UI.rgParty.filter(id=>cand.some(f=>f.id===id)).slice(0,max);
     const head=`<h2>${esc(D.name)} <small class="meta">· ${esc(C.name)}</small></h2>
-     <p class="meta">เดินทางสัปดาห์ <b>${wk}</b> · ${D.km} กม. · ${roadNights(D.km)?`ค้าง ${roadNights(D.km)} คืน`:"ไปกลับวันเดียว"} · คู่ชก: <b>${esc(this.oppName(G,dest))}</b> แชมป์ประจำจังหวัด</p>`;
+     <p class="meta">เดินทางสัปดาห์ <b>${wk}</b> · ${D.km} กม. · ${roadNights(D.km)?`ค้าง ${roadNights(D.km)} คืน`:"ไปกลับวันเดียว"} · ${((G.region.belts||{})[D.r]||{})[dest]?`ได้เข็มขัดแล้ว · ไปเที่ยว + <b>ศึกเวทีท้องถิ่น</b> (น็อกเอาต์ 3 ไฟต์ คู่ชกสุ่ม รางวัลทุกไฟต์ที่ชนะ)`:`คู่ชก: <b>${esc(this.oppName(G,dest))}</b> แชมป์ประจำจังหวัด`}</p>`;
     if((UI.rgStep||1)===1){const okF=UI.rgParty.some(id=>RD.some(f=>f.id===id));
       return `${head}<p class="rg-step">ขั้นที่ 1/2 · ใครไปด้วย</p>
        <p class="meta">${roadCarKey(G)==="none"?`ยังไม่มีรถค่าย · นั่งรถทัวร์ไปกี่คนก็ได้ จ่ายค่าตั๋วรายหัว · เลือกแล้ว ${UI.rgParty.length} คน`:`${esc(roadCarName(roadCarKey(G)))} · ${(ROAD_CAR[roadCarKey(G)]||{}).seats} ที่นั่ง (ผู้จัดการขับ${roadCoachIn(G)?" · ครูแดง 1 ที่":""}) · นักมวยไปได้ <b>${max}</b> คน · เลือกแล้ว ${UI.rgParty.length}/${max}`}</p>
@@ -1690,7 +1707,7 @@ const REGION={
      <div class="mfoot"><button class="btn" data-act="rgstep" data-v="1">◂ ใครไปด้วย</button>${now&&wk===G.week?`<button class="btn primary" data-act="rggonow" data-v="${dest}" ${me&&!poor?"":"disabled"}>${poor?"เงินไม่พอ":"ออกเดินทางเลย ▸"}</button>`:`<button class="btn primary" data-act="rggo" data-v="${dest}" ${me&&!poor?"":"disabled"}>${poor?"เงินไม่พอ":"ยืนยันการเดินทาง"}</button>`}</div>
      ${now&&wk===G.week?`<p class="meta center">ออกเดินทางแล้วสัปดาห์นี้จะจบทันที (ซ้อมตามโปรแกรม → ขับรถ → โรงแรม → เวที)</p>`:""}`;},
   /* v1.91.76 (Man): the "travel" button at the camp vehicle — pick a province, then go this week */
-  travelOk(G){const R=G.region;return !!(R&&R.belts&&regionOn()&&!R.close&&RG_ORDER.some(r=>this.beltCount(G,r)<4||(R.champ[r]&&R.champ[r].state!=="won")));},
+  travelOk(G){const R=G.region;return !!(R&&R.belts&&regionOn());}, /* v1.91.93 (Man): the van stays on the road after the belts are won — holidays and the local ring */
   /* v1.91.78 (Man): once a region's four belts are in, its title match shows in the travel popup as a big blinking button */
   finBtn(G,r){const c=G.region.champ[r]||{};if(this.beltCount(G,r)<4||c.state==="won"||c.state==="locked")return "";const C=RG[r],hot=c.state==="letter"||(c.state==="series"&&c.visit==="due");
     return `<button class="btn rg-finbtn ${hot?"hot":""}" data-act="rgfinopen" data-v="${r}">⚔ นัดชิงแชมป์${esc(C.name)} · ${esc(C.champ)}<small>${c.state==="letter"?"เลือกนักมวยชิงแชมป์":c.state==="series"?`${c.w}-${c.l}${c.next?` · นัด ${c.next.n} สัปดาห์ ${c.next.wk}`:""}${c.visit==="due"?" · เธอจะแวะมาค่าย":""}`:c.state==="lost"?"รอคำท้าครั้งใหม่":"รอจดหมายนัด"}</small></button>`;},
@@ -1698,7 +1715,7 @@ const REGION={
   travelHTML(G){const R=G.region,wk=this.tripWeek(G),now=wk===G.week;
     if(R.trip){const T=R.trip,D=ROAD_DEST[T.dest];return `<h2>🚐 เดินทาง · ศึกชิงเจ้าสี่ภาค</h2><p>นัดเดินทางไป<b>${esc(D?D.name:"")}</b> สัปดาห์ ${T.wk} แล้ว · ${esc(G.F[T.fid]?G.F[T.fid].name:"")}ขึ้นชก</p><p class="meta">ถึงสัปดาห์นั้น กดจบสัปดาห์แล้วออกเดินทาง</p><div class="mfoot"><button class="btn" data-act="rgcancel">ยกเลิกทริป (คืนเงิน)</button><button class="btn primary" data-act="closeModal">ปิด</button></div>`;}
     const rows=RG_ORDER.map(r=>{const C=RG[r],B=(R.belts||{})[r]||{};return `<div class="rgt-reg" style="--rc:${C.col}"><b>${esc(C.name)}</b><div class="rgt-pv">${C.prov.map(p=>{const D=ROAD_DEST[p];if(!D)return "";const got=!!B[p];
-      return `<button class="btn sm ${got?"":"gold"}" data-act="rgtravelto" data-v="${p}" ${got?"disabled":""}>${esc(D.name)}<small>${got?"ได้เข็มขัดแล้ว":`${D.km} กม.`}</small></button>`;}).join("")}</div>${this.finBtn(G,r)}</div>`;}).join("");
+      return `<button class="btn sm ${got?"":"gold"}" data-act="rgtravelto" data-v="${p}">${esc(D.name)}<small>${got?`เที่ยว · เวทีท้องถิ่น`:`${D.km} กม.`}</small></button>`;}).join("")}</div>${this.finBtn(G,r)}</div>`;}).join("");
     return `<h2>🚐 เดินทาง · ศึกชิงเจ้าสี่ภาค</h2>${roadSignHTML(G)}<p class="meta">${!wk?"ปีนี้ไม่มีสัปดาห์ว่างให้เดินทางแล้ว":now?"เลือกจังหวัด แล้วออกเดินทางได้เลยสัปดาห์นี้":`สัปดาห์นี้ยังออกไม่ได้ · ไปได้สัปดาห์ ${wk} (จองไว้ก่อนได้)`}</p>
       <div class="rgt-list">${rows}</div>${G.devTravel?this.travelDevHTML(G):""}<div class="mfoot"><button class="btn" data-act="closeModal">ปิด</button></div>`;},
   /* v1.91.77 (Man): the travel test save (#demo=travel_test) gets a small test panel — swap the camp vehicle, send Kru Daeng on leave, reset */
