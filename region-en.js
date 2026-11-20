@@ -1154,7 +1154,7 @@ const RG_CLOSE_SAY={baibua:"A small camp can stand tall. I saw it with my own ey
 /* after the fourth cup (or once the tournament has run its course): Naka League, the refusals, Ladda */
 function rgClose(G){const R=G.region,fah=rgIn(G,"fah"),rin=rgIn(G,"rin"),kati=rgIn(G,"kati");
  const fav=["baibua","tabtim","alicia","chaba"].sort((a,b)=>((R.meet||{})[b]||0)-((R.meet||{})[a]||0))[0];
- const four=["baibua","tabtim","alicia","chaba"].map(id=>({id,l:"fight",f:"happy"})),tense=["baibua","tabtim","alicia","chaba"].map((id,i)=>({id,l:"fight",f:i%2?"angry":"sad"}));
+ const four=["baibua","tabtim","alicia","chaba"].map(id=>({id,l:"fight",f:"happy"})),tense=["baibua","tabtim","alicia","chaba"].map((id,i)=>({id,l:"fight",f:"angry"})); /* v1.91.90 (Man): the scheme is out in the open — they refuse with their heads up, not in tears */
  /* v1.91.74 (Man): a real closing ceremony first (many guests, ceremony talk), Krerk as the host who backs the provincial and regional rings —
     no signing on stage; the four champions walk over afterwards to say no, and Krerk hands it to Ladda. Tense, no smiling faces; the beatings are text only. */
  return [
@@ -1168,11 +1168,11 @@ function rgClose(G){const R=G.region,fah=rgIn(G,"fah"),rin=rgIn(G,"rin"),kati=rg
  {n:"npc",who:"Khun Krerk",t:"I've already invited all four champions. No need to answer on stage. Tonight is their night."},
  {n:"nar",show:[],t:"The party goes on until the hall starts to thin out."},
  {n:"nar",show:tense,t:"Then all four champions walk over together and stop in front of Khun Krerk's table. One by one, the tables still occupied fall silent."},
- {n:"baibua",f:"sad",l:"fight",t:"Thank you for looking after the regional rings all this time… but I won't join the league. Bua Tha Sao camp still has me."},
- {n:"tabtim",f:"sad",l:"fight",t:"Tabtim's not joining either, okay? My little brother read me clause fourteen."},
+ {n:"baibua",f:"angry",l:"fight",t:"Thank you for looking after the regional rings all this time. But I'm not joining your league. Bua Tha Sao camp still has me, and I'm not selling it."},
+ {n:"tabtim",f:"happy",l:"fight",t:"Tabtim's not joining either! My little brother read me clause fourteen. You won't fool us that easily, okay?"},
  {n:"alicia",f:"angry",l:"fight",t:"I won't sign anything with the word \"forever\" in it. No matter whose it is."},
  {n:"chaba",f:"angry",l:"fight",t:"…Not joining."},
- {n:fav,f:"sad",l:"fight",t:RG_CLOSE_SAY[fav]},
+ {n:fav,f:"angry",l:"fight",t:RG_CLOSE_SAY[fav]},
  {n:"nar",show:[{id:"npc:krerk"}],t:"Khun Krerk hears them out without interrupting, then sets his glass down softly on the table."},
  {n:"npc",who:"Khun Krerk",t:"I respect your decision. But my league must be the strongest, and for people to believe that, they have to see it with their own eyes."},
  {n:"npc",who:"Khun Krerk",t:"Ladda"},

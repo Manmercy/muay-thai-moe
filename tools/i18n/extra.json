@@ -16696,5 +16696,7 @@
  " · ครูแดง 1 ที่": " · Kru Daeng 1 seat",
  " ที่นั่ง (ผู้จัดการขับ": " seats (the manager drives",
  "ยังไม่มีรถค่าย · นั่งรถทัวร์ไปกี่คนก็ได้ จ่ายค่าตั๋วรายหัว · เลือกแล้ว ": "No camp vehicle · the bus takes any number, a ticket each · picked ",
- "<button class=\"tripspot\" data-act=\"rgtravel\" aria-label=\"เดินทางไปชกศึกชิงเจ้าสี่ภาค\"><span class=\"triptag\">เดินทาง ▸</span></button>": "<button class=\"tripspot\" data-act=\"rgtravel\" aria-label=\"Travel to a Four Regions bout\"><span class=\"triptag\">Travel ▸</span></button>"
+ "<button class=\"tripspot\" data-act=\"rgtravel\" aria-label=\"เดินทางไปชกศึกชิงเจ้าสี่ภาค\"><span class=\"triptag\">เดินทาง ▸</span></button>": "<button class=\"tripspot\" data-act=\"rgtravel\" aria-label=\"Travel to a Four Regions bout\"><span class=\"triptag\">Travel ▸</span></button>",
+ "ขอบคุณที่ดูแลเวทีภาคมาตลอดเจ้า แต่หนูไม่เข้าลีก ค่ายบัวท่าเสายังมีหนูอยู่ และหนูไม่ขายมัน": "Thank you for looking after the regional rings all this time. But I'm not joining your league. Bua Tha Sao camp still has me, and I'm not selling it.",
+ "ทับทิมก็ไม่เข้า! น้องชายอ่านสัญญาข้อสิบสี่ให้ฟังแล้ว ไม่หลอกกันง่าย ๆ หรอกเด้อ": "Tabtim's not joining either! My little brother read me clause fourteen. You won't fool us that easily, okay?"
 }

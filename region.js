@@ -1154,7 +1154,7 @@ const RG_CLOSE_SAY={baibua:"ค่ายเล็กก็ยืนได้เ�
 /* after the fourth cup (or once the tournament has run its course): Naka League, the refusals, Ladda */
 function rgClose(G){const R=G.region,fah=rgIn(G,"fah"),rin=rgIn(G,"rin"),kati=rgIn(G,"kati");
  const fav=["baibua","tabtim","alicia","chaba"].sort((a,b)=>((R.meet||{})[b]||0)-((R.meet||{})[a]||0))[0];
- const four=["baibua","tabtim","alicia","chaba"].map(id=>({id,l:"fight",f:"happy"})),tense=["baibua","tabtim","alicia","chaba"].map((id,i)=>({id,l:"fight",f:i%2?"angry":"sad"}));
+ const four=["baibua","tabtim","alicia","chaba"].map(id=>({id,l:"fight",f:"happy"})),tense=["baibua","tabtim","alicia","chaba"].map((id,i)=>({id,l:"fight",f:"angry"})); /* v1.91.90 (Man): the scheme is out in the open — they refuse with their heads up, not in tears */
  /* v1.91.74 (Man): a real closing ceremony first (many guests, ceremony talk), Krerk as the host who backs the provincial and regional rings —
     no signing on stage; the four champions walk over afterwards to say no, and Krerk hands it to Ladda. Tense, no smiling faces; the beatings are text only. */
  return [
@@ -1168,11 +1168,11 @@ function rgClose(G){const R=G.region,fah=rgIn(G,"fah"),rin=rgIn(G,"rin"),kati=rg
  {n:"npc",who:"คุณเกริก",t:"ผมเชิญแชมป์ทั้งสี่คนไว้แล้ว ไม่ต้องตอบบนเวทีนะครับ คืนนี้เป็นคืนของพวกเธอ"},
  {n:"nar",show:[],t:"งานเลี้ยงดำเนินต่อไป จนห้องเริ่มบางตา"},
  {n:"nar",show:tense,t:"แล้วแชมป์ทั้งสี่ก็เดินมาหยุดตรงหน้าโต๊ะของคุณเกริกพร้อมกัน ห้องที่ยังเหลือคนอยู่เงียบลงทีละโต๊ะ"},
- {n:"baibua",f:"sad",l:"fight",t:"ขอบคุณที่ดูแลเวทีภาคมาตลอด… แต่หนูขอไม่เข้าลีก ค่ายบัวท่าเสายังมีหนูอยู่"},
- {n:"tabtim",f:"sad",l:"fight",t:"ทับทิมก็ขอไม่เข้า น้องชายอ่านสัญญาข้อสิบสี่ให้ฟังแล้ว"},
+ {n:"baibua",f:"angry",l:"fight",t:"ขอบคุณที่ดูแลเวทีภาคมาตลอดเจ้า แต่หนูไม่เข้าลีก ค่ายบัวท่าเสายังมีหนูอยู่ และหนูไม่ขายมัน"},
+ {n:"tabtim",f:"happy",l:"fight",t:"ทับทิมก็ไม่เข้า! น้องชายอ่านสัญญาข้อสิบสี่ให้ฟังแล้ว ไม่หลอกกันง่าย ๆ หรอกเด้อ"},
  {n:"alicia",f:"angry",l:"fight",t:"ฉันจะไม่เซ็นอะไรที่มีคำว่า \"ตลอดไป\" ค่ะ ไม่ว่าจะเป็นของใคร"},
  {n:"chaba",f:"angry",l:"fight",t:"…ไม่เข้า"},
- {n:fav,f:"sad",l:"fight",t:RG_CLOSE_SAY[fav]},
+ {n:fav,f:"angry",l:"fight",t:RG_CLOSE_SAY[fav]},
  {n:"nar",show:[{id:"npc:krerk"}],t:"คุณเกริกฟังจนจบโดยไม่ขัด แล้ววางแก้วลงบนโต๊ะเบา ๆ"},
  {n:"npc",who:"คุณเกริก",t:"ผมเคารพการตัดสินใจครับ แต่ลีกของผมต้องแข็งที่สุด และคนจะเชื่อแบบนั้นได้ ก็ต้องเห็นกับตา"},
  {n:"npc",who:"คุณเกริก",t:"ลดา"},
