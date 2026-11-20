@@ -237,7 +237,7 @@ details summary{cursor:pointer;color:var(--muted);font-size:13px;padding:4px 0}
 .stand.c{left:50%;transform:translateX(-50%)}
 .stand.l{left:30%;transform:translateX(-50%)}
 .stand.r{left:70%;transform:translateX(-50%)}
-.stand.off{filter:brightness(.5) saturate(.7);transform:translateX(-50%) scale(.96);transform-origin:bottom center}
+.stand.off{filter:brightness(.68) saturate(.8);transform:translateX(-50%) scale(.96);transform-origin:bottom center}
 .stand.on{z-index:2}
   background:rgba(22,17,38,.94);box-shadow:inset 0 0 0 3px var(--c),inset 6px 6px 0 rgba(255,255,255,.04),inset -6px -6px 0 rgba(0,0,0,.25)}
 .who{display:flex;align-items:center;gap:10px}
