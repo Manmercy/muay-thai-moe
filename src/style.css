@@ -2368,3 +2368,6 @@ div.mdelask{margin:2px 0 8px;padding:8px;box-shadow:inset 0 0 0 2px var(--line);
 .wp-l,.wp-name{margin:.15rem 0;opacity:0;animation:wpIn .4s ease-out forwards;animation-delay:var(--d)}.wp-l.sm{font-size:.8rem;opacity:0}.wp-name{font-size:1.7rem;font-weight:800;color:#ffd45a;text-shadow:0 2px 0 #5a2a00,0 0 14px rgba(255,212,90,.7);animation-name:wpPop}
 @keyframes wpIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}@keyframes wpPop{0%{opacity:0;transform:scale(.4)}70%{opacity:1;transform:scale(1.15)}100%{opacity:1;transform:scale(1)}}
 @media(prefers-reduced-motion:reduce){.wp-l,.wp-name{animation:none;opacity:1}}
+
+/* v1.91.86: scene portraits centre on the face (--cx = face centre across the picture) */
+.cast .stand{transform:translateX(calc(var(--cx,.5) * -100%))}.cast .stand.off{transform:translateX(calc(var(--cx,.5) * -100%)) scale(.96)}
