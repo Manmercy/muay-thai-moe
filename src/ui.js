@@ -1,5 +1,5 @@
 // ================= MUAY THAI MOE v1.3 — UI =================
-const VERSION="1.91.72";
+const VERSION="1.91.73";
 const CUR_LANG=(typeof window!=="undefined"&&window.LANG)||"th";
 const TH_LABEL=String.fromCharCode(3652,3607,3618);
 function langSwitch(cls){return `<div class="langsw ${cls||""}" role="group" aria-label="Language">${[["th",TH_LABEL],["en","EN"]].map(([k,l])=>`<button class="lsb ${CUR_LANG===k?"on":""}" data-act="setlang" data-v="${k}" aria-pressed="${CUR_LANG===k}">${l}</button>`).join("")}</div>`;}
@@ -1939,7 +1939,7 @@ const ACT={
   firestaff:d=>{fireStaff(G,d.v);save();toast(`เลิกจ้าง${STAFF[d.v].name}แล้ว`);render();},
   paydebt:()=>{const p=Math.min(10000,G.debt);G.cash-=p;G.debt-=p;save();render();},
   sign:d=>{const f=G.F[d.v];if(G.cash<f.fee)return;
-    if(!d.ok&&(weeklyNet(G)-f.wage<0||G.cash-f.fee<15000)){UI.modal={type:"signwarn",id:f.id};render();return;}UI.modal=null;G.cash-=f.fee;f.camp="player";f.met=true;if(f.id==="mali"){G.flags.maliIn=G.week;G.flags.maliInAbs=gameWeek(G);}add(G,f.id,"trust",5);
+    if(!d.ok&&(weeklyNet(G)-f.wage<0||G.cash-f.fee<15000)){UI.modal={type:"signwarn",id:f.id};render();return;}UI.modal=null;G.cash-=f.fee;f.camp="player";f.met=true;spFloor(f);if(f.id==="mali"){G.flags.maliIn=G.week;G.flags.maliInAbs=gameWeek(G);}add(G,f.id,"trust",5);
     if(stageOf(G.week)==="local")G.rank[f.div][f.id]={pts:0,w:0,l:0,d:0};genOffers(G,{midweek:true});save();
     playScene([{n:f.id,f:"happy",l:"train",t:f.id==="mali"?"ฝากตัวด้วยนะคะ! หนูจะเตะให้ค่ายศิริชัยดังไปทั้งจังหวัดเลย~":"สัญญาเรียบร้อยค่ะ ฉันจะส่งแผนการซ้อมสัปดาห์แรกให้ภายในคืนนี้"},
       {n:"kati",f:"happy",l:"train",with:f.id,t:f.id==="mali"?"ยินดีต้อนรับนะมะลิ! ค่ายเราไม่เหงาแล้ว!":"ยินดีต้อนรับค่ะริน! …ขออย่านับว่าหนูการ์ดตกกี่ครั้งเลยนะ"}],()=>render(),{bg:"gym",look:"train"});},
