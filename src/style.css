@@ -542,6 +542,7 @@ td,th{padding:6px 6px}
 .cutin{position:fixed;left:0;right:0;top:34%;z-index:60;display:grid;justify-items:center;gap:2px;pointer-events:none;animation:cutin 2s ease-out both}
 .cut-band{width:100%;height:clamp(90px,16vh,150px);overflow:hidden;position:relative;background:linear-gradient(90deg,#3a0610,#e23b4e 40%,#3a0610);box-shadow:0 0 0 4px #000,0 0 40px rgba(226,59,78,.8);transform:skewY(-4deg)}
 .cut-band img{position:absolute;left:50%;height:900%;top:-62%;transform:translateX(-50%) skewY(4deg);filter:contrast(1.15) saturate(1.2)}
+.cut-spr{position:absolute;left:50%;top:-40%;height:320%;aspect-ratio:1;transform:translateX(-50%) skewY(4deg);background-size:400% 600%;background-position:33.333% 100%;background-repeat:no-repeat;image-rendering:pixelated;filter:contrast(1.1) saturate(1.2) drop-shadow(0 0 6px rgba(0,0,0,.6))}
 .cutin.B .cut-band{background:linear-gradient(90deg,#3a0610,#7a2ad0 40%,#3a0610)}
 .cutin b{font-family:"Pixelify Sans",var(--f-display);font-size:clamp(26px,5vw,44px);color:#fff;text-shadow:3px 3px 0 #000,0 0 18px #e23b4e;letter-spacing:.06em;margin-top:6px}
 .cutin span{font-size:13px;color:#fff;text-shadow:1px 1px 0 #000;background:rgba(0,0,0,.55);padding:2px 8px}

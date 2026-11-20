@@ -27,11 +27,22 @@ function beltStore(G,venue="tha"){if(venue==="tha")return G.belt=G.belt||{};G.ve
 function beltHolder(G,div,venue="tha"){const B=beltStore(G,venue);if(!B[div]||!G.F[B[div].id]){const c=Object.values(G.F).filter(f=>f.div===div&&f.camp!=="player"&&f.camp!=="free"&&!f.canon&&f.injury===0).sort((a,b)=>ovr(b.a)-ovr(a.a));const chosen=c[Math.min(venue==="tha"?0:venue==="ping"?1:2,c.length-1)];if(!chosen)return null;B[div]={id:chosen.id,def:2,since:G.week};}return G.F[B[div].id];}
 function beltChallenger(G,div,not){return Object.values(G.F).filter(f=>f.div===div&&f.camp!=="player"&&f.camp!=="free"&&f.id!==not&&!f.injury).sort((a,b)=>ovr(b.a)-ovr(a.a))[0]||null;}
 const QGRP_BG={gang:"bg_market_morning.webp",rooster:"bg_rooster.webp",bull:"bg_farm.webp"};
-function qTarget(G,fid){const f=fid&&G.F[fid];if(f)return ovr(f.a);const R=roster(G);return R.length?R.reduce((s,x)=>s+ovr(x.a),0)/R.length:9;}
-function makeQ(G,kind,fid,tag){const K=QK[kind],t=qTarget(G,fid)+K.lvl+Math.min(1.5,((G.season||1)-1)*.25),rng=mulberry32((G.seed^(G.week*977))+kind.length*31);const a={};
+/* v1.91.83 (Man): the quest foes kept pace with her stats only, so a late-game girl with a full skill tree outgrew even the bosses.
+   They now read a fifth of her hidden edge (the season bonus halved to make room) (skills, perks, level) like the Loy thief, carry whatever the stat ceiling cannot hold as ring craft,
+   and fight with their own signature skills (cut-in + burst, like the Naka League) — minions one, lieutenants two, bosses three */
+const Q_EDGE=.2,Q_VET_MAX=8; /* sims: bosses ~50–60% for a strong girl at every stage, minions ~75–90% */
+const QSK={
+  gang:[{id:"q_g_debt",name:"หมัดทวงหนี้",k:"atk",w:"punch"},{id:"q_g_guard",name:"การ์ดลูกพี่",k:"def"},{id:"q_g_knee",name:"เข่าเก็บค่าคุ้มครอง",k:"atk",w:"knee"}],
+  rooster:[{id:"q_r_spur",name:"แข้งเดือยไก่ชน",k:"atk",w:"kick"},{id:"q_r_flap",name:"กระพือปีกหลบ",k:"def"},{id:"q_r_peck",name:"ศอกจิกหัว",k:"atk",w:"elbow"}],
+  bull:[{id:"q_b_horn",name:"ขวิดเขากระทิงดุ",k:"atk",w:"knee"},{id:"q_b_hide",name:"หนังหนาวัวควาย",k:"def"},{id:"q_b_cud",name:"เคี้ยวเอื้องเรียกแรง",k:"rec"}]};
+const qSkN=K=>K.lvl<-.3?1:K.lvl<1?2:3;
+function qTarget(G,fid){const f=fid&&G.F[fid];if(f)return ovr(f.a)+(f.camp==="player"&&typeof hiddenEdge==="function"?Q_EDGE*hiddenEdge(f):0);const R=roster(G);return R.length?R.reduce((s,x)=>s+ovr(x.a),0)/R.length:9;}
+function makeQ(G,kind,fid,tag){const K=QK[kind],t=qTarget(G,fid)+K.lvl+Math.min(.75,((G.season||1)-1)*.125),rng=mulberry32((G.seed^(G.week*977))+kind.length*31);const a={};
   for(const [k] of ATTRS)a[k]=clamp(t+(K.tilt[k]||0)+(rng()*1.6-.8),3,19.5);
   const d=t-ovr(a);for(const [k] of ATTRS)a[k]=clamp(a[k]+d,3,19.5);
   const id=`q_${kind}_${tag||G.week}`;const f=baseFighter(id,{name:K.name,full:K.name,div:"X",camp:"quest",color:K.color,potential:t+2,a});
+  {const short=t-ovr(a);if(short>.05)f.vet=+Math.min(Q_VET_MAX,short).toFixed(2);} /* past the stat ceiling: ring craft */
+  if(QSK[K.grp])f.nlsk=QSK[K.grp].slice(0,qSkN(K));
   f.sprite=K.sprite;f.kind=kind;f.grp=K.grp;f.lvl=clamp(Math.round(t-6),1,10);f.fatigue=0;f.morale=70;G.F[id]=f;syncFighterAges(G);return id;}
 function qCleanup(G){const keep=new Set([...G.bookings.map(b=>b.b),...G.offers.map(o=>o.b),...(G.mail||[]).filter(m=>!m.done&&m.qid).map(m=>m.qid)]);
   for(const id of Object.keys(G.F))if(id.startsWith("q_")&&!keep.has(id)&&(G.F[id].lastFightAbs==null||gameWeek(G)-G.F[id].lastFightAbs>2))delete G.F[id];}

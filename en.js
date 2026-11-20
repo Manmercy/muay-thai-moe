@@ -6518,7 +6518,7 @@ AU.gsfx=function(kind,a){if(!this.init()||this.muted||!SETTINGS.sfx)return;const
   if(kind==="shimmer")for(let i=0;i<6;i++)T(i*.05,{f:1400+Math.random()*1400,type:"sine",dur:.12,peak:.06});};
 
 // ================= MUAY THAI MOE v1.3 — UI =================
-const VERSION="1.91.82";
+const VERSION="1.91.83";
 const CUR_LANG=(typeof window!=="undefined"&&window.LANG)||"th";
 const TH_LABEL=String.fromCharCode(3652,3607,3618);
 function langSwitch(cls){return `<div class="langsw ${cls||""}" role="group" aria-label="Language">${[["th",TH_LABEL],["en","EN"]].map(([k,l])=>`<button class="lsb ${CUR_LANG===k?"on":""}" data-act="setlang" data-v="${k}" aria-pressed="${CUR_LANG===k}">${l}</button>`).join("")}</div>`;}
@@ -8181,7 +8181,7 @@ function fightHTML(){const U=UI.fight,b=U.b,me=G.F[b.a],op=G.F[b.b],F=U.F;
       <div class="rnd">${F.round?`Round ${F.round}/${F.rounds}`:""}</div><div class="cards">${U.stage!=="done"?"":F.cards.map((c,i)=>`<span class="num">R${i+1} ${c[0]}–${c[1]}</span>`).join("")}</div>
       ${U.stage==="done"&&U.bubble?`<div class="obub ${U.F.result.win==="B"?"taunt":"sulk"}" role="note"><b>${esc(U.F.B.name)}</b>${esc(U.bubble)}</div>`:""}
       ${U.stage==="corner"?"":`<div class="caption ov ${cap?cap.side:""} ${cap&&cap.heat?"heat"+cap.heat:""}" aria-live="polite">${cap?esc(cap.text):"…"}</div>`}</div>
-     ${U.cutin?(U.cutin.skill?`<div class="cutin sk ${U.cutin.kind} ${U.cutin.side}" aria-live="assertive"><div class="cut-band"><img src="${ASSET}${U.cutin.id}_fight_angry.webp" alt=""></div><b>${esc(U.cutin.skill)}</b><span>${esc(U.cutin.name)} · ${U.cutin.kind==="atk"?`${WNAME[U.cutin.w]}: sharper and harder for a while`:U.cutin.kind==="def"?"Better evasion and counters for a while":"Energy recovered"}</span></div>`:`<div class="cutin ${U.cutin.side}" aria-live="assertive"><div class="cut-band"><img src="${ASSET}${U.cutin.id}_fight_angry.webp" alt=""></div><b>Blood-boil mode!</b><span>${esc(U.cutin.name)} changes eyes · stronger counters, easier criticals</span></div>`):""}
+     ${U.cutin?(U.cutin.skill?`<div class="cutin sk ${U.cutin.kind} ${U.cutin.side}" aria-live="assertive"><div class="cut-band">${cutPic(U.cutin.id)}</div><b>${esc(U.cutin.skill)}</b><span>${esc(U.cutin.name)} · ${U.cutin.kind==="atk"?`${WNAME[U.cutin.w]}: sharper and harder for a while`:U.cutin.kind==="def"?"Better evasion and counters for a while":"Energy recovered"}</span></div>`:`<div class="cutin ${U.cutin.side}" aria-live="assertive"><div class="cut-band">${cutPic(U.cutin.id)}</div><b>Blood-boil mode!</b><span>${esc(U.cutin.name)} changes eyes · stronger counters, easier criticals</span></div>`):""}
      ${U.stage==="corner"?"":liveStats()}`;
     // v1.21: one compact row — speed, then the 3 carried skills
     if(U.stage==="playing")mid+=`<div class="fctl2"><div class="seg sm">${[["1","x1"],["2","x2"]].map(([v,t])=>`<button data-act="fspeed" data-v="${v}" aria-pressed="${String(UI.speed)===v}" aria-label="Speed ${t}">${t}</button>`).join("")}</div>${U.brawl?`<span class="meta skhint">Watching from ringside · they fight on their own</span>`:skillBarHTML()}</div>`; /* v1.89.3: speed and skills share one row right under the live stats again (as before v1.83 pinned them to the bottom) */
@@ -8385,6 +8385,8 @@ function fskill(id){const U=UI.fight;if(!U||U.stage!=="playing")return;const s0=
 /* v1.91.60: what each rank of an active skill costs in stamina (the in-fight "mana") */
 /* v1.91.60: a "−14" floats off the gold stamina bar when the player fires a skill, so the cost is seen */
 function staPop(d){if(!d||typeof document==="undefined")return;const m=document.querySelector(".fside.a .meter.thin");if(!m)return;const r=m.getBoundingClientRect(),el=document.createElement("b");el.className="stapop "+(d<0?"neg":"pos");el.textContent=`${d<0?"−":"+"}${Math.abs(d)} ⚡`;el.style.left=(r.left+r.width*.5+scrollX)+"px";el.style.top=(r.top+scrollY-4)+"px";document.body.appendChild(el);setTimeout(()=>el.remove(),1300);}
+/* v1.91.83: sprite-only fighters (quest foes, Naka League, prodigies) have no cut-in portrait — show the shouting frame of their sheet instead */
+function cutPic(id){const f=typeof G!=="undefined"&&G.F&&G.F[id];if(f&&f.sprite)return `<div class="cut-spr" style="background-image:url('${ASSET}${f.sprite}_sheet.webp')"></div>`;return `<img src="${ASSET}${id}_fight_angry.webp" alt="">`;}
 function skCostLine(sk,r){const k=skillKind(sk).k,c=SK_COST[k]||SK_COST.atk;if(!c[2])return `<p class="skcost-l">⚡ No stamina cost · restores stamina</p>`;return `<p class="skcost-l">⚡ Stamina cost in fights: ${c.map((v,i)=>`<span class="${i+1===r?"on":""}">Rank ${i+1} · ${v}</span>`).join("")}</p>`;}
 function skillBarHTML(){const U=UI.fight,F=U.F;const L=fightSkills(F.A);if(!L.length)return `<span class="meta skhint">No skills yet · level up, then upgrade skills in the fighter info</span>`;const slots=[0,1,2].map(i=>L[i]);
   return `<div class="skbar2" role="group" aria-label="Skills ${F.A.skRound?" (used this round)":""}">${slots.map(k=>{if(!k)return `<span class="skbtn2 empty">Empty</span>`;const c=skCost(k),cd=skCdLeft(F,F.A,k.id),poor=!cd&&staPts(F.A)<c-1e-9;return `<button class="skbtn2 ${k.k}${poor?" poor":""}${cd?" cd":""}" data-act="fskill" data-v="${k.id}" ${cd||F.A.skRound||F.over||poor?"disabled":""} title="${esc(k.name)} · ${esc(SKILL_KIND_NAME[k.k])}${c?` · costs stamina ${c}`:""}${poor?" · not enough stamina":""}${cd?" · rests 1 round":""}">${PIX["sk_"+k.k]}<b>${esc(k.name)}</b><i class="skcost">${cd?"Rest 1 rd":c?`⚡${c}`:"⚡+"}</i></button>`;}).join("")}</div>`;}function sideOf(e,F){if(e.s==="A"||e.s==="B")return e.s;if(e.mside)return e.mside;return e.an===F.A.name?"A":"B";}
@@ -8763,11 +8765,22 @@ function beltStore(G,venue="tha"){if(venue==="tha")return G.belt=G.belt||{};G.ve
 function beltHolder(G,div,venue="tha"){const B=beltStore(G,venue);if(!B[div]||!G.F[B[div].id]){const c=Object.values(G.F).filter(f=>f.div===div&&f.camp!=="player"&&f.camp!=="free"&&!f.canon&&f.injury===0).sort((a,b)=>ovr(b.a)-ovr(a.a));const chosen=c[Math.min(venue==="tha"?0:venue==="ping"?1:2,c.length-1)];if(!chosen)return null;B[div]={id:chosen.id,def:2,since:G.week};}return G.F[B[div].id];}
 function beltChallenger(G,div,not){return Object.values(G.F).filter(f=>f.div===div&&f.camp!=="player"&&f.camp!=="free"&&f.id!==not&&!f.injury).sort((a,b)=>ovr(b.a)-ovr(a.a))[0]||null;}
 const QGRP_BG={gang:"bg_market_morning.webp",rooster:"bg_rooster.webp",bull:"bg_farm.webp"};
-function qTarget(G,fid){const f=fid&&G.F[fid];if(f)return ovr(f.a);const R=roster(G);return R.length?R.reduce((s,x)=>s+ovr(x.a),0)/R.length:9;}
-function makeQ(G,kind,fid,tag){const K=QK[kind],t=qTarget(G,fid)+K.lvl+Math.min(1.5,((G.season||1)-1)*.25),rng=mulberry32((G.seed^(G.week*977))+kind.length*31);const a={};
+/* v1.91.83 (Man): the quest foes kept pace with her stats only, so a late-game girl with a full skill tree outgrew even the bosses.
+   They now read a fifth of her hidden edge (the season bonus halved to make room) (skills, perks, level) like the Loy thief, carry whatever the stat ceiling cannot hold as ring craft,
+   and fight with their own signature skills (cut-in + burst, like the Naka League) — minions one, lieutenants two, bosses three */
+const Q_EDGE=.2,Q_VET_MAX=8; /* sims: bosses ~50–60% for a strong girl at every stage, minions ~75–90% */
+const QSK={
+  gang:[{id:"q_g_debt",name:"Debt-Collector Punch",k:"atk",w:"punch"},{id:"q_g_guard",name:"Big Bro's Guard",k:"def"},{id:"q_g_knee",name:"Protection-Money Knee",k:"atk",w:"knee"}],
+  rooster:[{id:"q_r_spur",name:"Fighting-Cock Spur Kick",k:"atk",w:"kick"},{id:"q_r_flap",name:"Wing-Flap Dodge",k:"def"},{id:"q_r_peck",name:"Pecking Elbow",k:"atk",w:"elbow"}],
+  bull:[{id:"q_b_horn",name:"Raging Horn Gore",k:"atk",w:"knee"},{id:"q_b_hide",name:"Buffalo Hide",k:"def"},{id:"q_b_cud",name:"Cud-Chew Recharge",k:"rec"}]};
+const qSkN=K=>K.lvl<-.3?1:K.lvl<1?2:3;
+function qTarget(G,fid){const f=fid&&G.F[fid];if(f)return ovr(f.a)+(f.camp==="player"&&typeof hiddenEdge==="function"?Q_EDGE*hiddenEdge(f):0);const R=roster(G);return R.length?R.reduce((s,x)=>s+ovr(x.a),0)/R.length:9;}
+function makeQ(G,kind,fid,tag){const K=QK[kind],t=qTarget(G,fid)+K.lvl+Math.min(.75,((G.season||1)-1)*.125),rng=mulberry32((G.seed^(G.week*977))+kind.length*31);const a={};
   for(const [k] of ATTRS)a[k]=clamp(t+(K.tilt[k]||0)+(rng()*1.6-.8),3,19.5);
   const d=t-ovr(a);for(const [k] of ATTRS)a[k]=clamp(a[k]+d,3,19.5);
   const id=`q_${kind}_${tag||G.week}`;const f=baseFighter(id,{name:K.name,full:K.name,div:"X",camp:"quest",color:K.color,potential:t+2,a});
+  {const short=t-ovr(a);if(short>.05)f.vet=+Math.min(Q_VET_MAX,short).toFixed(2);} /* past the stat ceiling: ring craft */
+  if(QSK[K.grp])f.nlsk=QSK[K.grp].slice(0,qSkN(K));
   f.sprite=K.sprite;f.kind=kind;f.grp=K.grp;f.lvl=clamp(Math.round(t-6),1,10);f.fatigue=0;f.morale=70;G.F[id]=f;syncFighterAges(G);return id;}
 function qCleanup(G){const keep=new Set([...G.bookings.map(b=>b.b),...G.offers.map(o=>o.b),...(G.mail||[]).filter(m=>!m.done&&m.qid).map(m=>m.qid)]);
   for(const id of Object.keys(G.F))if(id.startsWith("q_")&&!keep.has(id)&&(G.F[id].lastFightAbs==null||gameWeek(G)-G.F[id].lastFightAbs>2))delete G.F[id];}
