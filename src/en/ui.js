@@ -1,5 +1,5 @@
 // ================= MUAY THAI MOE v1.3 — UI =================
-const VERSION="1.91.75";
+const VERSION="1.91.76";
 const CUR_LANG=(typeof window!=="undefined"&&window.LANG)||"th";
 const TH_LABEL=String.fromCharCode(3652,3607,3618);
 function langSwitch(cls){return `<div class="langsw ${cls||""}" role="group" aria-label="Language">${[["th",TH_LABEL],["en","EN"]].map(([k,l])=>`<button class="lsb ${CUR_LANG===k?"on":""}" data-act="setlang" data-v="${k}" aria-pressed="${CUR_LANG===k}">${l}</button>`).join("")}</div>`;}
@@ -1214,6 +1214,8 @@ function sceneNext(){const S=UI.scene;if(!S)return;
 // v1.35: once she is close she calls you by name, not by title
 function nameCall(n,t){if(typeof t!=="string"||!G||!G.F[n]||!G.F[n].canon||(G.F[n].bond||0)<25)return t;const nm=G.player.name;return t.replace(/^ผู้จัดการ(?=คะ|ครับ|!|…| )/,""+nm).replace(/^Manager(?=[,!…. ])/,nm);}
 function sceneChoose(k){const S=UI.scene,c=S.cur.choice[k];AU.sfx("ui");if(c.fx)c.fx(G);S.steps.splice(S.i+1,0,...(c.then||[]));S.i++;sceneNext();}
+/* v1.91.77: art drawn crouching/sitting (not standing full height) is shown smaller so heads match everyone else */
+const STAND_LOW=["npc:thief"];
 function sceneHTML(){const S=UI.scene,c=S.cur||{};const sp=c.n==="coach"?{name:c.tel?"Coach Daeng (on the phone)":"Coach Daeng",color:"#d98a4a"}:c.n==="npc"?{name:c.who||"",color:"#8fbf6a"}:(SPK[c.n]||{name:""});
   const who=c.n==="me"?esc(G.player.name):c.n==="nar"?"":esc(sp.name||"");
   const spk=c.n||S.lastN;if(c.n)S.lastN=c.n;
@@ -1222,9 +1224,9 @@ function sceneHTML(){const S=UI.scene,c=S.cur||{};const sp=c.n==="coach"?{name:c
   /* v1.91.68 (Man): players can hide him (Settings) — the "try in a scene" preview always shows him */
   const mOn=S.mgr&&(S.mlook||SETTINGS.mgrShow!==false);
   const mu=mOn&&typeof MGRP!=="undefined"&&(S.mlook||(G&&G.avatar))?MGRP.url(S.mlook||G.avatar,S.mf||"normal",()=>render()):"";
-  const girls=mOn?S.cast.slice(-1):S.cast,nOn=girls.length+(mOn?1:0);
-  const mst=mOn&&!c.cg?(mu?`<img class="stand mgrst ${girls.length?"l":"c"} ${spk==="me"&&!c.choice?"on":"off"}" src="${mu}" alt="">`:""):"";
-  const cast=mst+girls.map((m,i)=>{const active=m.id===spk||(c.choice&&i===girls.length-1);const pos=nOn===1?"c":mOn?"r":nOn>2?"g":i===0?"l":"r",gx=nOn>2?` style="left:${Math.round((i+.5)/nOn*100)}%;z-index:${active?3:1}"`:"";
+  const girls0=mOn?S.cast.slice(-1):S.cast,many=girls0.length+(mOn?1:0)>3,girls=many?[]:girls0,nOn=girls.length+(mOn&&!many?1:0); /* v1.91.77 (Man): more than three on stage → text only, no portraits */
+  const mst=mOn&&!many&&!c.cg?(mu?`<img class="stand mgrst ${girls.length?"l":"c"} ${spk==="me"&&!c.choice?"on":"off"}" src="${mu}" alt="">`:""):"";
+  const cast=mst+girls.map((m,i)=>{const active=m.id===spk||(c.choice&&i===girls.length-1);const pos=(nOn===1?"c":mOn?"r":nOn>2?"g":i===0?"l":"r")+(STAND_LOW.includes(m.id)?" st-low":""),gx=nOn>2?` style="left:${Math.round((i+.5)/nOn*100)}%;z-index:${active?3:1}"`:"";
     return `<img class="stand ${pos} ${active&&!m.back?"on":"off"}${m.back?" back":""}"${gx} src="${m.id.startsWith("npc:")?(m.id.slice(4).startsWith("nl_")?`${ASSET}${m.id.slice(4)}.webp`:`${ASSET}npc_${m.id.slice(4)}.webp`):m.back?`${ASSET}${m.id}_back.webp`:stand(m.id,m.look,active&&!c.choice?moodFor(c.f,m.look,c.t):moodFor(m.f,m.look,""))}" alt="">`;}).join("");
   const tag="";
   return `<div class="vn" role="dialog" aria-label="Story scene"><div class="vbg bg-${S.bg==="camp"?"gym":S.bg}" ${bgKey?`style="background-image:url(${ASSET}${bgKey})"`:""}></div>

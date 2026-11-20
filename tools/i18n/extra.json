@@ -16153,5 +16153,12 @@
  " ทุกคนวางกระเป๋า ": ". Everyone drops their bags. ",
  "เช็กอินโรงแรมใน": "Checked into a hotel in ",
  "สัปดาห์นี้ยังออกเดินทางไม่ได้ · ไปได้สัปดาห์ ": "Can't set off this week · next possible week ",
- " แชมป์ประจำจังหวัด ชกต่อหน้าคนบ้านเขา ครูแดงโทรมาสั้น ๆ ว่าอย่าตื่นเสียงเชียร์": ", the province champion, fights in front of her home crowd tonight. Kru Daeng calls briefly: don't let the cheering rattle you."
+ " แชมป์ประจำจังหวัด ชกต่อหน้าคนบ้านเขา ครูแดงโทรมาสั้น ๆ ว่าอย่าตื่นเสียงเชียร์": ", the province champion, fights in front of her home crowd tonight. Kru Daeng calls briefly: don't let the cheering rattle you.",
+ "ไปแบบรวบรัด</button></div></div>": " quick trip</button></div></div>",
+ "</button><button class=\"btn sm\" data-act=\"rgtdev\" data-v=\"reset\">รีเซ็ต: ยกเลิกทริป · คืนเข็มขัด · เงิน ฿200,000</button><button class=\"btn sm\" data-act=\"rgtdev\" data-v=\"quick\">": "</button><button class=\"btn sm\" data-act=\"rgtdev\" data-v=\"reset\">Reset: cancel trip · return belts · cash ฿200,000</button><button class=\"btn sm\" data-act=\"rgtdev\" data-v=\"quick\">",
+ "ให้ครูแดงลา": "Send Kru Daeng on leave",
+ "ครูแดงลาอยู่ (กดให้กลับ)": "Kru Daeng on leave (tap to bring back)",
+ " คน</button>": " fighters</button>",
+ "<div class=\"rgt-dev\"><b>🧪 โหมดทดสอบการเดินทาง</b>\n      <div><small>รถค่าย</small>": "<div class=\"rgt-dev\"><b>🧪 Travel test mode</b>\n      <div><small>Camp vehicle</small>",
+ "<div class=\"mfoot\"><button class=\"btn\" data-act=\"closeModal\">ปิด</button></div>": "<div class=\"mfoot\"><button class=\"btn\" data-act=\"closeModal\">Close</button></div>"
 }
