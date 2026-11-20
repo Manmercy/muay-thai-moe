@@ -16676,5 +16676,15 @@
  "แข้งเดือยไก่ชน": "Fighting-Cock Spur Kick",
  "เข่าเก็บค่าคุ้มครอง": "Protection-Money Knee",
  "การ์ดลูกพี่": "Big Bro's Guard",
- "หมัดทวงหนี้": "Debt-Collector Punch"
+ "หมัดทวงหนี้": "Debt-Collector Punch",
+ "…ขึ้นมา พร้อมกันทั้งสี่คนเลยก็ได้": "…Come up. All four at once is fine.",
+ "สายไปแล้ว แชมป์สี่คนมองหน้ากัน ไม่มีใครยอมรุมคนคนเดียว ใบบัวถอดรองเท้า ลอดเชือกขึ้นไปก่อนใคร": "Too late. The four champions look at each other — none of them will gang up on one woman. Baibua kicks off her shoes and slips through the ropes before anyone else.",
+ "</b><small>เลือกระดับต่อไป</small></span><span class=\"rg-nlv\"><button class=\"btn gold rg-nbtn\" data-act=\"rglegopen\">✦ ระดับตำนาน ▸</button></span></div>": "</b><small>Pick your next level</small></span><span class=\"rg-nlv\"><button class=\"btn gold rg-nbtn\" data-act=\"rglegopen\">✦ Legend tier ▸</button></span></div>",
+ "<div class=\"px rg-nstrip won\"><span class=\"rg-ncard\">🂠</span><span><b>ไฟต์ใต้ดิน 5 ต่อ 5 · ชนะแล้ว ": "<div class=\"px rg-nstrip won\"><span class=\"rg-ncard\">🂠</span><span><b>Underground 5 vs 5 · won ",
+ " สัปดาห์</small></span>": " weeks</small></span>",
+ "<small>อีก ": "<small>",
+ "<span class=\"rg-nwait\">ไปได้สัปดาห์ ": "<span class=\"rg-nwait\">Open from week ",
+ "<button class=\"btn red rg-nbtn\" data-act=\"rgfline\">ไปโกดัง ▸</button>": "<button class=\"btn red rg-nbtn\" data-act=\"rgfline\">To the warehouse ▸</button>",
+ " · ท้ามาแล้ว ": " · tried ",
+ "<div class=\"px rg-nstrip\"><span class=\"rg-ncard\">🂠</span><span><b>ไฟต์ใต้ดิน 5 ต่อ 5 · นาคาลีก</b><small>โกดังเก่าท่าเรือคลองเตย · กติกาเปิด · ชนะ 3 ใน 5": "<div class=\"px rg-nstrip\"><span class=\"rg-ncard\">🂠</span><span><b>Underground 5 vs 5 · Naga League</b><small>Old Khlong Toei dock warehouse · open rules · best of 5"
 }
