@@ -1029,16 +1029,18 @@ const REGION={
     f.rg=dest;rgDress(f);f.lvl=(me.lvl||1)+(n<8?1:2);/* v1.90.20 (Man): province champions 1–2 levels above */f.fatigue=0;f.morale=70;setT(RG_FIX.belt(n)+rgEdB(G,"eb"));f.rgT=+(RG_FIX.belt(n)+rgEdB(G,"eb")).toFixed(2);f.camp="quest";f.div="X";f.rg=dest;f.rgSty=rgBeltSty(r,id);rgDress(f);f.sprite="rgp_"+dest;/* v1.89.14: high-level sheet dyed in the province colour */f.color=RG[r].col;f.lvl=(me.lvl||1)+(n<8?1:2);/* v1.90.20 (Man): province champions 1–2 levels above */f.fatigue=0;f.morale=70;
     G.F[id]=f;syncFighterAges(G);return id;},
   purse(G){const n=this.beltTotal(G),w=Math.round((10000+n*800)*(1+Math.min(G.rep,50)/100)/100)*100;return {win:w,lose:Math.round(w*.4/100)*100};},
-  book(G,dest,fid){const R=G.region,D=ROAD_DEST[dest],me=G.F[fid];if(!R||!D||!me)return {ok:false,why:"Missing data"};
+  book(G,dest,fid,now){const R=G.region,D=ROAD_DEST[dest],me=G.F[fid];if(!R||!D||!me)return {ok:false,why:"Missing data"};
     if(R.trip)return {ok:false,why:"A trip is already planned"};if((R.belts[D.r]||{})[dest])return {ok:false,why:"Already won this province's belt"};
-    const wk=this.tripWeek(G);if(!wk)return {ok:false,why:"No free week left to travel this year"};
+    const wk=this.tripWeek(G);if(!wk)return {ok:false,why:"No free week left to travel this year"};if(now&&wk!==G.week)return {ok:false,why:`Can't set off this week · next possible week ${wk}`};
     if(!this.riders(G,wk).some(f=>f.id===fid))return {ok:false,why:`${me.name} isn't fit to travel`};
     const abs=this.base(G)+wk,P=roadPlan(G,dest,null,abs);if(G.cash<P.total)return {ok:false,why:"Not enough money for the trip"};
     const opp=this.makeOpp(G,dest,me,abs),pay=this.purse(G),bid=`rg${abs}_${dest}`;
     G.bookings.push({id:bid,a:fid,b:opp,week:wk,tier:"region",rounds:3,win:pay.win,lose:pay.lose,region:{r:D.r,dest},bg:dest==="chanthaburi"?"bg_region_east.webp":`bg_ring_${dest}.webp`});
     G.cash-=P.total;G.offers=(G.offers||[]).filter(o=>o.week!==wk);
-    R.trip={abs,season:G.season||1,wk,dest,fid,opp,bid,cost:P.total,car:P.car,fat:P.fat,quick:this.canQuick(G,dest)&&!!R.quickPref};
+    R.trip={abs,season:G.season||1,wk,dest,fid,opp,bid,cost:P.total,car:P.car,fat:P.fat,quick:this.canQuick(G,dest)&&!!R.quickPref,party:this.party(G,fid)};
     G.log=G.log||[];G.log.push(`Trip planned to ${D.name} week ${wk} · travel cost ${fmt(P.total)}`);return {ok:true,wk,cost:P.total};},
+  /* v1.91.76 (Man): the travelling party — the fighter always, then whoever the player picked, capped by the vehicle's seats */
+  party(G,fid){const max=roadSeats(G),pick=(UI.rgParty||[]).filter(id=>id!==fid&&G.F[id]&&G.F[id].camp==="player");return [fid,...pick].slice(0,max);},
   cancel(G){const R=G.region,T=R&&R.trip;if(!T)return false;G.bookings=G.bookings.filter(b=>b.id!==T.bid);G.cash+=T.cost;
     (R.gc=R.gc||[]).push(T.opp);R.trip=null;return true;},
 
@@ -1080,8 +1082,16 @@ Pick your fighter under Fights › Four Regions Championship`+((t=>t?`\n\n(${t})
     /* v1.91.50 (playtest): a quick trip to a region you know — no drive, no hotel menu, no shop; the nights are rest */
     if(T.quick&&this.canQuick(G,dest)){this.arrive(G,T,P,null);openFight(b,()=>{const n=P.nights||0;if(n){for(const f of roadRiders(G))f.fatigue=Math.max(0,(f.fatigue||0)-10*n);}
       G.log=G.log||[];G.log.push(`Back at camp from ${ROAD_DEST[dest].name}${n?` · rested at the hotel ${n} night(s), fatigue −${10*n}`:""}`);save();done();});return;}
-    ROAD.open(dest,{paid:true,plan:P,onArrive:(P2,front)=>{this.arrive(G,T,P2||P,front);const go=()=>openFight(b,()=>this.night(T,P2||P,1,done)),A=this.firstArrive(G,ROAD_DEST[dest].r,dest);
+    ROAD.open(dest,{paid:true,plan:P,onArrive:(P2,front)=>{this.arrive(G,T,P2||P,front);const go=()=>this.hotel(b,T,()=>openFight(b,()=>this.night(T,P2||P,1,done))),A=this.firstArrive(G,ROAD_DEST[dest].r,dest);
       if(A){playScene(A,go,{bg:"gas_station",look:"casual"});}else go();}});},
+  /* v1.91.76 (Man): drive → hotel → "head for the ring" → the bout */
+  hotel(b,T,go){const D=ROAD_DEST[T.dest],me=G.F[b.a],op=G.F[b.b];if(!me||!op){go();return;}
+    playScene([{n:"nar",t:`Checked into a hotel in ${D.name}. Everyone drops their bags. ${me.name} sits at the end of the bed, quietly wrapping her hands`},
+      roadCoachIn(G)?{n:"coach",t:`Tonight ${op.name}, the province champion, fights in front of her home crowd tonight. Don't let the cheering rattle you.`}:{n:"nar",t:`Tonight ${op.name}, the province champion, fights in front of her home crowd tonight. Kru Daeng calls briefly: don't let the cheering rattle you.`},
+      {n:"nar",t:"Outside, the pi chawa from the ring starts to carry through the window",choice:[
+        {t:"Head for the ring ▸"},
+        {t:"Stretch before heading out",fx:G2=>{const f=G2.F[b.a];if(f)f.fatigue=Math.max(0,(f.fatigue||0)-5);},then:[{n:"nar",t:`${me.name} stretches until she breaks a sweat, then grabs her robe · fatigue −5`}]}]}],
+      ()=>{save();go();},{bg:"hotel_room",look:"casual"});},
   /* the first trip into a region: its champion comes to meet the camp on the way in */
   firstArrive(G,r,dest){const R=G.region;R.arrived=R.arrived||{};if(R.arrived[r]||!RG_ARRIVE[r])return null;R.arrived[r]=1;rgTouch(G,RG_CID[r]);return RG_ARRIVE[r](G,ROAD_DEST[dest]);},
   /* road fatigue for everyone on board (the fighter only half: the corner keeps her off her feet) · the shotgun seat is a small moment */
@@ -1258,7 +1268,7 @@ ${RG[r].champ}, the new champion of ${RG[r].name} is open to a new regional titl
 .rg-reg{border-top:6px solid var(--rc);position:relative}.rg-reg h3{margin:.1rem 0 0}.rg-reg h3::first-letter{text-transform:uppercase}.rg-champ{font-size:.85rem;opacity:.85;margin-bottom:.5rem}
 .rg-prov{display:flex;align-items:center;justify-content:space-between;gap:.5rem;padding:.35rem 0;border-bottom:1px dashed rgba(0,0,0,.15)}
 .rg-prov:last-child{border-bottom:0}.rg-prov small{opacity:.7}.rg-fin{opacity:.9}.rg-miss{display:block;color:#d4688f;opacity:1!important}.rg-belt{color:#b8860b;font-weight:700}
-.rg-trip{border-left:6px solid var(--gold,#d9a21b)}.rg-load{position:fixed;inset:0;z-index:9000;display:flex;align-items:center;justify-content:center;background:#07040c url(${ASSET}bg_naka_underground.webp) center/cover}.rgl-in{background:rgba(8,4,10,.82);box-shadow:inset 0 0 0 3px #c41d33;padding:1rem 1.2rem;max-width:min(90vw,520px);display:grid;gap:.6rem;color:#f3e9ff}.rgl-in b{color:#ff5a6c;font-size:1.2rem}.rgl-in p{margin:0;line-height:1.5}.rgl-bar{height:10px;background:#2a0d14;box-shadow:inset 0 0 0 2px #5a1520}.rgl-bar i{display:block;height:100%;width:0;background:#e0283c;transition:width .2s}.fprep3{display:grid;gap:6px;margin:.4rem 0}.fprep3 h4{margin:0;color:#ff7a8a}.fprep3 .btn{text-align:left;display:grid;justify-items:start;padding:.5rem .8rem}.fprep3 .btn.gold{box-shadow:inset 0 0 0 3px #ffcf4a}.fprep3 .btn small{opacity:.8}.rg-show{position:fixed;inset:0;z-index:9000;background:#07040c;display:flex;align-items:center;justify-content:center}.rgs-in{position:relative;width:min(100vw,960px)}.rg-show canvas{width:100%;height:auto;display:block;image-rendering:auto}.rgs-cap{min-height:3.2em;padding:.7rem 1rem;color:#f3e9ff;font-size:1.05rem;line-height:1.5;background:linear-gradient(180deg,#1a1028,#0d0815);border-top:3px solid #ff4d6d}.rgs-skip{position:absolute;top:.5rem;right:.5rem}.rg-quick{display:grid;grid-template-columns:auto 1fr;column-gap:.5rem;align-items:center;margin:.6rem 0;cursor:pointer}.rg-quick small{grid-column:2}.rg-pick{display:flex;flex-wrap:wrap;gap:.4rem;margin:.4rem 0}
+.rg-trip{border-left:6px solid var(--gold,#d9a21b)}.rgt-list{display:grid;gap:.5rem}.rgt-reg{border-left:6px solid var(--rc);padding:.3rem .5rem;background:rgba(0,0,0,.12)}.rgt-pv{display:flex;flex-wrap:wrap;gap:6px;margin-top:4px}.rgt-pv .btn{display:grid;text-align:left}.rgt-pv .btn small{opacity:.75}.rg-load{position:fixed;inset:0;z-index:9000;display:flex;align-items:center;justify-content:center;background:#07040c url(${ASSET}bg_naka_underground.webp) center/cover}.rgl-in{background:rgba(8,4,10,.82);box-shadow:inset 0 0 0 3px #c41d33;padding:1rem 1.2rem;max-width:min(90vw,520px);display:grid;gap:.6rem;color:#f3e9ff}.rgl-in b{color:#ff5a6c;font-size:1.2rem}.rgl-in p{margin:0;line-height:1.5}.rgl-bar{height:10px;background:#2a0d14;box-shadow:inset 0 0 0 2px #5a1520}.rgl-bar i{display:block;height:100%;width:0;background:#e0283c;transition:width .2s}.fprep3{display:grid;gap:6px;margin:.4rem 0}.fprep3 h4{margin:0;color:#ff7a8a}.fprep3 .btn{text-align:left;display:grid;justify-items:start;padding:.5rem .8rem}.fprep3 .btn.gold{box-shadow:inset 0 0 0 3px #ffcf4a}.fprep3 .btn small{opacity:.8}.rg-show{position:fixed;inset:0;z-index:9000;background:#07040c;display:flex;align-items:center;justify-content:center}.rgs-in{position:relative;width:min(100vw,960px)}.rg-show canvas{width:100%;height:auto;display:block;image-rendering:auto}.rgs-cap{min-height:3.2em;padding:.7rem 1rem;color:#f3e9ff;font-size:1.05rem;line-height:1.5;background:linear-gradient(180deg,#1a1028,#0d0815);border-top:3px solid #ff4d6d}.rgs-skip{position:absolute;top:.5rem;right:.5rem}.rg-quick{display:grid;grid-template-columns:auto 1fr;column-gap:.5rem;align-items:center;margin:.6rem 0;cursor:pointer}.rg-quick small{grid-column:2}.rg-pick{display:flex;flex-wrap:wrap;gap:.4rem;margin:.4rem 0}
 .rg-pick button{display:flex;align-items:center;gap:.35rem}.rg-pick button[aria-pressed="true"]{outline:3px solid var(--gold,#d9a21b)}
 .rg-bill .kv-row{padding:.15rem 0}.rg-fuel.cheap{color:#2f8a50}.rg-fuel.high{color:#c8283c}
 #rdcv{width:100%;height:auto;image-rendering:pixelated;background:#1b1530;box-shadow:inset 0 0 0 2px var(--line)}
@@ -1301,17 +1311,33 @@ ${RG[r].champ}, the new champion of ${RG[r].name} is open to a new regional titl
     return `<button class="px newfighter" data-act="rgvisit" data-v="${r}"><span class="newb">NEW!</span>${G.F[cid]?`<img src="${faceSrc(cid,"happy")}" alt="">`:""}<span><b>${esc(RG[r].champ)} is visiting the camp</b><small>Tap to welcome her · only until bout 2</small></span><span class="chev">▸</span></button>`;},
   canQuick(G,dest){const R=G.region,D=ROAD_DEST[dest];if(!R||!D)return false;return !!((R.arrived||{})[D.r])&&!(RG_TRIPX[dest]&&!((R.tx||{})[dest]));},
   planHTML(dest){const D=ROAD_DEST[dest],C=RG[D.r],wk=this.tripWeek(G);if(!wk)return `<h2>${esc(D.name)}</h2><p>No free week left to travel this year</p>`;
-    const abs=this.base(G)+wk,P=roadPlan(G,dest,null,abs),R=this.riders(G,wk);if(!UI.rgFid||!R.some(f=>f.id===UI.rgFid))UI.rgFid=R[0]?R[0].id:null;
+    const R=this.riders(G,wk);if(!UI.rgFid||!R.some(f=>f.id===UI.rgFid))UI.rgFid=R[0]?R[0].id:null;
+    /* v1.91.76 (Man): seats decide who comes along — the fighter, then the picked teammates */
+    const max=roadSeats(G),cand=roster(G).filter(f=>!f.injury||f.injury<3);
+    if(!UI.rgParty||UI.rgPartyFor!==UI.rgFid){UI.rgPartyFor=UI.rgFid;UI.rgParty=[UI.rgFid,...cand.filter(f=>f.id!==UI.rgFid).sort((a,b)=>(b.bond||0)-(a.bond||0)).map(f=>f.id)].filter(Boolean).slice(0,max);}
+    if(UI.rgFid&&!UI.rgParty.includes(UI.rgFid))UI.rgParty=[UI.rgFid,...UI.rgParty].slice(0,max);
+    const abs=this.base(G)+wk,P=roadPlan(G,dest,null,abs),now=!!UI.rgNow;
     const me=UI.rgFid&&G.F[UI.rgFid],poor=G.cash<P.total,line=(k,v)=>v?`<div class="kv-row"><span>${k}</span><b class="num">${fmt(v)}</b></div>`:"";
     return `<h2>${esc(D.name)} <small class="meta">· ${esc(C.name)}</small></h2>
      <p class="meta">Travel in week <b>${wk}</b> · ${D.km} km · ${P.nights?`Stay ${P.nights} night(s)`:"Day trip"} · opponent: <b>${esc(this.oppName(G,dest))}</b>, the provincial champion</p>
      <h3>Who fights?</h3>${R.length?`<div class="rg-pick">${R.map(f=>`<button class="btn sm" data-act="rgfid" data-v="${f.id}" aria-pressed="${f.id===UI.rgFid}">${faceImg(f,"sm")}${esc(f.name)} <small>Lv.${f.lvl||1}</small></button>`).join("")}</div>`:`<p class="redt">Nobody is fit to travel that week</p>`}
-     <h3>Round-trip travel cost</h3><div class="rg-bill"><div class="kv-row"><span>Vehicle</span><b>${esc(roadCarName(P.car))}</b></div>
+     <h3>Who comes along <small class="meta">${esc(roadCarName(roadCarKey(G)))} · fighters allowed: ${max} · the manager drives ${roadCoachIn(G)?" · Kru Daeng comes along":" · Kru Daeng is on leave"}</small></h3>
+     <div class="rg-pick">${cand.map(f=>{const on=UI.rgParty.includes(f.id),lock=f.id===UI.rgFid,full=!on&&UI.rgParty.length>=max;return `<button class="btn sm" data-act="rgparty" data-v="${f.id}" aria-pressed="${on}" ${lock||full?"disabled":""}>${faceImg(f,"sm")}${esc(f.name)}${lock?" <small>fights</small>":""}</button>`;}).join("")}</div>
+     <h3>Travel cost, round trip</h3><div class="rg-bill"><div class="kv-row"><span>Vehicle</span><b>${esc(roadCarName(P.car))}</b></div>
       ${line(`Fuel ${Math.round(P.litres)} L × ฿${P.price.toFixed(2)}`,P.fuel)}${line("Tolls",P.toll)}${line(`Bus tickets × ${P.onBus}`,P.bus)}${line(`Lodging ${P.nights} night(s)`,P.lodge)}${line(`Food × ${P.people}`,P.food)}
       <div class="kv-row"><span><b>Total</b></span><b class="num ${poor?"redt":"goldt"}">${fmt(P.total)}</b></div><div class="kv-row"><span>Camp cash after paying</span><b class="num ${poor?"redt":""}">${fmt(G.cash-P.total)}</b></div></div>
-     <p class="meta">The whole camp: ${P.people} people travel together; no other bouts that week · road fatigue about +${P.fat} each ${P.car==="none"?" · the camp has no vehicle yet, so it's the bus (pricier and more tiring)":""}</p>
+     <p class="meta">Travelling together: ${P.people} people (incl. the manager ${roadCoachIn(G)?" and Kru Daeng":""}) · those who stay train as programmed · no other fights that week · travel fatigue about +${P.fat} each ${P.car==="none"?" · the camp has no vehicle yet, so it's the bus (pricier and more tiring)":""}</p>
      ${this.canQuick(G,dest)?`<label class="rg-quick"><input type="checkbox" data-act="rgquick" ${G.region.quickPref?"checked":""}> Quick trip <small class="meta">skip the drive, the hotel nights and the souvenir shop · nights away count as rest</small></label>`:""}
-     <div class="mfoot"><button class="btn" data-act="closeModal">Not now</button><button class="btn primary" data-act="rggo" data-v="${dest}" ${me&&!poor?"":"disabled"}>${poor?"Not enough money":"Confirm the trip"}</button></div>`;}
+     <div class="mfoot"><button class="btn" data-act="closeModal">Later</button>${now&&wk===G.week?`<button class="btn primary" data-act="rggonow" data-v="${dest}" ${me&&!poor?"":"disabled"}>${poor?"Not enough money":"Set off now ▸"}</button>`:`<button class="btn primary" data-act="rggo" data-v="${dest}" ${me&&!poor?"":"disabled"}>${poor?"Not enough money":"Confirm the trip"}</button>`}</div>
+     ${now&&wk===G.week?`<p class="meta center">Setting off ends this week right away (training → drive → hotel → ring)</p>`:""}`;},
+  /* v1.91.76 (Man): the "travel" button at the camp vehicle — pick a province, then go this week */
+  travelOk(G){const R=G.region;return !!(R&&R.belts&&regionOn()&&!R.close&&RG_ORDER.some(r=>this.beltCount(G,r)<4));},
+  travelHTML(G){const R=G.region,wk=this.tripWeek(G),now=wk===G.week;
+    if(R.trip){const T=R.trip,D=ROAD_DEST[T.dest];return `<h2>🚐 Travel · Four Regions Championship</h2><p>Trip booked to <b>${esc(D?D.name:"")}</b> week ${T.wk} booked · ${esc(G.F[T.fid]?G.F[T.fid].name:"")} fights</p><p class="meta">When that week comes, end the week to set off</p><div class="mfoot"><button class="btn" data-act="rgcancel">Cancel trip (refund)</button><button class="btn primary" data-act="closeModal">Close</button></div>`;}
+    const rows=RG_ORDER.map(r=>{const C=RG[r],B=(R.belts||{})[r]||{};return `<div class="rgt-reg" style="--rc:${C.col}"><b>${esc(C.name)}</b><div class="rgt-pv">${C.prov.map(p=>{const D=ROAD_DEST[p];if(!D)return "";const got=!!B[p];
+      return `<button class="btn sm ${got?"":"gold"}" data-act="rgtravelto" data-v="${p}" ${got?"disabled":""}>${esc(D.name)}<small>${got?"Belt won":`${D.km} km`}</small></button>`;}).join("")}</div></div>`;}).join("");
+    return `<h2>🚐 Travel · Four Regions Championship</h2><p class="meta">${!wk?"No free week left to travel this year":now?"Pick a province and set off this week":`Can't leave this week · next possible week ${wk} (you can book ahead)`}</p>
+      <div class="rgt-list">${rows}</div><div class="mfoot"><button class="btn" data-act="closeModal">Close</button></div>`;}
 };
 
 /* round 11: the underground final — state, the region-page card, the line-up and the five bouts */
@@ -1445,15 +1471,19 @@ if(typeof ACT!=="undefined")Object.assign(ACT,{
 });
 if(typeof XMODAL!=="undefined"){XMODAL.rgfline=()=>({body:REGION.boardHTML(),foot:false});XMODAL.rgleg=m=>({body:REGION.legPickHTML(m.k),foot:false});
   XMODAL.rgflost=()=>({body:`<h2>Lost the underground fight</h2><p>Next time all five bouts start again from bout 1 · go back and train, then set a new line-up from next week, or wait until you're ready</p><div class="mfoot"><button class="btn primary" data-act="rgfhome">Back to training</button></div>`,foot:false});}
-if(typeof XMODAL!=="undefined"){XMODAL.rgplan=m=>({body:REGION.planHTML(m.dest),foot:false});XMODAL.rgser=m=>({body:REGION.seriesHTML(m.r),foot:false});}
+if(typeof XMODAL!=="undefined"){XMODAL.rgplan=m=>({body:REGION.planHTML(m.dest),foot:false});XMODAL.rgtravel=()=>({body:REGION.travelHTML(G),foot:false});XMODAL.rgser=m=>({body:REGION.seriesHTML(m.r),foot:false});}
 if(typeof ACT!=="undefined")Object.assign(ACT,{
   lbgo:d=>{UI.modal=null;lbStart(G,d.v);},
   nltest:d=>{if(REGION_LIVE)return;nlTest(d.v);},
-  rgplan:d=>{UI.rgFid=null;UI.modal={type:"rgplan",dest:d.v};render();},
+  rgplan:d=>{UI.rgFid=null;UI.rgParty=null;UI.rgNow=false;UI.modal={type:"rgplan",dest:d.v};render();},
+  rgtravel:()=>{if(!REGION.travelOk(G))return;UI.modal={type:"rgtravel"};render();},
+  rgtravelto:d=>{UI.rgFid=null;UI.rgParty=null;UI.rgNow=true;UI.modal={type:"rgplan",dest:d.v};render();},
+  rgparty:d=>{const P=UI.rgParty=UI.rgParty||[],i=P.indexOf(d.v);if(d.v===UI.rgFid)return;if(i>=0)P.splice(i,1);else if(P.length<roadSeats(G))P.push(d.v);render();},
+  rggonow:d=>{const r=REGION.book(G,d.v,UI.rgFid,true);if(!r.ok){toast(r.why);return;}UI.modal=null;UI.rgParty=null;UI.rgNow=false;AU.sfx&&AU.sfx("level");save();endWeek();},
   rgfid:d=>{UI.rgFid=d.v;render();},
   rgclosetest:()=>{REGION.playClose(()=>render());},
   rgquick:()=>{G.region.quickPref=!G.region.quickPref;save();render();},
-  rggo:d=>{const r=REGION.book(G,d.v,UI.rgFid);if(!r.ok){toast(r.why);return;}UI.modal=null;AU.sfx&&AU.sfx("level");toast(`Trip booked for week ${r.wk} · travel cost paid ${fmt(r.cost)}`);save();render();},
+  rggo:d=>{const r=REGION.book(G,d.v,UI.rgFid);if(!r.ok){toast(r.why);return;}UI.modal=null;UI.rgParty=null;AU.sfx&&AU.sfx("level");toast(`Trip booked for week ${r.wk} · travel cost paid ${fmt(r.cost)}`);save();render();},
   rgvisit:d=>{const r=d.v,c=G.region.champ[r],cid=REGION.champId[r];if(!c||c.visit!=="due")return;
     playScene(RG_VISIT[r](G),()=>DUEL.open(r,false,res=>{if(!res){render();return;}c.visit="done";const T=DUEL_TALK[r];
       playScene([{n:cid,f:res.w>=2?"flustered":"happy",l:"casual",t:res.w>=2?T.win:T.lose},{n:"nar",t:`${RG[r].champ} heads home that evening · bout 2 is at the regional ring`}],()=>{const g=typeof cardCheck==="function"?cardCheck(G):[];if(g.length){G.cardPend=(G.cardPend||[]).concat(g);UI.modal={type:"cardnew"};}save();render();},{bg:"camp",look:"casual"});}),{bg:"camp",look:"casual"});},

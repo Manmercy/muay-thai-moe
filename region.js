@@ -44,11 +44,16 @@ function roadFuelHint(G){const w=G?gameWeek(G):1,now=roadFuel(G,w),nx=roadFuel(G
 
 function roadCarKey(G){return G?decorChoice(G,"vehicle"):"none";}
 function roadCarName(k){return k==="none"?ROAD_CAR.none.name:((CAMP_DECOR.vehicle.items[k]||{}).name||k);}
-function roadRiders(G){return G?roster(G).filter(f=>!f.injury||f.injury<3):[];}
+function roadRiders(G){if(!G)return [];const all=roster(G).filter(f=>!f.injury||f.injury<3);
+  /* v1.91.76 (Man): who travels is limited by the camp vehicle's seats — the trip carries its party (planning uses UI.rgParty) */
+  const P=(G.region&&G.region.trip&&G.region.trip.party)||(typeof UI!=="undefined"&&UI.rgParty)||null;return P?all.filter(f=>P.includes(f.id)):all;}
+/* seats left for fighters: the manager drives, Kru Daeng always comes unless he is on leave; no camp vehicle = bus tickets for a small group */
+function roadCoachIn(G){return !(G&&G.coachAwayAbs&&gameWeek(G)<G.coachAwayAbs);}
+function roadSeats(G){const k=roadCarKey(G),C=ROAD_CAR[k]||ROAD_CAR.none;return Math.max(1,(k==="none"?4:C.seats)-1-(roadCoachIn(G)?1:0));}
 
 /* the whole bill for one trip, there and back */
 function roadPlan(G,destKey,carKey,wk){const D=ROAD_DEST[destKey],k=carKey||roadCarKey(G),C=ROAD_CAR[k]||ROAD_CAR.none,price=roadFuel(G,wk);
-  const people=Math.max(1,roadRiders(G).length)+1/* the manager */,nights=roadNights(D.km),rt=D.km*2;
+  const people=Math.max(1,roadRiders(G).length)+1/* the manager */+(roadCoachIn(G)?1:0)/* v1.91.76: Kru Daeng */,nights=roadNights(D.km),rt=D.km*2;
   const inCar=k==="none"?0:Math.min(people,C.seats),onBus=people-inCar;
   const litres=C.kmL?rt/C.kmL:0,fuel=Math.round(litres*price),toll=k==="none"?0:Math.round(rt*ROAD_TOLL_PER_KM*ROAD_KM_K),bus=Math.round(onBus*rt*ROAD_BUS_PER_KM*ROAD_KM_K);
   const rooms=Math.ceil(people/2),lodge=nights*rooms*ROAD_ROOM,food=(nights+1)*people*ROAD_FOOD;
@@ -1273,16 +1278,18 @@ const REGION={
     f.rg=dest;rgDress(f);f.lvl=(me.lvl||1)+(n<8?1:2);/* v1.90.20 (Man): province champions 1–2 levels above */f.fatigue=0;f.morale=70;setT(RG_FIX.belt(n)+rgEdB(G,"eb"));f.rgT=+(RG_FIX.belt(n)+rgEdB(G,"eb")).toFixed(2);f.camp="quest";f.div="X";f.rg=dest;f.rgSty=rgBeltSty(r,id);rgDress(f);f.sprite="rgp_"+dest;/* v1.89.14: high-level sheet dyed in the province colour */f.color=RG[r].col;f.lvl=(me.lvl||1)+(n<8?1:2);/* v1.90.20 (Man): province champions 1–2 levels above */f.fatigue=0;f.morale=70;
     G.F[id]=f;syncFighterAges(G);return id;},
   purse(G){const n=this.beltTotal(G),w=Math.round((10000+n*800)*(1+Math.min(G.rep,50)/100)/100)*100;return {win:w,lose:Math.round(w*.4/100)*100};},
-  book(G,dest,fid){const R=G.region,D=ROAD_DEST[dest],me=G.F[fid];if(!R||!D||!me)return {ok:false,why:"ข้อมูลไม่ครบ"};
+  book(G,dest,fid,now){const R=G.region,D=ROAD_DEST[dest],me=G.F[fid];if(!R||!D||!me)return {ok:false,why:"ข้อมูลไม่ครบ"};
     if(R.trip)return {ok:false,why:"มีทริปที่นัดไว้แล้ว"};if((R.belts[D.r]||{})[dest])return {ok:false,why:"ได้เข็มขัดจังหวัดนี้แล้ว"};
-    const wk=this.tripWeek(G);if(!wk)return {ok:false,why:"ปีนี้ไม่มีสัปดาห์ว่างให้เดินทางแล้ว"};
+    const wk=this.tripWeek(G);if(!wk)return {ok:false,why:"ปีนี้ไม่มีสัปดาห์ว่างให้เดินทางแล้ว"};if(now&&wk!==G.week)return {ok:false,why:`สัปดาห์นี้ยังออกเดินทางไม่ได้ · ไปได้สัปดาห์ ${wk}`};
     if(!this.riders(G,wk).some(f=>f.id===fid))return {ok:false,why:`${me.name}ไม่พร้อมเดินทาง`};
     const abs=this.base(G)+wk,P=roadPlan(G,dest,null,abs);if(G.cash<P.total)return {ok:false,why:"เงินไม่พอค่าเดินทาง"};
     const opp=this.makeOpp(G,dest,me,abs),pay=this.purse(G),bid=`rg${abs}_${dest}`;
     G.bookings.push({id:bid,a:fid,b:opp,week:wk,tier:"region",rounds:3,win:pay.win,lose:pay.lose,region:{r:D.r,dest},bg:dest==="chanthaburi"?"bg_region_east.webp":`bg_ring_${dest}.webp`});
     G.cash-=P.total;G.offers=(G.offers||[]).filter(o=>o.week!==wk);
-    R.trip={abs,season:G.season||1,wk,dest,fid,opp,bid,cost:P.total,car:P.car,fat:P.fat,quick:this.canQuick(G,dest)&&!!R.quickPref};
+    R.trip={abs,season:G.season||1,wk,dest,fid,opp,bid,cost:P.total,car:P.car,fat:P.fat,quick:this.canQuick(G,dest)&&!!R.quickPref,party:this.party(G,fid)};
     G.log=G.log||[];G.log.push(`วางแผนเดินทางไป${D.name} สัปดาห์ ${wk} · ค่าเดินทาง ${fmt(P.total)}`);return {ok:true,wk,cost:P.total};},
+  /* v1.91.76 (Man): the travelling party — the fighter always, then whoever the player picked, capped by the vehicle's seats */
+  party(G,fid){const max=roadSeats(G),pick=(UI.rgParty||[]).filter(id=>id!==fid&&G.F[id]&&G.F[id].camp==="player");return [fid,...pick].slice(0,max);},
   cancel(G){const R=G.region,T=R&&R.trip;if(!T)return false;G.bookings=G.bookings.filter(b=>b.id!==T.bid);G.cash+=T.cost;
     (R.gc=R.gc||[]).push(T.opp);R.trip=null;return true;},
 
@@ -1320,8 +1327,16 @@ const REGION={
     /* v1.91.50 (playtest): a quick trip to a region you know — no drive, no hotel menu, no shop; the nights are rest */
     if(T.quick&&this.canQuick(G,dest)){this.arrive(G,T,P,null);openFight(b,()=>{const n=P.nights||0;if(n){for(const f of roadRiders(G))f.fatigue=Math.max(0,(f.fatigue||0)-10*n);}
       G.log=G.log||[];G.log.push(`กลับถึงค่ายจาก${ROAD_DEST[dest].name}${n?` · พักที่โรงแรม ${n} คืน ความล้า −${10*n}`:""}`);save();done();});return;}
-    ROAD.open(dest,{paid:true,plan:P,onArrive:(P2,front)=>{this.arrive(G,T,P2||P,front);const go=()=>openFight(b,()=>this.night(T,P2||P,1,done)),A=this.firstArrive(G,ROAD_DEST[dest].r,dest);
+    ROAD.open(dest,{paid:true,plan:P,onArrive:(P2,front)=>{this.arrive(G,T,P2||P,front);const go=()=>this.hotel(b,T,()=>openFight(b,()=>this.night(T,P2||P,1,done))),A=this.firstArrive(G,ROAD_DEST[dest].r,dest);
       if(A){playScene(A,go,{bg:"gas_station",look:"casual"});}else go();}});},
+  /* v1.91.76 (Man): drive → hotel → "head for the ring" → the bout */
+  hotel(b,T,go){const D=ROAD_DEST[T.dest],me=G.F[b.a],op=G.F[b.b];if(!me||!op){go();return;}
+    playScene([{n:"nar",t:`เช็กอินโรงแรมใน${D.name} ทุกคนวางกระเป๋า ${me.name}นั่งพันมืออยู่ปลายเตียงเงียบ ๆ`},
+      roadCoachIn(G)?{n:"coach",t:`คืนนี้${op.name} แชมป์ประจำจังหวัด ชกต่อหน้าคนบ้านเขา อย่าตื่นเสียงเชียร์`}:{n:"nar",t:`คืนนี้${op.name} แชมป์ประจำจังหวัด ชกต่อหน้าคนบ้านเขา ครูแดงโทรมาสั้น ๆ ว่าอย่าตื่นเสียงเชียร์`},
+      {n:"nar",t:"ข้างนอกเริ่มได้ยินเสียงปี่ชวาจากเวที",choice:[
+        {t:"มุ่งสู่เวที ▸"},
+        {t:"ยืดเส้นยืดสายก่อนออกไป",fx:G2=>{const f=G2.F[b.a];if(f)f.fatigue=Math.max(0,(f.fatigue||0)-5);},then:[{n:"nar",t:`${me.name}ยืดตัวจนเหงื่อซึม แล้วลุกขึ้นคว้าเสื้อคลุม · ความล้า −5`}]}]}],
+      ()=>{save();go();},{bg:"hotel_room",look:"casual"});},
   /* the first trip into a region: its champion comes to meet the camp on the way in */
   firstArrive(G,r,dest){const R=G.region;R.arrived=R.arrived||{};if(R.arrived[r]||!RG_ARRIVE[r])return null;R.arrived[r]=1;rgTouch(G,RG_CID[r]);return RG_ARRIVE[r](G,ROAD_DEST[dest]);},
   /* road fatigue for everyone on board (the fighter only half: the corner keeps her off her feet) · the shotgun seat is a small moment */
@@ -1494,7 +1509,7 @@ const REGION={
 .rg-reg{border-top:6px solid var(--rc);position:relative}.rg-reg h3{margin:.1rem 0 0}.rg-reg h3::first-letter{text-transform:uppercase}.rg-champ{font-size:.85rem;opacity:.85;margin-bottom:.5rem}
 .rg-prov{display:flex;align-items:center;justify-content:space-between;gap:.5rem;padding:.35rem 0;border-bottom:1px dashed rgba(0,0,0,.15)}
 .rg-prov:last-child{border-bottom:0}.rg-prov small{opacity:.7}.rg-fin{opacity:.9}.rg-miss{display:block;color:#d4688f;opacity:1!important}.rg-belt{color:#b8860b;font-weight:700}
-.rg-trip{border-left:6px solid var(--gold,#d9a21b)}.rg-load{position:fixed;inset:0;z-index:9000;display:flex;align-items:center;justify-content:center;background:#07040c url(${ASSET}bg_naka_underground.webp) center/cover}.rgl-in{background:rgba(8,4,10,.82);box-shadow:inset 0 0 0 3px #c41d33;padding:1rem 1.2rem;max-width:min(90vw,520px);display:grid;gap:.6rem;color:#f3e9ff}.rgl-in b{color:#ff5a6c;font-size:1.2rem}.rgl-in p{margin:0;line-height:1.5}.rgl-bar{height:10px;background:#2a0d14;box-shadow:inset 0 0 0 2px #5a1520}.rgl-bar i{display:block;height:100%;width:0;background:#e0283c;transition:width .2s}.fprep3{display:grid;gap:6px;margin:.4rem 0}.fprep3 h4{margin:0;color:#ff7a8a}.fprep3 .btn{text-align:left;display:grid;justify-items:start;padding:.5rem .8rem}.fprep3 .btn.gold{box-shadow:inset 0 0 0 3px #ffcf4a}.fprep3 .btn small{opacity:.8}.rg-show{position:fixed;inset:0;z-index:9000;background:#07040c;display:flex;align-items:center;justify-content:center}.rgs-in{position:relative;width:min(100vw,960px)}.rg-show canvas{width:100%;height:auto;display:block;image-rendering:auto}.rgs-cap{min-height:3.2em;padding:.7rem 1rem;color:#f3e9ff;font-size:1.05rem;line-height:1.5;background:linear-gradient(180deg,#1a1028,#0d0815);border-top:3px solid #ff4d6d}.rgs-skip{position:absolute;top:.5rem;right:.5rem}.rg-quick{display:grid;grid-template-columns:auto 1fr;column-gap:.5rem;align-items:center;margin:.6rem 0;cursor:pointer}.rg-quick small{grid-column:2}.rg-pick{display:flex;flex-wrap:wrap;gap:.4rem;margin:.4rem 0}
+.rg-trip{border-left:6px solid var(--gold,#d9a21b)}.rgt-list{display:grid;gap:.5rem}.rgt-reg{border-left:6px solid var(--rc);padding:.3rem .5rem;background:rgba(0,0,0,.12)}.rgt-pv{display:flex;flex-wrap:wrap;gap:6px;margin-top:4px}.rgt-pv .btn{display:grid;text-align:left}.rgt-pv .btn small{opacity:.75}.rg-load{position:fixed;inset:0;z-index:9000;display:flex;align-items:center;justify-content:center;background:#07040c url(${ASSET}bg_naka_underground.webp) center/cover}.rgl-in{background:rgba(8,4,10,.82);box-shadow:inset 0 0 0 3px #c41d33;padding:1rem 1.2rem;max-width:min(90vw,520px);display:grid;gap:.6rem;color:#f3e9ff}.rgl-in b{color:#ff5a6c;font-size:1.2rem}.rgl-in p{margin:0;line-height:1.5}.rgl-bar{height:10px;background:#2a0d14;box-shadow:inset 0 0 0 2px #5a1520}.rgl-bar i{display:block;height:100%;width:0;background:#e0283c;transition:width .2s}.fprep3{display:grid;gap:6px;margin:.4rem 0}.fprep3 h4{margin:0;color:#ff7a8a}.fprep3 .btn{text-align:left;display:grid;justify-items:start;padding:.5rem .8rem}.fprep3 .btn.gold{box-shadow:inset 0 0 0 3px #ffcf4a}.fprep3 .btn small{opacity:.8}.rg-show{position:fixed;inset:0;z-index:9000;background:#07040c;display:flex;align-items:center;justify-content:center}.rgs-in{position:relative;width:min(100vw,960px)}.rg-show canvas{width:100%;height:auto;display:block;image-rendering:auto}.rgs-cap{min-height:3.2em;padding:.7rem 1rem;color:#f3e9ff;font-size:1.05rem;line-height:1.5;background:linear-gradient(180deg,#1a1028,#0d0815);border-top:3px solid #ff4d6d}.rgs-skip{position:absolute;top:.5rem;right:.5rem}.rg-quick{display:grid;grid-template-columns:auto 1fr;column-gap:.5rem;align-items:center;margin:.6rem 0;cursor:pointer}.rg-quick small{grid-column:2}.rg-pick{display:flex;flex-wrap:wrap;gap:.4rem;margin:.4rem 0}
 .rg-pick button{display:flex;align-items:center;gap:.35rem}.rg-pick button[aria-pressed="true"]{outline:3px solid var(--gold,#d9a21b)}
 .rg-bill .kv-row{padding:.15rem 0}.rg-fuel.cheap{color:#2f8a50}.rg-fuel.high{color:#c8283c}
 #rdcv{width:100%;height:auto;image-rendering:pixelated;background:#1b1530;box-shadow:inset 0 0 0 2px var(--line)}
@@ -1537,17 +1552,33 @@ const REGION={
     return `<button class="px newfighter" data-act="rgvisit" data-v="${r}"><span class="newb">NEW!</span>${G.F[cid]?`<img src="${faceSrc(cid,"happy")}" alt="">`:""}<span><b>${esc(RG[r].champ)}มาเยือนค่าย</b><small>แตะเพื่อต้อนรับ · มาได้ถึงก่อนนัดที่ 2 เท่านั้น</small></span><span class="chev">▸</span></button>`;},
   canQuick(G,dest){const R=G.region,D=ROAD_DEST[dest];if(!R||!D)return false;return !!((R.arrived||{})[D.r])&&!(RG_TRIPX[dest]&&!((R.tx||{})[dest]));},
   planHTML(dest){const D=ROAD_DEST[dest],C=RG[D.r],wk=this.tripWeek(G);if(!wk)return `<h2>${esc(D.name)}</h2><p>ปีนี้ไม่มีสัปดาห์ว่างให้เดินทางแล้ว</p>`;
-    const abs=this.base(G)+wk,P=roadPlan(G,dest,null,abs),R=this.riders(G,wk);if(!UI.rgFid||!R.some(f=>f.id===UI.rgFid))UI.rgFid=R[0]?R[0].id:null;
+    const R=this.riders(G,wk);if(!UI.rgFid||!R.some(f=>f.id===UI.rgFid))UI.rgFid=R[0]?R[0].id:null;
+    /* v1.91.76 (Man): seats decide who comes along — the fighter, then the picked teammates */
+    const max=roadSeats(G),cand=roster(G).filter(f=>!f.injury||f.injury<3);
+    if(!UI.rgParty||UI.rgPartyFor!==UI.rgFid){UI.rgPartyFor=UI.rgFid;UI.rgParty=[UI.rgFid,...cand.filter(f=>f.id!==UI.rgFid).sort((a,b)=>(b.bond||0)-(a.bond||0)).map(f=>f.id)].filter(Boolean).slice(0,max);}
+    if(UI.rgFid&&!UI.rgParty.includes(UI.rgFid))UI.rgParty=[UI.rgFid,...UI.rgParty].slice(0,max);
+    const abs=this.base(G)+wk,P=roadPlan(G,dest,null,abs),now=!!UI.rgNow;
     const me=UI.rgFid&&G.F[UI.rgFid],poor=G.cash<P.total,line=(k,v)=>v?`<div class="kv-row"><span>${k}</span><b class="num">${fmt(v)}</b></div>`:"";
     return `<h2>${esc(D.name)} <small class="meta">· ${esc(C.name)}</small></h2>
      <p class="meta">เดินทางสัปดาห์ <b>${wk}</b> · ${D.km} กม. · ${P.nights?`ค้าง ${P.nights} คืน`:"ไปกลับวันเดียว"} · คู่ชก: <b>${esc(this.oppName(G,dest))}</b> แชมป์ประจำจังหวัด</p>
      <h3>ใครขึ้นชก</h3>${R.length?`<div class="rg-pick">${R.map(f=>`<button class="btn sm" data-act="rgfid" data-v="${f.id}" aria-pressed="${f.id===UI.rgFid}">${faceImg(f,"sm")}${esc(f.name)} <small>Lv.${f.lvl||1}</small></button>`).join("")}</div>`:`<p class="redt">ไม่มีนักมวยที่พร้อมเดินทางสัปดาห์นี้</p>`}
+     <h3>ใครไปด้วย <small class="meta">${esc(roadCarName(roadCarKey(G)))} · นักมวยไปได้ ${max} คน · ผู้จัดการขับ${roadCoachIn(G)?" · ครูแดงไปด้วย":" · ครูแดงลาอยู่"}</small></h3>
+     <div class="rg-pick">${cand.map(f=>{const on=UI.rgParty.includes(f.id),lock=f.id===UI.rgFid,full=!on&&UI.rgParty.length>=max;return `<button class="btn sm" data-act="rgparty" data-v="${f.id}" aria-pressed="${on}" ${lock||full?"disabled":""}>${faceImg(f,"sm")}${esc(f.name)}${lock?" <small>ขึ้นชก</small>":""}</button>`;}).join("")}</div>
      <h3>ค่าเดินทาง ไป-กลับ</h3><div class="rg-bill"><div class="kv-row"><span>รถ</span><b>${esc(roadCarName(P.car))}</b></div>
       ${line(`น้ำมัน ${Math.round(P.litres)} ลิตร × ฿${P.price.toFixed(2)}`,P.fuel)}${line("ทางด่วน",P.toll)}${line(`ตั๋วรถทัวร์ × ${P.onBus}`,P.bus)}${line(`ที่พัก ${P.nights} คืน`,P.lodge)}${line(`ค่ากิน × ${P.people}`,P.food)}
       <div class="kv-row"><span><b>รวม</b></span><b class="num ${poor?"redt":"goldt"}">${fmt(P.total)}</b></div><div class="kv-row"><span>เงินค่ายหลังจ่าย</span><b class="num ${poor?"redt":""}">${fmt(G.cash-P.total)}</b></div></div>
-     <p class="meta">ทั้งค่าย ${P.people} คนไปด้วยกัน สัปดาห์นั้นไม่รับไฟต์อื่น · ความล้าระหว่างทางราว +${P.fat} ต่อคน${P.car==="none"?" · ยังไม่มีรถประจำค่าย ต้องนั่งรถทัวร์ (แพงและล้ากว่า)":""}</p>
+     <p class="meta">ไปด้วยกัน ${P.people} คน (รวมผู้จัดการ${roadCoachIn(G)?"และครูแดง":""}) · คนที่อยู่ค่ายซ้อมตามโปรแกรมเดิม · สัปดาห์นั้นไม่รับไฟต์อื่น · ความล้าระหว่างทางราว +${P.fat} ต่อคน${P.car==="none"?" · ยังไม่มีรถประจำค่าย ต้องนั่งรถทัวร์ (แพงและล้ากว่า)":""}</p>
      ${this.canQuick(G,dest)?`<label class="rg-quick"><input type="checkbox" data-act="rgquick" ${G.region.quickPref?"checked":""}> ไปแบบรวบรัด <small class="meta">ข้ามฉากขับรถ คืนที่โรงแรม และร้านของฝาก · คืนที่ค้างนับเป็นพักผ่อน</small></label>`:""}
-     <div class="mfoot"><button class="btn" data-act="closeModal">ไว้ก่อน</button><button class="btn primary" data-act="rggo" data-v="${dest}" ${me&&!poor?"":"disabled"}>${poor?"เงินไม่พอ":"ยืนยันการเดินทาง"}</button></div>`;}
+     <div class="mfoot"><button class="btn" data-act="closeModal">ไว้ก่อน</button>${now&&wk===G.week?`<button class="btn primary" data-act="rggonow" data-v="${dest}" ${me&&!poor?"":"disabled"}>${poor?"เงินไม่พอ":"ออกเดินทางเลย ▸"}</button>`:`<button class="btn primary" data-act="rggo" data-v="${dest}" ${me&&!poor?"":"disabled"}>${poor?"เงินไม่พอ":"ยืนยันการเดินทาง"}</button>`}</div>
+     ${now&&wk===G.week?`<p class="meta center">ออกเดินทางแล้วสัปดาห์นี้จะจบทันที (ซ้อมตามโปรแกรม → ขับรถ → โรงแรม → เวที)</p>`:""}`;},
+  /* v1.91.76 (Man): the "travel" button at the camp vehicle — pick a province, then go this week */
+  travelOk(G){const R=G.region;return !!(R&&R.belts&&regionOn()&&!R.close&&RG_ORDER.some(r=>this.beltCount(G,r)<4));},
+  travelHTML(G){const R=G.region,wk=this.tripWeek(G),now=wk===G.week;
+    if(R.trip){const T=R.trip,D=ROAD_DEST[T.dest];return `<h2>🚐 เดินทาง · ศึกชิงเจ้าสี่ภาค</h2><p>นัดเดินทางไป<b>${esc(D?D.name:"")}</b> สัปดาห์ ${T.wk} แล้ว · ${esc(G.F[T.fid]?G.F[T.fid].name:"")}ขึ้นชก</p><p class="meta">ถึงสัปดาห์นั้น กดจบสัปดาห์แล้วออกเดินทาง</p><div class="mfoot"><button class="btn" data-act="rgcancel">ยกเลิกทริป (คืนเงิน)</button><button class="btn primary" data-act="closeModal">ปิด</button></div>`;}
+    const rows=RG_ORDER.map(r=>{const C=RG[r],B=(R.belts||{})[r]||{};return `<div class="rgt-reg" style="--rc:${C.col}"><b>${esc(C.name)}</b><div class="rgt-pv">${C.prov.map(p=>{const D=ROAD_DEST[p];if(!D)return "";const got=!!B[p];
+      return `<button class="btn sm ${got?"":"gold"}" data-act="rgtravelto" data-v="${p}" ${got?"disabled":""}>${esc(D.name)}<small>${got?"ได้เข็มขัดแล้ว":`${D.km} กม.`}</small></button>`;}).join("")}</div></div>`;}).join("");
+    return `<h2>🚐 เดินทาง · ศึกชิงเจ้าสี่ภาค</h2><p class="meta">${!wk?"ปีนี้ไม่มีสัปดาห์ว่างให้เดินทางแล้ว":now?"เลือกจังหวัด แล้วออกเดินทางได้เลยสัปดาห์นี้":`สัปดาห์นี้ยังออกไม่ได้ · ไปได้สัปดาห์ ${wk} (จองไว้ก่อนได้)`}</p>
+      <div class="rgt-list">${rows}</div><div class="mfoot"><button class="btn" data-act="closeModal">ปิด</button></div>`;}
 };
 
 /* round 11: the underground final — state, the region-page card, the line-up and the five bouts */
@@ -1669,15 +1700,19 @@ if(typeof ACT!=="undefined")Object.assign(ACT,{
 });
 if(typeof XMODAL!=="undefined"){XMODAL.rgfline=()=>({body:REGION.boardHTML(),foot:false});XMODAL.rgleg=m=>({body:REGION.legPickHTML(m.k),foot:false});
   XMODAL.rgflost=()=>({body:`<h2>แพ้ไฟต์ใต้ดิน</h2><p>ครั้งหน้าต้องชกใหม่ตั้งแต่นัดแรกทั้งห้านัด · กลับไปซ้อม แล้วจัดทีมใหม่ได้ตั้งแต่สัปดาห์หน้า หรือรอจนกว่าจะพร้อม</p><div class="mfoot"><button class="btn primary" data-act="rgfhome">กลับไปซ้อม</button></div>`,foot:false});}
-if(typeof XMODAL!=="undefined"){XMODAL.rgplan=m=>({body:REGION.planHTML(m.dest),foot:false});XMODAL.rgser=m=>({body:REGION.seriesHTML(m.r),foot:false});}
+if(typeof XMODAL!=="undefined"){XMODAL.rgplan=m=>({body:REGION.planHTML(m.dest),foot:false});XMODAL.rgtravel=()=>({body:REGION.travelHTML(G),foot:false});XMODAL.rgser=m=>({body:REGION.seriesHTML(m.r),foot:false});}
 if(typeof ACT!=="undefined")Object.assign(ACT,{
   lbgo:d=>{UI.modal=null;lbStart(G,d.v);},
   nltest:d=>{if(REGION_LIVE)return;nlTest(d.v);},
-  rgplan:d=>{UI.rgFid=null;UI.modal={type:"rgplan",dest:d.v};render();},
+  rgplan:d=>{UI.rgFid=null;UI.rgParty=null;UI.rgNow=false;UI.modal={type:"rgplan",dest:d.v};render();},
+  rgtravel:()=>{if(!REGION.travelOk(G))return;UI.modal={type:"rgtravel"};render();},
+  rgtravelto:d=>{UI.rgFid=null;UI.rgParty=null;UI.rgNow=true;UI.modal={type:"rgplan",dest:d.v};render();},
+  rgparty:d=>{const P=UI.rgParty=UI.rgParty||[],i=P.indexOf(d.v);if(d.v===UI.rgFid)return;if(i>=0)P.splice(i,1);else if(P.length<roadSeats(G))P.push(d.v);render();},
+  rggonow:d=>{const r=REGION.book(G,d.v,UI.rgFid,true);if(!r.ok){toast(r.why);return;}UI.modal=null;UI.rgParty=null;UI.rgNow=false;AU.sfx&&AU.sfx("level");save();endWeek();},
   rgfid:d=>{UI.rgFid=d.v;render();},
   rgclosetest:()=>{REGION.playClose(()=>render());},
   rgquick:()=>{G.region.quickPref=!G.region.quickPref;save();render();},
-  rggo:d=>{const r=REGION.book(G,d.v,UI.rgFid);if(!r.ok){toast(r.why);return;}UI.modal=null;AU.sfx&&AU.sfx("level");toast(`นัดเดินทางสัปดาห์ ${r.wk} แล้ว · จ่ายค่าเดินทาง ${fmt(r.cost)}`);save();render();},
+  rggo:d=>{const r=REGION.book(G,d.v,UI.rgFid);if(!r.ok){toast(r.why);return;}UI.modal=null;UI.rgParty=null;AU.sfx&&AU.sfx("level");toast(`นัดเดินทางสัปดาห์ ${r.wk} แล้ว · จ่ายค่าเดินทาง ${fmt(r.cost)}`);save();render();},
   rgvisit:d=>{const r=d.v,c=G.region.champ[r],cid=REGION.champId[r];if(!c||c.visit!=="due")return;
     playScene(RG_VISIT[r](G),()=>DUEL.open(r,false,res=>{if(!res){render();return;}c.visit="done";const T=DUEL_TALK[r];
       playScene([{n:cid,f:res.w>=2?"flustered":"happy",l:"casual",t:res.w>=2?T.win:T.lose},{n:"nar",t:`${RG[r].champ}กลับไปตอนค่ำ · นัดที่ 2 เจอกันที่เวทีภาค`}],()=>{const g=typeof cardCheck==="function"?cardCheck(G):[];if(g.length){G.cardPend=(G.cardPend||[]).concat(g);UI.modal={type:"cardnew"};}save();render();},{bg:"camp",look:"casual"});}),{bg:"camp",look:"casual"});},

@@ -44,11 +44,16 @@ function roadFuelHint(G){const w=G?gameWeek(G):1,now=roadFuel(G,w),nx=roadFuel(G
 
 function roadCarKey(G){return G?decorChoice(G,"vehicle"):"none";}
 function roadCarName(k){return k==="none"?ROAD_CAR.none.name:((CAMP_DECOR.vehicle.items[k]||{}).name||k);}
-function roadRiders(G){return G?roster(G).filter(f=>!f.injury||f.injury<3):[];}
+function roadRiders(G){if(!G)return [];const all=roster(G).filter(f=>!f.injury||f.injury<3);
+  /* v1.91.76 (Man): who travels is limited by the camp vehicle's seats — the trip carries its party (planning uses UI.rgParty) */
+  const P=(G.region&&G.region.trip&&G.region.trip.party)||(typeof UI!=="undefined"&&UI.rgParty)||null;return P?all.filter(f=>P.includes(f.id)):all;}
+/* seats left for fighters: the manager drives, Kru Daeng always comes unless he is on leave; no camp vehicle = bus tickets for a small group */
+function roadCoachIn(G){return !(G&&G.coachAwayAbs&&gameWeek(G)<G.coachAwayAbs);}
+function roadSeats(G){const k=roadCarKey(G),C=ROAD_CAR[k]||ROAD_CAR.none;return Math.max(1,(k==="none"?4:C.seats)-1-(roadCoachIn(G)?1:0));}
 
 /* the whole bill for one trip, there and back */
 function roadPlan(G,destKey,carKey,wk){const D=ROAD_DEST[destKey],k=carKey||roadCarKey(G),C=ROAD_CAR[k]||ROAD_CAR.none,price=roadFuel(G,wk);
-  const people=Math.max(1,roadRiders(G).length)+1/* the manager */,nights=roadNights(D.km),rt=D.km*2;
+  const people=Math.max(1,roadRiders(G).length)+1/* the manager */+(roadCoachIn(G)?1:0)/* v1.91.76: Kru Daeng */,nights=roadNights(D.km),rt=D.km*2;
   const inCar=k==="none"?0:Math.min(people,C.seats),onBus=people-inCar;
   const litres=C.kmL?rt/C.kmL:0,fuel=Math.round(litres*price),toll=k==="none"?0:Math.round(rt*ROAD_TOLL_PER_KM*ROAD_KM_K),bus=Math.round(onBus*rt*ROAD_BUS_PER_KM*ROAD_KM_K);
   const rooms=Math.ceil(people/2),lodge=nights*rooms*ROAD_ROOM,food=(nights+1)*people*ROAD_FOOD;
