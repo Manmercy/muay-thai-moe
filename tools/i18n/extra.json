@@ -16696,5 +16696,5 @@
  " · ครูแดง 1 ที่": " · Kru Daeng 1 seat",
  " ที่นั่ง (ผู้จัดการขับ": " seats (the manager drives",
  "ยังไม่มีรถค่าย · นั่งรถทัวร์ไปกี่คนก็ได้ จ่ายค่าตั๋วรายหัว · เลือกแล้ว ": "No camp vehicle · the bus takes any number, a ticket each · picked ",
- "<button class=\"tripspot\" data-act=\"rgtravel\" aria-label=\"เดินทางไปชกศึกชิงเจ้าสี่ภาค\"><span class=\"triptag\">🚐 เดินทาง ▸</span></button>": "<button class=\"tripspot\" data-act=\"rgtravel\" aria-label=\"Travel to a Four Regions bout\"><span class=\"triptag\">🚐 Travel ▸</span></button>"
+ "<button class=\"tripspot\" data-act=\"rgtravel\" aria-label=\"เดินทางไปชกศึกชิงเจ้าสี่ภาค\"><span class=\"triptag\">เดินทาง ▸</span></button>": "<button class=\"tripspot\" data-act=\"rgtravel\" aria-label=\"Travel to a Four Regions bout\"><span class=\"triptag\">Travel ▸</span></button>"
 }
