@@ -1,5 +1,5 @@
 // ================= MUAY THAI MOE v1.3 — UI =================
-const VERSION="1.91.91";
+const VERSION="1.91.92";
 const CUR_LANG=(typeof window!=="undefined"&&window.LANG)||"th";
 const TH_LABEL=String.fromCharCode(3652,3607,3618);
 function langSwitch(cls){return `<div class="langsw ${cls||""}" role="group" aria-label="Language">${[["th",TH_LABEL],["en","EN"]].map(([k,l])=>`<button class="lsb ${CUR_LANG===k?"on":""}" data-act="setlang" data-v="${k}" aria-pressed="${CUR_LANG===k}">${l}</button>`).join("")}</div>`;}
@@ -1017,7 +1017,7 @@ function skTreeHTML(f,li,mine,lines,path){const L=skillList(f.id).filter(s=>s.li
   const sdesc=s=>{const rn=s.br!=null&&R?R[s.br].n:null;return s.desc.split(" · ").filter(x=>!/^Lv\.\d+$/.test(x)&&x!==rn).join(" · ");};
   const node=s=>{const t=st(s),[r,c,cn]=pos(s),eq=eqd.includes(s.id);
     const lockTxt=mine&&t.st==="lock"&&t.B?`<p class="skwhy">${why(t)}</p>`:"";
-    const cls=t.st==="lock"&&t.r?"has":t.st;
+    const cls=(t.st==="lock"||t.st==="nosp")&&t.r?"has":t.st; /* v1.91.92: a learned skill keeps its colours when you are out of points */
     return `<div class="skn2 ${cls}${s.passive?" pas":""}${s.feed!=null?" feed":""}${s.nd===5?" leg":""}${eq?" eq":""}${cn?" "+cn:""}" style="grid-row:${r};grid-column:${c}">
       ${skIcon(s,f.id)}<b class="nm">${s.name}${s.br==null?`<small class="tier">${skKindTag(s)}</small>`:""}<span class="pips" aria-label="Rank ${t.r}/3">${[1,2,3].map(i=>`<i class="${i<=t.r?"on":""}"></i>`).join("")}</span></b>
       <div class="sktx"><p class="skds">${sdesc(s)}</p>${s.passive?"":skCostLine(s,t.r)}${lockTxt}</div>

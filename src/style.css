@@ -2062,7 +2062,7 @@ body.hasnews main>h1.sr+.homegrid,body.hasnews main>h1.sr+.rinnote{margin-top:46
 .skn2.lock .skwhy{color:#ddd}
 .skn2:not(.wide) .ctl{grid-column:1/-1;justify-self:end}
 .skn2:not(.wide) .ctl:empty{display:none}
-.skeq{min-width:64px;height:40px;padding:0 10px;font:700 14px/1 var(--f-display,sans-serif);background:#5a5670;color:#e9e6f2;box-shadow:inset 0 0 0 2px #2a2638,inset 2px 2px 0 rgba(255,255,255,.22),inset -2px -3px 0 rgba(0,0,0,.3)}
+.skeq{min-width:64px;height:40px;padding:0 10px;font:700 14px/1 var(--f-display,sans-serif);background:#2f6fd0;color:#fff;box-shadow:inset 0 0 0 2px #142c5c,inset 2px 2px 0 rgba(255,255,255,.3),inset -2px -3px 0 rgba(0,0,0,.3)} /* v1.91.92 (Man): grey 'equip' read as disabled — now a clear blue button; 'remove' stays gold */
 .skeq.on{background:var(--gold);color:#2a1b02;box-shadow:inset 0 0 0 2px var(--gold-d),inset 2px 2px 0 rgba(255,255,255,.4),inset -2px -3px 0 rgba(0,0,0,.2)}
 .skeq:active,.skplus:active{transform:translateY(1px)}
 .skplus{width:40px;height:40px}

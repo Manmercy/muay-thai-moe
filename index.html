@@ -2067,7 +2067,7 @@ body.hasnews main>h1.sr+.homegrid,body.hasnews main>h1.sr+.rinnote{margin-top:46
 .skn2.lock .skwhy{color:#ddd}
 .skn2:not(.wide) .ctl{grid-column:1/-1;justify-self:end}
 .skn2:not(.wide) .ctl:empty{display:none}
-.skeq{min-width:64px;height:40px;padding:0 10px;font:700 14px/1 var(--f-display,sans-serif);background:#5a5670;color:#e9e6f2;box-shadow:inset 0 0 0 2px #2a2638,inset 2px 2px 0 rgba(255,255,255,.22),inset -2px -3px 0 rgba(0,0,0,.3)}
+.skeq{min-width:64px;height:40px;padding:0 10px;font:700 14px/1 var(--f-display,sans-serif);background:#2f6fd0;color:#fff;box-shadow:inset 0 0 0 2px #142c5c,inset 2px 2px 0 rgba(255,255,255,.3),inset -2px -3px 0 rgba(0,0,0,.3)} /* v1.91.92 (Man): grey 'equip' read as disabled — now a clear blue button; 'remove' stays gold */
 .skeq.on{background:var(--gold);color:#2a1b02;box-shadow:inset 0 0 0 2px var(--gold-d),inset 2px 2px 0 rgba(255,255,255,.4),inset -2px -3px 0 rgba(0,0,0,.2)}
 .skeq:active,.skplus:active{transform:translateY(1px)}
 .skplus{width:40px;height:40px}
@@ -8894,7 +8894,7 @@ AU.gsfx=function(kind,a){if(!this.init()||this.muted||!SETTINGS.sfx)return;const
   if(kind==="shimmer")for(let i=0;i<6;i++)T(i*.05,{f:1400+Math.random()*1400,type:"sine",dur:.12,peak:.06});};
 
 // ================= MUAY THAI MOE v1.3 — UI =================
-const VERSION="1.91.91";
+const VERSION="1.91.92";
 const CUR_LANG=(typeof window!=="undefined"&&window.LANG)||"th";
 const TH_LABEL=String.fromCharCode(3652,3607,3618);
 function langSwitch(cls){return `<div class="langsw ${cls||""}" role="group" aria-label="Language">${[["th",TH_LABEL],["en","EN"]].map(([k,l])=>`<button class="lsb ${CUR_LANG===k?"on":""}" data-act="setlang" data-v="${k}" aria-pressed="${CUR_LANG===k}">${l}</button>`).join("")}</div>`;}
@@ -9912,7 +9912,7 @@ function skTreeHTML(f,li,mine,lines,path){const L=skillList(f.id).filter(s=>s.li
   const sdesc=s=>{const rn=s.br!=null&&R?R[s.br].n:null;return s.desc.split(" · ").filter(x=>!/^Lv\.\d+$/.test(x)&&x!==rn).join(" · ");};
   const node=s=>{const t=st(s),[r,c,cn]=pos(s),eq=eqd.includes(s.id);
     const lockTxt=mine&&t.st==="lock"&&t.B?`<p class="skwhy">${why(t)}</p>`:"";
-    const cls=t.st==="lock"&&t.r?"has":t.st;
+    const cls=(t.st==="lock"||t.st==="nosp")&&t.r?"has":t.st; /* v1.91.92: a learned skill keeps its colours when you are out of points */
     return `<div class="skn2 ${cls}${s.passive?" pas":""}${s.feed!=null?" feed":""}${s.nd===5?" leg":""}${eq?" eq":""}${cn?" "+cn:""}" style="grid-row:${r};grid-column:${c}">
       ${skIcon(s,f.id)}<b class="nm">${s.name}${s.br==null?`<small class="tier">${skKindTag(s)}</small>`:""}<span class="pips" aria-label="ขั้น ${t.r}/3">${[1,2,3].map(i=>`<i class="${i<=t.r?"on":""}"></i>`).join("")}</span></b>
       <div class="sktx"><p class="skds">${sdesc(s)}</p>${s.passive?"":skCostLine(s,t.r)}${lockTxt}</div>
@@ -13542,7 +13542,7 @@ CHAT.fah.push(
 <script>
 (function(){
 /* v1.87: Thai code ships inside index.html; English code (en.js) and the dictionary (i18n.js) load only when needed */
-var B="398a5fd47c";
+var B="43c8645b8d";
 var L="";try{L=localStorage.getItem("mtm_lang")||"";}catch(e){}
 try{var h=(location.hash||"").match(/lang=(th|en)/);if(h)L=h[1];}catch(e){}
 if(L!=="th"&&L!=="en")L="th";
