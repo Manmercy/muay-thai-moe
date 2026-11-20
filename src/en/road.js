@@ -9,16 +9,26 @@ const ROAD_FUEL_BASE=35; // ฿ per litre at an average week
 /* kmL = km per litre (rises with price) · seats = riders who fit (the rest ride the public bus) · fat = fatigue multiplier on the road */
 const ROAD_CAR={
  none:{name:"Intercity bus",kmL:0,seats:0,fat:1.25},
- songthaew:{kmL:10.5,seats:10,fat:1.15},
- yellowthaew:{kmL:11,seats:10,fat:1.15},
- rotdaeng:{kmL:11,seats:10,fat:1.12},
- tuktuk:{kmL:12,seats:3,fat:1.3},
- minibus:{kmL:13.5,seats:12,fat:1},
- bluevan:{kmL:15,seats:12,fat:.95},
- pinkvan:{kmL:16,seats:12,fat:.95},
- tourbus:{kmL:16.5,seats:30,fat:.85},
- limo:{kmL:18,seats:8,fat:.75},
- goldvan:{kmL:21,seats:12,fat:.8}};
+ songthaew:{kmL:10.5,seats:10,fat:1.15,fuel:"diesel"},
+ yellowthaew:{kmL:11,seats:10,fat:1.15,fuel:"diesel"},
+ rotdaeng:{kmL:11,seats:10,fat:1.12,fuel:"diesel"},
+ tuktuk:{kmL:12,seats:3,fat:1.3,fuel:"lpg"},
+ minibus:{kmL:13.5,seats:12,fat:1,fuel:"diesel"},
+ bluevan:{kmL:15,seats:12,fat:.95,fuel:"diesel"},
+ pinkvan:{kmL:16,seats:12,fat:.95,fuel:"diesel"},
+ tourbus:{kmL:16.5,seats:30,fat:.85,fuel:"diesel"},
+ limo:{kmL:18,seats:8,fat:.75,fuel:"g95"},
+ goldvan:{kmL:21,seats:12,fat:.8,fuel:"diesel"},
+ /* v1.91.78 (Man): more cars — diesel = strong, gets there sooner (less road fatigue) but the car costs more; electric = cheapest per km (charged by the unit), dearest to buy */
+ pickup:{kmL:12.5,seats:5,fat:.85,fuel:"diesel",fast:1},
+ vipvan:{kmL:13,seats:10,fat:.72,fuel:"diesel",fast:1},
+ citycar:{kmL:17,seats:5,fat:1.05,fuel:"e20"},
+ evsuv:{kmL:6.5,seats:5,fat:.68,fuel:"ev",fast:1},
+ evvan:{kmL:5,seats:9,fat:.8,fuel:"ev"}};
+/* v1.91.78 (Man): a Thai pump sign — each fuel has its own price; electricity is per unit (kWh) and moves less */
+const ROAD_FUELS={diesel:{n:"Diesel B7",base:32.9,u:"litre"},g95:{n:"Gasohol 95",base:37.3,u:"litre"},g91:{n:"Gasohol 91",base:36.9,u:"litre"},e20:{n:"E20",base:34.6,u:"litre"},lpg:{n:"LPG",base:21.2,u:"litre"},ev:{n:"Electricity (fast charge)",base:7.5,u:"unit",calm:1}};
+const ROAD_SIGN=["diesel","g95","g91","e20","lpg","ev"];
+const roadFuelOf=k=>(ROAD_CAR[k]&&ROAD_CAR[k].fuel)||"diesel";
 const ROAD_BUS_PER_KM=1.1,ROAD_TOLL_PER_KM=.35,ROAD_ROOM=650,ROAD_FOOD=180; // per person per km / per km / per room per night / per person per day
 
 const ROAD_REGION={north:{name:"the North",tag:"North"},isan:{name:"Isan",tag:"Isan"},central:{name:"the Central Plains",tag:"Central"},south:{name:"the South",tag:"South"}};
@@ -34,14 +44,18 @@ const ROAD_KM_K=.65;
 const roadNights=km=>km<600?0:km<1200?1:2;
 
 // ---------- fuel: changes every week, cheap and dear weeks come in turns, holidays push it up ----------
-function roadFuel(G,wk){const w=wk!=null?wk:(G?gameWeek(G):1),s=((G&&G.seed)||1)%997,r=mulberry32(s*131+w*7919)();
-  let p=1+.14*Math.sin(w*1.1+s)+.06*Math.sin(w*.37+s*2)+(r-.5)*.08;const wy=((w-1)%52)+1;if((wy>=14&&wy<=16)||wy>=51||wy<=1)p+=.1;
-  return Math.round(ROAD_FUEL_BASE*p*100)/100;}
-const roadFuelBand=p=>p<ROAD_FUEL_BASE*.94?"cheap":p>ROAD_FUEL_BASE*1.07?"high":"mid";
+function roadFuelK(G,wk){const w=wk!=null?wk:(G?gameWeek(G):1),s=((G&&G.seed)||1)%997,r=mulberry32(s*131+w*7919)();
+  let p=1+.14*Math.sin(w*1.1+s)+.06*Math.sin(w*.37+s*2)+(r-.5)*.08;const wy=((w-1)%52)+1;if((wy>=14&&wy<=16)||wy>=51||wy<=1)p+=.1;return p;}
+function roadFuel(G,wk,type){const t=ROAD_FUELS[type||"diesel"]||ROAD_FUELS.diesel,k=roadFuelK(G,wk),m=t.calm?1+(k-1)*.3:k+(type==="lpg"?(k-1)*-.4:0);return Math.round(t.base*m*100)/100;}
+const roadFuelBand=(p,type)=>{const b=(ROAD_FUELS[type||"diesel"]||ROAD_FUELS.diesel).base;return p<b*.94?"cheap":p>b*1.07?"high":"mid";};
 /* the news ticker guesses next week right about three times in four */
-function roadFuelHint(G){const w=G?gameWeek(G):1,now=roadFuel(G,w),nx=roadFuel(G,w+1);let up=nx>now;if(mulberry32((((G&&G.seed)||1)%997)*17+w*31)()<.25)up=!up;
+function roadFuelHint(G){const w=G?gameWeek(G):1,now=roadFuelK(G,w),nx=roadFuelK(G,w+1);let up=nx>now;if(mulberry32((((G&&G.seed)||1)%997)*17+w*31)()<.25)up=!up;
   return up?"Energy news: fuel looks set to go up next week ▲":"Energy news: fuel looks set to go down next week ▼";}
 
+function roadSignHTML(G){const w=G?gameWeek(G):1,mine=roadFuelOf(roadCarKey(G)),car=roadCarKey(G);
+  return `<div class="pump-sign" role="img" aria-label="This week's fuel prices"><div class="ps-top">⛽ Fuel prices today <small>week ${((w-1)%52)+1}</small></div>${ROAD_SIGN.map(t=>{const p=roadFuel(G,w,t),b=roadFuelBand(p,t),d=p-roadFuel(G,w-1,t);
+    return `<div class="ps-row ${car!=="none"&&t===mine?"mine":""}"><span>${esc(ROAD_FUELS[t].n)}</span><b class="ps-led ${b}">${p.toFixed(2)}</b><i class="${d>0.004?"up":d<-0.004?"dn":""}">${d>0.004?"▲":d<-0.004?"▼":"–"}</i></div>`;}).join("")}
+    <div class="ps-foot">${car==="none"?"No camp vehicle · taking the bus":`The camp vehicle runs on ${esc(ROAD_FUELS[mine].n)}`} · ${esc(roadFuelHint(G).replace(/^[^:]*:\s*/,""))}</div></div>`;}
 function roadCarKey(G){return G?decorChoice(G,"vehicle"):"none";}
 function roadCarName(k){return k==="none"?ROAD_CAR.none.name:((CAMP_DECOR.vehicle.items[k]||{}).name||k);}
 function roadRiders(G){if(!G)return [];const all=roster(G).filter(f=>!f.injury||f.injury<3);
@@ -52,13 +66,13 @@ function roadCoachIn(G){return !(G&&G.coachAwayAbs&&gameWeek(G)<G.coachAwayAbs);
 function roadSeats(G){const k=roadCarKey(G),C=ROAD_CAR[k]||ROAD_CAR.none;return Math.max(1,(k==="none"?4:C.seats)-1-(roadCoachIn(G)?1:0));}
 
 /* the whole bill for one trip, there and back */
-function roadPlan(G,destKey,carKey,wk){const D=ROAD_DEST[destKey],k=carKey||roadCarKey(G),C=ROAD_CAR[k]||ROAD_CAR.none,price=roadFuel(G,wk);
+function roadPlan(G,destKey,carKey,wk){const D=ROAD_DEST[destKey],k=carKey||roadCarKey(G),C=ROAD_CAR[k]||ROAD_CAR.none,ft=C.fuel||"diesel",price=roadFuel(G,wk,ft);
   const people=Math.max(1,roadRiders(G).length)+1/* the manager */+(roadCoachIn(G)?1:0)/* v1.91.76: Kru Daeng */,nights=roadNights(D.km),rt=D.km*2;
   const inCar=k==="none"?0:Math.min(people,C.seats),onBus=people-inCar;
   const litres=C.kmL?rt/C.kmL:0,fuel=Math.round(litres*price),toll=k==="none"?0:Math.round(rt*ROAD_TOLL_PER_KM*ROAD_KM_K),bus=Math.round(onBus*rt*ROAD_BUS_PER_KM*ROAD_KM_K);
   const rooms=Math.ceil(people/2),lodge=nights*rooms*ROAD_ROOM,food=(nights+1)*people*ROAD_FOOD;
   const fat=Math.round(D.km/100*C.fat*1.2*ROAD_KM_K); // fatigue every traveller picks up on the way
-  return {dest:destKey,D,car:k,C,price,band:roadFuelBand(price),people,inCar,onBus,nights,rt,litres,fuel,toll,bus,lodge,food,fat,total:fuel+toll+bus+lodge+food};}
+  return {dest:destKey,D,car:k,C,ft,unit:(ROAD_FUELS[ft]||ROAD_FUELS.diesel).u,price,band:roadFuelBand(price,ft),people,inCar,onBus,nights,rt,litres,fuel,toll,bus,lodge,food,fat,total:fuel+toll+bus+lodge+food};}
 
 // ---------- driving scene: lines ----------
 const ROAD_SCENERY={
@@ -95,7 +109,7 @@ const ROAD_SHOTGUN={
 
 function roadLines(S){const P=S.plan,D=P.D,r=D.r,rng=mulberry32(S.seed),pick=a=>a[Math.floor(rng()*a.length)],L=[];
   L.push({n:"nar",t:`${roadCarName(P.car)} of Sirichai Camp sets off in ${S.time==="night"?"the afternoon":"the small hours"}, heading for ${D.name}, ${D.km} km away.`});
-  if(P.car!=="none"&&P.band!=="mid")L.push({n:"nar",t:`Fuel stop, per litre: ${fmt(P.price)} ${P.band==="high"?"— so pricey this week the manager lets out a long sigh":P.band==="cheap"?"— cheaper than last week, everyone cheers":"— a normal price, nobody complains"}`});
+  if(P.car!=="none"&&P.band!=="mid")L.push({n:"nar",t:`${P.ft==="ev"?`Stopped to charge, per unit ${fmt(P.price)}`:`Stopped to fill up with ${(ROAD_FUELS[P.ft]||ROAD_FUELS.diesel).n} per litre ${fmt(P.price)}`} ${P.band==="high"?"— so pricey this week the manager lets out a long sigh":P.band==="cheap"?"— cheaper than last week, everyone cheers":"— a normal price, nobody complains"}`});
   L.push({n:"nar",t:ROAD_CAR_GAG[P.car]||ROAD_CAR_GAG.minibus});
   L.push({n:"nar",t:pick(ROAD_SCENERY[r])});
   const ids=S.riders.filter(id=>ROAD_TALK[id]);
@@ -199,12 +213,12 @@ const ROAD={st:null,
       const P=S.opts.plan||roadPlan(G,S.dest,S.car);if(S.opts.charge!==false&&!S.opts.paid){if(G.cash<P.total){toast("Not enough money for the trip");return;}G.cash-=P.total;}
       const w=G?gameWeek(G):1,rr=mulberry32((G.seed||1)+w*13)(),D=P.D,wetW=((w-1)%52)+1>=20&&((w-1)%52)+1<=40;
       return this.drive(P,D.km>=1100?"night":D.km>=600?"dusk":"day",wetW&&rr<(D.r==="south"?.5:.3));}},
-  sheetHTML(P,S){const band={cheap:["cheap","cheap"],mid:["Normal","mid"],high:["pricey","high"]}[P.band],pos=Math.max(4,Math.min(96,50+(P.price/ROAD_FUEL_BASE-1)*250));
+  sheetHTML(P,S){const band={cheap:["cheap","cheap"],mid:["Normal","mid"],high:["pricey","high"]}[P.band],pos=Math.max(4,Math.min(96,50+(P.price/(ROAD_FUELS[P.ft]||ROAD_FUELS.diesel).base-1)*250)),U=P.unit||"litre";
     const row=(a,b)=>`<div class="kv-row"><span>${a}</span><span>${b}</span></div>`;
-    return `<div class="rd-car"><b>${esc(roadCarName(P.car))}</b><small>${P.car==="none"?"The camp has no vehicle yet · everyone buys a bus ticket":`Economy ${P.C.kmL} km/L · seats ${P.C.seats} fighters in camp`}</small></div>
-     <div class="rd-fuel ${band[1]}"><span class="rd-pump">⛽</span><div class="rd-gauge"><i style="left:${pos}%"></i></div><b>${fmt(P.price)}/L · ${band[0]}</b></div>
+    return `<div class="rd-car"><b>${esc(roadCarName(P.car))}</b><small>${P.car==="none"?"The camp has no vehicle yet · everyone buys a bus ticket":`${esc((ROAD_FUELS[P.ft]||ROAD_FUELS.diesel).n)} · ${P.C.kmL} km/${U} · seats ${P.C.seats} fighters in camp ${P.C.fast?" · strong, gets there sooner":""}`}</small></div>
+     <div class="rd-fuel ${band[1]}"><span class="rd-pump">⛽</span><div class="rd-gauge"><i style="left:${pos}%"></i></div><b>${fmt(P.price)}/${U} · ${band[0]}</b></div>
      ${G?`<p class="meta center">${roadFuelHint(G)}</p>`:""}
-     <div class="px rd-bill">${P.fuel?row(`Fuel (round trip ${P.rt.toLocaleString("en-US")} km · ${Math.round(P.litres)} L)`,fmt(P.fuel)):""}${P.toll?row("Tolls",fmt(P.toll)):""}
+     <div class="px rd-bill">${P.fuel?row(`${P.ft==="ev"?"Electricity":"Fuel"} (round trip ${P.rt.toLocaleString("en-US")} km · ${Math.round(P.litres)} ${U})`,fmt(P.fuel)):""}${P.toll?row("Tolls",fmt(P.toll)):""}
       ${P.bus?row(`Bus tickets ${P.onBus} fighters in camp ${P.car!=="none"?" (not enough seats)":""}`,fmt(P.bus)):""}${P.lodge?row(`Lodging ${P.nights} night(s)`,fmt(P.lodge)):""}${row(`Food ${P.people} fighters in camp`,fmt(P.food))}
       <div class="kv-row rd-total"><span>Total</span><b class="goldt">${fmt(P.total)}</b></div></div>
      <p class="meta center">Road fatigue +${P.fat} each ${P.nights?` · stay ${P.nights} night(s)`:" · day trip"}</p>`;},
@@ -246,3 +260,10 @@ const ROAD={st:null,
     if(S.demo){S.phase="demo";this.draw();return;}const front=S.front;this.close(true);if(cb&&P)cb(P,front);},
   close(quiet){cancelAnimationFrame(this.raf);const el=document.getElementById("roadtrip");if(el)el.remove();this.st=null;if(quiet)return;try{AU.startMusic&&AU.startMusic("hub");}catch(e){}if(typeof render==="function"&&G)render();}};
 try{if(/roaddemo/.test(location.hash||""))setTimeout(()=>ROAD.demo(),600);}catch(e){}
+
+/* v1.91.78 pump sign */
+if(typeof document!=="undefined"&&!document.getElementById("pumpcss")){const st=document.createElement("style");st.id="pumpcss";st.textContent=`.pump-sign{background:linear-gradient(#0b5d3b,#063a25);border:3px solid #f2c230;box-shadow:inset 0 0 0 2px #063a25,0 3px 0 #1b1230;padding:.4rem .5rem;margin:.3rem 0 .6rem;color:#fff;max-width:340px;margin-inline:auto}
+.ps-top{background:#f2c230;color:#1b1230;font-weight:700;text-align:center;padding:.15rem;margin:-.4rem -.5rem .4rem;display:flex;justify-content:center;gap:.5rem;align-items:baseline}.ps-top small{opacity:.7}
+.ps-row{display:grid;grid-template-columns:1fr auto 1.2em;gap:.4rem;align-items:center;padding:.15rem .25rem;border-bottom:1px dashed rgba(255,255,255,.18)}.ps-row:last-of-type{border:0}.ps-row.mine{background:rgba(242,194,48,.18);outline:1px solid #f2c230}
+.ps-led{font-family:ui-monospace,"Courier New",monospace;background:#120808;color:#ff4d3a;padding:0 .35rem;letter-spacing:.06em;text-shadow:0 0 4px rgba(255,77,58,.8);min-width:4.2em;text-align:right}.ps-led.cheap{color:#59ff7a;text-shadow:0 0 4px rgba(89,255,122,.8)}.ps-led.mid{color:#ffcf4a;text-shadow:0 0 4px rgba(255,207,74,.8)}
+.ps-row i{font-style:normal;font-size:.8em}.ps-row i.up{color:#ff7a6a}.ps-row i.dn{color:#7aff9a}.ps-foot{font-size:.78rem;opacity:.85;margin-top:.3rem;text-align:center}`;document.head.appendChild(st);}

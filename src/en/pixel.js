@@ -230,7 +230,14 @@ function decorVehicle(P,G,t,F){const v=decorChoice(G,"vehicle");if(v==="none")re
     body(x,y+8,46,13,sc);F.box(x+1,y+1.5,32,2,"#3a3550",ol);F(x+2,y+3.5,1,5,"#3a3550");F(x+31,y+3.5,1,5,"#3a3550");F(x+2,y+4,30,4.5,"#e8e0c8");F(x+2,y+4,30,1,"#fff8e6");
     body(x+33,y+5,13,12,sc);glass(x+36,y+6.5,8,5);for(let i=0;i<4;i++)F.box(x+4+i*7,y+11.5,4,4,shadeHex(sc,-.3),null,shadeHex(sc,.2));F(x+3,y+10,28,.5,"#ffd36b");
     lamp(x+44.5,y+15.5);F(x-1,y+18,2,1.5,"#c8283c");wheel(x+3);wheel(x+34);return;}
-  if(v==="minibus"||v==="pinkvan"||v==="bluevan"){const x=228,mc=v==="pinkvan"?"#f4b6c8":v==="bluevan"?"#3a6fc0":"#ece9df";F.shadow(x+25,y+26,28,2.5);
+  /* v1.91.78 (Man): more cars — diesel pickup, small E20 sedan, electric SUV (the vans reuse the van body) */
+  if(v==="pickup"){const x=230,c="#7a1f2b";F.shadow(x+24,y+26,26,2.5);body(x,y+11,48,10,c);F.box(x+28,y+3,18,9,c,ol,shadeHex(c,.25));glass(x+31,y+4.5,6,5);glass(x+38.5,y+4.5,6,5);
+    F(x+2,y+9,25,2,"#4a3a40");F(x+2,y+9,25,.75,"#6a5a60");F(x,y+15.5,48,.75,"#d9d9e0");F.text("Sirichai",x+13,y+18.2,3.4,"#ffffff");lamp(x+45.5,y+14);F(x-.5,y+14,1.5,2,"#ff6b6b");wheel(x+4);wheel(x+36);return;}
+  if(v==="citycar"){const x=236,c="#e0e6ee";F.shadow(x+18,y+26,20,2.5);body(x,y+12,38,9,c);F.box(x+7,y+6,22,7,c,ol,"#ffffff");glass(x+9,y+7.5,8,4.5);glass(x+19,y+7.5,8,4.5);
+    F(x,y+16,38,.75,"#c8283c");lamp(x+35.5,y+15);F(x-.5,y+15,1.5,2,"#ff6b6b");wheel(x+4);wheel(x+28);return;}
+  if(v==="evsuv"){const x=232,c="#f4f6f8";F.shadow(x+22,y+26,25,2.5);body(x,y+11,46,10,c);F.box(x+6,y+4,32,8,c,ol,"#ffffff");F(x+8,y+5,28,5.5,"#1c2430");F(x+9,y+5.5,26,1.2,"#3a4a5e");
+    F(x+21,y+5,1,5.5,c);F(x+2,y+14,42,.6,"#6fd3ff");F.glow(x+44,y+15,6,"rgba(140,220,255,.35)");F.box(x+42,y+13.5,3,1.5,"#bfefff",ol);F(x+20,y+16.5,4,2,"#6fd3ff");F(x+21.5,y+16,1,3,"#ffffff");F(x-.5,y+14,1.5,1.5,"#ff4d5a");wheel(x+4);wheel(x+35);return;}
+  if(v==="minibus"||v==="pinkvan"||v==="bluevan"||v==="vipvan"||v==="evvan"){const x=228,mc=v==="pinkvan"?"#f4b6c8":v==="bluevan"?"#3a6fc0":v==="vipvan"?"#34313a":v==="evvan"?"#f2f6f4":"#ece9df";F.shadow(x+25,y+26,28,2.5);
     body(x,y+6,50,15,mc);F.box(x+2,y+2.5,40,4,mc,ol,"#ffffff");for(let i=0;i<4;i++)glass(x+4+i*9,y+8,7,5);glass(x+40,y+7,9,6);
     F(x,y+14,50,1.5,"#d9a520");F(x,y+15.5,50,.5,"#c8283c");F.box(x+16,y+17,14,2,"#c8283c",null);lamp(x+47,y+16);F(x-.5,y+17,1.5,2,"#c8283c");wheel(x+5);wheel(x+38);return;}
   if(v==="tuktuk"){const x=240,oc="#e8892a";F.shadow(x+20,y+26,22,2.5); /* v1.86: three-wheeled tuk-tuk, roof canopy, chrome trim */

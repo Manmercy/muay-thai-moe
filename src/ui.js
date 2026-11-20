@@ -1,5 +1,5 @@
 // ================= MUAY THAI MOE v1.3 — UI =================
-const VERSION="1.91.77";
+const VERSION="1.91.78";
 const CUR_LANG=(typeof window!=="undefined"&&window.LANG)||"th";
 const TH_LABEL=String.fromCharCode(3652,3607,3618);
 function langSwitch(cls){return `<div class="langsw ${cls||""}" role="group" aria-label="Language">${[["th",TH_LABEL],["en","EN"]].map(([k,l])=>`<button class="lsb ${CUR_LANG===k?"on":""}" data-act="setlang" data-v="${k}" aria-pressed="${CUR_LANG===k}">${l}</button>`).join("")}</div>`;}
@@ -731,22 +731,35 @@ function trophySVG(kind,pal,dim){const rows=TROPHY_PX[kind],w=Math.max(...rows.m
 const BELT_PAL={tha:{a:"#2a1d10",b:"#f1c232",c:"#c8283c",d:"#c8283c"},ping:{a:"#10202a",b:"#f1c232",c:"#2c5fb3",d:"#2c5fb3"},lanna:{a:"#14261a",b:"#f1c232",c:"#2f8a4f",d:"#2f8a4f"}};
 const CUP_PAL={province:{a:"#7a5a10",b:"#f1c232",c:"#5a3a2a"},district:{a:"#5d6168",b:"#d7dde4",c:"#4a3a2a"},local:{a:"#6b3d1c",b:"#d08a4a",c:"#4a3a2a"},
   rg_north:{a:"#7a2a4e",b:"#f2a2c4",c:"#4a2a3a"},rg_isan:{a:"#6a1420",b:"#e8505e",c:"#3a1a1a"},rg_central:{a:"#14306a",b:"#f1c232",c:"#1a2a4a"},rg_south:{a:"#0c4a3a",b:"#5fd0b0",c:"#1a3a2a"}};
+/* v1.91.78 (Man): the trophy room is split by level — general league, sub-district, district, province, region — newest first;
+   tapping a belt or cup opens a popup with who won it, against whom, at what level and when */
+const HALL_LV=[{k:"gen",n:"ลีกทั่วไป",d:"เข็มขัดเวทีมวย · Death Match"},{k:"local",n:"ระดับตำบล",d:"อันดับหนึ่งรอบตำบล"},{k:"district",n:"ระดับอำเภอ",d:"อันดับหนึ่งรอบอำเภอ"},{k:"province",n:"ระดับจังหวัด",d:"แชมป์จังหวัด"},{k:"region",n:"ระดับภาค",d:"เข็มขัดจังหวัด · ถ้วยแชมป์ภาค"}];
+const hallLevel=k=>k==="local"?"local":k==="district"?"district":k==="province"?"province":k==="rgbelt"||/^rg_/.test(k)?"region":"gen";
 function trophyItems(){const H=G.honors||[],items=[];
-  for(const h of H){const who=esc(G.F[h.id]?.name||h.id),when=h.season?`ปีที่ ${h.season} สัปดาห์ ${h.week}`:"ก่อนอัปเดต";
-    if(h.kind==="rgbelt"){const D=typeof ROAD_DEST!=="undefined"&&ROAD_DEST[h.venue],col=D&&typeof RG!=="undefined"&&RG[D.r]?RG[D.r].col:"#c8283c";items.push({kind:"belt",pal:{a:"#2a1d10",b:"#f1c232",c:col,d:col},title:honorLabel(h.kind,h.venue),sub:`${who} · รุ่น ${h.div}`,when,shelf:"belt"});continue;}
-    if(h.kind==="belt"||h.kind==="defense"){const v=h.venue||"tha";items.push({kind:"belt",pal:BELT_PAL[v]||BELT_PAL.tha,title:honorLabel(h.kind,h.venue),sub:`${who} · รุ่น ${h.div}`,when,shelf:"belt"});}
-    else if(h.kind==="dm")items.push({kind:"medal",pal:{a:"#5a1a22",b:"#d23246",d:"#3a6fd0"},title:"แชมป์ Death Match",sub:`${who} · รุ่น ${h.div}`,when,shelf:"cup"});
-    else items.push({kind:"cup",pal:CUP_PAL[h.kind]||CUP_PAL.local,title:honorLabel(h.kind,h.venue),sub:`${who} · รุ่น ${h.div}`,when,shelf:"cup"});}
-  for(const a of (G.campAwards||[])){const A=CAMP_AWARDS[a.id];if(!A)continue;items.push({kind:"cert",pal:{a:"#c9961c",b:"#f4ead8",c:"#8a7a6a",d:"#c8283c"},title:A.name,sub:`มอบโดย ${A.from}`,when:`ปีที่ ${a.season} สัปดาห์ ${a.week}`,shelf:"cert"});}
+  for(const h of H){const who=esc(G.F[h.id]?.name||h.id),when=h.season?`ปีที่ ${h.season} สัปดาห์ ${h.week}`:"ก่อนอัปเดต",lv=hallLevel(h.kind),base={who:G.F[h.id]?.name||h.id,fid:h.id,div:h.div,opp:h.opp||null,lv,sk:(h.season||0)*100+(h.week||0)};
+    if(h.kind==="rgbelt"){const D=typeof ROAD_DEST!=="undefined"&&ROAD_DEST[h.venue],col=D&&typeof RG!=="undefined"&&RG[D.r]?RG[D.r].col:"#c8283c";items.push({...base,kind:"belt",pal:{a:"#2a1d10",b:"#f1c232",c:col,d:col},title:honorLabel(h.kind,h.venue),sub:`${who} · รุ่น ${h.div}`,when,shelf:"belt"});continue;}
+    if(h.kind==="belt"||h.kind==="defense"){const v=h.venue||"tha";items.push({...base,kind:"belt",pal:BELT_PAL[v]||BELT_PAL.tha,title:honorLabel(h.kind,h.venue),sub:`${who} · รุ่น ${h.div}`,when,shelf:"belt"});}
+    else if(h.kind==="dm")items.push({...base,kind:"medal",pal:{a:"#5a1a22",b:"#d23246",d:"#3a6fd0"},title:"แชมป์ Death Match",sub:`${who} · รุ่น ${h.div}`,when,shelf:"cup"});
+    else items.push({...base,kind:"cup",pal:CUP_PAL[h.kind]||CUP_PAL.local,title:honorLabel(h.kind,h.venue),sub:`${who} · รุ่น ${h.div}`,when,shelf:"cup"});}
+  for(const a of (G.campAwards||[])){const A=CAMP_AWARDS[a.id];if(!A)continue;items.push({kind:"cert",pal:{a:"#c9961c",b:"#f4ead8",c:"#8a7a6a",d:"#c8283c"},title:A.name,sub:`มอบโดย ${A.from}`,when:`ปีที่ ${a.season} สัปดาห์ ${a.week}`,shelf:"cert",lv:"cert",sk:(a.season||0)*100+(a.week||0)});}
   return items;}
-function trophyRoomHTML(){const it=trophyItems(),sel=UI.trophySel!=null?it[UI.trophySel]:null;
-  const shelf=(key,label,empty)=>{const L=it.map((x,i)=>[x,i]).filter(([x])=>x.shelf===key);
-    return `<div class="tshelf ${key}"><span class="tlbl">${label} <b>${L.length}</b></span><div class="trow">${L.length?L.map(([x,i])=>`<button class="tit ${x.kind} ${UI.trophySel===i?"on":""}" data-act="trophy" data-v="${i}" aria-label="${esc(x.title)}">${trophySVG(x.kind,x.pal)}</button>`).join(""):empty.map(k=>`<span class="tit ghost ${k}">${trophySVG(k,{},true)}</span>`).join("")}</div></div>`;};
+function trophyRoomHTML(){const it=trophyItems(),UA=UI.hallAll||{};
+  const shelf=lv=>{const L=it.map((x,i)=>[x,i]).filter(([x])=>x.lv===lv.k).sort((a,b)=>b[0].sk-a[0].sk),all=!!UA[lv.k],show=all?L:L.slice(0,8);
+    return `<div class="tshelf lv-${lv.k}"><span class="tlbl">${lv.n} <b>${L.length}</b> <small>${lv.d}</small></span><div class="trow">${L.length?show.map(([x,i])=>`<button class="tit ${x.kind}" data-act="trophy" data-v="${i}" aria-label="${esc(x.title)} · ${esc(x.sub)}">${trophySVG(x.kind,x.pal)}</button>`).join(""):`<span class="meta">ยังไม่มี</span>`}</div>
+      ${L.length>8?`<button class="btn sm ghost" data-act="hallall" data-v="${lv.k}">${all?"ย่อ":`ดูทั้งหมด (${L.length})`}</button>`:""}</div>`;};
+  const certs=it.map((x,i)=>[x,i]).filter(([x])=>x.lv==="cert");
   const certLeft=Object.entries(CAMP_AWARDS).filter(([id])=>!(G.campAwards||[]).some(a=>a.id===id));
-  return `<div class="troom">${shelf("cup","ถ้วยรางวัล",["cup","cup","medal"])}${shelf("belt","เข็มขัดแชมป์",["belt"])}${shelf("cert","เกียรติบัตรของค่าย",["cert","cert"])}
-    <div class="tdetail">${sel?`<b>${esc(sel.title)}</b><span>${sel.sub}</span><small>${sel.when}</small>`:`<span class="meta">แตะของบนชั้นเพื่อดูว่าได้มาจากไฟต์ไหน · ครบทุกชิ้นแล้ว ถ่ายรูปค่ายไว้อวดได้</span>`}</div>
+  return `<div class="troom">${HALL_LV.map(shelf).join("")}
+    <div class="tshelf cert"><span class="tlbl">เกียรติบัตรของค่าย <b>${certs.length}</b></span><div class="trow">${certs.length?certs.map(([x,i])=>`<button class="tit cert" data-act="trophy" data-v="${i}" aria-label="${esc(x.title)}">${trophySVG("cert",x.pal)}</button>`).join(""):["cert","cert"].map(k=>`<span class="tit ghost ${k}">${trophySVG(k,{},true)}</span>`).join("")}</div></div>
+    <p class="meta">แตะเข็มขัดหรือถ้วยเพื่อดูว่าได้มาจากไฟต์ไหน</p>
     ${certLeft.length?`<details class="tnext"><summary>เกียรติบัตรที่ยังไม่ได้ (${certLeft.length})</summary>${certLeft.map(([id,A])=>`<div class="kv-row"><span>📜 ${A.name}</span><span class="meta">${A.hint}</span></div>`).join("")}</details>`:""}
     <button class="btn sm gold" data-act="showcase">📸 ถ่ายรูปค่ายไว้อวด</button></div>`;}
+function trophyPopHTML(i){const x=trophyItems()[i];if(!x)return `<p>ไม่พบรางวัลนี้</p>`;const lv=HALL_LV.find(l=>l.k===x.lv),f=x.fid&&G.F[x.fid];
+  return `<div class="tpop"><div class="tpop-art">${trophySVG(x.kind,x.pal)}</div><h2>${esc(x.title)}</h2>
+    ${f?`<div class="tpop-who">${faceImg(f,"sm")}<b>${esc(f.name)}</b><small>รุ่น ${esc(x.div||"")}</small></div>`:`<p>${x.sub}</p>`}
+    <div class="kv-row"><span>ระดับ</span><b>${lv?lv.n:"เกียรติบัตรค่าย"}</b></div>
+    ${x.opp?`<div class="kv-row"><span>${/^อันดับ/.test(x.opp)?"ผลงาน":"คู่ชก"}</span><b>${esc(x.opp)}</b></div>`:x.lv!=="cert"?`<div class="kv-row"><span>คู่ชก</span><b class="meta">ไม่ได้บันทึกไว้ (ได้ก่อนอัปเดต)</b></div>`:""}
+    <div class="kv-row"><span>เมื่อ</span><b>${x.when}</b></div></div><div class="mfoot"><button class="btn primary" data-act="closeModal">ปิด</button></div>`;}
 function showcaseHTML(){const R=roster(G),H=(G.honors||[]).length,C=(G.campAwards||[]).length;
   return `<h2>ค่ายมวยศิริชัย · ปีที่ ${G.season||1}</h2><div class="px card"><canvas class="campcv" width="640" height="360" data-camp="1" aria-label="ภาพค่ายปัจจุบัน"></canvas></div>
    <p class="meta center">${esc(G.player.name)} · ค่าย Lv.${campLevel(G)} · นักมวย ${R.length} คน · นักเรียน ${students(G)} คน · เกียรติยศ ${H} · เกียรติบัตร ${C}</p>
@@ -1150,6 +1163,7 @@ function modalHTML(){const m=UI.modal;let body="",foot=true;
      <div class="mfoot"><button class="btn ghost" data-act="closeModal">รอก่อน</button><button class="btn primary" data-act="sign" data-v="${f.id}" data-ok="1">เซ็นเลย</button></div>`;}
   if(m.type==="levelup"){body=`<h2 class="lvup">LEVEL UP!</h2>${m.ids.map(id=>{const f=G.F[id];return `<div class="lvrow"><div class="l">${faceImg(f,"sm")}<b>${esc(f.name)} Lv.${f.lvl}</b></div>${coachOn()&&f.sp>0&&!hasTree(f.id)?`<p class="hinttxt"><img src="${faceSrc("coach")}" alt=""><span>${skillTip(f)}</span></p>`:""}${skillGrid(f,true)}</div>`;}).join("")}`;}
   if(m.type==="ytinfo"){body=ytInfoHTML();foot=true;}
+  if(m.type==="trophy"){body=trophyPopHTML(m.i);foot=false;}
   if(typeof XMODAL!=="undefined"&&XMODAL[m.type]){const r=XMODAL[m.type](m);body=r.body;foot=r.foot;}
   return `<div class="overlay" data-act="closeModalBg" data-sk="ov-${m.type}"><div class="px modal pxscroll m-${m.type}${m.type==="fighter"?" fpm t-"+(UI.ptab||"over"):""}" data-sk="modal-${m.type}" role="dialog" aria-modal="true"><button class="xbtn" data-act="closeModal" aria-label="ปิด">✕</button>${body}
     ${foot?`<div class="mfoot"><button class="btn primary" data-act="closeModal">${m.type==="report"||m.type==="levelup"?"ไปต่อ ▸":"ปิด"}</button></div>`:""}</div></div>`;}
@@ -1925,7 +1939,7 @@ const ACT={
     UI.modal={type:"confirm",title:"ซื้อของตกแต่งนี้?",ok:`ซื้อ ${fmt(c)}`,no:"ยกเลิก",yes:"decorbuyok",k:d.k,v:d.v,
       html:`<div class="px confirm"><b>${esc(it.name)}</b><p class="meta">${esc(CAMP_DECOR[d.k].name)} · ราคา ${fmt(c)} · เหลือเงิน ${fmt(G.cash-c)}</p><p class="meta">ซื้อแล้วใช้ได้ตลอด สลับกลับเป็นแบบเดิมได้ทุกเมื่อ</p></div>`};render();},
   decorbuyok:()=>{const m=UI.modal;if(!m||m.yes!=="decorbuyok")return;const d={k:m.k,v:m.v};UI.modal=null;const c=decorPrice(G,d.k,d.v);if(buyDecor(G,d.k,d.v)){AU.sfx&&AU.sfx("level");save();toast(`ซื้อ "${CAMP_DECOR[d.k].items[d.v].name}" แล้ว ${fmt(c)}`);}render();},
-  trophy:d=>{UI.trophySel=UI.trophySel===+d.v?null:+d.v;AU.sfx&&AU.sfx("ui");render();},
+  trophy:d=>{UI.modal={type:"trophy",i:+d.v};AU.sfx&&AU.sfx("ui");render();},hallall:d=>{UI.hallAll=UI.hallAll||{};UI.hallAll[d.v]=!UI.hallAll[d.v];render();},
   showcase:()=>{UI.modal={type:"showcase"};render();},
   showcaseSave:()=>{const src=document.querySelector(".m-showcase canvas[data-camp]");if(!src)return;const W=640,cv=document.createElement("canvas");cv.width=W;cv.height=470;const x=cv.getContext("2d");x.imageSmoothingEnabled=false;
     x.fillStyle="#141020";x.fillRect(0,0,W,470);x.drawImage(src,0,0,W,360);x.fillStyle="#f1c232";x.font='bold 26px "Chakra Petch","IBM Plex Sans Thai",sans-serif';x.fillText(`ค่ายมวยศิริชัย · ปีที่ ${G.season||1}`,20,400);

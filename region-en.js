@@ -9,16 +9,26 @@ const ROAD_FUEL_BASE=35; // ฿ per litre at an average week
 /* kmL = km per litre (rises with price) · seats = riders who fit (the rest ride the public bus) · fat = fatigue multiplier on the road */
 const ROAD_CAR={
  none:{name:"Intercity bus",kmL:0,seats:0,fat:1.25},
- songthaew:{kmL:10.5,seats:10,fat:1.15},
- yellowthaew:{kmL:11,seats:10,fat:1.15},
- rotdaeng:{kmL:11,seats:10,fat:1.12},
- tuktuk:{kmL:12,seats:3,fat:1.3},
- minibus:{kmL:13.5,seats:12,fat:1},
- bluevan:{kmL:15,seats:12,fat:.95},
- pinkvan:{kmL:16,seats:12,fat:.95},
- tourbus:{kmL:16.5,seats:30,fat:.85},
- limo:{kmL:18,seats:8,fat:.75},
- goldvan:{kmL:21,seats:12,fat:.8}};
+ songthaew:{kmL:10.5,seats:10,fat:1.15,fuel:"diesel"},
+ yellowthaew:{kmL:11,seats:10,fat:1.15,fuel:"diesel"},
+ rotdaeng:{kmL:11,seats:10,fat:1.12,fuel:"diesel"},
+ tuktuk:{kmL:12,seats:3,fat:1.3,fuel:"lpg"},
+ minibus:{kmL:13.5,seats:12,fat:1,fuel:"diesel"},
+ bluevan:{kmL:15,seats:12,fat:.95,fuel:"diesel"},
+ pinkvan:{kmL:16,seats:12,fat:.95,fuel:"diesel"},
+ tourbus:{kmL:16.5,seats:30,fat:.85,fuel:"diesel"},
+ limo:{kmL:18,seats:8,fat:.75,fuel:"g95"},
+ goldvan:{kmL:21,seats:12,fat:.8,fuel:"diesel"},
+ /* v1.91.78 (Man): more cars — diesel = strong, gets there sooner (less road fatigue) but the car costs more; electric = cheapest per km (charged by the unit), dearest to buy */
+ pickup:{kmL:12.5,seats:5,fat:.85,fuel:"diesel",fast:1},
+ vipvan:{kmL:13,seats:10,fat:.72,fuel:"diesel",fast:1},
+ citycar:{kmL:17,seats:5,fat:1.05,fuel:"e20"},
+ evsuv:{kmL:6.5,seats:5,fat:.68,fuel:"ev",fast:1},
+ evvan:{kmL:5,seats:9,fat:.8,fuel:"ev"}};
+/* v1.91.78 (Man): a Thai pump sign — each fuel has its own price; electricity is per unit (kWh) and moves less */
+const ROAD_FUELS={diesel:{n:"Diesel B7",base:32.9,u:"litre"},g95:{n:"Gasohol 95",base:37.3,u:"litre"},g91:{n:"Gasohol 91",base:36.9,u:"litre"},e20:{n:"E20",base:34.6,u:"litre"},lpg:{n:"LPG",base:21.2,u:"litre"},ev:{n:"Electricity (fast charge)",base:7.5,u:"unit",calm:1}};
+const ROAD_SIGN=["diesel","g95","g91","e20","lpg","ev"];
+const roadFuelOf=k=>(ROAD_CAR[k]&&ROAD_CAR[k].fuel)||"diesel";
 const ROAD_BUS_PER_KM=1.1,ROAD_TOLL_PER_KM=.35,ROAD_ROOM=650,ROAD_FOOD=180; // per person per km / per km / per room per night / per person per day
 
 const ROAD_REGION={north:{name:"the North",tag:"North"},isan:{name:"Isan",tag:"Isan"},central:{name:"the Central Plains",tag:"Central"},south:{name:"the South",tag:"South"}};
@@ -34,14 +44,18 @@ const ROAD_KM_K=.65;
 const roadNights=km=>km<600?0:km<1200?1:2;
 
 // ---------- fuel: changes every week, cheap and dear weeks come in turns, holidays push it up ----------
-function roadFuel(G,wk){const w=wk!=null?wk:(G?gameWeek(G):1),s=((G&&G.seed)||1)%997,r=mulberry32(s*131+w*7919)();
-  let p=1+.14*Math.sin(w*1.1+s)+.06*Math.sin(w*.37+s*2)+(r-.5)*.08;const wy=((w-1)%52)+1;if((wy>=14&&wy<=16)||wy>=51||wy<=1)p+=.1;
-  return Math.round(ROAD_FUEL_BASE*p*100)/100;}
-const roadFuelBand=p=>p<ROAD_FUEL_BASE*.94?"cheap":p>ROAD_FUEL_BASE*1.07?"high":"mid";
+function roadFuelK(G,wk){const w=wk!=null?wk:(G?gameWeek(G):1),s=((G&&G.seed)||1)%997,r=mulberry32(s*131+w*7919)();
+  let p=1+.14*Math.sin(w*1.1+s)+.06*Math.sin(w*.37+s*2)+(r-.5)*.08;const wy=((w-1)%52)+1;if((wy>=14&&wy<=16)||wy>=51||wy<=1)p+=.1;return p;}
+function roadFuel(G,wk,type){const t=ROAD_FUELS[type||"diesel"]||ROAD_FUELS.diesel,k=roadFuelK(G,wk),m=t.calm?1+(k-1)*.3:k+(type==="lpg"?(k-1)*-.4:0);return Math.round(t.base*m*100)/100;}
+const roadFuelBand=(p,type)=>{const b=(ROAD_FUELS[type||"diesel"]||ROAD_FUELS.diesel).base;return p<b*.94?"cheap":p>b*1.07?"high":"mid";};
 /* the news ticker guesses next week right about three times in four */
-function roadFuelHint(G){const w=G?gameWeek(G):1,now=roadFuel(G,w),nx=roadFuel(G,w+1);let up=nx>now;if(mulberry32((((G&&G.seed)||1)%997)*17+w*31)()<.25)up=!up;
+function roadFuelHint(G){const w=G?gameWeek(G):1,now=roadFuelK(G,w),nx=roadFuelK(G,w+1);let up=nx>now;if(mulberry32((((G&&G.seed)||1)%997)*17+w*31)()<.25)up=!up;
   return up?"Energy news: fuel looks set to go up next week ▲":"Energy news: fuel looks set to go down next week ▼";}
 
+function roadSignHTML(G){const w=G?gameWeek(G):1,mine=roadFuelOf(roadCarKey(G)),car=roadCarKey(G);
+  return `<div class="pump-sign" role="img" aria-label="This week's fuel prices"><div class="ps-top">⛽ Fuel prices today <small>week ${((w-1)%52)+1}</small></div>${ROAD_SIGN.map(t=>{const p=roadFuel(G,w,t),b=roadFuelBand(p,t),d=p-roadFuel(G,w-1,t);
+    return `<div class="ps-row ${car!=="none"&&t===mine?"mine":""}"><span>${esc(ROAD_FUELS[t].n)}</span><b class="ps-led ${b}">${p.toFixed(2)}</b><i class="${d>0.004?"up":d<-0.004?"dn":""}">${d>0.004?"▲":d<-0.004?"▼":"–"}</i></div>`;}).join("")}
+    <div class="ps-foot">${car==="none"?"No camp vehicle · taking the bus":`The camp vehicle runs on ${esc(ROAD_FUELS[mine].n)}`} · ${esc(roadFuelHint(G).replace(/^[^:]*:\s*/,""))}</div></div>`;}
 function roadCarKey(G){return G?decorChoice(G,"vehicle"):"none";}
 function roadCarName(k){return k==="none"?ROAD_CAR.none.name:((CAMP_DECOR.vehicle.items[k]||{}).name||k);}
 function roadRiders(G){if(!G)return [];const all=roster(G).filter(f=>!f.injury||f.injury<3);
@@ -52,13 +66,13 @@ function roadCoachIn(G){return !(G&&G.coachAwayAbs&&gameWeek(G)<G.coachAwayAbs);
 function roadSeats(G){const k=roadCarKey(G),C=ROAD_CAR[k]||ROAD_CAR.none;return Math.max(1,(k==="none"?4:C.seats)-1-(roadCoachIn(G)?1:0));}
 
 /* the whole bill for one trip, there and back */
-function roadPlan(G,destKey,carKey,wk){const D=ROAD_DEST[destKey],k=carKey||roadCarKey(G),C=ROAD_CAR[k]||ROAD_CAR.none,price=roadFuel(G,wk);
+function roadPlan(G,destKey,carKey,wk){const D=ROAD_DEST[destKey],k=carKey||roadCarKey(G),C=ROAD_CAR[k]||ROAD_CAR.none,ft=C.fuel||"diesel",price=roadFuel(G,wk,ft);
   const people=Math.max(1,roadRiders(G).length)+1/* the manager */+(roadCoachIn(G)?1:0)/* v1.91.76: Kru Daeng */,nights=roadNights(D.km),rt=D.km*2;
   const inCar=k==="none"?0:Math.min(people,C.seats),onBus=people-inCar;
   const litres=C.kmL?rt/C.kmL:0,fuel=Math.round(litres*price),toll=k==="none"?0:Math.round(rt*ROAD_TOLL_PER_KM*ROAD_KM_K),bus=Math.round(onBus*rt*ROAD_BUS_PER_KM*ROAD_KM_K);
   const rooms=Math.ceil(people/2),lodge=nights*rooms*ROAD_ROOM,food=(nights+1)*people*ROAD_FOOD;
   const fat=Math.round(D.km/100*C.fat*1.2*ROAD_KM_K); // fatigue every traveller picks up on the way
-  return {dest:destKey,D,car:k,C,price,band:roadFuelBand(price),people,inCar,onBus,nights,rt,litres,fuel,toll,bus,lodge,food,fat,total:fuel+toll+bus+lodge+food};}
+  return {dest:destKey,D,car:k,C,ft,unit:(ROAD_FUELS[ft]||ROAD_FUELS.diesel).u,price,band:roadFuelBand(price,ft),people,inCar,onBus,nights,rt,litres,fuel,toll,bus,lodge,food,fat,total:fuel+toll+bus+lodge+food};}
 
 // ---------- driving scene: lines ----------
 const ROAD_SCENERY={
@@ -95,7 +109,7 @@ const ROAD_SHOTGUN={
 
 function roadLines(S){const P=S.plan,D=P.D,r=D.r,rng=mulberry32(S.seed),pick=a=>a[Math.floor(rng()*a.length)],L=[];
   L.push({n:"nar",t:`${roadCarName(P.car)} of Sirichai Camp sets off in ${S.time==="night"?"the afternoon":"the small hours"}, heading for ${D.name}, ${D.km} km away.`});
-  if(P.car!=="none"&&P.band!=="mid")L.push({n:"nar",t:`Fuel stop, per litre: ${fmt(P.price)} ${P.band==="high"?"— so pricey this week the manager lets out a long sigh":P.band==="cheap"?"— cheaper than last week, everyone cheers":"— a normal price, nobody complains"}`});
+  if(P.car!=="none"&&P.band!=="mid")L.push({n:"nar",t:`${P.ft==="ev"?`Stopped to charge, per unit ${fmt(P.price)}`:`Stopped to fill up with ${(ROAD_FUELS[P.ft]||ROAD_FUELS.diesel).n} per litre ${fmt(P.price)}`} ${P.band==="high"?"— so pricey this week the manager lets out a long sigh":P.band==="cheap"?"— cheaper than last week, everyone cheers":"— a normal price, nobody complains"}`});
   L.push({n:"nar",t:ROAD_CAR_GAG[P.car]||ROAD_CAR_GAG.minibus});
   L.push({n:"nar",t:pick(ROAD_SCENERY[r])});
   const ids=S.riders.filter(id=>ROAD_TALK[id]);
@@ -199,12 +213,12 @@ const ROAD={st:null,
       const P=S.opts.plan||roadPlan(G,S.dest,S.car);if(S.opts.charge!==false&&!S.opts.paid){if(G.cash<P.total){toast("Not enough money for the trip");return;}G.cash-=P.total;}
       const w=G?gameWeek(G):1,rr=mulberry32((G.seed||1)+w*13)(),D=P.D,wetW=((w-1)%52)+1>=20&&((w-1)%52)+1<=40;
       return this.drive(P,D.km>=1100?"night":D.km>=600?"dusk":"day",wetW&&rr<(D.r==="south"?.5:.3));}},
-  sheetHTML(P,S){const band={cheap:["cheap","cheap"],mid:["Normal","mid"],high:["pricey","high"]}[P.band],pos=Math.max(4,Math.min(96,50+(P.price/ROAD_FUEL_BASE-1)*250));
+  sheetHTML(P,S){const band={cheap:["cheap","cheap"],mid:["Normal","mid"],high:["pricey","high"]}[P.band],pos=Math.max(4,Math.min(96,50+(P.price/(ROAD_FUELS[P.ft]||ROAD_FUELS.diesel).base-1)*250)),U=P.unit||"litre";
     const row=(a,b)=>`<div class="kv-row"><span>${a}</span><span>${b}</span></div>`;
-    return `<div class="rd-car"><b>${esc(roadCarName(P.car))}</b><small>${P.car==="none"?"The camp has no vehicle yet · everyone buys a bus ticket":`Economy ${P.C.kmL} km/L · seats ${P.C.seats} fighters in camp`}</small></div>
-     <div class="rd-fuel ${band[1]}"><span class="rd-pump">⛽</span><div class="rd-gauge"><i style="left:${pos}%"></i></div><b>${fmt(P.price)}/L · ${band[0]}</b></div>
+    return `<div class="rd-car"><b>${esc(roadCarName(P.car))}</b><small>${P.car==="none"?"The camp has no vehicle yet · everyone buys a bus ticket":`${esc((ROAD_FUELS[P.ft]||ROAD_FUELS.diesel).n)} · ${P.C.kmL} km/${U} · seats ${P.C.seats} fighters in camp ${P.C.fast?" · strong, gets there sooner":""}`}</small></div>
+     <div class="rd-fuel ${band[1]}"><span class="rd-pump">⛽</span><div class="rd-gauge"><i style="left:${pos}%"></i></div><b>${fmt(P.price)}/${U} · ${band[0]}</b></div>
      ${G?`<p class="meta center">${roadFuelHint(G)}</p>`:""}
-     <div class="px rd-bill">${P.fuel?row(`Fuel (round trip ${P.rt.toLocaleString("en-US")} km · ${Math.round(P.litres)} L)`,fmt(P.fuel)):""}${P.toll?row("Tolls",fmt(P.toll)):""}
+     <div class="px rd-bill">${P.fuel?row(`${P.ft==="ev"?"Electricity":"Fuel"} (round trip ${P.rt.toLocaleString("en-US")} km · ${Math.round(P.litres)} ${U})`,fmt(P.fuel)):""}${P.toll?row("Tolls",fmt(P.toll)):""}
       ${P.bus?row(`Bus tickets ${P.onBus} fighters in camp ${P.car!=="none"?" (not enough seats)":""}`,fmt(P.bus)):""}${P.lodge?row(`Lodging ${P.nights} night(s)`,fmt(P.lodge)):""}${row(`Food ${P.people} fighters in camp`,fmt(P.food))}
       <div class="kv-row rd-total"><span>Total</span><b class="goldt">${fmt(P.total)}</b></div></div>
      <p class="meta center">Road fatigue +${P.fat} each ${P.nights?` · stay ${P.nights} night(s)`:" · day trip"}</p>`;},
@@ -246,6 +260,13 @@ const ROAD={st:null,
     if(S.demo){S.phase="demo";this.draw();return;}const front=S.front;this.close(true);if(cb&&P)cb(P,front);},
   close(quiet){cancelAnimationFrame(this.raf);const el=document.getElementById("roadtrip");if(el)el.remove();this.st=null;if(quiet)return;try{AU.startMusic&&AU.startMusic("hub");}catch(e){}if(typeof render==="function"&&G)render();}};
 try{if(/roaddemo/.test(location.hash||""))setTimeout(()=>ROAD.demo(),600);}catch(e){}
+
+/* v1.91.78 pump sign */
+if(typeof document!=="undefined"&&!document.getElementById("pumpcss")){const st=document.createElement("style");st.id="pumpcss";st.textContent=`.pump-sign{background:linear-gradient(#0b5d3b,#063a25);border:3px solid #f2c230;box-shadow:inset 0 0 0 2px #063a25,0 3px 0 #1b1230;padding:.4rem .5rem;margin:.3rem 0 .6rem;color:#fff;max-width:340px;margin-inline:auto}
+.ps-top{background:#f2c230;color:#1b1230;font-weight:700;text-align:center;padding:.15rem;margin:-.4rem -.5rem .4rem;display:flex;justify-content:center;gap:.5rem;align-items:baseline}.ps-top small{opacity:.7}
+.ps-row{display:grid;grid-template-columns:1fr auto 1.2em;gap:.4rem;align-items:center;padding:.15rem .25rem;border-bottom:1px dashed rgba(255,255,255,.18)}.ps-row:last-of-type{border:0}.ps-row.mine{background:rgba(242,194,48,.18);outline:1px solid #f2c230}
+.ps-led{font-family:ui-monospace,"Courier New",monospace;background:#120808;color:#ff4d3a;padding:0 .35rem;letter-spacing:.06em;text-shadow:0 0 4px rgba(255,77,58,.8);min-width:4.2em;text-align:right}.ps-led.cheap{color:#59ff7a;text-shadow:0 0 4px rgba(89,255,122,.8)}.ps-led.mid{color:#ffcf4a;text-shadow:0 0 4px rgba(255,207,74,.8)}
+.ps-row i{font-style:normal;font-size:.8em}.ps-row i.up{color:#ff7a6a}.ps-row i.dn{color:#7aff9a}.ps-foot{font-size:.78rem;opacity:.85;margin-top:.3rem;text-align:center}`;document.head.appendChild(st);}
 
 // ================= v1.90 (hidden) ศึกชิงเจ้าสี่ภาค — regional chapter core =================
 /* Ships as its own file (region.js, bundled with road.js) and loads only once the chapter opens, so players in years 1–5 never download it.
@@ -423,7 +444,7 @@ const RG_CH={
    {n:"chaba",f:"flustered",l:"casual",t:"…Can you stay one more day? …Yeah?"},
    {n:"nar",t:"Chaba turns to face the sea the moment she finishes, but her ears are red enough to see in the moonlight."}]}};
 /* the camp girl closest to you (bond 40+) — she reacts when a champion gets near */
-function rgTopGirl(G){const L=CANON_IDS.map(id=>G.F[id]).filter(f=>f&&f.camp==="player"&&(f.bond||0)>=40).sort((a,b)=>(b.bond||0)-(a.bond||0));return L[0]||null;}
+function rgTopGirl(G){const TP=G.region&&G.region.trip&&G.region.trip.party,L=CANON_IDS.map(id=>G.F[id]).filter(f=>f&&f.camp==="player"&&(f.bond||0)>=40&&(!TP||TP.includes(f.id))).sort((a,b)=>(b.bond||0)-(a.bond||0));return L[0]||null;}
 function rgJeal(id,champ){const L={kati:`Coach… ${champ} was standing a little close, wasn't she? I'm only noticing.`,mali:`Mali wants a hug too~ …Just kidding. (Not kidding.)`,
   rin:`The distance between the Manager and ${champ} just now was below the average for the whole night. Just data.`,ploy:`What's with the smiling… Nothing. I didn't say anything.`,fah:`Hey, ${champ}! The manager belongs to Sirichai Camp! …I mean, he's the camp's manager!`};return L[id]||"…";}
 function rgMeet(G,cid,v){const R=G.region,m=R.meet;m[cid]=(m[cid]||0)+v;if(v>0&&R.joined&&R.joined[cid]&&G.F[cid])add(G,cid,"bond",v);rgTouch(G,cid);(R.meetPk=R.meetPk||{})[cid]=Math.max(R.meetPk[cid]||0,m[cid]);}
@@ -615,6 +636,9 @@ const RG_ODD_FX={tired:["nobody slept much · fatigue +4",G=>{for(const f of roa
 const RG_CID={north:"baibua",isan:"tabtim",central:"alicia",south:"chaba"};
 const RG_CID0={...RG_CID}; /* v1.91.30: the four first champions — fixed, even when a later edition crowns someone new */
 const rgIn=(G,id)=>!!(G.F[id]&&G.F[id].camp==="player");
+/* v1.91.78 (Man): on a trip, only the girls who actually rode along can be in the scene */
+const rgInT=(G,id)=>rgIn(G,id)&&(()=>{const P=G.region&&G.region.trip&&G.region.trip.party;return !P||P.includes(id);})();
+const RG_PAIR={uttaradit:"kati",buriram:"ploy",surat:"mali",suphan:"rin"};
 const rgIf=(ok,steps)=>ok?steps:[];
 function rgGala(G){const top=rgTopGirl(G),fah=rgIn(G,"fah"),ploy=rgIn(G,"ploy"),R=G.region,meet=(id,v)=>G2=>rgMeet(G2,id,v);return [
  {n:"nar",bg:"gala",t:"The camp's van pulls up in front of a hotel in the middle of Bangkok. A Naga Energy Drink banner three storeys high hangs above, a green-gold naga coiled at the centre, head raised high."},
@@ -695,7 +719,7 @@ function rgCup1(G,r){const cid=RG_CID[r],rin=rgIn(G,"rin"),R=G.region,L=RG_C1_CA
 /* v1.90 round 6: the North in full — the first arrival, the Tha Sao shrine at Uttaradit (Kati's story), a richer visit, the letter after the cup and Baibua's chats.
    คำเมือง lines are drafts for Man to check. The other regions follow in rounds 7–9 (same hooks). */
 const RG_ARRIVE={
- north:(G,D)=>{const top=rgTopGirl(G),kati=rgIn(G,"kati"),me=G.F[(G.region.trip||{}).fid];return [
+ north:(G,D)=>{const top=rgTopGirl(G),kati=rgInT(G,"kati"),me=G.F[(G.region.trip||{}).fid];return [
   {n:"nar",bg:"gas_station",t:`The camp's van stops for fuel at the last petrol station before ${D.name}. Mist still hangs low over the mountains.`},
   {n:"nar",t:"An old motorbike is parked in front of the coffee kiosk. A pink-haired girl stands hugging a big rattan basket."},
   {n:"baibua",f:"happy",l:"casual",t:"You're here, jao! I heard Sirichai Camp was coming to collect the northern belts, so I rode out to wait for you."},
@@ -714,7 +738,7 @@ const RG_ARRIVE={
   {n:"nar",t:"Baibua waves the van out of the petrol station, then follows on her motorbike all the way to the arena."}];}};
 /* a scene on the first night of a particular trip */
 const RG_TRIPX={
- uttaradit:{bg:"tasao_shrine",steps:G=>{const kati=rgIn(G,"kati");return [
+ uttaradit:{bg:"tasao_shrine",steps:G=>{const kati=rgInT(G,"kati");return [
   {n:"nar",t:"Before heading back, Baibua takes the whole camp to the Tha Sao teachers' shrine: an old wooden shrine under a bodhi tree, with a worn pair of gloves hanging beside the altar."},
   {n:"baibua",f:"happy",l:"casual",t:"This is where Tha Sao boxing was born, jao. Dad brought me here to pay respects every year, before he hurt his knee."},
   ...(kati?[
@@ -765,7 +789,7 @@ const RG_CHAT={
    ["Talking to you makes my heart feel lighter, jao… I don't know why.",[["Because you're not carrying it alone anymore.",2,"…Yes. I'm not carrying it alone anymore."],["Message me anytime.",1,"Yes! I'll message you often, jao."],["Good",0,""]]]]}]};
 if(typeof CHAT!=="undefined")for(const k in RG_CHAT)CHAT[k]=RG_CHAT[k];
 /* v1.90 round 7: Isan in full — Tabtim hitches a ride on the first trip, Buriram brings Vector (Vega + Pailin) and Ploy's answer, a richer visit, the letter after the cup and Tabtim's chats. Isan lines are drafts for a native speaker to check. */
-RG_ARRIVE.isan=(G,D)=>{const top=rgTopGirl(G),ploy=rgIn(G,"ploy"),me=G.F[(G.region.trip||{}).fid];return [
+RG_ARRIVE.isan=(G,D)=>{const top=rgTopGirl(G),ploy=rgInT(G,"ploy"),me=G.F[(G.region.trip||{}).fid];return [
   {n:"nar",bg:"gas_station",t:"A straight road runs through the rice fields as far as the eye can see. Ahead, a motorbike sits smoking outside an abandoned petrol station, and a red-haired girl stands in the middle of the road waving with both arms."},
   {n:"tabtim",f:"happy",l:"casual",t:"Stop, stop, stop! Is this Sirichai Camp? It's Tabtim! Tabtim's bike just broke down. Give Tabtim a lift to the ring!"},
   {n:"nar",t:"Before anyone can answer, Tabtim opens the front door and climbs into the passenger seat as if it were hers."},
@@ -782,7 +806,7 @@ RG_ARRIVE.isan=(G,D)=>{const top=rgTopGirl(G),ploy=rgIn(G,"ploy"),me=G.F[(G.regi
   {n:"nar",t:me?`${me.name} remembers Tabtim's tips · morale +3`:"Everyone remembers Tabtim's tips."},
   {n:"coach",t:"The som tam here is so spicy Kru's crying… but it's really good."},
   {n:"tabtim",f:"happy",l:"casual",t:"Let's go, everyone! Tabtim will cheer by the ring… not saying which side, haha."}];};
-RG_TRIPX.buriram={bg:"night_isan",steps:G=>{const ploy=rgIn(G,"ploy");return [
+RG_TRIPX.buriram={bg:"night_isan",steps:G=>{const ploy=rgInT(G,"ploy");return [
   {n:"nar",t:"Same night, same ring: on the undercard before our bout, a Vector Camp fighter wins by knockout in round two."},
   {n:"npc",who:"Vega",t:"The data said he'd raise his guard late in round two. …Data never lies."},
   ...(ploy?[
@@ -829,7 +853,7 @@ RG_CHAT.tabtim=[
   ["Back to training! A hundred more kicks!",[["Kick one for me too",2,"The hundredth kick is for you!"],["Don't overdo it.",1,"I know, I know"],["OK",0,"Yeah!"]]]]}];
 CHAT.tabtim=RG_CHAT.tabtim;
 /* v1.90 round 8: the South in full — Chaba's sidecar at the bus terminal, Mali's home at Chaiya and the pier at Don Sak (Mali's story), a richer visit, the letter after the cup and Chaba's chats. Southern lines are drafts for a native speaker to check. */
-RG_ARRIVE.south=(G,D)=>{const top=rgTopGirl(G),mali=rgIn(G,"mali"),me=G.F[(G.region.trip||{}).fid];return [
+RG_ARRIVE.south=(G,D)=>{const top=rgTopGirl(G),mali=rgInT(G,"mali"),me=G.F[(G.region.trip||{}).fid];return [
   {n:"nar",bg:"bus_terminal",t:"After driving all night, the camp's van pulls into the bus terminal at dawn. By the exit, a faded sidecar motorbike is parked all alone."},
   {n:"chaba",f:"happy",l:"casual",t:"…The guesthouse is down a lane. Big vans can't get in. Sidecar. One at a time."},
   {n:"nar",t:"Chaba points at the sidecar seat and looks only at the Manager, without explaining anything.",choice:[
@@ -843,7 +867,7 @@ RG_ARRIVE.south=(G,D)=>{const top=rgTopGirl(G),mali=rgIn(G,"mali"),me=G.F[(G.reg
   {fx:G2=>{if(me)me.morale=Math.min(100,(me.morale||0)+3);}},
   {n:"nar",t:me?`${me.name} remembers Chaba's tips · morale +3`:"Everyone remembers Chaba's tips."},
   {n:"coach",t:"She really doesn't talk much… but every word counts."}];};
-RG_TRIPX.surat={bg:"mali_home",steps:G=>{const mali=rgIn(G,"mali");return mali?[
+RG_TRIPX.surat={bg:"mali_home",steps:G=>{const mali=rgInT(G,"mali");return mali?[
   {n:"nar",t:"The morning after the bout, Mali asks to stop in Chaiya. \"Mali's house is right on the way!\" In fact it's a forty-kilometre detour."},
   {n:"nar",t:"At Mali's mother's house, her three younger siblings run out to hug her, and her mother sets out khao yam until the bench is full."},
   {n:"npc",who:"Mali's mom",t:"You're here! Eat first, all of you… Oh? And why is that girl standing out in front of the house?"},
@@ -891,7 +915,7 @@ RG_CHAT.chaba=[
   ["…Talked to you. Now I can sleep.",[["Then message me every night.",2,"…All right."],["What a lovely dream",1,"Mm. Good night."],["Go to sleep.",0,"…"]]]]}];
 CHAT.chaba=RG_CHAT.chaba;
 /* v1.90 round 9: the Central Plains in full — Alicia's live stream on the first trip, Lopburi's monkeys, the draft Naka League contract (Rin's story) at Suphan, a richer visit, her post after the cup and Alicia's chats. */
-RG_ARRIVE.central=(G,D)=>{const top=rgTopGirl(G),rin=rgIn(G,"rin"),me=G.F[(G.region.trip||{}).fid];return [
+RG_ARRIVE.central=(G,D)=>{const top=rgTopGirl(G),rin=rgInT(G,"rin"),me=G.F[(G.region.trip||{}).fid];return [
   {n:"nar",bg:"camp_hanuman",t:`On the way to ${D.name}, Alicia sends a pin asking the camp to stop by Hanuman camp in Lopburi first. "Just on the way. Not an invitation."`},
   {n:"nar",t:"The van door isn't even fully open when a phone on a selfie stick pokes in, ring light blazing."},
   {n:"alicia",f:"happy",l:"casual",t:"Hi everyone~ We have a special guest today! This is the camp everyone in the comments has been talking about… Sirichai camp!"},
@@ -906,7 +930,7 @@ RG_ARRIVE.central=(G,D)=>{const top=rgTopGirl(G),rin=rgIn(G,"rin"),me=G.F[(G.reg
   {fx:G2=>{if(me)me.morale=Math.min(100,(me.morale||0)+3);}},
   {n:"nar",t:me?`${me.name} remembers Alicia's advice · Morale +3`:"Everyone remembers Alicia's advice"},
   {n:"coach",t:"Is the live over? Then Kru can take off the sunglasses."}];};
-RG_TRIPX.lopburi={bg:"lopburi_monkeys",steps:G=>{const top=rgTopGirl(G),fah=rgIn(G,"fah");return [
+RG_TRIPX.lopburi={bg:"lopburi_monkeys",steps:G=>{const top=rgTopGirl(G),fah=rgInT(G,"fah");return [
   {n:"nar",t:"That evening the whole camp stops at Phra Prang Sam Yot to buy souvenirs. Before anyone's out of the van, a troop of monkeys leaps onto the roof, a dozen of them."},
   {n:"nar",t:"The biggest monkey snatches the whole bag of souvenir snacks, then sits on a lamppost unwrapping them in front of everyone."},
   fah?{n:"fah",f:"angry",l:"casual",t:"Hey! That's Fah's snack! Get down here right now, Fah'll kick you off that pole!"}:{n:"coach",t:"Don't try to get it back. It'll call fifty more of its friends."},
@@ -916,7 +940,7 @@ RG_TRIPX.lopburi={bg:"lopburi_monkeys",steps:G=>{const top=rgTopGirl(G),fah=rgIn
   {n:"coach",t:"Forget it… we'll come back for the wraps next year. It'll probably be Lopburi's champion by then."},
   {fx:G2=>{for(const f of roadRiders(G2))f.morale=Math.min(100,(f.morale||0)+2);}},
   {n:"nar",t:"Everyone laughs until their stomachs hurt · Everyone's morale +2 · One pair of hand wraps lost"}];}};
-RG_TRIPX.suphan={bg:"hotel_room",steps:G=>{const rin=rgIn(G,"rin");return rin?[
+RG_TRIPX.suphan={bg:"hotel_room",steps:G=>{const rin=rgInT(G,"rin");return rin?[
   {n:"nar",t:"Ten at night, someone knocks on the hotel room door. Alicia stands outside, hood pulled over her head, a thick folder in her hands."},
   {n:"alicia",f:"sad",l:"casual",t:"Sorry for coming so late… Could I borrow Rin? Just for an hour."},
   {n:"alicia",f:"sad",l:"casual",with:"rin",t:"This is the draft Naka League contract. My personal manager says it's great and wants me to sign this week. You're good at reading contracts, right? Please take a look."},
@@ -1047,6 +1071,17 @@ const NL={
   tip:"Changes form mid-fight · rounds 1–2 hooded, heavy and steady · rounds 3–4 hood off, very fast · round 5 blood mode"}};
 const NL_ORDER=["nia","varya","meili","rosa","ladda"];
 /* build (or refresh) a team member sized against `me`: she wins about `p` of 5-round bouts, never above the ceiling `ceil` */
+/* v1.91.78 (Man): the Naka team and the regional champions talk in their own voice after a bout, not the generic NPC lines */
+if(typeof POST_BUBBLE!=="undefined")Object.assign(POST_BUBBLE,{
+ nl_nia:{win:["The drum hadn't even finished the song.","Your rhythm is half a beat behind mine, {foe}.","Go learn to hear the rhythm again."],lose:["…My drum slipped a beat. Once is enough to lose.","You read my rhythm… not bad.","Next time I change the song."]},
+ nl_varya:{win:["On the ground, there's no Muay Thai.","You tapped sooner than I thought, {foe}.","A bear doesn't let go of what it catches."],lose:["…You wouldn't go to the ground. Smart.","Your legs are stronger than the data said.","Next time I'll catch you in the first round."]},
+ nl_meili:{win:["Did you see my leg… no, you didn't.","One finger is enough.","Want to come back to Yaowarat for dinner? My treat."],lose:["…Speed alone isn't enough, is it.","My sifu is going to lecture me for ages.","You took my kicks. You've got nerve."]},
+ nl_rosa:{win:["¡Olé! Prettiest fall in the whole warehouse!","A pink heart never stops beating!","Don't be sad, give yourself a round of applause!"],lose:["¡Ay! …If you lose, bow beautifully.","My mask stays on, but my heart gives in.","You made the crowd shout for you instead of me. ¡Bravo!"]},
+ nl_ladda:{win:["…Noted.","Can you get up?","Weaker than the data said."],lose:["…that was fun","The data… wasn't complete.","Next time I won't miss there."]},
+ baibua:{win:["Thank you for not backing down, {foe}.","The Tha Sao elbow is still sharp.","Come back again next time, jao."],lose:["…I have to go back and train again.","You really have got better.","It's okay. Dad will understand."]},
+ tabtim:{win:["Khak thae! Your time hasn't come yet.","Don't cry over a loss. Tabtim's lost too.","Want to get som tam? Tabtim's treat."],lose:["Ow! Hurts, but that was fun.","A loss is a loss. You hit hard, for real.","Next time Tabtim gets it back for sure."]},
+ alicia:{win:["You can turn the camera off now. It's over.","I didn't win because of my face.","Thanks for actually fighting me."],lose:["…Cameras off. Give me five minutes.","You really don't care about the camera. Good.","Next time I won't lose."]},
+ chaba:{win:["…Just a little more.","If you can stand, stand.","More training."],lose:["…That hurt. Good.","You don't stop. Like the waves.","…Next time."]}});
 function nlFighter(G,k,me,p,ceil,leg){const D=NL[k],id="nl_"+k;let f=G.F[id];
   if(!f){f=baseFighter(id,mkNPC(id,D.name,"X",14,mulberry32(hashStr(id)),2));f.camp="quest";f.div="X";G.F[id]=f;}
   Object.assign(f,{name:D.name,full:D.name,color:D.col,grap:D.grap,sub:D.sub,tdName:D.tdName,tdSty:D.tdSty||null,subName:D.subName,pfx:D.pfx,nlsk:D.nlsk,spl:D.spl.length?D.spl:null,nl:k,lvUpd:0,phases:D.phases||null,phR:D.phR||null,rgSty:D.sty||null,hpX:D.hpX||0,hurt:D.hurt||null});
@@ -1175,7 +1210,11 @@ function rgClose(G){const R=G.region,fah=rgIn(G,"fah"),rin=rgIn(G,"rin"),kati=rg
  {n:"coach",t:"Throws allowed, locks allowed… we haven't trained for any of that, not even one day"},
  {n:"coach",t:"We have three weeks. Drill every counter, then on the night we pick one per bout. The card is in the mailbox."}];}
 /* v1.91.75 (Man): the original champions have phones — personal words go to her chat; a new champion of a later edition still writes letters */
-function rgSay(G,r,title,body){const R=G.region,cid=RG_CID0[r];if(G.F[cid]&&!(R.nc&&R.nc[r])&&typeof chatNote==="function"){chatNote(G,cid,body);return;}
+/* v1.91.78 (Man): the very first personal message is a handwritten letter (with her number on it) — after that she texts */
+const RG_PHONE={baibua:"P.S. I wrote my number at the end of the envelope. From now on I'll text you instead.",tabtim:"P.S. Tabtim's number is on the back, okay! From now on just text, it saves on stamps!",alicia:"P.S. My private number is on the back. Not my manager's. Don't give it to anyone.",chaba:"P.S. Number, back of envelope."};
+function rgSay(G,r,title,body){const R=G.region,cid=RG_CID0[r];if(G.F[cid]&&!(R.nc&&R.nc[r])&&typeof chatNote==="function"){R.wrote=R.wrote||{};
+  if(!R.wrote[cid]&&!(G.chatLastAbs||{})[cid]){R.wrote[cid]=1;addMail(G,{kind:"letter",tone:"region",from:`${RG[r].champ} · Champion of ${RG[r].name}`,title,body:body+"\n\n"+(RG_PHONE[cid]||"")});G.F[cid].met=true;return;}
+  R.wrote[cid]=1;chatNote(G,cid,body);return;}
   addMail(G,{kind:"letter",tone:"region",from:`${RG[r].champ} · Champion of ${RG[r].name}`,title,body});}
 const RG_VISITMSG={baibua:"Before our next bout, may I drop by Sirichai Camp? I'll bring khao tom mat for everyone.",tabtim:"The next bout's not here yet, so Tabtim's dropping by to see your camp first, okay!",alicia:"Before bout two I'll stop by your camp. Not for content. I'm just passing through.",chaba:"…I'll drop by your camp. Before bout two."};
 function rgOrg(G,r,title,body){addMail(G,{kind:"letter",tone:"region",from:"Four Regions Championship organizers",title,body});}
@@ -1289,6 +1328,8 @@ const REGION={
     R.trip={abs,season:G.season||1,wk,dest,fid,opp,bid,cost:P.total,car:P.car,fat:P.fat,quick:this.canQuick(G,dest)&&!!R.quickPref,party:this.party(G,fid)};
     G.log=G.log||[];G.log.push(`Trip planned to ${D.name} week ${wk} · travel cost ${fmt(P.total)}`);return {ok:true,wk,cost:P.total};},
   /* v1.91.76 (Man): the travelling party — the fighter always, then whoever the player picked, capped by the vehicle's seats */
+  pairDue(G,dest){const R=G.region,D=ROAD_DEST[dest];if(!R||!D)return null;const tx=R.tx||{},dfr=R.txDefer||{};
+    const ds=[dest,...Object.keys(dfr).filter(d=>dfr[d]&&ROAD_DEST[d]&&ROAD_DEST[d].r===D.r)];for(const d of ds)if(RG_PAIR[d]&&RG_TRIPX[d]&&!tx[d]&&rgIn(G,RG_PAIR[d]))return RG_PAIR[d];return null;},
   party(G,fid){const max=roadSeats(G),pick=(UI.rgParty||[]).filter(id=>id!==fid&&G.F[id]&&G.F[id].camp==="player");return [fid,...pick].slice(0,max);},
   cancel(G){const R=G.region,T=R&&R.trip;if(!T)return false;G.bookings=G.bookings.filter(b=>b.id!==T.bid);G.cash+=T.cost;
     (R.gc=R.gc||[]).push(T.opp);R.trip=null;return true;},
@@ -1296,9 +1337,10 @@ const REGION={
   /* ---------- results + weekly upkeep ---------- */
   flush(G){const R=G.region;if(R)rgApply(G);if(R&&R.joined)this.joinSkills(G);if(R)this.bondSync(G);if(!R||!R.pend||!R.pend.length)return;const done=R.pend.splice(0);
     for(const p of done){const rg=p.region||{},r=rg.r,dest=rg.dest,D=ROAD_DEST[dest];if(rg.nlfinal){if(R.final){R.final.cur=R.final.cur||{};R.final.cur[rg.nlfinal]=p.res||"L";}continue;}if(rg.nlleg){this.legResult(G,rg.nlleg,p);continue;}if(!D||!RG[r])continue;
-      if(rg.series){this.seriesResult(G,r,p);continue;}
+      if(rg.series){this.lbAdd(G,p.a,"rc:"+r,p.res,p.stop);this.seriesResult(G,r,p);continue;}
+      this.lbAdd(G,p.a,"pc:"+dest,p.res,p.stop);
       rgTouch(G,RG_CID[r]);const T=R.trip,abs=T&&T.bid===p.bid?T.abs:gameWeek(G);
-      if(p.res==="W"){R.belts[r]=R.belts[r]||{};R.belts[r][dest]=1;G.log=G.log||[];G.log.push(`${G.F[p.a]?G.F[p.a].name:""} wins the provincial belt of ${D.name}!`);if(G.F[p.a])recordHonor(G,"rgbelt",p.a,G.F[p.a].div,G.week,dest); /* v1.91.14 (Man): a province belt gets the same ceremony as the main game */
+      if(p.res==="W"){R.belts[r]=R.belts[r]||{};R.belts[r][dest]=1;G.log=G.log||[];G.log.push(`${G.F[p.a]?G.F[p.a].name:""} wins the provincial belt of ${D.name}!`);if(G.F[p.a])recordHonor(G,"rgbelt",p.a,G.F[p.a].div,G.week,dest,G.F[p.b]?G.F[p.b].name:this.oppName(G,dest)); /* v1.91.14 (Man): a province belt gets the same ceremony as the main game */
         if(this.beltCount(G,r)===4&&R.champ[r].state==="locked"){R.champ[r].state="letter";this.champFighter(G,r);
           rgOrg(G,r,`${RG_TITLE[r]}: all four belts won`,`Dear Manager of Sirichai Camp,
 
@@ -1316,7 +1358,7 @@ Pick your fighter under Fights › Four Regions Championship`+((t=>t?`\n\n(${t})
       const gap=now-R.meetT[cid];
       if(gap>=3&&!R.miss[cid]){R.miss[cid]=1;rgSay(G,r,`A letter from ${RG[r].champ}`,RG_MISS[r]);}
       if(gap>=4){const pk=(R.meetPk||{})[cid]||m[cid],fl=RG_FLOOR.find(t=>pk>=t)||0;if(m[cid]>fl)m[cid]=Math.max(fl,Math.round((m[cid]-.25)*100)/100);}}},
-  weekly(G){const R=G.region;rgApply(G);this.flush(G);this.seriesWeekly(G);this.fade(G);this.letters(G);this.finalWeekly(G);this.joinWeekly(G);this.joinPerks(G);this.loopWeekly(G);const T=R.trip;
+  weekly(G){const R=G.region;rgApply(G);this.lbWeek(G);this.flush(G);this.legendMail(G);this.seriesWeekly(G);this.fade(G);this.letters(G);this.finalWeekly(G);this.joinWeekly(G);this.joinPerks(G);this.loopWeekly(G);const T=R.trip;
     /* a trip whose bout vanished (the week went by, the booking was dropped) is let go */
     if(T&&gameWeek(G)>T.abs&&!G.bookings.some(b=>b.id===T.bid)){(R.gc=R.gc||[]).push(T.opp);R.trip=null;R.nextTripAbs=Math.max(R.nextTripAbs||0,T.abs+RG_TRIP_GAP);}
     const keep=new Set(G.bookings.map(b=>b.b));R.gc=(R.gc||[]).filter(id=>{if(keep.has(id))return true;if(G.F[id]&&G.F[id].rg)delete G.F[id];return false;});},
@@ -1351,7 +1393,12 @@ Pick your fighter under Fights › Four Regions Championship`+((t=>t?`\n\n(${t})
   night(T,P,n,done){const D=ROAD_DEST[T.dest],r=D.r,nights=P.nights||0;
     /* after the cup: the champion's private night takes the place of the first hotel night (even on a day trip) */
     if(T.cupNight&&n===1){playScene(RG_CH[r].night(G,T),()=>{T.cupNight=0;this.night(T,P,2,done);},{bg:RG_CH[r].nightBg,look:"casual"});return;}
-    {const X=RG_TRIPX[T.dest],tx=G.region.tx=G.region.tx||{};if(n===1&&X&&!tx[T.dest]&&!T.series){tx[T.dest]=1;rgTouch(G,RG_CID[r]);playScene(X.steps(G,T),()=>this.night(T,P,n,done),{bg:X.bg,look:"casual"});return;}}
+    {const tx=G.region.tx=G.region.tx||{},dfr=G.region.txDefer=G.region.txDefer||{};
+      /* v1.91.78 (Man): a province's pair scene waits until her girl rides along — on this trip or a later one in the same region */
+      const ready=d=>RG_TRIPX[d]&&!tx[d]&&(!RG_PAIR[d]||rgInT(G,RG_PAIR[d])||!rgIn(G,RG_PAIR[d]));
+      let key=null;if(n===1&&!T.series){if(RG_TRIPX[T.dest]&&!tx[T.dest]){if(ready(T.dest))key=T.dest;else dfr[T.dest]=1;}
+        if(!key)key=Object.keys(dfr).find(d=>dfr[d]&&ROAD_DEST[d]&&ROAD_DEST[d].r===r&&ready(d))||null;}
+      if(key){const X=RG_TRIPX[key];tx[key]=1;delete dfr[key];rgTouch(G,RG_CID[r]);playScene(X.steps(G,T),()=>this.night(T,P,n,done),{bg:X.bg,look:"casual"});return;}}
     if(n>nights){if(nights===0&&n===1&&!T.extra&&!T.series){const rooms=Math.ceil((P.people||roadRiders(G).length)/2),cost=rooms*ROAD_ROOM;
         playScene([{n:"nar",t:`The bout in ${D.name} is over. Everyone waits by the car.`,choice:[
           {t:"Head back to camp",then:[{n:"nar",t:"The car pulls out of town, and everyone is asleep before you even leave the province."}]},
@@ -1433,7 +1480,7 @@ Pick your fighter under Fights › Four Regions Championship`+((t=>t?`\n\n(${t})
   seriesResult(G,r,p){const R=G.region,c=R.champ[r];if(!c||c.state!=="series")return;rgTouch(G,RG_CID[r]);const abs=c.next?c.next.abs:gameWeek(G),me=G.F[c.fid];
     c.n=(c.n||0)+1;if(p.res==="W")c.w++;else if(p.res==="L")c.l++;c.next=null;R.nextTripAbs=Math.max(R.nextTripAbs||0,abs+RG_TRIP_GAP);G.log=G.log||[];
     if(c.w>=2){c.state="won";c.wonAbs=abs;(R.post=R.post||{})[r]=abs+1;R.cups=R.cups||[];if(!R.cups.includes(r))R.cups.push(r);G.cash+=RG_CUP_PRIZE;G.rep+=4;
-      if(me){G.honors=G.honors||[];const key=`${G.season||1}:rg_${r}:${me.div}::${me.id}`;if(!G.honors.some(h=>h.key===key))G.honors.push({key,season:G.season||1,week:G.week,id:me.id,div:me.div,kind:"rg_"+r});}
+      if(me){G.honors=G.honors||[];const key=`${G.season||1}:rg_${r}:${me.div}::${me.id}`;if(!G.honors.some(h=>h.key===key))G.honors.push({key,season:G.season||1,week:G.week,id:me.id,div:me.div,kind:"rg_"+r,opp:`${RG[r].champ} · won ${c.w}-${c.l}`});}
       rgMeet(G,this.champId[r],4);R.just={r,kind:"cup",res:p.res,w:c.w,l:c.l};
       G.log.push(`${HONOR_LABEL["rg_"+r]}: ${me?me.name:""} ${c.w}-${c.l} ${RG[r].champ} · prize ${fmt(RG_CUP_PRIZE)}`);return;}
     if(c.l>=2){c.state="lost";c.tries=(c.tries||0)+1;c.letterAbs=abs+2;R.just={r,kind:"lost",res:p.res,w:c.w,l:c.l};
@@ -1517,7 +1564,12 @@ ${RG[r].champ}, the new champion of ${RG[r].name} is open to a new regional titl
 .rg-reg{border-top:6px solid var(--rc);position:relative}.rg-reg h3{margin:.1rem 0 0}.rg-reg h3::first-letter{text-transform:uppercase}.rg-champ{font-size:.85rem;opacity:.85;margin-bottom:.5rem}
 .rg-prov{display:flex;align-items:center;justify-content:space-between;gap:.5rem;padding:.35rem 0;border-bottom:1px dashed rgba(0,0,0,.15)}
 .rg-prov:last-child{border-bottom:0}.rg-prov small{opacity:.7}.rg-fin{opacity:.9}.rg-miss{display:block;color:#d4688f;opacity:1!important}.rg-belt{color:#b8860b;font-weight:700}
-.rg-trip{border-left:6px solid var(--gold,#d9a21b)}.rgt-list{display:grid;gap:.5rem}.rgt-dev{margin-top:.6rem;padding:.5rem;border:2px dashed #8fd3ff;display:grid;gap:.4rem}.rgt-dev>div{display:flex;flex-wrap:wrap;gap:5px;align-items:center}.rgt-dev small{opacity:.75;margin-right:4px}.rgt-reg{border-left:6px solid var(--rc);padding:.3rem .5rem;background:rgba(0,0,0,.12)}.rgt-pv{display:flex;flex-wrap:wrap;gap:6px;margin-top:4px}.rgt-pv .btn{display:grid;text-align:left}.rgt-pv .btn small{opacity:.75}.rg-load{position:fixed;inset:0;z-index:9000;display:flex;align-items:center;justify-content:center;background:#07040c url(${ASSET}bg_naka_underground.webp) center/cover}.rgl-in{background:rgba(8,4,10,.82);box-shadow:inset 0 0 0 3px #c41d33;padding:1rem 1.2rem;max-width:min(90vw,520px);display:grid;gap:.6rem;color:#f3e9ff}.rgl-in b{color:#ff5a6c;font-size:1.2rem}.rgl-in p{margin:0;line-height:1.5}.rgl-bar{height:10px;background:#2a0d14;box-shadow:inset 0 0 0 2px #5a1520}.rgl-bar i{display:block;height:100%;width:0;background:#e0283c;transition:width .2s}.fprep3{display:grid;gap:6px;margin:.4rem 0}.fprep3 h4{margin:0;color:#ff7a8a}.fprep3 .btn{text-align:left;display:grid;justify-items:start;padding:.5rem .8rem}.fprep3 .btn.gold{box-shadow:inset 0 0 0 3px #ffcf4a}.fprep3 .btn small{opacity:.8}.rg-show{position:fixed;inset:0;z-index:9000;background:#07040c;display:flex;align-items:center;justify-content:center}.rgs-in{position:relative;width:min(100vw,960px)}.rg-show canvas{width:100%;height:auto;display:block;image-rendering:auto}.rgs-cap{min-height:3.2em;padding:.7rem 1rem;color:#f3e9ff;font-size:1.05rem;line-height:1.5;background:linear-gradient(180deg,#1a1028,#0d0815);border-top:3px solid #ff4d6d}.rgs-skip{position:absolute;top:.5rem;right:.5rem}.rg-quick{display:grid;grid-template-columns:auto 1fr;column-gap:.5rem;align-items:center;margin:.6rem 0;cursor:pointer}.rg-quick small{grid-column:2}.rg-pick{display:flex;flex-wrap:wrap;gap:.4rem;margin:.4rem 0}
+.rg-trip{border-left:6px solid var(--gold,#d9a21b)}.rgt-list{display:grid;gap:.5rem}.rg-finbtn{display:grid;width:100%;margin-top:6px;text-align:left;background:#7a1020;color:#fff;box-shadow:inset 0 0 0 2px #ffcf4a}.rg-finbtn small{opacity:.85}.rg-finbtn.hot{animation:finb 1s steps(2) infinite}@keyframes finb{50%{box-shadow:inset 0 0 0 2px #ffcf4a,0 0 0 4px #ff3b55}}
+.lb-head,.lb-row{display:grid;grid-template-columns:1.6em 2.6em 1fr auto 2.6em;gap:.4rem;align-items:center}.lb-head{font-size:.75rem;opacity:.7;padding:0 .3rem}.lb-row{padding:.3rem;border-left:4px solid var(--rc);margin:3px 0;background:rgba(0,0,0,.14)}.lb-row.us{background:rgba(255,207,74,.14);box-shadow:inset 0 0 0 1px #ffcf4a}
+.lb-n{font-weight:700;text-align:center}.lb-mv{font-style:normal;font-size:.72rem;opacity:.7}.lb-mv.up{color:#7aff9a;opacity:1}.lb-mv.dn{color:#ff7a6a;opacity:1}.lb-mv.new{color:#ffcf4a;opacity:1}
+.lb-who{display:flex;align-items:center;gap:.35rem;min-width:0}.lb-who>span{display:grid;min-width:0}.lb-who small{opacity:.7;font-size:.72rem}.lb-who img{width:26px;height:26px}
+.lb-rec{display:grid;justify-items:end;font-size:.82rem}.lb-rec small{opacity:.7;font-size:.7rem}.lb-fm{display:flex;gap:1px}.lb-fm .fm{font-size:.62rem;padding:0 2px}.fm.W{background:#2f8a4f}.fm.L{background:#8a2f3a}.fm.D{background:#6a6a7a}.lb-pts{text-align:right;color:var(--gold,#ffcf4a);font-size:1.05rem}
+@media (prefers-reduced-motion:reduce){.rg-finbtn.hot{animation:none}}.rg-pairtag small{color:#ffd36a}.rgt-dev{margin-top:.6rem;padding:.5rem;border:2px dashed #8fd3ff;display:grid;gap:.4rem}.rgt-dev>div{display:flex;flex-wrap:wrap;gap:5px;align-items:center}.rgt-dev small{opacity:.75;margin-right:4px}.rgt-reg{border-left:6px solid var(--rc);padding:.3rem .5rem;background:rgba(0,0,0,.12)}.rgt-pv{display:flex;flex-wrap:wrap;gap:6px;margin-top:4px}.rgt-pv .btn{display:grid;text-align:left}.rgt-pv .btn small{opacity:.75}.rg-load{position:fixed;inset:0;z-index:9000;display:flex;align-items:center;justify-content:center;background:#07040c url(${ASSET}bg_naka_underground.webp) center/cover}.rgl-in{background:rgba(8,4,10,.82);box-shadow:inset 0 0 0 3px #c41d33;padding:1rem 1.2rem;max-width:min(90vw,520px);display:grid;gap:.6rem;color:#f3e9ff}.rgl-in b{color:#ff5a6c;font-size:1.2rem}.rgl-in p{margin:0;line-height:1.5}.rgl-bar{height:10px;background:#2a0d14;box-shadow:inset 0 0 0 2px #5a1520}.rgl-bar i{display:block;height:100%;width:0;background:#e0283c;transition:width .2s}.fprep3{display:grid;gap:6px;margin:.4rem 0}.fprep3 h4{margin:0;color:#ff7a8a}.fprep3 .btn{text-align:left;display:grid;justify-items:start;padding:.5rem .8rem}.fprep3 .btn.gold{box-shadow:inset 0 0 0 3px #ffcf4a}.fprep3 .btn small{opacity:.8}.rg-show{position:fixed;inset:0;z-index:9000;background:#07040c;display:flex;align-items:center;justify-content:center}.rgs-in{position:relative;width:min(100vw,960px)}.rg-show canvas{width:100%;height:auto;display:block;image-rendering:auto}.rgs-cap{min-height:3.2em;padding:.7rem 1rem;color:#f3e9ff;font-size:1.05rem;line-height:1.5;background:linear-gradient(180deg,#1a1028,#0d0815);border-top:3px solid #ff4d6d}.rgs-skip{position:absolute;top:.5rem;right:.5rem}.rg-quick{display:grid;grid-template-columns:auto 1fr;column-gap:.5rem;align-items:center;margin:.6rem 0;cursor:pointer}.rg-quick small{grid-column:2}.rg-pick{display:flex;flex-wrap:wrap;gap:.4rem;margin:.4rem 0}
 .rg-pick button{display:flex;align-items:center;gap:.35rem}.rg-pick button[aria-pressed="true"]{outline:3px solid var(--gold,#d9a21b)}
 .rg-bill .kv-row{padding:.15rem 0}.rg-fuel.cheap{color:#2f8a50}.rg-fuel.high{color:#c8283c}
 #rdcv{width:100%;height:auto;image-rendering:pixelated;background:#1b1530;box-shadow:inset 0 0 0 2px var(--line)}
@@ -1533,8 +1585,45 @@ ${RG[r].champ}, the new champion of ${RG[r].name} is open to a new regional titl
 .rd-fuel.cheap b{color:#7fd88a}.rd-fuel.high b{color:#ff8f8f}
 .rd-bill{display:grid;gap:2px;padding:8px 10px}.rd-bill .kv-row{font-size:13px}.rd-total{border-top:1px dashed #4a3f6b;padding-top:4px;margin-top:2px}
 .rd-seg{display:flex;flex-wrap:wrap;gap:4px;justify-content:center}#roadtrip{background:#0a0616}`;document.head.appendChild(st);},
-  fuelLine(G){const p=roadFuel(G,gameWeek(G)),b=roadFuelBand(p);
+  fuelLine(G){const ft=roadFuelOf(roadCarKey(G)),p=roadFuel(G,gameWeek(G),ft),b=roadFuelBand(p,ft);
     return `<p class="meta">Fuel this week <b class="rg-fuel ${b}">฿${p.toFixed(2)}/L · ${b==="cheap"?"cheap":b==="high"?"pricey":"Normal"}</b> · ${esc(roadFuelHint(G))}</p>`;},
+  /* ---------- v1.91.78 (Man): the regional tab is a ranking board like the sub-district/district/province tables ----------
+     points per bout (win 3 · win inside the distance +1 · draw 1), each fighter's record, rank up/down by week; the province and
+     regional champions also fight each other on the circuit, two bouts a week */
+  lb(G){const R=G.region,ed=R.edition||1;if(!R.lb||R.lb.ed!==ed){const L={ed,pts:{},w:{},l:{},d:{},ko:{},form:{},prev:{},log:[]};R.lb=L;
+      for(const r of RG_ORDER){for(const p of RG[r].prov){const P=R.pc&&R.pc[p],k="pc:"+p;L.pts[k]=0;L.w[k]=0;L.l[k]=0;L.ko[k]=0;
+          for(const x of (P&&P.path)||[]){L.pts[k]+=3+(x.m==="ko"?1:0);L.w[k]++;if(x.m==="ko")L.ko[k]++;}}
+        const k="rc:"+r;L.pts[k]=9;L.w[k]=3;L.l[k]=0;L.ko[k]=1;}
+      /* a save already part-way through: count the belts and cups our fighters have won since the chapter opened */
+      for(const h of G.honors||[]){if(!G.F[h.id]||G.F[h.id].camp!=="player")continue;if(h.season&&((h.season-1)*52+(h.week||1))<(R.startAbs||0))continue;const n=h.kind==="rgbelt"?1:/^rg_/.test(h.kind)?2:0;if(!n)continue;
+        for(const o of [L.pts,L.w,L.l,L.d,L.ko])if(o[h.id]==null)o[h.id]=0;L.pts[h.id]+=3*n;L.w[h.id]+=n;}
+      this.lbRank(G,true);}
+    return R.lb;},
+  lbKeys(G){const L=this.lb(G);return Object.keys(L.pts).filter(k=>!/^(pc|rc):/.test(k)?G.F[k]&&G.F[k].camp==="player":true);},
+  lbName(G,k){if(k.startsWith("pc:")){const d=k.slice(3);return {n:this.oppName(G,d),c:`Provincial champion ${ROAD_DEST[d]?ROAD_DEST[d].name:""}`,col:RG[ROAD_DEST[d].r].col};}
+    if(k.startsWith("rc:")){const r=k.slice(3);return {n:RG[r].champ,c:`Champion ${RG[r].name}`,col:RG[r].col,rc:1};}
+    const f=G.F[k];return {n:f?f.name:k,c:"Sirichai Camp",us:1,f};},
+  lbSorted(G){const L=this.lb(G);return this.lbKeys(G).sort((a,b)=>(L.pts[b]||0)-(L.pts[a]||0)||(L.w[b]||0)-(L.w[a]||0)||(L.l[a]||0)-(L.l[b]||0)||a.localeCompare(b));},
+  lbRank(G,snap){const L=G.region.lb;if(!L)return;if(snap){L.prev={};this.lbSorted(G).forEach((k,i)=>L.prev[k]=i+1);}},
+  lbAdd(G,a,b,res,stop){if(!a||!b)return;const L=this.lb(G),one=(k,r)=>{for(const o of [L.pts,L.w,L.l,L.d,L.ko])if(o[k]==null)o[k]=0;
+      if(r==="W"){L.pts[k]+=3+(stop?1:0);L.w[k]++;if(stop)L.ko[k]++;}else if(r==="L")L.l[k]++;else{L.pts[k]+=1;L.d[k]++;}(L.form[k]=L.form[k]||[]).push(r||"D");if(L.form[k].length>5)L.form[k].shift();};
+    const ra=res==="W"?"W":res==="L"?"L":"D",rb=ra==="W"?"L":ra==="L"?"W":"D";one(a,ra);one(b,rb);
+    L.log.unshift({wk:G.week,ss:G.season||1,a,b,r:ra,stop:!!stop,pa:ra==="W"?3+(stop?1:0):ra==="D"?1:0,pb:rb==="W"?3+(stop?1:0):rb==="D"?1:0});if(L.log.length>14)L.log.length=14;},
+  lbWeek(G){const R=G.region,now=gameWeek(G),L=this.lb(G);if(L.simWk===now)return;L.simWk=now;this.lbRank(G,true);
+    const bots=Object.keys(L.pts).filter(k=>/^(pc|rc):/.test(k)),rng=mulberry32((G.seed||1)*7+now*131+(R.edition||1)*17);
+    for(let n=0;n<2&&bots.length>1;n++){const a=bots[Math.floor(rng()*bots.length)];let b=bots[Math.floor(rng()*bots.length)];if(a===b)continue;
+      const sa=a.startsWith("rc:")?1.6:1,sb=b.startsWith("rc:")?1.6:1,pw=sa/(sa+sb),x=rng(),res=x<pw*.94?"W":x<.94?"L":"D";this.lbAdd(G,a,b,res,rng()<.35);}},
+  boardHTML2(G){const R=G.region,L=this.lb(G),S=this.lbSorted(G);
+    const mv=k=>{const p=L.prev[k],c=S.indexOf(k)+1;return !p?`<i class="lb-mv new">new</i>`:p>c?`<i class="lb-mv up">▲${p-c}</i>`:p<c?`<i class="lb-mv dn">▼${c-p}</i>`:`<i class="lb-mv">–</i>`;};
+    const rows=S.map((k,i)=>{const N=this.lbName(G,k),fm=(L.form[k]||[]).map(x=>`<b class="fm ${x}">${x==="W"?"W":x==="L"?"L":"D"}</b>`).join("");
+      return `<div class="lb-row ${N.us?"us":""}" style="--rc:${N.col||"#c8283c"}"><span class="lb-n">${i+1}</span>${mv(k)}<span class="lb-who">${N.f?faceImg(N.f,"sm"):""}<span><b>${esc(N.n)}</b><small>${esc(N.c)}</small></span></span><span class="lb-rec">${L.w[k]||0}-${L.l[k]||0}${L.d[k]?`-${L.d[k]}`:""}<small>${L.ko[k]?`KO ${L.ko[k]}`:""}</small><span class="lb-fm">${fm}</span></span><b class="lb-pts">${L.pts[k]||0}</b></div>`;}).join("");
+    const nm=k=>esc(this.lbName(G,k).n);
+    const log=L.log.length?L.log.slice(0,10).map(x=>`<div class="kv-row"><span><small>Week ${x.wk}</small> ${nm(x.a)} <b>${x.r==="W"?"Win":x.r==="L"?"Loss":"Draw"}</b> ${nm(x.b)}${x.stop&&x.r!=="D"?" <small>(inside the distance)</small>":""}</span><span class="num">+${x.pa} / +${x.pb}</span></div>`).join(""):`<p class="meta">No bouts yet this edition</p>`;
+    return `<section class="px card rg-head"><div><h3>Four Regions Championship standings</h3><span class="meta">Edition ${R.edition||1}${this.nextEdTxt(G)}</span></div>
+      <p class="meta">Win 3 pts · win inside the distance +1 · draw 1 · province and regional champions fight each other twice a week · arrows compare with the start of the week · travel from the 🚐 button by the camp vehicle on the home screen</p>
+      ${this.overTime(G)?`<p class="meta redt">This edition has run out of time</p>`:""}</section>
+      <section class="px card"><div class="lb-head"><span>#</span><span></span><span>Fighter</span><span>Record</span><span>Pts</span></div>${rows}</section>
+      <section class="px card"><h4>Latest bouts</h4>${log}</section>`;},
   html(){this.css();
     if(!G.region){const t=(G.honors||[]).filter(h=>h.kind==="province").length;
       return `<section class="px card"><h3>Four Regions Championship</h3><p>The regional tournament sends its invitation once year 5 is over and the camp has won 3 provincial titles.</p>
@@ -1550,10 +1639,8 @@ ${RG[r].champ}, the new champion of ${RG[r].name} is open to a new regional titl
         const P=R.pc&&R.pc[p];return `<div class="rg-prov"><span><b>${esc(D.name)}</b> <small>${D.km} km · ${nights?`Stay ${nights} night(s)`:"Day trip"}</small>${P?this.histHTML(P,p,`Provincial champion: ${rgNm(P,p)}`):""}</span>${got?`<span class="rg-belt">🏅 Belt won</span>`:`<button class="btn sm${T||!nx?"":" primary"}" data-act="rgplan" data-v="${p}" ${T||!nx?"disabled":""}>Plan</button>`}</div>`;}).join("");
       const fin=this.finRow(r);
       return `<section class="px card rg-reg" style="--rc:${C.col}"><h3>${esc(C.name)}</h3><div class="rg-champ">Regional champion: <b>${esc(C.champ)}</b> · ${esc(C.nick)}${R.nc&&R.nc[r]?this.histHTML(R.nc[r],R.nc[r].home,"The new regional champion's story"):""}</div>${rows}${fin}</section>`;}).join("");
-    return `<section class="px card rg-head"><div><h3>Four Regions Championship</h3><span class="meta">Edition ${R.edition||1}${this.nextEdTxt(G)}</span></div>
-       <div class="rg-stats"><span class="pill gold">Cups ${cups}/4</span><span class="pill">Belts ${belts}/16</span><span class="pill ${T?"red":nx?"green":""}">${T?`Trip: ${esc(ROAD_DEST[T.dest].name)} · Week ${T.wk}`:nx?`Can travel week ${nx}`:"No more trips this year"}</span></div></section>
-     ${!R.gala?`<p class="meta rg-gala">🎉 The Four Regions Cup opening gala in Bangkok ${R.galaAbs!=null&&gameWeek(G)<R.galaAbs?"is held at the end of next week":"is held at the end of this week"} · the whole camp is invited</p>`:""}${!REGION_LIVE?`<p class="meta">Test mode: <button class="btn sm" data-act="rggala" data-v="gala">Watch the gala</button> <button class="btn sm" data-act="rgclosetest">Watch the closing</button> Underground test fight (open rules): ${NL_ORDER.map(k=>`<button class="btn sm" data-act="nltest" data-v="${k}">${esc(NL[k].name)}</button>`).join(" ")}${(R.cups||[]).length?` <button class="btn sm" data-act="rggala" data-v="c1">Watch the green envelope scene</button>`:""}</p>`:""}
-     ${this.finalCard(G)}${this.legendCard(G)}${this.joinCard(G)}${tripCard}${this.fuelLine(G)}<div class="rg-grid">${regs}</div>`;},
+    return `${!R.gala?`<p class="meta rg-gala">🎉 The Four Regions Cup opening gala in Bangkok ${R.galaAbs!=null&&gameWeek(G)<R.galaAbs?"is held at the end of next week":"is held at the end of this week"} · the whole camp is invited</p>`:""}${this.boardHTML2(G)}
+     ${!REGION_LIVE?`<p class="meta">Test mode: <button class="btn sm" data-act="rggala" data-v="gala">Watch the gala</button> <button class="btn sm" data-act="rgclosetest">Watch the closing</button> Underground test fight (open rules): ${NL_ORDER.map(k=>`<button class="btn sm" data-act="nltest" data-v="${k}">${esc(NL[k].name)}</button>`).join(" ")}${(R.cups||[]).length?` <button class="btn sm" data-act="rggala" data-v="c1">Watch the green envelope scene</button>`:""}</p>`:""}${!REGION_LIVE?`<details class="rg-dev"><summary>Test mode: old cards</summary>${this.finalCard(G)}${this.legendCard(G)}<div class="rg-grid">${regs}</div></details>`:""}`;},
   /* quick trips: only once the region's first meeting and this province's own story have been seen */
   /* v1.91.50 (playtest): a champion coming to visit shows on the home screen too — it was easy to miss on the regional tab */
   visitBanner(G){const R=G.region;if(!R||!R.champ)return "";const r=RG_ORDER.find(x=>R.champ[x]&&R.champ[x].visit==="due");if(!r)return "";const cid=this.champId[r];
@@ -1571,24 +1658,28 @@ ${RG[r].champ}, the new champion of ${RG[r].name} is open to a new regional titl
      <p class="meta">Travel in week <b>${wk}</b> · ${D.km} km · ${P.nights?`Stay ${P.nights} night(s)`:"Day trip"} · opponent: <b>${esc(this.oppName(G,dest))}</b>, the provincial champion</p>
      <h3>Who fights?</h3>${R.length?`<div class="rg-pick">${R.map(f=>`<button class="btn sm" data-act="rgfid" data-v="${f.id}" aria-pressed="${f.id===UI.rgFid}">${faceImg(f,"sm")}${esc(f.name)} <small>Lv.${f.lvl||1}</small></button>`).join("")}</div>`:`<p class="redt">Nobody is fit to travel that week</p>`}
      <h3>Who comes along <small class="meta">${esc(roadCarName(roadCarKey(G)))} · fighters allowed: ${max} · the manager drives ${roadCoachIn(G)?" · Kru Daeng comes along":" · Kru Daeng is on leave"}</small></h3>
-     <div class="rg-pick">${cand.map(f=>{const on=UI.rgParty.includes(f.id),lock=f.id===UI.rgFid,full=!on&&UI.rgParty.length>=max;return `<button class="btn sm" data-act="rgparty" data-v="${f.id}" aria-pressed="${on}" ${lock||full?"disabled":""}>${faceImg(f,"sm")}${esc(f.name)}${lock?" <small>fights</small>":""}</button>`;}).join("")}</div>
+     <div class="rg-pick">${cand.map(f=>{const on=UI.rgParty.includes(f.id),lock=f.id===UI.rgFid,full=!on&&UI.rgParty.length>=max;const pr=this.pairDue(G,dest)===f.id;return `<button class="btn sm${pr?" rg-pairtag":""}" data-act="rgparty" data-v="${f.id}" aria-pressed="${on}" ${lock||full?"disabled":""}>${faceImg(f,"sm")}${esc(f.name)}${lock?" <small>fights</small>":""}${pr?` <small>💬 has a story with ${esc(RG[ROAD_DEST[dest].r].champ)}</small>`:""}</button>`;}).join("")}</div>
      <h3>Travel cost, round trip</h3><div class="rg-bill"><div class="kv-row"><span>Vehicle</span><b>${esc(roadCarName(P.car))}</b></div>
-      ${line(`Fuel ${Math.round(P.litres)} L × ฿${P.price.toFixed(2)}`,P.fuel)}${line("Tolls",P.toll)}${line(`Bus tickets × ${P.onBus}`,P.bus)}${line(`Lodging ${P.nights} night(s)`,P.lodge)}${line(`Food × ${P.people}`,P.food)}
+      ${line(`${P.ft==="ev"?"Electricity":"Fuel"} ${Math.round(P.litres)} ${P.unit||"litre"} × ฿${P.price.toFixed(2)}`,P.fuel)}${line("Tolls",P.toll)}${line(`Bus tickets × ${P.onBus}`,P.bus)}${line(`Lodging ${P.nights} night(s)`,P.lodge)}${line(`Food × ${P.people}`,P.food)}
       <div class="kv-row"><span><b>Total</b></span><b class="num ${poor?"redt":"goldt"}">${fmt(P.total)}</b></div><div class="kv-row"><span>Camp cash after paying</span><b class="num ${poor?"redt":""}">${fmt(G.cash-P.total)}</b></div></div>
      <p class="meta">Travelling together: ${P.people} people (incl. the manager ${roadCoachIn(G)?" and Kru Daeng":""}) · those who stay train as programmed · no other fights that week · travel fatigue about +${P.fat} each ${P.car==="none"?" · the camp has no vehicle yet, so it's the bus (pricier and more tiring)":""}</p>
      ${this.canQuick(G,dest)?`<label class="rg-quick"><input type="checkbox" data-act="rgquick" ${G.region.quickPref?"checked":""}> Quick trip <small class="meta">skip the drive, the hotel nights and the souvenir shop · nights away count as rest</small></label>`:""}
      <div class="mfoot"><button class="btn" data-act="closeModal">Later</button>${now&&wk===G.week?`<button class="btn primary" data-act="rggonow" data-v="${dest}" ${me&&!poor?"":"disabled"}>${poor?"Not enough money":"Set off now ▸"}</button>`:`<button class="btn primary" data-act="rggo" data-v="${dest}" ${me&&!poor?"":"disabled"}>${poor?"Not enough money":"Confirm the trip"}</button>`}</div>
      ${now&&wk===G.week?`<p class="meta center">Setting off ends this week right away (training → drive → hotel → ring)</p>`:""}`;},
   /* v1.91.76 (Man): the "travel" button at the camp vehicle — pick a province, then go this week */
-  travelOk(G){const R=G.region;return !!(R&&R.belts&&regionOn()&&!R.close&&RG_ORDER.some(r=>this.beltCount(G,r)<4));},
+  travelOk(G){const R=G.region;return !!(R&&R.belts&&regionOn()&&!R.close&&RG_ORDER.some(r=>this.beltCount(G,r)<4||(R.champ[r]&&R.champ[r].state!=="won")));},
+  /* v1.91.78 (Man): once a region's four belts are in, its title match shows in the travel popup as a big blinking button */
+  finBtn(G,r){const c=G.region.champ[r]||{};if(this.beltCount(G,r)<4||c.state==="won"||c.state==="locked")return "";const C=RG[r],hot=c.state==="letter"||(c.state==="series"&&c.visit==="due");
+    return `<button class="btn rg-finbtn ${hot?"hot":""}" data-act="rgfinopen" data-v="${r}">⚔ Title match · ${esc(C.name)} · ${esc(C.champ)}<small>${c.state==="letter"?"Pick your title fighter":c.state==="series"?`${c.w}-${c.l}${c.next?` · bout ${c.next.n} week ${c.next.wk}`:""}${c.visit==="due"?" · she'll drop by the camp":""}`:c.state==="lost"?"Waiting for a new challenge":"Waiting for her letter"}</small></button>`;},
+  finHTML(r){const C=RG[r];return `<h2>⚔ Title match · ${esc(C.name)}</h2><div class="rg-reg" style="--rc:${C.col}">${this.finRow(r)}</div><div class="mfoot"><button class="btn" data-act="rgtravel">◂ Back</button></div>`;},
   travelHTML(G){const R=G.region,wk=this.tripWeek(G),now=wk===G.week;
     if(R.trip){const T=R.trip,D=ROAD_DEST[T.dest];return `<h2>🚐 Travel · Four Regions Championship</h2><p>Trip booked to <b>${esc(D?D.name:"")}</b> week ${T.wk} booked · ${esc(G.F[T.fid]?G.F[T.fid].name:"")} fights</p><p class="meta">When that week comes, end the week to set off</p><div class="mfoot"><button class="btn" data-act="rgcancel">Cancel trip (refund)</button><button class="btn primary" data-act="closeModal">Close</button></div>`;}
     const rows=RG_ORDER.map(r=>{const C=RG[r],B=(R.belts||{})[r]||{};return `<div class="rgt-reg" style="--rc:${C.col}"><b>${esc(C.name)}</b><div class="rgt-pv">${C.prov.map(p=>{const D=ROAD_DEST[p];if(!D)return "";const got=!!B[p];
-      return `<button class="btn sm ${got?"":"gold"}" data-act="rgtravelto" data-v="${p}" ${got?"disabled":""}>${esc(D.name)}<small>${got?"Belt won":`${D.km} km`}</small></button>`;}).join("")}</div></div>`;}).join("");
-    return `<h2>🚐 Travel · Four Regions Championship</h2><p class="meta">${!wk?"No free week left to travel this year":now?"Pick a province and set off this week":`Can't leave this week · next possible week ${wk} (you can book ahead)`}</p>
+      return `<button class="btn sm ${got?"":"gold"}" data-act="rgtravelto" data-v="${p}" ${got?"disabled":""}>${esc(D.name)}<small>${got?"Belt won":`${D.km} km`}</small></button>`;}).join("")}</div>${this.finBtn(G,r)}</div>`;}).join("");
+    return `<h2>🚐 Travel · Four Regions Championship</h2>${roadSignHTML(G)}<p class="meta">${!wk?"No free week left to travel this year":now?"Pick a province and set off this week":`Can't leave this week · next possible week ${wk} (you can book ahead)`}</p>
       <div class="rgt-list">${rows}</div>${G.devTravel?this.travelDevHTML(G):""}<div class="mfoot"><button class="btn" data-act="closeModal">Close</button></div>`;},
   /* v1.91.77 (Man): the travel test save (#demo=travel_test) gets a small test panel — swap the camp vehicle, send Kru Daeng on leave, reset */
-  travelDevHTML(G){const cur=roadCarKey(G),cars=["none","tuktuk","songthaew","minibus","limo","tourbus"],away=!roadCoachIn(G);
+  travelDevHTML(G){const cur=roadCarKey(G),cars=["none","tuktuk","citycar","pickup","songthaew","minibus","vipvan","evsuv","evvan","limo","tourbus"],away=!roadCoachIn(G);
     return `<div class="rgt-dev"><b>🧪 Travel test mode</b>
       <div><small>Camp vehicle</small>${cars.map(k=>`<button class="btn sm ${k===cur?"gold":""}" data-act="rgtdev" data-v="car:${k}">${esc(roadCarName(k))} · ${Math.max(1,(k==="none"?4:ROAD_CAR[k].seats)-1-(away?0:1))} fighters</button>`).join("")}</div>
       <div><button class="btn sm ${away?"gold":""}" data-act="rgtdev" data-v="coach">${away?"Kru Daeng on leave (tap to bring back)":"Send Kru Daeng on leave"}</button><button class="btn sm" data-act="rgtdev" data-v="reset">Reset: cancel trip · return belts · cash ฿200,000</button><button class="btn sm" data-act="rgtdev" data-v="quick">${G.region.quickPref?"Close":"On"} quick trip</button></div></div>`;}
@@ -1619,7 +1710,7 @@ Open rules: throws and locks allowed · no prize, no press, no excuses
 The door is open every night. Send your fighters.
 
 — Krerk Naka ${ps}`});},
-  letterAct(m){const R=G.region,F=R&&R.final;if(!F)return "";if(F.won)return `<p class="meta center">Sirichai Camp won the underground night ${esc(F.score||"")}</p>`;const now=gameWeek(G);
+  letterAct(m){const R=G.region,F=R&&R.final;if(!F)return "";if(m.lg)return `<button class="btn gold big" data-act="rglegopen">✦ Open the legend tier ▸</button>`;if(F.won)return `<p class="meta center">Sirichai Camp won the underground night ${esc(F.score||"")}</p>`;const now=gameWeek(G);
     return now<F.abs?`<p class="meta center">Open from week ${((F.abs-1)%52)+1} · trained ${F.abs-now} weeks</p>`:`<button class="btn red big" data-act="rgfline">🂠 Go to the Khlong Toei warehouse ▸</button>`;},
   finalWeekly(G){const R=G.region,F=R.final,now=gameWeek(G);if(!F||F.intel||now<F.intelAbs)return;F.intel=1;
     addMail(G,{kind:"letter",tone:"naka",from:"(unsigned)",title:"Naka League team intel",body:"Don't ask who sent this\n\n"+NL_ORDER.map(k=>`${NL[k].name} · ${NL[k].art}\n${NL[k].tip||""}`).join("\n\n")+"\n\nLadda looks for old fight tapes of everyone in your camp. The ones she has never seen fight, she can't read.\n\nP.S. No need to return the tablet."});},
@@ -1693,6 +1784,9 @@ Object.assign(REGION,{
       <p class="meta">Optional · tougher than the underground final · one bout a week · injuries and fatigue count · ★ win · ★★ win without going down · ★★★ no knockdown and inside the distance · each new star gives stardust ${LEG_DUST}</p>
       <div class="rg-nl">${NL_ORDER.map(k=>`<div class="kv-row"><span><b>${esc(NL[k].name)}</b> <small>${esc(NL[k].art)}</small></span><span>${this.legStars(L[k]||0)} <button class="btn sm" data-act="rglegpick" data-v="${k}" ${used?"disabled":""}>Challenge ▸</button></span></div>`).join("")}</div>
       ${used?`<p class="meta">Already fought a legend bout this week</p>`:""}</section>`;},
+  /* v1.91.78 (Man): the legend tier opens from a Naka letter (the regional tab is only the ranking board now) */
+  legendMail(G){const R=G.region,F=R&&R.final;if(!F||!F.won||R.legMail)return;R.legMail=1;
+    addMail(G,{kind:"letter",tone:"naka",lg:1,from:"Naka League",title:"Legend tier · Naka League",body:"To Sirichai Camp,\n\nThe Naka League team is training again, and they are stronger than that night.\nWhoever wants another go can come once a week. Open rules, five rounds.\n\nCollect all fifteen stars and we will admit your camp is the real thing."});},
   legPickHTML(k){const R=G.region,pool=this.finalPool(G),L=R.legend||{};
     return `<h2>Legend · ${esc(NL[k].name)}</h2><p class="meta">${esc(NL[k].art)} · now ${this.legStars(L[k]||0)} · 5 rounds, open rules</p>
       <div class="vs-pick">${pool.map(f=>`<button class="vs-pc" data-act="rglego" data-v="${k}|${f.id}"><span class="vs-art">${this.vsArt(f,"r")}</span><b>${esc(f.name)}</b><small>Lv.${f.lvl||1}</small></button>`).join("")}</div>
@@ -1725,11 +1819,13 @@ if(typeof ACT!=="undefined")Object.assign(ACT,{
 });
 if(typeof XMODAL!=="undefined"){XMODAL.rgfline=()=>({body:REGION.boardHTML(),foot:false});XMODAL.rgleg=m=>({body:REGION.legPickHTML(m.k),foot:false});
   XMODAL.rgflost=()=>({body:`<h2>Lost the underground fight</h2><p>Next time all five bouts start again from bout 1 · go back and train, then set a new line-up from next week, or wait until you're ready</p><div class="mfoot"><button class="btn primary" data-act="rgfhome">Back to training</button></div>`,foot:false});}
-if(typeof XMODAL!=="undefined"){XMODAL.rgplan=m=>({body:REGION.planHTML(m.dest),foot:false});XMODAL.rgtravel=()=>({body:REGION.travelHTML(G),foot:false});XMODAL.rgser=m=>({body:REGION.seriesHTML(m.r),foot:false});}
+if(typeof XMODAL!=="undefined"){XMODAL.rgplan=m=>({body:REGION.planHTML(m.dest),foot:false});XMODAL.rgtravel=()=>({body:REGION.travelHTML(G),foot:false});XMODAL.rgfin=m=>({body:REGION.finHTML(m.r),foot:false});XMODAL.rglegend=()=>({body:`${REGION.legendCard(G)}<div class="mfoot"><button class="btn" data-act="closeModal">Close</button></div>`,foot:false});XMODAL.rgser=m=>({body:REGION.seriesHTML(m.r),foot:false});}
 if(typeof ACT!=="undefined")Object.assign(ACT,{
   lbgo:d=>{UI.modal=null;lbStart(G,d.v);},
   nltest:d=>{if(REGION_LIVE)return;nlTest(d.v);},
   rgplan:d=>{UI.rgFid=null;UI.rgParty=null;UI.rgNow=false;UI.modal={type:"rgplan",dest:d.v};render();},
+  rgfinopen:d=>{UI.modal={type:"rgfin",r:d.v};render();},
+  rglegopen:()=>{if(!G.region||!G.region.final||!G.region.final.won)return;REGION.css();UI.modal={type:"rglegend"};render();},
   rgtravel:()=>{if(!REGION.travelOk(G))return;UI.modal={type:"rgtravel"};render();},
   rgtravelto:d=>{UI.rgFid=null;UI.rgParty=null;UI.rgNow=true;UI.modal={type:"rgplan",dest:d.v};render();},
   rgparty:d=>{const P=UI.rgParty=UI.rgParty||[],i=P.indexOf(d.v);if(d.v===UI.rgFid)return;if(i>=0)P.splice(i,1);else if(P.length<roadSeats(G))P.push(d.v);render();},

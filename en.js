@@ -938,7 +938,7 @@ const CAMP_DECOR={
  gate:{name:"Entrance gate",items:{none:{name:"No gate",r:"N"},plain:{name:"Wooden gate",r:"N"},painted:{name:"Camp color gate",r:"R",fac:["brand",1]},lantern:{name:"Lantern gate",r:"SR",year:2,rep:18},trophy:{name:"Trophy gate",r:"SSR",honors:3},gold:{name:"Golden honor gate",r:"SS",honors:8},lanna:{name:"Lanna teak gate",r:"SR",shop:1,price:60000},jade:{name:"Jade gate",r:"SR",shop:1,price:65000},indigo:{name:"Indigo Cloth Gate",r:"SR",shop:1,price:58000},stucco:{name:"White Stucco Gate",r:"SR",shop:1,price:62000},bougain:{name:"Bougainvillea Arch",r:"SR",shop:1,price:60000},marigold:{name:"Marigold Arch",r:"SR",shop:1,price:60000}}},
  ring:{name:"Boxing ring",items:{plain:{name:"Original ring",r:"N"},red:{name:"Red ring trim",r:"R",fac:["ring",1]},blue:{name:"Blue ring trim",r:"R",fac:["ring",2]},sponsor:{name:"Sponsor ring",r:"SR",rep:30},gold:{name:"Champion ring",r:"SSR",honor:"province"},green:{name:"Emerald green ring",r:"R",shop:1,price:30000},purple:{name:"Royal purple ring",r:"SR",shop:1,price:60000},black:{name:"Midnight black ring",r:"SR",shop:1,price:75000},pink:{name:"Pastel Pink Ring",r:"R",shop:1,price:35000},orange:{name:"Bright Orange Ring",r:"R",shop:1,price:35000},yellow:{name:"Sunflower Yellow Ring",r:"R",shop:1,price:35000}}},
  track:{name:"Camp running track",items:{dirt:{name:"Dirt path",r:"N"},chalk:{name:"Chalk lane",r:"R",fac:["hill",1]},gravel:{name:"Gravel track",r:"SR",fac:["hill",2]},rubber:{name:"Rubber track",r:"SR",fac:["gym",2],rep:20},lantern:{name:"Lantern track",r:"SSR",year:3,rep:35},blue:{name:"Blue track",r:"R",shop:1,price:30000},green:{name:"Green track",r:"R",shop:1,price:30000},pink:{name:"Pink Track",r:"R",shop:1,price:30000},yellow:{name:"Yellow Track",r:"R",shop:1,price:30000},goldcarpet:{name:"Gold Carpet Track",r:"SSR",beauty:1}}},
- vehicle:{name:"Camp vehicle",items:{none:{name:"No vehicle",r:"N"},songthaew:{name:"Songthaew",r:"R",fac:["van",1]},minibus:{name:"Van",r:"SR",fac:["van",2]},tourbus:{name:"Camp bus",r:"SR",fac:["van",2],rep:35},limo:{name:"Limousine",r:"SSR",fac:["van",2],rep:45,honor:"province"},goldvan:{name:"Golden van",r:"SS",bossWins:10},rotdaeng:{name:"Chiang Mai red truck",r:"R",shop:1,price:40000},pinkvan:{name:"Pastel pink van",r:"SR",shop:1,price:95000},bluevan:{name:"Ocean Blue Van",r:"SR",shop:1,price:85000},tuktuk:{name:"Orange Tuk-tuk",r:"R",shop:1,price:45000},yellowthaew:{name:"Yellow Songthaew",r:"R",shop:1,price:40000}}},
+ vehicle:{name:"Camp vehicle",items:{none:{name:"No vehicle",r:"N"},songthaew:{name:"Songthaew",r:"R",fac:["van",1]},minibus:{name:"Van",r:"SR",fac:["van",2]},tourbus:{name:"Camp bus",r:"SR",fac:["van",2],rep:35},limo:{name:"Limousine",r:"SSR",fac:["van",2],rep:45,honor:"province"},goldvan:{name:"Golden van",r:"SS",bossWins:10},rotdaeng:{name:"Chiang Mai red truck",r:"R",shop:1,price:40000},pinkvan:{name:"Pastel pink van",r:"SR",shop:1,price:95000},bluevan:{name:"Ocean Blue Van",r:"SR",shop:1,price:85000},tuktuk:{name:"Orange Tuk-tuk",r:"R",shop:1,price:45000},yellowthaew:{name:"Yellow Songthaew",r:"R",shop:1,price:40000},citycar:{name:"E20 sedan",r:"N",shop:1,price:60000},pickup:{name:"Diesel cab pickup",r:"R",shop:1,price:120000},vipvan:{name:"VIP diesel van",r:"SR",shop:1,price:180000},evsuv:{name:"Electric SUV",r:"SSR",shop:1,price:380000},evvan:{name:"Electric van",r:"SSR",shop:1,price:420000}}},
  bags:{name:"Punching bags",items:{plain:{name:"Old bag",r:"N"},red:{name:"Red bag",r:"R",fac:["gym",1]},blue:{name:"Blue bag",r:"R",fac:["gym",2]},team:{name:"Camp crest bag",r:"SR",rep:20},gold:{name:"Champion bag",r:"SSR",honors:5},green:{name:"Army green bags",r:"N",shop:1,price:8000},black:{name:"Matte black bags",r:"R",shop:1,price:15000},pink:{name:"Sweet pink bags",r:"R",shop:1,price:15000},white:{name:"Pearl White Bags",r:"N",shop:1,price:8000},orange:{name:"Bright Orange Bags",r:"R",shop:1,price:15000},yellow:{name:"Bright Yellow Bags",r:"R",shop:1,price:15000}}}
 };
 const campWeekIndex=G=>gameWeek(G);
@@ -1094,9 +1094,9 @@ if(G.F)for(const id in G.F){const f=G.F[id];if(f&&hasTree(id)&&!f.spv){f.sp=(f.s
     for(const [div,b] of Object.entries(G.belt||{}))if(G.F[b.id]?.camp==="player")G.honors.push({key:`legacy:belt:${div}`,season:null,week:b.since||0,id:b.id,div,kind:"belt"});
     for(const f of Object.values(G.F))if(f.camp==="player"&&f.belts>0&&!G.honors.some(h=>h.kind==="belt"&&h.id===f.id))G.honors.push({key:`legacy:belt:${f.id}`,season:null,week:0,id:f.id,div:f.div,kind:"belt"});}
   G.awards=Array.isArray(G.awards)?G.awards:[];G.rank=G.rank||{A:{},B:{}};for(const d of ["A","B"])G.rank[d]=G.rank[d]||{};for(const f of Object.values(G.F))if(f.camp!=="free"&&f.camp!=="quest"&&(f.div==="A"||f.div==="B")&&!G.rank[f.div][f.id])G.rank[f.div][f.id]={pts:0,w:0,l:0,d:0};G.decor=G.decor||{};if(G.goldHelmetWins==null)G.goldHelmetWins=G.gang&&G.gang.st>=5?1:0;grantDecorUnlocks(G);for(const [slot,key] of Object.entries(G.decor))if(CAMP_DECOR[slot]&&CAMP_DECOR[slot].items[key]&&!G.decorUnlocks[slot].includes(key))G.decorUnlocks[slot].push(key);lateSeasonOpposition(G);return G;}
-function recordHonor(G,kind,id,div,week=G.week,venue=null){if(!G.F[id]||G.F[id].camp!=="player")return null;G.honors=G.honors||[];G.awards=G.awards||[];
+function recordHonor(G,kind,id,div,week=G.week,venue=null,opp=null){if(!G.F[id]||G.F[id].camp!=="player")return null;G.honors=G.honors||[];G.awards=G.awards||[];
   const season=G.season||1,key=`${season}:${kind}:${div}:${venue||""}:${kind==="dm"||kind==="belt"||kind==="defense"?week:id}`;
-  if(G.honors.some(h=>h.key===key))return null;const h={key,season,week,id,div,kind,...(venue?{venue}:{})};G.honors.push(h);G.awards.push(h);return h;}
+  if(G.honors.some(h=>h.key===key))return null;const h={key,season,week,id,div,kind,...(venue?{venue}:{}),...(opp?{opp}:{})};G.honors.push(h);G.awards.push(h);return h;}
 const DAENG_COST=[0,15000,30000];
 function facTotal(G){return Object.keys(FACILITIES).reduce((s,k)=>s+(G.fac[k]||0),0)+(G.fac.daeng-1);}
 function campLevel(G){const t=facTotal(G);return t>=13?3:t>=5?2:1;}
@@ -1401,14 +1401,14 @@ function standings(G,div){
 function stageTransition(G){ // called after week's results, before week++
   const rng=mulberry32(G.seed+G.week*31);
   if(G.week===20){
-    for(const div of ["A","B"]){const lead=standings(G,div)[0];if(lead)recordHonor(G,"local",lead.id,div);}
+    for(const div of ["A","B"]){const lead=standings(G,div)[0];if(lead)recordHonor(G,"local",lead.id,div,G.week,null,lead.pts!=null?`Top spot · ${lead.pts} pts`:null);}
     for(const div of ["A","B"]){G.qual[div]=storyTop4(G,div);}
     for(const div of ["A","B"]){NPC_DISTRICT[div].forEach(([n,l],i)=>{const id=`d${div}${i}`;G.F[id]=baseFighter(id,mkNPC(id,n,div,l,rng,i+3));startLv(G.F[id]);G.qual[div].push(id);});
       G.rank[div]={};G.qual[div].forEach((id,i)=>{G.rank[div][id]={pts:id.startsWith("d")?0:[4,3,2,1][i]||0,w:0,l:0,d:0};});}
     G.flags.qualDone=true;ensureStageNPCs(G,"district");
   }
   if(G.week===40){
-    for(const div of ["A","B"]){const lead=standings(G,div)[0];if(lead)recordHonor(G,"district",lead.id,div);}
+    for(const div of ["A","B"]){const lead=standings(G,div)[0];if(lead)recordHonor(G,"district",lead.id,div,G.week,null,lead.pts!=null?`Top spot · ${lead.pts} pts`:null);}
     // v1.4: top 4 of the district stage go to the provincial semi-finals (1v4, 2v3, week 44); winners meet in the final (week 49)
     G.semis=G.semis||{A:[],B:[]};
     for(const div of ["A","B"]){const t=storyTop4(G,div);G.semis[div]=t;G.finalists[div]=[];
@@ -1464,7 +1464,7 @@ function finishBracket(G,booking,F){
   if(booking.npc){const rv=leadRival(G,div);if((booking.a===rv||booking.b===rv)&&G.F[rv].camp==="rival"&&w!==rv){w=rv;F.result.win=rv===booking.a?"A":"B";F.result.type="Decision win";}}
   if(!G.finalists[div].includes(w))G.finalists[div].push(w);
   if(G.finalists[div].length===2){const [a,b]=G.finalists[div];bookBracket(G,`final${div}`,a,b,49,"final",5);}}
-function finishFinal(G,booking,F){const div=G.F[booking.a].div;const w=F.result.win==="A"?booking.a:F.result.win==="B"?booking.b:(ovr(G.F[booking.a].a)>=ovr(G.F[booking.b].a)?booking.a:booking.b);G.champ[div]=w;recordHonor(G,"province",w,div);}
+function finishFinal(G,booking,F){const div=G.F[booking.a].div;const w=F.result.win==="A"?booking.a:F.result.win==="B"?booking.b:(ovr(G.F[booking.a].a)>=ovr(G.F[booking.b].a)?booking.a:booking.b);G.champ[div]=w;const lo=w===booking.a?booking.b:booking.a;recordHonor(G,"province",w,div,G.week,null,G.F[lo]?G.F[lo].name:null);}
 
 // week phase 1: training & upkeep (before fights)
 function weekTrain(G){
@@ -5520,7 +5520,14 @@ function decorVehicle(P,G,t,F){const v=decorChoice(G,"vehicle");if(v==="none")re
     body(x,y+8,46,13,sc);F.box(x+1,y+1.5,32,2,"#3a3550",ol);F(x+2,y+3.5,1,5,"#3a3550");F(x+31,y+3.5,1,5,"#3a3550");F(x+2,y+4,30,4.5,"#e8e0c8");F(x+2,y+4,30,1,"#fff8e6");
     body(x+33,y+5,13,12,sc);glass(x+36,y+6.5,8,5);for(let i=0;i<4;i++)F.box(x+4+i*7,y+11.5,4,4,shadeHex(sc,-.3),null,shadeHex(sc,.2));F(x+3,y+10,28,.5,"#ffd36b");
     lamp(x+44.5,y+15.5);F(x-1,y+18,2,1.5,"#c8283c");wheel(x+3);wheel(x+34);return;}
-  if(v==="minibus"||v==="pinkvan"||v==="bluevan"){const x=228,mc=v==="pinkvan"?"#f4b6c8":v==="bluevan"?"#3a6fc0":"#ece9df";F.shadow(x+25,y+26,28,2.5);
+  /* v1.91.78 (Man): more cars — diesel pickup, small E20 sedan, electric SUV (the vans reuse the van body) */
+  if(v==="pickup"){const x=230,c="#7a1f2b";F.shadow(x+24,y+26,26,2.5);body(x,y+11,48,10,c);F.box(x+28,y+3,18,9,c,ol,shadeHex(c,.25));glass(x+31,y+4.5,6,5);glass(x+38.5,y+4.5,6,5);
+    F(x+2,y+9,25,2,"#4a3a40");F(x+2,y+9,25,.75,"#6a5a60");F(x,y+15.5,48,.75,"#d9d9e0");F.text("Sirichai",x+13,y+18.2,3.4,"#ffffff");lamp(x+45.5,y+14);F(x-.5,y+14,1.5,2,"#ff6b6b");wheel(x+4);wheel(x+36);return;}
+  if(v==="citycar"){const x=236,c="#e0e6ee";F.shadow(x+18,y+26,20,2.5);body(x,y+12,38,9,c);F.box(x+7,y+6,22,7,c,ol,"#ffffff");glass(x+9,y+7.5,8,4.5);glass(x+19,y+7.5,8,4.5);
+    F(x,y+16,38,.75,"#c8283c");lamp(x+35.5,y+15);F(x-.5,y+15,1.5,2,"#ff6b6b");wheel(x+4);wheel(x+28);return;}
+  if(v==="evsuv"){const x=232,c="#f4f6f8";F.shadow(x+22,y+26,25,2.5);body(x,y+11,46,10,c);F.box(x+6,y+4,32,8,c,ol,"#ffffff");F(x+8,y+5,28,5.5,"#1c2430");F(x+9,y+5.5,26,1.2,"#3a4a5e");
+    F(x+21,y+5,1,5.5,c);F(x+2,y+14,42,.6,"#6fd3ff");F.glow(x+44,y+15,6,"rgba(140,220,255,.35)");F.box(x+42,y+13.5,3,1.5,"#bfefff",ol);F(x+20,y+16.5,4,2,"#6fd3ff");F(x+21.5,y+16,1,3,"#ffffff");F(x-.5,y+14,1.5,1.5,"#ff4d5a");wheel(x+4);wheel(x+35);return;}
+  if(v==="minibus"||v==="pinkvan"||v==="bluevan"||v==="vipvan"||v==="evvan"){const x=228,mc=v==="pinkvan"?"#f4b6c8":v==="bluevan"?"#3a6fc0":v==="vipvan"?"#34313a":v==="evvan"?"#f2f6f4":"#ece9df";F.shadow(x+25,y+26,28,2.5);
     body(x,y+6,50,15,mc);F.box(x+2,y+2.5,40,4,mc,ol,"#ffffff");for(let i=0;i<4;i++)glass(x+4+i*9,y+8,7,5);glass(x+40,y+7,9,6);
     F(x,y+14,50,1.5,"#d9a520");F(x,y+15.5,50,.5,"#c8283c");F.box(x+16,y+17,14,2,"#c8283c",null);lamp(x+47,y+16);F(x-.5,y+17,1.5,2,"#c8283c");wheel(x+5);wheel(x+38);return;}
   if(v==="tuktuk"){const x=240,oc="#e8892a";F.shadow(x+20,y+26,22,2.5); /* v1.86: three-wheeled tuk-tuk, roof canopy, chrome trim */
@@ -6468,7 +6475,7 @@ AU.gsfx=function(kind,a){if(!this.init()||this.muted||!SETTINGS.sfx)return;const
   if(kind==="shimmer")for(let i=0;i<6;i++)T(i*.05,{f:1400+Math.random()*1400,type:"sine",dur:.12,peak:.06});};
 
 // ================= MUAY THAI MOE v1.3 — UI =================
-const VERSION="1.91.76";
+const VERSION="1.91.77";
 const CUR_LANG=(typeof window!=="undefined"&&window.LANG)||"th";
 const TH_LABEL=String.fromCharCode(3652,3607,3618);
 function langSwitch(cls){return `<div class="langsw ${cls||""}" role="group" aria-label="Language">${[["th",TH_LABEL],["en","EN"]].map(([k,l])=>`<button class="lsb ${CUR_LANG===k?"on":""}" data-act="setlang" data-v="${k}" aria-pressed="${CUR_LANG===k}">${l}</button>`).join("")}</div>`;}
@@ -7200,22 +7207,35 @@ function trophySVG(kind,pal,dim){const rows=TROPHY_PX[kind],w=Math.max(...rows.m
 const BELT_PAL={tha:{a:"#2a1d10",b:"#f1c232",c:"#c8283c",d:"#c8283c"},ping:{a:"#10202a",b:"#f1c232",c:"#2c5fb3",d:"#2c5fb3"},lanna:{a:"#14261a",b:"#f1c232",c:"#2f8a4f",d:"#2f8a4f"}};
 const CUP_PAL={province:{a:"#7a5a10",b:"#f1c232",c:"#5a3a2a"},district:{a:"#5d6168",b:"#d7dde4",c:"#4a3a2a"},local:{a:"#6b3d1c",b:"#d08a4a",c:"#4a3a2a"},
   rg_north:{a:"#7a2a4e",b:"#f2a2c4",c:"#4a2a3a"},rg_isan:{a:"#6a1420",b:"#e8505e",c:"#3a1a1a"},rg_central:{a:"#14306a",b:"#f1c232",c:"#1a2a4a"},rg_south:{a:"#0c4a3a",b:"#5fd0b0",c:"#1a3a2a"}};
+/* v1.91.78 (Man): the trophy room is split by level — general league, sub-district, district, province, region — newest first;
+   tapping a belt or cup opens a popup with who won it, against whom, at what level and when */
+const HALL_LV=[{k:"gen",n:"General league",d:"Stadium belts · Death Match"},{k:"local",n:"Subdistrict",d:"Top of the sub-district round"},{k:"district",n:"District",d:"Top of the district round"},{k:"province",n:"Provincial",d:"Provincial champion"},{k:"region",n:"Regional",d:"Province belts · regional cups"}];
+const hallLevel=k=>k==="local"?"local":k==="district"?"district":k==="province"?"province":k==="rgbelt"||/^rg_/.test(k)?"region":"gen";
 function trophyItems(){const H=G.honors||[],items=[];
-  for(const h of H){const who=esc(G.F[h.id]?.name||h.id),when=h.season?`Year ${h.season} week ${h.week}`:"Before update";
-    if(h.kind==="rgbelt"){const D=typeof ROAD_DEST!=="undefined"&&ROAD_DEST[h.venue],col=D&&typeof RG!=="undefined"&&RG[D.r]?RG[D.r].col:"#c8283c";items.push({kind:"belt",pal:{a:"#2a1d10",b:"#f1c232",c:col,d:col},title:honorLabel(h.kind,h.venue),sub:`${who} · Div ${h.div}`,when,shelf:"belt"});continue;}
-    if(h.kind==="belt"||h.kind==="defense"){const v=h.venue||"tha";items.push({kind:"belt",pal:BELT_PAL[v]||BELT_PAL.tha,title:honorLabel(h.kind,h.venue),sub:`${who} · Div ${h.div}`,when,shelf:"belt"});}
-    else if(h.kind==="dm")items.push({kind:"medal",pal:{a:"#5a1a22",b:"#d23246",d:"#3a6fd0"},title:"Death Match champion",sub:`${who} · Div ${h.div}`,when,shelf:"cup"});
-    else items.push({kind:"cup",pal:CUP_PAL[h.kind]||CUP_PAL.local,title:honorLabel(h.kind,h.venue),sub:`${who} · Div ${h.div}`,when,shelf:"cup"});}
-  for(const a of (G.campAwards||[])){const A=CAMP_AWARDS[a.id];if(!A)continue;items.push({kind:"cert",pal:{a:"#c9961c",b:"#f4ead8",c:"#8a7a6a",d:"#c8283c"},title:A.name,sub:`Awarded by ${A.from}`,when:`Year ${a.season} week ${a.week}`,shelf:"cert"});}
+  for(const h of H){const who=esc(G.F[h.id]?.name||h.id),when=h.season?`Year ${h.season} week ${h.week}`:"Before update",lv=hallLevel(h.kind),base={who:G.F[h.id]?.name||h.id,fid:h.id,div:h.div,opp:h.opp||null,lv,sk:(h.season||0)*100+(h.week||0)};
+    if(h.kind==="rgbelt"){const D=typeof ROAD_DEST!=="undefined"&&ROAD_DEST[h.venue],col=D&&typeof RG!=="undefined"&&RG[D.r]?RG[D.r].col:"#c8283c";items.push({...base,kind:"belt",pal:{a:"#2a1d10",b:"#f1c232",c:col,d:col},title:honorLabel(h.kind,h.venue),sub:`${who} · Div ${h.div}`,when,shelf:"belt"});continue;}
+    if(h.kind==="belt"||h.kind==="defense"){const v=h.venue||"tha";items.push({...base,kind:"belt",pal:BELT_PAL[v]||BELT_PAL.tha,title:honorLabel(h.kind,h.venue),sub:`${who} · Div ${h.div}`,when,shelf:"belt"});}
+    else if(h.kind==="dm")items.push({...base,kind:"medal",pal:{a:"#5a1a22",b:"#d23246",d:"#3a6fd0"},title:"Death Match champion",sub:`${who} · Div ${h.div}`,when,shelf:"cup"});
+    else items.push({...base,kind:"cup",pal:CUP_PAL[h.kind]||CUP_PAL.local,title:honorLabel(h.kind,h.venue),sub:`${who} · Div ${h.div}`,when,shelf:"cup"});}
+  for(const a of (G.campAwards||[])){const A=CAMP_AWARDS[a.id];if(!A)continue;items.push({kind:"cert",pal:{a:"#c9961c",b:"#f4ead8",c:"#8a7a6a",d:"#c8283c"},title:A.name,sub:`Awarded by ${A.from}`,when:`Year ${a.season} week ${a.week}`,shelf:"cert",lv:"cert",sk:(a.season||0)*100+(a.week||0)});}
   return items;}
-function trophyRoomHTML(){const it=trophyItems(),sel=UI.trophySel!=null?it[UI.trophySel]:null;
-  const shelf=(key,label,empty)=>{const L=it.map((x,i)=>[x,i]).filter(([x])=>x.shelf===key);
-    return `<div class="tshelf ${key}"><span class="tlbl">${label} <b>${L.length}</b></span><div class="trow">${L.length?L.map(([x,i])=>`<button class="tit ${x.kind} ${UI.trophySel===i?"on":""}" data-act="trophy" data-v="${i}" aria-label="${esc(x.title)}">${trophySVG(x.kind,x.pal)}</button>`).join(""):empty.map(k=>`<span class="tit ghost ${k}">${trophySVG(k,{},true)}</span>`).join("")}</div></div>`;};
+function trophyRoomHTML(){const it=trophyItems(),UA=UI.hallAll||{};
+  const shelf=lv=>{const L=it.map((x,i)=>[x,i]).filter(([x])=>x.lv===lv.k).sort((a,b)=>b[0].sk-a[0].sk),all=!!UA[lv.k],show=all?L:L.slice(0,8);
+    return `<div class="tshelf lv-${lv.k}"><span class="tlbl">${lv.n} <b>${L.length}</b> <small>${lv.d}</small></span><div class="trow">${L.length?show.map(([x,i])=>`<button class="tit ${x.kind}" data-act="trophy" data-v="${i}" aria-label="${esc(x.title)} · ${esc(x.sub)}">${trophySVG(x.kind,x.pal)}</button>`).join(""):`<span class="meta">None yet</span>`}</div>
+      ${L.length>8?`<button class="btn sm ghost" data-act="hallall" data-v="${lv.k}">${all?"Collapse":`See all (${L.length})`}</button>`:""}</div>`;};
+  const certs=it.map((x,i)=>[x,i]).filter(([x])=>x.lv==="cert");
   const certLeft=Object.entries(CAMP_AWARDS).filter(([id])=>!(G.campAwards||[]).some(a=>a.id===id));
-  return `<div class="troom">${shelf("cup","Trophies",["cup","cup","medal"])}${shelf("belt","Championship Belts",["belt"])}${shelf("cert","Camp Certificates",["cert","cert"])}
-    <div class="tdetail">${sel?`<b>${esc(sel.title)}</b><span>${sel.sub}</span><small>${sel.when}</small>`:`<span class="meta">Tap an item on the shelf to see which fight it came from · once the shelves fill up, snap a camp photo to show off</span>`}</div>
+  return `<div class="troom">${HALL_LV.map(shelf).join("")}
+    <div class="tshelf cert"><span class="tlbl">Camp certificates <b>${certs.length}</b></span><div class="trow">${certs.length?certs.map(([x,i])=>`<button class="tit cert" data-act="trophy" data-v="${i}" aria-label="${esc(x.title)}">${trophySVG("cert",x.pal)}</button>`).join(""):["cert","cert"].map(k=>`<span class="tit ghost ${k}">${trophySVG(k,{},true)}</span>`).join("")}</div></div>
+    <p class="meta">Tap a belt or cup to see which fight it came from</p>
     ${certLeft.length?`<details class="tnext"><summary>Certificates not yet earned (${certLeft.length})</summary>${certLeft.map(([id,A])=>`<div class="kv-row"><span>📜 ${A.name}</span><span class="meta">${A.hint}</span></div>`).join("")}</details>`:""}
     <button class="btn sm gold" data-act="showcase">📸 Snap a camp photo to show off</button></div>`;}
+function trophyPopHTML(i){const x=trophyItems()[i];if(!x)return `<p>Award not found</p>`;const lv=HALL_LV.find(l=>l.k===x.lv),f=x.fid&&G.F[x.fid];
+  return `<div class="tpop"><div class="tpop-art">${trophySVG(x.kind,x.pal)}</div><h2>${esc(x.title)}</h2>
+    ${f?`<div class="tpop-who">${faceImg(f,"sm")}<b>${esc(f.name)}</b><small>Division ${esc(x.div||"")}</small></div>`:`<p>${x.sub}</p>`}
+    <div class="kv-row"><span>Level</span><b>${lv?lv.n:"Camp certificate"}</b></div>
+    ${x.opp?`<div class="kv-row"><span>${/^อันดับ/.test(x.opp)?"Result":"Opponent"}</span><b>${esc(x.opp)}</b></div>`:x.lv!=="cert"?`<div class="kv-row"><span>Opponent</span><b class="meta">Not recorded (won before this update)</b></div>`:""}
+    <div class="kv-row"><span>When</span><b>${x.when}</b></div></div><div class="mfoot"><button class="btn primary" data-act="closeModal">Close</button></div>`;}
 function showcaseHTML(){const R=roster(G),H=(G.honors||[]).length,C=(G.campAwards||[]).length;
   return `<h2>Sirichai Boxing Camp · Year ${G.season||1}</h2><div class="px card"><canvas class="campcv" width="640" height="360" data-camp="1" aria-label="Current camp view"></canvas></div>
    <p class="meta center">${esc(G.player.name)} · Camp Lv.${campLevel(G)} · Fighters ${R.length} · Students ${students(G)} · Honors ${H} · Certificates ${C}</p>
@@ -7619,6 +7639,7 @@ function modalHTML(){const m=UI.modal;let body="",foot=true;
      <div class="mfoot"><button class="btn ghost" data-act="closeModal">Wait</button><button class="btn primary" data-act="sign" data-v="${f.id}" data-ok="1">Sign now</button></div>`;}
   if(m.type==="levelup"){body=`<h2 class="lvup">LEVEL UP!</h2>${m.ids.map(id=>{const f=G.F[id];return `<div class="lvrow"><div class="l">${faceImg(f,"sm")}<b>${esc(f.name)} Lv.${f.lvl}</b></div>${coachOn()&&f.sp>0&&!hasTree(f.id)?`<p class="hinttxt"><img src="${faceSrc("coach")}" alt=""><span>${skillTip(f)}</span></p>`:""}${skillGrid(f,true)}</div>`;}).join("")}`;}
   if(m.type==="ytinfo"){body=ytInfoHTML();foot=true;}
+  if(m.type==="trophy"){body=trophyPopHTML(m.i);foot=false;}
   if(typeof XMODAL!=="undefined"&&XMODAL[m.type]){const r=XMODAL[m.type](m);body=r.body;foot=r.foot;}
   return `<div class="overlay" data-act="closeModalBg" data-sk="ov-${m.type}"><div class="px modal pxscroll m-${m.type}${m.type==="fighter"?" fpm t-"+(UI.ptab||"over"):""}" data-sk="modal-${m.type}" role="dialog" aria-modal="true"><button class="xbtn" data-act="closeModal" aria-label="Close">✕</button>${body}
     ${foot?`<div class="mfoot"><button class="btn primary" data-act="closeModal">${m.type==="report"||m.type==="levelup"?"Continue ▸":"Close"}</button></div>`:""}</div></div>`;}
@@ -8394,7 +8415,7 @@ const ACT={
     UI.modal={type:"confirm",title:"Buy this decoration?",ok:`Buy ${fmt(c)}`,no:"Cancel",yes:"decorbuyok",k:d.k,v:d.v,
       html:`<div class="px confirm"><b>${esc(it.name)}</b><p class="meta">${esc(CAMP_DECOR[d.k].name)} · price ${fmt(c)} · left after: ${fmt(G.cash-c)}</p><p class="meta">Yours to keep; switch back to the old look any time</p></div>`};render();},
   decorbuyok:()=>{const m=UI.modal;if(!m||m.yes!=="decorbuyok")return;const d={k:m.k,v:m.v};UI.modal=null;const c=decorPrice(G,d.k,d.v);if(buyDecor(G,d.k,d.v)){AU.sfx&&AU.sfx("level");save();toast(`Bought "${CAMP_DECOR[d.k].items[d.v].name}" for ${fmt(c)}`);}render();},
-  trophy:d=>{UI.trophySel=UI.trophySel===+d.v?null:+d.v;AU.sfx&&AU.sfx("ui");render();},
+  trophy:d=>{UI.modal={type:"trophy",i:+d.v};AU.sfx&&AU.sfx("ui");render();},hallall:d=>{UI.hallAll=UI.hallAll||{};UI.hallAll[d.v]=!UI.hallAll[d.v];render();},
   showcase:()=>{UI.modal={type:"showcase"};render();},
   showcaseSave:()=>{const src=document.querySelector(".m-showcase canvas[data-camp]");if(!src)return;const W=640,cv=document.createElement("canvas");cv.width=W;cv.height=470;const x=cv.getContext("2d");x.imageSmoothingEnabled=false;
     x.fillStyle="#141020";x.fillRect(0,0,W,470);x.drawImage(src,0,0,W,360);x.fillStyle="#f1c232";x.font='bold 26px "Chakra Petch","IBM Plex Sans Thai",sans-serif';x.fillText(`Sirichai Boxing Camp · Year ${G.season||1}`,20,400);
@@ -8537,7 +8558,7 @@ let MAILN=0;
 function addMail(G,m){G.mail=G.mail||[];m.id="m"+G.week+"_"+(++MAILN)+"_"+Math.floor(Math.random()*1e4);m.wk=G.week;m.season=G.season||1;if(m.exp!=null)m.expAbs=gameWeek(G)+(m.exp-G.week);m.read=false;G.mail.unshift(m);for(let i=G.mail.length-1;G.mail.length>40&&i>=0;i--)if(!mailKeep(G.mail[i]))G.mail.splice(i,1);if(G.mail.length>60)G.mail=G.mail.slice(0,60);return m;}
 const mailOpen=m=>!m.done&&!m.expired&&(["take","pay","quiz","quest"].includes(m.kind)||(m.kind==="event"&&(m.ev==="kongka"||m.ev==="thief"||m.ev==="tuy"||m.ev==="dress")));
 /* v1.91.32: the player may delete letters — never an event invitation, and only once a letter no longer waits on an answer */
-function mailKeep(m){if(!m)return "";if(m.kind==="event"&&m.ev==="loy")return "event";if(m.bk&&!m.done)return "event";if(m.done||m.expired)return "";if(mailOpen(m))return "act";
+function mailKeep(m){if(!m)return "";if(m.kind==="event"&&m.ev==="loy")return "event";if(m.bk&&!m.done)return "event";if(m.lg)return "event";if(m.done||m.expired)return "";if(mailOpen(m))return "act";
   if(m.kind==="lotto"){try{const [s,i]=String(m.draw).split("_").map(Number),d=lottoSt(G).draws.find(x=>x.season===s&&x.i===i);return d&&d.res&&!d.done?"act":"";}catch(e){return "";}}
   if(m.kind==="loan")return typeof loanOk==="function"&&loanOk(G)?"act":"";if(m.kind==="job"||m.kind==="event")return "act";return "";}
 const mailDelN=()=>(G.mail||[]).filter(m=>m.read&&!mailKeep(m)).length;
@@ -8705,8 +8726,8 @@ function questAfter(b,done){const S=b.quest,res=(G.cal||[]).slice(-1)[0];const w
   if(S.q==="challenge")op&&(win?G.rep+=1:0);
   if(S.q==="belt"){const venue=S.venue||"tha",V=STADIUMS[venue],slot=beltStore(G,venue),B=slot[S.div];
     if(win&&!S.defend){slot[S.div]={id:me.id,def:0,since:G.week};G.rep+=3;me.belts=(me.belts||0)+1;
-      recordHonor(G,"belt",me.id,S.div,G.week,venue==="tha"?null:venue);playHonorQueue(fin);return;}
-    if(win&&S.defend){B.def++;G.rep+=1.5;recordHonor(G,"defense",me.id,S.div,G.week,venue==="tha"?null:venue);playHonorQueue(fin);return;}
+      recordHonor(G,"belt",me.id,S.div,G.week,venue==="tha"?null:venue,op?op.name:null);playHonorQueue(fin);return;}
+    if(win&&S.defend){B.def++;G.rep+=1.5;recordHonor(G,"defense",me.id,S.div,G.week,venue==="tha"?null:venue,op?op.name:null);playHonorQueue(fin);return;}
     if(!win&&S.defend){slot[S.div]={id:op.id,def:0,since:G.week};playScene([{n:"nar",t:`The ${V.name} belt changes hands to ${op.name}`},{n:me.id,f:"sad",l:"fight",t:"I will win it back"}],fin,{bg:V.scene,look:"fight"});return;}
     if(!win&&!S.defend&&B)B.def++;}
   fin();}
@@ -8739,7 +8760,7 @@ function letterHTML(m){m.read=true;let act="";
   if(m.kind==="quiz")act=m.done?`<p class="meta center">${m.ok?`Correct! You won ${fmt(m.amt)}`:`Wrong! The answer was "${esc(m.opts[m.ans])}"`}</p>`:m.expired?"":`<p class="qz"><b>${esc(m.q)}</b></p><div class="qopts">${m.opts.map((o,i)=>`<button class="btn" data-act="mquiz" data-v="${m.id}" data-k="${i}">${esc(o)}</button>`).join("")}</div>`;
   if(m.kind==="job")act=m.done?`<p class="meta center">${m.declined?"Didn't go":m.grade?`Helped out · grade ${m.grade}`:"Sent someone to help: ฿550"}</p>`:m.expired?`<p class="meta center">Expired</p>`:`<span class="mgtag">${JOY_PX}MINIGAME</span><button class="btn" data-act="mjdecl" data-v="${m.id}">Too busy</button><button class="btn" data-act="mjskip" data-v="${m.id}">Send someone (฿550)</button><button class="btn primary" data-act="mjplay" data-v="${m.id}">${JOY_PX} Help in person</button>`;
   if(m.kind==="event")act=evMailAct(m);
-  if(m.bk&&typeof REGION!=="undefined"&&REGION.letterAct)act=REGION.letterAct(m); /* v1.91.72: Krerk's black card is the way into the warehouse */
+  if((m.bk||m.lg)&&typeof REGION!=="undefined"&&REGION.letterAct)act=REGION.letterAct(m); /* v1.91.72: Krerk's black card is the way into the warehouse */
   if(m.kind==="loan")act=m.done?`<p class="meta center">${m.took?"Loan taken":"Card binned"}</p>`:!loanOk(G)?`<p class="meta center">${G.loan>0?"A Gold Helmet loan is still unpaid. You can't borrow again.":"Cash is out of the danger zone. No need for this card."}</p>`:`<button class="btn" data-act="mloanno" data-v="${m.id}">Bin the card</button><button class="btn red" data-act="mloan" data-v="${m.id}">See loan ${fmt(LOAN_AMT)}</button>`;
   if(m.kind==="lotto")act=lottoLetterAct(m);
   if(m.kind==="quest")act=m.done?`<p class="meta center">${m.declined?"Declined":"Fighter sent"}</p>`:m.expired?`<p class="meta center">Expired</p>`:`<button class="btn" data-act="mdecl" data-v="${m.id}">Not going</button><button class="btn primary" data-act="macc" data-v="${m.id}">Take the job · choose a fighter</button>`;
