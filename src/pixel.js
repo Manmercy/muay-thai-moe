@@ -48,7 +48,7 @@ function outfitSheet(f,k){const key=f.id+"|"+k;if(TINTS[key])return TINTS[key];c
   TINTS[key]=c;return c;}
 /* v1.89.24: Loy Krathong pixel outfits — every event bout, and off-stage when the gold-tier "Thai dress" toggle is on */
 const LOY_SP=["kati","mali","rin","ploy","fah"];
-function loyLookNow(){try{if(typeof UI!=="undefined"&&UI.fight&&UI.fight.b)return !!UI.fight.b.ev;const L=typeof G!=="undefined"&&G&&G.ev&&G.ev.loy;return !!(L&&L.dressOn&&L.tiers&&L.tiers.gold);}catch(e){return false;}}
+function loyLookNow(){try{if(typeof UI!=="undefined"&&UI.fight&&UI.fight.b)return !!UI.fight.b.ev;return false;} /* v1.91.97: Loy Krathong sprites only in the event's own fights */catch(e){return false;}}
 const loyImg=(id,name,f)=>LOY_SP.includes(id)&&(loyLookNow()||(f&&f.outfit==="loy"&&f.camp==="player"))?name.replace(id+"_",id+"_loykrathong_"):name;
 function sheetFor(f){
   if(f.canon&&LOY_SP.includes(f.id)&&loyLookNow())return img(f.id+"_loykrathong_sheet.webp");

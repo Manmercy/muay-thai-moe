@@ -998,7 +998,7 @@ function evMailAct(m){loyPreload();if(m.ev==="dress"){const f=G.F[m.fid],L=loyOf
   ${thiefOn(G)?`<button class="btn" data-act="thief" ${!thiefReady(G)?"disabled":""}>${!thiefReady(G)?`ไล่จับไอ้ตุ่มแล้ว (${thiefAgain(G)})`:"ไล่จับไอ้ตุ่ม โจรงมกระทง"}</button>`:`<p class="meta center">ไอ้ตุ่มจะกลับมาช่วงลอยกระทงในเกม (สัปดาห์ ${THIEF_WK[0]}–${THIEF_WK[1]} ทุกปี) ป้าแต๋วจะส่งจดหมายมาบอก</p>`}
   ${L.intro?`<div class="evrep"><button class="btn sm" data-act="loyintro">ดูฉากเปิดอีกครั้ง</button>${ends}${loyCanFloat(L)?`<button class="btn sm gold" data-act="loywishopen">🪷 ไปลอยกระทงกับสาว ๆ</button>`:""}</div>`:""}
   ${L.wish?`<p class="meta center">คำอธิษฐานของผู้จัดการ: "${esc((LOY_WISH.find(w=>w.k===L.wish)||{}).t||"")}"</p>`:""}
-  ${T.gold?`<div class="evrep"><button class="btn sm" data-act="loydress" aria-pressed="${!!L.dressOn}">ชุดไทยนอกเวที: ${L.dressOn?"เปิด":"ปิด"}</button></div>`:""}`;}
+`;} /* v1.91.97: the "Thai dress off the ring" toggle is gone with the feature */
 function loyIntro(G){const S=[
   {n:"nar",bg:"loy_night",t:"คืนวันเพ็ญเดือนสิบสอง ตลาดน้ำริมปิงคึกคักกว่าทุกปี เรือขายกระทงจอดเรียงริมตลิ่ง แสงเทียนสะท้อนน้ำวิบวับ"},
   {n:"npc",who:"ป้าแต๋ว",t:"มาแล้วเหรอผู้จัดการ! ป้าขนชุดไทยของลูกสาวป้ามาให้เด็ก ๆ ใส่เที่ยวงาน ไปเปลี่ยนเร็ว ๆ!"},
