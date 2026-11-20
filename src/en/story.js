@@ -485,11 +485,16 @@ const noCnt=(G,id)=>(G.noCnt&&G.noCnt[id])||0;
 const loveOffLeft=(G,id)=>{const a=G.loveOff&&G.loveOff[id];return a==null?0:Math.max(0,LOVE_OFF_WK-(absWeek(G)-a));};
 const isFriendz=(G,id)=>!!(G.friendz&&G.friendz[id]);
 const awayWord=(G,id)=>G.F[id].camp==="player"?"Left camp":"Not in touch";
-function relLabel(G,f,lv,short){const id=f&&f.id;if(G&&id&&G.F&&G.F[id]&&isAway(G,id)&&G.F[id].awayWhy==="train"){const n=awayLeft(G,id);return short?"Training away":`Away training (${n} wk)`;}
+/* v1.91.72 (Man): a regional champion who has not joined the camp is not a "camp-mate" yet — that rung reads "friend from another camp" for her */
+const RG_CHAMP_IDS=["baibua","tabtim","alicia","chaba"];
+const outChamp=f=>!!(f&&RG_CHAMP_IDS.includes(f.id)&&f.camp!=="player");
+const tierFor=(n,f)=>n==="Teammate"&&outChamp(f)?"Friend from another camp":n;
+function relLabel(G,f,lv,short){return tierFor(relLabel0(G,f,lv,short),f);}
+function relLabel0(G,f,lv,short){const id=f&&f.id;if(G&&id&&G.F&&G.F[id]&&isAway(G,id)&&G.F[id].awayWhy==="train"){const n=awayLeft(G,id);return short?"Training away":`Away training (${n} wk)`;}
   if(G&&id&&G.F&&G.F[id]&&isAway(G,id)){const w=G.F[id].awayWhy==="break"?"Heartbroken":"Sulking";return short?w:`${w} · ${awayWord(G,id)} (back in ${awayLeft(G,id)} wk)`;}
   return relBase(G,f,lv);}
 /* the ladder shown in her profile: the same labels, the current step lit — lovers climb their own ladder (LOVER_TIERS) */
-const REL_DESC={"Acquaintance":"Still calls you \"Manager\", a bit stiffly","Teammate":"Jokes around, texts about everyday things","Close":"Sometimes lets your name slip · shares personal stories","Special":"Always calls you by name",
+const REL_DESC={"Friend from another camp":"In another camp, but you chat now and then","Acquaintance":"Still calls you \"Manager\", a bit stiffly","Teammate":"Jokes around, texts about everyday things","Close":"Sometimes lets your name slip · shares personal stories","Special":"Always calls you by name",
   "Deeply bonded":"On the same page about almost everything","Kindred":"One look and she knows what you're thinking","Inseparable":"Misses you after a single week apart","Most important person":"You're the first person she thinks of","Partner in the ring":"In the same corner, in the ring and out of it",
   "Lover":"Together","Kindred sweetheart":"Together long enough to know each other's every thought","Inseparable pair":"Can't be apart anymore","Soon-to-be partner":"Starting to talk about the future","Life partner":"Walking the whole road together",
   "Promised":"A promise made, waiting for the day you're in the same camp","Close friend":"You said no once, but you still matter to each other","Ex":"You used to date. Still a little awkward"};

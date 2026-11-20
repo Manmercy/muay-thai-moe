@@ -33,7 +33,7 @@ const RG_RETRY={bout:.03,sMax:2};
 /* v1.90.21 (Man): one bar for everyone — opponent strength is fixed, not fitted to your fighter. It climbs with progress (later belts and champions have studied the tapes of earlier fights).
    Set from a "casual" fighter (stats 20, Lv.18, every skill she can learn, morale 70, no fight prep): the middle of the five heroines wins belts 48% → 32%,
    championship series 22% → 12%, the Naka members 45/40/35/30% and Ladda 20%. Morale, fight prep, the camp and limit-break growth all push past that */
-const RG_FIX={belt:n=>22.25+.65*Math.min(15,n)/15,champ:(cups,tries)=>23.41+.1067*Math.min(3,cups)-.15*Math.min(2,tries||0),nl:{nia:23.81,varya:25.2,meili:23.97,rosa:25.51,ladda:24.0}} /* v1.91.54 (Man, option B): the four members −0.4 now that a lost night starts over (about level with the regional champions; Ladda unchanged) */; /* v1.91.38 (Man): champions a little harder (+.3 → maxed series ~56→45%), the Naka members harder (+.5 → ~40%), Ladda a brutal final (+1.3 → ~18%) */ /* v1.91.13 (Man): set for a maxed fighter (Lv.32, every bonus, stat 20) — belts ~80% · series ~60% · Naka ~50% · Ladda ~40% */ /* v1.91.6: re-set after the heroine rebalance (v1.91.0–1.91.5), same targets, middle of the five home-line builds · v1.91.7: champions −0.35 after opponents got fixed styles */
+const RG_FIX={belt:n=>22.25+.65*Math.min(15,n)/15,champ:(cups,tries)=>23.41+.1067*Math.min(3,cups)-.15*Math.min(2,tries||0),nl:{nia:23.41,varya:25.35,meili:23.82,rosa:25.51,ladda:24.0}} /* v1.91.54 (Man, option B): the four members −0.4 now that a lost night starts over (about level with the regional champions; Ladda unchanged) */; /* v1.91.38 (Man): champions a little harder (+.3 → maxed series ~56→45%), the Naka members harder (+.5 → ~40%), Ladda a brutal final (+1.3 → ~18%) */ /* v1.91.13 (Man): set for a maxed fighter (Lv.32, every bonus, stat 20) — belts ~80% · series ~60% · Naka ~50% · Ladda ~40% */ /* v1.91.6: re-set after the heroine rebalance (v1.91.0–1.91.5), same targets, middle of the five home-line builds · v1.91.7: champions −0.35 after opponents got fixed styles */
 /* v1.90.18 (Man): belts 40% every time, championship series 20% → 12% — the chapter in about 3 years for a fighter who never outgrows the fit */
 const RG_ODDS={belt:n=>.40,series:cups=>.20-.08*Math.min(3,cups)/3,bout:s=>{let lo=0,hi=1;for(let i=0;i<30;i++){const m=(lo+hi)/2;m*m*(3-2*m)<s?lo=m:hi=m;}return (lo+hi)/2;}};
 /* the opponent strength (≤ ceil) at which `me` wins about `p` of 5-round bouts. setT(T) rebuilds the opponent at strength T. */
@@ -909,13 +909,11 @@ function rgClose(G){const R=G.region,fah=rgIn(G,"fah"),rin=rgIn(G,"rin");
  {n:"lada",l:"casual",t:"…They didn't sign because of your camp. I want to know what your camp has."},
  fah?{n:"fah",f:"sad",l:"casual",t:"That's… modern fighting. Just like Fah"}:{n:"coach",t:"That's not just Muay Thai… that's everything combined"},
  {n:"npc",who:"Khun Krerk",t:"Thank you all for coming"},
- {n:"nar",bg:"camp",show:[],t:"Three days later, a black card with no logo arrives at the camp"},
- {n:"nar",t:"\"Sirichai Camp is invited: five on five · the old beverage factory warehouse, Khlong Toei port · open rules, throws and locks allowed · no prize, no press\""},
- {inject:()=>[{n:"nar",t:R.closeDare?"Handwritten on the back: \"You told me to send fighters to face your camp… Sent. Five of them. — L.\"":R.closeFace?"Handwritten on the back: \"Not a fighter, but didn't back down… Now I want to see your fighters. — L.\"":"Handwritten on the back: \"I just want to know how well your small Muay Thai camp handles the real world — L.\""}]},
+ {n:"nar",bg:"camp",show:[],t:"Three days later a black envelope edged in red reaches the camp. No stamp, only one signature everyone knows: Krerk Naka."},
  ...rgIf(R.c2==="deal",[rin?{n:"rin",f:"flustered",l:"casual",t:"Manager, the partner contract we took money for. Clause 30 says: \"Should Naka League lose to the partner camp, this contract shall terminate immediately\""}:{n:"coach",t:"The partner contract we took money for. Clause 30 says if Naka League loses to our camp, the contract ends immediately…"},
    {n:"coach",t:"He was that confident, to write this clause in"}]),
  {n:"coach",t:"Throws allowed, locks allowed… we haven't trained for any of that, not even one day"},
- {n:"coach",t:"Three weeks to prepare. Choose how to train for it on the Four Regions Championship page"}];}
+ {n:"coach",t:"We have three weeks. Drill every counter, then on the night we pick one per bout. The card is in the mailbox."}];}
 const RG_FPREP={sprawl:{n:"Stop takedowns",d:"Kick them off when they shoot in, and land clinch knees more often"},escape:{n:"Escape locks",d:"Get up off the mat and slip out of locks more often"},strike:{n:"Stand and trade",d:"Ignore the takedowns. Sharpen your strikes and finish it before they drag you down"}};
 /* v1.91.57 (Man): the Naka League talk a little before and after their bouts — an introduction the first night, a jab after; Ladda barely speaks */
 const NL_SAY={
@@ -931,8 +929,9 @@ const NL_SAY={
 function rgFinalIntro(G){const R=G.region,F=R.final;return [
  {n:"nar",bg:"naka_underground",t:F.tries?"The same warehouse by Khlong Toei port, as dim as last time. The same small crowd stands silent in the shadows":"An old warehouse by Khlong Toei port. Dim lights, the smell of sour syrup drifting from old tanks. In the middle, a ring with black ropes and soft MMA-style mats on the floor"},
  {n:"npc",who:"Khun Krerk",t:F.tries?"Back again, I see. I like that kind of stubbornness":"Welcome. No cameras, no press, no prize money. Just one question"},
- {n:"lada",l:"casual",t:"Five bouts, first to three takes it. I fight last"},
- {n:"coach",t:`Remember, everyone. We trained for ${RG_FPREP[F.prep||"strike"].n} Do what we trained. Don't play their game`}];}
+ {n:"npc",who:"Khun Krerk",t:"Five bouts, first to three. My daughter fights the last one."},
+ {n:"nar",t:"Ladda leans on a pillar in the dark, hood over half her face. She says nothing at all."},
+ {n:"coach",t:"Pick a counter for each opponent. Stop the throws, escape the locks, and if you trade, finish it fast."}];}
 function rgFinalBetween(G,i,me,o,res,w,l){return [
  {n:"nar",t:`${res==="W"?`${me.name} Win ${o.name}`:res==="D"?`${me.name} Tied with ${o.name}`:`${o.name} Win ${me.name}`} · Sirichai ${w} – ${l} Naka League`}];}
 function rgFinalWin(G,w,l,beatLadda,ladFid){const R=G.region,fah=rgIn(G,"fah"),rin=rgIn(G,"rin"),looked=ladFid==="fah"&&fah?"Fah":"Manager";return [
@@ -991,7 +990,7 @@ const REGION={
     /* v1.91.47 (playtest): a camp that reaches the closing ceremony on the time limit with only one or two cups still gets Krerk's dinner and Pailin's tablet first — the ceremony and the reveal lean on them */
     if(this.closeDue(G)&&!R.c2){R.c2="later";playScene(rgCup2(G),()=>{save();done();},{bg:"camp",look:"casual"});return;}
     if(this.closeDue(G)&&!R.c3){R.c3="seen";playScene(rgCup3(G),()=>{save();done();},{bg:"camp",look:"casual"});return;}
-    if(this.closeDue(G)){this.openFinal(G);this.playClose(()=>{save();done();});return;} /* v1.91.20 round 11 */
+    if(this.closeDue(G)){this.openFinal(G);this.playClose(()=>{this.blackCard(G);save();done();});return;} /* v1.91.20 round 11 */
     done();},
   /* ---------- state helpers ---------- */
   base(G){return ((G.season||1)-1)*52;},
@@ -1034,17 +1033,17 @@ const REGION={
       rgTouch(G,RG_CID[r]);const T=R.trip,abs=T&&T.bid===p.bid?T.abs:gameWeek(G);
       if(p.res==="W"){R.belts[r]=R.belts[r]||{};R.belts[r][dest]=1;G.log=G.log||[];G.log.push(`${G.F[p.a]?G.F[p.a].name:""} wins the provincial belt of ${D.name}!`);if(G.F[p.a])recordHonor(G,"rgbelt",p.a,G.F[p.a].div,G.week,dest); /* v1.91.14 (Man): a province belt gets the same ceremony as the main game */
         if(this.beltCount(G,r)===4&&R.champ[r].state==="locked"){R.champ[r].state="letter";this.champFighter(G,r);
-          addMail(G,{kind:"letter",from:`${RG[r].champ} · Champion of ${RG[r].name}`,title:`${RG_TITLE[r]}: all four belts won`,body:RG_CH[r].letter+((t=>t?`\n\n(${t})`:"")(this.tipText(G,r)))});}}
+          addMail(G,{kind:"letter",tone:"region",from:`${RG[r].champ} · Champion of ${RG[r].name}`,title:`${RG_TITLE[r]}: all four belts won`,body:RG_CH[r].letter+((t=>t?`\n\n(${t})`:"")(this.tipText(G,r)))});}}
       R.trip=null;R.nextTripAbs=Math.max(R.nextTripAbs||0,abs+RG_TRIP_GAP);(R.gc=R.gc||[]).push(p.b);}},
   /* weekly: post-cup letters and champion chats */
   letters(G){const R=G.region,now=gameWeek(G);R.postDone=R.postDone||{};
-    for(const r of RG_ORDER){if(R.post&&R.post[r]!=null&&now>=R.post[r]&&!R.postDone[r]&&RG_POST[r]){R.postDone[r]=1;addMail(G,{kind:"letter",from:`${RG[r].champ} · Champion of ${RG[r].name}`,title:`A letter from ${RG[r].champ}`,body:RG_POST[r]});}
+    for(const r of RG_ORDER){if(R.post&&R.post[r]!=null&&now>=R.post[r]&&!R.postDone[r]&&RG_POST[r]){R.postDone[r]=1;addMail(G,{kind:"letter",tone:"region",from:`${RG[r].champ} · Champion of ${RG[r].name}`,title:`A letter from ${RG[r].champ}`,body:RG_POST[r]});}
       const cid=RG_CID0[r],c=R.champ[r]||{},open=RG_CHAT[cid]&&G.F[cid]&&((R.joined&&R.joined[cid])||c.visit==="done"||c.state==="won"||rgEd(G)>=2);G.chatIn=G.chatIn||{};
       if(open&&!G.chatIn[cid]&&now-((G.chatLastAbs||{})[cid]??-999)>=2&&mulberry32((G.seed||1)+now*31+cid.length)()<.45)G.chatIn[cid]=G.week;}},
   fade(G){const R=G.region,now=gameWeek(G),m=R.meet||{};R.meetT=R.meetT||{};R.miss=R.miss||{};
     for(const r of RG_ORDER){const cid=RG_CID0[r];if(!(m[cid]>0))continue;if(R.meetT[cid]==null){R.meetT[cid]=now;continue;}if(R.joined&&R.joined[cid])continue;
       const gap=now-R.meetT[cid];
-      if(gap>=3&&!R.miss[cid]){R.miss[cid]=1;addMail(G,{kind:"letter",from:`${RG[r].champ} · Champion of ${RG[r].name}`,title:`A letter from ${RG[r].champ}`,body:RG_MISS[r]});}
+      if(gap>=3&&!R.miss[cid]){R.miss[cid]=1;addMail(G,{kind:"letter",tone:"region",from:`${RG[r].champ} · Champion of ${RG[r].name}`,title:`A letter from ${RG[r].champ}`,body:RG_MISS[r]});}
       if(gap>=4){const pk=(R.meetPk||{})[cid]||m[cid],fl=RG_FLOOR.find(t=>pk>=t)||0;if(m[cid]>fl)m[cid]=Math.max(fl,Math.round((m[cid]-.25)*100)/100);}}},
   weekly(G){const R=G.region;rgApply(G);this.flush(G);this.seriesWeekly(G);this.fade(G);this.letters(G);this.finalWeekly(G);this.joinWeekly(G);this.joinPerks(G);this.loopWeekly(G);const T=R.trip;
     /* a trip whose bout vanished (the week went by, the booking was dropped) is let go */
@@ -1162,7 +1161,7 @@ const REGION={
       G.log.push(`${RG_TITLE[r]}: ${RG[r].champ} keeps the title ${c.l}-${c.w}`);return;}
     R.just={r,kind:"bout",res:p.res,w:c.w,l:c.l,n:c.n};const s=this.schedule(G,r,abs+2); /* v1.90.17 (Man): bouts two weeks apart */
     /* between bout 1 and bout 2 the champion drops by the camp (round 4) — missed if bout 2 comes first */
-    if(c.n===1&&!c.visit){c.visit="due";addMail(G,{kind:"letter",from:`${RG[r].champ} · Champion of ${RG[r].name}`,title:`${RG[r].champ} is dropping by the camp`,body:`${RG[r].champ} sent word she'll drop by the camp before bout 2
+    if(c.n===1&&!c.visit){c.visit="due";addMail(G,{kind:"letter",tone:"region",from:`${RG[r].champ} · Champion of ${RG[r].name}`,title:`${RG[r].champ} is dropping by the camp`,body:`${RG[r].champ} sent word she'll drop by the camp before bout 2
 
 Welcome her at Fights › Four Regions Cup`});}
     else if(c.n>=2&&c.visit==="due")c.visit="missed";
@@ -1170,10 +1169,10 @@ Welcome her at Fights › Four Regions Cup`});}
   /* weekly: a hurt fighter gets the bout moved, a dropped bout is rescheduled, a lost series sends a new letter later */
   seriesWeekly(G){const R=G.region,now=gameWeek(G);
     {const n=(R.cups||[]).length;if(!R.close&&!R.endWarn&&n>=1&&n<4&&now>=(R.startAbs||0)+130){R.endWarn=1; /* v1.91.47: half a year of warning before the time limit */
-      addMail(G,{kind:"letter",from:"NAGA Energy Drink",title:"Clash of the Four Regions: about half a year left",body:"Dear Manager of Sirichai Camp,\n\nThis Clash of the Four Regions closes in about half a year. After that there will be no new challenges to the regional champions. Any series still under way will be fought to the end, and then comes the closing ceremony in Bangkok.\n\nIf there are cups left to win, win them before time runs out.\n\nNaka Energy Drink · Drink Naka, fight without end!"});}}
+      addMail(G,{kind:"letter",tone:"naka",from:"NAGA Energy Drink",title:"Clash of the Four Regions: about half a year left",body:"Dear Manager of Sirichai Camp,\n\nThis Clash of the Four Regions closes in about half a year. After that there will be no new challenges to the regional champions. Any series still under way will be fought to the end, and then comes the closing ceremony in Bangkok.\n\nIf there are cups left to win, win them before time runs out.\n\nNaka Energy Drink · Drink Naka, fight without end!"});}}
     for(const r of RG_ORDER){const c=R.champ[r];if(!c)continue;
       if(c.state==="lost"&&now>=(c.letterAbs||0)&&!this.overTime(G)){c.state="letter";c.fid=null;c.w=0;c.l=0;c.n=0;
-        addMail(G,{kind:"letter",from:`${RG[r].champ} · Champion of ${RG[r].name}`,title:`${RG_TITLE[r]}: a new challenge`,body:RG_CH[r].again+((t=>t?`\n\n(${t})`:"")(this.tipText(G,r)))});continue;}
+        addMail(G,{kind:"letter",tone:"region",from:`${RG[r].champ} · Champion of ${RG[r].name}`,title:`${RG_TITLE[r]}: a new challenge`,body:RG_CH[r].again+((t=>t?`\n\n(${t})`:"")(this.tipText(G,r)))});continue;}
       if(c.state!=="series")continue;const me=G.F[c.fid];
       if(!me||me.camp!=="player"){G.bookings=G.bookings.filter(b=>!(c.next&&b.id===c.next.bid));Object.assign(c,{state:"letter",fid:null,w:0,l:0,n:0,next:null});continue;}
       const x=c.next;
@@ -1183,7 +1182,7 @@ Welcome her at Fights › Four Regions Cup`});}
       if(x.abs===now&&me.injury>0){G.bookings=G.bookings.filter(b=>b.id!==x.bid);this.postpone(G,r,now+me.injury+1,`${me.name} is still injured`);continue;}
       this.ensureBooking(G,r);}},
   postpone(G,r,from,why){const c=G.region.champ[r];c.next=null;const s=this.schedule(G,r,from);
-    addMail(G,{kind:"letter",from:`${RG[r].champ} · Champion of ${RG[r].name}`,title:`Bout postponed: ${RG_TITLE[r]}`,
+    addMail(G,{kind:"letter",tone:"region",from:`${RG[r].champ} · Champion of ${RG[r].name}`,title:`Bout postponed: ${RG_TITLE[r]}`,
       body:`${why} · the organiser has moved bout ${(c.n||0)+1}${s?` to week ${s.wk}${s.season!==(G.season||1)?` (next year)`:""}`:""}\n\n${RG_CH[r].wait}`});},
   /* the championship trip: drive (paid by the sponsor) → the champion before the bell → the bout → cup or hotel → home */
   seriesTrip(b,done){const r=b.region.r,c=G.region.champ[r],dest=RG[r].fin;
@@ -1227,7 +1226,7 @@ Welcome her at Fights › Four Regions Cup`});}
       :c.state==="letter"?`<button class="btn sm gold" data-act="rgser" data-v="${r}">Pick a title fighter</button>`
       :c.state==="series"?`<span class="meta">${me?esc(me.name):""} ${c.w}-${c.l}${c.next?` · bout ${c.next.n} week ${c.next.wk}${c.next.season!==(G.season||1)?` (next year)`:""}`:""}</span>${c.visit==="due"?`<button class="btn sm gold" data-act="rgvisit" data-v="${r}">Welcome ${esc(C.champ)} to camp</button>`:c.visit==="done"?`<button class="btn sm" data-act="rgduel" data-v="${r}">Practice duel</button>`:""}`
       :c.state==="lost"?`<span class="meta">${esc(C.champ)} kept her title · ${this.overTime(G)?"this edition's time is up":"waiting for a new challenge letter"}</span>`:`<span class="meta">✉️ Waiting for the champion's letter</span>`;
-    const chat=G.chatIn&&G.chatIn[RG_CID[r]]&&G.F[RG_CID[r]]?`<button class="btn sm gold" data-act="rgchat" data-v="${RG_CID[r]}">💬 ${esc(C.champ)} sent a message</button>`:"";
+    const chat=""; /* v1.91.72 (Man): her chat lives in the Characters tab like everyone else's — no chat button on the region card */
     const R=G.region,cid=RG_CID[r],gap=(R.meet||{})[cid]>0&&(R.meetT||{})[cid]!=null?gameWeek(G)-R.meetT[cid]:0;
     return `<div class="rg-prov rg-fin"><span><b>${esc(F.name)}</b> <small>regional championship ring</small>${gap>=3?`<small class="rg-miss">💭 ${gap} weeks since you last saw ${esc(C.champ)}</small>`:""}</span>${chat}${st}</div>`;},
 
@@ -1238,7 +1237,7 @@ Welcome her at Fights › Four Regions Cup`});}
 .rg-reg{border-top:6px solid var(--rc);position:relative}.rg-reg h3{margin:.1rem 0 0}.rg-reg h3::first-letter{text-transform:uppercase}.rg-champ{font-size:.85rem;opacity:.85;margin-bottom:.5rem}
 .rg-prov{display:flex;align-items:center;justify-content:space-between;gap:.5rem;padding:.35rem 0;border-bottom:1px dashed rgba(0,0,0,.15)}
 .rg-prov:last-child{border-bottom:0}.rg-prov small{opacity:.7}.rg-fin{opacity:.9}.rg-miss{display:block;color:#d4688f;opacity:1!important}.rg-belt{color:#b8860b;font-weight:700}
-.rg-trip{border-left:6px solid var(--gold,#d9a21b)}.rg-show{position:fixed;inset:0;z-index:9000;background:#07040c;display:flex;align-items:center;justify-content:center}.rgs-in{position:relative;width:min(100vw,960px)}.rg-show canvas{width:100%;height:auto;display:block;image-rendering:auto}.rgs-cap{min-height:3.2em;padding:.7rem 1rem;color:#f3e9ff;font-size:1.05rem;line-height:1.5;background:linear-gradient(180deg,#1a1028,#0d0815);border-top:3px solid #ff4d6d}.rgs-skip{position:absolute;top:.5rem;right:.5rem}.rg-quick{display:grid;grid-template-columns:auto 1fr;column-gap:.5rem;align-items:center;margin:.6rem 0;cursor:pointer}.rg-quick small{grid-column:2}.rg-pick{display:flex;flex-wrap:wrap;gap:.4rem;margin:.4rem 0}
+.rg-trip{border-left:6px solid var(--gold,#d9a21b)}.rg-load{position:fixed;inset:0;z-index:9000;display:flex;align-items:center;justify-content:center;background:#07040c url(${ASSET}bg_naka_underground.webp) center/cover}.rgl-in{background:rgba(8,4,10,.82);box-shadow:inset 0 0 0 3px #c41d33;padding:1rem 1.2rem;max-width:min(90vw,520px);display:grid;gap:.6rem;color:#f3e9ff}.rgl-in b{color:#ff5a6c;font-size:1.2rem}.rgl-in p{margin:0;line-height:1.5}.rgl-bar{height:10px;background:#2a0d14;box-shadow:inset 0 0 0 2px #5a1520}.rgl-bar i{display:block;height:100%;width:0;background:#e0283c;transition:width .2s}.fprep3{display:grid;gap:6px;margin:.4rem 0}.fprep3 h4{margin:0;color:#ff7a8a}.fprep3 .btn{text-align:left;display:grid;justify-items:start;padding:.5rem .8rem}.fprep3 .btn.gold{box-shadow:inset 0 0 0 3px #ffcf4a}.fprep3 .btn small{opacity:.8}.rg-show{position:fixed;inset:0;z-index:9000;background:#07040c;display:flex;align-items:center;justify-content:center}.rgs-in{position:relative;width:min(100vw,960px)}.rg-show canvas{width:100%;height:auto;display:block;image-rendering:auto}.rgs-cap{min-height:3.2em;padding:.7rem 1rem;color:#f3e9ff;font-size:1.05rem;line-height:1.5;background:linear-gradient(180deg,#1a1028,#0d0815);border-top:3px solid #ff4d6d}.rgs-skip{position:absolute;top:.5rem;right:.5rem}.rg-quick{display:grid;grid-template-columns:auto 1fr;column-gap:.5rem;align-items:center;margin:.6rem 0;cursor:pointer}.rg-quick small{grid-column:2}.rg-pick{display:flex;flex-wrap:wrap;gap:.4rem;margin:.4rem 0}
 .rg-pick button{display:flex;align-items:center;gap:.35rem}.rg-pick button[aria-pressed="true"]{outline:3px solid var(--gold,#d9a21b)}
 .rg-bill .kv-row{padding:.15rem 0}.rg-fuel.cheap{color:#2f8a50}.rg-fuel.high{color:#c8283c}
 #rdcv{width:100%;height:auto;image-rendering:pixelated;background:#1b1530;box-shadow:inset 0 0 0 2px var(--line)}
@@ -1302,28 +1301,41 @@ Object.assign(REGION,{
     if(cups.length>=4){const last=R.champ[cups[3]];return now>=((last&&last.wonAbs)||0)+2;}
     /* the tournament runs its course without four cups: three years in, nothing in progress */
     return cups.length>=1&&now>=(R.startAbs||0)+156&&!RG_ORDER.some(r=>R.champ[r]&&R.champ[r].state==="series")&&!R.trip;},
-  openFinal(G){const R=G.region,now=gameWeek(G);R.close=now;R.final={stage:"prep",abs:now+3,prep:null,tries:0,won:false,intelAbs:now+1};
-    addMail(G,{kind:"letter",from:"(no sender)",title:"Black card",body:`Sirichai Camp is invited: five on five
-The old beverage factory warehouse, Khlong Toei port
-From week ${((R.final.abs-1)%52)+1} onward
+  openFinal(G){const R=G.region,now=gameWeek(G);R.close=now;R.final={stage:"prep",abs:now+3,prep:null,tries:0,won:false,intelAbs:now+1};},
+  /* v1.91.73 (Man): the black card is Krerk's own challenge — a black letter with a blinking red frame that is also the way into the warehouse */
+  blackCard(G){const R=G.region,F=R.final;if(!F)return;const wk=((F.abs-1)%52)+1;
+    const ps=R.closeDare?"\n\nP.S. That night you told me to send my fighters to your camp. I am sending five.":R.closeFace?"\n\nP.S. My daughter never asks anyone's name. That night she asked yours.":"";
+    addMail(G,{kind:"letter",tone:"black",bk:1,from:"Krerk Naka",title:"Black card",body:`To the manager of Sirichai Camp,
 
-Open rules. Throws allowed. Locks allowed.
-No prize. No press.
+For three years I have hosted the Four Regions Championship, waiting for those four champions. You are the reason they did not come.
 
-I just want to know how well your small Muay Thai camp handles the real world.
-— L.`});},
+So let us find out how long a camp that teaches people to say no can stay standing.
+
+Five vs five · the old drinks-factory warehouse, Khlong Toei Port
+From week ${wk} onward
+Open rules: throws and locks allowed · no prize, no press, no excuses
+
+The door is open every night. Send your fighters.
+
+— Krerk Naka ${ps}`});},
+  letterAct(m){const R=G.region,F=R&&R.final;if(!F)return "";if(F.won)return `<p class="meta center">Sirichai Camp won the underground night ${esc(F.score||"")}</p>`;const now=gameWeek(G);
+    return now<F.abs?`<p class="meta center">Open from week ${((F.abs-1)%52)+1} · trained ${F.abs-now} weeks</p>`:`<button class="btn red big" data-act="rgfline">🂠 Go to the Khlong Toei warehouse ▸</button>`;},
   finalWeekly(G){const R=G.region,F=R.final,now=gameWeek(G);if(!F||F.intel||now<F.intelAbs)return;F.intel=1;
-    addMail(G,{kind:"letter",from:"(unsigned)",title:"Naka League team intel",body:"Don't ask who sent this\n\n"+NL_ORDER.map(k=>`${NL[k].name} · ${NL[k].art}\n${NL[k].tip||""}`).join("\n\n")+"\n\nLadda looks for old fight tapes of everyone in your camp. The ones she has never seen fight, she can't read.\n\nP.S. No need to return the tablet."});},
+    addMail(G,{kind:"letter",tone:"naka",from:"(unsigned)",title:"Naka League team intel",body:"Don't ask who sent this\n\n"+NL_ORDER.map(k=>`${NL[k].name} · ${NL[k].art}\n${NL[k].tip||""}`).join("\n\n")+"\n\nLadda looks for old fight tapes of everyone in your camp. The ones she has never seen fight, she can't read.\n\nP.S. No need to return the tablet."});},
   finalCard(G){const R=G.region,F=R.final;if(!F)return "";const now=gameWeek(G),ready=now>=F.abs,wk=((F.abs-1)%52)+1;
-    const plans=Object.entries(RG_FPREP).map(([k,P])=>`<button class="btn sm ${F.prep===k?"gold":""}" data-act="rgfprep" data-v="${k}" aria-pressed="${F.prep===k}"><b>${esc(P.n)}</b><small>${esc(P.d)}</small></button>`).join("");
     const team=F.intel?`<div class="rg-nl">${NL_ORDER.map(k=>`<div class="kv-row"><span><b>${esc(NL[k].name)}</b> <small>${esc(NL[k].art)}</small></span><small>${NL[k].nlsk.map(s=>esc(s.name)).join(" · ")}</small></div>`).join("")}</div>`:`<p class="meta">You know nothing about the Naka League team yet</p>`;
     if(F.won)return `<section class="px card rg-final won"><h3>Underground fight · Naka League</h3><p>Sirichai Camp won ${F.score||""} · ${F.beatLadda?"Ladda went down too":"Ladda is still unbeaten"}</p></section>`;
     return `<section class="px card rg-final"><h3>🂠 Black card · Naka League underground fight</h3>
-      <p class="meta">Five on five · first to three · open rules, throws and locks allowed · no prize ${F.tries?` · attempts so far: ${F.tries} times`:""}</p>
-      <h4>Underground training plan</h4><div class="rg-pick rg-fprep">${plans}</div>
+      <p class="meta">Five on five · first to three · open rules, throws and locks allowed · no prize ${F.tries?` · attempts so far: ${F.tries} times`:""} · pick each bout's fighter and counter plan on the fight-prep screen</p>
       <h4>Naka League team</h4>${team}
-      <div class="mfoot">${ready?`<button class="btn primary" data-act="rgfline" ${F.prep?"":"disabled"}>${!F.prep?"Choose a training plan first":F.live?"Back into the warehouse ▸":"Go to the underground warehouse ▸"}</button>`:`<span class="meta">Available from week ${wk} · trained ${F.abs-now} more weeks</span>`}</div></section>`;},
+      <div class="mfoot">${ready?`<button class="btn primary" data-act="rgfline">${F.live?"Back into the warehouse ▸":"Go to the underground warehouse ▸"}</button>`:`<span class="meta">Available from week ${wk} · trained ${F.abs-now} more weeks</span>`}</div></section>`;},
   finalPool(G){return roster(G).filter(f=>!f.injury&&!isAway(G,f.id));},
+  /* v1.91.73 (Man): a loading screen on the way in — the board opens only when every portrait and sprite of the night is ready (no blank, stuck cards) */
+  finalLoad(done){if(typeof document==="undefined"){done();return;}const pool=this.finalPool(G),ref=pool[0]||roster(G)[0];for(const k of NL_ORDER)if(!G.F["nl_"+k]&&ref)nlFighter(G,k,ref);
+    const L=["bg_naka_underground","lada_fight_happy","lada_fight_angry","nl_rosa_win_por",...NL_ORDER.filter(k=>k!=="ladda").map(k=>`nl_${k}_por`),...NL_ORDER.map(k=>G.F["nl_"+k]&&G.F["nl_"+k].sprite?G.F["nl_"+k].sprite+"_sheet":null).filter(Boolean),"nl_ladda_hood_sheet","nl_ladda_sheet","nl_ladda_blood_sheet",...pool.map(f=>`${f.id}_fight_happy`)];
+    const el=document.createElement("div");el.className="rg-load";el.innerHTML=`<div class="rgl-in"><b>🂠 Khlong Toei Port</b><p>The camp van turns into the alley of an abandoned warehouse. Its headlights find a steel door left ajar, waiting…</p><div class="rgl-bar"><i></i></div></div>`;document.body.appendChild(el);
+    const bar=el.querySelector(".rgl-bar i");let n=0;const one=src=>new Promise(r=>{const im=new Image();im.onload=im.onerror=()=>{n++;bar.style.width=Math.round(n/L.length*100)+"%";r();};im.src=ASSET+src+".webp";});
+    const t0=Date.now();Promise.race([Promise.all(L.map(one)),new Promise(r=>setTimeout(r,8000))]).then(()=>setTimeout(()=>{el.remove();done();},Math.max(0,1100-(Date.now()-t0))));},
   vsArt(f,side,win){const A={kati:1,mali:1,rin:1,ploy:1,fah:1,baibua:1,tabtim:1,alicia:1,chaba:1,pailin:1};
     if(f.nl==="ladda")return `<img src="${ASSET}lada_fight_${win?"happy":"angry"}.webp" alt="">`;
     if(f.nl)return `<img src="${ASSET}nl_${f.nl}${f.nl==="rosa"&&win?"_win":""}_por.webp" alt="">`; /* v1.91.23: Man's Naka League portraits */
@@ -1331,34 +1343,32 @@ I just want to know how well your small Muay Thai camp handles the real world.
     return `<canvas width="128" height="128" data-sprite="${f.id}" data-mode="guard" ${side==="r"?'data-flip="1"':""}></canvas>`;},
   boardHTML(){const R=G.region,F=R.final,pool=this.finalPool(G),L=F.line=F.line||{},K=F.clear=F.clear||{};
     if(!F.live){F.cur={};F.clear={};for(const k in K)delete K[k];} /* v1.91.53 (Man): a lost night starts again from bout 1 (v1.91.24 kept the bouts already won) */
-    const C=F.cur;
+    const C=F.cur=F.cur||{};
     for(const k of NL_ORDER)if(!C[k]&&L[k]&&!pool.some(f=>f.id===L[k]))delete L[k];
-    if(!F.live&&!NL_ORDER.some(k=>!C[k]&&L[k])){const used=new Set();for(const k of NL_ORDER){if(C[k])continue;const f=pool.filter(x=>!used.has(x.id)).sort((a,b)=>effOvr(G,b)-effOvr(G,a))[0];if(f){L[k]=f.id;used.add(f.id);}}}
+    for(const k of NL_ORDER)if(!C[k])delete L[k]; /* v1.91.73 (Man): our side starts empty — each bout's fighter is picked when that bout comes up, then the prep screen locks her in */
     const ref=pool[0]||roster(G)[0];for(const k of NL_ORDER)if(!G.F["nl_"+k]&&ref)nlFighter(G,k,ref);
     const v=Object.values(C),w=v.filter(x=>x==="W").length,l=v.filter(x=>x==="L").length,next=NL_ORDER.find(k=>!C[k]);
     if(UI.rgPick&&!C[UI.rgPick]){const k=UI.rgPick,o=G.F["nl_"+k],at=id=>NL_ORDER.find(x=>L[x]===id);
       return `<div class="vsb"><h2>Bout ${NL_ORDER.indexOf(k)+1} · Who fights ${esc(NL[k].name)}</h2><p class="meta">${esc(NL[k].art)}</p>
-        <div class="vs-pick">${pool.map(f=>{const x=at(f.id),done=x&&C[x];return `<button class="vs-pc ${L[k]===f.id?"on":""}" data-act="rgfset" data-v="${k}|${f.id}" ${done?"disabled":""}>
-          <span class="vs-art">${this.vsArt(f,"r")}</span><b>${esc(f.name)}</b><small>Lv.${f.lvl||1}${done?" · already fought":x&&x!==k?` · in bout ${NL_ORDER.indexOf(x)+1}`:""}</small></button>`;}).join("")}</div>
-        ${pool.length<5?`<p class="redt">You need at least 5 fighters ready to fight (right now: ${pool.length})</p>`:""}
+        <div class="vs-pick">${pool.map(f=>{const x=at(f.id),done=x&&C[x];return `<button class="vs-pc" data-act="rgfset" data-v="${k}|${f.id}" ${done?"disabled":""}>
+          <span class="vs-art">${this.vsArt(f,"r")}</span><b>${esc(f.name)}</b><small>Lv.${f.lvl||1}${done?" · already fought":""}</small></button>`;}).join("")}</div>
         <div class="mfoot"><button class="btn" data-act="rgfpickx">Back</button></div></div>`;}
     const stamp=(r,sd)=>r?`<i class="vs-st ${sd} ${r==="W"?"w":r==="L"?"l":"d"}">${r==="W"?"WIN":r==="L"?"LOSE":"DRAW"}</i>`:"";
     const rows=NL_ORDER.map((k,i)=>{const o=G.F["nl_"+k],kept=!!(K[k]&&!L[k]),me=kept?G.F[K[k]]:L[k]&&G.F[L[k]],r=C[k],their=r==="W"?"L":r==="L"?"W":r;
       return `<div class="vs-row ${r?"done":""} ${kept?"kept":""} ${k===next?"next":""}">
         <div class="vs-l ${r&&their!=="W"?"lost":""}"><span class="vs-art">${o?this.vsArt(o,"l",their==="W"):""}</span><span class="vs-tx">${(n=>`<b>${esc(n[0])}</b>${n[1]?`<em>${esc(n.slice(1).join(" "))}</em>`:""}`)(NL[k].name.split(" "))}<small>${esc(NL[k].art)}</small></span></div>
         <div class="vs-mid">VS<small>Bout ${i+1}</small></div>
-        <button class="vs-r ${r&&r!=="W"?"lost":""}" data-act="rgfslot" data-v="${k}" ${r?"disabled":""}>${me?`<span class="vs-tx"><b>${esc(me.name)}</b><small>${kept?"Won last time":`Lv.${me.lvl||1}`}</small></span><span class="vs-art">${this.vsArt(me,"r")}</span>`:`<span class="vs-tx vs-empty"><b>+ Pick a fighter</b></span>`}</button>${stamp(their,"vsl")}${stamp(r,"vsr")}</div>`;}).join("");
-    const nk=next&&NL_ORDER.indexOf(next)+1,full=NL_ORDER.every(k=>C[k]||L[k]),ok=next&&L[next]&&(F.live||full); /* v1.91.47 (playtest): every bout needs a fighter before the first bell — an injured fifth fighter left the night stuck at bout 5 */
+        <button class="vs-r ${r&&r!=="W"?"lost":""}" data-act="rgfslot" data-v="${k}" ${r||k!==next?"disabled":""}>${me?`<span class="vs-tx"><b>${esc(me.name)}</b><small>${kept?"Won last time":`Lv.${me.lvl||1}`}</small></span><span class="vs-art">${this.vsArt(me,"r")}</span>`:`<span class="vs-tx vs-empty"><b>${k===next?"+ Pick fighter":"I'll wait"}</b></span>`}</button>${stamp(their,"vsl")}${stamp(r,"vsr")}</div>`;}).join("");
+    const nk=next&&NL_ORDER.indexOf(next)+1,usedIds=new Set(NL_ORDER.filter(k=>C[k]).map(k=>F.line&&F.line[k]).filter(Boolean)),left=pool.filter(f=>!usedIds.has(f.id)).length;
     return `<div class="vsb"><div class="vs-head"><span class="vs-tl">Naka League</span><b class="vs-sc">${w>0||l>0?`${l} – ${w}`:"VS"}</b><span class="vs-tr">Sirichai Camp</span></div>
-      <p class="meta vs-sub">Five on five · first to three · tap a blue slot to pick a fighter · lose and it starts over from bout 1, new line-up from next week · no injuries carry over after the fight</p>
+      <p class="meta vs-sub">Five vs five · first to three · tap the next bout's blue slot to pick a fighter, then prep the fight · lose and you restart from bout 1 next week · no lasting injuries</p>
       <div class="vs-rows">${rows}</div>
-      <div class="mfoot">${next?`${F.live?"":`<button class="btn" data-act="closeModal">Not yet</button>`}<button class="btn primary" data-act="rgfgo" ${ok?"":"disabled"}>${ok?`Fight bout ${nk} ▸`:L[next]&&!full?(pool.length<NL_ORDER.filter(k=>!C[k]).length?"Not enough fit fighters":"Pick a fighter for every bout first"):`Pick a fighter for bout ${nk} first`}</button>`:`<button class="btn primary" data-act="rgfend">See the result ▸</button>`}</div></div>`;},
+      <div class="mfoot">${next?`${F.live?"":`<button class="btn" data-act="closeModal">Not yet</button>`}${left?`<button class="btn primary" data-act="rgfslot" data-v="${next}">Pick fighter for bout ${nk} ▸</button>`:`<button class="btn red" data-act="rgfforfeit">No fighters left · forfeit bout ${nk}</button>`}`:`<button class="btn primary" data-act="rgfend">See the result ▸</button>`}</div></div>`;},
   finalNext(){const R=G.region,F=R.final,C=F.cur=F.cur||{},k=NL_ORDER.find(x=>!C[x]);if(!k||!(F.line||{})[k])return;UI.modal=null;UI.rgPick=null;
-    if(!F.live){F.live=true;save();AU.startMusic&&AU.startMusic("hub");playScene(rgFinalIntro(G),()=>this.finalBout(k),{bg:"naka_underground",look:"casual"});return;}
-    this.finalBout(k);},
+    F.live=true;this.finalBout(k);},
   finalBout(k){const R=G.region,F=R.final,i=NL_ORDER.indexOf(k),me=G.F[F.line[k]];if(!me)return;
     const keep={injury:me.injury||0,fatigue:me.fatigue||0},o=nlFighter(G,k,me);
-    const b={id:`nlf${F.tries||0}_${i}_${gameWeek(G)}`,a:me.id,b:o.id,week:G.week,tier:"exhibition",rounds:5,win:0,lose:0,bg:"bg_naka_underground.webp",gprep:F.prep,region:{nlfinal:k}};
+    const b={id:`nlf${F.tries||0}_${i}_${gameWeek(G)}`,a:me.id,b:o.id,week:G.week,tier:"exhibition",rounds:5,win:0,lose:0,bg:"bg_naka_underground.webp",gprep:null,region:{nlfinal:k}};
     G.bookings.push(b);save();
     const S=NL_SAY[k],spk=t=>k==="ladda"?{n:"lada",l:"fight",f:"angry",t}:{n:"npc",who:NL[k].name,t},
       after=()=>{const res=F.cur[k],t=S&&(res==="W"?S.lose:res==="L"?S.win:null);const fin=()=>{UI.modal={type:"rgfline"};render();};
@@ -1367,7 +1377,7 @@ I just want to know how well your small Muay Thai camp handles the real world.
       if(!F.cur[k])F.cur[k]="L";save();after();});
     if(S)playScene([spk(F.tries?S.again:S.first)],go,{bg:"naka_underground",look:"fight"});else go();},
   finalEnd(){const R=G.region,F=R.final,v=Object.values(F.cur||{}),w=v.filter(x=>x==="W").length,l=v.filter(x=>x==="L").length,beat=(F.cur||{}).ladda==="W";F.tries=(F.tries||0)+1;F.live=false;UI.modal=null;
-    if(w>=3){F.won=true;F.stage="done";F.wonAbs=gameWeek(G);F.score=`${w}–${l}`;F.beatLadda=beat;R.hall=R.hall||[];R.hall.push({k:"naka",season:G.season||1,score:F.score,ladda:beat});
+    if(w>=3){for(const m of G.mail||[])if(m.bk)m.done=true;F.won=true;F.stage="done";F.wonAbs=gameWeek(G);F.score=`${w}–${l}`;F.beatLadda=beat;R.hall=R.hall||[];R.hall.push({k:"naka",season:G.season||1,score:F.score,ladda:beat});
       for(const r of RG_ORDER)rgTouch(G,RG_CID[r]);G.rep+=3;
       AU.startMusic&&AU.startMusic("victory");playScene(rgFinalWin(G,w,l,beat,F.line.ladda),()=>{AU.startMusic&&AU.startMusic("hub");save();render();},{bg:"naka_underground",look:"casual"});return;}
     F.abs=gameWeek(G)+1;F.cur={};F.clear={}; /* v1.91.53 (Man): back next week at the earliest, from bout 1 */
@@ -1398,15 +1408,19 @@ if(typeof ACT!=="undefined")Object.assign(ACT,{
   rglegpick:d=>{if(!G.region||!G.region.final||!G.region.final.won)return;UI.modal={type:"rgleg",k:d.v};render();},
   rglego:d=>{const [k,id]=d.v.split("|");REGION.legGo(k,id);},
   rgfprep:d=>{const F=G.region&&G.region.final;if(!F||F.won)return;F.prep=d.v;save();render();},
-  rgfline:()=>{const F=G.region&&G.region.final;if(!F||F.won||!F.prep||gameWeek(G)<F.abs)return;UI.rgPick=null;UI.modal={type:"rgfline"};render();},
+  rgfline:()=>{const F=G.region&&G.region.final;if(!F||F.won||gameWeek(G)<F.abs)return;UI.rgPick=null;UI.modal=null;render();REGION.finalLoad(()=>{const open=()=>{UI.modal={type:"rgfline"};render();};if(F.live){open();return;}
+    F.live=true;save();AU.startMusic&&AU.startMusic("hub");playScene(rgFinalIntro(G),open,{bg:"naka_underground",look:"casual"});});},
+  rgfswap:()=>{const U=UI.fight;if(!U||!U.b||!U.b.region||!U.b.region.nlfinal||U.stage!=="pre")return;const k=U.b.region.nlfinal,F=G.region.final;G.bookings=G.bookings.filter(x=>x.id!==U.b.id);if(F.line)delete F.line[k];UI.fight=null;UI.rgPick=k;UI.modal={type:"rgfline"};save();render();},
+  rgfp:d=>{const U=UI.fight;if(U&&U.b&&U.b.region&&U.b.region.nlfinal){U.b.gprep=d.v;render();}},
   rgfslot:d=>{const F=G.region.final;if((F.cur||{})[d.v])return;UI.rgPick=d.v;render();},
   rgfpickx:()=>{UI.rgPick=null;render();},
   rgfset:d=>{const [k,id]=d.v.split("|"),F=G.region.final,L=F.line=F.line||{},C=F.cur||{};if(C[k])return;
-    const was=NL_ORDER.find(x=>L[x]===id);if(was&&C[was])return;if(was&&was!==k){if(L[k])L[was]=L[k];else delete L[was];}L[k]=id;UI.rgPick=null;save();render();},
+    const was=NL_ORDER.find(x=>L[x]===id);if(was&&C[was])return;L[k]=id;UI.rgPick=null;save();REGION.finalNext();},
+  rgfforfeit:()=>{const F=G.region.final,k=NL_ORDER.find(x=>!(F.cur||{})[x]);if(!k)return;F.cur=F.cur||{};F.cur[k]="L";F.live=true;save();render();},
   rgfgo:()=>REGION.finalNext(),
   rgfend:()=>{const F=G.region.final;if(NL_ORDER.every(k=>(F.cur||{})[k]))REGION.finalEnd();},
   rgfagain:()=>{const F=G.region.final;if(gameWeek(G)<F.abs){UI.modal=null;render();return;}F.cur={};F.live=false;UI.rgPick=null;UI.modal={type:"rgfline"};render();},
-  rgfhome:()=>{const F=G.region.final;F.abs=gameWeek(G)+1;UI.modal=null;addMail(G,{kind:"letter",from:"(no sender)",title:"A new black card",body:"The door is still open\n— L."});save();render();},
+  rgfhome:()=>{const F=G.region.final;F.abs=gameWeek(G)+1;UI.modal=null;addMail(G,{kind:"letter",tone:"black",bk:1,from:"Krerk Naka",title:"A new black card",body:"The door is still open, manager.\nRest up, then come back.\n\n— Krerk Naka"});save();render();},
 });
 if(typeof XMODAL!=="undefined"){XMODAL.rgfline=()=>({body:REGION.boardHTML(),foot:false});XMODAL.rgleg=m=>({body:REGION.legPickHTML(m.k),foot:false});
   XMODAL.rgflost=()=>({body:`<h2>Lost the underground fight</h2><p>Next time all five bouts start again from bout 1 · go back and train, then set a new line-up from next week, or wait until you're ready</p><div class="mfoot"><button class="btn primary" data-act="rgfhome">Back to training</button></div>`,foot:false});}
@@ -1585,7 +1599,7 @@ Object.assign(REGION,{
     const m=R.meet||{};for(const r of RG_ORDER){const cid=RG_CID0[r];if(rgEd(G)>=2&&!(R.nc&&R.nc[r])&&!(R.champ[r]&&R.champ[r].state==="won"))continue;if(!R.joined[cid]&&!(R.joinPend&&R.joinPend.cid===cid)&&!R.offers.includes(cid)&&!R.joinQ.includes(cid)&&!(R.joinGone||{})[cid]&&(m[cid]||0)>=RG_JOIN_MIN)R.joinQ.push(cid);}
     R.joinQ.sort((a,b)=>(m[b]||0)-(m[a]||0));
     if(R.joinQ.length&&now>=(R.joinNext||0)){const cid=R.joinQ.shift(),r=RG_ORDER.find(x=>RG_CID0[x]===cid);R.offers.push(cid);R.joinNext=now+RG_JOIN_GAP;
-      addMail(G,{kind:"letter",from:`${RG[r].champ} · Champion of ${RG[r].name}`,title:`Application from ${RG[r].champ}`,body:RG_JOIN[cid].letter+`
+      addMail(G,{kind:"letter",tone:"region",from:`${RG[r].champ} · Champion of ${RG[r].name}`,title:`Application from ${RG[r].champ}`,body:RG_JOIN[cid].letter+`
 
 (Contract: signing fee ${fmt(RG_JOIN_FEE)} · wage ${fmt(RG_JOIN_WAGE)}/week · trait: ${RG_TRAIT[cid].name} · she will need rebuilding: 5 levels lower, slightly lower stats · see the contract on the Camp page › Coaches & Fighters)`});}},
   joinOk(G,cid){const R=G.region;if(!R.offers||!R.offers.includes(cid)||(R.joined&&R.joined[cid]))return "No such contract";if(R.joinPend)return "Wait for the one who already said yes to move in first";{const r=RG_ORDER.find(x=>RG_CID0[x]===cid);if(rgEd(G)>=2&&!(R.nc&&R.nc[r])&&R.champ[r]&&R.champ[r].state!=="won")return "She is defending her regional title · win this edition's cup first";}
@@ -1762,7 +1776,7 @@ The cup is still mine. Send a fighter again whenever you're ready
       R.champ[r]={state:"locked",fid:null,w:0,l:0,tries:0,visit:gone?"none":"done"};}
     rgApply.k=null;rgApply(G);
     const lines=RG_ORDER.map(r=>{const N=R.nc[r];return N?`${RG0[r].name}: ${rgNm(N,N.home)} "${RG_NK[r][N.nk%3]}" — new champion (${RG0[r].champ} has moved to Sirichai Camp)`:`${RG0[r].name}: ${RG0[r].champ} — the reigning champion, back and stronger`;}).join("\n");
-    addMail(G,{kind:"letter",from:"NAGA Energy Drink",title:`Invitation: Battle of the Four Regions, Edition ${ed}`,
+    addMail(G,{kind:"letter",tone:"naka",from:"NAGA Energy Drink",title:`Invitation: Battle of the Four Regions, Edition ${ed}`,
       body:`Dear Manager of Sirichai Camp
 
 The Battle of the Four Regions, Edition ${ed} is open · all 16 provincial belts were decided again in each province's own qualifier. The winners are the new provincial champions waiting for your camp

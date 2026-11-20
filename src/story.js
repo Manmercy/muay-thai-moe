@@ -485,11 +485,16 @@ const noCnt=(G,id)=>(G.noCnt&&G.noCnt[id])||0;
 const loveOffLeft=(G,id)=>{const a=G.loveOff&&G.loveOff[id];return a==null?0:Math.max(0,LOVE_OFF_WK-(absWeek(G)-a));};
 const isFriendz=(G,id)=>!!(G.friendz&&G.friendz[id]);
 const awayWord=(G,id)=>G.F[id].camp==="player"?"หนีไปจากค่าย":"ไม่ติดต่อมา";
-function relLabel(G,f,lv,short){const id=f&&f.id;if(G&&id&&G.F&&G.F[id]&&isAway(G,id)&&G.F[id].awayWhy==="train"){const n=awayLeft(G,id);return short?"ไปฝึกวิชา":`ไปฝึกวิชา (อีก ${n} สัปดาห์)`;}
+/* v1.91.72 (Man): a regional champion who has not joined the camp is not a "camp-mate" yet — that rung reads "friend from another camp" for her */
+const RG_CHAMP_IDS=["baibua","tabtim","alicia","chaba"];
+const outChamp=f=>!!(f&&RG_CHAMP_IDS.includes(f.id)&&f.camp!=="player");
+const tierFor=(n,f)=>n==="เพื่อนร่วมค่าย"&&outChamp(f)?"เพื่อนต่างค่าย":n;
+function relLabel(G,f,lv,short){return tierFor(relLabel0(G,f,lv,short),f);}
+function relLabel0(G,f,lv,short){const id=f&&f.id;if(G&&id&&G.F&&G.F[id]&&isAway(G,id)&&G.F[id].awayWhy==="train"){const n=awayLeft(G,id);return short?"ไปฝึกวิชา":`ไปฝึกวิชา (อีก ${n} สัปดาห์)`;}
   if(G&&id&&G.F&&G.F[id]&&isAway(G,id)){const w=G.F[id].awayWhy==="break"?"อกหัก":"งอน";return short?w:`${w} · ${awayWord(G,id)} (อีก ${awayLeft(G,id)} สัปดาห์)`;}
   return relBase(G,f,lv);}
 /* the ladder shown in her profile: the same labels, the current step lit — lovers climb their own ladder (LOVER_TIERS) */
-const REL_DESC={"คนรู้จัก":"ยังเรียกคุณว่าผู้จัดการแบบเกร็ง ๆ","เพื่อนร่วมค่าย":"เริ่มคุยเล่น ทักแชตเรื่องทั่วไป","คนสนิท":"บางทีก็หลุดเรียกชื่อคุณ · มีเรื่องส่วนตัวมาเล่า","คนพิเศษ":"เรียกชื่อคุณตลอด",
+const REL_DESC={"เพื่อนต่างค่าย":"อยู่คนละค่าย แต่ทักแชตมาคุยกันบ้าง","คนรู้จัก":"ยังเรียกคุณว่าผู้จัดการแบบเกร็ง ๆ","เพื่อนร่วมค่าย":"เริ่มคุยเล่น ทักแชตเรื่องทั่วไป","คนสนิท":"บางทีก็หลุดเรียกชื่อคุณ · มีเรื่องส่วนตัวมาเล่า","คนพิเศษ":"เรียกชื่อคุณตลอด",
   "ผูกพันลึก":"ใจตรงกันแทบทุกเรื่อง","รู้ใจ":"แค่มองหน้าก็รู้ว่าคิดอะไร","ขาดกันไม่ได้":"ไม่เจอกันสัปดาห์เดียวก็คิดถึง","คนสำคัญที่สุด":"คุณคือคนที่เธอนึกถึงเป็นคนแรก","คู่ใจในสังเวียน":"ยืนมุมเดียวกันทั้งบนเวทีและนอกเวที",
   "คนรัก":"คบกันอยู่","แฟนที่รู้ใจ":"คบกันมาจนรู้ใจกันทุกเรื่อง","คู่ที่ขาดกันไม่ได้":"อยู่ห่างกันไม่ได้แล้ว","ว่าที่คู่ชีวิต":"เริ่มคุยกันเรื่องอนาคต","คู่ชีวิต":"เดินไปด้วยกันตลอดทาง",
   "คนที่สัญญากันไว้":"สัญญากันไว้แล้ว รอวันที่ได้อยู่ค่ายเดียวกัน","เพื่อนสนิท":"เคยปฏิเสธไปแล้ว แต่ยังเป็นคนสำคัญของกันและกัน","เคยคบ":"เคยคบกัน ตอนนี้ยังอึดอัดกันอยู่บ้าง"};

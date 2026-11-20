@@ -33,7 +33,7 @@ const RG_RETRY={bout:.03,sMax:2};
 /* v1.90.21 (Man): one bar for everyone — opponent strength is fixed, not fitted to your fighter. It climbs with progress (later belts and champions have studied the tapes of earlier fights).
    Set from a "casual" fighter (stats 20, Lv.18, every skill she can learn, morale 70, no fight prep): the middle of the five heroines wins belts 48% → 32%,
    championship series 22% → 12%, the Naka members 45/40/35/30% and Ladda 20%. Morale, fight prep, the camp and limit-break growth all push past that */
-const RG_FIX={belt:n=>22.25+.65*Math.min(15,n)/15,champ:(cups,tries)=>23.41+.1067*Math.min(3,cups)-.15*Math.min(2,tries||0),nl:{nia:23.81,varya:25.2,meili:23.97,rosa:25.51,ladda:24.0}} /* v1.91.54 (Man, option B): the four members −0.4 now that a lost night starts over (about level with the regional champions; Ladda unchanged) */; /* v1.91.38 (Man): champions a little harder (+.3 → maxed series ~56→45%), the Naka members harder (+.5 → ~40%), Ladda a brutal final (+1.3 → ~18%) */ /* v1.91.13 (Man): set for a maxed fighter (Lv.32, every bonus, stat 20) — belts ~80% · series ~60% · Naka ~50% · Ladda ~40% */ /* v1.91.6: re-set after the heroine rebalance (v1.91.0–1.91.5), same targets, middle of the five home-line builds · v1.91.7: champions −0.35 after opponents got fixed styles */
+const RG_FIX={belt:n=>22.25+.65*Math.min(15,n)/15,champ:(cups,tries)=>23.41+.1067*Math.min(3,cups)-.15*Math.min(2,tries||0),nl:{nia:23.41,varya:25.35,meili:23.82,rosa:25.51,ladda:24.0}} /* v1.91.54 (Man, option B): the four members −0.4 now that a lost night starts over (about level with the regional champions; Ladda unchanged) */; /* v1.91.38 (Man): champions a little harder (+.3 → maxed series ~56→45%), the Naka members harder (+.5 → ~40%), Ladda a brutal final (+1.3 → ~18%) */ /* v1.91.13 (Man): set for a maxed fighter (Lv.32, every bonus, stat 20) — belts ~80% · series ~60% · Naka ~50% · Ladda ~40% */ /* v1.91.6: re-set after the heroine rebalance (v1.91.0–1.91.5), same targets, middle of the five home-line builds · v1.91.7: champions −0.35 after opponents got fixed styles */
 /* v1.90.18 (Man): belts 40% every time, championship series 20% → 12% — the chapter in about 3 years for a fighter who never outgrows the fit */
 const RG_ODDS={belt:n=>.40,series:cups=>.20-.08*Math.min(3,cups)/3,bout:s=>{let lo=0,hi=1;for(let i=0;i<30;i++){const m=(lo+hi)/2;m*m*(3-2*m)<s?lo=m:hi=m;}return (lo+hi)/2;}};
 /* the opponent strength (≤ ceil) at which `me` wins about `p` of 5-round bouts. setT(T) rebuilds the opponent at strength T. */
@@ -909,13 +909,11 @@ function rgClose(G){const R=G.region,fah=rgIn(G,"fah"),rin=rgIn(G,"rin");
  {n:"lada",l:"casual",t:"…พวกเธอไม่เซ็นเพราะค่ายคุณ ฉันอยากรู้ว่าค่ายคุณมีอะไร"},
  fah?{n:"fah",f:"sad",l:"casual",t:"นั่นมัน… มวยสมัยใหม่ เหมือนฟ้าเลย"}:{n:"coach",t:"นั่นไม่ใช่มวยไทยอย่างเดียว… นั่นมันทุกอย่างรวมกัน"},
  {n:"npc",who:"คุณเกริก",t:"ขอบคุณที่มาร่วมงานครับทุกท่าน"},
- {n:"nar",bg:"camp",show:[],t:"สามวันต่อมา การ์ดสีดำไม่มีโลโก้มาถึงค่าย"},
- {n:"nar",t:"\"ขอเชิญค่ายศิริชัย ห้าต่อห้า · โกดังโรงงานเครื่องดื่มเก่า ท่าเรือคลองเตย · กติกาเปิด ทุ่มได้ ล็อกได้ · ไม่มีรางวัล ไม่มีสื่อ\""},
- {inject:()=>[{n:"nar",t:R.closeDare?"ด้านหลังการ์ดเขียนด้วยลายมือ: \"คุณบอกให้ส่งนักมวยมาเจอค่ายคุณ… ส่งมาแล้ว ห้าคน — ล.\"":R.closeFace?"ด้านหลังการ์ดเขียนด้วยลายมือ: \"คนที่ไม่ใช่นักมวยแต่ไม่ถอย… อยากเห็นนักมวยของคุณบ้าง — ล.\"":"ด้านหลังการ์ดเขียนด้วยลายมือ: \"แค่อยากรู้ว่ามวยไทยค่ายเล็กของคุณรับมือโลกจริงได้แค่ไหน — ล.\""}]},
+ {n:"nar",bg:"camp",show:[],t:"สามวันต่อมา ซองสีดำขอบแดงมาถึงค่าย ไม่มีตราประทับ มีแค่ลายเซ็นเดียวที่ทุกคนจำได้ · เกริก นาคา"},
  ...rgIf(R.c2==="deal",[rin?{n:"rin",f:"flustered",l:"casual",t:"ผู้จัดการคะ สัญญาพันธมิตรที่เรารับเงินมา ข้อ 30 เขียนว่า \"หากนาคาลีกแพ้ให้แก่ค่ายคู่สัญญา ให้สัญญานี้สิ้นสุดทันที\""}:{n:"coach",t:"สัญญาพันธมิตรที่เรารับเงินมา ข้อ 30 เขียนว่าถ้านาคาลีกแพ้ค่ายเรา สัญญาจบทันที…"},
    {n:"coach",t:"เขามั่นใจขนาดนั้นเชียว ถึงกล้าเขียนข้อนี้ไว้"}]),
  {n:"coach",t:"ทุ่มได้ ล็อกได้… พวกเราไม่เคยซ้อมเรื่องพวกนี้เลยสักวัน"},
- {n:"coach",t:"มีเวลาสามสัปดาห์ ต้องเลือกว่าจะซ้อมรับมือแบบไหน เลือกได้ที่หน้าศึกชิงเจ้าสี่ภาค"}];}
+ {n:"coach",t:"มีเวลาสามสัปดาห์ ซ้อมรับมือไว้ให้ครบทุกแบบ ถึงคืนนั้นค่อยเลือกทีละนัดว่าจะรับมือยังไง การ์ดอยู่ในกล่องจดหมายแล้ว"}];}
 const RG_FPREP={sprawl:{n:"กันทุ่ม",d:"ถีบขาหนีตอนโดนพุ่งจับ และกดคอตีเข่าสวนได้บ่อยขึ้น"},escape:{n:"หนีล็อก",d:"ดันตัวลุกจากพื้นและหลุดจากล็อกได้ดีขึ้น"},strike:{n:"ยืนแลก",d:"ไม่สนการทุ่ม ซ้อมออกอาวุธให้แม่นขึ้น จบก่อนโดนดึงลงพื้น"}};
 /* v1.91.57 (Man): the Naka League talk a little before and after their bouts — an introduction the first night, a jab after; Ladda barely speaks */
 const NL_SAY={
@@ -931,8 +929,9 @@ const NL_SAY={
 function rgFinalIntro(G){const R=G.region,F=R.final;return [
  {n:"nar",bg:"naka_underground",t:F.tries?"โกดังเดิมริมท่าเรือคลองเตย ไฟสลัวเหมือนครั้งก่อน คนดูกลุ่มเดิมยังยืนเงียบอยู่ในเงามืด":"โกดังเก่าริมท่าเรือคลองเตย ไฟสลัว กลิ่นน้ำหวานบูดลอยมาจากถังเก่า กลางห้องมีเวทีเชือกสีดำ พื้นปูเบาะนุ่มแบบเวที MMA"},
  {n:"npc",who:"คุณเกริก",t:F.tries?"กลับมาอีกแล้วนะครับ ผมชอบความดื้อแบบนี้":"ยินดีต้อนรับครับ ไม่มีกล้อง ไม่มีสื่อ ไม่มีเงินรางวัล มีแค่คำถามข้อเดียว"},
- {n:"lada",l:"casual",t:"ห้านัด ชนะสามเอาไป ฉันชกนัดสุดท้าย"},
- {n:"coach",t:`จำไว้ทุกคน ซ้อมมาแบบ${RG_FPREP[F.prep||"strike"].n} ทำแบบที่ซ้อม อย่าเล่นตามเกมเขา`}];}
+ {n:"npc",who:"คุณเกริก",t:"ห้านัด ชนะสามเอาไป ลูกสาวผมชกนัดสุดท้าย"},
+ {n:"nar",t:"ลดายืนพิงเสาอยู่ในเงามืด ฮู้ดคลุมครึ่งหน้า ไม่พูดอะไรสักคำ"},
+ {n:"coach",t:"แต่ละนัดเลือกวิธีรับมือให้ตรงกับคู่ ทุ่มก็กัน ล็อกก็หนี จะยืนแลกก็ต้องจบให้ไว"}];}
 function rgFinalBetween(G,i,me,o,res,w,l){return [
  {n:"nar",t:`${res==="W"?`${me.name}ชนะ${o.name}`:res==="D"?`${me.name}เสมอกับ${o.name}`:`${o.name}ชนะ${me.name}`} · ศิริชัย ${w} – ${l} นาคาลีก`}];}
 function rgFinalWin(G,w,l,beatLadda,ladFid){const R=G.region,fah=rgIn(G,"fah"),rin=rgIn(G,"rin"),looked=ladFid==="fah"&&fah?"ฟ้า":"ผู้จัดการ";return [
@@ -991,7 +990,7 @@ const REGION={
     /* v1.91.47 (playtest): a camp that reaches the closing ceremony on the time limit with only one or two cups still gets Krerk's dinner and Pailin's tablet first — the ceremony and the reveal lean on them */
     if(this.closeDue(G)&&!R.c2){R.c2="later";playScene(rgCup2(G),()=>{save();done();},{bg:"camp",look:"casual"});return;}
     if(this.closeDue(G)&&!R.c3){R.c3="seen";playScene(rgCup3(G),()=>{save();done();},{bg:"camp",look:"casual"});return;}
-    if(this.closeDue(G)){this.openFinal(G);this.playClose(()=>{save();done();});return;} /* v1.91.20 round 11 */
+    if(this.closeDue(G)){this.openFinal(G);this.playClose(()=>{this.blackCard(G);save();done();});return;} /* v1.91.20 round 11 */
     done();},
   /* ---------- state helpers ---------- */
   base(G){return ((G.season||1)-1)*52;},
@@ -1034,17 +1033,17 @@ const REGION={
       rgTouch(G,RG_CID[r]);const T=R.trip,abs=T&&T.bid===p.bid?T.abs:gameWeek(G);
       if(p.res==="W"){R.belts[r]=R.belts[r]||{};R.belts[r][dest]=1;G.log=G.log||[];G.log.push(`${G.F[p.a]?G.F[p.a].name:""}คว้าเข็มขัดจังหวัด${D.name}!`);if(G.F[p.a])recordHonor(G,"rgbelt",p.a,G.F[p.a].div,G.week,dest); /* v1.91.14 (Man): a province belt gets the same ceremony as the main game */
         if(this.beltCount(G,r)===4&&R.champ[r].state==="locked"){R.champ[r].state="letter";this.champFighter(G,r);
-          addMail(G,{kind:"letter",from:`${RG[r].champ} · แชมป์${RG[r].name}`,title:`${RG_TITLE[r]}: ครบสี่เข็มขัดแล้ว`,body:RG_CH[r].letter+((t=>t?`\n\n(${t})`:"")(this.tipText(G,r)))});}}
+          addMail(G,{kind:"letter",tone:"region",from:`${RG[r].champ} · แชมป์${RG[r].name}`,title:`${RG_TITLE[r]}: ครบสี่เข็มขัดแล้ว`,body:RG_CH[r].letter+((t=>t?`\n\n(${t})`:"")(this.tipText(G,r)))});}}
       R.trip=null;R.nextTripAbs=Math.max(R.nextTripAbs||0,abs+RG_TRIP_GAP);(R.gc=R.gc||[]).push(p.b);}},
   /* weekly: post-cup letters and champion chats */
   letters(G){const R=G.region,now=gameWeek(G);R.postDone=R.postDone||{};
-    for(const r of RG_ORDER){if(R.post&&R.post[r]!=null&&now>=R.post[r]&&!R.postDone[r]&&RG_POST[r]){R.postDone[r]=1;addMail(G,{kind:"letter",from:`${RG[r].champ} · แชมป์${RG[r].name}`,title:`จดหมายจาก${RG[r].champ}`,body:RG_POST[r]});}
+    for(const r of RG_ORDER){if(R.post&&R.post[r]!=null&&now>=R.post[r]&&!R.postDone[r]&&RG_POST[r]){R.postDone[r]=1;addMail(G,{kind:"letter",tone:"region",from:`${RG[r].champ} · แชมป์${RG[r].name}`,title:`จดหมายจาก${RG[r].champ}`,body:RG_POST[r]});}
       const cid=RG_CID0[r],c=R.champ[r]||{},open=RG_CHAT[cid]&&G.F[cid]&&((R.joined&&R.joined[cid])||c.visit==="done"||c.state==="won"||rgEd(G)>=2);G.chatIn=G.chatIn||{};
       if(open&&!G.chatIn[cid]&&now-((G.chatLastAbs||{})[cid]??-999)>=2&&mulberry32((G.seed||1)+now*31+cid.length)()<.45)G.chatIn[cid]=G.week;}},
   fade(G){const R=G.region,now=gameWeek(G),m=R.meet||{};R.meetT=R.meetT||{};R.miss=R.miss||{};
     for(const r of RG_ORDER){const cid=RG_CID0[r];if(!(m[cid]>0))continue;if(R.meetT[cid]==null){R.meetT[cid]=now;continue;}if(R.joined&&R.joined[cid])continue;
       const gap=now-R.meetT[cid];
-      if(gap>=3&&!R.miss[cid]){R.miss[cid]=1;addMail(G,{kind:"letter",from:`${RG[r].champ} · แชมป์${RG[r].name}`,title:`จดหมายจาก${RG[r].champ}`,body:RG_MISS[r]});}
+      if(gap>=3&&!R.miss[cid]){R.miss[cid]=1;addMail(G,{kind:"letter",tone:"region",from:`${RG[r].champ} · แชมป์${RG[r].name}`,title:`จดหมายจาก${RG[r].champ}`,body:RG_MISS[r]});}
       if(gap>=4){const pk=(R.meetPk||{})[cid]||m[cid],fl=RG_FLOOR.find(t=>pk>=t)||0;if(m[cid]>fl)m[cid]=Math.max(fl,Math.round((m[cid]-.25)*100)/100);}}},
   weekly(G){const R=G.region;rgApply(G);this.flush(G);this.seriesWeekly(G);this.fade(G);this.letters(G);this.finalWeekly(G);this.joinWeekly(G);this.joinPerks(G);this.loopWeekly(G);const T=R.trip;
     /* a trip whose bout vanished (the week went by, the booking was dropped) is let go */
@@ -1162,16 +1161,16 @@ const REGION={
       G.log.push(`${RG_TITLE[r]}: ${RG[r].champ} ป้องกันแชมป์ไว้ได้ ${c.l}-${c.w}`);return;}
     R.just={r,kind:"bout",res:p.res,w:c.w,l:c.l,n:c.n};const s=this.schedule(G,r,abs+2); /* v1.90.17 (Man): bouts two weeks apart */
     /* between bout 1 and bout 2 the champion drops by the camp (round 4) — missed if bout 2 comes first */
-    if(c.n===1&&!c.visit){c.visit="due";addMail(G,{kind:"letter",from:`${RG[r].champ} · แชมป์${RG[r].name}`,title:`${RG[r].champ}จะแวะมาที่ค่าย`,body:`${RG[r].champ}ฝากข่าวมาว่าจะแวะมาเยี่ยมค่ายก่อนนัดที่ 2\n\nไปต้อนรับได้ที่หน้าไฟต์ › ศึกชิงเจ้าสี่ภาค`});}
+    if(c.n===1&&!c.visit){c.visit="due";addMail(G,{kind:"letter",tone:"region",from:`${RG[r].champ} · แชมป์${RG[r].name}`,title:`${RG[r].champ}จะแวะมาที่ค่าย`,body:`${RG[r].champ}ฝากข่าวมาว่าจะแวะมาเยี่ยมค่ายก่อนนัดที่ 2\n\nไปต้อนรับได้ที่หน้าไฟต์ › ศึกชิงเจ้าสี่ภาค`});}
     else if(c.n>=2&&c.visit==="due")c.visit="missed";
     G.log.push(`${RG_TITLE[r]} นัดที่ ${c.n}: ${p.res==="W"?"ชนะ":p.res==="L"?"แพ้":"เสมอ"} · สกอร์ ${c.w}-${c.l}${s?` · นัดต่อไปสัปดาห์ ${s.wk}`:""}`);},
   /* weekly: a hurt fighter gets the bout moved, a dropped bout is rescheduled, a lost series sends a new letter later */
   seriesWeekly(G){const R=G.region,now=gameWeek(G);
     {const n=(R.cups||[]).length;if(!R.close&&!R.endWarn&&n>=1&&n<4&&now>=(R.startAbs||0)+130){R.endWarn=1; /* v1.91.47: half a year of warning before the time limit */
-      addMail(G,{kind:"letter",from:"นาคาเอเนอร์จี้ดริงค์",title:"ศึกชิงเจ้าสี่ภาค: เหลือเวลาอีกราวครึ่งปี",body:"เรียน ผู้จัดการค่ายศิริชัย\n\nศึกชิงเจ้าสี่ภาคครั้งนี้จะปิดฉากในอีกราวครึ่งปี หลังจากนั้นจะไม่มีจดหมายท้าแชมป์ภาคครั้งใหม่ นัดที่ยังชกค้างอยู่จะชกต่อจนจบ แล้วจึงเข้าสู่พิธีปิดที่กรุงเทพฯ\n\nถ้วยที่ยังเหลือ ขอให้รีบเก็บก่อนหมดเวลา\n\nนาคาเอเนอร์จี้ดริงค์ · ดื่มนาคา ชกไม่มีหมด!"});}}
+      addMail(G,{kind:"letter",tone:"naka",from:"นาคาเอเนอร์จี้ดริงค์",title:"ศึกชิงเจ้าสี่ภาค: เหลือเวลาอีกราวครึ่งปี",body:"เรียน ผู้จัดการค่ายศิริชัย\n\nศึกชิงเจ้าสี่ภาคครั้งนี้จะปิดฉากในอีกราวครึ่งปี หลังจากนั้นจะไม่มีจดหมายท้าแชมป์ภาคครั้งใหม่ นัดที่ยังชกค้างอยู่จะชกต่อจนจบ แล้วจึงเข้าสู่พิธีปิดที่กรุงเทพฯ\n\nถ้วยที่ยังเหลือ ขอให้รีบเก็บก่อนหมดเวลา\n\nนาคาเอเนอร์จี้ดริงค์ · ดื่มนาคา ชกไม่มีหมด!"});}}
     for(const r of RG_ORDER){const c=R.champ[r];if(!c)continue;
       if(c.state==="lost"&&now>=(c.letterAbs||0)&&!this.overTime(G)){c.state="letter";c.fid=null;c.w=0;c.l=0;c.n=0;
-        addMail(G,{kind:"letter",from:`${RG[r].champ} · แชมป์${RG[r].name}`,title:`${RG_TITLE[r]}: คำท้าครั้งใหม่`,body:RG_CH[r].again+((t=>t?`\n\n(${t})`:"")(this.tipText(G,r)))});continue;}
+        addMail(G,{kind:"letter",tone:"region",from:`${RG[r].champ} · แชมป์${RG[r].name}`,title:`${RG_TITLE[r]}: คำท้าครั้งใหม่`,body:RG_CH[r].again+((t=>t?`\n\n(${t})`:"")(this.tipText(G,r)))});continue;}
       if(c.state!=="series")continue;const me=G.F[c.fid];
       if(!me||me.camp!=="player"){G.bookings=G.bookings.filter(b=>!(c.next&&b.id===c.next.bid));Object.assign(c,{state:"letter",fid:null,w:0,l:0,n:0,next:null});continue;}
       const x=c.next;
@@ -1181,7 +1180,7 @@ const REGION={
       if(x.abs===now&&me.injury>0){G.bookings=G.bookings.filter(b=>b.id!==x.bid);this.postpone(G,r,now+me.injury+1,`${me.name}ยังเจ็บอยู่`);continue;}
       this.ensureBooking(G,r);}},
   postpone(G,r,from,why){const c=G.region.champ[r];c.next=null;const s=this.schedule(G,r,from);
-    addMail(G,{kind:"letter",from:`${RG[r].champ} · แชมป์${RG[r].name}`,title:`เลื่อนนัด: ${RG_TITLE[r]}`,
+    addMail(G,{kind:"letter",tone:"region",from:`${RG[r].champ} · แชมป์${RG[r].name}`,title:`เลื่อนนัด: ${RG_TITLE[r]}`,
       body:`${why} · ผู้จัดเลื่อนนัดที่ ${(c.n||0)+1}${s?` ไปเป็นสัปดาห์ ${s.wk}${s.season!==(G.season||1)?` (ปีหน้า)`:""}`:""}\n\n${RG_CH[r].wait}`});},
   /* the championship trip: drive (paid by the sponsor) → the champion before the bell → the bout → cup or hotel → home */
   seriesTrip(b,done){const r=b.region.r,c=G.region.champ[r],dest=RG[r].fin;
@@ -1225,7 +1224,7 @@ const REGION={
       :c.state==="letter"?`<button class="btn sm gold" data-act="rgser" data-v="${r}">เลือกนักมวยชิงแชมป์</button>`
       :c.state==="series"?`<span class="meta">${me?esc(me.name):""} ${c.w}-${c.l}${c.next?` · นัด ${c.next.n} สัปดาห์ ${c.next.wk}${c.next.season!==(G.season||1)?` (ปีหน้า)`:""}`:""}</span>${c.visit==="due"?`<button class="btn sm gold" data-act="rgvisit" data-v="${r}">ต้อนรับ${esc(C.champ)}ที่ค่าย</button>`:c.visit==="done"?`<button class="btn sm" data-act="rgduel" data-v="${r}">ดวลซ้อม</button>`:""}`
       :c.state==="lost"?`<span class="meta">${esc(C.champ)}ป้องกันแชมป์ไว้ได้ · ${this.overTime(G)?"ศึกครั้งนี้หมดเวลาแล้ว":"รอจดหมายท้าครั้งใหม่"}</span>`:`<span class="meta">✉️ รอจดหมายนัดจากแชมป์</span>`;
-    const chat=G.chatIn&&G.chatIn[RG_CID[r]]&&G.F[RG_CID[r]]?`<button class="btn sm gold" data-act="rgchat" data-v="${RG_CID[r]}">💬 ${esc(C.champ)}ทักแชตมา</button>`:"";
+    const chat=""; /* v1.91.72 (Man): her chat lives in the Characters tab like everyone else's — no chat button on the region card */
     const R=G.region,cid=RG_CID[r],gap=(R.meet||{})[cid]>0&&(R.meetT||{})[cid]!=null?gameWeek(G)-R.meetT[cid]:0;
     return `<div class="rg-prov rg-fin"><span><b>${esc(F.name)}</b> <small>เวทีชิงแชมป์ภาค</small>${gap>=3?`<small class="rg-miss">💭 ${gap} สัปดาห์แล้วที่ไม่ได้เจอ${esc(C.champ)}</small>`:""}</span>${chat}${st}</div>`;},
 
@@ -1236,7 +1235,7 @@ const REGION={
 .rg-reg{border-top:6px solid var(--rc);position:relative}.rg-reg h3{margin:.1rem 0 0}.rg-reg h3::first-letter{text-transform:uppercase}.rg-champ{font-size:.85rem;opacity:.85;margin-bottom:.5rem}
 .rg-prov{display:flex;align-items:center;justify-content:space-between;gap:.5rem;padding:.35rem 0;border-bottom:1px dashed rgba(0,0,0,.15)}
 .rg-prov:last-child{border-bottom:0}.rg-prov small{opacity:.7}.rg-fin{opacity:.9}.rg-miss{display:block;color:#d4688f;opacity:1!important}.rg-belt{color:#b8860b;font-weight:700}
-.rg-trip{border-left:6px solid var(--gold,#d9a21b)}.rg-show{position:fixed;inset:0;z-index:9000;background:#07040c;display:flex;align-items:center;justify-content:center}.rgs-in{position:relative;width:min(100vw,960px)}.rg-show canvas{width:100%;height:auto;display:block;image-rendering:auto}.rgs-cap{min-height:3.2em;padding:.7rem 1rem;color:#f3e9ff;font-size:1.05rem;line-height:1.5;background:linear-gradient(180deg,#1a1028,#0d0815);border-top:3px solid #ff4d6d}.rgs-skip{position:absolute;top:.5rem;right:.5rem}.rg-quick{display:grid;grid-template-columns:auto 1fr;column-gap:.5rem;align-items:center;margin:.6rem 0;cursor:pointer}.rg-quick small{grid-column:2}.rg-pick{display:flex;flex-wrap:wrap;gap:.4rem;margin:.4rem 0}
+.rg-trip{border-left:6px solid var(--gold,#d9a21b)}.rg-load{position:fixed;inset:0;z-index:9000;display:flex;align-items:center;justify-content:center;background:#07040c url(${ASSET}bg_naka_underground.webp) center/cover}.rgl-in{background:rgba(8,4,10,.82);box-shadow:inset 0 0 0 3px #c41d33;padding:1rem 1.2rem;max-width:min(90vw,520px);display:grid;gap:.6rem;color:#f3e9ff}.rgl-in b{color:#ff5a6c;font-size:1.2rem}.rgl-in p{margin:0;line-height:1.5}.rgl-bar{height:10px;background:#2a0d14;box-shadow:inset 0 0 0 2px #5a1520}.rgl-bar i{display:block;height:100%;width:0;background:#e0283c;transition:width .2s}.fprep3{display:grid;gap:6px;margin:.4rem 0}.fprep3 h4{margin:0;color:#ff7a8a}.fprep3 .btn{text-align:left;display:grid;justify-items:start;padding:.5rem .8rem}.fprep3 .btn.gold{box-shadow:inset 0 0 0 3px #ffcf4a}.fprep3 .btn small{opacity:.8}.rg-show{position:fixed;inset:0;z-index:9000;background:#07040c;display:flex;align-items:center;justify-content:center}.rgs-in{position:relative;width:min(100vw,960px)}.rg-show canvas{width:100%;height:auto;display:block;image-rendering:auto}.rgs-cap{min-height:3.2em;padding:.7rem 1rem;color:#f3e9ff;font-size:1.05rem;line-height:1.5;background:linear-gradient(180deg,#1a1028,#0d0815);border-top:3px solid #ff4d6d}.rgs-skip{position:absolute;top:.5rem;right:.5rem}.rg-quick{display:grid;grid-template-columns:auto 1fr;column-gap:.5rem;align-items:center;margin:.6rem 0;cursor:pointer}.rg-quick small{grid-column:2}.rg-pick{display:flex;flex-wrap:wrap;gap:.4rem;margin:.4rem 0}
 .rg-pick button{display:flex;align-items:center;gap:.35rem}.rg-pick button[aria-pressed="true"]{outline:3px solid var(--gold,#d9a21b)}
 .rg-bill .kv-row{padding:.15rem 0}.rg-fuel.cheap{color:#2f8a50}.rg-fuel.high{color:#c8283c}
 #rdcv{width:100%;height:auto;image-rendering:pixelated;background:#1b1530;box-shadow:inset 0 0 0 2px var(--line)}
@@ -1300,20 +1299,29 @@ Object.assign(REGION,{
     if(cups.length>=4){const last=R.champ[cups[3]];return now>=((last&&last.wonAbs)||0)+2;}
     /* the tournament runs its course without four cups: three years in, nothing in progress */
     return cups.length>=1&&now>=(R.startAbs||0)+156&&!RG_ORDER.some(r=>R.champ[r]&&R.champ[r].state==="series")&&!R.trip;},
-  openFinal(G){const R=G.region,now=gameWeek(G);R.close=now;R.final={stage:"prep",abs:now+3,prep:null,tries:0,won:false,intelAbs:now+1};
-    addMail(G,{kind:"letter",from:"(ไม่มีชื่อผู้ส่ง)",title:"การ์ดสีดำ",body:`ขอเชิญค่ายศิริชัย ห้าต่อห้า\nโกดังโรงงานเครื่องดื่มเก่า ท่าเรือคลองเตย\nตั้งแต่สัปดาห์ที่ ${((R.final.abs-1)%52)+1} เป็นต้นไป\n\nกติกาเปิด ทุ่มได้ ล็อกได้\nไม่มีรางวัล ไม่มีสื่อ\n\nแค่อยากรู้ว่ามวยไทยค่ายเล็กของคุณรับมือโลกจริงได้แค่ไหน\n— ล.`});},
+  openFinal(G){const R=G.region,now=gameWeek(G);R.close=now;R.final={stage:"prep",abs:now+3,prep:null,tries:0,won:false,intelAbs:now+1};},
+  /* v1.91.73 (Man): the black card is Krerk's own challenge — a black letter with a blinking red frame that is also the way into the warehouse */
+  blackCard(G){const R=G.region,F=R.final;if(!F)return;const wk=((F.abs-1)%52)+1;
+    const ps=R.closeDare?"\n\nป.ล. คืนนั้นคุณบอกให้ผมส่งนักมวยไปเจอค่ายคุณ ผมส่งไปห้าคน":R.closeFace?"\n\nป.ล. ลูกสาวผมไม่เคยถามชื่อใคร คืนนั้นเธอถามชื่อคุณ":"";
+    addMail(G,{kind:"letter",tone:"black",bk:1,from:"เกริก นาคา",title:"การ์ดสีดำ",body:`ถึง ผู้จัดการค่ายศิริชัย\n\nสามปีที่ผมเป็นเจ้าภาพศึกชิงเจ้าสี่ภาค ผมรอแชมป์ทั้งสี่คนนั้นมาตลอด และคุณคือเหตุผลที่พวกเธอไม่มา\n\nงั้นมาพิสูจน์กันครับ ว่าค่ายที่สอนให้คนกล้าปฏิเสธ ยืนได้นานแค่ไหน\n\nห้าต่อห้า · โกดังโรงงานเครื่องดื่มเก่า ท่าเรือคลองเตย\nตั้งแต่สัปดาห์ที่ ${wk} เป็นต้นไป\nกติกาเปิด ทุ่มได้ ล็อกได้ · ไม่มีรางวัล ไม่มีสื่อ ไม่มีข้ออ้าง\n\nประตูเปิดรอทุกคืน ส่งนักมวยของคุณมา\n\n— เกริก นาคา${ps}`});},
+  letterAct(m){const R=G.region,F=R&&R.final;if(!F)return "";if(F.won)return `<p class="meta center">ค่ายศิริชัยชนะไฟต์ใต้ดิน ${esc(F.score||"")}</p>`;const now=gameWeek(G);
+    return now<F.abs?`<p class="meta center">ไปได้ตั้งแต่สัปดาห์ ${((F.abs-1)%52)+1} · ซ้อมอีก ${F.abs-now} สัปดาห์</p>`:`<button class="btn red big" data-act="rgfline">🂠 ไปโกดังท่าเรือคลองเตย ▸</button>`;},
   finalWeekly(G){const R=G.region,F=R.final,now=gameWeek(G);if(!F||F.intel||now<F.intelAbs)return;F.intel=1;
-    addMail(G,{kind:"letter",from:"(ไม่ลงชื่อ)",title:"ข้อมูลทีมนาคาลีก",body:"ไม่ต้องถามว่าใครส่งมา\n\n"+NL_ORDER.map(k=>`${NL[k].name} · ${NL[k].art}\n${NL[k].tip||""}`).join("\n\n")+"\n\nลดามองหาเทปไฟต์เก่าของทุกคนในค่ายคุณ คนที่เธอไม่เคยเห็นชก เธออ่านไม่ออก\n\nป.ล. แท็บเล็ตไม่ต้องคืนแล้ว"});},
+    addMail(G,{kind:"letter",tone:"naka",from:"(ไม่ลงชื่อ)",title:"ข้อมูลทีมนาคาลีก",body:"ไม่ต้องถามว่าใครส่งมา\n\n"+NL_ORDER.map(k=>`${NL[k].name} · ${NL[k].art}\n${NL[k].tip||""}`).join("\n\n")+"\n\nลดามองหาเทปไฟต์เก่าของทุกคนในค่ายคุณ คนที่เธอไม่เคยเห็นชก เธออ่านไม่ออก\n\nป.ล. แท็บเล็ตไม่ต้องคืนแล้ว"});},
   finalCard(G){const R=G.region,F=R.final;if(!F)return "";const now=gameWeek(G),ready=now>=F.abs,wk=((F.abs-1)%52)+1;
-    const plans=Object.entries(RG_FPREP).map(([k,P])=>`<button class="btn sm ${F.prep===k?"gold":""}" data-act="rgfprep" data-v="${k}" aria-pressed="${F.prep===k}"><b>${esc(P.n)}</b><small>${esc(P.d)}</small></button>`).join("");
     const team=F.intel?`<div class="rg-nl">${NL_ORDER.map(k=>`<div class="kv-row"><span><b>${esc(NL[k].name)}</b> <small>${esc(NL[k].art)}</small></span><small>${NL[k].nlsk.map(s=>esc(s.name)).join(" · ")}</small></div>`).join("")}</div>`:`<p class="meta">ยังไม่รู้อะไรเกี่ยวกับทีมนาคาลีกเลย</p>`;
     if(F.won)return `<section class="px card rg-final won"><h3>ไฟต์ใต้ดิน · นาคาลีก</h3><p>ค่ายศิริชัยชนะ ${F.score||""} · ${F.beatLadda?"ล้มลดาได้ด้วย":"ลดายังไม่แพ้ใคร"}</p></section>`;
     return `<section class="px card rg-final"><h3>🂠 การ์ดสีดำ · ไฟต์ใต้ดินนาคาลีก</h3>
-      <p class="meta">ห้าต่อห้า · ชนะสามได้ไป · กติกาเปิด ทุ่มได้ ล็อกได้ · ไม่มีรางวัล${F.tries?` · เคยไปแล้ว ${F.tries} ครั้ง`:""}</p>
-      <h4>แผนซ้อมใต้ดิน</h4><div class="rg-pick rg-fprep">${plans}</div>
+      <p class="meta">ห้าต่อห้า · ชนะสามได้ไป · กติกาเปิด ทุ่มได้ ล็อกได้ · ไม่มีรางวัล${F.tries?` · เคยไปแล้ว ${F.tries} ครั้ง`:""} · เลือกนักมวยและวิธีรับมือทีละนัดในหน้าเตรียมไฟต์</p>
       <h4>ทีมนาคาลีก</h4>${team}
-      <div class="mfoot">${ready?`<button class="btn primary" data-act="rgfline" ${F.prep?"":"disabled"}>${!F.prep?"เลือกแผนซ้อมก่อน":F.live?"กลับเข้าโกดัง ชกต่อ ▸":"ไปโกดังใต้ดิน ▸"}</button>`:`<span class="meta">ไปได้ตั้งแต่สัปดาห์ ${wk} · ซ้อมอีก ${F.abs-now} สัปดาห์</span>`}</div></section>`;},
+      <div class="mfoot">${ready?`<button class="btn primary" data-act="rgfline">${F.live?"กลับเข้าโกดัง ชกต่อ ▸":"ไปโกดังใต้ดิน ▸"}</button>`:`<span class="meta">ไปได้ตั้งแต่สัปดาห์ ${wk} · ซ้อมอีก ${F.abs-now} สัปดาห์</span>`}</div></section>`;},
   finalPool(G){return roster(G).filter(f=>!f.injury&&!isAway(G,f.id));},
+  /* v1.91.73 (Man): a loading screen on the way in — the board opens only when every portrait and sprite of the night is ready (no blank, stuck cards) */
+  finalLoad(done){if(typeof document==="undefined"){done();return;}const pool=this.finalPool(G),ref=pool[0]||roster(G)[0];for(const k of NL_ORDER)if(!G.F["nl_"+k]&&ref)nlFighter(G,k,ref);
+    const L=["bg_naka_underground","lada_fight_happy","lada_fight_angry","nl_rosa_win_por",...NL_ORDER.filter(k=>k!=="ladda").map(k=>`nl_${k}_por`),...NL_ORDER.map(k=>G.F["nl_"+k]&&G.F["nl_"+k].sprite?G.F["nl_"+k].sprite+"_sheet":null).filter(Boolean),"nl_ladda_hood_sheet","nl_ladda_sheet","nl_ladda_blood_sheet",...pool.map(f=>`${f.id}_fight_happy`)];
+    const el=document.createElement("div");el.className="rg-load";el.innerHTML=`<div class="rgl-in"><b>🂠 ท่าเรือคลองเตย</b><p>รถค่ายเลี้ยวเข้าซอยโกดังร้าง ไฟหน้ารถส่องประตูเหล็กที่เปิดแง้มไว้รอ…</p><div class="rgl-bar"><i></i></div></div>`;document.body.appendChild(el);
+    const bar=el.querySelector(".rgl-bar i");let n=0;const one=src=>new Promise(r=>{const im=new Image();im.onload=im.onerror=()=>{n++;bar.style.width=Math.round(n/L.length*100)+"%";r();};im.src=ASSET+src+".webp";});
+    const t0=Date.now();Promise.race([Promise.all(L.map(one)),new Promise(r=>setTimeout(r,8000))]).then(()=>setTimeout(()=>{el.remove();done();},Math.max(0,1100-(Date.now()-t0))));},
   vsArt(f,side,win){const A={kati:1,mali:1,rin:1,ploy:1,fah:1,baibua:1,tabtim:1,alicia:1,chaba:1,pailin:1};
     if(f.nl==="ladda")return `<img src="${ASSET}lada_fight_${win?"happy":"angry"}.webp" alt="">`;
     if(f.nl)return `<img src="${ASSET}nl_${f.nl}${f.nl==="rosa"&&win?"_win":""}_por.webp" alt="">`; /* v1.91.23: Man's Naka League portraits */
@@ -1321,34 +1329,32 @@ Object.assign(REGION,{
     return `<canvas width="128" height="128" data-sprite="${f.id}" data-mode="guard" ${side==="r"?'data-flip="1"':""}></canvas>`;},
   boardHTML(){const R=G.region,F=R.final,pool=this.finalPool(G),L=F.line=F.line||{},K=F.clear=F.clear||{};
     if(!F.live){F.cur={};F.clear={};for(const k in K)delete K[k];} /* v1.91.53 (Man): a lost night starts again from bout 1 (v1.91.24 kept the bouts already won) */
-    const C=F.cur;
+    const C=F.cur=F.cur||{};
     for(const k of NL_ORDER)if(!C[k]&&L[k]&&!pool.some(f=>f.id===L[k]))delete L[k];
-    if(!F.live&&!NL_ORDER.some(k=>!C[k]&&L[k])){const used=new Set();for(const k of NL_ORDER){if(C[k])continue;const f=pool.filter(x=>!used.has(x.id)).sort((a,b)=>effOvr(G,b)-effOvr(G,a))[0];if(f){L[k]=f.id;used.add(f.id);}}}
+    for(const k of NL_ORDER)if(!C[k])delete L[k]; /* v1.91.73 (Man): our side starts empty — each bout's fighter is picked when that bout comes up, then the prep screen locks her in */
     const ref=pool[0]||roster(G)[0];for(const k of NL_ORDER)if(!G.F["nl_"+k]&&ref)nlFighter(G,k,ref);
     const v=Object.values(C),w=v.filter(x=>x==="W").length,l=v.filter(x=>x==="L").length,next=NL_ORDER.find(k=>!C[k]);
     if(UI.rgPick&&!C[UI.rgPick]){const k=UI.rgPick,o=G.F["nl_"+k],at=id=>NL_ORDER.find(x=>L[x]===id);
       return `<div class="vsb"><h2>นัด ${NL_ORDER.indexOf(k)+1} · ใครจะขึ้นชกกับ${esc(NL[k].name)}</h2><p class="meta">${esc(NL[k].art)}</p>
-        <div class="vs-pick">${pool.map(f=>{const x=at(f.id),done=x&&C[x];return `<button class="vs-pc ${L[k]===f.id?"on":""}" data-act="rgfset" data-v="${k}|${f.id}" ${done?"disabled":""}>
-          <span class="vs-art">${this.vsArt(f,"r")}</span><b>${esc(f.name)}</b><small>Lv.${f.lvl||1}${done?" · ชกไปแล้ว":x&&x!==k?` · อยู่นัด ${NL_ORDER.indexOf(x)+1}`:""}</small></button>`;}).join("")}</div>
-        ${pool.length<5?`<p class="redt">ต้องมีนักมวยพร้อมชกอย่างน้อย 5 คน (ตอนนี้ ${pool.length} คน)</p>`:""}
+        <div class="vs-pick">${pool.map(f=>{const x=at(f.id),done=x&&C[x];return `<button class="vs-pc" data-act="rgfset" data-v="${k}|${f.id}" ${done?"disabled":""}>
+          <span class="vs-art">${this.vsArt(f,"r")}</span><b>${esc(f.name)}</b><small>Lv.${f.lvl||1}${done?" · ชกไปแล้ว":""}</small></button>`;}).join("")}</div>
         <div class="mfoot"><button class="btn" data-act="rgfpickx">กลับ</button></div></div>`;}
     const stamp=(r,sd)=>r?`<i class="vs-st ${sd} ${r==="W"?"w":r==="L"?"l":"d"}">${r==="W"?"WIN":r==="L"?"LOSE":"DRAW"}</i>`:"";
     const rows=NL_ORDER.map((k,i)=>{const o=G.F["nl_"+k],kept=!!(K[k]&&!L[k]),me=kept?G.F[K[k]]:L[k]&&G.F[L[k]],r=C[k],their=r==="W"?"L":r==="L"?"W":r;
       return `<div class="vs-row ${r?"done":""} ${kept?"kept":""} ${k===next?"next":""}">
         <div class="vs-l ${r&&their!=="W"?"lost":""}"><span class="vs-art">${o?this.vsArt(o,"l",their==="W"):""}</span><span class="vs-tx">${(n=>`<b>${esc(n[0])}</b>${n[1]?`<em>${esc(n.slice(1).join(" "))}</em>`:""}`)(NL[k].name.split(" "))}<small>${esc(NL[k].art)}</small></span></div>
         <div class="vs-mid">VS<small>นัด ${i+1}</small></div>
-        <button class="vs-r ${r&&r!=="W"?"lost":""}" data-act="rgfslot" data-v="${k}" ${r?"disabled":""}>${me?`<span class="vs-tx"><b>${esc(me.name)}</b><small>${kept?"ชนะไว้ครั้งก่อน":`Lv.${me.lvl||1}`}</small></span><span class="vs-art">${this.vsArt(me,"r")}</span>`:`<span class="vs-tx vs-empty"><b>+ เลือกนักมวย</b></span>`}</button>${stamp(their,"vsl")}${stamp(r,"vsr")}</div>`;}).join("");
-    const nk=next&&NL_ORDER.indexOf(next)+1,full=NL_ORDER.every(k=>C[k]||L[k]),ok=next&&L[next]&&(F.live||full); /* v1.91.47 (playtest): every bout needs a fighter before the first bell — an injured fifth fighter left the night stuck at bout 5 */
+        <button class="vs-r ${r&&r!=="W"?"lost":""}" data-act="rgfslot" data-v="${k}" ${r||k!==next?"disabled":""}>${me?`<span class="vs-tx"><b>${esc(me.name)}</b><small>${kept?"ชนะไว้ครั้งก่อน":`Lv.${me.lvl||1}`}</small></span><span class="vs-art">${this.vsArt(me,"r")}</span>`:`<span class="vs-tx vs-empty"><b>${k===next?"+ เลือกนักมวย":"รอ"}</b></span>`}</button>${stamp(their,"vsl")}${stamp(r,"vsr")}</div>`;}).join("");
+    const nk=next&&NL_ORDER.indexOf(next)+1,usedIds=new Set(NL_ORDER.filter(k=>C[k]).map(k=>F.line&&F.line[k]).filter(Boolean)),left=pool.filter(f=>!usedIds.has(f.id)).length;
     return `<div class="vsb"><div class="vs-head"><span class="vs-tl">นาคาลีก</span><b class="vs-sc">${w>0||l>0?`${l} – ${w}`:"VS"}</b><span class="vs-tr">ค่ายศิริชัย</span></div>
-      <p class="meta vs-sub">ห้าต่อห้า · ชนะสามได้ไป · แตะช่องสีน้ำเงินเพื่อเลือกนักมวย · แพ้แล้วต้องเริ่มใหม่ตั้งแต่นัดแรก จัดทีมใหม่ได้สัปดาห์หน้า · ไม่มีบาดเจ็บค้างหลังไฟต์</p>
+      <p class="meta vs-sub">ห้าต่อห้า · ชนะสามได้ไป · แตะช่องสีน้ำเงินของนัดถัดไปเพื่อเลือกนักมวย แล้วเตรียมไฟต์ · แพ้แล้วต้องเริ่มใหม่ตั้งแต่นัดแรก มาใหม่ได้สัปดาห์หน้า · ไม่มีบาดเจ็บค้างหลังไฟต์</p>
       <div class="vs-rows">${rows}</div>
-      <div class="mfoot">${next?`${F.live?"":`<button class="btn" data-act="closeModal">ไว้ก่อน</button>`}<button class="btn primary" data-act="rgfgo" ${ok?"":"disabled"}>${ok?`ชกนัด ${nk} ▸`:L[next]&&!full?(pool.length<NL_ORDER.filter(k=>!C[k]).length?"นักมวยพร้อมชกไม่ครบ":"เลือกนักมวยให้ครบทุกนัดก่อน"):`เลือกนักมวยนัด ${nk} ก่อน`}</button>`:`<button class="btn primary" data-act="rgfend">ดูผลไฟต์ใต้ดิน ▸</button>`}</div></div>`;},
+      <div class="mfoot">${next?`${F.live?"":`<button class="btn" data-act="closeModal">ไว้ก่อน</button>`}${left?`<button class="btn primary" data-act="rgfslot" data-v="${next}">เลือกนักมวยนัด ${nk} ▸</button>`:`<button class="btn red" data-act="rgfforfeit">ไม่มีนักมวยเหลือ · ยอมแพ้นัด ${nk}</button>`}`:`<button class="btn primary" data-act="rgfend">ดูผลไฟต์ใต้ดิน ▸</button>`}</div></div>`;},
   finalNext(){const R=G.region,F=R.final,C=F.cur=F.cur||{},k=NL_ORDER.find(x=>!C[x]);if(!k||!(F.line||{})[k])return;UI.modal=null;UI.rgPick=null;
-    if(!F.live){F.live=true;save();AU.startMusic&&AU.startMusic("hub");playScene(rgFinalIntro(G),()=>this.finalBout(k),{bg:"naka_underground",look:"casual"});return;}
-    this.finalBout(k);},
+    F.live=true;this.finalBout(k);},
   finalBout(k){const R=G.region,F=R.final,i=NL_ORDER.indexOf(k),me=G.F[F.line[k]];if(!me)return;
     const keep={injury:me.injury||0,fatigue:me.fatigue||0},o=nlFighter(G,k,me);
-    const b={id:`nlf${F.tries||0}_${i}_${gameWeek(G)}`,a:me.id,b:o.id,week:G.week,tier:"exhibition",rounds:5,win:0,lose:0,bg:"bg_naka_underground.webp",gprep:F.prep,region:{nlfinal:k}};
+    const b={id:`nlf${F.tries||0}_${i}_${gameWeek(G)}`,a:me.id,b:o.id,week:G.week,tier:"exhibition",rounds:5,win:0,lose:0,bg:"bg_naka_underground.webp",gprep:null,region:{nlfinal:k}};
     G.bookings.push(b);save();
     const S=NL_SAY[k],spk=t=>k==="ladda"?{n:"lada",l:"fight",f:"angry",t}:{n:"npc",who:NL[k].name,t},
       after=()=>{const res=F.cur[k],t=S&&(res==="W"?S.lose:res==="L"?S.win:null);const fin=()=>{UI.modal={type:"rgfline"};render();};
@@ -1357,7 +1363,7 @@ Object.assign(REGION,{
       if(!F.cur[k])F.cur[k]="L";save();after();});
     if(S)playScene([spk(F.tries?S.again:S.first)],go,{bg:"naka_underground",look:"fight"});else go();},
   finalEnd(){const R=G.region,F=R.final,v=Object.values(F.cur||{}),w=v.filter(x=>x==="W").length,l=v.filter(x=>x==="L").length,beat=(F.cur||{}).ladda==="W";F.tries=(F.tries||0)+1;F.live=false;UI.modal=null;
-    if(w>=3){F.won=true;F.stage="done";F.wonAbs=gameWeek(G);F.score=`${w}–${l}`;F.beatLadda=beat;R.hall=R.hall||[];R.hall.push({k:"naka",season:G.season||1,score:F.score,ladda:beat});
+    if(w>=3){for(const m of G.mail||[])if(m.bk)m.done=true;F.won=true;F.stage="done";F.wonAbs=gameWeek(G);F.score=`${w}–${l}`;F.beatLadda=beat;R.hall=R.hall||[];R.hall.push({k:"naka",season:G.season||1,score:F.score,ladda:beat});
       for(const r of RG_ORDER)rgTouch(G,RG_CID[r]);G.rep+=3;
       AU.startMusic&&AU.startMusic("victory");playScene(rgFinalWin(G,w,l,beat,F.line.ladda),()=>{AU.startMusic&&AU.startMusic("hub");save();render();},{bg:"naka_underground",look:"casual"});return;}
     F.abs=gameWeek(G)+1;F.cur={};F.clear={}; /* v1.91.53 (Man): back next week at the earliest, from bout 1 */
@@ -1388,15 +1394,19 @@ if(typeof ACT!=="undefined")Object.assign(ACT,{
   rglegpick:d=>{if(!G.region||!G.region.final||!G.region.final.won)return;UI.modal={type:"rgleg",k:d.v};render();},
   rglego:d=>{const [k,id]=d.v.split("|");REGION.legGo(k,id);},
   rgfprep:d=>{const F=G.region&&G.region.final;if(!F||F.won)return;F.prep=d.v;save();render();},
-  rgfline:()=>{const F=G.region&&G.region.final;if(!F||F.won||!F.prep||gameWeek(G)<F.abs)return;UI.rgPick=null;UI.modal={type:"rgfline"};render();},
+  rgfline:()=>{const F=G.region&&G.region.final;if(!F||F.won||gameWeek(G)<F.abs)return;UI.rgPick=null;UI.modal=null;render();REGION.finalLoad(()=>{const open=()=>{UI.modal={type:"rgfline"};render();};if(F.live){open();return;}
+    F.live=true;save();AU.startMusic&&AU.startMusic("hub");playScene(rgFinalIntro(G),open,{bg:"naka_underground",look:"casual"});});},
+  rgfswap:()=>{const U=UI.fight;if(!U||!U.b||!U.b.region||!U.b.region.nlfinal||U.stage!=="pre")return;const k=U.b.region.nlfinal,F=G.region.final;G.bookings=G.bookings.filter(x=>x.id!==U.b.id);if(F.line)delete F.line[k];UI.fight=null;UI.rgPick=k;UI.modal={type:"rgfline"};save();render();},
+  rgfp:d=>{const U=UI.fight;if(U&&U.b&&U.b.region&&U.b.region.nlfinal){U.b.gprep=d.v;render();}},
   rgfslot:d=>{const F=G.region.final;if((F.cur||{})[d.v])return;UI.rgPick=d.v;render();},
   rgfpickx:()=>{UI.rgPick=null;render();},
   rgfset:d=>{const [k,id]=d.v.split("|"),F=G.region.final,L=F.line=F.line||{},C=F.cur||{};if(C[k])return;
-    const was=NL_ORDER.find(x=>L[x]===id);if(was&&C[was])return;if(was&&was!==k){if(L[k])L[was]=L[k];else delete L[was];}L[k]=id;UI.rgPick=null;save();render();},
+    const was=NL_ORDER.find(x=>L[x]===id);if(was&&C[was])return;L[k]=id;UI.rgPick=null;save();REGION.finalNext();},
+  rgfforfeit:()=>{const F=G.region.final,k=NL_ORDER.find(x=>!(F.cur||{})[x]);if(!k)return;F.cur=F.cur||{};F.cur[k]="L";F.live=true;save();render();},
   rgfgo:()=>REGION.finalNext(),
   rgfend:()=>{const F=G.region.final;if(NL_ORDER.every(k=>(F.cur||{})[k]))REGION.finalEnd();},
   rgfagain:()=>{const F=G.region.final;if(gameWeek(G)<F.abs){UI.modal=null;render();return;}F.cur={};F.live=false;UI.rgPick=null;UI.modal={type:"rgfline"};render();},
-  rgfhome:()=>{const F=G.region.final;F.abs=gameWeek(G)+1;UI.modal=null;addMail(G,{kind:"letter",from:"(ไม่มีชื่อผู้ส่ง)",title:"การ์ดสีดำใบใหม่",body:"ประตูยังเปิดอยู่\n— ล."});save();render();},
+  rgfhome:()=>{const F=G.region.final;F.abs=gameWeek(G)+1;UI.modal=null;addMail(G,{kind:"letter",tone:"black",bk:1,from:"เกริก นาคา",title:"การ์ดสีดำใบใหม่",body:"ประตูยังเปิดอยู่ครับ ผู้จัดการ\nพักให้หาย แล้วกลับมาใหม่\n\n— เกริก นาคา"});save();render();},
 });
 if(typeof XMODAL!=="undefined"){XMODAL.rgfline=()=>({body:REGION.boardHTML(),foot:false});XMODAL.rgleg=m=>({body:REGION.legPickHTML(m.k),foot:false});
   XMODAL.rgflost=()=>({body:`<h2>แพ้ไฟต์ใต้ดิน</h2><p>ครั้งหน้าต้องชกใหม่ตั้งแต่นัดแรกทั้งห้านัด · กลับไปซ้อม แล้วจัดทีมใหม่ได้ตั้งแต่สัปดาห์หน้า หรือรอจนกว่าจะพร้อม</p><div class="mfoot"><button class="btn primary" data-act="rgfhome">กลับไปซ้อม</button></div>`,foot:false});}
@@ -1575,7 +1585,7 @@ Object.assign(REGION,{
     const m=R.meet||{};for(const r of RG_ORDER){const cid=RG_CID0[r];if(rgEd(G)>=2&&!(R.nc&&R.nc[r])&&!(R.champ[r]&&R.champ[r].state==="won"))continue;if(!R.joined[cid]&&!(R.joinPend&&R.joinPend.cid===cid)&&!R.offers.includes(cid)&&!R.joinQ.includes(cid)&&!(R.joinGone||{})[cid]&&(m[cid]||0)>=RG_JOIN_MIN)R.joinQ.push(cid);}
     R.joinQ.sort((a,b)=>(m[b]||0)-(m[a]||0));
     if(R.joinQ.length&&now>=(R.joinNext||0)){const cid=R.joinQ.shift(),r=RG_ORDER.find(x=>RG_CID0[x]===cid);R.offers.push(cid);R.joinNext=now+RG_JOIN_GAP;
-      addMail(G,{kind:"letter",from:`${RG[r].champ} · แชมป์${RG[r].name}`,title:`ใบสมัครจาก${RG[r].champ}`,body:RG_JOIN[cid].letter+`\n\n(สัญญา: ค่าเซ็น ${fmt(RG_JOIN_FEE)} · ค่าจ้าง ${fmt(RG_JOIN_WAGE)}/สัปดาห์ · ลักษณะพิเศษ: ${RG_TRAIT[cid].name} · ย้ายมาแล้วต้องปั้นใหม่: เลเวลลดลง 5 ค่าพลังลดลงเล็กน้อย · ดูสัญญาที่หน้าค่าย › ครู & นักมวย)`});}},
+      addMail(G,{kind:"letter",tone:"region",from:`${RG[r].champ} · แชมป์${RG[r].name}`,title:`ใบสมัครจาก${RG[r].champ}`,body:RG_JOIN[cid].letter+`\n\n(สัญญา: ค่าเซ็น ${fmt(RG_JOIN_FEE)} · ค่าจ้าง ${fmt(RG_JOIN_WAGE)}/สัปดาห์ · ลักษณะพิเศษ: ${RG_TRAIT[cid].name} · ย้ายมาแล้วต้องปั้นใหม่: เลเวลลดลง 5 ค่าพลังลดลงเล็กน้อย · ดูสัญญาที่หน้าค่าย › ครู & นักมวย)`});}},
   joinOk(G,cid){const R=G.region;if(!R.offers||!R.offers.includes(cid)||(R.joined&&R.joined[cid]))return "ไม่มีสัญญานี้";if(R.joinPend)return "รอคนที่ตอบรับไปก่อนหน้าย้ายมาก่อน";{const r=RG_ORDER.find(x=>RG_CID0[x]===cid);if(rgEd(G)>=2&&!(R.nc&&R.nc[r])&&R.champ[r]&&R.champ[r].state!=="won")return "เธอกำลังป้องกันแชมป์ภาค · ชนะถ้วยครั้งนี้ก่อน";}
     if(this.joinRooms(G)>=dormRooms(G))return `ห้องพักเต็ม (${dormRooms(G)} ห้อง) · อัปเกรดหอพักก่อน`;if(G.cash<RG_JOIN_FEE)return `เงินไม่พอ · ค่าเซ็น ${fmt(RG_JOIN_FEE)}`;return "";},
   joinAccept(G,cid){const why=this.joinOk(G,cid);if(why){toast(why);return;}const R=G.region;G.cash-=RG_JOIN_FEE;R.offers=R.offers.filter(x=>x!==cid);R.joinPend={cid,abs:gameWeek(G)+1};
@@ -1740,7 +1750,7 @@ Object.assign(REGION,{
       R.champ[r]={state:"locked",fid:null,w:0,l:0,tries:0,visit:gone?"none":"done"};}
     rgApply.k=null;rgApply(G);
     const lines=RG_ORDER.map(r=>{const N=R.nc[r];return N?`${RG0[r].name}: ${rgNm(N,N.home)} "${RG_NK[r][N.nk%3]}" แชมป์คนใหม่ (${RG0[r].champ}ย้ายมาอยู่ค่ายศิริชัยแล้ว)`:`${RG0[r].name}: ${RG0[r].champ} แชมป์เดิม กลับมาเก่งกว่าเดิม`;}).join("\n");
-    addMail(G,{kind:"letter",from:"นาคาเอเนอร์จี้ดริงค์",title:`จดหมายเชิญ: ศึกชิงเจ้าสี่ภาค ครั้งที่ ${ed}`,
+    addMail(G,{kind:"letter",tone:"naka",from:"นาคาเอเนอร์จี้ดริงค์",title:`จดหมายเชิญ: ศึกชิงเจ้าสี่ภาค ครั้งที่ ${ed}`,
       body:`เรียน ผู้จัดการค่ายศิริชัย\n\nศึกชิงเจ้าสี่ภาค ครั้งที่ ${ed} เปิดแล้ว · เข็มขัดจังหวัดทั้ง 16 เส้นตัดสินใหม่ด้วยศึกคัดเลือกในแต่ละจังหวัด ผู้ชนะคือแชมป์จังหวัดคนใหม่ที่รอค่ายของท่านอยู่\n\nแชมป์ภาค\n${lines}\n\nเก็บเข็มขัดให้ครบสี่จังหวัด แล้วท้าชิงถ้วยเหมือนเดิม`});
     G.log=G.log||[];G.log.push(`ศึกชิงเจ้าสี่ภาค ครั้งที่ ${ed} เริ่มแล้ว`);},
 });

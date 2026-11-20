@@ -879,7 +879,7 @@ function regionLoad(){if(typeof REGION!=="undefined")return Promise.resolve(REGI
 function regionStart(G){if(G.region)return;const now=gameWeek(G),R=["north","isan","central","south"];
   G.region={edition:1,startAbs:now,belts:Object.fromEntries(R.map(r=>[r,{}])),trip:null,nextTripAbs:now+1,
     champ:Object.fromEntries(R.map(r=>[r,{state:"locked",fid:null,w:0,l:0}])),cups:[],meet:{},hall:[],pend:[],gc:[]};
-  addMail(G,{kind:"letter",from:"NAGA Energy Drink",title:"Invitation: Four Regions Championship",
+  addMail(G,{kind:"letter",tone:"naka",from:"NAGA Energy Drink",title:"Invitation: Four Regions Championship",
     body:`Dear Manager of Sirichai Camp,
 
 With three provincial titles to your name, NAGA Energy Drink invites your camp to the "Four Regions Championship", the country's first regional tournament.

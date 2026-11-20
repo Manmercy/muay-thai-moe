@@ -879,7 +879,7 @@ function regionLoad(){if(typeof REGION!=="undefined")return Promise.resolve(REGI
 function regionStart(G){if(G.region)return;const now=gameWeek(G),R=["north","isan","central","south"];
   G.region={edition:1,startAbs:now,belts:Object.fromEntries(R.map(r=>[r,{}])),trip:null,nextTripAbs:now+1,
     champ:Object.fromEntries(R.map(r=>[r,{state:"locked",fid:null,w:0,l:0}])),cups:[],meet:{},hall:[],pend:[],gc:[]};
-  addMail(G,{kind:"letter",from:"นาคาเอเนอร์จี้ดริงค์",title:"จดหมายเชิญ: ศึกชิงเจ้าสี่ภาค",
+  addMail(G,{kind:"letter",tone:"naka",from:"นาคาเอเนอร์จี้ดริงค์",title:"จดหมายเชิญ: ศึกชิงเจ้าสี่ภาค",
     body:`เรียน ผู้จัดการค่ายศิริชัย\n\nด้วยผลงานแชมป์จังหวัดถึงสามสมัย นาคาเอเนอร์จี้ดริงค์ขอเชิญค่ายของท่านร่วม "ศึกชิงเจ้าสี่ภาค" ทัวร์นาเมนต์ระดับภาคครั้งแรกของประเทศ\n\nเก็บเข็มขัดจังหวัดให้ครบสี่จังหวัดในแต่ละภาค แล้วท้าชิงถ้วยกับแชมป์ประจำภาค เหนือ อีสาน กลาง ใต้\n\nเปิดดูรายละเอียดและวางแผนการเดินทางได้ที่หน้าไฟต์ › ศึกชิงเจ้าสี่ภาค\n\nด้วยความนับถือ\nเกริก ประธานนาคาเอเนอร์จี้ดริงค์`});}
 /* weekly: send the invitation once the camp qualifies, tidy finished trips */
 function regionWeek(G){if(!regionOn())return;if(!G.region){if(regionReady(G))regionStart(G);return;}
