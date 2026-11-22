@@ -25,12 +25,26 @@ const STADIUMS={
 function beltStore(G,venue="tha"){if(venue==="tha")return G.belt=G.belt||{};G.venueBelts=G.venueBelts||{};return G.venueBelts[venue]=G.venueBelts[venue]||{};}
 
 function beltHolder(G,div,venue="tha"){const B=beltStore(G,venue);if(!B[div]||!G.F[B[div].id]){const c=Object.values(G.F).filter(f=>f.div===div&&f.camp!=="player"&&f.camp!=="free"&&!f.canon&&f.injury===0).sort((a,b)=>ovr(b.a)-ovr(a.a));const chosen=c[Math.min(venue==="tha"?0:venue==="ping"?1:2,c.length-1)];if(!chosen)return null;B[div]={id:chosen.id,def:2,since:G.week};}return G.F[B[div].id];}
-function beltChallenger(G,div,not){return Object.values(G.F).filter(f=>f.div===div&&f.camp!=="player"&&f.camp!=="free"&&f.id!==not&&!f.injury).sort((a,b)=>ovr(b.a)-ovr(a.a))[0]||null;}
+function beltChallenger(G,div,not){let ids=Object.values(G.F).filter(f=>f.div===div&&f.camp!=="player"&&f.camp!=="free"&&f.camp!=="quest"&&f.id!==not&&!f.injury&&!isBooked(G,f.id,G.week)).sort((a,b)=>ovr(b.a)-ovr(a.a)).slice(0,8).map(f=>f.id);let round=0;
+  while(ids.length>1){const next=[];for(let i=0;i<ids.length;i+=2){if(!ids[i+1]){next.push(ids[i]);continue;}const F=quickFight(G.F[ids[i]],G.F[ids[i+1]],G.seed+gameWeek(G)*313+round*17+i,5);next.push(dmWinFrom(F)==="A"?ids[i]:ids[i+1]);}ids=next;round++;}return G.F[ids[0]]||null;}
+// A title is earned through the division bracket; defenses remain one bout.
+function beltTournament(G,m,fid){if(G.dm&&!G.dm.done)return null;const me=G.F[fid],venue=m.venue||"tha",holder=beltHolder(G,m.div,venue);
+  if(!me||me.div!==m.div||!holder||holder.camp==="player"||!dmCanEnter(me)||isBooked(G,holder.id,G.week))return null;
+  const pool=Object.values(G.F).filter(f=>f.id!==fid&&f.div===m.div&&f.camp!=="player"&&f.camp!=="quest"&&f.camp!=="free"&&!f.injury&&!isBooked(G,f.id,G.week));
+  const ids=[holder.id,...pool.filter(f=>f.id!==holder.id).sort((a,b)=>ovr(b.a)-ovr(a.a)).slice(0,6).map(f=>f.id)];
+  const slots=Array(8).fill(null);slots[0]=fid;slots[7]=holder.id;[1,2,3,4,5,6].forEach((slot,i)=>slots[slot]=ids[i+1]||null);
+  return {wk:G.week,absWeek:gameWeek(G),slots,w:[[],[],[]],r:0,mine:[fid],out:{},done:false,belt:{venue,div:m.div,pay:m.pay||STADIUMS[venue].win,holder:holder.id}};}
+function beltTournamentFinish(D){const S=D.belt,champ=D.champ,won=dmMine(champ);beltStore(G,S.venue)[S.div]={id:champ,def:0,since:G.week};D.best=won?4:(D.out[D.mine[0]]||1);D.prize=won?S.pay:0;
+  if(won){G.cash+=D.prize;G.wkFight=(G.wkFight||0)+D.prize;G.rep+=3;G.F[champ].belts=(G.F[champ].belts||0)+1;const rival=D.w[1].find(id=>id!==champ);recordHonor(G,"belt",champ,S.div,D.wk,S.venue==="tha"?null:S.venue,G.F[rival]?.name,rival);}save();}
+function beltBracketHTML(D){const title=STADIUMS[D.belt.venue].name+" · "+D.belt.div,nm=id=>esc(G.F[id]?.name||"—"),nx=dmNextMatch();
+  const columns=[D.slots,D.w[0],D.w[1],D.w[2]].map((L,r)=>`<div class="dmcol"><h4>${["8","4","2","🏆"][r]}</h4>${L.map(id=>`<div class="dmc ${dmMine(id)?"mine":""}">${nm(id)}</div>`).join("")}</div>`).join("");
+  const action=D.done?`<p class="center goldt">🏆 ${nm(D.champ)} · ${fmt(D.prize||0)}</p><button class="btn primary" data-act="dmclose">กลับค่าย</button>`:nx?`<button class="btn primary" data-act="dmgo" data-id="${dmMine(nx[0])?nx[0]:nx[1]}" data-v="${dmMine(nx[0])?nx[1]:nx[0]}">${nm(nx[0])} vs ${nm(nx[1])} ▸</button>`:"";
+  return `<h2>ทัวร์นาเมนต์ชิงเข็มขัด ${title}</h2><p class="meta">รุ่นเดียวกัน · แพ้คัดออก · ชกไฟต์ละห้ายก</p><div class="dmb">${columns}</div>${action}`;}
 const QGRP_BG={gang:"bg_market_morning.webp",rooster:"bg_rooster.webp",bull:"bg_farm.webp"};
 /* v1.91.83 (Man): the quest foes kept pace with her stats only, so a late-game girl with a full skill tree outgrew even the bosses.
    They now read a fifth of her hidden edge (the season bonus halved to make room) (skills, perks, level) like the Loy thief, carry whatever the stat ceiling cannot hold as ring craft,
    and fight with their own signature skills (cut-in + burst, like the Naka League) — minions one, lieutenants two, bosses three */
-const Q_EDGE=.2,Q_VET_MAX=8; /* sims: bosses ~50–60% for a strong girl at every stage, minions ~75–90% */
+const Q_EDGE=.5,Q_VET_MAX=12; /* sims: bosses ~50–60% for a strong girl at every stage, minions ~75–90% */
 const QSK={
   gang:[{id:"q_g_debt",name:"หมัดทวงหนี้",k:"atk",w:"punch"},{id:"q_g_guard",name:"การ์ดลูกพี่",k:"def"},{id:"q_g_knee",name:"เข่าเก็บค่าคุ้มครอง",k:"atk",w:"knee"}],
   rooster:[{id:"q_r_spur",name:"แข้งเดือยไก่ชน",k:"atk",w:"kick"},{id:"q_r_flap",name:"กระพือปีกหลบ",k:"def"},{id:"q_r_peck",name:"ศอกจิกหัว",k:"atk",w:"elbow"}],
@@ -149,21 +163,21 @@ function mailWeekly(G){G.mail=G.mail||[];if(typeof thiefMail==="function"){thief
     else addMail(G,{kind:"quest",q:"gang",qk:k,from:"แม่ค้าตลาดเช้า (ไม่ลงชื่อ)",title:G.gang.st>=4?"เสี่ยหมวกทองคำมาเอง!":"พวกหมวกกันน็อกกลับมาอีกแล้ว",
       body:[`พวกมันกลับมาเก็บดอกอีกแล้ว คราวนี้มี "${QK[k].name}" มาคุม ใครไม่จ่ายร้อยละยี่สิบ โดนพังแผง ช่วยพวกเราอีกครั้งได้ไหม`,`ไอ้${QK[k].name}มันขู่ว่าจะยึดรถเข็นลูกชิ้นของยายแหวว ถ้าค่ายศิริชัยยังไม่หยุดมันก็ไม่มีใครหยุดได้แล้ว`,`ตลาดทั้งตลาดเงียบหมด เพราะ "${QK[k].name}" มานั่งเฝ้าตั้งแต่ตีห้า ขอร้องล่ะ`,`เขาว่าหัวหน้าใหญ่ "${QK[k].name}" จะมาเก็บเงินเอง ทั้งตลาดเป็นหนี้มันหมด ถ้าล้มตัวนี้ได้ แก๊งจบแน่`][G.gang.st-1],exp:G.week+3});G.gang.nextAbs=gameWeek(G)+5;}
   // Recurring side challenges return more often as the years pass.
-  if((G.season||1)>=2&&G.week>=7&&G.week<=47){const year=G.season||1;
+  if(G.week>=7&&G.week<=50){const year=G.season||1;
     if(G.gang.st>=5&&gameWeek(G)>=(G.gang.loopNextAbs||0)&&!G.mail.some(m=>m.q==="gang"&&!m.done&&!m.expired)){
-      const i=G.gang.loopN||0,k=["gang2","gang3","gang4","gang6","gang5"][i%5];G.gang.loopN=i+1;G.gang.loopNextAbs=gameWeek(G)+Math.max(5,15-year*2);
+      const i=G.gang.loopN||0,k=["gang2","gang3","gang4","gang6","gang5"][i%5];G.gang.loopN=i+1;G.gang.loopNextAbs=gameWeek(G)+Math.max(3,10-year);
       addMail(G,{kind:"quest",q:"gang",qk:k,repeat:1,from:"ป้าศรี ตลาดเช้า",title:"แก๊งหมวกกันน็อกกลับมาอีก",body:`${QK[k].name} กลับมาก่อเรื่องที่ตลาดอีกแล้ว คราวนี้พวกมันซ้อมมาหนักกว่าเดิม ช่วยมาจัดการให้หน่อยได้ไหม`,exp:G.week+3,pay:3000+year*500});}
     G.animalLoop=G.animalLoop||{nextAbs:0,turn:0};
     if(gameWeek(G)>=G.animalLoop.nextAbs&&!G.mail.some(m=>["cow","rooster"].includes(m.q)&&!m.done&&!m.expired)){
       const cow=G.animalLoop.turn%2===0,k=cow?(year>=4?"bull3":"bull2"):(year>=4?"rooster5":"rooster3");
-      G.animalLoop.turn++;G.animalLoop.nextAbs=gameWeek(G)+Math.max(4,15-year*2);
+      G.animalLoop.turn++;G.animalLoop.nextAbs=gameWeek(G)+Math.max(3,9-year);
       addMail(G,{kind:"quest",q:cow?"cow":"rooster",qk:k,repeat:1,from:cow?"ลุงเฉลิม ฟาร์มโคนม":"เสี่ยต๋อง สนามไก่",title:cow?"วัวกลับมาท้าค่าย!":"ไก่ชนกลับมาขอรีแมตช์!",body:cow?`เจ้า${QK[k].name}ฝึกถีบกระสอบทรายทุกวัน ตอนนี้ไม่มีใครกล้าเข้าฟาร์ม ช่วยมาสู้กับมันอีกที`:`${QK[k].name}ชนะไก่ทั้งสนามมาแล้ว มันกำลังรอคู่ชกจากค่ายศิริชัย`,exp:G.week+2,pay:2000+year*400});}}
   // Stadium titles: Tha Phae saves keep their original G.belt slots.
   for(const [venue,V] of Object.entries(STADIUMS))if((G.season||1)>=V.minYear&&V.weeks.includes(G.week))
     for(const div of [...new Set(roster(G).map(f=>f.div))]){const h=beltHolder(G,div,venue);if(!h)continue;
       const ours=h.camp==="player",op=ours?beltChallenger(G,div,h.id):h;if(!op)continue;const B=beltStore(G,venue)[div];
       addMail(G,{kind:"quest",q:"belt",venue,bg:V.bg,npc:op.id,div,defend:ours?h.id:null,from:`โปรโมเตอร์${V.name}`,title:ours?`ป้องกันเข็มขัด${V.name} รุ่น ${div}`:`ชิงเข็มขัด${V.name} รุ่น ${div}`,
-        body:ours?`${op.name} มาท้าชิงเข็มขัดของ${h.name}ที่${V.name} รับภายในสองสัปดาห์ ชนะรับ ${fmt(V.defend)}`:`${op.name} ครองเข็มขัด${V.name}มา ${B.def} ครั้งแล้ว ห้ายก ชนะรับ ${fmt(V.win)} พร้อมเข็มขัด`,exp:G.week+2,pay:ours?V.defend:V.win});}
+        body:ours?`${op.name} ผ่านสายคัดเลือกมาท้าชิงเข็มขัดของ${h.name}ที่${V.name} ป้องกันหนึ่งไฟต์ ห้ายก รับภายในสองสัปดาห์ ชนะรับ ${fmt(V.defend)}`:`${V.name} เปิดทัวร์นาเมนต์รุ่น ${div} รวมแชมป์ ${op.name} แพ้คัดออก ชกไฟต์ละห้ายก ผู้ชนะรับ ${fmt(V.win)} พร้อมเข็มขัด หากเสียเข็มขัดต้องกลับมาแข่งรายการใหม่`,exp:G.week+2,pay:ours?V.defend:V.win});}
   // v1.69: Auntie Taew writes in for help at her som tam stall every few weeks (a minigame that does not use the camp activity)
   if(G.week>=4&&G.week<=49&&gameWeek(G)>=(G.tamNextAbs||4)&&!G.mail.some(m=>m.kind==="job"&&!m.done&&!m.expired)){G.tamNextAbs=gameWeek(G)+3+Math.floor(rng()*2);
     const T=TAM_MAIL[(G.mailN_tam=(G.mailN_tam||0)+1)%TAM_MAIL.length];addMail(G,{kind:"job",job:"somtam",exp:G.week+1,from:"ป้าแต๋ว ร้านส้มตำหน้าวัด",title:T[0],body:T[1]});}
@@ -180,8 +194,8 @@ function mailWeekly(G){G.mail=G.mail||[];if(typeof thiefMail==="function"){thief
   // quiz from the community radio
   // v1.26: mid-season income — sponsors reward a win, paid appearances every few weeks
   const won=(G.cal||[]).some(c=>c.absWeek!=null&&c.absWeek>=gameWeek(G)-1&&c.res==="W"&&G.F[c.a]&&G.F[c.a].camp==="player"&&!(TIER[c.tier]&&TIER[c.tier].off));
-  if(won&&G.week>=6&&G.week<=42&&rng()<.45){const B=WIN_BONUS[(G.week+G.seed)%WIN_BONUS.length];addMail(G,{kind:"take",from:B[0],title:B[1],body:B[2],amt:Math.round((1500+G.week*70)/100)*100});}
-  const gi=GIG_WEEKS.indexOf(G.week);if(gi>=0){const g=GIGS[gi%GIGS.length];addMail(G,{kind:"take",from:g[0],title:g[1],body:g[2],amt:Math.round((3000+G.week*90)/100)*100});}
+  if(won&&G.week>=6&&G.week<=42&&rng()<.2){const B=WIN_BONUS[(G.week+G.seed)%WIN_BONUS.length];addMail(G,{kind:"take",from:B[0],title:B[1],body:B[2],amt:Math.round((300+G.week*10)/50)*50});}
+  const gi=GIG_WEEKS.indexOf(G.week);if(gi>=0&&G.campUsed===["promo","kids","fightnight","clip","tourist","class"][gi]){const g=GIGS[gi%GIGS.length];addMail(G,{kind:"take",from:g[0],title:g[1],body:g[2],amt:Math.round((500+G.week*15)/50)*50});}
   if(G.week%3===1&&G.week>=4&&G.week<=49){const q=QUIZ[(Math.floor(G.week/3)+G.seed)%QUIZ.length];addMail(G,{kind:"quiz",from:"วิทยุชุมชน 'มวยบ้านเรา'",title:"ชิงรางวัลประจำสัปดาห์",body:"ตอบถูกรับเงินรางวัลจากผู้สนับสนุนรายการ (ตอบได้ครั้งเดียว)",q:q[0],opts:q[1],ans:q[2],amt:Math.round((800+Math.min(2200,G.week*45))/10)*10,exp:G.week+2});}
   // odd bills
   if(G.week>=5&&rng()<.22){const L=BILLS.filter(b=>!b[3]||b[3](G));const b=L[Math.floor(rng()*L.length)];addMail(G,{kind:"pay",from:b[0],title:"ใบแจ้งหนี้",body:b[1],amt:Math.round(b[2]*(1+G.week/60)/10)*10,exp:G.week+2});}
@@ -202,6 +216,7 @@ function questFighters(){return roster(G).filter(f=>!f.injury);}
 function startQuest(spec,fid,done){const f=G.F[fid];if(!f){done&&done();return;}
   const opp=spec.npc||makeQ(G,spec.qk,fid,spec.tag||("w"+G.week));const tier="quest";
   const b={id:"q"+G.week+"_"+fid+"_"+Math.floor(Math.random()*1e4),a:fid,b:opp,week:G.week,tier,rounds:spec.rounds||3,win:spec.purse||0,lose:0,quest:spec};
+  b.title=spec.q==="belt"?STADIUMS[spec.venue||"tha"].name+" · "+spec.div:spec.q==="gang"?"ศึกแผงตลาด":spec.q==="rooster"||spec.q==="cow"||spec.q==="bull"?"ศึกพิสดาร":null;
   b.bg=spec.bg||(spec.rematch||spec.hq?"bg_gang_hideout.webp":spec.q==="belt"?"bg_district.webp":spec.npc?"bg_food.webp":QGRP_BG[QK[spec.qk].grp]);
   if(typeof questPlan==="function"){questPlan(b,()=>openFight(b,()=>questAfter(b,done)));return;}
   openFight(b,()=>questAfter(b,done));}
@@ -264,7 +279,7 @@ function letterHTML(m){m.read=true;let act="";
    ${m.kind==="take"||m.kind==="pay"?`<p class="lamt ${m.kind}">${m.kind==="take"?"+":"−"}${fmt(m.amt)}</p>`:""}
    ${opp&&m.kind==="quest"?`<div class="qopp">${m.qk?`<canvas width="96" height="96" data-qsprite="${QK[m.qk].sprite}"></canvas>`:faceImg(opp)}<span><b>${esc(opp.name)}</b><small>${m.q==="belt"?`ห้ายก · พลังคู่ชก ${ovr(opp.a).toFixed(1)}`:m.q==="challenge"?"ไฟต์โชว์ ไม่นับสถิติ":"ชกทันที · ไม่นับสถิติและอันดับ · นักมวยล้าเพิ่ม"}${m.pay?` · ค่าเหนื่อย ${fmt(m.pay)}`:m.q==="gang"?" · ค่าตอบแทนมาทางตู้จดหมาย":""}</small></span></div>`:""}</div>
    <div class="mfoot lact">${act}</div><div class="mdelrow">${del}</div>`;}
-function qpickHTML(mid){const m=(G.mail||[]).find(x=>x.id===mid);const R=roster(G);
+function qpickHTML(mid){const m=(G.mail||[]).find(x=>x.id===mid);const R=roster(G).filter(f=>!m||m.q!=="belt"||(f.div===m.div&&(!m.defend||m.defend===f.id)));
   return `<h2>ส่งใครไป?</h2><p class="meta">${m?esc(m.title):""} · ชกทันทีสัปดาห์นี้ ล้าเพิ่ม ไม่นับสถิติ</p><div class="qpick">${R.map(f=>`<button class="qpf px" data-act="qsend" data-id="${f.id}" data-v="${mid}" ${f.injury?"disabled":""}>${faceImg(f,"sm")}<span><b>${esc(f.name)} Lv.${f.lvl}</b><small>${f.injury?`บาดเจ็บ ${f.injury} สด.`:`ล้า ${Math.round(f.fatigue)} · ความพร้อม ${condition(f)}`}</small></span></button>`).join("")}</div>`;}
 // cash flow & fame graphs
 function lineSVG(pts,key,col,fmtY){if(pts.length<2)return `<p class="meta">ยังไม่มีข้อมูลพอ เล่นต่ออีกสักสัปดาห์</p>`;const W=320,H=130,P=26;const ys=pts.map(p=>p[key]);let mn=Math.min(0,...ys),mx=Math.max(...ys);if(mx===mn)mx=mn+1;
@@ -339,7 +354,7 @@ Object.assign(ACT,{
   mloanno:d=>{const m=G.mail.find(x=>x.id===d.v);if(!m||m.done)return;m.done=true;save();render();toast("ครูแดงพยักหน้าเงียบ ๆ");},
   mdecl:d=>{const m=G.mail.find(x=>x.id===d.v);if(!m)return;m.done=true;m.declined=true;if(m.q==="gang"&&G.gang)G.gang.nextAbs=gameWeek(G)+(G.loan>0?2:4);save();render();},
   macc:d=>{UI.modal={type:"qpick",id:d.v};render();},
-  qsend:d=>{const m=G.mail.find(x=>x.id===d.v);if(!m||m.done)return;m.done=true;UI.modal=null;
+  qsend:d=>{const m=G.mail.find(x=>x.id===d.v),f=G.F[d.id];if(!m||m.done||m.expired||!f||f.camp!=="player"||f.injury||isBooked(G,f.id,G.week))return;if(m.q==="belt"&&(f.div!==m.div||(m.defend&&m.defend!==f.id)))return;if(m.q==="belt"&&!m.defend){const D=beltTournament(G,m,d.id);if(!D)return;G.dm=D;m.done=true;UI.modal={type:"dm"};dmAdvance();save();render();return;}if(m.q==="belt"&&m.defend&&beltHolder(G,m.div,m.venue||"tha")?.id!==d.id)return;if(m.q==="belt"&&m.defend&&(!G.F[m.npc]||G.F[m.npc].div!==m.div||G.F[m.npc].injury||isBooked(G,m.npc,G.week)))return;m.done=true;UI.modal=null;
     const spec=m.q==="belt"?{q:"belt",npc:m.npc,pay:m.pay,from:m.from,div:m.div,defend:m.defend,venue:m.venue||"tha",bg:m.bg,rounds:5}:m.q==="challenge"?{q:"challenge",npc:m.npc,pay:m.pay,from:m.from}:{q:m.q,qk:m.qk,hq:m.hq,pay:m.pay,from:m.from,rounds:m.qk==="gang5"?4:3};
     const intro=m.q==="gang"&&m.hq?[{n:"nar",t:"โกดังหลังตลาดเช้า ไฟสลัว ลูกน้องหมวกแดงนั่งล้อมโต๊ะแผนที่ พอเห็นค่ายศิริชัยเดินเข้ามา ทุกคนลุกพรวด"},{n:"npc",who:QK[m.qk].name,t:GANG_HQ_TAUNT[m.qk]||"มาจนได้! ที่นี่ไม่มีแม่ค้าคอยเชียร์แล้วนะ"},{n:d.id,f:"angry",l:"fight",t:"มาตามนัดแล้วค่ะ!"}]
       :m.q==="gang"?[{n:"nar",t:"ตลาดเช้า… มอเตอร์ไซค์สิบกว่าคันจอดเรียงหน้าแผงผัก"},{n:"npc",who:QK[m.qk].name,t:m.early?"ลูกน้องฉันแพ้เธอซ้ำแล้วซ้ำเล่า เสียชื่อหมด! แถมค่ายเธอยังติดหนี้ฉันอยู่ วันนี้ฉันจัดการเอง!":m.qk==="gang5"?"ได้ยินว่ามีค่ายมวยมาเกะกะธุรกิจฉัน วันนี้หัวหน้าใหญ่ลงมาเอง!":m.qk==="gang4"?"ลูกน้องหมวกแดงของฉันโดนเด็กค่ายมวยไล่ตะเพิดเหรอ? หมวกเงินคนนี้จะสอนมารยาทให้เอง":m.qk==="gang6"?"เสี่ยไม่ต้องลงมาเปลืองแรงหรอก มือขวาอย่างฉันจัดการแทนได้":"ไหนใครที่ไล่ลูกน้องฉัน ออกมาเลย!"},{n:d.id,f:"angry",l:"fight",t:"ฉันเอง!"}]
@@ -396,18 +411,18 @@ EVENTS.push(
 // v1.36 DEATH MATCH — a special 8-fighter knockout offer every ~10 weeks, all divisions mixed,
 // fought back to back the same week. The player runs every one of the camp's fights.
 // =====================================================================================
-const DM_WEEKS=[12,19,24,31,36,46];
+const DM_WEEKS=[6,10,14,18,22,26,30,34,38,42,46,50];
 const DM_PRIZE=[0,3000,8000,18000,40000];   // by how far our best fighter got: out in QF / SF / final / champion
 const DM_STAGE=["รอบ 8 คน","รอบรองชนะเลิศ","รอบชิงชนะเลิศ"];
-const dmOfferOn=G=>DM_WEEKS.includes(G.week)&&!(G.dmSeenSeason===(G.season||1)&&(G.dmSeen||{})[G.week])&&!G.ended;
+const dmOfferOn=G=>!(G.dm&&!G.dm.done)&&DM_WEEKS.includes(G.week)&&!(G.dmSeenSeason===(G.season||1)&&(G.dmSeen||{})[G.week])&&!G.ended;
 const dmMine=id=>G.F[id]&&G.F[id].camp==="player";
-const dmCanEnter=f=>!f.injury&&!isBooked(G,f.id,G.week);
-function dmBuild(G,mine){const pool=Object.values(G.F).filter(f=>!mine.includes(f.id)&&f.camp!=="player"&&f.camp!=="quest"&&f.camp!=="free"&&!f.injury&&f.div!=="X"&&!isBooked(G,f.id,G.week));
+const dmCanEnter=f=>!!f&&f.camp==="player"&&!f.injury&&!isBooked(G,f.id,G.week);
+function dmBuild(G,mine){mine=[...new Set(mine)].filter(id=>G.F[id]&&G.F[id].camp==="player"&&!G.F[id].injury&&!isBooked(G,id,G.week)).slice(0,3);if(!mine.length)return null;const pool=Object.values(G.F).filter(f=>!mine.includes(f.id)&&f.camp!=="player"&&f.camp!=="quest"&&f.camp!=="free"&&!f.injury&&f.div!=="X"&&!isBooked(G,f.id,G.week));
   const avg=mine.reduce((s,id)=>s+ovr(G.F[id].a),0)/mine.length;
   const stars=["ploy","fah"].filter(id=>pool.some(f=>f.id===id));
   const rest=pool.filter(f=>!stars.includes(f.id)).map(f=>[f,Math.abs(ovr(f.a)-(avg+.4))]).sort((a,b)=>a[1]-b[1]).map(x=>x[0].id);
   let others=[...stars,...rest].slice(0,8-mine.length);
-  if(others.length<8-mine.length){/* v1.81.1: a short field used to leave empty slots and freeze the week */const extra=Object.values(G.F).filter(f=>!mine.includes(f.id)&&!others.includes(f.id)&&f.camp!=="player"&&f.camp!=="quest"&&f.camp!=="free"&&(f.div==="A"||f.div==="B")).map(f=>[f,Math.abs(ovr(f.a)-(avg+.4))]).sort((a,b)=>a[1]-b[1]).map(x=>x[0].id);others=others.concat(extra).slice(0,8-mine.length);}
+
   const slots=Array(8).fill(null);[0,4,2,6].slice(0,mine.length).forEach((p,i)=>slots[p]=mine[i]);
   const order=[7,3,5,1,6,2,4,0].filter(p=>!slots[p]);others.forEach((id,i)=>slots[order[i]]=id);
   return {wk:G.week,absWeek:gameWeek(G),slots,w:[[],[],[]],r:0,mine:[...mine],out:{},done:false};}
@@ -422,19 +437,19 @@ function dmAdvance(){const D=G.dm;if(!D||D.done)return;
     const F=quickFight(G.F[a],G.F[b],(G.seed^(G.week*313))+D.r*17+m,3);D.w[D.r].push(dmWinFrom(F)==="A"?a:b);}
   D.done=true;dmFinish();}
 function dmNextMatch(){const D=G.dm;if(!D||D.done||D.r>=3)return null;const L=dmList(D),m=D.w[D.r].length;return [L[m*2],L[m*2+1]];}
-function dmFight(meId,opId){const D=G.dm;if(!G.F[opId]){D.w[D.r].push(meId);dmAdvance();UI.modal={type:"dm"};save();render();return;}const b={id:"dm"+G.week+"_"+D.r+"_"+meId,a:meId,b:opId,week:G.week,tier:"dm",rounds:3,win:0,lose:0,dm:1,bg:"bg_hall.webp"};
+function dmFight(meId,opId){const D=G.dm;if(!D||D.done)return;const next=dmNextMatch();if(!next||!next.includes(meId)||!next.includes(opId)||!dmMine(meId))return;if(!G.F[opId]){D.w[D.r].push(meId);dmAdvance();UI.modal={type:"dm"};save();render();return;}const b={id:"dm"+G.week+"_"+D.r+"_"+meId,a:meId,b:opId,week:G.week,tier:"dm",rounds:D.belt?5:3,win:0,lose:0,dm:1,title:D.belt?STADIUMS[D.belt.venue].name+" · "+D.belt.div:null,bg:D.belt?STADIUMS[D.belt.venue].bg:"bg_hall.webp"};
   UI.modal=null;openFight(b,()=>{const w=b.result;const winner=w==="A"?meId:opId,loser=w==="A"?opId:meId;D.w[D.r].push(winner);if(dmMine(loser))D.out[loser]=D.r+1;
     dmAdvance();UI.modal={type:"dm"};save();render();});}
-function dmFinish(){const D=G.dm;const champ=D.w[2][0];D.champ=champ;
+function dmFinish(){const D=G.dm;if(!D||D.paid)return;const champ=D.w[2][0];if(!champ||!G.F[champ]){D.done=true;D.paid=true;D.prize=0;save();return;}D.champ=champ;D.paid=true;if(D.belt){beltTournamentFinish(D);return;}
   let best=0;for(const id of D.mine){const lv=id===champ?4:(D.out[id]||1);best=Math.max(best,lv);}D.best=best;
   const prize=DM_PRIZE[best]||0;G.cash+=prize;G.wkFight=(G.wkFight||0)+prize;D.prize=prize;
   if(best===4){G.rep+=4;roster(G).forEach(f=>f.morale=Math.min(100,f.morale+10));recordHonor(G,"dm",champ,G.F[champ].div,D.wk,null,null,D.w[1].find(id=>id!==champ));}else if(best===3)G.rep+=1.5;
   G.dmLog=(G.dmLog||[]).concat([{wk:D.wk,champ,best,prize}]);save();}
-function dmBracketHTML(){const D=G.dm;if(!D)return "";const nm=id=>id&&G.F[id]?esc(G.F[id].name):"…";
-  const cell=(id,r)=>{if(!id)return `<div class="dmc tbd">…</div>`;const won=(D.w[r]||[]).includes(id),lost=r<3&&D.w[r]&&D.w[r].length*2>((r===0?D.slots:D.w[r-1]).indexOf(id))&&!won;
+function dmBracketHTML(){const D=G.dm;if(!D)return "";if(D.belt)return beltBracketHTML(D);const nm=id=>id&&G.F[id]?esc(G.F[id].name):"…";
+  const cell=(id,r)=>{if(!id||!G.F[id])return `<div class="dmc tbd">…</div>`;const won=(D.w[r]||[]).includes(id),lost=r<3&&D.w[r]&&D.w[r].length*2>((r===0?D.slots:D.w[r-1]).indexOf(id))&&!won;
     return `<div class="dmc ${dmMine(id)?"mine":""} ${won?"won":""} ${lost?"lost":""}">${G.F[id].canon?`<img src="${faceSrc(id,"happy")}" alt="">`:""}<b>${nm(id)}</b><small>${G.F[id].div==="A"?"รุ่น A":"รุ่น B"}</small></div>`;};
   const col=(L,r,title)=>`<div class="dmcol"><h4>${title}</h4>${Array.from({length:L.length/2},(_,i)=>`<div class="dmm">${cell(L[i*2],r)}${cell(L[i*2+1],r)}</div>`).join("")}</div>`;
-  const pad=(L,n)=>[...L,...Array(n-L.length).fill(null)];
+  const pad=(L,n)=>[...L.slice(0,n),...Array(Math.max(0,n-L.length)).fill(null)];
   const nx=dmNextMatch();let foot="";
   if(D.done){const lab=["","ตกรอบ 8 คน","ตกรอบรองฯ","ได้รองแชมป์","แชมป์!"][D.best];
     foot=`<div class="dmend ${D.best===4?"champ":""}"><b>${D.best===4?`🏆 ${nm(D.champ)} คว้าแชมป์ Death Match!`:`แชมป์คือ ${nm(D.champ)} · ค่ายเรา${lab}`}</b><span>เงินรางวัล ${fmt(D.prize||0)}${D.best===4?" · ชื่อเสียง +4 · กำลังใจทั้งค่าย +10":D.best===3?" · ชื่อเสียง +1.5":""}</span></div><button class="btn primary big" data-act="dmclose">กลับค่าย</button>`;}
@@ -448,7 +463,7 @@ function dmPickHTML(){const R=roster(G);const sel=UI.dmSel||[];
    <div class="dmprize"><span>ตกรอบแรก ${fmt(DM_PRIZE[1])}</span><span>ตกรองฯ ${fmt(DM_PRIZE[2])}</span><span>รองแชมป์ ${fmt(DM_PRIZE[3])}</span><b>แชมป์ ${fmt(DM_PRIZE[4])}</b></div>
    <div class="list">${R.map(f=>`<button class="dmpick ${sel.includes(f.id)?"on":""}" data-act="dmsel" data-id="${f.id}" ${dmCanEnter(f)?"":"disabled"}>${faceImg(f,"sm")}<span><b>${esc(f.name)} Lv.${f.lvl}</b><small>${f.injury?"บาดเจ็บ":`ล้า ${Math.round(f.fatigue)} · กำลังใจ ${Math.round(f.morale)}`}</small></span><i>${sel.includes(f.id)?"✓":""}</i></button>`).join("")}</div>
    <div class="row2"><button class="btn" data-act="dmno">ไม่ร่วม</button><button class="btn primary" data-act="dmstart" ${sel.length?"":"disabled"}>ลงแข่ง ${sel.length} คน ▸</button></div>`;}
-function dmCardHTML(){if(G.dm&&!G.dm.done&&G.dm.wk===G.week)return `<section class="px card dmcard"><div><b>ศึก Death Match กำลังดำเนินอยู่</b><span class="meta">${DM_STAGE[Math.min(2,G.dm.r)]}</span></div><button class="btn primary" data-act="dmopen">ไปต่อ ▸</button></section>`;
+function dmCardHTML(){if(G.dm&&!G.dm.done&&G.dm.belt)return `<section class="px card dmcard"><b>${STADIUMS[G.dm.belt.venue].name} · ${G.dm.belt.div}</b><button class="btn primary" data-act="dmopen">▸</button></section>`;if(G.dm&&!G.dm.done&&G.dm.wk===G.week)return `<section class="px card dmcard"><div><b>ศึก Death Match กำลังดำเนินอยู่</b><span class="meta">${DM_STAGE[Math.min(2,G.dm.r)]}</span></div><button class="btn primary" data-act="dmopen">ไปต่อ ▸</button></section>`;
   if(!dmOfferOn(G))return "";return `<section class="px card dmcard"><span class="ribbon">ข้อเสนอพิเศษ</span><div><b>ศึก Death Match 8 คน ข้ามรุ่น</b><span class="meta">ชกรวดเดียวจบในสัปดาห์นี้ · ไม่นับอันดับ · แชมป์ ${fmt(DM_PRIZE[4])}</span></div><button class="btn gold" data-act="dmpick">ดูรายละเอียด</button></section>`;}
 Object.assign(ACT,{
   dmpick:()=>{UI.dmSel=roster(G).filter(dmCanEnter).slice(0,1).map(f=>f.id);UI.modal={type:"dmpick"};render();},

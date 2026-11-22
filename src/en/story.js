@@ -2009,7 +2009,12 @@ EVENTS.push(
   {inject:G=>G.F.fah.bond<40?[{n:"nar",t:"(If you were closer with Fah, this might go further)"}]:[]}]},
  {id:"fah_join",look:"casual",bg:"camp",when:G=>(G.season||1)>=2&&G.week>=10&&G.seen.fah_trainer&&fahRival(G)&&(G.F.fah.bond||0)>=40&&absWeek(G)>=((G.flags||{}).fahRetry||0),steps:[
   {n:"nar",t:"Monday morning, the rain has just stopped. A big canvas bag sits outside the gate, its owner crouched beside it, pretending to look at the sky."},
-  {n:"fah",f:"flustered",l:"casual",t:"I don't WANT to switch camps! It's just… if there's room here… I can train hard, wake up early, I'll even wash dishes!"},
+  {n:"fah",f:"flustered",l:"casual",t:"I didn't skip training… I ran at five this morning, until the rain stopped. Then I finally dared to come here."},
+  {n:"nar",t:"Fah lays a contract with rain-soaked corners on the table. The hand that challenges an entire stadium clings tightly to her bag."},
+  {n:"fah",f:"sad",l:"casual",t:"At Golden Tiger, I have to win and smile for the camera. I can't say I'm tired. When I lose, nobody wants to hear me at all."},
+  {n:"coach",t:"You fight in the ring, kid. Outside it, you need somewhere to rest. Not another person listing your mistakes."},
+  {n:"fah",f:"sad",l:"casual",t:"I still want to fight, Coach. I want the whole stadium roaring with every kick… I just want someone to ask if I've eaten when I get home."},
+  {n:"fah",f:"flustered",l:"casual",t:"If there's room here, could I start again? I'll train hard, wake early, wash the dishes… Just don't make me pretend nothing hurts all the time."},
   {inject:G=>inCamp(G,"mali")?[{n:"mali",f:"surprised",l:"casual",t:"Fah!? The one who kicked me out of the ring last year!?"},{n:"fah",f:"happy",l:"casual",t:"And then you got up and punched me back till my eye went purple! Call it even!"}]:[]},
   {choice:[
    {t:"Welcome aboard (contract buyout ฿60,000 · wage ฿1,800/week)",fx:G=>{if(G.cash>=60000){G.cash-=60000;joinCamp(G,"fah",1800);makeProdigy(G,"B","fah");add(G,"fah","trust",8);G.flags.fahJoinedAbs=absWeek(G);}else{G.flags.fahRetry=absWeek(G)+4;G.seen.fah_join=false;}},

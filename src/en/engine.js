@@ -784,7 +784,7 @@ function fightEx(F){const rng=F.rng,log=[],ex=F.ex,mA=F.mA,mB=F.mB;
       if(P.fst==="read"&&s.readSty)log.push({ha:F.A.hp,hb:F.B.hp,sa:F.A.sta,sb:F.B.sta,s:s===F.A?"A":"B",k:"big",an:s.name,dn:o.name,
         t:s.readHit?`${s.name} glances once and switches rhythm at once… as if she knew ${o.name}'s game already.`:`${s.name} moves to cut off where the data says… but ${o.name} isn't there — the data can't read ${o.name}!`});}
     const ini=s=>{const a=s.f.a,m=s===F.A?mA:mB;return (s.ph&&s.ph.ini||0)-s.legs/12+effA(s,"speed")*.3+a.foot*.15+a.iq*.2+a.comp*.1+m.aggr*10+rng()*9+(s.sta-60)/12;};
-    const [at,df]=ini(F.A)>=ini(F.B)?[F.A,F.B]:[F.B,F.A];const ma=at===F.A?mA:mB,md=at===F.A?mB:mA;
+    const initiativeGap=ini(F.A)-ini(F.B);const [at,df]=rng()<clamp(.5+initiativeGap/30,.2,.8)?[F.A,F.B]:[F.B,F.A];const ma=at===F.A?mA:mB,md=at===F.A?mB:mA;
     const a=at.f.a,d=df.f.a;
     if(F.gnd||at.f.grap){if(grapEx(F,at,df,rng,log,md)){for(const s of [F.A,F.B])s.sta=clamp(s.sta+STA.ex+s.f.a.stamina*STA.exK+s.sk.regen,0,100);
       for(const s of [F.A,F.B])if(s.burst&&--s.burst.left<=0)s.burst=null;F.ex++;F.rlog.push(...log);return log;}}
@@ -1201,7 +1201,7 @@ function weeklyNet(G){return classIncome(G)-upkeep(G)-wages(G);}
 
 function eligible(G,f){const st=stageOf(G.week);
   if(st==="local")return true; if(st==="district")return G.qual[f.div].includes(f.id); return false;}
-function isBooked(G,id,week){return G.bookings.some(b=>(b.a===id||b.b===id)&&(week==null||b.week===week));}
+function isBooked(G,id,week){return !!(G.dm&&!G.dm.done&&(week==null||week===G.dm.wk)&&(G.dm.slots||[]).includes(id))||G.bookings.some(b=>(b.a===id||b.b===id)&&(week==null||b.week===week));}
 
 const CROSS_OF={kati:"fah",mali:"ploy",rin:"fah"},SPECIAL_WEEKS=[8,13,18,23,28,33,38,42];
 const RIVAL_OF={kati:"ploy",mali:"fah"},RIVAL_WEEKS=[25,29,33,36],RIVAL_EARLY={mali:[7,12,17,21]};
@@ -1442,7 +1442,7 @@ function makeProdigy(G,div,from){G.prodigy=G.prodigy||{};if(G.prodigy[div])retur
   G.F[id]=f;syncFighterAges(G);G.prodigy[div]=id;G.rank=G.rank||{A:{},B:{}};G.rank[div][id]={pts:0,w:0,l:0,d:0};if((G.season||1)>=2)rivalCatchUp(G,id);return f;}
 function joinCamp(G,id,wage){const f=G.F[id];if(!f)return;G.joinLog=(G.joinLog||[]).filter(x=>x.id!==id).concat([{id,season:G.season||1,wk:G.week}]);f.camp="player";f.wage=wage;f.met=true;G.bookings=G.bookings.filter(b=>!(b.b===id&&G.F[b.a]&&G.F[b.a].camp==="player"));
   if(id==="mali"){G.flags.maliIn=G.week;G.flags.maliInAbs=gameWeek(G);}
-  G.offers=(G.offers||[]).filter(o=>o.b!==id);G.rank[f.div]=G.rank[f.div]||{};if(!G.rank[f.div][id])G.rank[f.div][id]={pts:0,w:0,l:0,d:0};}
+  G.offers=(G.offers||[]).filter(o=>o.b!==id&&o.a!==id);for(const m of G.mail||[])if(!m.done&&m.npc===id&&(m.q==="challenge"||m.q==="belt")){m.done=true;m.expired=true;}if(id==="ploy"){f.aura=0;f.surge=0;}G.rank[f.div]=G.rank[f.div]||{};if(!G.rank[f.div][id])G.rank[f.div][id]={pts:0,w:0,l:0,d:0};}
 function storyTop4(G,div){let t=standings(G,div).slice(0,4).map(s=>s.id);const me=LEADS[div][0],rv=leadRival(G,div);G.wild=G.wild||{};
   /* v1.66: only year 1 is story-protected; from year 2 everyone qualifies on points */
   if((G.season||1)===1)for(const id of [rv,me]){const f=G.F[id];if(!f||t.includes(id))continue;if(id===me&&f.camp!=="player")continue;if(id===rv&&f.camp!=="rival")continue;
