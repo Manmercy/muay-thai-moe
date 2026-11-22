@@ -2327,9 +2327,9 @@ div.mdelask{margin:2px 0 8px;padding:8px;box-shadow:inset 0 0 0 2px var(--line);
 @media (prefers-reduced-motion:reduce){.mrow2.tnaka,.mrow2.tregion,.mrow2.tblack{animation:none}}
 .letter h3+p{white-space:pre-line}.letter.tl-black{animation:bkfr 1.4s steps(2) infinite}@keyframes bkfr{50%{box-shadow:inset 0 0 0 3px #5a0d17,4px 4px 0 rgba(0,0,0,.35)}}@media (prefers-reduced-motion:reduce){.letter.tl-black{animation:none}}
 /* Dialogue portraits use the original shared framing: one speaker is larger, pairs fit side by side. */
-.cast .stand{height:var(--sh);bottom:calc(var(--sh) * -.53)}
-.cast.duo .stand{height:calc(var(--sh) * .86);bottom:calc(var(--sh) * -.455)}
-.cast.grp .stand{height:calc(var(--sh) * .72);bottom:calc(var(--sh) * -.38)}
+.cast .stand{--portrait-h:min(var(--sh),var(--native-h,960px));height:var(--portrait-h);bottom:calc(var(--portrait-h) * -.53)}
+.cast.duo .stand{--portrait-h:min(calc(var(--sh) * .86),var(--native-h,960px));height:var(--portrait-h);bottom:calc(var(--portrait-h) * -.529)}
+.cast.grp .stand{--portrait-h:min(calc(var(--sh) * .72),var(--native-h,960px));height:var(--portrait-h);bottom:calc(var(--portrait-h) * -.528)}
 .cast .stand.mgrst{height:calc(var(--sh) * .75);bottom:calc(var(--sh) * -.25)}
 .cast.duo .stand.mgrst{height:calc(var(--sh) * .645);bottom:calc(var(--sh) * -.215)}
 .cast .stand.st-low{height:calc(var(--sh) * .5);bottom:calc(var(--sh) * -.1)}
