@@ -108,14 +108,14 @@ SKILLS.kati.push(
 SKILLS.mali.push(
  SKX("cy_flash",0,4,"cy_erawan",["elbow","speed"],"chaiya","ศอกกลับฟ้าแลบ","Lv.14 · ศอกเร็วจนคู่ชกมองไม่ทัน · แรงศอก +14% ศอกแม่น +3%",r=>({dmg:{elbow:.14*r},hit:{elbow:.03*r}}),{lv:14}),
  SKX("cy_soar",0,5,"cy_flash",["elbow","knee"],"chaiya","ทะยานฟ้าไชยา","Lv.22 · ขั้นปรมาจารย์ · แรงศอก +16% แรงเข่า +8% ศอกแม่น +3%",r=>({dmg:{elbow:.16*r,knee:.08*r},hit:{elbow:.03*r}}),{lv:22}),
- SKX("cy_bloom",1,4,"cy_hanuman",["kick","foot"],"chaiya","ดอกมะลิร่ายรำ","Lv.14 · เตะต่อเนื่องเหมือนร่ายรำ · เตะแม่น +4% คะแนนเตะ +10% ฟื้นแรง +10%",r=>({hit:{kick:.04*r},pts:{kick:.1*r},regen:.1*r}),{lv:14}),
+ SKX("cy_bloom",1,4,"cy_hanuman",["kick","foot"],"chaiya","ดอกมะลิร่ายรำ · เตะต่อเนื่อง","Lv.14 · เตะต่อเนื่องเหมือนร่ายรำ · เตะแม่น +4% คะแนนเตะ +10% ฟื้นแรง +10%",r=>({hit:{kick:.04*r},pts:{kick:.1*r},regen:.1*r}),{lv:14}),
  SKX("cy_gale",1,5,"cy_bloom",["speed","kick"],"chaiya","ลมกรดไชยา","Lv.22 · ขั้นปรมาจารย์ · หลบ +2.5% เตะแม่น +4% แรงเตะ +10% ใช้แรงน้อยลง 3%",r=>({evade:.025*r,hit:{kick:.04*r},dmg:{kick:.1*r},staSave:.03*r}),{lv:22}),
  SKX("cy_gate",2,4,"cy_root",["guard","clinch"],"chaiya","สักพวงมาลัย","Lv.14 · ลูกไม้มวยไทย ปัดหมัดแล้วกระแทกศอกเข้าอก · ป้องกันวงใน +1 หลบ +2% สวนกลับ +3%",r=>({clDef:1*r,evade:.02*r,ctr:.03*r}),{lv:14}),
  SKX("cy_meru",2,5,"cy_gate",["guard","dur"],"chaiya","เขาพระสุเมรุ","Lv.22 · ขั้นปรมาจารย์ · ป้องกันวงใน +1.4 หลบ +3% ฟื้นแรง +12% เลือดต่ำแม่นขึ้น 3%",r=>({clDef:1.4*r,evade:.03*r,regen:.12*r,clutch:.03*r}),{lv:22}));
 SKILLS.rin.push(
  SKX("lb_shadow",0,4,"lb_kris",["counter","speed"],"lopburi","สวนกลับไร้เงา","Lv.14 · สวนก่อนคู่ชกจะออกอาวุธจบ · สวนกลับ +5% แรงหมัดสวน +16%",r=>({ctr:.05*r,ctrDmg:.16*r}),{lv:14}),
- SKX("lb_proof",0,5,"lb_shadow",["counter","iq"],"lopburi","สมการปิดเกม","Lv.22 · ขั้นปรมาจารย์ · สวนกลับ +6% แรงหมัดสวน +20% หมัดแม่น +2%",r=>({ctr:.06*r,ctrDmg:.2*r,hit:{punch:.02*r}}),{lv:22}),
- SKX("lb_three",1,4,"lb_giant",["iq","comp"],"lopburi","อ่านใจสามยก","Lv.14 · วางแผนล่วงหน้าทั้งไฟต์ · คำสั่งพักยก +35% ความแม่นพื้นฐาน +1.2% หลบ +1%",r=>({corner:.35*r,prep:.012*r,evade:.01*r}),{lv:14}),
+ SKX("lb_proof",0,5,"lb_shadow",["counter","iq"],"lopburi","สมการปิดเกม · หมัดสวน","Lv.22 · ขั้นปรมาจารย์ · สวนกลับ +6% แรงหมัดสวน +20% หมัดแม่น +2%",r=>({ctr:.06*r,ctrDmg:.2*r,hit:{punch:.02*r}}),{lv:22}),
+ SKX("lb_three",1,4,"lb_giant",["iq","comp"],"lopburi","อ่านใจสามยก · อ่านเชิงมวย","Lv.14 · วางแผนล่วงหน้าทั้งไฟต์ · คำสั่งพักยก +35% ความแม่นพื้นฐาน +1.2% หลบ +1%",r=>({corner:.35*r,prep:.012*r,evade:.01*r}),{lv:14}),
  SKX("lb_book",1,5,"lb_three",["iq","counter"],"lopburi","ตำราลพบุรี","Lv.22 · ขั้นปรมาจารย์ · คำสั่งพักยก +45% ความแม่นพื้นฐาน +1.6% สวนกลับ +3%",r=>({corner:.45*r,prep:.016*r,ctr:.03*r}),{lv:22}),
  SKX("lb_fold",2,4,"lb_tiger",["kick","power"],"lopburi","บาทาลูบพักตร์","Lv.14 · ลูกไม้มวยไทย ชิงถีบหน้าก่อนคู่ชกจะออกอาวุธ · เตะแม่น +3% คะแนนเตะ +10% หลบ +1.5%",r=>({hit:{kick:.03*r},pts:{kick:.1*r},evade:.015*r}),{lv:14}),
  SKX("lb_circle",2,5,"lb_fold",["foot","kick"],"lopburi","วงนอกไม่มีวันแตก","Lv.22 · ขั้นปรมาจารย์ · เตะแม่น +4% แรงเตะ +12% หลบ +2% สวนกลับ +3%",r=>({hit:{kick:.04*r},dmg:{kick:.12*r},evade:.02*r,ctr:.03*r}),{lv:22}));
@@ -136,8 +136,8 @@ SKILLS.ploy=[
  SKX("p_read",2,1,"captain",["iq"],"korat","อ่านเกมพยัคฆ์","จดทุกจังหวะของคู่ชก · สวนกลับ +3% หลบ +1%",r=>({ctr:.03*r,evade:.01*r})),
  SKX("p_note",2,2,"captain",["iq"],"korat","สมุดแผนไฟต์","ติดตัว · ได้ EXP จากทุกไฟต์เพิ่ม 6%",r=>({}),{passive:1,px:r=>({fightXp:.06*r})}),
  SKX("p_wall",2,3,"p_read",["guard","iq"],"korat","พระรามน้าวศร","ลูกไม้มวยไทย ย่อหลบ ยกแขนรับ แล้วชกสวน · หลบ +2% ป้องกันวงใน +0.8 สวนกลับ +3%",r=>({evade:.02*r,clDef:.8*r,ctr:.03*r})),
- SKX("p_sister",2,4,"p_wall",["iq","counter"],"korat","เงาพี่สาว","Lv.14 · ท่าที่ไพลินเคยสอน · สวนกลับ +5% คำสั่งพักยก +25% หลบ +1.5%",r=>({ctr:.05*r,corner:.25*r,evade:.015*r}),{lv:14}),
- SKX("p_crown",2,5,"p_sister",["guard","comp"],"korat","มงกุฎพยัคฆ์","Lv.22 · ขั้นปรมาจารย์ · หลบ +3% ป้องกันวงใน +1 สวนกลับ +5% เลือดต่ำแม่นขึ้น 3%",r=>({evade:.03*r,clDef:1*r,ctr:.05*r,clutch:.03*r}),{lv:22})];
+ SKX("p_sister",2,4,"p_wall",["iq","counter"],"korat","เงาพี่สาว · หลบแล้วสวน","Lv.14 · ท่าที่ไพลินเคยสอน · สวนกลับ +5% คำสั่งพักยก +25% หลบ +1.5%",r=>({ctr:.05*r,corner:.25*r,evade:.015*r}),{lv:14}),
+ SKX("p_crown",2,5,"p_sister",["guard","comp"],"korat","มงกุฎพยัคฆ์ · การ์ดสวน","Lv.22 · ขั้นปรมาจารย์ · หลบ +3% ป้องกันวงใน +1 สวนกลับ +5% เลือดต่ำแม่นขึ้น 3%",r=>({evade:.03*r,clDef:1*r,ctr:.05*r,clutch:.03*r}),{lv:22})];
 SKILLS.fah=[
  SKX("tiger",0,0,null,["elbow"],"modern","ศอกพยัคฆ์","แรงศอก +12% แม่น +2%",r=>({dmg:{elbow:.12*r},hit:{elbow:.02*r}})),
  SKX("f_cut",0,1,"tiger",["elbow","speed"],"modern","ศอกเฉียงฟ้า","ฟันศอกเฉียงขึ้น · แรงศอก +8% ศอกแม่น +1.5%",r=>({dmg:{elbow:.08*r},hit:{elbow:.015*r}})),
@@ -898,7 +898,7 @@ function regionAfterFight(G,b,ret,F){if(!G.region)return;G.region.pend=G.region.
 function stageOf(w){return w<=20?"local":w<=40?"district":w<=50?"final":"off";}
 const STAGE_NAME={local:"รอบตำบล",district:"รอบอำเภอ",final:"ชิงแชมป์จังหวัด",off:"ปิดปี"};
 
-function ployAura(w,G){const b=Math.max(0,.42*(1-(w-1)/27));if(!G||!G.F||!G.F.ploy||G.F.ploy.camp!=="rival")return G&&G.F&&G.F.ploy&&G.F.ploy.camp==="player"?0:b;/* v1.59: the undefeated genius keeps her edge until someone beats her this year · v1.91.5 (Man): beaten or not she keeps it while at Golden Tiger; it goes only when she joins your camp */return Math.max(b,w<41?.25:w<49?.2:.15);} // v1.23: Ploy's early edge is gone by week 28
+function ployAura(w,G){if(G&&G.F&&G.F.ploy&&G.F.ploy.camp==="player")return 0;return G&&(G.season||1)===1?.6:.42;}
 function startLv(f){if(f.id==="ploy")f.aura=ployAura(1);if(f.id==="ploy")f.lvl=5;else if(f.id==="fah")f.lvl=3;else if(f.camp==="npc")f.lvl=clamp(Math.round(ovr(f.a)-7),1,6);}
 // v1.22 difficulty: easy = rivals grow slower + more class income; hard = rivals grow faster and use skills harder
 const DIFF={easy:{rival:.7,ai:.6,inc:1.2,train:1.12,name:"ง่าย"},normal:{rival:1,ai:.8,inc:1,train:1,name:"ปกติ"},hard:{rival:1.12,ai:.95,inc:.9,train:.97,name:"ยาก"}};
@@ -1456,7 +1456,7 @@ function finishBracket(G,booking,F){
   if(booking.tier==="final")return finishFinal(G,booking,F);
   if(booking.tier!=="semi")return;
   const div=G.F[booking.a].div;let w=F.result.win==="A"?booking.a:F.result.win==="B"?booking.b:(ovr(G.F[booking.a].a)>=ovr(G.F[booking.b].a)?booking.a:booking.b);
-  if(booking.npc){const rv=leadRival(G,div);if((booking.a===rv||booking.b===rv)&&G.F[rv].camp==="rival"&&w!==rv){w=rv;F.result.win=rv===booking.a?"A":"B";F.result.type="ชนะคะแนน";}}
+  if(booking.npc&&(G.season||1)===1){const rv=leadRival(G,div);if((booking.a===rv||booking.b===rv)&&G.F[rv].camp==="rival"&&w!==rv){w=rv;F.result.win=rv===booking.a?"A":"B";F.result.type="ชนะคะแนน";}}
   if(!G.finalists[div].includes(w))G.finalists[div].push(w);
   if(G.finalists[div].length===2){const [a,b]=G.finalists[div];bookBracket(G,`final${div}`,a,b,49,"final",5);}}
 function finishFinal(G,booking,F){const div=G.F[booking.a].div;const w=F.result.win==="A"?booking.a:F.result.win==="B"?booking.b:(ovr(G.F[booking.a].a)>=ovr(G.F[booking.b].a)?booking.a:booking.b);G.champ[div]=w;const lo=w===booking.a?booking.b:booking.a;recordHonor(G,"province",w,div,G.week,null,G.F[lo]?G.F[lo].name:null,lo);}

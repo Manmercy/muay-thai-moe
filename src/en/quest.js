@@ -1456,12 +1456,12 @@ const campLv=G=>{const R=roster(G).map(f=>f.lvl||1).sort((a,b)=>b-a).slice(0,3);
 function thiefMail(G){if(!thiefReady(G))return;if((G.mail||[]).some(m=>m.ev==="thief"&&!m.done&&!m.expired))return;
   addMail(G,{kind:"event",ev:"thief",from:"Auntie Taew, som tam stall by the temple",title:"Tum Is Back!",exp:G.week+1,
     body:"Manager dear, every Loy Krathong that Tum the krathong thief shows up. Last night he hauled off a sack full of coins from people's krathongs again. Send the girls to help catch him — Auntie's frying khanom krok for you."});}
-const THIEF_SCALE={m:1.04,mt:1.07,e:.35}; /* v1.91.7: scaled to the girl who steps up (her stats + half her skill/gear edge), not the camp average — a stand-out fighter no longer flattens him */
+const THIEF_SCALE={m:1.04,mt:1.07,e:.5}; /* v1.91.7: scaled to the girl who steps up (her stats + half her skill/gear edge), not the camp average — a stand-out fighter no longer flattens him */
 function thiefBase(G,f){const g=typeof loyBoost==="function"?loyBoost(f):f,me=ovr(g.a)+(g.camp==="player"?THIEF_SCALE.e*hiddenEdge(g):0);return Math.max(campPow(G),me);}
-function evThief(G,f,tuy){const K=QK.gang1,t=Math.min(tuy?19.5:19.2,Math.max(6,thiefBase(G,f)*(tuy?THIEF_SCALE.mt:THIEF_SCALE.m))),rng=mulberry32((G.seed^(tuy?0x7b3:0x7a1))+absWeek(G)*17);const a={};
+function evThief(G,f,tuy){const K=QK.gang1,target=Math.max(6,thiefBase(G,f)*(tuy?THIEF_SCALE.mt:THIEF_SCALE.m)),t=Math.min(tuy?19.5:19.2,target),rng=mulberry32((G.seed^(tuy?0x7b3:0x7a1))+absWeek(G)*17);const a={};
   for(const [x] of ATTRS)a[x]=clamp(t+(K.tilt[x]||0)+(rng()*1.2-.6),3,19.5);const id="q_evthief";
   const nm=tuy?LOY_TUY.name:LOY_THIEF.name;const o=baseFighter(id,{name:nm,full:nm,div:"X",camp:"quest",color:tuy?"#a8202c":"#6b7a2e",potential:t+2,a});
-  o.sprite=tuy?"thief2":"thief";o.kind="gang1";o.grp="gang";o.lvl=campLv(G)+(tuy?2:1);o.fatigue=0;o.morale=70;G.F[id]=o;return id;}
+  o.vet=Math.min(12,Math.max(0,target-ovr(a)));o.nlsk=QSK.gang.slice(0,tuy?3:2);o.sprite=tuy?"thief2":"thief";o.kind="gang1";o.grp="gang";o.lvl=campLv(G)+(tuy?2:1);o.fatigue=0;o.morale=70;G.F[id]=o;return id;}
 function thiefHTML(){const pool=gauntPool(),tuy=UI.thiefK==="tuy";return `${tuy?`<h2>Catch Tuy the Red Mask</h2><p class="meta">A 3-round bout, no injuries · tougher than Tum, bigger rewards · win for EXP and stardust ✦ (a little stardust even if you lose) · only on 20–23 Nov, once a day</p>`:`<h2>Catch the Krathong Thief</h2><p class="meta">A 2-round bout, no injuries · win for EXP and stardust ✦ (a little stardust even if you lose) · Tum gets tougher as your camp does · only during Loy Krathong, once a week</p>`}
   <div class="gpick">${pool.map(f=>`<button class="gpk" data-act="thiefgo" data-v="${f.id}">${faceImg(f)}<span><b>${esc(f.name)}</b><small>${isLoyGuest(f)?"Guest · ":""}Lv.${f.lvl}</small></span></button>`).join("")}</div>
   <div class="center endbtns"><button class="btn" data-act="closeModal">Later</button></div>`;}

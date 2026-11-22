@@ -108,14 +108,14 @@ SKILLS.kati.push(
 SKILLS.mali.push(
  SKX("cy_flash",0,4,"cy_erawan",["elbow","speed"],"chaiya","Lightning Return Elbow","Lv.14 · an elbow too fast to see · elbow power +14%, elbow accuracy +3%",r=>({dmg:{elbow:.14*r},hit:{elbow:.03*r}}),{lv:14}),
  SKX("cy_soar",0,5,"cy_flash",["elbow","knee"],"chaiya","Chaiya Sky Leap","Lv.22 · Master · elbow power +16%, knee power +8%, elbow accuracy +3%",r=>({dmg:{elbow:.16*r,knee:.08*r},hit:{elbow:.03*r}}),{lv:22}),
- SKX("cy_bloom",1,4,"cy_hanuman",["kick","foot"],"chaiya","Jasmine Dance","Lv.14 · flowing kicks like a dance · kick accuracy +4%, kick scoring +10%, recovery +10%",r=>({hit:{kick:.04*r},pts:{kick:.1*r},regen:.1*r}),{lv:14}),
+ SKX("cy_bloom",1,4,"cy_hanuman",["kick","foot"],"chaiya","Jasmine Dance · Combination Kicks","Lv.14 · flowing kicks like a dance · kick accuracy +4%, kick scoring +10%, recovery +10%",r=>({hit:{kick:.04*r},pts:{kick:.1*r},regen:.1*r}),{lv:14}),
  SKX("cy_gale",1,5,"cy_bloom",["speed","kick"],"chaiya","Chaiya Whirlwind","Lv.22 · Master · evade +2.5%, kick accuracy +4%, kick power +10%, stamina use -3%",r=>({evade:.025*r,hit:{kick:.04*r},dmg:{kick:.1*r},staSave:.03*r}),{lv:22}),
  SKX("cy_gate",2,4,"cy_root",["guard","clinch"],"chaiya","Pinning the Garland","Lv.14 · Look mai: parry, elbow to the chest · clinch defense +1, evade +2%, counters +3%",r=>({clDef:1*r,evade:.02*r,ctr:.03*r}),{lv:14}),
  SKX("cy_meru",2,5,"cy_gate",["guard","dur"],"chaiya","Mount Meru","Lv.22 · Master · clinch defense +1.4, evade +3%, recovery +12%, +3% accuracy at low health",r=>({clDef:1.4*r,evade:.03*r,regen:.12*r,clutch:.03*r}),{lv:22}));
 SKILLS.rin.push(
  SKX("lb_shadow",0,4,"lb_kris",["counter","speed"],"lopburi","Shadowless Counter","Lv.14 · counters before the opponent's strike lands · counters +5%, counter-punch power +16%",r=>({ctr:.05*r,ctrDmg:.16*r}),{lv:14}),
- SKX("lb_proof",0,5,"lb_shadow",["counter","iq"],"lopburi","Closing Equation","Lv.22 · Master · counters +6%, counter-punch power +20%, punch accuracy +2%",r=>({ctr:.06*r,ctrDmg:.2*r,hit:{punch:.02*r}}),{lv:22}),
- SKX("lb_three",1,4,"lb_giant",["iq","comp"],"lopburi","Three-Round Mind Read","Lv.14 · plans the whole fight ahead · corner orders +35%, base accuracy +1.2%, evade +1%",r=>({corner:.35*r,prep:.012*r,evade:.01*r}),{lv:14}),
+ SKX("lb_proof",0,5,"lb_shadow",["counter","iq"],"lopburi","Closing Equation · Counterpunch","Lv.22 · Master · counters +6%, counter-punch power +20%, punch accuracy +2%",r=>({ctr:.06*r,ctrDmg:.2*r,hit:{punch:.02*r}}),{lv:22}),
+ SKX("lb_three",1,4,"lb_giant",["iq","comp"],"lopburi","Three-Round Mind Read · Ringcraft","Lv.14 · plans the whole fight ahead · corner orders +35%, base accuracy +1.2%, evade +1%",r=>({corner:.35*r,prep:.012*r,evade:.01*r}),{lv:14}),
  SKX("lb_book",1,5,"lb_three",["iq","counter"],"lopburi","Lopburi Textbook","Lv.22 · Master · corner orders +45%, base accuracy +1.6%, counters +3%",r=>({corner:.45*r,prep:.016*r,ctr:.03*r}),{lv:22}),
  SKX("lb_fold",2,4,"lb_tiger",["kick","power"],"lopburi","Foot Strokes the Face","Lv.14 · Look mai: teep the face before they can strike · kick accuracy +3%, kick scoring +10%, evade +1.5%",r=>({hit:{kick:.03*r},pts:{kick:.1*r},evade:.015*r}),{lv:14}),
  SKX("lb_circle",2,5,"lb_fold",["foot","kick"],"lopburi","Unbreakable Outer Ring","Lv.22 · Master · kick accuracy +4%, kick power +12%, evade +2%, counters +3%",r=>({hit:{kick:.04*r},dmg:{kick:.12*r},evade:.02*r,ctr:.03*r}),{lv:22}));
@@ -136,8 +136,8 @@ SKILLS.ploy=[
  SKX("p_read",2,1,"captain",["iq"],"korat","Tiger Reads the Fight","Notes every rhythm of the opponent · counters +3%, evade +1%",r=>({ctr:.03*r,evade:.01*r})),
  SKX("p_note",2,2,"captain",["iq"],"korat","Fight-Plan Notebook","Passive · +6% EXP from every fight",r=>({}),{passive:1,px:r=>({fightXp:.06*r})}),
  SKX("p_wall",2,3,"p_read",["guard","iq"],"korat","Rama Draws the Bow","Look mai: drop under, arm up, punch back · evade +2%, clinch defense +0.8, counters +3%",r=>({evade:.02*r,clDef:.8*r,ctr:.03*r})),
- SKX("p_sister",2,4,"p_wall",["iq","counter"],"korat","Sister's Shadow","Lv.14 · what Pailin once taught her · counters +5%, corner orders +25%, evade +1.5%",r=>({ctr:.05*r,corner:.25*r,evade:.015*r}),{lv:14}),
- SKX("p_crown",2,5,"p_sister",["guard","comp"],"korat","Tiger Crown","Lv.22 · Master · evade +3%, clinch defense +1, counters +5%, +3% accuracy at low health",r=>({evade:.03*r,clDef:1*r,ctr:.05*r,clutch:.03*r}),{lv:22})];
+ SKX("p_sister",2,4,"p_wall",["iq","counter"],"korat","Sister's Shadow · Slip and Counter","Lv.14 · what Pailin once taught her · counters +5%, corner orders +25%, evade +1.5%",r=>({ctr:.05*r,corner:.25*r,evade:.015*r}),{lv:14}),
+ SKX("p_crown",2,5,"p_sister",["guard","comp"],"korat","Tiger Crown · Counter Guard","Lv.22 · Master · evade +3%, clinch defense +1, counters +5%, +3% accuracy at low health",r=>({evade:.03*r,clDef:1*r,ctr:.05*r,clutch:.03*r}),{lv:22})];
 SKILLS.fah=[
  SKX("tiger",0,0,null,["elbow"],"modern","Tiger Elbow","Elbow power +12%, accuracy +2%",r=>({dmg:{elbow:.12*r},hit:{elbow:.02*r}})),
  SKX("f_cut",0,1,"tiger",["elbow","speed"],"modern","Sky-Slash Elbow","Rising diagonal elbow · elbow power +8%, elbow accuracy +1.5%",r=>({dmg:{elbow:.08*r},hit:{elbow:.015*r}})),
@@ -907,7 +907,7 @@ function regionAfterFight(G,b,ret,F){if(!G.region)return;G.region.pend=G.region.
 function stageOf(w){return w<=20?"local":w<=40?"district":w<=50?"final":"off";}
 const STAGE_NAME={local:"Subdistrict round",district:"District round",final:"Provincial final",off:"Year end"};
 
-function ployAura(w,G){const b=Math.max(0,.42*(1-(w-1)/27));if(!G||!G.F||!G.F.ploy||G.F.ploy.camp!=="rival")return G&&G.F&&G.F.ploy&&G.F.ploy.camp==="player"?0:b;/* v1.59: the undefeated genius keeps her edge until someone beats her this year · v1.91.5 (Man): beaten or not she keeps it while at Golden Tiger; it goes only when she joins your camp */return Math.max(b,w<41?.25:w<49?.2:.15);} // v1.23: Ploy's early edge is gone by week 28
+function ployAura(w,G){if(G&&G.F&&G.F.ploy&&G.F.ploy.camp==="player")return 0;return G&&(G.season||1)===1?.6:.42;}
 function startLv(f){if(f.id==="ploy")f.aura=ployAura(1);if(f.id==="ploy")f.lvl=5;else if(f.id==="fah")f.lvl=3;else if(f.camp==="npc")f.lvl=clamp(Math.round(ovr(f.a)-7),1,6);}
 // v1.22 difficulty: easy = rivals grow slower + more class income; hard = rivals grow faster and use skills harder
 const DIFF={easy:{rival:.7,ai:.6,inc:1.2,train:1.12,name:"Easy"},normal:{rival:1,ai:.8,inc:1,train:1,name:"Normal"},hard:{rival:1.12,ai:.95,inc:.9,train:.97,name:"It is"}};
@@ -1465,7 +1465,7 @@ function finishBracket(G,booking,F){
   if(booking.tier==="final")return finishFinal(G,booking,F);
   if(booking.tier!=="semi")return;
   const div=G.F[booking.a].div;let w=F.result.win==="A"?booking.a:F.result.win==="B"?booking.b:(ovr(G.F[booking.a].a)>=ovr(G.F[booking.b].a)?booking.a:booking.b);
-  if(booking.npc){const rv=leadRival(G,div);if((booking.a===rv||booking.b===rv)&&G.F[rv].camp==="rival"&&w!==rv){w=rv;F.result.win=rv===booking.a?"A":"B";F.result.type="Decision win";}}
+  if(booking.npc&&(G.season||1)===1){const rv=leadRival(G,div);if((booking.a===rv||booking.b===rv)&&G.F[rv].camp==="rival"&&w!==rv){w=rv;F.result.win=rv===booking.a?"A":"B";F.result.type="Decision win";}}
   if(!G.finalists[div].includes(w))G.finalists[div].push(w);
   if(G.finalists[div].length===2){const [a,b]=G.finalists[div];bookBracket(G,`final${div}`,a,b,49,"final",5);}}
 function finishFinal(G,booking,F){const div=G.F[booking.a].div;const w=F.result.win==="A"?booking.a:F.result.win==="B"?booking.b:(ovr(G.F[booking.a].a)>=ovr(G.F[booking.b].a)?booking.a:booking.b);G.champ[div]=w;const lo=w===booking.a?booking.b:booking.a;recordHonor(G,"province",w,div,G.week,null,G.F[lo]?G.F[lo].name:null,lo);}

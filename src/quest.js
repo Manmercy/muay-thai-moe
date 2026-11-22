@@ -1456,12 +1456,12 @@ const campLv=G=>{const R=roster(G).map(f=>f.lvl||1).sort((a,b)=>b-a).slice(0,3);
 function thiefMail(G){if(!thiefReady(G))return;if((G.mail||[]).some(m=>m.ev==="thief"&&!m.done&&!m.expired))return;
   addMail(G,{kind:"event",ev:"thief",from:"ป้าแต๋ว ร้านส้มตำหน้าวัด",title:"ไอ้ตุ่มมาอีกแล้ว!",exp:G.week+1,
     body:"ผู้จัดการจ๋า เทศกาลลอยกระทงทีไร ไอ้ตุ่มโจรงมกระทงโผล่มาทุกที เมื่อคืนมันหอบเหรียญจากกระทงชาวบ้านไปเต็มกระสอบอีกแล้ว ส่งเด็ก ๆ มาช่วยจับหน่อยนะ ป้าทอดขนมครกรอ"});}
-const THIEF_SCALE={m:1.04,mt:1.07,e:.35}; /* v1.91.7: scaled to the girl who steps up (her stats + half her skill/gear edge), not the camp average — a stand-out fighter no longer flattens him */
+const THIEF_SCALE={m:1.04,mt:1.07,e:.5}; /* v1.91.7: scaled to the girl who steps up (her stats + half her skill/gear edge), not the camp average — a stand-out fighter no longer flattens him */
 function thiefBase(G,f){const g=typeof loyBoost==="function"?loyBoost(f):f,me=ovr(g.a)+(g.camp==="player"?THIEF_SCALE.e*hiddenEdge(g):0);return Math.max(campPow(G),me);}
-function evThief(G,f,tuy){const K=QK.gang1,t=Math.min(tuy?19.5:19.2,Math.max(6,thiefBase(G,f)*(tuy?THIEF_SCALE.mt:THIEF_SCALE.m))),rng=mulberry32((G.seed^(tuy?0x7b3:0x7a1))+absWeek(G)*17);const a={};
+function evThief(G,f,tuy){const K=QK.gang1,target=Math.max(6,thiefBase(G,f)*(tuy?THIEF_SCALE.mt:THIEF_SCALE.m)),t=Math.min(tuy?19.5:19.2,target),rng=mulberry32((G.seed^(tuy?0x7b3:0x7a1))+absWeek(G)*17);const a={};
   for(const [x] of ATTRS)a[x]=clamp(t+(K.tilt[x]||0)+(rng()*1.2-.6),3,19.5);const id="q_evthief";
   const nm=tuy?LOY_TUY.name:LOY_THIEF.name;const o=baseFighter(id,{name:nm,full:nm,div:"X",camp:"quest",color:tuy?"#a8202c":"#6b7a2e",potential:t+2,a});
-  o.sprite=tuy?"thief2":"thief";o.kind="gang1";o.grp="gang";o.lvl=campLv(G)+(tuy?2:1);o.fatigue=0;o.morale=70;G.F[id]=o;return id;}
+  o.vet=Math.min(12,Math.max(0,target-ovr(a)));o.nlsk=QSK.gang.slice(0,tuy?3:2);o.sprite=tuy?"thief2":"thief";o.kind="gang1";o.grp="gang";o.lvl=campLv(G)+(tuy?2:1);o.fatigue=0;o.morale=70;G.F[id]=o;return id;}
 function thiefHTML(){const pool=gauntPool(),tuy=UI.thiefK==="tuy";return `${tuy?`<h2>ไล่จับไอ้ตุ๋ย หน้ากากแดง</h2><p class="meta">ไฟต์ 3 ยก ไม่บาดเจ็บ · เก่งกว่าไอ้ตุ่ม รางวัลก็มากกว่า · ชนะได้ EXP กับเศษดาว ✦ (แพ้ก็ได้เศษดาวปลอบใจ) · มาเฉพาะ 20–23 พ.ย. วันละครั้ง</p>`:`<h2>ไล่จับโจรงมกระทง</h2><p class="meta">ไฟต์ 2 ยก ไม่บาดเจ็บ · ชนะได้ EXP กับเศษดาว ✦ (แพ้ก็ได้เศษดาวปลอบใจ) · ไอ้ตุ่มเก่งขึ้นตามค่าย · มาเฉพาะช่วงลอยกระทง สัปดาห์ละครั้ง</p>`}
   <div class="gpick">${pool.map(f=>`<button class="gpk" data-act="thiefgo" data-v="${f.id}">${faceImg(f)}<span><b>${esc(f.name)}</b><small>${isLoyGuest(f)?"แขกรับเชิญ · ":""}Lv.${f.lvl}</small></span></button>`).join("")}</div>
   <div class="center endbtns"><button class="btn" data-act="closeModal">ไว้ก่อน</button></div>`;}

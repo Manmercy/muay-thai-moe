@@ -669,8 +669,8 @@ EVENTS.push(
 // --- v1.89.11: every pair has its own quarrel — in the Valentine ring and in the spats while you see more than one ---
 const pairKey=(a,b)=>[a,b].sort((x,y)=>LOVE_IDS.indexOf(x)-LOVE_IDS.indexOf(y)).join("_");
 const PAIR={
- kati_mali:{ring:{kati:"มะลิ พี่เคยยกข้าวเหนียวมะม่วงให้ได้ แต่อันนี้ไม่ยกให้นะ!",mali:"พี่กะทิไม่ต้องยก! มะลิจะชนะเอาเอง!"},
-  spat:[["mali","pout","พี่กะทิได้นั่งข้างผู้จัดการตอนกินข้าวสามวันติดแล้วนะ วันนี้ตามะลิ!"],["kati","angry","ก็หนูมาก่อน! หนูอยู่ค่ายนี้ก่อนมะลิอีก!"],["mali","angry","มาก่อนไม่ได้แปลว่าจองได้ตลอดชีวิตนะคะ!"]]},
+ kati_mali:{ring:{kati:"มะลิ ฉันเคยยกข้าวเหนียวมะม่วงให้ได้ แต่อันนี้ไม่ยกให้นะ!",mali:"กะทิไม่ต้องยก! ฉันจะชนะเอาเอง!"},
+  spat:[["mali","pout","พี่กะทิได้นั่งข้างผู้จัดการตอนกินข้าวสามวันติดแล้วนะ วันนี้ตามะลิ!"],["kati","angry","ก็ฉันมาก่อน! ฉันอยู่ค่ายนี้ก่อนเธออีก!"],["mali","angry","มาก่อนไม่ได้แปลว่าจองได้ตลอดชีวิตนะคะ!"]]},
  kati_rin:{ring:{kati:"รินคำนวณได้ทุกอย่าง แต่คำนวณใจผู้จัดการไม่ได้หรอก!",rin:"คำนวณได้ค่ะ ผลออกมาว่าเธอเสียเปรียบ"},
   spat:[["rin","pout","กะทิ เมื่อวานผู้จัดการคุยกับเธอสี่สิบนาที กับฉันยี่สิบนาที ฉันจดไว้"],["kati","angry","จดทำไมเล่า! จะเอาไปฟ้องใคร!"],["rin","pout","ไม่ได้ฟ้อง แค่ข้อมูลไม่สมดุล และฉันไม่ชอบข้อมูลที่ไม่สมดุล"]]},
  kati_ploy:{ring:{kati:"พี่พลอยสอนหนูมาตลอด วันนี้หนูจะให้ดูว่าเรียนจบแล้ว!",ploy:"ยังเร็วไปสิบปีนะ น้องกะทิ"},
@@ -1359,7 +1359,7 @@ EVENTS.push(
  {id:"fah_mali",look:"casual",when:G=>G.week>=16&&G.F.mali.camp==="player"&&G.F.fah.met,bg:"fair",steps:[
   {n:"nar",t:"ตลาดเย็น มะลิกำลังจะหยิบไส้กรอกไม้สุดท้าย มีมือที่มีรอยสักหยิบตัดหน้าไป"},
   {n:"fah",f:"happy",l:"casual",t:"ช้าไปหนึ่งจังหวะนะ เด็กไชยา บนเวทีก็จะช้าแบบนี้แหละ"},
-  {n:"mali",f:"pout",l:"casual",t:"พี่ฟ้า! อยู่รุ่น B เหมือนกันแล้วยังจะมาแย่งไส้กรอกอีก!"},
+  {n:"mali",f:"pout",l:"casual",t:"ฟ้า! อยู่รุ่น B เหมือนกันแล้วยังจะมาแย่งไส้กรอกอีก!"},
   {choice:[{t:"เก็บไว้แก้แค้นบนเวทีนะ มะลิ",fx:G=>{add(G,"mali","morale",6);add(G,"fah","bond",3);},then:[{n:"fah",f:"happy",l:"casual",t:"ชอบแววตานั่นแฮะ เจอกันบนเวที"}]},
    {t:"เลี้ยงไส้กรอกทั้งสองคนเลย",fx:G=>{G.cash-=120;add(G,"mali","bond",4);add(G,"fah","bond",5);},then:[{n:"fah",f:"flustered",l:"casual",t:"…นายนี่แปลกคนนะ เลี้ยงคู่แข่งด้วย ขอบใจ"}]}]}]});
 // v1.15: the camp talks about last week's big fight
@@ -2030,7 +2030,7 @@ EVENTS.push(
   {n:"nar",t:"(ใบหยกขึ้นเป็นคู่ปรับตัวท็อปของรุ่น B แทนฟ้า)"}]},
  {id:"fah_settle",look:"casual",bg:"camp",when:G=>inCamp(G,"fah")&&G.flags.fahJoinedAbs!=null&&absWeek(G)>=G.flags.fahJoinedAbs+2,steps:[
   {n:"nar",t:"สัปดาห์แรกของฟ้าที่ค่ายศิริชัย เสียงในค่ายดังขึ้นสองเท่า"},
-  {inject:G=>{const o=[];if(inCamp(G,"mali"))o.push({n:"mali",f:"angry",l:"train",t:"พี่ฟ้า! นั่นผ้าเช็ดตัวหนู!"},{n:"fah",f:"happy",l:"train",t:"ของใครหยิบก่อนได้ก่อน! กฎค่ายพยัคฆ์ทอง!"},{n:"kati",f:"pout",l:"train",t:"ที่นี่ค่ายศิริชัยค่ะ!"});
+  {inject:G=>{const o=[];if(inCamp(G,"mali"))o.push({n:"mali",f:"angry",l:"train",t:"ฟ้า! นั่นผ้าเช็ดตัวฉันนะ!"},{n:"fah",f:"happy",l:"train",t:"ของใครหยิบก่อนได้ก่อน! กฎค่ายพยัคฆ์ทอง!"},{n:"kati",f:"pout",l:"train",t:"ที่นี่ค่ายศิริชัยค่ะ!"});
    if(hasPet(G,"turtle"))o.push({n:"fah",f:"happy",l:"casual",t:`${petName(G,"turtle")}! ฟ้ามาอยู่ด้วยแล้วนะ ทีนี้ไม่ต้องแอบเอาผักบุ้งมาให้แล้ว!`});
    o.push({n:"fah",f:"flustered",l:"casual",t:"…ที่นี่ไม่มีใครบอกให้ฟ้าเลิกยิ้มเลย แปลกดีนะ"});return o;}},
   {choice:[{t:"ยิ้มให้เต็มที่ ที่นี่บ้านเธอแล้ว",fx:G=>{add(G,"fah","bond",5);add(G,"fah","morale",10);},then:[{n:"fah",f:"happy",l:"casual",t:"งั้นฟ้าจะยิ้มจนทุกคนรำคาญเลย!"}]},
