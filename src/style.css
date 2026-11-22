@@ -2326,9 +2326,12 @@ div.mdelask{margin:2px 0 8px;padding:8px;box-shadow:inset 0 0 0 2px var(--line);
 .letter.tl-black{background:#0b0709;color:#f0e6e8;box-shadow:inset 0 0 0 3px #c41d33,4px 4px 0 rgba(0,0,0,.35)}.letter.tl-black h3{color:#ff4a5e}.letter.tl-black .lhead small{color:#b98a91}.letter.tl-black .lhead{border-color:#c41d33}
 @media (prefers-reduced-motion:reduce){.mrow2.tnaka,.mrow2.tregion,.mrow2.tblack{animation:none}}
 .letter h3+p{white-space:pre-line}.letter.tl-black{animation:bkfr 1.4s steps(2) infinite}@keyframes bkfr{50%{box-shadow:inset 0 0 0 3px #5a0d17,4px 4px 0 rgba(0,0,0,.35)}}@media (prefers-reduced-motion:reduce){.letter.tl-black{animation:none}}
-/* v1.91.77 (Man): one portrait size in every scene — alone, in a pair or a trio, so nobody shrinks or grows when someone else walks in */
-.cast .stand,.cast.duo .stand,.cast.grp .stand{height:calc(var(--sh) * .9);bottom:calc(var(--sh) * -.477)}
-.cast .stand.mgrst,.cast.duo .stand.mgrst{height:calc(var(--sh) * .675);bottom:calc(var(--sh) * -.225)}
+/* Dialogue portraits use the original shared framing: one speaker is larger, pairs fit side by side. */
+.cast .stand{height:var(--sh);bottom:calc(var(--sh) * -.53)}
+.cast.duo .stand{height:calc(var(--sh) * .86);bottom:calc(var(--sh) * -.455)}
+.cast.grp .stand{height:calc(var(--sh) * .72);bottom:calc(var(--sh) * -.38)}
+.cast .stand.mgrst{height:calc(var(--sh) * .75);bottom:calc(var(--sh) * -.25)}
+.cast.duo .stand.mgrst{height:calc(var(--sh) * .645);bottom:calc(var(--sh) * -.215)}
 .cast .stand.st-low{height:calc(var(--sh) * .5);bottom:calc(var(--sh) * -.1)}
 .cast.grp .stand.off{filter:brightness(.8) saturate(.85)}
 /* v1.91.82 (Man): the travel button no longer covers the van — the van itself is the button, with a small tag above its roof */
@@ -2371,6 +2374,3 @@ div.mdelask{margin:2px 0 8px;padding:8px;box-shadow:inset 0 0 0 2px var(--line);
 
 /* v1.91.86: scene portraits centre on the face (--cx = face centre across the picture) */
 .cast .stand{transform:translateX(calc(var(--cx,.5) * -100%))}.cast .stand.off{transform:translateX(calc(var(--cx,.5) * -100%)) scale(.96)}
-
-/* v1.91.88: portrait sizes are in cast-height units */
-.cast{container-type:size}
