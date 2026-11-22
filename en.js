@@ -6538,14 +6538,14 @@ AU.gsfx=function(kind,a){if(!this.init()||this.muted||!SETTINGS.sfx)return;const
   if(kind==="shimmer")for(let i=0;i<6;i++)T(i*.05,{f:1400+Math.random()*1400,type:"sine",dur:.12,peak:.06});};
 
 // ================= MUAY THAI MOE v1.3 — UI =================
-const VERSION="1.91.102";
+const VERSION="1.91.103";
 const CUR_LANG=(typeof window!=="undefined"&&window.LANG)||"th";
 const TH_LABEL=String.fromCharCode(3652,3607,3618);
 function langSwitch(cls){return `<div class="langsw ${cls||""}" role="group" aria-label="Language">${[["th",TH_LABEL],["en","EN"]].map(([k,l])=>`<button class="lsb ${CUR_LANG===k?"on":""}" data-act="setlang" data-v="${k}" aria-pressed="${CUR_LANG===k}">${l}</button>`).join("")}</div>`;}
 const SAVE_KEY="mtm-save-v13";
 const CANON_IDS=["kati","mali","rin","ploy","fah"];
 /* Full-resolution source portraits. Other expressions keep their approved art. */
-const STAND_PNG=new Set(CANON_IDS.flatMap(id=>[`${id}_casual`,...['happy','sad','flustered'].map(m=>`${id}_fight_${m}`)]).concat(["mali_casual_flustered", "mali_casual_pout", "fah_casual_pout", "fah_fight_angry", "kati_fight_angry", "mali_fight_angry", "ploy_fight_angry", "rin_fight_angry", "kati_thai", "rin_thai", "mali_thai", "ploy_thai", "fah_thai", "fah_thai_fl", "rin_casual_pout", "kati_casual_pout", "ploy_casual_flustered"]));
+const STAND_PNG=new Set(CANON_IDS.flatMap(id=>[`${id}_casual`,...['happy','sad','flustered'].map(m=>`${id}_fight_${m}`)]).concat(["mali_casual_flustered", "mali_casual_pout", "fah_casual_pout", "fah_fight_angry", "kati_fight_angry", "mali_fight_angry", "ploy_fight_angry", "rin_fight_angry", "kati_thai", "rin_thai", "mali_thai", "ploy_thai", "fah_thai", "fah_thai_fl", "rin_casual_pout", "kati_casual_pout", "ploy_casual_flustered","kati_thai_fl","rin_thai_fl","mali_thai_fl","ploy_thai_fl","rin_casual_flustered","ploy_casual_pout"]));
 const standArt=key=>`${ASSET}${key}.${STAND_PNG.has(key)?'png':'webp'}`;
 const CHAMP_IDS=["baibua","tabtim","alicia","chaba","lada"];/* v1.89.14: Lada (Naka) joins the scene cast */ /* v1.90 (hidden): the four regional champions — full portraits in scenes like the heroines */
 const castId=id=>CANON_IDS.includes(id)||CHAMP_IDS.includes(id);
@@ -6601,7 +6601,7 @@ const cardFaceSrc=C=>{const fa=cardFaceArt(C);if(fa)return `${ASSET}${fa}.webp`;
   return `${ASSET}${C.c}_casual${suffix}_face.webp`;};
 /* v1.91.26 (Man): the card shows the same character picture as the dialogue (the body sprite), not the cropped face;
    falls back to the face crop if a sprite doesn't exist */
-const cardBodySrc=src=>src.replace(/\/([a-z]+)_(happy|sad|flustered|angry)_face\.webp$/,"/$1_fight_$2.webp").replace(/_face\.webp$/,".webp");
+const cardBodySrc=src=>{const body=src.replace(/\/([a-z]+)_(happy|sad|flustered|angry)_face\.webp$/,"/$1_fight_$2.webp").replace(/_face\.webp$/,".webp"),key=body.startsWith(ASSET)?body.slice(ASSET.length).replace(/\.webp$/,""):null;return key&&STAND_PNG.has(key)?standArt(key):body;};
 const cardArtHTML=(C,lazy=false)=>{const art=cardFaceArt(C),f=cardFaceSrc(C),src=art?f:cardBodySrc(f);
   return `<span class="card-art${art?" art":" body"}" style="--card-scene:url('${ASSET}${BGIMG[C.bg]||BGIMG.camp}')"><img src="${src}" alt="" ${src!==f?`onerror="this.onerror=null;this.src='${f}';this.parentNode.classList.remove('body')"`:""} ${lazy?'loading="lazy" decoding="async"':""}></span>`;};
 // v1.34: portraits for the market and helmet-gang side characters (matched by speaker name, or st.img)
@@ -7197,7 +7197,6 @@ function regionTabHTML(){if(typeof REGION!=="undefined")return REGION.html();
 // v1.7 scouting: watch tape to see the opponent's tendencies (free when Rin is in the camp)
 // v1.21: tape is always a deliberate step again — Rin (or the analyst) just makes it free
 const SCOUT_COST=400;const rinIn=()=>G.F.rin.camp==="player";const RIN_GAP=3;const rinFree=()=>rinIn()&&!G.F.rin.injury&&!(typeof isAway==="function"&&isAway(G,"rin"))&&(G.rinTapeAbs==null||gameWeek(G)-G.rinTapeAbs>=RIN_GAP); /* Rin watches one tape for free every three absolute weeks. */
-const rinSpyOK=()=>rinIn()&&!(G.rinTapeAbs!=null&&gameWeek(G)>=G.rinTapeAbs&&gameWeek(G)-G.rinTapeAbs<RIN_GAP)&&!(G.bookings||[]).some(b=>b.a==="rin"&&b.week===G.week)&&!(G.F.rin.injury>0)&&!(typeof isAway==="function"&&isAway(G,"rin")); // v1.38: Rin studies one tape for free every 3 weeks
 /* v1.91.80 (Man): a tape's price follows the bout — 8% of the win purse, her rank (rookie x0.8 · rising x1 · skilled x1.2 · top x1.5 · elite x1.8 · legend x2.2), x0.6 weaker / x1 close / x1.5 stronger / x2 much stronger,
    x1.5 for regional bouts, and sellers mark it up as the camp gets famous (+2% per point of reputation over 10); the video room halves it */
 function tapeCtx(id){return [...(G.bookings||[]),...(G.offers||[])].find(x=>x.b===id)||null;}
@@ -7249,25 +7248,22 @@ function rinRead(op){const S=rinSeries(op);if(S.length<2)return {S,few:true};con
   let all=0,n=0;for(const id in G.oppHist||{}){const H=G.oppHist[id];if(H.length>=2){all+=(H[H.length-1][1]-H[0][1])/10/Math.max(1,H[H.length-1][0]-H[0][0]);n++;}}
   const avg=n?all/n:0,pace=d(1)/span,rows=[2,3,4,5,6].map(i=>({i,dv:d(i)})).sort((x,y)=>y.dv-x.dv),top=rows[0];
   const x=tapeCtx(op.id),ahead=x?Math.max(0,x.week-G.week):0;return {S,span,pace,avg,top,ahead,proj:z[top.i]+(top.dv/span)*ahead,z};}
-function rinSpyLine(op){const w=G.rinSpy&&G.rinSpy[op.id];if(w==null||gameWeek(G)-w>8)return "";const H=(G.oppHist&&G.oppHist[op.id])||[],last=H[H.length-1];
-  if(!last)return "🕵️ I sneaked a look at their gym. She's training hard at everything.";const now=oppRow(op.a),d=[2,3,4,5,6].map(i=>({i,dv:(now[i-1]-last[i])/10})).sort((x,y)=>y.dv-x.dv)[0];
-  return d.dv>.15?`🕵️ I sneaked a look at their gym. Lately she's drilling ${RH_ROWS[d.i-1]}, really hard.`:"🕵️ I sneaked a look at their gym. Light training lately, nothing new.";}
-function rinGraphHTML(op){if(!rinIn()||!scouted(op.id))return "";const R=rinRead(op),SPY=rinSpyLine(op);
-  if(R.few)return `<div class="rinbox"><b>📊 Rin's tape analysis</b>${SPY?`<p>${SPY}</p>`:""}<p>The back data on ${esc(op.name)} is still thin. I only just started recording. Give it a month or two and the trend will show.</p></div>`;
+function rinGraphHTML(op){if(!rinIn()||!scouted(op.id))return "";const R=rinRead(op);
+  if(R.few)return `<div class="rinbox"><b>📊 Rin's tape analysis</b><p>The back data on ${esc(op.name)} is still thin. I only just started recording. Give it a month or two and the trend will show.</p></div>`;
   const S=R.S,W=300,H=86,x0=S[0][0],x1=S[S.length-1][0],idx=[1,R.top.i],vals=S.flatMap(p=>idx.map(i=>p[i])),lo=Math.floor(Math.min(...vals)-.5),hi=Math.ceil(Math.max(...vals)+.5);
   const X=w=>8+(x1>x0?(w-x0)/(x1-x0):1)*(W-16),Y=v=>H-8-(v-lo)/Math.max(1,hi-lo)*(H-16),line=(i,c,sw)=>`<polyline fill="none" stroke="${c}" stroke-width="${sw}" points="${S.map(p=>`${X(p[0]).toFixed(1)},${Y(p[i]).toFixed(1)}`).join(" ")}"/>${S.map(p=>`<circle cx="${X(p[0]).toFixed(1)}" cy="${Y(p[i]).toFixed(1)}" r="2.4" fill="${c}"/>`).join("")}`;
   const sp=R.pace>R.avg*1.4+.005?"faster than others at her level":R.pace<R.avg*.6?"slower than average":"about average",nm=RH_ROWS[R.top.i-1],sg=v=>(v>=0?"+":"")+v.toFixed(1);
   const L=[`${R.span} weeks before the tape, overall ${sg(R.z[1]-S[0][1])} — progress ${sp}`,R.top.dv>.3?`Fastest riser: ${nm} ${sg(R.top.dv)}`:"She's barely improved lately.",
     R.ahead&&R.top.dv>.3?`If she keeps training like this, on fight night (in ${R.ahead} weeks) ${nm} should be around ${R.proj.toFixed(1)}`:""].filter(Boolean);
   return `<div class="rinbox"><b>📊 Rin's tape analysis</b><svg viewBox="0 0 ${W} ${H}" class="rinsvg" role="img" aria-label="Progress chart"><line x1="8" x2="${W-8}" y1="${H-8}" y2="${H-8}" stroke="rgba(255,255,255,.15)"/>${line(1,"#f5cf4f",2.4)}${line(R.top.i,"#6aa8ff",1.6)}</svg>
-   <div class="rinleg"><span class="lg1">Overall</span><span class="lg2">${nm}</span><span class="mutt">${R.span} weeks → tape day</span></div>${SPY?`<p>${SPY}</p>`:""}${L.map(t=>`<p>${t}</p>`).join("")}</div>`;}
+   <div class="rinleg"><span class="lg1">Overall</span><span class="lg2">${nm}</span><span class="mutt">${R.span} weeks → tape day</span></div>${L.map(t=>`<p>${t}</p>`).join("")}</div>`;}
 function intelHTML(op){const bk=oppKnown(G,op.id);if(!scouted(op.id))return `${bk?oppMemoHTML(op,bk):""}<div class="intel locked"><span>${bk?"Watch new tape to see what changed":"No tape watched yet"} · only the style is known: ${styleOf(op.a)}</span><button class="btn sm gold" data-act="scout" data-v="${op.id}" ${G.cash<scoutCost(op.id)?"disabled":""}>${scoutLabel(op.id)}</button></div>${scoutCost(op.id)?`<small class="tquip">🎞️ Tape seller: "${tapeQuip(op.id)}"</small>`:""}`;
   const I=oppIntel(op),nt=bk&&bk.trick?`<span class="newtrick">⚠️ New trick: trained ${attrName(bk.trick.k)} harder since your last meeting</span>`:bk&&topWeapon(op.a)!==bk.last.top?`<span class="newtrick">⚠️ Main weapon changed from ${attrName(bk.last.top)} to ${attrName(topWeapon(op.a))}</span>`:"";return `<div class="intel"><b>${G.F.rin.camp==="player"?"Rin's analysis":"From the tape"}</b><span>Main weapon: ${I.top}</span><span>Weak spot: ${I.weak}</span>${nt}${bk?`<span class="dim">Met ${bk.n} times</span>`:""}</div>`;}
 function offersHTML(){const mine=G.bookings.filter(b=>G.F[b.a].camp==="player").sort((a,b)=>a.week-b.week);
   return `${mine.length?`<section class="px card"><h3>Booked fights</h3><div class="list">${mine.map(b=>{const o=G.F[b.b],me=G.F[b.a];
      return `<div class="bookcard"><div class="vsstage"><canvas width="150" height="150" data-sprite="${me.id}" data-mode="guard"></canvas><b class="vsx">VS</b><canvas width="150" height="150" data-sprite="${o.id}" data-mode="guard" data-flip="1"></canvas></div>
        <div class="bk-info"><div class="t">${esc(me.name)} vs ${esc(o.name)}</div><div class="meta">Week ${b.week} · ${(b.title||TIER[b.tier].name)} · ${b.rounds} rounds ${b.win?` · purse ${fmt(b.lose)} (+${fmt(b.win-b.lose)} if win)`:""}</div>
-       <span class="pill ${b.week===G.week?"red":"gold"}">${b.week===G.week?"This week":`${b.week-G.week} wk`}</span>${(()=>{const v=verdictOf(adviseCached(me.id,o.id,b.rounds||3).bestRate);return `<span class="pill dtag ${v.c}">${v.t}</span>`;})()}</div><div class="bk-btns">${b.planSet?`<button class="btn sm done" data-act="fplan" data-id="${b.id}">✓ Plan: ${PLANS[b.plan||"balanced"].name}</button>`:`<button class="btn sm red" data-act="fplan" data-id="${b.id}">Set fight plan</button>`}${scouted(o.id)?`<button class="btn sm done" disabled>${G.F.rin.camp==="player"?"✓ Rin analyzed":"✓ Scouted"}</button>`:`<button class="btn sm gold" data-act="scout" data-v="${o.id}" ${G.cash<scoutCost(o.id)?"disabled":""}>${scoutLabel(o.id)}</button>${rinSpyOK()?`<button class="btn sm" data-act="rinspy" data-v="${o.id}">🕵️ Send Rin</button>`:""}`}</div></div>`;}).join("")}</div></section>`:""}
+       <span class="pill ${b.week===G.week?"red":"gold"}">${b.week===G.week?"This week":`${b.week-G.week} wk`}</span>${(()=>{const v=verdictOf(adviseCached(me.id,o.id,b.rounds||3).bestRate);return `<span class="pill dtag ${v.c}">${v.t}</span>`;})()}</div><div class="bk-btns">${b.planSet?`<button class="btn sm done" data-act="fplan" data-id="${b.id}">✓ Plan: ${PLANS[b.plan||"balanced"].name}</button>`:`<button class="btn sm red" data-act="fplan" data-id="${b.id}">Set fight plan</button>`}${scouted(o.id)?`<button class="btn sm done" disabled>${G.F.rin.camp==="player"?"✓ Rin analyzed":"✓ Scouted"}</button>`:`<button class="btn sm gold" data-act="scout" data-v="${o.id}" ${G.cash<scoutCost(o.id)?"disabled":""}>${scoutLabel(o.id)}</button>`}</div></div>`;}).join("")}</div></section>`:""}
    ${dmCardHTML()}<section class="px card"><div class="card-h"><h3>This week's offers</h3>${G.losses&&G.losses.length?`<button class="btn sm" data-act="lossrev">Review the loss</button>`:`<span class="legend"><i class="dot green"></i>Weaker <i class="dot gold"></i>Even <i class="dot red"></i>Stronger</span>`}</div><div class="list">${
      [...G.offers].sort((x,y)=>(y.rv||y.beast||y.hard||y.tier==="special"?1:0)-(x.rv||x.beast||x.hard||x.tier==="special"?1:0)).map(o=>{const op=G.F[o.b],me=G.F[o.a];const A=adviseCached(o.a,o.b,o.rounds||3);const v=verdictOf(A.bestRate);
        const sp=o.by?["rv","Baiyok's rematch letter"]:o.pc?["rv","Challenge letter from Petcha"]:o.rv?["rv","Grudge match · the whole province is watching"]:o.beast?["beast",QK[o.beast].grp==="rooster"?"Wild bout · Human vs fighting rooster":"Wild bout · Bull wrestling, Muay Thai edition"]:o.tier==="special"?["sp","Special cross-division bout"]:o.hard?["hard","Punch up · purse ×1.5"]:o.fair?["fair",o.cross?"Temple fair · cross-division star!":"Temple fair bout · not ranked"]:null;
@@ -7742,7 +7738,6 @@ const PATCH_AV={id:"1.91.71",ver:"Muay Thai Moe v1.91",title:"The manager gets a
 const PATCH_TAPE={id:"1.91.80",ver:"Muay Thai Moe v1.91",title:"Tapes, Coach Daeng and Rin",lead:"You can now get to know an opponent much better before the bell. The more you know, the sharper Coach Daeng's advice.",items:[
  ["🎞️","Coach reads what you know","No tape: Coach only has gym gossip and a rough win chance. Fought her before: he remembers how she was then. With a tape: the plan, the counter-drill and what to watch, in detail."],
  ["📊","Rin analyses the tape","With Rin in camp and a tape watched, you get a chart of the opponent's progress: rising fast or stalled, and how good she'll likely be on fight night."],
- ["🕵️","Send Rin spying","Instead of a free tape, every 3 weeks Rin can sneak a look at the rival gym: free, as good as a tape, plus what the opponent is drilling hard right now. Rin skips training that week."],
  ["💸","Tape prices follow the bout","Big bouts, stronger or higher-ranked opponents and regional fights cost more. The more famous the camp, the more the tape seller marks up. The video room still halves it."],
  ["🧑‍🏫","Coach Daeng's talks","Every 4 weeks Coach calls you over about a girl's weak spot, hidden power or a move. On the pre-fight compare, 'แรง' is now 'Endurance'."],
  ["✨","Hidden powers hit harder","Past Lv.3 each hidden-power level adds 10% (was 5%), up to 170%. Girls who joined later got their missing skill points back."]],
@@ -7836,7 +7831,7 @@ function montageHTML(){const M=UI.montage;
 const WARMED={};let WARM_NEED=null;function warm(src){if(!src)return;if(WARM_NEED)WARM_NEED.push(src);if(WARMED[src])return;const i=new Image();i.src=src;WARMED[src]=i;}
 function warmChar(id,look){if(id==="coach"){warm(`${ASSET}coach.png`);return;}if(!castId(id)&&id!=="pailin")return;
   (look==="casual"||look==="thai"?["happy","flustered","pout"]:["happy","sad","surprised","angry"]).forEach(m=>warm(stand(id,look,m)));}
-function warmSteps(steps,look){const walk=list=>(list||[]).forEach(st=>{if(!st)return;const n=typeof st.n==="function"?null:st.n;if(n==="npc"){const im=npcImg({...st,who:speakerWho});if(im)warm(im.startsWith("nl_")?`${ASSET}${im}.webp`:`${ASSET}npc_${im}.webp`);}else if(n)warmChar(n,st.l==="casual"||st.l==="thai"?st.l:(look==="casual"||look==="thai")&&!st.l?look:"fight");
+function warmSteps(steps,look){const walk=list=>(list||[]).forEach(st=>{if(!st)return;const n=typeof st.n==="function"?null:st.n;if(n==="npc"){const im=npcImg(st);if(im)warm(im.startsWith("nl_")?`${ASSET}${im}.webp`:`${ASSET}npc_${im}.webp`);}else if(n)warmChar(n,st.l==="casual"||st.l==="thai"?st.l:(look==="casual"||look==="thai")&&!st.l?look:"fight");
   if(st.with)warmChar(st.with,look==="casual"||look==="thai"?look:"fight");if(st.bg&&BGIMG[st.bg])warm(ASSET+BGIMG[st.bg]);if(st.choice)st.choice.forEach(c=>walk(c.then));});walk(steps);}
 /* v1.91.47 (Man): the Thai dress has only happy/flustered art — a scene with a sad, angry or pouting line keeps the casual clothes all the way through */
 let THAI_HOLD=false;const sceneNoThai=(steps,look)=>{if(THAI_XP)return false;const seen=new Set();const walk=(x,d)=>{if(!x||typeof x!=="object"||d>6||seen.has(x))return false;seen.add(x);if(Array.isArray(x))return x.some(y=>walk(y,d+1));
@@ -8415,8 +8410,8 @@ function staPop(d){if(!d||typeof document==="undefined")return;const m=document.
 /* v1.91.94 (Man): the skill cut-in shows the painted portrait whenever one exists (the Naga team, Ladda, the regional champions showed a blown-up sprite) — face framed from the scene-portrait measurements */
 function cutPicArt(id){const f=typeof G!=="undefined"&&G.F&&G.F[id];let k=f&&f.nl?(f.nl==="ladda"?"lada_fight_angry":`nl_${f.nl}_por`):`${id}_fight_angry`;
   if(typeof STANDFIT==="undefined"||!STANDFIT[k])return "";const fk=STANDFIT[k],d=.22/fk[0],ch=1-(.83-.22-fk[1])/fk[0],cr=ch-d,hp=125/d;
-  return `<img class="cut-art" src="${ASSET}${k}.webp" alt="" style="height:${hp.toFixed(0)}%;top:${(46-(cr+.55*d)*hp).toFixed(0)}%;left:50%;transform:translateX(${(-fk[2]*100).toFixed(1)}%) skewY(4deg)">`;}
-function cutPic(id){const art=cutPicArt(id);if(art)return art;const f=typeof G!=="undefined"&&G.F&&G.F[id];if(f&&f.sprite)return `<div class="cut-spr" style="background-image:url('${ASSET}${f.sprite}_sheet.webp')"></div>`;return `<img src="${ASSET}${id}_fight_angry.webp" alt="">`;}
+  return `<img class="cut-art" src="${standArt(k)}" alt="" style="height:${hp.toFixed(0)}%;top:${(46-(cr+.55*d)*hp).toFixed(0)}%;left:50%;transform:translateX(${(-fk[2]*100).toFixed(1)}%) skewY(4deg)">`;}
+function cutPic(id){const art=cutPicArt(id);if(art)return art;const f=typeof G!=="undefined"&&G.F&&G.F[id];if(f&&f.sprite)return `<div class="cut-spr" style="background-image:url('${ASSET}${f.sprite}_sheet.webp')"></div>`;return `<img src="${standArt(id+"_fight_angry")}" alt="">`;}
 function skCostLine(sk,r){const k=skillKind(sk).k,c=SK_COST[k]||SK_COST.atk;if(!c[2])return `<p class="skcost-l">⚡ No stamina cost · restores stamina</p>`;return `<p class="skcost-l">⚡ Stamina cost in fights: ${c.map((v,i)=>`<span class="${i+1===r?"on":""}">Rank ${i+1} · ${v}</span>`).join("")}</p>`;}
 function skillBarHTML(){const U=UI.fight,F=U.F;const L=fightSkills(F.A);if(!L.length)return `<span class="meta skhint">No skills yet · level up, then upgrade skills in the fighter info</span>`;const slots=[0,1,2].map(i=>L[i]);
   return `<div class="skbar2" role="group" aria-label="Skills ${F.A.skRound?" (used this round)":""}">${slots.map(k=>{if(!k)return `<span class="skbtn2 empty">Empty</span>`;const c=skCost(k),cd=skCdLeft(F,F.A,k.id),poor=!cd&&staPts(F.A)<c-1e-9;return `<button class="skbtn2 ${k.k}${poor?" poor":""}${cd?" cd":""}" data-act="fskill" data-v="${k.id}" ${cd||F.A.skRound||F.over||poor?"disabled":""} title="${esc(k.name)} · ${esc(SKILL_KIND_NAME[k.k])}${c?` · costs stamina ${c}`:""}${poor?" · not enough stamina":""}${cd?" · rests 1 round":""}">${PIX["sk_"+k.k]}<b>${esc(k.name)}</b><i class="skcost">${cd?"Rest 1 rd":c?`⚡${c}`:"⚡+"}</i></button>`;}).join("")}</div>`;}function sideOf(e,F){if(e.s==="A"||e.s==="B")return e.s;if(e.mside)return e.mside;return e.an===F.A.name?"A":"B";}
@@ -8700,7 +8695,6 @@ const ACT={
   bplanb:d=>{const b=G.bookings.find(x=>x.id===d.id);if(!b)return;b.plan=d.v;save();render();},
   btgt:d=>{const b=G.bookings.find(x=>x.id===d.id);if(!b)return;b.tac={...(b.tac||{}),target:d.v};save();render();},ctac:d=>{UI.fight.F.A.tac[d.k]=d.v;render();},
   /* v1.91.80 (Man): send Rin to the other gym — free, a tape's worth of intel plus what she is drilling right now; Rin skips this week's training. Every 3 weeks. */
-  rinspy:d=>{ACT.scout(d);},
   scout:d=>{const c=scoutCost(d.v),q=c?tapeQuip(d.v):"";if(!G.F[d.v]||G.cash<c||scouted(d.v))return;const free=rinFree()&&!(G.staff||[]).includes("wit");G.cash-=c;if(free)G.rinTapeAbs=gameWeek(G);G.scoutAbs=G.scoutAbs||{};G.scoutAbs[d.v]=gameWeek(G);save();toast(q?`Tape watched · tape seller: "${q}"`:"Tape scouted, Coach has noted the weak spots");render();},
   corner:d=>{AU.sfx("ui");UI.fight.F.A.instr=d.v;playRound();},
   chint:()=>{UI.fight.hint=!UI.fight.hint;render();},
