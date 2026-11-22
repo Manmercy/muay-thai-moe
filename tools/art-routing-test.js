@@ -12,5 +12,9 @@ for(const lang of ['th','en']){
  // Exercise NPC preloading; a stale speaker variable used to throw before the scene opened.
  const start=src.indexOf('function warmSteps('),end=src.indexOf('\nfunction ',start+1);let warms=0;
  Object.assign(c,{npcImg:()=> 'tiger_boss',warm:()=>warms++,warmChar:()=>{},CARD_ART:{}});vm.runInContext(src.slice(start,end),c);vm.runInContext('warmSteps([{n:"npc",who:"เถ้าแก่เสือ",t:"test"}],"fight")',c);if(!warms)throw Error('NPC art not warmed');
+ const map=vm.createContext({G:{flags:{}},ASSET:'a/'});for(const prefix of ['const NPC_IMG=','const npcImg='])vm.runInContext(lines.find(l=>l.startsWith(prefix)),map);
+ for(const [who,want] of [['เถ้าแก่เสือ ค่ายพยัคฆ์ทอง','tiger_boss'],['โค้ชเกรียงไกร','krerk'],['เพชรา','petchara'],['ใบหยก','baiyok_black'],['Boss Suea, Golden Tiger Camp','tiger_boss'],['Golden Tiger owner','tiger_boss'],['Baiyok','baiyok_black']]){
+  map.speaker={who};const got=vm.runInContext('npcImg(speaker)',map);if(got!==want||!fs.existsSync(path.join(root,'a','npc_'+got+'.webp')))throw Error('Missing Golden Tiger face for '+who+': '+got);
+ }
  console.log('PASS',lang,keys.length+' full-resolution portraits; cards; cut-ins; NPC preloading');
 }

@@ -150,9 +150,9 @@ const DATE_CLOSE={
 const CHATTER=[
  {id:"c_kati_mali",need:G=>G.F.mali.camp==="player",bg:"camp",look:"train",steps:[
   {n:"mali",f:"happy",t:"Kati! I made you a garland, hang it in the ring corner~",with:"kati"},
-  {n:"kati",f:"flustered",t:"Oh, it's pretty! But… why do you call me 'big sis', Mali? I'm only a year older!"},
-  {n:"mali",f:"happy",t:"Because you train at five every morning, you totally look like the big sister"},
-  {choice:[{t:"Being the camp's big sister suits you, Kati",fx:G=>{add(G,"kati","morale",4);add(G,"mali","bond",2);},then:[{n:"kati",f:"happy",t:"If you say so, Manager… then I'll look after Mali!"}]},
+  {n:"kati",f:"flustered",t:"Oh, it's lovely! But it'll get kicked across the ring there. I'll keep it beside our corner."},
+  {n:"mali",f:"happy",t:"Deal. You're here training at five every morning. I wanted you to see flowers before the bell."},
+  {choice:[{t:"You two look after the corner together",fx:G=>{add(G,"kati","morale",4);add(G,"mali","bond",2);},then:[{n:"kati",f:"happy",t:"Yes, Manager! I'll mind this corner. Mali, go warm up."}]},
    {t:"You two really are like sisters",fx:G=>{add(G,"kati","bond",2);add(G,"mali","bond",2);},then:[{n:"mali",f:"happy",t:"Right? Our camp has more sisters now~"}]}]}]},
  {id:"c_kati_rin",need:G=>G.F.rin.camp==="player",bg:"camp",look:"train",steps:[
   {n:"rin",f:"happy",t:"Kati, your left guard drops three centimeters every time you throw the right. I counted 41 times in one clip",with:"kati"},
@@ -167,7 +167,7 @@ const CHATTER=[
   {n:"mali",f:"happy",t:"No! It's for the whole camp. Shared calories don't count~"},
   {n:"rin",f:"happy",t:"…There's no research supporting that theory. But I'll take two"},
   {fx:G=>{for(const f of roster(G))add(G,f.id,"morale",3);}}]},
- {id:"c_kati_fah",need:G=>G.F.fah.met&&G.week>=8,bg:"fair",look:"casual",steps:[
+ {id:"c_kati_fah",need:G=>G.F.fah.met&&G.F.fah.camp==="rival"&&G.week>=8,bg:"fair",look:"casual",steps:[
   {n:"fah",f:"happy",t:"Oh, Kati, strolling the market? Not training? You'll lose to Fah again",with:"kati"},
   {n:"kati",f:"flustered",t:"You're the one eating sausage at 9pm. Not worried about your weight!"},
   {n:"fah",f:"flustered",t:"…! Then let's arm wrestle right here, loser pays!"},
@@ -179,7 +179,7 @@ const CHATTER=[
   {n:"ploy",f:"happy",t:"No need to apologize. You did the right thing. If I'd been braver back then, I'd have left too"},
   {n:"rin",f:"flustered",t:"…Hearing that from you, Ploy, wasn't in my calculations"},
   {fx:G=>{add(G,"rin","morale",6);add(G,"ploy","bond",3);}}]},
- {id:"c_ploy_kati",need:G=>G.F.ploy.met&&G.week>=16,bg:"local",look:"fight",steps:[
+ {id:"c_ploy_kati",need:G=>G.F.ploy.met&&G.F.ploy.camp==="rival"&&(G.season||1)===1&&G.week>=16,bg:"local",look:"fight",steps:[
   {n:"ploy",f:"happy",t:"Kati, I watched your fight just now",with:"kati"},
   {n:"kati",f:"flustered",t:"Ploy! …Why were you watching?"},
   {n:"ploy",f:"happy",t:"If you keep dropping your guard on the right hand, Fah will drop an elbow right there. Remember that"},

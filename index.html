@@ -4360,10 +4360,10 @@ const DATE_CLOSE={
 // ---------- CHATTER (two characters meet) ----------
 const CHATTER=[
  {id:"c_kati_mali",need:G=>G.F.mali.camp==="player",bg:"camp",look:"train",steps:[
-  {n:"mali",f:"happy",t:"พี่กะทิ! หนูร้อยมาลัยมาให้ค่ะ ห้อยไว้ที่มุมเวทีนะ~",with:"kati"},
-  {n:"kati",f:"flustered",t:"อ๊ะ สวยจัง! แต่… มะลิเรียกหนูว่าพี่ทำไมเนี่ย หนูแก่กว่าแค่ปีเดียวเอง!"},
-  {n:"mali",f:"happy",t:"ก็พี่ซ้อมตั้งแต่ตีห้าทุกวัน ดูเป็นพี่ใหญ่สุด ๆ เลยค่ะ"},
-  {choice:[{t:"เป็นพี่ใหญ่ของค่ายก็ดีนะกะทิ",fx:G=>{add(G,"kati","morale",4);add(G,"mali","bond",2);},then:[{n:"kati",f:"happy",t:"ถ้าผู้จัดการว่างั้น… งั้นพี่จะดูแลมะลิเองค่ะ!"}]},
+  {n:"mali",f:"happy",t:"กะทิ! ฉันร้อยมาลัยมาให้ ห้อยไว้ที่มุมเวทีนะ~",with:"kati"},
+  {n:"kati",f:"flustered",t:"อ๊ะ สวยจัง! แต่ห้อยตรงนั้นเดี๋ยวโดนแข้งเตะปลิว ฉันเก็บไว้ข้างมุมให้"},
+  {n:"mali",f:"happy",t:"ได้เลย เธอซ้อมตั้งแต่ตีห้า ฉันอยากให้เห็นดอกไม้ก่อนขึ้นเวที"},
+  {choice:[{t:"สองคนดูแลมุมเวทีด้วยกันดีนะ",fx:G=>{add(G,"kati","morale",4);add(G,"mali","bond",2);},then:[{n:"kati",f:"happy",t:"ค่ะผู้จัดการ! ฉันจะดูมุมนี้ให้ มะลิไปวอร์มก่อนเลย"}]},
    {t:"สองคนนี้เหมือนพี่น้องกันจริง ๆ",fx:G=>{add(G,"kati","bond",2);add(G,"mali","bond",2);},then:[{n:"mali",f:"happy",t:"ใช่ไหมคะ! ค่ายเรามีพี่น้องเพิ่มแล้ว~"}]}]}]},
  {id:"c_kati_rin",need:G=>G.F.rin.camp==="player",bg:"camp",look:"train",steps:[
   {n:"rin",f:"happy",t:"กะทิ การ์ดซ้ายเธอตกลงสามเซนติเมตรทุกครั้งที่ออกหมัดขวา ฉันนับได้ 41 ครั้งในคลิปเดียว",with:"kati"},
@@ -4378,7 +4378,7 @@ const CHATTER=[
   {n:"mali",f:"happy",t:"ไม่ใช่ค่ะ! แบ่งทั้งค่ายเลย แคลอรี่ที่แบ่งกันไม่นับนะคะ~"},
   {n:"rin",f:"happy",t:"…ทฤษฎีนั้นไม่มีงานวิจัยรองรับ แต่ฉันขอสองลูกค่ะ"},
   {fx:G=>{for(const f of roster(G))add(G,f.id,"morale",3);}}]},
- {id:"c_kati_fah",need:G=>G.F.fah.met&&G.week>=8,bg:"fair",look:"casual",steps:[
+ {id:"c_kati_fah",need:G=>G.F.fah.met&&G.F.fah.camp==="rival"&&G.week>=8,bg:"fair",look:"casual",steps:[
   {n:"fah",f:"happy",t:"อ้าว กะทิ มาเดินตลาดเหรอ ไม่ไปซ้อมล่ะ เดี๋ยวก็แพ้ฟ้าอีกหรอก",with:"kati"},
   {n:"kati",f:"flustered",t:"ฟ้านั่นแหละมากินไส้กรอกตอนสามทุ่ม ไม่กลัวน้ำหนักขึ้นเหรอ!"},
   {n:"fah",f:"flustered",t:"…! งั้นมางัดข้อกันตรงนี้เลย ใครแพ้เลี้ยง!"},
@@ -4390,18 +4390,18 @@ const CHATTER=[
   {n:"ploy",f:"happy",t:"ไม่ต้องขอโทษ เธอทำถูกแล้ว ถ้าตอนนั้นฉันกล้ากว่านี้ ฉันคงออกมาด้วย"},
   {n:"rin",f:"flustered",t:"…พี่พลอยพูดแบบนี้ ฉันไม่ได้คำนวณไว้เลยค่ะ"},
   {fx:G=>{add(G,"rin","morale",6);add(G,"ploy","bond",3);}}]},
- {id:"c_ploy_kati",need:G=>G.F.ploy.met&&G.week>=16,bg:"local",look:"fight",steps:[
+ {id:"c_ploy_kati",need:G=>G.F.ploy.met&&G.F.ploy.camp==="rival"&&(G.season||1)===1&&G.week>=16,bg:"local",look:"fight",steps:[
   {n:"ploy",f:"happy",t:"กะทิ เมื่อกี้ฉันดูไฟต์เธอแล้ว",with:"kati"},
   {n:"kati",f:"flustered",t:"พี่พลอย! …มาดูทำไมคะ"},
   {n:"ploy",f:"happy",t:"ถ้าเธอยังการ์ดตกตอนออกหมัดขวา ฟ้าจะสับศอกใส่ตรงนั้นแน่ จำไว้"},
-  {n:"kati",f:"happy",t:"…ขอบคุณค่ะ ทำไมพี่ถึงบอกหนูล่ะคะ"},
+  {n:"kati",f:"happy",t:"…ขอบคุณค่ะ ทำไมพี่ถึงบอกฉันล่ะคะ"},
   {n:"ploy",f:"sad",t:"เพราะฉันอยากเห็นรอบชิงที่ดีที่สุด ไม่ใช่รอบชิงที่จบเร็ว"},
   {fx:G=>{G.F.kati.a.guard=Math.min(20,G.F.kati.a.guard+.3);add(G,"ploy","bond",2);}}]},
  {id:"c_fah_mali",need:G=>G.F.mali.met&&G.F.fah.met&&G.week>=12,bg:"fair",look:"casual",steps:[
   {n:"fah",f:"happy",t:"นี่ใครกัน ตัวจิ๋วเชียว หลงทางมาจากโรงเรียนอนุบาลเหรอ",with:"mali"},
-  {n:"mali",f:"happy",t:"สวัสดีค่ะพี่ฟ้า! รอยสักพี่สวยมากเลย เสือตัวนี้ชื่ออะไรคะ?"},
+  {n:"mali",f:"happy",t:"ฟ้า! รอยสักเธอสวยมากเลย เสือตัวนี้ชื่ออะไรเหรอ?"},
   {n:"fah",f:"flustered",t:"ห้ะ…? มันไม่มีชื่อ… ทำไมไม่โกรธล่ะที่โดนแซว"},
-  {n:"mali",f:"happy",t:"ก็พี่ไม่ได้พูดจริงนี่คะ~ งั้นหนูตั้งชื่อให้นะ ชื่อ 'น้องเสือฟ้า'!"},
+  {n:"mali",f:"happy",t:"ก็เธอไม่ได้พูดจริงนี่~ งั้นฉันตั้งชื่อให้นะ ชื่อ 'น้องเสือฟ้า'!"},
   {n:"fah",f:"flustered",t:"…ห้ามเรียกแบบนั้นต่อหน้าคนอื่นเด็ดขาด!"},
   {fx:G=>{add(G,"fah","bond",2);add(G,"mali","morale",3);}}]},
  {id:"c_coach_kati",need:G=>G.week>=10,bg:"night",look:"train",steps:[
@@ -8916,7 +8916,7 @@ AU.gsfx=function(kind,a){if(!this.init()||this.muted||!SETTINGS.sfx)return;const
   if(kind==="shimmer")for(let i=0;i<6;i++)T(i*.05,{f:1400+Math.random()*1400,type:"sine",dur:.12,peak:.06});};
 
 // ================= MUAY THAI MOE v1.3 — UI =================
-const VERSION="1.91.105";
+const VERSION="1.91.106";
 const CUR_LANG=(typeof window!=="undefined"&&window.LANG)||"th";
 const TH_LABEL=String.fromCharCode(3652,3607,3618);
 function langSwitch(cls){return `<div class="langsw ${cls||""}" role="group" aria-label="Language">${[["th",TH_LABEL],["en","EN"]].map(([k,l])=>`<button class="lsb ${CUR_LANG===k?"on":""}" data-act="setlang" data-v="${k}" aria-pressed="${CUR_LANG===k}">${l}</button>`).join("")}</div>`;}
@@ -10267,7 +10267,7 @@ const STAND_LOW=["npc:thief"],STAND_SOLO=["lada"];
 /* Most scene portraits are 960px tall; these painted originals are about 1500px tall. */
 const STAND_HIRES=/^(?:pailin_fight_|nl_(?:meili|nia|rosa|rosa_win|varya)_por$|npc_(?:krerk|petchara|tiger_boss)$)/;
 /* Portrait measurements still frame skill cut-ins; dialogue portraits use the shared scene size again. [height, bottom, face centre x] */
-const STANDFIT={"alicia_casual":[1.583,-0.729,0.506],"alicia_casual_flustered":[1.583,-0.71,0.494],"alicia_casual_pout":[1.583,-0.72,0.501],"alicia_fight_angry":[1.63,-0.726,0.508],"alicia_fight_flustered":[1.63,-0.759,0.435],"alicia_fight_happy":[1.63,-0.759,0.511],"alicia_fight_sad":[1.63,-0.726,0.541],"alicia_fight_surprised":[1.63,-0.75,0.49],"baibua_casual":[1.497,-0.619,0.536],"baibua_casual_flustered":[1.497,-0.598,0.534],"baibua_casual_pout":[1.497,-0.614,0.536],"baibua_fight_angry":[1.517,-0.612,0.545],"baibua_fight_flustered":[1.517,-0.604,0.527],"baibua_fight_happy":[1.517,-0.634,0.535],"baibua_fight_sad":[1.517,-0.604,0.581],"baibua_fight_surprised":[1.517,-0.639,0.517],"chaba_casual":[1.833,-0.976,0.509],"chaba_casual_flustered":[1.833,-0.941,0.506],"chaba_casual_pout":[1.833,-0.947,0.506],"chaba_fight_angry":[1.897,-1.029,0.515],"chaba_fight_flustered":[1.897,-0.991,0.511],"chaba_fight_happy":[1.897,-1.029,0.511],"chaba_fight_sad":[1.897,-1.029,0.506],"chaba_fight_surprised":[1.897,-1.012,0.505],"coach":[1.833,-0.955,0.55],"fah_casual":[1.864,-0.986,0.55],"fah_casual_flustered":[1.864,-0.986,0.55],"fah_casual_pout":[1.257,-0.364,0.661],"fah_fight_angry":[1.849,-0.971,0.525],"fah_fight_flustered":[1.849,-0.971,0.474],"fah_fight_happy":[1.849,-0.971,0.526],"fah_fight_sad":[1.849,-0.971,0.516],"fah_thai":[1.849,-0.971,0.519],"fah_thai_fl":[1.849,-0.971,0.586],"fah_thai_pout":[1.849,-0.975,0.521],"fah_thai_sad":[1.849,-0.934,0.563],"kati_casual":[1.692,-0.786,0.57],"kati_casual_flustered":[1.692,-0.769,0.654],"kati_casual_pout":[1.467,-0.556,0.612],"kati_fight_angry":[1.692,-0.768,0.54],"kati_fight_flustered":[1.692,-0.788,0.557],"kati_fight_happy":[1.692,-0.801,0.542],"kati_fight_sad":[1.692,-0.801,0.562],"kati_thai":[1.692,-0.808,0.534],"kati_thai_fl":[1.692,-0.774,0.539],"kati_thai_pout":[1.692,-0.792,0.537],"kati_thai_sad":[1.692,-0.774,0.541],"lada_casual":[1.913,-0.987,0.413],"lada_casual_flustered":[1.913,-0.987,0.413],"lada_casual_pout":[1.913,-0.987,0.413],"lada_fight_angry":[1.549,-0.691,0.555],"lada_fight_flustered":[1.549,-0.691,0.554],"lada_fight_happy":[1.549,-0.691,0.565],"lada_fight_sad":[1.549,-0.691,0.554],"lada_fight_surprised":[1.549,-0.691,0.565],"mali_casual":[1.571,-0.694,0.471],"mali_casual_flustered":[1.419,-0.51,0.487],"mali_casual_pout":[1.419,-0.533,0.474],"mali_fight_angry":[1.571,-0.663,0.536],"mali_fight_flustered":[1.571,-0.68,0.491],"mali_fight_happy":[1.571,-0.694,0.497],"mali_fight_sad":[1.447,-0.559,0.53],"mali_thai":[1.571,-0.694,0.502],"mali_thai_fl":[1.571,-0.668,0.484],"mali_thai_pout":[1.571,-0.674,0.498],"mali_thai_sad":[1.571,-0.671,0.499],"nl_meili_por":[1.419,-0.561,0.5],"nl_nia_por":[1.294,-0.374,0.5],"nl_rosa_por":[1.571,-0.686,0.5],"nl_rosa_win_por":[1.571,-0.686,0.5],"nl_varya_por":[1.333,-0.397,0.5],"npc_baiyok":[1.517,-0.611,0.587],"npc_baiyok_black":[1.517,-0.611,0.572],"npc_gang_boss":[1.76,-0.812,0.5],"npc_gang_goldblack":[1.571,-0.672,0.5],"npc_gang_silver":[1.571,-0.672,0.45],"npc_grandma":[1.63,-0.759,0.55],"npc_krerk":[2.316,-1.421,0.55],"npc_nai":[2.095,-1.204,0.55],"npc_petchara":[1.571,-0.671,0.48],"npc_tiger_boss":[1.333,-0.46,0.5],"npc_tiger_boss_cry":[1.158,-0.263,0.5],"npc_vendor_green":[1.76,-0.868,0.5],"npc_vendor_red":[1.63,-0.759,0.52],"pailin_fight_angry":[1.913,-0.968,0.481],"pailin_fight_happy":[1.913,-1.007,0.489],"pailin_fight_sad":[1.913,-0.968,0.485],"pailin_fight_surprised":[1.913,-1.01,0.488],"ploy_casual":[2.095,-1.213,0.462],"ploy_casual_flustered":[1.56,-0.722,0.507],"ploy_casual_pout":[1.56,-0.722,0.45],"ploy_fight_angry":[2.095,-1.213,0.469],"ploy_fight_flustered":[2.095,-1.2,0.492],"ploy_fight_happy":[2.095,-1.213,0.47],"ploy_fight_sad":[2.095,-1.213,0.481],"ploy_thai":[1.833,-0.958,0.47],"ploy_thai_fl":[1.833,-0.958,0.473],"ploy_thai_pout":[1.833,-0.953,0.471],"ploy_thai_sad":[1.833,-0.925,0.475],"rin_casual":[1.76,-0.86,0.505],"rin_casual_flustered":[1.457,-0.558,0.528],"rin_casual_pout":[1.457,-0.561,0.567],"rin_fight_angry":[1.705,-0.78,0.529],"rin_fight_flustered":[1.705,-0.814,0.514],"rin_fight_happy":[1.705,-0.814,0.533],"rin_fight_sad":[1.705,-0.814,0.547],"rin_thai":[1.667,-0.777,0.538],"rin_thai_fl":[1.667,-0.777,0.535],"rin_thai_pout":[1.667,-0.772,0.545],"rin_thai_sad":[1.667,-0.765,0.543],"tabtim_casual":[1.864,-0.96,0.5],"tabtim_casual_flustered":[1.864,-0.97,0.517],"tabtim_casual_pout":[1.864,-0.96,0.505],"tabtim_fight_angry":[1.583,-0.664,0.569],"tabtim_fight_flustered":[1.583,-0.696,0.548],"tabtim_fight_happy":[1.583,-0.696,0.513],"tabtim_fight_sad":[1.583,-0.696,0.546],"tabtim_fight_surprised":[1.583,-0.697,0.511]};
+const STANDFIT={"alicia_casual":[1.583,-0.729,0.506],"alicia_casual_flustered":[1.583,-0.71,0.494],"alicia_casual_pout":[1.583,-0.72,0.501],"alicia_fight_angry":[1.63,-0.726,0.508],"alicia_fight_flustered":[1.63,-0.759,0.435],"alicia_fight_happy":[1.63,-0.759,0.511],"alicia_fight_sad":[1.63,-0.726,0.541],"alicia_fight_surprised":[1.63,-0.75,0.49],"baibua_casual":[1.497,-0.619,0.536],"baibua_casual_flustered":[1.497,-0.598,0.534],"baibua_casual_pout":[1.497,-0.614,0.536],"baibua_fight_angry":[1.517,-0.612,0.545],"baibua_fight_flustered":[1.517,-0.604,0.527],"baibua_fight_happy":[1.517,-0.634,0.535],"baibua_fight_sad":[1.517,-0.604,0.581],"baibua_fight_surprised":[1.517,-0.639,0.517],"chaba_casual":[1.833,-0.976,0.509],"chaba_casual_flustered":[1.833,-0.941,0.506],"chaba_casual_pout":[1.833,-0.947,0.506],"chaba_fight_angry":[1.897,-1.029,0.515],"chaba_fight_flustered":[1.897,-0.991,0.511],"chaba_fight_happy":[1.897,-1.029,0.511],"chaba_fight_sad":[1.897,-1.029,0.506],"chaba_fight_surprised":[1.897,-1.012,0.505],"coach":[1.833,-0.955,0.55],"fah_casual":[1.864,-0.986,0.51],"fah_casual_flustered":[1.864,-0.986,0.55],"fah_casual_pout":[1.257,-0.364,0.54],"fah_fight_angry":[1.849,-0.971,0.525],"fah_fight_flustered":[1.849,-0.971,0.474],"fah_fight_happy":[1.849,-0.971,0.526],"fah_fight_sad":[1.849,-0.971,0.516],"fah_thai":[1.849,-0.971,0.519],"fah_thai_fl":[1.849,-0.971,0.586],"fah_thai_pout":[1.849,-0.975,0.521],"fah_thai_sad":[1.849,-0.934,0.563],"kati_casual":[1.692,-0.786,0.57],"kati_casual_flustered":[1.692,-0.769,0.654],"kati_casual_pout":[1.467,-0.556,0.612],"kati_fight_angry":[1.692,-0.768,0.54],"kati_fight_flustered":[1.692,-0.788,0.557],"kati_fight_happy":[1.692,-0.801,0.542],"kati_fight_sad":[1.692,-0.801,0.562],"kati_thai":[1.692,-0.808,0.534],"kati_thai_fl":[1.692,-0.774,0.539],"kati_thai_pout":[1.692,-0.792,0.537],"kati_thai_sad":[1.692,-0.774,0.541],"lada_casual":[1.913,-0.987,0.413],"lada_casual_flustered":[1.913,-0.987,0.413],"lada_casual_pout":[1.913,-0.987,0.413],"lada_fight_angry":[1.549,-0.691,0.555],"lada_fight_flustered":[1.549,-0.691,0.554],"lada_fight_happy":[1.549,-0.691,0.565],"lada_fight_sad":[1.549,-0.691,0.554],"lada_fight_surprised":[1.549,-0.691,0.565],"mali_casual":[1.571,-0.694,0.471],"mali_casual_flustered":[1.419,-0.51,0.487],"mali_casual_pout":[1.419,-0.533,0.474],"mali_fight_angry":[1.571,-0.663,0.536],"mali_fight_flustered":[1.571,-0.68,0.491],"mali_fight_happy":[1.571,-0.694,0.497],"mali_fight_sad":[1.447,-0.559,0.53],"mali_thai":[1.571,-0.694,0.502],"mali_thai_fl":[1.571,-0.668,0.484],"mali_thai_pout":[1.571,-0.674,0.498],"mali_thai_sad":[1.571,-0.671,0.499],"nl_meili_por":[1.419,-0.561,0.5],"nl_nia_por":[1.294,-0.374,0.5],"nl_rosa_por":[1.571,-0.686,0.5],"nl_rosa_win_por":[1.571,-0.686,0.5],"nl_varya_por":[1.333,-0.397,0.5],"npc_baiyok":[1.517,-0.611,0.587],"npc_baiyok_black":[1.517,-0.611,0.572],"npc_gang_boss":[1.76,-0.812,0.5],"npc_gang_goldblack":[1.571,-0.672,0.5],"npc_gang_silver":[1.571,-0.672,0.45],"npc_grandma":[1.63,-0.759,0.55],"npc_krerk":[2.316,-1.421,0.55],"npc_nai":[2.095,-1.204,0.55],"npc_petchara":[1.571,-0.671,0.48],"npc_tiger_boss":[1.333,-0.46,0.5],"npc_tiger_boss_cry":[1.158,-0.263,0.5],"npc_vendor_green":[1.76,-0.868,0.5],"npc_vendor_red":[1.63,-0.759,0.52],"pailin_fight_angry":[1.913,-0.968,0.481],"pailin_fight_happy":[1.913,-1.007,0.489],"pailin_fight_sad":[1.913,-0.968,0.485],"pailin_fight_surprised":[1.913,-1.01,0.488],"ploy_casual":[2.095,-1.213,0.51],"ploy_casual_flustered":[1.56,-0.722,0.507],"ploy_casual_pout":[1.56,-0.722,0.45],"ploy_fight_angry":[2.095,-1.213,0.469],"ploy_fight_flustered":[2.095,-1.2,0.492],"ploy_fight_happy":[2.095,-1.213,0.47],"ploy_fight_sad":[2.095,-1.213,0.481],"ploy_thai":[1.833,-0.958,0.47],"ploy_thai_fl":[1.833,-0.958,0.473],"ploy_thai_pout":[1.833,-0.953,0.471],"ploy_thai_sad":[1.833,-0.925,0.475],"rin_casual":[1.76,-0.86,0.505],"rin_casual_flustered":[1.457,-0.558,0.528],"rin_casual_pout":[1.457,-0.561,0.567],"rin_fight_angry":[1.705,-0.78,0.529],"rin_fight_flustered":[1.705,-0.814,0.514],"rin_fight_happy":[1.705,-0.814,0.533],"rin_fight_sad":[1.705,-0.814,0.547],"rin_thai":[1.667,-0.777,0.538],"rin_thai_fl":[1.667,-0.777,0.535],"rin_thai_pout":[1.667,-0.772,0.545],"rin_thai_sad":[1.667,-0.765,0.543],"tabtim_casual":[1.864,-0.96,0.5],"tabtim_casual_flustered":[1.864,-0.97,0.517],"tabtim_casual_pout":[1.864,-0.96,0.505],"tabtim_fight_angry":[1.583,-0.664,0.569],"tabtim_fight_flustered":[1.583,-0.696,0.548],"tabtim_fight_happy":[1.583,-0.696,0.513],"tabtim_fight_sad":[1.583,-0.696,0.546],"tabtim_fight_surprised":[1.583,-0.697,0.511]};
 function sceneHTML(){const S=UI.scene,c=S.cur||{};const sp=c.n==="coach"?{name:c.tel?"ครูแดง (โทรมา)":"ครูแดง",color:"#d98a4a"}:c.n==="npc"?{name:c.who||"",color:"#8fbf6a"}:(SPK[c.n]||{name:""});
   const who=c.n==="me"?esc(G.player.name):c.n==="nar"?"":esc(sp.name||"");
   const spk=c.n||S.lastN;if(c.n)S.lastN=c.n;
@@ -12972,10 +12972,33 @@ const CHAT_X={
  ploy:[["ถ้าวันหนึ่งฉันไม่ได้อยู่พยัคฆ์ทองแล้ว…ค่ายศิริชัยจะรับฉันไหมคะ (สมมติค่ะ)",[["ประตูเปิดเสมอ",2,"…ฉันจะเก็บคำนี้ไว้ในที่ที่ไม่มีใครเห็นนะคะ"],["ต้องถามกะทิก่อน",1,"ฮึ ๆ ใช่ค่ะ กะทิคงตกใจ"],["ไม่น่าเกิดนะ",0,"ค่ะ สมมติเฉย ๆ"]]],["ฉันเริ่มรอแชทวันอาทิตย์แล้วค่ะ แปลกไหมคะ",[["ไม่แปลก ฉันก็รอ",2,"…งั้นวันอาทิตย์หน้า ฉันจะทักก่อนนะคะ"],["ไม่แปลกหรอก",1,"ค่ะ ดีแล้ว"],["แปลกนิดหน่อย",0,"…ค่ะ"]]]],
  fah:[["…นี่ ถ้าฟ้าบอกว่าดีใจที่ได้รู้จักนาย นายจะหัวเราะไหม",[["ไม่หัวเราะ ฉันก็ดีใจเหมือนกัน",2,"…!! พอ ๆ ไม่ต้องพูดต่อ ฟ้าเขินแล้ว!!"],["ขึ้นอยู่กับว่าพูดหน้าแบบไหน",1,"หน้าปกติไง! …มั้ง"],["หัวเราะแน่",0,"งั้นไม่พูดย่ะ!"]]],["หมัดเหล็ก (แมว) นอนบนเสื้อที่นายลืมไว้ทั้งคืนเลย",[["งั้นยกเสื้อให้หมัดเหล็กเลย",2,"…ไม่ได้ให้หมัดเหล็กนะ ฟ้าเก็บไว้ให้เอง! เอ๊ย!"],["ฝากซักด้วยนะ",1,"ไม่ใช่แม่บ้านย่ะ!"],["ขนแมวติดเสื้อเลย",0,"ใจร้าย!"]]]]};
 
-function chatTopic(G,id){const L=CHAT[id]||[];G.chatSeen=G.chatSeen||{};const seen=G.chatSeen[id]||[];
-  const hot=t=>/_(lost|won|final|beaten)$/.test(t.id)?0:1;const W=G.chatWkAbs||{};const ctx=L.filter(t=>t.need&&t.need(G)&&(!seen.includes(t.id)||(t.rep&&gameWeek(G)-(W[id+":"+t.id]??-999)>=t.rep))).sort((p,q)=>hot(p)-hot(q));if(ctx.length)return ctx[0];
-  const gen=L.filter(t=>!t.need&&!seen.includes(t.id));if(gen.length)return gen[(G.week+G.seed)%gen.length];
-  const all=L.filter(t=>!t.need).sort((a,b)=>seen.indexOf(a.id)-seen.indexOf(b.id));return all[0];}
+// Old rival conversations stay in a save's history, but stop appearing after a transfer.
+for(const id of ["p_prom","p_meet","p_river","p_beaten","p_captain","p_talent","p_final"])CHAT.ploy.find(t=>t.id===id).when=G=>G.F.ploy.camp==="rival";
+for(const id of ["f_prom","f_visit","f_night","f_beaten","f_cat","f_grandma","f_rival"])CHAT.fah.find(t=>t.id===id).when=G=>G.F.fah.camp==="rival";
+CHAT.rin.find(t=>t.id==="r_ploy").when=G=>G.F.ploy.camp==="rival";
+CHAT.kati.find(t=>t.id==="k_final").when=G=>(G.season||1)===1&&G.F.ploy.camp==="rival";
+CHAT.ploy.push({id:"p_home_ring",need:G=>inCamp(G,"ploy"),rep:10,x:[
+ ["กะทิขอให้พี่ช่วยดูการ์ดตอนเข้าวงในค่ะ พี่เลยให้ลองแก้ตอนโดนจับคอสามรอบ",[["สอนต่อเลย เธออ่านจังหวะเก่งที่สุด",2,"พี่จะให้เธอเริ่มจากวางเท้า ถ้าฐานแน่น เข่าก็มาเอง"],["กะทิเป็นยังไงบ้าง",1,"รอบสามหลุดได้แล้วค่ะ แล้วยิ้มเหมือนชนะเข็มขัด"]]],
+ ["เมื่อก่อนพี่ต้องชกให้สมชื่อค่าย วันนี้พี่อยากชกให้สมกับคนที่ยืนอยู่มุมเดียวกัน",[["ทั้งค่ายจะอยู่มุมนั้น",2,"…ขอบใจ พี่จะไม่ปล่อยให้ใครยืนเชียร์เหนื่อยเปล่า"],["เก็บแรงไว้ก่อนนะ",1,"ค่ะ พักแล้ว เดี๋ยวพรุ่งนี้ซ้อมต่อ"]]] ]});
+CHAT.fah.push({id:"f_home_ring",need:G=>inCamp(G,"fah"),rep:9,x:[
+ ["วันนี้ฟ้าซ้อมศอกแล้วครูแดงตะโกนว่าเก็บคาง! ฟ้าหันไปเถียง โดนกะทิแย็บหน้าผากพอดี",[["คราวหน้าตอบครูหลังระฆัง",2,"รู้แล้วน่า! แต่กะทิแอบขำ ฟ้าเห็นนะ"],["กะทิแย็บไวขึ้นนะ",1,"ไวจริง ฟ้าเลยขอซ้อมต่ออีกยก"]]],
+ ["ตอนเดินเข้ามุมหลังยกสุดท้าย ครูแดงถามฟ้าว่าหิวไหม แค่นั้นฟ้าก็ชกต่อไหวแล้ว",[["ค่ายนี้มีข้าวรอทุกคน",2,"ดี! ฟ้าจะกลับมากินพร้อมทุกคน แล้วค่อยคุยเรื่องไฟต์"],["เดี๋ยวเตรียมข้าวไว้",1,"ขอไข่เจียวด้วยนะ ฟ้าออกอาวุธไปเยอะ"]]] ]});
+CHAT.ploy.push({id:"p_home_camp",when:G=>inCamp(G,"ploy"),x:[
+ ["วันนี้พี่คุมมุมให้มะลิ เธอฟังคำว่า 'อย่าแลกแข้งตอนนำ' แล้วหันมายิ้มเหมือนพี่ชวนกินขนมครก",[["ครั้งหน้าพูดว่ามีขนมรอหลังยก",2,"ได้ผลแน่ค่ะ แต่พี่จะให้กินหลังซ้อมเท่านั้น"],["มะลิฟังครูไหม",1,"ฟังค่ะ แล้วเตะคุมระยะได้ดีขึ้นด้วย"]]],
+ ["ค่ายนี้เสียงดังตอนกินข้าวกว่าตอนชกอีกนะ พี่เริ่มชินแล้ว",[["พรุ่งนี้พี่เลือกกับข้าวเลย",2,"งั้นขอแกงจืดค่ะ ฟ้าทำส้มตำเผ็ดจนพี่ต้องยอมแพ้"],["ดีที่ชินแล้ว",1,"ค่ะ พอเงียบไปกลับรู้สึกแปลก"]]] ]});
+CHAT.ploy.push({id:"p_home_corner",when:G=>inCamp(G,"ploy"),x:[
+ ["ครูแดงให้พี่ช่วยจับจังหวะคู่ซ้อม เวลามวยถอยต้องถีบคุม ไม่ใช่เดินหนีเฉย ๆ",[["พูดแบบนี้เด็กค่ายจำได้แน่",2,"พี่ให้ทุกคนลองขึ้นเวทีแล้วค่ะ จำด้วยเท้าดีกว่าจำด้วยปาก"],["เหนื่อยไหม",1,"นิดหน่อย แต่สนุกค่ะ"]]],
+ ["พี่จดชื่อทุกคนที่ช่วยเก็บเวทีหลังซ้อมไว้ค่ะ ไม่ใช่ให้รางวัล แค่อยากจำว่าใครอยู่ด้วยกันจนไฟดับ",[["พี่ไม่ต้องแบกค่ายคนเดียวแล้ว",2,"…รู้ค่ะ เพิ่งเริ่มเชื่อจริง ๆ วันนี้"],["ไฟดับอีกแล้วเหรอ",1,"ดับค่ะ ฟ้าตะโกนว่าได้เวลา Death Match มืด ๆ"]]] ]});
+CHAT.fah.push({id:"f_home_camp",when:G=>inCamp(G,"fah"),x:[
+ ["ฟ้าเอาเสื่อเก่ามาปูนอนข้างเวที ครูแดงบอกให้ไปนอนห้อง ฟ้าบอกว่ากำลังฟังเสียงปี่ในหัว",[["ปี่ในหัวหรือท้องร้อง",2,"…ท้องร้องด้วย! ใครชวนกินข้าวก่อนคนนั้นชนะ"],["พักให้พอด้วย",1,"รู้แล้วน่า พรุ่งนี้ฟ้าจะตื่นก่อนครูอีก"]]],
+ ["วันนี้กะทิช่วยฟ้าพันมือ ฟ้าพันเองแน่นไปจนกำหมัดไม่สุด",[["ดีแล้วที่บอกกันตรง ๆ",2,"อืม ฟ้าก็ช่วยเธอซ้อมศอกกลับเหมือนกัน อย่าบอกว่าเราสนิทนะ"],["ลองใช้ผ้าพันใหม่ไหม",1,"ลองแล้ว กะทิบอกของเก่ายังดีอยู่"]]] ]});
+CHAT.fah.push({id:"f_home_corner",when:G=>inCamp(G,"fah"),x:[
+ ["ป้าข้างเวทีตะโกน 'โอ้' ตอนฟ้าหลบแข้ง ทั้งที่ฟ้ายังไม่ได้สวนเลย",[["จังหวะหลบสวย คนดูเห็น",2,"จริง! ฟ้าจะหลบแล้วสวนให้ครบ คราวหน้าป้าจะร้องสองที"],["ป้าคงตกใจ",1,"ตกใจแล้วก็ดีใจ ฟ้าได้ยิน"]]],
+ ["เสี่ยร้านข้าวถามว่าชกสวย ๆ ทำไมไม่เอาค่าตัวเพิ่ม ฟ้าบอกว่าขอไข่ดาวเพิ่มก่อน",[["ค่าตัวคุยได้ แต่ไข่ดาวต้องได้",2,"ถูกต้อง! ฟ้าจะชกให้คุ้มทั้งสองอย่าง"],["ได้ไข่ดาวไหม",1,"ได้สองฟองเลย คุ้มกว่าโบนัสนิดเดียว"]]] ]});
+function chatTopic(G,id){const L=CHAT[id]||[];G.chatSeen=G.chatSeen||{};const seen=G.chatSeen[id]||[],ok=t=>!t.when||t.when(G);
+  const hot=t=>/_(lost|won|final|beaten)$/.test(t.id)?0:1;const W=G.chatWkAbs||{};const ctx=L.filter(t=>ok(t)&&t.need&&t.need(G)&&(!seen.includes(t.id)||(t.rep&&gameWeek(G)-(W[id+":"+t.id]??-999)>=t.rep))).sort((p,q)=>hot(p)-hot(q));if(ctx.length)return ctx[0];
+  const gen=L.filter(t=>ok(t)&&!t.need&&!seen.includes(t.id));if(gen.length)return gen[(G.week+G.seed)%gen.length];
+  const all=L.filter(t=>ok(t)&&!t.need).sort((a,b)=>seen.indexOf(a.id)-seen.indexOf(b.id));return all[0]||L.find(ok);}
 // v1.27: she texts first, now and then, once you're close enough; an unread chat waits for you
 const CHAT_BOND=15;
 // v1.52: bonds fade a little when you haven't seen someone for a month — never below a stage already reached
@@ -12986,7 +13009,7 @@ function bondFade(G){G.relT=G.relT||{};for(const id of CANON_IDS){const f=G.F[id
   if((f.bondX||0)>0)continue;/* v1.86: past the first 100 the bond no longer fades */if(f.bond>floor)f.bond=Math.max(floor,Math.round((f.bond-rate)*100)/100);}}
 function chatWeekly(G){bondFade(G);G.chatIn=G.chatIn||{};G.chatLast=G.chatLast||{};const rng=mulberry32(G.seed*31+G.week*7+3);
   for(const id of CANON_IDS){const f=G.F[id];if(!f||!f.met||G.chatIn[id]||isAway(G,id))continue;
-    {const L=CHAT[id]||[],seen=(G.chatSeen||{})[id]||[],W=G.chatWkAbs||{};if((f.bond||0)>=8&&gameWeek(G)-(G.chatLastAbs?.[id]??-999)>=1&&L.some(t=>t.need&&/_(lost|won|dm|flood|loan|miss|loy|loyw)$/.test(t.id)&&t.need(G)&&(!seen.includes(t.id)||(t.rep&&gameWeek(G)-(W[id+":"+t.id]??-999)>=t.rep)))){G.chatIn[id]=G.week;continue;}}
+    {const L=CHAT[id]||[],seen=(G.chatSeen||{})[id]||[],W=G.chatWkAbs||{};if((f.bond||0)>=8&&gameWeek(G)-(G.chatLastAbs?.[id]??-999)>=1&&L.some(t=>(!t.when||t.when(G))&&t.need&&/_(lost|won|dm|flood|loan|miss|loy|loyw)$/.test(t.id)&&t.need(G)&&(!seen.includes(t.id)||(t.rep&&gameWeek(G)-(W[id+":"+t.id]??-999)>=t.rep)))){G.chatIn[id]=G.week;continue;}}
     if((f.bond||0)<CHAT_BOND)continue;
     if(gameWeek(G)-(G.chatLastAbs?.[id]??-999)<3)continue;if(rng()<.3+((f.bond||0)>=50?.1:0))G.chatIn[id]=G.week;}}
 const chatLen=f=>3+((f.bond||0)>=40?1:0)+((f.bond||0)>=70?1:0);
@@ -13008,7 +13031,7 @@ function chatOpen(id){const f=G.F[id];UI.lvMenu=false;if(f&&!canChat(f)&&(canCha
     const log=[];for(const n of N)for(const p0 of String(n).split(/\n\n+/)){const p=p0.trim().replace(/^(ป\.ล\.|P\.S\.)\s*/,"");if(p&&!/^(เรียน|ถึง|Dear |To )/.test(p)&&!/^[—–-]\s*\S+$/.test(p))log.push({w:"them",t:p});}
     UI.chat={id,x:[],i:0,log,gain:0,typing:false,done:true,note:true};UI.modal={type:"chat"};save();render();return;}}G.chatLast=G.chatLast||{};G.chatLast[id]=G.week;G.chatLastAbs=G.chatLastAbs||{};G.chatLastAbs[id]=gameWeek(G);const T=chatTopic(G,id);
   G.chatSeen=G.chatSeen||{};G.chatSeen[id]=(G.chatSeen[id]||[]).filter(x=>x!==T.id).concat([T.id]);G.chatWk=G.chatWk||{};G.chatWk[id+":"+T.id]=G.week;G.chatWkAbs=G.chatWkAbs||{};G.chatWkAbs[id+":"+T.id]=gameWeek(G);
-  const x=[...T.x];const ex=CHAT_X[id]||[];G.chatX=G.chatX||{};const xs=G.chatX[id]=G.chatX[id]||[];const extra=Math.min(1,chatLen(f)-3);for(let i=0;i<ex.length&&extra>0;i++)if(!xs.includes(i)&&(i===0||(f.bond||0)>=70)){x.push(ex[i]);xs.push(i);break;}
+  const x=[...T.x];const ex=id==="ploy"&&inCamp(G,"ploy")?CHAT_X.ploy.slice(1):CHAT_X[id]||[];G.chatX=G.chatX||{};const xs=G.chatX[id]=G.chatX[id]||[];const extra=Math.min(1,chatLen(f)-3);for(let i=0;i<ex.length&&extra>0;i++)if(!xs.includes(i)&&(i===0||(f.bond||0)>=70)){x.push(ex[i]);xs.push(i);break;}
   const rng=mulberry32(G.seed+G.week*17+id.length);x.forEach(e=>{e.ord=[0,1,2].sort(()=>rng()-.5);});
   UI.chat={id,x,i:0,log:[{w:"them",t:x[0][0]}],gain:0,typing:false};UI.modal={type:"chat"};save();render();}
 function chatPick(k){const C=UI.chat;if(!C||C.typing||C.i>=C.x.length)return;const e=C.x[C.i],o=e[1][k];if(!o)return;
@@ -13047,7 +13070,9 @@ const MISS_X={
  rin:[["ข้อมูลระบุว่าเราไม่ได้คุยกันมา 21 วันแล้วค่ะ …ฉันแค่สังเกตเฉย ๆ ไม่ได้หมายความว่าอะไร",[["ขอโทษนะ ฉันก็คิดถึงเหมือนกัน",2,"…ค่านี้ไม่อยู่ในโมเดลฉันเลย ขอเวลาประมวลผลสักครู่ค่ะ"],["นับวันด้วยเหรอ",1,"นับทุกอย่างค่ะ …แต่อันนี้นับเป็นพิเศษ"],["ช่วงนี้งานเยอะ",0,"เข้าใจค่ะ บันทึกไว้แล้ว"]]]],
  ploy:[["ไม่ได้มาวนแถวค่ายพยัคฆ์ทองนานแล้วนะ ผู้จัดการค่ายศิริชัย …ไม่ได้รอ แค่สังเกต",[["คิดถึงพลอยเหมือนกัน",2,"…พูดอะไรของนาย ไปซ้อมไป"],["ยุ่งกับการพาค่ายไปชนะเธอ",1,"ฮึ ก็ดี จะได้มีคนให้ล้มสนุก ๆ"],["มีอะไรรึเปล่า",0,"ไม่มีอะไร ลืมไปซะ"]]]],
  fah:[["นี่! หายไปไหนมา! ฟ้าไม่ได้รอนะ! …แค่ส่งสติกเกอร์ไปสิบกว่าอันไม่มีใครอ่าน",[["ขอโทษ คิดถึงฟ้านะ",2,"ห-หา!? ไม่ได้ถามสักหน่อย! …แต่ก็โอเค ยกโทษให้"],["มัวแต่ยุ่งกับค่าย",1,"ฮึ่ย ค่ายสำคัญกว่าฟ้าเหรอ! …ก็จริงแหละ"],["อ่านแล้วนะ",0,"อ่านแล้วไม่ตอบแย่กว่าอีก!!"]]]]};
-for(const id in MISS_X){CHAT[id]=CHAT[id]||[];CHAT[id].push({id:id.slice(0,1)+"_miss",need:G=>missGap(G,id)>=3,rep:8,x:MISS_X[id]});}
+for(const id in MISS_X){CHAT[id]=CHAT[id]||[];CHAT[id].push({id:id.slice(0,1)+"_miss",need:G=>missGap(G,id)>=3,when:G=>id!=="ploy"||G.F.ploy.camp==="rival",rep:8,x:MISS_X[id]});}
+CHAT.ploy.push({id:"p_miss_home",need:G=>inCamp(G,"ploy")&&missGap(G,"ploy")>=3,rep:8,x:[
+ ["ไม่ได้คุยกันหลายสัปดาห์แล้วนะ วันนี้พี่ซ้อมเข่ากับกะทิจนมืด เธอว่างมาดูเทปด้วยไหม",[["ว่างสิ เดี๋ยวเอาน้ำไปให้",2,"เอามาเผื่อกะทิด้วยนะ เธอซ้อมหนักกว่าพี่อีก"],["เทปไฟต์ไหน",1,"ไฟต์ล่าสุดของค่ายเรา พี่จดจังหวะไว้แล้ว"]]] ]});
 
 // v1.82: Loy Krathong event chats — they text you once the code is in, and again after the first riverside brawl
 const loyHas=G=>typeof loyOf==="function"&&!!loyOf(G);
@@ -13085,6 +13110,13 @@ const CHAT_LOY={
    ["เห็นนายต่อยกับแก๊งหมวกบนท่าเรือ! …ฟ้าหมายถึงค่ายนาย ไม่ใช่นาย!",[["ฟ้ามาดูด้วยเหรอ",2,"ผ่านมาพอดี! …ยืนดูทั้งชั่วโมงก็คือผ่านมาพอดีนั่นแหละ!"],["ทุกคนเก่งมาก",1,"ก็พอใช้ได้ แต่ถ้าฟ้าขึ้น จบในยกเดียว!"],["ปีหน้ามาสู้ด้วยกันไหม",0,"ฟ้าอยู่คนละค่าย! …แต่ถ้าชวนดี ๆ ก็คิดดูก่อน"]]],
    ["…พลุลูกใหญ่วันนั้น นายจะไม่เล่าให้ใครฟังใช่ไหม",[["ความลับของเราสองคน",2,"…สองคน ใช่ สองคน! โอเค ฟ้าเชื่อนาย"],["เล่าไปแล้วนิดหน่อย",1,"ห้ะ!! ใคร! มะลิใช่ไหม! ฟ้าจะไปเตะ!"],["เรื่องอะไรนะ",0,"…ดีแล้ว ลืมไปเลย ลืมให้หมด"]]]]}]};
 for(const id in CHAT_LOY)CHAT[id].unshift(...CHAT_LOY[id]);
+for(const id of ["p_dm","p_loy","p_loyw"])CHAT.ploy.find(t=>t.id===id).when=G=>G.F.ploy.camp==="rival";
+for(const id of ["f_flood","f_loyw"])CHAT.fah.find(t=>t.id===id).when=G=>G.F.fah.camp==="rival";
+CHAT.fah.find(t=>t.id==="f_dm").when=G=>!!(G.dm&&Array.isArray(G.dm.mine)&&G.dm.mine.includes("fah"));
+CHAT.ploy.push({id:"p_loy_home",need:G=>inCamp(G,"ploy")&&loyRan(G),x:[
+ ["เมื่อคืนพี่ดูคลิปศึกริมน้ำ ฟ้าตะโกนให้แก๊งหมวกเก็บคางก่อนชก พี่ไม่เคยเห็นใครเตือนคู่ชกแบบนั้น",[["ฟ้าห่วงทุกคนจริง ๆ",2,"ค่ะ แม้แต่คนที่เธอกำลังจะต่อย"],["แล้วพลอยดูไฟต์ตัวเองไหม",1,"ดูค่ะ พี่พลาดจังหวะถีบตอนพื้นลื่น"]]] ]});
+CHAT.fah.push({id:"f_loyw_home",need:G=>inCamp(G,"fah")&&loyRan(G),x:[
+ ["ศึกริมน้ำเมื่อคืน ฟ้าอยากเอาคลิปให้ยายดู ยายบอกว่าเห็นแล้ว เสียงเชียร์ค่ายเราดังไปถึงหน้าบ้าน",[["ยายคงภูมิใจในฟ้ามาก",2,"ยายบอกว่าฟ้าเก็บคางดีขึ้นด้วย! ฟ้าว่ายายดูมวยเก่งกว่าครูอีก"],["เดี๋ยวส่งคลิปเต็มให้",1,"ส่งเลย ฟ้าจะดูจังหวะศอกอีกที"]]] ]});
 // v1.88: heart-level chats, chats that come back with the season, and more everyday topics
 CHAT.kati.push(
   {id:"k_h11",need:G=>hAt(G,"kati")>=11,x:[
@@ -13451,7 +13483,7 @@ CHAT.ploy.push(
    ["ที่โคราชมีร้านผัดหมี่ใต้ต้นมะขาม พ่อพาพี่ไปกินหลังทุกไฟต์ ทั้งชนะทั้งแพ้ …แต่พี่ไม่เคยแพ้",[["พ่อเธอเตรียมไว้ทั้งสองกรณีเลยนะ",2,"…ใช่ พ่อไม่เคยบอกว่าแพ้ไม่ได้ พี่บอกตัวเองคนเดียว"],["ฟังดูอร่อย",1,"อร่อยที่สุด"],["พ่อเธอใจดีนะ",1,"ใจดีแต่เข้มงวด"]]],
    ["วันหนึ่งถ้าไปโคราช พี่จะพาไปร้านนั้น",[["สัญญานะ",2,"พี่ไม่เคยผิดสัญญา"],["ไปแน่",1,"ดี"],["ไกลนะ",0,"ห้าชั่วโมง ไม่ไกล"]]]]},
   {id:"p_temple",x:[
-   ["หลวงตาที่วัดให้พี่ช่วยสอนเด็กวัดออกกำลังกายตอนเช้า",[["เด็กวัดคงตื่นเต้นที่ได้กัปตันพยัคฆ์ทองสอน",1,"พวกเขาไม่รู้ว่าพี่เป็นใคร เรียกพี่ว่า 'พี่สาวตัวสูง'"],["ฟังดูดีกว่าซ้อมรุ่นน้องอีกนะ",2,"…ใช่ ไม่มีใครคาดหวังว่าพวกเขาต้องชนะ พวกเขาแค่หัวเราะ"],["อย่าให้ซ้อมหนักนะ",0,"พี่ให้แค่วิ่งรอบโบสถ์สามรอบ"]]],
+   ["หลวงตาที่วัดให้พี่ช่วยสอนเด็กวัดออกกำลังกายตอนเช้า",[["เด็กวัดคงตื่นเต้นที่ได้นักมวยเก่ง ๆ สอน",1,"พวกเขาไม่รู้ว่าพี่เป็นใคร เรียกพี่ว่า 'พี่สาวตัวสูง'"],["ฟังดูดีกว่าซ้อมรุ่นน้องอีกนะ",2,"…ใช่ ไม่มีใครคาดหวังว่าพวกเขาต้องชนะ พวกเขาแค่หัวเราะ"],["อย่าให้ซ้อมหนักนะ",0,"พี่ให้แค่วิ่งรอบโบสถ์สามรอบ"]]],
    ["'พี่สาวตัวสูง' พี่ชอบชื่อนี้มากกว่า 'พรสวรรค์' เยอะ",[["ฉันจะเรียกเธอแบบนั้นบ้างได้ไหม",2,"…ไม่ได้ คุณเรียกชื่อพี่ก็พอ ชื่อพี่จากปากคุณดีที่สุดแล้ว"],["เพราะไม่มีความคาดหวังสินะ",2,"…คุณเข้าใจพี่เร็วเกินไป"],["พรสวรรค์ก็คำชมนะ",0,"สำหรับคนพูด"]]],
    ["พรุ่งนี้ตีห้า ไปช่วยพี่สอนเด็กวัดไหม",[["ไป",2,"เด็ก ๆ จะเรียกคุณว่า 'พี่ที่มากับพี่สาวตัวสูง'"],["ถ้าตื่นทันนะ",1,"พี่โทรปลุก"],["ตีห้าเช้าไป",0,"เด็กวัดตื่นตีสี่"]]]]},
   {id:"p_late",x:[
@@ -13550,7 +13582,7 @@ CHAT.fah.push(
   {id:"f_sausage",x:[
    ["ยายสอนฟ้าทำไส้กรอกอีสานแล้ว! ฟ้ายัดไส้แตกไปสิบเส้น",[["เส้นที่สิบเอ็ดสำเร็จใช่ไหม",2,"รู้ได้ไง!! เส้นที่สิบเอ็ดสวยที่สุด ฟ้าเก็บไว้ให้นาย"],["ยายใจเย็นสอนไหม",1,"ยายหัวเราะทุกเส้นที่แตก"],["ซื้อยายกินดีกว่า",0,"ฟ้าอยากทำเป็น!"]]],
    ["ยายบอกว่าสูตรนี้ต้องส่งต่อให้คนในครอบครัวเท่านั้น",[["ฉันจะไม่ถามสูตรหรอก",2,"…ยายบอกว่านายเป็นข้อยกเว้น ไม่ต้องคิดมาก!"],["เก็บไว้ดี ๆ นะ",1,"ฟ้าจดไว้ในสมุดเสือ"],["ขอสูตรได้ไหม",0,"ไม่ได้! …ยัง"]]],
-   ["พรุ่งนี้ฟ้าจะเอาไส้กรอกฝีมือฟ้าไปให้ทุกคนที่ค่ายนายชิม",[["ฉันขอชิมคนแรกนะ",2,"…จองไว้ตั้งแต่เส้นที่สิบเอ็ดแล้ว"],["ทุกคนรอนะ",1,"ไม่อร่อยห้ามพูด!"],["เผื่อท้องเสียไว้นะ",0,"นาย!!!"]]]]},
+   ["พรุ่งนี้ฟ้าจะเอาไส้กรอกฝีมือฟ้าไปให้ทุกคนที่ค่ายศิริชัยชิม",[["ฉันขอชิมคนแรกนะ",2,"…จองไว้ตั้งแต่เส้นที่สิบเอ็ดแล้ว"],["ทุกคนรอนะ",1,"ไม่อร่อยห้ามพูด!"],["เผื่อท้องเสียไว้นะ",0,"นาย!!!"]]]]},
   {id:"f_mali",x:[
    ["มะลิแอบเอาดอกไม้มาทัดหูฟ้าตอนฟ้าหลับ! ตื่นมาเหมือนนางรำ!",[["ส่งรูปมา อยากเห็นนางรำผมสีเงิน",2,"ไม่!! …ส่งไปแล้ว ห้ามเซฟ ห้ามให้ใครดู"],["มะลิแกล้งเก่ง",1,"พรุ่งนี้ฟ้าเอาคืน ใส่ปลาร้าในรองเท้า"],["ก็น่ารักดีนะ",1,"…น่ารักเหรอ"]]],
    ["แต่… มะลิเป็นเพื่อนคนแรกในค่ายที่ไม่กลัวฟ้า",[["เพราะมะลิเห็นว่าเธอใจดี",2,"…ฟ้าไม่ได้ใจดี! …ห้ามบอกมะลินะว่าฟ้าพูดแบบนี้"],["มะลิเข้ากับทุกคน",1,"ใช่ น่ารำคาญ"],["ทุกคนก็ไม่กลัวเธอนะ",0,"กลัวสิ! ฟ้าน่ากลัว!"]]],
@@ -13598,11 +13630,14 @@ CHAT.fah.push({id:'f_ringcraft_102',need:G=>inCamp(G,'fah'),x:[
  ['พี่พลอยบอกให้ฟ้าเลิกยิ้มตอนโดนสวน ฟ้าบอกว่าไม่ได้ยิ้ม ฟ้ากัดฟันอยู่!',[['ฟังพี่เขาหน่อย เขามองเห็นตอนเธอพลาด',2,'อืม… ฟ้าจะลองดูเทปกับพี่เขา แต่ถ้าพี่พลอยแซว ฟ้าจะโทษนายก่อน'],['คราวหน้าหลบให้ทันก่อนยิ้ม',1,'ได้! หลบแล้วสวน แล้วค่อยยิ้มให้กล้อง แบบนี้ครบเลย']]]
 ]});
 
+CHAT.ploy.find(t=>t.id==='p_kati').when=G=>G.F.ploy.camp==='rival';
+for(const id of ['f_tiger','f_mali'])CHAT.fah.find(t=>t.id===id).when=G=>inCamp(G,'fah');
+
 </script>
 <script>
 (function(){
 /* v1.87: Thai code ships inside index.html; English code (en.js) and the dictionary (i18n.js) load only when needed */
-var B="b9f28406ce";
+var B="5c6362111c";
 var L="";try{L=localStorage.getItem("mtm_lang")||"";}catch(e){}
 try{var h=(location.hash||"").match(/lang=(th|en)/);if(h)L=h[1];}catch(e){}
 if(L!=="th"&&L!=="en")L="th";

@@ -185,10 +185,33 @@ const CHAT_X={
  ploy:[["If someday I'm no longer at Golden Tiger… would Sirichai take me? (hypothetically)",[["The door is always open",2,"…I'll keep those words somewhere no one can see"],["Have to ask Kati first",1,"Heh, yes, Kati would be shocked"],["Unlikely to happen",0,"Yes, just hypothetically"]]],["I've started waiting for our Sunday chats. Is that strange?",[["Not strange. I wait too",2,"…Then next Sunday, I'll message first"],["Not strange at all",1,"Good, then"],["A little strange",0,"…Okay."]]]],
  fah:[["…Hey, if Fah said she's glad she met you, would you laugh?",[["I wouldn't laugh. I'm glad too",2,"…!! Enough, enough, stop talking, Fah's embarrassed!!"],["Depends on the face you make saying it",1,"A normal face! …probably"],["I'd definitely laugh",0,"Then Fah's not saying it!"]]],["Iron Fist (the cat) slept on the shirt you left behind all night",[["Then give the shirt to Iron Fist",2,"…Not giving it to Iron Fist, Fah's keeping it! Wait, no!"],["Wash it for me",1,"I'm not your maid!"],["Now it's covered in cat hair",0,"Mean!"]]]]};
 
-function chatTopic(G,id){const L=CHAT[id]||[];G.chatSeen=G.chatSeen||{};const seen=G.chatSeen[id]||[];
-  const hot=t=>/_(lost|won|final|beaten)$/.test(t.id)?0:1;const W=G.chatWkAbs||{};const ctx=L.filter(t=>t.need&&t.need(G)&&(!seen.includes(t.id)||(t.rep&&gameWeek(G)-(W[id+":"+t.id]??-999)>=t.rep))).sort((p,q)=>hot(p)-hot(q));if(ctx.length)return ctx[0];
-  const gen=L.filter(t=>!t.need&&!seen.includes(t.id));if(gen.length)return gen[(G.week+G.seed)%gen.length];
-  const all=L.filter(t=>!t.need).sort((a,b)=>seen.indexOf(a.id)-seen.indexOf(b.id));return all[0];}
+// Rival-only conversations remain in save history but cannot recur after a transfer.
+for(const id of ["p_prom","p_meet","p_river","p_beaten","p_captain","p_talent","p_final"])CHAT.ploy.find(t=>t.id===id).when=G=>G.F.ploy.camp==="rival";
+for(const id of ["f_prom","f_visit","f_night","f_beaten","f_cat","f_grandma","f_rival"])CHAT.fah.find(t=>t.id===id).when=G=>G.F.fah.camp==="rival";
+CHAT.rin.find(t=>t.id==="r_ploy").when=G=>G.F.ploy.camp==="rival";
+CHAT.kati.find(t=>t.id==="k_final").when=G=>(G.season||1)===1&&G.F.ploy.camp==="rival";
+CHAT.ploy.push({id:"p_home_ring",need:G=>inCamp(G,"ploy"),rep:10,x:[
+ ["Kati asked me to check her guard in the clinch. I made her escape a neck tie three times.",[["Keep teaching her. You read the ring better than anyone.",2,"I'll start with her foot position. A stable base makes the knees work."],["How did Kati do?",1,"She escaped on the third try, then smiled as if she'd won a belt."]]],
+ ["I used to fight for the camp name. Today I want to fight for the people in my corner.",[["The whole camp will be there.",2,"…Thanks. I won't make you cheer for nothing."],["Save your strength for now.",1,"I rested. We'll train again tomorrow."]]] ]});
+CHAT.fah.push({id:"f_home_ring",need:G=>inCamp(G,"fah"),rep:9,x:[
+ ["Coach Daeng yelled 'chin down' during elbow drills. Fah turned to argue and Kati jabbed her forehead!",[["Answer Coach after the bell next time.",2,"Fah knows! Kati was laughing, too. Fah saw her."],["Kati's jab got quicker.",1,"It did. Fah asked for another round."]]],
+ ["After the last round, Coach Daeng asked if Fah was hungry. That was enough to get Fah through it.",[["There's dinner waiting for everyone here.",2,"Good! Fah will eat with everyone, then talk about the fight."],["I'll set some aside.",1,"Save an omelet too. Fah threw a lot of shots."]]] ]});
+CHAT.ploy.push({id:"p_home_camp",when:G=>inCamp(G,"ploy"),x:[
+ ["I cornered Mali today. I told her not to trade kicks while ahead, and she smiled like I'd offered khanom krok.",[["Tell her there's a treat after the round.",2,"That would work. Only after training, though."],["Did Mali listen?",1,"She did, and controlled the range better."]]],
+ ["This camp is louder at dinner than during a bout. I'm getting used to it.",[["You pick tomorrow's meal.",2,"Clear soup, please. Fah made som tam so hot I had to submit."],["Glad you're settling in.",1,"Yes. Now silence feels strange."]]] ]});
+CHAT.ploy.push({id:"p_home_corner",when:G=>inCamp(G,"ploy"),x:[
+ ["Coach Daeng had me watch sparring. A fighter backing up should teep to manage range, not just walk away.",[["The kids will remember that.",2,"I made them try it in the ring. Feet remember better than words."],["Was it tiring?",1,"A little, but fun."]]],
+ ["I wrote down everyone who helped clean up after training. No prize. I just want to remember who stayed until the lights went out.",[["You don't have to carry the camp alone.",2,"…I know. Today I finally believed it."],["Did the lights go out again?",1,"They did. Fah shouted that it was time for a dark Death Match."]]] ]});
+CHAT.fah.push({id:"f_home_camp",when:G=>inCamp(G,"fah"),x:[
+ ["Fah spread an old mat by the ring. Coach told her to sleep in her room. Fah said she was listening to the piphat in her head.",[["The music, or your stomach growling?",2,"…Both! First person to suggest dinner wins."],["Get enough rest.",1,"Fah knows. She'll be up before Coach."]]],
+ ["Kati helped wrap Fah's hands today. Fah had tied them so tight she couldn't close her fists.",[["Good that you told each other.",2,"Mm. Fah helped her practice spinning elbows too. Don't tell anyone we're close."],["Try fresh wraps?",1,"We did. Kati says the old ones still work."]]] ]});
+CHAT.fah.push({id:"f_home_corner",when:G=>inCamp(G,"fah"),x:[
+ ["An auntie ringside shouted 'oh!' when Fah slipped a kick. Fah hadn't even countered yet.",[["That slip was sharp. People saw it.",2,"Right! Next time Fah will slip and counter so she shouts twice."],["She must have been startled.",1,"Startled and happy. Fah heard both."]]],
+ ["The rice-shop owner asked why Fah doesn't charge more to fight so beautifully. Fah asked for an extra fried egg first.",[["We'll discuss the purse, but the egg is yours.",2,"Exactly! Fah will fight for both."],["Did you get the egg?",1,"Two! Nearly as good as a bonus."]]] ]});
+function chatTopic(G,id){const L=CHAT[id]||[];G.chatSeen=G.chatSeen||{};const seen=G.chatSeen[id]||[],ok=t=>!t.when||t.when(G);
+  const hot=t=>/_(lost|won|final|beaten)$/.test(t.id)?0:1;const W=G.chatWkAbs||{};const ctx=L.filter(t=>ok(t)&&t.need&&t.need(G)&&(!seen.includes(t.id)||(t.rep&&gameWeek(G)-(W[id+":"+t.id]??-999)>=t.rep))).sort((p,q)=>hot(p)-hot(q));if(ctx.length)return ctx[0];
+  const gen=L.filter(t=>ok(t)&&!t.need&&!seen.includes(t.id));if(gen.length)return gen[(G.week+G.seed)%gen.length];
+  const all=L.filter(t=>ok(t)&&!t.need).sort((a,b)=>seen.indexOf(a.id)-seen.indexOf(b.id));return all[0]||L.find(ok);}
 // v1.27: she texts first, now and then, once you're close enough; an unread chat waits for you
 const CHAT_BOND=15;
 // v1.52: bonds fade a little when you haven't seen someone for a month — never below a stage already reached
@@ -199,7 +222,7 @@ function bondFade(G){G.relT=G.relT||{};for(const id of CANON_IDS){const f=G.F[id
   if((f.bondX||0)>0)continue;/* v1.86: past the first 100 the bond no longer fades */if(f.bond>floor)f.bond=Math.max(floor,Math.round((f.bond-rate)*100)/100);}}
 function chatWeekly(G){bondFade(G);G.chatIn=G.chatIn||{};G.chatLast=G.chatLast||{};const rng=mulberry32(G.seed*31+G.week*7+3);
   for(const id of CANON_IDS){const f=G.F[id];if(!f||!f.met||G.chatIn[id]||isAway(G,id))continue;
-    {const L=CHAT[id]||[],seen=(G.chatSeen||{})[id]||[],W=G.chatWkAbs||{};if((f.bond||0)>=8&&gameWeek(G)-(G.chatLastAbs?.[id]??-999)>=1&&L.some(t=>t.need&&/_(lost|won|dm|flood|loan|miss|loy|loyw)$/.test(t.id)&&t.need(G)&&(!seen.includes(t.id)||(t.rep&&gameWeek(G)-(W[id+":"+t.id]??-999)>=t.rep)))){G.chatIn[id]=G.week;continue;}}
+    {const L=CHAT[id]||[],seen=(G.chatSeen||{})[id]||[],W=G.chatWkAbs||{};if((f.bond||0)>=8&&gameWeek(G)-(G.chatLastAbs?.[id]??-999)>=1&&L.some(t=>(!t.when||t.when(G))&&t.need&&/_(lost|won|dm|flood|loan|miss|loy|loyw)$/.test(t.id)&&t.need(G)&&(!seen.includes(t.id)||(t.rep&&gameWeek(G)-(W[id+":"+t.id]??-999)>=t.rep)))){G.chatIn[id]=G.week;continue;}}
     if((f.bond||0)<CHAT_BOND)continue;
     if(gameWeek(G)-(G.chatLastAbs?.[id]??-999)<3)continue;if(rng()<.3+((f.bond||0)>=50?.1:0))G.chatIn[id]=G.week;}}
 const chatLen=f=>3+((f.bond||0)>=40?1:0)+((f.bond||0)>=70?1:0);
@@ -221,7 +244,7 @@ function chatOpen(id){const f=G.F[id];UI.lvMenu=false;if(f&&!canChat(f)&&(canCha
     const log=[];for(const n of N)for(const p0 of String(n).split(/\n\n+/)){const p=p0.trim().replace(/^(ป\.ล\.|P\.S\.)\s*/,"");if(p&&!/^(เรียน|ถึง|Dear |To )/.test(p)&&!/^[—–-]\s*\S+$/.test(p))log.push({w:"them",t:p});}
     UI.chat={id,x:[],i:0,log,gain:0,typing:false,done:true,note:true};UI.modal={type:"chat"};save();render();return;}}G.chatLast=G.chatLast||{};G.chatLast[id]=G.week;G.chatLastAbs=G.chatLastAbs||{};G.chatLastAbs[id]=gameWeek(G);const T=chatTopic(G,id);
   G.chatSeen=G.chatSeen||{};G.chatSeen[id]=(G.chatSeen[id]||[]).filter(x=>x!==T.id).concat([T.id]);G.chatWk=G.chatWk||{};G.chatWk[id+":"+T.id]=G.week;G.chatWkAbs=G.chatWkAbs||{};G.chatWkAbs[id+":"+T.id]=gameWeek(G);
-  const x=[...T.x];const ex=CHAT_X[id]||[];G.chatX=G.chatX||{};const xs=G.chatX[id]=G.chatX[id]||[];const extra=Math.min(1,chatLen(f)-3);for(let i=0;i<ex.length&&extra>0;i++)if(!xs.includes(i)&&(i===0||(f.bond||0)>=70)){x.push(ex[i]);xs.push(i);break;}
+  const x=[...T.x];const ex=id==="ploy"&&inCamp(G,"ploy")?CHAT_X.ploy.slice(1):CHAT_X[id]||[];G.chatX=G.chatX||{};const xs=G.chatX[id]=G.chatX[id]||[];const extra=Math.min(1,chatLen(f)-3);for(let i=0;i<ex.length&&extra>0;i++)if(!xs.includes(i)&&(i===0||(f.bond||0)>=70)){x.push(ex[i]);xs.push(i);break;}
   const rng=mulberry32(G.seed+G.week*17+id.length);x.forEach(e=>{e.ord=[0,1,2].sort(()=>rng()-.5);});
   UI.chat={id,x,i:0,log:[{w:"them",t:x[0][0]}],gain:0,typing:false};UI.modal={type:"chat"};save();render();}
 function chatPick(k){const C=UI.chat;if(!C||C.typing||C.i>=C.x.length)return;const e=C.x[C.i],o=e[1][k];if(!o)return;
@@ -260,7 +283,9 @@ const MISS_X={
  rin:[["Data indicates we haven't talked in 21 days. …I'm only observing. It doesn't mean anything.",[["Sorry. I've missed you too.",2,"…That value isn't in my model at all. Give me a moment to process."],["You're counting days?",1,"I count everything. …This one I count specially."],["Work's been busy.",0,"Understood. Noted."]]]],
  ploy:[["You haven't come around Golden Tiger in a while, Sirichai manager. …Not that I'm waiting. Just observing.",[["I've missed you too, Ploy.",2,"…What are you even saying. Go train."],["Busy getting my camp ready to beat you.",1,"Hmph. Good. At least someone'll be fun to knock down."],["Is something up?",0,"Nothing. Forget it."]]]],
  fah:[["Hey! Where've you been!? I wasn't waiting! …I just sent like ten stickers and nobody read them.",[["Sorry. I missed you, Fah.",2,"Wh-what!? I didn't ask! …But fine, you're forgiven."],["Been busy with the camp.",1,"Hmph, the camp's more important than me!? …Well, fair enough."],["I did read them.",0,"Reading and not replying is even worse!!"]]]]};
-for(const id in MISS_X){CHAT[id]=CHAT[id]||[];CHAT[id].push({id:id.slice(0,1)+"_miss",need:G=>missGap(G,id)>=3,rep:8,x:MISS_X[id]});}
+for(const id in MISS_X){CHAT[id]=CHAT[id]||[];CHAT[id].push({id:id.slice(0,1)+"_miss",need:G=>missGap(G,id)>=3,when:G=>id!=="ploy"||G.F.ploy.camp==="rival",rep:8,x:MISS_X[id]});}
+CHAT.ploy.push({id:"p_miss_home",need:G=>inCamp(G,"ploy")&&missGap(G,"ploy")>=3,rep:8,x:[
+ ["We haven't talked in weeks. Kati and I drilled knees until dark. Want to review the tape with us?",[["Sure. I'll bring water.",2,"Bring some for Kati too. She trained even harder than I did."],["Which fight is it?",1,"Our camp's latest bout. I've marked the key moments."]]] ]});
 
 // v1.82: Loy Krathong event chats — they text you once the code is in, and again after the first riverside brawl
 const loyHas=G=>typeof loyOf==="function"&&!!loyOf(G);
@@ -298,6 +323,13 @@ const CHAT_LOY={
    ["Saw you fighting the helmet gang on the pier! …Fah means your camp, not you!",[["You came to watch?",2,"Just passing by! …Standing there watching for an hour is still just passing by!"],["Everyone was great.",1,"They were okay. But if Fah were up there, it'd be over in one round!"],["Want to fight alongside us next year?",0,"Fah's in a different camp! …But if you ask nicely, she'll think about it."]]],
    ["…That big firework the other night. You won't tell anyone, right?",[["Our secret, just the two of us.",2,"…Two of us. Yes. Two of us! Okay, Fah trusts you."],["I told a few people already.",1,"Huh!! Who! It's Mali, isn't it! Fah's gonna kick her!"],["What thing?",0,"…Good. Forget it. Forget all of it."]]]]}]};
 for(const id in CHAT_LOY)CHAT[id].unshift(...CHAT_LOY[id]);
+for(const id of ["p_dm","p_loy","p_loyw"])CHAT.ploy.find(t=>t.id===id).when=G=>G.F.ploy.camp==="rival";
+for(const id of ["f_flood","f_loyw"])CHAT.fah.find(t=>t.id===id).when=G=>G.F.fah.camp==="rival";
+CHAT.fah.find(t=>t.id==="f_dm").when=G=>!!(G.dm&&Array.isArray(G.dm.mine)&&G.dm.mine.includes("fah"));
+CHAT.ploy.push({id:"p_loy_home",need:G=>inCamp(G,"ploy")&&loyRan(G),x:[
+ ["I watched our riverside bout last night. Fah yelled at the helmet gang to keep their chins down before the bell. I've never seen anyone warn an opponent like that.",[["Fah worries about everyone.",2,"Yes. Even people she's about to punch."],["Did you review your own fight?",1,"I did. I missed a teep on the slippery boards."]]] ]});
+CHAT.fah.push({id:"f_loyw_home",need:G=>inCamp(G,"fah")&&loyRan(G),x:[
+ ["Fah wanted to show Grandma last night's riverside fight. She'd already seen it. Said our camp's cheering reached her house.",[["She must be proud of you.",2,"She said Fah kept her chin down, too! Grandma knows more boxing than Coach."],["I'll send her the full clip.",1,"Please do. Fah wants to check that elbow again."]]] ]});
 // v1.88: heart-level chats, chats that come back with the season, and more everyday topics
 CHAT.kati.push(
   {id:"k_h11",need:G=>hAt(G,"kati")>=11,x:[
@@ -763,7 +795,7 @@ CHAT.fah.push(
   {id:"f_sausage",x:[
    ["Grandma taught me to make Isan sausage! I burst ten of them stuffing",[["Number eleven worked though?",2,"How'd you know!! Eleven's the prettiest. I saved it for you"],["Was Grandma patient?",1,"She laughed at every burst"],["Easier to just buy hers",0,"I want to know how!"]]],
    ["Grandma says this recipe only passes to family",[["I won't ask for it, then",2,"…She said you're the exception. Don't read into it!"],["Guard it well",1,"I wrote it in my tiger book"],["Can I have the recipe?",0,"No! …Not yet"]]],
-   ["Tomorrow I'm bringing my sausages for everyone at your camp to taste",[["I want to taste first",2,"…Already reserved since number eleven"],["Everyone's waiting",1,"If it's bad, keep quiet!"],["Better keep the bathroom free",0,"YOU!!!"]]]]},
+   ["Tomorrow I'm bringing my sausages for everyone at Sirichai to taste",[["I want to taste first",2,"…Already reserved since number eleven"],["Everyone's waiting",1,"If it's bad, keep quiet!"],["Better keep the bathroom free",0,"YOU!!!"]]]]},
   {id:"f_mali",x:[
    ["Mali tucked flowers behind my ear while I slept! I woke up looking like a Thai dancer!",[["Send a photo. I want to see the silver-haired dancer",2,"No!! …Sent. No saving, no showing anyone"],["Mali's sneaky",1,"Revenge tomorrow. Fermented fish in her shoes"],["It's cute",1,"…Cute?"]]],
    ["But… Mali was the first person at camp who wasn't scared of me",[["Because she can see you're kind",2,"…I'm not kind! …Don't tell Mali I said that"],["Mali gets along with everyone",1,"Yeah. Annoying"],["No one's scared of you",0,"They should be! I'm scary!"]]],
@@ -794,3 +826,6 @@ CHAT.mali.push({id:'m_ringcraft_102',need:G=>inCamp(G,'mali'),x:[['I drilled che
 CHAT.rin.push({id:'r_tape_102',need:G=>inCamp(G,'rin'),x:[['The tape shows her right hand drops after every left kick. The seller talks more than the commentator.',[['Write it down, then drill the counter',2,'Already done. Entries and exits, not just his complaints about prices.'],['Was the tape worth it?',1,'Yes, apart from the lecture on how he used to be a fighter.']]]]});
 CHAT.ploy.push({id:'p_ringcraft_102',need:G=>inCamp(G,'ploy'),x:[['The clinch is not about hugging harder. Control the neck and arms, then place your feet.',[['Let us drill the escapes together',2,'Good. Everyone should know an exit instead of losing their balance at the first grip.'],['Sounds like chess',1,'Yes. Except if you think too slowly, the other pieces knee you.']]]]});
 CHAT.fah.push({id:'f_ringcraft_102',need:G=>inCamp(G,'fah'),x:[['Body punches today! Coach said listen to the pads. I heard my stomach first.',[['Let us eat together after training',2,'Deal! Half my energy for punching, half for fighting over the omelette.'],['Keep your chin tucked too',1,'I know! I am not opening my mouth waiting for rice in the ring.']]]]});
+
+CHAT.ploy.find(t=>t.id==='p_kati').when=G=>G.F.ploy.camp==='rival';
+for(const id of ['f_tiger','f_mali'])CHAT.fah.find(t=>t.id===id).when=G=>inCamp(G,'fah');

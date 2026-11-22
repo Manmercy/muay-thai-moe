@@ -149,10 +149,10 @@ const DATE_CLOSE={
 // ---------- CHATTER (two characters meet) ----------
 const CHATTER=[
  {id:"c_kati_mali",need:G=>G.F.mali.camp==="player",bg:"camp",look:"train",steps:[
-  {n:"mali",f:"happy",t:"พี่กะทิ! หนูร้อยมาลัยมาให้ค่ะ ห้อยไว้ที่มุมเวทีนะ~",with:"kati"},
-  {n:"kati",f:"flustered",t:"อ๊ะ สวยจัง! แต่… มะลิเรียกหนูว่าพี่ทำไมเนี่ย หนูแก่กว่าแค่ปีเดียวเอง!"},
-  {n:"mali",f:"happy",t:"ก็พี่ซ้อมตั้งแต่ตีห้าทุกวัน ดูเป็นพี่ใหญ่สุด ๆ เลยค่ะ"},
-  {choice:[{t:"เป็นพี่ใหญ่ของค่ายก็ดีนะกะทิ",fx:G=>{add(G,"kati","morale",4);add(G,"mali","bond",2);},then:[{n:"kati",f:"happy",t:"ถ้าผู้จัดการว่างั้น… งั้นพี่จะดูแลมะลิเองค่ะ!"}]},
+  {n:"mali",f:"happy",t:"กะทิ! ฉันร้อยมาลัยมาให้ ห้อยไว้ที่มุมเวทีนะ~",with:"kati"},
+  {n:"kati",f:"flustered",t:"อ๊ะ สวยจัง! แต่ห้อยตรงนั้นเดี๋ยวโดนแข้งเตะปลิว ฉันเก็บไว้ข้างมุมให้"},
+  {n:"mali",f:"happy",t:"ได้เลย เธอซ้อมตั้งแต่ตีห้า ฉันอยากให้เห็นดอกไม้ก่อนขึ้นเวที"},
+  {choice:[{t:"สองคนดูแลมุมเวทีด้วยกันดีนะ",fx:G=>{add(G,"kati","morale",4);add(G,"mali","bond",2);},then:[{n:"kati",f:"happy",t:"ค่ะผู้จัดการ! ฉันจะดูมุมนี้ให้ มะลิไปวอร์มก่อนเลย"}]},
    {t:"สองคนนี้เหมือนพี่น้องกันจริง ๆ",fx:G=>{add(G,"kati","bond",2);add(G,"mali","bond",2);},then:[{n:"mali",f:"happy",t:"ใช่ไหมคะ! ค่ายเรามีพี่น้องเพิ่มแล้ว~"}]}]}]},
  {id:"c_kati_rin",need:G=>G.F.rin.camp==="player",bg:"camp",look:"train",steps:[
   {n:"rin",f:"happy",t:"กะทิ การ์ดซ้ายเธอตกลงสามเซนติเมตรทุกครั้งที่ออกหมัดขวา ฉันนับได้ 41 ครั้งในคลิปเดียว",with:"kati"},
@@ -167,7 +167,7 @@ const CHATTER=[
   {n:"mali",f:"happy",t:"ไม่ใช่ค่ะ! แบ่งทั้งค่ายเลย แคลอรี่ที่แบ่งกันไม่นับนะคะ~"},
   {n:"rin",f:"happy",t:"…ทฤษฎีนั้นไม่มีงานวิจัยรองรับ แต่ฉันขอสองลูกค่ะ"},
   {fx:G=>{for(const f of roster(G))add(G,f.id,"morale",3);}}]},
- {id:"c_kati_fah",need:G=>G.F.fah.met&&G.week>=8,bg:"fair",look:"casual",steps:[
+ {id:"c_kati_fah",need:G=>G.F.fah.met&&G.F.fah.camp==="rival"&&G.week>=8,bg:"fair",look:"casual",steps:[
   {n:"fah",f:"happy",t:"อ้าว กะทิ มาเดินตลาดเหรอ ไม่ไปซ้อมล่ะ เดี๋ยวก็แพ้ฟ้าอีกหรอก",with:"kati"},
   {n:"kati",f:"flustered",t:"ฟ้านั่นแหละมากินไส้กรอกตอนสามทุ่ม ไม่กลัวน้ำหนักขึ้นเหรอ!"},
   {n:"fah",f:"flustered",t:"…! งั้นมางัดข้อกันตรงนี้เลย ใครแพ้เลี้ยง!"},
@@ -179,18 +179,18 @@ const CHATTER=[
   {n:"ploy",f:"happy",t:"ไม่ต้องขอโทษ เธอทำถูกแล้ว ถ้าตอนนั้นฉันกล้ากว่านี้ ฉันคงออกมาด้วย"},
   {n:"rin",f:"flustered",t:"…พี่พลอยพูดแบบนี้ ฉันไม่ได้คำนวณไว้เลยค่ะ"},
   {fx:G=>{add(G,"rin","morale",6);add(G,"ploy","bond",3);}}]},
- {id:"c_ploy_kati",need:G=>G.F.ploy.met&&G.week>=16,bg:"local",look:"fight",steps:[
+ {id:"c_ploy_kati",need:G=>G.F.ploy.met&&G.F.ploy.camp==="rival"&&(G.season||1)===1&&G.week>=16,bg:"local",look:"fight",steps:[
   {n:"ploy",f:"happy",t:"กะทิ เมื่อกี้ฉันดูไฟต์เธอแล้ว",with:"kati"},
   {n:"kati",f:"flustered",t:"พี่พลอย! …มาดูทำไมคะ"},
   {n:"ploy",f:"happy",t:"ถ้าเธอยังการ์ดตกตอนออกหมัดขวา ฟ้าจะสับศอกใส่ตรงนั้นแน่ จำไว้"},
-  {n:"kati",f:"happy",t:"…ขอบคุณค่ะ ทำไมพี่ถึงบอกหนูล่ะคะ"},
+  {n:"kati",f:"happy",t:"…ขอบคุณค่ะ ทำไมพี่ถึงบอกฉันล่ะคะ"},
   {n:"ploy",f:"sad",t:"เพราะฉันอยากเห็นรอบชิงที่ดีที่สุด ไม่ใช่รอบชิงที่จบเร็ว"},
   {fx:G=>{G.F.kati.a.guard=Math.min(20,G.F.kati.a.guard+.3);add(G,"ploy","bond",2);}}]},
  {id:"c_fah_mali",need:G=>G.F.mali.met&&G.F.fah.met&&G.week>=12,bg:"fair",look:"casual",steps:[
   {n:"fah",f:"happy",t:"นี่ใครกัน ตัวจิ๋วเชียว หลงทางมาจากโรงเรียนอนุบาลเหรอ",with:"mali"},
-  {n:"mali",f:"happy",t:"สวัสดีค่ะพี่ฟ้า! รอยสักพี่สวยมากเลย เสือตัวนี้ชื่ออะไรคะ?"},
+  {n:"mali",f:"happy",t:"ฟ้า! รอยสักเธอสวยมากเลย เสือตัวนี้ชื่ออะไรเหรอ?"},
   {n:"fah",f:"flustered",t:"ห้ะ…? มันไม่มีชื่อ… ทำไมไม่โกรธล่ะที่โดนแซว"},
-  {n:"mali",f:"happy",t:"ก็พี่ไม่ได้พูดจริงนี่คะ~ งั้นหนูตั้งชื่อให้นะ ชื่อ 'น้องเสือฟ้า'!"},
+  {n:"mali",f:"happy",t:"ก็เธอไม่ได้พูดจริงนี่~ งั้นฉันตั้งชื่อให้นะ ชื่อ 'น้องเสือฟ้า'!"},
   {n:"fah",f:"flustered",t:"…ห้ามเรียกแบบนั้นต่อหน้าคนอื่นเด็ดขาด!"},
   {fx:G=>{add(G,"fah","bond",2);add(G,"mali","morale",3);}}]},
  {id:"c_coach_kati",need:G=>G.week>=10,bg:"night",look:"train",steps:[
