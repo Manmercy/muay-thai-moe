@@ -470,7 +470,7 @@ td,th{padding:6px 6px}
 /* VN v1.3: half-body portraits, raised dialog box */
 .vn{--vb:calc(max(7dvh,28px) + 128px);--sh:min(150dvh,200vw,1500px)}
 .cast{position:absolute;inset:0 0 auto 0;bottom:var(--vb);overflow:hidden;-webkit-mask-image:linear-gradient(#000 88%,transparent);mask-image:linear-gradient(#000 88%,transparent)}
-.stand{position:absolute;bottom:calc(var(--sh) * -.53);height:var(--sh);width:auto;max-width:none;transition:filter .2s,transform .2s;filter:drop-shadow(0 0 16px rgba(0,0,0,.5))}
+.stand{position:absolute;bottom:calc(var(--sh) * -.53);height:var(--sh);width:auto;max-width:none;transition:filter .2s,transform .2s;filter:drop-shadow(0 3px 2px rgba(0,0,0,.3))}
 .stand.c{left:50%}.stand.l{left:30%}.stand.r{left:70%}
 .stand{transform:translateX(-50%)}.stand.off{transform:translateX(-50%) scale(.96);transform-origin:50% 0}.stand.on{z-index:2}
 @media (max-width:760px){.stand.l{left:24%}.stand.r{left:76%}}
