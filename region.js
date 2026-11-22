@@ -1348,7 +1348,7 @@ const REGION={
       if(rg.local){const T=R.trip,abs=T&&T.abs!=null?T.abs:gameWeek(G);R.trip=null;R.nextTripAbs=Math.max(R.nextTripAbs||0,abs+RG_TRIP_GAP);(R.gc=R.gc||[]).push(p.b);continue;} /* v1.91.93: the local ring pays a purse, no belt */
       this.lbAdd(G,p.a,"pc:"+dest,p.res,p.stop);
       rgTouch(G,RG_CID[r]);const T=R.trip,abs=T&&T.bid===p.bid?T.abs:gameWeek(G);
-      if(p.res==="W"){R.belts[r]=R.belts[r]||{};R.belts[r][dest]=1;G.log=G.log||[];G.log.push(`${G.F[p.a]?G.F[p.a].name:""}คว้าเข็มขัดจังหวัด${D.name}!`);if(G.F[p.a])recordHonor(G,"rgbelt",p.a,G.F[p.a].div,G.week,dest,G.F[p.b]?G.F[p.b].name:this.oppName(G,dest)); /* v1.91.14 (Man): a province belt gets the same ceremony as the main game */
+      if(p.res==="W"){R.belts[r]=R.belts[r]||{};R.belts[r][dest]=1;G.log=G.log||[];G.log.push(`${G.F[p.a]?G.F[p.a].name:""}คว้าเข็มขัดจังหวัด${D.name}!`);if(G.F[p.a])recordHonor(G,"rgbelt",p.a,G.F[p.a].div,G.week,dest,G.F[p.b]?G.F[p.b].name:this.oppName(G,dest),p.b); /* v1.91.14 (Man): a province belt gets the same ceremony as the main game */
         if(this.beltCount(G,r)===4&&R.champ[r].state==="locked"){R.champ[r].state="letter";this.champFighter(G,r);
           rgOrg(G,r,`${RG_TITLE[r]}: ครบสี่เข็มขัดแล้ว`,`เรียน ผู้จัดการค่ายศิริชัย\n\nค่ายของท่านครบสี่เข็มขัดของ${RG[r].name}แล้ว ${RG[r].champ} แชมป์${RG[r].name} ขอท้าชิงแชมป์ภาค ชนะ 2 ใน 3 นัด ผู้จัดออกค่าเดินทาง\n\nเลือกนักมวยได้ที่หน้าไฟต์ › ศึกชิงเจ้าสี่ภาค`+((t=>t?`\n\n(${t})`:"")(this.tipText(G,r))));rgSay(G,r,`${RG_TITLE[r]}: ครบสี่เข็มขัดแล้ว`,RG_CH[r].letter);}}
       R.trip=null;R.nextTripAbs=Math.max(R.nextTripAbs||0,abs+RG_TRIP_GAP);(R.gc=R.gc||[]).push(p.b);}},

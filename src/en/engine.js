@@ -1097,9 +1097,9 @@ if(G.F)for(const id in G.F){const f=G.F[id];if(f&&hasTree(id)&&!f.spv){f.sp=(f.s
     for(const [div,b] of Object.entries(G.belt||{}))if(G.F[b.id]?.camp==="player")G.honors.push({key:`legacy:belt:${div}`,season:null,week:b.since||0,id:b.id,div,kind:"belt"});
     for(const f of Object.values(G.F))if(f.camp==="player"&&f.belts>0&&!G.honors.some(h=>h.kind==="belt"&&h.id===f.id))G.honors.push({key:`legacy:belt:${f.id}`,season:null,week:0,id:f.id,div:f.div,kind:"belt"});}
   G.awards=Array.isArray(G.awards)?G.awards:[];G.rank=G.rank||{A:{},B:{}};for(const d of ["A","B"])G.rank[d]=G.rank[d]||{};for(const f of Object.values(G.F))if(f.camp!=="free"&&f.camp!=="quest"&&(f.div==="A"||f.div==="B")&&!G.rank[f.div][f.id])G.rank[f.div][f.id]={pts:0,w:0,l:0,d:0};G.decor=G.decor||{};if(G.goldHelmetWins==null)G.goldHelmetWins=G.gang&&G.gang.st>=5?1:0;grantDecorUnlocks(G);for(const [slot,key] of Object.entries(G.decor))if(CAMP_DECOR[slot]&&CAMP_DECOR[slot].items[key]&&!G.decorUnlocks[slot].includes(key))G.decorUnlocks[slot].push(key);lateSeasonOpposition(G);return G;}
-function recordHonor(G,kind,id,div,week=G.week,venue=null,opp=null){if(!G.F[id]||G.F[id].camp!=="player")return null;G.honors=G.honors||[];G.awards=G.awards||[];
+function recordHonor(G,kind,id,div,week=G.week,venue=null,opp=null,oppId=null){if(!G.F[id]||G.F[id].camp!=="player")return null;G.honors=G.honors||[];G.awards=G.awards||[];
   const season=G.season||1,key=`${season}:${kind}:${div}:${venue||""}:${kind==="dm"||kind==="belt"||kind==="defense"?week:id}`;
-  if(G.honors.some(h=>h.key===key))return null;const h={key,season,week,id,div,kind,...(venue?{venue}:{}),...(opp?{opp}:{})};G.honors.push(h);G.awards.push(h);return h;}
+  if(G.honors.some(h=>h.key===key))return null;const h={key,season,week,id,div,kind,...(venue?{venue}:{}),...(opp?{opp}:{}),...(oppId&&G.F[oppId]&&oppId!==id?{oppId}:{})};G.honors.push(h);G.awards.push(h);return h;}
 const DAENG_COST=[0,15000,30000];
 function facTotal(G){return Object.keys(FACILITIES).reduce((s,k)=>s+(G.fac[k]||0),0)+(G.fac.daeng-1);}
 function campLevel(G){const t=facTotal(G);return t>=13?3:t>=5?2:1;}
@@ -1405,14 +1405,14 @@ function standings(G,div){
 function stageTransition(G){ // called after week's results, before week++
   const rng=mulberry32(G.seed+G.week*31);
   if(G.week===20){
-    for(const div of ["A","B"]){const lead=standings(G,div)[0];if(lead)recordHonor(G,"local",lead.id,div,G.week,null,lead.pts!=null?`Top spot · ${lead.pts} pts`:null);}
+    for(const div of ["A","B"]){const table=standings(G,div),lead=table[0];if(lead)recordHonor(G,"local",lead.id,div,G.week,null,lead.pts!=null?`Top spot · ${lead.pts} pts`:null,table[1]?.id);}
     for(const div of ["A","B"]){G.qual[div]=storyTop4(G,div);}
     for(const div of ["A","B"]){NPC_DISTRICT[div].forEach(([n,l],i)=>{const id=`d${div}${i}`;G.F[id]=baseFighter(id,mkNPC(id,n,div,l,rng,i+3));startLv(G.F[id]);G.qual[div].push(id);});
       G.rank[div]={};G.qual[div].forEach((id,i)=>{G.rank[div][id]={pts:id.startsWith("d")?0:[4,3,2,1][i]||0,w:0,l:0,d:0};});}
     G.flags.qualDone=true;ensureStageNPCs(G,"district");
   }
   if(G.week===40){
-    for(const div of ["A","B"]){const lead=standings(G,div)[0];if(lead)recordHonor(G,"district",lead.id,div,G.week,null,lead.pts!=null?`Top spot · ${lead.pts} pts`:null);}
+    for(const div of ["A","B"]){const table=standings(G,div),lead=table[0];if(lead)recordHonor(G,"district",lead.id,div,G.week,null,lead.pts!=null?`Top spot · ${lead.pts} pts`:null,table[1]?.id);}
     // v1.4: top 4 of the district stage go to the provincial semi-finals (1v4, 2v3, week 44); winners meet in the final (week 49)
     G.semis=G.semis||{A:[],B:[]};
     for(const div of ["A","B"]){const t=storyTop4(G,div);G.semis[div]=t;G.finalists[div]=[];
@@ -1468,7 +1468,7 @@ function finishBracket(G,booking,F){
   if(booking.npc){const rv=leadRival(G,div);if((booking.a===rv||booking.b===rv)&&G.F[rv].camp==="rival"&&w!==rv){w=rv;F.result.win=rv===booking.a?"A":"B";F.result.type="Decision win";}}
   if(!G.finalists[div].includes(w))G.finalists[div].push(w);
   if(G.finalists[div].length===2){const [a,b]=G.finalists[div];bookBracket(G,`final${div}`,a,b,49,"final",5);}}
-function finishFinal(G,booking,F){const div=G.F[booking.a].div;const w=F.result.win==="A"?booking.a:F.result.win==="B"?booking.b:(ovr(G.F[booking.a].a)>=ovr(G.F[booking.b].a)?booking.a:booking.b);G.champ[div]=w;const lo=w===booking.a?booking.b:booking.a;recordHonor(G,"province",w,div,G.week,null,G.F[lo]?G.F[lo].name:null);}
+function finishFinal(G,booking,F){const div=G.F[booking.a].div;const w=F.result.win==="A"?booking.a:F.result.win==="B"?booking.b:(ovr(G.F[booking.a].a)>=ovr(G.F[booking.b].a)?booking.a:booking.b);G.champ[div]=w;const lo=w===booking.a?booking.b:booking.a;recordHonor(G,"province",w,div,G.week,null,G.F[lo]?G.F[lo].name:null,lo);}
 
 // week phase 1: training & upkeep (before fights)
 function weekTrain(G){

@@ -1,5 +1,5 @@
 // ================= MUAY THAI MOE v1.3 — UI =================
-const VERSION="1.91.100";
+const VERSION="1.91.101";
 const CUR_LANG=(typeof window!=="undefined"&&window.LANG)||"th";
 const TH_LABEL=String.fromCharCode(3652,3607,3618);
 function langSwitch(cls){return `<div class="langsw ${cls||""}" role="group" aria-label="Language">${[["th",TH_LABEL],["en","EN"]].map(([k,l])=>`<button class="lsb ${CUR_LANG===k?"on":""}" data-act="setlang" data-v="${k}" aria-pressed="${CUR_LANG===k}">${l}</button>`).join("")}</div>`;}
@@ -1315,11 +1315,11 @@ function playScene(steps,done,opts={}){WARM_NEED=[];const noThai=sceneNoThai(ste
   const sh=setTimeout(()=>{if(go||UI.loadScr)return;UI.loadScr={n,total,scene:true,tip:LOAD_TIPS[Math.floor(Math.random()*LOAD_TIPS.length)]};render();},180),cap=setTimeout(start,8000);
   wait.forEach(i=>{const f=()=>{n++;if(UI.loadScr&&UI.loadScr.scene){UI.loadScr.n=n;const b=document.querySelector(".ldbar i"),c=document.querySelector(".ldn span");if(b)b.style.width=Math.round(n/total*100)+"%";if(c)c.textContent=`${n}/${total}`;}if(n>=total)setTimeout(start,UI.loadScr?200:0);};
     i.addEventListener("load",f,{once:true});i.addEventListener("error",f,{once:true});});}
-/* v1.91.82 (Man): a winner popup first, like the camp-beauty results — the announcer calls the title, the referee raises her hand — then the ceremony talk */
+/* The winner popup calls the result, then the winning boxer celebrates beside the other fighter. */
 function winPopHTML(m){const h=m.h,f=G.F[h.id];if(!f)return "";const label=honorLabel(h.kind,h.venue),ranked=h.kind==="local"||h.kind==="district";
-  return `<div class="winpop"><canvas class="wincv" width="640" height="360" data-winpop="1" aria-label="The referee raises the winner's hand"></canvas>
+  return `<div class="winpop"><canvas class="wincv" width="640" height="360" data-winpop="1" aria-label="Two boxers in the ring; the winner raises her arms"></canvas>
     <div class="wp-lines"><p class="wp-l" style="--d:200ms">${ranked?"Points for the whole round…":"The decision…"}</p><p class="wp-l" style="--d:1100ms">The winner of the ${esc(label)} Div ${esc(h.div||"")}…</p>
-    <p class="wp-name" style="--d:2000ms">${esc(f.name)}!</p><p class="wp-l sm" style="--d:2400ms">Sirichai Camp ${h.opp&&!/^อันดับ/.test(h.opp)?` · won ${esc(h.opp)}`:""}</p></div></div>
+    <p class="wp-name" style="--d:2000ms">${esc(f.name)}!</p><p class="wp-l sm" style="--d:2400ms">Sirichai Camp ${!ranked&&h.opp?` · beat ${esc(h.opp)}`:""}</p></div></div>
     <div class="mfoot"><button class="btn primary" data-act="winpopgo">To the ceremony ▸</button></div>`;}
 function playHonorQueue(done){while((G.awards||[]).length&&!(G.F[G.awards[0].id]))G.awards.shift();const h=(G.awards||[])[0];if(!h){AU.startMusic("hub");if(done)done();return;}AU.startMusic("victory");
   if(!h._pop){h._pop=1;UI.winNext=()=>playHonorQueue(done);UI.wpT0=0;UI.modal={type:"winpop",h};render();setTimeout(()=>{if(UI.modal&&UI.modal.type==="winpop"){AU.sfx("champ");}},2000);return;}

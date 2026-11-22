@@ -1098,9 +1098,9 @@ if(G.F)for(const id in G.F){const f=G.F[id];if(f&&hasTree(id)&&!f.spv){f.sp=(f.s
     for(const [div,b] of Object.entries(G.belt||{}))if(G.F[b.id]?.camp==="player")G.honors.push({key:`legacy:belt:${div}`,season:null,week:b.since||0,id:b.id,div,kind:"belt"});
     for(const f of Object.values(G.F))if(f.camp==="player"&&f.belts>0&&!G.honors.some(h=>h.kind==="belt"&&h.id===f.id))G.honors.push({key:`legacy:belt:${f.id}`,season:null,week:0,id:f.id,div:f.div,kind:"belt"});}
   G.awards=Array.isArray(G.awards)?G.awards:[];G.rank=G.rank||{A:{},B:{}};for(const d of ["A","B"])G.rank[d]=G.rank[d]||{};for(const f of Object.values(G.F))if(f.camp!=="free"&&f.camp!=="quest"&&(f.div==="A"||f.div==="B")&&!G.rank[f.div][f.id])G.rank[f.div][f.id]={pts:0,w:0,l:0,d:0};G.decor=G.decor||{};if(G.goldHelmetWins==null)G.goldHelmetWins=G.gang&&G.gang.st>=5?1:0;grantDecorUnlocks(G);for(const [slot,key] of Object.entries(G.decor))if(CAMP_DECOR[slot]&&CAMP_DECOR[slot].items[key]&&!G.decorUnlocks[slot].includes(key))G.decorUnlocks[slot].push(key);lateSeasonOpposition(G);return G;}
-function recordHonor(G,kind,id,div,week=G.week,venue=null,opp=null){if(!G.F[id]||G.F[id].camp!=="player")return null;G.honors=G.honors||[];G.awards=G.awards||[];
+function recordHonor(G,kind,id,div,week=G.week,venue=null,opp=null,oppId=null){if(!G.F[id]||G.F[id].camp!=="player")return null;G.honors=G.honors||[];G.awards=G.awards||[];
   const season=G.season||1,key=`${season}:${kind}:${div}:${venue||""}:${kind==="dm"||kind==="belt"||kind==="defense"?week:id}`;
-  if(G.honors.some(h=>h.key===key))return null;const h={key,season,week,id,div,kind,...(venue?{venue}:{}),...(opp?{opp}:{})};G.honors.push(h);G.awards.push(h);return h;}
+  if(G.honors.some(h=>h.key===key))return null;const h={key,season,week,id,div,kind,...(venue?{venue}:{}),...(opp?{opp}:{}),...(oppId&&G.F[oppId]&&oppId!==id?{oppId}:{})};G.honors.push(h);G.awards.push(h);return h;}
 const DAENG_COST=[0,15000,30000];
 function facTotal(G){return Object.keys(FACILITIES).reduce((s,k)=>s+(G.fac[k]||0),0)+(G.fac.daeng-1);}
 function campLevel(G){const t=facTotal(G);return t>=13?3:t>=5?2:1;}
@@ -1406,14 +1406,14 @@ function standings(G,div){
 function stageTransition(G){ // called after week's results, before week++
   const rng=mulberry32(G.seed+G.week*31);
   if(G.week===20){
-    for(const div of ["A","B"]){const lead=standings(G,div)[0];if(lead)recordHonor(G,"local",lead.id,div,G.week,null,lead.pts!=null?`Top spot · ${lead.pts} pts`:null);}
+    for(const div of ["A","B"]){const table=standings(G,div),lead=table[0];if(lead)recordHonor(G,"local",lead.id,div,G.week,null,lead.pts!=null?`Top spot · ${lead.pts} pts`:null,table[1]?.id);}
     for(const div of ["A","B"]){G.qual[div]=storyTop4(G,div);}
     for(const div of ["A","B"]){NPC_DISTRICT[div].forEach(([n,l],i)=>{const id=`d${div}${i}`;G.F[id]=baseFighter(id,mkNPC(id,n,div,l,rng,i+3));startLv(G.F[id]);G.qual[div].push(id);});
       G.rank[div]={};G.qual[div].forEach((id,i)=>{G.rank[div][id]={pts:id.startsWith("d")?0:[4,3,2,1][i]||0,w:0,l:0,d:0};});}
     G.flags.qualDone=true;ensureStageNPCs(G,"district");
   }
   if(G.week===40){
-    for(const div of ["A","B"]){const lead=standings(G,div)[0];if(lead)recordHonor(G,"district",lead.id,div,G.week,null,lead.pts!=null?`Top spot · ${lead.pts} pts`:null);}
+    for(const div of ["A","B"]){const table=standings(G,div),lead=table[0];if(lead)recordHonor(G,"district",lead.id,div,G.week,null,lead.pts!=null?`Top spot · ${lead.pts} pts`:null,table[1]?.id);}
     // v1.4: top 4 of the district stage go to the provincial semi-finals (1v4, 2v3, week 44); winners meet in the final (week 49)
     G.semis=G.semis||{A:[],B:[]};
     for(const div of ["A","B"]){const t=storyTop4(G,div);G.semis[div]=t;G.finalists[div]=[];
@@ -1469,7 +1469,7 @@ function finishBracket(G,booking,F){
   if(booking.npc){const rv=leadRival(G,div);if((booking.a===rv||booking.b===rv)&&G.F[rv].camp==="rival"&&w!==rv){w=rv;F.result.win=rv===booking.a?"A":"B";F.result.type="Decision win";}}
   if(!G.finalists[div].includes(w))G.finalists[div].push(w);
   if(G.finalists[div].length===2){const [a,b]=G.finalists[div];bookBracket(G,`final${div}`,a,b,49,"final",5);}}
-function finishFinal(G,booking,F){const div=G.F[booking.a].div;const w=F.result.win==="A"?booking.a:F.result.win==="B"?booking.b:(ovr(G.F[booking.a].a)>=ovr(G.F[booking.b].a)?booking.a:booking.b);G.champ[div]=w;const lo=w===booking.a?booking.b:booking.a;recordHonor(G,"province",w,div,G.week,null,G.F[lo]?G.F[lo].name:null);}
+function finishFinal(G,booking,F){const div=G.F[booking.a].div;const w=F.result.win==="A"?booking.a:F.result.win==="B"?booking.b:(ovr(G.F[booking.a].a)>=ovr(G.F[booking.b].a)?booking.a:booking.b);G.champ[div]=w;const lo=w===booking.a?booking.b:booking.a;recordHonor(G,"province",w,div,G.week,null,G.F[lo]?G.F[lo].name:null,lo);}
 
 // week phase 1: training & upkeep (before fights)
 function weekTrain(G){
@@ -2160,11 +2160,24 @@ FUN.kd.push("Uncle in front drops his sticky rice!");
 FUN.cheer.push("A kid in the back blows a whistle!");
 const CHANT=["Oh!!","Oh!! The crowd calls every kick!","The whole stadium goes 'Oh!'"],ODDS=["The odds just moved!","Ringside bettors flip the odds!","The bettors wave for takers!","The underdog backers are smiling now!"];
 const CHAR_COM={kati:["Sirichai blood! No stepping back!","Kati's smiling through the red face!","Grandpa Chai is smiling up there!"],mali:["Sweet smile. Not a sweet elbow.","Small frame, huge heart!","Chaiya form, all of it!"],rin:["Rin had that one calculated!","Measured with a ruler!","Lopburi brains!"],ploy:["Pure talent!","A true Korat buffalo swing!","She doesn't even look tired!"],fah:["Fah's playing to the camera again!","There's Fah's smirk!","Silver hair flying across the ring!"]};
+const RING_CALL={
+ hit:{punch:["{a} lands! Even the crowd winces!","Clean hook from {a}! The front row jumps!","{a} connects! The drum gets louder!"],
+  kick:["{a} whips a kick in! The crowd roars!","That kick from {a}! The gamblers stand!","{a} lands a kick! Hear that crowd!"],
+  knee:["{a} drives the knee in! Ouch!","Knee from {a}! The front row winces!","{a} lands the knee! No room to breathe!"],
+  elbow:["{a} lands an elbow! Check that brow!","Sharp elbow from {a}! The crowd gasps!","{a} slices through with an elbow!"]},
+ miss:["Whiff! {d} slips away beautifully!","{d} dodges! The front row felt the breeze!","{a} hits air! {d} grins back!"],
+ counter:["{a} fires back! What a counter!","Counter from {a}! The crowd erupts!","{a} counters! {d} walked into it!"],
+ kd:["{d} goes down! The whole ring holds its breath!","Down goes {d}! The referee counts!"],
+ ko:["That's it! {a} wins by knockout!","Lights out! {a} takes the knockout!"],
+ cut:["A cut on {d}! The doctor hurries in!","{d} is cut! Time to check the brow!"]};
+const RING_CRIT=["What a shot from {a}! The crowd roars!","{a} lands flush! Even the band stutters!"];
+function shortRing(e,R,fill,o){const L=e.ev==="hit"?(e.crit?RING_CRIT:RING_CALL.hit[e.w]):RING_CALL[e.ev];return L?fill(R(L),o):e.t;}
 function comLine(e,F,rng){if(e.ev==="wake")return e.t;const R=a=>a[Math.floor(rng()*a.length)];const fill=(s,o)=>s.replace(/\{(\w)\}/g,(m,k)=>o[k]??"");
   const o={a:e.an,d:e.dn,w:WNAME[e.w]||""};const h=fightHeat(F);const grp=F.B.f&&F.B.f.grp,C=grp&&CREATURE_COM[grp];
   // special bouts (rooster / bull / helmet gang): the caller goes all-in on jokes
   if(C){const cA=e.an===F.B.name;const k=e.ev==="hit"?(cA?"cHit":"pHit"):e.ev==="miss"?(cA?"cMiss":"pMiss"):e.ev==="counter"?"counter":e.ev==="kd"?(e.dn===F.B.name?"cKd":"pKd"):"";
-    if(k&&rng()<(e.ev==="kd"?.9:.5)){const L=C[k].filter(y=>y!==F.lastFun);const y=R(L);F.lastFun=y;return fill(y,{c:F.B.name,p:F.A.name});}}
+    if(k&&rng()<(e.ev==="kd"?.9:.5)){const L=C[k].filter(y=>y!==F.lastFun&&fill(y,{c:F.B.name,p:F.A.name}).length<=COM_MAX);if(L.length){const y=R(L);F.lastFun=y;return fill(y,{c:F.B.name,p:F.A.name});}}}
+  if(RING_CALL[e.ev]&&rng()<.7)return shortRing(e,R,fill,o);
   const fun=x=>{if(!x||C)return x;const L=FUN[e.ev==="counter"?"counter":e.ev==="kd"?"kd":e.ev==="miss"?"miss":e.ev==="hit"?"hit":""];
     const sk=e.ev==="kd"?"kd":e.ev!=="hit"?"":h>=3&&rng()<.5?"hot":e.w==="kick"?(/คอ|คาง|หน้า|neck|chin|head|face/i.test(x)?"kickHead":"kick"):e.w==="punch"?"punch":e.w==="knee"?"knee":"";
     if(e.ev==="hit"&&e.w==="kick"&&F.round>=2&&rng()<.14)return x+" "+R(CHANT);
@@ -2174,8 +2187,8 @@ function comLine(e,F,rng){if(e.ev==="wake")return e.t;const R=a=>a[Math.floor(rn
     if(L&&rng()<(e.ev==="kd"?.3:.11)){const y=R(L.filter(z=>z!==F.lastFun));F.lastFun=y;return x+" "+fill(y,o);}if(e.ev==="hit"&&rng()<.03)return x+" "+R(FUN.cheer);return x;};
   const hype=x=>{if(!h||!x)return x;const big=e.crit||e.ev==="kd"||e.ev==="skill"||e.ev==="rage";
     if(rng()>=(big?.8:.1+h*.1))return x;const L=HYPE[Math.min(4,h+(big&&h>=2?1:0))].filter(y=>y!==F.lastHype);const y=R(L);F.lastHype=y;return x+" "+y;};
-  const b=baseLine(e,F,R,fill,o,h);if(!b||COM.feel.includes(b))return b;let x=hype(b);if(x===b)x=fun(b);return x.length>COM_MAX?b:x;}
-const COM_MAX=100;
+  const b=baseLine(e,F,R,fill,o,h);if(!b||COM.feel.includes(b))return b;let x=hype(b);if(x===b)x=fun(b);return x.length>COM_MAX?shortRing(e,R,fill,o):x;}
+const COM_MAX=56;
 function baseLine(e,F,R,fill,o,h){
   if(e.ev==="ko"&&h>=2)return fill(R(KO_HOT),o);
   if(F.round===1&&F.rounds>=3&&!e.crit&&(e.ev==="miss"?Math.random()<.35:e.ev==="hit"&&Math.random()<.12))return R(COM.feel);
@@ -6240,22 +6253,22 @@ function drawLoyWish(ctx,t,ids,tf){const S=2,W=320,H=180,P=(x,y,w,h,c)=>{ctx.fil
 function mountLoyWish(){document.querySelectorAll("canvas[data-loywish]").forEach(cv=>{const x=cv.getContext("2d"),ids=(cv.dataset.loywish||"").split(",").filter(Boolean);
   LOOPS.add(t=>{if(!cv.isConnected)return;let tt=t-(UI.lwT0||t);if(UI.lwSkip)tt+=60000;x.clearRect(0,0,cv.width,cv.height);drawLoyWish(x,tt,ids,UI.lwF0?t-UI.lwF0:-1);});});}
 /* v1.91.82 winner popup: the referee raises the winner's hand under a spotlight */
+function honorRival(h){const fs=G&&G.F||{},win=fs[h.id];if(!win)return null;
+  if(h.oppId&&h.oppId!==h.id&&fs[h.oppId])return fs[h.oppId];
+  if(h.opp){const byName=Object.values(fs).find(f=>f.id!==h.id&&f.name===h.opp&&f.div===h.div);if(byName)return byName;}
+  const ranked=G.rank&&G.rank[h.div]&&Object.entries(G.rank[h.div]).filter(([id])=>id!==h.id&&fs[id]).sort((a,b)=>(b[1].pts||0)-(a[1].pts||0));
+  if(ranked&&ranked.length)return fs[ranked[0][0]];
+  return Object.values(fs).filter(f=>f.id!==h.id&&f.div===h.div&&f.camp!=="free"&&f.camp!=="quest").sort((a,b)=>Math.abs(ovr(a.a)-ovr(win.a))-Math.abs(ovr(b.a)-ovr(win.a)))[0]||null;}
 function mountWinPop(){document.querySelectorAll("canvas[data-winpop]").forEach(cv=>{if(cv._wp)return;cv._wp=1;const x=cv.getContext("2d");x.imageSmoothingEnabled=false;
-  const m=UI.modal,h=m&&m.h,f=h&&G.F[h.id];if(!f)return;const sh=sheetFor(f),bgk=h.kind==="rgbelt"&&BGIMG["rgring_"+h.venue]?"rgring_"+h.venue:(BGIMG.ring?"ring":"hall"),bg=img(BGIMG[bgk]||BGIMG.hall);const T0=performance.now();
-  LOOPS.add(t=>{if(!cv.isConnected)return;const e=t-T0,W=cv.width,H=cv.height,up=e>1900,k=Math.min(1,Math.max(0,(e-1900)/260));x.clearRect(0,0,W,H);
+  const m=UI.modal,h=m&&m.h,f=h&&G.F[h.id];if(!f)return;const rival=honorRival(h),bgk=h.kind==="rgbelt"&&BGIMG["rgring_"+h.venue]?"rgring_"+h.venue:(BGIMG.ring?"ring":"hall"),bg=img(BGIMG[bgk]||BGIMG.hall);const T0=performance.now();
+  LOOPS.add(t=>{if(!cv.isConnected)return;const e=t-T0,W=cv.width,H=cv.height,up=e>=2000,foot=H*.985,sh2=H*.79,wx=W*.28,ox=W*.72;x.clearRect(0,0,W,H);
     if(bg.complete&&bg.naturalWidth){const r=Math.max(W/bg.naturalWidth,H/bg.naturalHeight),bw=bg.naturalWidth*r,bh=bg.naturalHeight*r;x.drawImage(bg,(W-bw)/2,(H-bh)/2,bw,bh);}
     x.fillStyle="rgba(8,4,14,.55)";x.fillRect(0,0,W,H);
-    const cx=W*.44,foot=H*.99,sh2=H*1.05;const sp=x.createRadialGradient(cx+30,foot-sh2*.5,10,cx+30,foot-sh2*.5,H*.62);sp.addColorStop(0,`rgba(255,240,190,${up?.55:.3})`);sp.addColorStop(1,"rgba(255,240,190,0)");x.fillStyle=sp;x.fillRect(0,0,W,H);
-    if(up&&e<2300){x.fillStyle=`rgba(255,255,255,${(2300-e)/400*.6})`;x.fillRect(0,0,W,H);}
-    drawFrame(x,sh,up?ROW.win:ROW.idle,Math.floor(e/(up?180:260))%4,cx,foot,sh2);
-    /* the referee: white shirt, black bow tie, black trousers; his left hand lifts her wrist */
-    const rx=cx+sh2*.27,ry=foot-sh2*.04,u=sh2/40;const P=(a,b,w,hh,c)=>{x.fillStyle=c;x.fillRect(Math.round(rx+a*u),Math.round(ry-b*u),Math.ceil(w*u),Math.ceil(hh*u));};
-    P(-2.2,12,2,12,"#1b1820");P(.4,12,2,12,"#1b1820");P(-2.6,1,2.6,1.2,"#0c0a10");P(.2,1,2.6,1.2,"#0c0a10");
-    P(-3,21,6,9.5,"#f4f2ee");P(-3,21,6,.8,"#d8d4cc");P(-.9,20.6,1.8,1.2,"#111");P(-.4,19.8,.8,9,"#d8d4cc");
-    P(-1.4,25.2,2.8,4.2,"#d9a77f");P(-1.6,25.6,3.2,1.3,"#2a2026");P(-.6,23.1,1,.4,"#8a5a46");
-    P(1.8,20.6,1.6,7,"#f4f2ee");P(2,13.8,1.2,1.4,"#d9a77f");
-    const sx=rx-2.4*u,sy=ry-20.4*u,hx=cx+sh2*(.13+.04*k),hy=foot-sh2*(.42+.36*k);x.strokeStyle="#f4f2ee";x.lineWidth=1.7*u;x.beginPath();x.moveTo(sx,sy);x.lineTo(hx+u,hy+2*u);x.stroke();x.fillStyle="#d9a77f";x.fillRect(hx-u,hy,2*u,2*u);
-    if(up)for(let i=0;i<26;i++){const ph=((e-1900)/2600+i/26)%1,px=(i*97)%W,py=ph*H;x.fillStyle=["#ffd45a","#ff6b6b","#8fd3ff","#c785e6","#9dffb0"][i%5];x.fillRect(px+Math.sin(e/300+i)*12,py,5,9);}});});}
+    for(const [cx,bright] of [[wx,up?.65:.4],[ox,up?.22:.4]]){const sp=x.createRadialGradient(cx,foot-sh2*.5,8,cx,foot-sh2*.5,H*.54);sp.addColorStop(0,`rgba(255,240,190,${bright})`);sp.addColorStop(1,"rgba(255,240,190,0)");x.fillStyle=sp;x.fillRect(0,0,W,H);}
+    if(rival)drawFrame(x,sheetFor(rival),up?ROW.idle:ROW.guard,Math.floor(e/270)%4,ox,foot,sh2,true,up?.8:1);
+    if(up&&e<2340){x.fillStyle=`rgba(255,255,255,${(2340-e)/340*.42})`;x.fillRect(0,0,W,H);}
+    drawFrame(x,sheetFor(f),up?ROW.win:ROW.idle,Math.floor(e/(up?180:260))%4,wx,foot,sh2);
+    if(up)for(let i=0;i<32;i++){const ph=((e-2000)/2600+i/32)%1,px=(i*97)%W,py=ph*H;x.fillStyle=["#ffd45a","#ff6b6b","#8fd3ff","#c785e6","#9dffb0"][i%5];x.fillRect(px+Math.sin(e/300+i)*12,py,5,9);}});});}
 function mountContest(){document.querySelectorAll("canvas[data-contest]").forEach(cv=>{const x=cv.getContext("2d"),k=cv.dataset.contest;
   LOOPS.add(t=>{if(!cv.isConnected||!G)return;const R=(G.contests||{})[G.season||1];if(!R)return;let tt=t-(UI.ctT0||t);if(UI.ctSkip)tt+=60000;x.clearRect(0,0,cv.width,cv.height);
     if(k==="walk")drawContestWalk(x,G,tt,R);else drawContestAward(x,G,tt,R);});});}
@@ -6519,7 +6532,7 @@ AU.gsfx=function(kind,a){if(!this.init()||this.muted||!SETTINGS.sfx)return;const
   if(kind==="shimmer")for(let i=0;i<6;i++)T(i*.05,{f:1400+Math.random()*1400,type:"sine",dur:.12,peak:.06});};
 
 // ================= MUAY THAI MOE v1.3 — UI =================
-const VERSION="1.91.100";
+const VERSION="1.91.101";
 const CUR_LANG=(typeof window!=="undefined"&&window.LANG)||"th";
 const TH_LABEL=String.fromCharCode(3652,3607,3618);
 function langSwitch(cls){return `<div class="langsw ${cls||""}" role="group" aria-label="Language">${[["th",TH_LABEL],["en","EN"]].map(([k,l])=>`<button class="lsb ${CUR_LANG===k?"on":""}" data-act="setlang" data-v="${k}" aria-pressed="${CUR_LANG===k}">${l}</button>`).join("")}</div>`;}
@@ -7835,11 +7848,11 @@ function playScene(steps,done,opts={}){WARM_NEED=[];const noThai=sceneNoThai(ste
   const sh=setTimeout(()=>{if(go||UI.loadScr)return;UI.loadScr={n,total,scene:true,tip:LOAD_TIPS[Math.floor(Math.random()*LOAD_TIPS.length)]};render();},180),cap=setTimeout(start,8000);
   wait.forEach(i=>{const f=()=>{n++;if(UI.loadScr&&UI.loadScr.scene){UI.loadScr.n=n;const b=document.querySelector(".ldbar i"),c=document.querySelector(".ldn span");if(b)b.style.width=Math.round(n/total*100)+"%";if(c)c.textContent=`${n}/${total}`;}if(n>=total)setTimeout(start,UI.loadScr?200:0);};
     i.addEventListener("load",f,{once:true});i.addEventListener("error",f,{once:true});});}
-/* v1.91.82 (Man): a winner popup first, like the camp-beauty results — the announcer calls the title, the referee raises her hand — then the ceremony talk */
+/* The winner popup calls the result, then the winning boxer celebrates beside the other fighter. */
 function winPopHTML(m){const h=m.h,f=G.F[h.id];if(!f)return "";const label=honorLabel(h.kind,h.venue),ranked=h.kind==="local"||h.kind==="district";
-  return `<div class="winpop"><canvas class="wincv" width="640" height="360" data-winpop="1" aria-label="The referee raises the winner's hand"></canvas>
+  return `<div class="winpop"><canvas class="wincv" width="640" height="360" data-winpop="1" aria-label="Two boxers in the ring; the winner raises her arms"></canvas>
     <div class="wp-lines"><p class="wp-l" style="--d:200ms">${ranked?"Points for the whole round…":"The decision…"}</p><p class="wp-l" style="--d:1100ms">The winner of the ${esc(label)} Div ${esc(h.div||"")}…</p>
-    <p class="wp-name" style="--d:2000ms">${esc(f.name)}!</p><p class="wp-l sm" style="--d:2400ms">Sirichai Camp ${h.opp&&!/^อันดับ/.test(h.opp)?` · won ${esc(h.opp)}`:""}</p></div></div>
+    <p class="wp-name" style="--d:2000ms">${esc(f.name)}!</p><p class="wp-l sm" style="--d:2400ms">Sirichai Camp ${!ranked&&h.opp?` · beat ${esc(h.opp)}`:""}</p></div></div>
     <div class="mfoot"><button class="btn primary" data-act="winpopgo">To the ceremony ▸</button></div>`;}
 function playHonorQueue(done){while((G.awards||[]).length&&!(G.F[G.awards[0].id]))G.awards.shift();const h=(G.awards||[])[0];if(!h){AU.startMusic("hub");if(done)done();return;}AU.startMusic("victory");
   if(!h._pop){h._pop=1;UI.winNext=()=>playHonorQueue(done);UI.wpT0=0;UI.modal={type:"winpop",h};render();setTimeout(()=>{if(UI.modal&&UI.modal.type==="winpop"){AU.sfx("champ");}},2000);return;}
@@ -8972,8 +8985,8 @@ function questAfter(b,done){const S=b.quest,res=(G.cal||[]).slice(-1)[0];const w
   if(S.q==="challenge")op&&(win?G.rep+=1:0);
   if(S.q==="belt"){const venue=S.venue||"tha",V=STADIUMS[venue],slot=beltStore(G,venue),B=slot[S.div];
     if(win&&!S.defend){slot[S.div]={id:me.id,def:0,since:G.week};G.rep+=3;me.belts=(me.belts||0)+1;
-      recordHonor(G,"belt",me.id,S.div,G.week,venue==="tha"?null:venue,op?op.name:null);playHonorQueue(fin);return;}
-    if(win&&S.defend){B.def++;G.rep+=1.5;recordHonor(G,"defense",me.id,S.div,G.week,venue==="tha"?null:venue,op?op.name:null);playHonorQueue(fin);return;}
+      recordHonor(G,"belt",me.id,S.div,G.week,venue==="tha"?null:venue,op?op.name:null,op?op.id:null);playHonorQueue(fin);return;}
+    if(win&&S.defend){B.def++;G.rep+=1.5;recordHonor(G,"defense",me.id,S.div,G.week,venue==="tha"?null:venue,op?op.name:null,op?op.id:null);playHonorQueue(fin);return;}
     if(!win&&S.defend){slot[S.div]={id:op.id,def:0,since:G.week};playScene([{n:"nar",t:`The ${V.name} belt changes hands to ${op.name}`},{n:me.id,f:"sad",l:"fight",t:"I will win it back"}],fin,{bg:V.scene,look:"fight"});return;}
     if(!win&&!S.defend&&B)B.def++;}
   fin();}
@@ -9180,7 +9193,7 @@ function dmFight(meId,opId){const D=G.dm;if(!G.F[opId]){D.w[D.r].push(meId);dmAd
 function dmFinish(){const D=G.dm;const champ=D.w[2][0];D.champ=champ;
   let best=0;for(const id of D.mine){const lv=id===champ?4:(D.out[id]||1);best=Math.max(best,lv);}D.best=best;
   const prize=DM_PRIZE[best]||0;G.cash+=prize;G.wkFight=(G.wkFight||0)+prize;D.prize=prize;
-  if(best===4){G.rep+=4;roster(G).forEach(f=>f.morale=Math.min(100,f.morale+10));recordHonor(G,"dm",champ,G.F[champ].div,D.wk);}else if(best===3)G.rep+=1.5;
+  if(best===4){G.rep+=4;roster(G).forEach(f=>f.morale=Math.min(100,f.morale+10));recordHonor(G,"dm",champ,G.F[champ].div,D.wk,null,null,D.w[1].find(id=>id!==champ));}else if(best===3)G.rep+=1.5;
   G.dmLog=(G.dmLog||[]).concat([{wk:D.wk,champ,best,prize}]);save();}
 function dmBracketHTML(){const D=G.dm;if(!D)return "";const nm=id=>id&&G.F[id]?esc(G.F[id].name):"…";
   const cell=(id,r)=>{if(!id)return `<div class="dmc tbd">…</div>`;const won=(D.w[r]||[]).includes(id),lost=r<3&&D.w[r]&&D.w[r].length*2>((r===0?D.slots:D.w[r-1]).indexOf(id))&&!won;

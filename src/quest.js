@@ -220,8 +220,8 @@ function questAfter(b,done){const S=b.quest,res=(G.cal||[]).slice(-1)[0];const w
   if(S.q==="challenge")op&&(win?G.rep+=1:0);
   if(S.q==="belt"){const venue=S.venue||"tha",V=STADIUMS[venue],slot=beltStore(G,venue),B=slot[S.div];
     if(win&&!S.defend){slot[S.div]={id:me.id,def:0,since:G.week};G.rep+=3;me.belts=(me.belts||0)+1;
-      recordHonor(G,"belt",me.id,S.div,G.week,venue==="tha"?null:venue,op?op.name:null);playHonorQueue(fin);return;}
-    if(win&&S.defend){B.def++;G.rep+=1.5;recordHonor(G,"defense",me.id,S.div,G.week,venue==="tha"?null:venue,op?op.name:null);playHonorQueue(fin);return;}
+      recordHonor(G,"belt",me.id,S.div,G.week,venue==="tha"?null:venue,op?op.name:null,op?op.id:null);playHonorQueue(fin);return;}
+    if(win&&S.defend){B.def++;G.rep+=1.5;recordHonor(G,"defense",me.id,S.div,G.week,venue==="tha"?null:venue,op?op.name:null,op?op.id:null);playHonorQueue(fin);return;}
     if(!win&&S.defend){slot[S.div]={id:op.id,def:0,since:G.week};playScene([{n:"nar",t:`เข็มขัด${V.name}เปลี่ยนมือไปอยู่กับ${op.name}`},{n:me.id,f:"sad",l:"fight",t:"…ขอโทษนะคะ หนูจะเอาคืนมาให้ได้"}],fin,{bg:V.scene,look:"fight"});return;}
     if(!win&&!S.defend&&B)B.def++;}
   fin();}
@@ -428,7 +428,7 @@ function dmFight(meId,opId){const D=G.dm;if(!G.F[opId]){D.w[D.r].push(meId);dmAd
 function dmFinish(){const D=G.dm;const champ=D.w[2][0];D.champ=champ;
   let best=0;for(const id of D.mine){const lv=id===champ?4:(D.out[id]||1);best=Math.max(best,lv);}D.best=best;
   const prize=DM_PRIZE[best]||0;G.cash+=prize;G.wkFight=(G.wkFight||0)+prize;D.prize=prize;
-  if(best===4){G.rep+=4;roster(G).forEach(f=>f.morale=Math.min(100,f.morale+10));recordHonor(G,"dm",champ,G.F[champ].div,D.wk);}else if(best===3)G.rep+=1.5;
+  if(best===4){G.rep+=4;roster(G).forEach(f=>f.morale=Math.min(100,f.morale+10));recordHonor(G,"dm",champ,G.F[champ].div,D.wk,null,null,D.w[1].find(id=>id!==champ));}else if(best===3)G.rep+=1.5;
   G.dmLog=(G.dmLog||[]).concat([{wk:D.wk,champ,best,prize}]);save();}
 function dmBracketHTML(){const D=G.dm;if(!D)return "";const nm=id=>id&&G.F[id]?esc(G.F[id].name):"…";
   const cell=(id,r)=>{if(!id)return `<div class="dmc tbd">…</div>`;const won=(D.w[r]||[]).includes(id),lost=r<3&&D.w[r]&&D.w[r].length*2>((r===0?D.slots:D.w[r-1]).indexOf(id))&&!won;

@@ -325,11 +325,24 @@ FUN.kd.push("Uncle in front drops his sticky rice!");
 FUN.cheer.push("A kid in the back blows a whistle!");
 const CHANT=["Oh!!","Oh!! The crowd calls every kick!","The whole stadium goes 'Oh!'"],ODDS=["The odds just moved!","Ringside bettors flip the odds!","The bettors wave for takers!","The underdog backers are smiling now!"];
 const CHAR_COM={kati:["Sirichai blood! No stepping back!","Kati's smiling through the red face!","Grandpa Chai is smiling up there!"],mali:["Sweet smile. Not a sweet elbow.","Small frame, huge heart!","Chaiya form, all of it!"],rin:["Rin had that one calculated!","Measured with a ruler!","Lopburi brains!"],ploy:["Pure talent!","A true Korat buffalo swing!","She doesn't even look tired!"],fah:["Fah's playing to the camera again!","There's Fah's smirk!","Silver hair flying across the ring!"]};
+const RING_CALL={
+ hit:{punch:["{a} lands! Even the crowd winces!","Clean hook from {a}! The front row jumps!","{a} connects! The drum gets louder!"],
+  kick:["{a} whips a kick in! The crowd roars!","That kick from {a}! The gamblers stand!","{a} lands a kick! Hear that crowd!"],
+  knee:["{a} drives the knee in! Ouch!","Knee from {a}! The front row winces!","{a} lands the knee! No room to breathe!"],
+  elbow:["{a} lands an elbow! Check that brow!","Sharp elbow from {a}! The crowd gasps!","{a} slices through with an elbow!"]},
+ miss:["Whiff! {d} slips away beautifully!","{d} dodges! The front row felt the breeze!","{a} hits air! {d} grins back!"],
+ counter:["{a} fires back! What a counter!","Counter from {a}! The crowd erupts!","{a} counters! {d} walked into it!"],
+ kd:["{d} goes down! The whole ring holds its breath!","Down goes {d}! The referee counts!"],
+ ko:["That's it! {a} wins by knockout!","Lights out! {a} takes the knockout!"],
+ cut:["A cut on {d}! The doctor hurries in!","{d} is cut! Time to check the brow!"]};
+const RING_CRIT=["What a shot from {a}! The crowd roars!","{a} lands flush! Even the band stutters!"];
+function shortRing(e,R,fill,o){const L=e.ev==="hit"?(e.crit?RING_CRIT:RING_CALL.hit[e.w]):RING_CALL[e.ev];return L?fill(R(L),o):e.t;}
 function comLine(e,F,rng){if(e.ev==="wake")return e.t;const R=a=>a[Math.floor(rng()*a.length)];const fill=(s,o)=>s.replace(/\{(\w)\}/g,(m,k)=>o[k]??"");
   const o={a:e.an,d:e.dn,w:WNAME[e.w]||""};const h=fightHeat(F);const grp=F.B.f&&F.B.f.grp,C=grp&&CREATURE_COM[grp];
   // special bouts (rooster / bull / helmet gang): the caller goes all-in on jokes
   if(C){const cA=e.an===F.B.name;const k=e.ev==="hit"?(cA?"cHit":"pHit"):e.ev==="miss"?(cA?"cMiss":"pMiss"):e.ev==="counter"?"counter":e.ev==="kd"?(e.dn===F.B.name?"cKd":"pKd"):"";
-    if(k&&rng()<(e.ev==="kd"?.9:.5)){const L=C[k].filter(y=>y!==F.lastFun);const y=R(L);F.lastFun=y;return fill(y,{c:F.B.name,p:F.A.name});}}
+    if(k&&rng()<(e.ev==="kd"?.9:.5)){const L=C[k].filter(y=>y!==F.lastFun&&fill(y,{c:F.B.name,p:F.A.name}).length<=COM_MAX);if(L.length){const y=R(L);F.lastFun=y;return fill(y,{c:F.B.name,p:F.A.name});}}}
+  if(RING_CALL[e.ev]&&rng()<.7)return shortRing(e,R,fill,o);
   const fun=x=>{if(!x||C)return x;const L=FUN[e.ev==="counter"?"counter":e.ev==="kd"?"kd":e.ev==="miss"?"miss":e.ev==="hit"?"hit":""];
     const sk=e.ev==="kd"?"kd":e.ev!=="hit"?"":h>=3&&rng()<.5?"hot":e.w==="kick"?(/คอ|คาง|หน้า|neck|chin|head|face/i.test(x)?"kickHead":"kick"):e.w==="punch"?"punch":e.w==="knee"?"knee":"";
     if(e.ev==="hit"&&e.w==="kick"&&F.round>=2&&rng()<.14)return x+" "+R(CHANT);
@@ -339,8 +352,8 @@ function comLine(e,F,rng){if(e.ev==="wake")return e.t;const R=a=>a[Math.floor(rn
     if(L&&rng()<(e.ev==="kd"?.3:.11)){const y=R(L.filter(z=>z!==F.lastFun));F.lastFun=y;return x+" "+fill(y,o);}if(e.ev==="hit"&&rng()<.03)return x+" "+R(FUN.cheer);return x;};
   const hype=x=>{if(!h||!x)return x;const big=e.crit||e.ev==="kd"||e.ev==="skill"||e.ev==="rage";
     if(rng()>=(big?.8:.1+h*.1))return x;const L=HYPE[Math.min(4,h+(big&&h>=2?1:0))].filter(y=>y!==F.lastHype);const y=R(L);F.lastHype=y;return x+" "+y;};
-  const b=baseLine(e,F,R,fill,o,h);if(!b||COM.feel.includes(b))return b;let x=hype(b);if(x===b)x=fun(b);return x.length>COM_MAX?b:x;}
-const COM_MAX=100;
+  const b=baseLine(e,F,R,fill,o,h);if(!b||COM.feel.includes(b))return b;let x=hype(b);if(x===b)x=fun(b);return x.length>COM_MAX?shortRing(e,R,fill,o):x;}
+const COM_MAX=56;
 function baseLine(e,F,R,fill,o,h){
   if(e.ev==="ko"&&h>=2)return fill(R(KO_HOT),o);
   if(F.round===1&&F.rounds>=3&&!e.crit&&(e.ev==="miss"?Math.random()<.35:e.ev==="hit"&&Math.random()<.12))return R(COM.feel);

@@ -325,11 +325,25 @@ FUN.kd.push("ลุงแถวหน้าทำข้าวเหนียว�
 FUN.cheer.push("เด็กแถวหลังเป่านกหวีดลั่น!");
 const CHANT=["โอ้!!","โอ้!! คนดูร้องตามลูกเตะ!","เสียง 'โอ้!' ดังพร้อมกันทั้งสนาม!"],ODDS=["ราคาเปลี่ยนแล้วครับ!","เซียนขอบเวทีชูมือเปลี่ยนราคา!","เซียนเริ่มกวักมือเรียกต่อ!","คนแทงรองเริ่มยิ้มออก!"];
 const CHAR_COM={kati:["เลือดศิริชัยครับ! ไม่มีถอย!","กะทิยิ้มทั้งที่หน้าแดง!","ปู่ชัยต้องยิ้มอยู่บนฟ้าแน่!"],mali:["ยิ้มหวาน แต่ศอกไม่หวานเลย!","ตัวเล็กแต่ใจเกินตัวครับ!","ท่าดีไชยามาเต็ม!"],rin:["รินคำนวณไว้แล้วแน่ ๆ!","แม่นเหมือนวัดด้วยไม้บรรทัด!","ฉลาดลพบุรีครับ!"],ploy:["พรสวรรค์ล้วน ๆ ครับ!","เหวี่ยงควายโคราชของแท้!","หน้านิ่งเหมือนไม่เหนื่อยเลย!"],fah:["ฟ้าโชว์ใส่กล้องอีกแล้ว!","ฟ้ายิ้มเยาะแล้วครับ!","ผมเงินปลิวทั้งสนาม!"]};
+// Short live calls keep the action and the ringside wit in one readable beat.
+const RING_CALL={
+ hit:{punch:["{a} ฮุกเข้า! คนดูร้องโอ๊ยแทน!","{a} หมัดเข้า! ป้าแต๋วตีกะละมังลั่น!","หมัดของ {a} มา! เซียนทำข้าวหล่น!"],
+  kick:["{a} ฟาดแข้ง! เสียงโอ้ดังทั้งสนาม!","แข้ง {a} เข้า! เซียนขอบเวทีลุกพรึ่บ!","{a} เตะเข้า! ปี่ชวาแทบเร่งไม่ทัน!"],
+  knee:["{a} ตีเข่า! คนดูจุกแทน {d}!","เข่าของ {a} เข้า! ลุงตบเข่าฉาด!","{a} ย้ำเข่า! กองเชียร์ร้องตาม!"],
+  elbow:["{a} ศอกเข้า! คนดูเผลอจับคิ้ว!","ศอกของ {a} มา! เสียวแทนทั้งเวที!","{a} ฟันศอก! เซียนขอบเวทีสะดุ้ง!"]},
+ miss:["วืดครับ! {d} หลบเหมือนหลบเจ้าหนี้!","{d} หลบสวย! ลมเย็นถึงแถวหน้า!","{a} ฟาดลม! {d} ยิ้มมุมปากแล้ว!"],
+ counter:["{a} สวนทันควัน! คนดูตบเข่าฉาด!","สวนของ {a} มาแล้ว! เซียนร้องโอ้!","{a} สวนเปรี้ยง! {d} เข้ามาเอง!"],
+ kd:["{d} ร่วง! กรรมการนับ คนดูหยุดหายใจ!","ล้มแล้ว! {d} ลงไป เซียนลุกทั้งแถว!"],
+ ko:["{a} ปิดบัญชี! น็อกครับท่านผู้ชม!","จบแล้ว! {a} น็อก สนามแทบแตก!"],
+ cut:["{d} คิ้วแตก! หมอเวทีวิ่งแล้ว!","แตกแล้วครับ! {d} ต้องเช็กแผล!"]};
+const RING_CRIT=["โอ้โห! {a} เข้าเต็ม! คนดูร้องลั่น!","{a} เข้าเปรี้ยง! ปี่ชวาหยุดไปวิหนึ่ง!"];
+function shortRing(e,R,fill,o){const L=e.ev==="hit"?(e.crit?RING_CRIT:RING_CALL.hit[e.w]):RING_CALL[e.ev];return L?fill(R(L),o):e.t;}
 function comLine(e,F,rng){if(e.ev==="wake")return e.t;const R=a=>a[Math.floor(rng()*a.length)];const fill=(s,o)=>s.replace(/\{(\w)\}/g,(m,k)=>o[k]??"");
   const o={a:e.an,d:e.dn,w:WNAME[e.w]||""};const h=fightHeat(F);const grp=F.B.f&&F.B.f.grp,C=grp&&CREATURE_COM[grp];
   // special bouts (rooster / bull / helmet gang): the caller goes all-in on jokes
   if(C){const cA=e.an===F.B.name;const k=e.ev==="hit"?(cA?"cHit":"pHit"):e.ev==="miss"?(cA?"cMiss":"pMiss"):e.ev==="counter"?"counter":e.ev==="kd"?(e.dn===F.B.name?"cKd":"pKd"):"";
-    if(k&&rng()<(e.ev==="kd"?.9:.5)){const L=C[k].filter(y=>y!==F.lastFun);const y=R(L);F.lastFun=y;return fill(y,{c:F.B.name,p:F.A.name});}}
+    if(k&&rng()<(e.ev==="kd"?.9:.5)){const L=C[k].filter(y=>y!==F.lastFun&&fill(y,{c:F.B.name,p:F.A.name}).length<=COM_MAX);if(L.length){const y=R(L);F.lastFun=y;return fill(y,{c:F.B.name,p:F.A.name});}}}
+  if(RING_CALL[e.ev]&&rng()<.7)return shortRing(e,R,fill,o);
   const fun=x=>{if(!x||C)return x;const L=FUN[e.ev==="counter"?"counter":e.ev==="kd"?"kd":e.ev==="miss"?"miss":e.ev==="hit"?"hit":""];
     const sk=e.ev==="kd"?"kd":e.ev!=="hit"?"":h>=3&&rng()<.5?"hot":e.w==="kick"?(/คอ|คาง|หน้า|neck|chin|head|face/i.test(x)?"kickHead":"kick"):e.w==="punch"?"punch":e.w==="knee"?"knee":"";
     if(e.ev==="hit"&&e.w==="kick"&&F.round>=2&&rng()<.14)return x+" "+R(CHANT);
@@ -339,8 +353,8 @@ function comLine(e,F,rng){if(e.ev==="wake")return e.t;const R=a=>a[Math.floor(rn
     if(L&&rng()<(e.ev==="kd"?.3:.11)){const y=R(L.filter(z=>z!==F.lastFun));F.lastFun=y;return x+" "+fill(y,o);}if(e.ev==="hit"&&rng()<.03)return x+" "+R(FUN.cheer);return x;};
   const hype=x=>{if(!h||!x)return x;const big=e.crit||e.ev==="kd"||e.ev==="skill"||e.ev==="rage";
     if(rng()>=(big?.8:.1+h*.1))return x;const L=HYPE[Math.min(4,h+(big&&h>=2?1:0))].filter(y=>y!==F.lastHype);const y=R(L);F.lastHype=y;return x+" "+y;};
-  const b=baseLine(e,F,R,fill,o,h);if(!b||COM.feel.includes(b))return b;let x=hype(b);if(x===b)x=fun(b);return x.length>COM_MAX?b:x;}
-const COM_MAX=66;
+  const b=baseLine(e,F,R,fill,o,h);if(!b||COM.feel.includes(b))return b;let x=hype(b);if(x===b)x=fun(b);return x.length>COM_MAX?shortRing(e,R,fill,o):x;}
+const COM_MAX=50;
 function baseLine(e,F,R,fill,o,h){
   if(e.ev==="ko"&&h>=2)return fill(R(KO_HOT),o);
   if(F.round===1&&F.rounds>=3&&!e.crit&&(e.ev==="miss"?Math.random()<.35:e.ev==="hit"&&Math.random()<.12))return R(COM.feel);

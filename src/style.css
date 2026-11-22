@@ -665,7 +665,7 @@ td,th{padding:6px 6px}
 .gymstrip .tr-tag{font-size:12px}.gymstrip .tr-pre{position:absolute;left:4px;bottom:4px;font-size:11px;padding:1px 5px;background:rgba(20,16,32,.8);color:var(--fg)}
 .trow.one{grid-template-columns:1fr}
 @media (max-width:420px){.gymstrip .tr-anim{height:96px}}
-.caption.ov{position:absolute;left:8px;right:8px;bottom:8px;min-height:0;padding:6px 10px;font-size:clamp(14px,2.2vw,18px);line-height:1.4;background:rgba(16,12,30,.86)}
+.caption.ov{position:absolute;left:8px;right:8px;bottom:8px;min-height:0;padding:6px 10px;font-size:clamp(14px,2.2vw,18px);line-height:1.4;background:rgba(16,12,30,.86);display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .stagewrap .cards{bottom:auto;top:44px;left:auto;right:8px;transform:none;flex-direction:column;align-items:flex-end}
 .stagewrap .cards span{font-size:12px;padding:1px 5px}
 .fight.incorner #fstage{height:22vh;width:auto;max-width:100%;margin:0 auto}
