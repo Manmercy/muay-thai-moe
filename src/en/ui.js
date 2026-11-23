@@ -1,5 +1,5 @@
 // ================= MUAY THAI MOE v1.3 — UI =================
-const VERSION="1.91.110";
+const VERSION="1.91.111";
 const CUR_LANG=(typeof window!=="undefined"&&window.LANG)||"th";
 const TH_LABEL=String.fromCharCode(3652,3607,3618);
 function langSwitch(cls){return `<div class="langsw ${cls||""}" role="group" aria-label="Language">${[["th",TH_LABEL],["en","EN"]].map(([k,l])=>`<button class="lsb ${CUR_LANG===k?"on":""}" data-act="setlang" data-v="${k}" aria-pressed="${CUR_LANG===k}">${l}</button>`).join("")}</div>`;}
@@ -1204,8 +1204,16 @@ const PATCH_TAPE={id:"1.91.80",ver:"Muay Thai Moe v1.91",title:"Tapes, Coach Dae
  ["🧑‍🏫","Coach Daeng's talks","Every 4 weeks Coach calls you over about a girl's weak spot, hidden power or a move. On the pre-fight compare, 'แรง' is now 'Endurance'."],
  ["✨","Hidden powers hit harder","Past Lv.3 each hidden-power level adds 10% (was 5%), up to 170%. Girls who joined later got their missing skill points back."]],
  foot:"I've been keeping notes on every opponent. Just get me the tape, Manager, I'll handle the rest ✦"};
+const PATCH_FIX={id:"1.91.111",ver:"Muay Thai Moe v1.91.111",title:"News from Sirichai Camp",lead:"The first-year title path now follows the story, with updates to venues, letters and camp life",items:[
+ ["🏆","First-year finals","Ploy stays unbeaten in simulated bouts during year one and is seeded opposite Kati, as Fah is opposite Mali. If Kati and Mali win their semifinals, they meet their rivals in five-round finals"],
+ ["🥊","A clearer belt path","Win a title through a tournament, defend it in one bout, and enter a new tournament after losing it. Only fighters in the matching A or B division can enter"],
+ ["⚡","More Death Matches","The tournament opens on more weeks, and short entry lists are repaired so the bracket can continue"],
+ ["✉️","Rooster and bull letters","After the first encounter, each escaped animal sends another challenge through the mailbox every three weeks. Opponents grow with your camp"],
+ ["🎬","Title ceremony and market","Belt and cup ceremonies show the two fighters without a referee; the winner celebrates under fireworks. Night market outings use the market backdrop again"],
+ ["🎞️","Fight tapes and Rin","Tapes now cost hundreds to a few thousand baht. Rin reviews one free every three weeks, and many dialogue portraits use sharper original art"]],
+ foot:"Coach Daeng says: train hard, read your letters, and see you ringside! ✦"};
 /* popups queue up in order; each one is closed on its own */
-const PATCHES=[PATCH_AV,PATCH_TAPE],PATCH=PATCHES[PATCHES.length-1];
+const PATCHES=[PATCH_AV,PATCH_TAPE,PATCH_FIX],PATCH=PATCHES[PATCHES.length-1];
 function nextPatch(){const i=PATCHES.findIndex(p=>p.id===(G&&G.newsSeen));return i<0?PATCHES[0]:PATCHES[i+1]||null;}
 function maybeWhatsNew(){if(!G||G.ended||UI.scene)return;const P=nextPatch();if(!P)return;UI.modal={type:"whatsnew",id:P.id};}
 function whatsNewHTML(){const P=PATCHES.find(p=>p.id===(UI.modal&&UI.modal.id))||nextPatch()||PATCH,n=PATCHES.length-PATCHES.indexOf(P)-1;return `<div class="wnew"><span class="pill gold">Update · ${esc(P.ver)}</span><h2>🥊 ${esc(P.title)}</h2><p class="lead">${esc(P.lead)}</p>

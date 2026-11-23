@@ -1,5 +1,5 @@
 // ================= MUAY THAI MOE v1.3 — UI =================
-const VERSION="1.91.110";
+const VERSION="1.91.111";
 const CUR_LANG=(typeof window!=="undefined"&&window.LANG)||"th";
 const TH_LABEL=String.fromCharCode(3652,3607,3618);
 function langSwitch(cls){return `<div class="langsw ${cls||""}" role="group" aria-label="Language">${[["th",TH_LABEL],["en","EN"]].map(([k,l])=>`<button class="lsb ${CUR_LANG===k?"on":""}" data-act="setlang" data-v="${k}" aria-pressed="${CUR_LANG===k}">${l}</button>`).join("")}</div>`;}
@@ -1204,8 +1204,16 @@ const PATCH_TAPE={id:"1.91.80",ver:"Muay Thai Moe v1.91",title:"เทปคู�
  ["🧑‍🏫","ครูแดงเรียกคุย","ทุก 4 สัปดาห์ ครูแดงเรียกไปคุยเรื่องจุดอ่อน พลังแฝง หรือท่ามวยของลูกค่าย ในหน้าเทียบก่อนชก ค่า 'แรง' เปลี่ยนชื่อเป็น 'อึด'"],
  ["✨","พลังแฝงแรงขึ้น","อัปพลังแฝงเกิน Lv.3 ได้เพิ่มเลเวลละ 10% (เดิม 5%) สูงสุด 170% และลูกค่ายที่เข้ามาทีหลังได้แต้มสกิลที่ขาดคืนแล้ว"]],
  foot:"รินเก็บข้อมูลคู่ชกทุกคนไว้แล้วนะคะ ผู้จัดการแค่ซื้อเทปมา ที่เหลือหนูจัดการเอง ✦"};
+const PATCH_FIX={id:"1.91.111",ver:"Muay Thai Moe v1.91.111",title:"รายงานจากค่ายศิริชัย",lead:"จัดเส้นทางศึกปีแรกให้ตรงเรื่อง และเก็บรายละเอียดเวที จดหมาย กับชีวิตในค่าย",items:[
+ ["🏆","คู่ชิงปีแรกตามบท","พลอยไม่แพ้ไฟต์ที่เกมจำลองเองในปีแรก และอยู่คนละสายกับกะทิ เช่นเดียวกับฟ้ากับมะลิ ถ้ากะทิและมะลิชนะรอบรองชิง จะได้เจอคู่ปรับในรอบชิง 5 ยก"],
+ ["🥊","เส้นทางเข็มขัดชัดขึ้น","ชิงเข็มขัดครั้งแรกผ่านทัวร์นาเมนต์ ป้องกันแชมป์แบบนัดเดียว ถ้าเสียเข็มขัดต้องกลับไปชิงใหม่ และส่งนักมวยได้เฉพาะรุ่น A หรือ B ของตัวเอง"],
+ ["⚡","Death Match จัดบ่อยขึ้น","เพิ่มสัปดาห์ที่เปิดศึก และแก้การจัดสายเมื่อผู้เข้าแข่งไม่ครบ เพื่อให้การแข่งขันดำเนินต่อได้"],
+ ["✉️","ไก่หลุดกับวัวหลุดส่งจดหมาย","หลังเจอครั้งแรก ทั้งสองจะกลับมาท้าทายทางตู้จดหมายทุก 3 สัปดาห์ต่อราย และคู่ชกพัฒนาตามค่ายของเรา"],
+ ["🎬","ภาพประกาศแชมป์และฉากตลาด","ตอนรับเข็มขัดหรือถ้วย เวทีแสดงนักมวยสองคนโดยไม่มีกรรมการ ผู้ชนะชูมือท่ามกลางพลุ ส่วนการเดินตลาดนัดกลับไปใช้ฉากตลาด"],
+ ["🎞️","เทปคู่ชกและริน","ค่าเทปปรับให้อยู่ในหลักร้อยถึงหลักพัน รินช่วยดูเทปฟรีทุก 3 สัปดาห์ และภาพพูดหลายตัวเปลี่ยนไปใช้ต้นฉบับที่คมขึ้น"]],
+ foot:"ครูแดงฝากบอกว่า ซ้อมให้หนัก อ่านจดหมายให้ครบ แล้วเจอกันข้างเวที! ✦"};
 /* popups queue up in order; each one is closed on its own */
-const PATCHES=[PATCH_AV,PATCH_TAPE],PATCH=PATCHES[PATCHES.length-1];
+const PATCHES=[PATCH_AV,PATCH_TAPE,PATCH_FIX],PATCH=PATCHES[PATCHES.length-1];
 function nextPatch(){const i=PATCHES.findIndex(p=>p.id===(G&&G.newsSeen));return i<0?PATCHES[0]:PATCHES[i+1]||null;}
 function maybeWhatsNew(){if(!G||G.ended||UI.scene)return;const P=nextPatch();if(!P)return;UI.modal={type:"whatsnew",id:P.id};}
 function whatsNewHTML(){const P=PATCHES.find(p=>p.id===(UI.modal&&UI.modal.id))||nextPatch()||PATCH,n=PATCHES.length-PATCHES.indexOf(P)-1;return `<div class="wnew"><span class="pill gold">อัปเดต · ${esc(P.ver)}</span><h2>🥊 ${esc(P.title)}</h2><p class="lead">${esc(P.lead)}</p>
