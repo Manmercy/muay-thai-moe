@@ -43,7 +43,7 @@ const UNLOCK={blood:15,bday:15,hobby:15,personality:25,story:45,likesAll:55,disl
 // ---------- DATES ----------
 const ACTIVITIES={
   eat:{name:"Khao soi at Auntie Daeng's",cost:200,bg:"food",intro:["Auntie Daeng's khao soi shop is packed like every evening; you can smell the roasted chili from down the street","Auntie Daeng calls out from the door: \"Oh! The Sirichai crew is here. Your usual table, dear\""]},
-  market:{name:"Saturday night market stroll",cost:300,bg:"fair",intro:["The walking street glows with orange lights, the sound of a seung and the smell of grilled food drifting by","The market is extra busy tonight; a busking band is playing at the head of the street"]},
+  market:{name:"Saturday night market stroll",cost:300,bg:"market",intro:["The walking street glows with orange lights, the sound of a seung and the smell of grilled food drifting by","The market is extra busy tonight; a busking band is playing at the head of the street"]},
   temple:{name:"Making merit at the temple near camp",cost:0,bg:"temple",intro:["The temple grounds are calm; only the wind chimes on the chapel eaves can be heard","The sun has just set; candlelight in the hall glints off the golden Buddha"]},
   cafe:{name:"Cafe and fight replays",cost:250,bg:"cafe",intro:["A tiny alley cafe with plugs at every table, perfect for long fight-tape sessions","The smell of light-roast coffee drifts by; the shop TV plays Muay Thai on mute"]},
   river:{name:"Evening bike ride along the river",cost:100,bg:"river",intro:["A cool breeze blows along the riverside bike path as the sky turns orange","Kids chase each other on the bank; someone is fishing under the bridge"]},

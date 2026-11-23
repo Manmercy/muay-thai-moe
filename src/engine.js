@@ -1385,7 +1385,12 @@ function simNPCWeek(G){
     let pool=Object.values(G.F).filter(f=>f.div===div&&f.camp!=="player"&&f.camp!=="free"&&f.injury===0&&(f.lastFightAbs==null||gameWeek(G)-f.lastFightAbs>=3)&&!isBooked(G,f.id)&&eligible(G,f));
     pool.sort(()=>rng()-.5);
     let n=0;while(pool.length>=2&&n<2){const a=pool.pop(),b=pool.pop();n++;
-      const F=quickFight(a,b,Math.floor(rng()*1e9),3);applyResult(G,F,{tier:st});
+      const F=quickFight(a,b,Math.floor(rng()*1e9),3);
+      // Year-one Ploy is the unbeaten rival in the story. Keep simulated NPC
+      // results aligned with that arc; a player bout still uses its real result.
+      if((G.season||1)===1&&G.F.ploy.camp==="rival"&&(a.id==="ploy"||b.id==="ploy")&&F.result.win!==(a.id==="ploy"?"A":"B")){
+        F.result.win=a.id==="ploy"?"A":"B";F.result.type="ชนะคะแนน";}
+      applyResult(G,F,{tier:st});
       G.log.push(`[${div}] ${a.name} ${F.result.win==="A"?"ชนะ":F.result.win==="B"?"แพ้":"เสมอ"} ${b.name} (${F.result.type})`);}
   }
 }

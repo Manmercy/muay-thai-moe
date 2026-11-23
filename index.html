@@ -3771,7 +3771,12 @@ function simNPCWeek(G){
     let pool=Object.values(G.F).filter(f=>f.div===div&&f.camp!=="player"&&f.camp!=="free"&&f.injury===0&&(f.lastFightAbs==null||gameWeek(G)-f.lastFightAbs>=3)&&!isBooked(G,f.id)&&eligible(G,f));
     pool.sort(()=>rng()-.5);
     let n=0;while(pool.length>=2&&n<2){const a=pool.pop(),b=pool.pop();n++;
-      const F=quickFight(a,b,Math.floor(rng()*1e9),3);applyResult(G,F,{tier:st});
+      const F=quickFight(a,b,Math.floor(rng()*1e9),3);
+      // Year-one Ploy is the unbeaten rival in the story. Keep simulated NPC
+      // results aligned with that arc; a player bout still uses its real result.
+      if((G.season||1)===1&&G.F.ploy.camp==="rival"&&(a.id==="ploy"||b.id==="ploy")&&F.result.win!==(a.id==="ploy"?"A":"B")){
+        F.result.win=a.id==="ploy"?"A":"B";F.result.type="ชนะคะแนน";}
+      applyResult(G,F,{tier:st});
       G.log.push(`[${div}] ${a.name} ${F.result.win==="A"?"ชนะ":F.result.win==="B"?"แพ้":"เสมอ"} ${b.name} (${F.result.type})`);}
   }
 }
@@ -4254,7 +4259,7 @@ const UNLOCK={blood:15,bday:15,hobby:15,personality:25,story:45,likesAll:55,disl
 // ---------- DATES ----------
 const ACTIVITIES={
   eat:{name:"กินข้าวซอยร้านป้าแดง",cost:200,bg:"food",intro:["ร้านข้าวซอยป้าแดงคนแน่นเหมือนทุกเย็น กลิ่นพริกเผาลอยมาแต่ไกล","ป้าแดงตะโกนทักตั้งแต่หน้าร้าน “อ้าว! คนค่ายศิริชัยมาแล้ว นั่งโต๊ะเดิมเลยลูก”"]},
-  market:{name:"เดินตลาดนัดคืนวันเสาร์",cost:300,bg:"fair",intro:["ถนนคนเดินเต็มไปด้วยไฟสีส้ม เสียงซึงกับกลิ่นของปิ้งย่างลอยมาเป็นระยะ","ตลาดนัดคืนนี้คนเยอะเป็นพิเศษ มีวงดนตรีเปิดหมวกเล่นอยู่หัวถนน"]},
+  market:{name:"เดินตลาดนัดคืนวันเสาร์",cost:300,bg:"market",intro:["ถนนคนเดินเต็มไปด้วยไฟสีส้ม เสียงซึงกับกลิ่นของปิ้งย่างลอยมาเป็นระยะ","ตลาดนัดคืนนี้คนเยอะเป็นพิเศษ มีวงดนตรีเปิดหมวกเล่นอยู่หัวถนน"]},
   temple:{name:"ไหว้พระที่วัดใกล้ค่าย",cost:0,bg:"temple",intro:["ลานวัดเงียบสงบ ได้ยินแต่เสียงกระดิ่งลมจากชายคาโบสถ์","พระอาทิตย์เพิ่งตก แสงเทียนในวิหารสะท้อนกับองค์พระสีทอง"]},
   cafe:{name:"นั่งคาเฟ่ ดูไฟต์ย้อนหลัง",cost:250,bg:"cafe",intro:["คาเฟ่เล็ก ๆ ในซอยมีปลั๊กทุกโต๊ะ เหมาะกับการเปิดคลิปไฟต์ดูยาว ๆ","กลิ่นกาแฟคั่วอ่อนลอยมา ทีวีในร้านเปิดรายการมวยไทยเงียบ ๆ"]},
   river:{name:"ปั่นจักรยานเลียบแม่น้ำตอนเย็น",cost:100,bg:"river",intro:["ทางจักรยานเลียบแม่น้ำมีลมเย็นพัดมาเรื่อย ๆ ฟ้ากำลังเปลี่ยนเป็นสีส้ม","เด็ก ๆ วิ่งไล่จับกันริมตลิ่ง มีคนตกปลาอยู่ใต้สะพาน"]},
@@ -8916,7 +8921,7 @@ AU.gsfx=function(kind,a){if(!this.init()||this.muted||!SETTINGS.sfx)return;const
   if(kind==="shimmer")for(let i=0;i<6;i++)T(i*.05,{f:1400+Math.random()*1400,type:"sine",dur:.12,peak:.06});};
 
 // ================= MUAY THAI MOE v1.3 — UI =================
-const VERSION="1.91.109";
+const VERSION="1.91.110";
 const CUR_LANG=(typeof window!=="undefined"&&window.LANG)||"th";
 const TH_LABEL=String.fromCharCode(3652,3607,3618);
 function langSwitch(cls){return `<div class="langsw ${cls||""}" role="group" aria-label="Language">${[["th",TH_LABEL],["en","EN"]].map(([k,l])=>`<button class="lsb ${CUR_LANG===k?"on":""}" data-act="setlang" data-v="${k}" aria-pressed="${CUR_LANG===k}">${l}</button>`).join("")}</div>`;}
@@ -10567,7 +10572,7 @@ function fightHTML(){const U=UI.fight,b=U.b,me=G.F[b.a],op=G.F[b.b],F=U.F;
   let mid="";
   if(U.stage==="pre"){const c=condition(me);const P=personaOf(op);
     mid=`<div class="pre px"><div class="vsrow"><div class="vsc">${faceImg(me)}<b>${esc(me.name)}</b>${hotBadge(me,1)}<span class="meta">${styleOf(me.a)}</span></div><span class="vs">VS</span><div class="vsc">${faceImg(op)}<b>${esc(op.name)}</b>${hotBadge(op,1)}<span class="meta">${styleOf(op.a)} · ${rec(op)}</span></div></div>
-     ${P?`<p class="quote">“${esc(P.line)}”</p>`:""}${h2hText(op)?`<p class="meta goldt center">${h2hText(op)}</p>`:""}${op.id==="ploy"&&(op.aura||0)>=.1?`<p class="meta redt center">👑 อัจฉริยะไร้พ่าย · ปีนี้ยังไม่มีใครล้มเธอได้ เธออ่านเกมขาดกว่าทุกคน</p>`:""}
+     ${P?`<p class="quote">“${esc(P.line)}”</p>`:""}${h2hText(op)?`<p class="meta goldt center">${h2hText(op)}</p>`:""}${op.id==="ploy"&&(op.aura||0)>=.1&&(op.rec?.l||0)===0?`<p class="meta redt center">👑 อัจฉริยะไร้พ่าย · ปีนี้ยังไม่มีใครล้มเธอได้ เธออ่านเกมขาดกว่าทุกคน</p>`:""}
      <div class="prebox"><div><small>แผน</small><b>${PLANS[U.plan].name}</b></div><div><small>เป้าหมาย</small><b>${TGT[U.tac.target]}</b></div><div><small>ความพร้อม</small><b class="num">${c}</b></div></div>
      ${me.fatigue>25?`<p class="meta center warnt">ล้า ${Math.round(me.fatigue)} · ขึ้นเวทีด้วยแรง ${Math.round(clamp(100-me.fatigue*.4,40,100))}% และหมดแรงเร็วกว่าปกติ</p>`:""}
      ${preCompare(me,op,b)}
@@ -13641,7 +13646,7 @@ for(const id of ['f_tiger','f_mali'])CHAT.fah.find(t=>t.id===id).when=G=>inCamp(
 <script>
 (function(){
 /* v1.87: Thai code ships inside index.html; English code (en.js) and the dictionary (i18n.js) load only when needed */
-var B="867f7cd7d2";
+var B="ccd8561516";
 var L="";try{L=localStorage.getItem("mtm_lang")||"";}catch(e){}
 try{var h=(location.hash||"").match(/lang=(th|en)/);if(h)L=h[1];}catch(e){}
 if(L!=="th"&&L!=="en")L="th";
