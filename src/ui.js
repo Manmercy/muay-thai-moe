@@ -37,11 +37,12 @@ const BGIMG={river_dawn:"bg_river_dawn.webp",gang_hq:"bg_gang_hq.webp",gang_hide
   /* v1.89.7: new scenes, ready to use */camp_night:"bg_camp_night.webp",camp_rain:"bg_camp_rain.webp",songkran:"bg_songkran.webp",newyear:"bg_newyear.webp",kitchen:"bg_kitchen.webp",hill:"bg_hill.webp",tvstudio:"bg_tvstudio.webp",live_corner:"bg_live_corner.webp",hospital:"bg_hospital.webp",vector_lab:"bg_vector_lab.webp",loy_night:"bg_loy_night.webp",sportsday:"bg_sportsday.webp",dorm_room:"bg_dorm_room.webp"};
 /* v1.91.26 (Man): every SSR card has its own illustration — shown full-screen at its moment in the card story, viewable in the card's
    details once owned, and usable as the card face (G.cardArt[id]=1). at = the story line it appears on (it stays for the next line too). */
-const CARD_ART={e_champ:{f:"ssr_e_champ",f2:"ssr_e_champ_2",at:1},g_kati_ssr:{f:"ssr_g_kati",f2:"ssr_g_kati_2",at:5},g_mali_ssr:{f:"ssr_g_mali",f2:"ssr_g_mali_2",at:5},g_rin_ssr:{f:"ssr_g_rin",f2:"ssr_g_rin_2",at:4},g_ploy_ssr:{f:"ssr_g_ploy",f2:"ssr_g_ploy_2",at:5},
-  g_fah_ssr:{f:"ssr_g_fah",f2:"ssr_g_fah_2",at:3},g_team_ssr:{f:"ssr_g_team",f2:"ssr_g_team_2",at:3},lg_team_ssr:{f:"ssr_lg_team",f2:"ssr_lg_team_2",at:0},
-  lv_ssr_kati:{f:"ssr_love_kati",f2:"ssr_love_kati_2",at:0},lv_ssr_mali:{f:"ssr_love_mali",f2:"ssr_love_mali_2",at:0},lv_ssr_rin:{f:"ssr_love_rin",f2:"ssr_love_rin_2",at:0},lv_ssr_ploy:{f:"ssr_love_ploy",f2:"ssr_love_ploy_2",at:0},lv_ssr_fah:{f:"ssr_love_fah",f2:"ssr_love_fah_2",at:0},lv_ssr_team:{f:"ssr_love_team",f2:"ssr_love_team_2",at:0},
+const CARD_ART={e_champ:{f:"ssr_e_champ",f2:"ssr_e_champ_2",at:1},g_kati_ssr:{f:"ssr_g_kati",f2:"ssr_g_kati_2",at:5},g_mali_ssr:{f:"ssr_g_mali",f2:"ssr_g_mali_2",at:5},g_rin_ssr:{f:"ssr_g_rin",f2:"ssr_g_rin_2",at:4},g_ploy_ssr:{f:"ssr_g_ploy.jpg",f2:"ssr_g_ploy_2.jpg",at:5},
+  g_fah_ssr:{f:"ssr_g_fah",f2:"ssr_g_fah_2",at:3},g_team_ssr:{f:"ssr_g_team.jpg",f2:"ssr_g_team_2",at:3},lg_team_ssr:{f:"ssr_lg_team",f2:"ssr_lg_team_2",at:0},
+  lv_ssr_kati:{f:"ssr_love_kati",f2:"ssr_love_kati_2",at:0},lv_ssr_mali:{f:"ssr_love_mali",f2:"ssr_love_mali_2",at:0},lv_ssr_rin:{f:"ssr_love_rin",f2:"ssr_love_rin_2",at:0},lv_ssr_ploy:{f:"ssr_love_ploy",f2:"ssr_love_ploy_2.jpg",at:0},lv_ssr_fah:{f:"ssr_love_fah",f2:"ssr_love_fah_2",at:0},lv_ssr_team:{f:"ssr_love_team.jpg",f2:"ssr_love_team_2",at:0},
   /* SR cards: one illustration each, no secret art */
-  x_kati_sr1:{f:"sr_x_kati_sr1",at:1},x_rin_sr1:{f:"sr_x_rin_sr1",at:1},e_beatploy:{f:"sr_e_beatploy",at:8},e_fahjoin:{f:"sr_e_fahjoin",at:1},e_ployjoin:{f:"sr_e_ployjoin",at:1},h_kati:{f:"sr_h_kati",at:5},h_mali:{f:"sr_h_mali",at:6},h_rin:{f:"sr_h_rin",at:4},h_ploy:{f:"sr_h_ploy",at:0},h_fah:{f:"sr_h_fah",at:7},g_kati_sr:{f:"sr_g_kati_sr",at:0},g_mali_sr:{f:"sr_g_mali_sr",at:0},g_rin_sr:{f:"sr_g_rin_sr",at:3},g_ploy_sr:{f:"sr_g_ploy_sr",at:1},g_fah_sr:{f:"sr_g_fah_sr",at:0},m_baghard:{f:"sr_m_baghard",at:2},m_livehot:{f:"sr_m_livehot",at:6},lk_kati:{f:"sr_lk_kati",at:3},lk_mali:{f:"sr_lk_mali",at:8},lk_rin:{f:"sr_lk_rin",at:5},lk_ploy:{f:"sr_lk_ploy",at:6},lk_fah:{f:"sr_lk_fah",at:5},lg_kati_sr:{f:"sr_lg_kati_sr",at:4},lg_mali_sr:{f:"sr_lg_mali_sr",at:1},lg_rin_sr:{f:"sr_lg_rin_sr",at:1},lg_ploy_sr:{f:"sr_lg_ploy_sr",at:2},lg_fah_sr:{f:"sr_lg_fah_sr",at:1}};
+  x_kati_sr1:{f:"sr_x_kati_sr1",at:1},x_rin_sr1:{f:"sr_x_rin_sr1",at:1},e_beatploy:{f:"sr_e_beatploy.jpg",at:8},e_fahjoin:{f:"sr_e_fahjoin.jpg",at:1},e_ployjoin:{f:"sr_e_ployjoin.jpg",at:1},h_kati:{f:"sr_h_kati",at:5},h_mali:{f:"sr_h_mali",at:6},h_rin:{f:"sr_h_rin",at:4},h_ploy:{f:"sr_h_ploy",at:0},h_fah:{f:"sr_h_fah",at:7},g_kati_sr:{f:"sr_g_kati_sr",at:0},g_mali_sr:{f:"sr_g_mali_sr",at:0},g_rin_sr:{f:"sr_g_rin_sr",at:3},g_ploy_sr:{f:"sr_g_ploy_sr",at:1},g_fah_sr:{f:"sr_g_fah_sr",at:0},m_baghard:{f:"sr_m_baghard",at:2},m_livehot:{f:"sr_m_livehot",at:6},lk_kati:{f:"sr_lk_kati",at:3},lk_mali:{f:"sr_lk_mali",at:8},lk_rin:{f:"sr_lk_rin",at:5},lk_ploy:{f:"sr_lk_ploy",at:6},lk_fah:{f:"sr_lk_fah",at:5},lg_kati_sr:{f:"sr_lg_kati_sr",at:4},lg_mali_sr:{f:"sr_lg_mali_sr",at:1},lg_rin_sr:{f:"sr_lg_rin_sr",at:1},lg_ploy_sr:{f:"sr_lg_ploy_sr.jpg",at:2},lg_fah_sr:{f:"sr_lg_fah_sr.jpg",at:1}};
+const cardArtFile=f=>/\.(?:png|jpe?g|webp)$/i.test(f)?f:`${f}.webp`;
 function cardArtOf(id){const A=CARD_ART[id];return A&&CARDS[id]?A:null;}
 /* the hidden art: box cards open it at card Lv.3 (spare copies) · story cards can't be duplicated, so theirs opens a year after you got the card */
 const ART2_WK=52;
@@ -54,7 +55,7 @@ function cardArtSteps(id,steps){const A=cardArtOf(id);if(!A)return steps;const o
 function cardArtInit(){if(cardArtInit.ok)return;cardArtInit.ok=1;for(const k in CARD_ART)if(CARDS[k])CARDS[k]._art={id:k,f:CARD_ART[k].f,f2:CARD_ART[k].f2||null};}
 const cardFaceArt=C=>{cardArtInit();const A=C._art;if(!A||!G||!G.cardArt)return null;const w=G.cardArt[A.id],o=(G.cards||{})[A.id];if(!w||!o||!art1Open(A.id,o))return null;
   if(w===2&&art2Open(A.id,o))return A.f2;return A.f;};
-const cardFaceSrc=C=>{const fa=cardFaceArt(C);if(fa)return `${ASSET}${fa}.webp`;if(C.face)return `${ASSET}${C.face}.webp`;const scene=(C.steps||[]).find(s=>s.n===C.c)||{},mood=scene.f||"happy",look=scene.l||"casual";
+const cardFaceSrc=C=>{const fa=cardFaceArt(C);if(fa)return `${ASSET}${cardArtFile(fa)}`;if(C.face)return `${ASSET}${C.face}.webp`;const scene=(C.steps||[]).find(s=>s.n===C.c)||{},mood=scene.f||"happy",look=scene.l||"casual";
   if(look==="train")return `${ASSET}${C.c}_train_face.webp`;
   if(look==="thai"&&THAI_IDS.includes(C.c))return `${ASSET}${C.c}_thai${thaiSuf(mood)}_face.webp`;
   if(look==="fight")return `${ASSET}${C.c}_${["happy","sad","flustered","angry"].includes(mood)?mood:"happy"}_face.webp`;
@@ -188,7 +189,7 @@ let PREF=false;
 function prefetchArt(){if(PREF||!G)return;PREF=true;const c=navigator.connection||{};if(c.saveData||/2g/.test(c.effectiveType||""))return;
   const S=new Set();Object.values(BGIMG).forEach(b=>{if(b)S.add(ASSET+b);});
   /* v1.91.38: the cards you own — their illustrations and the character picture on the card face */
-  try{for(const id in (G.cards||{})){const C=CARDS[id];if(!C)continue;const A=CARD_ART[id];if(A){S.add(`${ASSET}${A.f}.webp`);if(A.f2)S.add(`${ASSET}${A.f2}.webp`);}const f=cardFaceSrc(C);S.add(cardBodySrc(f));}}catch(e){}
+  try{for(const id in (G.cards||{})){const C=CARDS[id];if(!C)continue;const A=CARD_ART[id];if(A){S.add(`${ASSET}${cardArtFile(A.f)}`);if(A.f2)S.add(`${ASSET}${cardArtFile(A.f2)}`);}const f=cardFaceSrc(C);S.add(cardBodySrc(f));}}catch(e){}
   SHEET_IDS.forEach(id=>S.add(`${ASSET}${id}_sheet.webp`));S.add(`${ASSET}coach.png`);for(const id of CANON_IDS){const f=G.F[id];if(!f||!(f.camp==="player"||f.met))continue;for(const l of ["casual","fight","train"])for(const m of ["happy","flustered","pout","sad"])S.add(stand(id,l,m));}
   /* v1.91.28: then every fight sprite, special move and NPC portrait (one-time — the service worker keeps them), so bouts and scenes don't pop in */
   const slow=/3g/.test(c.effectiveType||"");(window.__MTM_ART||[]).forEach(n=>{if(!slow||G&&Object.values(G.F||{}).some(f=>n.startsWith((f.sprite||f.id||"")+"_")))S.add(ASSET+n);});
@@ -759,8 +760,8 @@ function albRestore(){const y=UI.albY||0;if(!y)return;const go=()=>{const o=docu
 function cardArtPanel(id){const A=cardArtOf(id);if(!A)return "";const o=(G.cards||{})[id]||{},w=(G.cardArt||{})[id]||0,open2=art2Open(id,o);
   if(!art1Open(id,o))return `<div class="cdart"><div class="cdartrow"><button class="cdartimg lock" data-act="cardplay" data-v="${id}"><b>🔒</b><span>อ่านเรื่องราวการ์ดเพื่อปลดภาพ</span></button></div></div>`;
   const lab=w===2&&open2?"ภาพลับ":w?"ภาพพิเศษ":"หน้าตัวละคร";
-  return `<div class="cdart"><div class="cdartrow"><button class="cdartimg" data-act="cardart" data-v="${id}" aria-label="ดูภาพเต็ม"><img src="${ASSET}${A.f}.webp" alt="" loading="lazy"><span>🔍 ภาพพิเศษ</span></button>
-    ${A.f2?(open2?`<button class="cdartimg s2" data-act="cardart2" data-v="${id}" aria-label="ดูภาพลับ"><img src="${ASSET}${A.f2}.webp" alt="" loading="lazy"><span>✦ ภาพลับ</span></button>`:`<div class="cdartimg lock"><b>🔒</b><span>ภาพลับ · ${art2Hint(id,o)}</span></div>`):""}</div>
+  return `<div class="cdart"><div class="cdartrow"><button class="cdartimg" data-act="cardart" data-v="${id}" aria-label="ดูภาพเต็ม"><img src="${ASSET}${cardArtFile(A.f)}" alt="" loading="lazy"><span>🔍 ภาพพิเศษ</span></button>
+    ${A.f2?(open2?`<button class="cdartimg s2" data-act="cardart2" data-v="${id}" aria-label="ดูภาพลับ"><img src="${ASSET}${cardArtFile(A.f2)}" alt="" loading="lazy"><span>✦ ภาพลับ</span></button>`:`<div class="cdartimg lock"><b>🔒</b><span>ภาพลับ · ${art2Hint(id,o)}</span></div>`):""}</div>
     <button class="btn sm ${w?"gold":""}" data-act="cardface" data-v="${id}">หน้าการ์ด: ${lab} ⟳</button></div>`;}
 function cardInfoHTML(id){const C=CARDS[id];if(!C)return "";const o=(G.cards||{})[id],R=CARD_R[C.r],who=G.F[C.c]?G.F[C.c].name:"",src=C.lg?"ตู้ลอยกระทง (ช่วงเทศกาล)":C.g?"ตู้สุ่มการ์ด":`${C.hint||"ติดตามเนื้อเรื่องไปเรื่อย ๆ"}`;
   if(!o)return `<h2>การ์ดที่ยังไม่ได้</h2><div class="cdet" style="--rc:#77747d"><div class="ccard big lock" data-rarity="${C.r}">${cardArtHTML(C,true)}<span class="tstar">${"★".repeat(R.s)}</span><b>???</b><small>${C.r}</small></div>
@@ -1231,7 +1232,7 @@ function modalHTML(){const m=UI.modal;let body="",foot=true;
   if(m.type==="gift")body=giftHTML(m.id);
   if(m.type==="petname"){const p=(G.pets||[])[m.i];if(!p){UI.modal=null;return "";}body=`<h2>ตั้งชื่อ${esc(PETS[p.k].name)}</h2><div class="petnm"><img class="peti" src="${petIcon(p.k)}" alt=""><input id="petname" maxlength="12" value="${esc(p.name)}" autocomplete="off"></div><p class="meta">ชื่อนี้จะโผล่ในฉากต่าง ๆ ของค่าย</p><button class="btn primary" id="petnamebtn" data-act="petnamesave" data-v="${m.i}">ตั้งชื่อ</button>`;}
   if(m.type==="card"){body=cardInfoHTML(m.id);foot=false;}
-  if(m.type==="cardart"){const A=cardArtOf(m.id),C=CARDS[m.id];if(!A||!C){UI.modal=null;return "";}body=`<div class="cdfull" data-act="cardinfo" data-v="${m.id}"><img src="${ASSET}${m.w===2&&A.f2?A.f2:A.f}.webp" alt=""><p class="meta center">${esc(C.t)} · แตะเพื่อกลับ</p></div>`;foot=false;}
+  if(m.type==="cardart"){const A=cardArtOf(m.id),C=CARDS[m.id];if(!A||!C){UI.modal=null;return "";}body=`<div class="cdfull" data-act="cardinfo" data-v="${m.id}"><img src="${ASSET}${cardArtFile(m.w===2&&A.f2?A.f2:A.f)}" alt=""><p class="meta center">${esc(C.t)} · แตะเพื่อกลับ</p></div>`;foot=false;}
   if(m.type==="contest"){body=contestHTML();foot=false;}
   if(m.type==="waikhru"){body=waiKhruHTML();foot=false;}
   if(m.type==="gbox"){body=gboxHTML();foot=false;}
@@ -1369,7 +1370,7 @@ function sceneHTML(){const S=UI.scene,c=S.cur||{};const sp=c.n==="coach"?{name:c
     return `<img class="stand ${pos} ${active&&!m.back?"on":"off"}${m.back?" back":""}"${sty} src="${src}" alt="">`;}).join("");
   const tag="";
   return `<div class="vn" role="dialog" aria-label="ฉากเนื้อเรื่อง"><div class="vbg bg-${S.bg==="camp"?"gym":S.bg}" ${bgKey?`style="background-image:url(${ASSET}${bgKey})"`:""}></div>
-   ${c.cg?`<div class="vcg" style="--cg:url(${ASSET}${c.cg}.webp)"><img src="${ASSET}${c.cg}.webp" alt=""></div>`:`<div class="cast ${nOn>2?"grp":nOn>1?"duo":""}">${cast}</div>`}
+   ${c.cg?`<div class="vcg" style="--cg:url(${ASSET}${cardArtFile(c.cg)})"><img src="${ASSET}${cardArtFile(c.cg)}" alt=""></div>`:`<div class="cast ${nOn>2?"grp":nOn>1?"duo":""}">${cast}</div>`}
    ${S.award?`<div class="awardfx" aria-hidden="true">${Array.from({length:24},(_,i)=>`<i style="--i:${i}"></i>`).join("")}${[["14%","22%","0s","#ffd45a"],["78%","16%","-.8s","#ff6b6b"],["50%","30%","-1.6s","#8fd3ff"],["30%","12%","-1.2s","#c785e6"],["66%","34%","-.4s","#9dffb0"]].map(([x,y,d,c])=>`<span class="fw" style="--x:${x};--y:${y};--d:${d};--c:${c}">${Array.from({length:12},(_,a)=>`<b style="--a:${a}"></b>`).join("")}</span>`).join("")}<div class="awardbelt${(Date.now()-(S.awT0||(S.awT0=Date.now())))>1500?" settled":""}"><span class="strap"></span><span class="seal">★</span><span class="strap"></span></div><div class="awardname${(Date.now()-(S.awT0||Date.now()))>1500?" settled":""}">${esc(honorLabel(S.award.kind,S.award.venue))}</div></div>`:""}
    ${c.choice?"":`<button class="vtap" data-act="vnext" aria-label="ไปต่อ"></button>`}
    <div class="vbox px" data-act="${c.choice?"":"vnext"}" style="--c:${sp.color||"var(--gold)"}">
