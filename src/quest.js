@@ -162,7 +162,7 @@ function mailWeekly(G){G.mail=G.mail||[];if(typeof thiefMail==="function"){thief
     if(early){addMail(G,{kind:"quest",q:"gang",qk:k,early:1,from:"แม่ค้าตลาดเช้า (ไม่ลงชื่อ)",title:"เสี่ยหมวกทองคำลงมาเอง!",body:`ลูกน้องมันแพ้ค่ายศิริชัยมาสามรอบติด เสี่ยหมวกทองคำเสียหน้าหนัก เลยลงมาคุมตลาดเอง แถมรู้ว่าค่ายติดหนี้มันอยู่ เขาลือกันว่าถ้าใครล้มเสี่ยได้ หนี้ทั้งตลาดก็จบ`,exp:G.week+3});G.gang.nextAbs=gameWeek(G)+5;}
     else addMail(G,{kind:"quest",q:"gang",qk:k,from:"แม่ค้าตลาดเช้า (ไม่ลงชื่อ)",title:G.gang.st>=4?"เสี่ยหมวกทองคำมาเอง!":"พวกหมวกกันน็อกกลับมาอีกแล้ว",
       body:[`พวกมันกลับมาเก็บดอกอีกแล้ว คราวนี้มี "${QK[k].name}" มาคุม ใครไม่จ่ายร้อยละยี่สิบ โดนพังแผง ช่วยพวกเราอีกครั้งได้ไหม`,`ไอ้${QK[k].name}มันขู่ว่าจะยึดรถเข็นลูกชิ้นของยายแหวว ถ้าค่ายศิริชัยยังไม่หยุดมันก็ไม่มีใครหยุดได้แล้ว`,`ตลาดทั้งตลาดเงียบหมด เพราะ "${QK[k].name}" มานั่งเฝ้าตั้งแต่ตีห้า ขอร้องล่ะ`,`เขาว่าหัวหน้าใหญ่ "${QK[k].name}" จะมาเก็บเงินเอง ทั้งตลาดเป็นหนี้มันหมด ถ้าล้มตัวนี้ได้ แก๊งจบแน่`][G.gang.st-1],exp:G.week+3});G.gang.nextAbs=gameWeek(G)+5;}
-  // The helmet gang keeps returning; escaped animals remain one-off mail events.
+  // The helmet gang keeps returning; escaped-animal challenges are sent by mail below.
   if(G.week>=7&&G.week<=50){const year=G.season||1;
     if(G.gang.st>=5&&gameWeek(G)>=(G.gang.loopNextAbs||0)&&!G.mail.some(m=>m.q==="gang"&&!m.done&&!m.expired)){
       const i=G.gang.loopN||0,k=["gang2","gang3","gang4","gang6","gang5"][i%5];G.gang.loopN=i+1;G.gang.loopNextAbs=gameWeek(G)+Math.max(3,10-year);
@@ -176,9 +176,17 @@ function mailWeekly(G){G.mail=G.mail||[];if(typeof thiefMail==="function"){thief
   // v1.69: Auntie Taew writes in for help at her som tam stall every few weeks (a minigame that does not use the camp activity)
   if(G.week>=4&&G.week<=49&&gameWeek(G)>=(G.tamNextAbs||4)&&!G.mail.some(m=>m.kind==="job"&&!m.done&&!m.expired)){G.tamNextAbs=gameWeek(G)+3+Math.floor(rng()*2);
     const T=TAM_MAIL[(G.mailN_tam=(G.mailN_tam||0)+1)%TAM_MAIL.length];addMail(G,{kind:"job",job:"somtam",exp:G.week+1,from:"ป้าแต๋ว ร้านส้มตำหน้าวัด",title:T[0],body:T[1]});}
-  // cow on the loose — once, mid season
+  // First escaped-animal letters; later escapes use the same mailbox route.
   if(!G.mailSeen.cow&&G.week>=9&&rng()<.6){G.mailSeen.cow=1;addMail(G,{kind:"quest",q:"cow",qk:"bull1",from:"ลุงเฉลิม ฟาร์มโคนม",title:"ช่วยด้วย! วัวหลุด!!",body:"แม่นมสดวัวที่ดุที่สุดในฟาร์มหลุดคอก มันดูมวยทางทีวีทุกคืนจนตั้งการ์ดเป็น! ตอนนี้ยืนขวางถนนหน้าตลาด ใครเข้าใกล้โดนถีบหมด ส่งนักมวยมาช่วยที ลุงให้ค่าเหนื่อยพร้อมนมสดอีกหนึ่งถัง",exp:G.week+2,pay:1500});}
   if(!G.mailSeen.rooster&&G.week>=5&&rng()<.6){G.mailSeen.rooster=1;addMail(G,{kind:"quest",q:"rooster",qk:"rooster1",from:"เสี่ยต๋อง สนามไก่",title:"ไก่ผมหลุดเข้าค่ายคุณ",body:"ไก่แจ้หัวร้อนของผมบินข้ามรั้วไปจิกกระสอบทรายค่ายคุณตั้งแต่เช้า ใครเข้าใกล้มันตั้งท่ามวยใส่ ช่วยจับให้ทีครับ ผมให้ค่าจ้างและไข่ไก่สองแผง",exp:G.week+2,pay:1000});}
+  G.runawayNext=G.runawayNext||{};
+  for(const q of ["rooster","cow"])if(G.mailSeen[q]&&G.runawayNext[q]==null){const first=G.mail.find(m=>m.q===q&&!m.repeat);G.runawayNext[q]=first?.expAbs!=null?first.expAbs+4:gameWeek(G)+2;}
+  if(G.week>=5&&G.week<=48)for(const q of ["rooster","cow"]){
+    if(!G.mailSeen[q]||gameWeek(G)<G.runawayNext[q]||G.mail.some(m=>m.q===q&&!m.done&&!m.expired))continue;
+    const cow=q==="cow",year=G.season||1;
+    const k=cow?(year>=4?"bull3":"bull2"):(year>=4?"rooster5":"rooster3");
+    G.runawayNext[q]=gameWeek(G)+6;
+    addMail(G,{kind:"quest",q,qk:k,repeat:1,from:cow?"ลุงเฉลิม ฟาร์มโคนม":"เสี่ยต๋อง สนามไก่",title:cow?"วัวหลุดอีกแล้ว!":"ไก่หลุดอีกแล้ว!",body:cow?`ลุงปิดคอกแน่นแล้วแท้ ๆ แต่เจ้า${QK[k].name}ถีบประตูออกมาขวางทางตลาดอีกแล้ว ช่วยส่งนักมวยมาหยุดมันที`:`เจ้า${QK[k].name}หลุดจากสนามไก่มาจิกกระสอบทรายค่ายอีกแล้ว คราวนี้ตั้งการ์ดหลบคนจับเก่งขึ้น ช่วยทีครับ`,exp:G.week+2,pay:(cow?1500:1000)+Math.min(1000,(year-1)*200)});}
   // rivals we keep ignoring write in to taunt us
   const sn=Object.entries(G.snub||{}).filter(([id,n])=>n>=3&&G.F[id]&&!G.F[id].injury&&!G.F[id].canon&&(G.F[id].camp==="npc"||G.F[id].camp==="rival")&&!G.mailSeen["ch_"+(G.season||1)+"_"+id]&&!isBooked(G,id)).sort((a,b)=>b[1]-a[1])[0];
   if(sn&&rng()<.5&&G.week<=46){const op=G.F[sn[0]];G.mailSeen["ch_"+(G.season||1)+"_"+op.id]=1;
