@@ -180,12 +180,13 @@ function mailWeekly(G){G.mail=G.mail||[];if(typeof thiefMail==="function"){thief
   if(!G.mailSeen.cow&&G.week>=9&&rng()<.6){G.mailSeen.cow=1;addMail(G,{kind:"quest",q:"cow",qk:"bull1",from:"ลุงเฉลิม ฟาร์มโคนม",title:"ช่วยด้วย! วัวหลุด!!",body:"แม่นมสดวัวที่ดุที่สุดในฟาร์มหลุดคอก มันดูมวยทางทีวีทุกคืนจนตั้งการ์ดเป็น! ตอนนี้ยืนขวางถนนหน้าตลาด ใครเข้าใกล้โดนถีบหมด ส่งนักมวยมาช่วยที ลุงให้ค่าเหนื่อยพร้อมนมสดอีกหนึ่งถัง",exp:G.week+2,pay:1500});}
   if(!G.mailSeen.rooster&&G.week>=5&&rng()<.6){G.mailSeen.rooster=1;addMail(G,{kind:"quest",q:"rooster",qk:"rooster1",from:"เสี่ยต๋อง สนามไก่",title:"ไก่ผมหลุดเข้าค่ายคุณ",body:"ไก่แจ้หัวร้อนของผมบินข้ามรั้วไปจิกกระสอบทรายค่ายคุณตั้งแต่เช้า ใครเข้าใกล้มันตั้งท่ามวยใส่ ช่วยจับให้ทีครับ ผมให้ค่าจ้างและไข่ไก่สองแผง",exp:G.week+2,pay:1000});}
   G.runawayNext=G.runawayNext||{};
-  for(const q of ["rooster","cow"])if(G.mailSeen[q]&&G.runawayNext[q]==null){const first=G.mail.find(m=>m.q===q&&!m.repeat);G.runawayNext[q]=first?.expAbs!=null?first.expAbs+4:gameWeek(G)+2;}
+  if(G.runawayCadence!==3){for(const q of ["rooster","cow"])if(G.runawayNext[q]!=null){const last=G.mail.find(m=>m.q===q);G.runawayNext[q]=Math.min(G.runawayNext[q],last?.expAbs!=null?last.expAbs+1:gameWeek(G)+2);}G.runawayCadence=3;}
+  for(const q of ["rooster","cow"])if(G.mailSeen[q]&&G.runawayNext[q]==null){const first=G.mail.find(m=>m.q===q&&!m.repeat);G.runawayNext[q]=first?.expAbs!=null?first.expAbs+1:gameWeek(G)+2;}
   if(G.week>=5&&G.week<=48)for(const q of ["rooster","cow"]){
     if(!G.mailSeen[q]||gameWeek(G)<G.runawayNext[q]||G.mail.some(m=>m.q===q&&!m.done&&!m.expired))continue;
     const cow=q==="cow",year=G.season||1;
     const k=cow?(year>=4?"bull3":"bull2"):(year>=4?"rooster5":"rooster3");
-    G.runawayNext[q]=gameWeek(G)+6;
+    G.runawayNext[q]=gameWeek(G)+3;
     addMail(G,{kind:"quest",q,qk:k,repeat:1,from:cow?"ลุงเฉลิม ฟาร์มโคนม":"เสี่ยต๋อง สนามไก่",title:cow?"วัวหลุดอีกแล้ว!":"ไก่หลุดอีกแล้ว!",body:cow?`ลุงปิดคอกแน่นแล้วแท้ ๆ แต่เจ้า${QK[k].name}ถีบประตูออกมาขวางทางตลาดอีกแล้ว ช่วยส่งนักมวยมาหยุดมันที`:`เจ้า${QK[k].name}หลุดจากสนามไก่มาจิกกระสอบทรายค่ายอีกแล้ว คราวนี้ตั้งการ์ดหลบคนจับเก่งขึ้น ช่วยทีครับ`,exp:G.week+2,pay:(cow?1500:1000)+Math.min(1000,(year-1)*200)});}
   // rivals we keep ignoring write in to taunt us
   const sn=Object.entries(G.snub||{}).filter(([id,n])=>n>=3&&G.F[id]&&!G.F[id].injury&&!G.F[id].canon&&(G.F[id].camp==="npc"||G.F[id].camp==="rival")&&!G.mailSeen["ch_"+(G.season||1)+"_"+id]&&!isBooked(G,id)).sort((a,b)=>b[1]-a[1])[0];

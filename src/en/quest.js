@@ -180,12 +180,13 @@ function mailWeekly(G){G.mail=G.mail||[];if(typeof thiefMail==="function"){thief
   if(!G.mailSeen.cow&&G.week>=9&&rng()<.6){G.mailSeen.cow=1;addMail(G,{kind:"quest",q:"cow",qk:"bull1",from:"Uncle Chaloem, dairy farm",title:"Help! The cow's loose!!",body:"Fresh Milk, the fiercest cow on the farm, broke out of her pen. She watches Muay Thai on TV every night and now she can hold a guard! She's blocking the road in front of the market and kicks anyone who comes near. Send a fighter, please. Uncle will pay, plus a bucket of fresh milk",exp:G.week+2,pay:1500});}
   if(!G.mailSeen.rooster&&G.week>=5&&rng()<.6){G.mailSeen.rooster=1;addMail(G,{kind:"quest",q:"rooster",qk:"rooster1",from:"Sia Tong, rooster arena",title:"My rooster flew into your camp",body:"My hot-headed bantam flew over the fence and has been pecking your heavy bag since morning. It squares up at anyone who comes close. Please catch it for me. I'll pay, plus two trays of eggs",exp:G.week+2,pay:1000});}
   G.runawayNext=G.runawayNext||{};
-  for(const q of ["rooster","cow"])if(G.mailSeen[q]&&G.runawayNext[q]==null){const first=G.mail.find(m=>m.q===q&&!m.repeat);G.runawayNext[q]=first?.expAbs!=null?first.expAbs+4:gameWeek(G)+2;}
+  if(G.runawayCadence!==3){for(const q of ["rooster","cow"])if(G.runawayNext[q]!=null){const last=G.mail.find(m=>m.q===q);G.runawayNext[q]=Math.min(G.runawayNext[q],last?.expAbs!=null?last.expAbs+1:gameWeek(G)+2);}G.runawayCadence=3;}
+  for(const q of ["rooster","cow"])if(G.mailSeen[q]&&G.runawayNext[q]==null){const first=G.mail.find(m=>m.q===q&&!m.repeat);G.runawayNext[q]=first?.expAbs!=null?first.expAbs+1:gameWeek(G)+2;}
   if(G.week>=5&&G.week<=48)for(const q of ["rooster","cow"]){
     if(!G.mailSeen[q]||gameWeek(G)<G.runawayNext[q]||G.mail.some(m=>m.q===q&&!m.done&&!m.expired))continue;
     const cow=q==="cow",year=G.season||1;
     const k=cow?(year>=4?"bull3":"bull2"):(year>=4?"rooster5":"rooster3");
-    G.runawayNext[q]=gameWeek(G)+6;
+    G.runawayNext[q]=gameWeek(G)+3;
     addMail(G,{kind:"quest",q,qk:k,repeat:1,from:cow?"Uncle Chaloem, dairy farm":"Sia Tong, rooster arena",title:cow?"The cow escaped again!":"The rooster escaped again!",body:cow?`Uncle locked the pen, but ${QK[k].name} kicked through the gate and is blocking the market road again. Please send a fighter to stop her.`:`${QK[k].name} escaped the rooster arena and is pecking your gym's heavy bag again. This time it even dodges anyone trying to catch it. Please help.`,exp:G.week+2,pay:(cow?1500:1000)+Math.min(1000,(year-1)*200)});}
   // rivals we keep ignoring write in to taunt us
   const sn=Object.entries(G.snub||{}).filter(([id,n])=>n>=3&&G.F[id]&&!G.F[id].injury&&!G.F[id].canon&&(G.F[id].camp==="npc"||G.F[id].camp==="rival")&&!G.mailSeen["ch_"+(G.season||1)+"_"+id]&&!isBooked(G,id)).sort((a,b)=>b[1]-a[1])[0];
