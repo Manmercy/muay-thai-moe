@@ -1309,7 +1309,7 @@ const RG_DATEP={};
  const chime=(G)=>{const n=rgProvN(G,"south");return n>=4?[C("happy","…All four."),C("flustered","I'll string it in Phuket. …Manager. Come help string it. When you come for the cup."),{n:"nar",t:"Chaba's seashell wind chime: all 4/4 shells"}]
    :[{n:"nar",t:`Chaba's seashell wind chime: ${n}/4 shells · the next one is waiting in another province`}];};
  RG_PROV.chumphon=(G,D)=>{const opp=REGION.oppName(G,"chumphon");return {
-  meet:[{n:"nar",bg:"sea",t:"Thung Wua Laen beach in the morning. A faded sidecar motorbike is parked on the sand. Chaba squats at the water's edge and doesn't turn around until the camp van has stopped."},
+  meet:[{n:"nar",bg:"phuket_beach",t:"Thung Wua Laen beach in the morning. A faded sidecar motorbike is parked on the sand. Chaba squats at the water's edge and doesn't turn around until the camp van has stopped."},
    C("happy","…You're here. Chumphon. Gateway to the South."),
    ...rgProvTip(G,"chumphon",[C("happy",`${opp} uses the Swooping Gull Kick. …Swoops down from above. Fast.`),C("happy","…But after the swoop, she has to climb. When she climbs, go in.")],"Chaba")],
   body:[{n:"nar",t:"Chaba bends down and picks up an orange-pink shell, rinses it in the sea and holds it up to the sun."},
@@ -1346,7 +1346,7 @@ const RG_DATEP={};
     {t:"\"He's just like you.\"",fx:G2=>rgMeet(G2,"chaba",3),then:[C("flustered","…Not like me."),{n:"nar",t:"But on the way out of the shop, Chaba buys a small Ai Teng puppet and hands it to the manager."}]},
     {t:"Ask Chaba to try working a puppet",fx:G2=>rgMeet(G2,"chaba",2),then:[{n:"nar",t:"Chaba works the Ai Teng puppet and says in a deep southern voice, \"The Sirichai manager is not as handsome as Ai Teng.\" Everyone roars with laughter. Chaba's face doesn't move."}]},
     {t:"Buy a puppet for Chaba's brother",fx:G2=>rgMeet(G2,"chaba",2),then:[C("happy","…My brother likes Ai Teng. He'll hang it next to the wind chime.")]}]}),
-   {n:"nar",bg:"sea",t:"On the way back Chaba stops at a beach outside town, searches bent over for a long time, then holds up a tiger-striped shell."},
+   {n:"nar",bg:"phuket_beach",t:"On the way back Chaba stops at a beach outside town, searches bent over for a long time, then holds up a tiger-striped shell."},
    ...rgJealStep(G,"Chaba",0,"near"),
    ...chime(G)]};};
  RG_PROV.songkhla=(G,D)=>{const opp=REGION.oppName(G,"songkhla");return {
@@ -1491,7 +1491,7 @@ const RG_SIDE={
    {n:"npc",who:"Hia Long",t:"Fine. Three bouts. Win them all and I'll back off for now. Lose one, and we come every night until your father signs."},
    {n:"coach",t:"The practice ring behind the camp will do. Whoever's ready, step up. Don't push it if you're too tired."}],
   win:G=>[{n:"nar",t:"Hia Long hits the canvas of the practice ring. His men haul him into the van in a hurry."},
-   {n:"npc",who:"Hia Long",t:"Remember this! Sia Jin Long won't stop here!"},
+   {n:"npc",who:"Hia Long",img:"hialong_angry",t:"Remember this! Sia Jin Long won't stop here!"},
    {n:"nar",t:"A phone lies beside the ring, its screen still lit. The latest message, from \"Sia Jin Long\": Make it bad enough that her father sells. Five thousand a night."},
    {n:"baibua",f:"surprised",l:"casual",t:"This is... proof the resort hired thugs!",choice:[
     {t:"Take photos of it, and go to the police together tomorrow morning",fx:G2=>{rgMeet(G2,"baibua",4);G2.region.side.north.how="police";},then:[{n:"baibua",f:"flustered",l:"casual",t:"Together...? Okay. I'll be waiting outside the station first thing."}]},
@@ -1613,7 +1613,7 @@ if(typeof QK!=="undefined")Object.assign(QK,{
   wn1:{fst:"pressure",name:"Tank-top guy from the temple fair",sprite:"rg_chaytrae1",lvl:-1.1,tilt:{punch:1.5,power:1,iq:-2,guard:-1.5},color:"#c8283c",grp:"gang"},
   wn2:{fst:"power",name:"Tong, the rice-whisky heavy hitter",sprite:"rg_chaytrae1",lvl:-.3,tilt:{power:2,punch:1,dur:1,speed:-1,iq:-1},color:"#8a1f2a",grp:"gang"},
   wn3:{fst:"inside",name:"Seua Dang, three-time temple ring champion",sprite:"rg_chaytrae2",lvl:.5,tilt:{punch:1.5,knee:1.5,power:1,iq:-.5},color:"#5a1420",grp:"gang"}});
-RG_SIDE.isan={cid:"tabtim",bg:"fair",ring:"bg_fair.webp",title:"Off-schedule fight · temple fair ring",
+RG_SIDE.isan={cid:"tabtim",bg:"fair",ring:"bg_fair_ring.webp",title:"Off-schedule fight · temple fair ring",
   foes:[{qk:"wn1",t:"A girl in the temple ring? I'll go easy on you, sweetheart."},{qk:"wn2",t:"He just slipped. This one won't slip."},{qk:"wn3",t:"Three titles, and no woman has lasted a full round in front of me."}],
   between:["One of Seua Dang's boys kicks off his flip-flops and ducks through the ropes.","Seua Dang tosses away his glass and climbs into the ring himself. The whole fair gets to its feet."],
   intro:(G,D)=>[{n:"nar",t:"At dusk, a message from Tabtim pops up on the manager's phone: a photo of a boxing ring in the middle of a temple fair, coloured lights wound around the posts."},
@@ -1627,18 +1627,18 @@ RG_SIDE.isan={cid:"tabtim",bg:"fair",ring:"bg_fair.webp",title:"Off-schedule fig
    {n:"nar",t:"Nil wears a black jacket cut with neon-red lines, small scales running down the sleeves."},
    {n:"nar",t:"Before anyone can answer, five or six men in tank tops shove their way in. Their leader has a blotchy face and a glass of rice whisky in his hand."},
    {n:"npc",who:"Seua Dang",t:"Well, well. The Ruby of the Isan Plains, with a whole van of girl boxers. Women's boxing is just for show, right, Nil?"},
-   {n:"npc",who:"Brother Nil",t:"He said it, not me."},
+   {n:"npc",who:"Brother Nil",img:"nil_smirk",t:"He said it, not me."},
    {n:"tabtim",f:"angry",l:"casual",t:"...Brother Nil, you're just standing there laughing along with him?"},
    {n:"npc",who:"Temple ring announcer",t:"Ladies and gentlemen! A special bout, off the programme: a women's camp from Chiang Mai takes on the temple-fair boys, three in a row! Let's hear it!"},
    {n:"coach",t:"Nobody's name is on the line. Just go up and fight so they can see. Whoever's ready, step up."}],
   win:G=>[{n:"nar",t:"Seua Dang lies flat on his back in the temple ring. The whole fair roars over the mor lam music. His boys haul him into a pickup and the whole gang tears off."},
    {n:"tabtim",f:"happy",l:"casual",t:"See that! Women's boxing is just a show, is it? Ha ha... Manager, thank you so much."},
    {n:"npc",who:"Brother Nil",t:"Beat some temple-fair drunks and now you think you're good?"},
-   {n:"npc",who:"Brother Nil",t:"I've signed with the Naka League, Tabtim. Next year I'm on the international stage. And you'll still be kicking at temple fairs like this."},
+   {n:"npc",who:"Brother Nil",img:"nil_smirk",t:"I've signed with the Naka League, Tabtim. Next year I'm on the international stage. And you'll still be kicking at temple fairs like this."},
    {n:"tabtim",f:"sad",l:"casual",t:"...The Naka League. When did you sign, Brother Nil? Does Dad know?"},
    {n:"npc",who:"Brother Nil",t:"Dad knows. He's happy for me. His son is going abroad."},
    {n:"nar",t:"Brother Nil disappears into the crowd. Tabtim stands still, the fair's coloured lights reflected in her eyes."}],
-  lose:G=>[{n:"npc",who:"Seua Dang",t:"See? Women's boxing is just a show!"},{n:"npc",who:"Brother Nil",t:"Told you."},
+  lose:G=>[{n:"npc",who:"Seua Dang",t:"See? Women's boxing is just a show!"},{n:"npc",who:"Brother Nil",img:"nil_smirk",t:"Told you."},
    {n:"tabtim",f:"sad",l:"casual",t:"It's all right... everyone's hurt. I'm sorry I brought you into this."},{n:"coach",t:"Next time we're in Isan, that temple ring will still be there."}],
   after:(G,T,cb)=>playScene([
     {n:"nar",t:"As the fair thins out, Petch stops in front of Tabtim holding a bamboo rocket, hand-painted with a naga."},
@@ -1650,7 +1650,7 @@ RG_SIDE.isan={cid:"tabtim",bg:"fair",ring:"bg_fair.webp",title:"Off-schedule fig
     playScene([
      {n:"nar",t:ok?`Dad's rocket shoots up ${best} metres, higher than any rocket at the fair that night. Cheers break out from every corner of the temple ground.`:`Dad's rocket climbs ${best} metres. Not as high as Petch's, but the whole temple ground still applauds.`},
      {n:"npc",who:"Brother Petch",t:ok?"Higher than mine, every year... your kicks too. I watched all night.":"A rocket that falls, you light again next year. Boxing's the same... your kicks tonight, I was watching."},
-     {n:"npc",who:"Brother Petch",t:"Dad still won't admit it. He's stubborn. But I'll tell him myself what I saw tonight."},
+     {n:"npc",who:"Brother Petch",img:"phet_smile",t:"Dad still won't admit it. He's stubborn. But I'll tell him myself what I saw tonight."},
      {n:"tabtim",f:"sad",l:"casual",t:"...Brother Petch."},
      {n:"nar",t:"Petch ruffles Tabtim's hair once with his big hand, the way he probably hasn't since she was little, then walks back to their father at the pickup truck."},
      {n:"tabtim",f:"flustered",l:"casual",t:"Ha ha, I'm not crying. The rocket smoke got in my eyes.",choice:[
@@ -2841,7 +2841,7 @@ RG_LOVE2.baibua={
   {n:"baibua",f:"flustered",l:"casual",t:"...I wished we could release lanterns like this together every year. What did you wish for?",choice:[
    {t:"\"Same wish as yours\"",fx:G2=>add(G2,"baibua","bond",5),then:[{n:"baibua",f:"happy",l:"casual",t:"Then those two lanterns wished for the same thing... it has to come true."}]},
    {t:"\"It's a secret\"",fx:G2=>add(G2,"baibua","bond",3),then:[{n:"baibua",f:"pout",l:"casual",t:"Cheater... I already told you mine."}]}]}],
- 16:G=>[{n:"nar",t:"Baibua's mother invites you to dinner at home. The long wooden table beside the lotus pond is covered in every northern dish imaginable."},
+ 16:G=>[{n:"nar",bg:"home_baibua",t:"Baibua's mother invites you to dinner at home. The long wooden table beside the lotus pond is covered in every northern dish imaginable."},
   {n:"npc",who:"Baibua's father",t:"I won't ask about boxing anymore. My daughter fights better than I did at her age... I'll ask just one thing. Will you look after her?"},
   {n:"baibua",f:"flustered",l:"casual",t:"Dad! How can you ask that in front of a guest!",choice:[
    {t:"\"We look after each other. She's looked after me all along\"",fx:G2=>add(G2,"baibua","bond",5),then:[{n:"npc",who:"Baibua's father",t:"...Good answer. Let's eat."},{n:"baibua",f:"happy",l:"casual",t:"Dad smiled... he doesn't smile at people easily."}]},
@@ -2886,13 +2886,13 @@ RG_LOVE2.tabtim={
   {n:"nar",t:"Comments flood in until the app freezes. Every girl in the camp turns to look at once.",choice:[
    {t:"Wave at the camera",fx:G2=>add(G2,"tabtim","bond",5),then:[{n:"tabtim",f:"happy",l:"casual",t:"See that! My boyfriend's as bold as me!"}]},
    {t:"Hide your face behind the bag",fx:G2=>add(G2,"tabtim","bond",3),then:[{n:"tabtim",f:"pout",l:"casual",t:"What's there to be shy about! ...Okay, okay, sorry I didn't ask first. But I'm not sorry!"}]}]}],
- 8:G=>[{n:"nar",t:"The bang fai festival in Tabtim's village. She has you on the first bus at five in the morning."},
+ 8:G=>[{n:"nar",bg:"home_tabtim",t:"The bang fai festival in Tabtim's village. She has you on the first bus at five in the morning."},
   {n:"tabtim",f:"happy",l:"casual",t:"This year you and me light the same one! Dad made it just for the two of us."},
   {n:"nar",t:"The rocket shoots straight up into the clouds. Cheers roll across the fields."},
   {n:"tabtim",f:"flustered",l:"casual",t:"When a bang fai goes up straight like that, they say the rain will be good and the rice will grow... and the people who lit it together stay together a long time. I didn't make that up!",choice:[
    {t:"\"Then let's light one together again next year\"",fx:G2=>add(G2,"tabtim","bond",5),then:[{n:"tabtim",f:"happy",l:"casual",t:"It's a promise! I'll tell Dad to make a bigger one!"}]},
    {t:"Tease her that she made it up",fx:G2=>add(G2,"tabtim","bond",3),then:[{n:"tabtim",f:"pout",l:"casual",t:"...Fine, I made up half. But the half I want to come true is real."}]}]}],
- 16:G=>[{n:"nar",t:"Back home in Phimai for Songkran, the whole family sits around a jungle-curry feast under the mango tree, Tabtim's father at the head."},
+ 16:G=>[{n:"nar",bg:"home_tabtim",t:"Back home in Phimai for Songkran, the whole family sits around a jungle-curry feast under the mango tree, Tabtim's father at the head."},
   {n:"npc",who:"Tabtim's father",t:"My daughter kicks hard, you know. She once kicked her big brother till he cried. Watch yourself."},
   {n:"tabtim",f:"flustered",l:"casual",t:"Dad! I was eight!",choice:[
    {t:"\"I've been careful all along, and happy to get kicked\"",fx:G2=>add(G2,"tabtim","bond",4),then:[{n:"npc",who:"Tabtim's father",t:"Ha ha! Good, good. Keep eating."}]},
@@ -2944,7 +2944,7 @@ RG_LOVE2.alicia={
   {n:"alicia",f:"happy",l:"casual",t:"...I'm not pointing. No one saw your face. It's not content. I just wanted you to hear it with ten thousand people.",choice:[
    {t:"Stand and listen to the end without moving",fx:G2=>add(G2,"alicia","bond",5),then:[{n:"alicia",f:"happy",l:"casual",t:"I saw you standing still through the whole song... I really sang to just one person, in front of ten thousand."}]},
    {t:"Wave the lightstick Minnie shoved into your hand",fx:G2=>add(G2,"alicia","bond",4),then:[{n:"alicia",f:"flustered",l:"casual",t:"And a lightstick in my colour... who taught you to wave it in rhythm? Minnie, right?"}]}]}],
- 16:G=>[{n:"nar",t:"Alicia's mother invites you to dinner at the Bangkok condo the sponsor pays for, but tonight she cooked every dish herself."},
+ 16:G=>[{n:"nar",bg:"home_alicia",t:"Alicia's mother invites you to dinner at the Bangkok condo the sponsor pays for, but tonight she cooked every dish herself."},
   {n:"npc",who:"Alicia's mother",t:"I've watched my daughter through a screen for ten years. Today's the first time I've seen her laugh without looking for the lens."},
   {n:"alicia",f:"flustered",l:"casual",t:"Mum! How can you say that in front of him?",choice:[
    {t:"\"She laughs like this at camp every day\"",fx:G2=>add(G2,"alicia","bond",5),then:[{n:"npc",who:"Alicia's mother",t:"Then I'll leave my daughter with that camp of yours."},{n:"alicia",f:"sad",l:"casual",t:"...Mum has never trusted me to anyone. Not even the label."}]},
@@ -2994,7 +2994,7 @@ RG_LOVE2.chaba={
   {n:"chaba",f:"flustered",l:"casual",t:"...Dad. Talks too much.",choice:[
    {t:"Help haul the nets all night",fx:G2=>add(G2,"chaba","bond",5),then:[{n:"npc",who:"Chaba's father",t:"Good hands. Come again next year."},{n:"chaba",f:"happy",l:"casual",t:"...Dad invited you. Dad doesn't invite anyone."}]},
    {t:"Sit at the stern with Chaba and watch the other boats' lights",fx:G2=>add(G2,"chaba","bond",4),then:[{n:"chaba",f:"happy",l:"casual",t:"...When I was little I thought those lights were shooting stars. Still do."}]}]}],
- 16:G=>[{n:"nar",t:"Chak Phra festival in Chaiya. Chaba brings the manager and Mali back to the old neighbourhood. Her brother walks the whole length of the boat procession."},
+ 16:G=>[{n:"nar",bg:"home_chaba",t:"Chak Phra festival in Chaiya. Chaba brings the manager and Mali back to the old neighbourhood. Her brother walks the whole length of the boat procession."},
   {n:"npc",who:"Chaba's brother",t:"Chaba smiles more these days... thank you for making my little sister smile."},
   {n:"chaba",f:"flustered",l:"casual",t:"...Not smiling. Sun's strong.",choice:[
    {t:"\"The sun's been strong every day lately\"",fx:G2=>add(G2,"chaba","bond",5),then:[{n:"chaba",f:"happy",l:"casual",t:"...Mm. Every day. Because someone's standing next to me."}]},
@@ -3028,6 +3028,15 @@ const RG_PAIRSAY={
  tabtim:[{n:"ploy",f:"happy",l:"casual",t:"Tabtim has been twice as loud since last week. The whole camp knows. ...Look after each other, both of you."},{n:"tabtim",f:"happy",l:"casual",t:"Big sister Ploy gave us her blessing! Korat girls have to understand each other!"}],
  alicia:[{n:"rin",f:"happy",l:"casual",t:"The probability of me guessing this wrong was zero. I knew since the Ayutthaya boat trip. ...Congratulations."},{n:"alicia",f:"flustered",l:"casual",t:"...Rin guessed right again. Annoying. Thank you."}],
  chaba:[{n:"mali",f:"happy",l:"casual",t:"Big sister Chaba has a boyfriend~! I'm calling Mum. She'll be happier than anyone, I just know it."},{n:"chaba",f:"flustered",l:"casual",t:"...Don't tell Mum. Mum tells all of Chaiya. ...Fine, tell her."}]};
+
+/* v1.91.138 (Man): each time-together scene shows where it happens (the market, the river, the kitchen, her room…) instead of always the gym */
+{const RG_SCENE_BG={"baibua.hang.0": "market_morning", "baibua.hang.1": "night", "baibua.hang.2": "camp", "baibua.love": "night_north", "baibua.h2.0": "river", "baibua.h2.1": "kitchen", "baibua.ag.0": "doisuthep", "baibua.ag.1": "camp", "baibua.ag.2": "camp_day", "baibua.heart.55": "camp", "baibua.heart.70": "dorm_room", "baibua.love2.2": "night", "baibua.love2.8": "loy_night", "tabtim.hang.0": "somtam_stall", "tabtim.hang.1": "camp_day", "tabtim.love": "mekong", "tabtim.h2.0": "camp_day", "tabtim.h2.1": "live_corner", "alicia.hang.0": "live_corner", "tabtim.ag.2": "dorm_room", "tabtim.heart.55": "night", "tabtim.heart.70": "camp_day", "alicia.hang.1": "dorm_room", "alicia.love": "boat", "alicia.h2.0": "camp_day", "alicia.h2.1": "kitchen", "alicia.ag.0": "dorm_room", "alicia.heart.55": "gymdusk", "alicia.heart.70": "night", "alicia.love2.2": "cafe", "alicia.love2.8": "closing_ceremony", "chaba.hang.0": "camp_day", "chaba.hang.1": "camp_day", "chaba.love": "andaman", "chaba.h2.0": "river", "chaba.h2.1": "kitchen", "chaba.ag.1": "camp_day", "chaba.ag.2": "camp_rain", "chaba.heart.55": "camp_day", "chaba.heart.70": "dorm_room", "chaba.love2.2": "night", "chaba.love2.8": "andaman"};
+ const tag=(sc,bg)=>{if(!bg||!sc)return sc;if(typeof sc==="function"){const f=sc;return G=>{const a=f(G);if(a&&a[0]&&!a[0].bg)a[0]={...a[0],bg};return a;};}if(sc[0]&&!sc[0].bg)sc[0]={...sc[0],bg};return sc;};
+ for(const c of ["baibua","tabtim","alicia","chaba"]){const J=RG_JOIN[c];if(!J)continue;
+  (J.hang||[]).forEach((sc,i)=>J.hang[i]=tag(sc,RG_SCENE_BG[c+".hang."+i]));J.love=tag(J.love,RG_SCENE_BG[c+".love"]);
+  (RG_HANG2[c]||[]).forEach((sc,i)=>RG_HANG2[c][i]=tag(sc,RG_SCENE_BG[c+".h2."+i]));(RG_AGAIN[c]||[]).forEach((sc,i)=>RG_AGAIN[c][i]=tag(sc,RG_SCENE_BG[c+".ag."+i]));
+  for(const k of RG_HEART_AT)if(RG_HEART[c]&&RG_HEART[c][k])RG_HEART[c][k]=tag(RG_HEART[c][k],RG_SCENE_BG[c+".heart."+k]);
+  for(const k of RG_LOVE_AT)if(RG_LOVE2[c]&&RG_LOVE2[c][k])RG_LOVE2[c][k]=tag(RG_LOVE2[c][k],RG_SCENE_BG[c+".love2."+k]);}}
 
 const RG_PROF={
  baibua:{height:"165 cm",blood:"A",bday:"12 November (Yi Peng)",home:"Chiang Mai · a wooden house behind her father's small camp",heritage:"Muay Tha Sao (same lineage as Kati)",
@@ -3125,7 +3134,7 @@ Object.assign(REGION,{
     if(P.length){const top=P.map(k=>G.F[k]).filter(Boolean).sort((a,b)=>((b.bond||0)+(b.bondX||0))-((a.bond||0)+(a.bondX||0)))[0];if(top)R.twoQ={id:top.id,cid,abs:now+3};}
     G.log=G.log||[];G.log.push(`${f?f.name:cid} and the Manager started dating ${P.length?" (two-timing)":""}`);},
   breakC(G,cid){const R=G.region,f=G.F[cid];if(!this.isLovC(G,cid))return;delete R.lov[cid];(R.ex=R.ex||{})[cid]=gameWeek(G);if(R.twoQ&&R.twoQ.cid===cid)delete R.twoQ;if(f)add(G,cid,"bond",-35);},
-  hangC(G,cid){const f=G.F[cid];if(!f||G.freeUsed||isAway(G,cid))return;const J=RG_JOIN[cid],R=G.region;R.hangI=R.hangI||{};const i=R.hangI[cid]||0,lov=this.isLovC(G,cid);
+  hangC(G,cid){const f=G.F[cid];if(!f||G.freeUsed||isAway(G,cid))return;if(typeof hospDue==="function"&&hospDue(G,cid)){const st=hospScene(G,cid);save();playScene(st,()=>{save();render();},{bg:"hospital",look:"casual"});return;}const J=RG_JOIN[cid],R=G.region;R.hangI=R.hangI||{};const i=R.hangI[cid]||0,lov=this.isLovC(G,cid);
     R.hangF=R.hangF||{};const H=[...J.hang,...(RG_HANG2[cid]||[])],A=RG_AGAIN[cid]||J.hang;if(R.hangF[cid]==null)R.hangF[cid]=Math.min(Math.ceil(i/(lov?2:1)),J.hang.length);
     let P;if(lov&&i%2===1)P=J.love;else if(R.hangF[cid]<H.length)P=H[R.hangF[cid]++];else{R.hangAI=R.hangAI||{};P=A[(R.hangAI[cid]=(R.hangAI[cid]||0)+1)%A.length];}R.hangI[cid]=i+1;G.freeUsed=true;f.hangWk=G.week;
     const S=P.map(x=>x.choice?{...x,choice:x.choice.map(o=>({t:o.t,fx:G2=>{add(G2,cid,"bond",o.b);add(G2,cid,"morale",3);},then:o.then}))}:{...x});

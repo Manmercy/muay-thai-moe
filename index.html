@@ -1420,7 +1420,7 @@ html.vnopen,html.vnopen body{overflow:hidden;overscroll-behavior:none;height:100
 /* v1.67 live-selling minigame */
 .lvitems{display:flex;flex-wrap:wrap;gap:6px;justify-content:center}
 .mplay.lv{gap:10px}
-.lvphone{position:relative;height:300px;background:linear-gradient(#2b2146,#120e22);box-shadow:inset 0 0 0 3px #4a3f6b;overflow:hidden}
+.lvphone{position:relative;height:300px;background:linear-gradient(rgba(43,33,70,.35),rgba(18,14,34,.75)),url(a/bg_live_corner.webp) 50% 60%/cover;box-shadow:inset 0 0 0 3px #4a3f6b;overflow:hidden}
 .lvface{position:absolute;left:50%;bottom:0;transform:translateX(-50%);height:96%;object-fit:contain;opacity:.95}
 .lvtop{position:absolute;top:6px;left:6px;right:6px;display:flex;gap:10px;align-items:center;font-size:13px;text-shadow:0 1px 2px #000}
 .lvtop #lvt{margin-left:auto;background:rgba(0,0,0,.5);padding:0 6px}
@@ -4270,14 +4270,14 @@ const UNLOCK={blood:15,bday:15,hobby:15,personality:25,story:45,likesAll:55,disl
 // ---------- DATES ----------
 const ACTIVITIES={
   eat:{name:"กินข้าวซอยร้านป้าแดง",cost:200,bg:"food",intro:["ร้านข้าวซอยป้าแดงคนแน่นเหมือนทุกเย็น กลิ่นพริกเผาลอยมาแต่ไกล","ป้าแดงตะโกนทักตั้งแต่หน้าร้าน “อ้าว! คนค่ายศิริชัยมาแล้ว นั่งโต๊ะเดิมเลยลูก”"]},
-  market:{name:"เดินตลาดนัดคืนวันเสาร์",cost:300,bg:"market",intro:["ถนนคนเดินเต็มไปด้วยไฟสีส้ม เสียงซึงกับกลิ่นของปิ้งย่างลอยมาเป็นระยะ","ตลาดนัดคืนนี้คนเยอะเป็นพิเศษ มีวงดนตรีเปิดหมวกเล่นอยู่หัวถนน"]},
+  market:{name:"เดินตลาดนัดคืนวันเสาร์",cost:300,bg:"night_north",intro:["ถนนคนเดินเต็มไปด้วยไฟสีส้ม เสียงซึงกับกลิ่นของปิ้งย่างลอยมาเป็นระยะ","ตลาดนัดคืนนี้คนเยอะเป็นพิเศษ มีวงดนตรีเปิดหมวกเล่นอยู่หัวถนน"]},
   temple:{name:"ไหว้พระที่วัดใกล้ค่าย",cost:0,bg:"temple",intro:["ลานวัดเงียบสงบ ได้ยินแต่เสียงกระดิ่งลมจากชายคาโบสถ์","พระอาทิตย์เพิ่งตก แสงเทียนในวิหารสะท้อนกับองค์พระสีทอง"]},
   cafe:{name:"นั่งคาเฟ่ ดูไฟต์ย้อนหลัง",cost:250,bg:"cafe",intro:["คาเฟ่เล็ก ๆ ในซอยมีปลั๊กทุกโต๊ะ เหมาะกับการเปิดคลิปไฟต์ดูยาว ๆ","กลิ่นกาแฟคั่วอ่อนลอยมา ทีวีในร้านเปิดรายการมวยไทยเงียบ ๆ"]},
   river:{name:"ปั่นจักรยานเลียบแม่น้ำตอนเย็น",cost:100,bg:"river",intro:["ทางจักรยานเลียบแม่น้ำมีลมเย็นพัดมาเรื่อย ๆ ฟ้ากำลังเปลี่ยนเป็นสีส้ม","เด็ก ๆ วิ่งไล่จับกันริมตลิ่ง มีคนตกปลาอยู่ใต้สะพาน"]},
-  jog:{name:"วิ่งรอบอ่างเก็บน้ำตอนเช้า",cost:0,bg:"river",intro:["หมอกยังลอยเหนืออ่างเก็บน้ำ เสียงรองเท้าวิ่งกระทบทางดินเป็นจังหวะ","ฟ้าเพิ่งสาง ลุงขายปาท่องโก๋ตั้งกระทะรอคนวิ่งเสร็จ"]},
+  jog:{name:"วิ่งรอบอ่างเก็บน้ำตอนเช้า",cost:0,bg:"river_dawn",intro:["หมอกยังลอยเหนืออ่างเก็บน้ำ เสียงรองเท้าวิ่งกระทบทางดินเป็นจังหวะ","ฟ้าเพิ่งสาง ลุงขายปาท่องโก๋ตั้งกระทะรอคนวิ่งเสร็จ"]},
   cat:{name:"ให้อาหารแมวหลังวัด",cost:0,bg:"temple",intro:["แมวลายสลิดห้าตัวรอหน้ากุฏิเหมือนรู้เวลา","หลังวัดมีแมวส้มตัวอ้วนนอนกลิ้งบนกองฟาง พอได้ยินเสียงถุงขนมก็ลุกทันที"]},
-  stars:{name:"นั่งดูดาวบนหลังคาค่าย",cost:0,bg:"camp",campOnly:true,intro:["ไฟในค่ายดับหมดแล้ว บนหลังคาสังกะสีมีแค่ลมเย็นกับดาวเต็มฟ้า","เสื่อผืนเก่าปูบนหลังคา ข้าง ๆ มีกระติกน้ำชาร้อน"]},
-  cook:{name:"ทำส้มตำกินกันในค่าย",cost:0,bg:"camp",campOnly:true,intro:["ครกไม้ใบใหญ่ของปู่ชัยถูกยกออกมาจากครัว เสียงตำดังไปทั้งซอย","มะละกอสองลูกจากต้นหลังค่ายกำลังถูกสับเป็นเส้น"]},
+  stars:{name:"นั่งดูดาวบนหลังคาค่าย",cost:0,bg:"night",campOnly:true,intro:["ไฟในค่ายดับหมดแล้ว บนหลังคาสังกะสีมีแค่ลมเย็นกับดาวเต็มฟ้า","เสื่อผืนเก่าปูบนหลังคา ข้าง ๆ มีกระติกน้ำชาร้อน"]},
+  cook:{name:"ทำส้มตำกินกันในค่าย",cost:0,bg:"camp_day",campOnly:true,intro:["ครกไม้ใบใหญ่ของปู่ชัยถูกยกออกมาจากครัว เสียงตำดังไปทั้งซอย","มะละกอสองลูกจากต้นหลังค่ายกำลังถูกสับเป็นเส้น"]},
   spar:{name:"ซ้อมเสริมตัวต่อตัว",cost:0,bg:"camp",campOnly:true,intro:["ค่ายเลิกคอร์สแล้ว เหลือแค่เสียงพัดลมกับกระสอบทรายที่ยังแกว่งอยู่","ไฟสนามเปิดแค่ครึ่งเดียว พอให้เห็นเงาบนเวที"]},
 };
 // v1.88: date spots that open with the heart level (♥Lv.12 / 14 / 17) — content only, no gameplay effect
@@ -5065,7 +5065,7 @@ const EVENTS=[
      {n:"coach",t:"ครูเตะครกได้ แต่ครูจะไม่เต้นนะ บอกไว้ก่อน"},
      {n:"nar",t:"สุดท้ายครูแดงก็เต้น"}]}]}]},
 
- {id:"mali_meet",look:"fight",when:G=>G.week>=4,bgbg:"fair_ring",steps:[
+ {id:"mali_meet",look:"fight",when:G=>G.week>=4,bg:"fair_ring",steps:[
   {n:"nar",t:"งานวัดประจำปี เวทีมวยชั่วคราวตั้งอยู่ข้างชิงช้าสวรรค์ เสียงปี่กลองดังไปทั่ว"},
   {n:"nar",t:"นักมวยสาวตัวเล็กผมมัดจุก ติดดอกลั่นทม เตะคู่ต่อสู้ที่ตัวใหญ่กว่าจนต้องถอยร่น"},
   {n:"mali",f:"happy",t:"เย้! ชนะแล้ว~ ขอบคุณทุกคนนะคะ!"},
@@ -5151,7 +5151,7 @@ const EVENTS=[
    {t:"การแบกทุกคนไว้คนเดียว ไม่ใช่หน้าที่เธอคนเดียวนะ",fx:G=>{add(G,"ploy","bond",9);},then:[{n:"ploy",f:"flustered",t:"…คุณนี่แปลกนะ เป็นคู่แข่งแต่พูดเหมือนเป็นห่วง ขอบคุณ"}]},
    {t:"งั้นบนเวที ค่ายเราจะไม่ออมมือ",fx:G=>{add(G,"ploy","bond",5);add(G,"ploy","trust",4);},then:[{n:"ploy",f:"happy",t:"ดี แบบนี้ฉันชอบ อย่าทำให้ฉันผิดหวังล่ะ"}]}]}]},
 
- {id:"loykrathong",look:"casual",when:G=>G.week>=26,bgbg:"loy_night",steps:[
+ {id:"loykrathong",look:"casual",when:G=>G.week>=26,bg:"loy_night",steps:[
   {n:"nar",t:"คืนวันเพ็ญเดือนสิบสอง แม่น้ำเต็มไปด้วยกระทงและแสงเทียน ทั้งค่ายหยุดซ้อมหนึ่งคืน"},
   {n:"coach",t:"ไปเถอะ ไปลอยกระทงกัน ขอให้สิ่งไม่ดีลอยไปกับน้ำ ปีนี้ค่ายเราเจอมาเยอะแล้ว"},
   {n:"nar",t:"คุณจะชวนใครไปลอยกระทงด้วย?"},
@@ -7718,6 +7718,58 @@ function tellSteps(G,id){const f=G.F[id],two=twoFor(G,id),ready=tellReady(G,f);
   if(two)return [open[0],{n:"nar",t:"⚠ คุณมีคนรักอยู่แล้ว ถ้าบอกออกไปจะกลายเป็นคบซ้อน",choice:[{t:"บอกไปตามตรง (คบซ้อน)",then:[open[1],...yes]},{t:"ไม่บอกดีกว่า",then:[{n:"nar",t:"คุณเก็บคำพูดไว้ในใจ แล้วชวนคุยเรื่องซ้อมแทน"}]}]}];
   return [...open,...yes];}
 function tellLove(id){const f=G.F[id],T=tellState(G,f);if(!T||!T.ok)return;save();playScene(tellSteps(G,id),()=>{save();render();},{bg:"night",look:"casual"});}
+/* v1.91.138 (Man): when a fighter is badly hurt, time together can be a visit to her at the hospital */
+const HOSP_VISIT={
+ kati:{in:"ห้องพักคนไข้ชั้นสาม กะทินอนพิงหมอนอยู่ ขาข้างหนึ่งพันผ้ายืดไว้ แต่มือยังกำลูกบอลบีบอยู่ไม่หยุด",
+  a:"ผู้จัดการ! มาทำไมคะ หนูไม่ได้เป็นอะไรมากเลย หมอแค่ขี้ตกใจ",
+  q:"…ผู้จัดการไม่ต้องห่วงนะคะ หนูจะกลับไปซ้อมให้เร็วที่สุด",
+  o:[["\"ไม่ต้องรีบ ค่ายรอได้\"","…ค่ายรอได้ แต่หนูรอไม่ได้นี่สิคะ ฮิ ๆ ก็ได้ค่ะ หนูจะพักให้ครบ"],["ปอกส้มให้","ปอกเก่งกว่าหนูอีกนะคะ… หนูปอกทีไรเปลือกขาดเป็นชิ้นเล็ก ๆ ทุกที"],["\"คุณปู่คงดุถ้าเห็นเธอฝืน\"","…ใช่ค่ะ คุณปู่ต้องเคาะหัวหนูแน่ ๆ หนูจะเชื่อหมอค่ะ"]],
+  out:"ก่อนกลับ กะทิแอบโบกมือจากเตียงจนพยาบาลต้องหันมามอง"},
+ mali:{in:"ห้องพักคนไข้รวม มะลินั่งเอนบนเตียง ข้างหมอนมีพวงมาลัยดอกมะลิที่ใครสักคนเอามาวางไว้",
+  a:"ผู้จัดการ~! มาเยี่ยมมะลิจริง ๆ ด้วย! มะลิบอกพยาบาลไปแล้วว่าวันนี้ต้องมีคนมาแน่ ๆ",
+  q:"กับข้าวโรงพยาบาลจืดมากเลยค่ะ… มะลิคิดถึงน้ำพริกแม่",
+  o:[["แอบหยิบน้ำพริกออกจากกระเป๋า","!!! ผู้จัดการคือพระเอกของมะลิ! ชู่ว์~ อย่าให้พยาบาลเห็นนะคะ"],["\"หายแล้วพาไปกินเลย\"","สัญญาแล้วนะคะ~ มะลิจำได้ทุกคำ!"],["\"ต้องกินตามที่หมอสั่ง\"","…ค่า ผู้จัดการพูดเหมือนพี่รินเลย"]],
+  out:"ขากลับ ได้ยินเสียงมะลิร้องเพลงลูกทุ่งให้ป้าเตียงข้าง ๆ ฟัง"},
+ rin:{in:"ห้องพักคนไข้ รินนั่งพิงหัวเตียง แท็บเล็ตวางบนตัก หน้าจอเต็มไปด้วยกราฟการฟื้นตัว",
+  a:"…คุณมาทำไมคะ ตามสถิติ คนเจ็บแบบนี้ไม่จำเป็นต้องมีคนเยี่ยม",
+  q:"ฉันคำนวณแล้ว ถ้าซ้อมเบา ๆ ตั้งแต่พรุ่งนี้ จะกลับมาได้เร็วขึ้นสี่วัน",
+  o:[["ปิดแท็บเล็ตให้","…คุณเพิ่งลบความน่าจะเป็นที่ฉันจะไม่ฟังหมอทิ้งไป สิบเปอร์เซ็นต์ …ขอบคุณค่ะ"],["\"สี่วันแลกกับเจ็บซ้ำ ไม่คุ้ม\"","…ตัวเลขนั้นฉันไม่ได้ใส่ในสมการ คุณพูดถูกค่ะ"],["นั่งเงียบ ๆ อยู่ด้วย","…ไม่ต้องพูดก็ได้ค่ะ อยู่ตรงนี้ก็พอ"]],
+  out:"ตอนออกจากห้อง เห็นรินเปลี่ยนหน้าจอจากกราฟเป็นรูปทั้งค่ายที่ถ่ายด้วยกัน"},
+ ploy:{in:"ห้องพักคนไข้เดี่ยว พลอยนั่งตัวตรงบนเตียงเหมือนนั่งรอชก มือพันผ้าไว้ทั้งที่ไม่ต้องพัน",
+  a:"…มาแล้วเหรอ ไม่ต้องมาก็ได้ พี่ไม่ได้เป็นอะไร",
+  q:"ตอนเจ็บที่ค่ายเก่า ไม่มีใครมาเยี่ยม เขาแค่ถามว่าเมื่อไหร่ชกได้",
+  o:[["\"ที่นี่ถามว่าเมื่อไหร่หายต่างหาก\"","…นายพูดแบบนี้ พี่จะร้องไห้ให้ใครเห็นไม่ได้นะ"],["แกะผ้าพันมือให้","…ติดเป็นนิสัย พี่พันไว้ทุกครั้งที่กลัว ขอบใจ"],["\"กะทิฝากของมาด้วย\"","ขนมเปี๊ยะร้านเดิม… ยัยนั่นยังจำได้อีก"]],
+  out:"พลอยไม่ได้มองตามตอนคุณเดินออกไป แต่พยาบาลบอกว่าเธอยิ้มอยู่ครู่ใหญ่"},
+ fah:{in:"ห้องพักคนไข้ ฟ้านอนคลุมโปงอยู่ เหลือแต่ผมสีเงินโผล่พ้นผ้าห่ม",
+  a:"…ใครให้มา! ฟ้าไม่อยากให้ใครเห็นตอนนี้!",
+  q:"ฟ้าเกลียดโรงพยาบาล… ยายนอนที่นี่ตั้งสามเดือนตอนฟ้าเด็ก ๆ",
+  o:[["\"งั้นจะอยู่จนเธอหลับ\"","…ห้ามไปไหนนะ ถ้าฟ้าตื่นมาแล้วไม่เจอ ฟ้าจะโกรธ"],["เล่าเรื่องตลกในค่าย","ฮ่า! มะลิทำแบบนั้นจริงเหรอ… โอ๊ย ขำแล้วเจ็บ อย่าเล่าอีก! …เล่าอีก"],["\"ยายรู้หรือยัง\"","…ยังไม่บอก ยายจะห่วง นายอย่าบอกนะ สัญญา"]],
+  out:"ก่อนกลับ ฟ้าดึงผ้าห่มลงมาแค่ครึ่งหน้า พอให้เห็นว่าไม่ได้ร้องไห้แล้ว"},
+ baibua:{in:"ห้องพักคนไข้ ใบบัวนั่งพับเพียบบนเตียงอย่างเรียบร้อย ข้างตัวมีกระติกชาร้อนที่แม่ฝากมา",
+  a:"ผู้จัดการ… มาเยี่ยมหนูเหรอเจ้า ไม่ต้องลำบากก็ได้",
+  q:"พ่อโทรมาถามทุกชั่วโมงเลยเจ้า หนูบอกว่าไม่เป็นไร แต่พ่อไม่เชื่อ",
+  o:[["\"เดี๋ยวบอกพ่อให้เองว่าเธอเก่งมาก\"","…พ่อต้องเชื่อผู้จัดการแน่เจ้า ขอบใจนะ"],["ช่วยเทชาให้","ชาของแม่… เทเก่งกว่าหนูอีกเจ้า ฮิ ๆ"],["กดจุดที่ไหล่ให้บ้าง","…ผู้จัดการจำได้ด้วย เบา ๆ ตรงนั้นแหละเจ้า"]],
+  out:"ใบบัวเดินมาส่งถึงประตูห้อง ทั้งที่พยาบาลบอกให้นอนนิ่ง ๆ"},
+ tabtim:{in:"ห้องพักคนไข้ เสียงหมอลำจากโทรศัพท์ทับทิมดังเบา ๆ เธอโยกหัวตามจังหวะทั้งที่ขายกสูงอยู่",
+  a:"ผู้จัดการ! มาพอดีเลยเด้อ ข้อยเบื่อจะตายแล้ว ฟ้อนก็บ่ได้!",
+  q:"แม่บอกว่าจะนั่งรถทัวร์มาจากโคราช ข้อยบอกว่าบ่ต้อง… แม่บ่ฟัง",
+  o:[["\"ให้แม่มาเถอะ แม่ห่วง\"","…อือ ข้อยก็อยากเห็นหน้าแม่แหละ บอกบ่ได้เฉย ๆ"],["ฟ้อนมือให้ดูแทน","ฮ่า ๆ ๆ! ผู้จัดการฟ้อนแข็งเหมือนเสาไฟฟ้า! ขำจนเจ็บแผลแล้วเด้อ!"],["\"พี่ ๆ รู้ยัง\"","พี่เพชรส่งสติกเกอร์มาแล้ว พี่นิล… ส่งมาหนึ่งข้อความ ว่า 'หายไว ๆ' แค่นั้นก็พอแล้วเด้อ"]],
+  out:"ขากลับยังได้ยินเสียงทับทิมคุยโทรศัพท์กับแม่ดังไปทั้งทางเดิน"},
+ alicia:{in:"ห้องพักคนไข้ชั้นบนสุด ม่านปิดทุกบาน อลิเซียใส่หมวกกับแมสก์ทั้งที่อยู่บนเตียง",
+  a:"…ใครบอกคุณว่าฉันอยู่ที่นี่ ห้ามมีรูปหลุดออกไปเด็ดขาด",
+  q:"คุณกฤตอยากให้แถลงข่าวว่าฉันสบายดี ฉันไม่อยากโกหกแฟน ๆ",
+  o:[["\"บอกตรง ๆ ว่าเจ็บ แล้วจะกลับมา\"","…Honest. แฟนตัวจริงรับได้ ฉันจะพิมพ์เอง"],["เปิดม่านให้แสงเข้ามา","…ไม่มีกล้องข้างนอกใช่ไหม …โอเค แดดอุ่นดี"],["\"วันนี้ไม่ต้องเป็นใคร นอนพักเฉย ๆ\"","…ไม่มีใครเคยบอกฉันแบบนี้ ขอบคุณ"]],
+  out:"คืนนั้นอลิเซียโพสต์รูปมือที่พันผ้า พร้อมข้อความสั้น ๆ ว่า 'พักแป๊บ เดี๋ยวกลับมา'"},
+ chaba:{in:"ห้องพักคนไข้ ชบานั่งมองหน้าต่างที่ไม่เห็นทะเล ไม้ค้ำวางพิงเตียงอยู่ข้าง ๆ",
+  a:"…มาทำไม",
+  q:"ไม้ค้ำนี่ พี่เคยใช้ ตอนนี้ฉานใช้บ้าง …แปลกดี",
+  o:[["\"เธอจะเดินได้เร็วกว่าพี่\"","…อือ พี่ก็พูดแบบนี้ ทางโทรศัพท์ เมื่อเช้า"],["นั่งลงข้าง ๆ เงียบ ๆ","ชบาเอียงไหล่มาพิงนิดหนึ่ง แล้วไม่ได้พูดอะไรอีก"],["เอากระดิ่งลมเปลือกหอยมาแขวนให้","…เสียงเหมือนบ้าน …หรอย"]],
+  out:"ตอนออกจากห้อง ได้ยินเสียงกระดิ่งลมดังเบา ๆ ตามหลังมา"}};
+function hospDue(G,id){const f=G.F[id];return !!(f&&HOSP_VISIT[id]&&(f.injury||0)>=2&&f.camp==="player");}
+function hospScene(G,id){const f=G.F[id],H=HOSP_VISIT[id];G.freeUsed=true;f.hangWk=G.week;
+  return [{n:"nar",bg:"hospital",t:H.in},{n:id,f:"flustered",l:"casual",t:H.a},{n:id,f:"sad",l:"casual",t:H.q},
+   {choice:H.o.map(([t,r])=>({t,fx:G2=>{add(G2,id,"bond",6);add(G2,id,"morale",6);},then:[{n:/^ชบาเอียง/.test(r)?"nar":id,f:"happy",l:"casual",t:r}]}))},
+   {n:"nar",t:H.out}];}
 
 // ================= MUAY THAI MOE v1.2 — PIXEL SYSTEMS =================
 const ASSET="a/";
@@ -8953,7 +9005,7 @@ AU.gsfx=function(kind,a){if(!this.init()||this.muted||!SETTINGS.sfx)return;const
   if(kind==="shimmer")for(let i=0;i<6;i++)T(i*.05,{f:1400+Math.random()*1400,type:"sine",dur:.12,peak:.06});};
 
 // ================= MUAY THAI MOE v1.3 — UI =================
-const VERSION="1.91.137";
+const VERSION="1.91.138";
 const CUR_LANG=(typeof window!=="undefined"&&window.LANG)||"th";
 const TH_LABEL=String.fromCharCode(3652,3607,3618);
 function langSwitch(cls){return `<div class="langsw ${cls||""}" role="group" aria-label="Language">${[["th",TH_LABEL],["en","EN"]].map(([k,l])=>`<button class="lsb ${CUR_LANG===k?"on":""}" data-act="setlang" data-v="${k}" aria-pressed="${CUR_LANG===k}">${l}</button>`).join("")}</div>`;}
@@ -8994,7 +9046,7 @@ const THAI_IDS=["kati","mali","rin","ploy","fah"];
 // v1.91.48: sad + pout Thai-dress art — with THAI_XP on, every mood has its own picture and the casual-clothes guard is off
 const THAI_XP=true;const thaiSuf=m=>THAI_XP&&m==="sad"?"_sad":THAI_XP&&["pout","angry"].includes(m)?"_pout":["flustered","surprised","pout","sad","angry"].includes(m)?"_fl":"";
 const faceSrc=(id,mood,look)=>id==="prod_B"?stand(id,look==="casual"||!look?"casual":look,mood).replace(/\.(png|webp)$/,"_face.png"):look==="thai"&&THAI_IDS.includes(id)?`${ASSET}${id}_thai${thaiSuf(mood)}_face.${["sad","pout","angry"].includes(mood)?"png":"webp"}`:id==="coach"?`${ASSET}coach_face.webp`:id==="pailin"?`${ASSET}${look==="casual"?`pailin_casual${mood==="flustered"?"_flustered":["sad","angry","pout"].includes(mood)?"_pout":""}_face`:`pailin_fight_${["happy","sad","angry","surprised","flustered"].includes(mood)?mood:FMOOD(mood)}_face`}.png`:look&&look!=="fight"&&look!=="thai"?`${ASSET}${id}_${look}_face.${REGIONAL_IDS.includes(id)||id==="fah"&&look.startsWith("casual")||id==="kati"&&look==="casual_flustered"?"png":"webp"}`:`${ASSET}${id}_${["happy","sad","flustered"].includes(mood)||REGIONAL_IDS.includes(id)&&["angry","surprised"].includes(mood)?mood:"happy"}_face.${REGIONAL_IDS.includes(id)?"png":"webp"}`;
-const BGIMG={river_dawn:"bg_river_dawn.webp",gang_hq:"bg_gang_hq.webp",gang_hideout:"bg_gang_hideout.webp",loy_ring:"bg_loy_ring.webp",market_morning:"bg_market_morning.webp",camp:"bg_camp.webp",night:"bg_camp_night.webp",bus:"bg_bus_rain.webp",letter:"bg_grandpa_letter.webp",fair:"bg_fair.webp",fair_ring:"bg_fair_ring.webp",camp_day:"bg_camp_day.webp",home_baibua:"bg_home_baibua.webp",home_tabtim:"bg_home_tabtim.webp",home_chaba:"bg_home_chaba.webp",home_alicia:"bg_home_alicia.webp",phuket_beach:"bg_phuket_beach.webp",local:"bg_local.webp",district:"bg_district.webp",ring:"bg_local.webp",final:"bg_final.webp",hall:"bg_hall.webp",gym:null,gymdusk:"gym1.webp",food:"bg_food.webp",temple:"bg_temple.webp",cafe:"bg_cafe.webp",river:"bg_river.webp",market:"bg_market.webp",rooster:"bg_rooster.webp",farm:"bg_farm.webp",sea:"bg_sea.webp",mountain:"bg_mountain.webp",ayutthaya:"bg_ayutthaya.webp",amphawa:"bg_amphawa.webp",
+const BGIMG={river_dawn:"bg_river_dawn.webp",gang_hq:"bg_gang_hq.webp",gang_hideout:"bg_gang_hideout.webp",loy_ring:"bg_loy_ring.webp",market_morning:"bg_market_morning.webp",camp:"bg_camp.webp",night:"bg_camp_night.webp",bus:"bg_bus_rain.webp",letter:"bg_grandpa_letter.webp",fair:"bg_fair.webp",fair_ring:"bg_fair_ring.webp",night_north:"bg_night_north.webp",camp_day:"bg_camp_day.webp",home_baibua:"bg_home_baibua.webp",home_tabtim:"bg_home_tabtim.webp",home_chaba:"bg_home_chaba.webp",home_alicia:"bg_home_alicia.webp",phuket_beach:"bg_phuket_beach.webp",local:"bg_local.webp",district:"bg_district.webp",ring:"bg_local.webp",final:"bg_final.webp",hall:"bg_hall.webp",gym:null,gymdusk:"gym1.webp",food:"bg_food.webp",temple:"bg_temple.webp",cafe:"bg_cafe.webp",river:"bg_river.webp",market:"bg_market.webp",rooster:"bg_rooster.webp",farm:"bg_farm.webp",sea:"bg_sea.webp",mountain:"bg_mountain.webp",ayutthaya:"bg_ayutthaya.webp",amphawa:"bg_amphawa.webp",
   /* v1.89.7: new scenes, ready to use */camp_night:"bg_camp_night.webp",camp_rain:"bg_camp_rain.webp",songkran:"bg_songkran.webp",newyear:"bg_newyear.webp",kitchen:"bg_kitchen.webp",hill:"bg_hill.webp",tvstudio:"bg_tvstudio.webp",live_corner:"bg_live_corner.webp",hospital:"bg_hospital.webp",vector_lab:"bg_vector_lab.webp",loy_night:"bg_loy_night.webp",sportsday:"bg_sportsday.webp",dorm_room:"bg_dorm_room.webp"};
 /* v1.91.26 (Man): every SSR card has its own illustration — shown full-screen at its moment in the card story, viewable in the card's
    details once owned, and usable as the card face (G.cardArt[id]=1). at = the story line it appears on (it stays for the next line too). */
@@ -9041,6 +9093,9 @@ const npcPortraitSrc=(im,st={})=>{if(im.startsWith("vector_")||im==="petchara")r
   }
   return im.startsWith("nl_")?`${ASSET}${im}.webp`:`${ASSET}npc_${im}.webp`;};
 const TIER_BG={evloy:"bg_river.webp",pro:"bg_fair_ring.webp",semi:"bg_hall.webp",local:"bg_local.webp",district:"bg_district.webp",final:"bg_final.webp",exhibition:"bg_fair_ring.webp",special:"bg_district.webp",lab:"bg_hall.webp",quest:"bg_food.webp",beast:"bg_fair_ring.webp",dm:"bg_hall.webp"};
+
+/* v1.91.138 (Man): every scene shows where it happens — per-scene backgrounds read from where and when each scene takes place */
+const EV_BG={"kati_why": "gymdusk", "first_loss": "hall", "kati_ourcamp": "camp_day", "night_final": "gymdusk", "district_mid": "gymdusk", "storm": "camp_rain", "kati_knee": "camp", "daeng_past": "gymdusk", "me_photo": "letter", "ploy_ko40": "camp", "kati_overwork": "gymdusk", "rin_notebook": "camp", "bb_kati_55": "camp_rain", "bb_mali_55": "gymdusk", "bb_rin_55": "camp", "bb_ploy_55": "hall", "hs_rin_15": "camp", "hs_fah_12": "camp_rain", "hf_coach_letter": "letter", "bday_ploy": "newyear", "pet_cat": "camp_rain", "ploy_injury": "hospital", "by_leave": "market_morning", "y5_vector_contract": "camp", "vector_annual_letter": "letter", "ploy_surge": "gymdusk", "fah_surge": "hill", "xlh_pailin_1": "dorm_room", "y2_ploy_team": "camp", "rival_meet": "night_north", "coach_money": "gymdusk", "fame36": "camp_day", "fame60": "camp_day", "tiger_news": "camp", "tempt_mali": "kitchen", "tempt_rin": "cafe", "tempt_ploy": "night", "feud_mali_rin": "dorm_room", "hs_kati_12": "dorm_room", "hs_kati_15": "market_morning", "hs_mali_12": "camp_day", "hs_fah_30": "night", "mem_kati_bike": "camp_day", "mali_day1": "camp_day", "bday_kati": "songkran", "fest_newyear": "market", "fest_krathong": "camp_day", "pet_turtle": "market_morning", "petx_cat_rin": "kitchen", "bday_baibua": "loy_night", "bday_tabtim": "songkran", "bday_alicia": "newyear", "c_kati_fah": "night_north", "c_dinner": "night", "c3_trio_dinner": "night"};
 const gymBg=()=>`gym${G?campLevel(G):1}.webp`;
 // v1.13 pixel icons — no emoji in the fight UI
 function pxIcon(rows,pal){const h=rows.length,w=rows[0].length;let r="";rows.forEach((row,y)=>[...row].forEach((c,x)=>{if(c!=="."&&pal[c])r+=`<rect x="${x}" y="${y}" width="1.02" height="1.02" fill="${pal[c]}"/>`;}));
@@ -9766,7 +9821,7 @@ function peopleHTML(){const rgP=typeof REGION!=="undefined"&&REGION.peopleIds&&G
      <div class="pbody"><div class="pnm"><b class="nm">${esc(f.name)}</b><span class="meta">${xl(f)?xlCamp(G,f):f.camp==="player"?"ค่ายศิริชัย":out(f)?esc(REGION.campOf(f.id)):f.camp==="rival"&&!f.indie?"พยัคฆ์ทอง":"อิสระ"}${relTag(G,f)}</span></div>${hearts(f.bond,f)}
       <div class="pbtns"><button class="btn sm" data-act="fighter" data-id="${f.id}" data-v="rel">ประวัติ</button><button class="btn sm primary" data-act="${xl(f)?"xhang":rgc(f)?"rghang":"hang"}" data-id="${f.id}" data-v="${f.id}" ${out(f)||G.freeUsed||isAway(G,f.id)?"disabled":""}>${out(f)?"เจอได้ตอนไปภาคเธอ":isAway(G,f.id)?"ไม่อยู่":"ใช้เวลาด้วยกัน"}</button><button class="btn sm gold giftb" data-act="giftpick" data-id="${f.id}" ${out(f)||f.giftWeek===gameWeek(G)||isAway(G,f.id)?"disabled":""}>${PIX.gift}<span>${f.giftWeek===gameWeek(G)?"ให้แล้ว":"ของขวัญ"}</span></button><button class="btn sm chatb" data-act="${rgc(f)?"rgchat":"chat"}" data-id="${f.id}" data-v="${f.id}" ${rgc(f)?(G.chatIn&&G.chatIn[f.id]||canChatTell(f)?"":"disabled"):canChat(f)||canChatLov(f)||canChatTell(f)?"":"disabled"}>${(nw=>`${CHAT_PX}<span>${nw?"แชทใหม่":isAway(G,f.id)?"ไม่ตอบแชท":canChatLov(f)||canChatTell(f)?"แชท":(f.bond||0)<CHAT_BOND?"ยังไม่สนิท":"ไม่มีข้อความ"}</span>${nw?'<i class="dot"></i>':""}`)(rgc(f)?!!(G.chatIn&&G.chatIn[f.id]):canChat(f))}</button>${rgc(f)&&REGION.isLovC&&REGION.isLovC(G,f.id)?`<button class="btn sm" data-act="rgbreak" data-v="${f.id}">ขอเลิก</button>`:""}${xl(f)&&xlLov(G,f.id)?`<button class="btn sm" data-act="xbreak" data-v="${f.id}">ขอเลิก</button>`:""}</div></div></section>`).join("")}</div>`;}
 function hangHTML(id){const f=G.F[id],hlv=heartLv(f).lv;const pref=k=>f.know["act_"+k]==="like"?'<i class="likeb">ชอบ</i>':f.know["act_"+k]==="dislike"?'<i class="disb">ไม่ชอบ</i>':"";
-  return `<h2>ใช้เวลากับ${esc(f.name)}</h2><p class="meta">เลือกที่ที่อยากไปด้วยกัน</p><div class="acts">${Object.entries(ACTIVITIES).filter(([k,a])=>(!a.campOnly||f.camp==="player")&&(!a.heart||hlv>=10)).map(([k,a])=>{const lock=a.heart&&hlv<a.heart;return `<button class="actbtn${lock?" lockd":a.heart?" hspot":""}" data-act="date" data-id="${f.id}" data-v="${k}" ${lock||G.freeUsed||G.cash<a.cost?"disabled":""}><b>${a.heart?"♥ ":""}${a.name}${lock?"":pref(k)}</b><small>${lock?`🔒 ปลดที่ ♥Lv.${a.heart}`:a.cost?fmt(a.cost):"ฟรี"}</small></button>`;}).join("")}</div>`;}
+  return `<h2>ใช้เวลากับ${esc(f.name)}</h2><p class="meta">เลือกที่ที่อยากไปด้วยกัน</p><div class="acts">${typeof hospDue==="function"&&hospDue(G,f.id)?`<button class="actbtn hspot" data-act="hosp" data-id="${f.id}" ${G.freeUsed?"disabled":""}><b>ไปเยี่ยมที่โรงพยาบาล</b><small>เจ็บอีก ${f.injury} สัปดาห์ · ฟรี</small></button>`:""}${Object.entries(ACTIVITIES).filter(([k,a])=>(!a.campOnly||f.camp==="player")&&(!a.heart||hlv>=10)).map(([k,a])=>{const lock=a.heart&&hlv<a.heart;return `<button class="actbtn${lock?" lockd":a.heart?" hspot":""}" data-act="date" data-id="${f.id}" data-v="${k}" ${lock||G.freeUsed||G.cash<a.cost?"disabled":""}><b>${a.heart?"♥ ":""}${a.name}${lock?"":pref(k)}</b><small>${lock?`🔒 ปลดที่ ♥Lv.${a.heart}`:a.cost?fmt(a.cost):"ฟรี"}</small></button>`;}).join("")}</div>`;}
 // v1.33: what each camp level brings, so upgrades feel like a goal
 function campLvHTML(){const lv=campLevel(G),t=facTotal(G),need=[0,0,5,13];
   const unlock=L=>[...Object.entries(FACILITIES).filter(([k,F])=>F.req&&F.req.lv===L).map(([k,F])=>F.name),...Object.entries(STAFF).filter(([k,S])=>S.req&&S.req.lv===L).map(([k,S])=>S.name)];
@@ -10437,7 +10492,7 @@ function runEvents(done){const list=pendingEvents().sort((a,b)=>(b.pri||0)-(a.pr
     if(G.coachAwayAbs&&gameWeek(G)<G.coachAwayAbs&&!EV_MUST.test(e.id)&&!/daeng|coach/.test(e.id)&&e.steps.some(x=>x.n==="coach")){step();return;}/* v1.60: scenes where Kru Daeng talks wait until he is back */
     if(!EV_MUST.test(e.id)&&!/^lv_/.test(e.id)&&awaySpeaks(G,e.steps)){step();return;}/* v1.89.11: scenes with a girl who left camp wait until she is back */
     if(!EV_MUST.test(e.id)){if(opt>=((G.season||1)>=2&&(G.week===44||G.week===49)?0:EV_CAP)){step();return;}opt++;}
-    if(e.id==="coach_talk")G.coachTalkWk=gameWeek(G);else if(e.annual){G.seenY=G.seenY||{};G.seenY[e.id]=G.season||1;}else G.seen[e.id]=true;G.seenWk=G.seenWk||{};G.seenWk[e.id]=G.week;G.seenAbs=G.seenAbs||{};G.seenAbs[e.id]=gameWeek(G);played++;playScene(e.steps,step,{bg:e.bg,look:e.look,coachOK:/daeng|coach/.test(e.id)});};step();}
+    if(e.id==="coach_talk")G.coachTalkWk=gameWeek(G);else if(e.annual){G.seenY=G.seenY||{};G.seenY[e.id]=G.season||1;}else G.seen[e.id]=true;G.seenWk=G.seenWk||{};G.seenWk[e.id]=G.week;G.seenAbs=G.seenAbs||{};G.seenAbs[e.id]=gameWeek(G);played++;playScene(e.steps,step,{bg:EV_BG[e.id]||e.bg,look:e.look,coachOK:/daeng|coach/.test(e.id)});};step();}
 function weeklyExtra(done){const rng=mulberry32(G.seed+G.week*313);if(typeof questExtra==="function"&&questExtra(done,mulberry32(G.seed+G.week*59)))return;
   const dil=(typeof DILEMMAS!=="undefined"?DILEMMAS:[]).filter(d=>!G.seen[d.id]&&G.week>=d.from&&G.week<=d.to&&d.need(G)&&!awaySpeaks(G,d.steps));
   const sinceD=gameWeek(G)-(G.lastDilemma||0);
@@ -10447,7 +10502,7 @@ function weeklyExtra(done){const rng=mulberry32(G.seed+G.week*313);if(typeof que
   const chats=CHATTER.filter(c=>!G.seen[c.id]&&c.need(G));const haps=HAPPENINGS.filter(h=>!G.seen[h.id]);
   const chats2=chats.filter(c=>(!c.need2||c.need2(G))&&!awaySpeaks(G,c.steps)),haps2=haps.filter(h=>(!h.need||h.need(G))&&!awaySpeaks(G,h.steps));
   let pick=null;if(chats2.length&&rng()<.6)pick=chats2[Math.floor(rng()*chats2.length)];else if(haps2.length&&rng()<.7)pick=haps2[Math.floor(rng()*haps2.length)];
-  if(!pick){done();return;}G.seen[pick.id]=true;playScene(pick.steps,done,{bg:pick.bg==="camp"?"gym":pick.bg,look:pick.look||"train"});}
+  if(!pick){done();return;}G.seen[pick.id]=true;playScene(pick.steps,done,{bg:EV_BG[pick.id]||(pick.bg==="camp"?"gym":pick.bg),look:pick.look||"train"});}
 function afterWeekFlow(){playHonorQueue(afterWeekFlowMain);}
 function afterWeekFlowMain(){if(typeof cardCheck==="function"){const got=cardCheck(G);if(got.length){G.cardPend=(G.cardPend||[]).concat(got);}}if(typeof mailWeekly==="function"&&!G.ended)mailWeekly(G);if(typeof chatWeekly==="function"&&!G.ended)chatWeekly(G);runEvents(played=>{const fin=()=>{if(G.ended){startEnding();return;}
     if(typeof cardCheck==="function"){const g2=cardCheck(G);if(g2.length)G.cardPend=(G.cardPend||[]).concat(g2);}relTierCheck();if((G.newCerts||[]).length){const n=G.newCerts.map(k=>CAMP_AWARDS[k]?CAMP_AWARDS[k].name:k);G.newCerts=[];setTimeout(()=>toast(`📜 ได้รับเกียรติบัตร: ${n.join(", ")} · ดูได้ที่ห้องถ้วยรางวัล`),600);}if(typeof OUTFITS!=="undefined"){G.outSeen=G.outSeen||{};const nu=Object.keys(OUTFITS).filter(k=>k!=="base"&&k!=="heart"&&!G.outSeen[k]&&outfitOk(G,null,k));nu.forEach(k=>G.outSeen[k]=1);if(nu.length)setTimeout(()=>toast(`ปลดล็อกชุดใหม่: ${nu.map(k=>OUTFITS[k].name).join(", ")} · เปลี่ยนได้ที่โปรไฟล์นักมวย แท็บ "ชุด"`),400);}if(UI.relUp&&UI.relUp.length){const m=UI.relUp.join(" / ");UI.relUp=[];setTimeout(()=>toast("♥ "+m),300);}
@@ -11088,6 +11143,7 @@ const ACT={
   campmg:()=>{const k=UI.modal.pick,a=CAMP_ACTIONS[k];if(!a||!a.mg||G.campUsed)return;UI.modal=null;render();BAG.openMode(a.mg,k);},
   cfxskip:()=>{if(UI.modal&&UI.modal.type==="campres"&&!UI.modal.skip){UI.modal.skip=true;const el=document.querySelector(".campres");if(el)el.classList.add("skip");}},
   campact:d=>{UI.cfxIds=null;const note=doCampAction(G,d.v);if(note==null)return;G.campNote=note;AU.sfx("level");UI.modal={type:"campres",k:d.v,note};save();render();},
+  hosp:d=>{UI.modal=null;UI.tab="people";const steps=hospScene(G,d.id);save();playScene(steps,()=>{save();render();},{bg:"hospital",look:"casual"});},
   date:d=>{UI.modal=null;UI.tab="people";const steps=dateScene(G,d.id,d.v);AU.startMusic("date");playScene(steps,()=>{AU.startMusic("hub");render();},{bg:ACTIVITIES[d.v].bg==="camp"?"gym":ACTIVITIES[d.v].bg,look:"casual"});},
   giftpick:d=>{UI.modal={type:"gift",id:d.id};render();},
   winpopgo:()=>{const n=UI.winNext;UI.winNext=null;UI.modal=null;render();if(n)n();},
@@ -12175,12 +12231,12 @@ Object.assign(CARDS,{
   {n:"nar",t:"รูปออกมาเบลอทั้งใบเพราะไม่มีใครยืนนิ่ง แต่มันถูกใส่กรอบแขวนไว้ในห้องทำงานจนทุกวันนี้"}]}});
 
 Object.assign(CARDS,{
- m_live:{c:"kati",r:"R",t:"ไลฟ์แรกของค่าย",hint:"ไลฟ์ขายของค่ายครั้งแรก",bg:"camp",need:G=>(G.flags.liveN||0)>=1,steps:[
+ m_live:{c:"kati",r:"R",t:"ไลฟ์แรกของค่าย",hint:"ไลฟ์ขายของค่ายครั้งแรก",bg:"live_corner",need:G=>(G.flags.liveN||0)>=1,steps:[
   {n:"nar",t:"มือถือตั้งบนกองกระสอบทราย กะทิกับเสื้อค่ายตัวเดียวที่รีดเรียบที่สุด กล้องหน้าเปิดอยู่ คนดู 3 คน"},
   {n:"kati",f:"flustered",l:"casual",t:"สะ… สวัสดีค่ะ ค่ายศิริชัยค่ะ วันนี้มีเสื้อมาขาย… คนดูสามคน หนึ่งในนั้นคือครูแดง"},
   {n:"coach",t:"(คอมเมนต์จากบัญชี 'แดงศิริชัย') CF 1 ตัว"},
   {n:"kati",f:"happy",l:"casual",t:"ครูคะ! ครูยืนอยู่ข้างหลังหนูเนี่ย! …แต่ขอบคุณค่ะ ออเดอร์แรกของค่ายเลยนะคะ"}]},
- m_livehot:{c:"fah",r:"SR",t:"ไลฟ์แตก",hint:"ได้เกรด S ในไลฟ์ขายของ",bg:"camp",need:G=>(G.flags.liveS||0)>=1,steps:[
+ m_livehot:{c:"fah",r:"SR",t:"ไลฟ์แตก",hint:"ได้เกรด S ในไลฟ์ขายของ",bg:"live_corner",need:G=>(G.flags.liveS||0)>=1,steps:[
   {n:"nar",t:"ตัวเลขคนดูพุ่งเกินพัน ออเดอร์เด้งจนมือถือสั่นไม่หยุด ทั้งค่ายช่วยกันจดใส่สมุดของริน"},
   {n:"fah",f:"happy",l:"casual",t:"เห็นไหม! บอกแล้วว่าไลฟ์ต้องมีฟ้า! …อ้าว วันนี้ฟ้าไม่ได้ไลฟ์เหรอ ช่างเถอะ ฟ้าเชียร์อยู่หลังกล้องก็นับ!"},
   {n:"rin",f:"pout",l:"casual",t:"ออเดอร์ทั้งหมดบันทึกครบ ไม่มีซ้ำ ไม่มีตก …เสื้อในโกดังเหลือสองตัว ใครจะบอกลูกค้าคนที่สามสิบเอ็ด"},
@@ -14093,7 +14149,7 @@ Object.assign(CARDS,{
 <script>
 (function(){
 /* v1.87: Thai code ships inside index.html; English code (en.js) and the dictionary (i18n.js) load only when needed */
-var B="68b0198a53";
+var B="12049a9f91";
 var L="";try{L=localStorage.getItem("mtm_lang")||"";}catch(e){}
 try{var h=(location.hash||"").match(/lang=(th|en)/);if(h)L=h[1];}catch(e){}
 if(L!=="th"&&L!=="en")L="th";

@@ -186,7 +186,7 @@ const EVENTS=[
      {n:"coach",t:"Coach can kick a mortar. But Coach is not dancing. Just so you know"},
      {n:"nar",t:"In the end, Coach Daeng danced"}]}]}]},
 
- {id:"mali_meet",look:"fight",when:G=>G.week>=4,bg:"fair",steps:[
+ {id:"mali_meet",look:"fight",when:G=>G.week>=4,bg:"fair_ring",steps:[
   {n:"nar",t:"The annual temple fair. A temporary ring stands beside the Ferris wheel, pipes and drums echoing everywhere"},
   {n:"nar",t:"A small fighter with a topknot and a frangipani flower kicks a bigger opponent all the way back"},
   {n:"mali",f:"happy",t:"Yay! I won~ Thank you everyone!"},
@@ -272,7 +272,7 @@ const EVENTS=[
    {t:"Carrying everyone alone isn't your job alone",fx:G=>{add(G,"ploy","bond",9);},then:[{n:"ploy",f:"flustered",t:"…You're strange. A rival, but you talk like you care. Thank you"}]},
    {t:"Then in the ring, our camp won't hold back",fx:G=>{add(G,"ploy","bond",5);add(G,"ploy","trust",4);},then:[{n:"ploy",f:"happy",t:"Good. I like that. Don't disappoint me"}]}]}]},
 
- {id:"loykrathong",look:"casual",when:G=>G.week>=26,bg:"fair",steps:[
+ {id:"loykrathong",look:"casual",when:G=>G.week>=26,bg:"loy_night",steps:[
   {n:"nar",t:"Full moon of the twelfth month. The river is full of krathongs and candlelight; the whole camp skips training for one night"},
   {n:"coach",t:"Go on, go float krathongs. Let the bad luck float away; this camp's had plenty this year"},
   {n:"nar",t:"Who will you invite to float a krathong?"},
@@ -2839,3 +2839,55 @@ function tellSteps(G,id){const f=G.F[id],two=twoFor(G,id),ready=tellReady(G,f);
   if(two)return [open[0],{n:"nar",t:"⚠ You're already with someone. Saying it would make this two-timing.",choice:[{t:"Tell her honestly (two-timing)",then:[open[1],...yes]},{t:"Better not say it",then:[{n:"nar",t:"You keep the words to yourself and talk about training instead."}]}]}];
   return [...open,...yes];}
 function tellLove(id){const f=G.F[id],T=tellState(G,f);if(!T||!T.ok)return;save();playScene(tellSteps(G,id),()=>{save();render();},{bg:"night",look:"casual"});}
+/* v1.91.138 (Man): when a fighter is badly hurt, time together can be a visit to her at the hospital */
+const HOSP_VISIT={
+ kati:{in:"A hospital room on the third floor. Kati lies propped on her pillow, one leg in an elastic bandage, still squeezing a stress ball nonstop.",
+  a:"Manager! What are you doing here? It's nothing much, the doctor's just a worrier.",
+  q:"...Don't worry, Manager. I'll get back to training as fast as I can.",
+  o:[["\"No rush. The camp can wait\"","...The camp can wait, but I can't, hee hee. Okay, I'll rest the full time."],["Peel an orange for her","You peel better than me... whenever I peel one, the skin comes off in tiny bits."],["\"Grandpa would scold you if he saw you pushing it\"","...Yes. Grandpa would rap me on the head for sure. I'll listen to the doctor."]],
+  out:"Before you leave, Kati waves from her bed until the nurse turns to look."},
+ mali:{in:"A shared hospital ward. Mali leans back on her bed, a jasmine garland someone brought lying by her pillow.",
+  a:"Manager~! You really came to see me! I told the nurse someone would definitely come today.",
+  q:"Hospital food is so bland... I miss Mum's chilli paste.",
+  o:[["Sneak a jar of chilli paste out of your bag","!!! You're my hero! Shh~ don't let the nurse see!"],["\"Once you're better, I'll take you for a proper meal\"","It's a promise~ I'll remember every word!"],["\"You have to eat what the doctor says\"","...Okay. You sound just like Rin."]],
+  out:"On the way out, you hear Mali singing luk thung for the auntie in the next bed."},
+ rin:{in:"A hospital room. Rin sits against the headboard, a tablet on her lap full of recovery graphs.",
+  a:"...Why did you come? Statistically, an injury like this doesn't need visitors.",
+  q:"I've done the maths. If I start light training tomorrow, I'll be back four days sooner.",
+  o:[["Switch off her tablet","...You just deleted the ten percent chance I wouldn't listen to the doctor. ...Thank you."],["\"Four days isn't worth getting hurt again\"","...I didn't put that number in the equation. You're right."],["Sit with her quietly","...You don't have to say anything. Being here is enough."]],
+  out:"As you leave, you see Rin switch the screen from her graphs to a photo of the whole camp together."},
+ ploy:{in:"A private hospital room. Ploy sits bolt upright on the bed as if waiting for a bout, hands wrapped though they don't need to be.",
+  a:"...You came? You didn't have to. I'm fine.",
+  q:"When I got hurt at my old camp, nobody visited. They only asked when I could fight again.",
+  o:[["\"Here we ask when you'll be better\"","...If you say things like that, I can't let anyone see me cry."],["Unwrap the tape on her hands","...Habit. I wrap them every time I'm scared. Thanks."],["\"Kati sent something for you\"","Pastries from the same shop... that girl still remembers."]],
+  out:"Ploy doesn't watch you go, but the nurse says she smiled for a good while after."},
+ fah:{in:"A hospital room. Fah lies with the blanket over her head, only her silver hair poking out.",
+  a:"...Who said you could come! I don't want anyone to see me like this!",
+  q:"I hate hospitals... Grandma was in here three months when I was little.",
+  o:[["\"Then I'll stay until you fall asleep\"","...Don't go anywhere. If I wake up and you're gone, I'll be mad."],["Tell her funny stories from the camp","Ha! Mali really did that?... Ow, it hurts when I laugh, stop! ...Tell me another one."],["\"Does your grandma know?\"","...Not yet. Grandma would worry. Don't tell her. Promise."]],
+  out:"Before you leave, Fah pulls the blanket down halfway, just enough to show she's stopped crying."},
+ baibua:{in:"A hospital room. Baibua sits neatly with her legs folded on the bed, a flask of hot tea from her mother beside her.",
+  a:"Manager... you came to see me? You didn't have to go to the trouble.",
+  q:"Dad calls every hour. I tell him I'm fine, but he doesn't believe me.",
+  o:[["\"I'll tell your dad myself how great you did\"","...Dad will believe you for sure. Thank you."],["Pour the tea for her","Mum's tea... you pour it better than I do. Hee hee."],["Press the points on her shoulders for a change","...You remembered. Gently, right there."]],
+  out:"Baibua walks you to the door of the room, even though the nurse told her to lie still."},
+ tabtim:{in:"A hospital room. Mor lam plays softly from Tabtim's phone; she bobs her head to the beat with her leg propped up.",
+  a:"Manager! Perfect timing! I'm bored to death, and I can't even dance!",
+  q:"Mum says she's taking the bus all the way from Korat. I told her not to... she won't listen.",
+  o:[["\"Let her come. She's worried\"","...Yeah. I want to see Mum's face too. I just can't say it."],["Do the hand dance for her instead","Ha ha ha! You dance as stiff as a lamp post! I'm laughing so hard my stitches hurt!"],["\"Do your brothers know?\"","Brother Petch sent stickers. Brother Nil... sent one message: 'Get well soon.' That's enough."]],
+  out:"On the way out you can still hear Tabtim on the phone with her mother all the way down the corridor."},
+ alicia:{in:"A hospital room on the top floor, every curtain drawn. Alicia wears a cap and a mask even in bed.",
+  a:"...Who told you I was here? No photos get out. None.",
+  q:"Mr. Krit wants a statement saying I'm fine. I don't want to lie to my fans.",
+  o:[["\"Just tell them you're hurt and you'll be back\"","...Honest. Real fans can take it. I'll write it myself."],["Open the curtains to let the light in","...No cameras outside, right? ...Okay. The sun's warm."],["\"Today you don't have to be anyone. Just rest\"","...Nobody's ever told me that. Thank you."]],
+  out:"That night Alicia posts a photo of her taped hand with a short caption: 'Taking a short break. Be right back.'"},
+ chaba:{in:"A hospital room. Chaba sits looking out of a window with no sea in it, crutches leaning against the bed.",
+  a:"...Why'd you come.",
+  q:"These crutches. My brother used them. Now it's my turn. ...Strange.",
+  o:[["\"You'll walk again faster than your brother did\"","...Mm. My brother said that too. On the phone. This morning."],["Sit down beside her, quietly","Chaba tilts her shoulder to lean on you a little, and says nothing more."],["Hang up the seashell wind chime for her","...Sounds like home. ...Nice."]],
+  out:"As you leave the room, the wind chime rings softly behind you."}};
+function hospDue(G,id){const f=G.F[id];return !!(f&&HOSP_VISIT[id]&&(f.injury||0)>=2&&f.camp==="player");}
+function hospScene(G,id){const f=G.F[id],H=HOSP_VISIT[id];G.freeUsed=true;f.hangWk=G.week;
+  return [{n:"nar",bg:"hospital",t:H.in},{n:id,f:"flustered",l:"casual",t:H.a},{n:id,f:"sad",l:"casual",t:H.q},
+   {choice:H.o.map(([t,r])=>({t,fx:G2=>{add(G2,id,"bond",6);add(G2,id,"morale",6);},then:[{n:/^ชบาเอียง/.test(r)?"nar":id,f:"happy",l:"casual",t:r}]}))},
+   {n:"nar",t:H.out}];}

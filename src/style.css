@@ -1415,7 +1415,7 @@ html.vnopen,html.vnopen body{overflow:hidden;overscroll-behavior:none;height:100
 /* v1.67 live-selling minigame */
 .lvitems{display:flex;flex-wrap:wrap;gap:6px;justify-content:center}
 .mplay.lv{gap:10px}
-.lvphone{position:relative;height:300px;background:linear-gradient(#2b2146,#120e22);box-shadow:inset 0 0 0 3px #4a3f6b;overflow:hidden}
+.lvphone{position:relative;height:300px;background:linear-gradient(rgba(43,33,70,.35),rgba(18,14,34,.75)),url(a/bg_live_corner.webp) 50% 60%/cover;box-shadow:inset 0 0 0 3px #4a3f6b;overflow:hidden}
 .lvface{position:absolute;left:50%;bottom:0;transform:translateX(-50%);height:96%;object-fit:contain;opacity:.95}
 .lvtop{position:absolute;top:6px;left:6px;right:6px;display:flex;gap:10px;align-items:center;font-size:13px;text-shadow:0 1px 2px #000}
 .lvtop #lvt{margin-left:auto;background:rgba(0,0,0,.5);padding:0 6px}

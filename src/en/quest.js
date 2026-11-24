@@ -970,12 +970,12 @@ Object.assign(CARDS,{
   {n:"nar",t:"The photo comes out blurry because nobody stood still, but it's framed and still hangs in the office today."}]}});
 
 Object.assign(CARDS,{
- m_live:{c:"kati",r:"R",t:"The Camp's First Live",hint:"Stream the camp's merch for the first time",bg:"camp",need:G=>(G.flags.liveN||0)>=1,steps:[
+ m_live:{c:"kati",r:"R",t:"The Camp's First Live",hint:"Stream the camp's merch for the first time",bg:"live_corner",need:G=>(G.flags.liveN||0)>=1,steps:[
   {n:"nar",t:"A phone propped on a stack of sandbags. Kati in the one camp shirt she ironed flattest. Front camera on. Three viewers."},
   {n:"kati",f:"flustered",l:"casual",t:"H-hello, this is Sirichai Camp. Today we have shirts for sale… Three viewers. One of them is Coach Daeng."},
   {n:"coach",t:"(Comment from the account 'Daeng Sirichai') CF 1 shirt"},
   {n:"kati",f:"happy",l:"casual",t:"Coach! You're standing right behind me! …But thank you. That's the camp's very first order."}]},
- m_livehot:{c:"fah",r:"SR",t:"The Live Blew Up",hint:"Get an S on the merch live stream",bg:"camp",need:G=>(G.flags.liveS||0)>=1,steps:[
+ m_livehot:{c:"fah",r:"SR",t:"The Live Blew Up",hint:"Get an S on the merch live stream",bg:"live_corner",need:G=>(G.flags.liveS||0)>=1,steps:[
   {n:"nar",t:"The viewer count shoots past a thousand. Orders pour in until the phone won't stop buzzing. The whole camp helps write them into Rin's notebook."},
   {n:"fah",f:"happy",l:"casual",t:"See! I told you a live needs Fah! …Wait, Fah wasn't the one streaming today? Whatever, cheering behind the camera counts!"},
   {n:"rin",f:"pout",l:"casual",t:"Every order logged. No duplicates, none missed. …There are two shirts left in storage. Who's telling customer number thirty-one?"},

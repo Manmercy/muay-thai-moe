@@ -43,14 +43,14 @@ const UNLOCK={blood:15,bday:15,hobby:15,personality:25,story:45,likesAll:55,disl
 // ---------- DATES ----------
 const ACTIVITIES={
   eat:{name:"Khao soi at Auntie Daeng's",cost:200,bg:"food",intro:["Auntie Daeng's khao soi shop is packed like every evening; you can smell the roasted chili from down the street","Auntie Daeng calls out from the door: \"Oh! The Sirichai crew is here. Your usual table, dear\""]},
-  market:{name:"Saturday night market stroll",cost:300,bg:"market",intro:["The walking street glows with orange lights, the sound of a seung and the smell of grilled food drifting by","The market is extra busy tonight; a busking band is playing at the head of the street"]},
+  market:{name:"Saturday night market stroll",cost:300,bg:"night_north",intro:["The walking street glows with orange lights, the sound of a seung and the smell of grilled food drifting by","The market is extra busy tonight; a busking band is playing at the head of the street"]},
   temple:{name:"Making merit at the temple near camp",cost:0,bg:"temple",intro:["The temple grounds are calm; only the wind chimes on the chapel eaves can be heard","The sun has just set; candlelight in the hall glints off the golden Buddha"]},
   cafe:{name:"Cafe and fight replays",cost:250,bg:"cafe",intro:["A tiny alley cafe with plugs at every table, perfect for long fight-tape sessions","The smell of light-roast coffee drifts by; the shop TV plays Muay Thai on mute"]},
   river:{name:"Evening bike ride along the river",cost:100,bg:"river",intro:["A cool breeze blows along the riverside bike path as the sky turns orange","Kids chase each other on the bank; someone is fishing under the bridge"]},
-  jog:{name:"Morning run around the reservoir",cost:0,bg:"river",intro:["Mist still hangs over the reservoir; running shoes thud on the dirt path in rhythm","Dawn is just breaking; the patongo uncle is heating his wok for the runners"]},
+  jog:{name:"Morning run around the reservoir",cost:0,bg:"river_dawn",intro:["Mist still hangs over the reservoir; running shoes thud on the dirt path in rhythm","Dawn is just breaking; the patongo uncle is heating his wok for the runners"]},
   cat:{name:"Feed the cats behind the temple",cost:0,bg:"temple",intro:["Five tabby cats wait by the monks' quarters as if they know the time","A fat orange cat rolls on a haystack behind the temple and jumps up at the sound of a snack bag"]},
-  stars:{name:"Stargaze on the camp roof",cost:0,bg:"camp",campOnly:true,intro:["All the camp lights are off; on the tin roof there's just a cool breeze and a sky full of stars","An old mat spread on the roof, a thermos of hot tea beside it"]},
-  cook:{name:"Make som tam together at camp",cost:0,bg:"camp",campOnly:true,intro:["Grandpa Chai's big wooden mortar comes out of the kitchen; the pounding echoes down the whole lane","Two papayas from the tree behind camp are being shredded into strips"]},
+  stars:{name:"Stargaze on the camp roof",cost:0,bg:"night",campOnly:true,intro:["All the camp lights are off; on the tin roof there's just a cool breeze and a sky full of stars","An old mat spread on the roof, a thermos of hot tea beside it"]},
+  cook:{name:"Make som tam together at camp",cost:0,bg:"camp_day",campOnly:true,intro:["Grandpa Chai's big wooden mortar comes out of the kitchen; the pounding echoes down the whole lane","Two papayas from the tree behind camp are being shredded into strips"]},
   spar:{name:"One-on-one extra training",cost:0,bg:"camp",campOnly:true,intro:["Classes are done; only the fan and a still-swinging heavy bag remain","The gym lights are half on, just enough to see shadows on the ring"]},
 };
 // v1.88: date spots that open with the heart level (♥Lv.12 / 14 / 17) — content only, no gameplay effect

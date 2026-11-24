@@ -3286,6 +3286,15 @@ const RG_PAIRSAY={
  alicia:[{n:"rin",f:"happy",l:"casual",t:"ความน่าจะเป็นที่ฉันจะทายเรื่องนี้ผิดคือศูนย์ค่ะ ฉันรู้ตั้งแต่ตอนล่องเรืออยุธยาแล้ว …ยินดีด้วย"},{n:"alicia",f:"flustered",l:"casual",t:"…Rin ทายถูกอีกแล้ว Annoying. ขอบคุณนะ"}],
  chaba:[{n:"mali",f:"happy",l:"casual",t:"พี่ชบามีแฟนแล้ว~! มะลิจะโทรบอกแม่ แม่ต้องดีใจกว่าใครแน่ ๆ เลยค่ะ"},{n:"chaba",f:"flustered",l:"casual",t:"…อย่าบอกแม่ แม่บอกทั้งไชยา …บอกก็ได้"}]};
 
+/* v1.91.138 (Man): each time-together scene shows where it happens (the market, the river, the kitchen, her room…) instead of always the gym */
+{const RG_SCENE_BG={"baibua.hang.0": "market_morning", "baibua.hang.1": "night", "baibua.hang.2": "camp", "baibua.love": "night_north", "baibua.h2.0": "river", "baibua.h2.1": "kitchen", "baibua.ag.0": "doisuthep", "baibua.ag.1": "camp", "baibua.ag.2": "camp_day", "baibua.heart.55": "camp", "baibua.heart.70": "dorm_room", "baibua.love2.2": "night", "baibua.love2.8": "loy_night", "tabtim.hang.0": "somtam_stall", "tabtim.hang.1": "camp_day", "tabtim.love": "mekong", "tabtim.h2.0": "camp_day", "tabtim.h2.1": "live_corner", "alicia.hang.0": "live_corner", "tabtim.ag.2": "dorm_room", "tabtim.heart.55": "night", "tabtim.heart.70": "camp_day", "alicia.hang.1": "dorm_room", "alicia.love": "boat", "alicia.h2.0": "camp_day", "alicia.h2.1": "kitchen", "alicia.ag.0": "dorm_room", "alicia.heart.55": "gymdusk", "alicia.heart.70": "night", "alicia.love2.2": "cafe", "alicia.love2.8": "closing_ceremony", "chaba.hang.0": "camp_day", "chaba.hang.1": "camp_day", "chaba.love": "andaman", "chaba.h2.0": "river", "chaba.h2.1": "kitchen", "chaba.ag.1": "camp_day", "chaba.ag.2": "camp_rain", "chaba.heart.55": "camp_day", "chaba.heart.70": "dorm_room", "chaba.love2.2": "night", "chaba.love2.8": "andaman"};
+ const tag=(sc,bg)=>{if(!bg||!sc)return sc;if(typeof sc==="function"){const f=sc;return G=>{const a=f(G);if(a&&a[0]&&!a[0].bg)a[0]={...a[0],bg};return a;};}if(sc[0]&&!sc[0].bg)sc[0]={...sc[0],bg};return sc;};
+ for(const c of ["baibua","tabtim","alicia","chaba"]){const J=RG_JOIN[c];if(!J)continue;
+  (J.hang||[]).forEach((sc,i)=>J.hang[i]=tag(sc,RG_SCENE_BG[c+".hang."+i]));J.love=tag(J.love,RG_SCENE_BG[c+".love"]);
+  (RG_HANG2[c]||[]).forEach((sc,i)=>RG_HANG2[c][i]=tag(sc,RG_SCENE_BG[c+".h2."+i]));(RG_AGAIN[c]||[]).forEach((sc,i)=>RG_AGAIN[c][i]=tag(sc,RG_SCENE_BG[c+".ag."+i]));
+  for(const k of RG_HEART_AT)if(RG_HEART[c]&&RG_HEART[c][k])RG_HEART[c][k]=tag(RG_HEART[c][k],RG_SCENE_BG[c+".heart."+k]);
+  for(const k of RG_LOVE_AT)if(RG_LOVE2[c]&&RG_LOVE2[c][k])RG_LOVE2[c][k]=tag(RG_LOVE2[c][k],RG_SCENE_BG[c+".love2."+k]);}}
+
 const RG_PROF={
  baibua:{height:"165 ซม.",blood:"A",bday:"12 พฤศจิกายน (ยี่เป็ง)",home:"เชียงใหม่ · บ้านไม้หลังค่ายเล็กของพ่อ",heritage:"มวยท่าเสา (สายเดียวกับกะทิ)",
   personality:"ขี้อาย สำรวม พูดเสียงเบา ขอโทษก่อนสวนศอกทุกครั้ง แต่บนเวทีไม่เคยถอย",likes:["ข้าวซอยร้านลับหลังตลาด","หมอกตอนเช้ามืด","ปักผ้าลายตีนจก"],
@@ -3380,7 +3389,7 @@ Object.assign(REGION,{
     if(P.length){const top=P.map(k=>G.F[k]).filter(Boolean).sort((a,b)=>((b.bond||0)+(b.bondX||0))-((a.bond||0)+(a.bondX||0)))[0];if(top)R.twoQ={id:top.id,cid,abs:now+3};}
     G.log=G.log||[];G.log.push(`${f?f.name:cid}กับผู้จัดการตกลงคบกัน${P.length?" (คบซ้อน)":""}`);},
   breakC(G,cid){const R=G.region,f=G.F[cid];if(!this.isLovC(G,cid))return;delete R.lov[cid];(R.ex=R.ex||{})[cid]=gameWeek(G);if(R.twoQ&&R.twoQ.cid===cid)delete R.twoQ;if(f)add(G,cid,"bond",-35);},
-  hangC(G,cid){const f=G.F[cid];if(!f||G.freeUsed||isAway(G,cid))return;const J=RG_JOIN[cid],R=G.region;R.hangI=R.hangI||{};const i=R.hangI[cid]||0,lov=this.isLovC(G,cid);
+  hangC(G,cid){const f=G.F[cid];if(!f||G.freeUsed||isAway(G,cid))return;if(typeof hospDue==="function"&&hospDue(G,cid)){const st=hospScene(G,cid);save();playScene(st,()=>{save();render();},{bg:"hospital",look:"casual"});return;}const J=RG_JOIN[cid],R=G.region;R.hangI=R.hangI||{};const i=R.hangI[cid]||0,lov=this.isLovC(G,cid);
     R.hangF=R.hangF||{};const H=[...J.hang,...(RG_HANG2[cid]||[])],A=RG_AGAIN[cid]||J.hang;if(R.hangF[cid]==null)R.hangF[cid]=Math.min(Math.ceil(i/(lov?2:1)),J.hang.length);
     let P;if(lov&&i%2===1)P=J.love;else if(R.hangF[cid]<H.length)P=H[R.hangF[cid]++];else{R.hangAI=R.hangAI||{};P=A[(R.hangAI[cid]=(R.hangAI[cid]||0)+1)%A.length];}R.hangI[cid]=i+1;G.freeUsed=true;f.hangWk=G.week;
     const S=P.map(x=>x.choice?{...x,choice:x.choice.map(o=>({t:o.t,fx:G2=>{add(G2,cid,"bond",o.b);add(G2,cid,"morale",3);},then:o.then}))}:{...x});
