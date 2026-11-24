@@ -1598,6 +1598,87 @@ RG_SIDE.isan={cid:"tabtim",bg:"fair",ring:"bg_fair.webp",title:"Off-schedule fig
       {t:"\"Brother Nil will see it too, someday\"",fx:G2=>rgMeet(G2,"tabtim",2),then:[{n:"tabtim",f:"sad",l:"casual",t:"Brother Nil's gone far now, all the way to Naka... but if we ever meet in the ring, I'll kick so he sees it with his own eyes."}]}]}],cb,{bg:"fair",look:"casual"});}),{bg:"fair",look:"casual"}),
   done:(G)=>addMail(G,{kind:"letter",from:"Tabtim",title:"News from Tabtim's home",body:
    "Manager,\n\nBrother Petch posted the bang fai clip in the family LINE group, and the little ones flooded it with hearts.\n\nThen Dad called me for the first time in two years. He asked just one thing: \"Who was the one aiming the rocket with you?\"\n\nI said the manager of Sirichai Camp. Dad went quiet for a long time, then said, \"Tell him thank you.\"\n\nBrother Nil still hasn't answered my messages. I'll try again.\n\nTabtim"})};
+/* v1.91.129 (Man): Chaba's minigame — lead the gang's speedboat into the reef. Steer left/right through the rocks;
+   tap "กางใบ" while a gust passes to pull away. Keep the gap above zero for 30 seconds. */
+const RG_SAIL={st:null,T:30,
+  css(){if(document.getElementById("rgsail-css"))return;const s=document.createElement("style");s.id="rgsail-css";s.textContent=`
+#rgsail{background:linear-gradient(rgba(10,6,22,.6),rgba(10,6,22,.85)),url(a/bg_night_south.webp) center/cover}#rgsail .mbox{gap:8px}
+#rgsail canvas{width:100%;max-height:52vh;aspect-ratio:3/4;display:block;margin:0 auto;border:3px solid #2f5f7a;image-rendering:pixelated;background:#0d3550}
+#rgsail .shud{display:flex;justify-content:space-between;align-items:center;gap:8px}#rgsail .sgap{flex:1;height:14px;background:#2a1d18;border:2px solid #6b4a32;position:relative}#rgsail .sgap b{position:absolute;left:0;top:0;bottom:0;background:#4ec3e0}
+#rgsail .sbtn{display:grid;grid-template-columns:1fr 1.2fr 1fr;gap:6px}#rgsail .sbtn button{padding:14px 4px;font-size:16px}#rgsail .sbtn .gust{background:#e8b23a;color:#1a1208}`;document.head.appendChild(s);},
+  el(){return document.getElementById("rgsail");},
+  open(done){this.css();let el=this.el();if(!el){el=document.createElement("div");el.id="rgsail";el.className="mgame";document.body.appendChild(el);}
+    this.st={phase:"intro",done};this.draw();
+    el.onclick=e=>{const b=e.target.closest("[data-sl]");if(!b)return;const a=b.dataset.sl;if(a==="go")this.start();else if(a==="end")this.close();else if(a==="sail")this.sail();};
+    if(!this.keyH){this.keyH=e=>{const S=this.st;if(!S||S.phase!=="play")return;const k=e.key.toLowerCase();if(k==="arrowleft"||k==="a")S.dir=-1;else if(k==="arrowright"||k==="d")S.dir=1;else if(k===" "){e.preventDefault();this.sail();}};
+      this.keyU=e=>{const S=this.st;if(S&&(e.key==="ArrowLeft"||e.key==="ArrowRight"||e.key==="a"||e.key==="d"))S.dir=0;};document.addEventListener("keydown",this.keyH);document.addEventListener("keyup",this.keyU);}},
+  draw(){const S=this.st,el=this.el();if(!S||!el)return;
+    if(S.phase==="intro"){el.innerHTML=`<div class="mbox px"><h2>Lure the gang into the reef</h2><div style="display:flex;gap:8px;align-items:center"><img src="${faceSrc("chaba","happy")}" alt="" style="width:40px;height:40px;image-rendering:pixelated"><span>...Left and right to dodge the rocks. When the wind comes, hit Sail. Our boat's light, it gets through the reef. Theirs is heavy, it can't.</span></div>
+      <p class="center meta">Keep your lead for ${this.T} seconds</p><div class="mfoot roadbtns"><button class="btn primary" data-sl="go">Set sail ▸</button></div></div>`;return;}
+    if(S.phase==="play"){el.innerHTML=`<div class="mbox px"><div class="shud"><span>Gap</span><div class="sgap"><b id="slgap"></b></div><span><b id="slt">${this.T}</b> s</span></div>
+      <canvas id="slcv" width="240" height="320"></canvas><div class="sbtn"><button class="btn" id="slL">◀ Left</button><button class="btn gust" data-sl="sail">Sail</button><button class="btn" id="slR">Right ▶</button></div></div>`;
+      const hold=(id,d)=>{const b=document.getElementById(id);const on=e=>{e.preventDefault();S.dir=d;},off=()=>{if(S.dir===d)S.dir=0;};b.addEventListener("pointerdown",on);b.addEventListener("pointerup",off);b.addEventListener("pointerleave",off);b.addEventListener("pointercancel",off);};
+      hold("slL",-1);hold("slR",1);return;}
+    if(S.phase==="end"){el.innerHTML=`<div class="mbox px"><h2>${S.win?"The gang hit the reef!":"The gang caught up..."}</h2><p class="center">${S.win?"The gang's speedboat smashed into the reef and wrecked its propeller, while Chaba's sailboat slipped through easily.":"The gang's boat caught up before the reef, but the marine police lights showed up at the edge of the bay just in time."}</p>
+      <p class="center meta">Rocks hit ${S.hits} times · gusts caught ${S.gusts} times</p><div class="mfoot roadbtns"><button class="btn primary" data-sl="end">Next ▸</button></div></div>`;}},
+  start(){const S=this.st;Object.assign(S,{phase:"play",x:120,dir:0,gap:60,t0:performance.now(),last:performance.now(),rocks:[],gust:null,nextRock:0,nextGust:2.5,hits:0,gusts:0,boost:0,scroll:0});this.draw();
+    const loop=now=>{if(this.st!==S||S.phase!=="play")return;const dt=Math.min(.05,(now-S.last)/1000);S.last=now;this.step(dt,(now-S.t0)/1000);this.paint();requestAnimationFrame(loop);};requestAnimationFrame(loop);},
+  step(dt,t){const S=this.st,sp=110+t*3+(S.boost>0?60:0);S.scroll+=sp*dt;S.x=Math.max(22,Math.min(218,S.x+S.dir*150*dt));S.boost=Math.max(0,S.boost-dt);
+    if(t>=S.nextRock){S.rocks.push({x:20+Math.random()*200,y:-20,r:10+Math.random()*10});S.nextRock=t+Math.max(.32,.8-t*.015);}
+    if(t>=S.nextGust&&!S.gust){S.gust={y:-30,used:false};S.nextGust=t+3+Math.random()*2;}
+    for(const r of S.rocks){r.y+=sp*dt;if(!r.hit&&Math.abs(r.y-262)<r.r+10&&Math.abs(r.x-S.x)<r.r+9){r.hit=1;S.hits++;S.gap-=14;AU.sfx&&AU.sfx("miss");}}
+    S.rocks=S.rocks.filter(r=>r.y<360);if(S.gust){S.gust.y+=sp*dt;if(S.gust.y>360)S.gust=null;}
+    S.gap+=(S.boost>0?4:-1.2)*dt*3;S.gap=Math.min(100,S.gap);
+    const g=document.getElementById("slgap");if(g)g.style.width=Math.max(0,S.gap)+"%";const tt=document.getElementById("slt");if(tt)tt.textContent=Math.max(0,Math.ceil(this.T-t));
+    if(S.gap<=0||t>=this.T)this.finish(S.gap>0);},
+  sail(){const S=this.st;if(!S||S.phase!=="play"||!S.gust||S.gust.used)return;if(Math.abs(S.gust.y-262)<70){S.gust.used=true;S.boost=2.2;S.gusts++;S.gap=Math.min(100,S.gap+10);AU.sfx&&AU.sfx("level");}},
+  paint(){const S=this.st,c=document.getElementById("slcv");if(!c)return;const x=c.getContext("2d");x.fillStyle="#0d3550";x.fillRect(0,0,240,320);
+    x.fillStyle="#1d5778";for(let i=0;i<14;i++){const yy=((i*40+S.scroll*.9)%360)-20;x.fillRect((i*53)%220,yy,20,3);}
+    if(S.gust&&!S.gust.used){x.fillStyle="rgba(232,178,58,.35)";x.fillRect(0,S.gust.y-14,240,28);x.fillStyle="#ffe08a";x.font="bold 12px sans-serif";x.fillText("Wind!",96,S.gust.y+4);}
+    for(const r of S.rocks){x.fillStyle=r.hit?"#5a5a5a":"#7a6a5a";x.fillRect(r.x-r.r,r.y-r.r*.7,r.r*2,r.r*1.4);x.fillStyle="#cfe9f2";x.fillRect(r.x-r.r,r.y+r.r*.6,r.r*2,2);}
+    x.fillStyle="#f2efe6";x.fillRect(S.x-5,240,10,30);x.fillStyle=S.boost>0?"#ffe08a":"#e8e2d0";x.beginPath();x.moveTo(S.x,214);x.lineTo(S.x+16,252);x.lineTo(S.x,252);x.fill();x.fillStyle="#c0392b";x.fillRect(S.x-7,268,14,4);
+    const py=274+Math.max(0,S.gap)*1.1;if(py<320){x.fillStyle="#222";x.fillRect(S.x-12,py,24,26);x.fillStyle="#e33";x.fillRect(S.x-12,py,24,4);x.fillStyle="#cfe9f2";x.fillRect(S.x-14,py+26,28,3);}},
+  finish(win){const S=this.st;if(S.phase!=="play")return;S.phase="end";S.win=win;AU.sfx&&AU.sfx(win?"level":"ui");this.draw();},
+  close(){const S=this.st,el=this.el();this.st=null;if(el)el.remove();if(S&&S.done)S.done(!!S.win);}};
+if(typeof QK!=="undefined")Object.assign(QK,{
+  ru1:{fst:"pressure",name:"White Bear bar bouncer",sprite:"gang1",lvl:-.9,tilt:{punch:1.5,power:1.5,iq:-2,foot:-1},color:"#4a6fa5",grp:"gang"},
+  ru2:{fst:"inside",name:"Dima, the White Bear's right hand",sprite:"gang2",lvl:-.1,tilt:{clinch:1.5,power:1.5,dur:1,speed:-1},color:"#33507a",grp:"gang"},
+  ru3:{fst:"power",name:"Boris, owner of the White Bear bar",sprite:"gang3",lvl:.7,tilt:{power:2.5,punch:1.5,dur:1.5,foot:-1.5},color:"#d8d8e0",grp:"gang"}});
+RG_SIDE.south={cid:"chaba",bg:"pier_south",ring:"bg_pier_south.webp",title:"Off-schedule fight · the pier",
+  foes:[{qk:"ru1",t:"This shop pays every month. Don't pay this month, and you pay some other way."},{qk:"ru2",t:"Muay Thai, huh? There are no ropes to lean on out on the pier."},{qk:"ru3",t:"This pier has been mine for five years. A little women's camp thinks it can take it?"}],
+  between:["Another guard takes off a gold watch, sets it on a fish crate, and steps into the circle.","Boris pulls off his flowered shirt, a white bear tattooed across his whole back, and steps down himself."],
+  intro:(G,D)=>[{n:"nar",t:"That evening an unknown number calls the manager's phone. Three seconds of silence on the line."},
+   {n:"chaba",f:"sad",l:"casual",t:`...It's Chaba. At my family's restaurant in ${D.name}, the White Bear bar's men are collecting protection money again.`},
+   {n:"chaba",f:"sad",l:"casual",t:"My brother's alone at the shop, in his wheelchair... I don't want to ask. But I'm asking."}],
+  go:"\"Send me the address. We're coming now.\"",no:"\"Everyone's spent tonight. I'm sorry.\"",
+  noT:G=>[{n:"chaba",f:"sad",l:"casual",t:"...Okay. It's fine. Chaba will go alone."},{n:"nar",t:"The line goes dead before anyone can say goodbye."}],
+  arrive:G=>[{n:"nar",bg:"pier_south",t:"A seafood restaurant by the pier, tables knocked over. Three big men stand around Chaba's brother's wheelchair."},
+   {n:"npc",who:"Boris",t:"Protection's doubled this month. Every shop in the network. Don't pay, and your family's fishing boats never leave the pier again."},
+   {n:"chaba",f:"angry",l:"casual",t:"...Get out of the shop."},
+   {n:"npc",who:"Chaba's brother",t:"Chaba, don't... just pay. I don't want you hurt too."},
+   {n:"chaba",f:"angry",l:"casual",t:"Not paying. From today, not one baht."},
+   {n:"npc",who:"Boris",t:"Then let's settle it like boxers. Out on the pier. Three of you. Win them all and I never set foot in this shop again. Lose one, and you pay double all year."},
+   {n:"coach",t:"No ropes, no referee. Watch the slippery floor. Whoever's ready, go."}],
+  win:G=>[{n:"nar",t:"Boris falls onto a pile of nets beside the fish crates. His two men help each other run to the black speedboat at the end of the pier."},
+   {n:"npc",who:"Boris",t:"It's not over! Tonight your family won't have a single fishing boat left!"},
+   {n:"nar",t:"The speedboat's engine roars. Its bow swings toward the moorings where Chaba's family's fishing boats are tied."},
+   {n:"chaba",f:"angry",l:"casual",t:"...Manager, get on the sailboat, quick. Chaba will lure him into the reef."}],
+  lose:G=>[{n:"npc",who:"Boris",t:"Double, all year. Remember it."},{n:"npc",who:"Chaba's brother",t:"It's okay. It's okay, Chaba..."},
+   {n:"chaba",f:"sad",l:"casual",t:"...Sorry. For dragging everyone into getting hurt."},{n:"coach",t:"Next time we're down south, we take this pier back."}],
+  after:(G,T,cb)=>RG_SAIL.open(won=>{const S=G.region.side.south;S.sail=won?1:0;rgMeet(G,"chaba",won?4:2);save();
+   playScene([
+    {n:"nar",bg:"sea",t:won?"Boris's speedboat slams into the reef, its propeller shattering, just as the marine police lights come in from the mouth of the bay.":"Boris's speedboat swings round and closes in, but the marine police lights come in from the mouth of the bay before he can do anything."},
+    {n:"chaba",f:"happy",l:"casual",t:won?"...Good wind, steady hands. You were born for sailing.":"...Close. But we made it. Chaba's sailboat never loses to the sea."},
+    {n:"nar",bg:"pier_south",t:"Back on shore, the owners of several restaurants in the network are waiting on the pier. Every one of them saw tonight's fight."},
+    {n:"npc",who:"Auntie who runs the curry shop",t:"The White Bear bar has squeezed every shop for five years and nobody dared speak... if a young girl can be brave, so can I."},
+    {n:"chaba",f:"sad",l:"casual",t:"...But if we stop paying one shop at a time, they'll come for us one shop at a time.",choice:[
+     {t:"\"Every restaurant in the network refuses together, and you all report to the marine police together\"",fx:G2=>{rgMeet(G2,"chaba",3);G2.region.side.south.how="all";},then:[{n:"nar",t:"The owners look at each other one by one, then nod one by one, until every one of them has."},{n:"chaba",f:"flustered",l:"casual",t:"...Every shop at once. Why didn't Chaba think of that."}]},
+     {t:"\"Put tonight's fight on the camp live, so the whole south knows\"",fx:G2=>{rgMeet(G2,"chaba",2);G2.region.side.south.how="live";},then:[{n:"nar",t:"The clip of the fight on the pier is shared across the whole south before midnight."},{n:"chaba",f:"happy",l:"casual",t:"...Famous now. Nobody'll dare come again."}]}]},
+    {n:"npc",who:"Chaba's brother",t:"Chaba's never brought anyone home before, Manager... thank you for looking after my little sister."},
+    {n:"chaba",f:"flustered",l:"casual",t:"...Brother. Talks too much."}],cb,{bg:"sea",look:"casual"});}),
+  done:(G,how)=>addMail(G,{kind:"letter",from:"Chaba",title:"...From the pier",body:how==="live"?
+   "Manager\n\nThe pier clip has three million views.\n\nThe White Bear bar is closed. The marine police check every night.\n\nMy brother reads the comments every day. Smiles all day.\n\n...Thanks.\n\nChaba":
+   "Manager\n\nEvery restaurant in the network across the south refused at the same time, and reported to the marine police at the same time.\n\nThe White Bear bar is closed. Boris was arrested at the pier.\n\nMum says any restaurant in the network, you eat free for life.\n\n...Thanks.\n\nChaba"})};
 function rgSideDue(G,T){const R=G.region,D=ROAD_DEST[T.dest];if(!R||!D||T.fa||T.series||T.local)return null;const X=RG_SIDE[D.r];if(!X)return null;
   const S=(R.side=R.side||{})[D.r]=R.side[D.r]||{};if(S.won)return null;if(R.joined&&R.joined[X.cid])return null;if(!(R.arrived||{})[D.r])return null;
   if(S.triedAbs!=null&&S.triedAbs===T.abs)return null;return X;}
