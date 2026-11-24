@@ -3,6 +3,8 @@ const ASSET="a/";
 const IMGS={};
 function img(name){if(!IMGS[name]){const i=new Image();i.decoding="async";i.src=ASSET+name;IMGS[name]=i;}return IMGS[name];}
 const SHEET_IDS=["kati","mali","rin","ploy","fah","pailin"];
+const REGIONAL_SPRITE_IDS=new Set(["alicia","baibua","tabtim","chaba"]);
+const spriteFile=(name)=>name+(REGIONAL_SPRITE_IDS.has(name.split("_")[0])?".png":".webp");
 function preloadCore(){/* v1.87: the title only needs Kati — the rest arrives with the save that uses it */img("kati_sheet.webp");}
 // sprite rows in sheets (4 frames each): 0 idle,1 guard,2 step,3 punch,4 knee/kick,5 victory
 const ROW={idle:0,guard:1,walk:2,punch:3,knee:4,win:5};
@@ -35,7 +37,7 @@ const KIT_MASK={kati:(h,l,s)=>(h<.035||h>.93)&&s>.38&&l>.12&&l<.8,mali:(h,l,s)=>
  baibua:(h,l,s,fy,fx)=>h>.9&&s>.3&&l>.1&&l<.76&&fy>.47&&!(fx<.38&&fy<.66),tabtim:(h,l,s,fy,fx)=>h>.89&&s>.3&&l>.1&&l<.7&&fy>.47&&!(fx<.36&&fy<.52),
  alicia:(h,l,s,fy)=>h>.55&&h<.74&&s>.2&&l>.08&&fy>.46,chaba:(h,l,s,fy,fx)=>h>.42&&h<.6&&s>.15&&l>.05&&fy>.47&&!(fx<.38&&fy<.62)};
 function outfitOk(G,f,k){const O=OUTFITS[k];return !!O&&(!O.need||O.need(G,f));}
-function outfitSheet(f,k){const key=f.id+"|"+k;if(TINTS[key])return TINTS[key];const O=OUTFITS[k],M=KIT_MASK[f.id],src=img(f.id+"_sheet.webp");if(!O||!M||!src.complete||!src.naturalWidth)return src;
+function outfitSheet(f,k){const key=f.id+"|"+k;if(TINTS[key])return TINTS[key];const O=OUTFITS[k],M=KIT_MASK[f.id],src=img(spriteFile(f.id+"_sheet"));if(!O||!M||!src.complete||!src.naturalWidth)return src;
   const c=document.createElement("canvas");c.width=src.naturalWidth;c.height=src.naturalHeight;const x=c.getContext("2d",{willReadFrequently:true});x.drawImage(src,0,0);const FW=c.width/4,FH=c.height/6;
   try{const d=x.getImageData(0,0,c.width,c.height),p=d.data,W=c.width;
     for(let i=0;i<p.length;i+=4){if(p[i+3]<10)continue;const r=p[i]/255,g=p[i+1]/255,b=p[i+2]/255,mx=Math.max(r,g,b),mn=Math.min(r,g,b),l=(mx+mn)/2,dd=mx-mn;if(dd<.001)continue;
@@ -52,7 +54,7 @@ function loyLookNow(){try{if(typeof UI!=="undefined"&&UI.fight&&UI.fight.b)retur
 const loyImg=(id,name,f)=>LOY_SP.includes(id)&&(loyLookNow()||(f&&f.outfit==="loy"&&f.camp==="player"))?name.replace(id+"_",id+"_loykrathong_"):name;
 function sheetFor(f){
   if(f.canon&&LOY_SP.includes(f.id)&&loyLookNow())return img(f.id+"_loykrathong_sheet.webp");
-  if(f.canon){if(f.outfit==="loy"&&f.camp==="player"&&LOY_SP.includes(f.id))return img(f.id+"_loykrathong_sheet.webp");if(f.outfit&&f.outfit!=="base"&&f.camp==="player"&&OUTFITS[f.outfit])return outfitSheet(f,f.outfit);return img(f.id+"_sheet.webp");}
+  if(f.canon){if(f.outfit==="loy"&&f.camp==="player"&&LOY_SP.includes(f.id))return img(f.id+"_loykrathong_sheet.webp");if(f.outfit&&f.outfit!=="base"&&f.camp==="player"&&OUTFITS[f.outfit])return outfitSheet(f,f.outfit);return img(spriteFile(f.id+"_sheet"));}
   if(f.sprite)return f.tintHue!=null?spriteTint(f.sprite,f.tintHue):img(f.sprite+"_sheet.webp"); // v1.23: gang, roosters, bulls · v1.89.24: tintHue re-dyes the red kit (the krathong thief)
   if(TINTS[f.id])return TINTS[f.id];
   const nb=npcBase(f.id),base=nb.base,blonde=!!(f.prodigy||(f.id||"").startsWith("prod_")),lab=!!f.lab&&!blonde,hue=blonde?42:lab?276:nb.hue,dark=blonde?true:lab?false:nb.dark; /* v1.88: Vector camp fighters wear their black-purple kit */const src=img(base+"_sheet.webp"); /* v1.56: Golden Tiger prodigies: black-gold kit; v1.88: hair dyed silver like Fah */if(!src.complete||!src.naturalWidth)return src;
@@ -563,8 +565,8 @@ const FS={cv:null,ctx:null,bg:null,A:null,B:null,fx:[],shake:0,
   init(cv,bgName,fa,fb){this.cv=cv;this.ctx=cv?cv.getContext("2d"):null;this.bg=img(bgName);
     const mk=(f,side)=>({f,side,x:side==="A"?370:590,base:side==="A"?370:590,anim:"guard",t0:0,flash:0,down:0,ko:false,win:false});
     this.A=mk(fa,"A");this.B=mk(fb,"B");this.fx=[];this.shake=0;this.spR={A:-1,B:-1};this.spN={A:0,B:0};this.banner=null;
-    for(const f of [fa,fb])if(f&&f.canon&&SPECIALS[f.id])SPECIALS[f.id].forEach(m=>m.img&&img(loyImg(f.id,m.img,f)+".webp"));
-    for(const f of [fa,fb])if(f&&!f.canon){(f.spl||[]).forEach(m=>m.img&&img(m.img+".webp"));(f.phases||[]).forEach(P=>img(P.sprite+"_sheet.webp"));if(f.phases)this[f===fa?"A":"B"].f={...f,sprite:f.phases[0].sprite,blood:0};}},
+    for(const f of [fa,fb])if(f&&f.canon&&SPECIALS[f.id])SPECIALS[f.id].forEach(m=>m.img&&img(spriteFile(loyImg(f.id,m.img,f))));
+    for(const f of [fa,fb])if(f&&!f.canon){(f.spl||[]).forEach(m=>m.img&&img(spriteFile(m.img)));(f.phases||[]).forEach(P=>img(P.sprite+"_sheet.webp"));if(f.phases)this[f===fa?"A":"B"].f={...f,sprite:f.phases[0].sprite,blood:0};}},
   attach(cv){if(!cv)return;this.cv=cv;this.ctx=cv.getContext("2d");},
   play(e,now){const at=e.at||(e.ev==="counter"?(e.mside?e.mside:null):null);
     const atk=this[e.side==="A"?"A":"B"],def=this[e.side==="A"?"B":"A"];if(!atk)return;
@@ -601,7 +603,7 @@ const FS={cv:null,ctx:null,bg:null,A:null,B:null,fx:[],shake:0,
   burst(e){for(const k of ["A","B"]){const v=e["b"+k];if(v===undefined)continue;const s=this[k];if(!s)continue;if(v!=="def"&&s.bkT&&performance.now()-s.bkT<1800)continue;s.bk=v==="def"?"def":null;}},
   special(sp,round,now){const s=this[sp.side];if(!s)return;this.spN=this.spN||{A:0,B:0};this.spN[sp.side]=this.spR[sp.side]===round?(this.spN[sp.side]||0)+1:1;this.spR[sp.side]=round;this.banner={txt:sp.name,side:sp.side,t0:now,head:sp.head,tier:spTier(s.f)};
     const tier=spTier(s.f),T=SP_TIER[tier];
-    if(sp.mv&&sp.mv.img){s.anim="special";const hi=SP_HIT[sp.mv.img]??5;s.sp={im:img(loyImg(s.f.id,sp.mv.img,s.f)+".webp"),t0:now,tier,fr:T.fr,hold:T.hold,hi,len:T.fr*8+T.hold+200,hit:false,dodge:!!(sp.mv.dodge||sp.mv.noHit),col:SP_COL[s.f.id]||(s.f&&s.f.color)||"#ffd34a"};this.shake=sp.mv.dodge?6:tier===3?20:tier===2?16:14;if(tier>1){this.heat={tier,t0:now,side:sp.side,len:s.sp.len};}
+    if(sp.mv&&sp.mv.img){s.anim="special";const hi=SP_HIT[sp.mv.img]??5;s.sp={im:img(spriteFile(loyImg(s.f.id,sp.mv.img,s.f))),t0:now,tier,fr:T.fr,hold:T.hold,hi,len:T.fr*8+T.hold+200,hit:false,dodge:!!(sp.mv.dodge||sp.mv.noHit),col:SP_COL[s.f.id]||(s.f&&s.f.color)||"#ffd34a"};this.shake=sp.mv.dodge?6:tier===3?20:tier===2?16:14;if(tier>1){this.heat={tier,t0:now,side:sp.side,len:s.sp.len};}
       if(sp.mv.td){const o=s===this.A?this.B:this.A,P=s.sp,g=(TH_GRAB[sp.mv.img]??2);if(o&&o.gnd){o.throwT=now;o.slam=false;o.th={st:thStyle(s.f),grab:g*P.fr,imp:P.hi*P.fr,hide:!!TH_HIDE[sp.mv.img]};P.td={o,gap:TH_HIDE[sp.mv.img]?34:o.th.st==="slam"?70:88};}}return;}
     if(tier>1)this.heat={tier,t0:now,side:sp.side,len:SUP.len};
     /* v1.91.67 (Man): a real suplex, animated in code from the thrower's own frames until a drawn sheet arrives —

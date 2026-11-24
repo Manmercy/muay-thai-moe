@@ -1,7 +1,15 @@
 {
+  "fah_casual.png": {
+    "source": "01_Source_Art/Characters/fah/portrait/fah_casual.png",
+    "usage": "full-resolution dialogue portrait; prior version archived in the character folder"
+  },
+  "fah_casual_flustered.png": {
+    "source": "01_Source_Art/Characters/fah/portrait/fah_casual_flustered.png",
+    "usage": "full-resolution dialogue portrait; prior version archived in the character folder"
+  },
   "fah_casual_pout.png": {
-    "source": "01_Source_Art/Original Character/7AC19C23-F28F-4F7F-9B70-64BE8726462B.PNG",
-    "usage": "full-body portrait; dialogue, card body and skill cut-in when applicable"
+    "source": "01_Source_Art/Characters/fah/portrait/fah_casual_pout.png",
+    "usage": "full-resolution dialogue portrait; prior version archived in the character folder"
   },
   "fah_fight_angry.png": {
     "source": "01_Source_Art/Original Character/65A350C0-D88B-4B9E-83B8-267A5C5CD6F5.PNG",
@@ -26,6 +34,18 @@
   "fah_thai_fl.png": {
     "source": "01_Source_Art/Original Character/86D9D053-F9A0-47C6-812C-0303600CAE44.PNG",
     "usage": "full-body portrait; dialogue, card body and skill cut-in when applicable"
+  },
+  "fah_thai_pout.png": {
+    "source": "01_Source_Art/Characters/fah/portrait/fah_thai_pout.png",
+    "usage": "full-resolution Loy Krathong dialogue portrait; prior WebP archived in the character folder"
+  },
+  "fah_thai_sad.png": {
+    "source": "01_Source_Art/Characters/fah/portrait/fah_thai_sad.png",
+    "usage": "full-resolution Loy Krathong dialogue portrait; prior WebP archived in the character folder"
+  },
+  "kati_casual_flustered.png": {
+    "source": "01_Source_Art/Characters/kati/portrait/kati_casual_flustered.png",
+    "usage": "full-resolution dialogue portrait; prior version archived in the character folder"
   },
   "kati_casual_pout.png": {
     "source": "01_Source_Art/Original Character/46A3724A-A315-4C0D-9E5F-51EA6D669378.PNG",
@@ -55,6 +75,14 @@
     "source": "01_Source_Art/Original Character/0A5BD930-C6B0-47EC-9EEE-5C0E5505FB77.PNG",
     "usage": "full-body portrait; dialogue, card body and skill cut-in when applicable"
   },
+  "kati_thai_pout.png": {
+    "source": "01_Source_Art/Characters/kati/portrait/kati_thai_pout.png",
+    "usage": "full-resolution Loy Krathong dialogue portrait; prior WebP archived in the character folder"
+  },
+  "kati_thai_sad.png": {
+    "source": "01_Source_Art/Characters/kati/portrait/kati_thai_sad.png",
+    "usage": "full-resolution Loy Krathong dialogue portrait; prior WebP archived in the character folder"
+  },
   "mali_fight_angry.png": {
     "source": "01_Source_Art/Original Character/54613CFF-82C9-4B7B-907E-73D3332AC8DD.PNG",
     "usage": "full-body portrait; dialogue, card body and skill cut-in when applicable"
@@ -78,6 +106,14 @@
   "mali_thai_fl.png": {
     "source": "01_Source_Art/Original Character/A282D0B1-EF9E-43BE-ADC0-09FEDDBED261.PNG",
     "usage": "full-body portrait; dialogue, card body and skill cut-in when applicable"
+  },
+  "mali_thai_pout.png": {
+    "source": "01_Source_Art/Characters/mali/portrait/mali_thai_pout.png",
+    "usage": "full-resolution Loy Krathong dialogue portrait; prior WebP archived in the character folder"
+  },
+  "mali_thai_sad.png": {
+    "source": "01_Source_Art/Characters/mali/portrait/mali_thai_sad.png",
+    "usage": "full-resolution Loy Krathong dialogue portrait; prior WebP archived in the character folder"
   },
   "ploy_casual_flustered.png": {
     "source": "01_Source_Art/Original Character/38AD82A0-2580-401E-95E5-0C22925C4AD9.PNG",
@@ -111,6 +147,14 @@
     "source": "01_Source_Art/Original Character/B0AEF85E-29F7-4726-A0FD-A89C674BEDB5.PNG",
     "usage": "full-body portrait; dialogue, card body and skill cut-in when applicable"
   },
+  "ploy_thai_pout.png": {
+    "source": "01_Source_Art/Characters/ploy/portrait/ploy_thai_pout.png",
+    "usage": "full-resolution Loy Krathong dialogue portrait; prior WebP archived in the character folder"
+  },
+  "ploy_thai_sad.png": {
+    "source": "01_Source_Art/Characters/ploy/portrait/ploy_thai_sad.png",
+    "usage": "full-resolution Loy Krathong dialogue portrait; prior WebP archived in the character folder"
+  },
   "rin_casual_flustered.png": {
     "source": "01_Source_Art/Original Character/377CF7D2-319B-4779-BC65-8C3E7FF3DAD2.PNG",
     "usage": "full-body portrait; dialogue, card body and skill cut-in when applicable"
@@ -142,5 +186,13 @@
   "rin_thai_fl.png": {
     "source": "01_Source_Art/Original Character/45606265-06DD-483C-A077-F391319B41B5.PNG",
     "usage": "full-body portrait; dialogue, card body and skill cut-in when applicable"
+  },
+  "rin_thai_pout.png": {
+    "source": "01_Source_Art/Characters/rin/portrait/rin_thai_pout.png",
+    "usage": "full-resolution Loy Krathong dialogue portrait; prior WebP archived in the character folder"
+  },
+  "rin_thai_sad.png": {
+    "source": "01_Source_Art/Characters/rin/portrait/rin_thai_sad.png",
+    "usage": "full-resolution Loy Krathong dialogue portrait; prior WebP archived in the character folder"
   }
 }

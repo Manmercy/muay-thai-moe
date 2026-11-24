@@ -6,7 +6,10 @@ function langSwitch(cls){return `<div class="langsw ${cls||""}" role="group" ari
 const SAVE_KEY="mtm-save-v13";
 const CANON_IDS=["kati","mali","rin","ploy","fah"];
 /* Full-resolution source portraits. Other expressions keep their approved art. */
-const STAND_PNG=new Set(CANON_IDS.flatMap(id=>[`${id}_casual`,...['happy','sad','flustered'].map(m=>`${id}_fight_${m}`)]).concat(["mali_casual_flustered", "mali_casual_pout", "fah_casual_pout", "fah_fight_angry", "kati_fight_angry", "mali_fight_angry", "ploy_fight_angry", "rin_fight_angry", "kati_thai", "rin_thai", "mali_thai", "ploy_thai", "fah_thai", "fah_thai_fl", "rin_casual_pout", "kati_casual_pout", "ploy_casual_flustered","kati_thai_fl","rin_thai_fl","mali_thai_fl","ploy_thai_fl","rin_casual_flustered","ploy_casual_pout"]));
+const REGIONAL_IDS=["baibua","tabtim","alicia","chaba"];
+const STAND_PNG=new Set(CANON_IDS.flatMap(id=>[`${id}_casual`,...['happy','sad','flustered'].map(m=>`${id}_fight_${m}`)]).concat(REGIONAL_IDS.flatMap(id=>[`${id}_casual`,`${id}_casual_flustered`,`${id}_casual_pout`,...['happy','sad','flustered','angry','surprised'].map(m=>`${id}_fight_${m}`)])).concat(["mali_casual_flustered", "mali_casual_pout", "fah_casual_pout", "fah_fight_angry", "kati_fight_angry", "mali_fight_angry", "ploy_fight_angry", "rin_fight_angry", "kati_thai", "rin_thai", "mali_thai", "ploy_thai", "fah_thai", "fah_thai_fl", "rin_casual_pout", "kati_casual_pout", "ploy_casual_flustered","kati_thai_fl","rin_thai_fl","mali_thai_fl","ploy_thai_fl","rin_casual_flustered","ploy_casual_pout"]));
+["kati_casual_flustered","fah_casual_flustered","pailin_casual","pailin_casual_flustered","pailin_casual_pout",...['happy','sad','angry','surprised','flustered'].map(m=>`pailin_fight_${m}`)].forEach(k=>STAND_PNG.add(k));
+CANON_IDS.flatMap(id=>[`${id}_thai_sad`,`${id}_thai_pout`]).forEach(k=>STAND_PNG.add(k));
 const standArt=key=>`${ASSET}${key}.${STAND_PNG.has(key)?'png':'webp'}`;
 const CHAMP_IDS=["baibua","tabtim","alicia","chaba","lada"];/* v1.89.14: Lada (Naka) joins the scene cast */ /* v1.90 (hidden): the four regional champions — full portraits in scenes like the heroines */
 const castId=id=>CANON_IDS.includes(id)||CHAMP_IDS.includes(id);
@@ -25,14 +28,14 @@ const stand=(id,look,mood)=>{if(id==="coach")return `${ASSET}coach.png`;
   // v1.81: Loy Krathong Thai dress — happy + flustered art only; gold-tier players can dress the girls in it off-stage
   /* v1.91.97 (Man): the Thai dress is for the Loy Krathong event only — no more swapping casual for it in other scenes */
   if(look==="thai"&&THAI_IDS.includes(id))return standArt(`${id}_thai${thaiSuf(mood)}`);
-if(id==="pailin")return `${ASSET}pailin_fight_${mood==="surprised"||mood==="flustered"?"surprised":FMOOD(mood)}.webp`;
+if(id==="pailin")return standArt(look==="casual"?`pailin_casual${mood==="flustered"?"_flustered":["sad","angry","pout"].includes(mood)?"_pout":""}`:`pailin_fight_${["happy","sad","angry","surprised","flustered"].includes(mood)?mood:FMOOD(mood)}`);
   if(look==="casual"){const v=mood==="flustered"?"_flustered":["pout","angry","sad"].includes(mood)?"_pout":"";return standArt(`${id}_casual${v}`);}
   // v1.8: one main outfit — training scenes use the fight outfit too, so clothes never flip mid-scene
   return standArt(`${id}_fight_${FMOOD(mood)}`);};
 const THAI_IDS=["kati","mali","rin","ploy","fah"];
 // v1.91.48: sad + pout Thai-dress art — with THAI_XP on, every mood has its own picture and the casual-clothes guard is off
 const THAI_XP=true;const thaiSuf=m=>THAI_XP&&m==="sad"?"_sad":THAI_XP&&["pout","angry"].includes(m)?"_pout":["flustered","surprised","pout","sad","angry"].includes(m)?"_fl":"";
-const faceSrc=(id,mood,look)=>id==="coach"?`${ASSET}coach_face.webp`:id==="pailin"?`${ASSET}pailin_face.webp`:look&&look!=="fight"&&look!=="thai"?`${ASSET}${id}_${look}_face.webp`:`${ASSET}${id}_${["happy","sad","flustered"].includes(mood)?mood:"happy"}_face.webp`;
+const faceSrc=(id,mood,look)=>look==="thai"&&THAI_IDS.includes(id)?`${ASSET}${id}_thai${thaiSuf(mood)}_face.${["sad","pout","angry"].includes(mood)?"png":"webp"}`:id==="coach"?`${ASSET}coach_face.webp`:id==="pailin"?`${ASSET}${look==="casual"?`pailin_casual${mood==="flustered"?"_flustered":["sad","angry","pout"].includes(mood)?"_pout":""}_face`:`pailin_fight_${["happy","sad","angry","surprised","flustered"].includes(mood)?mood:FMOOD(mood)}_face`}.png`:look&&look!=="fight"&&look!=="thai"?`${ASSET}${id}_${look}_face.${REGIONAL_IDS.includes(id)||id==="fah"&&look.startsWith("casual")||id==="kati"&&look==="casual_flustered"?"png":"webp"}`:`${ASSET}${id}_${["happy","sad","flustered"].includes(mood)||REGIONAL_IDS.includes(id)&&["angry","surprised"].includes(mood)?mood:"happy"}_face.${REGIONAL_IDS.includes(id)?"png":"webp"}`;
 const BGIMG={river_dawn:"bg_river_dawn.webp",gang_hq:"bg_gang_hq.webp",gang_hideout:"bg_gang_hideout.webp",loy_ring:"bg_loy_ring.webp",market_morning:"bg_market_morning.webp",camp:"bg_camp.webp",night:"bg_camp_night.webp",bus:"bg_bus_rain.webp",letter:"bg_grandpa_letter.webp",fair:"bg_fair.webp",local:"bg_local.webp",district:"bg_district.webp",ring:"bg_local.webp",final:"bg_final.webp",hall:"bg_hall.webp",gym:null,gymdusk:"gym1.webp",food:"bg_food.webp",temple:"bg_temple.webp",cafe:"bg_cafe.webp",river:"bg_river.webp",market:"bg_market.webp",rooster:"bg_rooster.webp",farm:"bg_farm.webp",sea:"bg_sea.webp",mountain:"bg_mountain.webp",ayutthaya:"bg_ayutthaya.webp",amphawa:"bg_amphawa.webp",
   /* v1.89.7: new scenes, ready to use */camp_night:"bg_camp_night.webp",camp_rain:"bg_camp_rain.webp",songkran:"bg_songkran.webp",newyear:"bg_newyear.webp",kitchen:"bg_kitchen.webp",hill:"bg_hill.webp",tvstudio:"bg_tvstudio.webp",live_corner:"bg_live_corner.webp",hospital:"bg_hospital.webp",vector_lab:"bg_vector_lab.webp",loy_night:"bg_loy_night.webp",sportsday:"bg_sportsday.webp",dorm_room:"bg_dorm_room.webp"};
 /* v1.91.26 (Man): every SSR card has its own illustration — shown full-screen at its moment in the card story, viewable in the card's
@@ -57,18 +60,27 @@ const cardFaceArt=C=>{cardArtInit();const A=C._art;if(!A||!G||!G.cardArt)return 
   if(w===2&&art2Open(A.id,o))return A.f2;return A.f;};
 const cardFaceSrc=C=>{const fa=cardFaceArt(C);if(fa)return `${ASSET}${cardArtFile(fa)}`;if(C.face)return `${ASSET}${C.face}.webp`;const scene=(C.steps||[]).find(s=>s.n===C.c)||{},mood=scene.f||"happy",look=scene.l||"casual";
   if(look==="train")return `${ASSET}${C.c}_train_face.webp`;
-  if(look==="thai"&&THAI_IDS.includes(C.c))return `${ASSET}${C.c}_thai${thaiSuf(mood)}_face.webp`;
+  if(look==="thai"&&THAI_IDS.includes(C.c))return `${ASSET}${C.c}_thai${thaiSuf(mood)}_face.${["sad","pout","angry"].includes(mood)?"png":"webp"}`;
   if(look==="fight")return `${ASSET}${C.c}_${["happy","sad","flustered","angry"].includes(mood)?mood:"happy"}_face.webp`;
   const suffix=["pout","sad","angry"].includes(mood)?"_pout":["flustered","surprised"].includes(mood)?"_flustered":"";
   return `${ASSET}${C.c}_casual${suffix}_face.webp`;};
 /* v1.91.26 (Man): the card shows the same character picture as the dialogue (the body sprite), not the cropped face;
    falls back to the face crop if a sprite doesn't exist */
-const cardBodySrc=src=>{const body=src.replace(/\/([a-z]+)_(happy|sad|flustered|angry)_face\.webp$/,"/$1_fight_$2.webp").replace(/_face\.webp$/,".webp"),key=body.startsWith(ASSET)?body.slice(ASSET.length).replace(/\.webp$/,""):null;return key&&STAND_PNG.has(key)?standArt(key):body;};
+const cardBodySrc=src=>{const body=src.replace(/\/([a-z]+)_(happy|sad|flustered|angry)_face\.(?:png|webp)$/,"/$1_fight_$2.webp").replace(/_face\.(?:png|webp)$/,".webp"),key=body.startsWith(ASSET)?body.slice(ASSET.length).replace(/\.webp$/,""):null;return key&&STAND_PNG.has(key)?standArt(key):body;};
 const cardArtHTML=(C,lazy=false)=>{const art=cardFaceArt(C),f=cardFaceSrc(C),src=art?f:cardBodySrc(f);
   return `<span class="card-art${art?" art":" body"}" style="--card-scene:url('${ASSET}${BGIMG[C.bg]||BGIMG.camp}')"><img src="${src}" alt="" ${src!==f?`onerror="this.onerror=null;this.src='${f}';this.parentNode.classList.remove('body')"`:""} ${lazy?'loading="lazy" decoding="async"':""}></span>`;};
 // v1.34: portraits for the market and helmet-gang side characters (matched by speaker name, or st.img)
 const NPC_IMG=[[/ไนอา|Nia Okafor/,"nl_nia_por"],[/วาร์ยา|Varya/,"nl_varya_por"],[/เหม่ยลี่|Meili/,"nl_meili_por"],[/Corazón Rosa/,"nl_rosa_por"],[/ใบหยก|Baiyok/,()=>typeof byFree==="function"&&byFree(G)?"baiyok":"baiyok_black"],[/เพชรา|Petcha/,"petchara"],[/เถ้าแก่เสือ|เถ้าแก่พยัคฆ์ทอง|Boss Suea|Golden Tiger owner/,"tiger_boss"],[/เกริก|เกรียงไกร|Krerk|Kriangkrai/,"krerk"],[/นายอำเภอ|District Chief/,"nai"],[/แม่ค้า|ป้าศรี|Auntie Sri|vendor/,"vendor_green"],[/ป้าแต๋ว|เจ๊หมวย|ป้าขาย|Auntie Taew|Jae Muay/,"vendor_red"],[/ไอ้ตุ๋ย|Tuy the Red Mask/,"thief2"],[/ไอ้ตุ่ม|โจรงมกระทง|Krathong Thief/,"thief"],[/เสี่ยหมวกทองคำ|Big Boss Golden Helmet/,"gang_boss"],[/หมวกเงิน|Silver Helmet/,"gang_silver"],[/หมวกทองดำ|ลูกน้องหมวกทอง|Gold-Black Helmet|Golden Helmet's (man|men)|Gold Helmet/,"gang_goldblack"],[/หมวก|แจ็กเก็ต|Helmet|Jacket/,"gang_group"],[/ยาย|Grandma/,"grandma"]];
+NPC_IMG.unshift([/ไนท์|Knight/,"vector_knight"],[/เวกา|Vega/,"vector_vega"],[/เมษา|Mesa/,"vector_mesa"]);
 const npcImg=st=>{const v=st.img||(st.who&&(NPC_IMG.find(([r])=>r.test(st.who))||[])[1])||null;return typeof v==="function"?v():v;};
+const npcPortraitSrc=(im,st={})=>{if(im.startsWith("vector_")||im==="petchara")return `${ASSET}npc_${im}.png`;
+  if(im==="baiyok"||im==="baiyok_black"){
+    const f=st.f||"happy",casual=st.l==="casual"||st.look==="casual";
+    if(casual)return `${ASSET}npc_baiyok_casual${f==="flustered"?"_flustered":["sad","angry","pout"].includes(f)?"_pout":""}.png`;
+    const mood=im==="baiyok_black"&&f==="surprised"?"happy":["happy","sad","angry","flustered","surprised"].includes(f)?f:"happy";
+    return `${ASSET}npc_baiyok_${im==="baiyok_black"?"black":"white"}_${mood}.png`;
+  }
+  return im.startsWith("nl_")?`${ASSET}${im}.webp`:`${ASSET}npc_${im}.webp`;};
 const TIER_BG={evloy:"bg_river.webp",pro:"bg_fair.webp",semi:"bg_hall.webp",local:"bg_local.webp",district:"bg_district.webp",final:"bg_final.webp",exhibition:"bg_fair.webp",special:"bg_district.webp",lab:"bg_hall.webp",quest:"bg_food.webp",beast:"bg_fair.webp",dm:"bg_hall.webp"};
 const gymBg=()=>`gym${G?campLevel(G):1}.webp`;
 // v1.13 pixel icons — no emoji in the fight UI
@@ -1301,7 +1313,7 @@ function montageHTML(){const M=UI.montage;
 const WARMED={};let WARM_NEED=null;function warm(src){if(!src)return;if(WARM_NEED)WARM_NEED.push(src);if(WARMED[src])return;const i=new Image();i.src=src;WARMED[src]=i;}
 function warmChar(id,look){if(id==="coach"){warm(`${ASSET}coach.png`);return;}if(!castId(id)&&id!=="pailin")return;
   (look==="casual"||look==="thai"?["happy","flustered","pout"]:["happy","sad","surprised","angry"]).forEach(m=>warm(stand(id,look,m)));}
-function warmSteps(steps,look){const walk=list=>(list||[]).forEach(st=>{if(!st)return;const n=typeof st.n==="function"?null:st.n;if(n==="npc"){const im=npcImg(st);if(im)warm(im.startsWith("nl_")?`${ASSET}${im}.webp`:`${ASSET}npc_${im}.webp`);}else if(n)warmChar(n,st.l==="casual"||st.l==="thai"?st.l:(look==="casual"||look==="thai")&&!st.l?look:"fight");
+function warmSteps(steps,look){const walk=list=>(list||[]).forEach(st=>{if(!st)return;const n=typeof st.n==="function"?null:st.n;if(n==="npc"){const im=npcImg(st);if(im)warm(npcPortraitSrc(im,{...st,l:st.l||look}));}else if(n)warmChar(n,st.l==="casual"||st.l==="thai"?st.l:(look==="casual"||look==="thai")&&!st.l?look:"fight");
   if(st.with)warmChar(st.with,look==="casual"||look==="thai"?look:"fight");if(st.bg&&BGIMG[st.bg])warm(ASSET+BGIMG[st.bg]);if(st.choice)st.choice.forEach(c=>walk(c.then));});walk(steps);}
 /* v1.91.47 (Man): the Thai dress has only happy/flustered art — a scene with a sad, angry or pouting line keeps the casual clothes all the way through */
 let THAI_HOLD=false;const sceneNoThai=(steps,look)=>{if(THAI_XP)return false;const seen=new Set();const walk=(x,d)=>{if(!x||typeof x!=="object"||d>6||seen.has(x))return false;seen.add(x);if(Array.isArray(x))return x.some(y=>walk(y,d+1));
@@ -1371,9 +1383,10 @@ function sceneHTML(){const S=UI.scene,c=S.cur||{};const sp=c.n==="coach"?{name:c
   const girls0=mOn?S.cast.slice(-1):S.cast,many=girls0.length+(mOn?1:0)>3,girls=many?[]:girls0,nOn=girls.length+(mOn&&!many?1:0); /* v1.91.77 (Man): more than three on stage → text only, no portraits */
   const mst=mOn&&!many&&!c.cg?(mu?`<img class="stand mgrst ${girls.length?"l":"c"} ${spk==="me"&&!c.choice?"on":"off"}" src="${mu}" alt="">`:""):"";
   const cast=mst+girls.map((m,i)=>{const active=nOn===1&&!mOn||m.id===spk||(spk==="npc"&&m.id.startsWith("npc:"))||(c.choice&&i===girls.length-1); /* v1.91.83: someone alone on stage is never dimmed */ /* v1.91.82: an NPC who is talking stays lit (Krerk was dimmed) */const pos=(nOn===1?"c":mOn?"r":nOn>2?"g":i===0?"l":"r")+(STAND_LOW.includes(m.id)?" st-low":"");
-    const src=m.id.startsWith("npc:")?(m.id.slice(4).startsWith("nl_")?`${ASSET}${m.id.slice(4)}.webp`:`${ASSET}npc_${m.id.slice(4)}.webp`):m.back?`${ASSET}${m.id}_back.webp`:stand(m.id,m.look,active&&!c.choice?moodFor(c.f,m.look,c.t):moodFor(m.f,m.look,""));
+    const src=m.id.startsWith("npc:")?npcPortraitSrc(m.id.slice(4),{f:active&&!c.choice?c.f:m.f,look:m.look}):m.back?`${ASSET}${m.id}_back.webp`:stand(m.id,m.look,active&&!c.choice?moodFor(c.f,m.look,c.t):moodFor(m.f,m.look,""));
     const key=src.slice(ASSET.length).replace(/\.(?:webp|png)$/,"");
-    const fk=STANDFIT[key],center=fk?`--cx:${fk[2]};`:"",native=STAND_HIRES.test(key)?"--native-h:1500px;":"";
+    const fitKey=key.replace(/^npc_baiyok_white_.*/,"npc_baiyok").replace(/^npc_baiyok_black_.*/,"npc_baiyok_black");
+    const fk=STANDFIT[fitKey],center=fk?`--cx:${fk[2]};`:"",native=STAND_HIRES.test(key)?"--native-h:1500px;":"";
     const sty=center||native||nOn>2?` style="${center}${native}${nOn>2?`left:${Math.round((i+.5)/nOn*100)}%;z-index:${active?3:1}`:""}"`:"";
     return `<img class="stand ${pos} ${active&&!m.back?"on":"off"}${m.back?" back":""}"${sty} src="${src}" alt="">`;}).join("");
   const tag="";
