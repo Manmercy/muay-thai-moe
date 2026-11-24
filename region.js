@@ -1786,6 +1786,95 @@ const RG_MAS={st:null,N:6,
     for(const P of S.per){const f=G.F[P.id];if(!f)continue;const fa=Math.round(8+16*P.q),mo=Math.round(2+4*P.q);f.fatigue=Math.max(0,(f.fatigue||0)-fa);f.morale=Math.min(100,(f.morale||0)+mo);lines.push(`${esc(f.name)} ความล้า −${fa} · กำลังใจ +${mo}`);}
     const bd=2+Math.round(3*q);rgMeet(G,"baibua",bd);G.region.masBest=Math.max(G.region.masBest||0,q);save();S.res={q,lines};S.phase="end";this.draw();AU.sfx&&AU.sfx(q>=.8?"level":"ui");},
   close(){const S=this.st,el=this.el();this.st=null;if(el)el.remove();if(S){clearTimeout(S.to);S.done&&S.done(S.res?S.res.q:null);}}};
+/* v1.91.128 (Man): Tabtim's minigame — light her father's bang fai. Lock the angle while the rocket sways, then the fuse power while it pulses;
+   three rockets, the best one counts against Petch's mark from last year. */
+const RG_RKT={st:null,MARK:240,
+  css(){if(document.getElementById("rgrkt-css"))return;const s=document.createElement("style");s.id="rgrkt-css";s.textContent=`
+#rgrkt{background:linear-gradient(rgba(10,6,22,.6),rgba(10,6,22,.85)),url(a/bg_night_isan.webp) center/cover}#rgrkt .mbox{gap:8px}
+#rgrkt .rsky{position:relative;width:100%;height:46vh;max-height:380px;overflow:hidden;border:3px solid #6b4a32;background:linear-gradient(#141030,#3b2c63 70%,#6b4a32 70%,#4a3322)}
+#rgrkt .rpad{position:absolute;left:50%;bottom:8%;width:6px;height:60px;margin-left:-3px;transform-origin:50% 100%}
+#rgrkt .rpad i{position:absolute;left:-5px;bottom:0;width:16px;height:54px;background:repeating-linear-gradient(#c9a25c 0 8px,#9c7a3c 8px 10px);border:2px solid #3a2a12}
+#rgrkt .rpad i:before{content:"";position:absolute;left:-2px;top:-12px;border:8px solid transparent;border-bottom:12px solid #c0392b}
+#rgrkt .rgauge{position:absolute;left:50%;bottom:8%;width:200px;height:100px;margin-left:-100px;border:2px dashed rgba(255,224,138,.35);border-bottom:0;border-radius:100px 100px 0 0;pointer-events:none}
+#rgrkt .rbar{height:18px;background:#2a1d18;border:2px solid #6b4a32;position:relative}#rgrkt .rbar b{position:absolute;left:0;top:0;bottom:0;background:#e86a2a}
+#rgrkt .rbar u{position:absolute;top:-2px;bottom:-2px;left:78%;width:14%;border:2px solid #ffe08a;text-decoration:none}
+#rgrkt .rfly{position:absolute;left:50%;bottom:8%;width:16px;height:54px;margin-left:-8px;background:repeating-linear-gradient(#c9a25c 0 8px,#9c7a3c 8px 10px);transition:transform 1.6s cubic-bezier(.2,.7,.3,1)}
+#rgrkt .rfly:after{content:"";position:absolute;left:4px;top:54px;width:8px;height:40px;background:linear-gradient(#ffd34d,rgba(255,120,40,.2))}
+#rgrkt .rmark{position:absolute;left:0;right:0;border-top:2px dashed #9bd36a;font-size:12px;color:#9bd36a;text-align:right;padding-right:4px}
+#rgrkt .rhud{display:flex;justify-content:space-between}#rgrkt .rbig{width:100%;padding:14px;font-size:18px}`;document.head.appendChild(s);},
+  el(){return document.getElementById("rgrkt");},
+  open(done){this.css();let el=this.el();if(!el){el=document.createElement("div");el.id="rgrkt";el.className="mgame";document.body.appendChild(el);}
+    this.st={n:0,best:0,shots:[],done,phase:"intro"};this.draw();
+    el.onclick=e=>{const b=e.target.closest("[data-rk]");if(!b)return;const a=b.dataset.rk;if(a==="go")this.aim();else if(a==="lock")this.lock();else if(a==="next")this.next();else if(a==="end")this.close();};},
+  frame(inner){return `<div class="mbox px"><h2>จุดบั้งไฟของพ่อ</h2><div class="rhud"><span>ลูกที่ <b>${Math.min(3,this.st.n+1)}</b>/3</span><span>สูงสุด <b>${this.st.best}</b> ม.</span><span>พี่เพชร ${this.MARK} ม.</span></div>${inner}</div>`;},
+  sky(extra){const h=this.MARK/340*100;return `<div class="rsky" id="rksky"><div class="rmark" style="bottom:${(8+h*.86).toFixed(1)}%">พี่เพชร ${this.MARK} ม.</div>${extra||""}</div>`;},
+  draw(){const S=this.st,el=this.el();if(!S||!el)return;
+    if(S.phase==="intro"){el.innerHTML=this.frame(`<div class="mhead" style="display:flex;gap:8px;align-items:center"><img src="${faceSrc("tabtim","happy")}" alt="" style="width:40px;height:40px;image-rendering:pixelated"><span>ตอนบั้งไฟส่าย แตะตอนมันตั้งตรงที่สุดเด้อ แล้วแตะอีกทีตอนแรงดินปืนอยู่ในกรอบสีทอง!</span></div>${this.sky(`<div class="rgauge"></div><div class="rpad"><i></i></div>`)}<button class="btn primary rbig" data-rk="go">เริ่ม ▸</button>`);return;}
+    if(S.phase==="aim"||S.phase==="pow"){el.innerHTML=this.frame(`${this.sky(`<div class="rgauge"></div><div class="rpad" id="rkpad"><i></i></div>`)}
+      <div class="rbar" id="rkbar"><u></u><b id="rkpow" style="width:0"></b></div><button class="btn primary rbig" data-rk="lock">${S.phase==="aim"?"ล็อกมุม!":"จุดชนวน!"}</button>`);return;}
+    if(S.phase==="fly"){const sh=S.shots[S.shots.length-1];el.innerHTML=this.frame(`${this.sky(`<div class="rfly" id="rkfly" style="transform:rotate(${sh.ang.toFixed(1)}deg)"></div>`)}
+      <p class="center"><b>${sh.boom?"ดินปืนแน่นเกินไป บั้งไฟแตกกลางทาง!":`${sh.h} เมตร`}</b> · ${esc(sh.line)}</p><button class="btn primary rbig" data-rk="next">${S.n>=3?"ดูผล ▸":"ลูกต่อไป ▸"}</button>`);
+      requestAnimationFrame(()=>requestAnimationFrame(()=>{const f=document.getElementById("rkfly");if(f){const up=sh.boom?35:Math.min(96,sh.h/340*86);const dx=Math.tan(sh.ang*Math.PI/180)*up*3;f.style.transform=`translate(${dx.toFixed(0)}px,-${(up*3.4).toFixed(0)}px) rotate(${sh.ang.toFixed(1)}deg)`;}}));return;}
+    if(S.phase==="end"){const ok=S.best>=this.MARK;el.innerHTML=this.frame(`<h3 class="center">${ok?"สูงกว่าของพี่เพชร!":"ยังไม่ถึงของพี่เพชร"}</h3><p class="center">${S.shots.map((s,i)=>`ลูก ${i+1}: ${s.boom?"แตก":s.h+" ม."}`).join(" · ")}</p><button class="btn primary rbig" data-rk="end">กลับไปที่งานวัด ▸</button>`);}},
+  aim(){const S=this.st;S.phase="aim";this.draw();const t0=performance.now(),sp=1.6+S.n*.35;
+    const tk=()=>{if(this.st!==S||S.phase!=="aim")return;S.ang=Math.sin((performance.now()-t0)/1000*sp*Math.PI)*38;const p=document.getElementById("rkpad");if(p)p.style.transform=`rotate(${S.ang.toFixed(1)}deg)`;requestAnimationFrame(tk);};tk();},
+  lock(){const S=this.st;if(S.phase==="aim"){S.lockAng=S.ang;S.phase="pow";const pad=document.getElementById("rkpad");const btn=document.querySelector("#rgrkt [data-rk=lock]");if(btn)btn.textContent="จุดชนวน!";
+      const t0=performance.now(),sp=1.1+S.n*.25;const tk=()=>{if(this.st!==S||S.phase!=="pow")return;S.pow=(1-Math.cos((performance.now()-t0)/1000*sp*Math.PI))/2*100;const b=document.getElementById("rkpow");if(b)b.style.width=S.pow.toFixed(1)+"%";requestAnimationFrame(tk);};tk();return;}
+    if(S.phase==="pow"){const a=Math.abs(S.lockAng),p=S.pow,boom=p>95;const pf=p<78?p/78*.8:p<=92?1:1-(p-92)/20;
+      const h=boom?0:Math.round(330*Math.cos(a*Math.PI/180)**6*pf);
+      const line=boom?"ลมพัดควันดำไปทั้งลาน คนดูหัวเราะลั่น":h>=this.MARK?"คนทั้งงานวัดเงยหน้าตามจนคอตั้งบ่า":h>=180?"ขึ้นสวย แต่ยังไม่สุดฟ้า":a>20?"เอียงไปทางทุ่งนา ชาวบ้านวิ่งหลบกันวุ่น":"ขึ้นได้นิดเดียวก็หมดแรง";
+      S.shots.push({ang:S.lockAng,pow:p,h,boom,line});S.best=Math.max(S.best,h);S.n++;S.phase="fly";AU.sfx&&AU.sfx(boom?"miss":h>=this.MARK?"level":"ui");this.draw();}},
+  next(){const S=this.st;if(S.n>=3){S.phase="end";this.draw();return;}this.aim();},
+  close(){const S=this.st,el=this.el();this.st=null;if(el)el.remove();if(S&&S.done)S.done(S.best);}};
+if(typeof QK!=="undefined")Object.assign(QK,{
+  wn1:{fst:"pressure",name:"เด็กแว้นหมวกแดงงานวัด",sprite:"gang1",lvl:-1.1,tilt:{punch:1.5,power:1,iq:-2,guard:-1.5},color:"#c8283c",grp:"gang"},
+  wn2:{fst:"power",name:"ไอ้โต้ง เหล้าขาวหมัดหนัก",sprite:"gang2",lvl:-.3,tilt:{power:2,punch:1,dur:1,speed:-1,iq:-1},color:"#8a1f2a",grp:"gang"},
+  wn3:{fst:"inside",name:"เสือด่าง แชมป์เวทีวัดสามสมัย",sprite:"gang3",lvl:.5,tilt:{punch:1.5,knee:1.5,power:1,iq:-.5},color:"#5a1420",grp:"gang"}});
+RG_SIDE.isan={cid:"tabtim",bg:"fair",ring:"bg_fair.webp",title:"ไฟต์นอกตาราง · เวทีงานวัด",
+  foes:[{qk:"wn1",t:"ผู้หญิงขึ้นเวทีวัดเหรอ เดี๋ยวพี่ตีเบา ๆ ให้นะน้อง"},{qk:"wn2",t:"เมื่อกี้มันลื่นเฉย ๆ คนนี้ไม่ลื่นแน่"},{qk:"wn3",t:"สามสมัยไม่มีผู้หญิงคนไหนยืนครบยกต่อหน้าข้า"}],
+  between:["ลูกน้องเสือด่างถอดหมวกกันน็อกแดงโยนลงพื้น แล้วมุดเชือกขึ้นมา","เสือด่างโยนแก้วเหล้าทิ้ง เดินขึ้นเวทีเอง คนดูทั้งงานวัดลุกขึ้นยืน"],
+  intro:(G,D)=>[{n:"nar",t:"หัวค่ำ มือถือผู้จัดการเด้งข้อความจากทับทิม เป็นรูปเวทีมวยกลางงานวัด ไฟหลากสีพันรอบเสา"},
+   {n:"tabtim",f:"happy",l:"casual",t:`พี่ผู้จัดการ! คืนนี้งานวัดที่${D.name} พี่ชายทับทิมได้รับเชิญมาชกโชว์ มาเที่ยวกันเด้อ ทับทิมเลี้ยงลูกชิ้นปิ้งเอง!`}],
+  go:"\"ไปสิ เดี๋ยวพาทุกคนไปด้วย\"",no:"\"คืนนี้ขอพักก่อนนะ\"",
+  noT:G=>[{n:"tabtim",f:"pout",l:"casual",t:"โธ่… บ่เป็นหยังเด้อ ไว้คราวหน้า ทับทิมจะเก็บลูกชิ้นไว้ให้ไม้หนึ่ง"}],
+  arrive:G=>[{n:"nar",bg:"fair",t:"งานวัดคนแน่นจนเดินไหล่ชนกัน เสียงหมอลำซิ่งดังมาจากเวทีฝั่งโน้น ข้างเวทีมวยมีคนมุงขอถ่ายรูปผู้ชายตัวใหญ่สองคน"},
+   {n:"tabtim",f:"happy",l:"casual",t:"นั่นพี่เพชรกับพี่นิล พี่ชายทับทิมเอง ดังกว่าทับทิมอีกเด้อ ฮ่า ๆ"},
+   {n:"npc",who:"พี่เพชร",t:"…มาแล้วรึ ทับทิม ค่ายเชียงใหม่ที่เอ็งเล่าให้ฟังนี่ล่ะสิ"},
+   {n:"npc",who:"พี่นิล",t:"พาค่ายผู้หญิงมาเที่ยวงานวัดเหรอ เวทีนี้เขาไว้ให้มวยจริงชกนะทับทิม ไม่ใช่ไว้เตะสวย ๆ ให้คนถ่ายรูป"},
+   {n:"nar",t:"พี่นิลสวมแจ็กเก็ตสีดำตัดเส้นแดงนีออน ลายเกล็ดเล็ก ๆ ไล่ตามแขนเสื้อ"},
+   {n:"nar",t:"ยังไม่ทันมีใครตอบ กลุ่มเด็กแว้นหมวกกันน็อกแดงห้าหกคนก็เดินเบียดเข้ามา หัวโจกเป็นผู้ชายหน้าด่างที่ถือแก้วเหล้าขาวอยู่ในมือ"},
+   {n:"npc",who:"เสือด่าง",t:"โอ้โห ทับทิมเอกแดนอีสาน มาพร้อมค่ายผู้หญิงทั้งคัน ผู้หญิงชกมวยได้แค่โชว์ จริงไหมพี่นิล"},
+   {n:"npc",who:"พี่นิล",t:"เอ็งพูดเอง ข้าไม่ได้พูด"},
+   {n:"tabtim",f:"angry",l:"casual",t:"…พี่นิลยืนหัวเราะตามมันจั่งซี้แม่นบ่"},
+   {n:"npc",who:"โฆษกเวทีวัด",t:"ท่านผู้ชมครับ! ศึกพิเศษนอกโปรแกรม ค่ายผู้หญิงจากเชียงใหม่ ท้าหนุ่มงานวัดสามคู่ติด! เชียร์กันหน่อยครับ!"},
+   {n:"coach",t:"ไม่ต้องเอาชื่อใครมาเดิมพัน ขึ้นไปชกให้เขาเห็นก็พอ ใครพร้อมก็ขึ้น"}],
+  win:G=>[{n:"nar",t:"เสือด่างนอนหงายกลางเวทีวัด คนทั้งงานวัดเฮลั่นจนกลบเสียงหมอลำ เด็กแว้นหิ้วหัวโจกขึ้นมอเตอร์ไซค์บิดหนีไปทั้งแก๊ง"},
+   {n:"tabtim",f:"happy",l:"casual",t:"เห็นบ่! ผู้หญิงชกมวยได้แค่โชว์บ้อ! ฮ่า ๆ …พี่ผู้จัดการ ขอบใจหลาย ๆ เด้อ"},
+   {n:"npc",who:"พี่นิล",t:"ชนะเด็กแว้นงานวัดแล้วเก่งนักเหรอ"},
+   {n:"npc",who:"พี่นิล",t:"พี่เซ็นกับนาคาลีกแล้วนะทับทิม ปีหน้าพี่ขึ้นเวทีนานาชาติ ส่วนเอ็งก็คงเตะอยู่งานวัดแบบนี้แหละ"},
+   {n:"tabtim",f:"sad",l:"casual",t:"…นาคาลีก พี่นิลไปเซ็นตั้งแต่ตอนไหน พ่อรู้หรือยัง"},
+   {n:"npc",who:"พี่นิล",t:"พ่อรู้แล้ว พ่อดีใจด้วย ลูกชายพ่อได้ไปเมืองนอก"},
+   {n:"nar",t:"พี่นิลเดินหายไปในฝูงคน ทับทิมยืนนิ่ง ไฟหลากสีของงานวัดสะท้อนในตาเธอ"}],
+  lose:G=>[{n:"npc",who:"เสือด่าง",t:"เห็นไหมล่ะ ผู้หญิงชกมวยได้แค่โชว์!"},{n:"npc",who:"พี่นิล",t:"บอกแล้ว"},
+   {n:"tabtim",f:"sad",l:"casual",t:"บ่เป็นหยังเด้อ… ทุกคนเจ็บหมดแล้ว ทับทิมขอโทษที่พามาเจอเรื่องจั่งซี้"},{n:"coach",t:"คราวหน้าที่มาอีสาน เวทีวัดนี้ยังอยู่ที่เดิม"}],
+  after:(G,T,cb)=>playScene([
+    {n:"nar",t:"งานวัดเริ่มซา พี่เพชรเดินมาหยุดตรงหน้าทับทิม ในมือถือบั้งไฟไม้ไผ่ลูกหนึ่ง ลวดลายพญานาคเพนต์มือ"},
+    {n:"npc",who:"พี่เพชร",t:"บั้งไฟของพ่อ ปีนี้พ่อหลังไม่ดี จุดเองไม่ไหว พ่อฝากมา"},
+    {n:"npc",who:"พี่เพชร",t:"ทุกปีพี่เป็นคนจุดแทน ปีนี้… ทับทิม จุดแทนพ่อ"},
+    {n:"tabtim",f:"surprised",l:"casual",t:"ทับทิมเหรอ… พี่เพชรให้ทับทิมจุด…"},
+    {n:"tabtim",f:"flustered",l:"casual",t:"พี่ผู้จัดการ มาช่วยทับทิมเล็งหน่อยเด้อ มือทับทิมสั่นไปหมดแล้ว"}],
+   ()=>RG_RKT.open(best=>{const ok=best>=RG_RKT.MARK,S=G.region.side.isan;S.rkt=best;rgMeet(G,"tabtim",ok?4:2);save();
+    playScene([
+     {n:"nar",t:ok?`บั้งไฟของพ่อพุ่งขึ้นไป ${best} เมตร สูงกว่าทุกลูกในงานคืนนั้น เสียงเฮดังมาจากทุกมุมของลานวัด`:`บั้งไฟของพ่อขึ้นไปได้ ${best} เมตร ไม่ถึงของพี่เพชร แต่คนทั้งลานวัดยังปรบมือให้`},
+     {n:"npc",who:"พี่เพชร",t:ok?"สูงกว่าของพี่ทุกปี …เตะของเอ็งก็เหมือนกัน พี่ดูมาทั้งคืนแล้ว":"บั้งไฟตกก็จุดใหม่ปีหน้า มวยก็เหมือนกัน …เตะของเอ็งคืนนี้ พี่ดูอยู่นะ"},
+     {n:"npc",who:"พี่เพชร",t:"พ่อยังไม่ยอมรับหรอก พ่อหัวแข็ง แต่พี่จะเล่าให้พ่อฟังเองว่าคืนนี้เห็นอะไร"},
+     {n:"tabtim",f:"sad",l:"casual",t:"…พี่เพชร"},
+     {n:"nar",t:"พี่เพชรเอามือหนา ๆ ขยี้หัวทับทิมทีหนึ่ง แบบที่คงไม่ได้ทำมาตั้งแต่เธอยังเด็ก แล้วเดินกลับไปหาพ่อที่รถกระบะ"},
+     {n:"tabtim",f:"flustered",l:"casual",t:"ฮ่า ๆ ทับทิมบ่ได้ร้องไห้เด้อ ควันบั้งไฟเข้าตา",choice:[
+      {t:"ยื่นผ้าเช็ดหน้าให้เงียบ ๆ",fx:G2=>rgMeet(G2,"tabtim",3),then:[{n:"tabtim",f:"flustered",l:"casual",t:"…ควันเข้าตาจริง ๆ เด้อ ขอยืมแป๊บเดียว"}]},
+      {t:"\"พี่นิลจะเห็นเหมือนกันสักวัน\"",fx:G2=>rgMeet(G2,"tabtim",2),then:[{n:"tabtim",f:"sad",l:"casual",t:"พี่นิลไปไกลแล้วเด้อ ไปถึงนาคาโน่น… แต่ถ้าวันไหนเจอกันบนเวที ทับทิมจะเตะให้พี่นิลเห็นกับตา"}]}]}],cb,{bg:"fair",look:"casual"});}),{bg:"fair",look:"casual"}),
+  done:(G)=>addMail(G,{kind:"letter",from:"ทับทิม",title:"ข่าวจากบ้านทับทิม",body:
+   "พี่ผู้จัดการ\n\nพี่เพชรส่งคลิปบั้งไฟลงกลุ่มไลน์ครอบครัว น้อง ๆ กดหัวใจกันรัว ๆ เลยเด้อ\n\nแล้วพ่อโทรมาหาทับทิมเป็นครั้งแรกในรอบสองปี ถามคำเดียวว่า \"คนที่ยืนเล็งบั้งไฟกับเจ้าเป็นไผ\"\n\nทับทิมบอกว่าผู้จัดการค่ายศิริชัย พ่อเงียบไปนานมาก แล้วบอกว่า \"ฝากขอบใจเขาด้วย\"\n\nส่วนพี่นิลยังไม่ตอบข้อความทับทิมเลย ไว้ทับทิมจะลองใหม่เด้อ\n\nทับทิม"})};
 function rgSideDue(G,T){const R=G.region,D=ROAD_DEST[T.dest];if(!R||!D||T.fa||T.series||T.local)return null;const X=RG_SIDE[D.r];if(!X)return null;
   const S=(R.side=R.side||{})[D.r]=R.side[D.r]||{};if(S.won)return null;if(R.joined&&R.joined[X.cid])return null;if(!(R.arrived||{})[D.r])return null;
   if(S.triedAbs!=null&&S.triedAbs===T.abs)return null;return X;}
@@ -2105,7 +2194,7 @@ const REGION={
       if(A){playScene(A,goB,{bg:"gas_station",look:"casual"});}else goB();}});},
   /* v1.91.121 (Man): off-schedule fight — the call, the choice to go, then bout after bout */
   sideRun(T,X,done){const R=G.region,r=ROAD_DEST[T.dest].r,S=R.side[r];S.triedAbs=T.abs;rgTouch(G,X.cid);
-    let go=0;playScene([...X.intro(G),{n:"nar",t:"จะทำยังไงดี?",choice:[{t:X.go,fx:()=>{go=1;}},{t:X.no,then:X.noT(G)}]}],()=>{
+    let go=0;playScene([...X.intro(G,ROAD_DEST[T.dest]),{n:"nar",t:"จะทำยังไงดี?",choice:[{t:X.go,fx:()=>{go=1;}},{t:X.no,then:X.noT(G)}]}],()=>{
       if(!go){save();done();return;}
       playScene(X.arrive(G),()=>this.sideBout(T,X,0,done),{bg:X.bg,look:"casual"});},{bg:this.hotelBg[r],look:"casual"});},
   sideBout(T,X,i,done){const R=G.region,r=ROAD_DEST[T.dest].r,S=R.side[r],N=X.foes.length,F=X.foes[i],K=QK[F.qk];

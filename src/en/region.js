@@ -1509,6 +1509,95 @@ const RG_MAS={st:null,N:6,
     for(const P of S.per){const f=G.F[P.id];if(!f)continue;const fa=Math.round(8+16*P.q),mo=Math.round(2+4*P.q);f.fatigue=Math.max(0,(f.fatigue||0)-fa);f.morale=Math.min(100,(f.morale||0)+mo);lines.push(`${esc(f.name)} fatigue −${fa} · morale +${mo}`);}
     const bd=2+Math.round(3*q);rgMeet(G,"baibua",bd);G.region.masBest=Math.max(G.region.masBest||0,q);save();S.res={q,lines};S.phase="end";this.draw();AU.sfx&&AU.sfx(q>=.8?"level":"ui");},
   close(){const S=this.st,el=this.el();this.st=null;if(el)el.remove();if(S){clearTimeout(S.to);S.done&&S.done(S.res?S.res.q:null);}}};
+/* v1.91.128 (Man): Tabtim's minigame — light her father's bang fai. Lock the angle while the rocket sways, then the fuse power while it pulses;
+   three rockets, the best one counts against Petch's mark from last year. */
+const RG_RKT={st:null,MARK:240,
+  css(){if(document.getElementById("rgrkt-css"))return;const s=document.createElement("style");s.id="rgrkt-css";s.textContent=`
+#rgrkt{background:linear-gradient(rgba(10,6,22,.6),rgba(10,6,22,.85)),url(a/bg_night_isan.webp) center/cover}#rgrkt .mbox{gap:8px}
+#rgrkt .rsky{position:relative;width:100%;height:46vh;max-height:380px;overflow:hidden;border:3px solid #6b4a32;background:linear-gradient(#141030,#3b2c63 70%,#6b4a32 70%,#4a3322)}
+#rgrkt .rpad{position:absolute;left:50%;bottom:8%;width:6px;height:60px;margin-left:-3px;transform-origin:50% 100%}
+#rgrkt .rpad i{position:absolute;left:-5px;bottom:0;width:16px;height:54px;background:repeating-linear-gradient(#c9a25c 0 8px,#9c7a3c 8px 10px);border:2px solid #3a2a12}
+#rgrkt .rpad i:before{content:"";position:absolute;left:-2px;top:-12px;border:8px solid transparent;border-bottom:12px solid #c0392b}
+#rgrkt .rgauge{position:absolute;left:50%;bottom:8%;width:200px;height:100px;margin-left:-100px;border:2px dashed rgba(255,224,138,.35);border-bottom:0;border-radius:100px 100px 0 0;pointer-events:none}
+#rgrkt .rbar{height:18px;background:#2a1d18;border:2px solid #6b4a32;position:relative}#rgrkt .rbar b{position:absolute;left:0;top:0;bottom:0;background:#e86a2a}
+#rgrkt .rbar u{position:absolute;top:-2px;bottom:-2px;left:78%;width:14%;border:2px solid #ffe08a;text-decoration:none}
+#rgrkt .rfly{position:absolute;left:50%;bottom:8%;width:16px;height:54px;margin-left:-8px;background:repeating-linear-gradient(#c9a25c 0 8px,#9c7a3c 8px 10px);transition:transform 1.6s cubic-bezier(.2,.7,.3,1)}
+#rgrkt .rfly:after{content:"";position:absolute;left:4px;top:54px;width:8px;height:40px;background:linear-gradient(#ffd34d,rgba(255,120,40,.2))}
+#rgrkt .rmark{position:absolute;left:0;right:0;border-top:2px dashed #9bd36a;font-size:12px;color:#9bd36a;text-align:right;padding-right:4px}
+#rgrkt .rhud{display:flex;justify-content:space-between}#rgrkt .rbig{width:100%;padding:14px;font-size:18px}`;document.head.appendChild(s);},
+  el(){return document.getElementById("rgrkt");},
+  open(done){this.css();let el=this.el();if(!el){el=document.createElement("div");el.id="rgrkt";el.className="mgame";document.body.appendChild(el);}
+    this.st={n:0,best:0,shots:[],done,phase:"intro"};this.draw();
+    el.onclick=e=>{const b=e.target.closest("[data-rk]");if(!b)return;const a=b.dataset.rk;if(a==="go")this.aim();else if(a==="lock")this.lock();else if(a==="next")this.next();else if(a==="end")this.close();};},
+  frame(inner){return `<div class="mbox px"><h2>Light Dad's bang fai</h2><div class="rhud"><span>Rocket <b>${Math.min(3,this.st.n+1)}</b>/3</span><span>Best <b>${this.st.best}</b> m</span><span>Petch ${this.MARK} m</span></div>${inner}</div>`;},
+  sky(extra){const h=this.MARK/340*100;return `<div class="rsky" id="rksky"><div class="rmark" style="bottom:${(8+h*.86).toFixed(1)}%">Petch ${this.MARK} m</div>${extra||""}</div>`;},
+  draw(){const S=this.st,el=this.el();if(!S||!el)return;
+    if(S.phase==="intro"){el.innerHTML=this.frame(`<div class="mhead" style="display:flex;gap:8px;align-items:center"><img src="${faceSrc("tabtim","happy")}" alt="" style="width:40px;height:40px;image-rendering:pixelated"><span>While the rocket sways, tap when it's most upright, then tap again when the powder power is inside the gold box!</span></div>${this.sky(`<div class="rgauge"></div><div class="rpad"><i></i></div>`)}<button class="btn primary rbig" data-rk="go">Start ▸</button>`);return;}
+    if(S.phase==="aim"||S.phase==="pow"){el.innerHTML=this.frame(`${this.sky(`<div class="rgauge"></div><div class="rpad" id="rkpad"><i></i></div>`)}
+      <div class="rbar" id="rkbar"><u></u><b id="rkpow" style="width:0"></b></div><button class="btn primary rbig" data-rk="lock">${S.phase==="aim"?"Lock the angle!":"Light the fuse!"}</button>`);return;}
+    if(S.phase==="fly"){const sh=S.shots[S.shots.length-1];el.innerHTML=this.frame(`${this.sky(`<div class="rfly" id="rkfly" style="transform:rotate(${sh.ang.toFixed(1)}deg)"></div>`)}
+      <p class="center"><b>${sh.boom?"Packed too tight. The rocket burst halfway!":`${sh.h} m`}</b> · ${esc(sh.line)}</p><button class="btn primary rbig" data-rk="next">${S.n>=3?"See result ▸":"Next rocket ▸"}</button>`);
+      requestAnimationFrame(()=>requestAnimationFrame(()=>{const f=document.getElementById("rkfly");if(f){const up=sh.boom?35:Math.min(96,sh.h/340*86);const dx=Math.tan(sh.ang*Math.PI/180)*up*3;f.style.transform=`translate(${dx.toFixed(0)}px,-${(up*3.4).toFixed(0)}px) rotate(${sh.ang.toFixed(1)}deg)`;}}));return;}
+    if(S.phase==="end"){const ok=S.best>=this.MARK;el.innerHTML=this.frame(`<h3 class="center">${ok?"Higher than Petch's!":"Not as high as Petch's yet"}</h3><p class="center">${S.shots.map((s,i)=>`Rocket ${i+1}: ${s.boom?"burst":s.h+" m"}`).join(" · ")}</p><button class="btn primary rbig" data-rk="end">Back to the fair ▸</button>`);}},
+  aim(){const S=this.st;S.phase="aim";this.draw();const t0=performance.now(),sp=1.6+S.n*.35;
+    const tk=()=>{if(this.st!==S||S.phase!=="aim")return;S.ang=Math.sin((performance.now()-t0)/1000*sp*Math.PI)*38;const p=document.getElementById("rkpad");if(p)p.style.transform=`rotate(${S.ang.toFixed(1)}deg)`;requestAnimationFrame(tk);};tk();},
+  lock(){const S=this.st;if(S.phase==="aim"){S.lockAng=S.ang;S.phase="pow";const pad=document.getElementById("rkpad");const btn=document.querySelector("#rgrkt [data-rk=lock]");if(btn)btn.textContent="Light the fuse!";
+      const t0=performance.now(),sp=1.1+S.n*.25;const tk=()=>{if(this.st!==S||S.phase!=="pow")return;S.pow=(1-Math.cos((performance.now()-t0)/1000*sp*Math.PI))/2*100;const b=document.getElementById("rkpow");if(b)b.style.width=S.pow.toFixed(1)+"%";requestAnimationFrame(tk);};tk();return;}
+    if(S.phase==="pow"){const a=Math.abs(S.lockAng),p=S.pow,boom=p>95;const pf=p<78?p/78*.8:p<=92?1:1-(p-92)/20;
+      const h=boom?0:Math.round(330*Math.cos(a*Math.PI/180)**6*pf);
+      const line=boom?"Black smoke blows across the whole ground. The crowd roars with laughter.":h>=this.MARK?"The whole fair cranes its neck to follow it.":h>=180?"A nice climb, but not all the way to the sky.":a>20?"It veers off over the rice fields. Villagers scatter.":"It barely gets off the ground before it gives out.";
+      S.shots.push({ang:S.lockAng,pow:p,h,boom,line});S.best=Math.max(S.best,h);S.n++;S.phase="fly";AU.sfx&&AU.sfx(boom?"miss":h>=this.MARK?"level":"ui");this.draw();}},
+  next(){const S=this.st;if(S.n>=3){S.phase="end";this.draw();return;}this.aim();},
+  close(){const S=this.st,el=this.el();this.st=null;if(el)el.remove();if(S&&S.done)S.done(S.best);}};
+if(typeof QK!=="undefined")Object.assign(QK,{
+  wn1:{fst:"pressure",name:"Red-helmet temple-fair biker",sprite:"gang1",lvl:-1.1,tilt:{punch:1.5,power:1,iq:-2,guard:-1.5},color:"#c8283c",grp:"gang"},
+  wn2:{fst:"power",name:"Tong, the rice-whisky heavy hitter",sprite:"gang2",lvl:-.3,tilt:{power:2,punch:1,dur:1,speed:-1,iq:-1},color:"#8a1f2a",grp:"gang"},
+  wn3:{fst:"inside",name:"Seua Dang, three-time temple ring champion",sprite:"gang3",lvl:.5,tilt:{punch:1.5,knee:1.5,power:1,iq:-.5},color:"#5a1420",grp:"gang"}});
+RG_SIDE.isan={cid:"tabtim",bg:"fair",ring:"bg_fair.webp",title:"Off-schedule fight · temple fair ring",
+  foes:[{qk:"wn1",t:"A girl in the temple ring? I'll go easy on you, sweetheart."},{qk:"wn2",t:"He just slipped. This one won't slip."},{qk:"wn3",t:"Three titles, and no woman has lasted a full round in front of me."}],
+  between:["One of Seua Dang's boys throws his red helmet on the ground and ducks through the ropes.","Seua Dang tosses away his glass and climbs into the ring himself. The whole fair gets to its feet."],
+  intro:(G,D)=>[{n:"nar",t:"At dusk, a message from Tabtim pops up on the manager's phone: a photo of a boxing ring in the middle of a temple fair, coloured lights wound around the posts."},
+   {n:"tabtim",f:"happy",l:"casual",t:`Manager! There's a temple fair tonight in ${D.name}. My brothers were invited to fight an exhibition. Come and have fun! I'm buying the grilled meatballs!`}],
+  go:"\"Sure, I'll bring everyone\"",no:"\"I'll rest tonight\"",
+  noT:G=>[{n:"tabtim",f:"pout",l:"casual",t:"Aww... it's okay. Next time. I'll save you a skewer."}],
+  arrive:G=>[{n:"nar",bg:"fair",t:"The fair is so packed people bump shoulders. Mor lam sing blares from the far stage, and beside the boxing ring a crowd queues for photos with two big men."},
+   {n:"tabtim",f:"happy",l:"casual",t:"That's Brother Petch and Brother Nil, my older brothers. They're more famous than me, ha ha."},
+   {n:"npc",who:"Brother Petch",t:"...You came, Tabtim. So this is the Chiang Mai camp you told me about."},
+   {n:"npc",who:"Brother Nil",t:"Bringing a girls' camp to the temple fair? This ring is for real boxing, Tabtim. Not for pretty kicks for people to photograph."},
+   {n:"nar",t:"Nil wears a black jacket cut with neon-red lines, small scales running down the sleeves."},
+   {n:"nar",t:"Before anyone can answer, five or six bikers in red helmets shove their way in. Their leader has a blotchy face and a glass of rice whisky in his hand."},
+   {n:"npc",who:"Seua Dang",t:"Well, well. The Ruby of the Isan Plains, with a whole van of girl boxers. Women's boxing is just for show, right, Nil?"},
+   {n:"npc",who:"Brother Nil",t:"He said it, not me."},
+   {n:"tabtim",f:"angry",l:"casual",t:"...Brother Nil, you're just standing there laughing along with him?"},
+   {n:"npc",who:"Temple ring announcer",t:"Ladies and gentlemen! A special bout, off the programme: a women's camp from Chiang Mai takes on the temple-fair boys, three in a row! Let's hear it!"},
+   {n:"coach",t:"Nobody's name is on the line. Just go up and fight so they can see. Whoever's ready, step up."}],
+  win:G=>[{n:"nar",t:"Seua Dang lies flat on his back in the temple ring. The whole fair roars over the mor lam music. His bikers haul him onto a motorbike and the whole gang speeds off."},
+   {n:"tabtim",f:"happy",l:"casual",t:"See that! Women's boxing is just a show, is it? Ha ha... Manager, thank you so much."},
+   {n:"npc",who:"Brother Nil",t:"Beat some temple-fair bikers and now you think you're good?"},
+   {n:"npc",who:"Brother Nil",t:"I've signed with the Naka League, Tabtim. Next year I'm on the international stage. And you'll still be kicking at temple fairs like this."},
+   {n:"tabtim",f:"sad",l:"casual",t:"...The Naka League. When did you sign, Brother Nil? Does Dad know?"},
+   {n:"npc",who:"Brother Nil",t:"Dad knows. He's happy for me. His son is going abroad."},
+   {n:"nar",t:"Brother Nil disappears into the crowd. Tabtim stands still, the fair's coloured lights reflected in her eyes."}],
+  lose:G=>[{n:"npc",who:"Seua Dang",t:"See? Women's boxing is just a show!"},{n:"npc",who:"Brother Nil",t:"Told you."},
+   {n:"tabtim",f:"sad",l:"casual",t:"It's all right... everyone's hurt. I'm sorry I brought you into this."},{n:"coach",t:"Next time we're in Isan, that temple ring will still be there."}],
+  after:(G,T,cb)=>playScene([
+    {n:"nar",t:"As the fair thins out, Petch stops in front of Tabtim holding a bamboo rocket, hand-painted with a naga."},
+    {n:"npc",who:"Brother Petch",t:"Dad's bang fai. His back's bad this year, he can't light it himself. He sent it with me."},
+    {n:"npc",who:"Brother Petch",t:"Every year I light it for him. This year... Tabtim, you light it for Dad."},
+    {n:"tabtim",f:"surprised",l:"casual",t:"Me...? Brother Petch, you're letting me light it..."},
+    {n:"tabtim",f:"flustered",l:"casual",t:"Manager, help me aim, please. My hands are shaking all over."}],
+   ()=>RG_RKT.open(best=>{const ok=best>=RG_RKT.MARK,S=G.region.side.isan;S.rkt=best;rgMeet(G,"tabtim",ok?4:2);save();
+    playScene([
+     {n:"nar",t:ok?`Dad's rocket shoots up ${best} metres, higher than any rocket at the fair that night. Cheers break out from every corner of the temple ground.`:`Dad's rocket climbs ${best} metres. Not as high as Petch's, but the whole temple ground still applauds.`},
+     {n:"npc",who:"Brother Petch",t:ok?"Higher than mine, every year... your kicks too. I watched all night.":"A rocket that falls, you light again next year. Boxing's the same... your kicks tonight, I was watching."},
+     {n:"npc",who:"Brother Petch",t:"Dad still won't admit it. He's stubborn. But I'll tell him myself what I saw tonight."},
+     {n:"tabtim",f:"sad",l:"casual",t:"...Brother Petch."},
+     {n:"nar",t:"Petch ruffles Tabtim's hair once with his big hand, the way he probably hasn't since she was little, then walks back to their father at the pickup truck."},
+     {n:"tabtim",f:"flustered",l:"casual",t:"Ha ha, I'm not crying. The rocket smoke got in my eyes.",choice:[
+      {t:"Hand her a handkerchief without a word",fx:G2=>rgMeet(G2,"tabtim",3),then:[{n:"tabtim",f:"flustered",l:"casual",t:"...Really, it's the smoke. Just let me borrow it a moment."}]},
+      {t:"\"Brother Nil will see it too, someday\"",fx:G2=>rgMeet(G2,"tabtim",2),then:[{n:"tabtim",f:"sad",l:"casual",t:"Brother Nil's gone far now, all the way to Naka... but if we ever meet in the ring, I'll kick so he sees it with his own eyes."}]}]}],cb,{bg:"fair",look:"casual"});}),{bg:"fair",look:"casual"}),
+  done:(G)=>addMail(G,{kind:"letter",from:"Tabtim",title:"News from Tabtim's home",body:
+   "Manager,\n\nBrother Petch posted the bang fai clip in the family LINE group, and the little ones flooded it with hearts.\n\nThen Dad called me for the first time in two years. He asked just one thing: \"Who was the one aiming the rocket with you?\"\n\nI said the manager of Sirichai Camp. Dad went quiet for a long time, then said, \"Tell him thank you.\"\n\nBrother Nil still hasn't answered my messages. I'll try again.\n\nTabtim"})};
 function rgSideDue(G,T){const R=G.region,D=ROAD_DEST[T.dest];if(!R||!D||T.fa||T.series||T.local)return null;const X=RG_SIDE[D.r];if(!X)return null;
   const S=(R.side=R.side||{})[D.r]=R.side[D.r]||{};if(S.won)return null;if(R.joined&&R.joined[X.cid])return null;if(!(R.arrived||{})[D.r])return null;
   if(S.triedAbs!=null&&S.triedAbs===T.abs)return null;return X;}
@@ -1832,7 +1921,7 @@ Pick your fighter under Fights › Four Regions Championship`+((t=>t?`\n\n(${t})
       if(A){playScene(A,goB,{bg:"gas_station",look:"casual"});}else goB();}});},
   /* v1.91.121 (Man): off-schedule fight — the call, the choice to go, then bout after bout */
   sideRun(T,X,done){const R=G.region,r=ROAD_DEST[T.dest].r,S=R.side[r];S.triedAbs=T.abs;rgTouch(G,X.cid);
-    let go=0;playScene([...X.intro(G),{n:"nar",t:"What do you do?",choice:[{t:X.go,fx:()=>{go=1;}},{t:X.no,then:X.noT(G)}]}],()=>{
+    let go=0;playScene([...X.intro(G,ROAD_DEST[T.dest]),{n:"nar",t:"What do you do?",choice:[{t:X.go,fx:()=>{go=1;}},{t:X.no,then:X.noT(G)}]}],()=>{
       if(!go){save();done();return;}
       playScene(X.arrive(G),()=>this.sideBout(T,X,0,done),{bg:X.bg,look:"casual"});},{bg:this.hotelBg[r],look:"casual"});},
   sideBout(T,X,i,done){const R=G.region,r=ROAD_DEST[T.dest].r,S=R.side[r],N=X.foes.length,F=X.foes[i],K=QK[F.qk];
