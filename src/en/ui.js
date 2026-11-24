@@ -1,5 +1,5 @@
 // ================= MUAY THAI MOE v1.3 — UI =================
-const VERSION="1.91.111";
+const VERSION="1.91.112";
 const CUR_LANG=(typeof window!=="undefined"&&window.LANG)||"th";
 const TH_LABEL=String.fromCharCode(3652,3607,3618);
 function langSwitch(cls){return `<div class="langsw ${cls||""}" role="group" aria-label="Language">${[["th",TH_LABEL],["en","EN"]].map(([k,l])=>`<button class="lsb ${CUR_LANG===k?"on":""}" data-act="setlang" data-v="${k}" aria-pressed="${CUR_LANG===k}">${l}</button>`).join("")}</div>`;}
@@ -1204,14 +1204,14 @@ const PATCH_TAPE={id:"1.91.80",ver:"Muay Thai Moe v1.91",title:"Tapes, Coach Dae
  ["🧑‍🏫","Coach Daeng's talks","Every 4 weeks Coach calls you over about a girl's weak spot, hidden power or a move. On the pre-fight compare, 'แรง' is now 'Endurance'."],
  ["✨","Hidden powers hit harder","Past Lv.3 each hidden-power level adds 10% (was 5%), up to 170%. Girls who joined later got their missing skill points back."]],
  foot:"I've been keeping notes on every opponent. Just get me the tape, Manager, I'll handle the rest ✦"};
-const PATCH_FIX={id:"1.91.111",ver:"Muay Thai Moe v1.91.111",title:"News from Sirichai Camp",lead:"The first-year title path now follows the story, with updates to venues, letters and camp life",items:[
- ["🏆","First-year finals","Ploy stays unbeaten in simulated bouts during year one and is seeded opposite Kati, as Fah is opposite Mali. If Kati and Mali win their semifinals, they meet their rivals in five-round finals"],
- ["🥊","A clearer belt path","Win a title through a tournament, defend it in one bout, and enter a new tournament after losing it. Only fighters in the matching A or B division can enter"],
- ["⚡","More Death Matches","The tournament opens on more weeks, and short entry lists are repaired so the bracket can continue"],
- ["✉️","Rooster and bull letters","After the first encounter, each escaped animal sends another challenge through the mailbox every three weeks. Opponents grow with your camp"],
- ["🎬","Title ceremony and market","Belt and cup ceremonies show the two fighters without a referee; the winner celebrates under fireworks. Night market outings use the market backdrop again"],
- ["🎞️","Fight tapes and Rin","Tapes now cost hundreds to a few thousand baht. Rin reviews one free every three weeks, and many dialogue portraits use sharper original art"]],
- foot:"Coach Daeng says: train hard, read your letters, and see you ringside! ✦"};
+const PATCH_FIX={id:"1.91.111",ver:"Muay Thai Moe v1.91.111",title:"Report from Sirichai Camp",lead:"The year-one fight path now follows the story, plus polish for the ring, letters and camp life",items:[
+ ["🏆","Year-one finals follow the story","Ploy no longer loses the fights the game simulates in year one and sits on the other side of the bracket from Kati, as does Fah from Mali. If Kati and Mali win their semifinals, they meet their rivals in a 5-round final"],
+ ["🥊","Clearer belt path","A first title is won through a tournament, defenses are a single bout, a lost belt must be won again from scratch, and only fighters in that belt's A or B division may enter"],
+ ["⚡","Death Match more often","More Death Match weeks, and the bracket now copes with an incomplete field so the event can carry on"],
+ ["✉️","Runaway rooster and cow letters","After the first encounter, both return to challenge you by mail every 3 weeks each, and the opponents grow with your camp"],
+ ["🎬","Champion screen and market scene","When a belt or trophy is won, the ring shows both fighters with no referee and the winner raises her arm amid fireworks. The market walk uses the market scene again"],
+ ["🎞️","Fight tapes and Rin","Tape prices now run from the hundreds to the low thousands, Rin reviews a tape for free every 3 weeks, and many speaking portraits now use sharper original art"]],
+ foot:"Kru Daeng says: train hard, read all your letters, and see you ringside! ✦"};
 /* popups queue up in order; each one is closed on its own */
 const PATCHES=[PATCH_AV,PATCH_TAPE,PATCH_FIX],PATCH=PATCHES[PATCHES.length-1];
 function nextPatch(){const i=PATCHES.findIndex(p=>p.id===(G&&G.newsSeen));return i<0?PATCHES[0]:PATCHES[i+1]||null;}
@@ -1318,9 +1318,9 @@ function playScene(steps,done,opts={}){WARM_NEED=[];const noThai=sceneNoThai(ste
     i.addEventListener("load",f,{once:true});i.addEventListener("error",f,{once:true});});}
 /* The winner popup calls the result, then the winning boxer celebrates beside the other fighter. */
 function winPopHTML(m){const h=m.h,f=G.F[h.id];if(!f)return "";const label=honorLabel(h.kind,h.venue),ranked=h.kind==="local"||h.kind==="district";
-  return `<div class="winpop"><canvas class="wincv" width="640" height="360" data-winpop="1" aria-label="Two boxers in the ring; the winner raises her arms"></canvas>
+  return `<div class="winpop"><canvas class="wincv" width="640" height="360" data-winpop="1" aria-label="Two fighters in the ring, the winner raising her arm in joy"></canvas>
     <div class="wp-lines"><p class="wp-l" style="--d:200ms">${ranked?"Points for the whole round…":"The decision…"}</p><p class="wp-l" style="--d:1100ms">The winner of the ${esc(label)} Div ${esc(h.div||"")}…</p>
-    <p class="wp-name" style="--d:2000ms">${esc(f.name)}!</p><p class="wp-l sm" style="--d:2400ms">Sirichai Camp ${!ranked&&h.opp?` · beat ${esc(h.opp)}`:""}</p></div></div>
+    <p class="wp-name" style="--d:2000ms">${esc(f.name)}!</p><p class="wp-l sm" style="--d:2400ms">Sirichai Camp ${!ranked&&h.opp?` · won ${esc(h.opp)}`:""}</p></div></div>
     <div class="mfoot"><button class="btn primary" data-act="winpopgo">To the ceremony ▸</button></div>`;}
 function playHonorQueue(done){while((G.awards||[]).length&&!(G.F[G.awards[0].id]))G.awards.shift();const h=(G.awards||[])[0];if(!h){AU.startMusic("hub");if(done)done();return;}AU.startMusic("victory");
   if(!h._pop){h._pop=1;UI.winNext=()=>playHonorQueue(done);UI.wpT0=0;UI.modal={type:"winpop",h};render();setTimeout(()=>{if(UI.modal&&UI.modal.type==="winpop"){AU.sfx("champ");}},2000);return;}

@@ -109,14 +109,14 @@ SKILLS.kati.push(
 SKILLS.mali.push(
  SKX("cy_flash",0,4,"cy_erawan",["elbow","speed"],"chaiya","Lightning Return Elbow","Lv.14 · an elbow too fast to see · elbow power +14%, elbow accuracy +3%",r=>({dmg:{elbow:.14*r},hit:{elbow:.03*r}}),{lv:14}),
  SKX("cy_soar",0,5,"cy_flash",["elbow","knee"],"chaiya","Chaiya Sky Leap","Lv.22 · Master · elbow power +16%, knee power +8%, elbow accuracy +3%",r=>({dmg:{elbow:.16*r,knee:.08*r},hit:{elbow:.03*r}}),{lv:22}),
- SKX("cy_bloom",1,4,"cy_hanuman",["kick","foot"],"chaiya","Jasmine Dance · Combination Kicks","Lv.14 · flowing kicks like a dance · kick accuracy +4%, kick scoring +10%, recovery +10%",r=>({hit:{kick:.04*r},pts:{kick:.1*r},regen:.1*r}),{lv:14}),
+ SKX("cy_bloom",1,4,"cy_hanuman",["kick","foot"],"chaiya","Dancing Jasmine · Kick Combo","Lv.14 · flowing kicks like a dance · kick accuracy +4%, kick scoring +10%, recovery +10%",r=>({hit:{kick:.04*r},pts:{kick:.1*r},regen:.1*r}),{lv:14}),
  SKX("cy_gale",1,5,"cy_bloom",["speed","kick"],"chaiya","Chaiya Whirlwind","Lv.22 · Master · evade +2.5%, kick accuracy +4%, kick power +10%, stamina use -3%",r=>({evade:.025*r,hit:{kick:.04*r},dmg:{kick:.1*r},staSave:.03*r}),{lv:22}),
  SKX("cy_gate",2,4,"cy_root",["guard","clinch"],"chaiya","Pinning the Garland","Lv.14 · Look mai: parry, elbow to the chest · clinch defense +1, evade +2%, counters +3%",r=>({clDef:1*r,evade:.02*r,ctr:.03*r}),{lv:14}),
  SKX("cy_meru",2,5,"cy_gate",["guard","dur"],"chaiya","Mount Meru","Lv.22 · Master · clinch defense +1.4, evade +3%, recovery +12%, +3% accuracy at low health",r=>({clDef:1.4*r,evade:.03*r,regen:.12*r,clutch:.03*r}),{lv:22}));
 SKILLS.rin.push(
  SKX("lb_shadow",0,4,"lb_kris",["counter","speed"],"lopburi","Shadowless Counter","Lv.14 · counters before the opponent's strike lands · counters +5%, counter-punch power +16%",r=>({ctr:.05*r,ctrDmg:.16*r}),{lv:14}),
- SKX("lb_proof",0,5,"lb_shadow",["counter","iq"],"lopburi","Closing Equation · Counterpunch","Lv.22 · Master · counters +6%, counter-punch power +20%, punch accuracy +2%",r=>({ctr:.06*r,ctrDmg:.2*r,hit:{punch:.02*r}}),{lv:22}),
- SKX("lb_three",1,4,"lb_giant",["iq","comp"],"lopburi","Three-Round Mind Read · Ringcraft","Lv.14 · plans the whole fight ahead · corner orders +35%, base accuracy +1.2%, evade +1%",r=>({corner:.35*r,prep:.012*r,evade:.01*r}),{lv:14}),
+ SKX("lb_proof",0,5,"lb_shadow",["counter","iq"],"lopburi","Endgame Equation · Counter Punch","Lv.22 · Master · counters +6%, counter-punch power +20%, punch accuracy +2%",r=>({ctr:.06*r,ctrDmg:.2*r,hit:{punch:.02*r}}),{lv:22}),
+ SKX("lb_three",1,4,"lb_giant",["iq","comp"],"lopburi","Three-Round Mind Read · Reading the Fight","Lv.14 · plans the whole fight ahead · corner orders +35%, base accuracy +1.2%, evade +1%",r=>({corner:.35*r,prep:.012*r,evade:.01*r}),{lv:14}),
  SKX("lb_book",1,5,"lb_three",["iq","counter"],"lopburi","Lopburi Textbook","Lv.22 · Master · corner orders +45%, base accuracy +1.6%, counters +3%",r=>({corner:.45*r,prep:.016*r,ctr:.03*r}),{lv:22}),
  SKX("lb_fold",2,4,"lb_tiger",["kick","power"],"lopburi","Foot Strokes the Face","Lv.14 · Look mai: teep the face before they can strike · kick accuracy +3%, kick scoring +10%, evade +1.5%",r=>({hit:{kick:.03*r},pts:{kick:.1*r},evade:.015*r}),{lv:14}),
  SKX("lb_circle",2,5,"lb_fold",["foot","kick"],"lopburi","Unbreakable Outer Ring","Lv.22 · Master · kick accuracy +4%, kick power +12%, evade +2%, counters +3%",r=>({hit:{kick:.04*r},dmg:{kick:.12*r},evade:.02*r,ctr:.03*r}),{lv:22}));
@@ -137,7 +137,7 @@ SKILLS.ploy=[
  SKX("p_read",2,1,"captain",["iq"],"korat","Tiger Reads the Fight","Notes every rhythm of the opponent · counters +3%, evade +1%",r=>({ctr:.03*r,evade:.01*r})),
  SKX("p_note",2,2,"captain",["iq"],"korat","Fight-Plan Notebook","Passive · +6% EXP from every fight",r=>({}),{passive:1,px:r=>({fightXp:.06*r})}),
  SKX("p_wall",2,3,"p_read",["guard","iq"],"korat","Rama Draws the Bow","Look mai: drop under, arm up, punch back · evade +2%, clinch defense +0.8, counters +3%",r=>({evade:.02*r,clDef:.8*r,ctr:.03*r})),
- SKX("p_sister",2,4,"p_wall",["iq","counter"],"korat","Sister's Shadow · Slip and Counter","Lv.14 · what Pailin once taught her · counters +5%, corner orders +25%, evade +1.5%",r=>({ctr:.05*r,corner:.25*r,evade:.015*r}),{lv:14}),
+ SKX("p_sister",2,4,"p_wall",["iq","counter"],"korat","Big Sister's Shadow · Slip and Counter","Lv.14 · what Pailin once taught her · counters +5%, corner orders +25%, evade +1.5%",r=>({ctr:.05*r,corner:.25*r,evade:.015*r}),{lv:14}),
  SKX("p_crown",2,5,"p_sister",["guard","comp"],"korat","Tiger Crown · Counter Guard","Lv.22 · Master · evade +3%, clinch defense +1, counters +5%, +3% accuracy at low health",r=>({evade:.03*r,clDef:1*r,ctr:.05*r,clutch:.03*r}),{lv:22})];
 SKILLS.fah=[
  SKX("tiger",0,0,null,["elbow"],"modern","Tiger Elbow","Elbow power +12%, accuracy +2%",r=>({dmg:{elbow:.12*r},hit:{elbow:.02*r}})),
@@ -1989,10 +1989,10 @@ const DATE_CLOSE={
 // ---------- CHATTER (two characters meet) ----------
 const CHATTER=[
  {id:"c_kati_mali",need:G=>G.F.mali.camp==="player",bg:"camp",look:"train",steps:[
-  {n:"mali",f:"happy",t:"Kati! I made you a garland, hang it in the ring corner~",with:"kati"},
-  {n:"kati",f:"flustered",t:"Oh, it's lovely! But it'll get kicked across the ring there. I'll keep it beside our corner."},
-  {n:"mali",f:"happy",t:"Deal. You're here training at five every morning. I wanted you to see flowers before the bell."},
-  {choice:[{t:"You two look after the corner together",fx:G=>{add(G,"kati","morale",4);add(G,"mali","bond",2);},then:[{n:"kati",f:"happy",t:"Yes, Manager! I'll mind this corner. Mali, go warm up."}]},
+  {n:"mali",f:"happy",t:"Kati! I strung a garland for you. Hang it on the ring corner~",with:"kati"},
+  {n:"kati",f:"flustered",t:"Oh, it's pretty! But hanging there, a kick will send it flying. I'll keep it by the corner for you."},
+  {n:"mali",f:"happy",t:"Sure. She's been training since five a.m. I want her to see flowers before she steps in the ring."},
+  {choice:[{t:"It's nice that you two run the corner together.",fx:G=>{add(G,"kati","morale",4);add(G,"mali","bond",2);},then:[{n:"kati",f:"happy",t:"Yes, Manager! I'll take this corner. Mali, go warm up first."}]},
    {t:"You two really are like sisters",fx:G=>{add(G,"kati","bond",2);add(G,"mali","bond",2);},then:[{n:"mali",f:"happy",t:"Right? Our camp has more sisters now~"}]}]}]},
  {id:"c_kati_rin",need:G=>G.F.rin.camp==="player",bg:"camp",look:"train",steps:[
   {n:"rin",f:"happy",t:"Kati, your left guard drops three centimeters every time you throw the right. I counted 41 times in one clip",with:"kati"},
@@ -2023,14 +2023,14 @@ const CHATTER=[
   {n:"ploy",f:"happy",t:"Kati, I watched your fight just now",with:"kati"},
   {n:"kati",f:"flustered",t:"Ploy! …Why were you watching?"},
   {n:"ploy",f:"happy",t:"If you keep dropping your guard on the right hand, Fah will drop an elbow right there. Remember that"},
-  {n:"kati",f:"happy",t:"…Thank you. Why tell me?"},
+  {n:"kati",f:"happy",t:"…Thank you. Why are you telling me this?"},
   {n:"ploy",f:"sad",t:"Because I want to see the best possible final, not one that ends early"},
   {fx:G=>{G.F.kati.a.guard=Math.min(20,G.F.kati.a.guard+.3);add(G,"ploy","bond",2);}}]},
  {id:"c_fah_mali",need:G=>G.F.mali.met&&G.F.fah.met&&G.week>=12,bg:"fair",look:"casual",steps:[
   {n:"fah",f:"happy",t:"Who's this tiny thing? Lost on the way from kindergarten?",with:"mali"},
-  {n:"mali",f:"happy",t:"Hi Fah! Your tattoo is so pretty, what's the tiger's name?"},
+  {n:"mali",f:"happy",t:"Fah! Your tattoo is so pretty. What's this tiger's name?"},
   {n:"fah",f:"flustered",t:"Huh…? It doesn't have a name… why aren't you mad I teased you?"},
-  {n:"mali",f:"happy",t:"Because you didn't mean it~ Then I'll name it, 'Little Sky Tiger'!"},
+  {n:"mali",f:"happy",t:"You didn't really tell me~ So I'll name it myself: 'Little Sky Tiger'!"},
   {n:"fah",f:"flustered",t:"…Never call it that in front of anyone!"},
   {fx:G=>{add(G,"fah","bond",2);add(G,"mali","morale",3);}}]},
  {id:"c_coach_kati",need:G=>G.week>=10,bg:"night",look:"train",steps:[
@@ -2165,17 +2165,18 @@ FUN.kd.push("Uncle in front drops his sticky rice!");
 FUN.cheer.push("A kid in the back blows a whistle!");
 const CHANT=["Oh!!","Oh!! The crowd calls every kick!","The whole stadium goes 'Oh!'"],ODDS=["The odds just moved!","Ringside bettors flip the odds!","The bettors wave for takers!","The underdog backers are smiling now!"];
 const CHAR_COM={kati:["Sirichai blood! No stepping back!","Kati's smiling through the red face!","Grandpa Chai is smiling up there!"],mali:["Sweet smile. Not a sweet elbow.","Small frame, huge heart!","Chaiya form, all of it!"],rin:["Rin had that one calculated!","Measured with a ruler!","Lopburi brains!"],ploy:["Pure talent!","A true Korat buffalo swing!","She doesn't even look tired!"],fah:["Fah's playing to the camera again!","There's Fah's smirk!","Silver hair flying across the ring!"]};
+// Short live calls keep the action and the ringside wit in one readable beat.
 const RING_CALL={
- hit:{punch:["{a} lands! Even the crowd winces!","Clean hook from {a}! The front row jumps!","{a} connects! The drum gets louder!"],
-  kick:["{a} whips a kick in! The crowd roars!","That kick from {a}! The gamblers stand!","{a} lands a kick! Hear that crowd!"],
-  knee:["{a} drives the knee in! Ouch!","Knee from {a}! The front row winces!","{a} lands the knee! No room to breathe!"],
-  elbow:["{a} lands an elbow! Check that brow!","Sharp elbow from {a}! The crowd gasps!","{a} slices through with an elbow!"]},
- miss:["Whiff! {d} slips away beautifully!","{d} dodges! The front row felt the breeze!","{a} hits air! {d} grins back!"],
- counter:["{a} fires back! What a counter!","Counter from {a}! The crowd erupts!","{a} counters! {d} walked into it!"],
- kd:["{d} goes down! The whole ring holds its breath!","Down goes {d}! The referee counts!"],
- ko:["That's it! {a} wins by knockout!","Lights out! {a} takes the knockout!"],
- cut:["A cut on {d}! The doctor hurries in!","{d} is cut! Time to check the brow!"]};
-const RING_CRIT=["What a shot from {a}! The crowd roars!","{a} lands flush! Even the band stutters!"];
+ hit:{punch:["{a}'s hook lands! The crowd yells 'ouch' for her!","{a}'s punch lands! Auntie Taew bangs her basin!","Here's {a}'s punch! A gambler drops his rice!"],
+  kick:["{a} whips the shin! 'Oh!' rings through the stadium!","{a}'s shin connects! The ringside gamblers jump up!","{a} lands the kick! The pi chawa can barely keep up!"],
+  knee:["{a} fires a knee! The crowd feels it for {d}!","{a}'s knee lands! An old man slaps his knee hard!","{a} drives the knee again! The cheer squad shouts along!"],
+  elbow:["{a}'s elbow lands! The crowd grabs their own eyebrows!","Here comes {a}'s elbow! The whole ring winces!","{a} slices an elbow! The ringside gamblers flinch!"]},
+ miss:["Whiffed! {d} dodges like dodging a debt collector!","Beautiful slip by {d}! The front row felt the breeze!","{a} hits nothing but air! {d} is smirking now!"],
+ counter:["{a} counters on the spot! The crowd slaps their knees!","Here's {a}'s counter! The gamblers go 'oh'!","{a} counters hard! {d} walked right into it!"],
+ kd:["{d} drops! The referee counts and the crowd stops breathing!","Down goes {d}! The whole row of gamblers is on its feet!"],
+ ko:["{a} closes the books! A knockout, ladies and gentlemen!","It's over! {a} wins by KO and the stadium nearly comes down!"],
+ cut:["{d}'s brow is split! The ringside doctor is running!","It's open! {d} needs the cut checked!"]};
+const RING_CRIT=["Whoa! {a} lands it clean! The crowd roars!","{a} lands a bomb! The pi chawa stops for a second!"];
 function shortRing(e,R,fill,o){const L=e.ev==="hit"?(e.crit?RING_CRIT:RING_CALL.hit[e.w]):RING_CALL[e.ev];return L?fill(R(L),o):e.t;}
 function comLine(e,F,rng){if(e.ev==="wake")return e.t;const R=a=>a[Math.floor(rng()*a.length)];const fill=(s,o)=>s.replace(/\{(\w)\}/g,(m,k)=>o[k]??"");
   const o={a:e.an,d:e.dn,w:WNAME[e.w]||""};const h=fightHeat(F);const grp=F.B.f&&F.B.f.grp,C=grp&&CREATURE_COM[grp];
@@ -2193,7 +2194,7 @@ function comLine(e,F,rng){if(e.ev==="wake")return e.t;const R=a=>a[Math.floor(rn
   const hype=x=>{if(!h||!x)return x;const big=e.crit||e.ev==="kd"||e.ev==="skill"||e.ev==="rage";
     if(rng()>=(big?.8:.1+h*.1))return x;const L=HYPE[Math.min(4,h+(big&&h>=2?1:0))].filter(y=>y!==F.lastHype);const y=R(L);F.lastHype=y;return x+" "+y;};
   const b=baseLine(e,F,R,fill,o,h);if(!b||COM.feel.includes(b))return b;let x=hype(b);if(x===b)x=fun(b);return x.length>COM_MAX?shortRing(e,R,fill,o):x;}
-const COM_MAX=56;
+const COM_MAX=50;
 function baseLine(e,F,R,fill,o,h){
   if(e.ev==="ko"&&h>=2)return fill(R(KO_HOT),o);
   if(F.round===1&&F.rounds>=3&&!e.crit&&(e.ev==="miss"?Math.random()<.35:e.ev==="hit"&&Math.random()<.12))return R(COM.feel);
@@ -3160,8 +3161,8 @@ EVENTS.push(
 // --- v1.89.11: every pair has its own quarrel — in the Valentine ring and in the spats while you see more than one ---
 const pairKey=(a,b)=>[a,b].sort((x,y)=>LOVE_IDS.indexOf(x)-LOVE_IDS.indexOf(y)).join("_");
 const PAIR={
- kati_mali:{ring:{kati:"Mali, I could give you my mango sticky rice, but not this!",mali:"You don't have to give it, Kati! Mali will win it herself!"},
-  spat:[["mali","pout","Kati's sat next to the manager at dinner three days in a row! Today it's Mali's turn!"],["kati","angry","Because I was here first! I was at this camp before you!"],["mali","angry","Being first doesn't mean you get dibs for life!"]]},
+ kati_mali:{ring:{kati:"Mali, I could give you mango sticky rice, but I'm not giving you this one!",mali:"Kati, don't give it to me! I'll win it myself!"},
+  spat:[["mali","pout","Kati's sat next to the manager at dinner three days in a row! Today it's Mali's turn!"],["kati","angry","Well I was here first! I joined this camp before you!"],["mali","angry","Being first doesn't mean you get dibs for life!"]]},
  kati_rin:{ring:{kati:"Rin, you can calculate anything, but not the manager's heart!",rin:"I can. The result says you're at a disadvantage"},
   spat:[["rin","pout","Kati, yesterday the manager talked to you for forty minutes and to me for twenty. I wrote it down"],["kati","angry","Why write that down! Who are you telling!"],["rin","pout","Not tell. The data's unbalanced, and I don't like unbalanced data"]]},
  kati_ploy:{ring:{kati:"You've always taught me, Ploy. Today I'll show you I've graduated!",ploy:"Ten years too early, Kati"},
@@ -3850,7 +3851,7 @@ EVENTS.push(
  {id:"fah_mali",look:"casual",when:G=>G.week>=16&&G.F.mali.camp==="player"&&G.F.fah.met,bg:"fair",steps:[
   {n:"nar",t:"Evening market. Mali reaches for the last sausage skewer, and a tattooed hand snatches it first"},
   {n:"fah",f:"happy",l:"casual",t:"One beat too slow, Chaiya kid. You'll be this slow in the ring too"},
-  {n:"mali",f:"pout",l:"casual",t:"Fah! We're in the same Division B now and you're still stealing my sausage!"},
+  {n:"mali",f:"pout",l:"casual",t:"Fah! We're both in Division B now and you're still stealing my sausages!"},
   {choice:[{t:"Save it for revenge in the ring, Mali",fx:G=>{add(G,"mali","morale",6);add(G,"fah","bond",3);},then:[{n:"fah",f:"happy",l:"casual",t:"I like that look in your eye. See you in the ring"}]},
    {t:"Buy sausages for both",fx:G=>{G.cash-=120;add(G,"mali","bond",4);add(G,"fah","bond",5);},then:[{n:"fah",f:"flustered",l:"casual",t:"…You're a weird one. Treating a rival too. Thanks"}]}]}]});
 // v1.15: the camp talks about last week's big fight
@@ -4500,13 +4501,14 @@ EVENTS.push(
   {inject:G=>G.F.fah.bond<40?[{n:"nar",t:"(If you were closer with Fah, this might go further)"}]:[]}]},
  {id:"fah_join",look:"casual",bg:"camp",when:G=>(G.season||1)>=2&&G.week>=10&&G.seen.fah_trainer&&fahRival(G)&&(G.F.fah.bond||0)>=40&&absWeek(G)>=((G.flags||{}).fahRetry||0),steps:[
   {n:"nar",t:"Monday morning, the rain has just stopped. A big canvas bag sits outside the gate, its owner crouched beside it, pretending to look at the sky."},
-  {n:"fah",f:"flustered",l:"casual",t:"I didn't skip training… I ran at five this morning, until the rain stopped. Then I finally dared to come here."},
-  {n:"nar",t:"Fah lays a contract with rain-soaked corners on the table. The hand that challenges an entire stadium clings tightly to her bag."},
-  {n:"fah",f:"sad",l:"casual",t:"At Golden Tiger, I have to win and smile for the camera. I can't say I'm tired. When I lose, nobody wants to hear me at all."},
-  {n:"coach",t:"You fight in the ring, kid. Outside it, you need somewhere to rest. Not another person listing your mistakes."},
-  {n:"fah",f:"sad",l:"casual",t:"I still want to fight, Coach. I want the whole stadium roaring with every kick… I just want someone to ask if I've eaten when I get home."},
-  {n:"fah",f:"flustered",l:"casual",t:"If there's room here, could I start again? I'll train hard, wake early, wash the dishes… Just don't make me pretend nothing hurts all the time."},
-  {inject:G=>inCamp(G,"mali")?[{n:"mali",f:"surprised",l:"casual",t:"Fah!? The one who kicked me out of the ring last year!?"},{n:"fah",f:"happy",l:"casual",t:"And then you got up and punched me back till my eye went purple! Call it even!"}]:[]},
+  {n:"fah",f:"flustered",l:"casual",t:"Fah didn't skip training… I woke up at five today and ran until the rain stopped. Only then did I dare walk here."},
+  {n:"nar",t:"Fah sets a contract envelope, wet at one corner, on the table. The hands that once raised gloves to challenge a whole stadium now grip her bag strap tight."},
+  {n:"fah",f:"sad",l:"casual",t:"At Golden Tiger, Fah had to win, smile for the camera, and never say she was tired… On days I lost, it felt like nobody wanted to hear Fah's voice at all."},
+  {n:"coach",t:"In the ring you fight. Out of it, you should have a place to rest, not just people pointing out where you messed up."},
+  {n:"fah",f:"sad",l:"casual",t:"Fah still wants to be a fighter, Kru. I still want to kick so the whole stadium goes 'oh'… I just want to come back to camp and have someone ask if I've eaten."},
+  {n:"nar",t:"The heavy bag behind the camp falls silent. Fah glances at it for a moment, then takes a breath and looks the manager straight in the eye."},
+  {n:"fah",f:"flustered",l:"casual",t:"If there's room here, can Fah start over? I can train hard, wake up early, wash dishes… I only ask one thing: don't make Fah pretend it doesn't hurt all the time."},
+  {inject:G=>inCamp(G,"mali")?[{n:"mali",f:"surprised",l:"casual",t:"Fah!? You brought your bag… are you coming to live with us?"},{n:"fah",f:"happy",l:"casual",t:"And then you got up and punched me back till my eye went purple! Call it even!"}]:[]},
   {choice:[
    {t:"Welcome aboard (contract buyout ฿60,000 · wage ฿1,800/week)",fx:G=>{if(G.cash>=60000){G.cash-=60000;joinCamp(G,"fah",1800);makeProdigy(G,"B","fah");add(G,"fah","trust",8);G.flags.fahJoinedAbs=absWeek(G);}else{G.flags.fahRetry=absWeek(G)+4;G.seen.fah_join=false;}},
     then:[{inject:G=>G.F.fah.camp==="player"?[{n:"fah",f:"happy",l:"casual",t:"Really!? …No take-backs! I get to be the old Fah here. Smile in the ring, dance when I win!"},{n:"nar",t:"(Fah has joined Sirichai Camp)"}]
@@ -6543,7 +6545,7 @@ AU.gsfx=function(kind,a){if(!this.init()||this.muted||!SETTINGS.sfx)return;const
   if(kind==="shimmer")for(let i=0;i<6;i++)T(i*.05,{f:1400+Math.random()*1400,type:"sine",dur:.12,peak:.06});};
 
 // ================= MUAY THAI MOE v1.3 — UI =================
-const VERSION="1.91.111";
+const VERSION="1.91.112";
 const CUR_LANG=(typeof window!=="undefined"&&window.LANG)||"th";
 const TH_LABEL=String.fromCharCode(3652,3607,3618);
 function langSwitch(cls){return `<div class="langsw ${cls||""}" role="group" aria-label="Language">${[["th",TH_LABEL],["en","EN"]].map(([k,l])=>`<button class="lsb ${CUR_LANG===k?"on":""}" data-act="setlang" data-v="${k}" aria-pressed="${CUR_LANG===k}">${l}</button>`).join("")}</div>`;}
@@ -7748,14 +7750,14 @@ const PATCH_TAPE={id:"1.91.80",ver:"Muay Thai Moe v1.91",title:"Tapes, Coach Dae
  ["🧑‍🏫","Coach Daeng's talks","Every 4 weeks Coach calls you over about a girl's weak spot, hidden power or a move. On the pre-fight compare, 'แรง' is now 'Endurance'."],
  ["✨","Hidden powers hit harder","Past Lv.3 each hidden-power level adds 10% (was 5%), up to 170%. Girls who joined later got their missing skill points back."]],
  foot:"I've been keeping notes on every opponent. Just get me the tape, Manager, I'll handle the rest ✦"};
-const PATCH_FIX={id:"1.91.111",ver:"Muay Thai Moe v1.91.111",title:"News from Sirichai Camp",lead:"The first-year title path now follows the story, with updates to venues, letters and camp life",items:[
- ["🏆","First-year finals","Ploy stays unbeaten in simulated bouts during year one and is seeded opposite Kati, as Fah is opposite Mali. If Kati and Mali win their semifinals, they meet their rivals in five-round finals"],
- ["🥊","A clearer belt path","Win a title through a tournament, defend it in one bout, and enter a new tournament after losing it. Only fighters in the matching A or B division can enter"],
- ["⚡","More Death Matches","The tournament opens on more weeks, and short entry lists are repaired so the bracket can continue"],
- ["✉️","Rooster and bull letters","After the first encounter, each escaped animal sends another challenge through the mailbox every three weeks. Opponents grow with your camp"],
- ["🎬","Title ceremony and market","Belt and cup ceremonies show the two fighters without a referee; the winner celebrates under fireworks. Night market outings use the market backdrop again"],
- ["🎞️","Fight tapes and Rin","Tapes now cost hundreds to a few thousand baht. Rin reviews one free every three weeks, and many dialogue portraits use sharper original art"]],
- foot:"Coach Daeng says: train hard, read your letters, and see you ringside! ✦"};
+const PATCH_FIX={id:"1.91.111",ver:"Muay Thai Moe v1.91.111",title:"Report from Sirichai Camp",lead:"The year-one fight path now follows the story, plus polish for the ring, letters and camp life",items:[
+ ["🏆","Year-one finals follow the story","Ploy no longer loses the fights the game simulates in year one and sits on the other side of the bracket from Kati, as does Fah from Mali. If Kati and Mali win their semifinals, they meet their rivals in a 5-round final"],
+ ["🥊","Clearer belt path","A first title is won through a tournament, defenses are a single bout, a lost belt must be won again from scratch, and only fighters in that belt's A or B division may enter"],
+ ["⚡","Death Match more often","More Death Match weeks, and the bracket now copes with an incomplete field so the event can carry on"],
+ ["✉️","Runaway rooster and cow letters","After the first encounter, both return to challenge you by mail every 3 weeks each, and the opponents grow with your camp"],
+ ["🎬","Champion screen and market scene","When a belt or trophy is won, the ring shows both fighters with no referee and the winner raises her arm amid fireworks. The market walk uses the market scene again"],
+ ["🎞️","Fight tapes and Rin","Tape prices now run from the hundreds to the low thousands, Rin reviews a tape for free every 3 weeks, and many speaking portraits now use sharper original art"]],
+ foot:"Kru Daeng says: train hard, read all your letters, and see you ringside! ✦"};
 /* popups queue up in order; each one is closed on its own */
 const PATCHES=[PATCH_AV,PATCH_TAPE,PATCH_FIX],PATCH=PATCHES[PATCHES.length-1];
 function nextPatch(){const i=PATCHES.findIndex(p=>p.id===(G&&G.newsSeen));return i<0?PATCHES[0]:PATCHES[i+1]||null;}
@@ -7862,9 +7864,9 @@ function playScene(steps,done,opts={}){WARM_NEED=[];const noThai=sceneNoThai(ste
     i.addEventListener("load",f,{once:true});i.addEventListener("error",f,{once:true});});}
 /* The winner popup calls the result, then the winning boxer celebrates beside the other fighter. */
 function winPopHTML(m){const h=m.h,f=G.F[h.id];if(!f)return "";const label=honorLabel(h.kind,h.venue),ranked=h.kind==="local"||h.kind==="district";
-  return `<div class="winpop"><canvas class="wincv" width="640" height="360" data-winpop="1" aria-label="Two boxers in the ring; the winner raises her arms"></canvas>
+  return `<div class="winpop"><canvas class="wincv" width="640" height="360" data-winpop="1" aria-label="Two fighters in the ring, the winner raising her arm in joy"></canvas>
     <div class="wp-lines"><p class="wp-l" style="--d:200ms">${ranked?"Points for the whole round…":"The decision…"}</p><p class="wp-l" style="--d:1100ms">The winner of the ${esc(label)} Div ${esc(h.div||"")}…</p>
-    <p class="wp-name" style="--d:2000ms">${esc(f.name)}!</p><p class="wp-l sm" style="--d:2400ms">Sirichai Camp ${!ranked&&h.opp?` · beat ${esc(h.opp)}`:""}</p></div></div>
+    <p class="wp-name" style="--d:2000ms">${esc(f.name)}!</p><p class="wp-l sm" style="--d:2400ms">Sirichai Camp ${!ranked&&h.opp?` · won ${esc(h.opp)}`:""}</p></div></div>
     <div class="mfoot"><button class="btn primary" data-act="winpopgo">To the ceremony ▸</button></div>`;}
 function playHonorQueue(done){while((G.awards||[]).length&&!(G.F[G.awards[0].id]))G.awards.shift();const h=(G.awards||[])[0];if(!h){AU.startMusic("hub");if(done)done();return;}AU.startMusic("victory");
   if(!h._pop){h._pop=1;UI.winNext=()=>playHonorQueue(done);UI.wpT0=0;UI.modal={type:"winpop",h};render();setTimeout(()=>{if(UI.modal&&UI.modal.type==="winpop"){AU.sfx("champ");}},2000);return;}
@@ -8776,20 +8778,20 @@ Anything in slot 3 will be replaced`))return;
 // ================= MUAY THAI MOE v1.23 — MAILBOX, SIDE QUESTS, ODD FIGHTS, CALENDAR, GRAPHS, NEWS BAR =================
 // ---------- odd opponents (sprite sheets in a/<sprite>_sheet.webp, same 6-row layout as the girls) ----------
 const QK={
-  gang1:{name:"Red-Helmet Grunt",sprite:"gang1",lvl:-1.6,tilt:{punch:1.5,power:1,iq:-2,guard:-1.5,comp:-1},color:"#c8283c",grp:"gang"},
-  gang2:{name:"Black Jacket, Red Helmet",sprite:"gang2",lvl:-.8,tilt:{punch:1.5,kick:1,iq:-1.5,comp:-1},color:"#a01f2f",grp:"gang"},
-  gang3:{name:"Black-Red Helmet Lieutenant",sprite:"gang3",lvl:.1,tilt:{punch:1.5,knee:1,power:1,iq:-1},color:"#5a1420",grp:"gang"},
-  gang4:{name:"Silver Helmet Chief",sprite:"gangsilver",lvl:.8,tilt:{power:2,punch:1.5,dur:1,foot:-1},color:"#c9ced8",grp:"gang"}, /* v1.89.24: the silver chief gets his own silver sprite */
-  gang6:{name:"Gold-Black Helmet Right Hand",sprite:"gang4",lvl:1.2,tilt:{power:2,kick:1.5,guard:1,dur:1,foot:-1},color:"#d9a520",grp:"gang"}, /* v1.89.24: the boss's gold-and-black right hand (the old gang4 sheet) */
-  gang5:{name:"Big Boss Golden Helmet",sprite:"gang5",lvl:1.6,tilt:{power:2,punch:2,dur:1.5,comp:1,foot:-1},color:"#f7d24a",grp:"gang"},
-  rooster1:{name:"Hot-Headed Bantam",sprite:"rooster1",lvl:-.9,tilt:{speed:2.5,kick:2,dur:-2,power:-1},color:"#e8a23a",grp:"rooster"},
-  rooster2:{name:"Singburi Gray Rooster",sprite:"rooster2",lvl:-.2,tilt:{speed:2,kick:2,foot:1,dur:-1.5},color:"#8a8f9a",grp:"rooster"},
-  rooster3:{name:"Temple-Boxing White Rooster",sprite:"rooster3",lvl:.4,tilt:{speed:2,kick:2.5,counter:1,dur:-1.5},color:"#f4f1ea",grp:"rooster"},
-  rooster4:{name:"Black Red-Tail",sprite:"rooster4",lvl:.9,tilt:{speed:2,kick:2,power:1,guard:1,dur:-1},color:"#c8283c",grp:"rooster"},
-  rooster5:{name:"Golden Rooster Godfather",sprite:"rooster5",lvl:1.5,tilt:{speed:2,kick:2.5,power:1.5,comp:1,dur:-.5},color:"#f7d24a",grp:"rooster"},
-  bull1:{name:"Fresh Milk, the Runaway Cow",sprite:"bull1",lvl:-.6,tilt:{power:2,dur:2.5,clinch:1,speed:-2,iq:-1},color:"#f4f1ea",grp:"bull"},
-  bull2:{name:"Red Curved-Horn",sprite:"bull2",lvl:.7,tilt:{power:2.5,dur:2,knee:1.5,speed:-1.5},color:"#a0522d",grp:"bull"},
-  bull3:{name:"Mafia Buffalo",sprite:"bull3",lvl:1.4,tilt:{power:3,dur:2.5,clinch:2,speed:-1.5,foot:-1},color:"#2b2530",grp:"bull"},
+  gang1:{fst:"pressure",name:"Red-Helmet Grunt",sprite:"gang1",lvl:-1.6,tilt:{punch:1.5,power:1,iq:-2,guard:-1.5,comp:-1},color:"#c8283c",grp:"gang"},
+  gang2:{fst:"pressure",name:"Black Jacket, Red Helmet",sprite:"gang2",lvl:-.8,tilt:{punch:1.5,kick:1,iq:-1.5,comp:-1},color:"#a01f2f",grp:"gang"},
+  gang3:{fst:"inside",name:"Black-Red Helmet Lieutenant",sprite:"gang3",lvl:.1,tilt:{punch:1.5,knee:1,power:1,iq:-1},color:"#5a1420",grp:"gang"},
+  gang4:{fst:"power",name:"Silver Helmet Chief",sprite:"gangsilver",lvl:.8,tilt:{power:2,punch:1.5,dur:1,foot:-1},color:"#c9ced8",grp:"gang"}, /* v1.89.24: the silver chief gets his own silver sprite */
+  gang6:{fst:"power",name:"Gold-Black Helmet Right Hand",sprite:"gang4",lvl:1.2,tilt:{power:2,kick:1.5,guard:1,dur:1,foot:-1},color:"#d9a520",grp:"gang"}, /* v1.89.24: the boss's gold-and-black right hand (the old gang4 sheet) */
+  gang5:{fst:"inside",name:"Big Boss Golden Helmet",sprite:"gang5",lvl:1.6,tilt:{power:2,punch:2,dur:1.5,comp:1,foot:-1},color:"#f7d24a",grp:"gang"},
+  rooster1:{fst:"pressure",name:"Hot-Headed Bantam",sprite:"rooster1",lvl:-.9,tilt:{speed:2.5,kick:2,dur:-2,power:-1},color:"#e8a23a",grp:"rooster"},
+  rooster2:{fst:"footwork",name:"Singburi Gray Rooster",sprite:"rooster2",lvl:-.2,tilt:{speed:2,kick:2,foot:1,dur:-1.5},color:"#8a8f9a",grp:"rooster"},
+  rooster3:{fst:"counter",name:"Temple-Boxing White Rooster",sprite:"rooster3",lvl:.4,tilt:{speed:2,kick:2.5,counter:1,dur:-1.5},color:"#f4f1ea",grp:"rooster"},
+  rooster4:{fst:"footwork",name:"Black Red-Tail",sprite:"rooster4",lvl:.9,tilt:{speed:2,kick:2,power:1,guard:1,dur:-1},color:"#c8283c",grp:"rooster"},
+  rooster5:{fst:"counter",name:"Golden Rooster Godfather",sprite:"rooster5",lvl:1.5,tilt:{speed:2,kick:2.5,power:1.5,comp:1,dur:-.5},color:"#f7d24a",grp:"rooster"},
+  bull1:{fst:"inside",name:"Fresh Milk, the Runaway Cow",sprite:"bull1",lvl:-.6,tilt:{power:2,dur:2.5,clinch:1,speed:-2,iq:-1},color:"#f4f1ea",grp:"bull"},
+  bull2:{fst:"pressure",name:"Red Curved-Horn",sprite:"bull2",lvl:.7,tilt:{power:2.5,dur:2,knee:1.5,speed:-1.5},color:"#a0522d",grp:"bull"},
+  bull3:{fst:"inside",name:"Mafia Buffalo",sprite:"bull3",lvl:1.4,tilt:{power:3,dur:2.5,clinch:2,speed:-1.5,foot:-1},color:"#2b2530",grp:"bull"},
 };
 const BELT_WEEKS=[10,18,26,34,42];
 const STADIUMS={
@@ -8814,24 +8816,26 @@ function beltTournamentFinish(D){const S=D.belt,champ=D.champ,won=dmMine(champ);
 function beltBracketHTML(D){const title=STADIUMS[D.belt.venue].name+" · "+D.belt.div,nm=id=>esc(G.F[id]?.name||"—"),nx=dmNextMatch();
   const columns=[D.slots,D.w[0],D.w[1],D.w[2]].map((L,r)=>`<div class="dmcol"><h4>${["8","4","2","🏆"][r]}</h4>${L.map(id=>`<div class="dmc ${dmMine(id)?"mine":""}">${nm(id)}</div>`).join("")}</div>`).join("");
   const action=D.done?`<p class="center goldt">🏆 ${nm(D.champ)} · ${fmt(D.prize||0)}</p><button class="btn primary" data-act="dmclose">Back to camp</button>`:nx?`<button class="btn primary" data-act="dmgo" data-id="${dmMine(nx[0])?nx[0]:nx[1]}" data-v="${dmMine(nx[0])?nx[1]:nx[0]}">${nm(nx[0])} vs ${nm(nx[1])} ▸</button>`:"";
-  return `<h2>Title tournament · ${title}</h2><p class="meta">Same division · knockout · five rounds per bout</p><div class="dmb">${columns}</div>${action}`;}
+  return `<h2>Belt Tournament ${title}</h2><p class="meta">Same division · single elimination · five rounds a bout</p><div class="dmb">${columns}</div>${action}`;}
 const QGRP_BG={gang:"bg_market_morning.webp",rooster:"bg_rooster.webp",bull:"bg_farm.webp"};
 /* v1.91.83 (Man): the quest foes kept pace with her stats only, so a late-game girl with a full skill tree outgrew even the bosses.
    They now read a fifth of her hidden edge (the season bonus halved to make room) (skills, perks, level) like the Loy thief, carry whatever the stat ceiling cannot hold as ring craft,
    and fight with their own signature skills (cut-in + burst, like the Naka League) — minions one, lieutenants two, bosses three */
-const Q_EDGE=.5,Q_VET_MAX=12; /* sims: bosses ~50–60% for a strong girl at every stage, minions ~75–90% */
+const Q_EDGE=.35,Q_VET_MAX=12; /* v1.91.112 (Man): a little easier than .5; past 2 points the edge counts half — the mirror test rates Mali's kit higher than it plays against these lopsided foes, so a straight read doubled her penalty */
+const qEdge=e=>e<=2?e:2+(e-2)*.5;
 const QSK={
   gang:[{id:"q_g_debt",name:"Debt-Collector Punch",k:"atk",w:"punch"},{id:"q_g_guard",name:"Big Bro's Guard",k:"def"},{id:"q_g_knee",name:"Protection-Money Knee",k:"atk",w:"knee"}],
   rooster:[{id:"q_r_spur",name:"Fighting-Cock Spur Kick",k:"atk",w:"kick"},{id:"q_r_flap",name:"Wing-Flap Dodge",k:"def"},{id:"q_r_peck",name:"Pecking Elbow",k:"atk",w:"elbow"}],
   bull:[{id:"q_b_horn",name:"Raging Horn Gore",k:"atk",w:"knee"},{id:"q_b_hide",name:"Buffalo Hide",k:"def"},{id:"q_b_cud",name:"Cud-Chew Recharge",k:"rec"}]};
 const qSkN=K=>K.lvl<-.3?1:K.lvl<1?2:3;
-function qTarget(G,fid){const f=fid&&G.F[fid];if(f)return ovr(f.a)+(f.camp==="player"&&typeof hiddenEdge==="function"?Q_EDGE*hiddenEdge(f):0);const R=roster(G);return R.length?R.reduce((s,x)=>s+ovr(x.a),0)/R.length:9;}
+function qTarget(G,fid){const f=fid&&G.F[fid];if(f)return ovr(f.a)+(f.camp==="player"&&typeof hiddenEdge==="function"?Q_EDGE*qEdge(hiddenEdge(f)):0);const R=roster(G);return R.length?R.reduce((s,x)=>s+ovr(x.a),0)/R.length:9;}
 function makeQ(G,kind,fid,tag){const K=QK[kind],t=qTarget(G,fid)+K.lvl+Math.min(.75,((G.season||1)-1)*.125),rng=mulberry32((G.seed^(G.week*977))+kind.length*31);const a={};
   for(const [k] of ATTRS)a[k]=clamp(t+(K.tilt[k]||0)+(rng()*1.6-.8),3,19.5);
   const d=t-ovr(a);for(const [k] of ATTRS)a[k]=clamp(a[k]+d,3,19.5);
   const id=`q_${kind}_${tag||G.week}`;const f=baseFighter(id,{name:K.name,full:K.name,div:"X",camp:"quest",color:K.color,potential:t+2,a});
   {const short=t-ovr(a);if(short>.05)f.vet=+Math.min(Q_VET_MAX,short).toFixed(2);} /* past the stat ceiling: ring craft */
   if(QSK[K.grp])f.nlsk=QSK[K.grp].slice(0,qSkN(K));
+  if(K.fst)f.fstyle=K.fst; /* v1.91.112 (Man): every quest foe fights in its own style — thugs, bulls and the gold boss rush or clinch (Mali's footwork beats them), the silver chief and his right hand hit heavy and the temple roosters wait to counter (Kati's inside game beats them) */
   f.sprite=K.sprite;f.kind=kind;f.grp=K.grp;f.lvl=clamp(Math.round(t-6),1,10);f.fatigue=0;f.morale=70;G.F[id]=f;syncFighterAges(G);return id;}
 function qCleanup(G){const keep=new Set([...G.bookings.map(b=>b.b),...G.offers.map(o=>o.b),...(G.mail||[]).filter(m=>!m.done&&m.qid).map(m=>m.qid)]);
   for(const id of Object.keys(G.F))if(id.startsWith("q_")&&!keep.has(id)&&(G.F[id].lastFightAbs==null||gameWeek(G)-G.F[id].lastFightAbs>2))delete G.F[id];}
@@ -8942,12 +8946,12 @@ function mailWeekly(G){G.mail=G.mail||[];if(typeof thiefMail==="function"){thief
     if(G.gang.st>=5&&gameWeek(G)>=(G.gang.loopNextAbs||0)&&!G.mail.some(m=>m.q==="gang"&&!m.done&&!m.expired)){
       const i=G.gang.loopN||0,k=["gang2","gang3","gang4","gang6","gang5"][i%5];G.gang.loopN=i+1;G.gang.loopNextAbs=gameWeek(G)+Math.max(3,10-year);
       addMail(G,{kind:"quest",q:"gang",qk:k,repeat:1,from:"Aunt Sri at the Market",title:"The helmet gang is back",body:`${QK[k].name} is causing trouble at the market again. They have trained harder this year. Can your gym help?`,exp:G.week+3,pay:3000+year*500});}}
-  // Stadium titles: legacy Tha Phae saves retain their original G.belt slots.
+  // Stadium titles: Tha Phae saves keep their original G.belt slots.
   for(const [venue,V] of Object.entries(STADIUMS))if((G.season||1)>=V.minYear&&V.weeks.includes(G.week))
     for(const div of [...new Set(roster(G).map(f=>f.div))]){const h=beltHolder(G,div,venue);if(!h)continue;
       const ours=h.camp==="player",op=ours?beltChallenger(G,div,h.id):h;if(!op)continue;const B=beltStore(G,venue)[div];
-      addMail(G,{kind:"quest",q:"belt",venue,bg:V.bg,npc:op.id,div,defend:ours?h.id:null,from:`${V.name} promoter`,title:ours?`Defend the ${V.name} belt · Div ${div}`:`Challenge for the ${V.name} belt · Div ${div}`,
-        body:ours?`${op.name} won the challenger bracket and challenges ${h.name} at ${V.name}. One five-round defense; win ${fmt(V.defend)}.`:`${V.name} opens the ${div} knockout title tournament, including champion ${op.name}. Five rounds per bout; the winner earns ${fmt(V.win)} and the belt. Lose the belt and enter the tournament again.`,exp:G.week+2,pay:ours?V.defend:V.win});}
+      addMail(G,{kind:"quest",q:"belt",venue,bg:V.bg,npc:op.id,div,defend:ours?h.id:null,from:`The promoter ${V.name}`,title:ours?`Defend the ${V.name} Div ${div}`:`Challenge for the ${V.name} Div ${div}`,
+        body:ours?`${op.name} came through the qualifiers to challenge for the belt of ${h.name}${V.name}. One defense, five rounds. Accept within two weeks. Win and take ${fmt(V.defend)}`:`${V.name} opens a tournament in division ${div} including champion ${op.name}. Single elimination, five rounds a bout. The winner takes ${fmt(V.win)} with the belt. Lose it and you'll have to enter a new tournament`,exp:G.week+2,pay:ours?V.defend:V.win});}
   // v1.69: Auntie Taew writes in for help at her som tam stall every few weeks (a minigame that does not use the camp activity)
   if(G.week>=4&&G.week<=49&&gameWeek(G)>=(G.tamNextAbs||4)&&!G.mail.some(m=>m.kind==="job"&&!m.done&&!m.expired)){G.tamNextAbs=gameWeek(G)+3+Math.floor(rng()*2);
     const T=TAM_MAIL[(G.mailN_tam=(G.mailN_tam||0)+1)%TAM_MAIL.length];addMail(G,{kind:"job",job:"somtam",exp:G.week+1,from:"Auntie Taew, som tam stall by the temple",title:T[0],body:T[1]});}
@@ -8962,7 +8966,7 @@ function mailWeekly(G){G.mail=G.mail||[];if(typeof thiefMail==="function"){thief
     const cow=q==="cow",year=G.season||1;
     const k=cow?(year>=4?"bull3":"bull2"):(year>=4?"rooster5":"rooster3");
     G.runawayNext[q]=gameWeek(G)+3;
-    addMail(G,{kind:"quest",q,qk:k,repeat:1,from:cow?"Uncle Chaloem, dairy farm":"Sia Tong, rooster arena",title:cow?"The cow escaped again!":"The rooster escaped again!",body:cow?`Uncle locked the pen, but ${QK[k].name} kicked through the gate and is blocking the market road again. Please send a fighter to stop her.`:`${QK[k].name} escaped the rooster arena and is pecking your gym's heavy bag again. This time it even dodges anyone trying to catch it. Please help.`,exp:G.week+2,pay:(cow?1500:1000)+Math.min(1000,(year-1)*200)});}
+    addMail(G,{kind:"quest",q,qk:k,repeat:1,from:cow?"Uncle Chaloem, dairy farm":"Sia Tong, rooster arena",title:cow?"The cow's loose again!":"The rooster's loose again!",body:cow?`I shut the pen tight, I swear, but ${QK[k].name} kicked the gate open and is blocking the market road again. Please send a fighter to stop it`:`${QK[k].name} got loose from the cockpit and is pecking the camp's heavy bags again. This time it's better at guarding and dodging whoever tries to catch it. Please help!`,exp:G.week+2,pay:(cow?1500:1000)+Math.min(1000,(year-1)*200)});}
   // rivals we keep ignoring write in to taunt us
   const sn=Object.entries(G.snub||{}).filter(([id,n])=>n>=3&&G.F[id]&&!G.F[id].injury&&!G.F[id].canon&&(G.F[id].camp==="npc"||G.F[id].camp==="rival")&&!G.mailSeen["ch_"+(G.season||1)+"_"+id]&&!isBooked(G,id)).sort((a,b)=>b[1]-a[1])[0];
   if(sn&&rng()<.5&&G.week<=46){const op=G.F[sn[0]];G.mailSeen["ch_"+(G.season||1)+"_"+op.id]=1;
@@ -8995,7 +8999,7 @@ function questFighters(){return roster(G).filter(f=>!f.injury);}
 function startQuest(spec,fid,done){const f=G.F[fid];if(!f){done&&done();return;}
   const opp=spec.npc||makeQ(G,spec.qk,fid,spec.tag||("w"+G.week));const tier="quest";
   const b={id:"q"+G.week+"_"+fid+"_"+Math.floor(Math.random()*1e4),a:fid,b:opp,week:G.week,tier,rounds:spec.rounds||3,win:spec.purse||0,lose:0,quest:spec};
-  b.title=spec.q==="belt"?STADIUMS[spec.venue||"tha"].name+" · "+spec.div:spec.q==="gang"?"Market showdown":spec.q==="rooster"||spec.q==="cow"||spec.q==="bull"?"Strange beasts showdown":null;
+  b.title=spec.q==="belt"?STADIUMS[spec.venue||"tha"].name+" · "+spec.div:spec.q==="gang"?"Market Stall Brawl":spec.q==="rooster"||spec.q==="cow"||spec.q==="bull"?"Wild bout":null;
   b.bg=spec.bg||(spec.rematch||spec.hq?"bg_gang_hideout.webp":spec.q==="belt"?"bg_district.webp":spec.npc?"bg_food.webp":QGRP_BG[QK[spec.qk].grp]);
   if(typeof questPlan==="function"){questPlan(b,()=>openFight(b,()=>questAfter(b,done)));return;}
   openFight(b,()=>questAfter(b,done));}
@@ -10613,29 +10617,29 @@ const CHAT_X={
  ploy:[["If someday I'm no longer at Golden Tiger… would Sirichai take me? (hypothetically)",[["The door is always open",2,"…I'll keep those words somewhere no one can see"],["Have to ask Kati first",1,"Heh, yes, Kati would be shocked"],["Unlikely to happen",0,"Yes, just hypothetically"]]],["I've started waiting for our Sunday chats. Is that strange?",[["Not strange. I wait too",2,"…Then next Sunday, I'll message first"],["Not strange at all",1,"Good, then"],["A little strange",0,"…Okay."]]]],
  fah:[["…Hey, if Fah said she's glad she met you, would you laugh?",[["I wouldn't laugh. I'm glad too",2,"…!! Enough, enough, stop talking, Fah's embarrassed!!"],["Depends on the face you make saying it",1,"A normal face! …probably"],["I'd definitely laugh",0,"Then Fah's not saying it!"]]],["Iron Fist (the cat) slept on the shirt you left behind all night",[["Then give the shirt to Iron Fist",2,"…Not giving it to Iron Fist, Fah's keeping it! Wait, no!"],["Wash it for me",1,"I'm not your maid!"],["Now it's covered in cat hair",0,"Mean!"]]]]};
 
-// Rival-only conversations remain in save history but cannot recur after a transfer.
+// Old rival conversations stay in a save's history, but stop appearing after a transfer.
 for(const id of ["p_prom","p_meet","p_river","p_beaten","p_captain","p_talent","p_final"])CHAT.ploy.find(t=>t.id===id).when=G=>G.F.ploy.camp==="rival";
 for(const id of ["f_prom","f_visit","f_night","f_beaten","f_cat","f_grandma","f_rival"])CHAT.fah.find(t=>t.id===id).when=G=>G.F.fah.camp==="rival";
 CHAT.rin.find(t=>t.id==="r_ploy").when=G=>G.F.ploy.camp==="rival";
 CHAT.kati.find(t=>t.id==="k_final").when=G=>(G.season||1)===1&&G.F.ploy.camp==="rival";
 CHAT.ploy.push({id:"p_home_ring",need:G=>inCamp(G,"ploy"),rep:10,x:[
- ["Kati asked me to check her guard in the clinch. I made her escape a neck tie three times.",[["Keep teaching her. You read the ring better than anyone.",2,"I'll start with her foot position. A stable base makes the knees work."],["How did Kati do?",1,"She escaped on the third try, then smiled as if she'd won a belt."]]],
- ["I used to fight for the camp name. Today I want to fight for the people in my corner.",[["The whole camp will be there.",2,"…Thanks. I won't make you cheer for nothing."],["Save your strength for now.",1,"I rested. We'll train again tomorrow."]]] ]});
+ ["Kati asked me to check her guard in the clinch. So I had her practice escaping a neck grab three times.",[["Keep teaching. You read timing better than anyone.",2,"I'll start her with footwork. If the base is solid, the knee comes on its own."],["How's Kati doing?",1,"She escaped on the third try, then smiled like she'd won a belt."]]],
+ ["I used to fight to live up to the camp's name. Today I want to fight to live up to the people standing in my corner.",[["The whole camp will be in that corner.",2,"…Thanks. I won't let anyone stand there cheering for nothing."],["Save your energy for now.",1,"Yes, resting now. We'll keep training tomorrow."]]] ]});
 CHAT.fah.push({id:"f_home_ring",need:G=>inCamp(G,"fah"),rep:9,x:[
- ["Coach Daeng yelled 'chin down' during elbow drills. Fah turned to argue and Kati jabbed her forehead!",[["Answer Coach after the bell next time.",2,"Fah knows! Kati was laughing, too. Fah saw her."],["Kati's jab got quicker.",1,"It did. Fah asked for another round."]]],
- ["After the last round, Coach Daeng asked if Fah was hungry. That was enough to get Fah through it.",[["There's dinner waiting for everyone here.",2,"Good! Fah will eat with everyone, then talk about the fight."],["I'll set some aside.",1,"Save an omelet too. Fah threw a lot of shots."]]] ]});
+ ["Fah was drilling elbows today and Kru Daeng shouted 'tuck your chin!' Fah turned to argue and got jabbed right on the forehead by Kati.",[["Next time answer Kru after the bell.",2,"I know, I know! But Kati was secretly laughing. Fah saw that."],["Kati's jab got faster, huh.",1,"So fast. Fah asked to drill another round."]]],
+ ["Walking back to the corner after the last round, Kru Daeng asked if Fah was hungry. Just that was enough for Fah to keep fighting.",[["There's rice waiting for everyone at this camp.",2,"Great! Fah will come back and eat with everyone, then we'll talk about the fight."],["I'll have rice ready.",1,"An omelette too, please. Fah threw a lot of weapons."]]] ]});
 CHAT.ploy.push({id:"p_home_camp",when:G=>inCamp(G,"ploy"),x:[
- ["I cornered Mali today. I told her not to trade kicks while ahead, and she smiled like I'd offered khanom krok.",[["Tell her there's a treat after the round.",2,"That would work. Only after training, though."],["Did Mali listen?",1,"She did, and controlled the range better."]]],
- ["This camp is louder at dinner than during a bout. I'm getting used to it.",[["You pick tomorrow's meal.",2,"Clear soup, please. Fah made som tam so hot I had to submit."],["Glad you're settling in.",1,"Yes. Now silence feels strange."]]] ]});
+ ["Today I worked Mali's corner. She heard 'don't trade shins while you're ahead' and turned to smile at me like I'd invited her for khanom krok.",[["Next time say there are snacks waiting after the round.",2,"It'll work for sure. But I'll only let her eat after training."],["Does Mali listen to Kru?",1,"She listens. And her distance-control kicks are better too."]]],
+ ["This camp is louder at dinner than in a fight. I'm starting to get used to it.",[["You pick tomorrow's dishes.",2,"Then I'd like clear soup. Fah made the som tam so spicy I had to surrender."],["Good that you're used to it.",1,"Yes. When it goes quiet, it actually feels strange."]]] ]});
 CHAT.ploy.push({id:"p_home_corner",when:G=>inCamp(G,"ploy"),x:[
- ["Coach Daeng had me watch sparring. A fighter backing up should teep to manage range, not just walk away.",[["The kids will remember that.",2,"I made them try it in the ring. Feet remember better than words."],["Was it tiring?",1,"A little, but fun."]]],
- ["I wrote down everyone who helped clean up after training. No prize. I just want to remember who stayed until the lights went out.",[["You don't have to carry the camp alone.",2,"…I know. Today I finally believed it."],["Did the lights go out again?",1,"They did. Fah shouted that it was time for a dark Death Match."]]] ]});
+ ["Kru Daeng asked me to help the sparring partners with timing. When a fighter backs up she has to push kick to control it, not just walk away.",[["Put it like that and the camp kids will remember for sure.",2,"I've had everyone try it in the ring. Remembering with your feet beats remembering with your mouth."],["Tired?",1,"A little. But it's fun."]]],
+ ["I wrote down the name of everyone who helps put the ring away after training. Not for a reward. I just want to remember who stayed together until the lights went out.",[["You don't have to carry the camp alone anymore.",2,"…I know. I only started truly believing it today."],["Power's out again?",1,"Out. Fah shouted that it's time for a Death Match in the dark."]]] ]});
 CHAT.fah.push({id:"f_home_camp",when:G=>inCamp(G,"fah"),x:[
- ["Fah spread an old mat by the ring. Coach told her to sleep in her room. Fah said she was listening to the piphat in her head.",[["The music, or your stomach growling?",2,"…Both! First person to suggest dinner wins."],["Get enough rest.",1,"Fah knows. She'll be up before Coach."]]],
- ["Kati helped wrap Fah's hands today. Fah had tied them so tight she couldn't close her fists.",[["Good that you told each other.",2,"Mm. Fah helped her practice spinning elbows too. Don't tell anyone we're close."],["Try fresh wraps?",1,"We did. Kati says the old ones still work."]]] ]});
+ ["Fah laid an old mat by the ring to sleep. Kru Daeng told her to go to her room. Fah said she's listening to the pi music in her head.",[["The pi music in your head, or your stomach growling?",2,"…and her stomach's growling too! Whoever offers dinner first wins."],["Get enough rest too.",1,"I know, I know. Tomorrow Fah will wake up before Kru."]]],
+ ["Kati helped Fah wrap her hands today. Fah wraps them so tight she can't make a full fist.",[["Good that you two are honest with each other.",2,"Hmm, Fah helped her drill the return elbow too. Don't go saying we're close."],["Want to try new hand wraps?",1,"I tried. Kati says the old ones are still fine."]]] ]});
 CHAT.fah.push({id:"f_home_corner",when:G=>inCamp(G,"fah"),x:[
- ["An auntie ringside shouted 'oh!' when Fah slipped a kick. Fah hadn't even countered yet.",[["That slip was sharp. People saw it.",2,"Right! Next time Fah will slip and counter so she shouts twice."],["She must have been startled.",1,"Startled and happy. Fah heard both."]]],
- ["The rice-shop owner asked why Fah doesn't charge more to fight so beautifully. Fah asked for an extra fried egg first.",[["We'll discuss the purse, but the egg is yours.",2,"Exactly! Fah will fight for both."],["Did you get the egg?",1,"Two! Nearly as good as a bonus."]]] ]});
+ ["The auntie ringside yelled 'oh' when Fah slipped the kick, and Fah hadn't even countered yet.",[["That was a nice slip. The crowd saw it.",2,"True! Fah will slip and counter the whole way next time, so Auntie shouts twice."],["Auntie must have been startled.",1,"Shocked and happy. Fah heard it."]]],
+ ["The rice shop boss asked why Fah fights so pretty and doesn't ask for a higher fee. Fah said she'd ask for an extra fried egg first.",[["The fee is negotiable, but the fried egg is not.",2,"Exactly! Fah will fight to earn both."],["Did you get fried eggs?",1,"Two of them. Worth a bit more than a bonus."]]] ]});
 function chatTopic(G,id){const L=CHAT[id]||[];G.chatSeen=G.chatSeen||{};const seen=G.chatSeen[id]||[],ok=t=>!t.when||t.when(G);
   const hot=t=>/_(lost|won|final|beaten)$/.test(t.id)?0:1;const W=G.chatWkAbs||{};const ctx=L.filter(t=>ok(t)&&t.need&&t.need(G)&&(!seen.includes(t.id)||(t.rep&&gameWeek(G)-(W[id+":"+t.id]??-999)>=t.rep))).sort((p,q)=>hot(p)-hot(q));if(ctx.length)return ctx[0];
   const gen=L.filter(t=>ok(t)&&!t.need&&!seen.includes(t.id));if(gen.length)return gen[(G.week+G.seed)%gen.length];
@@ -10713,7 +10717,7 @@ const MISS_X={
  fah:[["Hey! Where've you been!? I wasn't waiting! …I just sent like ten stickers and nobody read them.",[["Sorry. I missed you, Fah.",2,"Wh-what!? I didn't ask! …But fine, you're forgiven."],["Been busy with the camp.",1,"Hmph, the camp's more important than me!? …Well, fair enough."],["I did read them.",0,"Reading and not replying is even worse!!"]]]]};
 for(const id in MISS_X){CHAT[id]=CHAT[id]||[];CHAT[id].push({id:id.slice(0,1)+"_miss",need:G=>missGap(G,id)>=3,when:G=>id!=="ploy"||G.F.ploy.camp==="rival",rep:8,x:MISS_X[id]});}
 CHAT.ploy.push({id:"p_miss_home",need:G=>inCamp(G,"ploy")&&missGap(G,"ploy")>=3,rep:8,x:[
- ["We haven't talked in weeks. Kati and I drilled knees until dark. Want to review the tape with us?",[["Sure. I'll bring water.",2,"Bring some for Kati too. She trained even harder than I did."],["Which fight is it?",1,"Our camp's latest bout. I've marked the key moments."]]] ]});
+ ["We haven't talked in weeks. Today I drilled knees with Kati until dark. Are you free to watch tape with me?",[["Sure, I'll bring you water.",2,"Bring some for Kati too. She trains harder than I do."],["Which fight tape?",1,"Our camp's latest fight. I've already noted the timing."]]] ]});
 
 // v1.82: Loy Krathong event chats — they text you once the code is in, and again after the first riverside brawl
 const loyHas=G=>typeof loyOf==="function"&&!!loyOf(G);
@@ -10755,9 +10759,9 @@ for(const id of ["p_dm","p_loy","p_loyw"])CHAT.ploy.find(t=>t.id===id).when=G=>G
 for(const id of ["f_flood","f_loyw"])CHAT.fah.find(t=>t.id===id).when=G=>G.F.fah.camp==="rival";
 CHAT.fah.find(t=>t.id==="f_dm").when=G=>!!(G.dm&&Array.isArray(G.dm.mine)&&G.dm.mine.includes("fah"));
 CHAT.ploy.push({id:"p_loy_home",need:G=>inCamp(G,"ploy")&&loyRan(G),x:[
- ["I watched our riverside bout last night. Fah yelled at the helmet gang to keep their chins down before the bell. I've never seen anyone warn an opponent like that.",[["Fah worries about everyone.",2,"Yes. Even people she's about to punch."],["Did you review your own fight?",1,"I did. I missed a teep on the slippery boards."]]] ]});
+ ["Last night I watched the riverside fight clip. Fah yelled at the helmet gang to tuck their chins before the bout. I've never seen anyone warn an opponent like that.",[["Fah really cares about everyone.",2,"Yes. Even the person she's about to punch."],["And do you watch your own fights, Ploy?",1,"I do. I missed a push kick when the canvas was slippery."]]] ]});
 CHAT.fah.push({id:"f_loyw_home",need:G=>inCamp(G,"fah")&&loyRan(G),x:[
- ["Fah wanted to show Grandma last night's riverside fight. She'd already seen it. Said our camp's cheering reached her house.",[["She must be proud of you.",2,"She said Fah kept her chin down, too! Grandma knows more boxing than Coach."],["I'll send her the full clip.",1,"Please do. Fah wants to check that elbow again."]]] ]});
+ ["The riverside fight last night: Fah wanted to show Grandma the clip. Grandma said she'd seen it, our camp's cheering reached her front door.",[["Your grandma must be so proud of you.",2,"Grandma says Fah tucks her chin better too! Fah thinks Grandma reads fights better than Kru."],["I'll send you the full clip.",1,"Send it. Fah wants to check her elbow timing again."]]] ]});
 // v1.88: heart-level chats, chats that come back with the season, and more everyday topics
 CHAT.kati.push(
   {id:"k_h11",need:G=>hAt(G,"kati")>=11,x:[
@@ -11124,7 +11128,7 @@ CHAT.ploy.push(
    ["In Korat there's a pad mee stall under a tamarind tree. My father took me after every fight, win or lose. …Though I never lost",[["Your father planned for both outcomes",2,"…He did. He never said I couldn't lose. I told myself that"],["Sounds delicious",1,"The best"],["Your dad's kind",1,"Kind but strict"]]],
    ["If we ever go to Korat, I'll take you to that stall",[["Promise",2,"I've never broken a promise"],["Definitely",1,"Good"],["It's far",0,"Five hours. Not far"]]]]},
   {id:"p_temple",x:[
-   ["The old monk asked me to teach the temple boys some morning exercise",[["They must be thrilled to have a champion teaching them",1,"They don't know who I am. They call me 'the tall lady'"],["Sounds nicer than training juniors",2,"…It is. No one expects them to win. They just laugh"],["Go easy on them",0,"Just three laps around the hall"]]],
+   ["The old monk asked me to teach the temple boys some morning exercise",[["The temple kids must be excited to be taught by great fighters.",1,"They don't know who I am. They call me 'the tall lady'"],["Sounds nicer than training juniors",2,"…It is. No one expects them to win. They just laugh"],["Go easy on them",0,"Just three laps around the hall"]]],
    ["'The tall lady.' I like that so much better than 'prodigy'",[["Can I call you that too?",2,"…No. Just my name. My name from you is best"],["Because there's no expectation in it",2,"…You understand me too quickly"],["Prodigy's a compliment",0,"For the person saying it"]]],
    ["Five tomorrow. Want to help with the temple boys?",[["I'm in",2,"They'll call you 'the one who comes with the tall lady'"],["If I wake up",1,"I'll call you"],["Five's too early",0,"The boys are up at four"]]]]},
   {id:"p_late",x:[
@@ -11223,7 +11227,7 @@ CHAT.fah.push(
   {id:"f_sausage",x:[
    ["Grandma taught me to make Isan sausage! I burst ten of them stuffing",[["Number eleven worked though?",2,"How'd you know!! Eleven's the prettiest. I saved it for you"],["Was Grandma patient?",1,"She laughed at every burst"],["Easier to just buy hers",0,"I want to know how!"]]],
    ["Grandma says this recipe only passes to family",[["I won't ask for it, then",2,"…She said you're the exception. Don't read into it!"],["Guard it well",1,"I wrote it in my tiger book"],["Can I have the recipe?",0,"No! …Not yet"]]],
-   ["Tomorrow I'm bringing my sausages for everyone at Sirichai to taste",[["I want to taste first",2,"…Already reserved since number eleven"],["Everyone's waiting",1,"If it's bad, keep quiet!"],["Better keep the bathroom free",0,"YOU!!!"]]]]},
+   ["Tomorrow Fah is bringing her homemade sausages for everyone at Sirichai Camp to try.",[["I want to taste first",2,"…Already reserved since number eleven"],["Everyone's waiting",1,"If it's bad, keep quiet!"],["Better keep the bathroom free",0,"YOU!!!"]]]]},
   {id:"f_mali",x:[
    ["Mali tucked flowers behind my ear while I slept! I woke up looking like a Thai dancer!",[["Send a photo. I want to see the silver-haired dancer",2,"No!! …Sent. No saving, no showing anyone"],["Mali's sneaky",1,"Revenge tomorrow. Fermented fish in her shoes"],["It's cute",1,"…Cute?"]]],
    ["But… Mali was the first person at camp who wasn't scared of me",[["Because she can see you're kind",2,"…I'm not kind! …Don't tell Mali I said that"],["Mali gets along with everyone",1,"Yeah. Annoying"],["No one's scared of you",0,"They should be! I'm scary!"]]],
@@ -11249,11 +11253,27 @@ CHAT.fah.push(
    ["Grandma says tigers mean protection. Now I have a tiger protecting me, not just me protecting others",[["We protect each other",2,"…Two tigers. Fifty-four will be that"],["Glad you feel safe",1,"Safest I've ever felt"],["I'm no tiger",0,"You are! I say so!"]]],
    ["Hey… thank you for staying. Always. I can type it now. No deleting",[["Thank you for letting me stay",2,"…I never once managed to chase you off. Good"],["Always",2,"Forever. No take-backs"],["No problem",0,"…Your answers are so unromantic"]]]]});
 
-CHAT.kati.push({id:'k_ringcraft_102',need:G=>inCamp(G,'kati'),x:[['Coach has me drilling teeps for distance. The auntie ringside shouts before my foot even lands!',[['Control the range before trading shots',2,'Yes! Think first, kick second. Coach would love hearing that.'],['She really backs you',1,'Yes! I must not miss or she will lose her rhythm.']]]]});
-CHAT.mali.push({id:'m_ringcraft_102',need:G=>inCamp(G,'mali'),x:[['I drilled checking kicks today! Coach heard a crack and asked if it was my shin or the bag.',[['Get the technique right first',2,'Yes! I want a long career, not one good day and a month of ice packs.'],['What cracked?',1,'Auntie swatting a mosquito. We all looked the wrong way!']]]]});
-CHAT.rin.push({id:'r_tape_102',need:G=>inCamp(G,'rin'),x:[['The tape shows her right hand drops after every left kick. The seller talks more than the commentator.',[['Write it down, then drill the counter',2,'Already done. Entries and exits, not just his complaints about prices.'],['Was the tape worth it?',1,'Yes, apart from the lecture on how he used to be a fighter.']]]]});
-CHAT.ploy.push({id:'p_ringcraft_102',need:G=>inCamp(G,'ploy'),x:[['The clinch is not about hugging harder. Control the neck and arms, then place your feet.',[['Let us drill the escapes together',2,'Good. Everyone should know an exit instead of losing their balance at the first grip.'],['Sounds like chess',1,'Yes. Except if you think too slowly, the other pieces knee you.']]]]});
-CHAT.fah.push({id:'f_ringcraft_102',need:G=>inCamp(G,'fah'),x:[['Body punches today! Coach said listen to the pads. I heard my stomach first.',[['Let us eat together after training',2,'Deal! Half my energy for punching, half for fighting over the omelette.'],['Keep your chin tucked too',1,'I know! I am not opening my mouth waiting for rice in the ring.']]]]});
+// Ringside details and camp life; these topics do not expire with a season.
+CHAT.kati.push({id:'k_ringcraft_102',need:G=>inCamp(G,'kati'),x:[
+ ["Kru had me practice push kicks to control distance. Once I landed them clean, the auntie ringside said 'oh' before my foot even reached the target.",[["If you control the distance, you don't have to rush the exchange.",2,"Yes! I'll use my head before my shin. Kru Daeng would be so proud to hear that."],["Auntie's cheering her heart out.",1,"Yes! But no missed push kicks, or Auntie will lose her rhythm."]]],
+ ["Ploy says in the corner I have to listen to Kru. I got so caught up in the pi music I started nodding along to the beat.",[["Listen to Kru first. There's more pi music next round.",2,"Got it! Kru never told me to dance in the middle of the round."],["What did Kru say?",1,"He told me to tuck my chin, then asked if I was even listening…"]]]
+]});
+CHAT.mali.push({id:'m_ringcraft_102',need:G=>inCamp(G,'mali'),x:[
+ ["Mali practiced lifting her shin to check kicks~ It went 'pok!' so loud that Kru asked whether the shin or the bag broke.",[["Get the form right first.",2,"Yes! Mali wants to be good for a long time, not good for one day and on ice packs for a month."],["So what broke?",1,"Auntie swatting a mosquito… Everyone turned the wrong way."]]],
+ ["Kati is teaching the kids the wai khru. One asked if a pretty bow earns extra points.",[["Looking pretty isn't enough. You have to respect your teacher too.",2,"Mali told them exactly that! Then the kids bowed to the heavy bag too. So cute."],["And what did you say?",1,"I said the judges don't add points, but Kru Daeng adds smiles~"]]]
+]});
+CHAT.rin.push({id:'r_tape_102',need:G=>inCamp(G,'rin'),x:[
+ ["I've watched the opponent's tape. She drops her right hand after every left kick… The tape seller talks more than the announcer.",[["Note the timing, then we'll drill the answer.",2,"It's ready. Entries and exits both, not just the prices the seller complained about."],["Was the tape worth it?",1,"Worth it. Not counting the time spent listening to him say he used to fight."]]],
+ ["One tape every three weeks is about right. Watch it, then take it to training, not hoard tapes until we can open a shop.",[["Just what we'll actually use is enough.",2,"Agreed. Data used at the right moment beats a full shelf you can't remember."],["Have you named the shop yet?",1,"Not yet. But it can't be 'Rin Video'. That's too easy."]]]
+]});
+CHAT.ploy.push({id:'p_ringcraft_102',need:G=>inCamp(G,'ploy'),x:[
+ ["The clinch isn't about who hugs tighter. You control the neck, control the arms, and plant your feet right.",[["I'll pair up sparring partners so they can practice escapes.",2,"Good. Let everyone know there's a way out, instead of giving up their shape the moment their neck is grabbed."],["Sounds like playing chess.",1,"Yes. Except if you think too slowly, the other side's piece throws a knee at you."]]],
+ ["The loudest 'oh' from the crowd isn't always the shot that scored most. You have to watch who loses composure.",[["Keep your shape until the final bell.",2,"Yes. The last beat still belongs to the fight. Don't celebrate too early."],["Crowd noise can fool you too.",1,"Sure. Especially when the one cheering is an uncle still holding his betting slip upside down."]]]
+]});
+CHAT.fah.push({id:'f_ringcraft_102',need:G=>inCamp(G,'fah'),x:[
+ ["Fah trained body punches today! Kru said listen to the pad, but Fah heard her own stomach first.",[["Let's eat together after training.",2,"Deal! Fah will save half her punching power, and the other half is for fighting over the omelette."],["Don't forget to tuck your chin.",1,"I know, I know! Fah isn't standing there with her mouth open waiting for dinner."]]],
+ ["Ploy told Fah to stop smiling when she gets countered. Fah said she isn't smiling, she's gritting her teeth!",[["Listen to her a bit. She can see where you slip up.",2,"Hmm… Fah will watch tape with her. But if Ploy teases me, I'm blaming you first."],["Next time, dodge before you smile.",1,"Fine! Slip, counter, then smile for the camera. That's the full set."]]]
+]});
 
 CHAT.ploy.find(t=>t.id==='p_kati').when=G=>G.F.ploy.camp==='rival';
 for(const id of ['f_tiger','f_mali'])CHAT.fah.find(t=>t.id===id).when=G=>inCamp(G,'fah');

@@ -669,8 +669,8 @@ EVENTS.push(
 // --- v1.89.11: every pair has its own quarrel — in the Valentine ring and in the spats while you see more than one ---
 const pairKey=(a,b)=>[a,b].sort((x,y)=>LOVE_IDS.indexOf(x)-LOVE_IDS.indexOf(y)).join("_");
 const PAIR={
- kati_mali:{ring:{kati:"Mali, I could give you my mango sticky rice, but not this!",mali:"You don't have to give it, Kati! Mali will win it herself!"},
-  spat:[["mali","pout","Kati's sat next to the manager at dinner three days in a row! Today it's Mali's turn!"],["kati","angry","Because I was here first! I was at this camp before you!"],["mali","angry","Being first doesn't mean you get dibs for life!"]]},
+ kati_mali:{ring:{kati:"Mali, I could give you mango sticky rice, but I'm not giving you this one!",mali:"Kati, don't give it to me! I'll win it myself!"},
+  spat:[["mali","pout","Kati's sat next to the manager at dinner three days in a row! Today it's Mali's turn!"],["kati","angry","Well I was here first! I joined this camp before you!"],["mali","angry","Being first doesn't mean you get dibs for life!"]]},
  kati_rin:{ring:{kati:"Rin, you can calculate anything, but not the manager's heart!",rin:"I can. The result says you're at a disadvantage"},
   spat:[["rin","pout","Kati, yesterday the manager talked to you for forty minutes and to me for twenty. I wrote it down"],["kati","angry","Why write that down! Who are you telling!"],["rin","pout","Not tell. The data's unbalanced, and I don't like unbalanced data"]]},
  kati_ploy:{ring:{kati:"You've always taught me, Ploy. Today I'll show you I've graduated!",ploy:"Ten years too early, Kati"},
@@ -1359,7 +1359,7 @@ EVENTS.push(
  {id:"fah_mali",look:"casual",when:G=>G.week>=16&&G.F.mali.camp==="player"&&G.F.fah.met,bg:"fair",steps:[
   {n:"nar",t:"Evening market. Mali reaches for the last sausage skewer, and a tattooed hand snatches it first"},
   {n:"fah",f:"happy",l:"casual",t:"One beat too slow, Chaiya kid. You'll be this slow in the ring too"},
-  {n:"mali",f:"pout",l:"casual",t:"Fah! We're in the same Division B now and you're still stealing my sausage!"},
+  {n:"mali",f:"pout",l:"casual",t:"Fah! We're both in Division B now and you're still stealing my sausages!"},
   {choice:[{t:"Save it for revenge in the ring, Mali",fx:G=>{add(G,"mali","morale",6);add(G,"fah","bond",3);},then:[{n:"fah",f:"happy",l:"casual",t:"I like that look in your eye. See you in the ring"}]},
    {t:"Buy sausages for both",fx:G=>{G.cash-=120;add(G,"mali","bond",4);add(G,"fah","bond",5);},then:[{n:"fah",f:"flustered",l:"casual",t:"…You're a weird one. Treating a rival too. Thanks"}]}]}]});
 // v1.15: the camp talks about last week's big fight
@@ -2009,13 +2009,14 @@ EVENTS.push(
   {inject:G=>G.F.fah.bond<40?[{n:"nar",t:"(If you were closer with Fah, this might go further)"}]:[]}]},
  {id:"fah_join",look:"casual",bg:"camp",when:G=>(G.season||1)>=2&&G.week>=10&&G.seen.fah_trainer&&fahRival(G)&&(G.F.fah.bond||0)>=40&&absWeek(G)>=((G.flags||{}).fahRetry||0),steps:[
   {n:"nar",t:"Monday morning, the rain has just stopped. A big canvas bag sits outside the gate, its owner crouched beside it, pretending to look at the sky."},
-  {n:"fah",f:"flustered",l:"casual",t:"I didn't skip training… I ran at five this morning, until the rain stopped. Then I finally dared to come here."},
-  {n:"nar",t:"Fah lays a contract with rain-soaked corners on the table. The hand that challenges an entire stadium clings tightly to her bag."},
-  {n:"fah",f:"sad",l:"casual",t:"At Golden Tiger, I have to win and smile for the camera. I can't say I'm tired. When I lose, nobody wants to hear me at all."},
-  {n:"coach",t:"You fight in the ring, kid. Outside it, you need somewhere to rest. Not another person listing your mistakes."},
-  {n:"fah",f:"sad",l:"casual",t:"I still want to fight, Coach. I want the whole stadium roaring with every kick… I just want someone to ask if I've eaten when I get home."},
-  {n:"fah",f:"flustered",l:"casual",t:"If there's room here, could I start again? I'll train hard, wake early, wash the dishes… Just don't make me pretend nothing hurts all the time."},
-  {inject:G=>inCamp(G,"mali")?[{n:"mali",f:"surprised",l:"casual",t:"Fah!? The one who kicked me out of the ring last year!?"},{n:"fah",f:"happy",l:"casual",t:"And then you got up and punched me back till my eye went purple! Call it even!"}]:[]},
+  {n:"fah",f:"flustered",l:"casual",t:"Fah didn't skip training… I woke up at five today and ran until the rain stopped. Only then did I dare walk here."},
+  {n:"nar",t:"Fah sets a contract envelope, wet at one corner, on the table. The hands that once raised gloves to challenge a whole stadium now grip her bag strap tight."},
+  {n:"fah",f:"sad",l:"casual",t:"At Golden Tiger, Fah had to win, smile for the camera, and never say she was tired… On days I lost, it felt like nobody wanted to hear Fah's voice at all."},
+  {n:"coach",t:"In the ring you fight. Out of it, you should have a place to rest, not just people pointing out where you messed up."},
+  {n:"fah",f:"sad",l:"casual",t:"Fah still wants to be a fighter, Kru. I still want to kick so the whole stadium goes 'oh'… I just want to come back to camp and have someone ask if I've eaten."},
+  {n:"nar",t:"The heavy bag behind the camp falls silent. Fah glances at it for a moment, then takes a breath and looks the manager straight in the eye."},
+  {n:"fah",f:"flustered",l:"casual",t:"If there's room here, can Fah start over? I can train hard, wake up early, wash dishes… I only ask one thing: don't make Fah pretend it doesn't hurt all the time."},
+  {inject:G=>inCamp(G,"mali")?[{n:"mali",f:"surprised",l:"casual",t:"Fah!? You brought your bag… are you coming to live with us?"},{n:"fah",f:"happy",l:"casual",t:"And then you got up and punched me back till my eye went purple! Call it even!"}]:[]},
   {choice:[
    {t:"Welcome aboard (contract buyout ฿60,000 · wage ฿1,800/week)",fx:G=>{if(G.cash>=60000){G.cash-=60000;joinCamp(G,"fah",1800);makeProdigy(G,"B","fah");add(G,"fah","trust",8);G.flags.fahJoinedAbs=absWeek(G);}else{G.flags.fahRetry=absWeek(G)+4;G.seen.fah_join=false;}},
     then:[{inject:G=>G.F.fah.camp==="player"?[{n:"fah",f:"happy",l:"casual",t:"Really!? …No take-backs! I get to be the old Fah here. Smile in the ring, dance when I win!"},{n:"nar",t:"(Fah has joined Sirichai Camp)"}]

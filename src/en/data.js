@@ -149,10 +149,10 @@ const DATE_CLOSE={
 // ---------- CHATTER (two characters meet) ----------
 const CHATTER=[
  {id:"c_kati_mali",need:G=>G.F.mali.camp==="player",bg:"camp",look:"train",steps:[
-  {n:"mali",f:"happy",t:"Kati! I made you a garland, hang it in the ring corner~",with:"kati"},
-  {n:"kati",f:"flustered",t:"Oh, it's lovely! But it'll get kicked across the ring there. I'll keep it beside our corner."},
-  {n:"mali",f:"happy",t:"Deal. You're here training at five every morning. I wanted you to see flowers before the bell."},
-  {choice:[{t:"You two look after the corner together",fx:G=>{add(G,"kati","morale",4);add(G,"mali","bond",2);},then:[{n:"kati",f:"happy",t:"Yes, Manager! I'll mind this corner. Mali, go warm up."}]},
+  {n:"mali",f:"happy",t:"Kati! I strung a garland for you. Hang it on the ring corner~",with:"kati"},
+  {n:"kati",f:"flustered",t:"Oh, it's pretty! But hanging there, a kick will send it flying. I'll keep it by the corner for you."},
+  {n:"mali",f:"happy",t:"Sure. She's been training since five a.m. I want her to see flowers before she steps in the ring."},
+  {choice:[{t:"It's nice that you two run the corner together.",fx:G=>{add(G,"kati","morale",4);add(G,"mali","bond",2);},then:[{n:"kati",f:"happy",t:"Yes, Manager! I'll take this corner. Mali, go warm up first."}]},
    {t:"You two really are like sisters",fx:G=>{add(G,"kati","bond",2);add(G,"mali","bond",2);},then:[{n:"mali",f:"happy",t:"Right? Our camp has more sisters now~"}]}]}]},
  {id:"c_kati_rin",need:G=>G.F.rin.camp==="player",bg:"camp",look:"train",steps:[
   {n:"rin",f:"happy",t:"Kati, your left guard drops three centimeters every time you throw the right. I counted 41 times in one clip",with:"kati"},
@@ -183,14 +183,14 @@ const CHATTER=[
   {n:"ploy",f:"happy",t:"Kati, I watched your fight just now",with:"kati"},
   {n:"kati",f:"flustered",t:"Ploy! …Why were you watching?"},
   {n:"ploy",f:"happy",t:"If you keep dropping your guard on the right hand, Fah will drop an elbow right there. Remember that"},
-  {n:"kati",f:"happy",t:"…Thank you. Why tell me?"},
+  {n:"kati",f:"happy",t:"…Thank you. Why are you telling me this?"},
   {n:"ploy",f:"sad",t:"Because I want to see the best possible final, not one that ends early"},
   {fx:G=>{G.F.kati.a.guard=Math.min(20,G.F.kati.a.guard+.3);add(G,"ploy","bond",2);}}]},
  {id:"c_fah_mali",need:G=>G.F.mali.met&&G.F.fah.met&&G.week>=12,bg:"fair",look:"casual",steps:[
   {n:"fah",f:"happy",t:"Who's this tiny thing? Lost on the way from kindergarten?",with:"mali"},
-  {n:"mali",f:"happy",t:"Hi Fah! Your tattoo is so pretty, what's the tiger's name?"},
+  {n:"mali",f:"happy",t:"Fah! Your tattoo is so pretty. What's this tiger's name?"},
   {n:"fah",f:"flustered",t:"Huh…? It doesn't have a name… why aren't you mad I teased you?"},
-  {n:"mali",f:"happy",t:"Because you didn't mean it~ Then I'll name it, 'Little Sky Tiger'!"},
+  {n:"mali",f:"happy",t:"You didn't really tell me~ So I'll name it myself: 'Little Sky Tiger'!"},
   {n:"fah",f:"flustered",t:"…Never call it that in front of anyone!"},
   {fx:G=>{add(G,"fah","bond",2);add(G,"mali","morale",3);}}]},
  {id:"c_coach_kati",need:G=>G.week>=10,bg:"night",look:"train",steps:[
@@ -325,17 +325,18 @@ FUN.kd.push("Uncle in front drops his sticky rice!");
 FUN.cheer.push("A kid in the back blows a whistle!");
 const CHANT=["Oh!!","Oh!! The crowd calls every kick!","The whole stadium goes 'Oh!'"],ODDS=["The odds just moved!","Ringside bettors flip the odds!","The bettors wave for takers!","The underdog backers are smiling now!"];
 const CHAR_COM={kati:["Sirichai blood! No stepping back!","Kati's smiling through the red face!","Grandpa Chai is smiling up there!"],mali:["Sweet smile. Not a sweet elbow.","Small frame, huge heart!","Chaiya form, all of it!"],rin:["Rin had that one calculated!","Measured with a ruler!","Lopburi brains!"],ploy:["Pure talent!","A true Korat buffalo swing!","She doesn't even look tired!"],fah:["Fah's playing to the camera again!","There's Fah's smirk!","Silver hair flying across the ring!"]};
+// Short live calls keep the action and the ringside wit in one readable beat.
 const RING_CALL={
- hit:{punch:["{a} lands! Even the crowd winces!","Clean hook from {a}! The front row jumps!","{a} connects! The drum gets louder!"],
-  kick:["{a} whips a kick in! The crowd roars!","That kick from {a}! The gamblers stand!","{a} lands a kick! Hear that crowd!"],
-  knee:["{a} drives the knee in! Ouch!","Knee from {a}! The front row winces!","{a} lands the knee! No room to breathe!"],
-  elbow:["{a} lands an elbow! Check that brow!","Sharp elbow from {a}! The crowd gasps!","{a} slices through with an elbow!"]},
- miss:["Whiff! {d} slips away beautifully!","{d} dodges! The front row felt the breeze!","{a} hits air! {d} grins back!"],
- counter:["{a} fires back! What a counter!","Counter from {a}! The crowd erupts!","{a} counters! {d} walked into it!"],
- kd:["{d} goes down! The whole ring holds its breath!","Down goes {d}! The referee counts!"],
- ko:["That's it! {a} wins by knockout!","Lights out! {a} takes the knockout!"],
- cut:["A cut on {d}! The doctor hurries in!","{d} is cut! Time to check the brow!"]};
-const RING_CRIT=["What a shot from {a}! The crowd roars!","{a} lands flush! Even the band stutters!"];
+ hit:{punch:["{a}'s hook lands! The crowd yells 'ouch' for her!","{a}'s punch lands! Auntie Taew bangs her basin!","Here's {a}'s punch! A gambler drops his rice!"],
+  kick:["{a} whips the shin! 'Oh!' rings through the stadium!","{a}'s shin connects! The ringside gamblers jump up!","{a} lands the kick! The pi chawa can barely keep up!"],
+  knee:["{a} fires a knee! The crowd feels it for {d}!","{a}'s knee lands! An old man slaps his knee hard!","{a} drives the knee again! The cheer squad shouts along!"],
+  elbow:["{a}'s elbow lands! The crowd grabs their own eyebrows!","Here comes {a}'s elbow! The whole ring winces!","{a} slices an elbow! The ringside gamblers flinch!"]},
+ miss:["Whiffed! {d} dodges like dodging a debt collector!","Beautiful slip by {d}! The front row felt the breeze!","{a} hits nothing but air! {d} is smirking now!"],
+ counter:["{a} counters on the spot! The crowd slaps their knees!","Here's {a}'s counter! The gamblers go 'oh'!","{a} counters hard! {d} walked right into it!"],
+ kd:["{d} drops! The referee counts and the crowd stops breathing!","Down goes {d}! The whole row of gamblers is on its feet!"],
+ ko:["{a} closes the books! A knockout, ladies and gentlemen!","It's over! {a} wins by KO and the stadium nearly comes down!"],
+ cut:["{d}'s brow is split! The ringside doctor is running!","It's open! {d} needs the cut checked!"]};
+const RING_CRIT=["Whoa! {a} lands it clean! The crowd roars!","{a} lands a bomb! The pi chawa stops for a second!"];
 function shortRing(e,R,fill,o){const L=e.ev==="hit"?(e.crit?RING_CRIT:RING_CALL.hit[e.w]):RING_CALL[e.ev];return L?fill(R(L),o):e.t;}
 function comLine(e,F,rng){if(e.ev==="wake")return e.t;const R=a=>a[Math.floor(rng()*a.length)];const fill=(s,o)=>s.replace(/\{(\w)\}/g,(m,k)=>o[k]??"");
   const o={a:e.an,d:e.dn,w:WNAME[e.w]||""};const h=fightHeat(F);const grp=F.B.f&&F.B.f.grp,C=grp&&CREATURE_COM[grp];
@@ -353,7 +354,7 @@ function comLine(e,F,rng){if(e.ev==="wake")return e.t;const R=a=>a[Math.floor(rn
   const hype=x=>{if(!h||!x)return x;const big=e.crit||e.ev==="kd"||e.ev==="skill"||e.ev==="rage";
     if(rng()>=(big?.8:.1+h*.1))return x;const L=HYPE[Math.min(4,h+(big&&h>=2?1:0))].filter(y=>y!==F.lastHype);const y=R(L);F.lastHype=y;return x+" "+y;};
   const b=baseLine(e,F,R,fill,o,h);if(!b||COM.feel.includes(b))return b;let x=hype(b);if(x===b)x=fun(b);return x.length>COM_MAX?shortRing(e,R,fill,o):x;}
-const COM_MAX=56;
+const COM_MAX=50;
 function baseLine(e,F,R,fill,o,h){
   if(e.ev==="ko"&&h>=2)return fill(R(KO_HOT),o);
   if(F.round===1&&F.rounds>=3&&!e.crit&&(e.ev==="miss"?Math.random()<.35:e.ev==="hit"&&Math.random()<.12))return R(COM.feel);

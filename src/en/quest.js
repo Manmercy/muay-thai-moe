@@ -1,20 +1,20 @@
 // ================= MUAY THAI MOE v1.23 — MAILBOX, SIDE QUESTS, ODD FIGHTS, CALENDAR, GRAPHS, NEWS BAR =================
 // ---------- odd opponents (sprite sheets in a/<sprite>_sheet.webp, same 6-row layout as the girls) ----------
 const QK={
-  gang1:{name:"Red-Helmet Grunt",sprite:"gang1",lvl:-1.6,tilt:{punch:1.5,power:1,iq:-2,guard:-1.5,comp:-1},color:"#c8283c",grp:"gang"},
-  gang2:{name:"Black Jacket, Red Helmet",sprite:"gang2",lvl:-.8,tilt:{punch:1.5,kick:1,iq:-1.5,comp:-1},color:"#a01f2f",grp:"gang"},
-  gang3:{name:"Black-Red Helmet Lieutenant",sprite:"gang3",lvl:.1,tilt:{punch:1.5,knee:1,power:1,iq:-1},color:"#5a1420",grp:"gang"},
-  gang4:{name:"Silver Helmet Chief",sprite:"gangsilver",lvl:.8,tilt:{power:2,punch:1.5,dur:1,foot:-1},color:"#c9ced8",grp:"gang"}, /* v1.89.24: the silver chief gets his own silver sprite */
-  gang6:{name:"Gold-Black Helmet Right Hand",sprite:"gang4",lvl:1.2,tilt:{power:2,kick:1.5,guard:1,dur:1,foot:-1},color:"#d9a520",grp:"gang"}, /* v1.89.24: the boss's gold-and-black right hand (the old gang4 sheet) */
-  gang5:{name:"Big Boss Golden Helmet",sprite:"gang5",lvl:1.6,tilt:{power:2,punch:2,dur:1.5,comp:1,foot:-1},color:"#f7d24a",grp:"gang"},
-  rooster1:{name:"Hot-Headed Bantam",sprite:"rooster1",lvl:-.9,tilt:{speed:2.5,kick:2,dur:-2,power:-1},color:"#e8a23a",grp:"rooster"},
-  rooster2:{name:"Singburi Gray Rooster",sprite:"rooster2",lvl:-.2,tilt:{speed:2,kick:2,foot:1,dur:-1.5},color:"#8a8f9a",grp:"rooster"},
-  rooster3:{name:"Temple-Boxing White Rooster",sprite:"rooster3",lvl:.4,tilt:{speed:2,kick:2.5,counter:1,dur:-1.5},color:"#f4f1ea",grp:"rooster"},
-  rooster4:{name:"Black Red-Tail",sprite:"rooster4",lvl:.9,tilt:{speed:2,kick:2,power:1,guard:1,dur:-1},color:"#c8283c",grp:"rooster"},
-  rooster5:{name:"Golden Rooster Godfather",sprite:"rooster5",lvl:1.5,tilt:{speed:2,kick:2.5,power:1.5,comp:1,dur:-.5},color:"#f7d24a",grp:"rooster"},
-  bull1:{name:"Fresh Milk, the Runaway Cow",sprite:"bull1",lvl:-.6,tilt:{power:2,dur:2.5,clinch:1,speed:-2,iq:-1},color:"#f4f1ea",grp:"bull"},
-  bull2:{name:"Red Curved-Horn",sprite:"bull2",lvl:.7,tilt:{power:2.5,dur:2,knee:1.5,speed:-1.5},color:"#a0522d",grp:"bull"},
-  bull3:{name:"Mafia Buffalo",sprite:"bull3",lvl:1.4,tilt:{power:3,dur:2.5,clinch:2,speed:-1.5,foot:-1},color:"#2b2530",grp:"bull"},
+  gang1:{fst:"pressure",name:"Red-Helmet Grunt",sprite:"gang1",lvl:-1.6,tilt:{punch:1.5,power:1,iq:-2,guard:-1.5,comp:-1},color:"#c8283c",grp:"gang"},
+  gang2:{fst:"pressure",name:"Black Jacket, Red Helmet",sprite:"gang2",lvl:-.8,tilt:{punch:1.5,kick:1,iq:-1.5,comp:-1},color:"#a01f2f",grp:"gang"},
+  gang3:{fst:"inside",name:"Black-Red Helmet Lieutenant",sprite:"gang3",lvl:.1,tilt:{punch:1.5,knee:1,power:1,iq:-1},color:"#5a1420",grp:"gang"},
+  gang4:{fst:"power",name:"Silver Helmet Chief",sprite:"gangsilver",lvl:.8,tilt:{power:2,punch:1.5,dur:1,foot:-1},color:"#c9ced8",grp:"gang"}, /* v1.89.24: the silver chief gets his own silver sprite */
+  gang6:{fst:"power",name:"Gold-Black Helmet Right Hand",sprite:"gang4",lvl:1.2,tilt:{power:2,kick:1.5,guard:1,dur:1,foot:-1},color:"#d9a520",grp:"gang"}, /* v1.89.24: the boss's gold-and-black right hand (the old gang4 sheet) */
+  gang5:{fst:"inside",name:"Big Boss Golden Helmet",sprite:"gang5",lvl:1.6,tilt:{power:2,punch:2,dur:1.5,comp:1,foot:-1},color:"#f7d24a",grp:"gang"},
+  rooster1:{fst:"pressure",name:"Hot-Headed Bantam",sprite:"rooster1",lvl:-.9,tilt:{speed:2.5,kick:2,dur:-2,power:-1},color:"#e8a23a",grp:"rooster"},
+  rooster2:{fst:"footwork",name:"Singburi Gray Rooster",sprite:"rooster2",lvl:-.2,tilt:{speed:2,kick:2,foot:1,dur:-1.5},color:"#8a8f9a",grp:"rooster"},
+  rooster3:{fst:"counter",name:"Temple-Boxing White Rooster",sprite:"rooster3",lvl:.4,tilt:{speed:2,kick:2.5,counter:1,dur:-1.5},color:"#f4f1ea",grp:"rooster"},
+  rooster4:{fst:"footwork",name:"Black Red-Tail",sprite:"rooster4",lvl:.9,tilt:{speed:2,kick:2,power:1,guard:1,dur:-1},color:"#c8283c",grp:"rooster"},
+  rooster5:{fst:"counter",name:"Golden Rooster Godfather",sprite:"rooster5",lvl:1.5,tilt:{speed:2,kick:2.5,power:1.5,comp:1,dur:-.5},color:"#f7d24a",grp:"rooster"},
+  bull1:{fst:"inside",name:"Fresh Milk, the Runaway Cow",sprite:"bull1",lvl:-.6,tilt:{power:2,dur:2.5,clinch:1,speed:-2,iq:-1},color:"#f4f1ea",grp:"bull"},
+  bull2:{fst:"pressure",name:"Red Curved-Horn",sprite:"bull2",lvl:.7,tilt:{power:2.5,dur:2,knee:1.5,speed:-1.5},color:"#a0522d",grp:"bull"},
+  bull3:{fst:"inside",name:"Mafia Buffalo",sprite:"bull3",lvl:1.4,tilt:{power:3,dur:2.5,clinch:2,speed:-1.5,foot:-1},color:"#2b2530",grp:"bull"},
 };
 const BELT_WEEKS=[10,18,26,34,42];
 const STADIUMS={
@@ -39,24 +39,26 @@ function beltTournamentFinish(D){const S=D.belt,champ=D.champ,won=dmMine(champ);
 function beltBracketHTML(D){const title=STADIUMS[D.belt.venue].name+" · "+D.belt.div,nm=id=>esc(G.F[id]?.name||"—"),nx=dmNextMatch();
   const columns=[D.slots,D.w[0],D.w[1],D.w[2]].map((L,r)=>`<div class="dmcol"><h4>${["8","4","2","🏆"][r]}</h4>${L.map(id=>`<div class="dmc ${dmMine(id)?"mine":""}">${nm(id)}</div>`).join("")}</div>`).join("");
   const action=D.done?`<p class="center goldt">🏆 ${nm(D.champ)} · ${fmt(D.prize||0)}</p><button class="btn primary" data-act="dmclose">Back to camp</button>`:nx?`<button class="btn primary" data-act="dmgo" data-id="${dmMine(nx[0])?nx[0]:nx[1]}" data-v="${dmMine(nx[0])?nx[1]:nx[0]}">${nm(nx[0])} vs ${nm(nx[1])} ▸</button>`:"";
-  return `<h2>Title tournament · ${title}</h2><p class="meta">Same division · knockout · five rounds per bout</p><div class="dmb">${columns}</div>${action}`;}
+  return `<h2>Belt Tournament ${title}</h2><p class="meta">Same division · single elimination · five rounds a bout</p><div class="dmb">${columns}</div>${action}`;}
 const QGRP_BG={gang:"bg_market_morning.webp",rooster:"bg_rooster.webp",bull:"bg_farm.webp"};
 /* v1.91.83 (Man): the quest foes kept pace with her stats only, so a late-game girl with a full skill tree outgrew even the bosses.
    They now read a fifth of her hidden edge (the season bonus halved to make room) (skills, perks, level) like the Loy thief, carry whatever the stat ceiling cannot hold as ring craft,
    and fight with their own signature skills (cut-in + burst, like the Naka League) — minions one, lieutenants two, bosses three */
-const Q_EDGE=.5,Q_VET_MAX=12; /* sims: bosses ~50–60% for a strong girl at every stage, minions ~75–90% */
+const Q_EDGE=.35,Q_VET_MAX=12; /* v1.91.112 (Man): a little easier than .5; past 2 points the edge counts half — the mirror test rates Mali's kit higher than it plays against these lopsided foes, so a straight read doubled her penalty */
+const qEdge=e=>e<=2?e:2+(e-2)*.5;
 const QSK={
   gang:[{id:"q_g_debt",name:"Debt-Collector Punch",k:"atk",w:"punch"},{id:"q_g_guard",name:"Big Bro's Guard",k:"def"},{id:"q_g_knee",name:"Protection-Money Knee",k:"atk",w:"knee"}],
   rooster:[{id:"q_r_spur",name:"Fighting-Cock Spur Kick",k:"atk",w:"kick"},{id:"q_r_flap",name:"Wing-Flap Dodge",k:"def"},{id:"q_r_peck",name:"Pecking Elbow",k:"atk",w:"elbow"}],
   bull:[{id:"q_b_horn",name:"Raging Horn Gore",k:"atk",w:"knee"},{id:"q_b_hide",name:"Buffalo Hide",k:"def"},{id:"q_b_cud",name:"Cud-Chew Recharge",k:"rec"}]};
 const qSkN=K=>K.lvl<-.3?1:K.lvl<1?2:3;
-function qTarget(G,fid){const f=fid&&G.F[fid];if(f)return ovr(f.a)+(f.camp==="player"&&typeof hiddenEdge==="function"?Q_EDGE*hiddenEdge(f):0);const R=roster(G);return R.length?R.reduce((s,x)=>s+ovr(x.a),0)/R.length:9;}
+function qTarget(G,fid){const f=fid&&G.F[fid];if(f)return ovr(f.a)+(f.camp==="player"&&typeof hiddenEdge==="function"?Q_EDGE*qEdge(hiddenEdge(f)):0);const R=roster(G);return R.length?R.reduce((s,x)=>s+ovr(x.a),0)/R.length:9;}
 function makeQ(G,kind,fid,tag){const K=QK[kind],t=qTarget(G,fid)+K.lvl+Math.min(.75,((G.season||1)-1)*.125),rng=mulberry32((G.seed^(G.week*977))+kind.length*31);const a={};
   for(const [k] of ATTRS)a[k]=clamp(t+(K.tilt[k]||0)+(rng()*1.6-.8),3,19.5);
   const d=t-ovr(a);for(const [k] of ATTRS)a[k]=clamp(a[k]+d,3,19.5);
   const id=`q_${kind}_${tag||G.week}`;const f=baseFighter(id,{name:K.name,full:K.name,div:"X",camp:"quest",color:K.color,potential:t+2,a});
   {const short=t-ovr(a);if(short>.05)f.vet=+Math.min(Q_VET_MAX,short).toFixed(2);} /* past the stat ceiling: ring craft */
   if(QSK[K.grp])f.nlsk=QSK[K.grp].slice(0,qSkN(K));
+  if(K.fst)f.fstyle=K.fst; /* v1.91.112 (Man): every quest foe fights in its own style — thugs, bulls and the gold boss rush or clinch (Mali's footwork beats them), the silver chief and his right hand hit heavy and the temple roosters wait to counter (Kati's inside game beats them) */
   f.sprite=K.sprite;f.kind=kind;f.grp=K.grp;f.lvl=clamp(Math.round(t-6),1,10);f.fatigue=0;f.morale=70;G.F[id]=f;syncFighterAges(G);return id;}
 function qCleanup(G){const keep=new Set([...G.bookings.map(b=>b.b),...G.offers.map(o=>o.b),...(G.mail||[]).filter(m=>!m.done&&m.qid).map(m=>m.qid)]);
   for(const id of Object.keys(G.F))if(id.startsWith("q_")&&!keep.has(id)&&(G.F[id].lastFightAbs==null||gameWeek(G)-G.F[id].lastFightAbs>2))delete G.F[id];}
@@ -167,12 +169,12 @@ function mailWeekly(G){G.mail=G.mail||[];if(typeof thiefMail==="function"){thief
     if(G.gang.st>=5&&gameWeek(G)>=(G.gang.loopNextAbs||0)&&!G.mail.some(m=>m.q==="gang"&&!m.done&&!m.expired)){
       const i=G.gang.loopN||0,k=["gang2","gang3","gang4","gang6","gang5"][i%5];G.gang.loopN=i+1;G.gang.loopNextAbs=gameWeek(G)+Math.max(3,10-year);
       addMail(G,{kind:"quest",q:"gang",qk:k,repeat:1,from:"Aunt Sri at the Market",title:"The helmet gang is back",body:`${QK[k].name} is causing trouble at the market again. They have trained harder this year. Can your gym help?`,exp:G.week+3,pay:3000+year*500});}}
-  // Stadium titles: legacy Tha Phae saves retain their original G.belt slots.
+  // Stadium titles: Tha Phae saves keep their original G.belt slots.
   for(const [venue,V] of Object.entries(STADIUMS))if((G.season||1)>=V.minYear&&V.weeks.includes(G.week))
     for(const div of [...new Set(roster(G).map(f=>f.div))]){const h=beltHolder(G,div,venue);if(!h)continue;
       const ours=h.camp==="player",op=ours?beltChallenger(G,div,h.id):h;if(!op)continue;const B=beltStore(G,venue)[div];
-      addMail(G,{kind:"quest",q:"belt",venue,bg:V.bg,npc:op.id,div,defend:ours?h.id:null,from:`${V.name} promoter`,title:ours?`Defend the ${V.name} belt · Div ${div}`:`Challenge for the ${V.name} belt · Div ${div}`,
-        body:ours?`${op.name} won the challenger bracket and challenges ${h.name} at ${V.name}. One five-round defense; win ${fmt(V.defend)}.`:`${V.name} opens the ${div} knockout title tournament, including champion ${op.name}. Five rounds per bout; the winner earns ${fmt(V.win)} and the belt. Lose the belt and enter the tournament again.`,exp:G.week+2,pay:ours?V.defend:V.win});}
+      addMail(G,{kind:"quest",q:"belt",venue,bg:V.bg,npc:op.id,div,defend:ours?h.id:null,from:`The promoter ${V.name}`,title:ours?`Defend the ${V.name} Div ${div}`:`Challenge for the ${V.name} Div ${div}`,
+        body:ours?`${op.name} came through the qualifiers to challenge for the belt of ${h.name}${V.name}. One defense, five rounds. Accept within two weeks. Win and take ${fmt(V.defend)}`:`${V.name} opens a tournament in division ${div} including champion ${op.name}. Single elimination, five rounds a bout. The winner takes ${fmt(V.win)} with the belt. Lose it and you'll have to enter a new tournament`,exp:G.week+2,pay:ours?V.defend:V.win});}
   // v1.69: Auntie Taew writes in for help at her som tam stall every few weeks (a minigame that does not use the camp activity)
   if(G.week>=4&&G.week<=49&&gameWeek(G)>=(G.tamNextAbs||4)&&!G.mail.some(m=>m.kind==="job"&&!m.done&&!m.expired)){G.tamNextAbs=gameWeek(G)+3+Math.floor(rng()*2);
     const T=TAM_MAIL[(G.mailN_tam=(G.mailN_tam||0)+1)%TAM_MAIL.length];addMail(G,{kind:"job",job:"somtam",exp:G.week+1,from:"Auntie Taew, som tam stall by the temple",title:T[0],body:T[1]});}
@@ -187,7 +189,7 @@ function mailWeekly(G){G.mail=G.mail||[];if(typeof thiefMail==="function"){thief
     const cow=q==="cow",year=G.season||1;
     const k=cow?(year>=4?"bull3":"bull2"):(year>=4?"rooster5":"rooster3");
     G.runawayNext[q]=gameWeek(G)+3;
-    addMail(G,{kind:"quest",q,qk:k,repeat:1,from:cow?"Uncle Chaloem, dairy farm":"Sia Tong, rooster arena",title:cow?"The cow escaped again!":"The rooster escaped again!",body:cow?`Uncle locked the pen, but ${QK[k].name} kicked through the gate and is blocking the market road again. Please send a fighter to stop her.`:`${QK[k].name} escaped the rooster arena and is pecking your gym's heavy bag again. This time it even dodges anyone trying to catch it. Please help.`,exp:G.week+2,pay:(cow?1500:1000)+Math.min(1000,(year-1)*200)});}
+    addMail(G,{kind:"quest",q,qk:k,repeat:1,from:cow?"Uncle Chaloem, dairy farm":"Sia Tong, rooster arena",title:cow?"The cow's loose again!":"The rooster's loose again!",body:cow?`I shut the pen tight, I swear, but ${QK[k].name} kicked the gate open and is blocking the market road again. Please send a fighter to stop it`:`${QK[k].name} got loose from the cockpit and is pecking the camp's heavy bags again. This time it's better at guarding and dodging whoever tries to catch it. Please help!`,exp:G.week+2,pay:(cow?1500:1000)+Math.min(1000,(year-1)*200)});}
   // rivals we keep ignoring write in to taunt us
   const sn=Object.entries(G.snub||{}).filter(([id,n])=>n>=3&&G.F[id]&&!G.F[id].injury&&!G.F[id].canon&&(G.F[id].camp==="npc"||G.F[id].camp==="rival")&&!G.mailSeen["ch_"+(G.season||1)+"_"+id]&&!isBooked(G,id)).sort((a,b)=>b[1]-a[1])[0];
   if(sn&&rng()<.5&&G.week<=46){const op=G.F[sn[0]];G.mailSeen["ch_"+(G.season||1)+"_"+op.id]=1;
@@ -220,7 +222,7 @@ function questFighters(){return roster(G).filter(f=>!f.injury);}
 function startQuest(spec,fid,done){const f=G.F[fid];if(!f){done&&done();return;}
   const opp=spec.npc||makeQ(G,spec.qk,fid,spec.tag||("w"+G.week));const tier="quest";
   const b={id:"q"+G.week+"_"+fid+"_"+Math.floor(Math.random()*1e4),a:fid,b:opp,week:G.week,tier,rounds:spec.rounds||3,win:spec.purse||0,lose:0,quest:spec};
-  b.title=spec.q==="belt"?STADIUMS[spec.venue||"tha"].name+" · "+spec.div:spec.q==="gang"?"Market showdown":spec.q==="rooster"||spec.q==="cow"||spec.q==="bull"?"Strange beasts showdown":null;
+  b.title=spec.q==="belt"?STADIUMS[spec.venue||"tha"].name+" · "+spec.div:spec.q==="gang"?"Market Stall Brawl":spec.q==="rooster"||spec.q==="cow"||spec.q==="bull"?"Wild bout":null;
   b.bg=spec.bg||(spec.rematch||spec.hq?"bg_gang_hideout.webp":spec.q==="belt"?"bg_district.webp":spec.npc?"bg_food.webp":QGRP_BG[QK[spec.qk].grp]);
   if(typeof questPlan==="function"){questPlan(b,()=>openFight(b,()=>questAfter(b,done)));return;}
   openFight(b,()=>questAfter(b,done));}
