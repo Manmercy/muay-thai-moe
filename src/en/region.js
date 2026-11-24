@@ -1679,6 +1679,92 @@ RG_SIDE.south={cid:"chaba",bg:"pier_south",ring:"bg_pier_south.webp",title:"Off-
   done:(G,how)=>addMail(G,{kind:"letter",from:"Chaba",title:"...From the pier",body:how==="live"?
    "Manager\n\nThe pier clip has three million views.\n\nThe White Bear bar is closed. The marine police check every night.\n\nMy brother reads the comments every day. Smiles all day.\n\n...Thanks.\n\nChaba":
    "Manager\n\nEvery restaurant in the network across the south refused at the same time, and reported to the marine police at the same time.\n\nThe White Bear bar is closed. Boris was arrested at the pier.\n\nMum says any restaurant in the network, you eat free for life.\n\n...Thanks.\n\nChaba"})};
+/* v1.91.130 (Man): Alicia's minigame — the Sportygal live. Notes fall in two lanes; tap ซ้าย/ขวา as each crosses the line.
+   Misses bring the hate comments back; a streak brings Mabelle, Minnie and the fans. */
+const RG_SING={st:null,N:28,
+  css(){if(document.getElementById("rgsing-css"))return;const s=document.createElement("style");s.id="rgsing-css";s.textContent=`
+#rgsing{background:linear-gradient(rgba(10,6,22,.55),rgba(10,6,22,.85)),url(a/bg_tvstudio.webp) center/cover}#rgsing .mbox{gap:8px}
+#rgsing .sgrid{display:grid;grid-template-columns:1fr 1fr;gap:6px}#rgsing canvas{width:100%;aspect-ratio:3/4;max-height:44vh;display:block;border:3px solid #ea5aa0;image-rendering:pixelated;background:#1a1030}
+#rgsing .sfeed{height:44vh;max-height:none;aspect-ratio:auto;overflow:hidden;display:flex;flex-direction:column;justify-content:flex-end;gap:4px;font-size:12px;background:rgba(0,0,0,.35);padding:4px;border:3px solid #3a2a5a}
+#rgsing .sfeed p{margin:0;padding:3px 5px;background:rgba(255,255,255,.08)}#rgsing .sfeed p.h{color:#ff8a8a}#rgsing .sfeed p.c{color:#9be0ff}#rgsing .sfeed p.m{color:#ffd34d}
+#rgsing .sbtns{display:grid;grid-template-columns:1fr 1fr;gap:6px}#rgsing .sbtns button{padding:16px;font-size:18px}#rgsing .shud{display:flex;justify-content:space-between}`;document.head.appendChild(s);},
+  el(){return document.getElementById("rgsing");},
+  hate:["Pretty, but can't fight","Why is an idol boxing?","Just sing, stay out of boxing","All looks, nothing else","Feel sorry for the sponsor"],
+  cheer:[["Mabelle","Go Alicia!! We ride together!","m"],["Minnie","Whoever's dissing my friend gets dunked on!","m"],["Fan","Such a good voice","c"],["Fan","A real Muay Thai princess","c"],["Fan","Thank you for still singing for us","c"],["Mabelle","Sportygal never leaves anyone behind!","m"]],
+  open(done){this.css();let el=this.el();if(!el){el=document.createElement("div");el.id="rgsing";el.className="mgame";document.body.appendChild(el);}
+    this.st={phase:"intro",done};this.draw();
+    el.onclick=e=>{const b=e.target.closest("[data-sg]");if(!b)return;const a=b.dataset.sg;if(a==="go")this.start();else if(a==="end")this.close();};
+    if(!this.keyH){this.keyH=e=>{const S=this.st;if(!S||S.phase!=="play"||e.repeat)return;const k=e.key.toLowerCase();if(k==="f"||k==="arrowleft")this.tap(0);else if(k==="j"||k==="arrowright")this.tap(1);};document.addEventListener("keydown",this.keyH);}},
+  draw(){const S=this.st,el=this.el();if(!S||!el)return;
+    if(S.phase==="intro"){el.innerHTML=`<div class="mbox px"><h2>Sportygal live · duet with Alicia</h2><div style="display:flex;gap:8px;align-items:center"><img src="${faceSrc("alicia","sad")}" alt="" style="width:40px;height:40px;image-rendering:pixelated"><span>...Keep the rhythm for me. Tap left or right as each note reaches the line. If you don't slip, I won't either.</span></div><div class="mfoot roadbtns"><button class="btn primary" data-sg="go">Go live ▸</button></div></div>`;return;}
+    if(S.phase==="play"){el.innerHTML=`<div class="mbox px"><div class="shud"><span>LIVE <b id="sgv">0</b> viewers</span><span>Combo <b id="sgc">0</b></span></div>
+      <div class="sgrid"><canvas id="sgcv" width="160" height="214"></canvas><div class="sfeed" id="sgfeed"></div></div>
+      <div class="sbtns"><button class="btn" id="sg0">Left</button><button class="btn" id="sg1">Right</button></div></div>`;
+      for(const i of [0,1]){const b=document.getElementById("sg"+i);b.addEventListener("pointerdown",e=>{e.preventDefault();this.tap(i);});}return;}
+    if(S.phase==="end"){const q=S.q;el.innerHTML=`<div class="mbox px"><h2>${q>=.8?"The best live of the year!":q>=.5?"Song finished":"Voice shaking, but she sang to the end"}</h2><p class="center">Perfect ${S.p} · Great ${S.g} · slipped ${S.m} · best combo ${S.best}</p><p class="center">Peak viewers ${S.peak.toLocaleString()} viewers</p><div class="mfoot roadbtns"><button class="btn primary" data-sg="end">End live ▸</button></div></div>`;}},
+  start(){const S=this.st,notes=[];let t=1.4;for(let i=0;i<this.N;i++){notes.push({t,l:Math.random()<.5?0:1});t+=i%7===6?.9:(.42+Math.random()*.28);}
+    Object.assign(S,{phase:"play",notes,t0:performance.now(),p:0,g:0,m:0,combo:0,best:0,view:1200,peak:1200,feedN:0});this.draw();
+    for(let i=0;i<2;i++)this.feed(this.hate[i],"h","Comment");
+    const loop=()=>{if(this.st!==S||S.phase!=="play")return;const now=(performance.now()-S.t0)/1000;
+      for(const n of S.notes)if(!n.done&&now-n.t>.22){n.done=1;this.grade("m");}
+      this.paint(now);if(S.notes.every(n=>n.done)){setTimeout(()=>this.finish(),500);return;}requestAnimationFrame(loop);};requestAnimationFrame(loop);},
+  tap(l){const S=this.st;if(!S||S.phase!=="play")return;const now=(performance.now()-S.t0)/1000;let best=null;
+    for(const n of S.notes)if(!n.done&&n.l===l&&Math.abs(n.t-now)<.3&&(!best||Math.abs(n.t-now)<Math.abs(best.t-now)))best=n;
+    if(!best)return;best.done=1;const d=Math.abs(best.t-now);this.grade(d<.09?"p":"g");},
+  grade(k){const S=this.st;S[k]++;if(k==="m"){S.combo=0;S.view=Math.max(300,S.view-180);this.feed(this.hate[S.m%this.hate.length],"h","Comment");AU.sfx&&AU.sfx("miss");}
+    else{S.combo++;S.best=Math.max(S.best,S.combo);S.view+=k==="p"?260:140;if(S.combo%4===0){const c=this.cheer[(S.combo/4-1)%this.cheer.length];this.feed(c[1],c[2],c[0]);}}
+    S.peak=Math.max(S.peak,S.view);const v=document.getElementById("sgv");if(v)v.textContent=S.view.toLocaleString();const c=document.getElementById("sgc");if(c)c.textContent=S.combo;},
+  feed(t,cls,who){const f=document.getElementById("sgfeed");if(!f)return;const p=document.createElement("p");p.className=cls;p.innerHTML=`<b>${esc(who)}</b> ${esc(t)}`;f.appendChild(p);while(f.children.length>9)f.firstChild.remove();},
+  paint(now){const c=document.getElementById("sgcv");if(!c)return;const x=c.getContext("2d");x.fillStyle="#1a1030";x.fillRect(0,0,160,214);
+    x.fillStyle="#2a1a48";x.fillRect(78,0,4,214);x.fillStyle="#ea5aa0";x.fillRect(0,184,160,4);
+    for(const n of this.st.notes){if(n.done)continue;const y=184-(n.t-now)*150;if(y<-12||y>214)continue;const xx=n.l?120:40;x.fillStyle=n.l?"#9be0ff":"#ffd34d";x.fillRect(xx-14,y-6,28,12);x.fillStyle="#fff";x.fillRect(xx-14,y-6,28,2);}},
+  finish(){const S=this.st;if(S.phase!=="play")return;S.q=(S.p+.6*S.g)/this.N;S.phase="end";AU.sfx&&AU.sfx(S.q>=.8?"level":"ui");this.draw();},
+  close(){const S=this.st,el=this.el();this.st=null;if(el)el.remove();if(S&&S.done)S.done(S.q||0);}};
+if(typeof QK!=="undefined")Object.assign(QK,{
+  ss1:{fst:"pressure",name:"Sasaeng fan with a lightstick",sprite:"thief",lvl:-1.2,tilt:{speed:1.5,stamina:1,power:-1,iq:-2},color:"#ea5aa0",grp:"gang"},
+  ss2:{fst:"footwork",name:"Long-lens sneak photographer",sprite:"thief2",lvl:-.4,tilt:{speed:2,foot:1.5,power:-1,guard:-1},color:"#7a4ab0",grp:"gang"},
+  ss3:{fst:"counter",name:"Sasaeng fan club leader, former amateur boxer",sprite:"gang2",lvl:.5,tilt:{counter:1.5,punch:1.5,iq:.5},color:"#3a1f5a",grp:"gang"}});
+RG_SIDE.central={cid:"alicia",bg:"tvstudio",ring:"bg_tvstudio.webp",title:"Off-schedule fight · backstage at the concert",
+  foes:[{qk:"ss1",t:"Alicia belongs to her fans! Not to some boxing camp!"},{qk:"ss2",t:"One photo, just one photo. Get out of the way!"},{qk:"ss3",t:"I've followed her for three years. Every concert, every fight... where did your camp even come from?"}],
+  between:["Another fan raises a long-lens camera, shooting nonstop as he pushes forward.","The fan club leader rips off a fan shirt printed with Alicia's face, throws it down and raises a guard like someone who's boxed before."],
+  intro:(G,D)=>[{n:"nar",t:"At ten at night a voice message from Alicia pops up on the manager's phone, loud noise in the background."},
+   {n:"alicia",f:"sad",l:"casual",t:`Manager... Sportygal has a mini concert tonight in ${D.name}. A sasaeng fan group has followed me since Lopburi. Last night someone was waiting outside my hotel room.`},
+   {n:"alicia",f:"flustered",l:"casual",t:"The event has two guards... I'm not asking you to come. Just telling you, in case you're free."}],
+  go:"\"Send the location. We're on our way.\"",no:"\"Get more security. Our camp really can't tonight.\"",
+  noT:G=>[{n:"alicia",f:"pout",l:"casual",t:"...It's fine. I'm used to it."}],
+  arrive:G=>[{n:"nar",bg:"tvstudio",t:"Backstage, green-and-gold Naka Energy Drink banners line the whole corridor. The back door has been pushed ajar by a crowd with lightsticks and long-lens cameras."},
+   {n:"npc",who:"Mabelle",t:"You're the manager of Sirichai Camp, right? Perfect timing. Our two guards can't hold them anymore."},
+   {n:"npc",who:"Minnie",t:"Alicia's in the dressing room. She's locked the door and won't come out."},
+   {n:"npc",who:"Sasaeng fan club leader",t:"Open the door! Alicia promised on her live she'd meet the fans!"},
+   {n:"alicia",f:"angry",l:"casual",t:"I promised to meet fans, not to let people storm my dressing room! ...Manager? You actually came?"},
+   {n:"coach",t:"The hallway's narrow. No need for a show. Just get them away from that door. Whoever's ready, go."}],
+  win:G=>[{n:"nar",t:"The fan club leader slumps against the wall. Event security arrives with the tourist police, and the sasaeng group is led out the back door one by one."},
+   {n:"npc",who:"Minnie",t:"All clear! ...Wow, Sirichai Camp is the real deal."},
+   {n:"nar",show:[{id:"alicia",l:"casual"}],t:"The dressing-room door opens. Alicia sits in front of the mirror, hands shaking, mascara smudged."},
+   {n:"npc",who:"Alicia's personal manager",t:"Live in ten minutes, Alicia. Naka Energy Drink wants to open the live with that fight clip. The views will go through the roof."},
+   {n:"alicia",f:"sad",l:"casual",t:"...I can't sing, Manager. My voice won't come."},
+   {n:"alicia",f:"sad",l:"casual",t:"Everyone wants the princess on camera. Nobody wants the one who fights... some days I forget why I fight at all."}],
+  lose:G=>[{n:"npc",who:"Sasaeng fan club leader",t:"See? A boxing camp can't stop me!"},{n:"npc",who:"Mabelle",t:"Security's here! Everyone, back off!"},
+   {n:"alicia",f:"sad",l:"casual",t:"...Thank you for coming. I'm cancelling tonight's live."},{n:"coach",t:"Next time we're in the central region, nobody gets near that door again."}],
+  after:(G,T,cb)=>playScene([
+    {n:"nar",t:"Mabelle and Minnie sit down on either side of Alicia. The manager leans against the door.",choice:[
+     {t:"\"You fight because you want to. I've seen it since your first fight\"",fx:G2=>rgMeet(G2,"alicia",3),then:[{n:"alicia",f:"flustered",l:"casual",t:"...My first fight. You remember it?"}]},
+     {t:"\"Tonight, sing for yourself, not for the sponsor\"",fx:G2=>rgMeet(G2,"alicia",3),then:[{n:"alicia",f:"happy",l:"casual",t:"...For myself. I haven't done that in a long time."}]}]},
+    {n:"npc",who:"Mabelle",t:"Sportygal always goes on stage together. Nobody sings alone."},
+    {n:"npc",who:"Minnie",t:"And the camp manager can keep a beat too, right?"},
+    {n:"alicia",f:"flustered",l:"casual",t:"...Keep the rhythm for me. If you don't slip, I won't either."}],
+   ()=>RG_SING.open(q=>{const S=G.region.side.central;S.sing=+(q||0).toFixed(2);rgMeet(G,"alicia",q>=.6?4:2);save();
+    playScene([
+     {n:"nar",bg:"tvstudio",t:q>=.6?"The song ends. The live comments turn into a flood of pink hearts, too many to read.":"Alicia's voice shakes through two verses, but she sings to the end, Mabelle and Minnie with their arms around her shoulders."},
+     {n:"npc",who:"Alicia's personal manager",t:"Great! Now upload the backstage fight clip like the sponsor asked. Naka pays us a year..."},
+     {n:"alicia",f:"happy",l:"casual",t:"No."},
+     {n:"alicia",f:"happy",l:"casual",t:"That clip is people from Sirichai Camp getting hurt protecting me. It's not content. From tonight, I choose what goes on camera."},
+     {n:"npc",who:"Alicia's personal manager",t:"Alicia, the Naka contract doesn't say that..."},
+     {n:"alicia",f:"happy",l:"casual",t:"Then rewrite it, or there's no contract at all... I'm a fighter. I choose."},
+     {n:"npc",who:"Mabelle",t:"Yay!! That's my girl!"},
+     {n:"alicia",f:"flustered",l:"casual",t:"...Don't get the wrong idea. I didn't dare say that because you were standing there... maybe a little."}],cb,{bg:"tvstudio",look:"casual"});}),{bg:"tvstudio",look:"casual"}),
+  done:(G)=>addMail(G,{kind:"letter",from:"Alicia",title:"Update from the Princess",body:
+   "Dear Manager of Sirichai Camp,\n\nI've told Naka Energy Drink I won't make any content I haven't chosen myself. They want to renegotiate... I'm in no hurry to answer.\n\nThat sasaeng group is banned from every event now. Mabelle made a light-up \"Sirichai Camp\" sign for backstage. Minnie asked for Kru Daeng's number (don't ask why).\n\nYesterday I trained for six hours without turning on a camera once. It felt... mine.\n\nAlicia"})};
 function rgSideDue(G,T){const R=G.region,D=ROAD_DEST[T.dest];if(!R||!D||T.fa||T.series||T.local)return null;const X=RG_SIDE[D.r];if(!X)return null;
   const S=(R.side=R.side||{})[D.r]=R.side[D.r]||{};if(S.won)return null;if(R.joined&&R.joined[X.cid])return null;if(!(R.arrived||{})[D.r])return null;
   if(S.triedAbs!=null&&S.triedAbs===T.abs)return null;return X;}

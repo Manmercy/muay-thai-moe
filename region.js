@@ -1956,6 +1956,92 @@ RG_SIDE.south={cid:"chaba",bg:"pier_south",ring:"bg_pier_south.webp",title:"ไ�
   done:(G,how)=>addMail(G,{kind:"letter",from:"ชบา",title:"…จากท่าเรือ",body:how==="live"?
    "ผู้จัดการ\n\nคลิปท่าเรือมีคนดูสามล้าน\n\nบาร์ไวต์แบร์ปิดแล้ว ตำรวจน้ำมาตรวจทุกคืน\n\nพี่ชายเปิดอ่านคอมเมนต์ทุกวัน ยิ้มทั้งวัน\n\n…ขอบใจ\n\nชบา":
    "ผู้จัดการ\n\nร้านในเครือทั้งภาคใต้ม่ายจ่ายพร้อมกัน แจ้งตำรวจน้ำพร้อมกัน\n\nบาร์ไวต์แบร์ปิดแล้ว บอริสโดนจับที่ท่าเรือ\n\nแม่ให้บอก ร้านไหนในเครือ ผู้จัดการกินฟรีตลอดชีวิต\n\n…ขอบใจ\n\nชบา"})};
+/* v1.91.130 (Man): Alicia's minigame — the Sportygal live. Notes fall in two lanes; tap ซ้าย/ขวา as each crosses the line.
+   Misses bring the hate comments back; a streak brings Mabelle, Minnie and the fans. */
+const RG_SING={st:null,N:28,
+  css(){if(document.getElementById("rgsing-css"))return;const s=document.createElement("style");s.id="rgsing-css";s.textContent=`
+#rgsing{background:linear-gradient(rgba(10,6,22,.55),rgba(10,6,22,.85)),url(a/bg_tvstudio.webp) center/cover}#rgsing .mbox{gap:8px}
+#rgsing .sgrid{display:grid;grid-template-columns:1fr 1fr;gap:6px}#rgsing canvas{width:100%;aspect-ratio:3/4;max-height:44vh;display:block;border:3px solid #ea5aa0;image-rendering:pixelated;background:#1a1030}
+#rgsing .sfeed{height:44vh;max-height:none;aspect-ratio:auto;overflow:hidden;display:flex;flex-direction:column;justify-content:flex-end;gap:4px;font-size:12px;background:rgba(0,0,0,.35);padding:4px;border:3px solid #3a2a5a}
+#rgsing .sfeed p{margin:0;padding:3px 5px;background:rgba(255,255,255,.08)}#rgsing .sfeed p.h{color:#ff8a8a}#rgsing .sfeed p.c{color:#9be0ff}#rgsing .sfeed p.m{color:#ffd34d}
+#rgsing .sbtns{display:grid;grid-template-columns:1fr 1fr;gap:6px}#rgsing .sbtns button{padding:16px;font-size:18px}#rgsing .shud{display:flex;justify-content:space-between}`;document.head.appendChild(s);},
+  el(){return document.getElementById("rgsing");},
+  hate:["สวยแต่ชกไม่เป็น","ไอดอลมาชกมวยทำไม","ร้องเพลงไปเถอะ อย่ามายุ่งกับมวย","ขายหน้าตาล้วน ๆ","เหนื่อยแทนสปอนเซอร์"],
+  cheer:[["มาเบลล์","อลิเซียสู้ ๆ!! ปั่นไปด้วยกัน!","m"],["มินนี่","ใครแซะเพื่อนฉัน เจอดังก์!","m"],["แฟนคลับ","เสียงดีมากกก","c"],["แฟนคลับ","เจ้าหญิงมวยไทยของจริง","c"],["แฟนคลับ","ขอบคุณที่ยังร้องให้ฟัง","c"],["มาเบลล์","Sportygal ไม่ทิ้งกัน!","m"]],
+  open(done){this.css();let el=this.el();if(!el){el=document.createElement("div");el.id="rgsing";el.className="mgame";document.body.appendChild(el);}
+    this.st={phase:"intro",done};this.draw();
+    el.onclick=e=>{const b=e.target.closest("[data-sg]");if(!b)return;const a=b.dataset.sg;if(a==="go")this.start();else if(a==="end")this.close();};
+    if(!this.keyH){this.keyH=e=>{const S=this.st;if(!S||S.phase!=="play"||e.repeat)return;const k=e.key.toLowerCase();if(k==="f"||k==="arrowleft")this.tap(0);else if(k==="j"||k==="arrowright")this.tap(1);};document.addEventListener("keydown",this.keyH);}},
+  draw(){const S=this.st,el=this.el();if(!S||!el)return;
+    if(S.phase==="intro"){el.innerHTML=`<div class="mbox px"><h2>ไลฟ์ Sportygal · ร้องคู่อลิเซีย</h2><div style="display:flex;gap:8px;align-items:center"><img src="${faceSrc("alicia","sad")}" alt="" style="width:40px;height:40px;image-rendering:pixelated"><span>…จับจังหวะให้ฉันหน่อย แตะซ้ายหรือขวาตอนโน้ตตกถึงเส้น ถ้าคุณไม่หลุด ฉันก็จะไม่หลุด</span></div><div class="mfoot roadbtns"><button class="btn primary" data-sg="go">เริ่มไลฟ์ ▸</button></div></div>`;return;}
+    if(S.phase==="play"){el.innerHTML=`<div class="mbox px"><div class="shud"><span>LIVE <b id="sgv">0</b> คนดู</span><span>คอมโบ <b id="sgc">0</b></span></div>
+      <div class="sgrid"><canvas id="sgcv" width="160" height="214"></canvas><div class="sfeed" id="sgfeed"></div></div>
+      <div class="sbtns"><button class="btn" id="sg0">ซ้าย</button><button class="btn" id="sg1">ขวา</button></div></div>`;
+      for(const i of [0,1]){const b=document.getElementById("sg"+i);b.addEventListener("pointerdown",e=>{e.preventDefault();this.tap(i);});}return;}
+    if(S.phase==="end"){const q=S.q;el.innerHTML=`<div class="mbox px"><h2>${q>=.8?"ไลฟ์ปังที่สุดของปี!":q>=.5?"ร้องจบเพลง":"เสียงสั่น แต่ร้องจนจบ"}</h2><p class="center">เพอร์เฟกต์ ${S.p} · ดี ${S.g} · หลุด ${S.m} · คอมโบสูงสุด ${S.best}</p><p class="center">คนดูสูงสุด ${S.peak.toLocaleString()} คน</p><div class="mfoot roadbtns"><button class="btn primary" data-sg="end">จบไลฟ์ ▸</button></div></div>`;}},
+  start(){const S=this.st,notes=[];let t=1.4;for(let i=0;i<this.N;i++){notes.push({t,l:Math.random()<.5?0:1});t+=i%7===6?.9:(.42+Math.random()*.28);}
+    Object.assign(S,{phase:"play",notes,t0:performance.now(),p:0,g:0,m:0,combo:0,best:0,view:1200,peak:1200,feedN:0});this.draw();
+    for(let i=0;i<2;i++)this.feed(this.hate[i],"h","คอมเมนต์");
+    const loop=()=>{if(this.st!==S||S.phase!=="play")return;const now=(performance.now()-S.t0)/1000;
+      for(const n of S.notes)if(!n.done&&now-n.t>.22){n.done=1;this.grade("m");}
+      this.paint(now);if(S.notes.every(n=>n.done)){setTimeout(()=>this.finish(),500);return;}requestAnimationFrame(loop);};requestAnimationFrame(loop);},
+  tap(l){const S=this.st;if(!S||S.phase!=="play")return;const now=(performance.now()-S.t0)/1000;let best=null;
+    for(const n of S.notes)if(!n.done&&n.l===l&&Math.abs(n.t-now)<.3&&(!best||Math.abs(n.t-now)<Math.abs(best.t-now)))best=n;
+    if(!best)return;best.done=1;const d=Math.abs(best.t-now);this.grade(d<.09?"p":"g");},
+  grade(k){const S=this.st;S[k]++;if(k==="m"){S.combo=0;S.view=Math.max(300,S.view-180);this.feed(this.hate[S.m%this.hate.length],"h","คอมเมนต์");AU.sfx&&AU.sfx("miss");}
+    else{S.combo++;S.best=Math.max(S.best,S.combo);S.view+=k==="p"?260:140;if(S.combo%4===0){const c=this.cheer[(S.combo/4-1)%this.cheer.length];this.feed(c[1],c[2],c[0]);}}
+    S.peak=Math.max(S.peak,S.view);const v=document.getElementById("sgv");if(v)v.textContent=S.view.toLocaleString();const c=document.getElementById("sgc");if(c)c.textContent=S.combo;},
+  feed(t,cls,who){const f=document.getElementById("sgfeed");if(!f)return;const p=document.createElement("p");p.className=cls;p.innerHTML=`<b>${esc(who)}</b> ${esc(t)}`;f.appendChild(p);while(f.children.length>9)f.firstChild.remove();},
+  paint(now){const c=document.getElementById("sgcv");if(!c)return;const x=c.getContext("2d");x.fillStyle="#1a1030";x.fillRect(0,0,160,214);
+    x.fillStyle="#2a1a48";x.fillRect(78,0,4,214);x.fillStyle="#ea5aa0";x.fillRect(0,184,160,4);
+    for(const n of this.st.notes){if(n.done)continue;const y=184-(n.t-now)*150;if(y<-12||y>214)continue;const xx=n.l?120:40;x.fillStyle=n.l?"#9be0ff":"#ffd34d";x.fillRect(xx-14,y-6,28,12);x.fillStyle="#fff";x.fillRect(xx-14,y-6,28,2);}},
+  finish(){const S=this.st;if(S.phase!=="play")return;S.q=(S.p+.6*S.g)/this.N;S.phase="end";AU.sfx&&AU.sfx(S.q>=.8?"level":"ui");this.draw();},
+  close(){const S=this.st,el=this.el();this.st=null;if(el)el.remove();if(S&&S.done)S.done(S.q||0);}};
+if(typeof QK!=="undefined")Object.assign(QK,{
+  ss1:{fst:"pressure",name:"แฟนคลับซาแซงถือแท่งไฟ",sprite:"thief",lvl:-1.2,tilt:{speed:1.5,stamina:1,power:-1,iq:-2},color:"#ea5aa0",grp:"gang"},
+  ss2:{fst:"footwork",name:"ช่างภาพแอบถ่ายเลนส์ยาว",sprite:"thief2",lvl:-.4,tilt:{speed:2,foot:1.5,power:-1,guard:-1},color:"#7a4ab0",grp:"gang"},
+  ss3:{fst:"counter",name:"หัวหน้าแฟนคลับซาแซง อดีตนักมวยสมัครเล่น",sprite:"gang2",lvl:.5,tilt:{counter:1.5,punch:1.5,iq:.5},color:"#3a1f5a",grp:"gang"}});
+RG_SIDE.central={cid:"alicia",bg:"tvstudio",ring:"bg_tvstudio.webp",title:"ไฟต์นอกตาราง · หลังเวทีคอนเสิร์ต",
+  foes:[{qk:"ss1",t:"อลิเซียเป็นของแฟนคลับ! ไม่ใช่ของค่ายมวยที่ไหน!"},{qk:"ss2",t:"ขอรูปเดียว แค่รูปเดียว หลบไปสิ!"},{qk:"ss3",t:"ฉันตามเธอมาสามปี ทุกคอนเสิร์ต ทุกไฟต์ …ค่ายเธอมาจากไหนกัน"}],
+  between:["แฟนคลับอีกคนยกกล้องเลนส์ยาวขึ้นมาถ่ายรัวระหว่างเดินฝ่าเข้ามา","หัวหน้าแฟนคลับถอดเสื้อทีมที่สกรีนหน้าอลิเซียโยนทิ้ง แล้วตั้งการ์ดแบบคนเคยชกมวย"],
+  intro:(G,D)=>[{n:"nar",t:"สี่ทุ่ม ข้อความเสียงจากอลิเซียเด้งขึ้นมาในมือถือผู้จัดการ เสียงพื้นหลังดังอื้ออึง"},
+   {n:"alicia",f:"sad",l:"casual",t:`ผู้จัดการคะ… คืนนี้ Sportygal มีมินิคอนเสิร์ตที่${D.name} มีกลุ่มแฟนคลับซาแซงตามฉันมาตั้งแต่ลพบุรี เมื่อคืนมีคนไปยืนรอหน้าห้องพักด้วย`},
+   {n:"alicia",f:"flustered",l:"casual",t:"การ์ดของอีเวนต์มีสองคน …ไม่ได้ขอให้มานะคะ แค่บอกไว้เฉย ๆ เผื่อคุณว่าง"}],
+  go:"\"ส่งโลเคชันมา ค่ายเรากำลังไป\"",no:"\"แจ้งการ์ดเพิ่มนะ คืนนี้ค่ายเราไม่ไหวจริง ๆ\"",
+  noT:G=>[{n:"alicia",f:"pout",l:"casual",t:"…It's fine. ฉันชินแล้ว"}],
+  arrive:G=>[{n:"nar",bg:"tvstudio",t:"หลังเวทีคอนเสิร์ต ป้ายนาคาเอเนอร์จี้ดริงค์สีเขียวทองตั้งเรียงเต็มทางเดิน ประตูหลังถูกกลุ่มคนถือแท่งไฟกับกล้องเลนส์ยาวเบียดจนแง้ม"},
+   {n:"npc",who:"มาเบลล์",t:"ผู้จัดการค่ายศิริชัยใช่ไหมคะ! มาพอดีเลย การ์ดสองคนกันไม่อยู่แล้ว"},
+   {n:"npc",who:"มินนี่",t:"อลิเซียอยู่ห้องแต่งตัว ล็อกประตูไว้ ไม่ยอมออกมาเลย"},
+   {n:"npc",who:"หัวหน้าแฟนคลับซาแซง",t:"เปิดประตู! อลิเซียสัญญาไว้ในไลฟ์ว่าจะเจอแฟนคลับ!"},
+   {n:"alicia",f:"angry",l:"casual",t:"ฉันสัญญาว่าจะเจอแฟนคลับ ไม่ได้สัญญาว่าจะให้คนบุกห้องแต่งตัว! …ผู้จัดการ? คุณมาจริง ๆ เหรอ"},
+   {n:"coach",t:"ทางเดินแคบ ไม่ต้องเล่นใหญ่ กันพวกนี้ออกไปจากประตูก็พอ ใครพร้อมก็ขึ้น"}],
+  win:G=>[{n:"nar",t:"หัวหน้าแฟนคลับนั่งพิงกำแพง การ์ดของอีเวนต์มาถึงพร้อมตำรวจท่องเที่ยว กลุ่มซาแซงถูกพาออกไปทางประตูหลังทีละคน"},
+   {n:"npc",who:"มินนี่",t:"เคลียร์แล้ว! …โอ้โห ค่ายศิริชัยนี่ของจริงนะเนี่ย"},
+   {n:"nar",show:[{id:"alicia",l:"casual"}],t:"ประตูห้องแต่งตัวเปิดออก อลิเซียนั่งอยู่หน้ากระจก มือสั่น มาสคาร่าเลอะ"},
+   {n:"npc",who:"ผู้จัดการส่วนตัวของอลิเซีย",t:"อีกสิบนาทีไลฟ์นะอลิเซีย สปอนเซอร์นาคาเอเนอร์จี้ดริงค์ขอเปิดไลฟ์ด้วยคลิปไฟต์เมื่อกี้ ยอดวิวจะพุ่งแน่"},
+   {n:"alicia",f:"sad",l:"casual",t:"…ฉันร้องไม่ได้ ผู้จัดการ เสียงมันไม่ออก"},
+   {n:"alicia",f:"sad",l:"casual",t:"ทุกคนอยากได้เจ้าหญิงในกล้อง ไม่มีใครอยากได้คนที่ชกมวย …บางวันฉันก็ลืมไปแล้วว่าฉันชกเพราะอะไร"}],
+  lose:G=>[{n:"npc",who:"หัวหน้าแฟนคลับซาแซง",t:"เห็นไหม ค่ายมวยก็กันฉันไม่อยู่!"},{n:"npc",who:"มาเบลล์",t:"การ์ดมาแล้ว! ทุกคนถอยออกมาก่อน!"},
+   {n:"alicia",f:"sad",l:"casual",t:"…ขอบคุณที่มา คืนนี้ฉันขอยกเลิกไลฟ์"},{n:"coach",t:"คราวหน้าที่มาภาคกลาง เราจะไม่ให้ใครเข้าใกล้ประตูนั้นอีก"}],
+  after:(G,T,cb)=>playScene([
+    {n:"nar",t:"มาเบลล์กับมินนี่นั่งลงสองข้างอลิเซีย ผู้จัดการยืนพิงประตู",choice:[
+     {t:"\"เธอชกเพราะอยากชก ฉันเห็นมาตั้งแต่ไฟต์แรก\"",fx:G2=>rgMeet(G2,"alicia",3),then:[{n:"alicia",f:"flustered",l:"casual",t:"…ไฟต์แรก คุณจำได้ด้วยเหรอ"}]},
+     {t:"\"คืนนี้ร้องให้ตัวเองฟัง ไม่ต้องร้องให้สปอนเซอร์\"",fx:G2=>rgMeet(G2,"alicia",3),then:[{n:"alicia",f:"happy",l:"casual",t:"…ให้ตัวเอง ฉันไม่ได้ทำแบบนั้นมานานแล้ว"}]}]},
+    {n:"npc",who:"มาเบลล์",t:"Sportygal ขึ้นเวทีด้วยกันเสมอ ไม่มีใครร้องคนเดียว"},
+    {n:"npc",who:"มินนี่",t:"แล้วผู้จัดการค่ายเขาก็จับจังหวะเป็นด้วยนะ ใช่ไหมคะ?"},
+    {n:"alicia",f:"flustered",l:"casual",t:"…จับจังหวะให้ฉันหน่อย ถ้าคุณไม่หลุด ฉันก็จะไม่หลุด"}],
+   ()=>RG_SING.open(q=>{const S=G.region.side.central;S.sing=+(q||0).toFixed(2);rgMeet(G,"alicia",q>=.6?4:2);save();
+    playScene([
+     {n:"nar",bg:"tvstudio",t:q>=.6?"เพลงจบลง คอมเมนต์ในไลฟ์ไหลเป็นหัวใจสีชมพูจนมองไม่เห็นข้อความ":"เสียงอลิเซียสั่นอยู่สองท่อน แต่เธอร้องจนจบเพลง มาเบลล์กับมินนี่โอบไหล่เธอไว้ตลอด"},
+     {n:"npc",who:"ผู้จัดการส่วนตัวของอลิเซีย",t:"ดีมาก! ทีนี้อัปคลิปไฟต์หลังเวทีตามที่สปอนเซอร์ขอ นาคาเขาจ่ายเราปีละ…"},
+     {n:"alicia",f:"happy",l:"casual",t:"ไม่ค่ะ"},
+     {n:"alicia",f:"happy",l:"casual",t:"คลิปนั้นคือคนในค่ายศิริชัยเจ็บเพื่อปกป้องฉัน ไม่ใช่คอนเทนต์ ฉันจะเลือกเองว่าอะไรได้ออกกล้อง ตั้งแต่คืนนี้"},
+     {n:"npc",who:"ผู้จัดการส่วนตัวของอลิเซีย",t:"อลิเซีย สัญญานาคามันไม่ได้เขียนแบบนั้น…"},
+     {n:"alicia",f:"happy",l:"casual",t:"งั้นก็เขียนใหม่ หรือไม่ก็ไม่ต้องมีสัญญา …I'm a fighter. I choose."},
+     {n:"npc",who:"มาเบลล์",t:"เย่!! นี่แหละเพื่อนฉัน!"},
+     {n:"alicia",f:"flustered",l:"casual",t:"…อย่าเข้าใจผิดนะ ที่ฉันกล้าพูดแบบนี้ไม่ได้เป็นเพราะคุณยืนอยู่ตรงนั้นหรอก …อาจจะนิดหน่อย"}],cb,{bg:"tvstudio",look:"casual"});}),{bg:"tvstudio",look:"casual"}),
+  done:(G)=>addMail(G,{kind:"letter",from:"อลิเซีย",title:"Update จากเจ้าหญิง",body:
+   "Dear ผู้จัดการค่ายศิริชัย\n\nฉันแจ้งนาคาเอเนอร์จี้ดริงค์แล้วนะคะ ว่าจะไม่ทำคอนเทนต์ที่ฉันไม่ได้เลือกเอง เขาขอคุยใหม่ …ฉันจะไม่รีบตอบ\n\nแฟนคลับซาแซงกลุ่มนั้นโดนแบนจากทุกอีเวนต์แล้ว มาเบลล์ทำป้ายไฟ \"ค่ายศิริชัย\" ไปติดหลังเวทีด้วย มินนี่ขอเบอร์ครูแดง (ห้ามถามว่าเพื่ออะไร)\n\nเมื่อวานฉันซ้อมหกชั่วโมงโดยไม่เปิดกล้องเลย It felt… mine.\n\nAlicia"})};
 function rgSideDue(G,T){const R=G.region,D=ROAD_DEST[T.dest];if(!R||!D||T.fa||T.series||T.local)return null;const X=RG_SIDE[D.r];if(!X)return null;
   const S=(R.side=R.side||{})[D.r]=R.side[D.r]||{};if(S.won)return null;if(R.joined&&R.joined[X.cid])return null;if(!(R.arrived||{})[D.r])return null;
   if(S.triedAbs!=null&&S.triedAbs===T.abs)return null;return X;}
