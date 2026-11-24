@@ -6639,7 +6639,7 @@ AU.gsfx=function(kind,a){if(!this.init()||this.muted||!SETTINGS.sfx)return;const
   if(kind==="shimmer")for(let i=0;i<6;i++)T(i*.05,{f:1400+Math.random()*1400,type:"sine",dur:.12,peak:.06});};
 
 // ================= MUAY THAI MOE v1.3 — UI =================
-const VERSION="1.91.151";
+const VERSION="1.91.154";
 const CUR_LANG=(typeof window!=="undefined"&&window.LANG)||"th";
 const TH_LABEL=String.fromCharCode(3652,3607,3618);
 function langSwitch(cls){return `<div class="langsw ${cls||""}" role="group" aria-label="Language">${[["th",TH_LABEL],["en","EN"]].map(([k,l])=>`<button class="lsb ${CUR_LANG===k?"on":""}" data-act="setlang" data-v="${k}" aria-pressed="${CUR_LANG===k}">${l}</button>`).join("")}</div>`;}
@@ -7876,7 +7876,16 @@ const PATCH_FIX={id:"1.91.111",ver:"Muay Thai Moe v1.91.111",title:"Report from 
  ["🎞️","Fight tapes and Rin","Tape prices now run from the hundreds to the low thousands, Rin reviews a tape for free every 3 weeks, and many speaking portraits now use sharper original art"]],
  foot:"Kru Daeng says: train hard, read all your letters, and see you ringside! ✦"};
 /* popups queue up in order; each one is closed on its own */
-const PATCHES=[PATCH_AV,PATCH_TAPE,PATCH_FIX],PATCH=PATCHES[PATCHES.length-1];
+const PATCH_TANI={id:"1.93",ver:"Muay Thai Moe v1.93",title:"Nang Tani is awake!",lead:"Sirichai camp has a banana-tree guardian spirit, pets that grow, a Muay Thai radio game show — and Baiyok and Pailin are open to romance",items:[
+ ["🪷","Camp merit and Nang Tani","As the camp grows, the banana-tree ghost wakes and haunts your dreams. Keep camp merit high through camp activities and she'll come less. A three-year story — from chaos, to a shrine, to friendship. See \"What is camp merit?\" in camp activities"],
+ ["🥊","Three-round dream fights","During Buddhist Lent the krasue, krahang, Ma Bong and Phi Phong drop by. At camp merit 60+ you command the corner yourself — and one day you'll command Nang Tani's too"],
+ ["🐾","Pets level up","Tap the pets button on the home screen. Play with each pet once a week; they grow to Lv.10 and help the camp with weekly rolls. Some days they won't play, or they run off into the rice fields. If Fah moves in, her silver cat Iron Fist comes too"],
+ ["📻","The Seven-Mortar Muay Thai Superfan Show","Answer the radio quiz right often enough and you'll be invited onto a 20-question Muay Thai trivia show — top prize ฿100,000"],
+ ["💖","Baiyok and Pailin","Fight them 6 times and win 4 and you can start chatting, giving gifts, dating and confessing — but this road is harder than the others. The dorm now grows to a fifth level too"],
+ ["🌳","Every scene has its place","New backgrounds, and over a hundred scenes now show where they really happen. Camp activity pictures match their captions, injured fighters sit out, and nobody fights on the water anymore"],
+ ["✨","Polish","Pixel icons everywhere, character art in its true colours, 4 new opponent looks, a Thai silk shirt and krathong hat for the manager from Loy Krathong gold, quest foes with their own fighting styles, and belt-defence letters that let you pick the right fighter"]],
+ foot:"Kru Daeng says: make some merit — the banana-tree ghost has sharp eyes ✦"};
+const PATCHES=[PATCH_AV,PATCH_TAPE,PATCH_FIX],PATCH=PATCHES[PATCHES.length-1]; /* PATCH_TANI (v1.93) is ready — add it here when Man says to show it */
 function nextPatch(){if(G&&G.newsSeen==="1.91.144")G.newsSeen="1.91.111"; /* v1.91.145: the 1.91.144 popup was withdrawn — those who saw it must not get the old ones again */const i=PATCHES.findIndex(p=>p.id===(G&&G.newsSeen));return i<0?PATCHES[0]:PATCHES[i+1]||null;}
 function maybeWhatsNew(){if(!G||G.ended||UI.scene)return;const P=nextPatch();if(!P)return;UI.modal={type:"whatsnew",id:P.id};}
 function whatsNewHTML(){const P=PATCHES.find(p=>p.id===(UI.modal&&UI.modal.id))||nextPatch()||PATCH,n=PATCHES.length-PATCHES.indexOf(P)-1;return `<div class="wnew"><span class="pill gold">Update · ${esc(P.ver)}</span><h2>🥊 ${esc(P.title)}</h2><p class="lead">${esc(P.lead)}</p>
@@ -12075,7 +12084,7 @@ const QS={st:null,tm:null,
     const lad=`<ol class="qs-lad">${QS_LAD.map((a,i)=>`<li class="${i===k&&S.phase!=="end"?"on":""} ${i<k?"ok":""} ${QS_SAFE.includes(i)?"sf":""}"><span>${i+1}</span><b>${fmt(a)}</b></li>`).reverse().join("")}</ol>`;
     const krok=`<div class="qs-krok ${S.shake?"shake":""} ${S.phase==="right"||S.phase==="end"&&S.amt>=QS_LAD[19]?"hop":""}">${"<i></i>".repeat(7)}</div>`;
     const stage=`<div class="qs-stage"><div class="qs-pod me"><div class="qs-fig">${me?`<img src="${me}" alt="">`:`<div class="qs-sil"></div>`}</div><div class="qs-plate">${esc(ME(G))}</div></div>
-      <div class="qs-pod host"><div class="qs-fig"><img src="${ASSET}qhost_${S.host||"smile"}.webp" alt=""></div><div class="qs-plate">${QS_HOST}</div></div>${krok}</div>`;
+      <div class="qs-pod host"><div class="qs-fig"><img src="${ASSET}qhost_${S.host||"smile"}_half.webp" alt=""></div><div class="qs-plate">${QS_HOST}</div></div>${krok}</div>`;
     const say=`<div class="qs-say"><small>${QS_HOST}</small><p>${esc(S.say||"")}</p>${S.heck&&S.phase==="q"&&m.aud?`<p class="qs-heck">${esc(S.heck)}</p>`:""}${S.react&&(S.phase==="right"||S.phase==="end")?`<p class="qs-heck">${esc(S.react)}</p>`:""}</div>`;
     let body="";
     if(S.phase==="intro")body=`<div class="qs-foot"><button class="btn primary" data-qs="introNext">${S.step>=S.intro.length-1?"Let's go! ▸":"Next ▸"}</button></div>`;
@@ -12099,6 +12108,27 @@ const QS={st:null,tm:null,
 };
 const qsTier=k=>k<5?0:k<10?1:k<15?2:3;
 const qsSafe=k=>{let s=0;for(const i of QS_SAFE)if(i<k)s=QS_LAD[i];return s;};
+
+/* v1.91.153 (Man): the contestant talks back — a sigh, a mutter, a jab at Pa Piak, under the host's line */
+const QS_ME={
+ q:["(I've read about this one… while waiting for a fighter to go on)","(Breathe deep, the way Kru Daeng taught… in… out…)","(Why are the studio lights hotter than the ring lights?)","(Kru Daeng must be listening on the radio — don't blow it)","(Focus… it's not an exam, it's only a hundred thousand baht)"],
+ qh:["Wait wait wait — is the clock running faster than usual, Pa?!","Pa, don't talk yet, give me one second!","(My mind's as blank as a fresh hand wrap)"],
+ lock:["Locked in… you don't have to drag it out that long, Pa.","(My heart's pounding harder than at a belt fight)","Pa… please, don't make the sad face before the reveal.","(If this is wrong, Kati will tease me for a month)"],
+ right:["Phew… survived another one.","Pa always does the sad voice before the reveal. My heart can't take it!","Correct! Pork barbecue for the whole camp when I get back!","(Grinning so wide my gums are drying out)","Kru Daeng! Did you hear that! Right again!"],
+ cut:["Down to two… still a headache, though.","(The two that are left look exactly the same)"],
+ aud:["Let's ask the audience… hope it isn't a rival camp's cheering section tonight.","(Why is the front row smirking like that?)"],
+ phone:["Using a lifeline… please pick up.","(Praying they're not in the middle of training)"],
+ quitask:["(Money in hand… or a bird in the bush… why does Pa have to ask now?)"],
+ win:["Is this real… somebody pinch me!","A hundred thousand! New heavy bags for the whole camp!"],
+ lose:["(Long sigh) Kru Daeng is going to tease me about this all year.","Phew… never mind. At least I got to be on the radio.","This one's too brutal, Pa! Who wrote these questions?!"],
+ quit:["That's enough for today. The camp still has an electricity bill.","(Walking out of the studio like a winner… even without the hundred grand)"]};
+{const _d=QS.draw;QS.draw=function(){_d.call(this);try{const S=this.st,m=this.m();if(!S||!m)return;
+  const used=m.used||{};const key=S.phase==="end"?(m.how||"lose"):S.phase==="q"?(S.hurried?"qh":used.c&&!S.myC?"cut":used.a&&!S.myA?"aud":"q"):S.phase;
+  if(key==="cut")S.myC=1;if(key==="aud")S.myA=1;
+  const kk=key+"|"+(m.k||0);
+  if(kk!==S.myK){S.myK=kk;const L=QS_ME[key];S.my=L&&(key!=="q"||Math.random()<.45)?L[Math.floor(Math.random()*L.length)]:null;}
+  if(!S.my)return;const box=document.querySelector("#qshow .qs-say");if(!box||box.querySelector(".qs-my"))return;
+  const p=document.createElement("p");p.className="qs-my";const b=document.createElement("b");b.textContent=`${ME(G)}: `;p.appendChild(b);p.appendChild(document.createTextNode(S.my));box.appendChild(p);}catch(e){}};}
 
 // ================= MUAY THAI MOE — MERIT & THE GHOST OF THE BANANA TREE "นางตานี" (v1.91.144, Man 24 พ.ย.) =================
 // Phase 1: camp merit (บุญ) from merit-making, the wai kru and new big merit events; it slowly runs down when nobody makes merit.

@@ -287,7 +287,7 @@ const QS={st:null,tm:null,
     const lad=`<ol class="qs-lad">${QS_LAD.map((a,i)=>`<li class="${i===k&&S.phase!=="end"?"on":""} ${i<k?"ok":""} ${QS_SAFE.includes(i)?"sf":""}"><span>${i+1}</span><b>${fmt(a)}</b></li>`).reverse().join("")}</ol>`;
     const krok=`<div class="qs-krok ${S.shake?"shake":""} ${S.phase==="right"||S.phase==="end"&&S.amt>=QS_LAD[19]?"hop":""}">${"<i></i>".repeat(7)}</div>`;
     const stage=`<div class="qs-stage"><div class="qs-pod me"><div class="qs-fig">${me?`<img src="${me}" alt="">`:`<div class="qs-sil"></div>`}</div><div class="qs-plate">${esc(ME(G))}</div></div>
-      <div class="qs-pod host"><div class="qs-fig"><img src="${ASSET}qhost_${S.host||"smile"}.webp" alt=""></div><div class="qs-plate">${QS_HOST}</div></div>${krok}</div>`;
+      <div class="qs-pod host"><div class="qs-fig"><img src="${ASSET}qhost_${S.host||"smile"}_half.webp" alt=""></div><div class="qs-plate">${QS_HOST}</div></div>${krok}</div>`;
     const say=`<div class="qs-say"><small>${QS_HOST}</small><p>${esc(S.say||"")}</p>${S.heck&&S.phase==="q"&&m.aud?`<p class="qs-heck">${esc(S.heck)}</p>`:""}${S.react&&(S.phase==="right"||S.phase==="end")?`<p class="qs-heck">${esc(S.react)}</p>`:""}</div>`;
     let body="";
     if(S.phase==="intro")body=`<div class="qs-foot"><button class="btn primary" data-qs="introNext">${S.step>=S.intro.length-1?"Let's go! ▸":"Next ▸"}</button></div>`;
@@ -311,3 +311,24 @@ const QS={st:null,tm:null,
 };
 const qsTier=k=>k<5?0:k<10?1:k<15?2:3;
 const qsSafe=k=>{let s=0;for(const i of QS_SAFE)if(i<k)s=QS_LAD[i];return s;};
+
+/* v1.91.153 (Man): the contestant talks back — a sigh, a mutter, a jab at Pa Piak, under the host's line */
+const QS_ME={
+ q:["(I've read about this one… while waiting for a fighter to go on)","(Breathe deep, the way Kru Daeng taught… in… out…)","(Why are the studio lights hotter than the ring lights?)","(Kru Daeng must be listening on the radio — don't blow it)","(Focus… it's not an exam, it's only a hundred thousand baht)"],
+ qh:["Wait wait wait — is the clock running faster than usual, Pa?!","Pa, don't talk yet, give me one second!","(My mind's as blank as a fresh hand wrap)"],
+ lock:["Locked in… you don't have to drag it out that long, Pa.","(My heart's pounding harder than at a belt fight)","Pa… please, don't make the sad face before the reveal.","(If this is wrong, Kati will tease me for a month)"],
+ right:["Phew… survived another one.","Pa always does the sad voice before the reveal. My heart can't take it!","Correct! Pork barbecue for the whole camp when I get back!","(Grinning so wide my gums are drying out)","Kru Daeng! Did you hear that! Right again!"],
+ cut:["Down to two… still a headache, though.","(The two that are left look exactly the same)"],
+ aud:["Let's ask the audience… hope it isn't a rival camp's cheering section tonight.","(Why is the front row smirking like that?)"],
+ phone:["Using a lifeline… please pick up.","(Praying they're not in the middle of training)"],
+ quitask:["(Money in hand… or a bird in the bush… why does Pa have to ask now?)"],
+ win:["Is this real… somebody pinch me!","A hundred thousand! New heavy bags for the whole camp!"],
+ lose:["(Long sigh) Kru Daeng is going to tease me about this all year.","Phew… never mind. At least I got to be on the radio.","This one's too brutal, Pa! Who wrote these questions?!"],
+ quit:["That's enough for today. The camp still has an electricity bill.","(Walking out of the studio like a winner… even without the hundred grand)"]};
+{const _d=QS.draw;QS.draw=function(){_d.call(this);try{const S=this.st,m=this.m();if(!S||!m)return;
+  const used=m.used||{};const key=S.phase==="end"?(m.how||"lose"):S.phase==="q"?(S.hurried?"qh":used.c&&!S.myC?"cut":used.a&&!S.myA?"aud":"q"):S.phase;
+  if(key==="cut")S.myC=1;if(key==="aud")S.myA=1;
+  const kk=key+"|"+(m.k||0);
+  if(kk!==S.myK){S.myK=kk;const L=QS_ME[key];S.my=L&&(key!=="q"||Math.random()<.45)?L[Math.floor(Math.random()*L.length)]:null;}
+  if(!S.my)return;const box=document.querySelector("#qshow .qs-say");if(!box||box.querySelector(".qs-my"))return;
+  const p=document.createElement("p");p.className="qs-my";const b=document.createElement("b");b.textContent=`${ME(G)}: `;p.appendChild(b);p.appendChild(document.createTextNode(S.my));box.appendChild(p);}catch(e){}};}

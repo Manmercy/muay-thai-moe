@@ -1,5 +1,5 @@
 // ================= MUAY THAI MOE v1.3 — UI =================
-const VERSION="1.91.152";
+const VERSION="1.91.154";
 const CUR_LANG=(typeof window!=="undefined"&&window.LANG)||"th";
 const TH_LABEL=String.fromCharCode(3652,3607,3618);
 function langSwitch(cls){return `<div class="langsw ${cls||""}" role="group" aria-label="Language">${[["th",TH_LABEL],["en","EN"]].map(([k,l])=>`<button class="lsb ${CUR_LANG===k?"on":""}" data-act="setlang" data-v="${k}" aria-pressed="${CUR_LANG===k}">${l}</button>`).join("")}</div>`;}
@@ -1236,7 +1236,16 @@ const PATCH_FIX={id:"1.91.111",ver:"Muay Thai Moe v1.91.111",title:"Report from 
  ["🎞️","Fight tapes and Rin","Tape prices now run from the hundreds to the low thousands, Rin reviews a tape for free every 3 weeks, and many speaking portraits now use sharper original art"]],
  foot:"Kru Daeng says: train hard, read all your letters, and see you ringside! ✦"};
 /* popups queue up in order; each one is closed on its own */
-const PATCHES=[PATCH_AV,PATCH_TAPE,PATCH_FIX],PATCH=PATCHES[PATCHES.length-1];
+const PATCH_TANI={id:"1.93",ver:"Muay Thai Moe v1.93",title:"Nang Tani is awake!",lead:"Sirichai camp has a banana-tree guardian spirit, pets that grow, a Muay Thai radio game show — and Baiyok and Pailin are open to romance",items:[
+ ["🪷","Camp merit and Nang Tani","As the camp grows, the banana-tree ghost wakes and haunts your dreams. Keep camp merit high through camp activities and she'll come less. A three-year story — from chaos, to a shrine, to friendship. See \"What is camp merit?\" in camp activities"],
+ ["🥊","Three-round dream fights","During Buddhist Lent the krasue, krahang, Ma Bong and Phi Phong drop by. At camp merit 60+ you command the corner yourself — and one day you'll command Nang Tani's too"],
+ ["🐾","Pets level up","Tap the pets button on the home screen. Play with each pet once a week; they grow to Lv.10 and help the camp with weekly rolls. Some days they won't play, or they run off into the rice fields. If Fah moves in, her silver cat Iron Fist comes too"],
+ ["📻","The Seven-Mortar Muay Thai Superfan Show","Answer the radio quiz right often enough and you'll be invited onto a 20-question Muay Thai trivia show — top prize ฿100,000"],
+ ["💖","Baiyok and Pailin","Fight them 6 times and win 4 and you can start chatting, giving gifts, dating and confessing — but this road is harder than the others. The dorm now grows to a fifth level too"],
+ ["🌳","Every scene has its place","New backgrounds, and over a hundred scenes now show where they really happen. Camp activity pictures match their captions, injured fighters sit out, and nobody fights on the water anymore"],
+ ["✨","Polish","Pixel icons everywhere, character art in its true colours, 4 new opponent looks, a Thai silk shirt and krathong hat for the manager from Loy Krathong gold, quest foes with their own fighting styles, and belt-defence letters that let you pick the right fighter"]],
+ foot:"Kru Daeng says: make some merit — the banana-tree ghost has sharp eyes ✦"};
+const PATCHES=[PATCH_AV,PATCH_TAPE,PATCH_FIX],PATCH=PATCHES[PATCHES.length-1]; /* PATCH_TANI (v1.93) is ready — add it here when Man says to show it */
 function nextPatch(){if(G&&G.newsSeen==="1.91.144")G.newsSeen="1.91.111"; /* v1.91.145: the 1.91.144 popup was withdrawn — those who saw it must not get the old ones again */const i=PATCHES.findIndex(p=>p.id===(G&&G.newsSeen));return i<0?PATCHES[0]:PATCHES[i+1]||null;}
 function maybeWhatsNew(){if(!G||G.ended||UI.scene)return;const P=nextPatch();if(!P)return;UI.modal={type:"whatsnew",id:P.id};}
 function whatsNewHTML(){const P=PATCHES.find(p=>p.id===(UI.modal&&UI.modal.id))||nextPatch()||PATCH,n=PATCHES.length-PATCHES.indexOf(P)-1;return `<div class="wnew"><span class="pill gold">Update · ${esc(P.ver)}</span><h2>🥊 ${esc(P.title)}</h2><p class="lead">${esc(P.lead)}</p>

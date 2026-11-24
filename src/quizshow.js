@@ -287,7 +287,7 @@ const QS={st:null,tm:null,
     const lad=`<ol class="qs-lad">${QS_LAD.map((a,i)=>`<li class="${i===k&&S.phase!=="end"?"on":""} ${i<k?"ok":""} ${QS_SAFE.includes(i)?"sf":""}"><span>${i+1}</span><b>${fmt(a)}</b></li>`).reverse().join("")}</ol>`;
     const krok=`<div class="qs-krok ${S.shake?"shake":""} ${S.phase==="right"||S.phase==="end"&&S.amt>=QS_LAD[19]?"hop":""}">${"<i></i>".repeat(7)}</div>`;
     const stage=`<div class="qs-stage"><div class="qs-pod me"><div class="qs-fig">${me?`<img src="${me}" alt="">`:`<div class="qs-sil"></div>`}</div><div class="qs-plate">คุณ${esc(ME(G))}</div></div>
-      <div class="qs-pod host"><div class="qs-fig"><img src="${ASSET}qhost_${S.host||"smile"}.webp" alt=""></div><div class="qs-plate">${QS_HOST}</div></div>${krok}</div>`;
+      <div class="qs-pod host"><div class="qs-fig"><img src="${ASSET}qhost_${S.host||"smile"}_half.webp" alt=""></div><div class="qs-plate">${QS_HOST}</div></div>${krok}</div>`;
     const say=`<div class="qs-say"><small>${QS_HOST}</small><p>${esc(S.say||"")}</p>${S.heck&&S.phase==="q"&&m.aud?`<p class="qs-heck">${esc(S.heck)}</p>`:""}${S.react&&(S.phase==="right"||S.phase==="end")?`<p class="qs-heck">${esc(S.react)}</p>`:""}</div>`;
     let body="";
     if(S.phase==="intro")body=`<div class="qs-foot"><button class="btn primary" data-qs="introNext">${S.step>=S.intro.length-1?"เริ่มเลย! ▸":"ต่อ ▸"}</button></div>`;
@@ -311,3 +311,24 @@ const QS={st:null,tm:null,
 };
 const qsTier=k=>k<5?0:k<10?1:k<15?2:3;
 const qsSafe=k=>{let s=0;for(const i of QS_SAFE)if(i<k)s=QS_LAD[i];return s;};
+
+/* v1.91.153 (Man): the contestant talks back — a sigh, a mutter, a jab at Pa Piak, under the host's line */
+const QS_ME={
+ q:["(ข้อนี้… เคยอ่านผ่านตาตอนนั่งรอลูกค่ายขึ้นชกนี่นา)","(หายใจเข้าลึก ๆ แบบที่ครูแดงสอน… เข้า… ออก…)","(ทำไมไฟสตูดิโอร้อนกว่าไฟเวทีอีก)","(ครูแดงต้องเปิดวิทยุฟังอยู่แน่ ๆ อย่าปล่อยไก่นะ)","(ตั้งสติ… นี่ไม่ใช่ข้อสอบ นี่แค่เงินหลักแสน)"],
+ qh:["เดี๋ยว ๆ ๆ นาฬิกามันเดินเร็วกว่าปกติหรือเปล่าป๋า!","ป๋าอย่าเพิ่งพูด ขอคิดแป๊บเดียว!","(สมองขาวโพลนเหมือนผ้าพันมือใหม่)"],
+ lock:["ล็อกแล้ว… ไม่ต้องลากเสียงยาวขนาดนั้นก็ได้ป๋า","(หัวใจเต้นแรงกว่าตอนลูกค่ายชิงเข็มขัดอีก)","ป๋า… ขอร้องล่ะ อย่าทำหน้าเศร้าก่อนเฉลย","(ถ้าผิด กลับค่ายไปคงโดนกะทิล้อทั้งเดือน)"],
+ right:["เฮ้อ… รอดไปอีกข้อ","ป๋าแกล้งทำเสียงเศร้าก่อนทุกที ใจจะวาย!","ถูกแล้ว! กลับไปเลี้ยงหมูกระทะทั้งค่าย!","(ยิ้มกว้างจนเหงือกแห้ง)","ครูแดง! ได้ยินไหม! ถูกอีกแล้ว!"],
+ cut:["ตัดเหลือสองข้อ… ก็ยังปวดหัวอยู่ดีนะ","(สองข้อที่เหลือหน้าตาเหมือนกันเปี๊ยบ)"],
+ aud:["ถามคนดูดีกว่า… หวังว่าคนดูวันนี้ไม่ใช่กองเชียร์ค่ายคู่แข่งนะ","(ทำไมคนดูแถวหน้ายิ้มเยาะแบบนั้น)"],
+ phone:["ขอใช้ตัวช่วย… รับสายด้วยเถอะ","(ภาวนาให้อีกฝั่งไม่ได้กำลังซ้อมอยู่)"],
+ quitask:["(เงินในมือ… หรือนกในป่า… ทำไมป๋าต้องถามตอนนี้ด้วย)"],
+ win:["นี่เรื่องจริงใช่ไหม… ใครก็ได้หยิกที!","แสนบาท! ซื้อกระสอบทรายใหม่ทั้งค่ายเลย!"],
+ lose:["(ถอนหายใจยาว) ครูแดงต้องล้อไปอีกทั้งปีแน่","เฮ้อ… ไม่เป็นไร อย่างน้อยก็ได้ออกวิทยุ","ข้อนี้โหดเกินไปแล้วป๋า! ใครออกข้อสอบ!"],
+ quit:["พอแค่นี้ก่อน ค่ายยังต้องจ่ายค่าไฟ","(เดินออกจากสตูดิโอแบบคนชนะ… ถึงจะไม่ได้แสนก็เถอะ)"]};
+{const _d=QS.draw;QS.draw=function(){_d.call(this);try{const S=this.st,m=this.m();if(!S||!m)return;
+  const used=m.used||{};const key=S.phase==="end"?(m.how||"lose"):S.phase==="q"?(S.hurried?"qh":used.c&&!S.myC?"cut":used.a&&!S.myA?"aud":"q"):S.phase;
+  if(key==="cut")S.myC=1;if(key==="aud")S.myA=1;
+  const kk=key+"|"+(m.k||0);
+  if(kk!==S.myK){S.myK=kk;const L=QS_ME[key];S.my=L&&(key!=="q"||Math.random()<.45)?L[Math.floor(Math.random()*L.length)]:null;}
+  if(!S.my)return;const box=document.querySelector("#qshow .qs-say");if(!box||box.querySelector(".qs-my"))return;
+  const p=document.createElement("p");p.className="qs-my";const b=document.createElement("b");b.textContent=`คุณ${ME(G)}: `;p.appendChild(b);p.appendChild(document.createTextNode(S.my));box.appendChild(p);}catch(e){}};}
