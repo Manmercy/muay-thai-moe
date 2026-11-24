@@ -1204,12 +1204,20 @@ const OFFER_BANDS=[-.7,.45,1.4,.9],EFF_BANDS=[-.9,-.1,.8,.3];
 /* v1.83.1: our fighters are stronger than their stats show — skills, mastery, aura, grit, facilities and the corner picking the right plan.
    Measure that edge (in stat points) by sparring a mirror with none of it but a known ring-craft lead; from year 2 matchmaking, the field and rewards all use it. */
 const _edge={};
-function hiddenEdge(f){if(!f||f.camp!=="player")return 0;const key=(traitOf(f)||"")+traitLv(f)+":"+(f.lvl||1)+":"+Object.values(f.skills||{}).reduce((s,v)=>s+v,0)+":"+(f.equip||[]).join()+":"+ovr(f.a).toFixed(1)+":"+(f.aura||0)+":"+(f.grit||0)+":"+(f.facPrep||0)+":"+hasSignature(f);
+function hiddenEdge(f){if(!f||f.camp!=="player")return 0;const key=(traitOf(f)||"")+traitLv(f)+":"+(f.lvl||1)+":"+Object.values(f.skills||{}).reduce((s,v)=>s+v,0)+":"+(f.equip||[]).join()+":"+Math.round(ovr(f.a)*2)/2+":"+(f.aura||0)+":"+(f.grit||0)+":"+(f.facPrep||0)+":"+hasSignature(f);
   if(_edge[f.id]&&_edge[f.id].k===key)return _edge[f.id].v;
-  const me={...f,a:{...f.a},morale:65,fatigue:0,injury:0},OFF=3,o=ovr(f.a),mir={...f,id:"_mirror",camp:"npc",canon:false,trait:null,vet:OFF,a:Object.fromEntries(Object.keys(f.a).map(k=>[k,o])),skills:{},aura:0,grit:0,counterPrep:false,prepBonus:false,ployNotes:false,labPrep:0,morale:65,fatigue:0,injury:0};
-  let best=0;for(const plan of Object.keys(PLANS)){let w=0;const n=16;for(let i=0;i<n;i++){const F=newFight(me,mir,{seed:7001+i*13,rounds:3,planA:plan});
-    while(!F.over){F.A.instr=aiCorner(F,F.A,F.B);F.B.instr=aiCorner(F,F.B,F.A);fightRound(F);}w+=F.result.win==="A"?1:F.result.win==="D"?.5:0;}best=Math.max(best,w/n);}
-  const r=clamp(best,.03,.97),v=Math.max(0,OFF+Math.log(r/(1-r))/.9);_edge[f.id]={k:key,v};return v;}
+  /* v1.91.116 (Man): the cache key rounds her stats to half a point (was a tenth) — the panel costs 2.5× the old clone test, so it re-measures only when she has really grown
+     v1.91.116 (Man): measured against a panel of five sparring partners, one per fight style, instead of a flat-stat clone of herself.
+     The clone always fought one style (counter), so a line whose style beat it looked far stronger than it plays (Mali's elbow line 3.6 vs her kick line 1.8,
+     though the kick line wins 75% of league bouts and the elbow line 47%). Panel average tracks real league results (r .88, was .52); EDGE_CAL keeps the overall level */
+  const me={...f,a:{...f.a},morale:65,fatigue:0,injury:0},OFF=3,o=ovr(f.a),n=8;let lsum=0;
+  for(const st of Object.keys(EDGE_PANEL)){const T=EDGE_PANEL[st],a={};for(const k of Object.keys(f.a))a[k]=o+(T[k]||0);const d=o-ovr(a);for(const k in a)a[k]+=d;
+    const op={...f,id:"_panel_"+st,camp:"npc",canon:false,trait:null,fstyle:st,fstyleN:null,rgSty:null,nlsk:null,vet:OFF,a,skills:{},equip:[],aura:0,grit:0,counterPrep:false,prepBonus:false,ployNotes:false,labPrep:0,morale:65,fatigue:0,injury:0};
+    let best=0;for(const plan of Object.keys(PLANS)){let w=0;for(let i=0;i<n;i++){const F=newFight(me,op,{seed:7001+i*13,rounds:3,planA:plan});
+      while(!F.over){F.A.instr=aiCorner(F,F.A,F.B);F.B.instr=aiCorner(F,F.B,F.A);fightRound(F);}w+=F.result.win==="A"?1:F.result.win==="D"?.5:0;}best=Math.max(best,w/n);}
+    const r=clamp(best,.03,.97);lsum+=Math.log(r/(1-r));}
+  const v=Math.max(0,OFF+lsum/5/.9-EDGE_CAL);_edge[f.id]={k:key,v};return v;}
+const EDGE_PANEL={power:{punch:1.5,power:1.5,speed:-1,foot:-.5},pressure:{elbow:1,stamina:1.5,power:.5,guard:-1,counter:-.5},counter:{counter:1.5,guard:1.5,iq:1,power:-1,stamina:-.5},footwork:{foot:1.5,kick:1.5,speed:1,clinch:-1,power:-.5},inside:{knee:1.5,clinch:1.5,dur:1,foot:-1,speed:-.5}},EDGE_CAL=.55;
 const edgeOf=(G,f)=>f&&f.camp!=="player"?(f.vet||0):(G&&(G.season||1)>=2)?hiddenEdge(f):0;
 const effOvr=(G,f)=>ovr(lbA(f.a))+edgeOf(G,f);
 /* how much harder `op` is than `me` once the hidden edge is counted (positive = tougher) */
