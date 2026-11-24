@@ -8632,7 +8632,7 @@ const FS={cv:null,ctx:null,bg:null,A:null,B:null,fx:[],shake:0,
 
 // ---------- v1.19 CAMP ACTIVITY SCENES (short animated vignette before the result) ----------
 const CFX={
-  merit:{bg:"bg_temple.webp",tint:"rgba(255,150,60,.18)",cap:"เช้ามืด ทุกคนตื่นมาตักบาตรหน้าค่าย",monks:true,fx:"rice",kneel:true},
+  merit:{bg:"bg_camp_day.webp",tint:"rgba(255,150,60,.18)",cap:"เช้ามืด ทุกคนตื่นมาตักบาตรหน้าค่าย",monks:true,fx:"rice",kneel:true},
   rest:{bg:"bg_river_night.webp",tint:"rgba(20,30,70,.35)",cap:"วันหยุดค่าย นั่งเล่นริมน้ำ ไม่ต้องซ้อม",fx:"z",row:"idle"},
   class:{bg:"gym",cap:"สอนคลาสวันอาทิตย์ นักเรียนเต็มลาน",students:3,row:"punch",fx:"stars"},
   promo:{bg:"gym",cap:"ไลฟ์โปรโมทค่ายออนไลน์",phone:true,row:"win",fx:"hearts"},
@@ -8643,15 +8643,15 @@ const CFX={
   massage:{bg:"gym",tint:"rgba(80,40,20,.25)",cap:"หมอนวดแผนไทยมาคลายเส้นให้ทุกคน",masseuse:true,row:"idle",fx:"steam"},
   media:{bg:"gym",cap:"สื่อมาถ่ายทำสกู๊ปค่ายศิริชัย",camera:true,crew:true,row:"win",fx:"flash"},
   kids:{bg:"gym",cap:"คลาสมวยเด็กเล็ก ไหว้ครูกันพร้อมเพรียง",students:4,row:"guard",fx:"hearts"},
-  stall:{bg:"bg_camp.webp",tint:"rgba(255,160,60,.15)",cap:"บูธขนมครกที่ตลาดนัด หอมไปทั้งซอย",students:3,row:"idle",fx:"steam"},
+  stall:{bg:"bg_market.webp",tint:"rgba(255,160,60,.15)",cap:"บูธขนมครกที่ตลาดนัด หอมไปทั้งซอย",students:3,row:"idle",fx:"steam"},
   tourist:{bg:"gym",cap:"นักท่องเที่ยวมาลองเตะเป้าครั้งแรก",students:3,row:"knee",fx:"flash",camera:true},
-  trail:{bg:"bg_river_dawn.webp",tint:"rgba(40,90,40,.2)",cap:"วิ่งเทรลขึ้นดอยตอนเช้ามืด",walk:true,fx:"sparks"},
+  trail:{bg:"bg_hill.webp",tint:"rgba(40,90,40,.2)",cap:"วิ่งเทรลขึ้นดอยตอนเช้ามืด",walk:true,fx:"sparks"},
   tape:{bg:"gym",tint:"rgba(10,10,40,.55)",cap:"คืนดูเทปไฟต์เก่า จดจุดอ่อนคู่ชก",camera:true,row:"idle",fx:"flash"},
   fightnight:{bg:"bg_camp.webp",tint:"rgba(80,20,60,.25)",cap:"ไฟต์ไนท์ในค่าย คนดูแน่นเวที",spar:true,fx:"hearts"},
-  clinicday:{bg:"gym",tint:"rgba(40,120,120,.18)",cap:"วันฟื้นฟูที่คลินิกกายภาพ",masseuse:true,row:"idle",fx:"steam"},
+  clinicday:{bg:"bg_hospital.webp",tint:"rgba(40,120,120,.18)",cap:"วันฟื้นฟูที่คลินิกกายภาพ",masseuse:true,row:"idle",fx:"steam"},
   waikhru:{bg:"bg_temple.webp",tint:"rgba(255,180,80,.2)",cap:"พิธีไหว้ครูที่ศาลพ่อแก่",kneel:true,fx:"rice"},
   // v1.82.5: special investments get their own scene too
-  master:{bg:"bg_temple.webp",tint:"rgba(255,170,70,.22)",cap:"ครูมวยโบราณมาถ่ายทอดวิชาที่ลานค่าย",elder:true,row:"knee",fx:"stars"},
+  master:{bg:"bg_camp_day.webp",tint:"rgba(255,170,70,.22)",cap:"ครูมวยโบราณมาถ่ายทอดวิชาที่ลานค่าย",elder:true,row:"knee",fx:"stars"},
   hostshow:{bg:"bg_camp.webp",tint:"rgba(60,20,70,.3)",cap:"ศึกมวยค่ายศิริชัย คนดูแน่นลาน",spar:true,crowd:true,fx:"flash"},
 };
 function cfxRoster(){if(G&&typeof UI!=="undefined"&&UI.cfxIds&&UI.cfxIds.length)return UI.cfxIds.map(id=>G.F[id]).filter(Boolean);return (G?Object.values(G.F).filter(f=>f.camp==="player"):[]);}
@@ -9116,7 +9116,7 @@ AU.gsfx=function(kind,a){if(!this.init()||this.muted||!SETTINGS.sfx)return;const
   if(kind==="shimmer")for(let i=0;i<6;i++)T(i*.05,{f:1400+Math.random()*1400,type:"sine",dur:.12,peak:.06});};
 
 // ================= MUAY THAI MOE v1.3 — UI =================
-const VERSION="1.91.146";
+const VERSION="1.91.147";
 const CUR_LANG=(typeof window!=="undefined"&&window.LANG)||"th";
 const TH_LABEL=String.fromCharCode(3652,3607,3618);
 function langSwitch(cls){return `<div class="langsw ${cls||""}" role="group" aria-label="Language">${[["th",TH_LABEL],["en","EN"]].map(([k,l])=>`<button class="lsb ${CUR_LANG===k?"on":""}" data-act="setlang" data-v="${k}" aria-pressed="${CUR_LANG===k}">${l}</button>`).join("")}</div>`;}
@@ -15207,7 +15207,7 @@ for(const [k,v] of [["merit",6],["waikhru",10]]){const A=CAMP_ACTIONS[k];if(!A)c
   if(S.lowRun>=8&&gameWeek(G)-(S.nudge??-99)>=20){S.nudge=gameWeek(G);save();
     playScene([C("ผู้จัดการ… ครูขอคุยเรื่องบุญค่ายหน่อย"),C(`ตอนนี้บุญค่ายเราเหลือ ${S.merit} เอง ผีมาทุกเดือน เด็ก ๆ ไข้กันเป็นแถว ครูสวดมนต์จนเสียงแหบแล้ว`),
       C("ไม่ต้องทำบุญใหญ่ก็ได้ ตักบาตรเช้าสัปดาห์เว้นสัปดาห์ก็พอแล้ว ถูกด้วย สามร้อยบาท ไหว้ครูยิ่งดีใหญ่"),C("ดูได้ที่กิจกรรมค่ายนะ มีแถบ 🪷 บุญค่ายอยู่ข้างบน"),
-      {choice:[{t:"เข้าใจแล้วครับครู",then:[C("ดี! เดี๋ยวครูตื่นตีห้าไปซื้อของใส่บาตรรอ")]},{t:"บุญค่ายคืออะไรนะครับ",then:GH_HELP(G)}]}],done,{bg:"camp",look:"casual"});return true;}
+      {choice:[{t:"เข้าใจแล้วครู",then:[C("ดี! เดี๋ยวครูตื่นตีห้าไปซื้อของใส่บาตรรอ")]},{t:"บุญค่ายคืออะไรนะ",then:GH_HELP(G)}]}],done,{bg:"camp",look:"casual"});return true;}
   const y=ghYear(G);
   if(y>=4&&S.shrine&&S.f3&&!S.sulk&&!ghIn(G,GH_LENT())&&gameWeek(G)-(S.chAbs??(S.f3Abs||-99))>=16&&Math.random()<.2){S.chAbs=gameWeek(G);save();ghWander(done);return true;}
   return _s(done);};}
@@ -15413,7 +15413,7 @@ try{window.PXEMOJI={keys:Object.keys(R),svg:mk};}catch(e){}
 <script>
 (function(){
 /* v1.87: Thai code ships inside index.html; English code (en.js) and the dictionary (i18n.js) load only when needed */
-var B="76da786784";
+var B="897c427742";
 var L="";try{L=localStorage.getItem("mtm_lang")||"";}catch(e){}
 try{var h=(location.hash||"").match(/lang=(th|en)/);if(h)L=h[1];}catch(e){}
 if(L!=="th"&&L!=="en")L="th";

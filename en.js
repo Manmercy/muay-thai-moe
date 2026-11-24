@@ -6146,7 +6146,7 @@ const FS={cv:null,ctx:null,bg:null,A:null,B:null,fx:[],shake:0,
 // ---------- v1.19 CAMP ACTIVITY SCENES (short animated vignette before the result) ----------
 const CFX={
   merit:{bg:"bg_temple.webp",tint:"rgba(255,150,60,.18)",cap:"At dawn, everyone gets up to give alms in front of the camp",monks:true,fx:"rice",kneel:true},
-  rest:{bg:"bg_river.webp",tint:"rgba(20,30,70,.35)",cap:"Camp day off, lounging by the river, no training",fx:"z",row:"idle"},
+  rest:{bg:"bg_river_night.webp",tint:"rgba(20,30,70,.35)",cap:"Camp day off, lounging by the river, no training",fx:"z",row:"idle"},
   class:{bg:"gym",cap:"Sunday class, the yard full of students",students:3,row:"punch",fx:"stars"},
   promo:{bg:"gym",cap:"Live-streaming camp promo online",phone:true,row:"win",fx:"hearts"},
   repair:{bg:"gym",cap:"Repairing the camp together, fresh paint",walk:true,fx:"sparks",planks:true},
@@ -6158,7 +6158,7 @@ const CFX={
   kids:{bg:"gym",cap:"Kids' class, everyone doing the wai khru in unison",students:4,row:"guard",fx:"hearts"},
   stall:{bg:"bg_camp.webp",tint:"rgba(255,160,60,.15)",cap:"Khanom khrok stall at the market, smelling up the whole street",students:3,row:"idle",fx:"steam"},
   tourist:{bg:"gym",cap:"Tourists try kicking pads for the first time",students:3,row:"knee",fx:"flash",camera:true},
-  trail:{bg:"bg_river.webp",tint:"rgba(40,90,40,.2)",cap:"Dawn trail run up the mountain",walk:true,fx:"sparks"},
+  trail:{bg:"bg_river_dawn.webp",tint:"rgba(40,90,40,.2)",cap:"Dawn trail run up the mountain",walk:true,fx:"sparks"},
   tape:{bg:"gym",tint:"rgba(10,10,40,.55)",cap:"Old fight-tape night, noting opponent weaknesses",camera:true,row:"idle",fx:"flash"},
   fightnight:{bg:"bg_camp.webp",tint:"rgba(80,20,60,.25)",cap:"Camp fight night, packed ringside",spar:true,fx:"hearts"},
   clinicday:{bg:"gym",tint:"rgba(40,120,120,.18)",cap:"Recovery day at the physio clinic",masseuse:true,row:"idle",fx:"steam"},
@@ -6629,7 +6629,7 @@ AU.gsfx=function(kind,a){if(!this.init()||this.muted||!SETTINGS.sfx)return;const
   if(kind==="shimmer")for(let i=0;i<6;i++)T(i*.05,{f:1400+Math.random()*1400,type:"sine",dur:.12,peak:.06});};
 
 // ================= MUAY THAI MOE v1.3 — UI =================
-const VERSION="1.91.145";
+const VERSION="1.91.146";
 const CUR_LANG=(typeof window!=="undefined"&&window.LANG)||"th";
 const TH_LABEL=String.fromCharCode(3652,3607,3618);
 function langSwitch(cls){return `<div class="langsw ${cls||""}" role="group" aria-label="Language">${[["th",TH_LABEL],["en","EN"]].map(([k,l])=>`<button class="lsb ${CUR_LANG===k?"on":""}" data-act="setlang" data-v="${k}" aria-pressed="${CUR_LANG===k}">${l}</button>`).join("")}</div>`;}
@@ -6717,7 +6717,7 @@ const npcPortraitSrc=(im,st={})=>{if(im.startsWith("vector_")||im==="petchara")r
     return `${ASSET}npc_baiyok_${im==="baiyok_black"?"black":"white"}_${mood}.png`;
   }
   return im.startsWith("nl_")?`${ASSET}${im}.webp`:`${ASSET}npc_${im}.webp`;};
-const TIER_BG={evloy:"bg_river.webp",pro:"bg_fair_ring.webp",semi:"bg_hall.webp",local:"bg_local.webp",district:"bg_district.webp",final:"bg_final.webp",exhibition:"bg_fair_ring.webp",special:"bg_district.webp",lab:"bg_hall.webp",quest:"bg_food.webp",beast:"bg_fair_ring.webp",dm:"bg_hall.webp"};
+const TIER_BG={evloy:"bg_loy_ring.webp",pro:"bg_fair_ring.webp",semi:"bg_hall.webp",local:"bg_local.webp",district:"bg_district.webp",final:"bg_final.webp",exhibition:"bg_fair_ring.webp",special:"bg_district.webp",lab:"bg_hall.webp",quest:"bg_food.webp",beast:"bg_fair_ring.webp",dm:"bg_hall.webp"};
 
 /* v1.91.138 (Man): every scene shows where it happens — per-scene backgrounds read from where and when each scene takes place */
 const EV_BG={"kati_why": "gymdusk", "first_loss": "backstage", "kati_ourcamp": "camp_day", "night_final": "gymdusk", "district_mid": "gymdusk", "storm": "camp_rain", "kati_knee": "camp", "daeng_past": "gymdusk", "me_photo": "letter", "ploy_ko40": "camp", "kati_overwork": "gymdusk", "rin_notebook": "camp", "bb_kati_55": "camp_rain", "bb_mali_55": "gymdusk", "bb_rin_55": "camp", "bb_ploy_55": "hall", "hs_rin_15": "camp", "hs_fah_12": "camp_rain", "hf_coach_letter": "letter", "bday_ploy": "newyear", "pet_cat": "camp_rain", "ploy_injury": "hospital", "by_leave": "market_morning", "y5_vector_contract": "camp", "vector_annual_letter": "letter", "ploy_surge": "gymdusk", "fah_surge": "hill", "xlh_pailin_1": "dorm_room", "y2_ploy_team": "camp", "rival_meet": "night_north", "coach_money": "gymdusk", "fame36": "camp_day", "fame60": "camp_day", "tiger_news": "camp", "tempt_mali": "kitchen", "tempt_rin": "cafe", "tempt_ploy": "night", "feud_mali_rin": "dorm_room", "hs_kati_12": "dorm_room", "hs_kati_15": "market_morning", "hs_mali_12": "camp_day", "hs_fah_30": "grandma_home", "mem_kati_bike": "camp_day", "mali_day1": "camp_day", "bday_kati": "songkran", "fest_newyear": "market", "fest_krathong": "camp_day", "pet_turtle": "market_morning", "petx_cat_rin": "kitchen", "bday_baibua": "loy_night", "bday_tabtim": "songkran", "bday_alicia": "newyear", "c_kati_fah": "night_north", "c_dinner": "night", "c3_trio_dinner": "night", "first_student": "camp_day", "rin_meet": "camp_day", "fah_night": "conv_night", "mali_family": "camp_day", "pre_qual": "camp", "new_sign": "camp_day", "up_full": "camp_day", "fame20": "camp_day", "fame50": "camp_day", "first_class": "camp_day", "debt_visit": "camp_day", "lv_val": "camp_day", "lv_hm2": "camp_day", "lv_hmr": "camp_day", "lv_hm3": "rooftop", "lv_hy_newyear": "rooftop", "open_day": "camp_day", "buyout": "camp_day", "tempt_kati": "dorm_room", "tempt_fah": "camp_day", "ploy_prefinal": "backstage", "fah_prefinal": "backstage", "sp_mali_share": "backstage", "fah_mali": "night_north", "bb_rin_20": "dorm_room", "bb_fah_20": "camp_day", "bb_fah_55": "grandma_home", "hs_kati_30": "camp_day", "hs_mali_25": "camp_day", "hs_rin_12": "dorm_room", "hs_rin_25": "lecture_hall", "hs_ploy_15": "river_night", "fah_trainer": "river_night", "hs_ploy_30": "hall", "sp_fah_respect": "camp_day", "rin_note": "camp_day", "poach": "camp_day", "year_open": "camp_day", "pet_dog": "camp_day", "pet_rooster": "camp_day", "petx_dog_mali": "camp_day", "petx_rooster_kati": "night", "petx_turtle_fah": "camp_day", "fah_join": "camp_day", "ploy_visit3": "camp_day", "y2_cross_fah_ploy": "gymdusk", "y2_fah_rooftop": "rooftop", "y5_vector_arrive": "camp_day", "vector_annual_return": "vector_lab", "drain_rooster": "market", "drain_banquet": "night", "drain_durian": "camp_day", "drain_flamingo": "camp_day", "camp_clean_day": "camp_day", "camp_open_house": "camp_day", "nai_color": "camp_day", "yt_intro_flood": "camp_day", "yt_flood_hit": "camp_rain", "yt_flood_end": "camp_day", "yt_intro_sponsor": "camp_day", "yt_intro_tourist": "camp_day", "xlh_pailin_2": "camp_day", "xl_join_prod_B": "camp_day", "xll_prod_B_0": "temple", "xll_prod_B_2": "dorm_room", "c_fah_ploy": "backstage", "c_fah_sulk": "fair_ring", "h_rooster": "camp_day", "h_kid": "camp_day", "d_tourists": "camp_day", "d_tiktok": "camp_day", "d_noodle": "kitchen", "d_poor_kid": "camp_day"};
@@ -8911,7 +8911,7 @@ const QK={
 const BELT_WEEKS=[10,18,26,34,42];
 const STADIUMS={
  tha:{name:"Tha Phae Stadium",scene:"district",bg:"bg_district.webp",weeks:[10,18,26,34,42],minYear:1,win:15000,defend:10000},
- ping:{name:"Ping Riverside Stadium",scene:"river",bg:"bg_river.webp",weeks:[15,30,45],minYear:2,win:18000,defend:12000},
+ ping:{name:"Ping Riverside Stadium",scene:"loy_ring",bg:"bg_loy_ring.webp",weeks:[15,30,45],minYear:2,win:18000,defend:12000},
  lanna:{name:"Lanna Stadium",scene:"hall",bg:"bg_hall.webp",weeks:[22,38,48],minYear:3,win:22000,defend:14000}
 };
 function beltStore(G,venue="tha"){if(venue==="tha")return G.belt=G.belt||{};G.venueBelts=G.venueBelts||{};return G.venueBelts[venue]=G.venueBelts[venue]||{};}
@@ -8932,7 +8932,7 @@ function beltBracketHTML(D){const title=STADIUMS[D.belt.venue].name+" · "+D.bel
   const columns=[D.slots,D.w[0],D.w[1],D.w[2]].map((L,r)=>`<div class="dmcol"><h4>${["8","4","2","🏆"][r]}</h4>${L.map(id=>`<div class="dmc ${dmMine(id)?"mine":""}">${nm(id)}</div>`).join("")}</div>`).join("");
   const action=D.done?`<p class="center goldt">🏆 ${nm(D.champ)} · ${fmt(D.prize||0)}</p><button class="btn primary" data-act="dmclose">Back to camp</button>`:nx?`<button class="btn primary" data-act="dmgo" data-id="${dmMine(nx[0])?nx[0]:nx[1]}" data-v="${dmMine(nx[0])?nx[1]:nx[0]}">${nm(nx[0])} vs ${nm(nx[1])} ▸</button>`:"";
   return `<h2>Belt Tournament ${title}</h2><p class="meta">Same division · single elimination · five rounds a bout</p><div class="dmb">${columns}</div>${action}`;}
-const QGRP_BG={gang:"bg_market_morning.webp",rooster:"bg_rooster.webp",bull:"bg_farm.webp"};
+const QGRP_BG={gang:"bg_market.webp",rooster:"bg_rooster.webp",bull:"bg_farm.webp"};
 /* v1.91.83 (Man): the quest foes kept pace with her stats only, so a late-game girl with a full skill tree outgrew even the bosses.
    They now read a fifth of her hidden edge (the season bonus halved to make room) (skills, perks, level) like the Loy thief, carry whatever the stat ceiling cannot hold as ring craft,
    and fight with their own signature skills (cut-in + burst, like the Naka League) — minions one, lieutenants two, bosses three */
@@ -9115,7 +9115,7 @@ function startQuest(spec,fid,done){const f=G.F[fid];if(!f){done&&done();return;}
   const opp=spec.npc||makeQ(G,spec.qk,fid,spec.tag||("w"+G.week));const tier="quest";
   const b={id:"q"+G.week+"_"+fid+"_"+Math.floor(Math.random()*1e4),a:fid,b:opp,week:G.week,tier,rounds:spec.rounds||3,win:spec.purse||0,lose:0,quest:spec};
   b.title=spec.q==="belt"?STADIUMS[spec.venue||"tha"].name+" · "+spec.div:spec.q==="gang"?"Market Stall Brawl":spec.q==="rooster"||spec.q==="cow"||spec.q==="bull"?"Wild bout":null;
-  b.bg=spec.bg||(spec.rematch||spec.hq?"bg_gang_hideout.webp":spec.q==="belt"?"bg_district.webp":spec.npc?"bg_food.webp":QGRP_BG[QK[spec.qk].grp]);
+  b.bg=spec.bg||(spec.rematch||spec.hq?"bg_gang_hideout.webp":spec.q==="belt"?STADIUMS[spec.venue||"tha"].bg:spec.npc?"bg_food.webp":QGRP_BG[QK[spec.qk].grp]);
   if(typeof questPlan==="function"){questPlan(b,()=>openFight(b,()=>questAfter(b,done)));return;}
   openFight(b,()=>questAfter(b,done));}
 const GANG_HQ_TAUNT={gang3:"At the market you're tough, but this is my turf!",gang4:"Finally! No market aunties to cheer for you here. The Silver Helmet will teach you some manners.",gang6:"The boss said you don't walk out of this warehouse easily."};
@@ -9256,7 +9256,7 @@ Object.assign(ACT,{
   mdecl:d=>{const m=G.mail.find(x=>x.id===d.v);if(!m)return;m.done=true;m.declined=true;if(m.q==="gang"&&G.gang)G.gang.nextAbs=gameWeek(G)+(G.loan>0?2:4);save();render();},
   macc:d=>{UI.modal={type:"qpick",id:d.v};render();},
   qsend:d=>{const m=G.mail.find(x=>x.id===d.v),f=G.F[d.id];if(!m||m.done||m.expired||!f||f.camp!=="player")return;{const why=qpickWhy(f);if(why){toast(`${f.name} ${why}`);return;}}if(!qpickOK(m,f))return;if(m.q==="belt"&&!m.defend){const D=beltTournament(G,m,d.id);if(!D)return;G.dm=D;m.done=true;UI.modal={type:"dm"};dmAdvance();save();render();return;}if(m.q==="belt"&&m.defend&&beltHolder(G,m.div,m.venue||"tha")?.id!==d.id)return;if(m.q==="belt"&&m.defend&&(!G.F[m.npc]||G.F[m.npc].div!==m.div||G.F[m.npc].injury||isBooked(G,m.npc,G.week))){const nc=beltChallenger(G,m.div,m.defend);if(!nc){toast("The challenger can't fight this week — try again next week");return;}m.npc=nc.id;}m.done=true;UI.modal=null;
-    const spec=m.q==="belt"?{q:"belt",npc:m.npc,pay:m.pay,from:m.from,div:m.div,defend:m.defend,venue:m.venue||"tha",bg:m.bg,rounds:5}:m.q==="challenge"?{q:"challenge",npc:m.npc,pay:m.pay,from:m.from}:{q:m.q,qk:m.qk,hq:m.hq,pay:m.pay,from:m.from,rounds:m.qk==="gang5"?4:3};
+    const spec=m.q==="belt"?{q:"belt",npc:m.npc,pay:m.pay,from:m.from,div:m.div,defend:m.defend,venue:m.venue||"tha",bg:STADIUMS[m.venue||"tha"].bg,rounds:5}:m.q==="challenge"?{q:"challenge",npc:m.npc,pay:m.pay,from:m.from}:{q:m.q,qk:m.qk,hq:m.hq,pay:m.pay,from:m.from,rounds:m.qk==="gang5"?4:3};
     const intro=m.q==="gang"&&m.hq?[{n:"nar",t:"The warehouse behind the morning market, dimly lit. Red-helmet goons sit around a table with a map. The moment Sirichai camp walks in, they all jump to their feet."},{n:"npc",who:QK[m.qk].name,t:GANG_HQ_TAUNT[m.qk]||"Finally! No market aunties to cheer for you here."},{n:d.id,f:"angry",l:"fight",t:"Here as promised!"}]
       :m.q==="gang"?[{n:"nar",t:"Morning market… more than ten motorbikes are lined up in front of the vegetable stalls"},{n:"npc",who:QK[m.qk].name,t:m.early?"My boys lost to you again and again. My name's mud! And your camp still owes me. Today I handle you myself!":m.qk==="gang5"?"I hear some fight camp is meddling in my business. Today the big boss came down himself!":m.qk==="gang4"?"My red-helmet boys got chased off by camp kids? This Silver Helmet will teach you some manners.":m.qk==="gang6"?"The boss needn't waste his strength. His right hand can handle this.":"So who chased off my boys? Come on out!"},{n:d.id,f:"angry",l:"fight",t:"Me!"}]
       :m.q==="belt"?[{n:"nar",t:`${STADIUMS[m.venue||"tha"].name}. Spotlights hit the center of the ring as the announcer calls both corners.`},{n:"npc",who:G.F[m.npc].name,t:m.defend?"That belt should be mine. Today I'm taking it back.":"Want the belt? You'll have to get through me first."},{n:d.id,f:"angry",l:"fight",t:m.defend?"Come and take it, then!":"That's exactly why I'm here!"}]
@@ -12779,7 +12779,7 @@ const PX={
  turtle:{pas:p=>`Everyone's morale +1${p.lv>=5?"~2":""} (rolled weekly)`,tal:["Calm: injured fighters may heal early","Calm: injuries heal early more often","Sacred turtle: injuries heal much faster"],
   modes:[["Pat the shell",15,10,0],["Slow walk",5,20,0],["Feed morning glory",25,6,20]],bg:"bg_camp_day.webp"},
  otter:{pas:p=>`Everyone's fatigue −1 (rolled weekly)`,tal:["Viral clips: a little reputation","Viral clips: reputation up more often","TikTok star otter: reputation up every week"],
-  modes:[["Play in the water",15,10,0],["Swim training",5,20,0],["Feed little fish",25,6,50]],bg:"bg_river.webp"}};
+  modes:[["Play in the water",15,10,0],["Swim training",5,20,0],["Feed little fish",25,6,50]],bg:"bg_river_dawn.webp"}};
 const PLINE={
  cat:[[" rolls over for belly scratches and purrs loud enough for the whole camp"," pounces at the red dot and crashes into the heavy bag"," finishes the whole pack of treats and stares at you for more"]," walks off to sleep on Kru Daeng's gym bag, ignoring everyone"," leaps the fence and runs into the rice fields after a rat!"],
  dog:[[" fetches the ball and drops it at your feet, tail spinning like a propeller"," leads the run round camp until the fighters are gasping"," shakes off and soaks the whole yard"]," lies flat by the ring with a long sigh — not today"," spots a buffalo in the field and chases it barking, refusing to come back!"],

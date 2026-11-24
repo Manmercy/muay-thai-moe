@@ -629,7 +629,7 @@ for(const [k,v] of [["merit",6],["waikhru",10]]){const A=CAMP_ACTIONS[k];if(!A)c
   if(S.lowRun>=8&&gameWeek(G)-(S.nudge??-99)>=20){S.nudge=gameWeek(G);save();
     playScene([C("Manager… can we talk about the camp's merit?"),C(`Our camp merit is down to ${S.merit}. Ghosts every month, the kids down with fevers one after another, and I've chanted myself hoarse.`),
       C("No need for anything big. Morning alms every other week is enough, and it's cheap — three hundred baht. A wai kru is even better."),C("It's in camp activities — the 🪷 camp merit bar is at the top."),
-      {choice:[{t:"Understood, Kru.",then:[C("Good! I'll get up at five and buy the alms food.")]},{t:"What is camp merit again?",then:GH_HELP(G)}]}],done,{bg:"camp",look:"casual"});return true;}
+      {choice:[{t:"Got it, Coach",then:[C("Good! I'll get up at five and buy the alms food.")]},{t:"What is camp merit, again?",then:GH_HELP(G)}]}],done,{bg:"camp",look:"casual"});return true;}
   const y=ghYear(G);
   if(y>=4&&S.shrine&&S.f3&&!S.sulk&&!ghIn(G,GH_LENT())&&gameWeek(G)-(S.chAbs??(S.f3Abs||-99))>=16&&Math.random()<.2){S.chAbs=gameWeek(G);save();ghWander(done);return true;}
   return _s(done);};}

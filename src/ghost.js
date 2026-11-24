@@ -629,7 +629,7 @@ for(const [k,v] of [["merit",6],["waikhru",10]]){const A=CAMP_ACTIONS[k];if(!A)c
   if(S.lowRun>=8&&gameWeek(G)-(S.nudge??-99)>=20){S.nudge=gameWeek(G);save();
     playScene([C("ผู้จัดการ… ครูขอคุยเรื่องบุญค่ายหน่อย"),C(`ตอนนี้บุญค่ายเราเหลือ ${S.merit} เอง ผีมาทุกเดือน เด็ก ๆ ไข้กันเป็นแถว ครูสวดมนต์จนเสียงแหบแล้ว`),
       C("ไม่ต้องทำบุญใหญ่ก็ได้ ตักบาตรเช้าสัปดาห์เว้นสัปดาห์ก็พอแล้ว ถูกด้วย สามร้อยบาท ไหว้ครูยิ่งดีใหญ่"),C("ดูได้ที่กิจกรรมค่ายนะ มีแถบ 🪷 บุญค่ายอยู่ข้างบน"),
-      {choice:[{t:"เข้าใจแล้วครับครู",then:[C("ดี! เดี๋ยวครูตื่นตีห้าไปซื้อของใส่บาตรรอ")]},{t:"บุญค่ายคืออะไรนะครับ",then:GH_HELP(G)}]}],done,{bg:"camp",look:"casual"});return true;}
+      {choice:[{t:"เข้าใจแล้วครู",then:[C("ดี! เดี๋ยวครูตื่นตีห้าไปซื้อของใส่บาตรรอ")]},{t:"บุญค่ายคืออะไรนะ",then:GH_HELP(G)}]}],done,{bg:"camp",look:"casual"});return true;}
   const y=ghYear(G);
   if(y>=4&&S.shrine&&S.f3&&!S.sulk&&!ghIn(G,GH_LENT())&&gameWeek(G)-(S.chAbs??(S.f3Abs||-99))>=16&&Math.random()<.2){S.chAbs=gameWeek(G);save();ghWander(done);return true;}
   return _s(done);};}
