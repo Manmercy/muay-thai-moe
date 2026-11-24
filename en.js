@@ -6145,7 +6145,7 @@ const FS={cv:null,ctx:null,bg:null,A:null,B:null,fx:[],shake:0,
 
 // ---------- v1.19 CAMP ACTIVITY SCENES (short animated vignette before the result) ----------
 const CFX={
-  merit:{bg:"bg_temple.webp",tint:"rgba(255,150,60,.18)",cap:"At dawn, everyone gets up to give alms in front of the camp",monks:true,fx:"rice",kneel:true},
+  merit:{bg:"bg_camp_day.webp",tint:"rgba(255,150,60,.18)",cap:"At dawn, everyone gets up to give alms in front of the camp",monks:true,fx:"rice",kneel:true},
   rest:{bg:"bg_river_night.webp",tint:"rgba(20,30,70,.35)",cap:"Camp day off, lounging by the river, no training",fx:"z",row:"idle"},
   class:{bg:"gym",cap:"Sunday class, the yard full of students",students:3,row:"punch",fx:"stars"},
   promo:{bg:"gym",cap:"Live-streaming camp promo online",phone:true,row:"win",fx:"hearts"},
@@ -6156,15 +6156,15 @@ const CFX={
   massage:{bg:"gym",tint:"rgba(80,40,20,.25)",cap:"A Thai masseuse loosens everyone up",masseuse:true,row:"idle",fx:"steam"},
   media:{bg:"gym",cap:"Press filming a feature on Sirichai",camera:true,crew:true,row:"win",fx:"flash"},
   kids:{bg:"gym",cap:"Kids' class, everyone doing the wai khru in unison",students:4,row:"guard",fx:"hearts"},
-  stall:{bg:"bg_camp.webp",tint:"rgba(255,160,60,.15)",cap:"Khanom khrok stall at the market, smelling up the whole street",students:3,row:"idle",fx:"steam"},
+  stall:{bg:"bg_market.webp",tint:"rgba(255,160,60,.15)",cap:"Khanom khrok stall at the market, smelling up the whole street",students:3,row:"idle",fx:"steam"},
   tourist:{bg:"gym",cap:"Tourists try kicking pads for the first time",students:3,row:"knee",fx:"flash",camera:true},
-  trail:{bg:"bg_river_dawn.webp",tint:"rgba(40,90,40,.2)",cap:"Dawn trail run up the mountain",walk:true,fx:"sparks"},
+  trail:{bg:"bg_hill.webp",tint:"rgba(40,90,40,.2)",cap:"Dawn trail run up the mountain",walk:true,fx:"sparks"},
   tape:{bg:"gym",tint:"rgba(10,10,40,.55)",cap:"Old fight-tape night, noting opponent weaknesses",camera:true,row:"idle",fx:"flash"},
   fightnight:{bg:"bg_camp.webp",tint:"rgba(80,20,60,.25)",cap:"Camp fight night, packed ringside",spar:true,fx:"hearts"},
-  clinicday:{bg:"gym",tint:"rgba(40,120,120,.18)",cap:"Recovery day at the physio clinic",masseuse:true,row:"idle",fx:"steam"},
+  clinicday:{bg:"bg_hospital.webp",tint:"rgba(40,120,120,.18)",cap:"Recovery day at the physio clinic",masseuse:true,row:"idle",fx:"steam"},
   waikhru:{bg:"bg_temple.webp",tint:"rgba(255,180,80,.2)",cap:"Wai khru ceremony at the shrine",kneel:true,fx:"rice"},
   // v1.82.5: special investments get their own scene too
-  master:{bg:"bg_temple.webp",tint:"rgba(255,170,70,.22)",cap:"An old-school master teaches in the camp yard",elder:true,row:"knee",fx:"stars"},
+  master:{bg:"bg_camp_day.webp",tint:"rgba(255,170,70,.22)",cap:"An old-school master teaches in the camp yard",elder:true,row:"knee",fx:"stars"},
   hostshow:{bg:"bg_camp.webp",tint:"rgba(60,20,70,.3)",cap:"Fight night at Sirichai Gym, the yard packed with fans",spar:true,crowd:true,fx:"flash"},
 };
 function cfxRoster(){if(G&&typeof UI!=="undefined"&&UI.cfxIds&&UI.cfxIds.length)return UI.cfxIds.map(id=>G.F[id]).filter(Boolean);return (G?Object.values(G.F).filter(f=>f.camp==="player"):[]);}
@@ -6629,7 +6629,7 @@ AU.gsfx=function(kind,a){if(!this.init()||this.muted||!SETTINGS.sfx)return;const
   if(kind==="shimmer")for(let i=0;i<6;i++)T(i*.05,{f:1400+Math.random()*1400,type:"sine",dur:.12,peak:.06});};
 
 // ================= MUAY THAI MOE v1.3 — UI =================
-const VERSION="1.91.146";
+const VERSION="1.91.147";
 const CUR_LANG=(typeof window!=="undefined"&&window.LANG)||"th";
 const TH_LABEL=String.fromCharCode(3652,3607,3618);
 function langSwitch(cls){return `<div class="langsw ${cls||""}" role="group" aria-label="Language">${[["th",TH_LABEL],["en","EN"]].map(([k,l])=>`<button class="lsb ${CUR_LANG===k?"on":""}" data-act="setlang" data-v="${k}" aria-pressed="${CUR_LANG===k}">${l}</button>`).join("")}</div>`;}
@@ -12721,7 +12721,7 @@ for(const [k,v] of [["merit",6],["waikhru",10]]){const A=CAMP_ACTIONS[k];if(!A)c
   if(S.lowRun>=8&&gameWeek(G)-(S.nudge??-99)>=20){S.nudge=gameWeek(G);save();
     playScene([C("Manager… can we talk about the camp's merit?"),C(`Our camp merit is down to ${S.merit}. Ghosts every month, the kids down with fevers one after another, and I've chanted myself hoarse.`),
       C("No need for anything big. Morning alms every other week is enough, and it's cheap — three hundred baht. A wai kru is even better."),C("It's in camp activities — the 🪷 camp merit bar is at the top."),
-      {choice:[{t:"Understood, Kru.",then:[C("Good! I'll get up at five and buy the alms food.")]},{t:"What is camp merit again?",then:GH_HELP(G)}]}],done,{bg:"camp",look:"casual"});return true;}
+      {choice:[{t:"Got it, Coach",then:[C("Good! I'll get up at five and buy the alms food.")]},{t:"What is camp merit, again?",then:GH_HELP(G)}]}],done,{bg:"camp",look:"casual"});return true;}
   const y=ghYear(G);
   if(y>=4&&S.shrine&&S.f3&&!S.sulk&&!ghIn(G,GH_LENT())&&gameWeek(G)-(S.chAbs??(S.f3Abs||-99))>=16&&Math.random()<.2){S.chAbs=gameWeek(G);save();ghWander(done);return true;}
   return _s(done);};}
