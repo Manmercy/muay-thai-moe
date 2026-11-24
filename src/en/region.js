@@ -1441,10 +1441,74 @@ const RG_SIDE={
   lose:G=>[{n:"npc",who:"Hia Long",t:"Ha! So that's all a boxing camp's got. We'll be back tomorrow!"},
    {n:"baibua",f:"sad",l:"casual",t:"It's all right. Everyone's hurt already, go back and rest... you came to help, that's enough to make me happy."},
    {n:"coach",t:"Next time we're up north, we take it back."}],
+  /* v1.91.126 (Man): the massage minigame, then Krerk's offer — she turns it down */
+  after:(G,T,cb)=>{const ids=[...new Set(T.sideFought||[])];
+   playScene([{n:"baibua",f:"sad",l:"casual",t:"Everyone's bruised all over... come into the spa first. I'll give you a massage."},
+    {n:"baibua",f:"flustered",l:"casual",t:"Manager, help me, please. I'll teach you to find the sen lines. So many are hurt, my two hands can't keep up."}],()=>RG_MAS.open(ids,q=>playScene([
+    {n:"baibua",f:q!=null&&q>=.6?"happy":"flustered",l:"casual",t:q!=null&&q>=.6?"You find the sen lines like you've done massage before... Mum would hire you for sure.":"A bit heavy-handed, but everyone's sleeping soundly now. Not bad."},
+    {n:"nar",t:"Before the massage is even finished, a long black car pulls up outside the spa, its headlights cutting through the bamboo blinds."},
+    {n:"nar",show:[{id:"npc:krerk"}],t:"Krerk Naka steps out of the back seat, his dark suit without a single crease."},
+    {n:"npc",who:"Khun Krerk",t:"Forgive me for coming so late. I've known about the Jin Long resort since last month."},
+    {n:"npc",who:"Khun Krerk",t:"Miss Baibua, if you sign with the Naka League, one phone call from me and tomorrow no one will dare touch this land again. The camp, the spa, your mother's lotus pond, all safe."},
+    {n:"nar",show:[{id:"baibua",l:"casual"}],t:"Baibua grips the hem of her shirt and glances at the manager.",choice:[
+     {t:"Say nothing and let Baibua decide",fx:G2=>rgMeet(G2,"baibua",2)},
+     {t:"\"Our camp can help, without you having to trade anything\"",fx:G2=>rgMeet(G2,"baibua",3)}]},
+    {n:"baibua",f:"happy",l:"casual",t:"Thank you, Mr. Krerk. But this is my home, and I'll fight for it myself... with the people who stood beside me tonight."},
+    {n:"npc",who:"Khun Krerk",t:"I respect your answer."},
+    {n:"npc",who:"Khun Krerk",t:"But remember, luck doesn't always side with good people... I know that better than anyone."},
+    {n:"nar",show:[{id:"baibua",l:"casual"}],t:"The black car backs slowly out of the lane. Baibua stands still until its tail lights are gone, her hands still shaking."},
+    {n:"baibua",f:"flustered",l:"casual",t:"I almost said yes... if you hadn't been standing right here."}],cb,{bg:"camp_buatasao",look:"casual"})),{bg:"camp_buatasao",look:"casual"});},
   /* the trouble ends: the evidence works, the resort backs off */
   done:(G,how)=>addMail(G,{kind:"letter",from:"Baibua",title:"News from Bua Tha Sao",body:how==="news"?
    "Dear Manager,\n\nWe made the front page of the Uttaradit paper: \"Resort hires thugs to harass local spa.\" The whole province shared it. The Jin Long resort came out to apologise and withdrew its offer for our land.\n\nMum is sending free massage cards for the whole camp. They're good for life.\n\nBaibua":
    "Dear Manager,\n\nThe police called Sia Jin Long in for questioning. The messages on that phone were so clear he couldn't argue. This morning the resort sent a letter withdrawing its offer for our land.\n\nDad says that on the day you stood waiting with me outside the police station, he saw it from the car window... he smiled all day.\n\nBaibua"})}};
+/* v1.91.126 (Man): Baibua's minigame — traditional Thai massage at the Bua Tha Sao spa after the Jin Long fight.
+   A ring closes on each pressure point along the sen lines; tap as it meets the point. Three grades: ตรงเส้น / ใกล้เส้น / พลาด. */
+const RG_MAS={st:null,N:6,
+  css(){if(document.getElementById("rgmas-css"))return;const s=document.createElement("style");s.id="rgmas-css";s.textContent=`
+#rgmas{background:linear-gradient(rgba(10,6,22,.72),rgba(10,6,22,.88)),url(a/bg_camp_buatasao.webp) center/cover}#rgmas .mbox{gap:8px}#rgmas .mspa{position:relative;width:100%;aspect-ratio:3/4;max-height:58vh;margin:0 auto;background:linear-gradient(#3a2a22,#2a1d18);border:3px solid #6b4a32;image-rendering:pixelated;overflow:hidden}
+#rgmas .mback{position:absolute;left:22%;right:22%;top:8%;bottom:6%;background:#d9a77c;border-radius:42% 42% 18% 18%/22% 22% 10% 10%;box-shadow:inset -8px 0 0 #c48e63,inset 8px 0 0 #e6b88f}
+#rgmas .msen{position:absolute;top:14%;bottom:10%;width:2px;background:repeating-linear-gradient(#9a5b38 0 6px,transparent 6px 12px);opacity:.7}
+#rgmas .mpt{position:absolute;width:44px;height:44px;margin:-22px 0 0 -22px;border:0;padding:0;background:none;touch-action:manipulation}
+#rgmas .mpt i{position:absolute;left:14px;top:14px;width:16px;height:16px;background:#7a2f1c;border:2px solid #f6d7a8}
+#rgmas .mpt b{position:absolute;left:50%;top:50%;width:44px;height:44px;margin:-22px 0 0 -22px;border:3px solid #ffe08a;transform-origin:center}
+#rgmas .mpt.p i{background:#ffd34d}#rgmas .mpt.g i{background:#9bd36a}#rgmas .mpt.m i{background:#555}
+#rgmas .mpt.p b,#rgmas .mpt.g b,#rgmas .mpt.m b{display:none}
+#rgmas .mpop{position:absolute;transform:translate(-50%,-140%);font-weight:700;text-shadow:0 2px 0 #000;pointer-events:none;white-space:nowrap}
+#rgmas .mtip{min-height:2.6em;text-align:center}#rgmas .mhead{display:flex;align-items:center;gap:8px}#rgmas .mhead img{width:40px;height:40px;image-rendering:pixelated}`;document.head.appendChild(s);},
+  el(){return document.getElementById("rgmas");},
+  open(ids,done){const L=ids.filter(id=>G.F[id]);if(!L.length){done&&done(null);return;}this.css();
+    let el=this.el();if(!el){el=document.createElement("div");el.id="rgmas";el.className="mgame";document.body.appendChild(el);}
+    this.st={ids:L,i:0,hit:{p:0,g:0,m:0},per:[],done,phase:"intro"};this.draw();},
+  tips:["Press with the breath. Breathe out, then press down.","This line runs up from the waist. Slowly, no need to rush.","Press on the line and hold, count one to three, the way Mum taught me."],
+  draw(){const S=this.st,el=this.el();if(!S||!el)return;const f=G.F[S.ids[S.i]];
+    if(S.phase==="intro"){el.innerHTML=`<div class="mbox px"><h2>Thai massage · Bua Tha Sao spa</h2>
+      <div class="mhead"><img src="${faceSrc("baibua","happy")}" alt=""><span>${S.i===0?"The ring closes in on the point on the line. Tap right when it covers the point.":esc(this.tips[S.i%this.tips.length])}</span></div>
+      <p class="center">Person ${S.i+1}/${S.ids.length} · <b>${esc(f.name)}</b> · fatigue ${Math.round(f.fatigue||0)}</p>
+      <div class="mfoot roadbtns"><button class="btn primary" data-ms="go">Start massage ▸</button></div></div>`;
+      el.onclick=e=>{const b=e.target.closest("[data-ms]");if(b&&b.dataset.ms==="go")this.start();else if(b&&b.dataset.ms==="end")this.close();};return;}
+    if(S.phase==="play"){el.innerHTML=`<div class="mbox px"><div class="mhead"><img src="${faceSrc(f.id,"happy")}" alt=""><b>${esc(f.name)}</b><span style="margin-left:auto">Point <b id="msn">1</b>/${this.N}</span></div>
+      <div class="mspa" id="msspa"><div class="mback"></div><div class="msen" style="left:40%"></div><div class="msen" style="left:60%"></div></div>
+      <p class="mtip meta" id="mstip">${esc(this.tips[S.i%this.tips.length])}</p></div>`;return;}
+    if(S.phase==="end"){const R=S.res;el.innerHTML=`<div class="mbox px"><h2>${R.q>=.8?"Just the right pressure!":R.q>=.5?"Not bad. Almost there.":"It's all right. Practise slowly."}</h2>
+      <div class="mhead"><img src="${faceSrc("baibua",R.q>=.5?"happy":"flustered")}" alt=""><span>On the sen ${S.hit.p} · close ${S.hit.g} · Miss ${S.hit.m}</span></div>
+      <p class="center">${R.lines.join("<br>")}</p><div class="mfoot roadbtns"><button class="btn primary" data-ms="end">Done ▸</button></div></div>`;}},
+  start(){const S=this.st;S.phase="play";S.k=0;S.got={p:0,g:0,m:0};this.draw();const spa=document.getElementById("msspa");
+    const P=[];for(let k=0;k<this.N;k++)P.push({x:k%2?60:40,y:24+k*11+(Math.random()*4-2)});S.pts=P;
+    const DUR=1150-S.i*120;let k=0;const spawn=()=>{if(this.st!==S||S.phase!=="play")return;if(k>=this.N)return;this.point(spa,P[k],DUR,k);k++;if(k<this.N)S.to=setTimeout(spawn,DUR*.62);};spawn();},
+  point(spa,p,DUR,k){const S=this.st,b=document.createElement("button");b.className="mpt";b.style.left=p.x+"%";b.style.top=p.y+"%";b.innerHTML="<i></i><b></b>";spa.appendChild(b);
+    const t0=performance.now(),ring=b.querySelector("b");let done=false;
+    const grade=(g)=>{if(done)return;done=true;b.classList.add(g);S.got[g]++;S.hit[g]++;const t=document.createElement("span");t.className="mpop";t.style.left=p.x+"%";t.style.top=p.y+"%";
+      t.textContent=g==="p"?"On the sen!":g==="g"?"Close":"Miss";t.style.color=g==="p"?"#ffd34d":g==="g"?"#9bd36a":"#bbb";spa.appendChild(t);setTimeout(()=>t.remove(),600);
+      AU.sfx&&AU.sfx(g==="m"?"miss":"ui");const n=document.getElementById("msn");if(n)n.textContent=Math.min(this.N,S.k+2);S.k++;if(S.k>=this.N)setTimeout(()=>this.patientDone(),550);};
+    b.addEventListener("pointerdown",e=>{e.preventDefault();const d=Math.abs(performance.now()-t0-DUR);grade(d<110?"p":d<260?"g":"m");});
+    const tick=()=>{if(done||this.st!==S)return;const u=(performance.now()-t0)/DUR;ring.style.transform=`scale(${Math.max(.36,2.4-2.04*u).toFixed(3)})`;if(u>1+260/DUR){grade("m");return;}requestAnimationFrame(tick);};tick();},
+  patientDone(){const S=this.st;if(!S||S.phase!=="play")return;const q=(S.got.p+.6*S.got.g)/this.N;S.per.push({id:S.ids[S.i],q});S.i++;
+    if(S.i<S.ids.length){S.phase="intro";this.draw();return;}this.finish();},
+  finish(){const S=this.st,tot=S.per.length*this.N,q=(S.hit.p+.6*S.hit.g)/tot,lines=[];
+    for(const P of S.per){const f=G.F[P.id];if(!f)continue;const fa=Math.round(8+16*P.q),mo=Math.round(2+4*P.q);f.fatigue=Math.max(0,(f.fatigue||0)-fa);f.morale=Math.min(100,(f.morale||0)+mo);lines.push(`${esc(f.name)} fatigue −${fa} · morale +${mo}`);}
+    const bd=2+Math.round(3*q);rgMeet(G,"baibua",bd);G.region.masBest=Math.max(G.region.masBest||0,q);save();S.res={q,lines};S.phase="end";this.draw();AU.sfx&&AU.sfx(q>=.8?"level":"ui");},
+  close(){const S=this.st,el=this.el();this.st=null;if(el)el.remove();if(S){clearTimeout(S.to);S.done&&S.done(S.res?S.res.q:null);}}};
 function rgSideDue(G,T){const R=G.region,D=ROAD_DEST[T.dest];if(!R||!D||T.fa||T.series||T.local)return null;const X=RG_SIDE[D.r];if(!X)return null;
   const S=(R.side=R.side||{})[D.r]=R.side[D.r]||{};if(S.won)return null;if(R.joined&&R.joined[X.cid])return null;if(!(R.arrived||{})[D.r])return null;
   if(S.triedAbs!=null&&S.triedAbs===T.abs)return null;return X;}
@@ -1774,14 +1838,14 @@ Pick your fighter under Fights › Four Regions Championship`+((t=>t?`\n\n(${t})
   sideBout(T,X,i,done){const R=G.region,r=ROAD_DEST[T.dest].r,S=R.side[r],N=X.foes.length,F=X.foes[i],K=QK[F.qk];
     const P=T.party||null,riders=roster(G).filter(f=>(!P||P.includes(f.id))&&!(f.injury>=3)).sort((a,b)=>(a.fatigue||0)-(b.fatigue||0));
     const fin=(won)=>{if(won){S.won=1;R.sideN=(R.sideN||0)+1;G.rep=(G.rep||0)+1;G.log=G.log||[];G.log.push(`${X.title} · won all ${N} bouts · fame +1`);}
-      playScene(won?X.win(G):X.lose(G),()=>{if(won&&X.done)X.done(G,S.how);save();done();},{bg:X.bg,look:"casual"});};
+      const end=()=>{if(won&&X.done)X.done(G,S.how);save();done();};playScene(won?X.win(G):X.lose(G),()=>{if(won&&X.after)X.after(G,T,end);else end();},{bg:X.bg,look:"casual"});};
     if(!riders.length){fin(false);return;}
     let pick=null;
     playScene([{n:"npc",who:K.name,t:F.t},{n:"nar",t:`Off-schedule fight, bout ${i+1}/${N} · who steps in?`,choice:[
       ...riders.slice(0,4).map(f=>({t:`Send ${f.name} (fatigue ${Math.round(f.fatigue||0)})`,fx:()=>{pick=f.id;}})),
       {t:"Back off for now, come back another time",then:[{n:"nar",t:"The camp backs off to the van, the thugs' laughter following them out."}]}]}],()=>{
       if(!pick){fin(false);return;}
-      const me=G.F[pick],inj=me.injury||0,opp=makeQ(G,F.qk,pick,`side_${r}_${T.abs}_${i}`);
+      (T.sideFought=T.sideFought||[]).push(pick);const me=G.F[pick],inj=me.injury||0,opp=makeQ(G,F.qk,pick,`side_${r}_${T.abs}_${i}`);
       const b={id:`rgs${T.abs}_${r}_${i}`,a:pick,b:opp,week:G.week,tier:"quest",rounds:3,win:0,lose:0,region:{r,side:1},bg:X.ring,title:X.title};
       openFight(b,()=>{me.injury=inj;const L=R.lastRes,res=L&&L.bid===b.id?L.res:null;save();
         if(res!=="W"){fin(false);return;}
