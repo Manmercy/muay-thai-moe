@@ -749,7 +749,7 @@ const FS={cv:null,ctx:null,bg:null,A:null,B:null,fx:[],shake:0,
 // ---------- v1.19 CAMP ACTIVITY SCENES (short animated vignette before the result) ----------
 const CFX={
   merit:{bg:"bg_temple.webp",tint:"rgba(255,150,60,.18)",cap:"At dawn, everyone gets up to give alms in front of the camp",monks:true,fx:"rice",kneel:true},
-  rest:{bg:"bg_river.webp",tint:"rgba(20,30,70,.35)",cap:"Camp day off, lounging by the river, no training",fx:"z",row:"idle"},
+  rest:{bg:"bg_river_night.webp",tint:"rgba(20,30,70,.35)",cap:"Camp day off, lounging by the river, no training",fx:"z",row:"idle"},
   class:{bg:"gym",cap:"Sunday class, the yard full of students",students:3,row:"punch",fx:"stars"},
   promo:{bg:"gym",cap:"Live-streaming camp promo online",phone:true,row:"win",fx:"hearts"},
   repair:{bg:"gym",cap:"Repairing the camp together, fresh paint",walk:true,fx:"sparks",planks:true},
@@ -761,7 +761,7 @@ const CFX={
   kids:{bg:"gym",cap:"Kids' class, everyone doing the wai khru in unison",students:4,row:"guard",fx:"hearts"},
   stall:{bg:"bg_camp.webp",tint:"rgba(255,160,60,.15)",cap:"Khanom khrok stall at the market, smelling up the whole street",students:3,row:"idle",fx:"steam"},
   tourist:{bg:"gym",cap:"Tourists try kicking pads for the first time",students:3,row:"knee",fx:"flash",camera:true},
-  trail:{bg:"bg_river.webp",tint:"rgba(40,90,40,.2)",cap:"Dawn trail run up the mountain",walk:true,fx:"sparks"},
+  trail:{bg:"bg_river_dawn.webp",tint:"rgba(40,90,40,.2)",cap:"Dawn trail run up the mountain",walk:true,fx:"sparks"},
   tape:{bg:"gym",tint:"rgba(10,10,40,.55)",cap:"Old fight-tape night, noting opponent weaknesses",camera:true,row:"idle",fx:"flash"},
   fightnight:{bg:"bg_camp.webp",tint:"rgba(80,20,60,.25)",cap:"Camp fight night, packed ringside",spar:true,fx:"hearts"},
   clinicday:{bg:"gym",tint:"rgba(40,120,120,.18)",cap:"Recovery day at the physio clinic",masseuse:true,row:"idle",fx:"steam"},

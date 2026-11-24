@@ -19,7 +19,7 @@ const QK={
 const BELT_WEEKS=[10,18,26,34,42];
 const STADIUMS={
  tha:{name:"เวทีท่าแพ",scene:"district",bg:"bg_district.webp",weeks:[10,18,26,34,42],minYear:1,win:15000,defend:10000},
- ping:{name:"เวทีริมปิง",scene:"river",bg:"bg_river.webp",weeks:[15,30,45],minYear:2,win:18000,defend:12000},
+ ping:{name:"เวทีริมปิง",scene:"loy_ring",bg:"bg_loy_ring.webp",weeks:[15,30,45],minYear:2,win:18000,defend:12000},
  lanna:{name:"เวทีล้านนา",scene:"hall",bg:"bg_hall.webp",weeks:[22,38,48],minYear:3,win:22000,defend:14000}
 };
 function beltStore(G,venue="tha"){if(venue==="tha")return G.belt=G.belt||{};G.venueBelts=G.venueBelts||{};return G.venueBelts[venue]=G.venueBelts[venue]||{};}
@@ -40,7 +40,7 @@ function beltBracketHTML(D){const title=STADIUMS[D.belt.venue].name+" · "+D.bel
   const columns=[D.slots,D.w[0],D.w[1],D.w[2]].map((L,r)=>`<div class="dmcol"><h4>${["8","4","2","🏆"][r]}</h4>${L.map(id=>`<div class="dmc ${dmMine(id)?"mine":""}">${nm(id)}</div>`).join("")}</div>`).join("");
   const action=D.done?`<p class="center goldt">🏆 ${nm(D.champ)} · ${fmt(D.prize||0)}</p><button class="btn primary" data-act="dmclose">กลับค่าย</button>`:nx?`<button class="btn primary" data-act="dmgo" data-id="${dmMine(nx[0])?nx[0]:nx[1]}" data-v="${dmMine(nx[0])?nx[1]:nx[0]}">${nm(nx[0])} vs ${nm(nx[1])} ▸</button>`:"";
   return `<h2>ทัวร์นาเมนต์ชิงเข็มขัด ${title}</h2><p class="meta">รุ่นเดียวกัน · แพ้คัดออก · ชกไฟต์ละห้ายก</p><div class="dmb">${columns}</div>${action}`;}
-const QGRP_BG={gang:"bg_market_morning.webp",rooster:"bg_rooster.webp",bull:"bg_farm.webp"};
+const QGRP_BG={gang:"bg_market.webp",rooster:"bg_rooster.webp",bull:"bg_farm.webp"};
 /* v1.91.83 (Man): the quest foes kept pace with her stats only, so a late-game girl with a full skill tree outgrew even the bosses.
    They now read a fifth of her hidden edge (the season bonus halved to make room) (skills, perks, level) like the Loy thief, carry whatever the stat ceiling cannot hold as ring craft,
    and fight with their own signature skills (cut-in + burst, like the Naka League) — minions one, lieutenants two, bosses three */
@@ -223,7 +223,7 @@ function startQuest(spec,fid,done){const f=G.F[fid];if(!f){done&&done();return;}
   const opp=spec.npc||makeQ(G,spec.qk,fid,spec.tag||("w"+G.week));const tier="quest";
   const b={id:"q"+G.week+"_"+fid+"_"+Math.floor(Math.random()*1e4),a:fid,b:opp,week:G.week,tier,rounds:spec.rounds||3,win:spec.purse||0,lose:0,quest:spec};
   b.title=spec.q==="belt"?STADIUMS[spec.venue||"tha"].name+" · "+spec.div:spec.q==="gang"?"ศึกแผงตลาด":spec.q==="rooster"||spec.q==="cow"||spec.q==="bull"?"ศึกพิสดาร":null;
-  b.bg=spec.bg||(spec.rematch||spec.hq?"bg_gang_hideout.webp":spec.q==="belt"?"bg_district.webp":spec.npc?"bg_food.webp":QGRP_BG[QK[spec.qk].grp]);
+  b.bg=spec.bg||(spec.rematch||spec.hq?"bg_gang_hideout.webp":spec.q==="belt"?STADIUMS[spec.venue||"tha"].bg:spec.npc?"bg_food.webp":QGRP_BG[QK[spec.qk].grp]);
   if(typeof questPlan==="function"){questPlan(b,()=>openFight(b,()=>questAfter(b,done)));return;}
   openFight(b,()=>questAfter(b,done));}
 const GANG_HQ_TAUNT={gang3:"ที่ตลาดแกเก่ง แต่ที่นี่ถิ่นข้า!",gang4:"มาจนได้! ที่นี่ไม่มีแม่ค้าคอยเชียร์แล้วนะ หมวกเงินจะสอนมารยาทให้เอง",gang6:"เสี่ยสั่งมาว่าห้ามให้แกเดินออกจากโกดังนี้ไปง่าย ๆ"};
@@ -364,7 +364,7 @@ Object.assign(ACT,{
   mdecl:d=>{const m=G.mail.find(x=>x.id===d.v);if(!m)return;m.done=true;m.declined=true;if(m.q==="gang"&&G.gang)G.gang.nextAbs=gameWeek(G)+(G.loan>0?2:4);save();render();},
   macc:d=>{UI.modal={type:"qpick",id:d.v};render();},
   qsend:d=>{const m=G.mail.find(x=>x.id===d.v),f=G.F[d.id];if(!m||m.done||m.expired||!f||f.camp!=="player")return;{const why=qpickWhy(f);if(why){toast(`${f.name} ${why}`);return;}}if(!qpickOK(m,f))return;if(m.q==="belt"&&!m.defend){const D=beltTournament(G,m,d.id);if(!D)return;G.dm=D;m.done=true;UI.modal={type:"dm"};dmAdvance();save();render();return;}if(m.q==="belt"&&m.defend&&beltHolder(G,m.div,m.venue||"tha")?.id!==d.id)return;if(m.q==="belt"&&m.defend&&(!G.F[m.npc]||G.F[m.npc].div!==m.div||G.F[m.npc].injury||isBooked(G,m.npc,G.week))){const nc=beltChallenger(G,m.div,m.defend);if(!nc){toast("ผู้ท้าชิงยังไม่พร้อมชกสัปดาห์นี้ ลองใหม่สัปดาห์หน้า");return;}m.npc=nc.id;}m.done=true;UI.modal=null;
-    const spec=m.q==="belt"?{q:"belt",npc:m.npc,pay:m.pay,from:m.from,div:m.div,defend:m.defend,venue:m.venue||"tha",bg:m.bg,rounds:5}:m.q==="challenge"?{q:"challenge",npc:m.npc,pay:m.pay,from:m.from}:{q:m.q,qk:m.qk,hq:m.hq,pay:m.pay,from:m.from,rounds:m.qk==="gang5"?4:3};
+    const spec=m.q==="belt"?{q:"belt",npc:m.npc,pay:m.pay,from:m.from,div:m.div,defend:m.defend,venue:m.venue||"tha",bg:STADIUMS[m.venue||"tha"].bg,rounds:5}:m.q==="challenge"?{q:"challenge",npc:m.npc,pay:m.pay,from:m.from}:{q:m.q,qk:m.qk,hq:m.hq,pay:m.pay,from:m.from,rounds:m.qk==="gang5"?4:3};
     const intro=m.q==="gang"&&m.hq?[{n:"nar",t:"โกดังหลังตลาดเช้า ไฟสลัว ลูกน้องหมวกแดงนั่งล้อมโต๊ะแผนที่ พอเห็นค่ายศิริชัยเดินเข้ามา ทุกคนลุกพรวด"},{n:"npc",who:QK[m.qk].name,t:GANG_HQ_TAUNT[m.qk]||"มาจนได้! ที่นี่ไม่มีแม่ค้าคอยเชียร์แล้วนะ"},{n:d.id,f:"angry",l:"fight",t:"มาตามนัดแล้วค่ะ!"}]
       :m.q==="gang"?[{n:"nar",t:"ตลาดเช้า… มอเตอร์ไซค์สิบกว่าคันจอดเรียงหน้าแผงผัก"},{n:"npc",who:QK[m.qk].name,t:m.early?"ลูกน้องฉันแพ้เธอซ้ำแล้วซ้ำเล่า เสียชื่อหมด! แถมค่ายเธอยังติดหนี้ฉันอยู่ วันนี้ฉันจัดการเอง!":m.qk==="gang5"?"ได้ยินว่ามีค่ายมวยมาเกะกะธุรกิจฉัน วันนี้หัวหน้าใหญ่ลงมาเอง!":m.qk==="gang4"?"ลูกน้องหมวกแดงของฉันโดนเด็กค่ายมวยไล่ตะเพิดเหรอ? หมวกเงินคนนี้จะสอนมารยาทให้เอง":m.qk==="gang6"?"เสี่ยไม่ต้องลงมาเปลืองแรงหรอก มือขวาอย่างฉันจัดการแทนได้":"ไหนใครที่ไล่ลูกน้องฉัน ออกมาเลย!"},{n:d.id,f:"angry",l:"fight",t:"ฉันเอง!"}]
       :m.q==="belt"?[{n:"nar",t:`${STADIUMS[m.venue||"tha"].name} ไฟสปอตไลต์ส่องลงกลางเวที โฆษกประกาศชื่อทั้งสองมุม`},{n:"npc",who:G.F[m.npc].name,t:m.defend?"เข็มขัดเส้นนั้นควรเป็นของฉัน วันนี้ฉันมาเอาคืน":"อยากได้เข็มขัดเหรอ? ต้องข้ามศพฉันไปก่อน"},{n:d.id,f:"angry",l:"fight",t:m.defend?"มาเอาให้ได้สิ!":"หนูมาเพื่อสิ่งนั้นแหละ!"}]

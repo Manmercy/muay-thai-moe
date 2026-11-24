@@ -749,7 +749,7 @@ const FS={cv:null,ctx:null,bg:null,A:null,B:null,fx:[],shake:0,
 // ---------- v1.19 CAMP ACTIVITY SCENES (short animated vignette before the result) ----------
 const CFX={
   merit:{bg:"bg_temple.webp",tint:"rgba(255,150,60,.18)",cap:"เช้ามืด ทุกคนตื่นมาตักบาตรหน้าค่าย",monks:true,fx:"rice",kneel:true},
-  rest:{bg:"bg_river.webp",tint:"rgba(20,30,70,.35)",cap:"วันหยุดค่าย นั่งเล่นริมน้ำ ไม่ต้องซ้อม",fx:"z",row:"idle"},
+  rest:{bg:"bg_river_night.webp",tint:"rgba(20,30,70,.35)",cap:"วันหยุดค่าย นั่งเล่นริมน้ำ ไม่ต้องซ้อม",fx:"z",row:"idle"},
   class:{bg:"gym",cap:"สอนคลาสวันอาทิตย์ นักเรียนเต็มลาน",students:3,row:"punch",fx:"stars"},
   promo:{bg:"gym",cap:"ไลฟ์โปรโมทค่ายออนไลน์",phone:true,row:"win",fx:"hearts"},
   repair:{bg:"gym",cap:"ช่วยกันซ่อมแซมค่าย ทาสีใหม่",walk:true,fx:"sparks",planks:true},
@@ -761,7 +761,7 @@ const CFX={
   kids:{bg:"gym",cap:"คลาสมวยเด็กเล็ก ไหว้ครูกันพร้อมเพรียง",students:4,row:"guard",fx:"hearts"},
   stall:{bg:"bg_camp.webp",tint:"rgba(255,160,60,.15)",cap:"บูธขนมครกที่ตลาดนัด หอมไปทั้งซอย",students:3,row:"idle",fx:"steam"},
   tourist:{bg:"gym",cap:"นักท่องเที่ยวมาลองเตะเป้าครั้งแรก",students:3,row:"knee",fx:"flash",camera:true},
-  trail:{bg:"bg_river.webp",tint:"rgba(40,90,40,.2)",cap:"วิ่งเทรลขึ้นดอยตอนเช้ามืด",walk:true,fx:"sparks"},
+  trail:{bg:"bg_river_dawn.webp",tint:"rgba(40,90,40,.2)",cap:"วิ่งเทรลขึ้นดอยตอนเช้ามืด",walk:true,fx:"sparks"},
   tape:{bg:"gym",tint:"rgba(10,10,40,.55)",cap:"คืนดูเทปไฟต์เก่า จดจุดอ่อนคู่ชก",camera:true,row:"idle",fx:"flash"},
   fightnight:{bg:"bg_camp.webp",tint:"rgba(80,20,60,.25)",cap:"ไฟต์ไนท์ในค่าย คนดูแน่นเวที",spar:true,fx:"hearts"},
   clinicday:{bg:"gym",tint:"rgba(40,120,120,.18)",cap:"วันฟื้นฟูที่คลินิกกายภาพ",masseuse:true,row:"idle",fx:"steam"},

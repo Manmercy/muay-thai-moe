@@ -23,7 +23,7 @@ const PX={
  turtle:{pas:p=>`Everyone's morale +1${p.lv>=5?"~2":""} (rolled weekly)`,tal:["Calm: injured fighters may heal early","Calm: injuries heal early more often","Sacred turtle: injuries heal much faster"],
   modes:[["Pat the shell",15,10,0],["Slow walk",5,20,0],["Feed morning glory",25,6,20]],bg:"bg_camp_day.webp"},
  otter:{pas:p=>`Everyone's fatigue −1 (rolled weekly)`,tal:["Viral clips: a little reputation","Viral clips: reputation up more often","TikTok star otter: reputation up every week"],
-  modes:[["Play in the water",15,10,0],["Swim training",5,20,0],["Feed little fish",25,6,50]],bg:"bg_river.webp"}};
+  modes:[["Play in the water",15,10,0],["Swim training",5,20,0],["Feed little fish",25,6,50]],bg:"bg_river_dawn.webp"}};
 const PLINE={
  cat:[[" rolls over for belly scratches and purrs loud enough for the whole camp"," pounces at the red dot and crashes into the heavy bag"," finishes the whole pack of treats and stares at you for more"]," walks off to sleep on Kru Daeng's gym bag, ignoring everyone"," leaps the fence and runs into the rice fields after a rat!"],
  dog:[[" fetches the ball and drops it at your feet, tail spinning like a propeller"," leads the run round camp until the fighters are gasping"," shakes off and soaks the whole yard"]," lies flat by the ring with a long sigh — not today"," spots a buffalo in the field and chases it barking, refusing to come back!"],
