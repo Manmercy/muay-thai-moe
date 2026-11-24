@@ -84,7 +84,7 @@ const bondCap=G=>100;
 // v1.44: bond grows a bit faster, and the girls who join later catch up while still distant
 const BOND_MUL=.3,BOND_LATE=["mali","rin"];
 const absWeek=G=>((G.season||1)-1)*52+G.week;
-const add=(G,id,k,v)=>{const f=G.F[id];if(!f)return;if(k==="bond"&&v>0&&typeof partners==="function"&&LOVE_IDS.includes(id)&&!isPartner(G,id)){const n=partners(G).length;if(n)v*=n>=2?.7:.85;}/* v1.89.11: courting while taken is slower · v1.90.12 (Man): softer, was .75/.6 */if(k==="bond"&&v>0)f.lastTouch=absWeek(G);if(k==="bond"&&v>0)v=Math.max(.5,Math.round(v*BOND_MUL*(BOND_LATE.includes(id)&&(f.bond||0)<50?1.6:1)*2)/2);
+const add=(G,id,k,v)=>{const f=G.F[id];if(!f)return;if(k==="bond"&&v>0&&typeof partners==="function"&&LOVE_IDS.includes(id)&&!isPartner(G,id)){const n=partners(G).length;if(n)v*=n>=2?.7:.85;}/* v1.89.11: courting while taken is slower · v1.90.12 (Man): softer, was .75/.6 */if(k==="bond"&&v>0)f.lastTouch=absWeek(G);if(k==="bond"&&v>0&&typeof xlIs==="function"&&xlIs(id)&&!xlLov(G,id))v*=XL_SLOW;/* v1.91.124 (Man): Baiyok and Pailin warm up slowly */if(k==="bond"&&v>0)v=Math.max(.5,Math.round(v*BOND_MUL*(BOND_LATE.includes(id)&&(f.bond||0)<50?1.6:1)*2)/2);
   if(k==="bond"){const lv0=heartLv(f).lv;/* v1.86: affection past 100 keeps counting as heart levels (bond itself stays 0–100 for every existing check) */
     if(v>=0){const tot=(f.bond||0)+(f.bondX||0),cap=heartAt(heartCapLv(G));v=tot>=cap?0:Math.min(v,cap-tot);/* v1.89.11: chapter cap, never takes away what she already has */
       const t=(f.bond||0)+v;f.bond=Math.min(100,t);if(t>100)f.bondX=(f.bondX||0)+(t-100);}
@@ -2827,13 +2827,13 @@ function tellState(G,f){const id=f&&f.id;if(!id||!G.F[id])return null;const cham
   if(!(LOVE_IDS.includes(id)||champ||xl)||f.camp!=="player"&&!xl||!f.met&&!champ||isLovAny(G,id)||(f.bond||0)<75)return null;
   if(xl&&G.xlex&&G.xlex[id]!=null&&absWeek(G)-G.xlex[id]<12)return null;
   if(isAway(G,id)||(champ?(G.region.ex&&G.region.ex[id]!=null&&gameWeek(G)-G.region.ex[id]<12):exWait(G,id))||loveOffLeft(G,id))return null;
-  const t=G.tellAbs&&G.tellAbs[id];if(t!=null&&absWeek(G)-t<LOVE_TELL_CD)return null;
+  const t=G.tellAbs&&G.tellAbs[id];if(t!=null&&absWeek(G)-t<(xl?XL_TELL_CD:LOVE_TELL_CD))return null;
   return {ok:true};}
-function tellReady(G,f){const id=f.id;if(typeof xlIs==="function"&&xlIs(id))return (f.bond||0)>=75&&absWeek(G)-((G.xl&&G.xl[id]&&G.xl[id].open)||absWeek(G))>=6;if(isChampLove(G,id)){const J=G.region.joined||{};return (f.bond||0)>=75&&gameWeek(G)-(J[id]||gameWeek(G))>=6;}return (f.bond||0)>=75&&(f.trust||0)>=40;}
+function tellReady(G,f){const id=f.id;if(typeof xlIs==="function"&&xlIs(id))return xlReady(G,id);if(isChampLove(G,id)){const J=G.region.joined||{};return (f.bond||0)>=75&&gameWeek(G)-(J[id]||gameWeek(G))>=6;}return (f.bond||0)>=75&&(f.trust||0)>=40;}
 function tellSteps(G,id){const f=G.F[id],two=twoFor(G,id),ready=tellReady(G,f);
   const yes=[{fx:G2=>takeAny(G2,id)},{n:id,f:"flustered",l:"casual",t:yesLine(G,id)},{n:"nar",t:`Relationship with ${f.name}: lovers ♥`}];
   const wait=[{fx:G2=>{(G2.tellAbs=G2.tellAbs||{})[id]=absWeek(G2);add(G2,id,"bond",1);}},{n:id,f:"flustered",l:"casual",t:loveLine(TELL_WAIT,G,id)},
-    {n:"nar",t:`${f.name} isn't ready yet · you need to grow closer ${!isChampLove(G,id)&&!(typeof xlIs==="function"&&xlIs(id))&&(f.trust||0)<40?` · trust ${Math.floor(f.trust||0)}/40`:""}${isChampLove(G,id)&&(f.bond||0)>=75?" · give her a little more time at the camp":""} · you can tell her again in ${LOVE_TELL_CD} weeks`}];
+    {n:"nar",t:typeof xlIs==="function"&&xlIs(id)?`${f.name} isn't ready yet · ${G.tellAbs&&G.tellAbs[id]!=null&&!xlProofWon(G,id)?"our camp has to win her challenge in the ring first":"the first time she's never ready, so try again"} · you can tell her again in ${XL_TELL_CD} weeks`:`${f.name} isn't ready yet · you need to grow closer ${!isChampLove(G,id)&&!(typeof xlIs==="function"&&xlIs(id))&&(f.trust||0)<40?` · trust ${Math.floor(f.trust||0)}/40`:""}${isChampLove(G,id)&&(f.bond||0)>=75?" · give her a little more time at the camp":""} · you can tell her again in ${LOVE_TELL_CD} weeks`}];
   const spot=(typeof TELL_SPOT!=="undefined"&&TELL_SPOT[id])||"back of the camp",open=[{n:"nar",t:`That night you go to meet her at the ${spot} · ${f.name} is already waiting.`},{n:"nar",t:"You tell her plainly how you feel."}];
   if(!ready)return [...open,...wait];
   if(two)return [open[0],{n:"nar",t:"⚠ You're already with someone. Saying it would make this two-timing.",choice:[{t:"Tell her honestly (two-timing)",then:[open[1],...yes]},{t:"Better not say it",then:[{n:"nar",t:"You keep the words to yourself and talk about training instead."}]}]}];

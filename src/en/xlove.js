@@ -15,7 +15,7 @@ function xlOpen(G,id){G.xl=G.xl||{};G.xl[id]={open:absWeek(G)};const f=G.F[id];f
 function xlTake(G,id){G.xlov=G.xlov||{};G.xlov[id]=absWeek(G);if(G.xlex)delete G.xlex[id];if(G.friendz)delete G.friendz[id];if(G.mono)delete G.mono;add(G,id,"morale",12);}
 function xlBreak(G,id){if(!xlLov(G,id))return;delete G.xlov[id];G.xlex=G.xlex||{};G.xlex[id]=absWeek(G);add(G,id,"bond",-20);add(G,id,"morale",-15);}
 /* weekly: new chats once she is close enough (same rhythm as the heroines), a lover texts at least every other week */
-function xlWeekly(G){G.chatIn=G.chatIn||{};const rng=mulberry32(G.seed*37+G.week*11+5);
+function xlWeekly(G){G.chatIn=G.chatIn||{};try{xlProofWeekly(G);}catch(e){console.error("xl proof",e);}const rng=mulberry32(G.seed*37+G.week*11+5);
   for(const id of XL_IDS){if(!xlOn(G,id))continue;const f=G.F[id];if(G.chatIn[id]||isAway(G,id))continue;if(gameWeek(G)-(G.chatLastAbs?.[id]??-999)<(xlLov(G,id)?2:3))continue;
     if(xlLov(G,id)||(f.bond||0)>=CHAT_BOND&&rng()<.35+((f.bond||0)>=50?.1:0))G.chatIn[id]=G.week;}}
 /* time together — five places each, in order; after that a short visit from a small pool */
@@ -202,7 +202,7 @@ EVENTS.push({id:"xl_join_prod_B",look:"casual",bg:"camp",pri:40,when:xlJoinDue,s
  xN("Sunday morning. Baiyok reaches camp before anyone else, as always, but today there's an old suitcase beside her."),xB("pout","They're repairing the pavilion at the temple ground. No training for three months."),
  xB("flustered","…I lied. The pavilion isn't being repaired. I just want to train here every day, not only on Sundays."),
  {inject:G=>dormUsed(G)>=dormRooms(G)?[xN(`The dorm is full (${dormRooms(G)} rooms) · upgrade the dorm and she'll ask again`),{fx:G2=>{G2.xlJoinNo=absWeek(G2);if(G2.seen)delete G2.seen.xl_join_prod_B;}}]:[{n:"nar",t:"What will you reply?",choice:[
-  {t:"\"There's a free room upstairs. Move in.\"",fx:G2=>{joinCamp(G2,"prod_B",2500);const f=G2.F.prod_B;f.indie=false;f.full="Baiyok";add(G2,"prod_B","bond",5);add(G2,"prod_B","morale",15);},
+  {t:"\"There's a free room upstairs. Move in.\"",fx:G2=>{joinCamp(G2,"prod_B",2500);const f=G2.F.prod_B;f.indie=false;f.full="Baiyok";xlJoinDrop(f);add(G2,"prod_B","bond",5);add(G2,"prod_B","morale",15);},
    then:[xB("happy","…I won't let anyone down."),xB("flustered","Except oversleeping. I have never overslept."),xN("Baiyok moves into Sirichai Camp · she fights Division B for us")]},
   {t:"\"Not just yet.\"",fx:G2=>{G2.xlJoinNo=absWeek(G2);if(G2.seen)delete G2.seen.xl_join_prod_B;},then:[xB("pout","…All right. I'll wait. But I'm still coming Sundays.")]}]}]}]});
 
@@ -233,3 +233,146 @@ Object.assign(TELL_WAIT,XL_WAIT);
 /* test host only (loadTestSave): Vector and Baiyok exist and the camp already has 6 bouts / 4 wins against each, so both opening scenes play at the end of the first week */
 function xlTestSetup(G){try{G.arcs=G.arcs||{};if(!G.arcs.vector){G.arcs.vector=G.season||1;ensureVector(G);}if(!G.F.prod_B&&G.F.fah){makeProdigy(G,"B","fah");}G.flags=G.flags||{};if(G.flags.byFree==null)G.flags.byFree=absWeek(G);fixProdigies(G);
   for(const id of XL_IDS){if(!G.F[id]||xlRec(G,id).n>=6)continue;for(const res of ["W","W","L","W","L","W"])G.cal.push({wk:1,season:1,absWeek:1,a:"kati",b:id,bn:G.F[id].name,tier:"local",res});}}catch(e){console.error("xl test",e);}}
+
+/* ---------- v1.91.124 (Man): a harder route — no harem, slow warm-up, the first confession is always "not yet", and she has to be beaten in a bout she asks for ---------- */
+const XL_SLOW=.7,XL_TELL_CD=6;
+/* like the regional champions who move in: five levels down (not below 10), stats at 90% */
+function xlJoinDrop(f){f.lvl=Math.max(10,(f.lvl||14)-5);for(const k in f.a)f.a[k]=Math.round(f.a[k]*.9*100)/100;}
+const xlProof=(G,id)=>G.xlProof&&G.xlProof[id];
+const xlProofWon=(G,id)=>{const P=xlProof(G,id);if(!P)return false;if(P.won)return true;const w=(G.cal||[]).some(c=>c.b===id&&c.res==="W"&&(c.absWeek||0)>=P.from);if(w)P.won=absWeek(G);return w;};
+function xlReady(G,id){const f=G.F[id],o=G.xl&&G.xl[id];return (f.bond||0)>=75&&!!o&&absWeek(G)-o.open>=6&&G.tellAbs&&G.tellAbs[id]!=null&&xlProofWon(G,id);}
+/* the challenge: once the third heart scene has played, she asks the camp's best for a bout; reissued every six weeks until we win one against her */
+function xlProofWeekly(G){G.xlProof=G.xlProof||{};for(const id of XL_IDS){const f=G.F[id];if(!xlOn(G,id)||xlLov(G,id)||!G.seen["xlh_"+id+"_2"]||f.camp==="player"||f.injury||xlProofWon(G,id))continue;
+  const P=G.xlProof[id]=G.xlProof[id]||{from:absWeek(G),at:-99};if(gameWeek(G)-P.at<6)continue;if(G.offers.some(o=>o.b===id)||G.bookings.some(b=>b.b===id))continue;
+  const me=roster(G).filter(x=>!x.injury&&!isAway(G,x.id)).sort((a,b)=>ovr(b.a)-ovr(a.a))[0];if(!me)continue;const wk=[G.week+3,G.week+4,G.week+2].find(w=>w<=48&&!isBooked(G,id,w)&&!G.bookings.some(b=>b.a===me.id&&Math.abs(b.week-w)<=1));if(!wk)continue;
+  P.at=gameWeek(G);G.offers.push({id:`o${G.week}_${me.id}_xlp`,a:me.id,b:id,week:wk,tier:"special",rv:1,xlp:1,win:Math.round(TIER.special.win*1.5/100)*100,lose:Math.round(TIER.special.lose*1.3/100)*100});
+  if(typeof chatNote==="function")chatNote(G,id,XL_DARE[id](me.name));}}
+const XL_DARE={prod_B:n=>`I've sent the challenge to your camp. ${n} against me, five rounds. …If you've got something to say to me, beat me first. Then say it.`,
+ pailin:n=>`I've booked the ring. ${n} against me. If your camp wins, I'll admit my data was wrong… and I'll listen to everything you want to say.`};
+Object.assign(TELL_WAIT,{prod_B:G=>G.tellAbs&&G.tellAbs.prod_B!=null&&!xlProofWon(G,"prod_B")?"…I told you. Beat me in the ring first. Not because I don't want to hear it. I want to know how hard you'll fight for it.":XL_WAIT.prod_B,
+ pailin:G=>G.tellAbs&&G.tellAbs.pailin!=null&&!xlProofWon(G,"pailin")?"The last variable hasn't passed. Your camp has to beat me in the ring first. …I need proof, not words.":XL_WAIT.pailin});
+/* on the harem route neither of them joins the group */
+const XL_HAREM_NO={prod_B:[{n:"prod_B",f:"pout",l:"casual",t:"…I heard about it at the camp. That you have more than one."},{n:"prod_B",f:"sad",l:"casual",t:"I grew up as one of twenty the coach had to choose from. …I don't want to be one of many again."},{n:"prod_B",f:"happy",l:"casual",t:"But I'll still come on Sundays. We can be friends."}],
+ pailin:[{n:"pailin",f:"pout",l:"casual",t:"I've analysed the relationships in your camp. …Too many variables."},{n:"pailin",f:"sad",l:"casual",t:"I don't take part in experiments where I'm not the main variable. I'm sorry."},{n:"pailin",f:"happy",l:"casual",t:"But we can still have coffee. I'll still come up to Chiang Mai."}]};
+{const _tell=tellSteps;tellSteps=function(G,id){if(xlIs(id)&&G.harem)return [{n:"nar",t:`That night you go to meet her at the ${TELL_SPOT[id]}`},{fx:G2=>{(G2.tellAbs=G2.tellAbs||{})[id]=absWeek(G2);}},...XL_HAREM_NO[id],{n:"nar",t:`${G.F[id].name} won't join the harem · you can stay friends ${id==="prod_B"?" and she can still move into the camp":""}`}];return _tell(G,id);};}
+
+/* ---------- v1.91.124: chats for when she is yours, and chats that follow what happens ---------- */
+const xlLast=(G,id)=>{const L=(G.cal||[]).filter(c=>c.b===id);return L[L.length-1]||null;};
+const xlFresh=(G,id,res)=>{const c=xlLast(G,id);return !!c&&c.res===res&&gameWeek(G)-(c.absWeek||0)<=2;};
+CHAT.prod_B.push(
+ {id:"yb_lost",need:G=>xlFresh(G,"prod_B","W"),rep:4,x:[
+  ["Lost again. …I've watched the tape three times and still can't find where I went wrong.",[["You didn't make a mistake. Today was just our day.",2,"…You sound like Grandma. She says boxing has its days."],["Rest first, then watch.",1,"Fine. I'll watch it at five tomorrow."],["Train harder, then.",0,"…I'm already training more."]]],
+  ["The strange thing is I'm not as upset as I used to be. I just want to fight your camp again.",[["That's what fun is.",2,"…Fun. I'm starting to understand that word."],["See you next time.",1,"Next time I won't lose."],["Good",0,"Mm"]]],
+  ["Tell the one who beat me her round-three elbow was beautiful.",[["I'll tell her. She'll be thrilled.",2,"…Don't say it was me. Say the crowd said it."],["Tell her yourself.",1,"I'm not good with words."],["OK",0,"Thanks."]]]]},
+ {id:"yb_won",need:G=>xlFresh(G,"prod_B","L"),rep:4,x:[
+  ["I won today. …But when they raised my hand I looked at your camp's corner, not the crowd.",[["I saw. You smiled too.",2,"…I know. You don't have to say it."],["Congratulations. Great fight.",1,"Thanks. Your camp fought well too."],["We'll get you back.",0,"Bring it."]]],
+  ["Look after the one who lost. My knee in round four landed hard.",[["She's being looked after. Nothing serious.",2,"…Good. I worried all night."],["You worry about your opponent?",1,"I don't want to win because the other one is hurt."],["That's boxing.",0,"…Mm"]]],
+  ["Don't comfort me today. Comfort your fighter first.",[["So kind",2,"I'm not kind. …I just lost once and nobody comforted me."],["Okay, let's talk later.",1,"Mm. Five a.m. tomorrow."],["OK",0,"Mm"]]]]},
+ {id:"yb_miss",need:G=>missGap(G,"prod_B")>=4,rep:6,x:[
+  ["Weeks without seeing you. …I did all my kicks every day. I can count without anyone.",[["Sorry, I've been really busy.",1,"Don't apologise. I'm just telling you."],["I miss you.",2,"…I've been counting the days we haven't met too."],["Well done.",0,"…Mm"]]],
+  ["Grandma asked about you. I said you're busy. She said busy people still have to eat.",[["Let's have rice soup this Sunday.",2,"…I'll tell Grandma to get the big bowl ready."],["Thank your grandma for me.",1,"Sure"],["When I'm free.",0,"Fine… I can wait."]]],
+  ["I'm not messaging because I'm lonely.",[["I know. But I'm glad you did.",2,"…Fine. A little lonely."],["Then why did you message?",1,"…I don't know. My finger pressed it."],["OK",0,"Mm"]]]]},
+ {id:"yb_l1",when:G=>xlLov(G,"prod_B"),x:[
+  ["If someone asks what I am to you now, what do I say?",[["Say girlfriend.",2,"…Girlfriend. I tried saying it in my head. My ears went hot."],["Answer however you want.",1,"I want to say 'the one who counts my kicks'."],["You don't have to answer.",0,"…Mm"]]],
+  ["Grandma knows. She made a big pot of hang lay curry to celebrate, but won't say what for.",[["Your grandma is the cutest.",2,"Grandma says you have to come and eat it all. No leftovers."],["How did Grandma know?",1,"I smiled while eating. Grandma said she hadn't seen that in ten years."],["Is hang lay curry spicy?",0,"Not spicy."]]],
+  ["…Can I just call you by your name? Not 'manager'.",[["Of course.",2,"…I'll type it now. But I won't send it. I can't. Too embarrassing."],["Call me whatever you like.",1,"Then I'll say 'you' for now."],["'Manager' is fine.",0,"…Fine"]]]]},
+ {id:"yb_l2",when:G=>xlLov(G,"prod_B"),x:[
+  ["Training finished early today. I'm free. …Not inviting you. Just saying.",[["Then let's go out and eat.",2,"…Fine. I got dressed before I even typed."],["Get some rest",1,"I don't know how to rest, but I'll try."],["Good",0,"…Mm"]]],
+  ["I bought a shirt that isn't white. Blue. I don't know if it suits me.",[["It'll suit you for sure. Wear it for me.",2,"…I'll wear it the day we meet. Don't laugh."],["Any colour suits you.",1,"That's too easy an answer."],["White's better.",0,"Then I'll put it away for now."]]],
+  ["These days I wake at five because I want to, not because I have to.",[["That's the best news of the day.",2,"…I just wanted you to be the first to know."],["You've come a long way.",1,"Because of you."],["Sleep in sometimes.",0,"No. I've never overslept."]]]]},
+ {id:"yb_l3",when:G=>xlLov(G,"prod_B"),x:[
+  ["If I quit fighting one day, would you still be here?",[["I'll stay, fighting or not.",2,"…I'll keep fighting a long time. But thank you for that answer."],["Why ask that?",1,"I just want to know what I am if I'm not fighting."],["Don't think about it yet.",0,"…Mm"]]],
+  ["At Golden Tiger, my worth was my last fight result.",[["It isn't like that here.",2,"…I know now. I lost two fights and you still sent me rice soup."],["You're worth much more than that.",2,"…You're too direct. I wasn't ready."],["Results matter too.",0,"…Yes. It matters."]]],
+  ["On the back of my next fight ticket I'll write 'someone is waiting'.",[["Write it, and keep it in the box.",2,"That's the third box now. …I bought a bigger one."],["Why not write the result?",1,"Because the result isn't as important."],["OK",0,"Mm"]]]]});
+CHAT.pailin.push(
+ {id:"pl_lost",need:G=>xlFresh(G,"pailin","W"),rep:4,x:[
+  ["I lost to your camp again. My lab team was silent the whole van ride back to Bangkok.",[["You fought really well. It just wasn't your day.",2,"…'Not your day' isn't a measurable variable. But I'll accept it tonight."],["Are you all right, though?",2,"Better than the data says, because someone asked."],["Next time, try again.",1,"Of course. It's noted."]]],
+  ["The part that can't be predicted is why I still fight myself. I said that once, didn't I?",[["Yes, and it's still true.",2,"…Yes. It's still true."],["Not sure.",0,"I said it. I remember."],["I remember.",1,"Good. You really listen to me."]]],
+  ["Tell Ploy I'm not sad. …Actually, don't. She already knows.",[["I'll tell her her sister fought beautifully.",2,"…Thank you."],["Tell her yourself.",1,"I'm typing it now. I've deleted it twice."],["OK",0,"It is"]]]]},
+ {id:"pl_won",need:G=>xlFresh(G,"pailin","L"),rep:4,x:[
+  ["Today my data was right. …But I'm not as happy as I expected.",[["Why?",1,"Because the one who lost is someone in the camp you love."],["Being right is good, isn't it?",0,"Yes. It's good."],["You didn't want to win like that, did you?",2,"…You've read me again."]]],
+  ["I've sent you a file analysing your fighters' weak spots. Free.",[["Why give it away for free?",1,"Because next time I want to beat your best, not someone with weak spots."],["Thank you so much.",2,"No need for thanks. Just beat me."],["It's fine, you don't have to.",0,"Already sent. It can't be deleted."]]],
+  ["Tonight I won't watch tapes. First time in three years.",[["Good. Get some rest.",2,"…I'll sleep at ten. And I won't log the stats."],["Why not?",1,"Because I'd rather talk to you."],["That's odd.",0,"It is"]]]]},
+ {id:"pl_miss",need:G=>missGap(G,"pailin")>=4,rep:6,x:[
+  ["The time since we last talked is now twice the average.",[["Sorry. I miss you too.",2,"…'Too'. I'll log that word."],["I've been really busy.",1,"I understand. I'm busy too, but I still count."],["You count them?",0,"I count."]]],
+  ["I have a flight to Chiang Mai on Friday. …Not to see anyone. A site visit.",[["Then have dinner with me after.",2,"The visit ends at five. I've already booked a table for six."],["A site visit to what?",1,"…I haven't decided yet."],["Have a safe trip.",0,"Thank you"]]],
+  ["Ploy says you've looked tired lately. Eat properly. That isn't advice. It's an order.",[["Understood, doctor.",2,"I'm not a doctor. But I am certified in nutrition."],["You worry about me?",1,"That data hasn't been released."],["No problem",0,"It is."]]]]},
+ {id:"pl_l1",when:G=>xlLov(G,"pailin"),x:[
+  ["For the first time in my life I've made a folder on my computer called 'Not Work'.",[["What's in it?",2,"Thirty-two photos of sunsets at your camp."],["Good. Something besides work.",1,"Yes. My team asked if I was ill."],["That's odd.",0,"It is"]]],
+  ["My team caught me smiling at my phone during the budget meeting.",[["And what did you tell them?",1,"I said the budget chart was beautiful. Nobody believed me."],["Were you smiling at me?",2,"…That question isn't on the meeting agenda."],["Focus on the meeting.",0,"I am focused."]]],
+  ["I haven't officially told Ploy yet.",[["Tell her slowly.",2,"…I'll tell her the day the mist falls on Khao Yai, so she can't see my face clearly."],["Just tell her.",1,"I'm a little scared of my own sister."],["She'll figure it out herself.",0,"…Yes. Probably."]]]]},
+ {id:"pl_l2",when:G=>xlLov(G,"pailin"),x:[
+  ["I bought a fourth watch. This one doesn't track heart rate or steps. It only tells the time.",[["Why'd you buy it?",1,"To count the time left until I see you. That's all."],["That's sweet",2,"…I won't be replying to this message."],["Isn't four watches heavy?",0,"It is. But I wear them."]]],
+  ["Today I ate a whole meal without opening my tablet.",[["I'm so proud of you.",2,"…It's easier when I imagine you sitting across from me."],["Was the food good?",1,"I don't know. I was thinking about something else."],["How did you manage?",0,"Practice."]]],
+  ["If Vector has to close, will you think I failed?",[["Not at all. You'd just have chosen the right path.",2,"…I'll remember that if the day comes."],["It won't close.",1,"The data doesn't say that. But thank you."],["It depends on the outcome.",0,"…Okay."]]]]},
+ {id:"pl_l3",when:G=>xlLov(G,"pailin"),x:[
+  ["I used to think love was a decision made without enough data.",[["And now?",2,"Now I think it's the decision where data isn't necessary."],["That's true.",1,"Yes. And I've decided."],["You're overthinking.",0,"I always overthink."]]],
+  ["Mum asked why Ploy and I both look happier, and what happened.",[["What did you tell her?",1,"I said 'Sirichai Camp'. Mum laughed and said she already knew."],["I'm glad you two sisters are doing well.",2,"…That's a gift I didn't expect."],["Luck, maybe",0,"Nothing is a coincidence."]]],
+  ["Tonight I'll write the last research note of the year. Title: 'The Variable That Can't Be Measured'.",[["What's the conclusion?",2,"Conclusion: found. It's in Chiang Mai. No further measurement needed."],["Send it to me to read.",1,"One page. But it took three years to write."],["Go go!",0,"Thank you"]]]]});
+{const _w=xlWeekly;xlWeekly=function(G){_w(G);for(const id of XL_IDS){if(!xlOn(G,id)||G.chatIn[id]||isAway(G,id))continue;const seen=(G.chatSeen||{})[id]||[],W=G.chatWkAbs||{};
+  if((CHAT[id]||[]).some(t=>t.need&&(!t.when||t.when(G))&&t.need(G)&&(!seen.includes(t.id)||(t.rep&&gameWeek(G)-(W[id+":"+t.id]??-999)>=t.rep))))G.chatIn[id]=G.week;}};}
+
+/* ---------- v1.91.124: three scenes once she is yours (2 / 8 / 16 weeks in) ---------- */
+const XL_LOVE_AT=[2,8,16];
+const xlLoveDue=(G,id,k)=>xlLov(G,id)&&!isAway(G,id)&&absWeek(G)-G.xlov[id]>=XL_LOVE_AT[k]&&(k===0||G.seen["xll_"+id+"_"+(k-1)])&&gameWeek(G)-(G.xlHeartAbs||-99)>=2;
+const XL_LOVE={
+ prod_B:[
+  [xN("Baiyok asks to meet at the temple ground at five as always, but today there's no bag and no rope, only a tiffin and a small mat."),xB("flustered","Grandma says a couple should have breakfast together at least once. I don't know if that's true, but Grandma never lies."),
+   xN("You eat slowly, and so does she, though her chopsticks shake a little."),xB("happy","…Fifteen minutes and still no whistle."),{n:"nar",t:"What do you say?",choice:[
+    {t:"\"There won't be any more of that.\"",fx:G=>add(G,"prod_B","bond",3),then:[xB("flustered","…I know. But can you say it again? I want to remember this voice instead.")]},
+    {t:"Feed her a bite",fx:G=>add(G,"prod_B","bond",3),then:[xN("Baiyok freezes for a full three seconds, then takes the bite and turns away at once."),xB("flustered","…Not in front of Grandma.")]}]}],
+  [xN("Baiyok's big fight tonight. She asks you to stand in her red corner, though Sirichai has no one on the card."),xB("pout","The rules say someone has to be in the corner. …This time I'm not borrowing anyone. I chose."),
+   xN("Round five: a kick to the ribs drops her. She comes back to the corner with blood at her lip."),xB("sad","…If I lose, will you be disappointed?"),{n:"nar",t:"What do you say before the bell?",choice:[
+    {t:"\"I'm here for you, not for the result.\"",fx:G=>add(G,"prod_B","bond",4),then:[xN("She's up the moment the bell rings and wins the last round on points."),xB("happy","…That line hit harder than my opponent.")]},
+    {t:"\"Those three hundred left kicks you counted. Use them now.\"",fx:G=>add(G,"prod_B","bond",4),then:[xN("Her left kick ends it midway through round five. The whole arena is on its feet."),xB("happy","You really did count every time.")]}]}],
+  [xN("A rainy night. Baiyok opens all three shoeboxes on her floor. Fight tickets cover the floor."),xB("happy","I counted. Since last month, tickets that say 'fun' outnumber 'lost, fix it'."),
+   xB("flustered","On the newest one I wrote something else."),xN("On the back of the newest ticket, in tiny handwriting: 'I have a home to go back to now.'"),xB("pout","…Don't read it aloud.")]],
+ pailin:[
+  [xN("Pailin flies up on a Friday night and opens her tablet in front of you. On screen: a timetable for the next six months."),xP("happy","I've drawn up a schedule. Chiang Mai twice a month, Friday to Sunday."),
+   xP("flustered","…If you're not free I can delete every slot. I don't want it to look like a contract."),{n:"nar",t:"What will you reply?",choice:[
+    {t:"\"Don't delete them. Add one more.\"",fx:G=>add(G,"pailin","bond",3),then:[xP("flustered","…I'll add a Wednesday slot. My team will definitely get suspicious.")]},
+    {t:"Close the tablet and take her hand",fx:G=>add(G,"pailin","bond",3),then:[xN("She looks at the dark tablet longer than she should, then doesn't open it again all night.")]}]}],
+  [xN("A funders' meeting at Vector in Bangkok. Pailin video-calls from a twentieth-floor restroom, so quietly you can barely hear her."),xP("sad","They say if I don't take Naka's funding back, Vector has eight months."),
+   xP("sad","I can calculate every option. I can't calculate which one I won't hate myself for."),{n:"nar",t:"What do you say?",choice:[
+    {t:"\"Eight months is enough to find another way. We'll find it together.\"",fx:G=>add(G,"pailin","bond",4),then:[xP("flustered","…'We'. I'll walk back into the meeting with that word.")]},
+    {t:"\"You turned that money down once. You can do it again.\"",fx:G=>add(G,"pailin","bond",4),then:[xP("happy","…The historical data supports you. I'll trust my past self.")]}]}],
+  [xN("Thick mist on Khao Yai at 5 a.m. Pailin brought you as promised, on the day she picked from ten years of forecasts."),xP("happy","The probability of mist today was 83%. …And it came."),
+   xN("Ploy is standing on the far side of the viewpoint. She came too. Pailin invited her."),{n:"ploy",f:"happy",l:"casual",t:"My sister told me. …Congratulations. Don't you dare make her cry."},
+   xP("flustered","No plan of mine has ever turned out better than calculated. …Until today.")]]};
+for(const id of XL_IDS)XL_LOVE[id].forEach((st,k)=>EVENTS.push({id:"xll_"+id+"_"+k,look:"casual",bg:id==="pailin"?["cafe","night","mountain"][k]:["river_dawn","hall","camp_rain"][k],pri:30,
+  when:G=>xlLoveDue(G,id,k),steps:[{fx:G=>{G.xlHeartAbs=gameWeek(G);}},...st,{inject:G=>{add(G,id,"bond",3);return [{n:"nar",t:`Bond with ${G.F[id].name} +3`}];}}]}));
+
+/* ---------- v1.91.124: birthdays (Baiyok 14 Feb — Valentine's Day too · Pailin 23 Aug), once she has opened up and is close ---------- */
+const XL_BDAY={prod_B:[14,1],pailin:[23,7]};
+const xlBdayDue=(G,id)=>{const x=XL_BDAY[id],w=dateWeek(x[0],x[1]);return xlOn(G,id)&&(G.F[id].bond||0)>=30&&!isAway(G,id)&&G.week>=w&&G.week<=w+1;};
+EVENTS.push({id:"xl_bday_prod_B",annual:true,look:"casual",bg:"food",pri:33,when:G=>xlBdayDue(G,"prod_B"),steps:[
+ {inject:G=>xlLov(G,"prod_B")?[xN("14 February: Valentine's Day, and Baiyok's birthday. She's never told anyone. Her grandmother whispered it to you."),xB("pout","Grandma's a tattletale."),
+   xB("flustered","Every year I hate this day. The whole city is roses and nobody knows it's my birthday."),{n:"nar",t:"What do you give her?",choice:[
+    {t:"A handful of jasmine, not roses",fx:G2=>add(G2,"prod_B","bond",5),then:[xB("flustered","…You remembered I like jasmine better. I never said. I only looked at the garland stall a bit too long, once.")]},
+    {t:"One candle stuck in a bowl of Grandma's rice soup",fx:G2=>add(G2,"prod_B","bond",5),then:[xN("Baiyok blows out the candle and stays still for a long time."),xB("happy","I wished that next year… I won't say. It won't come true if I do.")]}]}]
+  :[xN("Baiyok's grandmother messages you: \"Today is my granddaughter's birthday. She never tells anyone, so I'm telling you.\""),xN("You send her a birthday message. Five minutes later she replies."),xB("flustered","…Grandma told you, didn't she. Thanks. This year two people remembered."),{fx:G2=>add(G2,"prod_B","bond",3)}]}]});
+EVENTS.push({id:"xl_bday_pailin",annual:true,look:"casual",bg:"cafe",pri:33,when:G=>xlBdayDue(G,"pailin"),steps:[
+ {inject:G=>xlLov(G,"pailin")?[xN("23 August, Pailin's birthday. She tells everyone she's working as usual, but her flight to Chiang Mai was booked three months ago."),xP("happy","I'm not here to celebrate. I'm here for a meeting. …The only item on the agenda is you."),
+   {n:"nar",t:"What do you give her?",choice:[{t:"A cake with a candle for every year",fx:G2=>add(G2,"pailin","bond",5),then:[xP("pout","Thirty-one candles… you actually counted. Nobody's ever dared do this to me."),xP("happy","…All in one breath. My lung data is still good.")]},
+    {t:"A blank notebook, its first page titled 'What Doesn't Need Measuring'",fx:G2=>add(G2,"pailin","bond",5),then:[xP("flustered","…I'll write the first page right now."),xN("She writes a single word and closes the notebook before you can see.")]}]}]
+  :[xN("📱 Pailin sends a photo of a small slice of cake on her desk. No candle, just a note: '23/8'."),xN("You call to wish her happy birthday. The line is silent for two seconds."),xP("flustered","…I didn't send it for birthday wishes. I just sent it. …But thank you."),{fx:G2=>add(G2,"pailin","bond",3)}]}]});
+
+/* ---------- v1.91.124 (Man): her cards stay out of the album (and its count) until she has opened up and you are close (25) ---------- */
+const xlShow=(G,id)=>xlOn(G,id)&&((G.F[id].bond||0)>=25||Object.keys(G.cards||{}).some(k=>CARDS[k]&&CARDS[k].c===id));
+Object.assign(CARDS,{
+ xl_by_n:{c:"prod_B",xl:1,r:"N",t:"The Kick-Count Notebook",hint:"Get to know Baiyok (acquaintance)",bg:"river_dawn",need:G=>xlOn(G,"prod_B")&&(G.F.prod_B.bond||0)>=25,steps:[
+  xN("A little brown notebook left on the temple-ground bench. Inside, nothing but 300 / 300, hundreds of lines."),xB("pout","Don't read it. …It's only numbers. Nothing interesting."),xN("The last line has something added in faint pencil: 'Someone counted for me today.'"),xB("flustered","…I told you not to read it.")]},
+ xl_by_r:{c:"prod_B",xl:1,r:"R",t:"Wooden-handled skipping ropes",hint:"Grow close to Baiyok (close friend)",bg:"river_dawn",need:G=>xlOn(G,"prod_B")&&(G.F.prod_B.bond||0)>=40,steps:[
+  xN("Baiyok teaches you crossover skips with her grandmother's old rope, the wooden handles worn deep by thumbs."),xB("happy","Grandma skipped with this rope when she was young. She says she was better than me."),xB("flustered","…I've never let anyone touch this rope. You're the first. Don't feel special.")]},
+ xl_by_sr:{c:"prod_B",xl:1,r:"SR",t:"Beat Me First",hint:"Our camp wins Baiyok's challenge",bg:"hall",need:G=>xlProofWon(G,"prod_B"),steps:[
+  xN("After the fight, Baiyok sits against the ropes, her white hand wraps with gold trim still on."),xB("sad","Lost again. …I didn't hold back for a single round."),xB("happy","Good. If your camp had won because I held back, I wouldn't believe a word you said."),xB("flustered","…Now, say whatever you want to say.")]},
+ xl_by_ssr:{c:"prod_B",xl:1,r:"SSR",t:"A Home to Go Back To",hint:"Baiyok is your girlfriend",bg:"camp_rain",need:G=>xlLov(G,"prod_B"),steps:[
+  xN("Heavy rain at the temple ground. Baiyok stops training and shelters in your car for the first time."),xB("happy","When it rained I used to keep training, because I had nowhere to go."),xB("flustered","…Now I do, so I can stop.")]},
+ xl_pl_n:{c:"pailin",xl:1,r:"N",t:"The Third Cup",hint:"Get to know Pailin (acquaintance)",bg:"cafe",need:G=>xlOn(G,"pailin")&&(G.F.pailin.bond||0)>=25,steps:[
+  xN("A window table, three black coffees: one for Pailin, one for you, and one 'spare'."),xP("happy","The spare cup is for when the conversation runs longer than calculated."),xP("flustered","…Which it is, every time.")]},
+ xl_pl_r:{c:"pailin",xl:1,r:"R",t:"Three Watches",hint:"Grow close to Pailin (close friend)",bg:"river",need:G=>xlOn(G,"pailin")&&(G.F.pailin.bond||0)>=40,steps:[
+  xN("Pailin takes off her watches one by one and lays them on the table. One tracks heart rate, one counts steps, one was her father's."),xP("sad","Dad timed Ploy and me running up the hill with this one. It's been two minutes slow for ten years."),xP("happy","I've never reset it. …Some things don't need to be accurate.")]},
+ xl_pl_sr:{c:"pailin",xl:1,r:"SR",t:"Proof",hint:"Our camp wins Pailin's challenge",bg:"vector_lab",need:G=>xlProofWon(G,"pailin"),steps:[
+  xN("Vector's lab late at night. Pailin replays the fight she just lost for the tenth time."),xP("pout","My data was wrong. I admit it."),xP("flustered","And as agreed… I'm ready to hear everything you want to say.")]},
+ xl_pl_ssr:{c:"pailin",xl:1,r:"SSR",t:"What Doesn't Need Measuring",hint:"Pailin is your girlfriend",bg:"mountain",need:G=>xlLov(G,"pailin"),steps:[
+  xN("The sea of mist at Khao Yai. Pailin isn't wearing a single watch."),xP("happy","Today I don't know the time. I don't know my heart rate."),xP("flustered","…All I know is I want to stay here longer than planned.")]}});
