@@ -1039,13 +1039,16 @@ const MGRP=(()=>{const W=640,H=960,IM={},MK={},CACHE={},WAIT={};const SKIN0={m:[
   const ok=i=>i&&i.complete&&i.naturalWidth>0;
   const maskOf=n=>{if(MK[n])return MK[n];const i=im(n);if(!ok(i))return null;const c=document.createElement("canvas");c.width=W;c.height=H;const x=c.getContext("2d");x.drawImage(i,0,0,W,H);const d=x.getImageData(0,0,W,H).data,a=new Uint8Array(W*H);for(let p=0;p<W*H;p++)a[p]=d[p*4];return MK[n]=a;};
   const tint=(C,k,o,j,sp=1.6,cap=1)=>{for(let c=0;c<3;c++){const v=k<=1?C[c]*k:C[c]+(1-C[c])*Math.min(cap,(k-1)*sp);o[j+c]=v*255;}};
-  function parts(L){const g=L.gender==="f"?"f":"m",hat=L.hat==="cap"||L.hat==="bucket"?L.hat:null,hs=hat||(["crop","bob","pony","buns","long"].includes(L.hairStyle)?L.hairStyle:(g==="f"?"bob":"crop")),o=["tee","polo","suit","hoodie"].includes(L.outfit)?L.outfit:"tee",gl=L.glasses==="glasses"||L.glasses==="sun"?L.glasses:null;return {g,hat,hs,o,gl};}
+  function parts(L){const g=L.gender==="f"?"f":"m",hat=L.hat==="cap"||L.hat==="bucket"?L.hat:null,hs=hat||(["crop","bob","pony","buns","long"].includes(L.hairStyle)?L.hairStyle:(g==="f"?"bob":"crop")),o=["tee","polo","suit","hoodie","thai"].includes(L.outfit)?L.outfit:"tee",gl=L.glasses==="glasses"||L.glasses==="sun"?L.glasses:null,kt=L.hat==="krathong";return {g,hat,hs,o,gl,kt};}
+  /* v1.91.117 (Man): Loy Krathong gold reward — Thai silk shirt (own cut, long sleeves) and a krathong worn on the head over any hairstyle */
+  const cutOf=P=>P.o==="thai"?`${P.g}_thai_cut.png`:`${P.g}_tee_cut.png`;
+  const KT={m:[318,115,1],f:[319,137,1.1]};
   function files(L,e){const P=parts(L),g=P.g;const f=[`${g}_${P.hs}.webp`,`${g}_${P.hs}_hair.webp`,`${g}_cloth_${P.o}.webp`,`${g}_cloth_${P.o}_m.png`,`${g}_skin.png`,`${g}_eyes.png`,`${g}_pants.png`];
-    if(e&&e!=="normal")f.push(`${g}_face_${e}.webp`);if(P.gl)f.push(`${g}_gl_${P.gl}.webp`);if(P.hat)f.push(`${g}_${P.hs}_hat.png`);if(P.o!=="tee")f.push(`${g}_tee_cut.png`);return f;}
+    if(e&&e!=="normal")f.push(`${g}_face_${e}.webp`);if(P.gl)f.push(`${g}_gl_${P.gl}.webp`);if(P.hat)f.push(`${g}_${P.hs}_hat.png`);if(P.o!=="tee")f.push(cutOf(P));if(P.kt)f.push("krathong.webp");return f;}
   function lref(d,m,lo){let s=0,n=0;for(let p=0;p<W*H;p+=3)if(m[p]>150){const j=p*4,l=(.299*d[j]+.587*d[j+1]+.114*d[j+2])/255;if(l>lo){s+=l;n++;}}return n?s/n:.6;}
   function compose(L,e){const P=parts(L),g=P.g,F=n=>im(n);
     const c=document.createElement("canvas");c.width=W;c.height=H;const x=c.getContext("2d",{willReadFrequently:true});
-    x.drawImage(F(`${g}_${P.hs}.webp`),0,0,W,H);if(P.o!=="tee"){x.globalCompositeOperation="destination-out";x.drawImage(F(`${g}_tee_cut.png`),0,0,W,H);x.globalCompositeOperation="source-over";}x.drawImage(F(`${g}_cloth_${P.o}.webp`),0,0,W,H);if(e&&e!=="normal")x.drawImage(F(`${g}_face_${e}.webp`),0,0,W,H);
+    x.drawImage(F(`${g}_${P.hs}.webp`),0,0,W,H);if(P.o!=="tee"){x.globalCompositeOperation="destination-out";x.drawImage(F(cutOf(P)),0,0,W,H);x.globalCompositeOperation="source-over";}x.drawImage(F(`${g}_cloth_${P.o}.webp`),0,0,W,H);if(e&&e!=="normal")x.drawImage(F(`${g}_face_${e}.webp`),0,0,W,H);
     const id=x.getImageData(0,0,W,H),d=id.data,sk=maskOf(`${g}_skin.png`),cm=maskOf(`${g}_cloth_${P.o}_m.png`),pm=maskOf(`${g}_pants.png`),em=maskOf(`${g}_eyes.png`);
     const S0=SKIN0[g],S1=hex(L.skin||"#eec1a0").map(v=>v*255),rr=S1.map((v,i)=>v/S0[i]),CC=hex(L.outfitColor||"#f2f2f2"),CP=hex(L.pantsColor||"#1f1f24"),CE=hex(L.eyes||"#3a2a24");
     const lc=lref(d,cm,.15),lp=lref(d,pm,.05),o=[0,0,0];
@@ -1064,6 +1067,7 @@ const MGRP=(()=>{const W=640,H=960,IM={},MK={},CACHE={},WAIT={};const SKIN0={m:[
     for(let p=0;p<W*H;p++){const j=p*4;if(!q[j+3])continue;const l=(.299*q[j]+.587*q[j+1]+.114*q[j+2])/255,isHat=hm&&hm[p]>128;if(isHat)tint(CT,l/lt,o,0);else tint(CH,l/lh,o,0,.9,.55);q[j]=o[0];q[j+1]=o[1];q[j+2]=o[2];}
     y.putImageData(hd,0,0);x.drawImage(h,0,0);
     if(P.gl)x.drawImage(F(`${g}_gl_${P.gl}.webp`),0,0,W,H);
+    if(P.kt){const K=F("krathong.webp"),[kx,ky,ks]=KT[g];if(ok(K)){const w=K.naturalWidth*ks,h=K.naturalHeight*ks;x.drawImage(K,kx-w/2,ky-112*ks,w,h);}}
     return c;}
   const key=(L,e)=>JSON.stringify([L.gender,L.hairStyle,L.hair,L.skin,L.eyes,L.outfit,L.outfitColor,L.pantsColor,L.hat,L.hatColor,L.glasses,e||"normal"]);
   /* returns a data: URL, or "" while the art loads (then calls back once it is ready) */

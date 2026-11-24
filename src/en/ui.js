@@ -1,5 +1,5 @@
 // ================= MUAY THAI MOE v1.3 — UI =================
-const VERSION="1.91.116";
+const VERSION="1.91.117";
 const CUR_LANG=(typeof window!=="undefined"&&window.LANG)||"th";
 const TH_LABEL=String.fromCharCode(3652,3607,3618);
 function langSwitch(cls){return `<div class="langsw ${cls||""}" role="group" aria-label="Language">${[["th",TH_LABEL],["en","EN"]].map(([k,l])=>`<button class="lsb ${CUR_LANG===k?"on":""}" data-act="setlang" data-v="${k}" aria-pressed="${CUR_LANG===k}">${l}</button>`).join("")}</div>`;}
@@ -318,6 +318,8 @@ function crRoll(c,part){const O=CHIBI.OPT,p=a=>a[Math.floor(Math.random()*a.leng
   if(part==="wear"){c.outfit=p(["tee","polo","suit","hoodie"]);c.outfitColor=p(O.cloth);c.pants=p(["long","long","shorts"]);c.pantsColor=p(["#1f1f24","#2c3e6b","#5a4a3a","#8a8f99","#e8dcc0"]);}
   if(part==="acc"){c.hat=p(["none","none","cap","bucket"]);c.hatColor=p(O.cloth);c.glasses=p(["none","none","glasses","sun"]);}}
 const crName=()=>{const e=document.getElementById("pname");if(e&&UI.creator)UI.creator.name=e.value;};
+/* v1.91.117 (Man): the Loy Krathong gold tier unlocks the manager's Thai shirt and krathong hat, worn any time */
+const loyGoldOn=()=>{try{const L=typeof loyOf==="function"&&typeof G!=="undefined"&&G?loyOf(G):null;return !!(L&&L.tiers&&L.tiers.gold);}catch(e){return false;}};
 function crPanels(c){const O=CHIBI.OPT;
   const sw=(prop,list)=>`<div class="sw">${list.map(v=>`<button style="background:${v}" aria-label="${v}" aria-pressed="${c[prop]===v}" data-act="cset" data-k="${prop}" data-v="${v}"></button>`).join("")}</div>`;
   const seg=(prop,list)=>`<div class="seg">${list.map(([v,t])=>`<button data-act="cset" data-k="${prop}" data-v="${v}" aria-pressed="${c[prop]===v}">${t}</button>`).join("")}</div>`;
@@ -325,8 +327,8 @@ function crPanels(c){const O=CHIBI.OPT;
   const tab=c.tab||(c.edit?"face":"base");
   const T={base:F("Gender (affects dialogue)",seg("gender",[["m","Male"],["f","Female"]]))+F("Difficulty",seg("diff",[["easy","Easy"],["normal","Normal"],["hard","It is"]]))+`<p class="meta">${{easy:"Rivals grow slower, more class income. For players who want the story",normal:"Balanced as designed",hard:"Ploy and Fah are tougher, use stronger skills, money is tighter"}[c.diff||"normal"]}</p>`+F("Seed (optional)",`<input id="pseed" maxlength="20" value="${esc(c.seed||"")}" autocomplete="off" placeholder="Leave blank = random world">`)+`<p class="meta">Use the same seed as a friend to get the same world: rival fighters, fight offers and random events all match. Numbers or words both work.</p>`,
    face:F("Hairstyle",seg("hairStyle",O.hairStyle))+F("Hair color",sw("hair",O.hair))+`<div class="two">${F("Skin tone",sw("skin",O.mskin))}${F("Eye color",sw("eyes",O.eyes))}</div>`,
-   wear:F("Outfit",seg("outfit",[["tee","T-shirt"],["polo","Polo"],["suit","Suit"],["hoodie","Hoodie"]])+sw("outfitColor",O.cloth))+F("Pants",seg("pants",[["long","Long"],["shorts","Shorts"]])+sw("pantsColor",["#1f1f24","#2c3e6b","#5a4a3a","#8a8f99","#e8dcc0"])),
-   acc:F("Hat",seg("hat",[["none","None"],["cap","Cap"],["bucket","Bucket"]]))+(c.hat!=="none"?F("Hat color",sw("hatColor",O.cloth)):"")+F("Glasses",seg("glasses",[["none","None"],["glasses","Prescription"],["sun","Sunglasses"]]))};
+   wear:F("Outfit",seg("outfit",[["tee","T-shirt"],["polo","Polo"],["suit","Suit"],["hoodie","Hoodie"]].concat(loyGoldOn()?[["thai","Thai Dress"]]:[]))+sw("outfitColor",O.cloth))+F("Pants",seg("pants",[["long","Long"],["shorts","Shorts"]])+sw("pantsColor",["#1f1f24","#2c3e6b","#5a4a3a","#8a8f99","#e8dcc0"])),
+   acc:F("Hat",seg("hat",[["none","None"],["cap","Cap"],["bucket","Bucket"]].concat(loyGoldOn()?[["krathong","Krathong"]]:[])))+(c.hat!=="none"&&c.hat!=="krathong"?F("Hat color",sw("hatColor",O.cloth)):"")+F("Glasses",seg("glasses",[["none","None"],["glasses","Prescription"],["sun","Sunglasses"]]))};
   if(c.edit)T.base=F("Gender (affects dialogue)",seg("gender",[["m","Male"],["f","Female"]]));
   return {tab,T};}
 /* v1.91.68 (prototype): the manager's expressions (anime portrait) */

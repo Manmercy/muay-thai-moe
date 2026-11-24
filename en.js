@@ -1799,6 +1799,8 @@ const LM={
   pantsShort:{21:".......oppppppppo.......",22:".......oppppppppo.......",23:".......oppppppppo.......",24:".......opppoopppo.......",25:".......oqqqooqqqo.......",30:".......osssooosso.......",31:".......oooooooooo......."},
   cap:{0:"........oooooooo........",1:"......ooccccccccoo......",2:".....occcccccccccco.....",3:"....occcccccccccccco....",4:"....oddddddddddddddddo.."},
   bucket:{0:".......oooooooooo.......",1:"......occcccccccco......",2:".....occcccccccccco.....",3:".....occcccccccccco.....",4:"...oddddddddddddddddo...",5:"...oooooooooooooooooo..."},
+  thai:{14:"..........owwo..........",15:".....oxxxxwwwwxxxxo.....",16:".....oxxxxxtxxxxxxo.....",17:".....oxoxxxtxxxxoxo.....",18:".....oxoxxxtxxxxoxo.....",19:".....oxoxxxtxxxxoxo.....",20:".....oyoyyyyyyyyoyo.....",21:".......oyyyyyyyyo......."},
+  krathong:{0:"...........y..i.i.......",1:"...........w..i.i.......",2:"......offfwfffifffo.....",3:"....oggfgfgfgfgfgggo....",4:"....oggggggggggggggo....",5:".....oooooooooooooo....."},
   glasses:{8:".......oooo..oooo.......",9:".......o..oooo..o.......",10:".......oooo..oooo......."},
   sun:{8:".......oooo..oooo.......",9:".......offooooffo.......",10:".......offo..offo......."},
 };
@@ -1814,7 +1816,8 @@ function managerLayers(st){
   out.push({rows:st.pants==="shorts"?LM.pantsShort:LM.pantsLong,map:{o:pa.outline,p:pa.base,q:pa.dark,s:"#3a2a24"},move:"none"});
   out.push({rows:LM[st.outfit]||LM.tee,map:{o:top.outline,x:top.base,y:top.dark,z:top.outline,w:"#f4f1ea",t:st.outfit==="suit"?"#c8283c":top.light},move:"all"});
   out.push({rows:st.hairStyle==="crop"?L.hairFrontCrop:L.hairFrontBob,map:hairMap,move:"all"});
-  if(st.hat&&st.hat!=="none")out.push({rows:LM[st.hat],map:{o:hat.outline,c:hat.base,d:hat.dark},move:"all"});
+  if(st.hat==="krathong")out.push({rows:LM.krathong,map:{o:"#24502c",g:"#3e8a3c",f:"#f39a1e",y:"#ffd84a",w:"#f4efd8",i:"#8a5a3a"},move:"all"});
+  else if(st.hat&&st.hat!=="none")out.push({rows:LM[st.hat],map:{o:hat.outline,c:hat.base,d:hat.dark},move:"all"});
   if(st.glasses&&st.glasses!=="none")out.push({rows:LM[st.glasses],map:{o:"#1b1520",f:"#3a3550"},move:"all"});
   if(st.stache)out.push({rows:{11:".........oooooo........."},map:{o:st.stache},move:"all"}); /* v1.86: the district chief's moustache */
   if(st.epaulet)out.push({rows:{15:".....oyy........yyo....."},map:{o:"#7a5a10",y:st.epaulet},move:"all"});
@@ -6379,13 +6382,16 @@ const MGRP=(()=>{const W=640,H=960,IM={},MK={},CACHE={},WAIT={};const SKIN0={m:[
   const ok=i=>i&&i.complete&&i.naturalWidth>0;
   const maskOf=n=>{if(MK[n])return MK[n];const i=im(n);if(!ok(i))return null;const c=document.createElement("canvas");c.width=W;c.height=H;const x=c.getContext("2d");x.drawImage(i,0,0,W,H);const d=x.getImageData(0,0,W,H).data,a=new Uint8Array(W*H);for(let p=0;p<W*H;p++)a[p]=d[p*4];return MK[n]=a;};
   const tint=(C,k,o,j,sp=1.6,cap=1)=>{for(let c=0;c<3;c++){const v=k<=1?C[c]*k:C[c]+(1-C[c])*Math.min(cap,(k-1)*sp);o[j+c]=v*255;}};
-  function parts(L){const g=L.gender==="f"?"f":"m",hat=L.hat==="cap"||L.hat==="bucket"?L.hat:null,hs=hat||(["crop","bob","pony","buns","long"].includes(L.hairStyle)?L.hairStyle:(g==="f"?"bob":"crop")),o=["tee","polo","suit","hoodie"].includes(L.outfit)?L.outfit:"tee",gl=L.glasses==="glasses"||L.glasses==="sun"?L.glasses:null;return {g,hat,hs,o,gl};}
+  function parts(L){const g=L.gender==="f"?"f":"m",hat=L.hat==="cap"||L.hat==="bucket"?L.hat:null,hs=hat||(["crop","bob","pony","buns","long"].includes(L.hairStyle)?L.hairStyle:(g==="f"?"bob":"crop")),o=["tee","polo","suit","hoodie","thai"].includes(L.outfit)?L.outfit:"tee",gl=L.glasses==="glasses"||L.glasses==="sun"?L.glasses:null,kt=L.hat==="krathong";return {g,hat,hs,o,gl,kt};}
+  /* v1.91.117 (Man): Loy Krathong gold reward — Thai silk shirt (own cut, long sleeves) and a krathong worn on the head over any hairstyle */
+  const cutOf=P=>P.o==="thai"?`${P.g}_thai_cut.png`:`${P.g}_tee_cut.png`;
+  const KT={m:[318,115,1],f:[319,137,1.1]};
   function files(L,e){const P=parts(L),g=P.g;const f=[`${g}_${P.hs}.webp`,`${g}_${P.hs}_hair.webp`,`${g}_cloth_${P.o}.webp`,`${g}_cloth_${P.o}_m.png`,`${g}_skin.png`,`${g}_eyes.png`,`${g}_pants.png`];
-    if(e&&e!=="normal")f.push(`${g}_face_${e}.webp`);if(P.gl)f.push(`${g}_gl_${P.gl}.webp`);if(P.hat)f.push(`${g}_${P.hs}_hat.png`);if(P.o!=="tee")f.push(`${g}_tee_cut.png`);return f;}
+    if(e&&e!=="normal")f.push(`${g}_face_${e}.webp`);if(P.gl)f.push(`${g}_gl_${P.gl}.webp`);if(P.hat)f.push(`${g}_${P.hs}_hat.png`);if(P.o!=="tee")f.push(cutOf(P));if(P.kt)f.push("krathong.webp");return f;}
   function lref(d,m,lo){let s=0,n=0;for(let p=0;p<W*H;p+=3)if(m[p]>150){const j=p*4,l=(.299*d[j]+.587*d[j+1]+.114*d[j+2])/255;if(l>lo){s+=l;n++;}}return n?s/n:.6;}
   function compose(L,e){const P=parts(L),g=P.g,F=n=>im(n);
     const c=document.createElement("canvas");c.width=W;c.height=H;const x=c.getContext("2d",{willReadFrequently:true});
-    x.drawImage(F(`${g}_${P.hs}.webp`),0,0,W,H);if(P.o!=="tee"){x.globalCompositeOperation="destination-out";x.drawImage(F(`${g}_tee_cut.png`),0,0,W,H);x.globalCompositeOperation="source-over";}x.drawImage(F(`${g}_cloth_${P.o}.webp`),0,0,W,H);if(e&&e!=="normal")x.drawImage(F(`${g}_face_${e}.webp`),0,0,W,H);
+    x.drawImage(F(`${g}_${P.hs}.webp`),0,0,W,H);if(P.o!=="tee"){x.globalCompositeOperation="destination-out";x.drawImage(F(cutOf(P)),0,0,W,H);x.globalCompositeOperation="source-over";}x.drawImage(F(`${g}_cloth_${P.o}.webp`),0,0,W,H);if(e&&e!=="normal")x.drawImage(F(`${g}_face_${e}.webp`),0,0,W,H);
     const id=x.getImageData(0,0,W,H),d=id.data,sk=maskOf(`${g}_skin.png`),cm=maskOf(`${g}_cloth_${P.o}_m.png`),pm=maskOf(`${g}_pants.png`),em=maskOf(`${g}_eyes.png`);
     const S0=SKIN0[g],S1=hex(L.skin||"#eec1a0").map(v=>v*255),rr=S1.map((v,i)=>v/S0[i]),CC=hex(L.outfitColor||"#f2f2f2"),CP=hex(L.pantsColor||"#1f1f24"),CE=hex(L.eyes||"#3a2a24");
     const lc=lref(d,cm,.15),lp=lref(d,pm,.05),o=[0,0,0];
@@ -6404,6 +6410,7 @@ const MGRP=(()=>{const W=640,H=960,IM={},MK={},CACHE={},WAIT={};const SKIN0={m:[
     for(let p=0;p<W*H;p++){const j=p*4;if(!q[j+3])continue;const l=(.299*q[j]+.587*q[j+1]+.114*q[j+2])/255,isHat=hm&&hm[p]>128;if(isHat)tint(CT,l/lt,o,0);else tint(CH,l/lh,o,0,.9,.55);q[j]=o[0];q[j+1]=o[1];q[j+2]=o[2];}
     y.putImageData(hd,0,0);x.drawImage(h,0,0);
     if(P.gl)x.drawImage(F(`${g}_gl_${P.gl}.webp`),0,0,W,H);
+    if(P.kt){const K=F("krathong.webp"),[kx,ky,ks]=KT[g];if(ok(K)){const w=K.naturalWidth*ks,h=K.naturalHeight*ks;x.drawImage(K,kx-w/2,ky-112*ks,w,h);}}
     return c;}
   const key=(L,e)=>JSON.stringify([L.gender,L.hairStyle,L.hair,L.skin,L.eyes,L.outfit,L.outfitColor,L.pantsColor,L.hat,L.hatColor,L.glasses,e||"normal"]);
   /* returns a data: URL, or "" while the art loads (then calls back once it is ready) */
@@ -6555,7 +6562,7 @@ AU.gsfx=function(kind,a){if(!this.init()||this.muted||!SETTINGS.sfx)return;const
   if(kind==="shimmer")for(let i=0;i<6;i++)T(i*.05,{f:1400+Math.random()*1400,type:"sine",dur:.12,peak:.06});};
 
 // ================= MUAY THAI MOE v1.3 — UI =================
-const VERSION="1.91.116";
+const VERSION="1.91.117";
 const CUR_LANG=(typeof window!=="undefined"&&window.LANG)||"th";
 const TH_LABEL=String.fromCharCode(3652,3607,3618);
 function langSwitch(cls){return `<div class="langsw ${cls||""}" role="group" aria-label="Language">${[["th",TH_LABEL],["en","EN"]].map(([k,l])=>`<button class="lsb ${CUR_LANG===k?"on":""}" data-act="setlang" data-v="${k}" aria-pressed="${CUR_LANG===k}">${l}</button>`).join("")}</div>`;}
@@ -6874,6 +6881,8 @@ function crRoll(c,part){const O=CHIBI.OPT,p=a=>a[Math.floor(Math.random()*a.leng
   if(part==="wear"){c.outfit=p(["tee","polo","suit","hoodie"]);c.outfitColor=p(O.cloth);c.pants=p(["long","long","shorts"]);c.pantsColor=p(["#1f1f24","#2c3e6b","#5a4a3a","#8a8f99","#e8dcc0"]);}
   if(part==="acc"){c.hat=p(["none","none","cap","bucket"]);c.hatColor=p(O.cloth);c.glasses=p(["none","none","glasses","sun"]);}}
 const crName=()=>{const e=document.getElementById("pname");if(e&&UI.creator)UI.creator.name=e.value;};
+/* v1.91.117 (Man): the Loy Krathong gold tier unlocks the manager's Thai shirt and krathong hat, worn any time */
+const loyGoldOn=()=>{try{const L=typeof loyOf==="function"&&typeof G!=="undefined"&&G?loyOf(G):null;return !!(L&&L.tiers&&L.tiers.gold);}catch(e){return false;}};
 function crPanels(c){const O=CHIBI.OPT;
   const sw=(prop,list)=>`<div class="sw">${list.map(v=>`<button style="background:${v}" aria-label="${v}" aria-pressed="${c[prop]===v}" data-act="cset" data-k="${prop}" data-v="${v}"></button>`).join("")}</div>`;
   const seg=(prop,list)=>`<div class="seg">${list.map(([v,t])=>`<button data-act="cset" data-k="${prop}" data-v="${v}" aria-pressed="${c[prop]===v}">${t}</button>`).join("")}</div>`;
@@ -6881,8 +6890,8 @@ function crPanels(c){const O=CHIBI.OPT;
   const tab=c.tab||(c.edit?"face":"base");
   const T={base:F("Gender (affects dialogue)",seg("gender",[["m","Male"],["f","Female"]]))+F("Difficulty",seg("diff",[["easy","Easy"],["normal","Normal"],["hard","It is"]]))+`<p class="meta">${{easy:"Rivals grow slower, more class income. For players who want the story",normal:"Balanced as designed",hard:"Ploy and Fah are tougher, use stronger skills, money is tighter"}[c.diff||"normal"]}</p>`+F("Seed (optional)",`<input id="pseed" maxlength="20" value="${esc(c.seed||"")}" autocomplete="off" placeholder="Leave blank = random world">`)+`<p class="meta">Use the same seed as a friend to get the same world: rival fighters, fight offers and random events all match. Numbers or words both work.</p>`,
    face:F("Hairstyle",seg("hairStyle",O.hairStyle))+F("Hair color",sw("hair",O.hair))+`<div class="two">${F("Skin tone",sw("skin",O.mskin))}${F("Eye color",sw("eyes",O.eyes))}</div>`,
-   wear:F("Outfit",seg("outfit",[["tee","T-shirt"],["polo","Polo"],["suit","Suit"],["hoodie","Hoodie"]])+sw("outfitColor",O.cloth))+F("Pants",seg("pants",[["long","Long"],["shorts","Shorts"]])+sw("pantsColor",["#1f1f24","#2c3e6b","#5a4a3a","#8a8f99","#e8dcc0"])),
-   acc:F("Hat",seg("hat",[["none","None"],["cap","Cap"],["bucket","Bucket"]]))+(c.hat!=="none"?F("Hat color",sw("hatColor",O.cloth)):"")+F("Glasses",seg("glasses",[["none","None"],["glasses","Prescription"],["sun","Sunglasses"]]))};
+   wear:F("Outfit",seg("outfit",[["tee","T-shirt"],["polo","Polo"],["suit","Suit"],["hoodie","Hoodie"]].concat(loyGoldOn()?[["thai","Thai Dress"]]:[]))+sw("outfitColor",O.cloth))+F("Pants",seg("pants",[["long","Long"],["shorts","Shorts"]])+sw("pantsColor",["#1f1f24","#2c3e6b","#5a4a3a","#8a8f99","#e8dcc0"])),
+   acc:F("Hat",seg("hat",[["none","None"],["cap","Cap"],["bucket","Bucket"]].concat(loyGoldOn()?[["krathong","Krathong"]]:[])))+(c.hat!=="none"&&c.hat!=="krathong"?F("Hat color",sw("hatColor",O.cloth)):"")+F("Glasses",seg("glasses",[["none","None"],["glasses","Prescription"],["sun","Sunglasses"]]))};
   if(c.edit)T.base=F("Gender (affects dialogue)",seg("gender",[["m","Male"],["f","Female"]]));
   return {tab,T};}
 /* v1.91.68 (prototype): the manager's expressions (anime portrait) */
@@ -10237,7 +10246,7 @@ function loyCardDrop(G,order){G.cards=G.cards||{};const left=LOY_CARDS.filter(k=
   const pref=(order||[]).map(id=>"lk_"+id).filter(k=>left.includes(k));const L=loyOf(G);const id=pref[0]||left[((L&&L.runs)||0)%left.length];
   G.cards[id]={n:1,lv:1,wk:absWeek(G),seen:false}; /* v1.89.24: event card — no bond or stardust carried into the main game */
   return `New SR card: "${CARDS[id].t}" (see it in the album)`;}
-function loyGold(G){const L=loyOf(G);if(!L)return null;L.dressOn=1;return "Thai dress off-stage unlocked: the girls wear Thai dress in outings and dates (toggle it in Auntie Taew's letter)";}
+function loyGold(G){const L=loyOf(G);if(!L)return null;return "Unlocked the manager's Thai silk shirt and krathong hat (wear them any time · Settings › Edit character)";} /* v1.91.117 (Man): the gold tier now dresses the manager */
 const loyThaiLook=G=>!!(G&&G.ev&&G.ev.loy&&G.ev.loy.tiers&&G.ev.loy.tiers.silver);
 /* v1.89.25: Tum comes back every in-game Loy Krathong (weeks 24–28) by letter — the event's stardust giver; he scales a little above the camp's top three */
 const THIEF_WK=[24,27];

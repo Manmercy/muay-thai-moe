@@ -1437,7 +1437,7 @@ function loyCardDrop(G,order){G.cards=G.cards||{};const left=LOY_CARDS.filter(k=
   const pref=(order||[]).map(id=>"lk_"+id).filter(k=>left.includes(k));const L=loyOf(G);const id=pref[0]||left[((L&&L.runs)||0)%left.length];
   G.cards[id]={n:1,lv:1,wk:absWeek(G),seen:false}; /* v1.89.24: event card — no bond or stardust carried into the main game */
   return `การ์ด SR ใหม่: "${CARDS[id].t}" (ดูได้ในอัลบั้ม)`;}
-function loyGold(G){const L=loyOf(G);if(!L)return null;L.dressOn=1;return "ปลดล็อกชุดไทยนอกเวที: สาว ๆ ใส่ชุดไทยในฉากเที่ยวและเดท (เปิด/ปิดได้ในจดหมายของป้าแต๋ว)";}
+function loyGold(G){const L=loyOf(G);if(!L)return null;return "ปลดล็อกชุดไทยกับหมวกกระทงของผู้จัดการ (ใส่ได้ตลอด · ตั้งค่า › แก้ไขตัวละคร)";} /* v1.91.117 (Man): the gold tier now dresses the manager */
 const loyThaiLook=G=>!!(G&&G.ev&&G.ev.loy&&G.ev.loy.tiers&&G.ev.loy.tiers.silver);
 /* v1.89.25: Tum comes back every in-game Loy Krathong (weeks 24–28) by letter — the event's stardust giver; he scales a little above the camp's top three */
 const THIEF_WK=[24,27];

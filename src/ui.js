@@ -1,5 +1,5 @@
 // ================= MUAY THAI MOE v1.3 — UI =================
-const VERSION="1.91.116";
+const VERSION="1.91.117";
 const CUR_LANG=(typeof window!=="undefined"&&window.LANG)||"th";
 const TH_LABEL=String.fromCharCode(3652,3607,3618);
 function langSwitch(cls){return `<div class="langsw ${cls||""}" role="group" aria-label="Language">${[["th",TH_LABEL],["en","EN"]].map(([k,l])=>`<button class="lsb ${CUR_LANG===k?"on":""}" data-act="setlang" data-v="${k}" aria-pressed="${CUR_LANG===k}">${l}</button>`).join("")}</div>`;}
@@ -318,6 +318,8 @@ function crRoll(c,part){const O=CHIBI.OPT,p=a=>a[Math.floor(Math.random()*a.leng
   if(part==="wear"){c.outfit=p(["tee","polo","suit","hoodie"]);c.outfitColor=p(O.cloth);c.pants=p(["long","long","shorts"]);c.pantsColor=p(["#1f1f24","#2c3e6b","#5a4a3a","#8a8f99","#e8dcc0"]);}
   if(part==="acc"){c.hat=p(["none","none","cap","bucket"]);c.hatColor=p(O.cloth);c.glasses=p(["none","none","glasses","sun"]);}}
 const crName=()=>{const e=document.getElementById("pname");if(e&&UI.creator)UI.creator.name=e.value;};
+/* v1.91.117 (Man): the Loy Krathong gold tier unlocks the manager's Thai shirt and krathong hat, worn any time */
+const loyGoldOn=()=>{try{const L=typeof loyOf==="function"&&typeof G!=="undefined"&&G?loyOf(G):null;return !!(L&&L.tiers&&L.tiers.gold);}catch(e){return false;}};
 function crPanels(c){const O=CHIBI.OPT;
   const sw=(prop,list)=>`<div class="sw">${list.map(v=>`<button style="background:${v}" aria-label="${v}" aria-pressed="${c[prop]===v}" data-act="cset" data-k="${prop}" data-v="${v}"></button>`).join("")}</div>`;
   const seg=(prop,list)=>`<div class="seg">${list.map(([v,t])=>`<button data-act="cset" data-k="${prop}" data-v="${v}" aria-pressed="${c[prop]===v}">${t}</button>`).join("")}</div>`;
@@ -325,8 +327,8 @@ function crPanels(c){const O=CHIBI.OPT;
   const tab=c.tab||(c.edit?"face":"base");
   const T={base:F("เพศ (มีผลกับบทพูด)",seg("gender",[["m","ชาย"],["f","หญิง"]]))+F("ความยาก",seg("diff",[["easy","ง่าย"],["normal","ปกติ"],["hard","ยาก"]]))+`<p class="meta">${{easy:"คู่แข่งพัฒนาช้าลง รายได้คลาสมากขึ้น เหมาะกับคนอยากเล่นเนื้อเรื่อง",normal:"สมดุลตามที่ออกแบบไว้",hard:"พลอยกับฟ้าโหดขึ้น ใช้สกิลแรงขึ้น เงินตึงขึ้น"}[c.diff||"normal"]}</p>`+F("Seed (ไม่บังคับ)",`<input id="pseed" maxlength="20" value="${esc(c.seed||"")}" autocomplete="off" placeholder="เว้นว่าง = สุ่มโลกใหม่">`)+`<p class="meta">ใส่ seed เดียวกับเพื่อน จะได้โลกเดียวกัน: นักมวยคู่แข่ง ข้อเสนอไฟต์ และเหตุการณ์สุ่มตรงกัน ใส่เป็นตัวเลขหรือคำก็ได้</p>`,
    face:F("ทรงผม",seg("hairStyle",O.hairStyle))+F("สีผม",sw("hair",O.hair))+`<div class="two">${F("สีผิว",sw("skin",O.mskin))}${F("สีตา",sw("eyes",O.eyes))}</div>`,
-   wear:F("ชุด",seg("outfit",[["tee","เสื้อยืด"],["polo","โปโล"],["suit","สูท"],["hoodie","ฮู้ด"]])+sw("outfitColor",O.cloth))+F("กางเกง",seg("pants",[["long","ขายาว"],["shorts","ขาสั้น"]])+sw("pantsColor",["#1f1f24","#2c3e6b","#5a4a3a","#8a8f99","#e8dcc0"])),
-   acc:F("หมวก",seg("hat",[["none","ไม่ใส่"],["cap","แก๊ป"],["bucket","บักเก็ต"]]))+(c.hat!=="none"?F("สีหมวก",sw("hatColor",O.cloth)):"")+F("แว่น",seg("glasses",[["none","ไม่ใส่"],["glasses","สายตา"],["sun","กันแดด"]]))};
+   wear:F("ชุด",seg("outfit",[["tee","เสื้อยืด"],["polo","โปโล"],["suit","สูท"],["hoodie","ฮู้ด"]].concat(loyGoldOn()?[["thai","ชุดไทย"]]:[]))+sw("outfitColor",O.cloth))+F("กางเกง",seg("pants",[["long","ขายาว"],["shorts","ขาสั้น"]])+sw("pantsColor",["#1f1f24","#2c3e6b","#5a4a3a","#8a8f99","#e8dcc0"])),
+   acc:F("หมวก",seg("hat",[["none","ไม่ใส่"],["cap","แก๊ป"],["bucket","บักเก็ต"]].concat(loyGoldOn()?[["krathong","กระทง"]]:[])))+(c.hat!=="none"&&c.hat!=="krathong"?F("สีหมวก",sw("hatColor",O.cloth)):"")+F("แว่น",seg("glasses",[["none","ไม่ใส่"],["glasses","สายตา"],["sun","กันแดด"]]))};
   if(c.edit)T.base=F("เพศ (มีผลกับบทพูด)",seg("gender",[["m","ชาย"],["f","หญิง"]]));
   return {tab,T};}
 /* v1.91.68 (prototype): the manager's expressions (anime portrait) */

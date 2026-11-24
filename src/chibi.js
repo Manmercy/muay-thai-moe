@@ -112,6 +112,8 @@ const LM={
   pantsShort:{21:".......oppppppppo.......",22:".......oppppppppo.......",23:".......oppppppppo.......",24:".......opppoopppo.......",25:".......oqqqooqqqo.......",30:".......osssooosso.......",31:".......oooooooooo......."},
   cap:{0:"........oooooooo........",1:"......ooccccccccoo......",2:".....occcccccccccco.....",3:"....occcccccccccccco....",4:"....oddddddddddddddddo.."},
   bucket:{0:".......oooooooooo.......",1:"......occcccccccco......",2:".....occcccccccccco.....",3:".....occcccccccccco.....",4:"...oddddddddddddddddo...",5:"...oooooooooooooooooo..."},
+  thai:{14:"..........owwo..........",15:".....oxxxxwwwwxxxxo.....",16:".....oxxxxxtxxxxxxo.....",17:".....oxoxxxtxxxxoxo.....",18:".....oxoxxxtxxxxoxo.....",19:".....oxoxxxtxxxxoxo.....",20:".....oyoyyyyyyyyoyo.....",21:".......oyyyyyyyyo......."},
+  krathong:{0:"...........y..i.i.......",1:"...........w..i.i.......",2:"......offfwfffifffo.....",3:"....oggfgfgfgfgfgggo....",4:"....oggggggggggggggo....",5:".....oooooooooooooo....."},
   glasses:{8:".......oooo..oooo.......",9:".......o..oooo..o.......",10:".......oooo..oooo......."},
   sun:{8:".......oooo..oooo.......",9:".......offooooffo.......",10:".......offo..offo......."},
 };
@@ -127,7 +129,8 @@ function managerLayers(st){
   out.push({rows:st.pants==="shorts"?LM.pantsShort:LM.pantsLong,map:{o:pa.outline,p:pa.base,q:pa.dark,s:"#3a2a24"},move:"none"});
   out.push({rows:LM[st.outfit]||LM.tee,map:{o:top.outline,x:top.base,y:top.dark,z:top.outline,w:"#f4f1ea",t:st.outfit==="suit"?"#c8283c":top.light},move:"all"});
   out.push({rows:st.hairStyle==="crop"?L.hairFrontCrop:L.hairFrontBob,map:hairMap,move:"all"});
-  if(st.hat&&st.hat!=="none")out.push({rows:LM[st.hat],map:{o:hat.outline,c:hat.base,d:hat.dark},move:"all"});
+  if(st.hat==="krathong")out.push({rows:LM.krathong,map:{o:"#24502c",g:"#3e8a3c",f:"#f39a1e",y:"#ffd84a",w:"#f4efd8",i:"#8a5a3a"},move:"all"});
+  else if(st.hat&&st.hat!=="none")out.push({rows:LM[st.hat],map:{o:hat.outline,c:hat.base,d:hat.dark},move:"all"});
   if(st.glasses&&st.glasses!=="none")out.push({rows:LM[st.glasses],map:{o:"#1b1520",f:"#3a3550"},move:"all"});
   if(st.stache)out.push({rows:{11:".........oooooo........."},map:{o:st.stache},move:"all"}); /* v1.86: the district chief's moustache */
   if(st.epaulet)out.push({rows:{15:".....oyy........yyo....."},map:{o:"#7a5a10",y:st.epaulet},move:"all"});
