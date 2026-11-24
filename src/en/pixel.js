@@ -308,24 +308,38 @@ function drawCamp(ctx,G,t){
   if(look>=6){P(118,142,200,30,"#b8a58a");for(let x=118;x<318;x+=10)P(x,142,1,30,"#a8957a");}
   decorTrack(P,G,t,F);
   decorTree(P,G,t,F);
-  // building
-  const bx=8,by=58,bw=104,bh=62;
-  P(bx,by,bw,bh,look>=4?"#9a6a42":"#7d573a");for(let y=by+4;y<by+bh;y+=6)P(bx,y,bw,1,look>=4?"#87593a":"#6b4a31");
+  // building — v1.91.122 (Man): the camp house is the fighters' dorm and grows with every level:
+  // 1 attic dormers and a striped porch awning · 2 a wooden second storey · 3 rebuilt in concrete, flat roof, water tank and flag
+  // 4 balconies, laundry lines and air-con units · 5 a third storey and a lit camp sign
+  const bx=8,by=58,bw=104,bh=62,dl=(G.fac&&G.fac.dorm)||0,ex=dl>=5?2:dl>=2?1:0,fh=18,topY=by-ex*fh,cc=dl>=3;
+  const win=(x,y,w,h,i)=>{P(x,y,w,h,"#2a1d2e");const on=look>=4||dl>=2?((Math.floor(t/2200)+i*5)%11?"#ffd98a":"#c8a060"):null;if(on){P(x+1,y+1,w-2,h-2,on);P(x+(w>>1),y+1,1,h-2,cc?"#b8aa96":"#7d573a");}};
+  P(bx,by,bw,bh,cc?"#e8dcc8":look>=4?"#9a6a42":"#7d573a");for(let y=by+4;y<by+bh;y+=6)P(bx,y,bw,1,cc?"#d8ccb6":look>=4?"#87593a":"#6b4a31");
+  for(let f=0;f<ex;f++){const y=topY+f*fh;P(bx,y,bw,fh,cc?"#efe6d4":"#a87850");if(!cc)for(let yy=y+3;yy<y+fh;yy+=5)P(bx,yy,bw,1,"#94673f");
+    P(bx-2,y+fh-2,bw+4,2,cc?(dl>=5?"#c8283c":"#bfae94"):"#6a4a30");for(let k=0;k<5;k++)win(bx+6+k*20,y+4,10,9,f*5+k);}
   // roof
-  for(let i=0;i<14;i++)P(bx-6+i,by-14+i,bw+12-i*2,1,"#8d949c");
-  P(bx-6,by-1,bw+12,2,"#6d747c");
-  const rust=Math.max(0,7-Math.floor(look/2));for(let i=0;i<rust;i++){P(bx+4+((i*37)%96),by-12+((i*5)%10),6,2,"#a0522d");}
+  if(!cc){for(let i=0;i<14;i++)P(bx-6+i,topY-14+i,bw+12-i*2,1,"#8d949c");P(bx-6,topY-1,bw+12,2,"#6d747c");
+    const rust=dl>=2?0:Math.max(0,7-Math.floor(look/2));for(let i=0;i<rust;i++){P(bx+4+((i*37)%96),topY-12+((i*5)%10),6,2,"#a0522d");}
+    if(dl===1)for(const dx of [bx+18,bx+74]){P(dx,by-11,12,9,"#a87850");for(let i=0;i<4;i++)P(dx-2+i,by-15+i,16-i*2,1,"#6d747c");win(dx+3,by-9,6,6,dx);}}
+  else{P(bx-3,topY-4,bw+6,4,"#9a8a78");P(bx-3,topY-5,bw+6,1,"#b8aa96");
+    P(bx+bw-26,topY-14,12,10,"#3c6fb0");P(bx+bw-25,topY-15,10,1,"#5a8fd0");P(bx+bw-24,topY-4,1,1,"#555");P(bx+bw-17,topY-4,1,1,"#555");
+    const fx=bx+bw-8;P(fx,topY-26,1,22,"#d8d8d8");const wv=Math.round(Math.sin(t/300));["#c8283c","#f2f2f2","#2c5fb3","#2c5fb3","#f2f2f2","#c8283c"].forEach((c,i)=>P(fx+1,topY-25+i+wv*(i%2),11,1,c));}
   // door & windows
-  P(bx+44,by+30,16,32,"#4a2f1f");P(bx+46,by+32,12,28,look>=4?"#6a442c":"#3b2518");
-  for(const wx of [bx+12,bx+76]){P(wx,by+20,16,14,"#2a1d2e");if(look>=4){P(wx+1,by+21,14,12,"#ffd98a");P(wx+7,by+21,1,12,"#7d573a");P(wx+1,by+27,14,1,"#7d573a");}
-    else{P(wx-1,by+22,18,2,"#8a6a4a");P(wx-1,by+29,18,2,"#8a6a4a");}}
-  // sign
-  P(bx+12,by-30,80,14,look>=4?"#f4ead8":"#c9bba8");P(bx+12,by-30,80,1,"#5a3a2a");P(bx+12,by-17,80,1,"#5a3a2a");
-  P(bx+28,by-16,2,8,"#5a3a2a");P(bx+74,by-16,2,8,"#5a3a2a");
+  P(bx+44,by+30,16,32,cc?"#5a4a3a":"#4a2f1f");P(bx+46,by+32,12,28,look>=4||cc?"#6a442c":"#3b2518");
+  if(dl>=1){for(let i=0;i<9;i++)P(bx+38+i*3,by+24,3,4,i%2?"#f2f2f2":"#c8283c");P(bx+38,by+28,27,1,"#8a2030");}
+  for(const wx of [bx+12,bx+76]){if(look>=4||dl>=2)win(wx,by+20,16,14,wx);else{P(wx,by+20,16,14,"#2a1d2e");P(wx-1,by+22,18,2,"#8a6a4a");P(wx-1,by+29,18,2,"#8a6a4a");}}
+  if(dl>=4){for(let f=0;f<ex;f++){const y=topY+f*fh+fh-2;P(bx+2,y-3,bw-4,1,"#5a3a2a");for(let x=bx+2;x<bx+bw-2;x+=3)P(x,y-3,1,3,"#5a3a2a");
+      const C=["#c8283c","#2c5fb3","#f2f2f2","#f7d24a","#2f8a4f"],lx=f%2?bx+4:bx+64;P(lx,y-14,36,1,"#e8e0d0");for(let k=0;k<4;k++){const sw=Math.round(Math.sin(t/400+k+f));P(lx+3+k*9+sw,y-13,5,6,C[(k+f*2)%5]);}
+      P(bx+bw+1,y-10,5,4,"#c8ccd2");P(bx+bw+2,y-9,3,1,"#8a9098");}
+    for(const px of [bx+30,bx+66]){P(px,by+bh-5,5,5,"#b0603a");P(px,by+bh-8,5,3,"#4fb06a");}}
+  // sign — on the gable for the wooden house, on the parapet once it is concrete
+  const sy=cc?topY-18:topY-30;
+  const sx=cc?bx+4:bx+12,sw2=cc?70:80;P(sx,sy,sw2,14,look>=4||dl>=1?"#f4ead8":"#c9bba8");P(sx,sy,sw2,1,"#5a3a2a");P(sx,sy+13,sw2,1,"#5a3a2a");
+  if(!cc){P(bx+28,sy+14,2,8,"#5a3a2a");P(bx+74,sy+14,2,8,"#5a3a2a");}
+  if(dl>=5)for(let i=0;i<18;i++)P(sx+i*4,sy-2,2,2,(Math.floor(t/250)+i)%2?"#fff7c4":"#f7d24a");
   ctx.save();ctx.font=`bold ${9*S}px "Chakra Petch","IBM Plex Sans Thai",sans-serif`;ctx.textAlign="center";ctx.textBaseline="middle";
-  ctx.fillStyle=look>=4?"#c8283c":"#6a4a3a";ctx.fillText("SIRICHAI GYM",(bx+52)*S,(by-23)*S);ctx.restore();
+  ctx.fillStyle=look>=4||dl>=1?"#c8283c":"#6a4a3a";ctx.fillText(dl>=3?"Sirichai Camp Dorm":"Sirichai Muay Thai Camp",(sx+sw2/2)*S,(sy+7)*S);ctx.restore();
   // string lights
-  if(look>=6){for(let i=0;i<22;i++){const x=bx-4+i*5,y=by-2+Math.sin(i/3)*2;const on=(Math.floor(t/400)+i)%3;P(x,y,2,2,["#ffd36b","#ff7b8a","#8ad7ff"][on]);}
+  if(look>=6){for(let i=0;i<22;i++){const x=bx-4+i*5,y=(cc?by-2:topY-2)+Math.sin(i/3)*2;const on=(Math.floor(t/400)+i)%3;P(x,y,2,2,["#ffd36b","#ff7b8a","#8ad7ff"][on]);}
     for(let i=0;i<20;i++){const x=150+i*7,y=78+Math.sin(i/2.5)*3;P(x,y,2,2,["#ffd36b","#ff7b8a","#8ad7ff"][(Math.floor(t/400)+i)%3]);}}
   // weeds / trash
   if(look<5){for(let i=0;i<10;i++){const x=6+((i*53)%300),y=124+((i*17)%50);P(x,y,1,3,"#4f6a3a");P(x+1,y+1,1,2,"#5f7a45");}P(120,166,6,3,"#9aa0a8");P(300,150,4,4,"#6d747c");}
@@ -351,8 +365,6 @@ function drawCamp(ctx,G,t){
   if(G.fac.sauna){P(296,146,22,16,"#7a4a2a");for(let i=0;i<6;i++)P(294+i,140+i,26-i*2,1,"#5a3a2a");P(303,152,7,10,"#3b2518");for(let k=0;k<3;k++){const y=136-((t/40+k*9)%16);P(299+k*6+Math.sin(t/300+k)*2,y,2,2,"rgba(255,255,255,.55)");}}
   if(G.fac.lights){for(const lx of [150,300]){P(lx,46,2,62,"#9aa0a8");P(lx-4,44,10,4,"#3a3550");P(lx-3,45,8,2,Math.floor(t/700)%2&&G.fac.lights>=2?"#fff7c4":"#ffe9a0");}}
   if(G.fac.hall){P(286,112,22,24,"#5a3a2a");P(288,114,18,18,"#2a1d2e");P(293,117,8,6,"#f7d24a");P(295,123,4,6,"#d9a520");if(G.fac.hall>=2){P(289,128,6,3,"#c8283c");P(299,128,6,3,"#2c5fb3");}}
-  // dorm house
-  if(G.fac.dorm>=1){P(268,70,44,36,"#b88a5a");for(let i=0;i<9;i++)P(264+i,62+i,52-i*2,1,"#7a4a3a");P(284,88,10,18,"#5a3a2a");P(272,78,8,7,"#ffd98a");P(298,78,8,7,"#ffd98a");if(G.fac.dorm>=2){P(266,58,48,3,"#c8283c");}}
   // kitchen stall
   if(G.fac.kitchen>=1){P(120,128,26,14,"#e8d8b8");for(let i=0;i<26;i+=4)P(120+i,124,4,4,i%8?"#f2f2f2":"#c8283c");if(Math.floor(t/500)%2)P(128,118,2,4,"#dcdcdc");}
   // brand billboard

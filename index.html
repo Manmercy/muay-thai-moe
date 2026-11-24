@@ -3385,7 +3385,7 @@ const FACILITIES={
   recovery:{name:"ห้องฟื้นฟูและอ่างน้ำแข็ง",cost:[15000,30000,50000],desc:"ฟื้นความล้า +5/สัปดาห์ ต่อระดับ"},
   classroom:{name:"ลานสอนคอร์ส",cost:[8000,14000,22000,32000,45000],desc:"รับนักเรียนได้เพิ่ม 3 คน ต่อระดับ"},
   brand:{name:"ป้ายและโปรโมทค่าย",cost:[8000,20000,40000,50000],desc:"คนอยากมาเรียนเพิ่ม 3 คน ต่อระดับ ชื่อเสียง +0.5"},
-  dorm:{name:"ห้องพักนักมวย",cost:[18000,40000,60000,90000],desc:"กำลังใจ +1.5 และความเชื่อใจ +0.3 ทุกสัปดาห์ ต่อระดับ"},
+  dorm:{name:"ห้องพักนักมวย",cost:[30000,80000,180000,600000,1500000],desc:"ห้องนักมวยหลัก +1 ต่อระดับ (5 → 10 ห้อง) · กำลังใจ +1.5 และความเชื่อใจ +0.3 ทุกสัปดาห์ ต่อระดับ"} /* v1.91.122 (Man): a fifth level, up to ten rooms; levels 4–5 still open with the regional chapter and are priced as late-game money sinks (players hold millions by then) */,
   kitchen:{name:"ครัวโภชนาการ",cost:[10000,25000],desc:"ฟื้นความล้า +2 และลดโอกาสบาดเจ็บ 20% ต่อระดับ"},
   // v1.18: bigger projects that open up as the camp grows (late-game money sinks with real effects)
   hill:{name:"ลู่วิ่งขึ้นเขาหลังค่าย",cost:[20000,45000],desc:"ฝึกฟิตร่างกายได้ผล +20% และล้าน้อยลง ต่อระดับ",req:{week:12}},
@@ -3490,7 +3490,7 @@ function growStudents(G){const t=Math.min(studentCap(G),studentDemand(G)),n=stud
 const studentFee=G=>Math.round(dif(G).inc*560*(1+(G.fac.daeng-1)*.12)*(1+(campLevel(G)-1)*.2));
 const classIncome=G=>Math.round(students(G)*studentFee(G)*(ytKey(G)==="tourist"?1.2:1)*(G.disaster&&gameWeek(G)<G.disaster.untilAbs?(G.disaster.inc||0):1));
 function campLook(G){return clamp(Math.round(facTotal(G)+(G.camp?G.camp.beauty:0)/2+Math.min(G.rep,30)/8),0,20);}
-/* v1.90: the dorm's fourth level opens with the regional chapter · main characters get 5 + dorm level rooms */
+/* v1.90: the dorm's fourth level (v1.91.122: and fifth) opens with the regional chapter · main characters get 5 + dorm level rooms */
 const facMax=(G,k)=>k==="dorm"&&!G.region?3:FACILITIES[k].cost.length;
 const dormRooms=G=>5+((G.fac&&G.fac.dorm)||0);
 function buyFacility(G,k){const F=FACILITIES[k],lv=G.fac[k]||0;if(lv>=facMax(G,k)||facLocked(G,k))return false;const c=F.cost[lv];if(G.cash<c)return false;
@@ -3671,7 +3671,7 @@ function genOffers(G,opt){
     for(const f of fighters){const wk=[G.week+2,G.week+3,G.week+4].find(w=>w<=48&&!isBooked(G,op.id,w)&&!G.bookings.some(b=>b.a===f.id&&Math.abs(b.week-w)<=1));
       if(wk&&!G.offers.some(o=>o.a===f.id&&o.b===op.id)){G.offers.push({id:`o${G.week}_${f.id}_${op.id}`,a:f.id,b:op.id,week:wk,tier:"lab",lab:1,win:TIER.lab.win,lose:TIER.lab.lose});break;}}}
   // v1.89.25: Baiyok's rematch letters to Fah — twice a year from her second season on, before and after she leaves Golden Tiger
-  {const pb=G.prodigy&&G.prodigy.B,o=pb&&G.F[pb],fah=G.F.fah;if(o&&fah&&fah.camp==="player"&&(G.season||1)>=2&&[14,30].includes(G.week)&&!o.injury&&!fah.injury&&!(typeof isAway==="function"&&isAway(G,"fah"))){
+  {const pb=G.prodigy&&G.prodigy.B,o=pb&&G.F[pb],fah=G.F.fah;if(o&&o.camp!=="player"/* v1.91.122: not once Baiyok trains with us */&&fah&&fah.camp==="player"&&(G.season||1)>=2&&[14,30].includes(G.week)&&!o.injury&&!fah.injury&&!(typeof isAway==="function"&&isAway(G,"fah"))){
     const wk=[G.week+3,G.week+4,G.week+2].find(w=>w<=48&&!isBooked(G,o.id,w)&&!G.bookings.some(b=>b.a==="fah"&&Math.abs(b.week-w)<=1));
     if(wk){G.offers=G.offers.filter(x=>!(x.a==="fah"&&x.b===o.id));G.offers.push({id:`o${G.week}_fah_by`,a:"fah",b:o.id,week:wk,tier:"special",rv:1,by:1,win:Math.round(TIER.special.win*1.6/100)*100,lose:Math.round(TIER.special.lose*1.4/100)*100});}}}
   // v1.89.27: Petchara's yearly challenge letter to Kati (week 12; the grudge offers at 25/29/33/36 come on top)
@@ -4977,7 +4977,7 @@ const LOVER_TIERS=[[1,"คนรัก"],[15,"แฟนที่รู้ใจ"
 const hTot=f=>((f&&f.bond)||0)+((f&&f.bondX)||0);
 // relationship state, written to work with a single romance (G.romance) and with several lovers / promises / exes (G.lovers, G.promise, G.exAbs)
 function relState(G,id){if(!G||!id)return null;const L=Array.isArray(G.lovers)?G.lovers:(G.romance?[G.romance]:[]);if(L.includes(id))return "lover";
-  if(G.promise&&G.promise[id]!=null)return "promise";if(G.exAbs&&G.exAbs[id]!=null)return "ex";const R=G.region;if(R&&R.lov&&R.lov[id]!=null)return "lover";if(R&&R.ex&&R.ex[id]!=null)return "ex";return null;} /* v1.91.28: regional champions keep their own romance track (G.region.lov / .ex) */
+  if(G.promise&&G.promise[id]!=null)return "promise";if(G.exAbs&&G.exAbs[id]!=null)return "ex";const R=G.region;if(R&&R.lov&&R.lov[id]!=null)return "lover";if(R&&R.ex&&R.ex[id]!=null)return "ex";if(G.xlov&&G.xlov[id]!=null)return "lover";if(G.xlex&&G.xlex[id]!=null)return "ex";return null;} /* v1.91.28: regional champions keep their own romance track (G.region.lov / .ex) */
 /* v1.89.11: Lv.30 is the top at 1,000 points — each step past 100 asks a little more (15 → 80) */
 const HEART_STEPS=[15,20,20,25,30,35,35,40,45,45,50,55,60,60,65,70,75,75,80],HEART_MAX=30,HEART_TOP=1000;
 const heartStep=n=>HEART_STEPS[n-11]||0; // points from Lv.n to Lv.n+1, for 11 ≤ n < 30
@@ -5366,7 +5366,7 @@ const isFriendz=(G,id)=>!!(G.friendz&&G.friendz[id]);
 const awayWord=(G,id)=>G.F[id].camp==="player"?"หนีไปจากค่าย":"ไม่ติดต่อมา";
 /* v1.91.72 (Man): a regional champion who has not joined the camp is not a "camp-mate" yet — that rung reads "friend from another camp" for her */
 const RG_CHAMP_IDS=["baibua","tabtim","alicia","chaba"];
-const outChamp=f=>!!(f&&RG_CHAMP_IDS.includes(f.id)&&f.camp!=="player");
+const outChamp=f=>!!(f&&(RG_CHAMP_IDS.includes(f.id)||f.id==="prod_B"||f.id==="pailin")&&f.camp!=="player"); /* v1.91.122: Baiyok / Pailin too */
 const tierFor=(n,f)=>n==="เพื่อนร่วมค่าย"&&outChamp(f)?"เพื่อนต่างค่าย":n;
 function relLabel(G,f,lv,short){return tierFor(relLabel0(G,f,lv,short),f);}
 function relLabel0(G,f,lv,short){const id=f&&f.id;if(G&&id&&G.F&&G.F[id]&&isAway(G,id)&&G.F[id].awayWhy==="train"){const n=awayLeft(G,id);return short?"ไปฝึกวิชา":`ไปฝึกวิชา (อีก ${n} สัปดาห์)`;}
@@ -5700,7 +5700,7 @@ EVENTS.push(
 // warn before a second "yes"
 const cheatWarn=(G,id)=>(partners(G).some(k=>k!==id)||rgLovN(G)>0)?[{n:"nar",t:"⚠ คุณมีคนรักอยู่แล้ว ถ้าตอบรับจะกลายเป็นคบซ้อน… เรื่องแบบนี้ปิดไม่มิดไปตลอดหรอกนะ"}]:[];
 const yesTxt=(G,id,t)=>(partners(G).some(k=>k!==id)||rgLovN(G)>0)?t+" (คบซ้อน)":t;
-const rgLovN=G=>G&&G.region&&G.region.lov?Object.keys(G.region.lov).length:0; /* v1.91.28: a regional champion you are seeing counts as someone else */
+const rgLovN=G=>(G&&G.region&&G.region.lov?Object.keys(G.region.lov).length:0)+(typeof xlLovN==="function"?xlLovN(G):0); /* v1.91.122: Baiyok / Pailin count too */ /* v1.91.28: a regional champion you are seeing counts as someone else */
 const lovSolo=G=>partners(G).length===1&&!rgLovN(G);
 const topLock=(G,id)=>isPartner(G,id)&&partners(G).length+rgLovN(G)>1; /* the top heart scene and the Lv.27/30 chats wait while you see more than one person (harem too) */ /* the lover bonus only holds while you see one person */
 // v1.30: lovers get their own dates/scenes; Ploy & Fah make a promise instead (romance with them waits for season 2)
@@ -7145,7 +7145,7 @@ function byVisitSteps(G){const F=G.flags,fah=inCamp(G,"fah"),mali=inCamp(G,"mali
   const d=F.byD||0;for(let i=0;i<D.length;i++){const s=D[(d+i)%D.length]();if(s){F.byV=Math.max(k,V.length);F.byD=d+i+1;F.byNext=absWeek(G)+BY_DROP_GAP;return s;}}
   F.byNext=absWeek(G)+BY_DROP_GAP;return [{n:"nar",t:"ใบหยกแวะมาใช้เวทีตอนเช้ามืด แล้วกลับไปก่อนที่ใครจะตื่น"}];}
 EVENTS.push(
- {id:"by_visit",pri:2,look:"casual",bg:"gym",when:G=>byFree(G)&&!!(G.prodigy&&G.F[G.prodigy.B])&&absWeek(G)>=(G.flags.byNext!=null?G.flags.byNext:G.flags.byFree+BY_GAP[0])&&!(G.F[G.prodigy.B].injury>0),
+ {id:"by_visit",pri:2,look:"casual",bg:"gym",when:G=>byFree(G)&&!!(G.prodigy&&G.F[G.prodigy.B])&&G.F[G.prodigy.B].camp!=="player"&&absWeek(G)>=(G.flags.byNext!=null?G.flags.byNext:G.flags.byFree+BY_GAP[0])&&!(G.F[G.prodigy.B].injury>0),
   steps:[{inject:G=>byVisitSteps(G)},{fx:G=>{delete G.seen.by_visit;}}]});
 
 /* v1.89.27: Petchara stays Golden Tiger — she becomes its captain, keeps an eye on Kati, takes the boss's anger, and sends Kati a challenge letter every year */
@@ -7686,10 +7686,10 @@ const TELL_WAIT={kati:"ผู้จัดการคะ… หนูดีใ�
   chaba:"…ยัง"};
 const loveLine=(L,G,id)=>{const v=L[id];return typeof v==="function"?v(G):v||"…";};
 const isChampLove=(G,id)=>!LOVE_IDS.includes(id)&&!!(G.region&&G.region.joined&&G.region.joined[id]!=null);
-const isLovAny=(G,id)=>isLov(G,id)||(typeof REGION!=="undefined"&&REGION.isLovC&&REGION.isLovC(G,id));
-const twoFor=(G,id)=>partners(G).some(k=>k!==id)||(G.region&&G.region.lov?Object.keys(G.region.lov).some(k=>k!==id):false);
-function takeAny(G,id){if(G.friendz)delete G.friendz[id];if(isChampLove(G,id)){REGION.takeC(G,id);}else takeLover(G,id);}
-const yesLine=(G,id)=>isChampLove(G,id)?(RG_JOIN[id]&&RG_JOIN[id].yes(G))||"…":LOVE_YES[id];
+const isLovAny=(G,id)=>isLov(G,id)||(typeof REGION!=="undefined"&&REGION.isLovC&&REGION.isLovC(G,id))||!!(G.xlov&&G.xlov[id]!=null);
+const twoFor=(G,id)=>partners(G).some(k=>k!==id)||(G.region&&G.region.lov?Object.keys(G.region.lov).some(k=>k!==id):false)||(G.xlov?Object.keys(G.xlov).some(k=>k!==id&&G.F[k]):false);
+function takeAny(G,id){if(G.friendz)delete G.friendz[id];if(typeof xlIs==="function"&&xlIs(id)){xlTake(G,id);}else if(isChampLove(G,id)){REGION.takeC(G,id);}else takeLover(G,id);}
+const yesLine=(G,id)=>typeof xlIs==="function"&&xlIs(id)?XL_YES[id]:isChampLove(G,id)?(RG_JOIN[id]&&RG_JOIN[id].yes(G))||"…":LOVE_YES[id];
 /* who is due to reach out (third "no" + 6 weeks, still close, still here) */
 function doorWho(G){const ids=[...LOVE_IDS,...Object.keys((G.region&&G.region.joined)||{})];
   return ids.find(id=>{const f=G.F[id];return f&&f.camp==="player"&&G.loveOff&&G.loveOff[id]!=null&&!loveOffLeft(G,id)&&!(G.doorDone&&G.doorDone[id])&&!isLovAny(G,id)&&!isAway(G,id)&&(f.bond||0)>=60;})||null;}
@@ -7702,15 +7702,17 @@ EVENTS.push({id:"lv_door",look:"casual",bg:"camp",pri:70,when:G=>!!doorWho(G),st
 /* the button in the Characters tab */
 function tellState(G,f){const id=f&&f.id;if(!id||!G.F[id])return null;const champ=isChampLove(G,id);
   /* v1.91.70 (Man): the button is not always there — it shows only once the hearts are really there (closeness 75), and stays hidden while she is away, just broken up, stepping back, or after a "not yet" until the 13 weeks are up */
-  if(!(LOVE_IDS.includes(id)||champ)||f.camp!=="player"||!f.met&&!champ||isLovAny(G,id)||(f.bond||0)<75)return null;
+  const xl=typeof xlIs==="function"&&xlIs(id)&&xlOn(G,id); /* v1.91.122: Baiyok and Pailin — wherever they train */
+  if(!(LOVE_IDS.includes(id)||champ||xl)||f.camp!=="player"&&!xl||!f.met&&!champ||isLovAny(G,id)||(f.bond||0)<75)return null;
+  if(xl&&G.xlex&&G.xlex[id]!=null&&absWeek(G)-G.xlex[id]<12)return null;
   if(isAway(G,id)||(champ?(G.region.ex&&G.region.ex[id]!=null&&gameWeek(G)-G.region.ex[id]<12):exWait(G,id))||loveOffLeft(G,id))return null;
   const t=G.tellAbs&&G.tellAbs[id];if(t!=null&&absWeek(G)-t<LOVE_TELL_CD)return null;
   return {ok:true};}
-function tellReady(G,f){const id=f.id;if(isChampLove(G,id)){const J=G.region.joined||{};return (f.bond||0)>=75&&gameWeek(G)-(J[id]||gameWeek(G))>=6;}return (f.bond||0)>=75&&(f.trust||0)>=40;}
+function tellReady(G,f){const id=f.id;if(typeof xlIs==="function"&&xlIs(id))return (f.bond||0)>=75&&absWeek(G)-((G.xl&&G.xl[id]&&G.xl[id].open)||absWeek(G))>=6;if(isChampLove(G,id)){const J=G.region.joined||{};return (f.bond||0)>=75&&gameWeek(G)-(J[id]||gameWeek(G))>=6;}return (f.bond||0)>=75&&(f.trust||0)>=40;}
 function tellSteps(G,id){const f=G.F[id],two=twoFor(G,id),ready=tellReady(G,f);
   const yes=[{fx:G2=>takeAny(G2,id)},{n:id,f:"flustered",l:"casual",t:yesLine(G,id)},{n:"nar",t:`ความสัมพันธ์กับ${f.name}: คนรัก ♥`}];
   const wait=[{fx:G2=>{(G2.tellAbs=G2.tellAbs||{})[id]=absWeek(G2);add(G2,id,"bond",1);}},{n:id,f:"flustered",l:"casual",t:loveLine(TELL_WAIT,G,id)},
-    {n:"nar",t:`${f.name}ยังไม่พร้อม · ต้องสนิทกันกว่านี้${!isChampLove(G,id)&&(f.trust||0)<40?` · ความเชื่อใจ ${Math.floor(f.trust||0)}/40`:""}${isChampLove(G,id)&&(f.bond||0)>=75?" · ให้เธอได้อยู่ค่ายนานกว่านี้อีกหน่อย":""} · บอกใหม่ได้อีก ${LOVE_TELL_CD} สัปดาห์`}];
+    {n:"nar",t:`${f.name}ยังไม่พร้อม · ต้องสนิทกันกว่านี้${!isChampLove(G,id)&&!(typeof xlIs==="function"&&xlIs(id))&&(f.trust||0)<40?` · ความเชื่อใจ ${Math.floor(f.trust||0)}/40`:""}${isChampLove(G,id)&&(f.bond||0)>=75?" · ให้เธอได้อยู่ค่ายนานกว่านี้อีกหน่อย":""} · บอกใหม่ได้อีก ${LOVE_TELL_CD} สัปดาห์`}];
   const spot=(typeof TELL_SPOT!=="undefined"&&TELL_SPOT[id])||"หลังค่าย",open=[{n:"nar",t:`คืนนั้นคุณไปตามนัดที่${spot} · ${f.name}รออยู่ก่อนแล้ว`},{n:"nar",t:"คุณบอกความรู้สึกไปตรง ๆ"}];
   if(!ready)return [...open,...wait];
   if(two)return [open[0],{n:"nar",t:"⚠ คุณมีคนรักอยู่แล้ว ถ้าบอกออกไปจะกลายเป็นคบซ้อน",choice:[{t:"บอกไปตามตรง (คบซ้อน)",then:[open[1],...yes]},{t:"ไม่บอกดีกว่า",then:[{n:"nar",t:"คุณเก็บคำพูดไว้ในใจ แล้วชวนคุยเรื่องซ้อมแทน"}]}]}];
@@ -8027,24 +8029,38 @@ function drawCamp(ctx,G,t){
   if(look>=6){P(118,142,200,30,"#b8a58a");for(let x=118;x<318;x+=10)P(x,142,1,30,"#a8957a");}
   decorTrack(P,G,t,F);
   decorTree(P,G,t,F);
-  // building
-  const bx=8,by=58,bw=104,bh=62;
-  P(bx,by,bw,bh,look>=4?"#9a6a42":"#7d573a");for(let y=by+4;y<by+bh;y+=6)P(bx,y,bw,1,look>=4?"#87593a":"#6b4a31");
+  // building — v1.91.122 (Man): the camp house is the fighters' dorm and grows with every level:
+  // 1 attic dormers and a striped porch awning · 2 a wooden second storey · 3 rebuilt in concrete, flat roof, water tank and flag
+  // 4 balconies, laundry lines and air-con units · 5 a third storey and a lit camp sign
+  const bx=8,by=58,bw=104,bh=62,dl=(G.fac&&G.fac.dorm)||0,ex=dl>=5?2:dl>=2?1:0,fh=18,topY=by-ex*fh,cc=dl>=3;
+  const win=(x,y,w,h,i)=>{P(x,y,w,h,"#2a1d2e");const on=look>=4||dl>=2?((Math.floor(t/2200)+i*5)%11?"#ffd98a":"#c8a060"):null;if(on){P(x+1,y+1,w-2,h-2,on);P(x+(w>>1),y+1,1,h-2,cc?"#b8aa96":"#7d573a");}};
+  P(bx,by,bw,bh,cc?"#e8dcc8":look>=4?"#9a6a42":"#7d573a");for(let y=by+4;y<by+bh;y+=6)P(bx,y,bw,1,cc?"#d8ccb6":look>=4?"#87593a":"#6b4a31");
+  for(let f=0;f<ex;f++){const y=topY+f*fh;P(bx,y,bw,fh,cc?"#efe6d4":"#a87850");if(!cc)for(let yy=y+3;yy<y+fh;yy+=5)P(bx,yy,bw,1,"#94673f");
+    P(bx-2,y+fh-2,bw+4,2,cc?(dl>=5?"#c8283c":"#bfae94"):"#6a4a30");for(let k=0;k<5;k++)win(bx+6+k*20,y+4,10,9,f*5+k);}
   // roof
-  for(let i=0;i<14;i++)P(bx-6+i,by-14+i,bw+12-i*2,1,"#8d949c");
-  P(bx-6,by-1,bw+12,2,"#6d747c");
-  const rust=Math.max(0,7-Math.floor(look/2));for(let i=0;i<rust;i++){P(bx+4+((i*37)%96),by-12+((i*5)%10),6,2,"#a0522d");}
+  if(!cc){for(let i=0;i<14;i++)P(bx-6+i,topY-14+i,bw+12-i*2,1,"#8d949c");P(bx-6,topY-1,bw+12,2,"#6d747c");
+    const rust=dl>=2?0:Math.max(0,7-Math.floor(look/2));for(let i=0;i<rust;i++){P(bx+4+((i*37)%96),topY-12+((i*5)%10),6,2,"#a0522d");}
+    if(dl===1)for(const dx of [bx+18,bx+74]){P(dx,by-11,12,9,"#a87850");for(let i=0;i<4;i++)P(dx-2+i,by-15+i,16-i*2,1,"#6d747c");win(dx+3,by-9,6,6,dx);}}
+  else{P(bx-3,topY-4,bw+6,4,"#9a8a78");P(bx-3,topY-5,bw+6,1,"#b8aa96");
+    P(bx+bw-26,topY-14,12,10,"#3c6fb0");P(bx+bw-25,topY-15,10,1,"#5a8fd0");P(bx+bw-24,topY-4,1,1,"#555");P(bx+bw-17,topY-4,1,1,"#555");
+    const fx=bx+bw-8;P(fx,topY-26,1,22,"#d8d8d8");const wv=Math.round(Math.sin(t/300));["#c8283c","#f2f2f2","#2c5fb3","#2c5fb3","#f2f2f2","#c8283c"].forEach((c,i)=>P(fx+1,topY-25+i+wv*(i%2),11,1,c));}
   // door & windows
-  P(bx+44,by+30,16,32,"#4a2f1f");P(bx+46,by+32,12,28,look>=4?"#6a442c":"#3b2518");
-  for(const wx of [bx+12,bx+76]){P(wx,by+20,16,14,"#2a1d2e");if(look>=4){P(wx+1,by+21,14,12,"#ffd98a");P(wx+7,by+21,1,12,"#7d573a");P(wx+1,by+27,14,1,"#7d573a");}
-    else{P(wx-1,by+22,18,2,"#8a6a4a");P(wx-1,by+29,18,2,"#8a6a4a");}}
-  // sign
-  P(bx+12,by-30,80,14,look>=4?"#f4ead8":"#c9bba8");P(bx+12,by-30,80,1,"#5a3a2a");P(bx+12,by-17,80,1,"#5a3a2a");
-  P(bx+28,by-16,2,8,"#5a3a2a");P(bx+74,by-16,2,8,"#5a3a2a");
+  P(bx+44,by+30,16,32,cc?"#5a4a3a":"#4a2f1f");P(bx+46,by+32,12,28,look>=4||cc?"#6a442c":"#3b2518");
+  if(dl>=1){for(let i=0;i<9;i++)P(bx+38+i*3,by+24,3,4,i%2?"#f2f2f2":"#c8283c");P(bx+38,by+28,27,1,"#8a2030");}
+  for(const wx of [bx+12,bx+76]){if(look>=4||dl>=2)win(wx,by+20,16,14,wx);else{P(wx,by+20,16,14,"#2a1d2e");P(wx-1,by+22,18,2,"#8a6a4a");P(wx-1,by+29,18,2,"#8a6a4a");}}
+  if(dl>=4){for(let f=0;f<ex;f++){const y=topY+f*fh+fh-2;P(bx+2,y-3,bw-4,1,"#5a3a2a");for(let x=bx+2;x<bx+bw-2;x+=3)P(x,y-3,1,3,"#5a3a2a");
+      const C=["#c8283c","#2c5fb3","#f2f2f2","#f7d24a","#2f8a4f"],lx=f%2?bx+4:bx+64;P(lx,y-14,36,1,"#e8e0d0");for(let k=0;k<4;k++){const sw=Math.round(Math.sin(t/400+k+f));P(lx+3+k*9+sw,y-13,5,6,C[(k+f*2)%5]);}
+      P(bx+bw+1,y-10,5,4,"#c8ccd2");P(bx+bw+2,y-9,3,1,"#8a9098");}
+    for(const px of [bx+30,bx+66]){P(px,by+bh-5,5,5,"#b0603a");P(px,by+bh-8,5,3,"#4fb06a");}}
+  // sign — on the gable for the wooden house, on the parapet once it is concrete
+  const sy=cc?topY-18:topY-30;
+  const sx=cc?bx+4:bx+12,sw2=cc?70:80;P(sx,sy,sw2,14,look>=4||dl>=1?"#f4ead8":"#c9bba8");P(sx,sy,sw2,1,"#5a3a2a");P(sx,sy+13,sw2,1,"#5a3a2a");
+  if(!cc){P(bx+28,sy+14,2,8,"#5a3a2a");P(bx+74,sy+14,2,8,"#5a3a2a");}
+  if(dl>=5)for(let i=0;i<18;i++)P(sx+i*4,sy-2,2,2,(Math.floor(t/250)+i)%2?"#fff7c4":"#f7d24a");
   ctx.save();ctx.font=`bold ${9*S}px "Chakra Petch","IBM Plex Sans Thai",sans-serif`;ctx.textAlign="center";ctx.textBaseline="middle";
-  ctx.fillStyle=look>=4?"#c8283c":"#6a4a3a";ctx.fillText("ค่ายมวยศิริชัย",(bx+52)*S,(by-23)*S);ctx.restore();
+  ctx.fillStyle=look>=4||dl>=1?"#c8283c":"#6a4a3a";ctx.fillText(dl>=3?"หอพักค่ายศิริชัย":"ค่ายมวยศิริชัย",(sx+sw2/2)*S,(sy+7)*S);ctx.restore();
   // string lights
-  if(look>=6){for(let i=0;i<22;i++){const x=bx-4+i*5,y=by-2+Math.sin(i/3)*2;const on=(Math.floor(t/400)+i)%3;P(x,y,2,2,["#ffd36b","#ff7b8a","#8ad7ff"][on]);}
+  if(look>=6){for(let i=0;i<22;i++){const x=bx-4+i*5,y=(cc?by-2:topY-2)+Math.sin(i/3)*2;const on=(Math.floor(t/400)+i)%3;P(x,y,2,2,["#ffd36b","#ff7b8a","#8ad7ff"][on]);}
     for(let i=0;i<20;i++){const x=150+i*7,y=78+Math.sin(i/2.5)*3;P(x,y,2,2,["#ffd36b","#ff7b8a","#8ad7ff"][(Math.floor(t/400)+i)%3]);}}
   // weeds / trash
   if(look<5){for(let i=0;i<10;i++){const x=6+((i*53)%300),y=124+((i*17)%50);P(x,y,1,3,"#4f6a3a");P(x+1,y+1,1,2,"#5f7a45");}P(120,166,6,3,"#9aa0a8");P(300,150,4,4,"#6d747c");}
@@ -8070,8 +8086,6 @@ function drawCamp(ctx,G,t){
   if(G.fac.sauna){P(296,146,22,16,"#7a4a2a");for(let i=0;i<6;i++)P(294+i,140+i,26-i*2,1,"#5a3a2a");P(303,152,7,10,"#3b2518");for(let k=0;k<3;k++){const y=136-((t/40+k*9)%16);P(299+k*6+Math.sin(t/300+k)*2,y,2,2,"rgba(255,255,255,.55)");}}
   if(G.fac.lights){for(const lx of [150,300]){P(lx,46,2,62,"#9aa0a8");P(lx-4,44,10,4,"#3a3550");P(lx-3,45,8,2,Math.floor(t/700)%2&&G.fac.lights>=2?"#fff7c4":"#ffe9a0");}}
   if(G.fac.hall){P(286,112,22,24,"#5a3a2a");P(288,114,18,18,"#2a1d2e");P(293,117,8,6,"#f7d24a");P(295,123,4,6,"#d9a520");if(G.fac.hall>=2){P(289,128,6,3,"#c8283c");P(299,128,6,3,"#2c5fb3");}}
-  // dorm house
-  if(G.fac.dorm>=1){P(268,70,44,36,"#b88a5a");for(let i=0;i<9;i++)P(264+i,62+i,52-i*2,1,"#7a4a3a");P(284,88,10,18,"#5a3a2a");P(272,78,8,7,"#ffd98a");P(298,78,8,7,"#ffd98a");if(G.fac.dorm>=2){P(266,58,48,3,"#c8283c");}}
   // kitchen stall
   if(G.fac.kitchen>=1){P(120,128,26,14,"#e8d8b8");for(let i=0;i<26;i+=4)P(120+i,124,4,4,i%8?"#f2f2f2":"#c8283c");if(Math.floor(t/500)%2)P(128,118,2,4,"#dcdcdc");}
   // brand billboard
@@ -8938,16 +8952,18 @@ AU.gsfx=function(kind,a){if(!this.init()||this.muted||!SETTINGS.sfx)return;const
   if(kind==="shimmer")for(let i=0;i<6;i++)T(i*.05,{f:1400+Math.random()*1400,type:"sine",dur:.12,peak:.06});};
 
 // ================= MUAY THAI MOE v1.3 — UI =================
-const VERSION="1.91.121";
+const VERSION="1.91.122";
 const CUR_LANG=(typeof window!=="undefined"&&window.LANG)||"th";
 const TH_LABEL=String.fromCharCode(3652,3607,3618);
 function langSwitch(cls){return `<div class="langsw ${cls||""}" role="group" aria-label="Language">${[["th",TH_LABEL],["en","EN"]].map(([k,l])=>`<button class="lsb ${CUR_LANG===k?"on":""}" data-act="setlang" data-v="${k}" aria-pressed="${CUR_LANG===k}">${l}</button>`).join("")}</div>`;}
 const SAVE_KEY="mtm-save-v13";
 const CANON_IDS=["kati","mali","rin","ploy","fah"];
+/* v1.91.122: main-fighter rooms in use — the five heroines in camp plus regional champions who joined */
+const dormUsed=G=>[...CANON_IDS,"prod_B"].filter(id=>G.F[id]&&G.F[id].camp==="player"&&(id!=="prod_B"||G.xlov&&G.xlov.prod_B!=null||G.xl&&G.xl.prod_B)).length+Object.keys((G.region&&G.region.joined)||{}).filter(c=>G.F[c]&&G.F[c].camp==="player").length;
 const REGIONAL_IDS=["baibua","tabtim","alicia","chaba"];
 /* Full-resolution source portraits. Other expressions keep their approved art. */
 const STAND_PNG=new Set(CANON_IDS.flatMap(id=>[`${id}_casual`,...['happy','sad','flustered'].map(m=>`${id}_fight_${m}`)]).concat(REGIONAL_IDS.flatMap(id=>[`${id}_casual`,`${id}_casual_flustered`,`${id}_casual_pout`,...['happy','sad','flustered','angry','surprised'].map(m=>`${id}_fight_${m}`)])).concat(["mali_casual_flustered", "mali_casual_pout", "fah_casual_pout", "fah_fight_angry", "kati_fight_angry", "mali_fight_angry", "ploy_fight_angry", "rin_fight_angry", "kati_thai", "rin_thai", "mali_thai", "ploy_thai", "fah_thai", "fah_thai_fl", "rin_casual_pout", "kati_casual_pout", "ploy_casual_flustered","kati_thai_fl","rin_thai_fl","mali_thai_fl","ploy_thai_fl","rin_casual_flustered","ploy_casual_pout"]));
-["kati_casual_flustered","fah_casual_flustered","pailin_casual","pailin_casual_flustered","pailin_casual_pout",...['happy','sad','angry','surprised','flustered'].map(m=>`pailin_fight_${m}`)].forEach(k=>STAND_PNG.add(k));
+["npc_baiyok_casual","npc_baiyok_casual_flustered","npc_baiyok_casual_pout",...["happy","sad","angry","flustered"].flatMap(m=>[`npc_baiyok_white_${m}`,`npc_baiyok_black_${m}`]),"npc_baiyok_white_surprised","kati_casual_flustered","fah_casual_flustered","pailin_casual","pailin_casual_flustered","pailin_casual_pout",...['happy','sad','angry','surprised','flustered'].map(m=>`pailin_fight_${m}`)].forEach(k=>STAND_PNG.add(k));
 CANON_IDS.flatMap(id=>[`${id}_thai_sad`,`${id}_thai_pout`]).forEach(k=>STAND_PNG.add(k));
 const standArt=key=>`${ASSET}${key}.${STAND_PNG.has(key)?'png':'webp'}`;
 const CHAMP_IDS=[...REGIONAL_IDS,"lada"];/* v1.89.14: Lada (Naka) joins the scene cast */ /* v1.90 (hidden): the four regional champions — full portraits in scenes like the heroines */
@@ -8967,14 +8983,16 @@ const stand=(id,look,mood)=>{if(id==="coach")return `${ASSET}coach.png`;
   // v1.81: Loy Krathong Thai dress — happy + flustered art only; gold-tier players can dress the girls in it off-stage
   /* v1.91.97 (Man): the Thai dress is for the Loy Krathong event only — no more swapping casual for it in other scenes */
   if(look==="thai"&&THAI_IDS.includes(id))return standArt(`${id}_thai${thaiSuf(mood)}`);
-if(id==="pailin")return standArt(look==="casual"?`pailin_casual${mood==="flustered"?"_flustered":["sad","angry","pout"].includes(mood)?"_pout":""}`:`pailin_fight_${["happy","sad","angry","surprised","flustered"].includes(mood)?mood:FMOOD(mood)}`);
+/* v1.91.122: Baiyok as a speaker — her own casual art, white fighting kit once she is free (black-gold before) */
+  if(id==="prod_B"){if(look==="casual")return standArt(`npc_baiyok_casual${mood==="flustered"?"_flustered":["sad","angry","pout"].includes(mood)?"_pout":""}`);const fr=typeof byFree==="function"&&byFree(G),m=["happy","sad","angry","flustered","surprised"].includes(mood)?mood:"happy";return standArt(`npc_baiyok_${fr?"white":"black"}_${!fr&&m==="surprised"?"happy":m}`);}
+  if(id==="pailin")return standArt(look==="casual"?`pailin_casual${mood==="flustered"?"_flustered":["sad","angry","pout"].includes(mood)?"_pout":""}`:`pailin_fight_${["happy","sad","angry","surprised","flustered"].includes(mood)?mood:FMOOD(mood)}`);
   if(look==="casual"){const v=mood==="flustered"?"_flustered":["pout","angry","sad"].includes(mood)?"_pout":"";return standArt(`${id}_casual${v}`);}
   // v1.8: one main outfit — training scenes use the fight outfit too, so clothes never flip mid-scene
   return standArt(`${id}_fight_${FMOOD(mood)}`);};
 const THAI_IDS=["kati","mali","rin","ploy","fah"];
 // v1.91.48: sad + pout Thai-dress art — with THAI_XP on, every mood has its own picture and the casual-clothes guard is off
 const THAI_XP=true;const thaiSuf=m=>THAI_XP&&m==="sad"?"_sad":THAI_XP&&["pout","angry"].includes(m)?"_pout":["flustered","surprised","pout","sad","angry"].includes(m)?"_fl":"";
-const faceSrc=(id,mood,look)=>look==="thai"&&THAI_IDS.includes(id)?`${ASSET}${id}_thai${thaiSuf(mood)}_face.${["sad","pout","angry"].includes(mood)?"png":"webp"}`:id==="coach"?`${ASSET}coach_face.webp`:id==="pailin"?`${ASSET}${look==="casual"?`pailin_casual${mood==="flustered"?"_flustered":["sad","angry","pout"].includes(mood)?"_pout":""}_face`:`pailin_fight_${["happy","sad","angry","surprised","flustered"].includes(mood)?mood:FMOOD(mood)}_face`}.png`:look&&look!=="fight"&&look!=="thai"?`${ASSET}${id}_${look}_face.${REGIONAL_IDS.includes(id)||id==="fah"&&look.startsWith("casual")||id==="kati"&&look==="casual_flustered"?"png":"webp"}`:`${ASSET}${id}_${["happy","sad","flustered"].includes(mood)||REGIONAL_IDS.includes(id)&&["angry","surprised"].includes(mood)?mood:"happy"}_face.${REGIONAL_IDS.includes(id)?"png":"webp"}`;
+const faceSrc=(id,mood,look)=>id==="prod_B"?stand(id,look==="casual"||!look?"casual":look,mood).replace(/\.(png|webp)$/,"_face.png"):look==="thai"&&THAI_IDS.includes(id)?`${ASSET}${id}_thai${thaiSuf(mood)}_face.${["sad","pout","angry"].includes(mood)?"png":"webp"}`:id==="coach"?`${ASSET}coach_face.webp`:id==="pailin"?`${ASSET}${look==="casual"?`pailin_casual${mood==="flustered"?"_flustered":["sad","angry","pout"].includes(mood)?"_pout":""}_face`:`pailin_fight_${["happy","sad","angry","surprised","flustered"].includes(mood)?mood:FMOOD(mood)}_face`}.png`:look&&look!=="fight"&&look!=="thai"?`${ASSET}${id}_${look}_face.${REGIONAL_IDS.includes(id)||id==="fah"&&look.startsWith("casual")||id==="kati"&&look==="casual_flustered"?"png":"webp"}`:`${ASSET}${id}_${["happy","sad","flustered"].includes(mood)||REGIONAL_IDS.includes(id)&&["angry","surprised"].includes(mood)?mood:"happy"}_face.${REGIONAL_IDS.includes(id)?"png":"webp"}`;
 const BGIMG={river_dawn:"bg_river_dawn.webp",gang_hq:"bg_gang_hq.webp",gang_hideout:"bg_gang_hideout.webp",loy_ring:"bg_loy_ring.webp",market_morning:"bg_market_morning.webp",camp:"bg_camp.webp",night:"bg_camp_night.webp",bus:"bg_bus_rain.webp",letter:"bg_grandpa_letter.webp",fair:"bg_fair.webp",local:"bg_local.webp",district:"bg_district.webp",ring:"bg_local.webp",final:"bg_final.webp",hall:"bg_hall.webp",gym:null,gymdusk:"gym1.webp",food:"bg_food.webp",temple:"bg_temple.webp",cafe:"bg_cafe.webp",river:"bg_river.webp",market:"bg_market.webp",rooster:"bg_rooster.webp",farm:"bg_farm.webp",sea:"bg_sea.webp",mountain:"bg_mountain.webp",ayutthaya:"bg_ayutthaya.webp",amphawa:"bg_amphawa.webp",
   /* v1.89.7: new scenes, ready to use */camp_night:"bg_camp_night.webp",camp_rain:"bg_camp_rain.webp",songkran:"bg_songkran.webp",newyear:"bg_newyear.webp",kitchen:"bg_kitchen.webp",hill:"bg_hill.webp",tvstudio:"bg_tvstudio.webp",live_corner:"bg_live_corner.webp",hospital:"bg_hospital.webp",vector_lab:"bg_vector_lab.webp",loy_night:"bg_loy_night.webp",sportsday:"bg_sportsday.webp",dorm_room:"bg_dorm_room.webp"};
 /* v1.91.26 (Man): every SSR card has its own illustration — shown full-screen at its moment in the card story, viewable in the card's
@@ -9740,11 +9758,11 @@ function rankHTML(){const st=stageOf(G.week),cut=st==="local"?4:st==="district"?
    ${rows.map((r,i)=>`<tr class="${r.f.camp==="player"?"me":r.f.camp==="rival"?"rival":""} ${cut&&i<cut?"zone":""} ${cut&&i===cut-1?"cut":""}"><td class="num">${i+1}</td><td>${moveIcon(mv[r.id])}</td><td>${tierChip(r.f)} ${esc(r.f.name)}</td><td class="num"><b>${r.pts}</b></td><td class="num">${r.w}-${r.l}-${r.d}</td><td>${formHTML(r.f)}</td></tr>`).join("")}
    </tbody></table></div></section>${calendarHTML()}`;}
 
-function peopleHTML(){const rgP=typeof REGION!=="undefined"&&REGION.peopleIds&&G.region?(REGION.bondSync(G),REGION.peopleIds(G)):[];const met=[...CANON_IDS.map(id=>G.F[id]).filter(f=>f&&f.met),...rgP.map(id=>G.F[id]).filter(Boolean)];const rgc=f=>!CANON_IDS.includes(f.id),out=f=>rgc(f)&&f.camp!=="player"; /* v1.91.30 (Man): regional champions you know and can chat with are in the Characters tab — at her own camp until she moves in */
+function peopleHTML(){const rgP=typeof REGION!=="undefined"&&REGION.peopleIds&&G.region?(REGION.bondSync(G),REGION.peopleIds(G)):[];const xlP=typeof XL_IDS!=="undefined"?XL_IDS.filter(id=>xlOn(G,id)).map(id=>G.F[id]):[];const met=[...CANON_IDS.map(id=>G.F[id]).filter(f=>f&&f.met),...rgP.map(id=>G.F[id]).filter(Boolean),...xlP];const xl=f=>typeof xlIs==="function"&&xlIs(f.id),rgc=f=>!CANON_IDS.includes(f.id)&&!xl(f),out=f=>rgc(f)&&f.camp!=="player"; /* v1.91.122: Baiyok and Pailin join the list once they open up */ /* v1.91.30 (Man): regional champions you know and can chat with are in the Characters tab — at her own camp until she moves in */
   return `<div class="card-h"><p class="meta">ใช้เวลาด้วยกันสัปดาห์ละ 1 คน · พอสนิทกัน เธอจะทักแชทมาเองเป็นครั้งคราว</p><button class="btn sm gold albbtn" data-act="album">🃏 อัลบั้มการ์ด ${Object.keys(G.cards||{}).length}/${Object.keys(CARDS).length}${Object.entries(G.cards||{}).some(([k,c])=>cardFresh(k,c)||cardCanUp(k,c))?'<i class="ndot"></i>':""}</button>${G.freeUsed?'<span class="pill">เวลาว่าง: ใช้แล้ว</span>':'<span class="pill gold">เวลาว่าง: เหลือ 1</span>'}</div>
    <div class="plist">${met.map(f=>`<section class="px pcard"><button class="pthumb" data-act="fighter" data-id="${f.id}" data-v="rel" aria-label="ดูโปรไฟล์${esc(f.name)}"><img src="${pCardSrc(f)}" alt="" loading="lazy"></button>
-     <div class="pbody"><div class="pnm"><b class="nm">${esc(f.name)}</b><span class="meta">${f.camp==="player"?"ค่ายศิริชัย":out(f)?esc(REGION.campOf(f.id)):f.camp==="rival"&&!f.indie?"พยัคฆ์ทอง":"อิสระ"}${relTag(G,f)}</span></div>${hearts(f.bond,f)}
-      <div class="pbtns"><button class="btn sm" data-act="fighter" data-id="${f.id}" data-v="rel">ประวัติ</button><button class="btn sm primary" data-act="${rgc(f)?"rghang":"hang"}" data-id="${f.id}" data-v="${f.id}" ${out(f)||G.freeUsed||isAway(G,f.id)?"disabled":""}>${out(f)?"เจอได้ตอนไปภาคเธอ":isAway(G,f.id)?"ไม่อยู่":"ใช้เวลาด้วยกัน"}</button><button class="btn sm gold giftb" data-act="giftpick" data-id="${f.id}" ${out(f)||f.giftWeek===gameWeek(G)||isAway(G,f.id)?"disabled":""}>${PIX.gift}<span>${f.giftWeek===gameWeek(G)?"ให้แล้ว":"ของขวัญ"}</span></button><button class="btn sm chatb" data-act="${rgc(f)?"rgchat":"chat"}" data-id="${f.id}" data-v="${f.id}" ${rgc(f)?(G.chatIn&&G.chatIn[f.id]||canChatTell(f)?"":"disabled"):canChat(f)||canChatLov(f)||canChatTell(f)?"":"disabled"}>${(nw=>`${CHAT_PX}<span>${nw?"แชทใหม่":isAway(G,f.id)?"ไม่ตอบแชท":canChatLov(f)||canChatTell(f)?"แชท":(f.bond||0)<CHAT_BOND?"ยังไม่สนิท":"ไม่มีข้อความ"}</span>${nw?'<i class="dot"></i>':""}`)(rgc(f)?!!(G.chatIn&&G.chatIn[f.id]):canChat(f))}</button>${rgc(f)&&REGION.isLovC&&REGION.isLovC(G,f.id)?`<button class="btn sm" data-act="rgbreak" data-v="${f.id}">ขอเลิก</button>`:""}</div></div></section>`).join("")}</div>`;}
+     <div class="pbody"><div class="pnm"><b class="nm">${esc(f.name)}</b><span class="meta">${xl(f)?xlCamp(G,f):f.camp==="player"?"ค่ายศิริชัย":out(f)?esc(REGION.campOf(f.id)):f.camp==="rival"&&!f.indie?"พยัคฆ์ทอง":"อิสระ"}${relTag(G,f)}</span></div>${hearts(f.bond,f)}
+      <div class="pbtns"><button class="btn sm" data-act="fighter" data-id="${f.id}" data-v="rel">ประวัติ</button><button class="btn sm primary" data-act="${xl(f)?"xhang":rgc(f)?"rghang":"hang"}" data-id="${f.id}" data-v="${f.id}" ${out(f)||G.freeUsed||isAway(G,f.id)?"disabled":""}>${out(f)?"เจอได้ตอนไปภาคเธอ":isAway(G,f.id)?"ไม่อยู่":"ใช้เวลาด้วยกัน"}</button><button class="btn sm gold giftb" data-act="giftpick" data-id="${f.id}" ${out(f)||f.giftWeek===gameWeek(G)||isAway(G,f.id)?"disabled":""}>${PIX.gift}<span>${f.giftWeek===gameWeek(G)?"ให้แล้ว":"ของขวัญ"}</span></button><button class="btn sm chatb" data-act="${rgc(f)?"rgchat":"chat"}" data-id="${f.id}" data-v="${f.id}" ${rgc(f)?(G.chatIn&&G.chatIn[f.id]||canChatTell(f)?"":"disabled"):canChat(f)||canChatLov(f)||canChatTell(f)?"":"disabled"}>${(nw=>`${CHAT_PX}<span>${nw?"แชทใหม่":isAway(G,f.id)?"ไม่ตอบแชท":canChatLov(f)||canChatTell(f)?"แชท":(f.bond||0)<CHAT_BOND?"ยังไม่สนิท":"ไม่มีข้อความ"}</span>${nw?'<i class="dot"></i>':""}`)(rgc(f)?!!(G.chatIn&&G.chatIn[f.id]):canChat(f))}</button>${rgc(f)&&REGION.isLovC&&REGION.isLovC(G,f.id)?`<button class="btn sm" data-act="rgbreak" data-v="${f.id}">ขอเลิก</button>`:""}${xl(f)&&xlLov(G,f.id)?`<button class="btn sm" data-act="xbreak" data-v="${f.id}">ขอเลิก</button>`:""}</div></div></section>`).join("")}</div>`;}
 function hangHTML(id){const f=G.F[id],hlv=heartLv(f).lv;const pref=k=>f.know["act_"+k]==="like"?'<i class="likeb">ชอบ</i>':f.know["act_"+k]==="dislike"?'<i class="disb">ไม่ชอบ</i>':"";
   return `<h2>ใช้เวลากับ${esc(f.name)}</h2><p class="meta">เลือกที่ที่อยากไปด้วยกัน</p><div class="acts">${Object.entries(ACTIVITIES).filter(([k,a])=>(!a.campOnly||f.camp==="player")&&(!a.heart||hlv>=10)).map(([k,a])=>{const lock=a.heart&&hlv<a.heart;return `<button class="actbtn${lock?" lockd":a.heart?" hspot":""}" data-act="date" data-id="${f.id}" data-v="${k}" ${lock||G.freeUsed||G.cash<a.cost?"disabled":""}><b>${a.heart?"♥ ":""}${a.name}${lock?"":pref(k)}</b><small>${lock?`🔒 ปลดที่ ♥Lv.${a.heart}`:a.cost?fmt(a.cost):"ฟรี"}</small></button>`;}).join("")}</div>`;}
 // v1.33: what each camp level brings, so upgrades feel like a goal
@@ -9851,7 +9869,7 @@ function campHTML(){const inc=classIncome(G),up=upkeep(G),wg=wages(G),lv=campLev
     ${staffHTML()}</section>
    </div>
    <section class="px card cpane ${cs==="fac"?"on":""}"><h3>สิ่งอำนวยความสะดวก</h3><div class="facs">${(()=>{const E=Object.entries(FACILITIES),lk=E.filter(([k])=>facLocked(G,k));return [...E.filter(([k])=>!facLocked(G,k)),...lk.slice(0,1)];})().map(([k,F])=>{const l=G.fac[k]||0,m=facMax(G,k),lk=facLocked(G,k);
-     return `<div class="item fac ${lk?"locked":""}"><div><div class="t">${F.name} ${dots(l,m)}${F.req&&!l&&!lk?' <span class="newb sm">ใหม่</span>':""}</div><div class="meta">${F.desc}${k==="dorm"&&G.region?` · ห้องพักตัวละครหลัก ${dormRooms(G)} ห้อง`:""}</div></div>${lk?`<span class="pill">ปลดล็อก: ${lk}</span>`:l<m?`<button class="btn sm gold" data-act="buyfac" data-v="${k}" ${G.cash<F.cost[l]?"disabled":""}>${fmt(F.cost[l])}</button>`:'<span class="pill green">สูงสุด</span>'}</div>`;}).join("")}</div></section>
+     return `<div class="item fac ${lk?"locked":""}"><div><div class="t">${F.name} ${dots(l,m)}${F.req&&!l&&!lk?' <span class="newb sm">ใหม่</span>':""}</div><div class="meta">${F.desc}${k==="dorm"?` · <b>ห้องนักมวยหลัก ${dormUsed(G)}/${dormRooms(G)}</b>${l>=3&&!G.region?" · ระดับ 4–5 เปิดเมื่อเข้าบทภูมิภาค":""}`:""}</div></div>${lk?`<span class="pill">ปลดล็อก: ${lk}</span>`:l<m?`<button class="btn sm gold" data-act="buyfac" data-v="${k}" ${G.cash<F.cost[l]?"disabled":""}>${fmt(F.cost[l])}</button>`:'<span class="pill green">สูงสุด</span>'}</div>`;}).join("")}</div></section>
    <section class="px card cpane ${cs==="fac"?"on":""}"><h3>ลงทุนพิเศษ</h3>
     <div class="item nw"><div><div class="t">เชิญครูมวยโบราณมาสอน</div><div class="meta">${fmt(18000)} · นักมวยได้แต้มสกิล +1 และค่าสถานะตามสำนัก · คนละครั้งต่อฤดูกาล · เปิดสัปดาห์ 16</div></div><button class="btn sm gold" data-act="mastersOpen" ${G.week<16?"disabled":""}>เลือก</button></div>
     <div class="item nw"><div><div class="t">จัดศึกมวยที่ค่ายศิริชัย</div><div class="meta">${fmt(SHOW_COST)} · ชื่อเสียง +3 ค่ายสวยขึ้น กำลังใจทุกคน +8 · รอบละครั้ง</div></div><button class="btn sm gold" data-act="hostshow" ${G.cash<SHOW_COST||G.week<10||G.flags["show_"+stageOf(G.week)]?"disabled":""}>${G.flags["show_"+stageOf(G.week)]?"จัดแล้ว":"จัดงาน"}</button></div>
@@ -10038,7 +10056,7 @@ function relLadderHTML(f){const H=heartLv(f).lv,cur=relLabel(G,f,H),k=relKind(G,
    <ol class="rsteps">${T.map(([lv,n],i)=>`<li class="${i===lit&&k!=="friend"&&k!=="ex"?"on":H>=lv?"done":""}"><i>Lv.${lv}</i>${esc(tierFor(n,f))}</li>`).join("")}</ol>
    ${(()=>{const T=typeof loveTitle==="function"?loveTitle(G,f):null;return T?`<div class="ltitle${T.k==="mono"?" lmono":""}"><b>${T.k==="mono"?"💍":"✦"} ${esc(T.t)}</b><small>${esc(T.d)}</small></div>`:"";})()}
    <p class="meta rcap">บทนี้หัวใจสูงสุด Lv.${heartCapLv(G)}${HEART_NEXT[heartCapLv(G)]?` · ${HEART_NEXT[heartCapLv(G)]}`:""}</p>
-   <div class="rbranch"><small>ตอนสารภาพรัก (สนิท 75 + เชื่อใจ 40)</small><div>${REL_BRANCH.map(([kk,n])=>`<span class="${kk===k?"on":""}">${esc(n)}</span>`).join("")}</div></div></div>`;}
+   <div class="rbranch"><small>${typeof xlIs==="function"&&xlIs(f.id)?"ตอนสารภาพรัก (สนิท 75)":"ตอนสารภาพรัก (สนิท 75 + เชื่อใจ 40)"}</small><div>${REL_BRANCH.map(([kk,n])=>`<span class="${kk===k?"on":""}">${esc(n)}</span>`).join("")}</div></div></div>`;}
 function giftHTML(id){const f=G.F[id];
   const E=giftsFor(id).map(k=>[k,{...GIFTS[k],bond:giftBond(id,k)}]).sort((x,y)=>(x[1].bond||0)-(y[1].bond||0)||(x[1].only?1:0)-(y[1].only?1:0));
   {const lk=E.filter(([k,g])=>(g.bond||0)>(f.bond||0));const nx=lk[0];const hid=lk.length-(nx?1:0);E.splice(0,E.length,...E.filter(([k,g])=>(g.bond||0)<=(f.bond||0)),...(nx?[nx]:[]));E.hidden=hid;}
@@ -10215,6 +10233,7 @@ function modalHTML(){const m=UI.modal;let body="",foot=true;
   if(m.type==="tpick"){body=tpickHTML(m.id);foot=false;}
   if(m.type==="fplan"){body=fplanHTML(m.id);foot=false;}
   if(m.type==="hang"){body=hangHTML(m.id);}
+  if(m.type==="xhang"){body=xlHangHTML(m.id);}
   if(m.type==="dm"){foot=false;body=dmBracketHTML();}
   if(m.type==="dmpick"){foot=false;body=dmPickHTML();}
   if(m.type==="camplv"){foot=false;body=campLvHTML();}
@@ -11173,7 +11192,7 @@ document.addEventListener("keydown",e=>{
 preloadCore();setTimeout(()=>{if(!G){["happy","surprised","sad"].forEach(m=>warm(stand("kati","fight",m)));warm(`${ASSET}coach.png`);}},4000);render();
 /* v1.91.80 (Man): on the test link (any host but the real game) the title menu offers a mid-game test save, so a fix can be seen without starting over */
 const TEST_HOST=typeof location!=="undefined"&&!/(^|\.)github\.io$/.test(location.hostname);
-function loadTestSave(name){fetch(`saves/${name}.json?v=${Date.now()}`).then(r=>{if(!r.ok)throw 0;return r.json();}).then(s=>{if(!s||!s.F||!s.week)throw 0;if(typeof I18N_FIX==="function")s=I18N_FIX(s);fixSave(s);G=s;UI.slot=3;save();UI.modal=null;UI.title=null;UI.tab="home";UI.tsAsk=0;
+function loadTestSave(name){fetch(`saves/${name}.json?v=${Date.now()}`).then(r=>{if(!r.ok)throw 0;return r.json();}).then(s=>{if(!s||!s.F||!s.week)throw 0;if(typeof I18N_FIX==="function")s=I18N_FIX(s);fixSave(s);if(typeof xlTestSetup==="function")xlTestSetup(s);G=s;UI.slot=3;save();UI.modal=null;UI.title=null;UI.tab="home";UI.tsAsk=0;
   AU.startMusic&&AU.startMusic("hub");render();toast(`โหลดเซฟทดสอบลงช่อง 3 แล้ว`);}).catch(()=>{UI.tsAsk=0;render();toast("โหลดเซฟทดสอบไม่ได้");});}
 /* v1.91.71 (dev): "#demo=<name>" loads a prepared test save from saves/<name>.json into slot 3 (asks first) — for Man to play a scene without replaying the whole chapter */
 (function(){const m=typeof location!=="undefined"&&(location.hash||"").match(/demo=([a-z0-9_]+)/);if(!m)return;const name=m[1];
@@ -13063,7 +13082,8 @@ function chatWeekly(G){bondFade(G);G.chatIn=G.chatIn||{};G.chatLast=G.chatLast||
   for(const id of CANON_IDS){const f=G.F[id];if(!f||!f.met||G.chatIn[id]||isAway(G,id))continue;
     {const L=CHAT[id]||[],seen=(G.chatSeen||{})[id]||[],W=G.chatWkAbs||{};if((f.bond||0)>=8&&gameWeek(G)-(G.chatLastAbs?.[id]??-999)>=1&&L.some(t=>(!t.when||t.when(G))&&t.need&&/_(lost|won|dm|flood|loan|miss|loy|loyw)$/.test(t.id)&&t.need(G)&&(!seen.includes(t.id)||(t.rep&&gameWeek(G)-(W[id+":"+t.id]??-999)>=t.rep)))){G.chatIn[id]=G.week;continue;}}
     if((f.bond||0)<CHAT_BOND)continue;
-    if(gameWeek(G)-(G.chatLastAbs?.[id]??-999)<3)continue;if(rng()<.3+((f.bond||0)>=50?.1:0))G.chatIn[id]=G.week;}}
+    if(gameWeek(G)-(G.chatLastAbs?.[id]??-999)<3)continue;if(rng()<.3+((f.bond||0)>=50?.1:0))G.chatIn[id]=G.week;}
+  if(typeof xlWeekly==="function")xlWeekly(G);}
 const chatLen=f=>3+((f.bond||0)>=40?1:0)+((f.bond||0)>=70?1:0);
 const canChat=f=>!!(f&&f.met&&G.chatIn&&G.chatIn[f.id]&&!isAway(G,f.id));
 /* v1.91.75 (Man): champions have phones — what used to come as their personal letters arrives as chat messages (shown first next time the chat opens) */
@@ -13685,11 +13705,247 @@ CHAT.fah.push({id:'f_ringcraft_102',need:G=>inCamp(G,'fah'),x:[
 CHAT.ploy.find(t=>t.id==='p_kati').when=G=>G.F.ploy.camp==='rival';
 for(const id of ['f_tiger','f_mali'])CHAT.fah.find(t=>t.id===id).when=G=>inCamp(G,'fah');
 
+/* v1.91.122 (Man): Baiyok and Pailin become characters you can grow close to — chat, gifts, time together, heart scenes and love —
+   once the camp has fought her often and beaten her more often than not (6 bouts, 4 wins, any of our fighters).
+   Both stay in their own corner of the story: Pailin keeps running Vector in Bangkok; Baiyok, once she is yours and fighting free in white,
+   can move into the camp. Their romance keeps its own track (G.xlov / G.xlex) beside the heroines' and the regional champions'. */
+const XL_IDS=["prod_B","pailin"],XL_NEED={n:6,w:4};
+const xlIs=id=>XL_IDS.includes(id);
+const xlRec=(G,id)=>{let n=0,w=0;for(const c of G.cal||[])if(c.b===id&&G.F[c.a]){n++;if(c.res==="W")w++;}return {n,w};};
+const xlOn=(G,id)=>!!(G&&G.xl&&G.xl[id]&&G.xl[id].open!=null&&G.F[id]);
+const xlLov=(G,id)=>!!(G&&G.xlov&&G.xlov[id]!=null);
+const xlLovN=G=>G&&G.xlov?Object.keys(G.xlov).filter(k=>G.F[k]).length:0;
+const xlDue=(G,id)=>{const f=G.F[id];if(!f||xlOn(G,id))return false;if(id==="prod_B"&&!(G.prodigy&&G.prodigy.B==="prod_B"))return false;const r=xlRec(G,id);return r.n>=XL_NEED.n&&r.w>=XL_NEED.w;};
+const xlWho=id=>id==="prod_B"?"ใบหยก":"ไพลิน";
+const xlCamp=(G,f)=>f.camp==="player"?"ค่ายศิริชัย":f.id==="pailin"?"ค่ายเวกเตอร์":f.indie?"อิสระ":"พยัคฆ์ทอง";
+function xlOpen(G,id){G.xl=G.xl||{};G.xl[id]={open:absWeek(G)};const f=G.F[id];f.met=true;f.know=f.know||{};if((f.bond||0)<12)f.bond=12;f.lastTouch=absWeek(G);G.chatIn=G.chatIn||{};G.chatIn[id]=G.week;}
+function xlTake(G,id){G.xlov=G.xlov||{};G.xlov[id]=absWeek(G);if(G.xlex)delete G.xlex[id];if(G.friendz)delete G.friendz[id];if(G.mono)delete G.mono;add(G,id,"morale",12);}
+function xlBreak(G,id){if(!xlLov(G,id))return;delete G.xlov[id];G.xlex=G.xlex||{};G.xlex[id]=absWeek(G);add(G,id,"bond",-20);add(G,id,"morale",-15);}
+/* weekly: new chats once she is close enough (same rhythm as the heroines), a lover texts at least every other week */
+function xlWeekly(G){G.chatIn=G.chatIn||{};const rng=mulberry32(G.seed*37+G.week*11+5);
+  for(const id of XL_IDS){if(!xlOn(G,id))continue;const f=G.F[id];if(G.chatIn[id]||isAway(G,id))continue;if(gameWeek(G)-(G.chatLastAbs?.[id]??-999)<(xlLov(G,id)?2:3))continue;
+    if(xlLov(G,id)||(f.bond||0)>=CHAT_BOND&&rng()<.35+((f.bond||0)>=50?.1:0))G.chatIn[id]=G.week;}}
+/* time together — five places each, in order; after that a short visit from a small pool */
+function xlHang(id){const f=G.F[id];if(!f||!xlOn(G,id)||G.freeUsed||isAway(G,id))return;G.freeUsed=true;f.lastTouch=absWeek(G);f.xlDate=f.xlDate||0;
+  const D=XL_DATE[id],i=f.xlDate,first=i<D.length,d=first?D[i]:XL_AGAIN[id][(i-D.length)%XL_AGAIN[id].length];f.xlDate++;
+  const gain=first?7:4;save();AU.startMusic("date");
+  playScene([...d.steps(G),{inject:G2=>{add(G2,id,"bond",gain);add(G2,id,"morale",4);return [{n:"nar",t:`ความสนิทกับ${f.name} +${gain}`}];}}],()=>{AU.startMusic("hub");save();render();},{bg:d.bg,look:"casual"});}
+function xlHangHTML(id){const f=G.F[id],D=XL_DATE[id],i=f.xlDate||0;const nx=i<D.length?D[i].name:"เจอกันแบบสบาย ๆ";
+  return `<h2>ใช้เวลากับ${esc(f.name)}</h2><p class="meta">${id==="pailin"?"ไพลินอยู่กรุงเทพฯ · นัดตอนเธอขึ้นมาเชียงใหม่":"นัดตามที่เธอสะดวก"} · ใช้เวลาว่างของสัปดาห์นี้</p>
+   <div class="acts"><button class="actbtn hspot" data-act="xhanggo" data-id="${id}" ${G.freeUsed?"disabled":""}><b>${esc(nx)}</b><small>${i<D.length?`ที่ใหม่ ${i+1}/${D.length}`:"ฟรี"}</small></button></div>`;}
+function xlBreakAsk(id){const f=G.F[id];if(!xlLov(G,id))return;playScene([{n:"nar",t:`จะขอเลิกกับ${f.name}จริง ๆ เหรอ?`,choice:[
+    {t:"ขอเลิก",fx:G2=>xlBreak(G2,id),then:XL_BREAK[id]},{t:"ไม่ใช่ตอนนี้",then:[{n:"nar",t:"คุณเก็บโทรศัพท์ แล้วพิมพ์ไปแค่ว่าคิดถึง"}]}]}],()=>{save();render();},{bg:"night",look:"casual"});}
+/* which heart scene is due (25 / 45 / 65 closeness, in order) */
+const xlHeartDue=(G,id,k)=>xlOn(G,id)&&!isAway(G,id)&&(G.F[id].bond||0)>=XL_HEART_AT[k]&&(k===0||G.seen["xlh_"+id+"_"+(k-1)])&&gameWeek(G)-(G.xlHeartAbs||-99)>=2;
+const XL_HEART_AT=[25,45,65];
+Object.assign(ACT,{xhang:d=>{UI.modal={type:"xhang",id:d.id};render();},xhanggo:d=>{UI.modal=null;xlHang(d.id);},xbreak:d=>xlBreakAsk(d.v)});
+
+/* ---------- Baiyok ---------- */
+SPK.prod_B={name:"ใบหยก",color:"#d9b24a"};
+const XL_PROF={
+ prod_B:{age:20,height:"171 ซม.",blood:"B",bday:"14 กุมภาพันธ์",home:"เชียงใหม่ · บ้านยายริมคลองแม่ข่า",heritage:"ท่ามวยของยาย (ก่อนเข้าพยัคฆ์ทอง)",
+  personality:"นิ่ง พูดสั้น ซื่อตรงจนดูเย็นชา ใจดีแบบไม่รู้วิธีแสดงออก กำลังหัดสนุกกับมวยเป็นครั้งแรก",likes:["เชือกกระโดดด้ามไม้","ข้าวต้มตอนตีห้า","ฝนตกตอนซ้อม"],
+  dislikes:["เสียงนกหวีด","ชุดสีดำ","คำว่า 'ตามแผน'"],hobby:"นับเตะทีละร้อยเอง แล้วจดไว้ในสมุดเล่มเล็ก",
+  story:"ยายพาไปฝึกท่ามวยตั้งแต่เจ็ดขวบ พยัคฆ์ทองรับตัวตอนสิบสาม ซ้อมวันละสิบชั่วโมงจนเป็นอัจฉริยะที่ไม่เคยยิ้ม จนวันที่ออกมาชกในชื่อตัวเอง",
+  secret:"เก็บตั๋วเวทีทุกไฟต์ที่เจอค่ายศิริชัยไว้ในกล่องรองเท้า เขียนผลไว้หลังตั๋ว"},
+ pailin:{age:31,height:"175 ซม.",blood:"A",bday:"23 สิงหาคม",home:"โคราช · ตอนนี้คอนโดใกล้ห้องแล็บเวกเตอร์ กรุงเทพฯ",heritage:"มวยโคราช (สายเดียวกับพลอย) + วิทยาศาสตร์การกีฬา",
+  personality:"มั่นใจ คิดเป็นตัวเลข แซวเก่ง ยอมรับความผิดยาก แต่ซื่อสัตย์กับข้อมูลเสมอ ห่วงน้องสาวมากกว่าที่ยอมพูด",likes:["กาแฟดำไม่ใส่น้ำตาล","สเปรดชีต","ทะเลหมอกเขาใหญ่"],
+  dislikes:["คนที่พูดว่า 'ดวง'","ข้อมูลที่ไม่มีหน่วย","ถูกเรียกว่าพี่พลอย"],hobby:"วิ่งตอนตีห้าพร้อมนาฬิกาสามเรือน",
+  story:"พี่สาวคนโตของบ้านครูพละที่โคราช ชกมวยก่อนพลอย ไปเรียนวิทยาศาสตร์การกีฬาที่กรุงเทพฯ แล้วตั้งค่ายเวกเตอร์ด้วยทุนที่ภายหลังรู้ว่ามาจากใคร",
+  secret:"ยังเก็บนวมคู่แรกของพลอยไว้ในตู้ห้องทำงาน พลอยคิดว่าทิ้งไปนานแล้ว"}};
+Object.assign(GIFTS,{
+ yb_rope:{name:"เชือกกระโดดด้ามไม้สลักชื่อ",price:600,bond:18,only:"prod_B",cat:"keep"},yb_ribbon:{name:"ริบบิ้นผูกผมไหมทองผืนใหม่",price:1500,bond:40,only:"prod_B",cat:"wear"},
+ pl_pen:{name:"ปากกาหมึกซึมสลักชื่อ",price:1400,bond:20,only:"pailin",cat:"keep"},pl_scarf:{name:"ผ้าพันคอไหมโคราชสีม่วง",price:2600,bond:42,only:"pailin",cat:"wear"}});
+const XL_GPREF={prod_B:{love:["yb_rope","yb_ribbon","khanom","wrap","malai"],like:["sausage","tea","photo","shorts","mongkhon"],dislike:["stickers"]},
+ pailin:{love:["pl_pen","pl_scarf","coffee","book","bracelet"],like:["tea","sketch","spa","prajiad"],dislike:["doll"]}};
+const XL_GLINES={prod_B:{love:"…ของฉันเหรอ ไม่มีใครเคยซื้อของให้ฉันเพราะอยากให้เฉย ๆ เลย ฉันจะใช้ทุกวัน",like:"ขอบใจ …ฉันจะเก็บไว้ดี ๆ",ok:"ขอบใจ",dislike:"…ฉันไม่รู้จะแปะไว้ตรงไหน แต่ขอบใจนะ"},
+ pailin:{love:"…คุณเก็บข้อมูลฉันได้แม่นกว่าที่คิดนะคะ ฉันจะใช้มันทุกวัน แล้วจะนับไว้ด้วยว่ากี่วัน",like:"ใช้ได้ค่ะ ฉันให้คะแนนแปดเต็มสิบ",ok:"ขอบคุณค่ะ",dislike:"ตุ๊กตา… ฉันจะส่งให้พลอย เธอชอบทำเป็นไม่ชอบของแบบนี้"}};
+const XL_GAGAIN={prod_B:{food:["{g}อีกแล้ว …ครั้งก่อนฉันกินหมดในคืนเดียว","ฉันจะแบ่งยายครึ่งหนึ่ง ยายถามว่าใครให้ ฉันยังไม่ได้ตอบ"],wear:["อันเก่ายังไม่ขาด แต่ฉันจะใช้อันนี้วันไปชก","{g}อีกอัน …ฉันมีไว้สลับได้แล้ว"],keep:["{g}อีกแล้ว ฉันเก็บไว้ในกล่องเดียวกับตั๋วเวที","คุณจำได้ว่าฉันชอบ …ฉันไม่ค่อยมีใครจำ"],exp:["อีกรอบเหรอ …ได้ ฉันจะไม่ซ้อมวันนั้น"]},
+ pailin:{food:["{g}อีกแล้วนะคะ ฉันเริ่มเก็บสถิติว่าคุณซื้อให้ทุกกี่สัปดาห์","ล็อตนี้ฉันจะแบ่งทีมแล็บ เขาจะได้รู้ว่าฉันมีคนส่งของให้"],wear:["{g}อีกชิ้น ฉันใช้สลับวันจันทร์กับวันพฤหัสค่ะ","อันเก่ายังสภาพดี แต่ฉันรับอันนี้ไว้ด้วย ไม่ได้แปลว่าฉันอยากได้นะคะ"],keep:["{g}อีกแล้ว ฉันวางไว้บนโต๊ะทำงาน ทีมงานถามทุกวัน","ข้อมูลยืนยันซ้ำ: คุณจำได้ว่าฉันชอบอะไร"],exp:["อีกรอบเหรอคะ ฉันจะเคลียร์ตารางให้ค่ะ"]}};
+for(const id of XL_IDS){if(typeof PROFILES!=="undefined"&&!PROFILES[id])PROFILES[id]=XL_PROF[id];if(!GIFT_PREF[id])GIFT_PREF[id]=XL_GPREF[id];if(!GIFT_LINES[id])GIFT_LINES[id]=XL_GLINES[id];if(!GIFT_AGAIN[id])GIFT_AGAIN[id]=XL_GAGAIN[id];if(typeof SOUV_LOVE!=="undefined"&&!SOUV_LOVE[id])SOUV_LOVE[id]=id==="prod_B"?["n_umbrella","p_lampang"]:["c_bencharong","i_praewa"];}
+Object.assign(TELL_MEET,{prod_B:"…ได้ ลานวัดริมน้ำ ฉันจะไปก่อน",pailin:"ได้ค่ะ ฉันขึ้นเครื่องเที่ยวหกโมงเย็น สามทุ่มเจอกันที่ร้านกาแฟใต้คอนโดเพื่อนฉันนะคะ"});
+Object.assign(TELL_SPOT,{prod_B:"ลานวัดริมน้ำ",pailin:"ร้านกาแฟเปิดดึกกลางนิมมาน"});
+const XL_YES={prod_B:"…ฉันไม่รู้ว่าต้องตอบยังไง ไม่มีใครสอนเรื่องนี้ …แต่ใจฉันเต้นเร็วกว่ายกห้า งั้นคงแปลว่าใช่",
+ pailin:"ฉันคำนวณไว้แล้วว่าวันนี้คุณจะพูด …แต่ไม่ได้คำนวณว่าตัวเองจะดีใจขนาดนี้ ตกลงค่ะ"};
+const XL_WAIT={prod_B:"…ฉันยังไม่รู้ว่ารู้สึกยังไง ขอเวลาหน่อย ไม่ได้แปลว่าไม่",pailin:"ข้อมูลยังไม่พอค่ะ …ขอเก็บเพิ่มอีกหน่อย อย่าเข้าใจผิดนะคะ ไม่ได้แปลว่าไม่"};
+const XL_BREAK={prod_B:[{n:"prod_B",f:"pout",l:"casual",t:"…เข้าใจแล้ว"},{n:"prod_B",f:"pout",l:"casual",t:"ฉันจะไม่ร้องไห้ต่อหน้าใคร ยายสอนไว้ …แต่คืนนี้ฉันจะเตะกระสอบนานหน่อย"}],
+ pailin:[{n:"pailin",f:"sad",l:"casual",t:"…ฉันเห็นสัญญาณมาสักพักแล้วค่ะ แค่ไม่อยากเชื่อข้อมูลตัวเอง"},{n:"pailin",f:"sad",l:"casual",t:"ขอบคุณที่บอกตรง ๆ นะคะ ไปเถอะ ก่อนฉันจะเปลี่ยนใจขอให้คุณอยู่"}]};
+
+/* the opening scenes — after 6 bouts and 4 losses she comes to find out why */
+EVENTS.push({id:"xl_open_prod_B",look:"casual",bg:"camp_night",pri:45,when:G=>xlDue(G,"prod_B"),steps:[
+ {inject:G=>{const r=xlRec(G,"prod_B");return [{n:"nar",t:"สามทุ่มกว่า ไฟลานซ้อมดับไปแล้ว มีคนยืนอยู่หน้าประตูค่าย ถือสมุดเล่มเล็ก"},
+  {n:"prod_B",f:"happy",l:"casual",t:`ฉันนับไว้ ชกกับค่ายนี้ ${r.n} ครั้ง ชนะ ${r.n-r.w} แพ้ ${r.w}`}];}},
+ {n:"prod_B",f:"pout",l:"casual",t:"ที่พยัคฆ์ทอง ใครแพ้สองครั้งติดต้องซ้อมเพิ่มสามชั่วโมง ฉันซ้อมเพิ่มจนไม่รู้จะเพิ่มตรงไหนแล้ว"},
+ {n:"prod_B",f:"happy",l:"casual",t:"ฉันเลยมาถามคนที่ยืนมุมให้คนที่ชนะฉัน …ค่ายนี้ซ้อมอะไรที่ฉันไม่ได้ซ้อม"},
+ {n:"nar",t:"จะตอบว่าอะไร?",choice:[
+  {t:"\"ซ้อมให้สนุกก่อน แล้วค่อยซ้อมให้หนัก\"",fx:G=>add(G,"prod_B","bond",4),then:[{n:"prod_B",f:"pout",l:"casual",t:"สนุก… ฉันจดไว้แล้ว ยังไม่เข้าใจ แต่จดไว้แล้ว"}]},
+  {t:"\"มีคนรอกินข้าวด้วยหลังซ้อม\"",fx:G=>add(G,"prod_B","bond",6),then:[{n:"prod_B",f:"flustered",l:"casual",t:"…ข้าวเย็นนับด้วยเหรอ ฉันไม่เคยคิดว่ามันนับ"}]},
+  {t:"\"มาดูเองสิ วันอาทิตย์\"",fx:G=>add(G,"prod_B","bond",5),then:[{n:"prod_B",f:"happy",l:"casual",t:"วันอาทิตย์ …ได้ ฉันจะมาก่อนทุกคนตื่น"}]}]},
+ {n:"prod_B",f:"pout",l:"casual",t:"…ขอเบอร์ไว้ได้ไหม เผื่อฉันมีเรื่องมวยจะถาม เรื่องมวยเท่านั้นนะ"},
+ {fx:G=>xlOpen(G,"prod_B")},{n:"nar",t:"ใบหยกเพิ่มคุณเป็นเพื่อน · แชท ของขวัญ และใช้เวลาด้วยกันได้ที่แท็บตัวละคร"}]});
+EVENTS.push({id:"xl_open_pailin",look:"casual",bg:"cafe",pri:45,when:G=>xlDue(G,"pailin"),steps:[
+ {n:"nar",t:"📱 ข้อความจากเบอร์กรุงเทพฯ ที่ไม่ได้บันทึกไว้: \"พรุ่งนี้ฉันอยู่เชียงใหม่ ร้านกาแฟหน้ามอ สิบโมง ไม่มาถือว่ายอมแพ้นะคะ\""},
+ {inject:G=>{const r=xlRec(G,"pailin");return [{n:"nar",t:"ไพลินนั่งรออยู่ก่อนแล้ว แท็บเล็ตวางคว่ำบนโต๊ะ กาแฟดำแก้วที่สองพร่องไปครึ่ง"},
+  {n:"pailin",f:"happy",l:"casual",t:`${r.n} ไฟต์ที่ข้อมูลบอกว่าฉันควรชนะ ฉันแพ้ไป ${r.w} …วันนี้ฉันไม่ได้มาในฐานะหัวหน้าเวกเตอร์นะคะ`}];}},
+ {n:"pailin",f:"pout",l:"casual",t:"ฉันมาในฐานะคนที่อยากรู้ว่าตัวแปรที่ฉันวัดไม่ได้คืออะไร แล้วทำไมมันอยู่ที่ค่ายคุณ ไม่อยู่ที่แล็บฉัน"},
+ {n:"nar",t:"จะตอบว่าอะไร?",choice:[
+  {t:"\"ถ้าวัดได้ ก็คงไม่ใช่มวยแล้ว\"",fx:G=>add(G,"pailin","bond",4),then:[{n:"pailin",f:"pout",l:"casual",t:"คำตอบที่ฉันเกลียดที่สุด …แต่ก็ยังไม่มีข้อมูลมาเถียงได้"}]},
+  {t:"\"เพราะพวกเธอชกให้คนที่รอ ไม่ได้ชกให้ตัวเลข\"",fx:G=>add(G,"pailin","bond",6),then:[{n:"pailin",f:"flustered",l:"casual",t:"…พลอยพูดประโยคนี้กับฉันเมื่อสิบปีก่อน คำต่อคำเลยค่ะ"}]},
+  {t:"\"บอกตอนนี้ก็ไม่สนุกสิ\"",fx:G=>add(G,"pailin","bond",5),then:[{n:"pailin",f:"happy",l:"casual",t:"ขี้โกงนะคะ งั้นฉันต้องเก็บข้อมูลคุณต่อไปเรื่อย ๆ สินะ"}]}]},
+ {n:"pailin",f:"happy",l:"casual",t:"แลกไลน์กันไว้นะคะ เพื่อการวิจัยล้วน ๆ …อย่าบอกพลอยว่าฉันขึ้นมาเชียงใหม่ด้วย"},
+ {fx:G=>xlOpen(G,"pailin")},{n:"nar",t:"ไพลินเพิ่มคุณเป็นเพื่อน · แชท ของขวัญ และใช้เวลาด้วยกันได้ที่แท็บตัวละคร"}]});
+
+/* ---------- chats (5 topics each · a reply moves her closeness a little) ---------- */
+CHAT.prod_B=[
+ {id:"yb_count",x:[
+  ["เตะซ้ายสามร้อย ขวาสามร้อย เสร็จแล้ว …ไม่มีใครนับให้ ฉันเลยส่งมาให้คุณนับ",[["นับแล้ว หกร้อยพอดี เก่งมาก",2,"…มีคนนับให้แล้วมันเบาขึ้นแปลก ๆ"],["พักขาบ้างนะ",1,"ขาฉันไม่เคยมีใครห่วง ขอบใจ"],["ทำไมไม่เตะเจ็ดร้อยล่ะ",0,"…ได้ พรุ่งนี้เจ็ดร้อย"]]],
+  ["ที่พยัคฆ์ทอง ถ้าเตะไม่ครบ โค้ชจะเป่านกหวีดยาวจนกว่าจะครบ ฉันยังได้ยินเสียงนั้นตอนหลับ",[["ที่นี่ไม่มีนกหวีด มีแต่ป้าแดงตะโกนเรียกกินข้าว",2,"…เสียงเรียกกินข้าว ฉันอยากได้ยินแบบนั้นแทน"],["ค่อย ๆ ลืมไปนะ",1,"ฉันกำลังพยายาม"],["ก็ฝึกวินัยดีนี่",0,"…อืม"]]],
+  ["ไปนอนแล้ว พรุ่งนี้ตีห้า",[["ฝันดี อย่าฝันถึงนกหวีด",2,"…ถ้าฝัน ฉันจะนึกถึงเสียงป้าแดงแทน"],["ตีห้าเจอกันที่ลานวัด",1,"ได้ อย่ามาสาย"],["อือ",0,"อือ"]]]]},
+ {id:"yb_grandma",x:[
+  ["ยายถามว่าทำไมช่วงนี้ฉันกินข้าวช้าลง",[["แล้วตอบยายว่าอะไร",1,"ฉันบอกว่ามีคนสอนว่าข้าวไม่ได้มีเวลาสิบนาที ยายหัวเราะจนไอ"],["ยายสังเกตเก่งนะ",2,"ยายสังเกตทุกอย่าง …ยายถามด้วยว่าคนสอนชื่ออะไร"],["กินเร็วก็ไม่ผิดนะ",0,"…ฉันชอบแบบช้ามากกว่าแล้ว"]]],
+  ["ท่าศอกที่ฉันใช้ปิดยก ยายสอนตอนฉันเจ็ดขวบ ก่อนใครจะมาบอกว่าฉันเป็นอัจฉริยะ",[["มวยของยายสวยที่สุดในตัวเธอเลย",2,"…ฉันจะบอกยาย ยายต้องดีใจมาก"],["อยากเจอยายจัง",2,"ยายอยากเจอคุณเหมือนกัน ยายบอกให้พามากินข้าวต้ม"],["พยัคฆ์ทองไม่ได้สอนท่านี้เหรอ",0,"เขาบอกให้ทิ้ง ฉันไม่ทิ้ง"]]],
+  ["วันอาทิตย์ยายจะทำแกงส้ม ถ้าว่าง…",[["ว่าง! ไปแน่",2,"…ฉันจะบอกยายให้ทำเผ็ดน้อยลง"],["ขอดูตารางก่อนนะ",1,"ไม่เป็นไร ไว้ครั้งหน้าก็ได้"],["ไม่ค่อยกินเผ็ด",0,"ยายจะทำแกงจืดให้ …ยายใจดีกว่าฉัน"]]]]},
+ {id:"yb_fah",x:[
+  ["ฟ้าส่งรูปผ้าพันมือขาวขลิบทองมาถามว่ายังใช้อยู่ไหม",[["ยังใช้ทุกไฟต์ใช่ไหม",2,"ทุกไฟต์ แต่ห้ามบอกฟ้านะ เดี๋ยวเธอได้ใจ"],["ฟ้าห่วงเธอนะ",1,"…ฉันรู้ ฉันแค่ไม่รู้จะตอบคนห่วงยังไง"],["ทักไปสิ",0,"ฉันพิมพ์แล้วลบสามรอบแล้ว"]]],
+  ["ตอนอยู่พยัคฆ์ทอง โค้ชให้ดูเทปฟ้าทุกคืน บอกว่าฉันต้องชกให้เหมือนเธอ",[["แต่ตอนนี้เธอชกเป็นตัวเองแล้ว",2,"…ใช่ ฉันเลือกชุดเอง เลือกท่าเอง เลือกคนที่อยากคุยด้วยเองด้วย"],["ฟ้าเก่งจริงนะ",1,"เก่ง แต่ฉันจะชนะเธอให้ได้สักวัน"],["คงเหนื่อยแย่",0,"เคยชินแล้ว"]]],
+  ["ถ้าฉันชนะฟ้าครั้งหน้า คุณจะโกรธไหม",[["จะดีใจกับคนที่ชกดีกว่า",2,"…คำตอบที่ยุติธรรมที่สุดที่ฉันเคยได้ยิน"],["เชียร์ฟ้าอยู่แล้ว",0,"ก็สมควร เธออยู่ค่ายคุณ"],["ลองดูสิ",1,"…ฉันจะลอง"]]]]},
+ {id:"yb_rain",x:[
+  ["ฝนตก ลานวัดเป็นโคลน ฉันยังซ้อมอยู่",[["มาซ้อมใต้หลังคาค่ายก็ได้นะ",2,"…จริงเหรอ ฉันจะเช็ดเท้าก่อนเข้า"],["ระวังลื่นนะ",1,"ลื่นไปสองรอบแล้ว ไม่เจ็บ"],["ฝนตกก็พักสิ",0,"ฉันไม่รู้จะพักยังไง"]]],
+  ["ตอนเด็กยายบอกว่าฝนคือเสียงปรบมือของเทวดา ฉันเลยชอบซ้อมตอนฝนตก",[["งั้นเทวดาคงเป็นแฟนคลับเธอ",2,"…คุณพูดแปลก ๆ แต่ฉันชอบ"],["ยายเธอพูดเพราะจัง",1,"ยายพูดเพราะทุกเรื่อง ยกเว้นเรื่องเงิน"],["เปียกแล้วเป็นหวัดนะ",0,"ไม่เคยเป็น"]]],
+  ["ฝนหยุดแล้ว ท้องฟ้าส้มมาก …ฉันถ่ายรูปไว้ ส่งให้ดู",[["สวยมาก ขอบคุณที่ส่งมา",2,"ฉันไม่เคยถ่ายรูปท้องฟ้าส่งให้ใครมาก่อนเลย"],["ที่ค่ายก็สีเดียวกันเลย",1,"งั้นเรามองท้องฟ้าเดียวกันอยู่"],["มือถือชัดดีนะ",0,"…ยายซื้อให้"]]]]},
+ {id:"yb_smile",x:[
+  ["วันนี้ฉันชนะงานวัด แล้วคนดูบอกว่าฉันยิ้มตอนยกมือ ฉันไม่รู้ตัวเลย",[["อยากเห็นจัง ส่งคลิปมาหน่อย",2,"…ห้ามหัวเราะ ฉันยิ้มไม่เก่ง"],["ยินดีด้วย!",1,"ขอบใจ"],["ยิ้มบนเวทีระวังโดนสวนนะ",0,"ฉันรู้ …ฉันจะระวัง"]]],
+  ["ที่ค่ายเก่า ยิ้มบนเวทีไม่มีในตำรา ฉันเลยคิดว่าฉันยิ้มไม่เป็น",[["เป็นสิ แค่ไม่มีใครให้ยิ้มด้วย",2,"…ตอนนี้มีแล้ว"],["ค่อย ๆ หัดก็ได้",1,"ฉันซ้อมหน้ากระจกแล้ว ยายบอกว่าน่ากลัว"],["ไม่ยิ้มก็เท่ดีนะ",0,"งั้นฉันจะไม่ยิ้มให้คุณ"]]],
+  ["ถ้าฉันยิ้มบ่อยขึ้น คุณจะดีใจไหม",[["ดีใจที่สุดเลย",2,"…งั้นฉันจะยิ้มบ่อยขึ้น เฉพาะตอนคุณอยู่"],["ยิ้มเพื่อตัวเองก่อนนะ",2,"ตัวเองก่อน …ฉันจดไว้แล้ว"],["แล้วแต่เธอ",0,"อืม"]]]]}];
+CHAT.pailin=[
+ {id:"pl_data",x:[
+  ["สถิติสามเดือนของค่ายคุณ: แพ้ยกแรกบ่อยกว่าค่าเฉลี่ย 12% แต่ชนะยกห้ามากกว่า 31% คุณทำอะไรกับพวกเธอคะ",[["บอกให้หายใจยาว ๆ แล้วสนุกกับยกแรก",2,"…สนุกกับยกแรก ฉันจะเพิ่มคอลัมน์นี้ในสเปรดชีต"],["ความลับค่าย",1,"ขี้หวงนะคะ งั้นฉันจะวิเคราะห์เอง"],["บังเอิญมั้ง",0,"ไม่มีอะไรบังเอิญ 31% ค่ะ"]]],
+  ["ทีมแล็บฉันเรียกค่ายคุณว่า 'ค่าที่หลุดกราฟ' ทุกครั้งที่ประชุม",[["ฟังดูเหมือนคำชม",2,"…ก็เป็นคำชมค่ะ อย่าเพิ่งได้ใจ"],["หลุดกราฟก็ดีแล้ว",1,"ดีสำหรับคุณ ปวดหัวสำหรับฉัน"],["ทำไมเรียกงั้น",0,"เพราะทำนายไม่ได้ค่ะ ชัดอยู่แล้ว"]]],
+  ["คืนนี้ฉันจะนั่งดูเทปค่ายคุณถึงตีสอง ไม่ต้องห่วงนะคะ ฉันมีกาแฟ",[["นอนบ้างเถอะ เทปไม่หนีไปไหน",2,"…คุณพูดเหมือนพลอยเลย ก็ได้ค่ะ ตีหนึ่ง"],["ส่งโน้ตมาแลกกันบ้างสิ",1,"ฝันไปเถอะค่ะ"],["สู้ ๆ",0,"ขอบคุณค่ะ"]]]]},
+ {id:"pl_ploy",x:[
+  ["พลอยกินข้าวครบสามมื้อไหมคะ อย่าบอกเธอนะว่าฉันถาม",[["ครบ แถมขโมยไส้กรอกฟ้าด้วย",2,"…ดีแล้ว ตอนเด็กเธอกินแต่ข้าวไข่เจียว"],["ทำไมไม่ถามเองล่ะ",1,"ถ้าถามเอง เธอจะตอบว่า 'พี่ไม่ต้องยุ่ง' ฉันรู้ค่ะ"],["ไม่แน่ใจ",0,"คุณควรรู้นะคะ คุณเป็นผู้จัดการ"]]],
+  ["ตอนพลอยสิบขวบชนะน็อกยกแรก ทุกคนเรียกเธอว่าพรสวรรค์ ไม่มีใครถามว่าเธอเหนื่อยไหม",[["เธอเป็นคนแรกที่ถามใช่ไหม",2,"…ใช่ค่ะ แล้วฉันก็ไปกรุงเทพฯ ทิ้งเธอไว้กับคำนั้นคนเดียว"],["พลอยแข็งแรงกว่าที่คิดนะ",1,"ฉันรู้ค่ะ แข็งแรงเกินไปด้วย"],["พรสวรรค์ก็ดีนี่",0,"…ดีสำหรับคนดู"]]],
+  ["ขอบคุณที่ดูแลน้องฉันนะคะ ประโยคนี้ฉันจะพูดครั้งเดียว",[["รับไว้ครั้งเดียวแต่จำตลอดไป",2,"…คุณนี่ตอบเก่งจนน่ารำคาญเลยค่ะ"],["พลอยดูแลตัวเองได้อยู่แล้ว",1,"ใช่ค่ะ แต่มีคนช่วยก็ดีกว่า"],["ไม่เป็นไร",0,"ค่ะ"]]]]},
+ {id:"pl_run",x:[
+  ["ตีห้ายี่สิบ วิ่งสิบกิโล ชีพจรเฉลี่ย 148 ฉันส่งมาให้ดูเฉย ๆ ค่ะ",[["เร็วกว่าเมื่อวานด้วย",2,"…คุณจำของเมื่อวานได้ด้วยเหรอคะ"],["ตื่นเช้าจัง",1,"ฉันตื่นก่อนนาฬิกาทุกเรือนค่ะ"],["148 สูงไปไหม",0,"อยู่ในเกณฑ์ค่ะ ไม่ต้องห่วง"]]],
+  ["ทำไมคนชอบถามว่าฉันวิ่งไปทำไม ในเมื่อฉันไม่ได้ขึ้นชกบ่อยแล้ว",[["เพราะวิ่งแล้วสมองโล่ง",2,"ถูกต้องค่ะ คุณเป็นคนแรกที่ตอบแทนฉันได้"],["เพราะยังอยากชกใช่ไหม",2,"…คุณอ่านฉันออกแล้วนะคะ ไม่ยุติธรรมเลย"],["ไม่รู้สิ",0,"ไม่เป็นไรค่ะ"]]],
+  ["วันหลังมาวิ่งด้วยกันไหมคะ ฉันจะลดความเร็วให้ …นิดหน่อย",[["ไป! แต่อย่าทิ้งกันนะ",2,"ฉันจะรอที่หลักกิโลทุกหลักค่ะ สัญญา"],["ขอเป็นปั่นจักรยานตามได้ไหม",1,"โกงค่ะ แต่ฉันอนุญาต"],["ไม่ไหวหรอก",0,"งั้นฉันวิ่งคนเดียวก็ได้ค่ะ"]]]]},
+ {id:"pl_vector",x:[
+  ["วันนี้ฉันเซ็นยกเลิกสัญญาทุนเดิมไปอีกฉบับ ห้องแล็บเงียบไปทั้งห้อง",[["ทำถูกแล้ว",2,"…ขอบคุณค่ะ ฉันอยากได้ยินใครพูดแบบนี้สักคน"],["แล้วเวกเตอร์จะไหวไหม",1,"ไม่รู้ค่ะ แต่ฉันจะหาทางที่ไม่ต้องขายตัวเอง"],["เสียดายเงินนะ",0,"…เงินนั้นมีราคาที่แพงกว่าค่ะ"]]],
+  ["ทีมงานถามว่าทำไมไม่ย้ายค่ายไปเชียงใหม่ซะเลย ฉันบอกว่าไม่ใช่เรื่องของพวกเธอ",[["แล้วเป็นเรื่องของใคร",2,"…ของฉันค่ะ ฉันยังไม่ตอบตัวเองเลย"],["กรุงเทพฯ ก็ดีอยู่แล้ว",1,"ใช่ค่ะ ข้อมูลก็ว่าแบบนั้น"],["มาเชียงใหม่สิ อากาศดี",1,"คุณขายของเก่งนะคะ"]]],
+  ["ฉันยังเชื่อว่าวิทยาศาสตร์ทำให้คนชกปลอดภัยขึ้นได้ แค่ต้องไม่ลืมว่าคนชกเป็นคน",[["นั่นแหละคือความต่างของเธอ",2,"…ฉันจะจำประโยคนี้ไว้ตอนท้อค่ะ"],["เห็นด้วย",1,"ดีค่ะ งั้นเราอยู่ทีมเดียวกัน"],["คนก็คือตัวเลขชุดหนึ่ง",0,"…ฉันเคยคิดแบบนั้นค่ะ แล้วมันพาฉันมาผิดทาง"]]]]},
+ {id:"pl_korat",x:[
+  ["แม่ส่งปิ่นโตสามชั้นมาให้ถึงคอนโด ฉันกินไม่ทันเลยค่ะ",[["ส่งชั้นหนึ่งมาเชียงใหม่สิ",2,"ส่งทางไปรษณีย์ไม่ได้ค่ะ …ฉันจะถือขึ้นเครื่องมาให้"],["แม่ห่วงนะ",1,"แม่ห่วงทุกคน ยกเว้นตัวเองค่ะ"],["แช่ตู้เย็นไว้",0,"ทำแล้วค่ะ"]]],
+  ["ตอนเด็กพ่อจับเวลาวิ่งขึ้นเขาให้ฉันกับพลอย ฉันชนะทุกครั้งจนพลอยสิบสาม แล้วไม่เคยชนะอีกเลย",[["เลยเลิกแข่งวิ่งกับน้อง?",1,"เลยเปลี่ยนไปแข่งเรื่องที่ฉันชนะได้ค่ะ อย่างเช่นคณิตศาสตร์"],["คิดถึงตอนนั้นไหม",2,"…ทุกครั้งที่เห็นหมอกบนเขาใหญ่ค่ะ"],["พลอยเก่งจริง",0,"น้องฉันค่ะ แน่นอน"]]],
+  ["ถ้าวันหนึ่งฉันพาคุณไปเขาใหญ่ตอนหมอกลง คุณจะไปไหมคะ",[["ไปแน่ บอกวันมาเลย",2,"…ฉันจะดูพยากรณ์อากาศย้อนหลังสิบปีเพื่อหาวันที่ดีที่สุดค่ะ"],["ไปทั้งค่ายเลยไหม",1,"ไม่ค่ะ ครั้งนี้ไม่ใช่ทริปค่าย"],["ขอคิดดูก่อน",0,"ไม่รีบค่ะ"]]]]}];
+
+/* ---------- time together: five places each, then short visits ---------- */
+const xB=(f,t)=>({n:"prod_B",f,l:"casual",t}),xP=(f,t)=>({n:"pailin",f,l:"casual",t}),xN=t=>({n:"nar",t});
+const XL_DATE={
+ prod_B:[
+  {name:"ลานวัดริมน้ำ ตีห้า",bg:"river_dawn",steps:G=>[xN("ฟ้ายังไม่สว่าง ใบหยกแขวนกระสอบใบเดียวไว้กับกิ่งมะขาม เชือกกระโดดพาดคอ"),xB("happy","มาตรงเวลา …ฉันนึกว่าคุณจะไม่ตื่น"),
+   xN("เธอยื่นเชือกกระโดดเส้นเก่าให้ ด้ามไม้สึกจนเป็นรอยนิ้ว"),xB("pout","ร้อยครั้ง ห้ามหยุด …ฉันล้อเล่น ห้าสิบก็พอ"),xN("พอคุณหยุดหอบที่สามสิบ เธอหัวเราะออกมาสั้น ๆ แล้วรีบหันหน้าหนี"),xB("flustered","ฉันไม่ได้หัวเราะ …ลมพัด")]},
+  {name:"ร้านข้าวต้มยาย",bg:"food",steps:G=>[xN("ร้านข้าวต้มห้องแถวเก่า ยายของใบหยกตักข้าวต้มปลาให้คุณชามใหญ่กว่าหลานตัวเองสองเท่า"),xB("pout","ยายไม่เคยตักให้ฉันเยอะขนาดนี้"),
+   xN("ยายกระซิบว่าหลานตื่นตีสี่มาช่วยหั่นขิงตั้งแต่รู้ว่าคุณจะมา"),xB("flustered","ยาย! …ไม่ต้องเล่าทุกอย่าง"),xB("happy","…กินช้า ๆ นะ ที่นี่ไม่มีใครนับเวลา")]},
+  {name:"ดูเทปเก่าหลบฝน",bg:"camp_rain",steps:G=>[xN("ฝนตกหนักจนต้องหลบใต้ชายคาค่าย ใบหยกเปิดคลิปไฟต์เก่าของตัวเองในมือถือ ชุดดำ ไม่มีรอยยิ้ม"),
+   xB("sad","คนในคลิปนี้ชนะทุกไฟต์ แต่ฉันจำไม่ได้เลยว่าเขารู้สึกอะไร"),{n:"nar",t:"จะพูดว่าอะไร?",choice:[
+    {t:"\"ตอนนี้เธอรู้สึกอะไรล่ะ\"",fx:G2=>add(G2,"prod_B","bond",2),then:[xB("flustered","…หนาว แล้วก็ไม่อยากให้ฝนหยุด")]},
+    {t:"\"คนในคลิปเก่งมาก แต่ฉันชอบคนที่อยู่ข้างฉันมากกว่า\"",fx:G2=>add(G2,"prod_B","bond",3),then:[xB("flustered","…ปิดคลิปแล้ว ไม่ต้องดูแล้ว")]}]}]},
+  {name:"งานวัดเชียงใหม่",bg:"fair",steps:G=>[xN("งานวัดคืนวันเสาร์ ใบหยกยืนนิ่งอยู่หน้าซุ้มปาเป้าได้ตุ๊กตา"),xB("happy","ฉันปาโดนทุกลูก แต่เขาไม่ยอมให้ตุ๊กตาตัวใหญ่"),
+   xN("คุณซื้อตั๋วอีกชุด แล้วปาพลาดหมดทุกลูก เธอหัวเราะเสียงดังจนคนหันมามอง"),xB("flustered","…ขอโทษ ฉันไม่ได้หัวเราะดังขนาดนี้มานานแล้ว"),xN("ขากลับ เธอถือตุ๊กตาตัวเล็กที่สุดที่ได้มาไว้แน่นทั้งทาง")]},
+  {name:"ดอยสุเทพตอนเย็น",bg:"mountain",steps:G=>[xN("จุดชมวิวบนดอยสุเทพ ไฟเมืองเชียงใหม่ค่อย ๆ ติดทีละดวง"),xB("happy","ที่พยัคฆ์ทอง ฉันอยู่สิบปี ไม่เคยได้ขึ้นมาตรงนี้ เพราะวันอาทิตย์ก็ต้องซ้อม"),
+   xB("pout","ตอนนี้ฉันมีวันอาทิตย์เป็นของตัวเองแล้ว …ฉันอยากใช้มันแบบนี้"),xN("ลมแรงจนริบบิ้นสีทองบนหัวเธอปลิว คุณคว้าไว้ทัน"),xB("flustered","…ขอบใจ ผูกให้หน่อยได้ไหม ฉันมองไม่เห็นข้างหลัง")]}],
+ pailin:[
+  {name:"ร้านกาแฟเปิดดึกนิมมาน",bg:"cafe",steps:G=>[xN("ไพลินสั่งกาแฟดำสองแก้ว แก้วหนึ่งของคุณ อีกแก้วของเธอเอง แล้วสั่งอีกแก้วสำรอง"),xP("happy","ฉันเตรียมคำถามมายี่สิบข้อค่ะ เรื่องค่ายคุณ"),
+   xN("พอถึงข้อสาม คำถามเริ่มกลายเป็นเรื่องที่คุณชอบกิน วันหยุดทำอะไร และทำไมถึงมาเป็นผู้จัดการค่ายมวย"),xP("flustered","…ข้อสี่ถึงยี่สิบฉันเขียนผิดหมวดค่ะ ไม่ต้องตอบก็ได้"),xP("happy","แต่ถ้าอยากตอบ ฉันมีเวลาถึงร้านปิดนะคะ")]},
+  {name:"วิ่งรอบคูเมืองตอนเช้า",bg:"river",steps:G=>[xN("ตีห้าครึ่ง ไพลินใส่นาฬิกาสามเรือน ยืนยืดเส้นรออยู่ที่ประตูท่าแพ"),xP("happy","ฉันลดความเร็วให้แล้วนะคะ 5:30 ต่อกิโล"),
+   xN("กิโลที่สาม คุณเริ่มหอบ เธอวิ่งถอยหลังรอแล้วหัวเราะ"),xP("pout","ชีพจรคุณ 172 ค่ะ หยุดพักได้ ฉันไม่บันทึกลงสถิติให้"),xN("ทั้งสองคนนั่งพักริมคูเมือง เธอยื่นขวดน้ำให้ เป็นขวดเดียวที่เธอพกมา"),xP("flustered","…ฉันคำนวณผิด ควรพกมาสองขวด")]},
+  {name:"แล็บเวกเตอร์สาขาเชียงใหม่ที่ยังไม่เปิด",bg:"vector_lab",steps:G=>[xN("ห้องว่างชั้นสองของตึกเก่า มีลู่วิ่งกับกล้องจับการเคลื่อนไหวสองตัวยังห่อพลาสติกอยู่"),
+   xP("happy","ฉันเช่าไว้สามเดือนแล้วค่ะ ยังไม่ได้บอกใครแม้แต่พลอย"),xP("sad","ฉันอยากมีที่ที่ใช้วิทยาศาสตร์ช่วยค่ายเล็ก ๆ โดยไม่ต้องขายอะไรให้ใคร"),{n:"nar",t:"จะพูดว่าอะไร?",choice:[
+    {t:"\"ศิริชัยจะเป็นลูกค้ารายแรก\"",fx:G2=>add(G2,"pailin","bond",3),then:[xP("flustered","…ส่วนลดพนักงานไม่มีนะคะ แต่ฉันจะคิดราคาเป็นมิตรที่สุด")]},
+    {t:"\"แล้วทำไมบอกฉันก่อนพลอย\"",fx:G2=>add(G2,"pailin","bond",2),then:[xP("flustered","…ข้อมูลส่วนนั้นยังไม่พร้อมเปิดเผยค่ะ")]}]}]},
+  {name:"ตลาดวโรรส",bg:"market",steps:G=>[xN("ไพลินเดินผ่านแผงผลไม้แบบคนที่วางแผนเส้นทางไว้แล้ว ทุกแผงมีโน้ตในมือถือ"),xP("happy","ลำไยร้านนี้หวานกว่าร้านข้าง ๆ 1.5 บริกซ์ค่ะ ฉันวัดไว้ปีที่แล้ว"),
+   xN("แม่ค้าถามว่าแฟนเหรอ ไพลินตอบว่า 'คู่ค้า' เร็วเกินไปนิดหนึ่ง"),xP("flustered","…คู่ค้าทางวิชาการค่ะ อย่ายิ้มแบบนั้น"),xP("happy","ซื้อไปฝากค่ายด้วยนะคะ บอกพลอยว่าคุณซื้อเอง")]},
+  {name:"ระเบียงดาดฟ้าตอนฝนหยุด",bg:"camp_night",steps:G=>[xN("ไฟล์ทกลับกรุงเทพฯ ดีเลย์สามชั่วโมง ไพลินโทรมาบอกด้วยน้ำเสียงที่ไม่ได้ฟังดูเสียดายเลย"),xP("happy","ฉันมีเวลาว่างที่ไม่ได้วางแผนไว้ค่ะ …รู้สึกแปลกดี"),
+   xN("ดาดฟ้าของค่ายยังเปียกฝน เธอนั่งบนเก้าอี้พลาสติกตัวเดียว ไม่ได้เปิดแท็บเล็ตเลยสักครั้ง"),xP("sad","ตั้งแต่ตั้งเวกเตอร์ ฉันไม่เคยนั่งเฉย ๆ เกินห้านาที"),xP("flustered","…ผ่านไปสี่สิบนาทีแล้วค่ะ ฉันไม่ได้นับนะ นาฬิกาแจ้งเตือนเอง")]}]};
+const XL_AGAIN={
+ prod_B:[{bg:"river_dawn",steps:G=>[xN("ตีห้าที่ลานวัดอีกครั้ง ใบหยกนับเตะให้คุณดู แล้วให้คุณนับให้"),xB("happy","สองร้อย …วันนี้คุณนับไม่หลงเลย")]},
+  {bg:"food",steps:G=>[xN("ข้าวต้มยาย ชามของคุณใหญ่กว่าเดิมอีก"),xB("pout","ยายรักคุณมากกว่าฉันแล้ว")]},
+  {bg:"camp",steps:G=>[xN("ใบหยกแวะมาค่ายวันอาทิตย์ ช่วยเก็บเวทีจนสะอาดกว่าเดิม"),xB("happy","ฉันมาก่อนทุกคนตื่นอีกแล้ว")]}],
+ pailin:[{bg:"cafe",steps:G=>[xN("ร้านกาแฟเดิม ไพลินมาถึงก่อนสิบนาทีเหมือนทุกครั้ง"),xP("happy","กาแฟแก้วที่สามของวันค่ะ แก้วนี้นับเป็นแก้วของคุณ")]},
+  {bg:"river",steps:G=>[xN("วิ่งรอบคูเมืองอีกรอบ วันนี้เธอพกน้ำมาสองขวด"),xP("happy","ฉันแก้ข้อผิดพลาดแล้วค่ะ")]},
+  {bg:"camp_night",steps:G=>[xN("วิดีโอคอลตอนสี่ทุ่ม ไพลินยังนั่งอยู่ในแล็บ แต่หันกล้องให้ดูวิวกรุงเทพฯ"),xP("flustered","…ไม่มีอะไรค่ะ แค่อยากให้ดูไฟ")]}]};
+
+/* ---------- heart scenes (closeness 25 / 45 / 65) ---------- */
+const XL_HEART={
+ prod_B:[
+  [xN("ใบหยกส่งข้อความมาตอนเที่ยงคืน: \"ออกมาหน้าค่ายหน่อย\""),xN("เธอยืนอยู่ใต้ไฟถนน ในมือมีกล่องรองเท้าเก่า"),xB("happy","ฉันเก็บตั๋วเวทีทุกไฟต์ที่เจอค่ายนี้ไว้ เขียนผลไว้ข้างหลัง"),
+   xB("pout","ตอนแรกเขียนไว้ว่า 'แพ้ ต้องแก้' ตอนนี้ฉันเขียนว่า 'สนุก' …ฉันไม่รู้ว่าเปลี่ยนตอนไหน"),{n:"nar",t:"จะพูดว่าอะไร?",choice:[
+    {t:"\"เปลี่ยนตอนเธอเลือกชกเป็นตัวเอง\"",fx:G=>add(G,"prod_B","bond",3),then:[xB("flustered","…หรือตอนที่มีคนยืนมุมให้ฉันโดยไม่ต้องขอ")]},
+    {t:"\"เก็บไว้ให้เต็มกล่องเลยนะ\"",fx:G=>add(G,"prod_B","bond",2),then:[xB("happy","กล่องที่สองฉันซื้อไว้แล้ว")]}]}],
+  [xN("คืนก่อนไฟต์ใหญ่ ใบหยกโทรมาแต่ไม่พูดอะไรเลยเกือบนาที"),xB("sad","…ยายเข้าโรงพยาบาล หมอบอกไม่เป็นไรมาก แต่ฉันนั่งอยู่หน้าห้องคนเดียว"),
+   xN("คุณขับรถไปถึงในยี่สิบนาที เธอลุกขึ้นยืนทันทีที่เห็น แล้วไม่รู้จะทำอะไรกับมือตัวเอง"),xB("sad","ที่ค่ายเก่า ถ้าใครมีเรื่องที่บ้าน โค้ชบอกให้ทิ้งไว้นอกเวที ฉันเลยไม่รู้ว่าต้องเอาความกลัวไปไว้ไหน"),
+   {n:"nar",t:"จะทำยังไง?",choice:[{t:"นั่งลงข้าง ๆ เงียบ ๆ จนเช้า",fx:G=>add(G,"prod_B","bond",4),then:[xN("หกโมงเช้า หมอบอกว่ายายตื่นแล้ว ใบหยกหลับคอพับอยู่บนไหล่คุณ")]},
+    {t:"\"เอามาไว้ที่ฉันก่อน\"",fx:G=>add(G,"prod_B","bond",4),then:[xB("flustered","…หนักนะ"),xN("เธอเอนหัวพิงไหล่คุณจนเช้า")]}]}],
+  [xN("ไฟต์ที่ใบหยกชนะน็อกยกสาม เธอวิ่งลงจากเวทีมาที่มุมฝั่งค่ายศิริชัย ทั้งที่ไม่ใช่มุมของเธอ"),xB("happy","คุณเห็นไหม …ฉันยิ้มตอนยกมือ ฉันรู้ตัวครั้งนี้"),
+   xB("flustered","ฉันยิ้มเพราะมองหาคุณในคนดู แล้วเจอ"),xN("กรรมการเรียกกลับขึ้นเวทีสามรอบ เธอยังไม่ยอมปล่อยมือคุณ"),xB("pout","…ไปแล้ว ห้ามหายไปไหนนะ")]],
+ pailin:[
+  [xN("ไพลินส่งไฟล์มาตอนตีหนึ่ง ชื่อไฟล์ว่า 'ค่าที่หลุดกราฟ_v7'"),xN("เปิดดูแล้วไม่ใช่สถิติค่าย เป็นรูปถ่ายเบลอ ๆ ของคุณกับนักมวยในค่ายหัวเราะกันที่ริมเวที"),
+   xP("flustered","ส่งผิดไฟล์ค่ะ ลบด้วย"),xP("pout","…ถ้ายังไม่ลบ ก็ช่วยบอกหน่อยว่าทำไมทุกคนในรูปดูมีความสุขขนาดนั้น ฉันหาตัวแปรไม่เจอ"),{n:"nar",t:"จะตอบว่าอะไร?",choice:[
+    {t:"\"เพราะไม่มีใครถูกวัดอยู่ตอนนั้น\"",fx:G=>add(G,"pailin","bond",3),then:[xP("sad","…ข้อสรุปที่ฉันไม่อยากได้ยิน แต่ฉันจะจดไว้")]},
+    {t:"\"มานั่งตรงนั้นด้วยกันสิ แล้วจะรู้\"",fx:G=>add(G,"pailin","bond",3),then:[xP("flustered","…นั่นไม่ใช่วิธีวิจัยที่ถูกต้องค่ะ แต่ฉันจะลอง")]}]}],
+  [xN("ไพลินขึ้นชกไฟต์อุ่นเครื่องที่กรุงเทพฯ แล้วแพ้คะแนนเด็กอายุสิบเก้า"),xN("คืนนั้นเธอวิดีโอคอลมาจากห้องพักนักกีฬา ผ้าพันมือยังไม่ได้แกะ"),
+   xP("sad","ข้อมูลบอกว่าฉันควรเลิกชกได้แล้วตั้งแต่สามปีก่อน ความเร็วลดลงปีละ 4%"),xP("sad","แต่วันนี้ตอนแพ้ ฉันกลับดีใจที่ยังได้ยืนอยู่บนเวที …ฉันไม่เข้าใจตัวเองค่ะ"),
+   {n:"nar",t:"จะพูดว่าอะไร?",choice:[{t:"\"บางเรื่องไม่ต้องเข้าใจ แค่ทำต่อ\"",fx:G=>add(G,"pailin","bond",4),then:[xP("flustered","…คุณพูดเหมือนคนที่ไม่เคยเปิดสเปรดชีตเลยค่ะ แต่ฉันจะเชื่อ")]},
+    {t:"\"ฉันดีใจที่เธอยังชกอยู่\"",fx:G=>add(G,"pailin","bond",4),then:[xP("flustered","…ไม่มีใครเคยพูดแบบนี้กับฉันตั้งแต่พ่อ")]}]}],
+  [xN("ไพลินขึ้นมาเชียงใหม่โดยไม่บอกล่วงหน้า ยืนรออยู่หน้าค่ายตอนพระอาทิตย์ตก กับกระเป๋าใบเล็กใบเดียว"),xP("happy","ฉันยกเลิกประชุมสามนัด เลื่อนเทสต์แล็บหนึ่งชุด และโกหกทีมงานว่าไปดูงาน"),
+   xP("flustered","ทั้งหมดนี้เพื่อมาดูพระอาทิตย์ตกกับคุณ ซึ่งไม่มีประโยชน์ทางสถิติเลยสักนิด"),xN("เธอหยุดพูด แล้วหันไปมองฟ้าแทน"),xP("pout","…ฉันกำลังเสียการควบคุมตัวแปรค่ะ และฉันไม่อยากควบคุมมันด้วย")]]};
+for(const id of XL_IDS)XL_HEART[id].forEach((st,k)=>EVENTS.push({id:"xlh_"+id+"_"+k,look:"casual",bg:id==="pailin"?["cafe","night","camp"][k]:["camp_night","hospital","hall"][k],pri:30,
+  when:G=>xlHeartDue(G,id,k),steps:[{fx:G=>{G.xlHeartAbs=gameWeek(G);}},...st,{inject:G=>{add(G,id,"bond",3);return [{n:"nar",t:`ความสนิทกับ${G.F[id].name} +3`}];}}]}));
+
+/* ---------- Baiyok moves in while she fights free in white and a dorm room is open: four weeks after she is yours, or (Man) as a close friend (closeness 60) eight weeks after she opened up ---------- */
+const xlJoinDue=G=>{const f=G.F.prod_B;return !!f&&xlOn(G,"prod_B")&&(xlLov(G,"prod_B")?absWeek(G)-G.xlov.prod_B>=4:(f.bond||0)>=60&&absWeek(G)-G.xl.prod_B.open>=8)&&f.camp!=="player"&&byFree(G)&&!(G.xlJoinNo&&absWeek(G)-G.xlJoinNo<8);};
+EVENTS.push({id:"xl_join_prod_B",look:"casual",bg:"camp",pri:40,when:xlJoinDue,steps:[
+ xN("เช้าวันอาทิตย์ ใบหยกมาถึงค่ายก่อนทุกคนเหมือนเคย แต่วันนี้ข้างตัวมีกระเป๋าเดินทางใบเก่า"),xB("pout","ลานวัดเขาจะซ่อมศาลา ห้ามซ้อมสามเดือน"),
+ xB("flustered","…ฉันโกหก ศาลาไม่ได้ซ่อม ฉันแค่อยากซ้อมที่นี่ทุกวัน ไม่ใช่แค่วันอาทิตย์"),
+ {inject:G=>dormUsed(G)>=dormRooms(G)?[xN(`หอพักเต็มแล้ว (${dormRooms(G)} ห้อง) · อัปเกรดหอพักก่อนแล้วเธอจะมาถามอีกครั้ง`),{fx:G2=>{G2.xlJoinNo=absWeek(G2);if(G2.seen)delete G2.seen.xl_join_prod_B;}}]:[{n:"nar",t:"จะตอบว่าอะไร?",choice:[
+  {t:"\"ห้องว่างอยู่ชั้นสอง ย้ายมาเลย\"",fx:G2=>{joinCamp(G2,"prod_B",2500);const f=G2.F.prod_B;f.indie=false;f.full="ใบหยก";add(G2,"prod_B","bond",5);add(G2,"prod_B","morale",15);},
+   then:[xB("happy","…ฉันจะไม่ทำให้ใครผิดหวัง"),xB("flustered","ยกเว้นเรื่องตื่นสาย ฉันไม่เคยตื่นสาย"),xN("ใบหยกย้ายเข้าค่ายศิริชัย · ชกรุ่น B ให้ค่ายเรา")]},
+  {t:"\"ยังไม่ใช่ตอนนี้\"",fx:G2=>{G2.xlJoinNo=absWeek(G2);if(G2.seen)delete G2.seen.xl_join_prod_B;},then:[xB("pout","…ได้ ฉันจะรอ แต่วันอาทิตย์ยังมาเหมือนเดิมนะ")]}]}]}]});
+
+/* ---------- two sisters (Pailin and Ploy) ---------- */
+const xlPloyNear=G=>G.F.ploy&&G.F.ploy.met&&(G.F.ploy.bond||0)>=40;
+EVENTS.push({id:"xl_sis1",look:"casual",bg:"camp",pri:35,when:G=>xlOn(G,"pailin")&&(G.F.pailin.bond||0)>=45&&xlPloyNear(G)&&!isAway(G,"ploy"),steps:[
+ xN("พลอยวางโทรศัพท์ลงตรงหน้าคุณ หน้าจอเปิดแชทของพี่สาว ข้อความล่าสุด: \"ผู้จัดการค่ายเธอวิ่งช้ามาก ฝากบอกด้วย\""),
+ {n:"ploy",f:"pout",l:"casual",t:"พี่ฉันไม่ทักฉันก่อนมาสามปี แต่ทักเรื่องคุณสามวันติด"},{n:"ploy",f:"pout",l:"casual",t:"…ไปวิ่งกับพี่ฉันตอนไหน"},
+ {n:"nar",t:"จะตอบว่าอะไร?",choice:[{t:"\"ไพลินคิดถึงเธอนะ แค่ไม่รู้จะเริ่มยังไง\"",fx:G=>{add(G,"ploy","bond",3);add(G,"pailin","bond",2);},then:[{n:"ploy",f:"sad",l:"casual",t:"…ฉันก็ไม่รู้เหมือนกัน"},{n:"ploy",f:"pout",l:"casual",t:"บอกพี่ว่าวันเสาร์นี้ ถ้าว่าง ให้มาวิ่งเขาที่นี่ วิ่งสามคน"}]},
+  {t:"\"หึงเหรอ\"",fx:G=>add(G,"ploy","bond",1),then:[{n:"ploy",f:"flustered",l:"casual",t:"หึงพี่หรือหึงคุณ ฉันยังไม่ตัดสินใจ อย่าเพิ่งถาม"}]}]}]});
+EVENTS.push({id:"xl_sis2",look:"casual",bg:"night",pri:36,when:G=>xlOn(G,"pailin")&&G.F.ploy&&G.F.ploy.met&&!isAway(G,"ploy")&&
+  ((xlLov(G,"pailin")&&(G.F.ploy.bond||0)>=45)||(isPartner(G,"ploy")&&(G.F.pailin.bond||0)>=45)),steps:[
+ {inject:G=>{const withP=xlLov(G,"pailin");return [xN("คืนนั้นสองพี่น้องนั่งคนละฝั่งของโต๊ะกินข้าวในค่าย ไม่มีใครแตะจานตัวเอง"),
+  withP?{n:"ploy",f:"pout",l:"casual",t:"พี่เอาทุกอย่างไปก่อนฉันตลอด ชกก่อน ไปกรุงเทพฯ ก่อน …คราวนี้ก็อีกแล้ว"}:{n:"pailin",f:"sad",l:"casual",t:"พลอยได้ทุกอย่างที่พี่อยากได้มาตลอด พรสวรรค์ หมัด …คราวนี้ก็คนนี้อีก"},
+  withP?{n:"pailin",f:"sad",l:"casual",t:"…พี่ไม่ได้แย่งนะ พลอย พี่แค่ไม่เคยกล้าขออะไรที่อยากได้จริง ๆ จนครั้งนี้"}:{n:"ploy",f:"sad",l:"casual",t:"…ฉันไม่เคยรู้เลยว่าพี่อยากได้อะไรจากฉัน เพราะพี่ไม่เคยพูด"},
+  {n:"nar",t:"ทั้งคู่หันมามองคุณพร้อมกัน",choice:[
+   {t:"\"พวกเธอสองคนสำคัญกับฉันคนละแบบ\"",fx:G2=>{add(G2,"ploy","bond",2);add(G2,"pailin","bond",2);},then:[{n:"pailin",f:"pout",l:"casual",t:"คำตอบการทูตมาก ฉันให้คะแนนหกเต็มสิบ"},{n:"ploy",f:"pout",l:"casual",t:"…ห้าเต็มสิบ แต่วันนี้ยกให้"}]},
+   {t:"\"คุยกันเองก่อน ฉันจะออกไปรอข้างนอก\"",fx:G2=>{add(G2,"ploy","bond",3);add(G2,"pailin","bond",3);},then:[xN("ยี่สิบนาทีต่อมา เสียงหัวเราะของสองพี่น้องลอดออกมาจากห้อง เป็นครั้งแรกที่คุณได้ยินพร้อมกัน"),{n:"ploy",f:"happy",l:"casual",t:"…เราตกลงกันได้แล้ว รายละเอียดเป็นความลับ"}]}]}];}}]});
+
+/* ---------- when a heroine notices (once per new romance, if she is close to you) ---------- */
+const XL_TWO={kati:"ครูคะ… หนูเห็นแล้วนะคะว่าครูยิ้มให้โทรศัพท์ทั้งวัน หนูไม่ถามก็ได้ค่ะ แต่หนูรู้",mali:"คุณคะ มะลิได้ยินว่าคุณไปวิ่งตอนเช้ากับใครบางคน… มะลิไม่ได้เสียใจหรอก แค่ซ้อมเตะแรงขึ้นนิดหน่อยค่ะ~",
+ rin:"สามสัปดาห์นี้คุณออกนอกค่ายเช้าวันอาทิตย์ทุกครั้งค่ะ ฉันบันทึกไว้แล้ว ไม่ได้ต้องการคำอธิบาย",ploy:"…ไม่ต้องพูด ฉันเห็นแล้ว",fah:"นี่! คิดว่าฟ้าไม่รู้เหรอว่าใครส่งข้อความมาทุกคืน! …ไม่ต้องตอบ ฟ้าไปซ้อมก่อน"};
+const xlTwoWho=(G,id)=>{const P=partners(G).filter(k=>XL_TWO[k]&&G.F[k]&&G.F[k].camp==="player"&&!isAway(G,k));if(P.length)return P[0];
+  const L=["kati","mali","rin","ploy","fah"].map(k=>G.F[k]).filter(f=>f&&f.camp==="player"&&f.met&&(f.bond||0)>=50&&!isAway(G,f.id)&&!(id==="pailin"&&f.id==="ploy")).sort((a,b)=>(b.bond||0)-(a.bond||0));return L.length?L[0].id:null;};
+for(const id of XL_IDS)EVENTS.push({id:"xl_two_"+id,look:"casual",bg:"camp",pri:34,when:G=>xlLov(G,id)&&absWeek(G)-G.xlov[id]>=1&&!!xlTwoWho(G,id),
+ steps:[{inject:G=>{const k=xlTwoWho(G,id);add(G,k,"bond",-2);return [{n:k,f:"pout",l:"casual",t:XL_TWO[k]},xN(`${G.F[k].name}รู้เรื่องคุณกับ${xlWho(id)}แล้ว`)];}}]});
+Object.assign(TELL_WAIT,XL_WAIT);
+/* test host only (loadTestSave): Vector and Baiyok exist and the camp already has 6 bouts / 4 wins against each, so both opening scenes play at the end of the first week */
+function xlTestSetup(G){try{G.arcs=G.arcs||{};if(!G.arcs.vector){G.arcs.vector=G.season||1;ensureVector(G);}if(!G.F.prod_B&&G.F.fah){makeProdigy(G,"B","fah");}G.flags=G.flags||{};if(G.flags.byFree==null)G.flags.byFree=absWeek(G);fixProdigies(G);
+  for(const id of XL_IDS){if(!G.F[id]||xlRec(G,id).n>=6)continue;for(const res of ["W","W","L","W","L","W"])G.cal.push({wk:1,season:1,absWeek:1,a:"kati",b:id,bn:G.F[id].name,tier:"local",res});}}catch(e){console.error("xl test",e);}}
+
 </script>
 <script>
 (function(){
 /* v1.87: Thai code ships inside index.html; English code (en.js) and the dictionary (i18n.js) load only when needed */
-var B="28491a0d03";
+var B="2a86830966";
 var L="";try{L=localStorage.getItem("mtm_lang")||"";}catch(e){}
 try{var h=(location.hash||"").match(/lang=(th|en)/);if(h)L=h[1];}catch(e){}
 if(L!=="th"&&L!=="en")L="th";

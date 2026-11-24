@@ -999,7 +999,7 @@ const FACILITIES={
   recovery:{name:"ห้องฟื้นฟูและอ่างน้ำแข็ง",cost:[15000,30000,50000],desc:"ฟื้นความล้า +5/สัปดาห์ ต่อระดับ"},
   classroom:{name:"ลานสอนคอร์ส",cost:[8000,14000,22000,32000,45000],desc:"รับนักเรียนได้เพิ่ม 3 คน ต่อระดับ"},
   brand:{name:"ป้ายและโปรโมทค่าย",cost:[8000,20000,40000,50000],desc:"คนอยากมาเรียนเพิ่ม 3 คน ต่อระดับ ชื่อเสียง +0.5"},
-  dorm:{name:"ห้องพักนักมวย",cost:[18000,40000,60000,90000],desc:"กำลังใจ +1.5 และความเชื่อใจ +0.3 ทุกสัปดาห์ ต่อระดับ"},
+  dorm:{name:"ห้องพักนักมวย",cost:[30000,80000,180000,600000,1500000],desc:"ห้องนักมวยหลัก +1 ต่อระดับ (5 → 10 ห้อง) · กำลังใจ +1.5 และความเชื่อใจ +0.3 ทุกสัปดาห์ ต่อระดับ"} /* v1.91.122 (Man): a fifth level, up to ten rooms; levels 4–5 still open with the regional chapter and are priced as late-game money sinks (players hold millions by then) */,
   kitchen:{name:"ครัวโภชนาการ",cost:[10000,25000],desc:"ฟื้นความล้า +2 และลดโอกาสบาดเจ็บ 20% ต่อระดับ"},
   // v1.18: bigger projects that open up as the camp grows (late-game money sinks with real effects)
   hill:{name:"ลู่วิ่งขึ้นเขาหลังค่าย",cost:[20000,45000],desc:"ฝึกฟิตร่างกายได้ผล +20% และล้าน้อยลง ต่อระดับ",req:{week:12}},
@@ -1104,7 +1104,7 @@ function growStudents(G){const t=Math.min(studentCap(G),studentDemand(G)),n=stud
 const studentFee=G=>Math.round(dif(G).inc*560*(1+(G.fac.daeng-1)*.12)*(1+(campLevel(G)-1)*.2));
 const classIncome=G=>Math.round(students(G)*studentFee(G)*(ytKey(G)==="tourist"?1.2:1)*(G.disaster&&gameWeek(G)<G.disaster.untilAbs?(G.disaster.inc||0):1));
 function campLook(G){return clamp(Math.round(facTotal(G)+(G.camp?G.camp.beauty:0)/2+Math.min(G.rep,30)/8),0,20);}
-/* v1.90: the dorm's fourth level opens with the regional chapter · main characters get 5 + dorm level rooms */
+/* v1.90: the dorm's fourth level (v1.91.122: and fifth) opens with the regional chapter · main characters get 5 + dorm level rooms */
 const facMax=(G,k)=>k==="dorm"&&!G.region?3:FACILITIES[k].cost.length;
 const dormRooms=G=>5+((G.fac&&G.fac.dorm)||0);
 function buyFacility(G,k){const F=FACILITIES[k],lv=G.fac[k]||0;if(lv>=facMax(G,k)||facLocked(G,k))return false;const c=F.cost[lv];if(G.cash<c)return false;
@@ -1285,7 +1285,7 @@ function genOffers(G,opt){
     for(const f of fighters){const wk=[G.week+2,G.week+3,G.week+4].find(w=>w<=48&&!isBooked(G,op.id,w)&&!G.bookings.some(b=>b.a===f.id&&Math.abs(b.week-w)<=1));
       if(wk&&!G.offers.some(o=>o.a===f.id&&o.b===op.id)){G.offers.push({id:`o${G.week}_${f.id}_${op.id}`,a:f.id,b:op.id,week:wk,tier:"lab",lab:1,win:TIER.lab.win,lose:TIER.lab.lose});break;}}}
   // v1.89.25: Baiyok's rematch letters to Fah — twice a year from her second season on, before and after she leaves Golden Tiger
-  {const pb=G.prodigy&&G.prodigy.B,o=pb&&G.F[pb],fah=G.F.fah;if(o&&fah&&fah.camp==="player"&&(G.season||1)>=2&&[14,30].includes(G.week)&&!o.injury&&!fah.injury&&!(typeof isAway==="function"&&isAway(G,"fah"))){
+  {const pb=G.prodigy&&G.prodigy.B,o=pb&&G.F[pb],fah=G.F.fah;if(o&&o.camp!=="player"/* v1.91.122: not once Baiyok trains with us */&&fah&&fah.camp==="player"&&(G.season||1)>=2&&[14,30].includes(G.week)&&!o.injury&&!fah.injury&&!(typeof isAway==="function"&&isAway(G,"fah"))){
     const wk=[G.week+3,G.week+4,G.week+2].find(w=>w<=48&&!isBooked(G,o.id,w)&&!G.bookings.some(b=>b.a==="fah"&&Math.abs(b.week-w)<=1));
     if(wk){G.offers=G.offers.filter(x=>!(x.a==="fah"&&x.b===o.id));G.offers.push({id:`o${G.week}_fah_by`,a:"fah",b:o.id,week:wk,tier:"special",rv:1,by:1,win:Math.round(TIER.special.win*1.6/100)*100,lose:Math.round(TIER.special.lose*1.4/100)*100});}}}
   // v1.89.27: Petchara's yearly challenge letter to Kati (week 12; the grudge offers at 25/29/33/36 come on top)

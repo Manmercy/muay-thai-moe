@@ -1009,7 +1009,7 @@ const FACILITIES={
   recovery:{name:"Recovery room & ice baths",cost:[15000,30000,50000],desc:"Fatigue recovery +5/wk per level"},
   classroom:{name:"Class yard",cost:[8000,14000,22000,32000,45000],desc:"Holds 3 more students per level"},
   brand:{name:"Signs & camp promotion",cost:[8000,20000,40000,50000],desc:"+3 people want to join per level, fame +0.5"},
-  dorm:{name:"Fighter dorm",cost:[18000,40000,60000,90000],desc:"Morale +1.5 and trust +0.3 weekly, per level"},
+  dorm:{name:"Fighter dorm",cost:[30000,80000,180000,600000,1500000],desc:"+1 main-fighter room per level (5 → 10 rooms) · morale +1.5 and trust +0.3 every week per level"} /* v1.91.122 (Man): a fifth level, up to ten rooms; levels 4–5 still open with the regional chapter and are priced as late-game money sinks (players hold millions by then) */,
   kitchen:{name:"Nutrition kitchen",cost:[10000,25000],desc:"Fatigue recovery +2 and 20% lower injury risk per level"},
   // v1.18: bigger projects that open up as the camp grows (late-game money sinks with real effects)
   hill:{name:"Hill-run track behind camp",cost:[20000,45000],desc:"Conditioning +20% and less fatigue per level",req:{week:12}},
@@ -1114,7 +1114,7 @@ function growStudents(G){const t=Math.min(studentCap(G),studentDemand(G)),n=stud
 const studentFee=G=>Math.round(dif(G).inc*560*(1+(G.fac.daeng-1)*.12)*(1+(campLevel(G)-1)*.2));
 const classIncome=G=>Math.round(students(G)*studentFee(G)*(ytKey(G)==="tourist"?1.2:1)*(G.disaster&&gameWeek(G)<G.disaster.untilAbs?(G.disaster.inc||0):1));
 function campLook(G){return clamp(Math.round(facTotal(G)+(G.camp?G.camp.beauty:0)/2+Math.min(G.rep,30)/8),0,20);}
-/* v1.90: the dorm's fourth level opens with the regional chapter · main characters get 5 + dorm level rooms */
+/* v1.90: the dorm's fourth level (v1.91.122: and fifth) opens with the regional chapter · main characters get 5 + dorm level rooms */
 const facMax=(G,k)=>k==="dorm"&&!G.region?3:FACILITIES[k].cost.length;
 const dormRooms=G=>5+((G.fac&&G.fac.dorm)||0);
 function buyFacility(G,k){const F=FACILITIES[k],lv=G.fac[k]||0;if(lv>=facMax(G,k)||facLocked(G,k))return false;const c=F.cost[lv];if(G.cash<c)return false;
@@ -1295,7 +1295,7 @@ function genOffers(G,opt){
     for(const f of fighters){const wk=[G.week+2,G.week+3,G.week+4].find(w=>w<=48&&!isBooked(G,op.id,w)&&!G.bookings.some(b=>b.a===f.id&&Math.abs(b.week-w)<=1));
       if(wk&&!G.offers.some(o=>o.a===f.id&&o.b===op.id)){G.offers.push({id:`o${G.week}_${f.id}_${op.id}`,a:f.id,b:op.id,week:wk,tier:"lab",lab:1,win:TIER.lab.win,lose:TIER.lab.lose});break;}}}
   // v1.89.25: Baiyok's rematch letters to Fah — twice a year from her second season on, before and after she leaves Golden Tiger
-  {const pb=G.prodigy&&G.prodigy.B,o=pb&&G.F[pb],fah=G.F.fah;if(o&&fah&&fah.camp==="player"&&(G.season||1)>=2&&[14,30].includes(G.week)&&!o.injury&&!fah.injury&&!(typeof isAway==="function"&&isAway(G,"fah"))){
+  {const pb=G.prodigy&&G.prodigy.B,o=pb&&G.F[pb],fah=G.F.fah;if(o&&o.camp!=="player"/* v1.91.122: not once Baiyok trains with us */&&fah&&fah.camp==="player"&&(G.season||1)>=2&&[14,30].includes(G.week)&&!o.injury&&!fah.injury&&!(typeof isAway==="function"&&isAway(G,"fah"))){
     const wk=[G.week+3,G.week+4,G.week+2].find(w=>w<=48&&!isBooked(G,o.id,w)&&!G.bookings.some(b=>b.a==="fah"&&Math.abs(b.week-w)<=1));
     if(wk){G.offers=G.offers.filter(x=>!(x.a==="fah"&&x.b===o.id));G.offers.push({id:`o${G.week}_fah_by`,a:"fah",b:o.id,week:wk,tier:"special",rv:1,by:1,win:Math.round(TIER.special.win*1.6/100)*100,lose:Math.round(TIER.special.lose*1.4/100)*100});}}}
   // v1.89.27: Petchara's yearly challenge letter to Kati (week 12; the grudge offers at 25/29/33/36 come on top)
@@ -2601,7 +2601,7 @@ const LOVER_TIERS=[[1,"Lover"],[15,"Kindred sweetheart"],[20,"Inseparable pair"]
 const hTot=f=>((f&&f.bond)||0)+((f&&f.bondX)||0);
 // relationship state, written to work with a single romance (G.romance) and with several lovers / promises / exes (G.lovers, G.promise, G.exAbs)
 function relState(G,id){if(!G||!id)return null;const L=Array.isArray(G.lovers)?G.lovers:(G.romance?[G.romance]:[]);if(L.includes(id))return "lover";
-  if(G.promise&&G.promise[id]!=null)return "promise";if(G.exAbs&&G.exAbs[id]!=null)return "ex";const R=G.region;if(R&&R.lov&&R.lov[id]!=null)return "lover";if(R&&R.ex&&R.ex[id]!=null)return "ex";return null;} /* v1.91.28: regional champions keep their own romance track (G.region.lov / .ex) */
+  if(G.promise&&G.promise[id]!=null)return "promise";if(G.exAbs&&G.exAbs[id]!=null)return "ex";const R=G.region;if(R&&R.lov&&R.lov[id]!=null)return "lover";if(R&&R.ex&&R.ex[id]!=null)return "ex";if(G.xlov&&G.xlov[id]!=null)return "lover";if(G.xlex&&G.xlex[id]!=null)return "ex";return null;} /* v1.91.28: regional champions keep their own romance track (G.region.lov / .ex) */
 /* v1.89.11: Lv.30 is the top at 1,000 points — each step past 100 asks a little more (15 → 80) */
 const HEART_STEPS=[15,20,20,25,30,35,35,40,45,45,50,55,60,60,65,70,75,75,80],HEART_MAX=30,HEART_TOP=1000;
 const heartStep=n=>HEART_STEPS[n-11]||0; // points from Lv.n to Lv.n+1, for 11 ≤ n < 30
@@ -2990,7 +2990,7 @@ const isFriendz=(G,id)=>!!(G.friendz&&G.friendz[id]);
 const awayWord=(G,id)=>G.F[id].camp==="player"?"Left camp":"Not in touch";
 /* v1.91.72 (Man): a regional champion who has not joined the camp is not a "camp-mate" yet — that rung reads "friend from another camp" for her */
 const RG_CHAMP_IDS=["baibua","tabtim","alicia","chaba"];
-const outChamp=f=>!!(f&&RG_CHAMP_IDS.includes(f.id)&&f.camp!=="player");
+const outChamp=f=>!!(f&&(RG_CHAMP_IDS.includes(f.id)||f.id==="prod_B"||f.id==="pailin")&&f.camp!=="player"); /* v1.91.122: Baiyok / Pailin too */
 const tierFor=(n,f)=>n==="Teammate"&&outChamp(f)?"Friend from another camp":n;
 function relLabel(G,f,lv,short){return tierFor(relLabel0(G,f,lv,short),f);}
 function relLabel0(G,f,lv,short){const id=f&&f.id;if(G&&id&&G.F&&G.F[id]&&isAway(G,id)&&G.F[id].awayWhy==="train"){const n=awayLeft(G,id);return short?"Training away":`Away training (${n} wk)`;}
@@ -3324,7 +3324,7 @@ EVENTS.push(
 // warn before a second "yes"
 const cheatWarn=(G,id)=>(partners(G).some(k=>k!==id)||rgLovN(G)>0)?[{n:"nar",t:"⚠ You already have someone. Say yes and you'll be two-timing… and secrets like this never stay hidden for long."}]:[];
 const yesTxt=(G,id,t)=>(partners(G).some(k=>k!==id)||rgLovN(G)>0)?t+" (two-timing)":t;
-const rgLovN=G=>G&&G.region&&G.region.lov?Object.keys(G.region.lov).length:0; /* v1.91.28: a regional champion you are seeing counts as someone else */
+const rgLovN=G=>(G&&G.region&&G.region.lov?Object.keys(G.region.lov).length:0)+(typeof xlLovN==="function"?xlLovN(G):0); /* v1.91.122: Baiyok / Pailin count too */ /* v1.91.28: a regional champion you are seeing counts as someone else */
 const lovSolo=G=>partners(G).length===1&&!rgLovN(G);
 const topLock=(G,id)=>isPartner(G,id)&&partners(G).length+rgLovN(G)>1; /* the top heart scene and the Lv.27/30 chats wait while you see more than one person (harem too) */ /* the lover bonus only holds while you see one person */
 // v1.30: lovers get their own dates/scenes; Ploy & Fah make a promise instead (romance with them waits for season 2)
@@ -4769,7 +4769,7 @@ function byVisitSteps(G){const F=G.flags,fah=inCamp(G,"fah"),mali=inCamp(G,"mali
   const d=F.byD||0;for(let i=0;i<D.length;i++){const s=D[(d+i)%D.length]();if(s){F.byV=Math.max(k,V.length);F.byD=d+i+1;F.byNext=absWeek(G)+BY_DROP_GAP;return s;}}
   F.byNext=absWeek(G)+BY_DROP_GAP;return [{n:"nar",t:"Baiyok used the ring before dawn and was gone before anyone woke up."}];}
 EVENTS.push(
- {id:"by_visit",pri:2,look:"casual",bg:"gym",when:G=>byFree(G)&&!!(G.prodigy&&G.F[G.prodigy.B])&&absWeek(G)>=(G.flags.byNext!=null?G.flags.byNext:G.flags.byFree+BY_GAP[0])&&!(G.F[G.prodigy.B].injury>0),
+ {id:"by_visit",pri:2,look:"casual",bg:"gym",when:G=>byFree(G)&&!!(G.prodigy&&G.F[G.prodigy.B])&&G.F[G.prodigy.B].camp!=="player"&&absWeek(G)>=(G.flags.byNext!=null?G.flags.byNext:G.flags.byFree+BY_GAP[0])&&!(G.F[G.prodigy.B].injury>0),
   steps:[{inject:G=>byVisitSteps(G)},{fx:G=>{delete G.seen.by_visit;}}]});
 
 /* v1.89.27: Petchara stays Golden Tiger — she becomes its captain, keeps an eye on Kati, takes the boss's anger, and sends Kati a challenge letter every year */
@@ -5310,10 +5310,10 @@ const TELL_WAIT={kati:"Manager… I'm really happy. But give me a little more ti
   chaba:"…Not yet."};
 const loveLine=(L,G,id)=>{const v=L[id];return typeof v==="function"?v(G):v||"…";};
 const isChampLove=(G,id)=>!LOVE_IDS.includes(id)&&!!(G.region&&G.region.joined&&G.region.joined[id]!=null);
-const isLovAny=(G,id)=>isLov(G,id)||(typeof REGION!=="undefined"&&REGION.isLovC&&REGION.isLovC(G,id));
-const twoFor=(G,id)=>partners(G).some(k=>k!==id)||(G.region&&G.region.lov?Object.keys(G.region.lov).some(k=>k!==id):false);
-function takeAny(G,id){if(G.friendz)delete G.friendz[id];if(isChampLove(G,id)){REGION.takeC(G,id);}else takeLover(G,id);}
-const yesLine=(G,id)=>isChampLove(G,id)?(RG_JOIN[id]&&RG_JOIN[id].yes(G))||"…":LOVE_YES[id];
+const isLovAny=(G,id)=>isLov(G,id)||(typeof REGION!=="undefined"&&REGION.isLovC&&REGION.isLovC(G,id))||!!(G.xlov&&G.xlov[id]!=null);
+const twoFor=(G,id)=>partners(G).some(k=>k!==id)||(G.region&&G.region.lov?Object.keys(G.region.lov).some(k=>k!==id):false)||(G.xlov?Object.keys(G.xlov).some(k=>k!==id&&G.F[k]):false);
+function takeAny(G,id){if(G.friendz)delete G.friendz[id];if(typeof xlIs==="function"&&xlIs(id)){xlTake(G,id);}else if(isChampLove(G,id)){REGION.takeC(G,id);}else takeLover(G,id);}
+const yesLine=(G,id)=>typeof xlIs==="function"&&xlIs(id)?XL_YES[id]:isChampLove(G,id)?(RG_JOIN[id]&&RG_JOIN[id].yes(G))||"…":LOVE_YES[id];
 /* who is due to reach out (third "no" + 6 weeks, still close, still here) */
 function doorWho(G){const ids=[...LOVE_IDS,...Object.keys((G.region&&G.region.joined)||{})];
   return ids.find(id=>{const f=G.F[id];return f&&f.camp==="player"&&G.loveOff&&G.loveOff[id]!=null&&!loveOffLeft(G,id)&&!(G.doorDone&&G.doorDone[id])&&!isLovAny(G,id)&&!isAway(G,id)&&(f.bond||0)>=60;})||null;}
@@ -5326,15 +5326,17 @@ EVENTS.push({id:"lv_door",look:"casual",bg:"camp",pri:70,when:G=>!!doorWho(G),st
 /* the button in the Characters tab */
 function tellState(G,f){const id=f&&f.id;if(!id||!G.F[id])return null;const champ=isChampLove(G,id);
   /* v1.91.70 (Man): the button is not always there — it shows only once the hearts are really there (closeness 75), and stays hidden while she is away, just broken up, stepping back, or after a "not yet" until the 13 weeks are up */
-  if(!(LOVE_IDS.includes(id)||champ)||f.camp!=="player"||!f.met&&!champ||isLovAny(G,id)||(f.bond||0)<75)return null;
+  const xl=typeof xlIs==="function"&&xlIs(id)&&xlOn(G,id); /* v1.91.122: Baiyok and Pailin — wherever they train */
+  if(!(LOVE_IDS.includes(id)||champ||xl)||f.camp!=="player"&&!xl||!f.met&&!champ||isLovAny(G,id)||(f.bond||0)<75)return null;
+  if(xl&&G.xlex&&G.xlex[id]!=null&&absWeek(G)-G.xlex[id]<12)return null;
   if(isAway(G,id)||(champ?(G.region.ex&&G.region.ex[id]!=null&&gameWeek(G)-G.region.ex[id]<12):exWait(G,id))||loveOffLeft(G,id))return null;
   const t=G.tellAbs&&G.tellAbs[id];if(t!=null&&absWeek(G)-t<LOVE_TELL_CD)return null;
   return {ok:true};}
-function tellReady(G,f){const id=f.id;if(isChampLove(G,id)){const J=G.region.joined||{};return (f.bond||0)>=75&&gameWeek(G)-(J[id]||gameWeek(G))>=6;}return (f.bond||0)>=75&&(f.trust||0)>=40;}
+function tellReady(G,f){const id=f.id;if(typeof xlIs==="function"&&xlIs(id))return (f.bond||0)>=75&&absWeek(G)-((G.xl&&G.xl[id]&&G.xl[id].open)||absWeek(G))>=6;if(isChampLove(G,id)){const J=G.region.joined||{};return (f.bond||0)>=75&&gameWeek(G)-(J[id]||gameWeek(G))>=6;}return (f.bond||0)>=75&&(f.trust||0)>=40;}
 function tellSteps(G,id){const f=G.F[id],two=twoFor(G,id),ready=tellReady(G,f);
   const yes=[{fx:G2=>takeAny(G2,id)},{n:id,f:"flustered",l:"casual",t:yesLine(G,id)},{n:"nar",t:`Relationship with ${f.name}: lovers ♥`}];
   const wait=[{fx:G2=>{(G2.tellAbs=G2.tellAbs||{})[id]=absWeek(G2);add(G2,id,"bond",1);}},{n:id,f:"flustered",l:"casual",t:loveLine(TELL_WAIT,G,id)},
-    {n:"nar",t:`${f.name} isn't ready yet · you need to grow closer ${!isChampLove(G,id)&&(f.trust||0)<40?` · trust ${Math.floor(f.trust||0)}/40`:""}${isChampLove(G,id)&&(f.bond||0)>=75?" · give her a little more time at the camp":""} · you can tell her again in ${LOVE_TELL_CD} weeks`}];
+    {n:"nar",t:`${f.name} isn't ready yet · you need to grow closer ${!isChampLove(G,id)&&!(typeof xlIs==="function"&&xlIs(id))&&(f.trust||0)<40?` · trust ${Math.floor(f.trust||0)}/40`:""}${isChampLove(G,id)&&(f.bond||0)>=75?" · give her a little more time at the camp":""} · you can tell her again in ${LOVE_TELL_CD} weeks`}];
   const spot=(typeof TELL_SPOT!=="undefined"&&TELL_SPOT[id])||"back of the camp",open=[{n:"nar",t:`That night you go to meet her at the ${spot} · ${f.name} is already waiting.`},{n:"nar",t:"You tell her plainly how you feel."}];
   if(!ready)return [...open,...wait];
   if(two)return [open[0],{n:"nar",t:"⚠ You're already with someone. Saying it would make this two-timing.",choice:[{t:"Tell her honestly (two-timing)",then:[open[1],...yes]},{t:"Better not say it",then:[{n:"nar",t:"You keep the words to yourself and talk about training instead."}]}]}];
@@ -5651,24 +5653,38 @@ function drawCamp(ctx,G,t){
   if(look>=6){P(118,142,200,30,"#b8a58a");for(let x=118;x<318;x+=10)P(x,142,1,30,"#a8957a");}
   decorTrack(P,G,t,F);
   decorTree(P,G,t,F);
-  // building
-  const bx=8,by=58,bw=104,bh=62;
-  P(bx,by,bw,bh,look>=4?"#9a6a42":"#7d573a");for(let y=by+4;y<by+bh;y+=6)P(bx,y,bw,1,look>=4?"#87593a":"#6b4a31");
+  // building — v1.91.122 (Man): the camp house is the fighters' dorm and grows with every level:
+  // 1 attic dormers and a striped porch awning · 2 a wooden second storey · 3 rebuilt in concrete, flat roof, water tank and flag
+  // 4 balconies, laundry lines and air-con units · 5 a third storey and a lit camp sign
+  const bx=8,by=58,bw=104,bh=62,dl=(G.fac&&G.fac.dorm)||0,ex=dl>=5?2:dl>=2?1:0,fh=18,topY=by-ex*fh,cc=dl>=3;
+  const win=(x,y,w,h,i)=>{P(x,y,w,h,"#2a1d2e");const on=look>=4||dl>=2?((Math.floor(t/2200)+i*5)%11?"#ffd98a":"#c8a060"):null;if(on){P(x+1,y+1,w-2,h-2,on);P(x+(w>>1),y+1,1,h-2,cc?"#b8aa96":"#7d573a");}};
+  P(bx,by,bw,bh,cc?"#e8dcc8":look>=4?"#9a6a42":"#7d573a");for(let y=by+4;y<by+bh;y+=6)P(bx,y,bw,1,cc?"#d8ccb6":look>=4?"#87593a":"#6b4a31");
+  for(let f=0;f<ex;f++){const y=topY+f*fh;P(bx,y,bw,fh,cc?"#efe6d4":"#a87850");if(!cc)for(let yy=y+3;yy<y+fh;yy+=5)P(bx,yy,bw,1,"#94673f");
+    P(bx-2,y+fh-2,bw+4,2,cc?(dl>=5?"#c8283c":"#bfae94"):"#6a4a30");for(let k=0;k<5;k++)win(bx+6+k*20,y+4,10,9,f*5+k);}
   // roof
-  for(let i=0;i<14;i++)P(bx-6+i,by-14+i,bw+12-i*2,1,"#8d949c");
-  P(bx-6,by-1,bw+12,2,"#6d747c");
-  const rust=Math.max(0,7-Math.floor(look/2));for(let i=0;i<rust;i++){P(bx+4+((i*37)%96),by-12+((i*5)%10),6,2,"#a0522d");}
+  if(!cc){for(let i=0;i<14;i++)P(bx-6+i,topY-14+i,bw+12-i*2,1,"#8d949c");P(bx-6,topY-1,bw+12,2,"#6d747c");
+    const rust=dl>=2?0:Math.max(0,7-Math.floor(look/2));for(let i=0;i<rust;i++){P(bx+4+((i*37)%96),topY-12+((i*5)%10),6,2,"#a0522d");}
+    if(dl===1)for(const dx of [bx+18,bx+74]){P(dx,by-11,12,9,"#a87850");for(let i=0;i<4;i++)P(dx-2+i,by-15+i,16-i*2,1,"#6d747c");win(dx+3,by-9,6,6,dx);}}
+  else{P(bx-3,topY-4,bw+6,4,"#9a8a78");P(bx-3,topY-5,bw+6,1,"#b8aa96");
+    P(bx+bw-26,topY-14,12,10,"#3c6fb0");P(bx+bw-25,topY-15,10,1,"#5a8fd0");P(bx+bw-24,topY-4,1,1,"#555");P(bx+bw-17,topY-4,1,1,"#555");
+    const fx=bx+bw-8;P(fx,topY-26,1,22,"#d8d8d8");const wv=Math.round(Math.sin(t/300));["#c8283c","#f2f2f2","#2c5fb3","#2c5fb3","#f2f2f2","#c8283c"].forEach((c,i)=>P(fx+1,topY-25+i+wv*(i%2),11,1,c));}
   // door & windows
-  P(bx+44,by+30,16,32,"#4a2f1f");P(bx+46,by+32,12,28,look>=4?"#6a442c":"#3b2518");
-  for(const wx of [bx+12,bx+76]){P(wx,by+20,16,14,"#2a1d2e");if(look>=4){P(wx+1,by+21,14,12,"#ffd98a");P(wx+7,by+21,1,12,"#7d573a");P(wx+1,by+27,14,1,"#7d573a");}
-    else{P(wx-1,by+22,18,2,"#8a6a4a");P(wx-1,by+29,18,2,"#8a6a4a");}}
-  // sign
-  P(bx+12,by-30,80,14,look>=4?"#f4ead8":"#c9bba8");P(bx+12,by-30,80,1,"#5a3a2a");P(bx+12,by-17,80,1,"#5a3a2a");
-  P(bx+28,by-16,2,8,"#5a3a2a");P(bx+74,by-16,2,8,"#5a3a2a");
+  P(bx+44,by+30,16,32,cc?"#5a4a3a":"#4a2f1f");P(bx+46,by+32,12,28,look>=4||cc?"#6a442c":"#3b2518");
+  if(dl>=1){for(let i=0;i<9;i++)P(bx+38+i*3,by+24,3,4,i%2?"#f2f2f2":"#c8283c");P(bx+38,by+28,27,1,"#8a2030");}
+  for(const wx of [bx+12,bx+76]){if(look>=4||dl>=2)win(wx,by+20,16,14,wx);else{P(wx,by+20,16,14,"#2a1d2e");P(wx-1,by+22,18,2,"#8a6a4a");P(wx-1,by+29,18,2,"#8a6a4a");}}
+  if(dl>=4){for(let f=0;f<ex;f++){const y=topY+f*fh+fh-2;P(bx+2,y-3,bw-4,1,"#5a3a2a");for(let x=bx+2;x<bx+bw-2;x+=3)P(x,y-3,1,3,"#5a3a2a");
+      const C=["#c8283c","#2c5fb3","#f2f2f2","#f7d24a","#2f8a4f"],lx=f%2?bx+4:bx+64;P(lx,y-14,36,1,"#e8e0d0");for(let k=0;k<4;k++){const sw=Math.round(Math.sin(t/400+k+f));P(lx+3+k*9+sw,y-13,5,6,C[(k+f*2)%5]);}
+      P(bx+bw+1,y-10,5,4,"#c8ccd2");P(bx+bw+2,y-9,3,1,"#8a9098");}
+    for(const px of [bx+30,bx+66]){P(px,by+bh-5,5,5,"#b0603a");P(px,by+bh-8,5,3,"#4fb06a");}}
+  // sign — on the gable for the wooden house, on the parapet once it is concrete
+  const sy=cc?topY-18:topY-30;
+  const sx=cc?bx+4:bx+12,sw2=cc?70:80;P(sx,sy,sw2,14,look>=4||dl>=1?"#f4ead8":"#c9bba8");P(sx,sy,sw2,1,"#5a3a2a");P(sx,sy+13,sw2,1,"#5a3a2a");
+  if(!cc){P(bx+28,sy+14,2,8,"#5a3a2a");P(bx+74,sy+14,2,8,"#5a3a2a");}
+  if(dl>=5)for(let i=0;i<18;i++)P(sx+i*4,sy-2,2,2,(Math.floor(t/250)+i)%2?"#fff7c4":"#f7d24a");
   ctx.save();ctx.font=`bold ${9*S}px "Chakra Petch","IBM Plex Sans Thai",sans-serif`;ctx.textAlign="center";ctx.textBaseline="middle";
-  ctx.fillStyle=look>=4?"#c8283c":"#6a4a3a";ctx.fillText("SIRICHAI GYM",(bx+52)*S,(by-23)*S);ctx.restore();
+  ctx.fillStyle=look>=4||dl>=1?"#c8283c":"#6a4a3a";ctx.fillText(dl>=3?"Sirichai Camp Dorm":"Sirichai Muay Thai Camp",(sx+sw2/2)*S,(sy+7)*S);ctx.restore();
   // string lights
-  if(look>=6){for(let i=0;i<22;i++){const x=bx-4+i*5,y=by-2+Math.sin(i/3)*2;const on=(Math.floor(t/400)+i)%3;P(x,y,2,2,["#ffd36b","#ff7b8a","#8ad7ff"][on]);}
+  if(look>=6){for(let i=0;i<22;i++){const x=bx-4+i*5,y=(cc?by-2:topY-2)+Math.sin(i/3)*2;const on=(Math.floor(t/400)+i)%3;P(x,y,2,2,["#ffd36b","#ff7b8a","#8ad7ff"][on]);}
     for(let i=0;i<20;i++){const x=150+i*7,y=78+Math.sin(i/2.5)*3;P(x,y,2,2,["#ffd36b","#ff7b8a","#8ad7ff"][(Math.floor(t/400)+i)%3]);}}
   // weeds / trash
   if(look<5){for(let i=0;i<10;i++){const x=6+((i*53)%300),y=124+((i*17)%50);P(x,y,1,3,"#4f6a3a");P(x+1,y+1,1,2,"#5f7a45");}P(120,166,6,3,"#9aa0a8");P(300,150,4,4,"#6d747c");}
@@ -5694,8 +5710,6 @@ function drawCamp(ctx,G,t){
   if(G.fac.sauna){P(296,146,22,16,"#7a4a2a");for(let i=0;i<6;i++)P(294+i,140+i,26-i*2,1,"#5a3a2a");P(303,152,7,10,"#3b2518");for(let k=0;k<3;k++){const y=136-((t/40+k*9)%16);P(299+k*6+Math.sin(t/300+k)*2,y,2,2,"rgba(255,255,255,.55)");}}
   if(G.fac.lights){for(const lx of [150,300]){P(lx,46,2,62,"#9aa0a8");P(lx-4,44,10,4,"#3a3550");P(lx-3,45,8,2,Math.floor(t/700)%2&&G.fac.lights>=2?"#fff7c4":"#ffe9a0");}}
   if(G.fac.hall){P(286,112,22,24,"#5a3a2a");P(288,114,18,18,"#2a1d2e");P(293,117,8,6,"#f7d24a");P(295,123,4,6,"#d9a520");if(G.fac.hall>=2){P(289,128,6,3,"#c8283c");P(299,128,6,3,"#2c5fb3");}}
-  // dorm house
-  if(G.fac.dorm>=1){P(268,70,44,36,"#b88a5a");for(let i=0;i<9;i++)P(264+i,62+i,52-i*2,1,"#7a4a3a");P(284,88,10,18,"#5a3a2a");P(272,78,8,7,"#ffd98a");P(298,78,8,7,"#ffd98a");if(G.fac.dorm>=2){P(266,58,48,3,"#c8283c");}}
   // kitchen stall
   if(G.fac.kitchen>=1){P(120,128,26,14,"#e8d8b8");for(let i=0;i<26;i+=4)P(120+i,124,4,4,i%8?"#f2f2f2":"#c8283c");if(Math.floor(t/500)%2)P(128,118,2,4,"#dcdcdc");}
   // brand billboard
@@ -6562,16 +6576,18 @@ AU.gsfx=function(kind,a){if(!this.init()||this.muted||!SETTINGS.sfx)return;const
   if(kind==="shimmer")for(let i=0;i<6;i++)T(i*.05,{f:1400+Math.random()*1400,type:"sine",dur:.12,peak:.06});};
 
 // ================= MUAY THAI MOE v1.3 — UI =================
-const VERSION="1.91.121";
+const VERSION="1.91.122";
 const CUR_LANG=(typeof window!=="undefined"&&window.LANG)||"th";
 const TH_LABEL=String.fromCharCode(3652,3607,3618);
 function langSwitch(cls){return `<div class="langsw ${cls||""}" role="group" aria-label="Language">${[["th",TH_LABEL],["en","EN"]].map(([k,l])=>`<button class="lsb ${CUR_LANG===k?"on":""}" data-act="setlang" data-v="${k}" aria-pressed="${CUR_LANG===k}">${l}</button>`).join("")}</div>`;}
 const SAVE_KEY="mtm-save-v13";
 const CANON_IDS=["kati","mali","rin","ploy","fah"];
+/* v1.91.122: main-fighter rooms in use — the five heroines in camp plus regional champions who joined */
+const dormUsed=G=>[...CANON_IDS,"prod_B"].filter(id=>G.F[id]&&G.F[id].camp==="player"&&(id!=="prod_B"||G.xlov&&G.xlov.prod_B!=null||G.xl&&G.xl.prod_B)).length+Object.keys((G.region&&G.region.joined)||{}).filter(c=>G.F[c]&&G.F[c].camp==="player").length;
 const REGIONAL_IDS=["baibua","tabtim","alicia","chaba"];
 /* Full-resolution source portraits. Other expressions keep their approved art. */
 const STAND_PNG=new Set(CANON_IDS.flatMap(id=>[`${id}_casual`,...['happy','sad','flustered'].map(m=>`${id}_fight_${m}`)]).concat(REGIONAL_IDS.flatMap(id=>[`${id}_casual`,`${id}_casual_flustered`,`${id}_casual_pout`,...['happy','sad','flustered','angry','surprised'].map(m=>`${id}_fight_${m}`)])).concat(["mali_casual_flustered", "mali_casual_pout", "fah_casual_pout", "fah_fight_angry", "kati_fight_angry", "mali_fight_angry", "ploy_fight_angry", "rin_fight_angry", "kati_thai", "rin_thai", "mali_thai", "ploy_thai", "fah_thai", "fah_thai_fl", "rin_casual_pout", "kati_casual_pout", "ploy_casual_flustered","kati_thai_fl","rin_thai_fl","mali_thai_fl","ploy_thai_fl","rin_casual_flustered","ploy_casual_pout"]));
-["kati_casual_flustered","fah_casual_flustered","pailin_casual","pailin_casual_flustered","pailin_casual_pout",...['happy','sad','angry','surprised','flustered'].map(m=>`pailin_fight_${m}`)].forEach(k=>STAND_PNG.add(k));
+["npc_baiyok_casual","npc_baiyok_casual_flustered","npc_baiyok_casual_pout",...["happy","sad","angry","flustered"].flatMap(m=>[`npc_baiyok_white_${m}`,`npc_baiyok_black_${m}`]),"npc_baiyok_white_surprised","kati_casual_flustered","fah_casual_flustered","pailin_casual","pailin_casual_flustered","pailin_casual_pout",...['happy','sad','angry','surprised','flustered'].map(m=>`pailin_fight_${m}`)].forEach(k=>STAND_PNG.add(k));
 CANON_IDS.flatMap(id=>[`${id}_thai_sad`,`${id}_thai_pout`]).forEach(k=>STAND_PNG.add(k));
 const standArt=key=>`${ASSET}${key}.${STAND_PNG.has(key)?'png':'webp'}`;
 const CHAMP_IDS=[...REGIONAL_IDS,"lada"];/* v1.89.14: Lada (Naka) joins the scene cast */ /* v1.90 (hidden): the four regional champions — full portraits in scenes like the heroines */
@@ -6591,14 +6607,16 @@ const stand=(id,look,mood)=>{if(id==="coach")return `${ASSET}coach.png`;
   // v1.81: Loy Krathong Thai dress — happy + flustered art only; gold-tier players can dress the girls in it off-stage
   /* v1.91.97 (Man): the Thai dress is for the Loy Krathong event only — no more swapping casual for it in other scenes */
   if(look==="thai"&&THAI_IDS.includes(id))return standArt(`${id}_thai${thaiSuf(mood)}`);
-if(id==="pailin")return standArt(look==="casual"?`pailin_casual${mood==="flustered"?"_flustered":["sad","angry","pout"].includes(mood)?"_pout":""}`:`pailin_fight_${["happy","sad","angry","surprised","flustered"].includes(mood)?mood:FMOOD(mood)}`);
+/* v1.91.122: Baiyok as a speaker — her own casual art, white fighting kit once she is free (black-gold before) */
+  if(id==="prod_B"){if(look==="casual")return standArt(`npc_baiyok_casual${mood==="flustered"?"_flustered":["sad","angry","pout"].includes(mood)?"_pout":""}`);const fr=typeof byFree==="function"&&byFree(G),m=["happy","sad","angry","flustered","surprised"].includes(mood)?mood:"happy";return standArt(`npc_baiyok_${fr?"white":"black"}_${!fr&&m==="surprised"?"happy":m}`);}
+  if(id==="pailin")return standArt(look==="casual"?`pailin_casual${mood==="flustered"?"_flustered":["sad","angry","pout"].includes(mood)?"_pout":""}`:`pailin_fight_${["happy","sad","angry","surprised","flustered"].includes(mood)?mood:FMOOD(mood)}`);
   if(look==="casual"){const v=mood==="flustered"?"_flustered":["pout","angry","sad"].includes(mood)?"_pout":"";return standArt(`${id}_casual${v}`);}
   // v1.8: one main outfit — training scenes use the fight outfit too, so clothes never flip mid-scene
   return standArt(`${id}_fight_${FMOOD(mood)}`);};
 const THAI_IDS=["kati","mali","rin","ploy","fah"];
 // v1.91.48: sad + pout Thai-dress art — with THAI_XP on, every mood has its own picture and the casual-clothes guard is off
 const THAI_XP=true;const thaiSuf=m=>THAI_XP&&m==="sad"?"_sad":THAI_XP&&["pout","angry"].includes(m)?"_pout":["flustered","surprised","pout","sad","angry"].includes(m)?"_fl":"";
-const faceSrc=(id,mood,look)=>look==="thai"&&THAI_IDS.includes(id)?`${ASSET}${id}_thai${thaiSuf(mood)}_face.${["sad","pout","angry"].includes(mood)?"png":"webp"}`:id==="coach"?`${ASSET}coach_face.webp`:id==="pailin"?`${ASSET}${look==="casual"?`pailin_casual${mood==="flustered"?"_flustered":["sad","angry","pout"].includes(mood)?"_pout":""}_face`:`pailin_fight_${["happy","sad","angry","surprised","flustered"].includes(mood)?mood:FMOOD(mood)}_face`}.png`:look&&look!=="fight"&&look!=="thai"?`${ASSET}${id}_${look}_face.${REGIONAL_IDS.includes(id)||id==="fah"&&look.startsWith("casual")||id==="kati"&&look==="casual_flustered"?"png":"webp"}`:`${ASSET}${id}_${["happy","sad","flustered"].includes(mood)||REGIONAL_IDS.includes(id)&&["angry","surprised"].includes(mood)?mood:"happy"}_face.${REGIONAL_IDS.includes(id)?"png":"webp"}`;
+const faceSrc=(id,mood,look)=>id==="prod_B"?stand(id,look==="casual"||!look?"casual":look,mood).replace(/\.(png|webp)$/,"_face.png"):look==="thai"&&THAI_IDS.includes(id)?`${ASSET}${id}_thai${thaiSuf(mood)}_face.${["sad","pout","angry"].includes(mood)?"png":"webp"}`:id==="coach"?`${ASSET}coach_face.webp`:id==="pailin"?`${ASSET}${look==="casual"?`pailin_casual${mood==="flustered"?"_flustered":["sad","angry","pout"].includes(mood)?"_pout":""}_face`:`pailin_fight_${["happy","sad","angry","surprised","flustered"].includes(mood)?mood:FMOOD(mood)}_face`}.png`:look&&look!=="fight"&&look!=="thai"?`${ASSET}${id}_${look}_face.${REGIONAL_IDS.includes(id)||id==="fah"&&look.startsWith("casual")||id==="kati"&&look==="casual_flustered"?"png":"webp"}`:`${ASSET}${id}_${["happy","sad","flustered"].includes(mood)||REGIONAL_IDS.includes(id)&&["angry","surprised"].includes(mood)?mood:"happy"}_face.${REGIONAL_IDS.includes(id)?"png":"webp"}`;
 const BGIMG={river_dawn:"bg_river_dawn.webp",gang_hq:"bg_gang_hq.webp",gang_hideout:"bg_gang_hideout.webp",loy_ring:"bg_loy_ring.webp",market_morning:"bg_market_morning.webp",camp:"bg_camp.webp",night:"bg_camp_night.webp",bus:"bg_bus_rain.webp",letter:"bg_grandpa_letter.webp",fair:"bg_fair.webp",local:"bg_local.webp",district:"bg_district.webp",ring:"bg_local.webp",final:"bg_final.webp",hall:"bg_hall.webp",gym:null,gymdusk:"gym1.webp",food:"bg_food.webp",temple:"bg_temple.webp",cafe:"bg_cafe.webp",river:"bg_river.webp",market:"bg_market.webp",rooster:"bg_rooster.webp",farm:"bg_farm.webp",sea:"bg_sea.webp",mountain:"bg_mountain.webp",ayutthaya:"bg_ayutthaya.webp",amphawa:"bg_amphawa.webp",
   /* v1.89.7: new scenes, ready to use */camp_night:"bg_camp_night.webp",camp_rain:"bg_camp_rain.webp",songkran:"bg_songkran.webp",newyear:"bg_newyear.webp",kitchen:"bg_kitchen.webp",hill:"bg_hill.webp",tvstudio:"bg_tvstudio.webp",live_corner:"bg_live_corner.webp",hospital:"bg_hospital.webp",vector_lab:"bg_vector_lab.webp",loy_night:"bg_loy_night.webp",sportsday:"bg_sportsday.webp",dorm_room:"bg_dorm_room.webp"};
 /* v1.91.26 (Man): every SSR card has its own illustration — shown full-screen at its moment in the card story, viewable in the card's
@@ -7364,11 +7382,11 @@ function rankHTML(){const st=stageOf(G.week),cut=st==="local"?4:st==="district"?
    ${rows.map((r,i)=>`<tr class="${r.f.camp==="player"?"me":r.f.camp==="rival"?"rival":""} ${cut&&i<cut?"zone":""} ${cut&&i===cut-1?"cut":""}"><td class="num">${i+1}</td><td>${moveIcon(mv[r.id])}</td><td>${tierChip(r.f)} ${esc(r.f.name)}</td><td class="num"><b>${r.pts}</b></td><td class="num">${r.w}-${r.l}-${r.d}</td><td>${formHTML(r.f)}</td></tr>`).join("")}
    </tbody></table></div></section>${calendarHTML()}`;}
 
-function peopleHTML(){const rgP=typeof REGION!=="undefined"&&REGION.peopleIds&&G.region?(REGION.bondSync(G),REGION.peopleIds(G)):[];const met=[...CANON_IDS.map(id=>G.F[id]).filter(f=>f&&f.met),...rgP.map(id=>G.F[id]).filter(Boolean)];const rgc=f=>!CANON_IDS.includes(f.id),out=f=>rgc(f)&&f.camp!=="player"; /* v1.91.30 (Man): regional champions you know and can chat with are in the Characters tab — at her own camp until she moves in */
+function peopleHTML(){const rgP=typeof REGION!=="undefined"&&REGION.peopleIds&&G.region?(REGION.bondSync(G),REGION.peopleIds(G)):[];const xlP=typeof XL_IDS!=="undefined"?XL_IDS.filter(id=>xlOn(G,id)).map(id=>G.F[id]):[];const met=[...CANON_IDS.map(id=>G.F[id]).filter(f=>f&&f.met),...rgP.map(id=>G.F[id]).filter(Boolean),...xlP];const xl=f=>typeof xlIs==="function"&&xlIs(f.id),rgc=f=>!CANON_IDS.includes(f.id)&&!xl(f),out=f=>rgc(f)&&f.camp!=="player"; /* v1.91.122: Baiyok and Pailin join the list once they open up */ /* v1.91.30 (Man): regional champions you know and can chat with are in the Characters tab — at her own camp until she moves in */
   return `<div class="card-h"><p class="meta">Spend time with one person per week · Once you are close, they will sometimes text you first</p><button class="btn sm gold albbtn" data-act="album">🃏 Card album ${Object.keys(G.cards||{}).length}/${Object.keys(CARDS).length}${Object.entries(G.cards||{}).some(([k,c])=>cardFresh(k,c)||cardCanUp(k,c))?'<i class="ndot"></i>':""}</button>${G.freeUsed?"<span class=\"pill\">Free time: used</span>":"<span class=\"pill gold\">Free time: 1 left</span>"}</div>
    <div class="plist">${met.map(f=>`<section class="px pcard"><button class="pthumb" data-act="fighter" data-id="${f.id}" data-v="rel" aria-label="View profile of ${esc(f.name)}"><img src="${pCardSrc(f)}" alt="" loading="lazy"></button>
-     <div class="pbody"><div class="pnm"><b class="nm">${esc(f.name)}</b><span class="meta">${f.camp==="player"?"Sirichai Camp":out(f)?esc(REGION.campOf(f.id)):f.camp==="rival"&&!f.indie?"Golden Tiger":"Independent"}${relTag(G,f)}</span></div>${hearts(f.bond,f)}
-      <div class="pbtns"><button class="btn sm" data-act="fighter" data-id="${f.id}" data-v="rel">Profile</button><button class="btn sm primary" data-act="${rgc(f)?"rghang":"hang"}" data-id="${f.id}" data-v="${f.id}" ${out(f)||G.freeUsed||isAway(G,f.id)?"disabled":""}>${out(f)?"Meet her in her region":isAway(G,f.id)?"Away":"Hang out"}</button><button class="btn sm gold giftb" data-act="giftpick" data-id="${f.id}" ${out(f)||f.giftWeek===gameWeek(G)||isAway(G,f.id)?"disabled":""}>${PIX.gift}<span>${f.giftWeek===gameWeek(G)?"Given":"Gift"}</span></button><button class="btn sm chatb" data-act="${rgc(f)?"rgchat":"chat"}" data-id="${f.id}" data-v="${f.id}" ${rgc(f)?(G.chatIn&&G.chatIn[f.id]||canChatTell(f)?"":"disabled"):canChat(f)||canChatLov(f)||canChatTell(f)?"":"disabled"}>${(nw=>`${CHAT_PX}<span>${nw?"New chat":isAway(G,f.id)?"Not answering":canChatLov(f)||canChatTell(f)?"Chat":(f.bond||0)<CHAT_BOND?"Not close yet":"No messages"}</span>${nw?'<i class="dot"></i>':""}`)(rgc(f)?!!(G.chatIn&&G.chatIn[f.id]):canChat(f))}</button>${rgc(f)&&REGION.isLovC&&REGION.isLovC(G,f.id)?`<button class="btn sm" data-act="rgbreak" data-v="${f.id}">Break up</button>`:""}</div></div></section>`).join("")}</div>`;}
+     <div class="pbody"><div class="pnm"><b class="nm">${esc(f.name)}</b><span class="meta">${xl(f)?xlCamp(G,f):f.camp==="player"?"Sirichai Camp":out(f)?esc(REGION.campOf(f.id)):f.camp==="rival"&&!f.indie?"Golden Tiger":"Independent"}${relTag(G,f)}</span></div>${hearts(f.bond,f)}
+      <div class="pbtns"><button class="btn sm" data-act="fighter" data-id="${f.id}" data-v="rel">Profile</button><button class="btn sm primary" data-act="${xl(f)?"xhang":rgc(f)?"rghang":"hang"}" data-id="${f.id}" data-v="${f.id}" ${out(f)||G.freeUsed||isAway(G,f.id)?"disabled":""}>${out(f)?"Meet her in her region":isAway(G,f.id)?"Away":"Hang out"}</button><button class="btn sm gold giftb" data-act="giftpick" data-id="${f.id}" ${out(f)||f.giftWeek===gameWeek(G)||isAway(G,f.id)?"disabled":""}>${PIX.gift}<span>${f.giftWeek===gameWeek(G)?"Given":"Gift"}</span></button><button class="btn sm chatb" data-act="${rgc(f)?"rgchat":"chat"}" data-id="${f.id}" data-v="${f.id}" ${rgc(f)?(G.chatIn&&G.chatIn[f.id]||canChatTell(f)?"":"disabled"):canChat(f)||canChatLov(f)||canChatTell(f)?"":"disabled"}>${(nw=>`${CHAT_PX}<span>${nw?"New chat":isAway(G,f.id)?"Not answering":canChatLov(f)||canChatTell(f)?"Chat":(f.bond||0)<CHAT_BOND?"Not close yet":"No messages"}</span>${nw?'<i class="dot"></i>':""}`)(rgc(f)?!!(G.chatIn&&G.chatIn[f.id]):canChat(f))}</button>${rgc(f)&&REGION.isLovC&&REGION.isLovC(G,f.id)?`<button class="btn sm" data-act="rgbreak" data-v="${f.id}">Break up</button>`:""}${xl(f)&&xlLov(G,f.id)?`<button class="btn sm" data-act="xbreak" data-v="${f.id}">Break up</button>`:""}</div></div></section>`).join("")}</div>`;}
 function hangHTML(id){const f=G.F[id],hlv=heartLv(f).lv;const pref=k=>f.know["act_"+k]==="like"?"<i class=\"likeb\">Likes</i>":f.know["act_"+k]==="dislike"?"<i class=\"disb\">Dislikes</i>":"";
   return `<h2>Time with ${esc(f.name)}</h2><p class="meta">Choose where to go together</p><div class="acts">${Object.entries(ACTIVITIES).filter(([k,a])=>(!a.campOnly||f.camp==="player")&&(!a.heart||hlv>=10)).map(([k,a])=>{const lock=a.heart&&hlv<a.heart;return `<button class="actbtn${lock?" lockd":a.heart?" hspot":""}" data-act="date" data-id="${f.id}" data-v="${k}" ${lock||G.freeUsed||G.cash<a.cost?"disabled":""}><b>${a.heart?"♥ ":""}${a.name}${lock?"":pref(k)}</b><small>${lock?`🔒 Unlocks at ♥Lv.${a.heart}`:a.cost?fmt(a.cost):"Free"}</small></button>`;}).join("")}</div>`;}
 // v1.33: what each camp level brings, so upgrades feel like a goal
@@ -7475,7 +7493,7 @@ function campHTML(){const inc=classIncome(G),up=upkeep(G),wg=wages(G),lv=campLev
     ${staffHTML()}</section>
    </div>
    <section class="px card cpane ${cs==="fac"?"on":""}"><h3>Facilities</h3><div class="facs">${(()=>{const E=Object.entries(FACILITIES),lk=E.filter(([k])=>facLocked(G,k));return [...E.filter(([k])=>!facLocked(G,k)),...lk.slice(0,1)];})().map(([k,F])=>{const l=G.fac[k]||0,m=facMax(G,k),lk=facLocked(G,k);
-     return `<div class="item fac ${lk?"locked":""}"><div><div class="t">${F.name} ${dots(l,m)}${F.req&&!l&&!lk?" <span class=\"newb sm\">New</span>":""}</div><div class="meta">${F.desc}${k==="dorm"&&G.region?` · main-character rooms ${dormRooms(G)} rooms`:""}</div></div>${lk?`<span class="pill">Unlocks: ${lk}</span>`:l<m?`<button class="btn sm gold" data-act="buyfac" data-v="${k}" ${G.cash<F.cost[l]?"disabled":""}>${fmt(F.cost[l])}</button>`:"<span class=\"pill green\">Max</span>"}</div>`;}).join("")}</div></section>
+     return `<div class="item fac ${lk?"locked":""}"><div><div class="t">${F.name} ${dots(l,m)}${F.req&&!l&&!lk?" <span class=\"newb sm\">New</span>":""}</div><div class="meta">${F.desc}${k==="dorm"?` · <b>Main-fighter rooms ${dormUsed(G)}/${dormRooms(G)}</b>${l>=3&&!G.region?" · levels 4–5 open with the regional chapter":""}`:""}</div></div>${lk?`<span class="pill">Unlocks: ${lk}</span>`:l<m?`<button class="btn sm gold" data-act="buyfac" data-v="${k}" ${G.cash<F.cost[l]?"disabled":""}>${fmt(F.cost[l])}</button>`:"<span class=\"pill green\">Max</span>"}</div>`;}).join("")}</div></section>
    <section class="px card cpane ${cs==="fac"?"on":""}"><h3>Special investments</h3>
     <div class="item nw"><div><div class="t">Invite an old-school master to teach</div><div class="meta">${fmt(18000)} · fighter gains +1 skill point and school stats · once per fighter per season · opens week 16</div></div><button class="btn sm gold" data-act="mastersOpen" ${G.week<16?"disabled":""}>Choose</button></div>
     <div class="item nw"><div><div class="t">Host a fight night at Sirichai</div><div class="meta">${fmt(SHOW_COST)} · fame +3, camp looks better, everyone's morale +8 · once per round</div></div><button class="btn sm gold" data-act="hostshow" ${G.cash<SHOW_COST||G.week<10||G.flags["show_"+stageOf(G.week)]?"disabled":""}>${G.flags["show_"+stageOf(G.week)]?"Hosted":"Host"}</button></div>
@@ -7662,7 +7680,7 @@ function relLadderHTML(f){const H=heartLv(f).lv,cur=relLabel(G,f,H),k=relKind(G,
    <ol class="rsteps">${T.map(([lv,n],i)=>`<li class="${i===lit&&k!=="friend"&&k!=="ex"?"on":H>=lv?"done":""}"><i>Lv.${lv}</i>${esc(tierFor(n,f))}</li>`).join("")}</ol>
    ${(()=>{const T=typeof loveTitle==="function"?loveTitle(G,f):null;return T?`<div class="ltitle${T.k==="mono"?" lmono":""}"><b>${T.k==="mono"?"💍":"✦"} ${esc(T.t)}</b><small>${esc(T.d)}</small></div>`:"";})()}
    <p class="meta rcap">This chapter's heart cap: Lv.${heartCapLv(G)}${HEART_NEXT[heartCapLv(G)]?` · ${HEART_NEXT[heartCapLv(G)]}`:""}</p>
-   <div class="rbranch"><small>At the confession (bond 75 + trust 40)</small><div>${REL_BRANCH.map(([kk,n])=>`<span class="${kk===k?"on":""}">${esc(n)}</span>`).join("")}</div></div></div>`;}
+   <div class="rbranch"><small>${typeof xlIs==="function"&&xlIs(f.id)?"The confession (closeness 75)":"The confession (closeness 75 + trust 40)"}</small><div>${REL_BRANCH.map(([kk,n])=>`<span class="${kk===k?"on":""}">${esc(n)}</span>`).join("")}</div></div></div>`;}
 function giftHTML(id){const f=G.F[id];
   const E=giftsFor(id).map(k=>[k,{...GIFTS[k],bond:giftBond(id,k)}]).sort((x,y)=>(x[1].bond||0)-(y[1].bond||0)||(x[1].only?1:0)-(y[1].only?1:0));
   {const lk=E.filter(([k,g])=>(g.bond||0)>(f.bond||0));const nx=lk[0];const hid=lk.length-(nx?1:0);E.splice(0,E.length,...E.filter(([k,g])=>(g.bond||0)<=(f.bond||0)),...(nx?[nx]:[]));E.hidden=hid;}
@@ -7839,6 +7857,7 @@ function modalHTML(){const m=UI.modal;let body="",foot=true;
   if(m.type==="tpick"){body=tpickHTML(m.id);foot=false;}
   if(m.type==="fplan"){body=fplanHTML(m.id);foot=false;}
   if(m.type==="hang"){body=hangHTML(m.id);}
+  if(m.type==="xhang"){body=xlHangHTML(m.id);}
   if(m.type==="dm"){foot=false;body=dmBracketHTML();}
   if(m.type==="dmpick"){foot=false;body=dmPickHTML();}
   if(m.type==="camplv"){foot=false;body=campLvHTML();}
@@ -8797,7 +8816,7 @@ document.addEventListener("keydown",e=>{
 preloadCore();setTimeout(()=>{if(!G){["happy","surprised","sad"].forEach(m=>warm(stand("kati","fight",m)));warm(`${ASSET}coach.png`);}},4000);render();
 /* v1.91.80 (Man): on the test link (any host but the real game) the title menu offers a mid-game test save, so a fix can be seen without starting over */
 const TEST_HOST=typeof location!=="undefined"&&!/(^|\.)github\.io$/.test(location.hostname);
-function loadTestSave(name){fetch(`saves/${name}.json?v=${Date.now()}`).then(r=>{if(!r.ok)throw 0;return r.json();}).then(s=>{if(!s||!s.F||!s.week)throw 0;if(typeof I18N_FIX==="function")s=I18N_FIX(s);fixSave(s);G=s;UI.slot=3;save();UI.modal=null;UI.title=null;UI.tab="home";UI.tsAsk=0;
+function loadTestSave(name){fetch(`saves/${name}.json?v=${Date.now()}`).then(r=>{if(!r.ok)throw 0;return r.json();}).then(s=>{if(!s||!s.F||!s.week)throw 0;if(typeof I18N_FIX==="function")s=I18N_FIX(s);fixSave(s);if(typeof xlTestSetup==="function")xlTestSetup(s);G=s;UI.slot=3;save();UI.modal=null;UI.title=null;UI.tab="home";UI.tsAsk=0;
   AU.startMusic&&AU.startMusic("hub");render();toast(`Test save loaded into slot 3`);}).catch(()=>{UI.tsAsk=0;render();toast("Couldn't load the test save");});}
 /* v1.91.71 (dev): "#demo=<name>" loads a prepared test save from saves/<name>.json into slot 3 (asks first) — for Man to play a scene without replaying the whole chapter */
 (function(){const m=typeof location!=="undefined"&&(location.hash||"").match(/demo=([a-z0-9_]+)/);if(!m)return;const name=m[1];
@@ -10688,7 +10707,8 @@ function chatWeekly(G){bondFade(G);G.chatIn=G.chatIn||{};G.chatLast=G.chatLast||
   for(const id of CANON_IDS){const f=G.F[id];if(!f||!f.met||G.chatIn[id]||isAway(G,id))continue;
     {const L=CHAT[id]||[],seen=(G.chatSeen||{})[id]||[],W=G.chatWkAbs||{};if((f.bond||0)>=8&&gameWeek(G)-(G.chatLastAbs?.[id]??-999)>=1&&L.some(t=>(!t.when||t.when(G))&&t.need&&/_(lost|won|dm|flood|loan|miss|loy|loyw)$/.test(t.id)&&t.need(G)&&(!seen.includes(t.id)||(t.rep&&gameWeek(G)-(W[id+":"+t.id]??-999)>=t.rep)))){G.chatIn[id]=G.week;continue;}}
     if((f.bond||0)<CHAT_BOND)continue;
-    if(gameWeek(G)-(G.chatLastAbs?.[id]??-999)<3)continue;if(rng()<.3+((f.bond||0)>=50?.1:0))G.chatIn[id]=G.week;}}
+    if(gameWeek(G)-(G.chatLastAbs?.[id]??-999)<3)continue;if(rng()<.3+((f.bond||0)>=50?.1:0))G.chatIn[id]=G.week;}
+  if(typeof xlWeekly==="function")xlWeekly(G);}
 const chatLen=f=>3+((f.bond||0)>=40?1:0)+((f.bond||0)>=70?1:0);
 const canChat=f=>!!(f&&f.met&&G.chatIn&&G.chatIn[f.id]&&!isAway(G,f.id));
 /* v1.91.75 (Man): champions have phones — what used to come as their personal letters arrives as chat messages (shown first next time the chat opens) */
@@ -11309,4 +11329,240 @@ CHAT.fah.push({id:'f_ringcraft_102',need:G=>inCamp(G,'fah'),x:[
 
 CHAT.ploy.find(t=>t.id==='p_kati').when=G=>G.F.ploy.camp==='rival';
 for(const id of ['f_tiger','f_mali'])CHAT.fah.find(t=>t.id===id).when=G=>inCamp(G,'fah');
+
+/* v1.91.122 (Man): Baiyok and Pailin become characters you can grow close to — chat, gifts, time together, heart scenes and love —
+   once the camp has fought her often and beaten her more often than not (6 bouts, 4 wins, any of our fighters).
+   Both stay in their own corner of the story: Pailin keeps running Vector in Bangkok; Baiyok, once she is yours and fighting free in white,
+   can move into the camp. Their romance keeps its own track (G.xlov / G.xlex) beside the heroines' and the regional champions'. */
+const XL_IDS=["prod_B","pailin"],XL_NEED={n:6,w:4};
+const xlIs=id=>XL_IDS.includes(id);
+const xlRec=(G,id)=>{let n=0,w=0;for(const c of G.cal||[])if(c.b===id&&G.F[c.a]){n++;if(c.res==="W")w++;}return {n,w};};
+const xlOn=(G,id)=>!!(G&&G.xl&&G.xl[id]&&G.xl[id].open!=null&&G.F[id]);
+const xlLov=(G,id)=>!!(G&&G.xlov&&G.xlov[id]!=null);
+const xlLovN=G=>G&&G.xlov?Object.keys(G.xlov).filter(k=>G.F[k]).length:0;
+const xlDue=(G,id)=>{const f=G.F[id];if(!f||xlOn(G,id))return false;if(id==="prod_B"&&!(G.prodigy&&G.prodigy.B==="prod_B"))return false;const r=xlRec(G,id);return r.n>=XL_NEED.n&&r.w>=XL_NEED.w;};
+const xlWho=id=>id==="prod_B"?"Baiyok":"Pailin";
+const xlCamp=(G,f)=>f.camp==="player"?"Sirichai Camp":f.id==="pailin"?"Vector Gym":f.indie?"Independent":"Golden Tiger";
+function xlOpen(G,id){G.xl=G.xl||{};G.xl[id]={open:absWeek(G)};const f=G.F[id];f.met=true;f.know=f.know||{};if((f.bond||0)<12)f.bond=12;f.lastTouch=absWeek(G);G.chatIn=G.chatIn||{};G.chatIn[id]=G.week;}
+function xlTake(G,id){G.xlov=G.xlov||{};G.xlov[id]=absWeek(G);if(G.xlex)delete G.xlex[id];if(G.friendz)delete G.friendz[id];if(G.mono)delete G.mono;add(G,id,"morale",12);}
+function xlBreak(G,id){if(!xlLov(G,id))return;delete G.xlov[id];G.xlex=G.xlex||{};G.xlex[id]=absWeek(G);add(G,id,"bond",-20);add(G,id,"morale",-15);}
+/* weekly: new chats once she is close enough (same rhythm as the heroines), a lover texts at least every other week */
+function xlWeekly(G){G.chatIn=G.chatIn||{};const rng=mulberry32(G.seed*37+G.week*11+5);
+  for(const id of XL_IDS){if(!xlOn(G,id))continue;const f=G.F[id];if(G.chatIn[id]||isAway(G,id))continue;if(gameWeek(G)-(G.chatLastAbs?.[id]??-999)<(xlLov(G,id)?2:3))continue;
+    if(xlLov(G,id)||(f.bond||0)>=CHAT_BOND&&rng()<.35+((f.bond||0)>=50?.1:0))G.chatIn[id]=G.week;}}
+/* time together — five places each, in order; after that a short visit from a small pool */
+function xlHang(id){const f=G.F[id];if(!f||!xlOn(G,id)||G.freeUsed||isAway(G,id))return;G.freeUsed=true;f.lastTouch=absWeek(G);f.xlDate=f.xlDate||0;
+  const D=XL_DATE[id],i=f.xlDate,first=i<D.length,d=first?D[i]:XL_AGAIN[id][(i-D.length)%XL_AGAIN[id].length];f.xlDate++;
+  const gain=first?7:4;save();AU.startMusic("date");
+  playScene([...d.steps(G),{inject:G2=>{add(G2,id,"bond",gain);add(G2,id,"morale",4);return [{n:"nar",t:`Bond with ${f.name} +${gain}`}];}}],()=>{AU.startMusic("hub");save();render();},{bg:d.bg,look:"casual"});}
+function xlHangHTML(id){const f=G.F[id],D=XL_DATE[id],i=f.xlDate||0;const nx=i<D.length?D[i].name:"A relaxed meet-up";
+  return `<h2>Time with ${esc(f.name)}</h2><p class="meta">${id==="pailin"?"Pailin lives in Bangkok · meet when she's up in Chiang Mai":"Meet wherever suits her"} · uses this week's free time</p>
+   <div class="acts"><button class="actbtn hspot" data-act="xhanggo" data-id="${id}" ${G.freeUsed?"disabled":""}><b>${esc(nx)}</b><small>${i<D.length?`New place ${i+1}/${D.length}`:"Free"}</small></button></div>`;}
+function xlBreakAsk(id){const f=G.F[id];if(!xlLov(G,id))return;playScene([{n:"nar",t:`Really break up with ${f.name}?`,choice:[
+    {t:"Break up",fx:G2=>xlBreak(G2,id),then:XL_BREAK[id]},{t:"Not now",then:[{n:"nar",t:"You put your phone away and just text that you miss her."}]}]}],()=>{save();render();},{bg:"night",look:"casual"});}
+/* which heart scene is due (25 / 45 / 65 closeness, in order) */
+const xlHeartDue=(G,id,k)=>xlOn(G,id)&&!isAway(G,id)&&(G.F[id].bond||0)>=XL_HEART_AT[k]&&(k===0||G.seen["xlh_"+id+"_"+(k-1)])&&gameWeek(G)-(G.xlHeartAbs||-99)>=2;
+const XL_HEART_AT=[25,45,65];
+Object.assign(ACT,{xhang:d=>{UI.modal={type:"xhang",id:d.id};render();},xhanggo:d=>{UI.modal=null;xlHang(d.id);},xbreak:d=>xlBreakAsk(d.v)});
+
+/* ---------- Baiyok ---------- */
+SPK.prod_B={name:"Baiyok",color:"#d9b24a"};
+const XL_PROF={
+ prod_B:{age:20,height:"171 cm",blood:"B",bday:"14 February",home:"Chiang Mai · her grandmother's house by the Mae Kha canal",heritage:"Her grandmother's boxing (before Golden Tiger)",
+  personality:"Calm, terse, so straightforward she seems cold. Kind, without knowing how to show it. Learning to enjoy boxing for the first time.",likes:["Wooden-handled skipping ropes","Rice soup at 5 a.m.","Training in the rain"],
+  dislikes:["Whistles","Black kit","The words 'as planned'"],hobby:"Counts her kicks a hundred at a time and writes them in a little notebook",
+  story:"Her grandmother taught her boxing from age seven. Golden Tiger took her at thirteen; ten hours a day made her a prodigy who never smiled, until the day she fought under her own name.",
+  secret:"Keeps the ticket of every fight against Sirichai in a shoebox, with the result written on the back."},
+ pailin:{age:31,height:"175 cm",blood:"A",bday:"23 August",home:"Korat · now a condo near Vector's lab in Bangkok",heritage:"Korat boxing (same line as Ploy) + sports science",
+  personality:"Confident, thinks in numbers, a sharp teaser. Slow to admit she's wrong, but always honest with the data. Worries about her sister more than she lets on.",likes:["Black coffee, no sugar","Spreadsheets","The sea of mist at Khao Yai"],
+  dislikes:["People who say 'luck'","Data without units","Being called 'Ploy's sister'"],hobby:"Running at 5 a.m. with three watches",
+  story:"Eldest daughter of a PE teacher's family in Korat. Boxed before Ploy, studied sports science in Bangkok, then founded Vector with funding she later learned the source of.",
+  secret:"Still keeps Ploy's first pair of gloves in her office cabinet. Ploy thinks they were thrown out long ago."}};
+Object.assign(GIFTS,{
+ yb_rope:{name:"Wooden-handled skipping rope, engraved",price:600,bond:18,only:"prod_B",cat:"keep"},yb_ribbon:{name:"New gold silk hair ribbon",price:1500,bond:40,only:"prod_B",cat:"wear"},
+ pl_pen:{name:"Engraved fountain pen",price:1400,bond:20,only:"pailin",cat:"keep"},pl_scarf:{name:"Purple Korat silk scarf",price:2600,bond:42,only:"pailin",cat:"wear"}});
+const XL_GPREF={prod_B:{love:["yb_rope","yb_ribbon","khanom","wrap","malai"],like:["sausage","tea","photo","shorts","mongkhon"],dislike:["stickers"]},
+ pailin:{love:["pl_pen","pl_scarf","coffee","book","bracelet"],like:["tea","sketch","spa","prajiad"],dislike:["doll"]}};
+const XL_GLINES={prod_B:{love:"…For me? No one's ever bought me something just because they wanted to. I'll use it every day.",like:"Thanks. …I'll keep it safe.",ok:"Thanks.",dislike:"…I don't know where to stick these. But thanks."},
+ pailin:{love:"…Your data on me is more accurate than I thought. I'll use it every day, and count how many days.",like:"Not bad. I'd give it eight out of ten.",ok:"Thank you",dislike:"A doll… I'll send it to Ploy. She likes pretending she doesn't like things like this."}};
+const XL_GAGAIN={prod_B:{food:["{g} again… I finished the last one in one night.","I'll share half with Grandma. She asked who gave it. I haven't answered yet."],wear:["The old one isn't worn through, but I'll use this one on fight days.","Another {g}. …Now I can swap them."],keep:["{g} again. I keep it in the same box as the fight tickets.","You remembered I like it. …Not many people remember things about me."],exp:["Again? …Fine. I won't train that day."]},
+ pailin:{food:["{g} again. I've started tracking how many weeks apart you buy them.","I'll share this batch with the lab team, so they know someone sends me things."],wear:["Another {g}. I alternate them, Mondays and Thursdays.","The old one's still in good shape, but I'll take this one too. That doesn't mean I wanted it."],keep:["{g} again. I keep it on my desk. My team asks about it every day.","Data confirmed again: you remember what I like."],exp:["Again? I'll clear my schedule."]}};
+for(const id of XL_IDS){if(typeof PROFILES!=="undefined"&&!PROFILES[id])PROFILES[id]=XL_PROF[id];if(!GIFT_PREF[id])GIFT_PREF[id]=XL_GPREF[id];if(!GIFT_LINES[id])GIFT_LINES[id]=XL_GLINES[id];if(!GIFT_AGAIN[id])GIFT_AGAIN[id]=XL_GAGAIN[id];if(typeof SOUV_LOVE!=="undefined"&&!SOUV_LOVE[id])SOUV_LOVE[id]=id==="prod_B"?["n_umbrella","p_lampang"]:["c_bencharong","i_praewa"];}
+Object.assign(TELL_MEET,{prod_B:"…Fine. The riverside temple ground. I'll be there first.",pailin:"Yes. I'll take the 6 p.m. flight. Nine o'clock at the café under my friend's condo."});
+Object.assign(TELL_SPOT,{prod_B:"the riverside temple ground",pailin:"a late-night café in the middle of Nimman"});
+const XL_YES={prod_B:"…I don't know how to answer. No one taught me this. …But my heart's beating faster than in round five, so I guess that means yes.",
+ pailin:"I'd calculated you would say it today. …I hadn't calculated I'd be this happy. Yes."};
+const XL_WAIT={prod_B:"…I don't know what I feel yet. Give me time. It doesn't mean no.",pailin:"Not enough data yet. …Let me collect a little more. Don't misunderstand. It doesn't mean no."};
+const XL_BREAK={prod_B:[{n:"prod_B",f:"pout",l:"casual",t:"…Got it."},{n:"prod_B",f:"pout",l:"casual",t:"I won't cry in front of anyone, Grandma taught me. …But tonight I'll kick the bag a little longer."}],
+ pailin:[{n:"pailin",f:"sad",l:"casual",t:"…I've seen the signs for a while. I just didn't want to believe my own data."},{n:"pailin",f:"sad",l:"casual",t:"Thank you for being honest. Go, before I change my mind and ask you to stay."}]};
+
+/* the opening scenes — after 6 bouts and 4 losses she comes to find out why */
+EVENTS.push({id:"xl_open_prod_B",look:"casual",bg:"camp_night",pri:45,when:G=>xlDue(G,"prod_B"),steps:[
+ {inject:G=>{const r=xlRec(G,"prod_B");return [{n:"nar",t:"Past nine at night, the training-yard lights are off. Someone is standing at the camp gate holding a small notebook."},
+  {n:"prod_B",f:"happy",l:"casual",t:`I counted. Fought this camp ${r.n} times, won ${r.n-r.w} lost ${r.w}`}];}},
+ {n:"prod_B",f:"pout",l:"casual",t:"At Golden Tiger, lose twice in a row and you train three extra hours. I've added so much I don't know where to add any more."},
+ {n:"prod_B",f:"happy",l:"casual",t:"So I came to ask the one who stands in the corner of the girls who beat me. …What does this camp train that I don't?"},
+ {n:"nar",t:"What will you reply?",choice:[
+  {t:"\"Train to enjoy it first, then train hard.\"",fx:G=>add(G,"prod_B","bond",4),then:[{n:"prod_B",f:"pout",l:"casual",t:"Fun… I've written it down. I don't understand it yet, but it's written down."}]},
+  {t:"\"There's someone waiting to eat with them after training.\"",fx:G=>add(G,"prod_B","bond",6),then:[{n:"prod_B",f:"flustered",l:"casual",t:"…Dinner counts? I never thought it counted."}]},
+  {t:"\"Come and see for yourself. Sunday.\"",fx:G=>add(G,"prod_B","bond",5),then:[{n:"prod_B",f:"happy",l:"casual",t:"Sunday… fine. I'll come before anyone wakes up."}]}]},
+ {n:"prod_B",f:"pout",l:"casual",t:"…Can I have your number? In case I have a boxing question. Only boxing."},
+ {fx:G=>xlOpen(G,"prod_B")},{n:"nar",t:"Baiyok added you as a friend · chat, gifts and time together are in the Characters tab"}]});
+EVENTS.push({id:"xl_open_pailin",look:"casual",bg:"cafe",pri:45,when:G=>xlDue(G,"pailin"),steps:[
+ {n:"nar",t:"📱 A message from an unsaved Bangkok number: \"I'm in Chiang Mai tomorrow. The café by the university, ten o'clock. Not coming counts as a forfeit.\""},
+ {inject:G=>{const r=xlRec(G,"pailin");return [{n:"nar",t:"Pailin is already waiting, her tablet face-down on the table, her second black coffee half gone."},
+  {n:"pailin",f:"happy",l:"casual",t:`${r.n} fights the data said I should win, and I lost ${r.w}. …Today I'm not here as the head of Vector.`}];}},
+ {n:"pailin",f:"pout",l:"casual",t:"I came as someone who wants to know what the variable I can't measure is, and why it's in your camp and not in my lab."},
+ {n:"nar",t:"What will you reply?",choice:[
+  {t:"\"If you could measure it, it wouldn't be boxing.\"",fx:G=>add(G,"pailin","bond",4),then:[{n:"pailin",f:"pout",l:"casual",t:"The answer I hate most. …But I still have no data to argue with it."}]},
+  {t:"\"Because they fight for the people waiting for them, not for the numbers.\"",fx:G=>add(G,"pailin","bond",6),then:[{n:"pailin",f:"flustered",l:"casual",t:"…Ploy said that sentence to me ten years ago. Word for word."}]},
+  {t:"\"It's no fun if I tell you now.\"",fx:G=>add(G,"pailin","bond",5),then:[{n:"pailin",f:"happy",l:"casual",t:"That's cheating. Then I'll just have to keep collecting data on you."}]}]},
+ {n:"pailin",f:"happy",l:"casual",t:"Let's swap LINE. Purely for research. …And don't tell Ploy I came up to Chiang Mai."},
+ {fx:G=>xlOpen(G,"pailin")},{n:"nar",t:"Pailin added you as a friend · chat, gifts and time together are in the Characters tab"}]});
+
+/* ---------- chats (5 topics each · a reply moves her closeness a little) ---------- */
+CHAT.prod_B=[
+ {id:"yb_count",x:[
+  ["Three hundred left kicks, three hundred right. Done. …No one counts for me, so I'm sending them to you to count.",[["Counted. Exactly six hundred. Well done.",2,"…It feels strangely lighter with someone counting."],["Rest your legs a bit.",1,"No one has ever worried about my legs. Thanks."],["Why not seven hundred?",0,"…Fine. Seven hundred tomorrow."]]],
+  ["At Golden Tiger, if your kicks weren't done, the coach blew the whistle until they were. I still hear it in my sleep.",[["There are no whistles here. Just Auntie Daeng yelling that dinner's ready.",2,"…Being called to eat. I'd rather hear that instead."],["Let it fade slowly.",1,"I'm trying."],["Good for discipline, though.",0,"…Mm"]]],
+  ["Going to sleep. Five a.m. tomorrow.",[["Sweet dreams. Don't dream about whistles.",2,"…If I do, I'll think of Auntie Daeng's voice instead."],["Five a.m. at the temple ground.",1,"Fine. Don't be late."],["Mm.",0,"Mm."]]]]},
+ {id:"yb_grandma",x:[
+  ["Grandma asked why I've been eating more slowly lately.",[["So what did you tell her?",1,"I said someone taught me a meal doesn't have ten minutes. Grandma laughed until she coughed."],["Your grandma notices a lot.",2,"Grandma notices everything. …She also asked the teacher's name."],["Eating fast isn't wrong.",0,"…I like it slow better now."]]],
+  ["The elbow I close rounds with, Grandma taught me at seven, before anyone called me a prodigy.",[["Your grandma's boxing is the most beautiful thing about how you fight.",2,"…I'll tell Grandma. She'll be so happy."],["I'd love to meet your grandma.",2,"Grandma wants to meet you too. She said to bring you for rice soup."],["Golden Tiger didn't teach that move?",0,"They told me to drop it. I didn't."]]],
+  ["On Sunday Grandma's making sour curry. If you're free…",[["I'm free! I'll be there.",2,"…I'll tell Grandma to make it less spicy."],["Let me check my schedule.",1,"It's fine. Next time."],["I can't eat spicy food.",0,"Grandma will make clear soup for you. …Grandma's kinder than me."]]]]},
+ {id:"yb_fah",x:[
+  ["Fah sent a photo of the white hand wraps with gold trim and asked if I still use them.",[["You still use them every fight, right?",2,"Every fight. But don't tell Fah, she'll get smug."],["Fah worries about you.",1,"…I know. I just don't know how to answer someone who worries."],["Message her back.",0,"I've typed and deleted three times."]]],
+  ["At Golden Tiger the coach made me watch Fah's tapes every night. Said I had to fight like her.",[["But now you fight as yourself.",2,"…Yes. I chose my kit myself, my moves myself. And who I want to talk to, myself."],["Fah really is good.",1,"She's good. But I'll beat her one day."],["That must have been exhausting.",0,"I'm used to it."]]],
+  ["If I beat Fah next time, will you be angry?",[["I'll be happy for whoever fights better.",2,"…The fairest answer I've ever heard."],["I'm cheering for Fah, of course.",0,"Fair enough. She's in your camp."],["Try it.",1,"…I will."]]]]},
+ {id:"yb_rain",x:[
+  ["It's raining, the temple ground is mud. I'm still training.",[["You can train under the camp roof.",2,"…Really? I'll wipe my feet before I come in."],["Careful not to slip",1,"I've slipped twice. It didn't hurt."],["Rest when it rains.",0,"I don't know how to rest."]]],
+  ["When I was little, Grandma said rain is the angels clapping, so I like training in the rain.",[["Then the angels must be your fan club.",2,"…You say strange things. But I like it."],["Your grandma says such lovely things.",1,"Grandma says everything beautifully, except about money."],["You'll catch a cold if you get soaked.",0,"I never do."]]],
+  ["The rain's stopped. The sky's so orange… I took a photo, I'm sending it.",[["Beautiful. Thanks for sending it.",2,"I've never taken a photo of the sky to send anyone before."],["It's the same colour over the camp.",1,"Then we're looking at the same sky."],["Your phone takes sharp photos.",0,"…Grandma bought it for me."]]]]},
+ {id:"yb_smile",x:[
+  ["I won at the temple fair today, and the crowd said I smiled when they raised my hand. I didn't even notice.",[["I want to see! Send me the clip.",2,"…Don't laugh. I'm not good at smiling."],["Congratulations!",1,"Thanks."],["Careful smiling in the ring, you'll get countered.",0,"I know. …I'll be careful."]]],
+  ["At my old camp, smiling in the ring wasn't in the manual, so I thought I didn't know how.",[["Of course you can. You just had no one to smile with.",2,"…Now there is."],["You can learn slowly.",1,"I practised in the mirror. Grandma said it was scary."],["No smile looks cool",0,"Then I won't smile for you."]]],
+  ["If I smiled more often, would you be happy?",[["I'd be happiest of all.",2,"…Then I'll smile more. Only when you're there."],["Smile for yourself first.",2,"Myself first… I've written it down."],["Up to you.",0,"Mm"]]]]}];
+CHAT.pailin=[
+ {id:"pl_data",x:[
+  ["Your camp, three months: you lose the first round 12% more often than average but win the fifth 31% more. What do you do to them?",[["I tell them to breathe long and enjoy the first round.",2,"…Enjoy the first round. I'll add that column to the spreadsheet."],["Camp secret.",1,"So possessive. Then I'll analyse it myself."],["Luck, maybe",0,"Nothing is a coincidence at 31%."]]],
+  ["My lab team calls your camp 'the outlier' in every meeting.",[["Sounds like a compliment.",2,"…It is a compliment. Don't let it go to your head."],["Off the chart is good.",1,"Good for you. A headache for me."],["Why call it that?",0,"Because it can't be predicted. Obviously."]]],
+  ["Tonight I'll watch your camp's tapes until two. Don't worry, I have coffee.",[["Get some sleep. The tapes aren't going anywhere.",2,"…You sound just like Ploy. Fine. One a.m."],["Send me your notes in exchange.",1,"Keep dreaming."],["Go go!",0,"Thank you"]]]]},
+ {id:"pl_ploy",x:[
+  ["Is Ploy eating three meals a day? Don't tell her I asked.",[["All three, and she steals Fah's sausages too.",2,"…Good. As a kid she only ate rice with omelette."],["Why not ask her yourself?",1,"If I ask, she'll say 'Stay out of it, sis.' I know."],["Not sure.",0,"You should know. You're the manager."]]],
+  ["When Ploy won by first-round knockout at ten, everyone called her a prodigy. Nobody asked if she was tired.",[["You were the first to ask, weren't you?",2,"…Yes. And then I went to Bangkok and left her alone with that word."],["Ploy's stronger than you think.",1,"I know. Too strong, even."],["Talent's a good thing.",0,"…Good for the audience."]]],
+  ["Thank you for looking after my sister. I'll only say this once.",[["Said once, remembered forever.",2,"…You answer so well it's annoying."],["Ploy can look after herself.",1,"Yes. But it's better with someone helping."],["No problem",0,"It is"]]]]},
+ {id:"pl_run",x:[
+  ["5:20 a.m., ten kilometres, average heart rate 148. Just sharing.",[["Faster than yesterday, too.",2,"…You remember yesterday's?"],["You're up early.",1,"I wake up before every one of my watches."],["Isn't 148 a bit high?",0,"It's within range. Don't worry."]]],
+  ["Why do people keep asking why I run, when I don't fight much any more?",[["Because running clears your head.",2,"Correct. You're the first person who's answered it for me."],["Because you still want to fight, right?",2,"…You've read me already. That's not fair."],["I don't know",0,"That's fine."]]],
+  ["Come running with me sometime? I'll slow down for you. …A little.",[["Yes! But don't leave me behind.",2,"I'll wait at every kilometre marker. Promise."],["Can I follow on a bicycle?",1,"That's cheating. But I'll allow it."],["I can't keep up.",0,"Then I'll run alone."]]]]},
+ {id:"pl_vector",x:[
+  ["Today I signed away another of the old funding contracts. The whole lab went quiet.",[["You did the right thing.",2,"…Thank you. I wanted to hear someone say that."],["Will Vector be all right?",1,"I don't know. But I'll find a way that doesn't mean selling myself."],["Shame about the money.",0,"…That money had a higher price."]]],
+  ["My team asked why I don't just move the camp to Chiang Mai. I told them it's none of their business.",[["Then whose business is it?",2,"…Mine. I haven't answered myself yet."],["Bangkok's fine as it is.",1,"Yes. The data says so too."],["Come to Chiang Mai. The weather's nice.",1,"You're a good salesman."]]],
+  ["I still believe science can make fighting safer. We just can't forget that fighters are people.",[["That's exactly what makes you different.",2,"…I'll remember that sentence when I'm ready to give up."],["Agreed.",1,"Good. Then we're on the same team."],["People are just a set of numbers.",0,"…I used to think that. It led me the wrong way."]]]]},
+ {id:"pl_korat",x:[
+  ["Mum sent a three-tier tiffin all the way to my condo. I can't eat it fast enough.",[["Send one tier up to Chiang Mai.",2,"It can't go by post. …I'll carry it onto the plane for you."],["Your mum worries about you.",1,"Mum worries about everyone except herself."],["Put it in the fridge.",0,"Already done."]]],
+  ["When we were kids, Dad timed Ploy and me running up the hill. I won every time until Ploy was thirteen. Never again after that.",[["So you stopped racing your sister?",1,"So I switched to competing in things I could win. Mathematics, for example."],["Do you miss those days?",2,"…Every time I see the mist on Khao Yai."],["Ploy really is good.",0,"My sister. Of course."]]],
+  ["If one day I took you to Khao Yai when the mist comes down, would you come?",[["Definitely. Name the day.",2,"…I'll check ten years of weather records to find the best day."],["Shall we bring the whole camp?",1,"No. This one isn't a camp trip."],["Let me think about it",0,"No rush."]]]]}];
+
+/* ---------- time together: five places each, then short visits ---------- */
+const xB=(f,t)=>({n:"prod_B",f,l:"casual",t}),xP=(f,t)=>({n:"pailin",f,l:"casual",t}),xN=t=>({n:"nar",t});
+const XL_DATE={
+ prod_B:[
+  {name:"The riverside temple ground, 5 a.m.",bg:"river_dawn",steps:G=>[xN("The sky isn't light yet. Baiyok has one heavy bag hung from a tamarind branch, a skipping rope around her neck."),xB("happy","You're on time. …I thought you wouldn't get up."),
+   xN("She hands you an old skipping rope, its wooden handles worn into fingerprints."),xB("pout","A hundred, no stopping. …I'm joking. Fifty is fine."),xN("When you stop, gasping, at thirty, she lets out a short laugh and quickly turns away."),xB("flustered","I wasn't laughing. …It was the wind.")]},
+  {name:"Grandma's rice-soup stall",bg:"food",steps:G=>[xN("An old shophouse rice-soup stall. Baiyok's grandmother serves you fish rice soup in a bowl twice the size of her granddaughter's."),xB("pout","Grandma never serves me this much."),
+   xN("Grandma whispers that her granddaughter got up at four to slice ginger the moment she knew you were coming."),xB("flustered","Grandma! …You don't have to tell everything."),xB("happy","…Eat slowly. Nobody counts the time here.")]},
+  {name:"Old tapes while the rain falls",bg:"camp_rain",steps:G=>[xN("The rain is so heavy you shelter under the camp eaves. Baiyok opens a clip of an old fight on her phone: black kit, no smile."),
+   xB("sad","The one in this clip won every fight, but I can't remember what she felt at all."),{n:"nar",t:"What do you say?",choice:[
+    {t:"\"What do you feel now?\"",fx:G2=>add(G2,"prod_B","bond",2),then:[xB("flustered","…Cold. And I don't want the rain to stop.")]},
+    {t:"\"The one in the clip is very good. But I like the one beside me better.\"",fx:G2=>add(G2,"prod_B","bond",3),then:[xB("flustered","…The clip's closed. We don't need to watch it.")]}]}]},
+  {name:"A Chiang Mai temple fair",bg:"fair",steps:G=>[xN("A Saturday night temple fair. Baiyok stands stock-still in front of the dart stall with the dolls."),xB("happy","I hit every balloon, but they won't give me the big doll."),
+   xN("You buy another set of darts and miss every one. She laughs so loudly people turn to look."),xB("flustered","…Sorry. I haven't laughed that loud in a long time."),xN("On the way back she holds the smallest doll she won tight the whole way.")]},
+  {name:"Doi Suthep at dusk",bg:"mountain",steps:G=>[xN("The viewpoint on Doi Suthep. The lights of Chiang Mai come on one by one."),xB("happy","Ten years at Golden Tiger and I never once came up here, because Sundays were for training too."),
+   xB("pout","Now I have Sundays of my own. …I want to spend them like this."),xN("The wind is so strong the gold ribbon in her hair flies loose. You catch it in time."),xB("flustered","…Thanks. Can you tie it for me? I can't see behind me.")]}],
+ pailin:[
+  {name:"A late-night café in Nimman",bg:"cafe",steps:G=>[xN("Pailin orders two black coffees, one for you and one for her, then a spare."),xP("happy","I've prepared twenty questions. About your camp."),
+   xN("By question three, they've turned into what food you like, what you do on days off, and why you became a camp manager."),xP("flustered","…Questions four to twenty were filed under the wrong heading. You don't have to answer."),xP("happy","But if you'd like to answer, I have until the café closes.")]},
+  {name:"A morning run around the old city moat",bg:"river",steps:G=>[xN("Five-thirty a.m. Pailin, wearing three watches, stretches while she waits at Tha Phae Gate."),xP("happy","I've slowed down for you. 5:30 per kilometre."),
+   xN("At the third kilometre you start gasping. She jogs backwards to wait and laughs."),xP("pout","Your heart rate is 172. You can stop. I won't record it."),xN("You both sit by the moat to rest. She hands you the water bottle, the only one she brought."),xP("flustered","…I miscalculated. I should have brought two.")]},
+  {name:"Vector's Chiang Mai lab, not yet open",bg:"vector_lab",steps:G=>[xN("An empty second floor in an old building. A treadmill and two motion-capture cameras still in plastic."),
+   xP("happy","I've rented it for three months. I haven't told anyone, not even Ploy."),xP("sad","I want a place where science helps small camps without anyone having to sell anything to anyone."),{n:"nar",t:"What do you say?",choice:[
+    {t:"\"Sirichai will be your first client.\"",fx:G2=>add(G2,"pailin","bond",3),then:[xP("flustered","…There's no staff discount. But I'll give you the friendliest price.")]},
+    {t:"\"Then why tell me before Ploy?\"",fx:G2=>add(G2,"pailin","bond",2),then:[xP("flustered","…That data isn't ready for release.")]}]}]},
+  {name:"Warorot Market",bg:"market",steps:G=>[xN("Pailin walks the fruit stalls like someone with a planned route. Every stall has a note on her phone."),xP("happy","The longans here are 1.5 Brix sweeter than next door. I measured them last year."),
+   xN("The vendor asks if you're her boyfriend. Pailin answers 'business partner' a little too quickly."),xP("flustered","…Academic partner. Don't smile like that."),xP("happy","Take some back for the camp. Tell Ploy you bought them yourself.")]},
+  {name:"The rooftop after the rain",bg:"camp_night",steps:G=>[xN("Her flight back to Bangkok is delayed three hours. Pailin calls to tell you in a voice that doesn't sound sorry at all."),xP("happy","I have free time I didn't plan for. …It feels strange."),
+   xN("The camp rooftop is still wet with rain. She sits on the one plastic chair and never once opens her tablet."),xP("sad","Since founding Vector I've never sat still for more than five minutes."),xP("flustered","…Forty minutes have passed. I wasn't counting. My watch told me.")]}]};
+const XL_AGAIN={
+ prod_B:[{bg:"river_dawn",steps:G=>[xN("Five a.m. at the temple ground again. Baiyok shows you her kick count, then has you count for her."),xB("happy","Two hundred… you didn't lose count today.")]},
+  {bg:"food",steps:G=>[xN("Grandma's rice soup. Your bowl is even bigger than last time."),xB("pout","Grandma loves you more than me now.")]},
+  {bg:"camp",steps:G=>[xN("Baiyok drops by camp on Sunday and cleans the ring until it's cleaner than before."),xB("happy","I came before everyone woke up again.")]}],
+ pailin:[{bg:"cafe",steps:G=>[xN("The same café. Pailin arrives ten minutes early, as always."),xP("happy","My third coffee of the day. This one counts as yours.")]},
+  {bg:"river",steps:G=>[xN("Another run around the moat. Today she's brought two bottles of water."),xP("happy","I've corrected the error.")]},
+  {bg:"camp_night",steps:G=>[xN("A video call at ten at night. Pailin is still in the lab, but turns the camera to show you the Bangkok skyline."),xP("flustered","…Nothing. I just wanted you to see the lights.")]}]};
+
+/* ---------- heart scenes (closeness 25 / 45 / 65) ---------- */
+const XL_HEART={
+ prod_B:[
+  [xN("Baiyok texts at midnight: \"Come out to the camp gate.\""),xN("She's standing under the streetlight with an old shoebox in her hands."),xB("happy","I've kept the ticket from every fight against this camp, with the result written on the back."),
+   xB("pout","At first I wrote 'lost, fix it'. Now I write 'fun'. …I don't know when it changed."),{n:"nar",t:"What do you say?",choice:[
+    {t:"\"It changed when you chose to fight as yourself.\"",fx:G=>add(G,"prod_B","bond",3),then:[xB("flustered","…Or when someone stood in my corner without me asking.")]},
+    {t:"\"Fill the whole box.\"",fx:G=>add(G,"prod_B","bond",2),then:[xB("happy","I've already bought the second box.")]}]}],
+  [xN("The night before a big fight, Baiyok calls and says nothing for almost a minute."),xB("sad","…Grandma's in hospital. The doctor says it's not serious, but I'm sitting outside the room alone."),
+   xN("You drive there in twenty minutes. She stands the moment she sees you, then doesn't know what to do with her hands."),xB("sad","At my old camp, if anyone had trouble at home, the coach said leave it outside the ring. So I don't know where to put being scared."),
+   {n:"nar",t:"What do you do?",choice:[{t:"Sit beside her in silence until morning",fx:G=>add(G,"prod_B","bond",4),then:[xN("At six the doctor says her grandmother is awake. Baiyok is asleep, head drooped on your shoulder.")]},
+    {t:"\"Leave it with me for now.\"",fx:G=>add(G,"prod_B","bond",4),then:[xB("flustered","…It's heavy."),xN("She rests her head on your shoulder until morning.")]}]}],
+  [xN("Baiyok wins by knockout in the third. She runs down from the ring to the Sirichai corner, though it isn't her corner."),xB("happy","Did you see? …I smiled when they raised my hand. I knew it this time."),
+   xB("flustered","I smiled because I looked for you in the crowd, and found you."),xN("The referee calls her back to the ring three times. She still won't let go of your hand."),xB("pout","…Go on. Don't you disappear anywhere.")]],
+ pailin:[
+  [xN("Pailin sends a file at one in the morning, named 'outlier_v7'."),xN("It isn't camp statistics. It's a blurry photo of you and the fighters laughing at the ringside."),
+   xP("flustered","Wrong file. Delete it."),xP("pout","…If you haven't deleted it, then tell me why everyone in the photo looks so happy. I can't find the variable."),{n:"nar",t:"What will you reply?",choice:[
+    {t:"\"Because no one was being measured right then.\"",fx:G=>add(G,"pailin","bond",3),then:[xP("sad","…A conclusion I didn't want to hear. But I'll note it.")]},
+    {t:"\"Come sit there with us. Then you'll know.\"",fx:G=>add(G,"pailin","bond",3),then:[xP("flustered","…That's not proper research methodology. But I'll try it.")]}]}],
+  [xN("Pailin fights a warm-up bout in Bangkok and loses on points to a nineteen-year-old."),xN("That night she video-calls from the athletes' room, her hand wraps still on."),
+   xP("sad","The data says I should have retired three years ago. My speed drops 4% a year."),xP("sad","But today, losing, I was glad to still be standing in the ring. …I don't understand myself."),
+   {n:"nar",t:"What do you say?",choice:[{t:"\"Some things you don't have to understand. You just keep going.\"",fx:G=>add(G,"pailin","bond",4),then:[xP("flustered","…You sound like someone who has never opened a spreadsheet. But I'll believe you.")]},
+    {t:"\"I'm glad you're still fighting.\"",fx:G=>add(G,"pailin","bond",4),then:[xP("flustered","…No one has said that to me since my father.")]}]}],
+  [xN("Pailin comes up to Chiang Mai unannounced. She's waiting at the camp gate at sunset with one small bag."),xP("happy","I cancelled three meetings, pushed back a lab test, and lied to my team that I was on a site visit."),
+   xP("flustered","All this to watch a sunset with you, which has no statistical value whatsoever."),xN("She stops talking and looks at the sky instead."),xP("pout","…I'm losing control of my variables. And I don't want to control them.")]]};
+for(const id of XL_IDS)XL_HEART[id].forEach((st,k)=>EVENTS.push({id:"xlh_"+id+"_"+k,look:"casual",bg:id==="pailin"?["cafe","night","camp"][k]:["camp_night","hospital","hall"][k],pri:30,
+  when:G=>xlHeartDue(G,id,k),steps:[{fx:G=>{G.xlHeartAbs=gameWeek(G);}},...st,{inject:G=>{add(G,id,"bond",3);return [{n:"nar",t:`Bond with ${G.F[id].name} +3`}];}}]}));
+
+/* ---------- Baiyok moves in while she fights free in white and a dorm room is open: four weeks after she is yours, or (Man) as a close friend (closeness 60) eight weeks after she opened up ---------- */
+const xlJoinDue=G=>{const f=G.F.prod_B;return !!f&&xlOn(G,"prod_B")&&(xlLov(G,"prod_B")?absWeek(G)-G.xlov.prod_B>=4:(f.bond||0)>=60&&absWeek(G)-G.xl.prod_B.open>=8)&&f.camp!=="player"&&byFree(G)&&!(G.xlJoinNo&&absWeek(G)-G.xlJoinNo<8);};
+EVENTS.push({id:"xl_join_prod_B",look:"casual",bg:"camp",pri:40,when:xlJoinDue,steps:[
+ xN("Sunday morning. Baiyok reaches camp before anyone else, as always, but today there's an old suitcase beside her."),xB("pout","They're repairing the pavilion at the temple ground. No training for three months."),
+ xB("flustered","…I lied. The pavilion isn't being repaired. I just want to train here every day, not only on Sundays."),
+ {inject:G=>dormUsed(G)>=dormRooms(G)?[xN(`The dorm is full (${dormRooms(G)} rooms) · upgrade the dorm and she'll ask again`),{fx:G2=>{G2.xlJoinNo=absWeek(G2);if(G2.seen)delete G2.seen.xl_join_prod_B;}}]:[{n:"nar",t:"What will you reply?",choice:[
+  {t:"\"There's a free room upstairs. Move in.\"",fx:G2=>{joinCamp(G2,"prod_B",2500);const f=G2.F.prod_B;f.indie=false;f.full="Baiyok";add(G2,"prod_B","bond",5);add(G2,"prod_B","morale",15);},
+   then:[xB("happy","…I won't let anyone down."),xB("flustered","Except oversleeping. I have never overslept."),xN("Baiyok moves into Sirichai Camp · she fights Division B for us")]},
+  {t:"\"Not just yet.\"",fx:G2=>{G2.xlJoinNo=absWeek(G2);if(G2.seen)delete G2.seen.xl_join_prod_B;},then:[xB("pout","…All right. I'll wait. But I'm still coming Sundays.")]}]}]}]});
+
+/* ---------- two sisters (Pailin and Ploy) ---------- */
+const xlPloyNear=G=>G.F.ploy&&G.F.ploy.met&&(G.F.ploy.bond||0)>=40;
+EVENTS.push({id:"xl_sis1",look:"casual",bg:"camp",pri:35,when:G=>xlOn(G,"pailin")&&(G.F.pailin.bond||0)>=45&&xlPloyNear(G)&&!isAway(G,"ploy"),steps:[
+ xN("Ploy sets her phone down in front of you, open to her sister's chat. The latest message: \"Your camp manager runs very slowly. Pass that on.\""),
+ {n:"ploy",f:"pout",l:"casual",t:"My sister hasn't messaged me first in three years. She's messaged about you three days running."},{n:"ploy",f:"pout",l:"casual",t:"…When did you go running with my sister?"},
+ {n:"nar",t:"What will you reply?",choice:[{t:"\"Pailin misses you. She just doesn't know how to start.\"",fx:G=>{add(G,"ploy","bond",3);add(G,"pailin","bond",2);},then:[{n:"ploy",f:"sad",l:"casual",t:"…I don't know either."},{n:"ploy",f:"pout",l:"casual",t:"Tell her this Saturday, if she's free, to come run the hill here. The three of us."}]},
+  {t:"\"Jealous?\"",fx:G=>add(G,"ploy","bond",1),then:[{n:"ploy",f:"flustered",l:"casual",t:"Jealous of my sister or jealous of you, I haven't decided. Don't ask yet."}]}]}]});
+EVENTS.push({id:"xl_sis2",look:"casual",bg:"night",pri:36,when:G=>xlOn(G,"pailin")&&G.F.ploy&&G.F.ploy.met&&!isAway(G,"ploy")&&
+  ((xlLov(G,"pailin")&&(G.F.ploy.bond||0)>=45)||(isPartner(G,"ploy")&&(G.F.pailin.bond||0)>=45)),steps:[
+ {inject:G=>{const withP=xlLov(G,"pailin");return [xN("That night the two sisters sit on opposite sides of the camp dinner table. Neither touches her plate."),
+  withP?{n:"ploy",f:"pout",l:"casual",t:"You always got everything before me. Fought first, went to Bangkok first… and now again."}:{n:"pailin",f:"sad",l:"casual",t:"Ploy always got everything I wanted. The talent, the punch… and now this person too."},
+  withP?{n:"pailin",f:"sad",l:"casual",t:"…I'm not taking anything from you, Ploy. I've just never dared ask for something I really wanted. Until now."}:{n:"ploy",f:"sad",l:"casual",t:"…I never knew what you wanted from me, because you never said."},
+  {n:"nar",t:"They both turn to look at you.",choice:[
+   {t:"\"You two matter to me in different ways.\"",fx:G2=>{add(G2,"ploy","bond",2);add(G2,"pailin","bond",2);},then:[{n:"pailin",f:"pout",l:"casual",t:"A very diplomatic answer. I'd give it six out of ten."},{n:"ploy",f:"pout",l:"casual",t:"…Five out of ten. But I'll give you today."}]},
+   {t:"\"Talk it out first. I'll wait outside.\"",fx:G2=>{add(G2,"ploy","bond",3);add(G2,"pailin","bond",3);},then:[xN("Twenty minutes later, both sisters' laughter drifts out of the room. The first time you've heard them laugh together."),{n:"ploy",f:"happy",l:"casual",t:"…We've worked it out. The details are classified."}]}]}];}}]});
+
+/* ---------- when a heroine notices (once per new romance, if she is close to you) ---------- */
+const XL_TWO={kati:"Coach… I've seen you smiling at your phone all day. I don't have to ask. But I know.",mali:"Mali heard you go running in the mornings with someone… Mali's not upset. She's just kicking a little harder in training~",
+ rin:"For three weeks you have left camp every Sunday morning. I've logged it. I'm not asking for an explanation.",ploy:"…Don't say it. I've seen it",fah:"Hey! You think Fah doesn't know who's been texting you every night!? …Don't answer. Fah's going to train."};
+const xlTwoWho=(G,id)=>{const P=partners(G).filter(k=>XL_TWO[k]&&G.F[k]&&G.F[k].camp==="player"&&!isAway(G,k));if(P.length)return P[0];
+  const L=["kati","mali","rin","ploy","fah"].map(k=>G.F[k]).filter(f=>f&&f.camp==="player"&&f.met&&(f.bond||0)>=50&&!isAway(G,f.id)&&!(id==="pailin"&&f.id==="ploy")).sort((a,b)=>(b.bond||0)-(a.bond||0));return L.length?L[0].id:null;};
+for(const id of XL_IDS)EVENTS.push({id:"xl_two_"+id,look:"casual",bg:"camp",pri:34,when:G=>xlLov(G,id)&&absWeek(G)-G.xlov[id]>=1&&!!xlTwoWho(G,id),
+ steps:[{inject:G=>{const k=xlTwoWho(G,id);add(G,k,"bond",-2);return [{n:k,f:"pout",l:"casual",t:XL_TWO[k]},xN(`${G.F[k].name} knows about you and ${xlWho(id)}`)];}}]});
+Object.assign(TELL_WAIT,XL_WAIT);
+/* test host only (loadTestSave): Vector and Baiyok exist and the camp already has 6 bouts / 4 wins against each, so both opening scenes play at the end of the first week */
+function xlTestSetup(G){try{G.arcs=G.arcs||{};if(!G.arcs.vector){G.arcs.vector=G.season||1;ensureVector(G);}if(!G.F.prod_B&&G.F.fah){makeProdigy(G,"B","fah");}G.flags=G.flags||{};if(G.flags.byFree==null)G.flags.byFree=absWeek(G);fixProdigies(G);
+  for(const id of XL_IDS){if(!G.F[id]||xlRec(G,id).n>=6)continue;for(const res of ["W","W","L","W","L","W"])G.cal.push({wk:1,season:1,absWeek:1,a:"kati",b:id,bn:G.F[id].name,tier:"local",res});}}catch(e){console.error("xl test",e);}}
 

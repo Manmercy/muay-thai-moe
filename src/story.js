@@ -98,7 +98,7 @@ const LOVER_TIERS=[[1,"คนรัก"],[15,"แฟนที่รู้ใจ"
 const hTot=f=>((f&&f.bond)||0)+((f&&f.bondX)||0);
 // relationship state, written to work with a single romance (G.romance) and with several lovers / promises / exes (G.lovers, G.promise, G.exAbs)
 function relState(G,id){if(!G||!id)return null;const L=Array.isArray(G.lovers)?G.lovers:(G.romance?[G.romance]:[]);if(L.includes(id))return "lover";
-  if(G.promise&&G.promise[id]!=null)return "promise";if(G.exAbs&&G.exAbs[id]!=null)return "ex";const R=G.region;if(R&&R.lov&&R.lov[id]!=null)return "lover";if(R&&R.ex&&R.ex[id]!=null)return "ex";return null;} /* v1.91.28: regional champions keep their own romance track (G.region.lov / .ex) */
+  if(G.promise&&G.promise[id]!=null)return "promise";if(G.exAbs&&G.exAbs[id]!=null)return "ex";const R=G.region;if(R&&R.lov&&R.lov[id]!=null)return "lover";if(R&&R.ex&&R.ex[id]!=null)return "ex";if(G.xlov&&G.xlov[id]!=null)return "lover";if(G.xlex&&G.xlex[id]!=null)return "ex";return null;} /* v1.91.28: regional champions keep their own romance track (G.region.lov / .ex) */
 /* v1.89.11: Lv.30 is the top at 1,000 points — each step past 100 asks a little more (15 → 80) */
 const HEART_STEPS=[15,20,20,25,30,35,35,40,45,45,50,55,60,60,65,70,75,75,80],HEART_MAX=30,HEART_TOP=1000;
 const heartStep=n=>HEART_STEPS[n-11]||0; // points from Lv.n to Lv.n+1, for 11 ≤ n < 30
@@ -487,7 +487,7 @@ const isFriendz=(G,id)=>!!(G.friendz&&G.friendz[id]);
 const awayWord=(G,id)=>G.F[id].camp==="player"?"หนีไปจากค่าย":"ไม่ติดต่อมา";
 /* v1.91.72 (Man): a regional champion who has not joined the camp is not a "camp-mate" yet — that rung reads "friend from another camp" for her */
 const RG_CHAMP_IDS=["baibua","tabtim","alicia","chaba"];
-const outChamp=f=>!!(f&&RG_CHAMP_IDS.includes(f.id)&&f.camp!=="player");
+const outChamp=f=>!!(f&&(RG_CHAMP_IDS.includes(f.id)||f.id==="prod_B"||f.id==="pailin")&&f.camp!=="player"); /* v1.91.122: Baiyok / Pailin too */
 const tierFor=(n,f)=>n==="เพื่อนร่วมค่าย"&&outChamp(f)?"เพื่อนต่างค่าย":n;
 function relLabel(G,f,lv,short){return tierFor(relLabel0(G,f,lv,short),f);}
 function relLabel0(G,f,lv,short){const id=f&&f.id;if(G&&id&&G.F&&G.F[id]&&isAway(G,id)&&G.F[id].awayWhy==="train"){const n=awayLeft(G,id);return short?"ไปฝึกวิชา":`ไปฝึกวิชา (อีก ${n} สัปดาห์)`;}
@@ -821,7 +821,7 @@ EVENTS.push(
 // warn before a second "yes"
 const cheatWarn=(G,id)=>(partners(G).some(k=>k!==id)||rgLovN(G)>0)?[{n:"nar",t:"⚠ คุณมีคนรักอยู่แล้ว ถ้าตอบรับจะกลายเป็นคบซ้อน… เรื่องแบบนี้ปิดไม่มิดไปตลอดหรอกนะ"}]:[];
 const yesTxt=(G,id,t)=>(partners(G).some(k=>k!==id)||rgLovN(G)>0)?t+" (คบซ้อน)":t;
-const rgLovN=G=>G&&G.region&&G.region.lov?Object.keys(G.region.lov).length:0; /* v1.91.28: a regional champion you are seeing counts as someone else */
+const rgLovN=G=>(G&&G.region&&G.region.lov?Object.keys(G.region.lov).length:0)+(typeof xlLovN==="function"?xlLovN(G):0); /* v1.91.122: Baiyok / Pailin count too */ /* v1.91.28: a regional champion you are seeing counts as someone else */
 const lovSolo=G=>partners(G).length===1&&!rgLovN(G);
 const topLock=(G,id)=>isPartner(G,id)&&partners(G).length+rgLovN(G)>1; /* the top heart scene and the Lv.27/30 chats wait while you see more than one person (harem too) */ /* the lover bonus only holds while you see one person */
 // v1.30: lovers get their own dates/scenes; Ploy & Fah make a promise instead (romance with them waits for season 2)
@@ -2266,7 +2266,7 @@ function byVisitSteps(G){const F=G.flags,fah=inCamp(G,"fah"),mali=inCamp(G,"mali
   const d=F.byD||0;for(let i=0;i<D.length;i++){const s=D[(d+i)%D.length]();if(s){F.byV=Math.max(k,V.length);F.byD=d+i+1;F.byNext=absWeek(G)+BY_DROP_GAP;return s;}}
   F.byNext=absWeek(G)+BY_DROP_GAP;return [{n:"nar",t:"ใบหยกแวะมาใช้เวทีตอนเช้ามืด แล้วกลับไปก่อนที่ใครจะตื่น"}];}
 EVENTS.push(
- {id:"by_visit",pri:2,look:"casual",bg:"gym",when:G=>byFree(G)&&!!(G.prodigy&&G.F[G.prodigy.B])&&absWeek(G)>=(G.flags.byNext!=null?G.flags.byNext:G.flags.byFree+BY_GAP[0])&&!(G.F[G.prodigy.B].injury>0),
+ {id:"by_visit",pri:2,look:"casual",bg:"gym",when:G=>byFree(G)&&!!(G.prodigy&&G.F[G.prodigy.B])&&G.F[G.prodigy.B].camp!=="player"&&absWeek(G)>=(G.flags.byNext!=null?G.flags.byNext:G.flags.byFree+BY_GAP[0])&&!(G.F[G.prodigy.B].injury>0),
   steps:[{inject:G=>byVisitSteps(G)},{fx:G=>{delete G.seen.by_visit;}}]});
 
 /* v1.89.27: Petchara stays Golden Tiger — she becomes its captain, keeps an eye on Kati, takes the boss's anger, and sends Kati a challenge letter every year */
@@ -2807,10 +2807,10 @@ const TELL_WAIT={kati:"ผู้จัดการคะ… หนูดีใ�
   chaba:"…ยัง"};
 const loveLine=(L,G,id)=>{const v=L[id];return typeof v==="function"?v(G):v||"…";};
 const isChampLove=(G,id)=>!LOVE_IDS.includes(id)&&!!(G.region&&G.region.joined&&G.region.joined[id]!=null);
-const isLovAny=(G,id)=>isLov(G,id)||(typeof REGION!=="undefined"&&REGION.isLovC&&REGION.isLovC(G,id));
-const twoFor=(G,id)=>partners(G).some(k=>k!==id)||(G.region&&G.region.lov?Object.keys(G.region.lov).some(k=>k!==id):false);
-function takeAny(G,id){if(G.friendz)delete G.friendz[id];if(isChampLove(G,id)){REGION.takeC(G,id);}else takeLover(G,id);}
-const yesLine=(G,id)=>isChampLove(G,id)?(RG_JOIN[id]&&RG_JOIN[id].yes(G))||"…":LOVE_YES[id];
+const isLovAny=(G,id)=>isLov(G,id)||(typeof REGION!=="undefined"&&REGION.isLovC&&REGION.isLovC(G,id))||!!(G.xlov&&G.xlov[id]!=null);
+const twoFor=(G,id)=>partners(G).some(k=>k!==id)||(G.region&&G.region.lov?Object.keys(G.region.lov).some(k=>k!==id):false)||(G.xlov?Object.keys(G.xlov).some(k=>k!==id&&G.F[k]):false);
+function takeAny(G,id){if(G.friendz)delete G.friendz[id];if(typeof xlIs==="function"&&xlIs(id)){xlTake(G,id);}else if(isChampLove(G,id)){REGION.takeC(G,id);}else takeLover(G,id);}
+const yesLine=(G,id)=>typeof xlIs==="function"&&xlIs(id)?XL_YES[id]:isChampLove(G,id)?(RG_JOIN[id]&&RG_JOIN[id].yes(G))||"…":LOVE_YES[id];
 /* who is due to reach out (third "no" + 6 weeks, still close, still here) */
 function doorWho(G){const ids=[...LOVE_IDS,...Object.keys((G.region&&G.region.joined)||{})];
   return ids.find(id=>{const f=G.F[id];return f&&f.camp==="player"&&G.loveOff&&G.loveOff[id]!=null&&!loveOffLeft(G,id)&&!(G.doorDone&&G.doorDone[id])&&!isLovAny(G,id)&&!isAway(G,id)&&(f.bond||0)>=60;})||null;}
@@ -2823,15 +2823,17 @@ EVENTS.push({id:"lv_door",look:"casual",bg:"camp",pri:70,when:G=>!!doorWho(G),st
 /* the button in the Characters tab */
 function tellState(G,f){const id=f&&f.id;if(!id||!G.F[id])return null;const champ=isChampLove(G,id);
   /* v1.91.70 (Man): the button is not always there — it shows only once the hearts are really there (closeness 75), and stays hidden while she is away, just broken up, stepping back, or after a "not yet" until the 13 weeks are up */
-  if(!(LOVE_IDS.includes(id)||champ)||f.camp!=="player"||!f.met&&!champ||isLovAny(G,id)||(f.bond||0)<75)return null;
+  const xl=typeof xlIs==="function"&&xlIs(id)&&xlOn(G,id); /* v1.91.122: Baiyok and Pailin — wherever they train */
+  if(!(LOVE_IDS.includes(id)||champ||xl)||f.camp!=="player"&&!xl||!f.met&&!champ||isLovAny(G,id)||(f.bond||0)<75)return null;
+  if(xl&&G.xlex&&G.xlex[id]!=null&&absWeek(G)-G.xlex[id]<12)return null;
   if(isAway(G,id)||(champ?(G.region.ex&&G.region.ex[id]!=null&&gameWeek(G)-G.region.ex[id]<12):exWait(G,id))||loveOffLeft(G,id))return null;
   const t=G.tellAbs&&G.tellAbs[id];if(t!=null&&absWeek(G)-t<LOVE_TELL_CD)return null;
   return {ok:true};}
-function tellReady(G,f){const id=f.id;if(isChampLove(G,id)){const J=G.region.joined||{};return (f.bond||0)>=75&&gameWeek(G)-(J[id]||gameWeek(G))>=6;}return (f.bond||0)>=75&&(f.trust||0)>=40;}
+function tellReady(G,f){const id=f.id;if(typeof xlIs==="function"&&xlIs(id))return (f.bond||0)>=75&&absWeek(G)-((G.xl&&G.xl[id]&&G.xl[id].open)||absWeek(G))>=6;if(isChampLove(G,id)){const J=G.region.joined||{};return (f.bond||0)>=75&&gameWeek(G)-(J[id]||gameWeek(G))>=6;}return (f.bond||0)>=75&&(f.trust||0)>=40;}
 function tellSteps(G,id){const f=G.F[id],two=twoFor(G,id),ready=tellReady(G,f);
   const yes=[{fx:G2=>takeAny(G2,id)},{n:id,f:"flustered",l:"casual",t:yesLine(G,id)},{n:"nar",t:`ความสัมพันธ์กับ${f.name}: คนรัก ♥`}];
   const wait=[{fx:G2=>{(G2.tellAbs=G2.tellAbs||{})[id]=absWeek(G2);add(G2,id,"bond",1);}},{n:id,f:"flustered",l:"casual",t:loveLine(TELL_WAIT,G,id)},
-    {n:"nar",t:`${f.name}ยังไม่พร้อม · ต้องสนิทกันกว่านี้${!isChampLove(G,id)&&(f.trust||0)<40?` · ความเชื่อใจ ${Math.floor(f.trust||0)}/40`:""}${isChampLove(G,id)&&(f.bond||0)>=75?" · ให้เธอได้อยู่ค่ายนานกว่านี้อีกหน่อย":""} · บอกใหม่ได้อีก ${LOVE_TELL_CD} สัปดาห์`}];
+    {n:"nar",t:`${f.name}ยังไม่พร้อม · ต้องสนิทกันกว่านี้${!isChampLove(G,id)&&!(typeof xlIs==="function"&&xlIs(id))&&(f.trust||0)<40?` · ความเชื่อใจ ${Math.floor(f.trust||0)}/40`:""}${isChampLove(G,id)&&(f.bond||0)>=75?" · ให้เธอได้อยู่ค่ายนานกว่านี้อีกหน่อย":""} · บอกใหม่ได้อีก ${LOVE_TELL_CD} สัปดาห์`}];
   const spot=(typeof TELL_SPOT!=="undefined"&&TELL_SPOT[id])||"หลังค่าย",open=[{n:"nar",t:`คืนนั้นคุณไปตามนัดที่${spot} · ${f.name}รออยู่ก่อนแล้ว`},{n:"nar",t:"คุณบอกความรู้สึกไปตรง ๆ"}];
   if(!ready)return [...open,...wait];
   if(two)return [open[0],{n:"nar",t:"⚠ คุณมีคนรักอยู่แล้ว ถ้าบอกออกไปจะกลายเป็นคบซ้อน",choice:[{t:"บอกไปตามตรง (คบซ้อน)",then:[open[1],...yes]},{t:"ไม่บอกดีกว่า",then:[{n:"nar",t:"คุณเก็บคำพูดไว้ในใจ แล้วชวนคุยเรื่องซ้อมแทน"}]}]}];
