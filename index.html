@@ -8953,7 +8953,7 @@ AU.gsfx=function(kind,a){if(!this.init()||this.muted||!SETTINGS.sfx)return;const
   if(kind==="shimmer")for(let i=0;i<6;i++)T(i*.05,{f:1400+Math.random()*1400,type:"sine",dur:.12,peak:.06});};
 
 // ================= MUAY THAI MOE v1.3 — UI =================
-const VERSION="1.91.134";
+const VERSION="1.91.135";
 const CUR_LANG=(typeof window!=="undefined"&&window.LANG)||"th";
 const TH_LABEL=String.fromCharCode(3652,3607,3618);
 function langSwitch(cls){return `<div class="langsw ${cls||""}" role="group" aria-label="Language">${[["th",TH_LABEL],["en","EN"]].map(([k,l])=>`<button class="lsb ${CUR_LANG===k?"on":""}" data-act="setlang" data-v="${k}" aria-pressed="${CUR_LANG===k}">${l}</button>`).join("")}</div>`;}
@@ -9344,7 +9344,7 @@ function newsItems(){const N=[...(G.lvNews||[]).slice(0,1)],st=standings(G,"A").
   if(G.rep>=10)N.push(`ค่ายมวยศิริชัยกลับมาเป็นที่พูดถึงอีกครั้ง หลังเงียบไปหลายปี`);
   const nb=G.bookings.filter(b=>G.F[b.a].camp==="player").sort((a,b)=>a.week-b.week)[0];if(nb)N.push(`โปรแกรมสัปดาห์ ${nb.week}: ${G.F[nb.a].name} ปะทะ ${G.F[nb.b].name}`);
   N.unshift(...funnyNews(2));
-  if(typeof bdayWeek==="function")for(const id of ["kati","mali","rin","ploy","fah"]){const f=G.F[id];if(!f||!(f.camp==="player"||f.met))continue;const d=bdayWeek(id)-G.week;if(d>=0&&d<=2)N.unshift(d===0?`🎂 สัปดาห์นี้วันเกิด${f.name}!`:`🎂 อีก ${d} สัปดาห์ วันเกิด${f.name}`);}
+  if(typeof bdayWeek==="function")for(const id of (typeof BDAY_DM!=="undefined"?Object.keys(BDAY_DM):["kati","mali","rin","ploy","fah"])){const f=G.F[id];if(!f||!(f.camp==="player"||f.met))continue;const d=bdayWeek(id)-G.week;if(d>=0&&d<=2)N.unshift(d===0?`🎂 สัปดาห์นี้วันเกิด${f.name}!`:`🎂 อีก ${d} สัปดาห์ วันเกิด${f.name}`);}
   N.push(["ราคาน้ำมันมวยปรับขึ้น 5 บาท แม่ค้าบอก 'ช่วงนี้ขายดี'","สนามมวยอำเภอติดแอร์ใหม่ คนดูไม่ต้องพัดวีแล้ว","ครูมวยโคราชวัย 80 ยังสอนหมัดเหวี่ยงควายทุกเช้า","มวยหญิงได้รับความนิยมขึ้น ผู้ชมเพิ่มเกือบเท่าตัว","ชาวต่างชาติแห่เรียนมวยไทยช่วงไฮซีซัน"][G.week%5]);
   return N;}
 /* v1.88 yearly theme chip on the camp page; tap for what it means this year */
@@ -11523,7 +11523,7 @@ function repgraphHTML(){const r=G.rep,S=repSteps();const nx=S.find(([n])=>r<n),p
 // fight calendar under the rankings
 /* v1.87: the calendar also shows birthdays, festivals and the camp beauty contest */
 function calEvents(w){const E=[],S=G.season||1;
-  for(const id of ["kati","mali","rin","ploy","fah"]){const f=G.F[id];if(f&&(f.camp==="player"||f.met)&&typeof bdayWeek==="function"&&bdayWeek(id)===w)E.push({ic:"🎂",t:`วันเกิด${f.name}`});}
+  for(const id of (typeof BDAY_DM!=="undefined"?Object.keys(BDAY_DM):["kati","mali","rin","ploy","fah"])){const f=G.F[id];if(f&&(f.camp==="player"||f.met)&&typeof bdayWeek==="function"&&bdayWeek(id)===w)E.push({ic:"🎂",t:`วันเกิด${f.name}`});}
   const FE={26:["🏮","ลอยกระทง"],32:["🎆","ปีใหม่"],37:["🙏","ไหว้ครูประจำปี"],47:["💦","สงกรานต์"]};if(FE[w])E.push({ic:FE[w][0],t:FE[w][1]});if(typeof LOTTO_WK!=="undefined"&&LOTTO_WK.some(x=>x+2===w))E.push({ic:"🎟️",t:"ผลสลากออก"});
   /* v1.88 yearly theme marks */const yk=typeof ytKey==="function"&&ytKey(G);if(yk){const T=YEAR_THEMES[yk];if(T.from!=null&&w>=T.from&&w<=T.to)E.push({ic:T.ic,t:T.name});
     if(yk==="sponsor"&&G.yt.acc&&w===40)E.push({ic:"💼",t:"ตัดยอดชนะ 8 ไฟต์ของสปอนเซอร์"});}
@@ -14092,7 +14092,7 @@ Object.assign(CARDS,{
 <script>
 (function(){
 /* v1.87: Thai code ships inside index.html; English code (en.js) and the dictionary (i18n.js) load only when needed */
-var B="3993619cbb";
+var B="6bb96e001b";
 var L="";try{L=localStorage.getItem("mtm_lang")||"";}catch(e){}
 try{var h=(location.hash||"").match(/lang=(th|en)/);if(h)L=h[1];}catch(e){}
 if(L!=="th"&&L!=="en")L="th";

@@ -719,6 +719,64 @@ RG_CHAT.alicia=[
   ["If one day nobody watches my lives anymore, would you still watch?",[["Of course. Even if I'm your only viewer.",2,"…One viewer is enough."],["Your viewers won't disappear.",1,"Dodging the question. But thanks anyway."],["I don't know",0,"…That's a bit too honest."]]],
   ["Going to bed. Don't reply with a sticker, so I don't have to answer back.",[["(Send a sticker)",1,"…Replied. Happy? (heart sticker)"],["What a lovely dream",2,"…Sweet dreams, Manager."],["OK",0,"Good night."]]]]}];
 CHAT.alicia=RG_CHAT.alicia;
+/* v1.91.135 (Man): chats that only open once she has moved into the camp; the old problem chats close once that problem is behind her */
+{const J=G=>!!(G.region&&G.region.joined),inJ=c=>G=>!!(J(G)&&G.region.joined[c]),notJ=c=>G=>!inJ(c)(G),L=c=>G=>!!(inJ(c)(G)&&G.region.lov&&G.region.lov[c]!=null);
+for(const [c,id] of [["baibua","bb_vector"],["chaba","cb_naka"],["alicia","al_mgr"]]){const t=(RG_CHAT[c]||[]).find(x=>x.id===id);if(t)t.when=notJ(c);}
+const ADD={
+ baibua:[
+  {id:"bb_j_room",when:inJ("baibua"),x:[
+   ["My room at the camp faces Doi Suthep. Every morning I wake up to the temple on the mountain.",[["I picked that room for you on purpose.",2,"...Really? I thought it was a coincidence."],["Do you like it?",1,"I do. It's like a second home."],["I'll put up curtains for you.",1,"No need. I like the morning light."]]],
+   ["Kati knocked on my door at five this morning to go running.",[["Go running with Kati. You'll get close.",2,"Mm, running with Kati's fun, but she's really fast."],["Isn't five a bit early?",1,"At home I get up at four-thirty every day, hee hee."],["Tell Kati to go easy.",0,"It's fine. I don't mind at all."]]],
+   ["Thank you for coming all the way to Tha Sao to get me.",[["I'd come and get you any number of times.",2,"...If you say things like that often, I'll be too flustered to train."],["Welcome to Sirichai Camp.",1,"Mm! I'll make the camp proud."],["No need to thank me.",1,"I have to thank you."]]]]},
+  {id:"bb_j_spa",when:inJ("baibua"),x:[
+   ["Mum sent photos of the spa. Every room's full of customers.",[["Because you protected it.",2,"Because you and the whole camp helped. I couldn't have done it alone."],["Tell your mum I'm happy for her.",1,"Mum says thank you, Manager."],["I'll come for a massage on a day off.",2,"Come any time. I'll give you the massage myself, free."]]],
+   ["Nobody comes to cause trouble now. I slept soundly for the first time in a year.",[["You've earned the rest.",2,"...Mm. Thank you."],["If anyone comes again, tell me.",2,"You'll be the first person I tell."],["Good",1,""]]],
+   ["Tonight I'm making khao soi for the whole camp.",[["From that secret shop?",2,"Same recipe! I asked the auntie who owns the shop for it."],["I'll help chop the shallots.",2,"Mm! Come to the kitchen at six."],["Can't wait.",1,"Mm!"]]]]},
+  {id:"bb_j_miss",when:L("baibua"),x:[
+   ["You're right in the next room, and I'm still messaging you.",[["Message me any time.",2,"...I like typing more than talking, because nobody can see me go red."],["Come out and talk in front of the room.",2,"No way! Kati's sitting right there."],["Missed you too.",2,"...I didn't say I miss you. But yes, I do."]]],
+   ["I'm fighting tomorrow. Give me some encouragement?",[["Once the lotus blooms, you'll win.",2,"Hee hee, using my own technique's name to cheer me on? It works."],["Have fun out there. Don't get hurt.",2,"Mm, I'll come back in one piece."],["Go go!",1,"Mm!"]]],
+   ["Good night... Bua's going to sleep now.",[["Good night, Bua.",2,"...Calling me that before bed, I won't be able to sleep."],["See you in the morning.",1,"Mm, at the training yard."],["Dream about you too.",2,"I told you I won't be able to sleep!"]]]]}],
+ tabtim:[
+  {id:"tt_j_camp",when:inJ("tabtim"),x:[
+   ["Manager! I've covered my room in Mum's silk. Prettiest room in the camp!",[["Let me see it.",2,"Come on over! I've tidied up... almost tidied up."],["Prettier than Ploy's room?",2,"Of course! Don't tell Ploy, ha ha."],["Don't put up too much, it's a fire hazard.",0,"Silk doesn't burn that easily! ...I think."]]],
+   ["Big sister Ploy taught me hooks. She says kicks alone aren't enough.",[["Ploy and Tabtim, two Korat girls running the camp now.",2,"Yes! Team Korat!"],["Listen to Ploy carefully.",1,"I'm listening, even if she's a bit strict."],["But your kicks are already good.",1,"Right! That's what I think too, ha ha."]]],
+   ["This camp's more fun than I thought. Thank you!",[["Glad you came, Tabtim.",2,"I'm glad I came too! So much fun!"],["The camp's a lot louder now.",1,"Ha ha, well, I'm here now!"],["I haven't done anything yet.",1,"You've done a lot. You just don't notice."]]]]},
+  {id:"tt_j_nil",when:inJ("tabtim"),x:[
+   ["Brother Nil sent me a sticker! One sticker!",[["That's the first step.",2,"Yes! An orange cat... he even remembered I'm called Orange Cat."],["Reply to him.",2,"I did! I replied with ten stickers, ha ha."],["It's just a sticker.",0,"You don't get it! For Brother Nil that's a lot!"]]],
+   ["Brother Petch asked if he can visit the camp on his day off.",[["Come any time. He's welcome.",2,"Yay! I'll tell him right away. I'll take him for som tam at the stall outside camp."],["Have him come train with us.",2,"Oh wow, Brother Petch is going to love that."],["Ask Kati first.",0,"Why do you have to ask Kati, ha ha. Okay."]]],
+   ["Someday I want all three of us siblings on the same stage again.",[["That day will come.",2,"...Thank you. I believe you."],["I'll definitely be cheering ringside.",2,"You have to sit in the front row!"],["Nil has to get out of the Naka League first.",1,"Mm... I know. But I can wait."]]]]},
+  {id:"tt_j_love",when:L("tabtim"),x:[
+   ["Manager! On last night's live someone asked if I have a boyfriend. I already answered!",[["What did you say?",2,"I said yes! My boyfriend's great at kicking, ha ha. Well, I am."],["Don't go saying anything weird.",1,"I only said I have one! ...With a big grin."],["That's Tabtim for you.",2,"That's me!"]]],
+   ["There's a full moon tonight. Come look at it in front of the camp with me?",[["Coming right now.",2,"Hurry! I brought mango sticky rice."],["Let me finish work first.",1,"Okay, I'll wait. But don't take long."],["I'm sleepy",0,"Nope! The moon won't wait!"]]],
+   ["Good night... don't dream about anyone else.",[["I'll only dream about Orange Cat.",2,"Ha ha, good! Good night!"],["No threats.",1,"It's not a threat! Just a warning, ha ha."],["Night",1,"Good night!"]]]]}],
+ alicia:[
+  {id:"al_j_camp",when:inJ("alicia"),x:[
+   ["Morning. My room has no air-con, but it has a window... it's fine. I'll live.",[["I'll get you air-con.",1,"No no. I want to try living like a real fighter, just once."],["That window gets a beautiful sunrise.",2,"...True. I got up to watch it this morning. I haven't seen one like that in a long time."],["Can you put up with it?",1,"I'm tougher than I look."]]],
+   ["Rin made me a training schedule. With graphs. Who does that?",[["That's Rin.",2,"Ha. Fair. It's a good schedule too, better than my old camp's."],["Just follow Rin's plan.",1,"Already am. She's stricter than my trainer in Korea."],["Don't tell Rin you complained.",1,"My lips are sealed."]]],
+   ["Nobody tells me to smile here. It's... weird. In a good way.",[["Smile when you feel like it. That's enough.",2,"...Thank you. That's what I've wanted all along."],["But you look pretty when you smile.",1,"Don't push it. ...Thank you."],["This isn't an agency.",2,"Yeah. This is a boxing camp. I love it."]]]]},
+  {id:"al_j_song",when:inJ("alicia"),x:[
+   ["I've written half a verse. Nobody wrote it for me. I wrote it myself.",[["Can I hear it?",2,"Not yet. When it's done, you'll be the first to hear it. Promise."],["What's it about?",1,"About someone who ran away to become a fighter. ...Too obvious?"],["Great job",1,"Thanks. You haven't even heard it yet, ha."]]],
+   ["Mr. Krit called. He says there's a concert waiting if I want to go back.",[["Do you want to go back?",2,"...Not now. Right now I want to finish the season fighting."],["You can do both.",2,"Boxing and music. Why not both? You sound just like Mr. Krit, ha."],["Stay at the camp.",1,"I'm staying. Don't worry."]]],
+   ["Fans have started sending me pictures of me wearing a mongkol. Not concert stage photos anymore.",[["Real fans follow you anywhere.",2,"...Yeah. They've always been with me. I'm lucky."],["The mongkol really suits you.",2,"I know, right? Ha ha."],["Good",1,"Mm."]]]]},
+  {id:"al_j_love",when:L("alicia"),x:[
+   ["Sorry for messaging so late. I can't sleep. I just wanted to talk to you.",[["We can talk any time.",2,"...That's dangerous. I'll message every night."],["Is something wrong?",2,"Nothing's wrong. That's the weird part. Everything's too good."],["There's morning training tomorrow, you know",0,"Fine, fine. Good night, coach."]]],
+   ["The song's finished. The title is this camp's name. Don't laugh.",[["I won't laugh. It's really touching.",2,"...Okay. Tonight I'll sing it just for you."],["Sing it for the whole camp.",1,"Maybe later. You have to be the first."],["A camp's name can be a song title?",1,"I can do anything. You know that."]]],
+   ["Good night. ...You know, the person who stays beside you when no one's watching, that's the one who matters.",[["I'll always be here.",2,"I know. That's why it's you."],["Good night, Alicia.",1,"Good night."],["Three hundred thousand live viewers count too, you know.",0,"Ha. Doesn't count."]]]]}],
+ chaba:[
+  {id:"cb_j_camp",when:inJ("chaba"),x:[
+   ["My room's next to Mali's. Mali talks all night.",[["You two are really close.",2,"...Mm. Since we were kids. I'm not complaining. Just sleepy."],["Want to change rooms?",0,"No. No need."],["At least you're not lonely.",2,"...True. Not lonely."]]],
+   ["No sea, but the Ping River will do.",[["I'll take you to see the river on a day off.",2,"...Let's go."],["Do you miss the sea?",2,"Every day. But it's fine."],["Chiang Mai's cold, isn't it?",1,"Cold. I'm wearing three layers."]]],
+   ["Thanks. For letting me come.",[["Welcome, Chaba.",2,"…Mm."],["The whole camp's happy.",2,"Mali cried when I arrived. ...I almost did too."],["No need to thank me.",1,"I have to."]]]]},
+  {id:"cb_j_bro",when:inJ("chaba"),x:[
+   ["My brother sent a photo. He can get on a boat now. His legs don't shake.",[["I'm happy for him.",2,"...I'm happy too. Cried a little. Can't tell anyone."],["Invite him to the camp.",2,"He says he'll come at low tide. ...Nice."],["You helped him a lot.",1,"Not me. He did it himself."]]],
+   ["Nobody follows my boat anymore. The pier's quiet.",[["Because you fought.",2,"...Because I didn't fight alone."],["If anyone comes again, tell me.",2,"I'll tell."],["Good",1,"Mm."]]],
+   ["I can tie a new knot. Want me to teach you?",[["Teach me.",2,"Come to the training yard. Bring rope."],["What kind of knot?",1,"A knot that won't slip. Not even in a storm."],["Another day.",0,"…Mm."]]]]},
+  {id:"cb_j_love",when:L("chaba"),x:[
+   ["You asleep?",[["Not yet. Waiting for you to message.",2,"...Wasn't waiting. ...Were you?"],["About to sleep.",1,"Mm. Sleep."],["Why?",1,"Nothing. Just asking."]]],
+   ["Training wore me out today, but seeing your face made it go away.",[["You say things like this?",2,"...Can't unsend it. Forget it."],["You see my face every day.",2,"Then I feel better every day."],["Go get some rest.",1,"Mm."]]],
+   ["Good night, my person.",[["Good night, Chaba.",2,"…Tasty."],["Your person, is it?",2,"Yes. The knot's tied. It won't come loose."],["Night",1,"Mm."]]]]}]};
+for(const c in ADD){RG_CHAT[c]=RG_CHAT[c]||[];for(const t of ADD[c])if(!RG_CHAT[c].some(x=>x.id===t.id))RG_CHAT[c].push(t);if(typeof CHAT!=="undefined")CHAT[c]=RG_CHAT[c];}}
+
 /* ---------- v1.90 limit break: a fighter with every stat at 20 (Lv.20+) leaves camp for two weeks of training and comes back with a ceiling of 25 ---------- */
 const LB_CAP=25;
 const lbFull=f=>!!f&&ATTRS.every(([k])=>f.a[k]>=19.95);
@@ -2730,6 +2788,8 @@ const RG_HANG2={},RG_AGAIN={},RG_HEART={},RG_LOVE2={},RG_HEART_AT=[40,55,70],RG_
 function rgRelDue(G){const R=G.region;if(!R||!R.joined)return null;const now=gameWeek(G);R.hs=R.hs||{};R.ls=R.ls||{};
   for(const cid of Object.keys(R.joined)){const f=G.F[cid];if(!f||f.camp!=="player"||(typeof isAway==="function"&&isAway(G,cid)))continue;
     const hs=R.hs[cid]=R.hs[cid]||{};if(RG_HEART[cid])for(const th of RG_HEART_AT)if(!hs[th]&&(f.bond||0)>=th&&RG_HEART[cid][th]){hs[th]=now;return {cid,steps:RG_HEART[cid][th](G)};}
+    if(R.lov&&R.lov[cid]!=null&&RG_PAIRSAY[cid]){R.lr=R.lr||{};const r=RG_ORDER.find(x=>RG_CID0[x]===cid),pid=r&&RG_CH[r]&&RG_CH[r].pair,pf=pid&&G.F[pid],solo=!(typeof partners==="function"&&partners(G).length)&&!Object.keys(R.lov).some(k=>k!==cid&&G.F[k]);
+      if(!R.lr[cid]&&now-R.lov[cid]>=1&&solo&&pf&&pf.camp==="player"&&!(typeof isAway==="function"&&isAway(G,pid))){R.lr[cid]=now;return {cid,steps:RG_PAIRSAY[cid]};}}
     if(R.lov&&R.lov[cid]!=null&&RG_LOVE2[cid]){const ls=R.ls[cid]=R.ls[cid]||{};for(const w of RG_LOVE_AT)if(!ls[w]&&now-R.lov[cid]>=w){ls[w]=now;return {cid,steps:RG_LOVE2[cid][w](G)};}}}
   return null;}
 /* ---- ใบบัว ---- */
@@ -2939,6 +2999,35 @@ RG_LOVE2.chaba={
   {n:"chaba",f:"flustered",l:"casual",t:"...Not smiling. Sun's strong.",choice:[
    {t:"\"The sun's been strong every day lately\"",fx:G2=>add(G2,"chaba","bond",5),then:[{n:"chaba",f:"happy",l:"casual",t:"...Mm. Every day. Because someone's standing next to me."}]},
    {t:"Ask her brother to walk with you to the end of the procession",fx:G2=>add(G2,"chaba","bond",4),then:[{n:"npc",who:"Chaba's brother",t:"End of the procession! Next year I'll run it!"},{n:"chaba",f:"sad",l:"casual",t:"...I'll watch. Every Chak Phra. Never miss one."}]}]}]};
+
+/* v1.91.135 (Man): champions in the camp have birthdays like the heroines (Baibua 12 Nov · Tabtim 14 Apr · Alicia 1 Jan · Chaba 5 Oct) */
+const RG_BDAY={
+ baibua:{dm:[12,10],bg:"camp",y1:[{n:"nar",t:"Baibua's birthday falls on Yi Peng night. The whole camp folds a big pile of lanterns down by the landing."},{n:"baibua",f:"flustered",l:"casual",t:"Every year I release lanterns with just Mum and Dad... this year with the whole camp. It's brighter than ever."}],
+  y2:[{n:"nar",t:"Another Yi Peng. Kati secretly writes Baibua's name on every lantern."},{n:"baibua",f:"happy",l:"casual",t:"My name is floating all over the sky... I could die of embarrassment."}],
+  gift:"...This is for me? I'll keep it next to that teen jok cloth.",party:"Sirichai Camp releases twenty lanterns at once. Baibua stands smiling at the landing until the last one is out of sight.",wish:"Thank you... just hearing you wish me well is enough, Manager."},
+ tabtim:{dm:[14,3],bg:"camp",y1:[{n:"nar",t:"Tabtim's birthday falls on Songkran, one day after Kati's, so the camp stays soaked two days running."},{n:"tabtim",f:"happy",l:"casual",t:"My birthday has to be more fun than Kati's! Put on the mor lam! Anyone who doesn't dance gets splashed!"}],
+  y2:[{n:"nar",t:"Another Songkran. Tabtim's little brothers and sisters ride the bus all the way to camp to surprise their big sister on her birthday."},{n:"tabtim",f:"sad",l:"casual",t:"All of you came?... Who told you to come! Sniff, I'm not crying. It's Songkran water in my eyes."}],
+  gift:"For me, really? So fun! I'll use it every day!",party:"Mor lam blares until two in the morning. Tabtim drags everyone in the camp up to dance, one by one.",wish:"This is enough... I'm happy you remembered my birthday, Manager."},
+ alicia:{dm:[1,0],bg:"camp",y1:[{n:"nar",t:"New Year's Day, Alicia's birthday. Her phone hasn't stopped buzzing since midnight, but she's left it face down on the table."},{n:"alicia",f:"flustered",l:"casual",t:"No birthday live this year. ...I want to celebrate with the camp, that's all. Don't make that face."},{n:"ploy",f:"happy",l:"casual",t:"Same day as mine. ...This year someone's blowing out the cake with me."}],
+  y2:[{n:"nar",t:"Another New Year. Alicia and Ploy blow out the same cake for the second year running."},{n:"alicia",f:"happy",l:"casual",t:"New camp tradition. One cake, two birthdays. No exceptions."}],
+  alt:{y2:[{n:"nar",t:"Another New Year. The whole camp counts down together, then shouts happy birthday to Alicia instead of happy New Year."},{n:"alicia",f:"happy",l:"casual",t:"Happy New Year... and happy birthday to me. Even louder than last year."}],party:"The camp sets off small fireworks at midnight and sings happy birthday louder than any New Year song."},
+  gift:"...You remembered. Not everyone remembers New Year's Day is my birthday too.",party:"The camp sets off small fireworks and sings happy birthday twice: once for Alicia, once for Ploy.",wish:"Thank you... I don't need anything more than this."},
+ chaba:{dm:[5,9],bg:"camp",y1:[{n:"nar",t:"The morning of the fifth of October. Chaba trains as usual and tells no one what day it is."},{n:"mali",f:"happy",l:"casual",t:"(whispering) Today's big sister Chaba's birthday~ I've remembered since we were kids. She's never celebrated it."}],
+  y2:[{n:"nar",t:"Chaba's birthday comes round again. This year her brother sends a parcel from Phuket: a new seashell wind chime."},{n:"chaba",f:"happy",l:"casual",t:"...He made it himself. Took three months. I'm hanging it outside my room."}],
+  gift:"...For me. Thanks. Don't know what to say.",party:"The whole camp sings happy birthday. Chaba stands perfectly still until the song ends, then says a single word, \"...Delicious,\" though she hasn't touched the cake.",wish:"...Mm. Thanks."}};
+if(typeof BDAY_DM!=="undefined"&&typeof EVENTS!=="undefined")for(const id of Object.keys(RG_BDAY)){const B=RG_BDAY[id];BDAY_DM[id]=B.dm;
+  if(EVENTS.some(e=>e.id==="bday_"+id))continue;
+  EVENTS.push({id:"bday_"+id,annual:true,pri:1,look:"casual",bg:B.bg,when:G=>{const w=bdayWeek(id);return w>0&&G.week>=w&&G.week<=w+1&&!!(G.region&&G.region.joined&&G.region.joined[id])&&inCamp(G,id);},steps:[
+    {inject:G=>{const last=G.bday&&G.bday[id],noP=B.alt&&!inCamp(G,"ploy"),Y=last&&last.y<(G.season||1)?(noP?B.alt.y2:B.y2):B.y1.filter(x=>!noP||x.n!=="ploy"),PT=noP?B.alt.party:B.party;return Y.concat([{n:"nar",t:"What will you do for her?",choice:[
+      {t:"A gift chosen with care (฿800)",fx:G2=>{G2.cash-=800;add(G2,id,"bond",8);(G2.bday=G2.bday||{})[id]={y:G2.season||1,c:0};},then:[{n:id,f:"flustered",l:"casual",t:B.gift}]},
+      {t:"Throw a party for the whole camp (฿2,000 · everyone: morale +6)",fx:G2=>{G2.cash-=2000;add(G2,id,"bond",5);R_ALL(G2,f=>{f.morale=Math.min(100,f.morale+6);});(G2.bday=G2.bday||{})[id]={y:G2.season||1,c:1};},then:[{n:"nar",t:PT}]},
+      {t:"Heartfelt wishes",fx:G2=>{add(G2,id,"bond",3);(G2.bday=G2.bday||{})[id]={y:G2.season||1,c:2};},then:[{n:id,f:"happy",l:"casual",t:B.wish}]}]}]);}}]});}
+/* v1.91.135: the week after she and the manager get together, her partner in the camp says something (only when there is no one else) */
+const RG_PAIRSAY={
+ baibua:[{n:"kati",f:"happy",l:"casual",t:"Baibua and the manager... I'm so happy for you! I knew it the day they went all the way to Chiang Mai to fetch you."},{n:"baibua",f:"flustered",l:"casual",t:"Kati... thank you. I promise I won't steal the manager from your morning runs."}],
+ tabtim:[{n:"ploy",f:"happy",l:"casual",t:"Tabtim has been twice as loud since last week. The whole camp knows. ...Look after each other, both of you."},{n:"tabtim",f:"happy",l:"casual",t:"Big sister Ploy gave us her blessing! Korat girls have to understand each other!"}],
+ alicia:[{n:"rin",f:"happy",l:"casual",t:"The probability of me guessing this wrong was zero. I knew since the Ayutthaya boat trip. ...Congratulations."},{n:"alicia",f:"flustered",l:"casual",t:"...Rin guessed right again. Annoying. Thank you."}],
+ chaba:[{n:"mali",f:"happy",l:"casual",t:"Big sister Chaba has a boyfriend~! I'm calling Mum. She'll be happier than anyone, I just know it."},{n:"chaba",f:"flustered",l:"casual",t:"...Don't tell Mum. Mum tells all of Chaiya. ...Fine, tell her."}]};
 
 const RG_PROF={
  baibua:{height:"165 cm",blood:"A",bday:"12 November (Yi Peng)",home:"Chiang Mai · a wooden house behind her father's small camp",heritage:"Muay Tha Sao (same lineage as Kati)",
