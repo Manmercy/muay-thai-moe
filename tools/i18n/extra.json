@@ -18499,5 +18499,11 @@
  "อาม่าห้ามใช้ท่าชุดที่สามนอกบ้าน …เสียดายจัง อยากให้เธอเห็น": "Ama forbids the third set of forms outside the house... a shame. I wanted you to see it.",
  "คุณเกริกห้ามหักแขนใครคืนนี้ ฉันเลยแค่จับเฉย ๆ ครั้งหน้าไม่มีใครห้ามแล้ว": "Mr. Krerk said no breaking arms tonight, so I only held on. Next time nobody's stopping me.",
  "สามยกเองนะ เวทีอาชีพของฉันมีสิบสองยก …ไว้เจอกันตอนที่ยกมันยาวพอ": "Only three rounds. My pro fights go twelve... see you when the rounds are long enough.",
- "ทีมนาคาลีกเดินผ่านหน้าค่ายศิริชัยทีละคน ไม่มีใครก้มหน้า": "The Naka League walk past Sirichai Camp one by one. None of them lowers her head."
+ "ทีมนาคาลีกเดินผ่านหน้าค่ายศิริชัยทีละคน ไม่มีใครก้มหน้า": "The Naka League walk past Sirichai Camp one by one. None of them lowers her head.",
+ "<h2>แผนไฟต์</h2><p class=\"meta\">ไฟต์นี้ไม่มีข้อมูลคู่ชกให้ตั้งแผน ใช้แผนสมดุลไปก่อน</p>": "<h2>Fight plan</h2><p class=\"meta\">This bout has no opponent record to plan against — it will use the balanced plan</p>",
+ "ผู้ท้าชิงยังไม่พร้อมชกสัปดาห์นี้ ลองใหม่สัปดาห์หน้า": "The challenger can't fight this week — try again next week",
+ "ยังไม่มีนักมวยที่ส่งไปได้": "No fighter can go right now",
+ "ค่ายยังไม่มีนักมวยรุ่น ": "The camp has no fighter in division ",
+ "เจ้าของเข็มขัดไม่ได้อยู่ในค่ายแล้ว กด \"ไม่ไป\" ที่จดหมายได้เลย": "The belt holder is no longer in the camp — tap \"Decline\" on the letter",
+ "ติดไฟต์สัปดาห์นี้": "has a bout this week"
 }

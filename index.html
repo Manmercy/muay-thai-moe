@@ -8952,7 +8952,7 @@ AU.gsfx=function(kind,a){if(!this.init()||this.muted||!SETTINGS.sfx)return;const
   if(kind==="shimmer")for(let i=0;i<6;i++)T(i*.05,{f:1400+Math.random()*1400,type:"sine",dur:.12,peak:.06});};
 
 // ================= MUAY THAI MOE v1.3 — UI =================
-const VERSION="1.91.125";
+const VERSION="1.91.126";
 const CUR_LANG=(typeof window!=="undefined"&&window.LANG)||"th";
 const TH_LABEL=String.fromCharCode(3652,3607,3618);
 function langSwitch(cls){return `<div class="langsw ${cls||""}" role="group" aria-label="Language">${[["th",TH_LABEL],["en","EN"]].map(([k,l])=>`<button class="lsb ${CUR_LANG===k?"on":""}" data-act="setlang" data-v="${k}" aria-pressed="${CUR_LANG===k}">${l}</button>`).join("")}</div>`;}
@@ -9611,7 +9611,7 @@ function questPlan(b,go){let best="balanced";try{if(scouted(b.b))best=adviseCach
   UI.qb=b;UI.fpDraft={plan:best,target:"body"};
   UI.modal={type:"fplan",id:b.id,after:()=>{if(!b.planSet){b.plan=UI.fpDraft.plan;b.tac={...(b.tac||{}),target:UI.fpDraft.target};b.planSet=true;}UI.qb=null;go();}};render();}
 const fpBooking=id=>(G.bookings||[]).find(x=>x.id===id)||(UI.qb&&UI.qb.id===id?UI.qb:null);
-function fplanHTML(bid){const b=fpBooking(bid);if(!b)return "";const q=b===UI.qb;const f=G.F[b.a],op=G.F[b.b];const pl=UI.fpDraft.plan,tg=UI.fpDraft.target;const cp=scouted(op.id)?counterPreset(op):null;
+function fplanHTML(bid){const b=fpBooking(bid);if(!b)return "";const q=b===UI.qb;const f=G.F[b.a],op=G.F[b.b];if(!f||!op||!op.a)return `<h2>แผนไฟต์</h2><p class="meta">ไฟต์นี้ไม่มีข้อมูลคู่ชกให้ตั้งแผน ใช้แผนสมดุลไปก่อน</p>`; /* v1.91.126: a bout whose opponent record is missing no longer breaks the plan sheet */const pl=UI.fpDraft.plan,tg=UI.fpDraft.target;const cp=scouted(op.id)?counterPreset(op):null;
   return `<h2>แผนไฟต์ · ${esc(f.name)} vs ${esc(op.name)}</h2>
    <div class="fp-h">${scouted(op.id)?`<span class="pill">${styleOf(op.a)}</span>${(()=>{const I=oppIntel(op);return `<span class="meta">ถนัด ${I.top}</span>`;})()}`:`<button class="btn sm gold" data-act="scout" data-v="${op.id}" ${G.cash<scoutCost(op.id)?"disabled":""}>ดูเทป ${fmt(scoutCost(op.id))}</button><span class="meta">ดูเทปก่อนจะรู้จุดอ่อน</span>`}</div>
    ${(()=>{if(!scouted(op.id))return "";const A=adviseCached(f.id,op.id,b.rounds||3);return `<div class="ctip"><img src="${faceSrc("coach")}" alt=""><span><b>ครูแนะนำ:</b> แผน "${PLANS[A.best].name}" โอกาสชนะราว ${Math.round(A.bestRate*20)*5}%${A.best!=="balanced"&&A.rates.balanced<A.bestRate-.05?` (สมดุลได้ราว ${Math.round(A.rates.balanced*20)*5}%)`:""}</span></div>`;})()}
@@ -11488,8 +11488,11 @@ function letterHTML(m){m.read=true;let act="";
    ${m.kind==="take"||m.kind==="pay"?`<p class="lamt ${m.kind}">${m.kind==="take"?"+":"−"}${fmt(m.amt)}</p>`:""}
    ${opp&&m.kind==="quest"?`<div class="qopp">${m.qk?`<canvas width="96" height="96" data-qsprite="${QK[m.qk].sprite}"></canvas>`:faceImg(opp)}<span><b>${esc(opp.name)}</b><small>${m.q==="belt"?`ห้ายก · พลังคู่ชก ${ovr(opp.a).toFixed(1)}`:m.q==="challenge"?"ไฟต์โชว์ ไม่นับสถิติ":"ชกทันที · ไม่นับสถิติและอันดับ · นักมวยล้าเพิ่ม"}${m.pay?` · ค่าเหนื่อย ${fmt(m.pay)}`:m.q==="gang"?" · ค่าตอบแทนมาทางตู้จดหมาย":""}</small></span></div>`:""}</div>
    <div class="mfoot lact">${act}</div><div class="mdelrow">${del}</div>`;}
-function qpickHTML(mid){const m=(G.mail||[]).find(x=>x.id===mid);const R=roster(G).filter(f=>!m||m.q!=="belt"||(f.div===m.div&&(!m.defend||m.defend===f.id)));
-  return `<h2>ส่งใครไป?</h2><p class="meta">${m?esc(m.title):""} · ชกทันทีสัปดาห์นี้ ล้าเพิ่ม ไม่นับสถิติ</p><div class="qpick">${R.map(f=>`<button class="qpf px" data-act="qsend" data-id="${f.id}" data-v="${mid}" ${f.injury?"disabled":""}>${faceImg(f,"sm")}<span><b>${esc(f.name)} Lv.${f.lvl}</b><small>${f.injury?`บาดเจ็บ ${f.injury} สด.`:`ล้า ${Math.round(f.fatigue)} · ความพร้อม ${condition(f)}`}</small></span></button>`).join("")}</div>`;}
+/* v1.91.126 (player report): a belt defense always lists its holder, even one whose division no longer matches the belt (old saves let a fighter take another division's belt); fighters who cannot go now are greyed with the reason instead of tapping to nothing */
+const qpickOK=(m,f)=>!m||m.q!=="belt"||(m.defend?m.defend===f.id:f.div===m.div);
+function qpickWhy(f){return f.injury?`บาดเจ็บ ${f.injury} สด.`:isBooked(G,f.id,G.week)?"ติดไฟต์สัปดาห์นี้":"";}
+function qpickHTML(mid){const m=(G.mail||[]).find(x=>x.id===mid);const R=roster(G).filter(f=>qpickOK(m,f));
+  return `<h2>ส่งใครไป?</h2><p class="meta">${m?esc(m.title):""} · ชกทันทีสัปดาห์นี้ ล้าเพิ่ม ไม่นับสถิติ</p><div class="qpick">${R.length?R.map(f=>{const why=qpickWhy(f);return `<button class="qpf px" data-act="qsend" data-id="${f.id}" data-v="${mid}" ${why?"disabled":""}>${faceImg(f,"sm")}<span><b>${esc(f.name)} Lv.${f.lvl}</b><small>${why||`ล้า ${Math.round(f.fatigue)} · ความพร้อม ${condition(f)}`}</small></span></button>`;}).join(""):`<p class="meta">${m&&m.defend?"เจ้าของเข็มขัดไม่ได้อยู่ในค่ายแล้ว กด \"ไม่ไป\" ที่จดหมายได้เลย":m&&m.q==="belt"?`ค่ายยังไม่มีนักมวยรุ่น ${esc(m.div)}`:"ยังไม่มีนักมวยที่ส่งไปได้"}</p>`}</div>`;}
 // cash flow & fame graphs
 function lineSVG(pts,key,col,fmtY){if(pts.length<2)return `<p class="meta">ยังไม่มีข้อมูลพอ เล่นต่ออีกสักสัปดาห์</p>`;const W=320,H=130,P=26;const ys=pts.map(p=>p[key]);let mn=Math.min(0,...ys),mx=Math.max(...ys);if(mx===mn)mx=mn+1;
   const x=i=>P+(W-P-6)*i/(pts.length-1),y=v=>H-16-(H-28)*(v-mn)/(mx-mn);const d=pts.map((p,i)=>`${i?"L":"M"}${x(i).toFixed(1)},${y(p[key]).toFixed(1)}`).join("");
@@ -11563,7 +11566,7 @@ Object.assign(ACT,{
   mloanno:d=>{const m=G.mail.find(x=>x.id===d.v);if(!m||m.done)return;m.done=true;save();render();toast("ครูแดงพยักหน้าเงียบ ๆ");},
   mdecl:d=>{const m=G.mail.find(x=>x.id===d.v);if(!m)return;m.done=true;m.declined=true;if(m.q==="gang"&&G.gang)G.gang.nextAbs=gameWeek(G)+(G.loan>0?2:4);save();render();},
   macc:d=>{UI.modal={type:"qpick",id:d.v};render();},
-  qsend:d=>{const m=G.mail.find(x=>x.id===d.v),f=G.F[d.id];if(!m||m.done||m.expired||!f||f.camp!=="player"||f.injury||isBooked(G,f.id,G.week))return;if(m.q==="belt"&&(f.div!==m.div||(m.defend&&m.defend!==f.id)))return;if(m.q==="belt"&&!m.defend){const D=beltTournament(G,m,d.id);if(!D)return;G.dm=D;m.done=true;UI.modal={type:"dm"};dmAdvance();save();render();return;}if(m.q==="belt"&&m.defend&&beltHolder(G,m.div,m.venue||"tha")?.id!==d.id)return;if(m.q==="belt"&&m.defend&&(!G.F[m.npc]||G.F[m.npc].div!==m.div||G.F[m.npc].injury||isBooked(G,m.npc,G.week)))return;m.done=true;UI.modal=null;
+  qsend:d=>{const m=G.mail.find(x=>x.id===d.v),f=G.F[d.id];if(!m||m.done||m.expired||!f||f.camp!=="player")return;{const why=qpickWhy(f);if(why){toast(`${f.name} ${why}`);return;}}if(!qpickOK(m,f))return;if(m.q==="belt"&&!m.defend){const D=beltTournament(G,m,d.id);if(!D)return;G.dm=D;m.done=true;UI.modal={type:"dm"};dmAdvance();save();render();return;}if(m.q==="belt"&&m.defend&&beltHolder(G,m.div,m.venue||"tha")?.id!==d.id)return;if(m.q==="belt"&&m.defend&&(!G.F[m.npc]||G.F[m.npc].div!==m.div||G.F[m.npc].injury||isBooked(G,m.npc,G.week))){const nc=beltChallenger(G,m.div,m.defend);if(!nc){toast("ผู้ท้าชิงยังไม่พร้อมชกสัปดาห์นี้ ลองใหม่สัปดาห์หน้า");return;}m.npc=nc.id;}m.done=true;UI.modal=null;
     const spec=m.q==="belt"?{q:"belt",npc:m.npc,pay:m.pay,from:m.from,div:m.div,defend:m.defend,venue:m.venue||"tha",bg:m.bg,rounds:5}:m.q==="challenge"?{q:"challenge",npc:m.npc,pay:m.pay,from:m.from}:{q:m.q,qk:m.qk,hq:m.hq,pay:m.pay,from:m.from,rounds:m.qk==="gang5"?4:3};
     const intro=m.q==="gang"&&m.hq?[{n:"nar",t:"โกดังหลังตลาดเช้า ไฟสลัว ลูกน้องหมวกแดงนั่งล้อมโต๊ะแผนที่ พอเห็นค่ายศิริชัยเดินเข้ามา ทุกคนลุกพรวด"},{n:"npc",who:QK[m.qk].name,t:GANG_HQ_TAUNT[m.qk]||"มาจนได้! ที่นี่ไม่มีแม่ค้าคอยเชียร์แล้วนะ"},{n:d.id,f:"angry",l:"fight",t:"มาตามนัดแล้วค่ะ!"}]
       :m.q==="gang"?[{n:"nar",t:"ตลาดเช้า… มอเตอร์ไซค์สิบกว่าคันจอดเรียงหน้าแผงผัก"},{n:"npc",who:QK[m.qk].name,t:m.early?"ลูกน้องฉันแพ้เธอซ้ำแล้วซ้ำเล่า เสียชื่อหมด! แถมค่ายเธอยังติดหนี้ฉันอยู่ วันนี้ฉันจัดการเอง!":m.qk==="gang5"?"ได้ยินว่ามีค่ายมวยมาเกะกะธุรกิจฉัน วันนี้หัวหน้าใหญ่ลงมาเอง!":m.qk==="gang4"?"ลูกน้องหมวกแดงของฉันโดนเด็กค่ายมวยไล่ตะเพิดเหรอ? หมวกเงินคนนี้จะสอนมารยาทให้เอง":m.qk==="gang6"?"เสี่ยไม่ต้องลงมาเปลืองแรงหรอก มือขวาอย่างฉันจัดการแทนได้":"ไหนใครที่ไล่ลูกน้องฉัน ออกมาเลย!"},{n:d.id,f:"angry",l:"fight",t:"ฉันเอง!"}]
@@ -14088,7 +14091,7 @@ Object.assign(CARDS,{
 <script>
 (function(){
 /* v1.87: Thai code ships inside index.html; English code (en.js) and the dictionary (i18n.js) load only when needed */
-var B="44acb00838";
+var B="4f83740cb1";
 var L="";try{L=localStorage.getItem("mtm_lang")||"";}catch(e){}
 try{var h=(location.hash||"").match(/lang=(th|en)/);if(h)L=h[1];}catch(e){}
 if(L!=="th"&&L!=="en")L="th";

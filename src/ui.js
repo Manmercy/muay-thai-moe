@@ -1,5 +1,5 @@
 // ================= MUAY THAI MOE v1.3 — UI =================
-const VERSION="1.91.125";
+const VERSION="1.91.126";
 const CUR_LANG=(typeof window!=="undefined"&&window.LANG)||"th";
 const TH_LABEL=String.fromCharCode(3652,3607,3618);
 function langSwitch(cls){return `<div class="langsw ${cls||""}" role="group" aria-label="Language">${[["th",TH_LABEL],["en","EN"]].map(([k,l])=>`<button class="lsb ${CUR_LANG===k?"on":""}" data-act="setlang" data-v="${k}" aria-pressed="${CUR_LANG===k}">${l}</button>`).join("")}</div>`;}
@@ -658,7 +658,7 @@ function questPlan(b,go){let best="balanced";try{if(scouted(b.b))best=adviseCach
   UI.qb=b;UI.fpDraft={plan:best,target:"body"};
   UI.modal={type:"fplan",id:b.id,after:()=>{if(!b.planSet){b.plan=UI.fpDraft.plan;b.tac={...(b.tac||{}),target:UI.fpDraft.target};b.planSet=true;}UI.qb=null;go();}};render();}
 const fpBooking=id=>(G.bookings||[]).find(x=>x.id===id)||(UI.qb&&UI.qb.id===id?UI.qb:null);
-function fplanHTML(bid){const b=fpBooking(bid);if(!b)return "";const q=b===UI.qb;const f=G.F[b.a],op=G.F[b.b];const pl=UI.fpDraft.plan,tg=UI.fpDraft.target;const cp=scouted(op.id)?counterPreset(op):null;
+function fplanHTML(bid){const b=fpBooking(bid);if(!b)return "";const q=b===UI.qb;const f=G.F[b.a],op=G.F[b.b];if(!f||!op||!op.a)return `<h2>แผนไฟต์</h2><p class="meta">ไฟต์นี้ไม่มีข้อมูลคู่ชกให้ตั้งแผน ใช้แผนสมดุลไปก่อน</p>`; /* v1.91.126: a bout whose opponent record is missing no longer breaks the plan sheet */const pl=UI.fpDraft.plan,tg=UI.fpDraft.target;const cp=scouted(op.id)?counterPreset(op):null;
   return `<h2>แผนไฟต์ · ${esc(f.name)} vs ${esc(op.name)}</h2>
    <div class="fp-h">${scouted(op.id)?`<span class="pill">${styleOf(op.a)}</span>${(()=>{const I=oppIntel(op);return `<span class="meta">ถนัด ${I.top}</span>`;})()}`:`<button class="btn sm gold" data-act="scout" data-v="${op.id}" ${G.cash<scoutCost(op.id)?"disabled":""}>ดูเทป ${fmt(scoutCost(op.id))}</button><span class="meta">ดูเทปก่อนจะรู้จุดอ่อน</span>`}</div>
    ${(()=>{if(!scouted(op.id))return "";const A=adviseCached(f.id,op.id,b.rounds||3);return `<div class="ctip"><img src="${faceSrc("coach")}" alt=""><span><b>ครูแนะนำ:</b> แผน "${PLANS[A.best].name}" โอกาสชนะราว ${Math.round(A.bestRate*20)*5}%${A.best!=="balanced"&&A.rates.balanced<A.bestRate-.05?` (สมดุลได้ราว ${Math.round(A.rates.balanced*20)*5}%)`:""}</span></div>`;})()}
