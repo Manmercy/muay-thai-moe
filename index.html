@@ -2490,8 +2490,17 @@ body.dreamfx .fight::after{content:"";position:fixed;inset:0;pointer-events:none
 .psp{display:inline-block;width:40px;background-size:400% 100%;background-position:0 0;background-repeat:no-repeat;image-rendering:pixelated;flex:none}
 .petcard .psp{width:56px}.psp.big{width:80px}.petbtn .psp{width:30px}
 .qs-say .qs-my{font-size:.82rem;color:#7a5a10;margin-top:.35rem;padding-top:.3rem;border-top:1px dashed rgba(28,20,48,.2)}.qs-say .qs-my b{color:#a07010}
+/* v1.91.155 (Man): player and Pa Piak at the same size */
+.qs-pod .qs-fig{overflow:visible}
+.qs-pod .qs-fig img{height:100%;max-width:none;max-height:none}
+.qs-pod.host .qs-fig img{transform:translate(9%,8%)}
+
+/* v1.91.155 (Man): a cutscene during the quiz show plays over the dimmed show, like any story scene */
+body.qs-cutting .qshow{filter:brightness(.32) saturate(.8)}
+body.qs-cutting .vn{z-index:9999;background:transparent}
+body.qs-cutting .vn .vbg{display:none}
 </style></head><body>
-<script>window.__MTM_ART=["alicia_sheet.png","alicia_special.png","baibua_sheet.png","baibua_special.png","baiyok_sheet.webp","baiyok_white_sheet.webp","bull1_sheet.webp","bull2_sheet.webp","bull3_sheet.webp","chaba_sheet.png","chaba_special.png","fah_loykrathong_sheet.webp","fah_loykrathong_special.webp","fah_sheet.webp","fah_special.webp","gang1_sheet.webp","gang2_sheet.webp","gang3_sheet.webp","gang4_sheet.webp","gang5_sheet.webp","gangsilver_sheet.webp","kati_loykrathong_sheet.webp","kati_loykrathong_special.webp","kati_sheet.webp","kati_special.webp","krahang_sheet.webp","krasue_sheet.webp","mabong_sheet.webp","mali_loykrathong_sheet.webp","mali_loykrathong_special.webp","mali_sheet.webp","mali_special.webp","nl_ladda_blood_sheet.webp","nl_ladda_hood_sheet.webp","nl_ladda_sheet.webp","nl_meili_sheet.webp","nl_meili_special.webp","nl_nia_sheet.webp","nl_nia_special.webp","nl_rosa_sheet.webp","nl_rosa_special.webp","nl_varya_sheet.webp","nl_varya_special.webp","npc10_sheet.webp","npc11_sheet.webp","npc12_sheet.webp","npc13_sheet.webp","npc14_sheet.webp","npc1_sheet.webp","npc2_sheet.webp","npc3_sheet.webp","npc4_sheet.webp","npc5_sheet.webp","npc6_sheet.webp","npc7_sheet.webp","npc8_sheet.webp","npc9_sheet.webp","npc_baiyok_black_angry.png","npc_baiyok_black_flustered.png","npc_baiyok_black_happy.png","npc_baiyok_black_sad.png","npc_baiyok_casual.png","npc_baiyok_casual_flustered.png","npc_baiyok_casual_pout.png","npc_baiyok_white_angry.png","npc_baiyok_white_flustered.png","npc_baiyok_white_happy.png","npc_baiyok_white_sad.png","npc_baiyok_white_surprised.png","npc_boris.webp","npc_gang_boss.webp","npc_gang_boss_face.webp","npc_gang_goldblack.webp","npc_gang_group.webp","npc_gang_silver.webp","npc_grandma.webp","npc_hialong.webp","npc_hialong_angry.webp","npc_krerk.webp","npc_krerk_face.webp","npc_krit.webp","npc_krit_panic.webp","npc_luangpho.webp","npc_mabelle.webp","npc_mabelle_excited.webp","npc_minnie.webp","npc_minnie_smirk.webp","npc_mint.webp","npc_mint_flustered.webp","npc_morphi.webp","npc_nai.webp","npc_nil.webp","npc_nil_smirk.webp","npc_petchara.png","npc_phet.webp","npc_phet_smile.webp","npc_suea.webp","npc_suea_angry.webp","npc_tani_angry.webp","npc_tani_angry_smile.webp","npc_tani_face.webp","npc_tani_neutral.webp","npc_tani_scary.webp","npc_tani_shy.webp","npc_tani_smile.webp","npc_thief.webp","npc_thief2.webp","npc_tiger_boss.webp","npc_tiger_boss_cry.webp","npc_vector_knight.png","npc_vector_mesa.png","npc_vector_vega.png","npc_vendor_green.webp","npc_vendor_red.webp","pailin_sheet.webp","petchara_sheet.webp","phiphong_sheet.webp","ploy_loykrathong_sheet.webp","ploy_loykrathong_special.webp","ploy_sheet.webp","ploy_special.webp","rg_chaytrae1_sheet.webp","rg_chaytrae2_sheet.webp","rg_jinlong1_sheet.webp","rg_jinlong2_sheet.webp","rg_russian1_sheet.webp","rg_russian2_sheet.webp","rg_sasaeng1_sheet.webp","rg_sasaeng2_sheet.webp","rgp_buriram_sheet.webp","rgp_chanthaburi_sheet.webp","rgp_chiangrai_sheet.webp","rgp_chumphon_sheet.webp","rgp_khonkaen_sheet.webp","rgp_lampang_sheet.webp","rgp_lopburi_sheet.webp","rgp_nakhonsi_sheet.webp","rgp_nan_sheet.webp","rgp_phetchaburi_sheet.webp","rgp_songkhla_sheet.webp","rgp_suphan_sheet.webp","rgp_surat_sheet.webp","rgp_ubon_sheet.webp","rgp_udon_sheet.webp","rgp_uttaradit_sheet.webp","rin_loykrathong_sheet.webp","rin_loykrathong_special.webp","rin_sheet.webp","rin_special.webp","rooster1_sheet.webp","rooster2_sheet.webp","rooster3_sheet.webp","rooster4_sheet.webp","rooster5_sheet.webp","tabtim_sheet.png","tabtim_special.png","tani_sheet.webp","thief2_sheet.webp","thief_sheet.webp"];</script>
+<script>window.__MTM_ART=["alicia_sheet.png","alicia_special.png","baibua_sheet.png","baibua_special.png","baiyok_sheet.webp","baiyok_white_sheet.webp","bull1_sheet.webp","bull2_sheet.webp","bull3_sheet.webp","chaba_sheet.png","chaba_special.png","fah_loykrathong_sheet.webp","fah_loykrathong_special.webp","fah_sheet.webp","fah_special.webp","gang1_sheet.webp","gang2_sheet.webp","gang3_sheet.webp","gang4_sheet.webp","gang5_sheet.webp","gangsilver_sheet.webp","kati_loykrathong_sheet.webp","kati_loykrathong_special.webp","kati_sheet.webp","kati_special.webp","krahang_sheet.webp","krasue_sheet.webp","mabong_sheet.webp","mali_loykrathong_sheet.webp","mali_loykrathong_special.webp","mali_sheet.webp","mali_special.webp","nl_ladda_blood_sheet.webp","nl_ladda_hood_sheet.webp","nl_ladda_sheet.webp","nl_meili_sheet.webp","nl_meili_special.webp","nl_nia_sheet.webp","nl_nia_special.webp","nl_rosa_sheet.webp","nl_rosa_special.webp","nl_varya_sheet.webp","nl_varya_special.webp","npc10_sheet.webp","npc11_sheet.webp","npc12_sheet.webp","npc13_sheet.webp","npc14_sheet.webp","npc1_sheet.webp","npc2_sheet.webp","npc3_sheet.webp","npc4_sheet.webp","npc5_sheet.webp","npc6_sheet.webp","npc7_sheet.webp","npc8_sheet.webp","npc9_sheet.webp","npc_baiyok_black_angry.png","npc_baiyok_black_flustered.png","npc_baiyok_black_happy.png","npc_baiyok_black_sad.png","npc_baiyok_casual.png","npc_baiyok_casual_flustered.png","npc_baiyok_casual_pout.png","npc_baiyok_white_angry.png","npc_baiyok_white_flustered.png","npc_baiyok_white_happy.png","npc_baiyok_white_sad.png","npc_baiyok_white_surprised.png","npc_boris.webp","npc_gang_boss.webp","npc_gang_boss_face.webp","npc_gang_goldblack.webp","npc_gang_group.webp","npc_gang_silver.webp","npc_grandma.webp","npc_hialong.webp","npc_hialong_angry.webp","npc_krerk.webp","npc_krerk_face.webp","npc_krit.webp","npc_krit_panic.webp","npc_luangpho.webp","npc_mabelle.webp","npc_mabelle_excited.webp","npc_minnie.webp","npc_minnie_smirk.webp","npc_mint.webp","npc_mint_flustered.webp","npc_morphi.webp","npc_nai.webp","npc_nil.webp","npc_nil_smirk.webp","npc_petchara.png","npc_phet.webp","npc_phet_smile.webp","npc_qhost_correct.webp","npc_qhost_excited.webp","npc_qhost_smile.webp","npc_qhost_suspense.webp","npc_qhost_wrong.webp","npc_suea.webp","npc_suea_angry.webp","npc_tani_angry.webp","npc_tani_angry_smile.webp","npc_tani_face.webp","npc_tani_neutral.webp","npc_tani_scary.webp","npc_tani_shy.webp","npc_tani_smile.webp","npc_thief.webp","npc_thief2.webp","npc_tiger_boss.webp","npc_tiger_boss_cry.webp","npc_vector_knight.png","npc_vector_mesa.png","npc_vector_vega.png","npc_vendor_green.webp","npc_vendor_red.webp","pailin_sheet.webp","petchara_sheet.webp","phiphong_sheet.webp","ploy_loykrathong_sheet.webp","ploy_loykrathong_special.webp","ploy_sheet.webp","ploy_special.webp","rg_chaytrae1_sheet.webp","rg_chaytrae2_sheet.webp","rg_jinlong1_sheet.webp","rg_jinlong2_sheet.webp","rg_russian1_sheet.webp","rg_russian2_sheet.webp","rg_sasaeng1_sheet.webp","rg_sasaeng2_sheet.webp","rgp_buriram_sheet.webp","rgp_chanthaburi_sheet.webp","rgp_chiangrai_sheet.webp","rgp_chumphon_sheet.webp","rgp_khonkaen_sheet.webp","rgp_lampang_sheet.webp","rgp_lopburi_sheet.webp","rgp_nakhonsi_sheet.webp","rgp_nan_sheet.webp","rgp_phetchaburi_sheet.webp","rgp_songkhla_sheet.webp","rgp_suphan_sheet.webp","rgp_surat_sheet.webp","rgp_ubon_sheet.webp","rgp_udon_sheet.webp","rgp_uttaradit_sheet.webp","rin_loykrathong_sheet.webp","rin_loykrathong_special.webp","rin_sheet.webp","rin_special.webp","rooster1_sheet.webp","rooster2_sheet.webp","rooster3_sheet.webp","rooster4_sheet.webp","rooster5_sheet.webp","tabtim_sheet.png","tabtim_special.png","tani_sheet.webp","thief2_sheet.webp","thief_sheet.webp"];</script>
 <script>window.__MTM_PETART=["cat","dog","mudlek","otter","rooster","turtle"];</script>
 <div id="app"></div><div id="live" aria-live="polite" role="status"></div>
 <script type="text/plain" id="js-th">
@@ -9127,7 +9136,7 @@ AU.gsfx=function(kind,a){if(!this.init()||this.muted||!SETTINGS.sfx)return;const
   if(kind==="shimmer")for(let i=0;i<6;i++)T(i*.05,{f:1400+Math.random()*1400,type:"sine",dur:.12,peak:.06});};
 
 // ================= MUAY THAI MOE v1.3 — UI =================
-const VERSION="1.91.154";
+const VERSION="1.91.155";
 const CUR_LANG=(typeof window!=="undefined"&&window.LANG)||"th";
 const TH_LABEL=String.fromCharCode(3652,3607,3618);
 function langSwitch(cls){return `<div class="langsw ${cls||""}" role="group" aria-label="Language">${[["th",TH_LABEL],["en","EN"]].map(([k,l])=>`<button class="lsb ${CUR_LANG===k?"on":""}" data-act="setlang" data-v="${k}" aria-pressed="${CUR_LANG===k}">${l}</button>`).join("")}</div>`;}
@@ -10364,15 +10373,14 @@ const PATCH_FIX={id:"1.91.111",ver:"Muay Thai Moe v1.91.111",title:"รายง
  ["🎞️","เทปคู่ชกและริน","ค่าเทปปรับให้อยู่ในหลักร้อยถึงหลักพัน รินช่วยดูเทปฟรีทุก 3 สัปดาห์ และภาพพูดหลายตัวเปลี่ยนไปใช้ต้นฉบับที่คมขึ้น"]],
  foot:"ครูแดงฝากบอกว่า ซ้อมให้หนัก อ่านจดหมายให้ครบ แล้วเจอกันข้างเวที! ✦"};
 /* popups queue up in order; each one is closed on its own */
-const PATCH_TANI={id:"1.93",ver:"Muay Thai Moe v1.93",title:"นางตานีตื่นแล้ว!",lead:"ค่ายศิริชัยมีเจ้าที่ต้นกล้วย สัตว์เลี้ยงโตได้ เกมโชว์มวยทางวิทยุ และใบหยกกับไพลินเปิดใจให้จีบแล้ว",items:[
- ["🪷","บุญค่ายและนางตานี","เมื่อค่ายใหญ่ขึ้น ผีต้นกล้วยจะตื่นมาอำในฝัน ทำบุญจากกิจกรรมค่ายให้บุญค่ายสูงไว้ ผีจะมาน้อยลง เรื่องยาวสามปี จากชุลมุน ไปตั้งศาล จนเป็นเพื่อนกัน ดูวิธีทำบุญได้ที่ปุ่ม “บุญค่ายคืออะไร?” ในกิจกรรมค่าย"],
- ["🥊","ไฟต์ในฝัน 3 ยก","ช่วงเข้าพรรษา กระสือ กระหัง ม้าบ้อง และผีโพงจะแวะมา บุญค่าย 60 ขึ้นไปสั่งมุมได้เอง และวันหนึ่งคุณจะได้สั่งมุมให้นางตานีด้วย"],
- ["🐾","สัตว์เลี้ยงมีเลเวล","กดปุ่มสัตว์เลี้ยงที่หน้าแรก เล่นด้วยได้ตัวละครั้งต่อสัปดาห์ สัตว์โตถึง Lv.10 และช่วยค่ายแบบสุ่มทุกสัปดาห์ บางวันก็ไม่อยากเล่น หรือหนีไปวิ่งในทุ่งนา ถ้าฟ้าย้ายมา หมัดเหล็กแมวสีเงินของเธอจะตามมาด้วย"],
- ["📻","แฟนพันแท้มวยเด็ดเจ็ดครก","ตอบคำถามวิทยุถูกบ่อย ๆ จะได้รับเชิญขึ้นเกมโชว์ความรู้มวยไทย 20 ข้อ รางวัลสูงสุด ฿100,000"],
- ["💖","ใบหยกกับไพลิน","ชกกับพวกเธอครบ 6 ไฟต์และชนะ 4 ไฟต์ จะเริ่มคุย ให้ของขวัญ ไปเดต และสารภาพรักได้ แต่ทางนี้ยากกว่าคนอื่นนะ หอพักขยายได้ถึงชั้นห้าด้วย"],
- ["🌳","ทุกฉากมีที่มาที่ไป","ฉากหลังใหม่และฉากที่ตรงกับเรื่องกว่าร้อยฉาก ภาพกิจกรรมค่ายตรงกับคำบรรยาย นักมวยที่เจ็บนั่งพัก และไม่มีการชกบนผิวน้ำอีกแล้ว"],
- ["✨","เก็บรายละเอียด","ไอคอนพิกเซลทั้งเกม ภาพตัวละครสีสดตามจริง หน้าตาคู่ชกใหม่ 4 แบบ ลอยกระทงระดับทองได้เสื้อไหมกับหมวกกระทงให้ผู้จัดการ คู่ต่อสู้ในเควสต์มีสไตล์การชก และจดหมายป้องกันเข็มขัดเลือกนักมวยได้ถูกต้อง"]],
- foot:"ครูแดงฝากบอกว่า ทำบุญบ้างนะ ผีต้นกล้วยตาไวมาก ✦"};
+const PATCH_TANI={id:"1.93",ver:"Muay Thai Moe v1.93",title:"เสียงหัวเราะจากกอกล้วย",lead:"ค่ายศิริชัยมีเรื่องใหม่ให้ค้นพบเอง ขอบอกแค่นิดเดียวพอ",items:[
+ ["🪷","บุญค่าย","มีบางอย่างตื่นขึ้นที่กอกล้วยหลังค่าย… ทำบุญไว้บ้างนะ ดูได้ที่กิจกรรมค่าย"],
+ ["🐾","สัตว์เลี้ยงมีเลเวล","กดปุ่มสัตว์เลี้ยงที่หน้าแรก เล่นด้วยทุกสัปดาห์ แล้วจะรู้ว่าพวกมันช่วยค่ายได้แค่ไหน"],
+ ["📻","แฟนพันแท้มวยเด็ดเจ็ดครก","ฟังวิทยุไว้ให้ดี วันหนึ่งอาจได้รับเชิญไปออกรายการ"],
+ ["💖","ใบหยกกับไพลิน","สองคนนี้เริ่มมองค่ายเราด้วยสายตาที่ต่างไป…"],
+ ["🌳","ฉากใหม่","ฉากหลังใหม่ และทุกฉากอยู่ในที่ที่ควรอยู่"],
+ ["✨","เก็บรายละเอียด","ไอคอนพิกเซล ภาพตัวละครสีสด และอีกหลายอย่างให้ลองหาเอง"]],
+ foot:"ครูแดงฝากบอกว่า ทำบุญบ้างนะ ✦"};
 const PATCHES=[PATCH_AV,PATCH_TAPE,PATCH_FIX],PATCH=PATCHES[PATCHES.length-1]; /* PATCH_TANI (v1.93) is ready — add it here when Man says to show it */
 function nextPatch(){if(G&&G.newsSeen==="1.91.144")G.newsSeen="1.91.111"; /* v1.91.145: the 1.91.144 popup was withdrawn — those who saw it must not get the old ones again */const i=PATCHES.findIndex(p=>p.id===(G&&G.newsSeen));return i<0?PATCHES[0]:PATCHES[i+1]||null;}
 function maybeWhatsNew(){if(!G||G.ended||UI.scene)return;const P=nextPatch();if(!P)return;UI.modal={type:"whatsnew",id:P.id};}
@@ -14617,6 +14625,20 @@ const QS_ME={
   if(!S.my)return;const box=document.querySelector("#qshow .qs-say");if(!box||box.querySelector(".qs-my"))return;
   const p=document.createElement("p");p.className="qs-my";const b=document.createElement("b");b.textContent=`คุณ${ME(G)}: `;p.appendChild(b);p.appendChild(document.createTextNode(S.my));box.appendChild(p);}catch(e){}};}
 
+/* v1.91.155 (Man): phone calls and Pa Piak's jokes play as ordinary story cutscenes (the show steps aside, then comes back) */
+const QS_CUT=(steps,done,bg)=>{document.body.classList.add("qs-cutting");   /* the show dims behind; the scene's own background is hidden */
+  const back=()=>{document.body.classList.remove("qs-cutting");done&&done();};
+  try{playScene(steps,back,{bg:bg||"tvstudio",look:"casual"});}catch(e){console.error("qs cut",e);back();}};
+const QS_PICK=a=>a[Math.floor(Math.random()*a.length)];
+{const _d=QS.draw;QS.draw=function(){const S=this.st,m=this.m();
+  if(S&&m&&S.phase==="call"&&S.call&&!S.callScene){S.callScene=1;const c=S.call,n=c.lines.length,nm=(SPK[c.id]||{name:"ครูแดง"}).name;
+    const say=(t,i)=>c.id==="coach"?{n:"coach",t}:{n:c.id,f:i===n-2?"happy":i===0?"surprised":"flustered",l:"casual",t};
+    QS_CUT([{n:"nar",t:`📞 ตู๊ด… ตู๊ด… สายต่อถึง${nm}ที่ค่ายศิริชัย`},...c.lines.map(say)],()=>{if(this.st!==S)return;S.callScene=0;S.callI=n-1;this.act("callNext");});_d.call(this);return;}
+  _d.call(this);
+  if(S&&m&&(S.phase==="right"||S.phase==="end")&&S.react&&S.cutK!==S.react){S.cutK=S.react;const key=S.phase==="end"?(m.how||"lose"):"right";
+    const steps=[{n:"npc",who:QS_HOST,img:"qhost_"+(S.host||"smile"),t:S.react}];const L=QS_ME[key];if(L)steps.push({n:"me",t:QS_PICK(L)});
+    setTimeout(()=>{if(this.st===S)QS_CUT(steps,()=>{if(this.st===S)this.draw();});},700);}};}
+
 // ================= MUAY THAI MOE — MERIT & THE GHOST OF THE BANANA TREE "นางตานี" (v1.91.144, Man 24 พ.ย.) =================
 // Phase 1: camp merit (บุญ) from merit-making, the wai kru and new big merit events; it slowly runs down when nobody makes merit.
 // Once the camp is big and busy, Nang Tani — whose banana trees the fighters kick in training (and whose trunks went into krathongs) —
@@ -15454,7 +15476,7 @@ try{window.PXEMOJI={keys:Object.keys(R),svg:mk};}catch(e){}
 <script>
 (function(){
 /* v1.87: Thai code ships inside index.html; English code (en.js) and the dictionary (i18n.js) load only when needed */
-var B="7b359cabf8";
+var B="8561f36194";
 var L="";try{L=localStorage.getItem("mtm_lang")||"";}catch(e){}
 try{var h=(location.hash||"").match(/lang=(th|en)/);if(h)L=h[1];}catch(e){}
 if(L!=="th"&&L!=="en")L="th";

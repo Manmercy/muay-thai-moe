@@ -2485,3 +2485,12 @@ body.dreamfx .fight::after{content:"";position:fixed;inset:0;pointer-events:none
 .psp{display:inline-block;width:40px;background-size:400% 100%;background-position:0 0;background-repeat:no-repeat;image-rendering:pixelated;flex:none}
 .petcard .psp{width:56px}.psp.big{width:80px}.petbtn .psp{width:30px}
 .qs-say .qs-my{font-size:.82rem;color:#7a5a10;margin-top:.35rem;padding-top:.3rem;border-top:1px dashed rgba(28,20,48,.2)}.qs-say .qs-my b{color:#a07010}
+/* v1.91.155 (Man): player and Pa Piak at the same size */
+.qs-pod .qs-fig{overflow:visible}
+.qs-pod .qs-fig img{height:100%;max-width:none;max-height:none}
+.qs-pod.host .qs-fig img{transform:translate(9%,8%)}
+
+/* v1.91.155 (Man): a cutscene during the quiz show plays over the dimmed show, like any story scene */
+body.qs-cutting .qshow{filter:brightness(.32) saturate(.8)}
+body.qs-cutting .vn{z-index:9999;background:transparent}
+body.qs-cutting .vn .vbg{display:none}

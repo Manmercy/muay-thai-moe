@@ -332,3 +332,17 @@ const QS_ME={
   if(kk!==S.myK){S.myK=kk;const L=QS_ME[key];S.my=L&&(key!=="q"||Math.random()<.45)?L[Math.floor(Math.random()*L.length)]:null;}
   if(!S.my)return;const box=document.querySelector("#qshow .qs-say");if(!box||box.querySelector(".qs-my"))return;
   const p=document.createElement("p");p.className="qs-my";const b=document.createElement("b");b.textContent=`${ME(G)}: `;p.appendChild(b);p.appendChild(document.createTextNode(S.my));box.appendChild(p);}catch(e){}};}
+
+/* v1.91.155 (Man): phone calls and Pa Piak's jokes play as ordinary story cutscenes (the show steps aside, then comes back) */
+const QS_CUT=(steps,done,bg)=>{document.body.classList.add("qs-cutting");   /* the show dims behind; the scene's own background is hidden */
+  const back=()=>{document.body.classList.remove("qs-cutting");done&&done();};
+  try{playScene(steps,back,{bg:bg||"tvstudio",look:"casual"});}catch(e){console.error("qs cut",e);back();}};
+const QS_PICK=a=>a[Math.floor(Math.random()*a.length)];
+{const _d=QS.draw;QS.draw=function(){const S=this.st,m=this.m();
+  if(S&&m&&S.phase==="call"&&S.call&&!S.callScene){S.callScene=1;const c=S.call,n=c.lines.length,nm=(SPK[c.id]||{name:"Coach Daeng"}).name;
+    const say=(t,i)=>c.id==="coach"?{n:"coach",t}:{n:c.id,f:i===n-2?"happy":i===0?"surprised":"flustered",l:"casual",t};
+    QS_CUT([{n:"nar",t:`📞 Ring… ring… calling ${nm} at Sirichai camp`},...c.lines.map(say)],()=>{if(this.st!==S)return;S.callScene=0;S.callI=n-1;this.act("callNext");});_d.call(this);return;}
+  _d.call(this);
+  if(S&&m&&(S.phase==="right"||S.phase==="end")&&S.react&&S.cutK!==S.react){S.cutK=S.react;const key=S.phase==="end"?(m.how||"lose"):"right";
+    const steps=[{n:"npc",who:QS_HOST,img:"qhost_"+(S.host||"smile"),t:S.react}];const L=QS_ME[key];if(L)steps.push({n:"me",t:QS_PICK(L)});
+    setTimeout(()=>{if(this.st===S)QS_CUT(steps,()=>{if(this.st===S)this.draw();});},700);}};}

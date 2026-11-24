@@ -6639,7 +6639,7 @@ AU.gsfx=function(kind,a){if(!this.init()||this.muted||!SETTINGS.sfx)return;const
   if(kind==="shimmer")for(let i=0;i<6;i++)T(i*.05,{f:1400+Math.random()*1400,type:"sine",dur:.12,peak:.06});};
 
 // ================= MUAY THAI MOE v1.3 — UI =================
-const VERSION="1.91.154";
+const VERSION="1.91.155";
 const CUR_LANG=(typeof window!=="undefined"&&window.LANG)||"th";
 const TH_LABEL=String.fromCharCode(3652,3607,3618);
 function langSwitch(cls){return `<div class="langsw ${cls||""}" role="group" aria-label="Language">${[["th",TH_LABEL],["en","EN"]].map(([k,l])=>`<button class="lsb ${CUR_LANG===k?"on":""}" data-act="setlang" data-v="${k}" aria-pressed="${CUR_LANG===k}">${l}</button>`).join("")}</div>`;}
@@ -7876,15 +7876,14 @@ const PATCH_FIX={id:"1.91.111",ver:"Muay Thai Moe v1.91.111",title:"Report from 
  ["🎞️","Fight tapes and Rin","Tape prices now run from the hundreds to the low thousands, Rin reviews a tape for free every 3 weeks, and many speaking portraits now use sharper original art"]],
  foot:"Kru Daeng says: train hard, read all your letters, and see you ringside! ✦"};
 /* popups queue up in order; each one is closed on its own */
-const PATCH_TANI={id:"1.93",ver:"Muay Thai Moe v1.93",title:"Nang Tani is awake!",lead:"Sirichai camp has a banana-tree guardian spirit, pets that grow, a Muay Thai radio game show — and Baiyok and Pailin are open to romance",items:[
- ["🪷","Camp merit and Nang Tani","As the camp grows, the banana-tree ghost wakes and haunts your dreams. Keep camp merit high through camp activities and she'll come less. A three-year story — from chaos, to a shrine, to friendship. See \"What is camp merit?\" in camp activities"],
- ["🥊","Three-round dream fights","During Buddhist Lent the krasue, krahang, Ma Bong and Phi Phong drop by. At camp merit 60+ you command the corner yourself — and one day you'll command Nang Tani's too"],
- ["🐾","Pets level up","Tap the pets button on the home screen. Play with each pet once a week; they grow to Lv.10 and help the camp with weekly rolls. Some days they won't play, or they run off into the rice fields. If Fah moves in, her silver cat Iron Fist comes too"],
- ["📻","The Seven-Mortar Muay Thai Superfan Show","Answer the radio quiz right often enough and you'll be invited onto a 20-question Muay Thai trivia show — top prize ฿100,000"],
- ["💖","Baiyok and Pailin","Fight them 6 times and win 4 and you can start chatting, giving gifts, dating and confessing — but this road is harder than the others. The dorm now grows to a fifth level too"],
- ["🌳","Every scene has its place","New backgrounds, and over a hundred scenes now show where they really happen. Camp activity pictures match their captions, injured fighters sit out, and nobody fights on the water anymore"],
- ["✨","Polish","Pixel icons everywhere, character art in its true colours, 4 new opponent looks, a Thai silk shirt and krathong hat for the manager from Loy Krathong gold, quest foes with their own fighting styles, and belt-defence letters that let you pick the right fighter"]],
- foot:"Kru Daeng says: make some merit — the banana-tree ghost has sharp eyes ✦"};
+const PATCH_TANI={id:"1.93",ver:"Muay Thai Moe v1.93",title:"Laughter in the banana grove",lead:"There's something new to discover at Sirichai — we'll only drop a hint",items:[
+ ["🪷","Camp merit","Something has woken up in the banana grove behind the camp… make some merit. See camp activities"],
+ ["🐾","Pets level up","Tap the pets button on the home screen and play with them every week — you'll see how much they help"],
+ ["📻","The Seven-Mortar Muay Thai Superfan Show","Keep listening to the radio — one day you might be invited on the show"],
+ ["💖","Baiyok and Pailin","Those two are starting to look at our camp differently…"],
+ ["🌳","New scenes","New backgrounds, and every scene where it belongs"],
+ ["✨","Polish","Pixel icons, character art in true colour, and plenty more for you to find"]],
+ foot:"Kru Daeng says: make some merit now and then ✦"};
 const PATCHES=[PATCH_AV,PATCH_TAPE,PATCH_FIX],PATCH=PATCHES[PATCHES.length-1]; /* PATCH_TANI (v1.93) is ready — add it here when Man says to show it */
 function nextPatch(){if(G&&G.newsSeen==="1.91.144")G.newsSeen="1.91.111"; /* v1.91.145: the 1.91.144 popup was withdrawn — those who saw it must not get the old ones again */const i=PATCHES.findIndex(p=>p.id===(G&&G.newsSeen));return i<0?PATCHES[0]:PATCHES[i+1]||null;}
 function maybeWhatsNew(){if(!G||G.ended||UI.scene)return;const P=nextPatch();if(!P)return;UI.modal={type:"whatsnew",id:P.id};}
@@ -12129,6 +12128,20 @@ const QS_ME={
   if(kk!==S.myK){S.myK=kk;const L=QS_ME[key];S.my=L&&(key!=="q"||Math.random()<.45)?L[Math.floor(Math.random()*L.length)]:null;}
   if(!S.my)return;const box=document.querySelector("#qshow .qs-say");if(!box||box.querySelector(".qs-my"))return;
   const p=document.createElement("p");p.className="qs-my";const b=document.createElement("b");b.textContent=`${ME(G)}: `;p.appendChild(b);p.appendChild(document.createTextNode(S.my));box.appendChild(p);}catch(e){}};}
+
+/* v1.91.155 (Man): phone calls and Pa Piak's jokes play as ordinary story cutscenes (the show steps aside, then comes back) */
+const QS_CUT=(steps,done,bg)=>{document.body.classList.add("qs-cutting");   /* the show dims behind; the scene's own background is hidden */
+  const back=()=>{document.body.classList.remove("qs-cutting");done&&done();};
+  try{playScene(steps,back,{bg:bg||"tvstudio",look:"casual"});}catch(e){console.error("qs cut",e);back();}};
+const QS_PICK=a=>a[Math.floor(Math.random()*a.length)];
+{const _d=QS.draw;QS.draw=function(){const S=this.st,m=this.m();
+  if(S&&m&&S.phase==="call"&&S.call&&!S.callScene){S.callScene=1;const c=S.call,n=c.lines.length,nm=(SPK[c.id]||{name:"Coach Daeng"}).name;
+    const say=(t,i)=>c.id==="coach"?{n:"coach",t}:{n:c.id,f:i===n-2?"happy":i===0?"surprised":"flustered",l:"casual",t};
+    QS_CUT([{n:"nar",t:`📞 Ring… ring… calling ${nm} at Sirichai camp`},...c.lines.map(say)],()=>{if(this.st!==S)return;S.callScene=0;S.callI=n-1;this.act("callNext");});_d.call(this);return;}
+  _d.call(this);
+  if(S&&m&&(S.phase==="right"||S.phase==="end")&&S.react&&S.cutK!==S.react){S.cutK=S.react;const key=S.phase==="end"?(m.how||"lose"):"right";
+    const steps=[{n:"npc",who:QS_HOST,img:"qhost_"+(S.host||"smile"),t:S.react}];const L=QS_ME[key];if(L)steps.push({n:"me",t:QS_PICK(L)});
+    setTimeout(()=>{if(this.st===S)QS_CUT(steps,()=>{if(this.st===S)this.draw();});},700);}};}
 
 // ================= MUAY THAI MOE — MERIT & THE GHOST OF THE BANANA TREE "นางตานี" (v1.91.144, Man 24 พ.ย.) =================
 // Phase 1: camp merit (บุญ) from merit-making, the wai kru and new big merit events; it slowly runs down when nobody makes merit.
