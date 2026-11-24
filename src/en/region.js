@@ -972,13 +972,44 @@ function rgFinalWin(G,w,l,beatLadda,ladFid){const R=G.region,fah=rgIn(G,"fah"),r
  {n:"nar",bg:"naka_underground",t:`Five bouts done. Sirichai ${w} – ${l} Naka League`},
  {n:"nar",show:[{id:"npc:krerk"}],t:"Khun Krerk claps slowly from the second-floor balcony. The sound echoes through the whole warehouse"},
  {n:"npc",who:"Khun Krerk",t:"Congratulations, Sirichai Camp… luck was on your side today"},
- {n:"npc",who:"Khun Krerk",t:"Then I'll see you on the international stage."},
+ /* v1.91.124 (Man): the Naka League were not fighting for real yet — each one says so on the way out */
+ {n:"nar",t:"The Naka League walk past Sirichai Camp one by one. None of them lowers her head."},
+ {n:"npc",who:NL.nia.name,t:"Only three rounds. My pro fights go twelve... see you when the rounds are long enough."},
+ {n:"npc",who:NL.varya.name,t:"Mr. Krerk said no breaking arms tonight, so I only held on. Next time nobody's stopping me."},
+ {n:"npc",who:NL.meili.name,t:"Ama forbids the third set of forms outside the house... a shame. I wanted you to see it."},
+ {n:"npc",who:NL.rosa.name,t:"¡Hasta luego! The crowd was a little small tonight. My real mask is still in my bag."},
+ {n:"npc",who:"Khun Krerk",t:"My team fought by the rules I drew for them. Tonight I only wanted to know what your camp has... now I know."},
+ {n:"npc",who:"Khun Krerk",t:"Next time, there are no rules of mine. I'll see you on the international stage."},
  ...(beatLadda?[{n:"nar",show:[{id:"lada",l:"casual"}],t:"Ladda rises slowly from the mat and licks the blood from the corner of her mouth"},{n:"lada",l:"casual",t:"…that was fun"}]
   :[{n:"lada",l:"casual",t:"You beat the team. You haven't beaten me yet"}]),
  {n:"nar",show:[{id:"lada",l:"casual"}],t:`Before following her father out, Ladda stops and looks ${looked} One beat too long. Then she pulls the hood back over her head`},
+ /* v1.91.124 (Man): Fah calls her out — the first time anyone asks Ladda what she chose */
+ ...rgIf(fah,[
+  {n:"fah",f:"angry",l:"casual",with:"lada",t:"Wait! You. Ladda."},
+  {n:"nar",show:[{id:"fah",l:"casual"},{id:"lada",l:"casual"}],t:"Ladda stops walking, but doesn't turn around."},
+  {n:"fah",f:"angry",l:"casual",with:"lada",t:"You fight that well, but all night you never once looked at your father... are you just a machine? Why do you obey him like that?"},
+  {n:"npc",who:"Khun Krerk",t:"Ladda. Let's go."},
+  {n:"lada",f:"angry",l:"casual",with:"fah",t:"...Machines don't answer questions."},
+  {n:"fah",f:"angry",l:"casual",with:"lada",t:"Fah doesn't even have parents to obey. They left when Fah was little... but at least every fight Fah fights, Fah chose!"},
+  {n:"nar",show:[{id:"fah",l:"casual"},{id:"lada",l:"casual"}],t:"Ladda falters half a step. Her hand, gripping the edge of her hood, slowly loosens."},
+  {n:"lada",f:"sad",l:"casual",with:"fah",t:"...No one has ever asked me what I chose."},
+  {n:"nar",show:[{id:"npc:krerk"}],t:"Mr. Krerk looks at his daughter from the second-floor balcony with an expression no one in the warehouse has seen before, then turns and leaves first."},
+  {n:"nar",show:[{id:"fah",l:"casual"}],t:"Ladda follows her father out without another word. The warehouse's steel door slides shut."},
+  {n:"fah",f:"pout",l:"casual",t:"...Hey. Did Fah say too much?",choice:[
+   {t:"\"Maybe that's the first time in her life anyone has asked her\"",fx:G2=>{add(G2,"fah","bond",2);G2.region.final.fahAsk=1;},then:[{n:"fah",f:"flustered",l:"casual",t:"First time in her life... who could live like that? Fah's not worried about her! Just... annoyed."}]},
+   {t:"\"Next time you meet, ask her again\"",fx:G2=>{add(G2,"fah","bond",2);G2.region.final.fahAsk=2;},then:[{n:"fah",f:"happy",l:"casual",t:"I'll ask. I'll keep asking until she answers, even if I have to punch her between questions!"}]}]},
+  ...rgIf(rin,[{n:"rin",f:"sad",l:"casual",t:"Ladda fights the modern style, like Fah. I used to think Fah had no sister in her style... after tonight I'm not so sure."},
+   {n:"fah",f:"pout",l:"casual",t:"Sisters? No way! Fah doesn't want that! ...Really doesn't."}])]),
  ...rgIf(R.c2==="deal",[rin?{n:"rin",f:"happy",l:"casual",t:"Clause 30. Naka League lost to its contract partner, so the contract ends immediately. The money is ours. And our data is ours again"}:{n:"coach",t:"Clause 30… Naka League lost to us, the contract's over, and the money's still ours. Ha!"}]),
  {n:"nar",show:[{id:"baibua"},{id:"tabtim"},{id:"alicia"},{id:"chaba"}],t:"At ringside, the four regional champions have watched since the first bout. No one says a word, but they are all thinking the same thing"},
- {n:"coach",bg:"camp",show:[],t:"Let's go home. Five a.m. tomorrow, same as always"}];}
+ /* v1.91.124 (Man): the hook — the back seat of the black car */
+ {n:"nar",bg:"night_central",show:[],t:"The Naka family's black car pulls away from the Khlong Toei docks, city lights sliding across the back-seat window."},
+ {n:"npc",who:"Khun Krerk",t:"You lost the rhythm twice tonight. Tomorrow the doctor will add hours to your training."},
+ {n:"nar",t:"Ladda doesn't answer. She pushes back her hood and looks at her reflection in the window longer than on any other night."},
+ ...(fah?[{n:"nar",t:"The silver-haired girl's voice keeps ringing in her head: \"Fah chose!\""}]:[]),
+ {n:"coach",bg:"camp",show:[],t:"Let's go home. Five a.m. tomorrow, same as always"},
+ ...(fah?[{n:"nar",bg:"camp_night",t:"Late that night Fah sits under the dorm light drawing her fifty-something tiger. In the corner of the page, a small white snake with red-tipped scales lies coiled."},
+  {n:"fah",f:"pout",l:"casual",t:"It's nobody's snake! Fah's just doodling... next time, Fah will draw it facing this way."}]:[])];}
 function rgFinalLose(G,w,l){return [
  {n:"nar",bg:"naka_underground",t:`Five bouts done. Sirichai ${w} – ${l} Naka League`},
  {n:"npc",who:"Khun Krerk",t:"It's all right. The door is still open. Come back whenever you like"},
