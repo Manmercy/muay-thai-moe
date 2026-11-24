@@ -1401,6 +1401,260 @@ const RG_DATEP={};
   G=>[{n:"nar",bg:"night_north",t:"On the hotel roof the cold wind blows hard and the sky is full of stars. Baibua unwinds her tin-jok scarf and wraps it around the manager."},B("happy","I feel the cold less than you, jao… I've lived up north my whole life."),{n:"nar",t:"Five minutes later Baibua sneezes twice, but she won't take the scarf back."}]];
 }
 
+/* ---------- Isan: Tabtim's somtam card — one stamp a province, the prize waits in Korat ---------- */
+{const T=rgLine("tabtim");
+ const card=(G)=>{const n=rgProvN(G,"isan");return n>=4?[T("happy","All four boxes! The prize is… a fifth mortar of som tam, made by Tabtim herself at home in Korat, when you come to Phimai for the cup."),T("happy","If you lose, Tabtim will still make it for you, but with thirty chillies, haha."),{n:"nar",t:"Tabtim's som tam card: all 4/4 boxes"}]
+   :[{n:"nar",t:`Tabtim's som tam card: ${n}/4 boxes · the rest are waiting in other provinces`}];};
+ RG_PROV.udon=(G,D)=>{const opp=REGION.oppName(G,"udon"),ploy=rgInT(G,"ploy");return {
+  meet:[{n:"nar",bg:"boat",t:"Half past five in the morning. Tabtim has everyone meet at the Nong Han pier, where three small boats wait. Tabtim stands on a prow in a wide-brimmed hat, waving a paddle with both hands."},
+   T("happy","How are you, Manager! Get in the boat quick. The red lotus sea only blooms in the morning. By late morning they all close."),
+   ...rgProvTip(G,"udon",[T("happy",`${opp} uses the Red Lotus Bloom Kick. High and pretty like a lotus opening, but it opens slowly.`),T("happy","She always lifts her knee high before the kick. When you see the knee come up, step in and cut her off.")],"Tabtim")],
+  body:[{n:"nar",t:"The boat glides into the middle of the lake. Red lotuses bloom across the water as far as the eye can see, with thin mist above them. Everyone falls silent at once."},
+   T("happy","Pretty, right? Tabtim comes here every year with Mum."),
+   {n:"nar",t:"Tabtim pulls a piece of card out of her waist pouch. Written in marker across the top: \"Four-Province Som Tam Card, Certified by Tabtim\", with four empty boxes."},
+   T("happy","There are four belts, so there are four som tam shops! Every province we go to, Tabtim takes you to its best one. Fill all four boxes and… there's a prize.",{choice:[
+    {t:"Ask what the prize is",fx:G2=>rgMeet(G2,"tabtim",2),then:[T("flustered","Can't tell you! …Fill all four boxes first. No more questions.")]},
+    {t:"Ask which shop is the first box",fx:G2=>rgMeet(G2,"tabtim",1),then:[T("happy","Tam sua at Auntie Nu's by the lake, piled with rice noodles.")]},
+    {t:"\"I can't really handle spicy food.\"",fx:G2=>rgMeet(G2,"tabtim",2),then:[T("happy","No problem! Tabtim will order mild… five chillies. Mild for Tabtim is five, haha.")]}]}),
+   {n:"nar",bg:"somtam_stall",t:"Later that morning at Auntie Nu's stall by Nong Han, Tabtim stamps a mortar-shaped rubber stamp in the first box and writes in small letters: \"Spicy. Four and a half chillies.\""},
+   T("sad","Dad used to bring Tabtim fishing here… before Tabtim gave up punching and switched to kicks."),
+   T("happy","Hey! Why the long face? Keep eating. The first box means finishing the whole plate!"),
+   ...rgIf(ploy,[{n:"ploy",with:"tabtim",f:"happy",l:"casual",t:"Tabtim… you're from a Korat heavy-punch family. Why switch to kicks?"},T("happy","Tabtim's legs are longer than her arms, Sister Ploy, haha. …Tabtim'll tell you later.")]),
+   ...rgJealStep(G,"Tabtim",0,"near"),
+   ...card(G)]};};
+ RG_PROV.khonkaen=(G,D)=>{const opp=REGION.oppName(G,"khonkaen");return {
+  meet:[{n:"nar",bg:"rg_northeast",t:"A giant dinosaur stands at the entrance to Khon Kaen. Tabtim stands under it holding up a paper sign: \"Welcome Sirichai Camp to Dinosaur Town\"."},
+   T("happy","Manager! Khon Kaen has real dinosaurs! They dug up bones at Phu Wiang. Tabtim's going to kick as hard as a dinosaur's tail!"),
+   ...rgProvTip(G,"khonkaen",[T("happy",`${opp} uses the Khon Kaen Silk-Loom Knee. Quick knees like a loom, weaving on and on until you run out of gas.`),T("happy","Don't stay in close for long. Come out and kick from range. She's weak outside.")],"Tabtim")],
+  body:[{n:"nar",bg:"food",t:"Tabtim takes everyone to a Khao Suan Kwang grilled-chicken shop. Crispy-skinned chicken covers the table and the crab-and-pla-ra som tam comes by the tray."},
+   T("happy","Box two on the card! This shop's crab and pla ra som tam gets five full chillies from Tabtim!"),
+   {n:"nar",t:"While they eat, Tabtim's phone buzzes nonstop with messages from the family group chat."},
+   T("happy","Tabtim's sibling sent a photo of silk. Mum wove a new piece to sell for the youngest one's tuition."),
+   T("happy","Tabtim's the eldest. Every baht of fight money goes to tuition, haha. That's why Tabtim only has this one jacket.",{choice:[
+    {t:"\"You're an amazing big sister.\"",fx:G2=>rgMeet(G2,"tabtim",2),then:[T("flustered","…Don't praise Tabtim like that! Tabtim's out of jokes now.")]},
+    {t:"Offer to buy one of her mother's silks",fx:G2=>rgMeet(G2,"tabtim",3),then:[{n:"nar",t:"Tabtim goes quiet for the longest time since they met."},T("flustered","…Don't feel sorry for Tabtim. But if you really want one, Mum weaves beautifully. Tabtim will send it to you.")]},
+    {t:"\"And what do you get for yourself?\"",fx:G2=>rgMeet(G2,"tabtim",2),then:[T("sad","…"),T("happy","Tabtim gets to box! Boxing every day is enough for her.")]}]}),
+   ...rgJealStep(G,"Tabtim",0,"near"),
+   ...card(G)]};};
+ RG_PROV.buriram=(G,D)=>{const opp=REGION.oppName(G,"buriram");return {
+  meet:[{n:"nar",bg:"rg_northeast",t:"Phanom Rung sits on top of an old volcano. Afternoon light shines through its row of stone doorways. Tabtim waits on the naga staircase."},
+   T("happy","Buriram! City of castles, city of football… and city of lightning."),
+   ...rgProvTip(G,"buriram",[T("happy",`${opp} uses the Phanom Rung Lightning Punch. Fast and hard like lightning, but lightning never strikes the same place twice.`),T("happy","After her first punch she counts one-two before the next one. That's the gap. Kick right in.")],"Tabtim")],
+  body:[T("happy","Did you know? Four times a year the sunlight shines through all fifteen doorways exactly. The ancients were great at maths."),
+   T("happy","Tabtim's the same. In the ring she calculates every step. Outside it, she calculates nothing, haha."),
+   T("sad","Tabtim's dad was a Korat heavy-punch champion… when Tabtim was twelve she chose kicks over punches, because of her long legs."),
+   T("sad","Dad never said anything, but he's never come to watch Tabtim fight. Not once.",{choice:[
+    {t:"\"Someday your dad will come and watch.\"",fx:G2=>rgMeet(G2,"tabtim",2),then:[T("happy","…If that day comes, Tabtim will throw the most beautiful kick of her life.")]},
+    {t:"\"Your kicks come from Korat too.\"",fx:G2=>rgMeet(G2,"tabtim",3),then:[T("surprised","…!"),T("flustered","If you talk like that, Tabtim's going to cry all over these naga stairs.")]},
+    {t:"\"Just keep laughing.\"",fx:G2=>rgMeet(G2,"tabtim",1),then:[T("happy","Haha, Tabtim's good at that!")]}]}),
+   {n:"nar",bg:"somtam_stall",t:"At a som tam stall next to the football stadium Tabtim stamps the third box and writes: \"Thai som tam with crab. Three chillies. Atmosphere ten out of ten.\""},
+   ...rgJealStep(G,"Tabtim",0,"near"),
+   ...card(G)]};};
+ RG_PROV.ubon=(G,D)=>{const opp=REGION.oppName(G,"ubon");return {
+  meet:[{n:"nar",bg:"mekong",t:"At Khong Chiam the muddy Mekong meets the blue Mun River in two colours. Tabtim waits on a raft at the water's edge."},
+   T("happy","Ubon! Tabtim's been waiting longest for this one."),
+   ...rgProvTip(G,"ubon",[T("happy",`${opp} uses the Candle Festival Elbow. Beautifully carved like a festival candle, but slow.`),T("happy","If she keeps walking forward, don't trade elbows. Back off and kick her legs until she can't walk.")],"Tabtim")],
+  body:[T("happy","This two-coloured river: they meet but don't mix easily. They flow side by side for kilometres."),
+   T("flustered","Tabtim thinks it's like two people… one loud, one quiet, but going the same way… oops, what did Tabtim just say? Forget it, forget it!",{choice:[
+    {t:"\"The loud one is you. Who's the quiet one?\"",fx:G2=>rgMeet(G2,"tabtim",3),then:[T("flustered","…Not telling! That question's cheating!")]},
+    {t:"\"Say that again? I didn't catch it.\"",fx:G2=>rgMeet(G2,"tabtim",2),then:[T("pout","Not saying it again! …Tabtim only says that once a year.")]},
+    {t:"Suggest a photo with the river",fx:G2=>rgMeet(G2,"tabtim",2),then:[T("happy","Yes! Stand right on the line where the colours meet, one on each side… haha.")]}]}),
+   {n:"nar",bg:"somtam_stall",t:"At a som tam stall by the Mun River in the evening, Tabtim eats half a plate, then takes out the card to stamp it."},
+   ...rgJealStep(G,"Tabtim",0,"near"),
+   ...card(G)]};};
+ RG_DATE.udon=G=>[{n:"nar",bg:"night_isan",t:"That night a mor lam sing band plays behind the market. Tabtim pulls the manager by the hand through the crowd to the front of the stage."},
+   T("happy","This band is the most fun in Udon! Can you dance? If not, no problem, Tabtim will teach you.",{choice:[
+    {t:"Dance along with Tabtim",fx:G2=>rgMeet(G2,"tabtim",3),then:[{n:"nar",t:"The manager is off the beat on every move. Tabtim laughs so hard she sits down on the ground, but never lets go of the manager's hand."},T("happy","You dance like a robot! …Tabtim likes it.")]},
+    {t:"Stand by the stage holding her water",fx:G2=>rgMeet(G2,"tabtim",2),then:[T("happy","You're a manager even in front of a mor lam stage, haha. Pass the water, Tabtim's throat is dry.")]},
+    {t:"Request a song for Tabtim",fx:G2=>rgMeet(G2,"tabtim",2),then:[{n:"nar",t:"The mor lam singer announces from the stage, \"This song is requested for the redhead down front!\" Tabtim's face goes redder than her hair."}]}]})];
+ RG_DATE.khonkaen=G=>[{n:"nar",bg:"night_isan",t:"Bueng Kaen Nakhon lake in the evening, the path full of runners. Tabtim points at the track."},
+   T("happy","Race you around the lake! Loser buys sticky rice and grilled pork!",{choice:[
+    {t:"Run flat out",fx:G2=>rgMeet(G2,"tabtim",2),then:[{n:"nar",t:"The manager loses by a mile, but on the last stretch Tabtim runs back to jog alongside."},T("happy","You lose! …But Tabtim came back for you, so it doesn't count as a win, haha.")]},
+    {t:"Suggest walking slowly and talking instead",fx:G2=>rgMeet(G2,"tabtim",3),then:[T("happy","Okay, okay, walking's fine… honestly Tabtim's legs are tired, she just didn't want to say.")]},
+    {t:"Give up before the race starts",fx:G2=>rgMeet(G2,"tabtim",1),then:[T("pout","Cheater! …Then you're buying Tabtim ten grilled pork skewers.")]}]})];
+ RG_DATE.buriram=G=>[{n:"nar",bg:"night_isan",t:"Tabtim takes the manager to sit in the empty stands of a small football pitch. Half the floodlights are still on."},
+   T("happy","Tabtim likes open places. You can shout. Being loud is tiring too, you know. You have to shout it all out somewhere before you go home."),
+   T("happy","You try shouting.",{choice:[
+    {t:"Shout \"Tabtim is the best!\"",fx:G2=>rgMeet(G2,"tabtim",3),then:[T("flustered","…! Why are you shouting Tabtim's name! The groundskeeper heard you!")]},
+    {t:"Shout a cheer for Sirichai Camp",fx:G2=>rgMeet(G2,"tabtim",2),then:[T("happy","Haha, you really love your camp. Tabtim'll shout too: \"Long live Sirichai… but the Isan cup belongs to Tabtim!\"")]},
+    {t:"\"I'd rather listen to you shout.\"",fx:G2=>rgMeet(G2,"tabtim",2),then:[{n:"nar",t:"Tabtim shouts until she's hoarse: her siblings' tuition, her aching knee, her dad. Then she turns and smiles as if nothing happened."},T("happy","All better! Let's go eat larb.")]}]})];
+ RG_DATE.ubon=G=>[{n:"nar",bg:"night_isan",t:"Thung Si Mueang park at night. A giant intricately carved Buddhist Lent candle stands in the middle of the park. Tabtim is circling it for the third time."},
+   T("happy","The carvers spend months on a candle like this. One slip and they start over."),
+   T("flustered","Tabtim's impatient. She's never managed to carve a candle… but for someone Tabtim wanted to give it to, Tabtim thinks she could wait months too.",{choice:[
+    {t:"\"Who are you waiting for?\"",fx:G2=>rgMeet(G2,"tabtim",3),then:[T("flustered","…You ask so straight! How is Tabtim supposed to answer that!")]},
+    {t:"Buy her a small carved candle",fx:G2=>rgMeet(G2,"tabtim",3),then:[{n:"nar",t:"Tabtim holds the little candle in both hands all the way back and won't put it in her bag."}]},
+    {t:"\"Being impatient's fine. Your kicks are fast in the ring.\"",fx:G2=>rgMeet(G2,"tabtim",1),then:[T("happy","Exactly! You understand Tabtim best, haha.")]}]})];
+ RG_DATEP.tabtim=[
+  G=>[{n:"nar",bg:"night_isan",t:"The som tam stall outside the hotel is still open. Tabtim orders three plates."},T("happy","This place is so spicy… hahaha, Tabtim's crying from the chillies."),{n:"nar",t:"Tabtim laughs loud enough for the whole stall to hear, but when you hand her a tissue she goes quiet for a moment."}],
+  G=>[{n:"nar",bg:"night_isan",t:"At the karaoke bar outside the hotel, Tabtim belts out a luk thung song, then hands the manager the mic for the sweet part."},T("flustered","You sing this part! …The \"I miss you\" part. Tabtim can't sing it, too embarrassing.")],
+  G=>[{n:"nar",bg:"night_isan",t:"At the night market Tabtim orders two pan-fried egg sets, finishes hers, and stares at the manager's."},T("happy","That fried egg is looking at Tabtim… it wants Tabtim to eat it, haha.")]];
+}
+
+/* ---------- South: Chaba picks one shell a province for her brother's wind chime ---------- */
+{const C=rgLine("chaba");
+ const chime=(G)=>{const n=rgProvN(G,"south");return n>=4?[C("happy","…All four."),C("flustered","I'll string it in Phuket. …Manager. Come help string it. When you come for the cup."),{n:"nar",t:"Chaba's seashell wind chime: all 4/4 shells"}]
+   :[{n:"nar",t:`Chaba's seashell wind chime: ${n}/4 shells · the next one is waiting in another province`}];};
+ RG_PROV.chumphon=(G,D)=>{const opp=REGION.oppName(G,"chumphon");return {
+  meet:[{n:"nar",bg:"sea",t:"Thung Wua Laen beach in the morning. A faded sidecar motorbike is parked on the sand. Chaba squats at the water's edge and doesn't turn around until the camp van has stopped."},
+   C("happy","…You're here. Chumphon. Gateway to the South."),
+   ...rgProvTip(G,"chumphon",[C("happy",`${opp} uses the Swooping Gull Kick. …Swoops down from above. Fast.`),C("happy","…But after the swoop, she has to climb. When she climbs, go in.")],"Chaba")],
+  body:[{n:"nar",t:"Chaba bends down and picks up an orange-pink shell, rinses it in the sea and holds it up to the sun."},
+   C("happy","…For my brother."),
+   C("happy","My brother can't leave home for long. Wherever I go, I bring back a shell. For a wind chime. In his window."),
+   C("flustered","…Four provinces, four shells. Then I string them. …Help me look. Okay?",{choice:[
+    {t:"Get down and help her search properly",fx:G2=>rgMeet(G2,"chaba",3),then:[{n:"nar",t:"Ten minutes later the manager holds out a lopsided heart-shaped shell. Chaba looks at it a long time, then puts it in her shirt pocket, not the shell bag."},C("flustered","…This one. Not for my brother.")]},
+    {t:"\"Your brother will love it.\"",fx:G2=>rgMeet(G2,"chaba",2),then:[C("happy","…Mm. He likes the sound of the sea.")]},
+    {t:"\"Why not bring your brother along?\"",fx:G2=>rgMeet(G2,"chaba",1),then:[C("sad","…Someday. When his leg's better.")]}]}),
+   {n:"nar",t:"Before they leave the beach, Chaba hands everyone a bunch of lady-finger bananas without a word, except when she hands one to the manager."},
+   C("happy","…This bunch. Sweetest."),
+   ...rgJealStep(G,"Chaba",0,"near"),
+   ...chime(G)]};};
+ RG_PROV.surat=(G,D)=>{const opp=REGION.oppName(G,"surat"),mali=rgInT(G,"mali");return {
+  meet:[{n:"nar",bg:"market",t:"Mid-morning at the market on the Tapi River. Chaba stands at an oyster stall holding two bags of rongrien rambutans."},
+   C("happy","…Surat. Chaiya's not far."),
+   ...rgProvTip(G,"surat",[C("happy",`${opp} uses the Don Sak Oyster Elbow. …Closes up tight. Like an oyster.`),C("happy","…Wait for her to open up. When she throws the elbow, underneath is open.")],"Chaba")],
+  body:[{n:"nar",t:"Chaba shucks big oysters for everyone, so fast the vendor turns to watch."},
+   C("happy","…My brother taught me. As a kid."),
+   ...rgIf(mali,[{n:"mali",with:"chaba",f:"happy",l:"casual",t:"You still shuck oysters as fast as ever, Chaba…"},C("happy","…Eat.")]),
+   C("happy","…Can you shuck?",{choice:[
+    {t:"Ask Chaba to open one for you",fx:G2=>rgMeet(G2,"chaba",3),then:[{n:"nar",t:"Chaba shucks the biggest one on the tray, squeezes lime, sprinkles fried shallots and sets it in front of the manager, all without once looking at their face."}]},
+    {t:"Try shucking one yourself",fx:G2=>rgMeet(G2,"chaba",2),then:[{n:"nar",t:"The knife slips, and Chaba catches the manager's hand just in time."},C("flustered","…Clumsy. Don't. I'll do it.")]},
+    {t:"Ask about her brother",fx:G2=>rgMeet(G2,"chaba",2),then:[C("happy","…Best oyster shucker in the village. Still is. He can do it sitting down.")]}]}),
+   {n:"nar",t:"One oyster shell is lined with rainbow mother-of-pearl. Chaba rinses it and wraps it in a tissue."},
+   ...rgJealStep(G,"Chaba",0,"near"),
+   ...chime(G)]};};
+ RG_PROV.nakhonsi=(G,D)=>{const opp=REGION.oppName(G,"nakhonsi");return {
+  meet:[{n:"nar",bg:"temple",t:"In front of Wat Phra Mahathat in Nakhon Si Thammarat, the white chedi with its golden spire towers into the sky. Chaba waits under a tree, as expressionless as ever."},
+   C("happy","…Nakhon. Good curry rice. Eat first, talk later."),
+   ...rgProvTip(G,"nakhonsi",[C("happy",`${opp} uses the Shadow Puppet Punch. …Moves a lot, fakes a lot, like working a puppet.`),C("happy","…Watch the feet, not the hands. Feet don't lie.")],"Chaba")],
+  body:[{n:"nar",bg:"fair",t:"That afternoon Chaba takes everyone to an old shadow-puppet house, where a craftsman is punching patterns into cowhide for a clown figure."},
+   C("happy","…I like Ai Teng. Deadpan, never smiles, but the audience laughs.",{choice:[
+    {t:"\"He's just like you.\"",fx:G2=>rgMeet(G2,"chaba",3),then:[C("flustered","…Not like me."),{n:"nar",t:"But on the way out of the shop, Chaba buys a small Ai Teng puppet and hands it to the manager."}]},
+    {t:"Ask Chaba to try working a puppet",fx:G2=>rgMeet(G2,"chaba",2),then:[{n:"nar",t:"Chaba works the Ai Teng puppet and says in a deep southern voice, \"The Sirichai manager is not as handsome as Ai Teng.\" Everyone roars with laughter. Chaba's face doesn't move."}]},
+    {t:"Buy a puppet for Chaba's brother",fx:G2=>rgMeet(G2,"chaba",2),then:[C("happy","…My brother likes Ai Teng. He'll hang it next to the wind chime.")]}]}),
+   {n:"nar",bg:"sea",t:"On the way back Chaba stops at a beach outside town, searches bent over for a long time, then holds up a tiger-striped shell."},
+   ...rgJealStep(G,"Chaba",0,"near"),
+   ...chime(G)]};};
+ RG_PROV.songkhla=(G,D)=>{const opp=REGION.oppName(G,"songkhla");return {
+  meet:[{n:"nar",bg:"sea",t:"Samila Beach at dusk. The golden mermaid statue combs her hair on a rock. Chaba stands beside it with her arms folded, just as expressionless."},
+   C("happy","…Songkhla. Farthest one. Drive okay?"),
+   ...rgProvTip(G,"songkhla",[C("happy",`${opp} uses the Samila Mermaid Kick. …Kick and back off, back off and kick. Like waves.`),C("happy","…Don't chase. Wait. The wave comes back on its own.")],"Chaba")],
+  body:[C("happy","…People touch the mermaid's hair. For good grades."),
+   C("flustered","…I touched it before my final-year exam. Failed.",{choice:[
+    {t:"Burst out laughing",fx:G2=>rgMeet(G2,"chaba",2),then:[C("pout","…Funny, is it."),{n:"nar",t:"Chaba glares, but the corner of her mouth twitches."}]},
+    {t:"\"Touch it again and wish to win every fight.\"",fx:G2=>rgMeet(G2,"chaba",3),then:[{n:"nar",t:"Chaba reaches out, touches the mermaid's hair, then turns to look back."},C("flustered","…Wished. For you too.")]},
+    {t:"\"You failed, but you became the regional champion.\"",fx:G2=>rgMeet(G2,"chaba",2),then:[C("happy","…Mm. Better.")]}]}),
+   {n:"nar",t:"Chaba walks down to the water's edge, picks up a tiny white shell, and hands it to the manager to hold for now."},
+   ...rgJealStep(G,"Chaba",0,"near"),
+   ...chime(G)]};};
+ RG_DATE.chumphon=G=>[{n:"nar",bg:"night_south",t:"Chumphon's river mouth at night. Squid boats light up the sea in green rows like a floating town. Chaba sits on the fish pier, legs dangling."},
+   C("happy","…My brother used to go out on boats like that. I'd sit here waiting. Counting lights."),
+   C("flustered","…Tonight. Count with me. Okay?",{choice:[
+    {t:"Sit and count the lights together",fx:G2=>rgMeet(G2,"chaba",3),then:[{n:"nar",t:"One hundred and forty-two boats. Chaba falls asleep on the manager's shoulder at forty, and the manager counts the rest alone."}]},
+    {t:"\"You miscounted. There are two over there.\"",fx:G2=>rgMeet(G2,"chaba",2),then:[C("pout","…Start over."),{n:"nar",t:"Chaba starts over three times, as if she miscounts on purpose."}]},
+    {t:"Buy grilled squid to eat while you sit",fx:G2=>rgMeet(G2,"chaba",2),then:[C("happy","…Tasty.")]}]})];
+ RG_DATE.surat=G=>[{n:"nar",bg:"night_south",t:"The walking street along the Tapi River. Chaba passes a toy shop, stops at a round seal plushie for three seconds, then walks on as if nothing happened.",choice:[
+    {t:"Go back and buy it for her",fx:G2=>rgMeet(G2,"chaba",3),then:[C("flustered","…Didn't want it."),{n:"nar",t:"But Chaba hugs the seal tight all the way to the hotel."}]},
+    {t:"\"You like that one?\"",fx:G2=>rgMeet(G2,"chaba",2),then:[C("flustered","…No."),C("flustered","…A little.")]},
+    {t:"Pretend you didn't notice",fx:G2=>rgMeet(G2,"chaba",1),then:[{n:"nar",t:"Chaba looks back at the toy shop twice more before they reach the hotel."}]}]}];
+ RG_DATE.nakhonsi=G=>[{n:"nar",bg:"night_south",t:"A late-night tea shop in Nakhon. The place is full of people watching football. Chaba orders two hot teas and a plate of roti mataba."},
+   C("happy","…Tea shop. Southerners talk about everything here. Politics, boxing, dogs."),
+   C("happy","…What should we talk about.",{choice:[
+    {t:"\"You.\"",fx:G2=>rgMeet(G2,"chaba",3),then:[C("flustered","…About me. Nothing to tell."),{n:"nar",t:"But Chaba tells the longest story about herself since they met. Five whole sentences: her cat, her brother, the sea. Then she stops, red-faced."}]},
+    {t:"\"Boxing.\"",fx:G2=>rgMeet(G2,"chaba",2),then:[C("happy","…Okay. All night."),{n:"nar",t:"The two of them sketch fight plans on tissues until the table is covered."}]},
+    {t:"\"We don't have to talk. Let's just sit.\"",fx:G2=>rgMeet(G2,"chaba",2),then:[C("happy","…I like this.")]}]})];
+ RG_DATE.songkhla=G=>[{n:"nar",bg:"night_south",t:"Songkhla old town at night. Old Chinese shophouses glow orange. Chaba stops in front of a mural of two children riding double on a motorbike."},
+   C("happy","…Like me and my brother. When we were little."),
+   C("flustered","…Take a photo. Me next to the painting.",{choice:[
+    {t:"Take hers, then ask for one together",fx:G2=>rgMeet(G2,"chaba",3),then:[{n:"nar",t:"In the photo together Chaba stands half a step away, but as the shutter clicks she shifts in close."}]},
+    {t:"Take photos from lots of angles",fx:G2=>rgMeet(G2,"chaba",2),then:[C("happy","…This angle. Good. Sending it to my brother.")]},
+    {t:"\"Smile a little.\"",fx:G2=>rgMeet(G2,"chaba",2),then:[{n:"nar",t:"Chaba smiles so wide her eyes crinkle, the first smile in any photo of her, then hurries to grab the phone to delete it. The manager won't let her."}]}]})];
+ RG_DATEP.chaba=[
+  G=>[{n:"nar",bg:"night_south",t:"The beach in front of the hotel. The sea is quiet at night, only the sound of waves."},C("happy","…The sea is pretty at night."),{n:"nar",t:"Chaba says nothing more, but she stays beside you until the tide reaches her ankles."}],
+  G=>[{n:"nar",bg:"night_south",t:"Chaba takes the manager in her sidecar out to a cape past town to watch the moon rise from the sea."},C("happy","…No need to talk. Just watch."),{n:"nar",t:"The whole moon clears the water. Chaba glances over to check the manager is watching, then quickly looks away."}],
+  G=>[{n:"nar",bg:"night_south",t:"At the roti stall outside the hotel, Chaba orders two plates of banana roti and puts both in front of the manager."},C("happy","…Eat it all. Too thin.")]];
+}
+/* ---------- Central: Alicia shoots one vlog episode a province ---------- */
+{const A=rgLine("alicia");
+ const vlog=(G)=>{const n=rgProvN(G,"central");return n>=4?[A("happy","That's all four episodes! The special episode… I'll shoot it in Ayutthaya, the day you come for the cup."),A("flustered","I'll turn the camera off for that one. It's an episode that won't go on the channel… with an audience of one."),{n:"nar",t:"Alicia's vlog \"Four Provinces with Sirichai Camp\": all 4/4 episodes"}]
+   :[{n:"nar",t:`Alicia's vlog "Four Provinces with Sirichai Camp": episode ${n}/4 · the next episode is shot in the next province`}];};
+ RG_PROV.lopburi=(G,D)=>{const opp=REGION.oppName(G,"lopburi");return {
+  meet:[{n:"nar",bg:"rg_central",t:"Outside the Phra Kan shrine in Lopburi, Alicia stands with a camera on a gimbal and sunglasses on, two monkeys sitting on her shoulders."},
+   A("happy","Welcome to Lopburi~ Don't laugh! The monkeys climbed up on their own. I did not plan for them to be part of the content!"),
+   ...rgProvTip(G,"lopburi",[A("happy",`${opp} uses the Monkey Trick Punch. Fakes left, fakes right, like a monkey snatching your stuff.`),A("happy","But she fakes three times before the real punch. Count in your head and slip on the third.")],"Alicia")],
+  body:[A("happy","I have a new project: a vlog series, \"Four Provinces with Sirichai Camp\". One episode in every province we visit."),
+   A("flustered","Not because I want to see you more often! The sponsors asked… the fans asked… everyone asked."),
+   {n:"nar",t:"The monkey on Alicia's shoulder snatches her sunglasses and runs off up the prang.",choice:[
+    {t:"Run and get her sunglasses back",fx:G2=>rgMeet(G2,"alicia",2),then:[{n:"nar",t:"The manager trades a bunch of bananas for the sunglasses. The monkey looks very pleased. Alicia looks more pleased."},A("flustered","…I'm keeping this scene to watch by myself. It's not going on the channel.")]},
+    {t:"Film Alicia chasing the monkey",fx:G2=>rgMeet(G2,"alicia",2),then:[A("pout","Don't you dare post that! …If you do, credit me as the lead actress.")]},
+    {t:"\"You look prettier without the sunglasses.\"",fx:G2=>rgMeet(G2,"alicia",3),then:[A("flustered","…! The live isn't on, is it? It's not on, right!")]}]},
+   ...rgJealStep(G,"Alicia",0,"near"),
+   ...vlog(G)]};};
+ RG_PROV.suphan=(G,D)=>{const opp=REGION.oppName(G,"suphan");return {
+  meet:[{n:"nar",bg:"rg_central",t:"On the viewing deck of the tall tower in the middle of Suphan, Alicia presses against the glass and points her camera at rice fields stretching to the horizon."},
+   A("happy","Good morning! From up here you can see all of Suphan… this episode needs an epic opening."),
+   ...rgProvTip(G,"suphan",[A("happy",`${opp} uses the Suphan Master's Kick. Straight from the textbook, never a miss.`),A("happy","But a textbook is a textbook. She kicks on the same beat every time. Once you catch the rhythm you can counter every kick.")],"Alicia")],
+  body:[{n:"nar",bg:"market",t:"That afternoon at Sam Chuk, the hundred-year-old wooden market on the Tha Chin River, Alicia films the old coffee shop, the sweet shop, the barber, everything except herself."},
+   A("sad","You know the most common comment on my channel? \"Pretty but can't fight.\" I train six hours a day, and people still write that."),
+   A("sad","That's why I'd rather film other people.",{choice:[
+    {t:"\"Then today I'll film you.\"",fx:G2=>rgMeet(G2,"alicia",3),then:[{n:"nar",t:"The manager follows Alicia through the market with the camera. She walks stiff as a robot for ten minutes, then slowly starts laughing on her own while biting into a hot pastry."},A("flustered","…I'm keeping this clip for myself. It's not going on the channel.")]},
+    {t:"\"Nobody who's seen you fight for real would write that.\"",fx:G2=>rgMeet(G2,"alicia",2),then:[A("happy","…You talk like someone I've already punched.")]},
+    {t:"\"Maybe read fewer comments.\"",fx:G2=>rgMeet(G2,"alicia",1),then:[A("pout","I know… but I can't. Comments are my job.")]}]}),
+   ...rgJealStep(G,"Alicia",0,"near"),
+   ...vlog(G)]};};
+ RG_PROV.phetchaburi=(G,D)=>{const opp=REGION.oppName(G,"phetchaburi");return {
+  meet:[{n:"nar",bg:"hill",t:"At the cable-car station up to Khao Wang, Alicia waits with five boxes of khanom mo kaeng stacked in her arms."},
+   A("happy","Phetchaburi! The most famous khanom mo kaeng shop. You have to queue early… I didn't queue myself, my assistant did. …Okay, I queued. An hour and a half."),
+   ...rgProvTip(G,"phetchaburi",[A("happy",`${opp} uses the Khao Wang Knee. Her knees come up high like climbing a hill. Very heavy.`),A("happy","She always grabs the neck first. The moment her hand touches your neck, push your elbow out. Don't wait.")],"Alicia")],
+  body:[{n:"nar",t:"At the top of Khao Wang the wind blows hard, and all of Phetchaburi spreads below. Alicia sets up her camera, then puts it down without pressing record."},
+   A("sad","My personal manager called this morning about the Naka contract again. I told him I was filming a vlog and hung up."),
+   A("sad","Sometimes I wish I were just an ordinary boxer. Nobody knows me, and after training I come up the hill for sweets. No camera.",{choice:[
+    {t:"\"There's no camera now.\"",fx:G2=>rgMeet(G2,"alicia",3),then:[A("flustered","…That's true."),{n:"nar",t:"Alicia takes a big bite of khanom mo kaeng, gets it on the corner of her mouth, and laughs without caring who sees."}]},
+    {t:"\"People know you because you fight well.\"",fx:G2=>rgMeet(G2,"alicia",2),then:[A("happy","…You always say exactly what I want to hear, don't you.")]},
+    {t:"Share the khanom mo kaeng",fx:G2=>rgMeet(G2,"alicia",2),then:[A("happy","That box is yours. Taro. I picked it for you… not because I remembered you like taro. Coincidence.")]}]}),
+   ...rgJealStep(G,"Alicia",0,"near"),
+   ...vlog(G)]};};
+ RG_PROV.chanthaburi=(G,D)=>{const opp=REGION.oppName(G,"chanthaburi");return {
+  meet:[{n:"nar",bg:"market",t:"Chanthaburi's gem market on a Saturday morning. Traders inspect stones all along the street. Alicia sits at a gem table with a tiny loupe like an expert."},
+   A("happy","Today I'll teach everyone how to spot a real gem! …I can't, actually. But holding a loupe makes me look like I can."),
+   ...rgProvTip(G,"chanthaburi",[A("happy",`${opp} uses the Mangosteen Shell Punch. Her guard is as tight as a mangosteen rind. Hard to crack.`),A("happy","Don't bother cracking the shell. Keep kicking her legs. However hard the shell is, the legs are still soft.")],"Alicia")],
+  body:[{n:"nar",bg:"river",t:"That afternoon Alicia walks everyone through the Chanthaboon waterfront community. Old wooden houses line the river, and a big cathedral stands on the far bank."},
+   A("happy","I came to a training camp here when I was fifteen. It was the first time someone told me I fought well, not that I was pretty."),
+   A("flustered","…It was the mangosteen lady, ha ha. She watched me train every day and gave me a free bag of mangosteens.",{choice:[
+    {t:"Go and look for that mangosteen seller together",fx:G2=>rgMeet(G2,"alicia",3),then:[{n:"nar",t:"The mangosteen stall is still in the same spot. The vendor recognises Alicia at once and shouts, \"It's little Heavy Hands!\" Alicia runs in and hugs her like a child."}]},
+    {t:"\"I think you fight well too. Not just pretty.\"",fx:G2=>rgMeet(G2,"alicia",2),then:[A("pout","…Not pretty at all?"),A("flustered","Kidding! …Thank you.")]},
+    {t:"Help her keep filming the vlog",fx:G2=>rgMeet(G2,"alicia",1),then:[A("happy","Sure! The light is lovely here. You stand over there… in the frame, too.")]}]}),
+   ...rgJealStep(G,"Alicia",0,"near"),
+   ...vlog(G)]};};
+ RG_DATE.lopburi=G=>[{n:"nar",bg:"night_central",t:"A late-night café facing Phra Prang Sam Yot. Monkeys sleep in a row on the power lines like beads. Alicia turned her phone face down the moment she sat."},
+   A("happy","No live tonight. No filming, no posting… I want to see how ordinary people go on dates."),
+   A("flustered","…Not a date! I mean going out for coffee!",{choice:[
+    {t:"\"Then ordinary people just sit and talk.\"",fx:G2=>rgMeet(G2,"alicia",3),then:[{n:"nar",t:"They talk until the café closes. Alicia doesn't touch her phone once."}]},
+    {t:"\"It can be a date.\"",fx:G2=>rgMeet(G2,"alicia",3),then:[A("flustered","…! You said it, not me. Remember that.")]},
+    {t:"Take a photo of the monkeys on the wires",fx:G2=>rgMeet(G2,"alicia",1),then:[A("pout","So now you're taking photos for me? …Fine. Send them to me.")]}]})];
+ RG_DATE.suphan=G=>[{n:"nar",bg:"night_central",t:"The Wat Pa Lelai temple fair is packed tonight. The Ferris wheel turns slowly. Alicia buys two tickets without asking."},
+   {n:"nar",t:"The gondola stops right at the top. The wind is cool, and Alicia grips the rail tight."},
+   A("flustered","I'm not scared of heights… I'm scared of getting stuck up here for a long time.",{choice:[
+    {t:"Offer your hand",fx:G2=>rgMeet(G2,"alicia",3),then:[{n:"nar",t:"Alicia holds the hand tight all the way down, then lets go very fast and pretends to fix her hair."}]},
+    {t:"Point out the lights of the whole town",fx:G2=>rgMeet(G2,"alicia",2),then:[A("happy","…It's beautiful. I'll remember it without a photo.")]},
+    {t:"Rock the gondola to tease her",fx:G2=>rgMeet(G2,"alicia",1),then:[A("angry","…! When we get down you're getting one uppercut!")]}]})];
+ RG_DATE.phetchaburi=G=>[{n:"nar",bg:"night_central",t:"Cha-am beach at night. Seafood restaurants glow along the shore. Alicia carries her white boots and walks barefoot on the sand."},
+   A("happy","These are the most expensive boots I own, and the most painful to wear… just like fame.",{choice:[
+    {t:"\"I'll carry your boots, then.\"",fx:G2=>rgMeet(G2,"alicia",2),then:[A("happy","…Carrying a girl's shoes on the beach. If my viewers saw that, the whole channel would scream… lucky no one's watching.")]},
+    {t:"Take your shoes off and walk barefoot with her",fx:G2=>rgMeet(G2,"alicia",3),then:[{n:"nar",t:"A wave washes up over both their ankles. Alicia lets out a small shriek, then laughs louder than she ever does on a live."}]},
+    {t:"\"Fame is also how people see that you fight well.\"",fx:G2=>rgMeet(G2,"alicia",1),then:[A("happy","…You're such an optimist.")]}]})];
+ RG_DATE.chanthaburi=G=>[{n:"nar",bg:"night_central",t:"At a sweet shop in an old wooden house on the Chanthaboon waterfront, Alicia orders two bags of kanom kai and sits unusually still."},
+   A("happy","Can I ask you one thing? And you can't answer like a camp manager."),
+   A("flustered","If I weren't a champion, with no channel and no viewers… would you still come walking with me?",{choice:[
+    {t:"\"Of course.\"",fx:G2=>rgMeet(G2,"alicia",3),then:[A("flustered","…You answered too fast. You didn't even think."),A("happy","…But I like that you didn't think.")]},
+    {t:"\"Of course. But I'd probably have to pay for the snacks myself.\"",fx:G2=>rgMeet(G2,"alicia",2),then:[A("happy","Ha ha, you… Fine. The kanom kai is on me.")]},
+    {t:"\"Why do you ask?\"",fx:G2=>rgMeet(G2,"alicia",1),then:[A("pout","…I'm not asking anymore.")]}]})];
+ RG_DATEP.alicia=[
+  G=>[{n:"nar",bg:"night_central",t:"At a riverside café Alicia sits across the table, dressed up as if for an event."},A("happy","Don't get the wrong idea. I just wanted someone to walk with. The camera's off tonight…"),{n:"nar",t:"Alicia leaves her phone face down on the table all night. She never picks it up once."}],
+  G=>[{n:"nar",bg:"night_central",t:"The mall downtown is still open. Alicia drags the manager into a clothes shop and holds shirts up against him one by one."},A("flustered","This one. Not because I like it. The colour just goes with my jacket.")],
+  G=>[{n:"nar",bg:"night_central",t:"At an ice-cream shop by the river, Alicia takes twenty photos of her ice cream until it melts all over."},A("pout","Don't laugh! …You can help me eat it before it drips, if you like.")]];
+}
+
 const REGION={
   /* end of week (after the weekly events): the gala the week after the invitation, the contract beat the week after the first cup */
   weekScene(G,done){const R=G.region;if(!R){done();return;}rgApply(G);const now=gameWeek(G);if(lbWeek(G,done))return;
