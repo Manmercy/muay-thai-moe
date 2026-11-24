@@ -786,14 +786,15 @@ function drawCampFx(x,k,t){const C=CFX[k]||CFX.rest,W=x.canvas.width,H=x.canvas.
   if(C.tint){x.fillStyle=C.tint;x.fillRect(0,0,W,H);}
   x.fillStyle="rgba(0,0,0,.28)";x.fillRect(0,H*.78,W,H*.22);
   const R=cfxRoster(k),fy=H*.94,fh=Math.min(H*.62,W/Math.max(3,R.length)*1.15);const P=(a,b,w,h,c)=>{x.fillStyle=c;x.fillRect(Math.round(a),Math.round(b),w,h);};
-  if(C.students)for(let i=0;i<C.students;i++){const sx=W*(.52+i*.12),sy=fy-6+(i%2)*6;drawStudentNpc(x,"stu"+i+k,sx,sy,fh*.78,Math.floor(t/1400+i)%2?C.row:"guard",t+i*90,true);}
+  if(C.students)for(let i=0;i<C.students;i++){const sx=W*(.52+i*.08),sy=fy-6+(i%2)*6;drawStudentNpc(x,"stu"+i+k,sx,sy,fh*.78,Math.floor(t/1400+i)%2?C.row:"guard",t+i*90,true);}
   if(C.masseuse)drawStudentNpc(x,"masseuse",W*.72,fy,fh*.9,"idle",t,true);
   if(C.elder){drawStudentNpc(x,"oldmaster",W*.7,fy,fh*.95,Math.floor(t/1300)%2?"knee":"guard",t,true);}
   if(C.crew){drawStudentNpc(x,"crew1",W*.84,fy,fh*.85,"idle",t,true);}
   if(C.monks)for(let i=0;i<3;i++){const mx=-40+((t/22)+i*70)%(W+160);drawMonk(x,mx,fy-fh*.1,t,i,fh*.7/29,true);} // v1.38: monks walk behind, left to right
+  /* v1.91.149 (Man: nobody stands somewhere odd): the ones watching stand on the same floor at the sides, a step back — not up on the back wall or the ropes */
+  if(C.spar){const ring=k==="fightnight"||k==="hostshow",SX=[.1,.9,.2,.8,.05,.95,.15,.85];R.slice(2,10).forEach((f,i)=>{const sx=SX[i];drawFrame(x,sheetFor(f),ROW.idle,Math.floor(t/260+i)%4,W*sx,ring?H*1.04:fy-H*.06,fh*.72,sx>.5);});} /* at a ring show they watch from the front row, below the apron */
   if(C.spar&&R.length){const a=R[0],b=R[1]||{id:"sparnpc",canon:false};const ph=Math.floor(t/900)%2;
     drawFrame(x,sheetFor(a),ROW[ph?"punch":"guard"],Math.floor(t/150)%4,W*.4,fy,fh,false);drawFrame(x,sheetFor(b),ROW[ph?"guard":"knee"],Math.floor(t/150)%4,W*.6,fy,fh,true);}
-  if(C.spar)R.slice(2).forEach((f,i)=>drawFrame(x,sheetFor(f),ROW.guard,Math.floor(t/260)%4,W*(.12+(i+.5)*.76/Math.max(1,R.length-2)),H*.65,fh*.65,false));
   else R.forEach((f,i)=>{let cx=W*(.12+(i+.5)*.76/Math.max(1,R.length)),row=C.row||"idle";
     if(C.walk){const span=W*.5;cx=W*.12+((t/18+i*span/Math.max(1,R.length))%span);row="walk";}
     if(C.kneel){cx=W*(.12+(i+.5)*.76/Math.max(1,R.length));row="idle";}
