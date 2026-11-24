@@ -5065,7 +5065,7 @@ const EVENTS=[
      {n:"coach",t:"ครูเตะครกได้ แต่ครูจะไม่เต้นนะ บอกไว้ก่อน"},
      {n:"nar",t:"สุดท้ายครูแดงก็เต้น"}]}]}]},
 
- {id:"mali_meet",look:"fight",when:G=>G.week>=4,bg:"fair",steps:[
+ {id:"mali_meet",look:"fight",when:G=>G.week>=4,bgbg:"fair_ring",steps:[
   {n:"nar",t:"งานวัดประจำปี เวทีมวยชั่วคราวตั้งอยู่ข้างชิงช้าสวรรค์ เสียงปี่กลองดังไปทั่ว"},
   {n:"nar",t:"นักมวยสาวตัวเล็กผมมัดจุก ติดดอกลั่นทม เตะคู่ต่อสู้ที่ตัวใหญ่กว่าจนต้องถอยร่น"},
   {n:"mali",f:"happy",t:"เย้! ชนะแล้ว~ ขอบคุณทุกคนนะคะ!"},
@@ -5151,7 +5151,7 @@ const EVENTS=[
    {t:"การแบกทุกคนไว้คนเดียว ไม่ใช่หน้าที่เธอคนเดียวนะ",fx:G=>{add(G,"ploy","bond",9);},then:[{n:"ploy",f:"flustered",t:"…คุณนี่แปลกนะ เป็นคู่แข่งแต่พูดเหมือนเป็นห่วง ขอบคุณ"}]},
    {t:"งั้นบนเวที ค่ายเราจะไม่ออมมือ",fx:G=>{add(G,"ploy","bond",5);add(G,"ploy","trust",4);},then:[{n:"ploy",f:"happy",t:"ดี แบบนี้ฉันชอบ อย่าทำให้ฉันผิดหวังล่ะ"}]}]}]},
 
- {id:"loykrathong",look:"casual",when:G=>G.week>=26,bg:"fair",steps:[
+ {id:"loykrathong",look:"casual",when:G=>G.week>=26,bgbg:"loy_night",steps:[
   {n:"nar",t:"คืนวันเพ็ญเดือนสิบสอง แม่น้ำเต็มไปด้วยกระทงและแสงเทียน ทั้งค่ายหยุดซ้อมหนึ่งคืน"},
   {n:"coach",t:"ไปเถอะ ไปลอยกระทงกัน ขอให้สิ่งไม่ดีลอยไปกับน้ำ ปีนี้ค่ายเราเจอมาเยอะแล้ว"},
   {n:"nar",t:"คุณจะชวนใครไปลอยกระทงด้วย?"},
@@ -8953,7 +8953,7 @@ AU.gsfx=function(kind,a){if(!this.init()||this.muted||!SETTINGS.sfx)return;const
   if(kind==="shimmer")for(let i=0;i<6;i++)T(i*.05,{f:1400+Math.random()*1400,type:"sine",dur:.12,peak:.06});};
 
 // ================= MUAY THAI MOE v1.3 — UI =================
-const VERSION="1.91.136";
+const VERSION="1.91.137";
 const CUR_LANG=(typeof window!=="undefined"&&window.LANG)||"th";
 const TH_LABEL=String.fromCharCode(3652,3607,3618);
 function langSwitch(cls){return `<div class="langsw ${cls||""}" role="group" aria-label="Language">${[["th",TH_LABEL],["en","EN"]].map(([k,l])=>`<button class="lsb ${CUR_LANG===k?"on":""}" data-act="setlang" data-v="${k}" aria-pressed="${CUR_LANG===k}">${l}</button>`).join("")}</div>`;}
@@ -8994,7 +8994,7 @@ const THAI_IDS=["kati","mali","rin","ploy","fah"];
 // v1.91.48: sad + pout Thai-dress art — with THAI_XP on, every mood has its own picture and the casual-clothes guard is off
 const THAI_XP=true;const thaiSuf=m=>THAI_XP&&m==="sad"?"_sad":THAI_XP&&["pout","angry"].includes(m)?"_pout":["flustered","surprised","pout","sad","angry"].includes(m)?"_fl":"";
 const faceSrc=(id,mood,look)=>id==="prod_B"?stand(id,look==="casual"||!look?"casual":look,mood).replace(/\.(png|webp)$/,"_face.png"):look==="thai"&&THAI_IDS.includes(id)?`${ASSET}${id}_thai${thaiSuf(mood)}_face.${["sad","pout","angry"].includes(mood)?"png":"webp"}`:id==="coach"?`${ASSET}coach_face.webp`:id==="pailin"?`${ASSET}${look==="casual"?`pailin_casual${mood==="flustered"?"_flustered":["sad","angry","pout"].includes(mood)?"_pout":""}_face`:`pailin_fight_${["happy","sad","angry","surprised","flustered"].includes(mood)?mood:FMOOD(mood)}_face`}.png`:look&&look!=="fight"&&look!=="thai"?`${ASSET}${id}_${look}_face.${REGIONAL_IDS.includes(id)||id==="fah"&&look.startsWith("casual")||id==="kati"&&look==="casual_flustered"?"png":"webp"}`:`${ASSET}${id}_${["happy","sad","flustered"].includes(mood)||REGIONAL_IDS.includes(id)&&["angry","surprised"].includes(mood)?mood:"happy"}_face.${REGIONAL_IDS.includes(id)?"png":"webp"}`;
-const BGIMG={river_dawn:"bg_river_dawn.webp",gang_hq:"bg_gang_hq.webp",gang_hideout:"bg_gang_hideout.webp",loy_ring:"bg_loy_ring.webp",market_morning:"bg_market_morning.webp",camp:"bg_camp.webp",night:"bg_camp_night.webp",bus:"bg_bus_rain.webp",letter:"bg_grandpa_letter.webp",fair:"bg_fair.webp",local:"bg_local.webp",district:"bg_district.webp",ring:"bg_local.webp",final:"bg_final.webp",hall:"bg_hall.webp",gym:null,gymdusk:"gym1.webp",food:"bg_food.webp",temple:"bg_temple.webp",cafe:"bg_cafe.webp",river:"bg_river.webp",market:"bg_market.webp",rooster:"bg_rooster.webp",farm:"bg_farm.webp",sea:"bg_sea.webp",mountain:"bg_mountain.webp",ayutthaya:"bg_ayutthaya.webp",amphawa:"bg_amphawa.webp",
+const BGIMG={river_dawn:"bg_river_dawn.webp",gang_hq:"bg_gang_hq.webp",gang_hideout:"bg_gang_hideout.webp",loy_ring:"bg_loy_ring.webp",market_morning:"bg_market_morning.webp",camp:"bg_camp.webp",night:"bg_camp_night.webp",bus:"bg_bus_rain.webp",letter:"bg_grandpa_letter.webp",fair:"bg_fair.webp",fair_ring:"bg_fair_ring.webp",camp_day:"bg_camp_day.webp",home_baibua:"bg_home_baibua.webp",home_tabtim:"bg_home_tabtim.webp",home_chaba:"bg_home_chaba.webp",home_alicia:"bg_home_alicia.webp",phuket_beach:"bg_phuket_beach.webp",local:"bg_local.webp",district:"bg_district.webp",ring:"bg_local.webp",final:"bg_final.webp",hall:"bg_hall.webp",gym:null,gymdusk:"gym1.webp",food:"bg_food.webp",temple:"bg_temple.webp",cafe:"bg_cafe.webp",river:"bg_river.webp",market:"bg_market.webp",rooster:"bg_rooster.webp",farm:"bg_farm.webp",sea:"bg_sea.webp",mountain:"bg_mountain.webp",ayutthaya:"bg_ayutthaya.webp",amphawa:"bg_amphawa.webp",
   /* v1.89.7: new scenes, ready to use */camp_night:"bg_camp_night.webp",camp_rain:"bg_camp_rain.webp",songkran:"bg_songkran.webp",newyear:"bg_newyear.webp",kitchen:"bg_kitchen.webp",hill:"bg_hill.webp",tvstudio:"bg_tvstudio.webp",live_corner:"bg_live_corner.webp",hospital:"bg_hospital.webp",vector_lab:"bg_vector_lab.webp",loy_night:"bg_loy_night.webp",sportsday:"bg_sportsday.webp",dorm_room:"bg_dorm_room.webp"};
 /* v1.91.26 (Man): every SSR card has its own illustration — shown full-screen at its moment in the card story, viewable in the card's
    details once owned, and usable as the card face (G.cardArt[id]=1). at = the story line it appears on (it stays for the next line too). */
@@ -9040,7 +9040,7 @@ const npcPortraitSrc=(im,st={})=>{if(im.startsWith("vector_")||im==="petchara")r
     return `${ASSET}npc_baiyok_${im==="baiyok_black"?"black":"white"}_${mood}.png`;
   }
   return im.startsWith("nl_")?`${ASSET}${im}.webp`:`${ASSET}npc_${im}.webp`;};
-const TIER_BG={evloy:"bg_river.webp",pro:"bg_fair.webp",semi:"bg_hall.webp",local:"bg_local.webp",district:"bg_district.webp",final:"bg_final.webp",exhibition:"bg_fair.webp",special:"bg_district.webp",lab:"bg_hall.webp",quest:"bg_food.webp",beast:"bg_fair.webp",dm:"bg_hall.webp"};
+const TIER_BG={evloy:"bg_river.webp",pro:"bg_fair_ring.webp",semi:"bg_hall.webp",local:"bg_local.webp",district:"bg_district.webp",final:"bg_final.webp",exhibition:"bg_fair_ring.webp",special:"bg_district.webp",lab:"bg_hall.webp",quest:"bg_food.webp",beast:"bg_fair_ring.webp",dm:"bg_hall.webp"};
 const gymBg=()=>`gym${G?campLevel(G):1}.webp`;
 // v1.13 pixel icons — no emoji in the fight UI
 function pxIcon(rows,pal){const h=rows.length,w=rows[0].length;let r="";rows.forEach((row,y)=>[...row].forEach((c,x)=>{if(c!=="."&&pal[c])r+=`<rect x="${x}" y="${y}" width="1.02" height="1.02" fill="${pal[c]}"/>`;}));
@@ -14093,7 +14093,7 @@ Object.assign(CARDS,{
 <script>
 (function(){
 /* v1.87: Thai code ships inside index.html; English code (en.js) and the dictionary (i18n.js) load only when needed */
-var B="ed405a2f17";
+var B="68b0198a53";
 var L="";try{L=localStorage.getItem("mtm_lang")||"";}catch(e){}
 try{var h=(location.hash||"").match(/lang=(th|en)/);if(h)L=h[1];}catch(e){}
 if(L!=="th"&&L!=="en")L="th";
