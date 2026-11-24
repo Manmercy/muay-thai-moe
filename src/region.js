@@ -189,10 +189,12 @@ const RG_MISS={
 const RG_FLOOR=[20,10,5,0];
 /* scenes and fights for the champions */
 if(typeof BGIMG!=="undefined"){for(const d of Object.keys(RG_OPP))BGIMG["rgring_"+d]=d==="chanthaburi"?"bg_region_east.webp":`bg_ring_${d}.webp`; /* v1.91.14: the belt ceremony stays in the province's own ring */
+/* v1.91.133 (Man): each region has its own hotel room — "hotel_room" follows the region the camp is staying in */
+if(typeof BGIMG!=="undefined")Object.defineProperty(BGIMG,"hotel_room",{configurable:true,enumerable:true,get(){const r=window.__rgHotelR;return r?`bg_hotel_${r}.webp`:"bg_hotel_room.webp";},set(v){}});
 Object.assign(BGIMG,{rg_north:"bg_region_north.webp",rg_northeast:"bg_region_northeast.webp",rg_central:"bg_region_central.webp",rg_south:"bg_region_south.webp",rg_east:"bg_region_east.webp",
   doisuthep:"bg_doisuthep.webp",mekong:"bg_mekong.webp",boat:"bg_boat.webp",andaman:"bg_andaman.webp",
   night_north:"bg_night_north.webp",night_isan:"bg_night_isan.webp",night_central:"bg_night_central.webp",night_south:"bg_night_south.webp",
-  gala:"bg_gala_ballroom.webp",hotel_room:"bg_hotel_room.webp",gas_station:"bg_gas_station.webp",camp_buatasao:"bg_camp_buatasao.webp",tasao_shrine:"bg_tasao_shrine.webp",
+  gala:"bg_gala_ballroom.webp",gas_station:"bg_gas_station.webp",camp_buatasao:"bg_camp_buatasao.webp",tasao_shrine:"bg_tasao_shrine.webp",
   camp_phimai:"bg_camp_phimai.webp",somtam_stall:"bg_somtam_stall.webp",bus_terminal:"bg_bus_terminal.webp",mali_home:"bg_mali_home.webp",pier_south:"bg_pier_south.webp",
   camp_andaman:"bg_camp_andaman.webp",camp_hanuman:"bg_camp_hanuman.webp",lopburi_monkeys:"bg_lopburi_monkeys.webp",krerk_dinner:"bg_krerk_dinner.webp",
   closing_ceremony:"bg_closing_ceremony.webp",naka_underground:"bg_naka_underground.webp",naka_lab:"bg_naka_lab.webp"});}
@@ -2079,7 +2081,7 @@ const REGION={
     const fight=(cb)=>T.local?this.localRun(b,T,cb):openFight(b,cb);
     if(T.quick&&this.canQuick(G,dest)){this.arrive(G,T,P,null);fight(()=>{const n=P.nights||0;if(n){for(const f of roadRiders(G))f.fatigue=Math.max(0,(f.fatigue||0)-10*n);}
       G.log=G.log||[];G.log.push(`กลับถึงค่ายจาก${ROAD_DEST[dest].name}${n?` · พักที่โรงแรม ${n} คืน ความล้า −${10*n}`:""}`);save();done();});return;}
-    ROAD.open(dest,{paid:true,plan:P,onArrive:(P2,front)=>{this.arrive(G,T,P2||P,front);const go=()=>this.hotel(b,T,()=>fight(()=>this.night(T,P2||P,1,done))),A=this.firstArrive(G,ROAD_DEST[dest].r,dest),Bp=this.provArrive(G,dest,!!A);T.fa=A?1:0;
+    ROAD.open(dest,{paid:true,plan:P,onArrive:(P2,front)=>{this.arrive(G,T,P2||P,front);window.__rgHotelR=ROAD_DEST[dest].r;const go=()=>this.hotel(b,T,()=>fight(()=>this.night(T,P2||P,1,done))),A=this.firstArrive(G,ROAD_DEST[dest].r,dest),Bp=this.provArrive(G,dest,!!A);T.fa=A?1:0;
       const goB=()=>Bp?playScene(Bp,go,{bg:RG_RBG[ROAD_DEST[dest].r],look:"casual"}):go();
       if(A){playScene(A,goB,{bg:"gas_station",look:"casual"});}else goB();}});},
   /* v1.91.121 (Man): off-schedule fight — the call, the choice to go, then bout after bout */
@@ -2119,7 +2121,7 @@ const REGION={
   /* the first trip into a region: its champion comes to meet the camp on the way in */
   firstArrive(G,r,dest){const R=G.region;R.arrived=R.arrived||{};if(R.arrived[r]||!RG_ARRIVE[r])return null;R.arrived[r]=1;rgTouch(G,RG_CID[r]);return RG_ARRIVE[r](G,ROAD_DEST[dest]);},
   /* road fatigue for everyone on board (the fighter only half: the corner keeps her off her feet) · the shotgun seat is a small moment */
-  arrive(G,T,P,front){const fat=P.fat||0;for(const f of roadRiders(G)){const k=f.id===T.fid?.5:1;f.fatigue=Math.min(100,(f.fatigue||0)+Math.round(fat*k));}
+  arrive(G,T,P,front){window.__rgHotelR=(ROAD_DEST[T.dest]||{}).r||window.__rgHotelR;const fat=P.fat||0;for(const f of roadRiders(G)){const k=f.id===T.fid?.5:1;f.fatigue=Math.min(100,(f.fatigue||0)+Math.round(fat*k));}
     if(front&&G.F[front]){add(G,front,"bond",1);G.F[front].morale=Math.min(100,(G.F[front].morale||0)+2);}
     G.log=G.log||[];G.log.push(`ทั้งค่ายเดินทางถึง${ROAD_DEST[T.dest].name} · ความล้า +${fat}`);},
   /* night n of the trip. Far trips stay over (1–2 nights); a day trip may stay one extra night if you pay for the rooms */
@@ -2164,7 +2166,7 @@ const REGION={
       ...(pre?[]:[{t:"ซ้อมเบา ๆ ที่ลานจอดรถโรงแรม",fx:G2=>{for(const f of roadRiders(G2)){f.exp=(f.exp||0)+6;f.fatigue=Math.min(100,(f.fatigue||0)+2);}},then:[{n:"nar",t:"เตะเป้าใต้ไฟลานจอดรถจนยามโรงแรมมาดู · ประสบการณ์ +6"}]}]),
       {t:`🛍 ซื้อของฝาก${D.name} (ไม่เสียเวลา)`,fx:()=>{T.goShop=1;}},
       ...(pre?[{t:"มุ่งสู่เวทีเลย ▸",fx:()=>{T.goRing=1;}}]:[])];},
-  home(T,done){if(!T.shopDone){T.shopDone=1;this.shop(T,()=>this.home(T,done),1);return;}G.log=G.log||[];G.log.push(`กลับถึงค่ายจาก${ROAD_DEST[T.dest].name}`);save();done();},
+  home(T,done){window.__rgHotelR=null;if(!T.shopDone){T.shopDone=1;this.shop(T,()=>this.home(T,done),1);return;}G.log=G.log||[];G.log.push(`กลับถึงค่ายจาก${ROAD_DEST[T.dest].name}`);save();done();},
   /* v1.89.23: the souvenir shop on the way out of town — the only place regional souvenirs are sold; keep buying until you get back on the bus */
   shopIntro:{north:"ขากลับ รถแวะร้านของฝากริมถนน ร่มกระดาษสาแขวนเรียงเป็นแถว ผ้าทอผืนงามพับวางอยู่บนโต๊ะไม้",
     isan:"ก่อนออกจากเมือง รถแวะศูนย์ผ้าไหมประจำจังหวัด หมอนขวานกองสูงเป็นภูเขา ผ้าไหมแพรวาแขวนอยู่ในตู้กระจก",
