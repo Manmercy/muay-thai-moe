@@ -1694,9 +1694,205 @@ const RG_SIDE={
 function rgSideDue(G,T){const R=G.region,D=ROAD_DEST[T.dest];if(!R||!D||T.fa||T.series||T.local)return null;const X=RG_SIDE[D.r];if(!X)return null;
   const S=(R.side=R.side||{})[D.r]=R.side[D.r]||{};if(S.won)return null;if(R.joined&&R.joined[X.cid])return null;if(!(R.arrived||{})[D.r])return null;
   if(S.triedAbs!=null&&S.triedAbs===T.abs)return null;return X;}
+/* ---------- v1.91.122 (Man): the camp's own journey through the Four Regions ----------
+   RG_MS: milestone nights back at camp — first province belt, first four-belt ticket, each cup, all four cups (national).
+   RG_WARM: quiet hotel-night moments with the five, each once, in place of a hotel gag; lines read the camp's real progress. */
+const RG_MSL={
+ belt1:{bg:"camp_night",
+  head:(G,q)=>`The camp gets home late, but nobody will go to bed. The ${(ROAD_DEST[q.dest]||{name:""}).name} provincial belt lies in the middle of the dinner table.`,
+  me:{kati:"Grandpa... the first belt Sirichai Camp has won outside Chiang Mai. I brought it to show you.",
+   mali:"Mali sent Mum a photo~ She replied with one word: \"Seen.\" ...That's enough.",
+   rin:"I put our chance of winning that night at thirty-eight percent... I'm glad the number was wrong.",
+   ploy:"The knee held and the belt is ours... let me just sit here a while longer tonight.",
+   fah:"Anyone who wants a photo of Fah with the belt can take one! ...Send one to Grandma too. She'll call to ask for sure."},
+  any:{kati:"A belt from another province... Grandpa said one day Sirichai Camp would fight further than Chiang Mai. He was right.",
+   mali:"Can Mali hold it~? It's heavier than I thought! The next one's Mali's.",
+   rin:"I've started a new page in the black notebook, headed \"Four Regions\". It has one line so far... I don't want it to stay one line for long.",
+   ploy:"The first one's always the hardest. The rest get easier... not because the opponents get easy. Because now we know we can.",
+   fah:"Fah's not jealous! ...The next belt is Fah's. Remember that!"},
+  coach:"The camp's first belt away from home. Eat all you want tonight. Tomorrow we run at five as usual.",
+  end:"Auntie Daeng brings a pot of hang lay curry out of the kitchen and everyone cheers."},
+ ticket:{bg:"camp_night",
+  head:(G,q)=>`A letter from the association lies on the table: Sirichai Camp has all four belts of ${RG[q.r].name} and has earned the right to challenge the regional champion.`,
+  any:{kati:"Four belts! Next is the real regional champion... my hands are shaking for everyone.",
+   mali:"Regional champion, really~? It feels like yesterday we were sweating over subdistrict fights.",
+   rin:"From the subdistrict rings to here took less time than I expected... I like being wrong like this.",
+   ploy:"Back at Golden Tiger I thought a small camp could never get this far... I was wrong.",
+   fah:"Regional champions are people too! They can win and they can lose. Fah's not scared... whoever fights, tell Fah. Fah will work the corner."},
+  coach:"Best of three, not one fight. Watch the tape, find the answer, train for what you see. Now go rest."},
+ cup1:{bg:"camp_night",
+  head:(G,q)=>`The champion's cup of ${RG[q.r].name} stands on the shelf in the camp hall, next to Grandpa Chai's photo.`,
+  me:{kati:"Grandpa, Sirichai Camp is a regional champion... I put the cup next to you so you can see it every day.",
+   mali:"Mali video-called Mum, and Mum watched to the end for the first time~ ...Mali's already cried. Don't look.",
+   rin:"At nineteen I wrote in my notebook \"I'll never stand on a big stage again\"... today I crossed that line out.",
+   ploy:"My first cup where I wasn't fighting to please anyone. I fought because I wanted to... funny, isn't it.",
+   fah:"Fah's a regional champion! Grandma's going to tell the whole market... hey, thanks. Fah's only saying it once."},
+  any:{kati:"We've made it to regional level! From the little camp Grandpa built with a few old bags...",
+   mali:"Regional level~! Mali will write to Mum... and this letter Mali will really send.",
+   rin:"Regional level. I checked three times. I'm not dreaming.",
+   ploy:"Regional level... everyone, no 5 a.m. tomorrow. I'll talk to Kru Daeng myself.",
+   fah:"Regional level!! Fah's not crying. Dust in the eye!"},
+  coach:"Grandpa Chai said one day this camp would have a regional cup... today's the day. But don't get comfortable. Three regions to go.",
+  end:"That night the dorm lights stay on until 2 a.m., laughter carrying down to the training yard."},
+ cup2:{bg:"camp_night",
+  head:(G,q)=>`The champion's cup of ${RG[q.r].name} goes up next to the first cup. The shelf in the hall is starting to look small.`,
+  any:{kati:"Second cup! The shelf by Grandpa's photo is getting crowded. I'll ask Kru Daeng to build another.",
+   mali:"Two regions~ Mali's starting to learn the map of Thailand.",
+   rin:"Two of four. Fifty percent... the second half is always harder than the first.",
+   ploy:"Two cups. Don't get cocky. The other regions know who we are now.",
+   fah:"Two cups! Fah says we can take the whole country... Fah means it. Not joking."}},
+ cup3:{bg:"camp_night",
+  head:(G,q)=>`The champion's cup of ${RG[q.r].name} is the third. One space left on the shelf.`,
+  any:{kati:"One more region... just one more, and Sirichai Camp is a national-level camp.",
+   mali:"Just a little more~ Mali will train extra every evening so nobody has to carry it alone.",
+   rin:"One region left. I've made three plans... the fourth is trusting each other.",
+   ploy:"The last cup is the heaviest, because everyone starts fearing a slip... don't. We didn't come this far on luck.",
+   fah:"One more cup! If anyone's tired, Fah will carry them... not worried, okay. Just don't want to wait."}},
+ nat:{bg:"camp_night",
+  head:(G,q)=>"The fourth cup goes up on the shelf. All four regions. The whole country.",
+  any:{kati:"Sirichai Camp is national champion, Grandpa... I don't need to look for you in the stands anymore. I know you're right here.",
+   mali:"The whole country~ From Chaiya all the way up to Chiang Rai... Dad must be smiling.",
+   rin:"I've started a new black notebook. The first page has no numbers at all. Just everyone's names.",
+   ploy:"I used to fight so no one would be disappointed... these days I fight for you all, and it's so much better.",
+   fah:"Everyone important leaves... but none of you went anywhere. Fah... Fah's happy. Saying it once. No teasing!"},
+  coach:"National level... Grandpa Chai would have wanted to see this more than anyone. I'll tell him at this year's wai khru.",
+  end:"That night everyone drags mats out into the training yard and lies counting stars until they fall asleep one by one."}};
+function rgCampGirls(G){return CANON_IDS.filter(id=>G.F[id]&&G.F[id].camp==="player"&&!(typeof isAway==="function"&&isAway(G,id)));}
+function rgMsSteps(G,q){const M=RG_MSL[q.k];if(!M)return null;const gs=rgCampGirls(G),win=q.id&&gs.includes(q.id)?q.id:null;
+  const S=[{n:"nar",t:M.head(G,q)}];
+  if(win&&M.me)S.push({n:win,f:"happy",l:"casual",t:M.me[win]});
+  const rest=gs.filter(id=>id!==win);const lim=M.me||q.k==="ticket"||q.k==="nat"?5:3;
+  for(const id of rest.slice(0,lim))S.push({n:id,f:id==="fah"?"flustered":"happy",l:"casual",t:M.any[id]});
+  if(M.coach)S.push({n:"coach",t:M.coach});if(M.end)S.push({n:"nar",t:M.end});
+  for(const id of gs)add(G,id,"morale",3);S.push({n:"nar",t:"Whole camp: morale +3"});return S;}
+
+const rgB=(G)=>REGION.beltTotal(G),rgC=(G)=>((G.region&&G.region.cups)||[]).length;
+const RG_WARM=[
+ {id:"kati_gloves",g:["kati"],ok:G=>rgB(G)>=1,bg:"hotel_room",s:(G,D)=>[
+  {n:"nar",t:"1 a.m. Kati's light is still on, her door half open. She sits by the window with her first gloves on her lap."},
+  {n:"kati",f:"sad",l:"casual",t:`Grandpa, tonight I'm sleeping in ${D.name}. The farthest from home I've ever been.`},
+  {n:"kati",f:"surprised",l:"casual",t:"...Manager! You heard? I bring these gloves on every trip. Otherwise I can't sleep.",choice:[
+   {t:"Sit down beside her and ask which province her grandpa liked best",fx:G2=>add(G2,"kati","bond",2),then:[{n:"kati",f:"happy",l:"casual",t:"Grandpa loved Uttaradit most. He said the crowd there shouted louder than anywhere... I want to take everyone there someday."}]},
+   {t:"\"Your grandpa must be glad you brought the camp this far\"",fx:G2=>add(G2,"kati","bond",2),then:[{n:"kati",f:"flustered",l:"casual",t:"...I didn't bring the camp here alone. You brought us too. Grandpa must know."}]}]}]},
+ {id:"kati_kids",g:["kati"],r:"north",bg:"rg_north",s:(G,D)=>[
+  {n:"nar",t:"At dusk, five or six local kids in the hotel car park are shadowboxing, copying Kati."},
+  {n:"kati",f:"happy",l:"casual",t:"Guard higher than that! Like this, like this. Yes! Great job!"},
+  {n:"nar",t:"Kati teaches for half an hour like her Saturday kids' class. The smallest one won't let go of her hand."},
+  {n:"kati",f:"flustered",l:"casual",t:"Grandpa taught me in a yard just like this... one day these kids might fight in the Four Regions too."}]},
+ {id:"kati_letter",g:["kati"],ok:G=>rgC(G)>=1,bg:"hotel_room",s:(G,D)=>[
+  {n:"nar",t:"Kati is writing a letter at the desk, writing and erasing. The first page is already full."},
+  {n:"kati",f:"happy",l:"casual",t:`Usually I write to Grandpa and burn it on the anniversary. But this one I'm keeping... I'll burn it when the camp has all four regions.`},
+  {n:"kati",f:"flustered",l:"casual",t:"We have "+rgC(G)+" cups now. I wrote everyone's names in... and I wrote yours the biggest. Don't ask to read it!",choice:[
+   {t:"Promise not to ask to see it",fx:G2=>add(G2,"kati","bond",2),then:[{n:"kati",f:"happy",l:"casual",t:"You promised! ...If you really want to know, on the day I burn it, I'll read it to you."}]},
+   {t:"Tease her about what the biggest letters mean",fx:G2=>add(G2,"kati","bond",3),then:[{n:"kati",f:"flustered",l:"casual",t:"It... it means important! It doesn't mean anything else! Go to bed!"}]}]}]},
+ {id:"mali_garland",g:["mali"],bg:"hotel_room",s:(G,D)=>[
+  {n:"nar",t:`Mali gathers a handful of fallen flowers from the tree outside the hotel in ${D.name} and sits stringing them on her bed from eight o'clock.`},
+  {n:"mali",f:"happy",l:"casual",t:"Mali's been stringing garlands since she was five~ Mum taught her. We sold them outside the temple every holy day."},
+  {n:"mali",f:"happy",l:"casual",t:"This one's Kati's, this one's Rin's, Ploy's, Fah's... and this one's for you, Manager. Hang it in the van so we get home safe.",choice:[
+   {t:"Hang it on the rear-view mirror right away",fx:G2=>add(G2,"mali","bond",2),then:[{n:"mali",f:"flustered",l:"casual",t:"You really hung it~ ...Mali will make a new one every trip."}]},
+   {t:"Ask her to teach you",fx:G2=>add(G2,"mali","bond",3),then:[{n:"nar",t:"Ten minutes later, the manager's garland leans to one side."},{n:"mali",f:"happy",l:"casual",t:"Crooked but cute~ Mali's keeping this one herself."}]}]}]},
+ {id:"mali_sea",g:["mali"],r:"south",bg:"sea",s:(G,D)=>[
+  {n:"nar",t:"At dusk Mali sits alone on the beach hugging her knees, not smiling like she usually does."},
+  {n:"mali",f:"sad",l:"casual",t:"This sea looks just like the one in front of home in Chaiya... Dad used to bring Mali to watch the fishing boats come in."},
+  {n:"mali",f:"sad",l:"casual",t:"Mali doesn't want to smile today. Just for one day... you don't have to say anything.",choice:[
+   {t:"Sit beside her quietly until it's dark",fx:G2=>add(G2,"mali","bond",3),then:[{n:"nar",t:"The waves keep coming in until the first boat light shows on the horizon."},{n:"mali",f:"happy",l:"casual",t:"...Thank you for not asking. Tomorrow Mali will smile for everyone like always~"}]},
+   {t:"\"Your dad must have seen you fight from somewhere\"",fx:G2=>add(G2,"mali","bond",2),then:[{n:"mali",f:"sad",l:"casual",t:"...Mali wants to believe that. Could you say it again? Just once."}]}]}]},
+ {id:"mali_cry",g:["mali"],ok:G=>rgB(G)>=2,bg:"hotel_room",s:(G,D)=>[
+  {n:"nar",t:"Everyone gathers in Ploy's room, but Mali has been gone too long. The manager finds her on the fire stairs, eyes red."},
+  {n:"mali",f:"flustered",l:"casual",t:"Oh! I'm not crying~ It's just... every time the camp wins, Mali wishes Dad could see."},
+  {n:"mali",f:"sad",l:"casual",t:"Dad used to say women's boxing had no future... our camp has "+rgB(G)+" belts now. I wish Dad could see.",choice:[
+   {t:"\"Your future's already started, and everyone in the camp sees it\"",fx:G2=>add(G2,"mali","bond",3),then:[{n:"mali",f:"happy",l:"casual",t:"...Everyone in the camp sees it. That's true~ Let's go back in and celebrate."}]},
+   {t:"Hand her a handkerchief and wait until she stops crying",fx:G2=>add(G2,"mali","bond",2),then:[{n:"mali",f:"flustered",l:"casual",t:"Your handkerchief, Mali's borrowing it. I'll wash it and give it back... maybe I won't~"}]}]}]},
+ {id:"rin_stars",g:["rin"],bg:"night",s:(G,D)=>[
+  {n:"nar",t:"On the hotel roof, Rin lies on a deckchair, her black notebook closed beside her."},
+  {n:"rin",f:"surprised",l:"casual",t:"...Manager, I'm not slacking. Today I decided not to note anything down, to see what it's like."},
+  {n:"rin",f:"happy",l:"casual",t:`The stars in ${D.name} are clearer than Chiang Mai's by about... no. Not counting. Not tonight.`,choice:[
+   {t:"Lie on the chair next to her and count nothing together",fx:G2=>add(G2,"rin","bond",3),then:[{n:"nar",t:"Twenty minutes pass. Rin doesn't say a single number."},{n:"rin",f:"flustered",l:"casual",t:"...These are the twenty minutes I'll remember best from this trip. I'm counting this number."}]},
+   {t:"Ask how it feels not to write anything",fx:G2=>add(G2,"rin","bond",2),then:[{n:"rin",f:"happy",l:"casual",t:"Strange. Like forgetting my glasses... but something looks clearer."}]}]}]},
+ {id:"rin_laugh",g:["rin"],ok:G=>rgB(G)>=3,bg:"hotel_room",s:(G,D)=>[
+  {n:"rin",f:"happy",l:"casual",t:"Manager, I'd like you to look at a data set. I've kept it since the first trip."},
+  {n:"nar",t:"The page in the black notebook is headed \"Times everyone laughed in the van\", with tally marks growing longer trip by trip."},
+  {n:"rin",f:"flustered",l:"casual",t:"Twelve times on the first trip. Forty-one on the latest. Fah alone accounts for nineteen... it's useless for boxing, but I want to keep it.",choice:[
+   {t:"\"It's the best statistic in this notebook\"",fx:G2=>add(G2,"rin","bond",3),then:[{n:"rin",f:"flustered",l:"casual",t:"...I thought so too. I just didn't think anyone would agree."}]},
+   {t:"Ask how many times she laughed",fx:G2=>add(G2,"rin","bond",2),then:[{n:"rin",f:"pout",l:"casual",t:"I didn't count myself... fine, I did. Seven times. Five because of you. Satisfied?"}]}]}]},
+ {id:"rin_dad",g:["rin"],ok:G=>rgC(G)>=1,bg:"hotel_room",s:(G,D)=>[
+  {n:"nar",t:"Rin stares at her phone for a long time. It's a message from her father."},
+  {n:"rin",f:"surprised",l:"casual",t:"Dad sent me the news about the regional cup... Dad follows boxing? I never knew."},
+  {n:"rin",f:"sad",l:"casual",t:"At the end it says, \"I understand now why you didn't do the PhD.\" ...Manager, what should I reply?",choice:[
+   {t:"\"Just say thank you, and invite him to a fight\"",fx:G2=>add(G2,"rin","bond",3),then:[{n:"nar",t:"Rin types, deletes and types again three times before pressing send."},{n:"rin",f:"happy",l:"casual",t:"Sent... Dad's read it. He's typing."}]},
+   {t:"\"No need to answer yet. Keep the feeling for a while.\"",fx:G2=>add(G2,"rin","bond",2),then:[{n:"rin",f:"happy",l:"casual",t:"Yes. I'll keep it for now... read it another ten times or so."}]}]}]},
+ {id:"ploy_knee",g:["ploy"],bg:"hotel_room",s:(G,D)=>[
+  {n:"nar",t:"At midnight the manager goes down for water and finds Ploy alone by the vending machine, icing her knee."},
+  {n:"ploy",f:"surprised",l:"casual",t:"...Don't tell the juniors. It's just a bit tight. It's nothing."},
+  {n:"ploy",f:"sad",l:"casual",t:"That knee used to be everything I had. If it didn't come back, there'd be nothing left... but lately I don't think that way much.",choice:[
+   {t:"Hold the ice pack for her",fx:G2=>add(G2,"ploy","bond",3),then:[{n:"ploy",f:"flustered",l:"casual",t:"...You don't have to. I can do it... fine. Five minutes."}]},
+   {t:"\"You have more than your knee now\"",fx:G2=>add(G2,"ploy","bond",2),then:[{n:"ploy",f:"happy",l:"casual",t:"Juniors who are noisy all night, a manager who comes down for water at midnight... yes, I have more than a knee now."}]}]}]},
+ {id:"ploy_tea",g:["ploy"],r:"isan",bg:"night_isan",s:(G,D)=>[
+  {n:"nar",t:"Ploy opens the flask of tea her mother sent from Korat and pours oolong into a row of paper cups."},
+  {n:"ploy",f:"happy",l:"casual",t:"Mum made it... she sent it for everyone. Says if you drink it before bed you'll sleep well."},
+  {n:"ploy",f:"sad",l:"casual",t:"Mum stopped coming to my fights in my second year. Her heart couldn't take it... but she sends tea every time she knows I'm going to Isan.",choice:[
+   {t:"Finish the tea and ask for a second cup",fx:G2=>add(G2,"ploy","bond",2),then:[{n:"ploy",f:"happy",l:"casual",t:"I'll tell Mum someone asked for a second cup. She'll be happier than if I'd won."}]},
+   {t:"\"Someday, bring your mum to a fight that isn't scary\"",fx:G2=>add(G2,"ploy","bond",3),then:[{n:"ploy",f:"flustered",l:"casual",t:"...A fight that isn't scary. Is there such a thing? If there is, I'd want Mum sitting next to you."}]}]}]},
+ {id:"ploy_carry",g:["ploy","fah"],bg:"hotel_room",s:(G,D)=>[
+  {n:"nar",t:"Halfway through the movie in the common room, Fah has fallen asleep on Ploy's shoulder, a snack still in her hand."},
+  {n:"ploy",f:"happy",l:"casual",t:"Shh... I'll carry her to her room. Wake her now and she'll yell the whole floor down."},
+  {n:"nar",t:"Ploy carries Fah down the hall. Fah mumbles in her sleep."},
+  {n:"fah",f:"flustered",l:"casual",t:"...Ploy... Fah's not asleep... just resting her eyes..."},
+  {n:"ploy",f:"happy",l:"casual",t:"Yes, yes, not asleep... Manager, get the door for me. I'll tuck her in and come back.",choice:[
+   {t:"Get the door and carry the snacks she dropped",fx:G2=>{add(G2,"ploy","bond",2);add(G2,"fah","bond",2);},then:[{n:"nar",t:"In the morning Fah insists to everyone that she walked back to her room herself."}]},
+   {t:"Take a photo as evidence",fx:G2=>{add(G2,"ploy","bond",1);add(G2,"fah","bond",2);},then:[{n:"nar",t:"In the morning Fah sees the photo and chases the manager around the car park."},{n:"fah",f:"pout",l:"casual",t:"Delete it right now!! ...Send it to Fah first, then delete it!"}]}]}]},
+ {id:"fah_storm",g:["fah"],bg:"hotel_room",s:(G,D)=>[
+  {n:"nar",t:`2 a.m. A storm hits ${D.name}. Thunder cracks so hard the windows shake, then the whole hotel loses power.`},
+  {n:"nar",t:"Knocks on Fah's door, one after another: Kati, Mali, Rin, Ploy, each holding a pillow."},
+  {n:"fah",f:"pout",l:"casual",t:"What are you all doing here! ...Scared of thunder? Fine, you can sleep in Fah's room. Fah will keep watch."},
+  {n:"nar",t:"Nobody says they know Fah has been afraid of thunder since she was little. They just squeeze onto the two beds until the storm passes."},
+  {n:"fah",f:"flustered",l:"casual",t:"...Why are you standing at the door? Come in. Not inviting you, okay. The power's out and the hall is dark.",choice:[
+   {t:"Sit against the door inside the room until morning",fx:G2=>add(G2,"fah","bond",3),then:[{n:"fah",f:"flustered",l:"casual",t:"...Thanks. Once. Don't tell anyone."}]},
+   {t:"Tell everyone a ghost story",fx:G2=>add(G2,"fah","bond",1),then:[{n:"fah",f:"angry",l:"casual",t:"Youuu!! ...Keep going. Fah's not scared. Fah's just holding your arm."}]}]}]},
+ {id:"fah_laundry",g:["fah"],ok:G=>rgB(G)>=1,bg:"hotel_room",s:(G,D)=>[
+  {n:"nar",t:"In the morning everyone's training gear is folded neatly outside their doors, smelling of fabric softener."},
+  {n:"mali",f:"surprised",l:"casual",t:"Who washed these~? Mali didn't."},
+  {n:"fah",f:"pout",l:"casual",t:"Not Fah! Fah slept in, slept all night!"},
+  {n:"nar",t:"Fah's fingertips are still wrinkled from water, and a coin laundry receipt sticks out of her tiger jacket pocket.",choice:[
+   {t:"Play along and thank whoever did it, out loud",fx:G2=>add(G2,"fah","bond",3),then:[{n:"fah",f:"flustered",l:"casual",t:"...Whoever washed them is probably glad, I guess. Don't know. Fah didn't do it!"}]},
+   {t:"Hold up the receipt",fx:G2=>add(G2,"fah","bond",1),then:[{n:"fah",f:"angry",l:"casual",t:"Give it back!! ...Fine, Fah did it. Grandma says when you live in someone's house you help out. Happy now!"}]}]}]},
+ {id:"fah_style",g:["fah"],ok:G=>rgB(G)>=4,bg:"night",s:(G,D)=>[
+  {n:"nar",t:"In the van that day everyone talked about their home styles: Kati and Tha Sao, Mali and Chaiya, Ploy and Korat, Rin and Lopburi. That night Fah is oddly quiet."},
+  {n:"fah",f:"pout",l:"casual",t:"Everyone has a hometown style. Fah doesn't. Fah learned everything in real rings... not that Fah's upset. Just saying."},
+  {n:"fah",f:"sad",l:"casual",t:"So what style is Fah, really?",choice:[
+   {t:"\"The Sirichai style. You're the first of it.\"",fx:G2=>add(G2,"fah","bond",3),then:[{n:"fah",f:"flustered",l:"casual",t:"...First of her line. Sounds cool. Fah's taking that name. No changing it."}]},
+   {t:"\"A style nobody else has to match\"",fx:G2=>add(G2,"fah","bond",2),then:[{n:"fah",f:"happy",l:"casual",t:"Not like anyone... yes. Fah isn't like anyone anyway! You got one right for once."}]}]}]},
+ {id:"duo_kati_mali",g:["kati","mali"],bg:"hotel_room",s:(G,D)=>[
+  {n:"nar",t:`Kati and Mali sneak out to the convenience store at eleven and come back with two big bags.`},
+  {n:"kati",f:"happy",l:"casual",t:"Manager! Don't tell Kru Daeng, okay? There's some for you too."},
+  {n:"mali",f:"happy",l:"casual",t:`The official souvenir of ${D.name} that you can only get at a convenience store~ Mali picked it herself.`},
+  {n:"nar",t:"Five minutes later the room is full of laughter and crumbs. Next door knocks on the wall twice.",choice:[
+   {t:"Sit and eat with them until the bags are empty",fx:G2=>{add(G2,"kati","bond",2);add(G2,"mali","bond",2);},then:[{n:"kati",f:"happy",l:"casual",t:"This is what travelling tastes like!"}]},
+   {t:"Do Kru Daeng's voice outside the door",fx:G2=>{add(G2,"kati","bond",1);add(G2,"mali","bond",1);},then:[{n:"nar",t:"Kati and Mali dive under the blanket together. The snack bags vanish under the bed in one second."},{n:"mali",f:"pout",l:"casual",t:"Manager, you're so mean~!"}]}]}]},
+ {id:"duo_rin_ploy",g:["rin","ploy"],ok:G=>rgB(G)>=2,bg:"hotel_room",s:(G,D)=>[
+  {n:"nar",t:"Rin's light is still on. She and Ploy are watching tonight's fight together on a laptop."},
+  {n:"ploy",f:"happy",l:"casual",t:"Back at Golden Tiger we watched tape like this every night, remember?"},
+  {n:"rin",f:"sad",l:"casual",t:"I remember... I left without saying goodbye to you. I never apologised for that."},
+  {n:"ploy",f:"happy",l:"casual",t:"You were right to leave. I just left a bit later than you... come on, play it. Round two, my guard drops here, doesn't it?",choice:[
+   {t:"Pull up a chair and watch the tape too",fx:G2=>{add(G2,"rin","bond",2);add(G2,"ploy","bond",2);},then:[{n:"rin",f:"happy",l:"casual",t:"Three watch better than two. Statistically... I made that statistic up just now."}]},
+   {t:"Close the door quietly and leave them to talk",fx:G2=>{add(G2,"rin","bond",1);add(G2,"ploy","bond",1);},then:[{n:"nar",t:"The two of them keep laughing behind the door until late."}]}]}]},
+ {id:"duo_fah_kati",g:["fah","kati"],bg:"night",s:(G,D)=>[
+  {n:"fah",f:"happy",l:"casual",t:"Kati! Race you to the corner shop. Loser buys ice cream!"},
+  {n:"kati",f:"happy",l:"casual",t:"You're on! Manager, you're the referee!"},
+  {n:"nar",t:"They take off together. Fah passes her on the last corner, but Kati leaps and slaps the shop door half a step ahead."},
+  {n:"fah",f:"pout",l:"casual",t:"Doesn't count! Kati jumped! You, judge it again!",choice:[
+   {t:"Give it to Kati",fx:G2=>{add(G2,"kati","bond",2);add(G2,"fah","bond",1);},then:[{n:"fah",f:"pout",l:"casual",t:"...Fine, Fah's buying. But Fah picks the flavour!"},{n:"kati",f:"happy",l:"casual",t:"Ice cream you win tastes better than any other!"}]},
+   {t:"Call it a draw and buy for both of them",fx:G2=>{add(G2,"kati","bond",2);add(G2,"fah","bond",2);},then:[{n:"fah",f:"flustered",l:"casual",t:"...A draw, then. Next time Fah wins clean! Your ice cream's not bad, by the way."}]}]}]}];
+function rgWarmPick(G,T){const R=G.region,D=ROAD_DEST[T.dest];if(!R||!D)return null;const seen=R.warm=R.warm||{},P=T.party||[];
+  const here=id=>P.includes(id)&&G.F[id]&&G.F[id].camp==="player";
+  const L=RG_WARM.filter(w=>!seen[w.id]&&w.g.every(here)&&(!w.r||w.r===D.r)&&(!w.ok||w.ok(G)));if(!L.length)return null;
+  const w=L[Math.floor(Math.random()*L.length)];return w;}
+function rgMsQ(G,q){const R=G.region;R.ms=R.ms||{};if(R.ms[q.k])return;R.ms[q.k]=1;(R.msQ=R.msQ||[]).push(q);}
 const REGION={
   /* end of week (after the weekly events): the gala the week after the invitation, the contract beat the week after the first cup */
   weekScene(G,done){const R=G.region;if(!R){done();return;}rgApply(G);const now=gameWeek(G);if(lbWeek(G,done))return;
+    /* v1.91.122 (Man): the five celebrate the camp's milestones back home, one a week */
+    if(R.msQ&&R.msQ.length){const q=R.msQ.shift(),S=rgMsSteps(G,q);if(S){playScene(S,()=>{save();done();},{bg:RG_MSL[q.k].bg,look:"casual"});return;}}
     /* v1.91.26 (Man): Kru Daeng reminds you to watch tape and train the counter before each regional title bout — no new buttons */
     for(const r of RG_ORDER){const c=R.champ[r],x=c&&c.next;if(!c||c.state!=="series"||!x||x.warned)continue;const left=x.abs-now;if(left<1||left>2)continue;
       const me=G.F[c.fid],cf=G.F[this.champId[r]];if(!me||!cf)continue;const tape=G.scoutAbs&&G.scoutAbs[cf.id]!=null&&now-G.scoutAbs[cf.id]<=8,ok=tape&&me.plan&&me.plan.preset===counterPreset(cf);x.warned=1;if(ok)continue;
@@ -1765,8 +1961,8 @@ const REGION={
       if(rg.local){const T=R.trip,abs=T&&T.abs!=null?T.abs:gameWeek(G);R.trip=null;R.nextTripAbs=Math.max(R.nextTripAbs||0,abs+RG_TRIP_GAP);(R.gc=R.gc||[]).push(p.b);continue;} /* v1.91.93: the local ring pays a purse, no belt */
       this.lbAdd(G,p.a,"pc:"+dest,p.res,p.stop);
       rgTouch(G,RG_CID[r]);const T=R.trip,abs=T&&T.bid===p.bid?T.abs:gameWeek(G);
-      if(p.res==="W"){R.belts[r]=R.belts[r]||{};R.belts[r][dest]=1;G.log=G.log||[];G.log.push(`${G.F[p.a]?G.F[p.a].name:""} wins the provincial belt of ${D.name}!`);if(G.F[p.a])recordHonor(G,"rgbelt",p.a,G.F[p.a].div,G.week,dest,G.F[p.b]?G.F[p.b].name:this.oppName(G,dest),p.b); /* v1.91.14 (Man): a province belt gets the same ceremony as the main game */
-        if(this.beltCount(G,r)===4&&R.champ[r].state==="locked"){R.champ[r].state="letter";this.champFighter(G,r);
+      if(p.res==="W"){R.belts[r]=R.belts[r]||{};R.belts[r][dest]=1;G.log=G.log||[];G.log.push(`${G.F[p.a]?G.F[p.a].name:""} wins the provincial belt of ${D.name}!`);if(G.F[p.a])recordHonor(G,"rgbelt",p.a,G.F[p.a].div,G.week,dest,G.F[p.b]?G.F[p.b].name:this.oppName(G,dest),p.b);rgMsQ(G,{k:"belt1",id:p.a,dest}); /* v1.91.14 (Man): a province belt gets the same ceremony as the main game */
+        if(this.beltCount(G,r)===4&&R.champ[r].state==="locked"){rgMsQ(G,{k:"ticket",r});R.champ[r].state="letter";this.champFighter(G,r);
           rgOrg(G,r,`${RG_TITLE[r]}: all four belts won`,`Dear Manager of Sirichai Camp,
 
 Your camp now holds all four belts of the ${RG[r].name}. ${RG[r].champ}, the new champion of ${RG[r].name} challenges you for the regional title. Best 2 of 3; the organizer pays for travel.
@@ -1874,6 +2070,9 @@ Pick your fighter under Fights › Four Regions Championship`+((t=>t?`\n\n(${t})
           {t:`Stay one more night (rooms ${fmt(cost)})`,fx:G2=>{if(G2.cash<cost){T.extraNo=1;return;}G2.cash-=cost;T.extra=1;}}]}],
           ()=>{if(T.extra)this.night(T,{...P,nights:1},1,done);else{if(T.extraNo)toast("Not enough money for the rooms, so back to camp for now");this.home(T,done);}},{bg:this.hotelBg[r],look:"casual"});return;}
       return this.home(T,done);}
+    /* v1.91.122 (Man): a quiet moment with the camp's own girls — at most one a trip, each moment once */
+    if(!T.backShop&&!T.warmed&&Math.random()<(G.region.warmP!=null?G.region.warmP:.55)){T.warmed=1;const w=rgWarmPick(G,T);if(w){G.region.warm[w.id]=1;save();
+      playScene(w.s(G,D),()=>this.night(T,P,n,done),{bg:w.bg==="night"?this.hotelBg[r]:w.bg,look:"casual"});return;}}
     const girls=roadRiders(G).filter(f=>CANON_IDS.includes(f.id)).sort((a,b)=>(b.bond||0)-(a.bond||0));
     const choice=this.hotelMenu(T,D,girls,n,false);
     const oddL=RG_ODD[r]||[],oddOn=!T.backShop&&oddL.length&&girls.length&&Math.random()<.4,odd=oddOn?oddL[Math.floor(Math.random()*oddL.length)]:null,og=girls.length?girls[Math.floor(Math.random()*girls.length)]:null,
@@ -1966,7 +2165,7 @@ Pick your fighter under Fights › Four Regions Championship`+((t=>t?`\n\n(${t})
       /* v1.91.120 (Man): all four regional cups = national level — every fighter who won a cup this edition gets it in the hall */
       if(R.cups.length>=4&&!R.natDone){R.natDone=1;G.honors=G.honors||[];const ws=new Set();for(const h of G.honors)if(/^rg_/.test(h.kind)&&!(h.season&&((h.season-1)*52+(h.week||1))<(R.startAbs||0)))ws.add(h.id);
         for(const id of ws){const k=`${G.season||1}:rgnat:${rgEd(G)}::${id}`;if(!G.honors.some(h=>h.key===k))G.honors.push({key:k,season:G.season||1,week:G.week,id,div:(G.F[id]||{}).div,kind:"rgnat",opp:"All four cups · Four Regions Championship"});}}
-      rgMeet(G,this.champId[r],4);R.just={r,kind:"cup",res:p.res,w:c.w,l:c.l};
+      rgMsQ(G,{k:["cup1","cup2","cup3","nat"][Math.min(3,R.cups.length-1)],id:me?me.id:null,r});rgMeet(G,this.champId[r],4);R.just={r,kind:"cup",res:p.res,w:c.w,l:c.l};
       G.log.push(`${HONOR_LABEL["rg_"+r]}: ${me?me.name:""} ${c.w}-${c.l} ${RG[r].champ} · prize ${fmt(RG_CUP_PRIZE)}`);return;}
     if(c.l>=2){c.state="lost";c.tries=(c.tries||0)+1;c.letterAbs=abs+2;R.just={r,kind:"lost",res:p.res,w:c.w,l:c.l};
       G.log.push(`${RG_TITLE[r]}: ${RG[r].champ} keeps the title ${c.l}-${c.w}`);return;}

@@ -1694,9 +1694,205 @@ const RG_SIDE={
 function rgSideDue(G,T){const R=G.region,D=ROAD_DEST[T.dest];if(!R||!D||T.fa||T.series||T.local)return null;const X=RG_SIDE[D.r];if(!X)return null;
   const S=(R.side=R.side||{})[D.r]=R.side[D.r]||{};if(S.won)return null;if(R.joined&&R.joined[X.cid])return null;if(!(R.arrived||{})[D.r])return null;
   if(S.triedAbs!=null&&S.triedAbs===T.abs)return null;return X;}
+/* ---------- v1.91.122 (Man): the camp's own journey through the Four Regions ----------
+   RG_MS: milestone nights back at camp — first province belt, first four-belt ticket, each cup, all four cups (national).
+   RG_WARM: quiet hotel-night moments with the five, each once, in place of a hotel gag; lines read the camp's real progress. */
+const RG_MSL={
+ belt1:{bg:"camp_night",
+  head:(G,q)=>`คืนนั้นกลับถึงค่ายดึก แต่ไม่มีใครยอมเข้านอน เข็มขัดจังหวัด${(ROAD_DEST[q.dest]||{name:""}).name}วางอยู่กลางโต๊ะกินข้าว`,
+  me:{kati:"ปู่คะ… เข็มขัดเส้นแรกนอกเชียงใหม่ของค่ายศิริชัย หนูเอามาให้ปู่ดูแล้วนะคะ",
+   mali:"มะลิถ่ายรูปส่งให้แม่แล้วค่ะ~ แม่ตอบมาคำเดียวว่า \"เห็นแล้ว\" …แค่นั้นก็พอแล้วค่ะ",
+   rin:"ฉันคำนวณโอกาสชนะคืนนั้นไว้สามสิบแปดเปอร์เซ็นต์ค่ะ …ดีใจที่ตัวเลขผิด",
+   ploy:"เข่ายังไหว เข็มขัดก็ได้มา …คืนนี้ขอนั่งเฉย ๆ ตรงนี้นาน ๆ หน่อยนะ",
+   fah:"ใครจะถ่ายรูปฟ้ากับเข็มขัดก็ถ่ายได้นะ! …ส่งให้ยายด้วย ยายต้องโทรมาถามแน่"},
+  any:{kati:"เข็มขัดจากต่างจังหวัด… ปู่เคยพูดว่าสักวันค่ายศิริชัยจะได้ออกไปชกไกลกว่าเชียงใหม่ ปู่พูดถูกแล้วค่ะ",
+   mali:"มะลิขอจับหน่อยนะ~ หนักกว่าที่คิดอีก! เส้นต่อไปมะลิขอบ้างนะคะ",
+   rin:"ฉันเปิดหน้าใหม่ในสมุดดำแล้วค่ะ หัวข้อ \"ศึกชิงเจ้าสี่ภาค\" ตอนนี้มีบรรทัดเดียว …ไม่อยากให้มีบรรทัดเดียวนาน",
+   ploy:"เส้นแรกยากที่สุดเสมอ ที่เหลือจะง่ายขึ้น …ไม่ใช่เพราะคู่ง่ายนะ เพราะเรารู้แล้วว่าเราทำได้",
+   fah:"ฟ้าไม่ได้อิจฉาหรอกนะ! …แค่เส้นต่อไปฟ้าจะเอาเอง จำไว้!"},
+  coach:"เข็มขัดเส้นแรกของค่ายนอกบ้านเรา คืนนี้กินให้เต็มที่ พรุ่งนี้ตีห้าวิ่งตามเดิม",
+  end:"ป้าแดงยกหม้อแกงฮังเลออกมาจากครัว ทุกคนส่งเสียงเฮพร้อมกัน"},
+ ticket:{bg:"camp_night",
+  head:(G,q)=>`จดหมายจากสมาคมวางอยู่บนโต๊ะ ค่ายศิริชัยครบสี่เข็มขัดของ${RG[q.r].name}แล้ว ได้สิทธิ์ท้าชิงแชมป์ภาค`,
+  any:{kati:"สี่เส้นแล้วค่ะ! ต่อไปคือแชมป์ภาคตัวจริง… หนูมือสั่นแทนทุกคนเลย",
+   mali:"แชมป์ภาคเลยเหรอคะ~ เหมือนเมื่อวานเรายังลุ้นแค่ระดับตำบลกันอยู่เลย",
+   rin:"จากระดับตำบลถึงตรงนี้ ใช้เวลาน้อยกว่าที่ฉันคาดไว้ค่ะ …ฉันชอบที่ตัวเองคาดผิดแบบนี้",
+   ploy:"ตอนอยู่พยัคฆ์ทอง ฉันเคยคิดว่าค่ายเล็ก ๆ ไปไม่ถึงตรงนี้ …ฉันคิดผิด",
+   fah:"แชมป์ภาคก็คนเหมือนกัน! ชกได้ก็แพ้ได้ ฟ้าไม่กลัวหรอกนะ …ใครขึ้นชกบอกฟ้า ฟ้าจะคุมมุมให้"},
+  coach:"สามนัดชนะสองนะ ไม่ใช่ไฟต์เดียวจบ ดูเทป แก้ทาง ซ้อมให้ตรงกับที่เห็น ไปพักได้แล้ว"},
+ cup1:{bg:"camp_night",
+  head:(G,q)=>`ถ้วยแชมป์${RG[q.r].name}ตั้งอยู่บนชั้นในห้องโถงค่าย ข้าง ๆ รูปปู่ชัย`,
+  me:{kati:"ปู่คะ ค่ายศิริชัยเป็นแชมป์ระดับภาคแล้วนะคะ… หนูวางถ้วยไว้ข้างปู่ จะได้เห็นทุกวัน",
+   mali:"มะลิวิดีโอคอลหาแม่ แม่ดูจนจบเป็นครั้งแรกเลยค่ะ~ …มะลิร้องไปแล้ว อย่ามองนะ",
+   rin:"ตอนอายุสิบเก้า ฉันเคยจดในสมุดว่า \"ไม่มีวันได้ขึ้นเวทีใหญ่อีก\" …วันนี้ขีดฆ่าบรรทัดนั้นแล้วค่ะ",
+   ploy:"ถ้วยแรกของฉันที่ไม่ได้ชกเพื่อให้ใครพอใจ ชกเพราะอยากชกเอง …แปลกดีนะ",
+   fah:"ฟ้าเป็นแชมป์ภาค! ยายต้องเล่าให้คนทั้งตลาดฟังแน่ …นาย ขอบใจนะ ฟ้าพูดครั้งเดียว"},
+  any:{kati:"เรามาถึงระดับภาคแล้วนะคะ! จากค่ายเล็ก ๆ ที่ปู่สร้างไว้กับกระสอบเก่าไม่กี่ใบ…",
+   mali:"ระดับภาคแล้ว~! มะลิจะเขียนจดหมายบอกแม่ …ฉบับนี้มะลิจะส่งจริง ๆ ค่ะ",
+   rin:"ระดับภาคค่ะ ฉันเช็กแล้วสามรอบ ไม่ได้ฝัน",
+   ploy:"ระดับภาคแล้ว …ทุกคน พรุ่งนี้ไม่ต้องตื่นตีห้า พี่จะไปคุยกับครูแดงให้เอง",
+   fah:"ระดับภาค!! ฟ้าไม่ได้ร้องไห้นะ ฝุ่นเข้าตา!"},
+  coach:"ปู่ชัยพูดไว้ว่าสักวันค่ายนี้จะมีถ้วยระดับภาค …วันนี้มาถึงแล้ว แต่อย่าเพิ่งพอใจ ยังเหลืออีกสามภาค",
+  end:"คืนนั้นไฟในหอพักไม่ดับจนตีสอง เสียงหัวเราะดังลงมาถึงลานซ้อม"},
+ cup2:{bg:"camp_night",
+  head:(G,q)=>`ถ้วยแชมป์${RG[q.r].name}วางลงข้างถ้วยใบแรก ชั้นในห้องโถงเริ่มดูแคบ`,
+  any:{kati:"ถ้วยที่สองแล้วค่ะ! ชั้นข้างรูปปู่เริ่มแคบแล้ว หนูต้องขอครูแดงต่อชั้นเพิ่ม",
+   mali:"สองภาคแล้ว~ มะลิเริ่มจำทางในแผนที่ประเทศไทยได้แล้วนะคะ",
+   rin:"สองในสี่ค่ะ ห้าสิบเปอร์เซ็นต์ …ครึ่งทางหลังมักเหนื่อยกว่าครึ่งแรกเสมอ",
+   ploy:"สองถ้วยแล้ว อย่าเพิ่งหลงตัวเอง ภาคที่เหลือรู้แล้วว่าเราเป็นใคร",
+   fah:"สองถ้วย! ฟ้าว่าเราชิงทั้งประเทศได้นะ …ฟ้าพูดจริง ไม่ได้พูดเล่น"}},
+ cup3:{bg:"camp_night",
+  head:(G,q)=>`ถ้วยแชมป์${RG[q.r].name}เป็นใบที่สาม เหลือที่ว่างบนชั้นอีกช่องเดียว`,
+  any:{kati:"อีกภาคเดียวค่ะ… อีกภาคเดียว ค่ายศิริชัยจะเป็นค่ายระดับประเทศ",
+   mali:"อีกนิดเดียวเองค่ะ~ มะลิจะซ้อมเพิ่มทุกเย็น ไม่ให้ใครต้องแบกคนเดียว",
+   rin:"เหลือหนึ่งภาค ฉันวางแผนไว้สามแบบแล้วค่ะ …แบบที่สี่คือเชื่อใจกัน",
+   ploy:"ถ้วยสุดท้ายหนักที่สุด เพราะทุกคนเริ่มกลัวพลาด …อย่ากลัว เราไม่ได้มาไกลขนาดนี้เพราะโชค",
+   fah:"อีกถ้วยเดียว! ถ้าใครเหนื่อย ฟ้าแบกเอง …ไม่ได้ห่วงนะ แค่ไม่อยากรอ"}},
+ nat:{bg:"camp_night",
+  head:(G,q)=>"ถ้วยใบที่สี่วางลงบนชั้น ครบสี่ภาค ครบทั้งประเทศ",
+  any:{kati:"ค่ายศิริชัยเป็นแชมป์ระดับประเทศแล้วนะคะปู่… หนูไม่ต้องมองหาปู่บนอัฒจันทร์อีกแล้ว เพราะหนูรู้ว่าปู่อยู่ตรงนี้",
+   mali:"ทั้งประเทศเลยนะคะ~ จากไชยาขึ้นไปถึงเชียงราย …พ่อคงยิ้มอยู่แน่ ๆ",
+   rin:"ฉันเริ่มสมุดดำเล่มใหม่แล้วค่ะ หน้าแรกไม่มีตัวเลขเลย มีแค่ชื่อทุกคน",
+   ploy:"ฉันเคยชกเพื่อไม่ให้ใครผิดหวัง… ช่วงนี้ชกเพื่อพวกเธอ แล้วมันดีกว่าเยอะเลย",
+   fah:"ทุกคนที่สำคัญชอบไป… แต่พวกเธอไม่ไปไหนเลย ฟ้า… ฟ้าดีใจนะ พูดครั้งเดียว ห้ามล้อ!"},
+  coach:"ระดับประเทศ… ปู่ชัยคงอยากเห็นวันนี้มากกว่าใคร ผมจะเล่าให้แกฟังตอนไหว้ครูปีนี้",
+  end:"คืนนั้นทุกคนลากเสื่อมาปูนอนกลางลานซ้อม นับดาวจนหลับไปทีละคน"}};
+function rgCampGirls(G){return CANON_IDS.filter(id=>G.F[id]&&G.F[id].camp==="player"&&!(typeof isAway==="function"&&isAway(G,id)));}
+function rgMsSteps(G,q){const M=RG_MSL[q.k];if(!M)return null;const gs=rgCampGirls(G),win=q.id&&gs.includes(q.id)?q.id:null;
+  const S=[{n:"nar",t:M.head(G,q)}];
+  if(win&&M.me)S.push({n:win,f:"happy",l:"casual",t:M.me[win]});
+  const rest=gs.filter(id=>id!==win);const lim=M.me||q.k==="ticket"||q.k==="nat"?5:3;
+  for(const id of rest.slice(0,lim))S.push({n:id,f:id==="fah"?"flustered":"happy",l:"casual",t:M.any[id]});
+  if(M.coach)S.push({n:"coach",t:M.coach});if(M.end)S.push({n:"nar",t:M.end});
+  for(const id of gs)add(G,id,"morale",3);S.push({n:"nar",t:"ทั้งค่าย กำลังใจ +3"});return S;}
+
+const rgB=(G)=>REGION.beltTotal(G),rgC=(G)=>((G.region&&G.region.cups)||[]).length;
+const RG_WARM=[
+ {id:"kati_gloves",g:["kati"],ok:G=>rgB(G)>=1,bg:"hotel_room",s:(G,D)=>[
+  {n:"nar",t:"ตีหนึ่ง ไฟห้องกะทิยังเปิดอยู่ ประตูแง้มไว้ครึ่งหนึ่ง กะทินั่งริมหน้าต่าง นวมคู่แรกวางอยู่บนตัก"},
+  {n:"kati",f:"sad",l:"casual",t:`ปู่คะ คืนนี้หนูนอนที่${D.name}นะคะ ไกลบ้านที่สุดที่หนูเคยมาเลย`},
+  {n:"kati",f:"surprised",l:"casual",t:"…ผู้จัดการ! ได้ยินเหรอคะ หนูพกนวมคู่นี้มาทุกทริปเลยค่ะ ไม่งั้นนอนไม่หลับ",choice:[
+   {t:"นั่งลงข้าง ๆ แล้วถามว่าปู่ชอบจังหวัดไหน",fx:G2=>add(G2,"kati","bond",2),then:[{n:"kati",f:"happy",l:"casual",t:"ปู่ชอบอุตรดิตถ์ที่สุดค่ะ ปู่บอกว่าเวทีที่นั่นคนดูตะโกนดังกว่าทุกที่… หนูอยากพาทุกคนไปให้ได้สักครั้ง"}]},
+   {t:"\"ปู่คงดีใจที่หลานพาค่ายมาไกลขนาดนี้\"",fx:G2=>add(G2,"kati","bond",2),then:[{n:"kati",f:"flustered",l:"casual",t:"…หนูไม่ได้พามาคนเดียวนะคะ ผู้จัดการพามาด้วย ปู่ต้องรู้แน่ ๆ ค่ะ"}]}]}]},
+ {id:"kati_kids",g:["kati"],r:"north",bg:"rg_north",s:(G,D)=>[
+  {n:"nar",t:"หัวค่ำ ลานจอดรถโรงแรมมีเด็กแถวนั้นห้าหกคนยืนชกลมเลียนแบบท่ากะทิ"},
+  {n:"kati",f:"happy",l:"casual",t:"การ์ดต้องสูงกว่านี้นะ! แบบนี้ ๆ ใช่แล้ว เก่งมาก!"},
+  {n:"nar",t:"กะทิสอนอยู่ครึ่งชั่วโมงเหมือนคลาสเด็กวันเสาร์ที่ค่าย เด็กคนเล็กสุดไม่ยอมปล่อยมือเธอ"},
+  {n:"kati",f:"flustered",l:"casual",t:"ปู่ก็เคยสอนหนูที่ลานแบบนี้แหละค่ะ… วันหนึ่งเด็กพวกนี้อาจมาขึ้นเวทีศึกสี่ภาคก็ได้นะคะ"}]},
+ {id:"kati_letter",g:["kati"],ok:G=>rgC(G)>=1,bg:"hotel_room",s:(G,D)=>[
+  {n:"nar",t:"กะทิเขียนจดหมายอยู่บนโต๊ะในห้อง เขียนไปลบไป กระดาษหน้าแรกเต็มแล้ว"},
+  {n:"kati",f:"happy",l:"casual",t:`ปกติหนูเขียนถึงปู่แล้วเผาวันครบรอบค่ะ แต่ฉบับนี้หนูจะเก็บไว้ก่อน… จะเผาตอนค่ายครบสี่ภาค`},
+  {n:"kati",f:"flustered",l:"casual",t:"ตอนนี้ได้ถ้วยแล้ว "+rgC(G)+" ใบ หนูเขียนชื่อทุกคนลงไปหมดเลย …ชื่อผู้จัดการหนูเขียนตัวใหญ่สุดค่ะ ห้ามขอดูนะ!",choice:[
+   {t:"สัญญาว่าจะไม่ขอดู",fx:G2=>add(G2,"kati","bond",2),then:[{n:"kati",f:"happy",l:"casual",t:"สัญญาแล้วนะคะ! …ถ้าอยากรู้จริง ๆ ไว้วันที่เผา หนูจะอ่านให้ฟังค่ะ"}]},
+   {t:"แซวว่าตัวใหญ่สุดแปลว่าอะไร",fx:G2=>add(G2,"kati","bond",3),then:[{n:"kati",f:"flustered",l:"casual",t:"ก็…ก็แปลว่าสำคัญไงคะ! ไม่ได้แปลว่าอย่างอื่น! ไปนอนได้แล้วค่ะ!"}]}]}]},
+ {id:"mali_garland",g:["mali"],bg:"hotel_room",s:(G,D)=>[
+  {n:"nar",t:`มะลิขอดอกไม้ที่ร่วงจากต้นหน้าโรงแรม${D.name}มาเต็มกำมือ นั่งร้อยอยู่บนเตียงตั้งแต่สองทุ่ม`},
+  {n:"mali",f:"happy",l:"casual",t:"มะลิร้อยเป็นตั้งแต่ห้าขวบค่ะ~ แม่สอน ทำขายหน้าวัดทุกวันพระ"},
+  {n:"mali",f:"happy",l:"casual",t:"พวงนี้ของกะทิ พวงนี้ของริน ของพลอย ของฟ้า… แล้วพวงนี้ของผู้จัดการค่ะ แขวนไว้หน้ารถนะคะ จะได้กลับบ้านปลอดภัย",choice:[
+   {t:"แขวนไว้หน้ากระจกรถทันที",fx:G2=>add(G2,"mali","bond",2),then:[{n:"mali",f:"flustered",l:"casual",t:"แขวนจริงด้วย~ …มะลิจะร้อยพวงใหม่ให้ทุกทริปเลยค่ะ"}]},
+   {t:"ขอให้สอนร้อยบ้าง",fx:G2=>add(G2,"mali","bond",3),then:[{n:"nar",t:"สิบนาทีผ่านไป พวงมาลัยของผู้จัดการเบี้ยวไปข้างหนึ่ง"},{n:"mali",f:"happy",l:"casual",t:"เบี้ยวแต่น่ารักค่ะ~ มะลิขอเก็บพวงนี้ไว้เองนะ"}]}]}]},
+ {id:"mali_sea",g:["mali"],r:"south",bg:"sea",s:(G,D)=>[
+  {n:"nar",t:"หัวค่ำ มะลินั่งกอดเข่าอยู่ริมหาดคนเดียว ไม่ได้ยิ้มเหมือนทุกที"},
+  {n:"mali",f:"sad",l:"casual",t:"ทะเลตรงนี้เหมือนหน้าบ้านที่ไชยาเลยค่ะ… พ่อชอบพามะลิมานั่งดูเรือหาปลากลับเข้าฝั่ง"},
+  {n:"mali",f:"sad",l:"casual",t:"วันนี้มะลิไม่อยากยิ้มค่ะ ขอวันเดียวนะคะ… ไม่ต้องพูดอะไรก็ได้",choice:[
+   {t:"นั่งลงข้าง ๆ เงียบ ๆ จนฟ้ามืด",fx:G2=>add(G2,"mali","bond",3),then:[{n:"nar",t:"คลื่นซัดเข้ามาเรื่อย ๆ จนไฟเรือดวงแรกโผล่ที่ขอบฟ้า"},{n:"mali",f:"happy",l:"casual",t:"…ขอบคุณที่ไม่ถามนะคะ พรุ่งนี้มะลิจะยิ้มให้ทุกคนเหมือนเดิมค่ะ~"}]},
+   {t:"\"พ่อคงได้เห็นเธอชกแล้วจากตรงไหนสักแห่ง\"",fx:G2=>add(G2,"mali","bond",2),then:[{n:"mali",f:"sad",l:"casual",t:"…มะลิอยากเชื่อแบบนั้นค่ะ ช่วยพูดอีกครั้งได้ไหมคะ ครั้งเดียว"}]}]}]},
+ {id:"mali_cry",g:["mali"],ok:G=>rgB(G)>=2,bg:"hotel_room",s:(G,D)=>[
+  {n:"nar",t:"ทุกคนรวมตัวกันที่ห้องพลอย แต่มะลิหายไปนานผิดปกติ ผู้จัดการเจอเธอนั่งอยู่ที่บันไดหนีไฟ ตาแดง"},
+  {n:"mali",f:"flustered",l:"casual",t:"อ๊ะ! ไม่ได้ร้องไห้นะคะ~ แค่… ทุกครั้งที่ค่ายชนะ มะลิอยากให้พ่อได้เห็นน่ะค่ะ"},
+  {n:"mali",f:"sad",l:"casual",t:"พ่อเคยพูดว่าผู้หญิงชกมวยไม่มีอนาคต… ตอนนี้ค่ายเราได้เข็มขัดมา "+rgB(G)+" เส้นแล้วนะคะ อยากให้พ่อเห็นจัง",choice:[
+   {t:"\"อนาคตของเธอเริ่มแล้ว และทุกคนในค่ายเห็นอยู่\"",fx:G2=>add(G2,"mali","bond",3),then:[{n:"mali",f:"happy",l:"casual",t:"…ทุกคนในค่ายเห็นอยู่ค่ะ จริงด้วย~ กลับเข้าไปฉลองกันเถอะ"}]},
+   {t:"ยื่นผ้าเช็ดหน้าให้ แล้วนั่งรอจนหายสะอื้น",fx:G2=>add(G2,"mali","bond",2),then:[{n:"mali",f:"flustered",l:"casual",t:"ผ้าเช็ดหน้าผู้จัดการ มะลิขอยืมก่อนนะคะ ซักแล้วจะคืน… อาจจะไม่คืนก็ได้~"}]}]}]},
+ {id:"rin_stars",g:["rin"],bg:"night",s:(G,D)=>[
+  {n:"nar",t:"ดาดฟ้าโรงแรม รินนอนหงายบนเก้าอี้ผ้าใบ สมุดดำปิดวางอยู่ข้างตัว"},
+  {n:"rin",f:"surprised",l:"casual",t:"…ผู้จัดการ ฉันไม่ได้อู้นะคะ วันนี้ตั้งใจไม่จดอะไรเลย ลองดูว่าจะเป็นยังไง"},
+  {n:"rin",f:"happy",l:"casual",t:`ดาวที่${D.name}เห็นชัดกว่าเชียงใหม่ประมาณ… ไม่สิ ไม่นับ คืนนี้ไม่นับ`,choice:[
+   {t:"นอนลงเก้าอี้ข้าง ๆ แล้วไม่นับอะไรด้วยกัน",fx:G2=>add(G2,"rin","bond",3),then:[{n:"nar",t:"ผ่านไปยี่สิบนาที รินไม่พูดตัวเลขสักตัวเดียว"},{n:"rin",f:"flustered",l:"casual",t:"…นี่เป็นยี่สิบนาทีที่ฉันจำได้ดีที่สุดในทริปนี้ค่ะ ตัวเลขนี้ขอนับนะคะ"}]},
+   {t:"ถามว่ารู้สึกยังไงที่ไม่ได้จด",fx:G2=>add(G2,"rin","bond",2),then:[{n:"rin",f:"happy",l:"casual",t:"แปลก ๆ ค่ะ เหมือนลืมใส่แว่น …แต่เห็นอะไรบางอย่างชัดขึ้น"}]}]}]},
+ {id:"rin_laugh",g:["rin"],ok:G=>rgB(G)>=3,bg:"hotel_room",s:(G,D)=>[
+  {n:"rin",f:"happy",l:"casual",t:"ผู้จัดการคะ ขอให้ดูสถิติชุดหนึ่งค่ะ ฉันเก็บมาตั้งแต่ทริปแรก"},
+  {n:"nar",t:"หน้าสมุดดำเขียนหัวข้อว่า \"จำนวนครั้งที่ทุกคนหัวเราะในรถ\" แต่ละทริปมีขีดนับเรียงกันยาวขึ้นเรื่อย ๆ"},
+  {n:"rin",f:"flustered",l:"casual",t:"ทริปแรกสิบสองครั้งค่ะ ทริปล่าสุดสี่สิบเอ็ด ฟ้าคนเดียวนับไปสิบเก้า …ไม่มีประโยชน์ทางมวยเลย แต่ฉันอยากเก็บไว้",choice:[
+   {t:"\"เป็นสถิติที่ดีที่สุดในสมุดเล่มนี้\"",fx:G2=>add(G2,"rin","bond",3),then:[{n:"rin",f:"flustered",l:"casual",t:"…ฉันก็คิดแบบนั้นค่ะ แต่ไม่คิดว่าจะมีคนเห็นด้วย"}]},
+   {t:"ถามว่าตัวเองหัวเราะกี่ครั้ง",fx:G2=>add(G2,"rin","bond",2),then:[{n:"rin",f:"pout",l:"casual",t:"ไม่ได้นับตัวเองค่ะ …ก็ได้ นับ เจ็ดครั้ง ห้าครั้งเพราะผู้จัดการ พอใจหรือยังคะ"}]}]}]},
+ {id:"rin_dad",g:["rin"],ok:G=>rgC(G)>=1,bg:"hotel_room",s:(G,D)=>[
+  {n:"nar",t:"รินจ้องโทรศัพท์นิ่งอยู่นาน หน้าจอเป็นข้อความจากพ่อ"},
+  {n:"rin",f:"surprised",l:"casual",t:"พ่อส่งข่าวถ้วยแชมป์ภาคมาให้ค่ะ… พ่อตามข่าวมวยด้วยเหรอ ฉันไม่เคยรู้เลย"},
+  {n:"rin",f:"sad",l:"casual",t:"ท้ายข้อความเขียนว่า \"พ่อเข้าใจแล้วว่าทำไมลูกไม่เรียนเอก\" …ผู้จัดการคะ ฉันควรตอบว่าอะไรดี",choice:[
+   {t:"\"ตอบแค่ว่าขอบคุณ แล้วชวนพ่อมาดูไฟต์\"",fx:G2=>add(G2,"rin","bond",3),then:[{n:"nar",t:"รินพิมพ์ ลบ แล้วพิมพ์ใหม่สามรอบ ก่อนกดส่ง"},{n:"rin",f:"happy",l:"casual",t:"ส่งแล้วค่ะ …พ่ออ่านแล้ว พ่อกำลังพิมพ์อยู่"}]},
+   {t:"\"ไม่ต้องรีบตอบ เก็บความรู้สึกนี้ไว้ก่อนก็ได้\"",fx:G2=>add(G2,"rin","bond",2),then:[{n:"rin",f:"happy",l:"casual",t:"ค่ะ ฉันจะเก็บไว้ก่อน …อ่านซ้ำอีกสักสิบรอบ"}]}]}]},
+ {id:"ploy_knee",g:["ploy"],bg:"hotel_room",s:(G,D)=>[
+  {n:"nar",t:"เที่ยงคืน ผู้จัดการลงไปซื้อน้ำ เจอพลอยนั่งประคบน้ำแข็งที่เข่าอยู่คนเดียวหน้าตู้กดน้ำ"},
+  {n:"ploy",f:"surprised",l:"casual",t:"…อย่าบอกน้อง ๆ นะ แค่ตึงนิดหน่อย ไม่ได้เป็นอะไร"},
+  {n:"ploy",f:"sad",l:"casual",t:"เมื่อก่อนเข่านี้คือทุกอย่างที่ฉันมี ถ้ามันไม่กลับมาก็ไม่เหลืออะไร …แต่ช่วงนี้ฉันไม่ค่อยคิดแบบนั้นแล้ว",choice:[
+   {t:"ถือถุงน้ำแข็งประคบให้แทน",fx:G2=>add(G2,"ploy","bond",3),then:[{n:"ploy",f:"flustered",l:"casual",t:"…ไม่ต้องก็ได้ ฉันทำเองได้ …ก็ได้ ห้านาที"}]},
+   {t:"\"ตอนนี้เธอมีมากกว่าเข่าแล้ว\"",fx:G2=>add(G2,"ploy","bond",2),then:[{n:"ploy",f:"happy",l:"casual",t:"มีน้อง ๆ ที่เสียงดังทั้งคืน มีผู้จัดการที่ชอบลงมาซื้อน้ำเที่ยงคืน …ใช่ มีมากกว่าเข่าแล้ว"}]}]}]},
+ {id:"ploy_tea",g:["ploy"],r:"isan",bg:"night_isan",s:(G,D)=>[
+  {n:"nar",t:"พลอยเปิดกระติกชาที่แม่ฝากมาจากโคราช รินชาอู่หลงใส่แก้วกระดาษเรียงแถวบนโต๊ะ"},
+  {n:"ploy",f:"happy",l:"casual",t:"แม่ชงให้ค่ะ… แม่ชงฝากมาให้ทุกคน บอกว่าดื่มก่อนนอนจะหลับสบาย"},
+  {n:"ploy",f:"sad",l:"casual",t:"แม่เลิกมาดูฉันชกตั้งแต่ปีที่สอง ใจไม่ไหว …แต่ชงชาฝากมาทุกครั้งที่รู้ว่าฉันขึ้นอีสาน",choice:[
+   {t:"ดื่มชาจนหมดแก้วแล้วขอแก้วที่สอง",fx:G2=>add(G2,"ploy","bond",2),then:[{n:"ploy",f:"happy",l:"casual",t:"เดี๋ยวฉันจะบอกแม่ว่ามีคนขอแก้วที่สอง แม่ต้องดีใจกว่าฉันชนะอีก"}]},
+   {t:"\"วันหนึ่งพาแม่มาดูไฟต์ที่ไม่น่ากลัวสักไฟต์\"",fx:G2=>add(G2,"ploy","bond",3),then:[{n:"ploy",f:"flustered",l:"casual",t:"…ไฟต์ที่ไม่น่ากลัว มีด้วยเหรอ ถ้ามี ฉันอยากให้แม่นั่งข้างผู้จัดการ"}]}]}]},
+ {id:"ploy_carry",g:["ploy","fah"],bg:"hotel_room",s:(G,D)=>[
+  {n:"nar",t:"ดูหนังในห้องรวมได้ครึ่งเรื่อง ฟ้าหลับคาไหล่พลอยไปแล้ว ขนมยังคามือ"},
+  {n:"ploy",f:"happy",l:"casual",t:"ชู่… อุ้มไปส่งห้องเองดีกว่า ปลุกตอนนี้จะโวยวายทั้งชั้น"},
+  {n:"nar",t:"พลอยอุ้มฟ้าเดินไปตามทางเดิน ฟ้าละเมอเบา ๆ"},
+  {n:"fah",f:"flustered",l:"casual",t:"…พี่พลอย… ฟ้าไม่ได้หลับนะ… แค่พักตา…"},
+  {n:"ploy",f:"happy",l:"casual",t:"จ้ะ ๆ ไม่ได้หลับ …ผู้จัดการ เปิดประตูให้หน่อย เดี๋ยวพี่ห่มผ้าให้แล้วตามไป",choice:[
+   {t:"เปิดประตูแล้วถือขนมที่หล่นตามไปให้",fx:G2=>{add(G2,"ploy","bond",2);add(G2,"fah","bond",2);},then:[{n:"nar",t:"เช้ามา ฟ้ายืนยันกับทุกคนว่าเดินกลับห้องเอง"}]},
+   {t:"ถ่ายรูปไว้เป็นหลักฐาน",fx:G2=>{add(G2,"ploy","bond",1);add(G2,"fah","bond",2);},then:[{n:"nar",t:"เช้ามา ฟ้าเห็นรูปแล้วไล่ผู้จัดการรอบลานจอดรถ"},{n:"fah",f:"pout",l:"casual",t:"ลบเดี๋ยวนี้นะนาย!! …ส่งให้ฟ้าก่อนแล้วค่อยลบ!"}]}]}]},
+ {id:"fah_storm",g:["fah"],bg:"hotel_room",s:(G,D)=>[
+  {n:"nar",t:`ตีสอง พายุเข้า${D.name} ฟ้าผ่าดังสนั่นจนกระจกสั่น แล้วไฟดับทั้งโรงแรม`},
+  {n:"nar",t:"เสียงเคาะประตูห้องฟ้า ทีละคน กะทิ มะลิ ริน พลอย ถือหมอนกันมาคนละใบ"},
+  {n:"fah",f:"pout",l:"casual",t:"มาทำอะไรกันหมดเนี่ย! …กลัวฟ้าร้องกันเหรอ งั้นก็ได้ นอนห้องฟ้าก็ได้ ฟ้าจะเฝ้าให้"},
+  {n:"nar",t:"ไม่มีใครพูดว่ารู้ว่าฟ้ากลัวฟ้าร้องมาตั้งแต่เด็ก ทุกคนแค่นอนเบียดกันบนเตียงสองเตียงจนพายุผ่านไป"},
+  {n:"fah",f:"flustered",l:"casual",t:"…นาย ยืนอยู่หน้าประตูทำไม เข้ามาสิ ไม่ได้ชวนนะ แค่ไฟดับ ทางเดินมืด",choice:[
+   {t:"นั่งพิงประตูอยู่ในห้องจนเช้า",fx:G2=>add(G2,"fah","bond",3),then:[{n:"fah",f:"flustered",l:"casual",t:"…ขอบใจ ครั้งเดียวนะ ห้ามเล่าให้ใครฟัง"}]},
+   {t:"เล่าเรื่องผีให้ทุกคนฟัง",fx:G2=>add(G2,"fah","bond",1),then:[{n:"fah",f:"angry",l:"casual",t:"นายยยย!! …เล่าต่อ ฟ้าไม่ได้กลัว ฟ้าแค่จับแขนนายไว้เฉย ๆ"}]}]}]},
+ {id:"fah_laundry",g:["fah"],ok:G=>rgB(G)>=1,bg:"hotel_room",s:(G,D)=>[
+  {n:"nar",t:"เช้ามา ชุดซ้อมของทุกคนพับเรียบวางอยู่หน้าประตูห้อง หอมกลิ่นน้ำยาปรับผ้านุ่ม"},
+  {n:"mali",f:"surprised",l:"casual",t:"ใครซักให้คะเนี่ย~ มะลิไม่ได้ทำนะ"},
+  {n:"fah",f:"pout",l:"casual",t:"ไม่ใช่ฟ้า! ฟ้าตื่นสาย นอนอยู่ทั้งคืน!"},
+  {n:"nar",t:"ปลายนิ้วของฟ้ายังย่นจากน้ำ ใบเสร็จเครื่องซักผ้าหยอดเหรียญโผล่อยู่ในกระเป๋าแจ็กเก็ตเสือ",choice:[
+   {t:"แกล้งเชื่อ แล้วขอบคุณคนที่ซักให้ลอย ๆ",fx:G2=>add(G2,"fah","bond",3),then:[{n:"fah",f:"flustered",l:"casual",t:"…คนที่ซักคงดีใจมั้ง ไม่รู้สิ ฟ้าไม่ได้ซักนะ!"}]},
+   {t:"หยิบใบเสร็จขึ้นมาโชว์",fx:G2=>add(G2,"fah","bond",1),then:[{n:"fah",f:"angry",l:"casual",t:"เอาคืนมา!! …ก็ได้ ฟ้าซักเอง ยายสอนว่าอยู่บ้านใครต้องช่วยกัน พอใจยัง!"}]}]}]},
+ {id:"fah_style",g:["fah"],ok:G=>rgB(G)>=4,bg:"night",s:(G,D)=>[
+  {n:"nar",t:"กลางวันในรถ ทุกคนคุยกันเรื่องมวยบ้านเกิด กะทิกับท่าเสา มะลิกับไชยา พลอยกับโคราช รินกับลพบุรี คืนนั้นฟ้าเงียบผิดปกติ"},
+  {n:"fah",f:"pout",l:"casual",t:"ทุกคนมีสายมวยบ้านเกิดกันหมด ฟ้าไม่มี ฟ้าชกจากเวทีจริงล้วน ๆ …ไม่ได้น้อยใจนะ แค่พูดเฉย ๆ"},
+  {n:"fah",f:"sad",l:"casual",t:"ฟ้าเป็นมวยสายไหนกันแน่ นาย",choice:[
+   {t:"\"สายค่ายศิริชัย เธอเป็นคนแรกของสายนี้\"",fx:G2=>add(G2,"fah","bond",3),then:[{n:"fah",f:"flustered",l:"casual",t:"…คนแรกของสาย ฟังดูเท่ดีนะ ฟ้าเอาชื่อนี้แหละ ห้ามเปลี่ยน"}]},
+   {t:"\"สายที่ไม่ต้องมีใครเหมือน\"",fx:G2=>add(G2,"fah","bond",2),then:[{n:"fah",f:"happy",l:"casual",t:"ไม่ต้องมีใครเหมือน… ใช่ ฟ้าไม่เหมือนใครอยู่แล้ว! พูดถูกครั้งหนึ่งนะนาย"}]}]}]},
+ {id:"duo_kati_mali",g:["kati","mali"],bg:"hotel_room",s:(G,D)=>[
+  {n:"nar",t:`กะทิกับมะลิแอบลงไปซื้อของกินที่ร้านสะดวกซื้อตอนห้าทุ่ม กลับมาพร้อมถุงใหญ่สองถุง`},
+  {n:"kati",f:"happy",l:"casual",t:"ผู้จัดการ! ห้ามบอกครูแดงนะคะ มีส่วนของผู้จัดการด้วย"},
+  {n:"mali",f:"happy",l:"casual",t:`ของฝากประจำ${D.name}แบบที่ร้านสะดวกซื้อเท่านั้นที่มีค่ะ~ มะลิเลือกเอง`},
+  {n:"nar",t:"ห้านาทีต่อมา ห้องเต็มไปด้วยเสียงหัวเราะกับเศษขนม ประตูห้องข้าง ๆ เคาะเตือนสองครั้ง",choice:[
+   {t:"นั่งกินด้วยกันจนหมดถุง",fx:G2=>{add(G2,"kati","bond",2);add(G2,"mali","bond",2);},then:[{n:"kati",f:"happy",l:"casual",t:"นี่แหละค่ะรสชาติของการเดินทาง!"}]},
+   {t:"แกล้งทำเสียงครูแดงหน้าประตู",fx:G2=>{add(G2,"kati","bond",1);add(G2,"mali","bond",1);},then:[{n:"nar",t:"กะทิกับมะลิมุดเข้าผ้าห่มพร้อมกัน ถุงขนมหายไปใต้เตียงในหนึ่งวินาที"},{n:"mali",f:"pout",l:"casual",t:"ผู้จัดการใจร้ายค่ะ~!"}]}]}]},
+ {id:"duo_rin_ploy",g:["rin","ploy"],ok:G=>rgB(G)>=2,bg:"hotel_room",s:(G,D)=>[
+  {n:"nar",t:"ห้องรินยังเปิดไฟ รินกับพลอยนั่งดูเทปไฟต์คืนนี้ด้วยกันบนแล็ปท็อป"},
+  {n:"ploy",f:"happy",l:"casual",t:"ตอนอยู่พยัคฆ์ทอง เราก็นั่งดูเทปแบบนี้ทุกคืน จำได้ไหม"},
+  {n:"rin",f:"sad",l:"casual",t:"จำได้ค่ะ …ฉันลาออกโดยไม่ได้บอกลาเธอ ฉันยังไม่เคยขอโทษเรื่องนั้นเลย"},
+  {n:"ploy",f:"happy",l:"casual",t:"เธอคิดถูกที่ออกมา ฉันแค่ออกมาช้ากว่าเธอหน่อย …เอ้า เล่นต่อ ยกสองตรงนี้ฉันการ์ดตกใช่ไหม",choice:[
+   {t:"ยกเก้าอี้มานั่งดูเทปด้วย",fx:G2=>{add(G2,"rin","bond",2);add(G2,"ploy","bond",2);},then:[{n:"rin",f:"happy",l:"casual",t:"สามคนดูดีกว่าสองคนค่ะ ตามสถิติ …ฉันเพิ่งตั้งสถิตินี้เมื่อกี้"}]},
+   {t:"ปิดประตูให้เงียบ ๆ ปล่อยให้สองคนคุยกัน",fx:G2=>{add(G2,"rin","bond",1);add(G2,"ploy","bond",1);},then:[{n:"nar",t:"เสียงหัวเราะของสองคนดังลอดประตูออกมาเป็นระยะจนดึก"}]}]}]},
+ {id:"duo_fah_kati",g:["fah","kati"],bg:"night",s:(G,D)=>[
+  {n:"fah",f:"happy",l:"casual",t:"กะทิ! แข่งวิ่งไปร้านสะดวกซื้อหัวมุม ใครแพ้เลี้ยงไอติม!"},
+  {n:"kati",f:"happy",l:"casual",t:"รับค่ะ! ผู้จัดการเป็นกรรมการนะคะ!"},
+  {n:"nar",t:"สองคนออกตัวพร้อมกัน ฟ้าแซงตอนโค้งสุดท้าย กะทิกระโดดแตะประตูร้านก่อนครึ่งก้าว"},
+  {n:"fah",f:"pout",l:"casual",t:"ไม่นับ! กะทิกระโดด! นาย ตัดสินใหม่!",choice:[
+   {t:"ให้กะทิชนะ",fx:G2=>{add(G2,"kati","bond",2);add(G2,"fah","bond",1);},then:[{n:"fah",f:"pout",l:"casual",t:"…ก็ได้ ฟ้าเลี้ยง แต่ฟ้าเลือกรสเอง!"},{n:"kati",f:"happy",l:"casual",t:"ไอติมที่ชนะมาอร่อยกว่าทุกแท่งเลยค่ะ!"}]},
+   {t:"ตัดสินว่าเสมอ แล้วเลี้ยงเองทั้งคู่",fx:G2=>{add(G2,"kati","bond",2);add(G2,"fah","bond",2);},then:[{n:"fah",f:"flustered",l:"casual",t:"…เสมอก็ได้ ครั้งหน้าฟ้าชนะขาด! ไอติมนายก็อร่อยดีนะ"}]}]}]}];
+function rgWarmPick(G,T){const R=G.region,D=ROAD_DEST[T.dest];if(!R||!D)return null;const seen=R.warm=R.warm||{},P=T.party||[];
+  const here=id=>P.includes(id)&&G.F[id]&&G.F[id].camp==="player";
+  const L=RG_WARM.filter(w=>!seen[w.id]&&w.g.every(here)&&(!w.r||w.r===D.r)&&(!w.ok||w.ok(G)));if(!L.length)return null;
+  const w=L[Math.floor(Math.random()*L.length)];return w;}
+function rgMsQ(G,q){const R=G.region;R.ms=R.ms||{};if(R.ms[q.k])return;R.ms[q.k]=1;(R.msQ=R.msQ||[]).push(q);}
 const REGION={
   /* end of week (after the weekly events): the gala the week after the invitation, the contract beat the week after the first cup */
   weekScene(G,done){const R=G.region;if(!R){done();return;}rgApply(G);const now=gameWeek(G);if(lbWeek(G,done))return;
+    /* v1.91.122 (Man): the five celebrate the camp's milestones back home, one a week */
+    if(R.msQ&&R.msQ.length){const q=R.msQ.shift(),S=rgMsSteps(G,q);if(S){playScene(S,()=>{save();done();},{bg:RG_MSL[q.k].bg,look:"casual"});return;}}
     /* v1.91.26 (Man): Kru Daeng reminds you to watch tape and train the counter before each regional title bout — no new buttons */
     for(const r of RG_ORDER){const c=R.champ[r],x=c&&c.next;if(!c||c.state!=="series"||!x||x.warned)continue;const left=x.abs-now;if(left<1||left>2)continue;
       const me=G.F[c.fid],cf=G.F[this.champId[r]];if(!me||!cf)continue;const tape=G.scoutAbs&&G.scoutAbs[cf.id]!=null&&now-G.scoutAbs[cf.id]<=8,ok=tape&&me.plan&&me.plan.preset===counterPreset(cf);x.warned=1;if(ok)continue;
@@ -1765,8 +1961,8 @@ const REGION={
       if(rg.local){const T=R.trip,abs=T&&T.abs!=null?T.abs:gameWeek(G);R.trip=null;R.nextTripAbs=Math.max(R.nextTripAbs||0,abs+RG_TRIP_GAP);(R.gc=R.gc||[]).push(p.b);continue;} /* v1.91.93: the local ring pays a purse, no belt */
       this.lbAdd(G,p.a,"pc:"+dest,p.res,p.stop);
       rgTouch(G,RG_CID[r]);const T=R.trip,abs=T&&T.bid===p.bid?T.abs:gameWeek(G);
-      if(p.res==="W"){R.belts[r]=R.belts[r]||{};R.belts[r][dest]=1;G.log=G.log||[];G.log.push(`${G.F[p.a]?G.F[p.a].name:""}คว้าเข็มขัดจังหวัด${D.name}!`);if(G.F[p.a])recordHonor(G,"rgbelt",p.a,G.F[p.a].div,G.week,dest,G.F[p.b]?G.F[p.b].name:this.oppName(G,dest),p.b); /* v1.91.14 (Man): a province belt gets the same ceremony as the main game */
-        if(this.beltCount(G,r)===4&&R.champ[r].state==="locked"){R.champ[r].state="letter";this.champFighter(G,r);
+      if(p.res==="W"){R.belts[r]=R.belts[r]||{};R.belts[r][dest]=1;G.log=G.log||[];G.log.push(`${G.F[p.a]?G.F[p.a].name:""}คว้าเข็มขัดจังหวัด${D.name}!`);if(G.F[p.a])recordHonor(G,"rgbelt",p.a,G.F[p.a].div,G.week,dest,G.F[p.b]?G.F[p.b].name:this.oppName(G,dest),p.b);rgMsQ(G,{k:"belt1",id:p.a,dest}); /* v1.91.14 (Man): a province belt gets the same ceremony as the main game */
+        if(this.beltCount(G,r)===4&&R.champ[r].state==="locked"){rgMsQ(G,{k:"ticket",r});R.champ[r].state="letter";this.champFighter(G,r);
           rgOrg(G,r,`${RG_TITLE[r]}: ครบสี่เข็มขัดแล้ว`,`เรียน ผู้จัดการค่ายศิริชัย\n\nค่ายของท่านครบสี่เข็มขัดของ${RG[r].name}แล้ว ${RG[r].champ} แชมป์${RG[r].name} ขอท้าชิงแชมป์ภาค ชนะ 2 ใน 3 นัด ผู้จัดออกค่าเดินทาง\n\nเลือกนักมวยได้ที่หน้าไฟต์ › ศึกชิงเจ้าสี่ภาค`+((t=>t?`\n\n(${t})`:"")(this.tipText(G,r))));rgSay(G,r,`${RG_TITLE[r]}: ครบสี่เข็มขัดแล้ว`,RG_CH[r].letter);}}
       R.trip=null;R.nextTripAbs=Math.max(R.nextTripAbs||0,abs+RG_TRIP_GAP);(R.gc=R.gc||[]).push(p.b);}},
   /* weekly: post-cup letters and champion chats */
@@ -1870,6 +2066,9 @@ const REGION={
           {t:`อยู่เที่ยวต่ออีก 1 คืน (ค่าห้อง ${fmt(cost)})`,fx:G2=>{if(G2.cash<cost){T.extraNo=1;return;}G2.cash-=cost;T.extra=1;}}]}],
           ()=>{if(T.extra)this.night(T,{...P,nights:1},1,done);else{if(T.extraNo)toast("เงินไม่พอค่าห้อง กลับค่ายกันก่อน");this.home(T,done);}},{bg:this.hotelBg[r],look:"casual"});return;}
       return this.home(T,done);}
+    /* v1.91.122 (Man): a quiet moment with the camp's own girls — at most one a trip, each moment once */
+    if(!T.backShop&&!T.warmed&&Math.random()<(G.region.warmP!=null?G.region.warmP:.55)){T.warmed=1;const w=rgWarmPick(G,T);if(w){G.region.warm[w.id]=1;save();
+      playScene(w.s(G,D),()=>this.night(T,P,n,done),{bg:w.bg==="night"?this.hotelBg[r]:w.bg,look:"casual"});return;}}
     const girls=roadRiders(G).filter(f=>CANON_IDS.includes(f.id)).sort((a,b)=>(b.bond||0)-(a.bond||0));
     const choice=this.hotelMenu(T,D,girls,n,false);
     const oddL=RG_ODD[r]||[],oddOn=!T.backShop&&oddL.length&&girls.length&&Math.random()<.4,odd=oddOn?oddL[Math.floor(Math.random()*oddL.length)]:null,og=girls.length?girls[Math.floor(Math.random()*girls.length)]:null,
@@ -1962,7 +2161,7 @@ const REGION={
       /* v1.91.120 (Man): all four regional cups = national level — every fighter who won a cup this edition gets it in the hall */
       if(R.cups.length>=4&&!R.natDone){R.natDone=1;G.honors=G.honors||[];const ws=new Set();for(const h of G.honors)if(/^rg_/.test(h.kind)&&!(h.season&&((h.season-1)*52+(h.week||1))<(R.startAbs||0)))ws.add(h.id);
         for(const id of ws){const k=`${G.season||1}:rgnat:${rgEd(G)}::${id}`;if(!G.honors.some(h=>h.key===k))G.honors.push({key:k,season:G.season||1,week:G.week,id,div:(G.F[id]||{}).div,kind:"rgnat",opp:"ครบสี่ถ้วย · ศึกชิงเจ้าสี่ภาค"});}}
-      rgMeet(G,this.champId[r],4);R.just={r,kind:"cup",res:p.res,w:c.w,l:c.l};
+      rgMsQ(G,{k:["cup1","cup2","cup3","nat"][Math.min(3,R.cups.length-1)],id:me?me.id:null,r});rgMeet(G,this.champId[r],4);R.just={r,kind:"cup",res:p.res,w:c.w,l:c.l};
       G.log.push(`${HONOR_LABEL["rg_"+r]}: ${me?me.name:""} ${c.w}-${c.l} ${RG[r].champ} · เงินรางวัล ${fmt(RG_CUP_PRIZE)}`);return;}
     if(c.l>=2){c.state="lost";c.tries=(c.tries||0)+1;c.letterAbs=abs+2;R.just={r,kind:"lost",res:p.res,w:c.w,l:c.l};
       G.log.push(`${RG_TITLE[r]}: ${RG[r].champ} ป้องกันแชมป์ไว้ได้ ${c.l}-${c.w}`);return;}
