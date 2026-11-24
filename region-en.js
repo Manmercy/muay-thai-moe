@@ -1033,7 +1033,7 @@ const ADD={
    ["Nobody tells me to smile here. It's... weird. In a good way.",[["Smile when you feel like it. That's enough.",2,"...Thank you. That's what I've wanted all along."],["But you look pretty when you smile.",1,"Don't push it. ...Thank you."],["This isn't an agency.",2,"Yeah. This is a boxing camp. I love it."]]]]},
   {id:"al_j_song",when:inJ("alicia"),x:[
    ["I've written half a verse. Nobody wrote it for me. I wrote it myself.",[["Can I hear it?",2,"Not yet. When it's done, you'll be the first to hear it. Promise."],["What's it about?",1,"About someone who ran away to become a fighter. ...Too obvious?"],["Great job",1,"Thanks. You haven't even heard it yet, ha."]]],
-   ["Mr. Krit called. He says there's a concert waiting if I want to go back.",[["Do you want to go back?",2,"...Not now. Right now I want to finish the season fighting."],["You can do both.",2,"Boxing and music. Why not both? You sound just like Mr. Krit, ha."],["Stay at the camp.",1,"I'm staying. Don't worry."]]],
+   ["The label called. They say there's a concert waiting if I want to go back.",[["Do you want to go back?",2,"...Not now. Right now I want to finish the season fighting."],["You can do both.",2,"Boxing and music. Why not both? You sound just like Mabelle, ha."],["Stay at the camp.",1,"I'm staying. Don't worry."]]],
    ["Fans have started sending me pictures of me wearing a mongkol. Not concert stage photos anymore.",[["Real fans follow you anywhere.",2,"...Yeah. They've always been with me. I'm lucky."],["The mongkol really suits you.",2,"I know, right? Ha ha."],["Good",1,"Mm."]]]]},
   {id:"al_j_love",when:L("alicia"),x:[
    ["Sorry for messaging so late. I can't sleep. I just wanted to talk to you.",[["We can talk any time.",2,"...That's dangerous. I'll message every night."],["Is something wrong?",2,"Nothing's wrong. That's the weird part. Everything's too good."],["There's morning training tomorrow, you know",0,"Fine, fine. Good night, coach."]]],
@@ -2088,7 +2088,7 @@ RG_SIDE.central={cid:"alicia",bg:"tvstudio",ring:"bg_tvstudio.webp",title:"Off-s
      {t:"\"You fight because you want to. I've seen it since your first fight\"",fx:G2=>rgMeet(G2,"alicia",3),then:[{n:"alicia",f:"flustered",l:"casual",t:"...My first fight. You remember it?"}]},
      {t:"\"Tonight, sing for yourself, not for the sponsor\"",fx:G2=>rgMeet(G2,"alicia",3),then:[{n:"alicia",f:"happy",l:"casual",t:"...For myself. I haven't done that in a long time."}]}]},
     {n:"npc",who:"Mabelle",t:"Sportygal always goes on stage together. Nobody sings alone."},
-    {n:"npc",who:"Minnie",t:"And the camp manager can keep a beat too, right?"},
+    {n:"npc",who:"Minnie",img:"minnie_smirk",t:"And the camp manager can keep a beat too, right?"},
     {n:"alicia",f:"flustered",l:"casual",t:"...Keep the rhythm for me. If you don't slip, I won't either."}],
    ()=>RG_SING.open(q=>{const S=G.region.side.central;S.sing=+(q||0).toFixed(2);rgMeet(G,"alicia",q>=.6?4:2);save();
     playScene([
@@ -2096,9 +2096,9 @@ RG_SIDE.central={cid:"alicia",bg:"tvstudio",ring:"bg_tvstudio.webp",title:"Off-s
      {n:"npc",who:"Mr. Krit, personal manager",t:"Great! Now upload the backstage fight clip like the sponsor asked. Naka pays us a year..."},
      {n:"alicia",f:"happy",l:"casual",t:"No."},
      {n:"alicia",f:"happy",l:"casual",t:"That clip is people from Sirichai Camp getting hurt protecting me. It's not content. From tonight, I choose what goes on camera."},
-     {n:"npc",who:"Mr. Krit, personal manager",t:"Alicia, the Naka contract doesn't say that..."},
+     {n:"npc",who:"Mr. Krit, personal manager",img:"krit_panic",t:"Alicia, the Naka contract doesn't say that..."},
      {n:"alicia",f:"happy",l:"casual",t:"Then rewrite it, or there's no contract at all... I'm a fighter. I choose."},
-     {n:"npc",who:"Mabelle",t:"Yay!! That's my girl!"},
+     {n:"npc",who:"Mabelle",img:"mabelle_excited",t:"Yay!! That's my girl!"},
      {n:"alicia",f:"flustered",l:"casual",t:"...Don't get the wrong idea. I didn't dare say that because you were standing there... maybe a little."}],cb,{bg:"tvstudio",look:"casual"});}),{bg:"tvstudio",look:"casual"}),
   done:(G)=>addMail(G,{kind:"letter",from:"Alicia",title:"Update from the Princess",body:
    "Dear Manager of Sirichai Camp,\n\nI've told Naka Energy Drink I won't make any content I haven't chosen myself. They want to renegotiate... I'm in no hurry to answer.\n\nThat sasaeng group is banned from every event now. Mabelle made a light-up \"Sirichai Camp\" sign for backstage. Minnie asked for Kru Daeng's number (don't ask why).\n\nYesterday I trained for six hours without turning on a camera once. It felt... mine.\n\nAlicia"})};
@@ -2304,6 +2304,7 @@ const REGION={
   weekScene(G,done){const R=G.region;if(!R){done();return;}rgApply(G);const now=gameWeek(G);if(lbWeek(G,done))return;
     /* v1.91.122 (Man): the five celebrate the camp's milestones back home, one a week */
     if(R.msQ&&R.msQ.length){const q=R.msQ.shift(),S=rgMsSteps(G,q);if(S){playScene(S,()=>{save();done();},{bg:RG_MSL[q.k].bg,look:"casual"});return;}}
+    if(rgKritDue(G)){playScene(rgKritSteps(G),()=>{save();done();},{bg:"camp_day",look:"casual"});return;}
     {const hs=rgRelDue(G);if(hs){playScene(hs.steps,()=>{save();done();},{bg:"camp",look:"casual"});return;}}
     /* v1.91.26 (Man): Kru Daeng reminds you to watch tape and train the counter before each regional title bout — no new buttons */
     for(const r of RG_ORDER){const c=R.champ[r],x=c&&c.next;if(!c||c.state!=="series"||!x||x.warned)continue;const left=x.abs-now;if(left<1||left>2)continue;
@@ -3314,6 +3315,45 @@ const RG_PAIRSAY={
   (RG_HANG2[c]||[]).forEach((sc,i)=>RG_HANG2[c][i]=tag(sc,RG_SCENE_BG[c+".h2."+i]));(RG_AGAIN[c]||[]).forEach((sc,i)=>RG_AGAIN[c][i]=tag(sc,RG_SCENE_BG[c+".ag."+i]));
   for(const k of RG_HEART_AT)if(RG_HEART[c]&&RG_HEART[c][k])RG_HEART[c][k]=tag(RG_HEART[c][k],RG_SCENE_BG[c+".heart."+k]);
   for(const k of RG_LOVE_AT)if(RG_LOVE2[c]&&RG_LOVE2[c][k])RG_LOVE2[c][k]=tag(RG_LOVE2[c][k],RG_SCENE_BG[c+".love2."+k]);}}
+
+/* v1.91.140 (Man): Alicia's manager Mr. Krit is caught — he sold her backstage schedule to the sasaeng crowd for a viral clip the Naka sponsor paid for.
+   Mint, Sportygal's shy group manager, finds the proof and brings it to Sirichai; Alicia fires him and asks Mint to manage her. */
+const rgKritOut=G=>!!(G.region&&G.region.kritOut);
+function rgKritDue(G){const R=G.region,S=R&&R.side&&R.side.central;if(!S||!S.won||R.kritOut||R.trip)return false;return gameWeek(G)-(S.triedAbs||0)>=2;}
+function rgKritSteps(G){return [
+ {n:"nar",bg:"camp_day",t:"Tuesday afternoon, a woman with mint-green hair in a navy suit stands at the camp fence for a long time, hugging a thick folder so tightly the paper crumples."},
+ {n:"npc",who:"Mint",img:"mint_flustered",t:"S-sorry! Is this Sirichai Camp? I'm Mint, Sportygal's manager... not Alicia's manager, I only look after the group."},
+ {n:"npc",who:"Mint",img:"mint_flustered",t:"There's something I can't tell Alicia alone. She trusts the manager of this camp... so I came here."},
+ {n:"nar",t:"Papers fly out of the folder all over the yard. Kati runs to help gather them; Mint bows three times in apology."},
+ {n:"npc",who:"Mint",t:"These are Mr. Krit's chats with the sasaeng fan-club leader: her schedule, the dressing-room number, when the guards change shifts... the same night they stormed backstage."},
+ {n:"npc",who:"Mint",t:"And this is a transfer slip from Naka Energy Drink's marketing team, with the note 'backstage viral clip fee'... He sold out my friend."},
+ {n:"coach",t:"That clip he wanted uploaded that night... it was planned from the start."},
+ {n:"nar",t:"You call Alicia. Ten minutes later she arrives by taxi, cap pulled low, mask still on."},
+ {n:"alicia",f:"angry",l:"casual",t:"...Let me see it myself."},
+ {n:"nar",t:"Alicia reads every page without a word. The hand holding the paper doesn't shake at all."},
+ {n:"nar",t:"A silver sedan turns in and parks in front of the camp. Mr. Krit steps out, phone to his ear, wearing the same wide smile as always."},
+ {n:"npc",who:"Mr. Krit, personal manager",img:"krit",t:"Alicia! I've been looking everywhere. New job from Naka, double the fee, just a one-hour live of you training at this camp—"},
+ {n:"nar",t:"His eyes land on the folder in Mint's hands."},
+ {n:"npc",who:"Mr. Krit, personal manager",img:"krit_panic",t:"Wait... Mint, how did you get stuff off my phone? That's company data!"},
+ {n:"npc",who:"Mint",img:"mint_flustered",t:"Y-you sent it to the band's work group by mistake! I just... didn't delete it."},
+ {n:"npc",who:"Mr. Krit, personal manager",img:"krit_panic",t:"Alicia, hear me out! That clip got you three hundred thousand followers. I did it for you—"},
+ {n:"alicia",f:"angry",l:"casual",t:"That night people from this camp bled holding the door for me. You count followers. I count the hurt."},
+ {n:"nar",t:"Everyone in the camp turns to look at the manager.",choice:[
+  {t:"\"This camp doesn't welcome people who sell out their own\"",fx:G2=>rgMeet(G2,"alicia",3),then:[{n:"npc",who:"Mr. Krit, personal manager",img:"krit_panic",t:"...This is some backwater boxing camp. You've got no right to order me around!"},{n:"coach",t:"It's this country camp whose kids got hurt for your singer. Leave the way you came."}]},
+  {t:"\"Alicia, it's your call\"",fx:G2=>rgMeet(G2,"alicia",4),then:[{n:"alicia",f:"happy",l:"casual",t:"...Thank you for letting me choose. No one ever has."}]},
+  {t:"Hand Alicia your phone so she can call the label in front of him",fx:G2=>rgMeet(G2,"alicia",3),then:[{n:"nar",t:"Alicia puts it on speaker, dials the label's executive, and sets the phone on the table right in front of Mr. Krit."}]}]},
+ {n:"alicia",f:"angry",l:"casual",t:"Mr. Krit, you're fired. I've told the label. Your personal manager contract ends today. The Naka money goes through the lawyers."},
+ {n:"npc",who:"Mr. Krit, personal manager",img:"krit_panic",t:"How far do you think you'll get? Without me you're just a pretty girl who boxes—"},
+ {n:"alicia",f:"happy",l:"casual",t:"Yes. I box. Goodbye."},
+ {n:"nar",t:"The silver sedan reverses out from the front of the camp and clips Mali's jasmine pot. Mali presses her lips together to keep from laughing."},
+ {n:"alicia",f:"flustered",l:"casual",t:"Mint... I'm sorry I never noticed you were looking after all of us the whole time."},
+ {n:"alicia",f:"happy",l:"casual",t:"Would you be my manager? You don't have to find me lots of work. Just don't sell me out."},
+ {n:"npc",who:"Mint",img:"mint",t:"M-me!? I spill coffee on the schedule every single week..."},
+ {n:"npc",who:"Mint",img:"mint",t:"...But I won't let anyone open your dressing-room door again. I promise."},
+ {n:"nar",t:"That night Mabelle and Minnie video-call the group chat and send thirty firework stickers."},
+ {n:"npc",who:"Minnie",img:"minnie_smirk",t:"See? I told you that guy in the glasses was shady. As for Mint... a new title means you're buying shabu."},
+ {n:"npc",who:"Mabelle",img:"mabelle_excited",t:"The Sirichai manager has to come too! A Sportygal celebration needs the whole team!"},
+ {fx:G2=>{G2.region.kritOut=gameWeek(G2);rgMeet(G2,"alicia",2);}}];}
 
 const RG_PROF={
  baibua:{height:"165 cm",blood:"A",bday:"12 November (Yi Peng)",home:"Chiang Mai · a wooden house behind her father's small camp",heritage:"Muay Tha Sao (same lineage as Kati)",

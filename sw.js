@@ -1,7 +1,7 @@
 /* v1.87: Muay Thai Moe service worker — art is served from the device after the first visit.
    Images: cache first. v1.91.28: once per session each image is re-checked with its ETag (a few bytes, 304 when unchanged) instead of being downloaded again, so redrawn art still arrives without eating the player's bandwidth.
    Game code and pages: network first, cache only when offline. */
-const BUILD="41e8281273",ART="mtm-art-v1",CODE="mtm-code";
+const BUILD="6320c6048b",ART="mtm-art-v1",CODE="mtm-code";
 const fresh=new Set();
 self.addEventListener("install",()=>self.skipWaiting());
 self.addEventListener("activate",e=>e.waitUntil(self.clients.claim()));

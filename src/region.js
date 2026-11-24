@@ -756,7 +756,7 @@ const ADD={
    ["ไม่มีใครสั่งให้ฉันยิ้มที่นี่ It's… weird. In a good way.",[["ยิ้มเมื่ออยากยิ้มก็พอ",2,"…Thank you. นั่นคือสิ่งที่ฉันต้องการมาตลอด"],["แต่ยิ้มแล้วสวยนะ",1,"Don't push it. …ขอบคุณ"],["ที่นี่ไม่ใช่เอเจนซี่",2,"Yeah. ที่นี่คือค่ายมวย I love it."]]]]},
   {id:"al_j_song",when:inJ("alicia"),x:[
    ["ฉันเขียนเพลงได้ครึ่งท่อนแล้ว ไม่มีใครเขียนให้ ฉันเขียนเอง",[["ขอฟังได้ไหม",2,"Not yet. เสร็จแล้วคุณเป็นคนแรกที่ได้ฟัง Promise."],["เกี่ยวกับอะไร",1,"เกี่ยวกับคนที่หนีมาเป็นนักมวย …Too obvious?"],["เก่งมาก",1,"Thanks. ยังไม่ได้ฟังเลยนะ ฮ่า"]]],
-   ["คุณกฤตโทรมา บอกว่ามีงานคอนเสิร์ตรอ ถ้าฉันอยากกลับ",[["อยากกลับหรือเปล่า",2,"…ไม่ใช่ตอนนี้ ตอนนี้ฉันอยากชกให้จบซีซั่น"],["ทำได้ทั้งสองอย่าง",2,"Boxing and music. Why not both? คุณพูดเหมือนคุณกฤตเลย ฮ่า"],["อยู่ค่ายต่อเถอะ",1,"I'm staying. Don't worry."]]],
+   ["ค่ายเพลงโทรมา บอกว่ามีงานคอนเสิร์ตรอ ถ้าฉันอยากกลับ",[["อยากกลับหรือเปล่า",2,"…ไม่ใช่ตอนนี้ ตอนนี้ฉันอยากชกให้จบซีซั่น"],["ทำได้ทั้งสองอย่าง",2,"Boxing and music. Why not both? คุณพูดเหมือนมาเบลล์เลย ฮ่า"],["อยู่ค่ายต่อเถอะ",1,"I'm staying. Don't worry."]]],
    ["แฟน ๆ เริ่มส่งรูปฉันใส่มงคลมาให้ ไม่ใช่รูปบนเวทีคอนเสิร์ตแล้ว",[["แฟนตัวจริงตามมาทุกที่",2,"…Yeah. พวกนั้นอยู่กับฉันตลอด ฉันโชคดี"],["มงคลเหมาะกับอลิเซียมาก",2,"I know, right? ฮ่า ๆ"],["ดีแล้ว",1,"Mm."]]]]},
   {id:"al_j_love",when:L("alicia"),x:[
    ["ขอโทษที่ทักดึก ฉันนอนไม่หลับ แค่อยากคุยกับคุณ",[["คุยได้ทุกเวลา",2,"…That's dangerous. ฉันจะทักทุกคืนนะ"],["เป็นอะไรหรือเปล่า",2,"Nothing's wrong. That's the weird part. ทุกอย่างดีเกินไป"],["พรุ่งนี้มีซ้อมเช้านะ",0,"Fine, fine. Good night, coach."]]],
@@ -1811,7 +1811,7 @@ RG_SIDE.central={cid:"alicia",bg:"tvstudio",ring:"bg_tvstudio.webp",title:"ไ�
      {t:"\"เธอชกเพราะอยากชก ฉันเห็นมาตั้งแต่ไฟต์แรก\"",fx:G2=>rgMeet(G2,"alicia",3),then:[{n:"alicia",f:"flustered",l:"casual",t:"…ไฟต์แรก คุณจำได้ด้วยเหรอ"}]},
      {t:"\"คืนนี้ร้องให้ตัวเองฟัง ไม่ต้องร้องให้สปอนเซอร์\"",fx:G2=>rgMeet(G2,"alicia",3),then:[{n:"alicia",f:"happy",l:"casual",t:"…ให้ตัวเอง ฉันไม่ได้ทำแบบนั้นมานานแล้ว"}]}]},
     {n:"npc",who:"มาเบลล์",t:"Sportygal ขึ้นเวทีด้วยกันเสมอ ไม่มีใครร้องคนเดียว"},
-    {n:"npc",who:"มินนี่",t:"แล้วผู้จัดการค่ายเขาก็จับจังหวะเป็นด้วยนะ ใช่ไหมคะ?"},
+    {n:"npc",who:"มินนี่",img:"minnie_smirk",t:"แล้วผู้จัดการค่ายเขาก็จับจังหวะเป็นด้วยนะ ใช่ไหมคะ?"},
     {n:"alicia",f:"flustered",l:"casual",t:"…จับจังหวะให้ฉันหน่อย ถ้าคุณไม่หลุด ฉันก็จะไม่หลุด"}],
    ()=>RG_SING.open(q=>{const S=G.region.side.central;S.sing=+(q||0).toFixed(2);rgMeet(G,"alicia",q>=.6?4:2);save();
     playScene([
@@ -1819,9 +1819,9 @@ RG_SIDE.central={cid:"alicia",bg:"tvstudio",ring:"bg_tvstudio.webp",title:"ไ�
      {n:"npc",who:"คุณกฤต ผู้จัดการส่วนตัว",t:"ดีมาก! ทีนี้อัปคลิปไฟต์หลังเวทีตามที่สปอนเซอร์ขอ นาคาเขาจ่ายเราปีละ…"},
      {n:"alicia",f:"happy",l:"casual",t:"ไม่ค่ะ"},
      {n:"alicia",f:"happy",l:"casual",t:"คลิปนั้นคือคนในค่ายศิริชัยเจ็บเพื่อปกป้องฉัน ไม่ใช่คอนเทนต์ ฉันจะเลือกเองว่าอะไรได้ออกกล้อง ตั้งแต่คืนนี้"},
-     {n:"npc",who:"คุณกฤต ผู้จัดการส่วนตัว",t:"อลิเซีย สัญญานาคามันไม่ได้เขียนแบบนั้น…"},
+     {n:"npc",who:"คุณกฤต ผู้จัดการส่วนตัว",img:"krit_panic",t:"อลิเซีย สัญญานาคามันไม่ได้เขียนแบบนั้น…"},
      {n:"alicia",f:"happy",l:"casual",t:"งั้นก็เขียนใหม่ หรือไม่ก็ไม่ต้องมีสัญญา …I'm a fighter. I choose."},
-     {n:"npc",who:"มาเบลล์",t:"เย่!! นี่แหละเพื่อนฉัน!"},
+     {n:"npc",who:"มาเบลล์",img:"mabelle_excited",t:"เย่!! นี่แหละเพื่อนฉัน!"},
      {n:"alicia",f:"flustered",l:"casual",t:"…อย่าเข้าใจผิดนะ ที่ฉันกล้าพูดแบบนี้ไม่ได้เป็นเพราะคุณยืนอยู่ตรงนั้นหรอก …อาจจะนิดหน่อย"}],cb,{bg:"tvstudio",look:"casual"});}),{bg:"tvstudio",look:"casual"}),
   done:(G)=>addMail(G,{kind:"letter",from:"อลิเซีย",title:"Update จากเจ้าหญิง",body:
    "Dear ผู้จัดการค่ายศิริชัย\n\nฉันแจ้งนาคาเอเนอร์จี้ดริงค์แล้วนะคะ ว่าจะไม่ทำคอนเทนต์ที่ฉันไม่ได้เลือกเอง เขาขอคุยใหม่ …ฉันจะไม่รีบตอบ\n\nแฟนคลับซาแซงกลุ่มนั้นโดนแบนจากทุกอีเวนต์แล้ว มาเบลล์ทำป้ายไฟ \"ค่ายศิริชัย\" ไปติดหลังเวทีด้วย มินนี่ขอเบอร์ครูแดง (ห้ามถามว่าเพื่ออะไร)\n\nเมื่อวานฉันซ้อมหกชั่วโมงโดยไม่เปิดกล้องเลย It felt… mine.\n\nAlicia"})};
@@ -2027,6 +2027,7 @@ const REGION={
   weekScene(G,done){const R=G.region;if(!R){done();return;}rgApply(G);const now=gameWeek(G);if(lbWeek(G,done))return;
     /* v1.91.122 (Man): the five celebrate the camp's milestones back home, one a week */
     if(R.msQ&&R.msQ.length){const q=R.msQ.shift(),S=rgMsSteps(G,q);if(S){playScene(S,()=>{save();done();},{bg:RG_MSL[q.k].bg,look:"casual"});return;}}
+    if(rgKritDue(G)){playScene(rgKritSteps(G),()=>{save();done();},{bg:"camp_day",look:"casual"});return;}
     {const hs=rgRelDue(G);if(hs){playScene(hs.steps,()=>{save();done();},{bg:"camp",look:"casual"});return;}}
     /* v1.91.26 (Man): Kru Daeng reminds you to watch tape and train the counter before each regional title bout — no new buttons */
     for(const r of RG_ORDER){const c=R.champ[r],x=c&&c.next;if(!c||c.state!=="series"||!x||x.warned)continue;const left=x.abs-now;if(left<1||left>2)continue;
@@ -3017,6 +3018,45 @@ const RG_PAIRSAY={
   (RG_HANG2[c]||[]).forEach((sc,i)=>RG_HANG2[c][i]=tag(sc,RG_SCENE_BG[c+".h2."+i]));(RG_AGAIN[c]||[]).forEach((sc,i)=>RG_AGAIN[c][i]=tag(sc,RG_SCENE_BG[c+".ag."+i]));
   for(const k of RG_HEART_AT)if(RG_HEART[c]&&RG_HEART[c][k])RG_HEART[c][k]=tag(RG_HEART[c][k],RG_SCENE_BG[c+".heart."+k]);
   for(const k of RG_LOVE_AT)if(RG_LOVE2[c]&&RG_LOVE2[c][k])RG_LOVE2[c][k]=tag(RG_LOVE2[c][k],RG_SCENE_BG[c+".love2."+k]);}}
+
+/* v1.91.140 (Man): Alicia's manager Mr. Krit is caught — he sold her backstage schedule to the sasaeng crowd for a viral clip the Naka sponsor paid for.
+   Mint, Sportygal's shy group manager, finds the proof and brings it to Sirichai; Alicia fires him and asks Mint to manage her. */
+const rgKritOut=G=>!!(G.region&&G.region.kritOut);
+function rgKritDue(G){const R=G.region,S=R&&R.side&&R.side.central;if(!S||!S.won||R.kritOut||R.trip)return false;return gameWeek(G)-(S.triedAbs||0)>=2;}
+function rgKritSteps(G){return [
+ {n:"nar",bg:"camp_day",show:[{id:"npc:mint_flustered"}],t:"บ่ายวันอังคาร ผู้หญิงผมสีมินต์ในชุดสูทกรมท่ายืนเกาะรั้วค่ายอยู่นาน กอดแฟ้มหนาไว้แน่นจนกระดาษยับ"},
+ {n:"npc",who:"มิ้นท์",img:"mint_flustered",t:"ข-ขอโทษค่ะ! ใช่ค่ายศิริชัยไหมคะ ดิฉันมิ้นท์ ผู้จัดการวง Sportygal …ไม่ใช่ผู้จัดการอลิเซียนะคะ ดิฉันดูแลแค่วง"},
+ {n:"npc",who:"มิ้นท์",img:"mint_flustered",t:"มีเรื่องที่ดิฉันบอกอลิเซียคนเดียวไม่ได้ค่ะ เธอเชื่อใจผู้จัดการค่ายนี้ …ดิฉันเลยมาที่นี่"},
+ {n:"nar",t:"กระดาษหลุดจากแฟ้มปลิวไปทั่วลาน กะทิวิ่งช่วยเก็บ มิ้นท์ก้มหัวขอโทษสามรอบ"},
+ {n:"npc",who:"มิ้นท์",t:"นี่คือแชตของคุณกฤตกับหัวหน้าแฟนคลับซาแซงค่ะ ส่งตารางงาน เลขห้องแต่งตัว เวลาที่การ์ดเปลี่ยนกะ… คืนเดียวกับที่พวกนั้นบุกหลังเวที"},
+ {n:"npc",who:"มิ้นท์",t:"แล้วนี่สลิปโอนเงินจากฝ่ายการตลาดนาคาเอเนอร์จี้ดริงค์ หมายเหตุว่า 'ค่าคลิปไวรัลหลังเวที' …เขาขายเพื่อนดิฉันค่ะ"},
+ {n:"coach",t:"ไอ้คลิปที่เขาจะให้อัปคืนนั้น… มันวางแผนไว้ตั้งแต่แรก"},
+ {n:"nar",t:"คุณโทรหาอลิเซีย สิบนาทีต่อมาเธอมาถึงค่ายด้วยแท็กซี่ หมวกแก๊ปดึงต่ำ แมสก์ยังไม่ทันถอด"},
+ {n:"alicia",f:"angry",l:"casual",t:"…ขอดูเอง"},
+ {n:"nar",t:"อลิเซียอ่านทุกหน้า ไม่พูดอะไรเลย มือที่จับกระดาษไม่สั่นสักนิด"},
+ {n:"nar",t:"รถเก๋งสีเงินเลี้ยวเข้ามาจอดหน้าค่าย คุณกฤตก้าวลงมาพร้อมโทรศัพท์แนบหู ยิ้มกว้างเหมือนทุกครั้ง"},
+ {n:"npc",who:"คุณกฤต ผู้จัดการส่วนตัว",img:"krit",t:"อลิเซีย! ตามหาตั้งนาน มีงานใหม่จากนาคา ค่าตัวสองเท่า แค่ไลฟ์ซ้อมมวยในค่ายนี้สักชั่วโมง—"},
+ {n:"nar",show:[{id:"npc:krit"},{id:"npc:mint"}],t:"สายตาเขาไปหยุดที่แฟ้มในมือมิ้นท์"},
+ {n:"npc",who:"คุณกฤต ผู้จัดการส่วนตัว",img:"krit_panic",t:"เดี๋ยว… มิ้นท์ เอาของในเครื่องผมไปได้ยังไง นั่นมันข้อมูลบริษัท!"},
+ {n:"npc",who:"มิ้นท์",img:"mint_flustered",t:"ค-คุณส่งเข้ากลุ่มงานวงผิดกลุ่มเองค่ะ! ดิฉันแค่… ไม่ลบ"},
+ {n:"npc",who:"คุณกฤต ผู้จัดการส่วนตัว",img:"krit_panic",t:"อลิเซีย ฟังผมก่อน! คลิปนั้นทำให้ยอดฟอลเธอขึ้นสามแสนนะ ผมทำเพื่อเธอ—"},
+ {n:"alicia",f:"angry",l:"casual",t:"คืนนั้นคนค่ายนี้เลือดออกเพราะกันประตูให้ฉัน คุณนับยอดฟอล ฉันนับคนเจ็บ"},
+ {n:"nar",t:"ทุกคนในค่ายหันมามองผู้จัดการ",choice:[
+  {t:"\"ค่ายนี้ไม่ต้อนรับคนขายคนของตัวเอง\"",fx:G2=>rgMeet(G2,"alicia",3),then:[{n:"npc",who:"คุณกฤต ผู้จัดการส่วนตัว",img:"krit_panic",t:"…นี่มันค่ายมวยบ้านนอก ไม่มีสิทธิ์มาสั่งผม!"},{n:"coach",t:"ค่ายบ้านนอกนี่แหละที่เด็กเราไปเจ็บแทนนักร้องของคุณ ออกไปทางเดิมที่เข้ามา"}]},
+  {t:"\"อลิเซีย เธอเป็นคนตัดสินเอง\"",fx:G2=>rgMeet(G2,"alicia",4),then:[{n:"alicia",f:"happy",l:"casual",t:"…ขอบคุณที่ให้ฉันเลือก ไม่มีใครเคยให้"}]},
+  {t:"ยื่นโทรศัพท์ให้อลิเซียโทรหาค่ายเพลงต่อหน้าเขา",fx:G2=>rgMeet(G2,"alicia",3),then:[{n:"nar",t:"อลิเซียเปิดลำโพง กดเบอร์ผู้บริหารค่ายเพลง แล้ววางโทรศัพท์ไว้บนโต๊ะตรงหน้าคุณกฤต"}]}]},
+ {n:"alicia",f:"angry",l:"casual",t:"Mr. Krit, you're fired. ฉันแจ้งค่ายเพลงแล้ว สัญญาผู้จัดการส่วนตัวจบวันนี้ เรื่องเงินนาคาให้ทนายคุยกัน"},
+ {n:"npc",who:"คุณกฤต ผู้จัดการส่วนตัว",img:"krit_panic",t:"เธอจะไปได้สักกี่น้ำ ไม่มีผมเธอก็แค่เด็กหน้าสวยที่ชกมวย—"},
+ {n:"alicia",f:"happy",l:"casual",t:"ใช่ ฉันชกมวย Goodbye."},
+ {n:"nar",show:[{id:"alicia",l:"casual"},{id:"npc:mint"}],t:"รถเก๋งสีเงินถอยออกจากหน้าค่ายจนเฉี่ยวกระถางต้นมะลิ มะลิเม้มปากไว้ไม่ให้หัวเราะออกมา"},
+ {n:"alicia",f:"flustered",l:"casual",t:"มิ้นท์… ขอโทษที่ไม่เคยสังเกตว่าเธอดูแลพวกเราอยู่ตลอด"},
+ {n:"alicia",f:"happy",l:"casual",t:"ช่วยเป็นผู้จัดการของฉันได้ไหม ไม่ต้องหางานให้เยอะ แค่อย่าขายฉันก็พอ"},
+ {n:"npc",who:"มิ้นท์",img:"mint",t:"ด-ดิฉันเนี่ยนะคะ!? ดิฉันทำกาแฟหกใส่ตารางงานทุกสัปดาห์เลยนะคะ…"},
+ {n:"npc",who:"มิ้นท์",img:"mint",t:"…แต่ดิฉันจะไม่ให้ใครเปิดประตูห้องแต่งตัวคุณอีก สัญญาค่ะ"},
+ {n:"nar",t:"คืนนั้นมาเบลล์กับมินนี่วิดีโอคอลเข้ามาในกลุ่ม ส่งสติกเกอร์ดอกไม้ไฟมาสามสิบอัน"},
+ {n:"npc",who:"มินนี่",img:"minnie_smirk",t:"เห็นไหม บอกแล้วว่าตาแว่นนั่นมีพิรุธ ส่วนมิ้นท์นี่… ตำแหน่งใหม่ต้องเลี้ยงชาบูนะ"},
+ {n:"npc",who:"มาเบลล์",img:"mabelle_excited",t:"ผู้จัดการค่ายศิริชัยต้องมาด้วย! Sportygal ฉลองต้องครบทีม!"},
+ {fx:G2=>{G2.region.kritOut=gameWeek(G2);rgMeet(G2,"alicia",2);}}];}
 
 const RG_PROF={
  baibua:{height:"165 ซม.",blood:"A",bday:"12 พฤศจิกายน (ยี่เป็ง)",home:"เชียงใหม่ · บ้านไม้หลังค่ายเล็กของพ่อ",heritage:"มวยท่าเสา (สายเดียวกับกะทิ)",

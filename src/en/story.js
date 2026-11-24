@@ -2878,7 +2878,7 @@ const HOSP_VISIT={
   out:"On the way out you can still hear Tabtim on the phone with her mother all the way down the corridor."},
  alicia:{in:"A hospital room on the top floor, every curtain drawn. Alicia wears a cap and a mask even in bed.",
   a:"...Who told you I was here? No photos get out. None.",
-  q:"Mr. Krit wants a statement saying I'm fine. I don't want to lie to my fans.",
+  q:"The label wants a press statement saying I'm fine. I don't want to lie to my fans.",
   o:[["\"Just tell them you're hurt and you'll be back\"","...Honest. Real fans can take it. I'll write it myself."],["Open the curtains to let the light in","...No cameras outside, right? ...Okay. The sun's warm."],["\"Today you don't have to be anyone. Just rest\"","...Nobody's ever told me that. Thank you."]],
   out:"That night Alicia posts a photo of her taped hand with a short caption: 'Taking a short break. Be right back.'"},
  chaba:{in:"A hospital room. Chaba sits looking out of a window with no sea in it, crutches leaning against the bed.",
