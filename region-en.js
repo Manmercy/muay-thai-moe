@@ -1690,19 +1690,19 @@ const RG_DATEP={};
    2nd+ trip to her region (not the trip that first met her), first hotel night, once; before she joins the camp.
    Consecutive bouts, the player sends someone from the travelling party for each, no lingering injury; a loss or a retreat = try again on a later trip. */
 if(typeof QK!=="undefined")Object.assign(QK,{
-  jl1:{fst:"pressure",name:"Jin Long thug in a dragon shirt",sprite:"gang1",lvl:-1,tilt:{punch:1.5,power:1,iq:-2,guard:-1,comp:-1},color:"#3c6e5a",grp:"gang"},
-  jl2:{fst:"inside",name:"Hia Long's right hand",sprite:"gang2",lvl:-.2,tilt:{punch:1,knee:1.5,power:1,iq:-1},color:"#2f5546",grp:"gang"},
-  jl3:{fst:"power",name:"Hia Long, Jin Long gang boss",sprite:"gang3",lvl:.6,tilt:{power:2,punch:1.5,dur:1,foot:-1},color:"#c9a227",grp:"gang"}});
+  jl1:{fst:"pressure",name:"Jin Long thug in a black leather jacket",sprite:"rg_jinlong1",lvl:-1,tilt:{punch:1.5,power:1,iq:-2,guard:-1,comp:-1},color:"#3c6e5a",grp:"gang"},
+  jl2:{fst:"inside",name:"Hia Long's right hand",sprite:"rg_jinlong1",lvl:-.2,tilt:{punch:1,knee:1.5,power:1,iq:-1},color:"#2f5546",grp:"gang"},
+  jl3:{fst:"power",name:"Hia Long, Jin Long gang boss",sprite:"rg_jinlong2",lvl:.6,tilt:{power:2,punch:1.5,dur:1,foot:-1},color:"#c9a227",grp:"gang"}});
 const RG_SIDE={
  north:{cid:"baibua",bg:"camp_buatasao",ring:"bg_camp_buatasao.webp",title:"Off-schedule fight · Bua Tha Sao spa",
   foes:[{qk:"jl1",t:"I don't care which camp you are. I've kicked a lamppost in half."},{qk:"jl2",t:"Running out of fighters? Your next one's going to sleep too."},{qk:"jl3",t:"Those first two were soft. I'm not soft like them."}],
-  between:["The next thug rolls up his sleeves and steps through the ropes.","Hia Long throws off his dragon shirt and climbs into the ring himself."],
+  between:["The next thug rolls up his sleeves and steps through the ropes.","Hia Long throws off his suit jacket and climbs into the ring himself."],
   intro:G=>[{n:"nar",t:"At dusk, just as everyone gets back to the hotel, the manager's phone rings. It's Baibua."},
    {n:"baibua",f:"sad",l:"casual",t:"Manager... the Jin Long thugs are at the spa again. A whole van of them."},
    {n:"baibua",f:"sad",l:"casual",t:"Dad's going to go out there even with his bad knee. I can't stop him."}],
   go:"\"Stay there. The camp is on its way.\"",no:"\"Everyone's exhausted tonight. I'm sorry.\"",
   noT:G=>[{n:"baibua",f:"sad",l:"casual",t:"...It's all right. I understand. A camp has to look after its own people first."},{n:"nar",t:"Baibua hangs up first. The shouting is still going on at her end."}],
-  arrive:G=>[{n:"nar",bg:"camp_buatasao",t:"The camp van turns into the Bua Tha Sao lane while the sky is still red. Five or six men in dragon-print shirts stand around the massage shop's sign, sprayed over in red paint."},
+  arrive:G=>[{n:"nar",bg:"camp_buatasao",t:"The camp van turns into the Bua Tha Sao lane while the sky is still red. Five or six men in black leather jackets stand around the massage shop's sign, sprayed over in red paint."},
    {n:"npc",who:"Jin Long thug",t:"Which boxing camp are you? This is none of your business."},
    {n:"baibua",f:"angry",l:"casual",t:"Our land isn't for sale! Whoever wants it can climb into the ring behind the camp and take it."},
    {n:"npc",who:"Hia Long",t:"Fine. Three bouts. Win them all and I'll back off for now. Lose one, and we come every night until your father signs."},
@@ -1827,12 +1827,12 @@ const RG_RKT={st:null,MARK:240,
   next(){const S=this.st;if(S.n>=3){S.phase="end";this.draw();return;}this.aim();},
   close(){const S=this.st,el=this.el();this.st=null;if(el)el.remove();if(S&&S.done)S.done(S.best);}};
 if(typeof QK!=="undefined")Object.assign(QK,{
-  wn1:{fst:"pressure",name:"Red-helmet temple-fair biker",sprite:"gang1",lvl:-1.1,tilt:{punch:1.5,power:1,iq:-2,guard:-1.5},color:"#c8283c",grp:"gang"},
-  wn2:{fst:"power",name:"Tong, the rice-whisky heavy hitter",sprite:"gang2",lvl:-.3,tilt:{power:2,punch:1,dur:1,speed:-1,iq:-1},color:"#8a1f2a",grp:"gang"},
-  wn3:{fst:"inside",name:"Seua Dang, three-time temple ring champion",sprite:"gang3",lvl:.5,tilt:{punch:1.5,knee:1.5,power:1,iq:-.5},color:"#5a1420",grp:"gang"}});
+  wn1:{fst:"pressure",name:"Tank-top guy from the temple fair",sprite:"rg_chaytrae1",lvl:-1.1,tilt:{punch:1.5,power:1,iq:-2,guard:-1.5},color:"#c8283c",grp:"gang"},
+  wn2:{fst:"power",name:"Tong, the rice-whisky heavy hitter",sprite:"rg_chaytrae1",lvl:-.3,tilt:{power:2,punch:1,dur:1,speed:-1,iq:-1},color:"#8a1f2a",grp:"gang"},
+  wn3:{fst:"inside",name:"Seua Dang, three-time temple ring champion",sprite:"rg_chaytrae2",lvl:.5,tilt:{punch:1.5,knee:1.5,power:1,iq:-.5},color:"#5a1420",grp:"gang"}});
 RG_SIDE.isan={cid:"tabtim",bg:"fair",ring:"bg_fair.webp",title:"Off-schedule fight · temple fair ring",
   foes:[{qk:"wn1",t:"A girl in the temple ring? I'll go easy on you, sweetheart."},{qk:"wn2",t:"He just slipped. This one won't slip."},{qk:"wn3",t:"Three titles, and no woman has lasted a full round in front of me."}],
-  between:["One of Seua Dang's boys throws his red helmet on the ground and ducks through the ropes.","Seua Dang tosses away his glass and climbs into the ring himself. The whole fair gets to its feet."],
+  between:["One of Seua Dang's boys kicks off his flip-flops and ducks through the ropes.","Seua Dang tosses away his glass and climbs into the ring himself. The whole fair gets to its feet."],
   intro:(G,D)=>[{n:"nar",t:"At dusk, a message from Tabtim pops up on the manager's phone: a photo of a boxing ring in the middle of a temple fair, coloured lights wound around the posts."},
    {n:"tabtim",f:"happy",l:"casual",t:`Manager! There's a temple fair tonight in ${D.name}. My brothers were invited to fight an exhibition. Come and have fun! I'm buying the grilled meatballs!`}],
   go:"\"Sure, I'll bring everyone\"",no:"\"I'll rest tonight\"",
@@ -1842,15 +1842,15 @@ RG_SIDE.isan={cid:"tabtim",bg:"fair",ring:"bg_fair.webp",title:"Off-schedule fig
    {n:"npc",who:"Brother Petch",t:"...You came, Tabtim. So this is the Chiang Mai camp you told me about."},
    {n:"npc",who:"Brother Nil",t:"Bringing a girls' camp to the temple fair? This ring is for real boxing, Tabtim. Not for pretty kicks for people to photograph."},
    {n:"nar",t:"Nil wears a black jacket cut with neon-red lines, small scales running down the sleeves."},
-   {n:"nar",t:"Before anyone can answer, five or six bikers in red helmets shove their way in. Their leader has a blotchy face and a glass of rice whisky in his hand."},
+   {n:"nar",t:"Before anyone can answer, five or six men in tank tops shove their way in. Their leader has a blotchy face and a glass of rice whisky in his hand."},
    {n:"npc",who:"Seua Dang",t:"Well, well. The Ruby of the Isan Plains, with a whole van of girl boxers. Women's boxing is just for show, right, Nil?"},
    {n:"npc",who:"Brother Nil",t:"He said it, not me."},
    {n:"tabtim",f:"angry",l:"casual",t:"...Brother Nil, you're just standing there laughing along with him?"},
    {n:"npc",who:"Temple ring announcer",t:"Ladies and gentlemen! A special bout, off the programme: a women's camp from Chiang Mai takes on the temple-fair boys, three in a row! Let's hear it!"},
    {n:"coach",t:"Nobody's name is on the line. Just go up and fight so they can see. Whoever's ready, step up."}],
-  win:G=>[{n:"nar",t:"Seua Dang lies flat on his back in the temple ring. The whole fair roars over the mor lam music. His bikers haul him onto a motorbike and the whole gang speeds off."},
+  win:G=>[{n:"nar",t:"Seua Dang lies flat on his back in the temple ring. The whole fair roars over the mor lam music. His boys haul him into a pickup and the whole gang tears off."},
    {n:"tabtim",f:"happy",l:"casual",t:"See that! Women's boxing is just a show, is it? Ha ha... Manager, thank you so much."},
-   {n:"npc",who:"Brother Nil",t:"Beat some temple-fair bikers and now you think you're good?"},
+   {n:"npc",who:"Brother Nil",t:"Beat some temple-fair drunks and now you think you're good?"},
    {n:"npc",who:"Brother Nil",t:"I've signed with the Naka League, Tabtim. Next year I'm on the international stage. And you'll still be kicking at temple fairs like this."},
    {n:"tabtim",f:"sad",l:"casual",t:"...The Naka League. When did you sign, Brother Nil? Does Dad know?"},
    {n:"npc",who:"Brother Nil",t:"Dad knows. He's happy for me. His son is going abroad."},
@@ -1918,12 +1918,12 @@ const RG_SAIL={st:null,T:30,
   finish(win){const S=this.st;if(S.phase!=="play")return;S.phase="end";S.win=win;AU.sfx&&AU.sfx(win?"level":"ui");this.draw();},
   close(){const S=this.st,el=this.el();this.st=null;if(el)el.remove();if(S&&S.done)S.done(!!S.win);}};
 if(typeof QK!=="undefined")Object.assign(QK,{
-  ru1:{fst:"pressure",name:"White Bear bar bouncer",sprite:"gang1",lvl:-.9,tilt:{punch:1.5,power:1.5,iq:-2,foot:-1},color:"#4a6fa5",grp:"gang"},
-  ru2:{fst:"inside",name:"Dima, the White Bear's right hand",sprite:"gang2",lvl:-.1,tilt:{clinch:1.5,power:1.5,dur:1,speed:-1},color:"#33507a",grp:"gang"},
-  ru3:{fst:"power",name:"Boris, owner of the White Bear bar",sprite:"gang3",lvl:.7,tilt:{power:2.5,punch:1.5,dur:1.5,foot:-1.5},color:"#d8d8e0",grp:"gang"}});
+  ru1:{fst:"pressure",name:"White Bear bar bouncer",sprite:"rg_russian1",lvl:-.9,tilt:{punch:1.5,power:1.5,iq:-2,foot:-1},color:"#4a6fa5",grp:"gang"},
+  ru2:{fst:"inside",name:"Dima, the White Bear's right hand",sprite:"rg_russian1",lvl:-.1,tilt:{clinch:1.5,power:1.5,dur:1,speed:-1},color:"#33507a",grp:"gang"},
+  ru3:{fst:"power",name:"Boris, owner of the White Bear bar",sprite:"rg_russian2",lvl:.7,tilt:{power:2.5,punch:1.5,dur:1.5,foot:-1.5},color:"#d8d8e0",grp:"gang"}});
 RG_SIDE.south={cid:"chaba",bg:"pier_south",ring:"bg_pier_south.webp",title:"Off-schedule fight · the pier",
   foes:[{qk:"ru1",t:"This shop pays every month. Don't pay this month, and you pay some other way."},{qk:"ru2",t:"Muay Thai, huh? There are no ropes to lean on out on the pier."},{qk:"ru3",t:"This pier has been mine for five years. A little women's camp thinks it can take it?"}],
-  between:["Another guard takes off a gold watch, sets it on a fish crate, and steps into the circle.","Boris pulls off his flowered shirt, a white bear tattooed across his whole back, and steps down himself."],
+  between:["Another guard takes off a gold watch, sets it on a fish crate, and steps into the circle.","Boris drapes his long coat over a fish crate, pushes up his sleeves to show a white bear tattoo, and steps down himself."],
   intro:(G,D)=>[{n:"nar",t:"That evening an unknown number calls the manager's phone. Three seconds of silence on the line."},
    {n:"chaba",f:"sad",l:"casual",t:`...It's Chaba. At my family's restaurant in ${D.name}, the White Bear bar's men are collecting protection money again.`},
    {n:"chaba",f:"sad",l:"casual",t:"My brother's alone at the shop, in his wheelchair... I don't want to ask. But I'm asking."}],
@@ -1998,9 +1998,9 @@ const RG_SING={st:null,N:28,
   finish(){const S=this.st;if(S.phase!=="play")return;S.q=(S.p+.6*S.g)/this.N;S.phase="end";AU.sfx&&AU.sfx(S.q>=.8?"level":"ui");this.draw();},
   close(){const S=this.st,el=this.el();this.st=null;if(el)el.remove();if(S&&S.done)S.done(S.q||0);}};
 if(typeof QK!=="undefined")Object.assign(QK,{
-  ss1:{fst:"pressure",name:"Sasaeng fan with a lightstick",sprite:"thief",lvl:-1.2,tilt:{speed:1.5,stamina:1,power:-1,iq:-2},color:"#ea5aa0",grp:"gang"},
-  ss2:{fst:"footwork",name:"Long-lens sneak photographer",sprite:"thief2",lvl:-.4,tilt:{speed:2,foot:1.5,power:-1,guard:-1},color:"#7a4ab0",grp:"gang"},
-  ss3:{fst:"counter",name:"Sasaeng fan club leader, former amateur boxer",sprite:"gang2",lvl:.5,tilt:{counter:1.5,punch:1.5,iq:.5},color:"#3a1f5a",grp:"gang"}});
+  ss1:{fst:"pressure",name:"Sasaeng fan with a lightstick",sprite:"rg_sasaeng1",lvl:-1.2,tilt:{speed:1.5,stamina:1,power:-1,iq:-2},color:"#ea5aa0",grp:"gang"},
+  ss2:{fst:"footwork",name:"Long-lens sneak photographer",sprite:"rg_sasaeng1",lvl:-.4,tilt:{speed:2,foot:1.5,power:-1,guard:-1},color:"#7a4ab0",grp:"gang"},
+  ss3:{fst:"counter",name:"Sasaeng fan club leader, former amateur boxer",sprite:"rg_sasaeng2",lvl:.5,tilt:{counter:1.5,punch:1.5,iq:.5},color:"#3a1f5a",grp:"gang"}});
 RG_SIDE.central={cid:"alicia",bg:"tvstudio",ring:"bg_tvstudio.webp",title:"Off-schedule fight · backstage at the concert",
   foes:[{qk:"ss1",t:"Alicia belongs to her fans! Not to some boxing camp!"},{qk:"ss2",t:"One photo, just one photo. Get out of the way!"},{qk:"ss3",t:"I've followed her for three years. Every concert, every fight... where did your camp even come from?"}],
   between:["Another fan raises a long-lens camera, shooting nonstop as he pushes forward.","The fan club leader rips off a fan shirt printed with Alicia's face, throws it down and raises a guard like someone who's boxed before."],

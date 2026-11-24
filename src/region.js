@@ -1413,19 +1413,19 @@ const RG_DATEP={};
    2nd+ trip to her region (not the trip that first met her), first hotel night, once; before she joins the camp.
    Consecutive bouts, the player sends someone from the travelling party for each, no lingering injury; a loss or a retreat = try again on a later trip. */
 if(typeof QK!=="undefined")Object.assign(QK,{
-  jl1:{fst:"pressure",name:"ลูกน้องจินหลงเสื้อลายมังกร",sprite:"gang1",lvl:-1,tilt:{punch:1.5,power:1,iq:-2,guard:-1,comp:-1},color:"#3c6e5a",grp:"gang"},
-  jl2:{fst:"inside",name:"มือขวาเฮียหลง",sprite:"gang2",lvl:-.2,tilt:{punch:1,knee:1.5,power:1,iq:-1},color:"#2f5546",grp:"gang"},
-  jl3:{fst:"power",name:"เฮียหลง หัวหน้านักเลงจินหลง",sprite:"gang3",lvl:.6,tilt:{power:2,punch:1.5,dur:1,foot:-1},color:"#c9a227",grp:"gang"}});
+  jl1:{fst:"pressure",name:"ลูกน้องจินหลงเสื้อหนังดำ",sprite:"rg_jinlong1",lvl:-1,tilt:{punch:1.5,power:1,iq:-2,guard:-1,comp:-1},color:"#3c6e5a",grp:"gang"},
+  jl2:{fst:"inside",name:"มือขวาเฮียหลง",sprite:"rg_jinlong1",lvl:-.2,tilt:{punch:1,knee:1.5,power:1,iq:-1},color:"#2f5546",grp:"gang"},
+  jl3:{fst:"power",name:"เฮียหลง หัวหน้านักเลงจินหลง",sprite:"rg_jinlong2",lvl:.6,tilt:{power:2,punch:1.5,dur:1,foot:-1},color:"#c9a227",grp:"gang"}});
 const RG_SIDE={
  north:{cid:"baibua",bg:"camp_buatasao",ring:"bg_camp_buatasao.webp",title:"ไฟต์นอกตาราง · หน้าสปาบัวท่าเสา",
   foes:[{qk:"jl1",t:"ค่ายมวยจากไหนก็ช่าง ข้าเตะเสาไฟหักมาแล้วนะ"},{qk:"jl2",t:"หมดแรงหรือยังล่ะ คนต่อไปของแกก็หลับเหมือนกัน"},{qk:"jl3",t:"สองคนแรกมันอ่อน ข้าไม่อ่อนแบบมันหรอก"}],
-  between:["ลูกน้องคนต่อไปถลกแขนเสื้อ ก้าวข้ามเชือกขึ้นมา","เฮียหลงถอดเสื้อลายมังกรโยนทิ้ง แล้วเดินขึ้นเวทีเอง"],
+  between:["ลูกน้องคนต่อไปถลกแขนเสื้อ ก้าวข้ามเชือกขึ้นมา","เฮียหลงถอดเสื้อสูทโยนทิ้ง แล้วเดินขึ้นเวทีเอง"],
   intro:G=>[{n:"nar",t:"พลบค่ำ ทุกคนเพิ่งกลับถึงโรงแรม โทรศัพท์ผู้จัดการก็ดังขึ้น เบอร์ใบบัว"},
    {n:"baibua",f:"sad",l:"casual",t:"ผู้จัดการเจ้า… นักเลงจินหลงมาที่หน้าสปาอีกแล้ว มากันเต็มรถตู้เลยเจ้า"},
    {n:"baibua",f:"sad",l:"casual",t:"พ่อจะลุกออกไปทั้งที่เข่ายังเจ็บ หนูห้ามพ่อบ่อยู่แล้วเจ้า"}],
   go:"\"รออยู่ตรงนั้น ค่ายเรากำลังไป\"",no:"\"คืนนี้ทุกคนล้ามาก ขอโทษนะ\"",
   noT:G=>[{n:"baibua",f:"sad",l:"casual",t:"…บ่เป็นหยังเจ้า หนูเข้าใจ ค่ายมวยก็ต้องดูแลคนของตัวเองก่อน"},{n:"nar",t:"ใบบัววางสายไปก่อน เสียงตะโกนยังดังอยู่ปลายสาย"}],
-  arrive:G=>[{n:"nar",bg:"camp_buatasao",t:"รถของค่ายเลี้ยวเข้าซอยบัวท่าเสาตอนฟ้ายังแดงอยู่ ผู้ชายเสื้อเชิ้ตลายมังกรห้าหกคนยืนล้อมป้ายร้านนวดที่โดนพ่นสีแดง"},
+  arrive:G=>[{n:"nar",bg:"camp_buatasao",t:"รถของค่ายเลี้ยวเข้าซอยบัวท่าเสาตอนฟ้ายังแดงอยู่ ผู้ชายเสื้อหนังดำห้าหกคนยืนล้อมป้ายร้านนวดที่โดนพ่นสีแดง"},
    {n:"npc",who:"ลูกน้องจินหลง",t:"ค่ายมวยที่ไหนมาเนี่ย ที่นี่ไม่ใช่เรื่องของแก"},
    {n:"baibua",f:"angry",l:"casual",t:"ที่ดินบ้านหนูบ่ขาย! ใครอยากได้ ขึ้นเวทีหลังค่ายมาเอาเอง"},
    {n:"npc",who:"เฮียหลง",t:"เอาสิ สามคู่ ชนะหมดข้าจะถอยไปก่อน แพ้คู่เดียว พวกข้ามาทุกคืนจนกว่าพ่อแกจะเซ็น"},
@@ -1550,12 +1550,12 @@ const RG_RKT={st:null,MARK:240,
   next(){const S=this.st;if(S.n>=3){S.phase="end";this.draw();return;}this.aim();},
   close(){const S=this.st,el=this.el();this.st=null;if(el)el.remove();if(S&&S.done)S.done(S.best);}};
 if(typeof QK!=="undefined")Object.assign(QK,{
-  wn1:{fst:"pressure",name:"เด็กแว้นหมวกแดงงานวัด",sprite:"gang1",lvl:-1.1,tilt:{punch:1.5,power:1,iq:-2,guard:-1.5},color:"#c8283c",grp:"gang"},
-  wn2:{fst:"power",name:"ไอ้โต้ง เหล้าขาวหมัดหนัก",sprite:"gang2",lvl:-.3,tilt:{power:2,punch:1,dur:1,speed:-1,iq:-1},color:"#8a1f2a",grp:"gang"},
-  wn3:{fst:"inside",name:"เสือด่าง แชมป์เวทีวัดสามสมัย",sprite:"gang3",lvl:.5,tilt:{punch:1.5,knee:1.5,power:1,iq:-.5},color:"#5a1420",grp:"gang"}});
+  wn1:{fst:"pressure",name:"หนุ่มเสื้อกล้ามงานวัด",sprite:"rg_chaytrae1",lvl:-1.1,tilt:{punch:1.5,power:1,iq:-2,guard:-1.5},color:"#c8283c",grp:"gang"},
+  wn2:{fst:"power",name:"ไอ้โต้ง เหล้าขาวหมัดหนัก",sprite:"rg_chaytrae1",lvl:-.3,tilt:{power:2,punch:1,dur:1,speed:-1,iq:-1},color:"#8a1f2a",grp:"gang"},
+  wn3:{fst:"inside",name:"เสือด่าง แชมป์เวทีวัดสามสมัย",sprite:"rg_chaytrae2",lvl:.5,tilt:{punch:1.5,knee:1.5,power:1,iq:-.5},color:"#5a1420",grp:"gang"}});
 RG_SIDE.isan={cid:"tabtim",bg:"fair",ring:"bg_fair.webp",title:"ไฟต์นอกตาราง · เวทีงานวัด",
   foes:[{qk:"wn1",t:"ผู้หญิงขึ้นเวทีวัดเหรอ เดี๋ยวพี่ตีเบา ๆ ให้นะน้อง"},{qk:"wn2",t:"เมื่อกี้มันลื่นเฉย ๆ คนนี้ไม่ลื่นแน่"},{qk:"wn3",t:"สามสมัยไม่มีผู้หญิงคนไหนยืนครบยกต่อหน้าข้า"}],
-  between:["ลูกน้องเสือด่างถอดหมวกกันน็อกแดงโยนลงพื้น แล้วมุดเชือกขึ้นมา","เสือด่างโยนแก้วเหล้าทิ้ง เดินขึ้นเวทีเอง คนดูทั้งงานวัดลุกขึ้นยืน"],
+  between:["ลูกน้องเสือด่างสะบัดรองเท้าแตะทิ้ง แล้วมุดเชือกขึ้นมา","เสือด่างโยนแก้วเหล้าทิ้ง เดินขึ้นเวทีเอง คนดูทั้งงานวัดลุกขึ้นยืน"],
   intro:(G,D)=>[{n:"nar",t:"หัวค่ำ มือถือผู้จัดการเด้งข้อความจากทับทิม เป็นรูปเวทีมวยกลางงานวัด ไฟหลากสีพันรอบเสา"},
    {n:"tabtim",f:"happy",l:"casual",t:`พี่ผู้จัดการ! คืนนี้งานวัดที่${D.name} พี่ชายทับทิมได้รับเชิญมาชกโชว์ มาเที่ยวกันเด้อ ทับทิมเลี้ยงลูกชิ้นปิ้งเอง!`}],
   go:"\"ไปสิ เดี๋ยวพาทุกคนไปด้วย\"",no:"\"คืนนี้ขอพักก่อนนะ\"",
@@ -1565,15 +1565,15 @@ RG_SIDE.isan={cid:"tabtim",bg:"fair",ring:"bg_fair.webp",title:"ไฟต์น�
    {n:"npc",who:"พี่เพชร",t:"…มาแล้วรึ ทับทิม ค่ายเชียงใหม่ที่เอ็งเล่าให้ฟังนี่ล่ะสิ"},
    {n:"npc",who:"พี่นิล",t:"พาค่ายผู้หญิงมาเที่ยวงานวัดเหรอ เวทีนี้เขาไว้ให้มวยจริงชกนะทับทิม ไม่ใช่ไว้เตะสวย ๆ ให้คนถ่ายรูป"},
    {n:"nar",t:"พี่นิลสวมแจ็กเก็ตสีดำตัดเส้นแดงนีออน ลายเกล็ดเล็ก ๆ ไล่ตามแขนเสื้อ"},
-   {n:"nar",t:"ยังไม่ทันมีใครตอบ กลุ่มเด็กแว้นหมวกกันน็อกแดงห้าหกคนก็เดินเบียดเข้ามา หัวโจกเป็นผู้ชายหน้าด่างที่ถือแก้วเหล้าขาวอยู่ในมือ"},
+   {n:"nar",t:"ยังไม่ทันมีใครตอบ กลุ่มผู้ชายเสื้อกล้ามห้าหกคนก็เดินเบียดเข้ามา หัวโจกเป็นผู้ชายหน้าด่างที่ถือแก้วเหล้าขาวอยู่ในมือ"},
    {n:"npc",who:"เสือด่าง",t:"โอ้โห ทับทิมเอกแดนอีสาน มาพร้อมค่ายผู้หญิงทั้งคัน ผู้หญิงชกมวยได้แค่โชว์ จริงไหมพี่นิล"},
    {n:"npc",who:"พี่นิล",t:"เอ็งพูดเอง ข้าไม่ได้พูด"},
    {n:"tabtim",f:"angry",l:"casual",t:"…พี่นิลยืนหัวเราะตามมันจั่งซี้แม่นบ่"},
    {n:"npc",who:"โฆษกเวทีวัด",t:"ท่านผู้ชมครับ! ศึกพิเศษนอกโปรแกรม ค่ายผู้หญิงจากเชียงใหม่ ท้าหนุ่มงานวัดสามคู่ติด! เชียร์กันหน่อยครับ!"},
    {n:"coach",t:"ไม่ต้องเอาชื่อใครมาเดิมพัน ขึ้นไปชกให้เขาเห็นก็พอ ใครพร้อมก็ขึ้น"}],
-  win:G=>[{n:"nar",t:"เสือด่างนอนหงายกลางเวทีวัด คนทั้งงานวัดเฮลั่นจนกลบเสียงหมอลำ เด็กแว้นหิ้วหัวโจกขึ้นมอเตอร์ไซค์บิดหนีไปทั้งแก๊ง"},
+  win:G=>[{n:"nar",t:"เสือด่างนอนหงายกลางเวทีวัด คนทั้งงานวัดเฮลั่นจนกลบเสียงหมอลำ ลูกน้องหิ้วหัวโจกขึ้นกระบะบึ่งหนีไปทั้งแก๊ง"},
    {n:"tabtim",f:"happy",l:"casual",t:"เห็นบ่! ผู้หญิงชกมวยได้แค่โชว์บ้อ! ฮ่า ๆ …พี่ผู้จัดการ ขอบใจหลาย ๆ เด้อ"},
-   {n:"npc",who:"พี่นิล",t:"ชนะเด็กแว้นงานวัดแล้วเก่งนักเหรอ"},
+   {n:"npc",who:"พี่นิล",t:"ชนะพวกขี้เมางานวัดแล้วเก่งนักเหรอ"},
    {n:"npc",who:"พี่นิล",t:"พี่เซ็นกับนาคาลีกแล้วนะทับทิม ปีหน้าพี่ขึ้นเวทีนานาชาติ ส่วนเอ็งก็คงเตะอยู่งานวัดแบบนี้แหละ"},
    {n:"tabtim",f:"sad",l:"casual",t:"…นาคาลีก พี่นิลไปเซ็นตั้งแต่ตอนไหน พ่อรู้หรือยัง"},
    {n:"npc",who:"พี่นิล",t:"พ่อรู้แล้ว พ่อดีใจด้วย ลูกชายพ่อได้ไปเมืองนอก"},
@@ -1641,12 +1641,12 @@ const RG_SAIL={st:null,T:30,
   finish(win){const S=this.st;if(S.phase!=="play")return;S.phase="end";S.win=win;AU.sfx&&AU.sfx(win?"level":"ui");this.draw();},
   close(){const S=this.st,el=this.el();this.st=null;if(el)el.remove();if(S&&S.done)S.done(!!S.win);}};
 if(typeof QK!=="undefined")Object.assign(QK,{
-  ru1:{fst:"pressure",name:"การ์ดบาร์ไวต์แบร์",sprite:"gang1",lvl:-.9,tilt:{punch:1.5,power:1.5,iq:-2,foot:-1},color:"#4a6fa5",grp:"gang"},
-  ru2:{fst:"inside",name:"ดิมา มือขวาบาร์ไวต์แบร์",sprite:"gang2",lvl:-.1,tilt:{clinch:1.5,power:1.5,dur:1,speed:-1},color:"#33507a",grp:"gang"},
-  ru3:{fst:"power",name:"บอริส เจ้าของบาร์ไวต์แบร์",sprite:"gang3",lvl:.7,tilt:{power:2.5,punch:1.5,dur:1.5,foot:-1.5},color:"#d8d8e0",grp:"gang"}});
+  ru1:{fst:"pressure",name:"การ์ดบาร์ไวต์แบร์",sprite:"rg_russian1",lvl:-.9,tilt:{punch:1.5,power:1.5,iq:-2,foot:-1},color:"#4a6fa5",grp:"gang"},
+  ru2:{fst:"inside",name:"ดิมา มือขวาบาร์ไวต์แบร์",sprite:"rg_russian1",lvl:-.1,tilt:{clinch:1.5,power:1.5,dur:1,speed:-1},color:"#33507a",grp:"gang"},
+  ru3:{fst:"power",name:"บอริส เจ้าของบาร์ไวต์แบร์",sprite:"rg_russian2",lvl:.7,tilt:{power:2.5,punch:1.5,dur:1.5,foot:-1.5},color:"#d8d8e0",grp:"gang"}});
 RG_SIDE.south={cid:"chaba",bg:"pier_south",ring:"bg_pier_south.webp",title:"ไฟต์นอกตาราง · ท่าเรือ",
   foes:[{qk:"ru1",t:"ร้านนี้จ่ายทุกเดือน เดือนนี้ไม่จ่าย ก็ต้องจ่ายด้วยอย่างอื่น"},{qk:"ru2",t:"มวยไทยเหรอ บนท่าเรือไม่มีเชือกให้พิงนะ"},{qk:"ru3",t:"ท่าเรือนี้ของฉันมาห้าปี ผู้หญิงค่ายเล็ก ๆ จะมาเอาไปเหรอ"}],
-  between:["การ์ดอีกคนถอดนาฬิกาทองวางบนลังปลา แล้วก้าวเข้ามากลางวง","บอริสถอดเสื้อเชิ้ตลายดอก ลายสักหมีขาวเต็มแผ่นหลัง แล้วก้าวลงมาเอง"],
+  between:["การ์ดอีกคนถอดนาฬิกาทองวางบนลังปลา แล้วก้าวเข้ามากลางวง","บอริสถอดโค้ทยาวพาดลังปลา ถลกแขนเสื้อจนเห็นรอยสักหมีขาว แล้วก้าวลงมาเอง"],
   intro:(G,D)=>[{n:"nar",t:"ค่ำนั้นเบอร์แปลกโทรเข้ามือถือผู้จัดการ ปลายสายเงียบไปสามวินาที"},
    {n:"chaba",f:"sad",l:"casual",t:`…ชบาเอง ร้านในเครือบ้านชบาที่${D.name} คนของบาร์ไวต์แบร์มาเก็บค่าคุ้มครองอีกแล้ว`},
    {n:"chaba",f:"sad",l:"casual",t:"พี่ชายอยู่ร้านคนเดียว นั่งรถเข็น …ม่ายอยากขอ แต่ขอ"}],
@@ -1721,9 +1721,9 @@ const RG_SING={st:null,N:28,
   finish(){const S=this.st;if(S.phase!=="play")return;S.q=(S.p+.6*S.g)/this.N;S.phase="end";AU.sfx&&AU.sfx(S.q>=.8?"level":"ui");this.draw();},
   close(){const S=this.st,el=this.el();this.st=null;if(el)el.remove();if(S&&S.done)S.done(S.q||0);}};
 if(typeof QK!=="undefined")Object.assign(QK,{
-  ss1:{fst:"pressure",name:"แฟนคลับซาแซงถือแท่งไฟ",sprite:"thief",lvl:-1.2,tilt:{speed:1.5,stamina:1,power:-1,iq:-2},color:"#ea5aa0",grp:"gang"},
-  ss2:{fst:"footwork",name:"ช่างภาพแอบถ่ายเลนส์ยาว",sprite:"thief2",lvl:-.4,tilt:{speed:2,foot:1.5,power:-1,guard:-1},color:"#7a4ab0",grp:"gang"},
-  ss3:{fst:"counter",name:"หัวหน้าแฟนคลับซาแซง อดีตนักมวยสมัครเล่น",sprite:"gang2",lvl:.5,tilt:{counter:1.5,punch:1.5,iq:.5},color:"#3a1f5a",grp:"gang"}});
+  ss1:{fst:"pressure",name:"แฟนคลับซาแซงถือแท่งไฟ",sprite:"rg_sasaeng1",lvl:-1.2,tilt:{speed:1.5,stamina:1,power:-1,iq:-2},color:"#ea5aa0",grp:"gang"},
+  ss2:{fst:"footwork",name:"ช่างภาพแอบถ่ายเลนส์ยาว",sprite:"rg_sasaeng1",lvl:-.4,tilt:{speed:2,foot:1.5,power:-1,guard:-1},color:"#7a4ab0",grp:"gang"},
+  ss3:{fst:"counter",name:"หัวหน้าแฟนคลับซาแซง อดีตนักมวยสมัครเล่น",sprite:"rg_sasaeng2",lvl:.5,tilt:{counter:1.5,punch:1.5,iq:.5},color:"#3a1f5a",grp:"gang"}});
 RG_SIDE.central={cid:"alicia",bg:"tvstudio",ring:"bg_tvstudio.webp",title:"ไฟต์นอกตาราง · หลังเวทีคอนเสิร์ต",
   foes:[{qk:"ss1",t:"อลิเซียเป็นของแฟนคลับ! ไม่ใช่ของค่ายมวยที่ไหน!"},{qk:"ss2",t:"ขอรูปเดียว แค่รูปเดียว หลบไปสิ!"},{qk:"ss3",t:"ฉันตามเธอมาสามปี ทุกคอนเสิร์ต ทุกไฟต์ …ค่ายเธอมาจากไหนกัน"}],
   between:["แฟนคลับอีกคนยกกล้องเลนส์ยาวขึ้นมาถ่ายรัวระหว่างเดินฝ่าเข้ามา","หัวหน้าแฟนคลับถอดเสื้อทีมที่สกรีนหน้าอลิเซียโยนทิ้ง แล้วตั้งการ์ดแบบคนเคยชกมวย"],
