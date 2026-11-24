@@ -977,7 +977,7 @@ Object.assign(CARDS,{
   {n:"kati",f:"happy",l:"casual",t:"Coach! You're standing right behind me! …But thank you. That's the camp's very first order."}]},
  m_livehot:{c:"fah",r:"SR",t:"The Live Blew Up",hint:"Get an S on the merch live stream",bg:"live_corner",need:G=>(G.flags.liveS||0)>=1,steps:[
   {n:"nar",t:"The viewer count shoots past a thousand. Orders pour in until the phone won't stop buzzing. The whole camp helps write them into Rin's notebook."},
-  {n:"fah",f:"happy",l:"casual",t:"See! I told you a live needs Fah! …Wait, Fah wasn't the one streaming today? Whatever, cheering behind the camera counts!"},
+  {n:"fah",f:"happy",l:"casual",t:"See?! Told you the live needs Fah! Fah holds up one shirt to the camera and ten orders pop in!"},
   {n:"rin",f:"pout",l:"casual",t:"Every order logged. No duplicates, none missed. …There are two shirts left in storage. Who's telling customer number thirty-one?"},
   {n:"coach",t:"In Grandpa Chai's day the camp sold ten shirts a year… today we sold them in five minutes. The world really has changed."}]}});
 
@@ -1272,7 +1272,7 @@ Object.assign(CARDS,{
   T("kati","flustered","…Let's take one bag each. And… what I said just now, don't think about it. I only got one word wrong.")]},
  lk_mali:{c:"mali",r:"SR",ev:1,t:"Pageant Stand-In",hint:LOY_HINT,bg:"loy_night",need:()=>false,steps:[
   N("The call for Nang Noppamas contestants rings out for the third time. Number seven isn't coming; she suddenly fell ill."),
-  N("Auntie Taew, sitting as a judge, turns to look at Mali in her blue Thai dress and smiles the smile everyone at the market knows you can't escape."),
+  N("Auntie Taew, sitting on the judging panel, turns to Mali in her gold Thai dress and smiles the smile everyone at the market knows there is no escaping."),
   P("Auntie Taew","Mali! Yes, you. You're already dressed, hair's already up. Get on stage, dear!"),
   T("mali","flustered","Huh!? All I can do is sew, Auntie! I can't do a catwalk! Manager, help Mali!"),
   {choice:[{t:"\"Go on. That dress is the prettiest at the fair.\"",fx:G=>add(G,"mali","bond",3),then:[T("mali","flustered","…When you say that, how can Mali refuse? Fine, she'll go up!")]},
@@ -1329,7 +1329,7 @@ Object.assign(CARDS,{
   T("kati","happy","Manager, come fold with me! Fold the petals like this, fold in half, pin it. Super easy."),
   N("Thirty minutes later Kati has seven krathongs, all equally pretty. You have one, and it looks like a motorcycle helmet."),
   T("kati","flustered","…This one's cool! Totally one of a kind! Can I float this one? I'll trade you all seven of mine.")]},
- lg_kati_r:{c:"kati",r:"R",lg:1,t:"Scalded Tongue",hint:LG_HINT,bg:"river",need:()=>false,steps:[
+ lg_kati_r:{c:"kati",r:"R",lg:1,t:"Scalded Tongue",hint:LG_HINT,bg:"loy_night",need:()=>false,steps:[
   N("The khanom khrok boat fills the pier with its smell. Kati buys three trays despite saying she's watching her weight."),
   T("kati","happy","Full moon's an exception. Kru Daeng isn't here, no one's watching."),
   N("Kati bites into the first one while it's still scorching, then freezes for three full seconds."),
@@ -1344,7 +1344,7 @@ Object.assign(CARDS,{
    {t:"Listen quietly",fx:G=>add(G,"kati","bond",2),then:[N("Kati leans lightly against your shoulder, as if by accident, and doesn't move away.")]}]},
   T("kati","happy","So this year I wished for something new. First time in seven years."),
   T("kati","flustered","…I won't say what I wished for. But you're in it. That's enough.")]},
- lg_mali_n:{c:"mali",r:"N",lg:1,t:"A Bread Krathong for the Fish",hint:LG_HINT,bg:"river",need:()=>false,steps:[
+ lg_mali_n:{c:"mali",r:"N",lg:1,t:"A Bread Krathong for the Fish",hint:LG_HINT,bg:"loy_night",need:()=>false,steps:[
   N("Mali holds a bread krathong the size of a dinner plate, decorated with whole real marigolds."),
   T("mali","happy","It's a bread krathong. It won't pollute the water, and the fish can eat it. Mali baked it at five this morning~"),
   N("The krathong drifts less than two meters before a dozen catfish swarm it and it sinks, candle and all."),
@@ -1363,12 +1363,12 @@ Object.assign(CARDS,{
    {t:"\"I'll watch from the side first.\"",fx:G=>add(G,"mali","bond",1),then:[N("Mali dances around the circle alone twice. Every time she passes you, she holds out her hand without a word."),N("On the third pass, you take her hand.")]}]},
   T("mali","flustered","…Mom once said people who dance the ramwong together on the full moon will dance together again next year."),
   T("mali","happy","Mom might have made it up. But Mali believes everything Mom says~")]},
- lg_rin_n:{c:"rin",r:"N",lg:1,t:"Ping River Krathong Stats",hint:LG_HINT,bg:"river",need:()=>false,steps:[
+ lg_rin_n:{c:"rin",r:"N",lg:1,t:"Ping River Krathong Stats",hint:LG_HINT,bg:"loy_night",need:()=>false,steps:[
   N("Rin stands on the pier with a tally counter, clicking every time a krathong floats past."),
   T("rin","happy","1,284 this hour. 3% are foam, down 9% from last year. I'll send this data to the municipality."),
   T("rin","flustered","…You don't need to make that face, Manager. I can float krathongs too. Just after I finish counting."),
   N("At one a.m. Rin floats her own little banana-leaf krathong as number 4,071, and clicks the counter for it too.")]},
- lg_rin_r:{c:"rin",r:"R",lg:1,t:"Selfie Fail",hint:LG_HINT,bg:"river",need:()=>false,steps:[
+ lg_rin_r:{c:"rin",r:"R",lg:1,t:"Selfie Fail",hint:LG_HINT,bg:"loy_night",need:()=>false,steps:[
   N("Mali hands Rin her phone and tells her to take a photo with the manager, \"a Thai-dress souvenir.\""),
   T("rin","flustered","I've never taken a selfie. Front cameras distort facial proportions by about 30%. Unreliable."),
   N("The first shot is all chin, the second all sky, the third half Rin's finger."),
@@ -1383,31 +1383,31 @@ Object.assign(CARDS,{
   N("The lantern rises straight up without the slightest tilt, joining hundreds of others above the Ping River."),
   T("rin","flustered","…It's flying. My first one ever."),
   T("rin","happy","New hypothesis: it wasn't that I was impatient. It's that no one ever counted with me. This needs retesting every year.")]},
- lg_ploy_n:{c:"ploy",r:"N",lg:1,t:"Thai-Dress Billboard",hint:LG_HINT,bg:"river",need:()=>false,steps:[
+ lg_ploy_n:{c:"ploy",r:"N",lg:1,t:"Thai-Dress Billboard",hint:LG_HINT,bg:"loy_night",need:()=>false,steps:[
   N("A three-meter sports-drink billboard stands at the fair entrance: Ploy in Thai dress, holding a krathong, smiling wide."),
   N("The real one stands right under it, in a cap and a face mask."),
   T("ploy","flustered","Don't stare at the sign so long… I was so sleepy that day. That smile took forty retakes."),
   T("ploy","happy","But if you want to take a photo with the sign, I won't mind. That's the best smile of my life.")]},
- lg_ploy_r:{c:"ploy",r:"R",lg:1,t:"One Krathong, Ten Years Ago",hint:LG_HINT,bg:"river",need:()=>false,steps:[
+ lg_ploy_r:{c:"ploy",r:"R",lg:1,t:"One Krathong, Ten Years Ago",hint:LG_HINT,bg:"loy_night",need:()=>false,steps:[
   N("Ploy sits at the end of the pier, feet dangling, watching the krathongs drift past one by one."),
   T("ploy","sad","My first year at Golden Tiger I was twelve. Everyone went home to float krathongs with their families. I was the only one left."),
   T("ploy","sad","The boss gave me fifty baht for a krathong. I bought one and never floated it. Just held it until the candle burned out."),
   {choice:[{t:"\"You're not alone this year.\"",fx:G=>add(G,"ploy","bond",3),then:[T("ploy","flustered","…I know. You don't have to say it. But now that you have… it's fine.")]},
    {t:"Hand her a spare candle",fx:G=>add(G,"ploy","bond",2),then:[T("ploy","happy","In case the candle goes out again? …You're as prepared as a real cornerman.")]}]}]},
  lg_ploy_sr:{c:"ploy",r:"SR",lg:1,t:"The Night No One Recognized Her",hint:LG_HINT,bg:"river",need:()=>false,steps:[
-  N("Ploy wears a cat mask from a toy stall, hair tucked under a cap. Not a single person at the fair looks her way."),
+  N("Ploy wears a plastic hero mask from a toy stall pushed up on her cap, sunglasses hooked on her collar. Not one person at the fair turns to look at her."),
   T("ploy","happy","Three hours and not one photo request. I haven't walked a fair like this since I was a kid."),
   N("Ploy eats two meatball skewers, wins a teddy bear at the shooting gallery, and laughs out loud every time you miss."),
   {choice:[{t:"\"This cat shoots better than the champion.\"",fx:G=>add(G,"ploy","bond",2),then:[T("ploy","happy","Well, the champion's the one wearing the mask.")]},
    {t:"\"The mask suits you, but you're prettier without it.\"",fx:G=>add(G,"ploy","bond",3),then:[T("ploy","flustered","…Right now I'm glad I'm wearing a mask, because my face is completely red.")]}]},
   N("Before you part, Ploy shoves the teddy bear into your hands."),
   T("ploy","flustered","Keep it at your camp. If I ever get tired of being the Ploy everyone recognizes, I'll come visit it. …Not you. It.")]},
- lg_fah_n:{c:"fah",r:"N",lg:1,t:"The Giant Firecracker",hint:LG_HINT,bg:"river",need:()=>false,steps:[
+ lg_fah_n:{c:"fah",r:"N",lg:1,t:"The Giant Firecracker",hint:LG_HINT,bg:"loy_night",need:()=>false,steps:[
   N("Fah lugs in a cloth bag stuffed with firecrackers, looking as proud as if she'd just won a fight."),
   T("fah","happy","This one's the biggest in the shop! Fah's lighting it right here so the whole market knows Fah's arrived!"),
   P("Auntie Taew","Silver-top! Light that here and Auntie'll spank you striped! Go light it over there!"),
   T("fah","pout","…Yes sir, Auntie— I mean, yes ma'am! Manager, hold the bag. Fah's moving to the other side, quietly.")]},
- lg_fah_r:{c:"fah",r:"R",lg:1,t:"The Big Firework",hint:LG_HINT,bg:"river",need:()=>false,steps:[
+ lg_fah_r:{c:"fah",r:"R",lg:1,t:"The Big Firework",hint:LG_HINT,bg:"loy_night",need:()=>false,steps:[
   N("The biggest firework of the night bursts right overhead, so loud the shop windows rattle."),
   N("Fah jumps out of her skin and grabs your arm tight without thinking."),
   T("fah","flustered","…Fah's not scared! It's abnormally loud! Fah's just… keeping you from getting startled!"),

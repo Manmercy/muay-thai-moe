@@ -2244,10 +2244,10 @@ Pick your fighter under Fights › Four Regions Championship`+((t=>t?`\n\n(${t})
   dateMark(G,cid,dest){const R=G.region;R.dated=R.dated||{};if(RG_DATE[dest]&&!R.dated[dest]){R.dated[dest]=1;return;}R.dateN=R.dateN||{};R.dateN[cid]=(R.dateN[cid]||0)+1;},
   dateLines(cid,D,dest){const R=G.region;if(dest&&RG_DATE[dest]&&!(R.dated||{})[dest])return RG_DATE[dest](G);const P=RG_DATEP[cid];if(P&&P.length)return P[((R.dateN||{})[cid]||0)%P.length](G);
     const L={
-    baibua:[{n:"npc",who:"Baibua",t:`The walking street's crowded tonight, jao… if we get separated, you can hold on to my sleeve, jao.`},{n:"nar",t:"Baibua walks slowly so you can keep up. Your hands almost touch a few times, but neither of you says anything."}],
-    tabtim:[{n:"npc",who:"Tabtim",t:"Let's go eat som tam, de! This stall's real spicy… haha, I'm crying already, ai!"},{n:"nar",t:"Tabtim laughs loud enough for the whole stall to hear, but when you hand her a tissue she goes quiet for a moment."}],
-    alicia:[{n:"npc",who:"Alicia",t:"Don't get the wrong idea. I just wanted someone to walk with. The camera's off tonight…"},{n:"nar",t:"Alicia leaves her phone face down on the table all night. She never picks it up once."}],
-    chaba:[{n:"npc",who:"Chaba",t:"…The sea is pretty at night."},{n:"nar",t:"Chaba says nothing more, but she stays beside you until the tide reaches her ankles."}]};
+    baibua:[{n:"baibua",f:"flustered",l:"casual",t:`The walking street's crowded tonight, jao… if we get separated, you can hold on to my sleeve, jao.`},{n:"nar",t:"Baibua walks slowly so you can keep up. Your hands almost touch a few times, but neither of you says anything."}],
+    tabtim:[{n:"tabtim",f:"happy",l:"casual",t:"Let's go eat som tam, de! This stall's real spicy… haha, I'm crying already, ai!"},{n:"nar",t:"Tabtim laughs loud enough for the whole stall to hear, but when you hand her a tissue she goes quiet for a moment."}],
+    alicia:[{n:"alicia",f:"flustered",l:"casual",t:"Don't get the wrong idea. I just wanted someone to walk with. The camera's off tonight…"},{n:"nar",t:"Alicia leaves her phone face down on the table all night. She never picks it up once."}],
+    chaba:[{n:"chaba",f:"happy",l:"casual",t:"…The sea is pretty at night."},{n:"nar",t:"Chaba says nothing more, but she stays beside you until the tide reaches her ankles."}]};
     return L[cid]||[{n:"nar",t:`An evening walk in ${D.name}`}];},
   jealLine(id,champ){const L={kati:`You went walking with ${champ}? …No, I'm not asking.`,mali:`Mali saw that~ You went out with ${champ}, right? …Mali wants to go too.`,
     rin:`Out with ${champ} for two hours twelve minutes. I wasn't timing it. I just happened to look at my watch.`,ploy:`Out with ${champ}, huh? Good for you. …Why are you even asking?`,fah:`Oh, so you went out with ${champ}, huh! Fah's not sulking! Just… hungry!`};return L[id]||"…";},
