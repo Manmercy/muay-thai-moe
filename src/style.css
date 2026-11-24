@@ -2494,3 +2494,11 @@ body.dreamfx .fight::after{content:"";position:fixed;inset:0;pointer-events:none
 body.qs-cutting .qshow{filter:brightness(.32) saturate(.8)}
 body.qs-cutting .vn{z-index:9999;background:transparent}
 body.qs-cutting .vn .vbg{display:none}
+/* v1.91.156: quiz show log box */
+.qs-say.qs-log{padding-top:12px}.qs-logl{max-height:9.5em;overflow-y:auto;display:flex;flex-direction:column;gap:3px}
+.qs-logl p{margin:0;font-size:.84rem;line-height:1.4}.qs-logl p b{font-weight:700}.qs-logl p:last-child{font-size:.92rem}
+.qs-logl .lg-h b{color:#2b4d80}.qs-logl .lg-m{color:#7a5a10}.qs-logl .lg-m b{color:#a07010}.qs-logl .lg-a{color:#6a4a9a}.qs-logl .lg-f b{color:#b0306a}
+.qs-logl .lg-r{font-weight:700;color:#1c6b3a}.qs-logl .lg-r b{color:#1c6b3a}
+.qs-logl .lg-x{font-weight:700;color:#b02a3a}.qs-logl .lg-x b{color:#b02a3a}
+/* v1.91.156 (Man): Pa Piak turns to face the contestant */
+.qs-pod.host .qs-fig img{transform:scaleX(-1) translate(9%,8%)}

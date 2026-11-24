@@ -2499,6 +2499,14 @@ body.dreamfx .fight::after{content:"";position:fixed;inset:0;pointer-events:none
 body.qs-cutting .qshow{filter:brightness(.32) saturate(.8)}
 body.qs-cutting .vn{z-index:9999;background:transparent}
 body.qs-cutting .vn .vbg{display:none}
+/* v1.91.156: quiz show log box */
+.qs-say.qs-log{padding-top:12px}.qs-logl{max-height:9.5em;overflow-y:auto;display:flex;flex-direction:column;gap:3px}
+.qs-logl p{margin:0;font-size:.84rem;line-height:1.4}.qs-logl p b{font-weight:700}.qs-logl p:last-child{font-size:.92rem}
+.qs-logl .lg-h b{color:#2b4d80}.qs-logl .lg-m{color:#7a5a10}.qs-logl .lg-m b{color:#a07010}.qs-logl .lg-a{color:#6a4a9a}.qs-logl .lg-f b{color:#b0306a}
+.qs-logl .lg-r{font-weight:700;color:#1c6b3a}.qs-logl .lg-r b{color:#1c6b3a}
+.qs-logl .lg-x{font-weight:700;color:#b02a3a}.qs-logl .lg-x b{color:#b02a3a}
+/* v1.91.156 (Man): Pa Piak turns to face the contestant */
+.qs-pod.host .qs-fig img{transform:scaleX(-1) translate(9%,8%)}
 </style></head><body>
 <script>window.__MTM_ART=["alicia_sheet.png","alicia_special.png","baibua_sheet.png","baibua_special.png","baiyok_sheet.webp","baiyok_white_sheet.webp","bull1_sheet.webp","bull2_sheet.webp","bull3_sheet.webp","chaba_sheet.png","chaba_special.png","fah_loykrathong_sheet.webp","fah_loykrathong_special.webp","fah_sheet.webp","fah_special.webp","gang1_sheet.webp","gang2_sheet.webp","gang3_sheet.webp","gang4_sheet.webp","gang5_sheet.webp","gangsilver_sheet.webp","kati_loykrathong_sheet.webp","kati_loykrathong_special.webp","kati_sheet.webp","kati_special.webp","krahang_sheet.webp","krasue_sheet.webp","mabong_sheet.webp","mali_loykrathong_sheet.webp","mali_loykrathong_special.webp","mali_sheet.webp","mali_special.webp","nl_ladda_blood_sheet.webp","nl_ladda_hood_sheet.webp","nl_ladda_sheet.webp","nl_meili_sheet.webp","nl_meili_special.webp","nl_nia_sheet.webp","nl_nia_special.webp","nl_rosa_sheet.webp","nl_rosa_special.webp","nl_varya_sheet.webp","nl_varya_special.webp","npc10_sheet.webp","npc11_sheet.webp","npc12_sheet.webp","npc13_sheet.webp","npc14_sheet.webp","npc1_sheet.webp","npc2_sheet.webp","npc3_sheet.webp","npc4_sheet.webp","npc5_sheet.webp","npc6_sheet.webp","npc7_sheet.webp","npc8_sheet.webp","npc9_sheet.webp","npc_baiyok_black_angry.png","npc_baiyok_black_flustered.png","npc_baiyok_black_happy.png","npc_baiyok_black_sad.png","npc_baiyok_casual.png","npc_baiyok_casual_flustered.png","npc_baiyok_casual_pout.png","npc_baiyok_white_angry.png","npc_baiyok_white_flustered.png","npc_baiyok_white_happy.png","npc_baiyok_white_sad.png","npc_baiyok_white_surprised.png","npc_boris.webp","npc_gang_boss.webp","npc_gang_boss_face.webp","npc_gang_goldblack.webp","npc_gang_group.webp","npc_gang_silver.webp","npc_grandma.webp","npc_hialong.webp","npc_hialong_angry.webp","npc_krerk.webp","npc_krerk_face.webp","npc_krit.webp","npc_krit_panic.webp","npc_luangpho.webp","npc_mabelle.webp","npc_mabelle_excited.webp","npc_minnie.webp","npc_minnie_smirk.webp","npc_mint.webp","npc_mint_flustered.webp","npc_morphi.webp","npc_nai.webp","npc_nil.webp","npc_nil_smirk.webp","npc_petchara.png","npc_phet.webp","npc_phet_smile.webp","npc_qhost_correct.webp","npc_qhost_excited.webp","npc_qhost_smile.webp","npc_qhost_suspense.webp","npc_qhost_wrong.webp","npc_suea.webp","npc_suea_angry.webp","npc_tani_angry.webp","npc_tani_angry_smile.webp","npc_tani_face.webp","npc_tani_neutral.webp","npc_tani_scary.webp","npc_tani_shy.webp","npc_tani_smile.webp","npc_thief.webp","npc_thief2.webp","npc_tiger_boss.webp","npc_tiger_boss_cry.webp","npc_vector_knight.png","npc_vector_mesa.png","npc_vector_vega.png","npc_vendor_green.webp","npc_vendor_red.webp","pailin_sheet.webp","petchara_sheet.webp","phiphong_sheet.webp","ploy_loykrathong_sheet.webp","ploy_loykrathong_special.webp","ploy_sheet.webp","ploy_special.webp","rg_chaytrae1_sheet.webp","rg_chaytrae2_sheet.webp","rg_jinlong1_sheet.webp","rg_jinlong2_sheet.webp","rg_russian1_sheet.webp","rg_russian2_sheet.webp","rg_sasaeng1_sheet.webp","rg_sasaeng2_sheet.webp","rgp_buriram_sheet.webp","rgp_chanthaburi_sheet.webp","rgp_chiangrai_sheet.webp","rgp_chumphon_sheet.webp","rgp_khonkaen_sheet.webp","rgp_lampang_sheet.webp","rgp_lopburi_sheet.webp","rgp_nakhonsi_sheet.webp","rgp_nan_sheet.webp","rgp_phetchaburi_sheet.webp","rgp_songkhla_sheet.webp","rgp_suphan_sheet.webp","rgp_surat_sheet.webp","rgp_ubon_sheet.webp","rgp_udon_sheet.webp","rgp_uttaradit_sheet.webp","rin_loykrathong_sheet.webp","rin_loykrathong_special.webp","rin_sheet.webp","rin_special.webp","rooster1_sheet.webp","rooster2_sheet.webp","rooster3_sheet.webp","rooster4_sheet.webp","rooster5_sheet.webp","tabtim_sheet.png","tabtim_special.png","tani_sheet.webp","thief2_sheet.webp","thief_sheet.webp"];</script>
 <script>window.__MTM_PETART=["cat","dog","mudlek","otter","rooster","turtle"];</script>
@@ -9136,7 +9144,7 @@ AU.gsfx=function(kind,a){if(!this.init()||this.muted||!SETTINGS.sfx)return;const
   if(kind==="shimmer")for(let i=0;i<6;i++)T(i*.05,{f:1400+Math.random()*1400,type:"sine",dur:.12,peak:.06});};
 
 // ================= MUAY THAI MOE v1.3 — UI =================
-const VERSION="1.91.155";
+const VERSION="1.91.156";
 const CUR_LANG=(typeof window!=="undefined"&&window.LANG)||"th";
 const TH_LABEL=String.fromCharCode(3652,3607,3618);
 function langSwitch(cls){return `<div class="langsw ${cls||""}" role="group" aria-label="Language">${[["th",TH_LABEL],["en","EN"]].map(([k,l])=>`<button class="lsb ${CUR_LANG===k?"on":""}" data-act="setlang" data-v="${k}" aria-pressed="${CUR_LANG===k}">${l}</button>`).join("")}</div>`;}
@@ -14626,18 +14634,48 @@ const QS_ME={
   const p=document.createElement("p");p.className="qs-my";const b=document.createElement("b");b.textContent=`คุณ${ME(G)}: `;p.appendChild(b);p.appendChild(document.createTextNode(S.my));box.appendChild(p);}catch(e){}};}
 
 /* v1.91.155 (Man): phone calls and Pa Piak's jokes play as ordinary story cutscenes (the show steps aside, then comes back) */
-const QS_CUT=(steps,done,bg)=>{document.body.classList.add("qs-cutting");   /* the show dims behind; the scene's own background is hidden */
+const QS_CUT=(steps,done,bg)=>{try{const S=QS.st;if(S){S.log=S.log||[];for(const x of steps){if(!x.t||typeof x.t!=="string")continue;const who=x.n==="npc"?x.who:x.n==="me"?"คุณ"+ME(G):x.n==="nar"?"":x.n==="coach"?"ครูแดง":((SPK[x.n]||{}).name||"");if(who&&who!==QS_HOST)S.log.push({who,t:x.t,c:x.n==="me"?"m":"f"});}}}catch(e){}document.body.classList.add("qs-cutting");   /* the show dims behind; the scene's own background is hidden */
   const back=()=>{document.body.classList.remove("qs-cutting");done&&done();};
   try{playScene(steps,back,{bg:bg||"tvstudio",look:"casual"});}catch(e){console.error("qs cut",e);back();}};
 const QS_PICK=a=>a[Math.floor(Math.random()*a.length)];
+const QS_TEASE=["ก่อนจะเฉลย… คุณ{n}ตอบ “{c}” มั่นใจแค่ไหนครับ? สิบเต็มสิบเลยไหม?","“{c}”… คำตอบนี้ ทีมงานหลังห้องส่งเงียบกันหมดเลยครับ","คุณ{n}ครับ ถ้าข้อนี้ผิด… ไม่ต้องกังวล ป๋าเตรียมยาดมไว้ให้แล้ว","ขอผมดูหน้าคุณ{n}หน่อย… อืม… หน้าแบบนี้… ผมอ่านไม่ออกเลยครับ","“{c}” นะครับ… ไม่เปลี่ยนแล้วนะ? ล็อกแล้วนะ? แน่นะ? …ผมถามเล่น ๆ ครับ เปลี่ยนไม่ได้แล้ว"];
+const QS_ME_TEASE=["มั่นใจ… ครึ่งหนึ่ง","ป๋า เฉลยเถอะ ขอร้อง","(พยักหน้าทั้งที่ขาสั่น)","สิบเต็มสิบ! …เก้าครึ่งก็ได้","ป๋าอย่ามองหน้าแบบนั้นสิ!"];
+const QS_DRAG=["คำตอบที่ถูกต้องคือ… ถะ… ถะถะ… ถะถะถะถะถะ…","ใจเย็น ๆ นะครับคุณ{n}… ถะถะถะถะถะ… ถะถะถะถะ…","คำตอบของคุณ{n}… คือ… (หยุดหายใจสามวินาที) …ถะถะถะถะ…","ทางบ้านลุ้นไปพร้อมกันนะครับ… ถะ… ถะ… ถะถะถะถะถะถะ…","ซาวด์เอฟเฟกต์ไม่มี ป๋าทำเสียงเองครับ… ถะถะถะถะถะ… ตึ่ง!"];
 {const _d=QS.draw;QS.draw=function(){const S=this.st,m=this.m();
   if(S&&m&&S.phase==="call"&&S.call&&!S.callScene){S.callScene=1;const c=S.call,n=c.lines.length,nm=(SPK[c.id]||{name:"ครูแดง"}).name;
     const say=(t,i)=>c.id==="coach"?{n:"coach",t}:{n:c.id,f:i===n-2?"happy":i===0?"surprised":"flustered",l:"casual",t};
     QS_CUT([{n:"nar",t:`📞 ตู๊ด… ตู๊ด… สายต่อถึง${nm}ที่ค่ายศิริชัย`},...c.lines.map(say)],()=>{if(this.st!==S)return;S.callScene=0;S.callI=n-1;this.act("callNext");});_d.call(this);return;}
   _d.call(this);
-  if(S&&m&&(S.phase==="right"||S.phase==="end")&&S.react&&S.cutK!==S.react){S.cutK=S.react;const key=S.phase==="end"?(m.how||"lose"):"right";
-    const steps=[{n:"npc",who:QS_HOST,img:"qhost_"+(S.host||"smile"),t:S.react}];const L=QS_ME[key];if(L)steps.push({n:"me",t:QS_PICK(L)});
-    setTimeout(()=>{if(this.st===S)QS_CUT(steps,()=>{if(this.st===S)this.draw();});},700);}};}
+  /* v1.91.156 (Man): the middle box is a running log — host lines, jabs, the contestant's mutters and each result */
+  if(S&&m){S.log=S.log||[];const add=(who,t,c)=>{if(!t)return;const L=S.log,last=L[L.length-1];if(last&&last.t===t)return;L.push({who,t,c:c||""});if(L.length>30)L.shift();};
+    if(S.say!==S.lgSay){S.lgSay=S.say;add(QS_HOST,S.say,"h");}
+    if(S.heck&&S.heck!==S.lgHeck){S.lgHeck=S.heck;add("คนดู",S.heck,"a");}
+    if(S.react&&S.react!==S.lgReact){S.lgReact=S.react;add(QS_HOST,S.react,"h");}
+    if(S.my&&S.my!==S.lgMy&&S.phase!=="right"&&S.phase!=="end"){S.lgMy=S.my;add("คุณ"+ME(G),S.my,"m");}
+    const rk=S.phase+"|"+(m.k||0);if((S.phase==="right"||S.phase==="end")&&S.lgRes!==rk){S.lgRes=rk;const how=S.phase==="end"?(m.how||"lose"):"right";
+      add("ผล",how==="right"?`✓ ถูก · ผ่านข้อ ${m.k} · ในมือ ${fmt(m.bank)}`:how==="win"?`🏆 ครบ 20 ข้อ! ${fmt(S.amt||0)}`:how==="quit"?`🏳 ถอนตัว · รับ ${fmt(S.amt||0)}`:`✗ ผิด · กลับบ้านพร้อม ${fmt(S.amt||0)}`,how==="right"||how==="win"?"r":"x");}
+    const box=document.querySelector("#qshow .qs-say");if(box){box.classList.add("qs-log");box.innerHTML=`<small>${QS_HOST} · บันทึกรายการ</small><div class="qs-logl">${S.log.slice(-6).map(e=>`<p class="lg-${e.c}"><b>${esc(e.who)}:</b> ${esc(e.t)}</p>`).join("")}</div>`;const l=box.querySelector(".qs-logl");if(l)l.scrollTop=l.scrollHeight;}}
+  /* every reveal is a cutscene: Pa Piak drags it out, then right or wrong, his jab if he has one, and the contestant's answer */
+  if(S&&m&&(S.phase==="right"||S.phase==="end")&&S.revK!==S.phase+"|"+(m.k||0)){S.revK=S.phase+"|"+(m.k||0);
+    const key=S.phase==="end"?(m.how||"lose"):"right",H=(img,t)=>({n:"npc",who:QS_HOST,img:"qhost_"+img,t}),steps=[];
+    const Q=S.lastQ,od=S.lastOrd,ch=Q&&od&&S.sel>=0&&S.sel!=null?`${QS_ABC[S.sel]}. ${Q.o[od[S.sel]]}`:"";
+    if(key!=="quit"&&ch&&Math.random()<.65){steps.push(H("suspense",QS_PICK(QS_TEASE).replace(/\{n\}/g,ME(G)).replace(/\{c\}/g,ch)));steps.push({n:"me",t:QS_PICK(QS_ME_TEASE)});}
+    if(key!=="quit")steps.push(H("suspense",QS_PICK(QS_DRAG).replace(/\{n\}/g,ME(G))));
+    if(S.say)steps.push(H(S.host||"smile",S.say));if(S.react)steps.push(H(S.host||"smile",S.react));
+    const L=QS_ME[key];if(L)steps.push({n:"me",t:QS_PICK(L)});
+    setTimeout(()=>{if(this.st===S)QS_CUT(steps,()=>{if(this.st===S)this.draw();});},350);}};}
+
+/* v1.91.156 (Man): the opening monologue and the audience heckle are cutscenes too (the clock is stopped while they play) */
+{const _d=QS.draw;QS.draw=function(){const S=this.st,m=this.m();
+  if(S&&m&&S.phase==="intro"&&S.intro&&!S.introScene&&S.step===0){S.introScene=1;_d.call(this);
+    const steps=S.intro.map((t,i)=>({n:"npc",who:QS_HOST,img:"qhost_"+(i===S.intro.length-1?"correct":i===0?"excited":"smile"),t:this.fill(t)}));
+    setTimeout(()=>{if(this.st===S)QS_CUT(steps,()=>{if(this.st!==S||S.phase!=="intro")return;S.step=S.intro.length-1;this.act("introNext");});},250);return;}
+  _d.call(this);};}
+{const _a=QS.act;QS.act=function(a,v){const S=this.st,m=this.m(),was=m&&m.used&&m.used.a;_a.call(this,a,v);
+  if(a==="aud"&&S&&m&&!was&&m.used.a&&S.phase==="q"&&S.heck){this.stopTimer();const i=S.heck.indexOf(": ");const who=i>0?S.heck.slice(0,i):"คนดู",t=i>0?S.heck.slice(i+2):S.heck;
+    const steps=[{n:"nar",t:"📣 ไมค์ส่งไปที่แถวคนดู…"},{n:"npc",who,t},{n:"npc",who:QS_HOST,img:"qhost_excited",t:QS_PICK(QS_AUDC)},{n:"me",t:QS_PICK(QS_ME.aud)}];
+    QS_CUT(steps,()=>{if(this.st===S&&S.phase==="q"){this.draw();this.startTimer();}});}};}
+const QS_AUDC=["ได้ยินกันชัด ๆ นะครับ ความเห็นจากผู้ทรงคุณวุฒิแถวหน้า!","เสียงประชาชนคือเสียงสวรรค์… บางทีก็เสียงสวรรค์ที่หลงทางนะครับ","ขอบคุณครับ! ทีมงานจะส่งน้ำเปล่าไปให้หนึ่งขวดครับ"];
 
 // ================= MUAY THAI MOE — MERIT & THE GHOST OF THE BANANA TREE "นางตานี" (v1.91.144, Man 24 พ.ย.) =================
 // Phase 1: camp merit (บุญ) from merit-making, the wai kru and new big merit events; it slowly runs down when nobody makes merit.
@@ -15476,7 +15514,7 @@ try{window.PXEMOJI={keys:Object.keys(R),svg:mk};}catch(e){}
 <script>
 (function(){
 /* v1.87: Thai code ships inside index.html; English code (en.js) and the dictionary (i18n.js) load only when needed */
-var B="8561f36194";
+var B="96cc0eb591";
 var L="";try{L=localStorage.getItem("mtm_lang")||"";}catch(e){}
 try{var h=(location.hash||"").match(/lang=(th|en)/);if(h)L=h[1];}catch(e){}
 if(L!=="th"&&L!=="en")L="th";

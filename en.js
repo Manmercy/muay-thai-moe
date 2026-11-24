@@ -6639,7 +6639,7 @@ AU.gsfx=function(kind,a){if(!this.init()||this.muted||!SETTINGS.sfx)return;const
   if(kind==="shimmer")for(let i=0;i<6;i++)T(i*.05,{f:1400+Math.random()*1400,type:"sine",dur:.12,peak:.06});};
 
 // ================= MUAY THAI MOE v1.3 — UI =================
-const VERSION="1.91.155";
+const VERSION="1.91.156";
 const CUR_LANG=(typeof window!=="undefined"&&window.LANG)||"th";
 const TH_LABEL=String.fromCharCode(3652,3607,3618);
 function langSwitch(cls){return `<div class="langsw ${cls||""}" role="group" aria-label="Language">${[["th",TH_LABEL],["en","EN"]].map(([k,l])=>`<button class="lsb ${CUR_LANG===k?"on":""}" data-act="setlang" data-v="${k}" aria-pressed="${CUR_LANG===k}">${l}</button>`).join("")}</div>`;}
@@ -12130,18 +12130,48 @@ const QS_ME={
   const p=document.createElement("p");p.className="qs-my";const b=document.createElement("b");b.textContent=`${ME(G)}: `;p.appendChild(b);p.appendChild(document.createTextNode(S.my));box.appendChild(p);}catch(e){}};}
 
 /* v1.91.155 (Man): phone calls and Pa Piak's jokes play as ordinary story cutscenes (the show steps aside, then comes back) */
-const QS_CUT=(steps,done,bg)=>{document.body.classList.add("qs-cutting");   /* the show dims behind; the scene's own background is hidden */
+const QS_CUT=(steps,done,bg)=>{try{const S=QS.st;if(S){S.log=S.log||[];for(const x of steps){if(!x.t||typeof x.t!=="string")continue;const who=x.n==="npc"?x.who:x.n==="me"?""+ME(G):x.n==="nar"?"":x.n==="coach"?"Coach Daeng":((SPK[x.n]||{}).name||"");if(who&&who!==QS_HOST)S.log.push({who,t:x.t,c:x.n==="me"?"m":"f"});}}}catch(e){}document.body.classList.add("qs-cutting");   /* the show dims behind; the scene's own background is hidden */
   const back=()=>{document.body.classList.remove("qs-cutting");done&&done();};
   try{playScene(steps,back,{bg:bg||"tvstudio",look:"casual"});}catch(e){console.error("qs cut",e);back();}};
 const QS_PICK=a=>a[Math.floor(Math.random()*a.length)];
+const QS_TEASE=["Before I reveal it… you said “{c}”, {n} — how sure are you? Ten out of ten?","“{c}”… the whole crew backstage just went silent","{n}, if this one's wrong… don't worry, Pa has smelling salts ready","Let me look at your face, {n}… hmm… a face like that… I can't read it at all","“{c}”, then… not changing? Locked in? Sure? …Just kidding, you can't change it now"];
+const QS_ME_TEASE=["Confident… about half.","Pa, just reveal it, please","(Nods, legs shaking)","Ten out of ten! …Nine and a half, fine.","Pa, stop looking at me like that!"];
+const QS_DRAG=["The correct answer is… da… da-da… da-da-da-da-da…","Easy now, {n}… da-da-da-da-da… da-da-da-da…","Your answer, {n}… is… (holds his breath for three seconds) …da-da-da-da…","Everyone at home, hold your breath with me… da… da… da-da-da-da-da-da…","No sound effects budget — Pa does them himself… da-da-da-da-da… DUN!"];
 {const _d=QS.draw;QS.draw=function(){const S=this.st,m=this.m();
   if(S&&m&&S.phase==="call"&&S.call&&!S.callScene){S.callScene=1;const c=S.call,n=c.lines.length,nm=(SPK[c.id]||{name:"Coach Daeng"}).name;
     const say=(t,i)=>c.id==="coach"?{n:"coach",t}:{n:c.id,f:i===n-2?"happy":i===0?"surprised":"flustered",l:"casual",t};
     QS_CUT([{n:"nar",t:`📞 Ring… ring… calling ${nm} at Sirichai camp`},...c.lines.map(say)],()=>{if(this.st!==S)return;S.callScene=0;S.callI=n-1;this.act("callNext");});_d.call(this);return;}
   _d.call(this);
-  if(S&&m&&(S.phase==="right"||S.phase==="end")&&S.react&&S.cutK!==S.react){S.cutK=S.react;const key=S.phase==="end"?(m.how||"lose"):"right";
-    const steps=[{n:"npc",who:QS_HOST,img:"qhost_"+(S.host||"smile"),t:S.react}];const L=QS_ME[key];if(L)steps.push({n:"me",t:QS_PICK(L)});
-    setTimeout(()=>{if(this.st===S)QS_CUT(steps,()=>{if(this.st===S)this.draw();});},700);}};}
+  /* v1.91.156 (Man): the middle box is a running log — host lines, jabs, the contestant's mutters and each result */
+  if(S&&m){S.log=S.log||[];const add=(who,t,c)=>{if(!t)return;const L=S.log,last=L[L.length-1];if(last&&last.t===t)return;L.push({who,t,c:c||""});if(L.length>30)L.shift();};
+    if(S.say!==S.lgSay){S.lgSay=S.say;add(QS_HOST,S.say,"h");}
+    if(S.heck&&S.heck!==S.lgHeck){S.lgHeck=S.heck;add("Audience",S.heck,"a");}
+    if(S.react&&S.react!==S.lgReact){S.lgReact=S.react;add(QS_HOST,S.react,"h");}
+    if(S.my&&S.my!==S.lgMy&&S.phase!=="right"&&S.phase!=="end"){S.lgMy=S.my;add(""+ME(G),S.my,"m");}
+    const rk=S.phase+"|"+(m.k||0);if((S.phase==="right"||S.phase==="end")&&S.lgRes!==rk){S.lgRes=rk;const how=S.phase==="end"?(m.how||"lose"):"right";
+      add("Result",how==="right"?`✓ Right · passed question ${m.k} · in hand ${fmt(m.bank)}`:how==="win"?`🏆 All 20 questions! ${fmt(S.amt||0)}`:how==="quit"?`🏳 Walked away · took ${fmt(S.amt||0)}`:`✗ Wrong · going home with ${fmt(S.amt||0)}`,how==="right"||how==="win"?"r":"x");}
+    const box=document.querySelector("#qshow .qs-say");if(box){box.classList.add("qs-log");box.innerHTML=`<small>${QS_HOST} · show log</small><div class="qs-logl">${S.log.slice(-6).map(e=>`<p class="lg-${e.c}"><b>${esc(e.who)}:</b> ${esc(e.t)}</p>`).join("")}</div>`;const l=box.querySelector(".qs-logl");if(l)l.scrollTop=l.scrollHeight;}}
+  /* every reveal is a cutscene: Pa Piak drags it out, then right or wrong, his jab if he has one, and the contestant's answer */
+  if(S&&m&&(S.phase==="right"||S.phase==="end")&&S.revK!==S.phase+"|"+(m.k||0)){S.revK=S.phase+"|"+(m.k||0);
+    const key=S.phase==="end"?(m.how||"lose"):"right",H=(img,t)=>({n:"npc",who:QS_HOST,img:"qhost_"+img,t}),steps=[];
+    const Q=S.lastQ,od=S.lastOrd,ch=Q&&od&&S.sel>=0&&S.sel!=null?`${QS_ABC[S.sel]}. ${Q.o[od[S.sel]]}`:"";
+    if(key!=="quit"&&ch&&Math.random()<.65){steps.push(H("suspense",QS_PICK(QS_TEASE).replace(/\{n\}/g,ME(G)).replace(/\{c\}/g,ch)));steps.push({n:"me",t:QS_PICK(QS_ME_TEASE)});}
+    if(key!=="quit")steps.push(H("suspense",QS_PICK(QS_DRAG).replace(/\{n\}/g,ME(G))));
+    if(S.say)steps.push(H(S.host||"smile",S.say));if(S.react)steps.push(H(S.host||"smile",S.react));
+    const L=QS_ME[key];if(L)steps.push({n:"me",t:QS_PICK(L)});
+    setTimeout(()=>{if(this.st===S)QS_CUT(steps,()=>{if(this.st===S)this.draw();});},350);}};}
+
+/* v1.91.156 (Man): the opening monologue and the audience heckle are cutscenes too (the clock is stopped while they play) */
+{const _d=QS.draw;QS.draw=function(){const S=this.st,m=this.m();
+  if(S&&m&&S.phase==="intro"&&S.intro&&!S.introScene&&S.step===0){S.introScene=1;_d.call(this);
+    const steps=S.intro.map((t,i)=>({n:"npc",who:QS_HOST,img:"qhost_"+(i===S.intro.length-1?"correct":i===0?"excited":"smile"),t:this.fill(t)}));
+    setTimeout(()=>{if(this.st===S)QS_CUT(steps,()=>{if(this.st!==S||S.phase!=="intro")return;S.step=S.intro.length-1;this.act("introNext");});},250);return;}
+  _d.call(this);};}
+{const _a=QS.act;QS.act=function(a,v){const S=this.st,m=this.m(),was=m&&m.used&&m.used.a;_a.call(this,a,v);
+  if(a==="aud"&&S&&m&&!was&&m.used.a&&S.phase==="q"&&S.heck){this.stopTimer();const i=S.heck.indexOf(": ");const who=i>0?S.heck.slice(0,i):"Audience",t=i>0?S.heck.slice(i+2):S.heck;
+    const steps=[{n:"nar",t:"📣 The mic goes out to the audience…"},{n:"npc",who,t},{n:"npc",who:QS_HOST,img:"qhost_excited",t:QS_PICK(QS_AUDC)},{n:"me",t:QS_PICK(QS_ME.aud)}];
+    QS_CUT(steps,()=>{if(this.st===S&&S.phase==="q"){this.draw();this.startTimer();}});}};}
+const QS_AUDC=["You heard it loud and clear — expert opinion from the front row!","The voice of the people is the voice of heaven… sometimes a heaven that's lost its way.","Thank you! The crew will send you a bottle of water."];
 
 // ================= MUAY THAI MOE — MERIT & THE GHOST OF THE BANANA TREE "นางตานี" (v1.91.144, Man 24 พ.ย.) =================
 // Phase 1: camp merit (บุญ) from merit-making, the wai kru and new big merit events; it slowly runs down when nobody makes merit.
