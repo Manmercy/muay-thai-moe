@@ -2018,7 +2018,7 @@ RG_SIDE.central={cid:"alicia",bg:"tvstudio",ring:"bg_tvstudio.webp",title:"Off-s
   win:G=>[{n:"nar",t:"The fan club leader slumps against the wall. Event security arrives with the tourist police, and the sasaeng group is led out the back door one by one."},
    {n:"npc",who:"Minnie",t:"All clear! ...Wow, Sirichai Camp is the real deal."},
    {n:"nar",show:[{id:"alicia",l:"casual"}],t:"The dressing-room door opens. Alicia sits in front of the mirror, hands shaking, mascara smudged."},
-   {n:"npc",who:"Alicia's personal manager",t:"Live in ten minutes, Alicia. Naka Energy Drink wants to open the live with that fight clip. The views will go through the roof."},
+   {n:"npc",who:"Mr. Krit, personal manager",t:"Live in ten minutes, Alicia. Naka Energy Drink wants to open the live with that fight clip. The views will go through the roof."},
    {n:"alicia",f:"sad",l:"casual",t:"...I can't sing, Manager. My voice won't come."},
    {n:"alicia",f:"sad",l:"casual",t:"Everyone wants the princess on camera. Nobody wants the one who fights... some days I forget why I fight at all."}],
   lose:G=>[{n:"npc",who:"Sasaeng fan club leader",t:"See? A boxing camp can't stop me!"},{n:"npc",who:"Mabelle",t:"Security's here! Everyone, back off!"},
@@ -2033,10 +2033,10 @@ RG_SIDE.central={cid:"alicia",bg:"tvstudio",ring:"bg_tvstudio.webp",title:"Off-s
    ()=>RG_SING.open(q=>{const S=G.region.side.central;S.sing=+(q||0).toFixed(2);rgMeet(G,"alicia",q>=.6?4:2);save();
     playScene([
      {n:"nar",bg:"tvstudio",t:q>=.6?"The song ends. The live comments turn into a flood of pink hearts, too many to read.":"Alicia's voice shakes through two verses, but she sings to the end, Mabelle and Minnie with their arms around her shoulders."},
-     {n:"npc",who:"Alicia's personal manager",t:"Great! Now upload the backstage fight clip like the sponsor asked. Naka pays us a year..."},
+     {n:"npc",who:"Mr. Krit, personal manager",t:"Great! Now upload the backstage fight clip like the sponsor asked. Naka pays us a year..."},
      {n:"alicia",f:"happy",l:"casual",t:"No."},
      {n:"alicia",f:"happy",l:"casual",t:"That clip is people from Sirichai Camp getting hurt protecting me. It's not content. From tonight, I choose what goes on camera."},
-     {n:"npc",who:"Alicia's personal manager",t:"Alicia, the Naka contract doesn't say that..."},
+     {n:"npc",who:"Mr. Krit, personal manager",t:"Alicia, the Naka contract doesn't say that..."},
      {n:"alicia",f:"happy",l:"casual",t:"Then rewrite it, or there's no contract at all... I'm a fighter. I choose."},
      {n:"npc",who:"Mabelle",t:"Yay!! That's my girl!"},
      {n:"alicia",f:"flustered",l:"casual",t:"...Don't get the wrong idea. I didn't dare say that because you were standing there... maybe a little."}],cb,{bg:"tvstudio",look:"casual"});}),{bg:"tvstudio",look:"casual"}),

@@ -5362,8 +5362,9 @@ function hashStr(s){let h=2166136261;for(const c of s){h^=c.charCodeAt(0);h=Math
 // v1.16: extras use their own 5 base sheets; only the outfit/gloves (red or blue) are re-dyed per fighter
 const NPC_HUES=[0,215,130,45,280,22,180,330,95,255];
 /* v1.89.14: five more base sheets (green, blue, purple, gold, red) — each re-dyes its own kit colour */
-const NPC_KIT={npc6:(h,l,s)=>h>.2&&h<.46&&s>.25&&l>.1,npc8:(h,l,s)=>h>.7&&h<.9&&s>.22&&l>.1,npc9:(h,l,s)=>h>.088&&h<.19&&s>.4&&l>.15&&l<.85};
-function npcBase(id){const h=hashStr(id);return {base:"npc"+(1+h%10),hue:NPC_HUES[(h>>>5)%NPC_HUES.length],dark:((h>>>9)%7)===0};}
+/* v1.91.132 (Man): four more extras — npc11 teal, npc12 purple, npc13 rust (kept as drawn: its kit shares the skin hue), npc14 blue */
+const NPC_KIT={npc11:(h,l,s)=>h>.43&&h<.55&&s>.25&&l>.1,npc12:(h,l,s)=>h>.7&&h<.86&&s>.22&&l>.1,npc6:(h,l,s)=>h>.2&&h<.46&&s>.25&&l>.1,npc8:(h,l,s)=>h>.7&&h<.9&&s>.22&&l>.1,npc9:(h,l,s)=>h>.088&&h<.19&&s>.4&&l>.15&&l<.85};
+function npcBase(id){const h=hashStr(id),k=(h>>>13)%14;return {base:"npc"+(k>=10?k+1:1+h%10),hue:NPC_HUES[(h>>>5)%NPC_HUES.length],dark:((h>>>9)%7)===0};}
 // v1.70: pixel outfits — recolour only the kit (gloves, top, shorts, shoes) of a canon sheet; skin and hair stay
 const OUTFITS={
  base:{name:"Signature Kit",sw:null,hint:""},
@@ -5408,7 +5409,7 @@ function sheetFor(f){
     for(let i=0;i<p.length;i+=4){if(p[i+3]<10)continue;let r=p[i]/255,g=p[i+1]/255,b=p[i+2]/255;const mx=Math.max(r,g,b),mn=Math.min(r,g,b);let l=(mx+mn)/2;const gold=()=>{const L2=Math.min(.86,l*1.45+.3),S2=.07,H2=.66;const q2=L2<.5?L2*(1+S2):L2+S2-L2*S2,p2=2*L2-q2;const f2=t=>{t=(t+1)%1;return t<1/6?p2+(q2-p2)*6*t:t<1/2?q2:t<2/3?p2+(q2-p2)*(2/3-t)*6:p2;};p[i]=f2(H2+1/3)*255;p[i+1]=f2(H2)*255;p[i+2]=f2(H2-1/3)*255;};if(mx===mn){if(blonde&&l>.07&&l<.42)gold();continue;}
       const dd=mx-mn;let s=l>.5?dd/(2-mx-mn):dd/(mx+mn);let h=mx===r?(g-b)/dd+(g<b?6:0):mx===g?(b-r)/dd+2:(r-g)/dd+4;h/=6;
       if(blonde&&l>.07&&l<.42&&!(h>.53&&h<.74&&s>.25)&&!((h<.035||h>.93)&&s>.38)&&(s<.45||(h>.02&&h<.16))){gold();continue;}
-      const red=(h<.035||h>.93)&&s>.38&&l>.12&&l<.8,blue=h>.53&&h<.74&&s>.25&&l>.1,kit=NPC_KIT[base]&&NPC_KIT[base](h,l,s);if(!red&&!blue&&!kit)continue; // outfit only: skin & hair stay
+      const red=(h<.035||h>.93)&&s>.38&&l>.12&&l<.8,blue=h>.53&&h<.74&&s>.25&&l>.1,kit=NPC_KIT[base]&&NPC_KIT[base](h,l,s);if(base==="npc13"||(!red&&!blue&&!kit))continue; // outfit only: skin & hair stay
       h=th;/* v1.89.27: never dye a kit near-white (Man: no white NPC kits) */if(!dark&&!lab&&l>.78&&s<.35){l=.6;s=Math.max(s,.5);}if(dark){s*=.15;l*=.55;}else if(lab){if(l<.5){s*=.35;l*=.3;}else{s=Math.min(.8,Math.max(s,.55));l=Math.min(.5,l*.6);}} /* black kit, purple highlights */
       const q=l<.5?l*(1+s):l+s-l*s,pp=2*l-q;const fn=t=>{t=(t+1)%1;return t<1/6?pp+(q-pp)*6*t:t<1/2?q:t<2/3?pp+(q-pp)*(2/3-t)*6:pp;};
       p[i]=fn(h+1/3)*255;p[i+1]=fn(h)*255;p[i+2]=fn(h-1/3)*255;}
@@ -6576,7 +6577,7 @@ AU.gsfx=function(kind,a){if(!this.init()||this.muted||!SETTINGS.sfx)return;const
   if(kind==="shimmer")for(let i=0;i<6;i++)T(i*.05,{f:1400+Math.random()*1400,type:"sine",dur:.12,peak:.06});};
 
 // ================= MUAY THAI MOE v1.3 — UI =================
-const VERSION="1.91.130";
+const VERSION="1.91.131";
 const CUR_LANG=(typeof window!=="undefined"&&window.LANG)||"th";
 const TH_LABEL=String.fromCharCode(3652,3607,3618);
 function langSwitch(cls){return `<div class="langsw ${cls||""}" role="group" aria-label="Language">${[["th",TH_LABEL],["en","EN"]].map(([k,l])=>`<button class="lsb ${CUR_LANG===k?"on":""}" data-act="setlang" data-v="${k}" aria-pressed="${CUR_LANG===k}">${l}</button>`).join("")}</div>`;}
