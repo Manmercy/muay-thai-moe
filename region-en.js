@@ -1277,6 +1277,130 @@ function rgTiger(G){const kati=rgIn(G,"kati"),ploy=rgIn(G,"ploy");return [
    {t:"\"See you in the ring.\"",then:[{n:"npc",who:"Boss Suea",t:"Ha! Deal. Phayak Thong's kids will be waiting… on my own money this time."}]},
    {t:"Nod quietly",then:[{n:"nar",t:"Boss Suea picks his cigar up off the ground, nods back, then turns and walks to his car."}]}]},
  {n:"nar",t:"The gold sedan backs out slowly. For the first time, it doesn't honk at the camp gate."}];}
+/* v1.91.114 (Man): the first time the camp reaches each belt province, that region's champion comes to meet them — a longer scene before the hotel,
+   one piece of her story per province so the belts pull you on. Going out with her at the hotel has its own night per province (then her usual nights),
+   and the camp girl who sulks about it takes turns. */
+const RG_RBG={north:"rg_north",isan:"rg_northeast",central:"rg_central",south:"rg_south"};
+const rgLine=id=>(f,t,x)=>Object.assign({n:id,f,l:"casual",t},x||{});
+const rgProvWon=(G,dest)=>{const D=ROAD_DEST[dest],R=G.region;return !!(D&&R&&(R.belts[D.r]||{})[dest]);};
+const rgProvN=(G,r)=>{const M=(G.region&&G.region.provMet)||{};return RG[r].prov.filter(p=>M[p]).length;};
+/* her tip about tonight's local champion: only while the belt is still up for grabs */
+function rgProvTip(G,dest,steps,who){if(rgProvWon(G,dest))return [];const me=G.F[(G.region.trip||{}).fid];
+  return [...steps,{fx:G2=>{if(me)me.morale=Math.min(100,(me.morale||0)+3);}},{n:"nar",t:me?`${me.name} saved the tips on her phone · Morale +3`:"Everyone saved the tips on their phones"}];}
+/* the camp girl who sulks takes turns: everyone on the trip who is close to you (bond 40+), round and round */
+function rgJealGirl(G){const R=G.region,TP=R&&R.trip&&R.trip.party,L=CANON_IDS.map(id=>G.F[id]).filter(f=>f&&f.camp==="player"&&(f.bond||0)>=40&&(!TP||TP.includes(f.id))).sort((a,b)=>(b.bond||0)-(a.bond||0));
+  return L.length?L[((R&&R.jealN)||0)%L.length]:null;}
+const RG_JEALP={
+  near:{kati:["Um… {c} was standing a little close, wasn't she? I'm only noticing.","{c} is really nice, isn't she… to you, anyway."],
+   mali:["Mali wants a hug too~ …Just kidding. (Not kidding.)","{c} is so cute~ Mali's not jealous. Mali just can't quite smile right now~"],
+   rin:["The distance between you and {c} just now was below average. Just data.","{c}… I've added that name to my notebook. Under \"Uncontrollable variables.\""],
+   ploy:["What's with the smiling… Nothing. I didn't say anything.","…I'll wait in the van. I'm not sulking. It's just hot."],
+   fah:["Hey! {c}! The manager belongs to Sirichai Camp! …I mean, he's the camp's manager!","Why are you smiling like that! …Not that I'm looking!"]},
+  date:{kati:["You went walking with {c}? …No, I'm not asking.","I'm not sulking… I'm just going to bed first. And I didn't leave the light on for you."],
+   mali:["Mali saw that~ You went out with {c}, didn't you… Mali wants to go too.","Mali saved some snacks for you… but she's eaten half of them, because you took too long~"],
+   rin:["Two hours and twelve minutes with {c}. I wasn't timing it. I just happened to look at the clock.","Rin wasn't waiting in the lobby. Rin came down to read the newspaper… yesterday's."],
+   ploy:["You went out with {c}? Good for you. …Why are you even asking me?","I wasn't waiting up. My light was on because I was reading… the same book, the same page, all night."],
+   fah:["Oh, so you went out with {c}! I'm not sulking! I'm just… hungry!","Not that I care! …But you carried {c}'s stuff for her, didn't you? I saw!"]}};
+/* kind: "near" when she is standing next to the champion, "date" after a night out with her */
+function rgJealStep(G,champ,mood,kind){const g=rgJealGirl(G);if(!g)return [];const R=G.region,P=(RG_JEALP[kind||"date"]||RG_JEALP.date)[g.id]||["…"],k=Math.floor((R.jealN||0)/2)%P.length;
+  return [{n:g.id,f:"pout",l:"casual",t:P[k].replace(/\{c\}/g,champ)},{fx:G2=>{const R2=G2.region;R2.jealN=(R2.jealN||0)+1;if(mood){const f=G2.F[g.id];if(f)f.morale=Math.max(0,(f.morale||0)-mood);}}}];}
+const RG_PROV={};
+const RG_DATE={};
+const RG_DATEP={};
+/* ---------- North: Baibua carries her father's ring notebook — one page a province ---------- */
+{const B=rgLine("baibua");
+ const book=(G,r)=>{const n=rgProvN(G,r);return n>=4?[B("happy","That's all four pages, jao… only the last page is left. Dad wrote the heading but never pasted a ticket: \"Chiang Mai.\" I'll be waiting for you at my home ring for that page, jao."),{n:"nar",t:"Baibua's father's ring notebook: all 4/4 pages"}]
+   :[{n:"nar",t:`Baibua's father's ring notebook: ${n}/4 pages · Baibua will show you the rest when you reach each province`}];};
+ RG_PROV.chiangrai=(G,D)=>{const opp=REGION.oppName(G,"chiangrai"),kati=rgInT(G,"kati");return {
+  meet:[{n:"nar",bg:"hill",t:"The camp van turns into Chiang Rai under a sky so clear you can see the farthest mountains. In the car park outside Wat Rong Khun, one girl stands alone waving a pink handkerchief."},
+   B("happy","We've made it to Chiang Rai, jao! I've been waiting since seven… not long, jao. Only three hours."),
+   ...rgProvTip(G,"chiangrai",[B("happy",`${opp} grew up at the temples around here, jao. Her finisher is the Wat Rong Khun Elbow, clean and white like the temple, but sharp as glass.`),B("happy","In the first round she'll wait for us to come in first. Don't rush it, jao.")],"Baibua")],
+  body:[{n:"nar",bg:"temple",t:"Baibua leads everyone across the white bridge into the temple. Sunlight flashes off the mirrors all over the hall. She stops at a bench under a tree and takes an old cloth-covered notebook out of her basket."},
+   B("happy","It's Dad's ring notebook, jao. When he was young he fought all over the North, and in every province he pasted a ticket on its own page."),
+   B("happy","This is the Chiang Rai page. Dad won by knockout in the third round, jao. Under the ticket he wrote: \"Chiang Rai has the clearest sky.\""),
+   B("flustered","I've wanted to follow this notebook for so long, but there was nobody to come with me… and this year Sirichai Camp came along, jao.",{choice:[
+    {t:"\"Then let's follow your dad's notebook together on this trip.\"",fx:G2=>rgMeet(G2,"baibua",2),then:[B("flustered","…Together… Jao. I'll bring the notebook to every province, jao.")]},
+    {t:"Ask to see the other pages",fx:G2=>rgMeet(G2,"baibua",1),then:[B("happy","The other pages have to wait until we reach each province, jao. I'll show you one page at a time. No peeking.")]},
+    {t:"\"Your dad must be glad you've kept it so well.\"",fx:G2=>rgMeet(G2,"baibua",2),then:[B("sad","Dad has forgotten he ever had this notebook, jao. I found it in a box under the house…"),B("happy","But I remember it for him, jao.")]}]}),
+   ...rgIf(kati,[{n:"kati",with:"baibua",f:"happy",l:"casual",t:"Sister Baibua, is there an Uttaradit page in the notebook?"},B("happy","It does, jao. It's the thickest page. I'll tell you about it when we get there, Kati.")]),
+   ...rgJealStep(G,"Baibua",0,"near"),
+   B("happy","This notebook has four pages, jao: Chiang Rai, Nan, Uttaradit, Lampang… only one page has no winning ticket. Guess which one, jao."),
+   ...book(G,"north")]};};
+ RG_PROV.nan=(G,D)=>{const opp=REGION.oppName(G,"nan");return {
+  meet:[{n:"nar",bg:"river",t:"The road winds down from the mountains into Nan. Long racing boats are lined up along the river, and Baibua sits on the prow of one, legs dangling."},
+   B("happy","Manager! Over here, jao! Careful, it's slippery. The pier is mossy."),
+   ...rgProvTip(G,"nan",[B("happy",`${opp} has paddled racing boats since she was little, jao. Legs as hard as oars. Her finisher is the Nan Racing Boat Knee.`),B("happy","Don't let her grab your neck, jao. Once she locks you and the knees come up, it hurts for days.")],"Baibua")],
+  body:[{n:"nar",bg:"temple",t:"Baibua takes everyone to Wat Phumin. On the wall of the hall a man whispers into a woman's ear, and tourists crowd in to take photos."},
+   B("happy","This mural is called Pu Man Ya Man, jao. People call it the Whisper of Love… nobody knows what they're whispering."),
+   B("flustered","People love posing like the mural… I… I'm not asking you to take one, jao. I'm just telling you.",{choice:[
+    {t:"Ask her to pose like the mural",fx:G2=>rgMeet(G2,"baibua",3),then:[{n:"nar",t:"Baibua stands still as a statue for three seconds, then nods quickly."},B("flustered","…Whisper anything you like, jao, just don't let me hear it, or I'll be red in the photo."),{n:"nar",t:"The photo comes out blurry because Baibua turns away right as the shutter clicks, but she asks to keep the blurry one."}]},
+    {t:"\"If you could whisper one sentence, what would it be?\"",fx:G2=>rgMeet(G2,"baibua",2),then:[B("flustered","…\"Don't go back to Chiang Mai yet,\" jao… wait, I live in Chiang Mai too! I forgot, jao!")]},
+    {t:"Praise the painter's work",fx:G2=>rgMeet(G2,"baibua",1),then:[B("happy","The painter was Tai Lue, jao. The sarong patterns in the mural look just like my grandma's cloth.")]}]}),
+   ...rgJealStep(G,"Baibua",0,"near"),
+   {n:"nar",t:"Before they leave the temple, Baibua opens her father's ring notebook. The Nan page has a single ticket, no win, only his handwriting: \"Come back someday.\""},
+   B("sad","Dad lost here, jao, and never got to come back. His knee went first."),
+   B("happy","If Sirichai wins the Nan belt… may I write \"Came back\" under Dad's words, jao?"),
+   ...book(G,"north")]};};
+ RG_PROV.uttaradit=(G,D)=>{const opp=REGION.oppName(G,"uttaradit"),kati=rgInT(G,"kati");return {
+  meet:[{n:"nar",bg:"rg_north",t:"Outside Uttaradit's provincial hall, the statue of Phraya Phichai Dap Hak holds a sword in each hand, one snapped in half. Baibua stands with her palms together at its base."},
+   B("happy","We've made it to Uttaradit, jao, the birthplace of Tha Sao boxing… I was so excited I couldn't sleep."),
+   ...rgProvTip(G,"uttaradit",[B("happy",`${opp} uses Phraya Phichai's Broken Sword Elbow, jao. The left elbow is the fake, the right one is real.`),B("happy","When the left elbow comes, step back just half a step, jao. A full step and she follows you in.")],"Baibua")],
+  body:[B("happy","Did you know, jao? He fought until one of his swords broke, and he still didn't retreat."),
+   B("sad","Vector sent another letter yesterday, jao… some days I feel like one of my swords has already broken.",{choice:[
+    {t:"\"A broken sword still leaves the other one. And you still have someone standing beside you.\"",fx:G2=>rgMeet(G2,"baibua",3),then:[B("flustered","…Someone standing beside me… Jao. I'll remember that, jao.")]},
+    {t:"Ask about the letter",fx:G2=>rgMeet(G2,"baibua",2),then:[B("sad","They say if I sell the camp, Dad can have his knee operated on at a good hospital… I haven't answered them yet, jao."),B("happy","But now I've told you, my heart feels half as heavy, jao.")]},
+    {t:"Suggest getting langsat first to clear her head",fx:G2=>rgMeet(G2,"baibua",2),then:[B("happy","Laplae langsat are the sweetest in the world, jao! I know a good stall. Let's go, jao!")]}]}),
+   {n:"nar",t:"Baibua opens her father's ring notebook. The Uttaradit page really is the thickest. Between the tickets there's a dried bodhi leaf."},
+   B("happy","Dad picked this bodhi leaf in front of the Tha Sao teachers' shrine, jao. He said you can fight anywhere, but you pay respect to the teachers here first."),
+   ...rgIf(kati,[{n:"kati",f:"surprised",l:"casual",with:"baibua",t:"The Tha Sao teachers' shrine… it's in this town?"},B("happy","It is, jao. Come with me, Kati. I'll take you whenever we're free.")]),
+   ...rgJealStep(G,"Baibua",0,"near"),
+   ...book(G,"north")]};};
+ RG_PROV.lampang=(G,D)=>{const opp=REGION.oppName(G,"lampang");return {
+  meet:[{n:"nar",bg:"river",t:"Lampang in the morning. Brightly painted horse carriages trot along the road. One waits outside the hotel, and the girl beside the driver waves so hard her hat nearly flies off."},
+   B("happy","Get in the carriage, jao! I booked two… you ride in the front one with me, jao, because the back one is… full."),
+   ...rgProvTip(G,"lampang",[B("happy",`${opp} uses the Lampang Iron Horse Push Kick, jao. It hits as hard as a bucking horse.`),B("happy","But after the kick she's off balance for half a beat. Counter right then, jao.")],"Baibua")],
+  body:[{n:"nar",t:"The carriage rolls past old wooden houses by the Wang River. The horse tosses its head, and Baibua flinches and grabs the manager's sleeve tight."},
+   B("flustered","I… I'm a little scared of horses, jao. One ate my hat when I was little.",{choice:[
+    {t:"\"Hold on if you like. You don't have to let go.\"",fx:G2=>rgMeet(G2,"baibua",3),then:[B("flustered","…Jao."),{n:"nar",t:"Baibua holds the sleeve until the carriage stops, then forgets to let go for another minute."}]},
+    {t:"\"This horse is gentle. Look.\"",fx:G2=>rgMeet(G2,"baibua",2),then:[B("happy","…Oh. It really is looking at me, jao. What big eyes.")]},
+    {t:"\"The northern champion is scared of horses?\"",fx:G2=>rgMeet(G2,"baibua",1),then:[B("pout","…Don't tell anyone, jao. Especially not Tabtim.")]}]}),
+   {n:"nar",bg:"market",t:"The carriage stops at a rooster-bowl ceramics shop. Baibua picks bowls for so long that the driver falls asleep on his seat."},
+   B("happy","Dad's rice bowl broke last month, jao. He used it for twenty years. I'm buying him a new one."),
+   {n:"nar",t:"Baibua opens her father's ring notebook. The Lampang page has a winning ticket and his handwriting: \"Won, but my leg's hurt. The iron horse kicks hard.\""},
+   B("sad","It was Dad's last ticket before he quit, jao… after that he stayed at the camp and taught only me."),
+   ...rgJealStep(G,"Baibua",0,"near"),
+   ...book(G,"north")]};};
+ /* her night out, the first time in each province */
+ RG_DATE.chiangrai=G=>[{n:"nar",bg:"night_north",t:"Eight o'clock sharp. The clock tower in the middle of Chiang Rai lights up and changes colour to music. Baibua tugs the manager's sleeve and they run to make it in time."},
+   B("happy","Just in time, jao! The same man built this clock tower and Wat Rong Khun. The lights change colour every hour, jao."),
+   B("flustered","Two years ago I watched it alone when I came here to fight… everyone around me was in pairs, jao.",{choice:[
+    {t:"\"You didn't come alone this year.\"",fx:G2=>rgMeet(G2,"baibua",2),then:[B("flustered","…Jao. This year I didn't come alone."),{n:"nar",t:"The lights turn from gold to pink. Baibua watches the lights and won't look at the manager until the song ends."}]},
+    {t:"Suggest waiting for the nine o'clock show",fx:G2=>rgMeet(G2,"baibua",3),then:[B("happy","Okay, jao! …While we wait, let's get khanom jeen nam ngiao first. I'm hungry.")]},
+    {t:"Take a photo of the lights for her dad",fx:G2=>rgMeet(G2,"baibua",1),then:[B("happy","Good idea, jao. Dad loves pretty things… but he'll definitely ask who took it.")]}]})];
+ RG_DATE.nan=G=>[{n:"nar",bg:"night_north",t:"Nan's Khuang Mueang night market. People eat on mats in front of Wat Phumin. Baibua has already spread a small mat, just big enough for two."},
+   B("happy","I bought khao kab and sai ua already, jao. And this mat… it was the only small one left at the stall, jao. I didn't plan it."),
+   {n:"nar",t:"A folk band plays salo and sueng fiddles while children dance in front of the hall. The whispering mural glows faintly on the wall.",choice:[
+    {t:"Whisper in her ear: \"Thanks for bringing me.\"",fx:G2=>rgMeet(G2,"baibua",3),then:[{n:"nar",t:"The khao kab slips out of Baibua's hand."},B("flustered","…Manager! Right under that mural, jao! Everyone saw…")]},
+    {t:"Ask about her grandmother",fx:G2=>rgMeet(G2,"baibua",2),then:[B("happy","Grandma taught me to weave, jao, but every cloth came out crooked. So she said I'd better go box instead.")]},
+    {t:"Sit and listen to the music quietly",fx:G2=>rgMeet(G2,"baibua",2),then:[{n:"nar",t:"Three songs end. On the fourth, Baibua leans her head on the manager's shoulder and pretends to be asleep."}]}]}];
+ RG_DATE.uttaradit=G=>[{n:"nar",bg:"night_north",t:"A rice-soup shop by the Nan River. Baibua orders two bowls of fish rice soup and slides a basket of langsat into the middle of the table."},
+   B("sad","I've been practising for three days, jao, telling Dad I'll run the camp so he doesn't have to worry… but every time I see his face, the words won't come."),
+   B("flustered","Could you pretend to be my dad, jao…? Just let me practise once.",{choice:[
+    {t:"Put on a deep voice: \"Go on, child.\"",fx:G2=>rgMeet(G2,"baibua",3),then:[B("happy","Ha ha, Dad's voice isn't that deep, jao!"),B("happy","…Dad, jao, I'll look after Bua Tha Sao Camp myself. Rest your knee… I said it, jao! I said all of it!")]},
+    {t:"\"Practise with me, and on the day I'll be standing next to you.\"",fx:G2=>rgMeet(G2,"baibua",3),then:[B("flustered","…Promise, jao? If someone is standing next to me, I can say it for sure.")]},
+    {t:"\"Eat some langsat first. You'll be braver on a full stomach.\"",fx:G2=>rgMeet(G2,"baibua",1),then:[B("happy","Jao… I've eaten ten already and I'm still not brave enough.")]}]})];
+ RG_DATE.lampang=G=>[{n:"nar",bg:"night_north",t:"Kad Kong Ta walking street by the Wang River. Old wooden shophouses glow yellow. Baibua holds her bag with the rooster bowl tight, as if it might break."},
+   B("flustered","Could you carry this for me, jao…? It's not heavy. I just want a free hand for… for buying snacks, jao!",{choice:[
+    {t:"Carry the bag and offer her your other hand",fx:G2=>rgMeet(G2,"baibua",3),then:[{n:"nar",t:"Baibua looks at the offered hand so long that a passer-by bumps her shoulder, then slowly takes hold of two fingertips."},B("flustered","…Two fingers first, jao.")]},
+    {t:"Carry the bag and go buy snacks together",fx:G2=>rgMeet(G2,"baibua",2),then:[B("happy","Khao taen with watermelon syrup, jao! Lampang's best. I bought two bags, and one is yours.")]},
+    {t:"\"Careful not to break the bowl.\"",fx:G2=>rgMeet(G2,"baibua",1),then:[B("pout","…Jao. I can carry it myself.")]}]})];
+ /* her usual nights after that, in turn */
+ RG_DATEP.baibua=[
+  G=>[{n:"nar",bg:"night_north",t:"The walking street is crowded tonight. Baibua walks slowly so the manager can keep up."},B("flustered","If we get separated… you can hold on to my sleeve, jao."),{n:"nar",t:"Their hands almost bump a few times, but neither of them says anything."}],
+  G=>[{n:"nar",bg:"night_north",t:"The temple fair near the hotel has a balloon-dart stall. Baibua hits one balloon out of ten and wins a tiny elephant doll."},B("flustered","Take it, jao… this elephant looks like you when you're sleepy.")],
+  G=>[{n:"nar",bg:"night_north",t:"On the hotel roof the cold wind blows hard and the sky is full of stars. Baibua unwinds her tin-jok scarf and wraps it around the manager."},B("happy","I feel the cold less than you, jao… I've lived up north my whole life."),{n:"nar",t:"Five minutes later Baibua sneezes twice, but she won't take the scarf back."}]];
+}
+
 const REGION={
   /* end of week (after the weekly events): the gala the week after the invitation, the contract beat the week after the first cup */
   weekScene(G,done){const R=G.region;if(!R){done();return;}rgApply(G);const now=gameWeek(G);if(lbWeek(G,done))return;
@@ -1396,8 +1520,12 @@ Pick your fighter under Fights › Four Regions Championship`+((t=>t?`\n\n(${t})
     const fight=(cb)=>T.local?this.localRun(b,T,cb):openFight(b,cb);
     if(T.quick&&this.canQuick(G,dest)){this.arrive(G,T,P,null);fight(()=>{const n=P.nights||0;if(n){for(const f of roadRiders(G))f.fatigue=Math.max(0,(f.fatigue||0)-10*n);}
       G.log=G.log||[];G.log.push(`Back at camp from ${ROAD_DEST[dest].name}${n?` · rested at the hotel ${n} night(s), fatigue −${10*n}`:""}`);save();done();});return;}
-    ROAD.open(dest,{paid:true,plan:P,onArrive:(P2,front)=>{this.arrive(G,T,P2||P,front);const go=()=>this.hotel(b,T,()=>fight(()=>this.night(T,P2||P,1,done))),A=this.firstArrive(G,ROAD_DEST[dest].r,dest);
-      if(A){playScene(A,go,{bg:"gas_station",look:"casual"});}else go();}});},
+    ROAD.open(dest,{paid:true,plan:P,onArrive:(P2,front)=>{this.arrive(G,T,P2||P,front);const go=()=>this.hotel(b,T,()=>fight(()=>this.night(T,P2||P,1,done))),A=this.firstArrive(G,ROAD_DEST[dest].r,dest),Bp=this.provArrive(G,dest,!!A);
+      const goB=()=>Bp?playScene(Bp,go,{bg:RG_RBG[ROAD_DEST[dest].r],look:"casual"}):go();
+      if(A){playScene(A,goB,{bg:"gas_station",look:"casual"});}else goB();}});},
+  /* v1.91.114 (Man): the champion meets the camp the first time it reaches each of her belt provinces (after her first-arrival scene, only the province part) */
+  provArrive(G,dest,after){const R=G.region,D=ROAD_DEST[dest];if(!R||!D||!RG_PROV[dest])return null;R.provMet=R.provMet||{};if(R.provMet[dest])return null;
+    const cid=RG_CID[D.r];if(R.joined&&R.joined[cid])return null;R.provMet[dest]=1;rgTouch(G,cid);const S=RG_PROV[dest](G,D);return after?S.body:[...S.meet,...S.body];},
   /* v1.91.76 (Man): drive → hotel → "head for the ring" → the bout */
   hotel(b,T,go,again){const D=ROAD_DEST[T.dest],me=G.F[b.a],op=G.F[b.b];if(!me||!op){go();return;}
     const girls=roadRiders(G).filter(f=>CANON_IDS.includes(f.id)).sort((a,b2)=>(b2.bond||0)-(a.bond||0)),menu=this.hotelMenu(T,D,girls,1,true);
@@ -1440,13 +1568,13 @@ Pick your fighter under Fights › Four Regions Championship`+((t=>t?`\n\n(${t})
       if(T.goShop){T.goShop=0;this.shop(T,()=>{T.backShop=1;this.night(T,P,n,done);},1,1);return;}
       if(T.menuBack){T.menuBack=0;T.backShop=1;this.night(T,P,n,done);return;}this.night(T,P,n+1,done);},{bg:this.hotelBg[r],look:"casual"});},
   /* v1.91.82 (Man): the hotel menu in layers — go out ▸ pick who · go out with the champion · rest at the hotel · souvenirs · (before the bout) straight to the ring */
-  hotelMenu(T,D,girls,n,pre){const r=D.r,cid=this.champId[r],C=RG[r],top=girls[0],jeal=top&&(top.bond||0)>=40?top:null,back={t:"◂ Back",fx:()=>{T.menuBack=1;}};
+  hotelMenu(T,D,girls,n,pre){const r=D.r,cid=this.champId[r],C=RG[r],top=girls[0],back={t:"◂ Back",fx:()=>{T.menuBack=1;}};
     const outs=[...girls.map(g=>({t:`Out with ${g.name}`,fx:G2=>{add(G2,g.id,"bond",2);g.morale=Math.min(100,(g.morale||0)+4);},then:[{n:g.id,f:"happy",l:"casual",t:this.girlLine(g.id,D.name)}]})),
       ...(RG_OUT[T.dest]&&girls.length?[{t:`The whole team: ${RG_OUT[T.dest].t}`,fx:G2=>{for(const f of roadRiders(G2))f.morale=Math.min(100,(f.morale||0)+3);add(G2,girls[0].id,"bond",1);},then:[{n:"nar",t:RG_OUT[T.dest].l.replace(/\{g\}/g,girls[n%girls.length].name)+" · morale +3"}]}]:[]),back];
     return [
       ...(outs.length>1?[{t:`Go out around ${D.name} ▸`,then:[{n:"nar",t:"Who do you ask out?",choice:outs}]}]:[]),
-      {t:`Go out with ${C.champ} (champion of ${C.name})`,fx:G2=>{rgMeet(G2,cid,3);if(jeal)jeal.morale=Math.max(0,(jeal.morale||0)-3);},
-        then:[...this.dateLines(cid,D),...(jeal?[{n:jeal.id,f:"pout",l:"casual",t:this.jealLine(jeal.id,C.champ)}]:[])]},
+      {t:`Go out with ${C.champ} (champion of ${C.name})`,fx:G2=>{rgMeet(G2,cid,3);this.dateMark(G2,cid,T.dest);},
+        then:[...this.dateLines(cid,D,T.dest),...rgJealStep(G,C.champ,3)]},
       {t:"Rest at the hotel (fatigue −10)",fx:G2=>{for(const f of roadRiders(G2))f.fatigue=Math.max(0,(f.fatigue||0)-10);},then:[{n:"nar",t:pre?"Everyone rests in the room until it's time to go to the ring · fatigue −10":"Everyone turns in early and wakes up fresh · fatigue −10"}]},
       ...(pre?[]:[{t:"Light training in the hotel parking lot",fx:G2=>{for(const f of roadRiders(G2)){f.exp=(f.exp||0)+6;f.fatigue=Math.min(100,(f.fatigue||0)+2);}},then:[{n:"nar",t:"Pad work under the parking-lot lights until the hotel guard comes to watch · EXP +6"}]}]),
       {t:`🛍 Buy souvenirs from ${D.name} (takes no time)`,fx:()=>{T.goShop=1;}},
@@ -1465,7 +1593,10 @@ Pick your fighter under Fights › Four Regions Championship`+((t=>t?`\n\n(${t})
     const pv=L.find(k=>GIFTS[k].pv),head=hotel&&first?[{n:"nar",t:`The souvenir shop next to the hotel still has its lights on.${pv?` ${GIFTS[pv].name} famous in ${ROAD_DEST[T.dest].name} is lined up out front`:""}`}]:first?[{n:"nar",t:this.shopIntro[r]},{n:"nar",t:"Souvenirs aren't cheap, but the girls will love them · buy now, give later (shops like this only on trips)"}]:[];
     playScene([...head,{n:"nar",t:first?"Pick up anything to take home?":"Anything else?",choice}],()=>{
       if(st.end){next();return;}if(st.no)toast("Not enough money");if(st.got)toast(`Bought: ${GIFTS[st.got].name} · give it under Camp › Souvenirs`);this.shop(T,next,0,hotel);},{bg:this.hotelBg[r],look:"casual"});},
-  dateLines(cid,D){const L={
+  /* v1.91.114 (Man): her own night the first time in each province, then her usual nights in turn */
+  dateMark(G,cid,dest){const R=G.region;R.dated=R.dated||{};if(RG_DATE[dest]&&!R.dated[dest]){R.dated[dest]=1;return;}R.dateN=R.dateN||{};R.dateN[cid]=(R.dateN[cid]||0)+1;},
+  dateLines(cid,D,dest){const R=G.region;if(dest&&RG_DATE[dest]&&!(R.dated||{})[dest])return RG_DATE[dest](G);const P=RG_DATEP[cid];if(P&&P.length)return P[((R.dateN||{})[cid]||0)%P.length](G);
+    const L={
     baibua:[{n:"npc",who:"Baibua",t:`The walking street's crowded tonight, jao… if we get separated, you can hold on to my sleeve, jao.`},{n:"nar",t:"Baibua walks slowly so you can keep up. Your hands almost touch a few times, but neither of you says anything."}],
     tabtim:[{n:"npc",who:"Tabtim",t:"Let's go eat som tam, de! This stall's real spicy… haha, I'm crying already, ai!"},{n:"nar",t:"Tabtim laughs loud enough for the whole stall to hear, but when you hand her a tissue she goes quiet for a moment."}],
     alicia:[{n:"npc",who:"Alicia",t:"Don't get the wrong idea. I just wanted someone to walk with. The camera's off tonight…"},{n:"nar",t:"Alicia leaves her phone face down on the table all night. She never picks it up once."}],
@@ -1685,7 +1816,7 @@ ${RG[r].champ}, the new champion of ${RG[r].name} is open to a new regional titl
   /* v1.91.50 (playtest): a champion coming to visit shows on the home screen too — it was easy to miss on the regional tab */
   visitBanner(G){const R=G.region;if(!R||!R.champ)return "";const r=RG_ORDER.find(x=>R.champ[x]&&R.champ[x].visit==="due");if(!r)return "";const cid=this.champId[r];
     return `<button class="px newfighter" data-act="rgvisit" data-v="${r}"><span class="newb">NEW!</span>${G.F[cid]?`<img src="${faceSrc(cid,"happy")}" alt="">`:""}<span><b>${esc(RG[r].champ)} is visiting the camp</b><small>Tap to welcome her · only until bout 2</small></span><span class="chev">▸</span></button>`;},
-  canQuick(G,dest){const R=G.region,D=ROAD_DEST[dest];if(!R||!D)return false;return !!((R.arrived||{})[D.r])&&!(RG_TRIPX[dest]&&!((R.tx||{})[dest]));},
+  canQuick(G,dest){const R=G.region,D=ROAD_DEST[dest];if(!R||!D)return false;return !!((R.arrived||{})[D.r])&&!(RG_TRIPX[dest]&&!((R.tx||{})[dest]))&&!(RG_PROV[dest]&&!((R.provMet||{})[dest]));},
   /* v1.91.82 (Man): two popups — first who comes along (seats), then who fights (from those on board) with the bill */
   planHTML(dest){const D=ROAD_DEST[dest],C=RG[D.r],wk=this.tripWeek(G);if(!wk)return `<h2>${esc(D.name)}</h2><p>No free week left to travel this year</p>`;
     const RD=this.riders(G,wk),max=roadSeats(G),cand=roster(G).filter(f=>!f.injury||f.injury<3);

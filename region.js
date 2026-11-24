@@ -1277,6 +1277,130 @@ function rgTiger(G){const kati=rgIn(G,"kati"),ploy=rgIn(G,"ploy");return [
    {t:"\"เจอกันบนเวทีนะ\"",then:[{n:"npc",who:"เถ้าแก่เสือ",t:"ฮ่า! ได้ เด็กพยัคฆ์ทองจะรอ… คราวนี้ด้วยเงินผมเอง"}]},
    {t:"พยักหน้าเงียบ ๆ",then:[{n:"nar",t:"เถ้าแก่เสือเก็บซิการ์ขึ้นมาจากพื้น พยักหน้าตอบ แล้วหันหลังเดินไปที่รถ"}]}]},
  {n:"nar",t:"รถเก๋งสีทองถอยออกไปช้า ๆ เป็นครั้งแรกที่ไม่บีบแตรใส่หน้าค่าย"}];}
+/* v1.91.114 (Man): the first time the camp reaches each belt province, that region's champion comes to meet them — a longer scene before the hotel,
+   one piece of her story per province so the belts pull you on. Going out with her at the hotel has its own night per province (then her usual nights),
+   and the camp girl who sulks about it takes turns. */
+const RG_RBG={north:"rg_north",isan:"rg_northeast",central:"rg_central",south:"rg_south"};
+const rgLine=id=>(f,t,x)=>Object.assign({n:id,f,l:"casual",t},x||{});
+const rgProvWon=(G,dest)=>{const D=ROAD_DEST[dest],R=G.region;return !!(D&&R&&(R.belts[D.r]||{})[dest]);};
+const rgProvN=(G,r)=>{const M=(G.region&&G.region.provMet)||{};return RG[r].prov.filter(p=>M[p]).length;};
+/* her tip about tonight's local champion: only while the belt is still up for grabs */
+function rgProvTip(G,dest,steps,who){if(rgProvWon(G,dest))return [];const me=G.F[(G.region.trip||{}).fid];
+  return [...steps,{fx:G2=>{if(me)me.morale=Math.min(100,(me.morale||0)+3);}},{n:"nar",t:me?`${me.name}จดคำแนะนำไว้ในมือถือ · กำลังใจ +3`:"ทุกคนจดคำแนะนำไว้ในมือถือ"}];}
+/* the camp girl who sulks takes turns: everyone on the trip who is close to you (bond 40+), round and round */
+function rgJealGirl(G){const R=G.region,TP=R&&R.trip&&R.trip.party,L=CANON_IDS.map(id=>G.F[id]).filter(f=>f&&f.camp==="player"&&(f.bond||0)>=40&&(!TP||TP.includes(f.id))).sort((a,b)=>(b.bond||0)-(a.bond||0));
+  return L.length?L[((R&&R.jealN)||0)%L.length]:null;}
+const RG_JEALP={
+  near:{kati:["ครูคะ… {c}ยืนใกล้ไปหรือเปล่า หนูแค่สังเกตเฉย ๆ ค่ะ","พี่{c}ใจดีจังเลยนะคะ… กับครูคนเดียว"],
+   mali:["มะลิก็อยากได้กอดบ้างนะ~ …ล้อเล่นค่ะ (ไม่ได้ล้อเล่น)","{c}น่ารักจังเลย~ มะลิไม่ได้หึงนะ แค่ยิ้มไม่ออกนิดนึง~"],
+   rin:["ระยะห่างระหว่างผู้จัดการกับ{c}เมื่อกี้ ต่ำกว่าค่าเฉลี่ยค่ะ ข้อมูลเฉย ๆ","{c}… รินเพิ่มชื่อนี้ลงสมุดแล้วค่ะ หัวข้อ \"ตัวแปรที่ควบคุมไม่ได้\""],
+   ploy:["ยิ้มอะไรนักหนา …เปล่า ไม่ได้ว่าอะไร","…พี่ไปรอที่รถนะ ไม่ได้งอน แค่ร้อน"],
+   fah:["เฮ้! {c}! ผู้จัดการเป็นของค่ายศิริชัยนะ! …หมายถึงผู้จัดการค่ายน่ะ!","ทำหน้ายิ้มแบบนั้นทำไม! …ฟ้าไม่ได้มองหรอกนะ!"]},
+  date:{kati:["ครูไปเดินกับ{c}มาเหรอคะ… เปล่าค่ะ หนูไม่ได้ถาม","หนูไม่ได้งอนนะคะ… หนูแค่จะไปนอนก่อน แล้วก็ไม่ได้เปิดไฟรอด้วย"],
+   mali:["มะลิเห็นนะ~ ไปกับ{c}มาใช่ไหม… มะลิก็อยากไปบ้าง","มะลิเก็บขนมไว้ให้ผู้จัดการ… แต่กินไปครึ่งนึงแล้ว เพราะรอนานเกิน~"],
+   rin:["ไปกับ{c}สองชั่วโมงสิบสองนาที รินไม่ได้จับเวลานะ แค่บังเอิญดูนาฬิกา","รินไม่ได้นั่งรอที่ล็อบบี้นะคะ รินมาอ่านหนังสือพิมพ์… ฉบับเมื่อวาน"],
+   ploy:["ไปกับ{c}มาเหรอ ก็ดีนี่ …ทำไมต้องถามด้วย","พี่ไม่ได้รอนะ ไฟห้องพี่เปิดอยู่เพราะอ่านหนังสือ …เล่มเดิม หน้าเดิม ทั้งคืน"],
+   fah:["อ๋อ ไปกับ{c}มาล่ะสิ! ฟ้าไม่ได้งอนนะ! แค่…หิว!","ฟ้าไม่สนหรอกนะ! …แต่นายถือของให้{c}ด้วยใช่ไหม ฟ้าเห็นนะ!"]}};
+/* kind: "near" when she is standing next to the champion, "date" after a night out with her */
+function rgJealStep(G,champ,mood,kind){const g=rgJealGirl(G);if(!g)return [];const R=G.region,P=(RG_JEALP[kind||"date"]||RG_JEALP.date)[g.id]||["…"],k=Math.floor((R.jealN||0)/2)%P.length;
+  return [{n:g.id,f:"pout",l:"casual",t:P[k].replace(/\{c\}/g,champ)},{fx:G2=>{const R2=G2.region;R2.jealN=(R2.jealN||0)+1;if(mood){const f=G2.F[g.id];if(f)f.morale=Math.max(0,(f.morale||0)-mood);}}}];}
+const RG_PROV={};
+const RG_DATE={};
+const RG_DATEP={};
+/* ---------- North: Baibua carries her father's ring notebook — one page a province ---------- */
+{const B=rgLine("baibua");
+ const book=(G,r)=>{const n=rgProvN(G,r);return n>=4?[B("happy","ครบสี่หน้าแล้วเจ้า… เหลือหน้าสุดท้ายที่พ่อเขียนหัวไว้แต่บ่เคยได้แปะตั๋ว \"เชียงใหม่\" หน้านั้นหนูจะรอผู้จัดการที่เวทีบ้านหนูนะเจ้า"),{n:"nar",t:"สมุดเวทีของพ่อใบบัว ครบ 4/4 หน้า"}]
+   :[{n:"nar",t:`สมุดเวทีของพ่อใบบัว ${n}/4 หน้า · หน้าที่เหลือ ใบบัวจะเปิดให้ดูเมื่อไปถึงจังหวัดนั้น`}];};
+ RG_PROV.chiangrai=(G,D)=>{const opp=REGION.oppName(G,"chiangrai"),kati=rgInT(G,"kati");return {
+  meet:[{n:"nar",bg:"hill",t:"รถของค่ายเลี้ยวเข้าเชียงราย ฟ้าใสจนเห็นดอยไกลสุดตา ที่ลานจอดรถหน้าวัดร่องขุ่น มีคนยืนโบกผ้าเช็ดหน้าสีชมพูอยู่คนเดียว"},
+   B("happy","มาฮอดเชียงรายแล้วเจ้า! หนูมารอตั้งแต่เจ็ดโมง… บ่ได้รอนานหรอกเจ้า แค่สามชั่วโมงเอง"),
+   ...rgProvTip(G,"chiangrai",[B("happy",`${opp}เป็นลูกศิษย์วัดแถวนี้เจ้า ท่าไม้ตายชื่อศอกวัดร่องขุ่น ขาวสะอาดเหมือนวัด แต่คมเหมือนกระจก`),B("happy","ยกแรกเขาจะรอให้เราเข้าไปก่อน อย่าเพิ่งใจร้อนนะเจ้า")],"ใบบัว")],
+  body:[{n:"nar",bg:"temple",t:"ใบบัวพาทุกคนเดินข้ามสะพานสีขาวเข้าไปในวัด แดดสะท้อนกระจกเงาวับไปทั้งโบสถ์ เธอหยุดตรงม้านั่งใต้ต้นไม้ แล้วหยิบสมุดปกผ้าเก่า ๆ ออกจากตะกร้า"},
+   B("happy","สมุดเวทีของพ่อเจ้า สมัยหนุ่ม ๆ พ่อตระเวนชกทั่วภาคเหนือ ไปจังหวัดไหนก็แปะตั๋วมวยไว้หน้าหนึ่ง"),
+   B("happy","หน้าเชียงรายนี่ พ่อชนะน็อกยกสามเจ้า ใต้ตั๋วพ่อเขียนไว้ว่า \"ฟ้าเชียงรายใสที่สุด\""),
+   B("flustered","หนูอยากเดินตามสมุดเล่มนี้มานานแล้ว แต่ไม่มีใครมาด้วย… ปีนี้ค่ายศิริชัยมาพอดีเจ้า",{choice:[
+    {t:"\"งั้นทริปนี้ก็เดินตามสมุดของพ่อไปด้วยกัน\"",fx:G2=>rgMeet(G2,"baibua",2),then:[B("flustered","…ด้วยกัน… เจ้า หนูจะพกสมุดมาทุกจังหวัดเลยเจ้า")]},
+    {t:"ขอดูหน้าอื่นด้วยได้ไหม",fx:G2=>rgMeet(G2,"baibua",1),then:[B("happy","หน้าอื่นต้องรอไปถึงจังหวัดนั้นก่อนเจ้า หนูจะเปิดให้ดูทีละหน้า ห้ามแอบดูนะ")]},
+    {t:"\"พ่อคงดีใจที่เธอเก็บไว้ดีขนาดนี้\"",fx:G2=>rgMeet(G2,"baibua",2),then:[B("sad","พ่อลืมไปแล้วว่าเคยมีสมุดเล่มนี้เจ้า หนูเจอในกล่องใต้ถุนบ้าน…"),B("happy","แต่หนูจำแทนพ่อได้เจ้า")]}]}),
+   ...rgIf(kati,[{n:"kati",with:"baibua",f:"happy",l:"casual",t:"พี่ใบบัวคะ ในสมุดมีหน้าอุตรดิตถ์ไหมคะ"},B("happy","มีเจ้า เป็นหน้าที่หนาที่สุดเลย ไว้ไปถึงแล้วจะเล่าให้ฟังนะกะทิ")]),
+   ...rgJealStep(G,"ใบบัว",0,"near"),
+   B("happy","สมุดเล่มนี้มีสี่หน้าเจ้า เชียงราย น่าน อุตรดิตถ์ ลำปาง… มีหน้าเดียวที่พ่อบ่ได้แปะตั๋วชนะ ผู้จัดการทายดูนะเจ้าว่าหน้าไหน"),
+   ...book(G,"north")]};};
+ RG_PROV.nan=(G,D)=>{const opp=REGION.oppName(G,"nan");return {
+  meet:[{n:"nar",bg:"river",t:"ถนนคดเคี้ยวลงจากดอยเข้าเมืองน่าน ริมแม่น้ำมีเรือแข่งลำยาวจอดเรียงกัน ใบบัวนั่งห้อยขาอยู่บนหัวเรือลำหนึ่ง"},
+   B("happy","ผู้จัดการ! ทางนี้เจ้า! ระวังลื่นนะเจ้า ท่าน้ำมีตะไคร่"),
+   ...rgProvTip(G,"nan",[B("happy",`${opp}เป็นฝีพายเรือแข่งมาตั้งแต่เด็กเจ้า ขาแข็งเหมือนไม้พาย ท่าไม้ตายคือเข่าเรือแข่งน่าน`),B("happy","อย่าให้เขาจับคอได้นะเจ้า โดนล็อกแล้วเข่าขึ้นมาทีไรเจ็บยาว")],"ใบบัว")],
+  body:[{n:"nar",bg:"temple",t:"ใบบัวพาทุกคนไปวัดภูมินทร์ บนผนังวิหารมีภาพผู้ชายกำลังกระซิบข้างหูผู้หญิง นักท่องเที่ยวมุงถ่ายรูปกันแน่น"},
+   B("happy","ภาพนี้ชื่อปู่ม่านย่าม่านเจ้า คนเรียกกันว่าภาพกระซิบรัก… เขากระซิบอะไรกันก็บ่มีใครรู้"),
+   B("flustered","คนชอบมายืนถ่ายท่าเดียวกับในภาพ… หนู… หนูบ่ได้จะชวนถ่ายนะเจ้า แค่เล่าเฉย ๆ",{choice:[
+    {t:"ชวนถ่ายรูปท่าเดียวกับในภาพ",fx:G2=>rgMeet(G2,"baibua",3),then:[{n:"nar",t:"ใบบัวยืนนิ่งเหมือนรูปปั้นอยู่สามวินาที แล้วพยักหน้าเร็ว ๆ"},B("flustered","…กระซิบว่าอะไรก็ได้เจ้า แต่อย่าให้หนูได้ยินนะ เดี๋ยวหนูหน้าแดงในรูป"),{n:"nar",t:"รูปออกมาเบลอ เพราะใบบัวหันหนีตอนกดชัตเตอร์พอดี แต่เธอขอเก็บรูปเบลอนั้นไว้"}]},
+    {t:"\"ถ้ากระซิบได้หนึ่งประโยค เธอจะกระซิบว่าอะไร\"",fx:G2=>rgMeet(G2,"baibua",2),then:[B("flustered","…\"อย่าเพิ่งกลับเชียงใหม่\" เจ้า… เอ๊ะ บ้านหนูก็อยู่เชียงใหม่นี่นา! ลืมไปเลยเจ้า!")]},
+    {t:"ชมฝีมือช่างวาด",fx:G2=>rgMeet(G2,"baibua",1),then:[B("happy","ช่างวาดเป็นคนไทลื้อเจ้า ลายผ้าซิ่นในภาพเหมือนผ้าของยายหนูเลย")]}]}),
+   ...rgJealStep(G,"ใบบัว",0,"near"),
+   {n:"nar",t:"ก่อนออกจากวัด ใบบัวเปิดสมุดเวทีของพ่อ หน้าน่านมีตั๋วใบเดียว ไม่มีคำว่าชนะ มีแต่ลายมือพ่อเขียนว่า \"ไว้มาใหม่\""},
+   B("sad","พ่อแพ้ที่นี่เจ้า แล้วก็บ่เคยได้กลับมาอีกเลย เข่าเจ็บก่อน"),
+   B("happy","ถ้าค่ายศิริชัยได้เข็มขัดน่าน… หนูขอเขียนต่อใต้คำของพ่อว่า \"มาใหม่แล้ว\" ได้ไหมเจ้า"),
+   ...book(G,"north")]};};
+ RG_PROV.uttaradit=(G,D)=>{const opp=REGION.oppName(G,"uttaradit"),kati=rgInT(G,"kati");return {
+  meet:[{n:"nar",bg:"rg_north",t:"หน้าศาลากลางอุตรดิตถ์ อนุสาวรีย์พระยาพิชัยดาบหักยืนถือดาบสองมือ ดาบข้างหนึ่งหักครึ่ง ใบบัวพนมมือไหว้อยู่ที่ฐาน"},
+   B("happy","มาฮอดอุตรดิตถ์แล้วเจ้า บ้านเกิดของมวยท่าเสา… หนูตื่นเต้นจนนอนบ่หลับเลย"),
+   ...rgProvTip(G,"uttaradit",[B("happy",`${opp}ใช้ศอกดาบหักพระยาพิชัยเจ้า ศอกซ้ายหลอก ศอกขวาจริง`),B("happy","เห็นศอกซ้ายมาให้ถอยครึ่งก้าวพอนะเจ้า ถอยเต็มก้าวเขาจะตามเข้ามา")],"ใบบัว")],
+  body:[B("happy","ผู้จัดการรู้ไหมเจ้า ท่านสู้จนดาบหักไปข้างหนึ่ง ก็ยังไม่ถอย"),
+   B("sad","เวกเตอร์ส่งจดหมายมาอีกฉบับเมื่อวานเจ้า… บางวันหนูก็รู้สึกเหมือนดาบหักไปข้างแล้ว",{choice:[
+    {t:"\"ดาบหักก็ยังเหลืออีกข้าง แล้วเธอก็ยังมีคนยืนข้าง ๆ\"",fx:G2=>rgMeet(G2,"baibua",3),then:[B("flustered","…คนยืนข้าง ๆ… เจ้า หนูจะจำคำนี้ไว้นะเจ้า")]},
+    {t:"ถามเรื่องจดหมาย",fx:G2=>rgMeet(G2,"baibua",2),then:[B("sad","เขาว่าถ้าขายค่าย พ่อจะได้ผ่าเข่าที่โรงพยาบาลดี ๆ… หนูยังบ่ได้ตอบเขาเจ้า"),B("happy","แต่เล่าให้ผู้จัดการฟังแล้ว ใจเบาขึ้นครึ่งหนึ่งเลยเจ้า")]},
+    {t:"ชวนไปกินลางสาดก่อน หัวจะได้โล่ง",fx:G2=>rgMeet(G2,"baibua",2),then:[B("happy","ลางสาดลับแลหวานที่สุดในโลกเจ้า! หนูรู้ร้านอร่อย ไปเจ้า ๆ")]}]}),
+   {n:"nar",t:"ใบบัวเปิดสมุดเวทีของพ่อ หน้าอุตรดิตถ์หนาที่สุดจริง ๆ ระหว่างตั๋วมวยมีใบโพธิ์แห้งแปะไว้ใบหนึ่ง"},
+   B("happy","ใบโพธิ์นี้พ่อเก็บมาจากหน้าศาลครูท่าเสาเจ้า พ่อว่าชกที่ไหนก็ได้ แต่ต้องมาไหว้ครูที่นี่ก่อน"),
+   ...rgIf(kati,[{n:"kati",f:"surprised",l:"casual",with:"baibua",t:"ศาลครูท่าเสา… อยู่ในเมืองนี้เหรอคะ"},B("happy","อยู่เจ้า มาด้วยกันนะกะทิ ว่างเมื่อไหร่หนูพาไป")]),
+   ...rgJealStep(G,"ใบบัว",0,"near"),
+   ...book(G,"north")]};};
+ RG_PROV.lampang=(G,D)=>{const opp=REGION.oppName(G,"lampang");return {
+  meet:[{n:"nar",bg:"river",t:"เมืองลำปางยามเช้า รถม้าสีสดวิ่งเหยาะ ๆ อยู่ริมถนน คันหนึ่งจอดรอหน้าโรงแรม คนที่นั่งข้างคนขับโบกมือแรงจนหมวกแทบปลิว"},
+   B("happy","ขึ้นรถม้าเจ้า! หนูจองไว้สองคัน …ผู้จัดการนั่งคันหน้ากับหนูนะเจ้า เพราะคันหลัง… เต็มแล้ว"),
+   ...rgProvTip(G,"lampang",[B("happy",`${opp}ใช้ถีบม้าเหล็กลำปางเจ้า ถีบหนักเหมือนม้าดีด`),B("happy","แต่ถีบเสร็จจะเสียหลักครึ่งจังหวะ สวนตอนนั้นเลยเจ้า")],"ใบบัว")],
+  body:[{n:"nar",t:"รถม้าวิ่งผ่านบ้านไม้เก่าริมแม่น้ำวัง ม้าสะบัดหัวทีหนึ่ง ใบบัวสะดุ้งคว้าแขนเสื้อผู้จัดการไว้แน่น"},
+   B("flustered","หนู… หนูกลัวม้านิดหน่อยเจ้า ตอนเด็กโดนม้ากินหมวก",{choice:[
+    {t:"\"จับไว้ก็ได้ ไม่ต้องปล่อย\"",fx:G2=>rgMeet(G2,"baibua",3),then:[B("flustered","…เจ้า"),{n:"nar",t:"ใบบัวจับแขนเสื้อไว้จนรถม้าจอด แล้วยังลืมปล่อยไปอีกนาทีหนึ่ง"}]},
+    {t:"\"ม้าตัวนี้ใจดีนะ ดูสิ\"",fx:G2=>rgMeet(G2,"baibua",2),then:[B("happy","…เอ๊ะ มันหันมามองหนูจริงด้วยเจ้า ตาโตแท้")]},
+    {t:"\"แชมป์ภาคเหนือกลัวม้าเหรอ\"",fx:G2=>rgMeet(G2,"baibua",1),then:[B("pout","…ห้ามบอกใครนะเจ้า โดยเฉพาะทับทิม")]}]}),
+   {n:"nar",bg:"market",t:"รถม้าแวะร้านถ้วยชามตราไก่ ใบบัวเลือกชามอยู่นานจนคนขับรถม้าหลับคาเบาะ"},
+   B("happy","ชามข้าวของพ่อแตกเมื่อเดือนก่อนเจ้า พ่อใช้มายี่สิบปี หนูจะซื้อใบใหม่ไปให้"),
+   {n:"nar",t:"ใบบัวเปิดสมุดเวทีของพ่อ หน้าลำปางมีตั๋วชนะกับลายมือว่า \"ชนะ แต่ขาเจ็บ ม้าเหล็กถีบแรง\""},
+   B("sad","เป็นตั๋วใบสุดท้ายก่อนพ่อเลิกชกเจ้า… หลังจากนั้นพ่อก็อยู่แต่ในค่าย สอนหนูคนเดียว"),
+   ...rgJealStep(G,"ใบบัว",0,"near"),
+   ...book(G,"north")]};};
+ /* her night out, the first time in each province */
+ RG_DATE.chiangrai=G=>[{n:"nar",bg:"night_north",t:"สองทุ่มตรง หอนาฬิกากลางเมืองเชียงรายเปิดไฟเปลี่ยนสีพร้อมเสียงเพลง ใบบัวจูงแขนเสื้อผู้จัดการวิ่งไปให้ทันพอดี"},
+   B("happy","ทันพอดีเจ้า! หอนาฬิกานี้คนสร้างคนเดียวกับวัดร่องขุ่นเลยนะ ไฟเปลี่ยนสีทุกชั่วโมงเจ้า"),
+   B("flustered","สองปีก่อนหนูมาดูคนเดียวตอนมาชกที่นี่… คนรอบ ๆ มากันเป็นคู่ ๆ หมดเลยเจ้า",{choice:[
+    {t:"\"ปีนี้ไม่ได้มาคนเดียวแล้วนะ\"",fx:G2=>rgMeet(G2,"baibua",2),then:[B("flustered","…เจ้า ปีนี้บ่ได้มาคนเดียวแล้ว"),{n:"nar",t:"ไฟเปลี่ยนจากสีทองเป็นสีชมพู ใบบัวมองไฟ ไม่ยอมหันมามองหน้าเลยจนเพลงจบ"}]},
+    {t:"ชวนรอดูรอบสามทุ่มอีกรอบ",fx:G2=>rgMeet(G2,"baibua",3),then:[B("happy","ได้เจ้า! …ระหว่างรอ ไปกินขนมจีนน้ำเงี้ยวกันก่อนนะ หนูหิวแล้ว")]},
+    {t:"ถ่ายรูปไฟไว้ให้พ่อเธอดู",fx:G2=>rgMeet(G2,"baibua",1),then:[B("happy","ดีเจ้า พ่อชอบของสวย ๆ …แต่พ่อต้องถามแน่ว่าใครถ่าย")]}]})];
+ RG_DATE.nan=G=>[{n:"nar",bg:"night_north",t:"ตลาดคืนข่วงเมืองน่าน คนนั่งกินข้าวบนเสื่อหน้าวัดภูมินทร์ ใบบัวปูเสื่อผืนเล็กรอไว้แล้ว ขนาดพอดีสองคน"},
+   B("happy","หนูซื้อข้าวแคบกับไส้อั่วมาแล้วเจ้า เสื่อผืนนี้… ร้านเหลือแค่ผืนเล็กเจ้า บ่ได้ตั้งใจนะ"),
+   {n:"nar",t:"วงดนตรีพื้นเมืองเล่นสะล้อซอซึง เด็ก ๆ ฟ้อนอยู่หน้าวิหาร ภาพกระซิบรักบนผนังเปิดไฟสลัว ๆ",choice:[
+    {t:"กระซิบข้างหูว่า \"ขอบคุณที่พามานะ\"",fx:G2=>rgMeet(G2,"baibua",3),then:[{n:"nar",t:"ข้าวแคบหลุดจากมือใบบัว"},B("flustered","…ผู้จัดการ! ใต้ภาพนั้นเลยนะเจ้า! คนเห็นกันหมดแล้ว…")]},
+    {t:"ถามเรื่องยายของเธอ",fx:G2=>rgMeet(G2,"baibua",2),then:[B("happy","ยายสอนหนูทอผ้าเจ้า แต่หนูทอเบี้ยวทุกผืน ยายเลยบอกว่าไปชกมวยดีกว่า")]},
+    {t:"นั่งฟังดนตรีเงียบ ๆ",fx:G2=>rgMeet(G2,"baibua",2),then:[{n:"nar",t:"เพลงจบไปสามเพลง พอถึงเพลงที่สี่ ใบบัวเอนหัวพิงไหล่ผู้จัดการ แล้วทำเป็นหลับ"}]}]}];
+ RG_DATE.uttaradit=G=>[{n:"nar",bg:"night_north",t:"ร้านข้าวต้มริมแม่น้ำน่าน ใบบัวสั่งข้าวต้มปลาสองถ้วย แล้วเลื่อนตะกร้าลางสาดมาไว้กลางโต๊ะ"},
+   B("sad","หนูซ้อมพูดกับพ่อมาสามวันแล้วเจ้า ว่าหนูจะดูแลค่ายเอง บ่ต้องห่วง… แต่พอเจอหน้าพ่อ หนูพูดบ่ออกทุกที"),
+   B("flustered","ผู้จัดการลองเป็นพ่อหนูได้ไหมเจ้า… ให้หนูซ้อมพูดรอบเดียว",{choice:[
+    {t:"ทำเสียงทุ้ม \"ว่ามาลูก\"",fx:G2=>rgMeet(G2,"baibua",3),then:[B("happy","ฮ่า ๆ พ่อบ่ได้เสียงทุ้มขนาดนั้นเจ้า!"),B("happy","…พ่อเจ้า หนูจะดูแลค่ายบัวท่าเสาเอง พ่อพักเข่าเถอะ… พูดได้แล้วเจ้า! พูดได้ครบเลย!")]},
+    {t:"\"ซ้อมกับฉันก็ได้ แต่วันจริงฉันจะไปยืนข้าง ๆ ด้วย\"",fx:G2=>rgMeet(G2,"baibua",3),then:[B("flustered","…สัญญานะเจ้า ถ้ามีคนยืนข้าง ๆ หนูพูดได้แน่")]},
+    {t:"\"กินลางสาดก่อน ท้องอิ่มแล้วค่อยกล้า\"",fx:G2=>rgMeet(G2,"baibua",1),then:[B("happy","เจ้า… หนูกินไปสิบลูกแล้วยังบ่กล้าเลยเจ้า")]}]})];
+ RG_DATE.lampang=G=>[{n:"nar",bg:"night_north",t:"ถนนคนเดินกาดกองต้าริมแม่น้ำวัง ตึกไม้เก่าเปิดไฟสีเหลือง ใบบัวถือถุงชามตราไก่ไว้แน่นเหมือนกลัวมันแตก"},
+   B("flustered","ผู้จัดการช่วยถือให้หน่อยได้ไหมเจ้า… บ่ใช่ว่าหนัก หนูแค่อยากมีมือว่างไว้… ไว้ซื้อขนมเจ้า!",{choice:[
+    {t:"ถือถุงให้ แล้วยื่นมืออีกข้างให้",fx:G2=>rgMeet(G2,"baibua",3),then:[{n:"nar",t:"ใบบัวมองมือที่ยื่นมานานจนคนเดินชนไหล่ แล้วค่อย ๆ จับปลายนิ้วไว้สองนิ้ว"},B("flustered","…สองนิ้วก่อนนะเจ้า")]},
+    {t:"ถือถุงให้แล้วไปซื้อขนมด้วยกัน",fx:G2=>rgMeet(G2,"baibua",2),then:[B("happy","ข้าวแต๋นน้ำแตงโมเจ้า! ของดีลำปาง หนูซื้อสองถุง ถุงหนึ่งของผู้จัดการ")]},
+    {t:"\"ระวังชามแตกนะ\"",fx:G2=>rgMeet(G2,"baibua",1),then:[B("pout","…เจ้า หนูถือเองก็ได้")]}]})];
+ /* her usual nights after that, in turn */
+ RG_DATEP.baibua=[
+  G=>[{n:"nar",bg:"night_north",t:"ถนนคนเดินคืนนี้คนเยอะ ใบบัวเดินช้า ๆ ให้ผู้จัดการเดินทัน"},B("flustered","ถ้าหลงกัน… จับแขนเสื้อหนูไว้ก็ได้นะเจ้า"),{n:"nar",t:"มือเกือบชนกันหลายครั้ง แต่ไม่มีใครพูดอะไร"}],
+  G=>[{n:"nar",bg:"night_north",t:"งานวัดใกล้โรงแรมมีซุ้มปาลูกโป่ง ใบบัวปาโดนลูกเดียวจากสิบลูก ได้ตุ๊กตาช้างตัวเล็กมา"},B("flustered","เอาไปเจ้า… ช้างตัวนี้หน้าเหมือนผู้จัดการ ตอนง่วง ๆ")],
+  G=>[{n:"nar",bg:"night_north",t:"บนดาดฟ้าโรงแรม ลมหนาวพัดแรง ดาวเต็มฟ้า ใบบัวแกะผ้าพันคอลายตีนจกออกมาพันให้ผู้จัดการ"},B("happy","หนูขี้หนาวน้อยกว่าเจ้า… อยู่เหนือมาทั้งชีวิตแล้ว"),{n:"nar",t:"ห้านาทีต่อมา ใบบัวจามสองที แต่ไม่ยอมขอผ้าพันคอคืน"}]];
+}
+
 const REGION={
   /* end of week (after the weekly events): the gala the week after the invitation, the contract beat the week after the first cup */
   weekScene(G,done){const R=G.region;if(!R){done();return;}rgApply(G);const now=gameWeek(G);if(lbWeek(G,done))return;
@@ -1392,8 +1516,12 @@ const REGION={
     const fight=(cb)=>T.local?this.localRun(b,T,cb):openFight(b,cb);
     if(T.quick&&this.canQuick(G,dest)){this.arrive(G,T,P,null);fight(()=>{const n=P.nights||0;if(n){for(const f of roadRiders(G))f.fatigue=Math.max(0,(f.fatigue||0)-10*n);}
       G.log=G.log||[];G.log.push(`กลับถึงค่ายจาก${ROAD_DEST[dest].name}${n?` · พักที่โรงแรม ${n} คืน ความล้า −${10*n}`:""}`);save();done();});return;}
-    ROAD.open(dest,{paid:true,plan:P,onArrive:(P2,front)=>{this.arrive(G,T,P2||P,front);const go=()=>this.hotel(b,T,()=>fight(()=>this.night(T,P2||P,1,done))),A=this.firstArrive(G,ROAD_DEST[dest].r,dest);
-      if(A){playScene(A,go,{bg:"gas_station",look:"casual"});}else go();}});},
+    ROAD.open(dest,{paid:true,plan:P,onArrive:(P2,front)=>{this.arrive(G,T,P2||P,front);const go=()=>this.hotel(b,T,()=>fight(()=>this.night(T,P2||P,1,done))),A=this.firstArrive(G,ROAD_DEST[dest].r,dest),Bp=this.provArrive(G,dest,!!A);
+      const goB=()=>Bp?playScene(Bp,go,{bg:RG_RBG[ROAD_DEST[dest].r],look:"casual"}):go();
+      if(A){playScene(A,goB,{bg:"gas_station",look:"casual"});}else goB();}});},
+  /* v1.91.114 (Man): the champion meets the camp the first time it reaches each of her belt provinces (after her first-arrival scene, only the province part) */
+  provArrive(G,dest,after){const R=G.region,D=ROAD_DEST[dest];if(!R||!D||!RG_PROV[dest])return null;R.provMet=R.provMet||{};if(R.provMet[dest])return null;
+    const cid=RG_CID[D.r];if(R.joined&&R.joined[cid])return null;R.provMet[dest]=1;rgTouch(G,cid);const S=RG_PROV[dest](G,D);return after?S.body:[...S.meet,...S.body];},
   /* v1.91.76 (Man): drive → hotel → "head for the ring" → the bout */
   hotel(b,T,go,again){const D=ROAD_DEST[T.dest],me=G.F[b.a],op=G.F[b.b];if(!me||!op){go();return;}
     const girls=roadRiders(G).filter(f=>CANON_IDS.includes(f.id)).sort((a,b2)=>(b2.bond||0)-(a.bond||0)),menu=this.hotelMenu(T,D,girls,1,true);
@@ -1436,13 +1564,13 @@ const REGION={
       if(T.goShop){T.goShop=0;this.shop(T,()=>{T.backShop=1;this.night(T,P,n,done);},1,1);return;}
       if(T.menuBack){T.menuBack=0;T.backShop=1;this.night(T,P,n,done);return;}this.night(T,P,n+1,done);},{bg:this.hotelBg[r],look:"casual"});},
   /* v1.91.82 (Man): the hotel menu in layers — go out ▸ pick who · go out with the champion · rest at the hotel · souvenirs · (before the bout) straight to the ring */
-  hotelMenu(T,D,girls,n,pre){const r=D.r,cid=this.champId[r],C=RG[r],top=girls[0],jeal=top&&(top.bond||0)>=40?top:null,back={t:"◂ กลับ",fx:()=>{T.menuBack=1;}};
+  hotelMenu(T,D,girls,n,pre){const r=D.r,cid=this.champId[r],C=RG[r],top=girls[0],back={t:"◂ กลับ",fx:()=>{T.menuBack=1;}};
     const outs=[...girls.map(g=>({t:`ไปกับ${g.name}`,fx:G2=>{add(G2,g.id,"bond",2);g.morale=Math.min(100,(g.morale||0)+4);},then:[{n:g.id,f:"happy",l:"casual",t:this.girlLine(g.id,D.name)}]})),
       ...(RG_OUT[T.dest]&&girls.length?[{t:`ไปกันทั้งทีม: ${RG_OUT[T.dest].t}`,fx:G2=>{for(const f of roadRiders(G2))f.morale=Math.min(100,(f.morale||0)+3);add(G2,girls[0].id,"bond",1);},then:[{n:"nar",t:RG_OUT[T.dest].l.replace(/\{g\}/g,girls[n%girls.length].name)+" · กำลังใจ +3"}]}]:[]),back];
     return [
       ...(outs.length>1?[{t:`ออกไปเที่ยว${D.name} ▸`,then:[{n:"nar",t:"ชวนใครไปเที่ยวดี?",choice:outs}]}]:[]),
-      {t:`ออกไปเที่ยวกับ${C.champ} (แชมป์${C.name})`,fx:G2=>{rgMeet(G2,cid,3);if(jeal)jeal.morale=Math.max(0,(jeal.morale||0)-3);},
-        then:[...this.dateLines(cid,D),...(jeal?[{n:jeal.id,f:"pout",l:"casual",t:this.jealLine(jeal.id,C.champ)}]:[])]},
+      {t:`ออกไปเที่ยวกับ${C.champ} (แชมป์${C.name})`,fx:G2=>{rgMeet(G2,cid,3);this.dateMark(G2,cid,T.dest);},
+        then:[...this.dateLines(cid,D,T.dest),...rgJealStep(G,C.champ,3)]},
       {t:"พักผ่อนที่โรงแรม (ความล้า −10)",fx:G2=>{for(const f of roadRiders(G2))f.fatigue=Math.max(0,(f.fatigue||0)-10);},then:[{n:"nar",t:pre?"ทุกคนนอนพักในห้องจนถึงเวลาออกไปเวที · ความล้า −10":"ทุกคนเข้านอนแต่หัวค่ำ เช้ามาร่างกายสดชื่นขึ้น · ความล้า −10"}]},
       ...(pre?[]:[{t:"ซ้อมเบา ๆ ที่ลานจอดรถโรงแรม",fx:G2=>{for(const f of roadRiders(G2)){f.exp=(f.exp||0)+6;f.fatigue=Math.min(100,(f.fatigue||0)+2);}},then:[{n:"nar",t:"เตะเป้าใต้ไฟลานจอดรถจนยามโรงแรมมาดู · ประสบการณ์ +6"}]}]),
       {t:`🛍 ซื้อของฝาก${D.name} (ไม่เสียเวลา)`,fx:()=>{T.goShop=1;}},
@@ -1461,7 +1589,10 @@ const REGION={
     const pv=L.find(k=>GIFTS[k].pv),head=hotel&&first?[{n:"nar",t:`ร้านของฝากข้างโรงแรมยังเปิดไฟอยู่${pv?` ${GIFTS[pv].name}ของขึ้นชื่อ${ROAD_DEST[T.dest].name}วางเรียงอยู่หน้าร้าน`:""}`}]:first?[{n:"nar",t:this.shopIntro[r]},{n:"nar",t:"ของฝากแพงหน่อย แต่ได้ใจสาว ๆ มาก · ซื้อเก็บไว้แล้วค่อยให้ทีหลังได้ (ร้านแบบนี้มีแค่ตอนมาทริป)"}]:[];
     playScene([...head,{n:"nar",t:first?"จะซื้ออะไรติดมือกลับไปไหม?":"ซื้ออะไรเพิ่มไหม?",choice}],()=>{
       if(st.end){next();return;}if(st.no)toast("เงินไม่พอ");if(st.got)toast(`ซื้อแล้ว: ${GIFTS[st.got].name} · มอบได้ที่จัดการค่าย › ของฝาก`);this.shop(T,next,0,hotel);},{bg:this.hotelBg[r],look:"casual"});},
-  dateLines(cid,D){const L={
+  /* v1.91.114 (Man): her own night the first time in each province, then her usual nights in turn */
+  dateMark(G,cid,dest){const R=G.region;R.dated=R.dated||{};if(RG_DATE[dest]&&!R.dated[dest]){R.dated[dest]=1;return;}R.dateN=R.dateN||{};R.dateN[cid]=(R.dateN[cid]||0)+1;},
+  dateLines(cid,D,dest){const R=G.region;if(dest&&RG_DATE[dest]&&!(R.dated||{})[dest])return RG_DATE[dest](G);const P=RG_DATEP[cid];if(P&&P.length)return P[((R.dateN||{})[cid]||0)%P.length](G);
+    const L={
     baibua:[{n:"npc",who:"ใบบัว",t:`ถนนคนเดินคืนนี้คนเยอะ… ถ้าหลงกัน จับแขนเสื้อหนูไว้ก็ได้นะ`},{n:"nar",t:"ใบบัวเดินช้า ๆ ให้ผู้จัดการเดินทัน มือเกือบชนกันหลายครั้ง แต่ไม่มีใครพูดอะไร"}],
     tabtim:[{n:"npc",who:"ทับทิม",t:"ไปกินส้มตำกันนะ! ร้านนี้แซบมาก… ฮ่า ๆ ๆ เผ็ดจนน้ำตาไหลแล้วอ้าย"},{n:"nar",t:"ทับทิมหัวเราะเสียงดังทั้งร้าน แต่พอผู้จัดการยื่นทิชชูให้ เธอเงียบไปครู่หนึ่ง"}],
     alicia:[{n:"npc",who:"อลิเซีย",t:"อย่าเข้าใจผิดนะ ฉันแค่อยากมีคนเดินเป็นเพื่อน คืนนี้กล้องปิดแล้ว…"},{n:"nar",t:"อลิเซียคว่ำโทรศัพท์ไว้บนโต๊ะทั้งคืน ไม่ได้หยิบขึ้นมาเลยสักครั้ง"}],
@@ -1677,7 +1808,7 @@ const REGION={
   /* v1.91.50 (playtest): a champion coming to visit shows on the home screen too — it was easy to miss on the regional tab */
   visitBanner(G){const R=G.region;if(!R||!R.champ)return "";const r=RG_ORDER.find(x=>R.champ[x]&&R.champ[x].visit==="due");if(!r)return "";const cid=this.champId[r];
     return `<button class="px newfighter" data-act="rgvisit" data-v="${r}"><span class="newb">NEW!</span>${G.F[cid]?`<img src="${faceSrc(cid,"happy")}" alt="">`:""}<span><b>${esc(RG[r].champ)}มาเยือนค่าย</b><small>แตะเพื่อต้อนรับ · มาได้ถึงก่อนนัดที่ 2 เท่านั้น</small></span><span class="chev">▸</span></button>`;},
-  canQuick(G,dest){const R=G.region,D=ROAD_DEST[dest];if(!R||!D)return false;return !!((R.arrived||{})[D.r])&&!(RG_TRIPX[dest]&&!((R.tx||{})[dest]));},
+  canQuick(G,dest){const R=G.region,D=ROAD_DEST[dest];if(!R||!D)return false;return !!((R.arrived||{})[D.r])&&!(RG_TRIPX[dest]&&!((R.tx||{})[dest]))&&!(RG_PROV[dest]&&!((R.provMet||{})[dest]));},
   /* v1.91.82 (Man): two popups — first who comes along (seats), then who fights (from those on board) with the bill */
   planHTML(dest){const D=ROAD_DEST[dest],C=RG[D.r],wk=this.tripWeek(G);if(!wk)return `<h2>${esc(D.name)}</h2><p>ปีนี้ไม่มีสัปดาห์ว่างให้เดินทางแล้ว</p>`;
     const RD=this.riders(G,wk),max=roadSeats(G),cand=roster(G).filter(f=>!f.injury||f.injury<3);
