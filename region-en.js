@@ -466,10 +466,12 @@ const RG_MISS={
 const RG_FLOOR=[20,10,5,0];
 /* scenes and fights for the champions */
 if(typeof BGIMG!=="undefined"){for(const d of Object.keys(RG_OPP))BGIMG["rgring_"+d]=d==="chanthaburi"?"bg_region_east.webp":`bg_ring_${d}.webp`; /* v1.91.14: the belt ceremony stays in the province's own ring */
+/* v1.91.133 (Man): each region has its own hotel room — "hotel_room" follows the region the camp is staying in */
+if(typeof BGIMG!=="undefined")Object.defineProperty(BGIMG,"hotel_room",{configurable:true,enumerable:true,get(){const r=window.__rgHotelR;return r?`bg_hotel_${r}.webp`:"bg_hotel_room.webp";},set(v){}});
 Object.assign(BGIMG,{rg_north:"bg_region_north.webp",rg_northeast:"bg_region_northeast.webp",rg_central:"bg_region_central.webp",rg_south:"bg_region_south.webp",rg_east:"bg_region_east.webp",
   doisuthep:"bg_doisuthep.webp",mekong:"bg_mekong.webp",boat:"bg_boat.webp",andaman:"bg_andaman.webp",
   night_north:"bg_night_north.webp",night_isan:"bg_night_isan.webp",night_central:"bg_night_central.webp",night_south:"bg_night_south.webp",
-  gala:"bg_gala_ballroom.webp",hotel_room:"bg_hotel_room.webp",gas_station:"bg_gas_station.webp",camp_buatasao:"bg_camp_buatasao.webp",tasao_shrine:"bg_tasao_shrine.webp",
+  gala:"bg_gala_ballroom.webp",gas_station:"bg_gas_station.webp",camp_buatasao:"bg_camp_buatasao.webp",tasao_shrine:"bg_tasao_shrine.webp",
   camp_phimai:"bg_camp_phimai.webp",somtam_stall:"bg_somtam_stall.webp",bus_terminal:"bg_bus_terminal.webp",mali_home:"bg_mali_home.webp",pier_south:"bg_pier_south.webp",
   camp_andaman:"bg_camp_andaman.webp",camp_hanuman:"bg_camp_hanuman.webp",lopburi_monkeys:"bg_lopburi_monkeys.webp",krerk_dinner:"bg_krerk_dinner.webp",
   closing_ceremony:"bg_closing_ceremony.webp",naka_underground:"bg_naka_underground.webp",naka_lab:"bg_naka_lab.webp"});}
@@ -2244,6 +2246,7 @@ const REGION={
   weekScene(G,done){const R=G.region;if(!R){done();return;}rgApply(G);const now=gameWeek(G);if(lbWeek(G,done))return;
     /* v1.91.122 (Man): the five celebrate the camp's milestones back home, one a week */
     if(R.msQ&&R.msQ.length){const q=R.msQ.shift(),S=rgMsSteps(G,q);if(S){playScene(S,()=>{save();done();},{bg:RG_MSL[q.k].bg,look:"casual"});return;}}
+    {const hs=rgRelDue(G);if(hs){playScene(hs.steps,()=>{save();done();},{bg:"camp",look:"casual"});return;}}
     /* v1.91.26 (Man): Kru Daeng reminds you to watch tape and train the counter before each regional title bout — no new buttons */
     for(const r of RG_ORDER){const c=R.champ[r],x=c&&c.next;if(!c||c.state!=="series"||!x||x.warned)continue;const left=x.abs-now;if(left<1||left>2)continue;
       const me=G.F[c.fid],cf=G.F[this.champId[r]];if(!me||!cf)continue;const tape=G.scoutAbs&&G.scoutAbs[cf.id]!=null&&now-G.scoutAbs[cf.id]<=8,ok=tape&&me.plan&&me.plan.preset===counterPreset(cf);x.warned=1;if(ok)continue;
@@ -2360,7 +2363,7 @@ Pick your fighter under Fights › Four Regions Championship`+((t=>t?`\n\n(${t})
     const fight=(cb)=>T.local?this.localRun(b,T,cb):openFight(b,cb);
     if(T.quick&&this.canQuick(G,dest)){this.arrive(G,T,P,null);fight(()=>{const n=P.nights||0;if(n){for(const f of roadRiders(G))f.fatigue=Math.max(0,(f.fatigue||0)-10*n);}
       G.log=G.log||[];G.log.push(`Back at camp from ${ROAD_DEST[dest].name}${n?` · rested at the hotel ${n} night(s), fatigue −${10*n}`:""}`);save();done();});return;}
-    ROAD.open(dest,{paid:true,plan:P,onArrive:(P2,front)=>{this.arrive(G,T,P2||P,front);const go=()=>this.hotel(b,T,()=>fight(()=>this.night(T,P2||P,1,done))),A=this.firstArrive(G,ROAD_DEST[dest].r,dest),Bp=this.provArrive(G,dest,!!A);T.fa=A?1:0;
+    ROAD.open(dest,{paid:true,plan:P,onArrive:(P2,front)=>{this.arrive(G,T,P2||P,front);window.__rgHotelR=ROAD_DEST[dest].r;const go=()=>this.hotel(b,T,()=>fight(()=>this.night(T,P2||P,1,done))),A=this.firstArrive(G,ROAD_DEST[dest].r,dest),Bp=this.provArrive(G,dest,!!A);T.fa=A?1:0;
       const goB=()=>Bp?playScene(Bp,go,{bg:RG_RBG[ROAD_DEST[dest].r],look:"casual"}):go();
       if(A){playScene(A,goB,{bg:"gas_station",look:"casual"});}else goB();}});},
   /* v1.91.121 (Man): off-schedule fight — the call, the choice to go, then bout after bout */
@@ -2400,7 +2403,7 @@ Pick your fighter under Fights › Four Regions Championship`+((t=>t?`\n\n(${t})
   /* the first trip into a region: its champion comes to meet the camp on the way in */
   firstArrive(G,r,dest){const R=G.region;R.arrived=R.arrived||{};if(R.arrived[r]||!RG_ARRIVE[r])return null;R.arrived[r]=1;rgTouch(G,RG_CID[r]);return RG_ARRIVE[r](G,ROAD_DEST[dest]);},
   /* road fatigue for everyone on board (the fighter only half: the corner keeps her off her feet) · the shotgun seat is a small moment */
-  arrive(G,T,P,front){const fat=P.fat||0;for(const f of roadRiders(G)){const k=f.id===T.fid?.5:1;f.fatigue=Math.min(100,(f.fatigue||0)+Math.round(fat*k));}
+  arrive(G,T,P,front){window.__rgHotelR=(ROAD_DEST[T.dest]||{}).r||window.__rgHotelR;const fat=P.fat||0;for(const f of roadRiders(G)){const k=f.id===T.fid?.5:1;f.fatigue=Math.min(100,(f.fatigue||0)+Math.round(fat*k));}
     if(front&&G.F[front]){add(G,front,"bond",1);G.F[front].morale=Math.min(100,(G.F[front].morale||0)+2);}
     G.log=G.log||[];G.log.push(`The whole camp arrives in ${ROAD_DEST[T.dest].name} · fatigue +${fat}`);},
   /* night n of the trip. Far trips stay over (1–2 nights); a day trip may stay one extra night if you pay for the rooms */
@@ -2445,7 +2448,7 @@ Pick your fighter under Fights › Four Regions Championship`+((t=>t?`\n\n(${t})
       ...(pre?[]:[{t:"Light training in the hotel parking lot",fx:G2=>{for(const f of roadRiders(G2)){f.exp=(f.exp||0)+6;f.fatigue=Math.min(100,(f.fatigue||0)+2);}},then:[{n:"nar",t:"Pad work under the parking-lot lights until the hotel guard comes to watch · EXP +6"}]}]),
       {t:`🛍 Buy souvenirs from ${D.name} (takes no time)`,fx:()=>{T.goShop=1;}},
       ...(pre?[{t:"Straight to the ring ▸",fx:()=>{T.goRing=1;}}]:[])];},
-  home(T,done){if(!T.shopDone){T.shopDone=1;this.shop(T,()=>this.home(T,done),1);return;}G.log=G.log||[];G.log.push(`Back at camp from ${ROAD_DEST[T.dest].name}`);save();done();},
+  home(T,done){window.__rgHotelR=null;if(!T.shopDone){T.shopDone=1;this.shop(T,()=>this.home(T,done),1);return;}G.log=G.log||[];G.log.push(`Back at camp from ${ROAD_DEST[T.dest].name}`);save();done();},
   /* v1.89.23: the souvenir shop on the way out of town — the only place regional souvenirs are sold; keep buying until you get back on the bus */
   shopIntro:{north:"On the way home the bus stops at a roadside souvenir shop. Paper umbrellas hang in rows; fine handwoven cloth lies folded on a wooden table.",
     isan:"On the way out of town the bus stops at the provincial silk centre. Triangle pillows are piled like a mountain; Praewa silk hangs behind glass.",
@@ -2997,6 +3000,223 @@ const RG_JOIN={
   conf:()=>[{n:"nar",t:"Chaba knocks three times, then stands so still for so long that you open the door yourself"},{n:"chaba",f:"flustered",l:"casual",t:"Manager"},{n:"nar",t:"The wind passes once"},{n:"chaba",f:"flustered",l:"casual",t:"…Like you. That's all. Can't talk long"}],
   yes:()=>"…Mm. (She squeezes your hand tight, then just walks back to her room)",no:"…It's fine. We can still fix fences together",bye:"…Got it. No need to say more"}};
 /* v1.91.30: champions who move in get a profile, gift tastes and gift lines like the main cast */
+/* ---------- v1.91.134 (Man): champions who moved in get the heroines' rhythm ----------
+   time together: her first three + two more new places, then short visits · heart scenes at bond 40/55/70 (before she confesses at 75)
+   · as lovers: scenes after 2, 8 and 16 weeks. Heart and love scenes play at camp, one a week, through the regional week scene. */
+const RG_HANG2={},RG_AGAIN={},RG_HEART={},RG_LOVE2={},RG_HEART_AT=[40,55,70],RG_LOVE_AT=[2,8,16];
+function rgRelDue(G){const R=G.region;if(!R||!R.joined)return null;const now=gameWeek(G);R.hs=R.hs||{};R.ls=R.ls||{};
+  for(const cid of Object.keys(R.joined)){const f=G.F[cid];if(!f||f.camp!=="player"||(typeof isAway==="function"&&isAway(G,cid)))continue;
+    const hs=R.hs[cid]=R.hs[cid]||{};if(RG_HEART[cid])for(const th of RG_HEART_AT)if(!hs[th]&&(f.bond||0)>=th&&RG_HEART[cid][th]){hs[th]=now;return {cid,steps:RG_HEART[cid][th](G)};}
+    if(R.lov&&R.lov[cid]!=null&&RG_LOVE2[cid]){const ls=R.ls[cid]=R.ls[cid]||{};for(const w of RG_LOVE_AT)if(!ls[w]&&now-R.lov[cid]>=w){ls[w]=now;return {cid,steps:RG_LOVE2[cid][w](G)};}}}
+  return null;}
+/* ---- ใบบัว ---- */
+RG_HANG2.baibua=[
+ [{n:"nar",t:"Sunday afternoon, Baibua borrows a bamboo raft from the old man next to the camp and waits at the Ping River landing, pole in hand."},
+  {n:"baibua",f:"happy",l:"casual",t:"Home has a lotus pond, but no river... I've always wanted to pole a raft. You can just sit."},
+  {n:"nar",t:"The raft spins half a turn. Baibua laughs so hard she nearly drops the pole.",choice:[
+   {t:"Pole on the other side",b:5,then:[{n:"baibua",f:"flustered",l:"casual",t:"Same rhythm now... the raft's going straight, just like when we do pads together."}]},
+   {t:"Watch her pole all the way to the bend",b:4,then:[{n:"baibua",f:"happy",l:"casual",t:"We made the bend! I did it... clap for me."}]}]}],
+ [{n:"nar",t:"A sweet smell from the camp kitchen since five in the morning. Baibua and Kati sit wrapping khanom jok in a pile of banana leaves."},
+  {n:"kati",f:"happy",l:"casual",t:"Baibua wraps every one prettier than mine! Manager, come help us wrap!"},
+  {n:"baibua",f:"happy",l:"casual",t:"Fold the banana leaf like this, then press the top gently... don't worry about tearing it.",choice:[
+   {t:"Wrap the most lopsided one possible to make them laugh",b:4,then:[{n:"kati",f:"happy",l:"casual",t:"Ha ha, this one's yours, Manager. I'm keeping it to eat myself!"},{n:"baibua",f:"flustered",l:"casual",t:"...Can I have that one?"}]},
+   {t:"Wrap them carefully, step by step as she shows you",b:5,then:[{n:"baibua",f:"happy",l:"casual",t:"This one's prettier than Kati's... don't tell her."}]}]}]];
+RG_AGAIN.baibua=[
+ [{n:"nar",t:"That evening Baibua makes two cups of hot tea and watches Chiang Mai's lights come on one by one."},{n:"baibua",f:"happy",l:"casual",t:"It's quiet here... just sitting together is enough."}],
+ [{n:"nar",t:"After training, Baibua presses the points on your shoulders one by one, the way her mother taught her."},{n:"baibua",f:"flustered",l:"casual",t:"Your shoulders are as stiff as teak... you've been working too hard again."}],
+ [{n:"nar",t:"Baibua waters the lotus in the clay jar she brought from home. Today it has its first bud."},{n:"baibua",f:"happy",l:"casual",t:"It likes it here... like me."}]];
+RG_HEART.baibua={
+ 40:G=>[{n:"nar",t:"On a day off, Baibua's mother video-calls from the spa, the sound of the artificial waterfall behind her."},
+  {n:"npc",who:"Baibua's mother",t:((G.region.side||{}).north||{}).won?"The spa gets busier every day since the Jin Long news. People come to see the spa a boxing camp protected together.":"The spa's fine, dear. Dad can walk further now. Don't worry about home."},
+  {n:"nar",t:"After hanging up, Baibua sits silent for a long time."},
+  {n:"baibua",f:"sad",l:"casual",t:"I moved here... some nights I'm scared I abandoned home. Dad, Mum, the lotus pond.",choice:[
+   {t:"\"You didn't leave. You bring your home's name into every fight\"",fx:G2=>add(G2,"baibua","bond",4),then:[{n:"baibua",f:"happy",l:"casual",t:"...Bringing home's name with me. I'll think that every time I step into the ring."}]},
+   {t:"\"Let's visit home together on the next day off\"",fx:G2=>add(G2,"baibua","bond",5),then:[{n:"baibua",f:"flustered",l:"casual",t:"Together... Mum will make a huge pot of hang lay for sure."}]}]}],
+ 55:G=>[{n:"nar",t:"Saturday morning, a middle-aged man walks slowly through the camp gate without a cane. Baibua runs to him with her hands still wrapped."},
+  {n:"npc",who:"Baibua's father",t:"My knee's better, so I wanted to see my daughter train with my own eyes, just once."},
+  {n:"nar",t:"Baibua spends the whole morning on pads with Kati. Her father sits by the ring and says nothing at all."},
+  {n:"npc",who:"Baibua's father",t:"I've kept this ring notebook since her first fight. The last page is still empty... I think you should write the next one."},
+  {n:"baibua",f:"flustered",l:"casual",t:"Dad! ...You don't have to take it.",choice:[
+   {t:"Take the notebook with both hands",fx:G2=>add(G2,"baibua","bond",5),then:[{n:"npc",who:"Baibua's father",t:"Good. Please look after my daughter."},{n:"baibua",f:"sad",l:"casual",t:"...Dad has never trusted me to anyone."}]},
+   {t:"\"Let's write it together, Baibua and me\"",fx:G2=>add(G2,"baibua","bond",4),then:[{n:"npc",who:"Baibua's father",t:"Ha ha, all right. That's better."},{n:"baibua",f:"happy",l:"casual",t:"Together... on the next page I'll write \"Sirichai Camp\" in big letters."}]}]}],
+ 70:G=>[{n:"nar",t:"Late at night the clack of a small loom comes from Baibua's room. She borrowed her grandmother's loom last month."},
+  {n:"baibua",f:"flustered",l:"casual",t:"Grandma is Tai Lue. She says when you weave cloth for someone... that person will always find their way home."},
+  {n:"nar",t:"A small cloth, shorter than a forearm, a pink lotus in the middle and a single red thread running through the whole thing."},
+  {n:"baibua",f:"flustered",l:"casual",t:"The red thread is the way back to camp... this one's yours. I made three mistakes, but I didn't start over. I wanted it to have my marks in it.",choice:[
+   {t:"Tie the cloth around your wrist right away",fx:G2=>add(G2,"baibua","bond",5),then:[{n:"baibua",f:"happy",l:"casual",t:"...Tied tight, too. I thought you'd keep it in a drawer."}]},
+   {t:"\"The mistakes are my favourite part\"",fx:G2=>add(G2,"baibua","bond",5),then:[{n:"baibua",f:"flustered",l:"casual",t:"When you say that... I'll weave mistakes into every one."}]}]}]};
+RG_LOVE2.baibua={
+ 2:G=>{const A=G.player.gender==="f"?"You":"You";return [{n:"nar",t:"Dinner at the camp's long table. For the first time Baibua sits next to the manager in front of everyone."},
+  {n:"baibua",f:"flustered",l:"casual",t:`${A}... could you serve me some curry?`},{n:"nar",t:"The whole table goes silent, then Kati is the first to burst out laughing."},
+  {n:"kati",f:"happy",l:"casual",t:"She said it! She said it in front of everyone!"},
+  {n:"baibua",f:"flustered",l:"casual",t:"...We're together now. How long am I supposed to keep calling you that in secret?",choice:[
+   {t:"Fill her bowl to the brim",fx:G2=>add(G2,"baibua","bond",4),then:[{n:"baibua",f:"happy",l:"casual",t:"That's too full... but I'll finish it."}]},
+   {t:`Call her "Bua" back in front of everyone`,fx:G2=>add(G2,"baibua","bond",5),then:[{n:"baibua",f:"flustered",l:"casual",t:"...Bua. Keep calling me that."}]}]}];},
+ 8:G=>[{n:"nar",t:"Yi Peng night by the Ping River behind the camp. Baibua lights the lantern wick with slightly shaking hands."},
+  {n:"baibua",f:"happy",l:"casual",t:"Every year I wish to win. This year I didn't wish for anything about boxing."},
+  {n:"nar",t:"The two lanterns rise together, and the wind carries them the same way until they're gone."},
+  {n:"baibua",f:"flustered",l:"casual",t:"...I wished we could release lanterns like this together every year. What did you wish for?",choice:[
+   {t:"\"Same wish as yours\"",fx:G2=>add(G2,"baibua","bond",5),then:[{n:"baibua",f:"happy",l:"casual",t:"Then those two lanterns wished for the same thing... it has to come true."}]},
+   {t:"\"It's a secret\"",fx:G2=>add(G2,"baibua","bond",3),then:[{n:"baibua",f:"pout",l:"casual",t:"Cheater... I already told you mine."}]}]}],
+ 16:G=>[{n:"nar",t:"Baibua's mother invites you to dinner at home. The long wooden table beside the lotus pond is covered in every northern dish imaginable."},
+  {n:"npc",who:"Baibua's father",t:"I won't ask about boxing anymore. My daughter fights better than I did at her age... I'll ask just one thing. Will you look after her?"},
+  {n:"baibua",f:"flustered",l:"casual",t:"Dad! How can you ask that in front of a guest!",choice:[
+   {t:"\"We look after each other. She's looked after me all along\"",fx:G2=>add(G2,"baibua","bond",5),then:[{n:"npc",who:"Baibua's father",t:"...Good answer. Let's eat."},{n:"baibua",f:"happy",l:"casual",t:"Dad smiled... he doesn't smile at people easily."}]},
+   {t:"\"For as long as she wants me to\"",fx:G2=>add(G2,"baibua","bond",4),then:[{n:"npc",who:"Baibua's father",t:"Good. But she'll want looking after for a long time, I'm sure. I know my daughter."}]}]},
+  {n:"baibua",f:"happy",l:"casual",t:"My home always has room for you... just like this camp has room for me."}]};
+/* ---- ทับทิม ---- */
+RG_HANG2.tabtim=[
+ [{n:"nar",t:"Tabtim carries an old wooden phin out to the front of the camp. One string is broken, but she says two are enough."},
+  {n:"tabtim",f:"happy",l:"casual",t:"Dad taught me the phin before he taught me boxing. He said good boxing needs rhythm. Want to try?"},
+  {n:"nar",t:"Your phin sounds like a cat whose tail got stepped on. Tabtim laughs until she doubles over.",choice:[
+   {t:"Ask her to hold your hand and teach you note by note",b:5,then:[{n:"tabtim",f:"flustered",l:"casual",t:"...I'll hold your hand to teach you, but no laughing when I go red."}]},
+   {t:"Pluck at random so she can dance along",b:4,then:[{n:"tabtim",f:"happy",l:"casual",t:"So fun! This song is called \"Manager Plays Every Note Wrong\". I'm playing it on my live!"}]}]}],
+ [{n:"nar",t:"Tabtim sets up a camera outside her room, the table piled with her mother's mudmee silk."},
+  {n:"tabtim",f:"happy",l:"casual",t:"Today's live is selling Mum's silk! Be my model, Manager. Silk looks better on tall people."},
+  {n:"nar",t:"Viewers climb faster than on her boxing lives. Every comment asks \"who's the guy in the live?\"",choice:[
+   {t:"Pose with everything you've got",b:4,then:[{n:"tabtim",f:"happy",l:"casual",t:"Sold out! Mum already called asking how much this model charges, ha ha."}]},
+   {t:"Have her model the silk instead",b:5,then:[{n:"tabtim",f:"flustered",l:"casual",t:"...You said I look better in it. I heard that clearly. So did the viewers."}]}]}]];
+RG_AGAIN.tabtim=[
+ [{n:"nar",t:"Tabtim brings two packs of grilled chicken and sticky rice. You eat them sitting on the edge of the practice ring."},{n:"tabtim",f:"happy",l:"casual",t:"Food tastes better with someone you like... I mean a fellow camp member!"}],
+ [{n:"nar",t:"Tabtim plays mor lam clips one after another, laughing louder than the people in them."},{n:"tabtim",f:"happy",l:"casual",t:"One more clip! Really the last one... the last three."}],
+ [{n:"nar",t:"Tabtim is helping her youngest brother with maths homework on video call, then turns to you for help."},{n:"tabtim",f:"flustered",l:"casual",t:"I'm good at kicks, but not fractions. Help me out."}]];
+RG_HEART.tabtim={
+ 40:G=>[{n:"nar",t:"A message from Brother Petch pops up on Tabtim's phone: a clip of his latest fight."},
+  {n:"tabtim",f:"surprised",l:"casual",t:"He asked, \"Round two, where am I open on the left? Take a look for me\"... Brother Petch asked me to look at his fight! That's never happened!"},
+  {n:"tabtim",f:"flustered",l:"casual",t:"How should I answer? If I tell him straight, will he get angry?",choice:[
+   {t:"\"Tell him straight. He asked because he trusts your eye\"",fx:G2=>add(G2,"tabtim","bond",5),then:[{n:"nar",t:"Tabtim types three screens' worth and sends it without deleting a word."},{n:"tabtim",f:"happy",l:"casual",t:"Brother Petch answered with two words: \"Yeah, true.\" ...Ha ha, two words, but I'm keeping that screenshot for life."}]},
+   {t:"\"Let's watch it together and I'll help you phrase it\"",fx:G2=>add(G2,"tabtim","bond",4),then:[{n:"tabtim",f:"happy",l:"casual",t:"You put it more politely than me. Brother Petch won't get angry... but the last line I'm adding myself: \"Kicks are more accurate than punches, brother.\""}]}]}],
+ 55:G=>[{n:"nar",t:"One in the morning, Tabtim's phone won't stop ringing. The name on the screen is \"Brother Nil\"."},
+  {n:"tabtim",f:"sad",l:"casual",t:"Brother Nil's drunk... he says at the Naka League nobody calls you by name, only by number, and the training room is cold as an operating theatre."},
+  {n:"tabtim",f:"sad",l:"casual",t:"He said \"don't tell Dad\"... the person who's looked down on me my whole life called me at one in the morning.",choice:[
+   {t:"\"Tell him this camp always has a room free\"",fx:G2=>{add(G2,"tabtim","bond",5);G2.region.nilDoor=1;},then:[{n:"tabtim",f:"flustered",l:"casual",t:"...I sent it. He read it and didn't answer. But he didn't block me either. I think that's his answer."}]},
+   {t:"Sit beside her until she hangs up",fx:G2=>add(G2,"tabtim","bond",4),then:[{n:"tabtim",f:"sad",l:"casual",t:"Thank you for not asking anything... tonight I don't want to be a champion. Just a little sister."}]}]}],
+ 70:G=>[{n:"nar",t:"A parcel from Korat arrives at camp: a length of silk patterned all over with little orange cats."},
+  {n:"tabtim",f:"flustered",l:"casual",t:"Mum wove you an \"Orange Cat\" pattern! ...I didn't ask her to. She did it herself!"},
+  {n:"tabtim",f:"happy",l:"casual",t:"Know why the people close to me call me Orange Cat? When I was little I had an orange cat. Tiny, but it chased every dog off the street. Dad said I'm just like it."},
+  {n:"tabtim",f:"flustered",l:"casual",t:"Only family gets to call me Orange Cat... but if you want to, you can.",choice:[
+   {t:"Call her \"Orange Cat\" right away",fx:G2=>add(G2,"tabtim","bond",5),then:[{n:"tabtim",f:"flustered",l:"casual",t:"...Hearing it from you isn't like when Dad says it at all. My heart's beating harder."}]},
+   {t:"Drape the silk over your shoulders right away",fx:G2=>add(G2,"tabtim","bond",4),then:[{n:"tabtim",f:"happy",l:"casual",t:"It really suits you! Take a picture for Mum. She'll show it off to the whole village."}]}]}]};
+RG_LOVE2.tabtim={
+ 2:G=>[{n:"nar",t:"The camp's daily training live. Tabtim grabs the camera and holds it herself."},
+  {n:"tabtim",f:"happy",l:"casual",t:"Fans! Tabtim has an announcement... Tabtim has a boyfriend! The one holding the bag back there!"},
+  {n:"nar",t:"Comments flood in until the app freezes. Every girl in the camp turns to look at once.",choice:[
+   {t:"Wave at the camera",fx:G2=>add(G2,"tabtim","bond",5),then:[{n:"tabtim",f:"happy",l:"casual",t:"See that! My boyfriend's as bold as me!"}]},
+   {t:"Hide your face behind the bag",fx:G2=>add(G2,"tabtim","bond",3),then:[{n:"tabtim",f:"pout",l:"casual",t:"What's there to be shy about! ...Okay, okay, sorry I didn't ask first. But I'm not sorry!"}]}]}],
+ 8:G=>[{n:"nar",t:"The bang fai festival in Tabtim's village. She has you on the first bus at five in the morning."},
+  {n:"tabtim",f:"happy",l:"casual",t:"This year you and me light the same one! Dad made it just for the two of us."},
+  {n:"nar",t:"The rocket shoots straight up into the clouds. Cheers roll across the fields."},
+  {n:"tabtim",f:"flustered",l:"casual",t:"When a bang fai goes up straight like that, they say the rain will be good and the rice will grow... and the people who lit it together stay together a long time. I didn't make that up!",choice:[
+   {t:"\"Then let's light one together again next year\"",fx:G2=>add(G2,"tabtim","bond",5),then:[{n:"tabtim",f:"happy",l:"casual",t:"It's a promise! I'll tell Dad to make a bigger one!"}]},
+   {t:"Tease her that she made it up",fx:G2=>add(G2,"tabtim","bond",3),then:[{n:"tabtim",f:"pout",l:"casual",t:"...Fine, I made up half. But the half I want to come true is real."}]}]}],
+ 16:G=>[{n:"nar",t:"Back home in Phimai for Songkran, the whole family sits around a jungle-curry feast under the mango tree, Tabtim's father at the head."},
+  {n:"npc",who:"Tabtim's father",t:"My daughter kicks hard, you know. She once kicked her big brother till he cried. Watch yourself."},
+  {n:"tabtim",f:"flustered",l:"casual",t:"Dad! I was eight!",choice:[
+   {t:"\"I've been careful all along, and happy to get kicked\"",fx:G2=>add(G2,"tabtim","bond",4),then:[{n:"npc",who:"Tabtim's father",t:"Ha ha! Good, good. Keep eating."}]},
+   {t:"\"Her kicks have already won this camp a cup\"",fx:G2=>add(G2,"tabtim","bond",5),then:[{n:"npc",who:"Tabtim's father",t:"...Yeah. I watch every live fight. Kicks are kicks, but she kicks all the way."},{n:"tabtim",f:"sad",l:"casual",t:"Dad watched every fight... and he never told me."}]}]},
+  {n:"tabtim",f:"happy",l:"casual",t:"Thank you for coming to my home... this house is loud all day. You'd better get used to it now."}]};
+/* ---- อลิเซีย ---- */
+RG_HANG2.alicia=[
+ [{n:"nar",t:"On a day off Mabelle and Minnie show up at camp with one basketball and one bicycle."},
+  {n:"npc",who:"Minnie",t:"Sportygal is visiting our friend's new home! Manager, two-on-two? Me and Mabelle against you and Alicia."},
+  {n:"alicia",f:"flustered",l:"casual",t:"Don't. Minnie has dunked on three people's heads... but if you play, I won't let anyone dunk on you.",choice:[
+   {t:"Play until you drop",b:5,then:[{n:"nar",t:"You lose twenty to four. Alicia scores all four and high-fives you every time."},{n:"npc",who:"Mabelle",t:"I've never seen Alicia high-five anyone~"}]},
+   {t:"Referee, and quietly favour Alicia",b:4,then:[{n:"npc",who:"Minnie",t:"Foul where?! Totally biased!"},{n:"alicia",f:"happy",l:"casual",t:"Referee's call is final. Right, Manager?"}]}]}],
+ [{n:"nar",t:"A burnt smell drifts out of the kitchen. Alicia stands holding a wok, Auntie Daeng clutching her head beside her."},
+  {n:"alicia",f:"pout",l:"casual",t:"Khao soi is harder than a rap verse... I wanted to make you something myself for once, not order delivery."},
+  {n:"nar",t:"The first bowl of khao soi is so salty it needs half a bowl of water.",choice:[
+   {t:"Finish the whole bowl",b:5,then:[{n:"alicia",f:"flustered",l:"casual",t:"...You really finished it? Liar. But the cutest liar I've ever met."}]},
+   {t:"Ask to make the second bowl together",b:4,then:[{n:"alicia",f:"happy",l:"casual",t:"The second bowl is much better. Auntie Daeng even nodded! ...Because you added sugar instead of salt. I saw."}]}]}]];
+RG_AGAIN.alicia=[
+ [{n:"nar",t:"Before a fan meeting, Alicia holds out two shirts for you to pick."},{n:"alicia",f:"flustered",l:"casual",t:"I don't want your opinion or anything. Just... which one."}],
+ [{n:"nar",t:"Alicia reads her recent comments. Most of them ask about her heavy hands."},{n:"alicia",f:"happy",l:"casual",t:"They're asking about boxing now, not my face... I've waited a long time for this."}],
+ [{n:"nar",t:"Alicia works the bag for an hour, her phone face-down far away."},{n:"alicia",f:"happy",l:"casual",t:"No one's watching this hour but you. That's enough."}]];
+RG_HEART.alicia={
+ 40:G=>[{n:"nar",t:"Alicia drops a tablet on the table: a Sportygal concert tour schedule, twelve cities."},
+  {n:"alicia",f:"sad",l:"casual",t:"The label wants a three-month tour, right in fight season... if I go, I miss fights. If I don't, Mabelle and Minnie don't get a tour."},
+  {n:"alicia",f:"sad",l:"casual",t:"Both are my dreams. Neither one is a chore... why do I have to choose?",choice:[
+   {t:"\"Get the tour shortened and book fights around it\"",fx:G2=>add(G2,"alicia","bond",5),then:[{n:"alicia",f:"happy",l:"casual",t:"...Two months, six cities, and fights at venues along the way. I'm calling the label right now. You're a genius. Don't let it go to your head."}]},
+   {t:"\"Ask Mabelle and Minnie before deciding alone\"",fx:G2=>add(G2,"alicia","bond",4),then:[{n:"nar",t:"Ten minutes later two messages pop up in the Sportygal group at once: \"Go fight. We'll wait.\""},{n:"alicia",f:"sad",l:"casual",t:"...They can wait for me, and I won't make them wait too long."}]}]}],
+ 55:G=>[{n:"nar",t:"The tape room late at night. Alicia and Rin sit in opposite corners, half an hour into an argument."},
+  {n:"rin",f:"pout",l:"casual",t:"The numbers say this opponent throws a left after stepping back twice. Seventy-three percent."},
+  {n:"alicia",f:"pout",l:"casual",t:"And her eyes say she'll change plans the moment she knows we've read it. People aren't numbers, Rin."},
+  {n:"nar",t:"They both turn to the manager at once.",choice:[
+   {t:"\"Use both. Rin reads the plan, Alicia reads the person\"",fx:G2=>{add(G2,"alicia","bond",4);add(G2,"rin","bond",3);},then:[{n:"rin",f:"happy",l:"casual",t:"...This answer has very high statistical significance."},{n:"alicia",f:"happy",l:"casual",t:"Two Lopburi fighters in one camp. Our next opponent is in trouble. Rin, high five?"}]},
+   {t:"\"Have them hit pads against each other and see who reads whom\"",fx:G2=>{add(G2,"alicia","bond",5);add(G2,"rin","bond",2);},then:[{n:"nar",t:"Three rounds later, every round a draw. They sit panting and laughing on the ring floor."},{n:"alicia",f:"happy",l:"casual",t:"...You're better than I thought, Rin. I'll say it once."}]}]}],
+ 70:G=>[{n:"nar",t:"The camp roof at ten at night. Alicia sits with an acoustic guitar you've never seen her play."},
+  {n:"alicia",f:"flustered",l:"casual",t:"Every song I sing, the label wrote for me... I wrote this one. No one has heard it. No camera, no live."},
+  {n:"nar",t:"A short song, sung softly. The hook is about someone who looks at her without a screen in between."},
+  {n:"alicia",f:"flustered",l:"casual",t:"...That's it. You don't have to say anything. No, I want you to. But say something nice.",choice:[
+   {t:"\"Play it again\"",fx:G2=>add(G2,"alicia","bond",5),then:[{n:"alicia",f:"happy",l:"casual",t:"...An encore? One audience member wants an encore, so I'll sing it. My voice won't shake this time."}]},
+   {t:"\"Don't release this one. Keep it here\"",fx:G2=>add(G2,"alicia","bond",4),then:[{n:"alicia",f:"happy",l:"casual",t:"Keep it here on this roof... Deal. The first song I choose not to let anyone hear."}]}]}]};
+RG_LOVE2.alicia={
+ 2:G=>[{n:"nar",t:"Alicia's new post gets over a million hearts in the first hour: two coffee cups, and someone else's hand holding one by the handle."},
+  {n:"alicia",f:"flustered",l:"casual",t:"I didn't post your face. Just your hand... the caption says \"I choose.\" That's all. Let them guess."},
+  {n:"nar",t:"Mabelle comments thirty heart emojis under the post. Minnie comments, \"That hand looks familiar.\"",choice:[
+   {t:"\"This hand is happy to be in every post\"",fx:G2=>add(G2,"alicia","bond",5),then:[{n:"alicia",f:"happy",l:"casual",t:"...Remember you said that, because I'll be charging you for every post."}]},
+   {t:"\"That's my coffee cup. Don't you dare delete it\"",fx:G2=>add(G2,"alicia","bond",4),then:[{n:"alicia",f:"pout",l:"casual",t:"Not deleting it. Pinned it too. Obviously."}]}]}],
+ 8:G=>[{n:"nar",t:"Sportygal's Bangkok concert. Before the last song, Alicia asks for the stage alone."},
+  {n:"alicia",f:"flustered",l:"casual",t:"This song isn't on the set list... I wrote it myself, for someone from Chiang Mai who's standing backstage tonight."},
+  {n:"npc",who:"Minnie",t:"He's here! This one!"},{n:"npc",who:"Mabelle",t:"Minnie! Don't point!"},
+  {n:"alicia",f:"happy",l:"casual",t:"...I'm not pointing. No one saw your face. It's not content. I just wanted you to hear it with ten thousand people.",choice:[
+   {t:"Stand and listen to the end without moving",fx:G2=>add(G2,"alicia","bond",5),then:[{n:"alicia",f:"happy",l:"casual",t:"I saw you standing still through the whole song... I really sang to just one person, in front of ten thousand."}]},
+   {t:"Wave the lightstick Minnie shoved into your hand",fx:G2=>add(G2,"alicia","bond",4),then:[{n:"alicia",f:"flustered",l:"casual",t:"And a lightstick in my colour... who taught you to wave it in rhythm? Minnie, right?"}]}]}],
+ 16:G=>[{n:"nar",t:"Alicia's mother invites you to dinner at the Bangkok condo the sponsor pays for, but tonight she cooked every dish herself."},
+  {n:"npc",who:"Alicia's mother",t:"I've watched my daughter through a screen for ten years. Today's the first time I've seen her laugh without looking for the lens."},
+  {n:"alicia",f:"flustered",l:"casual",t:"Mum! How can you say that in front of him?",choice:[
+   {t:"\"She laughs like this at camp every day\"",fx:G2=>add(G2,"alicia","bond",5),then:[{n:"npc",who:"Alicia's mother",t:"Then I'll leave my daughter with that camp of yours."},{n:"alicia",f:"sad",l:"casual",t:"...Mum has never trusted me to anyone. Not even the label."}]},
+   {t:"\"Thank you for letting her choose her own way\"",fx:G2=>add(G2,"alicia","bond",4),then:[{n:"npc",who:"Alicia's mother",t:"I didn't let her. She's always chosen for herself. I just watched."}]}]},
+  {n:"alicia",f:"happy",l:"casual",t:"...Tonight isn't content. But I'll remember all of it myself. No recording."}]};
+/* ---- ชบา ---- */
+RG_HANG2.chaba=[
+ [{n:"nar",t:"On a day off Chaba rents a small sailboat at the reservoir outside town. The afternoon wind is just right."},
+  {n:"chaba",f:"happy",l:"casual",t:"...Not the sea, but real wind. Hold this rope. Pull when I say."},
+  {n:"nar",t:"The boat heels one way and Chaba leans the other without a thought.",choice:[
+   {t:"Pull the rope on her timing",b:5,then:[{n:"chaba",f:"happy",l:"casual",t:"...Good. Steady hands. The wind loves steady hands."}]},
+   {t:"Let her steer alone and watch",b:4,then:[{n:"chaba",f:"flustered",l:"casual",t:"Looking at what. ...The boat, or me."}]}]}],
+ [{n:"nar",t:"The camp kitchen is hotter than usual. Chaba and Mali are pounding kaeng tai pla paste in two mortars."},
+  {n:"mali",f:"happy",l:"casual",t:"Chaba pounds way harder than Mali~ Manager, come taste! Spicy like back home."},
+  {n:"chaba",f:"happy",l:"casual",t:"...Spicy. Careful.",choice:[
+   {t:"Take a big bite",b:4,then:[{n:"nar",t:"Three seconds later you can't speak. Chaba hands you water, the corner of her mouth twitching."},{n:"mali",f:"happy",l:"casual",t:"Chaba smiled! Mali saw it!"}]},
+   {t:"Taste a little and say it's \"roi\"",b:5,then:[{n:"chaba",f:"flustered",l:"casual",t:"...Speaking southern now. Who taught you."},{n:"mali",f:"happy",l:"casual",t:"Mali did~"}]}]}]];
+RG_AGAIN.chaba=[
+ [{n:"nar",t:"Chaba sits oiling the whole camp's gloves pair by pair, in silence."},{n:"chaba",f:"happy",l:"casual",t:"...This pair is yours. Pads. Oiled too."}],
+ [{n:"nar",t:"The same stray cat waits outside Chaba's door. She pours it food and sits down beside it."},{n:"chaba",f:"happy",l:"casual",t:"...It remembers the time. Like you."}],
+ [{n:"nar",t:"It pours all afternoon. Chaba watches the rain from the dorm balcony, a space left empty beside her."},{n:"chaba",f:"happy",l:"casual",t:"...Sit. Rain like this, no need to talk."}]];
+RG_HEART.chaba={
+ 40:G=>[{n:"nar",t:"Chaba stops in the middle of training and stares at her phone for a full minute."},
+  {n:"nar",t:"A video from Phuket: her brother grips two crutches and takes three steps out of his wheelchair."},
+  {n:"chaba",f:"sad",l:"casual",t:"...Three steps. The doctor said never."},
+  {n:"nar",t:"Tears run down, but Chaba's face stays as still as ever.",choice:[
+   {t:"Stand beside her and say nothing",fx:G2=>add(G2,"chaba","bond",5),then:[{n:"chaba",f:"sad",l:"casual",t:"...Thanks. For not talking."}]},
+   {t:"\"Call your brother back right now\"",fx:G2=>add(G2,"chaba","bond",4),then:[{n:"npc",who:"Chaba's brother",t:"Chaba! See? Three steps! Next month I'm walking to watch you fight myself!"},{n:"chaba",f:"happy",l:"casual",t:"...Come. I'll win for you to see."}]}]}],
+ 55:G=>[{n:"nar",t:"On the dorm balcony Chaba teaches sailing knots, one after another."},
+  {n:"chaba",f:"sad",l:"casual",t:"...The day the boat capsized, I tied this knot wrong. That's why my brother went in."},
+  {n:"chaba",f:"sad",l:"casual",t:"No one knows. Not Mum. Not my brother. ...I've been afraid of the sea since that day, but I still sail. Quitting would be giving up.",choice:[
+   {t:"\"You've sailed every year because you're the bravest, not because you were wrong\"",fx:G2=>add(G2,"chaba","bond",5),then:[{n:"chaba",f:"sad",l:"casual",t:"...Long words. You always talk long. But this time, I'll listen."}]},
+   {t:"Ask her to teach you to tie that knot right",fx:G2=>add(G2,"chaba","bond",5),then:[{n:"nar",t:"Chaba guides your hands through the same knot ten times. Not one wrong."},{n:"chaba",f:"happy",l:"casual",t:"...Right. Every time. I'll remember these hands when I sail."}]}]}],
+ 70:G=>[{n:"nar",t:"Before dawn, an envelope has been slipped under the manager's door. Big, slanted handwriting."},
+  {n:"nar",t:"\"Chaba wrote a dozen letters and never sent them. This one I'm sending.\" ...Inside, only three lines."},
+  {n:"nar",t:"\"Here is good / Manager is good / Want to stay long\"",choice:[
+   {t:"Write three lines back and slip them under her door",fx:G2=>add(G2,"chaba","bond",5),then:[{n:"nar",t:"Later that morning Chaba walks past with both ears red."},{n:"chaba",f:"flustered",l:"casual",t:"...Read it. Three lines. Same. Fair."}]},
+   {t:"Knock on her door and answer out loud",fx:G2=>add(G2,"chaba","bond",4),then:[{n:"chaba",f:"flustered",l:"casual",t:"...Letters are for reading, not talking. Go write. ...Fine. Heard it."}]}]}]};
+RG_LOVE2.chaba={
+ 2:G=>[{n:"nar",t:"At camp dinner Chaba sits down next to the manager and simply rests her hand on yours in the middle of the table."},
+  {n:"mali",f:"surprised",l:"casual",t:"Chaba! In front of everyone~!"},
+  {n:"chaba",f:"happy",l:"casual",t:"...Why. Not hiding.",choice:[
+   {t:"Hold her hand back until dinner's over",fx:G2=>add(G2,"chaba","bond",5),then:[{n:"chaba",f:"flustered",l:"casual",t:"...Eating one-handed is hard. Not letting go."}]},
+   {t:"Spoon a salted egg onto her plate with your other hand",fx:G2=>add(G2,"chaba","bond",4),then:[{n:"chaba",f:"happy",l:"casual",t:"...Chaiya salted egg. You know."},{n:"mali",f:"happy",l:"casual",t:"Mali told him~"}]}]}],
+ 8:G=>[{n:"nar",t:"On a long holiday Chaba takes the manager home to Phuket to go night squid fishing with her father. Green lamps light the sea in a wide circle."},
+  {n:"npc",who:"Chaba's father",t:"My daughter has never brought anyone on the boat. You're the first."},
+  {n:"chaba",f:"flustered",l:"casual",t:"...Dad. Talks too much.",choice:[
+   {t:"Help haul the nets all night",fx:G2=>add(G2,"chaba","bond",5),then:[{n:"npc",who:"Chaba's father",t:"Good hands. Come again next year."},{n:"chaba",f:"happy",l:"casual",t:"...Dad invited you. Dad doesn't invite anyone."}]},
+   {t:"Sit at the stern with Chaba and watch the other boats' lights",fx:G2=>add(G2,"chaba","bond",4),then:[{n:"chaba",f:"happy",l:"casual",t:"...When I was little I thought those lights were shooting stars. Still do."}]}]}],
+ 16:G=>[{n:"nar",t:"Chak Phra festival in Chaiya. Chaba brings the manager and Mali back to the old neighbourhood. Her brother walks the whole length of the boat procession."},
+  {n:"npc",who:"Chaba's brother",t:"Chaba smiles more these days... thank you for making my little sister smile."},
+  {n:"chaba",f:"flustered",l:"casual",t:"...Not smiling. Sun's strong.",choice:[
+   {t:"\"The sun's been strong every day lately\"",fx:G2=>add(G2,"chaba","bond",5),then:[{n:"chaba",f:"happy",l:"casual",t:"...Mm. Every day. Because someone's standing next to me."}]},
+   {t:"Ask her brother to walk with you to the end of the procession",fx:G2=>add(G2,"chaba","bond",4),then:[{n:"npc",who:"Chaba's brother",t:"End of the procession! Next year I'll run it!"},{n:"chaba",f:"sad",l:"casual",t:"...I'll watch. Every Chak Phra. Never miss one."}]}]}]};
+
 const RG_PROF={
  baibua:{height:"165 cm",blood:"A",bday:"12 November (Yi Peng)",home:"Chiang Mai · a wooden house behind her father's small camp",heritage:"Muay Tha Sao (same lineage as Kati)",
   personality:"Shy, reserved, soft-spoken, apologises before every counter elbow, yet never backs down in the ring",likes:["Khao soi from a hidden stall behind the market","Mist before dawn","Teen chok embroidery"],
@@ -3094,7 +3314,8 @@ Object.assign(REGION,{
     G.log=G.log||[];G.log.push(`${f?f.name:cid} and the Manager started dating ${P.length?" (two-timing)":""}`);},
   breakC(G,cid){const R=G.region,f=G.F[cid];if(!this.isLovC(G,cid))return;delete R.lov[cid];(R.ex=R.ex||{})[cid]=gameWeek(G);if(R.twoQ&&R.twoQ.cid===cid)delete R.twoQ;if(f)add(G,cid,"bond",-35);},
   hangC(G,cid){const f=G.F[cid];if(!f||G.freeUsed||isAway(G,cid))return;const J=RG_JOIN[cid],R=G.region;R.hangI=R.hangI||{};const i=R.hangI[cid]||0,lov=this.isLovC(G,cid);
-    const P=lov&&i%2===1?J.love:J.hang[Math.floor(i/(lov?2:1))%J.hang.length];R.hangI[cid]=i+1;G.freeUsed=true;f.hangWk=G.week;
+    R.hangF=R.hangF||{};const H=[...J.hang,...(RG_HANG2[cid]||[])],A=RG_AGAIN[cid]||J.hang;if(R.hangF[cid]==null)R.hangF[cid]=Math.min(Math.ceil(i/(lov?2:1)),J.hang.length);
+    let P;if(lov&&i%2===1)P=J.love;else if(R.hangF[cid]<H.length)P=H[R.hangF[cid]++];else{R.hangAI=R.hangAI||{};P=A[(R.hangAI[cid]=(R.hangAI[cid]||0)+1)%A.length];}R.hangI[cid]=i+1;G.freeUsed=true;f.hangWk=G.week;
     const S=P.map(x=>x.choice?{...x,choice:x.choice.map(o=>({t:o.t,fx:G2=>{add(G2,cid,"bond",o.b);add(G2,cid,"morale",3);},then:o.then}))}:{...x});
     if(!S.some(x=>x.choice))S.push({fx:G2=>{add(G2,cid,"bond",5);add(G2,cid,"morale",3);}});
     save();playScene(S,()=>{save();render();},{bg:"camp",look:"casual"});},
