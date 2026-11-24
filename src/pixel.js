@@ -785,20 +785,22 @@ function drawCampFx(x,k,t){const C=CFX[k]||CFX.rest,W=x.canvas.width,H=x.canvas.
   if(bg.complete&&bg.naturalWidth){const s=Math.max(W/bg.naturalWidth,H/bg.naturalHeight);const w=bg.naturalWidth*s,h=bg.naturalHeight*s;x.imageSmoothingEnabled=true;x.drawImage(bg,(W-w)/2,(H-h)/2,w,h);x.imageSmoothingEnabled=false;}
   if(C.tint){x.fillStyle=C.tint;x.fillRect(0,0,W,H);}
   x.fillStyle="rgba(0,0,0,.28)";x.fillRect(0,H*.78,W,H*.22);
-  const R=cfxRoster(k),fy=H*.94,fh=Math.min(H*.62,W/Math.max(3,R.length)*1.15);const P=(a,b,w,h,c)=>{x.fillStyle=c;x.fillRect(Math.round(a),Math.round(b),w,h);};
+  const R=cfxRoster(k),fy=H*.94,fh=H*.44; /* v1.91.150 (Man): everyone the same full size however big the camp is — a big camp stands in rows instead of shrinking */const P=(a,b,w,h,c)=>{x.fillStyle=c;x.fillRect(Math.round(a),Math.round(b),w,h);};
   if(C.students)for(let i=0;i<C.students;i++){const sx=W*(.52+i*.08),sy=fy-6+(i%2)*6;drawStudentNpc(x,"stu"+i+k,sx,sy,fh*.78,Math.floor(t/1400+i)%2?C.row:"guard",t+i*90,true);}
   if(C.masseuse)drawStudentNpc(x,"masseuse",W*.72,fy,fh*.9,"idle",t,true);
   if(C.elder){drawStudentNpc(x,"oldmaster",W*.7,fy,fh*.95,Math.floor(t/1300)%2?"knee":"guard",t,true);}
   if(C.crew){drawStudentNpc(x,"crew1",W*.84,fy,fh*.85,"idle",t,true);}
   if(C.monks)for(let i=0;i<3;i++){const mx=-40+((t/22)+i*70)%(W+160);drawMonk(x,mx,fy-fh*.1,t,i,fh*.7/29,true);} // v1.38: monks walk behind, left to right
   /* v1.91.149 (Man: nobody stands somewhere odd): the ones watching stand on the same floor at the sides, a step back — not up on the back wall or the ropes */
-  if(C.spar){const ring=k==="fightnight"||k==="hostshow",SX=[.1,.9,.2,.8,.05,.95,.15,.85];R.slice(2,10).forEach((f,i)=>{const sx=SX[i];drawFrame(x,sheetFor(f),ROW.idle,Math.floor(t/260+i)%4,W*sx,ring?H*1.04:fy-H*.06,fh*.72,sx>.5);});} /* at a ring show they watch from the front row, below the apron */
+  if(C.spar){const ring=k==="fightnight"||k==="hostshow",SX=[.1,.9,.2,.8,.05,.95,.15,.85];R.slice(2,10).forEach((f,i)=>{const sx=SX[i];drawFrame(x,sheetFor(f),ROW.idle,Math.floor(t/260+i)%4,W*sx,ring?H*1.04:fy-H*.06,fh,sx>.5);});} /* at a ring show they watch from the front row, below the apron */
   if(C.spar&&R.length){const a=R[0],b=R[1]||{id:"sparnpc",canon:false};const ph=Math.floor(t/900)%2;
     drawFrame(x,sheetFor(a),ROW[ph?"punch":"guard"],Math.floor(t/150)%4,W*.4,fy,fh,false);drawFrame(x,sheetFor(b),ROW[ph?"guard":"knee"],Math.floor(t/150)%4,W*.6,fy,fh,true);}
-  else R.forEach((f,i)=>{let cx=W*(.12+(i+.5)*.76/Math.max(1,R.length)),row=C.row||"idle";
-    if(C.walk){const span=W*.5;cx=W*.12+((t/18+i*span/Math.max(1,R.length))%span);row="walk";}
-    if(C.kneel){cx=W*(.12+(i+.5)*.76/Math.max(1,R.length));row="idle";}
-    drawFrame(x,sheetFor(f),ROW[row],Math.floor(t/(row==="idle"?260:150))%4,cx,C.kneel?fy+fh*.12:fy,C.kneel?fh*.88:fh,false);});
+  else{const PR=5,nr=Math.ceil(R.length/PR);
+    for(let r=nr-1;r>=0;r--){const L=R.slice(r*PR,r*PR+PR),off=r%2?.5:0,ry=fy-r*H*.09;
+      L.forEach((f,j)=>{const i=r*PR+j;let cx=W*(.1+(j+.5+off*(L.length<PR?0:-.25))*.8/L.length),row=C.row||"idle";
+        if(C.walk){const span=W*.55;cx=W*.1+((t/18+i*span/Math.max(1,R.length))%span);row="walk";}
+        if(C.kneel)row="idle";
+        drawFrame(x,sheetFor(f),ROW[row],Math.floor(t/(row==="idle"?260:150)+i)%4,cx,C.kneel?ry+fh*.12:ry,C.kneel?fh*.88:fh,false);});}}
   if(C.crowd)for(let i=0;i<16;i++){const cx=(i+.5)*W/16,hop=Math.floor(t/260+i*1.7)%3===0?3:0,cy=H*.9-hop+(i%2)*4;
     P(cx-7,cy,14,H*.12,["#2b2238","#352a44","#241d30"][i%3]);P(cx-5,cy-10,10,10,["#3b2f4a","#2e2539","#43354f"][i%3]);if(hop&&i%4===0)P(cx+6,cy-14,3,10,"#3b2f4a");}
   if(C.planks){P(W*.7,fy-40,46,6,"#8a5a32");P(W*.7,fy-30,46,6,"#a06a3a");P(W*.72,fy-46,4,40,"#5a3a22");P(W*.82,fy-46,4,40,"#5a3a22");}
