@@ -782,10 +782,13 @@ function drawMonk(x,cx,y,t,i,sc,right){const bob=Math.floor(t/300+i)%2,H=MONK_PX
 function drawStudentNpc(x,id,cx,fy,h,row,t,flip){drawFrame(x,sheetFor({id,canon:false}),ROW[row],Math.floor(t/170)%4,cx,fy,h,flip);}
 function drawCampFx(x,k,t){const C=CFX[k]||CFX.rest,W=x.canvas.width,H=x.canvas.height;x.imageSmoothingEnabled=false;
   const bgn=C.bg==="gym"?gymBg():C.bg;const bg=img(bgn);x.fillStyle="#1a1428";x.fillRect(0,0,W,H);
-  if(bg.complete&&bg.naturalWidth){const s=Math.max(W/bg.naturalWidth,H/bg.naturalHeight);const w=bg.naturalWidth*s,h=bg.naturalHeight*s;x.imageSmoothingEnabled=true;x.drawImage(bg,(W-w)/2,(H-h)/2,w,h);x.imageSmoothingEnabled=false;}
+  const R=cfxRoster(k),nR=Math.max(1,R.length);
+  /* v1.91.151 (Man): a camera, not a fixed frame — few people: zoom in on the floor so they stand big; a crowd: pull back a little so everyone fits */
+  const Z=nR<=1?1.55:nR===2?1.42:nR===3?1.3:nR===4?1.2:nR===5?1.12:nR<=7?1.05:1,fy=H*(.95-(Z-1)*.14);
+  if(bg.complete&&bg.naturalWidth){const s=Math.max(W/bg.naturalWidth,H/bg.naturalHeight)*Z;const w=bg.naturalWidth*s,h=bg.naturalHeight*s,by0=(H-h/Z)/2,ay=fy-by0,by=fy-ay*Z;x.imageSmoothingEnabled=true;x.drawImage(bg,(W-w)/2,Math.min(0,Math.max(H-h,by)),w,h);x.imageSmoothingEnabled=false;}
   if(C.tint){x.fillStyle=C.tint;x.fillRect(0,0,W,H);}
   x.fillStyle="rgba(0,0,0,.28)";x.fillRect(0,H*.78,W,H*.22);
-  const R=cfxRoster(k),fy=H*.94,fh=H*.44; /* v1.91.150 (Man): everyone the same full size however big the camp is — a big camp stands in rows instead of shrinking */const P=(a,b,w,h,c)=>{x.fillStyle=c;x.fillRect(Math.round(a),Math.round(b),w,h);};
+  const fh=H*.44*Z/1.12; /* v1.91.150 (Man): everyone the same full size however big the camp is — a big camp stands in rows instead of shrinking */const P=(a,b,w,h,c)=>{x.fillStyle=c;x.fillRect(Math.round(a),Math.round(b),w,h);};
   if(C.students)for(let i=0;i<C.students;i++){const sx=W*(.52+i*.08),sy=fy-6+(i%2)*6;drawStudentNpc(x,"stu"+i+k,sx,sy,fh*.78,Math.floor(t/1400+i)%2?C.row:"guard",t+i*90,true);}
   if(C.masseuse)drawStudentNpc(x,"masseuse",W*.72,fy,fh*.9,"idle",t,true);
   if(C.elder){drawStudentNpc(x,"oldmaster",W*.7,fy,fh*.95,Math.floor(t/1300)%2?"knee":"guard",t,true);}
