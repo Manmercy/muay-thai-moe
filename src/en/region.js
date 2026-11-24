@@ -80,10 +80,10 @@ const RG_CH={
    {n:"nar",t:"At five in the morning Baibua is waiting outside the hotel on an old motorbike. You ride up Doi Suthep while the sky is still dark."},
    {n:"baibua",f:"happy",l:"casual",t:"This is my place. When Dad could still teach, he brought me to watch the mist every New Year."},
    {n:"nar",t:"A cold wind rises from the valley. Baibua unfolds a small teen-chok cloth and shares half of it over the Manager's shoulders."},
-   {n:"baibua",f:"sad",l:"casual",t:"Dad hurt his knee and stopped teaching two years ago. Vector came to buy the camp. They said they'd pay for all his treatment."},
-   {n:"baibua",f:"sad",l:"casual",t:"I haven't answered anyone… I don't dare tell Dad either. I'm scared he'll be hurt that his daughter can't carry the camp."},
+   {n:"baibua",f:"sad",l:"casual",t:"Dad hurt his knee and stopped teaching two years ago. Lately the Jin Long resort next door keeps sending people to buy our whole plot of land: the camp and Mum's spa too."},
+   {n:"baibua",f:"sad",l:"casual",t:"Since we won't sell, they hire thugs to cause trouble outside the massage shop every week… I don't dare tell Dad. I'm afraid he'd get up and fight them with his knee still hurt."},
    {n:"nar",t:"Baibua falls silent. Down in the valley, the lights of Chiang Mai go out one by one.",choice:[
-     {t:"\"A small camp can stand on its own. Let ours be the example\"",fx:G2=>{rgMeet(G2,"baibua",3);},then:[{n:"baibua",f:"happy",l:"casual",t:"…That's Sirichai Camp. Everyone helps each other. I'm a little jealous."}]},
+     {t:"\"Boxing camps can stand together. Ours is here to help.\"",fx:G2=>{rgMeet(G2,"baibua",3);},then:[{n:"baibua",f:"happy",l:"casual",t:"…That's Sirichai Camp. Everyone helps each other. I'm a little jealous."}]},
      {t:"\"You don't have to carry it alone\"",fx:G2=>{rgMeet(G2,"baibua",4);},then:[{n:"baibua",f:"flustered",l:"casual",t:"…When you say that, I don't know where to put my face."}]}]},
    {n:"nar",t:"The sun rises above the sea of mist. Baibua murmurs something very softly."},
    {n:"baibua",f:"flustered",l:"casual",t:"…Ai."},
@@ -491,9 +491,9 @@ const RG_TRIPX={
   :[{n:"baibua",f:"sad",l:"casual",t:"This year I came alone, jao… thank you for keeping me company."},
    {n:"nar",t:"The Manager raises their hands in a wai to the shrine, following Baibua. The breeze gently sways the old gloves beside the altar.",fx:G2=>rgMeet(G2,"baibua",1)},
    {fx:G2=>rgMeet(G2,"baibua",1)}])];}}};
-/* the week after the cup: her answer to Vector, in a letter */
+/* the week after the cup: her answer (v1.91.119: to the Jin Long resort, was Vector), in a letter */
 const RG_POST={
- north:"Dear Manager of Sirichai Camp,\n\nI gave Vector my answer: Bua Tha Sao Camp is not for sale.\n\nDad asked where I found the courage. I told him, \"A small camp can stand on its own. Just look at Sirichai.\" He laughed for the first time in two years.\n\nThe cup is with Sirichai Camp now, but the heart of Tha Sao boxing is still here in Chiang Mai. Come up and visit Dad and me when you're free.\n\n— Baibua"};
+ north:"Dear Manager of Sirichai Camp, jao,\n\nI've given the Jin Long resort my answer, jao: the Bua Tha Sao land is not for sale. Not the camp, not the spa, not Mum's lotus pond.\n\nDad asked where I found the nerve. I told him, \"Nobody can push us around. Look at Sirichai Camp, jao.\" Dad laughed for the first time in two years, jao.\n\nThe cup is with Sirichai Camp now, but the heart of Tha Sao boxing is still here in Chiang Mai. Come up and visit me and Dad sometime, jao.\n\n— Baibua"};
 /* champion chats: open after her first visit to the camp (or the cup); a reply moves her bond a little and counts as contact */
 const RG_CHAT={
  baibua:[
@@ -514,8 +514,8 @@ const RG_CHAT={
    ["Did you know, Manager? Dad came up with this elbow when he saw a lotus blooming in the temple pond.",[["Beautiful, just like Tha Sao boxing.",2,"Yes… Dad's boxing is truly beautiful. I want the whole country to see it."],["Do lotuses even have thorns?",1,"They don't! Other people started calling me that, I didn't choose it, hehe."],["Lotus flowers are nice.",0,""]]],
    ["If I ever meet Kati in the ring one day, who will you cheer for, jao?",[["Baibua, quietly.",2,"…Don't tell Kati, jao. I'll cheer for you quietly too."],["Both of you.",1,"Good answer, jao… I'd cheer for Kati too."],["Kati, obviously.",0,"Hehe, that's the right answer, jao."]]]]},
   {id:"bb_vector",x:[
-   ["Vector wrote again, jao. They've raised their offer for the camp by another two hundred thousand.",[["Don't decide on your own yet.",2,"…Yes. I'll talk to you before I decide anything, every time."],["Bua Tha Sao Camp isn't for sale.",2,"That's exactly what Dad said, jao… I'm glad to hear someone else say it."],["Two hundred thousand is a lot.",0,"…Yes. I know."]]],
-   ["Sometimes I think if I sold the camp, Dad could get his knee treated at a good hospital.",[["There are other ways. I'll help you look.",2,"…You're really thinking it through with me. Thank you, jao."],["I know how hard that is.",1,"Yes… thank you for understanding."],["It's one option.",0,""]]],
+   ["Jin Long resort sent someone again, jao. They raised their offer for the land by another two million.",[["Don't decide on your own yet.",2,"…Yes. I'll talk to you before I decide anything, every time."],["Bua Tha Sao Camp isn't for sale.",2,"That's exactly what Dad said, jao… I'm glad to hear someone else say it."],["Two hundred thousand is a lot.",0,"…Yes. I know."]]],
+   ["Sometimes I think if we sold the land, the thugs would finally leave Mum and the massage ladies alone.",[["There are other ways. I'll help you look.",2,"…You're really thinking it through with me. Thank you, jao."],["I know how hard that is.",1,"Yes… thank you for understanding."],["It's one option.",0,""]]],
    ["Talking to you makes my heart feel lighter, jao… I don't know why.",[["Because you're not carrying it alone anymore.",2,"…Yes. I'm not carrying it alone anymore."],["Message me anytime.",1,"Yes! I'll message you often, jao."],["Good",0,""]]]]}]};
 if(typeof CHAT!=="undefined")for(const k in RG_CHAT)CHAT[k]=RG_CHAT[k];
 /* v1.90 round 7: Isan in full — Tabtim hitches a ride on the first trip, Buriram brings Vector (Vega + Pailin) and Ploy's answer, a richer visit, the letter after the cup and Tabtim's chats. Isan lines are drafts for a native speaker to check. */
@@ -872,7 +872,7 @@ function rgCup3(G){const R=G.region,rin=rgIn(G,"rin"),ploy=rgIn(G,"ploy"),kati=r
  {n:"nar",t:"Pailin walks back into the rain and never looks back"},
  {fx:()=>{R.c3="seen";}}];}
 /* who in the camp the regional champion likes best: the one who says the camp's name at the ceremony */
-const RG_CLOSE_SAY={baibua:"A small camp can stand tall. I saw it with my own eyes. Sirichai Camp",tabtim:"Sirichai Camp doesn't have much money, but they fight for each other with all their heart. Tabtim has seen it",
+const RG_CLOSE_SAY={baibua:"A boxing camp can stand on its own two shins, jao. I've seen it with my own eyes. Sirichai Camp.",tabtim:"Sirichai Camp doesn't have much money, but they fight for each other with all their heart. Tabtim has seen it",
  alicia:"I want to fight the Sirichai way. Where nobody asks me to smile for the camera",chaba:"…I want to stay at a camp that fixes its own fence"};
 /* after the fourth cup (or once the tournament has run its course): Naka League, the refusals, Ladda */
 function rgClose(G){const R=G.region,fah=rgIn(G,"fah"),rin=rgIn(G,"rin"),kati=rgIn(G,"kati");
@@ -1069,9 +1069,9 @@ const RG_DATEP={};
    B("happy","We've made it to Uttaradit, jao, the birthplace of Tha Sao boxing… I was so excited I couldn't sleep."),
    ...rgProvTip(G,"uttaradit",[B("happy",`${opp} uses Phraya Phichai's Broken Sword Elbow, jao. The left elbow is the fake, the right one is real.`),B("happy","When the left elbow comes, step back just half a step, jao. A full step and she follows you in.")],"Baibua")],
   body:[B("happy","Did you know, jao? He fought until one of his swords broke, and he still didn't retreat."),
-   B("sad","Vector sent another letter yesterday, jao… some days I feel like one of my swords has already broken.",{choice:[
+   B("sad","Jin Long resort's thugs threw stones at the spa sign again yesterday, jao… some days I feel like one of my swords has already broken.",{choice:[
     {t:"\"A broken sword still leaves the other one. And you still have someone standing beside you.\"",fx:G2=>rgMeet(G2,"baibua",3),then:[B("flustered","…Someone standing beside me… Jao. I'll remember that, jao.")]},
-    {t:"Ask about the letter",fx:G2=>rgMeet(G2,"baibua",2),then:[B("sad","They say if I sell the camp, Dad can have his knee operated on at a good hospital… I haven't answered them yet, jao."),B("happy","But now I've told you, my heart feels half as heavy, jao.")]},
+    {t:"Ask about the Jin Long resort",fx:G2=>rgMeet(G2,"baibua",2),then:[B("sad","They want my family's riverside land to expand the resort, jao. Since we won't sell, they send people to cause trouble every week… our camp fights back every time, but I'm tired, jao."),B("happy","But now I've told you, my heart feels half as heavy, jao.")]},
     {t:"Suggest getting langsat first to clear her head",fx:G2=>rgMeet(G2,"baibua",2),then:[B("happy","Laplae langsat are the sweetest in the world, jao! I know a good stall. Let's go, jao!")]}]}),
    {n:"nar",t:"Baibua opens her father's ring notebook. The Uttaradit page really is the thickest. Between the tickets there's a dried bodhi leaf."},
    B("happy","Dad picked this bodhi leaf in front of the Tha Sao teachers' shrine, jao. He said you can fight anywhere, but you pay respect to the teachers here first."),
@@ -1153,7 +1153,7 @@ const RG_DATEP={};
    T("happy","Box two on the card! This shop's crab and pla ra som tam gets five full chillies from Tabtim!"),
    {n:"nar",t:"While they eat, Tabtim's phone buzzes nonstop with messages from the family group chat."},
    T("happy","Tabtim's sibling sent a photo of silk. Mum wove a new piece to sell for the youngest one's tuition."),
-   T("happy","Tabtim's the eldest. Every baht of fight money goes to tuition, haha. That's why Tabtim only has this one jacket.",{choice:[
+   T("happy","Tabtim's the eldest sister to the little ones. Every baht of fight money goes to tuition, haha. That's why Tabtim only has this one jacket.",{choice:[
     {t:"\"You're an amazing big sister.\"",fx:G2=>rgMeet(G2,"tabtim",2),then:[T("flustered","…Don't praise Tabtim like that! Tabtim's out of jokes now.")]},
     {t:"Offer to buy one of her mother's silks",fx:G2=>rgMeet(G2,"tabtim",3),then:[{n:"nar",t:"Tabtim goes quiet for the longest time since they met."},T("flustered","…Don't feel sorry for Tabtim. But if you really want one, Mum weaves beautifully. Tabtim will send it to you.")]},
     {t:"\"And what do you get for yourself?\"",fx:G2=>rgMeet(G2,"tabtim",2),then:[T("sad","…"),T("happy","Tabtim gets to box! Boxing every day is enough for her.")]}]}),
