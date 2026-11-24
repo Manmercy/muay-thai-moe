@@ -1,5 +1,5 @@
 // ================= MUAY THAI MOE v1.3 — UI =================
-const VERSION="1.91.143";
+const VERSION="1.91.144";
 const CUR_LANG=(typeof window!=="undefined"&&window.LANG)||"th";
 const TH_LABEL=String.fromCharCode(3652,3607,3618);
 function langSwitch(cls){return `<div class="langsw ${cls||""}" role="group" aria-label="Language">${[["th",TH_LABEL],["en","EN"]].map(([k,l])=>`<button class="lsb ${CUR_LANG===k?"on":""}" data-act="setlang" data-v="${k}" aria-pressed="${CUR_LANG===k}">${l}</button>`).join("")}</div>`;}
@@ -1236,7 +1236,15 @@ const PATCH_FIX={id:"1.91.111",ver:"Muay Thai Moe v1.91.111",title:"Report from 
  ["🎞️","Fight tapes and Rin","Tape prices now run from the hundreds to the low thousands, Rin reviews a tape for free every 3 weeks, and many speaking portraits now use sharper original art"]],
  foot:"Kru Daeng says: train hard, read all your letters, and see you ringside! ✦"};
 /* popups queue up in order; each one is closed on its own */
-const PATCHES=[PATCH_AV,PATCH_TAPE,PATCH_FIX],PATCH=PATCHES[PATCHES.length-1];
+const PATCH_TANI={id:"1.91.144",ver:"Muay Thai Moe v1.91.144",title:"Nang Tani, pets and the radio quiz",lead:"Sirichai camp has a new guardian spirit, pets that grow, and a Muay Thai radio quiz",items:[
+ ["🪷","Camp merit and Nang Tani","As the camp grows, the banana-tree ghost wakes and haunts your dreams. Make merit through camp activities to calm her — a three-year story from chaos to a shrine to friendship. See \"What is camp merit?\" for how"],
+ ["🥊","Three-round dream fights","The krasue, krahang, Ma Bong and Phi Phong come out during Lent. At merit 60+ you command the corner yourself — and one day you'll command Nang Tani's"],
+ ["🐾","Pets level up","Tap the pets button on the home screen. Play with each pet once a week; they grow to Lv.10 and help the camp with weekly rolls. Some days they won't play — or they run off into the rice fields"],
+ ["🐱","Iron Fist follows Fah","If Fah moves to the camp, her silver cat with white socks comes too"],
+ ["📻","The Seven-Mortar Muay Thai Superfan Show","Answer the radio quiz right often enough and you'll be invited onto a Muay Thai trivia show — top prize ฿100,000"],
+ ["✨","Pixel icons everywhere","Every emoji in the game is now a pixel icon"]],
+ foot:"Kru Daeng says: make some merit — the banana-tree ghost has sharp eyes ✦"};
+const PATCHES=[PATCH_AV,PATCH_TAPE,PATCH_FIX,PATCH_TANI],PATCH=PATCHES[PATCHES.length-1];
 function nextPatch(){const i=PATCHES.findIndex(p=>p.id===(G&&G.newsSeen));return i<0?PATCHES[0]:PATCHES[i+1]||null;}
 function maybeWhatsNew(){if(!G||G.ended||UI.scene)return;const P=nextPatch();if(!P)return;UI.modal={type:"whatsnew",id:P.id};}
 function whatsNewHTML(){const P=PATCHES.find(p=>p.id===(UI.modal&&UI.modal.id))||nextPatch()||PATCH,n=PATCHES.length-PATCHES.indexOf(P)-1;return `<div class="wnew"><span class="pill gold">Update · ${esc(P.ver)}</span><h2>🥊 ${esc(P.title)}</h2><p class="lead">${esc(P.lead)}</p>

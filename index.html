@@ -2379,8 +2379,119 @@ div.mdelask{margin:2px 0 8px;padding:8px;box-shadow:inset 0 0 0 2px var(--line);
 
 /* v1.91.86: scene portraits centre on the face (--cx = face centre across the picture) */
 .cast .stand{transform:translateX(calc(var(--cx,.5) * -100%))}.cast .stand.off{transform:translateX(calc(var(--cx,.5) * -100%)) scale(.96)}
+/* v1.91.127: radio game show "แฟนพันแท้มวยเด็ดเจ็ดครก" */
+.qshow{background:radial-gradient(ellipse at 50% 0,#3a2468 0,#160e2c 55%,#0a0616 100%);padding:8px}
+.qs-wrap{margin:auto;width:min(760px,100%);display:grid;grid-template-columns:1fr 150px;gap:10px;align-items:start}
+.qs-main{display:grid;gap:8px;min-width:0}
+.qs-top{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.qs-top h2{margin:0;font-size:.95rem;line-height:1.05;text-align:center;color:#fff;letter-spacing:.02em}
+.qs-top h2 b{font-size:1.35rem;color:var(--gold);text-shadow:0 2px 0 #7a4b06,0 0 14px rgba(242,193,78,.5)}
+.qs-air{font:700 .7rem/1 "Chakra Petch",sans-serif;color:#ff5a6a;border:2px solid #ff5a6a;padding:3px 6px;animation:qsair 1.2s steps(2) infinite}
+.qs-fm{font:700 .7rem/1 "Chakra Petch",sans-serif;color:#9ad;border:2px solid #4a6a8a;padding:3px 6px}
+@keyframes qsair{50%{opacity:.35}}
+.qs-stage{position:relative;height:clamp(205px,36vh,300px);display:flex;justify-content:space-between;align-items:flex-end;padding:0 4% 18px;
+  background:radial-gradient(ellipse 30% 70% at 22% 100%,rgba(255,220,140,.22),transparent 70%),radial-gradient(ellipse 30% 70% at 78% 100%,rgba(140,200,255,.18),transparent 70%),linear-gradient(#1d1238,#2a1a4c);border:3px solid #4b3580;overflow:hidden}
+.qs-pod{position:relative;display:flex;flex-direction:column;align-items:center;width:42%;z-index:1}
+.qs-fig{height:clamp(150px,27vh,225px);display:flex;align-items:flex-end;justify-content:center}
+.qs-fig img{max-height:100%;max-width:100%;object-fit:contain;filter:drop-shadow(0 4px 0 rgba(0,0,0,.35))}
+.qs-pod.me .qs-fig img{transform:translateY(8%)}
+.qs-sil{width:60px;height:140px;background:#0d0820;border-radius:30px 30px 6px 6px}
+.qs-plate{width:100%;text-align:center;font:700 .75rem/1.2 "Chakra Petch",sans-serif;padding:6px 4px;color:#2a1b02;background:linear-gradient(#ffd977,#d79b2a);box-shadow:inset 0 -4px 0 #8a5a10;position:relative;z-index:2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.qs-pod.host .qs-plate{background:linear-gradient(#a9d4ff,#5d8fd0);box-shadow:inset 0 -4px 0 #2b4d80;color:#0b1830}
+.qs-krok{position:absolute;left:0;right:0;bottom:2px;display:flex;justify-content:center;gap:4%;z-index:3;pointer-events:none}
+.qs-krok i{width:20px;height:12px;background:linear-gradient(#7d746a,#4a433c);clip-path:polygon(0 0,100% 0,82% 100%,18% 100%);display:block}
+.qs-krok.shake i{animation:qsshake .45s ease 2}.qs-krok.hop i{animation:qshop .5s ease}.qs-krok.hop i:nth-child(2n){animation-delay:.08s}
+@keyframes qsshake{25%{transform:translateX(-3px) rotate(-8deg)}75%{transform:translateX(3px) rotate(8deg)}}
+@keyframes qshop{40%{transform:translateY(-10px)}}
+.qs-say{background:#fff;color:#1c1430;padding:8px 10px;border:3px solid #1c1430;box-shadow:4px 4px 0 rgba(0,0,0,.35);position:relative}
+.qs-say small{position:absolute;top:-11px;left:8px;background:#5d8fd0;color:#fff;font-weight:700;padding:0 6px;font-size:.72rem}
+.qs-say p{margin:.15rem 0 0;font-size:.92rem;line-height:1.45}
+.qs-say .qs-heck{font-size:.8rem;color:#6a4a9a;margin-top:.3rem}
+.qs-info{display:flex;justify-content:space-between;gap:6px;font-size:.8rem;color:var(--muted,#cbc3e3);flex-wrap:wrap}
+.qs-time{position:relative;height:16px;background:#0d0820;border:2px solid #4b3580}
+.qs-time i{position:absolute;inset:0 auto 0 0;background:linear-gradient(90deg,#ff5a6a,#f2c14e 40%,#4cc38a);transition:width .2s linear}
+.qs-time b{position:absolute;right:6px;top:50%;transform:translateY(-50%);font:700 .72rem/1 "Chakra Petch",sans-serif;color:#fff;text-shadow:0 1px 0 #000}
+.qs-time.pause i{opacity:.45}
+.qs-q{background:linear-gradient(#20164a,#140c30);border:3px solid #f2c14e;padding:10px 12px;clip-path:polygon(10px 0,calc(100% - 10px) 0,100% 50%,calc(100% - 10px) 100%,10px 100%,0 50%)}
+.qs-q p{margin:0;text-align:center;font-weight:600;line-height:1.45}
+.qs-opts{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.qs-o{position:relative;display:flex;align-items:center;gap:8px;text-align:left;padding:9px 10px;min-height:46px;background:#1d1540;border:2px solid #6a55b0;color:#fff;font:inherit;font-size:.86rem;line-height:1.3;cursor:pointer;overflow:hidden}
+.qs-o i{font-style:normal;font-weight:700;color:var(--gold);flex:none}
+.qs-o span{position:relative;z-index:1}
+.qs-o em{position:absolute;right:6px;bottom:3px;font-style:normal;font-size:.7rem;color:#9ad;z-index:1}
+.qs-o em::before{content:"";position:absolute;right:-6px;bottom:-3px;height:4px;width:calc(var(--p)*1.3);max-width:120px;background:#5d8fd0}
+.qs-o:not(:disabled):hover{background:#2b2060;border-color:var(--gold)}
+.qs-o:disabled{cursor:default}
+.qs-o.cut{opacity:.25}
+.qs-o.lock{background:#a06a10;border-color:#ffd977;animation:qsair .5s steps(2) infinite}
+.qs-o.right{background:#1f7a4c;border-color:#7ff0b4}
+.qs-o.bad{background:#8a2030;border-color:#ff8a97}
+.qs-life{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+.qs-l{display:flex;flex-direction:column;align-items:center;gap:2px;padding:6px 2px;background:#241a4a;border:2px solid #4b3580;color:#fff;font:inherit;font-size:1.1rem;cursor:pointer}
+.qs-l small{font-size:.66rem;line-height:1.2;color:#cbc3e3;text-align:center}
+.qs-l:disabled{opacity:.3;cursor:default}
+.qs-l.stop{border-color:#a77b1c}
+.qs-foot{display:flex;justify-content:center;gap:8px;flex-wrap:wrap}
+.qs-hint{margin:0;font-size:.82rem;color:#bfe0ff;text-align:center}
+.qs-fact,.qs-safe{margin:0;font-size:.82rem;background:rgba(255,255,255,.06);padding:6px 8px;border-left:3px solid var(--gold)}
+.qs-safe{border-color:#4cc38a}
+.qs-phone .qs-fr{display:flex;flex-wrap:wrap;justify-content:center;gap:6px}
+.qs-f{display:flex;flex-direction:column;align-items:center;gap:2px;background:#241a4a;border:2px solid #4b3580;padding:4px;color:#fff;font:inherit;cursor:pointer;width:72px}
+.qs-f img{width:56px;height:56px;object-fit:cover}.qs-f small{font-size:.7rem}
+.qs-callbox{display:flex;gap:8px;align-items:flex-start;background:#0e2238;border:2px solid #5d8fd0;padding:8px}
+.qs-callbox img{width:56px;height:56px;object-fit:cover;flex:none;border:2px solid #5d8fd0}
+.qs-callbox small{color:#9ad;font-weight:700}.qs-callbox p{margin:.2rem 0 0;font-size:.88rem;line-height:1.4}
+.qs-end{display:grid;gap:6px}
+.qs-amt{margin:0;text-align:center;font:700 2rem/1.1 "Chakra Petch",sans-serif;color:var(--gold);text-shadow:0 3px 0 #7a4b06}
+.qs-amt.zero{color:#cbc3e3;text-shadow:none}
+.qs-lad{list-style:none;margin:0;padding:6px;background:#120b26;border:3px solid #4b3580;display:grid;gap:1px;position:sticky;top:0}
+.qs-lad li{display:flex;justify-content:space-between;gap:6px;padding:1px 6px;font:600 .72rem/1.5 "Chakra Petch",sans-serif;color:#9a8fc0}
+.qs-lad li span{opacity:.7}.qs-lad li.sf{color:#fff}.qs-lad li.ok{color:#4cc38a}
+.qs-lad li.on{background:var(--gold);color:#2a1b02}
+@media (max-width:640px){.qs-wrap{grid-template-columns:1fr}.qs-lad{order:-1;position:static;display:flex;flex-direction:row-reverse;overflow-x:auto;padding:4px;gap:2px}
+ .qs-lad li{flex:none;flex-direction:column;align-items:center;padding:1px 4px;font-size:.6rem;line-height:1.2}.qs-lad li span{display:none}
+ .qs-opts{grid-template-columns:1fr}.qs-o{min-height:40px;padding:7px 9px}.qs-say p{font-size:.86rem}}
+@media (prefers-reduced-motion:reduce){.qs-air,.qs-o.lock,.qs-krok i{animation:none!important}}
+/* v1.91.144: camp merit bar, Nang Tani's lottery whisper, the dream-fight vignette */
+.ghbar{display:flex;align-items:center;gap:8px;margin:2px 0 8px;font-size:.82rem}
+.ghbar span{white-space:nowrap}
+.ghbar i{flex:1;height:10px;background:#20163a;border:2px solid #4b3580;position:relative}
+.ghbar i b{position:absolute;inset:0 auto 0 0;background:linear-gradient(90deg,#c58a2a,#f2c14e)}
+.ghbar em{font-style:normal;color:var(--muted,#cbc3e3);white-space:nowrap}
+.ghhint{display:flex;align-items:center;gap:8px;font-size:.85rem;background:rgba(63,138,79,.18);border-left:3px solid #6fcf7f;padding:6px 8px;margin:4px 0 8px}
+.ghhint img{width:42px;height:42px;object-fit:cover;border-radius:50%}
+body.dreamfx .fight::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:5;background:radial-gradient(ellipse at 50% 45%,transparent 45%,rgba(40,90,55,.55));mix-blend-mode:multiply}
+.ghcard{display:flex;align-items:center;gap:10px;padding:8px 10px;margin-top:8px;background:rgba(63,138,79,.14);border:2px solid #3f8a4f}
+.ghcard img.face{width:48px;height:48px;object-fit:cover;border-radius:50%;background:#1c2a20}
+.ghcard div{flex:1;display:flex;flex-direction:column}.ghcard small{color:var(--muted,#cbc3e3)}
+/* v1.91.144: Nang Tani guide line, merit chip on the home camp-action button */
+.ghgoal{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:-2px 0 10px;font-size:.78rem;color:var(--muted,#cbc3e3)}
+.ghgoal>span{flex:1;min-width:180px}
+.ghm{font-style:normal;color:#f2c14e}.ghm.ghlow{color:#ff7a7a}
+.ghcard .btn+.btn{margin-left:6px}
+/* v1.91.144: pixel emoji — every emoji in on-screen text becomes a 10x10 pixel icon (src/pxemoji.js) */
+.pxe{display:inline-block;width:1.15em;height:1.15em;vertical-align:-.2em;line-height:0;margin:0 .04em}
+.pxe svg{width:100%;height:100%;display:block;image-rendering:pixelated}
+.pxe.pxm{width:1em;height:1em;vertical-align:-.12em}
+/* v1.91.144: deeper camp pets — one home button, pet window, levels/joy/talents */
+.petbtn .peticons{display:flex;gap:2px;flex:none}.petbtn .peti{width:30px;height:auto;image-rendering:pixelated}
+.petgrid{display:grid;grid-template-columns:1fr;gap:8px;margin:8px 0}
+.petcard{display:grid;grid-template-columns:56px 1fr;gap:6px 10px;align-items:center;padding:8px 10px;color:var(--fg,#fff);background:var(--bg2,#241c38);box-shadow:inset 0 0 0 2px var(--line,#4b3a70)}
+.petcard .peti{width:56px;height:auto;image-rendering:pixelated}.petcard.done,.petcard.away{opacity:.8}
+.petcard .pcm{display:flex;flex-direction:column;gap:3px;min-width:0}.pcj{display:flex;align-items:center;gap:6px}.pcj small{font-size:.7rem;opacity:.8}
+.petcard .pc2{font-size:.72rem;color:var(--muted,#cbc3e3);line-height:1.25}
+.pcact{grid-column:1/-1;display:flex;flex-wrap:wrap;gap:6px;align-items:center}.pcact .btn{flex:1 1 auto}.pcact .ghost{flex:0 0 auto}
+.pbar{display:block;height:8px;background:#20163a;border:2px solid #4b3580;position:relative;min-width:60px;flex:1}.pbar b{position:absolute;inset:0 auto 0 0}
+.petdet .pdh{display:flex;gap:12px;align-items:center}.peti.big{width:72px;height:auto;image-rendering:pixelated}
+.pstat{display:flex;align-items:center;gap:8px;margin:6px 0;font-size:.82rem}.pstat span{width:58px;flex:none}.pstat .pbar{min-width:0}.pstat em{font-style:normal;color:var(--muted,#cbc3e3);font-size:.75rem;flex:none;max-width:45%}
+.ptal{list-style:none;padding:0;margin:8px 0;font-size:.82rem}.ptal li{padding:4px 0;border-bottom:1px dashed rgba(255,255,255,.08)}.ptal li.off{opacity:.5}.ptal b{color:#ffd34a;margin-right:4px}
+.pmodes{display:grid;gap:6px;margin:8px 0}.pmodes .btn{display:flex;flex-direction:column;align-items:flex-start;text-align:left}.pmodes small{font-size:.72rem;opacity:.85}
+.pwarn{color:#f0a33a}
+.psp{display:inline-block;width:40px;background-size:400% 100%;background-position:0 0;background-repeat:no-repeat;image-rendering:pixelated;flex:none}
+.petcard .psp{width:56px}.psp.big{width:80px}.petbtn .psp{width:30px}
 </style></head><body>
-<script>window.__MTM_ART=["alicia_sheet.png","alicia_special.png","baibua_sheet.png","baibua_special.png","baiyok_sheet.webp","baiyok_white_sheet.webp","bull1_sheet.webp","bull2_sheet.webp","bull3_sheet.webp","chaba_sheet.png","chaba_special.png","fah_loykrathong_sheet.webp","fah_loykrathong_special.webp","fah_sheet.webp","fah_special.webp","gang1_sheet.webp","gang2_sheet.webp","gang3_sheet.webp","gang4_sheet.webp","gang5_sheet.webp","gangsilver_sheet.webp","kati_loykrathong_sheet.webp","kati_loykrathong_special.webp","kati_sheet.webp","kati_special.webp","mali_loykrathong_sheet.webp","mali_loykrathong_special.webp","mali_sheet.webp","mali_special.webp","nl_ladda_blood_sheet.webp","nl_ladda_hood_sheet.webp","nl_ladda_sheet.webp","nl_meili_sheet.webp","nl_meili_special.webp","nl_nia_sheet.webp","nl_nia_special.webp","nl_rosa_sheet.webp","nl_rosa_special.webp","nl_varya_sheet.webp","nl_varya_special.webp","npc10_sheet.webp","npc11_sheet.webp","npc12_sheet.webp","npc13_sheet.webp","npc14_sheet.webp","npc1_sheet.webp","npc2_sheet.webp","npc3_sheet.webp","npc4_sheet.webp","npc5_sheet.webp","npc6_sheet.webp","npc7_sheet.webp","npc8_sheet.webp","npc9_sheet.webp","npc_baiyok_black_angry.png","npc_baiyok_black_flustered.png","npc_baiyok_black_happy.png","npc_baiyok_black_sad.png","npc_baiyok_casual.png","npc_baiyok_casual_flustered.png","npc_baiyok_casual_pout.png","npc_baiyok_white_angry.png","npc_baiyok_white_flustered.png","npc_baiyok_white_happy.png","npc_baiyok_white_sad.png","npc_baiyok_white_surprised.png","npc_boris.webp","npc_gang_boss.webp","npc_gang_boss_face.webp","npc_gang_goldblack.webp","npc_gang_group.webp","npc_gang_silver.webp","npc_grandma.webp","npc_hialong.webp","npc_hialong_angry.webp","npc_krerk.webp","npc_krerk_face.webp","npc_krit.webp","npc_krit_panic.webp","npc_mabelle.webp","npc_mabelle_excited.webp","npc_minnie.webp","npc_minnie_smirk.webp","npc_mint.webp","npc_mint_flustered.webp","npc_nai.webp","npc_nil.webp","npc_nil_smirk.webp","npc_petchara.png","npc_phet.webp","npc_phet_smile.webp","npc_suea.webp","npc_suea_angry.webp","npc_thief.webp","npc_thief2.webp","npc_tiger_boss.webp","npc_tiger_boss_cry.webp","npc_vector_knight.png","npc_vector_mesa.png","npc_vector_vega.png","npc_vendor_green.webp","npc_vendor_red.webp","pailin_sheet.webp","petchara_sheet.webp","ploy_loykrathong_sheet.webp","ploy_loykrathong_special.webp","ploy_sheet.webp","ploy_special.webp","rg_chaytrae1_sheet.webp","rg_chaytrae2_sheet.webp","rg_jinlong1_sheet.webp","rg_jinlong2_sheet.webp","rg_russian1_sheet.webp","rg_russian2_sheet.webp","rg_sasaeng1_sheet.webp","rg_sasaeng2_sheet.webp","rgp_buriram_sheet.webp","rgp_chanthaburi_sheet.webp","rgp_chiangrai_sheet.webp","rgp_chumphon_sheet.webp","rgp_khonkaen_sheet.webp","rgp_lampang_sheet.webp","rgp_lopburi_sheet.webp","rgp_nakhonsi_sheet.webp","rgp_nan_sheet.webp","rgp_phetchaburi_sheet.webp","rgp_songkhla_sheet.webp","rgp_suphan_sheet.webp","rgp_surat_sheet.webp","rgp_ubon_sheet.webp","rgp_udon_sheet.webp","rgp_uttaradit_sheet.webp","rin_loykrathong_sheet.webp","rin_loykrathong_special.webp","rin_sheet.webp","rin_special.webp","rooster1_sheet.webp","rooster2_sheet.webp","rooster3_sheet.webp","rooster4_sheet.webp","rooster5_sheet.webp","tabtim_sheet.png","tabtim_special.png","thief2_sheet.webp","thief_sheet.webp"];</script>
+<script>window.__MTM_ART=["alicia_sheet.png","alicia_special.png","baibua_sheet.png","baibua_special.png","baiyok_sheet.webp","baiyok_white_sheet.webp","bull1_sheet.webp","bull2_sheet.webp","bull3_sheet.webp","chaba_sheet.png","chaba_special.png","fah_loykrathong_sheet.webp","fah_loykrathong_special.webp","fah_sheet.webp","fah_special.webp","gang1_sheet.webp","gang2_sheet.webp","gang3_sheet.webp","gang4_sheet.webp","gang5_sheet.webp","gangsilver_sheet.webp","kati_loykrathong_sheet.webp","kati_loykrathong_special.webp","kati_sheet.webp","kati_special.webp","krahang_sheet.webp","krasue_sheet.webp","mabong_sheet.webp","mali_loykrathong_sheet.webp","mali_loykrathong_special.webp","mali_sheet.webp","mali_special.webp","nl_ladda_blood_sheet.webp","nl_ladda_hood_sheet.webp","nl_ladda_sheet.webp","nl_meili_sheet.webp","nl_meili_special.webp","nl_nia_sheet.webp","nl_nia_special.webp","nl_rosa_sheet.webp","nl_rosa_special.webp","nl_varya_sheet.webp","nl_varya_special.webp","npc10_sheet.webp","npc11_sheet.webp","npc12_sheet.webp","npc13_sheet.webp","npc14_sheet.webp","npc1_sheet.webp","npc2_sheet.webp","npc3_sheet.webp","npc4_sheet.webp","npc5_sheet.webp","npc6_sheet.webp","npc7_sheet.webp","npc8_sheet.webp","npc9_sheet.webp","npc_baiyok_black_angry.png","npc_baiyok_black_flustered.png","npc_baiyok_black_happy.png","npc_baiyok_black_sad.png","npc_baiyok_casual.png","npc_baiyok_casual_flustered.png","npc_baiyok_casual_pout.png","npc_baiyok_white_angry.png","npc_baiyok_white_flustered.png","npc_baiyok_white_happy.png","npc_baiyok_white_sad.png","npc_baiyok_white_surprised.png","npc_boris.webp","npc_gang_boss.webp","npc_gang_boss_face.webp","npc_gang_goldblack.webp","npc_gang_group.webp","npc_gang_silver.webp","npc_grandma.webp","npc_hialong.webp","npc_hialong_angry.webp","npc_krerk.webp","npc_krerk_face.webp","npc_krit.webp","npc_krit_panic.webp","npc_luangpho.webp","npc_mabelle.webp","npc_mabelle_excited.webp","npc_minnie.webp","npc_minnie_smirk.webp","npc_mint.webp","npc_mint_flustered.webp","npc_morphi.webp","npc_nai.webp","npc_nil.webp","npc_nil_smirk.webp","npc_petchara.png","npc_phet.webp","npc_phet_smile.webp","npc_suea.webp","npc_suea_angry.webp","npc_tani_angry.webp","npc_tani_angry_smile.webp","npc_tani_face.webp","npc_tani_neutral.webp","npc_tani_scary.webp","npc_tani_shy.webp","npc_tani_smile.webp","npc_thief.webp","npc_thief2.webp","npc_tiger_boss.webp","npc_tiger_boss_cry.webp","npc_vector_knight.png","npc_vector_mesa.png","npc_vector_vega.png","npc_vendor_green.webp","npc_vendor_red.webp","pailin_sheet.webp","petchara_sheet.webp","phiphong_sheet.webp","ploy_loykrathong_sheet.webp","ploy_loykrathong_special.webp","ploy_sheet.webp","ploy_special.webp","rg_chaytrae1_sheet.webp","rg_chaytrae2_sheet.webp","rg_jinlong1_sheet.webp","rg_jinlong2_sheet.webp","rg_russian1_sheet.webp","rg_russian2_sheet.webp","rg_sasaeng1_sheet.webp","rg_sasaeng2_sheet.webp","rgp_buriram_sheet.webp","rgp_chanthaburi_sheet.webp","rgp_chiangrai_sheet.webp","rgp_chumphon_sheet.webp","rgp_khonkaen_sheet.webp","rgp_lampang_sheet.webp","rgp_lopburi_sheet.webp","rgp_nakhonsi_sheet.webp","rgp_nan_sheet.webp","rgp_phetchaburi_sheet.webp","rgp_songkhla_sheet.webp","rgp_suphan_sheet.webp","rgp_surat_sheet.webp","rgp_ubon_sheet.webp","rgp_udon_sheet.webp","rgp_uttaradit_sheet.webp","rin_loykrathong_sheet.webp","rin_loykrathong_special.webp","rin_sheet.webp","rin_special.webp","rooster1_sheet.webp","rooster2_sheet.webp","rooster3_sheet.webp","rooster4_sheet.webp","rooster5_sheet.webp","tabtim_sheet.png","tabtim_special.png","tani_sheet.webp","thief2_sheet.webp","thief_sheet.webp"];</script>
+<script>window.__MTM_PETART=["cat","dog","mudlek","otter","rooster","turtle"];</script>
 <div id="app"></div><div id="live" aria-live="polite" role="status"></div>
 <script type="text/plain" id="js-th">
 window.__MTM_RAN=1;
@@ -3566,7 +3677,7 @@ function advise(G,a,b,rounds,n=40){const fa=G.F[a],fb=G.F[b];const res={};
   const best=Object.entries(res).sort((x,y)=>y[1]-x[1])[0];return {rates:res,best:best[0],bestRate:best[1],base:res.balanced};}
 // v1.51: camp pets — they join through little stories, wander the yard, and cheer the team up once a week
 const PETS={cat:{name:"แมวส้ม",food:150,eff:"ทุกคนกำลังใจ +2"},dog:{name:"หมาไทยหลังอาน",food:250,eff:"ทุกคนความล้า −3"},rooster:{name:"ไก่ชนปลดระวาง",food:100,eff:"ทุกคนกำลังใจ +1 · ความล้า −1"},turtle:{name:"เต่าวัด",food:80,eff:"ทุกคนกำลังใจ +3 (ใจเย็นลง)"},otter:{name:"ลูกนากริมน้ำ",food:0,eff:"ว่ายน้ำเป็นเพื่อนคนซ้อม · ทุกคนความล้า −1"}};
-const PET_NAMES={cat:["ส้มโอ","ขนมปัง","ตูบตู่"],dog:["เจ้าดำ","ไอ้ทอง","ข้าวตู"],rooster:["เจ้าเขียว","พญาไก่","โก๊ะ"],turtle:["ช้า ๆ","โมจิ","หลวงปู่"],otter:["น้ำปิง","กระทง","ข้าวเหนียว"]};
+const PET_NAMES={cat:["ส้มโอ","ขนมปัง","ตูบตู่"],dog:["ไอ้ทอง","ข้าวตู","เจ้าโกโก้"],rooster:["เจ้าเขียว","พญาไก่","โก๊ะ"],turtle:["ช้า ๆ","โมจิ","หลวงปู่"],otter:["น้ำปิง","กระทง","ข้าวเหนียว"]};
 const petFood=G=>(G&&G.pets||[]).reduce((s,p)=>s+(PETS[p.k]?PETS[p.k].food:0),0);
 function petPlay(G,i){const p=(G.pets||[])[i];if(!p||p.wk===gameWeek(G))return false;p.wk=gameWeek(G);p.joy=Math.min(100,(p.joy||50)+10);const R=roster(G);
   if(p.k==="cat")R.forEach(f=>f.morale=Math.min(100,f.morale+2));if(p.k==="dog")R.forEach(f=>f.fatigue=Math.max(0,f.fatigue-3));
@@ -8165,7 +8276,7 @@ function drawCamp(ctx,G,t){
   if(G.avatar){const pw=wander(31,t,[110,132,300,152],5200);chib(G.avatar,"player",pw.x,pw.y,.85,pw.flip,pw.moving?Math.floor(t/130)%2:Math.floor(t/420)%2);}
   // v1.51: adopted pets roam the yard (the stray soi dog stays until a dog is adopted)
   (G.pets||[]).forEach((p,i)=>{const w=wander(600+i*13,t+i*900,PET_BOX[p.k]||[20,150,300,170],PET_SPD[p.k]||3000);const px=w.x,py=w.y,fl=w.flip?-1:1,wd=p.k==="dog"?15:11,Z=2;
-    D.push({y:py+14,f:()=>{const Q=(x,y,ww,h,c)=>P(fl>0?px+x*Z:px+(wd-x-ww)*Z,py+y*Z,ww*Z,h*Z,c);drawPetQ(Q,p.k,t+i*333,w.moving);}});});
+    D.push({y:py+14,f:()=>{if(typeof petHub==="function"&&petHub(ctx,p.k,(px+wd*Z/2)*S,(py+9*Z)*S,fl,t+i*333,w.moving,S))return;/* v1.91.144: pets with sprite art draw themselves (src/pets.js) */const Q=(x,y,ww,h,c)=>P(fl>0?px+x*Z:px+(wd-x-ww)*Z,py+y*Z,ww*Z,h*Z,c);drawPetQ(Q,p.k,t+i*333,w.moving);}});});
   if(!(G.pets||[]).some(p=>p.k==="dog")){const dw=wander(5,t,[10,162,300,170],2600);const dx=dw.x,dy=dw.y+8,fl=dw.flip?-1:1,leg=dw.moving&&Math.floor(t/90)%2;
    D.push({y:dy+6,f:()=>{const Q=(x,y,w,h,c)=>P(fl>0?dx+x:dx+10-x-w,dy+y,w,h,c);Q(1,1,8,4,"#c99a5e");Q(8,-1,3,3,"#c99a5e");Q(10,0,1,1,"#2b2530");Q(0,Math.floor(t/150)%2?0:1,2,1,"#c99a5e");
      Q(1+(leg?1:0),5,1,2,"#a87a44");Q(7-(leg?1:0),5,1,2,"#a87a44");}});}
@@ -9005,7 +9116,7 @@ AU.gsfx=function(kind,a){if(!this.init()||this.muted||!SETTINGS.sfx)return;const
   if(kind==="shimmer")for(let i=0;i<6;i++)T(i*.05,{f:1400+Math.random()*1400,type:"sine",dur:.12,peak:.06});};
 
 // ================= MUAY THAI MOE v1.3 — UI =================
-const VERSION="1.91.143";
+const VERSION="1.91.144";
 const CUR_LANG=(typeof window!=="undefined"&&window.LANG)||"th";
 const TH_LABEL=String.fromCharCode(3652,3607,3618);
 function langSwitch(cls){return `<div class="langsw ${cls||""}" role="group" aria-label="Language">${[["th",TH_LABEL],["en","EN"]].map(([k,l])=>`<button class="lsb ${CUR_LANG===k?"on":""}" data-act="setlang" data-v="${k}" aria-pressed="${CUR_LANG===k}">${l}</button>`).join("")}</div>`;}
@@ -10242,7 +10353,15 @@ const PATCH_FIX={id:"1.91.111",ver:"Muay Thai Moe v1.91.111",title:"รายง
  ["🎞️","เทปคู่ชกและริน","ค่าเทปปรับให้อยู่ในหลักร้อยถึงหลักพัน รินช่วยดูเทปฟรีทุก 3 สัปดาห์ และภาพพูดหลายตัวเปลี่ยนไปใช้ต้นฉบับที่คมขึ้น"]],
  foot:"ครูแดงฝากบอกว่า ซ้อมให้หนัก อ่านจดหมายให้ครบ แล้วเจอกันข้างเวที! ✦"};
 /* popups queue up in order; each one is closed on its own */
-const PATCHES=[PATCH_AV,PATCH_TAPE,PATCH_FIX],PATCH=PATCHES[PATCHES.length-1];
+const PATCH_TANI={id:"1.91.144",ver:"Muay Thai Moe v1.91.144",title:"นางตานี สัตว์เลี้ยง และรายการวิทยุ",lead:"ค่ายศิริชัยมีเจ้าที่ใหม่ สัตว์เลี้ยงโตได้ และรายการตอบคำถามมวยทางวิทยุ",items:[
+ ["🪷","บุญค่ายและนางตานี","เมื่อค่ายใหญ่ขึ้น ผีต้นกล้วยจะตื่นมาอำในฝัน ทำบุญจากกิจกรรมค่ายเพื่อให้ผีสงบ เรื่องยาวสามปี ตั้งแต่ชุลมุน ตั้งศาล จนเป็นเพื่อนกัน ดูวิธีทำบุญได้ที่ปุ่ม “บุญค่ายคืออะไร?”"],
+ ["🥊","ไฟต์ในฝัน 3 ยก","ผีกระสือ กระหัง ม้าบ้อง ผีโพง ออกมาช่วงเข้าพรรษา บุญค่าย 60 ขึ้นไปสั่งมุมได้เอง และวันหนึ่งจะสั่งมุมให้นางตานีได้ด้วย"],
+ ["🐾","สัตว์เลี้ยงมีเลเวล","กดปุ่มสัตว์เลี้ยงที่หน้าแรก เล่นด้วยได้ตัวละครั้งต่อสัปดาห์ สัตว์โตถึง Lv.10 ช่วยค่ายแบบสุ่มทุกสัปดาห์ บางวันก็ไม่อยากเล่น หรือหนีไปวิ่งเล่นในทุ่งนา"],
+ ["🐱","หมัดเหล็กตามฟ้ามา","ถ้าฟ้าย้ายมาอยู่ค่าย แมวสีเงินถุงเท้าขาวของเธอจะตามมาด้วย"],
+ ["📻","แฟนพันแท้มวยเด็ดเจ็ดครก","ตอบคำถามรายการวิทยุถูกบ่อย ๆ จะได้รับเชิญไปแข่งตอบคำถามความรู้มวยไทย รางวัลสูงสุด ฿100,000"],
+ ["✨","ไอคอนพิกเซลทั้งเกม","อีโมจิทุกตัวในเกมเปลี่ยนเป็นไอคอนพิกเซล"]],
+ foot:"ครูแดงฝากบอกว่า ทำบุญบ้างนะ ผีต้นกล้วยตาไวมาก ✦"};
+const PATCHES=[PATCH_AV,PATCH_TAPE,PATCH_FIX,PATCH_TANI],PATCH=PATCHES[PATCHES.length-1];
 function nextPatch(){const i=PATCHES.findIndex(p=>p.id===(G&&G.newsSeen));return i<0?PATCHES[0]:PATCHES[i+1]||null;}
 function maybeWhatsNew(){if(!G||G.ended||UI.scene)return;const P=nextPatch();if(!P)return;UI.modal={type:"whatsnew",id:P.id};}
 function whatsNewHTML(){const P=PATCHES.find(p=>p.id===(UI.modal&&UI.modal.id))||nextPatch()||PATCH,n=PATCHES.length-PATCHES.indexOf(P)-1;return `<div class="wnew"><span class="pill gold">อัปเดต · ${esc(P.ver)}</span><h2>🥊 ${esc(P.title)}</h2><p class="lead">${esc(P.lead)}</p>
@@ -11333,7 +11452,7 @@ function qCleanup(G){const keep=new Set([...G.bookings.map(b=>b.b),...G.offers.m
 // ---------- mail ----------
 let MAILN=0;
 function addMail(G,m){G.mail=G.mail||[];m.id="m"+G.week+"_"+(++MAILN)+"_"+Math.floor(Math.random()*1e4);m.wk=G.week;m.season=G.season||1;if(m.exp!=null)m.expAbs=gameWeek(G)+(m.exp-G.week);m.read=false;G.mail.unshift(m);for(let i=G.mail.length-1;G.mail.length>40&&i>=0;i--)if(!mailKeep(G.mail[i]))G.mail.splice(i,1);if(G.mail.length>60)G.mail=G.mail.slice(0,60);return m;}
-const mailOpen=m=>!m.done&&!m.expired&&(["take","pay","quiz","quest"].includes(m.kind)||(m.kind==="event"&&(m.ev==="kongka"||m.ev==="thief"||m.ev==="tuy"||m.ev==="dress")));
+const mailOpen=m=>!m.done&&!m.expired&&(["take","pay","quiz","quest"].includes(m.kind)||(m.kind==="event"&&(m.ev==="kongka"||m.ev==="thief"||m.ev==="tuy"||m.ev==="dress"||m.ev==="qshow")));
 /* v1.91.32: the player may delete letters — never an event invitation, and only once a letter no longer waits on an answer */
 function mailKeep(m){if(!m)return "";if(m.kind==="event"&&m.ev==="loy")return "event";if(m.bk&&!m.done)return "event";if(m.lg)return "event";if(m.done||m.expired)return "";if(mailOpen(m))return "act";
   if(m.kind==="lotto"){try{const [s,i]=String(m.draw).split("_").map(Number),d=lottoSt(G).draws.find(x=>x.season===s&&x.i===i);return d&&d.res&&!d.done?"act":"";}catch(e){return "";}}
@@ -11530,7 +11649,7 @@ function questExtra(done,rng){if(!G||G.ended)return false;G.gang=G.gang||{st:0,n
 
 // ---------- modals ----------
 /* v1.89.24: the Loy Krathong invitation glows green until it is read and the gauntlet has been played once */
-function loyMailHot(m){if(m.kind==="event"&&(m.ev==="kongka"||m.ev==="thief"||m.ev==="tuy"||m.ev==="dress"))return !m.done&&!m.expired;return m.kind==="event"&&m.ev==="loy";} /* v1.90.4: the Loy invitation always glows green so it is easy to find again */
+function loyMailHot(m){if(m.kind==="event"&&(m.ev==="kongka"||m.ev==="thief"||m.ev==="tuy"||m.ev==="dress"||m.ev==="qshow"))return !m.done&&!m.expired;return m.kind==="event"&&m.ev==="loy";} /* v1.90.4: the Loy invitation always glows green so it is easy to find again */
 /* v1.91.72 (Man): Naka League letters are green with a blinking green frame, regional letters have a blinking blue frame, the black card is black with a blinking red frame */
 function mailTone(m){if(m.tone)return m.tone;const f=String(m.from||"");if(/ไม่มีชื่อผู้ส่ง|no sender/i.test(f))return "black";if(/นาคา|Naka|ไม่ลงชื่อ|Unsigned/i.test(f))return "naka";if(/แชมป์ภาค|regional champ/i.test(f))return "region";return "";}
 function mailListHTML(){const L=G.mail||[];
@@ -14151,11 +14270,1158 @@ Object.assign(CARDS,{
  xl_pl_ssr:{c:"pailin",xl:1,r:"SSR",t:"สิ่งที่ไม่ต้องวัด",hint:"ไพลินเป็นแฟน",bg:"mountain",need:G=>xlLov(G,"pailin"),steps:[
   xN("ทะเลหมอกเขาใหญ่ ไพลินไม่ได้ใส่นาฬิกาสักเรือน"),xP("happy","วันนี้ฉันไม่รู้ว่ากี่โมง ไม่รู้ว่าชีพจรเท่าไหร่"),xP("flustered","…รู้แค่ว่าอยากอยู่ตรงนี้นานกว่าที่วางแผนไว้ค่ะ")]}});
 
+// ================= MUAY THAI MOE — RADIO GAME SHOW "แฟนพันแท้มวยเด็ดเจ็ดครก" (v1.91.127, Man 24 พ.ย.) =================
+// The community radio invites the player after they keep answering its weekly quiz right (every 3 right answers, at most 4 shows a season).
+// 20 questions up a money ladder to ฿100,000, a timer on each, safe points at Q5/Q10/Q15, walk away any time with what is banked.
+// Lifelines (once each): cut two wrong answers · ask the studio audience · phone someone close (Kru Daeng or a fighter you know).
+// Everything the show needs to resume lives on the mail itself (m.k, m.bank, m.cq, m.ord, m.used…), so a reload never loses a show.
+const QS_LAD=[500,1000,2000,3000,5000,7000,9000,12000,15000,20000,25000,30000,35000,40000,50000,55000,60000,70000,80000,100000];
+const QS_SAFE=[4,9,14];
+const QS_TIME=[25,30,35,40];
+const QS_ABC=["ก","ข","ค","ง"];
+const QS_HOST="ป๋าเปี๊ยก";
+// [question, [4 answers], right index, fact shown after the answer]
+const QS_Q=[
+[ // tier 1 — warm-up (Q1–5)
+["มวยไทยได้ชื่อว่าเป็น “ศิลปะแห่งกี่อาวุธ”?",["สองอาวุธ","แปดอาวุธ","สิบแปดมงกุฎ","ร้อยแปดพันเก้า"],1,"หมัด เท้า เข่า ศอก อย่างละสอง รวมเป็นแปดอาวุธ"],
+["ก่อนชก นักมวยไทยร่ายรำบนเวทีเพื่อแสดงความเคารพครู เรียกว่าอะไร?",["รำวงย้อนยุค","ไหว้ครูรำมวย","เต้นแอโรบิก","รำแก้บน"],1,"ไหว้ครูเพื่อระลึกถึงครูบาอาจารย์ พ่อแม่ และสิ่งศักดิ์สิทธิ์ ทั้งยังได้วอร์มร่างกายและดูเชิงคู่ชกไปในตัว"],
+["ของที่สวมบนศีรษะนักมวยตอนไหว้ครู เรียกว่าอะไร?",["มงคล","หมวกกันน็อก","ที่คาดผมหูแมว","มาลัยพวงใหญ่"],0,"ครูหรือพี่เลี้ยงเป็นคนสวมให้ และถอดออกก่อนเริ่มชก"],
+["ผ้าที่ผูกต้นแขนนักมวยตามความเชื่อว่าช่วยคุ้มครอง เรียกว่าอะไร?",["ผ้าขาวม้า","ประเจียด","ผ้าพันคอ","ผ้าเช็ดหน้าคุณยาย"],1,""],
+["มุมเวทีมวยของนักมวยสองฝ่าย มีสีอะไร?",["แดง กับ น้ำเงิน","ชมพู กับ ม่วง","ขาว กับ ดำ","เขียว กับ ทองคำเปลว"],0,"อีกสองมุมที่เหลือเรียกว่ามุมกลาง"],
+["มวยไทยอาชีพตามมาตรฐานเวทีใหญ่ ชกกันกี่ยก?",["3 ยก","5 ยก","12 ยก","จนกว่าอีกฝ่ายจะหิว"],1,"ยกละ 3 นาที พักระหว่างยก 2 นาที"],
+["กรรมการพูดคำว่าอะไรเมื่อสั่งให้นักมวยที่กอดกันอยู่แยกออกจากกัน?",["“แยก!”","“หยุดก่อนน้อง”","“ตัดเข้าโฆษณา”","“กินข้าวยัง”"],0,"และคำว่า “ชก!” คือสั่งให้เริ่มชก"],
+["ดนตรีที่บรรเลงระหว่างชกมวยไทย ใช้เครื่องดนตรีชุดใด?",["ปี่ชวา กลองแขก ฉิ่ง","กีตาร์ เบส กลองชุด","พิณ แคน โหวด","ไวโอลินสี่ตัว"],0,"เรียกว่าวงปี่กลอง จังหวะจะเร่งขึ้นเมื่อการชกดุเดือด"],
+["“ถีบ” ในภาษามวย หมายถึงท่าอะไร?",["ใช้ฝ่าเท้ายันใส่คู่ชก","ปั่นจักรยานรอบเวที","เล่นมุกตลก","วิ่งหนีกลับมุม"],0,"ถีบดี ๆ คุมระยะได้ทั้งยก"],
+["น้ำมันที่นักมวยทาตัวก่อนชกให้กล้ามเนื้ออุ่น กลิ่นฉุนไปทั้งเวที เรียกว่าอะไร?",["น้ำมันมวย","น้ำมันพืช","น้ำมันหอยนางรม","น้ำมันเครื่อง"],0,""],
+["นักมวยใช้อะไรใส่ป้องกันฟันระหว่างชก?",["ฟันยาง","ฟันปลอมคุณยาย","หมากฝรั่ง","ข้าวเหนียวปั้น"],0,""],
+["“ค่ายมวย” คือที่ไหน?",["ที่ฝึกซ้อมและอยู่อาศัยของนักมวย","ค่ายลูกเสือ","ค่ายเพลงลูกทุ่ง","ร้านหมูกระทะ"],0,"นักมวยหลายคนกินนอนในค่ายตั้งแต่เด็ก"],
+["คนที่คอยดูแลนักมวยที่มุม ให้น้ำ บอกแผนระหว่างพักยก เรียกว่าอะไร?",["พี่เลี้ยง","ผู้กำกับ","แม่ยก","ไรเดอร์"],0,"ส่วนแม่ยกคือแฟนมวยที่มาเชียร์สุดใจ"],
+["ถ้านักมวยล้มแล้วลุกไม่ไหว กรรมการนับถึงเท่าไรจึงถือว่าแพ้น็อก?",["สิบ","สาม","ร้อย","นับจนกว่าจะหลับ"],0,""],
+["ข้อใดเป็น “ฟาวล์” ผิดกติกามวยไทย?",["กัดคู่ชก","เตะลำตัว","ตีเข่า","ถีบยัน"],0,""],
+["“เตะตัด” มักเตะไปที่ส่วนใดของคู่ชก?",["ขา","หัวเข่ากรรมการ","เพดานเวที","กระเป๋าสตางค์"],0,"เตะสะสมที่ขาทีละนิด ยกท้าย ๆ คู่ชกจะยืนไม่มั่น"],
+["มวยไทยแตกต่างจากมวยสากลชัดที่สุดตรงไหน?",["ใช้ได้ทั้งหมัด เท้า เข่า ศอก","ต้องใส่นวม","มีกรรมการ","มีเวทีสี่เหลี่ยม"],0,""],
+["ถ้าชกครบทุกยกแล้วไม่มีใครน็อก ผลแพ้ชนะตัดสินอย่างไร?",["กรรมการให้คะแนน","เป่ายิ้งฉุบ","ดูว่าใครหล่อกว่า","โยนเหรียญ"],0,""],
+["เข่าที่กระโดดลอยตัวขึ้นตีใส่คู่ชก เรียกว่าอะไร?",["เข่าลอย","เข่าแตก","เข่าอ่อน","เข่าพับ"],0,""],
+["“การ์ด” ในภาษามวยหมายถึงอะไร?",["การยกมือแขนขึ้นป้องกันตัว","บัตรสะสมแต้ม","การ์ดเชิญงานแต่ง","การ์ดเกมที่ค่ายเราสะสม"],0,"การ์ดตกเมื่อไหร่ หมัดมาเมื่อนั้น"],
+["ก่อนวันชก นักมวยต้องขึ้นตาชั่งเพื่ออะไร?",["ชั่งน้ำหนักให้ตรงรุ่น","ชั่งใจ","ชั่งทอง","ชั่งหัวหมูไหว้ครู"],0,""],
+["ระหว่างพักยก นักมวยไปนั่งที่ไหน?",["มุมของตัวเอง","ตักกรรมการ","มุมของคู่ชก","ขอบเวทีฝั่งคนดู"],0,""],
+["ลูกเตะของมวยไทยส่วนใหญ่ ใช้ส่วนใดของขากระทบเป้าหมาย?",["หน้าแข้ง","นิ้วก้อยเท้า","ส้นรองเท้า","ถุงเท้า"],0,"นักมวยไทยฝึกหน้าแข้งให้แกร่ง เตะทีเดียวเหมือนโดนไม้เบสบอล"],
+["“เตะก้านคอ” คือการเตะไปที่ไหน?",["บริเวณคอ","ก้านกล้วย","ก้านธูป","ข้อเท้า"],0,""],
+["“ไม้ตาย” ในภาษามวย หมายถึงอะไร?",["ท่าเด็ดที่ใช้ปิดเกม","ไม้ที่ตายแล้ว","ไม้เท้าคุณปู่","ไม้จิ้มฟัน"],0,""],
+["นักมวยสาย “มวยเข่า” เน้นอาวุธใดเป็นหลัก?",["ตีเข่าและจับคอปล้ำ","เตะสูง","หมัดชุด","กระโดดหลบ"],0,""],
+["ในมวยไทย คำว่า “ยก” หมายถึงอะไร?",["ช่วงเวลาชกแต่ละช่วง","การยกน้ำหนัก","การยกมือไหว้","การยกยอกรรมการ"],0,""],
+["มวยไทยถือเป็นศิลปะการต่อสู้และกีฬาประจำชาติของประเทศใด?",["ไทย","ญี่ปุ่น","บราซิล","ดาวพลูโต"],0,"ข้อนี้แจกฟรีครับ ป๋าเปี๊ยกใจดี"],
+["ท่าใดเป็นการใช้ “ศอก”?",["ศอกกลับ","ถีบยัน","เตะเฉียง","หมัดตรง"],0,""],
+["นักมวยกอดจับคอแล้วตีเข่าในระยะประชิด เรียกรวม ๆ ว่าอะไร?",["ปล้ำ (จับคอ)","มวยปล้ำอเมริกัน","กอดลาก่อน","ปล้ำการบ้าน"],0,""]
+],
+[ // tier 2 — getting warm (Q6–10)
+["เพลงที่วงปี่กลองบรรเลงประกอบการชกมวยไทย ชื่อเพลงอะไร?",["เพลงสะระหม่า","เพลงลาวดวงเดือน","เพลงช้าง","เพลงค้างคาวกินกล้วย"],0,"จังหวะจะช้าตอนไหว้ครู แล้วเร่งเร็วขึ้นตามความดุเดือดของไฟต์"],
+["นักมวยไทยมักขึ้นเวทีโดยข้ามเชือกเส้นบนแทนการมุดลอด เพราะอะไร?",["ถือว่าศีรษะเป็นของสูง ไม่ลอดต่ำ","เชือกล่างมีไฟฟ้า","ขี้เกียจก้ม","อยากโชว์ขายาว"],0,""],
+["“มวยคาดเชือก” คืออะไร?",["มวยโบราณที่พันมือด้วยเชือกแทนนวม","มวยที่ชกบนเชือก","มวยที่ลากเชือกไปมา","กระโดดเชือกวอร์มอัพ"],0,"ต่อมาเปลี่ยนมาใส่นวมเพื่อความปลอดภัย"],
+["กลอนมวยโบราณว่า “หมัดหนัก___ ฉลาดลพบุรี ท่าดีไชยา ไวท่าเสา” ช่องว่างคือภาคใด?",["โคราช","ภูเก็ต","ระยอง","บางกอก"],0,"มวยโคราชขึ้นชื่อเรื่องหมัดเหวี่ยงหนัก ๆ"],
+["“จระเข้ฟาดหาง” คือท่าอะไร?",["หมุนตัวเตะกลับหลัง","ก้มหลบต่ำ","เข่าลอย","ล้มตัวนอนแกล้งตาย"],0,"เป็นหนึ่งในแม่ไม้มวยไทย"],
+["“กระจับ” ในวงการมวยคืออะไร?",["อุปกรณ์ป้องกันอวัยวะเพศ","อาวุธโบราณ","ขนมไทย","ปลาน้ำจืด"],0,"ของจำเป็นที่สุดในชีวิตนักมวยชาย ป๋ายืนยัน"],
+["“นายขนมต้ม” มีชื่อเสียงจากการชกชนะนักมวยชาติใด?",["พม่า","ญี่ปุ่น","โปรตุเกส","ดาวอังคาร"],0,"ชนะติดต่อกันถึงสิบคนต่อหน้าพระเจ้ามังระ"],
+["วันที่ 17 มีนาคมของทุกปี ถูกยกให้เป็นวันระลึกถึงใคร?",["นายขนมต้ม บรมครูมวยไทย","พระยาพิชัยดาบหัก","นักมวยทุกคนที่โดนน็อก","ป๋าเปี๊ยก"],0,""],
+["บัวขาว บัญชาเมฆ ดังระดับโลกจากการคว้าแชมป์รายการใด?",["K-1 World MAX","วิมเบิลดัน","หมากรุกซีเกมส์","ประกวดร้องเพลงลูกทุ่ง"],0,"คว้าแชมป์ได้สองสมัย ปี 2004 และ 2006"],
+["“ศอกกลับ” คือการออกอาวุธแบบใด?",["หมุนตัวแล้วเหวี่ยงศอกกลับหลัง","ยืมศอกคนอื่นแล้วคืน","ศอกที่ข้อเคล็ดแล้วหายเอง","เดินกลับมุม"],0,""],
+["ศอกที่ฟันจากบนลงล่างใส่คู่ชก เรียกว่าอะไร?",["ศอกสับ","ศอกงัด","ศอกเฉียงข้าง","ศอกจิ้มฟัน"],0,"ส่วนศอกงัดคือศอกที่เสยขึ้นจากล่าง"],
+["ข้อใดผิดกติกามวยไทยอาชีพ?",["ใช้ศีรษะโขก","ตีเข่าจับคอ","ศอกตัด","เตะก้านคอ"],0,""],
+["ใครควรเป็นคนถอดมงคลออกจากศีรษะนักมวยก่อนเริ่มชก?",["ครูหรือพี่เลี้ยงที่มุม","กรรมการ","คู่ชก","คนดูแถวหน้าที่ใจดี"],0,"มงคลเป็นของสูง ห้ามวางพื้นหรือเดินข้าม"],
+["ในการไหว้ครู นักมวยมักกราบกี่ครั้ง?",["สามครั้ง","หนึ่งครั้ง","เจ็ดครั้ง เท่าจำนวนครกในสตูดิโอ","สิบครั้งถ้าค่าตัวแพง"],0,""],
+["พักระหว่างยกในมวยไทยอาชีพ นานเท่าไร?",["2 นาที","10 วินาที","ครึ่งชั่วโมง","จนกว่าครูแดงจะเล่าเรื่องจบ"],0,""],
+["นักมวยสาย “มวยฝีมือ” มักเน้นอะไร?",["ชั้นเชิง หลบหลีก สวนกลับ","หมัดหนักอย่างเดียว","เดินหน้าแลกไม่ถอย","ร้องเพลงกวนคู่ชก"],0,""],
+["ชื่อบนเวทีของนักมวยไทย ส่วนหลังมักมาจากอะไร?",["ชื่อค่ายหรือผู้สนับสนุน","ชื่อแม่","ยี่ห้อบะหมี่กึ่งสำเร็จรูป","เบอร์โทรศัพท์"],0,"เช่นลงท้ายด้วย “ศิษย์…” หรือชื่อค่ายที่สังกัด"],
+["“แม่ยก” ในวงการมวยหมายถึงใคร?",["แฟนมวยที่เชียร์และให้กำลังใจนักมวยสุดใจ","แม่ที่ยกของหนัก","กรรมการหญิง","ผู้หญิงที่ยกเวที"],0,""],
+["“ล้มมวย” หมายถึงอะไร?",["จงใจแพ้เพื่อล็อกผล ผิดกติกาและผิดกฎหมาย","ล้มเพราะเวทีลื่น","ล้มตัวหลบหมัด","ล้มเลิกการเป็นนักมวย"],0,"ค่ายที่ดีไม่ยุ่งเด็ดขาด ป๋าเปี๊ยกขอย้ำ"],
+["“กระบี่กระบอง” คืออะไร?",["ศิลปะการต่อสู้ด้วยอาวุธของไทย","ขนมไทยโบราณ","ชื่อเพลงมวย","ท่าเตะชนิดหนึ่ง"],0,""],
+["มงคลถือเป็นของสูง จึงไม่ควรทำสิ่งใดกับมงคล?",["วางบนพื้นหรือเดินข้าม","เก็บไว้ที่สูง","ให้ครูสวมให้","ไหว้ก่อนสวม"],0,""],
+["สนามมวยที่ได้ชื่อว่าเป็นสนามมวยมาตรฐานถาวรแห่งแรกของไทย คือที่ไหน?",["เวทีราชดำเนิน","เวทีท่าแพ","เวทีลานวัดหลังบ้าน","ตลาดนัดคลองถม"],0,"เปิดเมื่อ พ.ศ. 2488"],
+["สนามมวยเวทีราชดำเนิน ตั้งอยู่ที่ไหน?",["กรุงเทพมหานคร","เชียงใหม่","ภูเก็ต","ดาวอังคาร"],0,""],
+["ท่าใดคือการ “ถีบ” ใส่ลำตัวคู่ชกเพื่อคุมระยะ?",["ถีบยัน (ถีบตรง)","เตะตัด","ศอกเฉียง","เข่าโค้ง"],0,""],
+["“มุมกลาง” บนเวทีมวยคือมุมไหน?",["มุมที่ไม่ใช่มุมแดงและมุมน้ำเงิน","มุมที่กรรมการยืนตลอด","มุมขายน้ำ","มุมให้คนดูถ่ายรูป"],0,"เวลาคู่ชกล้ม นักมวยอีกฝ่ายต้องไปรอที่มุมกลาง"],
+["นักมวยไทยคนใดที่ได้ฉายาว่า “ซ้ายทะลวงไส้”?",["เขาทราย แกแล็คซี่","บัวขาว บัญชาเมฆ","สมรักษ์ คำสิงห์","โผน กิ่งเพชร"],0,"หมัดซ้ายเข้าลำตัวของเขาทำให้คู่ชกยืนไม่ไหวมานักต่อนัก"]
+],
+[ // tier 3 — the real fans (Q11–15)
+["แม่ไม้ “มอญยันหลัก” คือท่าอะไร?",["ถีบยันด้วยฝ่าเท้า","เตะก้านคอ","ศอกกลับ","กอดคอปล้ำ"],0,""],
+["“ยอเขาพระสุเมรุ” ตามแม่ไม้มวยไทย คือการออกอาวุธแบบใด?",["ย่อตัวแล้วชกหมัดเสยขึ้นใต้คาง","ปีนขึ้นมุมเวที","ถีบยันหน้าอก","กระโดดเตะสูง"],0,""],
+["แม่ไม้มวยไทยตามตำราที่สอนกันแพร่หลาย มีกี่ท่า?",["15 ท่า","8 ท่า","108 ท่า","3 ท่า"],0,"และมีลูกไม้อีก 15 ท่า"],
+["กษัตริย์พระองค์ใดที่เล่าขานว่าทรงปลอมพระองค์ไปชกมวยกับชาวบ้านที่ตำบลตลาดกรวด?",["พระเจ้าเสือ","พระเจ้าตากสิน","พ่อขุนรามคำแหง","สมเด็จพระนเรศวร"],0,"ทรงชนะนักมวยฝีมือดีของเมืองนั้นถึงสามคน"],
+["พระเจ้าเสือ ทรงครองราชย์ในสมัยอาณาจักรใด?",["อยุธยา","สุโขทัย","รัตนโกสินทร์","ล้านนา"],0,""],
+["พระเจ้ามังระตรัสชมนายขนมต้มไว้ว่าอย่างไร?",["คนไทยมีพิษสงรอบตัว","คนไทยกินเผ็ดเก่ง","คนไทยรำสวยที่สุด","คนไทยตื่นสาย"],0,"แม้มือเปล่า ยังเอาชนะคนได้ถึงสิบคน"],
+["นายขนมต้มถูกกวาดต้อนไปพม่าหลังเหตุการณ์ใด?",["เสียกรุงศรีอยุธยาครั้งที่ 2","สงครามโลกครั้งที่ 2","ตั้งกรุงสุโขทัย","ย้ายเมืองหลวงไปเชียงใหม่"],0,"กรุงแตกเมื่อ พ.ศ. 2310"],
+["นักมวยไทยคนแรกที่คว้าเหรียญทองโอลิมปิกให้ประเทศไทย คือใคร?",["สมรักษ์ คำสิงห์","สามารถ พยัคฆ์อรุณ","เขาทราย แกแล็คซี่","บัวขาว บัญชาเมฆ"],0,"มวยสากลสมัครเล่น โอลิมปิกแอตแลนตา 1996"],
+["สามารถ พยัคฆ์อรุณ นอกจากเป็นตำนานมวยไทย ยังเคยเป็นแชมป์โลกมวยสากลของสถาบันใด?",["WBC","FIFA","NBA","UNESCO"],0,"แชมป์โลกรุ่นซูเปอร์แบนตัมเวต"],
+["“หมัดเหวี่ยงควาย” เป็นหมัดเอกลักษณ์ของมวยสายใด?",["มวยโคราช","มวยไชยา","มวยลพบุรี","มวยท่าเสา"],0,""],
+["ท่าเดินเท้าเป็นรูปสามเหลี่ยมของมวยไทยโบราณ เรียกว่าอะไร?",["ย่างสามขุม","สามช่า","เดินหน้าสามถอยสอง","สามเหลี่ยมทองคำ"],0,""],
+["มวยไชยามีต้นกำเนิดในจังหวัดใดของปัจจุบัน?",["สุราษฎร์ธานี","เชียงราย","นครราชสีมา","ชลบุรี"],0,"ขึ้นชื่อเรื่องท่าทางสวยงามและการป้องกันแน่นหนา — “ท่าดีไชยา”"],
+["ในกลอนมวยโบราณ มวยสายใดได้ชื่อว่า “ฉลาด”?",["มวยลพบุรี","มวยโคราช","มวยท่าเสา","มวยไชยา"],0,"เด่นเรื่องชั้นเชิงและการหลอกล่อ"],
+["พระยาพิชัยดาบหัก ก่อนรับราชการเคยใช้ชื่อว่า “ทองดี” ตามด้วยฉายาใด?",["ฟันขาว","ฟันทอง","หมัดเหล็ก","ขาไว"],0,"เพราะไม่เคี้ยวหมากอย่างคนสมัยนั้น ฟันจึงขาว"],
+["สนามมวยเวทีลุมพินีอยู่ภายใต้การดูแลของหน่วยงานใด?",["กองทัพบก","กรมป่าไม้","การรถไฟ","สมาคมแม่ยกแห่งประเทศไทย"],0,""],
+["ตามความเชื่อเก่าแก่ ประเจียดของนักมวยมักทำจากอะไร?",["ผ้าที่แม่มอบให้ ลงยันต์คาถา","ถุงพลาสติก","ผ้าม่านค่าย","เสื้อของคู่ชก"],0,"ผูกแขนไว้เหมือนมีแม่คอยคุ้มครอง"],
+["บัวขาว บัญชาเมฆ คว้าแชมป์ K-1 World MAX ครั้งแรกในปีใด?",["2004","1984","2015","2025"],0,"และคว้าอีกครั้งในปี 2006"],
+["นักมวยไทยคนแรกที่ได้เป็นแชมป์โลกมวยสากลอาชีพ คือใคร?",["โผน กิ่งเพชร","เขาทราย แกแล็คซี่","สามารถ พยัคฆ์อรุณ","สมรักษ์ คำสิงห์"],0,"ได้แชมป์เมื่อ พ.ศ. 2503"],
+["นายขนมต้มชนะนักมวยพม่าติดต่อกันกี่คน ตามที่เล่าขานกัน?",["สิบคน","สองคน","ห้าสิบคน","ร้อยแปดคน"],0,""],
+["“เข่าโค้ง” ต่างจาก “เข่าตรง” อย่างไร?",["เข่าโค้งตีเฉียงเข้าด้านข้าง เข่าตรงพุ่งตรงไปข้างหน้า","เข่าโค้งใช้ตอนขาเคล็ด","เข่าตรงใช้เฉพาะวันจันทร์","ไม่ต่างกัน"],0,""],
+["ในการชกมวยไทย หมัดเสยขึ้นจากล่างใต้คาง ภาษามวยเรียกว่าอะไร?",["หมัดเสย","หมัดตรง","หมัดเหวี่ยง","หมัดหลังมือ"],0,""],
+["ข้อใดเป็นแม่ไม้มวยไทยจริง?",["จระเข้ฟาดหาง","ช้างเหยียบหาง","แมวขโมยปลาทู","ไก่ชนข้ามรั้ว"],0,""],
+["การทำร้ายคู่ชกที่ล้มลงไปแล้ว ถือว่าอย่างไร?",["ฟาวล์ ผิดกติกา","ได้คะแนนพิเศษ","กรรมการชม","คนดูให้ทิป"],0,""],
+["ทำไมนักมวยไทยจึงต้องฝึกเตะกระสอบหรือเตะเป้าซ้ำ ๆ เป็นพันครั้ง?",["ให้หน้าแข้งแกร่งและจังหวะเตะเป็นธรรมชาติ","เพราะกระสอบชอบ","เพื่อให้ครูได้พัก","เพื่อทำลายกระสอบ"],0,""],
+["ใครเป็นผู้สั่งให้จัดงานฉลองที่นายขนมต้มได้ชกโชว์?",["พระเจ้ามังระ","พระเจ้าบุเรงนอง","พระเจ้าอลองพญา","พระเจ้าตากสิน"],0,""],
+["สนามมวยเวทีราชดำเนิน เปิดครั้งแรกในปี พ.ศ. ใด?",["2488","2400","2525","2560"],0,""]
+],
+[ // tier 4 — the big money (Q16–20)
+["แม่ไม้ “นาคาบิดหาง” คืออะไร?",["จับขาที่คู่ชกเตะมาแล้วบิด","หมุนตัวเตะกลับหลัง","ศอกกลับ","ถีบยัน"],0,""],
+["แม่ไม้ “ปักลูกทอย” ใช้อาวุธใดสกัดลูกเตะของคู่ชก?",["ศอก","ฟัน","ศีรษะ","ไม้ครู"],0,"ปักศอกลงใส่ขาที่เตะเข้ามา เจ็บยิ่งกว่าเตะเอง"],
+["แม่ไม้ “หักคอเอราวัณ” คืออะไร?",["จับคอคู่ชกโน้มลงแล้วตีเข่า","เตะคอช้างจริง ๆ","ก้มหลบหมัด","ถีบยันหน้าอก"],0,""],
+["นายขนมต้มชกโชว์ในงานฉลองพระเจดีย์องค์ใด?",["ชเวดากอง เมืองย่างกุ้ง","พระธาตุดอยสุเทพ","พระปฐมเจดีย์","พระธาตุพนม"],0,"งานฉลองบูรณะและยกฉัตรพระเจดีย์"],
+["สนามมวยเวทีลุมพินีย้ายไปตั้งใหม่ที่ถนนใดเมื่อปี พ.ศ. 2557?",["รามอินทรา","สีลม","นิมมานเหมินท์","ข้าวสาร"],0,""],
+["มวยท่าเสา หรือ “ไวท่าเสา” มีต้นกำเนิดในจังหวัดใด?",["อุตรดิตถ์","ภูเก็ต","สมุทรปราการ","ตราด"],0,"ขึ้นชื่อเรื่องความว่องไวของเท้าและลูกเตะ"],
+["ปรมาจารย์ผู้สืบทอดและเผยแพร่มวยไชยาจนได้รับการยกย่อง คือใคร?",["ครูเขตร ศรียาภัย","นายขนมต้ม","พระยาพิชัยดาบหัก","ป๋าเปี๊ยก"],0,""],
+["ตามที่เล่าขาน มวยโคราชคาดเชือกยาวถึงตรงไหน?",["ถึงข้อศอก","แค่ปลายนิ้ว","ถึงไหล่แล้วพันคอ","ไม่คาดเลย"],0,"เพื่อรองรับหมัดเหวี่ยงกว้าง ๆ แบบโคราช"],
+["สหพันธ์มวยไทยสมัครเล่นนานาชาติ (IFMA) ได้รับการรับรองเต็มรูปแบบจากคณะกรรมการโอลิมปิกสากลเมื่อปีใด?",["ค.ศ. 2021","ค.ศ. 1950","ค.ศ. 1988","ยังไม่เคยได้รับ"],0,"ก้าวสำคัญบนเส้นทางสู่โอลิมปิก"],
+["เวทีมวยแบบมีเชือกกั้นตามแบบสากลแห่งแรกของไทย สร้างขึ้นที่ใด?",["สนามโรงเรียนสวนกุหลาบวิทยาลัย","ท่าแพ เชียงใหม่","สนามหลวง","หน้าวัดอรุณฯ"],0,"เมื่อ พ.ศ. 2464"],
+["ท่ารำมวยที่นักมวยหันไปไหว้ครบทั้งสี่ทิศ เรียกว่าอะไร?",["พรหมสี่หน้า","สี่ทิศพิชิตครก","หมุนสี่แยก","ไหว้รอบวง"],0,""],
+["ในตำนานพระเจ้าเสือที่ตลาดกรวด นักมวยชื่อ “นายเล็ก” มีฉายาว่าอะไร?",["หมัดเหล็ก","หมัดทอง","ขาไว","ศอกเพชร"],0,"อีกสองคนคือนายกลาง หมัดหนัก และนายใหญ่ หมัดมั่น"],
+["หลังชนะสิบคน นายขนมต้มขอพระราชทานสิ่งใดจากพระเจ้ามังระ?",["ปล่อยเชลยไทยกลับบ้าน","ภรรยาชาวพม่า","ทองคำหนึ่งหาบ","ตำแหน่งแม่ทัพ"],0,"เชลยไทยได้กลับคืนสู่แผ่นดินเกิด"],
+["นวมเข้ามาแทนการคาดเชือกในเวทีมวยไทย หลักๆ เพราะเหตุผลใด?",["ความปลอดภัยของนักมวย","นวมราคาถูกกว่าเชือก","เชือกขาดตลาด","ให้ถ่ายรูปสวย"],0,""],
+["ในแม่ไม้มวยไทย “หักงวงไอยรา” เกี่ยวข้องกับการรับมือแบบใด?",["รับลูกเตะของคู่ชกแล้วตอบโต้ที่ขา","กอดคอแล้วร้องเพลง","ชกหมัดตรงใส่จมูก","ลอดใต้เชือกหนี"],0,""],
+["“ลูกไม้” ในมวยไทย ต่างจาก “แม่ไม้” อย่างไร?",["ลูกไม้เป็นท่าแตกแขนงที่ต่อยอดจากแม่ไม้","ลูกไม้คือผลไม้ในค่าย","ลูกไม้ใช้เฉพาะเด็ก","ไม่ต่างกัน"],0,""],
+["ในระบบให้คะแนนมวยไทยอาชีพ ผู้ชนะยกมักได้คะแนนเท่าไร?",["10 คะแนน","100 คะแนน","1 คะแนน","ไม่มีการให้คะแนนรายยก"],0,"ฝ่ายที่เป็นรองในยกนั้นได้ 9 หรือน้อยกว่า"],
+["คำกล่าวว่า “ท่าดี” ในกลอนมวยโบราณ หมายถึงมวยสายใด?",["มวยไชยา","มวยโคราช","มวยลพบุรี","มวยท่าเสา"],0,""],
+["สามารถ พยัคฆ์อรุณ ได้แชมป์โลกมวยสากล WBC ในรุ่นใด?",["ซูเปอร์แบนตัมเวต","เฮฟวีเวต","มิดเดิลเวต","รุ่นไร้น้ำหนัก"],0,"ได้แชมป์เมื่อปี 1986"],
+["นายขนมต้มเป็นชาวเมืองใดก่อนถูกกวาดต้อน?",["กรุงศรีอยุธยา","เชียงใหม่","ปัตตานี","นครราชสีมา"],0,""],
+["ในวงการมวยไทย “ครูมวย” ที่ถ่ายทอดวิชาให้ศิษย์ ศิษย์จะแสดงความเคารพด้วยพิธีใดเป็นประจำทุกปี?",["พิธีไหว้ครูประจำปี","วันเกิดครู","งานเลี้ยงหมูกระทะ","แข่งเตะฟุตบอล"],0,""],
+["ท่าใดต่อไปนี้ “ไม่ใช่” แม่ไม้มวยไทย?",["ปลาทูกระโดดกระทะ","จระเข้ฟาดหาง","มอญยันหลัก","หักคอเอราวัณ"],0,"ปลาทูกระโดดกระทะ ป๋าเปี๊ยกแต่งเองเมื่อเช้าครับ"]
+]];
+
+/* ---------------- host lines (funny on purpose) ---------------- */
+const QSL={
+ open:"สวัสดีครับพี่น้องแฟนมวยทั่วหล้า! วิทยุชุมชน “มวยบ้านเรา” ขอต้อนรับเข้าสู่… แฟนพันแท้! มวยเด็ด! เจ็ดดดด ครกกกก!",
+ intro:["ผมป๋าเปี๊ยก พิธีกรประจำรายการ สูทมีสามตัว ใส่หมุนเวียนมาสิบห้าปี วันนี้ใส่ตัวที่ซักแล้วนะครับ",
+  "ผู้เข้าแข่งขันของเราวันนี้ คือคุณ{n} เจ้าของค่ายมวยที่ตอบคำถามวิทยุเราถูกบ่อยจนสถานีต้องเชิญมาเอง ไม่งั้นรางวัลหมดตู้!",
+  "ขอบคุณผู้สนับสนุนรายการ น้ำปลาร้าตราครกทอง “หอมทะลุนวม” และยาหม่องตรามวยล้ม “ทาแล้วลุกได้ก่อนนับสิบ”",
+  "รายการเรามีครกเจ็ดใบวางหน้าเวที ไม่ต้องถามว่ามีไว้ทำไม… ผมก็ไม่รู้ครับ มันอยู่ตรงนี้ตั้งแต่ผมมาทำงานแล้ว",
+  "ขอเสียงปรบมือให้คุณ{n}หน่อยครับ! …เสียงดังมาก ทั้งที่คนดูในห้องส่งมีสิบสองคน ขอบคุณครับ"],
+ rule:"กติกาง่ายมากครับ ตอบถูกยี่สิบข้อรับไปเลยแสนบาท! ข้อ 5, 10, 15 เป็นจุดปลอดภัย จะหยุดรับเงินเมื่อไหร่ก็ได้ ส่วนตัวช่วยมีสามอย่าง ใช้ได้อย่างละครั้ง เหมือนน้ำใจครูมวย มีจำกัด!",
+ ask:[["ข้อ {k} ครับ ข้อนี้ง่าย ง่ายจนครกยังหัวเราะ","ข้อ {k} ชิง {a}! ฟังดี ๆ นะครับ","อุ่นเครื่องกันก่อน ข้อ {k} ครับ","ข้อ {k}! ข้อนี้ถ้าตอบผิด ผมจะเล่าให้แม่ค้าส้มตำหน้าสถานีฟังนะครับ"],
+  ["ข้อ {k} เริ่มมีเหงื่อ… ของผมนะครับ ไม่ใช่ของคุณ","ข้อ {k} ชิง {a}! คนดูเงียบ… ครกก็เงียบ","เงินเริ่มเยอะแล้วนะครับ ข้อ {k} ระวังหมัดสวน!","ข้อ {k} ครับ ทีมงานเริ่มยืนดูหลังกระจกแล้ว ไม่มีใครกินข้าวเลย"],
+  ["ข้อ {k}! ยกสามแล้วครับพี่น้อง เงินเริ่มหนัก ครกเริ่มสั่น","ข้อ {k} ชิง {a}! ลุงแถวหน้าลุกขึ้นนั่งตัวตรงแล้วครับ","ข้อ {k} ครับ ข้อนี้คนตอบผิดมาเยอะ ผมไม่ได้ขู่นะ ผมแค่เล่า"],
+  ["ข้อ {k}… ยกห้าแล้วครับ ใครยังยืนอยู่ตอนนี้คือของจริง","ข้อ {k} ชิง {a}!! ผมขอหายใจหนึ่งที… ฮืดดด… โอเค ฟังนะ","ข้อ {k}! ข้อนี้ผมเองยังต้องแอบดูการ์ดคำตอบสองรอบ"]],
+ last:"ข้อสุดท้ายครับพี่น้อง!! แสนบาท!! ครกใบที่เจ็ดในตำนานของเรา ถูกยกมาวางกลางเวทีแล้ว!",
+ lock:["ข้อ {c} นะครับ… คำตอบสุดท้าย? ล็อก! ล็อกแน่นกว่าจับคอยกห้า!","{c}… ขอดูหน้าคุณ{n}หน่อย… ดูไม่ออกเลยครับ หน้านิ่งยิ่งกว่ากรรมการ","ตอบ {c}… ทีมงานครับ ขอเสียงกลองแขกหน่อย… ตึ่ง… ตึ่ง… ตึ่ง…","{c} หรือครับ… อืมมม… (ป๋าเปี๊ยกจ้องหน้าคุณนานเกินความจำเป็น)","ข้อ {c}… ผมขอพูดอะไรหน่อยนะครับ… …ไม่มีอะไรครับ แค่อยากให้ลุ้น"],
+ right:["ถูกกกกก! ถูกต้องงงง! ถูกยิ่งกว่าหวยงวดที่แล้วของป้าข้างบ้าน!","ถูกครับ!! ครกทั้งเจ็ดตำเฉลิมฉลอง โป๊ก โป๊ก โป๊ก!","ถูกต้อง! คุณ{n} มี {a} แล้วครับ! ยิ้มกว้างกว่าแม่ยกตอนลูกรักชนะน็อก","ใช่เลยครับ! คนดูแถวหลังลุกขึ้นยืน… อ๋อ เขาจะไปเข้าห้องน้ำ แต่ก็ปรบมือนะครับ","ถูกครับ! ผมดีใจจนลืมบท… ทีมงานชูป้ายอะไรครับ… อ๋อ “ไปต่อ”"],
+ safe:"จุดปลอดภัยครับ! {a} นี้เดินกลับบ้านได้แน่นอน ต่อให้ข้อหน้าตอบว่า “ไม่รู้” ก็ตาม!",
+ wrong:["โอ้ยยย… เจ็บกว่าโดนศอกกลับ! คำตอบที่ถูกคือ {c} ครับ","ไม่ใช่ครับ… ครกทั้งเจ็ดตำพร้อมกัน โป๊กกก! คำตอบคือ {c}","อุ๊ย… คนดูแถวหน้าเอามือปิดตา ผมก็ปิดครับ คำตอบคือ {c}","เสียดายยย! เหมือนเตะพลาดเป้าแล้วลื่นล้มเอง คำตอบที่ถูกคือ {c}"],
+ timeout:["หมดเวลาครับ! คิดนานกว่ากรรมการนับสิบอีก! คำตอบคือ {c}","ปี๊ดดด! เวลาหมด! นาฬิกาเราไม่รอใคร เหมือนพักยกที่ไม่เคยพอ คำตอบคือ {c}"],
+ quitAsk:"จะพอแค่นี้เหรอครับ? รับ {a} กลับบ้าน หรือไปต่อชิง {nx}? ถ้าไปต่อแล้วพลาด จะเหลือแค่ {sf} นะครับ…",
+ quit:["ไม่เสี่ยงก็ไม่เจ็บ! เหมือนนักมวยที่ถีบจนครบห้ายก ชนะคะแนนเฉยเลย คุณ{n} รับไป {a} ครับ!","ฉลาดครับ! ครูมวยสอนว่า รู้จักถอยคือรู้จักชนะ… ผมเพิ่งแต่งเมื่อกี้ แต่ฟังดูดีใช่ไหมครับ","รับเงินแล้วกลับบ้านนอนครับ! {a} ซื้อน้ำปลาร้าตราครกทองได้ทั้งค่ายเลย!"],
+ quitReveal:"…แต่ถ้าไปต่อนะครับ คำตอบข้อนั้นคือ {c} ครับ ฮี่ ๆ",
+ nostart:"ยังไม่ทันได้เงินเลยครับ จะกลับแล้วเหรอ? ประตูสตูดิโอล็อกไว้นะครับ ล้อเล่น ๆ แต่ตอบสักข้อก่อนไหมครับ",
+ win:"แสนบาทททท!!! คุณ{n} คือแฟนพันแท้มวยเด็ดเจ็ดครกตัวจริง! ครกใบที่เจ็ดตำเองโดยไม่มีใครตำ! ปาฏิหาริย์!",
+ zero:"กลับบ้านมือเปล่าครับ… แต่ได้ยาหม่องตรามวยล้มไปหนึ่งขวด ทาใจนะครับ",
+ home:"ยังได้ {a} กลับไปครับ! ไม่เลวเลย ซื้อน้ำปลาร้าตราครกทองได้ทั้งปี",
+ bye:"ขอบคุณคุณ{n} และพี่น้องแฟนมวยทุกท่าน แล้วพบกันใหม่… ในแฟนพันแท้มวยเด็ด… เจ็ดดด… ครกกก!",
+ cut:"ทีมงานครับ ตัดออกสองข้อ! …ฉับ! ฉับ! ขอโทษที่เสียงดังครับ ทีมงานเราใช้กรรไกรตัดหญ้า",
+ aud:"ขอเสียงคนดูในห้องส่งครับ! กดโหวตได้เลย… (คุณป้าแถวสองกดไปสามรอบ ทีมงานไม่ห้าม)",
+ heck:["ลุงแถวหลัง: “ข้อ {x} เลย! ลุงเชียร์ข้อ {x} มาตั้งแต่ปี 2530!”","เด็กแถวหน้า: “ข้อ {x}! …หนูเดานะ”","แม่ยกคนหนึ่ง: “ตอบข้อไหนก็ได้ลูก แม่รักหมดดด!”","พี่วินมอเตอร์ไซค์: “ข้อ {x} ครับ ผมรอรับคนดูกลับอยู่ อย่าลากยาว”","ป้าแม่ค้า: “ข้อ {x}! ถ้าถูกมาอุดหนุนส้มตำป้าด้วยนะ”"],
+ phone:"โทรหาคนสนิท! คุยได้สามสิบวินาทีนะครับ สายนี้สนับสนุนโดย… ไม่มีครับ ค่าโทรคุณ{n}จ่ายเองนะ",
+ phoneBack:"วางสายแล้ว! ได้คำใบ้แล้วนะครับ เชื่อหรือไม่เชื่อ ชีวิตเป็นของคุณครับ",
+ hurry:["นาฬิกาเดินนะครับ… เร็วกว่าเท้ามวยท่าเสาอีก!","ห้าวินาทีสุดท้าย! ตอบอะไรก็ได้ครับ แม่ยกแถวหน้าบอกว่ารักทุกข้อ!","เร็วครับเร็ว! เร็วเหมือนนักมวยตอนได้ยินว่ามีเลี้ยงหมูกระทะ!","คุณ{n}ครับ… ผมเห็นนาฬิกา คุณเห็นนาฬิกาไหมครับ"]
+};
+/* v1.91.144: more host material, so a season of shows does not run out of jokes */
+QSL.ask[0].push("ข้อ {k} ครับ ทีมงานบอกว่าข้อนี้เด็กประถมยังตอบได้ …ทีมงานเราเป็นเด็กประถมครับ ลูกเจ้าของสถานี","ข้อ {k} ชิง {a}! เงินเท่านี้ซื้อน้ำปลาร้าได้ครึ่งไห… ไหเล็กนะครับ","ข้อ {k}! ผมอ่านช้า ๆ นะครับ ผู้สนับสนุนจ่ายเป็นรายวินาที","ข้อ {k} ครับ ข้อนี้ผิดผมไม่โกรธ แต่ครกเจ็ดใบจะผิดหวังมาก");
+QSL.ask[1].push("ข้อ {k} ชิง {a}! ตอนนี้คนฟังทางบ้านขึ้นเป็นสี่สิบคนแล้วครับ สถิติใหม่ของสถานี!","ข้อ {k} ครับ ผมเห็นคุณ{n}ปาดเหงื่อ… อ๋อ ผมปาดเองครับ","ข้อ {k}! ทีมงานส่งกระดาษมาบอกว่า “พูดให้น้อยลง” …ผมจะพูดต่อครับ","ข้อ {k} ชิง {a}! ขอเปิดสปอตไลต์ดวงที่สองครับ …ทีมงานบอกค่าไฟยังไม่จ่าย ใช้ดวงเดียวพอ");
+QSL.ask[2].push("ข้อ {k} ชิง {a}! ป้าแม่ค้าส้มตำปิดร้านมานั่งดูหน้ากระจกแล้วครับ ตำค้างไว้ครกนึง","ข้อ {k}… ขออ่านด้วยเสียงทุ้มนะครับ… (กระแอม) …ไม่ทุ้มเลย ช่างมัน","ข้อ {k} ครับ ข้อนี้ผมแอบไปถามครูมวยแถวสถานีมาก่อน เขาตอบไม่ได้ แล้วเขาก็เตะผม","ข้อ {k}! เงินระดับนี้ ถ้าเป็นค่าตัวมวยงานวัดก็ชกได้สามไฟต์แล้วนะครับ");
+QSL.ask[3].push("ข้อ {k} ชิง {a}!! ผู้จัดการสถานีมายืนข้างหลังผมแล้วครับ หน้าซีดมาก","ข้อ {k}… คนดูสิบสองคนตอนนี้เหลือสิบเอ็ด อีกคนเป็นลมครับ ไม่เป็นไร เดี๋ยวฟื้น","ข้อ {k} ชิง {a}! ผมไม่มีสิทธิ์ช่วยแนะนำครับ… แต่ผมอยากแนะนำมากกก");
+/* pacing: a real host does not joke on every answer — short plain lines in between (these may repeat) */
+QSL.lockShort=["ข้อ {c} นะครับ… คำตอบสุดท้าย?","{c}… ล็อกครับ!","ตอบ {c}… ลุ้นนน…","{c} นะครับ… โอเค… ขอดูคำตอบ…"];
+QSL.rightShort=["ถูกต้องครับ!","ถูก! ไปต่อครับ!","ถูกครับ! ตอนนี้มี {a} แล้ว!","เยส! ถูกต้องงง!"];
+QSL.legend="ก่อนข้อ 16 ขอเล่าตำนานหน่อยครับ… ครกใบที่เจ็ดเป็นของผู้ก่อตั้งสถานี ท่านสั่งไว้ว่า วันไหนมีคนตอบครบยี่สิบข้อ ครกใบนี้จะตำเอง ผมรอมาสิบห้าปีแล้วครับ… ข้อ 16 ชิง {a}!";
+QSL.lock.push("{c}… ทีมงานครับ ขอไฟมืด… (ไฟดับทั้งสตูดิโอ) …ไม่ต้องมืดขนาดนั้นครับ!","{c} นะครับ… ขอคั่นโฆษณาสามสิบวินาที… ล้อเล่นครับ เราไม่มีงบโฆษณา","{c}… คุณ{n}มั่นใจกี่เปอร์เซ็นต์ครับ? …ไม่ต้องตอบ ผมดูจากมือที่สั่นได้","ตอบ {c}… ครกทั้งเจ็ดกลั้นหายใจครับ (ครกหายใจไม่ได้ แต่ขอให้จินตนาการ)","{c}… ขอเปิดซองคำตอบ… ซองติดกาวครับ… ทีมงาน! ขอกรรไกรตัดหญ้าอีกรอบ!");
+QSL.right.push("ถูกครับ! ป้าแถวสองกดปุ่มโหวตอีกแล้ว… ป้าครับ ตอนนี้ไม่ได้ให้โหวต","ถูกต้อง! ผมขอกอดหน่อย… แท่นห่างกันสามเมตรครับ กอดลมไปก่อน","ถูกครับ! ครกใบที่สามตำเอง… อ๋อ ทีมงานเตะโต๊ะ ขอโทษครับ","ใช่! ถูก! ผมรู้ตั้งแต่แรกแล้วว่าคุณ{n}ต้องตอบได้ (ผมไม่รู้ครับ)","ถูกต้องครับ! ทางบ้านโทรมาชมแล้วหนึ่งสาย… เป็นแม่ผมเองครับ","ถูกกก! กรรมการทั้งสามท่านให้สิบเต็มสิบ (รายการเรามีกรรมการคนเดียว คือผม)","ถูกครับ! พี่วินหน้าสถานีบีบแตรให้สามที… หรือเขาเรียกลูกค้า ไม่แน่ใจ");
+QSL.wrong.push("ผิดครับ… ครกใบที่สี่ร้องไห้ (ทีมงานเอาน้ำราด) คำตอบคือ {c}","ไม่ใช่ครับ ผมเสียใจด้วยจริง ๆ… เดี๋ยวนะ ผมยิ้มอยู่เหรอ ขอโทษครับ หน้าผมเป็นแบบนี้ คำตอบคือ {c}","อ๊ากกก! ลุงแถวหลังทำกระติบข้าวเหนียวหล่นเลยครับ คำตอบที่ถูกคือ {c}","ผิดครับ… ทีมงานเปิดเพลงเศร้าให้แล้ว… เพลงสะระหม่าครับ ไม่ค่อยเศร้าเท่าไหร่ คำตอบคือ {c}");
+QSL.timeout.push("หมดเวลาครับ… คุณ{n}ยืนนิ่งจนผมนึกว่าภาพค้าง ทั้งที่นี่รายการวิทยุ คำตอบคือ {c}");
+QSL.safeAt=["จุดปลอดภัยแรก! {a} กลับบ้านแน่นอน ครกใบแรกพยักหน้าแล้วครับ (ทีมงานเขย่าโต๊ะ)","จุดปลอดภัยที่สอง! {a} เป็นของคุณแล้ว ครกใบที่สองถึงหกเริ่มขยับ… หรือโต๊ะโยกก็ไม่รู้","จุดปลอดภัยสุดท้าย! {a}! ตอนนี้เหลือครกใบที่เจ็ดใบเดียวที่ยังนิ่ง… มันนิ่งมาสิบห้าปีแล้วครับ"];
+QSL.retWin="คุณ{n} กลับมาอีกแล้วครับ! ครั้งที่แล้วได้เงินไปเยอะจนสถานีต้องขายครกไปหนึ่งใบ… ล้อเล่นครับ ครกยังอยู่ครบเจ็ด";
+QSL.retZero="คุณ{n} กลับมาแก้มือครับ! ครั้งที่แล้วได้ยาหม่องกลับบ้าน ใช้หมดยังครับ วันนี้เตรียมไว้ให้อีกขวดแล้ว";
+QSL.retChamp="แชมป์แสนบาทกลับมาแล้วครับ! สถานีเกือบล้มละลาย แต่ผู้จัดการบอกว่าเรตติ้งดี เลยเชิญมาอีก";
+QSL.campCall=["ก่อนเริ่ม แจ้งข่าวครับ {g}โทรเข้าสถานีมาสามรอบแล้ว ขอเพลงให้คุณ{n} …น้องครับ รายการเราเป็นเกมโชว์ ไม่มีขอเพลง","มีคนจากค่ายคุณ{n}มานั่งเชียร์หน้ากระจกครับ… {g}ถือป้ายไฟมาด้วย เขียนว่า “สู้ ๆ” สะกดถูกด้วย เก่งมาก"];
+QSL.fast=["ตอบเร็วมาก! ผมยังอ่านคำถามไม่จบเลยครับ","เร็วกว่ากรรมการเป่านกหวีดอีก! มั่นใจหรือมือลั่นครับเนี่ย"];
+QSL.clutch=["ตอบตอนเหลือ {s} วินาที! หัวใจผมจะวายครับ","เฉียดฉิว! ทีมงานเอานิ้วจ่อปุ่มหมดเวลาไว้แล้วนะครับ"];
+QSL.fRight="เครดิตยกให้{f}ครับ! สถานีจะส่งยาหม่องไปขอบคุณหนึ่งขวด";
+QSL.fIgnoreRight="ไม่เชื่อ{f} แล้วถูก! {f}ครับ ถ้าฟังอยู่… ผมขอโทษแทนด้วยครับ";
+QSL.fIgnoreWrong="{f}บอกข้อ {x} นะครับ… ทำไมไม่เชื่อ{f}… ผมจะไม่พูดต่อ แต่ทั้งค่ายคงพูด";
+QSL.fWrong={coach:"ครูแดงครับ! ที่สัญญาไว้ว่าจะเลี้ยงข้าวเหนียวหมูปิ้งทั้งค่าย ทางสถานีจดไว้แล้วนะครับ!",kati:"กะทิครับ… พันเปอร์เซ็นต์เมื่อกี้ ตอนนี้เหลือศูนย์แล้วนะครับ",mali:"มะลิครับ… เลิกอ่านหนังสือตอนรอไมโครเวฟเถอะครับ",rin:"คุณรินครับ ความคลาดเคลื่อนรอบนี้น่าจะมาจากนมแก้วนั้นจริง ๆ",ploy:"คุณพลอยครับ… ผมจะไม่บอกใครว่าคุณพลอยไม่แน่ใจ (ทั้งจังหวัดฟังอยู่ครับ)",fah:"คุณฟ้าบอกว่าถ้าผิดให้โทษพิธีกร… ขอโทษครับ ผมไม่รู้ว่าขอโทษเรื่องอะไร",prod_B:"ใบหยกครับ ระบบประมวลผลต้องอัปเดตด่วนเลยครับ"};
+QSL.audWrong="คนดูในห้องส่งขอโทษครับ… ลุงแถวหลังแอบเดินออกทางประตูหลังไปแล้ว";
+QSL.audAgainst="สวนกระแสคนดูแล้วถูก! ป้าแถวสองกำลังจดชื่อคุณ{n}ลงสมุดครับ ไม่รู้ว่าดีหรือร้าย";
+/* the people you can phone — each answers in their own voice; acc = chance of being right by tier */
+const QS_FRIENDS={
+ coach:{acc:[.95,.85,.72,.6],hi:["ฮัลโหล! เจ้าของค่ายเหรอ ออกวิทยุอยู่ใช่ไหม ครูฟังอยู่ เสียงสั่นเชียว","เรื่องนี้นะ สมัยครูยังหนุ่ม ครูเคยชกงานวัด แล้วมีลุงคนนึงถือกระติบข้าวเหนียว…"],
+  sure:"…เอาเถอะ ตอบ {x} ไป ครูมั่นใจ ถ้าผิดครูเลี้ยงข้าวเหนียวหมูปิ้งทั้งค่าย",unsure:"อืม… ครูไม่แน่ใจนะ แต่ใจครูว่า {x} …ถ้าผิดอย่าบอกใครว่าครูตอบ",bye:"(ตู๊ด… ตู๊ด…) ครูวางสายก่อนเวลา เพราะเสียงตำน้ำพริกที่บ้านดังกลบ"},
+ kati:{acc:[.8,.6,.45,.3],always:1,hi:["สวัสดีค่ะ! กะทิฟังวิทยุอยู่เลย! ตื่นเต้นแทนจนนั่งไม่ติดแล้วเนี่ย!"],
+  sure:"{x}! ชัวร์ร้อยเปอร์เซ็นต์! …ไม่ ๆ พันเปอร์เซ็นต์!",unsure:"{x}! ชัวร์ร้อยเปอร์เซ็นต์!",bye:"…ทำไมชัวร์เหรอ? ไม่รู้สิ แต่ชื่อมันดูหมัดหนักดี! สู้ ๆ นะ!"},
+ mali:{acc:[.85,.65,.5,.35],hi:["ว้ายยย! ได้ยินเสียงตัวเองในวิทยุด้วย! มะลิออกอากาศแล้ว! สวัสดีค่ะทุกคนนน"],
+  sure:"มะลิว่า {x} นะคะ! เคยอ่านเจอตอนรอไมโครเวฟอุ่นข้าว",unsure:"อือออ… {x} มั้งคะ? มะลิเดานะ แต่มะลิเชื่อใจคุณที่สุดเลย!",bye:"ถ้าได้เงินแล้ว เลี้ยงบิงซูมะลิด้วยนะคะ! สู้ ๆ!"},
+ rin:{acc:[.95,.9,.8,.65],pct:1,hi:["รินพูดค่ะ ฉันฟังรายการอยู่ คำถามนี้จดไว้ในสมุดแล้ว"],
+  sure:"จากข้อมูลที่ฉันมี คำตอบ {x} ความน่าจะเป็นราว {p} เปอร์เซ็นต์ค่ะ",unsure:"ข้อมูลไม่พอค่ะ… ถ้าต้องเลือก {x} ความน่าจะเป็นราว {p} เปอร์เซ็นต์",bye:"ส่วนที่เหลือเป็นความคลาดเคลื่อนจากการที่คุณโทรมาตอนฉันกำลังดื่มนมค่ะ"},
+ ploy:{acc:[.9,.8,.65,.5],hi:["พลอยค่ะ …โทรมาถามเรื่องแค่นี้ ในรายการที่ทั้งจังหวัดฟังอยู่เหรอคะ"],
+  sure:"{x} ค่ะ เรื่องพื้นฐานแบบนี้ค่ายเก่าพลอยสอนตั้งแต่ปีแรก",unsure:"พลอยว่า {x} …อย่าเอาไปพูดว่าพลอยไม่แน่ใจล่ะ",bye:"วางนะคะ …ตอบให้ถูกล่ะ พลอยฟังอยู่"},
+ fah:{acc:[.8,.55,.4,.3],hi:["ฮึ ฟ้าเอง ออกวิทยุแล้วตื่นเต้นจนต้องโทรหาฟ้าเลยเหรอ"],
+  sure:"{x} สิ ง่ายจะตาย",unsure:"ไม่รู้หรอก แต่ {x} ชื่อเท่ดี เอาอันนี้ไป ถ้าผิดก็โทษพิธีกร",bye:"…ได้เงินแล้วอย่าลืมฟ้าล่ะ"},
+ prod_B:{acc:[.9,.9,.85,.8],pct:1,hi:["…รับสายแล้วค่ะ ใบหยกพร้อมตอบ"],
+  sure:"ประมวลผล… คำตอบ: {x} ความมั่นใจ {p} เปอร์เซ็นต์",unsure:"ประมวลผล… ข้อมูลขัดแย้งกัน คำตอบ: {x} ความมั่นใจ {p} เปอร์เซ็นต์",bye:"…ครั้งหน้าโทรมาเฉย ๆ ก็ได้นะคะ ไม่ต้องมีคำถาม"}
+};
+
+/* ---------------- invitation + counting ---------------- */
+function qsState(G){if(!G.qs){const r=(G.mail||[]).filter(m=>m.kind==="quiz"&&m.done&&m.ok).length;G.qs={right:r,used:0,yr:{},last:-99,seen:{},shows:0,best:0};}return G.qs;}
+function qsInvite(G){const S=qsState(G);S.last=gameWeek(G);const yk=G.season||1;S.yr[yk]=(S.yr[yk]||0)+1;
+  return addMail(G,{kind:"event",ev:"qshow",from:"สถานีวิทยุชุมชน “มวยบ้านเรา”",title:"เชิญออกอากาศ! แฟนพันแท้มวยเด็ดเจ็ดครก",
+    body:"คุณตอบคำถามรายการเราถูกบ่อยจนป๋าเปี๊ยกอยากเจอตัวจริง! ขอเชิญมาแข่งสดในรายการ “แฟนพันแท้มวยเด็ดเจ็ดครก” ตอบถูก 20 ข้อ รับสูงสุด ฿100,000 (มาได้ภายใน 2 สัปดาห์)",exp:G.week+2});}
+function qsWeekly(G){const S=qsState(G);if(G.week<5||G.week>50)return;if((G.mail||[]).some(m=>m.ev==="qshow"&&!m.done&&!m.expired))return;
+  if(S.right-S.used>=3&&(S.yr[G.season||1]||0)<4&&gameWeek(G)-S.last>=6){S.used+=3;qsInvite(G);}}
+{const _w=xlWeekly;xlWeekly=function(G){_w(G);try{qsWeekly(G);}catch(e){console.error("qshow",e);}};}
+{const _q=ACT.mquiz;ACT.mquiz=d=>{const m=G.mail.find(x=>x.id===d.v);const was=m&&m.done;_q(d);if(m&&!was&&m.done&&m.ok)qsState(G).right++;};}
+{const _e=evMailAct;evMailAct=function(m){if(m.ev!=="qshow")return _e(m);
+  if(m.done)return `<p class="meta center">${m.win?`ออกอากาศแล้ว · ได้รางวัล ${fmt(m.win)} (ตอบถูก ${m.k||0} ข้อ)`:`ออกอากาศแล้ว · ตอบถูก ${m.k||0} ข้อ · ได้ยาหม่องตรามวยล้มกลับบ้าน`}</p>`;
+  if(m.expired)return `<p class="meta center">พลาดรอบนี้ไปแล้ว ตอบคำถามวิทยุต่อไป เดี๋ยวสถานีเชิญใหม่</p>`;
+  return `<button class="btn primary" data-act="qsgo" data-v="${m.id}">${m.st?"กลับเข้าห้องส่ง ▸":"ไปออกอากาศ ▸"}</button>`;};}
+Object.assign(ACT,{qsgo:d=>{const m=G.mail.find(x=>x.id===d.v);if(!m||m.done||m.expired)return;UI.modal=null;render();QS.open(m);}});
+{const _t=xlTestSetup;xlTestSetup=function(G){_t(G);try{qsState(G);qsInvite(G);}catch(e){console.error(e);}};}
+
+/* ---------------- the show ---------------- */
+const QS={st:null,tm:null,
+  m(){return this.st&&G.mail.find(x=>x.id===this.st.mid);},
+  fill(s,o){const m=this.m(),k=m?m.k||0:0;o=o||{};return String(s).replace(/\{n\}/g,ME(G)).replace(/\{k\}/g,k+1).replace(/\{a\}/g,fmt(o.a!=null?o.a:QS_LAD[k])).replace(/\{nx\}/g,fmt(QS_LAD[Math.min(19,k)])).replace(/\{sf\}/g,fmt(qsSafe(k))).replace(/\{c\}/g,o.c||"").replace(/\{x\}/g,o.x||"").replace(/\{p\}/g,o.p||"");},
+  pick(a){return a[Math.floor(Math.random()*a.length)];},
+  /* v1.91.144 (Man: "ลองเทสความฮา"): host lines never repeat inside one show, and prefer lines this player has not heard in recent shows */
+  line(a,short){const S=this.st,Q=qsState(G);Q.heard=Q.heard||[];const U=S?(S.usedL=S.usedL||[]):[];let c=a.filter(x=>!U.includes(x));if(short&&(!c.length||Math.random()<.45))return this.pick(short);if(!c.length)c=a;const f=c.filter(x=>!Q.heard.includes(x));const r=this.pick(f.length?f:c);U.push(r);Q.heard.push(r);if(Q.heard.length>90)Q.heard.splice(0,Q.heard.length-90);return r;},
+  introLines(){const Q=qsState(G),L=[QSL.open];const ret=Q.shows>0;if(ret)L.push(Q.lastWin>=QS_LAD[19]?QSL.retChamp:Q.lastWin>0?QSL.retWin:QSL.retZero);
+    const g=["kati","mali","rin","ploy","fah","prod_B"].filter(id=>G.F[id]&&inCamp(G,id));if(g.length&&Math.random()<.6)L.push(this.line(QSL.campCall).replace(/\{g\}/g,(SPK[this.pick(g)]||{}).name||""));
+    while(L.length<3)L.push(this.line(QSL.intro));L.push(QSL.rule);return L;},
+  open(m){if(!m.st){m.st=1;m.k=0;m.bank=0;m.used={};}this.st={mid:m.id,phase:m.cq?"q":"intro",step:0,host:"excited",say:QSL.open,me:"smile"};this.st.intro=this.introLines();
+    if(m.cq){this.st.host="smile";this.st.say="ยินดีต้อนรับกลับเข้าห้องส่งครับ! สัญญาณเพิ่งกลับมา ข้อเดิมนะครับ ต่อกันเลย!";this.st.left=QS_TIME[qsTier(m.k)]*1000;}
+    save();this.mount();this.draw();if(this.st.phase==="q")this.startTimer();try{AU.sfx("bell");}catch(e){}},
+  shuf(a){a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;},
+  mount(){let el=document.getElementById("qshow");if(!el){el=document.createElement("div");el.id="qshow";el.className="mgame qshow";document.body.appendChild(el);}
+    el.onclick=e=>{const b=e.target.closest("[data-qs]");if(!b||b.disabled)return;this.act(b.dataset.qs,b.dataset.v);};},
+  close(){this.stopTimer();const el=document.getElementById("qshow");if(el)el.remove();this.st=null;save();render();},
+  q(){const m=this.m();if(!m||!m.cq)return null;const [t,i]=m.cq.split(".").map(Number);const Q=QS_Q[t]&&QS_Q[t][i];return Q?{q:Q[0],o:Q[1],a:Q[2],x:Q[3]||"",t}:null;},
+  draw1(){const m=this.m(),t=qsTier(m.k),S=qsState(G),key="t"+t;S.seen[key]=S.seen[key]||[];let pool=QS_Q[t].map((_,i)=>i).filter(i=>!S.seen[key].includes(i));if(!pool.length){S.seen[key]=[];pool=QS_Q[t].map((_,i)=>i);}
+    const i=this.pick(pool);S.seen[key].push(i);m.cq=t+"."+i;m.ord=this.shuf([0,1,2,3]);m.cut=null;m.aud=null;m.hint=null;save();},
+  next(){const m=this.m();this.draw1();this.st.phase="q";this.st.host="smile";this.st.me="normal";this.st.react="";this.st.say=this.fill(m.k===19?QSL.last:m.k===15?QSL.legend:this.line(QSL.ask[qsTier(m.k)]));this.st.left=QS_TIME[qsTier(m.k)]*1000;this.st.hurried=false;this.draw();this.startTimer();},
+  startTimer(){this.stopTimer();this.st.end=performance.now()+this.st.left;this.tm=setInterval(()=>this.tick(),200);},
+  stopTimer(){if(this.tm){clearInterval(this.tm);this.tm=null;}if(this.st&&this.st.end)this.st.left=Math.max(0,this.st.end-performance.now());},
+  tick(){const S=this.st;if(!S||S.phase!=="q"){this.stopTimer();return;}const left=S.end-performance.now(),m=this.m(),tot=QS_TIME[qsTier(m.k)]*1000;
+    const bar=document.querySelector(".qs-time i"),num=document.querySelector(".qs-time b");if(bar)bar.style.width=Math.max(0,left/tot*100)+"%";if(num)num.textContent=Math.max(0,Math.ceil(left/1000));
+    const sec=Math.ceil(left/1000);if(sec<=5&&sec!==S.lastSec&&left>0){S.lastSec=sec;try{AU.sfx("tick");}catch(e){}if(!S.hurried){S.hurried=true;S.me="flustered";S.host="suspense";S.say=this.fill(this.line(QSL.hurry));this.stopTimer();this.st.left=left;this.draw();this.startTimer();}}
+    if(left<=0){this.stopTimer();this.reveal(-1);}},
+  act(a,v){const S=this.st,m=this.m();if(!S||!m)return;if(a!=="aud")S.heck=null;
+    if(a==="introNext"){S.step++;if(S.step<S.intro.length){S.say=this.fill(S.intro[S.step]);S.host=S.step===S.intro.length-1?"correct":"smile";this.draw();}else this.next();return;}
+    if(a==="ans"&&S.phase==="q"){const d=+v;if(m.cut&&m.cut.includes(d))return;S.ansLeft=S.end-performance.now();this.stopTimer();S.phase="lock";S.sel=d;S.host="suspense";S.me="serious";S.say=this.fill(this.line(QSL.lock,QSL.lockShort),{c:QS_ABC[d]});this.draw();try{AU.sfx("choose");}catch(e){}setTimeout(()=>{if(this.st===S)this.reveal(d);},1900);return;}
+    if(a==="cut"&&S.phase==="q"&&!m.used.c){m.used.c=1;const Q=this.q(),ri=m.ord.indexOf(Q.a),wr=[0,1,2,3].filter(i=>i!==ri);m.cut=this.shuf(wr).slice(0,2);if(m.aud)m.aud=this.audience();S.host="excited";S.say=QSL.cut;save();this.draw();try{AU.sfx("pop");}catch(e){}return;}
+    if(a==="aud"&&S.phase==="q"&&!m.used.a){m.used.a=1;m.aud=this.audience();S.host="excited";const top=m.aud.indexOf(Math.max(...m.aud));S.heck=this.fill(this.line(QSL.heck),{x:QS_ABC[Math.random()<.6?top:this.pick([0,1,2,3].filter(i=>!(m.cut||[]).includes(i)))]});S.say=QSL.aud;save();this.draw();try{AU.sfx("pop");}catch(e){}return;}
+    if(a==="phone"&&S.phase==="q"&&!m.used.p){this.stopTimer();S.phase="phone";S.host="smile";S.say=this.fill(QSL.phone);this.draw();return;}
+    if(a==="phoneBack"&&S.phase==="phone"){S.phase="q";S.say="ไม่โทรแล้วเหรอครับ? เก็บไว้ก่อนก็ได้ ฉลาด!";this.draw();this.startTimer();return;}
+    if(a==="call"&&S.phase==="phone"){m.used.p=1;S.call=this.callLines(v);S.callI=0;S.phase="call";save();this.draw();try{AU.sfx("pop");}catch(e){}return;}
+    if(a==="callNext"&&S.phase==="call"){S.callI++;if(S.callI>=S.call.lines.length){m.hint={id:S.call.id,x:S.call.x,p:S.call.p};S.phase="q";S.host="smile";S.say=this.fill(QSL.phoneBack);save();this.draw();this.startTimer();}else this.draw();return;}
+    if(a==="quit"&&S.phase==="q"){this.stopTimer();if(!m.k){S.say=this.fill(QSL.nostart);S.host="wrong";this.draw();this.startTimer();return;}S.phase="quitask";S.host="suspense";S.say=this.fill(QSL.quitAsk,{a:m.bank});this.draw();return;}
+    if(a==="quitNo"&&S.phase==="quitask"){S.phase="q";S.host="excited";S.say="ใจถึง! นี่แหละเจ้าของค่ายมวย! ลุยต่อครับ!";this.draw();this.startTimer();return;}
+    if(a==="quitYes"&&S.phase==="quitask"){const Q=this.q();S.host="correct";S.me="smile";S.say=this.fill(this.line(QSL.quit),{a:m.bank});S.post=this.fill(QSL.quitReveal,{c:`${QS_ABC[m.ord.indexOf(Q.a)]}. ${Q.o[Q.a]}`});S.rightD=m.ord.indexOf(Q.a);this.finish(m.bank,"quit");return;}
+    if(a==="go"&&S.phase==="right"){this.next();return;}
+    if(a==="close"&&S.phase==="end"){this.close();return;}},
+  audience(){const m=this.m(),Q=this.q(),t=qsTier(m.k),ri=m.ord.indexOf(Q.a),live=[0,1,2,3].filter(i=>!(m.cut||[]).includes(i));
+    const w=[0,0,0,0];for(const i of live)w[i]=.15+Math.random()*.55;w[ri]+=[1.6,1.05,.7,.45][t]+Math.random()*.3;const s=w.reduce((a,b)=>a+b,0);const p=w.map(x=>Math.round(x/s*100));p[ri]+=100-p.reduce((a,b)=>a+b,0);return p;},
+  friends(){const L=["coach"];for(const id of ["kati","mali","rin","ploy","fah","prod_B"]){const f=G.F[id];if(f&&(inCamp(G,id)||(f.bond||0)>=40))L.push(id);}return L;},
+  callLines(id){const P=QS_FRIENDS[id]||QS_FRIENDS.coach,m=this.m(),Q=this.q(),t=qsTier(m.k),ri=m.ord.indexOf(Q.a),live=[0,1,2,3].filter(i=>!(m.cut||[]).includes(i));
+    const ok=Math.random()<P.acc[t],x=ok?ri:this.pick(live.filter(i=>i!==ri)),sure=P.always||(ok?Math.random()<.75:Math.random()<.35);
+    const p=P.pct?String(ok?60+Math.floor(Math.random()*35):35+Math.floor(Math.random()*25))+(id==="prod_B"?"."+Math.floor(Math.random()*10):""):"";
+    const xs=`${QS_ABC[x]}. ${Q.o[m.ord[x]]}`;
+    const lines=[...P.hi.map(s=>this.fill(s)),this.fill(sure?P.sure:P.unsure,{x:xs,p}),this.fill(P.bye)];return {id,x,p,lines};},
+  /* what the host says about HOW you answered: on the buzzer, in a hurry, with or against your phone friend / the audience */
+  reactTo(d,ok){const S=this.st,m=this.m(),R=[];if(d<0)return "";const tot=QS_TIME[qsTier(m.k)]*1000,left=S.ansLeft||0;
+    if(m.hint){const nm=(SPK[m.hint.id]||{name:"ครูแดง"}).name,fol=d===m.hint.x,xs=QS_ABC[m.hint.x];
+      R.push(ok&&fol?QSL.fRight:ok?QSL.fIgnoreRight:fol?(QSL.fWrong[m.hint.id]||QSL.fWrong.coach):QSL.fIgnoreWrong);S._f={f:nm,x:xs};}
+    else if(m.aud){const top=m.aud.indexOf(Math.max(...m.aud)),fol=d===top;if(!ok&&fol)R.push(QSL.audWrong);else if(ok&&!fol)R.push(QSL.audAgainst);}
+    if(!R.length&&left>tot-3000&&qsTier(m.k)>0)R.push(this.line(QSL.fast));
+    if(!R.length&&left<3000)R.push(this.line(QSL.clutch));
+    const f=S._f||{};S._f=null;return R.length?this.fill(R[0].replace(/\{f\}/g,f.f||"").replace(/\{x\}/g,f.x||"").replace(/\{s\}/g,Math.max(1,Math.ceil(left/1000)))):"";},
+  reveal(d){const S=this.st,m=this.m(),Q=this.q();if(!Q)return;const ri=m.ord.indexOf(Q.a),cs=`${QS_ABC[ri]}. ${Q.o[Q.a]}`;S.sel=d;S.rightD=ri;S.lastQ=Q;S.lastOrd=m.ord;S.react=this.reactTo(d,d===ri);
+    if(d===ri){m.k++;m.bank=QS_LAD[m.k-1];S.fact=Q.x;try{AU.sfx("level");}catch(e){}
+      if(m.k>=20){S.host="excited";S.me="surprised";S.say=this.fill(QSL.win);this.finish(QS_LAD[19],"win");try{AU.sfx("champ");}catch(e){}return;}
+      S.phase="right";S.host="correct";S.me="smile";S.say=this.fill(this.line(QSL.right,QSL.rightShort),{a:m.bank});if(QS_SAFE.includes(m.k-1))S.safe=this.fill(QSL.safeAt[QS_SAFE.indexOf(m.k-1)],{a:m.bank});else S.safe="";m.cq=null;save();this.draw();S.bump=1;return;}
+    try{AU.sfx("miss");}catch(e){}S.host="wrong";S.me="sad";S.fact=Q.x;const sf=qsSafe(m.k);S.say=this.fill(this.line(d<0?QSL.timeout:QSL.wrong),{c:cs});S.post=this.fill(sf?QSL.home:QSL.zero,{a:sf});S.shake=1;this.finish(sf,"lose");},
+  finish(amt,how){const S=this.st,m=this.m(),Q=qsState(G);this.stopTimer();m.done=true;m.win=amt;m.how=how;m.cq=null;G.cash+=amt;Q.shows++;Q.lastWin=amt;Q.best=Math.max(Q.best||0,m.k||0);S.phase="end";S.amt=amt;
+    if(amt>0)toast(`ได้รางวัลจากรายการ ${fmt(amt)}`);save();this.draw();},
+  meImg(e){const L=G.avatar||{gender:G.player.gender};const u=typeof MGRP!=="undefined"?MGRP.url(L,e,()=>{if(this.st)this.draw();}):"";if(u)this.lastMe=u;return u||this.lastMe||"";},
+  draw(){const S=this.st,el=document.getElementById("qshow"),m=this.m();if(!S||!el||!m)return;const k=m.k||0,Q=this.q()||(S.phase==="right"?S.lastQ:null),t=qsTier(Math.min(19,k));
+    const me=this.meImg(S.me==="normal"?"normal":S.me);
+    const lad=`<ol class="qs-lad">${QS_LAD.map((a,i)=>`<li class="${i===k&&S.phase!=="end"?"on":""} ${i<k?"ok":""} ${QS_SAFE.includes(i)?"sf":""}"><span>${i+1}</span><b>${fmt(a)}</b></li>`).reverse().join("")}</ol>`;
+    const krok=`<div class="qs-krok ${S.shake?"shake":""} ${S.phase==="right"||S.phase==="end"&&S.amt>=QS_LAD[19]?"hop":""}">${"<i></i>".repeat(7)}</div>`;
+    const stage=`<div class="qs-stage"><div class="qs-pod me"><div class="qs-fig">${me?`<img src="${me}" alt="">`:`<div class="qs-sil"></div>`}</div><div class="qs-plate">คุณ${esc(ME(G))}</div></div>
+      <div class="qs-pod host"><div class="qs-fig"><img src="${ASSET}qhost_${S.host||"smile"}.webp" alt=""></div><div class="qs-plate">${QS_HOST}</div></div>${krok}</div>`;
+    const say=`<div class="qs-say"><small>${QS_HOST}</small><p>${esc(S.say||"")}</p>${S.heck&&S.phase==="q"&&m.aud?`<p class="qs-heck">${esc(S.heck)}</p>`:""}${S.react&&(S.phase==="right"||S.phase==="end")?`<p class="qs-heck">${esc(S.react)}</p>`:""}</div>`;
+    let body="";
+    if(S.phase==="intro")body=`<div class="qs-foot"><button class="btn primary" data-qs="introNext">${S.step>=S.intro.length-1?"เริ่มเลย! ▸":"ต่อ ▸"}</button></div>`;
+    else if(S.phase==="end"){body=`<div class="qs-end"><p class="qs-amt ${S.amt?"":"zero"}">${S.amt?"+"+fmt(S.amt):"฿0"}</p>${S.post?`<p class="meta center">${esc(S.post)}</p>`:""}${S.fact&&m.how==="lose"?`<p class="qs-fact">💡 ${esc(S.fact)}</p>`:""}<p class="meta center">${esc(this.fill(QSL.bye))}</p><div class="qs-foot"><button class="btn primary" data-qs="close">กลับค่าย ▸</button></div></div>`;}
+    else if(Q){const ord=S.phase==="right"?S.lastOrd:m.ord,cut=m.cut||[],live=S.phase==="q";
+      const info=S.phase==="right"?`<div class="qs-info"><span>ผ่านข้อ <b>${k}</b>/20</span><span>ในมือ <b class="goldt">${fmt(m.bank)}</b></span></div>`:`<div class="qs-info"><span>ข้อ <b>${k+1}</b>/20</span><span>ชิง <b class="goldt">${fmt(QS_LAD[k])}</b></span><span>${k?`ในมือ ${fmt(m.bank)}`:""}${QS_SAFE.some(i=>i<k)?` · ประกัน ${fmt(qsSafe(k))}`:""}</span></div>`;
+      const tot=QS_TIME[t]*1000,lf=S.left||0;
+      const timer=S.phase==="q"||S.phase==="phone"||S.phase==="call"||S.phase==="quitask"?`<div class="qs-time ${S.phase!=="q"?"pause":""}"><i style="width:${Math.max(0,lf/tot*100)}%"></i><b>${Math.ceil(lf/1000)}</b></div>`:"";
+      const opts=`<div class="qs-opts">${ord.map((oi,d)=>{const c=[cut.includes(d)?"cut":"",S.sel===d&&S.phase==="lock"?"lock":"",(S.phase==="right"||S.phase==="end")&&d===S.rightD?"right":"",S.phase==="end"&&S.sel===d&&d!==S.rightD?"bad":""].join(" ");
+        return `<button class="qs-o ${c}" data-qs="ans" data-v="${d}" ${!live||cut.includes(d)?"disabled":""}><i>${QS_ABC[d]}</i><span>${cut.includes(d)?"":esc(Q.o[oi])}</span>${m.aud&&!cut.includes(d)&&S.phase!=="right"?`<em style="--p:${m.aud[d]}%">${m.aud[d]}%</em>`:""}</button>`;}).join("")}</div>`;
+      const hint=m.hint&&S.phase==="q"?`<p class="qs-hint">📞 ${esc((SPK[m.hint.id]||{name:"ครูแดง"}).name)}: ${QS_ABC[m.hint.x]}${m.hint.p?` (${m.hint.p}%)`:""}</p>`:"";
+      let ctl="";
+      if(S.phase==="q")ctl=`<div class="qs-life"><button class="qs-l" data-qs="cut" ${m.used.c?"disabled":""}>✂️<small>ตัดเหลือ 2</small></button><button class="qs-l" data-qs="aud" ${m.used.a?"disabled":""}>📣<small>ถามคนดู</small></button><button class="qs-l" data-qs="phone" ${m.used.p?"disabled":""}>📞<small>โทรหาคนสนิท</small></button><button class="qs-l stop" data-qs="quit">🏳️<small>${k?`พอแค่นี้ รับ ${fmt(m.bank)}`:"ขอกลับบ้าน"}</small></button></div>`;
+      if(S.phase==="quitask")ctl=`<div class="qs-foot"><button class="btn" data-qs="quitNo">ไปต่อ!</button><button class="btn primary" data-qs="quitYes">รับ ${fmt(m.bank)} กลับบ้าน</button></div>`;
+      if(S.phase==="right")ctl=`${S.safe?`<p class="qs-safe">🛡️ ${esc(S.safe)}</p>`:""}${S.fact?`<p class="qs-fact">💡 ${esc(S.fact)}</p>`:""}<div class="qs-foot"><button class="btn primary" data-qs="go">ข้อต่อไป ชิง ${fmt(QS_LAD[k])} ▸</button></div><p class="meta center">อยากพอ? กด 🏳️ ในข้อหน้าได้ — ตอนนี้มีในมือ ${fmt(m.bank)}</p>`;
+      if(S.phase==="phone")ctl=`<div class="qs-phone"><p class="meta center">จะโทรหาใครดี? (เวลาหยุดเดินระหว่างคุย)</p><div class="qs-fr">${this.friends().map(id=>`<button class="qs-f" data-qs="call" data-v="${id}"><img src="${faceSrc(id,"happy")}" alt=""><small>${esc((SPK[id]||{name:"ครูแดง"}).name)}</small></button>`).join("")}</div><div class="qs-foot"><button class="btn ghost" data-qs="phoneBack">ไม่โทรแล้ว</button></div></div>`;
+      if(S.phase==="call"){const c=S.call,nm=(SPK[c.id]||{name:"ครูแดง"}).name,last=S.callI>=c.lines.length-1;ctl=`<div class="qs-callbox"><img src="${faceSrc(c.id,S.callI===c.lines.length-2?"happy":"flustered")}" alt=""><div><small>📞 ${esc(nm)}</small><p>${esc(c.lines[S.callI])}</p></div></div><div class="qs-foot"><button class="btn primary" data-qs="callNext">${last?"วางสาย ▸":"ต่อ ▸"}</button></div>`;}
+      body=`${info}${timer}<div class="qs-q"><p>${esc(Q.q)}</p></div>${hint}${opts}${ctl}`;}
+    el.innerHTML=`<div class="qs-wrap"><div class="qs-main"><div class="qs-top"><span class="qs-air">● ON AIR</span><h2>แฟนพันแท้<br><b>มวยเด็ดเจ็ดครก</b></h2><span class="qs-fm">FM 99.7</span></div>${stage}${say}${body}</div>${lad}</div>`;
+    S.shake=0;const on=el.querySelector('.qs-lad li.on');if(on&&getComputedStyle(el.querySelector('.qs-lad')).flexDirection==='row-reverse'){const L=on.parentElement;L.scrollLeft=on.offsetLeft-L.clientWidth/2+on.clientWidth/2;}}
+};
+const qsTier=k=>k<5?0:k<10?1:k<15?2:3;
+const qsSafe=k=>{let s=0;for(const i of QS_SAFE)if(i<k)s=QS_LAD[i];return s;};
+
+// ================= MUAY THAI MOE — MERIT & THE GHOST OF THE BANANA TREE "นางตานี" (v1.91.144, Man 24 พ.ย.) =================
+// Phase 1: camp merit (บุญ) from merit-making, the wai kru and new big merit events; it slowly runs down when nobody makes merit.
+// Once the camp is big and busy, Nang Tani — whose banana trees the fighters kick in training (and whose trunks went into krathongs) —
+// wakes up and starts haunting dreams: a random fighter boxes her in the dream while the manager can only shout; losing means a week
+// in bed with a fever. Enough merit and Kru Daeng and Luang Pho suggest a spirit house; once it stands, Tani turns protector,
+// hints lottery numbers and keeps the fighters healthy. A mor phi can be hired as an expensive, unreliable shortcut.
+// Light comedy on purpose: at most one ghost-fever at a time, haunts several weeks apart, a skip option that never forces a fight.
+(()=>{
+const GH_MAX=100,GH_DECAY=3,GH_CD=4;
+const ghSt=G=>{if(!G.gh)G.gh={merit:40,on:0,stage:0,last:-99,haunts:0,wins:0,shrine:0,shrineOK:0,calm:0,mw:-1};return G.gh;};
+const ghAdd=(G,n)=>{const S=ghSt(G);S.merit=clamp(Math.round(S.merit+n),0,GH_MAX);S.mw=gameWeek(G);return S.merit;};
+const ghWk=(d,m)=>dateWeek(d,m);
+/* the Buddhist calendar on the game's year (week 1 = 25 May) */
+const GH_LENT=()=>[ghWk(30,6),ghWk(25,9)];            /* เข้าพรรษา → ออกพรรษา */
+const GH_KATHIN=()=>[ghWk(26,9),ghWk(24,10)];         /* the month after ออกพรรษา */
+const GH_ORDAIN=()=>[ghWk(1,3),ghWk(10,4)];           /* summer novice ordination, April – early May */
+const ghIn=(G,[a,b])=>a<=b?G.week>=a&&G.week<=b:G.week>=a||G.week<=b;
+const ghMood=G=>{const S=ghSt(G);return S.shrine?"smile":S.stage>=2?"angry_smile":S.stage>=1?"angry":"scary";};
+BGIMG.dream="bg_dream.webp";BGIMG.dream_room="bg_dream_room.webp";TIER_BG.dream="bg_dream.webp";
+/* the ghost theme: slow heartbeat klong, a low drone that slips a tritone, a wobbling pi and a far-off bell */
+AU.GHM=[57,0,0,60,0,58,0,0,64,0,63,0,0,0,0,0,57,0,60,0,61,0,0,0,52,0,0,0,0,51,0,0];
+AU.ghostStep=function(s,t,spb){const m=this.music,st=s%16;
+  if(st===0||st===2)this.tone(t,{f:st?70:85,to:45,dur:.25,peak:st?.32:.42,bus:m});
+  if(s===0||s===16)this.tone(t,{f:s?51.9:55,dur:spb*15,peak:.16,type:"triangle",bus:m});
+  if(s===4)[1760,2640,3520].forEach((f,k)=>this.tone(t,{f,dur:2.4/(k+1),peak:.05/(k+1),bus:m}));
+  if(s===24)this.tone(t,{f:930,to:610,dur:spb*6,peak:.05,bus:m});
+  const n=this.GHM[s];if(n){const f=440*Math.pow(2,(n-69)/12),c=this.ctx,o=c.createOscillator(),lfo=c.createOscillator(),lg=c.createGain(),bp=c.createBiquadFilter(),g=c.createGain();
+    o.type="sawtooth";o.frequency.value=f;lfo.frequency.value=3.2;lg.gain.value=f*.03;lfo.connect(lg);lg.connect(o.frequency);bp.type="bandpass";bp.frequency.value=900;bp.Q.value=2.2;
+    const dur=spb*3.2;g.gain.setValueAtTime(.0001,t);g.gain.exponentialRampToValueAtTime(.12,t+.25);g.gain.exponentialRampToValueAtTime(.0001,t+dur);
+    o.connect(bp);bp.connect(g);g.connect(m);[o,lfo].forEach(x=>{x.start(t);x.stop(t+dur+.05);});}};
+{const _ps=AU.playStep;AU.playStep=function(s,t,spb){if(this.mode==="ghost"){this.ghostStep(s,t,spb);return;}return _ps.call(this,s,t,spb);};
+ const _sm=AU.startMusic;AU.startMusic=function(mode){_sm.call(this,mode);try{if(mode==="ghost"&&this.ctx){this.tempo=60;if(this.music)this.music.gain.setTargetAtTime(.3,this.ctx.currentTime,.4);}}catch(e){}};
+ const _st=AU.setTempo;AU.setTempo=function(b){if(this.mode==="ghost")return;return _st.call(this,b);};}
+const GMON=()=>({inject:()=>{try{AU.startMusic("ghost");if(UI.scene)UI.scene.music="ghost";}catch(e){}return [];}}),GMOFF=()=>({inject:()=>{try{AU.startMusic("hub");if(UI.scene)UI.scene.music=null;}catch(e){}return [];}});
+const ghPlay=(steps,done,opts)=>{playScene([GMON(),...steps],()=>{try{AU.startMusic("hub");}catch(e){}done&&done();},opts);};
+{const _fs=fightStart;fightStart=function(q){_fs(q);try{if(UI.fight&&UI.fight.b&&UI.fight.b.dream)AU.startMusic("ghost");}catch(e){}};}
+const TANI="นางตานี",LP="หลวงพ่อ",MP="หมอผีเปลี่ยน";
+const TN=(t,img)=>({n:"npc",who:TANI,img:"tani_"+(img||ghMood(G)),t}),N=t=>({n:"nar",t}),C=t=>({n:"coach",t}),MY=t=>({n:"me",t});
+const GL=(id,f,t,l)=>({n:id,f,l:l||"casual",t});
+
+/* ---------- ghost fighters ---------- */
+Object.assign(QK,{
+ tani:{fst:"counter",name:"นางตานี (ในฝัน)",sprite:"tani",lvl:0,tilt:{speed:1.5,kick:1.5,foot:1,counter:1,dur:-1,power:-.5},color:"#3f8a4f",grp:"ghost"},
+ krasue:{fst:"pressure",name:"กระสือ",sprite:"krasue",lvl:.3,tilt:{speed:2,elbow:1.5,dur:-2,clinch:-1.5},color:"#b04fd0",grp:"ghost"},
+ krahang:{fst:"footwork",name:"กระหัง",sprite:"krahang",lvl:.3,tilt:{speed:1.5,kick:2,foot:1.5,power:-1},color:"#8a5a2b",grp:"ghost"},
+ mabong:{fst:"power",name:"ผีม้าบ้อง",sprite:"mabong",lvl:.5,tilt:{power:2,kick:2,dur:1.5,iq:-1.5,guard:-1},color:"#3c3550",grp:"ghost"},
+ phiphong:{fst:"inside",name:"ผีโพง",sprite:"phiphong",lvl:.4,tilt:{clinch:2,knee:1.5,power:1,foot:-1.5},color:"#d0602a",grp:"ghost"}});
+const GSK={tani:[{id:"g_t_leaf",name:"กาบกล้วยฟาดหน้า",k:"atk",w:"kick"},{id:"g_t_sabai",name:"สไบพันรอบตัว",k:"def"},{id:"g_t_lol",name:"หัวเราะคิกคักกลางดึก",k:"atk",w:"elbow"}],
+ krasue:[{id:"g_k_fly",name:"ลอยหัวพุ่งชน",k:"atk",w:"elbow"},{id:"g_k_glow",name:"แสงไส้วูบวาบ",k:"def"}],
+ krahang:[{id:"g_h_fan",name:"กระด้งฟาดลม",k:"atk",w:"kick"},{id:"g_h_fly",name:"บินหนีขึ้นหลังคา",k:"def"}],
+ mabong:[{id:"g_m_hoof",name:"กีบเท้าเตะเปรี้ยง",k:"atk",w:"kick"},{id:"g_m_neigh",name:"ร้องฮี้ข่มขวัญ",k:"rec"}],
+ phiphong:[{id:"g_p_light",name:"ไฟโพงส่องตา",k:"def"},{id:"g_p_grab",name:"กอดคอกลิ่นคาว",k:"atk",w:"knee"}]};
+TIER.dream={name:"ชกกับผีในฝัน",win:0,lose:0,rep:0,off:1};
+TIER_BG.dream="bg_camp_night.webp";
+/* the ghost is as strong as the fighter she meets, a little stronger when the camp's merit is low */
+function ghFoe(G,kind,f){const K=QK[kind],S=ghSt(G),adj=(S.merit<25?1.2:S.merit<45?.5:S.merit>=70?-.5:0)-(kind!=="tani"&&S.shrine?.6:0),t=Math.min(19.2,qTarget(G,f.id)+adj+(K.lvl||0)),rng=mulberry32((G.seed^0x6a05)+gameWeek(G)*31+kind.length);const a={};
+  for(const [x] of ATTRS)a[x]=clamp(t+(K.tilt[x]||0)+(rng()*1.2-.6),3,19.5);const d=t-ovr(a);for(const [x] of ATTRS)a[x]=clamp(a[x]+d,3,19.5);
+  const id="q_ghost_"+kind;const o=baseFighter(id,{name:K.name,full:K.name,div:"X",camp:"quest",color:K.color,potential:t+2,a});
+  {const short=t-ovr(a);if(short>.05)o.vet=+Math.min(Q_VET_MAX,short).toFixed(2);}
+  o.sprite=K.sprite;o.kind=kind;o.grp="ghost";o.fstyle=K.fst;o.nlsk=(GSK[kind]||[]).slice(0,S.merit<30?3:2);o.lvl=clamp(Math.round(t-6),1,10);o.fatigue=0;o.morale=80;G.F[id]=o;syncFighterAges(G);return id;}
+
+/* ---------- merit sources ---------- */
+const GH_ACT={
+ bigmerit:{name:"ทำบุญใหญ่ เลี้ยงพระที่ค่าย",desc:"บุญค่าย +16 · กำลังใจทุกคน +4",cost:8000,merit:16},
+ phapa:{name:"ร่วมทอดผ้าป่าที่วัดใกล้ค่าย",desc:"บุญค่าย +12 · ชื่อเสียง +0.3",cost:4000,merit:12,gap:6},
+ kathin:{name:"เป็นเจ้าภาพทอดกฐิน",desc:"บุญค่าย +30 · กำลังใจทุกคน +6 · ชื่อเสียง +1 (ปีละครั้ง หลังออกพรรษา)",cost:20000,merit:30,win:GH_KATHIN,yearly:1},
+ ordain:{name:"เป็นเจ้าภาพบวชเณรภาคฤดูร้อน",desc:"บุญค่าย +24 · ชื่อเสียง +1 (ปีละครั้ง ช่วงเมษายน)",cost:15000,merit:24,win:GH_ORDAIN,yearly:1},
+ morphi:{name:"จ้างหมอผีมาทำพิธีไล่ผี",desc:"ผีเงียบไปสักพัก… ถ้าพิธีได้ผล (ไม่รับประกัน)",cost:6000,merit:0},
+ shrine:{name:"ตั้งศาลนางตานีข้างกอกล้วย",desc:"ศาลถาวร · นางตานีคุ้มครองค่าย บอกใบ้หวย นักมวยแข็งแรงขึ้น",cost:60000,merit:5},
+ offer:{name:"ถวายของที่ศาลนางตานี",desc:"บุญค่าย +4 · นางตานีอารมณ์ดี",cost:300,merit:4}};
+const ghActOpen=(G,k)=>{const S=ghSt(G),A=GH_ACT[k];if(!S.on)return false;S.done=S.done||{};
+  if(k==="morphi")return !S.shrine;if(k==="shrine")return S.shrineOK&&!S.shrine;if(k==="offer")return !!S.shrine;
+  if(A.win&&!ghIn(G,A.win()))return false;if(A.yearly&&S.done[k]===(G.season||1))return false;if(A.gap&&S.done[k+"Abs"]!=null&&gameWeek(G)-S.done[k+"Abs"]<A.gap)return false;return true;};
+for(const k of Object.keys(GH_ACT)){const A=GH_ACT[k];CAMP_ACTIONS["gh_"+k]={name:A.name,desc:A.desc,cost:A.cost,get hidden(){return typeof G==="undefined"||!G||!ghActOpen(G,k);}};}
+const GH_MERIT_ACTS={merit:6,waikhru:10};
+{const _d=doCampAction;doCampAction=function(G,k){const note=_d(G,k);if(note==null)return note;const S=ghSt(G);let add="";
+  if(GH_MERIT_ACTS[k]){ghAdd(G,GH_MERIT_ACTS[k]);if(S.on)add=` · บุญค่าย +${GH_MERIT_ACTS[k]}`;}
+  if(k.startsWith("gh_")){const kk=k.slice(3),A=GH_ACT[kk],R=roster(G);S.done=S.done||{};S.done[kk]=G.season||1;S.done[kk+"Abs"]=gameWeek(G);if(A.merit)ghAdd(G,A.merit);
+    if(kk==="bigmerit"){R.forEach(f=>f.morale=clamp(f.morale+4,0,100));add="พระมาฉันเพลที่ค่าย ครูแดงนั่งพับเพียบนานจนขาชา ทุกคนยิ้มกันทั้งวัน";}
+    if(kk==="phapa"){G.rep+=.3;add="ทุกคนช่วยกันแห่ต้นผ้าป่า กะทิตีกลองยาวเพี้ยนทั้งทาง แต่ทุกคนสนุก";}
+    if(kk==="kathin"){G.rep+=1;R.forEach(f=>f.morale=clamp(f.morale+6,0,100));add="ขบวนกฐินค่ายศิริชัยยาวเกือบครึ่งกิโล ชาวบ้านพูดถึงทั้งตำบล";}
+    if(kk==="ordain"){G.rep+=1;add="เด็กวัดสามคนได้บวชเณรภาคฤดูร้อน ตอนโกนผมร้องไห้ ตอนสวดมนต์เป็นแล้วยิ้มแก้มปริ";}
+    if(kk==="morphi"){const ok=Math.random()<.55;S.mp=(S.mp||0)+1;if(ok){S.calm=gameWeek(G)+6;add="หมอผีเปลี่ยนรำดาบรอบกอกล้วย พ่นน้ำมนต์จนครูแดงเปียกทั้งตัว คืนนั้นเงียบสนิท… อย่างน้อยก็ช่วงนี้";}
+      else{S.mpFail=1;add="หมอผีเปลี่ยนรำไปได้ครึ่งพิธี แล้ววิ่งหนีออกจากค่ายไปทั้งที่ยังถือไก่ต้ม ทิ้งรองเท้าไว้หนึ่งข้าง";}}
+    if(kk==="shrine"){S.shrine=gameWeek(G);S.pendShrine=1;add="ศาลไม้เล็ก ๆ ทาสีเขียว ผูกผ้าแพรสามสีรอบต้นกล้วย ครูแดงจุดธูปเป็นคนแรก";}
+    if(kk==="offer"){S.tb=clamp((S.tb||0)+2,0,ghCap(G));add="วางขนมต้ม กล้วยน้ำว้า กับน้ำแดงไว้หน้าศาล ลมพัดใบกล้วยไหวเบา ๆ เหมือนมีใครพยักหน้า";}
+    return add+(A.merit?` · บุญค่าย +${A.merit}`:"");}
+  return note+add;};}
+/* the merit bar sits on top of the camp-activity list once Tani is awake */
+{const _h=campActsHTML;campActsHTML=function(){const h=_h();if(typeof G==="undefined"||!G||UI.modal.pick)return h;const S=ghSt(G);if(!S.on)return h;
+  const m=S.merit,lab=m>=70?"บุญหนุนนำ":m>=45?"ร่มเย็น":m>=25?"เริ่มวังเวง":"ขนลุกทั้งค่าย";
+  return h.replace("</h2>",`</h2><div class="ghbar" title="บุญค่าย"><span>🪷 บุญค่าย</span><i><b style="width:${m}%"></b></i><em>${m} · ${lab}</em></div>`);};}
+
+/* ---------- Tani wakes up ---------- */
+const ghReady=G=>{try{return G.week>=6&&roster(G).length>=4&&students(G)>=30&&facTotal(G)>=8;}catch(e){return false;}};
+EVENTS.push({id:"gh_wake",look:"casual",bg:"camp_night",pri:6,when:G=>!ghSt(G).on&&ghReady(G),steps:[
+ N("ค่ายศิริชัยตอนนี้คึกคักกว่าที่เคย ห้องพักเต็ม ลานสอนคอร์สมีเด็กมาเตะเป้าทุกเย็น ส่วนกอกล้วยหลังค่าย… โดนเตะทุกวันเหมือนกัน"),
+ C("เตะต้นกล้วยนี่แหละของจริง! สมัยครูยังเด็ก ไม่มีกระสอบทราย เตะต้นกล้วยจนหน้าแข้งด้านเป็นไม้"),
+ N("คืนนั้น ลมหยุดพัดตั้งแต่ตีหนึ่ง จิ้งหรีดเงียบ หมาข้างค่ายหอนสามรอบแล้วหนีเข้าใต้ถุนบ้าน"),
+ GMON(),N("คุณลืมตาขึ้นในความฝัน ตัวขยับไม่ได้ ข้างเตียงมีผู้หญิงชุดเขียวยืนอยู่ ผมยาวถึงพื้น ตัวเรืองแสงเขียวอ่อน ๆ"),
+ TN("ใคร… เตะ… ต้นกล้วย… ของข้า…","scary"),
+ MY("(พยายามจะตอบ แต่ปากขยับไม่ได้)"),
+ TN("เตะทุกวัน… วันละสามร้อยที… แล้วตอนลอยกระทง… ใครเอากาบกล้วยข้าไปทำกระทง!!","scary"),
+ TN("ลอยน้ำไปตั้งสามใบ… ใบนึงมีธูปปักเบี้ยวด้วย… ข้าจำได้หมด…","angry"),
+ N("แล้วเธอก็นั่งลงบนอกคุณ หนักเหมือนกระสอบทรายห้าสิบกิโล คุณสะดุ้งตื่นตอนตีสาม เหงื่อท่วมหมอน"),
+ GMOFF(),{n:"nar",t:"— เช้าวันต่อมา —",bg:"camp",show:[]},
+ C("เมื่อคืนครูฝันแปลก ๆ มีผู้หญิงชุดเขียวมาด่าครูเรื่องต้นกล้วย…"),
+ MY("…ผมก็ฝันแบบนั้นครับครู"),
+ C("……"),
+ N("ทั้งค่ายเงียบไปสามวินาที แล้วทุกคนก็เริ่มเล่าพร้อมกัน ฝันเหมือนกันหมด ต่างกันแค่ว่าใครโดนนั่งทับนานกว่า"),
+ C("นั่นมันนางตานี! ผีต้นกล้วย! เราไปเตะบ้านเขาทุกวัน แถมเอากาบเขาไปลอยน้ำ… ครูว่าต้องรีบทำบุญแล้ว"),
+ C("ทำบุญตักบาตร ไหว้ครู ทอดผ้าป่า อะไรก็ได้ที่เป็นบุญ บุญค่ายเยอะ ๆ ผีจะใจเย็นลง ถ้าบุญน้อยลงเมื่อไหร่… เธอมาเยี่ยมอีกแน่"),
+ N("🪷 เปิดระบบ “บุญค่าย” — ดูได้ที่กิจกรรมค่าย ทำบุญ ไหว้ครู หรือกิจกรรมบุญใหญ่เพื่อเพิ่ม ถ้าไม่ทำอะไรเลย บุญจะค่อย ๆ ลดลง"),
+ C("คืนนี้ครูจะสวดมนต์ก่อนนอน… สวดทุกคืนเลย สวดดัง ๆ ด้วย ใครนอนห้องติดครูขอโทษล่วงหน้า"),
+],fx:null});
+/* the wake event turns the system on (events have no fx, so a watcher does it right after) */
+{const _rv=runEvents;runEvents=function(done){_rv(function(n){try{const S=ghSt(G);if(!S.on&&G.seen&&G.seen.gh_wake){S.on=1;S.wakeAbs=gameWeek(G);S.last=gameWeek(G);save();}}catch(e){}if(done)done(n);});};}
+
+/* ---------- weekly: merit drifts down, the shrine looks after the fighters, story beats unlock ---------- */
+function ghWeekly(G){const S=ghSt(G);if(!S.on&&G.seen&&G.seen.gh_wake){S.on=1;S.wakeAbs=gameWeek(G);S.last=gameWeek(G);}if(!S.on)return;
+  if(gameWeek(G)-(S.mw??-99)>1)S.merit=clamp(S.merit-GH_DECAY,0,GH_MAX); /* no merit made last week: it runs down */
+  if(S.merit>=45&&S.stage<1&&S.haunts>=1)S.stage=1;if(S.merit>=60&&S.stage<2&&S.haunts>=2)S.stage=2;
+  if(!S.shrineOK&&S.merit>=60&&gameWeek(G)-(S.wakeAbs||0)>=6)S.shrineOK=1;
+  if(S.shrine){for(const f of roster(G))f.fatigue=clamp(f.fatigue-(S.merit>=40?2:1),0,100);}
+  if(S.sick&&G.F[S.sick]&&!G.F[S.sick].injury)S.sick=null;}
+{const _w=xlWeekly;xlWeekly=function(G){_w(G);try{ghWeekly(G);}catch(e){console.error("ghost",e);}};}
+
+/* ---------- the haunting: weekly extra scene ---------- */
+const GH_OPEN=[
+ [N("ตีสองสิบห้า คุณตื่นมาเพราะได้ยินเสียงใบกล้วยเสียดสีกัน ทั้งที่ไม่มีลมสักนิด"),N("ตัวขยับไม่ได้ ผ้าห่มหนักเหมือนตะกั่ว ปลายเตียงมีเงาเขียวนั่งยองอยู่")],
+ [N("คืนนี้ครูแดงสวดมนต์ไปได้ครึ่งบท แล้วหลับคาหนังสือสวดมนต์"),N("คุณฝันว่ายืนอยู่กลางเวทีมวยที่ล้อมด้วยต้นกล้วยแทนเชือก กรรมการเป็นตุ๊กแกตัวเท่าคน")],
+ [N("มีกลิ่นขนมต้มลอยมาในห้องนอน ตอนตีสาม ใครจะต้มขนมตอนตีสาม"),N("คุณขยับนิ้วเท้าไม่ได้ ผมยาว ๆ ค่อย ๆ ไหลลงมาจากเพดาน")]];
+const GH_TANI_LINE=[["ดีละ… คืนนี้ข้ามาทวงค่าเช่าต้นกล้วย","เมื่อวานมีคนเตะต้นข้าอีกแล้ว… หนึ่งร้อยสิบสองที ข้านับ!","ทำบุญแค่นี้เหรอ… ข้าได้กลิ่นธูปแค่ดอกเดียว"],
+ ["มาอีกแล้วนะ… ไม่ใช่เพราะคิดถึงหรอก ข้ามาเพราะบุญค่ายเจ้ามันน้อย","คราวก่อนแพ้ข้าไม่พอเหรอ หรือว่าชนะข้า… ข้าจำไม่ได้แล้ว แต่วันนี้เอาใหม่!"],
+ ["ข้ายังไม่หายโกรธนะ แค่… โกรธน้อยลงนิดนึง","ใครเอาน้ำแดงมาวางหน้ากอกล้วย… ไม่ได้ขอบใจนะ แค่ถามเฉย ๆ"]];
+const GH_ENTER={kati:"กะทิพังประตูฝันเข้ามาในชุดนอนลายหมี “ผีก็ต่อยได้! ผู้จัดการถอยไปค่ะ!”",
+ mali:"มะลิโผล่มาในฝัน ร้องไห้ไปตั้งการ์ดไป “มะลิกลัวผีที่สุดในโลกเลยค่ะ… แต่ใครแตะผู้จัดการ มะลิไม่ยอม!”",
+ rin:"รินเดินเข้ามาในฝันพร้อมสมุดจด “ผีไม่มีจริงค่ะ ตามหลักวิทยาศาสตร์… ทำไมขาฉันสั่นล่ะ”",
+ ploy:"พลอยยืนกอดอกอยู่กลางฝัน “มารบกวนการนอนของคนในค่ายฉันเหรอ ขึ้นเวทีมาคุยกัน”",
+ fah:"ฟ้าหาวหนึ่งที “ฮึ ผีเหรอ ปลุกฟ้าตอนตีสองเนี่ยนะ… เอาเถอะ ฟ้าหายง่วงแล้ว”",
+ prod_B:"ใบหยกปรากฏตัวในฝันท่ายืนตรง “ตรวจพบสิ่งผิดปกติในความฝันของคุณผู้จัดการ เริ่มกำจัดค่ะ”",
+ _:"{f}เดินเข้ามาในฝัน ขยี้ตาไปพลาง “ผู้จัดการ… ทำไมเราอยู่บนเวทีต้นกล้วยครับ”"};
+const GH_MORN={kati:{w:"เมื่อคืนกะทิฝันว่าต่อยกับผีผู้หญิงชุดเขียว แล้วชนะด้วย! …ทำไมผู้จัดการทำหน้าแบบนั้นคะ ฝันเหมือนกันเหรอ!?",l:"กะทิตัวร้อนจี๋… เมื่อคืนฝันว่าโดนผีเตะด้วยกาบกล้วย ตื่นมาก็จับไข้เลย ฮัดชิ่ว!"},
+ mali:{w:"มะลิฝันว่าชนะผีด้วยค่ะ! แต่มะลิร้องไห้ตลอดไฟต์เลย… ตื่นมาหมอนเปียกหมดเลย",l:"มะลิ… ตัวสั่นทั้งคืนค่ะ ฝันว่าแพ้ผีชุดเขียว แล้วเธอหัวเราะคิกคักอยู่ข้างหูทั้งคืน…"},
+ rin:{w:"ฉันฝันว่าต่อยชนะอะไรบางอย่าง…สีเขียว ตามหลักแล้วความฝันคือสมองจัดระเบียบความจำ …ใช่ไหมคะ ใช่ไหม",l:"ฉันมีไข้ค่ะ อุณหภูมิ 38.4 ไม่เกี่ยวกับผีแน่นอน… ผู้จัดการช่วยเปิดไฟทิ้งไว้ให้ด้วยได้ไหมคะ"},
+ ploy:{w:"เมื่อคืนพลอยฝันว่าชนะผี …เลิกยิ้มได้แล้ว พลอยไม่ได้กลัวสักหน่อย",l:"…พลอยไม่สบายนิดหน่อย ไม่ได้เกี่ยวกับความฝันแน่นอน อย่าไปเล่าให้ใครฟังนะคะ"},
+ fah:{w:"ฟ้าฝันว่าเตะผีกระเด็นไปติดต้นมะม่วง ง่ายจะตาย แต่ทำไมตื่นมาเหนื่อยจัง",l:"ฮัดชิ่ว! …ฟ้าไม่ได้แพ้ผีนะ ฟ้าแค่ปล่อยให้ผีชนะ เพราะสงสารต่างหาก"},
+ prod_B:{w:"บันทึกความฝัน: ชนะ เป้าหมายถอยไปทางกอกล้วย ใบหยกขอเพิ่มต้นกล้วยในรายการสิ่งที่ต้องเฝ้าระวังค่ะ",l:"ระบบ… มีไข้ค่ะ ใบหยกจะพักหนึ่งสัปดาห์ ขอเลื่อนตารางซ้อมทั้งหมดออกไปก่อน"},
+ _:{w:"เมื่อคืนผมฝันว่าต่อยกับผีครับ แล้วก็ชนะด้วย แปลกดี",l:"ผมตัวร้อนครับ เมื่อคืนฝันว่าโดนผีกาบกล้วยฟาด…"}};
+const GH_CHEER={push:"ตะโกน “ต่อยมันเลย! ผีก็มีหน้าให้ต่อย!”",counter:"ท่อง “อิติปิโส…” รัว ๆ เป็นกำลังใจ",range:"ตะโกน “อย่าให้มันเข้าใกล้! มันตัวเย็นนน!”",
+ clinch:"ตะโกน “กอดมันไว้!” …แล้วเปลี่ยนใจ “เดี๋ยว! อย่ากอด!”",defend:"ตะโกน “ยกการ์ด! ยกมือไหว้ไปด้วยก็ได้!”"};
+const GH_CHEER_TANI=["“ข้าได้ยินแล้ว!”","“เงียบ ๆ หน่อย ข้ากำลังเท่”","“เจ้าตะโกนเพี้ยนกว่าครูเจ้าสวดมนต์อีก”","“ฮิ ๆ เชียร์ข้าดังกว่านี้สิ!”"];
+const GH_CHEER_BACK=["“รู้แล้วววว!”","“ผู้จัดการเงียบก่อนได้ไหม!”","“อิติปิโสอะไรตอนนี้!”","“ได้ยินแล้ว! ทั้งฝันได้ยินหมดแล้ว!”","(พยักหน้าทั้งที่กำลังโดนผีฟาด)"];
+function ghHauntDue(G,rng){const S=ghSt(G);if(!S.on||S.shrine)return false;if(gameWeek(G)-S.last<GH_CD)return false;if(S.calm&&gameWeek(G)<S.calm)return false;
+  const R=roster(G).filter(f=>!f.injury);if(!R.length)return false;const p=S.merit<25?.55:S.merit<45?.38:S.merit<70?.22:.12;return rng()<p;} /* even at merit 100 she still drops by now and then */
+function ghPickFighter(G){const R=roster(G).filter(f=>!f.injury);const named=R.filter(f=>GH_ENTER[f.id]);const L=named.length&&Math.random()<.8?named:R;return L[Math.floor(Math.random()*L.length)];}
+function ghHaunt(done){const S=ghSt(G),f=ghPickFighter(G);if(!f){done();return;}S.last=gameWeek(G);S.haunts++;save();
+  const nm=f.name,enter=(GH_ENTER[f.id]||GH_ENTER._).replace(/\{f\}/g,nm),open=GH_OPEN[S.haunts%GH_OPEN.length],tl=GH_TANI_LINE[Math.min(2,S.stage)];
+  const steps=[...open,TN(tl[S.haunts%tl.length]),N(enter),MY("(อยากช่วย แต่ขยับได้แค่ปาก… งั้นเชียร์อย่างเดียว)"),
+   {choice:[{t:`ส่งเสียงเชียร์${nm}สุดใจ (ชกในฝัน)`,fx:()=>{UI.ghGo={fid:f.id,live:1};},then:[TN("ดี… ขึ้นมาเลย!")]},
+    {t:"ท่องอิติปิโสรัว ๆ แล้วหลับตาปี๋ (ข้ามไฟต์ ให้ผลออกเอง)",fx:()=>{UI.ghGo={fid:f.id,live:0};},then:[N("คุณท่องอิติปิโสได้ถึงรอบที่สิบเจ็ด เสียงตุบตับในฝันค่อย ๆ เงียบลง…")]}]}];
+  ghPlay(steps,()=>{const go=UI.ghGo;UI.ghGo=null;if(!go){done();return;}ghFight(go.fid,go.live,done);},{bg:"dream_room",look:"casual"});}
+/* with her shrine up, Nang Tani sometimes takes the dream fight herself — a little stronger than the fighter she stands in for */
+function ghAlly(G,f){const K=QK.tani,t=Math.min(19.4,qTarget(G,f.id)+.8),rng=mulberry32((G.seed^0x7a11)+gameWeek(G));const a={};
+  for(const [x] of ATTRS)a[x]=clamp(t+(K.tilt[x]||0)+(rng()*1.2-.6),3,19.5);const d=t-ovr(a);for(const [x] of ATTRS)a[x]=clamp(a[x]+d,3,19.5);
+  const id="q_tani_ally",o=baseFighter(id,{name:TANI,full:TANI,div:"X",camp:"quest",color:K.color,potential:t+2,a});{const short=t-ovr(a);if(short>.05)o.vet=+Math.min(Q_VET_MAX,short).toFixed(2);}
+  o.sprite="tani";o.kind="tani";o.grp="ghost";o.fstyle=K.fst;o.nlsk=GSK.tani.slice();o.lvl=clamp(Math.round(t-6),1,10);o.fatigue=0;o.morale=90;G.F[id]=o;syncFighterAges(G);return id;}
+const GH_TANI_WIN=["ข้าเตะมันตกทุ่งนาไปแล้ว ไม่ต้องขอบใจ …ขอบใจก็ได้ ถ้าจะเอาน้ำแดงมาด้วย","ฮึ! ผีบ้านนอกพวกนี้ ไม่รู้หรือไงว่าค่ายนี้มีเจ้าที่","จระเข้ฟาดหาง! …ข้าดูนักมวยของเจ้าซ้อมทุกวัน จำท่ามาหมดแล้ว"];
+function ghFight(fid,live,done,kind,taniOn){kind=kind||"tani";const f=G.F[fid],qid=ghFoe(G,kind,f),gn=GH_NAME[kind]||"ผี",ally=taniOn?ghAlly(G,f):null;
+  if(ally){const fin=win=>{const S=ghSt(G);delete G.F[qid];delete G.F[ally];if(win){S.wins++;S.tb=clamp((S.tb||0)+2,0,ghCap(G));}else S.merit=clamp(S.merit-3,0,GH_MAX);save();
+      ghPlay([N(win?`นางตานีหมุนตัวฟาดกาบกล้วย ${gn}กระเด็นหายไปในความมืด`:`${gn}หัวเราะลั่น นางตานีเซถอยไปพิงเสามุมเวที`),TN(win?GH_TANI_WIN[S.wins%GH_TANI_WIN.length]:"คืนนี้มันแรงกว่าที่คิด… ทำบุญให้ข้าเพิ่มหน่อย ข้าจะได้มีแรง",win?"angry_smile":"angry"),
+        GMOFF(),{n:"nar",t:"— เช้าวันต่อมา —",bg:"camp",show:[]},GH_ENTER[f.id]?GL(f.id,"happy",`เมื่อคืนฝันว่านางตานีชกกับ${gn}แทนพวกเรา เท่มากเลย! ไม่มีใครไข้ขึ้นสักคน`):{n:"nar",t:`ทั้งค่ายตื่นมาสดชื่น ไม่มีใครไข้ขึ้น`}],done,{bg:"dream",look:"casual"});};
+    if(!live){const F=quickFight(G.F[ally],G.F[qid],(G.seed^0xd2eb)+gameWeek(G)*13,GH_ROUNDS);fin(dmWinFrom(F)==="A");return;}
+    const bk={id:"bdream"+gameWeek(G),a:ally,b:qid,week:G.week,tier:"dream",rounds:GH_ROUNDS,ev:1,dream:1,ctrl:ghCtrl(G,1),waiDone:true,bg:"bg_dream.webp"};ghCtrlToast(bk);
+    try{document.body.classList.add("dreamfx");}catch(e){}openFight2(bk,()=>{try{document.body.classList.remove("dreamfx");}catch(e){}const F=LASTF;fin(!!(F&&F.result&&F.result.win==="A"));});return;}
+  const fin=win=>{const S=ghSt(G);delete G.F[qid];let sick=0;if(win)S.wins++;else if(!S.sick&&((S.fy&&S.fy[G.season||1])||0)<GH_FEVER_MAX){sick=S.merit<20?2:1;S.fy=S.fy||{};S.fy[G.season||1]=(S.fy[G.season||1]||0)+sick;f.injury=Math.max(f.injury||0,sick);S.sick=f.id;G.log.push(`${f.name}จับไข้หลังผีอำ พักซ้อม ${sick} สัปดาห์`);}
+    if(win)S.merit=clamp(S.merit+1,0,GH_MAX);save();
+    const T=kind==="tani",M=T?(GH_MORN[f.id]||GH_MORN._):(GH_MORN2[f.id]||GH_MORN2._),line=pk(win?M.w:M.l).replace(/\{f\}/g,f.name).replace(/\{g\}/g,gn);
+    const steps=[...(T?[N(win?`${f.name}ฟาดกาบกล้วยกระเด็น นางตานีถอยกลับเข้ากอกล้วย ทิ้งเสียงหัวเราะคิกคักไว้`:`${f.name}ล้มลงบนเวทีต้นกล้วย นางตานีหัวเราะคิกคักแล้วหายไปพร้อมลมเย็นวาบ`),
+      TN(win?"…วันนี้ข้ายอม… แต่ไม่ได้แพ้นะ แค่ง่วง":"ฮิ ๆ ๆ ทำบุญมาเยอะ ๆ แล้วค่อยมาท้าข้าใหม่")]
+      :[N(win?`${f.name}ซัด${gn}กระเด็นตกเวที เสียง${GH_SOUND[kind]}ค่อย ๆ ไกลออกไปจนเงียบ`:`${gn}หัวเราะลั่นแล้วหายไปในความมืด ${f.name}ทรุดลงกลางเวที`),...(ghSt(G).shrine?[TN(win?"ไปซะ! อย่าให้ข้าเห็นแถวนี้อีก":"ข้าช่วยกันไม่ทัน… ข้าจะไปเฝ้าเด็กมันเองคืนนี้",win?"angry":"neutral")]:[])]),
+      GMOFF(),{n:"nar",t:"— เช้าวันต่อมา —",bg:"camp",show:[]},
+      GH_ENTER[f.id]?GL(f.id,win?"happy":"sad",line):{n:"nar",t:line},
+      ...(sick?[C(`${f.name}ไข้ขึ้น ครูให้พัก${sick>1?"สองอาทิตย์":"อาทิตย์นึง"} …แล้วครูว่าเราต้องทำบุญได้แล้ว บุญค่ายตอนนี้ ${S.merit} เอง`)]:[C(win?"ชนะผีในฝัน… ครูไม่รู้จะบันทึกลงสถิติยังไงดี":"")].filter(s=>s.t))];
+    ghPlay(steps,done,{bg:"dream",look:"casual"});};
+  if(!live){const F=quickFight(f,G.F[qid],(G.seed^0xd2ea)+gameWeek(G)*13,GH_ROUNDS);fin(dmWinFrom(F)==="A");return;}
+  const bk={id:"bdream"+gameWeek(G),a:fid,b:qid,week:G.week,tier:"dream",rounds:GH_ROUNDS,ev:1,dream:1,ctrl:ghCtrl(G,0),waiDone:true,bg:"bg_dream.webp"};ghCtrlToast(bk);
+  try{document.body.classList.add("dreamfx");}catch(e){}
+  openFight2(bk,()=>{try{document.body.classList.remove("dreamfx");}catch(e){}const F=LASTF;fin(!!(F&&F.result&&F.result.win==="A"));});}
+/* in a dream fight the manager can only shout — the corner becomes a row of (useless, loud) cheers */
+{const _c=cornerHTML;cornerHTML=function(F){const U=UI.fight;if(!U||!U.b||!U.b.dream)return _c(F);if(U.b.ctrl)return _c(F).replace(/src="[^"]*q_tani_ally[^"]*"/g,`src="${ASSET+"npc_tani_face.webp"}"`);
+  return `<div class="corner px"><div class="chead"><b>พักยกในฝัน ${F.round}</b><span class="chip">เข้าเป้า ${F.A.rlanded}–${F.B.rlanded}</span><span class="chip warn">ขยับตัวไม่ได้ ตะโกนได้อย่างเดียว</span><span class="chip">🪷 บุญ 60+ หรือมีศาล จะสั่งมุมได้เอง</span></div>
+   <div class="opts">${Object.entries(GH_CHEER).map(([k,t])=>`<button data-act="ghcheer" data-v="${k}">${t}</button>`).join("")}</div></div>`;};}
+Object.assign(ACT,{ghcheer:d=>{const U=UI.fight;if(!U||!U.b||!U.b.dream)return;const C=U.care;if(C&&!C.done){C.q=.5;C.done=true;try{applyCare(U.F,.5);}catch(e){}}
+  U.pick=d.v;const L=U.F.A.f.id==="q_tani_ally"?GH_CHEER_TANI:GH_CHEER_BACK;U.caption={text:`${U.F.A.f.name}: ${L[Math.floor(Math.random()*L.length)]}`,side:"A"};ACT.cgo();}});
+{const _q=questExtra;questExtra=function(done,rng){try{if(G&&!G.ended){const S=ghSt(G);
+  if(ghStory(done)){S.lastAny=gameWeek(G);return true;}            /* the rare story beats keep their place */
+  if(_q(done,rng))return true;                                      /* v1.91.144 (Man): the main quests go before any ghost */
+  if(S.on&&gameWeek(G)-(S.lastAny??-99)>=GH_GAP){let hit=false;     /* at most one ghost scene every GH_GAP weeks, all kinds together */
+    if(ghHauntDue(G,rng)){ghHaunt(done);hit=true;}
+    else{const o=ghOtherDue(G,rng);if(o){ghOther(o,done);hit=true;}else if(ghOdd(G,rng)){ghOddPlay(done);hit=true;}}
+    if(hit){S.lastAny=gameWeek(G);return true;}}}}catch(e){console.error("ghost",e);}return false;};}
+
+/* ---------- story beats (played as weekly extras so they can carry state) ---------- */
+function ghStory(done){const S=ghSt(G);if(!S.on)return false;
+  if(S.mpFail===1){S.mpFail=2;save();playScene([N("สามวันหลังพิธีไล่ผี มีจดหมายเขียนลายมือหวัด ๆ มาถึงค่าย"),{n:"npc",who:MP,img:"morphi",t:"ค่ายท่านมีของแรง ผมทำต่อไม่ไหว เงินค่าครูผมขอเก็บไว้ทำขวัญตัวเองนะครับ แล้วก็… รองเท้าผมข้างซ้าย ช่วยส่งไปรษณีย์มาให้ด้วย"},C("ครูบอกแล้ว… ทำบุญเถอะ ถูกกว่าด้วย")],done,{bg:"camp",look:"casual"});return true;}
+  if(S.shrineOK===1){S.shrineOK=2;S.sq=1;S.sqAbs=gameWeek(G);save();playScene([N("บ่ายวันพระ หลวงพ่อจากวัดข้างค่ายเดินผ่านมา หยุดยืนมองกอกล้วยอยู่นาน"),
+    {n:"npc",who:LP,img:"luangpho",t:"ค่ายนี้ทำบุญเยอะนะโยม อาตมาเห็นทุกครั้ง… แต่กอกล้วยนี่ มีคนอยู่นะ"},C("หลวงพ่อก็เห็นเหรอครับ!"),
+    {n:"npc",who:LP,img:"luangpho",t:"เขาไม่ได้ร้ายหรอก เขาแค่น้อยใจ บ้านโดนเตะทุกวัน ไม่มีใครเคยบอกขอโทษ… ตั้งศาลให้เขาสักหลังเถอะ เขาจะดูแลที่นี่ให้"},
+    C("ศาลนางตานี… ครูว่าดีนะผู้จัดการ ผูกผ้าแพรสามสี ถวายขนมต้ม แล้วก็… เลิกเตะต้นที่อยู่ใกล้ศาลด้วย"),
+    N("🏮 เริ่มเควสต์ศาลนางตานี — ขั้นแรก: หาที่ตั้งศาล (เรื่องจะเดินเองในสัปดาห์หน้า)")],done,{bg:"temple",look:"casual"});return true;}
+  if(S.pendShrine){S.pendShrine=0;S.stage=3;save();playScene([N("คืนแรกหลังตั้งศาล ลมพัดเย็นสบาย ไม่มีเสียงหมาหอน ไม่มีกลิ่นขนมต้มตอนตีสาม"),
+    N("แต่คุณก็ยังฝันเห็นเธอ… คราวนี้เธอนั่งอยู่บนชานศาลไม้ แกว่งเท้าเล่น ไม่ได้นั่งบนอกคุณ"),
+    TN("…ศาลสีเขียว ผ้าแพรสามสี ขนมต้มยังอุ่นอยู่เลย","shy"),TN("ข้าไม่ได้ซึ้งนะ! แค่… ไม่มีใครเคยสร้างบ้านให้ข้ามาก่อน","angry_smile"),
+    MY("ขอโทษเรื่องต้นกล้วยนะครับ ทั้งที่โดนเตะ แล้วก็ที่โดนเอาไปทำกระทง"),
+    TN("ฮึ… ขอโทษช้าไปตั้งหลายปี แต่ก็ยังดีกว่าไม่ขอ","neutral"),
+    TN("ตกลง ตั้งแต่นี้ข้าจะดูแลค่ายนี้เอง ผีตนไหนจะมาวุ่นวาย ต้องผ่านข้าก่อน เด็ก ๆ ในค่ายข้าจะช่วยดูให้ไม่เจ็บไม่ไข้","smile"),
+    TN("แล้วถ้าครูของเจ้าจะซื้อหวย… มากระซิบถามข้าก่อนก็ได้ ข้าไม่รับประกันนะ แต่ข้าเห็นตัวเลขลอยอยู่ในน้ำค้างบ่อย ๆ","smile"),
+    TN("อ้อ แล้วต้นที่ติดศาล ห้ามเตะเด็ดขาด! ต้นอื่นเตะได้ เบา ๆ","angry_smile"),
+    N("🏮 ศาลนางตานีตั้งแล้ว: นางตานีคุ้มครองค่าย · นักมวยฟื้นความล้าเร็วขึ้นทุกสัปดาห์ · บอกใบ้หวยเมื่อครูแดงชวนซื้อ · ถวายของที่ศาลได้ในกิจกรรมค่าย")],done,{bg:"camp_night",look:"casual"});return true;}
+  return false;}
+
+/* ---------- the shrine whispers a lottery number ---------- */
+{const _p=lottoPickHTML;lottoPickHTML=function(i){const h=_p(i);const S=G&&G.gh;if(!S||!S.shrine)return h;const k=ghLottoK(G,i);
+  return h.replace('<div class="ltgrid">',`<p class="ghhint"><img src="${ASSET+"npc_tani_face.webp"}" alt="">นางตานีกระซิบตอนครูแดงจุดธูปที่ศาล: “ใบที่ ${k+1}… ข้าเห็นเลขนี้ลอยในน้ำค้างเมื่อเช้า”</p><div class="ltgrid">`).replace(`data-v="${k}"`,`data-v="${k}" style="outline:3px solid #6fcf7f;outline-offset:2px"`);};}
+const ghLottoK=(G,i)=>((G.seed||1)+(G.season||1)*7+i*3)%6;
+{const _b=lottoBuy;lottoBuy=function(G,i,k){const d=_b(G,i,k);try{if(d&&G.gh&&G.gh.shrine&&k===ghLottoK(G,i))d.tani=1;}catch(e){}return d;};}
+{const _r=lottoResult;lottoResult=function(G,d){const R=_r(G,d);if(d.tani&&R.out==="none"){const r=mulberry32((G.seed||1)*131+d.season*17+d.i);const x=r(),p=d.pick||"000000";
+    if(x<.25){R.out="last2";R.l2=p.slice(-2);R.prize=LOTTO_PRIZE.last2;}else if(x<.33){R.out="last3";R.l3=p.slice(-3);R.prize=LOTTO_PRIZE.last3;}}return R;};}
+
+/* ---------- test hook: the test save gets Tani awake and a haunt ready ---------- */
+{const _t=xlTestSetup;xlTestSetup=function(G){_t(G);try{const S=ghSt(G);S.on=1;S.wakeAbs=gameWeek(G)-8;S.last=-99;S.merit=30;G.seen=G.seen||{};G.seen.gh_wake=true;}catch(e){console.error(e);}};}
+
+/* ================= Phase 2: the Rains Retreat, the other ghosts, the girls' ghost stories, odd happenings ================= */
+/* v1.91.144 (Man): through the Rains Retreat Luang Pho must stay at his temple and can't come out to help — the other ghosts come out then, and often */
+const GH_SEASON=()=>GH_LENT();
+const GH_OTHER=["krasue","krahang","mabong","phiphong"];
+const GH_NAME={krasue:"กระสือ",krahang:"กระหัง",mabong:"ผีม้าบ้อง",phiphong:"ผีโพง",tani:"นางตานี"};
+const GH_SOUND={krasue:"คิก… คิก… คิก…",krahang:"พึ่บ! พั่บ! พึ่บ! พั่บ!",mabong:"ฮี้ฮี้ฮี้ฮี้!",phiphong:"ฟุดฟิด… ฟุดฟิด… กลิ่นปลาร้า…"};
+EVENTS.push({id:"gh_lp_go",annual:true,look:"casual",bg:"temple",pri:3,when:G=>ghSt(G).on&&ghIn(G,GH_SEASON()),steps:[
+ N("วันเข้าพรรษา ทั้งค่ายไปถวายเทียนพรรษาที่วัดข้างค่าย หลวงพ่อเดินมาส่งถึงประตูวัด"),
+ {n:"npc",who:LP,img:"luangpho",t:"สามเดือนนี้อาตมาต้องจำพรรษาอยู่ในวัดนะโยม ค้างแรมข้างนอกไม่ได้ มีอะไรมารบกวนตอนกลางคืน อาตมาออกไปช่วยไม่ได้"},
+ C("สามเดือนเลยเหรอครับหลวงพ่อ… ครูจะสวดมนต์วันละสองรอบ"),
+ {n:"npc",who:LP,img:"luangpho",t:"สวดได้ แต่สวดให้ถูกบทนะโยม คราวก่อนได้ยินโยมสวดชยันโตตอนจะนอน …ช่วงนี้ของไม่ดีมันรู้ว่าพระไม่ออกจากวัด มันชอบมาเดินเล่น ทำบุญไว้ใจจะได้ไม่หวั่น"},
+ N("🌙 ช่วงเข้าพรรษา (ปลาย ก.ค.–ปลาย ต.ค.) หลวงพ่อจำพรรษาในวัด ผีตนอื่นจะออกมาบ่อย — บุญค่ายสูงหรือมีศาลนางตานีช่วยได้มาก")]});
+EVENTS.push({id:"gh_lp_back",annual:true,look:"casual",bg:"temple",pri:2,when:G=>{const S=ghSt(G),L=GH_LENT();return S.on&&G.seenY&&G.seenY.gh_lp_go===(G.season||1)&&G.week>L[1]&&G.week<=L[1]+6;},steps:[
+ N("วันออกพรรษา ตักบาตรเทโวแต่เช้า หลวงพ่อยิ้มกว้างกว่าทุกวัน"),
+ {n:"npc",who:LP,img:"luangpho",t:"ออกพรรษาแล้วโยม อาตมาเดินไปไหนมาไหนได้แล้ว …ได้ยินว่าสามเดือนนี้มีอะไรมาเยี่ยมค่ายเยอะเลย"},
+ C("เยอะครับหลวงพ่อ ครูสวดมนต์จนจำได้ทั้งเล่มแล้ว")]});
+const ghSight={
+ krasue:f=>[N(`ตีหนึ่ง ${f}ลุกไปเข้าห้องน้ำ เห็นดวงไฟสีม่วงลอยต่ำ ๆ อยู่แถวเล้าไก่หลังค่าย`),{n:"_f",t:"ผู้จัดการ! มีโคมลอยหลงทาง… เดี๋ยวนะ ทำไมโคมมีหน้า!"},
+   N("ดวงไฟนั้นหันมายิ้มให้ ผมยาวสยาย ข้างล่างห้อยอะไรวิบวับ ๆ แล้วพุ่งหายเข้าไปในความมืด"),C("กระสือ! ปิดฝาโอ่งให้หมด ผ้าที่ตากไว้เก็บเข้าบ้าน! …ผ้าขาวม้าครูยังตากอยู่ ใครก็ได้ไปเก็บที")],
+ krahang:f=>[N("เสียงพึ่บพั่บดังบนหลังคาค่ายทั้งคืน เหมือนใครกำลังพัดลมด้วยกระด้งสองใบ"),{n:"_f",t:"ผู้จัดการ… มีคนบินได้ค่ะ! เอากระด้งมาทำปีก ขี่สากตำข้าวด้วย!"},
+   C("กระหัง! ห้ามทิ้งกระด้งกับสากไว้นอกบ้าน …ครูว่ามันมายืมของป้าแต๋วไปแน่ ๆ"),N("เช้าวันต่อมา ป้าแต๋วเดินมาบ่นว่ากระด้งหายไปสองใบ สากหายไปหนึ่งอัน")],
+ mabong:f=>[N("กลางดึกมีเสียง “ฮี้!” ดังมาจากทุ่งนาหลังค่าย ตามด้วยเสียงกุบกับวิ่งวนรอบค่ายสามรอบ"),{n:"_f",t:"ม้าที่ไหนมาวิ่งตอนตีสองคะ ในเชียงใหม่มีม้าด้วยเหรอ"},
+   C("ผีม้าบ้อง… ผีเหนือขนานแท้ คนที่โดนเข้าจะวิ่งร้องเป็นม้าทั้งคืน …เมื่อคืนใครวิ่งรอบค่าย ยกมือ"),N("ไม่มีใครยกมือ แต่นักเรียนคอร์สเช้าสองคนขาล้าเหมือนเพิ่งวิ่งมาราธอนมา")],
+ phiphong:f=>[N("มีแสงสีส้มลอยวูบวาบอยู่แถวคูน้ำ กลิ่นคาวปลาโชยมาเป็นระลอก"),{n:"_f",t:"หิ่งห้อยตัวใหญ่จังเลย… ทำไมมันมีจมูกด้วย แล้วทำไมแสงออกจากจมูก"},
+   C("ผีโพง! แสงออกจากรูจมูก ชอบกินของคาว ปลาร้าในครัวปิดฝาให้สนิท!"),N("เช้ามา ปลาร้าไหเล็กของค่ายหายไปครึ่งไห มีรอยนิ้วมันเยิ้มอยู่ที่ฝา")]};
+const GH_GOPEN={krasue:[N("คุณฝันว่ายืนอยู่บนเวทีกลางทุ่งนา หัวผู้หญิงลอยวนรอบเวที ไส้วิบวับเป็นไฟประดับ")],
+ krahang:[N("ในฝัน เวทีมวยตั้งอยู่บนหลังคาค่าย ชายร่างผอมกางกระด้งสองข้าง ร่อนลงมายืนมุมน้ำเงิน")],
+ mabong:[N("ในฝัน เสียงกีบเท้ากระทืบพื้นเวทีดังตึง ๆ ม้าสีดำตาแดงยืนสองขาตั้งการ์ด")],
+ phiphong:[N("ในฝัน ไฟทั้งสนามดับหมด เหลือแค่แสงสีส้มที่ออกมาจากจมูกของใครบางคนที่มุมน้ำเงิน")]};
+const GH_MORN2={kati:{w:"กะทิฝันว่าต่อย{g}จนหนีไปเลย! ผีหน้าหนาวไม่เห็นน่ากลัว",l:"ฮัดชิ่ว… กะทิฝันว่าแพ้{g} ตื่นมาไข้ขึ้นเลย ไม่ยุติธรรม!"},
+ mali:{w:"มะลิชนะ{g}ด้วยค่ะ! …แต่ขอนอนห้องครูแดงอีกคืนได้ไหมคะ",l:"มะลิไม่สบายค่ะ… ฝันถึง{g}ทั้งคืนเลย"},
+ rin:{w:"ฉันฝันว่าชนะ{g} ฉันจดลักษณะไว้แล้ว เผื่อมีงานวิจัยเรื่องนี้",l:"ไข้ 38.2 ค่ะ ไม่เกี่ยวกับ{g}แน่นอน …ผู้จัดการช่วยปิดหน้าต่างให้ที"},
+ ploy:{w:"เมื่อคืนพลอยชนะ{g} ไม่ต้องเล่าให้ใครฟังนะคะ",l:"พลอยไม่สบายนิดหน่อย …{g}เป็นแค่ความฝัน"},
+ fah:{w:"ฟ้าเตะ{g}กระเด็นไปสองทุ่งนา สบาย ๆ",l:"ฮัดชิ่ว! ฟ้าไม่ได้แพ้{g}นะ ฟ้าแค่ง่วง"},
+ prod_B:{w:"บันทึก: เป้าหมาย {g} ถูกกำจัดในความฝัน ใบหยกขอเพิ่ม {g} ในฐานข้อมูลค่ะ",l:"ระบบมีไข้ค่ะ… {g} ไม่อยู่ในฐานข้อมูล จึงป้องกันไม่ได้"},
+ _:{w:"เมื่อคืนผมฝันว่าต่อยชนะ{g}ครับ",l:"ผมตัวร้อนครับ เมื่อคืนฝันว่าแพ้{g}"}};
+function ghOtherDue(G,rng){const S=ghSt(G);if(!S.on||!ghIn(G,GH_SEASON()))return null;S.og=S.og||{};const yr=G.season||1;
+  if(gameWeek(G)-(S.lastO??-99)<3)return null;S.ogSeen=S.ogSeen||{};const fresh=GH_OTHER.filter(k=>S.ogSeen[k]!==yr),left=fresh.length&&rng()<.5?fresh:GH_OTHER;
+  const p=(S.merit<40?.6:S.merit<70?.45:.3)*(S.shrine?.6:1)*((S.th||0)>=3?.75:1);if(rng()>=p)return null;return left[Math.floor(rng()*left.length)];} /* v1.91.144 (Man): often, all Lent long, and never quite gone even at merit 100 */
+function ghOther(kind,done){const S=ghSt(G),yr=G.season||1;S.lastO=gameWeek(G);S.og=S.og||{};S.ogSeen=S.ogSeen||{};const seen=S.ogSeen[kind]===yr;
+  const R=roster(G).filter(f=>!f.injury);if(!R.length){done();return;}const named=R.filter(f=>GH_ENTER[f.id]),f=(named.length?named:R)[Math.floor(Math.random()*(named.length?named:R).length)];
+  if(!seen){S.ogSeen[kind]=yr;save();const st=ghSight[kind](f.name).map(s=>s.n==="_f"?(GH_ENTER[f.id]?GL(f.id,"surprised",s.t):{n:"nar",t:`${f.name}: ${s.t}`}):s);
+    ghPlay([N("— เรื่องแปลกกลางดึก —"),...st,...(S.shrine?[TN("ฮึ… พวกช่วงพรรษามากันแล้ว เดี๋ยวข้าดูให้","angry_smile")]:[])],done,{bg:"camp_night",look:"casual"});return;}
+  S.og[kind]=yr;save();const enter=(GH_ENTER[f.id]||GH_ENTER._).replace(/\{f\}/g,f.name),tani=S.shrine&&Math.random()<.45;
+  const steps=[pk(GH_GOPEN[kind]),{n:"npc",who:GH_NAME[kind],t:GH_SOUND[kind]},
+   ...(tani?[TN("ถอยไปให้หมด เด็ก ๆ คืนนี้ข้าจัดการเอง!","angry"),N("แสงเขียวพุ่งลงกลางเวที นางตานีถกชายผ้าถุงขึ้นเหน็บเอว ตั้งการ์ดแบบที่แอบดูนักมวยในค่ายซ้อมทุกวัน")]
+     :[N(enter),...(S.shrine?[TN("หยุดเดี๋ยวนี้! ค่ายนี้มีเจ้าที่แล้ว… ข้าเอง!","angry"),TN("เจ้านักมวย ซัดมันเลย ข้าคุมเวทีให้ มันจะอ่อนแรงลงเอง","angry_smile")]:[])]),
+   MY("(ขยับไม่ได้อีกแล้ว… งั้นตะโกนอย่างเดียว)"),
+   {choice:[{t:tani?"ส่งเสียงเชียร์นางตานีสุดใจ (ชกในฝัน)":`ส่งเสียงเชียร์${f.name}สุดใจ (ชกในฝัน)`,fx:()=>{UI.ghGo={fid:f.id,live:1,tani};}},{t:"ท่องอิติปิโสรัว ๆ (ข้ามไฟต์ ให้ผลออกเอง)",fx:()=>{UI.ghGo={fid:f.id,live:0,tani};},then:[N("คุณท่องอิติปิโสไปได้สิบสองรอบ เสียงในฝันเงียบลงทีละนิด…")]}]}];
+  ghPlay(steps,()=>{const go=UI.ghGo;UI.ghGo=null;if(!go){done();return;}ghFight(go.fid,go.live,done,kind,go.tani);},{bg:"dream_room",look:"casual"});}
+
+/* ---------- the girls' ghost stories (one each, once Tani is awake) ---------- */
+const ghGirl=(id,b=12)=>G=>{const S=ghSt(G);return S.on&&inCamp(G,id)&&(G.F[id].bond||0)>=b&&gameWeek(G)-(S.wakeAbs||0)>=3;};
+const BOND=(id,v)=>({inject:G=>{add(G,id,"bond",v);return [];}});
+EVENTS.push(
+ {id:"gh_kati",look:"casual",bg:"camp_night",when:ghGirl("kati"),steps:[
+  N("ตีหนึ่ง คุณเจอกะทิเดินลาดตระเวนรอบค่าย ถือไม้กวาดทางมะพร้าวเป็นอาวุธ ไฟฉายคาดหัว"),
+  GL("kati","happy","ผู้จัดการ! กะทิจะเฝ้าค่ายเอง ถ้าผีมา กะทิจะใช้ไม้กวาดฟาดแบบจระเข้ฟาดหาง!"),
+  MY("ผีฟาดด้วยไม้กวาดได้เหรอ"),GL("kati","flustered","ไม่รู้ค่ะ แต่ยายบอกว่าผีกลัวไม้กวาด… หรือว่าแม่มดกลัว… อันไหนนะ"),
+  N("ใบกล้วยหลังค่ายไหววูบ ทั้งที่ไม่มีลม กะทิหันขวับ ชูไม้กวาดตั้งการ์ด"),TN("…จะฟาดใครด้วยไม้กวาด","angry_smile"),
+  GL("kati","surprised","…ผะ ผะ ผู้จัดการ วิ่ง!!"),N("กะทิวิ่งไปได้สามก้าว แล้วหันกลับมาลากแขนคุณไปด้วย ไม้กวาดหล่นอยู่กลางลาน"),
+  N("เช้าวันต่อมา ไม้กวาดอันนั้นวางพิงประตูห้องกะทิอย่างเรียบร้อย ด้ามผูกโบสีเขียวไว้หนึ่งโบ"),GL("kati","flustered","…เธอคืนของด้วย ใจดีจัง กะทิขอโทษที่จะฟาดนะคะ!"),BOND("kati",2)]},
+ {id:"gh_mali",look:"casual",bg:"camp_night",when:ghGirl("mali"),steps:[
+  N("มะลิเคาะประตูห้องคุณตอนห้าทุ่ม กอดหมอนข้างมาด้วย"),GL("mali","sad","ผู้จัดการคะ… มะลินอนไม่หลับ ได้ยินเสียงคนหัวเราะคิกคักในกอกล้วย"),
+  MY("ฟังผิดหรือเปล่า อาจเป็นแมว"),GL("mali","sad","แมวหัวเราะ “ฮิ ๆ ๆ” ได้เหรอคะ…"),
+  N("มะลิขอนั่งอ่านการ์ตูนเป็นเพื่อนจนเที่ยงคืน แล้วผล็อยหลับไปบนเก้าอี้ ปากยังขมุบขมิบสวดอิติปิโส"),
+  TN("…เด็กคนนี้กลัวข้าขนาดนั้นเลยเหรอ","neutral"),N("ผ้าห่มผืนบางลอยมาคลุมไหล่มะลิเอง คุณมองตามแต่ไม่เห็นใคร"),
+  GL("mali","happy","(ตื่นมาตอนเช้า) ผู้จัดการห่มผ้าให้มะลิเหรอคะ ขอบคุณนะคะ!"),MY("…อืม ใช่ ๆ"),BOND("mali",2)]},
+ {id:"gh_rin",look:"casual",bg:"camp_night",when:ghGirl("rin"),steps:[
+  GL("rin","happy","ฉันติดกล้องอินฟราเรดไว้สามตัวรอบกอกล้วยค่ะ ถ้ามีผีจริงจะได้มีหลักฐาน ถ้าไม่มี ทุกคนจะได้เลิกกลัว"),
+  N("เช้าวันต่อมา รินเรียกทุกคนมาดูคลิป"),GL("rin","surprised","…ทั้งคืนมีภาพแค่อย่างเดียวค่ะ"),
+  N("ในจอ ครูแดงในชุดนอนลายช้าง เดินถือธูปวนรอบกอกล้วยเจ็ดรอบ ปากพึมพำบทสวดมนต์ เวลาตีสองสิบห้า"),C("…ครูไปทำบุญ ทำบุญตอนตีสองก็ได้"),
+  GL("rin","flustered","แต่กล้องตัวที่สามค่ะ… มีคนเอาใบกล้วยมาปิดเลนส์ไว้ตั้งแต่ตีสามจนเช้า มีรอยนิ้วมือสีเขียวด้วย"),N("ทั้งห้องเงียบ รินลบไฟล์นั้นทิ้งต่อหน้าทุกคน"),
+  GL("rin","sad","ไม่มีหลักฐาน ไม่มีผีค่ะ จบ …ผู้จัดการ คืนนี้ช่วยเดินไปส่งฉันที่ห้องได้ไหม"),BOND("rin",2)]},
+ {id:"gh_ploy",look:"casual",bg:"camp_night",when:ghGirl("ploy"),steps:[
+  N("ห้องของพลอยเปิดไฟสลัวทั้งคืน คุณเพิ่งรู้ตอนเดินผ่าน"),GL("ploy","angry","ไฟสลัวช่วยให้หลับง่าย ไม่เกี่ยวกับผีสักหน่อย"),
+  N("ทันใดนั้น “ฮี้!!” เสียงม้าร้องดังลั่นมาจากทุ่งนา พลอยคว้าแขนคุณไว้แน่นจนเล็บจิก"),MY("…พลอย แขน"),
+  GL("ploy","flustered","พลอยแค่… ตรวจชีพจรผู้จัดการ ดูว่าตกใจไหม …ผู้จัดการตกใจมากเลยนะคะ ชีพจรเต้นแรง"),
+  N("เสียงนั้นกลายเป็นม้าของลุงเขียวข้างค่ายที่หลุดคอก ไม่ใช่ผีม้าบ้อง"),GL("ploy","pout","อย่าเล่าเรื่องนี้ให้ใครฟังนะคะ ถ้าเล่า พลอยจะบอกว่าผู้จัดการกรี๊ด"),BOND("ploy",2)]},
+ {id:"gh_fah",look:"casual",bg:"camp_night",when:ghGirl("fah"),steps:[
+  GL("fah","happy","ฟ้าจะนอนใต้กอกล้วยหนึ่งคืน ถ้าไม่เจอผี ทุกคนเลี้ยงชานมฟ้าคนละแก้ว"),N("ตีหนึ่ง ฟ้านอนเล่นมือถืออยู่บนเสื่อใต้ต้นกล้วย คุณแอบดูจากหน้าต่าง"),
+  TN("…เจ้าเล่นอะไรอยู่ ส่องแสงหน้าข้าเนี่ย","angry"),GL("fah","surprised","…โอ้โห ผีจริง ชุดสวยดีนะ ขอถ่ายรูปคู่ได้ไหม"),TN("ถ่ายแล้วข้าจะติดกล้องเจ้าไหม…","neutral"),
+  N("สองคนนั่งคุยกันจนตีสาม ฟ้าสอนนางตานีเล่นเกมเรียงลูกแก้ว นางตานีสอนฟ้าวิธีเลือกเลขหวย"),
+  GL("fah","happy","(เช้ามา) ฟ้าแพ้พนันนะ เจอผีจริง …แต่ได้เพื่อนใหม่มาหนึ่งคน เธอเล่นเกมเก่งกว่าฟ้าอีก หงุดหงิด"),BOND("fah",2)]},
+ {id:"gh_baiyok",look:"casual",bg:"camp_night",when:G=>ghGirl("prod_B",10)(G)&&ghSt(G).shrine,steps:[
+  {n:"npc",who:"ใบหยก",t:"ใบหยกตรวจสอบศาลนางตานีมาสามคืนค่ะ อุณหภูมิรอบศาลต่ำกว่าปกติ 2.4 องศา ไม่มีคำอธิบายในฐานข้อมูล"},
+  TN("ยัยหุ่นยนต์คนนี้มายืนจ้องข้าสามคืนแล้ว…","angry_smile"),{n:"npc",who:"ใบหยก",t:"…ตรวจพบเสียงพูด ไม่มีแหล่งกำเนิด"},
+  N("ผมหางม้าของใบหยกค่อย ๆ ถูกถักเป็นเปียสองข้างเองต่อหน้าต่อตา ใบหยกยืนนิ่งไม่ขยับ"),{n:"npc",who:"ใบหยก",t:"……ข้อผิดพลาด ข้อผิดพลาด"},
+  TN("ฮิ ๆ น่ารักดีนี่ ผมยาวสวย ข้าแค่ช่วยถักให้","smile"),
+  {n:"npc",who:"ใบหยก",t:"(เช้ามา ใบหยกยังถักเปียอยู่) …ใบหยกตัดสินใจจะไม่แก้ทรงผมค่ะ ข้อมูลระบุว่า… มันดูดี"}]});
+
+/* ---------- odd happenings (light, every so often; more of them when merit is low) ---------- */
+const GH_ODD=[
+ f=>[N("ตีสอง มีแสงไฟกระพริบสามสีลอยนิ่งอยู่เหนือทุ่งนาหลังค่ายเกือบชั่วโมง"),{n:"_f",t:"ยูเอฟโอ! ผู้จัดการ ยูเอฟโอ!"},C("นั่นโดรนถ่ายงานบวชบ้านลุงเขียว… มั้ง ครูไม่แน่ใจ แต่เขาบวชกันกลางคืนเหรอ")],
+ f=>[N("ทั้งค่ายได้ยินเสียงระนาดเพลงสะระหม่าดังแว่ว ๆ ตอนเที่ยงคืน ทั้งที่ไม่มีงานวัดแถวนี้"),C("…นั่นเสียงโทรศัพท์ครูเอง ตั้งปลุกไว้แล้วลืมปิด ขอโทษ")],
+ f=>[N("เช้านี้มีรอยเท้าเล็ก ๆ บนเพดานห้องครัว เดินจากมุมห้องไปถึงหม้อข้าว"),{n:"_f",t:"ผีเด็กแน่ ๆ เลย!"},N("ตุ๊กแกตัวเท่าแขนโผล่หัวออกมาจากหลังตู้ มองทุกคนแล้วร้อง “ตุ๊กแก!” หนึ่งครั้ง")],
+ f=>[N("ครูแดงสวดมนต์ก่อนนอนทุกคืนมาสามอาทิตย์แล้ว คืนนี้สวดเสียงดังเป็นพิเศษ"),C("อิติปิโส ภะคะวา… ใครเปิดพัดลมห้องครู! ครูยังไม่ได้เปิด! อะระหัง!"),N("พัดลมเครื่องนั้นเสียมาสองเดือนแล้ว")],
+ f=>[N("ไก่ป้าแต๋วขันตอนเที่ยงคืนสามรอบ หมาข้างค่ายหอนตอบสองรอบ แมวไม่พูดอะไร"),C("ไก่ขันเที่ยงคืนเขาว่าลางไม่ดี… หรือไก่มันตั้งนาฬิกาผิด")],
+ f=>[N("มีคนเอาเลขสามตัวมาเขียนไว้บนใบกล้วยหน้าค่ายด้วยแป้งดินสอพอง"),C("เลขอะไรน่ะ… ครูจดไว้ก่อน ไม่ได้จะซื้อนะ แค่จด"),N("ทั้งค่ายจดตาม ป้าแต๋วจดด้วย ลุงเขียวถ่ายรูปไปโพสต์ในกลุ่มหมู่บ้าน")],
+ f=>[N("แมวดำตัวหนึ่งเดินขึ้นไปนั่งกลางเวทีมวยของค่าย นั่งอยู่ทั้งบ่าย ใครไล่ก็ไม่ไป"),{n:"_f",t:"มันจะมาสมัครเป็นนักมวยหรือเปล่าคะ"},C("ถ้ามันชกเป็น ครูรับ ค่าตัวเป็นปลาทูวันละตัว")],
+ f=>[N("วิทยุชุมชนในครัวเปิดเองตอนตีสี่ เปิดเพลงลูกทุ่งเพลงเดียวซ้ำ ๆ จนเช้า"),{n:"_f",t:"เพลงนี้… “น้ำตาผีเสื้อ” เหรอ"},C("ผีชอบเพลงเศร้าเว้ย ครูว่าเปลี่ยนเป็นเพลงมันส์ ๆ ให้ดีกว่า")],
+ f=>[N("นักเรียนคอร์สเย็นเล่าว่าเห็นพระรูปหนึ่งเดินผ่านหน้าค่ายตอนสามทุ่ม ทั้งที่หลวงพ่อจำพรรษาอยู่ในวัด"),C("…พระวัดอื่นมั้ง หรือพระวัดไกลมาบิณฑบาตผิดเวลา ครูว่าอย่าไปคิดมาก แล้วก็… คืนนี้นอนรวมกันนะ")]];
+function ghOdd(G,rng){const S=ghSt(G);if(!S.on||gameWeek(G)-(S.lastOdd??-99)<3)return false;if(rng()>=(S.merit<30?.16:S.merit<60?.09:.05))return false;return true;}
+function ghOddPlay(done){const S=ghSt(G);S.lastOdd=gameWeek(G);S.oddI=((S.oddI??-1)+1)%GH_ODD.length;save();const R=roster(G).filter(f=>GH_ENTER[f.id]),f=R[Math.floor(Math.random()*R.length)];
+  const st=GH_ODD[S.oddI](f?f.name:"").map(s=>s.n==="_f"?(f?GL(f.id,"surprised",s.t):{n:"nar",t:"เด็กคอร์ส: "+s.t}):s);ghPlay([N("— เรื่องแปลกในค่าย —"),...st],done,{bg:"camp_night",look:"casual"});}
+
+
+/* ================= Phase 3: sitting with Nang Tani at her shrine (friendship, not romance) ================= */
+/* once a week, in place of spending time with a fighter; topics never repeat until all are heard; heart scenes at 20/40/70 */
+const TT=[
+ {k:"green",o:[TN("เจ้าจ้องชุดข้าทำไม… ชุดเขียวนี่ใส่มาตั้งแต่เกิด ข้าเกิดจากต้นกล้วยนะ จะให้ใส่ชุดแดงเหรอ","angry_smile")],
+  c:[["สีเขียวเข้ากับคุณดีนะ",3,"…ปากหวานนะเจ้า ข้าไม่หลงหรอก แต่ขอบใจ","shy"],["ลองเปลี่ยนสีบ้างไหม",0,"ถ้าข้าใส่สีเหลือง คนจะคิดว่าข้าเป็นผีกล้วยหอม ข้าไม่ยอม","angry"],["ผมยาวขนาดนั้นสระยังไง",2,"น้ำค้างทุกเช้า ฟรี ไม่ต้องซื้อแชมพู คนเราน่าสงสาร","smile"]]},
+ {k:"lotto",o:[TN("ข้าสงสัยมานานแล้ว… ทำไมคนชอบมาขูดต้นกล้วยข้าหาเลข เจ็บนะรู้ไหม","angry")],
+  c:[["ขอโทษแทนทุกคนนะ",3,"ฮึ… เจ้าเป็นคนแรกที่ขอโทษแทนคนอื่น แปลกดี","shy"],["แล้วเลขงวดหน้าล่ะ",-1,"เห็นไหม! ถามแต่เลข! …สองตัวท้ายมีเลขเจ็ด ไปเลย","angry_smile"],["ผมจะทำป้ายห้ามขูด",2,"ทำตัวใหญ่ ๆ นะ แล้วเขียนว่า ‘เจ้าของต้นดุ’","smile"]]},
+ {k:"daeng",o:[TN("ครูของเจ้าน่ะ… สวดมนต์ทุกคืนเลยนะ แต่สวดผิดบทครึ่งนึง เมื่อคืนสวดบทกรวดน้ำตอนจะนอน","neutral")],
+  c:[["ครูแค่กลัวน่ะ",2,"ข้ารู้ ข้าเลยแกล้งเปิดพัดลมให้ ฮิ ๆ … อ้าว ไม่ควรบอกเหรอ","angry_smile"],["ช่วยสอนบทที่ถูกให้ครูหน่อย",3,"ข้าเป็นผี ไม่ใช่พระ! …แต่เดี๋ยวข้าไปกระซิบข้างหูให้คืนนี้","smile"],["ห้ามแกล้งครูนะ",1,"ไม่แกล้งก็ได้… แค่เปิดพัดลมให้เย็นสบาย","neutral"]]},
+ {k:"snack",o:[TN("ขนมต้มที่ถวายเมื่อวาน… ใครทำ มะพร้าวหวานไปหน่อย แต่ข้ากินหมดนะ","smile")],
+  c:[["ชอบขนมอะไรที่สุด",2,"ขนมต้ม ข้าวต้มมัด กล้วยบวชชี… เดี๋ยว กล้วยบวชชีไม่เอา มันเหมือนกินญาติ","angry"],["ครั้งหน้าเอากล้วยทอดมาให้",-2,"……เจ้าลองเอากระดูกเจ้าไปทอดดูไหม","scary"],["แล้วน้ำแดงล่ะ",2,"น้ำแดงต้องเย็น ๆ ใส่น้ำแข็งเยอะ ๆ ผีก็ร้อนเป็นนะ","smile"]]},
+ {k:"radio",o:[TN("เมื่อคืนข้าฟังวิทยุชุมชนในครัว มีรายการเกมโชว์ คนตอบผิดข้อสองยังได้ยาหม่องกลับบ้าน ข้าหัวเราะจนต้นกล้วยสั่น","smile")],
+  c:[["ผมเคยไปออกรายการนั้นนะ",3,"จริงดิ! ครกใบที่เจ็ดมันตำเองจริงไหม! …ไม่ต้องบอก ข้าไม่อยากรู้ ข้าอยากเชื่อ","shy"],["ผีฟังวิทยุได้ด้วย?",1,"ได้สิ แต่เปลี่ยนคลื่นไม่ได้ เลยต้องฟังลูกทุ่งทั้งคืน","neutral"],["คราวหน้าผมจะโทรหาคุณเป็นตัวช่วย",2,"โทรมาสิ… ข้าไม่มีโทรศัพท์ แต่ข้าจะไปกระซิบข้างหูเจ้า","angry_smile"]]},
+ {k:"girls",o:[TN("สาว ๆ ในค่ายเจ้านี่… ข้าดูมานานแล้วนะ บางคนแอบมองเจ้าตอนซ้อมด้วย ข้าเห็นหมด","angry_smile")],
+  c:[["ใครเหรอ",1,"ข้าไม่บอกหรอก ข้าเป็นผี ไม่ใช่แม่สื่อ …แต่คนที่ผูกเชือกแดงขาวน่ะ ดูบ่อยที่สุด","smile"],["อย่าไปแกล้งพวกเธอนะ",2,"ข้าไม่แกล้ง ข้าแค่ห่มผ้าให้ตอนหลับ… บางทีก็ถักเปียให้","shy"],["คุณขี้เหงาเหรอ",3,"……เจ้านี่ถามตรงเกินไปนะ","shy"]]},
+ {k:"fear",o:[TN("รู้ไหมข้ากลัวอะไรที่สุด","neutral")],
+  c:[["เสียงสวดมนต์?",0,"ไม่หรอก ข้าชอบฟังด้วยซ้ำ ถึงครูเจ้าจะสวดเพี้ยนก็เถอะ","smile"],["ปลวก?",2,"…ใช่! มันกินต้นกล้วยข้า! ผีอะไรก็ไม่น่ากลัวเท่าปลวกฝูงใหญ่","scary"],["เลื่อยไฟฟ้า",3,"อย่าพูดคำนั้น… ข้าขนลุก ทั้งที่ข้าเป็นผีแท้ ๆ","angry"]]},
+ {k:"moon",o:[TN("คืนพระจันทร์เต็มดวง ข้าแข็งแรงที่สุด ถ้าคืนนั้นมีผีตนไหนมาเพ่นพ่าน ข้าจะเตะให้ตกทุ่งนาเลย","smile")],
+  c:[["คุณเตะเป็นด้วยเหรอ",2,"ข้าโดนนักมวยเตะมาเป็นร้อยปี ข้าจำท่าได้หมดแล้ว! จระเข้ฟาดหาง… ฟิ้ว!","angry_smile"],["มาช่วยสอนเด็ก ๆ บ้างสิ",3,"ข้าสอนได้นะ แต่เด็กจะนอนไม่หลับสามคืน","smile"],["อย่าเตะแรงนะ",1,"ไม่แรงหรอก แค่ให้จำไปจนชาติหน้า","neutral"]]},
+ {k:"slang",o:[TN("ข้าได้ยินเด็กคอร์สพูดกันว่า “ปังมาก” “ตัวแม่” …แปลว่าอะไร ข้าอยากใช้บ้าง","neutral")],
+  c:[["ตัวแม่ แปลว่าเก่งที่สุดในเรื่องนั้น",3,"งั้นข้าคือตัวแม่ผีต้นกล้วยแห่งเชียงใหม่! …พูดถูกไหม ปังไหม","smile"],["อย่าใช้เลย ไม่เหมาะกับผี",0,"เชอะ คนสมัยนี้ยังเอาผีไปทำมีมเลย ข้าก็ต้องตามให้ทัน","angry"],["ปังมาก แปลว่าดีมาก",2,"ศาลข้า… ปังมาก! ฮิ ๆ","shy"]]},
+ {k:"kicks",o:[TN("วันนี้เด็กในค่ายเตะต้นกล้วยต้นหลัง… แต่เดินมาไหว้ศาลก่อนด้วย ข้าก็เลยไม่ว่าอะไร","smile")],
+  c:[["ผมบอกทุกคนให้ขออนุญาตก่อนเตะ",3,"…ขอบใจนะ แค่ขอก่อน ข้าก็ให้ได้ทั้งกอ","shy"],["เตะต้นอื่นแทนได้ไหม",1,"เตะได้ แต่อย่าเตะต้นที่กำลังออกปลี เด็กมันจะตกใจ","neutral"],["ซื้อกระสอบทรายเพิ่มดีกว่า",2,"ดี! เอาเงินไปซื้อกระสอบ ต้นกล้วยข้าจะได้มีชีวิตที่สงบ","smile"]]}];
+const TH=[
+ {at:20,steps:()=>[N("คืนนี้คุณนั่งที่ชานศาลนานกว่าปกติ นางตานีนั่งแกว่งเท้าอยู่บนหลังคาศาล"),
+  TN("เจ้ารู้ไหม… กอกล้วยนี้ ใครเป็นคนปลูก","neutral"),MY("ไม่รู้เลย"),
+  TN("คุณปู่ของเจ้าเองแหละ ตอนเขายังหนุ่ม ยังไม่มีค่าย ไม่มีกระสอบทราย มีแต่ต้นกล้วยกับความฝัน","smile"),
+  TN("ทุกเช้าก่อนเตะ เขาจะยกมือไหว้แล้วพูดว่า ‘ขอยืมต้นนะแม่นาง วันนี้ขอเตะสามร้อยที’ แล้วตอนเย็นก็เอาน้ำมารด","shy"),
+  TN("พอเขาตายไป… ไม่มีใครขอข้าอีกเลย เตะอย่างเดียว แล้วก็เอาไปลอยน้ำ","neutral"),
+  MY("งั้นตอนที่คุณมาอำทุกคน…"),TN("ข้าแค่อยากให้มีใครจำได้ว่าที่นี่มีคนอยู่… ผีอย่างข้าก็เหงาเป็นนะ","shy"),
+  N("ลมพัดใบกล้วยไหวเบา ๆ เหมือนใครกำลังพยักหน้า"),N("💚 ความผูกพันกับนางตานีเพิ่มขึ้น")]},
+ {at:40,steps:()=>{const f=roster(G).find(x=>x.injury>0)||roster(G)[0];const nm=f?f.name:"เด็กในค่าย";return [
+  N(`คืนนั้น${nm}นอนซมด้วยพิษไข้ คุณเดินไปดูตอนดึก`),N("ข้างฟูก นางตานีนั่งพับเพียบ โบกใบตองเป็นพัดให้ช้า ๆ"),
+  TN("ชู่ว์… อย่าเสียงดัง เด็กเพิ่งหลับ","neutral"),MY("ตอนแรกคุณเป็นคนทำให้ทุกคนไข้ขึ้นนะ"),
+  TN("ก็ข้ารู้… ตอนนั้นข้าโกรธ ตอนนี้ข้าเลยมาเฝ้าใช้หนี้","shy"),TN("ไข้ลงแล้วนะ เช้านี้กินข้าวต้มได้ อย่าให้ซ้อมหนักล่ะ ไม่งั้นข้าจะมาอำเจ้าแทน","angry_smile"),
+  N(`เช้าวันต่อมา${nm}ตื่นมาสดชื่น บอกว่าฝันว่ามีผู้หญิงชุดเขียวร้องเพลงกล่อมทั้งคืน เสียงเพี้ยนนิดหน่อย`),N("💚 ความผูกพันกับนางตานีเพิ่มขึ้น")];}},
+ {at:70,steps:()=>[N("คืนลอยกระทง ทั้งค่ายไปงานที่ริมน้ำ คุณเดินกลับมาที่ศาล ถือกระทงขนมปังมาหนึ่งใบ"),
+  TN("…กระทงขนมปัง ไม่ใช่กาบกล้วย","shy"),MY("ปีนี้ผมให้ทุกคนใช้ขนมปังหมด ปลากินได้ด้วย"),
+  TN("ฮิ ๆ ๆ… เจ้านี่มันบ้าจริง ๆ","smile"),N("นางตานีลอยลงมานั่งข้างคุณ เป็นครั้งแรกที่เธอนั่งใกล้ขนาดนี้ ตัวเธอเย็นเหมือนน้ำค้างตอนเช้า"),
+  TN("ข้าเป็นผี เจ้าเป็นคน ข้าอยู่ที่นี่ไปอีกร้อยปี เจ้าอยู่ได้อีกไม่กี่สิบ","neutral"),
+  TN("แต่ข้าว่า… เราเป็นเพื่อนกันได้นะ เพื่อนที่จะคอยดูค่ายนี้ไปด้วยกัน จนกว่าเจ้าจะแก่จนเตะต้นกล้วยไม่ไหว","smile"),
+  MY("เพื่อนกันครับ"),TN("ดี! งั้นเพื่อนต้องเอาน้ำแดงมาฝากทุกวันพระ ห้ามลืม!","angry_smile"),
+  N("ไกล ๆ เสียงพลุดังขึ้นเหนือแม่น้ำ แสงสีเขียวจาง ๆ ลอยขึ้นจากกอกล้วยไปปนกับแสงพลุ"),N("💚 นางตานีเป็นเพื่อนสนิทของคุณแล้ว — เธอจะคุ้มครองค่ายแรงขึ้นอีก")]}];
+function ghTalk(){const S=ghSt(G);if(!S.shrine||G.freeUsed)return;G.freeUsed=true;S.tb=S.tb||0;S.th=S.th||0;S.tt=S.tt||[];
+  const heart=TH.find((h,i)=>i>=S.th&&S.tb>=h.at);
+  if(heart){S.th=TH.indexOf(heart)+1;S.tb=clamp(S.tb+3,0,ghCap(G));save();playScene([N("คุณเดินไปนั่งที่ศาลนางตานี"),...heart.steps()],()=>render(),{bg:"camp_night",look:"casual"});return;}
+  let pool=TT.filter(t=>!S.tt.includes(t.k));if(!pool.length){S.tt=[];pool=TT;}const T=pool[Math.floor(Math.random()*pool.length)];S.tt.push(T.k);save();
+  playScene([N("คุณเดินไปนั่งที่ศาลนางตานี จุดธูปหนึ่งดอก แสงสีเขียวค่อย ๆ ลอยลงมานั่งบนชานศาล"),...T.o,
+   {choice:T.c.map(([t,v,r,img])=>({t,fx:()=>{S.tb=clamp((S.tb||0)+2+v,0,ghCap(G));save();},then:[TN(r,img)]}))},
+   {inject:()=>[N(`💚 ความสนิทกับนางตานี ${S.tb}`)]}],()=>render(),{bg:"camp_night",look:"casual"});}
+Object.assign(ACT,{ghtalk:()=>{UI.modal=null;ghTalk();}});
+/* she sits at the end of the people list once the shrine stands */
+{const _p=peopleHTML;peopleHTML=function(){const h=_p();const S=G&&G.gh;if(!S||!S.shrine)return h;const tb=S.tb||0;
+  return h+`<div class="pcard ghcard"><img class="face" src="${ASSET+"npc_tani_face.webp"}" alt=""><div><b>นางตานี</b><small>เจ้าที่ประจำค่าย · ความสนิท ${tb}/100${S.th>=3?" · เพื่อนสนิท":""}</small></div>
+   <button class="btn sm primary" data-act="ghtalk" ${G.freeUsed?"disabled":""}>ไปนั่งคุยที่ศาล</button></div>`;};}
+
+
+/* ================= Phase 4 (v1.91.144, Man): a three-year Tani arc, then a merit-keeping loop =================
+   Year 1 after she wakes — chaos: Tani and the Lent ghosts haunt; no shrine yet; ends with the dark-moon brawl where Tani "doesn't help".
+   Year 2 — merit: Luang Pho's advice, finding the spot, the teak, Tani's test, then the shrine (฿60,000).
+   Year 3 — closeness: deeper talks, her blossom day, Loy Krathong together, the Lent truce with the four ghosts.
+   After that — a loop: keep merit up or her shrine gathers dust and she sulks (and haunts) until you make it up to her. */
+const ghYear=G=>{const S=ghSt(G);if(S.ys==null)S.ys=S.shrine?Math.max(1,(G.season||1)-1):S.wakeAbs?Math.floor((S.wakeAbs-1)/52)+1:(G.season||1);return Math.max(1,(G.season||1)-S.ys+1);};
+const pk=x=>Array.isArray(x)?x[Math.floor(Math.random()*x.length)]:x;
+const LPS=t=>({n:"npc",who:LP,img:"luangpho",t});
+
+/* --- more variety for every repeating beat --- */
+GH_OPEN.push(
+ [N("ตีสามตรง นาฬิกาในครัวเดินถอยหลังสองทีแล้วหยุดนิ่ง"),N("ผ้าห่มของคุณถูกดึงลงไปทีละนิด ทีละนิด เหมือนมีใครอยากชวนตื่น")],
+ [N("ฝนตกปรอย ๆ ทั้งคืน แต่หยดน้ำบนหน้าต่างไหลขึ้นข้างบน"),N("เงาใบกล้วยบนผนังห้องค่อย ๆ ยืดยาวจนกลายเป็นมือผู้หญิง")],
+ [N("คุณฝันว่านั่งกินข้าวเหนียวกับครูแดง ครูแดงหันมายิ้ม ใบหน้าค่อย ๆ กลายเป็นสีเขียว"),N("“ฮิ ๆ ล้อเล่น ข้าเอง” เสียงผู้หญิงดังออกมาจากปากครูแดง")],
+ [N("ลมเย็นวาบผ่านต้นคอ ทั้งที่หน้าต่างปิดสนิท พัดลมเพดานหมุนช้า ๆ ทั้งที่ไม่ได้เสียบปลั๊ก"),N("ปลายเตียงมีกาบกล้วยวางเรียงสามแผ่น เขียนด้วยดินสอพองว่า 3… 2… 1…")]);
+GH_TANI_LINE[0].push("ข้าเห็นเจ้าตอนกลางวันนะ… ใส่รองเท้าแตะเดินผ่านกอกล้วยข้า ไม่ยกมือไหว้สักคำ","คืนนี้จันทร์ยังไม่เต็มดวง แต่อารมณ์ข้าเต็มร้อย");
+GH_TANI_LINE[1].push("นักมวยเจ้าเตะต้นข้าสามร้อยที คืนนี้ข้าเอาคืนสามร้อยหนึ่งที","ครูเจ้าสวดมนต์ทุกคืน… สวด ‘ภะคะวา’ เป็น ‘ภะคะวาว’ ข้าหัวเราะจนเกือบหลุดจากต้น");
+GH_TANI_LINE[2].push("เจ้าทำบุญเยอะขึ้นนะ ข้ารู้… แต่ข้ายังต้องมาตามหน้าที่ ผีก็มีภาระงาน","ข้ามาคืนนี้… เผื่อเจ้าเหงา ไม่ใช่ข้าเหงานะ");
+const GH_SULK=["ศาลข้าฝุ่นเกาะสามนิ้ว! ขนมต้มชิ้นสุดท้ายแข็งเป็นหินแล้ว ข้างอน!","บุญค่ายเจ้าตกจนข้าหิว ผีหิวก็โหดได้นะ","ข้าไม่ได้มาอำเพราะโกรธหรอก… มาเพราะคิดถึงขนมต้มต่างหาก"];
+const MORE_W={kati:["กะทิฝันอีกแล้ว! คราวนี้ผีชุดเขียวขอแลกท่าเตะกับกะทิ กะทิสอนจระเข้ฟาดหางให้ไปแล้ว…","กะทิชนะผีเป็นครั้งที่เท่าไหร่แล้วนะ นับไม่ทัน ผู้จัดการช่วยจดให้หน่อย!"],
+ mali:["มะลิชนะค่ะ! แล้วผีเขาก็ลูบหัวมะลิก่อนไปด้วย… มะลิควรดีใจหรือกลัวคะ","มะลิฝันว่าชนะผี แล้วเลี้ยงชานมผีด้วย ผีบอกว่าหวานไป"],
+ rin:["ฉันชนะอีกแล้วค่ะ สถิติตอนนี้ชนะผีมากกว่าแพ้ น่าจะตีพิมพ์ได้ …ล้อเล่น ไม่มีวารสารไหนรับ","ในฝันฉันใช้แผนรักษาระยะ ผีปรับตัวไม่ทัน ข้อมูลดีมาก จดไว้แล้วค่ะ"],
+ ploy:["พลอยชนะ ผีถึงกับก้มหัวให้ …พลอยก็ก้มหัวคืน มารยาทค่ะ","อีกแล้วเหรอคะ… ชนะก็ชนะ พลอยขอนอนต่ออีกชั่วโมง"],
+ fah:["ฟ้าชนะผีอีกแล้ว เบื่อจัง ผีในเชียงใหม่ไม่มีตัวที่เก่งกว่านี้เหรอ","ฟ้าถ่ายรูปคู่กับผีไว้ในฝันด้วย แต่ตื่นมาแบตหมด เซ็ง"],
+ prod_B:["บันทึก: ชนะอีกครั้ง… ใบหยกเริ่มสนุกค่ะ ข้อมูลนี้ไม่ควรมีในระบบ","ใบหยกปรับอัลกอริทึมใหม่ ชนะผีภายในยกเดียว ประสิทธิภาพเพิ่ม 34 เปอร์เซ็นต์"],
+ _:["ผมชนะผีอีกแล้วครับ ตอนนี้ไม่กลัวแล้ว แค่ง่วง"]};
+const MORE_L={kati:"ฮัดชิ่ว… กะทิแพ้เพราะผีจั๊กจี้! มันขี้โกง!",mali:"มะลิไม่สบายค่ะ… ฝันว่าผีจับมะลิถักเปีย ผมพันกันทั้งคืนเลย",rin:"ฉันไข้ขึ้นค่ะ …ในฝันผีอ่านเกมฉันออก ฉันต้องดูเทปตัวเองใหม่",
+ ploy:"พลอยไม่สบายค่ะ อย่าถามว่าเพราะอะไร",fah:"ฮัดชิ่ว… ไม่ต้องสงสารฟ้า ฟ้าแค่ปล่อยไก่ในฝัน",prod_B:"…ระบบเข้าโหมดซ่อมบำรุง ใบหยกจะพักหนึ่งสัปดาห์ค่ะ",_:"ผมไข้ขึ้นครับ… ฝันว่าผีเตะเบาแต่แม่น"};
+const MORE2={kati:["เมื่อคืนกะทิต่อย{g}จนร้องขอชีวิต! …ผีมีชีวิตไหมนะ","{g}มันโกง! ลอยหนีตลอด กะทิตามไม่ทัน ฮัดชิ่ว"],mali:["มะลิชนะ{g}ค่ะ! แต่หลับตาชกตลอดเลย ไม่รู้โดนตรงไหนบ้าง","มะลิไข้ขึ้นค่ะ… {g}น่ากลัวกว่าที่คิด"],
+ rin:["{g}มีจุดอ่อนที่การ์ดซ้ายค่ะ ฉันจดไว้แล้ว","ฉันวิเคราะห์{g}ผิดค่ะ… ไข้ขึ้นด้วย สองต่อ"],ploy:["{g}ไม่ใช่คู่มือของพลอย","…{g}โชคดี พลอยยังไม่ได้ทานข้าวเย็น"],
+ fah:["{g}เหรอ ฟ้าจำชื่อไม่ได้ด้วยซ้ำ ชนะง่ายเกิน","ฟ้าไม่ได้แพ้{g}นะ ฟ้าแค่อยากพัก"],prod_B:["เพิ่ม {g} ในฐานข้อมูลเรียบร้อย ความแม่นยำในการกำจัดเพิ่มขึ้นค่ะ","ข้อผิดพลาด… {g} อยู่นอกขอบเขตการประมวลผล"],
+ _:["ผมชนะ{g}ครับ ไม่อยากเจออีกแล้ว","ผมแพ้{g}ครับ ตัวร้อนจี๋"]};
+for(const k of Object.keys(GH_MORN)){const M=GH_MORN[k];M.w=[M.w,...(MORE_W[k]||[])];M.l=[M.l,MORE_L[k]].filter(Boolean);}
+for(const k of Object.keys(GH_MORN2)){const M=GH_MORN2[k],X=MORE2[k];if(X){M.w=[M.w,X[0]];M.l=[M.l,X[1]];}}
+GH_GOPEN.krasue.push(N("ในฝัน เวทีลอยอยู่กลางอากาศ หัวผู้หญิงยิ้มหวานลอยมาเกาะเสามุมน้ำเงิน ไส้วิบวับเหมือนไฟประดับงานวัด"),N("ในฝัน หัวลอย ๆ หัวเราะคิกคักวนรอบหัวคุณสามรอบ ก่อนลงไป… ลอยอยู่ตรงมุมน้ำเงิน"));
+GH_GOPEN.krahang.push(N("ในฝัน กระด้งสองใบร่อนลงบนเวที สากตำข้าวปักอยู่กลางเวทีเหมือนธง"),N("ในฝัน ชายร่างผอมกระพือกระด้งจนฝุ่นเวทีฟุ้ง “พึ่บ! พั่บ!” เป็นการวอร์มอัพ"));
+GH_GOPEN.mabong.push(N("ในฝัน ม้าสีดำวิ่งวนรอบเวทีสามรอบ แล้วกระโดดข้ามเชือกเข้ามาตั้งการ์ด"),N("ในฝัน เสียง “ฮี้!” ดังจนเชือกเวทีสั่น ผีม้าบ้องยกขาหน้าทำท่าไหว้ครู"));
+GH_GOPEN.phiphong.push(N("ในฝัน กลิ่นปลาร้าโชยมาก่อนตัว แสงส้มลอดออกจากรูจมูกส่องเวทีเหมือนไฟฉาย"),N("ในฝัน มุมน้ำเงินมืดสนิท มีแค่จุดไฟสีส้มสองจุดกะพริบ… ไม่สิ นั่นรูจมูก"));
+const ghSight2={
+ krasue:[f=>[N("คืนนี้ดวงไฟสีม่วงลอยมาเกาะราวตากผ้าหลังค่าย ส่องผ้าขาวม้าครูแดงอย่างสนใจ"),{n:"_f",t:"ผู้จัดการ… กระสือมาเลือกเสื้อผ้าเหรอคะ"},C("ห้ามเอาผ้าขาวม้าครูไป! ผืนนั้นครูใช้มาสิบปี!"),N("เช้ามาผ้าขาวม้าครูแดงหายไป ทิ้งรอยไหม้เป็นรูปหัวใจไว้บนราวตากผ้า")],
+  f=>[N("ไฟสีม่วงลอยวนรอบกอกล้วยสามรอบ แล้วหยุดนิ่งเหมือนรอคำเชิญ"),{n:"_f",t:"ได้ยินเสียงผู้หญิงสองคนเถียงกันเรื่องที่ตากผ้าค่ะ… ผีสองตนทะเลาะกันเหรอ"},C("ปีนี้ดีขึ้นนะ อย่างน้อยเขาเถียงกันเอง ไม่มาอำเรา")]],
+ krahang:[f=>[N("กลางดึกมีกระด้งใบหนึ่งร่อนตกลงกลางลานค่าย เขียนว่า ‘ขอบคุณที่ให้ยืม’"),{n:"_f",t:"เขาคืนของด้วย… มีมารยาทกว่าคนบางคนอีกค่ะ"},C("ป้าแต๋วได้กระด้งคืนแล้ว แต่สากยังไม่คืนนะ!")],
+  f=>[N("คืนนี้เสียงพึ่บพั่บบนหลังคามาเป็นจังหวะเพลงสะระหม่า"),{n:"_f",t:"กระหังซ้อมบินตามจังหวะปี่กลองเหรอ… หรือเขาจะมาเรียนมวย"},C("ถ้าจะมาเรียนก็จ่ายค่าคอร์สด้วย คอร์สละพันห้า")]],
+ mabong:[f=>[N("คืนนี้เสียงกีบเท้าวนรอบค่ายแค่สองรอบ แล้วหยุดอยู่หน้าลานซ้อม"),{n:"_f",t:"เขามาดูเราซ้อมวิ่งหรือเปล่าคะ เมื่อเช้าเหมือนมีคนวิ่งตามหลังมาตลอด"},C("ผีม้าบ้องวิ่งเร็วนะ ถ้ามันไม่ใช่ผี ครูจะชวนมาเป็นคู่ซ้อมวิ่ง")],
+  f=>[N("รอยกีบเท้าเต็มลานซ้อมตอนเช้า เรียงเป็นตัวอักษรว่า ‘แข่งไหม’"),{n:"_f",t:"ผีท้าแข่งวิ่ง… ใครจะไปรับคะ"},C("ไม่มีใครไปทั้งนั้น! …ครูขอคิดก่อน รางวัลเท่าไหร่")]],
+ phiphong:[f=>[N("ไหปลาร้าในครัวถูกย้ายไปซ่อนบนหลังตู้ แต่เช้ามาก็ยังหายไปครึ่งไหเหมือนเดิม"),{n:"_f",t:"ผีโพงปีนตู้ได้ด้วย…"},C("ปีหน้าครูจะหมักสองไห ไหนึงให้ผี ไหนึงให้คน")],
+  f=>[N("แสงสีส้มเล็ก ๆ ลอยมาหยุดหน้าครัว ทิ้งไหปลาร้าใบจิ๋วไว้หน้าประตู"),{n:"_f",t:"เขาเอาปลาร้ามาคืน… หรือเอามาฝาก กลิ่นหอมกว่าของเราอีกค่ะ"},C("ผีโพงหมักปลาร้าเก่งกว่าครู… ครูไม่ยอม ปีหน้าแข่งกัน")]]};
+GH_ODD.push(
+ f=>[N("ป้าแต๋วเล่าว่าเห็นเงาคนเตะต้นกล้วยตอนตีสาม พอส่องไฟดู ต้นกล้วยกำลังเตะเงาคนกลับ"),C("…ป้าแต๋วดื่มเหล้าขาวไปกี่จอกครับ")],
+ f=>[N("เช้านี้รองเท้านักมวยทุกคู่ในค่ายถูกจัดเรียงหันหัวออกนอกประตู"),{n:"_f",t:"ใครจัดคะ เรียบร้อยมาก"},C("เขาว่ารองเท้าหันออกคือไล่แขก… หรือเขาแค่ขยัน")],
+ f=>[N("กระสอบทรายลูกกลางแกว่งเองเบา ๆ ทั้งคืน เหมือนมีคนชกเป็นจังหวะ"),C("ถ้าผีซ้อมด้วย ครูคิดค่าเช่าอุปกรณ์นะ")],
+ f=>[N("เช้านี้ในกระป๋องน้ำมันมวยมีกลีบดอกมะลิลอยอยู่สามกลีบ"),{n:"_f",t:"หอมดีค่ะ ใครใส่"},C("ไม่มีใครใส่… ทาไปเถอะ หอมดี")],
+ f=>[N("ทีวีในห้องพักเปิดเองตอนตีหนึ่ง เปิดช่องมวยย้อนหลังไฟต์เก่า ๆ"),C("ไฟต์นี้ครูชกเองนี่หว่า! ใครอยากดูครูสมัยหนุ่ม ยกมือ")],
+ f=>[N("หมาข้างค่ายนั่งหันหน้าเข้ากอกล้วย กระดิกหางทั้งคืน"),{n:"_f",t:"เขาเห็นใครหรือเปล่าคะ"},C("หมามันรู้ ใครใจดี มันก็กระดิกหางให้")],
+ f=>[N("ไฟในห้องน้ำกะพริบเป็นจังหวะ สั้น-ยาว-สั้น"),{n:"_f",t:"มอร์สโค้ดเหรอคะ"},C("ครูอ่านไม่ออก แต่น่าจะแปลว่า ‘เปลี่ยนหลอดได้แล้ว’")],
+ f=>[N("ใบตองห่อข้าวเหนียวทุกห่อเช้านี้ถูกพับเป็นรูปนก"),C("…ฝีมือใครก็ขอบใจ สวยดี แต่ข้าวเหนียวหายไปห่อนึงนะ")],
+ f=>[N("เด็กคอร์สเช้าบอกว่ามีพี่ผู้หญิงชุดเขียวมาช่วยจับเป้าให้ เตะแล้วมือไม่สะเทือนเลย"),C("ค่ายเราไม่มีครูผู้หญิงชุดเขียว… ช่างเถอะ ขอบใจเขาด้วย")],
+ f=>[N("เสียงกริ่งจักรยานดังหน้าค่ายตอนเที่ยงคืน ไม่มีจักรยานสักคัน"),{n:"_f",t:"ไปรษณีย์ส่งของดึกจังเลย"},C("ไปรษณีย์ไม่ส่งตอนเที่ยงคืน… ไปนอนเถอะ")],
+ f=>[N("กระจกห้องแต่งตัวมีรอยลิปสีเขียวเขียนว่า ‘ทาครีมกันแดดด้วย’"),{n:"_f",t:"ผีห่วงผิวเราด้วยเหรอคะ"},C("ผีบ้านเราใจดีนะ แค่ปากหนัก")]);
+
+/* --- Luang Pho's Lent visits change with the years --- */
+{const go=EVENTS.find(e=>e.id==="gh_lp_go"),bk=EVENTS.find(e=>e.id==="gh_lp_back");const g1=go.steps,b1=bk.steps;
+ go.steps=[{inject:G=>{const y=ghYear(G);return y<=1?g1:y===2?[N("เข้าพรรษาอีกปี หลวงพ่อยิ้มให้ตั้งแต่ไกล"),LPS("ปีนี้โยมทำบุญดีขึ้นนะ อาตมาเห็น… แต่ของไม่ดีมันยังมาอยู่ ปีที่แล้วมันจำทางได้"),C("ครูซื้อหนังสือสวดมนต์เล่มใหม่แล้วครับหลวงพ่อ ตัวหนังสือใหญ่"),LPS("ดีโยม จะได้ไม่สวดชยันโตตอนจะนอนอีก"),N("🌙 เข้าพรรษา: หลวงพ่อจำพรรษาในวัด ผีตนอื่นจะมาบ่อย")]
+   :y===3?[N("เข้าพรรษาปีนี้ หลวงพ่อแวะยืนหน้าศาลนางตานีนานกว่าทุกปี"),LPS("พรรษานี้อาตมาไม่ห่วงแล้ว ค่ายนี้มีคนเฝ้าที่ดีอยู่"),C("หลวงพ่อรู้จักเธอดีกว่าครูอีกนะครับ"),LPS("อาตมาเห็นเขามาตั้งแต่ปู่ของผู้จัดการยังหนุ่ม… ตอนนั้นเขายังยิ้มเก่ง"),N("🌙 เข้าพรรษา: ผีตนอื่นจะมาบ่อย")]
+   :[N("เข้าพรรษาอีกปีแล้ว ทั้งค่ายแห่เทียนพรรษาไปวัดเหมือนทุกปี"),LPS(pk(["บุญก็เหมือนน้ำมันมวยนะโยม ทาทุกวันถึงจะอุ่น หยุดทาเมื่อไหร่ก็เย็น","อาตมาจำพรรษาสามเดือน โยมก็รักษาบุญค่ายไว้สามเดือนนะ ของไม่ดีมันรู้ว่าช่วงนี้พระไม่ออกจากวัด","ปีนี้ช่วยเตือนครูแดงด้วย สวดมนต์ได้ แต่อย่าสวดดังเกินเที่ยงคืน ชาวบ้านเขาร้องเรียนมา"])),N("🌙 เข้าพรรษา: ผีตนอื่นจะมาบ่อย")];}}];
+ bk.steps=[{inject:G=>{const y=ghYear(G),S=ghSt(G);return y<=1?b1:[N("ออกพรรษา ตักบาตรเทโวแต่เช้า"),LPS(S.shrine?pk(["พรรษานี้ศาลข้างกอกล้วยของโยมคึกคักนะ อาตมาได้ยินเสียงหัวเราะทุกคืน","ได้ยินว่าเจ้าที่ของโยมไล่ผีโพงตกคูน้ำไปสองรอบ… ดีแล้ว ปลาร้าจะได้ไม่หาย"]):(S.merit>=50?"ออกพรรษาแล้ว อาตมาออกจากวัดได้แล้ว… อีกไม่กี่วันจะแวะไปที่ค่าย มีเรื่องกอกล้วยจะคุยด้วย":"ออกพรรษาแล้วโยม อาตมาอยากช่วยเรื่องกอกล้วยนะ แต่บุญค่ายโยมยังน้อย ทำบุญให้ถึงห้าสิบก่อน แล้วอาตมาจะไปหา")),C("ครับหลวงพ่อ")];}}];}
+
+/* --- weekly arc state --- */
+{const _w=ghWeekly;ghWeekly=function(G){const S=ghSt(G),was=S.shrineOK;_w(G);if(!S.on)return;const y=ghYear(G);
+  if(S.sq==null)S.sq=S.shrine?5:S.shrineOK>=2?1:0; /* saves from before the quest */
+  const lpOK=S.merit>=50&&(y>=3||(y===2&&G.week>GH_LENT()[1])); /* v1.91.144: Luang Pho comes once the year-2 Lent is over */
+  if(!was&&S.shrineOK&&!lpOK)S.shrineOK=0;
+  if(!S.shrineOK&&lpOK)S.shrineOK=1;
+  if(S.stage<1&&(S.wins>=2||S.haunts>=3))S.stage=1;if(S.stage<2&&S.wins>=4&&S.haunts>=5)S.stage=2;
+  if(S.shrine){S.lowW=S.merit<25?(S.lowW||0)+1:0;if(!S.sulk&&S.lowW>=3)S.sulk=1;if(S.sulk===1&&S.merit>=45)S.sulk=2;}};}
+{const _d=ghHauntDue;ghHauntDue=function(G,rng){const S=ghSt(G);if(S.on&&S.shrine&&S.sulk===1){if(gameWeek(G)-S.last<GH_CD)return false;return rng()<.45;}return _d(G,rng);};}
+/* the shrine needs the year-2 quest; the teak is a camp action */
+GH_ACT.wood={name:"สั่งไม้สักทำศาลจากช่างไม้เมืองแพร่",desc:"ขั้นที่ 2 ของเควสต์ศาลนางตานี",cost:15000,merit:3};
+CAMP_ACTIONS.gh_wood={name:GH_ACT.wood.name,desc:GH_ACT.wood.desc,cost:15000,get hidden(){return typeof G==="undefined"||!G||!ghSt(G).on||ghSt(G).sq!==2;}};
+{const A=CAMP_ACTIONS.gh_shrine;Object.defineProperty(A,"hidden",{get(){if(typeof G==="undefined"||!G)return true;const S=ghSt(G);return !S.on||S.shrine||(S.sq||0)<4;}});}
+{const _d=doCampAction;doCampAction=function(G,k){const n=_d(G,k);if(n!=null&&k==="gh_wood"){const S=ghSt(G);S.sq=3;S.sqAbs=gameWeek(G);save();return "ช่างไม้แพร่ส่งไม้สักมาทั้งคันรถ ครูแดงต่อราคาจนช่างเกือบร้องไห้ · ขั้นต่อไป: นางตานีจะมาทดสอบใจคุณในฝัน";}return n;};}
+
+/* --- a generic dream duel for the big nights --- */
+function ghDuel(o,cb){const f=G.F[o.fid];const S=ghSt(G),save0=S.merit;if(o.adj)S.merit=clamp(S.merit-(o.adj*20),0,GH_MAX);const qid=ghFoe(G,o.kind,f);S.merit=save0;
+  const a=o.tani?ghAlly(G,f):f.id,clean=()=>{delete G.F[qid];if(o.tani)delete G.F[a];};
+  if(!o.live){const F=quickFight(G.F[a],G.F[qid],(G.seed^0x5ee)+gameWeek(G)*17+o.kind.length,o.rounds||GH_ROUNDS);clean();cb(dmWinFrom(F)==="A");return;}
+  const bk={id:"bduel"+gameWeek(G)+o.kind,a,b:qid,week:G.week,tier:"dream",rounds:o.rounds||GH_ROUNDS,ev:1,dream:1,ctrl:ghCtrl(G,o.tani?1:0),waiDone:true,bg:"bg_dream.webp"};ghCtrlToast(bk);
+  try{document.body.classList.add("dreamfx");}catch(e){}openFight2(bk,()=>{try{document.body.classList.remove("dreamfx");}catch(e){}const F=LASTF;clean();cb(!!(F&&F.result&&F.result.win==="A"));});}
+const CHOOSE=(t1,t2)=>({choice:[{t:t1,fx:()=>{UI.ghLive=1;}},{t:t2,fx:()=>{UI.ghLive=0;}}]});
+const MORNING=()=>({n:"nar",t:"— เช้าวันต่อมา —",bg:"camp",show:[]});
+
+/* --- story beats across the three years (weekly extras) --- */
+{const _s=ghStory;ghStory=function(done){const S=ghSt(G);if(!S.on)return false;const y=ghYear(G),L=GH_LENT(),R=roster(G).filter(f=>!f.injury);
+  /* year 1 finale: the dark-moon brawl after Lent */
+  if(!S.f1&&!S.shrine&&S.haunts>=2&&G.week>L[1]&&(y>=2||Object.keys(S.ogSeen||{}).length>=1)&&R.length){S.f1=1;save();const f=ghPickFighter(G)||R[0];
+    ghPlay([N("คืนเดือนดับหลังออกพรรษา ไฟทั้งค่ายดับพร้อมกันตอนเที่ยงคืน"),{n:"nar",t:"ในฝัน ทั้งค่ายยืนอยู่บนเวทีต้นกล้วย รอบเวทีมีแสงม่วง แสงส้ม เสียงกีบเท้า และเสียงพึ่บพั่บ… ผีทั้งสี่ตนมากันพร้อมหน้า",bg:"dream"},
+     {n:"npc",who:"ผีม้าบ้อง",t:"ฮี้! ค่ายนี้บุญเยอะเกินไปแล้ว พวกข้าจะมาเหยียบให้แบนทั้งค่าย!"},TN("…ใครจะเหยียบอะไรนะ","scary"),
+     N("แสงเขียวพุ่งลงมาขวางกลางเวที นางตานียืนกอดอก ผมยาวสยายเต็มเวที"),TN("ที่ตรงนี้ข้าจองไว้อำคนเดียว! พวกบ้านนอกไปอำที่อื่น!","angry"),
+     MY("(…เธอกำลังปกป้องเราเหรอ)"),TN(`ไม่ได้ปกป้อง! ข้าแค่หวงที่! …${f.name} ข้าจัดการตัวเล็ก ๆ เอง เจ้าเอาเจ้าม้าบ้าตัวนั้นไป`,"angry_smile"),
+     CHOOSE(`เชียร์${f.name}สู้กับผีม้าบ้อง (ชกในฝัน)`,"ท่องอิติปิโส ให้ผลออกเอง")],()=>{const live=UI.ghLive;UI.ghLive=null;
+      ghDuel({fid:f.id,kind:"mabong",adj:.4,live},win=>{S.stage=Math.max(S.stage,2);save();
+        ghPlay([N(win?"ผีม้าบ้องวิ่งหนีออกนอกค่าย ร้องฮี้ไปตลอดทาง ผีอีกสามตนแตกฮือตามไป":"ผีม้าบ้องถีบนักมวยกระเด็น แต่นางตานีพุ่งเข้าไปฟาดกาบกล้วยจนมันวิ่งหนี"),
+          TN(win?"ฮึ… พอใช้ได้":"เห็นไหม ไม่มีข้าพวกเจ้าแย่แน่",win?"angry_smile":"angry"),
+          TN("อย่าคิดว่าข้าช่วยนะ… แต่ถ้าปีหน้าพวกเจ้าทำบุญดีพอ ข้าอาจจะคิดเรื่องย้ายไปอยู่ที่ที่มีหลังคา","shy"),
+          GMOFF(),MORNING(),C("เมื่อคืนครูฝันว่านางตานีช่วยเรา… ครูว่าปีหน้าเราต้องทำบุญจริงจังแล้ว"),
+          N("📜 ปีแรกกับนางตานีจบแล้ว — ปีหน้า: ผ่านพรรษาปีที่สองไปให้ได้ ถ้าบุญค่ายถึง 50 หลังออกพรรษา หลวงพ่อจะมาช่วยเรื่องศาล")],done,{bg:"dream",look:"casual"});});},{bg:"dream_room",look:"casual"});return true;}
+  /* year 2: the shrine quest — Luang Pho (old beat, now sq=1), the spot, the teak (camp action), Tani's test */
+  if(S.sq===1&&gameWeek(G)-(S.sqAbs||0)>=1){S.sq=2;S.sqAbs=gameWeek(G);save();
+    playScene([N("ครูแดงถือตลับเมตรเดินวนรอบค่ายตั้งแต่เช้า จะหาที่ตั้งศาล"),C("ผู้จัดการว่าตรงไหนดี ครูว่าต้องถามเจ้าของบ้านด้วย…"),
+     {choice:[{t:"ข้างกอกล้วย ใต้ต้นที่ใหญ่ที่สุด",then:[N("ใบกล้วยไหวเบา ๆ ทั้งกอ ทั้งที่ไม่มีลม"),C("…ครูว่าเขาพยักหน้านะ")]},
+      {t:"ข้างเวทีมวย จะได้ดูไฟต์ทุกวัน",then:[N("ตลับเมตรของครูแดงม้วนกลับเองดังแปะ หนีบนิ้วครูเต็ม ๆ"),C("โอ๊ย! …ไม่เอาเวทีก็ได้ ข้างกอกล้วยแล้วกัน")]},
+      {t:"ข้างครัว ของถวายจะได้ร้อน ๆ",then:[N("กลิ่นกล้วยทอดจากครัวโชยมา แล้วกระทะก็คว่ำเองหนึ่งใบ"),C("…ข้างครัวมีกล้วยทอด เขาคงไม่ปลื้ม ข้างกอกล้วยแล้วกัน")]}]},
+     N("🏮 เควสต์ศาลนางตานี: ได้ที่ตั้งศาลแล้ว — ขั้นต่อไป สั่งไม้สักจากแพร่ (กิจกรรมค่าย)")],done,{bg:"camp",look:"casual"});return true;}
+  if(S.sq===3&&gameWeek(G)-(S.sqAbs||0)>=1){S.sqAbs=gameWeek(G);let ok=0;const Q=(_,o)=>({choice:o.map(([t,good,reply,img])=>({t,fx:()=>{if(good)ok++;},then:[TN(reply,img)]}))});save();
+    ghPlay([N("คืนที่ไม้สักมาถึงค่าย คุณฝันเห็นนางตานีนั่งไขว่ห้างอยู่บนกองไม้"),TN("จะสร้างบ้านให้ข้าเหรอ… ข้าต้องรู้ก่อนว่าเจ้ารู้จักข้าแค่ไหน ตอบมาสามข้อ","angry_smile"),
+     TN("ข้อหนึ่ง ของถวายที่ข้าชอบที่สุดคืออะไร","neutral"),Q(0,[["ขนมต้ม",1,"ถูก… มะพร้าวต้องหวานน้อยนะ","smile"],["กล้วยทอด",0,"……เจ้าอยากโดนอำอีกสามปีใช่ไหม","scary"],["พิซซ่า",0,"พิซซ่าคืออะไร… ฟังดูไม่ใช่ของผี","angry"]]),
+     TN("ข้อสอง ผ้าที่ควรผูกต้นข้า","neutral"),Q(1,[["ผ้าแพรสามสี",1,"ใช่… สีเขียว เหลือง ชมพู สวยที่สุด","shy"],["ผ้าขาวม้าครูแดง",0,"ผ้าผืนนั้นกลิ่นน้ำมันมวยสิบปี ไม่เอา!","angry"],["ริบบิ้นสีชมพูลายหัวใจ",0,"…ไม่เลวนะ แต่ไม่ใช่","angry_smile"]]),
+     TN("ข้อสุดท้าย… ทำไมเจ้าถึงอยากตั้งศาลให้ข้า","neutral"),Q(2,[["อยากขอบคุณ และขอโทษเรื่องต้นกล้วย",1,"…ตอบดีกว่าที่ข้าคิดไว้","shy"],["อยากได้เลขเด็ด",0,"ข้ารู้อยู่แล้ว! คนทั้งหมู่บ้านก็คิดแบบนี้","angry"],["เพราะกลัวผี",0,"กลัวแล้วสร้างบ้านให้ผีเนี่ยนะ… ตรรกะคนนี่แปลกจริง","angry_smile"]]),
+     {inject:()=>{if(ok>=2){S.sq=4;save();return [TN(`ถูก ${ok} ข้อ… ผ่าน! สร้างศาลให้ข้าได้ แต่ทาสีเขียวนะ ห้ามสีอื่น`,"smile"),GMOFF(),N("🏮 ผ่านบททดสอบ — ปลดล็อก “ตั้งศาลนางตานี” ในกิจกรรมค่าย")];}
+       return [TN(`ถูกแค่ ${ok} ข้อ… ไปทำความรู้จักข้าให้มากกว่านี้ แล้วค่อยมาใหม่`,"angry"),GMOFF(),N("นางตานีจะมาทดสอบอีกครั้งในอีกไม่กี่สัปดาห์")];}}],done,{bg:"dream",look:"casual"});
+    S.sqAbs=gameWeek(G)+1;return true;} /* sq stays 3 unless she passes you inside the scene; a retry comes two weeks on */
+  /* the shrine is neglected: she sulks, then makes up once merit comes back */
+  if(S.sulk===2){S.sulk=0;S.lowW=0;save();playScene([N("ฝุ่นบนศาลถูกเช็ดจนเงา ขนมต้มชุดใหม่ยังอุ่น น้ำแดงใส่น้ำแข็งเต็มแก้ว"),TN("…ฮึ ค่อยยังชั่ว","angry_smile"),TN("ไม่ได้หายงอนเพราะขนมนะ หายงอนเพราะเจ้ากลับมาจำข้าได้","shy"),N("🏮 นางตานีหายงอนแล้ว — กลับมาคุ้มครองค่ายเหมือนเดิม")],done,{bg:"camp_night",look:"casual"});return true;}
+  /* year 3 finale: the Lent truce — your fighter, then Tani against the phi phong elder */
+  if(!S.f3&&S.shrine&&y>=3&&G.week>L[1]&&R.length){S.f3=1;S.f3Abs=gameWeek(G);save();const f=ghPickFighter(G)||R[0];let w1=false;
+    ghPlay([N("ออกพรรษาปีที่สาม คืนนั้นลมแรงผิดปกติ ใบกล้วยทั้งกอส่งเสียงเหมือนคนกระซิบพร้อมกันเป็นร้อยคน"),{n:"nar",t:"ในฝัน ผีทั้งสี่ตนยืนเรียงหน้ากระดานบนเวที ตรงกลางคือผีโพงตัวใหญ่กว่าทุกครั้ง แสงจากจมูกสว่างจนแสบตา",bg:"dream"},
+     {n:"npc",who:"ผีโพงผู้เฒ่า",t:"ฟุดฟิด… สามปีแล้วที่ค่ายนี้ทำให้พวกข้าอดปลาร้า คืนนี้ตัดสินกัน ชนะสองไฟต์ พวกข้าจะไม่มาวุ่นวายอีก"},
+     TN("รับคำท้า! ไฟต์แรกให้นักมวยของบ้านนี้ ไฟต์หลังข้าเอง","angry"),MY("(ครั้งนี้ไม่ต้องให้ใครบอก… เชียร์สุดเสียง)"),
+     CHOOSE(`เชียร์${f.name}สู้กับกระสือ (ชกในฝัน)`,"ท่องอิติปิโส ให้ผลออกเอง")],()=>{const live=UI.ghLive;UI.ghLive=null;
+      ghDuel({fid:f.id,kind:"krasue",adj:.6,live},win=>{w1=win;
+        ghPlay([N(win?`${f.name}ซัดกระสือหมุนติ้วลอยหายไปเหนือทุ่งนา`:`กระสือหัวเราะคิกคัก ${f.name}ทรุดลงกลางเวที`),TN(win?"เก่งมาก! ทีนี้ตาข้า":"ไม่เป็นไร… ไฟต์หลังข้าเอาคืนให้",win?"smile":"angry"),
+          CHOOSE("เชียร์นางตานีสู้กับผีโพงผู้เฒ่า (ชกในฝัน)","ท่องอิติปิโส ให้ผลออกเอง")],()=>{const live2=UI.ghLive;UI.ghLive=null;
+          ghDuel({fid:f.id,kind:"phiphong",adj:1,live:live2,tani:1},win2=>{const both=w1&&win2;S.truce=win2?1:0;S.tb=clamp((S.tb||0)+(win2?6:2),0,ghCap(G));save();
+            ghPlay([N(win2?"นางตานีหมุนตัวฟาดกาบกล้วยเต็มแรง ผีโพงผู้เฒ่ากลิ้งตกคูน้ำ แสงส้มดับวูบ":"ผีโพงผู้เฒ่าผลักนางตานีถอยไปถึงเสามุม แต่เธอยังยืนอยู่"),
+              {n:"npc",who:"ผีโพงผู้เฒ่า",t:win2?"ฟุดฟิด… ยอมแล้ว ๆ สัญญาก็สัญญา พวกข้าจะแวะมาแค่นาน ๆ ที …ขอปลาร้าไว้หน้าครัวสักถ้วยก็พอ":"ฟุดฟิด… เจ้าที่บ้านนี้ใจสู้ ข้าไม่ยอมแพ้หรอก แต่ข้าจะลดความถี่ให้นิดหน่อย"},
+              TN(win2?"ได้ยินไหม! บ้านนี้มีเจ้าที่!":"…ปีหน้าข้าจะซ้อมเพิ่ม",win2?"angry_smile":"angry"),
+              TN("สามปีแล้วนะ ที่เจ้ามาเตะ มาวุ่นวาย มาทำบุญ มาคุยกับข้า… ข้าไม่เคยมีปีไหนที่ไม่เหงาเท่านี้มาก่อน","shy"),
+              GMOFF(),MORNING(),C(both?"เมื่อคืนครูฝันว่าเราชนะผีสองไฟต์รวด… ครูจะจดลงสมุดสถิติหน้าสุดท้าย หน้าที่ไม่มีใครเห็น":"เมื่อคืนครูฝันแปลก ๆ อีกแล้ว… แต่ตื่นมารู้สึกเบาใจยังไงไม่รู้"),
+              N("📜 เรื่องของนางตานีครบสามปีแล้ว — จากนี้ดูแลบุญค่ายไว้ ถ้าบุญตก ศาลจะฝุ่นเกาะและเธอจะงอน ผีช่วงพรรษาจะยังแวะมาเป็นระยะ")],done,{bg:"dream",look:"casual"});});},{bg:"dream",look:"casual"});});},{bg:"dream_room",look:"casual"});return true;}
+  return _s(done);};}
+/* once the truce stands, the Lent ghosts drop by less */
+{const _o=ghOtherDue;ghOtherDue=function(G,rng){const S=ghSt(G);if(S.truce&&rng()<.3)return null;if(S.sulk===1)return _o(G,()=>rng()*.8);return _o(G,rng);};}
+
+/* --- year-by-year sightings and the haunt lines while she sulks --- */
+{const _h=ghHaunt;ghHaunt=function(done){const S=ghSt(G);if(S.shrine&&S.sulk===1){const keep=GH_TANI_LINE[2];GH_TANI_LINE[2]=GH_SULK;const st=S.stage;S.stage=2;try{_h(done);}finally{GH_TANI_LINE[2]=keep;S.stage=st;}return;}_h(done);};}
+{const s0=Object.assign({},ghSight);for(const k of Object.keys(ghSight))ghSight[k]=f=>{const y=ghYear(G);return y<=1?s0[k](f):ghSight2[k][Math.min(y,3)-2](f);};}
+
+/* --- Tani's year-3 talks, hearts gated by year, and her yearly days --- */
+const TT3=[
+ {k:"fights",o:[TN("ร้อยปีก่อน แถวนี้มีงานวัดทุกเดือน คนชกมวยคาดเชือกกันกลางลานวัด ข้าดูจากกอกล้วยทุกไฟต์","smile")],
+  c:[["มวยสมัยนั้นต่างจากตอนนี้ไหม",3,"ไม่มียก ไม่มีนวม ชกจนอีกฝ่ายยอม แล้วก็ไปกินข้าวด้วยกัน… ข้าชอบตรงนั้นที่สุด","smile"],["ใครเก่งที่สุดที่คุณเคยเห็น",2,"มีคนนึงเตะต้นข้าหักครึ่งต้น ข้าโกรธมาก …แต่ก็ยอมรับว่าเก่ง","angry_smile"],["คุณชอบมวยด้วยเหรอ",1,"ข้าเกิดมาข้างเวทีนะ จะไม่ชอบได้ยังไง","neutral"]]},
+ {k:"name",o:[TN("ข้าไม่มีชื่อจริงหรอก ‘นางตานี’ คือชื่อที่คนเรียก… ถ้าเจ้าจะตั้งชื่อให้ข้าสักชื่อ จะชื่ออะไร","shy")],
+  c:[["ตานีก็เพราะดีแล้ว",3,"…งั้นข้าจะชอบชื่อนี้ให้มากกว่าเดิม","shy"],["เขียวมรกต",1,"ฟังเหมือนร้านทองหน้าตลาด แต่ก็… ไม่เลว","angry_smile"],["น้องกล้วย",-1,"……เจ้าอยากให้ข้ากลับไปอำไหม","scary"]]},
+ {k:"future",o:[TN("เมื่อวานมีคนใส่สูทมาวัดที่ดินข้างค่าย… เขาจะตัดกอกล้วยไหม","neutral")],
+  c:[["ผมจะไม่ให้ใครตัดกอกล้วยนี้",4,"…เจ้าพูดเหมือนปู่เจ้าเลย คำเดียวกันทุกคำ","shy"],["เขาแค่มาวัดที่ข้าง ๆ",1,"ข้าหวงนะ แค่ข้าง ๆ ก็หวง","angry"],["ถ้าตัด เราย้ายศาลไปด้วยกัน",3,"ย้ายบ้านกับเจ้าเหรอ… ฟังดูไม่แย่","smile"]]},
+ {k:"jealous",o:[TN("ข้าไม่หึงหรอก ผีไม่หึง… แค่อยากรู้ว่าช่วงนี้เจ้าไปเที่ยวกับใครบ่อย","angry_smile")],
+  c:[["ก็เด็ก ๆ ในค่ายนั่นแหละ",2,"ดีแล้ว ดูแลพวกเขาให้ดี ข้าดูอยู่นะ","neutral"],["มานั่งคุยกับคุณบ่อยที่สุด",3,"…ปากหวานอีกแล้ว แต่ก็จริงนะ","shy"],["ทำไมอยากรู้ล่ะ",1,"ข้าเป็นเจ้าที่! เจ้าที่ต้องรู้ทุกเรื่องในบ้าน!","angry"]]},
+ {k:"sleep",o:[TN("ผีไม่ได้นอนนะ แต่บางคืนข้าหลับตาฟังเสียงพวกเจ้ากรน… ครูเจ้ากรนเป็นเพลงลูกทุ่ง","smile")],
+  c:[["แล้วคุณฝันได้ไหม",3,"ข้าฝันตอนกลางวัน… ฝันว่าได้ลองเตะกระสอบทรายบ้าง","smile"],["ใครกรนดังสุดในค่าย",2,"ครูแดง รองลงมาคือคนที่ผูกเชือกแดงขาว …อย่าบอกเธอนะ","angry_smile"],["ไม่เหงาเหรอกลางคืน",2,"เหงา… แต่ตอนนี้มีเสียงกรนให้นับ เลยไม่เหงาเท่าเดิม","shy"]]},
+ {k:"grandpa",o:[TN("ปู่ของเจ้าน่ะ ตอนหนุ่มแพ้มวยงานวัดครั้งนึง เดินมาร้องไห้ข้างกอกล้วยข้าทั้งคืน","neutral")],
+  c:[["แล้วคุณทำยังไง",3,"ข้าเอาใบกล้วยห่มให้… วันต่อมาเขาเตะต้นข้าห้าร้อยที ข้ายอมให้เตะ","shy"],["ปู่ผมขี้แยด้วยเหรอ",1,"ทุกคนขี้แยตอนแพ้ เจ้าก็ด้วย ข้าเห็น","angry_smile"],["ขอบคุณที่ดูแลปู่นะ",4,"…ข้าดูแลทุกคนในบ้านนี้แหละ รวมถึงเจ้าด้วย","smile"]]},
+ {k:"scared",o:[TN("ตอนนี้เจ้ายังกลัวข้าอยู่ไหม บอกตรง ๆ","neutral")],
+  c:[["ไม่กลัวแล้ว",2,"ดี… แต่อย่าลืมว่าข้ายังอำได้นะ","angry_smile"],["กลัวนิดนึงตอนตีสาม",3,"ฮิ ๆ ตีสามข้าก็กลัวตัวเองนิดนึง","smile"],["กลัวว่าวันนึงคุณจะหายไป",4,"……ข้าไม่ไปไหนหรอก ตราบใดที่ยังมีคนจำข้าได้","shy"]]},
+ {k:"promise",o:[TN("สัญญากับข้าข้อนึงได้ไหม","neutral")],
+  c:[["สัญญาอะไรก็ได้",3,"เอาน้ำแดงมาทุกวันพระ แล้วบอกเด็ก ๆ ให้ไหว้ก่อนเตะ… แค่นั้น ง่ายใช่ไหม","smile"],["ขึ้นอยู่กับว่าสัญญาอะไร",1,"ระวังตัวแบบนี้ ข้าชอบ","angry_smile"],["ถ้าเป็นเรื่องเลขหวยไม่สัญญานะ",2,"ฮึ! ข้าไม่ได้จะขอเรื่องนั้น… แต่เดี๋ยวบอกใบ้ให้ก็ได้","shy"]]}];
+for(const t of TT3)t.y=3;TT.push(...TT3);
+TH[0].need=G=>!!ghSt(G).shrine;TH[1].need=G=>ghYear(G)>=3;TH[1].at=35;TH.splice(2,1); /* the third heart now plays on Loy Krathong night */
+{const _t=ghTalk;ghTalk=function(){const S=ghSt(G),y=ghYear(G),keepTT=TT.slice(),keepTH=TH.slice();
+  const tt=TT.filter(t=>(t.y||2)<=y),th=TH.map(h=>h.need&&!h.need(G)?{...h,at:999}:h);TT.length=0;TT.push(...tt);TH.length=0;TH.push(...th);
+  try{_t();}finally{TT.length=0;TT.push(...keepTT);TH.length=0;TH.push(...keepTH);}};}
+const GH_SONG=()=>[ghWk(12,3),ghWk(16,3)],GH_BLOSSOM=()=>[ghWk(10,7),ghWk(17,7)],GH_LOY=()=>[ghWk(20,10),ghWk(28,10)];
+EVENTS.push(
+ {id:"gh_songkran",annual:true,look:"casual",bg:"camp",pri:2,when:G=>{const S=ghSt(G);return S.on&&S.shrine&&ghYear(G)>=2&&ghIn(G,GH_SONG());},steps:[{inject:G=>{const S=ghSt(G),first=!S.songN;S.songN=(S.songN||0)+1;S.merit=clamp(S.merit+5,0,GH_MAX);S.tb=clamp((S.tb||0)+2,0,ghCap(G));
+   return first?[N("สงกรานต์ ทั้งค่ายเอาน้ำอบไทยมารดน้ำศาลนางตานี ครูแดงสรงน้ำช้า ๆ อย่างตั้งใจ"),N("แล้วกะทิก็สาดน้ำทั้งขันใส่ศาล… ใส่ต้นกล้วย… ใส่ครูแดง"),TN("ฮิ ๆ ๆ ๆ! เย็นดี! อีกขัน!","smile"),C("ทำไมครูรู้สึกว่ามีคนสาดน้ำกลับมาจากกอกล้วย…"),N("🪷 บุญค่าย +5 · ความสนิทกับนางตานี +2")]
+    :[N("สงกรานต์อีกปี ทั้งค่ายรดน้ำศาลนางตานีเหมือนทุกปี"),TN(pk(["ปีนี้ใส่น้ำอบเยอะหน่อยนะ ข้าชอบกลิ่นนี้","อย่าสาดแรงเหมือนปีที่แล้ว ผ้าแพรข้าเปียกสามวัน","สงกรานต์ทีไร ข้ารู้สึกเหมือนได้อาบน้ำครั้งเดียวของปี… ล้อเล่น"]),"smile"),N("🪷 บุญค่าย +5")];}}]},
+ {id:"gh_blossom",annual:true,look:"casual",bg:"camp_night",pri:2,when:G=>{const S=ghSt(G);return S.on&&S.shrine&&ghYear(G)>=3&&ghIn(G,GH_BLOSSOM());},steps:[{inject:G=>{const S=ghSt(G),first=!S.bloN;S.bloN=(S.bloN||0)+1;S.tb=clamp((S.tb||0)+3,0,ghCap(G));
+   return first?[N("ต้นกล้วยข้างศาลออกปลีสีม่วงแดงต้นแรกของปี ครูแดงบอกว่าเป็นมงคล"),TN("…วันนี้วันเกิดข้า ทุกปีที่ปลีแรกออก ข้าจะนับว่าข้าอายุเพิ่มหนึ่งปี","shy"),MY("แล้วตอนนี้อายุเท่าไหร่"),TN("ถามอายุผู้หญิง… ต่อให้เป็นผีก็เสียมารยาทนะ!","angry"),
+     N("คืนนั้นทั้งค่ายจุดเทียนเล่มเล็กรอบศาล มะลิทำขนมต้มใส่ถาด กะทิร้องเพลงวันเกิดผิดคีย์ทั้งเพลง"),TN("…ขอบใจนะ ทุกคน","smile"),N("💚 ความสนิทกับนางตานี +3")]
+    :[N("ปลีกล้วยต้นแรกของปีออกอีกแล้ว วันเกิดนางตานีวนมาอีกปี"),TN(pk(["ปีนี้ขนมต้มหวานพอดี ข้าให้ผ่าน","ข้าแก่ขึ้นอีกปีแล้ว… แต่ไม่ต้องนับนะ!","เทียนปีนี้เยอะกว่าปีที่แล้ว ข้าเห็นนะ ข้านับ"]),"smile"),N("💚 ความสนิทกับนางตานี +3")];}}]},
+ {id:"gh_loy",annual:true,look:"casual",bg:"camp_night",pri:3,when:G=>{const S=ghSt(G);return S.on&&S.shrine&&ghYear(G)>=3&&ghIn(G,GH_LOY());},steps:[{inject:G=>{const S=ghSt(G);
+   if(!S.loyHeart&&(S.tb||0)>=55){S.loyHeart=1;S.th=Math.max(S.th||0,3);S.tb=clamp(S.tb+5,0,ghCap(G));return [GMON(),N("คืนลอยกระทง ทั้งค่ายไปงานที่ริมน้ำ คุณเดินกลับมาที่ศาล ถือกระทงขนมปังมาหนึ่งใบ"),
+     TN("…กระทงขนมปัง ไม่ใช่กาบกล้วย","shy"),MY("ปีนี้ผมให้ทุกคนใช้ขนมปังหมด ปลากินได้ด้วย"),TN("ฮิ ๆ ๆ… เจ้านี่มันบ้าจริง ๆ","smile"),
+     N("นางตานีลอยลงมานั่งข้างคุณ เป็นครั้งแรกที่เธอนั่งใกล้ขนาดนี้ ตัวเธอเย็นเหมือนน้ำค้างตอนเช้า"),TN("ข้าเป็นผี เจ้าเป็นคน ข้าอยู่ที่นี่ไปอีกร้อยปี เจ้าอยู่ได้อีกไม่กี่สิบ","neutral"),
+     TN("แต่ข้าว่า… เราเป็นเพื่อนกันได้นะ เพื่อนที่จะคอยดูค่ายนี้ไปด้วยกัน จนกว่าเจ้าจะแก่จนเตะต้นกล้วยไม่ไหว","smile"),MY("เพื่อนกันครับ"),
+     TN("ดี! งั้นเพื่อนต้องเอาน้ำแดงมาฝากทุกวันพระ ห้ามลืม!","angry_smile"),N("ไกล ๆ เสียงพลุดังขึ้นเหนือแม่น้ำ แสงสีเขียวจาง ๆ ลอยขึ้นจากกอกล้วยไปปนกับแสงพลุ"),GMOFF(),N("💚 นางตานีเป็นเพื่อนสนิทของคุณแล้ว — เธอจะคุ้มครองค่ายแรงขึ้นอีก")];}
+   return [N("คืนลอยกระทง ทุกคนลอยกระทงขนมปัง ไม่มีใครแตะกาบกล้วยสักใบ"),TN(pk(["ปีนี้กระทงขนมปังของกะทิจมเร็วสุด ฮิ ๆ","ปลาในคลองอ้วนขึ้นทุกปีเพราะค่ายเจ้านะ","ข้าลอยกระทงด้วยนะปีนี้ …ไม่บอกหรอกว่าใบไหน"]),"smile")];}}]});
+
+
+/* ================= Phase 5 (v1.91.144, Man): a side story that guides the player and never crowds the main game =================
+   - ghost scenes of every kind at most once every 3 weeks, after the main quests
+   - fevers capped per season; Kru Daeng nudges a player who lets merit sink
+   - closeness capped by year (the friendship belongs to year 3)
+   - with merit (or the shrine) you command your fighter's corner in a dream; from heart 2 you command Tani's
+   - after the story, Tani now and then brings a wandering ghost to fight; offerings at her card like gifts */
+const GH_GAP=3,GH_FEVER_MAX=6,GH_ROUNDS=3; /* v1.91.144 (Man): dream fights go three rounds */
+const ghCapY=G=>{const y=ghYear(G);return y>=3?100:y===2?40:20;},ghCap=G=>Math.max(ghCapY(G),ghSt(G).tb||0); /* never takes back closeness an older save already has */
+const ghCtrl=(G,tani)=>{const S=ghSt(G);return tani?(S.th||0)>=2:(S.merit>=60||!!S.shrine);};
+const ghCtrlToast=bk=>{try{if(bk.ctrl)setTimeout(()=>toast(bk.a==="q_tani_ally"?"💚 นางตานีฟังคุณแล้ว — สั่งมุมให้เธอได้เต็มที่":"🪷 บุญค่ายแรงพอ คุณขยับตัวได้ในฝัน — สั่งมุมได้เต็มที่"),400);}catch(e){}};
+
+/* what to do next — shown on the merit bar, in the help and in Kru Daeng's tips */
+function ghGoal(G){const S=ghSt(G),y=ghYear(G);if(!S.on)return "";
+  if(S.shrine&&S.sulk===1)return "นางตานีงอน ศาลฝุ่นเกาะ — ทำบุญให้บุญค่ายกลับไปถึง 45";
+  if(y<=1)return S.f1?"ปีหน้า: ผ่านพรรษาไปให้ได้ บุญถึง 50 หลังออกพรรษา หลวงพ่อจะมาเรื่องศาล":"ปีแรก: ทำบุญให้บุญค่ายสูงไว้ ผีจะมาน้อยลง นักมวยไม่ค่อยไข้";
+  if(!S.shrine){if(!S.sq)return y===2&&G.week<=GH_LENT()[1]?"รอออกพรรษา แล้วรักษาบุญค่ายให้ถึง 50 — หลวงพ่อจะมาแนะนำเรื่องศาล":"ทำบุญให้บุญค่ายถึง 50 — หลวงพ่อจะมาแนะนำเรื่องศาล";
+    return ["","รอครูแดงหาที่ตั้งศาล (สัปดาห์หน้า)","สั่งไม้สักจากแพร่ — ในกิจกรรมค่าย","รอนางตานีมาทดสอบในฝัน","ตั้งศาลนางตานี ฿60,000 — ในกิจกรรมค่าย"][S.sq]||"";}
+  if(y===2)return "ไปนั่งคุยหรือถวายของที่ศาล — แท็บตัวละคร (ปีนี้ความสนิทขึ้นได้ถึง 40)";
+  if(!S.f3)return "ปีที่สาม: คุยกับนางตานีให้สนิท ลอยกระทงด้วยกัน และเตรียมรับคำท้าหลังออกพรรษา";
+  return "รักษาบุญค่ายไว้ไม่ให้ต่ำกว่า 25 — ไม่งั้นศาลฝุ่นเกาะ นางตานีงอน";}
+const GH_HELP=G=>{const S=ghSt(G);return [N("🪷 บุญค่ายคืออะไร"),
+  N(`บุญค่ายตอนนี้ ${S.merit}/100 · ดูได้ที่หน้าแรก (ปุ่มกิจกรรมค่าย) และบนรายการกิจกรรมค่าย ถ้าสัปดาห์ไหนไม่ได้ทำบุญเลย บุญจะลดลง 3`),
+  N("บุญสูง: ผีมาน้อย ผีอ่อนลง นักมวยไม่ค่อยไข้ · บุญ 60 ขึ้นไป สั่งมุมในไฟต์ฝันได้เอง · บุญต่ำกว่า 25: ผีมาบ่อย ผีแรง ไข้นานขึ้น"),
+  N("ทำบุญได้จาก “กิจกรรมค่าย” (สัปดาห์ละหนึ่งอย่าง): ตักบาตรเช้า +6 · ไหว้ครู +10 · ถวายของที่ศาล +4 · ผ้าป่า +12 (ทุก 6 สัปดาห์) · ทำบุญใหญ่ +16 · บวชเณรภาคฤดูร้อน +24 (เมษายน) · ทอดกฐิน +30 (หลังออกพรรษา)"),
+  N("ช่วงเข้าพรรษา (ปลายกรกฎาคม–ปลายตุลาคม) หลวงพ่อจำพรรษาในวัด ผีตนอื่นจะออกมาบ่อย"),
+  N(`🎯 ตอนนี้: ${ghGoal(G)}`)];};
+Object.assign(ACT,{ghhelp:()=>{UI.modal=null;playScene(GH_HELP(G),()=>render(),{bg:"temple",look:"casual"});}});
+{const _h=campActsHTML;campActsHTML=function(){const h=_h();if(typeof G==="undefined"||!G||UI.modal.pick)return h;const S=ghSt(G);if(!S.on)return h;
+  return h.replace(/(<div class="ghbar"[^]*?<\/div>)/,`$1<div class="ghgoal"><span>🎯 ${ghGoal(G)}</span><button class="btn sm" data-act="ghhelp">บุญค่ายคืออะไร?</button></div>`);};}
+{const _h=homeHTML;homeHTML=function(){const h=_h();try{const S=G&&G.gh;if(!S||!S.on)return h;const m=S.merit,c=m<25?"ghlow":"";
+  return h.replace('<small>กิจกรรมค่ายสัปดาห์นี้',`<small><em class="ghm ${c}">🪷 บุญค่าย ${m}</em> · กิจกรรมค่ายสัปดาห์นี้`);}catch(e){return h;}};}
+{const _t=coachTips;coachTips=function(force){const T=_t(force);try{const S=G&&G.gh;if(!S||!S.on||(!coachOn()&&!force))return T;
+  if(S.merit<25)T.push({p:7,t:`บุญค่ายเหลือ ${S.merit} ผีจะมาบ่อย นักมวยจะไข้ — เลือกตักบาตรเช้าหรือไหว้ครูในกิจกรรมค่ายเถอะผู้จัดการ`,act:{k:"campacts",label:"เลือกกิจกรรม"}});
+  else if(S.sq===2||(S.sq===4&&!S.shrine))T.push({p:5,t:`เรื่องศาลนางตานี: ${ghGoal(G)}`,act:{k:"campacts",label:"กิจกรรมค่าย"}});
+  return T.sort((a,b)=>b.p-a.p);}catch(e){return T;}};}
+/* the camp actions that make merit say so */
+for(const [k,v] of [["merit",6],["waikhru",10]]){const A=CAMP_ACTIONS[k];if(!A)continue;const d0=A.desc;Object.defineProperty(A,"desc",{configurable:true,get(){try{return G&&G.gh&&G.gh.on?`${d0} · 🪷 บุญค่าย +${v}`:d0;}catch(e){return d0;}}});}
+{const _w=ghWeekly;ghWeekly=function(G){const S=ghSt(G),m0=S.merit;_w(G);if(!S.on)return;
+  S.lowRun=S.merit<25?(S.lowRun||0)+1:0;
+  if(m0>=25&&S.merit<25)try{setTimeout(()=>toast("🪷 บุญค่ายต่ำกว่า 25 — ผีจะมาบ่อยขึ้น ดูวิธีทำบุญที่กิจกรรมค่าย"),600);}catch(e){}};}
+
+/* Kru Daeng's nudge, and the loop's wandering ghosts */
+{const _s=ghStory;ghStory=function(done){const S=ghSt(G);if(!S.on)return false;
+  if(S.lowRun>=8&&gameWeek(G)-(S.nudge??-99)>=20){S.nudge=gameWeek(G);save();
+    playScene([C("ผู้จัดการ… ครูขอคุยเรื่องบุญค่ายหน่อย"),C(`ตอนนี้บุญค่ายเราเหลือ ${S.merit} เอง ผีมาทุกเดือน เด็ก ๆ ไข้กันเป็นแถว ครูสวดมนต์จนเสียงแหบแล้ว`),
+      C("ไม่ต้องทำบุญใหญ่ก็ได้ ตักบาตรเช้าสัปดาห์เว้นสัปดาห์ก็พอแล้ว ถูกด้วย สามร้อยบาท ไหว้ครูยิ่งดีใหญ่"),C("ดูได้ที่กิจกรรมค่ายนะ มีแถบ 🪷 บุญค่ายอยู่ข้างบน"),
+      {choice:[{t:"เข้าใจแล้วครับครู",then:[C("ดี! เดี๋ยวครูตื่นตีห้าไปซื้อของใส่บาตรรอ")]},{t:"บุญค่ายคืออะไรนะครับ",then:GH_HELP(G)}]}],done,{bg:"camp",look:"casual"});return true;}
+  const y=ghYear(G);
+  if(y>=4&&S.shrine&&S.f3&&!S.sulk&&!ghIn(G,GH_LENT())&&gameWeek(G)-(S.chAbs??(S.f3Abs||-99))>=16&&Math.random()<.2){S.chAbs=gameWeek(G);save();ghWander(done);return true;}
+  return _s(done);};}
+const GH_WANDER=[["krasue","กระสือสาวจากบ้านโป่ง","ได้ข่าวว่าค่ายนี้มีเจ้าที่ชกเก่ง ข้ามาขอลองมือ!"],["krahang","กระหังร่อนเร่จากอยุธยา","ข้าบินมาสามวันสามคืน… ขอชกสักยกแล้วขอข้าวกินด้วย"],
+ ["mabong","ม้าบ้องสายซิ่งจากโคราช","ฮี้! ใครว่าข้าวิ่งเร็วแต่ชกไม่เป็น มาลองดู!"],["phiphong","ผีโพงหนุ่มจากอุบล","ฟุดฟิด… ข้าได้กลิ่นปลาร้าค่ายนี้มาไกลสามจังหวัด แลกกันชกหนึ่งไฟต์"]];
+function ghWander(done){const S=ghSt(G),R=roster(G).filter(f=>!f.injury);if(!R.length){done();return;}const [kind,name,taunt]=GH_WANDER[Math.floor(Math.random()*GH_WANDER.length)],f=R[Math.floor(Math.random()*R.length)];
+  ghPlay([N("ตีสอง ศาลนางตานีมีแสงเขียวสว่างวาบ ในฝันคุณเห็นเธอยืนรออยู่หน้าเวทีต้นกล้วย",),{n:"nar",t:"ข้าง ๆ เธอมีแขกแปลกหน้ายืนกอดอกอยู่",bg:"dream"},{n:"npc",who:name,t:taunt},
+   TN(pk(["มีผีจรมาขอท้า… จะรับไหม ข้าว่าสนุกนะ","แขกมาเยือนอีกแล้ว เจ้าจะส่งใครลง หรือให้ข้าเล่นเอง","ข้าเบื่อ ๆ อยู่พอดี… รับคำท้าไหม ชนะแล้วเขามักทิ้งของดีไว้ให้"]),"angry_smile"),
+   {choice:[{t:`ส่ง${f.name}ลงชก`,fx:()=>{UI.ghW={who:"f"};}},{t:"ให้นางตานีลงเอง",fx:()=>{UI.ghW={who:"t"};}},{t:"ไม่รับ ขอนอนต่อ",fx:()=>{UI.ghW=null;},then:[TN("ฮึ จืดชืด… งั้นข้าไล่เขากลับเอง","neutral")]}]}],()=>{
+   const w=UI.ghW;UI.ghW=null;if(!w){done();return;}
+   ghDuel({fid:f.id,kind,adj:.4,live:1,tani:w.who==="t"},win=>{const gift=win?1500+Math.floor(Math.random()*4)*500:0;if(win){G.cash+=gift;S.merit=clamp(S.merit+4,0,GH_MAX);S.tb=clamp((S.tb||0)+3,0,ghCap(G));}save();
+     ghPlay([N(win?`${name}ยอมแพ้ หัวเราะร่า แล้วทิ้งถุงผ้าเก่า ๆ ไว้กลางเวที`:`${name}ชนะ โค้งให้หนึ่งที แล้วลอยหายไปในความมืด`),
+       TN(win?pk(["ดีมาก! ข้าบอกแล้วว่าค่ายนี้ไม่ธรรมดา","ฮิ ๆ ผีจรรอบนี้แค่วอร์มอัพ","ได้ของฝากด้วย… อย่าเอาไปซื้อหวยหมดล่ะ"]):pk(["ไม่เป็นไร ผีจรบางตนก็แรงจริง","คราวหน้าเอาคืน","แพ้ก็สนุกดี ไม่มีใครไข้หรอก ข้าดูให้"]),win?"smile":"neutral"),
+       GMOFF(),MORNING(),N(win?`ตื่นเช้ามา เจอถุงผ้าเก่าวางอยู่หน้าศาล ข้างในมีเงิน ฿${gift.toLocaleString()} · บุญค่าย +4 · ความสนิท +3`:"ตื่นเช้ามา ทุกคนสดชื่นดี ไม่มีใครไข้ แค่ฝันว่าแพ้ผีแปลกหน้า")],done,{bg:"dream",look:"casual"});});},{bg:"dream_room",look:"casual"});}
+
+/* offerings at her card, like gifts — once a week, does not use the week's free time */
+const GH_GIFTS=[{k:"tom",n:"ขนมต้มมะพร้าวหวานน้อย",c:200,tb:4,m:3,img:"smile",r:["ขนมต้ม! …หวานกำลังดี เจ้ารู้ใจข้าแล้วนะ","ฮิ ๆ ขนมต้มอีกแล้ว ข้าไม่เบื่อหรอก ไม่มีวันเบื่อ"]},
+ {k:"red",n:"น้ำแดงใส่น้ำแข็ง",c:100,tb:3,m:2,img:"smile",r:["น้ำแดง… ชื่นใจ ผีก็ร้อนเป็นนะ","ใส่น้ำแข็งเยอะ ๆ แบบนี้แหละ ข้าชอบ"]},
+ {k:"jas",n:"พวงมาลัยมะลิ",c:150,tb:3,m:2,img:"shy",r:["มะลิ… หอมจัง ข้าจะคล้องไว้ทั้งคืน","ข้าไม่ได้เขินนะ! …แต่ก็สวยดี"]},
+ {k:"silk",n:"ผ้าแพรสามสีผืนใหม่",c:800,tb:6,m:4,img:"shy",r:["ผ้าใหม่! สีสดกว่าผืนเก่าตั้งเยอะ… ขอบใจนะ","เขียว เหลือง ชมพู… เจ้าเลือกสีเป็นแล้วนี่"]},
+ {k:"boba",n:"ชานมไข่มุก",c:120,tb:2,m:1,img:"neutral",r:["เม็ดดำ ๆ นี่อะไร… เคี้ยวหนึบดี ข้ายังไม่ตัดสินใจว่าชอบไหม","คนสมัยนี้กินอะไรแปลก ๆ …ขออีกแก้วได้ไหม"]},
+ {k:"fry",n:"กล้วยทอด",c:80,tb:-2,m:0,img:"angry",r:["……กล้วยทอด เอามาถวายผีต้นกล้วย เจ้าคิดอะไรอยู่","เจ้าจะให้ข้ากินญาติตัวเองเหรอ!"]}];
+function ghGift(){const S=ghSt(G);if(!S.shrine||S.giftW===gameWeek(G))return;
+  playScene([N("คุณเดินไปที่ศาลนางตานี จะถวายอะไรดี"),{choice:[...GH_GIFTS.map(g=>({t:`${g.n} · ฿${g.c}`,fx:()=>{if(G.cash<g.c){UI.ghG=-1;return;}G.cash-=g.c;S.giftW=gameWeek(G);S.tb=clamp((S.tb||0)+g.tb,0,ghCap(G));S.merit=clamp(S.merit+g.m,0,GH_MAX);UI.ghG=g;save();},
+     then:[{inject:()=>{const x=UI.ghG;UI.ghG=null;if(x===-1)return [N("เงินไม่พอ… ไว้คราวหน้า")];return [TN(pk(x.r),x.img),N(`💚 ความสนิท ${x.tb>0?"+":""}${x.tb}${x.m?` · 🪷 บุญค่าย +${x.m}`:""}`)];}}]})),{t:"ไว้วันหลัง",then:[]}]}],()=>render(),{bg:"camp_night",look:"casual"});}
+Object.assign(ACT,{ghgift:()=>{UI.modal=null;ghGift();}});
+{const _p=peopleHTML;peopleHTML=function(){const h=_p();try{const S=G&&G.gh;if(!S||!S.shrine)return h;const used=S.giftW===gameWeek(G);
+  return h.replace(/(data-act="ghtalk"[^>]*>[^<]*<\/button>)/,`$1<button class="btn sm" data-act="ghgift" ${used?"disabled":""}>${used?"ถวายแล้วสัปดาห์นี้":"ถวายของ"}</button>`).replace(/(ความสนิท|closeness) (\d+)\/100/,(a,w,n)=>w+" "+n+"/"+(+n>ghCapY(G)?100:ghCapY(G)));}catch(e){return h;}};}
+
+try{window.GHX={ghAlly,ghFoeT:ghFoe,ghSt,ghAdd,ghHaunt,ghFight,ghStory,ghWeekly,ghHauntDue,ghReady,ghOther,ghOtherDue,ghOddPlay,ghTalk,TT,TH,ghYear,ghDuel,ghOddDue:ghOdd,ghGoal,ghWander,ghGift,ghCap};}catch(e){}
+})();
+
+// ================= MUAY THAI MOE — camp pets, deeper (v1.91.144, Man) =================
+// One button on the home screen opens the pet window. Each pet has a level (1–10), joy, and a passive that helps the camp a little
+// every week — rolled each week like training, so it is never a sure thing. Playing opens the camp-activity style vignette.
+// Pets have moods: some days they don't feel like playing, now and then one bolts off into the rice fields and comes back a week later.
+// Old saves: the old play still works the same; existing pets start with EXP for the weeks they have lived at camp.
+;(function(){
+const PET_ART=new Set(window.__MTM_PETART||[]);
+const PMAX=10,needXP=l=>30*l;                                       /* Lv n → n+1 needs 30·n EXP */
+const pv=G=>(G.pets||[]);
+function pst(G,p){if(p.lv==null){p.lv=1;p.xp=0;const age=Math.max(0,gameWeek(G)-(p.since!=null?p.since:gameWeek(G)));petXP(p,Math.min(400,age*4),true);}p.joy=p.joy??60;return p;}
+function petXP(p,n,quiet){if(p.lv>=PMAX)return 0;p.xp=(p.xp||0)+n;let up=0;while(p.lv<PMAX&&p.xp>=needXP(p.lv)){p.xp-=needXP(p.lv);p.lv++;up++;}if(p.lv>=PMAX)p.xp=0;return up;}
+const tier=p=>p.lv>=10?3:p.lv>=6?2:p.lv>=3?1:0;                      /* talent tiers at Lv.3 / 6 / 10 */
+const away=(G,p)=>p.away!=null&&gameWeek(G)<p.away;
+
+/* ---------- what each pet does ---------- */
+const PX={
+ cat:{pas:p=>`กำลังใจทุกคน +1${p.lv>=5?"~2":""} (สุ่มทุกสัปดาห์)`,tal:["นักเรียนรักแมว: รายได้คลาส +3%","นักเรียนรักแมว: รายได้คลาส +5%","แมวประจำค่าย: รายได้คลาส +8%"],
+  modes:[["เกาพุง",15,10,0],["ไล่ไฟเลเซอร์",5,20,0],["ให้ขนมแมว",25,6,60]],bg:"bg_camp_day.webp"},
+ dog:{pas:p=>`ความล้าทุกคน −1${p.lv>=5?"~2":""} (สุ่มทุกสัปดาห์)`,tal:["เฝ้าค่าย: ค่าใช้จ่ายค่าย −3%","เฝ้าค่าย: ค่าใช้จ่ายค่าย −5%","หมาเฝ้าบ้านระดับตำนาน: ค่าใช้จ่าย −8%"],
+  modes:[["โยนบอลให้วิ่งเก็บ",15,10,0],["พาวิ่งรอบค่าย",5,20,0],["อาบน้ำให้",25,6,40]],bg:"bg_farm.webp"},
+ rooster:{pas:p=>`ปลุกเช้า: ผลการฝึก +${p.lv>=5?4:2}% (สุ่มทุกสัปดาห์)`,tal:["ใจนักสู้: นักมวยที่มีไฟต์สัปดาห์นี้ กำลังใจ +3","ใจนักสู้: กำลังใจ +5","ไก่ชนแชมป์: กำลังใจ +8"],
+  modes:[["ให้ขันโชว์",15,10,0],["พาเดินอวดชาวบ้าน",5,20,0],["โปรยข้าวสาร",25,6,30]],bg:"bg_rooster.webp"},
+ turtle:{pas:p=>`กำลังใจทุกคน +1${p.lv>=5?"~2":""} (สุ่มทุกสัปดาห์)`,tal:["ใจเย็น: นักมวยเจ็บมีลุ้นหายเร็วขึ้น","ใจเย็น: ลุ้นหายเร็วขึ้นบ่อยกว่าเดิม","เต่าศักดิ์สิทธิ์: แผลหายไวมาก"],
+  modes:[["ลูบกระดอง",15,10,0],["พาเดินเล่นช้า ๆ",5,20,0],["ให้ผักบุ้ง",25,6,20]],bg:"bg_camp_day.webp"},
+ otter:{pas:p=>`ความล้าทุกคน −1 (สุ่มทุกสัปดาห์)`,tal:["คลิปไวรัล: ชื่อเสียงขึ้นนิด ๆ","คลิปไวรัล: ชื่อเสียงขึ้นบ่อยขึ้น","นากดาวติ๊กต็อก: ชื่อเสียงขึ้นทุกสัปดาห์"],
+  modes:[["เล่นน้ำด้วยกัน",15,10,0],["ฝึกว่ายน้ำ",5,20,0],["ให้ปลาเล็ก",25,6,50]],bg:"bg_river.webp"}};
+const PLINE={
+ cat:[["นอนหงายให้เกาพุง ครางดังจนได้ยินทั้งค่าย","กระโดดตะครุบไฟแดงจนชนกระสอบทราย","กินขนมแมวหมดซองแล้วมองหน้าขออีก"],"เดินหนีไปนอนบนกระเป๋าซ้อมของครูแดง ไม่สนใคร","กระโจนข้ามรั้ววิ่งเข้าทุ่งนาไปไล่จับหนู!"],
+ dog:[["วิ่งเก็บบอลกลับมาวางแทบเท้า หางกระดิกเป็นใบพัด","วิ่งนำทุกคนรอบค่ายจนนักมวยหอบ","สะบัดน้ำใส่ทุกคนจนเปียกทั้งลาน"],"นอนหมอบหน้าเวที ถอนหายใจยาว ไม่อยากเล่นวันนี้","เห็นควายในทุ่ง วิ่งตามไปเห่าไม่ยอมกลับ!"],
+ rooster:[["ขันลั่นสามรอบ ชาวบ้านปรบมือ","เดินอกผายไหล่ผึ่งนำขบวนรอบหมู่บ้าน","จิกข้าวสารอย่างสง่างามแบบไก่ชนแชมป์"],"ยืนขาเดียวหลับตา ไม่สนใจโลก","บินข้ามรั้วไปจีบไก่บ้านข้าง ๆ ในทุ่ง!"],
+ turtle:[["ยื่นหัวออกมาให้ลูบช้า ๆ ทุกคนใจเย็นลง","เดินช้าจนทุกคนหยุดรอ แล้วก็หัวเราะกันทั้งค่าย","กินผักบุ้งทีละใบ ช้าแต่มั่นคง"],"หดหัวเข้ากระดอง เคาะเรียกก็ไม่ออก","ค่อย ๆ เดินออกไปทางทุ่งนา… ไม่มีใครเห็นตอนเริ่มออกเดิน"],
+ otter:[["ว่ายวนเป็นวงกลม แล้วตีน้ำใส่หน้าคุณ","ดำน้ำโชว์ท่ากลับตัวเหมือนนักกีฬา","รับปลาเล็กด้วยสองมือ น่ารักจนทุกคนถ่ายคลิป"],"นอนหงายลอยน้ำเฉย ๆ ไม่อยากเล่น","ว่ายตามฝูงปลาลงคลองไปไกลลิบ!"]};
+const BACK=[["กลับมาแล้ว เปื้อนโคลนทั้งตัว คาบแบงก์ยี่สิบมาด้วย",20],["กลับมาพร้อมพาลูกหมาข้างบ้านมาเที่ยวด้วย",0],["กลับมาตอนเช้า หอบมาก แต่ดูมีความสุข",0],["กลับมาพร้อมกับฟางข้าวติดหัว ชาวนาข้างทุ่งฝากขอบคุณที่ไล่หนูให้ ได้ข้าวสารมาถุงนึง",300],["กลับมาโดยมีเด็ก ๆ ในหมู่บ้านอุ้มมาส่งถึงหน้าค่าย",0]];
+
+/* ---------- weekly: joy, passive EXP, the rolled passives ---------- */
+function petsWeekly(G){const P=pv(G);if(!P.length)return;const R=roster(G),rng=mulberry32((G.seed^0x9e7)+gameWeek(G)*31),log=[];G.petLast={};
+  for(const p0 of P){const p=pst(G,p0),D=PX[p.k];if(!D)continue;
+    if(p.away!=null&&gameWeek(G)>=p.away){const b=BACK[Math.floor(rng()*BACK.length)];p.away=null;p.joy=Math.min(100,p.joy+10);if(b[1])G.cash+=b[1];log.push(`🐾 ${p.name}${b[0]}${b[1]?` (+฿${b[1]})`:""}`);continue;}
+    if(away(G,p))continue;
+    if(p.wk!==gameWeek(G))p.joy=Math.max(0,p.joy-5);                 /* no play this week */
+    if(p.joy>=60)petXP(p,5);
+    const lowJoy=p.joy<30,ok=rng()<.5+p.joy/200;if(!ok){G.petLast[p.k]="—";continue;}    /* the weekly roll, like training */
+    const big=p.lv>=5&&rng()<.5,amt=(big?2:1)*(lowJoy?.5:1);let got="";
+    if(p.k==="cat"||p.k==="turtle"){R.forEach(f=>f.morale=clamp(f.morale+amt,0,100));got=`กำลังใจ +${amt}`;}
+    if(p.k==="dog"||p.k==="otter"){const a=p.k==="otter"?1*(lowJoy?.5:1):amt;R.forEach(f=>f.fatigue=clamp(f.fatigue-a,0,100));got=`ความล้า −${a}`;}
+    if(p.k==="rooster")got="ปลุกเช้า";
+    const t=tier(p);if(t){const tm=[0,1,1.7,2.7][t]*(lowJoy?.5:1);
+      if(p.k==="cat"&&rng()<.6){const c=Math.round(classIncome(G)*.03*tm);if(c>0){G.cash+=c;got+=` · คลาส +฿${c}`;}}
+      if(p.k==="dog"&&rng()<.6){const c=Math.round(upkeep(G)*.03*tm);if(c>0){G.cash+=c;got+=` · ประหยัด ฿${c}`;}}
+      if(p.k==="rooster"){const add=[0,3,5,8][t]*(lowJoy?.5:1);const B=(G.bookings||[]).filter(b=>b.week===G.week+1||b.week===G.week).map(b=>G.F[b.a]).filter(f=>f&&f.camp==="player");B.forEach(f=>f.morale=clamp(f.morale+add,0,100));if(B.length)got+=` · ใจนักสู้ +${add}`;}
+      if(p.k==="turtle"){const ch=[0,.25,.4,.6][t];R.forEach(f=>{if(f.injury>0&&rng()<ch){f.injury--;got+=` · ${f.name}หายเร็วขึ้น`;}});}
+      if(p.k==="otter"&&rng()<[0,.3,.5,.9][t]){G.rep+=.03*(lowJoy?.5:1);got+=" · คลิปไวรัล ชื่อเสียง +0.03";}}
+    G.petLast[p.k]=got;}
+  if(log.length){G.log=G.log||[];log.forEach(l=>G.log.push(l));}}
+{const _w=xlWeekly;xlWeekly=function(G){_w(G);try{petsWeekly(G);}catch(e){console.error("pets",e);}};}
+/* the rooster's dawn crow makes training a touch better (rolled each week) */
+{const _t=trainWeek;trainWeek=function(G,f,rng){const r=_t(G,f,rng);try{const p=pv(G).find(x=>x.k==="rooster");if(p&&f.camp==="player"&&!away(G,p)&&f.gains&&G.petLast&&G.petLast.rooster&&G.petLast.rooster!=="—"){
+  const pc=(p.lv>=5?.04:.02)*(p.joy<30?.5:1);for(const x of Object.keys(f.gains)){const d=f.gains[x];if(d>0){const add=d*pc;f.a[x]=Math.min(stCap(f),f.a[x]+add);f.gains[x]=d+add;}}}}catch(e){}return r;};}
+/* the old one-tap play keeps its effect; it now also gives EXP, joy and moods */
+function petPlayMode(G,i,mi){const p=pst(G,pv(G)[i]);if(!p||p.wk===gameWeek(G)||away(G,p))return null;const D=PX[p.k],M=D.modes[mi]||D.modes[0];
+  if(M[3]&&G.cash<M[3])return {err:"เงินไม่พอ"};if(M[3])G.cash-=M[3];
+  const r=Math.random(),runP=["cat","dog","rooster","otter","turtle"].includes(p.k)?(p.joy<40?.08:.04):0,noP=p.joy<40?.18:.08;
+  if(r<runP){p.wk=gameWeek(G);p.away=gameWeek(G)+1;p.joy=Math.max(0,p.joy-5);return {p,res:"run",line:PLINE[p.k][2]};}
+  if(r<runP+noP){p.wk=gameWeek(G);petXP(p,3);return {p,res:"no",line:PLINE[p.k][1]};}
+  petPlay(G,i);p.joy=Math.min(100,p.joy-10+M[1]);const up=petXP(p,M[2]);return {p,res:"ok",line:PLINE[p.k][0][mi]||PLINE[p.k][0][0],M,up};}
+
+/* ---------- UI: one button on home, a pet window, the vignette ---------- */
+petsRowHTML=function(){const P=pv(G);if(!P.length)return "";const n=P.filter(p=>p.wk!==gameWeek(G)&&!away(G,p)).length;
+  return `<button class="campact petbtn" data-act="petsopen"><span class="peticons">${P.slice(0,5).map(p=>petThumb(p.k)).join("")}</span><span><small>🐾 สัตว์เลี้ยงค่าย ${P.length} ตัว</small><b>${n?`เล่นได้อีก ${n} ตัว`:"เล่นครบแล้วสัปดาห์นี้ ✓"}</b></span></button>`;};
+const bar=(v,m,c)=>`<i class="pbar"><b style="width:${Math.round(100*Math.min(1,v/m))}%;background:${c}"></b></i>`;
+XMODAL.pets=m=>{const P=pv(G);if(m.i!=null&&P[m.i]){const p=pst(G,P[m.i]),D=PX[p.k],done=p.wk===gameWeek(G),aw=away(G,p);
+    return {foot:false,body:`<div class="petdet"><div class="pdh">${petThumb(p.k,"big")}<div><h2>${esc(p.name)} <small>Lv.${p.lv}</small></h2><p class="meta">${esc(PETS[p.k].name)}${p.fav&&G.F[p.fav]?` · ซี้กับ${esc(G.F[p.fav].name)}`:""}</p></div></div>
+     <div class="pstat"><span>EXP</span>${bar(p.lv>=PMAX?1:p.xp,p.lv>=PMAX?1:needXP(p.lv),"#ffd34a")}<em>${p.lv>=PMAX?"MAX":`${p.xp}/${needXP(p.lv)}`}</em></div>
+     <div class="pstat"><span>ความสุข</span>${bar(p.joy,100,p.joy<30?"#e8434f":p.joy<60?"#f0a33a":"#5cc46a")}<em>${p.joy}${p.joy<30?" · เซ็ง (ช่วยค่ายได้ครึ่งเดียว)":""}</em></div>
+     <ul class="ptal"><li><b>ทุกสัปดาห์</b> ${esc(D.pas(p))}</li>${D.tal.map((t,j)=>`<li class="${p.lv>=[3,6,10][j]?"on":"off"}"><b>Lv.${[3,6,10][j]}</b> ${esc(t)}${p.lv>=[3,6,10][j]?"":" 🔒"}</li>`).join("")}</ul>
+     ${G.petLast&&G.petLast[p.k]?`<p class="meta">สัปดาห์ที่แล้ว: ${G.petLast[p.k]==="—"?"วันนี้ไม่ค่อยอยากช่วย 😴":esc(G.petLast[p.k])}</p>`:""}
+     ${aw?`<p class="pwarn">🏃 ${esc(p.name)}หนีไปวิ่งเล่นในทุ่งนา จะกลับมาสัปดาห์หน้า</p>`:done?`<p class="meta">เล่นแล้วสัปดาห์นี้ ✓</p>`:`<div class="pmodes">${D.modes.map((M,j)=>`<button class="btn" data-act="petgo" data-v="${m.i}:${j}"><b>${esc(M[0])}</b><small>ความสุข +${M[1]} · EXP +${M[2]}${M[3]?` · ฿${M[3]}`:""}</small></button>`).join("")}</div>`}
+     <div class="mfoot"><button class="btn ghost" data-act="petsopen">◂ สัตว์ทุกตัว</button><button class="btn ghost" data-act="petren" data-v="${m.i}">ตั้งชื่อใหม่</button></div></div>`};}
+  return {foot:true,body:`<h2>🐾 สัตว์เลี้ยงค่าย</h2><p class="meta">เล่นด้วยได้ตัวละครั้งต่อสัปดาห์ ไม่กินกิจกรรมค่าย · ความสุขสูง ช่วยค่ายได้ดีขึ้น · ช่วยแบบสุ่มทุกสัปดาห์ เหมือนผลการซ้อม</p>
+   <div class="petgrid">${P.map((p0,i)=>{const p=pst(G,p0),aw=away(G,p),done=p.wk===gameWeek(G),D=PX[p.k];return `<div class="petcard ${aw?"away":done?"done":""}">${petThumb(p.k)}
+     <div class="pcm"><span class="pc1"><b>${esc(p.name)}</b> <small>Lv.${p.lv}</small></span><span class="pcj"><small>ความสุข</small>${bar(p.joy,100,p.joy<30?"#e8434f":p.joy<60?"#f0a33a":"#5cc46a")}</span>
+     <small class="pc2">${esc(D?D.pas(p):"")}</small></div>
+     <div class="pcact">${aw?`<span class="pwarn">🏃 หนีไปทุ่งนา กลับสัปดาห์หน้า</span>`:done?`<span class="meta">เล่นแล้วสัปดาห์นี้ ✓</span>`:(D?D.modes:[]).map((M,j)=>`<button class="btn sm${j===0?" primary":""}" data-act="petgo" data-v="${i}:${j}">${esc(M[0])}${M[3]?` ฿${M[3]}`:""}</button>`).join("")}
+     <button class="btn sm ghost" data-act="petdet" data-v="${i}">รายละเอียด</button></div></div>`;}).join("")}</div>`};};
+for(const k of Object.keys(PX)){CFX["pet_"+k]={bg:PX[k].bg,cap:"",row:"idle",fx:"hearts"};CFX["pet_"+k+"_no"]={bg:PX[k].bg,cap:"",row:"idle",fx:"z"};CFX["pet_"+k+"_run"]={bg:"bg_farm.webp",cap:"",row:"idle",fx:"sparks"};}
+const PIMG={};const petImg=k=>{if(!PET_ART.has(k))return null;if(!(k in PIMG)){const i=new Image();i.src=ASSET+"pet_"+k+".webp";PIMG[k]=i;}const i=PIMG[k];return i.complete&&i.naturalWidth?i:null;};
+/* 8-bit sprite sheets: 4 walk frames side by side (frame sizes below) */
+/* Man's sprite sheets (v1.91.144): 4 columns × 5 rows — walk(4) · idle(2) · happy(2–3) · sulk(2) · run(4); [frame w, frame h, frames per row] */
+const PSZ={"cat": [86, 74, [4, 2, 2, 2, 4]], "dog": [97, 74, [4, 2, 2, 2, 4]], "turtle": [99, 74, [4, 2, 2, 2, 4]], "rooster": [84, 74, [4, 2, 3, 2, 4]], "otter": [87, 74, [4, 2, 2, 2, 4]], "mudlek": [84, 74, [4, 2, 2, 2, 4]]};
+const PROW={walk:0,idle:1,happy:2,sulk:3,run:4},PHT={cat:1,dog:1.1,rooster:1.1,turtle:.9,otter:.85,mudlek:1};   /* relative on-screen size */
+function petSprite(x,k,cx,fy,h,fl,t,anim){const im=petImg(k),Z=PSZ[k];if(!im||!Z)return false;const [fw,fh,cnt]=Z,row=PROW[anim]??0,n=cnt[row]||1,sp=anim==="run"?110:anim==="walk"?150:anim==="happy"?420:700,fr=Math.floor(t/sp)%n,w=h*fw/fh;
+  x.save();x.imageSmoothingEnabled=false;x.translate(Math.round(cx),Math.round(fy));x.scale(fl,1);x.drawImage(im,fr*fw,row*fh,fw,fh,Math.round(-w/2),Math.round(-h),Math.round(w),Math.round(h));x.restore();return true;}
+/* the camp yard on the home screen: pets walk about as sprites (pixel.js calls this) */
+window.petHub=(ctx,k,cx,fy,fl,t,moving,S)=>petSprite(ctx,k,cx,fy,22*S*(PHT[k]||1),fl,t,moving?"walk":"idle");
+const petThumb=(k,cls)=>PET_ART.has(k)&&PSZ[k]?`<span class="psp ${cls||""}" style="background-image:url(${ASSET}pet_${k}.webp);aspect-ratio:${PSZ[k][0]}/${PSZ[k][1]};background-size:400% 500%;background-position:0 25%" role="img" aria-label=""></span>`:`<img class="peti ${cls||""}" src="${petIcon(k)}" alt="">`;
+{const _d=drawCampFx;drawCampFx=function(x,k,t){if(!k||!k.startsWith("pet_"))return _d(x,k,t);const parts=k.split("_"),pk=parts[1],res=parts[2]||"ok",C=CFX[k]||{},W=x.canvas.width,H=x.canvas.height;
+  x.imageSmoothingEnabled=false;x.fillStyle="#1a1428";x.fillRect(0,0,W,H);const bg=img(C.bg||"bg_camp_day.webp");
+  if(bg.complete&&bg.naturalWidth){const s=Math.max(W/bg.naturalWidth,H/bg.naturalHeight);const w=bg.naturalWidth*s,h=bg.naturalHeight*s;x.imageSmoothingEnabled=true;x.save();if(pk==="otter"&&res!=="run"){x.translate(W,0);x.scale(-1,1);} /* the otter plays where the water is */x.drawImage(bg,(W-w)/2,(H-h)/2,w,h);x.restore();x.imageSmoothingEnabled=false;}
+  const fy=H*.93,fh=H*.6;const R=cfxRoster(),f=R[0];
+  if(f&&res!=="run")drawFrame(x,sheetFor(f),ROW[res==="ok"?(Math.floor(t/1200)%2?"win":"idle"):"idle"],Math.floor(t/220)%4,W*.22,fy,fh,false);
+  /* the pet keeps to the right half */
+  let cx=W*.5,bob=0,fl=1,mv=false;
+  if(res==="ok"){cx=W*.66+Math.sin(t/900)*W*.14;fl=Math.cos(t/900)>0?1:-1;mv=true;}
+  if(res==="run"){cx=W*.3+((t/5)%(W*.9));fl=1;mv=true;}
+  const ph=H*.4*(PHT[pk]||1);let pfy=fy;if(pk==="otter"&&res!=="run"){cx+=W*.2;pfy=H*.8;}   /* the otter swims in the river, off the pier */
+  /* happy: walks about, then stops for the happy pose · sulk: lies there · run: dashes off */
+  const cyc=t%3200,anim=res==="no"?"sulk":res==="run"?"run":cyc<1800?"walk":"happy";if(res==="ok"){const dir=Math.floor(t/3200)%2?-1:1;cx=(dir>0?W*.36:W*.66)+dir*Math.min(cyc,1800)/1800*W*.3;fl=dir;}
+  x.fillStyle="rgba(0,0,0,.25)";x.beginPath();x.ellipse(cx,pfy,ph*.55,ph*.08,0,0,Math.PI*2);x.fill();
+  if(!petSprite(x,pk,cx,pfy,ph,fl,t,anim)){const Z=Math.max(3,Math.round(ph/9)),wd=pk==="dog"?15:11,px=cx-wd*Z/2,py=fy-9*Z+bob;const Q=(a,b,w,h,c)=>{x.fillStyle=c;x.fillRect(Math.round(fl>0?px+a*Z:px+(wd-a-w)*Z),Math.round(py+b*Z),w*Z,h*Z);};try{drawPetQ(Q,pk,t,mv);}catch(e){}}
+  const ph2=(t%1400)/1400;
+  if(res==="ok"){x.globalAlpha=1-ph2;x.fillStyle="#ff6a8a";const hx=cx+8,hy=fy-ph-6-ph2*30;x.fillRect(hx,hy,4,3);x.fillRect(hx-2,hy+2,8,3);x.fillRect(hx,hy+5,4,2);x.globalAlpha=1;}
+  if(res==="no"){x.globalAlpha=1-ph2;x.fillStyle="#cfe2ff";x.font=`bold ${10+ph2*8}px "Pixelify Sans",sans-serif`;x.fillText("z",cx+10+ph2*10,fy-ph-ph2*30);x.globalAlpha=1;}
+  if(res==="run")for(let i=0;i<4;i++){x.globalAlpha=.6;x.fillStyle="#e8d9b0";x.fillRect(cx-20-i*9-(t/40%6),fy-4-(i%2)*4,6,4);x.globalAlpha=1;}};}
+Object.assign(ACT,{
+  petsopen:()=>{UI.modal={type:"pets"};render();},
+  petdet:d=>{UI.modal={type:"pets",i:+d.v};render();},
+  petplay:d=>{UI.modal={type:"pets",i:+d.v};render();},            /* the old chip now opens the pet */
+  petgo:d=>{const [i,mi]=String(d.v).split(":").map(Number);const r=petPlayMode(G,i,mi);if(!r)return;if(r.err){toast(r.err);return;}AU.sfx&&AU.sfx(r.res==="ok"?"level":"ui");
+    const p=r.p,fav=p.fav&&G.F[p.fav]&&G.F[p.fav].camp==="player"?[p.fav]:roster(G).slice(0,1).map(f=>f.id);UI.cfxIds=fav;
+    const note=r.res==="ok"?`${p.name}${r.line} · ${PETS[p.k].eff} · ความสุข ${p.joy} · EXP +${r.M[2]}${r.up?` · 🎉 เลเวลอัป! Lv.${p.lv}`:""}`
+      :r.res==="no"?`${p.name}${r.line} · ไม่มีอารมณ์เล่นวันนี้ (EXP +3) — ไว้สัปดาห์หน้าลองใหม่`:`${p.name}${r.line} · จะกลับมาสัปดาห์หน้า ระหว่างนี้ไม่ได้ช่วยค่าย`;
+    UI.modal={type:"campres",k:"pet_"+p.k+(r.res==="ok"?"":"_"+r.res),title:r.res==="ok"?`${r.M[0]}กับ${p.name}`:r.res==="no"?`${p.name}ไม่อยากเล่น`:`${p.name}หนีเที่ยว!`,cap:r.res==="ok"?`${r.M[0]} · ${p.name}`:r.res==="no"?`${p.name}ทำเมิน`:`${p.name}วิ่งเข้าทุ่งนา!`,note};save();render();}});
+
+/* ---------- หมัดเหล็ก: Fah's grey cat from Phayak Thong follows her when she joins the camp (v1.91.144, Man) ---------- */
+PETS.mudlek={name:"แมวสีเงินถุงเท้าขาว",food:120,eff:"กำลังใจทุกคน +1 · ฟ้ากำลังใจ +3"};PET_NAMES.mudlek=["หมัดเหล็ก"];
+PX.mudlek={pas:p=>`กำลังใจทุกคน +1${p.lv>=5?"~2":""} (สุ่มทุกสัปดาห์)`,tal:["แมวเฝ้าฟ้า: ฟ้าได้ผลการซ้อม +3%","แมวเฝ้าฟ้า: ฟ้าได้ผลการซ้อม +5%","หมัดเหล็กของแท้: ฟ้าได้ผลการซ้อม +8%"],
+  modes:[["เล่นมวยแมว",5,20,0],["ลูบหัว",15,10,0],["ให้ทูน่ากระป๋อง",25,6,60]],bg:"bg_camp_day.webp"};
+PLINE.mudlek=[["ตั้งการ์ดสองเท้าหน้า ปัดมือคุณรัว ๆ เหมือนฟ้าตอนซ้อม","ดันหัวเข้าหามือคุณ แล้วร้องเสียงแหบ ๆ แบบแมวเจ้าถิ่น","กินทูน่าหมดกระป๋อง แล้วเดินไปนอนบนนวมของฟ้า"],"นั่งหันหลังให้ มองฟ้าซ้อมคนเดียว ไม่สนคุณ","กระโดดข้ามรั้ววิ่งไปทางค่ายพยัคฆ์ทอง… คงไปเยี่ยมบ้านเก่า"];
+CFX.pet_mudlek={bg:"bg_camp_day.webp",cap:"",row:"idle",fx:"hearts"};CFX.pet_mudlek_no={bg:"bg_camp_day.webp",cap:"",row:"idle",fx:"z"};CFX.pet_mudlek_run={bg:"bg_farm.webp",cap:"",row:"idle",fx:"sparks"};
+{const _w=petsWeekly;petsWeekly=function(G){_w(G);const p=pv(G).find(x=>x.k==="mudlek");if(!p||away(G,p)||!G.petLast||G.petLast.mudlek!=="")return;
+  const R=roster(G),amt=(p.lv>=5&&Math.random()<.5?2:1)*(p.joy<30?.5:1);R.forEach(f=>f.morale=clamp(f.morale+amt,0,100));const fah=G.F.fah;if(fah&&fah.camp==="player")fah.morale=clamp(fah.morale+3,0,100);G.petLast.mudlek=`กำลังใจ +${amt} · ฟ้า +3`;};}
+{const _t=trainWeek;trainWeek=function(G,f,rng){const r=_t(G,f,rng);try{if(f.id==="fah"&&f.camp==="player"&&f.gains){const p=pv(G).find(x=>x.k==="mudlek");if(p&&!away(G,p)&&tier(p)){
+  const pc=[0,.03,.05,.08][tier(p)]*(p.joy<30?.5:1);for(const x of Object.keys(f.gains)){const d=f.gains[x];if(d>0){const add=d*pc;f.a[x]=Math.min(stCap(f),f.a[x]+add);f.gains[x]=d+add;}}}}}catch(e){}return r;};}
+EVENTS.push({id:"pet_mudlek",look:"casual",bg:"camp",pri:2,when:G=>inCamp(G,"fah")&&!hasPet(G,"mudlek"),steps:[
+  {n:"nar",t:"เช้าวันแรกที่ฟ้าย้ายมาอยู่ค่ายศิริชัย เธอลากกระเป๋าเดินทางมาหนึ่งใบ กับตะกร้าหวายอีกหนึ่งใบที่คลุมผ้าไว้มิดชิด"},
+  {n:"nar",t:"ตะกร้าหวายขยับเอง แล้วก็ร้อง “แง้ว” เสียงแหบ ๆ"},
+  {n:"fah",f:"flustered",l:"casual",t:"…อย่ามองแบบนั้น! หมัดเหล็กไม่ใช่ของพยัคฆ์ทองแล้ว ฟ้าย้าย มันก็ต้องย้ายตาม จบ"},
+  {n:"nar",t:"ฟ้าเปิดผ้าคลุม แมวขนสีเงินเหมือนผมฟ้าไม่มีผิดกระโดดออกมา เท้าขาวทั้งสี่ข้างเหมือนใส่ถุงเท้า หูข้างหนึ่งแหว่งนิด ๆ ตาเหลืองจ้องทุกคนเหมือนกำลังประเมินคู่ชก"},
+  {n:"coach",t:"สีเดียวกับเจ้าของเลย… ค่ายเรากลายเป็นสวนสัตว์แล้วนะผู้จัดการ"},
+  {inject:G=>hasPet(G,"cat")?[{n:"nar",t:`หมัดเหล็กเดินตรงไปที่กระสอบทราย ซึ่ง${petName(G,"cat")}นอนอยู่ แมวสองตัวจ้องกันสิบวินาทีเต็ม…`},{n:"nar",t:`แล้ว${petName(G,"cat")}ก็ขยับไปนอนอีกฝั่ง แบ่งกระสอบกันคนละครึ่ง`},{n:"fah",f:"happy",l:"casual",t:"เห็นไหม! หมัดเหล็กชนะตั้งแต่ยกแรก"}]:[{n:"fah",f:"happy",l:"casual",t:"มันเลือกกระสอบทรายลูกกลางแล้ว นั่นที่นอนมันนะ ห้ามใครแย่ง"}]},
+  {n:"fah",f:"pout",l:"casual",t:G=>`${CALL(G,"fah")} …ช่วยดูแลมันด้วยนะ มันชอบทูน่า แล้วก็ชอบคนที่ไม่พูดมาก`},
+  {inject:G=>{adoptPet(G,"mudlek","หมัดเหล็ก","fah");return [{n:"nar",t:"🐾 หมัดเหล็กเข้าร่วมค่าย — ดูได้ที่ปุ่มสัตว์เลี้ยงหน้าแรก"}];}}]});
+try{window.PETX={petsWeekly,petPlayMode,pst,petXP,PX};}catch(e){}
+})();
+
+// ================= MUAY THAI MOE — pixel emoji (v1.91.144, Man: "every icon in the game in pixel style") =================
+// Any emoji in text on screen is swapped for a 10x10 pixel icon as it appears (screens, scenes, toasts, letters, both languages).
+// Strings in the game stay untouched, so other code keeps working; an emoji with no icon here simply stays an emoji.
+// "x" pixels take the text colour, so ♥ ★ ✦ ✓ ✕ keep whatever colour the CSS gives them.
+;(function(){if(typeof document==="undefined")return;
+const PAL={"k": "#1b1530", "w": "#ffffff", "l": "#fff4d6", "y": "#ffd34a", "Y": "#c98a1a", "o": "#f08a2a", "r": "#e8434f", "R": "#8a1e2e", "p": "#ff8fb8", "P": "#c2477a", "g": "#5cc46a", "G": "#2e7a45", "b": "#4aa3ff", "B": "#2a5aa8", "c": "#9fe6ff", "v": "#a77bff", "V": "#5b3aa8", "n": "#b07a40", "N": "#6a4420", "s": "#d8d2ea", "S": "#8f86b0", "d": "#4a4366", "t": "#f6cfa4", "T": "#c98f62", "x": "currentColor"};
+const R={"✦": ["....x.....", "....x.....", "...xxx....", "xxxxxxxxx.", "...xxx....", "....x.....", "....x.....", "..........", "..........", ".........."], "♥": ["..........", ".xx...xx..", "xxxx.xxxx.", "xxxxxxxxx.", "xxxxxxxxx.", ".xxxxxxx..", "..xxxxx...", "...xxx....", "....x.....", ".........."], "❤": ["..........", ".kk...kk..", "krrk.krrk.", "krwrrrrRk.", "krrrrrRRk.", ".krrrRRk..", "..krRRk...", "...kRk....", "....k.....", ".........."], "♡": ["..........", ".xx...xx..", "x..x.x..x.", "x...x...x.", "x.......x.", ".x.....x..", "..x...x...", "...x.x....", "....x.....", ".........."], "★": ["....x.....", "....x.....", "...xxx....", "xxxxxxxxx.", ".xxxxxxx..", "..xxxxx...", "..xx.xx...", ".xx...xx..", ".x.....x..", ".........."], "✓": ["..........", "........xx", ".......xx.", "......xx..", "x....xx...", "xx..xx....", ".xxxx.....", "..xx......", "..........", ".........."], "✕": ["..........", "xx....xx..", ".xx..xx...", "..xxxx....", "...xx.....", "..xxxx....", ".xx..xx...", "xx....xx..", "..........", ".........."], "♪": ["....xxxx..", "....x..x..", "....x..x..", "....x.....", "....x.....", "..xxx.....", ".xxxx.....", ".xxx......", "..........", ".........."], "🪷": ["....k.....", "...kpk....", "..kpPpk...", ".kkpPpkk..", "kpkpPpkpk.", "kppkPkppk.", ".kppppPk..", "kGgggggGk.", ".kkkkkkk..", ".........."], "🔒": ["..kkkk....", ".kSkkSk...", ".kS..Sk...", ".kS..Sk...", "kkkkkkkk..", "kyyykyyk..", "kyyYkyYk..", "kyyyyyyk..", "kYYYYYYk..", "kkkkkkkk.."], "🏆": ["kkkkkkkkk.", "kyyyyyyyk.", "kyyyyyyYk.", ".kyyyyYk..", "..kyyYk...", "...kYk....", "...kyk....", "..kYYYk...", ".kkkkkkk..", ".........."], "⚠": ["....k.....", "...kyk....", "...kyk....", "..kykyk...", "..kykyk...", ".kyykyyk..", ".kyyyyyk..", "kyyykyyyk.", "kkkkkkkkk.", ".........."], "💚": ["..........", ".kk...kk..", "kggk.kggk.", "kgwggggGk.", "kggggggGk.", ".kgggggk..", "..kgggk...", "...kGk....", "....k.....", ".........."], "💖": ["..........", ".kk...kk..", "kppk.kpwk.", "kpwppppPk.", "kppppPPPk.", ".kpppPPk..", "..kpPPk..y", "...kPk..yy", "....k....y", ".........."], "🎯": ["..kkkkk...", ".krrrrrk..", "krwwwwwrk.", "krwrrrwrk.", "krwrkrwrk.", "krwrrrwrk.", "krwwwwwrk.", ".krrrrrk..", "..kkkkk...", ".........."], "🏮": ["....k.....", "..kkkkk...", ".krrrrrk..", "kryrrryrk.", "krrrrrrrk.", "kryrrryrk.", ".krrrrrk..", "..kkkkk...", "...kyk....", "....y....."], "⚡": [".....kkk..", "....kyyk..", "...kyyk...", "..kyyk....", ".kyyyyyk..", "....kyk...", "...kyk....", "..kyk.....", "..kk......", ".........."], "🚐": ["..........", ".kkkkkkk..", "kwccwccwk.", "kwccwccwwk", "kwwwwwwwwk", "kbbbbbbbbk", "kwwwwwwwwk", "kkdkkkkdkk", ".kSk..kSk.", "..k....k.."], "🃏": ["..kkkkkk..", ".klllllk..", ".klrlllk..", ".kllllPk..", ".kllrllk..", ".klPlllk..", ".klllrlk..", ".klllllk..", ".kkkkkkk..", ".........."], "🂠": ["..kkkkkk..", ".klllllk..", ".klrlllk..", ".kllllPk..", ".kllrllk..", ".klPlllk..", ".klllrlk..", ".klllllk..", ".kkkkkkk..", ".........."], "🎴": ["..kkkkkk..", ".klllllk..", ".klrlllk..", ".kllllPk..", ".kllrllk..", ".klPlllk..", ".klllrlk..", ".klllllk..", ".kkkkkkk..", ".........."], "📱": ["..kkkkkk..", "..kddddk..", "..kcccck..", "..kcbcck..", "..kcccck..", "..kcccbk..", "..kcccck..", "..kdwddk..", "..kkkkkk..", ".........."], "🔥": ["....k.....", "...kok....", "...kork...", "..korrok..", ".korryrok.", ".koryyrok.", "korywyrok.", ".koryyrok.", "..kkkkkk..", ".........."], "🌙": ["...kkk....", "..kyyk....", ".kyyk.....", ".kyk......", "kyyk......", "kyyk......", "kyyyk...k.", ".kyyykkyk.", "..kyyyyk..", "...kkkk..."], "📜": ["kkkkkkkk..", "klllllnk..", ".kllllk...", ".klSSlk...", ".kllllk...", ".klSSlk...", ".kllllk...", "kkllllnk..", "knkkkkkk..", ".........."], "💡": ["...kkkk...", "..kyyyyk..", ".kyywyyyk.", ".kywyyyyk.", ".kyyyyyyk.", "..kyyyyk..", "...kYYk...", "...kssk...", "...kSSk...", "....kk...."], "🎂": ["..r.r.r...", "..y.y.y...", ".kkkkkkk..", ".kpwpwpk..", ".kppppPk..", "kkkkkkkkk.", "klllllllk.", "kpppppPPk.", "kkkkkkkkk.", ".........."], "🥊": ["..kkkkk...", ".krrrrrk..", "krrwrrrrk.", "krwrrrrrk.", "krrrrrrRkk", "krrrrrRrrk", "kRrrrRRrk.", ".kRRRRRk..", ".kwwwwwk..", ".kkkkkkk.."], "🏃": [".....kk...", "....ktk...", ".....kk...", "...kkbbk..", "..kbbbkbk.", "..k.kbk...", "...kbbk...", "..kbk.kbk.", ".kk....kk.", ".........."], "🛒": ["kk........", ".kkkkkkkk.", ".kbsbsbsk.", ".kbbbbbbk.", "..kbsbsk..", "..kkkkkk..", "..k.......", "..kkkkkk..", "..kSk.kSk.", "...k...k.."], "🎲": [".kkkkkkk..", "kwwwwwwwk.", "kwkwwwkwk.", "kwwwwwwwk.", "kwwwkwwwk.", "kwwwwwwwk.", "kwkwwwkwk.", "kSSSSSSSk.", ".kkkkkkk..", ".........."], "📊": ["kkkkkkkkk.", "klllllllk.", "kllllllrk.", "kllllbllk.", "klllkbllk.", "kllgkbrlk.", "klgggbrlk.", "kkkkkkkkk.", "..........", ".........."], "🎞": ["kkkkkkkkk.", "kwkwkwkwk.", "kkkkkkkkk.", "kbbbkccck.", "kbbbkccck.", "kkkkkkkkk.", "kwkwkwkwk.", "kkkkkkkkk.", "..........", ".........."], "📼": ["kkkkkkkkk.", "kwkwkwkwk.", "kkkkkkkkk.", "kbbbkccck.", "kbbbkccck.", "kkkkkkkkk.", "kwkwkwkwk.", "kkkkkkkkk.", "..........", ".........."], "💍": ["...kck....", "..kcwck...", "...kck....", "..kkkkk...", ".kyk.kyk..", "kyk...kyk.", "kyk...kyk.", ".kyk.kyk..", "..kkkkk...", ".........."], "💼": ["...kkk....", "..kk.kk...", "kkkkkkkkk.", "knnnnnnnk.", "knnnyynnk.", "kNNNkkNNk.", "knnnnnnnk.", "knnnnnnnk.", "kkkkkkkkk.", ".........."], "🧳": ["...kkk....", "..kk.kk...", "kkkkkkkkk.", "knnnnnnnk.", "knnnyynnk.", "kNNNkkNNk.", "knnnnnnnk.", "knnnnnnnk.", "kkkkkkkkk.", ".........."], "🏳": ["kkkkkk....", "kwwwwwk...", "kwwwwwwk..", "kwwwwwwk..", "kwwwwwk...", "kkkkkk....", "k.........", "k.........", "k.........", "k........."], "🎌": ["k...k.....", "kkkkkkkkk.", "kwrwkwrwk.", "kwwwkwwwk.", "kkkkkkkkk.", "k...k.....", "k...k.....", "k...k.....", "k...k.....", ".........."], "🏅": ["kbk...kbk.", ".kbk.kbk..", "..kbkbk...", "...kkk....", "..kyyyk...", ".kyywyyk..", ".kyyyYyk..", ".kyyYYyk..", "..kyyyk...", "...kkk...."], "🥇": ["kbk...kbk.", ".kbk.kbk..", "..kbkbk...", "...kkk....", "..kyyyk...", ".kyywyyk..", ".kyyyYyk..", ".kyyYYyk..", "..kyyyk...", "...kkk...."], "🥈": ["kbk...kbk.", ".kbk.kbk..", "..kbkbk...", "...kkk....", "..ksssk...", ".ksswssk..", ".ksssSsk..", ".kssSSsk..", "..ksssk...", "...kkk...."], "🥉": ["kbk...kbk.", ".kbk.kbk..", "..kbkbk...", "...kkk....", "..koook...", ".koowook..", ".koooNok..", ".kooNNok..", "..koook...", "...kkk...."], "📞": ["..........", ".kkk......", "krrrk.....", "krrk......", "krrk......", ".krrk.kkk.", "..krrkrrrk", "...krrrrk.", "....kkkk..", ".........."], "🧪": ["...kkkk...", "....kk....", "....kk....", "...kwwk...", "...kwwk...", "..kwwwwk..", ".kgggggk..", "kgggwgggk.", "kgggggGGk.", ".kkkkkkk.."], "🥁": ["k.......k.", ".k.....k..", "..kkkkk...", ".kwwwwwk..", "kSwwwwwSk.", "krrrrrrrk.", "krwrwrwrk.", "krrrrrrrk.", ".kkkkkkk..", ".........."], "💭": ["..........", "..kkkkk...", ".kwwwwwk..", "kwwwwwwwk.", "kwwwwwwwk.", ".kwwwwwk..", "..kkkkk...", "...kk.....", "..kwk.....", "...k......"], "💬": ["..........", ".kkkkkkk..", "kwwwwwwwk.", "kwkwkwkwk.", "kwwwwwwwk.", ".kkwkkkk..", "..kwk.....", "..kk......", "..........", ".........."], "🧑": ["...kkkk...", "..kNNNNk..", ".kNtttTNk.", ".ktktktTk.", ".kttttTTk.", ".ktwwwwTk.", "..kwwwwk..", ".kbbbbbbk.", "kbbbbbbbbk", "kkkkkkkkkk"], "💆": ["...kkkk...", "..kNNNNk..", ".kNtttTNk.", ".ktktktTk.", ".kttttTTk.", ".ktwwwwTk.", "..kwwwwk..", ".kbbbbbbk.", "kbbbbbbbbk", "kkkkkkkkkk"], "😷": ["...kkkk...", "..kNNNNk..", ".kNtttTNk.", ".ktktktTk.", ".kttttTTk.", ".ktwwwwTk.", "..kwwwwk..", ".kbbbbbbk.", "kbbbbbbbbk", "kkkkkkkkkk"], "✉": ["..........", "kkkkkkkkk.", "kwkwwwkwk.", "kwwkwkwwk.", "kwwwkwwwk.", "kwwwwwwwk.", "kwwwwwwwk.", "kkkkkkkkk.", "..........", ".........."], "📩": ["..........", "kkkkkkkkk.", "kwkwwwkwk.", "kwwkwkwwk.", "kwwwkwwwk.", "kwwwwwwwk.", "kwwwwwwwk.", "kkkkkkkkk.", "..........", ".........."], "💌": ["..........", "kkkkkkkkk.", "kwkwwwkwk.", "kwwkwkwwk.", "kwwkrkrwk.", "kwwkrrrwk.", "kwwwkrkwk.", "kkkkkkkkk.", "..........", ".........."], "👑": ["..........", "y...y...y.", "yk.kyk.ky.", "kyykyykyy.", "kyyyyyyyk.", "kyryyyryk.", "kyyyyyyyk.", "kYYYYYYYk.", "kkkkkkkkk.", ".........."], "🗑": ["...kkk....", "kkkkkkkkk.", "kSSSSSSSk.", ".kSdSdSk..", ".kSdSdSk..", ".kSdSdSk..", ".kSdSdSk..", ".kSSSSSk..", "..kkkkk...", ".........."], "🎆": ["....y.....", "..y.y.y...", "...yyy....", "yyyywyyyy.", "...yyy....", "..y.y.y...", "....y..p..", "..b....pwp", "........p.", ".........."], "🎉": ["....y.....", "..y.y.y...", "...yyy....", "yyyywyyyy.", "...yyy....", "..y.y.y...", "....y..p..", "..b....pwp", "........p.", ".........."], "✨": ["....y.....", "..y.y.y...", "...yyy....", "yyyywyyyy.", "...yyy....", "..y.y.y...", "....y..p..", "..b....pwp", "........p.", ".........."], "🙏": ["....kk....", "...ktTk...", "...ktTk...", "..kttTTk..", "..kttTTk..", "..kttTTk..", ".kttkkTTk.", ".kbbkkbbk.", "kbbbkkbbbk", "kkkk..kkkk"], "💦": ["....k.....", "...kck....", "...kck....", "..kcwbk...", "..kcbbk...", ".kcbbbBk..", ".kbbbbBk..", "..kBBBk...", "...kkk....", ".........."], "💧": ["....k.....", "...kck....", "...kck....", "..kcwbk...", "..kcbbk...", ".kcbbbBk..", ".kbbbbBk..", "..kBBBk...", "...kkk....", ".........."], "🌸": ["....k.....", "...kpk....", ".kkkpkkk..", "kpppkpppk.", ".kpkykpk..", "..kpypk...", ".kppkppk..", ".kpk.kpk..", "..k...k...", ".........."], "🪢": ["...kkk....", "..knnnk...", ".knNkNnk..", ".knk.knk..", "..knnnk...", "...knk....", "...knk....", "..knNk....", "..knk.....", "...k......"], "⛽": ["kkkkkk....", "krrrrrk.k.", "krwwwrkkSk", "krwwwrk.Sk", "krrrrrk.Sk", "krrrrrkkSk", "krrrrrk.k.", "krrrrrk...", "kkkkkkk...", ".........."], "🌊": ["..........", "...kkk....", "..kbcck...", ".kbbkwck..", "kbbk.kk...", "kbbbk..kk.", "kbbbbkkbbk", "kBbbbbbbBk", "kkkkkkkkkk", ".........."], "📺": ["..k...k...", "...k.k....", "kkkkkkkkk.", "kdddddddk.", "kdcccccdk.", "kdcbcccdk.", "kdcccccdk.", "kdddddddk.", "kkkkkkkkk.", ".k.....k.."], "⚔": ["ks......sk", "ksk....ksk", ".ksk..ksk.", "..ksksk...", "...ksk....", "..ksksk...", ".knk..knk.", "kNk....kNk", "kk......kk", ".........."], "📷": ["..........", "...kkk....", "kkkSSSkkk.", "kSSSSSSSk.", "kSSkkkSSk.", "kSkcbckSk.", "kSkbbbkSk.", "kSSkkkSSk.", "kkkkkkkkk.", ".........."], "📸": ["..........", "...kkk....", "kkkSSSkkk.", "kSSSSSSSk.", "kSSkkkSSk.", "kSkcbckSk.", "kSkbbbkSk.", "kSSkkkSSk.", "kkkkkkkkk.", ".........."], "🖼": ["kkkkkkkkk.", "knnnnnnnk.", "knccccynk.", "kncccccnk.", "kncgcccnk.", "kngggcgnk.", "knggggnk..", "knnnnnnnk.", "kkkkkkkkk.", ".........."], "📒": ["kkkkkkkk..", "kBbbbbbbk.", "kBbwwwwbk.", "kBbbbbbbk.", "kBbbbbbbk.", "kBbbbbbbk.", "kBbbbbbbk.", "kBlllllk..", "kkkkkkkk..", ".........."], "📘": ["kkkkkkkk..", "kBbbbbbbk.", "kBbwwwwbk.", "kBbbbbbbk.", "kBbbbbbbk.", "kBbbbbbbk.", "kBbbbbbbk.", "kBlllllk..", "kkkkkkkk..", ".........."], "🔍": ["..kkkk....", ".kccwck...", "kccwcck...", "kcccccck..", "kcccccck..", ".kccccck..", "..kkkkkk..", ".....kNk..", "......kNk.", ".......kk."], "💾": ["kkkkkkkk..", "kbsssbbk..", "kbsSsbbbk.", "kbbbbbbbk.", "kbbbbbbbk.", "kbwwwwwbk.", "kbwdddwbk.", "kbwwwwwbk.", "kkkkkkkkk.", ".........."], "🌳": ["...kkkk...", "..kgggGk..", ".kggwggGk.", "kgggggggGk", "kggggggGGk", ".kgggGGGk.", "..kkNNkk..", "....Nk....", "....Nk....", "...kkkk..."], "🌱": ["...kkkk...", "..kgggGk..", ".kggwggGk.", "kgggggggGk", "kggggggGGk", ".kgggGGGk.", "..kkNNkk..", "....Nk....", "....Nk....", "...kkkk..."], "⛩": ["kkkkkkkkkk", "rrrrrrrrrr", "kkkkkkkkkk", ".kr....rk.", "kkkkkkkkk.", ".kr....rk.", ".kr....rk.", ".kr....rk.", ".kr....rk.", ".kk....kk."], "✏": ["......kkk.", ".....kprk.", "....kyyk..", "...kyyk...", "..kyyk....", ".kyyk.....", ".ktk......", "kdk.......", "kk........", ".........."], "💸": ["..........", "..........", "kkkkkkkkk.", "kgggggggk.", "kgkgggkgk.", "kggkykggk.", "kgkgggkgk.", "kgggggggk.", "kkkkkkkkk.", ".........."], "🏫": ["....k.....", "...krk....", "..krrrk...", ".krrrrrk..", "krrrrrrrk.", ".klllllk..", ".klbklbk..", ".kllkllk..", ".kllkllk..", ".kkkkkkk.."], "🏠": ["....k.....", "...krk....", "..krrrk...", ".krrrrrk..", "krrrrrrrk.", ".klllllk..", ".klbklbk..", ".kllkllk..", ".kllkllk..", ".kkkkkkk.."], "🎰": ["kkkkkkkk..", "krrrrrrk..", "kkkkkkkkk.", "kwkwkwkSk.", "krkykykSk.", "kwkwkwkSk.", "kkkkkkkkk.", "krrrrrrk..", "kkkkkkkk..", ".........."], "🎟": ["..........", "kkkkkkkkk.", "kooookook.", "kooookook.", ".kooo.ok..", ".kooo.ok..", "kooookook.", "kkkkkkkkk.", "..........", ".........."], "🥗": ["..........", "..g.g.....", ".gkgrgk...", "kgrgggGgk.", "kkkkkkkkk.", "kwwwwwwwk.", ".kwwwwwk..", "..kkkkk...", "..........", ".........."], "👁": ["..........", "..kkkkk...", ".kwwwwwk..", "kwwkbkwwk.", "kwkbbbkwk.", "kwwkbkwwk.", ".kwwwwwk..", "..kkkkk...", "..........", ".........."], "👏": ["..........", "..k.k.....", ".ktktk....", ".ktttkk...", "kttttTtk..", "kttttTTk..", ".kttTTTk..", "..ktTTk...", "...kkk....", ".........."], "💪": ["..........", "..k.k.....", ".ktktk....", ".ktttkk...", "kttttTtk..", "kttttTTk..", ".kttTTTk..", "..ktTTk...", "...kkk....", ".........."], "💨": ["..........", "....kkk...", "kkkkSSSk..", "SSSSSSkSk.", "kkkkkkkSk.", "..kkkkSk..", "SSSSSSk...", "kkkkkk....", "..........", ".........."], "⌛": ["kkkkkkkk..", "kwwwwwwk..", ".kyyyyk...", "..kyyk....", "...kk.....", "..kwyk....", ".kwyyyk...", "kyyyyyyk..", "kkkkkkkk..", ".........."], "🌧": ["...kkk....", ".kksssk...", "kssssssk..", "kssssSSk..", ".kkkkkk...", "..b..b....", ".b..b..b..", "b..b..b...", "..........", ".........."], "✂": ["kk.....kk.", "ksk...ksk.", ".ksk.ksk..", "..kskskk..", "...ksk....", "..kkkkk...", ".krk.krk..", "krrk.krrk.", ".kk...kk..", ".........."], "📣": ["......kk..", "....kkrk..", "..kkrrrk..", "kkrrrrrk..", "kwrrrrrk..", "kkrrrrrk..", "..kkrrrk..", "...kkkkk..", "...kk.....", ".........."], "🛡": ["kkkkkkkkk.", "kbbbbsssk.", "kbbbbsssk.", "kbbbbsssk.", "kssssbbbk.", ".ksssbbk..", ".ksssbbk..", "..kssbk...", "...kkk....", ".........."], "🧻": ["..kkkkkk..", ".klllllkk.", "kllllllkSk", "kllllllkSk", "kllllllkk.", "kllllllk..", "kllllllk..", ".kllllk...", "..kkkk....", ".........."], "⭐": ["....k.....", "...kyk....", "kkkkykkkk.", "kyyyyyyyk.", ".kyywyyk..", "..kyyyyk..", ".kyykkyyk.", ".kyk..kyk.", ".kk....kk.", ".........."], "💎": ["..kkkkk...", ".kcwcbck..", "kcwcccbbk.", "kkkkkkkkk.", ".kcccbbk..", "..kccbk...", "...kbk....", "....k.....", "..........", ".........."], "🟢": ["..kkkk....", ".kggggk...", "kggwgggk..", "kgwggggk..", "kggggGGk..", "kgggGGGk..", ".kGGGGk...", "..kkkk....", "..........", ".........."], "🔴": ["..kkkk....", ".krrrrk...", "krrwrrrk..", "krwrrrrk..", "krrrrRRk..", "krrrRRRk..", ".kRRRRk...", "..kkkk....", "..........", ".........."], "⚪": ["..kkkk....", ".kwwwwk...", "kwwwwwwk..", "kwwwwwwk..", "kwwwwssk..", "kwwwsssk..", ".kssssk...", "..kkkk....", "..........", ".........."], "🛍": ["...kkk....", "..k...k...", "..k...k...", "kkkkkkkkk.", "kpppppppk.", "kpppppppk.", "kppwwwppk.", "kpppppppk.", "kPPPPPPPk.", "kkkkkkkkk."], "ⓘ": ["..kkkkk...", ".kbbbbbk..", "kbbbwbbbk.", "kbbbbbbbk.", "kbbbwbbbk.", "kbbbwbbbk.", "kbbbwbbbk.", ".kbbbbbk..", "..kkkkk...", ".........."]};
+const MONO=new Set(["✦", "♥", "♡", "★", "✓", "✕", "♪"]);
+const svg={};const mk=k=>svg[k]||(svg[k]=(()=>{let r="";R[k].forEach((row,y)=>[...row].forEach((c,x)=>{if(c!=="."&&PAL[c])r+=`<rect x="${x}" y="${y}" width="1.02" height="1.02" fill="${PAL[c]}"/>`;}));
+  return `<svg viewBox="0 0 10 10" shape-rendering="crispEdges" aria-hidden="true">${r}</svg>`;})());
+const esc=s=>s.replace(/[.*+?^${}()|[\]\\]/g,"\\$&");
+const keys=Object.keys(R).sort((a,b)=>b.length-a.length).map(esc).join("|");
+const HAS=new RegExp("(?:"+keys+")","u"),SPLIT=new RegExp("((?:"+keys+")\uFE0F?)","gu");
+const SKIP=/^(SCRIPT|STYLE|TEXTAREA|INPUT|OPTION|SELECT|TITLE|svg|text|CANVAS)$/;
+const skip=n=>{for(let e=n.parentNode;e&&e!==document.body;e=e.parentNode){if(e.nodeType!==1)continue;if(SKIP.test(e.nodeName)||e.id==="live"||e.classList.contains("pxe")||e.isContentEditable)return true;}return false;};
+function fix(t){const s=t.data;if(!s||!t.parentNode||!t.isConnected||!HAS.test(s)||skip(t))return;const f=document.createDocumentFragment();
+  for(const part of s.split(SPLIT)){if(!part)continue;const k=part.replace("\uFE0F","");if(R[k]){const e=document.createElement("span");e.className="pxe"+(MONO.has(k)?" pxm":"");e.setAttribute("role","img");e.setAttribute("aria-label",k);e.innerHTML=mk(k);f.appendChild(e);}else f.appendChild(document.createTextNode(part));}
+  t.parentNode.replaceChild(f,t);}
+function walk(root){if(root.nodeType===3){fix(root);return;}if(root.nodeType!==1||SKIP.test(root.nodeName))return;const w=document.createTreeWalker(root,NodeFilter.SHOW_TEXT);const L=[];let n;while((n=w.nextNode()))if(HAS.test(n.data))L.push(n);L.forEach(fix);}
+const go=()=>{walk(document.body);new MutationObserver(ms=>{for(const m of ms){if(m.type==="characterData")fix(m.target);else m.addedNodes.forEach(walk);}}).observe(document.body,{childList:true,subtree:true,characterData:true});};
+if(document.body)go();else document.addEventListener("DOMContentLoaded",go);
+try{window.PXEMOJI={keys:Object.keys(R),svg:mk};}catch(e){}
+})();
+
 </script>
 <script>
 (function(){
 /* v1.87: Thai code ships inside index.html; English code (en.js) and the dictionary (i18n.js) load only when needed */
-var B="9a03fe2a29";
+var B="59a7e98ade";
 var L="";try{L=localStorage.getItem("mtm_lang")||"";}catch(e){}
 try{var h=(location.hash||"").match(/lang=(th|en)/);if(h)L=h[1];}catch(e){}
 if(L!=="th"&&L!=="en")L="th";

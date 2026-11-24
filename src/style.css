@@ -2374,3 +2374,113 @@ div.mdelask{margin:2px 0 8px;padding:8px;box-shadow:inset 0 0 0 2px var(--line);
 
 /* v1.91.86: scene portraits centre on the face (--cx = face centre across the picture) */
 .cast .stand{transform:translateX(calc(var(--cx,.5) * -100%))}.cast .stand.off{transform:translateX(calc(var(--cx,.5) * -100%)) scale(.96)}
+/* v1.91.127: radio game show "แฟนพันแท้มวยเด็ดเจ็ดครก" */
+.qshow{background:radial-gradient(ellipse at 50% 0,#3a2468 0,#160e2c 55%,#0a0616 100%);padding:8px}
+.qs-wrap{margin:auto;width:min(760px,100%);display:grid;grid-template-columns:1fr 150px;gap:10px;align-items:start}
+.qs-main{display:grid;gap:8px;min-width:0}
+.qs-top{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.qs-top h2{margin:0;font-size:.95rem;line-height:1.05;text-align:center;color:#fff;letter-spacing:.02em}
+.qs-top h2 b{font-size:1.35rem;color:var(--gold);text-shadow:0 2px 0 #7a4b06,0 0 14px rgba(242,193,78,.5)}
+.qs-air{font:700 .7rem/1 "Chakra Petch",sans-serif;color:#ff5a6a;border:2px solid #ff5a6a;padding:3px 6px;animation:qsair 1.2s steps(2) infinite}
+.qs-fm{font:700 .7rem/1 "Chakra Petch",sans-serif;color:#9ad;border:2px solid #4a6a8a;padding:3px 6px}
+@keyframes qsair{50%{opacity:.35}}
+.qs-stage{position:relative;height:clamp(205px,36vh,300px);display:flex;justify-content:space-between;align-items:flex-end;padding:0 4% 18px;
+  background:radial-gradient(ellipse 30% 70% at 22% 100%,rgba(255,220,140,.22),transparent 70%),radial-gradient(ellipse 30% 70% at 78% 100%,rgba(140,200,255,.18),transparent 70%),linear-gradient(#1d1238,#2a1a4c);border:3px solid #4b3580;overflow:hidden}
+.qs-pod{position:relative;display:flex;flex-direction:column;align-items:center;width:42%;z-index:1}
+.qs-fig{height:clamp(150px,27vh,225px);display:flex;align-items:flex-end;justify-content:center}
+.qs-fig img{max-height:100%;max-width:100%;object-fit:contain;filter:drop-shadow(0 4px 0 rgba(0,0,0,.35))}
+.qs-pod.me .qs-fig img{transform:translateY(8%)}
+.qs-sil{width:60px;height:140px;background:#0d0820;border-radius:30px 30px 6px 6px}
+.qs-plate{width:100%;text-align:center;font:700 .75rem/1.2 "Chakra Petch",sans-serif;padding:6px 4px;color:#2a1b02;background:linear-gradient(#ffd977,#d79b2a);box-shadow:inset 0 -4px 0 #8a5a10;position:relative;z-index:2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.qs-pod.host .qs-plate{background:linear-gradient(#a9d4ff,#5d8fd0);box-shadow:inset 0 -4px 0 #2b4d80;color:#0b1830}
+.qs-krok{position:absolute;left:0;right:0;bottom:2px;display:flex;justify-content:center;gap:4%;z-index:3;pointer-events:none}
+.qs-krok i{width:20px;height:12px;background:linear-gradient(#7d746a,#4a433c);clip-path:polygon(0 0,100% 0,82% 100%,18% 100%);display:block}
+.qs-krok.shake i{animation:qsshake .45s ease 2}.qs-krok.hop i{animation:qshop .5s ease}.qs-krok.hop i:nth-child(2n){animation-delay:.08s}
+@keyframes qsshake{25%{transform:translateX(-3px) rotate(-8deg)}75%{transform:translateX(3px) rotate(8deg)}}
+@keyframes qshop{40%{transform:translateY(-10px)}}
+.qs-say{background:#fff;color:#1c1430;padding:8px 10px;border:3px solid #1c1430;box-shadow:4px 4px 0 rgba(0,0,0,.35);position:relative}
+.qs-say small{position:absolute;top:-11px;left:8px;background:#5d8fd0;color:#fff;font-weight:700;padding:0 6px;font-size:.72rem}
+.qs-say p{margin:.15rem 0 0;font-size:.92rem;line-height:1.45}
+.qs-say .qs-heck{font-size:.8rem;color:#6a4a9a;margin-top:.3rem}
+.qs-info{display:flex;justify-content:space-between;gap:6px;font-size:.8rem;color:var(--muted,#cbc3e3);flex-wrap:wrap}
+.qs-time{position:relative;height:16px;background:#0d0820;border:2px solid #4b3580}
+.qs-time i{position:absolute;inset:0 auto 0 0;background:linear-gradient(90deg,#ff5a6a,#f2c14e 40%,#4cc38a);transition:width .2s linear}
+.qs-time b{position:absolute;right:6px;top:50%;transform:translateY(-50%);font:700 .72rem/1 "Chakra Petch",sans-serif;color:#fff;text-shadow:0 1px 0 #000}
+.qs-time.pause i{opacity:.45}
+.qs-q{background:linear-gradient(#20164a,#140c30);border:3px solid #f2c14e;padding:10px 12px;clip-path:polygon(10px 0,calc(100% - 10px) 0,100% 50%,calc(100% - 10px) 100%,10px 100%,0 50%)}
+.qs-q p{margin:0;text-align:center;font-weight:600;line-height:1.45}
+.qs-opts{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.qs-o{position:relative;display:flex;align-items:center;gap:8px;text-align:left;padding:9px 10px;min-height:46px;background:#1d1540;border:2px solid #6a55b0;color:#fff;font:inherit;font-size:.86rem;line-height:1.3;cursor:pointer;overflow:hidden}
+.qs-o i{font-style:normal;font-weight:700;color:var(--gold);flex:none}
+.qs-o span{position:relative;z-index:1}
+.qs-o em{position:absolute;right:6px;bottom:3px;font-style:normal;font-size:.7rem;color:#9ad;z-index:1}
+.qs-o em::before{content:"";position:absolute;right:-6px;bottom:-3px;height:4px;width:calc(var(--p)*1.3);max-width:120px;background:#5d8fd0}
+.qs-o:not(:disabled):hover{background:#2b2060;border-color:var(--gold)}
+.qs-o:disabled{cursor:default}
+.qs-o.cut{opacity:.25}
+.qs-o.lock{background:#a06a10;border-color:#ffd977;animation:qsair .5s steps(2) infinite}
+.qs-o.right{background:#1f7a4c;border-color:#7ff0b4}
+.qs-o.bad{background:#8a2030;border-color:#ff8a97}
+.qs-life{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+.qs-l{display:flex;flex-direction:column;align-items:center;gap:2px;padding:6px 2px;background:#241a4a;border:2px solid #4b3580;color:#fff;font:inherit;font-size:1.1rem;cursor:pointer}
+.qs-l small{font-size:.66rem;line-height:1.2;color:#cbc3e3;text-align:center}
+.qs-l:disabled{opacity:.3;cursor:default}
+.qs-l.stop{border-color:#a77b1c}
+.qs-foot{display:flex;justify-content:center;gap:8px;flex-wrap:wrap}
+.qs-hint{margin:0;font-size:.82rem;color:#bfe0ff;text-align:center}
+.qs-fact,.qs-safe{margin:0;font-size:.82rem;background:rgba(255,255,255,.06);padding:6px 8px;border-left:3px solid var(--gold)}
+.qs-safe{border-color:#4cc38a}
+.qs-phone .qs-fr{display:flex;flex-wrap:wrap;justify-content:center;gap:6px}
+.qs-f{display:flex;flex-direction:column;align-items:center;gap:2px;background:#241a4a;border:2px solid #4b3580;padding:4px;color:#fff;font:inherit;cursor:pointer;width:72px}
+.qs-f img{width:56px;height:56px;object-fit:cover}.qs-f small{font-size:.7rem}
+.qs-callbox{display:flex;gap:8px;align-items:flex-start;background:#0e2238;border:2px solid #5d8fd0;padding:8px}
+.qs-callbox img{width:56px;height:56px;object-fit:cover;flex:none;border:2px solid #5d8fd0}
+.qs-callbox small{color:#9ad;font-weight:700}.qs-callbox p{margin:.2rem 0 0;font-size:.88rem;line-height:1.4}
+.qs-end{display:grid;gap:6px}
+.qs-amt{margin:0;text-align:center;font:700 2rem/1.1 "Chakra Petch",sans-serif;color:var(--gold);text-shadow:0 3px 0 #7a4b06}
+.qs-amt.zero{color:#cbc3e3;text-shadow:none}
+.qs-lad{list-style:none;margin:0;padding:6px;background:#120b26;border:3px solid #4b3580;display:grid;gap:1px;position:sticky;top:0}
+.qs-lad li{display:flex;justify-content:space-between;gap:6px;padding:1px 6px;font:600 .72rem/1.5 "Chakra Petch",sans-serif;color:#9a8fc0}
+.qs-lad li span{opacity:.7}.qs-lad li.sf{color:#fff}.qs-lad li.ok{color:#4cc38a}
+.qs-lad li.on{background:var(--gold);color:#2a1b02}
+@media (max-width:640px){.qs-wrap{grid-template-columns:1fr}.qs-lad{order:-1;position:static;display:flex;flex-direction:row-reverse;overflow-x:auto;padding:4px;gap:2px}
+ .qs-lad li{flex:none;flex-direction:column;align-items:center;padding:1px 4px;font-size:.6rem;line-height:1.2}.qs-lad li span{display:none}
+ .qs-opts{grid-template-columns:1fr}.qs-o{min-height:40px;padding:7px 9px}.qs-say p{font-size:.86rem}}
+@media (prefers-reduced-motion:reduce){.qs-air,.qs-o.lock,.qs-krok i{animation:none!important}}
+/* v1.91.144: camp merit bar, Nang Tani's lottery whisper, the dream-fight vignette */
+.ghbar{display:flex;align-items:center;gap:8px;margin:2px 0 8px;font-size:.82rem}
+.ghbar span{white-space:nowrap}
+.ghbar i{flex:1;height:10px;background:#20163a;border:2px solid #4b3580;position:relative}
+.ghbar i b{position:absolute;inset:0 auto 0 0;background:linear-gradient(90deg,#c58a2a,#f2c14e)}
+.ghbar em{font-style:normal;color:var(--muted,#cbc3e3);white-space:nowrap}
+.ghhint{display:flex;align-items:center;gap:8px;font-size:.85rem;background:rgba(63,138,79,.18);border-left:3px solid #6fcf7f;padding:6px 8px;margin:4px 0 8px}
+.ghhint img{width:42px;height:42px;object-fit:cover;border-radius:50%}
+body.dreamfx .fight::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:5;background:radial-gradient(ellipse at 50% 45%,transparent 45%,rgba(40,90,55,.55));mix-blend-mode:multiply}
+.ghcard{display:flex;align-items:center;gap:10px;padding:8px 10px;margin-top:8px;background:rgba(63,138,79,.14);border:2px solid #3f8a4f}
+.ghcard img.face{width:48px;height:48px;object-fit:cover;border-radius:50%;background:#1c2a20}
+.ghcard div{flex:1;display:flex;flex-direction:column}.ghcard small{color:var(--muted,#cbc3e3)}
+/* v1.91.144: Nang Tani guide line, merit chip on the home camp-action button */
+.ghgoal{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:-2px 0 10px;font-size:.78rem;color:var(--muted,#cbc3e3)}
+.ghgoal>span{flex:1;min-width:180px}
+.ghm{font-style:normal;color:#f2c14e}.ghm.ghlow{color:#ff7a7a}
+.ghcard .btn+.btn{margin-left:6px}
+/* v1.91.144: pixel emoji — every emoji in on-screen text becomes a 10x10 pixel icon (src/pxemoji.js) */
+.pxe{display:inline-block;width:1.15em;height:1.15em;vertical-align:-.2em;line-height:0;margin:0 .04em}
+.pxe svg{width:100%;height:100%;display:block;image-rendering:pixelated}
+.pxe.pxm{width:1em;height:1em;vertical-align:-.12em}
+/* v1.91.144: deeper camp pets — one home button, pet window, levels/joy/talents */
+.petbtn .peticons{display:flex;gap:2px;flex:none}.petbtn .peti{width:30px;height:auto;image-rendering:pixelated}
+.petgrid{display:grid;grid-template-columns:1fr;gap:8px;margin:8px 0}
+.petcard{display:grid;grid-template-columns:56px 1fr;gap:6px 10px;align-items:center;padding:8px 10px;color:var(--fg,#fff);background:var(--bg2,#241c38);box-shadow:inset 0 0 0 2px var(--line,#4b3a70)}
+.petcard .peti{width:56px;height:auto;image-rendering:pixelated}.petcard.done,.petcard.away{opacity:.8}
+.petcard .pcm{display:flex;flex-direction:column;gap:3px;min-width:0}.pcj{display:flex;align-items:center;gap:6px}.pcj small{font-size:.7rem;opacity:.8}
+.petcard .pc2{font-size:.72rem;color:var(--muted,#cbc3e3);line-height:1.25}
+.pcact{grid-column:1/-1;display:flex;flex-wrap:wrap;gap:6px;align-items:center}.pcact .btn{flex:1 1 auto}.pcact .ghost{flex:0 0 auto}
+.pbar{display:block;height:8px;background:#20163a;border:2px solid #4b3580;position:relative;min-width:60px;flex:1}.pbar b{position:absolute;inset:0 auto 0 0}
+.petdet .pdh{display:flex;gap:12px;align-items:center}.peti.big{width:72px;height:auto;image-rendering:pixelated}
+.pstat{display:flex;align-items:center;gap:8px;margin:6px 0;font-size:.82rem}.pstat span{width:58px;flex:none}.pstat .pbar{min-width:0}.pstat em{font-style:normal;color:var(--muted,#cbc3e3);font-size:.75rem;flex:none;max-width:45%}
+.ptal{list-style:none;padding:0;margin:8px 0;font-size:.82rem}.ptal li{padding:4px 0;border-bottom:1px dashed rgba(255,255,255,.08)}.ptal li.off{opacity:.5}.ptal b{color:#ffd34a;margin-right:4px}
+.pmodes{display:grid;gap:6px;margin:8px 0}.pmodes .btn{display:flex;flex-direction:column;align-items:flex-start;text-align:left}.pmodes small{font-size:.72rem;opacity:.85}
+.pwarn{color:#f0a33a}
+.psp{display:inline-block;width:40px;background-size:400% 100%;background-position:0 0;background-repeat:no-repeat;image-rendering:pixelated;flex:none}
+.petcard .psp{width:56px}.psp.big{width:80px}.petbtn .psp{width:30px}

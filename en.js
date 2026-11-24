@@ -1190,7 +1190,7 @@ function advise(G,a,b,rounds,n=40){const fa=G.F[a],fb=G.F[b];const res={};
   const best=Object.entries(res).sort((x,y)=>y[1]-x[1])[0];return {rates:res,best:best[0],bestRate:best[1],base:res.balanced};}
 // v1.51: camp pets — they join through little stories, wander the yard, and cheer the team up once a week
 const PETS={cat:{name:"Orange cat",food:150,eff:"Everyone: morale +2"},dog:{name:"Thai Ridgeback",food:250,eff:"Everyone: fatigue −3"},rooster:{name:"Retired fighting rooster",food:100,eff:"Everyone: morale +1 · fatigue −1"},turtle:{name:"Temple turtle",food:80,eff:"Everyone: morale +3 (calmer minds)"},otter:{name:"Riverside Otter",food:0,eff:"Swims alongside whoever is training · everyone's fatigue −1"}};
-const PET_NAMES={cat:["Pomelo","Bread","Chubbs"],dog:["Blackie","Goldie","Khao Tu"],rooster:["Greenie","King Cluck","Goofy"],turtle:["Slowpoke","Mochi","Abbot"],otter:["Nam Ping","Krathong","Khao Niao"]};
+const PET_NAMES={cat:["Pomelo","Bread","Chubbs"],dog:["Goldie","Khao Tu","Cocoa"],rooster:["Greenie","King Cluck","Goofy"],turtle:["Slowpoke","Mochi","Abbot"],otter:["Nam Ping","Krathong","Khao Niao"]};
 const petFood=G=>(G&&G.pets||[]).reduce((s,p)=>s+(PETS[p.k]?PETS[p.k].food:0),0);
 function petPlay(G,i){const p=(G.pets||[])[i];if(!p||p.wk===gameWeek(G))return false;p.wk=gameWeek(G);p.joy=Math.min(100,(p.joy||50)+10);const R=roster(G);
   if(p.k==="cat")R.forEach(f=>f.morale=Math.min(100,f.morale+2));if(p.k==="dog")R.forEach(f=>f.fatigue=Math.max(0,f.fatigue-3));
@@ -5789,7 +5789,7 @@ function drawCamp(ctx,G,t){
   if(G.avatar){const pw=wander(31,t,[110,132,300,152],5200);chib(G.avatar,"player",pw.x,pw.y,.85,pw.flip,pw.moving?Math.floor(t/130)%2:Math.floor(t/420)%2);}
   // v1.51: adopted pets roam the yard (the stray soi dog stays until a dog is adopted)
   (G.pets||[]).forEach((p,i)=>{const w=wander(600+i*13,t+i*900,PET_BOX[p.k]||[20,150,300,170],PET_SPD[p.k]||3000);const px=w.x,py=w.y,fl=w.flip?-1:1,wd=p.k==="dog"?15:11,Z=2;
-    D.push({y:py+14,f:()=>{const Q=(x,y,ww,h,c)=>P(fl>0?px+x*Z:px+(wd-x-ww)*Z,py+y*Z,ww*Z,h*Z,c);drawPetQ(Q,p.k,t+i*333,w.moving);}});});
+    D.push({y:py+14,f:()=>{if(typeof petHub==="function"&&petHub(ctx,p.k,(px+wd*Z/2)*S,(py+9*Z)*S,fl,t+i*333,w.moving,S))return;/* v1.91.144: pets with sprite art draw themselves (src/pets.js) */const Q=(x,y,ww,h,c)=>P(fl>0?px+x*Z:px+(wd-x-ww)*Z,py+y*Z,ww*Z,h*Z,c);drawPetQ(Q,p.k,t+i*333,w.moving);}});});
   if(!(G.pets||[]).some(p=>p.k==="dog")){const dw=wander(5,t,[10,162,300,170],2600);const dx=dw.x,dy=dw.y+8,fl=dw.flip?-1:1,leg=dw.moving&&Math.floor(t/90)%2;
    D.push({y:dy+6,f:()=>{const Q=(x,y,w,h,c)=>P(fl>0?dx+x:dx+10-x-w,dy+y,w,h,c);Q(1,1,8,4,"#c99a5e");Q(8,-1,3,3,"#c99a5e");Q(10,0,1,1,"#2b2530");Q(0,Math.floor(t/150)%2?0:1,2,1,"#c99a5e");
      Q(1+(leg?1:0),5,1,2,"#a87a44");Q(7-(leg?1:0),5,1,2,"#a87a44");}});}
@@ -6629,7 +6629,7 @@ AU.gsfx=function(kind,a){if(!this.init()||this.muted||!SETTINGS.sfx)return;const
   if(kind==="shimmer")for(let i=0;i<6;i++)T(i*.05,{f:1400+Math.random()*1400,type:"sine",dur:.12,peak:.06});};
 
 // ================= MUAY THAI MOE v1.3 — UI =================
-const VERSION="1.91.142";
+const VERSION="1.91.144";
 const CUR_LANG=(typeof window!=="undefined"&&window.LANG)||"th";
 const TH_LABEL=String.fromCharCode(3652,3607,3618);
 function langSwitch(cls){return `<div class="langsw ${cls||""}" role="group" aria-label="Language">${[["th",TH_LABEL],["en","EN"]].map(([k,l])=>`<button class="lsb ${CUR_LANG===k?"on":""}" data-act="setlang" data-v="${k}" aria-pressed="${CUR_LANG===k}">${l}</button>`).join("")}</div>`;}
@@ -7866,7 +7866,15 @@ const PATCH_FIX={id:"1.91.111",ver:"Muay Thai Moe v1.91.111",title:"Report from 
  ["🎞️","Fight tapes and Rin","Tape prices now run from the hundreds to the low thousands, Rin reviews a tape for free every 3 weeks, and many speaking portraits now use sharper original art"]],
  foot:"Kru Daeng says: train hard, read all your letters, and see you ringside! ✦"};
 /* popups queue up in order; each one is closed on its own */
-const PATCHES=[PATCH_AV,PATCH_TAPE,PATCH_FIX],PATCH=PATCHES[PATCHES.length-1];
+const PATCH_TANI={id:"1.91.144",ver:"Muay Thai Moe v1.91.144",title:"Nang Tani, pets and the radio quiz",lead:"Sirichai camp has a new guardian spirit, pets that grow, and a Muay Thai radio quiz",items:[
+ ["🪷","Camp merit and Nang Tani","As the camp grows, the banana-tree ghost wakes and haunts your dreams. Make merit through camp activities to calm her — a three-year story from chaos to a shrine to friendship. See \"What is camp merit?\" for how"],
+ ["🥊","Three-round dream fights","The krasue, krahang, Ma Bong and Phi Phong come out during Lent. At merit 60+ you command the corner yourself — and one day you'll command Nang Tani's"],
+ ["🐾","Pets level up","Tap the pets button on the home screen. Play with each pet once a week; they grow to Lv.10 and help the camp with weekly rolls. Some days they won't play — or they run off into the rice fields"],
+ ["🐱","Iron Fist follows Fah","If Fah moves to the camp, her silver cat with white socks comes too"],
+ ["📻","The Seven-Mortar Muay Thai Superfan Show","Answer the radio quiz right often enough and you'll be invited onto a Muay Thai trivia show — top prize ฿100,000"],
+ ["✨","Pixel icons everywhere","Every emoji in the game is now a pixel icon"]],
+ foot:"Kru Daeng says: make some merit — the banana-tree ghost has sharp eyes ✦"};
+const PATCHES=[PATCH_AV,PATCH_TAPE,PATCH_FIX,PATCH_TANI],PATCH=PATCHES[PATCHES.length-1];
 function nextPatch(){const i=PATCHES.findIndex(p=>p.id===(G&&G.newsSeen));return i<0?PATCHES[0]:PATCHES[i+1]||null;}
 function maybeWhatsNew(){if(!G||G.ended||UI.scene)return;const P=nextPatch();if(!P)return;UI.modal={type:"whatsnew",id:P.id};}
 function whatsNewHTML(){const P=PATCHES.find(p=>p.id===(UI.modal&&UI.modal.id))||nextPatch()||PATCH,n=PATCHES.length-PATCHES.indexOf(P)-1;return `<div class="wnew"><span class="pill gold">Update · ${esc(P.ver)}</span><h2>🥊 ${esc(P.title)}</h2><p class="lead">${esc(P.lead)}</p>
@@ -8958,7 +8966,7 @@ function qCleanup(G){const keep=new Set([...G.bookings.map(b=>b.b),...G.offers.m
 // ---------- mail ----------
 let MAILN=0;
 function addMail(G,m){G.mail=G.mail||[];m.id="m"+G.week+"_"+(++MAILN)+"_"+Math.floor(Math.random()*1e4);m.wk=G.week;m.season=G.season||1;if(m.exp!=null)m.expAbs=gameWeek(G)+(m.exp-G.week);m.read=false;G.mail.unshift(m);for(let i=G.mail.length-1;G.mail.length>40&&i>=0;i--)if(!mailKeep(G.mail[i]))G.mail.splice(i,1);if(G.mail.length>60)G.mail=G.mail.slice(0,60);return m;}
-const mailOpen=m=>!m.done&&!m.expired&&(["take","pay","quiz","quest"].includes(m.kind)||(m.kind==="event"&&(m.ev==="kongka"||m.ev==="thief"||m.ev==="tuy"||m.ev==="dress")));
+const mailOpen=m=>!m.done&&!m.expired&&(["take","pay","quiz","quest"].includes(m.kind)||(m.kind==="event"&&(m.ev==="kongka"||m.ev==="thief"||m.ev==="tuy"||m.ev==="dress"||m.ev==="qshow")));
 /* v1.91.32: the player may delete letters — never an event invitation, and only once a letter no longer waits on an answer */
 function mailKeep(m){if(!m)return "";if(m.kind==="event"&&m.ev==="loy")return "event";if(m.bk&&!m.done)return "event";if(m.lg)return "event";if(m.done||m.expired)return "";if(mailOpen(m))return "act";
   if(m.kind==="lotto"){try{const [s,i]=String(m.draw).split("_").map(Number),d=lottoSt(G).draws.find(x=>x.season===s&&x.i===i);return d&&d.res&&!d.done?"act":"";}catch(e){return "";}}
@@ -9155,7 +9163,7 @@ function questExtra(done,rng){if(!G||G.ended)return false;G.gang=G.gang||{st:0,n
 
 // ---------- modals ----------
 /* v1.89.24: the Loy Krathong invitation glows green until it is read and the gauntlet has been played once */
-function loyMailHot(m){if(m.kind==="event"&&(m.ev==="kongka"||m.ev==="thief"||m.ev==="tuy"||m.ev==="dress"))return !m.done&&!m.expired;return m.kind==="event"&&m.ev==="loy";} /* v1.90.4: the Loy invitation always glows green so it is easy to find again */
+function loyMailHot(m){if(m.kind==="event"&&(m.ev==="kongka"||m.ev==="thief"||m.ev==="tuy"||m.ev==="dress"||m.ev==="qshow"))return !m.done&&!m.expired;return m.kind==="event"&&m.ev==="loy";} /* v1.90.4: the Loy invitation always glows green so it is easy to find again */
 /* v1.91.72 (Man): Naka League letters are green with a blinking green frame, regional letters have a blinking blue frame, the black card is black with a blinking red frame */
 function mailTone(m){if(m.tone)return m.tone;const f=String(m.from||"");if(/ไม่มีชื่อผู้ส่ง|no sender/i.test(f))return "black";if(/นาคา|Naka|ไม่ลงชื่อ|Unsigned/i.test(f))return "naka";if(/แชมป์ภาค|regional champ/i.test(f))return "region";return "";}
 function mailListHTML(){const L=G.mail||[];
@@ -11775,4 +11783,1151 @@ Object.assign(CARDS,{
   xN("Vector's lab late at night. Pailin replays the fight she just lost for the tenth time."),xP("pout","My data was wrong. I admit it."),xP("flustered","And as agreed… I'm ready to hear everything you want to say.")]},
  xl_pl_ssr:{c:"pailin",xl:1,r:"SSR",t:"What Doesn't Need Measuring",hint:"Pailin is your girlfriend",bg:"mountain",need:G=>xlLov(G,"pailin"),steps:[
   xN("The sea of mist at Khao Yai. Pailin isn't wearing a single watch."),xP("happy","Today I don't know the time. I don't know my heart rate."),xP("flustered","…All I know is I want to stay here longer than planned.")]}});
+
+// ================= MUAY THAI MOE — RADIO GAME SHOW "แฟนพันแท้มวยเด็ดเจ็ดครก" (v1.91.127, Man 24 พ.ย.) =================
+// The community radio invites the player after they keep answering its weekly quiz right (every 3 right answers, at most 4 shows a season).
+// 20 questions up a money ladder to ฿100,000, a timer on each, safe points at Q5/Q10/Q15, walk away any time with what is banked.
+// Lifelines (once each): cut two wrong answers · ask the studio audience · phone someone close (Kru Daeng or a fighter you know).
+// Everything the show needs to resume lives on the mail itself (m.k, m.bank, m.cq, m.ord, m.used…), so a reload never loses a show.
+const QS_LAD=[500,1000,2000,3000,5000,7000,9000,12000,15000,20000,25000,30000,35000,40000,50000,55000,60000,70000,80000,100000];
+const QS_SAFE=[4,9,14];
+const QS_TIME=[25,30,35,40];
+const QS_ABC=["A","B","C","D"];
+const QS_HOST="Papa Piak";
+// [question, [4 answers], right index, fact shown after the answer]
+const QS_Q=[
+[ // tier 1 — warm-up (Q1–5)
+["Muay Thai is known as “the art of how many limbs”?",["Two limbs","Eight limbs","A con artist","Umpteen"],1,"Punches, kicks, knees and elbows, two each — eight limbs"],
+["What is the dance a Thai boxer performs before fighting to honour the kru?",["Retro ramwong","Wai khru ram muay","Aerobics","A thanksgiving dance"],1,"The wai kru honours teachers, parents and the sacred, warms the body and sizes up the opponent"],
+["What is the headpiece boxers wear during the wai kru called?",["Mongkhon headband","A helmet","Cat-ear headband","A big garland"],0,"The kru or cornerman puts it on, and takes it off before the fight"],
+["What is the cloth tied on a boxer's upper arm for protection called?",["A pha khao ma","Prajiad armband","A scarf","Grandma's handkerchief"],1,""],
+["What colours are the two fighters' corners?",["Red and blue","Pink and purple","White and black","Green and gold leaf"],0,"The other two are the neutral corners"],
+["How many rounds is a pro Muay Thai fight in the big stadiums?",["3 rounds","5 rounds","12 rounds","Until the other one gets hungry"],1,"Three minutes a round, two minutes' rest between"],
+["What does the referee say to separate clinching boxers?",["“Yaek!” (Break!)","“Hold on, kid”","“Cut to commercials”","“Had lunch yet?”"],0,"And “Chok!” means start fighting"],
+["Which instruments play during a Muay Thai fight?",["Pi chawa, khaek drums, ching","Guitar, bass and drums","Phin, khaen and wot","Four violins"],0,"It's the pi-klong band; the tempo speeds up as the fight heats up"],
+["In boxing language, what is a “teep”?",["Pushing the opponent with the sole of the foot","Cycling round the ring","Telling a joke","Running back to the corner"],0,"A good teep controls distance all round"],
+["What is the pungent oil boxers rub on to warm their muscles before a fight called?",["Muay oil (namman muay)","Vegetable oil","Oyster sauce","Engine oil"],0,""],
+["What do boxers wear to protect their teeth?",["A mouthguard","Grandma's dentures","Chewing gum","A sticky-rice ball"],0,""],
+["What is a “boxing camp”?",["Where boxers train and live","A scout camp","A country-music label","A grilled-pork restaurant"],0,"Many boxers eat and sleep in camp from childhood"],
+["Who looks after a boxer in the corner — water, plans between rounds?",["The cornerman","A director","A devoted fan auntie","A rider"],0,"A “mae yok” is a devoted fan in the crowd"],
+["How far does the referee count before a downed boxer loses by knockout?",["Ten","Three","A hundred","Count until they fall asleep"],0,""],
+["Which of these is a foul in Muay Thai?",["Biting the opponent","Body kicks","Knees","Push kick"],0,""],
+["Where does a “low kick” usually land?",["The legs","The referee's knee","The ring ceiling","The wallet"],0,"Kick the legs a little at a time and by the late rounds they can't stand firm"],
+["What most clearly sets Muay Thai apart from boxing?",["Punches, kicks, knees and elbows are all allowed","Gloves","A referee","A square ring"],0,""],
+["If nobody is knocked out after all the rounds, how is the winner decided?",["The judges' scores","Rock-paper-scissors","Whoever is better-looking","A coin toss"],0,""],
+["What is the knee thrown while leaping into the air called?",["Flying knee","Broken knee","Weak knees","Buckling knee"],0,""],
+["In boxing, what is the “guard”?",["Raising the arms to protect yourself","A loyalty card","A wedding invitation","The game cards our camp collects"],0,"Drop your guard and the punch arrives"],
+["Why must a boxer step on the scale before fight day?",["Making weight for their division","Weighing up their feelings","Weighing gold","Weighing the pig's head for the wai kru"],0,""],
+["Where does a boxer sit between rounds?",["Their own corner","The referee's lap","The opponent's corner","The ring apron by the crowd"],0,""],
+["Which part of the leg do most Muay Thai kicks land with?",["The shin","The little toe","The shoe heel","Socks"],0,"Thai boxers harden their shins — one kick feels like a baseball bat"],
+["Where does a “neck kick” land?",["The neck","A banana stalk","A joss stick","The ankle"],0,""],
+["In boxing slang, what is a “mai tai” (killer move)?",["The move that finishes the fight","A dead tree","Grandpa's cane","A toothpick"],0,""],
+["What does a “Muay Khao” (knee fighter) mainly use?",["Knees and clinch","High kicks","Punch combinations","Jumping out of the way"],0,""],
+["In Muay Thai, what does “yok” (round) mean?",["Each period of fighting","Weightlifting","Raising your hands in a wai","Flattering the referee"],0,""],
+["Muay Thai is the national martial art and sport of which country?",["Thailand","Japan","Brazil","Pluto"],0,"This one's free — Papa Piak is generous"],
+["Which of these uses the elbow?",["Spinning elbow","Push kick","Diagonal kick","Straight punch"],0,""],
+["What is grabbing the neck and kneeing at close range called?",["Plam (the clinch)","American pro wrestling","A goodbye hug","Wrestling with homework"],0,""]
+],
+[ // tier 2 — getting warm (Q6–10)
+["What is the tune the pi-klong band plays during a Muay Thai fight?",["“Sarama”","“Lao Duang Duean”","“Elephant Song”","“Bat Eats Banana”"],0,"Slow during the wai kru, then faster as the fight heats up"],
+["Why do Thai boxers usually step over the top rope instead of ducking under?",["The head is sacred and shouldn't go low","The bottom rope is electrified","Too lazy to bend","To show off long legs"],0,""],
+["What is “Muay Khat Chueak”?",["Ancient boxing with rope-bound hands instead of gloves","Boxing on a tightrope","Boxing while dragging a rope","Jump rope to warm up"],0,"Later replaced by gloves for safety"],
+["The old Muay verse says “heavy fists, ___; clever, Lopburi; good form, Chaiya; quick, Tha Sao.” Which region fills the blank?",["Korat","Phuket","Rayong","Bangkok"],0,"Muay Korat is famous for heavy swinging punches"],
+["What is “Jorakhe Fad Hang” (Crocodile Whips Its Tail)?",["Spinning back kick","Ducking low","Flying knee","Lying down and playing dead"],0,"One of the Mae Mai Muay Thai"],
+["What is a “krachap” in boxing?",["A groin protector","An ancient weapon","A Thai dessert","A freshwater fish"],0,"The most essential item in a male boxer's life — Papa confirms"],
+["Boxers from which country did Nai Khanom Tom famously defeat?",["Burma","Japan","Portugal","Mars"],0,"He won ten in a row before King Mangra"],
+["Who is remembered every year on 17 March?",["Nai Khanom Tom, grandmaster of Muay Thai","Phraya Phichai Dap Hak","Every boxer who ever got knocked out","Papa Piak"],0,""],
+["Which title made Buakaw Banchamek world famous?",["K-1 World MAX","Wimbledon","SEA Games chess","A country-music singing contest"],0,"He won it twice, in 2004 and 2006"],
+["What is a “sok klap” (spinning elbow)?",["Spinning and swinging the elbow backwards","Borrowing someone's elbow and giving it back","An elbow that sprained and healed itself","Walking back to the corner"],0,""],
+["What is the elbow that chops down onto the opponent from above called?",["Chopping elbow","Rising elbow","Sideways elbow","Toothpick elbow"],0,"The rising elbow is the one that comes up from below"],
+["Which is against the rules of pro Muay Thai?",["Headbutting","Clinch knees","Slashing elbow","Neck-Line Kick"],0,""],
+["Who should take the mongkhon off the boxer's head before the fight?",["The kru or cornerman","The referee","Opponent","A kind fan in the front row"],0,"The mongkhon is sacred — never put it on the floor or step over it"],
+["How many times does a boxer usually bow down during the wai kru?",["Three times","Once","Seven, one per studio mortar","Ten if the purse is big"],0,""],
+["How long is the break between rounds in pro Muay Thai?",["2 minutes","10 seconds","Half an hour","Until Kru Daeng finishes his story"],0,""],
+["What does a “Muay Femur” (technical) fighter focus on?",["Craft — evasion and counters","Heavy punches only","Marching forward to trade","Singing to annoy the opponent"],0,""],
+["Where does the second part of a Thai boxer's ring name usually come from?",["Their camp or sponsor","Their mother's name","An instant-noodle brand","A phone number"],0,"Like “Sit…” or the name of their camp"],
+["Who are the “mae yok” in boxing?",["Fans who cheer and support boxers with all their heart","Mothers lifting heavy things","Female referees","Women who lift the ring"],0,""],
+["What does “lom muay” (throwing a fight) mean?",["Losing on purpose to fix the result — against the rules and the law","Falling on a slippery ring","Dropping to dodge a punch","Quitting boxing"],0,"Good camps never touch it — Papa Piak insists"],
+["What is “Krabi Krabong”?",["Thai armed martial art","An old Thai dessert","A boxing song","A kind of kick"],0,""],
+["The mongkhon is sacred — what should never be done with it?",["Putting it on the floor or stepping over it","Keeping it somewhere high","Having the kru put it on","Bowing before wearing it"],0,""],
+["Which is known as Thailand's first permanent standard boxing stadium?",["Rajadamnern Stadium","Tha Phae Stadium","The temple yard out back","Khlong Thom flea market"],0,"Opened in 1945 (B.E. 2488)"],
+["Where is Rajadamnern Stadium?",["Bangkok","Chiang Mai","Phuket","Mars"],0,""],
+["Which technique is the “push” into the body to control distance?",["Teep (straight push kick)","Low kick","Diagonal elbow","Curved knee"],0,""],
+["What are the “neutral corners” of a ring?",["The corners that are neither red nor blue","The corner where the referee always stands","The drinks corner","The selfie corner"],0,"When a fighter goes down, the other must wait in a neutral corner"],
+["Which Thai boxer was nicknamed “the left that pierces the gut”?",["Khaosai Galaxy","Buakaw Banchamek","Somluck Kamsing","Pone Kingpetch"],0,"His left to the body left opponent after opponent unable to stand"]
+],
+[ // tier 3 — the real fans (Q11–15)
+["What is the Mae Mai “Mon Yan Lak” (Mon Props the Pillar)?",["A push kick with the sole of the foot","Neck-Line Kick","Spinning elbow","A clinch"],0,""],
+["In Mae Mai Muay Thai, what is “Yo Khao Phra Sumen” (Lifting Mount Meru)?",["Dipping low and driving an uppercut under the chin","Climbing the corner post","A push kick to the chest","A jumping high kick"],0,""],
+["In the widely taught texts, how many Mae Mai Muay Thai techniques are there?",["15","8","108","3"],0,"Plus 15 Luk Mai"],
+["Which king, the story goes, disguised himself to box villagers at Talat Kruat?",["King Suea (the Tiger King)","King Taksin","King Ramkhamhaeng","King Naresuan"],0,"He beat three of the town's best boxers"],
+["In which kingdom's era did King Suea reign?",["Ayutthaya","Sukhothai","Rattanakosin","Lanna"],0,""],
+["How did King Mangra praise Nai Khanom Tom?",["Thais are dangerous all over","Thais eat spicy food well","Thais dance best","Thais wake up late"],0,"Even bare-handed, he could beat ten men"],
+["After which event was Nai Khanom Tom taken to Burma?",["The second fall of Ayutthaya","World War II","Founding Sukhothai","Moving the capital to Chiang Mai"],0,"The capital fell in 1767 (B.E. 2310)"],
+["Who was the first Thai boxer to win an Olympic gold medal for Thailand?",["Somluck Kamsing","Samart Payakaroon","Khaosai Galaxy","Buakaw Banchamek"],0,"Amateur boxing, Atlanta Olympics 1996"],
+["Besides being a Muay Thai legend, which body crowned Samart Payakaroon a world boxing champion?",["WBC","FIFA","NBA","UNESCO"],0,"World super bantamweight champion"],
+["The “buffalo swing” punch belongs to which style?",["Korat style","Chaiya style","Lopburi style","Tha Sao style"],0,""],
+["What is the triangular footwork of ancient Muay Thai called?",["Three-Step Walk","Cha-cha","Three steps forward, two back","The Golden Triangle"],0,""],
+["Muay Chaiya comes from which present-day province?",["Surat Thani","Chiang Rai","Nakhon Ratchasima","Chonburi"],0,"Known for beautiful form and a tight guard — “good form, Chaiya”"],
+["In the old Muay verse, which style is called “clever”?",["Lopburi style","Korat style","Tha Sao style","Chaiya style"],0,"Known for tactics and feints"],
+["Before entering service, Phraya Phichai Dap Hak was known as “Thong Di” plus which nickname?",["White Teeth","Gold Tooth","Iron Fist","Quick Legs"],0,"He didn't chew betel like people of his time, so his teeth stayed white"],
+["Which body runs Lumpinee Stadium?",["The Royal Thai Army","The Royal Forest Department","The State Railway","The Fan Aunties Association of Thailand"],0,""],
+["By old belief, what is a boxer's prajiad usually made from?",["Cloth from his mother, inscribed with yantra","A plastic bag","The camp curtains","The opponent's shirt"],0,"Tied on the arm, as if mother is always protecting him"],
+["In which year did Buakaw Banchamek first win K-1 World MAX?",["2004","1984","2015","2025"],0,"And won it again in 2006"],
+["Who was the first Thai to become a professional world boxing champion?",["Pone Kingpetch","Khaosai Galaxy","Samart Payakaroon","Somluck Kamsing"],0,"Won the title in 1960 (B.E. 2503)"],
+["According to the story, how many Burmese boxers did Nai Khanom Tom beat in a row?",["Ten","Two","Fifty","A hundred and eight"],0,""],
+["How is a “curved knee” different from a “straight knee”?",["A curved knee swings in from the side; a straight knee drives forward","Curved knees are for sprained legs","Straight knees are Mondays only","No difference"],0,""],
+["In Muay Thai, what is the punch that rises from below to under the chin called?",["Uppercut","Straight punch","Hook","Backfist"],0,""],
+["Which of these is a real Mae Mai Muay Thai?",["Crocodile Sweeps Its Tail","Elephant Steps on the Tail","Cat Steals the Mackerel","Fighting Cock Jumps the Fence"],0,""],
+["What does hitting a downed opponent count as?",["A foul — against the rules","Bonus points","The referee praises it","The crowd tips"],0,""],
+["Why do Thai boxers kick the bag or pads thousands of times?",["To harden the shins and make the kick natural","Because the bag likes it","So the kru can rest","To destroy the bag"],0,""],
+["Who ordered the celebration at which Nai Khanom Tom fought?",["King Mangra","King Bayinnaung","King Alaungpaya","King Taksin"],0,""],
+["In which year (B.E.) did Rajadamnern Stadium first open?",["2488","2400","2525","2560"],0,""]
+],
+[ // tier 4 — the big money (Q16–20)
+["What is the Mae Mai “Nakha Bid Hang” (Naga Twists Its Tail)?",["Catching the kicking leg and twisting it","Spinning back kick","Spinning elbow","Push kick"],0,""],
+["Which weapon does the Mae Mai “Pak Luk Thoi” use to stop a kick?",["Elbow","Teeth","The head","The kru's cane"],0,"Stab the elbow down into the incoming kick — it hurts more than the kick"],
+["What is the Mae Mai “Hak Kho Erawan” (Breaking Erawan's Neck)?",["Pulling the opponent's head down into a knee","Kicking a real elephant's neck","Ducking a punch","A push kick to the chest"],0,""],
+["At the celebration of which pagoda did Nai Khanom Tom fight?",["Shwedagon, Yangon","Phra That Doi Suthep","Phra Pathom Chedi","Phra That Phanom"],0,"A celebration of the pagoda's restoration and the raising of its spire umbrella"],
+["In 2014 (B.E. 2557), to which road did Lumpinee Stadium move?",["Ram Inthra","Silom","Nimmanhaemin","Khao San"],0,""],
+["Muay Tha Sao — “quick Tha Sao” — comes from which province?",["Uttaradit","Phuket","Samut Prakan","Trat"],0,"Known for quick feet and kicks"],
+["Who is the revered grandmaster who preserved and spread Muay Chaiya?",["Kru Khet Sriyaphai","Nai Khanom Tom","Phraya Phichai Dap Hak","Papa Piak"],0,""],
+["According to legend, how far up the arm did Muay Korat bind its rope?",["Up to the elbow","Just the fingertips","To the shoulder and round the neck","No binding at all"],0,"To support Korat's wide swinging punches"],
+["In which year did IFMA, the International Federation of Muaythai Associations, receive full recognition from the International Olympic Committee?",["2021","1950","1988","Never"],0,"A big step on the road to the Olympics"],
+["Where was Thailand's first international-style roped boxing ring built?",["The field of Suankularb Wittayalai School","Tha Phae, Chiang Mai","Sanam Luang","In front of Wat Arun"],0,"In 1921 (B.E. 2464)"],
+["What is the ram muay posture where the boxer bows to all four directions called?",["Four-Faced Brahma","Four Directions Conquer the Mortar","The four-way spin","Bowing around the circle"],0,""],
+["In the legend of King Suea at Talat Kruat, what was the boxer “Nai Lek” called?",["Iron Fist","Golden Fist","Quick Legs","Diamond Elbow"],0,"The other two were Nai Klang “Heavy Fist” and Nai Yai “Firm Fist”"],
+["After beating ten men, what did Nai Khanom Tom ask of King Mangra?",["Freedom for the Thai captives","A Burmese wife","A load of gold","A general's post"],0,"The Thai captives returned to their homeland"],
+["Why did gloves mainly replace rope-binding in Thai rings?",["Fighter safety","Gloves were cheaper than rope","A rope shortage","Better photos"],0,""],
+["In Mae Mai Muay Thai, what kind of defence is “Hak Nguang Aiyara” (Breaking the Elephant's Trunk)?",["Catching the opponent's kick and countering at the leg","Clinching and singing","A straight punch to the nose","Crawling under the ropes to escape"],0,""],
+["How does “Luk Mai” differ from “Mae Mai” in Muay Thai?",["Luk Mai are branch techniques built on the Mae Mai","Luk Mai is the fruit in the camp","Luk Mai is only for kids","No difference"],0,""],
+["In pro Muay Thai scoring, how many points does the winner of a round usually get?",["10 points","100 points","1 point","Rounds aren't scored"],0,"The loser of the round gets 9 or less"],
+["In the old Muay Thai verse, which style is called “good form”?",["Chaiya style","Korat style","Lopburi style","Tha Sao style"],0,""],
+["In which division did Samart Payakaroon win the WBC world boxing title?",["Super bantamweight","Heavyweight","Middleweight","Weightless division"],0,"Won the title in 1986"],
+["Where was Nai Khanom Tom from before he was taken captive?",["Ayutthaya","Chiang Mai","Pattani","Nakhon Ratchasima"],0,""],
+["In Muay Thai, which ceremony do students hold every year to honour the kru who taught them?",["The annual wai kru ceremony","Kru's birthday","A grilled-pork party","Kicking a football"],0,""],
+["Which of these is NOT a Mae Mai Muay Thai technique?",["Mackerel Jumps the Wok","Crocodile Sweeps Its Tail","Mon Braces the Post","Breaking Erawan's Neck"],0,"“Mackerel Jumps the Wok” — Papa Piak made that one up this morning"]
+]];
+
+/* ---------------- host lines (funny on purpose) ---------------- */
+const QSL={
+ open:"Hello, fight fans everywhere! Community radio “Our Hometown Muay” welcomes you to… Ultimate Fan! Muay! Seven… Mortaaars!",
+ intro:["I'm Papa Piak, your host. I own three suits and have rotated them for fifteen years. Today's is the washed one",
+  "Our contestant today is {n} — a camp owner who answers our radio quiz right so often the station had to invite them, or we'd run out of prizes!",
+  "Thanks to our sponsors: Golden Mortar fermented fish sauce, “smells through your gloves”, and Fallen Boxer balm, “rub it on and get up before ten”",
+  "We have seven mortars in front of the stage. Don't ask me why… I don't know either. They were here before I started",
+  "A round of applause for {n}! …Very loud, considering there are twelve people in the studio. Thank you"],
+ rule:"The rules are simple! Twenty right answers wins a hundred thousand baht! Questions 5, 10 and 15 are safe points, and you can stop and take the money any time. You get three lifelines, once each — like a kru's kindness, limited!",
+ ask:[["Question {k}. This one's easy — so easy the mortars are laughing","Question {k} for {a}! Listen carefully","Let's warm up — question {k}","Question {k}! Get this wrong and I'm telling the som tam lady outside the station"],
+  ["Question {k}, and the sweat starts… mine, not yours","Question {k} for {a}! The audience is silent… so are the mortars","The money's getting big now. Question {k} — watch out for the counter!","Question {k}. The crew are watching from behind the glass — nobody's eating lunch"],
+  ["Question {k}! Round three, everyone. The money's getting heavy, the mortars are shaking","Question {k} for {a}! The uncle in the front row just sat up straight","Question {k}. Lots of people got this one wrong. I'm not threatening you, just saying"],
+  ["Question {k}… round five now. Whoever's still standing is the real deal","Question {k} for {a}!! Let me breathe… hoooo… OK, listen","Question {k}! Even I had to peek at the answer card twice for this one"]],
+ last:"The last question, everyone!! A hundred thousand baht!! Our legendary seventh mortar is now in the middle of the stage!",
+ lock:["Answer {c}… final answer? Locked! Locked tighter than a fifth-round clinch!","{c}… let me look at {n}'s face… can't read it at all — straighter than a referee","{c}… crew, give me the drum please… thum… thum… thum…","{c}, is it… hmmm… (Papa Piak stares at you far longer than necessary)","{c}… let me say something… …nothing, I just wanted you to sweat"],
+ right:["Correeeect! Righter than the neighbour auntie's lottery ticket last draw!","Correct!! All seven mortars pound in celebration — bonk, bonk, bonk!","Correct! {n} now has {a}! A bigger smile than a fan auntie when her favourite wins by KO","That's it! The back row is standing up… oh, they're going to the bathroom, but they're clapping too","Correct! I'm so happy I forgot my lines… what's the crew's sign say… oh, “keep going”"],
+ safe:"Safe point! That {a} goes home with you for sure — even if you answer the next one “no idea”!",
+ wrong:["Owww… that hurts more than a spinning elbow! The right answer was {c}","Nope… all seven mortars pound at once, BONK! The answer was {c}","Oof… the front row covered their eyes, and so did I. The answer was {c}","So close! Like a kick that misses and you slip over by yourself. The right answer was {c}"],
+ timeout:["Time's up! You took longer than a ten count! The answer was {c}","Beeeep! Time's up! Our clock waits for no one — like a rest break that's never long enough. The answer was {c}"],
+ quitAsk:"Stopping here? Take {a} home, or go on for {nx}? Miss the next one and you'll only keep {sf}…",
+ quit:["No risk, no pain! Like a boxer who teeps all five rounds and wins on points. {n} takes home {a}!","Smart! The kru say knowing when to step back is knowing how to win… I just made that up, but it sounds good, right?","Take the money and go home to sleep! {a} buys Golden Mortar fish sauce for the whole camp!"],
+ quitReveal:"…but if you had gone on, the answer was {c}. Hee hee",
+ nostart:"You haven't won anything yet and you're leaving? The studio doors are locked. Kidding, kidding — but how about one answer first?",
+ win:"A HUNDRED THOUSAAAND!!! {n} is a true Seven Mortars Ultimate Fan! The seventh mortar pounded all by itself! A miracle!",
+ zero:"Going home empty-handed… but you get a bottle of Fallen Boxer balm. Rub it on your heart",
+ home:"You still take {a} home! Not bad at all — that's a year of Golden Mortar fermented fish sauce",
+ bye:"Thank you, {n}, and all you fight fans. See you next time… on Ultimate Fan… Seven… Mortars!",
+ cut:"Crew, cut two answers! …Snip! Snip! Sorry for the noise — our crew uses hedge shears",
+ aud:"Studio audience, your vote please! Press now… (the auntie in row two pressed three times — the crew allowed it)",
+ heck:["Uncle in the back row: “{x}! I've been rooting for {x} since 1987!”","Kid in the front row: “{x}! …I'm guessing”","A devoted fan auntie: “Pick anything, dear, I love them all!”","Motorbike taxi guy: “{x}! I'm waiting to drive people home, don't drag it out”","Market auntie: “{x}! If you win, come buy my som tam!”"],
+ phone:"Phone a friend! You get thirty seconds. This call is sponsored by… nobody. {n} pays the phone bill",
+ phoneBack:"Call over! You've got your hint. Believe it or not — your life, your choice",
+ hurry:["The clock is running… faster than a Tha Sao boxer's feet!","Last five seconds! Pick anything — the fan auntie in the front row loves them all!","Hurry, hurry! Fast like boxers when they hear there's a grilled-pork party!","{n}… I can see the clock. Can you see the clock?"]
+};
+/* v1.91.144: more host material, so a season of shows does not run out of jokes */
+QSL.ask[0].push("Question {k}. The crew says a primary-school kid could answer this …our crew are primary-school kids. The owner's children","Question {k} for {a}! That buys half a jar of fermented fish sauce… a small jar","Question {k}! I'll read slowly — the sponsor pays by the second","Question {k}. Get it wrong and I won't be angry, but seven mortars will be very disappointed");
+QSL.ask[1].push("Question {k} for {a}! Forty listeners at home now — a new station record!","Question {k}. I see {n} wiping sweat… oh, that's me","Question {k}! The crew just passed me a note: “talk less” …I'll keep talking","Question {k} for {a}! Let's turn on the second spotlight… the crew says the power bill isn't paid. One is enough");
+QSL.ask[2].push("Question {k} for {a}! The som tam lady closed her stall to watch through the glass — left a mortar half pounded","Question {k}… let me read it in a deep voice… (ahem) …not deep at all, never mind","Question {k}. I asked a kru near the station about this one. He didn't know, and then he kicked me","Question {k}! At this money you could fight three temple-fair bouts");
+QSL.ask[3].push("Question {k} for {a}!! The station manager is standing behind me. Very pale","Question {k}… our twelve audience members are now eleven. One fainted. It's fine, he'll wake up","Question {k} for {a}! I'm not allowed to help… but I really, really want to");
+/* pacing: a real host does not joke on every answer — short plain lines in between (these may repeat) */
+QSL.lockShort=["{c}… final answer?","{c}… locked in!","Answer {c}… here we gooo…","{c}… OK… let's see the answer…"];
+QSL.rightShort=["Correct!","Correct! Keep going!","Correct! You now have {a}!","Yes! Correeect!"];
+QSL.legend="Before question 16, a legend… the seventh mortar belonged to the station's founder. He said the day someone answers all twenty, it will pound by itself. I've waited fifteen years… question 16 for {a}!";
+QSL.lock.push("{c}… crew, lights down please… (the whole studio goes black) …not THAT dark!","{c}… let's take a thirty-second break… kidding, we have no ad budget","{c}… how sure are you, {n}? …don't answer, I can see your hands shaking","Answer {c}… all seven mortars hold their breath (mortars can't breathe, just imagine it)","{c}… let me open the answer envelope… it's glued shut… crew! The hedge shears again!");
+QSL.right.push("Correct! The auntie in row two pressed her vote button again… auntie, there's no vote right now","Correct! Let me hug you… our podiums are three metres apart. Hug the air for now","Correct! The third mortar pounded by itself… oh, the crew kicked the table. Sorry","Yes! Correct! I knew from the start {n} would get it (I did not)","Correct! A listener just called in to praise you… it's my mum","Correeect! All three judges give ten out of ten (we have one judge. It's me)","Correct! The motorbike taxi guy outside honked three times… or he's calling a customer, not sure");
+QSL.wrong.push("Wrong… the fourth mortar is crying (the crew poured water on it). The answer was {c}","No, I'm truly sorry… wait, am I smiling? Sorry, my face just does that. The answer was {c}","Aaagh! The uncle in the back row dropped his rice basket. The right answer was {c}","Wrong… the crew put on a sad song… it's the Sarama. Not very sad, honestly. The answer was {c}");
+QSL.timeout.push("Time's up… {n} stood so still I thought the picture froze — on a radio show. The answer was {c}");
+QSL.safeAt=["First safe point! {a} goes home for sure. The first mortar just nodded (the crew shook the table)","Second safe point! {a} is yours. Mortars two to six are starting to move… or the table is wobbling, not sure","Last safe point! {a}! Only the seventh mortar is still not moving… it hasn't moved in fifteen years"];
+QSL.retWin="{n} is back! Last time you won so much the station had to sell a mortar… kidding. All seven are still here";
+QSL.retZero="{n} is back for revenge! Last time you went home with balm — used it up yet? We've got another bottle ready";
+QSL.retChamp="The ฿100,000 champion is back! The station nearly went bankrupt, but the manager says the ratings were great, so here we are";
+QSL.campCall=["Quick news before we start: {g} has called the station three times asking for a song for {n} …dear, this is a game show. No requests","Someone from {n}'s camp is cheering outside the glass… {g} brought a light-up sign that says “Fight!”, spelled right too. Very good"];
+QSL.fast=["So fast! I hadn't even finished reading the question","Faster than the referee's whistle! Confidence or a twitchy finger?"];
+QSL.clutch=["Answered with {s} seconds left! My heart can't take this","Close call! The crew had a finger on the time-up button"];
+QSL.fRight="Credit to {f}! The station will send a bottle of balm as thanks";
+QSL.fIgnoreRight="Ignored {f} and got it right! {f}, if you're listening… I apologise on their behalf";
+QSL.fIgnoreWrong="{f} said {x}… why didn't you trust {f}… I won't say more, but the whole camp will";
+QSL.fWrong={coach:"Kru Daeng! Sticky rice and grilled pork for the whole camp, as promised — the station has it in writing!",kati:"Kati… that thousand percent is now zero",mali:"Mali… please stop reading while you wait for the microwave",rin:"Rin, this round's error really was that glass of milk",ploy:"Ploy… I won't tell anyone you weren't sure (the whole province is listening)",fah:"Fah said if it's wrong, blame the host… sorry. I don't know what I'm apologising for",prod_B:"Baiyok, your processing system needs an urgent update"};
+QSL.audWrong="The studio audience apologises… the uncle in the back row just slipped out the back door";
+QSL.audAgainst="Against the crowd and right! The auntie in row two is writing {n}'s name in her notebook. Good or bad, nobody knows";
+/* the people you can phone — each answers in their own voice; acc = chance of being right by tier */
+const QS_FRIENDS={
+ coach:{acc:[.95,.85,.72,.6],hi:["Hello! Camp owner? You're on the radio, right? Kru's listening — your voice is shaking","About that — back when Kru was young, I fought at a temple fair, and there was this old man holding a rice basket…"],
+  sure:"…Fine. Say {x}. Kru's sure. If it's wrong, sticky rice and grilled pork for the whole camp on me",unsure:"Hmm… Kru isn't sure, but my gut says {x} …if it's wrong, don't tell anyone I said it",bye:"(beep… beep…) Kru hung up early — the chili paste pounding at home drowned him out"},
+ kati:{acc:[.8,.6,.45,.3],always:1,hi:["Hi! Kati's listening to the radio right now! I'm so nervous for you I can't sit still!"],
+  sure:"{x}! A hundred percent sure! …No, no, a thousand percent!",unsure:"{x}! A hundred percent sure!",bye:"…Why am I sure? Dunno, but the name sounds like a heavy punch! Go go!"},
+ mali:{acc:[.85,.65,.5,.35],hi:["Eeek! I can hear myself on the radio! Mali's on air! Hi everyone!"],
+  sure:"Mali thinks {x}! I read it while waiting for the microwave",unsure:"Ummm… {x} maybe? Mali's guessing, but Mali trusts you the most!",bye:"If you win, buy Mali some bingsu! You can do it!"},
+ rin:{acc:[.95,.9,.8,.65],pct:1,hi:["Rin speaking. I'm listening to the show — I've already noted this question."],
+  sure:"Based on my data, the answer is {x}, roughly {p} percent likely.",unsure:"Not enough data… if I must choose, {x}, roughly {p} percent likely",bye:"The remaining error is because you called while I was drinking milk."},
+ ploy:{acc:[.9,.8,.65,.5],hi:["It's Ploy… you're calling me about this, on a show the whole province is hearing?"],
+  sure:"{x}. My old camp taught basics like this in year one.",unsure:"I think {x}… don't you dare say Ploy wasn't sure.",bye:"I'm hanging up… get it right. I'm listening."},
+ fah:{acc:[.8,.55,.4,.3],hi:["Hmph, it's Fah. On the radio and so nervous you had to call me?"],
+  sure:"{x}, obviously. Easy",unsure:"No idea. But {x} sounds cool. Go with that — if it's wrong, blame the host",bye:"…Don't forget Fah once you get the money."},
+ prod_B:{acc:[.9,.9,.85,.8],pct:1,hi:["…Call received. Baiyok is ready to answer."],
+  sure:"Processing… Answer: {x}. Confidence {p} percent",unsure:"Processing… conflicting data. Answer: {x}. Confidence {p} percent",bye:"…Next time you can just call. You don't need a question."}
+};
+
+/* ---------------- invitation + counting ---------------- */
+function qsState(G){if(!G.qs){const r=(G.mail||[]).filter(m=>m.kind==="quiz"&&m.done&&m.ok).length;G.qs={right:r,used:0,yr:{},last:-99,seen:{},shows:0,best:0};}return G.qs;}
+function qsInvite(G){const S=qsState(G);S.last=gameWeek(G);const yk=G.season||1;S.yr[yk]=(S.yr[yk]||0)+1;
+  return addMail(G,{kind:"event",ev:"qshow",from:"Community radio “Our Hometown Muay”",title:"You're on air! Ultimate Fan: Seven Mortars Muay",
+    body:"You answer our quiz right so often that Papa Piak wants to meet you in person! Come compete live on “Ultimate Fan: Seven Mortars Muay” — 20 right answers wins up to ฿100,000 (come within 2 weeks)",exp:G.week+2});}
+function qsWeekly(G){const S=qsState(G);if(G.week<5||G.week>50)return;if((G.mail||[]).some(m=>m.ev==="qshow"&&!m.done&&!m.expired))return;
+  if(S.right-S.used>=3&&(S.yr[G.season||1]||0)<4&&gameWeek(G)-S.last>=6){S.used+=3;qsInvite(G);}}
+{const _w=xlWeekly;xlWeekly=function(G){_w(G);try{qsWeekly(G);}catch(e){console.error("qshow",e);}};}
+{const _q=ACT.mquiz;ACT.mquiz=d=>{const m=G.mail.find(x=>x.id===d.v);const was=m&&m.done;_q(d);if(m&&!was&&m.done&&m.ok)qsState(G).right++;};}
+{const _e=evMailAct;evMailAct=function(m){if(m.ev!=="qshow")return _e(m);
+  if(m.done)return `<p class="meta center">${m.win?`Aired · won ${fmt(m.win)} (answered ${m.k||0} right)`:`Aired · answered ${m.k||0} right · went home with a bottle of Fallen Boxer balm`}</p>`;
+  if(m.expired)return `<p class="meta center">You missed this one. Keep answering the radio quiz and the station will invite you again</p>`;
+  return `<button class="btn primary" data-act="qsgo" data-v="${m.id}">${m.st?"Back to the studio ▸":"Go on air ▸"}</button>`;};}
+Object.assign(ACT,{qsgo:d=>{const m=G.mail.find(x=>x.id===d.v);if(!m||m.done||m.expired)return;UI.modal=null;render();QS.open(m);}});
+{const _t=xlTestSetup;xlTestSetup=function(G){_t(G);try{qsState(G);qsInvite(G);}catch(e){console.error(e);}};}
+
+/* ---------------- the show ---------------- */
+const QS={st:null,tm:null,
+  m(){return this.st&&G.mail.find(x=>x.id===this.st.mid);},
+  fill(s,o){const m=this.m(),k=m?m.k||0:0;o=o||{};return String(s).replace(/\{n\}/g,ME(G)).replace(/\{k\}/g,k+1).replace(/\{a\}/g,fmt(o.a!=null?o.a:QS_LAD[k])).replace(/\{nx\}/g,fmt(QS_LAD[Math.min(19,k)])).replace(/\{sf\}/g,fmt(qsSafe(k))).replace(/\{c\}/g,o.c||"").replace(/\{x\}/g,o.x||"").replace(/\{p\}/g,o.p||"");},
+  pick(a){return a[Math.floor(Math.random()*a.length)];},
+  /* v1.91.144 (Man: "ลองเทสความฮา"): host lines never repeat inside one show, and prefer lines this player has not heard in recent shows */
+  line(a,short){const S=this.st,Q=qsState(G);Q.heard=Q.heard||[];const U=S?(S.usedL=S.usedL||[]):[];let c=a.filter(x=>!U.includes(x));if(short&&(!c.length||Math.random()<.45))return this.pick(short);if(!c.length)c=a;const f=c.filter(x=>!Q.heard.includes(x));const r=this.pick(f.length?f:c);U.push(r);Q.heard.push(r);if(Q.heard.length>90)Q.heard.splice(0,Q.heard.length-90);return r;},
+  introLines(){const Q=qsState(G),L=[QSL.open];const ret=Q.shows>0;if(ret)L.push(Q.lastWin>=QS_LAD[19]?QSL.retChamp:Q.lastWin>0?QSL.retWin:QSL.retZero);
+    const g=["kati","mali","rin","ploy","fah","prod_B"].filter(id=>G.F[id]&&inCamp(G,id));if(g.length&&Math.random()<.6)L.push(this.line(QSL.campCall).replace(/\{g\}/g,(SPK[this.pick(g)]||{}).name||""));
+    while(L.length<3)L.push(this.line(QSL.intro));L.push(QSL.rule);return L;},
+  open(m){if(!m.st){m.st=1;m.k=0;m.bank=0;m.used={};}this.st={mid:m.id,phase:m.cq?"q":"intro",step:0,host:"excited",say:QSL.open,me:"smile"};this.st.intro=this.introLines();
+    if(m.cq){this.st.host="smile";this.st.say="Welcome back to the studio! The signal just came back — same question, let's carry on!";this.st.left=QS_TIME[qsTier(m.k)]*1000;}
+    save();this.mount();this.draw();if(this.st.phase==="q")this.startTimer();try{AU.sfx("bell");}catch(e){}},
+  shuf(a){a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;},
+  mount(){let el=document.getElementById("qshow");if(!el){el=document.createElement("div");el.id="qshow";el.className="mgame qshow";document.body.appendChild(el);}
+    el.onclick=e=>{const b=e.target.closest("[data-qs]");if(!b||b.disabled)return;this.act(b.dataset.qs,b.dataset.v);};},
+  close(){this.stopTimer();const el=document.getElementById("qshow");if(el)el.remove();this.st=null;save();render();},
+  q(){const m=this.m();if(!m||!m.cq)return null;const [t,i]=m.cq.split(".").map(Number);const Q=QS_Q[t]&&QS_Q[t][i];return Q?{q:Q[0],o:Q[1],a:Q[2],x:Q[3]||"",t}:null;},
+  draw1(){const m=this.m(),t=qsTier(m.k),S=qsState(G),key="t"+t;S.seen[key]=S.seen[key]||[];let pool=QS_Q[t].map((_,i)=>i).filter(i=>!S.seen[key].includes(i));if(!pool.length){S.seen[key]=[];pool=QS_Q[t].map((_,i)=>i);}
+    const i=this.pick(pool);S.seen[key].push(i);m.cq=t+"."+i;m.ord=this.shuf([0,1,2,3]);m.cut=null;m.aud=null;m.hint=null;save();},
+  next(){const m=this.m();this.draw1();this.st.phase="q";this.st.host="smile";this.st.me="normal";this.st.react="";this.st.say=this.fill(m.k===19?QSL.last:m.k===15?QSL.legend:this.line(QSL.ask[qsTier(m.k)]));this.st.left=QS_TIME[qsTier(m.k)]*1000;this.st.hurried=false;this.draw();this.startTimer();},
+  startTimer(){this.stopTimer();this.st.end=performance.now()+this.st.left;this.tm=setInterval(()=>this.tick(),200);},
+  stopTimer(){if(this.tm){clearInterval(this.tm);this.tm=null;}if(this.st&&this.st.end)this.st.left=Math.max(0,this.st.end-performance.now());},
+  tick(){const S=this.st;if(!S||S.phase!=="q"){this.stopTimer();return;}const left=S.end-performance.now(),m=this.m(),tot=QS_TIME[qsTier(m.k)]*1000;
+    const bar=document.querySelector(".qs-time i"),num=document.querySelector(".qs-time b");if(bar)bar.style.width=Math.max(0,left/tot*100)+"%";if(num)num.textContent=Math.max(0,Math.ceil(left/1000));
+    const sec=Math.ceil(left/1000);if(sec<=5&&sec!==S.lastSec&&left>0){S.lastSec=sec;try{AU.sfx("tick");}catch(e){}if(!S.hurried){S.hurried=true;S.me="flustered";S.host="suspense";S.say=this.fill(this.line(QSL.hurry));this.stopTimer();this.st.left=left;this.draw();this.startTimer();}}
+    if(left<=0){this.stopTimer();this.reveal(-1);}},
+  act(a,v){const S=this.st,m=this.m();if(!S||!m)return;if(a!=="aud")S.heck=null;
+    if(a==="introNext"){S.step++;if(S.step<S.intro.length){S.say=this.fill(S.intro[S.step]);S.host=S.step===S.intro.length-1?"correct":"smile";this.draw();}else this.next();return;}
+    if(a==="ans"&&S.phase==="q"){const d=+v;if(m.cut&&m.cut.includes(d))return;S.ansLeft=S.end-performance.now();this.stopTimer();S.phase="lock";S.sel=d;S.host="suspense";S.me="serious";S.say=this.fill(this.line(QSL.lock,QSL.lockShort),{c:QS_ABC[d]});this.draw();try{AU.sfx("choose");}catch(e){}setTimeout(()=>{if(this.st===S)this.reveal(d);},1900);return;}
+    if(a==="cut"&&S.phase==="q"&&!m.used.c){m.used.c=1;const Q=this.q(),ri=m.ord.indexOf(Q.a),wr=[0,1,2,3].filter(i=>i!==ri);m.cut=this.shuf(wr).slice(0,2);if(m.aud)m.aud=this.audience();S.host="excited";S.say=QSL.cut;save();this.draw();try{AU.sfx("pop");}catch(e){}return;}
+    if(a==="aud"&&S.phase==="q"&&!m.used.a){m.used.a=1;m.aud=this.audience();S.host="excited";const top=m.aud.indexOf(Math.max(...m.aud));S.heck=this.fill(this.line(QSL.heck),{x:QS_ABC[Math.random()<.6?top:this.pick([0,1,2,3].filter(i=>!(m.cut||[]).includes(i)))]});S.say=QSL.aud;save();this.draw();try{AU.sfx("pop");}catch(e){}return;}
+    if(a==="phone"&&S.phase==="q"&&!m.used.p){this.stopTimer();S.phase="phone";S.host="smile";S.say=this.fill(QSL.phone);this.draw();return;}
+    if(a==="phoneBack"&&S.phase==="phone"){S.phase="q";S.say="Not calling after all? Save it for later — smart!";this.draw();this.startTimer();return;}
+    if(a==="call"&&S.phase==="phone"){m.used.p=1;S.call=this.callLines(v);S.callI=0;S.phase="call";save();this.draw();try{AU.sfx("pop");}catch(e){}return;}
+    if(a==="callNext"&&S.phase==="call"){S.callI++;if(S.callI>=S.call.lines.length){m.hint={id:S.call.id,x:S.call.x,p:S.call.p};S.phase="q";S.host="smile";S.say=this.fill(QSL.phoneBack);save();this.draw();this.startTimer();}else this.draw();return;}
+    if(a==="quit"&&S.phase==="q"){this.stopTimer();if(!m.k){S.say=this.fill(QSL.nostart);S.host="wrong";this.draw();this.startTimer();return;}S.phase="quitask";S.host="suspense";S.say=this.fill(QSL.quitAsk,{a:m.bank});this.draw();return;}
+    if(a==="quitNo"&&S.phase==="quitask"){S.phase="q";S.host="excited";S.say="Brave! That's a camp owner! Let's keep going!";this.draw();this.startTimer();return;}
+    if(a==="quitYes"&&S.phase==="quitask"){const Q=this.q();S.host="correct";S.me="smile";S.say=this.fill(this.line(QSL.quit),{a:m.bank});S.post=this.fill(QSL.quitReveal,{c:`${QS_ABC[m.ord.indexOf(Q.a)]}. ${Q.o[Q.a]}`});S.rightD=m.ord.indexOf(Q.a);this.finish(m.bank,"quit");return;}
+    if(a==="go"&&S.phase==="right"){this.next();return;}
+    if(a==="close"&&S.phase==="end"){this.close();return;}},
+  audience(){const m=this.m(),Q=this.q(),t=qsTier(m.k),ri=m.ord.indexOf(Q.a),live=[0,1,2,3].filter(i=>!(m.cut||[]).includes(i));
+    const w=[0,0,0,0];for(const i of live)w[i]=.15+Math.random()*.55;w[ri]+=[1.6,1.05,.7,.45][t]+Math.random()*.3;const s=w.reduce((a,b)=>a+b,0);const p=w.map(x=>Math.round(x/s*100));p[ri]+=100-p.reduce((a,b)=>a+b,0);return p;},
+  friends(){const L=["coach"];for(const id of ["kati","mali","rin","ploy","fah","prod_B"]){const f=G.F[id];if(f&&(inCamp(G,id)||(f.bond||0)>=40))L.push(id);}return L;},
+  callLines(id){const P=QS_FRIENDS[id]||QS_FRIENDS.coach,m=this.m(),Q=this.q(),t=qsTier(m.k),ri=m.ord.indexOf(Q.a),live=[0,1,2,3].filter(i=>!(m.cut||[]).includes(i));
+    const ok=Math.random()<P.acc[t],x=ok?ri:this.pick(live.filter(i=>i!==ri)),sure=P.always||(ok?Math.random()<.75:Math.random()<.35);
+    const p=P.pct?String(ok?60+Math.floor(Math.random()*35):35+Math.floor(Math.random()*25))+(id==="prod_B"?"."+Math.floor(Math.random()*10):""):"";
+    const xs=`${QS_ABC[x]}. ${Q.o[m.ord[x]]}`;
+    const lines=[...P.hi.map(s=>this.fill(s)),this.fill(sure?P.sure:P.unsure,{x:xs,p}),this.fill(P.bye)];return {id,x,p,lines};},
+  /* what the host says about HOW you answered: on the buzzer, in a hurry, with or against your phone friend / the audience */
+  reactTo(d,ok){const S=this.st,m=this.m(),R=[];if(d<0)return "";const tot=QS_TIME[qsTier(m.k)]*1000,left=S.ansLeft||0;
+    if(m.hint){const nm=(SPK[m.hint.id]||{name:"Coach Daeng"}).name,fol=d===m.hint.x,xs=QS_ABC[m.hint.x];
+      R.push(ok&&fol?QSL.fRight:ok?QSL.fIgnoreRight:fol?(QSL.fWrong[m.hint.id]||QSL.fWrong.coach):QSL.fIgnoreWrong);S._f={f:nm,x:xs};}
+    else if(m.aud){const top=m.aud.indexOf(Math.max(...m.aud)),fol=d===top;if(!ok&&fol)R.push(QSL.audWrong);else if(ok&&!fol)R.push(QSL.audAgainst);}
+    if(!R.length&&left>tot-3000&&qsTier(m.k)>0)R.push(this.line(QSL.fast));
+    if(!R.length&&left<3000)R.push(this.line(QSL.clutch));
+    const f=S._f||{};S._f=null;return R.length?this.fill(R[0].replace(/\{f\}/g,f.f||"").replace(/\{x\}/g,f.x||"").replace(/\{s\}/g,Math.max(1,Math.ceil(left/1000)))):"";},
+  reveal(d){const S=this.st,m=this.m(),Q=this.q();if(!Q)return;const ri=m.ord.indexOf(Q.a),cs=`${QS_ABC[ri]}. ${Q.o[Q.a]}`;S.sel=d;S.rightD=ri;S.lastQ=Q;S.lastOrd=m.ord;S.react=this.reactTo(d,d===ri);
+    if(d===ri){m.k++;m.bank=QS_LAD[m.k-1];S.fact=Q.x;try{AU.sfx("level");}catch(e){}
+      if(m.k>=20){S.host="excited";S.me="surprised";S.say=this.fill(QSL.win);this.finish(QS_LAD[19],"win");try{AU.sfx("champ");}catch(e){}return;}
+      S.phase="right";S.host="correct";S.me="smile";S.say=this.fill(this.line(QSL.right,QSL.rightShort),{a:m.bank});if(QS_SAFE.includes(m.k-1))S.safe=this.fill(QSL.safeAt[QS_SAFE.indexOf(m.k-1)],{a:m.bank});else S.safe="";m.cq=null;save();this.draw();S.bump=1;return;}
+    try{AU.sfx("miss");}catch(e){}S.host="wrong";S.me="sad";S.fact=Q.x;const sf=qsSafe(m.k);S.say=this.fill(this.line(d<0?QSL.timeout:QSL.wrong),{c:cs});S.post=this.fill(sf?QSL.home:QSL.zero,{a:sf});S.shake=1;this.finish(sf,"lose");},
+  finish(amt,how){const S=this.st,m=this.m(),Q=qsState(G);this.stopTimer();m.done=true;m.win=amt;m.how=how;m.cq=null;G.cash+=amt;Q.shows++;Q.lastWin=amt;Q.best=Math.max(Q.best||0,m.k||0);S.phase="end";S.amt=amt;
+    if(amt>0)toast(`Prize from the show: ${fmt(amt)}`);save();this.draw();},
+  meImg(e){const L=G.avatar||{gender:G.player.gender};const u=typeof MGRP!=="undefined"?MGRP.url(L,e,()=>{if(this.st)this.draw();}):"";if(u)this.lastMe=u;return u||this.lastMe||"";},
+  draw(){const S=this.st,el=document.getElementById("qshow"),m=this.m();if(!S||!el||!m)return;const k=m.k||0,Q=this.q()||(S.phase==="right"?S.lastQ:null),t=qsTier(Math.min(19,k));
+    const me=this.meImg(S.me==="normal"?"normal":S.me);
+    const lad=`<ol class="qs-lad">${QS_LAD.map((a,i)=>`<li class="${i===k&&S.phase!=="end"?"on":""} ${i<k?"ok":""} ${QS_SAFE.includes(i)?"sf":""}"><span>${i+1}</span><b>${fmt(a)}</b></li>`).reverse().join("")}</ol>`;
+    const krok=`<div class="qs-krok ${S.shake?"shake":""} ${S.phase==="right"||S.phase==="end"&&S.amt>=QS_LAD[19]?"hop":""}">${"<i></i>".repeat(7)}</div>`;
+    const stage=`<div class="qs-stage"><div class="qs-pod me"><div class="qs-fig">${me?`<img src="${me}" alt="">`:`<div class="qs-sil"></div>`}</div><div class="qs-plate">${esc(ME(G))}</div></div>
+      <div class="qs-pod host"><div class="qs-fig"><img src="${ASSET}qhost_${S.host||"smile"}.webp" alt=""></div><div class="qs-plate">${QS_HOST}</div></div>${krok}</div>`;
+    const say=`<div class="qs-say"><small>${QS_HOST}</small><p>${esc(S.say||"")}</p>${S.heck&&S.phase==="q"&&m.aud?`<p class="qs-heck">${esc(S.heck)}</p>`:""}${S.react&&(S.phase==="right"||S.phase==="end")?`<p class="qs-heck">${esc(S.react)}</p>`:""}</div>`;
+    let body="";
+    if(S.phase==="intro")body=`<div class="qs-foot"><button class="btn primary" data-qs="introNext">${S.step>=S.intro.length-1?"Let's go! ▸":"Next ▸"}</button></div>`;
+    else if(S.phase==="end"){body=`<div class="qs-end"><p class="qs-amt ${S.amt?"":"zero"}">${S.amt?"+"+fmt(S.amt):"฿0"}</p>${S.post?`<p class="meta center">${esc(S.post)}</p>`:""}${S.fact&&m.how==="lose"?`<p class="qs-fact">💡 ${esc(S.fact)}</p>`:""}<p class="meta center">${esc(this.fill(QSL.bye))}</p><div class="qs-foot"><button class="btn primary" data-qs="close">Back to camp ▸</button></div></div>`;}
+    else if(Q){const ord=S.phase==="right"?S.lastOrd:m.ord,cut=m.cut||[],live=S.phase==="q";
+      const info=S.phase==="right"?`<div class="qs-info"><span>Cleared <b>${k}</b>/20</span><span>Holding <b class="goldt">${fmt(m.bank)}</b></span></div>`:`<div class="qs-info"><span>Question <b>${k+1}</b>/20</span><span>for <b class="goldt">${fmt(QS_LAD[k])}</b></span><span>${k?`Holding ${fmt(m.bank)}`:""}${QS_SAFE.some(i=>i<k)?` · safe ${fmt(qsSafe(k))}`:""}</span></div>`;
+      const tot=QS_TIME[t]*1000,lf=S.left||0;
+      const timer=S.phase==="q"||S.phase==="phone"||S.phase==="call"||S.phase==="quitask"?`<div class="qs-time ${S.phase!=="q"?"pause":""}"><i style="width:${Math.max(0,lf/tot*100)}%"></i><b>${Math.ceil(lf/1000)}</b></div>`:"";
+      const opts=`<div class="qs-opts">${ord.map((oi,d)=>{const c=[cut.includes(d)?"cut":"",S.sel===d&&S.phase==="lock"?"lock":"",(S.phase==="right"||S.phase==="end")&&d===S.rightD?"right":"",S.phase==="end"&&S.sel===d&&d!==S.rightD?"bad":""].join(" ");
+        return `<button class="qs-o ${c}" data-qs="ans" data-v="${d}" ${!live||cut.includes(d)?"disabled":""}><i>${QS_ABC[d]}</i><span>${cut.includes(d)?"":esc(Q.o[oi])}</span>${m.aud&&!cut.includes(d)&&S.phase!=="right"?`<em style="--p:${m.aud[d]}%">${m.aud[d]}%</em>`:""}</button>`;}).join("")}</div>`;
+      const hint=m.hint&&S.phase==="q"?`<p class="qs-hint">📞 ${esc((SPK[m.hint.id]||{name:"Coach Daeng"}).name)}: ${QS_ABC[m.hint.x]}${m.hint.p?` (${m.hint.p}%)`:""}</p>`:"";
+      let ctl="";
+      if(S.phase==="q")ctl=`<div class="qs-life"><button class="qs-l" data-qs="cut" ${m.used.c?"disabled":""}>✂️<small>Cut to 2</small></button><button class="qs-l" data-qs="aud" ${m.used.a?"disabled":""}>📣<small>Ask the audience</small></button><button class="qs-l" data-qs="phone" ${m.used.p?"disabled":""}>📞<small>Phone a friend</small></button><button class="qs-l stop" data-qs="quit">🏳️<small>${k?`Stop, take ${fmt(m.bank)}`:"Go home"}</small></button></div>`;
+      if(S.phase==="quitask")ctl=`<div class="qs-foot"><button class="btn" data-qs="quitNo">Keep going!</button><button class="btn primary" data-qs="quitYes">Take ${fmt(m.bank)} home</button></div>`;
+      if(S.phase==="right")ctl=`${S.safe?`<p class="qs-safe">🛡️ ${esc(S.safe)}</p>`:""}${S.fact?`<p class="qs-fact">💡 ${esc(S.fact)}</p>`:""}<div class="qs-foot"><button class="btn primary" data-qs="go">Next question for ${fmt(QS_LAD[k])} ▸</button></div><p class="meta center">Want to stop? Tap 🏳️ on the next question — you are holding ${fmt(m.bank)}</p>`;
+      if(S.phase==="phone")ctl=`<div class="qs-phone"><p class="meta center">Who will you call? (the clock stops while you talk)</p><div class="qs-fr">${this.friends().map(id=>`<button class="qs-f" data-qs="call" data-v="${id}"><img src="${faceSrc(id,"happy")}" alt=""><small>${esc((SPK[id]||{name:"Coach Daeng"}).name)}</small></button>`).join("")}</div><div class="qs-foot"><button class="btn ghost" data-qs="phoneBack">Never mind</button></div></div>`;
+      if(S.phase==="call"){const c=S.call,nm=(SPK[c.id]||{name:"Coach Daeng"}).name,last=S.callI>=c.lines.length-1;ctl=`<div class="qs-callbox"><img src="${faceSrc(c.id,S.callI===c.lines.length-2?"happy":"flustered")}" alt=""><div><small>📞 ${esc(nm)}</small><p>${esc(c.lines[S.callI])}</p></div></div><div class="qs-foot"><button class="btn primary" data-qs="callNext">${last?"Hang up ▸":"Next ▸"}</button></div>`;}
+      body=`${info}${timer}<div class="qs-q"><p>${esc(Q.q)}</p></div>${hint}${opts}${ctl}`;}
+    el.innerHTML=`<div class="qs-wrap"><div class="qs-main"><div class="qs-top"><span class="qs-air">● ON AIR</span><h2>Ultimate Fan<br><b>Seven Mortars Muay</b></h2><span class="qs-fm">FM 99.7</span></div>${stage}${say}${body}</div>${lad}</div>`;
+    S.shake=0;const on=el.querySelector('.qs-lad li.on');if(on&&getComputedStyle(el.querySelector('.qs-lad')).flexDirection==='row-reverse'){const L=on.parentElement;L.scrollLeft=on.offsetLeft-L.clientWidth/2+on.clientWidth/2;}}
+};
+const qsTier=k=>k<5?0:k<10?1:k<15?2:3;
+const qsSafe=k=>{let s=0;for(const i of QS_SAFE)if(i<k)s=QS_LAD[i];return s;};
+
+// ================= MUAY THAI MOE — MERIT & THE GHOST OF THE BANANA TREE "นางตานี" (v1.91.144, Man 24 พ.ย.) =================
+// Phase 1: camp merit (บุญ) from merit-making, the wai kru and new big merit events; it slowly runs down when nobody makes merit.
+// Once the camp is big and busy, Nang Tani — whose banana trees the fighters kick in training (and whose trunks went into krathongs) —
+// wakes up and starts haunting dreams: a random fighter boxes her in the dream while the manager can only shout; losing means a week
+// in bed with a fever. Enough merit and Kru Daeng and Luang Pho suggest a spirit house; once it stands, Tani turns protector,
+// hints lottery numbers and keeps the fighters healthy. A mor phi can be hired as an expensive, unreliable shortcut.
+// Light comedy on purpose: at most one ghost-fever at a time, haunts several weeks apart, a skip option that never forces a fight.
+(()=>{
+const GH_MAX=100,GH_DECAY=3,GH_CD=4;
+const ghSt=G=>{if(!G.gh)G.gh={merit:40,on:0,stage:0,last:-99,haunts:0,wins:0,shrine:0,shrineOK:0,calm:0,mw:-1};return G.gh;};
+const ghAdd=(G,n)=>{const S=ghSt(G);S.merit=clamp(Math.round(S.merit+n),0,GH_MAX);S.mw=gameWeek(G);return S.merit;};
+const ghWk=(d,m)=>dateWeek(d,m);
+/* the Buddhist calendar on the game's year (week 1 = 25 May) */
+const GH_LENT=()=>[ghWk(30,6),ghWk(25,9)];            /* เข้าพรรษา → ออกพรรษา */
+const GH_KATHIN=()=>[ghWk(26,9),ghWk(24,10)];         /* the month after ออกพรรษา */
+const GH_ORDAIN=()=>[ghWk(1,3),ghWk(10,4)];           /* summer novice ordination, April – early May */
+const ghIn=(G,[a,b])=>a<=b?G.week>=a&&G.week<=b:G.week>=a||G.week<=b;
+const ghMood=G=>{const S=ghSt(G);return S.shrine?"smile":S.stage>=2?"angry_smile":S.stage>=1?"angry":"scary";};
+BGIMG.dream="bg_dream.webp";BGIMG.dream_room="bg_dream_room.webp";TIER_BG.dream="bg_dream.webp";
+/* the ghost theme: slow heartbeat klong, a low drone that slips a tritone, a wobbling pi and a far-off bell */
+AU.GHM=[57,0,0,60,0,58,0,0,64,0,63,0,0,0,0,0,57,0,60,0,61,0,0,0,52,0,0,0,0,51,0,0];
+AU.ghostStep=function(s,t,spb){const m=this.music,st=s%16;
+  if(st===0||st===2)this.tone(t,{f:st?70:85,to:45,dur:.25,peak:st?.32:.42,bus:m});
+  if(s===0||s===16)this.tone(t,{f:s?51.9:55,dur:spb*15,peak:.16,type:"triangle",bus:m});
+  if(s===4)[1760,2640,3520].forEach((f,k)=>this.tone(t,{f,dur:2.4/(k+1),peak:.05/(k+1),bus:m}));
+  if(s===24)this.tone(t,{f:930,to:610,dur:spb*6,peak:.05,bus:m});
+  const n=this.GHM[s];if(n){const f=440*Math.pow(2,(n-69)/12),c=this.ctx,o=c.createOscillator(),lfo=c.createOscillator(),lg=c.createGain(),bp=c.createBiquadFilter(),g=c.createGain();
+    o.type="sawtooth";o.frequency.value=f;lfo.frequency.value=3.2;lg.gain.value=f*.03;lfo.connect(lg);lg.connect(o.frequency);bp.type="bandpass";bp.frequency.value=900;bp.Q.value=2.2;
+    const dur=spb*3.2;g.gain.setValueAtTime(.0001,t);g.gain.exponentialRampToValueAtTime(.12,t+.25);g.gain.exponentialRampToValueAtTime(.0001,t+dur);
+    o.connect(bp);bp.connect(g);g.connect(m);[o,lfo].forEach(x=>{x.start(t);x.stop(t+dur+.05);});}};
+{const _ps=AU.playStep;AU.playStep=function(s,t,spb){if(this.mode==="ghost"){this.ghostStep(s,t,spb);return;}return _ps.call(this,s,t,spb);};
+ const _sm=AU.startMusic;AU.startMusic=function(mode){_sm.call(this,mode);try{if(mode==="ghost"&&this.ctx){this.tempo=60;if(this.music)this.music.gain.setTargetAtTime(.3,this.ctx.currentTime,.4);}}catch(e){}};
+ const _st=AU.setTempo;AU.setTempo=function(b){if(this.mode==="ghost")return;return _st.call(this,b);};}
+const GMON=()=>({inject:()=>{try{AU.startMusic("ghost");if(UI.scene)UI.scene.music="ghost";}catch(e){}return [];}}),GMOFF=()=>({inject:()=>{try{AU.startMusic("hub");if(UI.scene)UI.scene.music=null;}catch(e){}return [];}});
+const ghPlay=(steps,done,opts)=>{playScene([GMON(),...steps],()=>{try{AU.startMusic("hub");}catch(e){}done&&done();},opts);};
+{const _fs=fightStart;fightStart=function(q){_fs(q);try{if(UI.fight&&UI.fight.b&&UI.fight.b.dream)AU.startMusic("ghost");}catch(e){}};}
+const TANI="Nang Tani",LP="The abbot",MP="Mor Phi Plian";
+const TN=(t,img)=>({n:"npc",who:TANI,img:"tani_"+(img||ghMood(G)),t}),N=t=>({n:"nar",t}),C=t=>({n:"coach",t}),MY=t=>({n:"me",t});
+const GL=(id,f,t,l)=>({n:id,f,l:l||"casual",t});
+
+/* ---------- ghost fighters ---------- */
+Object.assign(QK,{
+ tani:{fst:"counter",name:"Nang Tani (dream)",sprite:"tani",lvl:0,tilt:{speed:1.5,kick:1.5,foot:1,counter:1,dur:-1,power:-.5},color:"#3f8a4f",grp:"ghost"},
+ krasue:{fst:"pressure",name:"Krasue",sprite:"krasue",lvl:.3,tilt:{speed:2,elbow:1.5,dur:-2,clinch:-1.5},color:"#b04fd0",grp:"ghost"},
+ krahang:{fst:"footwork",name:"Krahang",sprite:"krahang",lvl:.3,tilt:{speed:1.5,kick:2,foot:1.5,power:-1},color:"#8a5a2b",grp:"ghost"},
+ mabong:{fst:"power",name:"Phi Ma Bong",sprite:"mabong",lvl:.5,tilt:{power:2,kick:2,dur:1.5,iq:-1.5,guard:-1},color:"#3c3550",grp:"ghost"},
+ phiphong:{fst:"inside",name:"Phi Phong",sprite:"phiphong",lvl:.4,tilt:{clinch:2,knee:1.5,power:1,foot:-1.5},color:"#d0602a",grp:"ghost"}});
+const GSK={tani:[{id:"g_t_leaf",name:"Banana-leaf slap",k:"atk",w:"kick"},{id:"g_t_sabai",name:"Sabai wrap",k:"def"},{id:"g_t_lol",name:"Midnight giggle",k:"atk",w:"elbow"}],
+ krasue:[{id:"g_k_fly",name:"Flying head-butt",k:"atk",w:"elbow"},{id:"g_k_glow",name:"Glowing entrails",k:"def"}],
+ krahang:[{id:"g_h_fan",name:"Winnowing-basket gust",k:"atk",w:"kick"},{id:"g_h_fly",name:"Fly off to the roof",k:"def"}],
+ mabong:[{id:"g_m_hoof",name:"Thunder-hoof kick",k:"atk",w:"kick"},{id:"g_m_neigh",name:"Terrifying neigh",k:"rec"}],
+ phiphong:[{id:"g_p_light",name:"Phong-light in the eyes",k:"def"},{id:"g_p_grab",name:"Fishy clinch",k:"atk",w:"knee"}]};
+TIER.dream={name:"Dream ghost fight",win:0,lose:0,rep:0,off:1};
+TIER_BG.dream="bg_camp_night.webp";
+/* the ghost is as strong as the fighter she meets, a little stronger when the camp's merit is low */
+function ghFoe(G,kind,f){const K=QK[kind],S=ghSt(G),adj=(S.merit<25?1.2:S.merit<45?.5:S.merit>=70?-.5:0)-(kind!=="tani"&&S.shrine?.6:0),t=Math.min(19.2,qTarget(G,f.id)+adj+(K.lvl||0)),rng=mulberry32((G.seed^0x6a05)+gameWeek(G)*31+kind.length);const a={};
+  for(const [x] of ATTRS)a[x]=clamp(t+(K.tilt[x]||0)+(rng()*1.2-.6),3,19.5);const d=t-ovr(a);for(const [x] of ATTRS)a[x]=clamp(a[x]+d,3,19.5);
+  const id="q_ghost_"+kind;const o=baseFighter(id,{name:K.name,full:K.name,div:"X",camp:"quest",color:K.color,potential:t+2,a});
+  {const short=t-ovr(a);if(short>.05)o.vet=+Math.min(Q_VET_MAX,short).toFixed(2);}
+  o.sprite=K.sprite;o.kind=kind;o.grp="ghost";o.fstyle=K.fst;o.nlsk=(GSK[kind]||[]).slice(0,S.merit<30?3:2);o.lvl=clamp(Math.round(t-6),1,10);o.fatigue=0;o.morale=80;G.F[id]=o;syncFighterAges(G);return id;}
+
+/* ---------- merit sources ---------- */
+const GH_ACT={
+ bigmerit:{name:"Big merit: host monks for a meal at camp",desc:"Camp merit +16 · everyone's morale +4",cost:8000,merit:16},
+ phapa:{name:"Join a pha pa offering at the temple nearby",desc:"Camp merit +12 · fame +0.3",cost:4000,merit:12,gap:6},
+ kathin:{name:"Host a kathin ceremony",desc:"Camp merit +30 · everyone's morale +6 · fame +1 (once a year, after the Rains Retreat)",cost:20000,merit:30,win:GH_KATHIN,yearly:1},
+ ordain:{name:"Sponsor summer novice ordination",desc:"Camp merit +24 · fame +1 (once a year, April)",cost:15000,merit:24,win:GH_ORDAIN,yearly:1},
+ morphi:{name:"Hire a mor phi for an exorcism",desc:"The ghosts go quiet for a while… if the ritual works (no guarantee)",cost:6000,merit:0},
+ shrine:{name:"Build Nang Tani's shrine by the banana grove",desc:"A permanent shrine · Nang Tani guards the camp, hints lottery numbers, keeps the fighters healthy",cost:60000,merit:5},
+ offer:{name:"Make offerings at Nang Tani's shrine",desc:"Camp merit +4 · Nang Tani's in a good mood",cost:300,merit:4}};
+const ghActOpen=(G,k)=>{const S=ghSt(G),A=GH_ACT[k];if(!S.on)return false;S.done=S.done||{};
+  if(k==="morphi")return !S.shrine;if(k==="shrine")return S.shrineOK&&!S.shrine;if(k==="offer")return !!S.shrine;
+  if(A.win&&!ghIn(G,A.win()))return false;if(A.yearly&&S.done[k]===(G.season||1))return false;if(A.gap&&S.done[k+"Abs"]!=null&&gameWeek(G)-S.done[k+"Abs"]<A.gap)return false;return true;};
+for(const k of Object.keys(GH_ACT)){const A=GH_ACT[k];CAMP_ACTIONS["gh_"+k]={name:A.name,desc:A.desc,cost:A.cost,get hidden(){return typeof G==="undefined"||!G||!ghActOpen(G,k);}};}
+const GH_MERIT_ACTS={merit:6,waikhru:10};
+{const _d=doCampAction;doCampAction=function(G,k){const note=_d(G,k);if(note==null)return note;const S=ghSt(G);let add="";
+  if(GH_MERIT_ACTS[k]){ghAdd(G,GH_MERIT_ACTS[k]);if(S.on)add=` · camp merit +${GH_MERIT_ACTS[k]}`;}
+  if(k.startsWith("gh_")){const kk=k.slice(3),A=GH_ACT[kk],R=roster(G);S.done=S.done||{};S.done[kk]=G.season||1;S.done[kk+"Abs"]=gameWeek(G);if(A.merit)ghAdd(G,A.merit);
+    if(kk==="bigmerit"){R.forEach(f=>f.morale=clamp(f.morale+4,0,100));add="Monks come to the camp for the midday meal. Kru Daeng kneels so long his legs go numb. Everyone smiles all day";}
+    if(kk==="phapa"){G.rep+=.3;add="Everyone helps parade the pha pa tree. Kati plays the long drum off-beat the whole way, but everyone has fun";}
+    if(kk==="kathin"){G.rep+=1;R.forEach(f=>f.morale=clamp(f.morale+6,0,100));add="Sirichai camp's kathin procession is nearly half a kilometre long. The whole subdistrict talks about it";}
+    if(kk==="ordain"){G.rep+=1;add="Three temple boys are ordained as summer novices. They cry when their heads are shaved and beam once they can chant";}
+    if(kk==="morphi"){const ok=Math.random()<.55;S.mp=(S.mp||0)+1;if(ok){S.calm=gameWeek(G)+6;add="Mor Phi Plian dances with a sword round the banana grove and sprays holy water until Kru Daeng is soaked. That night is perfectly quiet… for now at least";}
+      else{S.mpFail=1;add="Mor Phi Plian gets halfway through the ritual, then flees the camp still holding a boiled chicken, leaving one sandal behind";}}
+    if(kk==="shrine"){S.shrine=gameWeek(G);S.pendShrine=1;add="A small wooden shrine painted green, three-coloured silk tied round the banana tree. Kru Daeng lights the first incense";}
+    if(kk==="offer"){S.tb=clamp((S.tb||0)+2,0,ghCap(G));add="Khanom tom, bananas and red soda laid before the shrine. The wind stirs the leaves, as if someone nodded";}
+    return add+(A.merit?` · camp merit +${A.merit}`:"");}
+  return note+add;};}
+/* the merit bar sits on top of the camp-activity list once Tani is awake */
+{const _h=campActsHTML;campActsHTML=function(){const h=_h();if(typeof G==="undefined"||!G||UI.modal.pick)return h;const S=ghSt(G);if(!S.on)return h;
+  const m=S.merit,lab=m>=70?"Merit carries you":m>=45?"Cool and calm":m>=25?"Getting eerie":"Goosebumps everywhere";
+  return h.replace("</h2>",`</h2><div class="ghbar" title="Camp merit"><span>🪷 Camp merit</span><i><b style="width: ${m}%"></b></i><em>${m} · ${lab}</em></div>`);};}
+
+/* ---------- Tani wakes up ---------- */
+const ghReady=G=>{try{return G.week>=6&&roster(G).length>=4&&students(G)>=30&&facTotal(G)>=8;}catch(e){return false;}};
+EVENTS.push({id:"gh_wake",look:"casual",bg:"camp_night",pri:6,when:G=>!ghSt(G).on&&ghReady(G),steps:[
+ N("Sirichai camp is busier than ever: rooms full, kids kicking pads in the course yard every evening. And the banana grove behind camp… gets kicked every day too"),
+ C("Kicking banana trees, that's the real thing! When Kru was a kid there were no heavy bags — Kru kicked banana trees till his shins were like wood"),
+ N("That night the wind stops at one a.m. The crickets go quiet. The dog next door howls three times and hides under the house"),
+ GMON(),N("You open your eyes in the dream. You can't move. A woman in green stands by the bed, hair to the floor, glowing faint green"),
+ TN("Who… kicks… my… banana trees…","scary"),
+ MY("(You try to answer, but your mouth won't move)"),
+ TN("Kicked every day… three hundred times a day… and at Loy Krathong… who made krathongs out of my trunks!!","scary"),
+ TN("Three of them floated off… one with a crooked incense stick… I remember everything…","angry"),
+ N("Then she sits on your chest, heavy as a fifty-kilo bag. You jolt awake at three a.m., pillow soaked in sweat"),
+ GMOFF(),{n:"nar",t:"— The next morning —",bg:"camp",show:[]},
+ C("Kru had a strange dream last night. A woman in green scolding Kru about banana trees…"),
+ MY("…I had the same dream, Kru"),
+ C("……"),
+ N("The whole camp goes silent for three seconds, then everyone starts talking at once. Same dream for all — the only difference is who got sat on longer"),
+ C("That's Nang Tani! The banana-tree ghost! We kick her home every day and float her trunks down the river… we need to make merit, fast"),
+ C("Alms in the morning, the wai kru, pha pa offerings — anything that's merit. With plenty of camp merit, ghosts calm down. When it drops… she'll visit again"),
+ N("🪷 “Camp merit” unlocked — see it in camp activities. Make merit, hold the wai kru or big merit events to raise it. Do nothing and it slowly runs down"),
+ C("Kru will chant before bed tonight… every night, loudly. Apologies in advance to whoever's next door"),
+],fx:null});
+/* the wake event turns the system on (events have no fx, so a watcher does it right after) */
+{const _rv=runEvents;runEvents=function(done){_rv(function(n){try{const S=ghSt(G);if(!S.on&&G.seen&&G.seen.gh_wake){S.on=1;S.wakeAbs=gameWeek(G);S.last=gameWeek(G);save();}}catch(e){}if(done)done(n);});};}
+
+/* ---------- weekly: merit drifts down, the shrine looks after the fighters, story beats unlock ---------- */
+function ghWeekly(G){const S=ghSt(G);if(!S.on&&G.seen&&G.seen.gh_wake){S.on=1;S.wakeAbs=gameWeek(G);S.last=gameWeek(G);}if(!S.on)return;
+  if(gameWeek(G)-(S.mw??-99)>1)S.merit=clamp(S.merit-GH_DECAY,0,GH_MAX); /* no merit made last week: it runs down */
+  if(S.merit>=45&&S.stage<1&&S.haunts>=1)S.stage=1;if(S.merit>=60&&S.stage<2&&S.haunts>=2)S.stage=2;
+  if(!S.shrineOK&&S.merit>=60&&gameWeek(G)-(S.wakeAbs||0)>=6)S.shrineOK=1;
+  if(S.shrine){for(const f of roster(G))f.fatigue=clamp(f.fatigue-(S.merit>=40?2:1),0,100);}
+  if(S.sick&&G.F[S.sick]&&!G.F[S.sick].injury)S.sick=null;}
+{const _w=xlWeekly;xlWeekly=function(G){_w(G);try{ghWeekly(G);}catch(e){console.error("ghost",e);}};}
+
+/* ---------- the haunting: weekly extra scene ---------- */
+const GH_OPEN=[
+ [N("2:15 a.m. You wake to banana leaves rustling, though there's no wind at all"),N("You can't move. The blanket is heavy as lead. A green shadow crouches at the foot of the bed")],
+ [N("Tonight Kru Daeng gets halfway through his chant and falls asleep on the prayer book"),N("You dream you're standing in a ring roped with banana trees. The referee is a human-sized gecko")],
+ [N("The smell of khanom tom drifts into the bedroom at three a.m. Who makes sweets at three a.m."),N("You can't move your toes. Long hair slowly pours down from the ceiling")]];
+const GH_TANI_LINE=[["Right… tonight I've come to collect the banana-tree rent","Someone kicked my tree again yesterday… one hundred and twelve times. I counted!","That's all the merit you made? I smelled one incense stick"],
+ ["Back again… not because I missed you. I came because your camp's merit is low","Didn't losing to me last time teach you? Or did you win… I forget. Again, tonight!"],
+ ["I'm still angry, you know. Just… a little less","Who left red soda in front of the banana grove… I'm not thanking you. Just asking"]];
+const GH_ENTER={kati:"Kati bursts through the door of the dream in bear-print pyjamas. “Ghosts can be punched! Manager, stand back!”",
+ mali:"Mali pops into the dream, crying and putting her guard up. “Mali is scared of ghosts more than anything… but nobody touches the manager!”",
+ rin:"Rin walks into the dream with a notebook. “Ghosts aren't real, scientifically… so why are my legs shaking?”",
+ ploy:"Ploy stands in the middle of the dream, arms crossed. “You're disturbing my camp's sleep? Get in the ring and we'll talk.”",
+ fah:"Fah yawns. “Hmph, a ghost? Waking Fah at two a.m.?… Fine, Fah's awake now.”",
+ prod_B:"Baiyok appears in the dream standing at attention: “Anomaly detected in the manager's dream. Commencing elimination.”",
+ _:"{f} wanders into the dream, rubbing their eyes: “Manager… why are we on a banana-tree ring?”"};
+const GH_MORN={kati:{w:"Last night Kati dreamt she fought a ghost lady in green — and won! …Why are you making that face, manager? You had the same dream!?",l:"Kati's burning up… dreamt a ghost kicked her with a banana leaf and woke up with a fever. Achoo!"},
+ mali:{w:"Mali dreamt she beat the ghost! But Mali cried the whole fight… woke up with a soaked pillow",l:"Mali… shook all night. Dreamt she lost to the ghost in green, and she giggled in Mali's ear all night…"},
+ rin:{w:"I dreamt I beat something… green. Scientifically, dreams are the brain sorting memories …right? Right?",l:"I have a fever. 38.4 degrees. Definitely nothing to do with ghosts… Manager, could you leave the light on for me?"},
+ ploy:{w:"Last night Ploy dreamt she beat a ghost …stop smiling. Ploy wasn't scared",l:"…Ploy is a little unwell. Definitely not because of a dream. Don't tell anyone"},
+ fah:{w:"Fah dreamt she kicked a ghost into a mango tree. Easy. So why is Fah so tired",l:"Achoo! …Fah didn't lose to a ghost. Fah let the ghost win out of pity"},
+ prod_B:{w:"Dream log: win. Target retreated toward the banana grove. Baiyok requests adding banana trees to the watch list",l:"System… has a fever. Baiyok will rest one week. Please postpone all training sessions"},
+ _:{w:"Last night I dreamt I fought a ghost — and won. Weird",l:"I've got a fever. Last night I dreamt a ghost slapped me with a banana leaf…"}};
+const GH_CHEER={push:"Shout “Punch it! Ghosts have faces too!”",counter:"Rapid-chant “Itipiso…” for moral support",range:"Shout “Don't let it get close! It's freeezing!”",
+ clinch:"Shout “Hold it!” …then change your mind: “Wait! Don't hug it!”",defend:"Shout “Guard up! You can wai while you're at it!”"};
+const GH_CHEER_TANI=["“I heard you!”","“Quiet, I'm being cool”","“You shout more off-key than your kru chants”","“Hee hee, cheer me louder!”"];
+const GH_CHEER_BACK=["“I knooow!”","“Manager, could you be quiet for a sec!”","“Why are you chanting Itipiso NOW!”","“I heard you! The whole dream heard you!”","(Nods while getting whacked by a ghost)"];
+function ghHauntDue(G,rng){const S=ghSt(G);if(!S.on||S.shrine)return false;if(gameWeek(G)-S.last<GH_CD)return false;if(S.calm&&gameWeek(G)<S.calm)return false;
+  const R=roster(G).filter(f=>!f.injury);if(!R.length)return false;const p=S.merit<25?.55:S.merit<45?.38:S.merit<70?.22:.12;return rng()<p;} /* even at merit 100 she still drops by now and then */
+function ghPickFighter(G){const R=roster(G).filter(f=>!f.injury);const named=R.filter(f=>GH_ENTER[f.id]);const L=named.length&&Math.random()<.8?named:R;return L[Math.floor(Math.random()*L.length)];}
+function ghHaunt(done){const S=ghSt(G),f=ghPickFighter(G);if(!f){done();return;}S.last=gameWeek(G);S.haunts++;save();
+  const nm=f.name,enter=(GH_ENTER[f.id]||GH_ENTER._).replace(/\{f\}/g,nm),open=GH_OPEN[S.haunts%GH_OPEN.length],tl=GH_TANI_LINE[Math.min(2,S.stage)];
+  const steps=[...open,TN(tl[S.haunts%tl.length]),N(enter),MY("(Want to help, but only your mouth can move… so, cheering only)"),
+   {choice:[{t:`Cheer ${nm} with all your heart (dream fight)`,fx:()=>{UI.ghGo={fid:f.id,live:1};},then:[TN("Good… get up here!")]},
+    {t:"Rapid-chant Itipiso with your eyes squeezed shut (skip the fight, let it resolve)",fx:()=>{UI.ghGo={fid:f.id,live:0};},then:[N("You get the Itipiso chant to its seventeenth round. The thumping in the dream slowly fades…")]}]}];
+  ghPlay(steps,()=>{const go=UI.ghGo;UI.ghGo=null;if(!go){done();return;}ghFight(go.fid,go.live,done);},{bg:"dream_room",look:"casual"});}
+/* with her shrine up, Nang Tani sometimes takes the dream fight herself — a little stronger than the fighter she stands in for */
+function ghAlly(G,f){const K=QK.tani,t=Math.min(19.4,qTarget(G,f.id)+.8),rng=mulberry32((G.seed^0x7a11)+gameWeek(G));const a={};
+  for(const [x] of ATTRS)a[x]=clamp(t+(K.tilt[x]||0)+(rng()*1.2-.6),3,19.5);const d=t-ovr(a);for(const [x] of ATTRS)a[x]=clamp(a[x]+d,3,19.5);
+  const id="q_tani_ally",o=baseFighter(id,{name:TANI,full:TANI,div:"X",camp:"quest",color:K.color,potential:t+2,a});{const short=t-ovr(a);if(short>.05)o.vet=+Math.min(Q_VET_MAX,short).toFixed(2);}
+  o.sprite="tani";o.kind="tani";o.grp="ghost";o.fstyle=K.fst;o.nlsk=GSK.tani.slice();o.lvl=clamp(Math.round(t-6),1,10);o.fatigue=0;o.morale=90;G.F[id]=o;syncFighterAges(G);return id;}
+const GH_TANI_WIN=["I kicked it into the rice paddy. No need to thank me …you may, if it comes with red soda","Hmph! Country ghosts. Don't they know this camp has a guardian?","Crocodile Whips Its Tail! …I watch your boxers train every day — I know all the moves"];
+function ghFight(fid,live,done,kind,taniOn){kind=kind||"tani";const f=G.F[fid],qid=ghFoe(G,kind,f),gn=GH_NAME[kind]||"the ghost",ally=taniOn?ghAlly(G,f):null;
+  if(ally){const fin=win=>{const S=ghSt(G);delete G.F[qid];delete G.F[ally];if(win){S.wins++;S.tb=clamp((S.tb||0)+2,0,ghCap(G));}else S.merit=clamp(S.merit-3,0,GH_MAX);save();
+      ghPlay([N(win?`Nang Tani spins and whips a banana leaf. ${gn} flies off into the dark`:`${gn} laughs out loud. Nang Tani staggers back against the corner post`),TN(win?GH_TANI_WIN[S.wins%GH_TANI_WIN.length]:"It was stronger than I thought tonight… make me a little more merit so I have the strength",win?"angry_smile":"angry"),
+        GMOFF(),{n:"nar",t:"— The next morning —",bg:"camp",show:[]},GH_ENTER[f.id]?GL(f.id,"happy",`Last night I dreamt Nang Tani fought ${gn} for us — so cool! Nobody got a fever`):{n:"nar",t:`The whole camp wakes up refreshed. Nobody has a fever`}],done,{bg:"dream",look:"casual"});};
+    if(!live){const F=quickFight(G.F[ally],G.F[qid],(G.seed^0xd2eb)+gameWeek(G)*13,GH_ROUNDS);fin(dmWinFrom(F)==="A");return;}
+    const bk={id:"bdream"+gameWeek(G),a:ally,b:qid,week:G.week,tier:"dream",rounds:GH_ROUNDS,ev:1,dream:1,ctrl:ghCtrl(G,1),waiDone:true,bg:"bg_dream.webp"};ghCtrlToast(bk);
+    try{document.body.classList.add("dreamfx");}catch(e){}openFight2(bk,()=>{try{document.body.classList.remove("dreamfx");}catch(e){}const F=LASTF;fin(!!(F&&F.result&&F.result.win==="A"));});return;}
+  const fin=win=>{const S=ghSt(G);delete G.F[qid];let sick=0;if(win)S.wins++;else if(!S.sick&&((S.fy&&S.fy[G.season||1])||0)<GH_FEVER_MAX){sick=S.merit<20?2:1;S.fy=S.fy||{};S.fy[G.season||1]=(S.fy[G.season||1]||0)+sick;f.injury=Math.max(f.injury||0,sick);S.sick=f.id;G.log.push(`${f.name} caught a fever after the haunting; out of training for ${sick} weeks`);}
+    if(win)S.merit=clamp(S.merit+1,0,GH_MAX);save();
+    const T=kind==="tani",M=T?(GH_MORN[f.id]||GH_MORN._):(GH_MORN2[f.id]||GH_MORN2._),line=pk(win?M.w:M.l).replace(/\{f\}/g,f.name).replace(/\{g\}/g,gn);
+    const steps=[...(T?[N(win?`${f.name} swats the banana leaf away. Nang Tani retreats into her grove, leaving a giggle behind`:`${f.name} falls on the banana-tree ring. Nang Tani giggles and vanishes in a cold gust`),
+      TN(win?"…I'll let it go today… I didn't lose, I'm just sleepy":"Hee hee hee. Make plenty of merit, then come challenge me again")]
+      :[N(win?`${f.name} sends ${gn} flying off the stage. The ${GH_SOUND[kind]} fades into silence`:`${gn} laughs and vanishes into the dark. ${f.name} sinks to the canvas`),...(ghSt(G).shrine?[TN(win?"Begone! Don't let me see you round here again":"I couldn't stop it in time… I'll watch over the child myself tonight",win?"angry":"neutral")]:[])]),
+      GMOFF(),{n:"nar",t:"— The next morning —",bg:"camp",show:[]},
+      GH_ENTER[f.id]?GL(f.id,win?"happy":"sad",line):{n:"nar",t:line},
+      ...(sick?[C(`${f.name} has a fever. Kru's giving her ${sick>1?"two weeks":"a week"} off …and Kru thinks it's time we made merit. Camp merit is only ${S.merit} now`)]:[C(win?"Beat a ghost in a dream… Kru has no idea how to log that":"")].filter(s=>s.t))];
+    ghPlay(steps,done,{bg:"dream",look:"casual"});};
+  if(!live){const F=quickFight(f,G.F[qid],(G.seed^0xd2ea)+gameWeek(G)*13,GH_ROUNDS);fin(dmWinFrom(F)==="A");return;}
+  const bk={id:"bdream"+gameWeek(G),a:fid,b:qid,week:G.week,tier:"dream",rounds:GH_ROUNDS,ev:1,dream:1,ctrl:ghCtrl(G,0),waiDone:true,bg:"bg_dream.webp"};ghCtrlToast(bk);
+  try{document.body.classList.add("dreamfx");}catch(e){}
+  openFight2(bk,()=>{try{document.body.classList.remove("dreamfx");}catch(e){}const F=LASTF;fin(!!(F&&F.result&&F.result.win==="A"));});}
+/* in a dream fight the manager can only shout — the corner becomes a row of (useless, loud) cheers */
+{const _c=cornerHTML;cornerHTML=function(F){const U=UI.fight;if(!U||!U.b||!U.b.dream)return _c(F);if(U.b.ctrl)return _c(F).replace(/src="[^"]*q_tani_ally[^"]*"/g,`src="${ASSET+"npc_tani_face.webp"}"`);
+  return `<div class="corner px"><div class="chead"><b>Dream break ${F.round}</b><span class="chip">Landed ${F.A.rlanded}–${F.B.rlanded}</span><span class="chip warn">Can't move — you can only shout</span><span class="chip">🪷 Merit 60+ or the shrine lets you command the corner</span></div>
+   <div class="opts">${Object.entries(GH_CHEER).map(([k,t])=>`<button data-act="ghcheer" data-v="${k}">${t}</button>`).join("")}</div></div>`;};}
+Object.assign(ACT,{ghcheer:d=>{const U=UI.fight;if(!U||!U.b||!U.b.dream)return;const C=U.care;if(C&&!C.done){C.q=.5;C.done=true;try{applyCare(U.F,.5);}catch(e){}}
+  U.pick=d.v;const L=U.F.A.f.id==="q_tani_ally"?GH_CHEER_TANI:GH_CHEER_BACK;U.caption={text:`${U.F.A.f.name}: ${L[Math.floor(Math.random()*L.length)]}`,side:"A"};ACT.cgo();}});
+{const _q=questExtra;questExtra=function(done,rng){try{if(G&&!G.ended){const S=ghSt(G);
+  if(ghStory(done)){S.lastAny=gameWeek(G);return true;}            /* the rare story beats keep their place */
+  if(_q(done,rng))return true;                                      /* v1.91.144 (Man): the main quests go before any ghost */
+  if(S.on&&gameWeek(G)-(S.lastAny??-99)>=GH_GAP){let hit=false;     /* at most one ghost scene every GH_GAP weeks, all kinds together */
+    if(ghHauntDue(G,rng)){ghHaunt(done);hit=true;}
+    else{const o=ghOtherDue(G,rng);if(o){ghOther(o,done);hit=true;}else if(ghOdd(G,rng)){ghOddPlay(done);hit=true;}}
+    if(hit){S.lastAny=gameWeek(G);return true;}}}}catch(e){console.error("ghost",e);}return false;};}
+
+/* ---------- story beats (played as weekly extras so they can carry state) ---------- */
+function ghStory(done){const S=ghSt(G);if(!S.on)return false;
+  if(S.mpFail===1){S.mpFail=2;save();playScene([N("Three days after the exorcism, a letter in messy handwriting arrives at camp"),{n:"npc",who:MP,img:"morphi",t:"Your camp has something strong. I can't continue. I'm keeping the fee to restore my own spirits. And… my left sandal — please post it to me"},C("Kru told you… make merit. It's cheaper too")],done,{bg:"camp",look:"casual"});return true;}
+  if(S.shrineOK===1){S.shrineOK=2;S.sq=1;S.sqAbs=gameWeek(G);save();playScene([N("On a holy-day afternoon, Luang Pho from the temple next door walks by and stands looking at the banana grove for a long time"),
+    {n:"npc",who:LP,img:"luangpho",t:"This camp makes a lot of merit; I see it every time… but this banana grove — someone lives here"},C("You can see her too, Luang Pho!"),
+    {n:"npc",who:LP,img:"luangpho",t:"She isn't wicked. She's just hurt. Her home gets kicked every day and nobody ever apologised… build her a shrine. She'll look after this place"},
+    C("Nang Tani's shrine… Kru thinks that's good, manager. Tie three-coloured silk, offer khanom tom, and… stop kicking the trees near it"),
+    N("🏮 Nang Tani's shrine quest begins — first step: find a spot for the shrine (it happens by itself next week)")],done,{bg:"temple",look:"casual"});return true;}
+  if(S.pendShrine){S.pendShrine=0;S.stage=3;save();playScene([N("The first night after the shrine goes up, a cool breeze blows. No howling dogs. No smell of khanom tom at three a.m."),
+    N("But you still dream of her… this time she sits on the wooden shrine's ledge, swinging her feet, not on your chest"),
+    TN("…A green shrine, three-coloured silk, and the khanom tom is still warm","shy"),TN("I'm not touched! It's just… nobody ever built me a house before","angry_smile"),
+    MY("I'm sorry about the banana trees — the kicking, and the krathongs"),
+    TN("Hmph… an apology years too late. Still better than none","neutral"),
+    TN("Very well. From now on I'll look after this camp. Any ghost who wants trouble goes through me first. I'll keep the children here from injury and fever","smile"),
+    TN("And if your kru wants a lottery ticket… whisper to me first. No guarantees, but I often see numbers floating in the dew","smile"),
+    TN("Oh, and the tree next to the shrine — never kick it! The others you may. Gently","angry_smile"),
+    N("🏮 Nang Tani's shrine stands: she guards the camp · fighters recover from fatigue faster every week · she hints lottery numbers when Kru Daeng asks you to buy · make offerings at the shrine in camp activities")],done,{bg:"camp_night",look:"casual"});return true;}
+  return false;}
+
+/* ---------- the shrine whispers a lottery number ---------- */
+{const _p=lottoPickHTML;lottoPickHTML=function(i){const h=_p(i);const S=G&&G.gh;if(!S||!S.shrine)return h;const k=ghLottoK(G,i);
+  return h.replace('<div class="ltgrid">',`<p class="ghhint"><img src="${ASSET+"npc_tani_face.webp"}" alt="">Nang Tani whispers as Kru Daeng lights incense at the shrine: “Ticket ${k+1}… I saw this number floating in the dew this morning”</p><div class="ltgrid">`).replace(`data-v="${k}"`,`data-v="${k}" style="outline:3px solid #6fcf7f;outline-offset:2px"`);};}
+const ghLottoK=(G,i)=>((G.seed||1)+(G.season||1)*7+i*3)%6;
+{const _b=lottoBuy;lottoBuy=function(G,i,k){const d=_b(G,i,k);try{if(d&&G.gh&&G.gh.shrine&&k===ghLottoK(G,i))d.tani=1;}catch(e){}return d;};}
+{const _r=lottoResult;lottoResult=function(G,d){const R=_r(G,d);if(d.tani&&R.out==="none"){const r=mulberry32((G.seed||1)*131+d.season*17+d.i);const x=r(),p=d.pick||"000000";
+    if(x<.25){R.out="last2";R.l2=p.slice(-2);R.prize=LOTTO_PRIZE.last2;}else if(x<.33){R.out="last3";R.l3=p.slice(-3);R.prize=LOTTO_PRIZE.last3;}}return R;};}
+
+/* ---------- test hook: the test save gets Tani awake and a haunt ready ---------- */
+{const _t=xlTestSetup;xlTestSetup=function(G){_t(G);try{const S=ghSt(G);S.on=1;S.wakeAbs=gameWeek(G)-8;S.last=-99;S.merit=30;G.seen=G.seen||{};G.seen.gh_wake=true;}catch(e){console.error(e);}};}
+
+/* ================= Phase 2: the Rains Retreat, the other ghosts, the girls' ghost stories, odd happenings ================= */
+/* v1.91.144 (Man): through the Rains Retreat Luang Pho must stay at his temple and can't come out to help — the other ghosts come out then, and often */
+const GH_SEASON=()=>GH_LENT();
+const GH_OTHER=["krasue","krahang","mabong","phiphong"];
+const GH_NAME={krasue:"Krasue",krahang:"Krahang",mabong:"Phi Ma Bong",phiphong:"Phi Phong",tani:"Nang Tani"};
+const GH_SOUND={krasue:"Hee… hee… hee…",krahang:"Flap! Flop! Flap! Flop!",mabong:"Neeeeigh!",phiphong:"Sniff… sniff… smells like pla ra…"};
+EVENTS.push({id:"gh_lp_go",annual:true,look:"casual",bg:"temple",pri:3,when:G=>ghSt(G).on&&ghIn(G,GH_SEASON()),steps:[
+ N("First day of the Rains Retreat: the whole camp offers a Lent candle at the temple next door. Luang Pho walks you to the temple gate"),
+ {n:"npc",who:LP,img:"luangpho",t:"For these three months I must stay in the temple for the Rains Retreat. I can't spend a night outside — if something troubles you at night, I can't come to help"},
+ C("Three whole months, Luang Pho… Kru will chant twice a day"),
+ {n:"npc",who:LP,img:"luangpho",t:"Chant by all means, but the right one — last time I heard you doing the victory blessing before bed …Bad things know the monks won't leave the temple now, so they like to wander. Make merit and your heart won't waver"},
+ N("🌙 During the Rains Retreat (late Jul–late Oct) Luang Pho stays in his temple, and other ghosts come out often — high camp merit or Nang Tani's shrine helps a lot")]});
+EVENTS.push({id:"gh_lp_back",annual:true,look:"casual",bg:"temple",pri:2,when:G=>{const S=ghSt(G),L=GH_LENT();return S.on&&G.seenY&&G.seenY.gh_lp_go===(G.season||1)&&G.week>L[1]&&G.week<=L[1]+6;},steps:[
+ N("End of the Rains Retreat: the Tak Bat Devo alms round at dawn. Luang Pho smiles wider than ever"),
+ {n:"npc",who:LP,img:"luangpho",t:"The Retreat is over. I can go where I like again …I hear a lot came visiting your camp these three months"},
+ C("Plenty, Luang Pho. Kru chanted until he knows the whole book by heart")]});
+const ghSight={
+ krasue:f=>[N(`One a.m. ${f} gets up for the bathroom and sees a purple light floating low by the chicken coop behind camp`),{n:"_f",t:"Manager! A lost lantern… wait, why does the lantern have a face!"},
+   N("The light turns and smiles. Long hair spills out, something glittering dangles below — then it shoots off into the dark"),C("Krasue! Cover every water jar, bring in the laundry! …Kru's pha khao ma is still out — someone grab it")],
+ krahang:f=>[N("Flapping on the camp roof all night, like someone fanning with two winnowing baskets"),{n:"_f",t:"Manager… someone can fly! Winnowing baskets for wings, riding a rice pestle!"},
+   C("Krahang! Never leave baskets and pestles outside …Kru bets it borrowed Auntie Taew's"),N("Next morning Auntie Taew comes complaining that two of her winnowing baskets and a pestle are missing")],
+ mabong:f=>[N("In the dead of night a “NEIGH!” comes from the field behind camp, then hooves galloping three times round the camp"),{n:"_f",t:"Whose horse is running around at two a.m.? Are there even horses in Chiang Mai?"},
+   C("Phi ma bong… a true northern ghost. Whoever it possesses runs and neighs like a horse all night …who ran round the camp last night? Hands up"),N("Nobody raises a hand, but two morning-course students have legs as sore as if they ran a marathon")],
+ phiphong:f=>[N("An orange light flickers by the ditch, and a fishy smell drifts over in waves"),{n:"_f",t:"Such a big firefly… why does it have a nose, and why is the light coming out of it"},
+   C("Phi phong! The light comes out of its nostrils and it loves raw, fishy things. Lid on the pla ra in the kitchen!"),N("In the morning half the camp's small jar of pla ra is gone, greasy fingerprints on the lid")]};
+const GH_GOPEN={krasue:[N("You dream you're standing in a ring in the middle of a rice field. A woman's head floats around it, its entrails glittering like fairy lights")],
+ krahang:[N("In the dream the ring sits on the camp roof. A thin man spreads two rice-winnowing baskets and glides down into the blue corner")],
+ mabong:[N("In the dream, hooves stamp the canvas — thud, thud. A black, red-eyed horse stands on two legs with its guard up")],
+ phiphong:[N("In the dream every light in the arena goes out, except an orange glow from someone's nose in the blue corner")]};
+const GH_MORN2={kati:{w:"Kati dreamt she punched {g} until it ran away! Cool-season ghosts aren't scary at all",l:"Achoo… Kati dreamt she lost to {g} and woke up with a fever. Not fair!"},
+ mali:{w:"Mali beat {g} too! …but can Mali sleep in Kru Daeng's room one more night?",l:"Mali's not feeling well… dreamt about {g} all night"},
+ rin:{w:"I dreamt I beat {g}. I noted its features in case there's research on this",l:"38.2 degrees. Definitely nothing to do with {g} …Manager, close the window please"},
+ ploy:{w:"Last night Ploy beat {g}. No need to tell anyone",l:"Ploy's a little unwell …{g} was only a dream"},
+ fah:{w:"Fah kicked {g} two rice fields away. Easy",l:"Achoo! Fah didn't lose to {g}. Fah was just sleepy"},
+ prod_B:{w:"Log: target {g} eliminated in a dream. Baiyok requests adding {g} to the database",l:"System has a fever… {g} is not in the database, so it could not be blocked"},
+ _:{w:"Last night I dreamt I beat {g}",l:"I've got a fever. Last night I dreamt I lost to {g}"}};
+function ghOtherDue(G,rng){const S=ghSt(G);if(!S.on||!ghIn(G,GH_SEASON()))return null;S.og=S.og||{};const yr=G.season||1;
+  if(gameWeek(G)-(S.lastO??-99)<3)return null;S.ogSeen=S.ogSeen||{};const fresh=GH_OTHER.filter(k=>S.ogSeen[k]!==yr),left=fresh.length&&rng()<.5?fresh:GH_OTHER;
+  const p=(S.merit<40?.6:S.merit<70?.45:.3)*(S.shrine?.6:1)*((S.th||0)>=3?.75:1);if(rng()>=p)return null;return left[Math.floor(rng()*left.length)];} /* v1.91.144 (Man): often, all Lent long, and never quite gone even at merit 100 */
+function ghOther(kind,done){const S=ghSt(G),yr=G.season||1;S.lastO=gameWeek(G);S.og=S.og||{};S.ogSeen=S.ogSeen||{};const seen=S.ogSeen[kind]===yr;
+  const R=roster(G).filter(f=>!f.injury);if(!R.length){done();return;}const named=R.filter(f=>GH_ENTER[f.id]),f=(named.length?named:R)[Math.floor(Math.random()*(named.length?named:R).length)];
+  if(!seen){S.ogSeen[kind]=yr;save();const st=ghSight[kind](f.name).map(s=>s.n==="_f"?(GH_ENTER[f.id]?GL(f.id,"surprised",s.t):{n:"nar",t:`${f.name}: ${s.t}`}):s);
+    ghPlay([N("— Something strange in the night —"),...st,...(S.shrine?[TN("Hmph… the Rains Retreat lot have arrived. I'll keep an eye out","angry_smile")]:[])],done,{bg:"camp_night",look:"casual"});return;}
+  S.og[kind]=yr;save();const enter=(GH_ENTER[f.id]||GH_ENTER._).replace(/\{f\}/g,f.name),tani=S.shrine&&Math.random()<.45;
+  const steps=[pk(GH_GOPEN[kind]),{n:"npc",who:GH_NAME[kind],t:GH_SOUND[kind]},
+   ...(tani?[TN("Stand back, children. Tonight I'll handle this myself!","angry"),N("A green light shoots down into the ring. Nang Tani tucks up her sarong and raises a guard she's learned from watching the camp train every day")]
+     :[N(enter),...(S.shrine?[TN("Stop right there! This camp already has a guardian… me!","angry"),TN("Boxer, hit it! I'll hold the ring for you — it'll weaken on its own","angry_smile")]:[])]),
+   MY("(Can't move again… so, shouting only)"),
+   {choice:[{t:tani?"Cheer Nang Tani with all your heart (dream fight)":`Cheer ${f.name} with all your heart (dream fight)`,fx:()=>{UI.ghGo={fid:f.id,live:1,tani};}},{t:"Rapid-chant Itipiso (skip the fight, let it resolve)",fx:()=>{UI.ghGo={fid:f.id,live:0,tani};},then:[N("You chant Itipiso twelve times. The sounds in the dream fade little by little…")]}]}];
+  ghPlay(steps,()=>{const go=UI.ghGo;UI.ghGo=null;if(!go){done();return;}ghFight(go.fid,go.live,done,kind,go.tani);},{bg:"dream_room",look:"casual"});}
+
+/* ---------- the girls' ghost stories (one each, once Tani is awake) ---------- */
+const ghGirl=(id,b=12)=>G=>{const S=ghSt(G);return S.on&&inCamp(G,id)&&(G.F[id].bond||0)>=b&&gameWeek(G)-(S.wakeAbs||0)>=3;};
+const BOND=(id,v)=>({inject:G=>{add(G,id,"bond",v);return [];}});
+EVENTS.push(
+ {id:"gh_kati",look:"casual",bg:"camp_night",when:ghGirl("kati"),steps:[
+  N("One a.m. You find Kati patrolling the camp with a coconut-rib broom as a weapon and a headlamp on"),
+  GL("kati","happy","Manager! Kati will guard the camp. If a ghost comes, Kati will hit it with the broom like Crocodile Whips Its Tail!"),
+  MY("Can you hit a ghost with a broom?"),GL("kati","flustered","Dunno. But grandma said ghosts are scared of brooms… or was it witches… which one?"),
+  N("The leaves behind camp sway though there's no wind. Kati whirls round, broom up in guard"),TN("…Whack who with a broom?","angry_smile"),
+  GL("kati","surprised","…M-m-manager, RUN!!"),N("Kati runs three steps, then turns back and drags you along by the arm. The broom lies in the middle of the yard"),
+  N("The next morning the broom is propped neatly against Kati's door, a green ribbon tied round the handle"),GL("kati","flustered","…She even gave it back. So kind. Kati's sorry she was going to whack you!"),BOND("kati",2)]},
+ {id:"gh_mali",look:"casual",bg:"camp_night",when:ghGirl("mali"),steps:[
+  N("Mali knocks on your door at eleven, hugging a bolster pillow"),GL("mali","sad","Manager… Mali can't sleep. Someone's giggling in the banana grove"),
+  MY("Maybe you heard wrong. Could be a cat"),GL("mali","sad","Can cats laugh “hee hee hee”…?"),
+  N("Mali asks to sit and read comics with you until midnight, then dozes off in the chair, still mouthing the Itipiso chant"),
+  TN("…This child is that scared of me?","neutral"),N("A thin blanket floats over and settles on Mali's shoulders by itself. You look, but see no one"),
+  GL("mali","happy","(Next morning) Did the manager put a blanket on Mali? Thank you!"),MY("…Mm, yeah, yeah"),BOND("mali",2)]},
+ {id:"gh_rin",look:"casual",bg:"camp_night",when:ghGirl("rin"),steps:[
+  GL("rin","happy","I set up three infrared cameras around the banana grove. If there's a ghost, we'll have proof. If not, everyone can stop being scared"),
+  N("The next morning Rin calls everyone to watch the clip"),GL("rin","surprised","…There's only one thing in the footage all night"),
+  N("On screen: Kru Daeng in elephant-print pyjamas, walking seven times around the banana grove with incense, mumbling chants, at 2:15 a.m."),C("…Kru was making merit. You can make merit at two a.m."),
+  GL("rin","flustered","But camera three… someone covered the lens with a banana leaf from three a.m. till morning. There are green fingerprints"),N("The room goes silent. Rin deletes the file in front of everyone"),
+  GL("rin","sad","No evidence, no ghost. The end …Manager, would you walk me to my room tonight?"),BOND("rin",2)]},
+ {id:"gh_ploy",look:"casual",bg:"camp_night",when:ghGirl("ploy"),steps:[
+  N("Ploy's room has a dim light on all night. You only notice walking past"),GL("ploy","angry","A dim light helps you sleep. Nothing to do with ghosts"),
+  N("Suddenly a horse's “NEIGH!!” rings out from the rice field. Ploy grabs your arm so hard her nails dig in"),MY("…Ploy. My arm"),
+  GL("ploy","flustered","Ploy was just… checking the manager's pulse, to see if you were scared …your pulse is racing, manager"),
+  N("The sound turns out to be Uncle Khiao's horse from next door, loose from its pen — not a horse ghost"),GL("ploy","pout","Don't tell anyone. If you do, Ploy will say the manager screamed"),BOND("ploy",2)]},
+ {id:"gh_fah",look:"casual",bg:"camp_night",when:ghGirl("fah"),steps:[
+  GL("fah","happy","Fah will sleep under the banana grove for one night. If there's no ghost, everyone buys Fah a milk tea"),N("One a.m. Fah lies on a mat under the banana trees playing on her phone. You watch from the window"),
+  TN("…What are you playing, shining light in my face?","angry"),GL("fah","surprised","…Whoa, a real ghost. Nice dress. Can we take a selfie?"),TN("If you take it, will I show up on your camera…","neutral"),
+  N("The two of them talk until three. Fah teaches Nang Tani a match-three game; Nang Tani teaches Fah how to pick lottery numbers"),
+  GL("fah","happy","(Morning) Fah lost the bet — the ghost is real …but Fah made a new friend. She's better at the game than Fah. Annoying"),BOND("fah",2)]},
+ {id:"gh_baiyok",look:"casual",bg:"camp_night",when:G=>ghGirl("prod_B",10)(G)&&ghSt(G).shrine,steps:[
+  {n:"npc",who:"Baiyok",t:"Baiyok has inspected Nang Tani's shrine for three nights. The temperature around it is 2.4 degrees below normal. No explanation in the database"},
+  TN("This robot girl has been staring at me for three nights…","angry_smile"),{n:"npc",who:"Baiyok",t:"…Voice detected. No source"},
+  N("Baiyok's ponytail slowly braids itself into two plaits before your eyes. Baiyok stands perfectly still"),{n:"npc",who:"Baiyok",t:"……Error. Error"},
+  TN("Hee hee, cute. Such long pretty hair, I just helped braid it","smile"),
+  {n:"npc",who:"Baiyok",t:"(In the morning Baiyok is still in braids) …Baiyok has decided not to change her hair. The data says… it looks good"}]});
+
+/* ---------- odd happenings (light, every so often; more of them when merit is low) ---------- */
+const GH_ODD=[
+ f=>[N("Two a.m. A light blinking three colours hangs still over the rice field behind camp for almost an hour"),{n:"_f",t:"UFO! Manager, a UFO!"},C("That's a drone filming Uncle Khiao's ordination party… probably. Kru's not sure. Do they ordain at night?")],
+ f=>[N("The whole camp hears a ranat playing the Sarama faintly at midnight, though there's no temple fair nearby"),C("…That's my phone. I set an alarm and forgot to turn it off. Sorry")],
+ f=>[N("This morning there are tiny footprints on the kitchen ceiling, walking from the corner to the rice pot"),{n:"_f",t:"Must be a ghost child!"},N("A gecko as big as an arm pokes its head from behind the cupboard, looks at everyone, and calls “To-kay!” once")],
+ f=>[N("Kru Daeng has chanted before bed every night for three weeks. Tonight he's extra loud"),C("Itipiso bhagava… who turned on Kru's fan! Kru didn't turn it on! Araham!"),N("That fan has been broken for two months")],
+ f=>[N("Auntie Taew's rooster crows three times at midnight. The dog next door howls back twice. The cat says nothing"),C("They say a rooster crowing at midnight is a bad omen… or the rooster set its clock wrong")],
+ f=>[N("Someone has written three digits on a banana leaf at the camp gate in white powder"),C("What number is that… Kru's just writing it down. Not buying. Just writing"),N("The whole camp copies it down. Auntie Taew does too. Uncle Khiao posts a photo in the village group")],
+ f=>[N("A black cat climbs into the middle of the camp ring and sits there all afternoon. Nobody can shoo it away"),{n:"_f",t:"Is it here to sign up as a boxer?"},C("If it can box, I'll sign it. One mackerel a day")],
+ f=>[N("The community radio in the kitchen turns itself on at four a.m. and plays the same country song on repeat until morning"),{n:"_f",t:"This song… is it “Butterfly Tears”?"},C("Ghosts like sad songs. Let's put on something upbeat instead")],
+ f=>[N("The evening course kids say they saw a monk walk past the camp at nine, while Luang Pho is staying inside his temple for the Rains Retreat"),C("…A monk from another temple, maybe, out on alms at the wrong hour. Don't overthink it. And… let's all sleep in one room tonight")]];
+function ghOdd(G,rng){const S=ghSt(G);if(!S.on||gameWeek(G)-(S.lastOdd??-99)<3)return false;if(rng()>=(S.merit<30?.16:S.merit<60?.09:.05))return false;return true;}
+function ghOddPlay(done){const S=ghSt(G);S.lastOdd=gameWeek(G);S.oddI=((S.oddI??-1)+1)%GH_ODD.length;save();const R=roster(G).filter(f=>GH_ENTER[f.id]),f=R[Math.floor(Math.random()*R.length)];
+  const st=GH_ODD[S.oddI](f?f.name:"").map(s=>s.n==="_f"?(f?GL(f.id,"surprised",s.t):{n:"nar",t:"A course kid: "+s.t}):s);ghPlay([N("— Strange things in camp —"),...st],done,{bg:"camp_night",look:"casual"});}
+
+
+/* ================= Phase 3: sitting with Nang Tani at her shrine (friendship, not romance) ================= */
+/* once a week, in place of spending time with a fighter; topics never repeat until all are heard; heart scenes at 20/40/70 */
+const TT=[
+ {k:"green",o:[TN("Why are you staring at my dress… I've worn green since I was born. I was born from a banana tree — should I wear red?","angry_smile")],
+  c:[["Green suits you",3,"…Sweet talker. I won't fall for it, but thank you","shy"],["Ever tried another colour?",0,"If I wore yellow, people would think I'm a banana-flower ghost. Never","angry"],["How do you wash hair that long?",2,"Morning dew. Free. No shampoo. Humans are so pitiful","smile"]]},
+ {k:"lotto",o:[TN("I've wondered for ages… why do people scratch my tree looking for lottery numbers? It hurts, you know","angry")],
+  c:[["I'm sorry on everyone's behalf",3,"Hmph… you're the first to apologise on everyone else's behalf. Strange","shy"],["So what's next draw's number?",-1,"See! Only ever asking for numbers! …The last two digits have a seven. Off you go","angry_smile"],["I'll put up a ‘no scratching’ sign",2,"Make it big, and write ‘Owner of this tree is fierce’","smile"]]},
+ {k:"daeng",o:[TN("Your kru… chants every night, but half the chants are wrong. Last night he did the merit-sharing water chant before bed","neutral")],
+  c:[["The kru's just scared",2,"I know. That's why I turned his fan on as a joke, hee hee… oh, should I not have said that?","angry_smile"],["Teach the kru the right chant, please",3,"I'm a ghost, not a monk! …but I'll go whisper in his ear tonight","smile"],["No pranking the kru",1,"Fine, no tricks… I'll just turn the fan on to keep him cool","neutral"]]},
+ {k:"snack",o:[TN("The khanom tom offered yesterday… who made it? The coconut was a bit too sweet, but I ate it all","smile")],
+  c:[["What sweets do you like best?",2,"Khanom tom, khao tom mat, bananas in coconut milk… wait, no bananas in coconut milk. That's like eating a relative","angry"],["Next time I'll bring fried bananas",-2,"……How about I deep-fry your bones","scary"],["And red soda?",2,"Red soda must be cold, lots of ice. Ghosts get hot too","smile"]]},
+ {k:"radio",o:[TN("Last night I listened to the community radio in the kitchen. A game show — someone got question two wrong and still went home with balm. I laughed till my tree shook","smile")],
+  c:[["I've been on that show",3,"Really!? Did the seventh mortar really pound by itself? …Don't tell me. I don't want to know. I want to believe","shy"],["Ghosts can listen to the radio?",1,"I can, but I can't change the station, so it's country music all night","neutral"],["Next time I'll call you as my lifeline",2,"Call, then… I don't have a phone, but I'll whisper in your ear","angry_smile"]]},
+ {k:"girls",o:[TN("The girls in your camp… I've been watching a long time. Some sneak looks at you during training. I see everything","angry_smile")],
+  c:[["Who?",1,"I won't tell. I'm a ghost, not a matchmaker …but the one with the red-and-white cord looks most often","smile"],["Don't tease them",2,"I don't tease them. I just tuck them in while they sleep… sometimes I braid their hair","shy"],["Are you lonely?",3,"……You ask far too directly","shy"]]},
+ {k:"fear",o:[TN("Do you know what I'm most afraid of?","neutral")],
+  c:[["Chanting?",0,"Not at all, I like listening — even if your kru chants off-key","smile"],["Termites?",2,"…Yes! They eat my trees! No ghost is as scary as a big swarm of termites","scary"],["A chainsaw",3,"Don't say that word… I get goosebumps, and I'm a real ghost","angry"]]},
+ {k:"moon",o:[TN("On full-moon nights I'm strongest. If any ghost wanders around that night, I'll kick it into the rice paddy","smile")],
+  c:[["You can kick?",2,"Boxers have kicked me for a hundred years — I know every move! Crocodile Whips Its Tail… whoosh!","angry_smile"],["Come and teach the kids sometime",3,"I could teach. But the kids wouldn't sleep for three nights","smile"],["Don't kick too hard",1,"Not hard. Just enough to remember it in their next life","neutral"]]},
+ {k:"slang",o:[TN("I heard the course kids say “lit” and “queen” …what do they mean? I want to use them","neutral")],
+  c:[["“Queen” means the best at something",3,"Then I'm the queen of banana-tree ghosts in Chiang Mai! …Did I say it right? Is it lit?","smile"],["Don't. It doesn't suit a ghost",0,"Hmph. People turn ghosts into memes these days — I have to keep up","angry"],["“Lit” means really good",2,"My shrine… is lit! Hee hee","shy"]]},
+ {k:"kicks",o:[TN("The kids kicked the back tree today… but they came and bowed at the shrine first, so I let it go","smile")],
+  c:[["I told everyone to ask permission before kicking",3,"…Thank you. Just ask first, and I'd give you the whole grove","shy"],["Can they kick the other trees instead?",1,"You may. But not the one that's flowering — the little one will get scared","neutral"],["Better buy more heavy bags",2,"Good! Spend the money on bags. My banana trees can live in peace","smile"]]}];
+const TH=[
+ {at:20,steps:()=>[N("Tonight you sit at the shrine longer than usual. Nang Tani sits on its roof, swinging her feet"),
+  TN("Do you know… who planted this banana grove?","neutral"),MY("No idea"),
+  TN("Your own grandfather. When he was young — no camp, no heavy bags, just banana trees and a dream","smile"),
+  TN("Every morning before kicking, he'd raise his hands in a wai and say, ‘May I borrow your tree, lady? Three hundred kicks today’ — and in the evening he'd water it","shy"),
+  TN("After he died… nobody asked me again. They just kicked, and then floated me down the river","neutral"),
+  MY("So when you were haunting everyone…"),TN("I just wanted someone to remember that somebody lives here… even a ghost gets lonely","shy"),
+  N("The wind stirs the banana leaves gently, as if someone is nodding"),N("💚 Your bond with Nang Tani grows")]},
+ {at:40,steps:()=>{const f=roster(G).find(x=>x.injury>0)||roster(G)[0];const nm=f?f.name:"one of the kids";return [
+  N(`That night ${nm} was down with a fever. You went to check on her late at night`),N("Beside the mattress, Nang Tani kneels, slowly fanning with a banana leaf"),
+  TN("Shh… keep it down. She just fell asleep","neutral"),MY("You were the one giving everyone fevers at first, you know"),
+  TN("I know… back then I was angry. Now I sit with them to pay it back","shy"),TN("The fever's down. She can eat rice porridge this morning. Don't make her train hard, or I'll haunt you instead","angry_smile"),
+  N(`The next morning, ${nm} woke up refreshed, saying she dreamt a woman in green sang lullabies all night — slightly off-key`),N("💚 Your bond with Nang Tani grows")];}},
+ {at:70,steps:()=>[N("Loy Krathong night. The whole camp went to the river; you come back to the shrine holding one bread krathong"),
+  TN("…A bread krathong. Not banana trunk","shy"),MY("This year I made everyone use bread. The fish can eat them too"),
+  TN("Hee hee hee… you really are crazy","smile"),N("Nang Tani floats down and sits beside you — the closest she has ever sat. She's cool as morning dew"),
+  TN("I'm a ghost, you're a person. I'll be here another hundred years; you've got a few decades","neutral"),
+  TN("But I think… we can be friends. Friends who watch over this camp together, until you're too old to kick a banana tree","smile"),
+  MY("Friends it is"),TN("Good! Then a friend brings red soda every Buddhist holy day. Don't forget!","angry_smile"),
+  N("Far away, fireworks burst over the river. A faint green light rises from the banana grove and mixes with the sparks"),N("💚 Nang Tani is your close friend now — she'll guard the camp even harder")]}];
+function ghTalk(){const S=ghSt(G);if(!S.shrine||G.freeUsed)return;G.freeUsed=true;S.tb=S.tb||0;S.th=S.th||0;S.tt=S.tt||[];
+  const heart=TH.find((h,i)=>i>=S.th&&S.tb>=h.at);
+  if(heart){S.th=TH.indexOf(heart)+1;S.tb=clamp(S.tb+3,0,ghCap(G));save();playScene([N("You walk to Nang Tani's shrine"),...heart.steps()],()=>render(),{bg:"camp_night",look:"casual"});return;}
+  let pool=TT.filter(t=>!S.tt.includes(t.k));if(!pool.length){S.tt=[];pool=TT;}const T=pool[Math.floor(Math.random()*pool.length)];S.tt.push(T.k);save();
+  playScene([N("You walk to Nang Tani's shrine and light one incense stick. A soft green glow drifts down to sit on the shrine's ledge"),...T.o,
+   {choice:T.c.map(([t,v,r,img])=>({t,fx:()=>{S.tb=clamp((S.tb||0)+2+v,0,ghCap(G));save();},then:[TN(r,img)]}))},
+   {inject:()=>[N(`💚 Closeness with Nang Tani ${S.tb}`)]}],()=>render(),{bg:"camp_night",look:"casual"});}
+Object.assign(ACT,{ghtalk:()=>{UI.modal=null;ghTalk();}});
+/* she sits at the end of the people list once the shrine stands */
+{const _p=peopleHTML;peopleHTML=function(){const h=_p();const S=G&&G.gh;if(!S||!S.shrine)return h;const tb=S.tb||0;
+  return h+`<div class="pcard ghcard"><img class="face" src="${ASSET+"npc_tani_face.webp"}" alt=""><div><b>Nang Tani</b><small>The camp's guardian spirit · closeness ${tb}/100${S.th>=3?" · best friends":""}</small></div>
+   <button class="btn sm primary" data-act="ghtalk" ${G.freeUsed?"disabled":""}>Sit at the shrine</button></div>`;};}
+
+
+/* ================= Phase 4 (v1.91.144, Man): a three-year Tani arc, then a merit-keeping loop =================
+   Year 1 after she wakes — chaos: Tani and the Lent ghosts haunt; no shrine yet; ends with the dark-moon brawl where Tani "doesn't help".
+   Year 2 — merit: Luang Pho's advice, finding the spot, the teak, Tani's test, then the shrine (฿60,000).
+   Year 3 — closeness: deeper talks, her blossom day, Loy Krathong together, the Lent truce with the four ghosts.
+   After that — a loop: keep merit up or her shrine gathers dust and she sulks (and haunts) until you make it up to her. */
+const ghYear=G=>{const S=ghSt(G);if(S.ys==null)S.ys=S.shrine?Math.max(1,(G.season||1)-1):S.wakeAbs?Math.floor((S.wakeAbs-1)/52)+1:(G.season||1);return Math.max(1,(G.season||1)-S.ys+1);};
+const pk=x=>Array.isArray(x)?x[Math.floor(Math.random()*x.length)]:x;
+const LPS=t=>({n:"npc",who:LP,img:"luangpho",t});
+
+/* --- more variety for every repeating beat --- */
+GH_OPEN.push(
+ [N("Three a.m. exactly. The kitchen clock ticks backward twice, then stops."),N("Your blanket is being pulled down, little by little, as if someone wants you awake.")],
+ [N("A light rain falls all night, but the drops on the window run upward."),N("The shadow of a banana leaf on the wall stretches and stretches until it becomes a woman's hand.")],
+ [N("You dream you're eating sticky rice with Kru Daeng. He turns and smiles, and his face slowly goes green."),N("\"Hee hee, just kidding, it's me,\" says a woman's voice from Kru Daeng's mouth.")],
+ [N("A cold breath brushes your neck though the window is shut. The ceiling fan turns slowly though it isn't plugged in."),N("At the foot of the bed lie three banana sheaths in a row, chalked: 3… 2… 1…")]);
+GH_TANI_LINE[0].push("I saw you in the daytime… walking past my grove in flip-flops without so much as a wai.","The moon's not full tonight, but my temper is.");
+GH_TANI_LINE[1].push("Your fighters kicked my tree three hundred times. Tonight I pay back three hundred and one.","Your Kru chants every night… says 'Bhagava' as 'Bhagavow'. I laughed so hard I nearly fell out of my tree.");
+GH_TANI_LINE[2].push("You're making more merit, I know… but I still have to come. Ghosts have jobs too.","I came tonight… in case you were lonely. Not because I am.");
+const GH_SULK=["Three inches of dust on my shrine! The last khanom tom has gone hard as a rock. I'm sulking!","Your camp's merit dropped so low I'm hungry. Hungry ghosts get mean.","I'm not haunting you because I'm angry… I'm here because I miss the khanom tom."];
+const MORE_W={kati:["Kati dreamt again! This time the lady in green wanted to swap kicks. Kati taught her the crocodile tail-whip…","How many ghosts has Kati beaten now? Lost count. Manager, write it down for me!"],
+ mali:["Mali won! And the ghost patted Mali's head before it left… should Mali be happy or scared?","Mali dreamt she beat a ghost and then treated it to milk tea. It said too sweet."],
+ rin:["I won again. My record against ghosts is now winning. Publishable… kidding, no journal would take it.","In the dream I kept my range. The ghost couldn't adjust. Great data, all noted."],
+ ploy:["Ploy won. The ghost even bowed… Ploy bowed back. Manners.","Again? …A win's a win. Ploy wants one more hour of sleep."],
+ fah:["Fah beat a ghost again. Boring. Aren't there any tougher ghosts in Chiang Mai?","Fah took a selfie with the ghost in the dream, but woke up with a dead battery. Ugh."],
+ prod_B:["Log: another win… Baiyok is starting to enjoy this. This data should not be in the system.","Baiyok updated the algorithm. Ghost defeated within one round. Efficiency up 34 percent."],
+ _:["I beat a ghost again. Not scared anymore, just sleepy."]};
+const MORE_L={kati:"Achoo… Kati lost because the ghost tickled! Cheater!",mali:"Mali's sick… dreamt a ghost braided Mali's hair all night. It's all tangled.",rin:"I've got a fever… in the dream the ghost read my game. I need to rewatch my tapes.",
+ ploy:"Ploy is unwell. Don't ask why.",fah:"Achoo… don't feel sorry for Fah. Fah just slipped up in a dream.",prod_B:"…System entering maintenance mode. Baiyok will rest for one week.",_:"I've got a fever… dreamt a ghost kicked soft but accurate."};
+const MORE2={kati:["Last night Kati punched {g} till it begged for its life! …Do ghosts have lives?","{g} cheats! It kept floating away, Kati couldn't catch it. Achoo."],mali:["Mali beat {g}! But I punched with my eyes shut the whole time, no idea what I hit.","Mali's got a fever… {g} was scarier than I thought."],
+ rin:["{g} drops its left guard. I've noted it.","I misread {g}… and caught a fever. Double loss."],ploy:["{g} is no match for Ploy.","…{g} got lucky. Ploy hadn't had dinner yet."],
+ fah:["{g}? Fah can't even remember its name. Too easy.","Fah didn't lose to {g}. Fah just wanted a rest."],prod_B:["{g} added to the database. Elimination accuracy improved.","Error… {g} is outside processing parameters."],
+ _:["I beat {g}. I never want to meet it again.","I lost to {g}. I'm burning up."]};
+for(const k of Object.keys(GH_MORN)){const M=GH_MORN[k];M.w=[M.w,...(MORE_W[k]||[])];M.l=[M.l,MORE_L[k]].filter(Boolean);}
+for(const k of Object.keys(GH_MORN2)){const M=GH_MORN2[k],X=MORE2[k];if(X){M.w=[M.w,X[0]];M.l=[M.l,X[1]];}}
+GH_GOPEN.krasue.push(N("In the dream the ring floats in mid-air. A sweetly smiling woman's head drifts over to the blue corner post, her innards twinkling like temple-fair lights."),N("In the dream a floating head giggles three laps round your head before drifting down… to hover in the blue corner."));
+GH_GOPEN.krahang.push(N("In the dream two winnowing baskets glide down onto the ring, and a rice pestle stands planted in the centre like a flag."),N("In the dream a skinny man flaps his winnowing baskets till the ring dust swirls — \"flap! flap!\" — his warm-up."));
+GH_GOPEN.mabong.push(N("In the dream a black horse gallops three laps round the ring, then leaps the ropes and puts up its guard."),N("In the dream a 'NEIGH!' shakes the ropes. The Ma Bong raises its front legs in a wai khru."));
+GH_GOPEN.phiphong.push(N("In the dream the smell of pla ra arrives before he does; orange light beams out of his nostrils onto the ring like a torch."),N("In the dream the blue corner is pitch black, just two orange dots blinking… no, those are nostrils."));
+const ghSight2={
+ krasue:[f=>[N("Tonight a purple light drifts over to the clothesline behind camp and studies Kru Daeng's pha khao ma with great interest."),{n:"_f",t:"Manager… is the krasue picking out clothes?"},C("Don't you take my pha khao ma! I've used that one for ten years!"),N("In the morning Kru Daeng's pha khao ma is gone, leaving a heart-shaped scorch mark on the line.")],
+  f=>[N("The purple light circles the banana grove three times, then hangs still as if waiting to be invited."),{n:"_f",t:"I heard two women arguing about the clothesline… are two ghosts fighting?"},C("Better this year. At least they're arguing with each other instead of haunting us.")]],
+ krahang:[f=>[N("In the middle of the night a winnowing basket glides down into the camp yard. Written on it: 'Thanks for the loan.'"),{n:"_f",t:"He returned it… better manners than some people."},C("Pa Taew got her winnowing basket back, but not the pestle!")],
+  f=>[N("Tonight the flapping on the roof keeps time with the Sarama tune."),{n:"_f",t:"Is the Krahang practising flying to the pi-klong beat… or does he want to learn Muay Thai?"},C("If he wants to learn, he pays the course fee. Fifteen hundred a course.")]],
+ mabong:[f=>[N("Tonight the hoofbeats circle the camp only twice, then stop at the training yard."),{n:"_f",t:"Is it coming to watch us run? This morning it felt like someone was running behind us the whole way."},C("The Ma Bong is fast. If it weren't a ghost, I'd sign it up as a running partner.")],
+  f=>[N("Hoofprints all over the training yard this morning, spelling out 'race me?'"),{n:"_f",t:"A ghost challenging us to a race… who'd accept?"},C("Nobody's going! …Let me think. What's the prize?")]],
+ phiphong:[f=>[N("The pla ra jar was hidden on top of the kitchen cupboard, but by morning half of it was still gone."),{n:"_f",t:"The Phi Phong can climb cupboards too…"},C("Next year I'll ferment two jars. One for the ghost, one for the people.")],
+  f=>[N("A little orange light stops in front of the kitchen and leaves a tiny jar of pla ra at the door."),{n:"_f",t:"He brought the pla ra back… or brought us some. It smells better than ours."},C("The Phi Phong ferments pla ra better than I do… I won't stand for it. Next year, a contest.")]]};
+GH_ODD.push(
+ f=>[N("Pa Taew says she saw a shadow kicking the banana tree at 3 a.m. When she shone a torch, the tree was kicking the shadow back."),C("…How many glasses of rice whisky did Pa Taew have?")],
+ f=>[N("This morning every pair of fighters' shoes in camp has been lined up pointing out the door."),{n:"_f",t:"Who did this? So neat."},C("They say shoes pointing out means 'guests, go home'… or maybe someone's just tidy.")],
+ f=>[N("The middle heavy bag swings gently all night, as if someone were punching it in rhythm."),C("If ghosts train here too, I'm charging equipment rental.")],
+ f=>[N("This morning three jasmine petals are floating in the tin of boxing liniment."),{n:"_f",t:"Smells lovely. Who put it there?"},C("Nobody… just use it. Smells nice.")],
+ f=>[N("The TV in the dorm turns itself on at 1 a.m., replaying old fights on the boxing channel."),C("That's my fight! Who wants to see your Kru when he was young? Hands up.")],
+ f=>[N("The dog next to camp sits facing the banana grove, wagging its tail all night."),{n:"_f",t:"Is it seeing someone?"},C("Dogs know. Whoever's kind, they wag for.")],
+ f=>[N("The bathroom light flickers in a rhythm: short-long-short."),{n:"_f",t:"Morse code?"},C("I can't read it, but it probably means 'change the bulb already'.")],
+ f=>[N("This morning every banana-leaf packet of sticky rice has been folded into a bird."),C("…Whoever did it, thanks. Very pretty. But one packet of sticky rice is missing.")],
+ f=>[N("The morning-course kids say a lady in green held pads for them. They kicked and her hands didn't even budge."),C("We don't have a female trainer in green… never mind. Thank her for me.")],
+ f=>[N("A bicycle bell rings outside camp at midnight. There isn't a single bicycle."),{n:"_f",t:"Late delivery tonight."},C("The post doesn't come at midnight… go to bed.")],
+ f=>[N("The changing-room mirror has green lipstick on it: 'Wear sunscreen.'"),{n:"_f",t:"The ghost worries about our skin too?"},C("Our house ghost is kind. Just a bit blunt.")]);
+
+/* --- Luang Pho's Lent visits change with the years --- */
+{const go=EVENTS.find(e=>e.id==="gh_lp_go"),bk=EVENTS.find(e=>e.id==="gh_lp_back");const g1=go.steps,b1=bk.steps;
+ go.steps=[{inject:G=>{const y=ghYear(G);return y<=1?g1:y===2?[N("Another Lent. Luang Pho smiles at you from far off."),LPS("You've made more merit this year, I can see… but the bad things still come. They remember the way from last year."),C("I bought a new chanting book, Luang Pho. Big print."),LPS("Good. Then you won't chant the victory blessing at bedtime again."),N("🌙 Buddhist Lent: Luang Pho stays in the temple; the other ghosts will come often")]
+   :y===3?[N("This Lent, Luang Pho lingers in front of Nang Tani's shrine longer than ever."),LPS("This Lent I'm not worried. This camp has a good guardian."),C("Luang Pho knows her better than I do."),LPS("I've watched her since your grandfather was a young man… back then she smiled a lot."),N("🌙 Buddhist Lent: the other ghosts will come often")]
+   :[N("Another Lent. The whole camp parades the Lent candle to the temple like every year."),LPS(pk(["Merit is like boxing liniment, my child. Rub it in every day and it stays warm; stop and it goes cold.","I keep the Rains Retreat for three months, so you keep the camp's merit up for three months. The bad things know monks don't leave the temple now.","And this year please remind Kru Daeng: chanting is fine, but not loudly past midnight. The neighbours have complained."])),N("🌙 Buddhist Lent: the other ghosts will come often")];}}];
+ bk.steps=[{inject:G=>{const y=ghYear(G),S=ghSt(G);return y<=1?b1:[N("The end of Lent. Tak Bat Thewo alms at dawn."),LPS(S.shrine?pk(["Your shrine by the grove was lively this Lent. I heard laughing every night.","I hear your guardian chased the Phi Phong into the ditch twice… good. Your pla ra will stop disappearing."]):(S.merit>=50?"Lent is over and I can leave the temple… I'll drop by the camp in a few days. We need to talk about the banana grove.":"Lent is over, my child. I'd like to help with the banana grove, but your camp's merit is still low. Bring it to fifty, then I'll come.")),C("Yes, Luang Pho.")];}}];}
+
+/* --- weekly arc state --- */
+{const _w=ghWeekly;ghWeekly=function(G){const S=ghSt(G),was=S.shrineOK;_w(G);if(!S.on)return;const y=ghYear(G);
+  if(S.sq==null)S.sq=S.shrine?5:S.shrineOK>=2?1:0; /* saves from before the quest */
+  const lpOK=S.merit>=50&&(y>=3||(y===2&&G.week>GH_LENT()[1])); /* v1.91.144: Luang Pho comes once the year-2 Lent is over */
+  if(!was&&S.shrineOK&&!lpOK)S.shrineOK=0;
+  if(!S.shrineOK&&lpOK)S.shrineOK=1;
+  if(S.stage<1&&(S.wins>=2||S.haunts>=3))S.stage=1;if(S.stage<2&&S.wins>=4&&S.haunts>=5)S.stage=2;
+  if(S.shrine){S.lowW=S.merit<25?(S.lowW||0)+1:0;if(!S.sulk&&S.lowW>=3)S.sulk=1;if(S.sulk===1&&S.merit>=45)S.sulk=2;}};}
+{const _d=ghHauntDue;ghHauntDue=function(G,rng){const S=ghSt(G);if(S.on&&S.shrine&&S.sulk===1){if(gameWeek(G)-S.last<GH_CD)return false;return rng()<.45;}return _d(G,rng);};}
+/* the shrine needs the year-2 quest; the teak is a camp action */
+GH_ACT.wood={name:"Order shrine teak from a Phrae carpenter",desc:"Step 2 of Nang Tani's shrine quest",cost:15000,merit:3};
+CAMP_ACTIONS.gh_wood={name:GH_ACT.wood.name,desc:GH_ACT.wood.desc,cost:15000,get hidden(){return typeof G==="undefined"||!G||!ghSt(G).on||ghSt(G).sq!==2;}};
+{const A=CAMP_ACTIONS.gh_shrine;Object.defineProperty(A,"hidden",{get(){if(typeof G==="undefined"||!G)return true;const S=ghSt(G);return !S.on||S.shrine||(S.sq||0)<4;}});}
+{const _d=doCampAction;doCampAction=function(G,k){const n=_d(G,k);if(n!=null&&k==="gh_wood"){const S=ghSt(G);S.sq=3;S.sqAbs=gameWeek(G);save();return "The Phrae carpenter sends a whole truckload of teak; Kru Daeng haggles until the man nearly cries · Next: Nang Tani will test your heart in a dream";}return n;};}
+
+/* --- a generic dream duel for the big nights --- */
+function ghDuel(o,cb){const f=G.F[o.fid];const S=ghSt(G),save0=S.merit;if(o.adj)S.merit=clamp(S.merit-(o.adj*20),0,GH_MAX);const qid=ghFoe(G,o.kind,f);S.merit=save0;
+  const a=o.tani?ghAlly(G,f):f.id,clean=()=>{delete G.F[qid];if(o.tani)delete G.F[a];};
+  if(!o.live){const F=quickFight(G.F[a],G.F[qid],(G.seed^0x5ee)+gameWeek(G)*17+o.kind.length,o.rounds||GH_ROUNDS);clean();cb(dmWinFrom(F)==="A");return;}
+  const bk={id:"bduel"+gameWeek(G)+o.kind,a,b:qid,week:G.week,tier:"dream",rounds:o.rounds||GH_ROUNDS,ev:1,dream:1,ctrl:ghCtrl(G,o.tani?1:0),waiDone:true,bg:"bg_dream.webp"};ghCtrlToast(bk);
+  try{document.body.classList.add("dreamfx");}catch(e){}openFight2(bk,()=>{try{document.body.classList.remove("dreamfx");}catch(e){}const F=LASTF;clean();cb(!!(F&&F.result&&F.result.win==="A"));});}
+const CHOOSE=(t1,t2)=>({choice:[{t:t1,fx:()=>{UI.ghLive=1;}},{t:t2,fx:()=>{UI.ghLive=0;}}]});
+const MORNING=()=>({n:"nar",t:"— The next morning —",bg:"camp",show:[]});
+
+/* --- story beats across the three years (weekly extras) --- */
+{const _s=ghStory;ghStory=function(done){const S=ghSt(G);if(!S.on)return false;const y=ghYear(G),L=GH_LENT(),R=roster(G).filter(f=>!f.injury);
+  /* year 1 finale: the dark-moon brawl after Lent */
+  if(!S.f1&&!S.shrine&&S.haunts>=2&&G.week>L[1]&&(y>=2||Object.keys(S.ogSeen||{}).length>=1)&&R.length){S.f1=1;save();const f=ghPickFighter(G)||R[0];
+    ghPlay([N("A moonless night after Lent. Every light in camp goes out at midnight."),{n:"nar",t:"In the dream the whole camp stands on a banana-tree ring. Around it: purple light, orange light, hoofbeats and flapping… all four ghosts have come at once.",bg:"dream"},
+     {n:"npc",who:"Phi Ma Bong",t:"Neigh! This camp has far too much merit. We'll stamp the whole place flat!"},TN("…Who's flattening what?","scary"),
+     N("A streak of green light drops into the middle of the ring. Nang Tani stands with her arms folded, her long hair spread across the ring."),TN("This spot is mine to haunt! You country bumpkins go haunt somewhere else!","angry"),
+     MY("(…Is she protecting us?)"),TN(`I'm not protecting you! I'm just territorial! … ${f.name}, I'll handle the little ones. You take that crazy horse.`,"angry_smile"),
+     CHOOSE(`Cheer on ${f.name} against the Ma Bong ghost (dream fight)`,"Chant the Itipiso and let it play out")],()=>{const live=UI.ghLive;UI.ghLive=null;
+      ghDuel({fid:f.id,kind:"mabong",adj:.4,live},win=>{S.stage=Math.max(S.stage,2);save();
+        ghPlay([N(win?"The Ma Bong ghost bolts out of camp, neighing all the way. The other three scatter after it.":"The Ma Bong ghost kicks the fighter flying, but Nang Tani charges in with her banana sheath until it bolts."),
+          TN(win?"Hmph… not bad.":"See? Without me you'd all be done for.",win?"angry_smile":"angry"),
+          TN("Don't think I helped you… but if you make enough merit next year, I might think about moving somewhere with a roof.","shy"),
+          GMOFF(),MORNING(),C("Last night I dreamt Nang Tani helped us… I think next year we really need to make merit."),
+          N("📜 Your first year with Nang Tani is over — next year: get through the second Lent. If camp merit is 50 after Lent, Luang Pho will come to help with a shrine")],done,{bg:"dream",look:"casual"});});},{bg:"dream_room",look:"casual"});return true;}
+  /* year 2: the shrine quest — Luang Pho (old beat, now sq=1), the spot, the teak (camp action), Tani's test */
+  if(S.sq===1&&gameWeek(G)-(S.sqAbs||0)>=1){S.sq=2;S.sqAbs=gameWeek(G);save();
+    playScene([N("Kru Daeng has been walking round camp with a tape measure since morning, looking for a place for the shrine."),C("Where do you think, manager? I reckon we should ask the owner of the house too…"),
+     {choice:[{t:"By the grove, under the biggest tree",then:[N("The whole grove's leaves sway gently, though there's no wind."),C("…I think she just nodded.")]},
+      {t:"By the ring, so she can watch fights every day",then:[N("Kru Daeng's tape measure snaps back by itself with a smack, catching his finger."),C("Ow! …Fine, not the ring. By the grove, then.")]},
+      {t:"By the kitchen, so the offerings stay hot",then:[N("The smell of fried bananas drifts from the kitchen, and a wok flips over all by itself."),C("…There are fried bananas by the kitchen. She won't like it. By the grove, then.")]}]},
+     N("🏮 Nang Tani's shrine quest: the spot is chosen — next, order the teak from Phrae (camp activity)")],done,{bg:"camp",look:"casual"});return true;}
+  if(S.sq===3&&gameWeek(G)-(S.sqAbs||0)>=1){S.sqAbs=gameWeek(G);let ok=0;const Q=(_,o)=>({choice:o.map(([t,good,reply,img])=>({t,fx:()=>{if(good)ok++;},then:[TN(reply,img)]}))});save();
+    ghPlay([N("The night the teak arrives, you dream of Nang Tani sitting cross-legged on the timber pile."),TN("You'd build me a house? …First I need to know how well you know me. Answer three questions.","angry_smile"),
+     TN("First: what's my favourite offering?","neutral"),Q(0,[["Khanom tom",1,"Right… and the coconut not too sweet.","smile"],["Fried bananas",0,"……Do you want three more years of haunting?","scary"],["Pizza",0,"What's a pizza… doesn't sound like a ghost thing.","angry"]]),
+     TN("Second: what cloth should be tied round my tree?","neutral"),Q(1,[["Three-colour silk",1,"Yes… green, yellow and pink. The prettiest.","shy"],["Kru Daeng's pha khao ma",0,"That cloth smells of ten years of boxing liniment. No!","angry"],["Pink ribbon with little hearts",0,"…Not bad, but no.","angry_smile"]]),
+     TN("Last one… why do you want to build me a shrine?","neutral"),Q(2,[["To thank you, and to say sorry about the banana trees",1,"…A better answer than I expected.","shy"],["I want lucky numbers",0,"I knew it! The whole village thinks that way.","angry"],["Because I'm scared of ghosts",0,"You're scared, so you build a ghost a house? …Human logic is so strange.","angry_smile"]]),
+     {inject:()=>{if(ok>=2){S.sq=4;save();return [TN(`Got ${ok} right… you pass! You may build me a shrine. But paint it green. No other colour.`,"smile"),GMOFF(),N("🏮 Test passed — \"Build Nang Tani's shrine\" is unlocked in camp activities")];}
+       return [TN(`Only ${ok} right… go get to know me better, then come back.`,"angry"),GMOFF(),N("Nang Tani will come to test you again in a few weeks.")];}}],done,{bg:"dream",look:"casual"});
+    S.sqAbs=gameWeek(G)+1;return true;} /* sq stays 3 unless she passes you inside the scene; a retry comes two weeks on */
+  /* the shrine is neglected: she sulks, then makes up once merit comes back */
+  if(S.sulk===2){S.sulk=0;S.lowW=0;save();playScene([N("The shrine has been wiped till it shines. A fresh plate of khanom tom is still warm, and the red soda is full of ice."),TN("…Hmph. That's better.","angry_smile"),TN("I'm not over it because of the snacks. I'm over it because you remembered me again.","shy"),N("🏮 Nang Tani has stopped sulking — she's guarding the camp again.")],done,{bg:"camp_night",look:"casual"});return true;}
+  /* year 3 finale: the Lent truce — your fighter, then Tani against the phi phong elder */
+  if(!S.f3&&S.shrine&&y>=3&&G.week>L[1]&&R.length){S.f3=1;S.f3Abs=gameWeek(G);save();const f=ghPickFighter(G)||R[0];let w1=false;
+    ghPlay([N("The end of the third Lent. That night the wind is strangely strong; the whole grove rustles like a hundred people whispering at once."),{n:"nar",t:"In the dream, all four ghosts stand in a line across the ring. In the middle is a Phi Phong bigger than ever, his nose glowing bright enough to sting your eyes.",bg:"dream"},
+     {n:"npc",who:"Elder Phi Phong",t:"Sniff sniff… three years this camp has kept us from our pla ra. Tonight we settle it. Win two fights and we won't bother you again."},
+     TN("Challenge accepted! The first fight goes to a fighter of this house. The second one's mine.","angry"),MY("(This time nobody needs to tell me… cheer as loud as I can)"),
+     CHOOSE(`Cheer on ${f.name} against the krasue (dream fight)`,"Chant the Itipiso and let it play out")],()=>{const live=UI.ghLive;UI.ghLive=null;
+      ghDuel({fid:f.id,kind:"krasue",adj:.6,live},win=>{w1=win;
+        ghPlay([N(win?`${f.name} sends the krasue spinning off over the rice fields`:`The krasue giggles; ${f.name} sinks to the canvas`),TN(win?"Brilliant! My turn now.":"Never mind… I'll win the second one back for you.",win?"smile":"angry"),
+          CHOOSE("Cheer on Nang Tani against the Elder Phi Phong (dream fight)","Chant the Itipiso and let it play out")],()=>{const live2=UI.ghLive;UI.ghLive=null;
+          ghDuel({fid:f.id,kind:"phiphong",adj:1,live:live2,tani:1},win2=>{const both=w1&&win2;S.truce=win2?1:0;S.tb=clamp((S.tb||0)+(win2?6:2),0,ghCap(G));save();
+            ghPlay([N(win2?"Nang Tani spins and swings her banana sheath with everything she has. The Elder Phi Phong rolls into the ditch and the orange glow goes out.":"The Elder Phi Phong shoves Nang Tani back to the corner post, but she stays on her feet."),
+              {n:"npc",who:"Elder Phi Phong",t:win2?"Sniff sniff… I yield, I yield. A promise is a promise. We'll only drop by once in a while… just leave a cup of pla ra by the kitchen.":"Sniff sniff… this house's guardian has spirit. I'm not giving up, but I'll come round a little less."},
+              TN(win2?"Hear that? This house has a guardian!":"…I'll train more next year.",win2?"angry_smile":"angry"),
+              TN("Three years now, of you kicking, causing trouble, making merit, talking to me… I've never had years so un-lonely.","shy"),
+              GMOFF(),MORNING(),C(both?"Last night I dreamt we beat the ghosts two fights straight… I'm writing it on the last page of the record book, the one nobody reads.":"I had another strange dream last night… but I woke up feeling lighter somehow."),
+              N("📜 Three years of Nang Tani's story are complete — from now on keep the camp's merit up. If it drops, her shrine gathers dust and she sulks. The Lent ghosts will still drop by now and then.")],done,{bg:"dream",look:"casual"});});},{bg:"dream",look:"casual"});});},{bg:"dream_room",look:"casual"});return true;}
+  return _s(done);};}
+/* once the truce stands, the Lent ghosts drop by less */
+{const _o=ghOtherDue;ghOtherDue=function(G,rng){const S=ghSt(G);if(S.truce&&rng()<.3)return null;if(S.sulk===1)return _o(G,()=>rng()*.8);return _o(G,rng);};}
+
+/* --- year-by-year sightings and the haunt lines while she sulks --- */
+{const _h=ghHaunt;ghHaunt=function(done){const S=ghSt(G);if(S.shrine&&S.sulk===1){const keep=GH_TANI_LINE[2];GH_TANI_LINE[2]=GH_SULK;const st=S.stage;S.stage=2;try{_h(done);}finally{GH_TANI_LINE[2]=keep;S.stage=st;}return;}_h(done);};}
+{const s0=Object.assign({},ghSight);for(const k of Object.keys(ghSight))ghSight[k]=f=>{const y=ghYear(G);return y<=1?s0[k](f):ghSight2[k][Math.min(y,3)-2](f);};}
+
+/* --- Tani's year-3 talks, hearts gated by year, and her yearly days --- */
+const TT3=[
+ {k:"fights",o:[TN("A hundred years ago there was a temple fair here every month. Men fought with bound hands in the temple yard. I watched every fight from the grove.","smile")],
+  c:[["Was Muay Thai different back then?",3,"No rounds, no gloves. You fought till one side gave up, then ate together… that's the part I loved most.","smile"],["Who's the best you ever saw?",2,"One man kicked my tree in half. I was furious… but I'll admit he was good.","angry_smile"],["You like Muay Thai too?",1,"I was born beside a ring. How could I not?","neutral"]]},
+ {k:"name",o:[TN("I don't have a real name. 'Nang Tani' is just what people call me… if you gave me a name, what would it be?","shy")],
+  c:[["Tani is a lovely name already.",3,"…Then I'll like this name even more.","shy"],["Emerald Green",1,"Sounds like the gold shop at the market, but… not bad.","angry_smile"],["Little Banana",-1,"……Do you want me to go back to haunting you?","scary"]]},
+ {k:"future",o:[TN("Yesterday a man in a suit came to measure the land next to camp… will they cut down the grove?","neutral")],
+  c:[["I won't let anyone cut this banana grove.",4,"…You sound just like your grandpa. The exact same words.","shy"],["They're only measuring the plot next door.",1,"I'm possessive. Even next door, I'm possessive.","angry"],["If they cut it, we move the shrine together.",3,"Move house with you… doesn't sound bad.","smile"]]},
+ {k:"jealous",o:[TN("I'm not jealous. Ghosts don't get jealous… I just want to know who you've been going out with lately.","angry_smile")],
+  c:[["Just the kids in camp.",2,"Good. Look after them well. I'm watching.","neutral"],["Sitting here talking to you, mostly.",3,"…Sweet talker again. But it's true.","shy"],["Why do you want to know?",1,"I'm the house spirit! The house spirit has to know everything in the house!","angry"]]},
+ {k:"sleep",o:[TN("Ghosts don't sleep, but some nights I close my eyes and listen to you all snore… your Kru snores in luk thung.","smile")],
+  c:[["Can you dream?",3,"I dream in the daytime… that I finally get to kick the heavy bag.","smile"],["Who snores loudest in camp?",2,"Kru Daeng. Second is the one with the red-and-white rope… don't tell her.","angry_smile"],["Don't you get lonely at night?",2,"Lonely… but now I've got snores to count, so not as lonely as before.","shy"]]},
+ {k:"grandpa",o:[TN("Your grandpa, when he was young, lost a temple-fair fight once. He came and cried by my banana grove all night.","neutral")],
+  c:[["What did you do?",3,"I covered him with banana leaves… the next day he kicked my tree five hundred times. I let him.","shy"],["My grandpa was a crybaby?",1,"Everyone's a crybaby when they lose. You too. I've seen it.","angry_smile"],["Thank you for looking after my grandpa.",4,"…I look after everyone in this house. You too.","smile"]]},
+ {k:"scared",o:[TN("Are you still scared of me? Be honest.","neutral")],
+  c:[["Not anymore.",2,"Good… but don't forget I can still haunt you.","angry_smile"],["A little, at 3 a.m.",3,"Hee hee, at 3 a.m. I'm a little scared of myself too.","smile"],["That one day you'll be gone.",4,"……I'm not going anywhere. Not while someone still remembers me.","shy"]]},
+ {k:"promise",o:[TN("Will you promise me one thing?","neutral")],
+  c:[["I'll promise anything.",3,"Bring red soda every Buddhist holy day, and tell the kids to wai before they kick… that's all. Easy, right?","smile"],["Depends what the promise is.",1,"Careful, aren't you. I like that.","angry_smile"],["No promises about lottery numbers.",2,"Hmph! That's not what I was going to ask… but maybe I'll drop you a hint anyway.","shy"]]}];
+for(const t of TT3)t.y=3;TT.push(...TT3);
+TH[0].need=G=>!!ghSt(G).shrine;TH[1].need=G=>ghYear(G)>=3;TH[1].at=35;TH.splice(2,1); /* the third heart now plays on Loy Krathong night */
+{const _t=ghTalk;ghTalk=function(){const S=ghSt(G),y=ghYear(G),keepTT=TT.slice(),keepTH=TH.slice();
+  const tt=TT.filter(t=>(t.y||2)<=y),th=TH.map(h=>h.need&&!h.need(G)?{...h,at:999}:h);TT.length=0;TT.push(...tt);TH.length=0;TH.push(...th);
+  try{_t();}finally{TT.length=0;TT.push(...keepTT);TH.length=0;TH.push(...keepTH);}};}
+const GH_SONG=()=>[ghWk(12,3),ghWk(16,3)],GH_BLOSSOM=()=>[ghWk(10,7),ghWk(17,7)],GH_LOY=()=>[ghWk(20,10),ghWk(28,10)];
+EVENTS.push(
+ {id:"gh_songkran",annual:true,look:"casual",bg:"camp",pri:2,when:G=>{const S=ghSt(G);return S.on&&S.shrine&&ghYear(G)>=2&&ghIn(G,GH_SONG());},steps:[{inject:G=>{const S=ghSt(G),first=!S.songN;S.songN=(S.songN||0)+1;S.merit=clamp(S.merit+5,0,GH_MAX);S.tb=clamp((S.tb||0)+2,0,ghCap(G));
+   return first?[N("Songkran. The whole camp brings Thai scented water to bathe Nang Tani's shrine. Kru Daeng pours slowly and carefully."),N("Then Kati throws a whole bowl at the shrine… at the banana tree… at Kru Daeng."),TN("Hee hee hee hee! So cool! Another bowl!","smile"),C("Why does it feel like someone's splashing back from the banana grove…"),N("🪷 Camp merit +5 · Closeness with Nang Tani +2")]
+    :[N("Another Songkran. The whole camp pours water over Nang Tani's shrine like every year."),TN(pk(["More scented water this year, please. I like that smell.","Don't splash as hard as last year. My silk ribbons were wet for three days.","Every Songkran it feels like my one bath of the year… kidding."]),"smile"),N("🪷 Camp merit +5")];}}]},
+ {id:"gh_blossom",annual:true,look:"casual",bg:"camp_night",pri:2,when:G=>{const S=ghSt(G);return S.on&&S.shrine&&ghYear(G)>=3&&ghIn(G,GH_BLOSSOM());},steps:[{inject:G=>{const S=ghSt(G),first=!S.bloN;S.bloN=(S.bloN||0)+1;S.tb=clamp((S.tb||0)+3,0,ghCap(G));
+   return first?[N("The banana tree by the shrine puts out the year's first purple-red blossom. Kru Daeng says it's a good omen."),TN("…Today's my birthday. Every year the first blossom comes out, I count myself a year older.","shy"),MY("So how old are you now?"),TN("Asking a lady her age… even a ghost lady, that's rude!","angry"),
+     N("That night the whole camp lights little candles round the shrine. Mali brings a tray of khanom tom. Kati sings happy birthday off-key the whole way through."),TN("…Thank you, everyone.","smile"),N("💚 Closeness with Nang Tani +3")]
+    :[N("The first banana blossom of the year is out again. Nang Tani's birthday comes round once more."),TN(pk(["The khanom tom is just sweet enough this year. You pass.","I'm a year older again… but don't you count!","More candles than last year. I saw. I counted."]),"smile"),N("💚 Closeness with Nang Tani +3")];}}]},
+ {id:"gh_loy",annual:true,look:"casual",bg:"camp_night",pri:3,when:G=>{const S=ghSt(G);return S.on&&S.shrine&&ghYear(G)>=3&&ghIn(G,GH_LOY());},steps:[{inject:G=>{const S=ghSt(G);
+   if(!S.loyHeart&&(S.tb||0)>=55){S.loyHeart=1;S.th=Math.max(S.th||0,3);S.tb=clamp(S.tb+5,0,ghCap(G));return [GMON(),N("Loy Krathong night. The whole camp went to the river; you come back to the shrine holding one bread krathong"),
+     TN("…A bread krathong. Not banana trunk","shy"),MY("This year I made everyone use bread. The fish can eat them too"),TN("Hee hee hee… you really are crazy","smile"),
+     N("Nang Tani floats down and sits beside you — the closest she has ever sat. She's cool as morning dew"),TN("I'm a ghost, you're a person. I'll be here another hundred years; you've got a few decades","neutral"),
+     TN("But I think… we can be friends. Friends who watch over this camp together, until you're too old to kick a banana tree","smile"),MY("Friends it is"),
+     TN("Good! Then a friend brings red soda every Buddhist holy day. Don't forget!","angry_smile"),N("Far away, fireworks burst over the river. A faint green light rises from the banana grove and mixes with the sparks"),GMOFF(),N("💚 Nang Tani is your close friend now — she'll guard the camp even harder")];}
+   return [N("Loy Krathong night. Everyone floats bread krathongs. Nobody touches a single banana sheath."),TN(pk(["Kati's bread krathong sank fastest this year, hee hee.","The fish in the canal get fatter every year thanks to your camp.","I floated a krathong too this year… not telling you which one."]),"smile")];}}]});
+
+
+/* ================= Phase 5 (v1.91.144, Man): a side story that guides the player and never crowds the main game =================
+   - ghost scenes of every kind at most once every 3 weeks, after the main quests
+   - fevers capped per season; Kru Daeng nudges a player who lets merit sink
+   - closeness capped by year (the friendship belongs to year 3)
+   - with merit (or the shrine) you command your fighter's corner in a dream; from heart 2 you command Tani's
+   - after the story, Tani now and then brings a wandering ghost to fight; offerings at her card like gifts */
+const GH_GAP=3,GH_FEVER_MAX=6,GH_ROUNDS=3; /* v1.91.144 (Man): dream fights go three rounds */
+const ghCapY=G=>{const y=ghYear(G);return y>=3?100:y===2?40:20;},ghCap=G=>Math.max(ghCapY(G),ghSt(G).tb||0); /* never takes back closeness an older save already has */
+const ghCtrl=(G,tani)=>{const S=ghSt(G);return tani?(S.th||0)>=2:(S.merit>=60||!!S.shrine);};
+const ghCtrlToast=bk=>{try{if(bk.ctrl)setTimeout(()=>toast(bk.a==="q_tani_ally"?"💚 Nang Tani listens to you now — full corner commands for her":"🪷 The camp's merit is strong — you can move in the dream. Full corner commands"),400);}catch(e){}};
+
+/* what to do next — shown on the merit bar, in the help and in Kru Daeng's tips */
+function ghGoal(G){const S=ghSt(G),y=ghYear(G);if(!S.on)return "";
+  if(S.shrine&&S.sulk===1)return "Nang Tani is sulking, her shrine is dusty — raise camp merit back to 45";
+  if(y<=1)return S.f1?"Next year: get through Lent; with merit 50 after Lent, Luang Pho will come about a shrine":"Year one: keep camp merit high — fewer ghosts, fewer fevers";
+  if(!S.shrine){if(!S.sq)return y===2&&G.week<=GH_LENT()[1]?"Wait for Lent to end and keep camp merit at 50 — Luang Pho will come about a shrine":"Raise camp merit to 50 — Luang Pho will come about a shrine";
+    return ["","Wait for Kru Daeng to find a spot for the shrine (next week)","Order teak from Phrae — in camp activities","Wait for Nang Tani to test you in a dream","Build Nang Tani's shrine, ฿60,000 — in camp activities"][S.sq]||"";}
+  if(y===2)return "Talk or make offerings at her shrine — Characters tab (closeness can reach 40 this year)";
+  if(!S.f3)return "Year three: grow close to Nang Tani, float a krathong together, and get ready for the challenge after Lent";
+  return "Keep camp merit at 25 or above — or her shrine gathers dust and Nang Tani sulks";}
+const GH_HELP=G=>{const S=ghSt(G);return [N("🪷 What is camp merit?"),
+  N(`Camp merit now ${S.merit}/100 · shown on the home screen (camp-activity button) and on the camp-activity list. Any week without merit-making, it drops by 3`),
+  N("High merit: fewer, weaker ghosts and fewer fevers · merit 60+: you command the corner in dream fights · below 25: frequent, stronger ghosts and longer fevers"),
+  N("Make merit through \"Camp activities\" (one a week): morning alms +6 · wai kru +10 · shrine offering +4 · pha pa +12 (every 6 weeks) · big merit meal +16 · summer ordination +24 (April) · kathin +30 (after Lent)"),
+  N("During Buddhist Lent (late July–late October) Luang Pho stays in the temple and the other ghosts come out often."),
+  N(`🎯 Now: ${ghGoal(G)}`)];};
+Object.assign(ACT,{ghhelp:()=>{UI.modal=null;playScene(GH_HELP(G),()=>render(),{bg:"temple",look:"casual"});}});
+{const _h=campActsHTML;campActsHTML=function(){const h=_h();if(typeof G==="undefined"||!G||UI.modal.pick)return h;const S=ghSt(G);if(!S.on)return h;
+  return h.replace(/(<div class="ghbar"[^]*?<\/div>)/,`$1<div class="ghgoal"><span>🎯 ${ghGoal(G)}</span><button class="btn sm" data-act="ghhelp">What is camp merit?</button></div>`);};}
+{const _h=homeHTML;homeHTML=function(){const h=_h();try{const S=G&&G.gh;if(!S||!S.on)return h;const m=S.merit,c=m<25?"ghlow":"";
+  return h.replace("<small>This week's camp activity",`<small><em class="ghm ${c}">🪷 Merit ${m}</em> · This week's camp activity`);}catch(e){return h;}};}
+{const _t=coachTips;coachTips=function(force){const T=_t(force);try{const S=G&&G.gh;if(!S||!S.on||(!coachOn()&&!force))return T;
+  if(S.merit<25)T.push({p:7,t:`Camp merit is down to ${S.merit}. Ghosts will come often and fighters will fall sick — pick morning alms or wai kru in camp activities, manager.`,act:{k:"campacts",label:"Choose activity"}});
+  else if(S.sq===2||(S.sq===4&&!S.shrine))T.push({p:5,t:`Nang Tani's shrine: ${ghGoal(G)}`,act:{k:"campacts",label:"Camp activities"}});
+  return T.sort((a,b)=>b.p-a.p);}catch(e){return T;}};}
+/* the camp actions that make merit say so */
+for(const [k,v] of [["merit",6],["waikhru",10]]){const A=CAMP_ACTIONS[k];if(!A)continue;const d0=A.desc;Object.defineProperty(A,"desc",{configurable:true,get(){try{return G&&G.gh&&G.gh.on?`${d0} · 🪷 Camp merit +${v}`:d0;}catch(e){return d0;}}});}
+{const _w=ghWeekly;ghWeekly=function(G){const S=ghSt(G),m0=S.merit;_w(G);if(!S.on)return;
+  S.lowRun=S.merit<25?(S.lowRun||0)+1:0;
+  if(m0>=25&&S.merit<25)try{setTimeout(()=>toast("🪷 Camp merit below 25 — ghosts will come more often. See how to make merit in camp activities"),600);}catch(e){}};}
+
+/* Kru Daeng's nudge, and the loop's wandering ghosts */
+{const _s=ghStory;ghStory=function(done){const S=ghSt(G);if(!S.on)return false;
+  if(S.lowRun>=8&&gameWeek(G)-(S.nudge??-99)>=20){S.nudge=gameWeek(G);save();
+    playScene([C("Manager… can we talk about the camp's merit?"),C(`Our camp merit is down to ${S.merit}. Ghosts every month, the kids down with fevers one after another, and I've chanted myself hoarse.`),
+      C("No need for anything big. Morning alms every other week is enough, and it's cheap — three hundred baht. A wai kru is even better."),C("It's in camp activities — the 🪷 camp merit bar is at the top."),
+      {choice:[{t:"Understood, Kru.",then:[C("Good! I'll get up at five and buy the alms food.")]},{t:"What is camp merit again?",then:GH_HELP(G)}]}],done,{bg:"camp",look:"casual"});return true;}
+  const y=ghYear(G);
+  if(y>=4&&S.shrine&&S.f3&&!S.sulk&&!ghIn(G,GH_LENT())&&gameWeek(G)-(S.chAbs??(S.f3Abs||-99))>=16&&Math.random()<.2){S.chAbs=gameWeek(G);save();ghWander(done);return true;}
+  return _s(done);};}
+const GH_WANDER=[["krasue","Young Krasue from Ban Pong","I hear this camp's guardian can fight. I've come to test her!"],["krahang","Drifting Krahang from Ayutthaya","I've flown three days and nights… one round, then some rice, please."],
+ ["mabong","Speed-demon Ma Bong from Korat","Neigh! Who says I can run but can't fight? Try me!"],["phiphong","Young Phi Phong from Ubon","Sniff sniff… I smelled this camp's pla ra three provinces away. One fight for it."]];
+function ghWander(done){const S=ghSt(G),R=roster(G).filter(f=>!f.injury);if(!R.length){done();return;}const [kind,name,taunt]=GH_WANDER[Math.floor(Math.random()*GH_WANDER.length)],f=R[Math.floor(Math.random()*R.length)];
+  ghPlay([N("2 a.m. Nang Tani's shrine flashes green. In the dream she's waiting in front of the banana-tree ring.",),{n:"nar",t:"Beside her a stranger stands with arms folded.",bg:"dream"},{n:"npc",who:name,t:taunt},
+   TN(pk(["A wandering ghost wants a fight… accept? I think it'll be fun.","Another visitor. Who will you send — or shall I play?","I was getting bored… accept? Winners usually get left something nice."]),"angry_smile"),
+   {choice:[{t:`Send ${f.name} into the ring`,fx:()=>{UI.ghW={who:"f"};}},{t:"Let Nang Tani fight",fx:()=>{UI.ghW={who:"t"};}},{t:"Decline — keep sleeping",fx:()=>{UI.ghW=null;},then:[TN("Hmph, boring… then I'll send them home myself.","neutral")]}]}],()=>{
+   const w=UI.ghW;UI.ghW=null;if(!w){done();return;}
+   ghDuel({fid:f.id,kind,adj:.4,live:1,tani:w.who==="t"},win=>{const gift=win?1500+Math.floor(Math.random()*4)*500:0;if(win){G.cash+=gift;S.merit=clamp(S.merit+4,0,GH_MAX);S.tb=clamp((S.tb||0)+3,0,ghCap(G));}save();
+     ghPlay([N(win?`${name} gives up laughing and leaves an old cloth pouch in the middle of the ring`:`${name} wins, bows once, and floats off into the dark`),
+       TN(win?pk(["Excellent! I told you this camp is no ordinary camp.","Hee hee, that wanderer was just a warm-up.","And a gift too… don't spend it all on lottery tickets."]):pk(["Never mind. Some wandering ghosts really are strong.","We'll get it back next time.","Losing was fun too. Nobody gets a fever — I'll see to it."]),win?"smile":"neutral"),
+       GMOFF(),MORNING(),N(win?`In the morning there's an old cloth pouch in front of the shrine. Inside: ฿${gift.toLocaleString()} · Camp merit +4 · Closeness +3`:"In the morning everyone is fine, nobody has a fever — they just dreamt of losing to a strange ghost.")],done,{bg:"dream",look:"casual"});});},{bg:"dream_room",look:"casual"});}
+
+/* offerings at her card, like gifts — once a week, does not use the week's free time */
+const GH_GIFTS=[{k:"tom",n:"Khanom tom, coconut, not too sweet",c:200,tb:4,m:3,img:"smile",r:["Khanom tom! …Just sweet enough. You know me now.","Hee hee, khanom tom again. I'll never get tired of it."]},
+ {k:"red",n:"Red soda on ice",c:100,tb:3,m:2,img:"smile",r:["Red soda… refreshing. Ghosts get hot too, you know.","Lots of ice, just like this. I like it."]},
+ {k:"jas",n:"Jasmine garland",c:150,tb:3,m:2,img:"shy",r:["Jasmine… lovely. I'll wear it all night.","I'm not blushing! …It is pretty, though."]},
+ {k:"silk",n:"New three-colour silk",c:800,tb:6,m:4,img:"shy",r:["New cloth! So much brighter than the old one… thank you.","Green, yellow, pink… you've learned to pick colours."]},
+ {k:"boba",n:"Bubble milk tea",c:120,tb:2,m:1,img:"neutral",r:["What are these black balls… chewy. I haven't decided if I like them.","People these days eat such strange things… can I have another cup?"]},
+ {k:"fry",n:"Fried bananas",c:80,tb:-2,m:0,img:"angry",r:["……Fried bananas. For the banana-tree ghost. What were you thinking?","You want me to eat my own relatives?!"]}];
+function ghGift(){const S=ghSt(G);if(!S.shrine||S.giftW===gameWeek(G))return;
+  playScene([N("You walk over to Nang Tani's shrine. What will you offer?"),{choice:[...GH_GIFTS.map(g=>({t:`${g.n} · ฿${g.c}`,fx:()=>{if(G.cash<g.c){UI.ghG=-1;return;}G.cash-=g.c;S.giftW=gameWeek(G);S.tb=clamp((S.tb||0)+g.tb,0,ghCap(G));S.merit=clamp(S.merit+g.m,0,GH_MAX);UI.ghG=g;save();},
+     then:[{inject:()=>{const x=UI.ghG;UI.ghG=null;if(x===-1)return [N("Not enough money… next time.")];return [TN(pk(x.r),x.img),N(`💚 Closeness ${x.tb>0?"+":""}${x.tb}${x.m?` · 🪷 Camp merit +${x.m}`:""}`)];}}]})),{t:"Another day",then:[]}]}],()=>render(),{bg:"camp_night",look:"casual"});}
+Object.assign(ACT,{ghgift:()=>{UI.modal=null;ghGift();}});
+{const _p=peopleHTML;peopleHTML=function(){const h=_p();try{const S=G&&G.gh;if(!S||!S.shrine)return h;const used=S.giftW===gameWeek(G);
+  return h.replace(/(data-act="ghtalk"[^>]*>[^<]*<\/button>)/,`$1<button class="btn sm" data-act="ghgift" ${used?"disabled":""}>${used?"Offered this week":"Make an offering"}</button>`).replace(/(ความสนิท|closeness) (\d+)\/100/,(a,w,n)=>w+" "+n+"/"+(+n>ghCapY(G)?100:ghCapY(G)));}catch(e){return h;}};}
+
+try{window.GHX={ghAlly,ghFoeT:ghFoe,ghSt,ghAdd,ghHaunt,ghFight,ghStory,ghWeekly,ghHauntDue,ghReady,ghOther,ghOtherDue,ghOddPlay,ghTalk,TT,TH,ghYear,ghDuel,ghOddDue:ghOdd,ghGoal,ghWander,ghGift,ghCap};}catch(e){}
+})();
+
+// ================= MUAY THAI MOE — camp pets, deeper (v1.91.144, Man) =================
+// One button on the home screen opens the pet window. Each pet has a level (1–10), joy, and a passive that helps the camp a little
+// every week — rolled each week like training, so it is never a sure thing. Playing opens the camp-activity style vignette.
+// Pets have moods: some days they don't feel like playing, now and then one bolts off into the rice fields and comes back a week later.
+// Old saves: the old play still works the same; existing pets start with EXP for the weeks they have lived at camp.
+;(function(){
+const PET_ART=new Set(window.__MTM_PETART||[]);
+const PMAX=10,needXP=l=>30*l;                                       /* Lv n → n+1 needs 30·n EXP */
+const pv=G=>(G.pets||[]);
+function pst(G,p){if(p.lv==null){p.lv=1;p.xp=0;const age=Math.max(0,gameWeek(G)-(p.since!=null?p.since:gameWeek(G)));petXP(p,Math.min(400,age*4),true);}p.joy=p.joy??60;return p;}
+function petXP(p,n,quiet){if(p.lv>=PMAX)return 0;p.xp=(p.xp||0)+n;let up=0;while(p.lv<PMAX&&p.xp>=needXP(p.lv)){p.xp-=needXP(p.lv);p.lv++;up++;}if(p.lv>=PMAX)p.xp=0;return up;}
+const tier=p=>p.lv>=10?3:p.lv>=6?2:p.lv>=3?1:0;                      /* talent tiers at Lv.3 / 6 / 10 */
+const away=(G,p)=>p.away!=null&&gameWeek(G)<p.away;
+
+/* ---------- what each pet does ---------- */
+const PX={
+ cat:{pas:p=>`Everyone's morale +1${p.lv>=5?"~2":""} (rolled weekly)`,tal:["Students love the cat: class income +3%","Students love the cat: class income +5%","Camp mascot cat: class income +8%"],
+  modes:[["Belly scratches",15,10,0],["Laser-pointer chase",5,20,0],["Give cat treats",25,6,60]],bg:"bg_camp_day.webp"},
+ dog:{pas:p=>`Everyone's fatigue −1${p.lv>=5?"~2":""} (rolled weekly)`,tal:["Guard dog: camp upkeep −3%","Guard dog: camp upkeep −5%","Legendary guard dog: upkeep −8%"],
+  modes:[["Play fetch",15,10,0],["Run round camp",5,20,0],["Give a bath",25,6,40]],bg:"bg_farm.webp"},
+ rooster:{pas:p=>`Dawn wake-up: training gains +${p.lv>=5?4:2}% (rolled weekly)`,tal:["Fighting spirit: fighters with a bout this week get morale +3","Fighting spirit: morale +5","Champion gamecock: morale +8"],
+  modes:[["Crow for an audience",15,10,0],["Show off round the village",5,20,0],["Scatter rice",25,6,30]],bg:"bg_rooster.webp"},
+ turtle:{pas:p=>`Everyone's morale +1${p.lv>=5?"~2":""} (rolled weekly)`,tal:["Calm: injured fighters may heal early","Calm: injuries heal early more often","Sacred turtle: injuries heal much faster"],
+  modes:[["Pat the shell",15,10,0],["Slow walk",5,20,0],["Feed morning glory",25,6,20]],bg:"bg_camp_day.webp"},
+ otter:{pas:p=>`Everyone's fatigue −1 (rolled weekly)`,tal:["Viral clips: a little reputation","Viral clips: reputation up more often","TikTok star otter: reputation up every week"],
+  modes:[["Play in the water",15,10,0],["Swim training",5,20,0],["Feed little fish",25,6,50]],bg:"bg_river.webp"}};
+const PLINE={
+ cat:[[" rolls over for belly scratches and purrs loud enough for the whole camp"," pounces at the red dot and crashes into the heavy bag"," finishes the whole pack of treats and stares at you for more"]," walks off to sleep on Kru Daeng's gym bag, ignoring everyone"," leaps the fence and runs into the rice fields after a rat!"],
+ dog:[[" fetches the ball and drops it at your feet, tail spinning like a propeller"," leads the run round camp until the fighters are gasping"," shakes off and soaks the whole yard"]," lies flat by the ring with a long sigh — not today"," spots a buffalo in the field and chases it barking, refusing to come back!"],
+ rooster:[[" crows three times and the neighbours clap"," struts chest-out at the head of a parade round the village"," pecks the rice with the grace of a champion gamecock"]," stands on one leg with eyes shut, ignoring the world"," flaps over the fence to court the neighbour's hen in the field!"],
+ turtle:[[" stretches out for a slow pat, and everyone calms down"," walks so slowly everyone stops to wait, and the whole camp laughs"," eats morning glory one leaf at a time — slow but steady"]," pulls into the shell and won't come out, however much you knock"," slowly wanders off toward the fields… nobody saw them start"],
+ otter:[[" swims in circles, then splashes water in your face"," dives and does a flip turn like an athlete"," takes the little fish with both paws — so cute everyone films it"]," just floats on their back, not wanting to play"," follows a school of fish far down the canal!"]};
+const BACK=[[" is back, muddy all over, with a twenty-baht note in their mouth",20],[" is back, bringing the neighbour's puppy along",0],[" is back in the morning, panting but happy",0],[" is back with straw on their head; the farmer next door says thanks for chasing the rats and sends a bag of rice",300],[" is back — the village kids carried them all the way to the gate",0]];
+
+/* ---------- weekly: joy, passive EXP, the rolled passives ---------- */
+function petsWeekly(G){const P=pv(G);if(!P.length)return;const R=roster(G),rng=mulberry32((G.seed^0x9e7)+gameWeek(G)*31),log=[];G.petLast={};
+  for(const p0 of P){const p=pst(G,p0),D=PX[p.k];if(!D)continue;
+    if(p.away!=null&&gameWeek(G)>=p.away){const b=BACK[Math.floor(rng()*BACK.length)];p.away=null;p.joy=Math.min(100,p.joy+10);if(b[1])G.cash+=b[1];log.push(`🐾 ${p.name}${b[0]}${b[1]?` (+฿${b[1]})`:""}`);continue;}
+    if(away(G,p))continue;
+    if(p.wk!==gameWeek(G))p.joy=Math.max(0,p.joy-5);                 /* no play this week */
+    if(p.joy>=60)petXP(p,5);
+    const lowJoy=p.joy<30,ok=rng()<.5+p.joy/200;if(!ok){G.petLast[p.k]="—";continue;}    /* the weekly roll, like training */
+    const big=p.lv>=5&&rng()<.5,amt=(big?2:1)*(lowJoy?.5:1);let got="";
+    if(p.k==="cat"||p.k==="turtle"){R.forEach(f=>f.morale=clamp(f.morale+amt,0,100));got=`Morale +${amt}`;}
+    if(p.k==="dog"||p.k==="otter"){const a=p.k==="otter"?1*(lowJoy?.5:1):amt;R.forEach(f=>f.fatigue=clamp(f.fatigue-a,0,100));got=`fatigue −${a}`;}
+    if(p.k==="rooster")got="dawn wake-up";
+    const t=tier(p);if(t){const tm=[0,1,1.7,2.7][t]*(lowJoy?.5:1);
+      if(p.k==="cat"&&rng()<.6){const c=Math.round(classIncome(G)*.03*tm);if(c>0){G.cash+=c;got+=` · classes +฿${c}`;}}
+      if(p.k==="dog"&&rng()<.6){const c=Math.round(upkeep(G)*.03*tm);if(c>0){G.cash+=c;got+=` · saved ฿${c}`;}}
+      if(p.k==="rooster"){const add=[0,3,5,8][t]*(lowJoy?.5:1);const B=(G.bookings||[]).filter(b=>b.week===G.week+1||b.week===G.week).map(b=>G.F[b.a]).filter(f=>f&&f.camp==="player");B.forEach(f=>f.morale=clamp(f.morale+add,0,100));if(B.length)got+=` · fighting spirit +${add}`;}
+      if(p.k==="turtle"){const ch=[0,.25,.4,.6][t];R.forEach(f=>{if(f.injury>0&&rng()<ch){f.injury--;got+=` · ${f.name} heals faster`;}});}
+      if(p.k==="otter"&&rng()<[0,.3,.5,.9][t]){G.rep+=.03*(lowJoy?.5:1);got+=" · viral clip, reputation +0.03";}}
+    G.petLast[p.k]=got;}
+  if(log.length){G.log=G.log||[];log.forEach(l=>G.log.push(l));}}
+{const _w=xlWeekly;xlWeekly=function(G){_w(G);try{petsWeekly(G);}catch(e){console.error("pets",e);}};}
+/* the rooster's dawn crow makes training a touch better (rolled each week) */
+{const _t=trainWeek;trainWeek=function(G,f,rng){const r=_t(G,f,rng);try{const p=pv(G).find(x=>x.k==="rooster");if(p&&f.camp==="player"&&!away(G,p)&&f.gains&&G.petLast&&G.petLast.rooster&&G.petLast.rooster!=="—"){
+  const pc=(p.lv>=5?.04:.02)*(p.joy<30?.5:1);for(const x of Object.keys(f.gains)){const d=f.gains[x];if(d>0){const add=d*pc;f.a[x]=Math.min(stCap(f),f.a[x]+add);f.gains[x]=d+add;}}}}catch(e){}return r;};}
+/* the old one-tap play keeps its effect; it now also gives EXP, joy and moods */
+function petPlayMode(G,i,mi){const p=pst(G,pv(G)[i]);if(!p||p.wk===gameWeek(G)||away(G,p))return null;const D=PX[p.k],M=D.modes[mi]||D.modes[0];
+  if(M[3]&&G.cash<M[3])return {err:"Not enough money"};if(M[3])G.cash-=M[3];
+  const r=Math.random(),runP=["cat","dog","rooster","otter","turtle"].includes(p.k)?(p.joy<40?.08:.04):0,noP=p.joy<40?.18:.08;
+  if(r<runP){p.wk=gameWeek(G);p.away=gameWeek(G)+1;p.joy=Math.max(0,p.joy-5);return {p,res:"run",line:PLINE[p.k][2]};}
+  if(r<runP+noP){p.wk=gameWeek(G);petXP(p,3);return {p,res:"no",line:PLINE[p.k][1]};}
+  petPlay(G,i);p.joy=Math.min(100,p.joy-10+M[1]);const up=petXP(p,M[2]);return {p,res:"ok",line:PLINE[p.k][0][mi]||PLINE[p.k][0][0],M,up};}
+
+/* ---------- UI: one button on home, a pet window, the vignette ---------- */
+petsRowHTML=function(){const P=pv(G);if(!P.length)return "";const n=P.filter(p=>p.wk!==gameWeek(G)&&!away(G,p)).length;
+  return `<button class="campact petbtn" data-act="petsopen"><span class="peticons">${P.slice(0,5).map(p=>petThumb(p.k)).join("")}</span><span><small>🐾 Camp pets: ${P.length}</small><b>${n?`Can still play with ${n} more`:"All played this week ✓"}</b></span></button>`;};
+const bar=(v,m,c)=>`<i class="pbar"><b style="width:${Math.round(100*Math.min(1,v/m))}%;background:${c}"></b></i>`;
+XMODAL.pets=m=>{const P=pv(G);if(m.i!=null&&P[m.i]){const p=pst(G,P[m.i]),D=PX[p.k],done=p.wk===gameWeek(G),aw=away(G,p);
+    return {foot:false,body:`<div class="petdet"><div class="pdh">${petThumb(p.k,"big")}<div><h2>${esc(p.name)} <small>Lv.${p.lv}</small></h2><p class="meta">${esc(PETS[p.k].name)}${p.fav&&G.F[p.fav]?` · best buddy of ${esc(G.F[p.fav].name)}`:""}</p></div></div>
+     <div class="pstat"><span>EXP</span>${bar(p.lv>=PMAX?1:p.xp,p.lv>=PMAX?1:needXP(p.lv),"#ffd34a")}<em>${p.lv>=PMAX?"MAX":`${p.xp}/${needXP(p.lv)}`}</em></div>
+     <div class="pstat"><span>Joy</span>${bar(p.joy,100,p.joy<30?"#e8434f":p.joy<60?"#f0a33a":"#5cc46a")}<em>${p.joy}${p.joy<30?" · grumpy (helps only half as much)":""}</em></div>
+     <ul class="ptal"><li><b>Weekly</b> ${esc(D.pas(p))}</li>${D.tal.map((t,j)=>`<li class="${p.lv>=[3,6,10][j]?"on":"off"}"><b>Lv.${[3,6,10][j]}</b> ${esc(t)}${p.lv>=[3,6,10][j]?"":" 🔒"}</li>`).join("")}</ul>
+     ${G.petLast&&G.petLast[p.k]?`<p class="meta">Last week: ${G.petLast[p.k]==="—"?"didn't feel like helping 😴":esc(G.petLast[p.k])}</p>`:""}
+     ${aw?`<p class="pwarn">🏃 ${esc(p.name)} ran off to play in the rice fields — back next week</p>`:done?`<p class="meta">Played this week ✓</p>`:`<div class="pmodes">${D.modes.map((M,j)=>`<button class="btn" data-act="petgo" data-v="${m.i}:${j}"><b>${esc(M[0])}</b><small>joy +${M[1]} · EXP +${M[2]}${M[3]?` · ฿${M[3]}`:""}</small></button>`).join("")}</div>`}
+     <div class="mfoot"><button class="btn ghost" data-act="petsopen">◂ All pets</button><button class="btn ghost" data-act="petren" data-v="${m.i}">Rename</button></div></div>`};}
+  return {foot:true,body:`<h2>🐾 Camp pets</h2><p class="meta">Play with each pet once a week — it doesn't use your camp activity · happy pets help more · their help is rolled each week, like training</p>
+   <div class="petgrid">${P.map((p0,i)=>{const p=pst(G,p0),aw=away(G,p),done=p.wk===gameWeek(G),D=PX[p.k];return `<div class="petcard ${aw?"away":done?"done":""}">${petThumb(p.k)}
+     <div class="pcm"><span class="pc1"><b>${esc(p.name)}</b> <small>Lv.${p.lv}</small></span><span class="pcj"><small>Joy</small>${bar(p.joy,100,p.joy<30?"#e8434f":p.joy<60?"#f0a33a":"#5cc46a")}</span>
+     <small class="pc2">${esc(D?D.pas(p):"")}</small></div>
+     <div class="pcact">${aw?`<span class="pwarn">🏃 Off in the rice fields — back next week</span>`:done?`<span class="meta">Played this week ✓</span>`:(D?D.modes:[]).map((M,j)=>`<button class="btn sm${j===0?" primary":""}" data-act="petgo" data-v="${i}:${j}">${esc(M[0])}${M[3]?` ฿${M[3]}`:""}</button>`).join("")}
+     <button class="btn sm ghost" data-act="petdet" data-v="${i}">Details</button></div></div>`;}).join("")}</div>`};};
+for(const k of Object.keys(PX)){CFX["pet_"+k]={bg:PX[k].bg,cap:"",row:"idle",fx:"hearts"};CFX["pet_"+k+"_no"]={bg:PX[k].bg,cap:"",row:"idle",fx:"z"};CFX["pet_"+k+"_run"]={bg:"bg_farm.webp",cap:"",row:"idle",fx:"sparks"};}
+const PIMG={};const petImg=k=>{if(!PET_ART.has(k))return null;if(!(k in PIMG)){const i=new Image();i.src=ASSET+"pet_"+k+".webp";PIMG[k]=i;}const i=PIMG[k];return i.complete&&i.naturalWidth?i:null;};
+/* 8-bit sprite sheets: 4 walk frames side by side (frame sizes below) */
+/* Man's sprite sheets (v1.91.144): 4 columns × 5 rows — walk(4) · idle(2) · happy(2–3) · sulk(2) · run(4); [frame w, frame h, frames per row] */
+const PSZ={"cat": [86, 74, [4, 2, 2, 2, 4]], "dog": [97, 74, [4, 2, 2, 2, 4]], "turtle": [99, 74, [4, 2, 2, 2, 4]], "rooster": [84, 74, [4, 2, 3, 2, 4]], "otter": [87, 74, [4, 2, 2, 2, 4]], "mudlek": [84, 74, [4, 2, 2, 2, 4]]};
+const PROW={walk:0,idle:1,happy:2,sulk:3,run:4},PHT={cat:1,dog:1.1,rooster:1.1,turtle:.9,otter:.85,mudlek:1};   /* relative on-screen size */
+function petSprite(x,k,cx,fy,h,fl,t,anim){const im=petImg(k),Z=PSZ[k];if(!im||!Z)return false;const [fw,fh,cnt]=Z,row=PROW[anim]??0,n=cnt[row]||1,sp=anim==="run"?110:anim==="walk"?150:anim==="happy"?420:700,fr=Math.floor(t/sp)%n,w=h*fw/fh;
+  x.save();x.imageSmoothingEnabled=false;x.translate(Math.round(cx),Math.round(fy));x.scale(fl,1);x.drawImage(im,fr*fw,row*fh,fw,fh,Math.round(-w/2),Math.round(-h),Math.round(w),Math.round(h));x.restore();return true;}
+/* the camp yard on the home screen: pets walk about as sprites (pixel.js calls this) */
+window.petHub=(ctx,k,cx,fy,fl,t,moving,S)=>petSprite(ctx,k,cx,fy,22*S*(PHT[k]||1),fl,t,moving?"walk":"idle");
+const petThumb=(k,cls)=>PET_ART.has(k)&&PSZ[k]?`<span class="psp ${cls||""}" style="background-image:url(${ASSET}pet_${k}.webp);aspect-ratio:${PSZ[k][0]}/${PSZ[k][1]};background-size:400% 500%;background-position:0 25%" role="img" aria-label=""></span>`:`<img class="peti ${cls||""}" src="${petIcon(k)}" alt="">`;
+{const _d=drawCampFx;drawCampFx=function(x,k,t){if(!k||!k.startsWith("pet_"))return _d(x,k,t);const parts=k.split("_"),pk=parts[1],res=parts[2]||"ok",C=CFX[k]||{},W=x.canvas.width,H=x.canvas.height;
+  x.imageSmoothingEnabled=false;x.fillStyle="#1a1428";x.fillRect(0,0,W,H);const bg=img(C.bg||"bg_camp_day.webp");
+  if(bg.complete&&bg.naturalWidth){const s=Math.max(W/bg.naturalWidth,H/bg.naturalHeight);const w=bg.naturalWidth*s,h=bg.naturalHeight*s;x.imageSmoothingEnabled=true;x.save();if(pk==="otter"&&res!=="run"){x.translate(W,0);x.scale(-1,1);} /* the otter plays where the water is */x.drawImage(bg,(W-w)/2,(H-h)/2,w,h);x.restore();x.imageSmoothingEnabled=false;}
+  const fy=H*.93,fh=H*.6;const R=cfxRoster(),f=R[0];
+  if(f&&res!=="run")drawFrame(x,sheetFor(f),ROW[res==="ok"?(Math.floor(t/1200)%2?"win":"idle"):"idle"],Math.floor(t/220)%4,W*.22,fy,fh,false);
+  /* the pet keeps to the right half */
+  let cx=W*.5,bob=0,fl=1,mv=false;
+  if(res==="ok"){cx=W*.66+Math.sin(t/900)*W*.14;fl=Math.cos(t/900)>0?1:-1;mv=true;}
+  if(res==="run"){cx=W*.3+((t/5)%(W*.9));fl=1;mv=true;}
+  const ph=H*.4*(PHT[pk]||1);let pfy=fy;if(pk==="otter"&&res!=="run"){cx+=W*.2;pfy=H*.8;}   /* the otter swims in the river, off the pier */
+  /* happy: walks about, then stops for the happy pose · sulk: lies there · run: dashes off */
+  const cyc=t%3200,anim=res==="no"?"sulk":res==="run"?"run":cyc<1800?"walk":"happy";if(res==="ok"){const dir=Math.floor(t/3200)%2?-1:1;cx=(dir>0?W*.36:W*.66)+dir*Math.min(cyc,1800)/1800*W*.3;fl=dir;}
+  x.fillStyle="rgba(0,0,0,.25)";x.beginPath();x.ellipse(cx,pfy,ph*.55,ph*.08,0,0,Math.PI*2);x.fill();
+  if(!petSprite(x,pk,cx,pfy,ph,fl,t,anim)){const Z=Math.max(3,Math.round(ph/9)),wd=pk==="dog"?15:11,px=cx-wd*Z/2,py=fy-9*Z+bob;const Q=(a,b,w,h,c)=>{x.fillStyle=c;x.fillRect(Math.round(fl>0?px+a*Z:px+(wd-a-w)*Z),Math.round(py+b*Z),w*Z,h*Z);};try{drawPetQ(Q,pk,t,mv);}catch(e){}}
+  const ph2=(t%1400)/1400;
+  if(res==="ok"){x.globalAlpha=1-ph2;x.fillStyle="#ff6a8a";const hx=cx+8,hy=fy-ph-6-ph2*30;x.fillRect(hx,hy,4,3);x.fillRect(hx-2,hy+2,8,3);x.fillRect(hx,hy+5,4,2);x.globalAlpha=1;}
+  if(res==="no"){x.globalAlpha=1-ph2;x.fillStyle="#cfe2ff";x.font=`bold ${10+ph2*8}px "Pixelify Sans",sans-serif`;x.fillText("z",cx+10+ph2*10,fy-ph-ph2*30);x.globalAlpha=1;}
+  if(res==="run")for(let i=0;i<4;i++){x.globalAlpha=.6;x.fillStyle="#e8d9b0";x.fillRect(cx-20-i*9-(t/40%6),fy-4-(i%2)*4,6,4);x.globalAlpha=1;}};}
+Object.assign(ACT,{
+  petsopen:()=>{UI.modal={type:"pets"};render();},
+  petdet:d=>{UI.modal={type:"pets",i:+d.v};render();},
+  petplay:d=>{UI.modal={type:"pets",i:+d.v};render();},            /* the old chip now opens the pet */
+  petgo:d=>{const [i,mi]=String(d.v).split(":").map(Number);const r=petPlayMode(G,i,mi);if(!r)return;if(r.err){toast(r.err);return;}AU.sfx&&AU.sfx(r.res==="ok"?"level":"ui");
+    const p=r.p,fav=p.fav&&G.F[p.fav]&&G.F[p.fav].camp==="player"?[p.fav]:roster(G).slice(0,1).map(f=>f.id);UI.cfxIds=fav;
+    const note=r.res==="ok"?`${p.name}${r.line} · ${PETS[p.k].eff} · joy ${p.joy} · EXP +${r.M[2]}${r.up?` · 🎉 Level up! Lv.${p.lv}`:""}`
+      :r.res==="no"?`${p.name}${r.line} · not in the mood today (EXP +3) — try again next week`:`${p.name}${r.line} · back next week; no help to the camp until then`;
+    UI.modal={type:"campres",k:"pet_"+p.k+(r.res==="ok"?"":"_"+r.res),title:r.res==="ok"?`${r.M[0]} and ${p.name}`:r.res==="no"?`${p.name} doesn't feel like playing`:`${p.name} ran off!`,cap:r.res==="ok"?`${r.M[0]} · ${p.name}`:r.res==="no"?`${p.name} ignores you`:`${p.name} bolts into the rice fields!`,note};save();render();}});
+
+/* ---------- หมัดเหล็ก: Fah's grey cat from Phayak Thong follows her when she joins the camp (v1.91.144, Man) ---------- */
+PETS.mudlek={name:"Silver cat with white socks",food:120,eff:"Everyone's morale +1 · Fah's morale +3"};PET_NAMES.mudlek=["Iron Fist"];
+PX.mudlek={pas:p=>`Everyone's morale +1${p.lv>=5?"~2":""} (rolled weekly)`,tal:["Fah's watch-cat: Fah's training gains +3%","Fah's watch-cat: Fah's training gains +5%","The real Iron Fist: Fah's training gains +8%"],
+  modes:[["Cat boxing",5,20,0],["Pat his head",15,10,0],["Give canned tuna",25,6,60]],bg:"bg_camp_day.webp"};
+PLINE.mudlek=[[" puts up his front paws and jabs at your hand like Fah on the pads"," butts his head into your hand with a hoarse alley-boss meow"," finishes the whole tin of tuna and goes to sleep on Fah's gloves"]," sits with his back to you, watching only Fah train"," leaps the fence and heads toward Phayak Thong camp… probably visiting the old home"];
+CFX.pet_mudlek={bg:"bg_camp_day.webp",cap:"",row:"idle",fx:"hearts"};CFX.pet_mudlek_no={bg:"bg_camp_day.webp",cap:"",row:"idle",fx:"z"};CFX.pet_mudlek_run={bg:"bg_farm.webp",cap:"",row:"idle",fx:"sparks"};
+{const _w=petsWeekly;petsWeekly=function(G){_w(G);const p=pv(G).find(x=>x.k==="mudlek");if(!p||away(G,p)||!G.petLast||G.petLast.mudlek!=="")return;
+  const R=roster(G),amt=(p.lv>=5&&Math.random()<.5?2:1)*(p.joy<30?.5:1);R.forEach(f=>f.morale=clamp(f.morale+amt,0,100));const fah=G.F.fah;if(fah&&fah.camp==="player")fah.morale=clamp(fah.morale+3,0,100);G.petLast.mudlek=`Morale +${amt} · Fah +3`;};}
+{const _t=trainWeek;trainWeek=function(G,f,rng){const r=_t(G,f,rng);try{if(f.id==="fah"&&f.camp==="player"&&f.gains){const p=pv(G).find(x=>x.k==="mudlek");if(p&&!away(G,p)&&tier(p)){
+  const pc=[0,.03,.05,.08][tier(p)]*(p.joy<30?.5:1);for(const x of Object.keys(f.gains)){const d=f.gains[x];if(d>0){const add=d*pc;f.a[x]=Math.min(stCap(f),f.a[x]+add);f.gains[x]=d+add;}}}}}catch(e){}return r;};}
+EVENTS.push({id:"pet_mudlek",look:"casual",bg:"camp",pri:2,when:G=>inCamp(G,"fah")&&!hasPet(G,"mudlek"),steps:[
+  {n:"nar",t:"Fah's first morning at Sirichai camp. She drags in one suitcase, and one rattan basket covered tightly with a cloth."},
+  {n:"nar",t:"The rattan basket moves by itself, then lets out a hoarse \"meow\"."},
+  {n:"fah",f:"flustered",l:"casual",t:"…Don't look at me like that! Iron Fist doesn't belong to Phayak Thong anymore. Fah moved, so he moves too. End of story."},
+  {n:"nar",t:"Fah lifts the cloth. Out jumps a cat with silver fur exactly like Fah's hair, four white paws like little socks, a nick in one ear, and yellow eyes sizing everyone up like opponents."},
+  {n:"coach",t:"Same colour as his owner… our camp's turning into a zoo, manager."},
+  {inject:G=>hasPet(G,"cat")?[{n:"nar",t:`Iron Fist walks straight to the heavy bag, where ${petName(G,"cat")} is sleeping. The two cats stare at each other for a full ten seconds…`},{n:"nar",t:`${petName(G,"cat")} shifts over to the other side — they split the bag half and half`},{n:"fah",f:"happy",l:"casual",t:"See? Iron Fist won in the first round!"}]:[{n:"fah",f:"happy",l:"casual",t:"He's picked the middle heavy bag. That's his bed now — nobody take it."}]},
+  {n:"fah",f:"pout",l:"casual",t:G=>`${CALL(G,"fah")} …look after him, okay? He likes tuna, and people who don't talk too much.`},
+  {inject:G=>{adoptPet(G,"mudlek","Iron Fist","fah");return [{n:"nar",t:"🐾 Iron Fist joins the camp — see the pets button on the home screen"}];}}]});
+try{window.PETX={petsWeekly,petPlayMode,pst,petXP,PX};}catch(e){}
+})();
+
+// ================= MUAY THAI MOE — pixel emoji (v1.91.144, Man: "every icon in the game in pixel style") =================
+// Any emoji in text on screen is swapped for a 10x10 pixel icon as it appears (screens, scenes, toasts, letters, both languages).
+// Strings in the game stay untouched, so other code keeps working; an emoji with no icon here simply stays an emoji.
+// "x" pixels take the text colour, so ♥ ★ ✦ ✓ ✕ keep whatever colour the CSS gives them.
+;(function(){if(typeof document==="undefined")return;
+const PAL={"k": "#1b1530", "w": "#ffffff", "l": "#fff4d6", "y": "#ffd34a", "Y": "#c98a1a", "o": "#f08a2a", "r": "#e8434f", "R": "#8a1e2e", "p": "#ff8fb8", "P": "#c2477a", "g": "#5cc46a", "G": "#2e7a45", "b": "#4aa3ff", "B": "#2a5aa8", "c": "#9fe6ff", "v": "#a77bff", "V": "#5b3aa8", "n": "#b07a40", "N": "#6a4420", "s": "#d8d2ea", "S": "#8f86b0", "d": "#4a4366", "t": "#f6cfa4", "T": "#c98f62", "x": "currentColor"};
+const R={"✦": ["....x.....", "....x.....", "...xxx....", "xxxxxxxxx.", "...xxx....", "....x.....", "....x.....", "..........", "..........", ".........."], "♥": ["..........", ".xx...xx..", "xxxx.xxxx.", "xxxxxxxxx.", "xxxxxxxxx.", ".xxxxxxx..", "..xxxxx...", "...xxx....", "....x.....", ".........."], "❤": ["..........", ".kk...kk..", "krrk.krrk.", "krwrrrrRk.", "krrrrrRRk.", ".krrrRRk..", "..krRRk...", "...kRk....", "....k.....", ".........."], "♡": ["..........", ".xx...xx..", "x..x.x..x.", "x...x...x.", "x.......x.", ".x.....x..", "..x...x...", "...x.x....", "....x.....", ".........."], "★": ["....x.....", "....x.....", "...xxx....", "xxxxxxxxx.", ".xxxxxxx..", "..xxxxx...", "..xx.xx...", ".xx...xx..", ".x.....x..", ".........."], "✓": ["..........", "........xx", ".......xx.", "......xx..", "x....xx...", "xx..xx....", ".xxxx.....", "..xx......", "..........", ".........."], "✕": ["..........", "xx....xx..", ".xx..xx...", "..xxxx....", "...xx.....", "..xxxx....", ".xx..xx...", "xx....xx..", "..........", ".........."], "♪": ["....xxxx..", "....x..x..", "....x..x..", "....x.....", "....x.....", "..xxx.....", ".xxxx.....", ".xxx......", "..........", ".........."], "🪷": ["....k.....", "...kpk....", "..kpPpk...", ".kkpPpkk..", "kpkpPpkpk.", "kppkPkppk.", ".kppppPk..", "kGgggggGk.", ".kkkkkkk..", ".........."], "🔒": ["..kkkk....", ".kSkkSk...", ".kS..Sk...", ".kS..Sk...", "kkkkkkkk..", "kyyykyyk..", "kyyYkyYk..", "kyyyyyyk..", "kYYYYYYk..", "kkkkkkkk.."], "🏆": ["kkkkkkkkk.", "kyyyyyyyk.", "kyyyyyyYk.", ".kyyyyYk..", "..kyyYk...", "...kYk....", "...kyk....", "..kYYYk...", ".kkkkkkk..", ".........."], "⚠": ["....k.....", "...kyk....", "...kyk....", "..kykyk...", "..kykyk...", ".kyykyyk..", ".kyyyyyk..", "kyyykyyyk.", "kkkkkkkkk.", ".........."], "💚": ["..........", ".kk...kk..", "kggk.kggk.", "kgwggggGk.", "kggggggGk.", ".kgggggk..", "..kgggk...", "...kGk....", "....k.....", ".........."], "💖": ["..........", ".kk...kk..", "kppk.kpwk.", "kpwppppPk.", "kppppPPPk.", ".kpppPPk..", "..kpPPk..y", "...kPk..yy", "....k....y", ".........."], "🎯": ["..kkkkk...", ".krrrrrk..", "krwwwwwrk.", "krwrrrwrk.", "krwrkrwrk.", "krwrrrwrk.", "krwwwwwrk.", ".krrrrrk..", "..kkkkk...", ".........."], "🏮": ["....k.....", "..kkkkk...", ".krrrrrk..", "kryrrryrk.", "krrrrrrrk.", "kryrrryrk.", ".krrrrrk..", "..kkkkk...", "...kyk....", "....y....."], "⚡": [".....kkk..", "....kyyk..", "...kyyk...", "..kyyk....", ".kyyyyyk..", "....kyk...", "...kyk....", "..kyk.....", "..kk......", ".........."], "🚐": ["..........", ".kkkkkkk..", "kwccwccwk.", "kwccwccwwk", "kwwwwwwwwk", "kbbbbbbbbk", "kwwwwwwwwk", "kkdkkkkdkk", ".kSk..kSk.", "..k....k.."], "🃏": ["..kkkkkk..", ".klllllk..", ".klrlllk..", ".kllllPk..", ".kllrllk..", ".klPlllk..", ".klllrlk..", ".klllllk..", ".kkkkkkk..", ".........."], "🂠": ["..kkkkkk..", ".klllllk..", ".klrlllk..", ".kllllPk..", ".kllrllk..", ".klPlllk..", ".klllrlk..", ".klllllk..", ".kkkkkkk..", ".........."], "🎴": ["..kkkkkk..", ".klllllk..", ".klrlllk..", ".kllllPk..", ".kllrllk..", ".klPlllk..", ".klllrlk..", ".klllllk..", ".kkkkkkk..", ".........."], "📱": ["..kkkkkk..", "..kddddk..", "..kcccck..", "..kcbcck..", "..kcccck..", "..kcccbk..", "..kcccck..", "..kdwddk..", "..kkkkkk..", ".........."], "🔥": ["....k.....", "...kok....", "...kork...", "..korrok..", ".korryrok.", ".koryyrok.", "korywyrok.", ".koryyrok.", "..kkkkkk..", ".........."], "🌙": ["...kkk....", "..kyyk....", ".kyyk.....", ".kyk......", "kyyk......", "kyyk......", "kyyyk...k.", ".kyyykkyk.", "..kyyyyk..", "...kkkk..."], "📜": ["kkkkkkkk..", "klllllnk..", ".kllllk...", ".klSSlk...", ".kllllk...", ".klSSlk...", ".kllllk...", "kkllllnk..", "knkkkkkk..", ".........."], "💡": ["...kkkk...", "..kyyyyk..", ".kyywyyyk.", ".kywyyyyk.", ".kyyyyyyk.", "..kyyyyk..", "...kYYk...", "...kssk...", "...kSSk...", "....kk...."], "🎂": ["..r.r.r...", "..y.y.y...", ".kkkkkkk..", ".kpwpwpk..", ".kppppPk..", "kkkkkkkkk.", "klllllllk.", "kpppppPPk.", "kkkkkkkkk.", ".........."], "🥊": ["..kkkkk...", ".krrrrrk..", "krrwrrrrk.", "krwrrrrrk.", "krrrrrrRkk", "krrrrrRrrk", "kRrrrRRrk.", ".kRRRRRk..", ".kwwwwwk..", ".kkkkkkk.."], "🏃": [".....kk...", "....ktk...", ".....kk...", "...kkbbk..", "..kbbbkbk.", "..k.kbk...", "...kbbk...", "..kbk.kbk.", ".kk....kk.", ".........."], "🛒": ["kk........", ".kkkkkkkk.", ".kbsbsbsk.", ".kbbbbbbk.", "..kbsbsk..", "..kkkkkk..", "..k.......", "..kkkkkk..", "..kSk.kSk.", "...k...k.."], "🎲": [".kkkkkkk..", "kwwwwwwwk.", "kwkwwwkwk.", "kwwwwwwwk.", "kwwwkwwwk.", "kwwwwwwwk.", "kwkwwwkwk.", "kSSSSSSSk.", ".kkkkkkk..", ".........."], "📊": ["kkkkkkkkk.", "klllllllk.", "kllllllrk.", "kllllbllk.", "klllkbllk.", "kllgkbrlk.", "klgggbrlk.", "kkkkkkkkk.", "..........", ".........."], "🎞": ["kkkkkkkkk.", "kwkwkwkwk.", "kkkkkkkkk.", "kbbbkccck.", "kbbbkccck.", "kkkkkkkkk.", "kwkwkwkwk.", "kkkkkkkkk.", "..........", ".........."], "📼": ["kkkkkkkkk.", "kwkwkwkwk.", "kkkkkkkkk.", "kbbbkccck.", "kbbbkccck.", "kkkkkkkkk.", "kwkwkwkwk.", "kkkkkkkkk.", "..........", ".........."], "💍": ["...kck....", "..kcwck...", "...kck....", "..kkkkk...", ".kyk.kyk..", "kyk...kyk.", "kyk...kyk.", ".kyk.kyk..", "..kkkkk...", ".........."], "💼": ["...kkk....", "..kk.kk...", "kkkkkkkkk.", "knnnnnnnk.", "knnnyynnk.", "kNNNkkNNk.", "knnnnnnnk.", "knnnnnnnk.", "kkkkkkkkk.", ".........."], "🧳": ["...kkk....", "..kk.kk...", "kkkkkkkkk.", "knnnnnnnk.", "knnnyynnk.", "kNNNkkNNk.", "knnnnnnnk.", "knnnnnnnk.", "kkkkkkkkk.", ".........."], "🏳": ["kkkkkk....", "kwwwwwk...", "kwwwwwwk..", "kwwwwwwk..", "kwwwwwk...", "kkkkkk....", "k.........", "k.........", "k.........", "k........."], "🎌": ["k...k.....", "kkkkkkkkk.", "kwrwkwrwk.", "kwwwkwwwk.", "kkkkkkkkk.", "k...k.....", "k...k.....", "k...k.....", "k...k.....", ".........."], "🏅": ["kbk...kbk.", ".kbk.kbk..", "..kbkbk...", "...kkk....", "..kyyyk...", ".kyywyyk..", ".kyyyYyk..", ".kyyYYyk..", "..kyyyk...", "...kkk...."], "🥇": ["kbk...kbk.", ".kbk.kbk..", "..kbkbk...", "...kkk....", "..kyyyk...", ".kyywyyk..", ".kyyyYyk..", ".kyyYYyk..", "..kyyyk...", "...kkk...."], "🥈": ["kbk...kbk.", ".kbk.kbk..", "..kbkbk...", "...kkk....", "..ksssk...", ".ksswssk..", ".ksssSsk..", ".kssSSsk..", "..ksssk...", "...kkk...."], "🥉": ["kbk...kbk.", ".kbk.kbk..", "..kbkbk...", "...kkk....", "..koook...", ".koowook..", ".koooNok..", ".kooNNok..", "..koook...", "...kkk...."], "📞": ["..........", ".kkk......", "krrrk.....", "krrk......", "krrk......", ".krrk.kkk.", "..krrkrrrk", "...krrrrk.", "....kkkk..", ".........."], "🧪": ["...kkkk...", "....kk....", "....kk....", "...kwwk...", "...kwwk...", "..kwwwwk..", ".kgggggk..", "kgggwgggk.", "kgggggGGk.", ".kkkkkkk.."], "🥁": ["k.......k.", ".k.....k..", "..kkkkk...", ".kwwwwwk..", "kSwwwwwSk.", "krrrrrrrk.", "krwrwrwrk.", "krrrrrrrk.", ".kkkkkkk..", ".........."], "💭": ["..........", "..kkkkk...", ".kwwwwwk..", "kwwwwwwwk.", "kwwwwwwwk.", ".kwwwwwk..", "..kkkkk...", "...kk.....", "..kwk.....", "...k......"], "💬": ["..........", ".kkkkkkk..", "kwwwwwwwk.", "kwkwkwkwk.", "kwwwwwwwk.", ".kkwkkkk..", "..kwk.....", "..kk......", "..........", ".........."], "🧑": ["...kkkk...", "..kNNNNk..", ".kNtttTNk.", ".ktktktTk.", ".kttttTTk.", ".ktwwwwTk.", "..kwwwwk..", ".kbbbbbbk.", "kbbbbbbbbk", "kkkkkkkkkk"], "💆": ["...kkkk...", "..kNNNNk..", ".kNtttTNk.", ".ktktktTk.", ".kttttTTk.", ".ktwwwwTk.", "..kwwwwk..", ".kbbbbbbk.", "kbbbbbbbbk", "kkkkkkkkkk"], "😷": ["...kkkk...", "..kNNNNk..", ".kNtttTNk.", ".ktktktTk.", ".kttttTTk.", ".ktwwwwTk.", "..kwwwwk..", ".kbbbbbbk.", "kbbbbbbbbk", "kkkkkkkkkk"], "✉": ["..........", "kkkkkkkkk.", "kwkwwwkwk.", "kwwkwkwwk.", "kwwwkwwwk.", "kwwwwwwwk.", "kwwwwwwwk.", "kkkkkkkkk.", "..........", ".........."], "📩": ["..........", "kkkkkkkkk.", "kwkwwwkwk.", "kwwkwkwwk.", "kwwwkwwwk.", "kwwwwwwwk.", "kwwwwwwwk.", "kkkkkkkkk.", "..........", ".........."], "💌": ["..........", "kkkkkkkkk.", "kwkwwwkwk.", "kwwkwkwwk.", "kwwkrkrwk.", "kwwkrrrwk.", "kwwwkrkwk.", "kkkkkkkkk.", "..........", ".........."], "👑": ["..........", "y...y...y.", "yk.kyk.ky.", "kyykyykyy.", "kyyyyyyyk.", "kyryyyryk.", "kyyyyyyyk.", "kYYYYYYYk.", "kkkkkkkkk.", ".........."], "🗑": ["...kkk....", "kkkkkkkkk.", "kSSSSSSSk.", ".kSdSdSk..", ".kSdSdSk..", ".kSdSdSk..", ".kSdSdSk..", ".kSSSSSk..", "..kkkkk...", ".........."], "🎆": ["....y.....", "..y.y.y...", "...yyy....", "yyyywyyyy.", "...yyy....", "..y.y.y...", "....y..p..", "..b....pwp", "........p.", ".........."], "🎉": ["....y.....", "..y.y.y...", "...yyy....", "yyyywyyyy.", "...yyy....", "..y.y.y...", "....y..p..", "..b....pwp", "........p.", ".........."], "✨": ["....y.....", "..y.y.y...", "...yyy....", "yyyywyyyy.", "...yyy....", "..y.y.y...", "....y..p..", "..b....pwp", "........p.", ".........."], "🙏": ["....kk....", "...ktTk...", "...ktTk...", "..kttTTk..", "..kttTTk..", "..kttTTk..", ".kttkkTTk.", ".kbbkkbbk.", "kbbbkkbbbk", "kkkk..kkkk"], "💦": ["....k.....", "...kck....", "...kck....", "..kcwbk...", "..kcbbk...", ".kcbbbBk..", ".kbbbbBk..", "..kBBBk...", "...kkk....", ".........."], "💧": ["....k.....", "...kck....", "...kck....", "..kcwbk...", "..kcbbk...", ".kcbbbBk..", ".kbbbbBk..", "..kBBBk...", "...kkk....", ".........."], "🌸": ["....k.....", "...kpk....", ".kkkpkkk..", "kpppkpppk.", ".kpkykpk..", "..kpypk...", ".kppkppk..", ".kpk.kpk..", "..k...k...", ".........."], "🪢": ["...kkk....", "..knnnk...", ".knNkNnk..", ".knk.knk..", "..knnnk...", "...knk....", "...knk....", "..knNk....", "..knk.....", "...k......"], "⛽": ["kkkkkk....", "krrrrrk.k.", "krwwwrkkSk", "krwwwrk.Sk", "krrrrrk.Sk", "krrrrrkkSk", "krrrrrk.k.", "krrrrrk...", "kkkkkkk...", ".........."], "🌊": ["..........", "...kkk....", "..kbcck...", ".kbbkwck..", "kbbk.kk...", "kbbbk..kk.", "kbbbbkkbbk", "kBbbbbbbBk", "kkkkkkkkkk", ".........."], "📺": ["..k...k...", "...k.k....", "kkkkkkkkk.", "kdddddddk.", "kdcccccdk.", "kdcbcccdk.", "kdcccccdk.", "kdddddddk.", "kkkkkkkkk.", ".k.....k.."], "⚔": ["ks......sk", "ksk....ksk", ".ksk..ksk.", "..ksksk...", "...ksk....", "..ksksk...", ".knk..knk.", "kNk....kNk", "kk......kk", ".........."], "📷": ["..........", "...kkk....", "kkkSSSkkk.", "kSSSSSSSk.", "kSSkkkSSk.", "kSkcbckSk.", "kSkbbbkSk.", "kSSkkkSSk.", "kkkkkkkkk.", ".........."], "📸": ["..........", "...kkk....", "kkkSSSkkk.", "kSSSSSSSk.", "kSSkkkSSk.", "kSkcbckSk.", "kSkbbbkSk.", "kSSkkkSSk.", "kkkkkkkkk.", ".........."], "🖼": ["kkkkkkkkk.", "knnnnnnnk.", "knccccynk.", "kncccccnk.", "kncgcccnk.", "kngggcgnk.", "knggggnk..", "knnnnnnnk.", "kkkkkkkkk.", ".........."], "📒": ["kkkkkkkk..", "kBbbbbbbk.", "kBbwwwwbk.", "kBbbbbbbk.", "kBbbbbbbk.", "kBbbbbbbk.", "kBbbbbbbk.", "kBlllllk..", "kkkkkkkk..", ".........."], "📘": ["kkkkkkkk..", "kBbbbbbbk.", "kBbwwwwbk.", "kBbbbbbbk.", "kBbbbbbbk.", "kBbbbbbbk.", "kBbbbbbbk.", "kBlllllk..", "kkkkkkkk..", ".........."], "🔍": ["..kkkk....", ".kccwck...", "kccwcck...", "kcccccck..", "kcccccck..", ".kccccck..", "..kkkkkk..", ".....kNk..", "......kNk.", ".......kk."], "💾": ["kkkkkkkk..", "kbsssbbk..", "kbsSsbbbk.", "kbbbbbbbk.", "kbbbbbbbk.", "kbwwwwwbk.", "kbwdddwbk.", "kbwwwwwbk.", "kkkkkkkkk.", ".........."], "🌳": ["...kkkk...", "..kgggGk..", ".kggwggGk.", "kgggggggGk", "kggggggGGk", ".kgggGGGk.", "..kkNNkk..", "....Nk....", "....Nk....", "...kkkk..."], "🌱": ["...kkkk...", "..kgggGk..", ".kggwggGk.", "kgggggggGk", "kggggggGGk", ".kgggGGGk.", "..kkNNkk..", "....Nk....", "....Nk....", "...kkkk..."], "⛩": ["kkkkkkkkkk", "rrrrrrrrrr", "kkkkkkkkkk", ".kr....rk.", "kkkkkkkkk.", ".kr....rk.", ".kr....rk.", ".kr....rk.", ".kr....rk.", ".kk....kk."], "✏": ["......kkk.", ".....kprk.", "....kyyk..", "...kyyk...", "..kyyk....", ".kyyk.....", ".ktk......", "kdk.......", "kk........", ".........."], "💸": ["..........", "..........", "kkkkkkkkk.", "kgggggggk.", "kgkgggkgk.", "kggkykggk.", "kgkgggkgk.", "kgggggggk.", "kkkkkkkkk.", ".........."], "🏫": ["....k.....", "...krk....", "..krrrk...", ".krrrrrk..", "krrrrrrrk.", ".klllllk..", ".klbklbk..", ".kllkllk..", ".kllkllk..", ".kkkkkkk.."], "🏠": ["....k.....", "...krk....", "..krrrk...", ".krrrrrk..", "krrrrrrrk.", ".klllllk..", ".klbklbk..", ".kllkllk..", ".kllkllk..", ".kkkkkkk.."], "🎰": ["kkkkkkkk..", "krrrrrrk..", "kkkkkkkkk.", "kwkwkwkSk.", "krkykykSk.", "kwkwkwkSk.", "kkkkkkkkk.", "krrrrrrk..", "kkkkkkkk..", ".........."], "🎟": ["..........", "kkkkkkkkk.", "kooookook.", "kooookook.", ".kooo.ok..", ".kooo.ok..", "kooookook.", "kkkkkkkkk.", "..........", ".........."], "🥗": ["..........", "..g.g.....", ".gkgrgk...", "kgrgggGgk.", "kkkkkkkkk.", "kwwwwwwwk.", ".kwwwwwk..", "..kkkkk...", "..........", ".........."], "👁": ["..........", "..kkkkk...", ".kwwwwwk..", "kwwkbkwwk.", "kwkbbbkwk.", "kwwkbkwwk.", ".kwwwwwk..", "..kkkkk...", "..........", ".........."], "👏": ["..........", "..k.k.....", ".ktktk....", ".ktttkk...", "kttttTtk..", "kttttTTk..", ".kttTTTk..", "..ktTTk...", "...kkk....", ".........."], "💪": ["..........", "..k.k.....", ".ktktk....", ".ktttkk...", "kttttTtk..", "kttttTTk..", ".kttTTTk..", "..ktTTk...", "...kkk....", ".........."], "💨": ["..........", "....kkk...", "kkkkSSSk..", "SSSSSSkSk.", "kkkkkkkSk.", "..kkkkSk..", "SSSSSSk...", "kkkkkk....", "..........", ".........."], "⌛": ["kkkkkkkk..", "kwwwwwwk..", ".kyyyyk...", "..kyyk....", "...kk.....", "..kwyk....", ".kwyyyk...", "kyyyyyyk..", "kkkkkkkk..", ".........."], "🌧": ["...kkk....", ".kksssk...", "kssssssk..", "kssssSSk..", ".kkkkkk...", "..b..b....", ".b..b..b..", "b..b..b...", "..........", ".........."], "✂": ["kk.....kk.", "ksk...ksk.", ".ksk.ksk..", "..kskskk..", "...ksk....", "..kkkkk...", ".krk.krk..", "krrk.krrk.", ".kk...kk..", ".........."], "📣": ["......kk..", "....kkrk..", "..kkrrrk..", "kkrrrrrk..", "kwrrrrrk..", "kkrrrrrk..", "..kkrrrk..", "...kkkkk..", "...kk.....", ".........."], "🛡": ["kkkkkkkkk.", "kbbbbsssk.", "kbbbbsssk.", "kbbbbsssk.", "kssssbbbk.", ".ksssbbk..", ".ksssbbk..", "..kssbk...", "...kkk....", ".........."], "🧻": ["..kkkkkk..", ".klllllkk.", "kllllllkSk", "kllllllkSk", "kllllllkk.", "kllllllk..", "kllllllk..", ".kllllk...", "..kkkk....", ".........."], "⭐": ["....k.....", "...kyk....", "kkkkykkkk.", "kyyyyyyyk.", ".kyywyyk..", "..kyyyyk..", ".kyykkyyk.", ".kyk..kyk.", ".kk....kk.", ".........."], "💎": ["..kkkkk...", ".kcwcbck..", "kcwcccbbk.", "kkkkkkkkk.", ".kcccbbk..", "..kccbk...", "...kbk....", "....k.....", "..........", ".........."], "🟢": ["..kkkk....", ".kggggk...", "kggwgggk..", "kgwggggk..", "kggggGGk..", "kgggGGGk..", ".kGGGGk...", "..kkkk....", "..........", ".........."], "🔴": ["..kkkk....", ".krrrrk...", "krrwrrrk..", "krwrrrrk..", "krrrrRRk..", "krrrRRRk..", ".kRRRRk...", "..kkkk....", "..........", ".........."], "⚪": ["..kkkk....", ".kwwwwk...", "kwwwwwwk..", "kwwwwwwk..", "kwwwwssk..", "kwwwsssk..", ".kssssk...", "..kkkk....", "..........", ".........."], "🛍": ["...kkk....", "..k...k...", "..k...k...", "kkkkkkkkk.", "kpppppppk.", "kpppppppk.", "kppwwwppk.", "kpppppppk.", "kPPPPPPPk.", "kkkkkkkkk."], "ⓘ": ["..kkkkk...", ".kbbbbbk..", "kbbbwbbbk.", "kbbbbbbbk.", "kbbbwbbbk.", "kbbbwbbbk.", "kbbbwbbbk.", ".kbbbbbk..", "..kkkkk...", ".........."]};
+const MONO=new Set(["✦", "♥", "♡", "★", "✓", "✕", "♪"]);
+const svg={};const mk=k=>svg[k]||(svg[k]=(()=>{let r="";R[k].forEach((row,y)=>[...row].forEach((c,x)=>{if(c!=="."&&PAL[c])r+=`<rect x="${x}" y="${y}" width="1.02" height="1.02" fill="${PAL[c]}"/>`;}));
+  return `<svg viewBox="0 0 10 10" shape-rendering="crispEdges" aria-hidden="true">${r}</svg>`;})());
+const esc=s=>s.replace(/[.*+?^${}()|[\]\\]/g,"\\$&");
+const keys=Object.keys(R).sort((a,b)=>b.length-a.length).map(esc).join("|");
+const HAS=new RegExp("(?:"+keys+")","u"),SPLIT=new RegExp("((?:"+keys+")\uFE0F?)","gu");
+const SKIP=/^(SCRIPT|STYLE|TEXTAREA|INPUT|OPTION|SELECT|TITLE|svg|text|CANVAS)$/;
+const skip=n=>{for(let e=n.parentNode;e&&e!==document.body;e=e.parentNode){if(e.nodeType!==1)continue;if(SKIP.test(e.nodeName)||e.id==="live"||e.classList.contains("pxe")||e.isContentEditable)return true;}return false;};
+function fix(t){const s=t.data;if(!s||!t.parentNode||!t.isConnected||!HAS.test(s)||skip(t))return;const f=document.createDocumentFragment();
+  for(const part of s.split(SPLIT)){if(!part)continue;const k=part.replace("\uFE0F","");if(R[k]){const e=document.createElement("span");e.className="pxe"+(MONO.has(k)?" pxm":"");e.setAttribute("role","img");e.setAttribute("aria-label",k);e.innerHTML=mk(k);f.appendChild(e);}else f.appendChild(document.createTextNode(part));}
+  t.parentNode.replaceChild(f,t);}
+function walk(root){if(root.nodeType===3){fix(root);return;}if(root.nodeType!==1||SKIP.test(root.nodeName))return;const w=document.createTreeWalker(root,NodeFilter.SHOW_TEXT);const L=[];let n;while((n=w.nextNode()))if(HAS.test(n.data))L.push(n);L.forEach(fix);}
+const go=()=>{walk(document.body);new MutationObserver(ms=>{for(const m of ms){if(m.type==="characterData")fix(m.target);else m.addedNodes.forEach(walk);}}).observe(document.body,{childList:true,subtree:true,characterData:true});};
+if(document.body)go();else document.addEventListener("DOMContentLoaded",go);
+try{window.PXEMOJI={keys:Object.keys(R),svg:mk};}catch(e){}
+})();
 

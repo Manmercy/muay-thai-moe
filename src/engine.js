@@ -1180,7 +1180,7 @@ function advise(G,a,b,rounds,n=40){const fa=G.F[a],fb=G.F[b];const res={};
   const best=Object.entries(res).sort((x,y)=>y[1]-x[1])[0];return {rates:res,best:best[0],bestRate:best[1],base:res.balanced};}
 // v1.51: camp pets — they join through little stories, wander the yard, and cheer the team up once a week
 const PETS={cat:{name:"แมวส้ม",food:150,eff:"ทุกคนกำลังใจ +2"},dog:{name:"หมาไทยหลังอาน",food:250,eff:"ทุกคนความล้า −3"},rooster:{name:"ไก่ชนปลดระวาง",food:100,eff:"ทุกคนกำลังใจ +1 · ความล้า −1"},turtle:{name:"เต่าวัด",food:80,eff:"ทุกคนกำลังใจ +3 (ใจเย็นลง)"},otter:{name:"ลูกนากริมน้ำ",food:0,eff:"ว่ายน้ำเป็นเพื่อนคนซ้อม · ทุกคนความล้า −1"}};
-const PET_NAMES={cat:["ส้มโอ","ขนมปัง","ตูบตู่"],dog:["เจ้าดำ","ไอ้ทอง","ข้าวตู"],rooster:["เจ้าเขียว","พญาไก่","โก๊ะ"],turtle:["ช้า ๆ","โมจิ","หลวงปู่"],otter:["น้ำปิง","กระทง","ข้าวเหนียว"]};
+const PET_NAMES={cat:["ส้มโอ","ขนมปัง","ตูบตู่"],dog:["ไอ้ทอง","ข้าวตู","เจ้าโกโก้"],rooster:["เจ้าเขียว","พญาไก่","โก๊ะ"],turtle:["ช้า ๆ","โมจิ","หลวงปู่"],otter:["น้ำปิง","กระทง","ข้าวเหนียว"]};
 const petFood=G=>(G&&G.pets||[]).reduce((s,p)=>s+(PETS[p.k]?PETS[p.k].food:0),0);
 function petPlay(G,i){const p=(G.pets||[])[i];if(!p||p.wk===gameWeek(G))return false;p.wk=gameWeek(G);p.joy=Math.min(100,(p.joy||50)+10);const R=roster(G);
   if(p.k==="cat")R.forEach(f=>f.morale=Math.min(100,f.morale+2));if(p.k==="dog")R.forEach(f=>f.fatigue=Math.max(0,f.fatigue-3));

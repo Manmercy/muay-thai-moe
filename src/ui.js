@@ -1,5 +1,5 @@
 // ================= MUAY THAI MOE v1.3 — UI =================
-const VERSION="1.91.143";
+const VERSION="1.91.144";
 const CUR_LANG=(typeof window!=="undefined"&&window.LANG)||"th";
 const TH_LABEL=String.fromCharCode(3652,3607,3618);
 function langSwitch(cls){return `<div class="langsw ${cls||""}" role="group" aria-label="Language">${[["th",TH_LABEL],["en","EN"]].map(([k,l])=>`<button class="lsb ${CUR_LANG===k?"on":""}" data-act="setlang" data-v="${k}" aria-pressed="${CUR_LANG===k}">${l}</button>`).join("")}</div>`;}
@@ -1236,7 +1236,15 @@ const PATCH_FIX={id:"1.91.111",ver:"Muay Thai Moe v1.91.111",title:"รายง
  ["🎞️","เทปคู่ชกและริน","ค่าเทปปรับให้อยู่ในหลักร้อยถึงหลักพัน รินช่วยดูเทปฟรีทุก 3 สัปดาห์ และภาพพูดหลายตัวเปลี่ยนไปใช้ต้นฉบับที่คมขึ้น"]],
  foot:"ครูแดงฝากบอกว่า ซ้อมให้หนัก อ่านจดหมายให้ครบ แล้วเจอกันข้างเวที! ✦"};
 /* popups queue up in order; each one is closed on its own */
-const PATCHES=[PATCH_AV,PATCH_TAPE,PATCH_FIX],PATCH=PATCHES[PATCHES.length-1];
+const PATCH_TANI={id:"1.91.144",ver:"Muay Thai Moe v1.91.144",title:"นางตานี สัตว์เลี้ยง และรายการวิทยุ",lead:"ค่ายศิริชัยมีเจ้าที่ใหม่ สัตว์เลี้ยงโตได้ และรายการตอบคำถามมวยทางวิทยุ",items:[
+ ["🪷","บุญค่ายและนางตานี","เมื่อค่ายใหญ่ขึ้น ผีต้นกล้วยจะตื่นมาอำในฝัน ทำบุญจากกิจกรรมค่ายเพื่อให้ผีสงบ เรื่องยาวสามปี ตั้งแต่ชุลมุน ตั้งศาล จนเป็นเพื่อนกัน ดูวิธีทำบุญได้ที่ปุ่ม “บุญค่ายคืออะไร?”"],
+ ["🥊","ไฟต์ในฝัน 3 ยก","ผีกระสือ กระหัง ม้าบ้อง ผีโพง ออกมาช่วงเข้าพรรษา บุญค่าย 60 ขึ้นไปสั่งมุมได้เอง และวันหนึ่งจะสั่งมุมให้นางตานีได้ด้วย"],
+ ["🐾","สัตว์เลี้ยงมีเลเวล","กดปุ่มสัตว์เลี้ยงที่หน้าแรก เล่นด้วยได้ตัวละครั้งต่อสัปดาห์ สัตว์โตถึง Lv.10 ช่วยค่ายแบบสุ่มทุกสัปดาห์ บางวันก็ไม่อยากเล่น หรือหนีไปวิ่งเล่นในทุ่งนา"],
+ ["🐱","หมัดเหล็กตามฟ้ามา","ถ้าฟ้าย้ายมาอยู่ค่าย แมวสีเงินถุงเท้าขาวของเธอจะตามมาด้วย"],
+ ["📻","แฟนพันแท้มวยเด็ดเจ็ดครก","ตอบคำถามรายการวิทยุถูกบ่อย ๆ จะได้รับเชิญไปแข่งตอบคำถามความรู้มวยไทย รางวัลสูงสุด ฿100,000"],
+ ["✨","ไอคอนพิกเซลทั้งเกม","อีโมจิทุกตัวในเกมเปลี่ยนเป็นไอคอนพิกเซล"]],
+ foot:"ครูแดงฝากบอกว่า ทำบุญบ้างนะ ผีต้นกล้วยตาไวมาก ✦"};
+const PATCHES=[PATCH_AV,PATCH_TAPE,PATCH_FIX,PATCH_TANI],PATCH=PATCHES[PATCHES.length-1];
 function nextPatch(){const i=PATCHES.findIndex(p=>p.id===(G&&G.newsSeen));return i<0?PATCHES[0]:PATCHES[i+1]||null;}
 function maybeWhatsNew(){if(!G||G.ended||UI.scene)return;const P=nextPatch();if(!P)return;UI.modal={type:"whatsnew",id:P.id};}
 function whatsNewHTML(){const P=PATCHES.find(p=>p.id===(UI.modal&&UI.modal.id))||nextPatch()||PATCH,n=PATCHES.length-PATCHES.indexOf(P)-1;return `<div class="wnew"><span class="pill gold">อัปเดต · ${esc(P.ver)}</span><h2>🥊 ${esc(P.title)}</h2><p class="lead">${esc(P.lead)}</p>
