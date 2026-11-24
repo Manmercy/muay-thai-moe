@@ -6182,20 +6182,22 @@ function drawCampFx(x,k,t){const C=CFX[k]||CFX.rest,W=x.canvas.width,H=x.canvas.
   if(bg.complete&&bg.naturalWidth){const s=Math.max(W/bg.naturalWidth,H/bg.naturalHeight);const w=bg.naturalWidth*s,h=bg.naturalHeight*s;x.imageSmoothingEnabled=true;x.drawImage(bg,(W-w)/2,(H-h)/2,w,h);x.imageSmoothingEnabled=false;}
   if(C.tint){x.fillStyle=C.tint;x.fillRect(0,0,W,H);}
   x.fillStyle="rgba(0,0,0,.28)";x.fillRect(0,H*.78,W,H*.22);
-  const R=cfxRoster(k),fy=H*.94,fh=Math.min(H*.62,W/Math.max(3,R.length)*1.15);const P=(a,b,w,h,c)=>{x.fillStyle=c;x.fillRect(Math.round(a),Math.round(b),w,h);};
+  const R=cfxRoster(k),fy=H*.94,fh=H*.44; /* v1.91.150 (Man): everyone the same full size however big the camp is — a big camp stands in rows instead of shrinking */const P=(a,b,w,h,c)=>{x.fillStyle=c;x.fillRect(Math.round(a),Math.round(b),w,h);};
   if(C.students)for(let i=0;i<C.students;i++){const sx=W*(.52+i*.08),sy=fy-6+(i%2)*6;drawStudentNpc(x,"stu"+i+k,sx,sy,fh*.78,Math.floor(t/1400+i)%2?C.row:"guard",t+i*90,true);}
   if(C.masseuse)drawStudentNpc(x,"masseuse",W*.72,fy,fh*.9,"idle",t,true);
   if(C.elder){drawStudentNpc(x,"oldmaster",W*.7,fy,fh*.95,Math.floor(t/1300)%2?"knee":"guard",t,true);}
   if(C.crew){drawStudentNpc(x,"crew1",W*.84,fy,fh*.85,"idle",t,true);}
   if(C.monks)for(let i=0;i<3;i++){const mx=-40+((t/22)+i*70)%(W+160);drawMonk(x,mx,fy-fh*.1,t,i,fh*.7/29,true);} // v1.38: monks walk behind, left to right
   /* v1.91.149 (Man: nobody stands somewhere odd): the ones watching stand on the same floor at the sides, a step back — not up on the back wall or the ropes */
-  if(C.spar){const ring=k==="fightnight"||k==="hostshow",SX=[.1,.9,.2,.8,.05,.95,.15,.85];R.slice(2,10).forEach((f,i)=>{const sx=SX[i];drawFrame(x,sheetFor(f),ROW.idle,Math.floor(t/260+i)%4,W*sx,ring?H*1.04:fy-H*.06,fh*.72,sx>.5);});} /* at a ring show they watch from the front row, below the apron */
+  if(C.spar){const ring=k==="fightnight"||k==="hostshow",SX=[.1,.9,.2,.8,.05,.95,.15,.85];R.slice(2,10).forEach((f,i)=>{const sx=SX[i];drawFrame(x,sheetFor(f),ROW.idle,Math.floor(t/260+i)%4,W*sx,ring?H*1.04:fy-H*.06,fh,sx>.5);});} /* at a ring show they watch from the front row, below the apron */
   if(C.spar&&R.length){const a=R[0],b=R[1]||{id:"sparnpc",canon:false};const ph=Math.floor(t/900)%2;
     drawFrame(x,sheetFor(a),ROW[ph?"punch":"guard"],Math.floor(t/150)%4,W*.4,fy,fh,false);drawFrame(x,sheetFor(b),ROW[ph?"guard":"knee"],Math.floor(t/150)%4,W*.6,fy,fh,true);}
-  else R.forEach((f,i)=>{let cx=W*(.12+(i+.5)*.76/Math.max(1,R.length)),row=C.row||"idle";
-    if(C.walk){const span=W*.5;cx=W*.12+((t/18+i*span/Math.max(1,R.length))%span);row="walk";}
-    if(C.kneel){cx=W*(.12+(i+.5)*.76/Math.max(1,R.length));row="idle";}
-    drawFrame(x,sheetFor(f),ROW[row],Math.floor(t/(row==="idle"?260:150))%4,cx,C.kneel?fy+fh*.12:fy,C.kneel?fh*.88:fh,false);});
+  else{const PR=5,nr=Math.ceil(R.length/PR);
+    for(let r=nr-1;r>=0;r--){const L=R.slice(r*PR,r*PR+PR),off=r%2?.5:0,ry=fy-r*H*.09;
+      L.forEach((f,j)=>{const i=r*PR+j;let cx=W*(.1+(j+.5+off*(L.length<PR?0:-.25))*.8/L.length),row=C.row||"idle";
+        if(C.walk){const span=W*.55;cx=W*.1+((t/18+i*span/Math.max(1,R.length))%span);row="walk";}
+        if(C.kneel)row="idle";
+        drawFrame(x,sheetFor(f),ROW[row],Math.floor(t/(row==="idle"?260:150)+i)%4,cx,C.kneel?ry+fh*.12:ry,C.kneel?fh*.88:fh,false);});}}
   if(C.crowd)for(let i=0;i<16;i++){const cx=(i+.5)*W/16,hop=Math.floor(t/260+i*1.7)%3===0?3:0,cy=H*.9-hop+(i%2)*4;
     P(cx-7,cy,14,H*.12,["#2b2238","#352a44","#241d30"][i%3]);P(cx-5,cy-10,10,10,["#3b2f4a","#2e2539","#43354f"][i%3]);if(hop&&i%4===0)P(cx+6,cy-14,3,10,"#3b2f4a");}
   if(C.planks){P(W*.7,fy-40,46,6,"#8a5a32");P(W*.7,fy-30,46,6,"#a06a3a");P(W*.72,fy-46,4,40,"#5a3a22");P(W*.82,fy-46,4,40,"#5a3a22");}
@@ -6634,7 +6636,7 @@ AU.gsfx=function(kind,a){if(!this.init()||this.muted||!SETTINGS.sfx)return;const
   if(kind==="shimmer")for(let i=0;i<6;i++)T(i*.05,{f:1400+Math.random()*1400,type:"sine",dur:.12,peak:.06});};
 
 // ================= MUAY THAI MOE v1.3 — UI =================
-const VERSION="1.91.149";
+const VERSION="1.91.151";
 const CUR_LANG=(typeof window!=="undefined"&&window.LANG)||"th";
 const TH_LABEL=String.fromCharCode(3652,3607,3618);
 function langSwitch(cls){return `<div class="langsw ${cls||""}" role="group" aria-label="Language">${[["th",TH_LABEL],["en","EN"]].map(([k,l])=>`<button class="lsb ${CUR_LANG===k?"on":""}" data-act="setlang" data-v="${k}" aria-pressed="${CUR_LANG===k}">${l}</button>`).join("")}</div>`;}
@@ -12784,7 +12786,7 @@ const PX={
  turtle:{pas:p=>`Everyone's morale +1${p.lv>=5?"~2":""} (rolled weekly)`,tal:["Calm: injured fighters may heal early","Calm: injuries heal early more often","Sacred turtle: injuries heal much faster"],
   modes:[["Pat the shell",15,10,0],["Slow walk",5,20,0],["Feed morning glory",25,6,20]],bg:"bg_camp_day.webp"},
  otter:{pas:p=>`Everyone's fatigue −1 (rolled weekly)`,tal:["Viral clips: a little reputation","Viral clips: reputation up more often","TikTok star otter: reputation up every week"],
-  modes:[["Play in the water",15,10,0],["Swim training",5,20,0],["Feed little fish",25,6,50]],bg:"bg_farm.webp"}};
+  modes:[["Play in the water",15,10,0],["Swim training",5,20,0],["Feed little fish",25,6,50]],bg:"bg_river.webp"}}; /* v1.91.151 (Man): the otter swims IN the river — bg_river is mirrored so the water is on the right; the fighter stands on the pier, not on the water */
 const PLINE={
  cat:[[" rolls over for belly scratches and purrs loud enough for the whole camp"," pounces at the red dot and crashes into the heavy bag"," finishes the whole pack of treats and stares at you for more"]," walks off to sleep on Kru Daeng's gym bag, ignoring everyone"," leaps the fence and runs into the rice fields after a rat!"],
  dog:[[" fetches the ball and drops it at your feet, tail spinning like a propeller"," leads the run round camp until the fighters are gasping"," shakes off and soaks the whole yard"]," lies flat by the ring with a long sigh — not today"," spots a buffalo in the field and chases it barking, refusing to come back!"],
@@ -12863,7 +12865,7 @@ const petThumb=(k,cls)=>PET_ART.has(k)&&PSZ[k]?`<span class="psp ${cls||""}" sty
   let cx=W*.5,bob=0,fl=1,mv=false;
   if(res==="ok"){cx=W*.66+Math.sin(t/900)*W*.14;fl=Math.cos(t/900)>0?1:-1;mv=true;}
   if(res==="run"){cx=W*.3+((t/5)%(W*.9));fl=1;mv=true;}
-  const ph=H*.4*(PHT[pk]||1);let pfy=fy;if(pk==="otter"&&res!=="run"){cx+=W*.2;pfy=H*.8;}   /* the otter swims in the river, off the pier */
+  const ph=H*.4*(PHT[pk]||1);let pfy=fy;if(pk==="otter"&&res!=="run"){cx=Math.min(W*.9,cx+W*.28);pfy=H*.86;}   /* the otter swims in the river, off the pier */
   /* happy: walks about, then stops for the happy pose · sulk: lies there · run: dashes off */
   const cyc=t%3200,anim=res==="no"?"sulk":res==="run"?"run":cyc<1800?"walk":"happy";if(res==="ok"){const dir=Math.floor(t/3200)%2?-1:1;cx=(dir>0?W*.36:W*.66)+dir*Math.min(cyc,1800)/1800*W*.3;fl=dir;}
   x.fillStyle="rgba(0,0,0,.25)";x.beginPath();x.ellipse(cx,pfy,ph*.55,ph*.08,0,0,Math.PI*2);x.fill();

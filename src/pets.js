@@ -23,7 +23,7 @@ const PX={
  turtle:{pas:p=>`กำลังใจทุกคน +1${p.lv>=5?"~2":""} (สุ่มทุกสัปดาห์)`,tal:["ใจเย็น: นักมวยเจ็บมีลุ้นหายเร็วขึ้น","ใจเย็น: ลุ้นหายเร็วขึ้นบ่อยกว่าเดิม","เต่าศักดิ์สิทธิ์: แผลหายไวมาก"],
   modes:[["ลูบกระดอง",15,10,0],["พาเดินเล่นช้า ๆ",5,20,0],["ให้ผักบุ้ง",25,6,20]],bg:"bg_camp_day.webp"},
  otter:{pas:p=>`ความล้าทุกคน −1 (สุ่มทุกสัปดาห์)`,tal:["คลิปไวรัล: ชื่อเสียงขึ้นนิด ๆ","คลิปไวรัล: ชื่อเสียงขึ้นบ่อยขึ้น","นากดาวติ๊กต็อก: ชื่อเสียงขึ้นทุกสัปดาห์"],
-  modes:[["เล่นน้ำด้วยกัน",15,10,0],["ฝึกว่ายน้ำ",5,20,0],["ให้ปลาเล็ก",25,6,50]],bg:"bg_river.webp"}};
+  modes:[["เล่นน้ำด้วยกัน",15,10,0],["ฝึกว่ายน้ำ",5,20,0],["ให้ปลาเล็ก",25,6,50]],bg:"bg_river.webp"}}; /* v1.91.151 (Man): the otter swims IN the river — bg_river is mirrored so the water is on the right; the fighter stands on the pier, not on the water */
 const PLINE={
  cat:[["นอนหงายให้เกาพุง ครางดังจนได้ยินทั้งค่าย","กระโดดตะครุบไฟแดงจนชนกระสอบทราย","กินขนมแมวหมดซองแล้วมองหน้าขออีก"],"เดินหนีไปนอนบนกระเป๋าซ้อมของครูแดง ไม่สนใคร","กระโจนข้ามรั้ววิ่งเข้าทุ่งนาไปไล่จับหนู!"],
  dog:[["วิ่งเก็บบอลกลับมาวางแทบเท้า หางกระดิกเป็นใบพัด","วิ่งนำทุกคนรอบค่ายจนนักมวยหอบ","สะบัดน้ำใส่ทุกคนจนเปียกทั้งลาน"],"นอนหมอบหน้าเวที ถอนหายใจยาว ไม่อยากเล่นวันนี้","เห็นควายในทุ่ง วิ่งตามไปเห่าไม่ยอมกลับ!"],
@@ -102,7 +102,7 @@ const petThumb=(k,cls)=>PET_ART.has(k)&&PSZ[k]?`<span class="psp ${cls||""}" sty
   let cx=W*.5,bob=0,fl=1,mv=false;
   if(res==="ok"){cx=W*.66+Math.sin(t/900)*W*.14;fl=Math.cos(t/900)>0?1:-1;mv=true;}
   if(res==="run"){cx=W*.3+((t/5)%(W*.9));fl=1;mv=true;}
-  const ph=H*.4*(PHT[pk]||1);let pfy=fy;if(pk==="otter"&&res!=="run"){cx+=W*.2;pfy=H*.8;}   /* the otter swims in the river, off the pier */
+  const ph=H*.4*(PHT[pk]||1);let pfy=fy;if(pk==="otter"&&res!=="run"){cx=Math.min(W*.9,cx+W*.28);pfy=H*.86;}   /* the otter swims in the river, off the pier */
   /* happy: walks about, then stops for the happy pose · sulk: lies there · run: dashes off */
   const cyc=t%3200,anim=res==="no"?"sulk":res==="run"?"run":cyc<1800?"walk":"happy";if(res==="ok"){const dir=Math.floor(t/3200)%2?-1:1;cx=(dir>0?W*.36:W*.66)+dir*Math.min(cyc,1800)/1800*W*.3;fl=dir;}
   x.fillStyle="rgba(0,0,0,.25)";x.beginPath();x.ellipse(cx,pfy,ph*.55,ph*.08,0,0,Math.PI*2);x.fill();

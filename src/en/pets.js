@@ -23,7 +23,7 @@ const PX={
  turtle:{pas:p=>`Everyone's morale +1${p.lv>=5?"~2":""} (rolled weekly)`,tal:["Calm: injured fighters may heal early","Calm: injuries heal early more often","Sacred turtle: injuries heal much faster"],
   modes:[["Pat the shell",15,10,0],["Slow walk",5,20,0],["Feed morning glory",25,6,20]],bg:"bg_camp_day.webp"},
  otter:{pas:p=>`Everyone's fatigue −1 (rolled weekly)`,tal:["Viral clips: a little reputation","Viral clips: reputation up more often","TikTok star otter: reputation up every week"],
-  modes:[["Play in the water",15,10,0],["Swim training",5,20,0],["Feed little fish",25,6,50]],bg:"bg_river.webp"}};
+  modes:[["Play in the water",15,10,0],["Swim training",5,20,0],["Feed little fish",25,6,50]],bg:"bg_river.webp"}}; /* v1.91.151 (Man): the otter swims IN the river — bg_river is mirrored so the water is on the right; the fighter stands on the pier, not on the water */
 const PLINE={
  cat:[[" rolls over for belly scratches and purrs loud enough for the whole camp"," pounces at the red dot and crashes into the heavy bag"," finishes the whole pack of treats and stares at you for more"]," walks off to sleep on Kru Daeng's gym bag, ignoring everyone"," leaps the fence and runs into the rice fields after a rat!"],
  dog:[[" fetches the ball and drops it at your feet, tail spinning like a propeller"," leads the run round camp until the fighters are gasping"," shakes off and soaks the whole yard"]," lies flat by the ring with a long sigh — not today"," spots a buffalo in the field and chases it barking, refusing to come back!"],
@@ -102,7 +102,7 @@ const petThumb=(k,cls)=>PET_ART.has(k)&&PSZ[k]?`<span class="psp ${cls||""}" sty
   let cx=W*.5,bob=0,fl=1,mv=false;
   if(res==="ok"){cx=W*.66+Math.sin(t/900)*W*.14;fl=Math.cos(t/900)>0?1:-1;mv=true;}
   if(res==="run"){cx=W*.3+((t/5)%(W*.9));fl=1;mv=true;}
-  const ph=H*.4*(PHT[pk]||1);let pfy=fy;if(pk==="otter"&&res!=="run"){cx+=W*.2;pfy=H*.8;}   /* the otter swims in the river, off the pier */
+  const ph=H*.4*(PHT[pk]||1);let pfy=fy;if(pk==="otter"&&res!=="run"){cx=Math.min(W*.9,cx+W*.28);pfy=H*.86;}   /* the otter swims in the river, off the pier */
   /* happy: walks about, then stops for the happy pose · sulk: lies there · run: dashes off */
   const cyc=t%3200,anim=res==="no"?"sulk":res==="run"?"run":cyc<1800?"walk":"happy";if(res==="ok"){const dir=Math.floor(t/3200)%2?-1:1;cx=(dir>0?W*.36:W*.66)+dir*Math.min(cyc,1800)/1800*W*.3;fl=dir;}
   x.fillStyle="rgba(0,0,0,.25)";x.beginPath();x.ellipse(cx,pfy,ph*.55,ph*.08,0,0,Math.PI*2);x.fill();
