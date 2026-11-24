@@ -1249,7 +1249,7 @@ function rgFinalWin(G,w,l,beatLadda,ladFid){const R=G.region,fah=rgIn(G,"fah"),r
  {n:"nar",bg:"naka_underground",t:`จบห้านัด ศิริชัย ${w} – ${l} นาคาลีก`},
  {n:"nar",show:[{id:"npc:krerk"}],t:"คุณเกริกปรบมือช้า ๆ อยู่บนระเบียงชั้นสอง เสียงปรบมือก้องไปทั้งโกดัง"},
  {n:"npc",who:"คุณเกริก",t:"ยินดีด้วยครับ ค่ายศิริชัย… วันนี้โชคเข้าข้างคุณ"},
- {n:"npc",who:"คุณเกริก",t:"แล้วพบกันในระดับประเทศนะครับ"},
+ {n:"npc",who:"คุณเกริก",t:"แล้วพบกันบนเวทีนานาชาตินะครับ"},
  ...(beatLadda?[{n:"nar",show:[{id:"lada",l:"casual"}],t:"ลดาลุกขึ้นจากเบาะช้า ๆ เลียเลือดที่มุมปาก"},{n:"lada",l:"casual",t:"…สนุกดี"}]
   :[{n:"lada",l:"casual",t:"ชนะทีม แต่ยังไม่ได้ชนะฉัน"}]),
  {n:"nar",show:[{id:"lada",l:"casual"}],t:`ก่อนเดินตามพ่อออกไป ลดาหยุดมอง${looked}นานเกินไปหนึ่งจังหวะ แล้วดึงฮู้ดขึ้นคลุมหัว`},
@@ -1897,6 +1897,9 @@ const REGION={
     c.n=(c.n||0)+1;if(p.res==="W")c.w++;else if(p.res==="L")c.l++;c.next=null;R.nextTripAbs=Math.max(R.nextTripAbs||0,abs+RG_TRIP_GAP);G.log=G.log||[];
     if(c.w>=2){c.state="won";c.wonAbs=abs;(R.post=R.post||{})[r]=abs+1;R.cups=R.cups||[];if(!R.cups.includes(r))R.cups.push(r);G.cash+=RG_CUP_PRIZE;G.rep+=4;
       if(me){G.honors=G.honors||[];const key=`${G.season||1}:rg_${r}:${me.div}::${me.id}`;if(!G.honors.some(h=>h.key===key))G.honors.push({key,season:G.season||1,week:G.week,id:me.id,div:me.div,kind:"rg_"+r,opp:`${RG[r].champ} · ชนะ ${c.w}-${c.l}`});}
+      /* v1.91.120 (Man): all four regional cups = national level — every fighter who won a cup this edition gets it in the hall */
+      if(R.cups.length>=4&&!R.natDone){R.natDone=1;G.honors=G.honors||[];const ws=new Set();for(const h of G.honors)if(/^rg_/.test(h.kind)&&!(h.season&&((h.season-1)*52+(h.week||1))<(R.startAbs||0)))ws.add(h.id);
+        for(const id of ws){const k=`${G.season||1}:rgnat:${rgEd(G)}::${id}`;if(!G.honors.some(h=>h.key===k))G.honors.push({key:k,season:G.season||1,week:G.week,id,div:(G.F[id]||{}).div,kind:"rgnat",opp:"ครบสี่ถ้วย · ศึกชิงเจ้าสี่ภาค"});}}
       rgMeet(G,this.champId[r],4);R.just={r,kind:"cup",res:p.res,w:c.w,l:c.l};
       G.log.push(`${HONOR_LABEL["rg_"+r]}: ${me?me.name:""} ${c.w}-${c.l} ${RG[r].champ} · เงินรางวัล ${fmt(RG_CUP_PRIZE)}`);return;}
     if(c.l>=2){c.state="lost";c.tries=(c.tries||0)+1;c.letterAbs=abs+2;R.just={r,kind:"lost",res:p.res,w:c.w,l:c.l};
@@ -2038,7 +2041,7 @@ const REGION={
       <section class="px card"><h4>ไฟต์ล่าสุด</h4>${log}</section>`;},
   html(){this.css();
     if(!G.region){const t=(G.honors||[]).filter(h=>h.kind==="province").length;
-      return `<section class="px card"><h3>ศึกชิงเจ้าสี่ภาค</h3><p>ทัวร์นาเมนต์ระดับภาคจะส่งจดหมายเชิญมา เมื่อจบปีที่ 5 และค่ายได้แชมป์จังหวัดครบ 3 ครั้ง</p>
+      return `<section class="px card"><h3>ศึกชิงเจ้าสี่ภาค</h3><p>ทัวร์นาเมนต์ระดับประเทศจะส่งจดหมายเชิญมา เมื่อจบปีที่ 5 และค่ายได้แชมป์จังหวัดครบ 3 ครั้ง</p>
        <div class="kv-row"><span>ปีที่</span><b>${G.season||1} / 6</b></div><div class="kv-row"><span>แชมป์จังหวัด</span><b>${t} / 3</b></div>
        ${!REGION_LIVE?`<div class="mfoot"><button class="btn gold" data-act="rgdevstart">เปิดบทเลย (โหมดทดสอบ)</button></div>`:""}</section>`;}
     rgApply(G);const R=G.region,T=R.trip,cups=(R.cups||[]).length,belts=this.beltTotal(G),nx=T?null:this.tripWeek(G);

@@ -827,11 +827,11 @@ function trophySVG(kind,pal,dim){const rows=TROPHY_PX[kind],w=Math.max(...rows.m
   return `<svg viewBox="0 0 ${w} ${h}" shape-rendering="crispEdges" aria-hidden="true">${r}</svg>`;}
 const BELT_PAL={tha:{a:"#2a1d10",b:"#f1c232",c:"#c8283c",d:"#c8283c"},ping:{a:"#10202a",b:"#f1c232",c:"#2c5fb3",d:"#2c5fb3"},lanna:{a:"#14261a",b:"#f1c232",c:"#2f8a4f",d:"#2f8a4f"}};
 const CUP_PAL={province:{a:"#7a5a10",b:"#f1c232",c:"#5a3a2a"},district:{a:"#5d6168",b:"#d7dde4",c:"#4a3a2a"},local:{a:"#6b3d1c",b:"#d08a4a",c:"#4a3a2a"},
-  rg_north:{a:"#7a2a4e",b:"#f2a2c4",c:"#4a2a3a"},rg_isan:{a:"#6a1420",b:"#e8505e",c:"#3a1a1a"},rg_central:{a:"#14306a",b:"#f1c232",c:"#1a2a4a"},rg_south:{a:"#0c4a3a",b:"#5fd0b0",c:"#1a3a2a"}};
+  rg_north:{a:"#7a2a4e",b:"#f2a2c4",c:"#4a2a3a"},rg_isan:{a:"#6a1420",b:"#e8505e",c:"#3a1a1a"},rg_central:{a:"#14306a",b:"#f1c232",c:"#1a2a4a"},rg_south:{a:"#0c4a3a",b:"#5fd0b0",c:"#1a3a2a"},rgnat:{a:"#6a1a1a",b:"#ffd34a",c:"#1a2a6a"}};
 /* v1.91.78 (Man): the trophy room is split by level — general league, sub-district, district, province, region — newest first;
    tapping a belt or cup opens a popup with who won it, against whom, at what level and when */
-const HALL_LV=[{k:"gen",n:"General league",d:"Stadium belts · Death Match"},{k:"local",n:"Subdistrict",d:"Top of the sub-district round"},{k:"district",n:"District",d:"Top of the district round"},{k:"province",n:"Provincial",d:"Provincial champion"},{k:"region",n:"Regional",d:"Province belts · regional cups"}];
-const hallLevel=k=>k==="local"?"local":k==="district"?"district":k==="province"?"province":k==="rgbelt"||/^rg_/.test(k)?"region":"gen";
+const HALL_LV=[{k:"gen",n:"General league",d:"Stadium belts · Death Match"},{k:"local",n:"Subdistrict",d:"Top of the sub-district round"},{k:"district",n:"District",d:"Top of the district round"},{k:"province",n:"Provincial",d:"Provincial titles · provincial belts of the Four Regions"},{k:"region",n:"Regional",d:"Regional champion cups"},{k:"national",n:"National",d:"All four cups · Four Regions Championship"}];
+const hallLevel=k=>k==="local"?"local":k==="district"?"district":k==="province"?"province":k==="rgnat"?"national":k==="rgbelt"?"province":/^rg_/.test(k)?"region":"gen"; /* v1.91.120 (Man): belts of the four-region tour count as provincial, cups as regional, all four cups as national */
 function trophyItems(){const H=G.honors||[],items=[];
   for(const h of H){const who=esc(G.F[h.id]?.name||h.id),when=h.season?`Year ${h.season} week ${h.week}`:"Before update",lv=hallLevel(h.kind),base={who:G.F[h.id]?.name||h.id,fid:h.id,div:h.div,opp:h.opp||null,lv,sk:(h.season||0)*100+(h.week||0)};
     if(h.kind==="rgbelt"){const D=typeof ROAD_DEST!=="undefined"&&ROAD_DEST[h.venue],col=D&&typeof RG!=="undefined"&&RG[D.r]?RG[D.r].col:"#c8283c";items.push({...base,kind:"belt",pal:{a:"#2a1d10",b:"#f1c232",c:col,d:col},title:honorLabel(h.kind,h.venue),sub:`${who} · Div ${h.div}`,when,shelf:"belt"});continue;}
@@ -1214,7 +1214,7 @@ const PATCH_AV={id:"1.91.71",ver:"Muay Thai Moe v1.91",title:"The manager gets a
 const PATCH_TAPE={id:"1.91.80",ver:"Muay Thai Moe v1.91",title:"Tapes, Coach Daeng and Rin",lead:"You can now get to know an opponent much better before the bell. The more you know, the sharper Coach Daeng's advice.",items:[
  ["🎞️","Coach reads what you know","No tape: Coach only has gym gossip and a rough win chance. Fought her before: he remembers how she was then. With a tape: the plan, the counter-drill and what to watch, in detail."],
  ["📊","Rin analyses the tape","With Rin in camp and a tape watched, you get a chart of the opponent's progress: rising fast or stalled, and how good she'll likely be on fight night."],
- ["💸","Tape prices follow the bout","Big bouts, stronger or higher-ranked opponents and regional fights cost more. The more famous the camp, the more the tape seller marks up. The video room still halves it."],
+ ["💸","Tape prices follow the bout","Big bouts, stronger or higher-ranked opponents and Four Regions Championship fights cost more. The more famous the camp, the more the tape seller marks up. The video room still halves it."],
  ["🧑‍🏫","Coach Daeng's talks","Every 4 weeks Coach calls you over about a girl's weak spot, hidden power or a move. On the pre-fight compare, 'แรง' is now 'Endurance'."],
  ["✨","Hidden powers hit harder","Past Lv.3 each hidden-power level adds 10% (was 5%), up to 170%. Girls who joined later got their missing skill points back."]],
  foot:"I've been keeping notes on every opponent. Just get me the tape, Manager, I'll handle the rest ✦"};
@@ -1588,7 +1588,7 @@ function endTeaserHTML(){const y=G.season||1;if(G.ended==="bankrupt")return "";
     <p>The demo's main story ends in year 5. From here on it's <b>free mode</b>: play on as long as you like. Rivals get stronger every year, and Pailin and Vector Gym come back to challenge you every year.</p>
     <p class="meta">Stay tuned for more. We plan to keep adding new story, characters and stages.</p></section>`;
   if(y>=6)return `<section class="px card teaser"><span class="pill red">Free mode</span><h3>Year ${y+1}: rivals train even harder</h3><p class="meta">New story chapters are in the works. This save will carry on when they arrive.</p></section>`;
-  if(y===1)return `<section class="px card teaser"><span class="pill red">Next chapter · Coming soon</span><h3>The road to the regional stage</h3>
+  if(y===1)return `<section class="px card teaser"><span class="pill red">Next chapter · Coming soon</span><h3>The road to the national stage</h3>
     <ul><li>Golden Tiger Gym brings in a trainer from Bangkok, and Fah won't be the same anymore</li><li>New fighters from the Tha Sao and Korat styles are looking for a camp</li><li>Grandpa Chai's debt still holds secrets Kati hasn't told</li></ul></section>`;
   return "";}
 function endingHTML(){const E=UI.ending,all=roster(G),res=seasonResult();

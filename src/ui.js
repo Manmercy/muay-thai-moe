@@ -1,5 +1,5 @@
 // ================= MUAY THAI MOE v1.3 — UI =================
-const VERSION="1.91.119";
+const VERSION="1.91.120";
 const CUR_LANG=(typeof window!=="undefined"&&window.LANG)||"th";
 const TH_LABEL=String.fromCharCode(3652,3607,3618);
 function langSwitch(cls){return `<div class="langsw ${cls||""}" role="group" aria-label="Language">${[["th",TH_LABEL],["en","EN"]].map(([k,l])=>`<button class="lsb ${CUR_LANG===k?"on":""}" data-act="setlang" data-v="${k}" aria-pressed="${CUR_LANG===k}">${l}</button>`).join("")}</div>`;}
@@ -827,11 +827,11 @@ function trophySVG(kind,pal,dim){const rows=TROPHY_PX[kind],w=Math.max(...rows.m
   return `<svg viewBox="0 0 ${w} ${h}" shape-rendering="crispEdges" aria-hidden="true">${r}</svg>`;}
 const BELT_PAL={tha:{a:"#2a1d10",b:"#f1c232",c:"#c8283c",d:"#c8283c"},ping:{a:"#10202a",b:"#f1c232",c:"#2c5fb3",d:"#2c5fb3"},lanna:{a:"#14261a",b:"#f1c232",c:"#2f8a4f",d:"#2f8a4f"}};
 const CUP_PAL={province:{a:"#7a5a10",b:"#f1c232",c:"#5a3a2a"},district:{a:"#5d6168",b:"#d7dde4",c:"#4a3a2a"},local:{a:"#6b3d1c",b:"#d08a4a",c:"#4a3a2a"},
-  rg_north:{a:"#7a2a4e",b:"#f2a2c4",c:"#4a2a3a"},rg_isan:{a:"#6a1420",b:"#e8505e",c:"#3a1a1a"},rg_central:{a:"#14306a",b:"#f1c232",c:"#1a2a4a"},rg_south:{a:"#0c4a3a",b:"#5fd0b0",c:"#1a3a2a"}};
+  rg_north:{a:"#7a2a4e",b:"#f2a2c4",c:"#4a2a3a"},rg_isan:{a:"#6a1420",b:"#e8505e",c:"#3a1a1a"},rg_central:{a:"#14306a",b:"#f1c232",c:"#1a2a4a"},rg_south:{a:"#0c4a3a",b:"#5fd0b0",c:"#1a3a2a"},rgnat:{a:"#6a1a1a",b:"#ffd34a",c:"#1a2a6a"}};
 /* v1.91.78 (Man): the trophy room is split by level — general league, sub-district, district, province, region — newest first;
    tapping a belt or cup opens a popup with who won it, against whom, at what level and when */
-const HALL_LV=[{k:"gen",n:"ลีกทั่วไป",d:"เข็มขัดเวทีมวย · Death Match"},{k:"local",n:"ระดับตำบล",d:"อันดับหนึ่งรอบตำบล"},{k:"district",n:"ระดับอำเภอ",d:"อันดับหนึ่งรอบอำเภอ"},{k:"province",n:"ระดับจังหวัด",d:"แชมป์จังหวัด"},{k:"region",n:"ระดับภาค",d:"เข็มขัดจังหวัด · ถ้วยแชมป์ภาค"}];
-const hallLevel=k=>k==="local"?"local":k==="district"?"district":k==="province"?"province":k==="rgbelt"||/^rg_/.test(k)?"region":"gen";
+const HALL_LV=[{k:"gen",n:"ลีกทั่วไป",d:"เข็มขัดเวทีมวย · Death Match"},{k:"local",n:"ระดับตำบล",d:"อันดับหนึ่งรอบตำบล"},{k:"district",n:"ระดับอำเภอ",d:"อันดับหนึ่งรอบอำเภอ"},{k:"province",n:"ระดับจังหวัด",d:"แชมป์จังหวัด · เข็มขัดจังหวัดศึกสี่ภาค"},{k:"region",n:"ระดับภาค",d:"ถ้วยแชมป์ภาค"},{k:"national",n:"ระดับประเทศ",d:"ครบสี่ถ้วย · ศึกชิงเจ้าสี่ภาค"}];
+const hallLevel=k=>k==="local"?"local":k==="district"?"district":k==="province"?"province":k==="rgnat"?"national":k==="rgbelt"?"province":/^rg_/.test(k)?"region":"gen"; /* v1.91.120 (Man): belts of the four-region tour count as provincial, cups as regional, all four cups as national */
 function trophyItems(){const H=G.honors||[],items=[];
   for(const h of H){const who=esc(G.F[h.id]?.name||h.id),when=h.season?`ปีที่ ${h.season} สัปดาห์ ${h.week}`:"ก่อนอัปเดต",lv=hallLevel(h.kind),base={who:G.F[h.id]?.name||h.id,fid:h.id,div:h.div,opp:h.opp||null,lv,sk:(h.season||0)*100+(h.week||0)};
     if(h.kind==="rgbelt"){const D=typeof ROAD_DEST!=="undefined"&&ROAD_DEST[h.venue],col=D&&typeof RG!=="undefined"&&RG[D.r]?RG[D.r].col:"#c8283c";items.push({...base,kind:"belt",pal:{a:"#2a1d10",b:"#f1c232",c:col,d:col},title:honorLabel(h.kind,h.venue),sub:`${who} · รุ่น ${h.div}`,when,shelf:"belt"});continue;}
@@ -1214,7 +1214,7 @@ const PATCH_AV={id:"1.91.71",ver:"Muay Thai Moe v1.91",title:"ผู้จัด
 const PATCH_TAPE={id:"1.91.80",ver:"Muay Thai Moe v1.91",title:"เทปคู่ชก ครูแดง และริน",lead:"ก่อนขึ้นชกตอนนี้รู้จักคู่แข่งได้ลึกขึ้น ยิ่งรู้มาก ครูแดงยิ่งแนะนำแม่น",items:[
  ["🎞️","ครูแดงประเมินตามที่รู้","ยังไม่ดูเทป ครูบอกได้แค่ข่าวในวงการกับโอกาสชนะคร่าว ๆ เคยชกกันแล้ว ครูจำได้ว่าตอนนั้นเขาเป็นยังไง ดูเทปแล้ว ครูบอกแผน วิธีแก้ทาง และจุดที่ต้องระวังแบบละเอียด"],
  ["📊","รินวิเคราะห์เทป","มีรินในค่ายแล้วดูเทป จะเห็นกราฟพัฒนาการของคู่ชกย้อนหลัง ว่ากำลังมาแรงหรือหยุดพัฒนา และวันชกน่าจะเก่งแค่ไหน"],
- ["💸","ราคาเทปตามไฟต์","ไฟต์ใหญ่ คู่เก่ง ยอดมวย หรือไฟต์ระดับภาค เทปแพงขึ้น ค่ายยิ่งดัง คนขายเทปยิ่งโก่งราคา ห้องวิดีโอยังลดครึ่งราคาเหมือนเดิม"],
+ ["💸","ราคาเทปตามไฟต์","ไฟต์ใหญ่ คู่เก่ง ยอดมวย หรือไฟต์ศึกชิงเจ้าสี่ภาค เทปแพงขึ้น ค่ายยิ่งดัง คนขายเทปยิ่งโก่งราคา ห้องวิดีโอยังลดครึ่งราคาเหมือนเดิม"],
  ["🧑‍🏫","ครูแดงเรียกคุย","ทุก 4 สัปดาห์ ครูแดงเรียกไปคุยเรื่องจุดอ่อน พลังแฝง หรือท่ามวยของลูกค่าย ในหน้าเทียบก่อนชก ค่า 'แรง' เปลี่ยนชื่อเป็น 'อึด'"],
  ["✨","พลังแฝงแรงขึ้น","อัปพลังแฝงเกิน Lv.3 ได้เพิ่มเลเวลละ 10% (เดิม 5%) สูงสุด 170% และลูกค่ายที่เข้ามาทีหลังได้แต้มสกิลที่ขาดคืนแล้ว"]],
  foot:"รินเก็บข้อมูลคู่ชกทุกคนไว้แล้วนะคะ ผู้จัดการแค่ซื้อเทปมา ที่เหลือหนูจัดการเอง ✦"};
@@ -1588,7 +1588,7 @@ function endTeaserHTML(){const y=G.season||1;if(G.ended==="bankrupt")return "";
     <p>เนื้อเรื่องหลักของเดโมจบที่ปีที่ 5 หลังจากนี้เป็น<b>โหมดอิสระ</b> เล่นต่อได้ไม่จำกัด คู่แข่งจะเก่งขึ้นทุกปี และไพลินกับค่ายเวกเตอร์จะกลับมาท้าทุกปี</p>
     <p class="meta">โปรดติดตามเนื้อหาเพิ่มเติมในอนาคต เรามีแผนเพิ่มเนื้อเรื่อง ตัวละคร และเวทีใหม่เรื่อย ๆ ครับ</p></section>`;
   if(y>=6)return `<section class="px card teaser"><span class="pill red">โหมดอิสระ</span><h3>ปีที่ ${y+1} คู่แข่งซ้อมหนักขึ้นอีก</h3><p class="meta">เนื้อเรื่องใหม่กำลังทำอยู่ เซฟนี้จะเล่นต่อได้เมื่อบทใหม่มาถึง</p></section>`;
-  if(y===1)return `<section class="px card teaser"><span class="pill red">บทต่อไป · เร็ว ๆ นี้</span><h3>เส้นทางสู่เวทีระดับภาค</h3>
+  if(y===1)return `<section class="px card teaser"><span class="pill red">บทต่อไป · เร็ว ๆ นี้</span><h3>เส้นทางสู่เวทีระดับประเทศ</h3>
     <ul><li>ค่ายพยัคฆ์ทองดึงเทรนเนอร์จากกรุงเทพฯ และฟ้าจะไม่ใช่คนเดิมอีกต่อไป</li><li>นักมวยหน้าใหม่จากมวยท่าเสาและมวยโคราชกำลังมองหาค่าย</li><li>หนี้ของปู่ชัยยังมีความลับที่กะทิไม่ได้เล่าทั้งหมด</li></ul></section>`;
   return "";}
 function endingHTML(){const E=UI.ending,all=roster(G),res=seasonResult();
