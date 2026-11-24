@@ -1378,6 +1378,45 @@ const RG_DATEP={};
   G=>[{n:"nar",bg:"night_central",t:"At an ice-cream shop by the river, Alicia takes twenty photos of her ice cream until it melts all over."},A("pout","Don't laugh! …You can help me eat it before it drips, if you like.")]];
 }
 
+/* ---------- v1.91.121 (Man): off-schedule fights — a champion's own trouble spills into a camp trip ----------
+   2nd+ trip to her region (not the trip that first met her), first hotel night, once; before she joins the camp.
+   Consecutive bouts, the player sends someone from the travelling party for each, no lingering injury; a loss or a retreat = try again on a later trip. */
+if(typeof QK!=="undefined")Object.assign(QK,{
+  jl1:{fst:"pressure",name:"Jin Long thug in a dragon shirt",sprite:"gang1",lvl:-1,tilt:{punch:1.5,power:1,iq:-2,guard:-1,comp:-1},color:"#3c6e5a",grp:"gang"},
+  jl2:{fst:"inside",name:"Hia Long's right hand",sprite:"gang2",lvl:-.2,tilt:{punch:1,knee:1.5,power:1,iq:-1},color:"#2f5546",grp:"gang"},
+  jl3:{fst:"power",name:"Hia Long, Jin Long gang boss",sprite:"gang3",lvl:.6,tilt:{power:2,punch:1.5,dur:1,foot:-1},color:"#c9a227",grp:"gang"}});
+const RG_SIDE={
+ north:{cid:"baibua",bg:"camp_buatasao",ring:"bg_camp_buatasao.webp",title:"Off-schedule fight · Bua Tha Sao spa",
+  foes:[{qk:"jl1",t:"I don't care which camp you are. I've kicked a lamppost in half."},{qk:"jl2",t:"Running out of fighters? Your next one's going to sleep too."},{qk:"jl3",t:"Those first two were soft. I'm not soft like them."}],
+  between:["The next thug rolls up his sleeves and steps through the ropes.","Hia Long throws off his dragon shirt and climbs into the ring himself."],
+  intro:G=>[{n:"nar",t:"At dusk, just as everyone gets back to the hotel, the manager's phone rings. It's Baibua."},
+   {n:"baibua",f:"sad",l:"casual",t:"Manager... the Jin Long thugs are at the spa again. A whole van of them."},
+   {n:"baibua",f:"sad",l:"casual",t:"Dad's going to go out there even with his bad knee. I can't stop him."}],
+  go:"\"Stay there. The camp is on its way.\"",no:"\"Everyone's exhausted tonight. I'm sorry.\"",
+  noT:G=>[{n:"baibua",f:"sad",l:"casual",t:"...It's all right. I understand. A camp has to look after its own people first."},{n:"nar",t:"Baibua hangs up first. The shouting is still going on at her end."}],
+  arrive:G=>[{n:"nar",bg:"camp_buatasao",t:"The camp van turns into the Bua Tha Sao lane while the sky is still red. Five or six men in dragon-print shirts stand around the massage shop's sign, sprayed over in red paint."},
+   {n:"npc",who:"Jin Long thug",t:"Which boxing camp are you? This is none of your business."},
+   {n:"baibua",f:"angry",l:"casual",t:"Our land isn't for sale! Whoever wants it can climb into the ring behind the camp and take it."},
+   {n:"npc",who:"Hia Long",t:"Fine. Three bouts. Win them all and I'll back off for now. Lose one, and we come every night until your father signs."},
+   {n:"coach",t:"The practice ring behind the camp will do. Whoever's ready, step up. Don't push it if you're too tired."}],
+  win:G=>[{n:"nar",t:"Hia Long hits the canvas of the practice ring. His men haul him into the van in a hurry."},
+   {n:"npc",who:"Hia Long",t:"Remember this! Sia Jin Long won't stop here!"},
+   {n:"nar",t:"A phone lies beside the ring, its screen still lit. The latest message, from \"Sia Jin Long\": Make it bad enough that her father sells. Five thousand a night."},
+   {n:"baibua",f:"surprised",l:"casual",t:"This is... proof the resort hired thugs!",choice:[
+    {t:"Take photos of it, and go to the police together tomorrow morning",fx:G2=>{rgMeet(G2,"baibua",4);G2.region.side.north.how="police";},then:[{n:"baibua",f:"flustered",l:"casual",t:"Together...? Okay. I'll be waiting outside the station first thing."}]},
+    {t:"Send it to the local press so the whole province knows",fx:G2=>{rgMeet(G2,"baibua",3);G2.region.side.north.how="news";},then:[{n:"baibua",f:"happy",l:"casual",t:"Let all of Uttaradit know who's been causing trouble... good. They'll be too ashamed to come back."}]}]},
+   {n:"nar",t:"Baibua's father limps out of the house and gives a wai to everyone from the camp, one by one."},
+   {n:"baibua",f:"happy",l:"casual",t:"Thank you, all of you... Sirichai Camp really came to help."}],
+  lose:G=>[{n:"npc",who:"Hia Long",t:"Ha! So that's all a boxing camp's got. We'll be back tomorrow!"},
+   {n:"baibua",f:"sad",l:"casual",t:"It's all right. Everyone's hurt already, go back and rest... you came to help, that's enough to make me happy."},
+   {n:"coach",t:"Next time we're up north, we take it back."}],
+  /* the trouble ends: the evidence works, the resort backs off */
+  done:(G,how)=>addMail(G,{kind:"letter",from:"Baibua",title:"News from Bua Tha Sao",body:how==="news"?
+   "Dear Manager,\n\nWe made the front page of the Uttaradit paper: \"Resort hires thugs to harass local spa.\" The whole province shared it. The Jin Long resort came out to apologise and withdrew its offer for our land.\n\nMum is sending free massage cards for the whole camp. They're good for life.\n\nBaibua":
+   "Dear Manager,\n\nThe police called Sia Jin Long in for questioning. The messages on that phone were so clear he couldn't argue. This morning the resort sent a letter withdrawing its offer for our land.\n\nDad says that on the day you stood waiting with me outside the police station, he saw it from the car window... he smiled all day.\n\nBaibua"})}};
+function rgSideDue(G,T){const R=G.region,D=ROAD_DEST[T.dest];if(!R||!D||T.fa||T.series||T.local)return null;const X=RG_SIDE[D.r];if(!X)return null;
+  const S=(R.side=R.side||{})[D.r]=R.side[D.r]||{};if(S.won)return null;if(R.joined&&R.joined[X.cid])return null;if(!(R.arrived||{})[D.r])return null;
+  if(S.triedAbs!=null&&S.triedAbs===T.abs)return null;return X;}
 const REGION={
   /* end of week (after the weekly events): the gala the week after the invitation, the contract beat the week after the first cup */
   weekScene(G,done){const R=G.region;if(!R){done();return;}rgApply(G);const now=gameWeek(G);if(lbWeek(G,done))return;
@@ -1444,7 +1483,7 @@ const REGION={
 
   /* ---------- results + weekly upkeep ---------- */
   flush(G){const R=G.region;if(R)rgApply(G);if(R&&R.joined)this.joinSkills(G);if(R)this.bondSync(G);if(!R||!R.pend||!R.pend.length)return;const done=R.pend.splice(0);
-    for(const p of done){const rg=p.region||{},r=rg.r,dest=rg.dest,D=ROAD_DEST[dest];if(rg.nlfinal){if(R.final){R.final.cur=R.final.cur||{};R.final.cur[rg.nlfinal]=p.res||"L";}continue;}if(rg.nlleg){this.legResult(G,rg.nlleg,p);continue;}if(!D||!RG[r])continue;
+    for(const p of done){const rg=p.region||{},r=rg.r,dest=rg.dest,D=ROAD_DEST[dest];if(rg.nlfinal){if(R.final){R.final.cur=R.final.cur||{};R.final.cur[rg.nlfinal]=p.res||"L";}continue;}if(rg.nlleg){this.legResult(G,rg.nlleg,p);continue;}if(rg.side)continue;if(!D||!RG[r])continue;
       if(rg.series){this.lbAdd(G,p.a,"rc:"+r,p.res,p.stop);this.seriesResult(G,r,p);continue;}
       if(rg.local){const T=R.trip,abs=T&&T.abs!=null?T.abs:gameWeek(G);R.trip=null;R.nextTripAbs=Math.max(R.nextTripAbs||0,abs+RG_TRIP_GAP);(R.gc=R.gc||[]).push(p.b);continue;} /* v1.91.93: the local ring pays a purse, no belt */
       this.lbAdd(G,p.a,"pc:"+dest,p.res,p.stop);
@@ -1497,9 +1536,30 @@ Pick your fighter under Fights › Four Regions Championship`+((t=>t?`\n\n(${t})
     const fight=(cb)=>T.local?this.localRun(b,T,cb):openFight(b,cb);
     if(T.quick&&this.canQuick(G,dest)){this.arrive(G,T,P,null);fight(()=>{const n=P.nights||0;if(n){for(const f of roadRiders(G))f.fatigue=Math.max(0,(f.fatigue||0)-10*n);}
       G.log=G.log||[];G.log.push(`Back at camp from ${ROAD_DEST[dest].name}${n?` · rested at the hotel ${n} night(s), fatigue −${10*n}`:""}`);save();done();});return;}
-    ROAD.open(dest,{paid:true,plan:P,onArrive:(P2,front)=>{this.arrive(G,T,P2||P,front);const go=()=>this.hotel(b,T,()=>fight(()=>this.night(T,P2||P,1,done))),A=this.firstArrive(G,ROAD_DEST[dest].r,dest),Bp=this.provArrive(G,dest,!!A);
+    ROAD.open(dest,{paid:true,plan:P,onArrive:(P2,front)=>{this.arrive(G,T,P2||P,front);const go=()=>this.hotel(b,T,()=>fight(()=>this.night(T,P2||P,1,done))),A=this.firstArrive(G,ROAD_DEST[dest].r,dest),Bp=this.provArrive(G,dest,!!A);T.fa=A?1:0;
       const goB=()=>Bp?playScene(Bp,go,{bg:RG_RBG[ROAD_DEST[dest].r],look:"casual"}):go();
       if(A){playScene(A,goB,{bg:"gas_station",look:"casual"});}else goB();}});},
+  /* v1.91.121 (Man): off-schedule fight — the call, the choice to go, then bout after bout */
+  sideRun(T,X,done){const R=G.region,r=ROAD_DEST[T.dest].r,S=R.side[r];S.triedAbs=T.abs;rgTouch(G,X.cid);
+    let go=0;playScene([...X.intro(G),{n:"nar",t:"What do you do?",choice:[{t:X.go,fx:()=>{go=1;}},{t:X.no,then:X.noT(G)}]}],()=>{
+      if(!go){save();done();return;}
+      playScene(X.arrive(G),()=>this.sideBout(T,X,0,done),{bg:X.bg,look:"casual"});},{bg:this.hotelBg[r],look:"casual"});},
+  sideBout(T,X,i,done){const R=G.region,r=ROAD_DEST[T.dest].r,S=R.side[r],N=X.foes.length,F=X.foes[i],K=QK[F.qk];
+    const P=T.party||null,riders=roster(G).filter(f=>(!P||P.includes(f.id))&&!(f.injury>=3)).sort((a,b)=>(a.fatigue||0)-(b.fatigue||0));
+    const fin=(won)=>{if(won){S.won=1;R.sideN=(R.sideN||0)+1;G.rep=(G.rep||0)+1;G.log=G.log||[];G.log.push(`${X.title} · won all ${N} bouts · fame +1`);}
+      playScene(won?X.win(G):X.lose(G),()=>{if(won&&X.done)X.done(G,S.how);save();done();},{bg:X.bg,look:"casual"});};
+    if(!riders.length){fin(false);return;}
+    let pick=null;
+    playScene([{n:"npc",who:K.name,t:F.t},{n:"nar",t:`Off-schedule fight, bout ${i+1}/${N} · who steps in?`,choice:[
+      ...riders.slice(0,4).map(f=>({t:`Send ${f.name} (fatigue ${Math.round(f.fatigue||0)})`,fx:()=>{pick=f.id;}})),
+      {t:"Back off for now, come back another time",then:[{n:"nar",t:"The camp backs off to the van, the thugs' laughter following them out."}]}]}],()=>{
+      if(!pick){fin(false);return;}
+      const me=G.F[pick],inj=me.injury||0,opp=makeQ(G,F.qk,pick,`side_${r}_${T.abs}_${i}`);
+      const b={id:`rgs${T.abs}_${r}_${i}`,a:pick,b:opp,week:G.week,tier:"quest",rounds:3,win:0,lose:0,region:{r,side:1},bg:X.ring,title:X.title};
+      openFight(b,()=>{me.injury=inj;const L=R.lastRes,res=L&&L.bid===b.id?L.res:null;save();
+        if(res!=="W"){fin(false);return;}
+        if(i+1>=N){fin(true);return;}
+        playScene([{n:"nar",t:`${me.name} wins! ${(X.between||[])[i]||""}`}],()=>this.sideBout(T,X,i+1,done),{bg:X.bg,look:"casual"});});},{bg:X.bg,look:"casual"});},
   /* v1.91.114 (Man): the champion meets the camp the first time it reaches each of her belt provinces (after her first-arrival scene, only the province part) */
   provArrive(G,dest,after){const R=G.region,D=ROAD_DEST[dest];if(!R||!D||!RG_PROV[dest])return null;R.provMet=R.provMet||{};if(R.provMet[dest])return null;
     const cid=RG_CID[D.r];if(R.joined&&R.joined[cid])return null;R.provMet[dest]=1;rgTouch(G,cid);const S=RG_PROV[dest](G,D);return after?S.body:[...S.meet,...S.body];},
@@ -1523,6 +1583,8 @@ Pick your fighter under Fights › Four Regions Championship`+((t=>t?`\n\n(${t})
   night(T,P,n,done){const D=ROAD_DEST[T.dest],r=D.r,nights=P.nights||0;
     /* after the cup: the champion's private night takes the place of the first hotel night (even on a day trip) */
     if(T.cupNight&&n===1){playScene(RG_CH[r].night(G,T),()=>{T.cupNight=0;this.night(T,P,2,done);},{bg:RG_CH[r].nightBg,look:"casual"});return;}
+    /* v1.91.121 (Man): her trouble comes first — the off-schedule fight takes the first night */
+    if(n===1&&!T.sideSeen){const X=rgSideDue(G,T);if(X){T.sideSeen=1;this.sideRun(T,X,()=>this.night(T,P,n,done));return;}}
     {const tx=G.region.tx=G.region.tx||{},dfr=G.region.txDefer=G.region.txDefer||{};
       /* v1.91.78 (Man): a province's pair scene waits until her girl rides along — on this trip or a later one in the same region */
       const ready=d=>RG_TRIPX[d]&&!tx[d]&&(!RG_PAIR[d]||rgInT(G,RG_PAIR[d])||!rgIn(G,RG_PAIR[d]));
@@ -1796,7 +1858,7 @@ ${RG[r].champ}, the new champion of ${RG[r].name} is open to a new regional titl
   /* v1.91.50 (playtest): a champion coming to visit shows on the home screen too — it was easy to miss on the regional tab */
   visitBanner(G){const R=G.region;if(!R||!R.champ)return "";const r=RG_ORDER.find(x=>R.champ[x]&&R.champ[x].visit==="due");if(!r)return "";const cid=this.champId[r];
     return `<button class="px newfighter" data-act="rgvisit" data-v="${r}"><span class="newb">NEW!</span>${G.F[cid]?`<img src="${faceSrc(cid,"happy")}" alt="">`:""}<span><b>${esc(RG[r].champ)} is visiting the camp</b><small>Tap to welcome her · only until bout 2</small></span><span class="chev">▸</span></button>`;},
-  canQuick(G,dest){const R=G.region,D=ROAD_DEST[dest];if(!R||!D)return false;return !!((R.arrived||{})[D.r])&&!(RG_TRIPX[dest]&&!((R.tx||{})[dest]))&&!(RG_PROV[dest]&&!((R.provMet||{})[dest]));},
+  canQuick(G,dest){const R=G.region,D=ROAD_DEST[dest];if(!R||!D)return false;return !!((R.arrived||{})[D.r])&&!(RG_TRIPX[dest]&&!((R.tx||{})[dest]))&&!(RG_PROV[dest]&&!((R.provMet||{})[dest]))&&!(RG_SIDE[D.r]&&!((R.side||{})[D.r]||{}).won&&!(R.joined&&R.joined[RG_SIDE[D.r].cid]));},
   /* v1.91.82 (Man): two popups — first who comes along (seats), then who fights (from those on board) with the bill */
   planHTML(dest){const D=ROAD_DEST[dest],C=RG[D.r],wk=this.tripWeek(G);if(!wk)return `<h2>${esc(D.name)}</h2><p>No free week left to travel this year</p>`;
     const RD=this.riders(G,wk),max=roadSeats(G),cand=roster(G).filter(f=>!f.injury||f.injury<3);
