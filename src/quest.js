@@ -480,7 +480,7 @@ Object.assign(ACT,{
   dmno:()=>{if(G.dmSeenSeason!==(G.season||1)){G.dmSeen={};G.dmSeenSeason=G.season||1;}G.dmSeen[G.week]=1;UI.modal=null;save();render();},
   dmstart:()=>{const sel=(UI.dmSel||[]).filter(id=>dmMine(id)&&dmCanEnter(G.F[id]));if(!sel.length)return;if(G.dmSeenSeason!==(G.season||1)){G.dmSeen={};G.dmSeenSeason=G.season||1;}G.dmSeen[G.week]=1;
     G.dm=dmBuild(G,sel);UI.modal=null;save();
-    playScene([{n:"npc",who:"โฆษกสนาม",t:vary("dm1",["ท่านผู้ชมครับ! คืนนี้ไม่มีพรุ่งนี้! แปดนักชกจากทุกรุ่น ชกจนเหลือคนสุดท้าย! ศึก Death Match!!","กลับมาอีกครั้งครับ! ศึกที่ไม่มีคำว่าพัก! แปดคนเข้า หนึ่งคนออก! Death Match!!","ใครเหนื่อยกลับบ้านไปได้เลยครับ! คืนนี้ชกรวดเดียวจนได้แชมป์! Death Match!!","คนดูแน่นจนเต็นท์จะพัง! แปดยอดมวยหญิงทุกรุ่น ศึก Death Match มาแล้วครับ!!"])},
+    playScene([{n:"npc",who:"โฆษกสนาม",img:"caster_shout",t:vary("dm1",["ท่านผู้ชมครับ! คืนนี้ไม่มีพรุ่งนี้! แปดนักชกจากทุกรุ่น ชกจนเหลือคนสุดท้าย! ศึก Death Match!!","กลับมาอีกครั้งครับ! ศึกที่ไม่มีคำว่าพัก! แปดคนเข้า หนึ่งคนออก! Death Match!!","ใครเหนื่อยกลับบ้านไปได้เลยครับ! คืนนี้ชกรวดเดียวจนได้แชมป์! Death Match!!","คนดูแน่นจนเต็นท์จะพัง! แปดยอดมวยหญิงทุกรุ่น ศึก Death Match มาแล้วครับ!!"])},
       {n:"coach",t:G=>`${ME(G)} ฟังนะ ชนะแล้วต้องชกต่อเลย แรงที่เสียไปไม่กลับมาทันหรอก ยกแรก ๆ อย่าเปลืองแรง`},
       {n:sel[0],f:"angry",l:"fight",t:"ทุกคนเก่งหมดเลย… แต่ค่ายเรามาเพื่อชนะค่ะ!"}],()=>{dmAdvance();UI.modal={type:"dm"};render();},{bg:"hall",look:"fight"});},
   dmopen:()=>{dmAdvance();UI.modal={type:"dm"};render();},

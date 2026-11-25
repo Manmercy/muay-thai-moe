@@ -70,7 +70,7 @@ const RG_CH={
   lost:(G,J)=>[{n:"baibua",f:"happy",l:"fight",t:"The cup stays in Chiang Mai… but I really enjoyed fighting Sirichai Camp."},{n:"baibua",f:"flustered",l:"fight",t:"Whenever you're ready, write and tell me. I'll be waiting."},{n:"nar",t:"Baibua wais everyone before she leaves the ring, then turns back to look at the Manager once more."}],
   cup:(G,J)=>{const me=G.F[G.region.champ.north.fid],top=rgTopGirl(G);return [
    {n:"nar",t:`The bell for the last round rings. The referee raises the arm of ${me.name} — the Northern title series ends ${J.w}-${J.l}`},
-   {n:"npc",who:"MC",t:`Ladies and gentlemen! The Northern Regional Cup of the Four Regions Cup goes to… ${me.name} of Sirichai Gym!`},
+   {n:"npc",who:"MC",img:"gala_mc_hype",t:`Ladies and gentlemen! The Northern Regional Cup of the Four Regions Cup goes to… ${me.name} of Sirichai Gym!`},
    {n:"nar",t:"Khun Krerk hands over a golden cup in the middle of the ring. Hundreds of Yi Peng lanterns rise into the sky at once."},
    {n:"baibua",f:"happy",l:"fight",t:"Congratulations… Manager, tonight there's a place I'd like to take you… if you don't mind."},
    {n:"baibua",f:"flustered",l:"fight",t:"There's something I want to tell you… Um, never mind. Later is fine."},
@@ -102,7 +102,7 @@ const RG_CH={
   lost:(G,J)=>[{n:"tabtim",f:"happy",l:"fight",t:"Haha, the cup's still in Korat! But Sirichai Camp is fierce. Tabtim hurts all over."},{n:"tabtim",f:"flustered",l:"fight",t:"Come again, okay? Tabtim'll wait… Not missing you or anything. Just want to fight again."},{n:"nar",t:"Tabtim waves so loudly the MC has to move the mic away."}],
   cup:(G,J)=>{const me=G.F[G.region.champ.isan.fid],top=rgTopGirl(G);return [
    {n:"nar",t:`The bell for the last round rings. The referee raises the arm of ${me.name} — the Isan title series ends ${J.w}-${J.l}`},
-   {n:"npc",who:"MC",t:`Ladies and gentlemen! The Isan Regional Cup goes to… ${me.name} of Sirichai Gym!`},
+   {n:"npc",who:"MC",img:"gala_mc_hype",t:`Ladies and gentlemen! The Isan Regional Cup goes to… ${me.name} of Sirichai Gym!`},
    {n:"nar",t:"Tabtim runs over and hugs the Manager in the middle of the ring in front of everyone, so tight that Khun Krerk has to stand there holding the cup."},
    {n:"tabtim",f:"happy",l:"fight",t:"A loss is a loss! But I'm taking a hug back, okay? Haha… just a bit longer."},
    {n:"nar",t:"At the back, a dark-skinned middle-aged man stands still behind the crowd, nods once to Tabtim, then walks out."},
@@ -131,7 +131,7 @@ const RG_CH={
   lost:(G,J)=>[{n:"alicia",f:"happy",l:"fight",t:"The cup is still mine. Thanks for making tonight the best content of the year."},{n:"alicia",f:"flustered",l:"fight",t:"…No, wait. It's not about content. I really want to fight your camp again."},{n:"nar",t:"Alicia switches off her camera before she leaves the ring. The first time all night."}],
   cup:(G,J)=>{const me=G.F[G.region.champ.central.fid],top=rgTopGirl(G);return [
    {n:"nar",t:`The bell for the last round rings. The referee raises the arm of ${me.name} — the Central title series ends ${J.w}-${J.l}`},
-   {n:"npc",who:"MC",t:`Ladies and gentlemen! The Central Regional Cup goes to… ${me.name} of Sirichai Gym!`},
+   {n:"npc",who:"MC",img:"gala_mc_hype",t:`Ladies and gentlemen! The Central Regional Cup goes to… ${me.name} of Sirichai Gym!`},
    {n:"nar",t:"Camera flashes swarm in. Khun Krerk smiles for the cameras as he hands over the cup. Alicia pushes past the photographers and stops right in front of the Manager."},
    {n:"alicia",f:"happy",l:"fight",t:"Congratulations… And also, I haven't signed with anyone yet."},
    {n:"alicia",f:"flustered",l:"fight",t:"…Understand? You don't have to answer now."},
@@ -159,7 +159,7 @@ const RG_CH={
   lost:(G,J)=>[{n:"chaba",f:"happy",l:"fight",t:"…Cup stays here."},{n:"chaba",f:"flustered",l:"fight",t:"Come again. …I want you to."},{n:"nar",t:"That's all Chaba says before she walks out of the ring. Everyone at camp looks at each other."}],
   cup:(G,J)=>{const me=G.F[G.region.champ.south.fid],top=rgTopGirl(G);return [
    {n:"nar",t:`The bell for the last round rings. The referee raises the arm of ${me.name} — the Southern title series ends ${J.w}-${J.l}`},
-   {n:"npc",who:"MC",t:`Ladies and gentlemen! The Southern Regional Cup goes to… ${me.name} of Sirichai Gym!`},
+   {n:"npc",who:"MC",img:"gala_mc_hype",t:`Ladies and gentlemen! The Southern Regional Cup goes to… ${me.name} of Sirichai Gym!`},
    {n:"nar",t:"Beside the ring, a young man in a wheelchair claps slowly. Chaba goes to him first, then comes back to the Manager."},
    {n:"nar",t:"Chaba grips the Manager's hand hard, says nothing, and just walks off without letting go, so you have to follow three steps."},
    {n:"chaba",f:"flustered",l:"fight",t:"…My brother. Wants to meet you."},
@@ -411,7 +411,7 @@ function rgGala(G){const top=rgTopGirl(G),fah=rgIn(G,"fah"),ploy=rgIn(G,"ploy"),
  ...rgIf(fah,[{n:"fah",f:"pout",l:"casual",t:"Wait! Baibua has Kati, Tabtim has Ploy, Alicia has Rin, Chaba has Mali… and Fah?! Why doesn't Fah get a single style sibling!"},
    {n:"coach",t:"Then give your style a name yourself."}]),
  ...(top?[{n:top.id,f:"pout",l:"casual",t:rgJeal(top.id,"all four champions")}]:[]),
- {n:"npc",who:"MC",show:[],t:"And one more big announcement! Naga Energy presents a special guest camp that will fight in every region… Vector Camp, Bangkok!"},
+ {n:"npc",who:"MC",img:"gala_mc_hype",show:[],t:"And one more big announcement! Naga Energy presents a special guest camp that will fight in every region… Vector Camp, Bangkok!"},
  {n:"nar",t:ploy?"Pailin walks onstage in a purple-and-black suit. Her gaze sweeps the room and stops on Ploy longer than anyone else.":"Pailin walks onstage in a purple-and-black suit. Her gaze sweeps the room and stops at the Sirichai table."},
  {n:"pailin",f:"happy",t:"Every camp in this room is already on my tablet. …Enjoy the trip."},
  {n:"nar",show:[{id:"pailin"},{id:"npc:krerk"}],t:"Khun Krerk walks over and shakes Pailin's hand, patting her shoulder twice, like two people who have known each other far longer than anyone here knows."},
@@ -938,7 +938,7 @@ function rgClose(G){const R=G.region,fah=rgIn(G,"fah"),rin=rgIn(G,"rin"),kati=rg
     no signing on stage; the four champions walk over afterwards to say no, and Krerk hands it to Ladda. Tense, no smiling faces; the beatings are text only. */
  return [
  {n:"nar",bg:"closing_ceremony",show:[],t:"The closing ceremony of the Four Regions Championship. A grand hall in central Bangkok, every table full: provincial sports officials, promoters from all four regions, old-school teachers, and every camp that took part."},
- {n:"npc",who:"MC",t:"A big round of applause for the four regional champions! North, Baibua · Isan, Tabtim · Central, Alicia · South, Chaba"},
+ {n:"npc",who:"MC",img:"gala_mc_hype",t:"A big round of applause for the four regional champions! North, Baibua · Isan, Tabtim · Central, Alicia · South, Chaba"},
  {n:"nar",show:four,t:"All four step up together to receive their plaques of honour. Camera flashes light up the hall, and the old-school teachers rise to applaud, table by table."},
  {n:"npc",who:"Sports official",t:"Provincial and regional boxing are the roots of Muay Thai. Thank you to every camp, big and small, and thank you to our host for backing the regional rings for three years."},
  {n:"npc",who:"Khun Krerk",t:"I just pay the electricity bill for the ring. The people who gave this tournament meaning are every fighter and every teacher in this room."},
@@ -1625,7 +1625,7 @@ RG_SIDE.isan={cid:"tabtim",bg:"fair",ring:"bg_fair_ring.webp",title:"Off-schedul
    {n:"npc",who:"Seua Dang",t:"Well, well. The Ruby of the Isan Plains, with a whole van of girl boxers. Women's boxing is just for show, right, Nil?"},
    {n:"npc",who:"Brother Nil",img:"nil_smirk",t:"He said it, not me."},
    {n:"tabtim",f:"angry",l:"casual",t:"...Brother Nil, you're just standing there laughing along with him?"},
-   {n:"npc",who:"Temple ring announcer",t:"Ladies and gentlemen! A special bout, off the programme: a women's camp from Chiang Mai takes on the temple-fair boys, three in a row! Let's hear it!"},
+   {n:"npc",who:"Temple ring announcer",img:"caster_shout",t:"Ladies and gentlemen! A special bout, off the programme: a women's camp from Chiang Mai takes on the temple-fair boys, three in a row! Let's hear it!"},
    {n:"coach",t:"Nobody's name is on the line. Just go up and fight so they can see. Whoever's ready, step up."}],
   win:G=>[{n:"nar",t:"Seua Dang lies flat on his back in the temple ring. The whole fair roars over the mor lam music. His boys haul him into a pickup and the whole gang tears off."},
    {n:"tabtim",f:"happy",l:"casual",t:"See that! Women's boxing is just a show, is it? Ha ha... Manager, thank you so much."},
@@ -1711,7 +1711,7 @@ RG_SIDE.south={cid:"chaba",bg:"pier_south",ring:"bg_pier_south.webp",title:"Off-
   arrive:G=>[{n:"nar",bg:"pier_south",t:"A seafood restaurant by the pier, tables knocked over. Three big men stand around Chaba's brother's wheelchair."},
    {n:"npc",who:"Boris",t:"Protection's doubled this month. Every shop in the network. Don't pay, and your family's fishing boats never leave the pier again."},
    {n:"chaba",f:"angry",l:"casual",t:"...Get out of the shop."},
-   {n:"npc",who:"Chaba's brother",t:"Chaba, don't... just pay. I don't want you hurt too."},
+   {n:"npc",who:"Chaba's brother",img:"chaba_bro_sad",t:"Chaba, don't... just pay. I don't want you hurt too."},
    {n:"chaba",f:"angry",l:"casual",t:"Not paying. From today, not one baht."},
    {n:"npc",who:"Boris",t:"Then let's settle it like boxers. Out on the pier. Three of you. Win them all and I never set foot in this shop again. Lose one, and you pay double all year."},
    {n:"coach",t:"No ropes, no referee. Watch the slippery floor. Whoever's ready, go."}],
@@ -1719,7 +1719,7 @@ RG_SIDE.south={cid:"chaba",bg:"pier_south",ring:"bg_pier_south.webp",title:"Off-
    {n:"npc",who:"Boris",t:"It's not over! Tonight your family won't have a single fishing boat left!"},
    {n:"nar",t:"The speedboat's engine roars. Its bow swings toward the moorings where Chaba's family's fishing boats are tied."},
    {n:"chaba",f:"angry",l:"casual",t:"...Manager, get on the sailboat, quick. Chaba will lure him into the reef."}],
-  lose:G=>[{n:"npc",who:"Boris",t:"Double, all year. Remember it."},{n:"npc",who:"Chaba's brother",t:"It's okay. It's okay, Chaba..."},
+  lose:G=>[{n:"npc",who:"Boris",t:"Double, all year. Remember it."},{n:"npc",who:"Chaba's brother",img:"chaba_bro_sad",t:"It's okay. It's okay, Chaba..."},
    {n:"chaba",f:"sad",l:"casual",t:"...Sorry. For dragging everyone into getting hurt."},{n:"coach",t:"Next time we're down south, we take this pier back."}],
   after:(G,T,cb)=>RG_SAIL.open(won=>{const S=G.region.side.south;S.sail=won?1:0;rgMeet(G,"chaba",won?4:2);save();
    playScene([
@@ -2818,7 +2818,7 @@ RG_HEART.baibua={
   {n:"npc",who:"Baibua's father",t:"I've kept this ring notebook since her first fight. The last page is still empty... I think you should write the next one."},
   {n:"baibua",f:"flustered",l:"casual",t:"Dad! ...You don't have to take it.",choice:[
    {t:"Take the notebook with both hands",fx:G2=>add(G2,"baibua","bond",5),then:[{n:"npc",who:"Baibua's father",t:"Good. Please look after my daughter."},{n:"baibua",f:"sad",l:"casual",t:"...Dad has never trusted me to anyone."}]},
-   {t:"\"Let's write it together, Baibua and me\"",fx:G2=>add(G2,"baibua","bond",4),then:[{n:"npc",who:"Baibua's father",t:"Ha ha, all right. That's better."},{n:"baibua",f:"happy",l:"casual",t:"Together... on the next page I'll write \"Sirichai Camp\" in big letters."}]}]}],
+   {t:"\"Let's write it together, Baibua and me\"",fx:G2=>add(G2,"baibua","bond",4),then:[{n:"npc",who:"Baibua's father",img:"baibua_dad_smile",t:"Ha ha, all right. That's better."},{n:"baibua",f:"happy",l:"casual",t:"Together... on the next page I'll write \"Sirichai Camp\" in big letters."}]}]}],
  70:G=>[{n:"nar",t:"Late at night the clack of a small loom comes from Baibua's room. She borrowed her grandmother's loom last month."},
   {n:"baibua",f:"flustered",l:"casual",t:"Grandma is Tai Lue. She says when you weave cloth for someone... that person will always find their way home."},
   {n:"nar",t:"A small cloth, shorter than a forearm, a pink lotus in the middle and a single red thread running through the whole thing."},
@@ -2841,8 +2841,8 @@ RG_LOVE2.baibua={
  16:G=>[{n:"nar",bg:"home_baibua",t:"Baibua's mother invites you to dinner at home. The long wooden table beside the lotus pond is covered in every northern dish imaginable."},
   {n:"npc",who:"Baibua's father",t:"I won't ask about boxing anymore. My daughter fights better than I did at her age... I'll ask just one thing. Will you look after her?"},
   {n:"baibua",f:"flustered",l:"casual",t:"Dad! How can you ask that in front of a guest!",choice:[
-   {t:"\"We look after each other. She's looked after me all along\"",fx:G2=>add(G2,"baibua","bond",5),then:[{n:"npc",who:"Baibua's father",t:"...Good answer. Let's eat."},{n:"baibua",f:"happy",l:"casual",t:"Dad smiled... he doesn't smile at people easily."}]},
-   {t:"\"For as long as she wants me to\"",fx:G2=>add(G2,"baibua","bond",4),then:[{n:"npc",who:"Baibua's father",t:"Good. But she'll want looking after for a long time, I'm sure. I know my daughter."}]}]},
+   {t:"\"We look after each other. She's looked after me all along\"",fx:G2=>add(G2,"baibua","bond",5),then:[{n:"npc",who:"Baibua's father",img:"baibua_dad_smile",t:"...Good answer. Let's eat."},{n:"baibua",f:"happy",l:"casual",t:"Dad smiled... he doesn't smile at people easily."}]},
+   {t:"\"For as long as she wants me to\"",fx:G2=>add(G2,"baibua","bond",4),then:[{n:"npc",who:"Baibua's father",img:"baibua_dad_smile",t:"Good. But she'll want looking after for a long time, I'm sure. I know my daughter."}]}]},
   {n:"baibua",f:"happy",l:"casual",t:"My home always has room for you... just like this camp has room for me."}]};
 /* ---- ทับทิม ---- */
 RG_HANG2.tabtim=[
@@ -2892,7 +2892,7 @@ RG_LOVE2.tabtim={
  16:G=>[{n:"nar",bg:"home_tabtim",t:"Back home in Phimai for Songkran, the whole family sits around a jungle-curry feast under the mango tree, Tabtim's father at the head."},
   {n:"npc",who:"Tabtim's father",t:"My daughter kicks hard, you know. She once kicked her big brother till he cried. Watch yourself."},
   {n:"tabtim",f:"flustered",l:"casual",t:"Dad! I was eight!",choice:[
-   {t:"\"I've been careful all along, and happy to get kicked\"",fx:G2=>add(G2,"tabtim","bond",4),then:[{n:"npc",who:"Tabtim's father",t:"Ha ha! Good, good. Keep eating."}]},
+   {t:"\"I've been careful all along, and happy to get kicked\"",fx:G2=>add(G2,"tabtim","bond",4),then:[{n:"npc",who:"Tabtim's father",img:"tabtim_dad_laugh",t:"Ha ha! Good, good. Keep eating."}]},
    {t:"\"Her kicks have already won this camp a cup\"",fx:G2=>add(G2,"tabtim","bond",5),then:[{n:"npc",who:"Tabtim's father",t:"...Yeah. I watch every live fight. Kicks are kicks, but she kicks all the way."},{n:"tabtim",f:"sad",l:"casual",t:"Dad watched every fight... and he never told me."}]}]},
   {n:"tabtim",f:"happy",l:"casual",t:"Thank you for coming to my home... this house is loud all day. You'd better get used to it now."}]};
 /* ---- อลิเซีย ---- */
@@ -2942,9 +2942,9 @@ RG_LOVE2.alicia={
    {t:"Stand and listen to the end without moving",fx:G2=>add(G2,"alicia","bond",5),then:[{n:"alicia",f:"happy",l:"casual",t:"I saw you standing still through the whole song... I really sang to just one person, in front of ten thousand."}]},
    {t:"Wave the lightstick Minnie shoved into your hand",fx:G2=>add(G2,"alicia","bond",4),then:[{n:"alicia",f:"flustered",l:"casual",t:"And a lightstick in my colour... who taught you to wave it in rhythm? Minnie, right?"}]}]}],
  16:G=>[{n:"nar",bg:"home_alicia",t:"Alicia's mother invites you to dinner at the Bangkok condo the sponsor pays for, but tonight she cooked every dish herself."},
-  {n:"npc",who:"Alicia's mother",t:"I've watched my daughter through a screen for ten years. Today's the first time I've seen her laugh without looking for the lens."},
+  {n:"npc",who:"Alicia's mother",img:"alicia_mom_soft",t:"I've watched my daughter through a screen for ten years. Today's the first time I've seen her laugh without looking for the lens."},
   {n:"alicia",f:"flustered",l:"casual",t:"Mum! How can you say that in front of him?",choice:[
-   {t:"\"She laughs like this at camp every day\"",fx:G2=>add(G2,"alicia","bond",5),then:[{n:"npc",who:"Alicia's mother",t:"Then I'll leave my daughter with that camp of yours."},{n:"alicia",f:"sad",l:"casual",t:"...Mum has never trusted me to anyone. Not even the label."}]},
+   {t:"\"She laughs like this at camp every day\"",fx:G2=>add(G2,"alicia","bond",5),then:[{n:"npc",who:"Alicia's mother",img:"alicia_mom_soft",t:"Then I'll leave my daughter with that camp of yours."},{n:"alicia",f:"sad",l:"casual",t:"...Mum has never trusted me to anyone. Not even the label."}]},
    {t:"\"Thank you for letting her choose her own way\"",fx:G2=>add(G2,"alicia","bond",4),then:[{n:"npc",who:"Alicia's mother",t:"I didn't let her. She's always chosen for herself. I just watched."}]}]},
   {n:"alicia",f:"happy",l:"casual",t:"...Tonight isn't content. But I'll remember all of it myself. No recording."}]};
 /* ---- ชบา ---- */
@@ -2969,7 +2969,7 @@ RG_HEART.chaba={
   {n:"chaba",f:"sad",l:"casual",t:"...Three steps. The doctor said never."},
   {n:"nar",t:"Tears run down, but Chaba's face stays as still as ever.",choice:[
    {t:"Stand beside her and say nothing",fx:G2=>add(G2,"chaba","bond",5),then:[{n:"chaba",f:"sad",l:"casual",t:"...Thanks. For not talking."}]},
-   {t:"\"Call your brother back right now\"",fx:G2=>add(G2,"chaba","bond",4),then:[{n:"npc",who:"Chaba's brother",t:"Chaba! See? Three steps! Next month I'm walking to watch you fight myself!"},{n:"chaba",f:"happy",l:"casual",t:"...Come. I'll win for you to see."}]}]}],
+   {t:"\"Call your brother back right now\"",fx:G2=>add(G2,"chaba","bond",4),then:[{n:"npc",who:"Chaba's brother",img:"chaba_bro_stand",t:"Chaba! See? Three steps! Next month I'm walking to watch you fight myself!"},{n:"chaba",f:"happy",l:"casual",t:"...Come. I'll win for you to see."}]}]}],
  55:G=>[{n:"nar",t:"On the dorm balcony Chaba teaches sailing knots, one after another."},
   {n:"chaba",f:"sad",l:"casual",t:"...The day the boat capsized, I tied this knot wrong. That's why my brother went in."},
   {n:"chaba",f:"sad",l:"casual",t:"No one knows. Not Mum. Not my brother. ...I've been afraid of the sea since that day, but I still sail. Quitting would be giving up.",choice:[
@@ -2995,7 +2995,7 @@ RG_LOVE2.chaba={
   {n:"npc",who:"Chaba's brother",t:"Chaba smiles more these days... thank you for making my little sister smile."},
   {n:"chaba",f:"flustered",l:"casual",t:"...Not smiling. Sun's strong.",choice:[
    {t:"\"The sun's been strong every day lately\"",fx:G2=>add(G2,"chaba","bond",5),then:[{n:"chaba",f:"happy",l:"casual",t:"...Mm. Every day. Because someone's standing next to me."}]},
-   {t:"Ask her brother to walk with you to the end of the procession",fx:G2=>add(G2,"chaba","bond",4),then:[{n:"npc",who:"Chaba's brother",t:"End of the procession! Next year I'll run it!"},{n:"chaba",f:"sad",l:"casual",t:"...I'll watch. Every Chak Phra. Never miss one."}]}]}]};
+   {t:"Ask her brother to walk with you to the end of the procession",fx:G2=>add(G2,"chaba","bond",4),then:[{n:"npc",who:"Chaba's brother",img:"chaba_bro_stand",t:"End of the procession! Next year I'll run it!"},{n:"chaba",f:"sad",l:"casual",t:"...I'll watch. Every Chak Phra. Never miss one."}]}]}]};
 
 /* v1.91.135 (Man): champions in the camp have birthdays like the heroines (Baibua 12 Nov · Tabtim 14 Apr · Alicia 1 Jan · Chaba 5 Oct) */
 const RG_BDAY={
@@ -3263,7 +3263,7 @@ The cup is still mine. Send a fighter again whenever you're ready
   genCup(G2,r,J){const R=G2.region,me=G2.F[R.champ[r].fid],ed=rgEd(G2),n=(R.hall||[]).filter(h=>h.k==="cup"&&h.r===r).length+1,top=typeof rgTopGirl==="function"?rgTopGirl(G2):null;
     const who=this.spk(r,"happy","fight");
     return [{n:"nar",t:`The bell for the last round rings. The referee raises the arm of ${me?me.name:""}`},{n:"nar",t:`${RG_TITLE[r]}, Edition ${ed} · ${J.w}-${J.l}`},
-      {n:"npc",who:"MC",t:`Ladies and gentlemen! The champion's cup of ${RG0[r].name}, Edition ${ed} is… ${me?me.name:""} of Sirichai Gym!`},
+      {n:"npc",who:"MC",img:"gala_mc_hype",t:`Ladies and gentlemen! The champion's cup of ${RG0[r].name}, Edition ${ed} is… ${me?me.name:""} of Sirichai Gym!`},
       {...who,t:R.nc&&R.nc[r]?"Congratulations. Sirichai Camp really is as strong as they say":"…Lost again, but I went further this time. Congratulations"},
       ...(top?[{n:top.id,f:"happy",l:"fight",t:"You're the best! Another cup for our camp!"}]:[]),
       {n:"coach",t:`This region's cup no. ${n} for the camp… Grandpa Chai wouldn't believe his eyes`}];},
