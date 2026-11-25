@@ -232,12 +232,13 @@ const QS={st:null,tm:null,
     save();this.mount();this.draw();if(this.st.phase==="q")this.startTimer();try{AU.sfx("bell");}catch(e){}},
   shuf(a){a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;},
   mount(){let el=document.getElementById("qshow");if(!el){el=document.createElement("div");el.id="qshow";el.className="mgame qshow";document.body.appendChild(el);}
-    el.onclick=e=>{const b=e.target.closest("[data-qs]");if(!b||b.disabled)return;this.act(b.dataset.qs,b.dataset.v);};},
+    el.onclick=e=>{const b=e.target.closest("[data-qs]");if(!b||b.disabled)return;if(performance.now()<(this.armAt||0))return;/* swallow the 2nd tap of a double-tap: "next question" and the answer buttons share a spot */this.act(b.dataset.qs,b.dataset.v);};},
   close(){this.stopTimer();const el=document.getElementById("qshow");if(el)el.remove();this.st=null;save();render();},
   q(){const m=this.m();if(!m||!m.cq)return null;const [t,i]=m.cq.split(".").map(Number);const Q=QS_Q[t]&&QS_Q[t][i];return Q?{q:Q[0],o:Q[1],a:Q[2],x:Q[3]||"",t}:null;},
   draw1(){const m=this.m(),t=qsTier(m.k),S=qsState(G),key="t"+t;S.seen[key]=S.seen[key]||[];let pool=QS_Q[t].map((_,i)=>i).filter(i=>!S.seen[key].includes(i));if(!pool.length){S.seen[key]=[];pool=QS_Q[t].map((_,i)=>i);}
     const i=this.pick(pool);S.seen[key].push(i);m.cq=t+"."+i;m.ord=this.shuf([0,1,2,3]);m.cut=null;m.aud=null;m.hint=null;save();},
   next(){const m=this.m();this.draw1();this.st.phase="q";this.st.host="smile";this.st.me="normal";this.st.react="";this.st.say=this.fill(m.k===19?QSL.last:m.k===15?QSL.legend:this.line(QSL.ask[qsTier(m.k)]));this.st.left=QS_TIME[qsTier(m.k)]*1000;this.st.hurried=false;this.draw();this.startTimer();},
+  arm(ms=650){this.armAt=performance.now()+ms;},
   startTimer(){this.stopTimer();this.st.end=performance.now()+this.st.left;this.tm=setInterval(()=>this.tick(),200);},
   stopTimer(){if(this.tm){clearInterval(this.tm);this.tm=null;}if(this.st&&this.st.end)this.st.left=Math.max(0,this.st.end-performance.now());},
   tick(){const S=this.st;if(!S||S.phase!=="q"){this.stopTimer();return;}const left=S.end-performance.now(),m=this.m(),tot=QS_TIME[qsTier(m.k)]*1000;
@@ -282,7 +283,7 @@ const QS={st:null,tm:null,
   finish(amt,how){const S=this.st,m=this.m(),Q=qsState(G);this.stopTimer();m.done=true;m.win=amt;m.how=how;m.cq=null;G.cash+=amt;Q.shows++;Q.lastWin=amt;Q.best=Math.max(Q.best||0,m.k||0);S.phase="end";S.amt=amt;
     if(amt>0)toast(`ได้รางวัลจากรายการ ${fmt(amt)}`);save();this.draw();},
   meImg(e){const L=G.avatar||{gender:G.player.gender};const u=typeof MGRP!=="undefined"?MGRP.url(L,e,()=>{if(this.st)this.draw();}):"";if(u)this.lastMe=u;return u||this.lastMe||"";},
-  draw(){const S=this.st,el=document.getElementById("qshow"),m=this.m();if(!S||!el||!m)return;const k=m.k||0,Q=this.q()||(S.phase==="right"?S.lastQ:null),t=qsTier(Math.min(19,k));
+  draw(){const S=this.st,el=document.getElementById("qshow"),m=this.m();if(!S||!el||!m)return;const qk=S.phase+":"+(m.k||0);if(qk!==this.lastQk){this.lastQk=qk;this.arm();}const k=m.k||0,Q=this.q()||(S.phase==="right"?S.lastQ:null),t=qsTier(Math.min(19,k));
     const me=this.meImg(S.me==="normal"?"normal":S.me);
     const lad=`<ol class="qs-lad">${QS_LAD.map((a,i)=>`<li class="${i===k&&S.phase!=="end"?"on":""} ${i<k?"ok":""} ${QS_SAFE.includes(i)?"sf":""}"><span>${i+1}</span><b>${fmt(a)}</b></li>`).reverse().join("")}</ol>`;
     const krok=`<div class="qs-krok ${S.shake?"shake":""} ${S.phase==="right"||S.phase==="end"&&S.amt>=QS_LAD[19]?"hop":""}">${"<i></i>".repeat(7)}</div>`;
@@ -335,7 +336,7 @@ const QS_ME={
 
 /* v1.91.155 (Man): phone calls and Pa Piak's jokes play as ordinary story cutscenes (the show steps aside, then comes back) */
 const QS_CUT=(steps,done,bg)=>{try{const S=QS.st;if(S){S.log=S.log||[];for(const x of steps){if(!x.t||typeof x.t!=="string")continue;const who=x.n==="npc"?x.who:x.n==="me"?"คุณ"+ME(G):x.n==="nar"?"":x.n==="coach"?"ครูแดง":((SPK[x.n]||{}).name||"");if(who&&who!==QS_HOST)S.log.push({who,t:x.t,c:x.n==="me"?"m":"f"});}}}catch(e){}document.body.classList.add("qs-cutting");   /* the show dims behind; the scene's own background is hidden */
-  const back=()=>{document.body.classList.remove("qs-cutting");done&&done();};
+  const back=()=>{document.body.classList.remove("qs-cutting");QS.arm();done&&done();};
   try{playScene(steps,back,{bg:bg||"tvstudio",look:"casual"});}catch(e){console.error("qs cut",e);back();}};
 const QS_PICK=a=>a[Math.floor(Math.random()*a.length)];
 const QS_TEASE=["ก่อนจะเฉลย… คุณ{n}ตอบ “{c}” มั่นใจแค่ไหนครับ? สิบเต็มสิบเลยไหม?","“{c}”… คำตอบนี้ ทีมงานหลังห้องส่งเงียบกันหมดเลยครับ","คุณ{n}ครับ ถ้าข้อนี้ผิด… ไม่ต้องกังวล ป๋าเตรียมยาดมไว้ให้แล้ว","ขอผมดูหน้าคุณ{n}หน่อย… อืม… หน้าแบบนี้… ผมอ่านไม่ออกเลยครับ","“{c}” นะครับ… ไม่เปลี่ยนแล้วนะ? ล็อกแล้วนะ? แน่นะ? …ผมถามเล่น ๆ ครับ เปลี่ยนไม่ได้แล้ว"];
