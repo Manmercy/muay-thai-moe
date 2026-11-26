@@ -2502,3 +2502,6 @@ body.qs-cutting .vn .vbg{display:none}
 .qs-logl .lg-x{font-weight:700;color:#b02a3a}.qs-logl .lg-x b{color:#b02a3a}
 /* v1.91.156 (Man): Pa Piak turns to face the contestant */
 .qs-pod.host .qs-fig img{transform:scaleX(-1) translate(9%,8%)}
+/* quiz show: keep answers + lifelines on screen on phones (was 20–160px below the fold) */
+@media (max-width:640px){.qs-stage{height:clamp(150px,27vh,300px)}.qs-pod .qs-fig{height:calc(clamp(150px,27vh,300px) - 50px)}.qs-logl{max-height:clamp(3.2em,11vh,7.5em)}.qs-main{gap:6px}}
+@media (max-width:640px) and (max-height:760px){.qs-stage{height:146px}.qs-pod .qs-fig{height:96px}.qs-logl{max-height:3.3em}.qs-l small{font-size:.58rem;line-height:1.1;white-space:nowrap}.qs-l{padding:3px 2px;gap:1px;font-size:.95rem}.qs-o{min-height:36px;padding:5px 8px;font-size:.82rem}.qs-q{padding:7px 10px}.qs-q p{line-height:1.35}.qs-top h2 b{font-size:1.15rem}.qshow{padding:6px}}
