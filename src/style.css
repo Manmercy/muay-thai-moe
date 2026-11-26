@@ -2147,6 +2147,7 @@ html[lang=en] .fight .fctl2 .skbtn2 b{font-size:11px;display:-webkit-box;-webkit
 /* v1.89.24: Loy Krathong mail — green blinking frame */
 .mrow2.loyev{box-shadow:inset 0 0 0 2px #3ee07a;animation:loyblink 1.2s steps(2,end) infinite}.mrow2.loyev b{color:#6ff09a}.mrow2.loyev .mk{background:#1f7a45;color:#eafff1}
 @keyframes loyblink{50%{box-shadow:inset 0 0 0 2px rgba(62,224,122,.18)}}
+.mrow2.loyev.calm{animation:none} /* v1.91.165: the Loy letter keeps its green frame but stops blinking once the event has been played */
 @media (prefers-reduced-motion:reduce){.mrow2.loyev{animation:none}}
 .lwopts{display:grid;gap:8px;margin:8px 0}.lwopts .btn{white-space:normal;text-align:center;opacity:0;animation:ctin .35s ease-out var(--d) forwards}.lwopts .btn.now,.lwq.now{animation-delay:0s}
 .lwq{opacity:0;animation:ctin .35s ease-out var(--d) forwards}
