@@ -1,5 +1,5 @@
 // ================= MUAY THAI MOE v1.3 — UI =================
-const VERSION="1.91.160";
+const VERSION="1.91.161";
 const CUR_LANG=(typeof window!=="undefined"&&window.LANG)||"th";
 const TH_LABEL=String.fromCharCode(3652,3607,3618);
 function langSwitch(cls){return `<div class="langsw ${cls||""}" role="group" aria-label="Language">${[["th",TH_LABEL],["en","EN"]].map(([k,l])=>`<button class="lsb ${CUR_LANG===k?"on":""}" data-act="setlang" data-v="${k}" aria-pressed="${CUR_LANG===k}">${l}</button>`).join("")}</div>`;}
@@ -951,7 +951,7 @@ function pLookOf(f){const def=f.camp==="player"?"train":"fight";if(f.camp!=="pla
 /* v1.91.96 (Man): the character-tab card follows the outfit picked in her profile (the Loy Krathong dress no longer locks it) */
 function pCardSrc(f){const v=(G.pLook||{})[f.id];if(!v||!pLooks(f).some(x=>x[0]===v))return stand(f.id,"casual");if(v==="train")return `${ASSET}${f.id}_train.webp`;const h=THAI_HOLD;THAI_HOLD=true;try{return stand(f.id,v,"happy");}finally{THAI_HOLD=h;}}
 function pArtSrc(f){if(UI.look==="train"&&!CHAMP_IDS.includes(f.id))return `${ASSET}${f.id}_train.webp`;const h=THAI_HOLD;THAI_HOLD=true;try{return stand(f.id,UI.look==="train"?"casual":UI.look,"happy");}finally{THAI_HOLD=h;}} /* "ลำลอง" stays casual here even with the Thai dress worn day to day — the dress has its own button */
-function pFace(f){if(UI.look==="fight"||!(f.canon||CHAMP_IDS.includes(f.id))||!pLooks(f).some(x=>x[0]===UI.look))return faceImg(f);const src=pArtSrc(f);return /_(train|casual|thai)\.(?:png|webp)$/.test(src)?faceImg(f).replace(faceSrc(f.id,"happy"),src.replace(/\.(png|webp)$/,"_face.$1")):faceImg(f);}
+function pFace(f){if(UI.look==="fight"||!(f.canon||CHAMP_IDS.includes(f.id))||!pLooks(f).some(x=>x[0]===UI.look))return faceImg(f);return faceImg(f).replace(faceSrc(f.id,"happy"),faceSrc(f.id,"happy",UI.look));} /* v1.91.161 (player report): the face comes from faceSrc (which knows each look's real file) — deriving it from the body art broke once casual bodies moved to .png while their faces stayed .webp */
 function fighterHTML(f){const mine=f.camp==="player";const P=PROFILES[f.id];
   const tabs=mine?[["rel","ประวัติ"],["over","ค่าพลัง"],["skill","สกิล"]].concat(f.canon&&KIT_MASK[f.id]?[["look","ชุด"]]:[]):[["rel","ประวัติ"],["over","ค่าพลัง"]].concat(f.camp==="region"&&hasTree(f.id)?[["skill","สกิล"]]:[]); /* v1.91.45: a regional champion's tree can be looked at while she is still a rival */
   let t=UI.ptab;if(!tabs.some(x=>x[0]===t))t="over";
