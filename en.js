@@ -356,6 +356,8 @@ SHARED_SKILLS.push(SKX("sh5b3",5,6,"sh5b2",["dur", "comp"],"build","Down and Up"
 SHARED_SKILLS.push(SKX("sh5b4",5,7,"sh5b3",["dur"],"build","Unbreakable Nerve","Always on · boosts school lines · Lv.32 · +1% accuracy at low health, morale effect +0.5%",r=>({clutch:0.01*r,mor:0.005*r}),{lv:32,br:1,nd:4,passive:1,feed:"school",shared:1}));
 SHARED_SKILLS.push(SKX("sh5b5",5,8,"sh5b4",["dur", "guard"],"build","Mountain Doesn't Fall","Lv.38 · Legend · no one knocks over a mountain · clinch defense +1, +5% accuracy at low health, evade +2%",r=>({clDef:1*r,clutch:0.05*r,evade:0.02*r}),{lv:38,br:1,nd:5,shared:1}));
 /* end v1.89 skill roots */
+/* v1.91.166: Baiyok has a tree now (xlove.js) but as a rival she still fights without skills, as she always has — the tree opens when she moves into the camp */
+const skInert=f=>!!f&&f.id==="prod_B"&&f.camp!=="player";
 const skillList=fid=>(SKILLS[fid]||[]).concat(SKILLS[fid]&&SKILLS[fid][0]&&SKILLS[fid][0].line!=null?SHARED_SKILLS:[]);
 const sharedPathOf=f=>{for(const s of SHARED_SKILLS)if((f.skills&&f.skills[s.id])>0)return s.line;return null;};
 // v1.83: full skill reset — every point spent comes back so a fighter can move to another line. First reset per fighter is free.
@@ -390,7 +392,7 @@ const hasSignature=f=>!!SIGNATURE[f.id]&&f.camp==="player"&&(f.bond||0)>=60;
 function skillMods(f){const m={hit:{},pts:{},dmg:{},ctr:0,ctrDmg:0,clutch:0,regen:0,mor:0,evade:0,corner:0,prep:0,clDef:0,staSave:0,sprawl:0,tdTry:0,gnp:0,sub:0};
   if(hasSignature(f)){const e=SIGNATURE[f.id].fx;for(const k in e){if(typeof e[k]==="object")for(const w in e[k])m[k][w]=(m[k][w]||0)+e[k][w];else m[k]+=e[k];}}
   {const T=f.camp==="player"&&TRAITS[f.id]&&TRAITS[f.id][0].fx?TRAITS[f.id].find(t=>t.id===traitOf(f)):null;const e=T?T.fx:f.pfx,pk=T?traitK(f):1;if(e){for(const k in e){if(typeof e[k]==="object")for(const w in e[k])m[k][w]=(m[k][w]||0)+e[k][w]*pk;else m[k]+=e[k]*pk;}}} /* v1.90: a regional champion's own perk */
-  const list=skillList(f.id);if(!list.length||!f.skills)return m;const eq=equipped(f);
+  const list=skInert(f)?[]:skillList(f.id);if(!list.length||!f.skills)return m;const eq=equipped(f);
   for(const sk of list){if(!sk.passive&&!eq.includes(sk.id))continue;const r=f.skills[sk.id]||0;if(!r)continue;const e=sk.fx(r);
     for(const k in e){if(typeof e[k]==="object")for(const w in e[k])m[k][w]=(m[k][w]||0)+e[k][w];else m[k]+=e[k];}}
   return m;}
@@ -428,7 +430,7 @@ function skillBlock(f,sk){const d=skillDef(f.id,sk),r=(f.skills&&f.skills[sk])||
   if(f.sp<1)B.push({t:"sp"});return B;}
 function learnSkill(G,id,sk){const f=G.F[id],d=skillDef(id,sk);if(!d||skillBlock(f,sk).length)return false;f.skills[sk]=(f.skills[sk]||0)+1;f.sp--;
   if(d.passive)return true;f.equip=equipped(f);if(!f.equip.includes(sk)&&f.equip.length<3)f.equip.push(sk);return true;}
-function passiveMods(f){const m={fatKick:0,fatAll:0,lossXp:0,fightXp:0,moraleLoss:0};for(const sk of skillList(f.id)){const r=(f.skills&&f.skills[sk.id])||0;if(!r||!sk.px)continue;const e=sk.px(r);for(const k in e)m[k]+=e[k];}return m;}
+function passiveMods(f){const m={fatKick:0,fatAll:0,lossXp:0,fightXp:0,moraleLoss:0};if(skInert(f))return m;for(const sk of skillList(f.id)){const r=(f.skills&&f.skills[sk.id])||0;if(!r||!sk.px)continue;const e=sk.px(r);for(const k in e)m[k]+=e[k];}return m;}
 // v1.20: only 3 techniques are carried into the ring (player picks; rivals carry their best 3)
 const MAX_EQUIP=3;
 function equipped(f){const pas=k=>{const d=skillDef(f.id,k);return !!(d&&d.passive);};const has=k=>(f.skills&&f.skills[k])>0&&!pas(k);if(Array.isArray(f.equip))return f.equip.filter(has).slice(0,MAX_EQUIP);
@@ -689,7 +691,7 @@ function fightRound(F){roundBegin(F);while(!roundDone(F))fightEx(F);return round
 // every learned school skill: attack burst, guard burst or second wind — max one per round; since v1.91.60 a skill rests one round after use and costs stamina
 function skillKind(sk){const e=sk.fx(1);const wk=e.hit||e.pts||e.dmg;if(wk)return {k:"atk",w:Object.keys(wk)[0]};if(e.evade||e.ctr||e.clDef||e.ctrDmg)return {k:"def"};return {k:"rec"};}
 const SKILL_KIND_NAME={atk:"Finishing attack",def:"Defend & counter",rec:"Recover energy"};
-function fightSkills(s){if(s.f.nlsk)return s.f.nlsk.map(k=>({...k,r:3}));const L=skillList(s.f.id),eq=equipped(s.f);return L.filter(k=>eq.includes(k.id)).map(k=>({...k,r:s.f.skills[k.id],...skillKind(k)}));}
+function fightSkills(s){if(s.f.nlsk)return s.f.nlsk.map(k=>({...k,r:3}));if(skInert(s.f))return [];const L=skillList(s.f.id),eq=equipped(s.f);return L.filter(k=>eq.includes(k.id)).map(k=>({...k,r:s.f.skills[k.id],...skillKind(k)}));}
 // v1.89.6: classic mae mai / look mai techniques get called by name from the booth (keyed by skill id so it works in every language)
 const MAEMAI={"ts_low":"l","ts_croc":"m","ts_ring":"l","ts_trunk":"m","kati_1a1":"l","kati_2b1":"m","kati_2b3":"m","cy_spin":"l","cy_erawan":"m","cy_gate":"l","mali_2a3":"m","lb_jab":"l","lb_kris":"m","lb_feint":"m","lb_giant":"m","lb_teep":"m","lb_fold":"l","rin_0b1":"m","rin_2b3":"m","kr_thunder":"m","kr_sweep":"l","p_wall":"l","ploy_1a3":"l","ploy_2a3":"m"};
 function skillCall(F,s,sk){const k=MAEMAI[sk.id];if(!k)return `${s.name} uses "${sk.name}"!`;const kn=k==="m"?"Mae mai Muay Thai":"Look mai Muay Thai";
@@ -1041,7 +1043,7 @@ const hasStaff=(G,k)=>(G.staff||[]).includes(k);
 const staffLocked=(G,k)=>{const r=STAFF[k].req;if(!r)return "";if(r.lv&&campLevel(G)<r.lv)return `Camp Lv.${r.lv}`;if(r.rep&&G.rep<r.rep)return `Fame ${r.rep}`;return "";};
 function hireStaff(G,k){const S=STAFF[k];G.staff=G.staff||[];if(!S||hasStaff(G,k)||G.staff.length>=staffSlots(G)||staffLocked(G,k)||G.cash<S.fee)return false;G.cash-=S.fee;G.staff.push(k);G.fac.assistants=G.staff.length;return true;}
 function fireStaff(G,k){G.staff=(G.staff||[]).filter(x=>x!==k);G.fac.assistants=G.staff.length;return true;}
-function fixSave(G){/* v1.91.42: a card counts as read only if its story was ever opened (o.seen is set only there) — v1.91.41 wrongly marked every owned card read */if(G&&(G.cardRd||0)<2){for(const k in (G.cards||{})){const o=G.cards[k];o.rd=o.seen?1:0;}G.cardRd=2;}if(G&&G.F&&typeof hmFix==="function")hmFix(G);if(G&&G.F&&typeof monoFix==="function")monoFix(G);if(G&&G.ev&&G.ev.loy&&typeof thiefFix==="function")thiefFix(G);if(G&&G.F&&G.prodigy)fixProdigies(G);if(G&&G.flags&&G.flags.beat_ploy&&G.flags.beatS_ploy==null)G.flags.beatS_ploy=G.season||1;
+function fixSave(G){if(typeof byCampKit==="function")byCampKit(G); /* v1.91.166: Baiyok in the camp gets her tree *//* v1.91.42: a card counts as read only if its story was ever opened (o.seen is set only there) — v1.91.41 wrongly marked every owned card read */if(G&&(G.cardRd||0)<2){for(const k in (G.cards||{})){const o=G.cards[k];o.rd=o.seen?1:0;}G.cardRd=2;}if(G&&G.F&&typeof hmFix==="function")hmFix(G);if(G&&G.F&&typeof monoFix==="function")monoFix(G);if(G&&G.ev&&G.ev.loy&&typeof thiefFix==="function")thiefFix(G);if(G&&G.F&&G.prodigy)fixProdigies(G);if(G&&G.flags&&G.flags.beat_ploy&&G.flags.beatS_ploy==null)G.flags.beatS_ploy=G.season||1;
   // Legacy saves used week-of-season values. Infer only short, plausible effects;
   // otherwise expire them instead of resurrecting an old effect after New Year.
   const now=gameWeek(G),base=now-G.week;
@@ -6640,7 +6642,7 @@ AU.gsfx=function(kind,a){if(!this.init()||this.muted||!SETTINGS.sfx)return;const
   if(kind==="shimmer")for(let i=0;i<6;i++)T(i*.05,{f:1400+Math.random()*1400,type:"sine",dur:.12,peak:.06});};
 
 // ================= MUAY THAI MOE v1.3 — UI =================
-const VERSION="1.91.165";
+const VERSION="1.91.166";
 const CUR_LANG=(typeof window!=="undefined"&&window.LANG)||"th";
 const TH_LABEL=String.fromCharCode(3652,3607,3618);
 function langSwitch(cls){return `<div class="langsw ${cls||""}" role="group" aria-label="Language">${[["th",TH_LABEL],["en","EN"]].map(([k,l])=>`<button class="lsb ${CUR_LANG===k?"on":""}" data-act="setlang" data-v="${k}" aria-pressed="${CUR_LANG===k}">${l}</button>`).join("")}</div>`;}
@@ -7595,7 +7597,7 @@ function pCardSrc(f){const v=(G.pLook||{})[f.id];if(!v||!pLooks(f).some(x=>x[0]=
 function pArtSrc(f){if(UI.look==="train"&&!CHAMP_IDS.includes(f.id))return `${ASSET}${f.id}_train.webp`;const h=THAI_HOLD;THAI_HOLD=true;try{return stand(f.id,UI.look==="train"?"casual":UI.look,"happy");}finally{THAI_HOLD=h;}} /* "ลำลอง" stays casual here even with the Thai dress worn day to day — the dress has its own button */
 function pFace(f){if(UI.look==="fight"||!(f.canon||CHAMP_IDS.includes(f.id))||!pLooks(f).some(x=>x[0]===UI.look))return faceImg(f);return faceImg(f).replace(faceSrc(f.id,"happy"),faceSrc(f.id,"happy",UI.look));} /* v1.91.161 (player report): the face comes from faceSrc (which knows each look's real file) — deriving it from the body art broke once casual bodies moved to .png while their faces stayed .webp */
 function fighterHTML(f){const mine=f.camp==="player";const P=PROFILES[f.id];
-  const tabs=mine?[["rel","Profile"],["over","Stats"],["skill","Skills"]].concat(f.canon&&KIT_MASK[f.id]?[["look","Outfit"]]:[]):[["rel","Profile"],["over","Stats"]].concat(f.camp==="region"&&hasTree(f.id)?[["skill","Skills"]]:[]); /* v1.91.45: a regional champion's tree can be looked at while she is still a rival */
+  const tabs=mine?[["rel","Profile"],["over","Stats"],["skill","Skills"]].concat(f.canon&&KIT_MASK[f.id]?[["look","Outfit"]]:[]):[["rel","Profile"],["over","Stats"]].concat(f.camp==="region"&&hasTree(f.id)&&!skInert(f)?[["skill","Skills"]]:[]); /* v1.91.45: a regional champion's tree can be looked at while she is still a rival */
   let t=UI.ptab;if(!tabs.some(x=>x[0]===t))t="over";
   const head=`<div class="fp-head">${pFace(f)}<div><h2>${esc(f.full)}</h2><div class="meta">${f.age!=null?f.age+" yrs · ":""}${f.camp==="player"?"Sirichai Camp":f.lab?"Vector Gym, Bangkok":f.camp==="rival"&&!f.indie?"Golden Tiger Camp":"Free agent"} · Div ${f.div} · ${styleOf(f.a)} · ${rec(f)}</div>${G.belt&&Object.values(G.belt).some(x=>x.id===f.id)?`<div class="beltb">🏆 Tha Phae Stadium champion</div>`:Object.entries(G.venueBelts||{}).some(([v,ds])=>Object.values(ds).some(b=>b.id===f.id))?`<div class="beltb">🏆 ${STADIUMS[Object.entries(G.venueBelts).find(([v,ds])=>Object.values(ds).some(b=>b.id===f.id))[0]].name}</div>`:f.belts?`<div class="beltb old">Former stadium champion</div>`:""}<div class="tierline">${tierChip(f,1)}<span class="meta">Rating <b>${ratingOf(f)}</b></span>${tierYearNote(f)}</div>${xpBar(f)}</div></div>
    <div class="seg ptabs">${tabs.map(([k,n])=>`<button data-act="ptab" data-v="${k}" aria-pressed="${t===k}">${n}${k==="skill"&&skReady(f)?'<i class="tdot2"></i>':""}</button>`).join("")}</div>`;
@@ -11458,9 +11460,31 @@ Object.assign(ACT,{xhang:d=>{UI.modal={type:"xhang",id:d.id};render();},xhanggo:
 
 /* ---------- Baiyok ---------- */
 SPK.prod_B={name:"Baiyok",color:"#d9b24a"};
+/* v1.91.166 (Man): Baiyok gets a full kit like everyone else — Fah's tree (her old Division B rival line, 48 skills), Lv.42 legend tips of her own,
+   two hidden powers, a signature and a hot-form title. As a rival she still fights without skills (skInert in engine.js); the kit opens when she moves in. */
+const BY_CAP={
+ fah_0a5:["by_0a5","Elbows on the Rope's Beat","Lv.42 · Legend · elbows land on the beat like a wooden-handled jump rope · elbow power +22%, elbow accuracy +4% · Baiyok's mark: 1% less energy",r=>({staSave:.01*r})],
+ fah_0b5:["by_0b5","No Plan in the Ring","Lv.42 · Legend · fighting her own way for the first time in her life · elbow points +16%, elbow power +12%, morale effect +2% · Baiyok's mark: morale effect +1%",r=>({mor:.01*r})],
+ fah_1a5:["by_1a5","A Hundred Punches in a Little Notebook","Lv.42 · Legend · every punch counted until none miss · punch power +18%, punch points +10%, 4% less energy · Baiyok's mark: kick accuracy +1%",r=>({hit:{kick:.01*r}})],
+ fah_1b5:["by_1b5","First Downpour","Lv.42 · Legend · punches as heavy as the first downpour over training · punch power +24%, punch accuracy +3%, +3% accuracy at low health · Baiyok's mark: evade +1%",r=>({evade:.01*r})],
+ fah_2a5:["by_2a5","First Smile","Lv.42 · Legend · a smile nobody has seen before throws the opponent off · counter +6%, counter punch power +16%, evade +2% · Baiyok's mark: counter +1%",r=>({ctr:.01*r})],
+ fah_2b5:["by_2b5","Spotless White","Lv.42 · Legend · still standing at the final bell in her own white · +6% accuracy at low health, recovery +18%, morale effect +2% · Baiyok's mark: recovery +3%",r=>({regen:.03*r})]};
+const byFxAdd=(a,b)=>{const o={...a};for(const k in b){if(b[k]&&typeof b[k]==="object"){o[k]={...(a[k]||{})};for(const w in b[k])o[k][w]=(o[k][w]||0)+b[k][w];}else o[k]=(o[k]||0)+b[k];}return o;};
+(function byKit(){if(SKILLS.prod_B||!SKILLS.fah)return;REQ_ALIAS.prod_B="fah";
+  SKILLS.prod_B=SKILLS.fah.map(s=>{const c=BY_CAP[s.id];if(!c)return s;const [id,name,desc,ad]=c;return {...s,id,name,desc,fx:r=>byFxAdd(s.fx(r),ad(r))};});
+  TRAITS.prod_B=[{id:"by_count",name:"Count to a Hundred",desc:"Kick accuracy +4% · strikes cost 5% less stamina",fx:{hit:{kick:.04},staSave:.05}},
+    {id:"by_grandma",name:"Grandma's Stance",desc:"Counter +4% · recovers 10% faster between rounds",fx:{ctr:.04,regen:.1}}];
+  SIGNATURE.prod_B={name:"Wooden-Handled Jump Rope",desc:"Bond ♥ Lv.7+ · Kick power +12% · 5% less energy",fx:{dmg:{kick:.12},staSave:.05}};
+  HOT_TITLES.prod_B={name:"The Prodigy Who Learned to Smile",desc:"more accurate, slips a little more",prep:.026,ev:.012};})();
+/* in the camp she fights on Fah's lines like a main-cast fighter; her points are re-spent along her home line once (on moving in, or the first load after this update) */
+function byCampKit(G){const f=G&&G.F&&G.F.prod_B;if(!f||f.camp!=="player")return;
+  if(!HOME_STYLE.prod_B){HOME_LINE.prod_B=HOME_LINE.fah;HOME_STYLE.prod_B=HOME_STYLE.fah;if(LINE_K.fah)LINE_K.prod_B=LINE_K.fah;if(LINE_KR.fah)LINE_KR.prod_B=LINE_KR.fah;}
+  if(f.byKit)return;f.byKit=1;f.skills={};f.equip=[];f.spv=2;f.sp=SP_PER_LV(f)*Math.max(0,(f.lvl||1)-1);if(f.trLv==null){f.trLv=3;f.trBase=3;}if(!f.trait)f.trait=TRAITS.prod_B[0].id;
+  const L=HOME_LINE.prod_B,ord=[...skillList("prod_B")].sort((x,y)=>((x.line===L?0:x.school==="build"?1:2)-(y.line===L?0:y.school==="build"?1:2)));
+  let go=true;for(let i=0;go&&f.sp>0&&i<400;i++){go=false;for(const sk of ord){if(f.sp>0&&learnSkill(G,"prod_B",sk.id)){go=true;break;}}}}
 const XL_PROF={
  prod_B:{age:20,height:"171 cm",blood:"B",bday:"14 February",home:"Chiang Mai · her grandmother's house by the Mae Kha canal",heritage:"Her grandmother's boxing (before Golden Tiger)",
-  personality:"Calm, terse, so straightforward she seems cold. Kind, without knowing how to show it. Learning to enjoy boxing for the first time.",likes:["Wooden-handled skipping ropes","Rice soup at 5 a.m.","Training in the rain"],
+  personality:"Calm, terse, so straightforward she seems cold. Kind, without knowing how to show it. Learning to enjoy boxing for the first time.",likes:["Wooden-Handled Jump Rope","Rice soup at 5 a.m.","Training in the rain"],
   dislikes:["Whistles","Black kit","The words 'as planned'"],hobby:"Counts her kicks a hundred at a time and writes them in a little notebook",
   story:"Her grandmother taught her boxing from age seven. Golden Tiger took her at thirteen; ten hours a day made her a prodigy who never smiled, until the day she fought under her own name.",
   secret:"Keeps the ticket of every fight against Sirichai in a shoebox, with the result written on the back."},
@@ -11625,7 +11649,7 @@ EVENTS.push({id:"xl_join_prod_B",look:"casual",bg:"camp",pri:40,when:xlJoinDue,s
  xN("Sunday morning. Baiyok reaches camp before anyone else, as always, but today there's an old suitcase beside her."),xB("pout","They're repairing the pavilion at the temple ground. No training for three months."),
  xB("flustered","…I lied. The pavilion isn't being repaired. I just want to train here every day, not only on Sundays."),
  {inject:G=>dormUsed(G)>=dormRooms(G)?[xN(`The dorm is full (${dormRooms(G)} rooms) · upgrade the dorm and she'll ask again`),{fx:G2=>{G2.xlJoinNo=absWeek(G2);if(G2.seen)delete G2.seen.xl_join_prod_B;}}]:[{n:"nar",t:"What will you reply?",choice:[
-  {t:"\"There's a free room upstairs. Move in.\"",fx:G2=>{joinCamp(G2,"prod_B",2500);const f=G2.F.prod_B;f.indie=false;f.full="Baiyok";xlJoinDrop(f);add(G2,"prod_B","bond",5);add(G2,"prod_B","morale",15);},
+  {t:"\"There's a free room upstairs. Move in.\"",fx:G2=>{joinCamp(G2,"prod_B",2500);const f=G2.F.prod_B;f.indie=false;f.full="Baiyok";xlJoinDrop(f);byCampKit(G2);add(G2,"prod_B","bond",5);add(G2,"prod_B","morale",15);},
    then:[xB("happy","…I won't let anyone down."),xB("flustered","Except oversleeping. I have never overslept."),xN("Baiyok moves into Sirichai Camp · she fights Division B for us")]},
   {t:"\"Not just yet.\"",fx:G2=>{G2.xlJoinNo=absWeek(G2);if(G2.seen)delete G2.seen.xl_join_prod_B;},then:[xB("pout","…All right. I'll wait. But I'm still coming Sundays.")]}]}]}]});
 
@@ -11785,7 +11809,7 @@ const xlShow=(G,id)=>xlOn(G,id)&&((G.F[id].bond||0)>=25||Object.keys(G.cards||{}
 Object.assign(CARDS,{
  xl_by_n:{c:"prod_B",xl:1,r:"N",t:"The Kick-Count Notebook",hint:"Get to know Baiyok (acquaintance)",bg:"river_dawn",need:G=>xlOn(G,"prod_B")&&(G.F.prod_B.bond||0)>=25,steps:[
   xN("A little brown notebook left on the temple-ground bench. Inside, nothing but 300 / 300, hundreds of lines."),xB("pout","Don't read it. …It's only numbers. Nothing interesting."),xN("The last line has something added in faint pencil: 'Someone counted for me today.'"),xB("flustered","…I told you not to read it.")]},
- xl_by_r:{c:"prod_B",xl:1,r:"R",t:"Wooden-handled skipping ropes",hint:"Grow close to Baiyok (close friend)",bg:"river_dawn",need:G=>xlOn(G,"prod_B")&&(G.F.prod_B.bond||0)>=40,steps:[
+ xl_by_r:{c:"prod_B",xl:1,r:"R",t:"Wooden-Handled Jump Rope",hint:"Grow close to Baiyok (close friend)",bg:"river_dawn",need:G=>xlOn(G,"prod_B")&&(G.F.prod_B.bond||0)>=40,steps:[
   xN("Baiyok teaches you crossover skips with her grandmother's old rope, the wooden handles worn deep by thumbs."),xB("happy","Grandma skipped with this rope when she was young. She says she was better than me."),xB("flustered","…I've never let anyone touch this rope. You're the first. Don't feel special.")]},
  xl_by_sr:{c:"prod_B",xl:1,r:"SR",t:"Beat Me First",hint:"Our camp wins Baiyok's challenge",bg:"hall",need:G=>xlProofWon(G,"prod_B"),steps:[
   xN("After the fight, Baiyok sits against the ropes, her white hand wraps with gold trim still on."),xB("sad","Lost again. …I didn't hold back for a single round."),xB("happy","Good. If your camp had won because I held back, I wouldn't believe a word you said."),xB("flustered","…Now, say whatever you want to say.")]},

@@ -35,6 +35,28 @@ Object.assign(ACT,{xhang:d=>{UI.modal={type:"xhang",id:d.id};render();},xhanggo:
 
 /* ---------- Baiyok ---------- */
 SPK.prod_B={name:"ใบหยก",color:"#d9b24a"};
+/* v1.91.166 (Man): Baiyok gets a full kit like everyone else — Fah's tree (her old Division B rival line, 48 skills), Lv.42 legend tips of her own,
+   two hidden powers, a signature and a hot-form title. As a rival she still fights without skills (skInert in engine.js); the kit opens when she moves in. */
+const BY_CAP={
+ fah_0a5:["by_0a5","ศอกตามจังหวะเชือก","Lv.42 · ขั้นตำนาน · ศอกลงตรงจังหวะเหมือนกระโดดเชือกด้ามไม้ · แรงศอก +22% ศอกแม่น +4% · ลายเซ็นใบหยก: ใช้แรงน้อยลง 1%",r=>({staSave:.01*r})],
+ fah_0b5:["by_0b5","สังเวียนที่ไม่มีแผน","Lv.42 · ขั้นตำนาน · ชกตามใจตัวเองเป็นครั้งแรกในชีวิต · คะแนนศอก +16% แรงศอก +12% กำลังใจมีผล +2% · ลายเซ็นใบหยก: กำลังใจมีผล +1%",r=>({mor:.01*r})],
+ fah_1a5:["by_1a5","ร้อยหมัดในสมุดเล่มเล็ก","Lv.42 · ขั้นตำนาน · หมัดที่นับไว้ทุกดอกจนไม่พลาด · แรงหมัด +18% คะแนนหมัด +10% ใช้แรงน้อยลง 4% · ลายเซ็นใบหยก: เตะแม่น +1%",r=>({hit:{kick:.01*r}})],
+ fah_1b5:["by_1b5","ฝนห่าแรก","Lv.42 · ขั้นตำนาน · หมัดหนักเหมือนฝนห่าแรกตอนซ้อม · แรงหมัด +24% หมัดแม่น +3% เลือดต่ำแม่นขึ้น 3% · ลายเซ็นใบหยก: หลบ +1%",r=>({evade:.01*r})],
+ fah_2a5:["by_2a5","ยิ้มครั้งแรก","Lv.42 · ขั้นตำนาน · รอยยิ้มที่ไม่มีใครเคยเห็นทำคู่ชกเสียทรง · สวนกลับ +6% แรงหมัดสวน +16% หลบ +2% · ลายเซ็นใบหยก: สวนกลับ +1%",r=>({ctr:.01*r})],
+ fah_2b5:["by_2b5","ชุดขาวไม่เปื้อน","Lv.42 · ขั้นตำนาน · ยืนจนจบยกสุดท้ายในชุดขาวของตัวเอง · เลือดต่ำแม่นขึ้น 6% ฟื้นแรง +18% กำลังใจมีผล +2% · ลายเซ็นใบหยก: ฟื้นแรง +3%",r=>({regen:.03*r})]};
+const byFxAdd=(a,b)=>{const o={...a};for(const k in b){if(b[k]&&typeof b[k]==="object"){o[k]={...(a[k]||{})};for(const w in b[k])o[k][w]=(o[k][w]||0)+b[k][w];}else o[k]=(o[k]||0)+b[k];}return o;};
+(function byKit(){if(SKILLS.prod_B||!SKILLS.fah)return;REQ_ALIAS.prod_B="fah";
+  SKILLS.prod_B=SKILLS.fah.map(s=>{const c=BY_CAP[s.id];if(!c)return s;const [id,name,desc,ad]=c;return {...s,id,name,desc,fx:r=>byFxAdd(s.fx(r),ad(r))};});
+  TRAITS.prod_B=[{id:"by_count",name:"นับร้อยไม่พลาด",desc:"เตะแม่น +4% · ใช้แรงออกอาวุธน้อยลง 5%",fx:{hit:{kick:.04},staSave:.05}},
+    {id:"by_grandma",name:"ท่ามวยของยาย",desc:"สวนกลับ +4% · ฟื้นแรงระหว่างยกเร็วขึ้น 10%",fx:{ctr:.04,regen:.1}}];
+  SIGNATURE.prod_B={name:"เชือกกระโดดด้ามไม้",desc:"ความสนิท ♥ Lv.7+ · เตะแรง +12% · ใช้แรงน้อยลง 5%",fx:{dmg:{kick:.12},staSave:.05}};
+  HOT_TITLES.prod_B={name:"อัจฉริยะที่เริ่มยิ้ม",desc:"แม่นขึ้น หลบดีขึ้นนิดหน่อย",prep:.026,ev:.012};})();
+/* in the camp she fights on Fah's lines like a main-cast fighter; her points are re-spent along her home line once (on moving in, or the first load after this update) */
+function byCampKit(G){const f=G&&G.F&&G.F.prod_B;if(!f||f.camp!=="player")return;
+  if(!HOME_STYLE.prod_B){HOME_LINE.prod_B=HOME_LINE.fah;HOME_STYLE.prod_B=HOME_STYLE.fah;if(LINE_K.fah)LINE_K.prod_B=LINE_K.fah;if(LINE_KR.fah)LINE_KR.prod_B=LINE_KR.fah;}
+  if(f.byKit)return;f.byKit=1;f.skills={};f.equip=[];f.spv=2;f.sp=SP_PER_LV(f)*Math.max(0,(f.lvl||1)-1);if(f.trLv==null){f.trLv=3;f.trBase=3;}if(!f.trait)f.trait=TRAITS.prod_B[0].id;
+  const L=HOME_LINE.prod_B,ord=[...skillList("prod_B")].sort((x,y)=>((x.line===L?0:x.school==="build"?1:2)-(y.line===L?0:y.school==="build"?1:2)));
+  let go=true;for(let i=0;go&&f.sp>0&&i<400;i++){go=false;for(const sk of ord){if(f.sp>0&&learnSkill(G,"prod_B",sk.id)){go=true;break;}}}}
 const XL_PROF={
  prod_B:{age:20,height:"171 ซม.",blood:"B",bday:"14 กุมภาพันธ์",home:"เชียงใหม่ · บ้านยายริมคลองแม่ข่า",heritage:"ท่ามวยของยาย (ก่อนเข้าพยัคฆ์ทอง)",
   personality:"นิ่ง พูดสั้น ซื่อตรงจนดูเย็นชา ใจดีแบบไม่รู้วิธีแสดงออก กำลังหัดสนุกกับมวยเป็นครั้งแรก",likes:["เชือกกระโดดด้ามไม้","ข้าวต้มตอนตีห้า","ฝนตกตอนซ้อม"],
@@ -202,7 +224,7 @@ EVENTS.push({id:"xl_join_prod_B",look:"casual",bg:"camp",pri:40,when:xlJoinDue,s
  xN("เช้าวันอาทิตย์ ใบหยกมาถึงค่ายก่อนทุกคนเหมือนเคย แต่วันนี้ข้างตัวมีกระเป๋าเดินทางใบเก่า"),xB("pout","ลานวัดเขาจะซ่อมศาลา ห้ามซ้อมสามเดือน"),
  xB("flustered","…ฉันโกหก ศาลาไม่ได้ซ่อม ฉันแค่อยากซ้อมที่นี่ทุกวัน ไม่ใช่แค่วันอาทิตย์"),
  {inject:G=>dormUsed(G)>=dormRooms(G)?[xN(`หอพักเต็มแล้ว (${dormRooms(G)} ห้อง) · อัปเกรดหอพักก่อนแล้วเธอจะมาถามอีกครั้ง`),{fx:G2=>{G2.xlJoinNo=absWeek(G2);if(G2.seen)delete G2.seen.xl_join_prod_B;}}]:[{n:"nar",t:"จะตอบว่าอะไร?",choice:[
-  {t:"\"ห้องว่างอยู่ชั้นสอง ย้ายมาเลย\"",fx:G2=>{joinCamp(G2,"prod_B",2500);const f=G2.F.prod_B;f.indie=false;f.full="ใบหยก";xlJoinDrop(f);add(G2,"prod_B","bond",5);add(G2,"prod_B","morale",15);},
+  {t:"\"ห้องว่างอยู่ชั้นสอง ย้ายมาเลย\"",fx:G2=>{joinCamp(G2,"prod_B",2500);const f=G2.F.prod_B;f.indie=false;f.full="ใบหยก";xlJoinDrop(f);byCampKit(G2);add(G2,"prod_B","bond",5);add(G2,"prod_B","morale",15);},
    then:[xB("happy","…ฉันจะไม่ทำให้ใครผิดหวัง"),xB("flustered","ยกเว้นเรื่องตื่นสาย ฉันไม่เคยตื่นสาย"),xN("ใบหยกย้ายเข้าค่ายศิริชัย · ชกรุ่น B ให้ค่ายเรา")]},
   {t:"\"ยังไม่ใช่ตอนนี้\"",fx:G2=>{G2.xlJoinNo=absWeek(G2);if(G2.seen)delete G2.seen.xl_join_prod_B;},then:[xB("pout","…ได้ ฉันจะรอ แต่วันอาทิตย์ยังมาเหมือนเดิมนะ")]}]}]}]});
 

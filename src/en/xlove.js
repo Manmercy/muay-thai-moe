@@ -35,9 +35,31 @@ Object.assign(ACT,{xhang:d=>{UI.modal={type:"xhang",id:d.id};render();},xhanggo:
 
 /* ---------- Baiyok ---------- */
 SPK.prod_B={name:"Baiyok",color:"#d9b24a"};
+/* v1.91.166 (Man): Baiyok gets a full kit like everyone else — Fah's tree (her old Division B rival line, 48 skills), Lv.42 legend tips of her own,
+   two hidden powers, a signature and a hot-form title. As a rival she still fights without skills (skInert in engine.js); the kit opens when she moves in. */
+const BY_CAP={
+ fah_0a5:["by_0a5","Elbows on the Rope's Beat","Lv.42 · Legend · elbows land on the beat like a wooden-handled jump rope · elbow power +22%, elbow accuracy +4% · Baiyok's mark: 1% less energy",r=>({staSave:.01*r})],
+ fah_0b5:["by_0b5","No Plan in the Ring","Lv.42 · Legend · fighting her own way for the first time in her life · elbow points +16%, elbow power +12%, morale effect +2% · Baiyok's mark: morale effect +1%",r=>({mor:.01*r})],
+ fah_1a5:["by_1a5","A Hundred Punches in a Little Notebook","Lv.42 · Legend · every punch counted until none miss · punch power +18%, punch points +10%, 4% less energy · Baiyok's mark: kick accuracy +1%",r=>({hit:{kick:.01*r}})],
+ fah_1b5:["by_1b5","First Downpour","Lv.42 · Legend · punches as heavy as the first downpour over training · punch power +24%, punch accuracy +3%, +3% accuracy at low health · Baiyok's mark: evade +1%",r=>({evade:.01*r})],
+ fah_2a5:["by_2a5","First Smile","Lv.42 · Legend · a smile nobody has seen before throws the opponent off · counter +6%, counter punch power +16%, evade +2% · Baiyok's mark: counter +1%",r=>({ctr:.01*r})],
+ fah_2b5:["by_2b5","Spotless White","Lv.42 · Legend · still standing at the final bell in her own white · +6% accuracy at low health, recovery +18%, morale effect +2% · Baiyok's mark: recovery +3%",r=>({regen:.03*r})]};
+const byFxAdd=(a,b)=>{const o={...a};for(const k in b){if(b[k]&&typeof b[k]==="object"){o[k]={...(a[k]||{})};for(const w in b[k])o[k][w]=(o[k][w]||0)+b[k][w];}else o[k]=(o[k]||0)+b[k];}return o;};
+(function byKit(){if(SKILLS.prod_B||!SKILLS.fah)return;REQ_ALIAS.prod_B="fah";
+  SKILLS.prod_B=SKILLS.fah.map(s=>{const c=BY_CAP[s.id];if(!c)return s;const [id,name,desc,ad]=c;return {...s,id,name,desc,fx:r=>byFxAdd(s.fx(r),ad(r))};});
+  TRAITS.prod_B=[{id:"by_count",name:"Count to a Hundred",desc:"Kick accuracy +4% · strikes cost 5% less stamina",fx:{hit:{kick:.04},staSave:.05}},
+    {id:"by_grandma",name:"Grandma's Stance",desc:"Counter +4% · recovers 10% faster between rounds",fx:{ctr:.04,regen:.1}}];
+  SIGNATURE.prod_B={name:"Wooden-Handled Jump Rope",desc:"Bond ♥ Lv.7+ · Kick power +12% · 5% less energy",fx:{dmg:{kick:.12},staSave:.05}};
+  HOT_TITLES.prod_B={name:"The Prodigy Who Learned to Smile",desc:"more accurate, slips a little more",prep:.026,ev:.012};})();
+/* in the camp she fights on Fah's lines like a main-cast fighter; her points are re-spent along her home line once (on moving in, or the first load after this update) */
+function byCampKit(G){const f=G&&G.F&&G.F.prod_B;if(!f||f.camp!=="player")return;
+  if(!HOME_STYLE.prod_B){HOME_LINE.prod_B=HOME_LINE.fah;HOME_STYLE.prod_B=HOME_STYLE.fah;if(LINE_K.fah)LINE_K.prod_B=LINE_K.fah;if(LINE_KR.fah)LINE_KR.prod_B=LINE_KR.fah;}
+  if(f.byKit)return;f.byKit=1;f.skills={};f.equip=[];f.spv=2;f.sp=SP_PER_LV(f)*Math.max(0,(f.lvl||1)-1);if(f.trLv==null){f.trLv=3;f.trBase=3;}if(!f.trait)f.trait=TRAITS.prod_B[0].id;
+  const L=HOME_LINE.prod_B,ord=[...skillList("prod_B")].sort((x,y)=>((x.line===L?0:x.school==="build"?1:2)-(y.line===L?0:y.school==="build"?1:2)));
+  let go=true;for(let i=0;go&&f.sp>0&&i<400;i++){go=false;for(const sk of ord){if(f.sp>0&&learnSkill(G,"prod_B",sk.id)){go=true;break;}}}}
 const XL_PROF={
  prod_B:{age:20,height:"171 cm",blood:"B",bday:"14 February",home:"Chiang Mai · her grandmother's house by the Mae Kha canal",heritage:"Her grandmother's boxing (before Golden Tiger)",
-  personality:"Calm, terse, so straightforward she seems cold. Kind, without knowing how to show it. Learning to enjoy boxing for the first time.",likes:["Wooden-handled skipping ropes","Rice soup at 5 a.m.","Training in the rain"],
+  personality:"Calm, terse, so straightforward she seems cold. Kind, without knowing how to show it. Learning to enjoy boxing for the first time.",likes:["Wooden-Handled Jump Rope","Rice soup at 5 a.m.","Training in the rain"],
   dislikes:["Whistles","Black kit","The words 'as planned'"],hobby:"Counts her kicks a hundred at a time and writes them in a little notebook",
   story:"Her grandmother taught her boxing from age seven. Golden Tiger took her at thirteen; ten hours a day made her a prodigy who never smiled, until the day she fought under her own name.",
   secret:"Keeps the ticket of every fight against Sirichai in a shoebox, with the result written on the back."},
@@ -202,7 +224,7 @@ EVENTS.push({id:"xl_join_prod_B",look:"casual",bg:"camp",pri:40,when:xlJoinDue,s
  xN("Sunday morning. Baiyok reaches camp before anyone else, as always, but today there's an old suitcase beside her."),xB("pout","They're repairing the pavilion at the temple ground. No training for three months."),
  xB("flustered","…I lied. The pavilion isn't being repaired. I just want to train here every day, not only on Sundays."),
  {inject:G=>dormUsed(G)>=dormRooms(G)?[xN(`The dorm is full (${dormRooms(G)} rooms) · upgrade the dorm and she'll ask again`),{fx:G2=>{G2.xlJoinNo=absWeek(G2);if(G2.seen)delete G2.seen.xl_join_prod_B;}}]:[{n:"nar",t:"What will you reply?",choice:[
-  {t:"\"There's a free room upstairs. Move in.\"",fx:G2=>{joinCamp(G2,"prod_B",2500);const f=G2.F.prod_B;f.indie=false;f.full="Baiyok";xlJoinDrop(f);add(G2,"prod_B","bond",5);add(G2,"prod_B","morale",15);},
+  {t:"\"There's a free room upstairs. Move in.\"",fx:G2=>{joinCamp(G2,"prod_B",2500);const f=G2.F.prod_B;f.indie=false;f.full="Baiyok";xlJoinDrop(f);byCampKit(G2);add(G2,"prod_B","bond",5);add(G2,"prod_B","morale",15);},
    then:[xB("happy","…I won't let anyone down."),xB("flustered","Except oversleeping. I have never overslept."),xN("Baiyok moves into Sirichai Camp · she fights Division B for us")]},
   {t:"\"Not just yet.\"",fx:G2=>{G2.xlJoinNo=absWeek(G2);if(G2.seen)delete G2.seen.xl_join_prod_B;},then:[xB("pout","…All right. I'll wait. But I'm still coming Sundays.")]}]}]}]});
 
@@ -362,7 +384,7 @@ const xlShow=(G,id)=>xlOn(G,id)&&((G.F[id].bond||0)>=25||Object.keys(G.cards||{}
 Object.assign(CARDS,{
  xl_by_n:{c:"prod_B",xl:1,r:"N",t:"The Kick-Count Notebook",hint:"Get to know Baiyok (acquaintance)",bg:"river_dawn",need:G=>xlOn(G,"prod_B")&&(G.F.prod_B.bond||0)>=25,steps:[
   xN("A little brown notebook left on the temple-ground bench. Inside, nothing but 300 / 300, hundreds of lines."),xB("pout","Don't read it. …It's only numbers. Nothing interesting."),xN("The last line has something added in faint pencil: 'Someone counted for me today.'"),xB("flustered","…I told you not to read it.")]},
- xl_by_r:{c:"prod_B",xl:1,r:"R",t:"Wooden-handled skipping ropes",hint:"Grow close to Baiyok (close friend)",bg:"river_dawn",need:G=>xlOn(G,"prod_B")&&(G.F.prod_B.bond||0)>=40,steps:[
+ xl_by_r:{c:"prod_B",xl:1,r:"R",t:"Wooden-Handled Jump Rope",hint:"Grow close to Baiyok (close friend)",bg:"river_dawn",need:G=>xlOn(G,"prod_B")&&(G.F.prod_B.bond||0)>=40,steps:[
   xN("Baiyok teaches you crossover skips with her grandmother's old rope, the wooden handles worn deep by thumbs."),xB("happy","Grandma skipped with this rope when she was young. She says she was better than me."),xB("flustered","…I've never let anyone touch this rope. You're the first. Don't feel special.")]},
  xl_by_sr:{c:"prod_B",xl:1,r:"SR",t:"Beat Me First",hint:"Our camp wins Baiyok's challenge",bg:"hall",need:G=>xlProofWon(G,"prod_B"),steps:[
   xN("After the fight, Baiyok sits against the ropes, her white hand wraps with gold trim still on."),xB("sad","Lost again. …I didn't hold back for a single round."),xB("happy","Good. If your camp had won because I held back, I wouldn't believe a word you said."),xB("flustered","…Now, say whatever you want to say.")]},

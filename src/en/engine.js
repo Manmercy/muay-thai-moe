@@ -355,6 +355,8 @@ SHARED_SKILLS.push(SKX("sh5b3",5,6,"sh5b2",["dur", "comp"],"build","Down and Up"
 SHARED_SKILLS.push(SKX("sh5b4",5,7,"sh5b3",["dur"],"build","Unbreakable Nerve","Always on · boosts school lines · Lv.32 · +1% accuracy at low health, morale effect +0.5%",r=>({clutch:0.01*r,mor:0.005*r}),{lv:32,br:1,nd:4,passive:1,feed:"school",shared:1}));
 SHARED_SKILLS.push(SKX("sh5b5",5,8,"sh5b4",["dur", "guard"],"build","Mountain Doesn't Fall","Lv.38 · Legend · no one knocks over a mountain · clinch defense +1, +5% accuracy at low health, evade +2%",r=>({clDef:1*r,clutch:0.05*r,evade:0.02*r}),{lv:38,br:1,nd:5,shared:1}));
 /* end v1.89 skill roots */
+/* v1.91.166: Baiyok has a tree now (xlove.js) but as a rival she still fights without skills, as she always has — the tree opens when she moves into the camp */
+const skInert=f=>!!f&&f.id==="prod_B"&&f.camp!=="player";
 const skillList=fid=>(SKILLS[fid]||[]).concat(SKILLS[fid]&&SKILLS[fid][0]&&SKILLS[fid][0].line!=null?SHARED_SKILLS:[]);
 const sharedPathOf=f=>{for(const s of SHARED_SKILLS)if((f.skills&&f.skills[s.id])>0)return s.line;return null;};
 // v1.83: full skill reset — every point spent comes back so a fighter can move to another line. First reset per fighter is free.
@@ -389,7 +391,7 @@ const hasSignature=f=>!!SIGNATURE[f.id]&&f.camp==="player"&&(f.bond||0)>=60;
 function skillMods(f){const m={hit:{},pts:{},dmg:{},ctr:0,ctrDmg:0,clutch:0,regen:0,mor:0,evade:0,corner:0,prep:0,clDef:0,staSave:0,sprawl:0,tdTry:0,gnp:0,sub:0};
   if(hasSignature(f)){const e=SIGNATURE[f.id].fx;for(const k in e){if(typeof e[k]==="object")for(const w in e[k])m[k][w]=(m[k][w]||0)+e[k][w];else m[k]+=e[k];}}
   {const T=f.camp==="player"&&TRAITS[f.id]&&TRAITS[f.id][0].fx?TRAITS[f.id].find(t=>t.id===traitOf(f)):null;const e=T?T.fx:f.pfx,pk=T?traitK(f):1;if(e){for(const k in e){if(typeof e[k]==="object")for(const w in e[k])m[k][w]=(m[k][w]||0)+e[k][w]*pk;else m[k]+=e[k]*pk;}}} /* v1.90: a regional champion's own perk */
-  const list=skillList(f.id);if(!list.length||!f.skills)return m;const eq=equipped(f);
+  const list=skInert(f)?[]:skillList(f.id);if(!list.length||!f.skills)return m;const eq=equipped(f);
   for(const sk of list){if(!sk.passive&&!eq.includes(sk.id))continue;const r=f.skills[sk.id]||0;if(!r)continue;const e=sk.fx(r);
     for(const k in e){if(typeof e[k]==="object")for(const w in e[k])m[k][w]=(m[k][w]||0)+e[k][w];else m[k]+=e[k];}}
   return m;}
@@ -427,7 +429,7 @@ function skillBlock(f,sk){const d=skillDef(f.id,sk),r=(f.skills&&f.skills[sk])||
   if(f.sp<1)B.push({t:"sp"});return B;}
 function learnSkill(G,id,sk){const f=G.F[id],d=skillDef(id,sk);if(!d||skillBlock(f,sk).length)return false;f.skills[sk]=(f.skills[sk]||0)+1;f.sp--;
   if(d.passive)return true;f.equip=equipped(f);if(!f.equip.includes(sk)&&f.equip.length<3)f.equip.push(sk);return true;}
-function passiveMods(f){const m={fatKick:0,fatAll:0,lossXp:0,fightXp:0,moraleLoss:0};for(const sk of skillList(f.id)){const r=(f.skills&&f.skills[sk.id])||0;if(!r||!sk.px)continue;const e=sk.px(r);for(const k in e)m[k]+=e[k];}return m;}
+function passiveMods(f){const m={fatKick:0,fatAll:0,lossXp:0,fightXp:0,moraleLoss:0};if(skInert(f))return m;for(const sk of skillList(f.id)){const r=(f.skills&&f.skills[sk.id])||0;if(!r||!sk.px)continue;const e=sk.px(r);for(const k in e)m[k]+=e[k];}return m;}
 // v1.20: only 3 techniques are carried into the ring (player picks; rivals carry their best 3)
 const MAX_EQUIP=3;
 function equipped(f){const pas=k=>{const d=skillDef(f.id,k);return !!(d&&d.passive);};const has=k=>(f.skills&&f.skills[k])>0&&!pas(k);if(Array.isArray(f.equip))return f.equip.filter(has).slice(0,MAX_EQUIP);
@@ -688,7 +690,7 @@ function fightRound(F){roundBegin(F);while(!roundDone(F))fightEx(F);return round
 // every learned school skill: attack burst, guard burst or second wind — max one per round; since v1.91.60 a skill rests one round after use and costs stamina
 function skillKind(sk){const e=sk.fx(1);const wk=e.hit||e.pts||e.dmg;if(wk)return {k:"atk",w:Object.keys(wk)[0]};if(e.evade||e.ctr||e.clDef||e.ctrDmg)return {k:"def"};return {k:"rec"};}
 const SKILL_KIND_NAME={atk:"Finishing attack",def:"Defend & counter",rec:"Recover energy"};
-function fightSkills(s){if(s.f.nlsk)return s.f.nlsk.map(k=>({...k,r:3}));const L=skillList(s.f.id),eq=equipped(s.f);return L.filter(k=>eq.includes(k.id)).map(k=>({...k,r:s.f.skills[k.id],...skillKind(k)}));}
+function fightSkills(s){if(s.f.nlsk)return s.f.nlsk.map(k=>({...k,r:3}));if(skInert(s.f))return [];const L=skillList(s.f.id),eq=equipped(s.f);return L.filter(k=>eq.includes(k.id)).map(k=>({...k,r:s.f.skills[k.id],...skillKind(k)}));}
 // v1.89.6: classic mae mai / look mai techniques get called by name from the booth (keyed by skill id so it works in every language)
 const MAEMAI={"ts_low":"l","ts_croc":"m","ts_ring":"l","ts_trunk":"m","kati_1a1":"l","kati_2b1":"m","kati_2b3":"m","cy_spin":"l","cy_erawan":"m","cy_gate":"l","mali_2a3":"m","lb_jab":"l","lb_kris":"m","lb_feint":"m","lb_giant":"m","lb_teep":"m","lb_fold":"l","rin_0b1":"m","rin_2b3":"m","kr_thunder":"m","kr_sweep":"l","p_wall":"l","ploy_1a3":"l","ploy_2a3":"m"};
 function skillCall(F,s,sk){const k=MAEMAI[sk.id];if(!k)return `${s.name} uses "${sk.name}"!`;const kn=k==="m"?"Mae mai Muay Thai":"Look mai Muay Thai";
@@ -1040,7 +1042,7 @@ const hasStaff=(G,k)=>(G.staff||[]).includes(k);
 const staffLocked=(G,k)=>{const r=STAFF[k].req;if(!r)return "";if(r.lv&&campLevel(G)<r.lv)return `Camp Lv.${r.lv}`;if(r.rep&&G.rep<r.rep)return `Fame ${r.rep}`;return "";};
 function hireStaff(G,k){const S=STAFF[k];G.staff=G.staff||[];if(!S||hasStaff(G,k)||G.staff.length>=staffSlots(G)||staffLocked(G,k)||G.cash<S.fee)return false;G.cash-=S.fee;G.staff.push(k);G.fac.assistants=G.staff.length;return true;}
 function fireStaff(G,k){G.staff=(G.staff||[]).filter(x=>x!==k);G.fac.assistants=G.staff.length;return true;}
-function fixSave(G){/* v1.91.42: a card counts as read only if its story was ever opened (o.seen is set only there) — v1.91.41 wrongly marked every owned card read */if(G&&(G.cardRd||0)<2){for(const k in (G.cards||{})){const o=G.cards[k];o.rd=o.seen?1:0;}G.cardRd=2;}if(G&&G.F&&typeof hmFix==="function")hmFix(G);if(G&&G.F&&typeof monoFix==="function")monoFix(G);if(G&&G.ev&&G.ev.loy&&typeof thiefFix==="function")thiefFix(G);if(G&&G.F&&G.prodigy)fixProdigies(G);if(G&&G.flags&&G.flags.beat_ploy&&G.flags.beatS_ploy==null)G.flags.beatS_ploy=G.season||1;
+function fixSave(G){if(typeof byCampKit==="function")byCampKit(G); /* v1.91.166: Baiyok in the camp gets her tree *//* v1.91.42: a card counts as read only if its story was ever opened (o.seen is set only there) — v1.91.41 wrongly marked every owned card read */if(G&&(G.cardRd||0)<2){for(const k in (G.cards||{})){const o=G.cards[k];o.rd=o.seen?1:0;}G.cardRd=2;}if(G&&G.F&&typeof hmFix==="function")hmFix(G);if(G&&G.F&&typeof monoFix==="function")monoFix(G);if(G&&G.ev&&G.ev.loy&&typeof thiefFix==="function")thiefFix(G);if(G&&G.F&&G.prodigy)fixProdigies(G);if(G&&G.flags&&G.flags.beat_ploy&&G.flags.beatS_ploy==null)G.flags.beatS_ploy=G.season||1;
   // Legacy saves used week-of-season values. Infer only short, plausible effects;
   // otherwise expire them instead of resurrecting an old effect after New Year.
   const now=gameWeek(G),base=now-G.week;
