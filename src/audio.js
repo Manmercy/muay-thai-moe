@@ -24,6 +24,8 @@ const AU={ctx:null,master:null,music:null,sfxBus:null,crowdG:null,timer:null,ste
   /* v1.91.178 juice: one coin blip, pitch climbing with i (coins flying into the cash readout) */
   /* v1.91.180: soft typewriter tick */
   tick(){if(!this.init()||this.muted||!SETTINGS.sfx)return;const t=this.ctx.currentTime+.005;this.tone(t,{f:1700+Math.random()*300,type:"square",dur:.018,peak:.05});},
+  /* v1.91.181: combo blip, a step higher each hit in the chain */
+  combo(n){if(!this.init()||this.muted||!SETTINGS.sfx)return;const t=this.ctx.currentTime+.02,f=523*Math.pow(2,Math.min(n-2,10)*2/12);this.tone(t,{f,type:"square",dur:.06,peak:.12});this.tone(t+.06,{f:f*1.26,type:"square",dur:.06,peak:.1});if(n>=3)this.tone(t+.12,{f:f*1.5,type:"square",dur:.09,peak:.1});},
   coin(i){if(!this.init()||this.muted||!SETTINGS.sfx)return;const t=this.ctx.currentTime+.01,f=988*Math.pow(2,Math.min(i,12)/12);this.tone(t,{f,type:"square",dur:.05,peak:.18});this.tone(t+.05,{f:f*1.5,type:"square",dur:.07,peak:.14});},
   sfx(kind){if(!this.init()||this.muted||!SETTINGS.sfx)return;const t=this.ctx.currentTime+.01;
     if(kind==="punch"){this.noiseHit(t,{f:1400,dur:.09,peak:.9});this.tone(t,{f:120,to:55,dur:.12,peak:.8});}
