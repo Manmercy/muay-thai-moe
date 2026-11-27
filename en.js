@@ -6719,7 +6719,11 @@ AU.gsfx=function(kind,a){if(!this.init()||this.muted||!SETTINGS.sfx)return;const
   if(kind==="shimmer")for(let i=0;i<6;i++)T(i*.05,{f:1400+Math.random()*1400,type:"sine",dur:.12,peak:.06});};
 
 // ================= MUAY THAI MOE v1.3 — UI =================
+<<<<<<< Updated upstream
 const VERSION="1.91.189";
+=======
+const VERSION="1.91.187";
+>>>>>>> Stashed changes
 const CUR_LANG=(typeof window!=="undefined"&&window.LANG)||"th";
 const TH_LABEL=String.fromCharCode(3652,3607,3618);
 function langSwitch(cls){return `<div class="langsw ${cls||""}" role="group" aria-label="Language">${[["th",TH_LABEL],["en","EN"]].map(([k,l])=>`<button class="lsb ${CUR_LANG===k?"on":""}" data-act="setlang" data-v="${k}" aria-pressed="${CUR_LANG===k}">${l}</button>`).join("")}</div>`;}
@@ -9547,10 +9551,29 @@ Object.assign(ACT,{
 const BAG_DIFF={easy:{name:"Easy",bpm:92,bars:8,dens:0,mul:1},normal:{name:"Normal",bpm:108,bars:10,dens:1,mul:1.25},hard:{name:"It is",bpm:124,bars:12,dens:2,mul:1.6}};
 const BAG_PAT=[["L...L...","L...R...","R...R...","L.L.R...","L...R.R.","R...L..."],["L.R.L.R.","LLR.L...","L.RRL...","R.L.R.L.","L.L.RR.."],["LRLRL.R.","L.LRR.L.","RRL.RRL.","LLRRL.R.","LRRLLRR."]];
 const BAG_WIN={perfect:.06,great:.12,ok:.19};
-function bagChart(G,dk,salt=0){const D=BAG_DIFF[dk],beat=60/D.bpm,half=beat/2,N=[];let t=4*beat;/* one bar of count-in */
-  for(let b=0;b<D.bars;b++){const pool=[].concat(...BAG_PAT.slice(0,D.dens+1));const p=b===D.bars-1?"L.......":pool[Math.floor(srand(G,700+salt+b*13+D.dens*101+G.week)*pool.length)];
+function bagChart(G,dk,salt=0,song=null){const D0=BAG_DIFF[dk],D=song?{...D0,bpm:song.bpm,bars:song.bars}:D0,beat=60/D.bpm,half=beat/2,N=[];let t=4*beat;/* one bar of count-in */
+  const R=song?mulberry32(song.seed*7919):null;
+  for(let b=0;b<D.bars;b++){const pool=[].concat(...BAG_PAT.slice(0,D.dens+1));const p=b===D.bars-1?"L.......":pool[Math.floor((R?R():srand(G,700+salt+b*13+D.dens*101+G.week))*pool.length)];
     for(let i=0;i<8;i++){if(p[i]!==".")N.push({t:t+i*half,k:p[i],j:null});}t+=4*beat;}
   return {notes:N,end:t+beat,beat};}
+/* v1.91.188 (Man: the bag drill and the somtam stall need new songs — easy/normal/hard, 3–4 each, own backgrounds, rotating, a best score per song to chase).
+   Nine songs, each a fixed chart (same notes every time, so a score means something) and its own backing track synthesised in the browser:
+   a phin/pi lead in a Thai pentatonic, a bass line, ching on the beat, klong accents — slow and airy on easy, driving with arpeggios on hard. */
+const BAG_SONGS=[
+ {id:"ping",dk:"easy",n:"Cool Breeze on the Ping",sub:"A slow tune by the river at dawn",bpm:88,bars:8,bg:"bg_river_dawn.webp",root:62,prog:[0,4,5,3],seed:11,lead:"triangle",col:"#7fd4ff"},
+ {id:"talat",dk:"easy",n:"Holy-Day Morning Market",sub:"The vendor sings while making change",bpm:96,bars:8,bg:"bg_market_morning.webp",root:60,prog:[0,5,3,4],seed:23,lead:"square",col:"#ffd36a"},
+ {id:"waikru",dk:"easy",n:"Wai Kru Mid-Morning",sub:"The pi chawa leads, the klong khaek follows",bpm:92,bars:8,bg:"bg_camp_day.webp",root:57,prog:[0,3,0,4],seed:37,lead:"square",col:"#ffb3c8"},
+ {id:"ngarnwat",dk:"normal",n:"Temple Fair Klong Khaek",sub:"A ring in the middle of a full-moon temple fair",bpm:108,bars:10,bg:"bg_fair.webp",root:62,prog:[0,4,5,4],seed:41,lead:"square",col:"#ff8a5a"},
+ {id:"samlor",dk:"normal",n:"Samlor Rush on Walking Street",sub:"Street lights, roadside stalls, cool wind",bpm:114,bars:10,bg:"bg_night_north.webp",root:59,prog:[0,5,3,4],seed:53,lead:"square",col:"#c89bff"},
+ {id:"fontok",dk:"normal",n:"Rain at Camp",sub:"Training under a tin roof",bpm:110,bars:10,bg:"bg_camp_rain.webp",root:57,prog:[0,3,4,0],seed:67,lead:"triangle",col:"#7ab4ff"},
+ {id:"songkran",dk:"hard",n:"Songkran, No Mercy",sub:"Water guns, bass and chalk paste",bpm:126,bars:12,bg:"bg_songkran.webp",root:62,prog:[0,4,5,3],seed:71,lead:"square",col:"#5ad8ff"},
+ {id:"loy",dk:"hard",n:"Loy Krathong Drum Roll",sub:"Lanterns fill the sky, the drums won't stop",bpm:132,bars:12,bg:"bg_loy_night.webp",root:60,prog:[0,5,3,4],seed:83,lead:"square",col:"#ffcf5a"},
+ {id:"final",dk:"hard",n:"Title Night",sub:"The whole arena cheering · final round",bpm:140,bars:12,bg:"bg_final.webp",root:57,prog:[0,4,3,4],seed:97,lead:"sawtooth",col:"#ff5a6a"}];
+const BAG_SCALE=[0,2,4,7,9];
+function songsOf(dk){return BAG_SONGS.filter(x=>x.dk===dk);}
+function songBest(G,mode,id){return ((G.mini||{}).song||{})[mode+":"+id]||null;}
+/* the song of the week: rotates through each difficulty so there is always a "new" one to try */
+function songPickDefault(G,dk){const L=songsOf(dk);return L[((G.week||1)+(G.season||1)*3)%L.length];}
 const MG_MODES={
  bag:{icon:"🥁",title:"Bag Kicks to the Khong Khaek Drum",L:"Dum",R:"Tek",Ls:"Kick",Rs:"Punch",note:"Kick/punch rhythm training · stats, morale, stardust",open:G=>G.week>=2},
  somtam:{icon:"🥗",title:"Som Tam at Auntie Taew's",L:"Pound",R:"Toss",Ls:"Pestle",Rs:"Spoon",note:"Help Auntie Taew's stall at rush hour · earn pay and a little fame",open:G=>G.week>=4}};
@@ -9566,6 +9589,38 @@ const BAG={st:null,
   wood(k,t){if(!AU.ctx||AU.muted)return;try{if(k==="L"){AU.noiseHit(t,{f:700,dur:.06,peak:.8});AU.tone(t,{f:240,to:120,type:"triangle",dur:.12,peak:.6,bus:AU.sfxBus});}
     else{AU.noiseHit(t,{f:5200,type:"highpass",q:.7,dur:.09,peak:.35,sweep:.6});}}catch(e){}},
   ching(t,open){if(!AU.ctx||AU.muted)return;try{AU.tone(t,{f:open?2350:2100,type:"sine",dur:open?.5:.08,peak:open?.16:.12,bus:AU.sfxBus});AU.tone(t,{f:open?3130:2900,type:"sine",dur:open?.35:.06,peak:.07,bus:AU.sfxBus});}catch(e){}},
+  /* backing track for a song, scheduled up front on its own bus so it can be cut when the drill ends */
+  music(song,t0,beat,bars){if(!AU.ctx||AU.muted)return;try{const c=AU.ctx,bus=c.createGain();bus.gain.value=.55;bus.connect(AU.sfxBus);this.st.bus=bus;
+    const R=mulberry32(song.seed),dk=song.dk,hz=m=>440*Math.pow(2,(m-69)/12),sc=d=>song.root+12+BAG_SCALE[((d%5)+5)%5]+12*Math.floor(d/5);
+    const T=(t,o)=>AU.tone(t,{...o,bus});
+    /* a 2-bar motif from the song's seed, answered by a variation — the tune repeats so it is learnable */
+    const mot=[];let d=4;for(let i=0;i<16;i++){const rest=R()<(dk==="easy"?.4:dk==="normal"?.28:.18);if(rest){mot.push(null);continue;}d=Math.max(0,Math.min(9,d+[-2,-1,-1,0,1,1,2][Math.floor(R()*7)]));mot.push(d);}
+    const var2=mot.map((x,i)=>x==null?null:i>=12?Math.max(0,x-((i%2)+1)):x);
+    for(let b=0;b<bars+1;b++){const bt=t0+b*4*beat,ch=song.prog[b%song.prog.length],rootHz=hz(song.root-12+BAG_SCALE[ch%5]+(ch>=5?12:0));
+      for(let q=0;q<4;q++){const tq=bt+q*beat;
+        T(tq,{f:q%2?2100:2350,type:"sine",dur:q%2?.08:.4,peak:q%2?.1:.13});
+        if(b>0){T(tq,{f:rootHz,type:"triangle",dur:beat*.45,peak:.32});T(tq+beat/2,{f:rootHz*2,type:"triangle",dur:beat*.35,peak:.2});
+          if(q===0||q===2)T(tq,{f:120,to:50,type:"sine",dur:.18,peak:.28});
+          if(dk!=="easy"&&q===3)AU.noiseHit(tq+beat/2,{f:1800,type:"bandpass",q:1.5,dur:.05,peak:.18});
+          if(dk==="hard")for(let k=0;k<4;k++)T(tq+k*beat/4,{f:rootHz*[2,3,4,3][k],type:"square",dur:beat/4*.8,peak:.035});}}
+      if(b>=1&&b<bars){const M=(b%4===3)?var2:mot;const half=beat/2;for(let i=0;i<8;i++){const n=M[(b%2)*8+i];if(n==null)continue;const tt=bt+i*half;
+        T(tt,{f:hz(sc(n)),type:song.lead,dur:half*(i%2?0.8:1.4),peak:song.lead==="triangle"?.22:.09});}}}
+    /* last hit */const te=t0+bars*4*beat;T(te,{f:hz(song.root),type:"triangle",dur:1.2,peak:.3});T(te,{f:2350,type:"sine",dur:.8,peak:.16});}catch(e){}},
+  /* v1.91.188 live calls: Auntie Taew at the stall (with a rival stall across the lane racing for customers), Kru Daeng at the bag */
+  say(t){const e=document.getElementById("mbcomt");if(!e||e.textContent===t)return;e.textContent=t;const b=document.getElementById("mbcom");if(b){b.classList.remove("pop");void b.offsetWidth;b.classList.add("pop");}},
+  calls(t){const S=this.st;if(S.duel)return;const tam=S.mode==="somtam",P=tam?"Auntie Taew: ":"Kru Daeng: ",F=S.cf=S.cf||{},once=(k,x)=>{if(!F[k]){F[k]=1;this.say(P+x);}};
+    const pass=S.notes.filter(n=>n.t<t).length,tot=S.notes.length;
+    if(tam){S.rival=pass*72;const me=Math.floor(S.score/220),op=Math.floor(S.rival/220),a=document.getElementById("tamme"),b=document.getElementById("tamop"),u=document.querySelector("#tambar u");
+      if(a)a.textContent=me;if(b)b.textContent=op;if(u)u.style.width=Math.round(100*(S.score+200)/(S.score+S.rival+400))+"%";
+      const lead=S.score>=S.rival?1:-1;if(pass>6&&S.lead&&lead!==S.lead&&t-(S.leadT||0)>2.5){S.leadT=t;this.say(P+(lead>0?"The customers came over to us! Jae Pla looks sour":"Jae Pla is stealing our queue! Faster, dear!"));}S.lead=lead;}
+    if(S.combo>=10)once("c10",tam?"Hands are warm! The whole market can hear that mortar":"Good! You've found the beat, don't lose it");
+    if(S.combo>=20)once("c20",tam?"Twenty mortars, no misses! The queue is down the street":"Twenty in a row! Those are a fighter's legs");
+    S.mstreak=S.lastMiss!==S.c.miss?(S.mstreak||0)+(S.c.miss-(S.lastMiss||0)):S.mstreak;S.lastMiss=S.c.miss;
+    if(S.c.miss>0&&S.combo===0&&S.mstreak>=3&&t-(S.missT||0)>3){S.missT=t;S.mstreak=0;this.say(P+(tam?"Easy, dear, the papaya is flying out of the mortar":"Lost it! Listen to the ching, count from one"));}
+    if(S.combo>0)S.mstreak=0;
+    if(pass>=tot/2)once("half",tam?"Halfway. Customers keep coming":"Halfway there. Keep those legs going");
+    if(tot-pass<=8&&pass>8)once("last",tam?"Last plate! Pound it with everything!":"Last set! Empty the tank!");},
+  stopMusic(){const S=this.st;if(S&&S.bus){try{const g=S.bus;g.gain.setTargetAtTime(0,AU.ctx.currentTime,.05);setTimeout(()=>{try{g.disconnect()}catch(_){}},400);}catch(e){}S.bus=null;}},
   open(){const F=bagFighters(G);if(!F.length){toast("No fighter is fit to train");return;}
     const pick=(G.mini&&G.mini.bagLast&&F.find(f=>f.id===G.mini.bagLast))||F.slice().sort((a,b)=>(b.bond||0)-(a.bond||0))[0];
     this.st={phase:"hub",mode:"bag",id:pick.id,dk:(G.mini&&G.mini.bagDk)||"normal",practice:false};this.mount();this.draw();},
@@ -9573,13 +9628,13 @@ const BAG={st:null,
     this.st={phase:"pick",mode:m,act,mail,id:pick.id,dk:(G.mini&&G.mini.bagDk)||"normal",practice:false};this.mount();if(m==="live"){LIVE.pick();LIVE.st.practice=false;LIVE.st.act=act;LIVE.draw();}else if(m==="run"){RUN.pick();RUN.st.practice=false;RUN.st.act=act;RUN.draw();}else this.draw();},
   mount(){let el=document.getElementById("minibag");if(!el){el=document.createElement("div");el.id="minibag";el.className="mgame";document.body.appendChild(el);}
     el.onclick=e=>{const lv=e.target.closest("[data-lv]");if(lv&&typeof LIVE!=="undefined"){LIVE.act(lv.dataset.lv,lv.dataset.v);return;}const rn=e.target.closest("[data-rn]");if(rn&&typeof RUN!=="undefined"){if(rn.dataset.rn!=="L"&&rn.dataset.rn!=="R")RUN.act(rn.dataset.rn,rn.dataset.v);return;}const sp=e.target.closest("[data-sp]");if(sp&&typeof SPORTS!=="undefined"){SPORTS.act(sp.dataset.sp);return;}const du=e.target.closest("[data-du]");if(du&&typeof DUEL!=="undefined"){DUEL.act(du.dataset.du,du.dataset.v);return;}const b=e.target.closest("[data-mb]");if(!b)return;const a=b.dataset.mb,v=b.dataset.v;
-      if(a==="mode"&&MG_MODES[v]&&MG_MODES[v].custom){this.st.mode=v;if(v==="run")RUN.pick();else LIVE.pick();}else if(a==="mode"){this.st.mode=v;this.st.phase="pick";this.st.practice=mgPlayed(G,v);this.draw();}else if(a==="hub"){this.st.phase="hub";this.draw();}else if(a==="pick"){this.st.id=v;this.draw();}else if(a==="dk"){this.st.dk=v;this.draw();}else if(a==="go")this.start();else if(a==="close")this.close();else if(a==="claim")this.claim();else if(a==="again"){this.st.phase="pick";this.st.practice=true;this.draw();}};
+      if(a==="mode"&&MG_MODES[v]&&MG_MODES[v].custom){this.st.mode=v;if(v==="run")RUN.pick();else LIVE.pick();}else if(a==="mode"){this.st.mode=v;this.st.phase="pick";this.st.practice=mgPlayed(G,v);this.draw();}else if(a==="hub"){this.st.phase="hub";this.draw();}else if(a==="pick"){this.st.id=v;this.draw();}else if(a==="dk"){this.st.dk=v;this.st.song=null;this.draw();}else if(a==="song"){const sg=BAG_SONGS.find(x=>x.id===v);if(sg){this.st.song=v;this.st.dk=sg.dk;}this.draw();}else if(a==="go")this.start();else if(a==="close")this.close();else if(a==="claim")this.claim();else if(a==="again"){this.st.phase="pick";this.st.practice=true;this.draw();}};
     if(!this.keyH){this.keyH=e=>{if(!e.repeat&&typeof TUG!=="undefined"&&TUG.st&&!TUG.st.done){const k=e.key.toLowerCase();if(k==="f"||k==="d"||k==="arrowleft"){e.preventDefault();TUG.tap();return;}if(k==="j"||k==="k"||k==="arrowright"||k===" "){e.preventDefault();TUG.heave();return;}}if(!e.repeat&&typeof RELAY!=="undefined"&&RELAY.st&&(e.key===" "||/^[jk]$/i.test(e.key)||e.key==="ArrowRight")){e.preventDefault();RELAY.pass();return;}if(typeof LIVE!=="undefined"&&LIVE.st&&LIVE.st.phase==="play"&&/^[123]$/.test(e.key)){const d=LIVE.st.cur;if(d){e.preventDefault();LIVE.answer(d.ord[+e.key-1]);}return;}if(typeof RUN!=="undefined"&&RUN.st&&(RUN.st.phase==="race"||RUN.st.phase==="set")){const k=e.key.toLowerCase();if(e.repeat)return;if(k==="f"||k==="d"||k==="arrowleft"||k==="j"||k==="k"||k==="arrowright"||k===" "){e.preventDefault();RUN.tap("L");}return;}
       if(!this.st||this.st.phase!=="play")return;const k=e.key.toLowerCase();if(e.repeat)return;
       if(k==="f"||k==="d"||k==="arrowleft"){e.preventDefault();this.hit("L");}else if(k==="j"||k==="k"||k==="arrowright"){e.preventDefault();this.hit("R");}else if(k==="escape")this.close();};
       document.addEventListener("keydown",this.keyH);
-      document.addEventListener("visibilitychange",()=>{if(document.hidden&&typeof LIVE!=="undefined"&&LIVE.st&&LIVE.st.phase==="play"){LIVE.st.dur=0;}if(document.hidden&&this.st&&this.st.phase==="play"){this.st.phase="abort";cancelAnimationFrame(this.raf);this.draw();}if(document.hidden&&typeof RUN!=="undefined"&&RUN.st&&(RUN.st.phase==="race"||RUN.st.phase==="set")){RUN.stop();RUN.st.phase="pick";RUN.draw();}});}},
-  close(){cancelAnimationFrame(this.raf);if(typeof LIVE!=="undefined"&&LIVE.st){cancelAnimationFrame(LIVE.raf);LIVE.st=null;}if(typeof SPORTS!=="undefined"&&SPORTS.st){SPORTS.close();return;}if(typeof RUN!=="undefined"&&RUN.st){RUN.stop();RUN.st=null;}const dz=typeof DUEL!=="undefined"&&DUEL.st;if(dz){DUEL.abort();}const el=document.getElementById("minibag");if(el)el.remove();this.st=null;try{AU.startMusic("hub");}catch(e){}if((G.cardPend||[]).length&&!UI.modal)UI.modal={type:"cardnew"};render();},
+      document.addEventListener("visibilitychange",()=>{if(document.hidden&&typeof LIVE!=="undefined"&&LIVE.st&&LIVE.st.phase==="play"){LIVE.st.dur=0;}if(document.hidden&&this.st&&this.st.phase==="play"){this.stopMusic();this.st.phase="abort";cancelAnimationFrame(this.raf);this.draw();}if(document.hidden&&typeof RUN!=="undefined"&&RUN.st&&(RUN.st.phase==="race"||RUN.st.phase==="set")){RUN.stop();RUN.st.phase="pick";RUN.draw();}});}},
+  close(){cancelAnimationFrame(this.raf);this.stopMusic&&this.stopMusic();if(typeof LIVE!=="undefined"&&LIVE.st){cancelAnimationFrame(LIVE.raf);LIVE.st=null;}if(typeof SPORTS!=="undefined"&&SPORTS.st){SPORTS.close();return;}if(typeof RUN!=="undefined"&&RUN.st){RUN.stop();RUN.st=null;}const dz=typeof DUEL!=="undefined"&&DUEL.st;if(dz){DUEL.abort();}const el=document.getElementById("minibag");if(el)el.remove();this.st=null;try{AU.startMusic("hub");}catch(e){}if((G.cardPend||[]).length&&!UI.modal)UI.modal={type:"cardnew"};render();},
   draw(){const S=this.st,el=document.getElementById("minibag");if(!S||!el)return;if(S.phase==="live")return LIVE.draw();if(S.phase==="run")return RUN.draw();if(S.phase==="duel"&&typeof DUEL!=="undefined")return DUEL.draw();if(S.phase==="sports"&&typeof SPORTS!=="undefined")return SPORTS.draw();const F=bagFighters(G),f=G.F[S.id];
     const M=MG_MODES[S.mode];
     if(S.phase==="hub"){el.innerHTML=`<div class="mbox px"><h2>${JOY_PX} Minigames</h2><p class="meta center">Each game gives a reward once a week · replay as practice anytime</p>
@@ -9589,24 +9644,32 @@ const BAG={st:null,
       el.innerHTML=`<div class="mbox px"><h2>${M.icon} ${M.title}</h2>
        <p class="meta">Hit when a note reaches the circle · <b class="mbL">${M.L}</b> = ${M.Ls} (left button / F) · <b class="mbR">${M.R}</b> = ${M.Rs} (right button / J)</p>
        <div class="mbpick">${F.map(x=>`<button class="mbf ${x.id===S.id?"on":""}" data-mb="pick" data-v="${x.id}"><img src="${faceSrc(x.id,"happy")}" alt=""><small>${esc(x.name)}</small></button>`).join("")}</div>
-       <div class="mbdk">${Object.entries(BAG_DIFF).map(([k,d])=>`<button class="btn sm ${k===S.dk?"primary":""}" data-mb="dk" data-v="${k}">${d.name}${best[k]?` · ${best[k]}`:""}</button>`).join("")}</div>
+       <div class="sgtabs">${Object.entries(BAG_DIFF).map(([k,d])=>`<button class="${k===S.dk?"on":""}" data-mb="dk" data-v="${k}">${d.name}</button>`).join("")}</div>
+       <div class="songs">${songsOf(S.dk).map(x=>{const b=songBest(G,S.mode,x.id),on=(S.song||songPickDefault(G,S.dk).id)===x.id,rec=songPickDefault(G,S.dk).id===x.id;
+         return `<button class="songc ${on?"on":""}" data-mb="song" data-v="${x.id}" style="--bg:url(a/${x.bg});--sc:${x.col}"><span class="sgt"><b>${esc(x.n)}</b><small>${esc(x.sub)}</small><em>${x.bpm} BPM${rec?` · <i>Song of the week</i>`:""}</em></span>
+           <span class="sgb">${b?`<b class="g${b.g}">${b.g}</b><small>${b.s.toLocaleString()}</small>${b.fc?`<i>FC</i>`:""}`:`<small>Not played yet</small>`}</span></button>`;}).join("")}</div>
        <p class="meta center">${S.card?(S.practice?"Card minigame · practise as often as you like":"Card minigame · your first clear earns stardust ✦ by grade"):S.practice?"Already played this week · this run is practice, no rewards":S.mode==="bag"?"Weekly reward: kick/punch · morale · stardust ✦ · an S unlocks a card":"Weekly reward: pay from Auntie Taew · fame · stardust ✦ · an S unlocks a card"}</p>
        <div class="mfoot roadbtns"><button class="btn" data-mb="close">Later</button><button class="btn primary" data-mb="go">Start! ▸</button></div></div>`;return;}
-    if(S.phase==="play"){el.innerHTML=`<div class="mplay"><div class="mhud"><b>${esc(f.name)}</b><span>Combo <b id="mbc">0</b></span><span>Score <b id="mbs">0</b></span><button class="xbtn" data-mb="close" aria-label="Quit">✕</button></div>
+    if(S.phase==="play"){el.innerHTML=`<div class="mplay"><div class="mhud"><b>${esc(f.name)}</b><span>Combo <b id="mbc">0</b></span><span>Score <b id="mbs">0</b></span><button class="xbtn" data-mb="close" aria-label="Exit">✕</button></div>
+       ${S.songObj?`<div class="mbsong" style="--sc:${S.songObj.col}"><b>${esc(S.songObj.n)}</b><small>${BAG_DIFF[S.songObj.dk].name} · ${S.songObj.bpm} BPM</small></div>`:""}
+       ${S.mode==="somtam"&&!S.duel?`<div class="tamvs"><span class="me">Auntie Taew <b id="tamme">0</b> plates</span><i id="tambar"><u style="width:50%"></u></i><span class="op"><b id="tamop">0</b> plates Jae Pla</span></div>`:""}
        <canvas id="mbcv" width="360" height="300"></canvas>
+       ${S.duel?"":`<div class="rncom" id="mbcom"><img src="${S.mode==="somtam"?"a/npc_vendor_red.webp":faceSrc("coach")}" alt="" class="${S.mode==="somtam"?"tall":""}"><span id="mbcomt">${S.mode==="somtam"?"Auntie Taew: Customers are here! Keep up, dear":"Kru Daeng: Listen to the drum, then kick with it"}</span></div>`}
        <div class="mbtns"><button class="mbtn L ${S.mode}" id="mbL"><b>${M.L}</b><small>${M.Ls} · F</small></button><button class="mbtn R ${S.mode}" id="mbR"><b>${M.R}</b><small>${M.Rs} · J</small></button></div></div>`;
       const pd=k=>e=>{e.preventDefault();this.hit(k);};document.getElementById("mbL").addEventListener("pointerdown",pd("L"));document.getElementById("mbR").addEventListener("pointerdown",pd("R"));return;}
     if(S.phase==="abort"){el.innerHTML=`<div class="mbox px"><h2>Stopped</h2><p class="meta center">You switched apps or the screen turned off, so the song stopped · this week's reward is still available</p><div class="mfoot roadbtns"><button class="btn" data-mb="close">Close</button><button class="btn primary" data-mb="again">Play again</button></div></div>`;return;}
-    if(S.phase==="result"){const R=S.res;
-      el.innerHTML=`<div class="mbox px"><h2>Results</h2><div class="mgrade g${R.grade}">${R.grade}</div>
+    if(S.phase==="result"){const R=S.res,sb=R.song?songBest(G,S.mode,R.song.id):null;
+      el.innerHTML=`<div class="mbox px mres">${R.song?`<div class="mbsong big" style="--sc:${R.song.col};--bg:url(a/${R.song.bg})"><b>${esc(R.song.n)}</b><small>${BAG_DIFF[R.song.dk].name} · ${R.song.bpm} BPM</small></div>`:`<h2>Training result</h2>`}
+       ${S.mode==="somtam"&&R.rival!=null?`<p class="center tamres">${R.score>=R.rival?`<b class="goldt">Beat Jae Pla's stall!</b>&nbsp; Sold ${Math.floor(R.score/220)} plates to ${Math.floor(R.rival/220)}`:`Jae Pla's stall sold more · ${Math.floor(R.score/220)} to ${Math.floor(R.rival/220)} plates`}</p>`:""}
+       ${R.songBest&&R.prev&&R.prev.s?`<p class="center"><b class="newrec">New best for this song!</b> Was ${R.prev.s.toLocaleString()}</p>`:R.song&&sb&&!R.songBest?`<p class="center meta">Song best ${sb.s.toLocaleString()} · grade ${sb.g||"-"}</p>`:""}<div class="mgrade g${R.grade}">${R.grade}</div>
        ${R.c.miss===0&&R.maxc>0?`<div class="fullcombo">FULL COMBO!</div>`:""}<p class="center"><b>${R.score}</b> pts · Max combo ${R.maxc} · Accuracy ${Math.round(R.acc*100)}%</p>
        <p class="center meta">Perfect ${R.c.perfect} · Great ${R.c.great} · OK ${R.c.ok} · Miss ${R.c.miss}${R.best?" · <b class=\"goldt\">New record!</b>":""}</p>
        ${S.practice?`<p class="center meta">Practice mode · no rewards</p>`:`<p class="center">${R.rw}</p>`}
        <div class="mfoot roadbtns"><button class="btn" data-mb="again">Play again (practice)</button><button class="btn primary" data-mb="close">Back to camp</button></div></div>`;}},
   start(){const S=this.st;AU.resume&&AU.resume();try{AU.stopMusic();}catch(e){}
     G.mini=G.mini||{};G.mini.bagLast=S.id;G.mini.bagDk=S.dk;
-    const C=bagChart(G,S.dk,S.mode==="somtam"?5000:0);if(S.duel){const cut=C.beat*4*(1+S.duel.bars);C.notes=C.notes.filter(n=>n.t<cut);C.end=cut+C.beat;}S.notes=C.notes;S.end=C.end;S.beat=C.beat;S.phase="play";S.score=0;S.combo=0;S.maxc=0;S.c={perfect:0,great:0,ok:0,miss:0};S.fx=[];S.hitT=-9;S.hitK="L";
-    this.draw();S.t0=this.clock()+.6;const nb=Math.round(S.end/S.beat);for(let i=0;i<nb;i++)this.ching(S.t0+i*S.beat,i%2===0);
+    const song=S.duel?null:(BAG_SONGS.find(x=>x.id===S.song)||songPickDefault(G,S.dk));S.songObj=song;const C=bagChart(G,S.dk,S.mode==="somtam"?5000:0,song);if(S.duel){const cut=C.beat*4*(1+S.duel.bars);C.notes=C.notes.filter(n=>n.t<cut);C.end=cut+C.beat;}S.notes=C.notes;S.end=C.end;S.beat=C.beat;S.phase="play";S.cf={};S.lead=0;S.mstreak=0;S.lastMiss=0;S.missT=0;S.leadT=0;S.score=0;S.combo=0;S.maxc=0;S.c={perfect:0,great:0,ok:0,miss:0};S.fx=[];S.hitT=-9;S.hitK="L";
+    this.draw();S.t0=this.clock()+.6;if(song){this.music(song,S.t0,S.beat,Math.round((S.end-S.beat)/(4*S.beat)));if(song.bg)S.bgImg=img(song.bg);}else{const nb=Math.round(S.end/S.beat);for(let i=0;i<nb;i++)this.ching(S.t0+i*S.beat,i%2===0);}
     const cv=document.getElementById("mbcv");S.x=cv.getContext("2d");S.x.imageSmoothingEnabled=false;const loop=()=>{if(!this.st||this.st.phase!=="play")return;this.frame();this.raf=requestAnimationFrame(loop);};this.raf=requestAnimationFrame(loop);},
   now(){return this.clock()-this.st.t0;},
   judge(n,q){const S=this.st;n.j=q;S.c[q]++;if(q==="miss"){S.combo=0;}else{S.combo++;S.maxc=Math.max(S.maxc,S.combo);S.score+=({perfect:100,great:70,ok:40})[q]+Math.min(50,S.combo*2);}
@@ -9620,15 +9683,21 @@ const BAG={st:null,
   frame(){const S=this.st,x=S.x,W=360,H=300,t=this.now(),f=G.F[S.id];
     for(const n of S.notes){if(!n.j&&t-n.t>BAG_WIN.ok)this.judge(n,"miss");}
     if(t>S.end+.4){this.finish();return;}
+    if(t>0)this.calls(t);
     /* v1.91.185 rhythm juice (from the 4-lane rhythm demo): the whole screen pulses on the beat, a miss jolts it, the drum lights up when pressed,
        good hits burst a ring at the drum, PERFECT/GREAT pop big and settle, every 10 in a row a combo pop-up, full combo celebrated at the end */
     const RM=typeof matchMedia!=="undefined"&&matchMedia("(prefers-reduced-motion: reduce)").matches;
     x.save();if(!RM&&S.shk!=null&&t-S.shk<.18){const k2=1-(t-S.shk)/.18;x.translate((Math.random()-.5)*8*k2,(Math.random()-.5)*6*k2);}
-    x.clearRect(-10,-10,W+20,H+20);const bph=t>0?((t%S.beat)/S.beat):1,pul=RM?0:Math.pow(1-bph,3);x.fillStyle="#1b1530";x.fillRect(-10,-10,W+20,H+20);
+    x.clearRect(-10,-10,W+20,H+20);const bph=t>0?((t%S.beat)/S.beat):1,pul=RM?0:Math.pow(1-bph,3);x.fillStyle="#1b1530";x.fillRect(-10,-10,W+20,H+20);{const bi=S.bgImg;if(bi&&bi.complete&&bi.naturalWidth){const sc2=Math.max(W/bi.naturalWidth,222/bi.naturalHeight),bw=bi.naturalWidth*sc2,bh=bi.naturalHeight*sc2;x.imageSmoothingEnabled=true;x.drawImage(bi,(W-bw)/2,(222-bh)*.6,bw,bh);x.imageSmoothingEnabled=false;const gr=x.createLinearGradient(0,0,0,222);gr.addColorStop(0,"rgba(16,10,30,.15)");gr.addColorStop(1,"rgba(16,10,30,.75)");x.fillStyle=gr;x.fillRect(0,0,W,222);}}
     if(pul>0){x.fillStyle=`rgba(255,211,74,${.10*pul})`;x.fillRect(0,0,W,H);}
     // fighter + heavy bag (same drawing as the training drill)
     const dt=(t-S.hitT)*1000,hit=dt>=0&&dt<450;const row=hit?(S.mode==="somtam"?"punch":S.hitK==="L"?"knee":"punch"):(S.mode==="somtam"?"idle":"guard");const fr=hit?Math.min(3,Math.floor(dt/90)):Math.floor(performance.now()/260)%4;
     x.fillStyle="rgba(0,0,0,.35)";x.beginPath();x.ellipse(W*.4,196,40,6,0,0,7);x.fill();
+    if(S.mode==="somtam"&&!S.duel){/* the rival stall across the lane: green awning, Jae Pla pounding on the beat */const rx=6,ry=66;x.fillStyle="#1d5a32";x.fillRect(rx,ry,92,12);for(let i=0;i<6;i++){x.fillStyle=i%2?"#e8f3ea":"#2f8a50";x.fillRect(rx+i*15.3,ry+12,15.3,8);}
+      x.fillStyle="#5a3e24";x.fillRect(rx+4,ry+20,4,70);x.fillRect(rx+84,ry+20,4,70);x.fillStyle="#6b4a2b";x.fillRect(rx,ry+66,92,7);
+      const vg=img("npc_vendor_green.webp");if(vg.complete&&vg.naturalWidth){const bob=Math.max(0,Math.sin((t/S.beat)*Math.PI))*3;x.imageSmoothingEnabled=true;x.drawImage(vg,0,0,vg.naturalWidth,vg.naturalHeight*.55,rx+22,ry+20+bob,46,46*vg.naturalHeight*.55/vg.naturalWidth);x.imageSmoothingEnabled=false;}
+      x.fillStyle="#6b4a2b";x.fillRect(rx,ry+66,92,7);x.fillStyle="#b5653a";x.fillRect(rx+56,ry+56,20,12);
+      x.fillStyle="#fff";x.font="bold 10px sans-serif";x.textAlign="center";x.fillText("Jae Pla's Som Tam",rx+46,ry+9);}
     if(S.mode==="somtam"){/* stall table, clay mortar, wooden pestle */const mx=W*.62;x.fillStyle="#6b4a2b";x.fillRect(W*.42,150,W*.5,10);x.fillStyle="#4a3220";x.fillRect(W*.45,160,6,40);x.fillRect(W*.86,160,6,40);
       x.fillStyle="#2a1a10";x.fillRect(mx-30,112,60,40);x.fillStyle="#b5653a";x.fillRect(mx-28,114,56,36);x.fillStyle="#d07a48";x.fillRect(mx-28,114,10,36);x.fillStyle="#7a3d20";x.fillRect(mx-24,114,48,6);
       x.fillStyle="#9fd36a";for(let i=0;i<5;i++)x.fillRect(mx-20+i*9,108+(i%2)*2,6,6);x.fillStyle="#e84a3a";x.fillRect(mx-8,106,4,4);x.fillRect(mx+10,107,4,4);
@@ -9660,11 +9729,12 @@ const BAG={st:null,
     x.restore();
     // progress
     x.fillStyle="#2c2448";x.fillRect(0,H-4,W,4);x.fillStyle="#ffd34a";x.fillRect(0,H-4,W*Math.min(1,Math.max(0,t/S.end)),4);},
-  finish(){const S=this.st;cancelAnimationFrame(this.raf);S.phase="result";const n=S.notes.length,c=S.c;
+  finish(){const S=this.st;cancelAnimationFrame(this.raf);this.stopMusic();S.phase="result";const n=S.notes.length,c=S.c;
     const acc=(c.perfect+c.great*.75+c.ok*.4)/Math.max(1,n);const grade=acc>=.92&&c.miss===0?"S":acc>=.78?"A":acc>=.6?"B":"C";
     if(S.duel&&typeof DUEL!=="undefined"){S.res={acc,grade,score:S.score,maxc:S.maxc,c,best:false,rw:""};DUEL.done({score:acc,win:null},S);return;}
     G.mini=G.mini||{};G.mini.best=G.mini.best||{};if(typeof G.mini.best.easy==="number"){G.mini.best={bag:G.mini.best};}const B=G.mini.best[S.mode]=G.mini.best[S.mode]||{};const isBest=S.score>(B[S.dk]||0);if(isBest)B[S.dk]=S.score;
-    S.res={acc,grade,score:S.score,maxc:S.maxc,c,best:isBest,rw:""};
+    let sb=null,songBestNew=false;if(S.songObj){const key=S.mode+":"+S.songObj.id;G.mini.song=G.mini.song||{};const o=G.mini.song[key]||{s:0,g:null,a:0,fc:false,n:0};sb={...o};o.n=(o.n||0)+1;if(S.score>o.s){o.s=S.score;o.g=grade;o.a=Math.round(acc*1000)/1000;songBestNew=true;}if(c.miss===0)o.fc=true;G.mini.song[key]=o;}
+    S.res={acc,grade,score:S.score,maxc:S.maxc,c,best:isBest,rw:"",song:S.songObj,prev:sb,songBest:songBestNew,rival:S.mode==="somtam"?S.notes.length*72:null};
     if(!S.practice)S.res.rw=this.reward(grade,acc);save();this.draw();AU.sfx&&AU.sfx(grade==="S"||grade==="A"?"level":"ui");},
   /* v1.86: a card's Lv.3 minigame — rewards on the first clear only, then free practice */
   openCard(m,cid){const o=(G.cards||{})[cid];if(!o)return;this.openMode(m,null,null);if(this.st){this.st.card=cid;this.st.practice=!!o.mgDone;this.draw();}},
