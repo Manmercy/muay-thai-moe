@@ -9233,8 +9233,8 @@ const AU={ctx:null,master:null,music:null,sfxBus:null,crowdG:null,timer:null,ste
     if(!this.unlocked){try{const s=c.createBufferSource();s.buffer=c.createBuffer(1,1,22050);s.connect(c.destination);s.start(0);this.unlocked=true;}catch(e){}}
     if(this.playing&&this.next<c.currentTime)this.next=c.currentTime+.05;},
   env(g,t,a,d,peak){g.gain.setValueAtTime(0.0001,t);g.gain.exponentialRampToValueAtTime(peak,t+a);g.gain.exponentialRampToValueAtTime(0.0001,t+a+d);},
-  noiseHit(t,{f=1200,type="lowpass",q=1,dur=.12,peak=.8,sweep=0}){const c=this.ctx,s=c.createBufferSource();s.buffer=this.noise;const fl=c.createBiquadFilter();fl.type=type;fl.frequency.setValueAtTime(f,t);
-    if(sweep)fl.frequency.exponentialRampToValueAtTime(Math.max(60,f*sweep),t+dur);fl.Q.value=q;const g=c.createGain();this.env(g,t,.004,dur,peak);s.connect(fl);fl.connect(g);g.connect(this.sfxBus);s.start(t,Math.random());s.stop(t+dur+.05);},
+  noiseHit(t,{f=1200,type="lowpass",q=1,dur=.12,peak=.8,sweep=0,bus}){const c=this.ctx,s=c.createBufferSource();s.buffer=this.noise;const fl=c.createBiquadFilter();fl.type=type;fl.frequency.setValueAtTime(f,t);
+    if(sweep)fl.frequency.exponentialRampToValueAtTime(Math.max(60,f*sweep),t+dur);fl.Q.value=q;const g=c.createGain();this.env(g,t,.004,dur,peak);s.connect(fl);fl.connect(g);g.connect(bus||this.sfxBus);s.start(t,Math.random());s.stop(t+dur+.05);},
   tone(t,{f=200,type="sine",dur=.15,peak=.6,to=0,bus}){const c=this.ctx,o=c.createOscillator();o.type=type;o.frequency.setValueAtTime(f,t);if(to)o.frequency.exponentialRampToValueAtTime(to,t+dur);
     const g=c.createGain();this.env(g,t,.005,dur,peak);o.connect(g);g.connect(bus||this.sfxBus);o.start(t);o.stop(t+dur+.05);},
   /* v1.91.178 juice: one coin blip, pitch climbing with i (coins flying into the cash readout) */
@@ -9356,7 +9356,7 @@ AU.gsfx=function(kind,a){if(!this.init()||this.muted||!SETTINGS.sfx)return;const
   if(kind==="shimmer")for(let i=0;i<6;i++)T(i*.05,{f:1400+Math.random()*1400,type:"sine",dur:.12,peak:.06});};
 
 // ================= MUAY THAI MOE v1.3 — UI =================
-const VERSION="1.91.193";
+const VERSION="1.91.194";
 const CUR_LANG=(typeof window!=="undefined"&&window.LANG)||"th";
 const TH_LABEL=String.fromCharCode(3652,3607,3618);
 function langSwitch(cls){return `<div class="langsw ${cls||""}" role="group" aria-label="Language">${[["th",TH_LABEL],["en","EN"]].map(([k,l])=>`<button class="lsb ${CUR_LANG===k?"on":""}" data-act="setlang" data-v="${k}" aria-pressed="${CUR_LANG===k}">${l}</button>`).join("")}</div>`;}
@@ -12243,7 +12243,7 @@ const BAG={st:null,
         T(tq,{f:q%2?2100:2350,type:"sine",dur:q%2?.08:.4,peak:q%2?.1:.13});
         if(b>0){T(tq,{f:rootHz,type:"triangle",dur:beat*.45,peak:.32});T(tq+beat/2,{f:rootHz*2,type:"triangle",dur:beat*.35,peak:.2});
           if(q===0||q===2)T(tq,{f:120,to:50,type:"sine",dur:.18,peak:.28});
-          if(dk!=="easy"&&q===3)AU.noiseHit(tq+beat/2,{f:1800,type:"bandpass",q:1.5,dur:.05,peak:.18});
+          if(dk!=="easy"&&q===3)AU.noiseHit(tq+beat/2,{f:1800,type:"bandpass",q:1.5,dur:.05,peak:.18,bus});
           if(dk==="hard")for(let k=0;k<4;k++)T(tq+k*beat/4,{f:rootHz*[2,3,4,3][k],type:"square",dur:beat/4*.8,peak:.035});}}
       if(b>=1&&b<bars){const M=(b%4===3)?var2:mot;const half=beat/2;for(let i=0;i<8;i++){const n=M[(b%2)*8+i];if(n==null)continue;const tt=bt+i*half;
         T(tt,{f:hz(sc(n)),type:song.lead,dur:half*(i%2?0.8:1.4),peak:song.lead==="triangle"?.22:.09});}}}
@@ -12531,6 +12531,7 @@ MG_MODES.live={icon:"📱",title:"ไลฟ์ขายของค่าย",no
 /* Drag the runner into the blocks, wait for the gun, then alternate left/right as fast as you can.
    Same side twice = a stumble · tapping before the gun = a false start (the second one loses the race). */
 const RUN_LEN=100,RUN_STRIDE=1.1;
+const hz2=m=>440*Math.pow(2,(m-69)/12);
 const runMult=f=>f?1+((f.a.speed||10)-10)*.012+((f.a.stamina||10)-10)*.006:1;
 const RUN_LINE={S:"ครูแดงกดนาฬิกาจับเวลาแล้วเงียบไปสองวินาที \"…ลมส่งหรือเปล่าวะเนี่ย\"",A:"ครูแดงพยักหน้า \"ขาดีวันนี้ ไปเตะกระสอบต่อได้แล้ว\"",B:"\"วิ่งได้ แต่ช่วงกลางอย่าแผ่วสิ\" ครูแดงหัวเราะ",C:"\"ขาไม่หยุดนะเว้ย! กดให้สุดจนถึงเส้น!\" ครูแดงตะโกนจากข้างลู่"};
 const RUN={st:null,
@@ -12549,7 +12550,7 @@ const RUN={st:null,
     else if(a==="again"){S.phase="pick";S.practice=true;this.draw();}
     else if(a==="next"&&S.duel){if(S.duel.next)S.duel.next();else if(typeof DUEL!=="undefined")DUEL.next();}
     else if(a==="hub"){this.stop();this.st=null;BAG.st.phase="hub";BAG.draw();}},
-  stop(){cancelAnimationFrame(this.raf);clearTimeout(this.to);},
+  stop(){cancelAnimationFrame(this.raf);clearTimeout(this.to);this.musStop&&this.musStop(false);},
   runner(){return G.F[this.st.id];},
   oppInfo(){const S=this.st;if(S.duel)return S.duel.opp;const o=G.F[S.opp];return o?{id:o.id,name:o.name,f:o,pace:6.1+((o.a.speed||10)-10)*.1}:{id:null,name:"เงาของตัวเอง",pace:6.6};},
   draw(){const S=this.st,el=this.el();if(!S||!el)return;const F=bagFighters(G),me=this.runner(),O=this.oppInfo();
@@ -12572,7 +12573,7 @@ const RUN={st:null,
     if(S.phase==="result"){const R=S.res;
       el.innerHTML=`<div class="mbox px"><h2>${R.win?"เข้าเส้นก่อน!":"แพ้ไปนิดเดียว"}</h2>${R.grade?`<div class="mgrade g${R.grade}">${R.grade}</div>`:""}
        <p class="center">${esc(me.name)} <b>${R.dq?"ฟาวล์":R.t.toFixed(2)+" วิ"}</b> · ${esc(O.name)} <b>${R.ot.toFixed(2)} วิ</b>${R.best?` · <b class="goldt">สถิติใหม่!</b>`:""}</p>
-       <p class="center meta">สะดุด ${R.st} ครั้ง${R.fs?` · ฟาวล์ ${R.fs} ครั้ง`:""} · ออกตัว ${R.react.toFixed(2)} วิ</p>
+       ${R.chain?`<p class="center">กดรัวติดกันสูงสุด <b class="goldt">${R.chain} ครั้ง</b></p>`:""}<p class="center meta">สะดุด ${R.st} ครั้ง${R.fs?` · ฟาวล์ ${R.fs} ครั้ง`:""} · ออกตัว ${R.react.toFixed(2)} วิ</p>
        ${S.duel?"":S.practice?`<p class="center meta">โหมดซ้อม · ไม่มีรางวัล</p>`:`<p class="center">${R.rw}</p>`}
        <div class="mfoot roadbtns">${S.duel?`<button class="btn primary" data-rn="next">ต่อไป ▸</button>`:`<button class="btn" data-rn="again">วิ่งอีกรอบ (ซ้อม)</button><button class="btn primary" data-mb="close">กลับค่าย</button>`}</div></div>`;}},
   /* the blocks: drag the knob into the green zone and let go */
@@ -12584,7 +12585,7 @@ const RUN={st:null,
     k.addEventListener("pointerup",e=>{if(!drag)return;drag=false;const p=pos(e);if(p>=.78&&p<=.97)this.arm();else{place(.04);const m=document.getElementById("rnmsg");if(m)m.textContent="ยังไม่ถึงเส้น ลากอีกนิด";}});},
   set(){const S=this.st,me=this.runner();if(!me)return;AU.resume&&AU.resume();try{AU.stopMusic();}catch(e){}G.mini=G.mini||{};G.mini.runLast=S.id;
     const O=this.oppInfo();Object.assign(S,{phase:"set",armed:false,gun:0,fs:S.fs||0,x:0,v:0,rate:0,last:null,lastT:0,st:0,stumble:0,ox:0,ov:0,oReact:.14+Math.random()*.12,
-      oPace:O.pace*(1+(Math.random()-.5)*.05),done:false,t:0,ot:0,react:0,mult:runMult(me),started:false,com:"",cf:{},fadeT:0,lastT:0});this.draw();this.loop();},
+      oPace:O.pace*(1+(Math.random()-.5)*.05),done:false,t:0,ot:0,react:0,mult:runMult(me),started:false,com:"",cf:{},fadeT:0,lastT:0,chain:0,maxChain:0,lastTap:0,chainT:0,mile:null,shk:0,ghosts:[],mbus:null});this.draw();this.loop();},
   /* v1.91.185 (Man: the drag was fiddly) — one tap to get on the blocks, then three red lights come on one at a time with a beep (3 · 2 · 1),
      a short random hold, and the lights turn green with "ไป!" bursting in the middle. Tapping before green is a false start. */
   arm(){const S=this.st;if(!S||S.phase!=="set"||S.armed)return;S.armed=true;S.lights=0;S.green=0;S.com="นักวิ่งเข้าเส้นเตรียมแล้วครับ!";AU.sfx&&AU.sfx("ui");this.draw();
@@ -12592,7 +12593,7 @@ const RUN={st:null,
     const on=i=>{if(!this.st||this.st.phase!=="set"||!S.armed)return;S.lights=i;S.lightT=performance.now();if(i===1)this.say("เข้าที่… ระวัง…");AU.tone&&AU.init&&AU.init()&&AU.tone(AU.ctx.currentTime+.01,{f:440,type:"square",dur:.12,peak:.14});
       if(i<3)this.to=setTimeout(()=>on(i+1),750);
       else this.to=setTimeout(()=>{if(!this.st||this.st.phase!=="set"||!S.armed)return;S.phase="race";S.gun=performance.now();S.green=S.gun;S.started=true;
-        const m3=document.getElementById("rnmsg");if(m3)m3.textContent="ไป!";AU.init&&AU.init()&&AU.tone(AU.ctx.currentTime+.01,{f:880,type:"square",dur:.35,peak:.18});AU.sfx&&AU.sfx("bell");try{navigator.vibrate&&navigator.vibrate(40)}catch(_){} },500+Math.random()*900);};
+        const m3=document.getElementById("rnmsg");if(m3)m3.textContent="ไป!";this.musStart();AU.init&&AU.init()&&AU.tone(AU.ctx.currentTime+.01,{f:880,type:"square",dur:.35,peak:.18});AU.sfx&&AU.sfx("bell");try{navigator.vibrate&&navigator.vibrate(40)}catch(_){} },500+Math.random()*900);};
     this.to=setTimeout(()=>on(1),600);},
   tap(k){const S=this.st;if(!S)return;const b=document.getElementById("rnL");if(b){b.classList.remove("hit");void b.offsetWidth;b.classList.add("hit");}
     if(S.phase==="set"){if(!S.armed){this.arm();return;}S.fs++;clearTimeout(this.to);AU.sfx&&AU.sfx("ui");
@@ -12601,7 +12602,26 @@ const RUN={st:null,
     if(S.phase!=="race"||S.done)return;const now=performance.now();
     if(!S.react)S.react=(now-S.gun)/1000;
     /* one button: each tap is a stride; a thumb mashes slower than two alternating, so a tap counts for a little more */
-    const dt=S.lastT?(now-S.lastT)/1000:.25;S.lastT=now;S.rate=Math.min(12,S.rate*.6+(1.05/Math.max(.07,dt))*.4);S.taps=(S.taps||0)+1;S.dust=(S.dust||[]).concat([{t:now}]).slice(-6);},
+    const dt=S.lastT?(now-S.lastT)/1000:.25;S.lastT=now;S.rate=Math.min(12,S.rate*.6+(1.05/Math.max(.07,dt))*.4);if(S.lastTap&&now-S.lastTap>550)S.chain=0;S.lastTap=now;S.chain=(S.chain||0)+1;S.maxChain=Math.max(S.maxChain||0,S.chain);S.chainT=now;if(S.chain%25===0){S.mile={n:S.chain,t:now};S.shk=now;try{navigator.vibrate&&navigator.vibrate(25)}catch(_){}AU.init&&AU.init()&&AU.tone(AU.ctx.currentTime+.01,{f:1320,type:"square",dur:.12,peak:.1});}
+    S.taps=(S.taps||0)+1;S.dust=(S.dust||[]).concat([{t:now}]).slice(-6);},
+  /* v1.91.194 (Man: the sprint needs a pumping track and effects) — a 152 BPM race loop scheduled a little ahead each frame:
+     kick on every beat, clap on 2 and 4, 8th hats, a driving bass and a Thai-pentatonic riff on a square lead.
+     It thickens as you mash (fever adds 16th arps) and on the final 25 m, and stops dead when the race ends. */
+  musStart(){const S=this.st;if(!AU.init||!AU.init()||AU.muted)return;try{const c=AU.ctx,bus=c.createGain();bus.gain.value=.75;bus.connect(AU.sfxBus);S.mbus=bus;S.mT0=c.currentTime+.02;S.mNext=0;S.mBeat=60/152;
+      AU.noiseHit(S.mT0,{f:5000,type:"highpass",q:.7,dur:.9,peak:.35,bus});}catch(e){}},
+  musPump(){const S=this.st;if(!S||!S.mbus||!AU.ctx)return;const c=AU.ctx,bus=S.mbus,B=S.mBeat,ahead=c.currentTime+.35,T=(t,o)=>AU.tone(t,{...o,bus}),N=(t,o)=>AU.noiseHit(t,{...o,bus});
+    const riff=[0,2,4,2,5,4,2,4, 0,2,4,5,7,5,4,2],prog=[0,0,5,3, 0,0,4,4],hz=m=>440*Math.pow(2,(m-69)/12),sc=d=>62+[0,2,4,7,9][d%5]+12*Math.floor(d/5);
+    while(S.mT0+S.mNext*B/2<ahead){const i=S.mNext,t=S.mT0+i*B/2,beat=i>>1,bar=beat>>2,off=i%2,fever=S.rate>8.5,fin=Math.max(S.x,S.ox)>=75;
+      const root=hz(38+[0,2,4,7,9,5][prog[bar%8]%6]);
+      if(!off){T(t,{f:150,to:42,type:"sine",dur:.16,peak:.5});if(beat%2)N(t,{f:1500,type:"bandpass",q:1.2,dur:.09,peak:.3});}
+      N(t+(off?0:0),{f:8000,type:"highpass",q:.6,dur:.03,peak:off?.14:.08});
+      T(t,{f:root*(off?2:1),type:"sawtooth",dur:B/2*.8,peak:.07});
+      const n=riff[(i%16)];if(bar>=1)T(t,{f:hz(sc(n+(fin?2:0))),type:"square",dur:B/2*.75,peak:.055});
+      if(fever||fin)for(let k=0;k<2;k++)T(t+k*B/4,{f:hz(sc(n+[0,4][k])+12),type:"triangle",dur:B/4*.8,peak:.06});
+      if(fin&&!off)N(t,{f:3000,type:"highpass",q:.7,dur:.12,peak:.12});
+      S.mNext++;}},
+  musStop(end){const S=this.st;if(!S||!S.mbus)return;try{const c=AU.ctx,g=S.mbus;if(end){AU.tone(c.currentTime+.01,{f:hz2(62),type:"square",dur:.5,peak:.12,bus:g});AU.noiseHit(c.currentTime+.01,{f:4000,type:"highpass",q:.7,dur:1,peak:.3,bus:g});}
+      g.gain.setTargetAtTime(0,c.currentTime+(end?.6:0),.08);setTimeout(()=>{try{g.disconnect()}catch(_){}},1500);}catch(e){}S.mbus=null;},
   /* v1.91.186 (Man: give the sprint a commentator) — the ring commentator calls the race: the start, every quarter, a fade if you stop mashing, the finish */
   say(txt){const S=this.st;if(!S)return;S.com=txt;const e=document.getElementById("rncomt");if(e){e.textContent=txt;const b=document.getElementById("rncom");if(b){b.classList.remove("pop");void b.offsetWidth;b.classList.add("pop");}}},
   call(el,now){const S=this.st;if(!S||S.phase!=="race")return;const me=(this.runner()||{}).name||"",O=this.oppInfo().name,F=S.cf=S.cf||{},d=S.x-S.ox,ld=d>=0?me:O,tr=d>=0?O:me,gap=Math.abs(d);
@@ -12615,7 +12635,7 @@ const RUN={st:null,
     if(mk>=90&&gap<1.2)once("photo",()=>`สูสีมาก! อาจต้องดูภาพเส้นชัย!`);
     if(S.lastT&&now-S.lastT>700&&!S.done&&(!S.fadeT||now-S.fadeT>2500)){S.fadeT=now;this.say(`${me} แผ่วลงแล้วครับ! สู้ต่ออีกนิด!`);}
     if(S.done&&!F.fin)once("fin",()=>S.ox>=RUN_LEN&&S.ot&&S.ot<S.t?`เข้าเส้นแล้ว! ${O} ชนะไปครับ!`:`เข้าเส้นแล้ว! ${me} คว้าที่หนึ่งครับ!`);},
-  loop(){const step=()=>{if(!this.st||(this.st.phase!=="set"&&this.st.phase!=="race"))return;this.tick();this.paint();this.raf=requestAnimationFrame(step);};cancelAnimationFrame(this.raf);this.raf=requestAnimationFrame(step);},
+  loop(){const step=()=>{if(!this.st||(this.st.phase!=="set"&&this.st.phase!=="race"))return;this.tick();this.musPump();this.paint();this.raf=requestAnimationFrame(step);};cancelAnimationFrame(this.raf);this.raf=requestAnimationFrame(step);},
   tick(){const S=this.st,now=performance.now();if(S.phase!=="race")return;const el=(now-S.gun)/1000,dt=Math.min(.05,S.prev?(now-S.prev)/1000:.016);S.prev=now;
     if(!S.done){if(S.lastT&&now-S.lastT>350)S.rate*=Math.pow(.2,dt);const target=now<S.stumble?0:S.rate*RUN_STRIDE*S.mult;S.v+=(target-S.v)*Math.min(1,dt*4);S.x+=S.v*dt;S.t=el;
       if(S.x>=RUN_LEN){S.x=RUN_LEN;S.done=true;S.t=el;}}
@@ -12625,7 +12645,8 @@ const RUN={st:null,
     if(S.done&&S.ox>=RUN_LEN)this.finish(false);
     else if(S.done&&el>S.t+2.5){S.ot=S.ot||el+((RUN_LEN-S.ox)/Math.max(1,S.ov));this.finish(false);}
     else if(S.ox>=RUN_LEN&&el>S.ot+4){S.t=el+(RUN_LEN-S.x)/Math.max(1,S.v||1);this.finish(false);}},
-  paint(){const S=this.st,cv=document.getElementById("rncv");if(!S||!cv)return;const x=cv.getContext("2d");x.imageSmoothingEnabled=false;const W=cv.width,H=cv.height,now=performance.now();
+  paint(){const S=this.st,cv=document.getElementById("rncv");if(!S||!cv)return;const x=cv.getContext("2d");x.imageSmoothingEnabled=false;const W=cv.width,H=cv.height,now=performance.now(),RM=typeof JUICE_RM==="function"?JUICE_RM():false;
+    x.save();if(!RM&&S.shk&&now-S.shk<220){const a=(1-(now-S.shk)/220)*4;x.translate((Math.random()-.5)*a,(Math.random()-.5)*a);}
     const bg=img("bg_sportsday.webp");if(bg.complete&&bg.naturalWidth){const sw=bg.naturalWidth,sh=bg.naturalHeight*.55;x.drawImage(bg,0,0,sw,sh,0,0,W,H*.55);}else{x.fillStyle="#7fb6e6";x.fillRect(0,0,W,H*.55);}
     x.fillStyle="#c8553d";x.fillRect(0,H*.55,W,H*.45);x.fillStyle="#b4482f";x.fillRect(0,H*.55,W,4);
     const lead=Math.max(S.x,S.ox),cam=Math.max(0,Math.min(RUN_LEN-28,lead-14)),px=m=>(m-cam)*(W/36)+40;
@@ -12633,8 +12654,13 @@ const RUN={st:null,
     x.fillRect(0,H*.77,W,2);const fx=px(RUN_LEN);if(fx<W+10){for(let i=0;i<10;i++){x.fillStyle=i%2?"#000":"#fff";x.fillRect(fx,H*.57+i*9.5,6,9.5);}}
     const fr=(v,s)=>v>.5?Math.floor(now/Math.max(70,260-v*18))%4:0;
     const O=this.oppInfo(),me=this.runner(),oF=O.f||(O.id&&G.F[O.id]);
-    const drawR=(f,m,v,footY,stum)=>{if(!f)return;const sh=sheetFor(f);if(!sh||!(sh.complete||sh.width))return;const bob=v>.5?Math.abs(Math.sin(now/90))*3:0;drawFrame(x,sh,stum?ROW.guard:ROW.walk,fr(v),px(m),footY-bob,62,false,1);};
-    drawR(oF,S.ox,S.ov,H*.76,false);drawR(me,S.x,S.v,H*.99,now<S.stumble);
+    const drawR=(f,m,v,footY,stum,al=1)=>{if(!f)return;const sh=sheetFor(f);if(!sh||!(sh.complete||sh.width))return;const bob=v>.5?Math.abs(Math.sin(now/90))*3:0;drawFrame(x,sh,stum?ROW.guard:ROW.walk,fr(v),px(m),footY-bob,62,false,al);};
+    drawR(oF,S.ox,S.ov,H*.76,false);
+    /* fever: mashing hard leaves after-images and a gold glow under her feet */
+    const fever=S.phase==="race"&&!S.done&&S.rate>8.5;
+    if(fever&&!RM){x.save();const gx=px(S.x),gr=x.createRadialGradient(gx,H*.97,4,gx,H*.97,46);gr.addColorStop(0,"rgba(255,214,80,.55)");gr.addColorStop(1,"rgba(255,214,80,0)");x.fillStyle=gr;x.fillRect(gx-50,H*.8,100,H*.2);
+      for(let k=2;k>=1;k--)drawR(me,S.x-k*2.6,S.v,H*.99,false,k===2?.14:.3);x.restore();}
+    drawR(me,S.x,S.v,H*.99,now<S.stumble);
     /* speed lines once she's flying */
     if(S.phase==="race"&&S.v>6){x.save();x.globalAlpha=Math.min(.5,(S.v-6)/10);x.strokeStyle="#fff";x.lineWidth=2;for(let i=0;i<7;i++){const yy=H*.6+((i*37+now*.0)%(H*.38)),xx=(W-((now*.9+i*61)%(W+80)));x.beginPath();x.moveTo(xx,yy);x.lineTo(xx+40,yy);x.stroke();}x.restore();}
     for(const d of S.dust||[]){const e=(now-d.t)/400;if(e>1)continue;x.fillStyle=`rgba(240,220,190,${.6*(1-e)})`;x.beginPath();x.arc(px(S.x)-14-e*18,H*.97-e*6,3+e*6,0,7);x.fill();}
@@ -12645,12 +12671,23 @@ const RUN={st:null,
       if(g){const e=(now-S.gun)/900,sc=1.8-.8*Math.min(1,e*3);x.globalAlpha=Math.max(0,1-Math.max(0,e-.6)/.4);x.font=`900 ${Math.round(64*sc)}px "Chakra Petch","IBM Plex Sans Thai",sans-serif`;x.textAlign="center";x.textBaseline="middle";x.lineWidth=10;x.strokeStyle="#0a3a14";x.strokeText("ไป!",cx,cy+76);x.fillStyle="#7dff8f";x.fillText("ไป!",cx,cy+76);
         for(let i=0;i<14;i++){const a=i/14*6.283,r=40+e*160;x.fillStyle="#ffe066";x.fillRect(cx+Math.cos(a)*r-3,cy+76+Math.sin(a)*r*.6-3,6,6);}}
       x.restore();}
-    x.fillStyle="rgba(0,0,0,.45)";x.fillRect(0,0,W,18);x.fillStyle="#fff";x.font="11px sans-serif";x.fillText(`${(this.runner()||{}).name||""} ${S.x.toFixed(0)} ม. · ${O.name} ${S.ox.toFixed(0)} ม.`,6,13);},
-  finish(dq){const S=this.st;this.stop();if(S.phase==="result")return;S.phase="result";const O=this.oppInfo();
+    /* tap chain — a fighting-game hit counter: bumps on every tap, warms from white to gold to red, shakes past 50, fades when the chain breaks */
+    if(S.phase==="race"&&S.chain>=3){const age=now-S.chainT,alive=age<550||S.done,fade=alive?1:Math.max(0,1-(age-550)/500);
+      if(fade>0){const n=S.chain,bump=RM?1:1+.35*Math.max(0,1-age/120),col=n>=75?"#ff4a4a":n>=50?"#ff9a2a":n>=25?"#ffd34a":"#ffffff",jx=!RM&&n>=50&&alive?(Math.random()-.5)*2:0;
+        x.save();x.globalAlpha=fade;x.translate(W-14+jx,72);x.rotate(-.08);x.scale(bump,bump);x.textAlign="right";x.textBaseline="alphabetic";
+        x.font='italic 900 40px "Chakra Petch","IBM Plex Sans Thai",sans-serif';x.lineWidth=7;x.strokeStyle="#140a1e";x.strokeText(String(n),0,0);x.fillStyle=col;x.fillText(String(n),0,0);
+        x.font='900 14px "Chakra Petch","IBM Plex Sans Thai",sans-serif';x.lineWidth=4;x.strokeText("ครั้งติด!",0,18);x.fillStyle="#fff";x.fillText("ครั้งติด!",0,18);x.restore();}}
+    if(S.mile&&now-S.mile.t<900){const e=(now-S.mile.t)/900,cx=W/2,cy=H*.42;x.save();x.globalAlpha=1-e;x.textAlign="center";x.textBaseline="middle";
+      x.font=`900 ${Math.round(30*(1+.4*Math.max(0,1-e*4)))}px "Chakra Petch","IBM Plex Sans Thai",sans-serif`;x.lineWidth=7;x.strokeStyle="#3a1400";const tx=S.mile.n>=75?"ไฟลุก!":S.mile.n>=50?"ขาไม่หยุด!":"เร่งเครื่อง!";x.strokeText(tx,cx,cy-e*16);x.fillStyle="#ffd34a";x.fillText(tx,cx,cy-e*16);
+      if(!RM)for(let i=0;i<12;i++){const a=i/12*6.283,r=20+e*120;x.fillStyle=i%2?"#ffd34a":"#ff7a3a";x.fillRect(cx+Math.cos(a)*r-3,cy+Math.sin(a)*r*.55-3,6,6);}x.restore();}
+    /* final 25 m: red edges pulse with the beat */
+    if(S.phase==="race"&&!S.done&&Math.max(S.x,S.ox)>=75&&!RM){const p=.5+.5*Math.sin(now/((S.mBeat||.39)*1000)*Math.PI*2);const g2=x.createLinearGradient(0,0,26,0);g2.addColorStop(0,`rgba(255,60,60,${.25+.2*p})`);g2.addColorStop(1,"rgba(255,60,60,0)");x.fillStyle=g2;x.fillRect(0,0,26,H);x.save();x.translate(W,0);x.scale(-1,1);x.fillStyle=g2;x.fillRect(0,0,26,H);x.restore();}
+    x.fillStyle="rgba(0,0,0,.45)";x.fillRect(0,0,W,18);x.fillStyle="#fff";x.font="11px sans-serif";x.textAlign="left";x.fillText(`${(this.runner()||{}).name||""} ${S.x.toFixed(0)} ม. · ${O.name} ${S.ox.toFixed(0)} ม.`,6,13);x.restore();},
+  finish(dq){const S=this.st;if(S&&S.mbus)this.musStop(true);this.stop();if(S.phase==="result")return;S.phase="result";const O=this.oppInfo();
     const t=dq?99:S.t,ot=S.ot||((RUN_LEN-S.ox)/Math.max(1,S.ov||6)+S.t),win=!dq&&t<=ot;
     const grade=dq?"C":t<11?"S":t<12.5?"A":t<14?"B":"C";
     G.mini=G.mini||{};G.mini.best=G.mini.best||{};const isBest=!dq&&!S.duel&&(!G.mini.best.run||t<G.mini.best.run);if(isBest)G.mini.best.run=Math.round(t*100)/100;
-    S.res={win,t,ot,dq,st:S.st,fs:S.fs,react:S.react||0,grade:S.duel?null:grade,best:isBest,rw:""};
+    S.res={win,t,ot,dq,st:S.st,fs:S.fs,react:S.react||0,chain:S.maxChain||0,grade:S.duel?null:grade,best:isBest,rw:""};
     if(S.duel&&S.duel.cb){S.duel.cb({win,t,ot,dq});}
     else if(S.duel&&typeof DUEL!=="undefined"){DUEL.done({win,score:t},S);}
     else if(!S.practice)S.res.rw=this.reward(grade,win);
@@ -16189,7 +16226,7 @@ const STATS_HOST="https://us.i.posthog.com";     /* EU projects: https://eu.i.po
 <script>
 (function(){
 /* v1.87: Thai code ships inside index.html; English code (en.js) and the dictionary (i18n.js) load only when needed */
-var B="1202be280a";
+var B="cea82e3258";
 var L="";try{L=localStorage.getItem("mtm_lang")||"";}catch(e){}
 try{var h=(location.hash||"").match(/lang=(th|en)/);if(h)L=h[1];}catch(e){}
 if(L!=="th"&&L!=="en")L="th";
