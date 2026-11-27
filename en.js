@@ -7898,7 +7898,14 @@ const PATCH_TANI={id:"1.93",ver:"Muay Thai Moe v1.93",title:"Laughter in the ban
  ["🌳","New scenes","New backgrounds, and every scene where it belongs"],
  ["✨","Polish","Pixel icons, character art in true colour, and plenty more for you to find"]],
  foot:"Kru Daeng says: make some merit now and then ✦"};
-const PATCHES=[PATCH_AV,PATCH_TAPE,PATCH_FIX,PATCH_TANI],PATCH=PATCHES[PATCHES.length-1];
+const PATCH_SKN={id:"1.94",ver:"Muay Thai Moe v1.94",title:"Skill Names, Mae Mai Style",lead:"Every fighter's skills have new names that sound like real Muay Thai. Their power is exactly the same.",items:[
+ ["🥊","Muay Thai names, whole tree","Kati, Mali, Rin, Ploy and Fah's skills are renamed after mae mai, luk mai and real Muay Thai strikes, each still carrying her own flavour: Tha Sao, Chaiya, Lopburi, Korat and the tiger. Stats and learned skills are untouched."],
+ ["♟️","Rin makes her move","Some of Rin's moves now take their names from Thai chess: Three Moves Ahead, King Cornered, and her legend skill, Checkmate."],
+ ["🐯","Ploy stands on her own","Ploy's skills no longer lean on her sister — they're all Korat tiger power now."],
+ ["🪞","Baiyok's full skill tree","If Baiyok moves into our camp, she gets a full three-line skill tree like the other heroines, including the Mirror line: see a move once, use it right back."],
+ ["👁️","Copy Eye","Baiyok's passive: after each round she copies the weapon the opponent landed most, and sends it back harder and more accurately next round."]],
+ foot:"Kru Daeng says: new names, same sweat ✦"};
+const PATCHES=[PATCH_AV,PATCH_TAPE,PATCH_FIX,PATCH_TANI,PATCH_SKN],PATCH=PATCHES[PATCHES.length-1];
 function nextPatch(){if(G&&G.newsSeen==="1.91.144")G.newsSeen="1.91.111"; /* v1.91.145: the 1.91.144 popup was withdrawn — those who saw it must not get the old ones again */const i=PATCHES.findIndex(p=>p.id===(G&&G.newsSeen));return i<0?PATCHES[0]:PATCHES[i+1]||null;}
 function maybeWhatsNew(){if(!G||G.ended||UI.scene)return;const P=nextPatch();if(!P)return;UI.modal={type:"whatsnew",id:P.id};}
 function whatsNewHTML(){const P=PATCHES.find(p=>p.id===(UI.modal&&UI.modal.id))||nextPatch()||PATCH,n=PATCHES.length-PATCHES.indexOf(P)-1;return `<div class="wnew"><span class="pill gold">Update · ${esc(P.ver)}</span><h2>🥊 ${esc(P.title)}</h2><p class="lead">${esc(P.lead)}</p>

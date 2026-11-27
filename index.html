@@ -10407,7 +10407,14 @@ const PATCH_TANI={id:"1.93",ver:"Muay Thai Moe v1.93",title:"เสียงห�
  ["🌳","ฉากใหม่","ฉากหลังใหม่ และทุกฉากอยู่ในที่ที่ควรอยู่"],
  ["✨","เก็บรายละเอียด","ไอคอนพิกเซล ภาพตัวละครสีสด และอีกหลายอย่างให้ลองหาเอง"]],
  foot:"ครูแดงฝากบอกว่า ทำบุญบ้างนะ ✦"};
-const PATCHES=[PATCH_AV,PATCH_TAPE,PATCH_FIX,PATCH_TANI],PATCH=PATCHES[PATCHES.length-1];
+const PATCH_SKN={id:"1.94",ver:"Muay Thai Moe v1.94",title:"ชื่อสกิลแบบแม่ไม้มวยไทย",lead:"สกิลของทุกคนได้ชื่อใหม่ ฟังเป็นท่ามวยมากขึ้น ฝีมือเท่าเดิมทุกอย่าง",items:[
+ ["🥊","ชื่อท่ามวยทั้งต้น","สกิลของกะทิ มะลิ ริน พลอย และฟ้า เปลี่ยนชื่อเป็นแนวแม่ไม้ ลูกไม้ และชื่อท่ามวย แต่ละคนยังมีกลิ่นของตัวเอง ท่าเสา ไชยา ลพบุรี โคราช และพยัคฆ์ ค่าพลังกับสกิลที่อัปไว้ไม่หายไปไหน"],
+ ["♟️","รินเดินหมาก","บางท่าของรินได้ชื่อจากหมากรุกไทย อ่านหมากสามตา ต้อนขุนจนมุม จนถึงขั้นตำนาน รุกจน"],
+ ["🐯","พลอยเก่งของเขาเอง","สกิลของพลอยไม่ได้อิงพี่สาวอีกแล้ว เป็นสายพลังพยัคฆ์โคราชเต็มตัว"],
+ ["🪞","ใบหยกมีต้นสกิลครบ","ถ้าใบหยกย้ายมาอยู่ค่ายเรา เธอมีต้นสกิลสามสายเท่านางเอกคนอื่น รวมสายสะท้อนกลับที่เห็นท่าครั้งเดียวก็ใช้คืนได้"],
+ ["👁️","ตาถอดแบบ","สกิลติดตัวของใบหยก จบยกแล้วจำอาวุธที่คู่ชกเข้าเป้ามากสุด ยกถัดไปส่งอาวุธนั้นคืนแรงและแม่นขึ้น"]],
+ foot:"ครูแดงบอกว่า ชื่อท่าเปลี่ยน แต่เหงื่อเท่าเดิมนะ ✦"};
+const PATCHES=[PATCH_AV,PATCH_TAPE,PATCH_FIX,PATCH_TANI,PATCH_SKN],PATCH=PATCHES[PATCHES.length-1];
 function nextPatch(){if(G&&G.newsSeen==="1.91.144")G.newsSeen="1.91.111"; /* v1.91.145: the 1.91.144 popup was withdrawn — those who saw it must not get the old ones again */const i=PATCHES.findIndex(p=>p.id===(G&&G.newsSeen));return i<0?PATCHES[0]:PATCHES[i+1]||null;}
 function maybeWhatsNew(){if(!G||G.ended||UI.scene)return;const P=nextPatch();if(!P)return;UI.modal={type:"whatsnew",id:P.id};}
 function whatsNewHTML(){const P=PATCHES.find(p=>p.id===(UI.modal&&UI.modal.id))||nextPatch()||PATCH,n=PATCHES.length-PATCHES.indexOf(P)-1;return `<div class="wnew"><span class="pill gold">อัปเดต · ${esc(P.ver)}</span><h2>🥊 ${esc(P.title)}</h2><p class="lead">${esc(P.lead)}</p>
@@ -15659,7 +15666,7 @@ const STATS_HOST="https://us.i.posthog.com";     /* EU projects: https://eu.i.po
 <script>
 (function(){
 /* v1.87: Thai code ships inside index.html; English code (en.js) and the dictionary (i18n.js) load only when needed */
-var B="f4e2ef3c36";
+var B="e95ef21824";
 var L="";try{L=localStorage.getItem("mtm_lang")||"";}catch(e){}
 try{var h=(location.hash||"").match(/lang=(th|en)/);if(h)L=h[1];}catch(e){}
 if(L!=="th"&&L!=="en")L="th";
