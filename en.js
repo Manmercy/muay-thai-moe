@@ -6719,11 +6719,7 @@ AU.gsfx=function(kind,a){if(!this.init()||this.muted||!SETTINGS.sfx)return;const
   if(kind==="shimmer")for(let i=0;i<6;i++)T(i*.05,{f:1400+Math.random()*1400,type:"sine",dur:.12,peak:.06});};
 
 // ================= MUAY THAI MOE v1.3 — UI =================
-<<<<<<< Updated upstream
-const VERSION="1.91.189";
-=======
-const VERSION="1.91.187";
->>>>>>> Stashed changes
+const VERSION="1.91.190";
 const CUR_LANG=(typeof window!=="undefined"&&window.LANG)||"th";
 const TH_LABEL=String.fromCharCode(3652,3607,3618);
 function langSwitch(cls){return `<div class="langsw ${cls||""}" role="group" aria-label="Language">${[["th",TH_LABEL],["en","EN"]].map(([k,l])=>`<button class="lsb ${CUR_LANG===k?"on":""}" data-act="setlang" data-v="${k}" aria-pressed="${CUR_LANG===k}">${l}</button>`).join("")}</div>`;}
@@ -9590,7 +9586,7 @@ const BAG={st:null,
     else{AU.noiseHit(t,{f:5200,type:"highpass",q:.7,dur:.09,peak:.35,sweep:.6});}}catch(e){}},
   ching(t,open){if(!AU.ctx||AU.muted)return;try{AU.tone(t,{f:open?2350:2100,type:"sine",dur:open?.5:.08,peak:open?.16:.12,bus:AU.sfxBus});AU.tone(t,{f:open?3130:2900,type:"sine",dur:open?.35:.06,peak:.07,bus:AU.sfxBus});}catch(e){}},
   /* backing track for a song, scheduled up front on its own bus so it can be cut when the drill ends */
-  music(song,t0,beat,bars){if(!AU.ctx||AU.muted)return;try{const c=AU.ctx,bus=c.createGain();bus.gain.value=.55;bus.connect(AU.sfxBus);this.st.bus=bus;
+  music(song,t0,beat,bars){if(!AU.ctx||AU.muted)return;try{const c=AU.ctx,bus=c.createGain();bus.gain.value=.8;bus.connect(AU.sfxBus);this.st.bus=bus;
     const R=mulberry32(song.seed),dk=song.dk,hz=m=>440*Math.pow(2,(m-69)/12),sc=d=>song.root+12+BAG_SCALE[((d%5)+5)%5]+12*Math.floor(d/5);
     const T=(t,o)=>AU.tone(t,{...o,bus});
     /* a 2-bar motif from the song's seed, answered by a variation — the tune repeats so it is learnable */

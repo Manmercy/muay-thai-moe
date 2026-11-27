@@ -2553,7 +2553,6 @@ body.qs-cutting .vn .vbg{display:none}
 .rncom img{width:40px;height:40px;object-fit:cover;object-position:50% 6%;box-shadow:0 0 0 2px #ffd34a;flex:none;background:#2c2448}
 .rncom span{font-size:15px;line-height:1.35;color:#fff}
 .rncom.pop span{animation:rncp .25s ease-out}@keyframes rncp{0%{transform:translateX(-8px);opacity:.2}100%{transform:none;opacity:1}}
-<<<<<<< Updated upstream
 /* v1.91.177 support cards */
 .sctab{display:flex;flex-direction:column;gap:10px}
 .schead{display:flex;align-items:center;gap:8px}.schead b{font-family:var(--f-display);font-size:16px}.schead .meta{margin-right:auto}.schead .qbtn{min-width:32px}
@@ -2604,7 +2603,6 @@ body.qs-cutting .vn .vbg{display:none}
 @keyframes scshine{to{left:110%}}
 @media (prefers-reduced-motion:reduce){.scm.glow,.scpop{animation:none}}
 .chip.scchip{border-color:var(--gold,#f2c94c);color:var(--gold,#f2c94c);white-space:nowrap}
-=======
 
 /* v1.91.188 rhythm songs + nicer minigame UI */
 .mgame .mbox{background:linear-gradient(180deg,#2a2146,#1c1631);box-shadow:0 0 0 2px #0c0818,0 0 0 4px #4a3f6b,0 12px 30px rgba(0,0,0,.5)}
@@ -2635,4 +2633,3 @@ body.qs-cutting .vn .vbg{display:none}
 .tamres{font-size:15px}
 .rncom img.tall{object-position:50% 4%}
 .mhud{background:#120c22;padding:6px 10px;box-shadow:inset 0 0 0 2px #2c2448}
->>>>>>> Stashed changes

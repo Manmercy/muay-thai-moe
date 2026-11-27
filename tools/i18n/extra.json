@@ -21664,7 +21664,6 @@
  "</span><span><b id=\"rnt\">0.00</b> วิ</span><button class=\"xbtn\" data-mb=\"close\" aria-label=\"ออก\">✕</button></div>\n       <canvas id=\"rncv\" width=\"360\" height=\"230\"></canvas>\n       <div class=\"rncom\" id=\"rncom\"><img src=\"a/npc_caster.webp\" alt=\"\"><span id=\"rncomt\">": "</span><span><b id=\"rnt\">0.00</b> s</span><button class=\"xbtn\" data-mb=\"close\" aria-label=\"Exit\">✕</button></div>\n       <canvas id=\"rncv\" width=\"360\" height=\"230\"></canvas>\n       <div class=\"rncom\" id=\"rncom\"><img src=\"a/npc_caster.webp\" alt=\"\"><span id=\"rncomt\">",
  "\"ขาไม่หยุดนะเว้ย! กดให้สุดจนถึงเส้น!\" ครูแดงตะโกนจากข้างลู่": "\"Don't let those legs stop! All the way to the line!\" Kru Daeng shouts from the side of the track",
  "\"วิ่งได้ แต่ช่วงกลางอย่าแผ่วสิ\" ครูแดงหัวเราะ": "\"You can run, just don't fade in the middle,\" Kru Daeng laughs",
-<<<<<<< Updated upstream
  "<span class=\"chip scchip\">🃏 การ์ดทำงาน ": "<span class=\"chip scchip\">🃏 Cards fired ",
  "<p class=\"center meta\">💡 ติดการ์ดให้นักมวยได้ที่ ข้อมูลนักมวย → แท็บ \"ติดการ์ด\"</p>": "<p class=\"center meta\">💡 You can equip cards on fighters: fighter info → \"Cards\" tab</p>",
  "ติดการ์ด": "Cards",
@@ -21817,8 +21816,7 @@
  "คนมุงหน้าตลาดเป็นวงกลม ตรงกลางคือวัวนมตัวเดิม มีผ้าขาวม้าพันเขาไว้เหมือนมงคล": "A crowd circles the market entrance. In the middle: the same dairy cow, a pha khao ma tied round its horns like a mongkhon.",
  "หลบเก่งก็ต้องไล่ให้ทันค่ะ!": "If it dodges well, I'll just have to keep up!",
  "เมื่อคืนมันดูคู่เอกช่องสามจนจบ วันนี้หลบเก่งขึ้นอีกแล้ว!": "Last night it watched the main event on Channel 3 to the end. It's dodging even better today!",
- "วัวนมตัวเดิมยืนอยู่หน้าร้านกาแฟ เคี้ยวเอื้องไปส่ายหัวหลบซ้ายขวาไป เหมือนกำลังซ้อมหลบหมัด": "The same dairy cow stands outside the coffee shop, chewing cud and slipping its head left and right like it's drilling defence."
-=======
+ "วัวนมตัวเดิมยืนอยู่หน้าร้านกาแฟ เคี้ยวเอื้องไปส่ายหัวหลบซ้ายขวาไป เหมือนกำลังซ้อมหลบหมัด": "The same dairy cow stands outside the coffee shop, chewing cud and slipping its head left and right like it's drilling defence.",
  "ส้มตำเจ๊ปลา": "Jae Pla's Som Tam",
  "<p class=\"center meta\">สถิติเพลงนี้ ": "<p class=\"center meta\">Song best ",
  "<p class=\"center\"><b class=\"newrec\">สถิติใหม่ของเพลงนี้!</b> เดิม ": "<p class=\"center\"><b class=\"newrec\">New best for this song!</b> Was ",
@@ -21865,5 +21863,4 @@
  "ตลาดเช้าวันพระ": "Holy-Day Morning Market",
  "เพลงช้า ๆ ริมน้ำยามเช้า": "A slow tune by the river at dawn",
  "ลมเย็นริมปิง": "Cool Breeze on the Ping"
->>>>>>> Stashed changes
 }
