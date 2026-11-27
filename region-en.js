@@ -1891,7 +1891,7 @@ if(typeof QK!=="undefined")Object.assign(QK,{
   wn1:{fst:"pressure",name:"Tank-top guy from the temple fair",sprite:"rg_chaytrae1",lvl:-1.1,tilt:{punch:1.5,power:1,iq:-2,guard:-1.5},color:"#c8283c",grp:"gang"},
   wn2:{fst:"power",name:"Tong, the rice-whisky heavy hitter",sprite:"rg_chaytrae1",lvl:-.3,tilt:{power:2,punch:1,dur:1,speed:-1,iq:-1},color:"#8a1f2a",grp:"gang"},
   wn3:{fst:"inside",name:"Seua Dang, three-time temple ring champion",sprite:"rg_chaytrae2",lvl:.5,tilt:{punch:1.5,knee:1.5,power:1,iq:-.5},color:"#5a1420",grp:"gang"}});
-RG_SIDE.isan={cid:"tabtim",bg:"fair",ring:"bg_fair_ring.webp",title:"Off-schedule fight · temple fair ring",
+RG_SIDE.isan={cid:"tabtim",bg:"fair",ring:"bg_fair_fest.webp",title:"Off-schedule fight · temple fair ring",
   foes:[{qk:"wn1",t:"A girl in the temple ring? I'll go easy on you, sweetheart."},{qk:"wn2",t:"He just slipped. This one won't slip."},{qk:"wn3",t:"Three titles, and no woman has lasted a full round in front of me."}],
   between:["One of Seua Dang's boys kicks off his flip-flops and ducks through the ropes.","Seua Dang tosses away his glass and climbs into the ring himself. The whole fair gets to its feet."],
   intro:(G,D)=>[{n:"nar",t:"At dusk, a message from Tabtim pops up on the manager's phone: a photo of a boxing ring in the middle of a temple fair, coloured lights wound around the posts."},

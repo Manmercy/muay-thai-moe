@@ -1891,7 +1891,7 @@ if(typeof QK!=="undefined")Object.assign(QK,{
   wn1:{fst:"pressure",name:"หนุ่มเสื้อกล้ามงานวัด",sprite:"rg_chaytrae1",lvl:-1.1,tilt:{punch:1.5,power:1,iq:-2,guard:-1.5},color:"#c8283c",grp:"gang"},
   wn2:{fst:"power",name:"ไอ้โต้ง เหล้าขาวหมัดหนัก",sprite:"rg_chaytrae1",lvl:-.3,tilt:{power:2,punch:1,dur:1,speed:-1,iq:-1},color:"#8a1f2a",grp:"gang"},
   wn3:{fst:"inside",name:"เสือด่าง แชมป์เวทีวัดสามสมัย",sprite:"rg_chaytrae2",lvl:.5,tilt:{punch:1.5,knee:1.5,power:1,iq:-.5},color:"#5a1420",grp:"gang"}});
-RG_SIDE.isan={cid:"tabtim",bg:"fair",ring:"bg_fair_ring.webp",title:"ไฟต์นอกตาราง · เวทีงานวัด",
+RG_SIDE.isan={cid:"tabtim",bg:"fair",ring:"bg_fair_fest.webp",title:"ไฟต์นอกตาราง · เวทีงานวัด",
   foes:[{qk:"wn1",t:"ผู้หญิงขึ้นเวทีวัดเหรอ เดี๋ยวพี่ตีเบา ๆ ให้นะน้อง"},{qk:"wn2",t:"เมื่อกี้มันลื่นเฉย ๆ คนนี้ไม่ลื่นแน่"},{qk:"wn3",t:"สามสมัยไม่มีผู้หญิงคนไหนยืนครบยกต่อหน้าข้า"}],
   between:["ลูกน้องเสือด่างสะบัดรองเท้าแตะทิ้ง แล้วมุดเชือกขึ้นมา","เสือด่างโยนแก้วเหล้าทิ้ง เดินขึ้นเวทีเอง คนดูทั้งงานวัดลุกขึ้นยืน"],
   intro:(G,D)=>[{n:"nar",t:"หัวค่ำ มือถือผู้จัดการเด้งข้อความจากทับทิม เป็นรูปเวทีมวยกลางงานวัด ไฟหลากสีพันรอบเสา"},
