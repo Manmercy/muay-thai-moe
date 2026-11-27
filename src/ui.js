@@ -1,5 +1,5 @@
 // ================= MUAY THAI MOE v1.3 — UI =================
-const VERSION="1.91.195";
+const VERSION="1.91.196";
 const CUR_LANG=(typeof window!=="undefined"&&window.LANG)||"th";
 const TH_LABEL=String.fromCharCode(3652,3607,3618);
 function langSwitch(cls){return `<div class="langsw ${cls||""}" role="group" aria-label="Language">${[["th",TH_LABEL],["en","EN"]].map(([k,l])=>`<button class="lsb ${CUR_LANG===k?"on":""}" data-act="setlang" data-v="${k}" aria-pressed="${CUR_LANG===k}">${l}</button>`).join("")}</div>`;}
@@ -281,7 +281,8 @@ function pxBars(){document.querySelectorAll(".pxbar").forEach(b=>b.remove());if(
       if(show){bar.classList.add("on");clearTimeout(hide);hide=setTimeout(()=>bar.classList.remove("on"),1100);}};
     upd(false);el.addEventListener("scroll",()=>upd(true),{passive:true});});}
 addEventListener("resize",()=>pxBars());
-setInterval(()=>{try{AU.watch();if(G&&SETTINGS.music&&!AU.playing&&!UI.fight)AU.startMusic(UI.scene&&UI.scene.music||"hub");}catch(e){}},2000);
+/* v1.91.195 (Man): a minigame's own music must not have the scene music come back on top — the watchdog leaves the music alone while a minigame is open (closing it restarts the hub track) */
+setInterval(()=>{try{AU.watch();if(G&&SETTINGS.music&&!AU.playing&&!UI.fight&&!document.getElementById("minibag"))AU.startMusic(UI.scene&&UI.scene.music||"hub");}catch(e){}},2000);
 
 // ---------- title ----------
 function titleHTML(){const sv=loadSave();

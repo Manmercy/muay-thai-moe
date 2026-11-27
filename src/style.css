@@ -2634,3 +2634,49 @@ body.qs-cutting .vn .vbg{display:none}
 .tamres{font-size:15px}
 .rncom img.tall{object-position:50% 4%}
 .mhud{background:#120c22;padding:6px 10px;box-shadow:inset 0 0 0 2px #2c2448}
+/* v1.91.195 (Man: minigames should look like a pixel game) — chunky stepped frames, Pixelify headings and numbers, bevelled pixel buttons, no soft corners */
+.mgame{--px1:#0c0818;--px2:#4a3f6b;--px3:#7a6aa8;--pxg:#ffd34a}
+.mgame .mbox{border-radius:0;background:#231c3a;background-image:linear-gradient(180deg,rgba(255,255,255,.04) 0 50%,transparent 50%),linear-gradient(180deg,#2a2146,#1c1631);background-size:100% 4px,100% 100%;
+  box-shadow:0 0 0 3px var(--px1),0 0 0 6px var(--px2),0 0 0 9px var(--px1),inset 0 3px 0 var(--px3),inset 0 -3px 0 #120c22,0 14px 0 rgba(0,0,0,.35)}
+.mgame h2{font-family:"Pixelify Sans",var(--f-display);font-weight:700;letter-spacing:.5px;color:#ffe9b0;text-shadow:2px 2px 0 var(--px1),-1px -1px 0 #5a3a10;border-bottom:3px solid var(--px2);padding-bottom:6px;margin-bottom:8px}
+.mgame .btn{border-radius:0;font-weight:700;box-shadow:0 0 0 2px var(--px1),inset 2px 2px 0 rgba(255,255,255,.28),inset -2px -3px 0 rgba(0,0,0,.35);transition:transform .06s}
+.mgame .btn:active{transform:translateY(2px);box-shadow:0 0 0 2px var(--px1),inset 2px 2px 0 rgba(0,0,0,.35)}
+.mgame .btn.primary{background:#d9473b;color:#fff}.mgame .btn:not(.primary){background:#3a3158;color:#e9e3ff}
+.mgame .mhud{border-radius:0;font-family:"Pixelify Sans",var(--f-display);box-shadow:0 0 0 2px var(--px1),inset 0 0 0 2px var(--px2)}
+.mgame .mhud b{font-family:"Pixelify Sans",var(--f-display)}
+.mgame canvas{image-rendering:pixelated;box-shadow:0 0 0 3px var(--px1),0 0 0 5px var(--px2)}
+.mgame .mgrade{font-family:"Pixelify Sans",var(--f-display);text-shadow:4px 4px 0 var(--px1)}
+.mgame .sgtabs{box-shadow:0 0 0 2px var(--px1)}
+.mgame .sgtabs button{font-family:"Pixelify Sans",var(--f-display);font-size:14px}
+.mgame .sgtabs button:disabled{opacity:.35}
+.mgame .rncom{box-shadow:0 0 0 2px var(--px1),inset 0 0 0 2px var(--px2)}
+.mgame .rncom img{box-shadow:0 0 0 2px var(--px1),0 0 0 4px var(--pxg)}
+/* runner cards: face, name, two stepped stat bars, and how they stack up against ours */
+.mgame .mbpick{gap:8px}
+.mgame .mbf{border:0;border-radius:0;background:#2a2340;box-shadow:0 0 0 2px var(--px1),inset 0 0 0 2px var(--px2)}
+.mgame .mbf.on{background:#3a2f18;box-shadow:0 0 0 2px var(--px1),inset 0 0 0 3px var(--pxg),0 0 12px rgba(255,211,74,.35)}
+.mgame .mbf.rcard{width:92px;padding:6px 4px;gap:3px;display:flex;flex-direction:column;align-items:center}
+.mgame .mbf.rcard small{max-width:84px}
+.mgame .mbf.rcard img{width:56px;height:56px;box-shadow:0 0 0 2px var(--px1)}
+.rstat{display:flex;align-items:center;gap:2px;font-size:10px;line-height:1}
+.rstat b{width:9px;height:6px;background:#3f3560;box-shadow:0 0 0 1px var(--px1)}.rstat b.on{background:#ffd34a}
+.rstat i{font-style:normal;color:#cfc6ee;width:20px;text-align:left}
+.rstat u{text-decoration:none;color:#3f3560}
+.rk{font-style:normal;font-size:11px;font-weight:700;padding:1px 6px;box-shadow:0 0 0 2px var(--px1)}
+.rk.hard{background:#d9473b;color:#fff}.rk.even{background:#ffd34a;color:#2a1a00}.rk.easy{background:#3aa65a;color:#fff}
+.rfield{display:grid;gap:4px;margin:8px 0}
+.rfield span{display:flex;align-items:center;gap:8px;padding:5px 8px;background:#181230;box-shadow:inset 4px 0 0 var(--tc,#fff),0 0 0 2px var(--px1)}
+.rfield span b{flex:1;font-size:14px}.rfield span small{opacity:.8}
+/* finishing order */
+.rtable{display:grid;gap:3px;margin:8px 0}
+.rtable div{display:grid;grid-template-columns:28px 1fr auto;align-items:center;gap:8px;padding:5px 10px 5px 0;background:#181230;box-shadow:inset 5px 0 0 var(--tc,#fff),0 0 0 2px var(--px1)}
+.rtable div.me{background:#3a2f18;box-shadow:inset 5px 0 0 var(--tc,#fff),0 0 0 2px var(--px1),inset 0 0 0 2px var(--pxg)}
+.rtable b{font-family:"Pixelify Sans",var(--f-display);font-size:18px;text-align:center;color:#ffd34a}
+.rtable em{font-style:normal;font-family:"Pixelify Sans",monospace;font-size:15px}
+.mgame .sp-row{border-radius:0}
+.mgame .rwi{border-radius:0;box-shadow:0 0 0 2px var(--px1)}
+.mgame .songc{box-shadow:0 0 0 2px var(--px1),inset 0 0 0 2px #3a3060}
+.mgame .songc.on{box-shadow:0 0 0 2px var(--px1),inset 0 0 0 3px var(--sc),0 0 14px color-mix(in srgb,var(--sc) 55%,transparent)}
+.mgame .songc .sgt b,.mgame .songc .sgb b,.mgame .mbsong b{font-family:"Pixelify Sans",var(--f-display)}
+.mgame .mgitem{border-radius:0;box-shadow:0 0 0 2px var(--px1),inset 0 0 0 2px var(--px2),inset 0 3px 0 rgba(255,255,255,.06)}
+.mgame .mgitem:hover{box-shadow:0 0 0 2px var(--px1),inset 0 0 0 2px var(--pxg)}
