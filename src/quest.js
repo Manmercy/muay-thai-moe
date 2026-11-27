@@ -1177,7 +1177,13 @@ function spSquad(k){const y=G.season||1,T=RACE_TEAMS[k];
   if(k==="tiger"){const R=SPORTS.rivals().slice(0,4);if(G.dare&&G.dare.done)R.unshift(runDareRival(false));R.splice(4);let i=0;while(R.length<4)R.push(runNpc("sp_y"+i,["เสือเล็ก พยัคฆ์ทอง","เสือน้อย พยัคฆ์ทอง","เสือโคร่ง พยัคฆ์ทอง","เสือเหลือง พยัคฆ์ทอง"][i++],Math.min(19,13+y*.8),Math.min(19,13+y*.7),T.hue));return R;}
   const base=k==="teach"?[10.5,12]:[9,11],gr=k==="teach"?[.7,.5]:[.6,.5],cap=k==="teach"?17:15,P=SP_SQUADS[k],r=mulberry32((G.seed||1)+y*31+(k==="teach"?7:13));
   const rest=P.slice(1).map(x=>[x,r()]).sort((a,b)=>a[1]-b[1]).slice(0,3).map(x=>x[0]);
-  return [P[0],...rest].map(([id,n],i)=>runNpc(id,n,Math.min(cap+(i?0:1.5),base[0]+gr[0]*y+(i?-.4*i:.8)),Math.min(cap,base[1]+gr[1]*y),T.hue));}
+  const sq=[P[0],...rest].map(([id,n],i)=>runNpc(id,n,Math.min(cap+(i?0:1.5),base[0]+gr[0]*y+(i?-.4*i:.8)),Math.min(cap,base[1]+gr[1]*y),T.hue));
+  const g=spGuest();if(g&&g.team===k){sq.splice(1,0,g.f);sq.length=4;sq.guest=g.f;}return sq;}
+/* v1.91.199 (Man: it'd be funny if real fighters turned up at sports day) — every year one boxer from outside the camp runs as a guest
+   for the teachers or the TAO: Pailin, a Vector Lab fighter, or a fighter from the district league. Golden Tiger's own stay in yellow. */
+function spGuest(){const y=G.season||1,r=mulberry32((G.seed||1)+y*53),tig=new Set(SPORTS.rivals().map(f=>f.id));
+  const P=Object.values(G.F).filter(f=>!f.retired&&!f.injury&&f.camp!=="player"&&f.camp!=="region"&&!tig.has(f.id)&&(f.camp==="rival"||f.camp==="npc")&&f.a);
+  if(!P.length)return null;const star=P.filter(f=>f.camp==="rival").sort((a,b)=>(b.id==="pailin")-(a.id==="pailin")||a.id.localeCompare(b.id)),useStar=star.length&&r()<.65,f=useStar?star[(y-1)%star.length]:P[Math.floor(r()*P.length)];return {f,team:r()<.5?"teach":"obt"};}
 const SPORTS={st:null,
   el(){return document.getElementById("minibag");},
   open(done){BAG.st={phase:"sports",mode:"run",practice:true};BAG.mount();this.st={ph:"intro",ev:0,pts:{me:0,tiger:0,teach:0,obt:0},log:[],done};this.draw();},
@@ -1202,8 +1208,8 @@ const SPORTS={st:null,
     if(E.k==="relay"){const mk=k=>{const L=lane(k,sq[k][0],k==="me");L.legs=sq[k].slice(0,4).map(f=>({f}));L.teamName=RACE_TEAMS[k].n;return L;};
       return {label:"กีฬาสี · วิ่งผลัด 4×100",note:`ไม้ 1–4: ${sq.me.slice(0,4).map(f=>f.name).join(" → ")} · กดรัวให้วิ่ง พอเข้าเขตสีเหลืองแตะลู่วิ่งส่งไม้ (Enter ก็ได้) · แตะช่วงท้ายเขต = ส่งไม้เนียน`,
         dist:400,fixedMe:true,intro,me:sq.me[0],lanes:()=>[...keys.map(mk),mk("me")],cb,next:back};}
-    const d=E.k==="run400"?400:100,pickF=k=>k==="tiger"?sq.tiger[d===400?1:0]||sq.tiger[0]:sq[k][d===400?1:0];
-    return {label:`กีฬาสี · วิ่ง ${d} เมตร`,note:`4 สี 4 ลู่ · ที่ 1 ได้ 3 คะแนน ที่ 2 ได้ 2 ที่ 3 ได้ 1 · คู่แข่ง: ${keys.map(k=>`${RACE_TEAMS[k].n} ${pickF(k).name}`).join(" · ")}`,dist:d,intro:`ลู่สีเหลือง ${pickF("tiger").name} · สีฟ้า ${pickF("teach").name} · สีเขียว ${pickF("obt").name} · พร้อมแล้วครับ!`,
+    const d=E.k==="run400"?400:100,pickF=k=>k==="tiger"?sq.tiger[d===400?1:0]||sq.tiger[0]:sq[k].guest?(d===400?sq[k][0]:sq[k].guest):sq[k][d===400?1:0];
+    return {label:`กีฬาสี · วิ่ง ${d} เมตร`,note:`4 สี 4 ลู่ · ที่ 1 ได้ 3 คะแนน ที่ 2 ได้ 2 ที่ 3 ได้ 1 · คู่แข่ง: ${keys.map(k=>`${RACE_TEAMS[k].n} ${pickF(k).name}`).join(" · ")}`,dist:d,intro:(()=>{const gk=["teach","obt"].find(k=>sq[k].guest&&pickF(k)===sq[k].guest);return gk?`แขกรับเชิญครับ! ${sq[gk].guest.name} ลงวิ่งให้${RACE_TEAMS[gk].n}${gk==="obt"?"ทีม อบต.":"ทีมครู"}! ใครให้มาเนี่ย!`:`ลู่สีเหลือง ${pickF("tiger").name} · สีฟ้า ${pickF("teach").name} · สีเขียว ${pickF("obt").name} · พร้อมแล้วครับ!`;})(),
       lanes:me=>[...keys.map(k=>lane(k,pickF(k),false)),lane("me",me,true)],cb,next:back};},
   startEv(){const S=this.st,E=SP_EV[S.ev];
     if(E.k==="tug"){S.ph="tug";TUG.start(res=>{if(!this.st)return;this.rank(res.win);S.res=res;S.ph="res";this.draw();});return;}
@@ -1229,6 +1235,7 @@ const SPORTS={st:null,
   draw(){const S=this.st,el=this.el();if(!S||!el)return;const E=SP_EV[S.ev];
     if(S.ph==="intro"){el.innerHTML=`<div class="mbox px sp"><h2>🎌 งานกีฬาสีอำเภอ ประจำปี ${G.season||1}</h2>
        <div class="ctip"><img src="${faceSrc("coach")}" alt=""><span>ทางอำเภอชวนค่ายเราลงแข่งกีฬาสีอีกแล้ว ปีนี้เราได้สีแดง ค่ายพยัคฆ์ทองได้สีเหลือง ทีมครูโรงเรียนสีฟ้า ทีม อบต. สีเขียว… ห้ามแพ้พยัคฆ์ทองนะ!</span></div>
+       ${(()=>{const g=spGuest();return g?`<div class="rsay"><b>ข่าวลือข้างสนาม:</b> ปีนี้${g.team==="obt"?"ทีม อบต.":"ทีมครู"}ได้แขกรับเชิญเป็นนักมวยจริง… ${esc(g.f.name)}!</div>`:"";})()}
        ${this.table()}<p class="meta">${SP_EV.length} รายการ: ${SP_EV.map(e=>e.ic+" "+e.n).join(" · ")} · ที่ 1 ได้ 3 คะแนน ที่ 2 ได้ 2 ที่ 3 ได้ 1 · รวมคะแนนสีชนะ = ชื่อเสียง +1 · กำลังใจทุกคน · เศษดาว</p>
        <div class="mfoot roadbtns"><button class="btn" data-sp="end">ไม่ไปปีนี้</button><button class="btn primary" data-sp="go">ไปสนามกีฬา ▸</button></div></div>`;return;}
     if(S.ph==="ev"){el.innerHTML=`<div class="mbox px sp"><h2>${E.ic} รายการที่ ${S.ev+1}/${SP_EV.length}: ${E.n}</h2><p class="meta">${E.d}</p>${this.table()}
