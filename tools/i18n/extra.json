@@ -21662,5 +21662,6 @@
  "นักวิ่งเข้าเส้นเตรียมแล้วครับ!": "Runners are on the blocks!",
  "นักพากย์ประจำสนามพร้อมแล้วครับ!": "Your track commentator is ready!",
  "</span><span><b id=\"rnt\">0.00</b> วิ</span><button class=\"xbtn\" data-mb=\"close\" aria-label=\"ออก\">✕</button></div>\n       <canvas id=\"rncv\" width=\"360\" height=\"230\"></canvas>\n       <div class=\"rncom\" id=\"rncom\"><img src=\"a/npc_caster.webp\" alt=\"\"><span id=\"rncomt\">": "</span><span><b id=\"rnt\">0.00</b> s</span><button class=\"xbtn\" data-mb=\"close\" aria-label=\"Exit\">✕</button></div>\n       <canvas id=\"rncv\" width=\"360\" height=\"230\"></canvas>\n       <div class=\"rncom\" id=\"rncom\"><img src=\"a/npc_caster.webp\" alt=\"\"><span id=\"rncomt\">",
- "\"ขาไม่หยุดนะเว้ย! กดให้สุดจนถึงเส้น!\" ครูแดงตะโกนจากข้างลู่": "\"Don't let those legs stop! All the way to the line!\" Kru Daeng shouts from the side of the track"
+ "\"ขาไม่หยุดนะเว้ย! กดให้สุดจนถึงเส้น!\" ครูแดงตะโกนจากข้างลู่": "\"Don't let those legs stop! All the way to the line!\" Kru Daeng shouts from the side of the track",
+ "\"วิ่งได้ แต่ช่วงกลางอย่าแผ่วสิ\" ครูแดงหัวเราะ": "\"You can run, just don't fade in the middle,\" Kru Daeng laughs"
 }

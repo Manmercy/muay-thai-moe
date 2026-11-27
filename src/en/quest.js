@@ -768,7 +768,7 @@ MG_MODES.live={icon:"📱",title:"Camp Merch Live",note:"Answer comments in time
    Same side twice = a stumble · tapping before the gun = a false start (the second one loses the race). */
 const RUN_LEN=100,RUN_STRIDE=1.1;
 const runMult=f=>f?1+((f.a.speed||10)-10)*.012+((f.a.stamina||10)-10)*.006:1;
-const RUN_LINE={S:"Kru Daeng stops the watch and goes quiet for two seconds. \"…Was there a tailwind or what?\"",A:"Kru Daeng nods. \"Good legs today. Now go kick the bag.\"",B:"\"You can run, just stop tripping over your own feet,\" Kru Daeng laughs",C:"\"Don't let those legs stop! All the way to the line!\" Kru Daeng shouts from the side of the track"};
+const RUN_LINE={S:"Kru Daeng stops the watch and goes quiet for two seconds. \"…Was there a tailwind or what?\"",A:"Kru Daeng nods. \"Good legs today. Now go kick the bag.\"",B:"\"You can run, just don't fade in the middle,\" Kru Daeng laughs",C:"\"Don't let those legs stop! All the way to the line!\" Kru Daeng shouts from the side of the track"};
 const RUN={st:null,
   el(){return document.getElementById("minibag");},
   played(G){return mgPlayed(G,"run");},
