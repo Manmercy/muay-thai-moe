@@ -1416,7 +1416,8 @@ html.vnopen,html.vnopen body{overflow:hidden;overscroll-behavior:none;height:100
 .mghub{display:grid;gap:6px}
 .mgitem{display:flex;align-items:center;gap:8px;padding:8px 10px;border:0;cursor:pointer;text-align:left;font:inherit;color:var(--fg);background:#2a2340;box-shadow:inset 0 0 0 2px #4a3f6b}
 .mgitem .mi{font-size:24px}.mgitem small{display:block;color:var(--mute);font-size:12px}.mgitem .chev{margin-left:auto}.mgitem.done{opacity:.75}.mgitem:disabled{opacity:.4;cursor:default}
-.mbtn.L.somtam{background:#8a5a2b}.mbtn.R.somtam{background:#4f8a2b}
+/* v1.91.191 (Man): som tam buttons now match their notes — red = ตำ, blue = คลุก */
+.mbtn.L.somtam{background:#c8322b}.mbtn.R.somtam{background:#2b6fc8}
 /* v1.67 live-selling minigame */
 .lvitems{display:flex;flex-wrap:wrap;gap:6px;justify-content:center}
 .mplay.lv{gap:10px}
@@ -9355,7 +9356,7 @@ AU.gsfx=function(kind,a){if(!this.init()||this.muted||!SETTINGS.sfx)return;const
   if(kind==="shimmer")for(let i=0;i<6;i++)T(i*.05,{f:1400+Math.random()*1400,type:"sine",dur:.12,peak:.06});};
 
 // ================= MUAY THAI MOE v1.3 — UI =================
-const VERSION="1.91.190";
+const VERSION="1.91.191";
 const CUR_LANG=(typeof window!=="undefined"&&window.LANG)||"th";
 const TH_LABEL=String.fromCharCode(3652,3607,3618);
 function langSwitch(cls){return `<div class="langsw ${cls||""}" role="group" aria-label="Language">${[["th",TH_LABEL],["en","EN"]].map(([k,l])=>`<button class="lsb ${CUR_LANG===k?"on":""}" data-act="setlang" data-v="${k}" aria-pressed="${CUR_LANG===k}">${l}</button>`).join("")}</div>`;}
@@ -16178,7 +16179,7 @@ const STATS_HOST="https://us.i.posthog.com";     /* EU projects: https://eu.i.po
 <script>
 (function(){
 /* v1.87: Thai code ships inside index.html; English code (en.js) and the dictionary (i18n.js) load only when needed */
-var B="797c87e97e";
+var B="7a19fa1f3b";
 var L="";try{L=localStorage.getItem("mtm_lang")||"";}catch(e){}
 try{var h=(location.hash||"").match(/lang=(th|en)/);if(h)L=h[1];}catch(e){}
 if(L!=="th"&&L!=="en")L="th";

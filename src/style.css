@@ -1411,7 +1411,8 @@ html.vnopen,html.vnopen body{overflow:hidden;overscroll-behavior:none;height:100
 .mghub{display:grid;gap:6px}
 .mgitem{display:flex;align-items:center;gap:8px;padding:8px 10px;border:0;cursor:pointer;text-align:left;font:inherit;color:var(--fg);background:#2a2340;box-shadow:inset 0 0 0 2px #4a3f6b}
 .mgitem .mi{font-size:24px}.mgitem small{display:block;color:var(--mute);font-size:12px}.mgitem .chev{margin-left:auto}.mgitem.done{opacity:.75}.mgitem:disabled{opacity:.4;cursor:default}
-.mbtn.L.somtam{background:#8a5a2b}.mbtn.R.somtam{background:#4f8a2b}
+/* v1.91.191 (Man): som tam buttons now match their notes — red = ตำ, blue = คลุก */
+.mbtn.L.somtam{background:#c8322b}.mbtn.R.somtam{background:#2b6fc8}
 /* v1.67 live-selling minigame */
 .lvitems{display:flex;flex-wrap:wrap;gap:6px;justify-content:center}
 .mplay.lv{gap:10px}
