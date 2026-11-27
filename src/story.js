@@ -873,7 +873,7 @@ function dateScene(G,id,act){
   else{f.momentIdx=f.momentIdx||0;const M=MOMENTS[id];
     const quiet=[`คุณกับ${f.name}ใช้เวลาด้วยกันแบบไม่ต้องพูดอะไรมาก แค่นั้นก็พอแล้ว`,`${f.name}เล่าเรื่องซ้อมวันนี้ให้ฟังยาวเหยียด คุณฟังจนจบ`,`ระหว่างทางกลับ ${f.name}เดินช้าลงนิดหนึ่ง เหมือนไม่อยากให้วันนี้จบเร็ว`,`${f.name}หัวเราะกับเรื่องเล็ก ๆ ที่คุณเล่า แล้วบอกว่าวันนี้ดีจัง`];
     mid=f.momentIdx<M.length?[{n:"nar",t:M[f.momentIdx++]}]:[{n:"nar",t:freshLine(f,"quiet",quiet,rng)}];D.score+=1;}
-  const intro=freshOnce(f,"in_"+act,A.intro,rng),opener=freshOnce(f,"op_"+pref,OPENERS[id][pref],rng);
+  const intro=freshOnce(f,"in_"+act,A.intro,rng)||(A.intro&&A.intro.length?freshLine(f,"inr_"+act,A.intro,rng):null), /* v1.91.176 (Man): once every opening of a spot has been seen, they come round again instead of only the spot name */opener=freshOnce(f,"op_"+pref,OPENERS[id][pref],rng);
   const steps=[{n:"nar",bg:A.bg,t:intro||`${A.name}`},...(opener?[{n:id,f:pref==="dislike"?"sad":"happy",l:look,t:opener}]:[]),
     ...spotSteps(f,act),...mid,...dateTwist(G,f,D,look),
     {inject:G2=>{const gain=Math.max(0,1+Math.round(D.score*.7));const capped=false,b0=hTot(f);add(G2,id,"bond",gain);const real=Math.round((hTot(f)-b0)*2)/2,HL=heartLv(f),hleft=Math.max(0,Math.ceil((HL.need-HL.into)*2)/2);if(gain>=4)add(G2,id,"morale",4);

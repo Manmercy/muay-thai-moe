@@ -2292,33 +2292,36 @@ const GIFT_LINES={
 function giftTier(id,g){if(GIFTS[g]&&GIFTS[g].souv)return (SOUV_LOVE[id]||[]).includes(g)?"love":"like";const P=GIFT_PREF[id];return P.love.includes(g)?"love":P.like.includes(g)?"like":P.dislike.includes(g)?"dislike":"ok";}
 function giveGift(G,id,g){const f=G.F[id],it=GIFTS[g],sv=!!it.souv;if(sv?!((G.souv||{})[g]>0):G.cash<it.price)return null;if(f.giftWeek===gameWeek(G))return null;if(sv)G.souv[g]--;else G.cash-=it.price;f.giftWeek=gameWeek(G);if(typeof absWeek==="function")f.lastTouch=absWeek(G);
   // v1.16: the same gift again means less (and she says so)
-  f.giftN=f.giftN||{};f.giftL=f.giftL||{};if(f.giftL[g]&&gameWeek(G)-f.giftL[g]>=6)f.giftN[g]=0;const n=f.giftN[g]||0;f.giftN[g]=n+1;f.giftL[g]=gameWeek(G);f.giftTot=(f.giftTot||0)+1;
+  f.giftN=f.giftN||{};f.giftL=f.giftL||{};if(f.giftL[g]&&gameWeek(G)-f.giftL[g]>=6)f.giftN[g]=0;const n=f.giftN[g]||0;f.giftN[g]=n+1;f.giftC=f.giftC||{};f.giftC[g]=(f.giftC[g]||0)+1;f.giftL[g]=gameWeek(G);f.giftTot=(f.giftTot||0)+1;
   const t=giftTier(id,g),base=sv?(it.pv?{love:10,like:6}:{love:24,like:15})[t]:Math.round({love:6,like:4,ok:2,dislike:0}[t]*(it.bond&&t!=="dislike"?1.5:1)),gain=base>0?Math.max(1,Math.round(base*(n===0?1:t==="love"?(n===1?.6:.4):(n===1?.5:.25)))):base;
   const before=(f.bond||0)+(f.bondX||0);add(G,id,"bond",gain);if(t==="love")add(G,id,"morale",n<2?6:4);
-  f.know["gift_"+g]=t;return {t,gain:Math.round(((f.bond||0)+(f.bondX||0)-before)*10)/10,g,n};}
+  f.know["gift_"+g]=t;return {t,gain:Math.round(((f.bond||0)+(f.bondX||0)-before)*10)/10,g,n,c:f.giftC[g]};}
 // v1.21: repeat-gift lines follow what the gift is (food / something to wear / a keepsake / an outing) so they always fit
 const GIFT_AGAIN={
- kati:{food:["{g} again! I finished the last one already, I'm so happy","Got {g} again~ This time I'll share with Coach Daeng"],
-   wear:["Another {g}! Now I can rotate them, thank you","My old one was just getting worn, the new {g} came right on time"],
-   keep:["{g} again! I line them up on my shelf, I never get tired of them","You remembered I like {g}, didn't you? I'm so happy"],
-   exp:["We get to go again! I still haven't finished telling everyone about last time","Again? You're being way too kind"]},
- mali:{food:["{g} again~! Mali could eat it every day, never gets old","Hehe, {g} again! This time I'll share with the kids in camp"],
-   wear:["Another {g}~ Mali will wear them on alternate days","Got {g} again! I'm sending Mom another photo~"],
-   keep:["{g} again~ Mali has a whole collection now","You really get Mali. The more {g}, the better"],
-   exp:["We get to go again!! This time Mali's dragging you along~","Again~? Mali's legs say thank you"]},
- rin:{food:["{g} again… my consumption has doubled. But I'm still happy","Duplicate data: {g} again… yet the happiness output is unchanged"],
-   wear:["Another {g}. Having a spare does no harm. Thank you","I'll use this {g} on fight days and keep the old one for training"],
-   keep:["You're observant. You remembered I like {g}","{g} again… statistics say I've never once tired of it"],
-   exp:["Again? My body thanks you","I'll note that you've given this twice… so I can thank you properly"]},
- ploy:{food:["{g} again… you really remembered. Thank you","Got {g} again. I'll brew some for my juniors too"],
-   wear:["Another {g}, I just used up the old one. Thanks","I like your consistency"],
-   keep:["{g} again. I'll keep it close","I never tire of things like this. Thank you"],
-   exp:["Again… I suppose I should find time to rest. Thank you","You really do worry about me"]},
- fah:{food:["{g} again!! You know Fah best!","Haha, {g} again, Fah never gets bored, keep 'em coming!"],
-   wear:["Another {g}! Fah'll wear it every day …don't tell anyone Fah's happy","Got it again, yes! Gonna wear it to Golden Tiger to make them jealous"],
-   keep:["{g} again, fine, Fah'll keep it in the locker","Not bad, again. Thanks"],
-   exp:["Again? …Fine, fine, Fah'll go","You really like spoiling Fah, huh"]}};
-const giftAgainLine=(id,t,n,g)=>{const C=GIFT_AGAIN[id];if(!C)return null;const L=C[g?giftCat(g):"keep"]||C.keep;return L[(n-1)%L.length].replace("{g}",g?GIFTS[g].name:"this one");};
+ kati:{food:["{g} again! I finished the last one already, I'm so happy","Got {g} again~ This time I'll share with Coach Daeng","I save the {g} for after morning training. On tired days just seeing the bag helps.","You're getting me hooked on {g}… that's fine, I give in."],
+   wear:["Another {g}! Now I can rotate them, thank you","My old one was just getting worn, the new {g} came right on time","I'll wear this {g} when I pay respects to Grandpa at the camp shrine, so he sees someone looks after me.","I really fight with more confidence wearing what you gave me. I'm not joking."],
+   keep:["{g} again! I line them up on my shelf, I never get tired of them","You remembered I like {g}, didn't you? I'm so happy","I'm running out of space… I'll move one trophy out, then.","Every time I get a {g}, I write the date on the back of the box. Don't laugh."],
+   exp:["We get to go again! I still haven't finished telling everyone about last time","Again? You're being way too kind","If you take me out this often, Kru Daeng will say I'm better at outings than training.","We can go again. This time I'm paying for the ride."]},
+ mali:{food:["{g} again~! Mali could eat it every day, never gets old","Hehe, {g} again! This time I'll share with the kids in camp","{g} again~ Mali's sending Mom a photo to show they're fattening me up here.","Mali can't stop smiling while eating the {g}. Everyone can tell who gave it, hehe."],
+   wear:["Another {g}~ Mali will wear them on alternate days","Got {g} again! I'm sending Mom another photo~","Mali's wearing the {g} to the morning market so the aunties ask who bought it~","Let me spin for you~ …well? Cute, right?"],
+   keep:["{g} again~ Mali has a whole collection now","You really get Mali. The more {g}, the better","Mali names every {g}. This one's 'Little Ton'. Don't laugh!","Mali's shelf is full~ Gotta ask Kru Daeng to build another one."],
+   exp:["We get to go again!! This time Mali's dragging you along~","Again~? Mali's legs say thank you","Again~ Mali's taking a couple photo with you at every spot!","This time Mali's packing the snacks, you don't have to buy~"]},
+ rin:{food:["{g} again… my consumption has doubled. But I'm still happy","Duplicate data: {g} again… yet the happiness output is unchanged","I've added {g} to my nutrition table, in the column 'calories don't count'.","I've noticed my training the day after a {g} is better… possibly a coincidence."],
+   wear:["Another {g}. Having a spare does no harm. Thank you","I'll use this {g} on fight days and keep the old one for training","I keep the {g}s in a drawer sorted by date received. This is the newest entry.","More comfortable than I calculated. Thank you."],
+   keep:["You're observant. You remembered I like {g}","{g} again… statistics say I've never once tired of it","My {g} collection is growing faster than projected… that's not a complaint.","I labelled every one. They all say 'from the manager'."],
+   exp:["Again? My body thanks you","I'll note that you've given this twice… so I can thank you properly","I've planned the route. Twelve minutes faster than last time.","Going back is good. I can compare how it felt both times."]},
+ ploy:{food:["{g} again… you really remembered. Thank you","Got {g} again. I'll brew some for my juniors too","I used to think {g} was just a snack. Now it's something I wait for.","{g} again… I won't tell anyone how much I like it."],
+   wear:["Another {g}, I just used up the old one. Thanks","I like your consistency","Wearing your {g} feels like someone's always in my corner.","I'm saving this one for important days. Not for every day."],
+   keep:["{g} again. I'll keep it close","I never tire of things like this. Thank you","My room used to be all belts. Now there's more from you than belts.","I don't keep things much. But I keep everything from you."],
+   exp:["Again… I suppose I should find time to rest. Thank you","You really do worry about me","Again? …Sure. I always have time for you.","At Golden Tiger I never went anywhere. Thanks for taking me out so often."]},
+ fah:{food:["{g} again!! You know Fah best!","Haha, {g} again, Fah never gets bored, keep 'em coming!","{g} again! Fah will share with anyone… except Ploy. Kidding, kidding.","If you keep feeding Fah like this, I'll fight for you every night!"],
+   wear:["Another {g}! Fah'll wear it every day …don't tell anyone Fah's happy","Got it again, yes! Gonna wear it to Golden Tiger to make them jealous","Going live in the {g}. The fans will definitely ask who gave it.","Fah looks two levels cooler in it. You agree, right? Of course you do!"],
+   keep:["{g} again, fine, Fah'll keep it in the locker","Not bad, again. Thanks","Fah stuck the {g} on the locker. Anyone who touches it gets kicked.","Another one? …Fine. Fah's not smiling, the light's just in my eyes."],
+   exp:["Again? …Fine, fine, Fah'll go","You really like spoiling Fah, huh","Again! Fah drives this time… fine, no, you drive.","Fah likes the same spot — because it's with you. I said it, don't tease."]}};
+/* v1.91.176 (Man): repeats rotate through her repeat lines and her usual lines for this gift, so a favourite does not get the same reply every week */
+const giftAgainLine=(id,t,n,g)=>{const C=GIFT_AGAIN[id],P=[];if(C){const L=C[g?giftCat(g):"keep"]||C.keep;P.push(...L.map(x=>x.replace(/\{g\}/g,g?GIFTS[g].name:"this one")));}
+  if(g&&typeof GIFT_TALK_PERSONAL!=="undefined"&&GIFT_TALK_PERSONAL[id]&&GIFT_TALK_PERSONAL[id][g])P.push(GIFT_TALK_PERSONAL[id][g]);if(g&&typeof GIFT_TALK!=="undefined"&&GIFT_TALK[id]&&GIFT_TALK[id][g])P.push(GIFT_TALK[id][g]);
+  const U=[...new Set(P.filter(Boolean))];return U.length?U[(n-1)%U.length]:null;};
 
 // ---------- v1.3: more talk topics (no repeats) — only a fitting answer reveals the fact ----------
 const TALK_MORE={
@@ -3387,7 +3390,7 @@ function dateScene(G,id,act){
   else{f.momentIdx=f.momentIdx||0;const M=MOMENTS[id];
     const quiet=[`You and ${f.name} spend time together without needing to say much. That's enough`,`${f.name} tells you about today's training at great length; you listen to the end`,`On the way back, ${f.name} slows down a little, as if she doesn't want today to end`,`${f.name} laughs at the little things you say, then says today was nice`];
     mid=f.momentIdx<M.length?[{n:"nar",t:M[f.momentIdx++]}]:[{n:"nar",t:freshLine(f,"quiet",quiet,rng)}];D.score+=1;}
-  const intro=freshOnce(f,"in_"+act,A.intro,rng),opener=freshOnce(f,"op_"+pref,OPENERS[id][pref],rng);
+  const intro=freshOnce(f,"in_"+act,A.intro,rng)||(A.intro&&A.intro.length?freshLine(f,"inr_"+act,A.intro,rng):null), /* v1.91.176 (Man): once every opening of a spot has been seen, they come round again instead of only the spot name */opener=freshOnce(f,"op_"+pref,OPENERS[id][pref],rng);
   const steps=[{n:"nar",bg:A.bg,t:intro||`${A.name}`},...(opener?[{n:id,f:pref==="dislike"?"sad":"happy",l:look,t:opener}]:[]),
     ...spotSteps(f,act),...mid,...dateTwist(G,f,D,look),
     {inject:G2=>{const gain=Math.max(0,1+Math.round(D.score*.7));const capped=false,b0=hTot(f);add(G2,id,"bond",gain);const real=Math.round((hTot(f)-b0)*2)/2,HL=heartLv(f),hleft=Math.max(0,Math.ceil((HL.need-HL.into)*2)/2);if(gain>=4)add(G2,id,"morale",4);
@@ -6716,7 +6719,7 @@ AU.gsfx=function(kind,a){if(!this.init()||this.muted||!SETTINGS.sfx)return;const
   if(kind==="shimmer")for(let i=0;i<6;i++)T(i*.05,{f:1400+Math.random()*1400,type:"sine",dur:.12,peak:.06});};
 
 // ================= MUAY THAI MOE v1.3 — UI =================
-const VERSION="1.91.188";
+const VERSION="1.91.189";
 const CUR_LANG=(typeof window!=="undefined"&&window.LANG)||"th";
 const TH_LABEL=String.fromCharCode(3652,3607,3618);
 function langSwitch(cls){return `<div class="langsw ${cls||""}" role="group" aria-label="Language">${[["th",TH_LABEL],["en","EN"]].map(([k,l])=>`<button class="lsb ${CUR_LANG===k?"on":""}" data-act="setlang" data-v="${k}" aria-pressed="${CUR_LANG===k}">${l}</button>`).join("")}</div>`;}
@@ -8780,7 +8783,7 @@ function fightEnd(){const U=UI.fight;if(U.brawl){brawlEnd();return;}U.stage="don
 
 // ---------- actions ----------
 function giftScene(id,res){const f=G.F[id];const mood=res.t==="dislike"?"pout":res.t==="love"?"flustered":"happy";
-  playScene([{n:id,f:mood,l:"casual",t:(res.n&&res.t!=="dislike"&&giftAgainLine(id,res.t,res.n,res.g))||(GIFTS[res.g].souv&&souvLine(id,res.g,res.t))||(GIFT_TALK_PERSONAL[id]&&GIFT_TALK_PERSONAL[id][res.g])||((GIFT_TALK[id]&&GIFT_TALK[id][res.g])||GIFT_LINES[id][res.t])},{n:"nar",t:res.gain>0?(res.n>=2?`Bond with ${f.name} +${res.gain} · a bit too often, so it rises less`:`Bond with ${f.name} +${res.gain}`)
+  playScene([{n:id,f:mood,l:"casual",t:(((res.c||0)>1||res.n)&&res.t!=="dislike"&&giftAgainLine(id,res.t,Math.max(res.n||0,(res.c||1)-1),res.g))||(GIFTS[res.g].souv&&souvLine(id,res.g,res.t))||(GIFT_TALK_PERSONAL[id]&&GIFT_TALK_PERSONAL[id][res.g])||((GIFT_TALK[id]&&GIFT_TALK[id][res.g])||GIFT_LINES[id][res.t])},{n:"nar",t:res.gain>0?(res.n>=2?`Bond with ${f.name} +${res.gain} · a bit too often, so it rises less`:`Bond with ${f.name} +${res.gain}`)
       :res.t==="dislike"?`${f.name} accepts it with a smile, but it may not be a favorite · Bond unchanged`:heartCapped(G,f)?`${f.name} is delighted · hearts are full for this chapter`:f.bond>=100?`${f.name} is thrilled · Bond is already maxed`:`${f.name} is happy, but has been getting this a lot lately. Try mixing it up.`},
     ...((()=>{const k=f.giftTot===5?0:f.giftTot===10?1:-1;if(k<0||!GIFT_FREQ[id]||(f.giftFreq||0)>k)return [];f.giftFreq=k+1;
       return [...GIFT_FREQ[id][k].map(s=>({...s,l:"casual"})),k===1?{inject:G2=>{add(G2,id,"bond",3);G2.F[id].morale=Math.min(100,G2.F[id].morale+8);return [{n:"nar",t:`A gift in return from ${f.name} · Bond +3 · Morale: ${f.name} +8`}];}}:{inject:()=>[]}];})())],()=>{AU.startMusic("hub");render();},{bg:f.camp==="player"?"gym":"fair",look:"casual"});}
@@ -9420,7 +9423,7 @@ Object.assign(ACT,{
       :m.q==="gang"?[{n:"nar",t:"Morning market… more than ten motorbikes are lined up in front of the vegetable stalls"},{n:"npc",who:QK[m.qk].name,t:m.early?"My boys lost to you again and again. My name's mud! And your camp still owes me. Today I handle you myself!":m.qk==="gang5"?"I hear some fight camp is meddling in my business. Today the big boss came down himself!":m.qk==="gang4"?"My red-helmet boys got chased off by camp kids? This Silver Helmet will teach you some manners.":m.qk==="gang6"?"The boss needn't waste his strength. His right hand can handle this.":"So who chased off my boys? Come on out!"},{n:d.id,f:"angry",l:"fight",t:"Me!"}]
       :m.q==="belt"?[{n:"nar",t:`${STADIUMS[m.venue||"tha"].name}. Spotlights hit the center of the ring as the announcer calls both corners.`},{n:"npc",who:G.F[m.npc].name,t:m.defend?"That belt should be mine. Today I'm taking it back.":"Want the belt? You'll have to get through me first."},{n:d.id,f:"angry",l:"fight",t:m.defend?"Come and take it, then!":"That's exactly why I'm here!"}]
       :m.q==="challenge"?[{n:"nar",t:"The yard behind the fresh market. Crowds on both sides; someone has set up a table taking bets in red soda"},{n:"npc",who:G.F[m.npc].name,t:"So you finally came. I thought you'd run all season"},{n:d.id,f:"angry",l:"fight",t:"I wasn't running, I was busy. Now I'm free!"}]
-      :m.q==="cow"?[{n:"nar",t:"In the middle of the road by the market, a huge dairy cow holds a guard, front hooves doing footwork no cow should be able to do"},{n:"npc",who:"Uncle Chaloem",t:"That's her! Watch out for the kicks, dear, she watches fight replays every night!"},{n:d.id,f:"surprised",l:"fight",t:"…A cow really can hold a guard!?"}]
+      :(m.q==="cow"||m.q==="rooster")?runawayIntro(G,m,d.id)
       :[{n:"nar",t:"A small bantam stands on the heavy bag, chest puffed, neck feathers bristling"},{n:"npc",who:"Sia Tong",t:"Don't underestimate him. He once chased every big dog on the street"},{n:d.id,f:"happy",l:"fight",t:"Come on, chicken! I'm not a dog!"}];
     playScene(intro,()=>startQuest(spec,d.id,()=>{}),{bg:m.q==="gang"?(m.hq?"gang_hq":"market_morning"):m.q==="belt"?STADIUMS[m.venue||"tha"].scene:m.q==="challenge"?"food":m.q==="rooster"?"rooster":m.q==="cow"||m.q==="bull"?"farm":"fair",look:"fight"});},
   cashflow:()=>{UI.modal={type:"cashflow"};render();},
@@ -10746,6 +10749,19 @@ Object.assign(ACT,{
     dd.done=true;m.done=true;if(dd.res.prize){G.cash+=dd.res.prize;AU.sfx("level");}else AU.sfx("miss");save();const Ls=LOTTO_COACH[dd.res.out],line=Ls[(dd.i+dd.season)%Ls.length];
     UI.modal=null;render();playScene([{n:"coach",t:line}],()=>{render();},{bg:"camp",look:"casual"});}
 });
+
+/* v1.91.176 (Man): the runaway cow and rooster come back several times a year — each return opens differently (the first visit keeps its own scene) */
+const RUNAWAY_INTRO={
+ cow:[[["nar","In the middle of the road by the market, a huge dairy cow holds a guard, front hooves doing footwork no cow should be able to do"],["Uncle Chaloem","That's her! Watch out for the kicks, dear, she watches fight replays every night!"],["surprised","…A cow really can hold a guard!?"]],
+  [["nar","The same dairy cow stands outside the coffee shop, chewing cud and slipping its head left and right like it's drilling defence."],["Uncle Chaloem","Last night it watched the main event on Channel 3 to the end. It's dodging even better today!"],["angry","If it dodges well, I'll just have to keep up!"]],
+  [["nar","A crowd circles the market entrance. In the middle: the same dairy cow, a pha khao ma tied round its horns like a mongkhon."],["Uncle Chaloem","No idea who tied that cloth on. Now it thinks it's stepping into the ring!"],["surprised","…It even has a mongkhon. Should I do the wai khru first?"]],
+  [["nar","The same dairy cow waits at the zebra crossing. When it spots the Sirichai van it stamps twice."],["Uncle Chaloem","It knows your camp's van now. It's waiting for its regular rival!"],["surprised","Its regular rival… me!?"]]],
+ rooster:[[["nar","A small bantam stands on the heavy bag, chest puffed, neck feathers bristling"],["Sia Tong","Don't underestimate him. He once chased every big dog on the street"],["happy","Come on, chicken! I'm not a dog!"]],
+  [["nar","The same bantam perches on the training-ring ropes, crowing across the camp since 5 a.m."],["Sia Tong","It loves your ring. It flies over every time the gate's open."],["happy","You're not taking the ring today!"]],
+  [["nar","The bantam stands on the gym roof, wings half-spread like a guard."],["Sia Tong","It watches your camp's clips on my phone every night. That stance is a straight copy."],["surprised","…That's my guard stance!"]],
+  [["nar","The same bantam circles the heavy bag, pecking once at a time like it's warming up."],["Sia Tong","I think it just wants to join your camp… but those pecks hurt."],["angry","If you want into the camp, you'll have to get past me!"]]]};
+function runawayIntro(G,m,fid){const L=RUNAWAY_INTRO[m.q];G.runN=G.runN||{};let i=0;if(m.repeat){if(m.introI==null){G.runN[m.q]=(G.runN[m.q]||0)+1;m.introI=1+((G.runN[m.q]-1)%(L.length-1));}i=m.introI;}
+  const [a,b,c]=L[i];return [{n:"nar",t:a[1]},{n:"npc",who:b[0],t:b[1]},{n:fid,f:c[0],l:"fight",t:c[1]}];}
 
 // ================= MUAY THAI MOE v1.24 — PIXEL CHAT (one chat per character per week) =================
 // each exchange: [their line, [[my reply, score 0-2, their answer], ...]] — score 2 = what she loves to hear, 0 = falls flat (never negative)

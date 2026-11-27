@@ -4898,33 +4898,36 @@ const GIFT_LINES={
 function giftTier(id,g){if(GIFTS[g]&&GIFTS[g].souv)return (SOUV_LOVE[id]||[]).includes(g)?"love":"like";const P=GIFT_PREF[id];return P.love.includes(g)?"love":P.like.includes(g)?"like":P.dislike.includes(g)?"dislike":"ok";}
 function giveGift(G,id,g){const f=G.F[id],it=GIFTS[g],sv=!!it.souv;if(sv?!((G.souv||{})[g]>0):G.cash<it.price)return null;if(f.giftWeek===gameWeek(G))return null;if(sv)G.souv[g]--;else G.cash-=it.price;f.giftWeek=gameWeek(G);if(typeof absWeek==="function")f.lastTouch=absWeek(G);
   // v1.16: the same gift again means less (and she says so)
-  f.giftN=f.giftN||{};f.giftL=f.giftL||{};if(f.giftL[g]&&gameWeek(G)-f.giftL[g]>=6)f.giftN[g]=0;const n=f.giftN[g]||0;f.giftN[g]=n+1;f.giftL[g]=gameWeek(G);f.giftTot=(f.giftTot||0)+1;
+  f.giftN=f.giftN||{};f.giftL=f.giftL||{};if(f.giftL[g]&&gameWeek(G)-f.giftL[g]>=6)f.giftN[g]=0;const n=f.giftN[g]||0;f.giftN[g]=n+1;f.giftC=f.giftC||{};f.giftC[g]=(f.giftC[g]||0)+1;f.giftL[g]=gameWeek(G);f.giftTot=(f.giftTot||0)+1;
   const t=giftTier(id,g),base=sv?(it.pv?{love:10,like:6}:{love:24,like:15})[t]:Math.round({love:6,like:4,ok:2,dislike:0}[t]*(it.bond&&t!=="dislike"?1.5:1)),gain=base>0?Math.max(1,Math.round(base*(n===0?1:t==="love"?(n===1?.6:.4):(n===1?.5:.25)))):base;
   const before=(f.bond||0)+(f.bondX||0);add(G,id,"bond",gain);if(t==="love")add(G,id,"morale",n<2?6:4);
-  f.know["gift_"+g]=t;return {t,gain:Math.round(((f.bond||0)+(f.bondX||0)-before)*10)/10,g,n};}
+  f.know["gift_"+g]=t;return {t,gain:Math.round(((f.bond||0)+(f.bondX||0)-before)*10)/10,g,n,c:f.giftC[g]};}
 // v1.21: repeat-gift lines follow what the gift is (food / something to wear / a keepsake / an outing) so they always fit
 const GIFT_AGAIN={
- kati:{food:["{g}อีกแล้ว! หนูกินหมดไปตั้งแต่ครั้งก่อนเลยค่ะ ดีใจจัง","ได้{g}อีกแล้ว~ คราวนี้หนูแบ่งครูแดงด้วยนะคะ"],
-   wear:["{g}อีกชิ้น! หนูจะมีไว้ใช้สลับกันเลยค่ะ ขอบคุณนะคะ","อันเก่าหนูใช้จนเริ่มเก่าพอดีเลย ได้{g}ใหม่มาทันเวลาค่ะ"],
-   keep:["{g}อีกแล้ว! หนูเก็บไว้เรียงกันบนชั้นเลยค่ะ ไม่เคยเบื่อเลย","คุณจำได้ว่าหนูชอบ{g}ใช่ไหมคะ ดีใจจัง"],
-   exp:["ได้ไปอีกแล้วเหรอคะ! คราวก่อนหนูยังเล่าให้ทุกคนฟังไม่จบเลย","อีกรอบเหรอคะ… คุณใจดีเกินไปแล้วค่ะ"]},
- mali:{food:["{g}อีกแล้ว~! มะลิกินได้ทุกวันเลยนะ ไม่มีวันเบื่อ","ฮิ ๆ {g}อีกแล้ว! คราวนี้แบ่งน้อง ๆ ในค่ายด้วยนะคะ"],
-   wear:["{g}อีกอัน~ มะลิจะใส่สลับวันเลยค่ะ","ได้{g}อีกแล้ว! ส่งรูปให้แม่ดูอีกรอบดีกว่า~"],
-   keep:["{g}อีกแล้ว~ มะลิมีเป็นคอลเลกชันแล้วนะคะ","คุณนี่รู้ใจมะลิจริง ๆ {g}ยิ่งได้ยิ่งชอบ"],
-   exp:["ได้ไปอีกแล้ว!! มะลิจะชวนคุณไปด้วยนะคราวนี้~","อีกแล้วเหรอคะ~ ขามะลิขอบคุณคุณแทนเลยค่ะ"]},
- rin:{food:["{g}อีกแล้ว… ปริมาณที่ฉันบริโภคเพิ่มขึ้นสองเท่าแล้วค่ะ แต่ก็ยังดีใจ","ข้อมูลซ้ำค่ะ {g}อีกแล้ว… แต่ผลลัพธ์ความดีใจยังเท่าเดิม"],
-   wear:["{g}อีกชิ้น มีสำรองไว้ไม่เสียหายค่ะ ขอบคุณ","ฉันจะใช้{g}อันนี้ตอนวันแข่ง อันเก่าเก็บไว้ซ้อมค่ะ"],
-   keep:["คุณสังเกตเก่งนะคะ จำได้ว่าฉันชอบ{g}","{g}อีกแล้ว… สถิติบอกว่าฉันไม่เคยเบื่อมันเลยค่ะ"],
-   exp:["อีกรอบเหรอคะ ร่างกายฉันจะขอบคุณคุณค่ะ","ฉันจะจดไว้ว่าคุณให้มาสองครั้งแล้ว …เพื่อจะได้ขอบคุณให้ครบค่ะ"]},
- ploy:{food:["{g}อีกแล้ว… คุณจำได้จริง ๆ ด้วย ขอบใจนะ","ได้{g}อีกแล้ว เดี๋ยวพี่ชงแบ่งรุ่นน้องด้วย"],
-   wear:["{g}อีกชิ้น พี่ใช้อันเก่าจนหมดพอดี ขอบใจ","พี่ชอบความสม่ำเสมอของคุณนะ"],
-   keep:["{g}อีกแล้ว พี่จะเก็บไว้ใกล้ ๆ ตัว","พี่ไม่เคยเบื่อของแบบนี้หรอก ขอบใจ"],
-   exp:["อีกรอบเหรอ… พี่คงต้องหาเวลาพักบ้างแล้วล่ะ ขอบใจนะ","คุณนี่ห่วงพี่จริง ๆ นะ"]},
- fah:{food:["{g}อีกแล้ว!! นายรู้ใจฟ้าที่สุดเลย!","ฮ่า ๆ {g}อีกแล้ว ฟ้าไม่เบื่อหรอก เอามาอีกได้เรื่อย ๆ!"],
-   wear:["{g}อีกอัน! ฟ้าจะใส่ทุกวันเลย …อย่าบอกใครนะว่าดีใจ","ได้อีกแล้ว เยส! ใส่ไปค่ายพยัคฆ์ทองให้พวกนั้นอิจฉาเล่น"],
-   keep:["{g}อีกแล้ว ก็ดีนะ ฟ้าเก็บไว้ในล็อกเกอร์","ไม่เลวนี่ ได้อีกแล้ว ขอบใจนะนาย"],
-   exp:["อีกรอบ? …ก็ได้ ๆ ไปก็ได้","นายนี่ชอบตามใจฟ้าจริง ๆ นะ"]}};
-const giftAgainLine=(id,t,n,g)=>{const C=GIFT_AGAIN[id];if(!C)return null;const L=C[g?giftCat(g):"keep"]||C.keep;return L[(n-1)%L.length].replace("{g}",g?GIFTS[g].name:"อันนี้");};
+ kati:{food:["{g}อีกแล้ว! หนูกินหมดไปตั้งแต่ครั้งก่อนเลยค่ะ ดีใจจัง","ได้{g}อีกแล้ว~ คราวนี้หนูแบ่งครูแดงด้วยนะคะ","หนูเก็บ{g}ไว้กินหลังซ้อมเช้า วันไหนเหนื่อยแค่เห็นถุงก็หายเหนื่อยแล้วค่ะ","คุณจะทำให้หนูติด{g}แล้วนะคะ …แต่ไม่เป็นไร หนูยอม"],
+   wear:["{g}อีกชิ้น! หนูจะมีไว้ใช้สลับกันเลยค่ะ ขอบคุณนะคะ","อันเก่าหนูใช้จนเริ่มเก่าพอดีเลย ได้{g}ใหม่มาทันเวลาค่ะ","หนูจะใส่{g}ชิ้นนี้ไปไหว้ปู่ที่ศาลค่ายนะคะ ให้ปู่เห็นว่ามีคนดูแลหนูดี","ใส่ของที่คุณให้แล้วหนูชกมั่นใจขึ้นจริง ๆ นะคะ ไม่ได้พูดเล่น"],
+   keep:["{g}อีกแล้ว! หนูเก็บไว้เรียงกันบนชั้นเลยค่ะ ไม่เคยเบื่อเลย","คุณจำได้ว่าหนูชอบ{g}ใช่ไหมคะ ดีใจจัง","หนูเริ่มไม่มีที่วางแล้วค่ะ …งั้นย้ายถ้วยรางวัลออกไปหนึ่งใบก็ได้","ทุกครั้งที่ได้{g} หนูจดวันที่ไว้หลังกล่องด้วยนะคะ อย่าหัวเราะสิ"],
+   exp:["ได้ไปอีกแล้วเหรอคะ! คราวก่อนหนูยังเล่าให้ทุกคนฟังไม่จบเลย","อีกรอบเหรอคะ… คุณใจดีเกินไปแล้วค่ะ","คุณพาหนูไปบ่อยแบบนี้ ครูแดงจะว่าหนูเที่ยวเก่งกว่าซ้อมแล้วค่ะ","ไปอีกรอบก็ได้ค่ะ คราวนี้หนูขอเป็นคนจ่ายค่ารถนะ"]},
+ mali:{food:["{g}อีกแล้ว~! มะลิกินได้ทุกวันเลยนะ ไม่มีวันเบื่อ","ฮิ ๆ {g}อีกแล้ว! คราวนี้แบ่งน้อง ๆ ในค่ายด้วยนะคะ","{g}อีกแล้ว~ มะลิจะถ่ายรูปส่งให้แม่ดูว่าที่นี่เลี้ยงมะลิอ้วนแล้ว","มะลิกิน{g}ไปยิ้มไป ใครเห็นก็รู้ว่าใครให้มา ฮิ ๆ"],
+   wear:["{g}อีกอัน~ มะลิจะใส่สลับวันเลยค่ะ","ได้{g}อีกแล้ว! ส่งรูปให้แม่ดูอีกรอบดีกว่า~","มะลิจะใส่{g}ไปตลาดเช้า ให้ป้า ๆ ถามว่าใครซื้อให้~","ใส่แล้วหมุนตัวให้ดูหน่อยนะ~ …เป็นไง น่ารักไหมคะ"],
+   keep:["{g}อีกแล้ว~ มะลิมีเป็นคอลเลกชันแล้วนะคะ","คุณนี่รู้ใจมะลิจริง ๆ {g}ยิ่งได้ยิ่งชอบ","มะลิตั้งชื่อให้{g}ทุกชิ้นเลยนะ ชิ้นนี้ชื่อ 'ต้นน้อย' ห้ามขำ!","ชั้นของมะลิเต็มแล้ว~ ต้องขอครูแดงต่อชั้นใหม่แล้วล่ะ"],
+   exp:["ได้ไปอีกแล้ว!! มะลิจะชวนคุณไปด้วยนะคราวนี้~","อีกแล้วเหรอคะ~ ขามะลิขอบคุณคุณแทนเลยค่ะ","ไปอีกแล้ว~ มะลิจะชวนคุณถ่ายรูปคู่ทุกจุดเลยนะ","คราวนี้มะลิเตรียมขนมไปเองนะคะ คุณไม่ต้องซื้อ~"]},
+ rin:{food:["{g}อีกแล้ว… ปริมาณที่ฉันบริโภคเพิ่มขึ้นสองเท่าแล้วค่ะ แต่ก็ยังดีใจ","ข้อมูลซ้ำค่ะ {g}อีกแล้ว… แต่ผลลัพธ์ความดีใจยังเท่าเดิม","ฉันเพิ่ม{g}เข้าไปในตารางโภชนาการแล้วค่ะ ช่อง 'ไม่ต้องนับแคลอรี'","ฉันสังเกตว่าทุกครั้งที่ได้{g} ประสิทธิภาพการซ้อมวันถัดไปดีขึ้นค่ะ …อาจเป็นความบังเอิญ"],
+   wear:["{g}อีกชิ้น มีสำรองไว้ไม่เสียหายค่ะ ขอบคุณ","ฉันจะใช้{g}อันนี้ตอนวันแข่ง อันเก่าเก็บไว้ซ้อมค่ะ","ฉันจัด{g}ไว้ในลิ้นชักเรียงตามวันที่ได้รับค่ะ ชิ้นนี้คือลำดับล่าสุด","ใส่แล้วสบายกว่าที่คำนวณไว้ค่ะ ขอบคุณ"],
+   keep:["คุณสังเกตเก่งนะคะ จำได้ว่าฉันชอบ{g}","{g}อีกแล้ว… สถิติบอกว่าฉันไม่เคยเบื่อมันเลยค่ะ","คอลเลกชัน{g}ของฉันโตเร็วกว่าที่ฉันคาดไว้ค่ะ …ไม่ได้บ่นนะคะ","ฉันทำป้ายชื่อให้ทุกชิ้นแล้วค่ะ เขียนว่า 'จากผู้จัดการ' ทุกอัน"],
+   exp:["อีกรอบเหรอคะ ร่างกายฉันจะขอบคุณคุณค่ะ","ฉันจะจดไว้ว่าคุณให้มาสองครั้งแล้ว …เพื่อจะได้ขอบคุณให้ครบค่ะ","ฉันวางแผนเส้นทางไว้แล้วค่ะ คราวนี้เร็วกว่าครั้งก่อนสิบสองนาที","ไปซ้ำที่เดิมก็ดีค่ะ ฉันจะได้เปรียบเทียบความรู้สึกสองครั้ง"]},
+ ploy:{food:["{g}อีกแล้ว… คุณจำได้จริง ๆ ด้วย ขอบใจนะ","ได้{g}อีกแล้ว เดี๋ยวพี่ชงแบ่งรุ่นน้องด้วย","พี่เคยคิดว่า{g}เป็นของกินเล่น ตอนนี้กลายเป็นของที่พี่รอแล้ว","ได้{g}อีกแล้ว… พี่จะไม่บอกใครว่าพี่ชอบขนาดไหน"],
+   wear:["{g}อีกชิ้น พี่ใช้อันเก่าจนหมดพอดี ขอบใจ","พี่ชอบความสม่ำเสมอของคุณนะ","พี่ใส่{g}ของคุณแล้วเหมือนมีคนยืนมุมเวทีด้วยตลอด","ชิ้นนี้พี่เก็บไว้ใส่วันสำคัญนะ ไม่ใส่พร่ำเพรื่อหรอก"],
+   keep:["{g}อีกแล้ว พี่จะเก็บไว้ใกล้ ๆ ตัว","พี่ไม่เคยเบื่อของแบบนี้หรอก ขอบใจ","ห้องพี่เมื่อก่อนมีแต่เข็มขัด ตอนนี้มีของจากคุณมากกว่าแล้ว","พี่ไม่ค่อยเก็บของหรอก แต่ของจากคุณพี่เก็บหมด"],
+   exp:["อีกรอบเหรอ… พี่คงต้องหาเวลาพักบ้างแล้วล่ะ ขอบใจนะ","คุณนี่ห่วงพี่จริง ๆ นะ","ไปอีกรอบเหรอ… ได้ พี่ว่างให้คุณเสมอ","สมัยอยู่พยัคฆ์ทอง พี่ไม่เคยได้ไปไหนเลย ขอบใจที่พาไปบ่อย ๆ นะ"]},
+ fah:{food:["{g}อีกแล้ว!! นายรู้ใจฟ้าที่สุดเลย!","ฮ่า ๆ {g}อีกแล้ว ฟ้าไม่เบื่อหรอก เอามาอีกได้เรื่อย ๆ!","{g}อีกแล้ว! ฟ้าจะแบ่งให้ใครก็ได้ …ยกเว้นพลอย ล้อเล่น ๆ","นายเลี้ยงฟ้าเก่งแบบนี้ ฟ้าจะชกให้นายดูทุกคืนเลย!"],
+   wear:["{g}อีกอัน! ฟ้าจะใส่ทุกวันเลย …อย่าบอกใครนะว่าดีใจ","ได้อีกแล้ว เยส! ใส่ไปค่ายพยัคฆ์ทองให้พวกนั้นอิจฉาเล่น","ใส่{g}แล้วไลฟ์เลยดีกว่า แฟนคลับต้องถามแน่ว่าใครให้มา","ฟ้าใส่แล้วเท่ขึ้นสองระดับ นายเห็นด้วยใช่ไหม ใช่สิ!"],
+   keep:["{g}อีกแล้ว ก็ดีนะ ฟ้าเก็บไว้ในล็อกเกอร์","ไม่เลวนี่ ได้อีกแล้ว ขอบใจนะนาย","ฟ้าแปะ{g}ไว้บนล็อกเกอร์แล้ว ใครแตะโดนเตะนะ","เอามาอีกแล้วเหรอ …ก็ดี ฟ้าไม่ได้ยิ้มนะ แค่แสงมันแยงตา"],
+   exp:["อีกรอบ? …ก็ได้ ๆ ไปก็ได้","นายนี่ชอบตามใจฟ้าจริง ๆ นะ","ไปอีกรอบ! คราวนี้ฟ้าขับนะ …ไม่ได้ก็ได้ นายขับ","ฟ้าชอบที่เดิมนะ เพราะไปกับนายไง พูดไปแล้วอย่าล้อ"]}};
+/* v1.91.176 (Man): repeats rotate through her repeat lines and her usual lines for this gift, so a favourite does not get the same reply every week */
+const giftAgainLine=(id,t,n,g)=>{const C=GIFT_AGAIN[id],P=[];if(C){const L=C[g?giftCat(g):"keep"]||C.keep;P.push(...L.map(x=>x.replace(/\{g\}/g,g?GIFTS[g].name:"อันนี้")));}
+  if(g&&typeof GIFT_TALK_PERSONAL!=="undefined"&&GIFT_TALK_PERSONAL[id]&&GIFT_TALK_PERSONAL[id][g])P.push(GIFT_TALK_PERSONAL[id][g]);if(g&&typeof GIFT_TALK!=="undefined"&&GIFT_TALK[id]&&GIFT_TALK[id][g])P.push(GIFT_TALK[id][g]);
+  const U=[...new Set(P.filter(Boolean))];return U.length?U[(n-1)%U.length]:null;};
 
 // ---------- v1.3: more talk topics (no repeats) — only a fitting answer reveals the fact ----------
 const TALK_MORE={
@@ -5993,7 +5996,7 @@ function dateScene(G,id,act){
   else{f.momentIdx=f.momentIdx||0;const M=MOMENTS[id];
     const quiet=[`คุณกับ${f.name}ใช้เวลาด้วยกันแบบไม่ต้องพูดอะไรมาก แค่นั้นก็พอแล้ว`,`${f.name}เล่าเรื่องซ้อมวันนี้ให้ฟังยาวเหยียด คุณฟังจนจบ`,`ระหว่างทางกลับ ${f.name}เดินช้าลงนิดหนึ่ง เหมือนไม่อยากให้วันนี้จบเร็ว`,`${f.name}หัวเราะกับเรื่องเล็ก ๆ ที่คุณเล่า แล้วบอกว่าวันนี้ดีจัง`];
     mid=f.momentIdx<M.length?[{n:"nar",t:M[f.momentIdx++]}]:[{n:"nar",t:freshLine(f,"quiet",quiet,rng)}];D.score+=1;}
-  const intro=freshOnce(f,"in_"+act,A.intro,rng),opener=freshOnce(f,"op_"+pref,OPENERS[id][pref],rng);
+  const intro=freshOnce(f,"in_"+act,A.intro,rng)||(A.intro&&A.intro.length?freshLine(f,"inr_"+act,A.intro,rng):null), /* v1.91.176 (Man): once every opening of a spot has been seen, they come round again instead of only the spot name */opener=freshOnce(f,"op_"+pref,OPENERS[id][pref],rng);
   const steps=[{n:"nar",bg:A.bg,t:intro||`${A.name}`},...(opener?[{n:id,f:pref==="dislike"?"sad":"happy",l:look,t:opener}]:[]),
     ...spotSteps(f,act),...mid,...dateTwist(G,f,D,look),
     {inject:G2=>{const gain=Math.max(0,1+Math.round(D.score*.7));const capped=false,b0=hTot(f);add(G2,id,"bond",gain);const real=Math.round((hTot(f)-b0)*2)/2,HL=heartLv(f),hleft=Math.max(0,Math.ceil((HL.need-HL.into)*2)/2);if(gain>=4)add(G2,id,"morale",4);
@@ -9322,7 +9325,7 @@ AU.gsfx=function(kind,a){if(!this.init()||this.muted||!SETTINGS.sfx)return;const
   if(kind==="shimmer")for(let i=0;i<6;i++)T(i*.05,{f:1400+Math.random()*1400,type:"sine",dur:.12,peak:.06});};
 
 // ================= MUAY THAI MOE v1.3 — UI =================
-const VERSION="1.91.188";
+const VERSION="1.91.189";
 const CUR_LANG=(typeof window!=="undefined"&&window.LANG)||"th";
 const TH_LABEL=String.fromCharCode(3652,3607,3618);
 function langSwitch(cls){return `<div class="langsw ${cls||""}" role="group" aria-label="Language">${[["th",TH_LABEL],["en","EN"]].map(([k,l])=>`<button class="lsb ${CUR_LANG===k?"on":""}" data-act="setlang" data-v="${k}" aria-pressed="${CUR_LANG===k}">${l}</button>`).join("")}</div>`;}
@@ -11386,7 +11389,7 @@ function fightEnd(){const U=UI.fight;if(U.brawl){brawlEnd();return;}U.stage="don
 
 // ---------- actions ----------
 function giftScene(id,res){const f=G.F[id];const mood=res.t==="dislike"?"pout":res.t==="love"?"flustered":"happy";
-  playScene([{n:id,f:mood,l:"casual",t:(res.n&&res.t!=="dislike"&&giftAgainLine(id,res.t,res.n,res.g))||(GIFTS[res.g].souv&&souvLine(id,res.g,res.t))||(GIFT_TALK_PERSONAL[id]&&GIFT_TALK_PERSONAL[id][res.g])||((GIFT_TALK[id]&&GIFT_TALK[id][res.g])||GIFT_LINES[id][res.t])},{n:"nar",t:res.gain>0?(res.n>=2?`ความสนิทกับ${f.name} +${res.gain} · ได้บ่อยไปนิด เลยขึ้นน้อยลง`:`ความสนิทกับ${f.name} +${res.gain}`)
+  playScene([{n:id,f:mood,l:"casual",t:(((res.c||0)>1||res.n)&&res.t!=="dislike"&&giftAgainLine(id,res.t,Math.max(res.n||0,(res.c||1)-1),res.g))||(GIFTS[res.g].souv&&souvLine(id,res.g,res.t))||(GIFT_TALK_PERSONAL[id]&&GIFT_TALK_PERSONAL[id][res.g])||((GIFT_TALK[id]&&GIFT_TALK[id][res.g])||GIFT_LINES[id][res.t])},{n:"nar",t:res.gain>0?(res.n>=2?`ความสนิทกับ${f.name} +${res.gain} · ได้บ่อยไปนิด เลยขึ้นน้อยลง`:`ความสนิทกับ${f.name} +${res.gain}`)
       :res.t==="dislike"?`${f.name}รับไว้ด้วยรอยยิ้ม แต่อาจยังไม่ใช่ของโปรด · ความสนิทไม่เปลี่ยน`:heartCapped(G,f)?`${f.name}ดีใจมาก · หัวใจเต็มขั้นของบทนี้แล้ว`:f.bond>=100?`${f.name}ดีใจมาก · ความสนิทเต็มหลอดแล้ว`:`${f.name}ดีใจ แต่ช่วงนี้ได้ของชิ้นนี้บ่อยไปนิด ลองสลับของดูนะ`},
     ...((()=>{const k=f.giftTot===5?0:f.giftTot===10?1:-1;if(k<0||!GIFT_FREQ[id]||(f.giftFreq||0)>k)return [];f.giftFreq=k+1;
       return [...GIFT_FREQ[id][k].map(s=>({...s,l:"casual"})),k===1?{inject:G2=>{add(G2,id,"bond",3);G2.F[id].morale=Math.min(100,G2.F[id].morale+8);return [{n:"nar",t:`ได้ของตอบแทนจาก${f.name} · ความสนิท +3 · กำลังใจ${f.name} +8`}];}}:{inject:()=>[]}];})())],()=>{AU.startMusic("hub");render();},{bg:f.camp==="player"?"gym":"fair",look:"casual"});}
@@ -12025,7 +12028,7 @@ Object.assign(ACT,{
       :m.q==="gang"?[{n:"nar",t:"ตลาดเช้า… มอเตอร์ไซค์สิบกว่าคันจอดเรียงหน้าแผงผัก"},{n:"npc",who:QK[m.qk].name,t:m.early?"ลูกน้องฉันแพ้เธอซ้ำแล้วซ้ำเล่า เสียชื่อหมด! แถมค่ายเธอยังติดหนี้ฉันอยู่ วันนี้ฉันจัดการเอง!":m.qk==="gang5"?"ได้ยินว่ามีค่ายมวยมาเกะกะธุรกิจฉัน วันนี้หัวหน้าใหญ่ลงมาเอง!":m.qk==="gang4"?"ลูกน้องหมวกแดงของฉันโดนเด็กค่ายมวยไล่ตะเพิดเหรอ? หมวกเงินคนนี้จะสอนมารยาทให้เอง":m.qk==="gang6"?"เสี่ยไม่ต้องลงมาเปลืองแรงหรอก มือขวาอย่างฉันจัดการแทนได้":"ไหนใครที่ไล่ลูกน้องฉัน ออกมาเลย!"},{n:d.id,f:"angry",l:"fight",t:"ฉันเอง!"}]
       :m.q==="belt"?[{n:"nar",t:`${STADIUMS[m.venue||"tha"].name} ไฟสปอตไลต์ส่องลงกลางเวที โฆษกประกาศชื่อทั้งสองมุม`},{n:"npc",who:G.F[m.npc].name,t:m.defend?"เข็มขัดเส้นนั้นควรเป็นของฉัน วันนี้ฉันมาเอาคืน":"อยากได้เข็มขัดเหรอ? ต้องข้ามศพฉันไปก่อน"},{n:d.id,f:"angry",l:"fight",t:m.defend?"มาเอาให้ได้สิ!":"หนูมาเพื่อสิ่งนั้นแหละ!"}]
       :m.q==="challenge"?[{n:"nar",t:"ลานหลังตลาดสด คนมามุงเต็มสองฝั่ง มีคนตั้งโต๊ะรับพนันน้ำแดง"},{n:"npc",who:G.F[m.npc].name,t:"มาจนได้นะ นึกว่าจะหนีตลอดฤดูกาล"},{n:d.id,f:"angry",l:"fight",t:"ไม่ได้หนี แค่ยังไม่ว่าง ตอนนี้ว่างแล้ว!"}]
-      :m.q==="cow"?[{n:"nar",t:"กลางถนนหน้าตลาด วัวนมตัวใหญ่ยืนตั้งการ์ด ขาหน้าเต้นฟุตเวิร์กแบบที่ไม่มีวัวตัวไหนควรทำได้"},{n:"npc",who:"ลุงเฉลิม",t:"นั่นแหละ! ระวังถีบนะหนู มันดูไฟต์ย้อนหลังทุกคืน!"},{n:d.id,f:"surprised",l:"fight",t:"…วัวตั้งการ์ดได้จริง ๆ ด้วย!?"}]
+      :(m.q==="cow"||m.q==="rooster")?runawayIntro(G,m,d.id)
       :[{n:"nar",t:"ไก่แจ้ตัวเล็กยืนบนกระสอบทราย อกพองโต ขนคอตั้งชัน"},{n:"npc",who:"เสี่ยต๋อง",t:"อย่าดูถูกมันนะครับ มันเคยไล่สุนัขพันธุ์ใหญ่ทั้งซอยมาแล้ว"},{n:d.id,f:"happy",l:"fight",t:"มาเลยเจ้าไก่! หนูไม่ใช่สุนัขนะ!"}];
     playScene(intro,()=>startQuest(spec,d.id,()=>{}),{bg:m.q==="gang"?(m.hq?"gang_hq":"market_morning"):m.q==="belt"?STADIUMS[m.venue||"tha"].scene:m.q==="challenge"?"food":m.q==="rooster"?"rooster":m.q==="cow"||m.q==="bull"?"farm":"fair",look:"fight"});},
   cashflow:()=>{UI.modal={type:"cashflow"};render();},
@@ -13351,6 +13354,19 @@ Object.assign(ACT,{
     dd.done=true;m.done=true;if(dd.res.prize){G.cash+=dd.res.prize;AU.sfx("level");}else AU.sfx("miss");save();const Ls=LOTTO_COACH[dd.res.out],line=Ls[(dd.i+dd.season)%Ls.length];
     UI.modal=null;render();playScene([{n:"coach",t:line}],()=>{render();},{bg:"camp",look:"casual"});}
 });
+
+/* v1.91.176 (Man): the runaway cow and rooster come back several times a year — each return opens differently (the first visit keeps its own scene) */
+const RUNAWAY_INTRO={
+ cow:[[["nar","กลางถนนหน้าตลาด วัวนมตัวใหญ่ยืนตั้งการ์ด ขาหน้าเต้นฟุตเวิร์กแบบที่ไม่มีวัวตัวไหนควรทำได้"],["ลุงเฉลิม","นั่นแหละ! ระวังถีบนะหนู มันดูไฟต์ย้อนหลังทุกคืน!"],["surprised","…วัวตั้งการ์ดได้จริง ๆ ด้วย!?"]],
+  [["nar","วัวนมตัวเดิมยืนอยู่หน้าร้านกาแฟ เคี้ยวเอื้องไปส่ายหัวหลบซ้ายขวาไป เหมือนกำลังซ้อมหลบหมัด"],["ลุงเฉลิม","เมื่อคืนมันดูคู่เอกช่องสามจนจบ วันนี้หลบเก่งขึ้นอีกแล้ว!"],["angry","หลบเก่งก็ต้องไล่ให้ทันค่ะ!"]],
+  [["nar","คนมุงหน้าตลาดเป็นวงกลม ตรงกลางคือวัวนมตัวเดิม มีผ้าขาวม้าพันเขาไว้เหมือนมงคล"],["ลุงเฉลิม","ใครเอาผ้าไปพันให้มันก็ไม่รู้ ตอนนี้มันคิดว่าตัวเองขึ้นชกแล้ว!"],["surprised","…มีมงคลด้วย งั้นต้องไหว้ครูก่อนไหมคะ"]],
+  [["nar","วัวนมตัวเดิมยืนรออยู่ตรงทางม้าลาย พอเห็นรถค่ายศิริชัยก็กระทืบเท้าสองที"],["ลุงเฉลิม","มันจำรถค่ายหนูได้แล้วนะ รอคู่ปรับประจำของมันอยู่!"],["surprised","คู่ปรับประจำ… หนูเหรอ!?"]]],
+ rooster:[[["nar","ไก่แจ้ตัวเล็กยืนบนกระสอบทราย อกพองโต ขนคอตั้งชัน"],["เสี่ยต๋อง","อย่าดูถูกมันนะครับ มันเคยไล่สุนัขพันธุ์ใหญ่ทั้งซอยมาแล้ว"],["happy","มาเลยเจ้าไก่! หนูไม่ใช่สุนัขนะ!"]],
+  [["nar","ไก่แจ้ตัวเดิมเกาะอยู่บนเชือกเวทีซ้อม ขันเสียงดังลั่นค่ายตั้งแต่ตีห้า"],["เสี่ยต๋อง","มันชอบเวทีค่ายคุณครับ บินมาทุกครั้งที่ประตูเปิด"],["happy","วันนี้ไม่ให้ยึดเวทีหรอกนะ!"]],
+  [["nar","ไก่แจ้ยืนอยู่บนหลังคาโรงยิม กางปีกครึ่งเดียวเหมือนตั้งการ์ด"],["เสี่ยต๋อง","มันดูคลิปค่ายคุณในมือถือผมทุกคืน ท่ายืนนั่นก๊อปมาเลยครับ"],["surprised","…นั่นท่าตั้งการ์ดของหนูนี่!"]],
+  [["nar","ไก่แจ้ตัวเดิมเดินวนรอบกระสอบทราย จิกทีละทีเหมือนวอร์มอัพ"],["เสี่ยต๋อง","ผมว่ามันแค่อยากเข้าค่ายคุณนะครับ …แต่จิกเจ็บอยู่"],["angry","ถ้าอยากเข้าค่าย ต้องผ่านหนูก่อน!"]]]};
+function runawayIntro(G,m,fid){const L=RUNAWAY_INTRO[m.q];G.runN=G.runN||{};let i=0;if(m.repeat){if(m.introI==null){G.runN[m.q]=(G.runN[m.q]||0)+1;m.introI=1+((G.runN[m.q]-1)%(L.length-1));}i=m.introI;}
+  const [a,b,c]=L[i];return [{n:"nar",t:a[1]},{n:"npc",who:b[0],t:b[1]},{n:fid,f:c[0],l:"fight",t:c[1]}];}
 
 // ================= MUAY THAI MOE v1.24 — PIXEL CHAT (one chat per character per week) =================
 // each exchange: [their line, [[my reply, score 0-2, their answer], ...]] — score 2 = what she loves to hear, 0 = falls flat (never negative)
@@ -16066,7 +16082,7 @@ const STATS_HOST="https://us.i.posthog.com";     /* EU projects: https://eu.i.po
 <script>
 (function(){
 /* v1.87: Thai code ships inside index.html; English code (en.js) and the dictionary (i18n.js) load only when needed */
-var B="0c5d62e62a";
+var B="0d79d32188";
 var L="";try{L=localStorage.getItem("mtm_lang")||"";}catch(e){}
 try{var h=(location.hash||"").match(/lang=(th|en)/);if(h)L=h[1];}catch(e){}
 if(L!=="th"&&L!=="en")L="th";

@@ -430,33 +430,36 @@ const GIFT_LINES={
 function giftTier(id,g){if(GIFTS[g]&&GIFTS[g].souv)return (SOUV_LOVE[id]||[]).includes(g)?"love":"like";const P=GIFT_PREF[id];return P.love.includes(g)?"love":P.like.includes(g)?"like":P.dislike.includes(g)?"dislike":"ok";}
 function giveGift(G,id,g){const f=G.F[id],it=GIFTS[g],sv=!!it.souv;if(sv?!((G.souv||{})[g]>0):G.cash<it.price)return null;if(f.giftWeek===gameWeek(G))return null;if(sv)G.souv[g]--;else G.cash-=it.price;f.giftWeek=gameWeek(G);if(typeof absWeek==="function")f.lastTouch=absWeek(G);
   // v1.16: the same gift again means less (and she says so)
-  f.giftN=f.giftN||{};f.giftL=f.giftL||{};if(f.giftL[g]&&gameWeek(G)-f.giftL[g]>=6)f.giftN[g]=0;const n=f.giftN[g]||0;f.giftN[g]=n+1;f.giftL[g]=gameWeek(G);f.giftTot=(f.giftTot||0)+1;
+  f.giftN=f.giftN||{};f.giftL=f.giftL||{};if(f.giftL[g]&&gameWeek(G)-f.giftL[g]>=6)f.giftN[g]=0;const n=f.giftN[g]||0;f.giftN[g]=n+1;f.giftC=f.giftC||{};f.giftC[g]=(f.giftC[g]||0)+1;f.giftL[g]=gameWeek(G);f.giftTot=(f.giftTot||0)+1;
   const t=giftTier(id,g),base=sv?(it.pv?{love:10,like:6}:{love:24,like:15})[t]:Math.round({love:6,like:4,ok:2,dislike:0}[t]*(it.bond&&t!=="dislike"?1.5:1)),gain=base>0?Math.max(1,Math.round(base*(n===0?1:t==="love"?(n===1?.6:.4):(n===1?.5:.25)))):base;
   const before=(f.bond||0)+(f.bondX||0);add(G,id,"bond",gain);if(t==="love")add(G,id,"morale",n<2?6:4);
-  f.know["gift_"+g]=t;return {t,gain:Math.round(((f.bond||0)+(f.bondX||0)-before)*10)/10,g,n};}
+  f.know["gift_"+g]=t;return {t,gain:Math.round(((f.bond||0)+(f.bondX||0)-before)*10)/10,g,n,c:f.giftC[g]};}
 // v1.21: repeat-gift lines follow what the gift is (food / something to wear / a keepsake / an outing) so they always fit
 const GIFT_AGAIN={
- kati:{food:["{g} again! I finished the last one already, I'm so happy","Got {g} again~ This time I'll share with Coach Daeng"],
-   wear:["Another {g}! Now I can rotate them, thank you","My old one was just getting worn, the new {g} came right on time"],
-   keep:["{g} again! I line them up on my shelf, I never get tired of them","You remembered I like {g}, didn't you? I'm so happy"],
-   exp:["We get to go again! I still haven't finished telling everyone about last time","Again? You're being way too kind"]},
- mali:{food:["{g} again~! Mali could eat it every day, never gets old","Hehe, {g} again! This time I'll share with the kids in camp"],
-   wear:["Another {g}~ Mali will wear them on alternate days","Got {g} again! I'm sending Mom another photo~"],
-   keep:["{g} again~ Mali has a whole collection now","You really get Mali. The more {g}, the better"],
-   exp:["We get to go again!! This time Mali's dragging you along~","Again~? Mali's legs say thank you"]},
- rin:{food:["{g} again… my consumption has doubled. But I'm still happy","Duplicate data: {g} again… yet the happiness output is unchanged"],
-   wear:["Another {g}. Having a spare does no harm. Thank you","I'll use this {g} on fight days and keep the old one for training"],
-   keep:["You're observant. You remembered I like {g}","{g} again… statistics say I've never once tired of it"],
-   exp:["Again? My body thanks you","I'll note that you've given this twice… so I can thank you properly"]},
- ploy:{food:["{g} again… you really remembered. Thank you","Got {g} again. I'll brew some for my juniors too"],
-   wear:["Another {g}, I just used up the old one. Thanks","I like your consistency"],
-   keep:["{g} again. I'll keep it close","I never tire of things like this. Thank you"],
-   exp:["Again… I suppose I should find time to rest. Thank you","You really do worry about me"]},
- fah:{food:["{g} again!! You know Fah best!","Haha, {g} again, Fah never gets bored, keep 'em coming!"],
-   wear:["Another {g}! Fah'll wear it every day …don't tell anyone Fah's happy","Got it again, yes! Gonna wear it to Golden Tiger to make them jealous"],
-   keep:["{g} again, fine, Fah'll keep it in the locker","Not bad, again. Thanks"],
-   exp:["Again? …Fine, fine, Fah'll go","You really like spoiling Fah, huh"]}};
-const giftAgainLine=(id,t,n,g)=>{const C=GIFT_AGAIN[id];if(!C)return null;const L=C[g?giftCat(g):"keep"]||C.keep;return L[(n-1)%L.length].replace("{g}",g?GIFTS[g].name:"this one");};
+ kati:{food:["{g} again! I finished the last one already, I'm so happy","Got {g} again~ This time I'll share with Coach Daeng","I save the {g} for after morning training. On tired days just seeing the bag helps.","You're getting me hooked on {g}… that's fine, I give in."],
+   wear:["Another {g}! Now I can rotate them, thank you","My old one was just getting worn, the new {g} came right on time","I'll wear this {g} when I pay respects to Grandpa at the camp shrine, so he sees someone looks after me.","I really fight with more confidence wearing what you gave me. I'm not joking."],
+   keep:["{g} again! I line them up on my shelf, I never get tired of them","You remembered I like {g}, didn't you? I'm so happy","I'm running out of space… I'll move one trophy out, then.","Every time I get a {g}, I write the date on the back of the box. Don't laugh."],
+   exp:["We get to go again! I still haven't finished telling everyone about last time","Again? You're being way too kind","If you take me out this often, Kru Daeng will say I'm better at outings than training.","We can go again. This time I'm paying for the ride."]},
+ mali:{food:["{g} again~! Mali could eat it every day, never gets old","Hehe, {g} again! This time I'll share with the kids in camp","{g} again~ Mali's sending Mom a photo to show they're fattening me up here.","Mali can't stop smiling while eating the {g}. Everyone can tell who gave it, hehe."],
+   wear:["Another {g}~ Mali will wear them on alternate days","Got {g} again! I'm sending Mom another photo~","Mali's wearing the {g} to the morning market so the aunties ask who bought it~","Let me spin for you~ …well? Cute, right?"],
+   keep:["{g} again~ Mali has a whole collection now","You really get Mali. The more {g}, the better","Mali names every {g}. This one's 'Little Ton'. Don't laugh!","Mali's shelf is full~ Gotta ask Kru Daeng to build another one."],
+   exp:["We get to go again!! This time Mali's dragging you along~","Again~? Mali's legs say thank you","Again~ Mali's taking a couple photo with you at every spot!","This time Mali's packing the snacks, you don't have to buy~"]},
+ rin:{food:["{g} again… my consumption has doubled. But I'm still happy","Duplicate data: {g} again… yet the happiness output is unchanged","I've added {g} to my nutrition table, in the column 'calories don't count'.","I've noticed my training the day after a {g} is better… possibly a coincidence."],
+   wear:["Another {g}. Having a spare does no harm. Thank you","I'll use this {g} on fight days and keep the old one for training","I keep the {g}s in a drawer sorted by date received. This is the newest entry.","More comfortable than I calculated. Thank you."],
+   keep:["You're observant. You remembered I like {g}","{g} again… statistics say I've never once tired of it","My {g} collection is growing faster than projected… that's not a complaint.","I labelled every one. They all say 'from the manager'."],
+   exp:["Again? My body thanks you","I'll note that you've given this twice… so I can thank you properly","I've planned the route. Twelve minutes faster than last time.","Going back is good. I can compare how it felt both times."]},
+ ploy:{food:["{g} again… you really remembered. Thank you","Got {g} again. I'll brew some for my juniors too","I used to think {g} was just a snack. Now it's something I wait for.","{g} again… I won't tell anyone how much I like it."],
+   wear:["Another {g}, I just used up the old one. Thanks","I like your consistency","Wearing your {g} feels like someone's always in my corner.","I'm saving this one for important days. Not for every day."],
+   keep:["{g} again. I'll keep it close","I never tire of things like this. Thank you","My room used to be all belts. Now there's more from you than belts.","I don't keep things much. But I keep everything from you."],
+   exp:["Again… I suppose I should find time to rest. Thank you","You really do worry about me","Again? …Sure. I always have time for you.","At Golden Tiger I never went anywhere. Thanks for taking me out so often."]},
+ fah:{food:["{g} again!! You know Fah best!","Haha, {g} again, Fah never gets bored, keep 'em coming!","{g} again! Fah will share with anyone… except Ploy. Kidding, kidding.","If you keep feeding Fah like this, I'll fight for you every night!"],
+   wear:["Another {g}! Fah'll wear it every day …don't tell anyone Fah's happy","Got it again, yes! Gonna wear it to Golden Tiger to make them jealous","Going live in the {g}. The fans will definitely ask who gave it.","Fah looks two levels cooler in it. You agree, right? Of course you do!"],
+   keep:["{g} again, fine, Fah'll keep it in the locker","Not bad, again. Thanks","Fah stuck the {g} on the locker. Anyone who touches it gets kicked.","Another one? …Fine. Fah's not smiling, the light's just in my eyes."],
+   exp:["Again? …Fine, fine, Fah'll go","You really like spoiling Fah, huh","Again! Fah drives this time… fine, no, you drive.","Fah likes the same spot — because it's with you. I said it, don't tease."]}};
+/* v1.91.176 (Man): repeats rotate through her repeat lines and her usual lines for this gift, so a favourite does not get the same reply every week */
+const giftAgainLine=(id,t,n,g)=>{const C=GIFT_AGAIN[id],P=[];if(C){const L=C[g?giftCat(g):"keep"]||C.keep;P.push(...L.map(x=>x.replace(/\{g\}/g,g?GIFTS[g].name:"this one")));}
+  if(g&&typeof GIFT_TALK_PERSONAL!=="undefined"&&GIFT_TALK_PERSONAL[id]&&GIFT_TALK_PERSONAL[id][g])P.push(GIFT_TALK_PERSONAL[id][g]);if(g&&typeof GIFT_TALK!=="undefined"&&GIFT_TALK[id]&&GIFT_TALK[id][g])P.push(GIFT_TALK[id][g]);
+  const U=[...new Set(P.filter(Boolean))];return U.length?U[(n-1)%U.length]:null;};
 
 // ---------- v1.3: more talk topics (no repeats) — only a fitting answer reveals the fact ----------
 const TALK_MORE={

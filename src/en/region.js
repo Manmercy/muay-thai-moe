@@ -377,6 +377,14 @@ const rgIn=(G,id)=>!!(G.F[id]&&G.F[id].camp==="player");
 const rgInT=(G,id)=>rgIn(G,id)&&(()=>{const P=G.region&&G.region.trip&&G.region.trip.party;return !P||P.includes(id);})();
 const RG_PAIR={uttaradit:"kati",buriram:"ploy",surat:"mali",suphan:"rin"};
 const rgIf=(ok,steps)=>ok?steps:[];
+function rgWarn5(G,n,now){const me=G.player&&G.player.name||"Manager";return now?[
+  {n:"coach",t:`${me}, come here. Naka's underground night is five on five, and we only have this many ready: ${n} fighters in camp`},
+  {n:"coach",t:"I called Mr. Krirk. If a camp is short of five, the rules let one fighter go twice in the same night."},
+  {n:"coach",t:"But two bouts in one night is heavy. Choose carefully who goes twice."},
+  {n:"coach",t:"If there's still time, bring someone in first… five is always better."}]:[
+  {n:"coach",t:`${me}, word is this Four Regions tournament ends with a five-on-five night run by Naka.`},
+  {n:"coach",t:`Right now the camp only has ${n} fighters. If we mean to get that far, better find more before then.`},
+  {n:"coach",t:"An old rival, or a regional champion who's close to the camp — if hearts line up, she might want to move in with us."}];}
 function rgGala(G){const top=rgTopGirl(G),fah=rgIn(G,"fah"),ploy=rgIn(G,"ploy"),R=G.region,meet=(id,v)=>G2=>rgMeet(G2,id,v);return [
  {n:"nar",bg:"gala",t:"The camp's van pulls up in front of a hotel in the middle of Bangkok. A Naga Energy Drink banner three storeys high hangs above, a green-gold naga coiled at the centre, head raised high."},
  {n:"nar",t:"A life-size naga mascot waves at the door. Every time a guest walks past, it throws two punches at the air."},
@@ -2042,6 +2050,9 @@ const REGION={
     if(R.twoQ&&now>=R.twoQ.abs){const q=R.twoQ;delete R.twoQ;const g=G.F[q.id];if(g&&g.camp==="player"&&!isAway(G,q.id)&&this.isLovC(G,q.cid)&&RG_TWO[q.id]&&(isPartner(G,q.id)||this.isLovC(G,q.id))){add(G,q.id,"bond",-8);
       playScene([{n:q.id,f:"sad",l:"casual",t:RG_TWO[q.id]},{n:"nar",t:`${g.name} now knows about you and ${G.F[q.cid].name}`}],()=>{save();done();},{bg:"camp",look:"casual"});return;}}
     {const cid=this.confDue(G);if(cid){playScene(this.confSteps(G,cid),()=>{save();done();},{bg:"camp_night",look:"casual"});return;}}
+    /* v1.91.176 (Man): Kru Daeng warns when the camp is short of the five the Naka night needs */
+    if(R.final&&!R.final.won&&!R.final.warn5&&this.finalPool(G).length<NL_ORDER.length){R.final.warn5=1;playScene(rgWarn5(G,this.finalPool(G).length,true),()=>{save();done();},{bg:"camp",look:"casual"});return;}
+    if(R.endWarn&&!R.final&&!R.warn5e&&roster(G).length<NL_ORDER.length){R.warn5e=1;playScene(rgWarn5(G,roster(G).length,false),()=>{save();done();},{bg:"camp",look:"casual"});return;}
     if(!R.gala){if(R.galaAbs==null)R.galaAbs=now+1;if(now>=R.galaAbs){R.gala=1;AU.startMusic&&AU.startMusic("hub");playScene(rgGala(G),()=>{save();done();},{bg:"gala",look:"casual"});return;}}
     const r=(R.cups||[])[0],c=r&&R.champ[r];
     if(r&&!R.c1&&c&&now>=(c.wonAbs||0)+1){R.c1="seen";playScene(rgCup1(G,r),()=>{save();done();},{bg:"camp",look:"casual"});return;}
@@ -2556,6 +2567,9 @@ The door is open every night. Send your fighters.
       <h4>Naka League team</h4>${team}
       <div class="mfoot">${ready?`<button class="btn primary" data-act="rgfline">${F.live?"Back into the warehouse ▸":"Go to the underground warehouse ▸"}</button>`:`<span class="meta">Available from week ${wk} · trained ${F.abs-now} more weeks</span>`}</div></section>`;},
   finalPool(G){return roster(G).filter(f=>!f.injury&&!isAway(G,f.id));},
+  /* v1.91.176 (Man): with fewer than five fighters able to go, one fighter may take two bouts in the night */
+  finalCap(G){return this.finalPool(G).length<NL_ORDER.length?2:1;},
+  finalUses(F,id){const L=F.line||{},C=F.cur||{};return NL_ORDER.filter(x=>L[x]===id&&C[x]).length;},
   /* v1.91.72 (Man): a loading screen on the way in — the board opens only when every portrait and sprite of the night is ready (no blank, stuck cards) */
   finalLoad(done){if(typeof document==="undefined"){done();return;}const pool=this.finalPool(G),ref=pool[0]||roster(G)[0];for(const k of NL_ORDER)if(!G.F["nl_"+k]&&ref)nlFighter(G,k,ref);
     const L=["bg_naka_underground","lada_fight_happy","lada_fight_angry","nl_rosa_win_por",...NL_ORDER.filter(k=>k!=="ladda").map(k=>`nl_${k}_por`),...NL_ORDER.map(k=>G.F["nl_"+k]&&G.F["nl_"+k].sprite?G.F["nl_"+k].sprite+"_sheet":null).filter(Boolean),"nl_ladda_hood_sheet","nl_ladda_sheet","nl_ladda_blood_sheet",...pool.map(f=>`${f.id}_fight_happy`)];
@@ -2576,8 +2590,9 @@ The door is open every night. Send your fighters.
     const v=Object.values(C),w=v.filter(x=>x==="W").length,l=v.filter(x=>x==="L").length,next=NL_ORDER.find(k=>!C[k]);
     if(UI.rgPick&&!C[UI.rgPick]){const k=UI.rgPick,o=G.F["nl_"+k],at=id=>NL_ORDER.find(x=>L[x]===id);
       return `<div class="vsb"><h2>Bout ${NL_ORDER.indexOf(k)+1} · Who fights ${esc(NL[k].name)}</h2><p class="meta">${esc(NL[k].art)}</p>
-        <div class="vs-pick">${pool.map(f=>{const x=at(f.id),done=x&&C[x];return `<button class="vs-pc" data-act="rgfset" data-v="${k}|${f.id}" ${done?"disabled":""}>
-          <span class="vs-art">${this.vsArt(f,"r")}</span><b>${esc(f.name)}</b><small>Lv.${f.lvl||1}${done?" · already fought":""}</small></button>`;}).join("")}</div>
+        <div class="vs-pick">${pool.map(f=>{const u=this.finalUses(F,f.id),cap=this.finalCap(G),done=u>=cap;return `<button class="vs-pc" data-act="rgfset" data-v="${k}|${f.id}" ${done?"disabled":""}>
+          <span class="vs-art">${this.vsArt(f,"r")}</span><b>${esc(f.name)}</b><small>Lv.${f.lvl||1}${done?(cap>1?" · already fought twice":" · already fought"):u?" · second bout of the night":""}</small></button>`;}).join("")}</div>
+        ${this.finalCap(G)>1?`<p class="meta center">The camp has fewer than five fighters · one fighter may take two bouts tonight</p>`:""}
         <div class="mfoot"><button class="btn" data-act="rgfpickx">Back</button></div></div>`;}
     const stamp=(r,sd)=>r?`<i class="vs-st ${sd} ${r==="W"?"w":r==="L"?"l":"d"}">${r==="W"?"WIN":r==="L"?"LOSE":"DRAW"}</i>`:"";
     const rows=NL_ORDER.map((k,i)=>{const o=G.F["nl_"+k],kept=!!(K[k]&&!L[k]),me=kept?G.F[K[k]]:L[k]&&G.F[L[k]],r=C[k],their=r==="W"?"L":r==="L"?"W":r;
@@ -2585,9 +2600,9 @@ The door is open every night. Send your fighters.
         <div class="vs-l ${r&&their!=="W"?"lost":""}"><span class="vs-art">${o?this.vsArt(o,"l",their==="W"):""}</span><span class="vs-tx">${(n=>`<b>${esc(n[0])}</b>${n[1]?`<em>${esc(n.slice(1).join(" "))}</em>`:""}`)(NL[k].name.split(" "))}<small>${esc(NL[k].art)}</small></span></div>
         <div class="vs-mid">VS<small>Bout ${i+1}</small></div>
         <button class="vs-r ${r&&r!=="W"?"lost":""}" data-act="rgfslot" data-v="${k}" ${r||k!==next?"disabled":""}>${me?`<span class="vs-tx"><b>${esc(me.name)}</b><small>${kept?"Won last time":`Lv.${me.lvl||1}`}</small></span><span class="vs-art">${this.vsArt(me,"r")}</span>`:`<span class="vs-tx vs-empty"><b>${k===next?"+ Pick fighter":"I'll wait"}</b></span>`}</button>${stamp(their,"vsl")}${stamp(r,"vsr")}</div>`;}).join("");
-    const nk=next&&NL_ORDER.indexOf(next)+1,usedIds=new Set(NL_ORDER.filter(k=>C[k]).map(k=>F.line&&F.line[k]).filter(Boolean)),left=pool.filter(f=>!usedIds.has(f.id)).length;
+    const nk=next&&NL_ORDER.indexOf(next)+1,cap=this.finalCap(G),left=pool.filter(f=>this.finalUses(F,f.id)<cap).length;
     return `<div class="vsb"><div class="vs-head"><span class="vs-tl">Naka League</span><b class="vs-sc">${w>0||l>0?`${l} – ${w}`:"VS"}</b><span class="vs-tr">Sirichai Camp</span></div>
-      <p class="meta vs-sub">Five vs five · first to three · tap the next bout's blue slot to pick a fighter, then prep the fight · lose and you restart from bout 1 next week · no lasting injuries</p>
+      <p class="meta vs-sub">Five vs five · first to three · tap the next bout's blue slot to pick a fighter, then prep the fight · lose and you restart from bout 1 next week · no lasting injuries ${cap>1?" · fewer than five fighters: one fighter may take two bouts":""}</p>
       <div class="vs-rows">${rows}</div>
       <div class="mfoot">${next?`${F.live?"":`<button class="btn" data-act="closeModal">Not yet</button>`}${left?`<button class="btn primary" data-act="rgfslot" data-v="${next}">Pick fighter for bout ${nk} ▸</button>`:`<button class="btn red" data-act="rgfforfeit">No fighters left · forfeit bout ${nk}</button>`}`:`<button class="btn primary" data-act="rgfend">See the result ▸</button>`}</div></div>`;},
   finalNext(){const R=G.region,F=R.final,C=F.cur=F.cur||{},k=NL_ORDER.find(x=>!C[x]);if(!k||!(F.line||{})[k])return;UI.modal=null;UI.rgPick=null;
@@ -2644,7 +2659,7 @@ if(typeof ACT!=="undefined")Object.assign(ACT,{
   rgfslot:d=>{const F=G.region.final;if((F.cur||{})[d.v])return;UI.rgPick=d.v;render();},
   rgfpickx:()=>{UI.rgPick=null;render();},
   rgfset:d=>{const [k,id]=d.v.split("|"),F=G.region.final,L=F.line=F.line||{},C=F.cur||{};if(C[k])return;
-    const was=NL_ORDER.find(x=>L[x]===id);if(was&&C[was])return;L[k]=id;UI.rgPick=null;save();REGION.finalNext();},
+    if(REGION.finalUses(F,id)>=REGION.finalCap(G))return;L[k]=id;UI.rgPick=null;save();REGION.finalNext();},
   rgfforfeit:()=>{const F=G.region.final,k=NL_ORDER.find(x=>!(F.cur||{})[x]);if(!k)return;F.cur=F.cur||{};F.cur[k]="L";F.live=true;save();render();},
   rgfgo:()=>REGION.finalNext(),
   rgfend:()=>{const F=G.region.final;if(NL_ORDER.every(k=>(F.cur||{})[k]))REGION.finalEnd();},
