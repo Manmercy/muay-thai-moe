@@ -22,6 +22,8 @@ const AU={ctx:null,master:null,music:null,sfxBus:null,crowdG:null,timer:null,ste
   tone(t,{f=200,type="sine",dur=.15,peak=.6,to=0,bus}){const c=this.ctx,o=c.createOscillator();o.type=type;o.frequency.setValueAtTime(f,t);if(to)o.frequency.exponentialRampToValueAtTime(to,t+dur);
     const g=c.createGain();this.env(g,t,.005,dur,peak);o.connect(g);g.connect(bus||this.sfxBus);o.start(t);o.stop(t+dur+.05);},
   /* v1.91.178 juice: one coin blip, pitch climbing with i (coins flying into the cash readout) */
+  /* v1.91.180: soft typewriter tick */
+  tick(){if(!this.init()||this.muted||!SETTINGS.sfx)return;const t=this.ctx.currentTime+.005;this.tone(t,{f:1700+Math.random()*300,type:"square",dur:.018,peak:.05});},
   coin(i){if(!this.init()||this.muted||!SETTINGS.sfx)return;const t=this.ctx.currentTime+.01,f=988*Math.pow(2,Math.min(i,12)/12);this.tone(t,{f,type:"square",dur:.05,peak:.18});this.tone(t+.05,{f:f*1.5,type:"square",dur:.07,peak:.14});},
   sfx(kind){if(!this.init()||this.muted||!SETTINGS.sfx)return;const t=this.ctx.currentTime+.01;
     if(kind==="punch"){this.noiseHit(t,{f:1400,dur:.09,peak:.9});this.tone(t,{f:120,to:55,dur:.12,peak:.8});}

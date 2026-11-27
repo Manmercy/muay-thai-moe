@@ -1,5 +1,5 @@
 // ================= MUAY THAI MOE v1.3 — UI =================
-const VERSION="1.91.179";
+const VERSION="1.91.180";
 const CUR_LANG=(typeof window!=="undefined"&&window.LANG)||"th";
 const TH_LABEL=String.fromCharCode(3652,3607,3618);
 function langSwitch(cls){return `<div class="langsw ${cls||""}" role="group" aria-label="Language">${[["th",TH_LABEL],["en","EN"]].map(([k,l])=>`<button class="lsb ${CUR_LANG===k?"on":""}" data-act="setlang" data-v="${k}" aria-pressed="${CUR_LANG===k}">${l}</button>`).join("")}</div>`;}
@@ -245,7 +245,7 @@ function render(){
   if(albumTop&&UI.modal?.type==="album"){const modal=document.querySelector(".m-album");if(modal)modal.parentElement.scrollTop=albumTop;}
   const fc=document.getElementById("fstage");if(fc)FS.attach(fc);
   const lg=document.querySelector(".flog");if(lg)lg.scrollTop=lg.scrollHeight;
-  mountCanvases();if(typeof mountQSprites==="function")mountQSprites();pxBars();spotPaint();cashJuice();
+  mountCanvases();if(typeof mountQSprites==="function")mountQSprites();pxBars();spotPaint();cashJuice();vnType();winJuice();
   if(typeof newsSync==="function")newsSync();
 }
 // v1.12.1 spotlight intro: dim the screen and teach one part of it at a time
@@ -1373,6 +1373,7 @@ function winPopHTML(m){const h=m.h,f=G.F[h.id];if(!f)return "";const label=honor
 function playHonorQueue(done){while((G.awards||[]).length&&!(G.F[G.awards[0].id]))G.awards.shift();const h=(G.awards||[])[0];if(!h){AU.startMusic("hub");if(done)done();return;}AU.startMusic("victory");
   if(!h._pop){h._pop=1;UI.winNext=()=>playHonorQueue(done);UI.wpT0=0;UI.modal={type:"winpop",h};render();setTimeout(()=>{if(UI.modal&&UI.modal.type==="winpop"){AU.sfx("champ");}},2000);return;}
   AU.sfx("champ");
+  buzz([40,60,40,60,160]);
   playScene(honorSteps(G,h),()=>{G.awards.shift();save();playHonorQueue(done);},{bg:h.kind==="rgbelt"&&BGIMG["rgring_"+h.venue]?"rgring_"+h.venue:"hall",look:"fight",award:h});
   [500,1100,1900,2900,4200,5600].forEach(ms=>setTimeout(()=>{if(UI.scene&&UI.scene.award===h)AU.sfx("pop");},ms));} /* v1.91.14: fireworks pop over the ceremony */
 function sceneNext(){const S=UI.scene;if(!S)return;
@@ -1680,7 +1681,7 @@ const CHEER={kati:[["ปู่ชัยดูอยู่นะ ชกให้�
   mali:[["ไปโชว์ลูกเตะให้ทั้งเวทีเห็นเลย!","ได้เลย~ มะลิจะเตะให้เสียงดังที่สุดในคืนนี้!",1],["แม่เธอต้องภูมิใจแน่","…ขอบคุณนะ มะลิจะไม่ร้องไห้ก่อนชกหรอก",0],["อย่าประมาทล่ะ","รู้แล้วน่า~",0]],
   rin:[["เชื่อในข้อมูลที่เธอวิเคราะห์มา","…ค่ะ ทุกอย่างอยู่ในหัวแล้ว เหลือแค่ทำให้ได้",1],["สู้ ๆ นะริน!","ขอบคุณค่ะ… ฉันจะพยายาม",0],["ชกให้สนุกนะ","สนุก… จะลองดูค่ะ",0]]};
 function cheerLines(f){return CHEER[f.id]||[["เธอทำได้!","ค่ะ!",1],["ตามแผนนะ","รับทราบ",0],["อย่าเจ็บตัวล่ะ","ค่ะ",0]];}
-function openFight2(b,done){UI.confirmTowel=false;UI.towelCoach=false;UI.fight={b,done,stage:"pre",plan:b.plan||"balanced",tac:{focus:"auto",pace:"steady",target:(b.tac&&b.tac.target)||"body"},F:null,shown:[],pending:[],timer:null,res:null,caption:null};render();}
+function openFight2(b,done){irisIn();UI.confirmTowel=false;UI.towelCoach=false;UI.fight={b,done,stage:"pre",plan:b.plan||"balanced",tac:{focus:"auto",pace:"steady",target:(b.tac&&b.tac.target)||"body"},F:null,shown:[],pending:[],timer:null,res:null,caption:null};render();}
 // v1.46: side-by-side numbers before the bell (opponent hidden until scouted)
 /* v1.91.0: the fighter's style and the wheel, on her profile — the main heroines can change it with the school line they build */
 /* v1.91.5 hot-form title badge (win HOT_AT in a row) */
@@ -1724,6 +1725,28 @@ function cashJuice(){if(typeof document==="undefined"||!G)return;const el=docume
   const t0=performance.now()+(reduce?0:420),dur=reduce?1:T;el.textContent=fmt(prev);
   const step=t=>{const k=Math.max(0,Math.min(1,(t-t0)/dur));const e2=document.querySelector(".cashbtn b.num");if(!e2)return;const v=Math.round(prev+gain*(1-Math.pow(1-k,3)));
     const w=e2.querySelector(".cashwarn");e2.firstChild&&e2.firstChild.nodeType===3?e2.firstChild.nodeValue=fmt(v):e2.textContent=fmt(v);if(w&&!e2.contains(w))e2.appendChild(w);if(k<1)requestAnimationFrame(step);};requestAnimationFrame(step);}
+/* v1.91.180 game juice 2 */
+const JUICE_RM=()=>typeof matchMedia!=="undefined"&&matchMedia("(prefers-reduced-motion: reduce)").matches;
+function buzz(p){try{if(navigator.vibrate&&!JUICE_RM())navigator.vibrate(p);}catch(_){}}
+/* typewriter: a new line in a scene types itself out a grapheme at a time with a soft tick; the first tap finishes the line, the next tap moves on */
+function vnType(){const el=document.querySelector(".vn .vbox .txt");const S=UI.scene;if(!el||!S||!S.cur)return;const full=el.textContent;
+  if(UI.twKey===S.cur&&UI.twDone){return;}
+  if(UI.twKey!==S.cur){UI.twKey=S.cur;UI.twDone=JUICE_RM()||!full;UI.twT0=performance.now();}
+  if(UI.twDone)return;const seg=typeof Intl!=="undefined"&&Intl.Segmenter?[...new Intl.Segmenter("th",{granularity:"grapheme"}).segment(full)].map(x=>x.segment):[...full];
+  const cps=SETTINGS.textSpeed==="fast"?90:45;el.style.minHeight=el.offsetHeight+"px";
+  const nx=document.querySelector(".vn .nextc");if(nx)nx.style.visibility="hidden";
+  let last=-1;const step=t=>{if(UI.twKey!==S.cur||!el.isConnected)return;const n=Math.min(seg.length,Math.floor((t-UI.twT0)/1000*cps));
+    if(n!==last){el.textContent=seg.slice(0,n).join("");if(n%3===0&&n>last&&n<seg.length&&AU.tick)AU.tick();last=n;}
+    if(n>=seg.length){UI.twDone=true;el.textContent=full;if(nx)nx.style.visibility="";return;}requestAnimationFrame(step);};requestAnimationFrame(step);}
+/* victory: count the purse and EXP up, rain confetti; the iris closes in on the ring as a fight opens */
+function winJuice(){const U=UI.fight;if(!U||U.stage!=="done"||U.wj)return;const box=document.querySelector(".fight .result");if(!box)return;U.wj=1;
+  const win=U.F&&U.F.result&&U.F.result.win==="A";if(!win||JUICE_RM())return;buzz([30,40,30]);AU.cheer&&AU.cheer(1);
+  box.querySelectorAll("[data-count]").forEach(e=>{const to=+e.dataset.count,t0=performance.now()+250,d=900;const f=t=>{const k=Math.max(0,Math.min(1,(t-t0)/d));e.textContent=fmt(Math.round(to*(1-Math.pow(1-k,3))));if(k<1)requestAnimationFrame(f);else{e.classList.add("cbump2");}};requestAnimationFrame(f);});
+  const cv=document.createElement("canvas");cv.className="confetti";document.body.appendChild(cv);const W=cv.width=innerWidth,H=cv.height=innerHeight,x=cv.getContext("2d");
+  const C=["#ffd34a","#ff4d6d","#4dd2ff","#8dff7a","#ffffff","#c77dff"],P=Array.from({length:110},()=>({x:W/2+(Math.random()-.5)*W*.3,y:H*.35,vx:(Math.random()-.5)*14,vy:-8-Math.random()*10,r:Math.random()*6.3,vr:(Math.random()-.5)*.4,c:C[Math.random()*C.length|0],w:5+Math.random()*5}));
+  const t0=performance.now();const fr=t=>{const e=t-t0;x.clearRect(0,0,W,H);for(const p of P){p.vy+=.35;p.vx*=.985;p.x+=p.vx;p.y+=p.vy;p.r+=p.vr;x.save();x.translate(p.x,p.y);x.rotate(p.r);x.globalAlpha=Math.max(0,1-e/2600);x.fillStyle=p.c;x.fillRect(-p.w/2,-p.w/4,p.w,p.w/2);x.restore();}
+    if(e<2600)requestAnimationFrame(fr);else cv.remove();};requestAnimationFrame(fr);}
+function irisIn(){if(JUICE_RM()||typeof document==="undefined")return;const d=document.createElement("div");d.className="iris";document.body.appendChild(d);setTimeout(()=>d.remove(),900);}
 function fightHTML(){const U=UI.fight,b=U.b,me=G.F[b.a],op=G.F[b.b],F=U.F;
   const last=U.shown.filter(x=>x.ha!=null).slice(-1)[0];const sv=(s,k)=>F?(last?last[k]:s):100;
   const side=(f,cls,hp,sta)=>`<div class="fside ${cls}"><div class="fn">${f.canon||f.id==="pailin"?`<img class="face sm" src="${faceSrc(f.id,"happy")}" alt="">`:""}<b>${esc(f.name)}</b><span class="meta">Lv.${f.lvl}</span>${hotBadge(f,1)}</div>
@@ -1887,8 +1910,8 @@ function fightInsight(F,U){const A=F.A,B=F.B,win=F.result.win==="A",W={punch:"�
   return pick.slice(0,2).map(([k,t])=>`<li class="${k==="+"?"pos":"neg"}">${k==="+"?"▲":"▼"} ${t}</li>`).join("");}
 function resultHTML(){const U=UI.fight,F=U.F,r=F.result;const win=r.win==="A",draw=r.win==="D";const me=G.F[U.b.a];
   const acc=s=>s.thrown?Math.round(s.landed/s.thrown*100)+"%":"—";
-  return `<div class="result px"><div class="big ${win?"win":draw?"":"lose"}">${win?"ชนะ!":draw?"เสมอ":"แพ้"}</div>
-   <div>${esc(r.type)}${r.score?` · ${r.score}`:""} · ยก ${r.round}</div>${U.res?`<div class="meta">${U.res.pay||!TIER[U.b.tier].off?`ค่าตัวเข้าค่าย ${fmt(U.res.pay)}`:"ไม่นับสถิติ · ค่าตอบแทน (ถ้ามี) ส่งมาทางตู้จดหมาย"} · EXP เพิ่มขึ้น</div>`:""}
+  return `<div class="result px"><div class="big ${win?"win wdrop":draw?"":"lose"}">${win?"ชนะ!":draw?"เสมอ":"แพ้"}</div>
+   <div>${esc(r.type)}${r.score?` · ${r.score}`:""} · ยก ${r.round}</div>${U.res?`<div class="meta">${U.res.pay||!TIER[U.b.tier].off?`ค่าตัวเข้าค่าย <b class="num" data-count="${U.res.pay||0}">${fmt(U.res.pay)}</b>`:"ไม่นับสถิติ · ค่าตอบแทน (ถ้ามี) ส่งมาทางตู้จดหมาย"} · EXP เพิ่มขึ้น</div>`:""}
    <ul class="insight">${fightInsight(F,U)}</ul>
    <div class="statgrid"><b class="r num">${F.A.landed}/${F.A.thrown}</b><span class="c">เข้าเป้า</span><b class="num">${F.B.landed}/${F.B.thrown}</b>
      <b class="r num">${acc(F.A)}</b><span class="c">ความแม่น</span><b class="num">${acc(F.B)}</b><b class="r num">${F.A.kd}</b><span class="c">ถูกนับ</span><b class="num">${F.B.kd}</b></div>
@@ -2070,7 +2093,7 @@ const ACT={
   petnamesave:d=>{const p=(G.pets||[])[+d.v];const v=((document.getElementById("petname")||{}).value||"").trim();if(p&&v){p.name=v.slice(0,12);toast(`ตั้งชื่อว่า "${p.name}" แล้ว`);}UI.modal=UI.modalQ||null;UI.modalQ=null;save();render();},
   cardhint:d=>{const C=CARDS[d.v];if(C)toast(C.g?"การ์ดใบนี้ได้จากตู้กาชา":`วิธีได้: ${C.hint||"ติดตามเนื้อเรื่องไปเรื่อย ๆ"}`);},
   petren:d=>{UI.modal={type:"petname",i:+d.v};render();setTimeout(()=>{const el=document.getElementById("petname");if(el){el.focus();el.select();}},60);},
-  gacha:()=>{const r=gachaPull(G);if(!r)return;AU.sfx&&AU.sfx(CARDS[r.id].r==="SSR"||CARDS[r.id].r==="SR"?"level":"ui");save();UI.modal={type:"gacha",res:r};render();},
+  gacha:()=>{const r=gachaPull(G);if(!r)return;if(CARDS[r.id]&&CARDS[r.id].r==="SSR")setTimeout(()=>buzz([60,50,60,50,200]),1400);AU.sfx&&AU.sfx(CARDS[r.id].r==="SSR"||CARDS[r.id].r==="SR"?"level":"ui");save();UI.modal={type:"gacha",res:r};render();},
   album:()=>{const from=UI.modal&&UI.modal.type;if(from!=="card"&&from!=="gbox")UI.albY=0;UI.modal={type:"album"};render();albRestore();},
   waipick:d=>{const R=runWaiKhru(G,d.v);if(!R)return;save();UI.wkSkip=false;UI.wkT0=performance.now();UI.modal={type:"waikhru",ph:"rite"};AU.sfx&&AU.sfx("bell");render();},
   waiskip:()=>{UI.wkSkip=true;document.querySelectorAll(".wkrow,.wkgo").forEach(e=>e.classList.add("now"));},
@@ -2220,7 +2243,7 @@ const ACT={
     if(stageOf(G.week)==="local")G.rank[f.div][f.id]={pts:0,w:0,l:0,d:0};genOffers(G,{midweek:true});save();
     playScene([{n:f.id,f:"happy",l:"train",t:f.id==="mali"?"ฝากตัวด้วยนะคะ! หนูจะเตะให้ค่ายศิริชัยดังไปทั้งจังหวัดเลย~":"สัญญาเรียบร้อยค่ะ ฉันจะส่งแผนการซ้อมสัปดาห์แรกให้ภายในคืนนี้"},
       {n:"kati",f:"happy",l:"train",with:f.id,t:f.id==="mali"?"ยินดีต้อนรับนะมะลิ! ค่ายเราไม่เหงาแล้ว!":"ยินดีต้อนรับค่ะริน! …ขออย่านับว่าหนูการ์ดตกกี่ครั้งเลยนะ"}],()=>render(),{bg:"gym",look:"train"});},
-  vnext:()=>sceneNext(),vchoose:d=>{if(Date.now()-(UI._ct||0)<500)return;sceneChoose(+d.v);},vskip:()=>sceneSkip(),
+  vnext:()=>{if(UI.scene&&UI.twKey===UI.scene.cur&&!UI.twDone){UI.twDone=true;const el=document.querySelector(".vn .vbox .txt");render();return;}sceneNext();},vchoose:d=>{if(Date.now()-(UI._ct||0)<500)return;sceneChoose(+d.v);},vskip:()=>sceneSkip(),
   montageDone:()=>montageDone(),
   plan:d=>{UI.fight.plan=d.v;render();},
   fstart:()=>beginFight(false),fquick:()=>beginFight(true),fskip:()=>fskip(),fskill:d=>fskill(d.v),

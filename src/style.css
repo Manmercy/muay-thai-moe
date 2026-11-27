@@ -2524,3 +2524,13 @@ body.qs-cutting .vn .vbg{display:none}
 .cashbtn.cbump b.num{animation:cbump .18s ease-out}
 @keyframes cbump{0%{transform:scale(1.25);color:#ffd34a}100%{transform:scale(1)}}
 @media (prefers-reduced-motion:reduce){.rban,.meter .hpg,.stagewrap.lowhp::after{animation:none}.rban{display:none}}
+
+/* v1.91.180 game juice 2 */
+.result .big.wdrop{animation:wdrop .55s cubic-bezier(.2,1.6,.4,1) both}
+@keyframes wdrop{0%{transform:translateY(-120%) scale(1.6);opacity:0}60%{transform:translateY(6%) scale(.95);opacity:1}100%{transform:none}}
+.result [data-count]{color:var(--gold);display:inline-block}.result .cbump2{animation:cbump .25s ease-out}
+.confetti{position:fixed;inset:0;z-index:9998;pointer-events:none}
+.iris{position:fixed;inset:0;z-index:9997;pointer-events:none;background:radial-gradient(circle at 50% 45%,transparent 0,transparent var(--r),#0d0818 calc(var(--r) + 2px));animation:iris .85s ease-in-out forwards}
+@property --r{syntax:"<length>";inherits:false;initial-value:0px}
+@keyframes iris{0%{--r:120vmax}45%{--r:0px}55%{--r:0px}100%{--r:120vmax}}
+@media (prefers-reduced-motion:reduce){.iris,.confetti{display:none}.result .big.wdrop{animation:none}}
