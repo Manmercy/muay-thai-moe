@@ -108,13 +108,13 @@ SKILLS.kati.push(
 SKILLS.mali.push(
  SKX("cy_flash",0,4,"cy_erawan",["elbow","speed"],"chaiya","ศอกกลับฟ้าแลบ","Lv.14 · ศอกเร็วจนคู่ชกมองไม่ทัน · แรงศอก +14% ศอกแม่น +3%",r=>({dmg:{elbow:.14*r},hit:{elbow:.03*r}}),{lv:14}),
  SKX("cy_soar",0,5,"cy_flash",["elbow","knee"],"chaiya","ทะยานฟ้าไชยา","Lv.22 · ขั้นปรมาจารย์ · แรงศอก +16% แรงเข่า +8% ศอกแม่น +3%",r=>({dmg:{elbow:.16*r,knee:.08*r},hit:{elbow:.03*r}}),{lv:22}),
- SKX("cy_bloom",1,4,"cy_hanuman",["kick","foot"],"chaiya","ดอกมะลิร่ายรำ · เตะต่อเนื่อง","Lv.14 · เตะต่อเนื่องเหมือนร่ายรำ · เตะแม่น +4% คะแนนเตะ +10% ฟื้นแรง +10%",r=>({hit:{kick:.04*r},pts:{kick:.1*r},regen:.1*r}),{lv:14}),
+ SKX("cy_bloom",1,4,"cy_hanuman",["kick","foot"],"chaiya","ดอกมะลิร่ายรำ","Lv.14 · เตะต่อเนื่องเหมือนร่ายรำ · เตะแม่น +4% คะแนนเตะ +10% ฟื้นแรง +10%",r=>({hit:{kick:.04*r},pts:{kick:.1*r},regen:.1*r}),{lv:14}),
  SKX("cy_gale",1,5,"cy_bloom",["speed","kick"],"chaiya","ลมกรดไชยา","Lv.22 · ขั้นปรมาจารย์ · หลบ +2.5% เตะแม่น +4% แรงเตะ +10% ใช้แรงน้อยลง 3%",r=>({evade:.025*r,hit:{kick:.04*r},dmg:{kick:.1*r},staSave:.03*r}),{lv:22}),
  SKX("cy_gate",2,4,"cy_root",["guard","clinch"],"chaiya","สักพวงมาลัย","Lv.14 · ลูกไม้มวยไทย ปัดหมัดแล้วกระแทกศอกเข้าอก · ป้องกันวงใน +1 หลบ +2% สวนกลับ +3%",r=>({clDef:1*r,evade:.02*r,ctr:.03*r}),{lv:14}),
  SKX("cy_meru",2,5,"cy_gate",["guard","dur"],"chaiya","เขาพระสุเมรุ","Lv.22 · ขั้นปรมาจารย์ · ป้องกันวงใน +1.4 หลบ +3% ฟื้นแรง +12% เลือดต่ำแม่นขึ้น 3%",r=>({clDef:1.4*r,evade:.03*r,regen:.12*r,clutch:.03*r}),{lv:22}));
 SKILLS.rin.push(
  SKX("lb_shadow",0,4,"lb_kris",["counter","speed"],"lopburi","สวนกลับไร้เงา","Lv.14 · สวนก่อนคู่ชกจะออกอาวุธจบ · สวนกลับ +5% แรงหมัดสวน +16%",r=>({ctr:.05*r,ctrDmg:.16*r}),{lv:14}),
- SKX("lb_proof",0,5,"lb_shadow",["counter","iq"],"lopburi","สมการปิดเกม · หมัดสวน","Lv.22 · ขั้นปรมาจารย์ · สวนกลับ +6% แรงหมัดสวน +20% หมัดแม่น +2%",r=>({ctr:.06*r,ctrDmg:.2*r,hit:{punch:.02*r}}),{lv:22}),
+ SKX("lb_proof",0,5,"lb_shadow",["counter","iq"],"lopburi","สมการปิดเกม","Lv.22 · ขั้นปรมาจารย์ · สวนกลับ +6% แรงหมัดสวน +20% หมัดแม่น +2%",r=>({ctr:.06*r,ctrDmg:.2*r,hit:{punch:.02*r}}),{lv:22}),
  SKX("lb_three",1,4,"lb_giant",["iq","comp"],"lopburi","อ่านเชิงมวยสามยก","Lv.14 · วางแผนล่วงหน้าทั้งไฟต์ · คำสั่งพักยก +35% ความแม่นพื้นฐาน +1.2% หลบ +1%",r=>({corner:.35*r,prep:.012*r,evade:.01*r}),{lv:14}),
  SKX("lb_book",1,5,"lb_three",["iq","counter"],"lopburi","ตำราลพบุรี","Lv.22 · ขั้นปรมาจารย์ · คำสั่งพักยก +45% ความแม่นพื้นฐาน +1.6% สวนกลับ +3%",r=>({corner:.45*r,prep:.016*r,ctr:.03*r}),{lv:22}),
  SKX("lb_fold",2,4,"lb_tiger",["kick","power"],"lopburi","บาทาลูบพักตร์","Lv.14 · ลูกไม้มวยไทย ชิงถีบหน้าก่อนคู่ชกจะออกอาวุธ · เตะแม่น +3% คะแนนเตะ +10% หลบ +1.5%",r=>({hit:{kick:.03*r},pts:{kick:.1*r},evade:.015*r}),{lv:14}),
@@ -136,8 +136,8 @@ SKILLS.ploy=[
  SKX("p_read",2,1,"captain",["iq"],"korat","อ่านเกมพยัคฆ์","จดทุกจังหวะของคู่ชก · สวนกลับ +3% หลบ +1%",r=>({ctr:.03*r,evade:.01*r})),
  SKX("p_note",2,2,"captain",["iq"],"korat","สัญชาตญาณสัตว์ป่า","ติดตัว · ได้ EXP จากทุกไฟต์เพิ่ม 6%",r=>({}),{passive:1,px:r=>({fightXp:.06*r})}),
  SKX("p_wall",2,3,"p_read",["guard","iq"],"korat","พระรามน้าวศร","ลูกไม้มวยไทย ย่อหลบ ยกแขนรับ แล้วชกสวน · หลบ +2% ป้องกันวงใน +0.8 สวนกลับ +3%",r=>({evade:.02*r,clDef:.8*r,ctr:.03*r})),
- SKX("p_sister",2,4,"p_wall",["iq","counter"],"korat","เงาพี่สาว · หลบแล้วสวน","Lv.14 · ท่าที่ไพลินเคยสอน · สวนกลับ +5% คำสั่งพักยก +25% หลบ +1.5%",r=>({ctr:.05*r,corner:.25*r,evade:.015*r}),{lv:14}),
- SKX("p_crown",2,5,"p_sister",["guard","comp"],"korat","มงกุฎพยัคฆ์ · การ์ดสวน","Lv.22 · ขั้นปรมาจารย์ · หลบ +3% ป้องกันวงใน +1 สวนกลับ +5% เลือดต่ำแม่นขึ้น 3%",r=>({evade:.03*r,clDef:1*r,ctr:.05*r,clutch:.03*r}),{lv:22})];
+ SKX("p_sister",2,4,"p_wall",["iq","counter"],"korat","เงาพี่สาว","Lv.14 · ท่าที่ไพลินเคยสอน · สวนกลับ +5% คำสั่งพักยก +25% หลบ +1.5%",r=>({ctr:.05*r,corner:.25*r,evade:.015*r}),{lv:14}),
+ SKX("p_crown",2,5,"p_sister",["guard","comp"],"korat","มงกุฎพยัคฆ์","Lv.22 · ขั้นปรมาจารย์ · หลบ +3% ป้องกันวงใน +1 สวนกลับ +5% เลือดต่ำแม่นขึ้น 3%",r=>({evade:.03*r,clDef:1*r,ctr:.05*r,clutch:.03*r}),{lv:22})];
 SKILLS.fah=[
  SKX("tiger",0,0,null,["elbow"],"modern","ศอกพยัคฆ์","แรงศอก +12% แม่น +2%",r=>({dmg:{elbow:.12*r},hit:{elbow:.02*r}})),
  SKX("f_cut",0,1,"tiger",["elbow","speed"],"modern","ศอกเฉียงฟ้า","ฟันศอกเฉียงขึ้น · แรงศอก +8% ศอกแม่น +1.5%",r=>({dmg:{elbow:.08*r},hit:{elbow:.015*r}})),
@@ -248,7 +248,7 @@ SKILLS.rin.push(SKX("rin_1a1",1,6,"lb_book",["iq", "comp"],_rsch("rin","lb_book"
 SKILLS.rin.push(SKX("rin_1a2",1,7,"rin_1a1",["iq"],_rsch("rin","lb_book"),"จดทุกยก","ติดตัว · Lv.30 · ความแม่นพื้นฐาน +0.4% คำสั่งพักยก +5%",r=>({prep:0.004*r,corner:0.05*r}),{lv:30,br:0,nd:2,passive:1}));
 SKILLS.rin.push(SKX("rin_1a3",1,8,"rin_1a2",["iq", "foot"],_rsch("rin","lb_book"),"ต้อนตัดทางหนี","Lv.34 · ตำราลับ · บีบคู่ชกเข้ามุม · คำสั่งพักยก +25% หลบ +1.5% สวนกลับ +2%",r=>({corner:0.25*r,evade:0.015*r,ctr:0.02*r}),{lv:34,br:0,nd:3}));
 SKILLS.rin.push(SKX("rin_1a4",1,9,"rin_1a3",["iq", "kick"],_rsch("rin","lb_book"),"คำนวณระยะ","ติดตัว · หนุนสายคุมระยะ · Lv.38 · เตะแม่น +1.5% หลบ +0.6%",r=>({hit:{kick:0.015*r},evade:0.006*r}),{lv:38,br:0,nd:4,passive:1,feed:2}));
-SKILLS.rin.push(SKX("rin_1a5",1,10,"rin_1a4",["iq", "comp"],_rsch("rin","lb_book"),"ภาคผนวก: ชนะก่อนชก","Lv.42 · ขั้นตำนาน · ชนะตั้งแต่ในสมุด · คำสั่งพักยก +50% ความแม่นพื้นฐาน +1.8% สวนกลับ +3%",r=>({corner:0.5*r,prep:0.018*r,ctr:0.03*r}),{lv:42,br:0,nd:5}));
+SKILLS.rin.push(SKX("rin_1a5",1,10,"rin_1a4",["iq", "comp"],_rsch("rin","lb_book"),"ชนะก่อนชก","Lv.42 · ขั้นตำนาน · ชนะตั้งแต่ในสมุด · คำสั่งพักยก +50% ความแม่นพื้นฐาน +1.8% สวนกลับ +3%",r=>({corner:0.5*r,prep:0.018*r,ctr:0.03*r}),{lv:42,br:0,nd:5}));
 SKILLS.rin.push(SKX("rin_1b1",1,6,"lb_book",["iq", "counter"],_rsch("rin","lb_book"),"หลอกสองชั้น","Lv.26 · อ่านแล้วเล่น · หลอกซ้อนหลอก · สวนกลับ +3% หลบ +1.5% คำสั่งพักยก +10%",r=>({ctr:0.03*r,evade:0.015*r,corner:0.1*r}),{lv:26,br:1,nd:1}));
 SKILLS.rin.push(SKX("rin_1b2",1,7,"rin_1b1",["iq"],_rsch("rin","lb_book"),"ตาไม่กะพริบ","ติดตัว · Lv.30 · สวนกลับ +0.8% ความแม่นพื้นฐาน +0.2%",r=>({ctr:0.008*r,prep:0.002*r}),{lv:30,br:1,nd:2,passive:1}));
 SKILLS.rin.push(SKX("rin_1b3",1,8,"rin_1b2",["iq", "counter"],_rsch("rin","lb_book"),"ล่อเข้ากับดัก","Lv.34 · อ่านแล้วเล่น · เปิดช่องให้ แล้วปิดกับดัก · แรงหมัดสวน +14% สวนกลับ +3%",r=>({ctrDmg:0.14*r,ctr:0.03*r}),{lv:34,br:1,nd:3}));
@@ -270,9 +270,9 @@ SKILLS.ploy.push(SKX("ploy_0a3",0,8,"ploy_0a2",["punch", "speed"],_rsch("ploy","
 SKILLS.ploy.push(SKX("ploy_0a4",0,9,"ploy_0a3",["punch", "kick"],_rsch("ploy","kr_genius"),"หมัดเปิดคอ","ติดตัว · หนุนสายเตะคอขาด · Lv.38 · แรงเตะ +2.5% เตะแม่น +1%",r=>({dmg:{kick:0.025*r},hit:{kick:0.01*r}}),{lv:38,br:0,nd:4,passive:1,feed:1}));
 SKILLS.ploy.push(SKX("ploy_0a5",0,10,"ploy_0a4",["punch", "power"],_rsch("ploy","kr_genius"),"ควายเผือกถล่มเสา","Lv.42 · ขั้นตำนาน · หมัดที่ทำให้โคราชลือ · แรงหมัด +22% หมัดแม่น +3% คะแนนหมัด +6%",r=>({dmg:{punch:0.22*r},hit:{punch:0.03*r},pts:{punch:0.06*r}}),{lv:42,br:0,nd:5}));
 SKILLS.ploy.push(SKX("ploy_0b1",0,6,"kr_genius",["punch", "iq"],_rsch("ploy","kr_genius"),"หมัดเดียวรู้ผล","Lv.26 · หมัดอัจฉริยะ · หมัดเดียววัดเกม · หมัดแม่น +4% คะแนนหมัด +10%",r=>({hit:{punch:0.04*r},pts:{punch:0.1*r}}),{lv:26,br:1,nd:1}));
-SKILLS.ploy.push(SKX("ploy_0b2",0,7,"ploy_0b1",["punch"],_rsch("ploy","kr_genius"),"คำนวณหมัด","ติดตัว · Lv.30 · หมัดแม่น +1.2% ความแม่นพื้นฐาน +0.2%",r=>({hit:{punch:0.012*r},prep:0.002*r}),{lv:30,br:1,nd:2,passive:1}));
+SKILLS.ploy.push(SKX("ploy_0b2",0,7,"ploy_0b1",["punch"],_rsch("ploy","kr_genius"),"หมัดหนักแน่น","ติดตัว · Lv.30 · หมัดแม่น +1.2% ความแม่นพื้นฐาน +0.2%",r=>({hit:{punch:0.012*r},prep:0.002*r}),{lv:30,br:1,nd:2,passive:1}));
 SKILLS.ploy.push(SKX("ploy_0b3",0,8,"ploy_0b2",["punch", "counter"],_rsch("ploy","kr_genius"),"สวนหมัดเหวี่ยง","Lv.34 · หมัดอัจฉริยะ · สวนด้วยหมัดเหวี่ยง · สวนกลับ +3% แรงหมัดสวน +12%",r=>({ctr:0.03*r,ctrDmg:0.12*r}),{lv:34,br:1,nd:3}));
-SKILLS.ploy.push(SKX("ploy_0b4",0,9,"ploy_0b3",["punch", "iq"],_rsch("ploy","kr_genius"),"อ่านจากหมัด","ติดตัว · หนุนสายกำแพงพยัคฆ์ · Lv.38 · สวนกลับ +1% คำสั่งพักยก +5%",r=>({ctr:0.01*r,corner:0.05*r}),{lv:38,br:1,nd:4,passive:1,feed:2}));
+SKILLS.ploy.push(SKX("ploy_0b4",0,9,"ploy_0b3",["punch", "iq"],_rsch("ploy","kr_genius"),"สวนด้วยหมัดหนัก","ติดตัว · หนุนสายกำแพงพยัคฆ์ · Lv.38 · สวนกลับ +1% คำสั่งพักยก +5%",r=>({ctr:0.01*r,corner:0.05*r}),{lv:38,br:1,nd:4,passive:1,feed:2}));
 SKILLS.ploy.push(SKX("ploy_0b5",0,10,"ploy_0b4",["punch", "iq"],_rsch("ploy","kr_genius"),"พรสวรรค์ไร้พ่าย","Lv.42 · ขั้นตำนาน · หมัดของคนที่ไม่เคยแพ้ · หมัดแม่น +5% แรงหมัด +14% สวนกลับ +3%",r=>({hit:{punch:0.05*r},dmg:{punch:0.14*r},ctr:0.03*r}),{lv:42,br:1,nd:5}));
 SKILLS.ploy.push(SKX("ploy_1a1",1,6,"kr_tiger",["kick", "power"],_rsch("ploy","kr_tiger"),"เตะก้านคอสองข้าง","Lv.26 · เตะคอขาด · เตะก้านคอซ้ายขวา · แรงเตะ +14% เตะแม่น +2%",r=>({dmg:{kick:0.14*r},hit:{kick:0.02*r}}),{lv:26,br:0,nd:1}));
 SKILLS.ploy.push(SKX("ploy_1a2",1,7,"ploy_1a1",["kick"],_rsch("ploy","kr_tiger"),"แข้งโคราช","ติดตัว · Lv.30 · แรงเตะ +3%",r=>({dmg:{kick:0.03*r}}),{lv:30,br:0,nd:2,passive:1}));
