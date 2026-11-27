@@ -522,7 +522,7 @@ const BAG={st:null,
   mount(){let el=document.getElementById("minibag");if(!el){el=document.createElement("div");el.id="minibag";el.className="mgame";document.body.appendChild(el);}
     el.onclick=e=>{const lv=e.target.closest("[data-lv]");if(lv&&typeof LIVE!=="undefined"){LIVE.act(lv.dataset.lv,lv.dataset.v);return;}const rn=e.target.closest("[data-rn]");if(rn&&typeof RUN!=="undefined"){if(rn.dataset.rn!=="L"&&rn.dataset.rn!=="R")RUN.act(rn.dataset.rn,rn.dataset.v);return;}const sp=e.target.closest("[data-sp]");if(sp&&typeof SPORTS!=="undefined"){SPORTS.act(sp.dataset.sp);return;}const du=e.target.closest("[data-du]");if(du&&typeof DUEL!=="undefined"){DUEL.act(du.dataset.du,du.dataset.v);return;}const b=e.target.closest("[data-mb]");if(!b)return;const a=b.dataset.mb,v=b.dataset.v;
       if(a==="mode"&&MG_MODES[v]&&MG_MODES[v].custom){this.st.mode=v;if(v==="run")RUN.pick();else LIVE.pick();}else if(a==="mode"){this.st.mode=v;this.st.phase="pick";this.st.practice=mgPlayed(G,v);this.draw();}else if(a==="hub"){this.st.phase="hub";this.draw();}else if(a==="pick"){this.st.id=v;this.draw();}else if(a==="dk"){this.st.dk=v;this.draw();}else if(a==="go")this.start();else if(a==="close")this.close();else if(a==="claim")this.claim();else if(a==="again"){this.st.phase="pick";this.st.practice=true;this.draw();}};
-    if(!this.keyH){this.keyH=e=>{if(!e.repeat&&typeof TUG!=="undefined"&&TUG.st&&!TUG.st.done){const k=e.key.toLowerCase();if(k==="f"||k==="d"||k==="arrowleft"){e.preventDefault();TUG.tap();return;}if(k==="j"||k==="k"||k==="arrowright"||k===" "){e.preventDefault();TUG.heave();return;}}if(!e.repeat&&typeof RELAY!=="undefined"&&RELAY.st&&(e.key===" "||/^[jk]$/i.test(e.key)||e.key==="ArrowRight")){e.preventDefault();RELAY.pass();return;}if(typeof LIVE!=="undefined"&&LIVE.st&&LIVE.st.phase==="play"&&/^[123]$/.test(e.key)){const d=LIVE.st.cur;if(d){e.preventDefault();LIVE.answer(d.ord[+e.key-1]);}return;}if(typeof RUN!=="undefined"&&RUN.st&&(RUN.st.phase==="race"||RUN.st.phase==="set")){const k=e.key.toLowerCase();if(e.repeat)return;if(k==="f"||k==="d"||k==="arrowleft"){e.preventDefault();RUN.tap("L");}else if(k==="j"||k==="k"||k==="arrowright"){e.preventDefault();RUN.tap("R");}return;}
+    if(!this.keyH){this.keyH=e=>{if(!e.repeat&&typeof TUG!=="undefined"&&TUG.st&&!TUG.st.done){const k=e.key.toLowerCase();if(k==="f"||k==="d"||k==="arrowleft"){e.preventDefault();TUG.tap();return;}if(k==="j"||k==="k"||k==="arrowright"||k===" "){e.preventDefault();TUG.heave();return;}}if(!e.repeat&&typeof RELAY!=="undefined"&&RELAY.st&&(e.key===" "||/^[jk]$/i.test(e.key)||e.key==="ArrowRight")){e.preventDefault();RELAY.pass();return;}if(typeof LIVE!=="undefined"&&LIVE.st&&LIVE.st.phase==="play"&&/^[123]$/.test(e.key)){const d=LIVE.st.cur;if(d){e.preventDefault();LIVE.answer(d.ord[+e.key-1]);}return;}if(typeof RUN!=="undefined"&&RUN.st&&(RUN.st.phase==="race"||RUN.st.phase==="set")){const k=e.key.toLowerCase();if(e.repeat)return;if(k==="f"||k==="d"||k==="arrowleft"||k==="j"||k==="k"||k==="arrowright"||k===" "){e.preventDefault();RUN.tap("L");}return;}
       if(!this.st||this.st.phase!=="play")return;const k=e.key.toLowerCase();if(e.repeat)return;
       if(k==="f"||k==="d"||k==="arrowleft"){e.preventDefault();this.hit("L");}else if(k==="j"||k==="k"||k==="arrowright"){e.preventDefault();this.hit("R");}else if(k==="escape")this.close();};
       document.addEventListener("keydown",this.keyH);
@@ -547,7 +547,7 @@ const BAG={st:null,
     if(S.phase==="abort"){el.innerHTML=`<div class="mbox px"><h2>Stopped</h2><p class="meta center">You switched apps or the screen turned off, so the song stopped · this week's reward is still available</p><div class="mfoot roadbtns"><button class="btn" data-mb="close">Close</button><button class="btn primary" data-mb="again">Play again</button></div></div>`;return;}
     if(S.phase==="result"){const R=S.res;
       el.innerHTML=`<div class="mbox px"><h2>Results</h2><div class="mgrade g${R.grade}">${R.grade}</div>
-       <p class="center"><b>${R.score}</b> pts · Max combo ${R.maxc} · Accuracy ${Math.round(R.acc*100)}%</p>
+       ${R.c.miss===0&&R.maxc>0?`<div class="fullcombo">FULL COMBO!</div>`:""}<p class="center"><b>${R.score}</b> pts · Max combo ${R.maxc} · Accuracy ${Math.round(R.acc*100)}%</p>
        <p class="center meta">Perfect ${R.c.perfect} · Great ${R.c.great} · OK ${R.c.ok} · Miss ${R.c.miss}${R.best?" · <b class=\"goldt\">New record!</b>":""}</p>
        ${S.practice?`<p class="center meta">Practice mode · no rewards</p>`:`<p class="center">${R.rw}</p>`}
        <div class="mfoot roadbtns"><button class="btn" data-mb="again">Play again (practice)</button><button class="btn primary" data-mb="close">Back to camp</button></div></div>`;}},
@@ -558,7 +558,7 @@ const BAG={st:null,
     const cv=document.getElementById("mbcv");S.x=cv.getContext("2d");S.x.imageSmoothingEnabled=false;const loop=()=>{if(!this.st||this.st.phase!=="play")return;this.frame();this.raf=requestAnimationFrame(loop);};this.raf=requestAnimationFrame(loop);},
   now(){return this.clock()-this.st.t0;},
   judge(n,q){const S=this.st;n.j=q;S.c[q]++;if(q==="miss"){S.combo=0;}else{S.combo++;S.maxc=Math.max(S.maxc,S.combo);S.score+=({perfect:100,great:70,ok:40})[q]+Math.min(50,S.combo*2);}
-    S.fx.push({q,t:this.now()});const c=document.getElementById("mbc"),s=document.getElementById("mbs");if(c)c.textContent=S.combo;if(s)s.textContent=S.score;},
+    S.fx.push({q,t:this.now()});if(q!=="miss"){(S.rings=S.rings||[]).push({q,t:this.now()});if(S.combo>=10&&S.combo%10===0)S.cpop={n:S.combo,t:this.now()};}else S.shk=this.now();const c=document.getElementById("mbc"),s=document.getElementById("mbs");if(c){c.textContent=S.combo;c.classList.remove("cb");void c.offsetWidth;if(S.combo>1)c.classList.add("cb");}if(s)s.textContent=S.score;},
   hit(k){const S=this.st;if(!S||S.phase!=="play")return;const t=this.now();if(S.mode==="somtam")this.wood(k,this.clock());else this.drum(k,this.clock());S.hitT=t;S.hitK=k;
     const btn=document.getElementById(k==="L"?"mbL":"mbR");if(btn){btn.classList.remove("hit");void btn.offsetWidth;btn.classList.add("hit");}
     let best=null,bd=9;for(const n of S.notes){if(n.j)continue;const d=Math.abs(n.t-t);if(d<bd){bd=d;best=n;}if(n.t-t>BAG_WIN.ok)break;}
@@ -568,7 +568,12 @@ const BAG={st:null,
   frame(){const S=this.st,x=S.x,W=360,H=300,t=this.now(),f=G.F[S.id];
     for(const n of S.notes){if(!n.j&&t-n.t>BAG_WIN.ok)this.judge(n,"miss");}
     if(t>S.end+.4){this.finish();return;}
-    x.clearRect(0,0,W,H);x.fillStyle="#1b1530";x.fillRect(0,0,W,H);
+    /* v1.91.185 rhythm juice (from the 4-lane rhythm demo): the whole screen pulses on the beat, a miss jolts it, the drum lights up when pressed,
+       good hits burst a ring at the drum, PERFECT/GREAT pop big and settle, every 10 in a row a combo pop-up, full combo celebrated at the end */
+    const RM=typeof matchMedia!=="undefined"&&matchMedia("(prefers-reduced-motion: reduce)").matches;
+    x.save();if(!RM&&S.shk!=null&&t-S.shk<.18){const k2=1-(t-S.shk)/.18;x.translate((Math.random()-.5)*8*k2,(Math.random()-.5)*6*k2);}
+    x.clearRect(-10,-10,W+20,H+20);const bph=t>0?((t%S.beat)/S.beat):1,pul=RM?0:Math.pow(1-bph,3);x.fillStyle="#1b1530";x.fillRect(-10,-10,W+20,H+20);
+    if(pul>0){x.fillStyle=`rgba(255,211,74,${.10*pul})`;x.fillRect(0,0,W,H);}
     // fighter + heavy bag (same drawing as the training drill)
     const dt=(t-S.hitT)*1000,hit=dt>=0&&dt<450;const row=hit?(S.mode==="somtam"?"punch":S.hitK==="L"?"knee":"punch"):(S.mode==="somtam"?"idle":"guard");const fr=hit?Math.min(3,Math.floor(dt/90)):Math.floor(performance.now()/260)%4;
     x.fillStyle="rgba(0,0,0,.35)";x.beginPath();x.ellipse(W*.4,196,40,6,0,0,7);x.fill();
@@ -583,17 +588,24 @@ const BAG={st:null,
     x.fillStyle="#1f1f24";x.fillRect(bx-17,by+20,34,4);x.fillRect(bx-17,by+92,34,4);}
     try{drawFrame(x,sheetFor(f),ROW[row],fr,W*.38,198,180,false);}catch(e){}
     // judgement pop
-    const last=S.fx[S.fx.length-1];if(last&&t-last.t<.5){const a=(t-last.t)/.5;x.globalAlpha=1-a;x.font=`bold ${22+a*6}px "Pixelify Sans",sans-serif`;x.textAlign="center";x.lineWidth=4;x.strokeStyle="#000";
-      const T={perfect:["PERFECT!","#ffd34a"],great:["GREAT","#8ef0a0"],ok:["OK","#fff"],miss:["MISS","#ff6a6a"]}[last.q];x.strokeText(T[0],W*.6,26-a*10);x.fillStyle=T[1];x.fillText(T[0],W*.6,26-a*10);x.globalAlpha=1;}
+    const last=S.fx[S.fx.length-1];if(last&&t-last.t<.6){const a=(t-last.t)/.6,p=Math.min(1,(t-last.t)/.12),sc=last.q==="miss"?1:1+.6*(1-p)+.08*Math.sin(p*Math.PI);x.save();x.globalAlpha=Math.max(0,1-Math.max(0,a-.5)*2);
+      x.translate(W*.6,34-a*8);x.scale(sc,sc);x.font=`900 ${last.q==="perfect"?30:24}px "Chakra Petch","Pixelify Sans",sans-serif`;x.textAlign="center";x.textBaseline="middle";x.lineWidth=6;x.lineJoin="round";x.strokeStyle="#000";
+      const T={perfect:["PERFECT!","#ffd34a"],great:["GREAT!","#8ef0a0"],ok:["OK","#fff"],miss:["MISS","#ff6a6a"]}[last.q];x.strokeText(T[0],0,0);x.fillStyle=T[1];x.fillText(T[0],0,0);x.restore();}
+    if(S.cpop&&t-S.cpop.t<.9){const a=(t-S.cpop.t)/.9,p=Math.min(1,(t-S.cpop.t)/.15);x.save();x.globalAlpha=Math.max(0,1-Math.max(0,a-.6)/.4);x.translate(W*.24,70);x.rotate(-.12);x.scale(1+.7*(1-p),1+.7*(1-p));
+      x.font='900 30px "Chakra Petch",sans-serif';x.textAlign="center";x.lineWidth=7;x.lineJoin="round";x.strokeStyle="#4a0a18";x.strokeText(S.cpop.n+" COMBO!",0,0);x.fillStyle="#ff7a3a";x.fillText(S.cpop.n+" COMBO!",0,0);x.restore();}
     // note lane (taiko style: notes slide in from the right to the drum circle)
     const ly=252,hx=46,sp=210;x.fillStyle="#120e22";x.fillRect(0,ly-30,W,60);x.fillStyle="#2c2448";x.fillRect(0,ly-30,W,3);x.fillRect(0,ly+27,W,3);
     const bt=S.beat;for(let b=Math.ceil((t-.5)/bt)*bt;b<t+1.8;b+=bt){const bx2=hx+(b-t)*sp;if(bx2>0&&bx2<W){x.fillStyle="rgba(255,255,255,.08)";x.fillRect(bx2,ly-26,2,52);}}
-    x.lineWidth=3;x.strokeStyle="#ffd34a";x.beginPath();x.arc(hx,ly,22,0,7);x.stroke();x.strokeStyle="rgba(255,211,74,.35)";x.beginPath();x.arc(hx,ly,15,0,7);x.stroke();
+    {const pr=(t-S.hitT);if(pr>=0&&pr<.15){x.fillStyle=S.hitK==="L"?`rgba(226,68,60,${.55*(1-pr/.15)})`:`rgba(60,139,226,${.55*(1-pr/.15)})`;x.fillRect(0,ly-27,W,54);x.beginPath();x.arc(hx,ly,26,0,7);x.fill();}}
+    x.lineWidth=3+2*pul;x.strokeStyle="#ffd34a";x.beginPath();x.arc(hx,ly,22+2*pul,0,7);x.stroke();x.strokeStyle="rgba(255,211,74,.35)";x.beginPath();x.arc(hx,ly,15,0,7);x.stroke();
+    S.rings=(S.rings||[]).filter(r=>t-r.t<.4);for(const r of S.rings){const e=(t-r.t)/.4;x.strokeStyle=r.q==="perfect"?`rgba(255,211,74,${1-e})`:r.q==="great"?`rgba(142,240,160,${1-e})`:`rgba(255,255,255,${.7*(1-e)})`;x.lineWidth=4*(1-e)+1;x.beginPath();x.arc(hx,ly,22+e*34,0,7);x.stroke();
+      if(r.q==="perfect")for(let i=0;i<8;i++){const a=i/8*6.283;x.fillStyle=`rgba(255,240,170,${1-e})`;x.fillRect(hx+Math.cos(a)*(26+e*40)-2,ly+Math.sin(a)*(26+e*40)-2,4,4);}}
     for(let i=S.notes.length-1;i>=0;i--){const n=S.notes[i];if(n.j&&n.j!=="miss")continue;const nx=hx+(n.t-t)*sp;if(nx<-30||nx>W+30)continue;
       const L=n.k==="L",r=L?18:14;x.globalAlpha=n.j==="miss"?.35:1;x.fillStyle="#000";x.beginPath();x.arc(nx,ly,r+3,0,7);x.fill();x.fillStyle=L?"#e2443c":"#3c8be2";x.beginPath();x.arc(nx,ly,r,0,7);x.fill();
       x.fillStyle="rgba(255,255,255,.35)";x.beginPath();x.arc(nx-r*.3,ly-r*.35,r*.35,0,7);x.fill();x.fillStyle="#fff";x.font=`bold ${L?13:11}px sans-serif`;x.textAlign="center";x.fillText(L?MG_MODES[S.mode].L:MG_MODES[S.mode].R,nx,ly+4);x.globalAlpha=1;}
     // count-in
     if(t<4*bt){const n=4-Math.floor(Math.max(0,t)/bt);x.font='bold 40px "Pixelify Sans",sans-serif';x.textAlign="center";x.fillStyle="#fff";x.strokeStyle="#000";x.lineWidth=5;const s=t<0?"Ready":String(n);x.strokeText(s,W/2,120);x.fillText(s,W/2,120);}
+    x.restore();
     // progress
     x.fillStyle="#2c2448";x.fillRect(0,H-4,W,4);x.fillStyle="#ffd34a";x.fillRect(0,H-4,W*Math.min(1,Math.max(0,t/S.end)),4);},
   finish(){const S=this.st;cancelAnimationFrame(this.raf);S.phase="result";const n=S.notes.length,c=S.c;
@@ -780,18 +792,18 @@ const RUN={st:null,
     const face=x=>x&&x.id?`<img src="${faceSrc(x.id,"happy")}" alt="">`:"";
     if(S.phase==="pick"){const best=((G.mini&&G.mini.best)||{}).run;
       el.innerHTML=`<div class="mbox px"><h2>🏃 100 m sprint ${S.duel?` · ${esc(S.duel.label||"")}`:""}</h2>
-       <p class="meta">Drag the runner into the blocks, wait for the gun, then tap <b class="mbL">Left</b>/<b class="mbR">Right</b> alternately as fast as you can (F / J works too) · same side twice = stumble · moving before the gun = false start</p>
+       <p class="meta">Tap <b>On your marks</b>; three red lights come on 3 · 2 · 1. When they turn green — <b>GO!</b> — mash <b class="mbL">RUN!</b> as fast as you can (Space / F / J work too) · going before green is a false start, two and you're out</p>
        <b class="meta">Who runs</b><div class="mbpick">${F.map(x=>`<button class="mbf ${x.id===S.id?"on":""}" data-rn="me" data-v="${x.id}"><img src="${faceSrc(x.id,"happy")}" alt=""><small>${esc(x.name)}</small></button>`).join("")}</div>
        ${S.duel?`<p class="meta center">Opponent: <b>${esc(O.name)}</b></p>`:`<b class="meta">Race against</b><div class="mbpick">${F.filter(x=>x.id!==S.id).map(x=>`<button class="mbf ${x.id===S.opp?"on":""}" data-rn="opp" data-v="${x.id}"><img src="${faceSrc(x.id,"happy")}" alt=""><small>${esc(x.name)}</small></button>`).join("")||`<p class="meta">Race against your own time</p>`}</div>`}
        <p class="meta center">${S.duel?(S.duel.note||"Duel with a regional champion · best of 3"):S.practice?"Already played this week · this run is practice, no rewards":`Weekly reward: speed/stamina · morale · stardust ✦${best?` · record ${best.toFixed(2)} s`:""}`}</p>
        <div class="mfoot roadbtns"><button class="btn" data-mb="close">Not now</button><button class="btn primary" data-rn="go" ${me?"":"disabled"}>To the start line ▸</button></div></div>`;return;}
     if(S.phase==="set"||S.phase==="race"){
-      el.innerHTML=`<div class="mplay rn"><div class="mhud"><b>${esc(me.name)}</b><span id="rnmsg">${S.phase==="set"?"Drag into the blocks":""}</span><span><b id="rnt">0.00</b> s</span><button class="xbtn" data-mb="close" aria-label="Exit">✕</button></div>
+      el.innerHTML=`<div class="mplay rn"><div class="mhud"><b>${esc(me.name)}</b><span id="rnmsg">${S.phase==="set"&&!S.armed?"Tap to get on the blocks":""}</span><span><b id="rnt">0.00</b> s</span><button class="xbtn" data-mb="close" aria-label="Exit">✕</button></div>
        <canvas id="rncv" width="360" height="230"></canvas>
-       <div class="rnset ${S.phase==="set"&&!S.armed?"":"off"}" id="rnset"><div class="rnzone"></div><div class="rnknob" id="rnknob">${face(me)}</div></div>
-       <div class="mbtns"><button class="mbtn L run" id="rnL"><b>Left</b><small>F</small></button><button class="mbtn R run" id="rnR"><b>Right</b><small>J</small></button></div></div>`;
-      const pd=k=>e=>{e.preventDefault();this.tap(k);};document.getElementById("rnL").addEventListener("pointerdown",pd("L"));document.getElementById("rnR").addEventListener("pointerdown",pd("R"));
-      if(S.phase==="set"&&!S.armed)this.dragSetup();this.paint();return;}
+       <div class="mbtns one">${S.phase==="set"&&!S.armed?`<button class="mbtn ready" id="rnready">${face(me)}<b>On your marks</b><small>Tap when ready</small></button>`:`<button class="mbtn L run" id="rnL"><b>RUN!</b><small>Mash it · Space</small></button>`}</div></div>`;
+      const rb=document.getElementById("rnready");if(rb)rb.addEventListener("pointerdown",e=>{e.preventDefault();this.arm();});
+      const bl=document.getElementById("rnL");if(bl)bl.addEventListener("pointerdown",e=>{e.preventDefault();this.tap("L");});
+      this.paint();return;}
     if(S.phase==="result"){const R=S.res;
       el.innerHTML=`<div class="mbox px"><h2>${R.win?"First across the line!":"Lost by a hair"}</h2>${R.grade?`<div class="mgrade g${R.grade}">${R.grade}</div>`:""}
        <p class="center">${esc(me.name)} <b>${R.dq?"False start":R.t.toFixed(2)+" s"}</b> · ${esc(O.name)} <b>${R.ot.toFixed(2)} s</b>${R.best?` · <b class="goldt">New record!</b>`:""}</p>
@@ -808,18 +820,23 @@ const RUN={st:null,
   set(){const S=this.st,me=this.runner();if(!me)return;AU.resume&&AU.resume();try{AU.stopMusic();}catch(e){}G.mini=G.mini||{};G.mini.runLast=S.id;
     const O=this.oppInfo();Object.assign(S,{phase:"set",armed:false,gun:0,fs:S.fs||0,x:0,v:0,rate:0,last:null,lastT:0,st:0,stumble:0,ox:0,ov:0,oReact:.14+Math.random()*.12,
       oPace:O.pace*(1+(Math.random()-.5)*.05),done:false,t:0,ot:0,react:0,mult:runMult(me),started:false});this.draw();this.loop();},
-  arm(){const S=this.st;if(!S||S.phase!=="set")return;S.armed=true;const box=document.getElementById("rnset");if(box)box.classList.add("off");
-    const m=document.getElementById("rnmsg");if(m)m.textContent="On your marks…";AU.sfx&&AU.sfx("ui");
-    this.to=setTimeout(()=>{if(!this.st||this.st.phase!=="set")return;const mm=document.getElementById("rnmsg");if(mm)mm.textContent="Set…";
-      this.to=setTimeout(()=>{if(!this.st||this.st.phase!=="set")return;S.phase="race";S.gun=performance.now();S.started=true;const m3=document.getElementById("rnmsg");if(m3)m3.textContent="Go!";AU.sfx&&AU.sfx("bell");},900+Math.random()*1500);},700);},
-  tap(k){const S=this.st;if(!S)return;const b=document.getElementById(k==="L"?"rnL":"rnR");if(b){b.classList.remove("hit");void b.offsetWidth;b.classList.add("hit");}
-    if(S.phase==="set"){if(!S.armed)return;S.fs++;clearTimeout(this.to);AU.sfx&&AU.sfx("ui");
+  /* v1.91.185 (Man: the drag was fiddly) — one tap to get on the blocks, then three red lights come on one at a time with a beep (3 · 2 · 1),
+     a short random hold, and the lights turn green with "ไป!" bursting in the middle. Tapping before green is a false start. */
+  arm(){const S=this.st;if(!S||S.phase!=="set"||S.armed)return;S.armed=true;S.lights=0;S.green=0;AU.sfx&&AU.sfx("ui");this.draw();
+    const m=document.getElementById("rnmsg");if(m)m.textContent="On your marks…";
+    const on=i=>{if(!this.st||this.st.phase!=="set"||!S.armed)return;S.lights=i;S.lightT=performance.now();AU.tone&&AU.init&&AU.init()&&AU.tone(AU.ctx.currentTime+.01,{f:440,type:"square",dur:.12,peak:.14});
+      if(i<3)this.to=setTimeout(()=>on(i+1),750);
+      else this.to=setTimeout(()=>{if(!this.st||this.st.phase!=="set"||!S.armed)return;S.phase="race";S.gun=performance.now();S.green=S.gun;S.started=true;
+        const m3=document.getElementById("rnmsg");if(m3)m3.textContent="Go!";AU.init&&AU.init()&&AU.tone(AU.ctx.currentTime+.01,{f:880,type:"square",dur:.35,peak:.18});AU.sfx&&AU.sfx("bell");try{navigator.vibrate&&navigator.vibrate(40)}catch(_){} },500+Math.random()*900);};
+    this.to=setTimeout(()=>on(1),600);},
+  tap(k){const S=this.st;if(!S)return;const b=document.getElementById("rnL");if(b){b.classList.remove("hit");void b.offsetWidth;b.classList.add("hit");}
+    if(S.phase==="set"){if(!S.armed){this.arm();return;}S.fs++;clearTimeout(this.to);AU.sfx&&AU.sfx("ui");
       if(S.fs>=2){this.finish(true);return;}
-      S.armed=false;const m=document.getElementById("rnmsg");if(m)m.textContent="False start! You moved before the gun · one more chance";this.draw();const mm=document.getElementById("rnmsg");if(mm)mm.textContent="False start! One more chance";return;}
+      S.armed=false;S.lights=0;this.draw();const mm=document.getElementById("rnmsg");if(mm)mm.textContent="False start! You went before green · one more and you're out";return;}
     if(S.phase!=="race"||S.done)return;const now=performance.now();
     if(!S.react)S.react=(now-S.gun)/1000;
-    if(S.last===k){S.st++;S.stumble=now+350;S.v*=.55;S.rate*=.6;S.last=null;return;}
-    const dt=S.lastT?(now-S.lastT)/1000:.25;S.lastT=now;S.last=k;S.rate=Math.min(12,S.rate*.65+(1/Math.max(.06,dt))*.35);},
+    /* one button: each tap is a stride; a thumb mashes slower than two alternating, so a tap counts for a little more */
+    const dt=S.lastT?(now-S.lastT)/1000:.25;S.lastT=now;S.rate=Math.min(12,S.rate*.6+(1.05/Math.max(.07,dt))*.4);S.taps=(S.taps||0)+1;S.dust=(S.dust||[]).concat([{t:now}]).slice(-6);},
   loop(){const step=()=>{if(!this.st||(this.st.phase!=="set"&&this.st.phase!=="race"))return;this.tick();this.paint();this.raf=requestAnimationFrame(step);};cancelAnimationFrame(this.raf);this.raf=requestAnimationFrame(step);},
   tick(){const S=this.st,now=performance.now();if(S.phase!=="race")return;const el=(now-S.gun)/1000,dt=Math.min(.05,S.prev?(now-S.prev)/1000:.016);S.prev=now;
     if(!S.done){if(S.lastT&&now-S.lastT>350)S.rate*=Math.pow(.2,dt);const target=now<S.stumble?0:S.rate*RUN_STRIDE*S.mult;S.v+=(target-S.v)*Math.min(1,dt*4);S.x+=S.v*dt;S.t=el;
@@ -840,7 +857,16 @@ const RUN={st:null,
     const O=this.oppInfo(),me=this.runner(),oF=O.f||(O.id&&G.F[O.id]);
     const drawR=(f,m,v,footY,stum)=>{if(!f)return;const sh=sheetFor(f);if(!sh||!(sh.complete||sh.width))return;const bob=v>.5?Math.abs(Math.sin(now/90))*3:0;drawFrame(x,sh,stum?ROW.guard:ROW.walk,fr(v),px(m),footY-bob,62,false,1);};
     drawR(oF,S.ox,S.ov,H*.76,false);drawR(me,S.x,S.v,H*.99,now<S.stumble);
-    if(now<S.stumble){x.fillStyle="#fff";x.font="bold 14px sans-serif";x.fillText("Stumble!",px(S.x)-18,H*.62);}
+    /* speed lines once she's flying */
+    if(S.phase==="race"&&S.v>6){x.save();x.globalAlpha=Math.min(.5,(S.v-6)/10);x.strokeStyle="#fff";x.lineWidth=2;for(let i=0;i<7;i++){const yy=H*.6+((i*37+now*.0)%(H*.38)),xx=(W-((now*.9+i*61)%(W+80)));x.beginPath();x.moveTo(xx,yy);x.lineTo(xx+40,yy);x.stroke();}x.restore();}
+    for(const d of S.dust||[]){const e=(now-d.t)/400;if(e>1)continue;x.fillStyle=`rgba(240,220,190,${.6*(1-e)})`;x.beginPath();x.arc(px(S.x)-14-e*18,H*.97-e*6,3+e*6,0,7);x.fill();}
+    /* start lights: three reds one by one, then all green */
+    if(S.phase==="set"&&S.armed||S.phase==="race"&&now-S.gun<900){const g=S.phase==="race",cx=W/2,cy=H*.3;x.save();x.fillStyle="#141018";x.fillRect(cx-74,cy-24,148,48);x.strokeStyle="#000";x.lineWidth=3;x.strokeRect(cx-74,cy-24,148,48);
+      for(let i=0;i<3;i++){const lit=g||S.lights>i,col=g?"#3dff6a":"#ff2a2a";const lx=cx-46+i*46;x.fillStyle=lit?col:"#3a2a30";x.beginPath();x.arc(lx,cy,16,0,7);x.fill();if(lit){x.globalAlpha=.35;x.beginPath();x.arc(lx,cy,24,0,7);x.fill();x.globalAlpha=1;}}
+      if(!g&&S.lights>0){const e=(now-S.lightT)/300,sc=1+.6*Math.max(0,1-e);x.font=`900 ${Math.round(54*sc)}px "Chakra Petch","IBM Plex Sans Thai",sans-serif`;x.textAlign="center";x.textBaseline="middle";x.lineWidth=8;x.strokeStyle="#000";x.strokeText(String(4-S.lights),cx,cy+70);x.fillStyle="#fff";x.fillText(String(4-S.lights),cx,cy+70);}
+      if(g){const e=(now-S.gun)/900,sc=1.8-.8*Math.min(1,e*3);x.globalAlpha=Math.max(0,1-Math.max(0,e-.6)/.4);x.font=`900 ${Math.round(64*sc)}px "Chakra Petch","IBM Plex Sans Thai",sans-serif`;x.textAlign="center";x.textBaseline="middle";x.lineWidth=10;x.strokeStyle="#0a3a14";x.strokeText("Go!",cx,cy+76);x.fillStyle="#7dff8f";x.fillText("Go!",cx,cy+76);
+        for(let i=0;i<14;i++){const a=i/14*6.283,r=40+e*160;x.fillStyle="#ffe066";x.fillRect(cx+Math.cos(a)*r-3,cy+76+Math.sin(a)*r*.6-3,6,6);}}
+      x.restore();}
     x.fillStyle="rgba(0,0,0,.45)";x.fillRect(0,0,W,18);x.fillStyle="#fff";x.font="11px sans-serif";x.fillText(`${(this.runner()||{}).name||""} ${S.x.toFixed(0)} m · ${O.name} ${S.ox.toFixed(0)} m`,6,13);},
   finish(dq){const S=this.st;this.stop();if(S.phase==="result")return;S.phase="result";const O=this.oppInfo();
     const t=dq?99:S.t,ot=S.ot||((RUN_LEN-S.ox)/Math.max(1,S.ov||6)+S.t),win=!dq&&t<=ot;
@@ -861,7 +887,7 @@ const RUN={st:null,
     G.flags.runN=(G.flags.runN||0)+1;if(grade==="S")G.flags.runS=(G.flags.runS||0)+1;
     if(typeof cardCheck==="function"){const got=cardCheck(G);if(got.length){G.cardPend=(G.cardPend||[]).concat(got);out.push(`🃏 New card ×${got.length}`);}}
     return `<span class="rwl">${out.map(x=>`<span class="rwi">${x}</span>`).join("")}</span>`;}};
-MG_MODES.run={icon:"🏃",title:"100 m sprint",note:"Alternate left and right fast · speed/stamina, stardust",open:G=>(G.week>=6||(G.season||1)>=2)&&bagFighters(G).length>=1,custom:true};
+MG_MODES.run={icon:"🏃",title:"100 m sprint",note:"Mash one button · speed/stamina, stardust",open:G=>(G.week>=6||(G.season||1)>=2)&&bagFighters(G).length>=1,custom:true};
 MG_ACT.run="run";
 /* v1.90: district sports day — once a year from week 24: 100 m sprint, tug of war and a 3-leg relay against the other colours; points per event */
 const SPORTS_WK=24;

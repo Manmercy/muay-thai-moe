@@ -2534,3 +2534,16 @@ body.qs-cutting .vn .vbg{display:none}
 @property --r{syntax:"<length>";inherits:false;initial-value:0px}
 @keyframes iris{0%{--r:120vmax}45%{--r:0px}55%{--r:0px}100%{--r:120vmax}}
 @media (prefers-reduced-motion:reduce){.iris,.confetti{display:none}.result .big.wdrop{animation:none}}
+
+/* v1.91.185 sprint: one big button */
+.mbtns.one{grid-template-columns:1fr}
+.mbtn.ready{background:#2f8a50;grid-auto-flow:column;align-items:center;gap:12px;place-content:center}
+.mbtn.ready img{width:54px;height:54px;object-fit:cover;object-position:top;box-shadow:0 0 0 3px #120c1c;grid-row:span 2}
+.mbtn.ready small{grid-column:2}
+.mbtn.L.run{background:#c8322b;height:130px}.mbtn.L.run b{font-size:34px}
+
+/* v1.91.185 rhythm juice */
+#mbc{display:inline-block}#mbc.cb{animation:mbcb .16s ease-out}
+@keyframes mbcb{0%{transform:scale(1.5);color:#ffd34a}100%{transform:scale(1)}}
+.fullcombo{text-align:center;font:900 32px "Chakra Petch",var(--f-display);color:#ffd34a;-webkit-text-stroke:2px #6a1020;paint-order:stroke fill;animation:fullc .7s cubic-bezier(.2,1.6,.4,1) both;letter-spacing:1px}
+@keyframes fullc{0%{transform:scale(2.4) rotate(-8deg);opacity:0}100%{transform:none;opacity:1}}
