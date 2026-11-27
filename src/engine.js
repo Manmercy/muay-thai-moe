@@ -510,7 +510,7 @@ function trainWeek(G,f,rng){
   for(const [k,w] of Object.entries(p.w)){
     // v1.18: training your own style's core weapons fights diminishing returns less (style mastery path)
     const dim=1-Math.pow(f.a[k]/(f.potential+(core.includes(k)?CK:1.5)),2.2);
-    const g=.5*w*it.g*coach*fac*ready*mot*clamp(dim,.04,1)*(.75+rng()*.5)*(traitOf(f)==="surge"?1+.15*traitK(f):traitOf(f)==="talent"?1+.1*traitK(f):1)*(1+(f.drillBonus||0))*ytTrainMul(G,f);
+    const g=(typeof scTrainMul==="function"?scTrainMul(G,f,k):1)*.5*w*it.g*coach*fac*ready*mot*clamp(dim,.04,1)*(.75+rng()*.5)*(traitOf(f)==="surge"?1+.15*traitK(f):traitOf(f)==="talent"?1+.1*traitK(f):1)*(1+(f.drillBonus||0))*ytTrainMul(G,f);
     if(g>0){const g2=f.a[k]>=20?g*LB_RATE:g,b4=f.a[k];f.a[k]=Math.max(b4,Math.min(stCap(f),b4+g2));f.gains[k]=f.a[k]-b4;}
   }
   f.drillBonus=0;
@@ -625,7 +625,7 @@ function mastery(f){if(f.camp!=="player")return 0;const v=styleVal(f,mainStyle(f
 const VET_FX={hit:.08,dmg:.25,ev:.06}; // calibrated: vet 1 ≈ +1 stat point
 /* v1.90.13 "the more she bleeds, the harder she gets" (Ladda): f.hpX adds starting hp; f.hurt={def,ev,sta,rec,rnd} scale with how much hp is gone (0 fresh → 1 empty) */
 const hurtW=s=>s&&s.f.hurt?clamp(1-s.hp/(s.hp0||100),0,1):0;
-function fightSide(f,plan,rng){const sk=skillMods(f);{const m=mastery(f)*MK,s=mainStyle(f);if(m){if(s==="defense"){sk.evade+=MDEF.ev*m;sk.ctr+=MDEF.ctr*m;sk.ctrDmg+=MDEF.cd*m;}else{const w=s;sk.hit[w]=(sk.hit[w]||0)+MWPN.hit*m;sk.dmg[w]=(sk.dmg[w]||0)+MWPN.dmg*m;sk.pts[w]=(sk.pts[w]||0)+.1*m;}}}if(f.aura)sk.evade+=f.aura*.5;if(f.vet>0){const v=f.vet;for(const w of ["punch","kick","knee","elbow"]){sk.hit[w]=(sk.hit[w]||0)+VET_FX.hit*v;sk.dmg[w]=(sk.dmg[w]||0)+VET_FX.dmg*v;}sk.evade+=VET_FX.ev*v;}const gr=f.id==="kati"&&traitOf(f)!=="grit"?0:(f.grit||0)*(f.id==="kati"?traitK(f):1);if(gr)sk.evade+=gr*.4;
+function fightSide(f,plan,rng){const sk=skillMods(f);if(typeof scFightMods==="function")scFightMods(f,sk); /* v1.91.177 support cards */{const m=mastery(f)*MK,s=mainStyle(f);if(m){if(s==="defense"){sk.evade+=MDEF.ev*m;sk.ctr+=MDEF.ctr*m;sk.ctrDmg+=MDEF.cd*m;}else{const w=s;sk.hit[w]=(sk.hit[w]||0)+MWPN.hit*m;sk.dmg[w]=(sk.dmg[w]||0)+MWPN.dmg*m;sk.pts[w]=(sk.pts[w]||0)+.1*m;}}}if(f.aura)sk.evade+=f.aura*.5;if(f.vet>0){const v=f.vet;for(const w of ["punch","kick","knee","elbow"]){sk.hit[w]=(sk.hit[w]||0)+VET_FX.hit*v;sk.dmg[w]=(sk.dmg[w]||0)+VET_FX.dmg*v;}sk.evade+=VET_FX.ev*v;}const gr=f.id==="kati"&&traitOf(f)!=="grit"?0:(f.grit||0)*(f.id==="kati"?traitK(f):1);if(gr)sk.evade+=gr*.4;
   const hp0=100-(f.injury?15:0)+Math.round(gr*30)+(f.hpX||0),tl=f.trainLog||[];const brk=STA.brk+f.a.stamina*STA.brkK+(tl[tl.length-1]==="prep"?STA.prep:0)+(tl.slice(-2).includes("cond")?STA.cond:0)+(f.id==="fah"?STA.fah:0)+(f.camp==="player"&&typeof lovePerk==="function"?lovePerk(f).brk:0); /* Fah: hot-blooded and tireless, gets her breath back faster */
   return {f,id:f.id,name:f.name,plan,instr:"none",hp:hp0,hp0,brk,staMax:STA_TANK(f),sta:clamp(100-f.fatigue*.4,40,100),pts:0,rpts:0,kd:0,cuts:0,
     thrown:0,landed:0,dmgDealt:0,legs:0,tac:{focus:"auto",pace:"steady",target:"head"},sk,prep:(f.camp==="player"?(HERO_K[f.id]||0)+(LINE_K[f.id]?(LINE_K[f.id][heroLine(f)]||0)+(LINE_KR[f.id]?(LINE_KR[f.id][heroLine(f)]||0)*clamp(((f.lvl||1)-25)/7,0,1):0):0):0)+(f.prepBonus?.04:0)+(f.counterPrep?.05:0)+sk.prep+(f.aura||0)+gr+(f.labPrep||0)+(f.camp==="player"?(f.facPrep||0):0)+(f.camp==="player"&&typeof lovePerk==="function"?lovePerk(f).prep:0),counterPrep:!!f.counterPrep,trait:traitOf(f),trk:traitK(f),mor:(f.morale-60)/400+sk.mor,wl:{punch:0,kick:0,knee:0,elbow:0}};
@@ -824,14 +824,14 @@ function fightEx(F){const rng=F.rng,log=[],ex=F.ex,mA=F.mA,mB=F.mB;
     if(checked){at.legs=Math.min(60,at.legs+BAL.chkLegs);at.sta=clamp(at.sta-BAL.chkSta,0,100);at.hp-=BAL.chkHp;df.pts+=.3;df.rpts+=.3;
       log.push({ha:F.A.hp,hb:F.B.hp,sa:F.A.sta,sb:F.B.sta,s:df===F.A?"A":"B",t:`${df.name} ยกแข้งรับลูกเตะของ${at.name}ไว้ได้ แข้งปะทะแข้ง!`,k:"miss",ev:"miss",w:wpn,cl:clinch,mside:at===F.A?"A":"B",an:at.name,dn:df.name});}
     else if(rng()<hitP){
-      const crit=rng()<(at.rage?.35:.07);const q=crit?1.6:.6+rng()*.6;if(at.rage)at.rage--;
+      const crit=rng()<(at.rage?.35:.07+((at.sk.scCrit&&(at.sk.scCrit[wpn]||0)+(at.sk.scCrit.all||0))||0));const scp=typeof scProc==="function"?(crit?scProc(F,at,"crit",wpn):at.hp<45?scProc(F,at,"clutch"):null):null;const q=crit?1.6:.6+rng()*.6;if(at.rage)at.rage--;
       let dmg=1.35*W_INFO[wpn].imp*q*(.6+(BAL.specPow?effA(at,"power"):a.power)/25)*(1-d.guard/70)*(1.25-d.dur/40)*(1+(at.sk.dmg[wpn]||0))*(bA&&bA.w===wpn?1+.3*bA.pw:1)*(1+fury*TRV.furyDmg)*(at.libOn?trm(TRV.lib,at):1)*(at.trait==="rock"?trm(TRV.rockAtk,at):1)*(df.trait==="rock"?trm(TRV.rockDef,df):1)*(at.ph&&at.ph.dmg||1)*(at.f.camp==="player"?1+(HERO_D[at.f.id]||0):1)*(1+(at.titleD||0))*(df.f.hurt?1-df.f.hurt.def*hurtW(df):1);const tg=at.tac.target;
       if(tg==="head")dmg*=1.1;if(tg==="body"){dmg*=.9;df.sta=clamp(df.sta-dmg*.9,0,100);}if(tg==="legs"&&(wpn==="kick"||wpn==="knee")){dmg*=.85;df.legs=Math.min(60,df.legs+dmg*.8);}
       // v1.32 "flash knockout": a clean crit to the head can drop anyone early — rarer for durable/guarded fighters, likelier when the attacker clearly outclasses
       if(crit&&tg!=="body"&&(wpn!=="punch"||a.power>=10)&&rng()<clamp(.16+(ovr(a)-ovr(d))*.06-(d.dur-8)*.012+Math.max(0,a.power-12)*BAL.flashPow,.05,.45)){dmg+=10+rng()*8;at.flash=1;}
       at.rw[wpn]++;at.rdmg+=dmg;at.rlanded++;
       df.hp-=dmg;df.sta=clamp(df.sta-dmg*STA.hit*(df.f.hurt?1-df.f.hurt.sta*hurtW(df):1),0,100);at.landed++;at.wl[wpn]++;at.dmgDealt+=dmg;const p=W_INFO[wpn].pts*q*(1+(at.sk.pts[wpn]||0))*(df.trait==="rock"?trm(TRV.rockPts,df):1);at.pts+=p;at.rpts+=p;
-      log.push({ha:F.A.hp,hb:F.B.hp,sa:F.A.sta,sb:F.B.sta,s:at===F.A?"A":"B",t:`${at.name} ${tx}${crit?" — เข้าเต็ม ๆ!":""}`,k:crit?"big":"hit",ev:"hit",w:wpn,cl:clinch,crit,an:at.name,dn:df.name});
+      log.push({ha:F.A.hp,hb:F.B.hp,sa:F.A.sta,sb:F.B.sta,s:at===F.A?"A":"B",t:`${at.name} ${tx}${crit?" — เข้าเต็ม ๆ!":""}`,k:crit?"big":"hit",ev:"hit",w:wpn,cl:clinch,crit,an:at.name,dn:df.name,sc:scp});
       if(wpn==="elbow"&&q>1.3&&rng()<.25){df.cuts++;log.push({ha:F.A.hp,hb:F.B.hp,sa:F.A.sta,sb:F.B.sta,s:"x",t:`${df.name} โดนศอกแตก เลือดออกที่คิ้ว`,k:"warn",ev:"cut",an:at.name,dn:df.name});
         if(df.cuts>=2&&rng()<.5){F.over=true;F.result={win:at===F.A?"A":"B",type:"TKO (แพทย์สั่งยุติ)",round:F.round};}}
       if(!F.over&&df.hp<=0){at.flash=0;F.over=true;F.result={win:at===F.A?"A":"B",type:rng()<.5?"KO":"TKO",round:F.round};
@@ -848,9 +848,9 @@ function fightEx(F){const rng=F.rng,log=[],ex=F.ex,mA=F.mA,mB=F.mB;
       if(rng()<ctrP){const cw=d.kick>d.punch&&!clinch?"kick":"punch";
         const rc=!!df.rage;if(df.rage)df.rage--;const dmg=1.3*W_INFO[cw].imp*(rc?1.5:.7+rng()*.5)*(.6+(BAL.specPow?effA(df,"power"):d.power)/25)*(1-a.guard/70)*(1.25-a.dur/40)*(1+df.sk.ctrDmg)*(df.libOn?trm(TRV.lib,df):1)*(df.trait==="rock"?trm(TRV.rockAtk,df):1)*(at.trait==="rock"?trm(TRV.rockDef,at):1);
         at.hp-=dmg;at.sta=clamp(at.sta-dmg*STA.hit,0,100);df.landed++;df.thrown++;df.wl[cw]++;df.dmgDealt+=dmg;df.rw[cw]++;df.rdmg+=dmg;df.rlanded++;df.rthrown++;const p=W_INFO[cw].pts*.9;df.pts+=p;df.rpts+=p;
-        log.push({ha:F.A.hp,hb:F.B.hp,sa:F.A.sta,sb:F.B.sta,s:df===F.A?"A":"B",t:`${at.name} พลาดเป้า — ${df.name} สวนกลับด้วย${cw==="kick"?"ลูกเตะ":"หมัด"}เข้าเต็ม!${rc?" คริติคอล!":""}`,k:rc?"big":"hit",ev:"counter",crit:rc,w:cw,mw:wpn,an:df.name,dn:at.name});
+        log.push({ha:F.A.hp,hb:F.B.hp,sa:F.A.sta,sb:F.B.sta,s:df===F.A?"A":"B",t:`${at.name} พลาดเป้า — ${df.name} สวนกลับด้วย${cw==="kick"?"ลูกเตะ":"หมัด"}เข้าเต็ม!${rc?" คริติคอล!":""}`,k:rc?"big":"hit",ev:"counter",crit:rc,w:cw,mw:wpn,an:df.name,dn:at.name,sc:typeof scProc==="function"?scProc(F,df,"ctr"):null});
         if(at.hp<=0){F.over=true;F.result={win:df===F.A?"A":"B",type:"KO",round:F.round};log.push({ha:F.A.hp,hb:F.B.hp,sa:F.A.sta,sb:F.B.sta,s:"x",t:`${at.name} ล้มลงไม่ลุก! ชนะน็อก`,k:"big",ev:"ko",an:df.name,dn:at.name,koSide:df===F.A?"A":"B"});}
-      } else if(rng()<.45) log.push({ha:F.A.hp,hb:F.B.hp,sa:F.A.sta,sb:F.B.sta,s:"x",t:`${at.name} ${tx} แต่ ${df.name} ${TXT.miss[Math.floor(rng()*4)]}`,k:"miss",ev:"miss",w:wpn,cl:clinch,mside:at===F.A?"A":"B",an:at.name,dn:df.name});
+      } else if(rng()<.45) log.push({ha:F.A.hp,hb:F.B.hp,sa:F.A.sta,sb:F.B.sta,s:"x",t:`${at.name} ${tx} แต่ ${df.name} ${TXT.miss[Math.floor(rng()*4)]}`,k:"miss",ev:"miss",w:wpn,cl:clinch,mside:at===F.A?"A":"B",an:at.name,dn:df.name,sc:typeof scProc==="function"?scProc(F,df,"evade"):null});
     }
     for(const s of [F.A,F.B])s.sta=clamp(s.sta+STA.ex+s.f.a.stamina*STA.exK+s.sk.regen,0,100);
     for(const s of [F.A,F.B])if(s.burst&&--s.burst.left<=0)s.burst=null;

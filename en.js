@@ -511,7 +511,7 @@ function trainWeek(G,f,rng){
   for(const [k,w] of Object.entries(p.w)){
     // v1.18: training your own style's core weapons fights diminishing returns less (style mastery path)
     const dim=1-Math.pow(f.a[k]/(f.potential+(core.includes(k)?CK:1.5)),2.2);
-    const g=.5*w*it.g*coach*fac*ready*mot*clamp(dim,.04,1)*(.75+rng()*.5)*(traitOf(f)==="surge"?1+.15*traitK(f):traitOf(f)==="talent"?1+.1*traitK(f):1)*(1+(f.drillBonus||0))*ytTrainMul(G,f);
+    const g=(typeof scTrainMul==="function"?scTrainMul(G,f,k):1)*.5*w*it.g*coach*fac*ready*mot*clamp(dim,.04,1)*(.75+rng()*.5)*(traitOf(f)==="surge"?1+.15*traitK(f):traitOf(f)==="talent"?1+.1*traitK(f):1)*(1+(f.drillBonus||0))*ytTrainMul(G,f);
     if(g>0){const g2=f.a[k]>=20?g*LB_RATE:g,b4=f.a[k];f.a[k]=Math.max(b4,Math.min(stCap(f),b4+g2));f.gains[k]=f.a[k]-b4;}
   }
   f.drillBonus=0;
@@ -626,7 +626,7 @@ function mastery(f){if(f.camp!=="player")return 0;const v=styleVal(f,mainStyle(f
 const VET_FX={hit:.08,dmg:.25,ev:.06}; // calibrated: vet 1 ≈ +1 stat point
 /* v1.90.13 "the more she bleeds, the harder she gets" (Ladda): f.hpX adds starting hp; f.hurt={def,ev,sta,rec,rnd} scale with how much hp is gone (0 fresh → 1 empty) */
 const hurtW=s=>s&&s.f.hurt?clamp(1-s.hp/(s.hp0||100),0,1):0;
-function fightSide(f,plan,rng){const sk=skillMods(f);{const m=mastery(f)*MK,s=mainStyle(f);if(m){if(s==="defense"){sk.evade+=MDEF.ev*m;sk.ctr+=MDEF.ctr*m;sk.ctrDmg+=MDEF.cd*m;}else{const w=s;sk.hit[w]=(sk.hit[w]||0)+MWPN.hit*m;sk.dmg[w]=(sk.dmg[w]||0)+MWPN.dmg*m;sk.pts[w]=(sk.pts[w]||0)+.1*m;}}}if(f.aura)sk.evade+=f.aura*.5;if(f.vet>0){const v=f.vet;for(const w of ["punch","kick","knee","elbow"]){sk.hit[w]=(sk.hit[w]||0)+VET_FX.hit*v;sk.dmg[w]=(sk.dmg[w]||0)+VET_FX.dmg*v;}sk.evade+=VET_FX.ev*v;}const gr=f.id==="kati"&&traitOf(f)!=="grit"?0:(f.grit||0)*(f.id==="kati"?traitK(f):1);if(gr)sk.evade+=gr*.4;
+function fightSide(f,plan,rng){const sk=skillMods(f);if(typeof scFightMods==="function")scFightMods(f,sk); /* v1.91.177 support cards */{const m=mastery(f)*MK,s=mainStyle(f);if(m){if(s==="defense"){sk.evade+=MDEF.ev*m;sk.ctr+=MDEF.ctr*m;sk.ctrDmg+=MDEF.cd*m;}else{const w=s;sk.hit[w]=(sk.hit[w]||0)+MWPN.hit*m;sk.dmg[w]=(sk.dmg[w]||0)+MWPN.dmg*m;sk.pts[w]=(sk.pts[w]||0)+.1*m;}}}if(f.aura)sk.evade+=f.aura*.5;if(f.vet>0){const v=f.vet;for(const w of ["punch","kick","knee","elbow"]){sk.hit[w]=(sk.hit[w]||0)+VET_FX.hit*v;sk.dmg[w]=(sk.dmg[w]||0)+VET_FX.dmg*v;}sk.evade+=VET_FX.ev*v;}const gr=f.id==="kati"&&traitOf(f)!=="grit"?0:(f.grit||0)*(f.id==="kati"?traitK(f):1);if(gr)sk.evade+=gr*.4;
   const hp0=100-(f.injury?15:0)+Math.round(gr*30)+(f.hpX||0),tl=f.trainLog||[];const brk=STA.brk+f.a.stamina*STA.brkK+(tl[tl.length-1]==="prep"?STA.prep:0)+(tl.slice(-2).includes("cond")?STA.cond:0)+(f.id==="fah"?STA.fah:0)+(f.camp==="player"&&typeof lovePerk==="function"?lovePerk(f).brk:0); /* Fah: hot-blooded and tireless, gets her breath back faster */
   return {f,id:f.id,name:f.name,plan,instr:"none",hp:hp0,hp0,brk,staMax:STA_TANK(f),sta:clamp(100-f.fatigue*.4,40,100),pts:0,rpts:0,kd:0,cuts:0,
     thrown:0,landed:0,dmgDealt:0,legs:0,tac:{focus:"auto",pace:"steady",target:"head"},sk,prep:(f.camp==="player"?(HERO_K[f.id]||0)+(LINE_K[f.id]?(LINE_K[f.id][heroLine(f)]||0)+(LINE_KR[f.id]?(LINE_KR[f.id][heroLine(f)]||0)*clamp(((f.lvl||1)-25)/7,0,1):0):0):0)+(f.prepBonus?.04:0)+(f.counterPrep?.05:0)+sk.prep+(f.aura||0)+gr+(f.labPrep||0)+(f.camp==="player"?(f.facPrep||0):0)+(f.camp==="player"&&typeof lovePerk==="function"?lovePerk(f).prep:0),counterPrep:!!f.counterPrep,trait:traitOf(f),trk:traitK(f),mor:(f.morale-60)/400+sk.mor,wl:{punch:0,kick:0,knee:0,elbow:0}};
@@ -825,14 +825,14 @@ function fightEx(F){const rng=F.rng,log=[],ex=F.ex,mA=F.mA,mB=F.mB;
     if(checked){at.legs=Math.min(60,at.legs+BAL.chkLegs);at.sta=clamp(at.sta-BAL.chkSta,0,100);at.hp-=BAL.chkHp;df.pts+=.3;df.rpts+=.3;
       log.push({ha:F.A.hp,hb:F.B.hp,sa:F.A.sta,sb:F.B.sta,s:df===F.A?"A":"B",t:`${df.name} checks the kick from ${at.name}. Shin meets shin!`,k:"miss",ev:"miss",w:wpn,cl:clinch,mside:at===F.A?"A":"B",an:at.name,dn:df.name});}
     else if(rng()<hitP){
-      const crit=rng()<(at.rage?.35:.07);const q=crit?1.6:.6+rng()*.6;if(at.rage)at.rage--;
+      const crit=rng()<(at.rage?.35:.07+((at.sk.scCrit&&(at.sk.scCrit[wpn]||0)+(at.sk.scCrit.all||0))||0));const scp=typeof scProc==="function"?(crit?scProc(F,at,"crit",wpn):at.hp<45?scProc(F,at,"clutch"):null):null;const q=crit?1.6:.6+rng()*.6;if(at.rage)at.rage--;
       let dmg=1.35*W_INFO[wpn].imp*q*(.6+(BAL.specPow?effA(at,"power"):a.power)/25)*(1-d.guard/70)*(1.25-d.dur/40)*(1+(at.sk.dmg[wpn]||0))*(bA&&bA.w===wpn?1+.3*bA.pw:1)*(1+fury*TRV.furyDmg)*(at.libOn?trm(TRV.lib,at):1)*(at.trait==="rock"?trm(TRV.rockAtk,at):1)*(df.trait==="rock"?trm(TRV.rockDef,df):1)*(at.ph&&at.ph.dmg||1)*(at.f.camp==="player"?1+(HERO_D[at.f.id]||0):1)*(1+(at.titleD||0))*(df.f.hurt?1-df.f.hurt.def*hurtW(df):1);const tg=at.tac.target;
       if(tg==="head")dmg*=1.1;if(tg==="body"){dmg*=.9;df.sta=clamp(df.sta-dmg*.9,0,100);}if(tg==="legs"&&(wpn==="kick"||wpn==="knee")){dmg*=.85;df.legs=Math.min(60,df.legs+dmg*.8);}
       // v1.32 "flash knockout": a clean crit to the head can drop anyone early — rarer for durable/guarded fighters, likelier when the attacker clearly outclasses
       if(crit&&tg!=="body"&&(wpn!=="punch"||a.power>=10)&&rng()<clamp(.16+(ovr(a)-ovr(d))*.06-(d.dur-8)*.012+Math.max(0,a.power-12)*BAL.flashPow,.05,.45)){dmg+=10+rng()*8;at.flash=1;}
       at.rw[wpn]++;at.rdmg+=dmg;at.rlanded++;
       df.hp-=dmg;df.sta=clamp(df.sta-dmg*STA.hit*(df.f.hurt?1-df.f.hurt.sta*hurtW(df):1),0,100);at.landed++;at.wl[wpn]++;at.dmgDealt+=dmg;const p=W_INFO[wpn].pts*q*(1+(at.sk.pts[wpn]||0))*(df.trait==="rock"?trm(TRV.rockPts,df):1);at.pts+=p;at.rpts+=p;
-      log.push({ha:F.A.hp,hb:F.B.hp,sa:F.A.sta,sb:F.B.sta,s:at===F.A?"A":"B",t:`${at.name} ${tx}${crit?" — clean hit!":""}`,k:crit?"big":"hit",ev:"hit",w:wpn,cl:clinch,crit,an:at.name,dn:df.name});
+      log.push({ha:F.A.hp,hb:F.B.hp,sa:F.A.sta,sb:F.B.sta,s:at===F.A?"A":"B",t:`${at.name} ${tx}${crit?" — clean hit!":""}`,k:crit?"big":"hit",ev:"hit",w:wpn,cl:clinch,crit,an:at.name,dn:df.name,sc:scp});
       if(wpn==="elbow"&&q>1.3&&rng()<.25){df.cuts++;log.push({ha:F.A.hp,hb:F.B.hp,sa:F.A.sta,sb:F.B.sta,s:"x",t:`${df.name} is cut by an elbow, bleeding over the eyebrow`,k:"warn",ev:"cut",an:at.name,dn:df.name});
         if(df.cuts>=2&&rng()<.5){F.over=true;F.result={win:at===F.A?"A":"B",type:"TKO (doctor stoppage)",round:F.round};}}
       if(!F.over&&df.hp<=0){at.flash=0;F.over=true;F.result={win:at===F.A?"A":"B",type:rng()<.5?"KO":"TKO",round:F.round};
@@ -849,9 +849,9 @@ function fightEx(F){const rng=F.rng,log=[],ex=F.ex,mA=F.mA,mB=F.mB;
       if(rng()<ctrP){const cw=d.kick>d.punch&&!clinch?"kick":"punch";
         const rc=!!df.rage;if(df.rage)df.rage--;const dmg=1.3*W_INFO[cw].imp*(rc?1.5:.7+rng()*.5)*(.6+(BAL.specPow?effA(df,"power"):d.power)/25)*(1-a.guard/70)*(1.25-a.dur/40)*(1+df.sk.ctrDmg)*(df.libOn?trm(TRV.lib,df):1)*(df.trait==="rock"?trm(TRV.rockAtk,df):1)*(at.trait==="rock"?trm(TRV.rockDef,at):1);
         at.hp-=dmg;at.sta=clamp(at.sta-dmg*STA.hit,0,100);df.landed++;df.thrown++;df.wl[cw]++;df.dmgDealt+=dmg;df.rw[cw]++;df.rdmg+=dmg;df.rlanded++;df.rthrown++;const p=W_INFO[cw].pts*.9;df.pts+=p;df.rpts+=p;
-        log.push({ha:F.A.hp,hb:F.B.hp,sa:F.A.sta,sb:F.B.sta,s:df===F.A?"A":"B",t:`${at.name} misses — ${df.name} counters with ${cw==="kick"?"kick":"Punch"} Clean hit!${rc?" Critical!":""}`,k:rc?"big":"hit",ev:"counter",crit:rc,w:cw,mw:wpn,an:df.name,dn:at.name});
+        log.push({ha:F.A.hp,hb:F.B.hp,sa:F.A.sta,sb:F.B.sta,s:df===F.A?"A":"B",t:`${at.name} misses — ${df.name} counters with ${cw==="kick"?"kick":"Punch"} Clean hit!${rc?" Critical!":""}`,k:rc?"big":"hit",ev:"counter",crit:rc,w:cw,mw:wpn,an:df.name,dn:at.name,sc:typeof scProc==="function"?scProc(F,df,"ctr"):null});
         if(at.hp<=0){F.over=true;F.result={win:df===F.A?"A":"B",type:"KO",round:F.round};log.push({ha:F.A.hp,hb:F.B.hp,sa:F.A.sta,sb:F.B.sta,s:"x",t:`${at.name} is down and not getting up! Knockout win`,k:"big",ev:"ko",an:df.name,dn:at.name,koSide:df===F.A?"A":"B"});}
-      } else if(rng()<.45) log.push({ha:F.A.hp,hb:F.B.hp,sa:F.A.sta,sb:F.B.sta,s:"x",t:`${at.name} ${tx} but ${df.name} ${TXT.miss[Math.floor(rng()*4)]}`,k:"miss",ev:"miss",w:wpn,cl:clinch,mside:at===F.A?"A":"B",an:at.name,dn:df.name});
+      } else if(rng()<.45) log.push({ha:F.A.hp,hb:F.B.hp,sa:F.A.sta,sb:F.B.sta,s:"x",t:`${at.name} ${tx} but ${df.name} ${TXT.miss[Math.floor(rng()*4)]}`,k:"miss",ev:"miss",w:wpn,cl:clinch,mside:at===F.A?"A":"B",an:at.name,dn:df.name,sc:typeof scProc==="function"?scProc(F,df,"evade"):null});
     }
     for(const s of [F.A,F.B])s.sta=clamp(s.sta+STA.ex+s.f.a.stamina*STA.exK+s.sk.regen,0,100);
     for(const s of [F.A,F.B])if(s.burst&&--s.burst.left<=0)s.burst=null;
@@ -6716,7 +6716,7 @@ AU.gsfx=function(kind,a){if(!this.init()||this.muted||!SETTINGS.sfx)return;const
   if(kind==="shimmer")for(let i=0;i<6;i++)T(i*.05,{f:1400+Math.random()*1400,type:"sine",dur:.12,peak:.06});};
 
 // ================= MUAY THAI MOE v1.3 — UI =================
-const VERSION="1.91.186";
+const VERSION="1.91.188";
 const CUR_LANG=(typeof window!=="undefined"&&window.LANG)||"th";
 const TH_LABEL=String.fromCharCode(3652,3607,3618);
 function langSwitch(cls){return `<div class="langsw ${cls||""}" role="group" aria-label="Language">${[["th",TH_LABEL],["en","EN"]].map(([k,l])=>`<button class="lsb ${CUR_LANG===k?"on":""}" data-act="setlang" data-v="${k}" aria-pressed="${CUR_LANG===k}">${l}</button>`).join("")}</div>`;}
@@ -7363,7 +7363,7 @@ function tcard(f,L){const pf=projFatigue(f),rest=f.plan.preset==="rest";const ti
    <div class="tc-body"><div class="tc-h"><b class="nm">${esc(f.name)}</b><span class="lv">Lv.${f.lvl}</span>${prepLine(f)}</div>
     <div class="fatg"><span>Fatigue <b class="num">${Math.round(f.fatigue)}</b> → <b class="num">${Math.round(pf)}</b></span><i class="fgbar" style="--now:${clamp(f.fatigue,0,100)}%;--next:${clamp(pf,0,100)}%;--bc:${pf>70?"var(--red)":pf>55?"var(--warn)":"var(--green)"}"><s></s></i></div>
     ${tired?`<p class="warnchip">Very tired, should recover this week</p>`:""}
-    ${skReady(f)?`<button class="spchip" data-act="fighter" data-id="${f.id}" data-v="skill">★ Skills ready</button>`:""}<div class="tc-prog"><span class="pill ${L?"":"gold"}">${isAway(G,f.id)?`Away from camp · back in ${awayLeft(G,f.id)} weeks`:f.injury?"Recovering":PRESETS[f.plan.preset].name+(rest?"":" · "+INTENSITY[f.plan.intensity].name)}</span></div>
+    ${skReady(f)?`<button class="spchip" data-act="fighter" data-id="${f.id}" data-v="skill">★ Skills ready</button>`:""}${typeof scStrip==="function"&&scOn()?scStrip(f):""}<div class="tc-prog"><span class="pill ${L?"":"gold"}">${isAway(G,f.id)?`Away from camp · back in ${awayLeft(G,f.id)} weeks`:f.injury?"Recovering":PRESETS[f.plan.preset].name+(rest?"":" · "+INTENSITY[f.plan.intensity].name)}</span></div>
     ${f.injury?"":`<div class="tc-btns">${L&&!autoOn(f)?"":`<button class="btn sm" data-act="tpick" data-id="${f.id}">Program</button>`}${coachOn()&&!L?`<button class="btn sm" data-act="advice" data-id="${f.id}">Coach's advice</button>`:""}
      ${isAway(G,f.id)?`<span class="tc-ok auto">Away from camp · no training</span>`:autoOn(f)?`<span class="tc-ok auto">↻ Same programme for ${autoLeft(f)} more weeks</span>`:L?`<span class="tc-ok">✓ Program confirmed</span>`:`<button class="btn sm gold tc-go" data-act="tlock" data-id="${f.id}">Confirm program</button>`}</div>`}
 </div></section>`;}
@@ -7673,7 +7673,7 @@ function pCardSrc(f){const v=(G.pLook||{})[f.id];if(!v||!pLooks(f).some(x=>x[0]=
 function pArtSrc(f){if(UI.look==="train"&&!CHAMP_IDS.includes(f.id))return `${ASSET}${f.id}_train.webp`;const h=THAI_HOLD;THAI_HOLD=true;try{return stand(f.id,UI.look==="train"?"casual":UI.look,"happy");}finally{THAI_HOLD=h;}} /* "ลำลอง" stays casual here even with the Thai dress worn day to day — the dress has its own button */
 function pFace(f){if(UI.look==="fight"||!(f.canon||CHAMP_IDS.includes(f.id))||!pLooks(f).some(x=>x[0]===UI.look))return faceImg(f);return faceImg(f).replace(faceSrc(f.id,"happy"),faceSrc(f.id,"happy",UI.look));} /* v1.91.161 (player report): the face comes from faceSrc (which knows each look's real file) — deriving it from the body art broke once casual bodies moved to .png while their faces stayed .webp */
 function fighterHTML(f){const mine=f.camp==="player";const P=PROFILES[f.id];
-  const tabs=mine?[["rel","Profile"],["over","Stats"],["skill","Skills"]].concat(f.canon&&KIT_MASK[f.id]?[["look","Outfit"]]:[]):[["rel","Profile"],["over","Stats"]].concat(f.camp==="region"&&hasTree(f.id)&&!skInert(f)?[["skill","Skills"]]:[]); /* v1.91.45: a regional champion's tree can be looked at while she is still a rival */
+  const tabs=mine?[["rel","Profile"],["over","Stats"],["skill","Skills"]].concat(typeof scOn==="function"&&scOn()?[["card","Cards"]]:[]).concat(f.canon&&KIT_MASK[f.id]?[["look","Outfit"]]:[]):[["rel","Profile"],["over","Stats"]].concat(f.camp==="region"&&hasTree(f.id)&&!skInert(f)?[["skill","Skills"]]:[]); /* v1.91.45: a regional champion's tree can be looked at while she is still a rival */
   let t=UI.ptab;if(!tabs.some(x=>x[0]===t))t="over";
   const head=`<div class="fp-head">${pFace(f)}<div><h2>${esc(f.full)}</h2><div class="meta">${f.age!=null?f.age+" yrs · ":""}${f.camp==="player"?"Sirichai Camp":f.lab?"Vector Gym, Bangkok":f.camp==="rival"&&!f.indie?"Golden Tiger Camp":"Free agent"} · Div ${f.div} · ${styleOf(f.a)} · ${rec(f)}</div>${G.belt&&Object.values(G.belt).some(x=>x.id===f.id)?`<div class="beltb">🏆 Tha Phae Stadium champion</div>`:Object.entries(G.venueBelts||{}).some(([v,ds])=>Object.values(ds).some(b=>b.id===f.id))?`<div class="beltb">🏆 ${STADIUMS[Object.entries(G.venueBelts).find(([v,ds])=>Object.values(ds).some(b=>b.id===f.id))[0]].name}</div>`:f.belts?`<div class="beltb old">Former stadium champion</div>`:""}<div class="tierline">${tierChip(f,1)}<span class="meta">Rating <b>${ratingOf(f)}</b></span>${tierYearNote(f)}</div>${xpBar(f)}</div></div>
    <div class="seg ptabs">${tabs.map(([k,n])=>`<button data-act="ptab" data-v="${k}" aria-pressed="${t===k}">${n}${k==="skill"&&skReady(f)?'<i class="tdot2"></i>':""}</button>`).join("")}</div>`;
@@ -7690,6 +7690,7 @@ function fighterHTML(f){const mine=f.camp==="player";const P=PROFILES[f.id];
   if(t==="skill"&&hasTree(f.id))body=(typeof REGION!=="undefined"&&REGION.perkCard?REGION.perkCard(f):"")+skillGrid(f,mine);else if(t==="skill")body=skillGrid(f,mine)+(SIGNATURE[f.id]?`<details class="sigcard ${hasSignature(f)?"on":""}"><summary><b>${hasSignature(f)?"✦":"🔒"} Signature move: ${SIGNATURE[f.id].name}</b></summary><span class="meta">${SIGNATURE[f.id].desc}${hasSignature(f)?"":` · now ♥ Lv.${heartLv(f).lv}/7`}</span></details>`:"")+`<details class="skhelp"><summary>How do skills work?</summary><p class="meta">1 skill point per level-up · new moves unlock by level · each move upgrades 3 times · in a fight you can only use the 3 moves marked "Use" · tap a move's name for details</p></details>`;
   if(t==="skill")body=traitHTML(f,mine)+body;
   if(t==="rel")body=relHTML(f);
+  if(t==="card"&&typeof scTabHTML==="function")body=scTabHTML(f);
   return head+`<div class="fp-body"${t==="skill"?' data-sk="fpb"':""}>${body}</div>`;}
 const SK_AN=Object.fromEntries(ATTRS);
 const SK_LINES={kati:["Shin line","Punch & elbow line","Guard & heart line"],mali:["Elbow line","Kick & speed line","Defense line"],rin:["Counter line","Ring-IQ line","Range line"],ploy:["Korat Punch line","Neck-Cutter Kick line","Tiger Wall line"],fah:["Tiger Elbow line","Reckless Rush line","Mocking Smile line"]};
@@ -8007,10 +8008,10 @@ function modalHTML(){const m=UI.modal;let body="",foot=true;
     body=`<h2>Card album</h2><p class="meta">Collected ${Object.keys(own).filter(k=>CARDS[k]).length}/${Object.keys(CARDS).filter(k=>(!CARDS[k].rg||G.region)&&(!CARDS[k].xl||xlShow(G,CARDS[k].c))).length} · tap a card for details</p>
      <div class="gacha"><span><b class="goldt">✦ ${G.dust||0}</b> stardust<small>Earned from wins, new cards and duplicates · guaranteed SSR in ${Math.max(1,GACHA_PITY-(G.pity||0))} more</small></span><button class="btn sm gold" data-act="gopen" data-v="n">🎰 Gacha machine ${GACHA_COST}✦</button></div>${typeof loyGachaHTML==="function"?loyGachaHTML():""}
      ${[...CANON_IDS,...(G.region?CHAMP_IDS:[]),...(typeof XL_IDS!=="undefined"?XL_IDS.filter(c=>xlShow(G,c)):[])].filter(c=>G.F[c]&&byC[c]&&(UI.albAll||byC[c].some(id=>own[id]))).map(c=>`<h4 class="albh">${esc(G.F[c].name)} <small>${byC[c].filter(id=>own[id]).length}/${byC[c].length}</small></h4><div class="albg">${byC[c].filter(id=>UI.albAll||own[id]).map(id=>{const C=CARDS[id],o=own[id],R=CARD_R[C.r];
-       return o?`<button class="ccard pxc" data-rarity="${C.r}" style="--rc:${R.c}" data-act="cardinfo" data-v="${id}" title="${esc(C.t)}">${!o.seen?'<i class="ndot"></i>':cardFresh(id,o)?"<i class=\"cnew\">✦NEW</i>":""}${o.spare?`<i class="cdup">${cardCanUp(id,o)?"⬆ ":""}×${o.spare}</i>`:""}${cardArtHTML(C,true)}<i class="rr">${C.r}${(o.lv||1)>1?`<u>${o.lv}</u>`:""}</i><span class="tstar">${"★".repeat(R.s)}</span><b>${esc(C.t)}</b></button>`
+       return o?`<button class="ccard pxc" data-rarity="${C.r}" style="--rc:${R.c}" data-act="cardinfo" data-v="${id}" title="${esc(C.t)}">${!o.seen?'<i class="ndot"></i>':cardFresh(id,o)?"<i class=\"cnew\">✦NEW</i>":""}${o.spare?`<i class="cdup">${cardCanUp(id,o)?"⬆ ":""}×${o.spare}</i>`:""}${cardArtHTML(C,true)}<i class="rr">${C.r}${(o.lv||1)>1?`<u>${o.lv}</u>`:""}</i>${typeof scHolder==="function"&&scOn()&&scHolder(G,id)?`<i class="ceq">${esc(scHolder(G,id).name)}</i>`:""}<span class="tstar">${"★".repeat(R.s)}</span><b>${esc(C.t)}</b></button>`
          :`<button class="ccard pxc lock" data-rarity="${C.r}" style="--rc:#77747d" data-act="cardinfo" data-v="${id}" aria-label="Uncollected card">${cardArtHTML(C,true)}<i class="rr">${C.r}</i><span class="tstar">${"★".repeat(R.s)}</span><b>???</b></button>`;}).join("")}</div>`).join("")}<div class="center"><button class="btn sm" data-act="albtog">${UI.albAll?"Hide cards not yet collected":"Show cards not yet collected (hints)"}</button></div>`;}
   if(m.type==="cardnew"){const P=G.cardPend||[];const id=P[0];const C=CARDS[id];if(!C){G.cardPend=[];UI.modal=null;return "";}const RR=CARD_R[C.r];body=`<h2>New card!</h2><div class="gres" style="--rc: ${RR.c}"><div class="ccard big" data-rarity="${C.r}" style="--rc:${RR.c}">${cardArtHTML(C)}<span class="tstar">${"★".repeat(RR.s)}</span><b>${esc(C.t)}</b><small>${C.r}</small></div>
-    <p class="center meta">${C.hint?esc(C.hint)+" · ":""} Stardust <b class="goldt">✦ 5</b>${P.length>1?` · new cards left: ${P.length-1} more`:""}</p></div>
+    <p class="center meta">${C.hint?esc(C.hint)+" · ":""} Stardust <b class="goldt">✦ 5</b>${P.length>1?` · new cards left: ${P.length-1} more`:""}</p>${typeof scOn==="function"&&scOn()&&!(G.flags||{}).scHow?"<p class=\"center meta\">💡 You can equip cards on fighters: fighter info → \"Cards\" tab</p>":""}</div>
     <div class="mfoot roadbtns"><button class="btn primary" data-act="cardplay" data-v="${id}" data-from="new">View story now</button><button class="btn" data-act="cardlater">Save for later</button></div>`;foot=false;}
   if(m.type==="gacha"){const R=m.res,C=CARDS[R.id],RR=CARD_R[C.r];body=`<h2>Pull result</h2><div class="gres" style="--rc: ${RR.c}"><div class="ccard big" data-rarity="${C.r}" style="--rc:${RR.c}">${cardArtHTML(C)}<span class="tstar">${"★".repeat(RR.s)}</span><b>${esc(C.t)}</b><small>${C.r}</small></div>
     <p class="center">${R.isNew?"<b class=\"goldt\">New card!</b>":R.canUp?`<b class="goldt">Duplicate!</b> You can level this card up (spares: ${R.spare})`:`Card already at max level · kept as a spare (${R.spare} spare) <small class="meta">break spares into stardust on the card page</small>`}</p></div>
@@ -8533,7 +8534,7 @@ function oilPoured(C){C.phase="rub";C.t0=performance.now();AU.sfx("level");rende
 function cornerHTML(F){const U=UI.fight,C=U.care,A=F.A,B=F.B,c=F.cards[F.cards.length-1]||[10,10];const rec=aiCorner(F,A,B);
   const note=B.sta<40?"Opponent is fading":A.sta<40?"We're low on energy":A.rlanded<B.rlanded-2?"We took a lot this round":B.legs>20?"Opponent's legs getting heavy":A.rage?"Still in blood-boil!":"";
   const slots=(C.need||[]).map((k,i)=>{const g=C.got[i];return `<span class="cslot ${g==null?"":g===k?"ok":"bad"}">${PIX[k]}</span>`;}).join('<i class="arr">›</i>');
-  return `<div class="corner px"><div class="chead"><b>Break · round ${F.round}</b><button class="chip cardbtn" data-act="cshow" aria-pressed="${!!U.cshow}">${U.cshow?F.cards.map((c,i)=>`R${i+1} ${c[0]}–${c[1]}`).join(" · "):"See previous round scores ▸"}</button><span class="chip">Landed ${A.rlanded}–${B.rlanded}</span>${note?`<span class="chip warn">${note}</span>`:""}</div>
+  return `<div class="corner px"><div class="chead"><b>Break · round ${F.round}</b><button class="chip cardbtn" data-act="cshow" aria-pressed="${!!U.cshow}">${U.cshow?F.cards.map((c,i)=>`R${i+1} ${c[0]}–${c[1]}`).join(" · "):"See previous round scores ▸"}</button><span class="chip">Landed ${A.rlanded}–${B.rlanded}</span>${note?`<span class="chip warn">${note}</span>`:""}${A.scN?`<span class="chip scchip" title="Card effects this fight">🃏×${A.scN}</span>`:""}</div>
    ${C.mode==="off"?"":C.auto?`<div class="care"><div class="need"><img class="face sm" src="${faceSrc(A.f.id,"happy")}" alt=""><span>Coach Daeng took care of it · ${careSum(C)}</span></div></div>`:C.mode==="card"?careCardHTML(A,C):C.mode==="oil"?careOilHTML(A,C):`<div class="care"><div class="need"><img class="face sm" src="${faceSrc(A.f.id,"happy")}" alt=""><span>${C.done?(C.q>=1?"Fully refreshed!":C.q>0?"A little better":"Not much better"):"Do it in this order"}</span><div class="cslots">${slots}</div></div>
     <div class="carebtns">${Object.entries(CARE).map(([k,v])=>{const o=C.got.indexOf(k);return `<button data-act="care" data-v="${k}" ${C.done||o>=0?"disabled":""} class="${o>=0?"picked":""}">${o>=0?`<i class="ord">${o+1}</i>`:""}${PIX[k]}<small>${v.name}</small></button>`;}).join("")}</div></div>`}
    <div class="ohead"><b>Orders for next round</b>${coachOn()?`<button class="btn sm" data-act="chint">Coach's tip</button>`:""}</div>
@@ -8711,7 +8712,7 @@ function tick(){const U=UI.fight;if(!U||U.stage!=="playing")return;
   const e=U.pending.shift();U.shown.push(e);const F=U.F;const now=performance.now();let wait=1500;
   if(e.bell){AU.sfx("bell");U.caption=e.cap;}
   else if(e.tired){U.caption=e.cap;wait=1300;}
-  else if(e.ev){const sd=sideOf(e,F);FS.play({...e,side:sd},now);FS.burst&&FS.burst(e);if(e.ev==="skill"&&FS.skill)FS.skill(sd,e.skrow||0,e.skk,now);if(e.ev==="rage"&&FS.rage)FS.rage(sd,now);U.caption={text:comLine(e,F,U.rng),side:e.ev==="miss"?"":sd,heat:fightHeat(F)};
+  else if(e.ev){const sd=sideOf(e,F);FS.play({...e,side:sd},now);if(e.sc&&typeof scPop==="function")scPop(e.sc);FS.burst&&FS.burst(e);if(e.ev==="skill"&&FS.skill)FS.skill(sd,e.skrow||0,e.skk,now);if(e.ev==="rage"&&FS.rage)FS.rage(sd,now);U.caption={text:comLine(e,F,U.rng),side:e.ev==="miss"?"":sd,heat:fightHeat(F)};
     if(e.ev!=="skill"){const sp=spPick({...e},sd,F,U.rng);if(sp){FS.special(sp,F.round||1,now);const n=F[sp.side].f.name,R=[`Here comes the finisher!! ${sp.name}!!`,`${n} unleashes ${sp.name}!! The whole crowd is on its feet!`,`That right there is ${sp.name}!! The real deal, folks!!`];
       U.caption={text:R[Math.floor(U.rng()*R.length)],side:sp.side,heat:fightHeat(F)};AU.cheer(1);U.spWait=1900;}}
     if(e.ev==="hit"||e.ev==="counter"){AU.sfx(e.w||"punch");if(e.crit)AU.cheer(.8);}
@@ -8867,7 +8868,7 @@ const ACT={
     if(todo.length&&!UI.skipWarn&&SETTINGS.askEnd!==false){UI.modal={type:"endwarn",todo};render();return;}UI.skipWarn=false;endWeek();},
   endgo:()=>{UI.modal=null;UI.skipWarn=true;ACT.endweek();},
   noaskend:d=>{const el=document.querySelector("[data-act=noaskend]");SETTINGS.askEnd=!(el&&el.checked);saveSettings();},
-  fighter:d=>{UI.ptab=d.v||"over";UI.look=pLookOf(G.F[d.id]);UI.modal={type:"fighter",id:d.id};render();},
+  fighter:d=>{UI.ptab=d.v||"over";UI.scd=null;UI.look=pLookOf(G.F[d.id]);UI.modal={type:"fighter",id:d.id};render();},
   ptab:d=>{UI.ptab=d.v;render();},
   plook:d=>{UI.look=d.v;const id=UI.modal&&UI.modal.id,f=id&&G.F[id];if(f&&f.camp==="player"&&(f.canon||CHAMP_IDS.includes(f.id))){G.pLook=G.pLook||{};G.pLook[id]=d.v;save();}render();},
   albtog:()=>{UI.albAll=!UI.albAll;render();},
@@ -13229,6 +13230,152 @@ EVENTS.push({id:"pet_mudlek",look:"casual",bg:"camp",pri:2,when:G=>inCamp(G,"fah
   {inject:G=>{adoptPet(G,"mudlek","Iron Fist","fah");return [{n:"nar",t:"🐾 Iron Fist joins the camp — see the pets button on the home screen"}];}}]});
 try{window.PETX={petsWeekly,petPlayMode,pst,petXP,PX};}catch(e){}
 })();
+
+/* v1.91.177 (Man): support cards — every camp fighter can carry up to 5 album cards.
+   Slots open by HER level and cost money (dear on purpose: late-game camps sit on a lot of cash).
+   Equipping costs a fee by rarity (taking off is free), a card sits on one fighter at a time, her own card counts ×1.5.
+   Cards add a little to training (their theme stats) and to fights (crit/evade/counter/…); each card glows when it works. */
+const SC_LV=[1,8,15,22,30],SC_COST=[0,20000,80000,200000,400000],SC_MAX=5;
+const SC_FEE={N:1000,R:3000,SR:10000,SSR:30000};
+const SC_TRAIN={N:[.01,.015,.02],R:[.02,.025,.03],SR:[.03,.035,.04],SSR:[.04,.05,.06]};
+const SC_FIGHT={N:[0,0,0],R:[.003,.004,.005],SR:[.006,.008,.01],SSR:[.01,.0125,.015]};
+const SC_CAP={train:.2,crit:.07,evade:.01,ctr:.07,clutch:.09,regen:.06,corner:.25};
+const SC_OWN=1.5;
+const SC_FKM={crit:2,evade:.2,ctr:1.2,clutch:3.2,regen:1,corner:7}; /* per-effect weight so every girl's fight bonus is worth about the same (sim) */
+const SC_THEME={
+  kati:{tr:["kick","foot","guard"],fk:"crit",w:"all",txt:"Critical hits"},
+  mali:{tr:["elbow","knee","clinch","foot"],fk:"evade",txt:"Evade"},
+  rin:{tr:["counter","iq","guard"],fk:"ctr",txt:"Counter"},
+  ploy:{tr:["punch","power","speed"],fk:"crit",w:"punch",txt:"Punch crit"},
+  fah:{tr:["elbow","power","speed"],fk:"clutch",txt:"Accuracy when hurt"},
+  prod_B:{tr:["elbow","counter"],fk:"ctr",txt:"Counter"},
+  pailin:{tr:["iq","comp"],fk:"corner",txt:"Corner orders"},
+  team:{tr:null,half:1,fk:"regen",txt:"Recovery"}};
+const SC_FKNAME={crit:"Crit ",evade:"Evade",ctr:"Counter",clutch:"Accuracy when hurt",regen:"Recovery",corner:"Corner orders"};
+const scTeam=id=>/team/.test(id);
+/* v1.91.177 (Man): shipped dark — off for players until Man says so. Preview: open the game with #sc=1 (#sc=0 turns it back off). To launch, make this return true. */
+function scOn(){try{if(typeof location!=="undefined"){const m=/[#&]sc=([01])/.exec(location.hash||"");if(m){if(m[1]==="1")localStorage.setItem("mtm_sc","1");else localStorage.removeItem("mtm_sc");}}return typeof localStorage!=="undefined"&&localStorage.getItem("mtm_sc")==="1";}catch(e){return false;}}
+function scTheme(id){const C=CARDS[id];if(!C||scTeam(id))return SC_THEME.team;return SC_THEME[C.c]||(typeof REQ_ALIAS!=="undefined"&&SC_THEME[REQ_ALIAS[C.c]])||SC_THEME.team;}
+const scSlots=f=>Math.min(SC_MAX,Math.max(1,f.cslot||1));
+const scOwn=(f,id)=>{const C=CARDS[id];if(!C)return false;return scTeam(id)?!!(f.canon):C.c===f.id;};
+function scList(G,f){const own=(G&&G.cards)||{};return (f.scards||[]).filter(id=>CARDS[id]&&own[id]).slice(0,scSlots(f));}
+function scHolder(G,id){for(const f of Object.values(G.F||{}))if(f.camp==="player"&&(f.scards||[]).includes(id))return f;return null;}
+/* everything a set of cards gives one fighter (L defaults to what she wears) — capped */
+function scBonus(G,f,L,raw){L=L||scList(G,f);const tr={},fx={crit:{},evade:0,ctr:0,clutch:0,regen:0,corner:0},src={crit:{}},by=[],best={};
+  for(const id of L){const C=CARDS[id],o=(G.cards||{})[id];if(!C||!o)continue;const T=scTheme(id),lv=clamp((o.lv||1)-1,0,2),m=scOwn(f,id)?SC_OWN:1;
+    const tv=SC_TRAIN[C.r][lv]*m*(T.half?.5:1),fv=SC_FIGHT[C.r][lv]*m;
+    const stats=T.tr||ATTRS.map(a=>a[0]);for(const k of stats)tr[k]=(tr[k]||0)+tv;
+    /* v1.91.177 (Man): fight effects of one kind don't stack — the strongest card of that kind is the one that works */
+    if(fv){const v=fv*(SC_FKM[T.fk]||1);if(T.fk==="crit"){if(raw||!best.crit||v>best.crit.v){if(!raw)best.crit={v,w:T.w,id};else fx.crit[T.w]=(fx.crit[T.w]||0)+v;}}else if(raw)fx[T.fk]+=v;else if(v>fx[T.fk]){fx[T.fk]=v;src[T.fk]=id;}}
+    by.push({id,T,own:m>1,tv,fv:fv*(SC_FKM[T.fk]||1)});}
+  if(best.crit){fx.crit[best.crit.w]=best.crit.v;src.crit[best.crit.w]=best.crit.id;}
+  if(!raw){for(const k in tr)tr[k]=Math.min(SC_CAP.train,tr[k]);for(const w in fx.crit)fx.crit[w]=Math.min(SC_CAP.crit,fx.crit[w]);
+  for(const k of ["evade","ctr","clutch","regen","corner"])fx[k]=Math.min(SC_CAP[k],fx[k]);}
+  return {tr,fx,src,by};}
+/* engine hooks */
+function scTrainMul(G,f,k){if(!scOn()||!G||f.camp!=="player"||!(f.scards||[]).length)return 1;const b=scBonus(G,f);return 1+(b.tr[k]||0);}
+function scFightMods(f,sk){if(!scOn()||typeof G==="undefined"||!G||!G.F)return;const o=Array.isArray(f.scards)?f:G.F[f.id];if(!o||o.camp!=="player"||!(o.scards||[]).length)return;const b=scBonus(G,o);
+  sk.scCrit=b.fx.crit;sk.evade+=b.fx.evade;sk.ctr+=b.fx.ctr;sk.clutch+=b.fx.clutch;sk.regen+=b.fx.regen;sk.corner=(sk.corner||0)+b.fx.corner;sk.scSrc=b.src;}
+/* a card "works" at most once every few exchanges per fighter — the glow stays special */
+function scProc(F,s,key,w){const S=s.sk&&s.sk.scSrc;if(!S)return null;const id=key==="crit"?S.crit&&(S.crit[w]||S.crit.all):S[key];if(!id||!CARDS[id])return null;
+  const now=(F.round||1)*100+(F.ex||0);if(s.scNext!=null&&now<s.scNext)return null;s.scNext=now+4;s.scN=(s.scN||0)+1;
+  return {id,r:CARDS[id].r,t:key==="crit"?(w==="kick"?"Kick crit!":w==="punch"?"Punch crit!":"Crit!"):SC_FKNAME[key]+"!",sd:s===F.A?"A":"B"};}
+/* ---------- UI ---------- */
+const scArt=id=>{const C=CARDS[id];return C?cardArtHTML(C,true):"";};
+function scMini(id,cls,extra){const C=CARDS[id];if(!C)return "";const R=CARD_R[C.r];return `<span class="scm ${cls||""}" data-rarity="${C.r}" style="--rc:${R.c}"${extra||""}>${scArt(id)}<i class="rr">${C.r}</i></span>`;}
+function scDraft(f){if(!UI.scd||UI.scd.fid!==f.id)UI.scd={fid:f.id,L:(f.scards||[]).slice(),pk:null};return UI.scd;}
+function scDiff(G,f,L){const cur=f.scards||[],add=L.filter(id=>!cur.includes(id));return {add,fee:add.reduce((a,id)=>a+SC_FEE[CARDS[id].r],0),changed:add.length>0||cur.some(id=>!L.includes(id))};}
+function scPresetHit(f,id){const T=scTheme(id),w=(PRESETS[f.plan&&f.plan.preset]||{}).w||{};if(!T.tr)return Object.keys(w).length>0;return T.tr.some(k=>(w[k]||0)>0);}
+function scBonusLines(G,f,b){const A=Object.fromEntries(ATTRS),tr=Object.entries(b.tr).sort((x,y)=>y[1]-x[1]);const out=[];
+  const allSame=tr.length===ATTRS.length&&tr.every(x=>Math.abs(x[1]-tr[0][1])<1e-9);
+  if(allSame)out.push(`Training all stats +${(tr[0][1]*100).toFixed(1).replace(/\.0$/,"")}%`);
+  else for(const [k,v] of tr.slice(0,6))out.push(`Trains ${A[k]} +${(v*100).toFixed(1).replace(/\.0$/,"")}%${v>=SC_CAP.train-1e-9?" (max)":""}`);
+  for(const [w,v] of Object.entries(b.fx.crit))out.push(`${w==="kick"?"Kick crit":w==="punch"?"Punch crit":"Critical hits"} +${(v*100).toFixed(1).replace(/\.0$/,"")}%`);
+  for(const k of ["evade","ctr","clutch"])if(b.fx[k])out.push(`${SC_FKNAME[k]} +${(b.fx[k]*100).toFixed(1).replace(/\.0$/,"")}%`);
+  if(b.fx.regen)out.push(`Stamina recovery in fights +${(b.fx.regen*100).toFixed(1).replace(/\.0$/,"")}%`);if(b.fx.corner)out.push(`Corner orders work +${Math.round(b.fx.corner*100)}%`);
+  return out;}
+function scHowHTML(){return `<div class="px schow"><b>Kru Daeng: how cards work</b><ol><li>Tap an empty slot to pick a card from your album</li><li>Try it first — see what she gains before you pay</li><li>Press <b>Confirm</b> to pay the fee · removing is free · her own card counts ×1.5</li></ol>
+  <p class="meta">Up to 5 slots, unlocked by that fighter’s level · a card can be on one fighter at a time</p><p class="meta">Training bonuses stack · fight effects of the same kind don't, the strongest card works, so mixing kinds pays off</p><div class="center"><button class="btn sm gold" data-act="schow">Got it</button></div></div>`;}
+/* picker: filters + grid + detail */
+const SCT={hide:"Hide cards others wear",fee:"Fee",full:"Training bonus already maxed",dupd:"Same fight effect, uses",dupd2:"instead",no:"Adds nothing",dup:"Same effect",trfull:"Train maxed",put:"Equip",tap:"Tap a card to see details"};
+const SC_MAIN=["kati","mali","rin","ploy","fah"];
+const SC_ICO={crit:"Crit ",evade:"Evade",ctr:"Counter",clutch:"Grit",regen:"Regen",corner:"Corner"};
+function scOwnerKey(id){if(scTeam(id))return "team";const c=CARDS[id].c,a=(typeof REQ_ALIAS!=="undefined"&&REQ_ALIAS[c])||c;return SC_MAIN.includes(a)?a:"other";}
+const scIco=id=>{const T=scTheme(id);return T.fk==="crit"&&T.w==="punch"?"Punch":SC_ICO[T.fk]||"";};
+const scSum=b=>Object.values(b.tr).reduce((a,v)=>a+v,0)+Object.values(b.fx.crit).reduce((a,v)=>a+v,0)+["evade","ctr","clutch","regen","corner"].reduce((a,k)=>a+b.fx[k],0);
+/* what one more card adds on top of L: training gain after the cap, and whether its fight effect is beaten by another card of the same kind */
+function scInfo(f,L,id,GG){GG=GG||G;const M=L.filter(x=>x!==id),W=M.concat(id),a=scBonus(GG,f,M),b=scBonus(GG,f,W),T=scTheme(id);
+  const tr=Object.values(b.tr).reduce((x,v)=>x+v,0)-Object.values(a.tr).reduce((x,v)=>x+v,0);
+  let dup=null;if(SC_FIGHT[CARDS[id].r][0]){const s=T.fk==="crit"?Object.values(b.src.crit)[0]:b.src[T.fk];if(s&&s!==id)dup=s;}
+  return {tr,dup,score:tr*10+(SC_FIGHT[CARDS[id].r][0]&&!dup?(b.by.find(x=>x.id===id)||{}).fv||0:0)*20,none:tr<=1e-9&&(dup||!SC_FIGHT[CARDS[id].r][0])};}
+function scPickHTML(f,D){const own=G.cards||{},F=UI.scf=UI.scf||{o:"rec",r:"",hide:0};
+  const base=D.L.filter((x,i)=>i!==D.pk);
+  let ids=Object.keys(CARDS).filter(id=>own[id]&&!base.includes(id));
+  const hold=id=>{const h=scHolder(G,id);return h&&h.id!==f.id?h:null;};
+  const cnt={};for(const id of ids){const k=scOwnerKey(id);cnt[k]=(cnt[k]||0)+1;}
+  if(F.o!=="rec")ids=ids.filter(id=>scOwnerKey(id)===F.o);
+  if(F.r)ids=ids.filter(id=>CARDS[id].r===F.r);if(F.hide)ids=ids.filter(id=>!hold(id));
+  const gn={};for(const id of ids){const g=scInfo(f,base,id);gn[id]=g.score-(g.dup?100:0)-(g.none?1000:0);}
+  const sc=id=>(scOwn(f,id)?100:0)+CARD_R[CARDS[id].r].s*10+((own[id].lv)||1)+(scPresetHit(f,id)?3:0);
+  if(F.o==="rec")ids=ids.sort((x,y)=>gn[y]-gn[x]||sc(y)-sc(x)).slice(0,12);else ids.sort((x,y)=>sc(y)-sc(x));
+  const nm=k=>k==="rec"?"Suggested":k==="team"?"Team":k==="other"?"Others":(G.F[k]?G.F[k].name:k);
+  const chip=(act,v,on,t)=>`<button class="scf${on?" on":""}" data-act="${act}" data-v="${v}">${t}</button>`;
+  const ochips=["rec",...SC_MAIN,"team","other"].filter(k=>k==="rec"||cnt[k]).map(k=>chip("scfo",k,F.o===k,nm(k)+(k!=="rec"?`<small>${cnt[k]}</small>`:""))).join("");
+  const rchips=["","SSR","SR","R","N"].map(r=>chip("scfr",r,F.r===r,r||"All")).join("");
+  const sel=D.sel&&own[D.sel]&&!base.includes(D.sel)?D.sel:null;
+  const tile=id=>{const g=scInfo(f,base,id),h=hold(id),tag=g.none?SCT.no:g.dup?SCT.dup:g.tr<=1e-9?SCT.trfull:"";
+    return `<button class="sct${sel===id?" sel":""}${g.none?" dim":""}" data-act="scsel" data-v="${id}" aria-label="${esc(CARDS[id].t)}">${scMini(id)}<i class="sci">${scIco(id)}</i>${scOwn(f,id)?'<i class="scown">×1.5</i>':""}${h?`<i class="schold">${esc(h.name)}</i>`:""}${tag?`<i class="sccap">${tag}</i>`:""}</button>`;};
+  let det=`<p class="meta scdet">${SCT.tap}</p>`;
+  if(sel){const C=CARDS[sel],T=scTheme(sel),h=hold(sel),o=own[sel],g=scInfo(f,base,sel);
+    det=`<div class="scdet">${scMini(sel)}<span><b>${esc(C.t)}</b><small>${C.r}${(o.lv||1)>1?" · Lv."+o.lv:""} · ${T.tr?"Trains "+T.tr.map(k=>SK_AN[k]).join("/"):"Trains everything at half"}${SC_FIGHT[C.r][0]?" · fight: "+T.txt:""}${scOwn(f,sel)?" · <b class=\"goldt\">her own card ×1.5</b>":""}</small><small class="meta">${SCT.fee} ${fmt(SC_FEE[C.r])}${h?` · on ${esc(h.name)} (can move here)`:""}${g.dup?` · <b class="no">${SCT.dupd} ${esc(CARDS[g.dup].t)} ${SCT.dupd2}</b>`:""}${g.tr<=1e-9?` · <b class="no">${SCT.full}</b>`:""}</small></span><button class="btn sm gold" data-act="scput" data-v="${sel}">${SCT.put}</button></div>`;}
+  return `<div class="scpick"><div class="scpick-h"><b>${"Pick a card for slot"} ${D.pk+1}</b><button class="btn sm" data-act="scpkx">${"Close"}</button></div><div class="scfs">${ochips}</div><div class="scfs">${rchips}<label class="scfh"><input type="checkbox" data-act="scfh" ${F.hide?"checked":""}> ${SCT.hide}</label></div><div class="scgrid">${ids.length?ids.map(tile).join(""):`<p class="meta">${Object.keys(own).length?"No cards match this filter":"No free cards yet · pull some at the gacha in the album"}</p>`}</div>${det}</div>`;}
+function scTabHTML(f){const D=scDraft(f),n=scSlots(f),lv=lvOf(f),b=scBonus(G,f,D.L),df=scDiff(G,f,D.L);
+  const how=!(G.flags||{}).scHow||UI.scHowOpen;
+  const slot=i=>{if(i<n){const id=D.L[i];if(id){const tr=!(f.scards||[]).includes(id),hit=scPresetHit(f,id);
+        return `<div class="scslot on${tr?" try":""}"><button class="scbtn" data-act="scpick" data-v="${i}" aria-label="Change card ${esc(CARDS[id].t)}">${scMini(id,hit?"glow":"")}</button>${tr?"<i class=\"sctry\">Trying</i>":""}<button class="scx" data-act="scrm" data-v="${i}" aria-label="Remove">×</button></div>`;}
+      return `<div class="scslot"><button class="scbtn empty${D.pk===i?" pk":""}" data-act="scpick" data-v="${i}" aria-label="Pick a card for slot ${i+1}">+</button></div>`;}
+    const ok=i===n&&lv>=SC_LV[i];
+    return `<div class="scslot lock"><button class="scbtn locked" ${ok?`data-act="scunlock" data-id="${f.id}"`:"disabled"} aria-label="Slot ${i+1}">🔒<small>Lv.${SC_LV[i]}</small><small class="${ok?"goldt":""}">${fmt(SC_COST[i])}</small>${ok?"<small class=\"goldt\">Tap to unlock</small>":""}</button></div>`;};
+  const lines=scBonusLines(G,f,b);
+  const pick=D.pk!=null?scPickHTML(f,D):"";
+  return `<div class="sctab">${how?scHowHTML():""}<div class="schead"><b>Support cards</b><span class="meta">Slots ${n}/${SC_MAX}</span><button class="btn sm" data-act="scauto" data-id="${f.id}">Coach picks</button><button class="btn sm qbtn" data-act="schelp" aria-label="How to equip cards">?</button></div>
+   <div class="scslots">${[0,1,2,3,4].map(slot).join("")}</div>
+   <div class="scsum">${lines.length?lines.map(t=>`<span class="pill">${t}</span>`).join(""):"<span class=\"meta\">No cards equipped yet</span>"}</div>
+   ${df.changed?`<div class="scbar"><span>${df.add.length?`Equip ${df.add.length} new · <b class="${G.cash<df.fee?"no":"goldt"}">${fmt(df.fee)}</b>`:"Remove cards · free"}${G.cash<df.fee?` <small class="no">Short by ${fmt(df.fee-G.cash)}</small>`:""}</span><button class="btn sm" data-act="sccancel">Cancel</button><button class="btn sm gold" data-act="scok" data-id="${f.id}" ${G.cash<df.fee?"disabled":""}>Confirm</button></div>`:""}
+   ${pick}<p class="meta">Cards that suit this week’s training glow · in fights a card pops up when it works</p></div>`;}
+/* the strip on each training card */
+function scStrip(f){const L=scList(G,f);if(!L.length&&scSlots(f)<=1&&!Object.keys(G.cards||{}).length)return "";const b=scBonus(G,f);const w=(PRESETS[f.plan.preset]||{}).w||{};
+  const best=Object.entries(b.tr).filter(([k])=>(w[k]||0)>0).reduce((a,[,v])=>Math.max(a,v),0);
+  return `<button class="scstrip" data-act="fighter" data-id="${f.id}" data-v="card" aria-label="Cards of ${esc(f.name)}">${[0,1,2,3,4].map(i=>i<scSlots(f)?(L[i]?scMini(L[i],"xs"+(scPresetHit(f,L[i])?" glow":"")):'<span class="scm xs empty">+</span>'):'<span class="scm xs lockd">🔒</span>').join("")}${best?`<b class="ok">Training +${Math.round(best*100)}%</b>`:""}</button>`;}
+/* a card pops beside the fighter's bars when it works in a fight */
+function scPop(sc){if(!sc||typeof document==="undefined")return;const C=CARDS[sc.id];if(!C)return;const box=document.querySelector(`.fside.${sc.sd==="A"?"a":"b"}`);if(!box)return;const r=box.getBoundingClientRect(),R=CARD_R[C.r];
+  const el=document.createElement("div");el.className="scpop "+(sc.sd==="A"?"l":"r")+" r-"+C.r;el.style.setProperty("--rc",R.c);el.innerHTML=`${scMini(sc.id,"pop")}<span><small><i>${C.r}</i>${esc(C.t)}</small><b>${esc(sc.t)}</b></span>`;
+  el.style.top=(r.bottom+scrollY+6)+"px";if(sc.sd==="A")el.style.left=(r.left+scrollX)+"px";else el.style.right=(document.documentElement.clientWidth-r.right)+"px";document.body.appendChild(el);if(typeof AU!=="undefined"&&AU.sfx)AU.sfx("level");setTimeout(()=>el.remove(),1200);}
+function scAuto(G,f){const own=G.cards||{},n=scSlots(f);const used=new Set();for(const x of Object.values(G.F))if(x.camp==="player"&&x.id!==f.id)(x.scards||[]).forEach(id=>used.add(id));
+  const home=SC_THEME[f.id]||SC_THEME[(typeof REQ_ALIAS!=="undefined"&&REQ_ALIAS[f.id])]||null;
+  const sc=id=>{const C=CARDS[id],T=scTheme(id);return (scOwn(f,id)?60:0)+CARD_R[C.r].s*10+((own[id].lv)||1)*2+(scPresetHit(f,id)?8:0)+(home&&T===home?6:0);};
+  /* greedy: each pick is the card that adds most on top of what's already in — so it mixes fight effects instead of doubling one */
+  const pool=Object.keys(CARDS).filter(id=>own[id]&&!used.has(id)).sort((x,y)=>sc(y)-sc(x)).slice(0,40),L=[];
+  while(L.length<n&&pool.length){let bi=0,bv=-1e9;pool.forEach((id,i)=>{const g=scInfo(f,L,id,G),v=g.score-(g.dup?100:0)-(g.none?1000:0)+sc(id)*.01;if(v>bv){bv=v;bi=i;}});L.push(pool.splice(bi,1)[0]);}
+  return L;}
+Object.assign(ACT,{
+  scpick:d=>{const f=UI.modal&&G.F[UI.modal.id];if(!f)return;const D=scDraft(f);D.pk=+d.v;render();},
+  scpkx:()=>{if(UI.scd){UI.scd.pk=null;UI.scd.sel=null;}render();},
+  scsel:d=>{if(UI.scd)UI.scd.sel=UI.scd.sel===d.v?null:d.v;render();},
+  scfo:d=>{UI.scf=UI.scf||{o:"rec",r:"",hide:0};UI.scf.o=d.v;if(UI.scd)UI.scd.sel=null;render();},
+  scfr:d=>{UI.scf=UI.scf||{o:"rec",r:"",hide:0};UI.scf.r=d.v;if(UI.scd)UI.scd.sel=null;render();},
+  scfh:()=>{UI.scf=UI.scf||{o:"rec",r:"",hide:0};UI.scf.hide=UI.scf.hide?0:1;render();},
+  scput:d=>{const f=UI.modal&&G.F[UI.modal.id];if(!f)return;const D=scDraft(f);if(D.pk==null)return;D.L[D.pk]=d.v;D.L=D.L.filter(Boolean).slice(0,scSlots(f));D.pk=null;D.sel=null;AU.sfx("ui");render();},
+  scrm:d=>{const f=UI.modal&&G.F[UI.modal.id];if(!f)return;const D=scDraft(f);D.L.splice(+d.v,1);D.pk=null;render();},
+  sccancel:()=>{UI.scd=null;render();},
+  scok:d=>{const f=G.F[d.id];if(!f)return;const D=scDraft(f),df=scDiff(G,f,D.L);if(G.cash<df.fee){toast(`Not enough cash. Short by ${fmt(df.fee-G.cash)}`);return;}
+    G.cash-=df.fee;for(const id of D.L){const h=scHolder(G,id);if(h&&h.id!==f.id)h.scards=h.scards.filter(x=>x!==id);}f.scards=D.L.slice();UI.scd=null;AU.sfx("level");
+    toast(df.fee?`Cards equipped · ${f.name} · paid ${fmt(df.fee)}`:`Cards set · ${f.name}`);if(typeof save==="function")save();render();},
+  scunlock:d=>{const f=G.F[d.id];if(!f)return;const i=scSlots(f);if(i>=SC_MAX||lvOf(f)<SC_LV[i])return;if(G.cash<SC_COST[i]){toast(`Not enough cash. Need ${fmt(SC_COST[i])}`);return;}
+    G.cash-=SC_COST[i];f.cslot=i+1;AU.sfx("level");toast(`Unlocked card slot ${i+1} · ${f.name}`);if(typeof save==="function")save();render();},
+  scauto:d=>{const f=G.F[d.id];if(!f)return;const D=scDraft(f);D.L=scAuto(G,f);D.pk=null;if(!D.L.length)toast("No free cards to equip yet");render();},
+  schow:()=>{G.flags=G.flags||{};G.flags.scHow=1;UI.scHowOpen=false;render();},
+  schelp:()=>{UI.scHowOpen=!UI.scHowOpen;render();}});
 
 // ================= MUAY THAI MOE — pixel emoji (v1.91.144, Man: "every icon in the game in pixel style") =================
 // Any emoji in text on screen is swapped for a 10x10 pixel icon as it appears (screens, scenes, toasts, letters, both languages).

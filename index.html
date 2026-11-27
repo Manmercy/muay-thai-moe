@@ -2558,6 +2558,56 @@ body.qs-cutting .vn .vbg{display:none}
 .rncom img{width:40px;height:40px;object-fit:cover;object-position:50% 6%;box-shadow:0 0 0 2px #ffd34a;flex:none;background:#2c2448}
 .rncom span{font-size:15px;line-height:1.35;color:#fff}
 .rncom.pop span{animation:rncp .25s ease-out}@keyframes rncp{0%{transform:translateX(-8px);opacity:.2}100%{transform:none;opacity:1}}
+/* v1.91.177 support cards */
+.sctab{display:flex;flex-direction:column;gap:10px}
+.schead{display:flex;align-items:center;gap:8px}.schead b{font-family:var(--f-display);font-size:16px}.schead .meta{margin-right:auto}.schead .qbtn{min-width:32px}
+.schow{padding:10px 12px;border:2px solid var(--gold,#f2c94c);background:rgba(242,201,76,.08)}.schow ol{margin:6px 0 6px 20px;padding:0;font-size:13px;line-height:1.55}.schow b{font-family:var(--f-display)}
+.scslots{display:grid;grid-template-columns:repeat(5,1fr);gap:6px}
+.scslot{position:relative;display:flex;justify-content:center}
+.scbtn{width:100%;aspect-ratio:3/4.3;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;padding:0;background:#1b1530;border:2px dashed #4d4466;color:#cfc6e6;font:700 22px var(--f-pixel,monospace);cursor:pointer}
+.scbtn.pk{border-color:var(--gold,#f2c94c);color:var(--gold,#f2c94c)}
+.scbtn.locked{border-style:solid;background:#211c2c;color:#8a8399;font-size:14px;cursor:default}.scbtn.locked small{font:600 10px/1.2 var(--f-body);color:#9a93ad}.scbtn.locked[data-act]{cursor:pointer;border-color:var(--gold,#f2c94c)}
+.scslot.on .scbtn{border:0;background:none}
+.scm{position:relative;display:block;width:100%;aspect-ratio:3/4;border:2px solid var(--rc);background:#15102a;box-shadow:inset 0 0 0 1px #0f0c17;overflow:hidden}
+.scm .card-art{width:100%!important;height:100%;border:0}.scm .card-art img{width:100%;height:100%;object-fit:cover;object-position:center top}
+.scm .rr{position:absolute;left:2px;top:2px;padding:0 3px;background:var(--rc);color:#120d22;font:700 9px/12px var(--f-pixel,monospace);font-style:normal;z-index:2}
+.scm.glow{animation:scglow 1.4s ease-in-out infinite}
+@keyframes scglow{0%,100%{box-shadow:inset 0 0 0 1px #0f0c17,0 0 0 0 var(--rc)}50%{box-shadow:inset 0 0 0 1px #0f0c17,0 0 4px 1px var(--rc)}}
+.scm[data-rarity="SSR"].glow{animation:scrain 2.4s linear infinite}
+@keyframes scrain{0%,100%{box-shadow:0 0 4px 1px #f2c94c}33%{box-shadow:0 0 4px 1px #ff8fd0}66%{box-shadow:0 0 4px 1px #7fe3ff}}
+.scslot.try .scm{opacity:.9}.sctry{position:absolute;bottom:-6px;left:50%;transform:translateX(-50%);background:var(--gold,#f2c94c);color:#1b1026;font:700 10px/14px var(--f-body);padding:0 5px;white-space:nowrap;font-style:normal}
+.scx{position:absolute;top:-6px;right:-4px;width:22px;height:22px;border-radius:50%;border:2px solid #0f0c17;background:#e2465d;color:#fff;font:700 14px/16px var(--f-body);padding:0;cursor:pointer;z-index:3}
+.scsum{display:flex;flex-wrap:wrap;gap:5px}.scsum .pill{font-size:12px}
+.scbar{display:flex;align-items:center;gap:8px;padding:8px 10px;background:#241b3a;border:2px solid var(--gold,#f2c94c)}.scbar span{margin-right:auto;font-size:13px}
+.scpick{border:2px solid #4d4466;background:#17122a;padding:8px;display:flex;flex-direction:column;gap:6px}
+.scfs{display:flex;gap:4px;overflow-x:auto;align-items:center;padding-bottom:2px;scrollbar-width:none}.scfs::-webkit-scrollbar{display:none}
+.scf{flex:none;background:#211a36;border:1px solid #3a3150;color:inherit;font:inherit;font-size:12px;padding:5px 9px;min-height:32px;cursor:pointer;display:inline-flex;gap:4px;align-items:center}.scf small{opacity:.6;font-size:10.5px}.scf.on{background:#e8b84a;color:#1a1228;border-color:#e8b84a;font-weight:700}
+.scfh{flex:none;font-size:11.5px;display:inline-flex;gap:4px;align-items:center;margin-left:4px;white-space:nowrap}
+.scgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;max-height:300px;overflow:auto;padding:2px}
+.sct{position:relative;background:none;border:2px solid transparent;padding:0;cursor:pointer;color:inherit;font:inherit}.sct .scm{width:100%}.sct.sel{border-color:#fff;box-shadow:0 0 0 2px #e8b84a}.sct.dim .scm{opacity:.4;filter:grayscale(.6)}
+.sct>i{position:absolute;font-style:normal;font-size:9.5px;line-height:1.2;padding:1px 3px;background:rgba(10,6,20,.82);color:#fff;pointer-events:none}
+.sct>.sci{left:2px;bottom:2px}.sct>.scown{right:2px;bottom:2px;color:#f5d27a}.sct>.schold{left:2px;top:18px;max-width:90%;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;color:#9fd0ff}.sct>.sccap{left:50%;top:44%;transform:translateX(-50%);background:#5a2030;white-space:nowrap}
+.scdet{display:flex;gap:8px;align-items:center;background:#211a36;border:1px solid #3a3150;padding:6px;min-height:58px}.scdet>.scm{width:42px;flex:none}.scdet>span{flex:1;display:flex;flex-direction:column;gap:2px}.scdet b{font-size:13px}.scdet small{font-size:11.5px;line-height:1.35}p.scdet{justify-content:center}
+.scpick-h{display:flex;align-items:center;justify-content:space-between}
+.scrow{display:flex;gap:10px;align-items:center;text-align:left;background:#211a36;border:1px solid #3a3150;padding:6px;color:inherit;font:inherit;cursor:pointer}.scrow .scm{width:46px;flex:none}.scrow span{display:flex;flex-direction:column;gap:2px}.scrow b{font-size:13px}.scrow small{font-size:11.5px;line-height:1.35}
+.scstrip{display:flex;align-items:center;gap:4px;margin:4px 0 2px;padding:0;background:none;border:0;color:inherit;cursor:pointer}
+.scm.xs{width:26px;border-width:2px}.scm.xs .rr{display:none}.scm.xs::after{content:"";position:absolute;right:1px;top:1px;width:6px;height:6px;background:var(--rc);box-shadow:0 0 0 1px #0f0c17;z-index:2}.scm.xs.empty::after,.scm.xs.lockd::after{display:none}.scm.xs.empty,.scm.xs.lockd{display:flex;align-items:center;justify-content:center;border:2px dashed #4d4466;color:#8a8399;font:700 11px var(--f-pixel,monospace);--rc:#4d4466;background:#1b1530}.scm.xs.lockd{border-style:solid;font-size:9px}
+.scstrip b{font-size:11px;margin-left:4px}
+.ccard .ceq{position:absolute;bottom:18px;left:3px;right:3px;background:rgba(15,12,23,.85);color:var(--gold,#f2c94c);font:700 10px/14px var(--f-body);font-style:normal;text-align:center;z-index:2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.scpop{position:absolute;z-index:60;display:flex;align-items:center;gap:6px;padding:4px 10px 4px 4px;overflow:hidden;pointer-events:none;
+ background:linear-gradient(180deg,#ffe58a,#f2c94c 55%,#d9a521);border:2px solid #7a4f00;box-shadow:0 3px 0 #3d2700,0 0 16px 2px rgba(242,201,76,.75);
+ transform-origin:50% 0}
+.scpop::after{content:"";position:absolute;top:0;bottom:0;left:-40%;width:35%;background:linear-gradient(100deg,transparent,rgba(255,255,255,.85),transparent);animation:scshine .45s .2s ease-out forwards}
+.scpop .scm{width:30px;border-width:2px;flex:none}.scpop .scm .rr{display:none}.scpop span{display:flex;flex-direction:column;line-height:1.1}
+.scpop small{font:700 10px var(--f-body);color:#5a3a00;max-width:140px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.scpop small i{font-style:normal;display:inline-block;padding:0 3px;margin-right:3px;background:var(--rc);color:#120d22}
+.scpop b{font:700 15px var(--f-display);color:#2b1600;text-shadow:0 1px 0 rgba(255,255,255,.5)}
+@keyframes scinL{0%{opacity:1;transform:translateX(-140%) skewX(-14deg)}10%{transform:translateX(10px) skewX(-14deg)}17%{transform:translateX(0) skewX(-14deg)}80%{transform:translateX(0) skewX(-14deg) scaleY(1)}100%{transform:translateX(0) skewX(-14deg) scaleY(0)}}
+@keyframes scinR{0%{opacity:1;transform:translateX(140%) skewX(-14deg)}10%{transform:translateX(-10px) skewX(-14deg)}17%{transform:translateX(0) skewX(-14deg)}80%{transform:translateX(0) skewX(-14deg) scaleY(1)}100%{transform:translateX(0) skewX(-14deg) scaleY(0)}}
+.scpop.l{animation:scinL 1.15s cubic-bezier(.2,.9,.3,1) forwards}.scpop.r{animation:scinR 1.15s cubic-bezier(.2,.9,.3,1) forwards}
+.scpop>*{transform:skewX(14deg)}.scpop{padding-left:8px;padding-right:14px}
+@keyframes scshine{to{left:110%}}
+@media (prefers-reduced-motion:reduce){.scm.glow,.scpop{animation:none}}
+.chip.scchip{border-color:var(--gold,#f2c94c);color:var(--gold,#f2c94c);white-space:nowrap}
 </style></head><body>
 <script>window.__MTM_ART=["alicia_sheet.png","alicia_special.png","baibua_sheet.png","baibua_special.png","baiyok_sheet.webp","baiyok_white_sheet.webp","bull1_sheet.webp","bull2_sheet.webp","bull3_sheet.webp","chaba_sheet.png","chaba_special.png","fah_loykrathong_sheet.webp","fah_loykrathong_special.webp","fah_sheet.webp","fah_special.webp","gang1_sheet.webp","gang2_sheet.webp","gang3_sheet.webp","gang4_sheet.webp","gang5_sheet.webp","gangsilver_sheet.webp","kati_loykrathong_sheet.webp","kati_loykrathong_special.webp","kati_sheet.webp","kati_special.webp","krahang_sheet.webp","krasue_sheet.webp","mabong_sheet.webp","mali_loykrathong_sheet.webp","mali_loykrathong_special.webp","mali_sheet.webp","mali_special.webp","nl_ladda_blood_sheet.webp","nl_ladda_hood_sheet.webp","nl_ladda_sheet.webp","nl_meili_sheet.webp","nl_meili_special.webp","nl_nia_sheet.webp","nl_nia_special.webp","nl_rosa_sheet.webp","nl_rosa_special.webp","nl_varya_sheet.webp","nl_varya_special.webp","npc10_sheet.webp","npc11_sheet.webp","npc12_sheet.webp","npc13_sheet.webp","npc14_sheet.webp","npc1_sheet.webp","npc2_sheet.webp","npc3_sheet.webp","npc4_sheet.webp","npc5_sheet.webp","npc6_sheet.webp","npc7_sheet.webp","npc8_sheet.webp","npc9_sheet.webp","npc_alicia_mom.webp","npc_alicia_mom_soft.webp","npc_baibua_dad.webp","npc_baibua_dad_smile.webp","npc_baiyok_black_angry.png","npc_baiyok_black_flustered.png","npc_baiyok_black_happy.png","npc_baiyok_black_sad.png","npc_baiyok_casual.png","npc_baiyok_casual_flustered.png","npc_baiyok_casual_pout.png","npc_baiyok_white_angry.png","npc_baiyok_white_flustered.png","npc_baiyok_white_happy.png","npc_baiyok_white_sad.png","npc_baiyok_white_surprised.png","npc_boris.webp","npc_caster.webp","npc_caster_shout.webp","npc_chaba_bro.webp","npc_chaba_bro_sad.webp","npc_chaba_bro_stand.webp","npc_gala_mc.webp","npc_gala_mc_awk.webp","npc_gala_mc_hype.webp","npc_gang_boss.webp","npc_gang_boss_face.webp","npc_gang_goldblack.webp","npc_gang_group.webp","npc_gang_silver.webp","npc_grandma.webp","npc_hialong.webp","npc_hialong_angry.webp","npc_krerk.webp","npc_krerk_face.webp","npc_krit.webp","npc_krit_panic.webp","npc_luangpho.webp","npc_mabelle.webp","npc_mabelle_excited.webp","npc_mali_mom.webp","npc_mali_mom_laugh.webp","npc_mali_mom_tear.webp","npc_mark_guide.webp","npc_mark_guide_pain.webp","npc_mc_central.webp","npc_mc_central_hype.webp","npc_mc_isan.webp","npc_mc_isan_hype.webp","npc_mc_north.webp","npc_mc_north_f.webp","npc_mc_north_f_hype.webp","npc_mc_north_hype.webp","npc_mc_south.webp","npc_mc_south_hype.webp","npc_minnie.webp","npc_minnie_smirk.webp","npc_mint.webp","npc_mint_flustered.webp","npc_morphi.webp","npc_nai.webp","npc_nil.webp","npc_nil_smirk.webp","npc_petchara.png","npc_phet.webp","npc_phet_smile.webp","npc_ploy_mom.webp","npc_ploy_mom_cry.webp","npc_qhost_correct.webp","npc_qhost_excited.webp","npc_qhost_smile.webp","npc_qhost_suspense.webp","npc_qhost_wrong.webp","npc_suea.webp","npc_suea_angry.webp","npc_tabtim_dad.webp","npc_tabtim_dad_laugh.webp","npc_tani_angry.webp","npc_tani_angry_smile.webp","npc_tani_face.webp","npc_tani_neutral.webp","npc_tani_scary.webp","npc_tani_shy.webp","npc_tani_smile.webp","npc_thief.webp","npc_thief2.webp","npc_tiger_boss.webp","npc_tiger_boss_cry.webp","npc_vector_knight.png","npc_vector_mesa.png","npc_vector_vega.png","npc_vendor_green.webp","npc_vendor_red.webp","pailin_sheet.webp","petchara_sheet.webp","phiphong_sheet.webp","ploy_loykrathong_sheet.webp","ploy_loykrathong_special.webp","ploy_sheet.webp","ploy_special.webp","rg_chaytrae1_sheet.webp","rg_chaytrae2_sheet.webp","rg_jinlong1_sheet.webp","rg_jinlong2_sheet.webp","rg_russian1_sheet.webp","rg_russian2_sheet.webp","rg_sasaeng1_sheet.webp","rg_sasaeng2_sheet.webp","rgp_buriram_sheet.webp","rgp_chanthaburi_sheet.webp","rgp_chiangrai_sheet.webp","rgp_chumphon_sheet.webp","rgp_khonkaen_sheet.webp","rgp_lampang_sheet.webp","rgp_lopburi_sheet.webp","rgp_nakhonsi_sheet.webp","rgp_nan_sheet.webp","rgp_phetchaburi_sheet.webp","rgp_songkhla_sheet.webp","rgp_suphan_sheet.webp","rgp_surat_sheet.webp","rgp_ubon_sheet.webp","rgp_udon_sheet.webp","rgp_uttaradit_sheet.webp","rin_loykrathong_sheet.webp","rin_loykrathong_special.webp","rin_sheet.webp","rin_special.webp","rooster1_sheet.webp","rooster2_sheet.webp","rooster3_sheet.webp","rooster4_sheet.webp","rooster5_sheet.webp","tabtim_sheet.png","tabtim_special.png","tani_sheet.webp","thief2_sheet.webp","thief_sheet.webp"];</script>
 <script>window.__MTM_PETART=["cat","dog","mudlek","otter","rooster","turtle"];</script>
@@ -3076,7 +3126,7 @@ function trainWeek(G,f,rng){
   for(const [k,w] of Object.entries(p.w)){
     // v1.18: training your own style's core weapons fights diminishing returns less (style mastery path)
     const dim=1-Math.pow(f.a[k]/(f.potential+(core.includes(k)?CK:1.5)),2.2);
-    const g=.5*w*it.g*coach*fac*ready*mot*clamp(dim,.04,1)*(.75+rng()*.5)*(traitOf(f)==="surge"?1+.15*traitK(f):traitOf(f)==="talent"?1+.1*traitK(f):1)*(1+(f.drillBonus||0))*ytTrainMul(G,f);
+    const g=(typeof scTrainMul==="function"?scTrainMul(G,f,k):1)*.5*w*it.g*coach*fac*ready*mot*clamp(dim,.04,1)*(.75+rng()*.5)*(traitOf(f)==="surge"?1+.15*traitK(f):traitOf(f)==="talent"?1+.1*traitK(f):1)*(1+(f.drillBonus||0))*ytTrainMul(G,f);
     if(g>0){const g2=f.a[k]>=20?g*LB_RATE:g,b4=f.a[k];f.a[k]=Math.max(b4,Math.min(stCap(f),b4+g2));f.gains[k]=f.a[k]-b4;}
   }
   f.drillBonus=0;
@@ -3191,7 +3241,7 @@ function mastery(f){if(f.camp!=="player")return 0;const v=styleVal(f,mainStyle(f
 const VET_FX={hit:.08,dmg:.25,ev:.06}; // calibrated: vet 1 ≈ +1 stat point
 /* v1.90.13 "the more she bleeds, the harder she gets" (Ladda): f.hpX adds starting hp; f.hurt={def,ev,sta,rec,rnd} scale with how much hp is gone (0 fresh → 1 empty) */
 const hurtW=s=>s&&s.f.hurt?clamp(1-s.hp/(s.hp0||100),0,1):0;
-function fightSide(f,plan,rng){const sk=skillMods(f);{const m=mastery(f)*MK,s=mainStyle(f);if(m){if(s==="defense"){sk.evade+=MDEF.ev*m;sk.ctr+=MDEF.ctr*m;sk.ctrDmg+=MDEF.cd*m;}else{const w=s;sk.hit[w]=(sk.hit[w]||0)+MWPN.hit*m;sk.dmg[w]=(sk.dmg[w]||0)+MWPN.dmg*m;sk.pts[w]=(sk.pts[w]||0)+.1*m;}}}if(f.aura)sk.evade+=f.aura*.5;if(f.vet>0){const v=f.vet;for(const w of ["punch","kick","knee","elbow"]){sk.hit[w]=(sk.hit[w]||0)+VET_FX.hit*v;sk.dmg[w]=(sk.dmg[w]||0)+VET_FX.dmg*v;}sk.evade+=VET_FX.ev*v;}const gr=f.id==="kati"&&traitOf(f)!=="grit"?0:(f.grit||0)*(f.id==="kati"?traitK(f):1);if(gr)sk.evade+=gr*.4;
+function fightSide(f,plan,rng){const sk=skillMods(f);if(typeof scFightMods==="function")scFightMods(f,sk); /* v1.91.177 support cards */{const m=mastery(f)*MK,s=mainStyle(f);if(m){if(s==="defense"){sk.evade+=MDEF.ev*m;sk.ctr+=MDEF.ctr*m;sk.ctrDmg+=MDEF.cd*m;}else{const w=s;sk.hit[w]=(sk.hit[w]||0)+MWPN.hit*m;sk.dmg[w]=(sk.dmg[w]||0)+MWPN.dmg*m;sk.pts[w]=(sk.pts[w]||0)+.1*m;}}}if(f.aura)sk.evade+=f.aura*.5;if(f.vet>0){const v=f.vet;for(const w of ["punch","kick","knee","elbow"]){sk.hit[w]=(sk.hit[w]||0)+VET_FX.hit*v;sk.dmg[w]=(sk.dmg[w]||0)+VET_FX.dmg*v;}sk.evade+=VET_FX.ev*v;}const gr=f.id==="kati"&&traitOf(f)!=="grit"?0:(f.grit||0)*(f.id==="kati"?traitK(f):1);if(gr)sk.evade+=gr*.4;
   const hp0=100-(f.injury?15:0)+Math.round(gr*30)+(f.hpX||0),tl=f.trainLog||[];const brk=STA.brk+f.a.stamina*STA.brkK+(tl[tl.length-1]==="prep"?STA.prep:0)+(tl.slice(-2).includes("cond")?STA.cond:0)+(f.id==="fah"?STA.fah:0)+(f.camp==="player"&&typeof lovePerk==="function"?lovePerk(f).brk:0); /* Fah: hot-blooded and tireless, gets her breath back faster */
   return {f,id:f.id,name:f.name,plan,instr:"none",hp:hp0,hp0,brk,staMax:STA_TANK(f),sta:clamp(100-f.fatigue*.4,40,100),pts:0,rpts:0,kd:0,cuts:0,
     thrown:0,landed:0,dmgDealt:0,legs:0,tac:{focus:"auto",pace:"steady",target:"head"},sk,prep:(f.camp==="player"?(HERO_K[f.id]||0)+(LINE_K[f.id]?(LINE_K[f.id][heroLine(f)]||0)+(LINE_KR[f.id]?(LINE_KR[f.id][heroLine(f)]||0)*clamp(((f.lvl||1)-25)/7,0,1):0):0):0)+(f.prepBonus?.04:0)+(f.counterPrep?.05:0)+sk.prep+(f.aura||0)+gr+(f.labPrep||0)+(f.camp==="player"?(f.facPrep||0):0)+(f.camp==="player"&&typeof lovePerk==="function"?lovePerk(f).prep:0),counterPrep:!!f.counterPrep,trait:traitOf(f),trk:traitK(f),mor:(f.morale-60)/400+sk.mor,wl:{punch:0,kick:0,knee:0,elbow:0}};
@@ -3390,14 +3440,14 @@ function fightEx(F){const rng=F.rng,log=[],ex=F.ex,mA=F.mA,mB=F.mB;
     if(checked){at.legs=Math.min(60,at.legs+BAL.chkLegs);at.sta=clamp(at.sta-BAL.chkSta,0,100);at.hp-=BAL.chkHp;df.pts+=.3;df.rpts+=.3;
       log.push({ha:F.A.hp,hb:F.B.hp,sa:F.A.sta,sb:F.B.sta,s:df===F.A?"A":"B",t:`${df.name} ยกแข้งรับลูกเตะของ${at.name}ไว้ได้ แข้งปะทะแข้ง!`,k:"miss",ev:"miss",w:wpn,cl:clinch,mside:at===F.A?"A":"B",an:at.name,dn:df.name});}
     else if(rng()<hitP){
-      const crit=rng()<(at.rage?.35:.07);const q=crit?1.6:.6+rng()*.6;if(at.rage)at.rage--;
+      const crit=rng()<(at.rage?.35:.07+((at.sk.scCrit&&(at.sk.scCrit[wpn]||0)+(at.sk.scCrit.all||0))||0));const scp=typeof scProc==="function"?(crit?scProc(F,at,"crit",wpn):at.hp<45?scProc(F,at,"clutch"):null):null;const q=crit?1.6:.6+rng()*.6;if(at.rage)at.rage--;
       let dmg=1.35*W_INFO[wpn].imp*q*(.6+(BAL.specPow?effA(at,"power"):a.power)/25)*(1-d.guard/70)*(1.25-d.dur/40)*(1+(at.sk.dmg[wpn]||0))*(bA&&bA.w===wpn?1+.3*bA.pw:1)*(1+fury*TRV.furyDmg)*(at.libOn?trm(TRV.lib,at):1)*(at.trait==="rock"?trm(TRV.rockAtk,at):1)*(df.trait==="rock"?trm(TRV.rockDef,df):1)*(at.ph&&at.ph.dmg||1)*(at.f.camp==="player"?1+(HERO_D[at.f.id]||0):1)*(1+(at.titleD||0))*(df.f.hurt?1-df.f.hurt.def*hurtW(df):1);const tg=at.tac.target;
       if(tg==="head")dmg*=1.1;if(tg==="body"){dmg*=.9;df.sta=clamp(df.sta-dmg*.9,0,100);}if(tg==="legs"&&(wpn==="kick"||wpn==="knee")){dmg*=.85;df.legs=Math.min(60,df.legs+dmg*.8);}
       // v1.32 "flash knockout": a clean crit to the head can drop anyone early — rarer for durable/guarded fighters, likelier when the attacker clearly outclasses
       if(crit&&tg!=="body"&&(wpn!=="punch"||a.power>=10)&&rng()<clamp(.16+(ovr(a)-ovr(d))*.06-(d.dur-8)*.012+Math.max(0,a.power-12)*BAL.flashPow,.05,.45)){dmg+=10+rng()*8;at.flash=1;}
       at.rw[wpn]++;at.rdmg+=dmg;at.rlanded++;
       df.hp-=dmg;df.sta=clamp(df.sta-dmg*STA.hit*(df.f.hurt?1-df.f.hurt.sta*hurtW(df):1),0,100);at.landed++;at.wl[wpn]++;at.dmgDealt+=dmg;const p=W_INFO[wpn].pts*q*(1+(at.sk.pts[wpn]||0))*(df.trait==="rock"?trm(TRV.rockPts,df):1);at.pts+=p;at.rpts+=p;
-      log.push({ha:F.A.hp,hb:F.B.hp,sa:F.A.sta,sb:F.B.sta,s:at===F.A?"A":"B",t:`${at.name} ${tx}${crit?" — เข้าเต็ม ๆ!":""}`,k:crit?"big":"hit",ev:"hit",w:wpn,cl:clinch,crit,an:at.name,dn:df.name});
+      log.push({ha:F.A.hp,hb:F.B.hp,sa:F.A.sta,sb:F.B.sta,s:at===F.A?"A":"B",t:`${at.name} ${tx}${crit?" — เข้าเต็ม ๆ!":""}`,k:crit?"big":"hit",ev:"hit",w:wpn,cl:clinch,crit,an:at.name,dn:df.name,sc:scp});
       if(wpn==="elbow"&&q>1.3&&rng()<.25){df.cuts++;log.push({ha:F.A.hp,hb:F.B.hp,sa:F.A.sta,sb:F.B.sta,s:"x",t:`${df.name} โดนศอกแตก เลือดออกที่คิ้ว`,k:"warn",ev:"cut",an:at.name,dn:df.name});
         if(df.cuts>=2&&rng()<.5){F.over=true;F.result={win:at===F.A?"A":"B",type:"TKO (แพทย์สั่งยุติ)",round:F.round};}}
       if(!F.over&&df.hp<=0){at.flash=0;F.over=true;F.result={win:at===F.A?"A":"B",type:rng()<.5?"KO":"TKO",round:F.round};
@@ -3414,9 +3464,9 @@ function fightEx(F){const rng=F.rng,log=[],ex=F.ex,mA=F.mA,mB=F.mB;
       if(rng()<ctrP){const cw=d.kick>d.punch&&!clinch?"kick":"punch";
         const rc=!!df.rage;if(df.rage)df.rage--;const dmg=1.3*W_INFO[cw].imp*(rc?1.5:.7+rng()*.5)*(.6+(BAL.specPow?effA(df,"power"):d.power)/25)*(1-a.guard/70)*(1.25-a.dur/40)*(1+df.sk.ctrDmg)*(df.libOn?trm(TRV.lib,df):1)*(df.trait==="rock"?trm(TRV.rockAtk,df):1)*(at.trait==="rock"?trm(TRV.rockDef,at):1);
         at.hp-=dmg;at.sta=clamp(at.sta-dmg*STA.hit,0,100);df.landed++;df.thrown++;df.wl[cw]++;df.dmgDealt+=dmg;df.rw[cw]++;df.rdmg+=dmg;df.rlanded++;df.rthrown++;const p=W_INFO[cw].pts*.9;df.pts+=p;df.rpts+=p;
-        log.push({ha:F.A.hp,hb:F.B.hp,sa:F.A.sta,sb:F.B.sta,s:df===F.A?"A":"B",t:`${at.name} พลาดเป้า — ${df.name} สวนกลับด้วย${cw==="kick"?"ลูกเตะ":"หมัด"}เข้าเต็ม!${rc?" คริติคอล!":""}`,k:rc?"big":"hit",ev:"counter",crit:rc,w:cw,mw:wpn,an:df.name,dn:at.name});
+        log.push({ha:F.A.hp,hb:F.B.hp,sa:F.A.sta,sb:F.B.sta,s:df===F.A?"A":"B",t:`${at.name} พลาดเป้า — ${df.name} สวนกลับด้วย${cw==="kick"?"ลูกเตะ":"หมัด"}เข้าเต็ม!${rc?" คริติคอล!":""}`,k:rc?"big":"hit",ev:"counter",crit:rc,w:cw,mw:wpn,an:df.name,dn:at.name,sc:typeof scProc==="function"?scProc(F,df,"ctr"):null});
         if(at.hp<=0){F.over=true;F.result={win:df===F.A?"A":"B",type:"KO",round:F.round};log.push({ha:F.A.hp,hb:F.B.hp,sa:F.A.sta,sb:F.B.sta,s:"x",t:`${at.name} ล้มลงไม่ลุก! ชนะน็อก`,k:"big",ev:"ko",an:df.name,dn:at.name,koSide:df===F.A?"A":"B"});}
-      } else if(rng()<.45) log.push({ha:F.A.hp,hb:F.B.hp,sa:F.A.sta,sb:F.B.sta,s:"x",t:`${at.name} ${tx} แต่ ${df.name} ${TXT.miss[Math.floor(rng()*4)]}`,k:"miss",ev:"miss",w:wpn,cl:clinch,mside:at===F.A?"A":"B",an:at.name,dn:df.name});
+      } else if(rng()<.45) log.push({ha:F.A.hp,hb:F.B.hp,sa:F.A.sta,sb:F.B.sta,s:"x",t:`${at.name} ${tx} แต่ ${df.name} ${TXT.miss[Math.floor(rng()*4)]}`,k:"miss",ev:"miss",w:wpn,cl:clinch,mside:at===F.A?"A":"B",an:at.name,dn:df.name,sc:typeof scProc==="function"?scProc(F,df,"evade"):null});
     }
     for(const s of [F.A,F.B])s.sta=clamp(s.sta+STA.ex+s.f.a.stamina*STA.exK+s.sk.regen,0,100);
     for(const s of [F.A,F.B])if(s.burst&&--s.burst.left<=0)s.burst=null;
@@ -9272,7 +9322,7 @@ AU.gsfx=function(kind,a){if(!this.init()||this.muted||!SETTINGS.sfx)return;const
   if(kind==="shimmer")for(let i=0;i<6;i++)T(i*.05,{f:1400+Math.random()*1400,type:"sine",dur:.12,peak:.06});};
 
 // ================= MUAY THAI MOE v1.3 — UI =================
-const VERSION="1.91.187";
+const VERSION="1.91.188";
 const CUR_LANG=(typeof window!=="undefined"&&window.LANG)||"th";
 const TH_LABEL=String.fromCharCode(3652,3607,3618);
 function langSwitch(cls){return `<div class="langsw ${cls||""}" role="group" aria-label="Language">${[["th",TH_LABEL],["en","EN"]].map(([k,l])=>`<button class="lsb ${CUR_LANG===k?"on":""}" data-act="setlang" data-v="${k}" aria-pressed="${CUR_LANG===k}">${l}</button>`).join("")}</div>`;}
@@ -9919,7 +9969,7 @@ function tcard(f,L){const pf=projFatigue(f),rest=f.plan.preset==="rest";const ti
    <div class="tc-body"><div class="tc-h"><b class="nm">${esc(f.name)}</b><span class="lv">Lv.${f.lvl}</span>${prepLine(f)}</div>
     <div class="fatg"><span>ล้า <b class="num">${Math.round(f.fatigue)}</b> → <b class="num">${Math.round(pf)}</b></span><i class="fgbar" style="--now:${clamp(f.fatigue,0,100)}%;--next:${clamp(pf,0,100)}%;--bc:${pf>70?"var(--red)":pf>55?"var(--warn)":"var(--green)"}"><s></s></i></div>
     ${tired?`<p class="warnchip">ล้ามาก ควรพักฟื้นสัปดาห์นี้</p>`:""}
-    ${skReady(f)?`<button class="spchip" data-act="fighter" data-id="${f.id}" data-v="skill">★ อัปสกิลได้</button>`:""}<div class="tc-prog"><span class="pill ${L?"":"gold"}">${isAway(G,f.id)?`ไม่อยู่ค่าย · กลับในอีก ${awayLeft(G,f.id)} สัปดาห์`:f.injury?"พักรักษาตัว":PRESETS[f.plan.preset].name+(rest?"":" · "+INTENSITY[f.plan.intensity].name)}</span></div>
+    ${skReady(f)?`<button class="spchip" data-act="fighter" data-id="${f.id}" data-v="skill">★ อัปสกิลได้</button>`:""}${typeof scStrip==="function"&&scOn()?scStrip(f):""}<div class="tc-prog"><span class="pill ${L?"":"gold"}">${isAway(G,f.id)?`ไม่อยู่ค่าย · กลับในอีก ${awayLeft(G,f.id)} สัปดาห์`:f.injury?"พักรักษาตัว":PRESETS[f.plan.preset].name+(rest?"":" · "+INTENSITY[f.plan.intensity].name)}</span></div>
     ${f.injury?"":`<div class="tc-btns">${L&&!autoOn(f)?"":`<button class="btn sm" data-act="tpick" data-id="${f.id}">โปรแกรมฝึก</button>`}${coachOn()&&!L?`<button class="btn sm" data-act="advice" data-id="${f.id}">คำแนะนำครู</button>`:""}
      ${isAway(G,f.id)?`<span class="tc-ok auto">ไม่อยู่ค่าย · พักซ้อม</span>`:autoOn(f)?`<span class="tc-ok auto">↻ ซ้อมแผนเดิมอีก ${autoLeft(f)} สัปดาห์</span>`:L?`<span class="tc-ok">✓ ยืนยันโปรแกรมแล้ว</span>`:`<button class="btn sm gold tc-go" data-act="tlock" data-id="${f.id}">ยืนยันโปรแกรม</button>`}</div>`}
 </div></section>`;}
@@ -10229,7 +10279,7 @@ function pCardSrc(f){const v=(G.pLook||{})[f.id];if(!v||!pLooks(f).some(x=>x[0]=
 function pArtSrc(f){if(UI.look==="train"&&!CHAMP_IDS.includes(f.id))return `${ASSET}${f.id}_train.webp`;const h=THAI_HOLD;THAI_HOLD=true;try{return stand(f.id,UI.look==="train"?"casual":UI.look,"happy");}finally{THAI_HOLD=h;}} /* "ลำลอง" stays casual here even with the Thai dress worn day to day — the dress has its own button */
 function pFace(f){if(UI.look==="fight"||!(f.canon||CHAMP_IDS.includes(f.id))||!pLooks(f).some(x=>x[0]===UI.look))return faceImg(f);return faceImg(f).replace(faceSrc(f.id,"happy"),faceSrc(f.id,"happy",UI.look));} /* v1.91.161 (player report): the face comes from faceSrc (which knows each look's real file) — deriving it from the body art broke once casual bodies moved to .png while their faces stayed .webp */
 function fighterHTML(f){const mine=f.camp==="player";const P=PROFILES[f.id];
-  const tabs=mine?[["rel","ประวัติ"],["over","ค่าพลัง"],["skill","สกิล"]].concat(f.canon&&KIT_MASK[f.id]?[["look","ชุด"]]:[]):[["rel","ประวัติ"],["over","ค่าพลัง"]].concat(f.camp==="region"&&hasTree(f.id)&&!skInert(f)?[["skill","สกิล"]]:[]); /* v1.91.45: a regional champion's tree can be looked at while she is still a rival */
+  const tabs=mine?[["rel","ประวัติ"],["over","ค่าพลัง"],["skill","สกิล"]].concat(typeof scOn==="function"&&scOn()?[["card","การ์ด\u200b"]]:[]).concat(f.canon&&KIT_MASK[f.id]?[["look","ชุด"]]:[]):[["rel","ประวัติ"],["over","ค่าพลัง"]].concat(f.camp==="region"&&hasTree(f.id)&&!skInert(f)?[["skill","สกิล"]]:[]); /* v1.91.45: a regional champion's tree can be looked at while she is still a rival */
   let t=UI.ptab;if(!tabs.some(x=>x[0]===t))t="over";
   const head=`<div class="fp-head">${pFace(f)}<div><h2>${esc(f.full)}</h2><div class="meta">${f.age!=null?f.age+" ปี · ":""}${f.camp==="player"?"ค่ายศิริชัย":f.lab?"ค่ายเวกเตอร์ กรุงเทพฯ":f.camp==="rival"&&!f.indie?"ค่ายพยัคฆ์ทอง":"นักมวยอิสระ"} · รุ่น ${f.div} · ${styleOf(f.a)} · ${rec(f)}</div>${G.belt&&Object.values(G.belt).some(x=>x.id===f.id)?`<div class="beltb">🏆 แชมป์เวทีท่าแพ</div>`:Object.entries(G.venueBelts||{}).some(([v,ds])=>Object.values(ds).some(b=>b.id===f.id))?`<div class="beltb">🏆 แชมป์${STADIUMS[Object.entries(G.venueBelts).find(([v,ds])=>Object.values(ds).some(b=>b.id===f.id))[0]].name}</div>`:f.belts?`<div class="beltb old">อดีตแชมป์เวที</div>`:""}<div class="tierline">${tierChip(f,1)}<span class="meta">เรตติ้ง <b>${ratingOf(f)}</b></span>${tierYearNote(f)}</div>${xpBar(f)}</div></div>
    <div class="seg ptabs">${tabs.map(([k,n])=>`<button data-act="ptab" data-v="${k}" aria-pressed="${t===k}">${n}${k==="skill"&&skReady(f)?'<i class="tdot2"></i>':""}</button>`).join("")}</div>`;
@@ -10246,6 +10296,7 @@ function fighterHTML(f){const mine=f.camp==="player";const P=PROFILES[f.id];
   if(t==="skill"&&hasTree(f.id))body=(typeof REGION!=="undefined"&&REGION.perkCard?REGION.perkCard(f):"")+skillGrid(f,mine);else if(t==="skill")body=skillGrid(f,mine)+(SIGNATURE[f.id]?`<details class="sigcard ${hasSignature(f)?"on":""}"><summary><b>${hasSignature(f)?"✦":"🔒"} ท่าไม้ตาย: ${SIGNATURE[f.id].name}</b></summary><span class="meta">${SIGNATURE[f.id].desc}${hasSignature(f)?"":` · ตอนนี้ ♥ Lv.${heartLv(f).lv}/7`}</span></details>`:"")+`<details class="skhelp"><summary>สกิลทำงานยังไง?</summary><p class="meta">ได้แต้มสกิล 1 แต้มทุกเลเวลอัป · ท่าใหม่ปลดล็อกตามเลเวล · แต่ละท่าอัปได้ 3 ขั้น · ตอนชกกดใช้ได้เฉพาะ 3 ท่าที่ "ใช้" · แตะชื่อท่าเพื่อดูรายละเอียด</p></details>`;
   if(t==="skill")body=traitHTML(f,mine)+body;
   if(t==="rel")body=relHTML(f);
+  if(t==="card"&&typeof scTabHTML==="function")body=scTabHTML(f);
   return head+`<div class="fp-body"${t==="skill"?' data-sk="fpb"':""}>${body}</div>`;}
 const SK_AN=Object.fromEntries(ATTRS);
 const SK_LINES={kati:["สายแข้ง","สายหมัดศอก","สายการ์ดและใจ"],mali:["สายศอก","สายเตะและความไว","สายป้องกัน"],rin:["สายสวนกลับ","สายอ่านเกม","สายคุมระยะ"],ploy:["สายหมัดโคราช","สายเตะคอขาด","สายกำแพงพยัคฆ์"],fah:["สายศอกพยัคฆ์","สายบุกบ้าบิ่น","สายยิ้มเยาะ"]};
@@ -10563,10 +10614,10 @@ function modalHTML(){const m=UI.modal;let body="",foot=true;
     body=`<h2>อัลบั้มการ์ด</h2><p class="meta">เก็บได้ ${Object.keys(own).filter(k=>CARDS[k]).length}/${Object.keys(CARDS).filter(k=>(!CARDS[k].rg||G.region)&&(!CARDS[k].xl||xlShow(G,CARDS[k].c))).length} ใบ · แตะการ์ดเพื่อดูรายละเอียด</p>
      <div class="gacha"><span><b class="goldt">✦ ${G.dust||0}</b> เศษดาว<small>ได้จากชนะไฟต์ การ์ดใหม่ และการ์ดซ้ำ · การันตี SSR อีก ${Math.max(1,GACHA_PITY-(G.pity||0))} ครั้ง</small></span><button class="btn sm gold" data-act="gopen" data-v="n">🎰 ตู้กาชา ${GACHA_COST}✦</button></div>${typeof loyGachaHTML==="function"?loyGachaHTML():""}
      ${[...CANON_IDS,...(G.region?CHAMP_IDS:[]),...(typeof XL_IDS!=="undefined"?XL_IDS.filter(c=>xlShow(G,c)):[])].filter(c=>G.F[c]&&byC[c]&&(UI.albAll||byC[c].some(id=>own[id]))).map(c=>`<h4 class="albh">${esc(G.F[c].name)} <small>${byC[c].filter(id=>own[id]).length}/${byC[c].length}</small></h4><div class="albg">${byC[c].filter(id=>UI.albAll||own[id]).map(id=>{const C=CARDS[id],o=own[id],R=CARD_R[C.r];
-       return o?`<button class="ccard pxc" data-rarity="${C.r}" style="--rc:${R.c}" data-act="cardinfo" data-v="${id}" title="${esc(C.t)}">${!o.seen?'<i class="ndot"></i>':cardFresh(id,o)?'<i class="cnew">✦ใหม่</i>':""}${o.spare?`<i class="cdup">${cardCanUp(id,o)?"⬆ ":""}×${o.spare}</i>`:""}${cardArtHTML(C,true)}<i class="rr">${C.r}${(o.lv||1)>1?`<u>${o.lv}</u>`:""}</i><span class="tstar">${"★".repeat(R.s)}</span><b>${esc(C.t)}</b></button>`
+       return o?`<button class="ccard pxc" data-rarity="${C.r}" style="--rc:${R.c}" data-act="cardinfo" data-v="${id}" title="${esc(C.t)}">${!o.seen?'<i class="ndot"></i>':cardFresh(id,o)?'<i class="cnew">✦ใหม่</i>':""}${o.spare?`<i class="cdup">${cardCanUp(id,o)?"⬆ ":""}×${o.spare}</i>`:""}${cardArtHTML(C,true)}<i class="rr">${C.r}${(o.lv||1)>1?`<u>${o.lv}</u>`:""}</i>${typeof scHolder==="function"&&scOn()&&scHolder(G,id)?`<i class="ceq">${esc(scHolder(G,id).name)}</i>`:""}<span class="tstar">${"★".repeat(R.s)}</span><b>${esc(C.t)}</b></button>`
          :`<button class="ccard pxc lock" data-rarity="${C.r}" style="--rc:#77747d" data-act="cardinfo" data-v="${id}" aria-label="การ์ดที่ยังไม่ได้">${cardArtHTML(C,true)}<i class="rr">${C.r}</i><span class="tstar">${"★".repeat(R.s)}</span><b>???</b></button>`;}).join("")}</div>`).join("")}<div class="center"><button class="btn sm" data-act="albtog">${UI.albAll?"ซ่อนการ์ดที่ยังไม่ได้":"แสดงการ์ดที่ยังไม่ได้ (ดูคำใบ้)"}</button></div>`;}
   if(m.type==="cardnew"){const P=G.cardPend||[];const id=P[0];const C=CARDS[id];if(!C){G.cardPend=[];UI.modal=null;return "";}const RR=CARD_R[C.r];body=`<h2>ได้การ์ดใหม่!</h2><div class="gres" style="--rc:${RR.c}"><div class="ccard big" data-rarity="${C.r}" style="--rc:${RR.c}">${cardArtHTML(C)}<span class="tstar">${"★".repeat(RR.s)}</span><b>${esc(C.t)}</b><small>${C.r}</small></div>
-    <p class="center meta">${C.hint?esc(C.hint)+" · ":""}ได้เศษดาว <b class="goldt">✦ 5</b>${P.length>1?` · ยังมีการ์ดใหม่อีก ${P.length-1} ใบ`:""}</p></div>
+    <p class="center meta">${C.hint?esc(C.hint)+" · ":""}ได้เศษดาว <b class="goldt">✦ 5</b>${P.length>1?` · ยังมีการ์ดใหม่อีก ${P.length-1} ใบ`:""}</p>${typeof scOn==="function"&&scOn()&&!(G.flags||{}).scHow?'<p class="center meta">💡 ติดการ์ดให้นักมวยได้ที่ ข้อมูลนักมวย → แท็บ "การ์ด"</p>':""}</div>
     <div class="mfoot roadbtns"><button class="btn primary" data-act="cardplay" data-v="${id}" data-from="new">ดูเรื่องราวเลย</button><button class="btn" data-act="cardlater">เก็บไว้ดูทีหลัง</button></div>`;foot=false;}
   if(m.type==="gacha"){const R=m.res,C=CARDS[R.id],RR=CARD_R[C.r];body=`<h2>ผลการสุ่ม</h2><div class="gres" style="--rc:${RR.c}"><div class="ccard big" data-rarity="${C.r}" style="--rc:${RR.c}">${cardArtHTML(C)}<span class="tstar">${"★".repeat(RR.s)}</span><b>${esc(C.t)}</b><small>${C.r}</small></div>
     <p class="center">${R.isNew?"<b class=\"goldt\">การ์ดใหม่!</b>":R.canUp?`<b class="goldt">ได้ใบซ้ำ!</b> อัปขั้นการ์ดได้แล้ว (ใบซ้ำ ${R.spare} ใบ)`:`การ์ดเต็มขั้นแล้ว · เก็บเป็นใบซ้ำ (มี ${R.spare} ใบ) <small class="meta">ย่อยเป็นเศษดาวได้ที่หน้าการ์ด</small>`}</p></div>
@@ -11089,7 +11140,7 @@ function oilPoured(C){C.phase="rub";C.t0=performance.now();AU.sfx("level");rende
 function cornerHTML(F){const U=UI.fight,C=U.care,A=F.A,B=F.B,c=F.cards[F.cards.length-1]||[10,10];const rec=aiCorner(F,A,B);
   const note=B.sta<40?"คู่ชกเริ่มหมดแรง":A.sta<40?"เราแรงเหลือน้อย":A.rlanded<B.rlanded-2?"ยกนี้เราโดนเยอะ":B.legs>20?"ขาคู่ชกเริ่มหนัก":A.rage?"ยังเลือดเดือดอยู่!":"";
   const slots=(C.need||[]).map((k,i)=>{const g=C.got[i];return `<span class="cslot ${g==null?"":g===k?"ok":"bad"}">${PIX[k]}</span>`;}).join('<i class="arr">›</i>');
-  return `<div class="corner px"><div class="chead"><b>พักยก ${F.round}</b><button class="chip cardbtn" data-act="cshow" aria-pressed="${!!U.cshow}">${U.cshow?F.cards.map((c,i)=>`ย${i+1} ${c[0]}–${c[1]}`).join(" · "):"ดูคะแนนยกที่ผ่านมา ▸"}</button><span class="chip">เข้าเป้า ${A.rlanded}–${B.rlanded}</span>${note?`<span class="chip warn">${note}</span>`:""}</div>
+  return `<div class="corner px"><div class="chead"><b>พักยก ${F.round}</b><button class="chip cardbtn" data-act="cshow" aria-pressed="${!!U.cshow}">${U.cshow?F.cards.map((c,i)=>`ย${i+1} ${c[0]}–${c[1]}`).join(" · "):"ดูคะแนนยกที่ผ่านมา ▸"}</button><span class="chip">เข้าเป้า ${A.rlanded}–${B.rlanded}</span>${note?`<span class="chip warn">${note}</span>`:""}${A.scN?`<span class="chip scchip" title="การ์ดทำงานในไฟต์นี้">🃏×${A.scN}</span>`:""}</div>
    ${C.mode==="off"?"":C.auto?`<div class="care"><div class="need"><img class="face sm" src="${faceSrc(A.f.id,"happy")}" alt=""><span>ครูแดงจัดการให้แล้ว · ${careSum(C)}</span></div></div>`:C.mode==="card"?careCardHTML(A,C):C.mode==="oil"?careOilHTML(A,C):`<div class="care"><div class="need"><img class="face sm" src="${faceSrc(A.f.id,"happy")}" alt=""><span>${C.done?(C.q>=1?"สดชื่นเต็มที่!":C.q>0?"ดีขึ้นนิดหน่อย":"ยังไม่ค่อยดีขึ้น"):"ทำตามลำดับนี้"}</span><div class="cslots">${slots}</div></div>
     <div class="carebtns">${Object.entries(CARE).map(([k,v])=>{const o=C.got.indexOf(k);return `<button data-act="care" data-v="${k}" ${C.done||o>=0?"disabled":""} class="${o>=0?"picked":""}">${o>=0?`<i class="ord">${o+1}</i>`:""}${PIX[k]}<small>${v.name}</small></button>`;}).join("")}</div></div>`}
    <div class="ohead"><b>คำสั่งยกถัดไป</b>${coachOn()?`<button class="btn sm" data-act="chint">คำแนะนำครู</button>`:""}</div>
@@ -11267,7 +11318,7 @@ function tick(){const U=UI.fight;if(!U||U.stage!=="playing")return;
   const e=U.pending.shift();U.shown.push(e);const F=U.F;const now=performance.now();let wait=1500;
   if(e.bell){AU.sfx("bell");U.caption=e.cap;}
   else if(e.tired){U.caption=e.cap;wait=1300;}
-  else if(e.ev){const sd=sideOf(e,F);FS.play({...e,side:sd},now);FS.burst&&FS.burst(e);if(e.ev==="skill"&&FS.skill)FS.skill(sd,e.skrow||0,e.skk,now);if(e.ev==="rage"&&FS.rage)FS.rage(sd,now);U.caption={text:comLine(e,F,U.rng),side:e.ev==="miss"?"":sd,heat:fightHeat(F)};
+  else if(e.ev){const sd=sideOf(e,F);FS.play({...e,side:sd},now);if(e.sc&&typeof scPop==="function")scPop(e.sc);FS.burst&&FS.burst(e);if(e.ev==="skill"&&FS.skill)FS.skill(sd,e.skrow||0,e.skk,now);if(e.ev==="rage"&&FS.rage)FS.rage(sd,now);U.caption={text:comLine(e,F,U.rng),side:e.ev==="miss"?"":sd,heat:fightHeat(F)};
     if(e.ev!=="skill"){const sp=spPick({...e},sd,F,U.rng);if(sp){FS.special(sp,F.round||1,now);const n=F[sp.side].f.name,R=[`ท่าไม้ตายมาแล้วครับ!! ${sp.name}!!`,`${n} ปล่อย${sp.name}!! คนดูลุกทั้งสนาม!`,`นี่แหละ${sp.name}!! ของจริงครับท่านผู้ชม!!`];
       U.caption={text:R[Math.floor(U.rng()*R.length)],side:sp.side,heat:fightHeat(F)};AU.cheer(1);U.spWait=1900;}}
     if(e.ev==="hit"||e.ev==="counter"){AU.sfx(e.w||"punch");if(e.crit)AU.cheer(.8);}
@@ -11423,7 +11474,7 @@ const ACT={
     if(todo.length&&!UI.skipWarn&&SETTINGS.askEnd!==false){UI.modal={type:"endwarn",todo};render();return;}UI.skipWarn=false;endWeek();},
   endgo:()=>{UI.modal=null;UI.skipWarn=true;ACT.endweek();},
   noaskend:d=>{const el=document.querySelector("[data-act=noaskend]");SETTINGS.askEnd=!(el&&el.checked);saveSettings();},
-  fighter:d=>{UI.ptab=d.v||"over";UI.look=pLookOf(G.F[d.id]);UI.modal={type:"fighter",id:d.id};render();},
+  fighter:d=>{UI.ptab=d.v||"over";UI.scd=null;UI.look=pLookOf(G.F[d.id]);UI.modal={type:"fighter",id:d.id};render();},
   ptab:d=>{UI.ptab=d.v;render();},
   plook:d=>{UI.look=d.v;const id=UI.modal&&UI.modal.id,f=id&&G.F[id];if(f&&f.camp==="player"&&(f.canon||CHAMP_IDS.includes(f.id))){G.pLook=G.pLook||{};G.pLook[id]=d.v;save();}render();},
   albtog:()=>{UI.albAll=!UI.albAll;render();},
@@ -15785,6 +15836,152 @@ EVENTS.push({id:"pet_mudlek",look:"casual",bg:"camp",pri:2,when:G=>inCamp(G,"fah
 try{window.PETX={petsWeekly,petPlayMode,pst,petXP,PX};}catch(e){}
 })();
 
+/* v1.91.177 (Man): support cards — every camp fighter can carry up to 5 album cards.
+   Slots open by HER level and cost money (dear on purpose: late-game camps sit on a lot of cash).
+   Equipping costs a fee by rarity (taking off is free), a card sits on one fighter at a time, her own card counts ×1.5.
+   Cards add a little to training (their theme stats) and to fights (crit/evade/counter/…); each card glows when it works. */
+const SC_LV=[1,8,15,22,30],SC_COST=[0,20000,80000,200000,400000],SC_MAX=5;
+const SC_FEE={N:1000,R:3000,SR:10000,SSR:30000};
+const SC_TRAIN={N:[.01,.015,.02],R:[.02,.025,.03],SR:[.03,.035,.04],SSR:[.04,.05,.06]};
+const SC_FIGHT={N:[0,0,0],R:[.003,.004,.005],SR:[.006,.008,.01],SSR:[.01,.0125,.015]};
+const SC_CAP={train:.2,crit:.07,evade:.01,ctr:.07,clutch:.09,regen:.06,corner:.25};
+const SC_OWN=1.5;
+const SC_FKM={crit:2,evade:.2,ctr:1.2,clutch:3.2,regen:1,corner:7}; /* per-effect weight so every girl's fight bonus is worth about the same (sim) */
+const SC_THEME={
+  kati:{tr:["kick","foot","guard"],fk:"crit",w:"all",txt:"คริติคอล"},
+  mali:{tr:["elbow","knee","clinch","foot"],fk:"evade",txt:"หลบ"},
+  rin:{tr:["counter","iq","guard"],fk:"ctr",txt:"สวนกลับ"},
+  ploy:{tr:["punch","power","speed"],fk:"crit",w:"punch",txt:"คริลูกหมัด"},
+  fah:{tr:["elbow","power","speed"],fk:"clutch",txt:"เลือดต่ำแม่นขึ้น"},
+  prod_B:{tr:["elbow","counter"],fk:"ctr",txt:"สวนกลับ"},
+  pailin:{tr:["iq","comp"],fk:"corner",txt:"คำสั่งพักยก"},
+  team:{tr:null,half:1,fk:"regen",txt:"ฟื้นแรง"}};
+const SC_FKNAME={crit:"คริ",evade:"หลบ",ctr:"สวนกลับ",clutch:"เลือดต่ำแม่นขึ้น",regen:"ฟื้นแรง",corner:"คำสั่งพักยก"};
+const scTeam=id=>/team/.test(id);
+/* v1.91.177 (Man): shipped dark — off for players until Man says so. Preview: open the game with #sc=1 (#sc=0 turns it back off). To launch, make this return true. */
+function scOn(){try{if(typeof location!=="undefined"){const m=/[#&]sc=([01])/.exec(location.hash||"");if(m){if(m[1]==="1")localStorage.setItem("mtm_sc","1");else localStorage.removeItem("mtm_sc");}}return typeof localStorage!=="undefined"&&localStorage.getItem("mtm_sc")==="1";}catch(e){return false;}}
+function scTheme(id){const C=CARDS[id];if(!C||scTeam(id))return SC_THEME.team;return SC_THEME[C.c]||(typeof REQ_ALIAS!=="undefined"&&SC_THEME[REQ_ALIAS[C.c]])||SC_THEME.team;}
+const scSlots=f=>Math.min(SC_MAX,Math.max(1,f.cslot||1));
+const scOwn=(f,id)=>{const C=CARDS[id];if(!C)return false;return scTeam(id)?!!(f.canon):C.c===f.id;};
+function scList(G,f){const own=(G&&G.cards)||{};return (f.scards||[]).filter(id=>CARDS[id]&&own[id]).slice(0,scSlots(f));}
+function scHolder(G,id){for(const f of Object.values(G.F||{}))if(f.camp==="player"&&(f.scards||[]).includes(id))return f;return null;}
+/* everything a set of cards gives one fighter (L defaults to what she wears) — capped */
+function scBonus(G,f,L,raw){L=L||scList(G,f);const tr={},fx={crit:{},evade:0,ctr:0,clutch:0,regen:0,corner:0},src={crit:{}},by=[],best={};
+  for(const id of L){const C=CARDS[id],o=(G.cards||{})[id];if(!C||!o)continue;const T=scTheme(id),lv=clamp((o.lv||1)-1,0,2),m=scOwn(f,id)?SC_OWN:1;
+    const tv=SC_TRAIN[C.r][lv]*m*(T.half?.5:1),fv=SC_FIGHT[C.r][lv]*m;
+    const stats=T.tr||ATTRS.map(a=>a[0]);for(const k of stats)tr[k]=(tr[k]||0)+tv;
+    /* v1.91.177 (Man): fight effects of one kind don't stack — the strongest card of that kind is the one that works */
+    if(fv){const v=fv*(SC_FKM[T.fk]||1);if(T.fk==="crit"){if(raw||!best.crit||v>best.crit.v){if(!raw)best.crit={v,w:T.w,id};else fx.crit[T.w]=(fx.crit[T.w]||0)+v;}}else if(raw)fx[T.fk]+=v;else if(v>fx[T.fk]){fx[T.fk]=v;src[T.fk]=id;}}
+    by.push({id,T,own:m>1,tv,fv:fv*(SC_FKM[T.fk]||1)});}
+  if(best.crit){fx.crit[best.crit.w]=best.crit.v;src.crit[best.crit.w]=best.crit.id;}
+  if(!raw){for(const k in tr)tr[k]=Math.min(SC_CAP.train,tr[k]);for(const w in fx.crit)fx.crit[w]=Math.min(SC_CAP.crit,fx.crit[w]);
+  for(const k of ["evade","ctr","clutch","regen","corner"])fx[k]=Math.min(SC_CAP[k],fx[k]);}
+  return {tr,fx,src,by};}
+/* engine hooks */
+function scTrainMul(G,f,k){if(!scOn()||!G||f.camp!=="player"||!(f.scards||[]).length)return 1;const b=scBonus(G,f);return 1+(b.tr[k]||0);}
+function scFightMods(f,sk){if(!scOn()||typeof G==="undefined"||!G||!G.F)return;const o=Array.isArray(f.scards)?f:G.F[f.id];if(!o||o.camp!=="player"||!(o.scards||[]).length)return;const b=scBonus(G,o);
+  sk.scCrit=b.fx.crit;sk.evade+=b.fx.evade;sk.ctr+=b.fx.ctr;sk.clutch+=b.fx.clutch;sk.regen+=b.fx.regen;sk.corner=(sk.corner||0)+b.fx.corner;sk.scSrc=b.src;}
+/* a card "works" at most once every few exchanges per fighter — the glow stays special */
+function scProc(F,s,key,w){const S=s.sk&&s.sk.scSrc;if(!S)return null;const id=key==="crit"?S.crit&&(S.crit[w]||S.crit.all):S[key];if(!id||!CARDS[id])return null;
+  const now=(F.round||1)*100+(F.ex||0);if(s.scNext!=null&&now<s.scNext)return null;s.scNext=now+4;s.scN=(s.scN||0)+1;
+  return {id,r:CARDS[id].r,t:key==="crit"?(w==="kick"?"คริลูกเตะ!":w==="punch"?"คริลูกหมัด!":"คริ!"):SC_FKNAME[key]+"!",sd:s===F.A?"A":"B"};}
+/* ---------- UI ---------- */
+const scArt=id=>{const C=CARDS[id];return C?cardArtHTML(C,true):"";};
+function scMini(id,cls,extra){const C=CARDS[id];if(!C)return "";const R=CARD_R[C.r];return `<span class="scm ${cls||""}" data-rarity="${C.r}" style="--rc:${R.c}"${extra||""}>${scArt(id)}<i class="rr">${C.r}</i></span>`;}
+function scDraft(f){if(!UI.scd||UI.scd.fid!==f.id)UI.scd={fid:f.id,L:(f.scards||[]).slice(),pk:null};return UI.scd;}
+function scDiff(G,f,L){const cur=f.scards||[],add=L.filter(id=>!cur.includes(id));return {add,fee:add.reduce((a,id)=>a+SC_FEE[CARDS[id].r],0),changed:add.length>0||cur.some(id=>!L.includes(id))};}
+function scPresetHit(f,id){const T=scTheme(id),w=(PRESETS[f.plan&&f.plan.preset]||{}).w||{};if(!T.tr)return Object.keys(w).length>0;return T.tr.some(k=>(w[k]||0)>0);}
+function scBonusLines(G,f,b){const A=Object.fromEntries(ATTRS),tr=Object.entries(b.tr).sort((x,y)=>y[1]-x[1]);const out=[];
+  const allSame=tr.length===ATTRS.length&&tr.every(x=>Math.abs(x[1]-tr[0][1])<1e-9);
+  if(allSame)out.push(`ซ้อมทุกค่าพลัง +${(tr[0][1]*100).toFixed(1).replace(/\.0$/,"")}%`);
+  else for(const [k,v] of tr.slice(0,6))out.push(`ซ้อม${A[k]} +${(v*100).toFixed(1).replace(/\.0$/,"")}%${v>=SC_CAP.train-1e-9?" (เต็ม)":""}`);
+  for(const [w,v] of Object.entries(b.fx.crit))out.push(`${w==="kick"?"คริลูกเตะ":w==="punch"?"คริลูกหมัด":"คริติคอล"} +${(v*100).toFixed(1).replace(/\.0$/,"")}%`);
+  for(const k of ["evade","ctr","clutch"])if(b.fx[k])out.push(`${SC_FKNAME[k]} +${(b.fx[k]*100).toFixed(1).replace(/\.0$/,"")}%`);
+  if(b.fx.regen)out.push(`ฟื้นแรงระหว่างชก +${(b.fx.regen*100).toFixed(1).replace(/\.0$/,"")}%`);if(b.fx.corner)out.push(`คำสั่งพักยกได้ผล +${Math.round(b.fx.corner*100)}%`);
+  return out;}
+function scHowHTML(){return `<div class="px schow"><b>ครูแดงสอนติดการ์ด</b><ol><li>แตะช่องว่างเพื่อเลือกการ์ดจากอัลบั้ม</li><li>ลองใส่ได้ก่อน ดูเลยว่าได้อะไรเพิ่ม ยังไม่เสียเงิน</li><li>กด <b>ยืนยัน</b> แล้วค่อยจ่ายค่าติด · ถอดฟรี · การ์ดของตัวเองแรง ×1.5</li></ol>
+  <p class="meta">ช่องเพิ่มได้ถึง 5 ช่อง ปลดตามเลเวลของนักมวยคนนั้น · การ์ด 1 ใบติดได้ทีละคน</p><p class="meta">โบนัสซ้อมซ้อนกันได้ · เอฟเฟคตอนชกแบบเดียวกันไม่ซ้อน ใช้ใบที่แรงสุด ผสมหลายแบบคุ้มกว่า</p><div class="center"><button class="btn sm gold" data-act="schow">เข้าใจแล้ว</button></div></div>`;}
+/* picker: filters + grid + detail */
+const SCT={hide:"ซ่อนใบที่คนอื่นติดอยู่",fee:"ค่าติด",full:"โบนัสซ้อมเต็มแล้ว",dupd:"เอฟเฟคชกซ้ำ ใช้",dupd2:"แทน",no:"ไม่ได้เพิ่ม",dup:"เอฟเฟคซ้ำ",trfull:"ซ้อมเต็ม",put:"ใส่",tap:"แตะการ์ดเพื่อดูรายละเอียด"};
+const SC_MAIN=["kati","mali","rin","ploy","fah"];
+const SC_ICO={crit:"คริ",evade:"หลบ",ctr:"สวน",clutch:"ใจสู้",regen:"ฟื้น",corner:"พักยก"};
+function scOwnerKey(id){if(scTeam(id))return "team";const c=CARDS[id].c,a=(typeof REQ_ALIAS!=="undefined"&&REQ_ALIAS[c])||c;return SC_MAIN.includes(a)?a:"other";}
+const scIco=id=>{const T=scTheme(id);return T.fk==="crit"&&T.w==="punch"?"หมัด":SC_ICO[T.fk]||"";};
+const scSum=b=>Object.values(b.tr).reduce((a,v)=>a+v,0)+Object.values(b.fx.crit).reduce((a,v)=>a+v,0)+["evade","ctr","clutch","regen","corner"].reduce((a,k)=>a+b.fx[k],0);
+/* what one more card adds on top of L: training gain after the cap, and whether its fight effect is beaten by another card of the same kind */
+function scInfo(f,L,id,GG){GG=GG||G;const M=L.filter(x=>x!==id),W=M.concat(id),a=scBonus(GG,f,M),b=scBonus(GG,f,W),T=scTheme(id);
+  const tr=Object.values(b.tr).reduce((x,v)=>x+v,0)-Object.values(a.tr).reduce((x,v)=>x+v,0);
+  let dup=null;if(SC_FIGHT[CARDS[id].r][0]){const s=T.fk==="crit"?Object.values(b.src.crit)[0]:b.src[T.fk];if(s&&s!==id)dup=s;}
+  return {tr,dup,score:tr*10+(SC_FIGHT[CARDS[id].r][0]&&!dup?(b.by.find(x=>x.id===id)||{}).fv||0:0)*20,none:tr<=1e-9&&(dup||!SC_FIGHT[CARDS[id].r][0])};}
+function scPickHTML(f,D){const own=G.cards||{},F=UI.scf=UI.scf||{o:"rec",r:"",hide:0};
+  const base=D.L.filter((x,i)=>i!==D.pk);
+  let ids=Object.keys(CARDS).filter(id=>own[id]&&!base.includes(id));
+  const hold=id=>{const h=scHolder(G,id);return h&&h.id!==f.id?h:null;};
+  const cnt={};for(const id of ids){const k=scOwnerKey(id);cnt[k]=(cnt[k]||0)+1;}
+  if(F.o!=="rec")ids=ids.filter(id=>scOwnerKey(id)===F.o);
+  if(F.r)ids=ids.filter(id=>CARDS[id].r===F.r);if(F.hide)ids=ids.filter(id=>!hold(id));
+  const gn={};for(const id of ids){const g=scInfo(f,base,id);gn[id]=g.score-(g.dup?100:0)-(g.none?1000:0);}
+  const sc=id=>(scOwn(f,id)?100:0)+CARD_R[CARDS[id].r].s*10+((own[id].lv)||1)+(scPresetHit(f,id)?3:0);
+  if(F.o==="rec")ids=ids.sort((x,y)=>gn[y]-gn[x]||sc(y)-sc(x)).slice(0,12);else ids.sort((x,y)=>sc(y)-sc(x));
+  const nm=k=>k==="rec"?"แนะนำ":k==="team"?"ทีม":k==="other"?"อื่น ๆ":(G.F[k]?G.F[k].name:k);
+  const chip=(act,v,on,t)=>`<button class="scf${on?" on":""}" data-act="${act}" data-v="${v}">${t}</button>`;
+  const ochips=["rec",...SC_MAIN,"team","other"].filter(k=>k==="rec"||cnt[k]).map(k=>chip("scfo",k,F.o===k,nm(k)+(k!=="rec"?`<small>${cnt[k]}</small>`:""))).join("");
+  const rchips=["","SSR","SR","R","N"].map(r=>chip("scfr",r,F.r===r,r||"ทุกระดับ")).join("");
+  const sel=D.sel&&own[D.sel]&&!base.includes(D.sel)?D.sel:null;
+  const tile=id=>{const g=scInfo(f,base,id),h=hold(id),tag=g.none?SCT.no:g.dup?SCT.dup:g.tr<=1e-9?SCT.trfull:"";
+    return `<button class="sct${sel===id?" sel":""}${g.none?" dim":""}" data-act="scsel" data-v="${id}" aria-label="${esc(CARDS[id].t)}">${scMini(id)}<i class="sci">${scIco(id)}</i>${scOwn(f,id)?'<i class="scown">×1.5</i>':""}${h?`<i class="schold">${esc(h.name)}</i>`:""}${tag?`<i class="sccap">${tag}</i>`:""}</button>`;};
+  let det=`<p class="meta scdet">${SCT.tap}</p>`;
+  if(sel){const C=CARDS[sel],T=scTheme(sel),h=hold(sel),o=own[sel],g=scInfo(f,base,sel);
+    det=`<div class="scdet">${scMini(sel)}<span><b>${esc(C.t)}</b><small>${C.r}${(o.lv||1)>1?" · Lv."+o.lv:""} · ${T.tr?"ซ้อม"+T.tr.map(k=>SK_AN[k]).join("/"):"ซ้อมทุกด้านครึ่งเดียว"}${SC_FIGHT[C.r][0]?" · ชก: "+T.txt:""}${scOwn(f,sel)?' · <b class="goldt">การ์ดตัวเอง ×1.5</b>':""}</small><small class="meta">${SCT.fee} ${fmt(SC_FEE[C.r])}${h?` · ติดอยู่กับ${esc(h.name)} (ย้ายมาได้)`:""}${g.dup?` · <b class="no">${SCT.dupd} ${esc(CARDS[g.dup].t)} ${SCT.dupd2}</b>`:""}${g.tr<=1e-9?` · <b class="no">${SCT.full}</b>`:""}</small></span><button class="btn sm gold" data-act="scput" data-v="${sel}">${SCT.put}</button></div>`;}
+  return `<div class="scpick"><div class="scpick-h"><b>${"เลือกการ์ดใส่ช่อง"} ${D.pk+1}</b><button class="btn sm" data-act="scpkx">${"ปิด"}</button></div><div class="scfs">${ochips}</div><div class="scfs">${rchips}<label class="scfh"><input type="checkbox" data-act="scfh" ${F.hide?"checked":""}> ${SCT.hide}</label></div><div class="scgrid">${ids.length?ids.map(tile).join(""):`<p class="meta">${Object.keys(own).length?"ไม่มีการ์ดตามตัวกรองนี้":"ยังไม่มีการ์ดว่าง · สุ่มการ์ดได้ที่ตู้กาชาในอัลบั้ม"}</p>`}</div>${det}</div>`;}
+function scTabHTML(f){const D=scDraft(f),n=scSlots(f),lv=lvOf(f),b=scBonus(G,f,D.L),df=scDiff(G,f,D.L);
+  const how=!(G.flags||{}).scHow||UI.scHowOpen;
+  const slot=i=>{if(i<n){const id=D.L[i];if(id){const tr=!(f.scards||[]).includes(id),hit=scPresetHit(f,id);
+        return `<div class="scslot on${tr?" try":""}"><button class="scbtn" data-act="scpick" data-v="${i}" aria-label="เปลี่ยนการ์ด ${esc(CARDS[id].t)}">${scMini(id,hit?"glow":"")}</button>${tr?'<i class="sctry">ลองใส่</i>':""}<button class="scx" data-act="scrm" data-v="${i}" aria-label="ถอด">×</button></div>`;}
+      return `<div class="scslot"><button class="scbtn empty${D.pk===i?" pk":""}" data-act="scpick" data-v="${i}" aria-label="เลือกการ์ดใส่ช่อง ${i+1}">+</button></div>`;}
+    const ok=i===n&&lv>=SC_LV[i];
+    return `<div class="scslot lock"><button class="scbtn locked" ${ok?`data-act="scunlock" data-id="${f.id}"`:"disabled"} aria-label="ช่อง ${i+1}">🔒<small>Lv.${SC_LV[i]}</small><small class="${ok?"goldt":""}">${fmt(SC_COST[i])}</small>${ok?"<small class=\"goldt\">แตะเพื่อปลด</small>":""}</button></div>`;};
+  const lines=scBonusLines(G,f,b);
+  const pick=D.pk!=null?scPickHTML(f,D):"";
+  return `<div class="sctab">${how?scHowHTML():""}<div class="schead"><b>การ์ดช่วยซ้อม</b><span class="meta">ช่อง ${n}/${SC_MAX}</span><button class="btn sm" data-act="scauto" data-id="${f.id}">ครูจัดให้</button><button class="btn sm qbtn" data-act="schelp" aria-label="วิธีติดการ์ด">?</button></div>
+   <div class="scslots">${[0,1,2,3,4].map(slot).join("")}</div>
+   <div class="scsum">${lines.length?lines.map(t=>`<span class="pill">${t}</span>`).join(""):'<span class="meta">ยังไม่ได้ติดการ์ด</span>'}</div>
+   ${df.changed?`<div class="scbar"><span>${df.add.length?`ติดใหม่ ${df.add.length} ใบ · <b class="${G.cash<df.fee?"no":"goldt"}">${fmt(df.fee)}</b>`:"ถอดการ์ด · ไม่มีค่าใช้จ่าย"}${G.cash<df.fee?` <small class="no">ขาดอีก ${fmt(df.fee-G.cash)}</small>`:""}</span><button class="btn sm" data-act="sccancel">ยกเลิก</button><button class="btn sm gold" data-act="scok" data-id="${f.id}" ${G.cash<df.fee?"disabled":""}>ยืนยัน</button></div>`:""}
+   ${pick}<p class="meta">การ์ดที่เข้ากับโปรแกรมซ้อมตอนนี้จะเรืองแสง · ตอนชกการ์ดจะเด้งขึ้นเมื่อทำงาน</p></div>`;}
+/* the strip on each training card */
+function scStrip(f){const L=scList(G,f);if(!L.length&&scSlots(f)<=1&&!Object.keys(G.cards||{}).length)return "";const b=scBonus(G,f);const w=(PRESETS[f.plan.preset]||{}).w||{};
+  const best=Object.entries(b.tr).filter(([k])=>(w[k]||0)>0).reduce((a,[,v])=>Math.max(a,v),0);
+  return `<button class="scstrip" data-act="fighter" data-id="${f.id}" data-v="card" aria-label="การ์ดของ ${esc(f.name)}">${[0,1,2,3,4].map(i=>i<scSlots(f)?(L[i]?scMini(L[i],"xs"+(scPresetHit(f,L[i])?" glow":"")):'<span class="scm xs empty">+</span>'):'<span class="scm xs lockd">🔒</span>').join("")}${best?`<b class="ok">ซ้อม +${Math.round(best*100)}%</b>`:""}</button>`;}
+/* a card pops beside the fighter's bars when it works in a fight */
+function scPop(sc){if(!sc||typeof document==="undefined")return;const C=CARDS[sc.id];if(!C)return;const box=document.querySelector(`.fside.${sc.sd==="A"?"a":"b"}`);if(!box)return;const r=box.getBoundingClientRect(),R=CARD_R[C.r];
+  const el=document.createElement("div");el.className="scpop "+(sc.sd==="A"?"l":"r")+" r-"+C.r;el.style.setProperty("--rc",R.c);el.innerHTML=`${scMini(sc.id,"pop")}<span><small><i>${C.r}</i>${esc(C.t)}</small><b>${esc(sc.t)}</b></span>`;
+  el.style.top=(r.bottom+scrollY+6)+"px";if(sc.sd==="A")el.style.left=(r.left+scrollX)+"px";else el.style.right=(document.documentElement.clientWidth-r.right)+"px";document.body.appendChild(el);if(typeof AU!=="undefined"&&AU.sfx)AU.sfx("level");setTimeout(()=>el.remove(),1200);}
+function scAuto(G,f){const own=G.cards||{},n=scSlots(f);const used=new Set();for(const x of Object.values(G.F))if(x.camp==="player"&&x.id!==f.id)(x.scards||[]).forEach(id=>used.add(id));
+  const home=SC_THEME[f.id]||SC_THEME[(typeof REQ_ALIAS!=="undefined"&&REQ_ALIAS[f.id])]||null;
+  const sc=id=>{const C=CARDS[id],T=scTheme(id);return (scOwn(f,id)?60:0)+CARD_R[C.r].s*10+((own[id].lv)||1)*2+(scPresetHit(f,id)?8:0)+(home&&T===home?6:0);};
+  /* greedy: each pick is the card that adds most on top of what's already in — so it mixes fight effects instead of doubling one */
+  const pool=Object.keys(CARDS).filter(id=>own[id]&&!used.has(id)).sort((x,y)=>sc(y)-sc(x)).slice(0,40),L=[];
+  while(L.length<n&&pool.length){let bi=0,bv=-1e9;pool.forEach((id,i)=>{const g=scInfo(f,L,id,G),v=g.score-(g.dup?100:0)-(g.none?1000:0)+sc(id)*.01;if(v>bv){bv=v;bi=i;}});L.push(pool.splice(bi,1)[0]);}
+  return L;}
+Object.assign(ACT,{
+  scpick:d=>{const f=UI.modal&&G.F[UI.modal.id];if(!f)return;const D=scDraft(f);D.pk=+d.v;render();},
+  scpkx:()=>{if(UI.scd){UI.scd.pk=null;UI.scd.sel=null;}render();},
+  scsel:d=>{if(UI.scd)UI.scd.sel=UI.scd.sel===d.v?null:d.v;render();},
+  scfo:d=>{UI.scf=UI.scf||{o:"rec",r:"",hide:0};UI.scf.o=d.v;if(UI.scd)UI.scd.sel=null;render();},
+  scfr:d=>{UI.scf=UI.scf||{o:"rec",r:"",hide:0};UI.scf.r=d.v;if(UI.scd)UI.scd.sel=null;render();},
+  scfh:()=>{UI.scf=UI.scf||{o:"rec",r:"",hide:0};UI.scf.hide=UI.scf.hide?0:1;render();},
+  scput:d=>{const f=UI.modal&&G.F[UI.modal.id];if(!f)return;const D=scDraft(f);if(D.pk==null)return;D.L[D.pk]=d.v;D.L=D.L.filter(Boolean).slice(0,scSlots(f));D.pk=null;D.sel=null;AU.sfx("ui");render();},
+  scrm:d=>{const f=UI.modal&&G.F[UI.modal.id];if(!f)return;const D=scDraft(f);D.L.splice(+d.v,1);D.pk=null;render();},
+  sccancel:()=>{UI.scd=null;render();},
+  scok:d=>{const f=G.F[d.id];if(!f)return;const D=scDraft(f),df=scDiff(G,f,D.L);if(G.cash<df.fee){toast(`เงินไม่พอ ขาดอีก ${fmt(df.fee-G.cash)}`);return;}
+    G.cash-=df.fee;for(const id of D.L){const h=scHolder(G,id);if(h&&h.id!==f.id)h.scards=h.scards.filter(x=>x!==id);}f.scards=D.L.slice();UI.scd=null;AU.sfx("level");
+    toast(df.fee?`ติดการ์ด · ${f.name} · จ่าย ${fmt(df.fee)}`:`จัดการ์ดเรียบร้อย · ${f.name}`);if(typeof save==="function")save();render();},
+  scunlock:d=>{const f=G.F[d.id];if(!f)return;const i=scSlots(f);if(i>=SC_MAX||lvOf(f)<SC_LV[i])return;if(G.cash<SC_COST[i]){toast(`เงินไม่พอ ต้องใช้ ${fmt(SC_COST[i])}`);return;}
+    G.cash-=SC_COST[i];f.cslot=i+1;AU.sfx("level");toast(`ปลดช่องการ์ดที่ ${i+1} · ${f.name}`);if(typeof save==="function")save();render();},
+  scauto:d=>{const f=G.F[d.id];if(!f)return;const D=scDraft(f);D.L=scAuto(G,f);D.pk=null;if(!D.L.length)toast("ยังไม่มีการ์ดว่างให้ติด");render();},
+  schow:()=>{G.flags=G.flags||{};G.flags.scHow=1;UI.scHowOpen=false;render();},
+  schelp:()=>{UI.scHowOpen=!UI.scHowOpen;render();}});
+
 // ================= MUAY THAI MOE — pixel emoji (v1.91.144, Man: "every icon in the game in pixel style") =================
 // Any emoji in text on screen is swapped for a 10x10 pixel icon as it appears (screens, scenes, toasts, letters, both languages).
 // Strings in the game stay untouched, so other code keeps working; an emoji with no icon here simply stays an emoji.
@@ -15869,7 +16066,7 @@ const STATS_HOST="https://us.i.posthog.com";     /* EU projects: https://eu.i.po
 <script>
 (function(){
 /* v1.87: Thai code ships inside index.html; English code (en.js) and the dictionary (i18n.js) load only when needed */
-var B="452d0ef0ee";
+var B="0c5d62e62a";
 var L="";try{L=localStorage.getItem("mtm_lang")||"";}catch(e){}
 try{var h=(location.hash||"").match(/lang=(th|en)/);if(h)L=h[1];}catch(e){}
 if(L!=="th"&&L!=="en")L="th";
