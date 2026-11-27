@@ -21621,5 +21621,9 @@
  "</b><i>ชก!</i></div>": "</b><i>FIGHT!</i></div>",
  "<b>ยก ": "<b>ROUND ",
  "<small>ยกตัดสิน</small>": "<small>DECIDING ROUND</small>",
- "ค่าตัวเข้าค่าย <b class=\"num\" data-count=\"": "Purse to camp <b class=\"num\" data-count=\""
+ "ค่าตัวเข้าค่าย <b class=\"num\" data-count=\"": "Purse to camp <b class=\"num\" data-count=\"",
+ "รัวไม่ยั้ง!": "UNSTOPPABLE!",
+ "ปึก": "Thud",
+ "ตุ้บ": "Thump",
+ "ปั้ก": "Pak"
 }

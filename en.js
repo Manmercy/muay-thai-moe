@@ -6195,13 +6195,31 @@ FS.lag=0;FS._rt=0;FS.slow=null;
 FS.slowmo=function(t,dur){if(typeof matchMedia!=="undefined"&&matchMedia("(prefers-reduced-motion: reduce)").matches)return;FS.slow={t0:t,t1:t+dur};};
 {const R0=FS.render,P0=FS.play,I0=FS.init;
  FS.init=function(){FS.lag=0;FS._rt=0;FS.slow=null;return I0.apply(FS,arguments);};
- FS.play=function(e,now){return P0.call(FS,e,(now==null?performance.now():now)-FS.lag);};
+ FS.play=function(e,now){const t=(now==null?performance.now():now)-FS.lag,r=P0.call(FS,e,t);try{FS.comboEv(e,t);}catch(_){}return r;};
+ /* v1.91.181 combos (Man: "what about combos, rapid punches?"): blows that land back to back from the same corner count up
+    "2 HIT → 3 HIT COMBO! → รัวไม่ยั้ง!" over the attacker's head with a rising blip, and from the third one on each blow becomes
+    a quick flurry — two extra snaps of the arm, extra impact flashes and a little shake. Anything else (a miss, the other side
+    landing, a new round) breaks the chain. */
+ FS.cmb=null;
+ FS.comboEv=function(e,t){const S=FS;if(e.ev==="hit"||e.ev==="counter"){const sd=e.side==="A"?"A":"B",c=S.cmb,rd=typeof UI!=="undefined"&&UI.fight&&UI.fight.F?UI.fight.F.round:0;
+     const n=c&&c.side===sd&&c.round===rd&&t-c.t<6000?c.n+1:1;S.cmb={side:sd,n,t,round:rd};
+     if(n>=2){AU.combo&&AU.combo(n);}
+     if(n>=3&&!(typeof matchMedia!=="undefined"&&matchMedia("(prefers-reduced-motion: reduce)").matches)){const atk=S[sd],def=S[sd==="A"?"B":"A"],hits=Math.min(4,n-1);
+       for(let i=1;i<=hits;i++)setTimeout(()=>{if(!S.A||S.A!==atk&&S.B!==atk)return;const tt=performance.now()-S.lag;atk.t0=tt;atk.anim=i%2?"punch":atk.anim;def.flash=tt;S.shake=Math.max(S.shake||0,4+n);
+         S.fx.push({x:def.x+(def.side==="A"?30:-30)+(Math.random()-.5)*50,y:250+Math.random()*60,t0:tt,txt:["Pak","Thump","Thud"][i%3]});AU.sfx&&AU.sfx("punch");},i*105);}
+     return;}
+   if(e.ev==="miss"||e.ev==="phase"||e.ev==="ko")S.cmb=null;};
+
  FS.render=function(t){const S=FS;if(!S.cv||!S.cv.isConnected||!S.ctx)return R0(t);const dt=S._rt?Math.min(100,Math.max(0,t-S._rt)):0;S._rt=t;
   const sl=S.slow;let z=1,cx=0,cy=0,k=0;
   if(sl){if(t<sl.t1)S.lag+=dt*.78;k=t<sl.t1?Math.min(1,(t-sl.t0)/160):Math.max(0,1-(t-sl.t1)/450);if(t>sl.t1+450){S.slow=null;k=0;}
     z=1+.3*k;cx=S.A&&S.B?(S.A.x+S.B.x)/2:S.cv.width/2;cy=S.cv.height*.62;}
   const x=S.ctx;if(z!==1){x.save();x.translate(cx,cy);x.scale(z,z);x.translate(-cx,-cy);}
   R0(t-S.lag);if(z!==1)x.restore();
+  {const c=S.cmb;const e=c?t-S.lag-c.t:1e9;if(c&&c.n>=2&&e<1300){const atk=S[c.side];const ax=atk?atk.x:S.cv.width/2,p=Math.min(1,e/120),sc=(1.6-.6*p)*(1+Math.min(.5,(c.n-2)*.12)),al=e>1000?1-(e-1000)/300:1;
+    const col=c.n>=5?"#ff3355":c.n>=4?"#ff7a2a":c.n>=3?"#ffb02a":"#ffe066";x.save();x.globalAlpha=Math.max(0,al);x.translate(Math.max(150,Math.min(S.cv.width-150,ax+(c.side==="A"?-60:60))),S.cv.height*(S.banner?.62:.34)-e*.02);x.rotate(c.side==="A"?-.08:.08);x.scale(sc,sc);
+    x.textAlign="center";x.textBaseline="middle";x.lineJoin="round";x.font='900 64px "Chakra Petch","IBM Plex Sans Thai",sans-serif';x.lineWidth=12;x.strokeStyle="#1a0612";x.strokeText(c.n+" HIT",0,0);x.fillStyle=col;x.fillText(c.n+" HIT",0,0);
+    if(c.n>=3){const s2=c.n>=5?"UNSTOPPABLE!":"COMBO!";x.font='800 34px "Chakra Petch","IBM Plex Sans Thai",sans-serif';x.lineWidth=8;x.strokeText(s2,0,48);x.fillStyle="#fff";x.fillText(s2,0,48);}x.restore();}}
   if(sl){const W=S.cv.width,H=S.cv.height,e=t-sl.t0;x.save();
     if(e<520){x.globalCompositeOperation="saturation";x.globalAlpha=Math.max(0,1-e/520);x.fillStyle="#808080";x.fillRect(0,0,W,H);x.globalCompositeOperation="source-over";}
     if(e<90){x.globalAlpha=.55*(1-e/90);x.fillStyle="#fff";x.fillRect(0,0,W,H);}
@@ -6713,7 +6731,7 @@ AU.gsfx=function(kind,a){if(!this.init()||this.muted||!SETTINGS.sfx)return;const
   if(kind==="shimmer")for(let i=0;i<6;i++)T(i*.05,{f:1400+Math.random()*1400,type:"sine",dur:.12,peak:.06});};
 
 // ================= MUAY THAI MOE v1.3 — UI =================
-const VERSION="1.91.180";
+const VERSION="1.91.181";
 const CUR_LANG=(typeof window!=="undefined"&&window.LANG)||"th";
 const TH_LABEL=String.fromCharCode(3652,3607,3618);
 function langSwitch(cls){return `<div class="langsw ${cls||""}" role="group" aria-label="Language">${[["th",TH_LABEL],["en","EN"]].map(([k,l])=>`<button class="lsb ${CUR_LANG===k?"on":""}" data-act="setlang" data-v="${k}" aria-pressed="${CUR_LANG===k}">${l}</button>`).join("")}</div>`;}

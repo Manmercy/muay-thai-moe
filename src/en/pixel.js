@@ -762,7 +762,7 @@ FS.slowmo=function(t,dur){if(typeof matchMedia!=="undefined"&&matchMedia("(prefe
      if(n>=2){AU.combo&&AU.combo(n);}
      if(n>=3&&!(typeof matchMedia!=="undefined"&&matchMedia("(prefers-reduced-motion: reduce)").matches)){const atk=S[sd],def=S[sd==="A"?"B":"A"],hits=Math.min(4,n-1);
        for(let i=1;i<=hits;i++)setTimeout(()=>{if(!S.A||S.A!==atk&&S.B!==atk)return;const tt=performance.now()-S.lag;atk.t0=tt;atk.anim=i%2?"punch":atk.anim;def.flash=tt;S.shake=Math.max(S.shake||0,4+n);
-         S.fx.push({x:def.x+(def.side==="A"?30:-30)+(Math.random()-.5)*50,y:250+Math.random()*60,t0:tt,txt:["ปั้ก","ตุ้บ","ปึก"][i%3]});AU.sfx&&AU.sfx("punch");},i*105);}
+         S.fx.push({x:def.x+(def.side==="A"?30:-30)+(Math.random()-.5)*50,y:250+Math.random()*60,t0:tt,txt:["Pak","Thump","Thud"][i%3]});AU.sfx&&AU.sfx("punch");},i*105);}
      return;}
    if(e.ev==="miss"||e.ev==="phase"||e.ev==="ko")S.cmb=null;};
 
@@ -775,7 +775,7 @@ FS.slowmo=function(t,dur){if(typeof matchMedia!=="undefined"&&matchMedia("(prefe
   {const c=S.cmb;const e=c?t-S.lag-c.t:1e9;if(c&&c.n>=2&&e<1300){const atk=S[c.side];const ax=atk?atk.x:S.cv.width/2,p=Math.min(1,e/120),sc=(1.6-.6*p)*(1+Math.min(.5,(c.n-2)*.12)),al=e>1000?1-(e-1000)/300:1;
     const col=c.n>=5?"#ff3355":c.n>=4?"#ff7a2a":c.n>=3?"#ffb02a":"#ffe066";x.save();x.globalAlpha=Math.max(0,al);x.translate(Math.max(150,Math.min(S.cv.width-150,ax+(c.side==="A"?-60:60))),S.cv.height*(S.banner?.62:.34)-e*.02);x.rotate(c.side==="A"?-.08:.08);x.scale(sc,sc);
     x.textAlign="center";x.textBaseline="middle";x.lineJoin="round";x.font='900 64px "Chakra Petch","IBM Plex Sans Thai",sans-serif';x.lineWidth=12;x.strokeStyle="#1a0612";x.strokeText(c.n+" HIT",0,0);x.fillStyle=col;x.fillText(c.n+" HIT",0,0);
-    if(c.n>=3){const s2=c.n>=5?"รัวไม่ยั้ง!":"COMBO!";x.font='800 34px "Chakra Petch","IBM Plex Sans Thai",sans-serif';x.lineWidth=8;x.strokeText(s2,0,48);x.fillStyle="#fff";x.fillText(s2,0,48);}x.restore();}}
+    if(c.n>=3){const s2=c.n>=5?"UNSTOPPABLE!":"COMBO!";x.font='800 34px "Chakra Petch","IBM Plex Sans Thai",sans-serif';x.lineWidth=8;x.strokeText(s2,0,48);x.fillStyle="#fff";x.fillText(s2,0,48);}x.restore();}}
   if(sl){const W=S.cv.width,H=S.cv.height,e=t-sl.t0;x.save();
     if(e<520){x.globalCompositeOperation="saturation";x.globalAlpha=Math.max(0,1-e/520);x.fillStyle="#808080";x.fillRect(0,0,W,H);x.globalCompositeOperation="source-over";}
     if(e<90){x.globalAlpha=.55*(1-e/90);x.fillStyle="#fff";x.fillRect(0,0,W,H);}
