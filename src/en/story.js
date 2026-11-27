@@ -2043,6 +2043,13 @@ EVENTS.push(
   {choice:[{t:"Your style is your strength. Don't throw it away.",fx:G=>{add(G,"fah","bond",5);add(G,"fah","trust",3);},then:[{n:"fah",f:"flustered",l:"casual",t:"…You're the first person to say that. And you're from a different camp."}]},
    {t:"(Sit and listen quietly until she's let it all out)",fx:G=>{add(G,"fah","trust",6);add(G,"fah","bond",2);},then:[{n:"fah",f:"happy",l:"casual",t:"…Thanks for not lecturing me. I've been lectured all day."}]}]},
   {inject:G=>G.F.fah.bond<40?[{n:"nar",t:"(If you were closer with Fah, this might go further)"}]:[]}]},
+ /* v1.91.195 (playtest): a long run with the camp's two rivals left out never brought them in — Kru Daeng points the way once, in year 2 */
+ {id:"coach_rival_hint",look:"casual",bg:"camp",when:G=>(G.season||1)>=2&&G.week>=24&&G.week<=40&&((G.F.ploy&&G.F.ploy.camp==="rival"&&G.F.ploy.met&&(G.F.ploy.bond||0)<40)||(fahRival(G)&&G.F.fah.met&&(G.F.fah.bond||0)<30)),steps:[
+  {n:"coach",t:G=>`${G.player&&G.player.name||"Ton"}, let me ask you something. This is all the camp has. If one day we need to send a lot of fighters at once, will it be enough?`},
+  {n:"coach",t:"Ploy and Fah fight for Golden Tiger, sure. But nobody stays in one camp their whole life."},
+  {n:"coach",t:G=>G.F.ploy&&G.F.ploy.camp==="rival"?"Ploy only respects someone who beats her in a real fight, and she only listens to people she's close to. Take her out now and then.":"Ploy's with us already. Just look after her."},
+  {n:"coach",t:G=>fahRival(G)?"As for Fah — tough talk, soft heart. If you two get close enough, one day she might want to move here herself.":"Fah's with us already. No need to worry about that one."},
+  {n:"coach",t:"I'm not telling you to poach anyone. Just don't keep the camp gate shut."}]},
  {id:"fah_join",look:"casual",bg:"camp",when:G=>(G.season||1)>=2&&G.week>=10&&G.seen.fah_trainer&&fahRival(G)&&(G.F.fah.bond||0)>=40&&absWeek(G)>=((G.flags||{}).fahRetry||0),steps:[
   {n:"nar",t:"Monday morning, the rain has just stopped. A big canvas bag sits outside the gate, its owner crouched beside it, pretending to look at the sky."},
   {n:"fah",f:"flustered",l:"casual",t:"Fah didn't skip training… I woke up at five today and ran until the rain stopped. Only then did I dare walk here."},

@@ -896,7 +896,7 @@ function regionLoad(){if(typeof REGION!=="undefined")return Promise.resolve(REGI
   if(typeof window==="undefined"||!window.MTM_JS)return Promise.reject(new Error("no loader"));
   REGION_P=window.MTM_JS((window.LANG==="en"?"region-en.js":"region.js")+"?v="+(window.MTM_BUILD||"")).then(()=>{if(typeof REGION==="undefined")throw new Error("region.js did not run");return REGION;},e=>{REGION_P=null;throw e;});return REGION_P;}
 function regionStart(G){if(G.region)return;const now=gameWeek(G),R=["north","isan","central","south"];
-  G.region={edition:1,startAbs:now,belts:Object.fromEntries(R.map(r=>[r,{}])),trip:null,nextTripAbs:now+1,
+  G.region={edition:1,startAbs:now,belts:Object.fromEntries(R.map(r=>[r,{}])),trip:null,nextTripAbs:now+1,galaAbs:now+1,
     champ:Object.fromEntries(R.map(r=>[r,{state:"locked",fid:null,w:0,l:0}])),cups:[],meet:{},hall:[],pend:[],gc:[]};
   addMail(G,{kind:"letter",tone:"naka",from:"NAGA Energy Drink",title:"Invitation: Four Regions Championship",
     body:`Dear Manager of Sirichai Camp,
@@ -1051,7 +1051,7 @@ const hasStaff=(G,k)=>(G.staff||[]).includes(k);
 const staffLocked=(G,k)=>{const r=STAFF[k].req;if(!r)return "";if(r.lv&&campLevel(G)<r.lv)return `Camp Lv.${r.lv}`;if(r.rep&&G.rep<r.rep)return `Fame ${r.rep}`;return "";};
 function hireStaff(G,k){const S=STAFF[k];G.staff=G.staff||[];if(!S||hasStaff(G,k)||G.staff.length>=staffSlots(G)||staffLocked(G,k)||G.cash<S.fee)return false;G.cash-=S.fee;G.staff.push(k);G.fac.assistants=G.staff.length;return true;}
 function fireStaff(G,k){G.staff=(G.staff||[]).filter(x=>x!==k);G.fac.assistants=G.staff.length;return true;}
-function fixSave(G){if(typeof byCampKit==="function")byCampKit(G); /* v1.91.166: Baiyok in the camp gets her tree *//* v1.91.42: a card counts as read only if its story was ever opened (o.seen is set only there) — v1.91.41 wrongly marked every owned card read */if(G&&(G.cardRd||0)<2){for(const k in (G.cards||{})){const o=G.cards[k];o.rd=o.seen?1:0;}G.cardRd=2;}if(G&&G.F&&typeof hmFix==="function")hmFix(G);if(G&&G.F&&typeof monoFix==="function")monoFix(G);if(G&&G.ev&&G.ev.loy&&typeof thiefFix==="function")thiefFix(G);if(G&&G.F&&G.prodigy)fixProdigies(G);if(G&&G.flags&&G.flags.beat_ploy&&G.flags.beatS_ploy==null)G.flags.beatS_ploy=G.season||1;
+function fixSave(G){if(typeof byCampKit==="function")byCampKit(G);for(const [id,k] of [["ploy","captain"],["fah","grin"]])if(G.F&&G.F[id]&&G.F[id].skills&&(G.F[id].skills[k]||0)>3)G.F[id].skills[k]=3; /* v1.91.195: undo the old runaway yearly rank-up */ /* v1.91.166: Baiyok in the camp gets her tree *//* v1.91.42: a card counts as read only if its story was ever opened (o.seen is set only there) — v1.91.41 wrongly marked every owned card read */if(G&&(G.cardRd||0)<2){for(const k in (G.cards||{})){const o=G.cards[k];o.rd=o.seen?1:0;}G.cardRd=2;}if(G&&G.F&&typeof hmFix==="function")hmFix(G);if(G&&G.F&&typeof monoFix==="function")monoFix(G);if(G&&G.ev&&G.ev.loy&&typeof thiefFix==="function")thiefFix(G);if(G&&G.F&&G.prodigy)fixProdigies(G);if(G&&G.flags&&G.flags.beat_ploy&&G.flags.beatS_ploy==null)G.flags.beatS_ploy=G.season||1;
   // Legacy saves used week-of-season values. Infer only short, plausible effects;
   // otherwise expire them instead of resurrecting an old effect after New Year.
   const now=gameWeek(G),base=now-G.week;
@@ -1387,7 +1387,7 @@ function applyResult(G,F,booking){
         if(res==="W"){op.surge=(op.surge||0)+7;op.potential=Math.min(20,op.potential+.5);G.flags[`beat_${op.id}`]=(G.flags[`beat_${op.id}`]||0)+1;G.flags[`surgeWk_${op.id}`]=G.week;G.flags[`beatS_${op.id}`]=G.season||1;if(op.id==="ploy")op.aura=ployAura(G.week,G);}}
       /* v1.83.1: a win over a much weaker opponent teaches less, a close or tougher fight teaches more */const xpm=clamp(1+gapR*.3,.5,1.45);
       gainXP(G,me,Math.round((res==="W"?45*xpm:res==="D"?35*clamp(xpm,.75,1.2):30)*(1+pmods.fightXp+(res==="L"?pmods.lossXp:0))*(booking.tier==="district"?1.3:booking.tier==="semi"?1.6:booking.tier==="final"?2:1)));
-      G.cal=G.cal||[];G.cal.push({wk:G.week,season:G.season||1,absWeek:gameWeek(G),a:me.id,b:op.id,bn:op.name,tier:booking.tier,res,type:r.type,cards:(F.cards||[]).map(c=>[...c]),pay});
+      G.cal=G.cal||[];G.cal.push({wk:G.week,season:G.season||1,absWeek:gameWeek(G),a:me.id,b:op.id,bn:op.name,tier:booking.tier,...(booking.tierName?{tierName:booking.tierName}:{}),res,type:r.type,cards:(F.cards||[]).map(c=>[...c]),pay});
       oppRemember(G,me,op,res,r.type);
       ret={pay,res,upset};
     }
@@ -1556,7 +1556,7 @@ function weekFinish(G){if(G.rep>55)G.rep=55+(G.rep-55)*(.96+(G.fac.hall||0)*.01)
   stageTransition(G);
   {const pv=G.history.length?G.history[G.history.length-1].cash:60000,sp=G.sponsorWk||0;G.history.push({w:G.week,season:G.season||1,cash:Math.round(G.cash),rep:+G.rep.toFixed(1),inc,up,wg,debt:debtPay,sponsor:sp,fight:G.wkFight||0,oth:Math.round(G.cash-pv-(inc+sp-up-wg-debtPay)-(G.wkFight||0))});G.wkFight=0;}
   if((G.negWeeks>=4&&G.cash<-10000)||G.cash<-40000)G.ended="bankrupt";
-  if(G.week===21||G.week===41){G.F.ploy.skills.captain=(G.F.ploy.skills.captain||0)+1;G.F.fah.skills.grin=(G.F.fah.skills.grin||0)+1;}
+  if(G.week===21||G.week===41){G.F.ploy.skills.captain=Math.min(3,(G.F.ploy.skills.captain||0)+1);G.F.fah.skills.grin=Math.min(3,(G.F.fah.skills.grin||0)+1);} /* v1.91.195 (playtest): capped at the normal 3 ranks — it grew +2 a year forever (Ploy reached 27 ranks by year 14: +27% evade) */
   if(G.week===41){G.F.ploy.skills.kr_knee=Math.max(1,G.F.ploy.skills.kr_knee||0);} // v1.19.2: Ploy brings one more weapon to the semis/final
   G.week++;G.freeUsed=false;G.campUsed=null;
   syncFighterAges(G);

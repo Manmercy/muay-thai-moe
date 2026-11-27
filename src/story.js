@@ -2043,6 +2043,13 @@ EVENTS.push(
   {choice:[{t:"สไตล์ของฟ้าคือจุดแข็ง อย่าทิ้งมัน",fx:G=>{add(G,"fah","bond",5);add(G,"fah","trust",3);},then:[{n:"fah",f:"flustered",l:"casual",t:"…นายเป็นคนแรกที่พูดแบบนี้เลยนะ ทั้งที่อยู่คนละค่ายแท้ ๆ"}]},
    {t:"(นั่งฟังเงียบ ๆ จนเธอระบายหมด)",fx:G=>{add(G,"fah","trust",6);add(G,"fah","bond",2);},then:[{n:"fah",f:"happy",l:"casual",t:"…ขอบใจนะที่ไม่สั่งสอน ฟ้าโดนสั่งสอนมาทั้งวันแล้ว"}]}]},
   {inject:G=>G.F.fah.bond<40?[{n:"nar",t:"(ถ้าสนิทกับฟ้ามากกว่านี้ เรื่องนี้อาจไปต่อได้)"}]:[]}]},
+ /* v1.91.195 (playtest): a long run with the camp's two rivals left out never brought them in — Kru Daeng points the way once, in year 2 */
+ {id:"coach_rival_hint",look:"casual",bg:"camp",when:G=>(G.season||1)>=2&&G.week>=24&&G.week<=40&&((G.F.ploy&&G.F.ploy.camp==="rival"&&G.F.ploy.met&&(G.F.ploy.bond||0)<40)||(fahRival(G)&&G.F.fah.met&&(G.F.fah.bond||0)<30)),steps:[
+  {n:"coach",t:G=>`${G.player&&G.player.name||"ต้น"} ครูถามหน่อย ค่ายเรามีกันแค่นี้ วันหน้าถ้าต้องส่งนักมวยหลายคนพร้อมกัน จะพอไหม`},
+  {n:"coach",t:"พลอยกับฟ้าน่ะ อยู่พยัคฆ์ทองก็จริง แต่ไม่มีใครอยู่ค่ายเดียวไปตลอดชีวิตหรอก"},
+  {n:"coach",t:G=>G.F.ploy&&G.F.ploy.camp==="rival"?"พลอยเคารพแต่คนที่ชนะเธอได้ในไฟต์จริง และต้องสนิทกันมากพอถึงจะยอมฟัง ชวนเธอออกไปข้างนอกบ้าง":"พลอยอยู่กับเราแล้ว ดูแลเธอให้ดีก็พอ"},
+  {n:"coach",t:G=>fahRival(G)?"ส่วนฟ้า ปากแข็งแต่ใจไม่ได้แข็ง ถ้าสนิทกันพอ วันหนึ่งเธออาจอยากย้ายมาเอง":"ฟ้าอยู่กับเราแล้ว คนนั้นไม่ต้องห่วง"},
+  {n:"coach",t:"ครูไม่ได้บอกให้ไปแย่งใครนะ แค่อย่าปิดประตูค่ายไว้ก็พอ"}]},
  {id:"fah_join",look:"casual",bg:"camp",when:G=>(G.season||1)>=2&&G.week>=10&&G.seen.fah_trainer&&fahRival(G)&&(G.F.fah.bond||0)>=40&&absWeek(G)>=((G.flags||{}).fahRetry||0),steps:[
   {n:"nar",t:"เช้าวันจันทร์ ฝนเพิ่งหยุด มีกระเป๋าผ้าใบใหญ่วางอยู่หน้าประตูค่าย เจ้าของนั่งยอง ๆ อยู่ข้าง ๆ ทำเป็นมองฟ้า"},
   {n:"fah",f:"flustered",l:"casual",t:"ฟ้าไม่ได้หนีซ้อมนะ… วันนี้ฟ้าตื่นตั้งแต่ตีห้า วิ่งจนฝนหยุดแล้ว ถึงกล้าเดินมาที่นี่"},

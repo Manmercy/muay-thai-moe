@@ -2036,6 +2036,8 @@ const REGION={
   weekScene(G,done){const R=G.region;if(!R){done();return;}rgApply(G);const now=gameWeek(G);if(lbWeek(G,done))return;
     /* v1.91.122 (Man): the five celebrate the camp's milestones back home, one a week */
     if(R.msQ&&R.msQ.length){const q=R.msQ.shift(),S=rgMsSteps(G,q);if(S){playScene(S,()=>{save();done();},{bg:RG_MSL[q.k].bg,look:"casual"});return;}}
+    /* v1.91.194 (playtest): the opening gala comes before every other regional scene, and no trip leaves before it */
+    if(!R.gala){if(R.galaAbs==null)R.galaAbs=now+1;if(now>=R.galaAbs){R.gala=1;AU.startMusic&&AU.startMusic("hub");playScene(rgGala(G),()=>{save();done();},{bg:"gala",look:"casual"});return;}}
     if(rgKritDue(G)){playScene(rgKritSteps(G),()=>{save();done();},{bg:"camp_day",look:"casual"});return;}
     {const hs=rgRelDue(G);if(hs){playScene(hs.steps,()=>{save();done();},{bg:"camp",look:"casual"});return;}}
     /* v1.91.26 (Man): Kru Daeng reminds you to watch tape and train the counter before each regional title bout — no new buttons */
@@ -2053,7 +2055,6 @@ const REGION={
     /* v1.91.176 (Man): Kru Daeng warns when the camp is short of the five the Naka night needs */
     if(R.final&&!R.final.won&&!R.final.warn5&&this.finalPool(G).length<NL_ORDER.length){R.final.warn5=1;playScene(rgWarn5(G,this.finalPool(G).length,true),()=>{save();done();},{bg:"camp",look:"casual"});return;}
     if(R.endWarn&&!R.final&&!R.warn5e&&roster(G).length<NL_ORDER.length){R.warn5e=1;playScene(rgWarn5(G,roster(G).length,false),()=>{save();done();},{bg:"camp",look:"casual"});return;}
-    if(!R.gala){if(R.galaAbs==null)R.galaAbs=now+1;if(now>=R.galaAbs){R.gala=1;AU.startMusic&&AU.startMusic("hub");playScene(rgGala(G),()=>{save();done();},{bg:"gala",look:"casual"});return;}}
     const r=(R.cups||[])[0],c=r&&R.champ[r];
     if(r&&!R.c1&&c&&now>=(c.wonAbs||0)+1){R.c1="seen";playScene(rgCup1(G,r),()=>{save();done();},{bg:"camp",look:"casual"});return;}
     {const r2=(R.cups||[])[1],c2=r2&&R.champ[r2];if(r2&&!R.c2&&c2&&now>=(c2.wonAbs||0)+1){R.c2="later";playScene(rgCup2(G),()=>{save();done();},{bg:"camp",look:"casual"});return;}}
@@ -2495,11 +2496,12 @@ ${RG[r].champ}, the new champion of ${RG[r].name} is open to a title challenge a
        <p class="meta">${roadCarKey(G)==="none"?`No camp vehicle · the bus takes any number, a ticket each · picked ${UI.rgParty.length} fighters in camp`:`${esc(roadCarName(roadCarKey(G)))} · ${(ROAD_CAR[roadCarKey(G)]||{}).seats} seats (the manager drives ${roadCoachIn(G)?" · Kru Daeng 1 seat":""}) · fighters who fit: <b>${max}</b> · picked ${UI.rgParty.length}/${max}`}</p>
        ${roadCoachAvail(G)?`<div class="rg-pick"><button class="btn sm" data-act="rgcoach" aria-pressed="${roadCoachIn(G)}"><img class="face sm" src="${faceSrc("coach","happy")}" alt="">Kru Daeng <small>${roadCoachIn(G)?"coming · reads tape, advises from the corner":"stays at camp · no advice this trip"}</small></button></div>`:`<p class="meta">Kru Daeng is on leave · no advice this trip</p>`}
        <div class="rg-pick">${cand.map(f=>{const on=UI.rgParty.includes(f.id),full=!on&&UI.rgParty.length>=max,pr=this.pairDue(G,dest)===f.id,fit=RD.some(x=>x.id===f.id);
-         return `<button class="btn sm${pr?" rg-pairtag":""}" data-act="rgparty" data-v="${f.id}" aria-pressed="${on}" ${full?"disabled":""}>${faceImg(f,"sm")}${esc(f.name)}${fit?"":` <small>can't fight</small>`}${pr?` <small>💬 has a story with ${esc(C.champ)}</small>`:""}</button>`;}).join("")}</div>
+         return `<button class="btn sm${pr?" rg-pairtag":""}" data-act="rgparty" data-v="${f.id}" aria-pressed="${on}" ${full?"disabled":""}>${faceImg(f,"sm")}${esc(f.name)}${fit?"":` <small>${f.injury?`injured ${f.injury} wk · cheering`:"can't fight"}</small>`}${pr?` <small>💬 has a story with ${esc(C.champ)}</small>`:""}</button>`;}).join("")}</div>
        ${okF?"":`<p class="redt">Bring at least one fighter who is fit to fight</p>`}
        <div class="mfoot"><button class="btn" data-act="${UI.rgNow?"rgtravel":"closeModal"}">${UI.rgNow?"◂ Back":"Later"}</button><button class="btn primary" data-act="rgstep" data-v="2" ${okF?"":"disabled"}>Next · pick who fights ▸</button></div>`;}
     const R=RD.filter(f=>UI.rgParty.includes(f.id));if(!UI.rgFid||!R.some(f=>f.id===UI.rgFid))UI.rgFid=R[0]?R[0].id:null;
     const abs=this.base(G)+wk,P=roadPlan(G,dest,null,abs),now=!!UI.rgNow;
+    /* v1.91.195 (playtest): the bill warns when the trip leaves the camp only a few weeks of running costs */
     const me=UI.rgFid&&G.F[UI.rgFid],poor=G.cash<P.total,line=(k,v)=>v?`<div class="kv-row"><span>${k}</span><b class="num">${fmt(v)}</b></div>`:"";
     return `${head}<p class="rg-step">Step 2/2 · Who fights</p>
      ${R.length?`<div class="rg-pick">${R.map(f=>`<button class="btn sm" data-act="rgfid" data-v="${f.id}" aria-pressed="${f.id===UI.rgFid}">${faceImg(f,"sm")}${esc(f.name)} <small>Lv.${f.lvl||1}</small></button>`).join("")}</div>`:`<p class="redt">No one on board is fit to fight</p>`}
@@ -2507,12 +2509,13 @@ ${RG[r].champ}, the new champion of ${RG[r].name} is open to a title challenge a
      <h3>Travel cost, round trip</h3><div class="rg-bill"><div class="kv-row"><span>Vehicle</span><b>${esc(roadCarName(P.car))}</b></div>
       ${line(`${P.ft==="ev"?"Electricity":"Fuel"} ${Math.round(P.litres)} ${P.unit||"litre"} × ฿${P.price.toFixed(2)}`,P.fuel)}${line("Tolls",P.toll)}${line(`Bus tickets × ${P.onBus}`,P.bus)}${line(`Lodging ${P.nights} night(s)`,P.lodge)}${line(`Food × ${P.people}`,P.food)}
       <div class="kv-row"><span><b>Total</b></span><b class="num ${poor?"redt":"goldt"}">${fmt(P.total)}</b></div><div class="kv-row"><span>Camp cash after paying</span><b class="num ${poor?"redt":""}">${fmt(G.cash-P.total)}</b></div></div>
+      ${(()=>{const net=typeof weeklyNet==="function"?weeklyNet(G):0,left=G.cash-P.total;return !poor&&net<0&&left<-net*4?`<p class="redt">After this trip, cash covers about ${Math.max(0,Math.floor(left/-net))} weeks of camp costs (net spend ${fmt(-net)}/wk) · careful not to go into the red</p>`:"";})()}
      <p class="meta">Travelling together: ${P.people} people (incl. the manager ${roadCoachIn(G)?" and Kru Daeng":""}) · those who stay train as programmed · no other fights that week · travel fatigue about +${P.fat} each ${P.car==="none"?" · the camp has no vehicle yet, so it's the bus (pricier and more tiring)":""}</p>
      ${this.canQuick(G,dest)?`<label class="rg-quick"><input type="checkbox" data-act="rgquick" ${G.region.quickPref?"checked":""}> Quick trip <small class="meta">skip the drive, the hotel nights and the souvenir shop · nights away count as rest</small></label>`:""}
      <div class="mfoot"><button class="btn" data-act="rgstep" data-v="1">◂ Who comes along</button>${now&&wk===G.week?`<button class="btn primary" data-act="rggonow" data-v="${dest}" ${me&&!poor?"":"disabled"}>${poor?"Not enough money":"Set off now ▸"}</button>`:`<button class="btn primary" data-act="rggo" data-v="${dest}" ${me&&!poor?"":"disabled"}>${poor?"Not enough money":"Confirm the trip"}</button>`}</div>
      ${now&&wk===G.week?`<p class="meta center">Setting off ends this week right away (training → drive → hotel → ring)</p>`:""}`;},
   /* v1.91.76 (Man): the "travel" button at the camp vehicle — pick a province, then go this week */
-  travelOk(G){const R=G.region;return !!(R&&R.belts&&regionOn());}, /* v1.91.93 (Man): the van stays on the road after the belts are won — holidays and the local ring */
+  travelOk(G){const R=G.region;return !!(R&&R.belts&&regionOn()&&R.gala);}, /* v1.91.93 (Man): the van stays on the road after the belts are won — holidays and the local ring */
   /* v1.91.78 (Man): once a region's four belts are in, its title match shows in the travel popup as a big blinking button */
   finBtn(G,r){const c=G.region.champ[r]||{};if(this.beltCount(G,r)<4||c.state==="won"||c.state==="locked")return "";const C=RG[r],hot=c.state==="letter"||(c.state==="series"&&c.visit==="due");
     return `<button class="btn rg-finbtn ${hot?"hot":""}" data-act="rgfinopen" data-v="${r}">⚔ Title match · ${esc(C.name)} · ${esc(C.champ)}<small>${c.state==="letter"?"Pick your title fighter":c.state==="series"?`${c.w}-${c.l}${c.next?` · bout ${c.next.n} week ${c.next.wk}`:""}${c.visit==="due"?" · she'll drop by the camp":""}`:c.state==="lost"?"Waiting for a new challenge":"Waiting for her letter"}</small></button>`;},
@@ -2589,7 +2592,7 @@ The door is open every night. Send your fighters.
     const ref=pool[0]||roster(G)[0];for(const k of NL_ORDER)if(!G.F["nl_"+k]&&ref)nlFighter(G,k,ref);
     const v=Object.values(C),w=v.filter(x=>x==="W").length,l=v.filter(x=>x==="L").length,next=NL_ORDER.find(k=>!C[k]);
     if(UI.rgPick&&!C[UI.rgPick]){const k=UI.rgPick,o=G.F["nl_"+k],at=id=>NL_ORDER.find(x=>L[x]===id);
-      return `<div class="vsb"><h2>Bout ${NL_ORDER.indexOf(k)+1} · Who fights ${esc(NL[k].name)}</h2><p class="meta">${esc(NL[k].art)}</p>
+      return `<div class="vsb"><h2>Bout ${NL_ORDER.indexOf(k)+1} · Who fights ${/^[A-Za-z]/.test(NL[k].name)?" ":""}${esc(NL[k].name)}</h2><p class="meta">${esc(NL[k].art)}</p>
         <div class="vs-pick">${pool.map(f=>{const u=this.finalUses(F,f.id),cap=this.finalCap(G),done=u>=cap;return `<button class="vs-pc" data-act="rgfset" data-v="${k}|${f.id}" ${done?"disabled":""}>
           <span class="vs-art">${this.vsArt(f,"r")}</span><b>${esc(f.name)}</b><small>Lv.${f.lvl||1}${done?(cap>1?" · already fought twice":" · already fought"):u?" · second bout of the night":""}</small></button>`;}).join("")}</div>
         ${this.finalCap(G)>1?`<p class="meta center">The camp has fewer than five fighters · one fighter may take two bouts tonight</p>`:""}
@@ -2609,7 +2612,7 @@ The door is open every night. Send your fighters.
     F.live=true;this.finalBout(k);},
   finalBout(k){const R=G.region,F=R.final,i=NL_ORDER.indexOf(k),me=G.F[F.line[k]];if(!me)return;
     const keep={injury:me.injury||0,fatigue:me.fatigue||0},o=nlFighter(G,k,me);
-    const b={id:`nlf${F.tries||0}_${i}_${gameWeek(G)}`,a:me.id,b:o.id,week:G.week,tier:"exhibition",rounds:5,win:0,lose:0,bg:"bg_naka_underground.webp",gprep:null,region:{nlfinal:k}};
+    const b={id:`nlf${F.tries||0}_${i}_${gameWeek(G)}`,a:me.id,b:o.id,week:G.week,tier:"exhibition",tierName:"Naka underground bout",rounds:5,win:0,lose:0,bg:"bg_naka_underground.webp",gprep:null,region:{nlfinal:k}};
     G.bookings.push(b);save();
     const S=NL_SAY[k],spk=t=>k==="ladda"?{n:"lada",l:"fight",f:"angry",t}:{n:"npc",who:NL[k].name,t},
       after=()=>{const res=F.cur[k],t=S&&(res==="W"?S.lose:res==="L"?S.win:null);const fin=()=>{UI.modal={type:"rgfline"};render();};
@@ -2641,7 +2644,7 @@ Object.assign(REGION,{
       <div class="vs-pick">${pool.map(f=>`<button class="vs-pc" data-act="rglego" data-v="${k}|${f.id}"><span class="vs-art">${this.vsArt(f,"r")}</span><b>${esc(f.name)}</b><small>Lv.${f.lvl||1}</small></button>`).join("")}</div>
       ${pool.length?"":`<p class="redt">Nobody is fit to fight</p>`}<div class="mfoot"><button class="btn" data-act="closeModal">Not yet</button></div>`;},
   legGo(k,id){const R=G.region,me=G.F[id];if(!me||R.legWk===gameWeek(G))return;UI.modal=null;R.legWk=gameWeek(G);
-    const o=nlFighter(G,k,me,0,0,true),b={id:`nlleg_${k}_${gameWeek(G)}`,a:me.id,b:o.id,week:G.week,tier:"exhibition",rounds:5,win:0,lose:0,bg:"bg_naka_underground.webp",region:{nlleg:k}};
+    const o=nlFighter(G,k,me,0,0,true),b={id:`nlleg_${k}_${gameWeek(G)}`,a:me.id,b:o.id,week:G.week,tier:"exhibition",tierName:"Naka underground bout",rounds:5,win:0,lose:0,bg:"bg_naka_underground.webp",region:{nlleg:k}};
     G.bookings.push(b);save();openFight(b,()=>{G.bookings=G.bookings.filter(x=>x.id!==b.id);this.flush(G);save();render();});},
   legResult(G,k,p){const R=G.region,L=R.legend=R.legend||{},st=p.res==="W"?1+(p.kdA?0:1)+(!p.kdA&&p.stop?1:0):0,was=L[k]||0;
     if(st>was){L[k]=st;G.dust=(G.dust||0)+(st-was)*LEG_DUST;toast&&toast(`Legend · ${NL[k].name} ${"★".repeat(st)} · stardust +${(st-was)*LEG_DUST}`);}
@@ -2675,7 +2678,7 @@ if(typeof ACT!=="undefined")Object.assign(ACT,{
   rgplan:d=>{UI.rgFid=null;UI.rgParty=null;UI.rgNow=false;UI.rgStep=1;UI.modal={type:"rgplan",dest:d.v};render();},
   rgfinopen:d=>{UI.modal={type:"rgfin",r:d.v};render();},
   rglegopen:()=>{if(!G.region||!G.region.final||!G.region.final.won)return;REGION.css();UI.modal={type:"rglegend"};render();},
-  rgtravel:()=>{if(!REGION.travelOk(G))return;UI.modal={type:"rgtravel"};render();},
+  rgtravel:()=>{if(!REGION.travelOk(G)){if(G.region&&!G.region.gala)toast("Attend the opening gala in Bangkok first, then hit the road");return;}UI.modal={type:"rgtravel"};render();},
   rgtravelto:d=>{UI.rgFid=null;UI.rgParty=null;UI.rgNow=true;UI.rgStep=1;UI.modal={type:"rgplan",dest:d.v};render();},
   rgparty:d=>{const P=UI.rgParty=UI.rgParty||[],i=P.indexOf(d.v);if(i>=0)P.splice(i,1);else if(P.length<roadSeats(G))P.push(d.v);render();},
   rgstep:d=>{UI.rgStep=+d.v;render();},
