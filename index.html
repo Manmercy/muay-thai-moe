@@ -9356,7 +9356,7 @@ AU.gsfx=function(kind,a){if(!this.init()||this.muted||!SETTINGS.sfx)return;const
   if(kind==="shimmer")for(let i=0;i<6;i++)T(i*.05,{f:1400+Math.random()*1400,type:"sine",dur:.12,peak:.06});};
 
 // ================= MUAY THAI MOE v1.3 — UI =================
-const VERSION="1.91.192";
+const VERSION="1.91.193";
 const CUR_LANG=(typeof window!=="undefined"&&window.LANG)||"th";
 const TH_LABEL=String.fromCharCode(3652,3607,3618);
 function langSwitch(cls){return `<div class="langsw ${cls||""}" role="group" aria-label="Language">${[["th",TH_LABEL],["en","EN"]].map(([k,l])=>`<button class="lsb ${CUR_LANG===k?"on":""}" data-act="setlang" data-v="${k}" aria-pressed="${CUR_LANG===k}">${l}</button>`).join("")}</div>`;}
@@ -10613,7 +10613,14 @@ const PATCH_SKN={id:"1.94",ver:"Muay Thai Moe v1.94",title:"ชื่อสก�
  ["🪞","ใบหยกมีต้นสกิลครบ","ถ้าใบหยกย้ายมาอยู่ค่ายเรา เธอมีต้นสกิลสามสายเท่านางเอกคนอื่น รวมสายสะท้อนกลับที่เห็นท่าครั้งเดียวก็ใช้คืนได้"],
  ["👁️","ตาถอดแบบ","สกิลติดตัวของใบหยก จบยกแล้วจำอาวุธที่คู่ชกเข้าเป้ามากสุด ยกถัดไปส่งอาวุธนั้นคืนแรงและแม่นขึ้น"]],
  foot:"ครูแดงบอกว่า ชื่อท่าเปลี่ยน แต่เหงื่อเท่าเดิมนะ ✦"};
-const PATCHES=[PATCH_AV,PATCH_TAPE,PATCH_FIX,PATCH_TANI,PATCH_SKN],PATCH=PATCHES[PATCHES.length-1];
+const PATCH_MG={id:"1.95",ver:"Muay Thai Moe v1.95",title:"กลองแขกดังทั้งค่าย",lead:"มินิเกมมีเพลงใหม่ให้ไล่สถิติ และทุกหมัดในเวทีหนักมือขึ้น",items:[
+ ["🥁","เพลงใหม่ 9 เพลง","เตะกระสอบกับตำส้มตำมีเพลงระดับง่าย ปกติ ยาก อย่างละ 3 เพลง แต่ละเพลงมีดนตรีกับฉากของตัวเอง โน้ตเหมือนเดิมทุกรอบ สถิติดีสุดเก็บแยกรายเพลง ลองไล่เกรด S กับ FULL COMBO ให้ครบ ทุกสัปดาห์มีเพลงประจำสัปดาห์หมุนเวียน"],
+ ["🥗","ร้านเจ๊ปลามาเปิดแข่ง","ฝั่งตรงข้ามร้านป้าแต๋วมีร้านส้มตำเจ๊ปลามาแย่งลูกค้า ตำให้แม่นแล้วยอดจานจะแซง ป้าแต๋วพากย์สดตลอดเกม"],
+ ["🏃","วิ่งแข่งแบบใหม่","กดรัวปุ่มเดียวพอ กดเตรียมตัว รอไฟแดงสามดวงเปลี่ยนเป็นเขียวแล้วออกตัว มีนักพากย์ตามเชียร์ทั้งสนาม"],
+ ["💥","ชกหนักมือขึ้น","เลือดที่หายเห็นเป็นรอยค้าง ป้ายเริ่มยกใหม่ น็อกแล้วภาพช้าลงให้เห็นหมัดสุดท้าย เงินรางวัลเด้งเข้ากระเป๋า และมือถือสั่นตอนลุ้นของดี"],
+ ["🎨","หน้ามินิเกมใหม่","เลือกเพลงจากการ์ดที่มีภาพฉาก ตอนจบมีแบนเนอร์เพลงบอกว่าทำสถิติใหม่ไหม ปุ่มตำกับคลุกเป็นสีเดียวกับโน้ตแล้ว"]],
+ foot:"ป้าแต๋วฝากบอกว่า อย่าแพ้ร้านเจ๊ปลานะลูก ✦"};
+const PATCHES=[PATCH_AV,PATCH_TAPE,PATCH_FIX,PATCH_TANI,PATCH_SKN,PATCH_MG],PATCH=PATCHES[PATCHES.length-1];
 function nextPatch(){if(G&&G.newsSeen==="1.91.144")G.newsSeen="1.91.111"; /* v1.91.145: the 1.91.144 popup was withdrawn — those who saw it must not get the old ones again */const i=PATCHES.findIndex(p=>p.id===(G&&G.newsSeen));return i<0?PATCHES[0]:PATCHES[i+1]||null;}
 function maybeWhatsNew(){if(!G||G.ended||UI.scene)return;const P=nextPatch();if(!P)return;UI.modal={type:"whatsnew",id:P.id};}
 function whatsNewHTML(){const P=PATCHES.find(p=>p.id===(UI.modal&&UI.modal.id))||nextPatch()||PATCH,n=PATCHES.length-PATCHES.indexOf(P)-1;return `<div class="wnew"><span class="pill gold">อัปเดต · ${esc(P.ver)}</span><h2>🥊 ${esc(P.title)}</h2><p class="lead">${esc(P.lead)}</p>
@@ -11525,7 +11532,7 @@ const ACT={
   skselx:()=>{UI.skSel=null;render();},
   skpopbg:(d,e)=>{if(e.target.classList.contains("skpop-ov")){UI.skSel=null;render();}},
   newsok:()=>{const P=PATCHES.find(p=>p.id===(UI.modal&&UI.modal.id))||PATCH;G.newsSeen=P.id;UI.modal=null;save();const N=nextPatch();if(N)UI.modal={type:"whatsnew",id:N.id};render();},
-  closeModal:()=>{const m=UI.modal;if(m&&m.type==="whatsnew"){ACT.newsok();return;}if(m&&m.type==="avedit")UI.creator=null;if(m&&m.type==="loywish"){ACT.lwclose();return;}if(m&&m.type==="waikhru"){if(m.ph==="pick")runWaiKhru(G,"s");ACT.waidone();return;}if(m&&m.type==="lotto"&&typeof ACT.lottoskip==="function"){ACT.lottoskip();return;} /* closing the ticket sheet skips the draw */if(m&&m.back==="album"&&G){ACT.album();return;}if(m&&m.type==="contest"){ACT.contestdone();return;}if(m&&m.type==="whatsnew"&&G){G.newsSeen=PATCH.id;save();}UI.modal=null;render();if(m&&m.after)m.after();},
+  closeModal:()=>{const m=UI.modal;if(m&&m.type==="whatsnew"){if(G){G.newsSeen=PATCH.id;save();}UI.modal=null;render();return;} /* v1.91.192 (Man): closing the update note just closes it — no queue of older notes after */if(m&&m.type==="avedit")UI.creator=null;if(m&&m.type==="loywish"){ACT.lwclose();return;}if(m&&m.type==="waikhru"){if(m.ph==="pick")runWaiKhru(G,"s");ACT.waidone();return;}if(m&&m.type==="lotto"&&typeof ACT.lottoskip==="function"){ACT.lottoskip();return;} /* closing the ticket sheet skips the draw */if(m&&m.back==="album"&&G){ACT.album();return;}if(m&&m.type==="contest"){ACT.contestdone();return;}if(m&&m.type==="whatsnew"&&G){G.newsSeen=PATCH.id;save();}UI.modal=null;render();if(m&&m.after)m.after();},
   trup:d=>{const f=G.F[d.id];if(!f)return;const sl=document.querySelector(".sklist"),y=sl?sl.scrollTop:0;if(!traitUp(G,d.id))return;AU.sfx("level");save();render();const n=document.querySelector(".sklist");if(n)n.scrollTop=y;},
   trait:d=>{const f=G.F[d.id],L=TRAITS[d.id];if(!f||!L||f.camp!=="player")return;const t=L.find(x=>x.id===d.v);if(!t||traitOf(f)===t.id)return;f.trait=t.id;save();render();toast(`${f.name}ใช้พลังแฝง "${t.name}"`);},
   gopen:d=>{GB.box=d.v==="loy"?"loy":"n";if(GB.box==="loy"&&!loyFest()){toast(loySoon()?"ตู้ลอยกระทงเปิด 18 พ.ย. เวลา 00:00":"ตู้ลอยกระทงปิดแล้ว ไว้เจอกันเทศกาลหน้า");return;}const fromAlb=UI.modal&&UI.modal.type==="album";if(fromAlb)albKeep();GB.st=null;GB.ps=[];UI.gq=false;UI.modal={type:"gbox",back:fromAlb?"album":null};render();gbPreload();},
@@ -16179,7 +16186,7 @@ const STATS_HOST="https://us.i.posthog.com";     /* EU projects: https://eu.i.po
 <script>
 (function(){
 /* v1.87: Thai code ships inside index.html; English code (en.js) and the dictionary (i18n.js) load only when needed */
-var B="787d7eed4a";
+var B="db3a255f34";
 var L="";try{L=localStorage.getItem("mtm_lang")||"";}catch(e){}
 try{var h=(location.hash||"").match(/lang=(th|en)/);if(h)L=h[1];}catch(e){}
 if(L!=="th"&&L!=="en")L="th";

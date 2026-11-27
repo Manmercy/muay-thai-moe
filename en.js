@@ -6719,7 +6719,7 @@ AU.gsfx=function(kind,a){if(!this.init()||this.muted||!SETTINGS.sfx)return;const
   if(kind==="shimmer")for(let i=0;i<6;i++)T(i*.05,{f:1400+Math.random()*1400,type:"sine",dur:.12,peak:.06});};
 
 // ================= MUAY THAI MOE v1.3 — UI =================
-const VERSION="1.91.190";
+const VERSION="1.91.191";
 const CUR_LANG=(typeof window!=="undefined"&&window.LANG)||"th";
 const TH_LABEL=String.fromCharCode(3652,3607,3618);
 function langSwitch(cls){return `<div class="langsw ${cls||""}" role="group" aria-label="Language">${[["th",TH_LABEL],["en","EN"]].map(([k,l])=>`<button class="lsb ${CUR_LANG===k?"on":""}" data-act="setlang" data-v="${k}" aria-pressed="${CUR_LANG===k}">${l}</button>`).join("")}</div>`;}
@@ -7976,7 +7976,14 @@ const PATCH_SKN={id:"1.94",ver:"Muay Thai Moe v1.94",title:"Skill Names, Mae Mai
  ["🪞","Baiyok's full skill tree","If Baiyok moves into our camp, she gets a full three-line skill tree like the other heroines, including the Mirror line: see a move once, use it right back."],
  ["👁️","Copy Eye","Baiyok's passive: after each round she copies the weapon the opponent landed most, and sends it back harder and more accurately next round."]],
  foot:"Kru Daeng says: new names, same sweat ✦"};
-const PATCHES=[PATCH_AV,PATCH_TAPE,PATCH_FIX,PATCH_TANI,PATCH_SKN],PATCH=PATCHES[PATCHES.length-1];
+const PATCH_MG={id:"1.95",ver:"Muay Thai Moe v1.95",title:"Klong Khaek Across the Camp",lead:"The minigames have new songs to chase records on, and every punch in the ring lands harder.",items:[
+ ["🥁","9 new songs","The bag drill and the som tam stall have 3 songs each on easy, normal and hard, each with its own music and scene. The notes are the same every time and your best is kept per song — chase S and FULL COMBO on all of them. A song of the week rotates each week."],
+ ["🥗","Jae Pla opens a rival stall","Across from Auntie Taew's stall, Jae Pla's som tam stall is stealing customers. Pound on the beat and your plate count pulls ahead. Auntie Taew calls it live."],
+ ["🏃","New sprint race","Just mash one button. Get set, wait for the three red lights to turn green, then go — with a commentator calling the whole race."],
+ ["💥","Heavier hits","Lost health leaves a trailing mark, each round opens with a banner, a KO slows down so you see the last blow, prize money flies into your purse, and your phone buzzes when something good drops."],
+ ["🎨","New minigame screens","Pick a song from cards with its scene. The result banner tells you if you set a new record. The ตำ and คลุก buttons now match their notes."]],
+ foot:"Auntie Taew says: don't you dare lose to Jae Pla's stall, dear ✦"};
+const PATCHES=[PATCH_AV,PATCH_TAPE,PATCH_FIX,PATCH_TANI,PATCH_SKN,PATCH_MG],PATCH=PATCHES[PATCHES.length-1];
 function nextPatch(){if(G&&G.newsSeen==="1.91.144")G.newsSeen="1.91.111"; /* v1.91.145: the 1.91.144 popup was withdrawn — those who saw it must not get the old ones again */const i=PATCHES.findIndex(p=>p.id===(G&&G.newsSeen));return i<0?PATCHES[0]:PATCHES[i+1]||null;}
 function maybeWhatsNew(){if(!G||G.ended||UI.scene)return;const P=nextPatch();if(!P)return;UI.modal={type:"whatsnew",id:P.id};}
 function whatsNewHTML(){const P=PATCHES.find(p=>p.id===(UI.modal&&UI.modal.id))||nextPatch()||PATCH,n=PATCHES.length-PATCHES.indexOf(P)-1;return `<div class="wnew"><span class="pill gold">Update · ${esc(P.ver)}</span><h2>🥊 ${esc(P.title)}</h2><p class="lead">${esc(P.lead)}</p>
@@ -8888,7 +8895,7 @@ const ACT={
   skselx:()=>{UI.skSel=null;render();},
   skpopbg:(d,e)=>{if(e.target.classList.contains("skpop-ov")){UI.skSel=null;render();}},
   newsok:()=>{const P=PATCHES.find(p=>p.id===(UI.modal&&UI.modal.id))||PATCH;G.newsSeen=P.id;UI.modal=null;save();const N=nextPatch();if(N)UI.modal={type:"whatsnew",id:N.id};render();},
-  closeModal:()=>{const m=UI.modal;if(m&&m.type==="whatsnew"){ACT.newsok();return;}if(m&&m.type==="avedit")UI.creator=null;if(m&&m.type==="loywish"){ACT.lwclose();return;}if(m&&m.type==="waikhru"){if(m.ph==="pick")runWaiKhru(G,"s");ACT.waidone();return;}if(m&&m.type==="lotto"&&typeof ACT.lottoskip==="function"){ACT.lottoskip();return;} /* closing the ticket sheet skips the draw */if(m&&m.back==="album"&&G){ACT.album();return;}if(m&&m.type==="contest"){ACT.contestdone();return;}if(m&&m.type==="whatsnew"&&G){G.newsSeen=PATCH.id;save();}UI.modal=null;render();if(m&&m.after)m.after();},
+  closeModal:()=>{const m=UI.modal;if(m&&m.type==="whatsnew"){if(G){G.newsSeen=PATCH.id;save();}UI.modal=null;render();return;} /* v1.91.192 (Man): closing the update note just closes it — no queue of older notes after */if(m&&m.type==="avedit")UI.creator=null;if(m&&m.type==="loywish"){ACT.lwclose();return;}if(m&&m.type==="waikhru"){if(m.ph==="pick")runWaiKhru(G,"s");ACT.waidone();return;}if(m&&m.type==="lotto"&&typeof ACT.lottoskip==="function"){ACT.lottoskip();return;} /* closing the ticket sheet skips the draw */if(m&&m.back==="album"&&G){ACT.album();return;}if(m&&m.type==="contest"){ACT.contestdone();return;}if(m&&m.type==="whatsnew"&&G){G.newsSeen=PATCH.id;save();}UI.modal=null;render();if(m&&m.after)m.after();},
   trup:d=>{const f=G.F[d.id];if(!f)return;const sl=document.querySelector(".sklist"),y=sl?sl.scrollTop:0;if(!traitUp(G,d.id))return;AU.sfx("level");save();render();const n=document.querySelector(".sklist");if(n)n.scrollTop=y;},
   trait:d=>{const f=G.F[d.id],L=TRAITS[d.id];if(!f||!L||f.camp!=="player")return;const t=L.find(x=>x.id===d.v);if(!t||traitOf(f)===t.id)return;f.trait=t.id;save();render();toast(`${f.name} now uses the hidden power "${t.name}"`);},
   gopen:d=>{GB.box=d.v==="loy"?"loy":"n";if(GB.box==="loy"&&!loyFest()){toast(loySoon()?"The Loy Krathong gacha opens Nov 18 at 00:00":"The Loy Krathong machine is closed. See you next festival!");return;}const fromAlb=UI.modal&&UI.modal.type==="album";if(fromAlb)albKeep();GB.st=null;GB.ps=[];UI.gq=false;UI.modal={type:"gbox",back:fromAlb?"album":null};render();gbPreload();},
