@@ -1,5 +1,5 @@
 // ================= MUAY THAI MOE v1.3 — UI =================
-const VERSION="1.91.176";
+const VERSION="1.91.177";
 const CUR_LANG=(typeof window!=="undefined"&&window.LANG)||"th";
 const TH_LABEL=String.fromCharCode(3652,3607,3618);
 function langSwitch(cls){return `<div class="langsw ${cls||""}" role="group" aria-label="Language">${[["th",TH_LABEL],["en","EN"]].map(([k,l])=>`<button class="lsb ${CUR_LANG===k?"on":""}" data-act="setlang" data-v="${k}" aria-pressed="${CUR_LANG===k}">${l}</button>`).join("")}</div>`;}
@@ -89,6 +89,8 @@ const npcPortraitSrc=(im,st={})=>{if(im.startsWith("vector_")||im==="petchara")r
   }
   return im.startsWith("nl_")?`${ASSET}${im}.webp`:`${ASSET}npc_${im}.webp`;};
 const TIER_BG={evloy:"bg_loy_ring.webp",pro:"bg_fair_fest.webp",semi:"bg_hall.webp",local:"bg_local.webp",district:"bg_district.webp",final:"bg_final.webp",exhibition:"bg_fair_fest.webp",special:"bg_district.webp",lab:"bg_hall.webp",quest:"bg_food.webp",beast:"bg_fair_fest.webp",dm:"bg_hall.webp"};
+// v1.91.177 (Man): rooster/bull fair bouts fight in their own arena (chicken yard / farm), not the fair ring — older saved offers too
+function fightBg(b){return b.bg||(b.tier==="beast"&&b.beast&&typeof QK!=="undefined"&&QK[b.beast]&&typeof QGRP_BG!=="undefined"?QGRP_BG[QK[b.beast].grp]:null)||TIER_BG[b.tier];}
 
 /* v1.91.138 (Man): every scene shows where it happens — per-scene backgrounds read from where and when each scene takes place */
 const EV_BG={"kati_why": "gymdusk", "first_loss": "backstage", "kati_ourcamp": "camp_day", "night_final": "gymdusk", "district_mid": "gymdusk", "storm": "camp_rain", "kati_knee": "camp", "daeng_past": "gymdusk", "me_photo": "letter", "ploy_ko40": "camp", "kati_overwork": "gymdusk", "rin_notebook": "camp", "bb_kati_55": "camp_rain", "bb_mali_55": "gymdusk", "bb_rin_55": "camp", "bb_ploy_55": "hall", "hs_rin_15": "camp", "hs_fah_12": "camp_rain", "hf_coach_letter": "letter", "bday_ploy": "newyear", "pet_cat": "camp_rain", "ploy_injury": "hospital", "by_leave": "market_morning", "y5_vector_contract": "camp", "vector_annual_letter": "letter", "ploy_surge": "gymdusk", "fah_surge": "hill", "xlh_pailin_1": "dorm_room", "y2_ploy_team": "camp", "rival_meet": "night_north", "coach_money": "gymdusk", "fame36": "camp_day", "fame60": "camp_day", "tiger_news": "camp", "tempt_mali": "kitchen", "tempt_rin": "cafe", "tempt_ploy": "night", "feud_mali_rin": "dorm_room", "hs_kati_12": "dorm_room", "hs_kati_15": "market_morning", "hs_mali_12": "camp_day", "hs_fah_30": "grandma_home", "mem_kati_bike": "camp_day", "mali_day1": "camp_day", "bday_kati": "songkran", "fest_newyear": "market", "fest_krathong": "camp_day", "pet_turtle": "market_morning", "petx_cat_rin": "kitchen", "bday_baibua": "loy_night", "bday_tabtim": "songkran", "bday_alicia": "newyear", "c_kati_fah": "night_north", "c_dinner": "night", "c3_trio_dinner": "night", "first_student": "camp_day", "rin_meet": "camp_day", "fah_night": "conv_night", "mali_family": "camp_day", "pre_qual": "camp", "new_sign": "camp_day", "up_full": "camp_day", "fame20": "camp_day", "fame50": "camp_day", "first_class": "camp_day", "debt_visit": "camp_day", "lv_val": "camp_day", "lv_hm2": "camp_day", "lv_hmr": "camp_day", "lv_hm3": "rooftop", "lv_hy_newyear": "rooftop", "open_day": "camp_day", "buyout": "camp_day", "tempt_kati": "dorm_room", "tempt_fah": "camp_day", "ploy_prefinal": "backstage", "fah_prefinal": "backstage", "sp_mali_share": "backstage", "fah_mali": "night_north", "bb_rin_20": "dorm_room", "bb_fah_20": "camp_day", "bb_fah_55": "grandma_home", "hs_kati_30": "camp_day", "hs_mali_25": "camp_day", "hs_rin_12": "dorm_room", "hs_rin_25": "lecture_hall", "hs_ploy_15": "river_night", "fah_trainer": "river_night", "hs_ploy_30": "hall", "sp_fah_respect": "camp_day", "rin_note": "camp_day", "poach": "camp_day", "year_open": "camp_day", "pet_dog": "camp_day", "pet_rooster": "camp_day", "petx_dog_mali": "camp_day", "petx_rooster_kati": "night", "petx_turtle_fah": "camp_day", "fah_join": "camp_day", "ploy_visit3": "camp_day", "y2_cross_fah_ploy": "gymdusk", "y2_fah_rooftop": "rooftop", "y5_vector_arrive": "camp_day", "vector_annual_return": "vector_lab", "drain_rooster": "market", "drain_banquet": "night", "drain_durian": "camp_day", "drain_flamingo": "camp_day", "camp_clean_day": "camp_day", "camp_open_house": "camp_day", "nai_color": "camp_day", "yt_intro_flood": "camp_day", "yt_flood_hit": "camp_rain", "yt_flood_end": "camp_day", "yt_intro_sponsor": "camp_day", "yt_intro_tourist": "camp_day", "xlh_pailin_2": "camp_day", "xl_join_prod_B": "camp_day", "xll_prod_B_0": "temple", "xll_prod_B_2": "dorm_room", "c_fah_ploy": "backstage", "c_fah_sulk": "fair_ring", "h_rooster": "camp_day", "h_kid": "camp_day", "d_tourists": "camp_day", "d_tiktok": "camp_day", "d_noodle": "kitchen", "d_poor_kid": "camp_day"};
@@ -1657,7 +1659,7 @@ function openFight(b,done){const op=G.F[b.b],k=`taunt_${b.a}_${b.b}_${stageOf(G.
   if(!op.canon){openFight2(b,done);return;}
   let sc=null;const key=`${b.a}_${b.b}`;
   if(op.canon&&!G.seen[k]&&!(G.faceoffLast&&G.faceoffLast[key])&&!(b.tier==="final"&&(G.seen.ploy_prefinal||G.seen.fah_prefinal))){sc=tauntScene(G,b.a,b.b);if(sc)G.seen[k]=true;}
-  playScene(sc||fightFaceoff(b),()=>openFight2(b,done),{bg:(b.bg||TIER_BG[b.tier])?(b.bg||TIER_BG[b.tier]).replace(/^bg_|\.webp$/g,""):"local",look:"fight"});}
+  playScene(sc||fightFaceoff(b),()=>openFight2(b,done),{bg:fightBg(b)?fightBg(b).replace(/^bg_|\.webp$/g,""):"local",look:"fight"});}
 // Wai khru opens the first bout, canon matchups, and major bouts.
 const RAM={phrom:{name:"พรหมสี่หน้า",hint:"ไหว้ครบสี่ทิศ · ใจนิ่ง แม่นขึ้นยกแรก"},hong:{name:"หงส์เหิน",hint:"สง่างามดั่งหงส์ · กำลังใจ +6"},
   phra:{name:"พระรามแผลงศร",hint:"น้าวคันศร · ยกแรกออกอาวุธดุดัน"}};
@@ -1909,8 +1911,8 @@ let LASTF=null; /* v1.80: the last fight, read by the gauntlet to carry HP betwe
 function fightStart(quick){const U=UI.fight,b=U.b;AU.resume();
   U.F=newFight(b.ev&&typeof loyBoost==="function"?loyBoost(G.F[b.a]):G.F[b.a],G.F[b.b],{seed:(G.seed+G.week*131+b.b.length*7+(b.region?stableHash(b.id):0))>>>0, /* v1.91.47 (playtest): a regional bout fought again in the same week (underground retry) is a new fight, not a replay */rounds:b.rounds,tier:b.tier,planA:U.plan,gprepA:b.gprep||null,forceRage:!quick&&!(G.flags&&G.flags.rageShown)});U.F.dai=(DIFF[G.diff||"normal"]||DIFF.normal).ai;if(b.ev)U.F.ev=1;U.F.live=!quick;
   if(b.wai==="phrom")U.F.A.careMor=.02;if(b.wai==="phra")U.F.A.careMor=.01;if(b.cheer)U.F.A.mor+=b.cheer*.01;U.F.A.mor+=trustBonus(G.F[b.a]);{const fam=(G.fam||{})[b.b]||0;if(fam)U.F.A.mor+=fam*.015;}setTactics(U.F,U.tac);if(b.ev)U.F.A.sta=100; /* v1.89.31: event bouts ignore camp fatigue — the ladder shows full stamina, so start from it */if(b.carry){U.F.A.hp=Math.min(U.F.A.hp,b.carry.hp);U.F.A.sta=Math.min(U.F.A.sta,b.carry.sta);}LASTF=U.F;
-  if(quick){FS.init(null,b.bg||TIER_BG[b.tier]||"bg_local.webp",G.F[b.a],G.F[b.b]);const F=U.F;while(!F.over){F.A.instr=aiCorner(F,F.A,F.B);F.B.instr=aiCorner(F,F.B,F.A);const lg=fightRound(F);U.shown.push({rd:`ยกที่ ${F.round}`},...lg);}fightEnd();return;}
-  FS.init(null,b.bg||TIER_BG[b.tier]||"bg_local.webp",G.F[b.a],G.F[b.b]);AU.setTempo(104);AU.setHeat&&AU.setHeat(0);AU.startMusic();playRound();}
+  if(quick){FS.init(null,fightBg(b)||"bg_local.webp",G.F[b.a],G.F[b.b]);const F=U.F;while(!F.over){F.A.instr=aiCorner(F,F.A,F.B);F.B.instr=aiCorner(F,F.B,F.A);const lg=fightRound(F);U.shown.push({rd:`ยกที่ ${F.round}`},...lg);}fightEnd();return;}
+  FS.init(null,fightBg(b)||"bg_local.webp",G.F[b.a],G.F[b.b]);AU.setTempo(104);AU.setHeat&&AU.setHeat(0);AU.startMusic();playRound();}
 function playRound(){const U=UI.fight,F=U.F;if(FS.ground)FS.ground();fightMusic(F);F.B.instr=aiCorner(F,F.B,F.A);F.A.autoSkill=false;if(U.brawl){F.A.instr=aiCorner(F,F.A,F.B);F.A.autoSkill=true;}roundBegin(F);
   const rng=mulberry32(F.seed+F.round);U.rng=rng;U.tiredShown=false;
   F.tier=F.tier||U.b.tier;const sl=startLine(F,rng);U.pending=[{rd:`ยกที่ ${F.round}`,cap:{text:sl.text,side:"",heat:sl.heat},bell:true}];
@@ -2021,7 +2023,7 @@ function goalHidden(){try{return localStorage.getItem("mtm-goalhide")==="1"}catc
 function beginFight(quick){const b=UI.fight.b,op=G.F[b.b],first=!(G.flags&&G.flags.waiSeen);
   if(!b.waiDone&&(first||b.tier==="semi"||b.tier==="final"||op.canon||op.camp==="rival")){b.waiDone=true;
     const sc=waiKhruScene(b);G.flags=G.flags||{};G.flags.waiSeen=true;const keep=UI.fight;UI.fight=null;AU.startMusic("waikhru");
-    playScene(sc,()=>{UI.fight=keep;fightStart(quick);},{bg:(TIER_BG[b.tier]||"bg_local.webp").replace(/^bg_|\.webp$/g,""),look:"fight"});return;}
+    playScene(sc,()=>{UI.fight=keep;fightStart(quick);},{bg:(fightBg(b)||"bg_local.webp").replace(/^bg_|\.webp$/g,""),look:"fight"});return;}
   fightStart(quick);}
 const ACT={
   goaltog:()=>{const h=!goalHidden();UI.goalHide=h;try{localStorage.setItem("mtm-goalhide",h?"1":"0")}catch(e){}render();},
