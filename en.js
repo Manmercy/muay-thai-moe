@@ -6726,7 +6726,7 @@ AU.gsfx=function(kind,a){if(!this.init()||this.muted||!SETTINGS.sfx)return;const
   if(kind==="shimmer")for(let i=0;i<6;i++)T(i*.05,{f:1400+Math.random()*1400,type:"sine",dur:.12,peak:.06});};
 
 // ================= MUAY THAI MOE v1.3 — UI =================
-const VERSION="1.91.197";
+const VERSION="1.91.198";
 const CUR_LANG=(typeof window!=="undefined"&&window.LANG)||"th";
 const TH_LABEL=String.fromCharCode(3652,3607,3618);
 function langSwitch(cls){return `<div class="langsw ${cls||""}" role="group" aria-label="Language">${[["th",TH_LABEL],["en","EN"]].map(([k,l])=>`<button class="lsb ${CUR_LANG===k?"on":""}" data-act="setlang" data-v="${k}" aria-pressed="${CUR_LANG===k}">${l}</button>`).join("")}</div>`;}
@@ -9208,12 +9208,18 @@ const SPONSOR_MAIL=[
  {id:"sp_pump",when:G=>G.week>=41&&[...((G.semis||{}).A||[]),...((G.semis||{}).B||[])].some(id=>G.F[id]&&G.F[id].camp==="player"),from:"The District Gas Station",title:"Cheering our district's semifinalists",body:"The station would like to support our district's representative camp. Fill up 500 baht, get free drinking water (customers only). The camp receives the following sponsorship",amt:8000},
  {id:"sp_beatploy",when:G=>G.flags&&G.flags.beat_ploy>=1,from:"Women's Muay Thai Fan Club",title:"The Giant-Slayer Award",body:"A prize for the camp that finally beat Ploy, for the first time in two seasons. The fans chipped in",amt:5000}];
 
-const RUN_DARE=[["Suea Dam, Golden Tiger Camp","A 100 m dare","Heard Sirichai Camp trains its running every week. Come race me once at the temple yard? No shame in losing — everyone loses to me."],
- ["Suea Dam, Golden Tiger Camp","No holding back this time","My legs weren't awake last time. Saturday, temple yard, same as before — bigger crowd too, and Auntie Taew's already set up her som tam table."],
- ["Suea Dam, Golden Tiger Camp","The temple yard's buzzing again","Sia Tong's putting up a crate of red soda for the winner. I've drilled my start all week — send your fastest."]];
-/* the challenger: Golden Tiger's fastest fighter if there is one, otherwise their sprinter Suea Dam — always a touch quicker than our quickest */
-function runDareRival(){const R=roster(G).slice().sort((a,b)=>runVmax(b)-runVmax(a))[0],y=G.season||1;
-  const base=R?Math.min(21,(R.a.speed||10)+1.2):12;return runNpc("dare_suea","Suea Dam, Golden Tiger",base,Math.min(20,12+y),46);} /* always Suea Dam, the one who wrote the letter */
+/* v1.91.198 (Man: give the runners more story) — Suea Dam keeps score. His letters answer the last result; three wins over him bring a last dare at full tilt,
+   and once he is beaten in that one he tips his cap and turns up at sports day as Golden Tiger's anchor instead. */
+const RUN_DARE={first:["A 100 m dare","Heard Sirichai Camp trains its running every week. Come race me once at the temple yard? No shame in losing — everyone loses to me."],
+  won:[["One more?","My legs weren't awake last time, doesn't count. Saturday, temple yard, same as before. It's {w} to {l} — I'm not done."],["I've drilled my start","Sia Tong's putting up a crate of red soda for the winner. I've drilled my start every morning all week. {w} to {l} — this time I take it back."]],
+  lost:[["The temple yard's buzzing again","The temple folk haven't stopped talking about last time. {l} to {w}, I'm ahead. Want a rematch? Auntie Taew's already set up her som tam table."],["Still got the nerve?","Heard Kru Daeng's got you running extra every morning. Won't help. Suea Dam's legs never lose to a boxer. I lead {l} to {w}."]],
+  final:["The last dare","Lost to you three times. This time I'm going all out. Lose again and I'll never write to you again. But if I win… be ready."]};
+function runDareLetter(){const D=G.dare=G.dare||{w:0,l:0,n:0};const f=t=>t.replace("{w}",D.w).replace("{l}",D.l);
+  if(!D.n)return {t:RUN_DARE.first[0],b:RUN_DARE.first[1]};if(D.w>=3)return {t:RUN_DARE.final[0],b:RUN_DARE.final[1],final:1};
+  const P=D.last==="W"?RUN_DARE.won:RUN_DARE.lost,x=P[D.n%P.length];return {t:x[0],b:f(x[1])};}
+/* always Suea Dam, the one who wrote the letter — a touch quicker than our quickest, a little more on the last dare */
+function runDareRival(final){const R=roster(G).slice().sort((a,b)=>runVmax(b)-runVmax(a))[0],y=G.season||1;
+  const base=R?Math.min(21.5,(R.a.speed||10)+1.2+(final?.6:0)):12;return runNpc("dare_suea","Suea Dam, Golden Tiger",base,Math.min(20,12+y),46);}
 const TAM_MAIL=[["Stall's packed, come help!","There's a temple fair this weekend and the line reaches the chapel. I can't pound fast enough alone. Send me a fighter with heavy hands, dear. Pay depends on skill, and you take som tam home."],
  ["Tour buses at my stall!","Three tour buses pulled up at once and every one of them ordered mild Thai som tam. My arms are about to fall off, please come help!"],
  ["My helper called in sick","The girl who helps me pound has a fever, but the stall still has to open. Anyone free for half a day? I'll pay well."],
@@ -9259,8 +9265,8 @@ function mailWeekly(G){G.mail=G.mail||[];if(typeof thiefMail==="function"){thief
   if(G.week>=4&&G.week<=49&&gameWeek(G)>=(G.tamNextAbs||4)&&!G.mail.some(m=>m.kind==="job"&&!m.done&&!m.expired)){G.tamNextAbs=gameWeek(G)+3+Math.floor(rng()*2);
     const T=TAM_MAIL[(G.mailN_tam=(G.mailN_tam||0)+1)%TAM_MAIL.length];addMail(G,{kind:"job",job:"somtam",exp:G.week+1,from:"Auntie Taew, som tam stall by the temple",title:T[0],body:T[1]});}
   // v1.91.195 (Man): a runner from Golden Tiger turns up to challenge the camp to a 100 m race now and then — stakes are pride, morale and a little fame
-  if(G.week>=10&&G.week<=48&&gameWeek(G)>=(G.runDuelNextAbs||10+Math.floor(rng()*4))&&roster(G).length&&!G.mail.some(m=>m.job==="run"&&!m.done&&!m.expired)){G.runDuelNextAbs=gameWeek(G)+7+Math.floor(rng()*4);
-    const i=(G.runDuelN=(G.runDuelN||0)+1),L=RUN_DARE[(i-1)%RUN_DARE.length];addMail(G,{kind:"job",job:"run",exp:G.week+2,from:L[0],title:L[1],body:L[2],dare:i});}
+  if(G.week>=10&&G.week<=48&&gameWeek(G)>=(G.runDuelNextAbs||10+Math.floor(rng()*4))&&roster(G).length&&!(G.dare&&G.dare.done)&&!G.mail.some(m=>m.job==="run"&&!m.done&&!m.expired)){G.runDuelNextAbs=gameWeek(G)+7+Math.floor(rng()*4);
+    const L=runDareLetter();addMail(G,{kind:"job",job:"run",exp:G.week+2,from:"Suea Dam, Golden Tiger Camp",title:L.t,body:L.b,final:L.final||0});}
   // First escaped-animal letters; later escapes use the same mailbox route.
   if(!G.mailSeen.cow&&G.week>=9&&rng()<.6){G.mailSeen.cow=1;addMail(G,{kind:"quest",q:"cow",qk:"bull1",from:"Uncle Chaloem, dairy farm",title:"Help! The cow's loose!!",body:"Fresh Milk, the fiercest cow on the farm, broke out of her pen. She watches Muay Thai on TV every night and now she can hold a guard! She's blocking the road in front of the market and kicks anyone who comes near. Send a fighter, please. Uncle will pay, plus a bucket of fresh milk",exp:G.week+2,pay:1500});}
   if(!G.mailSeen.rooster&&G.week>=5&&rng()<.6){G.mailSeen.rooster=1;addMail(G,{kind:"quest",q:"rooster",qk:"rooster1",from:"Sia Tong, rooster arena",title:"My rooster flew into your camp",body:"My hot-headed bantam flew over the fence and has been pecking your heavy bag since morning. It squares up at anyone who comes close. Please catch it for me. I'll pay, plus two trays of eggs",exp:G.week+2,pay:1000});}
@@ -9443,11 +9449,11 @@ Object.assign(ACT,{
   mjdecl:d=>{const m=G.mail.find(x=>x.id===d.v);if(!m||m.done)return;m.done=true;m.declined=true;save();render();},
   mjskip:d=>{const m=G.mail.find(x=>x.id===d.v);if(!m||m.done)return;m.done=true;G.cash+=550;G.dust=(G.dust||0)+1;roster(G).forEach(f=>f.morale=clamp(f.morale+3,0,100));AU.sfx("ui");toast("Auntie Taew says thanks: ฿550 · ✦ +1");save();render();},
   mrdecl:d=>{const m=G.mail.find(x=>x.id===d.v);if(!m||m.done)return;m.done=true;m.declined=true;save();render();},
-  mrplay:d=>{const m=G.mail.find(x=>x.id===d.v);if(!m||m.done||m.expired)return;UI.modal=null;render();const o=runDareRival();
+  mrplay:d=>{const m=G.mail.find(x=>x.id===d.v);if(!m||m.done||m.expired)return;UI.modal=null;render();const o=runDareRival(m.final);
     BAG.st={phase:"run",mode:"run",practice:true};BAG.mount();
-    RUN.pick({race:{canBack:true,label:"Temple-yard race",note:`${o.name} of Golden Tiger dares you to 100 m · Win = fame +1 and camp morale · Lose = a dent in your runner's morale`,dist:100,
+    RUN.pick({race:{canBack:true,label:"Temple-yard race",intro:m.final?"Suea Dam: \"Last time. No holding back!\"":"Suea Dam: \"So you came. Let's go!\"",say:won=>({n:"Suea Dam",t:m.final?(won?"…I give in. Your legs are the real thing. I'm running Yellow at sports day this year — see you on the track.":"Knew it! Suea Dam never loses to boxers three times running."):(won?"Fluke! It won't be this easy next time.":"Like I said, everyone loses to me.")}),note:`${m.final?"Last dare · ":""}${o.name} of Golden Tiger dares you to 100 m · Win = fame +1 and camp morale · Lose = a dent in your runner's morale`,dist:100,
       lanes:me=>[runLane(o,{c:"#e8b62c",eff:.99,react:.13}),runLane(me,{me:true,c:"#e2443c"})],
-      cb:res=>{m.done=true;m.won=res.win;const f=RUN.runner(),out=[];if(res.win){G.rep=(G.rep||0)+1;roster(G).forEach(x=>x.morale=clamp((x.morale||0)+4,0,100));G.dust=(G.dust||0)+3;out.push("Fame +1 · whole camp morale +4 · ✦ +3");G.flags.runDareW=(G.flags.runDareW||0)+1;}
+      cb:res=>{m.done=true;m.won=res.win;const D=G.dare=G.dare||{w:0,l:0,n:0};D.n++;if(res.win)D.w++;else D.l++;D.last=res.win?"W":"L";if(m.final&&res.win)D.done=true;const f=RUN.runner(),out=[];if(res.win){G.rep=(G.rep||0)+1;roster(G).forEach(x=>x.morale=clamp((x.morale||0)+4,0,100));G.dust=(G.dust||0)+3;out.push("Fame +1 · whole camp morale +4 · ✦ +3");G.flags.runDareW=(G.flags.runDareW||0)+1;}
         else if(f&&G.F[f.id]){f.morale=clamp((f.morale||0)-3,0,100);out.push(`Morale ${f.name} -3`);}
         if(f&&G.F[f.id])f.fatigue=Math.min(100,(f.fatigue||0)+5);RUN.st.res.rw=`<span class="rwl">${out.map(x=>`<span class="rwi">${x}</span>`).join("")}</span>`;save();},
       next:()=>BAG.close()}});},
@@ -9937,18 +9943,30 @@ const runCap=f=>f&&f.a?16+.9*(f.a.stamina||10):25;
 const runMult=f=>f?runVmax(f)/8.35:1; /* kept for old callers */
 const RUN_LINE={S:"Kru Daeng stops the watch and goes quiet for two seconds. \"…Was there a tailwind or what?\"",A:"Kru Daeng nods. \"Good legs today. Now go kick the bag.\"",B:"\"You can run, just don't fade in the middle,\" Kru Daeng laughs",C:"\"Don't let those legs stop! All the way to the line!\" Kru Daeng shouts from the side of the track"};
 const RUN_MODES={solo:{n:"100 m trial",d:"Run alone against the ghost of your own best",dist:100},
-  duel:{n:"1-on-1",d:"Challenge a camp mate to 100 m · Beating someone faster pays more",dist:100},
+  duel:{n:"1-on-1",d:"One-on-one over 100 m · challenge a camp mate, or climb the ladder of five townsfolk",dist:100},
   m400:{n:"400 m · 4 runners",d:"One lap — manage your energy · Hold the green band, then go all out for the last 120 m",dist:400}};
 const RACE_TEAMS={me:{c:"#e2443c",n:"Red",hue:0},tiger:{c:"#e8b62c",n:"Yellow",hue:46},teach:{c:"#3a8ee0",n:"Blue",hue:214},obt:{c:"#3aa65a",n:"Green",hue:128}};
 /* people of the district who turn up to run: the morning running club, the school, the sub-district office */
 const RUN_LOCALS=[["loc_ton","Ton, morning running club",13,15],["loc_praew","Praew",11,10],["loc_wang","Uncle Wang, motorbike taxi",9,13],["loc_fai","Fai, school athlete",14,11]];
-const SP_SQUADS={teach:[["sp_t1","Coach Nui, PE teacher"],["sp_t2","Teacher Somchai"],["sp_t3","Teacher Ann"],["sp_t4","Principal Prayoon"]],obt:[["sp_o1","Deputy Ton"],["sp_o2","Sgt. Sombat"],["sp_o3","Fai from the TAO"],["sp_o4","Village Head Chaloem"]]};
+/* v1.91.198 each colour keeps its anchor every year (they get quicker), the rest of the team changes year to year */
+const SP_SQUADS={teach:[["sp_t1","Coach Nui, PE teacher"],["sp_t2","Teacher Somchai"],["sp_t3","Teacher Ann"],["sp_t4","Principal Prayoon"],["sp_t5","Teacher Beer, new hire"],["sp_t6","Teacher Jum, Thai"],["sp_t7","Teacher Oat, computers"],["sp_t8","Uncle Choet, school janitor"]],
+  obt:[["sp_o1","Deputy Ton"],["sp_o2","Sgt. Sombat"],["sp_o3","Fern from the TAO"],["sp_o4","Village Head Chaloem"],["sp_o5","TAO Chief Somsak"],["sp_o6","Em, rescue crew"],["sp_o7","Auntie Boonmee, health volunteer"],["sp_o8","Uncle Joy, garbage truck"]]};
+/* v1.91.198 (Man: more people to race) — the district ladder: five runners from the slow to the fast, each with a way of running and something to say.
+   fast = flies off the line and fades after 60 m · steady = the same all the way · kick = starts slow and finishes like a train */
+const RUN_LADDER=[
+ {id:"loc_wang",n:"Uncle Wang, motorbike taxi",sp:8,st:8,style:"fast",react:.1,hue:30,tag:"Quick off the line, fades late",pre:"Uncle rides a motorbike taxi all day, but the legs are still quick. Watch the start.",win:"Ha ha, the start's what counts! Remember that, kid.",lose:"Tired now… Uncle's going to sit down at the bike stand."},
+ {id:"loc_praew",n:"Praew",sp:11,st:10,style:"steady",hue:280,tag:"Runs even",pre:"Don't go easy on me! Praew's trained with Coach Nui all term.",win:"Praew beat a boxer! I'm telling the whole class tomorrow.",lose:"Praew'll be taller next year! Then I'm coming back to challenge you!"},
+ {id:"loc_ton",n:"Ton, morning running club",sp:13,st:15,style:"steady",hue:190,tag:"Tireless, never fades",pre:"Our club runs round the moat at 5:30 every morning. Sleep in and don't bother coming.",win:"Breathing rhythm is everything. Come run with the club.",lose:"OK, OK — boxers' legs are the real deal. I'll give you that."},
+ {id:"loc_fai",n:"Fai, school athlete",sp:15,st:13,style:"kick",react:.24,hue:330,tag:"Slow start, big finish",pre:"Fai runs the 100 m for the district. Nobody's ever beaten me on the run-in.",win:"The home straight belongs to Fai!",lose:"…Could I have Kru Daeng's number? I'd love to train at your camp."},
+ {id:"dare_suea",n:"Suea Dam, Golden Tiger",sp:16,st:13,style:"fast",react:.11,hue:46,tag:"Fast at both ends",suea:true,pre:"Climbing the ladder all the way to me is no joke. But this is where it ends.",win:"Like I said, everyone loses to me.",lose:"…Not bad. I'll be back."}];
+function ladderNpc(i){const L=RUN_LADDER[i],y=(G.season||1)-1,R=roster(G).slice().sort((a,b)=>runVmax(b)-runVmax(a))[0];
+  const sp=L.suea?Math.min(21,Math.max(L.sp+y*.5,R?(R.a.speed||10)+1:L.sp)):Math.min(19,L.sp+y*.5);return runNpc(L.id,L.n,sp,Math.min(20,L.st+y*.5),L.hue);}
 function runNpc(key,name,sp,st,hue){return {id:key,name,a:{speed:sp,stamina:st},sprite:npcBase(key).base,tintHue:hue,fake:true,fatigue:0};}
 function runLocal(i){const L=RUN_LOCALS[i%RUN_LOCALS.length];return runNpc(L[0],L[1],L[2],L[3],[30,280,190,330][i%4]);}
 /* a runner on the track */
 function runLane(f,o={}){return {f,name:(f&&f.name)||o.name||"",team:o.team||null,c:o.c||(o.team?RACE_TEAMS[o.team].c:"#ffffff"),me:!!o.me,ai:!o.me,ghost:o.ghost||null,
   vmax:o.vmax||runVmax(f),cap:o.cap||runCap(f),react:o.react??(.13+Math.random()*.13),eff:o.eff??(.94+Math.random()*.06),cruise:o.cruise??(.84+Math.random()*.05),
-  legs:o.legs||null,leg:0,legX:0,x:0,v:0,sta:1,done:false,t:0,wait:0,passQ:null};}
+  style:o.style||null,legs:o.legs||null,leg:0,legX:0,x:0,v:0,sta:1,done:false,t:0,wait:0,passQ:null};}
 /* what a runner would clock flat out (100 m) or well paced (400 m) — the "par" a grade is measured against */
 function runPar(f,dist){const L=runLane(f,{react:.18,eff:1});const c=runCruise(L,dist);let t=0;const dt=.02;while(L.x<dist&&t<120){runStep(L,dist<=100?1:(L.x<dist-120?c:1),dt);t+=dt;}return t+.18;}
 /* the fastest steady effort this runner's tank can hold until the last 120 m, keeping a quarter for the kick — the green band on the 400 m pace meter */
@@ -9961,13 +9979,15 @@ const RUN={st:null,
   played(G){return mgPlayed(G,"run");},
   /* opts.duel = {opp:{id,name,f,pace}, label, note, cb, next} — the regional duel; opts.race = a ready race (sports day, story challenge) */
   pick(opts){const F=bagFighters(G);const me=(G.mini&&G.mini.runLast&&F.find(f=>f.id===G.mini.runLast))||F[0];
-    const S={phase:"pick",md:(G.mini&&G.mini.runMd)||"solo",id:me?me.id:null,opp:null,practice:this.played(G),duel:null,race:null,act:null,...(opts||{})};
-    if(S.duel||S.race)S.md="duel";if(S.md==="duel"&&!S.duel&&!S.race&&F.length<2)S.md="solo";
+    const lad=(G.mini&&G.mini.ladder)||0;const S={phase:"pick",dsub:"camp",rung:Math.min(lad,RUN_LADDER.length-1),md:(G.mini&&G.mini.runMd)||"solo",id:me?me.id:null,opp:null,practice:this.played(G),duel:null,race:null,act:null,...(opts||{})};
+    if(S.duel||S.race)S.md="duel";if(F.length<2)S.dsub="town";
     if(!S.duel&&!S.race){const o=F.find(f=>f.id!==S.id);S.opp=o?o.id:null;}
     this.st=S;if(BAG.st)BAG.st.phase="run";this.draw();},
   act(a,v){const S=this.st;if(!S)return;
     if(a==="me"){S.id=v;if(S.opp===v)S.opp=(bagFighters(G).find(f=>f.id!==v)||{}).id||null;this.draw();}
     else if(a==="opp"){S.opp=v;this.draw();}
+    else if(a==="dsub"){S.dsub=v;this.draw();}
+    else if(a==="rung"){const i=+v;if(i<=((G.mini||{}).ladder||0)){S.rung=i;this.draw();}}
     else if(a==="md"){S.md=v;G.mini=G.mini||{};G.mini.runMd=v;this.draw();}
     else if(a==="go")this.set();
     else if(a==="pass")this.pass();
@@ -9982,6 +10002,7 @@ const RUN={st:null,
     if(S.duel){const O=S.duel.opp,of=O.f||(O.id&&G.F[O.id])||runNpc(O.id||"duel_opp",O.name,14,14,200);
       return [runLane(of,{name:O.name,c:"#ffd34a",vmax:O.pace?O.pace*1.32:undefined,eff:.97}),runLane(me,{me:true,c:"#e2443c"})];}
     if(S.md==="solo"){const g=((G.mini||{}).runGhost||{})[S.id];const L=[runLane(me,{me:true,c:"#e2443c"})];if(g)L.unshift(runLane(me,{name:"Record ghost",ghost:g,c:"#9fd8ff"}));return L;}
+    if(S.md==="duel"&&S.dsub==="town"){const i=Math.min(S.rung||0,RUN_LADDER.length-1),L=RUN_LADDER[i];return [runLane(ladderNpc(i),{c:"#ffd34a",style:L.style,react:L.react??.17,eff:.99}),runLane(me,{me:true,c:"#e2443c"})];}
     if(S.md==="duel"){const o=G.F[S.opp]||runLocal(0);return [runLane(o,{c:"#ffd34a"}),runLane(me,{me:true,c:"#e2443c"})];}
     /* 400 m: camp mates first, then whoever from the morning club turns up */
     const O=F.slice().sort((a,b)=>runVmax(b)-runVmax(a)).slice(0,3);let i=0;while(O.length<3)O.push(runLocal(i++));
@@ -9990,6 +10011,10 @@ const RUN={st:null,
   /* stars for the pick screen: how this runner compares with ours over this distance */
   vsTag(f){const me=this.runner();if(!me||!f)return "";const d=this.dist(),a=runPar(me,d),b=runPar(f,d),r=b/a;
     return r<.985?`<em class="rk hard">Faster</em>`:r<1.015?`<em class="rk even">Even</em>`:`<em class="rk easy">Slower</em>`;},
+  ladderHTML(){const S=this.st,got=(G.mini||{}).ladder||0;
+    return `<b class="meta">District race ladder · beaten ${got}/${RUN_LADDER.length}</b><div class="rladder">${RUN_LADDER.map((L,i)=>{const open=i<=got,f=open?ladderNpc(i):null;
+      return `<button class="rrung ${i===S.rung?"on":""} ${i<got?"beat":""}" data-rn="rung" data-v="${i}" ${open?"":"disabled"} style="--hc:hsl(${L.hue} 70% 55%)"><i>${i+1}</i><span><b>${open?esc(L.n):"???"}</b><small>${open?esc(L.tag):` wins ${esc(RUN_LADDER[i-1].n)} first`}</small></span>${open?this.vsTag(f):""}${i<got?`<em class="rk beat">Beaten</em>`:""}</button>`;}).join("")}</div>
+      ${RUN_LADDER[S.rung]?`<div class="rsay"><b>${esc(RUN_LADDER[S.rung].n)}:</b> "${esc(RUN_LADDER[S.rung].pre)}"</div>`:""}`;},
   /* relay: whole squads against each other, leg by leg */
   vsTeam(L,M){if(!M||!M.legs)return "";const sum=X=>X.legs.reduce((t,g)=>t+runPar(g.f,100),0),r=sum(L)/sum(M);
     return r<.985?`<em class="rk hard">Faster</em>`:r<1.015?`<em class="rk even">Even</em>`:`<em class="rk easy">Slower</em>`;},
@@ -10000,12 +10025,14 @@ const RUN={st:null,
       const card=(x,on,act)=>`<button class="mbf rcard ${on?"on":""}" data-rn="${act}" data-v="${x.id}"><img src="${faceSrc(x.id,"happy")}" alt=""><small>${esc(x.name)}</small>${this.statBar(x)}${act==="opp"?this.vsTag(x):""}</button>`;
       const lanes=me?this.field():[];
       el.innerHTML=`<div class="mbox px rnpick"><h2>🏃 ${ext?esc((S.duel||S.race).label||"Race"):"Sirichai Camp Track"}</h2>
-       ${ext?"":`<div class="sgtabs">${Object.entries(RUN_MODES).map(([k,m])=>`<button class="${k===S.md?"on":""}" data-rn="md" data-v="${k}" ${k==="duel"&&F.length<2?"disabled":""}>${m.n}</button>`).join("")}</div>
+       ${ext?"":`<div class="sgtabs">${Object.entries(RUN_MODES).map(([k,m])=>`<button class="${k===S.md?"on":""}" data-rn="md" data-v="${k}" >${m.n}</button>`).join("")}</div>
        <p class="meta">${M.d}${S.md==="solo"?` · 100 m record ${B.run?`<b class="goldt">${B.run.toFixed(2)} s</b>`:"none yet"}`:S.md==="m400"?` · 400 m record ${B.run400?`<b class="goldt">${B.run400.toFixed(2)} s</b>`:"none yet"}`:""}</p>`}
        ${ext&&(S.duel||S.race).note?`<p class="meta center">${esc((S.duel||S.race).note)}</p>`:""}
        ${S.race&&S.race.fixedMe?"":`<b class="meta">Runner</b><div class="mbpick">${F.map(x=>card(x,x.id===S.id,"me")).join("")}</div>`}
-       ${!ext&&S.md==="duel"?`<b class="meta">Challenge</b><div class="mbpick">${F.filter(x=>x.id!==S.id).map(x=>card(x,x.id===S.opp,"opp")).join("")}</div>`:""}
-       ${me&&(ext||S.md!=="duel")?`<div class="rfield">${lanes.filter(l=>!l.me).map(l=>`<span style="--tc:${l.c}"><b>${esc(l.ghost?"Record ghost":l.legs?l.teamName:l.name)}</b>${l.ghost?`<small>${l.ghost.t.toFixed(2)} s</small>`:l.legs?this.vsTeam(l,lanes.find(q=>q.me)):this.vsTag(l.f)}</span>`).join("")||`<span><b>Running alone</b><small>No record ghost yet</small></span>`}</div>`:""}
+       ${!ext&&S.md==="duel"?`<div class="sgtabs sub"><button class="${S.dsub!=="town"?"on":""}" data-rn="dsub" data-v="camp" ${F.length<2?"disabled":""}>Camp mates</button><button class="${S.dsub==="town"?"on":""}" data-rn="dsub" data-v="town">Townsfolk</button></div>`:""}
+       ${!ext&&S.md==="duel"&&S.dsub!=="town"?`<b class="meta">Challenge</b><div class="mbpick">${F.filter(x=>x.id!==S.id).map(x=>card(x,x.id===S.opp,"opp")).join("")}</div>`:""}
+       ${!ext&&S.md==="duel"&&S.dsub==="town"?this.ladderHTML():""}
+       ${me&&(ext||S.md!=="duel")&&!(S.md==="duel"&&S.dsub==="town")?`<div class="rfield">${lanes.filter(l=>!l.me).map(l=>`<span style="--tc:${l.c}"><b>${esc(l.ghost?"Record ghost":l.legs?l.teamName:l.name)}</b>${l.ghost?`<small>${l.ghost.t.toFixed(2)} s</small>`:l.legs?this.vsTeam(l,lanes.find(q=>q.me)):this.vsTag(l.f)}</span>`).join("")||`<span><b>Running alone</b><small>No record ghost yet</small></span>`}</div>`:""}
        <p class="meta center">${ext?"":S.practice?"Already played this week · this run is practice, no rewards":"Weekly reward: Speed/Stamina · morale · stardust"}</p>
        <div class="mfoot roadbtns">${ext&&!(S.race&&S.race.canBack)?"":`<button class="btn" data-mb="close">Later</button>`}<button class="btn primary" data-rn="go" ${me?"":"disabled"}>To the start line ▸</button></div></div>`;return;}
     if(S.phase==="set"||S.phase==="race"){const L=this.meLane(),cur=L?this.legF(L):me;
@@ -10022,6 +10049,8 @@ const RUN={st:null,
       el.innerHTML=`<div class="mbox px rnres"><h2>${R.dq?"False start!":R.place===1?(S.lanes.length>1?"First across the line!":"Finished!"):`Finished place ${R.place}`}</h2>${R.grade?`<div class="mgrade g${R.grade}">${R.grade}</div>`:""}
        <div class="rtable">${R.order.map((l,i)=>`<div class="${l.me?"me":""}" style="--tc:${l.c}"><b>${i+1}</b><span>${esc(l.team?RACE_TEAMS[l.team].n+" · ":"")}${esc(l.ghost?"Record ghost":l.legs?(l.teamName||l.name):l.name)}</span><em>${l.me&&R.dq?"False start":l.t.toFixed(2)+" s"}</em></div>`).join("")}</div>
        ${R.best?`<p class="center"><b class="newrec">New record!</b>${R.prev?` was ${R.prev.toFixed(2)} s`:""}</p>`:""}
+       ${R.say?`<div class="rsay"><b>${esc(R.say.n)}:</b> "${esc(R.say.t)}"</div>`:""}
+       ${R.ladUp?`<p class="center"><b class="newrec">${(G.mini.ladder||0)>=RUN_LADDER.length?"All five on the district ladder beaten!":`Next challenger unlocked: ${esc(RUN_LADDER[G.mini.ladder].n)}`}</b> · ✦ +2</p>`:""}
        ${R.chain?`<p class="center">Longest mash streak <b class="goldt">${R.chain} taps</b></p>`:""}
        <p class="center meta">Reaction ${R.react.toFixed(2)} s${R.passes?` · passes ${R.passes}`:""}${R.fs?` · false starts ${R.fs} times`:""}${R.par?` · target time for ${esc(me?me.name:"")} ${R.par.toFixed(2)} s`:""}</p>
        ${ext?(R.rw?`<p class="center">${R.rw}</p>`:""):S.practice?`<p class="center meta">Practice mode · no rewards</p>`:`<p class="center">${R.rw}</p>`}
@@ -10033,7 +10062,9 @@ const RUN={st:null,
     /* relay lanes: each leg's runner keeps its own top speed and tank */
     for(const L of lanes)if(L.legs){L.legs=L.legs.map(g=>({f:g.f,vmax:runVmax(g.f),cap:runCap(g.f)}));L.vmax=L.legs[0].vmax;L.cap=L.legs[0].cap;}
     Object.assign(S,{phase:"set",armed:false,gun:0,fs:S.fs||0,lanes,dist,relay:lanes.some(l=>l.legs),rate:0,lastT:0,stumble:0,done:false,t:0,react:0,com:"",cf:{},fadeT:0,
-      chain:0,maxChain:0,lastTap:0,chainT:0,mile:null,shk:0,mbus:null,path:[],pathT:0,passes:[],passMsg:null});this.draw();this.loop();},
+      chain:0,maxChain:0,lastTap:0,chainT:0,mile:null,shk:0,mbus:null,path:[],pathT:0,passes:[],passMsg:null});
+    if(S.race&&S.race.intro)S.com=S.race.intro;else if(S.md==="duel"&&S.dsub==="town"&&!S.race&&!S.duel){const L=RUN_LADDER[S.rung];S.com=`${L.n}: "${L.pre}"`;}
+    this.draw();this.loop();},
   /* v1.91.185 one tap to get on the blocks, three red lights, then green */
   arm(){const S=this.st;if(!S||S.phase!=="set"||S.armed)return;S.armed=true;S.lights=0;S.green=0;S.com="Runners are on the blocks!";AU.sfx&&AU.sfx("ui");this.draw();
     const m=document.getElementById("rnmsg");if(m)m.textContent="On your marks…";
@@ -10103,7 +10134,8 @@ const RUN={st:null,
       if(L.ghost){const p=L.ghost.p,i=el*10;L.x=i>=p.length-1?D:p[Math.floor(i)]+(p[Math.min(p.length-1,Math.floor(i)+1)]-p[Math.floor(i)])*(i%1);if(L.x>=D){L.done=true;L.t=L.ghost.t;}continue;}
       if(L.wait>0){L.wait-=dt;continue;}
       let e;if(L.me)e=S.react&&now>=S.stumble?S.rate/7.5:0;
-      else{if(el<L.react)continue;const lx=L.legs?L.legX:L.x,ld=L.legs?100:D;e=ld>=400&&lx<ld-120?(L.cq??=Math.min(1,runCruise(L,ld)+(L.cruise-.87))):L.eff*(1+.03*Math.sin(el*2.3+L.react*9));}
+      else{if(el<L.react)continue;const lx=L.legs?L.legX:L.x,ld=L.legs?100:D;e=ld>=400&&lx<ld-120?(L.cq??=Math.min(1,runCruise(L,ld)+(L.cruise-.87))):L.eff*(1+.03*Math.sin(el*2.3+L.react*9));
+        if(ld<400&&L.style){const fr=lx/ld;if(L.style==="fast")e=fr<.6?1:.9;else if(L.style==="kick"){if(fr<.65)e=.92;else{e=1;if(!L.kicked){L.kicked=1;L.vmax*=1.045;}}}}}
       const x0=L.x;runStep(L,e,dt);if(L.legs){L.legX+=L.x-x0;
         if(L.legX>=100&&L.leg<L.legs.length-1){if(L.me)this.handover(L,"late");else this.handover(L,"ai");}}
       if(L.x>=D){L.x=D;L.done=true;L.t=el;}}
@@ -10180,8 +10212,11 @@ const RUN={st:null,
     const prev=G.mini.best[bk]||null,isBest=!dq&&!ext&&!S.relay&&(!prev||t<prev);if(isBest)G.mini.best[bk]=Math.round(t*100)/100;
     /* the ghost is per runner, 100 m only */
     if(!dq&&!ext&&D===100&&f){G.mini.runGhost=G.mini.runGhost||{};const g=G.mini.runGhost[f.id];if(!g||t<g.t)G.mini.runGhost[f.id]={t:Math.round(t*100)/100,p:S.path.concat([D])};}
+    let say=null,ladUp=false;if(!ext&&S.md==="duel"&&S.dsub==="town"&&!dq){const L=RUN_LADDER[S.rung],won=place===1;say={n:L.n,t:won?L.lose:L.win};
+      if(won&&S.rung===(G.mini.ladder||0)){G.mini.ladder=(G.mini.ladder||0)+1;ladUp=true;G.dust=(G.dust||0)+2;if(G.mini.ladder<RUN_LADDER.length)S.rung=G.mini.ladder;}}
+    if(S.race&&S.race.say)say=S.race.say(place===1);
     const passTxt=S.passes&&S.passes.length?S.passes.map(q=>({perfect:"clean",good:"Good",early:"early",late:"late"}[q])).join(" · "):"";
-    S.res={win:place===1,place,t,ot:(live.find(l=>!l.me)||{}).t||0,dq,fs:S.fs,react:S.react||0,chain:S.maxChain||0,grade:ext||S.relay?null:grade,best:isBest,prev,par,order,passes:passTxt,rw:""};
+    S.res={win:place===1,place,t,ot:(live.find(l=>!l.me)||{}).t||0,dq,fs:S.fs,react:S.react||0,chain:S.maxChain||0,grade:ext||S.relay?null:grade,best:isBest,prev,par,order,passes:passTxt,rw:"",say,ladUp};
     const out={win:place===1,place,t,ot:S.res.ot,dq,order:order.map(l=>({team:l.team,t:l.t,me:l.me}))};
     if(S.race&&S.race.cb)S.race.cb(out);
     else if(S.duel&&S.duel.cb){S.duel.cb(out);}
@@ -10193,7 +10228,7 @@ const RUN={st:null,
     const up=k=>{const b=f.a[k];f.a[k]=Math.min(cap,Math.round((f.a[k]+g)*100)/100);return f.a[k]>b;};
     if(up(key[0])|up(key[1]))out.push(`Speed/stamina +${g}`);else out.push("Speed/stamina already at potential");
     const mo=win?6:3;f.morale=Math.min(100,(f.morale||0)+mo);out.push(`Morale +${mo}`);f.fatigue=Math.min(100,(f.fatigue||0)+(S.md==="m400"?7:5));out.push(`Fatigue +${S.md==="m400"?7:5}`);
-    const o=S.md==="duel"&&G.F[S.opp];if(o){o.fatigue=Math.min(100,(o.fatigue||0)+3);const R=S.res;if(Math.abs(R.t-R.ot)<.3){add(G,o.id,"bond",1);add(G,f.id,"bond",1);out.push("So close they both burst out laughing");}
+    const o=S.md==="duel"&&S.dsub!=="town"&&G.F[S.opp];if(o){o.fatigue=Math.min(100,(o.fatigue||0)+3);const R=S.res;if(Math.abs(R.t-R.ot)<.3){add(G,o.id,"bond",1);add(G,f.id,"bond",1);out.push("So close they both burst out laughing");}
       if(win&&runPar(o,100)<runPar(f,100)){G.dust=(G.dust||0)+2;out.push("Beat someone faster! ✦ +2");}}
     const du={S:5,A:3,B:2,C:1}[grade];G.dust=(G.dust||0)+du;out.push(`<b class="goldt">✦ +${du}</b>`);out.push(esc(RUN_LINE[grade]));
     G.flags.runN=(G.flags.runN||0)+1;if(grade==="S")G.flags.runS=(G.flags.runS||0)+1;
@@ -10211,9 +10246,10 @@ function sportsDayYear(done){if(!sportsDue(G)){done();return;}SPORTS.open(done);
    the teachers and the office get a little quicker every year, Golden Tiger is as quick as its fighters are */
 function spSquad(k){const y=G.season||1,T=RACE_TEAMS[k];
   if(k==="me"){const R=roster(G).filter(f=>!f.injury).sort((a,b)=>runVmax(b)-runVmax(a));let i=0;while(R.length<4)R.push(runNpc("sp_stu"+i,["Tonkla, camp student","Khaopan, camp student","Min, camp student","Ball, camp student"][i++],10,10,0));return R;}
-  if(k==="tiger"){const R=SPORTS.rivals().slice(0,4);let i=0;while(R.length<4)R.push(runNpc("sp_y"+i,["Suea Lek, Golden Tiger","Suea Noi, Golden Tiger","Suea Dam, Golden Tiger","Suea Lueang, Golden Tiger"][i++],Math.min(19,13+y*.8),Math.min(19,13+y*.7),T.hue));return R;}
-  const base=k==="teach"?[10.5,12]:[9,11],gr=k==="teach"?[.7,.5]:[.6,.5],cap=k==="teach"?17:15;
-  return SP_SQUADS[k].map(([id,n],i)=>runNpc(id,n,Math.min(cap,base[0]+gr[0]*y-i*.4),Math.min(cap,base[1]+gr[1]*y),T.hue));}
+  if(k==="tiger"){const R=SPORTS.rivals().slice(0,4);if(G.dare&&G.dare.done)R.unshift(runDareRival(false));R.splice(4);let i=0;while(R.length<4)R.push(runNpc("sp_y"+i,["Suea Lek, Golden Tiger","Suea Noi, Golden Tiger","Suea Khrong, Golden Tiger","Suea Lueang, Golden Tiger"][i++],Math.min(19,13+y*.8),Math.min(19,13+y*.7),T.hue));return R;}
+  const base=k==="teach"?[10.5,12]:[9,11],gr=k==="teach"?[.7,.5]:[.6,.5],cap=k==="teach"?17:15,P=SP_SQUADS[k],r=mulberry32((G.seed||1)+y*31+(k==="teach"?7:13));
+  const rest=P.slice(1).map(x=>[x,r()]).sort((a,b)=>a[1]-b[1]).slice(0,3).map(x=>x[0]);
+  return [P[0],...rest].map(([id,n],i)=>runNpc(id,n,Math.min(cap+(i?0:1.5),base[0]+gr[0]*y+(i?-.4*i:.8)),Math.min(cap,base[1]+gr[1]*y),T.hue));}
 const SPORTS={st:null,
   el(){return document.getElementById("minibag");},
   open(done){BAG.st={phase:"sports",mode:"run",practice:true};BAG.mount();this.st={ph:"intro",ev:0,pts:{me:0,tiger:0,teach:0,obt:0},log:[],done};this.draw();},
@@ -10234,11 +10270,12 @@ const SPORTS={st:null,
   race(E){const S=this.st,keys=["tiger","teach","obt"],sq={};for(const k of [...keys,"me"])sq[k]=spSquad(k);const y=G.season||1;
     const back=()=>{RUN.stop();RUN.st=null;BAG.st.phase="sports";S.ph="res";this.draw();},cb=res=>{this.rankOrder(res.order.map(o=>o.team));S.res=res;};
     const lane=(k,f,me)=>runLane(f,{team:k,me,eff:k==="tiger"?.97+Math.random()*.03:k==="teach"?.93+Math.random()*.05:.9+Math.random()*.06,cruise:k==="tiger"?.87:.84+Math.random()*.04});
+    const intro=`Yellow lane: ${sq.tiger[0].name} · Blue ${sq.teach[0].name} · Green ${sq.obt[0].name} · every colour's favourite is set!`;
     if(E.k==="relay"){const mk=k=>{const L=lane(k,sq[k][0],k==="me");L.legs=sq[k].slice(0,4).map(f=>({f}));L.teamName=RACE_TEAMS[k].n;return L;};
       return {label:"Sports day · 4×100 relay",note:`Legs 1–4: ${sq.me.slice(0,4).map(f=>f.name).join(" → ")} · Mash to run; in the yellow box, tap the track to hand over the baton (or Enter) · Tap late in the box for a clean pass`,
-        dist:400,fixedMe:true,me:sq.me[0],lanes:()=>[...keys.map(mk),mk("me")],cb,next:back};}
+        dist:400,fixedMe:true,intro,me:sq.me[0],lanes:()=>[...keys.map(mk),mk("me")],cb,next:back};}
     const d=E.k==="run400"?400:100,pickF=k=>k==="tiger"?sq.tiger[d===400?1:0]||sq.tiger[0]:sq[k][d===400?1:0];
-    return {label:`Sports day · ${d} m`,note:`4 colours, 4 lanes · 1st scores 3, 2nd 2, 3rd 1 · Rivals: ${keys.map(k=>`${RACE_TEAMS[k].n} ${pickF(k).name}`).join(" · ")}`,dist:d,
+    return {label:`Sports day · ${d} m`,note:`4 colours, 4 lanes · 1st scores 3, 2nd 2, 3rd 1 · Rivals: ${keys.map(k=>`${RACE_TEAMS[k].n} ${pickF(k).name}`).join(" · ")}`,dist:d,intro:`Yellow lane: ${pickF("tiger").name} · Blue ${pickF("teach").name} · Green ${pickF("obt").name} · ready to go!`,
       lanes:me=>[...keys.map(k=>lane(k,pickF(k),false)),lane("me",me,true)],cb,next:back};},
   startEv(){const S=this.st,E=SP_EV[S.ev];
     if(E.k==="tug"){S.ph="tug";TUG.start(res=>{if(!this.st)return;this.rank(res.win);S.res=res;S.ph="res";this.draw();});return;}

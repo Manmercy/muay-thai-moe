@@ -2711,3 +2711,15 @@ body.qs-cutting .vn .vbg{display:none}
 .spcer .ctrow{grid-template-columns:1fr auto}
 .spcer .ctrow>span{display:block}.spcer .ctrow>span>small{display:block;margin-top:2px}.spcer .ctrow .pxe{display:inline-block;vertical-align:-2px;margin-right:4px}
 .spcer .ctrow>b{white-space:nowrap}.spcer .ctrow>i{display:none}
+/* v1.91.198 district ladder + what the runners say */
+.mgame .sgtabs.sub{margin-top:6px;background:#181230}.mgame .sgtabs.sub button.on{background:#5ab0ff;color:#06121f;box-shadow:inset 0 -3px 0 #2a6fb0}
+.rladder{display:grid;gap:4px;margin:6px 0}
+.rrung{display:grid;grid-template-columns:30px 1fr auto auto;align-items:center;gap:8px;padding:6px 8px 6px 0;border:0;font:inherit;color:#fff;text-align:left;cursor:pointer;
+  background:#181230;box-shadow:inset 5px 0 0 var(--hc),0 0 0 2px var(--px1)}
+.rrung i{font:700 18px "Pixelify Sans",var(--f-display);font-style:normal;text-align:center;color:var(--hc)}
+.rrung span{display:grid;min-width:0}.rrung b{font-size:14px}.rrung small{font-size:11px;opacity:.75}
+.rrung.on{background:#2a2346;box-shadow:inset 5px 0 0 var(--hc),0 0 0 2px var(--px1),inset 0 0 0 2px var(--pxg)}
+.rrung:disabled{opacity:.45;cursor:default}.rrung.beat i::after{content:"✓";color:#5be06a;margin-left:2px}
+.rk.beat{background:#2a2346;color:#5be06a}
+.rsay{margin:8px 0;padding:8px 10px;background:#141024;box-shadow:0 0 0 2px var(--px1),inset 4px 0 0 var(--pxg);font-size:14px;line-height:1.4}
+.rsay b{color:#ffd34a}
