@@ -1,5 +1,5 @@
 // ================= MUAY THAI MOE v1.3 — UI =================
-const VERSION="1.91.199";
+const VERSION="1.91.200";
 const CUR_LANG=(typeof window!=="undefined"&&window.LANG)||"th";
 const TH_LABEL=String.fromCharCode(3652,3607,3618);
 function langSwitch(cls){return `<div class="langsw ${cls||""}" role="group" aria-label="Language">${[["th",TH_LABEL],["en","EN"]].map(([k,l])=>`<button class="lsb ${CUR_LANG===k?"on":""}" data-act="setlang" data-v="${k}" aria-pressed="${CUR_LANG===k}">${l}</button>`).join("")}</div>`;}
@@ -1265,7 +1265,15 @@ const PATCH_MG={id:"1.95",ver:"Muay Thai Moe v1.95",title:"Klong Khaek Across th
  ["💥","Heavier hits","Lost health leaves a trailing mark, each round opens with a banner, a KO slows down so you see the last blow, prize money flies into your purse, and your phone buzzes when something good drops."],
  ["🎨","New minigame screens","Pick a song from cards with its scene. The result banner tells you if you set a new record. The ตำ and คลุก buttons now match their notes."]],
  foot:"Auntie Taew says: don't you dare lose to Jae Pla's stall, dear ✦"};
-const PATCHES=[PATCH_AV,PATCH_TAPE,PATCH_FIX,PATCH_TANI,PATCH_SKN,PATCH_MG],PATCH=PATCHES[PATCHES.length-1];
+/* v1.91.200 (Man): the running update gets its own note, so players who already read v1.95 see it too */
+const PATCH_RUN={id:"1.96",ver:"Muay Thai Moe v1.96",title:"Camp Track & Sports Day",lead:"Racing isn't just 100 m against a camp mate any more — your fighters' Speed and Stamina count with every stride.",items:[
+ ["🏃","3 ways to use the camp track","A 100 m time trial against your own record ghost · 1-on-1 · 400 m with four, where you hold the green band and kick at the end"],
+ ["🪜","Race 5 townsfolk","Duel mode has a ladder: from Uncle Wang the motorbike taxi up to the fastest runner in the district. Each runs differently — beat one to meet the next."],
+ ["✉️","Race dares by mail","Keep an eye on your mailbox. Some weeks a runner from a rival camp dares you to a race at the temple yard. Win for fame and camp morale."],
+ ["🎌","Sports day: 4 colours, 4 lanes","Mid-year: 100 m and 400 m, tug of war, and a 4×100 relay where you pass the baton as the ring closes, ending with a podium ceremony · Some years an unexpected guest turns up to run too"],
+ ["🎨","A proper pixel-game look","Every minigame gets pixel frames, buttons and numbers. Scene music goes quiet while a minigame's music plays."]],
+ foot:"Kru Daeng says: fast legs aren't enough — you've got to pass the baton too ✦"};
+const PATCHES=[PATCH_AV,PATCH_TAPE,PATCH_FIX,PATCH_TANI,PATCH_SKN,PATCH_MG,PATCH_RUN],PATCH=PATCHES[PATCHES.length-1];
 function nextPatch(){if(G&&G.newsSeen==="1.91.144")G.newsSeen="1.91.111"; /* v1.91.145: the 1.91.144 popup was withdrawn — those who saw it must not get the old ones again */const i=PATCHES.findIndex(p=>p.id===(G&&G.newsSeen));return i<0?PATCHES[0]:PATCHES[i+1]||null;}
 function maybeWhatsNew(){if(!G||G.ended||UI.scene)return;const P=nextPatch();if(!P)return;UI.modal={type:"whatsnew",id:P.id};}
 function whatsNewHTML(){const P=PATCHES.find(p=>p.id===(UI.modal&&UI.modal.id))||nextPatch()||PATCH,n=PATCHES.length-PATCHES.indexOf(P)-1;return `<div class="wnew"><span class="pill gold">Update · ${esc(P.ver)}</span><h2>🥊 ${esc(P.title)}</h2><p class="lead">${esc(P.lead)}</p>

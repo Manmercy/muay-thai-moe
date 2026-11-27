@@ -1,5 +1,5 @@
 // ================= MUAY THAI MOE v1.3 — UI =================
-const VERSION="1.91.199";
+const VERSION="1.91.200";
 const CUR_LANG=(typeof window!=="undefined"&&window.LANG)||"th";
 const TH_LABEL=String.fromCharCode(3652,3607,3618);
 function langSwitch(cls){return `<div class="langsw ${cls||""}" role="group" aria-label="Language">${[["th",TH_LABEL],["en","EN"]].map(([k,l])=>`<button class="lsb ${CUR_LANG===k?"on":""}" data-act="setlang" data-v="${k}" aria-pressed="${CUR_LANG===k}">${l}</button>`).join("")}</div>`;}
@@ -1265,7 +1265,15 @@ const PATCH_MG={id:"1.95",ver:"Muay Thai Moe v1.95",title:"กลองแขก
  ["💥","ชกหนักมือขึ้น","เลือดที่หายเห็นเป็นรอยค้าง ป้ายเริ่มยกใหม่ น็อกแล้วภาพช้าลงให้เห็นหมัดสุดท้าย เงินรางวัลเด้งเข้ากระเป๋า และมือถือสั่นตอนลุ้นของดี"],
  ["🎨","หน้ามินิเกมใหม่","เลือกเพลงจากการ์ดที่มีภาพฉาก ตอนจบมีแบนเนอร์เพลงบอกว่าทำสถิติใหม่ไหม ปุ่มตำกับคลุกเป็นสีเดียวกับโน้ตแล้ว"]],
  foot:"ป้าแต๋วฝากบอกว่า อย่าแพ้ร้านเจ๊ปลานะลูก ✦"};
-const PATCHES=[PATCH_AV,PATCH_TAPE,PATCH_FIX,PATCH_TANI,PATCH_SKN,PATCH_MG],PATCH=PATCHES[PATCHES.length-1];
+/* v1.91.200 (Man): the running update gets its own note, so players who already read v1.95 see it too */
+const PATCH_RUN={id:"1.96",ver:"Muay Thai Moe v1.96",title:"ลู่วิ่งค่าย กับงานกีฬาสี",lead:"วิ่งแข่งไม่ได้มีแค่ 100 เมตรกับเพื่อนในค่ายอีกแล้ว ความเร็วกับความอึดของนักมวยมีผลจริงทุกก้าว",items:[
+ ["🏃","ลู่วิ่งค่าย 3 แบบ","จับเวลา 100 เมตรแข่งกับเงาสถิติของตัวเอง · ดวล 1 ต่อ 1 · 400 เมตร 4 คน ที่ต้องคุมแรงให้อยู่ในแถบเขียว แล้วค่อยพุ่งช่วงท้าย"],
+ ["🪜","ท้าคนในอำเภอ 5 คน","ในโหมดดวลมีบันไดท้าวิ่ง ตั้งแต่ลุงหวังวินมอไซค์ไปจนถึงคนที่เร็วที่สุดในอำเภอ แต่ละคนวิ่งไม่เหมือนกัน ชนะทีละคนถึงจะเจอคนต่อไป"],
+ ["✉️","จดหมายท้าวิ่ง","เปิดตู้จดหมายไว้ให้ดี บางสัปดาห์จะมีคนจากค่ายคู่แข่งมาท้าวิ่งที่ลานวัด ชนะได้ชื่อเสียงกับกำลังใจทั้งค่าย"],
+ ["🎌","งานกีฬาสี 4 สี 4 ลู่","กลางปีมีวิ่ง 100 และ 400 เมตร ชักเย่อ และวิ่งผลัด 4×100 ที่ต้องกดส่งไม้ตอนวงกลมหดพอดี จบด้วยพิธีประกาศผลบนโพเดียม · ปีไหนอาจมีแขกรับเชิญที่ไม่คาดคิดมาลงวิ่งด้วย"],
+ ["🎨","หน้าตาแบบเกมพิกเซล","มินิเกมทุกเกมได้กรอบ ปุ่ม และตัวเลขแบบพิกเซล เพลงฉากอื่นจะเงียบตอนเพลงมินิเกมเล่น"]],
+ foot:"ครูแดงฝากบอกว่า วิ่งเก่งไม่พอ ต้องส่งไม้เป็นด้วย ✦"};
+const PATCHES=[PATCH_AV,PATCH_TAPE,PATCH_FIX,PATCH_TANI,PATCH_SKN,PATCH_MG,PATCH_RUN],PATCH=PATCHES[PATCHES.length-1];
 function nextPatch(){if(G&&G.newsSeen==="1.91.144")G.newsSeen="1.91.111"; /* v1.91.145: the 1.91.144 popup was withdrawn — those who saw it must not get the old ones again */const i=PATCHES.findIndex(p=>p.id===(G&&G.newsSeen));return i<0?PATCHES[0]:PATCHES[i+1]||null;}
 function maybeWhatsNew(){if(!G||G.ended||UI.scene)return;const P=nextPatch();if(!P)return;UI.modal={type:"whatsnew",id:P.id};}
 function whatsNewHTML(){const P=PATCHES.find(p=>p.id===(UI.modal&&UI.modal.id))||nextPatch()||PATCH,n=PATCHES.length-PATCHES.indexOf(P)-1;return `<div class="wnew"><span class="pill gold">อัปเดต · ${esc(P.ver)}</span><h2>🥊 ${esc(P.title)}</h2><p class="lead">${esc(P.lead)}</p>
