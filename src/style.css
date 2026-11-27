@@ -2680,3 +2680,34 @@ body.qs-cutting .vn .vbg{display:none}
 .mgame .songc .sgt b,.mgame .songc .sgb b,.mgame .mbsong b{font-family:"Pixelify Sans",var(--f-display)}
 .mgame .mgitem{border-radius:0;box-shadow:0 0 0 2px var(--px1),inset 0 0 0 2px var(--px2),inset 0 3px 0 rgba(255,255,255,.06)}
 .mgame .mgitem:hover{box-shadow:0 0 0 2px var(--px1),inset 0 0 0 2px var(--pxg)}
+
+/* v1.91.197 relay: run + pass buttons side by side; the pass button wakes up in the hand-over box and glows green at the right moment */
+.mbtns.two{display:grid;grid-template-columns:1.4fr 1fr;gap:8px}
+.mbtn.pass{background:#3a3158;color:#bdb3d9;opacity:.6}
+.mbtn.pass.live{background:#d9a21b;color:#2a1a00;opacity:1;animation:passlive .5s steps(2) infinite}
+.mbtn.pass.now{background:#2fbf55;color:#fff;animation:none;box-shadow:inset 0 0 0 3px rgba(0,0,0,.35),0 0 18px #5dff7a}
+@keyframes passlive{50%{filter:brightness(1.25)}}
+@media (prefers-reduced-motion:reduce){.mbtn.pass.live{animation:none}}
+/* v1.91.197 sports-day results ceremony: podium rises colour by colour over the school field, then the table, then the coach */
+.spcer{cursor:pointer}
+.sppod{position:relative;height:170px;display:flex;align-items:flex-end;justify-content:center;gap:6px;padding:0 24px;overflow:hidden;
+  background:linear-gradient(180deg,rgba(14,9,26,.1),rgba(14,9,26,.55)),url(a/bg_sportsday.webp) center 30%/cover;box-shadow:0 0 0 3px var(--px1),0 0 0 5px var(--px2);image-rendering:pixelated}
+.sppod .spmc{position:absolute;left:6px;bottom:0;height:96px;width:auto;opacity:0;animation:ctin .4s ease-out .2s forwards}
+.sppod .pd{width:26%;display:grid;justify-items:center;align-content:start;padding-top:6px;background:var(--tc);color:#fff;transform:scaleY(0);transform-origin:bottom;
+  box-shadow:0 0 0 2px var(--px1),inset 3px 3px 0 rgba(255,255,255,.3),inset -3px -3px 0 rgba(0,0,0,.3);animation:pdup .45s steps(6) var(--d) forwards}
+.sppod .pd.p1{height:112px}.sppod .pd.p2{height:82px}.sppod .pd.p3{height:60px}
+.sppod .pd b{font:700 28px "Pixelify Sans",var(--f-display);text-shadow:2px 2px 0 var(--px1);line-height:1}
+.sppod .pd small{font-size:12px;font-weight:700;text-shadow:1px 1px 0 var(--px1)}
+.sppod .pd.me{box-shadow:0 0 0 2px var(--px1),0 0 0 4px var(--pxg),inset 3px 3px 0 rgba(255,255,255,.3)}
+.sppod.now .pd,.sppod .pd.now{animation-delay:0s;animation-duration:.01s}
+@keyframes pdup{to{transform:scaleY(1)}}
+.spconf{position:absolute;inset:0;pointer-events:none;opacity:0;animation:ctin .1s linear 5.6s forwards;
+  background-image:radial-gradient(#ffd34a 2px,transparent 2.5px),radial-gradient(#e2443c 2px,transparent 2.5px),radial-gradient(#5ab0ff 2px,transparent 2.5px);
+  background-size:38px 38px,52px 46px,44px 58px;background-position:0 0,13px 21px,27px 9px}
+.spconf:not(.now){animation:ctin .1s linear 5.6s forwards,spfall 2.4s linear 5.6s infinite}
+@keyframes spfall{from{background-position:0 -60px,13px -40px,27px -70px}to{background-position:0 60px,13px 80px,27px 50px}}
+.spcer .ctip.ctrow{display:flex;grid-template-columns:none}
+@media (prefers-reduced-motion:reduce){.sppod .pd{animation-duration:.01s}.spconf{animation:none;opacity:1}}
+.spcer .ctrow{grid-template-columns:1fr auto}
+.spcer .ctrow>span{display:block}.spcer .ctrow>span>small{display:block;margin-top:2px}.spcer .ctrow .pxe{display:inline-block;vertical-align:-2px;margin-right:4px}
+.spcer .ctrow>b{white-space:nowrap}.spcer .ctrow>i{display:none}

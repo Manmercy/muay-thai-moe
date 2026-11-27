@@ -22008,5 +22008,13 @@
  "เที่ยวก่อนขาฉันยังไม่ตื่น วันเสาร์นี้ลานวัดเหมือนเดิม คนดูเยอะกว่าเดิมด้วย ป้าแต๋วตั้งโต๊ะขายส้มตำรอแล้ว": "My legs weren't awake last time. Saturday, temple yard, same as before — bigger crowd too, and Auntie Taew's already set up her som tam table.",
  "คราวนี้ไม่ออมแรงแล้วนะ": "No holding back this time",
  "ได้ยินว่าค่ายศิริชัยซ้อมวิ่งทุกอาทิตย์ ลองมาวิ่งกับฉันที่ลานวัดสักเที่ยวไหม แพ้ก็ไม่ต้องอาย ใครก็แพ้ฉันทั้งนั้น": "Heard Sirichai Camp trains its running every week. Come race me once at the temple yard? No shame in losing — everyone loses to me.",
- "ท้าวิ่ง 100 เมตร": "A 100 m dare"
+ "ท้าวิ่ง 100 เมตร": "A 100 m dare",
+ "ส่งไม้…": "Pass…",
+ "แตะ!": "Tap!",
+ "<button class=\"mbtn L run\" id=\"rnL\"><b>วิ่ง!</b><small>กดรัว ๆ · Space</small></button><button class=\"mbtn pass\" id=\"rnP\"><b>ส่งไม้!</b><small>ตอนวงกลมหดพอดี · Enter</small></button>": "<button class=\"mbtn L run\" id=\"rnL\"><b>Run!</b><small>Mash · Space</small></button><button class=\"mbtn pass\" id=\"rnP\"><b>Pass!</b><small>When the ring closes · Enter</small></button>",
+ "</span></div>\n       <p class=\"meta center\">แตะเพื่อข้าม</p><div class=\"mfoot roadbtns\"><button class=\"btn primary\" data-sp=\"end\">กลับค่าย</button></div></div>": "</span></div>\n       <p class=\"meta center\">Tap to skip</p><div class=\"mfoot roadbtns\"><button class=\"btn primary\" data-sp=\"end\">Back to camp</button></div></div>",
+ "สีแดงค่ายศิริชัยได้อันดับ ": "Red, Sirichai Camp, places ",
+ "🏆 สีแดงค่ายศิริชัยคว้าแชมป์กีฬาสี!": "🏆 Red, Sirichai Camp, wins sports day!",
+ " คะแนน</b></div>": " pts</b></div>",
+ "\" data-sp=\"skip\"><h2>ประกาศผลกีฬาสีอำเภอ ปี ": "\" data-sp=\"skip\"><h2>District sports day results, year "
 }

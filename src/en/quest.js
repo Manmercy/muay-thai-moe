@@ -140,8 +140,8 @@ const RUN_DARE=[["Suea Dam, Golden Tiger Camp","A 100 m dare","Heard Sirichai Ca
  ["Suea Dam, Golden Tiger Camp","No holding back this time","My legs weren't awake last time. Saturday, temple yard, same as before — bigger crowd too, and Auntie Taew's already set up her som tam table."],
  ["Suea Dam, Golden Tiger Camp","The temple yard's buzzing again","Sia Tong's putting up a crate of red soda for the winner. I've drilled my start all week — send your fastest."]];
 /* the challenger: Golden Tiger's fastest fighter if there is one, otherwise their sprinter Suea Dam — always a touch quicker than our quickest */
-function runDareRival(){const R=roster(G).slice().sort((a,b)=>runVmax(b)-runVmax(a))[0],t=SPORTS.rivals()[0],y=G.season||1;
-  const base=R?Math.min(20,(R.a.speed||10)+1.2):12,f=t&&runVmax(t)>=runVmax(R)?t:runNpc("dare_suea","Suea Dam, Golden Tiger",base,Math.min(20,12+y),46);return f;}
+function runDareRival(){const R=roster(G).slice().sort((a,b)=>runVmax(b)-runVmax(a))[0],y=G.season||1;
+  const base=R?Math.min(21,(R.a.speed||10)+1.2):12;return runNpc("dare_suea","Suea Dam, Golden Tiger",base,Math.min(20,12+y),46);} /* always Suea Dam, the one who wrote the letter */
 const TAM_MAIL=[["Stall's packed, come help!","There's a temple fair this weekend and the line reaches the chapel. I can't pound fast enough alone. Send me a fighter with heavy hands, dear. Pay depends on skill, and you take som tam home."],
  ["Tour buses at my stall!","Three tour buses pulled up at once and every one of them ordered mild Thai som tam. My arms are about to fall off, please come help!"],
  ["My helper called in sick","The girl who helps me pound has a fever, but the stall still has to open. Anyone free for half a day? I'll pay well."],
@@ -940,9 +940,10 @@ const RUN={st:null,
       el.innerHTML=`<div class="mplay rn"><div class="mhud"><b>${esc((cur||me||{}).name||"")}</b><span id="rnmsg">${S.phase==="set"&&!S.armed?"Tap to get on the blocks":""}</span><span><b id="rnt">0.00</b> s</span><button class="xbtn" data-mb="close" aria-label="Exit">✕</button></div>
        <canvas id="rncv" width="360" height="${S.lanes.length>2?300:236}"></canvas>
        <div class="rncom" id="rncom"><img src="a/npc_caster.webp" alt=""><span id="rncomt">${S.com||"Your track commentator is ready!"}</span></div>
-       <div class="mbtns one">${S.phase==="set"&&!S.armed?`<button class="mbtn ready" id="rnready"><img src="${faceSrc((cur||me).id,"happy")}" alt=""><b>To the blocks</b><small>Tap when ready</small></button>`:`<button class="mbtn L run" id="rnL"><b>RUN!</b><small>Mash it · Space</small></button>`}</div></div>`;
+       <div class="mbtns ${S.relay&&!(S.phase==="set"&&!S.armed)?"two":"one"}">${S.phase==="set"&&!S.armed?`<button class="mbtn ready" id="rnready"><img src="${faceSrc((cur||me).id,"happy")}" alt=""><b>To the blocks</b><small>Tap when ready</small></button>`:S.relay?`<button class="mbtn L run" id="rnL"><b>Run!</b><small>Mash · Space</small></button><button class="mbtn pass" id="rnP"><b>Pass!</b><small>When the ring closes · Enter</small></button>`:`<button class="mbtn L run" id="rnL"><b>RUN!</b><small>Mash it · Space</small></button>`}</div></div>`;
       const rb=document.getElementById("rnready");if(rb)rb.addEventListener("pointerdown",e=>{e.preventDefault();this.arm();});
       const bl=document.getElementById("rnL");if(bl)bl.addEventListener("pointerdown",e=>{e.preventDefault();this.tap("L");});
+      const bp=document.getElementById("rnP");if(bp)bp.addEventListener("pointerdown",e=>{e.preventDefault();this.pass();});
       const cv=document.getElementById("rncv");if(cv&&S.relay)cv.addEventListener("pointerdown",e=>{e.preventDefault();this.pass();});
       this.paint();return;}
     if(S.phase==="result"){const R=S.res,ext=S.duel||S.race;
@@ -1062,10 +1063,15 @@ const RUN={st:null,
       /* lane tag */
       x.fillStyle=L.c;x.fillRect(0,top+i*lh+3,4,lh-6);if(L.me){x.fillStyle="rgba(255,255,255,.9)";x.font="bold 9px sans-serif";x.textAlign="left";x.fillText("▶",6,top+i*lh+12);}});
     if(S.phase==="race"&&me&&me.v>6){x.save();x.globalAlpha=Math.min(.45,(me.v-6)/10);x.strokeStyle="#fff";x.lineWidth=2;for(let i=0;i<7;i++){const yy=top+((i*37)%(H-top)),xx=(W-((now*.9+i*61)%(W+80)));x.beginPath();x.moveTo(xx,yy);x.lineTo(xx+40,yy);x.stroke();}x.restore();}
-    /* relay: the hand-over box lights up when our runner is in it */
-    if(S.relay&&me&&!me.done&&me.leg<me.legs.length-1&&me.legX>=70){const zx=px(me.leg*100+100-22),zx2=px(me.leg*100+100),ok=me.legX>=92,mid=me.legX>=78,fy=ly(n-1);
-      x.save();x.globalAlpha=.85+.15*Math.sin(now/70);x.strokeStyle=ok?"#7dff8f":mid?"#ffd34a":"#ffffff";x.lineWidth=4;x.strokeRect(zx,fy-sh-6,zx2-zx,sh+10);
-      x.font='900 16px "Chakra Petch","IBM Plex Sans Thai",sans-serif';x.textAlign="center";x.lineWidth=5;x.strokeStyle="#140a1e";const tx=ok?"Tap! Pass":mid?"Get ready…":"Hand-over";x.strokeText(tx,(zx+zx2)/2,fy-sh-12);x.fillStyle=ok?"#7dff8f":"#ffd34a";x.fillText(tx,(zx+zx2)/2,fy-sh-12);x.restore();}
+    /* relay (v1.91.197, Man: couldn't see where to tap): a ring closes in on the next runner; tap when it meets the inner circle */
+    {const bp=document.getElementById("rnP"),zone=S.relay&&me&&!me.done&&me.leg<me.legs.length-1&&me.legX>=72&&me.wait<=0;
+     if(bp){bp.classList.toggle("live",!!zone);bp.classList.toggle("now",!!zone&&me.legX>=92);}
+     if(zone){const fy=ly(n-1),cx=px((me.leg+1)*100),cy=fy-sh*.45,r0=22,k=Math.max(0,(95-me.legX)/23),r=r0+k*70,ok=me.legX>=92,mid=me.legX>=86;
+      const zx=px(me.leg*100+78),zx2=px(me.leg*100+100);x.save();x.fillStyle="rgba(255,211,74,.22)";x.fillRect(zx,top,zx2-zx,H-top);
+      x.lineWidth=4;x.strokeStyle="#140a1e";x.beginPath();x.arc(cx,cy,r0,0,7);x.stroke();x.lineWidth=3;x.strokeStyle="#ffffff";x.beginPath();x.arc(cx,cy,r0,0,7);x.stroke();
+      x.lineWidth=6;x.strokeStyle=ok?"#5dff7a":mid?"#ffd34a":"#ff8a3a";x.globalAlpha=.9;x.beginPath();x.arc(cx,cy,r,0,7);x.stroke();x.globalAlpha=1;
+      x.font='900 18px "Chakra Petch","IBM Plex Sans Thai",sans-serif';x.textAlign="center";x.lineWidth=5;x.strokeStyle="#140a1e";const tx=ok?"Tap!":"Pass…";
+      x.strokeText(tx,cx,cy-r0-12);x.fillStyle=ok?"#5dff7a":"#ffd34a";x.fillText(tx,cx,cy-r0-12);x.restore();}}
     if(S.passMsg&&now-S.passMsg.at<900){const e=(now-S.passMsg.at)/900;x.save();x.globalAlpha=1-e;x.textAlign="center";x.font='900 24px "Chakra Petch","IBM Plex Sans Thai",sans-serif';x.lineWidth=6;x.strokeStyle="#140a1e";x.strokeText(S.passMsg.t,W/2,sky-10-e*14);x.fillStyle=S.passMsg.good?"#7dff8f":"#ff8a6a";x.fillText(S.passMsg.t,W/2,sky-10-e*14);x.restore();}
     /* start lights */
     if(S.phase==="set"&&S.armed||S.phase==="race"&&now-S.gun<900){const g=S.phase==="race",cx=W/2,cy=H*.24;x.save();x.fillStyle="#141018";x.fillRect(cx-74,cy-24,148,48);x.strokeStyle="#000";x.lineWidth=3;x.strokeRect(cx-74,cy-24,148,48);
@@ -1139,7 +1145,9 @@ function spSquad(k){const y=G.season||1,T=RACE_TEAMS[k];
 const SPORTS={st:null,
   el(){return document.getElementById("minibag");},
   open(done){BAG.st={phase:"sports",mode:"run",practice:true};BAG.mount();this.st={ph:"intro",ev:0,pts:{me:0,tiger:0,teach:0,obt:0},log:[],done};this.draw();},
-  rivals(){return Object.values(G.F).filter(f=>f.camp==="rival"&&!f.retired).sort((a,b)=>(b.a.speed||0)-(a.a.speed||0));},
+  /* v1.91.197 (Man: why is Pailin running for Golden Tiger?) — only Golden Tiger's own fighters wear yellow: Ploy and Fah before they join us,
+     Petchara, and Baiyok while she is still theirs. Vector Lab and Pailin are another camp and stay out; Tiger's students fill the gaps. */
+  rivals(){return Object.values(G.F).filter(f=>f.camp==="rival"&&!f.retired&&!f.lab&&!f.indie&&/พยัคฆ์ทอง/.test(f.full||"")).sort((a,b)=>(b.a.speed||0)-(a.a.speed||0));},
   /* points by finishing order: 3 · 2 · 1 · 0 */
   rankOrder(order){const S=this.st;[3,2,1,0].forEach((p,i)=>S.pts[order[i]]+=p);S.log.push({ev:S.ev,order,win:order[0]==="me",place:order.indexOf("me")+1});},
   rank(win,none){const S=this.st,r=mulberry32((G.seed||1)+(G.season||1)*97+S.ev*13),o=r()<.5?["teach","obt"]:["obt","teach"];
@@ -1149,6 +1157,7 @@ const SPORTS={st:null,
     else if(a==="start")this.startEv();
     else if(a==="next"){S.ev++;if(S.ev>=SP_EV.length){this.finish();return;}S.ph="ev";this.draw();}
     else if(a==="tap")TUG.tap();else if(a==="heave")TUG.heave();
+    else if(a==="skip"){if(S.ph==="final"&&!S.skip){S.skip=true;this.draw();}}
     else if(a==="end")this.close();},
   race(E){const S=this.st,keys=["tiger","teach","obt"],sq={};for(const k of [...keys,"me"])sq[k]=spSquad(k);const y=G.season||1;
     const back=()=>{RUN.stop();RUN.st=null;BAG.st.phase="sports";S.ph="res";this.draw();},cb=res=>{this.rankOrder(res.order.map(o=>o.team));S.res=res;};
@@ -1169,8 +1178,15 @@ const SPORTS={st:null,
     if(place===1){G.rep=(G.rep||0)+1;out.push("Fame +1");G.flags.sportsWin=(G.flags.sportsWin||0)+1;}
     G.sports=G.sports||{};G.sports[y]={place,pts:{...S.pts}};
     if(typeof cardCheck==="function"){const got=cardCheck(G);if(got.length){G.cardPend=(G.cardPend||[]).concat(got);out.push(`🃏 New card ×${got.length}`);}}
-    S.place=place;S.out=out;S.ph="final";save();this.draw();AU.sfx&&AU.sfx(place===1?"champ":"level");},
-  close(){const S=this.st;if(!S)return;this.st=null;TUG.stop();if(RUN.st){RUN.stop();RUN.st=null;}
+    S.place=place;S.out=out;S.ph="final";S.skip=false;save();this.draw();this.ceremony();},
+  /* v1.91.197 (Man: announce the sports-day result like the camp contest) — the district chief reads the table from fourth up:
+     drum ticks under each name, the podium rises colour by colour, the winner gets the bell and the confetti */
+  ceremony(){const S=this.st,P=S.place,T=[900,2300,3700,5400];clearTimeout(this.cto);this.cto=[];
+    const tick=(t,f)=>this.cto.push(setTimeout(()=>{if(this.st===S&&!S.skip)f();},t));
+    for(let i=0;i<4;i++){for(let k=0;k<4;k++)tick(T[i]-480+k*110,()=>AU.init&&AU.init()&&AU.tone(AU.ctx.currentTime+.01,{f:150+k*20,to:70,type:"sine",dur:.08,peak:.25}));
+      tick(T[i],()=>AU.sfx&&AU.sfx(i===3?(P===1?"champ":"bell"):"ui"));}
+    if(P===1)for(let i=0;i<5;i++)tick(5900+i*900,()=>AU.sfx&&AU.sfx("pop"));},
+  close(){const S=this.st;if(!S)return;(this.cto||[]).forEach(clearTimeout);this.st=null;TUG.stop();if(RUN.st){RUN.stop();RUN.st=null;}
     const y=G.season||1;if(!(G.sports||{})[y]){G.sports=G.sports||{};G.sports[y]={place:0,pts:{...S.pts},left:1};}
     const el=this.el();if(el)el.remove();BAG.st=null;save();try{AU.startMusic("hub");}catch(e){}render();if(S.done)S.done();},
   draw(){const S=this.st,el=this.el();if(!S||!el)return;const E=SP_EV[S.ev];
@@ -1187,11 +1203,14 @@ const SPORTS={st:null,
       el.innerHTML=`<div class="mbox px sp"><h2>${E.ic} ${E.n} · ${R.none?"Did not compete":pl===1?"Red takes 1st!":`Red takes place ${pl}`}</h2><p class="center">${line}</p>
        ${run&&R.order?`<div class="rtable">${R.order.map((o,i)=>`<div class="${o.team==="me"?"me":""}" style="--tc:${RACE_TEAMS[o.team].c}"><b>${i+1}</b><span>${RACE_TEAMS[o.team].n}</span><em>${o.t.toFixed(2)} s</em></div>`).join("")}</div>`:""}${this.table()}
        <div class="mfoot roadbtns"><button class="btn primary" data-sp="next">${S.ev+1<SP_EV.length?"Next event ▸":"See the totals ▸"}</button></div></div>`;return;}
-    if(S.ph==="final"){const P=S.place;
-      el.innerHTML=`<div class="mbox px sp"><h2>${P===1?"🏆 Red wins sports day!":`Red finishes in place ${P}`}</h2>${this.table()}
-       <p class="center"><span class="rwl">${S.out.map(x=>`<span class="rwi">${x}</span>`).join("")}</span></p>
-       <div class="ctip"><img src="${faceSrc("coach")}" alt=""><span>${P===1?"Grandpa Chai won the sports day cup only once, back when the camp had fifteen people… and today we did it again.":"Losing at sports day is fine. Losing in the ring is not! Back to training."}</span></div>
-       <div class="mfoot roadbtns"><button class="btn primary" data-sp="end">Back to camp</button></div></div>`;}}};
+    if(S.ph==="final"){const P=S.place,y=G.season||1,ord=SP_TEAMS.map(t=>t.k).sort((a,b)=>S.pts[b]-S.pts[a]||(a==="me"?-1:b==="me"?1:0)),now=S.skip?" now":"",D=[900,2300,3700,5400];
+      const team=k=>SP_TEAMS.find(t=>t.k===k),pod=[1,0,2].map(i=>{const k=ord[i],t=team(k);return `<div class="pd p${i+1}${k==="me"?" me":""}${now}" style="--tc:${t.c};--d:${D[3-i]}ms"><b>${i+1}</b><small>${esc(RACE_TEAMS[k].n)}</small></div>`;}).join("");
+      el.innerHTML=`<div class="mbox px sp spcer${P===1?" win":""}" data-sp="skip"><h2>District sports day results, year ${y}</h2>
+       <div class="sppod${now}"><img class="spmc" src="a/npc_caster.webp" alt="">${pod}${P===1?`<div class="spconf${now}"></div>`:""}</div>
+       <div class="ctscore">${[3,2,1,0].map((i,j)=>{const k=ord[i],t=team(k);return `<div class="ctrow rk${i+1}${k==="me"?" me":""}${now}" style="--d:${D[j]}ms"><span>${i<3?["🥇","🥈","🥉"][i]:"　"} Place ${i+1} · ${esc(t.n)}</span><i></i><b>${S.pts[k]} pts</b></div>`;}).join("")}
+        <div class="ctrow tot${now}" style="--d:6200ms"><span>${P===1?"🏆 Red, Sirichai Camp, wins sports day!":`Red, Sirichai Camp, places ${P}`}<small>${S.out.map(x=>x.replace(/<[^>]+>/g,"")).join(" · ")}</small></span><i></i><b></b></div></div>
+       <div class="ctip ctrow${now}" style="--d:6800ms"><img src="${faceSrc("coach")}" alt=""><span>${P===1?"Grandpa Chai won the sports day cup only once, back when the camp had fifteen people… and today we did it again.":"Losing at sports day is fine. Losing in the ring is not! Back to training."}</span></div>
+       <p class="meta center">Tap to skip</p><div class="mfoot roadbtns"><button class="btn primary" data-sp="end">Back to camp</button></div></div>`;}}};
 /* tug of war: tap to pull, heave when the needle sits in the green */
 const TUG={st:null,
   start(cb){const R=roster(G),pw=R.length?R.reduce((s,f)=>s+(f.a.power||10)+(f.a.stamina||10),0)/R.length/20:1;
