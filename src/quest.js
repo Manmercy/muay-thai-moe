@@ -768,7 +768,7 @@ MG_MODES.live={icon:"📱",title:"ไลฟ์ขายของค่าย",no
    Same side twice = a stumble · tapping before the gun = a false start (the second one loses the race). */
 const RUN_LEN=100,RUN_STRIDE=1.1;
 const runMult=f=>f?1+((f.a.speed||10)-10)*.012+((f.a.stamina||10)-10)*.006:1;
-const RUN_LINE={S:"ครูแดงกดนาฬิกาจับเวลาแล้วเงียบไปสองวินาที \"…ลมส่งหรือเปล่าวะเนี่ย\"",A:"ครูแดงพยักหน้า \"ขาดีวันนี้ ไปเตะกระสอบต่อได้แล้ว\"",B:"\"วิ่งได้ แต่อย่าสะดุดเท้าตัวเองบ่อยนัก\" ครูแดงหัวเราะ",C:"\"ซ้ายขวา ซ้ายขวา! ไม่ใช่ซ้ายซ้ายขวา!\" ครูแดงตะโกนจากข้างลู่"};
+const RUN_LINE={S:"ครูแดงกดนาฬิกาจับเวลาแล้วเงียบไปสองวินาที \"…ลมส่งหรือเปล่าวะเนี่ย\"",A:"ครูแดงพยักหน้า \"ขาดีวันนี้ ไปเตะกระสอบต่อได้แล้ว\"",B:"\"วิ่งได้ แต่อย่าสะดุดเท้าตัวเองบ่อยนัก\" ครูแดงหัวเราะ",C:"\"ขาไม่หยุดนะเว้ย! กดให้สุดจนถึงเส้น!\" ครูแดงตะโกนจากข้างลู่"};
 const RUN={st:null,
   el(){return document.getElementById("minibag");},
   played(G){return mgPlayed(G,"run");},
@@ -800,6 +800,7 @@ const RUN={st:null,
     if(S.phase==="set"||S.phase==="race"){
       el.innerHTML=`<div class="mplay rn"><div class="mhud"><b>${esc(me.name)}</b><span id="rnmsg">${S.phase==="set"&&!S.armed?"กดเข้าเส้นเตรียม":""}</span><span><b id="rnt">0.00</b> วิ</span><button class="xbtn" data-mb="close" aria-label="ออก">✕</button></div>
        <canvas id="rncv" width="360" height="230"></canvas>
+       <div class="rncom" id="rncom"><img src="a/npc_caster.webp" alt=""><span id="rncomt">${S.com||"นักพากย์ประจำสนามพร้อมแล้วครับ!"}</span></div>
        <div class="mbtns one">${S.phase==="set"&&!S.armed?`<button class="mbtn ready" id="rnready">${face(me)}<b>เข้าเส้นเตรียม</b><small>แตะเมื่อพร้อม</small></button>`:`<button class="mbtn L run" id="rnL"><b>วิ่ง!</b><small>กดรัว ๆ · Space</small></button>`}</div></div>`;
       const rb=document.getElementById("rnready");if(rb)rb.addEventListener("pointerdown",e=>{e.preventDefault();this.arm();});
       const bl=document.getElementById("rnL");if(bl)bl.addEventListener("pointerdown",e=>{e.preventDefault();this.tap("L");});
@@ -819,12 +820,12 @@ const RUN={st:null,
     k.addEventListener("pointerup",e=>{if(!drag)return;drag=false;const p=pos(e);if(p>=.78&&p<=.97)this.arm();else{place(.04);const m=document.getElementById("rnmsg");if(m)m.textContent="ยังไม่ถึงเส้น ลากอีกนิด";}});},
   set(){const S=this.st,me=this.runner();if(!me)return;AU.resume&&AU.resume();try{AU.stopMusic();}catch(e){}G.mini=G.mini||{};G.mini.runLast=S.id;
     const O=this.oppInfo();Object.assign(S,{phase:"set",armed:false,gun:0,fs:S.fs||0,x:0,v:0,rate:0,last:null,lastT:0,st:0,stumble:0,ox:0,ov:0,oReact:.14+Math.random()*.12,
-      oPace:O.pace*(1+(Math.random()-.5)*.05),done:false,t:0,ot:0,react:0,mult:runMult(me),started:false});this.draw();this.loop();},
+      oPace:O.pace*(1+(Math.random()-.5)*.05),done:false,t:0,ot:0,react:0,mult:runMult(me),started:false,com:"",cf:{},fadeT:0,lastT:0});this.draw();this.loop();},
   /* v1.91.185 (Man: the drag was fiddly) — one tap to get on the blocks, then three red lights come on one at a time with a beep (3 · 2 · 1),
      a short random hold, and the lights turn green with "ไป!" bursting in the middle. Tapping before green is a false start. */
-  arm(){const S=this.st;if(!S||S.phase!=="set"||S.armed)return;S.armed=true;S.lights=0;S.green=0;AU.sfx&&AU.sfx("ui");this.draw();
+  arm(){const S=this.st;if(!S||S.phase!=="set"||S.armed)return;S.armed=true;S.lights=0;S.green=0;S.com="นักวิ่งเข้าเส้นเตรียมแล้วครับ!";AU.sfx&&AU.sfx("ui");this.draw();
     const m=document.getElementById("rnmsg");if(m)m.textContent="เข้าที่…";
-    const on=i=>{if(!this.st||this.st.phase!=="set"||!S.armed)return;S.lights=i;S.lightT=performance.now();AU.tone&&AU.init&&AU.init()&&AU.tone(AU.ctx.currentTime+.01,{f:440,type:"square",dur:.12,peak:.14});
+    const on=i=>{if(!this.st||this.st.phase!=="set"||!S.armed)return;S.lights=i;S.lightT=performance.now();if(i===1)this.say("เข้าที่… ระวัง…");AU.tone&&AU.init&&AU.init()&&AU.tone(AU.ctx.currentTime+.01,{f:440,type:"square",dur:.12,peak:.14});
       if(i<3)this.to=setTimeout(()=>on(i+1),750);
       else this.to=setTimeout(()=>{if(!this.st||this.st.phase!=="set"||!S.armed)return;S.phase="race";S.gun=performance.now();S.green=S.gun;S.started=true;
         const m3=document.getElementById("rnmsg");if(m3)m3.textContent="ไป!";AU.init&&AU.init()&&AU.tone(AU.ctx.currentTime+.01,{f:880,type:"square",dur:.35,peak:.18});AU.sfx&&AU.sfx("bell");try{navigator.vibrate&&navigator.vibrate(40)}catch(_){} },500+Math.random()*900);};
@@ -832,18 +833,31 @@ const RUN={st:null,
   tap(k){const S=this.st;if(!S)return;const b=document.getElementById("rnL");if(b){b.classList.remove("hit");void b.offsetWidth;b.classList.add("hit");}
     if(S.phase==="set"){if(!S.armed){this.arm();return;}S.fs++;clearTimeout(this.to);AU.sfx&&AU.sfx("ui");
       if(S.fs>=2){this.finish(true);return;}
-      S.armed=false;S.lights=0;this.draw();const mm=document.getElementById("rnmsg");if(mm)mm.textContent="ฟาวล์! ออกตัวก่อนไฟเขียว · อีกครั้งเดียวนะ";return;}
+      S.armed=false;S.lights=0;S.com="ฟาวล์ครับ! ออกตัวก่อนไฟเขียว!";this.draw();const mm=document.getElementById("rnmsg");if(mm)mm.textContent="ฟาวล์! ออกตัวก่อนไฟเขียว · อีกครั้งเดียวนะ";return;}
     if(S.phase!=="race"||S.done)return;const now=performance.now();
     if(!S.react)S.react=(now-S.gun)/1000;
     /* one button: each tap is a stride; a thumb mashes slower than two alternating, so a tap counts for a little more */
     const dt=S.lastT?(now-S.lastT)/1000:.25;S.lastT=now;S.rate=Math.min(12,S.rate*.6+(1.05/Math.max(.07,dt))*.4);S.taps=(S.taps||0)+1;S.dust=(S.dust||[]).concat([{t:now}]).slice(-6);},
+  /* v1.91.186 (Man: give the sprint a commentator) — the ring commentator calls the race: the start, every quarter, a fade if you stop mashing, the finish */
+  say(txt){const S=this.st;if(!S)return;S.com=txt;const e=document.getElementById("rncomt");if(e){e.textContent=txt;const b=document.getElementById("rncom");if(b){b.classList.remove("pop");void b.offsetWidth;b.classList.add("pop");}}},
+  call(el,now){const S=this.st;if(!S||S.phase!=="race")return;const me=(this.runner()||{}).name||"",O=this.oppInfo().name,F=S.cf=S.cf||{},d=S.x-S.ox,ld=d>=0?me:O,tr=d>=0?O:me,gap=Math.abs(d);
+    const once=(k,f)=>{if(!F[k]){F[k]=1;this.say(f());}};
+    if(S.react&&!F.go)once("go",()=>S.react<.2?`ปล่อยตัวแล้วครับ! ${me} ออกตัวไวเหมือนกระสุน!`:S.react>.4?`ปล่อยตัวแล้ว! ${me} ออกตัวช้าไปจังหวะนึงครับ!`:`ปล่อยตัวแล้วครับ! ทั้งสองคนพุ่งออกจากเส้นพร้อมกัน!`);
+    if(!S.react&&el>.6&&!F.slow)once("slow",()=>`ไฟเขียวแล้วครับ! ${me} ยังไม่ขยับเลย!`);
+    const mk=Math.max(S.x,S.ox);
+    if(mk>=25)once("q1",()=>gap<1.5?`25 เมตร! ไหล่ชนไหล่ครับท่านผู้ชม!`:`25 เมตร ${ld} นำอยู่ครับ!`);
+    if(mk>=50)once("q2",()=>gap<1.5?`ครึ่งทางแล้ว! ยังตัดสินไม่ได้เลยครับ!`:gap>8?`ครึ่งทาง ${ld} ทิ้งห่างไปไกลแล้ว!`:`ครึ่งทาง ${ld} นำ ${tr} ไล่ตามมาติด ๆ!`);
+    if(mk>=75)once("q3",()=>gap<2?`ทางตรงสุดท้าย! หัวชนหัวครับ!`:d<0?`ทางตรงสุดท้าย ${me} ต้องเร่งแล้วครับ!`:`ทางตรงสุดท้าย ${me} ยังนำอยู่!`);
+    if(mk>=90&&gap<1.2)once("photo",()=>`สูสีมาก! อาจต้องดูภาพเส้นชัย!`);
+    if(S.lastT&&now-S.lastT>700&&!S.done&&(!S.fadeT||now-S.fadeT>2500)){S.fadeT=now;this.say(`${me} แผ่วลงแล้วครับ! สู้ต่ออีกนิด!`);}
+    if(S.done&&!F.fin)once("fin",()=>S.ox>=RUN_LEN&&S.ot&&S.ot<S.t?`เข้าเส้นแล้ว! ${O} ชนะไปครับ!`:`เข้าเส้นแล้ว! ${me} คว้าที่หนึ่งครับ!`);},
   loop(){const step=()=>{if(!this.st||(this.st.phase!=="set"&&this.st.phase!=="race"))return;this.tick();this.paint();this.raf=requestAnimationFrame(step);};cancelAnimationFrame(this.raf);this.raf=requestAnimationFrame(step);},
   tick(){const S=this.st,now=performance.now();if(S.phase!=="race")return;const el=(now-S.gun)/1000,dt=Math.min(.05,S.prev?(now-S.prev)/1000:.016);S.prev=now;
     if(!S.done){if(S.lastT&&now-S.lastT>350)S.rate*=Math.pow(.2,dt);const target=now<S.stumble?0:S.rate*RUN_STRIDE*S.mult;S.v+=(target-S.v)*Math.min(1,dt*4);S.x+=S.v*dt;S.t=el;
       if(S.x>=RUN_LEN){S.x=RUN_LEN;S.done=true;S.t=el;}}
     /* the other runner: reacts, accelerates and holds a pace with a little sway */
     if(S.ox<RUN_LEN){const oe=el-S.oReact;if(oe>0){const tv=S.oPace*RUN_STRIDE*(1+.04*Math.sin(el*2.3));S.ov+=(tv-S.ov)*Math.min(1,dt*3);S.ox+=S.ov*dt;}if(S.ox>=RUN_LEN){S.ox=RUN_LEN;S.ot=el;}}
-    const t=document.getElementById("rnt");if(t)t.textContent=el.toFixed(2);
+    const t=document.getElementById("rnt");if(t)t.textContent=el.toFixed(2);this.call(el,now);
     if(S.done&&S.ox>=RUN_LEN)this.finish(false);
     else if(S.done&&el>S.t+2.5){S.ot=S.ot||el+((RUN_LEN-S.ox)/Math.max(1,S.ov));this.finish(false);}
     else if(S.ox>=RUN_LEN&&el>S.ot+4){S.t=el+(RUN_LEN-S.x)/Math.max(1,S.v||1);this.finish(false);}},

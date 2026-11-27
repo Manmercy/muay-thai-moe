@@ -768,7 +768,7 @@ MG_MODES.live={icon:"📱",title:"Camp Merch Live",note:"Answer comments in time
    Same side twice = a stumble · tapping before the gun = a false start (the second one loses the race). */
 const RUN_LEN=100,RUN_STRIDE=1.1;
 const runMult=f=>f?1+((f.a.speed||10)-10)*.012+((f.a.stamina||10)-10)*.006:1;
-const RUN_LINE={S:"Kru Daeng stops the watch and goes quiet for two seconds. \"…Was there a tailwind or what?\"",A:"Kru Daeng nods. \"Good legs today. Now go kick the bag.\"",B:"\"You can run, just stop tripping over your own feet,\" Kru Daeng laughs",C:"\"Left right, left right! Not left left right!\" Kru Daeng yells from the trackside"};
+const RUN_LINE={S:"Kru Daeng stops the watch and goes quiet for two seconds. \"…Was there a tailwind or what?\"",A:"Kru Daeng nods. \"Good legs today. Now go kick the bag.\"",B:"\"You can run, just stop tripping over your own feet,\" Kru Daeng laughs",C:"\"Don't let those legs stop! All the way to the line!\" Kru Daeng shouts from the side of the track"};
 const RUN={st:null,
   el(){return document.getElementById("minibag");},
   played(G){return mgPlayed(G,"run");},
@@ -800,6 +800,7 @@ const RUN={st:null,
     if(S.phase==="set"||S.phase==="race"){
       el.innerHTML=`<div class="mplay rn"><div class="mhud"><b>${esc(me.name)}</b><span id="rnmsg">${S.phase==="set"&&!S.armed?"Tap to get on the blocks":""}</span><span><b id="rnt">0.00</b> s</span><button class="xbtn" data-mb="close" aria-label="Exit">✕</button></div>
        <canvas id="rncv" width="360" height="230"></canvas>
+       <div class="rncom" id="rncom"><img src="a/npc_caster.webp" alt=""><span id="rncomt">${S.com||"Your track commentator is ready!"}</span></div>
        <div class="mbtns one">${S.phase==="set"&&!S.armed?`<button class="mbtn ready" id="rnready">${face(me)}<b>On your marks</b><small>Tap when ready</small></button>`:`<button class="mbtn L run" id="rnL"><b>RUN!</b><small>Mash it · Space</small></button>`}</div></div>`;
       const rb=document.getElementById("rnready");if(rb)rb.addEventListener("pointerdown",e=>{e.preventDefault();this.arm();});
       const bl=document.getElementById("rnL");if(bl)bl.addEventListener("pointerdown",e=>{e.preventDefault();this.tap("L");});
@@ -819,12 +820,12 @@ const RUN={st:null,
     k.addEventListener("pointerup",e=>{if(!drag)return;drag=false;const p=pos(e);if(p>=.78&&p<=.97)this.arm();else{place(.04);const m=document.getElementById("rnmsg");if(m)m.textContent="Not on the line yet, drag a bit further";}});},
   set(){const S=this.st,me=this.runner();if(!me)return;AU.resume&&AU.resume();try{AU.stopMusic();}catch(e){}G.mini=G.mini||{};G.mini.runLast=S.id;
     const O=this.oppInfo();Object.assign(S,{phase:"set",armed:false,gun:0,fs:S.fs||0,x:0,v:0,rate:0,last:null,lastT:0,st:0,stumble:0,ox:0,ov:0,oReact:.14+Math.random()*.12,
-      oPace:O.pace*(1+(Math.random()-.5)*.05),done:false,t:0,ot:0,react:0,mult:runMult(me),started:false});this.draw();this.loop();},
+      oPace:O.pace*(1+(Math.random()-.5)*.05),done:false,t:0,ot:0,react:0,mult:runMult(me),started:false,com:"",cf:{},fadeT:0,lastT:0});this.draw();this.loop();},
   /* v1.91.185 (Man: the drag was fiddly) — one tap to get on the blocks, then three red lights come on one at a time with a beep (3 · 2 · 1),
      a short random hold, and the lights turn green with "ไป!" bursting in the middle. Tapping before green is a false start. */
-  arm(){const S=this.st;if(!S||S.phase!=="set"||S.armed)return;S.armed=true;S.lights=0;S.green=0;AU.sfx&&AU.sfx("ui");this.draw();
+  arm(){const S=this.st;if(!S||S.phase!=="set"||S.armed)return;S.armed=true;S.lights=0;S.green=0;S.com="Runners are on the blocks!";AU.sfx&&AU.sfx("ui");this.draw();
     const m=document.getElementById("rnmsg");if(m)m.textContent="On your marks…";
-    const on=i=>{if(!this.st||this.st.phase!=="set"||!S.armed)return;S.lights=i;S.lightT=performance.now();AU.tone&&AU.init&&AU.init()&&AU.tone(AU.ctx.currentTime+.01,{f:440,type:"square",dur:.12,peak:.14});
+    const on=i=>{if(!this.st||this.st.phase!=="set"||!S.armed)return;S.lights=i;S.lightT=performance.now();if(i===1)this.say("On your marks… set…");AU.tone&&AU.init&&AU.init()&&AU.tone(AU.ctx.currentTime+.01,{f:440,type:"square",dur:.12,peak:.14});
       if(i<3)this.to=setTimeout(()=>on(i+1),750);
       else this.to=setTimeout(()=>{if(!this.st||this.st.phase!=="set"||!S.armed)return;S.phase="race";S.gun=performance.now();S.green=S.gun;S.started=true;
         const m3=document.getElementById("rnmsg");if(m3)m3.textContent="Go!";AU.init&&AU.init()&&AU.tone(AU.ctx.currentTime+.01,{f:880,type:"square",dur:.35,peak:.18});AU.sfx&&AU.sfx("bell");try{navigator.vibrate&&navigator.vibrate(40)}catch(_){} },500+Math.random()*900);};
@@ -832,18 +833,31 @@ const RUN={st:null,
   tap(k){const S=this.st;if(!S)return;const b=document.getElementById("rnL");if(b){b.classList.remove("hit");void b.offsetWidth;b.classList.add("hit");}
     if(S.phase==="set"){if(!S.armed){this.arm();return;}S.fs++;clearTimeout(this.to);AU.sfx&&AU.sfx("ui");
       if(S.fs>=2){this.finish(true);return;}
-      S.armed=false;S.lights=0;this.draw();const mm=document.getElementById("rnmsg");if(mm)mm.textContent="False start! You went before green · one more and you're out";return;}
+      S.armed=false;S.lights=0;S.com="False start! Went before green!";this.draw();const mm=document.getElementById("rnmsg");if(mm)mm.textContent="False start! You went before green · one more and you're out";return;}
     if(S.phase!=="race"||S.done)return;const now=performance.now();
     if(!S.react)S.react=(now-S.gun)/1000;
     /* one button: each tap is a stride; a thumb mashes slower than two alternating, so a tap counts for a little more */
     const dt=S.lastT?(now-S.lastT)/1000:.25;S.lastT=now;S.rate=Math.min(12,S.rate*.6+(1.05/Math.max(.07,dt))*.4);S.taps=(S.taps||0)+1;S.dust=(S.dust||[]).concat([{t:now}]).slice(-6);},
+  /* v1.91.186 (Man: give the sprint a commentator) — the ring commentator calls the race: the start, every quarter, a fade if you stop mashing, the finish */
+  say(txt){const S=this.st;if(!S)return;S.com=txt;const e=document.getElementById("rncomt");if(e){e.textContent=txt;const b=document.getElementById("rncom");if(b){b.classList.remove("pop");void b.offsetWidth;b.classList.add("pop");}}},
+  call(el,now){const S=this.st;if(!S||S.phase!=="race")return;const me=(this.runner()||{}).name||"",O=this.oppInfo().name,F=S.cf=S.cf||{},d=S.x-S.ox,ld=d>=0?me:O,tr=d>=0?O:me,gap=Math.abs(d);
+    const once=(k,f)=>{if(!F[k]){F[k]=1;this.say(f());}};
+    if(S.react&&!F.go)once("go",()=>S.react<.2?`They're off! ${me} flies out like a bullet!`:S.react>.4?`They're off! ${me} is a beat late off the line!`:`They're off! Both away from the line together!`);
+    if(!S.react&&el>.6&&!F.slow)once("slow",()=>`Green light! ${me} hasn't moved yet!`);
+    const mk=Math.max(S.x,S.ox);
+    if(mk>=25)once("q1",()=>gap<1.5?`25 metres! Shoulder to shoulder, folks!`:`25 metres — ${ld} in front!`);
+    if(mk>=50)once("q2",()=>gap<1.5?`Halfway! Still anyone's race!`:gap>8?`Halfway — ${ld} has pulled well clear!`:`Halfway — ${ld} leads, ${tr} right on her heels!`);
+    if(mk>=75)once("q3",()=>gap<2?`Final straight! Neck and neck!`:d<0?`Final straight — ${me} has to pick it up now!`:`Final straight — ${me} still leads!`);
+    if(mk>=90&&gap<1.2)once("photo",()=>`So close! We may need the photo finish!`);
+    if(S.lastT&&now-S.lastT>700&&!S.done&&(!S.fadeT||now-S.fadeT>2500)){S.fadeT=now;this.say(`${me} is fading! Keep going!`);}
+    if(S.done&&!F.fin)once("fin",()=>S.ox>=RUN_LEN&&S.ot&&S.ot<S.t?`Across the line! ${O} wins it!`:`Across the line! ${me} takes first place!`);},
   loop(){const step=()=>{if(!this.st||(this.st.phase!=="set"&&this.st.phase!=="race"))return;this.tick();this.paint();this.raf=requestAnimationFrame(step);};cancelAnimationFrame(this.raf);this.raf=requestAnimationFrame(step);},
   tick(){const S=this.st,now=performance.now();if(S.phase!=="race")return;const el=(now-S.gun)/1000,dt=Math.min(.05,S.prev?(now-S.prev)/1000:.016);S.prev=now;
     if(!S.done){if(S.lastT&&now-S.lastT>350)S.rate*=Math.pow(.2,dt);const target=now<S.stumble?0:S.rate*RUN_STRIDE*S.mult;S.v+=(target-S.v)*Math.min(1,dt*4);S.x+=S.v*dt;S.t=el;
       if(S.x>=RUN_LEN){S.x=RUN_LEN;S.done=true;S.t=el;}}
     /* the other runner: reacts, accelerates and holds a pace with a little sway */
     if(S.ox<RUN_LEN){const oe=el-S.oReact;if(oe>0){const tv=S.oPace*RUN_STRIDE*(1+.04*Math.sin(el*2.3));S.ov+=(tv-S.ov)*Math.min(1,dt*3);S.ox+=S.ov*dt;}if(S.ox>=RUN_LEN){S.ox=RUN_LEN;S.ot=el;}}
-    const t=document.getElementById("rnt");if(t)t.textContent=el.toFixed(2);
+    const t=document.getElementById("rnt");if(t)t.textContent=el.toFixed(2);this.call(el,now);
     if(S.done&&S.ox>=RUN_LEN)this.finish(false);
     else if(S.done&&el>S.t+2.5){S.ot=S.ot||el+((RUN_LEN-S.ox)/Math.max(1,S.ov));this.finish(false);}
     else if(S.ox>=RUN_LEN&&el>S.ot+4){S.t=el+(RUN_LEN-S.x)/Math.max(1,S.v||1);this.finish(false);}},

@@ -2547,3 +2547,9 @@ body.qs-cutting .vn .vbg{display:none}
 @keyframes mbcb{0%{transform:scale(1.5);color:#ffd34a}100%{transform:scale(1)}}
 .fullcombo{text-align:center;font:900 32px "Chakra Petch",var(--f-display);color:#ffd34a;-webkit-text-stroke:2px #6a1020;paint-order:stroke fill;animation:fullc .7s cubic-bezier(.2,1.6,.4,1) both;letter-spacing:1px}
 @keyframes fullc{0%{transform:scale(2.4) rotate(-8deg);opacity:0}100%{transform:none;opacity:1}}
+
+/* v1.91.186 sprint commentator */
+.rncom{display:flex;align-items:center;gap:8px;background:#141024;box-shadow:inset 0 0 0 2px #2c2448;padding:6px 10px 6px 6px;min-height:52px;margin:6px 0}
+.rncom img{width:40px;height:40px;object-fit:cover;object-position:50% 6%;box-shadow:0 0 0 2px #ffd34a;flex:none;background:#2c2448}
+.rncom span{font-size:15px;line-height:1.35;color:#fff}
+.rncom.pop span{animation:rncp .25s ease-out}@keyframes rncp{0%{transform:translateX(-8px);opacity:.2}100%{transform:none;opacity:1}}
