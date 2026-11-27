@@ -535,8 +535,8 @@ function condition(f){return clamp(Math.round(100-f.fatigue*.7-(f.injury?40:0)),
 // ---------- FIGHT ENGINE ----------
 const PLANS={
   balanced:{name:"Balanced",aggr:0,ctr:.04,evade:.02,desc:"Adapt to the fight"}, /* v1.87.2: adapting on the fly is worth a little */
-  pressure:{name:"Pressure",aggr:.25,w:{punch:1.3,elbow:1.3},sta:1.25,desc:"March forward and hunt. Very tiring"},
-  counter:{name:"Counter-fighter",aggr:-.15,ctr:.12,desc:"Let them come in, then counter"},
+  /* v1.91.202 (Man): plan names no longer match fight-style names (บุกกดดัน/รอสวน) */pressure:{name:"Hunt down",aggr:.25,w:{punch:1.3,elbow:1.3},sta:1.25,desc:"March forward and hunt. Very tiring"},
+  counter:{name:"Counter trap",aggr:-.15,ctr:.12,desc:"Let them come in, then counter"},
   outside:{name:"Control range",aggr:0,w:{kick:1.6},evade:.06,desc:"Use kicks, keep distance"},
   clinch:{name:"Clinch",aggr:.1,w:{knee:1.6,elbow:1.1},cl:.25,desc:"Wrestle inside, throw knees"},
 };

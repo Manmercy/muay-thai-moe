@@ -536,8 +536,8 @@ function condition(f){return clamp(Math.round(100-f.fatigue*.7-(f.injury?40:0)),
 // ---------- FIGHT ENGINE ----------
 const PLANS={
   balanced:{name:"Balanced",aggr:0,ctr:.04,evade:.02,desc:"Adapt to the fight"}, /* v1.87.2: adapting on the fly is worth a little */
-  pressure:{name:"Pressure",aggr:.25,w:{punch:1.3,elbow:1.3},sta:1.25,desc:"March forward and hunt. Very tiring"},
-  counter:{name:"Counter-fighter",aggr:-.15,ctr:.12,desc:"Let them come in, then counter"},
+  /* v1.91.202 (Man): plan names no longer match fight-style names (บุกกดดัน/รอสวน) */pressure:{name:"Hunt down",aggr:.25,w:{punch:1.3,elbow:1.3},sta:1.25,desc:"March forward and hunt. Very tiring"},
+  counter:{name:"Counter trap",aggr:-.15,ctr:.12,desc:"Let them come in, then counter"},
   outside:{name:"Control range",aggr:0,w:{kick:1.6},evade:.06,desc:"Use kicks, keep distance"},
   clinch:{name:"Clinch",aggr:.1,w:{knee:1.6,elbow:1.1},cl:.25,desc:"Wrestle inside, throw knees"},
 };
@@ -6726,7 +6726,7 @@ AU.gsfx=function(kind,a){if(!this.init()||this.muted||!SETTINGS.sfx)return;const
   if(kind==="shimmer")for(let i=0;i<6;i++)T(i*.05,{f:1400+Math.random()*1400,type:"sine",dur:.12,peak:.06});};
 
 // ================= MUAY THAI MOE v1.3 — UI =================
-const VERSION="1.91.201";
+const VERSION="1.91.202";
 const CUR_LANG=(typeof window!=="undefined"&&window.LANG)||"th";
 const TH_LABEL=String.fromCharCode(3652,3607,3618);
 function langSwitch(cls){return `<div class="langsw ${cls||""}" role="group" aria-label="Language">${[["th",TH_LABEL],["en","EN"]].map(([k,l])=>`<button class="lsb ${CUR_LANG===k?"on":""}" data-act="setlang" data-v="${k}" aria-pressed="${CUR_LANG===k}">${l}</button>`).join("")}</div>`;}
@@ -7044,7 +7044,7 @@ function settingsHTML(){const t=(k,label,desc)=>`<label class="set"><span><b>${l
    ${t("analytics","Share play stats (anonymous)","Helps the team see how far people get and what is fun · no names, saves or personal data")}
    <button class="set setguide" data-act="guide"><span class="setguide-ic">${BOOK_PX}</span><span><b>Game guide</b><small>Encyclopedia · fight styles, who beats whom · glossary</small></span><span class="setguide-go">›</span></button>
    <p class="meta">Muay Thai Moe v${VERSION}</p>`;}
-const GLOSS=[["Readiness","Condition on fight day. The higher, the better she fights. Drops with fatigue or injury"],["Fatigue","Builds up from training. Over 65 risks injury. Reduce with recovery, the recovery room, the kitchen"],
+const GLOSS=[["Readiness","Condition on fight day. The higher, the better she fights. Drops with fatigue or injury"],["Fatigue","Builds up from training. Over 70 starts risking injury. Lower it with recovery, the recovery room, the kitchen"],
  ["Morale","Higher morale means sharper strikes. Rises with wins, dates, merit-making; drops with losses or overtraining"],["Bond","Her closeness to you. Unlocks special scenes, the signature move at 60, and raises the chance of blood-boil mode"],
  ["Trust","How much a fighter trusts your orders. Higher trust makes corner orders work better (up to +4% accuracy); at 60 losses hurt morale less, and it affects confession scenes · raise it with merit-making scenes, wai khru, not overtraining, and a camp out of debt"],["Fame","How well-known the camp is. The higher, the more students come"],
  ["Skill points","Earned every level-up. Spend them on old-school moves from the fighter's school, and on hidden power (Lv.1–10 · 5 points a level)"],["Counter-training","Scout the opponent, then train the program that counters their main weapon the week before the fight. On fight night their main weapon lands less often and you read their game better"],
@@ -8002,7 +8002,7 @@ const PATCH_RUN={id:"1.96",ver:"Muay Thai Moe v1.96",title:"Camp Track & Sports 
  foot:"Kru Daeng says: fast legs aren't enough — you've got to pass the baton too ✦"};
 /* (Man): players asked which style beats which — the in-game guide and the style edge on fight sheets */
 const PATCH_GUIDE={id:"1.97",ver:"Muay Thai Moe v1.97",title:"The game guide is here",lead:"Wondering about something at the camp? Open the guide. It covers everything from training to the ring",items:[
- ["📘","Game guide","Tap the gear at the top right, then the book button \"Game guide\". 10 short, easy chapters, like a week at the camp, training and scouting, in the ring, skills, cards and the glossary"],
+ ["📘","Game guide","Tap the gear at the top right, then the book button \"Game guide\". 11 short, easy chapters, like a week at the camp, training and scouting, in the ring, skills, love, cards and the glossary"],
  ["🥊","Who beats whom","A table of all 5 fight styles: Power punch, Footwork, Pressure, Inside, Counter-fighter. Each beats 2 and loses to 2, plus which skill line changes each fighter's style"],
  ["🎞","Edge or outmatched","After scouting, the fight info and fight plan show both fighters' styles with an Edge, Outmatched or Even tag. If you're outmatched, the game tells you who in the camp has the edge on that opponent"],
  ["💡","The ? next to the style","Tap the ? next to the fight style to open the fight styles chapter right away, then go back to where you were"]],
@@ -8229,8 +8229,8 @@ function coachTalkPick(G){let best=null;for(const f of roster(G)){if(typeof isAw
   v.forEach((x,i)=>{const d=m-x,k=f.id+":"+i;if(k!==G.coachTalkLast&&(!best||d>best.d))best={f,i,d,x,m};});}return best&&best.d>=0.5?best:null;} /* v1.91.166: no "0.0 below her average" talk when nobody has a weak spot */
 /* v1.91.80 (Man): his talks vary — half the time a weak number, otherwise one girl's hidden power or one of her moves */
 const CT_TRTIP={grit:"Train steadily, never let it slip. The bonus keeps stacking for fight day.",surge:"She improves fast in hard training blocks but tires more easily than others. Watch her fatigue.",
- flow:"Distance control or counter plans suit her. Let the opponent throw a lot and miss.",wits:"Low on health? Don't throw in the towel yet. That's exactly when she dodges best.",
- eye:"Waiting to counter suits her best. Let the other girl come in first.",lib:"Watch the tape or counter-train before every fight you can. She gets more out of intel than anyone.",
+ flow:"The Control range or Counter trap plan suits her. Let the opponent throw a lot and miss",wits:"Low on health? Don't throw in the towel yet. That's exactly when she dodges best.",
+ eye:"The Counter trap plan suits her best. Let the other girl come in first.",lib:"Watch the tape or counter-train before every fight you can. She gets more out of intel than anyone.",
  fury:"The more she's hit, the harder she hits back, but she has to take damage first. Long fights favour her.",rock:"Hard to score on. Good for fights where you have to stand and trade all round.",
  talent:"She trains up faster than others. Before a big fight, let her train full out.",tempo:"She reads timing well. If she's behind on points, she can always catch up."};
 function coachTalkSteps(G){const r=mulberry32((gameWeek(G)*7919+(G.seed||1))>>>0)(),R=roster(G).filter(f=>!(typeof isAway==="function"&&isAway(G,f.id)));
@@ -8658,7 +8658,7 @@ function fightInsight(F,U){const A=F.A,B=F.B,win=F.result.win==="A",W={punch:"Pu
   if(U.careOK)out.push(["+",`Good corner work ${U.careOK} times, energy came back well`]);
   if(A.rageUsed)out.push(["+","Blood-boil mode turned the fight"]);
   if(A.sta<25)out.push(["−","Ran out of energy before the end. Try a more economical pace"]);
-  if(B.landed>A.landed+4)out.push(["−","Clearly took more. Try waiting to counter or controlling range"]);
+  if(B.landed>A.landed+4)out.push(["−","Clearly took more. Try the Counter trap plan or controlling range"]);
   if(!win&&!scouted(B.f.id)&&B.f.camp!=="quest")out.push(["−","Went in without knowing her game. Next time scout and counter-train"]);
   if(!win&&B.f.a&&A.f.a&&ovr(B.f)>ovr(A.f)+3)out.push(["−","The opponent's stats are quite a bit higher. Train a bit more before facing this level"]);
   const pick=win?out.filter(x=>x[0]==="+").concat(out.filter(x=>x[0]==="−")):out.filter(x=>x[0]==="−").concat(out.filter(x=>x[0]==="+"));
@@ -8706,7 +8706,7 @@ function coachNote(F,me){const A=F.A,B=F.B,r=F.result,w=r.win==="A",d=r.win==="D
   if(A.sta<30)return "Ran out of gas late. Add conditioning, and when ahead, order a points-safe round";
   if(!scouted(B.f.id)&&B.f.camp!=="quest")return `We didn't know ${B.f.name}'s style going in. Next time watch the tape, then train the counter ${fix}`;
   if(bt&&bt[1]>=3)return `Their ${W[bt[0]]} landed ${bt[1]} times. We need an answer to that.${fix}`;
-  if(B.landed>A.landed*1.3)return `Took clearly more hits. In the ring, try ordering a counter or range game ${fix}`;
+  if(B.landed>A.landed*1.3)return `Took clearly more hits. In the ring, try ordering Wait and counter, or a range game ${fix}`;
   return "A loss isn't the end. Coach still believes in you. Adjust the plan and come back";}
 function rinNote(F){const A=F.A;const best=Object.entries(A.wl).sort((a,b)=>b[1]-a[1])[0];return `Landed ${A.landed}/${A.thrown} times, most effective weapon: ${WNAME[best[0]]} (${best[1]} times)`;}
 let LASTF=null; /* v1.80: the last fight, read by the gauntlet to carry HP between bouts */
@@ -13750,7 +13750,7 @@ const GUIDE=[
   gl([`<b>Corner orders</b> · ${Object.values(CORNER).map(C=>C.name).join(" · ")}`,"<b>Corner massage</b> (minigame) · all correct gives +20 stamina back, 2 of 3 gives +10"])+
   gh("How fights are won")+
   gp("Knockout, or TKO (down too many times, or the doctor stops it). If it goes the distance, it's decided on points")+
-  gp("Some fight plans share a name with a style, but they're different things")+glink("style","Read about fight styles")},
+  gp("A fight plan and a fight style are two different things")+glink("style","Read about fight styles")},
  {id:"style",ic:"🥊",t:"Fight styles · who beats whom",h:()=>
   gp("Every fighter has one <b>fight style</b> out of 5. Each style <b>beats 2 and loses to 2</b>")+
   styTableHTML()+
@@ -13793,7 +13793,16 @@ const GUIDE=[
   gtip("Build what brings students first so money comes in every week, then build what helps training")},
  {id:"heart",ic:"💖",t:"Relationships",h:()=>
   gl(["<b>Bond ♥</b> · grows from outings, talking, gifts, and leveling up her cards","More bond unlocks special scenes. At ♥ Lv.7 she unlocks her <b>signature move</b> and enters blood-boil mode more easily","<b>Trust</b> · higher makes corner orders work better. At 60, a loss hurts her morale less","Trust grows from merit-making, wai khru, not overtraining, and a camp with no debt","<b>Morale</b> · higher means she lands more. Goes up with wins, down with losses"])+
-  gtip("Some things open by themselves once you're close enough. Spend time with everyone")},
+  gtip("Some things open by themselves once you're close enough. Spend time with everyone")+glink("love","Read about love")},
+ {id:"love",ic:"💌",t:"Love · one love, two-timing, harem",h:()=>
+  gp("This chapter only covers the rules and what follows. The stories down each path are yours to discover")+
+  gh("Getting together")+
+  gl(["When you're close enough and she trusts you enough, she'll confess on her own","Say yes to start dating, or say no and still stay close friends"])+
+  gh("3 paths you can take")+
+  gl(["<b>One love</b> · date just one. You get the deepest story with her, and she fights with better morale","<b>Two-timing</b> · dating several at once. Winning someone new gets harder, there's drama between them, and you don't get the morale bonus of having one lover","<b>Harem</b> · everyone has to accept each other first before they can be together as a team. It takes a long time. You get stories as a whole team, but some one-on-one stories won't happen"])+
+  gh("Break up")+
+  gp("You can break up through chat. She'll be hurt and leave the camp for a while, and can't train meanwhile. If you're still close later, you might get back together")+
+  gtip("One love goes deep, a harem goes wide. Keep two-timing without ever becoming a team, and you get neither")},
  {id:"card",ic:"🃏",t:"Guard",h:()=>
   gl(["Cards come from the story, bond, and the <b>gacha</b>","Card rarity N · R · SR · SSR (SSR is the rarest)","Finish a card's story to unlock its art · SSR cards hide a secret art too"])+
   gh("Gacha")+

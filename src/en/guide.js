@@ -47,7 +47,7 @@ const GUIDE=[
   gl([`<b>Corner orders</b> · ${Object.values(CORNER).map(C=>C.name).join(" · ")}`,"<b>Corner massage</b> (minigame) · all correct gives +20 stamina back, 2 of 3 gives +10"])+
   gh("How fights are won")+
   gp("Knockout, or TKO (down too many times, or the doctor stops it). If it goes the distance, it's decided on points")+
-  gp("Some fight plans share a name with a style, but they're different things")+glink("style","Read about fight styles")},
+  gp("A fight plan and a fight style are two different things")+glink("style","Read about fight styles")},
  {id:"style",ic:"🥊",t:"Fight styles · who beats whom",h:()=>
   gp("Every fighter has one <b>fight style</b> out of 5. Each style <b>beats 2 and loses to 2</b>")+
   styTableHTML()+
@@ -90,7 +90,16 @@ const GUIDE=[
   gtip("Build what brings students first so money comes in every week, then build what helps training")},
  {id:"heart",ic:"💖",t:"Relationships",h:()=>
   gl(["<b>Bond ♥</b> · grows from outings, talking, gifts, and leveling up her cards","More bond unlocks special scenes. At ♥ Lv.7 she unlocks her <b>signature move</b> and enters blood-boil mode more easily","<b>Trust</b> · higher makes corner orders work better. At 60, a loss hurts her morale less","Trust grows from merit-making, wai khru, not overtraining, and a camp with no debt","<b>Morale</b> · higher means she lands more. Goes up with wins, down with losses"])+
-  gtip("Some things open by themselves once you're close enough. Spend time with everyone")},
+  gtip("Some things open by themselves once you're close enough. Spend time with everyone")+glink("love","Read about love")},
+ {id:"love",ic:"💌",t:"Love · one love, two-timing, harem",h:()=>
+  gp("This chapter only covers the rules and what follows. The stories down each path are yours to discover")+
+  gh("Getting together")+
+  gl(["When you're close enough and she trusts you enough, she'll confess on her own","Say yes to start dating, or say no and still stay close friends"])+
+  gh("3 paths you can take")+
+  gl(["<b>One love</b> · date just one. You get the deepest story with her, and she fights with better morale","<b>Two-timing</b> · dating several at once. Winning someone new gets harder, there's drama between them, and you don't get the morale bonus of having one lover","<b>Harem</b> · everyone has to accept each other first before they can be together as a team. It takes a long time. You get stories as a whole team, but some one-on-one stories won't happen"])+
+  gh("Break up")+
+  gp("You can break up through chat. She'll be hurt and leave the camp for a while, and can't train meanwhile. If you're still close later, you might get back together")+
+  gtip("One love goes deep, a harem goes wide. Keep two-timing without ever becoming a team, and you get neither")},
  {id:"card",ic:"🃏",t:"Guard",h:()=>
   gl(["Cards come from the story, bond, and the <b>gacha</b>","Card rarity N · R · SR · SSR (SSR is the rarest)","Finish a card's story to unlock its art · SSR cards hide a secret art too"])+
   gh("Gacha")+

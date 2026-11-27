@@ -535,8 +535,8 @@ function condition(f){return clamp(Math.round(100-f.fatigue*.7-(f.injury?40:0)),
 // ---------- FIGHT ENGINE ----------
 const PLANS={
   balanced:{name:"สมดุล",aggr:0,ctr:.04,evade:.02,desc:"ปรับตามสถานการณ์"}, /* v1.87.2: adapting on the fly is worth a little */
-  pressure:{name:"บุกกดดัน",aggr:.25,w:{punch:1.3,elbow:1.3},sta:1.25,desc:"เดินหน้าไล่ต้อน กินแรงมาก"},
-  counter:{name:"รอสวน",aggr:-.15,ctr:.12,desc:"ให้คู่ต่อสู้เข้ามาแล้วสวน"},
+  /* v1.91.202 (Man): plan names no longer match fight-style names (บุกกดดัน/รอสวน) */pressure:{name:"ไล่ต้อน",aggr:.25,w:{punch:1.3,elbow:1.3},sta:1.25,desc:"เดินหน้าไล่ต้อน กินแรงมาก"},
+  counter:{name:"ดักสวน",aggr:-.15,ctr:.12,desc:"ให้คู่ต่อสู้เข้ามาแล้วสวน"},
   outside:{name:"คุมระยะ",aggr:0,w:{kick:1.6},evade:.06,desc:"ใช้ลูกเตะ รักษาระยะห่าง"},
   clinch:{name:"เข้าคลินช์",aggr:.1,w:{knee:1.6,elbow:1.1},cl:.25,desc:"ปล้ำวงใน ตีเข่า"},
 };

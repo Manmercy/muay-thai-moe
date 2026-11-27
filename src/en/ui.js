@@ -1,5 +1,5 @@
 // ================= MUAY THAI MOE v1.3 — UI =================
-const VERSION="1.91.201";
+const VERSION="1.91.202";
 const CUR_LANG=(typeof window!=="undefined"&&window.LANG)||"th";
 const TH_LABEL=String.fromCharCode(3652,3607,3618);
 function langSwitch(cls){return `<div class="langsw ${cls||""}" role="group" aria-label="Language">${[["th",TH_LABEL],["en","EN"]].map(([k,l])=>`<button class="lsb ${CUR_LANG===k?"on":""}" data-act="setlang" data-v="${k}" aria-pressed="${CUR_LANG===k}">${l}</button>`).join("")}</div>`;}
@@ -317,7 +317,7 @@ function settingsHTML(){const t=(k,label,desc)=>`<label class="set"><span><b>${l
    ${t("analytics","Share play stats (anonymous)","Helps the team see how far people get and what is fun · no names, saves or personal data")}
    <button class="set setguide" data-act="guide"><span class="setguide-ic">${BOOK_PX}</span><span><b>Game guide</b><small>Encyclopedia · fight styles, who beats whom · glossary</small></span><span class="setguide-go">›</span></button>
    <p class="meta">Muay Thai Moe v${VERSION}</p>`;}
-const GLOSS=[["Readiness","Condition on fight day. The higher, the better she fights. Drops with fatigue or injury"],["Fatigue","Builds up from training. Over 65 risks injury. Reduce with recovery, the recovery room, the kitchen"],
+const GLOSS=[["Readiness","Condition on fight day. The higher, the better she fights. Drops with fatigue or injury"],["Fatigue","Builds up from training. Over 70 starts risking injury. Lower it with recovery, the recovery room, the kitchen"],
  ["Morale","Higher morale means sharper strikes. Rises with wins, dates, merit-making; drops with losses or overtraining"],["Bond","Her closeness to you. Unlocks special scenes, the signature move at 60, and raises the chance of blood-boil mode"],
  ["Trust","How much a fighter trusts your orders. Higher trust makes corner orders work better (up to +4% accuracy); at 60 losses hurt morale less, and it affects confession scenes · raise it with merit-making scenes, wai khru, not overtraining, and a camp out of debt"],["Fame","How well-known the camp is. The higher, the more students come"],
  ["Skill points","Earned every level-up. Spend them on old-school moves from the fighter's school, and on hidden power (Lv.1–10 · 5 points a level)"],["Counter-training","Scout the opponent, then train the program that counters their main weapon the week before the fight. On fight night their main weapon lands less often and you read their game better"],
@@ -1275,7 +1275,7 @@ const PATCH_RUN={id:"1.96",ver:"Muay Thai Moe v1.96",title:"Camp Track & Sports 
  foot:"Kru Daeng says: fast legs aren't enough — you've got to pass the baton too ✦"};
 /* (Man): players asked which style beats which — the in-game guide and the style edge on fight sheets */
 const PATCH_GUIDE={id:"1.97",ver:"Muay Thai Moe v1.97",title:"The game guide is here",lead:"Wondering about something at the camp? Open the guide. It covers everything from training to the ring",items:[
- ["📘","Game guide","Tap the gear at the top right, then the book button \"Game guide\". 10 short, easy chapters, like a week at the camp, training and scouting, in the ring, skills, cards and the glossary"],
+ ["📘","Game guide","Tap the gear at the top right, then the book button \"Game guide\". 11 short, easy chapters, like a week at the camp, training and scouting, in the ring, skills, love, cards and the glossary"],
  ["🥊","Who beats whom","A table of all 5 fight styles: Power punch, Footwork, Pressure, Inside, Counter-fighter. Each beats 2 and loses to 2, plus which skill line changes each fighter's style"],
  ["🎞","Edge or outmatched","After scouting, the fight info and fight plan show both fighters' styles with an Edge, Outmatched or Even tag. If you're outmatched, the game tells you who in the camp has the edge on that opponent"],
  ["💡","The ? next to the style","Tap the ? next to the fight style to open the fight styles chapter right away, then go back to where you were"]],
@@ -1502,8 +1502,8 @@ function coachTalkPick(G){let best=null;for(const f of roster(G)){if(typeof isAw
   v.forEach((x,i)=>{const d=m-x,k=f.id+":"+i;if(k!==G.coachTalkLast&&(!best||d>best.d))best={f,i,d,x,m};});}return best&&best.d>=0.5?best:null;} /* v1.91.166: no "0.0 below her average" talk when nobody has a weak spot */
 /* v1.91.80 (Man): his talks vary — half the time a weak number, otherwise one girl's hidden power or one of her moves */
 const CT_TRTIP={grit:"Train steadily, never let it slip. The bonus keeps stacking for fight day.",surge:"She improves fast in hard training blocks but tires more easily than others. Watch her fatigue.",
- flow:"Distance control or counter plans suit her. Let the opponent throw a lot and miss.",wits:"Low on health? Don't throw in the towel yet. That's exactly when she dodges best.",
- eye:"Waiting to counter suits her best. Let the other girl come in first.",lib:"Watch the tape or counter-train before every fight you can. She gets more out of intel than anyone.",
+ flow:"The Control range or Counter trap plan suits her. Let the opponent throw a lot and miss",wits:"Low on health? Don't throw in the towel yet. That's exactly when she dodges best.",
+ eye:"The Counter trap plan suits her best. Let the other girl come in first.",lib:"Watch the tape or counter-train before every fight you can. She gets more out of intel than anyone.",
  fury:"The more she's hit, the harder she hits back, but she has to take damage first. Long fights favour her.",rock:"Hard to score on. Good for fights where you have to stand and trade all round.",
  talent:"She trains up faster than others. Before a big fight, let her train full out.",tempo:"She reads timing well. If she's behind on points, she can always catch up."};
 function coachTalkSteps(G){const r=mulberry32((gameWeek(G)*7919+(G.seed||1))>>>0)(),R=roster(G).filter(f=>!(typeof isAway==="function"&&isAway(G,f.id)));
@@ -1931,7 +1931,7 @@ function fightInsight(F,U){const A=F.A,B=F.B,win=F.result.win==="A",W={punch:"Pu
   if(U.careOK)out.push(["+",`Good corner work ${U.careOK} times, energy came back well`]);
   if(A.rageUsed)out.push(["+","Blood-boil mode turned the fight"]);
   if(A.sta<25)out.push(["−","Ran out of energy before the end. Try a more economical pace"]);
-  if(B.landed>A.landed+4)out.push(["−","Clearly took more. Try waiting to counter or controlling range"]);
+  if(B.landed>A.landed+4)out.push(["−","Clearly took more. Try the Counter trap plan or controlling range"]);
   if(!win&&!scouted(B.f.id)&&B.f.camp!=="quest")out.push(["−","Went in without knowing her game. Next time scout and counter-train"]);
   if(!win&&B.f.a&&A.f.a&&ovr(B.f)>ovr(A.f)+3)out.push(["−","The opponent's stats are quite a bit higher. Train a bit more before facing this level"]);
   const pick=win?out.filter(x=>x[0]==="+").concat(out.filter(x=>x[0]==="−")):out.filter(x=>x[0]==="−").concat(out.filter(x=>x[0]==="+"));
@@ -1979,7 +1979,7 @@ function coachNote(F,me){const A=F.A,B=F.B,r=F.result,w=r.win==="A",d=r.win==="D
   if(A.sta<30)return "Ran out of gas late. Add conditioning, and when ahead, order a points-safe round";
   if(!scouted(B.f.id)&&B.f.camp!=="quest")return `We didn't know ${B.f.name}'s style going in. Next time watch the tape, then train the counter ${fix}`;
   if(bt&&bt[1]>=3)return `Their ${W[bt[0]]} landed ${bt[1]} times. We need an answer to that.${fix}`;
-  if(B.landed>A.landed*1.3)return `Took clearly more hits. In the ring, try ordering a counter or range game ${fix}`;
+  if(B.landed>A.landed*1.3)return `Took clearly more hits. In the ring, try ordering Wait and counter, or a range game ${fix}`;
   return "A loss isn't the end. Coach still believes in you. Adjust the plan and come back";}
 function rinNote(F){const A=F.A;const best=Object.entries(A.wl).sort((a,b)=>b[1]-a[1])[0];return `Landed ${A.landed}/${A.thrown} times, most effective weapon: ${WNAME[best[0]]} (${best[1]} times)`;}
 let LASTF=null; /* v1.80: the last fight, read by the gauntlet to carry HP between bouts */
