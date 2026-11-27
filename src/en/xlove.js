@@ -64,7 +64,7 @@ const BY_NM={ /* v1.91.169 (Man): Muay Thai names — real strikes and mae mai/l
  f_smile:["Yuan Thot Hae (Casting the Net)","Lv.14 · luk mai · spreads her arms to catch the punch, then counters inside · +5% accuracy at low health, counters +4%, morale effect +2%"],
  f_star:["Grandma's Mae Mai","Lv.22 · Master · evade +3%, counters +5%, +4% accuracy at low health, recovery +10%"],
  fah_0a1:["Copied Spear Elbow","Lv.26 · Copy Stance · sees the opponent's spear elbow once and throws it back sharper · elbow power +14%, elbow accuracy +2%"],
- fah_0a2:["Copy Eye","Always on · remembers every move an opponent shows · Lv.30 · elbow power +3%"],
+ fah_0a2:["Copy Eye","Always on · Lv.30 · elbow power +3% · after each round she copies the weapon the opponent landed most; next round that weapon gets +1% accuracy and +2% power (per rank)"],
  fah_0a3:["Borrowed-Force Elbow","Lv.34 · Copy Stance · borrows the opponent's own momentum to drive an elbow back through the guard · elbow power +14%, elbow points +8%"],
  fah_0a4:["Elbow Opens for Fists","Always on · supports the Forward Fist line · Lv.38 · punch power +2.5%, stamina use -0.5%"],
  fah_0b1:["Mirror Spinning Elbow","Lv.26 · Mirror Elbow · the same spinning elbow the opponent just threw, sent straight back · elbow points +14%, morale effect +1%"],

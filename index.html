@@ -3197,11 +3197,18 @@ function aiCorner(F,me,op){ if(F.round===0)return "none";
 const BAL={flashPow:.025,specPow:0,wdef:.15,spec:4,specK:.4,clGap:9,clK:.03,repFree:.5,repPen:.7,chkBase:5,chkK:.016,chkMax:.3,chkLegs:4,chkSta:5,chkHp:1.2};
 function effA(s,k){const a=s.f.a,o=s.ov!=null?s.ov:(s.ov=ovr(a)),v=a[k],c=o+BAL.spec;return v>c?c+(v-c)*BAL.specK:v;}
 const EX_PER_ROUND=12;
+/* v1.91.174 (Man): Baiyok's Copy Eye (ตาถอดแบบ) — after a round she takes the weapon the opponent landed most and sends it back next round: +1% accuracy and +2% power per rank on that weapon (rank 3: +3% / +6%) */
+const CPY={hit:.01,dmg:.02};
+function copyEye(s,o,F){const f=s.f;if(s.cpy){s.sk.hit[s.cpy.w]-=s.cpy.h;s.sk.dmg[s.cpy.w]-=s.cpy.d;s.cpy=null;}
+  if(!f||f.id!=="prod_B"||skInert(f)||!f.skills||F.round<2||!o.rw)return;const r=f.skills.fah_0a2||0;if(!r)return;
+  const src=["punch","kick","knee","elbow"].some(k=>o.rw[k])?o.rw:o.rtw;let w=null,n=0;for(const k of ["punch","kick","knee","elbow"])if((src[k]||0)>n){n=src[k];w=k;}if(!w)return;
+  const h=CPY.hit*r,d=CPY.dmg*r;s.sk.hit[w]=(s.sk.hit[w]||0)+h;s.sk.dmg[w]=(s.sk.dmg[w]||0)+d;s.cpy={w,h,d,say:w!==s.cpyW?1:0};s.cpyW=w;} /* the booth calls it only when she switches to a new weapon */
 function roundBegin(F){F.round++;F.gnd=null;
   /* v1.90: a boss changes form every round (Ladda: hood → no hood → blood mode) */
   for(const s of [F.A,F.B])if(s.f.phases){const P=s.f.phases[(s.f.phR?s.f.phR[Math.min(F.round,s.f.phR.length)-1]:Math.min(F.round,s.f.phases.length))-1];s.phNew=!s.ph||s.ph.n!==P.n;s.ph=P;
     if(s.phNew&&P.fst){const o=s===F.A?F.B:F.A;s.fst=P.fst==="read"?readStyle(F,s,o,P.fall):P.fst;styleApply(F.A,F.B);}
     if(P.fst==="read"&&s.readSty&&!s.readHit)s.ph={...P,hit:0,ev:0,ini:0};} /* a wrong read also takes the edge off her fast form: she was fast because she knew */ /* v1.91.9: 5-round bosses hold a form over several rounds (phR) and each form can fight in its own style */F.A.rpts=0;F.B.rpts=0;F.kd0={A:F.A.kd,B:F.B.kd};F.ex=0;F.rlog=[];
+  for(const s of [F.A,F.B])copyEye(s,s===F.A?F.B:F.A,F);
   F.mA=mods(F.A,F);F.mB=mods(F.B,F);for(const s of [F.A,F.B]){s.rw={punch:0,kick:0,knee:0,elbow:0};s.rtw={punch:0,kick:0,knee:0,elbow:0};s.rdmg=0;s.rthrown=0;s.rlanded=0;s.skRound=false;}}
 const roundDone=F=>F.over||F.ex>=EX_PER_ROUND;
 function fightRound(F){roundBegin(F);while(!roundDone(F))fightEx(F);return roundFinish(F);}
@@ -3300,6 +3307,8 @@ function fightEx(F){const rng=F.rng,log=[],ex=F.ex,mA=F.mA,mB=F.mB;
       const forced=F.forceRage&&s===F.A&&s.f.camp==="player"&&F.round>=2&&ex>=4;
       const need=(s.hp<62&&behind)||s.hp<45||(F.round>=2&&behind&&s.hp<75);
       if(forced||(need&&rng()<(s.f.camp==="player"?.03+(s.f.bond||0)/1500+(s.f.morale||60)/2400:.08))){s.rageUsed=true;s.rage=4;log.push({ha:F.A.hp,hb:F.B.hp,sa:F.A.sta,sb:F.B.sta,s:s===F.A?"A":"B",t:`${s.name} ตาเปลี่ยน! โหมดเลือดเดือด!`,k:"big",ev:"rage",rid:s.f.id,an:s.name,dn:o.name});}}}}
+    for(const s of [F.A,F.B])if(s.cpy&&s.cpy.say&&!F.over){s.cpy.say=0;const o=s===F.A?F.B:F.A,wn={punch:"หมัด",kick:"เตะ",knee:"เข่า",elbow:"ศอก"}[s.cpy.w];
+      log.push({ha:F.A.hp,hb:F.B.hp,sa:F.A.sta,sb:F.B.sta,s:s===F.A?"A":"B",k:"big",an:s.name,dn:o.name,t:`ตาถอดแบบ! ${s.name}จำ${wn}ของ${o.name}ได้แล้ว ยกนี้ส่งคืนให้`});}
     for(const s of [F.A,F.B])if(s.phNew&&!F.over){s.phNew=false;const P=s.ph,o=s===F.A?F.B:F.A;if(P.self){s.hp-=P.self;s.rage=Math.max(s.rage||0,5);}
       if(P.say)log.push({ha:F.A.hp,hb:F.B.hp,sa:F.A.sta,sb:F.B.sta,s:s===F.A?"A":"B",t:P.say,k:"big",ev:"phase",ph:P.n,an:s.name,dn:o.name});
       if(P.fst==="read"&&s.readSty)log.push({ha:F.A.hp,hb:F.B.hp,sa:F.A.sta,sb:F.B.sta,s:s===F.A?"A":"B",k:"big",an:s.name,dn:o.name,
@@ -13997,7 +14006,7 @@ const BY_NM={ /* v1.91.169 (Man): Muay Thai names — real strikes and mae mai/l
  f_smile:["ญวนทอดแห","Lv.14 · ลูกไม้ · กางแขนรับหมัดแล้วสวนเข้าวงใน · เลือดต่ำแม่นขึ้น 5% สวนกลับ +4% กำลังใจมีผล +2%"],
  f_star:["แม่ไม้ท่ายาย","Lv.22 · ขั้นปรมาจารย์ · หลบ +3% สวนกลับ +5% เลือดต่ำแม่นขึ้น 4% ฟื้นแรง +10%"],
  fah_0a1:["ถอดแบบศอกพุ่ง","Lv.26 · ถอดแบบ · เห็นศอกพุ่งของคู่ชกครั้งเดียว ใช้กลับได้แม่นกว่าเดิม · แรงศอก +14% ศอกแม่น +2%"],
- fah_0a2:["ตาถอดแบบ","ติดตัว · จำท่าคู่ชกได้ทุกท่า · Lv.30 · แรงศอก +3%"],
+ fah_0a2:["ตาถอดแบบ","ติดตัว · Lv.30 · แรงศอก +3% · จบยกแล้วจำอาวุธที่คู่ชกเข้าเป้ามากสุด ยกถัดไปใช้อาวุธนั้นแม่น +1% แรง +2% (ต่อขั้น)"],
  fah_0a3:["ศอกยืมแรง","Lv.34 · ถอดแบบ · ยืมแรงพุ่งของคู่ชก กระทุ้งศอกฝ่าการ์ดกลับ · แรงศอก +14% คะแนนศอก +8%"],
  fah_0a4:["ศอกเปิดทางหมัด","ติดตัว · หนุนสายหมัดเดินหน้า · Lv.38 · แรงหมัด +2.5% ใช้แรงน้อยลง 0.5%"],
  fah_0b1:["ศอกกลับกระจกเงา","Lv.26 · ศอกกระจกเงา · หมุนศอกกลับแบบเดียวกับที่คู่ชกเพิ่งหมุนใส่ · คะแนนศอก +14% กำลังใจมีผล +1%"],
@@ -15650,7 +15659,7 @@ const STATS_HOST="https://us.i.posthog.com";     /* EU projects: https://eu.i.po
 <script>
 (function(){
 /* v1.87: Thai code ships inside index.html; English code (en.js) and the dictionary (i18n.js) load only when needed */
-var B="370840e520";
+var B="f4e2ef3c36";
 var L="";try{L=localStorage.getItem("mtm_lang")||"";}catch(e){}
 try{var h=(location.hash||"").match(/lang=(th|en)/);if(h)L=h[1];}catch(e){}
 if(L!=="th"&&L!=="en")L="th";

@@ -678,11 +678,18 @@ function aiCorner(F,me,op){ if(F.round===0)return "none";
 const BAL={flashPow:.025,specPow:0,wdef:.15,spec:4,specK:.4,clGap:9,clK:.03,repFree:.5,repPen:.7,chkBase:5,chkK:.016,chkMax:.3,chkLegs:4,chkSta:5,chkHp:1.2};
 function effA(s,k){const a=s.f.a,o=s.ov!=null?s.ov:(s.ov=ovr(a)),v=a[k],c=o+BAL.spec;return v>c?c+(v-c)*BAL.specK:v;}
 const EX_PER_ROUND=12;
+/* v1.91.174 (Man): Baiyok's Copy Eye (ตาถอดแบบ) — after a round she takes the weapon the opponent landed most and sends it back next round: +1% accuracy and +2% power per rank on that weapon (rank 3: +3% / +6%) */
+const CPY={hit:.01,dmg:.02};
+function copyEye(s,o,F){const f=s.f;if(s.cpy){s.sk.hit[s.cpy.w]-=s.cpy.h;s.sk.dmg[s.cpy.w]-=s.cpy.d;s.cpy=null;}
+  if(!f||f.id!=="prod_B"||skInert(f)||!f.skills||F.round<2||!o.rw)return;const r=f.skills.fah_0a2||0;if(!r)return;
+  const src=["punch","kick","knee","elbow"].some(k=>o.rw[k])?o.rw:o.rtw;let w=null,n=0;for(const k of ["punch","kick","knee","elbow"])if((src[k]||0)>n){n=src[k];w=k;}if(!w)return;
+  const h=CPY.hit*r,d=CPY.dmg*r;s.sk.hit[w]=(s.sk.hit[w]||0)+h;s.sk.dmg[w]=(s.sk.dmg[w]||0)+d;s.cpy={w,h,d,say:w!==s.cpyW?1:0};s.cpyW=w;} /* the booth calls it only when she switches to a new weapon */
 function roundBegin(F){F.round++;F.gnd=null;
   /* v1.90: a boss changes form every round (Ladda: hood → no hood → blood mode) */
   for(const s of [F.A,F.B])if(s.f.phases){const P=s.f.phases[(s.f.phR?s.f.phR[Math.min(F.round,s.f.phR.length)-1]:Math.min(F.round,s.f.phases.length))-1];s.phNew=!s.ph||s.ph.n!==P.n;s.ph=P;
     if(s.phNew&&P.fst){const o=s===F.A?F.B:F.A;s.fst=P.fst==="read"?readStyle(F,s,o,P.fall):P.fst;styleApply(F.A,F.B);}
     if(P.fst==="read"&&s.readSty&&!s.readHit)s.ph={...P,hit:0,ev:0,ini:0};} /* a wrong read also takes the edge off her fast form: she was fast because she knew */ /* v1.91.9: 5-round bosses hold a form over several rounds (phR) and each form can fight in its own style */F.A.rpts=0;F.B.rpts=0;F.kd0={A:F.A.kd,B:F.B.kd};F.ex=0;F.rlog=[];
+  for(const s of [F.A,F.B])copyEye(s,s===F.A?F.B:F.A,F);
   F.mA=mods(F.A,F);F.mB=mods(F.B,F);for(const s of [F.A,F.B]){s.rw={punch:0,kick:0,knee:0,elbow:0};s.rtw={punch:0,kick:0,knee:0,elbow:0};s.rdmg=0;s.rthrown=0;s.rlanded=0;s.skRound=false;}}
 const roundDone=F=>F.over||F.ex>=EX_PER_ROUND;
 function fightRound(F){roundBegin(F);while(!roundDone(F))fightEx(F);return roundFinish(F);}
@@ -781,6 +788,8 @@ function fightEx(F){const rng=F.rng,log=[],ex=F.ex,mA=F.mA,mB=F.mB;
       const forced=F.forceRage&&s===F.A&&s.f.camp==="player"&&F.round>=2&&ex>=4;
       const need=(s.hp<62&&behind)||s.hp<45||(F.round>=2&&behind&&s.hp<75);
       if(forced||(need&&rng()<(s.f.camp==="player"?.03+(s.f.bond||0)/1500+(s.f.morale||60)/2400:.08))){s.rageUsed=true;s.rage=4;log.push({ha:F.A.hp,hb:F.B.hp,sa:F.A.sta,sb:F.B.sta,s:s===F.A?"A":"B",t:`${s.name} — the eyes change! Blood-boil mode!`,k:"big",ev:"rage",rid:s.f.id,an:s.name,dn:o.name});}}}}
+    for(const s of [F.A,F.B])if(s.cpy&&s.cpy.say&&!F.over){s.cpy.say=0;const o=s===F.A?F.B:F.A,wn={punch:"Punch",kick:"Kick",knee:"Knee",elbow:"Elbow"}[s.cpy.w];
+      log.push({ha:F.A.hp,hb:F.B.hp,sa:F.A.sta,sb:F.B.sta,s:s===F.A?"A":"B",k:"big",an:s.name,dn:o.name,t:`Copy Eye! ${s.name} has copied the ${wn} of ${o.name} — and sends it back this round`});}
     for(const s of [F.A,F.B])if(s.phNew&&!F.over){s.phNew=false;const P=s.ph,o=s===F.A?F.B:F.A;if(P.self){s.hp-=P.self;s.rage=Math.max(s.rage||0,5);}
       if(P.say)log.push({ha:F.A.hp,hb:F.B.hp,sa:F.A.sta,sb:F.B.sta,s:s===F.A?"A":"B",t:P.say,k:"big",ev:"phase",ph:P.n,an:s.name,dn:o.name});
       if(P.fst==="read"&&s.readSty)log.push({ha:F.A.hp,hb:F.B.hp,sa:F.A.sta,sb:F.B.sta,s:s===F.A?"A":"B",k:"big",an:s.name,dn:o.name,

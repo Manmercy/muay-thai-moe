@@ -21550,5 +21550,9 @@
  "ศอกเงา": "Shadow Elbow",
  "Lv.42 · ขั้นตำนาน · เลิกสะท้อนท่าใคร ชกตามใจตัวเองเป็นครั้งแรกในชีวิต · คะแนนศอก +16% แรงศอก +12% กำลังใจมีผล +2% · ลายเซ็นใบหยก: กำลังใจมีผล +1%": "Lv.42 · Legend · stops mirroring anyone and fights her own way for the first time in her life · elbow points +16%, elbow power +12%, morale effect +2% · Baiyok's signature: morale effect +1%",
  "Lv.42 · ขั้นตำนาน · ถอดแบบมานับพันท่า รวมเป็นศอกเดียวของตัวเอง · แรงศอก +22% ศอกแม่น +4% · ลายเซ็นใบหยก: ใช้แรงน้อยลง 1%": "Lv.42 · Legend · a thousand copied moves folded into one elbow of her own · elbow power +22%, elbow accuracy +4% · Baiyok's signature: stamina use -1%",
- "ศอกพันท่า": "Thousand-Move Elbow"
+ "ศอกพันท่า": "Thousand-Move Elbow",
+ "ได้แล้ว ยกนี้ส่งคืนให้": " — and sends it back this round",
+ "จำ": " has copied the ",
+ "ตาถอดแบบ! ": "Copy Eye! ",
+ "ติดตัว · Lv.30 · แรงศอก +3% · จบยกแล้วจำอาวุธที่คู่ชกเข้าเป้ามากสุด ยกถัดไปใช้อาวุธนั้นแม่น +1% แรง +2% (ต่อขั้น)": "Always on · Lv.30 · elbow power +3% · after each round she copies the weapon the opponent landed most; next round that weapon gets +1% accuracy and +2% power (per rank)"
 }
