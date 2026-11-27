@@ -38,19 +38,19 @@ SPK.prod_B={name:"Baiyok",color:"#d9b24a"};
 /* v1.91.166 (Man): Baiyok gets a full kit like everyone else — Fah's tree (her old Division B rival line, 48 skills), Lv.42 legend tips of her own,
    two hidden powers, a signature and a hot-form title. As a rival she still fights without skills (skInert in engine.js); the kit opens when she moves in. */
 const BY_CAP={
- fah_0a5:["by_0a5","Elbows on the Rope's Beat","Lv.42 · Legend · elbows land on the beat like a wooden-handled jump rope · elbow power +22%, elbow accuracy +4% · Baiyok's mark: 1% less energy",r=>({staSave:.01*r})],
- fah_0b5:["by_0b5","Free Elbow","Lv.42 · Legend · fighting her own way for the first time in her life · elbow points +16%, elbow power +12%, morale effect +2% · Baiyok's mark: morale effect +1%",r=>({mor:.01*r})],
+ fah_0a5:["by_0a5","Thousand-Move Elbow","Lv.42 · Legend · a thousand copied moves folded into one elbow of her own · elbow power +22%, elbow accuracy +4% · Baiyok's signature: stamina use -1%",r=>({staSave:.01*r})],
+ fah_0b5:["by_0b5","Free Elbow","Lv.42 · Legend · stops mirroring anyone and fights her own way for the first time in her life · elbow points +16%, elbow power +12%, morale effect +2% · Baiyok's signature: morale effect +1%",r=>({mor:.01*r})],
  fah_1a5:["by_1a5","Hundred-Punch Fist","Lv.42 · Legend · every punch counted until none miss · punch power +18%, punch points +10%, 4% less energy · Baiyok's mark: punch accuracy +1%",r=>({hit:{punch:.01*r}})],
  fah_1b5:["by_1b5","First Downpour","Lv.42 · Legend · punches as heavy as the first downpour over training · punch power +24%, punch accuracy +3%, +3% accuracy at low health · Baiyok's mark: evade +1%",r=>({evade:.01*r})],
  fah_2a5:["by_2a5","Jade's Mae Mai","Lv.42 · Legend · a smile nobody has seen before throws the opponent off · counter +6%, counter punch power +16%, evade +2% · Baiyok's mark: counter +1%",r=>({ctr:.01*r})],
  fah_2b5:["by_2b5","White Jade","Lv.42 · Legend · still standing at the final bell in her own white · +6% accuracy at low health, recovery +18%, morale effect +2% · Baiyok's mark: recovery +3%",r=>({regen:.03*r})]};
 const BY_NM={ /* v1.91.169 (Man): Muay Thai names — real strikes and mae mai/luk mai (only ones the five don't use), with Baiyok's story kept in the descriptions and the passives */
  tiger:["Grandma's Chopping Elbow","a downward elbow, the way Grandma taught her at seven · Elbow power +12%, accuracy +2%"],
- f_cut:["Wind-Cutting Slant Elbow","a short rising elbow that never breaks the beat · elbow power +8%, elbow accuracy +1.5%"],
+ f_cut:["Shadow Elbow","the same angled elbow the opponent just used, sent right back · elbow power +8%, elbow accuracy +1.5%"],
  f_flex:["Wooden-Handled Rope","Passive · training fatigue -5% on every program"],
- f_storm:["Three-Beat Elbows","chopping, cutting and spinning elbows chained on a counted beat · elbow power +12%, elbow accuracy +3%, elbow scoring +6%"],
+ f_storm:["Three-Beat Copy","watches the opponent's combo once, then fires the same one back: downward, slashing, spinning elbow · elbow power +12%, elbow accuracy +3%, elbow points +6%"],
  f_thunder:["Salap Fan Pla (Zigzag)","Lv.14 · mae mai · zigzags aside and elbows left-right like switching feet on the jump rope · elbow power +14%, elbow accuracy +4%"],
- f_sky:["Spinning Elbow Mid-Ring","Lv.22 · Master · elbow power +16%, punch power +8%, elbow accuracy +3%"],
+ f_sky:["Mid-Ring Mirror Elbow","Lv.22 · Master · elbow power +16%, punch power +8%, elbow accuracy +3%"],
  fah_rush:["Straight Count of Ten","walks in throwing straight punches in sets, counting under her breath · Punch accuracy +2%, punch score +8%"],
  f_blitz:["Lead Hand Forward","a lead hand that quietly pushes the opponent back all round · punch accuracy +1.5%, punch scoring +6%, stamina use -2%"],
  reckless:["Golden Tiger Iron Body","Passive · 8% less stamina spent attacking"],
@@ -63,13 +63,13 @@ const BY_NM={ /* v1.91.169 (Man): Muay Thai names — real strikes and mae mai/l
  f_show:["Crowd-Calling Elbow","an elbow so clean the crowd shouts her name for the first time · morale effect +2%, punch points +4%, kick points +4%, +2% accuracy at low health"],
  f_smile:["Yuan Thot Hae (Casting the Net)","Lv.14 · luk mai · spreads her arms to catch the punch, then counters inside · +5% accuracy at low health, counters +4%, morale effect +2%"],
  f_star:["Grandma's Mae Mai","Lv.22 · Master · evade +3%, counters +5%, +4% accuracy at low health, recovery +10%"],
- fah_0a1:["On-Beat Spear Elbow","Lv.26 · Spear Elbow · the spear elbow lands exactly on the counted beat · elbow power +14%, elbow accuracy +2%"],
- fah_0a2:["Wooden-Handle Elbows","Always on · Lv.30 · elbow power +3%"],
- fah_0a3:["Uppercut Elbow Through the Guard","Lv.34 · Spear Elbow · an upward jab of the elbow through the guard the opponent set · elbow power +14%, elbow points +8%"],
+ fah_0a1:["Copied Spear Elbow","Lv.26 · Copy Stance · sees the opponent's spear elbow once and throws it back sharper · elbow power +14%, elbow accuracy +2%"],
+ fah_0a2:["Copy Eye","Always on · remembers every move an opponent shows · Lv.30 · elbow power +3%"],
+ fah_0a3:["Borrowed-Force Elbow","Lv.34 · Copy Stance · borrows the opponent's own momentum to drive an elbow back through the guard · elbow power +14%, elbow points +8%"],
  fah_0a4:["Elbow Opens for Fists","Always on · supports the Forward Fist line · Lv.38 · punch power +2.5%, stamina use -0.5%"],
- fah_0b1:["White Jade Spinning Elbow","Lv.26 · White Jade Elbow · a clean spinning back elbow, nothing extra · elbow points +14%, morale effect +1%"],
- fah_0b2:["Clean Form Scores","Always on · Lv.30 · elbow points +3%, morale effect +0.4%"],
- fah_0b3:["Chang Prasan Nga (Crossing Tusks)","Lv.34 · White Jade Elbow · luk mai · a light step, then both elbows come down crossed · evade +1.5%, elbow power +10%, elbow points +6%"],
+ fah_0b1:["Mirror Spinning Elbow","Lv.26 · Mirror Elbow · the same spinning elbow the opponent just threw, sent straight back · elbow points +14%, morale effect +1%"],
+ fah_0b2:["Shadow Overlay","Always on · the reflection looks cleaner than the original · Lv.30 · elbow points +3%, morale effect +0.4%"],
+ fah_0b3:["Chang Prasan Nga (Crossing Tusks)","Lv.34 · Mirror Elbow · luk mai · a light step, then both elbows come down crossed · evade +1.5%, elbow power +10%, elbow points +6%"],
  fah_0b4:["Deadpan Elbow","Always on · supports the Still Guard line · Lv.38 · +1% accuracy at low health, morale effect +0.5%"],
  fah_1a1:["Seven-Beat Combination","Lv.26 · Counted Punches · a seven-punch combo, every count exact · punch points +10%, punch power +10%, stamina use -2%"],
  fah_1a2:["Runner's Lungs","Always on · Lv.30 · stamina use -1.5%, recovery +3%"],
@@ -78,22 +78,23 @@ const BY_NM={ /* v1.91.169 (Man): Muay Thai names — real strikes and mae mai/l
  fah_1b1:["One Big Hook","Lv.26 · Free Hands · everything into one punch — her own call, nobody's order · punch power +18%, +2% accuracy at low health"],
  fah_1b2:["Fighter's Heart","Always on · Lv.30 · +1.2% accuracy at low health, punch power +1%"],
  fah_1b3:["Trading Mid-Ring","Lv.34 · Free Hands · stands and trades in the middle without stepping back · punch power +14%, clinch defense +0.3"],
- fah_1b4:["Punch Opens the Elbow","Always on · supports the Rhythm Elbow line · Lv.38 · elbow power +3%"],
+ fah_1b4:["Punch Opens the Elbow","Always on · supports the Mirror line · Lv.38 · elbow power +3%"],
  fah_2a1:["Raised-Arm Parry and Counter","Lv.26 · Lure and Counter · parries with a raised arm and counters at once · counters +4%, evade +1.5%"],
  fah_2a2:["Locked-On Eyes","Always on · Lv.30 · morale effect +0.5%, counters +0.6%"],
  fah_2a3:["Ka Chik Rang (Crow Tears the Nest)","Lv.34 · Lure and Counter · luk mai · splits the punches apart and counters the rush · counters +3%, counter-punch power +14%"],
- fah_2a4:["Still Elbow Range","Always on · supports the Rhythm Elbow line · Lv.38 · elbow accuracy +1.5%, counter-punch power +2%"],
+ fah_2a4:["Still Elbow Range","Always on · supports the Mirror line · Lv.38 · elbow accuracy +1.5%, counter-punch power +2%"],
  fah_2b1:["Grandma's Standing Block","Lv.26 · Rooted Stance · however much it hurts, her face doesn't change · +4% accuracy at low health, recovery +10%"],
  fah_2b2:["Grandma's Steady Knees","Always on · Lv.30 · +1.5% accuracy at low health"],
  fah_2b3:["Reset in White","Lv.34 · Rooted Stance · gets up and dusts herself off like nothing happened · recovery +15%, morale effect +1.5%"],
  fah_2b4:["Silent Walk","Always on · supports the Forward Fist line · Lv.38 · stamina use -1%, punch points +3%"]};
 const byFxAdd=(a,b)=>{const o={...a};for(const k in b){if(b[k]&&typeof b[k]==="object"){o[k]={...(a[k]||{})};for(const w in b[k])o[k][w]=(o[k][w]||0)+b[k][w];}else o[k]=(o[k]||0)+b[k];}return o;};
 (function byKit(){if(SKILLS.prod_B||!SKILLS.fah)return;REQ_ALIAS.prod_B="fah";
-  SK_LINES.prod_B=["Rhythm Elbow Line","Forward Fist Line","Still Guard Line"];
+  SK_LINES.prod_B=["Mirror Line","Forward Fist Line","Still Guard Line"];
   SKILLS.prod_B=SKILLS.fah.map(s=>{const c=BY_CAP[s.id];if(!c){const n=BY_NM[s.id];return n?{...s,name:n[0],desc:n[1]}:s;}const [id,name,desc,ad]=c;return {...s,id,name,desc,fx:r=>byFxAdd(s.fx(r),ad(r))};});
   TRAITS.prod_B=[{id:"by_count",name:"Count to a Hundred",desc:"Punch accuracy +4% · strikes cost 5% less stamina",fx:{hit:{punch:.04},staSave:.05}},
     {id:"by_grandma",name:"Grandma's Stance",desc:"Counter +4% · recovers 10% faster between rounds",fx:{ctr:.04,regen:.1}}];
   SIGNATURE.prod_B={name:"Wooden-Handled Jump Rope",desc:"Bond ♥ Lv.7+ · Elbow power +12% · 5% less energy",fx:{dmg:{elbow:.12},staSave:.05}};
+  SK_ROOTS.prod_B=[[{"n":"Copy Stance","m":"sees a move once and uses it right back"},{"n":"Mirror Elbow","m":"turns the opponent's own moves back on them with elbows"}],[{"n":"Counted Punches","m":"counted combos that never miss a beat"},{"n":"Free Hands","m":"throws everything into her own punches"}],[{"n":"Lure and Counter","m":"waits, still, and counters as they rush in"},{"n":"Rooted Stance","m":"stands to the final bell in her white kit"}]];
   HOT_TITLES.prod_B={name:"The Prodigy Who Learned to Smile",desc:"more accurate, slips a little more",prep:.026,ev:.012};})();
 /* in the camp she fights on Fah's lines like a main-cast fighter; her points are re-spent along her home line once (on moving in, or the first load after this update) */
 function byCampKit(G){const f=G&&G.F&&G.F.prod_B;if(!f||f.camp!=="player")return;
