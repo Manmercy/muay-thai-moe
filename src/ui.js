@@ -12,7 +12,8 @@ const REGIONAL_IDS=["baibua","tabtim","alicia","chaba"];
 const STAND_PNG=new Set(CANON_IDS.flatMap(id=>[`${id}_casual`,...['happy','sad','flustered'].map(m=>`${id}_fight_${m}`)]).concat(REGIONAL_IDS.flatMap(id=>[`${id}_casual`,`${id}_casual_flustered`,`${id}_casual_pout`,...['happy','sad','flustered','angry','surprised'].map(m=>`${id}_fight_${m}`)])).concat(["mali_casual_flustered", "mali_casual_pout", "fah_casual_pout", "fah_fight_angry", "kati_fight_angry", "mali_fight_angry", "ploy_fight_angry", "rin_fight_angry", "kati_thai", "rin_thai", "mali_thai", "ploy_thai", "fah_thai", "fah_thai_fl", "rin_casual_pout", "kati_casual_pout", "ploy_casual_flustered","kati_thai_fl","rin_thai_fl","mali_thai_fl","ploy_thai_fl","rin_casual_flustered","ploy_casual_pout"]));
 ["npc_baiyok_casual","npc_baiyok_casual_flustered","npc_baiyok_casual_pout",...["happy","sad","angry","flustered"].flatMap(m=>[`npc_baiyok_white_${m}`,`npc_baiyok_black_${m}`]),"npc_baiyok_white_surprised","kati_casual_flustered","fah_casual_flustered","pailin_casual","pailin_casual_flustered","pailin_casual_pout",...['happy','sad','angry','surprised','flustered'].map(m=>`pailin_fight_${m}`)].forEach(k=>STAND_PNG.add(k));
 CANON_IDS.flatMap(id=>[`${id}_thai_sad`,`${id}_thai_pout`]).forEach(k=>STAND_PNG.add(k));
-const standArt=key=>`${ASSET}${key}.${STAND_PNG.has(key)?'png':'webp'}`;
+/* v1.91.193 (Man): angry fight art loads as full-size WebP (same 1024x1536 picture, ~1/7 the bytes) so a special-move cut-in never waits on a 2 MB PNG */
+const standArt=key=>`${ASSET}${key}.${STAND_PNG.has(key)&&!/_fight_angry$/.test(key)?'png':'webp'}`;
 const CHAMP_IDS=[...REGIONAL_IDS,"lada"];/* v1.89.14: Lada (Naka) joins the scene cast */ /* v1.90 (hidden): the four regional champions — full portraits in scenes like the heroines */
 const castId=id=>CANON_IDS.includes(id)||CHAMP_IDS.includes(id);
 let G=null;
@@ -214,7 +215,7 @@ function prefetchArt(){if(PREF||!G)return;PREF=true;const c=navigator.connection
   const S=new Set();Object.values(BGIMG).forEach(b=>{if(b)S.add(ASSET+b);});
   /* v1.91.38: the cards you own — their illustrations and the character picture on the card face */
   try{for(const id in (G.cards||{})){const C=CARDS[id];if(!C)continue;const A=CARD_ART[id];if(A){S.add(`${ASSET}${cardArtFile(A.f)}`);if(A.f2)S.add(`${ASSET}${cardArtFile(A.f2)}`);}const f=cardFaceSrc(C);S.add(cardBodySrc(f));}}catch(e){}
-  SHEET_IDS.forEach(id=>S.add(`${ASSET}${id}_sheet.webp`));S.add(`${ASSET}coach.png`);for(const id of CANON_IDS){const f=G.F[id];if(!f||!(f.camp==="player"||f.met))continue;for(const l of ["casual","fight","train"])for(const m of ["happy","flustered","pout","sad"])S.add(stand(id,l,m));}
+  SHEET_IDS.forEach(id=>S.add(`${ASSET}${id}_sheet.webp`));S.add(`${ASSET}coach.png`);for(const id of CANON_IDS){const f=G.F[id];if(!f||!(f.camp==="player"||f.met))continue;for(const l of ["casual","fight","train"])for(const m of ["happy","flustered","pout","sad"])S.add(stand(id,l,m));S.add(standArt(`${id}_fight_angry`));}
   /* v1.91.28: then every fight sprite, special move and NPC portrait (one-time — the service worker keeps them), so bouts and scenes don't pop in */
   const slow=/3g/.test(c.effectiveType||"");(window.__MTM_ART||[]).forEach(n=>{if(!slow||G&&Object.values(G.F||{}).some(f=>n.startsWith((f.sprite||f.id||"")+"_")))S.add(ASSET+n);});
   const q=[...S].filter(u=>!WARMED[u]&&!IMGS[u.slice(ASSET.length)]);let busy=0;const next=()=>{if(UI.loadScr&&UI.loadScr.scene){setTimeout(next,400);return;}while(busy<2&&q.length){const u=q.shift();busy++;const i=new Image();i.decoding="async";i.onload=i.onerror=()=>{busy--;setTimeout(next,60);};i.src=u;WARMED[u]=i;}};
@@ -1689,7 +1690,7 @@ const CHEER={kati:[["ปู่ชัยดูอยู่นะ ชกให้�
   mali:[["ไปโชว์ลูกเตะให้ทั้งเวทีเห็นเลย!","ได้เลย~ มะลิจะเตะให้เสียงดังที่สุดในคืนนี้!",1],["แม่เธอต้องภูมิใจแน่","…ขอบคุณนะ มะลิจะไม่ร้องไห้ก่อนชกหรอก",0],["อย่าประมาทล่ะ","รู้แล้วน่า~",0]],
   rin:[["เชื่อในข้อมูลที่เธอวิเคราะห์มา","…ค่ะ ทุกอย่างอยู่ในหัวแล้ว เหลือแค่ทำให้ได้",1],["สู้ ๆ นะริน!","ขอบคุณค่ะ… ฉันจะพยายาม",0],["ชกให้สนุกนะ","สนุก… จะลองดูค่ะ",0]]};
 function cheerLines(f){return CHEER[f.id]||[["เธอทำได้!","ค่ะ!",1],["ตามแผนนะ","รับทราบ",0],["อย่าเจ็บตัวล่ะ","ค่ะ",0]];}
-function openFight2(b,done){irisIn();UI.confirmTowel=false;UI.towelCoach=false;UI.fight={b,done,stage:"pre",plan:b.plan||"balanced",tac:{focus:"auto",pace:"steady",target:(b.tac&&b.tac.target)||"body"},F:null,shown:[],pending:[],timer:null,res:null,caption:null};render();}
+function openFight2(b,done){irisIn();warmCut(b.a);warmCut(b.b);UI.confirmTowel=false;UI.towelCoach=false;UI.fight={b,done,stage:"pre",plan:b.plan||"balanced",tac:{focus:"auto",pace:"steady",target:(b.tac&&b.tac.target)||"body"},F:null,shown:[],pending:[],timer:null,res:null,caption:null};render();}
 // v1.46: side-by-side numbers before the bell (opponent hidden until scouted)
 /* v1.91.0: the fighter's style and the wheel, on her profile — the main heroines can change it with the school line they build */
 /* v1.91.5 hot-form title badge (win HOT_AT in a row) */
@@ -1986,6 +1987,8 @@ function staPop(d){if(!d||typeof document==="undefined")return;const m=document.
 function cutPicArt(id){const f=typeof G!=="undefined"&&G.F&&G.F[id];let k=f&&f.nl?(f.nl==="ladda"?"lada_fight_angry":`nl_${f.nl}_por`):`${id}_fight_angry`;
   if(typeof STANDFIT==="undefined"||!STANDFIT[k])return "";const fk=STANDFIT[k],d=.22/fk[0],ch=1-(.83-.22-fk[1])/fk[0],cr=ch-d,hp=125/d;
   return `<img class="cut-art" src="${standArt(k)}" alt="" style="height:${hp.toFixed(0)}%;top:${(46-(cr+.55*d)*hp).toFixed(0)}%;left:50%;transform:translateX(${(-fk[2]*100).toFixed(1)}%) skewY(4deg)">`;}
+/* v1.91.193: fetch both fighters' cut-in art while the pre-fight screen is up */
+function warmCut(id){try{const h=cutPicArt(id);const m=h&&h.match(/src="([^"]+)"/);if(m)warm(m[1]);}catch(e){}}
 function cutPic(id){const art=cutPicArt(id);if(art)return art;const f=typeof G!=="undefined"&&G.F&&G.F[id];if(f&&f.sprite)return `<div class="cut-spr" style="background-image:url('${ASSET}${f.sprite}_sheet.webp')"></div>`;return `<img src="${standArt(id+"_fight_angry")}" alt="">`;}
 function skCostLine(sk,r){const k=skillKind(sk).k,c=SK_COST[k]||SK_COST.atk;if(!c[2])return `<p class="skcost-l">⚡ ไม่ใช้แรง · เติมแรงคืนเอง</p>`;return `<p class="skcost-l">⚡ ใช้แรงตอนชก: ${c.map((v,i)=>`<span class="${i+1===r?"on":""}">ขั้น ${i+1} · ${v}</span>`).join("")}</p>`;}
 function skillBarHTML(){const U=UI.fight,F=U.F;const L=fightSkills(F.A);if(!L.length)return `<span class="meta skhint">ยังไม่มีสกิล · เลเวลอัปแล้วไปอัปสกิลที่ข้อมูลนักมวย</span>`;const slots=[0,1,2].map(i=>L[i]);
