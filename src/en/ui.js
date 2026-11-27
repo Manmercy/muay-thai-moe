@@ -1,5 +1,5 @@
 // ================= MUAY THAI MOE v1.3 — UI =================
-const VERSION="1.91.200";
+const VERSION="1.91.201";
 const CUR_LANG=(typeof window!=="undefined"&&window.LANG)||"th";
 const TH_LABEL=String.fromCharCode(3652,3607,3618);
 function langSwitch(cls){return `<div class="langsw ${cls||""}" role="group" aria-label="Language">${[["th",TH_LABEL],["en","EN"]].map(([k,l])=>`<button class="lsb ${CUR_LANG===k?"on":""}" data-act="setlang" data-v="${k}" aria-pressed="${CUR_LANG===k}">${l}</button>`).join("")}</div>`;}
@@ -315,7 +315,7 @@ function settingsHTML(){const t=(k,label,desc)=>`<label class="set"><span><b>${l
    <div class="set"><span><b>Back up save to a file</b><small>Keep the file yourself; import it on another device or browser</small></span><span class="obtns"><button class="btn sm" data-act="exportsave">Export</button><label class="btn sm">Import<input type="file" accept=".json,application/json" data-act="importsave" hidden></label></span></div>`:`<div class="set"><span><b>Import a save file</b><small>A previously exported file goes into slot 1</small></span><label class="btn sm">Import<input type="file" accept=".json,application/json" data-act="importsave" hidden></label></div>`}
    <div class="set"><span><b>Transfer save code</b><small>Move a save between Facebook and Safari</small></span><a class="btn sm" href="./rescue-save.html">Transfer save code</a></div>
    ${t("analytics","Share play stats (anonymous)","Helps the team see how far people get and what is fun · no names, saves or personal data")}
-   <details class="gloss"><summary><b>Game glossary</b></summary><dl>${GLOSS.map(([k,v])=>`<dt>${k}</dt><dd>${v}</dd>`).join("")}</dl></details>
+   <button class="set setguide" data-act="guide"><span class="setguide-ic">${BOOK_PX}</span><span><b>Game guide</b><small>Encyclopedia · fight styles, who beats whom · glossary</small></span><span class="setguide-go">›</span></button>
    <p class="meta">Muay Thai Moe v${VERSION}</p>`;}
 const GLOSS=[["Readiness","Condition on fight day. The higher, the better she fights. Drops with fatigue or injury"],["Fatigue","Builds up from training. Over 65 risks injury. Reduce with recovery, the recovery room, the kitchen"],
  ["Morale","Higher morale means sharper strikes. Rises with wins, dates, merit-making; drops with losses or overtraining"],["Bond","Her closeness to you. Unlocks special scenes, the signature move at 60, and raises the chance of blood-boil mode"],
@@ -671,7 +671,7 @@ function questPlan(b,go){let best="balanced";try{if(scouted(b.b))best=adviseCach
 const fpBooking=id=>(G.bookings||[]).find(x=>x.id===id)||(UI.qb&&UI.qb.id===id?UI.qb:null);
 function fplanHTML(bid){const b=fpBooking(bid);if(!b)return "";const q=b===UI.qb;const f=G.F[b.a],op=G.F[b.b];if(!f||!op||!op.a)return `<h2>Fight plan</h2><p class="meta">This bout has no opponent record to plan against — it will use the balanced plan</p>`; /* v1.91.126: a bout whose opponent record is missing no longer breaks the plan sheet */const pl=UI.fpDraft.plan,tg=UI.fpDraft.target;const cp=scouted(op.id)?counterPreset(op):null;
   return `<h2>Fight plan · ${esc(f.name)} vs ${esc(op.name)}</h2>
-   <div class="fp-h">${scouted(op.id)?`<span class="pill">${styleOf(op.a)}</span>${(()=>{const I=oppIntel(op);return `<span class="meta">Favors ${I.top}</span>`;})()}`:`<button class="btn sm gold" data-act="scout" data-v="${op.id}" ${G.cash<scoutCost(op.id)?"disabled":""}>Scout ${fmt(scoutCost(op.id))}</button><span class="meta">Scout to learn the weak spot</span>`}</div>
+   <div class="fp-h">${scouted(op.id)?`<span class="pill">${styleOf(op.a)}</span>${(()=>{const I=oppIntel(op);return `<span class="meta">Favors ${I.top}</span>`;})()}`:`<button class="btn sm gold" data-act="scout" data-v="${op.id}" ${G.cash<scoutCost(op.id)?"disabled":""}>Scout ${fmt(scoutCost(op.id))}</button><span class="meta">Scout to learn the weak spot</span>`}</div>${styMatchHTML(f,op)}
    ${(()=>{if(!scouted(op.id))return "";const A=adviseCached(f.id,op.id,b.rounds||3);return `<div class="ctip"><img src="${faceSrc("coach")}" alt=""><span><b>Kru suggests:</b> plan "${PLANS[A.best].name}", win chance about ${Math.round(A.bestRate*20)*5}%${A.best!=="balanced"&&A.rates.balanced<A.bestRate-.05?` (Balanced about ${Math.round(A.rates.balanced*20)*5}%)`:""}</span></div>`;})()}
    <h3>Plan</h3><div class="tgrid three">${Object.entries(PLANS).map(([k,p])=>{const rec=scouted(op.id)&&adviseCached(f.id,op.id,b.rounds||3).best===k;return `<button data-act="fpd" data-k="plan" data-v="${k}" aria-pressed="${pl===k}">${rec?"★ ":""}${p.name}</button>`;}).join("")}</div><p class="meta tdesc">${esc(PLANS[pl].desc)}</p>
    <h3>Target</h3><div class="tgrid three">${Object.entries(TGT).map(([k,t])=>`<button data-act="fpd" data-k="target" data-v="${k}" aria-pressed="${tg===k}">${t}</button>`).join("")}</div>
@@ -1137,7 +1137,7 @@ function souvGiveHTML(k){const it=GIFTS[k];if(!it)return "";const L=roster(G).fi
 function souvHTML(id){const S=G.souv||{},L=SOUV_IDS.filter(k=>S[k]>0);if(!L.length)return "";
   return `<h3 class="souvh">Souvenirs from your trips</h3><div class="gifts souvg">${L.map(k=>`<button class="giftbtn souv" data-act="give" data-id="${id}" data-v="${k}"><b>${esc(GIFTS[k].name)}</b><small>Souvenir from ${SOUV_RN[GIFTS[k].souv]} · ×${S[k]}</small></button>`).join("")}</div>`;}
 function considerHTML(o){const me=G.F[o.a],op=G.F[o.b];const A=adviseCached(o.a,o.b,o.rounds||3);const pct=x=>Math.round(x*100);const v=verdictOf(A.bestRate);const sc=scouted(op.id);const P=personaOf(op);
-  return `<h2>Fight info</h2><div class="vsrow"><div class="vsc">${faceImg(me)}<b>${esc(me.name)}</b>${hotBadge(me,1)}<span class="meta">${styleOf(me.a)}</span></div><span class="vs">VS</span><div class="vsc">${faceImg(op)}<b>${esc(op.name)}</b>${hotBadge(op,1)}<span class="meta">${styleOf(op.a)} · ${rec(op)}</span></div></div>
+  return `<h2>Fight info</h2><div class="vsrow"><div class="vsc">${faceImg(me)}<b>${esc(me.name)}</b>${hotBadge(me,1)}<span class="meta">${styleOf(me.a)}</span></div><span class="vs">VS</span><div class="vsc">${faceImg(op)}<b>${esc(op.name)}</b>${hotBadge(op,1)}<span class="meta">${styleOf(op.a)} · ${rec(op)}</span></div></div>${styMatchHTML(me,op)}
    ${P?`<p class="quote">“${esc(P.line)}” <span class="meta">— ${esc(P.tag)}</span></p>`:""}${h2hText(op)?`<p class="meta goldt">${h2hText(op)}</p>`:""}
    ${intelHTML(op)}${rinGraphHTML(op)}${(()=>{const CI=coachIntel(me,op,A),L=CI.tier===0?[CI.pct,...CI.news,...CI.adv]:CI.tier===1?[CI.pct]:CI.adv;return L.length?`<div class="ctip cintel"><img src="${faceSrc("coach")}" alt=""><span><b>Coach Daeng <small class="pill sm isrc lv ${CI.tier}">${CI.src}</small></b>${L.map(t=>`<i>${t}</i>`).join("")}</span></div>`:"";})()}
    ${sc?`<div class="planbars">${Object.entries(A.rates).sort((a,b)=>b[1]-a[1]).map(([k,x])=>`<div class="bar"><span>${PLANS[k].name}</span><i style="--v:${pct(x)}%;--bc:${k===A.best?"var(--gold)":"var(--blue)"}"></i><b class="num">${pct(x)}%</b></div>`).join("")}</div>`:`<p class="meta">Scout the tape to see the favorable plan</p>`}
@@ -1273,7 +1273,14 @@ const PATCH_RUN={id:"1.96",ver:"Muay Thai Moe v1.96",title:"Camp Track & Sports 
  ["🎌","Sports day: 4 colours, 4 lanes","Mid-year: 100 m and 400 m, tug of war, and a 4×100 relay where you pass the baton as the ring closes, ending with a podium ceremony · Some years an unexpected guest turns up to run too"],
  ["🎨","A proper pixel-game look","Every minigame gets pixel frames, buttons and numbers. Scene music goes quiet while a minigame's music plays."]],
  foot:"Kru Daeng says: fast legs aren't enough — you've got to pass the baton too ✦"};
-const PATCHES=[PATCH_AV,PATCH_TAPE,PATCH_FIX,PATCH_TANI,PATCH_SKN,PATCH_MG,PATCH_RUN],PATCH=PATCHES[PATCHES.length-1];
+/* (Man): players asked which style beats which — the in-game guide and the style edge on fight sheets */
+const PATCH_GUIDE={id:"1.97",ver:"Muay Thai Moe v1.97",title:"The game guide is here",lead:"Wondering about something at the camp? Open the guide. It covers everything from training to the ring",items:[
+ ["📘","Game guide","Tap the gear at the top right, then the book button \"Game guide\". 10 short, easy chapters, like a week at the camp, training and scouting, in the ring, skills, cards and the glossary"],
+ ["🥊","Who beats whom","A table of all 5 fight styles: Power punch, Footwork, Pressure, Inside, Counter-fighter. Each beats 2 and loses to 2, plus which skill line changes each fighter's style"],
+ ["🎞","Edge or outmatched","After scouting, the fight info and fight plan show both fighters' styles with an Edge, Outmatched or Even tag. If you're outmatched, the game tells you who in the camp has the edge on that opponent"],
+ ["💡","The ? next to the style","Tap the ? next to the fight style to open the fight styles chapter right away, then go back to where you were"]],
+ foot:"Coach Daeng says: read the guide, then don't forget to train ✦"};
+const PATCHES=[PATCH_AV,PATCH_TAPE,PATCH_FIX,PATCH_TANI,PATCH_SKN,PATCH_MG,PATCH_RUN,PATCH_GUIDE],PATCH=PATCHES[PATCHES.length-1];
 function nextPatch(){if(G&&G.newsSeen==="1.91.144")G.newsSeen="1.91.111"; /* v1.91.145: the 1.91.144 popup was withdrawn — those who saw it must not get the old ones again */const i=PATCHES.findIndex(p=>p.id===(G&&G.newsSeen));return i<0?PATCHES[0]:PATCHES[i+1]||null;}
 function maybeWhatsNew(){if(!G||G.ended||UI.scene)return;const P=nextPatch();if(!P)return;UI.modal={type:"whatsnew",id:P.id};}
 function whatsNewHTML(){const P=PATCHES.find(p=>p.id===(UI.modal&&UI.modal.id))||nextPatch()||PATCH,n=PATCHES.length-PATCHES.indexOf(P)-1;return `<div class="wnew"><span class="pill gold">Update · ${esc(P.ver)}</span><h2>🥊 ${esc(P.title)}</h2><p class="lead">${esc(P.lead)}</p>
@@ -1283,6 +1290,7 @@ function modalHTML(){const m=UI.modal;let body="",foot=true;
   if(m.type==="fighter"){body=fighterHTML(G.F[m.id]);foot=false;}
   if(m.type==="consider"){const o=G.offers.find(x=>x.id===m.id);if(!o){UI.modal=null;return "";}body=considerHTML(o);foot=false;}
   if(m.type==="whatsnew"){body=whatsNewHTML();foot=false;}
+  if(m.type==="guide"){body=guideHTML(m.ch);foot=false;}
   if(m.type==="skresetask"){const f=G.F[m.id],n=skPointsSpent(f),c=skResetCost(f);foot=false;
     body=`<h2>Reset skills for ${esc(f.name)}?</h2><p>All learned skills will be cleared and you get back <b class="goldt">${n} points</b> to spend on any line. Equipped moves will be removed.</p>
      <p class="meta">${c?`Cost ${fmt(c)} (next time ${fmt(Math.min(3,(f.skReset||0)+1)*10000)})`:"First reset is free, the next costs ฿10,000"}</p>
@@ -1709,7 +1717,7 @@ function hotBadge(f,sm){if(typeof hotForm!=="function"||!hotForm(f))return "";co
 function hotStreakLine(f){if(!f||f.camp!=="player")return "";const w=f.wst||0;if(hotForm(f)){const T=hotTitle(f);return `<p class="meta hotl">🔥 Title <b>${esc(T.name)}</b> · won ${w} in a row · ${esc(T.desc)} · a loss or draw ends it</p>`;}
   return w>=2?`<p class="meta hotl">Won ${w} in a row · ${HOT_AT-w} more for a title</p>`:"";}
 function styleCardHTML(f){const st=fightStyle(f),home=HOME_STYLE[f.id];
-  return `<p class="meta styline">Fight style <b>${FSTYLE[st]}</b>${home&&home!==st?` · home style ${FSTYLE[home]}`:""}${home?" · changes with the school line you build most":""}</p>`;}
+  return `<p class="meta styline">Fight style <b>${FSTYLE[st]}</b>${home&&home!==st?` · home style ${FSTYLE[home]}`:""}${home?" · changes with the school line you build most":""} <button class="gq" data-act="guide" data-v="style" aria-label="What are fight styles?">?</button></p>`;}
 function preCompare(me,op,b){const R=oppRead(op),v=verdictOf(adviseCached(me.id,op.id,b.rounds||3).bestRate);
   /* v1.91.10 (Man): regional opponents show their real strength — ring craft (vet) on top of the 20 stat ceiling, the part past 20 in gold.
      Main-game NPCs stay as before: your own skill edge is hidden there too, so adding only theirs would mislead */
@@ -1775,7 +1783,7 @@ function fightHTML(){const U=UI.fight,b=U.b,me=G.F[b.a],op=G.F[b.b],F=U.F;
   const hpA=F?hpN(F.A,sv(F.A.hp,"ha")):100,hpB=F?hpN(F.B,sv(F.B.hp,"hb")):100,stA=F?sv(F.A.sta,"sa"):100,stB=F?sv(F.B.sta,"sb"):100;
   let mid="";
   if(U.stage==="pre"){const c=condition(me);const P=personaOf(op);
-    mid=`<div class="pre px"><div class="vsrow"><div class="vsc">${faceImg(me)}<b>${esc(me.name)}</b>${hotBadge(me,1)}<span class="meta">${styleOf(me.a)}</span></div><span class="vs">VS</span><div class="vsc">${faceImg(op)}<b>${esc(op.name)}</b>${hotBadge(op,1)}<span class="meta">${styleOf(op.a)} · ${rec(op)}</span></div></div>
+    mid=`<div class="pre px"><div class="vsrow"><div class="vsc">${faceImg(me)}<b>${esc(me.name)}</b>${hotBadge(me,1)}<span class="meta">${styleOf(me.a)}</span></div><span class="vs">VS</span><div class="vsc">${faceImg(op)}<b>${esc(op.name)}</b>${hotBadge(op,1)}<span class="meta">${styleOf(op.a)} · ${rec(op)}</span></div></div>${styMatchHTML(me,op)}
      ${P?`<p class="quote">“${esc(P.line)}”</p>`:""}${h2hText(op)?`<p class="meta goldt center">${h2hText(op)}</p>`:""}${op.id==="ploy"&&(op.aura||0)>=.1&&(op.rec?.l||0)===0?`<p class="meta redt center">👑 Undefeated genius · nobody has beaten her this year. She reads the fight better than anyone</p>`:""}
      <div class="prebox"><div><small>Plan</small><b>${PLANS[U.plan].name}</b></div><div><small>Target</small><b>${TGT[U.tac.target]}</b></div><div><small>Readiness</small><b class="num">${c}</b></div></div>
      ${me.fatigue>25?`<p class="meta center warnt">Fatigue ${Math.round(me.fatigue)} · entering the ring at ${Math.round(clamp(100-me.fatigue*.4,40,100))}% energy and tiring faster than usual</p>`:""}

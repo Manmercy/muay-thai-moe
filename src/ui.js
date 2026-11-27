@@ -1,5 +1,5 @@
 // ================= MUAY THAI MOE v1.3 — UI =================
-const VERSION="1.91.200";
+const VERSION="1.91.201";
 const CUR_LANG=(typeof window!=="undefined"&&window.LANG)||"th";
 const TH_LABEL=String.fromCharCode(3652,3607,3618);
 function langSwitch(cls){return `<div class="langsw ${cls||""}" role="group" aria-label="Language">${[["th",TH_LABEL],["en","EN"]].map(([k,l])=>`<button class="lsb ${CUR_LANG===k?"on":""}" data-act="setlang" data-v="${k}" aria-pressed="${CUR_LANG===k}">${l}</button>`).join("")}</div>`;}
@@ -315,7 +315,7 @@ function settingsHTML(){const t=(k,label,desc)=>`<label class="set"><span><b>${l
    <div class="set"><span><b>สำรองเซฟเป็นไฟล์</b><small>เก็บไฟล์ไว้เอง ย้ายเครื่องหรือเบราว์เซอร์ก็นำเข้าได้</small></span><span class="obtns"><button class="btn sm" data-act="exportsave">ส่งออก</button><label class="btn sm">นำเข้า<input type="file" accept=".json,application/json" data-act="importsave" hidden></label></span></div>`:`<div class="set"><span><b>นำเข้าเซฟจากไฟล์</b><small>ไฟล์ที่เคยส่งออกไว้ จะลงช่อง 1</small></span><label class="btn sm">นำเข้า<input type="file" accept=".json,application/json" data-act="importsave" hidden></label></div>`}
    <div class="set"><span><b>ย้ายรหัสเซฟ</b><small>ย้ายเซฟระหว่าง Facebook กับ Safari</small></span><a class="btn sm" href="./rescue-save.html">ย้ายรหัสเซฟ</a></div>
    ${t("analytics","ส่งสถิติการเล่น (ไม่ระบุตัวตน)","ช่วยทีมรู้ว่าคนเล่นถึงไหน ส่วนไหนสนุก · ไม่เก็บชื่อ เซฟ หรือข้อมูลส่วนตัว")}
-   <details class="gloss"><summary><b>คำศัพท์ในเกม</b></summary><dl>${GLOSS.map(([k,v])=>`<dt>${k}</dt><dd>${v}</dd>`).join("")}</dl></details>
+   <button class="set setguide" data-act="guide"><span class="setguide-ic">${BOOK_PX}</span><span><b>คู่มือเกม</b><small>สารานุกรมเกม · สไตล์มวย ใครแพ้ทางใคร · คำศัพท์</small></span><span class="setguide-go">›</span></button>
    <p class="meta">Muay Thai Moe v${VERSION}</p>`;}
 const GLOSS=[["ความพร้อม","สภาพร่างกายวันชก ยิ่งสูงยิ่งชกได้เต็มที่ ลดลงเมื่อล้าหรือบาดเจ็บ"],["ความล้า","สะสมจากการซ้อม เกิน 65 เริ่มเสี่ยงบาดเจ็บ ลดได้ด้วยพักฟื้น ห้องฟื้นฟู ครัว"],
  ["กำลังใจ","ยิ่งสูงยิ่งชกแม่น ขึ้นจากชนะ เดต ทำบุญ ลดเมื่อแพ้หรือซ้อมหนักเกิน"],["ความสนิท","ความผูกพันกับคุณ ปลดฉากพิเศษ ท่าไม้ตายที่ 60 และเพิ่มโอกาสโหมดเลือดเดือด"],
@@ -671,7 +671,7 @@ function questPlan(b,go){let best="balanced";try{if(scouted(b.b))best=adviseCach
 const fpBooking=id=>(G.bookings||[]).find(x=>x.id===id)||(UI.qb&&UI.qb.id===id?UI.qb:null);
 function fplanHTML(bid){const b=fpBooking(bid);if(!b)return "";const q=b===UI.qb;const f=G.F[b.a],op=G.F[b.b];if(!f||!op||!op.a)return `<h2>แผนไฟต์</h2><p class="meta">ไฟต์นี้ไม่มีข้อมูลคู่ชกให้ตั้งแผน ใช้แผนสมดุลไปก่อน</p>`; /* v1.91.126: a bout whose opponent record is missing no longer breaks the plan sheet */const pl=UI.fpDraft.plan,tg=UI.fpDraft.target;const cp=scouted(op.id)?counterPreset(op):null;
   return `<h2>แผนไฟต์ · ${esc(f.name)} vs ${esc(op.name)}</h2>
-   <div class="fp-h">${scouted(op.id)?`<span class="pill">${styleOf(op.a)}</span>${(()=>{const I=oppIntel(op);return `<span class="meta">ถนัด ${I.top}</span>`;})()}`:`<button class="btn sm gold" data-act="scout" data-v="${op.id}" ${G.cash<scoutCost(op.id)?"disabled":""}>ดูเทป ${fmt(scoutCost(op.id))}</button><span class="meta">ดูเทปก่อนจะรู้จุดอ่อน</span>`}</div>
+   <div class="fp-h">${scouted(op.id)?`<span class="pill">${styleOf(op.a)}</span>${(()=>{const I=oppIntel(op);return `<span class="meta">ถนัด ${I.top}</span>`;})()}`:`<button class="btn sm gold" data-act="scout" data-v="${op.id}" ${G.cash<scoutCost(op.id)?"disabled":""}>ดูเทป ${fmt(scoutCost(op.id))}</button><span class="meta">ดูเทปก่อนจะรู้จุดอ่อน</span>`}</div>${styMatchHTML(f,op)}
    ${(()=>{if(!scouted(op.id))return "";const A=adviseCached(f.id,op.id,b.rounds||3);return `<div class="ctip"><img src="${faceSrc("coach")}" alt=""><span><b>ครูแนะนำ:</b> แผน "${PLANS[A.best].name}" โอกาสชนะราว ${Math.round(A.bestRate*20)*5}%${A.best!=="balanced"&&A.rates.balanced<A.bestRate-.05?` (สมดุลได้ราว ${Math.round(A.rates.balanced*20)*5}%)`:""}</span></div>`;})()}
    <h3>แผน</h3><div class="tgrid three">${Object.entries(PLANS).map(([k,p])=>{const rec=scouted(op.id)&&adviseCached(f.id,op.id,b.rounds||3).best===k;return `<button data-act="fpd" data-k="plan" data-v="${k}" aria-pressed="${pl===k}">${rec?"★ ":""}${p.name}</button>`;}).join("")}</div><p class="meta tdesc">${esc(PLANS[pl].desc)}</p>
    <h3>เป้าหมาย</h3><div class="tgrid three">${Object.entries(TGT).map(([k,t])=>`<button data-act="fpd" data-k="target" data-v="${k}" aria-pressed="${tg===k}">${t}</button>`).join("")}</div>
@@ -1137,7 +1137,7 @@ function souvGiveHTML(k){const it=GIFTS[k];if(!it)return "";const L=roster(G).fi
 function souvHTML(id){const S=G.souv||{},L=SOUV_IDS.filter(k=>S[k]>0);if(!L.length)return "";
   return `<h3 class="souvh">ของฝากที่ซื้อมาจากทริป</h3><div class="gifts souvg">${L.map(k=>`<button class="giftbtn souv" data-act="give" data-id="${id}" data-v="${k}"><b>${esc(GIFTS[k].name)}</b><small>ของฝาก${SOUV_RN[GIFTS[k].souv]} · มี ${S[k]} ชิ้น</small></button>`).join("")}</div>`;}
 function considerHTML(o){const me=G.F[o.a],op=G.F[o.b];const A=adviseCached(o.a,o.b,o.rounds||3);const pct=x=>Math.round(x*100);const v=verdictOf(A.bestRate);const sc=scouted(op.id);const P=personaOf(op);
-  return `<h2>ข้อมูลไฟต์</h2><div class="vsrow"><div class="vsc">${faceImg(me)}<b>${esc(me.name)}</b>${hotBadge(me,1)}<span class="meta">${styleOf(me.a)}</span></div><span class="vs">VS</span><div class="vsc">${faceImg(op)}<b>${esc(op.name)}</b>${hotBadge(op,1)}<span class="meta">${styleOf(op.a)} · ${rec(op)}</span></div></div>
+  return `<h2>ข้อมูลไฟต์</h2><div class="vsrow"><div class="vsc">${faceImg(me)}<b>${esc(me.name)}</b>${hotBadge(me,1)}<span class="meta">${styleOf(me.a)}</span></div><span class="vs">VS</span><div class="vsc">${faceImg(op)}<b>${esc(op.name)}</b>${hotBadge(op,1)}<span class="meta">${styleOf(op.a)} · ${rec(op)}</span></div></div>${styMatchHTML(me,op)}
    ${P?`<p class="quote">“${esc(P.line)}” <span class="meta">— ${esc(P.tag)}</span></p>`:""}${h2hText(op)?`<p class="meta goldt">${h2hText(op)}</p>`:""}
    ${intelHTML(op)}${rinGraphHTML(op)}${(()=>{const CI=coachIntel(me,op,A),L=CI.tier===0?[CI.pct,...CI.news,...CI.adv]:CI.tier===1?[CI.pct]:CI.adv;return L.length?`<div class="ctip cintel"><img src="${faceSrc("coach")}" alt=""><span><b>ครูแดง <small class="pill sm isrc lv${CI.tier}">${CI.src}</small></b>${L.map(t=>`<i>${t}</i>`).join("")}</span></div>`:"";})()}
    ${sc?`<div class="planbars">${Object.entries(A.rates).sort((a,b)=>b[1]-a[1]).map(([k,x])=>`<div class="bar"><span>${PLANS[k].name}</span><i style="--v:${pct(x)}%;--bc:${k===A.best?"var(--gold)":"var(--blue)"}"></i><b class="num">${pct(x)}%</b></div>`).join("")}</div>`:`<p class="meta">ดูเทปเพื่อเห็นแผนที่ได้เปรียบ</p>`}
@@ -1273,7 +1273,14 @@ const PATCH_RUN={id:"1.96",ver:"Muay Thai Moe v1.96",title:"ลู่วิ่�
  ["🎌","งานกีฬาสี 4 สี 4 ลู่","กลางปีมีวิ่ง 100 และ 400 เมตร ชักเย่อ และวิ่งผลัด 4×100 ที่ต้องกดส่งไม้ตอนวงกลมหดพอดี จบด้วยพิธีประกาศผลบนโพเดียม · ปีไหนอาจมีแขกรับเชิญที่ไม่คาดคิดมาลงวิ่งด้วย"],
  ["🎨","หน้าตาแบบเกมพิกเซล","มินิเกมทุกเกมได้กรอบ ปุ่ม และตัวเลขแบบพิกเซล เพลงฉากอื่นจะเงียบตอนเพลงมินิเกมเล่น"]],
  foot:"ครูแดงฝากบอกว่า วิ่งเก่งไม่พอ ต้องส่งไม้เป็นด้วย ✦"};
-const PATCHES=[PATCH_AV,PATCH_TAPE,PATCH_FIX,PATCH_TANI,PATCH_SKN,PATCH_MG,PATCH_RUN],PATCH=PATCHES[PATCHES.length-1];
+/* (Man): players asked which style beats which — the in-game guide and the style edge on fight sheets */
+const PATCH_GUIDE={id:"1.97",ver:"Muay Thai Moe v1.97",title:"คู่มือเกมมาแล้ว",lead:"สงสัยอะไรในค่าย เปิดคู่มือดูได้เลย มีครบตั้งแต่ซ้อมจนถึงขึ้นเวที",items:[
+ ["📘","คู่มือเกม","กดรูปเฟืองมุมขวาบน แล้วกดปุ่มรูปหนังสือ \"คู่มือเกม\" มี 10 บท เช่น หนึ่งสัปดาห์ในค่าย ซ้อมและดูเทป บนเวที สกิล การ์ด และคำศัพท์ เขียนสั้น ๆ อ่านง่าย"],
+ ["🥊","ใครแพ้ทางใคร","มีตารางสไตล์มวยทั้ง 5 แบบ หมัดหนัก ฟุตเวิร์ก บุกกดดัน วงใน รอสวน แต่ละแบบชนะ 2 แพ้ 2 พร้อมบอกว่านักมวยแต่ละคนเปลี่ยนสไตล์ได้ด้วยสายสกิลไหน"],
+ ["🎞","ได้ทาง เสียทาง","ดูเทปคู่ชกแล้ว หน้าข้อมูลไฟต์กับแผนไฟต์จะบอกสไตล์ของทั้งสองฝั่ง พร้อมป้ายได้ทาง เสียทาง หรือสูสี ถ้าเสียทาง เกมจะบอกว่าใครในค่ายได้ทางคู่ชกคนนั้น"],
+ ["💡","ปุ่ม ? ข้างสไตล์","แตะปุ่ม ? ข้างสไตล์ในไฟต์ เพื่อเปิดบทสไตล์มวยได้ทันที อ่านจบแล้วกดกลับมาหน้าเดิม"]],
+ foot:"ครูแดงฝากบอกว่า อ่านคู่มือแล้ว อย่าลืมไปซ้อมด้วยนะ ✦"};
+const PATCHES=[PATCH_AV,PATCH_TAPE,PATCH_FIX,PATCH_TANI,PATCH_SKN,PATCH_MG,PATCH_RUN,PATCH_GUIDE],PATCH=PATCHES[PATCHES.length-1];
 function nextPatch(){if(G&&G.newsSeen==="1.91.144")G.newsSeen="1.91.111"; /* v1.91.145: the 1.91.144 popup was withdrawn — those who saw it must not get the old ones again */const i=PATCHES.findIndex(p=>p.id===(G&&G.newsSeen));return i<0?PATCHES[0]:PATCHES[i+1]||null;}
 function maybeWhatsNew(){if(!G||G.ended||UI.scene)return;const P=nextPatch();if(!P)return;UI.modal={type:"whatsnew",id:P.id};}
 function whatsNewHTML(){const P=PATCHES.find(p=>p.id===(UI.modal&&UI.modal.id))||nextPatch()||PATCH,n=PATCHES.length-PATCHES.indexOf(P)-1;return `<div class="wnew"><span class="pill gold">อัปเดต · ${esc(P.ver)}</span><h2>🥊 ${esc(P.title)}</h2><p class="lead">${esc(P.lead)}</p>
@@ -1283,6 +1290,7 @@ function modalHTML(){const m=UI.modal;let body="",foot=true;
   if(m.type==="fighter"){body=fighterHTML(G.F[m.id]);foot=false;}
   if(m.type==="consider"){const o=G.offers.find(x=>x.id===m.id);if(!o){UI.modal=null;return "";}body=considerHTML(o);foot=false;}
   if(m.type==="whatsnew"){body=whatsNewHTML();foot=false;}
+  if(m.type==="guide"){body=guideHTML(m.ch);foot=false;}
   if(m.type==="skresetask"){const f=G.F[m.id],n=skPointsSpent(f),c=skResetCost(f);foot=false;
     body=`<h2>รีเซ็ตสกิลของ${esc(f.name)}?</h2><p>สกิลที่อัปไว้ทั้งหมดจะหายไป และได้คืน <b class="goldt">${n} แต้ม</b> เอาไปอัปสายไหนก็ได้ใหม่ ท่าที่ใส่ขึ้นชกจะถูกถอดออก</p>
      <p class="meta">${c?`ค่าใช้จ่าย ${fmt(c)} (ครั้งถัดไป ${fmt(Math.min(3,(f.skReset||0)+1)*10000)})`:"ครั้งแรกฟรี ครั้งต่อไป ฿10,000"}</p>
@@ -1709,7 +1717,7 @@ function hotBadge(f,sm){if(typeof hotForm!=="function"||!hotForm(f))return "";co
 function hotStreakLine(f){if(!f||f.camp!=="player")return "";const w=f.wst||0;if(hotForm(f)){const T=hotTitle(f);return `<p class="meta hotl">🔥 ฉายา <b>${esc(T.name)}</b> · ชนะติดกัน ${w} ไฟต์ · ${esc(T.desc)} · แพ้หรือเสมอเมื่อไรฉายาหาย</p>`;}
   return w>=2?`<p class="meta hotl">ชนะติดกัน ${w} ไฟต์ · อีก ${HOT_AT-w} ไฟต์ได้ฉายา</p>`:"";}
 function styleCardHTML(f){const st=fightStyle(f),home=HOME_STYLE[f.id];
-  return `<p class="meta styline">สไตล์ในไฟต์ <b>${FSTYLE[st]}</b>${home&&home!==st?` · ตัวตนเดิม ${FSTYLE[home]}`:""}${home?" · เปลี่ยนได้ด้วยสายสำนักที่อัปมากที่สุด":""}</p>`;}
+  return `<p class="meta styline">สไตล์ในไฟต์ <b>${FSTYLE[st]}</b>${home&&home!==st?` · ตัวตนเดิม ${FSTYLE[home]}`:""}${home?" · เปลี่ยนได้ด้วยสายสำนักที่อัปมากที่สุด":""} <button class="gq" data-act="guide" data-v="style" aria-label="สไตล์มวยคืออะไร">?</button></p>`;}
 function preCompare(me,op,b){const R=oppRead(op),v=verdictOf(adviseCached(me.id,op.id,b.rounds||3).bestRate);
   /* v1.91.10 (Man): regional opponents show their real strength — ring craft (vet) on top of the 20 stat ceiling, the part past 20 in gold.
      Main-game NPCs stay as before: your own skill edge is hidden there too, so adding only theirs would mislead */
@@ -1775,7 +1783,7 @@ function fightHTML(){const U=UI.fight,b=U.b,me=G.F[b.a],op=G.F[b.b],F=U.F;
   const hpA=F?hpN(F.A,sv(F.A.hp,"ha")):100,hpB=F?hpN(F.B,sv(F.B.hp,"hb")):100,stA=F?sv(F.A.sta,"sa"):100,stB=F?sv(F.B.sta,"sb"):100;
   let mid="";
   if(U.stage==="pre"){const c=condition(me);const P=personaOf(op);
-    mid=`<div class="pre px"><div class="vsrow"><div class="vsc">${faceImg(me)}<b>${esc(me.name)}</b>${hotBadge(me,1)}<span class="meta">${styleOf(me.a)}</span></div><span class="vs">VS</span><div class="vsc">${faceImg(op)}<b>${esc(op.name)}</b>${hotBadge(op,1)}<span class="meta">${styleOf(op.a)} · ${rec(op)}</span></div></div>
+    mid=`<div class="pre px"><div class="vsrow"><div class="vsc">${faceImg(me)}<b>${esc(me.name)}</b>${hotBadge(me,1)}<span class="meta">${styleOf(me.a)}</span></div><span class="vs">VS</span><div class="vsc">${faceImg(op)}<b>${esc(op.name)}</b>${hotBadge(op,1)}<span class="meta">${styleOf(op.a)} · ${rec(op)}</span></div></div>${styMatchHTML(me,op)}
      ${P?`<p class="quote">“${esc(P.line)}”</p>`:""}${h2hText(op)?`<p class="meta goldt center">${h2hText(op)}</p>`:""}${op.id==="ploy"&&(op.aura||0)>=.1&&(op.rec?.l||0)===0?`<p class="meta redt center">👑 อัจฉริยะไร้พ่าย · ปีนี้ยังไม่มีใครล้มเธอได้ เธออ่านเกมขาดกว่าทุกคน</p>`:""}
      <div class="prebox"><div><small>แผน</small><b>${PLANS[U.plan].name}</b></div><div><small>เป้าหมาย</small><b>${TGT[U.tac.target]}</b></div><div><small>ความพร้อม</small><b class="num">${c}</b></div></div>
      ${me.fatigue>25?`<p class="meta center warnt">ล้า ${Math.round(me.fatigue)} · ขึ้นเวทีด้วยแรง ${Math.round(clamp(100-me.fatigue*.4,40,100))}% และหมดแรงเร็วกว่าปกติ</p>`:""}
