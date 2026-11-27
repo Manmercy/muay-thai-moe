@@ -577,7 +577,7 @@ function spPick(e,side,F,rng){if(!e||!e.ev||!F||!F.A||!F.B)return null;const R=F
 const FS={cv:null,ctx:null,bg:null,A:null,B:null,fx:[],shake:0,
   init(cv,bgName,fa,fb){this.cv=cv;this.ctx=cv?cv.getContext("2d"):null;this.bg=img(bgName);
     const mk=(f,side)=>({f,side,x:side==="A"?370:590,base:side==="A"?370:590,anim:"guard",t0:0,flash:0,down:0,ko:false,win:false});
-    this.A=mk(fa,"A");this.B=mk(fb,"B");this.fx=[];this.shake=0;this.spR={A:-1,B:-1};this.spN={A:0,B:0};this.banner=null;
+    this.A=mk(fa,"A");this.B=mk(fb,"B");this.fx=[];this.shake=0;this.cmb={A:null,B:null};this.cmbDrop=[];this.spR={A:-1,B:-1};this.spN={A:0,B:0};this.banner=null;
     for(const f of [fa,fb])if(f&&f.canon&&SPECIALS[f.id])SPECIALS[f.id].forEach(m=>m.img&&img(spriteFile(loyImg(f.id,m.img,f))));
     for(const f of [fa,fb])if(f&&!f.canon){(f.spl||[]).forEach(m=>m.img&&img(spriteFile(m.img)));(f.phases||[]).forEach(P=>img(P.sprite+"_sheet.webp"));if(f.phases)this[f===fa?"A":"B"].f={...f,sprite:f.phases[0].sprite,blood:0};}},
   attach(cv){if(!cv)return;this.cv=cv;this.ctx=cv.getContext("2d");},
@@ -752,19 +752,42 @@ FS.slowmo=function(t,dur){if(typeof matchMedia!=="undefined"&&matchMedia("(prefe
 {const R0=FS.render,P0=FS.play,I0=FS.init;
  FS.init=function(){FS.lag=0;FS._rt=0;FS.slow=null;return I0.apply(FS,arguments);};
  FS.play=function(e,now){const t=(now==null?performance.now():now)-FS.lag,r=P0.call(FS,e,t);try{FS.comboEv(e,t);}catch(_){}return r;};
- /* v1.91.181 combos (Man: "what about combos, rapid punches?"): blows that land back to back from the same corner count up
-    "2 HIT → 3 HIT COMBO! → รัวไม่ยั้ง!" over the attacker's head with a rising blip, and from the third one on each blow becomes
-    a quick flurry — two extra snaps of the arm, extra impact flashes and a little shake. Anything else (a miss, the other side
-    landing, a new round) breaks the chain. */
- FS.cmb=null;
- FS.comboEv=function(e,t){const S=FS;if(e.ev==="hit"||e.ev==="counter"){const sd=e.side==="A"?"A":"B",c=S.cmb,rd=typeof UI!=="undefined"&&UI.fight&&UI.fight.F?UI.fight.F.round:0;
-     const n=c&&c.side===sd&&c.round===rd&&t-c.t<6000?c.n+1:1;S.cmb={side:sd,n,t,round:rd};
-     if(n>=2){AU.combo&&AU.combo(n);}
-     if(n>=3&&!(typeof matchMedia!=="undefined"&&matchMedia("(prefers-reduced-motion: reduce)").matches)){const atk=S[sd],def=S[sd==="A"?"B":"A"],hits=Math.min(4,n-1);
-       for(let i=1;i<=hits;i++)setTimeout(()=>{if(!S.A||S.A!==atk&&S.B!==atk)return;const tt=performance.now()-S.lag;atk.t0=tt;atk.anim=i%2?"punch":atk.anim;def.flash=tt;S.shake=Math.max(S.shake||0,4+n);
-         S.fx.push({x:def.x+(def.side==="A"?30:-30)+(Math.random()-.5)*50,y:250+Math.random()*60,t0:tt,txt:["Pak","Thump","Thud"][i%3]});AU.sfx&&AU.sfx("punch");},i*105);}
+ /* v1.91.183 combos, redone after Man's note ("it stutters, and it isn't like the Juice one"): a HUD combo counter in each fighter's top corner
+    (like the gameslash Combo Counter demo) — the number bounces and rolls up on every landed blow, the colour climbs by tier, a thin timer bar
+    shows how long the chain has before it drops, and when it drops the number falls away; a MAX stamp lands at the top tier.
+    No extra arm snaps any more (restarting the punch animation is what made it jerk) — just a soft impact spark per extra hit. */
+ FS.cmb={A:null,B:null};FS.cmbDrop=[];
+ FS.cmbWin=()=>(FS.banner?9000:5500)/((typeof UI!=="undefined"&&UI.speed===2)?2:1);
+ FS.comboBreak=function(sd,t){const c=FS.cmb[sd];if(c&&c.n>=2)FS.cmbDrop.push({side:sd,n:c.n,t0:t,tier:FS.cmbTier(c.n)});FS.cmb[sd]=null;};
+ FS.drawCombo=function(x,t){const S=FS,W=S.cv.width;if(!S.cmb||!("A" in S.cmb))return;const COL=["#ffffff","#ffe066","#ff9a2a","#ff3355"],F2='"Chakra Petch","IBM Plex Sans Thai",sans-serif';
+   for(const k of ["A","B"]){const c=S.cmb[k];if(c&&t-c.t>S.cmbWin())S.comboBreak(k,t);}
+   const draw=(sd,n,tier,bx,by,sc,al,rot,roll)=>{x.save();x.globalAlpha=al;x.translate(bx,by);x.rotate(rot);x.scale(sc*1.8,sc*1.8);x.textBaseline="alphabetic";x.lineJoin="round";
+     const left=sd==="A";x.textAlign=left?"left":"right";
+     x.save();x.beginPath();x.rect(left?-6:-150,-66,156,74);x.clip();
+     x.font=`900 64px ${F2}`;x.lineWidth=10;x.strokeStyle="#16061a";
+     if(roll<1){const o=(1-roll)*56;x.globalAlpha=al*roll;x.strokeText(n,0,o);x.fillStyle=COL[tier];x.fillText(n,0,o);x.globalAlpha=al*(1-roll);if(n>2){x.strokeText(n-1,0,o-56);x.fillText(n-1,0,o-56);}x.globalAlpha=al;}
+     else{x.strokeText(n,0,0);x.fillStyle=COL[tier];x.fillText(n,0,0);}x.restore();
+     const nw=Math.max(40,String(n).length*38);x.font=`800 24px ${F2}`;x.lineWidth=6;x.strokeText("HITS",left?nw+6:-nw-6,-6);x.fillStyle="#fff";x.fillText("HITS",left?nw+6:-nw-6,-6);
+     x.restore();};
+   for(const sd of ["A","B"]){const c=S.cmb[sd];if(!c||c.n<2)continue;const e=t-c.t,bx=sd==="A"?40:W-40,by=170;
+     const p=Math.min(1,e/170),back=1+.45*Math.pow(1-p,2)*Math.cos(p*Math.PI*1.5),tier=S.cmbTier(c.n),roll=Math.min(1,e/110);
+     draw(sd,c.n,tier,bx,by,back,1,sd==="A"?-.05:.05,roll);
+     const left=1-Math.min(1,e/S.cmbWin()),bw=260;x.save();x.fillStyle="rgba(10,4,16,.7)";x.fillRect(sd==="A"?bx:bx-bw,by+20,bw,12);x.fillStyle=COL[tier];x.fillRect(sd==="A"?bx:bx-bw*left,by+20,bw*left,12);x.restore();
+     if(c.max&&t-c.max<1200){const q=Math.min(1,(t-c.max)/140),s2=2.4-1.4*q;x.save();x.globalAlpha=Math.min(1,(1200-(t-c.max))/250);x.translate(sd==="A"?bx+150:bx-150,by+80);x.rotate(-.18);x.scale(s2,s2);
+       x.strokeStyle="#ff3355";x.lineWidth=5;x.strokeRect(-70,-22,140,44);x.font=`900 30px ${F2}`;x.textAlign="center";x.textBaseline="middle";x.fillStyle="#ff3355";x.fillText("MAX!",0,1);x.restore();}}
+   S.cmbDrop=S.cmbDrop.filter(d=>t-d.t0<650);
+   for(const d of S.cmbDrop){const e=(t-d.t0)/1000,bx=d.side==="A"?40:W-40,by=170+e*e*900;draw(d.side,d.n,d.tier,bx,by,1,Math.max(0,1-e/.65),(d.side==="A"?-1:1)*e*1.4,1);}};
+ FS.cmbTier=n=>n>=8?3:n>=5?2:n>=3?1:0;
+ FS.comboEv=function(e,t){const S=FS;if(!S.cmb||!("A" in S.cmb))S.cmb={A:null,B:null};const rd=typeof UI!=="undefined"&&UI.fight&&UI.fight.F?UI.fight.F.round:0;
+   for(const k of ["A","B"]){const c=S.cmb[k];if(c&&(t-c.t>S.cmbWin()||c.round!==rd))S.comboBreak(k,t);}
+   if(e.ev==="hit"||e.ev==="counter"){const sd=e.side==="A"?"A":"B",ot=sd==="A"?"B":"A";S.comboBreak(ot,t);
+     const c=S.cmb[sd],n=c?c.n+1:1;S.cmb[sd]={n,t,round:rd,prev:c?c.n:0,max:n>=8&&!(c&&c.n>=8)?t:(c&&c.max)};
+     if(n>=2&&AU.combo)AU.combo(n);
+     if(n>=3){const def=S[ot];S.fx.push({x:def.x+(def.side==="A"?40:-40),y:240+Math.random()*50,t0:t+90,txt:["Pak","Thump","Thud"][n%3]});}
      return;}
-   if(e.ev==="miss"||e.ev==="phase"||e.ev==="ko")S.cmb=null;};
+   if(e.ev==="miss"){S.comboBreak(e.side==="A"?"A":"B",t);}
+   if(e.ev==="phase"||e.ev==="ko"){S.comboBreak("A",t);S.comboBreak("B",t);}};
+
 
  FS.render=function(t){const S=FS;if(!S.cv||!S.cv.isConnected||!S.ctx)return R0(t);const dt=S._rt?Math.min(100,Math.max(0,t-S._rt)):0;S._rt=t;
   const sl=S.slow;let z=1,cx=0,cy=0,k=0;
@@ -772,10 +795,7 @@ FS.slowmo=function(t,dur){if(typeof matchMedia!=="undefined"&&matchMedia("(prefe
     z=1+.3*k;cx=S.A&&S.B?(S.A.x+S.B.x)/2:S.cv.width/2;cy=S.cv.height*.62;}
   const x=S.ctx;if(z!==1){x.save();x.translate(cx,cy);x.scale(z,z);x.translate(-cx,-cy);}
   R0(t-S.lag);if(z!==1)x.restore();
-  {const c=S.cmb;const e=c?t-S.lag-c.t:1e9;if(c&&c.n>=2&&e<1300){const atk=S[c.side];const ax=atk?atk.x:S.cv.width/2,p=Math.min(1,e/120),sc=(1.6-.6*p)*(1+Math.min(.5,(c.n-2)*.12)),al=e>1000?1-(e-1000)/300:1;
-    const col=c.n>=5?"#ff3355":c.n>=4?"#ff7a2a":c.n>=3?"#ffb02a":"#ffe066";x.save();x.globalAlpha=Math.max(0,al);x.translate(Math.max(150,Math.min(S.cv.width-150,ax+(c.side==="A"?-60:60))),S.cv.height*(S.banner?.62:.34)-e*.02);x.rotate(c.side==="A"?-.08:.08);x.scale(sc,sc);
-    x.textAlign="center";x.textBaseline="middle";x.lineJoin="round";x.font='900 64px "Chakra Petch","IBM Plex Sans Thai",sans-serif';x.lineWidth=12;x.strokeStyle="#1a0612";x.strokeText(c.n+" HIT",0,0);x.fillStyle=col;x.fillText(c.n+" HIT",0,0);
-    if(c.n>=3){const s2=c.n>=5?"UNSTOPPABLE!":"COMBO!";x.font='800 34px "Chakra Petch","IBM Plex Sans Thai",sans-serif';x.lineWidth=8;x.strokeText(s2,0,48);x.fillStyle="#fff";x.fillText(s2,0,48);}x.restore();}}
+  FS.drawCombo&&FS.drawCombo(x,t-S.lag);
   if(sl){const W=S.cv.width,H=S.cv.height,e=t-sl.t0;x.save();
     if(e<520){x.globalCompositeOperation="saturation";x.globalAlpha=Math.max(0,1-e/520);x.fillStyle="#808080";x.fillRect(0,0,W,H);x.globalCompositeOperation="source-over";}
     if(e<90){x.globalAlpha=.55*(1-e/90);x.fillStyle="#fff";x.fillRect(0,0,W,H);}
