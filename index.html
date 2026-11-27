@@ -9151,7 +9151,7 @@ AU.gsfx=function(kind,a){if(!this.init()||this.muted||!SETTINGS.sfx)return;const
   if(kind==="shimmer")for(let i=0;i<6;i++)T(i*.05,{f:1400+Math.random()*1400,type:"sine",dur:.12,peak:.06});};
 
 // ================= MUAY THAI MOE v1.3 — UI =================
-const VERSION="1.91.167";
+const VERSION="1.91.168";
 const CUR_LANG=(typeof window!=="undefined"&&window.LANG)||"th";
 const TH_LABEL=String.fromCharCode(3652,3607,3618);
 function langSwitch(cls){return `<div class="langsw ${cls||""}" role="group" aria-label="Language">${[["th",TH_LABEL],["en","EN"]].map(([k,l])=>`<button class="lsb ${CUR_LANG===k?"on":""}" data-act="setlang" data-v="${k}" aria-pressed="${CUR_LANG===k}">${l}</button>`).join("")}</div>`;}
@@ -13973,7 +13973,7 @@ SPK.prod_B={name:"ใบหยก",color:"#d9b24a"};
 const BY_CAP={
  fah_0a5:["by_0a5","ศอกตามจังหวะเชือก","Lv.42 · ขั้นตำนาน · ศอกลงตรงจังหวะเหมือนกระโดดเชือกด้ามไม้ · แรงศอก +22% ศอกแม่น +4% · ลายเซ็นใบหยก: ใช้แรงน้อยลง 1%",r=>({staSave:.01*r})],
  fah_0b5:["by_0b5","สังเวียนที่ไม่มีแผน","Lv.42 · ขั้นตำนาน · ชกตามใจตัวเองเป็นครั้งแรกในชีวิต · คะแนนศอก +16% แรงศอก +12% กำลังใจมีผล +2% · ลายเซ็นใบหยก: กำลังใจมีผล +1%",r=>({mor:.01*r})],
- fah_1a5:["by_1a5","ร้อยหมัดในสมุดเล่มเล็ก","Lv.42 · ขั้นตำนาน · หมัดที่นับไว้ทุกดอกจนไม่พลาด · แรงหมัด +18% คะแนนหมัด +10% ใช้แรงน้อยลง 4% · ลายเซ็นใบหยก: เตะแม่น +1%",r=>({hit:{kick:.01*r}})],
+ fah_1a5:["by_1a5","ร้อยหมัดในสมุดเล่มเล็ก","Lv.42 · ขั้นตำนาน · หมัดที่นับไว้ทุกดอกจนไม่พลาด · แรงหมัด +18% คะแนนหมัด +10% ใช้แรงน้อยลง 4% · ลายเซ็นใบหยก: หมัดแม่น +1%",r=>({hit:{punch:.01*r}})],
  fah_1b5:["by_1b5","ฝนห่าแรก","Lv.42 · ขั้นตำนาน · หมัดหนักเหมือนฝนห่าแรกตอนซ้อม · แรงหมัด +24% หมัดแม่น +3% เลือดต่ำแม่นขึ้น 3% · ลายเซ็นใบหยก: หลบ +1%",r=>({evade:.01*r})],
  fah_2a5:["by_2a5","ยิ้มครั้งแรก","Lv.42 · ขั้นตำนาน · รอยยิ้มที่ไม่มีใครเคยเห็นทำคู่ชกเสียทรง · สวนกลับ +6% แรงหมัดสวน +16% หลบ +2% · ลายเซ็นใบหยก: สวนกลับ +1%",r=>({ctr:.01*r})],
  fah_2b5:["by_2b5","ชุดขาวไม่เปื้อน","Lv.42 · ขั้นตำนาน · ยืนจนจบยกสุดท้ายในชุดขาวของตัวเอง · เลือดต่ำแม่นขึ้น 6% ฟื้นแรง +18% กำลังใจมีผล +2% · ลายเซ็นใบหยก: ฟื้นแรง +3%",r=>({regen:.03*r})]};
@@ -14024,13 +14024,13 @@ const byFxAdd=(a,b)=>{const o={...a};for(const k in b){if(b[k]&&typeof b[k]==="o
 (function byKit(){if(SKILLS.prod_B||!SKILLS.fah)return;REQ_ALIAS.prod_B="fah";
   SK_LINES.prod_B=["สายศอกจังหวะ","สายเดินหน้าเงียบ","สายใจนิ่ง"];
   SKILLS.prod_B=SKILLS.fah.map(s=>{const c=BY_CAP[s.id];if(!c){const n=BY_NM[s.id];return n?{...s,name:n[0],desc:n[1]}:s;}const [id,name,desc,ad]=c;return {...s,id,name,desc,fx:r=>byFxAdd(s.fx(r),ad(r))};});
-  TRAITS.prod_B=[{id:"by_count",name:"นับร้อยไม่พลาด",desc:"เตะแม่น +4% · ใช้แรงออกอาวุธน้อยลง 5%",fx:{hit:{kick:.04},staSave:.05}},
+  TRAITS.prod_B=[{id:"by_count",name:"นับร้อยไม่พลาด",desc:"หมัดแม่น +4% · ใช้แรงออกอาวุธน้อยลง 5%",fx:{hit:{punch:.04},staSave:.05}},
     {id:"by_grandma",name:"ท่ามวยของยาย",desc:"สวนกลับ +4% · ฟื้นแรงระหว่างยกเร็วขึ้น 10%",fx:{ctr:.04,regen:.1}}];
-  SIGNATURE.prod_B={name:"เชือกกระโดดด้ามไม้",desc:"ความสนิท ♥ Lv.7+ · เตะแรง +12% · ใช้แรงน้อยลง 5%",fx:{dmg:{kick:.12},staSave:.05}};
+  SIGNATURE.prod_B={name:"เชือกกระโดดด้ามไม้",desc:"ความสนิท ♥ Lv.7+ · ศอกแรง +12% · ใช้แรงน้อยลง 5%",fx:{dmg:{elbow:.12},staSave:.05}};
   HOT_TITLES.prod_B={name:"อัจฉริยะที่เริ่มยิ้ม",desc:"แม่นขึ้น หลบดีขึ้นนิดหน่อย",prep:.026,ev:.012};})();
 /* in the camp she fights on Fah's lines like a main-cast fighter; her points are re-spent along her home line once (on moving in, or the first load after this update) */
 function byCampKit(G){const f=G&&G.F&&G.F.prod_B;if(!f||f.camp!=="player")return;
-  if(!HOME_STYLE.prod_B){HOME_LINE.prod_B=HOME_LINE.fah;HOME_STYLE.prod_B=HOME_STYLE.fah;if(LINE_K.fah)LINE_K.prod_B=LINE_K.fah;if(LINE_KR.fah)LINE_KR.prod_B=LINE_KR.fah;}
+  if(!HOME_STYLE.prod_B){HOME_LINE.prod_B=HOME_LINE.fah;HOME_STYLE.prod_B=HOME_STYLE.fah;LINE_K.prod_B=[.05,.03,.06];LINE_KR.prod_B=[0,0,0];/* v1.91.168: her own line tuning — Fah's offsets assume Fah's stronger hidden powers; with these she lands level with Fah (sim: 5 girls + Baiyok, Fah-shaped stats, Lv.25/32/42) */}
   if(f.byKit)return;f.byKit=1;f.skills={};f.equip=[];f.spv=2;f.sp=SP_PER_LV(f)*Math.max(0,(f.lvl||1)-1);if(f.trLv==null){f.trLv=3;f.trBase=3;}if(!f.trait)f.trait=TRAITS.prod_B[0].id;
   const L=HOME_LINE.prod_B,ord=[...skillList("prod_B")].sort((x,y)=>((x.line===L?0:x.school==="build"?1:2)-(y.line===L?0:y.school==="build"?1:2)));
   let go=true;for(let i=0;go&&f.sp>0&&i<400;i++){go=false;for(const sk of ord){if(f.sp>0&&learnSkill(G,"prod_B",sk.id)){go=true;break;}}}}
@@ -15649,7 +15649,7 @@ const STATS_HOST="https://us.i.posthog.com";     /* EU projects: https://eu.i.po
 <script>
 (function(){
 /* v1.87: Thai code ships inside index.html; English code (en.js) and the dictionary (i18n.js) load only when needed */
-var B="de8615c839";
+var B="ee8c5f91a1";
 var L="";try{L=localStorage.getItem("mtm_lang")||"";}catch(e){}
 try{var h=(location.hash||"").match(/lang=(th|en)/);if(h)L=h[1];}catch(e){}
 if(L!=="th"&&L!=="en")L="th";

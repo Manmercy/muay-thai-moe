@@ -40,7 +40,7 @@ SPK.prod_B={name:"Baiyok",color:"#d9b24a"};
 const BY_CAP={
  fah_0a5:["by_0a5","Elbows on the Rope's Beat","Lv.42 · Legend · elbows land on the beat like a wooden-handled jump rope · elbow power +22%, elbow accuracy +4% · Baiyok's mark: 1% less energy",r=>({staSave:.01*r})],
  fah_0b5:["by_0b5","No Plan in the Ring","Lv.42 · Legend · fighting her own way for the first time in her life · elbow points +16%, elbow power +12%, morale effect +2% · Baiyok's mark: morale effect +1%",r=>({mor:.01*r})],
- fah_1a5:["by_1a5","A Hundred Punches in a Little Notebook","Lv.42 · Legend · every punch counted until none miss · punch power +18%, punch points +10%, 4% less energy · Baiyok's mark: kick accuracy +1%",r=>({hit:{kick:.01*r}})],
+ fah_1a5:["by_1a5","A Hundred Punches in a Little Notebook","Lv.42 · Legend · every punch counted until none miss · punch power +18%, punch points +10%, 4% less energy · Baiyok's mark: punch accuracy +1%",r=>({hit:{punch:.01*r}})],
  fah_1b5:["by_1b5","First Downpour","Lv.42 · Legend · punches as heavy as the first downpour over training · punch power +24%, punch accuracy +3%, +3% accuracy at low health · Baiyok's mark: evade +1%",r=>({evade:.01*r})],
  fah_2a5:["by_2a5","First Smile","Lv.42 · Legend · a smile nobody has seen before throws the opponent off · counter +6%, counter punch power +16%, evade +2% · Baiyok's mark: counter +1%",r=>({ctr:.01*r})],
  fah_2b5:["by_2b5","Spotless White","Lv.42 · Legend · still standing at the final bell in her own white · +6% accuracy at low health, recovery +18%, morale effect +2% · Baiyok's mark: recovery +3%",r=>({regen:.03*r})]};
@@ -91,13 +91,13 @@ const byFxAdd=(a,b)=>{const o={...a};for(const k in b){if(b[k]&&typeof b[k]==="o
 (function byKit(){if(SKILLS.prod_B||!SKILLS.fah)return;REQ_ALIAS.prod_B="fah";
   SK_LINES.prod_B=["Rhythm Elbow Line","Silent Advance Line","Still Heart Line"];
   SKILLS.prod_B=SKILLS.fah.map(s=>{const c=BY_CAP[s.id];if(!c){const n=BY_NM[s.id];return n?{...s,name:n[0],desc:n[1]}:s;}const [id,name,desc,ad]=c;return {...s,id,name,desc,fx:r=>byFxAdd(s.fx(r),ad(r))};});
-  TRAITS.prod_B=[{id:"by_count",name:"Count to a Hundred",desc:"Kick accuracy +4% · strikes cost 5% less stamina",fx:{hit:{kick:.04},staSave:.05}},
+  TRAITS.prod_B=[{id:"by_count",name:"Count to a Hundred",desc:"Punch accuracy +4% · strikes cost 5% less stamina",fx:{hit:{punch:.04},staSave:.05}},
     {id:"by_grandma",name:"Grandma's Stance",desc:"Counter +4% · recovers 10% faster between rounds",fx:{ctr:.04,regen:.1}}];
-  SIGNATURE.prod_B={name:"Wooden-Handled Jump Rope",desc:"Bond ♥ Lv.7+ · Kick power +12% · 5% less energy",fx:{dmg:{kick:.12},staSave:.05}};
+  SIGNATURE.prod_B={name:"Wooden-Handled Jump Rope",desc:"Bond ♥ Lv.7+ · Elbow power +12% · 5% less energy",fx:{dmg:{elbow:.12},staSave:.05}};
   HOT_TITLES.prod_B={name:"The Prodigy Who Learned to Smile",desc:"more accurate, slips a little more",prep:.026,ev:.012};})();
 /* in the camp she fights on Fah's lines like a main-cast fighter; her points are re-spent along her home line once (on moving in, or the first load after this update) */
 function byCampKit(G){const f=G&&G.F&&G.F.prod_B;if(!f||f.camp!=="player")return;
-  if(!HOME_STYLE.prod_B){HOME_LINE.prod_B=HOME_LINE.fah;HOME_STYLE.prod_B=HOME_STYLE.fah;if(LINE_K.fah)LINE_K.prod_B=LINE_K.fah;if(LINE_KR.fah)LINE_KR.prod_B=LINE_KR.fah;}
+  if(!HOME_STYLE.prod_B){HOME_LINE.prod_B=HOME_LINE.fah;HOME_STYLE.prod_B=HOME_STYLE.fah;LINE_K.prod_B=[.05,.03,.06];LINE_KR.prod_B=[0,0,0];/* v1.91.168: her own line tuning — Fah's offsets assume Fah's stronger hidden powers; with these she lands level with Fah (sim: 5 girls + Baiyok, Fah-shaped stats, Lv.25/32/42) */}
   if(f.byKit)return;f.byKit=1;f.skills={};f.equip=[];f.spv=2;f.sp=SP_PER_LV(f)*Math.max(0,(f.lvl||1)-1);if(f.trLv==null){f.trLv=3;f.trBase=3;}if(!f.trait)f.trait=TRAITS.prod_B[0].id;
   const L=HOME_LINE.prod_B,ord=[...skillList("prod_B")].sort((x,y)=>((x.line===L?0:x.school==="build"?1:2)-(y.line===L?0:y.school==="build"?1:2)));
   let go=true;for(let i=0;go&&f.sp>0&&i<400;i++){go=false;for(const sk of ord){if(f.sp>0&&learnSkill(G,"prod_B",sk.id)){go=true;break;}}}}
