@@ -21616,5 +21616,9 @@
  "ป้าคะ หนูกินไม่ทันแล้ว! …แต่หนูจะไม่ปฏิเสธไก่ย่างหรอกนะคะ": "Auntie, I can't keep up! …But I'm not saying no to the grilled chicken.",
  "เสียงพากย์มวยจากลำโพงหน้าเวทีดังมาตามลม ทุกคนเงียบลง แล้วออกเดินทางไปพร้อมกัน": "The ring announcer's voice drifts in on the wind from the speakers. Everyone falls quiet, then heads out together.",
  "ครูแดงเคาะประตูทีละห้อง \"ได้เวลาแล้ว\" ทั้งค่ายเดินเรียงแถวลงบันไดโรงแรมไปขึ้นรถ": "Kru Daeng knocks on each door: \"It's time.\" The whole camp files down the hotel stairs to the van.",
- "รถสามล้อสองคันมาจอดรอหน้าโรงแรม คนขับตะโกนถามว่า \"ค่ายมวยใช่ไหม ไปเวทีขึ้นเลย\"": "Two samlors are waiting outside the hotel. A driver shouts, \"The boxing camp? Ring's this way — hop on!\""
+ "รถสามล้อสองคันมาจอดรอหน้าโรงแรม คนขับตะโกนถามว่า \"ค่ายมวยใช่ไหม ไปเวทีขึ้นเลย\"": "Two samlors are waiting outside the hotel. A driver shouts, \"The boxing camp? Ring's this way — hop on!\"",
+ "\"><canvas id=\"fstage\" width=\"960\" height=\"540\" aria-label=\"เวทีมวย\"></canvas>": "\"><canvas id=\"fstage\" width=\"960\" height=\"540\" aria-label=\"Boxing ring\"></canvas>",
+ "</b><i>ชก!</i></div>": "</b><i>FIGHT!</i></div>",
+ "<b>ยก ": "<b>ROUND ",
+ "<small>ยกตัดสิน</small>": "<small>DECIDING ROUND</small>"
 }

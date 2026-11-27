@@ -1710,7 +1710,7 @@ function hpGhost(cls,hp){const U=UI.fight;if(!U||!U.F)return "";const G0=U.hpG=U
 function ghostNow(g,now){const el=now-g.t;if(el<350)return g.from;if(el>1000)return g.to;return g.from+(g.to-g.from)*(el-350)/650;}
 /* v1.91.178 juice: "ROUND n · FIGHT!" slams in at the bell */
 function roundBanner(U,F){const r=U.rban;if(!r)return "";const el=performance.now()-r.t;if(el>1500)return "";
-  return `<div class="rban" style="animation-delay:-${Math.round(el)}ms" aria-hidden="true">${r.last?`<small>ยกตัดสิน</small>`:""}<b>ยก ${r.n}</b><i>ชก!</i></div>`;}
+  return `<div class="rban" style="animation-delay:-${Math.round(el)}ms" aria-hidden="true">${r.last?`<small>DECIDING ROUND</small>`:""}<b>ROUND ${r.n}</b><i>FIGHT!</i></div>`;}
 /* v1.91.178 juice: money in → coins pop from the middle of the screen, fly into the cash readout with a climbing blip, and the number rolls up */
 function cashJuice(){if(typeof document==="undefined"||!G)return;const el=document.querySelector(".cashbtn b.num");const prev=UI.cashSeen;UI.cashSeen=G.cash;
   if(!el||prev==null||G.cash<=prev||UI.fight)return;const gain=G.cash-prev;if(gain<50)return;
@@ -1742,7 +1742,7 @@ function fightHTML(){const U=UI.fight,b=U.b,me=G.F[b.a],op=G.F[b.b],F=U.F;
        return `<div class="fprep3"><h4>Open-rules counter · pick 1</h4>${Object.entries(RG_FPREP).map(([k,P])=>`<button class="btn ${b.gprep===k?"gold":""}" data-act="rgfp" data-v="${k}" aria-pressed="${b.gprep===k}"><b>${esc(P.n)}</b><small>${esc(P.d)}</small></button>`).join("")}</div>`;})()}
      <div class="ctrl">${me.injury?`<button class="btn" data-act="withdraw">Withdraw</button>`:""}${b.region&&b.region.nlfinal?`<button class="btn" data-act="rgfswap">Swap fighter</button>`:""}<button class="btn primary big" data-act="fstart" ${b.region&&b.region.nlfinal&&!b.gprep?"disabled":""}>${b.region&&b.region.nlfinal&&!b.gprep?"Pick a counter plan first":"Fight! ▸"}</button></div></div>`;}
   else{const cap=U.caption;
-    mid=`<div class="stagewrap px${F&&!F.over&&hpA<=25?" lowhp":""}"><canvas id="fstage" width="960" height="540" aria-label="เวทีมวย"></canvas>${roundBanner(U,F)}
+    mid=`<div class="stagewrap px${F&&!F.over&&hpA<=25?" lowhp":""}"><canvas id="fstage" width="960" height="540" aria-label="Boxing ring"></canvas>${roundBanner(U,F)}
       <div class="rnd">${F.round?`Round ${F.round}/${F.rounds}`:""}</div><div class="cards">${U.stage!=="done"?"":F.cards.map((c,i)=>`<span class="num">R${i+1} ${c[0]}–${c[1]}</span>`).join("")}</div>
       ${U.stage==="done"&&U.bubble?`<div class="obub ${U.F.result.win==="B"?"taunt":"sulk"}" role="note"><b>${esc(U.F.B.name)}</b>${esc(U.bubble)}</div>`:""}
       ${U.stage==="corner"?"":`<div class="caption ov ${cap?cap.side:""} ${cap&&cap.heat?"heat"+cap.heat:""}" aria-live="polite">${cap?esc(cap.text):"…"}</div>`}</div>
