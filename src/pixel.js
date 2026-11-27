@@ -745,6 +745,27 @@ const FS={cv:null,ctx:null,bg:null,A:null,B:null,fx:[],shake:0,
       x.font=`700 ${Math.round(H*(S.banner.txt.length>12?.075:.09))}px "Chakra Petch",sans-serif`;x.lineWidth=8;x.strokeStyle=bt===3?"#5a0010":"#1b1230";x.strokeText(S.banner.txt,0,H*.035);if(bt===3){x.fillStyle="rgba(255,0,40,.8)";x.fillText(S.banner.txt,-4,H*.035);}x.fillStyle="#ffffff";x.fillText(S.banner.txt,0,H*.035);x.restore();}}
     x.restore();}
 };
+/* v1.91.178 game juice (Man: "make the game feel heavier") — the knockout punch plays in slow motion with the camera punching in,
+   the colour drains for a beat and a KO! stamp slams down. FS keeps a lag so everything after the slow beat stays in step. */
+FS.lag=0;FS._rt=0;FS.slow=null;
+FS.slowmo=function(t,dur){if(typeof matchMedia!=="undefined"&&matchMedia("(prefers-reduced-motion: reduce)").matches)return;FS.slow={t0:t,t1:t+dur};};
+{const R0=FS.render,P0=FS.play,I0=FS.init;
+ FS.init=function(){FS.lag=0;FS._rt=0;FS.slow=null;return I0.apply(FS,arguments);};
+ FS.play=function(e,now){return P0.call(FS,e,(now==null?performance.now():now)-FS.lag);};
+ FS.render=function(t){const S=FS;if(!S.cv||!S.cv.isConnected||!S.ctx)return R0(t);const dt=S._rt?Math.min(100,Math.max(0,t-S._rt)):0;S._rt=t;
+  const sl=S.slow;let z=1,cx=0,cy=0,k=0;
+  if(sl){if(t<sl.t1)S.lag+=dt*.78;k=t<sl.t1?Math.min(1,(t-sl.t0)/160):Math.max(0,1-(t-sl.t1)/450);if(t>sl.t1+450){S.slow=null;k=0;}
+    z=1+.3*k;cx=S.A&&S.B?(S.A.x+S.B.x)/2:S.cv.width/2;cy=S.cv.height*.62;}
+  const x=S.ctx;if(z!==1){x.save();x.translate(cx,cy);x.scale(z,z);x.translate(-cx,-cy);}
+  R0(t-S.lag);if(z!==1)x.restore();
+  if(sl){const W=S.cv.width,H=S.cv.height,e=t-sl.t0;x.save();
+    if(e<520){x.globalCompositeOperation="saturation";x.globalAlpha=Math.max(0,1-e/520);x.fillStyle="#808080";x.fillRect(0,0,W,H);x.globalCompositeOperation="source-over";}
+    if(e<90){x.globalAlpha=.55*(1-e/90);x.fillStyle="#fff";x.fillRect(0,0,W,H);}
+    if(e>220){const p=Math.min(1,(e-220)/160),out=t>sl.t1?Math.max(0,1-(t-sl.t1)/450):1,sc=2.2-1.2*(1-Math.pow(1-p,3));x.globalAlpha=out;
+      x.translate(W/2,H*.6);x.rotate(-.08);x.scale(sc,sc);x.font='bold 120px "Pixelify Sans",sans-serif';x.textAlign="center";x.textBaseline="middle";
+      x.lineWidth=18;x.strokeStyle="#1a0006";x.strokeText("KO!",0,0);x.fillStyle="#ff2a3a";x.fillText("KO!",0,0);x.lineWidth=0;x.fillStyle="#ffd34a";x.fillText("KO!",-5,-6);}
+    x.restore();}};}
+
 
 // ---------- v1.19 CAMP ACTIVITY SCENES (short animated vignette before the result) ----------
 const CFX={

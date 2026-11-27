@@ -2511,6 +2511,24 @@ body.qs-cutting .vn .vbg{display:none}
 /* quiz show: keep answers + lifelines on screen on phones (was 20–160px below the fold) */
 @media (max-width:640px){.qs-stage{height:clamp(150px,27vh,300px)}.qs-pod .qs-fig{height:calc(clamp(150px,27vh,300px) - 50px)}.qs-logl{max-height:clamp(3.2em,11vh,7.5em)}.qs-main{gap:6px}}
 @media (max-width:640px) and (max-height:760px){.qs-stage{height:146px}.qs-pod .qs-fig{height:96px}.qs-logl{max-height:3.3em}.qs-l small{font-size:.58rem;line-height:1.1;white-space:nowrap}.qs-l{padding:3px 2px;gap:1px;font-size:.95rem}.qs-o{min-height:36px;padding:5px 8px;font-size:.82rem}.qs-q{padding:7px 10px}.qs-q p{line-height:1.35}.qs-top h2 b{font-size:1.15rem}.qshow{padding:6px}}
+
+/* v1.91.178 game juice */
+.meter .hpg{position:absolute;top:2px;bottom:2px;left:2px;width:calc(var(--v) - 4px);background:#fff3d6;animation:hpg 1.05s linear forwards}
+.meter i{z-index:1}
+@keyframes hpg{0%{width:calc(var(--g) - 4px);background:#ffffff}33%{width:calc(var(--g) - 4px);background:#ffcf7a}100%{width:calc(var(--v) - 4px);background:#ff8a5a}}
+.stagewrap{position:relative}
+.stagewrap.lowhp::after{content:"";position:absolute;inset:0;pointer-events:none;box-shadow:inset 0 0 70px 10px rgba(255,20,40,.6);animation:lowhp 1.05s ease-in-out infinite}
+@keyframes lowhp{0%,100%{opacity:.35}50%{opacity:1}}
+.rban{position:absolute;left:0;right:0;top:30%;display:flex;flex-direction:column;align-items:center;pointer-events:none;z-index:5;animation:rban 1.5s forwards;font-family:var(--f-display);font-weight:800}
+.rban b{font-size:clamp(30px,9vw,56px);color:#fff;font-weight:800;paint-order:stroke fill;-webkit-text-stroke:6px #1a0d2e;text-shadow:0 4px 0 #1a0d2e;line-height:1.1}
+.rban i{font-style:normal;font-weight:800;font-size:clamp(44px,13vw,84px);color:#ffd34a;paint-order:stroke fill;-webkit-text-stroke:8px #6a1020;text-shadow:0 5px 0 #6a1020;line-height:1.1}
+.rban small{font-size:clamp(14px,4vw,20px);color:#ff8a8a;background:#1a0d2e;padding:2px 10px;margin-bottom:4px}
+.rban::before{content:"";position:absolute;left:-10%;right:-10%;top:-12px;bottom:-12px;background:linear-gradient(90deg,transparent,rgba(20,8,36,.82) 20%,rgba(20,8,36,.82) 80%,transparent);z-index:-1;transform:skewY(-4deg)}
+@keyframes rban{0%{opacity:0;transform:scale(2.2)}12%{opacity:1;transform:scale(.92)}18%{transform:scale(1.04)}22%,78%{opacity:1;transform:scale(1)}100%{opacity:0;transform:scale(1) translateX(40%)}}
+.flycoin{position:fixed;left:0;top:0;width:18px;height:18px;margin:-9px 0 0 -9px;z-index:9999;pointer-events:none;border-radius:50%;background:radial-gradient(circle at 35% 35%,#fff6b0 0 18%,#ffd34a 19% 55%,#c88a10 56% 100%);box-shadow:0 0 0 2px #6a4a00;image-rendering:pixelated}
+.cashbtn.cbump b.num{animation:cbump .18s ease-out}
+@keyframes cbump{0%{transform:scale(1.25);color:#ffd34a}100%{transform:scale(1)}}
+@media (prefers-reduced-motion:reduce){.rban,.meter .hpg,.stagewrap.lowhp::after{animation:none}.rban{display:none}}
 </style></head><body>
 <script>window.__MTM_ART=["alicia_sheet.png","alicia_special.png","baibua_sheet.png","baibua_special.png","baiyok_sheet.webp","baiyok_white_sheet.webp","bull1_sheet.webp","bull2_sheet.webp","bull3_sheet.webp","chaba_sheet.png","chaba_special.png","fah_loykrathong_sheet.webp","fah_loykrathong_special.webp","fah_sheet.webp","fah_special.webp","gang1_sheet.webp","gang2_sheet.webp","gang3_sheet.webp","gang4_sheet.webp","gang5_sheet.webp","gangsilver_sheet.webp","kati_loykrathong_sheet.webp","kati_loykrathong_special.webp","kati_sheet.webp","kati_special.webp","krahang_sheet.webp","krasue_sheet.webp","mabong_sheet.webp","mali_loykrathong_sheet.webp","mali_loykrathong_special.webp","mali_sheet.webp","mali_special.webp","nl_ladda_blood_sheet.webp","nl_ladda_hood_sheet.webp","nl_ladda_sheet.webp","nl_meili_sheet.webp","nl_meili_special.webp","nl_nia_sheet.webp","nl_nia_special.webp","nl_rosa_sheet.webp","nl_rosa_special.webp","nl_varya_sheet.webp","nl_varya_special.webp","npc10_sheet.webp","npc11_sheet.webp","npc12_sheet.webp","npc13_sheet.webp","npc14_sheet.webp","npc1_sheet.webp","npc2_sheet.webp","npc3_sheet.webp","npc4_sheet.webp","npc5_sheet.webp","npc6_sheet.webp","npc7_sheet.webp","npc8_sheet.webp","npc9_sheet.webp","npc_alicia_mom.webp","npc_alicia_mom_soft.webp","npc_baibua_dad.webp","npc_baibua_dad_smile.webp","npc_baiyok_black_angry.png","npc_baiyok_black_flustered.png","npc_baiyok_black_happy.png","npc_baiyok_black_sad.png","npc_baiyok_casual.png","npc_baiyok_casual_flustered.png","npc_baiyok_casual_pout.png","npc_baiyok_white_angry.png","npc_baiyok_white_flustered.png","npc_baiyok_white_happy.png","npc_baiyok_white_sad.png","npc_baiyok_white_surprised.png","npc_boris.webp","npc_caster.webp","npc_caster_shout.webp","npc_chaba_bro.webp","npc_chaba_bro_sad.webp","npc_chaba_bro_stand.webp","npc_gala_mc.webp","npc_gala_mc_awk.webp","npc_gala_mc_hype.webp","npc_gang_boss.webp","npc_gang_boss_face.webp","npc_gang_goldblack.webp","npc_gang_group.webp","npc_gang_silver.webp","npc_grandma.webp","npc_hialong.webp","npc_hialong_angry.webp","npc_krerk.webp","npc_krerk_face.webp","npc_krit.webp","npc_krit_panic.webp","npc_luangpho.webp","npc_mabelle.webp","npc_mabelle_excited.webp","npc_mali_mom.webp","npc_mali_mom_laugh.webp","npc_mali_mom_tear.webp","npc_mark_guide.webp","npc_mark_guide_pain.webp","npc_mc_central.webp","npc_mc_central_hype.webp","npc_mc_isan.webp","npc_mc_isan_hype.webp","npc_mc_north.webp","npc_mc_north_f.webp","npc_mc_north_f_hype.webp","npc_mc_north_hype.webp","npc_mc_south.webp","npc_mc_south_hype.webp","npc_minnie.webp","npc_minnie_smirk.webp","npc_mint.webp","npc_mint_flustered.webp","npc_morphi.webp","npc_nai.webp","npc_nil.webp","npc_nil_smirk.webp","npc_petchara.png","npc_phet.webp","npc_phet_smile.webp","npc_ploy_mom.webp","npc_ploy_mom_cry.webp","npc_qhost_correct.webp","npc_qhost_excited.webp","npc_qhost_smile.webp","npc_qhost_suspense.webp","npc_qhost_wrong.webp","npc_suea.webp","npc_suea_angry.webp","npc_tabtim_dad.webp","npc_tabtim_dad_laugh.webp","npc_tani_angry.webp","npc_tani_angry_smile.webp","npc_tani_face.webp","npc_tani_neutral.webp","npc_tani_scary.webp","npc_tani_shy.webp","npc_tani_smile.webp","npc_thief.webp","npc_thief2.webp","npc_tiger_boss.webp","npc_tiger_boss_cry.webp","npc_vector_knight.png","npc_vector_mesa.png","npc_vector_vega.png","npc_vendor_green.webp","npc_vendor_red.webp","pailin_sheet.webp","petchara_sheet.webp","phiphong_sheet.webp","ploy_loykrathong_sheet.webp","ploy_loykrathong_special.webp","ploy_sheet.webp","ploy_special.webp","rg_chaytrae1_sheet.webp","rg_chaytrae2_sheet.webp","rg_jinlong1_sheet.webp","rg_jinlong2_sheet.webp","rg_russian1_sheet.webp","rg_russian2_sheet.webp","rg_sasaeng1_sheet.webp","rg_sasaeng2_sheet.webp","rgp_buriram_sheet.webp","rgp_chanthaburi_sheet.webp","rgp_chiangrai_sheet.webp","rgp_chumphon_sheet.webp","rgp_khonkaen_sheet.webp","rgp_lampang_sheet.webp","rgp_lopburi_sheet.webp","rgp_nakhonsi_sheet.webp","rgp_nan_sheet.webp","rgp_phetchaburi_sheet.webp","rgp_songkhla_sheet.webp","rgp_suphan_sheet.webp","rgp_surat_sheet.webp","rgp_ubon_sheet.webp","rgp_udon_sheet.webp","rgp_uttaradit_sheet.webp","rin_loykrathong_sheet.webp","rin_loykrathong_special.webp","rin_sheet.webp","rin_special.webp","rooster1_sheet.webp","rooster2_sheet.webp","rooster3_sheet.webp","rooster4_sheet.webp","rooster5_sheet.webp","tabtim_sheet.png","tabtim_special.png","tani_sheet.webp","thief2_sheet.webp","thief_sheet.webp"];</script>
 <script>window.__MTM_PETART=["cat","dog","mudlek","otter","rooster","turtle"];</script>
@@ -8698,6 +8716,27 @@ const FS={cv:null,ctx:null,bg:null,A:null,B:null,fx:[],shake:0,
       x.font=`700 ${Math.round(H*(S.banner.txt.length>12?.075:.09))}px "Chakra Petch",sans-serif`;x.lineWidth=8;x.strokeStyle=bt===3?"#5a0010":"#1b1230";x.strokeText(S.banner.txt,0,H*.035);if(bt===3){x.fillStyle="rgba(255,0,40,.8)";x.fillText(S.banner.txt,-4,H*.035);}x.fillStyle="#ffffff";x.fillText(S.banner.txt,0,H*.035);x.restore();}}
     x.restore();}
 };
+/* v1.91.178 game juice (Man: "make the game feel heavier") — the knockout punch plays in slow motion with the camera punching in,
+   the colour drains for a beat and a KO! stamp slams down. FS keeps a lag so everything after the slow beat stays in step. */
+FS.lag=0;FS._rt=0;FS.slow=null;
+FS.slowmo=function(t,dur){if(typeof matchMedia!=="undefined"&&matchMedia("(prefers-reduced-motion: reduce)").matches)return;FS.slow={t0:t,t1:t+dur};};
+{const R0=FS.render,P0=FS.play,I0=FS.init;
+ FS.init=function(){FS.lag=0;FS._rt=0;FS.slow=null;return I0.apply(FS,arguments);};
+ FS.play=function(e,now){return P0.call(FS,e,(now==null?performance.now():now)-FS.lag);};
+ FS.render=function(t){const S=FS;if(!S.cv||!S.cv.isConnected||!S.ctx)return R0(t);const dt=S._rt?Math.min(100,Math.max(0,t-S._rt)):0;S._rt=t;
+  const sl=S.slow;let z=1,cx=0,cy=0,k=0;
+  if(sl){if(t<sl.t1)S.lag+=dt*.78;k=t<sl.t1?Math.min(1,(t-sl.t0)/160):Math.max(0,1-(t-sl.t1)/450);if(t>sl.t1+450){S.slow=null;k=0;}
+    z=1+.3*k;cx=S.A&&S.B?(S.A.x+S.B.x)/2:S.cv.width/2;cy=S.cv.height*.62;}
+  const x=S.ctx;if(z!==1){x.save();x.translate(cx,cy);x.scale(z,z);x.translate(-cx,-cy);}
+  R0(t-S.lag);if(z!==1)x.restore();
+  if(sl){const W=S.cv.width,H=S.cv.height,e=t-sl.t0;x.save();
+    if(e<520){x.globalCompositeOperation="saturation";x.globalAlpha=Math.max(0,1-e/520);x.fillStyle="#808080";x.fillRect(0,0,W,H);x.globalCompositeOperation="source-over";}
+    if(e<90){x.globalAlpha=.55*(1-e/90);x.fillStyle="#fff";x.fillRect(0,0,W,H);}
+    if(e>220){const p=Math.min(1,(e-220)/160),out=t>sl.t1?Math.max(0,1-(t-sl.t1)/450):1,sc=2.2-1.2*(1-Math.pow(1-p,3));x.globalAlpha=out;
+      x.translate(W/2,H*.6);x.rotate(-.08);x.scale(sc,sc);x.font='bold 120px "Pixelify Sans",sans-serif';x.textAlign="center";x.textBaseline="middle";
+      x.lineWidth=18;x.strokeStyle="#1a0006";x.strokeText("KO!",0,0);x.fillStyle="#ff2a3a";x.fillText("KO!",0,0);x.lineWidth=0;x.fillStyle="#ffd34a";x.fillText("KO!",-5,-6);}
+    x.restore();}};}
+
 
 // ---------- v1.19 CAMP ACTIVITY SCENES (short animated vignette before the result) ----------
 const CFX={
@@ -9080,6 +9119,8 @@ const AU={ctx:null,master:null,music:null,sfxBus:null,crowdG:null,timer:null,ste
     if(sweep)fl.frequency.exponentialRampToValueAtTime(Math.max(60,f*sweep),t+dur);fl.Q.value=q;const g=c.createGain();this.env(g,t,.004,dur,peak);s.connect(fl);fl.connect(g);g.connect(this.sfxBus);s.start(t,Math.random());s.stop(t+dur+.05);},
   tone(t,{f=200,type="sine",dur=.15,peak=.6,to=0,bus}){const c=this.ctx,o=c.createOscillator();o.type=type;o.frequency.setValueAtTime(f,t);if(to)o.frequency.exponentialRampToValueAtTime(to,t+dur);
     const g=c.createGain();this.env(g,t,.005,dur,peak);o.connect(g);g.connect(bus||this.sfxBus);o.start(t);o.stop(t+dur+.05);},
+  /* v1.91.178 juice: one coin blip, pitch climbing with i (coins flying into the cash readout) */
+  coin(i){if(!this.init()||this.muted||!SETTINGS.sfx)return;const t=this.ctx.currentTime+.01,f=988*Math.pow(2,Math.min(i,12)/12);this.tone(t,{f,type:"square",dur:.05,peak:.18});this.tone(t+.05,{f:f*1.5,type:"square",dur:.07,peak:.14});},
   sfx(kind){if(!this.init()||this.muted||!SETTINGS.sfx)return;const t=this.ctx.currentTime+.01;
     if(kind==="punch"){this.noiseHit(t,{f:1400,dur:.09,peak:.9});this.tone(t,{f:120,to:55,dur:.12,peak:.8});}
     if(kind==="kick"){this.noiseHit(t,{f:3000,type:"bandpass",q:.8,dur:.16,peak:.5,sweep:.25});this.noiseHit(t+.08,{f:900,dur:.1,peak:.9});this.tone(t+.08,{f:95,to:45,dur:.16,peak:.9});}
@@ -9195,7 +9236,7 @@ AU.gsfx=function(kind,a){if(!this.init()||this.muted||!SETTINGS.sfx)return;const
   if(kind==="shimmer")for(let i=0;i<6;i++)T(i*.05,{f:1400+Math.random()*1400,type:"sine",dur:.12,peak:.06});};
 
 // ================= MUAY THAI MOE v1.3 — UI =================
-const VERSION="1.91.177";
+const VERSION="1.91.178";
 const CUR_LANG=(typeof window!=="undefined"&&window.LANG)||"th";
 const TH_LABEL=String.fromCharCode(3652,3607,3618);
 function langSwitch(cls){return `<div class="langsw ${cls||""}" role="group" aria-label="Language">${[["th",TH_LABEL],["en","EN"]].map(([k,l])=>`<button class="lsb ${CUR_LANG===k?"on":""}" data-act="setlang" data-v="${k}" aria-pressed="${CUR_LANG===k}">${l}</button>`).join("")}</div>`;}
@@ -9441,7 +9482,7 @@ function render(){
   if(albumTop&&UI.modal?.type==="album"){const modal=document.querySelector(".m-album");if(modal)modal.parentElement.scrollTop=albumTop;}
   const fc=document.getElementById("fstage");if(fc)FS.attach(fc);
   const lg=document.querySelector(".flog");if(lg)lg.scrollTop=lg.scrollHeight;
-  mountCanvases();if(typeof mountQSprites==="function")mountQSprites();pxBars();spotPaint();
+  mountCanvases();if(typeof mountQSprites==="function")mountQSprites();pxBars();spotPaint();cashJuice();
   if(typeof newsSync==="function")newsSync();
 }
 // v1.12.1 spotlight intro: dim the screen and teach one part of it at a time
@@ -10896,10 +10937,34 @@ function preCompare(me,op,b){const R=oppRead(op),v=verdictOf(adviseCached(me.id,
   return `<div class="pcmp lv${R.lv}"><div class="pcmp-h"><span class="pill dtag ${v.c}">${v.t}</span>${note?`<small class="mutt">${note}</small>`:""}</div>${rows.map(r=>{
     if(r.y!=null)return `<div class="pcr"><b class="num ${r.x>r.y+.4?"goldt":""}">${r.x.toFixed(1)}</b>${bar("l",r.x,1)}<span>${r.n}</span>${bar("r",r.y,1)}<b class="num ${r.y>r.x+.4?"redt":""}">${r.y.toFixed(1)}</b></div>`;
     return `<div class="pcr"><b class="num ${r.x>r.hi?"goldt":""}">${r.x.toFixed(1)}</b>${bar("l",r.x,1)}<span>${r.n}</span>${bar("r est",(r.lo+r.hi)/2,1)}<b class="num rng ${r.lo>r.x?"redt":""}">${r.lo}–${r.hi}</b></div>`;}).join("")}</div>`;}
+/* v1.91.178 juice: a pale "ghost" of the lost HP hangs on the bar for a beat, then drains to the new value — you see how big the blow was.
+   The fight screen re-renders every beat, so the animation resumes from its elapsed time (negative delay) instead of restarting. */
+function hpGhost(cls,hp){const U=UI.fight;if(!U||!U.F)return "";const G0=U.hpG=U.hpG||{},g=G0[cls],v=clamp(hp,0,100),now=performance.now();
+  if(!g){G0[cls]={from:v,to:v,t:0};return "";}
+  if(Math.abs(g.to-v)>.4){G0[cls]={from:v<g.to?Math.max(g.to,ghostNow(g,now)):v,to:v,t:now};}
+  const c=G0[cls],el=now-c.t;if(c.from<=c.to+.4||el>1100)return "";
+  return `<b class="hpg" style="--g:${c.from.toFixed(1)}%;--v:${c.to.toFixed(1)}%;animation-delay:-${Math.round(el)}ms"></b>`;}
+function ghostNow(g,now){const el=now-g.t;if(el<350)return g.from;if(el>1000)return g.to;return g.from+(g.to-g.from)*(el-350)/650;}
+/* v1.91.178 juice: "ROUND n · FIGHT!" slams in at the bell */
+function roundBanner(U,F){const r=U.rban;if(!r)return "";const el=performance.now()-r.t;if(el>1500)return "";
+  return `<div class="rban" style="animation-delay:-${Math.round(el)}ms" aria-hidden="true">${r.last?`<small>ยกตัดสิน</small>`:""}<b>ยก ${r.n}</b><i>ชก!</i></div>`;}
+/* v1.91.178 juice: money in → coins pop from the middle of the screen, fly into the cash readout with a climbing blip, and the number rolls up */
+function cashJuice(){if(typeof document==="undefined"||!G)return;const el=document.querySelector(".cashbtn b.num");const prev=UI.cashSeen;UI.cashSeen=G.cash;
+  if(!el||prev==null||G.cash<=prev||UI.fight)return;const gain=G.cash-prev;if(gain<50)return;
+  const reduce=typeof matchMedia!=="undefined"&&matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const r=el.getBoundingClientRect(),n=Math.max(4,Math.min(12,Math.round(Math.log10(gain)*3))),T=reduce?0:900;
+  if(!reduce)for(let i=0;i<n;i++){const c=document.createElement("i");c.className="flycoin";document.body.appendChild(c);
+    const sx=innerWidth*(.42+Math.random()*.16),sy=innerHeight*(.5+Math.random()*.1),px=sx+(Math.random()-.5)*160,py=sy-60-Math.random()*90;
+    const tx=r.left+r.width*.6,ty=r.top+r.height*.5,d=i*55;
+    const a=c.animate([{transform:`translate(${sx}px,${sy}px) scale(.4)`,opacity:0},{transform:`translate(${px}px,${py}px) scale(1.1)`,opacity:1,offset:.35},{transform:`translate(${tx}px,${ty}px) scale(.55)`,opacity:1}],{duration:760,delay:d,easing:"cubic-bezier(.5,0,.75,.2)",fill:"forwards"});
+    a.onfinish=()=>{c.remove();AU.coin&&AU.coin(i);const b=document.querySelector(".cashbtn");if(b){b.classList.remove("cbump");void b.offsetWidth;b.classList.add("cbump");}};}
+  const t0=performance.now()+(reduce?0:420),dur=reduce?1:T;el.textContent=fmt(prev);
+  const step=t=>{const k=Math.max(0,Math.min(1,(t-t0)/dur));const e2=document.querySelector(".cashbtn b.num");if(!e2)return;const v=Math.round(prev+gain*(1-Math.pow(1-k,3)));
+    const w=e2.querySelector(".cashwarn");e2.firstChild&&e2.firstChild.nodeType===3?e2.firstChild.nodeValue=fmt(v):e2.textContent=fmt(v);if(w&&!e2.contains(w))e2.appendChild(w);if(k<1)requestAnimationFrame(step);};requestAnimationFrame(step);}
 function fightHTML(){const U=UI.fight,b=U.b,me=G.F[b.a],op=G.F[b.b],F=U.F;
   const last=U.shown.filter(x=>x.ha!=null).slice(-1)[0];const sv=(s,k)=>F?(last?last[k]:s):100;
   const side=(f,cls,hp,sta)=>`<div class="fside ${cls}"><div class="fn">${f.canon||f.id==="pailin"?`<img class="face sm" src="${faceSrc(f.id,"happy")}" alt="">`:""}<b>${esc(f.name)}</b><span class="meta">Lv.${f.lvl}</span>${hotBadge(f,1)}</div>
-    <div class="meter"><i style="--v:${clamp(hp,0,100)}%;--bc:${hp>50?"var(--green)":hp>25?"var(--warn)":"var(--red)"}"></i></div><div class="meter thin"><i style="--v:${clamp(sta,0,100)}%;--bc:var(--gold)"></i></div>${cls==="a"&&UI.fight&&UI.fight.F?`<small class="stanum">⚡ ${Math.round(sta*UI.fight.F.A.staMax/100)}/${UI.fight.F.A.staMax}</small>`:""}</div>`;
+    <div class="meter">${hpGhost(cls,hp)}<i style="--v:${clamp(hp,0,100)}%;--bc:${hp>50?"var(--green)":hp>25?"var(--warn)":"var(--red)"}"></i></div><div class="meter thin"><i style="--v:${clamp(sta,0,100)}%;--bc:var(--gold)"></i></div>${cls==="a"&&UI.fight&&UI.fight.F?`<small class="stanum">⚡ ${Math.round(sta*UI.fight.F.A.staMax/100)}/${UI.fight.F.A.staMax}</small>`:""}</div>`;
   const hpN=(S,v)=>S&&S.f.hpX?v*100/(S.hp0||100):v; /* v1.90.13: a boss with extra hp shows her bar as a share of her own max */
   const hpA=F?hpN(F.A,sv(F.A.hp,"ha")):100,hpB=F?hpN(F.B,sv(F.B.hp,"hb")):100,stA=F?sv(F.A.sta,"sa"):100,stB=F?sv(F.B.sta,"sb"):100;
   let mid="";
@@ -10914,7 +10979,7 @@ function fightHTML(){const U=UI.fight,b=U.b,me=G.F[b.a],op=G.F[b.b],F=U.F;
        return `<div class="fprep3"><h4>รับมือกติกาเปิด · เลือก 1</h4>${Object.entries(RG_FPREP).map(([k,P])=>`<button class="btn ${b.gprep===k?"gold":""}" data-act="rgfp" data-v="${k}" aria-pressed="${b.gprep===k}"><b>${esc(P.n)}</b><small>${esc(P.d)}</small></button>`).join("")}</div>`;})()}
      <div class="ctrl">${me.injury?`<button class="btn" data-act="withdraw">ถอนตัว</button>`:""}${b.region&&b.region.nlfinal?`<button class="btn" data-act="rgfswap">เปลี่ยนตัว</button>`:""}<button class="btn primary big" data-act="fstart" ${b.region&&b.region.nlfinal&&!b.gprep?"disabled":""}>${b.region&&b.region.nlfinal&&!b.gprep?"เลือกวิธีรับมือก่อน":"ขึ้นชก! ▸"}</button></div></div>`;}
   else{const cap=U.caption;
-    mid=`<div class="stagewrap px"><canvas id="fstage" width="960" height="540" aria-label="เวทีมวย"></canvas>
+    mid=`<div class="stagewrap px${F&&!F.over&&hpA<=25?" lowhp":""}"><canvas id="fstage" width="960" height="540" aria-label="เวทีมวย"></canvas>${roundBanner(U,F)}
       <div class="rnd">${F.round?`ยก ${F.round}/${F.rounds}`:""}</div><div class="cards">${U.stage!=="done"?"":F.cards.map((c,i)=>`<span class="num">ย${i+1} ${c[0]}–${c[1]}</span>`).join("")}</div>
       ${U.stage==="done"&&U.bubble?`<div class="obub ${U.F.result.win==="B"?"taunt":"sulk"}" role="note"><b>${esc(U.F.B.name)}</b>${esc(U.bubble)}</div>`:""}
       ${U.stage==="corner"?"":`<div class="caption ov ${cap?cap.side:""} ${cap&&cap.heat?"heat"+cap.heat:""}" aria-live="polite">${cap?esc(cap.text):"…"}</div>`}</div>
@@ -11111,7 +11176,7 @@ function fightStart(quick){const U=UI.fight,b=U.b;AU.resume();
   FS.init(null,fightBg(b)||"bg_local.webp",G.F[b.a],G.F[b.b]);AU.setTempo(104);AU.setHeat&&AU.setHeat(0);AU.startMusic();playRound();}
 function playRound(){const U=UI.fight,F=U.F;if(FS.ground)FS.ground();fightMusic(F);F.B.instr=aiCorner(F,F.B,F.A);F.A.autoSkill=false;if(U.brawl){F.A.instr=aiCorner(F,F.A,F.B);F.A.autoSkill=true;}roundBegin(F);
   const rng=mulberry32(F.seed+F.round);U.rng=rng;U.tiredShown=false;
-  F.tier=F.tier||U.b.tier;const sl=startLine(F,rng);U.pending=[{rd:`ยกที่ ${F.round}`,cap:{text:sl.text,side:"",heat:sl.heat},bell:true}];
+  F.tier=F.tier||U.b.tier;const sl=startLine(F,rng);U.pending=[{rd:`ยกที่ ${F.round}`,cap:{text:sl.text,side:"",heat:sl.heat},bell:true}];U.rban={n:F.round,t:performance.now(),last:F.round===F.rounds&&F.rounds>1};setTimeout(()=>{if(UI.fight&&UI.fight.rban)render();},1550);
   U.stage="playing";fightMusic(F);render();tick();}
 // v1.19: pull the next exchange only when the last one has been shown, so a skill pressed now shapes what follows
 function feedRound(){const U=UI.fight,F=U.F;
@@ -11150,7 +11215,7 @@ function tick(){const U=UI.fight;if(!U||U.stage!=="playing")return;
     if(e.ev==="miss"){AU.sfx("miss");wait=1150;}
     if(e.ev==="kd"){AU.sfx("kd");wait=2300;F.musicKd=performance.now();}
     if(e.ev)fightMusic(F);
-    if(e.ev==="ko"){AU.sfx("kd");AU.cheer(1);wait=2600;}
+    if(e.ev==="ko"){AU.sfx("kd");AU.cheer(1);wait=3100;FS.slowmo&&FS.slowmo(now,1100);if(navigator.vibrate&&SETTINGS.sfx!==false)try{navigator.vibrate([40,60,120])}catch(_){}}
     if(e.ev==="cut")wait=1700;
     if(e.ev==="wake"){AU.sfx("kd");AU.cheer(.9);wait=2200;}
     if(e.ev==="skill"&&e.skrow>=4&&SPECIALS[e.rid]){/* v1.88: a Lv.14/Lv.22 move pressed (or used by the AI) plays the heroine's special sheet */
@@ -15705,7 +15770,7 @@ const STATS_HOST="https://us.i.posthog.com";     /* EU projects: https://eu.i.po
 <script>
 (function(){
 /* v1.87: Thai code ships inside index.html; English code (en.js) and the dictionary (i18n.js) load only when needed */
-var B="f84f6dd30b";
+var B="0fdd70b7f4";
 var L="";try{L=localStorage.getItem("mtm_lang")||"";}catch(e){}
 try{var h=(location.hash||"").match(/lang=(th|en)/);if(h)L=h[1];}catch(e){}
 if(L!=="th"&&L!=="en")L="th";

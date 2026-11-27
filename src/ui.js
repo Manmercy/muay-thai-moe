@@ -1,5 +1,5 @@
 // ================= MUAY THAI MOE v1.3 — UI =================
-const VERSION="1.91.177";
+const VERSION="1.91.178";
 const CUR_LANG=(typeof window!=="undefined"&&window.LANG)||"th";
 const TH_LABEL=String.fromCharCode(3652,3607,3618);
 function langSwitch(cls){return `<div class="langsw ${cls||""}" role="group" aria-label="Language">${[["th",TH_LABEL],["en","EN"]].map(([k,l])=>`<button class="lsb ${CUR_LANG===k?"on":""}" data-act="setlang" data-v="${k}" aria-pressed="${CUR_LANG===k}">${l}</button>`).join("")}</div>`;}
@@ -245,7 +245,7 @@ function render(){
   if(albumTop&&UI.modal?.type==="album"){const modal=document.querySelector(".m-album");if(modal)modal.parentElement.scrollTop=albumTop;}
   const fc=document.getElementById("fstage");if(fc)FS.attach(fc);
   const lg=document.querySelector(".flog");if(lg)lg.scrollTop=lg.scrollHeight;
-  mountCanvases();if(typeof mountQSprites==="function")mountQSprites();pxBars();spotPaint();
+  mountCanvases();if(typeof mountQSprites==="function")mountQSprites();pxBars();spotPaint();cashJuice();
   if(typeof newsSync==="function")newsSync();
 }
 // v1.12.1 spotlight intro: dim the screen and teach one part of it at a time
@@ -1700,10 +1700,34 @@ function preCompare(me,op,b){const R=oppRead(op),v=verdictOf(adviseCached(me.id,
   return `<div class="pcmp lv${R.lv}"><div class="pcmp-h"><span class="pill dtag ${v.c}">${v.t}</span>${note?`<small class="mutt">${note}</small>`:""}</div>${rows.map(r=>{
     if(r.y!=null)return `<div class="pcr"><b class="num ${r.x>r.y+.4?"goldt":""}">${r.x.toFixed(1)}</b>${bar("l",r.x,1)}<span>${r.n}</span>${bar("r",r.y,1)}<b class="num ${r.y>r.x+.4?"redt":""}">${r.y.toFixed(1)}</b></div>`;
     return `<div class="pcr"><b class="num ${r.x>r.hi?"goldt":""}">${r.x.toFixed(1)}</b>${bar("l",r.x,1)}<span>${r.n}</span>${bar("r est",(r.lo+r.hi)/2,1)}<b class="num rng ${r.lo>r.x?"redt":""}">${r.lo}–${r.hi}</b></div>`;}).join("")}</div>`;}
+/* v1.91.178 juice: a pale "ghost" of the lost HP hangs on the bar for a beat, then drains to the new value — you see how big the blow was.
+   The fight screen re-renders every beat, so the animation resumes from its elapsed time (negative delay) instead of restarting. */
+function hpGhost(cls,hp){const U=UI.fight;if(!U||!U.F)return "";const G0=U.hpG=U.hpG||{},g=G0[cls],v=clamp(hp,0,100),now=performance.now();
+  if(!g){G0[cls]={from:v,to:v,t:0};return "";}
+  if(Math.abs(g.to-v)>.4){G0[cls]={from:v<g.to?Math.max(g.to,ghostNow(g,now)):v,to:v,t:now};}
+  const c=G0[cls],el=now-c.t;if(c.from<=c.to+.4||el>1100)return "";
+  return `<b class="hpg" style="--g:${c.from.toFixed(1)}%;--v:${c.to.toFixed(1)}%;animation-delay:-${Math.round(el)}ms"></b>`;}
+function ghostNow(g,now){const el=now-g.t;if(el<350)return g.from;if(el>1000)return g.to;return g.from+(g.to-g.from)*(el-350)/650;}
+/* v1.91.178 juice: "ROUND n · FIGHT!" slams in at the bell */
+function roundBanner(U,F){const r=U.rban;if(!r)return "";const el=performance.now()-r.t;if(el>1500)return "";
+  return `<div class="rban" style="animation-delay:-${Math.round(el)}ms" aria-hidden="true">${r.last?`<small>ยกตัดสิน</small>`:""}<b>ยก ${r.n}</b><i>ชก!</i></div>`;}
+/* v1.91.178 juice: money in → coins pop from the middle of the screen, fly into the cash readout with a climbing blip, and the number rolls up */
+function cashJuice(){if(typeof document==="undefined"||!G)return;const el=document.querySelector(".cashbtn b.num");const prev=UI.cashSeen;UI.cashSeen=G.cash;
+  if(!el||prev==null||G.cash<=prev||UI.fight)return;const gain=G.cash-prev;if(gain<50)return;
+  const reduce=typeof matchMedia!=="undefined"&&matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const r=el.getBoundingClientRect(),n=Math.max(4,Math.min(12,Math.round(Math.log10(gain)*3))),T=reduce?0:900;
+  if(!reduce)for(let i=0;i<n;i++){const c=document.createElement("i");c.className="flycoin";document.body.appendChild(c);
+    const sx=innerWidth*(.42+Math.random()*.16),sy=innerHeight*(.5+Math.random()*.1),px=sx+(Math.random()-.5)*160,py=sy-60-Math.random()*90;
+    const tx=r.left+r.width*.6,ty=r.top+r.height*.5,d=i*55;
+    const a=c.animate([{transform:`translate(${sx}px,${sy}px) scale(.4)`,opacity:0},{transform:`translate(${px}px,${py}px) scale(1.1)`,opacity:1,offset:.35},{transform:`translate(${tx}px,${ty}px) scale(.55)`,opacity:1}],{duration:760,delay:d,easing:"cubic-bezier(.5,0,.75,.2)",fill:"forwards"});
+    a.onfinish=()=>{c.remove();AU.coin&&AU.coin(i);const b=document.querySelector(".cashbtn");if(b){b.classList.remove("cbump");void b.offsetWidth;b.classList.add("cbump");}};}
+  const t0=performance.now()+(reduce?0:420),dur=reduce?1:T;el.textContent=fmt(prev);
+  const step=t=>{const k=Math.max(0,Math.min(1,(t-t0)/dur));const e2=document.querySelector(".cashbtn b.num");if(!e2)return;const v=Math.round(prev+gain*(1-Math.pow(1-k,3)));
+    const w=e2.querySelector(".cashwarn");e2.firstChild&&e2.firstChild.nodeType===3?e2.firstChild.nodeValue=fmt(v):e2.textContent=fmt(v);if(w&&!e2.contains(w))e2.appendChild(w);if(k<1)requestAnimationFrame(step);};requestAnimationFrame(step);}
 function fightHTML(){const U=UI.fight,b=U.b,me=G.F[b.a],op=G.F[b.b],F=U.F;
   const last=U.shown.filter(x=>x.ha!=null).slice(-1)[0];const sv=(s,k)=>F?(last?last[k]:s):100;
   const side=(f,cls,hp,sta)=>`<div class="fside ${cls}"><div class="fn">${f.canon||f.id==="pailin"?`<img class="face sm" src="${faceSrc(f.id,"happy")}" alt="">`:""}<b>${esc(f.name)}</b><span class="meta">Lv.${f.lvl}</span>${hotBadge(f,1)}</div>
-    <div class="meter"><i style="--v:${clamp(hp,0,100)}%;--bc:${hp>50?"var(--green)":hp>25?"var(--warn)":"var(--red)"}"></i></div><div class="meter thin"><i style="--v:${clamp(sta,0,100)}%;--bc:var(--gold)"></i></div>${cls==="a"&&UI.fight&&UI.fight.F?`<small class="stanum">⚡ ${Math.round(sta*UI.fight.F.A.staMax/100)}/${UI.fight.F.A.staMax}</small>`:""}</div>`;
+    <div class="meter">${hpGhost(cls,hp)}<i style="--v:${clamp(hp,0,100)}%;--bc:${hp>50?"var(--green)":hp>25?"var(--warn)":"var(--red)"}"></i></div><div class="meter thin"><i style="--v:${clamp(sta,0,100)}%;--bc:var(--gold)"></i></div>${cls==="a"&&UI.fight&&UI.fight.F?`<small class="stanum">⚡ ${Math.round(sta*UI.fight.F.A.staMax/100)}/${UI.fight.F.A.staMax}</small>`:""}</div>`;
   const hpN=(S,v)=>S&&S.f.hpX?v*100/(S.hp0||100):v; /* v1.90.13: a boss with extra hp shows her bar as a share of her own max */
   const hpA=F?hpN(F.A,sv(F.A.hp,"ha")):100,hpB=F?hpN(F.B,sv(F.B.hp,"hb")):100,stA=F?sv(F.A.sta,"sa"):100,stB=F?sv(F.B.sta,"sb"):100;
   let mid="";
@@ -1718,7 +1742,7 @@ function fightHTML(){const U=UI.fight,b=U.b,me=G.F[b.a],op=G.F[b.b],F=U.F;
        return `<div class="fprep3"><h4>รับมือกติกาเปิด · เลือก 1</h4>${Object.entries(RG_FPREP).map(([k,P])=>`<button class="btn ${b.gprep===k?"gold":""}" data-act="rgfp" data-v="${k}" aria-pressed="${b.gprep===k}"><b>${esc(P.n)}</b><small>${esc(P.d)}</small></button>`).join("")}</div>`;})()}
      <div class="ctrl">${me.injury?`<button class="btn" data-act="withdraw">ถอนตัว</button>`:""}${b.region&&b.region.nlfinal?`<button class="btn" data-act="rgfswap">เปลี่ยนตัว</button>`:""}<button class="btn primary big" data-act="fstart" ${b.region&&b.region.nlfinal&&!b.gprep?"disabled":""}>${b.region&&b.region.nlfinal&&!b.gprep?"เลือกวิธีรับมือก่อน":"ขึ้นชก! ▸"}</button></div></div>`;}
   else{const cap=U.caption;
-    mid=`<div class="stagewrap px"><canvas id="fstage" width="960" height="540" aria-label="เวทีมวย"></canvas>
+    mid=`<div class="stagewrap px${F&&!F.over&&hpA<=25?" lowhp":""}"><canvas id="fstage" width="960" height="540" aria-label="เวทีมวย"></canvas>${roundBanner(U,F)}
       <div class="rnd">${F.round?`ยก ${F.round}/${F.rounds}`:""}</div><div class="cards">${U.stage!=="done"?"":F.cards.map((c,i)=>`<span class="num">ย${i+1} ${c[0]}–${c[1]}</span>`).join("")}</div>
       ${U.stage==="done"&&U.bubble?`<div class="obub ${U.F.result.win==="B"?"taunt":"sulk"}" role="note"><b>${esc(U.F.B.name)}</b>${esc(U.bubble)}</div>`:""}
       ${U.stage==="corner"?"":`<div class="caption ov ${cap?cap.side:""} ${cap&&cap.heat?"heat"+cap.heat:""}" aria-live="polite">${cap?esc(cap.text):"…"}</div>`}</div>
@@ -1915,7 +1939,7 @@ function fightStart(quick){const U=UI.fight,b=U.b;AU.resume();
   FS.init(null,fightBg(b)||"bg_local.webp",G.F[b.a],G.F[b.b]);AU.setTempo(104);AU.setHeat&&AU.setHeat(0);AU.startMusic();playRound();}
 function playRound(){const U=UI.fight,F=U.F;if(FS.ground)FS.ground();fightMusic(F);F.B.instr=aiCorner(F,F.B,F.A);F.A.autoSkill=false;if(U.brawl){F.A.instr=aiCorner(F,F.A,F.B);F.A.autoSkill=true;}roundBegin(F);
   const rng=mulberry32(F.seed+F.round);U.rng=rng;U.tiredShown=false;
-  F.tier=F.tier||U.b.tier;const sl=startLine(F,rng);U.pending=[{rd:`ยกที่ ${F.round}`,cap:{text:sl.text,side:"",heat:sl.heat},bell:true}];
+  F.tier=F.tier||U.b.tier;const sl=startLine(F,rng);U.pending=[{rd:`ยกที่ ${F.round}`,cap:{text:sl.text,side:"",heat:sl.heat},bell:true}];U.rban={n:F.round,t:performance.now(),last:F.round===F.rounds&&F.rounds>1};setTimeout(()=>{if(UI.fight&&UI.fight.rban)render();},1550);
   U.stage="playing";fightMusic(F);render();tick();}
 // v1.19: pull the next exchange only when the last one has been shown, so a skill pressed now shapes what follows
 function feedRound(){const U=UI.fight,F=U.F;
@@ -1954,7 +1978,7 @@ function tick(){const U=UI.fight;if(!U||U.stage!=="playing")return;
     if(e.ev==="miss"){AU.sfx("miss");wait=1150;}
     if(e.ev==="kd"){AU.sfx("kd");wait=2300;F.musicKd=performance.now();}
     if(e.ev)fightMusic(F);
-    if(e.ev==="ko"){AU.sfx("kd");AU.cheer(1);wait=2600;}
+    if(e.ev==="ko"){AU.sfx("kd");AU.cheer(1);wait=3100;FS.slowmo&&FS.slowmo(now,1100);if(navigator.vibrate&&SETTINGS.sfx!==false)try{navigator.vibrate([40,60,120])}catch(_){}}
     if(e.ev==="cut")wait=1700;
     if(e.ev==="wake"){AU.sfx("kd");AU.cheer(.9);wait=2200;}
     if(e.ev==="skill"&&e.skrow>=4&&SPECIALS[e.rid]){/* v1.88: a Lv.14/Lv.22 move pressed (or used by the AI) plays the heroine's special sheet */
