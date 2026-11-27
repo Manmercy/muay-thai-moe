@@ -6642,7 +6642,7 @@ AU.gsfx=function(kind,a){if(!this.init()||this.muted||!SETTINGS.sfx)return;const
   if(kind==="shimmer")for(let i=0;i<6;i++)T(i*.05,{f:1400+Math.random()*1400,type:"sine",dur:.12,peak:.06});};
 
 // ================= MUAY THAI MOE v1.3 — UI =================
-const VERSION="1.91.168";
+const VERSION="1.91.169";
 const CUR_LANG=(typeof window!=="undefined"&&window.LANG)||"th";
 const TH_LABEL=String.fromCharCode(3652,3607,3618);
 function langSwitch(cls){return `<div class="langsw ${cls||""}" role="group" aria-label="Language">${[["th",TH_LABEL],["en","EN"]].map(([k,l])=>`<button class="lsb ${CUR_LANG===k?"on":""}" data-act="setlang" data-v="${k}" aria-pressed="${CUR_LANG===k}">${l}</button>`).join("")}</div>`;}
@@ -11469,52 +11469,52 @@ const BY_CAP={
  fah_1b5:["by_1b5","First Downpour","Lv.42 · Legend · punches as heavy as the first downpour over training · punch power +24%, punch accuracy +3%, +3% accuracy at low health · Baiyok's mark: evade +1%",r=>({evade:.01*r})],
  fah_2a5:["by_2a5","First Smile","Lv.42 · Legend · a smile nobody has seen before throws the opponent off · counter +6%, counter punch power +16%, evade +2% · Baiyok's mark: counter +1%",r=>({ctr:.01*r})],
  fah_2b5:["by_2b5","Spotless White","Lv.42 · Legend · still standing at the final bell in her own white · +6% accuracy at low health, recovery +18%, morale effect +2% · Baiyok's mark: recovery +3%",r=>({regen:.03*r})]};
-const BY_NM={ /* v1.91.167 (Man): her own names and lines — same numbers as Fah's tree, Baiyok's story in every name (grandma's stance, the jump rope, counting to a hundred, the white she fights in) */
- tiger:["Grandma's First Elbow","the first elbow Grandma taught her at seven · Elbow power +12%, accuracy +2%"],
- f_cut:["Wind-Cutting Elbow","a short rising elbow that never breaks the beat · elbow power +8%, elbow accuracy +1.5%"],
+const BY_NM={ /* v1.91.169 (Man): Muay Thai names — real strikes and mae mai/luk mai (only ones the five don't use), with Baiyok's story kept in the descriptions and the passives */
+ tiger:["Grandma's Chopping Elbow","a downward elbow, the way Grandma taught her at seven · Elbow power +12%, accuracy +2%"],
+ f_cut:["Wind-Cutting Slant Elbow","a short rising elbow that never breaks the beat · elbow power +8%, elbow accuracy +1.5%"],
  f_flex:["5 a.m. Jump Rope","Passive · training fatigue -5% on every program"],
- f_storm:["One-Two-Three Elbows","chained elbows inside, on a counted beat · elbow power +12%, elbow accuracy +3%, elbow scoring +6%"],
- f_thunder:["Switch-Foot Elbows","Lv.14 · left-right elbows like switching feet on the jump rope · elbow power +14%, elbow accuracy +4%"],
- f_sky:["A Hundred Elbows","Lv.22 · Master · elbow power +16%, punch power +8%, elbow accuracy +3%"],
- fah_rush:["Count of Ten","walks in and lets a combination go, counting under her breath · Punch accuracy +2%, punch score +8%"],
- f_blitz:["Forward Without a Word","walks forward in silence all round · punch accuracy +1.5%, punch scoring +6%, stamina use -2%"],
+ f_storm:["Three-Beat Elbows","chopping, cutting and spinning elbows chained on a counted beat · elbow power +12%, elbow accuracy +3%, elbow scoring +6%"],
+ f_thunder:["Salap Fan Pla (Zigzag)","Lv.14 · mae mai · zigzags aside and elbows left-right like switching feet on the jump rope · elbow power +14%, elbow accuracy +4%"],
+ f_sky:["Spinning Elbow Mid-Ring","Lv.22 · Master · elbow power +16%, punch power +8%, elbow accuracy +3%"],
+ fah_rush:["Straight Count of Ten","walks in throwing straight punches in sets, counting under her breath · Punch accuracy +2%, punch score +8%"],
+ f_blitz:["Lead Hand Forward","a lead hand that quietly pushes the opponent back all round · punch accuracy +1.5%, punch scoring +6%, stamina use -2%"],
  reckless:["Ten Hours a Day","Passive · 8% less stamina spent attacking"],
- f_tornado:["As Many as the Notebook Says","a long combination, every punch she wrote down · punch accuracy +3%, punch power +10%, punch scoring +8%"],
- f_hurricane:["Forward at 5 a.m.","Lv.14 · keeps walking forward all round without fading · punch accuracy +4%, punch power +12%, stamina use -3%"],
- f_heaven:["No Orders Needed","Lv.22 · Master · punch power +16%, punch accuracy +4%, punch scoring +8%"],
- grin:["Poker Face","Below 45 body: accuracy +3%"],
- f_taunt:["Wait for Them to Come","stands so still the opponent can't stand it and rushes in · counters +3%, evade +1%"],
- f_party:["Tickets in a Shoebox","Passive · +6% EXP from every fight"],
+ f_tornado:["Hook-Uppercut Combination","straight, hook, uppercut — exactly as written in her notebook · punch accuracy +3%, punch power +10%, punch scoring +8%"],
+ f_hurricane:["Hooks to the Corner","Lv.14 · short hooks herding the opponent all round without fading · punch accuracy +4%, punch power +12%, stamina use -3%"],
+ f_heaven:["Straight Through the Ring","Lv.22 · Master · punch power +16%, punch accuracy +4%, punch scoring +8%"],
+ grin:["Still Stance","Below 45 body: accuracy +3%"],
+ f_taunt:["Lure In, Counter","stands so still the opponent can't stand it and rushes in · counters +3%, evade +1%"],
+ f_party:["Every Fight a Teacher","Passive · +6% EXP from every fight"],
  f_show:["First Cheer","just found out people shout her name · morale effect +2%, punch scoring +4%, kick scoring +4%, +2% accuracy at low health"],
- f_smile:["Steady to the Last Round","Lv.14 · calm whatever happens · +5% accuracy at low health, counters +4%, morale effect +2%"],
- f_star:["Still as the Mae Kha Canal","Lv.22 · Master · evade +3%, counters +5%, +4% accuracy at low health, recovery +10%"],
- fah_0a1:["On-Beat Elbow","Lv.26 · Counted Elbows · the elbow lands exactly on the counted beat · elbow power +14%, elbow accuracy +2%"],
+ f_smile:["Yuan Thot Hae (Casting the Net)","Lv.14 · luk mai · spreads her arms to catch the punch, then counters inside · +5% accuracy at low health, counters +4%, morale effect +2%"],
+ f_star:["Grandma's Mae Mai","Lv.22 · Master · evade +3%, counters +5%, +4% accuracy at low health, recovery +10%"],
+ fah_0a1:["On-Beat Spear Elbow","Lv.26 · Spear Elbow · the spear elbow lands exactly on the counted beat · elbow power +14%, elbow accuracy +2%"],
  fah_0a2:["Wooden-Handle Elbows","Always on · Lv.30 · elbow power +3%"],
- fah_0a3:["Elbow Through the Plan","Lv.34 · Counted Elbows · an elbow through the guard the opponent planned · elbow power +14%, elbow points +8%"],
- fah_0a4:["Elbow Clears the Path","Always on · supports the Silent Advance line · Lv.38 · punch power +2.5%, stamina use -0.5%"],
- fah_0b1:["Spinning Elbow in White","Lv.26 · Elbows in White · a clean spinning elbow, nothing extra · elbow points +14%, morale effect +1%"],
+ fah_0a3:["Uppercut Elbow Through the Guard","Lv.34 · Spear Elbow · an upward jab of the elbow through the guard the opponent set · elbow power +14%, elbow points +8%"],
+ fah_0a4:["Elbow Opens for Fists","Always on · supports the Forward Fist line · Lv.38 · punch power +2.5%, stamina use -0.5%"],
+ fah_0b1:["Spinning Elbow in White","Lv.26 · Elbows in White · a clean spinning back elbow, nothing extra · elbow points +14%, morale effect +1%"],
  fah_0b2:["Clean Form Scores","Always on · Lv.30 · elbow points +3%, morale effect +0.4%"],
- fah_0b3:["Elbow in the Rain","Lv.34 · Elbows in White · moves lightly as if walking in the rain, then elbows · evade +1.5%, elbow power +10%, elbow points +6%"],
- fah_0b4:["Elbow, Straight Face","Always on · supports the Still Heart line · Lv.38 · +1% accuracy at low health, morale effect +0.5%"],
- fah_1a1:["Counted Seven","Lv.26 · A Hundred Steps · seven punches, counted without a miss · punch points +10%, punch power +10%, stamina use -2%"],
- fah_1a2:["5 a.m. Rice Porridge","Always on · Lv.30 · stamina use -1.5%, recovery +3%"],
- fah_1a3:["Quiet Herding","Lv.34 · A Hundred Steps · herds the opponent into the corner without a word · punch power +16%, punch accuracy +2%"],
- fah_1a4:["Walking Them Down","Always on · supports the Still Heart line · Lv.38 · +1% accuracy at low health, counters +0.6%"],
- fah_1b1:["The Punch Nobody Ordered","Lv.26 · No Plan B · everything into one punch, her own call · punch power +18%, +2% accuracy at low health"],
+ fah_0b3:["Chang Prasan Nga (Crossing Tusks)","Lv.34 · Elbows in White · luk mai · steps lightly, then brings both elbows down together · evade +1.5%, elbow power +10%, elbow points +6%"],
+ fah_0b4:["Elbow, Straight Face","Always on · supports the Still Guard line · Lv.38 · +1% accuracy at low health, morale effect +0.5%"],
+ fah_1a1:["Seven-Beat Combination","Lv.26 · Counted Advance · seven punches, counted without a miss · punch points +10%, punch power +10%, stamina use -2%"],
+ fah_1a2:["5 a.m. Runner's Lungs","Always on · Lv.30 · stamina use -1.5%, recovery +3%"],
+ fah_1a3:["Into the Corner","Lv.34 · Counted Advance · herds the opponent into the corner without a word · punch power +16%, punch accuracy +2%"],
+ fah_1a4:["Walking Them Down","Always on · supports the Still Guard line · Lv.38 · +1% accuracy at low health, counters +0.6%"],
+ fah_1b1:["One Big Hook","Lv.26 · No Plan B · everything into one punch — her own call, nobody's order · punch power +18%, +2% accuracy at low health"],
  fah_1b2:["A Heart Just Learning Fun","Always on · Lv.30 · +1.2% accuracy at low health, punch power +1%"],
- fah_1b3:["Trading in the Rain","Lv.34 · No Plan B · stands and trades in the middle without stepping back · punch power +14%, clinch defense +0.3"],
+ fah_1b3:["Trading Mid-Ring","Lv.34 · No Plan B · stands and trades in the middle without stepping back · punch power +14%, clinch defense +0.3"],
  fah_1b4:["Punch Opens the Elbow","Always on · supports the Rhythm Elbow line · Lv.38 · elbow power +3%"],
- fah_2a1:["A Still Stare Mid-Round","Lv.26 · Poker Face · stares so calmly the opponent rushes in · counters +4%, evade +1.5%"],
- fah_2a2:["Short Words, Short Answers","Always on · Lv.30 · morale effect +0.5%, counters +0.6%"],
- fah_2a3:["Noted, Then Countered","Lv.34 · Poker Face · notes the rhythm in her head and counters the rush · counters +3%, counter-punch power +14%"],
+ fah_2a1:["Raised-Arm Parry and Counter","Lv.26 · Lure and Counter · parries with a raised arm and counters at once · counters +4%, evade +1.5%"],
+ fah_2a2:["Eyes Never Leave Her","Always on · Lv.30 · morale effect +0.5%, counters +0.6%"],
+ fah_2a3:["Ka Chik Rang (Crow Tears the Nest)","Lv.34 · Lure and Counter · luk mai · splits the punches apart and counters the rush · counters +3%, counter-punch power +14%"],
  fah_2a4:["Still Until Elbow Range","Always on · supports the Rhythm Elbow line · Lv.38 · elbow accuracy +1.5%, counter-punch power +2%"],
- fah_2b1:["Standing Still Through the Pain","Lv.26 · Until the Bell · however much it hurts, her face doesn't change · +4% accuracy at low health, recovery +10%"],
+ fah_2b1:["Standing Firm","Lv.26 · Until the Bell · however much it hurts, her face doesn't change · +4% accuracy at low health, recovery +10%"],
  fah_2b2:["Not Falling in Front of Grandma","Always on · Lv.30 · +1.5% accuracy at low health"],
  fah_2b3:["Dusting Off the White","Lv.34 · Until the Bell · gets up and dusts herself off like nothing happened · recovery +15%, morale effect +1.5%"],
- fah_2b4:["Calm, Then Forward","Always on · supports the Silent Advance line · Lv.38 · stamina use -1%, punch points +3%"]};
+ fah_2b4:["Calm, Then Forward","Always on · supports the Forward Fist line · Lv.38 · stamina use -1%, punch points +3%"]};
 const byFxAdd=(a,b)=>{const o={...a};for(const k in b){if(b[k]&&typeof b[k]==="object"){o[k]={...(a[k]||{})};for(const w in b[k])o[k][w]=(o[k][w]||0)+b[k][w];}else o[k]=(o[k]||0)+b[k];}return o;};
 (function byKit(){if(SKILLS.prod_B||!SKILLS.fah)return;REQ_ALIAS.prod_B="fah";
-  SK_LINES.prod_B=["Rhythm Elbow Line","Silent Advance Line","Still Heart Line"];
+  SK_LINES.prod_B=["Rhythm Elbow Line","Forward Fist Line","Still Guard Line"];
   SKILLS.prod_B=SKILLS.fah.map(s=>{const c=BY_CAP[s.id];if(!c){const n=BY_NM[s.id];return n?{...s,name:n[0],desc:n[1]}:s;}const [id,name,desc,ad]=c;return {...s,id,name,desc,fx:r=>byFxAdd(s.fx(r),ad(r))};});
   TRAITS.prod_B=[{id:"by_count",name:"Count to a Hundred",desc:"Punch accuracy +4% · strikes cost 5% less stamina",fx:{hit:{punch:.04},staSave:.05}},
     {id:"by_grandma",name:"Grandma's Stance",desc:"Counter +4% · recovers 10% faster between rounds",fx:{ctr:.04,regen:.1}}];
