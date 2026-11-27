@@ -3,6 +3,11 @@
    Round 1: the invitation, the four regions, planning a trip (calendar + cost + whole camp away), the provincial belt bouts.
    Later rounds: the drive scene, the champion series, minigame duels, the story, the Naka League finale. Spec: claude/regional-chapter.md */
 
+/* v1.91.166 (Man): the walk to the ring rotates instead of one line every trip */
+const RG_TO_RING=["The pi chawa from the ring carries to the hotel door. Everyone grabs their bags and heads for the ring",
+  "Two samlors are waiting outside the hotel. A driver shouts, \"The boxing camp? Ring's this way — hop on!\"",
+  "Kru Daeng knocks on each door: \"It's time.\" The whole camp files down the hotel stairs to the van.",
+  "The ring announcer's voice drifts in on the wind from the speakers. Everyone falls quiet, then heads out together."];
 const RG={
  north:{name:"the North",champ:"Baibua",nick:"Thorned Lotus of Lanna",col:"#e86fa0",prov:["chiangrai","nan","uttaradit","lampang"],fin:"chiangmai",tilt:{elbow:2.5,counter:2}},
  isan:{name:"Isan",champ:"Tabtim",nick:"The Ruby of the Isan Plains",col:"#d23246",prov:["udon","khonkaen","buriram","ubon"],fin:"korat",tilt:{kick:2.5,foot:1.5}},
@@ -2177,7 +2182,7 @@ Pick your fighter under Fights › Four Regions Championship`+((t=>t?`\n\n(${t})
     playScene([...intro,{n:"nar",t:"There's still time before the bout. What now?",choice:menu}],()=>{save();
       if(T.goShop){T.goShop=0;this.shop(T,()=>this.hotel(b,T,go,1),1,1);return;}
       if(T.menuBack){T.menuBack=0;this.hotel(b,T,go,1);return;}
-      T.goRing=0;playScene([{n:"nar",t:"The pi chawa from the ring carries to the hotel door. Everyone grabs their bags and heads for the ring"}],()=>go(),{bg:"hotel_room",look:"casual"});},{bg:"hotel_room",look:"casual"});},
+      T.goRing=0;playScene([{n:"nar",t:RG_TO_RING[(G.region.ringN=(G.region.ringN||0)+1)%RG_TO_RING.length]}],()=>go(),{bg:"hotel_room",look:"casual"});},{bg:"hotel_room",look:"casual"});},
   /* the first trip into a region: its champion comes to meet the camp on the way in */
   firstArrive(G,r,dest){const R=G.region;R.arrived=R.arrived||{};if(R.arrived[r]||!RG_ARRIVE[r])return null;R.arrived[r]=1;rgTouch(G,RG_CID[r]);return RG_ARRIVE[r](G,ROAD_DEST[dest]);},
   /* road fatigue for everyone on board (the fighter only half: the corner keeps her off her feet) · the shotgun seat is a small moment */
@@ -2226,7 +2231,7 @@ Pick your fighter under Fights › Four Regions Championship`+((t=>t?`\n\n(${t})
       ...(pre?[]:[{t:"Light training in the hotel parking lot",fx:G2=>{for(const f of roadRiders(G2)){f.exp=(f.exp||0)+6;f.fatigue=Math.min(100,(f.fatigue||0)+2);}},then:[{n:"nar",t:"Pad work under the parking-lot lights until the hotel guard comes to watch · EXP +6"}]}]),
       {t:`🛍 Buy souvenirs from ${D.name} (takes no time)`,fx:()=>{T.goShop=1;}},
       ...(pre?[{t:"Straight to the ring ▸",fx:()=>{T.goRing=1;}}]:[])];},
-  home(T,done){window.__rgHotelR=null;if(!T.shopDone){T.shopDone=1;this.shop(T,()=>this.home(T,done),1);return;}G.log=G.log||[];G.log.push(`Back at camp from ${ROAD_DEST[T.dest].name}`);save();done();},
+  home(T,done){window.__rgHotelR=null;const R=G.region;R.shopSeen=R.shopSeen||{};if(!T.shopDone){T.shopDone=1;if(!R.shopSeen[T.dest]){R.shopSeen[T.dest]=1;this.shop(T,()=>this.home(T,done),1);return;}} /* v1.91.166 (Man): the roadside shop stop only the first time per province — the hotel shop stays open every trip */G.log=G.log||[];G.log.push(`Back at camp from ${ROAD_DEST[T.dest].name}`);save();done();},
   /* v1.89.23: the souvenir shop on the way out of town — the only place regional souvenirs are sold; keep buying until you get back on the bus */
   shopIntro:{north:"On the way home the bus stops at a roadside souvenir shop. Paper umbrellas hang in rows; fine handwoven cloth lies folded on a wooden table.",
     isan:"On the way out of town the bus stops at the provincial silk centre. Triangle pillows are piled like a mountain; Praewa silk hangs behind glass.",
@@ -2286,20 +2291,20 @@ Pick your fighter under Fights › Four Regions Championship`+((t=>t?`\n\n(${t})
   /* the letter came: pick the fighter who carries the whole series */
   startSeries(G,r,fid){const c=G.region.champ[r],me=G.F[fid];if(!c||c.state!=="letter"||!me||me.camp!=="player")return {ok:false,why:"Can't pick that fighter"};
     if(this.overTime(G))return {ok:false,why:"This Clash of the Four Regions is over · challenge again in the next edition"};
-    Object.assign(c,{state:"series",fid,w:0,l:0,n:0,next:null});this.champFighter(G,r,me);
+    Object.assign(c,{state:"series",fid,w:0,l:0,n:0,next:null,bo:(c.tries||0)>=1?1:3}); /* v1.91.166 (Man): a rematch after a lost series is one deciding bout */this.champFighter(G,r,me);
     const s=this.schedule(G,r,gameWeek(G)+1);if(!s){c.state="letter";c.fid=null;return {ok:false,why:"There aren't enough free weeks left this year for a title series"};}
     G.log=G.log||[];G.log.push(`${RG_TITLE[r]}: ${me.name} vs ${RG[r].champ} · bout 1, week ${s.wk}${s.season!==(G.season||1)?` (next year)`:""}`);
     return {ok:true,s};},
   seriesResult(G,r,p){const R=G.region,c=R.champ[r];if(!c||c.state!=="series")return;rgTouch(G,RG_CID[r]);const abs=c.next?c.next.abs:gameWeek(G),me=G.F[c.fid];
     c.n=(c.n||0)+1;if(p.res==="W")c.w++;else if(p.res==="L")c.l++;c.next=null;R.nextTripAbs=Math.max(R.nextTripAbs||0,abs+RG_TRIP_GAP);G.log=G.log||[];
-    if(c.w>=2){c.state="won";c.wonAbs=abs;(R.post=R.post||{})[r]=abs+1;R.cups=R.cups||[];if(!R.cups.includes(r))R.cups.push(r);G.cash+=RG_CUP_PRIZE;G.rep+=4;
+    const need=c.bo===1?1:2;if(c.w>=need){c.state="won";c.wonAbs=abs;if(me)G.lastBig={a:me.id,b:this.champId[r],win:"A",wk:G.week,absWeek:gameWeek(G),shown:false,cup:r,cupName:RG[r].name}; /* v1.91.166 (Man): a regional title always gets the village news + aunties */(R.post=R.post||{})[r]=abs+1;R.cups=R.cups||[];if(!R.cups.includes(r))R.cups.push(r);G.cash+=RG_CUP_PRIZE;G.rep+=4;
       if(me){G.honors=G.honors||[];const key=`${G.season||1}:rg_${r}:${me.div}::${me.id}`;if(!G.honors.some(h=>h.key===key))G.honors.push({key,season:G.season||1,week:G.week,id:me.id,div:me.div,kind:"rg_"+r,opp:`${RG[r].champ} · won ${c.w}-${c.l}`});}
       /* v1.91.120 (Man): all four regional cups = national level — every fighter who won a cup this edition gets it in the hall */
       if(R.cups.length>=4&&!R.natDone){R.natDone=1;G.honors=G.honors||[];const ws=new Set();for(const h of G.honors)if(/^rg_/.test(h.kind)&&!(h.season&&((h.season-1)*52+(h.week||1))<(R.startAbs||0)))ws.add(h.id);
         for(const id of ws){const k=`${G.season||1}:rgnat:${rgEd(G)}::${id}`;if(!G.honors.some(h=>h.key===k))G.honors.push({key:k,season:G.season||1,week:G.week,id,div:(G.F[id]||{}).div,kind:"rgnat",opp:"All four cups · Four Regions Championship"});}}
       rgMsQ(G,{k:["cup1","cup2","cup3","nat"][Math.min(3,R.cups.length-1)],id:me?me.id:null,r});rgMeet(G,this.champId[r],4);R.just={r,kind:"cup",res:p.res,w:c.w,l:c.l};
       G.log.push(`${HONOR_LABEL["rg_"+r]}: ${me?me.name:""} ${c.w}-${c.l} ${RG[r].champ} · prize ${fmt(RG_CUP_PRIZE)}`);return;}
-    if(c.l>=2){c.state="lost";c.tries=(c.tries||0)+1;c.letterAbs=abs+2;R.just={r,kind:"lost",res:p.res,w:c.w,l:c.l};
+    if(c.l>=need){c.state="lost";c.tries=(c.tries||0)+1;c.letterAbs=abs+1;R.just={r,kind:"lost",res:p.res,w:c.w,l:c.l};
       G.log.push(`${RG_TITLE[r]}: ${RG[r].champ} keeps the title ${c.l}-${c.w}`);return;}
     R.just={r,kind:"bout",res:p.res,w:c.w,l:c.l,n:c.n};const s=this.schedule(G,r,abs+2); /* v1.90.17 (Man): bouts two weeks apart */
     /* between bout 1 and bout 2 the champion drops by the camp (round 4) — missed if bout 2 comes first */
@@ -2316,7 +2321,7 @@ Pick your fighter under Fights › Four Regions Championship`+((t=>t?`\n\n(${t})
       if(c.state==="lost"&&now>=(c.letterAbs||0)&&!this.overTime(G)){c.state="letter";c.fid=null;c.w=0;c.l=0;c.n=0;
         rgOrg(G,r,`${RG_TITLE[r]}: a new challenge`,`Dear Manager of Sirichai Camp,
 
-${RG[r].champ}, the new champion of ${RG[r].name} is open to a new regional title challenge. Best 2 of 3 · pick your fighter under Fights › Four Regions Championship`+((t=>t?`\n\n(${t})`:"")(this.tipText(G,r))));rgSay(G,r,`${RG_TITLE[r]}: a new challenge`,RG_CH[r].again);continue;}
+${RG[r].champ}, the new champion of ${RG[r].name} is open to a title challenge again · the rematch is one deciding bout · pick your fighter under Fights › Four Regions`+((t=>t?`\n\n(${t})`:"")(this.tipText(G,r))));rgSay(G,r,`${RG_TITLE[r]}: a new challenge`,RG_CH[r].again);continue;}
       if(c.state!=="series")continue;const me=G.F[c.fid];
       if(!me||me.camp!=="player"){G.bookings=G.bookings.filter(b=>!(c.next&&b.id===c.next.bid));Object.assign(c,{state:"letter",fid:null,w:0,l:0,n:0,next:null});continue;}
       const x=c.next;
@@ -2357,7 +2362,7 @@ ${RG[r].champ}, the new champion of ${RG[r].name} is open to a new regional titl
   seriesHTML(r){const C=RG[r],H=RG_CH[r],c=G.region.champ[r],R=roster(G).filter(f=>!f.injury);if(!UI.rgFid||!R.some(f=>f.id===UI.rgFid))UI.rgFid=R[0]?R[0].id:null;
     const pay=this.seriesPurse(G);
     return `<h2>${esc(RG_TITLE[r])}</h2><p class="meta">${esc(C.champ)} · ${esc(C.nick)} · venue ${esc(ROAD_DEST[C.fin].name)}</p>
-     <div class="kv-row"><span>Format</span><b>Best of 3 · 5 rounds each · about 2 weeks apart</b></div>${(G.region.champ[r].tries||0)?`<div class="kv-row"><span>Rematch</span><b class="goldt">Series lost so far: ${G.region.champ[r].tries} · the camp knows this champion's game better now</b></div>`:""}
+     <div class="kv-row"><span>Format</span><b>${(G.region.champ[r].tries||0)?"Rematch · one deciding bout · 5 rounds":"Best of 3 · 5 rounds each · about 2 weeks apart"}</b></div>${(G.region.champ[r].tries||0)?`<div class="kv-row"><span>Rematch</span><b class="goldt">Series lost so far: ${G.region.champ[r].tries} · the camp knows this champion's game better now</b></div>`:""}
      ${(t=>t?`<p class="goldt rg-tip">📼 ${esc(t)}</p>`:"")(this.tipText(G,r))}
      <div class="kv-row"><span>Strength of ${esc(C.champ)}</span><b>${esc(H.perk.name)}</b></div><p class="meta">${esc(H.perk.desc)}</p>
      <div class="kv-row"><span>Purse per bout</span><b class="num">${fmt(pay.win)} / loss ${fmt(pay.lose)}</b></div><div class="kv-row"><span>Cup prize</span><b class="num">${fmt(RG_CUP_PRIZE)}</b></div>

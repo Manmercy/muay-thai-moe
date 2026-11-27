@@ -132,7 +132,7 @@ CFX.pet_mudlek={bg:"bg_camp_day.webp",cap:"",row:"idle",fx:"hearts"};CFX.pet_mud
 {const _t=trainWeek;trainWeek=function(G,f,rng){const r=_t(G,f,rng);try{if(f.id==="fah"&&f.camp==="player"&&f.gains){const p=pv(G).find(x=>x.k==="mudlek");if(p&&!away(G,p)&&tier(p)){
   const pc=[0,.03,.05,.08][tier(p)]*(p.joy<30?.5:1);for(const x of Object.keys(f.gains)){const d=f.gains[x];if(d>0){const add=d*pc;f.a[x]=Math.min(stCap(f),f.a[x]+add);f.gains[x]=d+add;}}}}}catch(e){}return r;};}
 EVENTS.push({id:"pet_mudlek",look:"casual",bg:"camp",pri:2,when:G=>inCamp(G,"fah")&&!hasPet(G,"mudlek"),steps:[
-  {n:"nar",t:"เช้าวันแรกที่ฟ้าย้ายมาอยู่ค่ายศิริชัย เธอลากกระเป๋าเดินทางมาหนึ่งใบ กับตะกร้าหวายอีกหนึ่งใบที่คลุมผ้าไว้มิดชิด"},
+  {n:"nar",t:"ฟ้ากลับไปขนของชุดสุดท้ายที่ค่ายพยัคฆ์ทอง ขากลับเธอลากกระเป๋ามาหนึ่งใบ กับตะกร้าหวายอีกหนึ่งใบที่คลุมผ้าไว้มิดชิด"},
   {n:"nar",t:"ตะกร้าหวายขยับเอง แล้วก็ร้อง “แง้ว” เสียงแหบ ๆ"},
   {n:"fah",f:"flustered",l:"casual",t:"…อย่ามองแบบนั้น! หมัดเหล็กไม่ใช่ของพยัคฆ์ทองแล้ว ฟ้าย้าย มันก็ต้องย้ายตาม จบ"},
   {n:"nar",t:"ฟ้าเปิดผ้าคลุม แมวขนสีเงินเหมือนผมฟ้าไม่มีผิดกระโดดออกมา เท้าขาวทั้งสี่ข้างเหมือนใส่ถุงเท้า หูข้างหนึ่งแหว่งนิด ๆ ตาเหลืองจ้องทุกคนเหมือนกำลังประเมินคู่ชก"},

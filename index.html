@@ -6397,7 +6397,42 @@ const WIN_SELF={kati:["แต่ยังไม่พอหรอกค่ะ! �
   mali:["เย้~ แต่มะลิยังไม่อิ่มนะ! ขอไฟต์ต่อไปเลย","ขาบวมนิดหน่อย แต่คุ้ม~ ใครทำขนมครกให้มะลิหน่อย!","เมื่อคืนมะลิเห็นแม่ยิ้มในแชตด้วยนะ~"],
   rin:["ชนะตามที่คำนวณไว้ค่ะ …แต่ส่วนต่างคะแนนยังแคบเกินไป ต้องดีกว่านี้","ผลออกมาตามโมเดลค่ะ ฉันจะปรับโมเดลให้แม่นกว่านี้อีก","…ดีใจค่ะ ฉันแค่แสดงออกไม่เป็น"]};
 const COACH_WIN=["ชนะแล้วอย่าเหลิง พรุ่งนี้ตีห้าเหมือนเดิม","ดี แต่ยกสองการ์ดตก ครูเห็นนะ","ปู่ชัยดูอยู่ ชนะแบบนี้ท่านคงพอใจ","กินให้อิ่ม นอนให้พอ แล้วกลับมาซ้อม","ชนะได้ก็แพ้ได้ อย่าลืมว่าวันนี้ได้มาเพราะอะไร"];
-function aftermathSteps(G,L){const me=G.F[L.a],op=G.F[L.b];const mates=roster(G).filter(f=>f.id!==me.id);const m=mates[0];const steps=[];
+/* v1.91.166 (Man): a regional title — the whole village hears, the aunties bring breakfast; up to four cups per edition, so every line rotates */
+const CUP_ME={kati:["ขอบคุณค่ะป้า ๆ …ปู่คะ หนูเอาถ้วยกลับบ้านได้แล้วนะ","ป้าคะ หนูกินไม่ทันแล้ว! …แต่หนูจะไม่ปฏิเสธไก่ย่างหรอกนะคะ"],
+  mali:["ป้าขา~ มะลิกินหมดทุกปิ่นโตเลยค่ะ! …ขอห่อกลับไปฝากแม่ด้วยได้ไหมคะ","ขนมครกอีกแล้ว~ มะลิรักหมู่บ้านนี้ที่สุดเลย!"],
+  rin:["ขอบคุณค่ะ …ฉันไม่ได้คำนวณเผื่อข้าวเหนียวสามกระติกไว้ในแผนเลย","ฉันจะบันทึกไว้ค่ะ ทุกครั้งที่ได้ถ้วย ปิ่นโตเพิ่มขึ้นเฉลี่ยสองเถา"],
+  fah:["ป้า ๆ! ฟ้าถ่ายรูปกับถ้วยให้ป้าทุกคนเลย! ยืนเรียงกัน เร็ว ๆ","ไลฟ์เลย! ป้า ๆ โบกมือหน่อย คนดูอยากเห็นแฟนคลับตัวจริงของฟ้า!"],
+  ploy:["…ขอบคุณค่ะ สมัยอยู่พยัคฆ์ทอง ไม่เคยมีใครถือปิ่นโตมาหาพลอยแบบนี้เลย","ป้าคะ ไม่ต้องตักให้พลอยเยอะขนาดนั้น …ก็ได้ค่ะ อีกทัพพีเดียว"]};
+const CUP_ARRIVE=["ยังไม่ทันแปดโมง ป้า ๆ ในหมู่บ้านก็เดินถือปิ่นโตมายืนเต็มหน้าประตูค่าย",
+  "รอบนี้ป้า ๆ มากันเร็วกว่าเดิม บางคนขี่มอเตอร์ไซค์พ่วงข้างมาพร้อมหม้อแกงทั้งหม้อ",
+  "หน้าค่ายมีโต๊ะพับมาตั้งรอตั้งแต่ตีหก ไม่มีใครรู้ว่าใครเป็นคนเอามาตั้ง",
+  "ถ้วยที่สี่ เสียงประกาศจากหอกระจายข่าวหมู่บ้านดังตั้งแต่ตีห้าครึ่ง ป้า ๆ มากันก่อนนักมวยตื่นเสียอีก"];
+const CUP_TAEW=[n=>`${n}! ป้าดูไลฟ์ทั้งคืน ตีกะละมังจนบุบไปใบหนึ่งแล้วลูก! ส้มตำไม่ใส่ปู ไก่ย่าง ข้าวเหนียว กินให้หมดนะ`,
+  n=>`${n}! ใบที่แล้วกะละมังบุบ ใบนี้ป้าเปลี่ยนมาตีฝาหม้อแทน …ก็บุบอีกนั่นแหละ`,
+  n=>`ป้าตั้งชื่อเมนูใหม่แล้วนะ "ตำ${n}" เผ็ดสามเม็ด เท่ากับจำนวนถ้วยของค่ายเราไง`,
+  n=>`${n}… ป้าขายส้มตำหน้าวัดมาสามสิบปี ไม่เคยมีข่าวไหนขายดีเท่าข่าวค่ายนี้เลยลูก`];
+const CUP_AUNT=[["ป้าบุญมี ตลาดเช้า",r=>`แชมป์${r}เชียวนะ! สมัยปู่ชัยยังหนุ่ม ป้าเคยเห็นแต่ในทีวี วันนี้มาอยู่หน้าบ้านเราเอง`],
+  ["ยายเฉลียว ร้านขนมครก",r=>`ยายทำขนมครกมาสองถาด ถาดหนึ่งให้แชมป์${r} อีกถาดให้คนที่ยังไม่ได้ถ้วย จะได้มีแรง`],
+  ["ป้าสมร แม่ค้าผลไม้",r=>`มะม่วงน้ำดอกไม้ลูกที่สวยที่สุดในแผง ป้าเก็บไว้ให้แชมป์${r}คนเดียว คนอื่นห้ามแย่งนะ`],
+  ["ป้าจุก ร้านกาแฟโบราณ",r=>`ชาเย็นแก้วนี้ป้าไม่คิดตังค์ แชมป์${r}กินฟรีทั้งปี …แต่มาเล่าเรื่องไฟต์ให้ป้าฟังทุกเช้านะ`]];
+const CUP_COACH=["แชมป์ภาคแล้วพรุ่งนี้ก็ตีห้าเหมือนเดิม …แต่เช้านี้ ให้กินก่อน","กินให้อิ่มแล้วไปขอบคุณป้า ๆ ให้ครบทุกคน มวยเราอยู่ได้เพราะคนแถวนี้",
+  "ปู่ชัยเคยบอกครูว่า วันไหนป้า ๆ ถือปิ่นโตมาหน้าค่าย วันนั้นค่ายเราเป็นของหมู่บ้านแล้ว","ครบสี่ภาคแล้ว …ครูไม่มีอะไรจะสอนเช้านี้ กินไป"];
+const CUP_END=["เช้านั้นทั้งค่ายนั่งกินข้าวกันบนเวทีซ้อม ป้าแต๋วขอยืมถ้วยไปตั้งหน้าร้านส้มตำหนึ่งวัน",
+  "ข้าวที่เหลือพอเลี้ยงทั้งค่ายไปอีกสองมื้อ ข้าวตูได้กระดูกไก่ไปหนึ่งถุงใหญ่",
+  "ป้า ๆ กลับไปตอนสาย ทิ้งปิ่นโตไว้เต็มโต๊ะ พร้อมกระดาษแผ่นเล็กเขียนว่า \"ล้างแล้วเอามาคืนด้วย\"",
+  "ถ้วยทั้งสี่ใบเรียงอยู่บนชั้นเดียวกับรูปปู่ชัย ป้า ๆ ยืนพนมมือไหว้รูปปู่ก่อนกลับ"];
+function cupNewsSteps(G,L,me,m){const rn=(typeof RG!=="undefined"&&RG[L.cup]&&RG[L.cup].name)||L.cupName||"ภาค";
+  const k=Math.max(0,Math.min(3,((G.region&&G.region.cups||[]).length||1)-1)),A=CUP_AUNT[k],own=CUP_ME[me.id];
+  return [
+  {n:"nar",t:`เช้าวันต่อมา ข่าว${me.name}คว้าแชมป์${rn}ไปทั่วหมู่บ้าน ตั้งแต่ร้านส้มตำหน้าวัดยันตลาดเช้า`},
+  {n:"nar",t:CUP_ARRIVE[k]},
+  {n:"npc",who:"ป้าแต๋ว",t:CUP_TAEW[k](me.name)},
+  {n:"npc",who:A[0],t:A[1](rn)},
+  {n:me.id,f:"happy",l:"casual",t:own?pickR(own,G,"cup_"+me.id):"ขอบคุณค่ะป้า ๆ ทุกคนเลย!"},
+  ...(m?[{n:m.id,f:"happy",l:"casual",t:WIN_TEASE[m.id]?pickR(WIN_TEASE[m.id],G,"t_"+m.id)(me.name):`ยินดีด้วยนะ ${me.name}!`}]:[]),
+  ...(coachOn()?[{n:"coach",t:CUP_COACH[k]}]:[]),
+  {n:"nar",t:CUP_END[k]}];}
+function aftermathSteps(G,L){const me=G.F[L.a],op=G.F[L.b];const mates=roster(G).filter(f=>f.id!==me.id);const m=mates[0];if(L.cup)return cupNewsSteps(G,L,me,m);const steps=[];
   if(L.win==="A"){steps.push({n:"nar",t:`เช้าวันต่อมา ข่าว${me.name}เอาชนะ${op.name}ไปทั่วหมู่บ้าน`});
     if(m)steps.push({n:m.id,f:"happy",l:"train",t:WIN_TEASE[m.id]?pickR(WIN_TEASE[m.id],G,"t_"+m.id)(me.name):`ยินดีด้วยนะ ${me.name}!`});
     if(op.id==="ploy")steps.push({n:me.id,f:"flustered",l:"train",t:"หนู… ชนะพี่พลอยได้จริง ๆ เหรอ ตีห้าทุกวันมันไม่เสียเปล่าเลย"});
@@ -7707,7 +7742,7 @@ EVENTS.push(
 {id:"yt_flood_hit",annual:true,pri:3,look:"casual",bg:"camp",when:G=>ytIn(G,"flood"),steps:[{fx:G=>{G.cash-=6000;G.disaster={name:"น้ำท่วม",untilAbs:absWeek(G)+3,inc:.5};}},{"n": "nar", "t": "คืนเดียวน้ำปิงเอ่อเข้าค่ายถึงเข่า กระสอบทรายลอยเป็นทุ่น ไก่ชนขึ้นไปยืนบนเวทีมองลงมาอย่างไม่พอใจ"},{"n": "coach", "t": "ค่าซ่อม ฿6,000 สามอาทิตย์นี้ซ้อมได้ไม่เต็มที่ นักเรียนก็มาได้ครึ่งเดียว"},{"n": "kati", "f": "happy", "l": "casual", "t": "หนูเตะน้ำได้แรงขึ้นนะคะ! …ฟังดูไม่ค่อยช่วยใช่ไหมคะ"}]},
 {id:"yt_flood_end",annual:true,pri:2,look:"casual",bg:"camp",when:G=>ytKey(G)==="flood"&&G.week>=17&&G.week<=19,steps:[{fx:G=>{roster(G).forEach(f=>f.morale=Math.min(100,f.morale+3));}},{"n": "nar", "t": "น้ำลดแล้ว ชาวบ้านทั้งตำบลถือไม้กวาดมาช่วยล้างค่าย มีคนเอาข้าวเหนียวหมูทอดมาเลี้ยงทุกคน"},{"n": "npc", "who": "ป้าศรี แม่ค้าผัก", "t": "ปีก่อนเด็กค่ายนี้ช่วยป้าขนผักหนีน้ำ ปีนี้ป้าขอมาช่วยคืนบ้าง"},{n:"nar",t:"ทุกคนกำลังใจ +3"}]},
 {id:"yt_intro_sponsor",annual:true,pri:2,look:"casual",bg:"camp",when:G=>ytKey(G)==="sponsor"&&G.week>=1,steps:[{"n": "nar", "t": "ชายใส่สูทถือแฟ้มลงจากรถตู้ แนะนำตัวว่ามาจากเครื่องดื่มชูกำลังยี่ห้อใหม่"},{"n": "npc", "who": "ผู้จัดการแบรนด์ 'ฮึดเดียว'", "t": "เราจ่ายสัปดาห์ละสองพันจนถึงสัปดาห์ 40 ขอแค่ติดโลโก้ที่กางเกงมวย ถ้าค่ายชนะครบ 8 ไฟต์ภายในสัปดาห์ 40 รับโบนัสอีกสองหมื่นครับ"},{choice:[{t:"รับข้อเสนอ ติดโลโก้ 'ฮึดเดียว'",fx:G=>{G.yt.acc=1;},then:[{"n": "kati", "f": "flustered", "l": "casual", "t": "โลโก้ใหญ่จังค่ะ… ใหญ่กว่าชื่อหนูอีก"}]},{t:"ปฏิเสธอย่างสุภาพ",then:[{"n": "coach", "t": "ก็ดี กางเกงมวยของปู่ชัยไม่เคยมีโลโก้"}]}]}]},
-{id:"yt_sponsor_end",annual:true,pri:2,look:"casual",bg:"camp",when:G=>ytKey(G)==="sponsor"&&G.yt.acc&&G.week>=41,steps:[{fx:G=>{const w=ytSponsorWins(G);G.yt.win=w;if(w>=8)G.cash+=20000;}},{n:"npc",who:"ผู้จัดการแบรนด์ 'ฮึดเดียว'",t:G=>G.yt.win>=8?`ปีนี้ค่ายชนะ ${G.yt.win} ไฟต์! โบนัสสองหมื่นตามสัญญาครับ ปีหน้าคุยกันใหม่นะ`:`ปีนี้ชนะ ${G.yt.win} ไฟต์ ยังไม่ถึงแปด โบนัสคงต้องรอปีหน้านะครับ ขอบคุณที่ติดโลโก้ให้ทั้งปี`}]},
+{id:"yt_sponsor_end",annual:true,pri:2,look:"casual",bg:"camp",when:G=>ytKey(G)==="sponsor"&&G.yt.acc&&G.week>=41,steps:[{fx:G=>{const w=ytSponsorWins(G);G.yt.win=w;if(w>=8)G.cash+=20000;}},{n:"npc",who:"ผู้จัดการแบรนด์ 'ฮึดเดียว'",t:G=>G.yt.win>=8?`ปีนี้ค่ายชนะ ${G.yt.win} ไฟต์! โบนัสสองหมื่นตามสัญญาครับ ปีหน้าคุยกันใหม่นะ`:`ปีนี้ชนะ ${G.yt.win!=null?G.yt.win:ytSponsorWins(G)} ไฟต์ ยังไม่ถึงแปด โบนัสคงต้องรอปีหน้านะครับ ขอบคุณที่ติดโลโก้ให้ทั้งปี`}]},
 {id:"yt_intro_pm25",annual:true,pri:2,look:"casual",bg:"camp",when:G=>ytKey(G)==="pm25"&&G.week>=1,steps:[{"n": "nar", "t": "ข่าวต้นปีบอกว่าหน้าแล้งปีนี้ไฟป่าจะหนัก ฝุ่นคงมาเร็วกว่าทุกปี"},{"n": "coach", "t": "ราวสัปดาห์ 37 ถึง 46 ฝุ่นจะคลุมทั้งเมือง ซ้อมกลางแจ้งได้ผลน้อยลง ถ้าเงินถึง ห้องซ้อมในร่มกรองฝุ่นช่วยได้ แต่แพงมากนะ"},{n:"nar",t:"😷 ปีฝุ่น PM2.5: สัปดาห์ 37–46 ซ้อมได้ผลน้อยลง ห้องซ้อมกรองฝุ่นอยู่ในหน้าจัดการค่าย"}]},
 {id:"yt_pm_start",annual:true,pri:2,look:"casual",bg:"camp",when:G=>ytIn(G,"pm25"),steps:[{"n": "nar", "t": "เช้านี้มองไม่เห็นดอยสุเทพ ฟ้าเป็นสีส้มขุ่น ทุกคนใส่หน้ากากมาซ้อม"},{"n": "kati", "f": "pout", "l": "casual", "t": "หายใจแล้วเหมือนกินข้าวเกรียมเลยค่ะ…"},{n:"coach",t:G=>G.fac.airgym?"โชคดีที่เรามีห้องกรองฝุ่น ย้ายเข้าไปซ้อมข้างในได้เต็มที่":"ซ้อมเบา ๆ ไปก่อน ใครอยากช่วยชาวบ้าน ไปแจกหน้ากากได้ในกิจกรรมค่าย"}]},
 {id:"yt_intro_tourist",annual:true,pri:2,look:"casual",bg:"market",when:G=>ytKey(G)==="tourist"&&G.week>=1,steps:[{"n": "nar", "t": "สายการบินเปิดเที่ยวบินตรงใหม่ นักท่องเที่ยวเต็มเมือง หน้าค่ายมีคนมายืนถ่ายรูปทุกวัน"},{"n": "coach", "t": "ปีนี้ขึ้นค่าเรียนได้ 20% แต่ค่ายจะวุ่น เด็ก ๆ จะเหนื่อยขึ้นนิดหน่อยทุกสัปดาห์"},{"n": "kati", "f": "happy", "l": "casual", "t": "หนูต้องหัดพูด 'ฮาวอาร์ยู' ใหม่แล้วค่ะ"}]},
@@ -9160,7 +9195,7 @@ AU.gsfx=function(kind,a){if(!this.init()||this.muted||!SETTINGS.sfx)return;const
   if(kind==="shimmer")for(let i=0;i<6;i++)T(i*.05,{f:1400+Math.random()*1400,type:"sine",dur:.12,peak:.06});};
 
 // ================= MUAY THAI MOE v1.3 — UI =================
-const VERSION="1.91.174";
+const VERSION="1.91.175";
 const CUR_LANG=(typeof window!=="undefined"&&window.LANG)||"th";
 const TH_LABEL=String.fromCharCode(3652,3607,3618);
 function langSwitch(cls){return `<div class="langsw ${cls||""}" role="group" aria-label="Language">${[["th",TH_LABEL],["en","EN"]].map(([k,l])=>`<button class="lsb ${CUR_LANG===k?"on":""}" data-act="setlang" data-v="${k}" aria-pressed="${CUR_LANG===k}">${l}</button>`).join("")}</div>`;}
@@ -10629,7 +10664,7 @@ const CT_AX=[["หมัด",a=>a.punch,"punch","หมัดคืออาว�
  ["อึด",a=>(a.stamina+a.dur)/2,"cond","อึดคือความอึดรวมกับความทน ถ้าต่ำ ยกท้าย ๆ จะหมดแรง และโดนนิดเดียวก็เจ็บ"],
  ["พลัง",a=>a.power,"cond","พลังคือความหนักของอาวุธ ออกโดนแต่ไม่หนัก ก็ไม่มีทางน็อกใคร"]];
 function coachTalkPick(G){let best=null;for(const f of roster(G)){if(typeof isAway==="function"&&isAway(G,f.id))continue;const v=CT_AX.map(([,g])=>g(f.a)),m=v.reduce((a,b)=>a+b,0)/v.length;
-  v.forEach((x,i)=>{const d=m-x,k=f.id+":"+i;if(k!==G.coachTalkLast&&(!best||d>best.d))best={f,i,d,x,m};});}return best;}
+  v.forEach((x,i)=>{const d=m-x,k=f.id+":"+i;if(k!==G.coachTalkLast&&(!best||d>best.d))best={f,i,d,x,m};});}return best&&best.d>=0.5?best:null;} /* v1.91.166: no "0.0 below her average" talk when nobody has a weak spot */
 /* v1.91.80 (Man): his talks vary — half the time a weak number, otherwise one girl's hidden power or one of her moves */
 const CT_TRTIP={grit:"ยิ่งซ้อมสม่ำเสมอ ไม่ปล่อยให้ว่าง โบนัสยิ่งสะสมไว้ใช้วันชก",surge:"ช่วงซ้อมหนักจะขึ้นไว แต่ล้าง่ายกว่าคนอื่น คอยดูความล้าด้วย",
  flow:"แผนคุมระยะหรือรอสวนเข้ากับเธอ ให้คู่ชกออกอาวุธเยอะ ๆ แล้วพลาดเอง",wits:"เลือดเหลือน้อยอย่าเพิ่งโยนผ้า ตอนนั้นแหละที่เธอหลบเก่งที่สุด",
@@ -10723,8 +10758,8 @@ function tiredScene(done){G.tiredAt=G.tiredAt||{};const f=roster(G).find(x=>!x.i
   playScene([{n:f.id,f:"sad",l:"fight",t:ask},...(coachOn()?[{n:"coach",t:`ล้า ${Math.round(f.fatigue)} แล้ว ฝืนต่อเสี่ยงเจ็บ ครูว่าพักฟื้นสัปดาห์นี้`}]:[]),
     {choice:[{t:"ให้พักฟื้นสัปดาห์นี้",fx:()=>{if(!trLocked(f))f.plan.preset="rest";f.morale=Math.min(100,f.morale+4);},then:[{n:f.id,f:"happy",l:"fight",t:{kati:"ขอบคุณค่ะ! สัปดาห์หน้าหนูจะกลับมาเต็มร้อย",mali:"เย้~ นอนกอดเจ้าโค้ชทั้งวันเลย!",rin:"ขอบคุณค่ะ ฉันจะใช้วันพักทบทวนเทปไปด้วย"}[f.id]||"ขอบคุณค่ะ!"}]},
      {t:"อดทนอีกนิด ไฟต์ใกล้แล้ว",fx:()=>{f.morale=Math.max(0,f.morale-5);},then:[{n:f.id,f:"sad",l:"fight",t:{kati:"…ค่ะ หนูจะพยายาม",mali:"งื้อ… ได้ค่ะ แต่ห้ามดุนะถ้ามะลิช้า",rin:"…รับทราบค่ะ ฉันจะบันทึกไว้ว่าฝืนเพราะอะไร"}[f.id]||"…ค่ะ"}]}]}],()=>{AU.startMusic("hub");save();done();},{bg:"gym",look:"fight"});}
-function aftermathScene(done){const L=G.lastBig;if(!L||L.shown||L.absWeek==null||gameWeek(G)-L.absWeek>1){done();return;}L.shown=true;const me=G.F[L.a];if(!me||me.camp!=="player"){done();return;}
-  playScene(aftermathSteps(G,L),()=>{AU.startMusic("hub");save();done();},{bg:"gym",look:"train"});}
+function aftermathScene(done){const L=G.lastBig;if(!L||L.shown||L.absWeek==null||gameWeek(G)-L.absWeek>1){done();return;}L.shown=true;G.aftLast=gameWeek(G);const me=G.F[L.a];if(!me||me.camp!=="player"){done();return;}
+  playScene(aftermathSteps(G,L),()=>{AU.startMusic("hub");save();done();},{bg:L.cup?"camp":"gym",look:L.cup?"casual":"train"});}
 // v1.15: Kru Daeng comes back from his leave and checks on everyone
 function coachBackScene(done){if(!G.coachAwayAbs||gameWeek(G)<G.coachAwayAbs||(G.flags&&G.flags.coachBack)){done();return;}G.flags=G.flags||{};G.flags.coachBack=true;const R=roster(G);const k=R[0];
   const tired=R.filter(f=>f.fatigue>=50).map(f=>f.name);
@@ -10839,7 +10874,7 @@ const CHEER={kati:[["ปู่ชัยดูอยู่นะ ชกให้�
   mali:[["ไปโชว์ลูกเตะให้ทั้งเวทีเห็นเลย!","ได้เลย~ มะลิจะเตะให้เสียงดังที่สุดในคืนนี้!",1],["แม่เธอต้องภูมิใจแน่","…ขอบคุณนะ มะลิจะไม่ร้องไห้ก่อนชกหรอก",0],["อย่าประมาทล่ะ","รู้แล้วน่า~",0]],
   rin:[["เชื่อในข้อมูลที่เธอวิเคราะห์มา","…ค่ะ ทุกอย่างอยู่ในหัวแล้ว เหลือแค่ทำให้ได้",1],["สู้ ๆ นะริน!","ขอบคุณค่ะ… ฉันจะพยายาม",0],["ชกให้สนุกนะ","สนุก… จะลองดูค่ะ",0]]};
 function cheerLines(f){return CHEER[f.id]||[["เธอทำได้!","ค่ะ!",1],["ตามแผนนะ","รับทราบ",0],["อย่าเจ็บตัวล่ะ","ค่ะ",0]];}
-function openFight2(b,done){UI.fight={b,done,stage:"pre",plan:b.plan||"balanced",tac:{focus:"auto",pace:"steady",target:(b.tac&&b.tac.target)||"body"},F:null,shown:[],pending:[],timer:null,res:null,caption:null};render();}
+function openFight2(b,done){UI.confirmTowel=false;UI.towelCoach=false;UI.fight={b,done,stage:"pre",plan:b.plan||"balanced",tac:{focus:"auto",pace:"steady",target:(b.tac&&b.tac.target)||"body"},F:null,shown:[],pending:[],timer:null,res:null,caption:null};render();}
 // v1.46: side-by-side numbers before the bell (opponent hidden until scouted)
 /* v1.91.0: the fighter's style and the wheel, on her profile — the main heroines can change it with the school line they build */
 /* v1.91.5 hot-form title badge (win HOT_AT in a row) */
@@ -11164,7 +11199,9 @@ function fightEnd(){const U=UI.fight;if(U.brawl){brawlEnd();return;}U.stage="don
   if(!U.b.ev)G.log.push(`${me.name} ${r.win==="A"?"ชนะ":r.win==="B"?"แพ้":"เสมอ"} ${G.F[U.b.b].name} (${r.type})`);
   if(G.F[U.b.b].canon){G.faceoffLast=G.faceoffLast||{};G.faceoffLast[`${U.b.a}_${U.b.b}`]={win:r.win,week:G.week};
     G.faceoffStats=G.faceoffStats||{};const key=`${U.b.a}_${U.b.b}`,s=G.faceoffStats[key]=G.faceoffStats[key]||{w:0,l:0,d:0};s[r.win==="A"?"w":r.win==="B"?"l":"d"]++;}
-  {const op=G.F[U.b.b];if(r.win!=="D"&&!TIER[U.b.tier].off&&(op.canon||U.b.tier==="semi"||U.b.tier==="final"||/KO/.test(r.type)))G.lastBig={a:me.id,b:op.id,win:r.win,wk:G.week,absWeek:gameWeek(G),shown:false};}
+  {const op=G.F[U.b.b];/* v1.91.166 (Man): the morning-after news came too often — now only semi/final, or a named rival at most once a month; trip, gang and underground bouts have their own scenes */
+  const RB=U.b.region,cool=gameWeek(G)-(G.aftLast==null?-99:G.aftLast)>=4;
+  if(r.win!=="D"&&!TIER[U.b.tier].off&&!U.b.ev&&(RB?(RB.dest&&!RB.local&&!RB.lr&&!RB.series&&r.win==="A"&&cool&&Math.random()<.34):(U.b.tier==="semi"||U.b.tier==="final"||op.canon&&cool)))G.lastBig={a:me.id,b:op.id,win:r.win,wk:G.week,absWeek:gameWeek(G),shown:false};}
   if(r.win==="B"&&!U.b.ev){const F=U.F,st=s=>({landed:s.landed,thrown:s.thrown,wl:{...s.wl},sta:Math.round(s.sta),kd:s.kd,legs:Math.round(s.legs)});
     G.losses=(G.losses||[]).concat([{wk:G.week,absWeek:gameWeek(G),a:me.id,b:U.b.b,type:r.type,round:r.round,cards:F.cards.map(c=>[...c]),A:st(F.A),B:st(F.B),sc:scouted(U.b.b),od:Math.round(ovr(G.F[U.b.b])-ovr(me)),plan:U.plan||"balanced",tg:(F.A.tac&&F.A.tac.target)||"",care:U.careOK||0}]).slice(-6);}
   U.afterScene=r.towel?towelScene(me):(prodigyResultScene(G,U.b,r.win)||vectorResultScene(G,U.b,r.win));
@@ -15571,7 +15608,7 @@ CFX.pet_mudlek={bg:"bg_camp_day.webp",cap:"",row:"idle",fx:"hearts"};CFX.pet_mud
 {const _t=trainWeek;trainWeek=function(G,f,rng){const r=_t(G,f,rng);try{if(f.id==="fah"&&f.camp==="player"&&f.gains){const p=pv(G).find(x=>x.k==="mudlek");if(p&&!away(G,p)&&tier(p)){
   const pc=[0,.03,.05,.08][tier(p)]*(p.joy<30?.5:1);for(const x of Object.keys(f.gains)){const d=f.gains[x];if(d>0){const add=d*pc;f.a[x]=Math.min(stCap(f),f.a[x]+add);f.gains[x]=d+add;}}}}}catch(e){}return r;};}
 EVENTS.push({id:"pet_mudlek",look:"casual",bg:"camp",pri:2,when:G=>inCamp(G,"fah")&&!hasPet(G,"mudlek"),steps:[
-  {n:"nar",t:"เช้าวันแรกที่ฟ้าย้ายมาอยู่ค่ายศิริชัย เธอลากกระเป๋าเดินทางมาหนึ่งใบ กับตะกร้าหวายอีกหนึ่งใบที่คลุมผ้าไว้มิดชิด"},
+  {n:"nar",t:"ฟ้ากลับไปขนของชุดสุดท้ายที่ค่ายพยัคฆ์ทอง ขากลับเธอลากกระเป๋ามาหนึ่งใบ กับตะกร้าหวายอีกหนึ่งใบที่คลุมผ้าไว้มิดชิด"},
   {n:"nar",t:"ตะกร้าหวายขยับเอง แล้วก็ร้อง “แง้ว” เสียงแหบ ๆ"},
   {n:"fah",f:"flustered",l:"casual",t:"…อย่ามองแบบนั้น! หมัดเหล็กไม่ใช่ของพยัคฆ์ทองแล้ว ฟ้าย้าย มันก็ต้องย้ายตาม จบ"},
   {n:"nar",t:"ฟ้าเปิดผ้าคลุม แมวขนสีเงินเหมือนผมฟ้าไม่มีผิดกระโดดออกมา เท้าขาวทั้งสี่ข้างเหมือนใส่ถุงเท้า หูข้างหนึ่งแหว่งนิด ๆ ตาเหลืองจ้องทุกคนเหมือนกำลังประเมินคู่ชก"},
@@ -15666,7 +15703,7 @@ const STATS_HOST="https://us.i.posthog.com";     /* EU projects: https://eu.i.po
 <script>
 (function(){
 /* v1.87: Thai code ships inside index.html; English code (en.js) and the dictionary (i18n.js) load only when needed */
-var B="e95ef21824";
+var B="252c1e417a";
 var L="";try{L=localStorage.getItem("mtm_lang")||"";}catch(e){}
 try{var h=(location.hash||"").match(/lang=(th|en)/);if(h)L=h[1];}catch(e){}
 if(L!=="th"&&L!=="en")L="th";

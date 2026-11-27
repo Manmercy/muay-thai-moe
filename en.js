@@ -3888,7 +3888,42 @@ const WIN_SELF={kati:["But it's not enough yet! My goal is still far ahead","Tha
   mali:["Yay~ but Mali's not full yet! Give me the next fight","Legs a bit swollen, but worth it~ Somebody make Mali khanom khrok!","Last night Mali saw Mom smiling in the chat~"],
   rin:["Won as calculated… but the margin is still too narrow. Must be better","The result matched the model. I'll make the model even more accurate","…I'm happy. I just don't know how to show it"]};
 const COACH_WIN=["Don't get cocky after a win. Five a.m. tomorrow as usual","Good, but your guard dropped in round two. I saw","Grandpa Chai is watching. A win like this would satisfy him","Eat well, sleep enough, then back to training","You can win, you can lose. Don't forget why you won today"];
-function aftermathSteps(G,L){const me=G.F[L.a],op=G.F[L.b];const mates=roster(G).filter(f=>f.id!==me.id);const m=mates[0];const steps=[];
+/* v1.91.166 (Man): a regional title — the whole village hears, the aunties bring breakfast; up to four cups per edition, so every line rotates */
+const CUP_ME={kati:["Thank you, aunties… Grandpa, I brought the cup home.","Auntie, I can't keep up! …But I'm not saying no to the grilled chicken."],
+  mali:["Aunties~ Mali will finish every single tiffin! …Can I wrap some up for Mom too?","Khanom krok again~ Mali loves this village the most!"],
+  rin:["Thank you… three baskets of sticky rice were not in my plan.","I'm logging this: every cup brings an average of two more tiffin carriers."],
+  fah:["Aunties! Fah'll take a photo of each of you with the cup! Line up, quick!","Going live! Aunties, wave! The viewers want to see Fah's real fan club!"],
+  ploy:["…Thank you. Back at Golden Tiger, nobody ever brought me breakfast like this.","Auntie, you don't need to give me that much… fine. One more scoop."]};
+const CUP_ARRIVE=["Before eight o'clock, the village aunties are crowding the camp gate with stacked tiffin carriers.",
+  "The aunties come even earlier this time — one rides in on a sidecar motorbike with a whole pot of curry.",
+  "A folding table has been waiting at the camp gate since six. Nobody knows who set it up.",
+  "The fourth cup. The village loudspeaker has been announcing it since half past five, and the aunties arrive before the fighters are even up."];
+const CUP_TAEW=[n=>`${n}! Auntie watched the live stream all night and banged a basin till it dented! Som tam without crab, grilled chicken, sticky rice — eat every bite, dear!`,
+  n=>`${n}! Last cup I dented a basin, so this time I banged a pot lid instead… dented that too.`,
+  n=>`I named a new dish: "Tam ${n}" — three chillies, one for each of the camp's cups.`,
+  n=>`${n}… thirty years selling som tam by the temple, and no news ever sold like this camp's news, dear.`];
+const CUP_AUNT=[["Auntie Boonmee (morning market)",r=>`Champion ${r} champion, no less! When Grandpa Chai was young I only ever saw that on TV — and now it's right here on our street.`],
+  ["Granny Chaliao (khanom krok stall)",r=>`Granny made two trays of khanom krok. One for the ${r} champion, the other for the ones who haven't got a cup yet — for strength.`],
+  ["Auntie Samorn (fruit seller)",r=>`The prettiest mango on my stall — I saved it just for the ${r} champion. Nobody else touch it!`],
+  ["Auntie Juk (old-style coffee shop)",r=>`This Thai iced tea is on me. The ${r} champion drinks free all year… but come tell Auntie about the fight every morning.`]];
+const CUP_COACH=["Regional champion or not, it's 5 a.m. tomorrow as usual… but this morning, eat first.","Eat your fill, then go thank every one of the aunties. Our boxing lives because of the people around here.",
+  "Grandpa Chai once told me: the day the aunties bring tiffins to the gate, the camp belongs to the village.","All four regions… I've got nothing to teach this morning. Eat."];
+const CUP_END=["That morning the whole camp eats breakfast on the training ring. Auntie Taew borrows the cup to show off at her som tam stall for a day.",
+  "The leftovers feed the whole camp for two more meals. Khao Tu gets a big bag of chicken bones.",
+  "The aunties leave late in the morning, the table still crowded with tiffin carriers and a small note: \"Wash them and bring them back.\"",
+  "All four cups now stand on the shelf beside Grandpa Chai's photo. The aunties put their palms together and wai his picture before they leave."];
+function cupNewsSteps(G,L,me,m){const rn=(typeof RG!=="undefined"&&RG[L.cup]&&RG[L.cup].name)||L.cupName||"regional";
+  const k=Math.max(0,Math.min(3,((G.region&&G.region.cups||[]).length||1)-1)),A=CUP_AUNT[k],own=CUP_ME[me.id];
+  return [
+  {n:"nar",t:`The next morning, the news that ${me.name} took the ${rn} title has reached every corner of the village, from the som tam stall by the temple to the morning market`},
+  {n:"nar",t:CUP_ARRIVE[k]},
+  {n:"npc",who:"Auntie Taew",t:CUP_TAEW[k](me.name)},
+  {n:"npc",who:A[0],t:A[1](rn)},
+  {n:me.id,f:"happy",l:"casual",t:own?pickR(own,G,"cup_"+me.id):"Thank you, all of you aunties!"},
+  ...(m?[{n:m.id,f:"happy",l:"casual",t:WIN_TEASE[m.id]?pickR(WIN_TEASE[m.id],G,"t_"+m.id)(me.name):`Congratulations, ${me.name}!`}]:[]),
+  ...(coachOn()?[{n:"coach",t:CUP_COACH[k]}]:[]),
+  {n:"nar",t:CUP_END[k]}];}
+function aftermathSteps(G,L){const me=G.F[L.a],op=G.F[L.b];const mates=roster(G).filter(f=>f.id!==me.id);const m=mates[0];if(L.cup)return cupNewsSteps(G,L,me,m);const steps=[];
   if(L.win==="A"){steps.push({n:"nar",t:`The next morning, the news that ${me.name} beat ${op.name} spreads through the village`});
     if(m)steps.push({n:m.id,f:"happy",l:"train",t:WIN_TEASE[m.id]?pickR(WIN_TEASE[m.id],G,"t_"+m.id)(me.name):`Congratulations, ${me.name}!`});
     if(op.id==="ploy")steps.push({n:me.id,f:"flustered",l:"train",t:"I… really beat Ploy? All those five a.m.s weren't wasted"});
@@ -5198,7 +5233,7 @@ EVENTS.push(
 {id:"yt_flood_hit",annual:true,pri:3,look:"casual",bg:"camp",when:G=>ytIn(G,"flood"),steps:[{fx:G=>{G.cash-=6000;G.disaster={name:"The flood",untilAbs:absWeek(G)+3,inc:.5};}},{"n": "nar", "t": "In one night the Ping river floods the camp knee-deep. The heavy bags float like buoys, and the rooster stands on the ring glaring down."},{"n": "coach", "t": "Repairs cost ฿6,000. For three weeks we can't train properly, and only half the students can make it."},{"n": "kati", "f": "happy", "l": "casual", "t": "I can kick through water harder now! …That doesn't really help, does it."}]},
 {id:"yt_flood_end",annual:true,pri:2,look:"casual",bg:"camp",when:G=>ytKey(G)==="flood"&&G.week>=17&&G.week<=19,steps:[{fx:G=>{roster(G).forEach(f=>f.morale=Math.min(100,f.morale+3));}},{"n": "nar", "t": "The water goes down. Half the subdistrict turns up with brooms to scrub the camp, and someone brings sticky rice and fried pork for everyone."},{"n": "npc", "who": "Auntie Sri, the vegetable seller", "t": "Last year your kids carried my vegetables out of the flood. This year it's my turn."},{n:"nar",t:"Everyone's morale +3"}]},
 {id:"yt_intro_sponsor",annual:true,pri:2,look:"casual",bg:"camp",when:G=>ytKey(G)==="sponsor"&&G.week>=1,steps:[{"n": "nar", "t": "A man in a suit steps out of a van with a folder. He's from a new energy-drink brand."},{"n": "npc", "who": "Brand manager, 'One Push'", "t": "We pay two thousand a week until week 40, just for our logo on the shorts. If the camp wins 8 fights by week 40, there's a twenty-thousand bonus."},{choice:[{t:"Take the deal and wear the 'One Push' logo",fx:G=>{G.yt.acc=1;},then:[{"n": "kati", "f": "flustered", "l": "casual", "t": "That logo's huge… bigger than my name."}]},{t:"Politely decline",then:[{"n": "coach", "t": "Fine by me. Grandpa Chai's shorts never had a logo."}]}]}]},
-{id:"yt_sponsor_end",annual:true,pri:2,look:"casual",bg:"camp",when:G=>ytKey(G)==="sponsor"&&G.yt.acc&&G.week>=41,steps:[{fx:G=>{const w=ytSponsorWins(G);G.yt.win=w;if(w>=8)G.cash+=20000;}},{n:"npc",who:"Brand manager, 'One Push'",t:G=>G.yt.win>=8?`This year the camp won ${G.yt.win} fights! Here's the twenty-thousand bonus as promised. Let's talk again next year.`:`This year: ${G.yt.win} fights, short of eight, so no bonus this time. Thanks for wearing the logo all year.`}]},
+{id:"yt_sponsor_end",annual:true,pri:2,look:"casual",bg:"camp",when:G=>ytKey(G)==="sponsor"&&G.yt.acc&&G.week>=41,steps:[{fx:G=>{const w=ytSponsorWins(G);G.yt.win=w;if(w>=8)G.cash+=20000;}},{n:"npc",who:"Brand manager, 'One Push'",t:G=>G.yt.win>=8?`This year the camp won ${G.yt.win} fights! Here's the twenty-thousand bonus as promised. Let's talk again next year.`:`This year: ${G.yt.win!=null?G.yt.win:ytSponsorWins(G)} fights, short of eight, so no bonus this time. Thanks for wearing the logo all year.`}]},
 {id:"yt_intro_pm25",annual:true,pri:2,look:"casual",bg:"camp",when:G=>ytKey(G)==="pm25"&&G.week>=1,steps:[{"n": "nar", "t": "Early-year news says the dry-season fires will be bad. The haze will come early."},{"n": "coach", "t": "From around week 37 to 46 the haze will cover the city and outdoor training won't do much. An indoor gym with air filters would fix it, if we can afford it. It isn't cheap."},{n:"nar",t:"😷 PM2.5 year: weeks 37–46 training is less effective. The filtered indoor gym is in Manage camp."}]},
 {id:"yt_pm_start",annual:true,pri:2,look:"casual",bg:"camp",when:G=>ytIn(G,"pm25"),steps:[{"n": "nar", "t": "This morning Doi Suthep has vanished. The sky is a murky orange and everyone trains in masks."},{"n": "kati", "f": "pout", "l": "casual", "t": "Breathing feels like eating burnt rice…"},{n:"coach",t:G=>G.fac.airgym?"Lucky we built the filtered gym. Move inside and train as usual.":"Train light for now. If you want to help the neighbours, hand out masks as this week's camp activity."}]},
 {id:"yt_intro_tourist",annual:true,pri:2,look:"casual",bg:"market",when:G=>ytKey(G)==="tourist"&&G.week>=1,steps:[{"n": "nar", "t": "A new direct flight opens and the city fills with tourists. Every day someone is taking photos at the camp gate."},{"n": "coach", "t": "We can charge 20% more for classes this year, but the camp will be hectic and the girls a little more tired each week."},{"n": "kati", "f": "happy", "l": "casual", "t": "I need to practise my 'how are you' again."}]},
@@ -6651,7 +6686,7 @@ AU.gsfx=function(kind,a){if(!this.init()||this.muted||!SETTINGS.sfx)return;const
   if(kind==="shimmer")for(let i=0;i<6;i++)T(i*.05,{f:1400+Math.random()*1400,type:"sine",dur:.12,peak:.06});};
 
 // ================= MUAY THAI MOE v1.3 — UI =================
-const VERSION="1.91.174";
+const VERSION="1.91.175";
 const CUR_LANG=(typeof window!=="undefined"&&window.LANG)||"th";
 const TH_LABEL=String.fromCharCode(3652,3607,3618);
 function langSwitch(cls){return `<div class="langsw ${cls||""}" role="group" aria-label="Language">${[["th",TH_LABEL],["en","EN"]].map(([k,l])=>`<button class="lsb ${CUR_LANG===k?"on":""}" data-act="setlang" data-v="${k}" aria-pressed="${CUR_LANG===k}">${l}</button>`).join("")}</div>`;}
@@ -8120,7 +8155,7 @@ const CT_AX=[["Punch",a=>a.punch,"punch","Punches are the mid-range weapon; high
  ["Endurance",a=>(a.stamina+a.dur)/2,"cond","Endurance is stamina plus durability. Low, and she runs out of gas late and gets hurt by little shots."],
  ["Power",a=>a.power,"cond","Power is how heavy each weapon lands. Land it without weight and you'll never knock anyone out."]];
 function coachTalkPick(G){let best=null;for(const f of roster(G)){if(typeof isAway==="function"&&isAway(G,f.id))continue;const v=CT_AX.map(([,g])=>g(f.a)),m=v.reduce((a,b)=>a+b,0)/v.length;
-  v.forEach((x,i)=>{const d=m-x,k=f.id+":"+i;if(k!==G.coachTalkLast&&(!best||d>best.d))best={f,i,d,x,m};});}return best;}
+  v.forEach((x,i)=>{const d=m-x,k=f.id+":"+i;if(k!==G.coachTalkLast&&(!best||d>best.d))best={f,i,d,x,m};});}return best&&best.d>=0.5?best:null;} /* v1.91.166: no "0.0 below her average" talk when nobody has a weak spot */
 /* v1.91.80 (Man): his talks vary — half the time a weak number, otherwise one girl's hidden power or one of her moves */
 const CT_TRTIP={grit:"Train steadily, never let it slip. The bonus keeps stacking for fight day.",surge:"She improves fast in hard training blocks but tires more easily than others. Watch her fatigue.",
  flow:"Distance control or counter plans suit her. Let the opponent throw a lot and miss.",wits:"Low on health? Don't throw in the towel yet. That's exactly when she dodges best.",
@@ -8214,8 +8249,8 @@ function tiredScene(done){G.tiredAt=G.tiredAt||{};const f=roster(G).find(x=>!x.i
   playScene([{n:f.id,f:"sad",l:"fight",t:ask},...(coachOn()?[{n:"coach",t:`Fatigue ${Math.round(f.fatigue)} already. Pushing on risks injury, Coach says recover this week`}]:[]),
     {choice:[{t:"Rest this week",fx:()=>{if(!trLocked(f))f.plan.preset="rest";f.morale=Math.min(100,f.morale+4);},then:[{n:f.id,f:"happy",l:"fight",t:{kati:"Thank you! Next week I'll be back at a hundred percent",mali:"Yay~ hugging Little Coach in bed all day!",rin:"Thank you. I'll use the rest day to review tapes"}[f.id]||"Thank you!"}]},
      {t:"Hang in there a bit longer, the fight is close",fx:()=>{f.morale=Math.max(0,f.morale-5);},then:[{n:f.id,f:"sad",l:"fight",t:{kati:"…Okay. I'll try",mali:"Waah… okay, but don't scold Mali if she's slow",rin:"…Understood. I'll note down why we're pushing through"}[f.id]||"…Okay."}]}]}],()=>{AU.startMusic("hub");save();done();},{bg:"gym",look:"fight"});}
-function aftermathScene(done){const L=G.lastBig;if(!L||L.shown||L.absWeek==null||gameWeek(G)-L.absWeek>1){done();return;}L.shown=true;const me=G.F[L.a];if(!me||me.camp!=="player"){done();return;}
-  playScene(aftermathSteps(G,L),()=>{AU.startMusic("hub");save();done();},{bg:"gym",look:"train"});}
+function aftermathScene(done){const L=G.lastBig;if(!L||L.shown||L.absWeek==null||gameWeek(G)-L.absWeek>1){done();return;}L.shown=true;G.aftLast=gameWeek(G);const me=G.F[L.a];if(!me||me.camp!=="player"){done();return;}
+  playScene(aftermathSteps(G,L),()=>{AU.startMusic("hub");save();done();},{bg:L.cup?"camp":"gym",look:L.cup?"casual":"train"});}
 // v1.15: Kru Daeng comes back from his leave and checks on everyone
 function coachBackScene(done){if(!G.coachAwayAbs||gameWeek(G)<G.coachAwayAbs||(G.flags&&G.flags.coachBack)){done();return;}G.flags=G.flags||{};G.flags.coachBack=true;const R=roster(G);const k=R[0];
   const tired=R.filter(f=>f.fatigue>=50).map(f=>f.name);
@@ -8330,7 +8365,7 @@ const CHEER={kati:[["Grandpa Chai is watching. Make him proud","…Yes! I'll fig
   mali:[["Go show the whole arena that kick!","You got it~ Mali's kicks will be the loudest tonight!",1],["Your mom must be proud","…Thank you. Mali won't cry before a fight",0],["Don't get careless","I know, I know~",0]],
   rin:[["Trust the data you analyzed","…Yes. It's all in my head. Now I just have to do it",1],["Go get 'em, Rin!","Thank you… I'll try",0],["Have fun out there","Fun… I'll try",0]]};
 function cheerLines(f){return CHEER[f.id]||[["You can do it!","Yes!",1],["Follow the plan","Noted",0],["Don't get hurt","It is",0]];}
-function openFight2(b,done){UI.fight={b,done,stage:"pre",plan:b.plan||"balanced",tac:{focus:"auto",pace:"steady",target:(b.tac&&b.tac.target)||"body"},F:null,shown:[],pending:[],timer:null,res:null,caption:null};render();}
+function openFight2(b,done){UI.confirmTowel=false;UI.towelCoach=false;UI.fight={b,done,stage:"pre",plan:b.plan||"balanced",tac:{focus:"auto",pace:"steady",target:(b.tac&&b.tac.target)||"body"},F:null,shown:[],pending:[],timer:null,res:null,caption:null};render();}
 // v1.46: side-by-side numbers before the bell (opponent hidden until scouted)
 /* v1.91.0: the fighter's style and the wheel, on her profile — the main heroines can change it with the school line they build */
 /* v1.91.5 hot-form title badge (win HOT_AT in a row) */
@@ -8655,7 +8690,9 @@ function fightEnd(){const U=UI.fight;if(U.brawl){brawlEnd();return;}U.stage="don
   if(!U.b.ev)G.log.push(`${me.name} ${r.win==="A"?"Win":r.win==="B"?"Loss":"Draw"} ${G.F[U.b.b].name} (${r.type})`);
   if(G.F[U.b.b].canon){G.faceoffLast=G.faceoffLast||{};G.faceoffLast[`${U.b.a}_${U.b.b}`]={win:r.win,week:G.week};
     G.faceoffStats=G.faceoffStats||{};const key=`${U.b.a}_${U.b.b}`,s=G.faceoffStats[key]=G.faceoffStats[key]||{w:0,l:0,d:0};s[r.win==="A"?"w":r.win==="B"?"l":"d"]++;}
-  {const op=G.F[U.b.b];if(r.win!=="D"&&!TIER[U.b.tier].off&&(op.canon||U.b.tier==="semi"||U.b.tier==="final"||/KO/.test(r.type)))G.lastBig={a:me.id,b:op.id,win:r.win,wk:G.week,absWeek:gameWeek(G),shown:false};}
+  {const op=G.F[U.b.b];/* v1.91.166 (Man): the morning-after news came too often — now only semi/final, or a named rival at most once a month; trip, gang and underground bouts have their own scenes */
+  const RB=U.b.region,cool=gameWeek(G)-(G.aftLast==null?-99:G.aftLast)>=4;
+  if(r.win!=="D"&&!TIER[U.b.tier].off&&!U.b.ev&&(RB?(RB.dest&&!RB.local&&!RB.lr&&!RB.series&&r.win==="A"&&cool&&Math.random()<.34):(U.b.tier==="semi"||U.b.tier==="final"||op.canon&&cool)))G.lastBig={a:me.id,b:op.id,win:r.win,wk:G.week,absWeek:gameWeek(G),shown:false};}
   if(r.win==="B"&&!U.b.ev){const F=U.F,st=s=>({landed:s.landed,thrown:s.thrown,wl:{...s.wl},sta:Math.round(s.sta),kd:s.kd,legs:Math.round(s.legs)});
     G.losses=(G.losses||[]).concat([{wk:G.week,absWeek:gameWeek(G),a:me.id,b:U.b.b,type:r.type,round:r.round,cards:F.cards.map(c=>[...c]),A:st(F.A),B:st(F.B),sc:scouted(U.b.b),od:Math.round(ovr(G.F[U.b.b])-ovr(me)),plan:U.plan||"balanced",tg:(F.A.tac&&F.A.tac.target)||"",care:U.careOK||0}]).slice(-6);}
   U.afterScene=r.towel?towelScene(me):(prodigyResultScene(G,U.b,r.win)||vectorResultScene(G,U.b,r.win));
@@ -13063,7 +13100,7 @@ CFX.pet_mudlek={bg:"bg_camp_day.webp",cap:"",row:"idle",fx:"hearts"};CFX.pet_mud
 {const _t=trainWeek;trainWeek=function(G,f,rng){const r=_t(G,f,rng);try{if(f.id==="fah"&&f.camp==="player"&&f.gains){const p=pv(G).find(x=>x.k==="mudlek");if(p&&!away(G,p)&&tier(p)){
   const pc=[0,.03,.05,.08][tier(p)]*(p.joy<30?.5:1);for(const x of Object.keys(f.gains)){const d=f.gains[x];if(d>0){const add=d*pc;f.a[x]=Math.min(stCap(f),f.a[x]+add);f.gains[x]=d+add;}}}}}catch(e){}return r;};}
 EVENTS.push({id:"pet_mudlek",look:"casual",bg:"camp",pri:2,when:G=>inCamp(G,"fah")&&!hasPet(G,"mudlek"),steps:[
-  {n:"nar",t:"Fah's first morning at Sirichai camp. She drags in one suitcase, and one rattan basket covered tightly with a cloth."},
+  {n:"nar",t:"Fah went back to Golden Tiger for the last of her things. She came back dragging one suitcase — and a rattan basket with a cloth tucked tightly over it."},
   {n:"nar",t:"The rattan basket moves by itself, then lets out a hoarse \"meow\"."},
   {n:"fah",f:"flustered",l:"casual",t:"…Don't look at me like that! Iron Fist doesn't belong to Phayak Thong anymore. Fah moved, so he moves too. End of story."},
   {n:"nar",t:"Fah lifts the cloth. Out jumps a cat with silver fur exactly like Fah's hair, four white paws like little socks, a nick in one ear, and yellow eyes sizing everyone up like opponents."},

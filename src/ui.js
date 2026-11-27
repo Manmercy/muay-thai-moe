@@ -1,5 +1,5 @@
 // ================= MUAY THAI MOE v1.3 — UI =================
-const VERSION="1.91.174";
+const VERSION="1.91.175";
 const CUR_LANG=(typeof window!=="undefined"&&window.LANG)||"th";
 const TH_LABEL=String.fromCharCode(3652,3607,3618);
 function langSwitch(cls){return `<div class="langsw ${cls||""}" role="group" aria-label="Language">${[["th",TH_LABEL],["en","EN"]].map(([k,l])=>`<button class="lsb ${CUR_LANG===k?"on":""}" data-act="setlang" data-v="${k}" aria-pressed="${CUR_LANG===k}">${l}</button>`).join("")}</div>`;}
@@ -1468,7 +1468,7 @@ const CT_AX=[["หมัด",a=>a.punch,"punch","หมัดคืออาว�
  ["อึด",a=>(a.stamina+a.dur)/2,"cond","อึดคือความอึดรวมกับความทน ถ้าต่ำ ยกท้าย ๆ จะหมดแรง และโดนนิดเดียวก็เจ็บ"],
  ["พลัง",a=>a.power,"cond","พลังคือความหนักของอาวุธ ออกโดนแต่ไม่หนัก ก็ไม่มีทางน็อกใคร"]];
 function coachTalkPick(G){let best=null;for(const f of roster(G)){if(typeof isAway==="function"&&isAway(G,f.id))continue;const v=CT_AX.map(([,g])=>g(f.a)),m=v.reduce((a,b)=>a+b,0)/v.length;
-  v.forEach((x,i)=>{const d=m-x,k=f.id+":"+i;if(k!==G.coachTalkLast&&(!best||d>best.d))best={f,i,d,x,m};});}return best;}
+  v.forEach((x,i)=>{const d=m-x,k=f.id+":"+i;if(k!==G.coachTalkLast&&(!best||d>best.d))best={f,i,d,x,m};});}return best&&best.d>=0.5?best:null;} /* v1.91.166: no "0.0 below her average" talk when nobody has a weak spot */
 /* v1.91.80 (Man): his talks vary — half the time a weak number, otherwise one girl's hidden power or one of her moves */
 const CT_TRTIP={grit:"ยิ่งซ้อมสม่ำเสมอ ไม่ปล่อยให้ว่าง โบนัสยิ่งสะสมไว้ใช้วันชก",surge:"ช่วงซ้อมหนักจะขึ้นไว แต่ล้าง่ายกว่าคนอื่น คอยดูความล้าด้วย",
  flow:"แผนคุมระยะหรือรอสวนเข้ากับเธอ ให้คู่ชกออกอาวุธเยอะ ๆ แล้วพลาดเอง",wits:"เลือดเหลือน้อยอย่าเพิ่งโยนผ้า ตอนนั้นแหละที่เธอหลบเก่งที่สุด",
@@ -1562,8 +1562,8 @@ function tiredScene(done){G.tiredAt=G.tiredAt||{};const f=roster(G).find(x=>!x.i
   playScene([{n:f.id,f:"sad",l:"fight",t:ask},...(coachOn()?[{n:"coach",t:`ล้า ${Math.round(f.fatigue)} แล้ว ฝืนต่อเสี่ยงเจ็บ ครูว่าพักฟื้นสัปดาห์นี้`}]:[]),
     {choice:[{t:"ให้พักฟื้นสัปดาห์นี้",fx:()=>{if(!trLocked(f))f.plan.preset="rest";f.morale=Math.min(100,f.morale+4);},then:[{n:f.id,f:"happy",l:"fight",t:{kati:"ขอบคุณค่ะ! สัปดาห์หน้าหนูจะกลับมาเต็มร้อย",mali:"เย้~ นอนกอดเจ้าโค้ชทั้งวันเลย!",rin:"ขอบคุณค่ะ ฉันจะใช้วันพักทบทวนเทปไปด้วย"}[f.id]||"ขอบคุณค่ะ!"}]},
      {t:"อดทนอีกนิด ไฟต์ใกล้แล้ว",fx:()=>{f.morale=Math.max(0,f.morale-5);},then:[{n:f.id,f:"sad",l:"fight",t:{kati:"…ค่ะ หนูจะพยายาม",mali:"งื้อ… ได้ค่ะ แต่ห้ามดุนะถ้ามะลิช้า",rin:"…รับทราบค่ะ ฉันจะบันทึกไว้ว่าฝืนเพราะอะไร"}[f.id]||"…ค่ะ"}]}]}],()=>{AU.startMusic("hub");save();done();},{bg:"gym",look:"fight"});}
-function aftermathScene(done){const L=G.lastBig;if(!L||L.shown||L.absWeek==null||gameWeek(G)-L.absWeek>1){done();return;}L.shown=true;const me=G.F[L.a];if(!me||me.camp!=="player"){done();return;}
-  playScene(aftermathSteps(G,L),()=>{AU.startMusic("hub");save();done();},{bg:"gym",look:"train"});}
+function aftermathScene(done){const L=G.lastBig;if(!L||L.shown||L.absWeek==null||gameWeek(G)-L.absWeek>1){done();return;}L.shown=true;G.aftLast=gameWeek(G);const me=G.F[L.a];if(!me||me.camp!=="player"){done();return;}
+  playScene(aftermathSteps(G,L),()=>{AU.startMusic("hub");save();done();},{bg:L.cup?"camp":"gym",look:L.cup?"casual":"train"});}
 // v1.15: Kru Daeng comes back from his leave and checks on everyone
 function coachBackScene(done){if(!G.coachAwayAbs||gameWeek(G)<G.coachAwayAbs||(G.flags&&G.flags.coachBack)){done();return;}G.flags=G.flags||{};G.flags.coachBack=true;const R=roster(G);const k=R[0];
   const tired=R.filter(f=>f.fatigue>=50).map(f=>f.name);
@@ -1678,7 +1678,7 @@ const CHEER={kati:[["ปู่ชัยดูอยู่นะ ชกให้�
   mali:[["ไปโชว์ลูกเตะให้ทั้งเวทีเห็นเลย!","ได้เลย~ มะลิจะเตะให้เสียงดังที่สุดในคืนนี้!",1],["แม่เธอต้องภูมิใจแน่","…ขอบคุณนะ มะลิจะไม่ร้องไห้ก่อนชกหรอก",0],["อย่าประมาทล่ะ","รู้แล้วน่า~",0]],
   rin:[["เชื่อในข้อมูลที่เธอวิเคราะห์มา","…ค่ะ ทุกอย่างอยู่ในหัวแล้ว เหลือแค่ทำให้ได้",1],["สู้ ๆ นะริน!","ขอบคุณค่ะ… ฉันจะพยายาม",0],["ชกให้สนุกนะ","สนุก… จะลองดูค่ะ",0]]};
 function cheerLines(f){return CHEER[f.id]||[["เธอทำได้!","ค่ะ!",1],["ตามแผนนะ","รับทราบ",0],["อย่าเจ็บตัวล่ะ","ค่ะ",0]];}
-function openFight2(b,done){UI.fight={b,done,stage:"pre",plan:b.plan||"balanced",tac:{focus:"auto",pace:"steady",target:(b.tac&&b.tac.target)||"body"},F:null,shown:[],pending:[],timer:null,res:null,caption:null};render();}
+function openFight2(b,done){UI.confirmTowel=false;UI.towelCoach=false;UI.fight={b,done,stage:"pre",plan:b.plan||"balanced",tac:{focus:"auto",pace:"steady",target:(b.tac&&b.tac.target)||"body"},F:null,shown:[],pending:[],timer:null,res:null,caption:null};render();}
 // v1.46: side-by-side numbers before the bell (opponent hidden until scouted)
 /* v1.91.0: the fighter's style and the wheel, on her profile — the main heroines can change it with the school line they build */
 /* v1.91.5 hot-form title badge (win HOT_AT in a row) */
@@ -2003,7 +2003,9 @@ function fightEnd(){const U=UI.fight;if(U.brawl){brawlEnd();return;}U.stage="don
   if(!U.b.ev)G.log.push(`${me.name} ${r.win==="A"?"ชนะ":r.win==="B"?"แพ้":"เสมอ"} ${G.F[U.b.b].name} (${r.type})`);
   if(G.F[U.b.b].canon){G.faceoffLast=G.faceoffLast||{};G.faceoffLast[`${U.b.a}_${U.b.b}`]={win:r.win,week:G.week};
     G.faceoffStats=G.faceoffStats||{};const key=`${U.b.a}_${U.b.b}`,s=G.faceoffStats[key]=G.faceoffStats[key]||{w:0,l:0,d:0};s[r.win==="A"?"w":r.win==="B"?"l":"d"]++;}
-  {const op=G.F[U.b.b];if(r.win!=="D"&&!TIER[U.b.tier].off&&(op.canon||U.b.tier==="semi"||U.b.tier==="final"||/KO/.test(r.type)))G.lastBig={a:me.id,b:op.id,win:r.win,wk:G.week,absWeek:gameWeek(G),shown:false};}
+  {const op=G.F[U.b.b];/* v1.91.166 (Man): the morning-after news came too often — now only semi/final, or a named rival at most once a month; trip, gang and underground bouts have their own scenes */
+  const RB=U.b.region,cool=gameWeek(G)-(G.aftLast==null?-99:G.aftLast)>=4;
+  if(r.win!=="D"&&!TIER[U.b.tier].off&&!U.b.ev&&(RB?(RB.dest&&!RB.local&&!RB.lr&&!RB.series&&r.win==="A"&&cool&&Math.random()<.34):(U.b.tier==="semi"||U.b.tier==="final"||op.canon&&cool)))G.lastBig={a:me.id,b:op.id,win:r.win,wk:G.week,absWeek:gameWeek(G),shown:false};}
   if(r.win==="B"&&!U.b.ev){const F=U.F,st=s=>({landed:s.landed,thrown:s.thrown,wl:{...s.wl},sta:Math.round(s.sta),kd:s.kd,legs:Math.round(s.legs)});
     G.losses=(G.losses||[]).concat([{wk:G.week,absWeek:gameWeek(G),a:me.id,b:U.b.b,type:r.type,round:r.round,cards:F.cards.map(c=>[...c]),A:st(F.A),B:st(F.B),sc:scouted(U.b.b),od:Math.round(ovr(G.F[U.b.b])-ovr(me)),plan:U.plan||"balanced",tg:(F.A.tac&&F.A.tac.target)||"",care:U.careOK||0}]).slice(-6);}
   U.afterScene=r.towel?towelScene(me):(prodigyResultScene(G,U.b,r.win)||vectorResultScene(G,U.b,r.win));

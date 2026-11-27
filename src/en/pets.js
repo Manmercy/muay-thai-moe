@@ -132,7 +132,7 @@ CFX.pet_mudlek={bg:"bg_camp_day.webp",cap:"",row:"idle",fx:"hearts"};CFX.pet_mud
 {const _t=trainWeek;trainWeek=function(G,f,rng){const r=_t(G,f,rng);try{if(f.id==="fah"&&f.camp==="player"&&f.gains){const p=pv(G).find(x=>x.k==="mudlek");if(p&&!away(G,p)&&tier(p)){
   const pc=[0,.03,.05,.08][tier(p)]*(p.joy<30?.5:1);for(const x of Object.keys(f.gains)){const d=f.gains[x];if(d>0){const add=d*pc;f.a[x]=Math.min(stCap(f),f.a[x]+add);f.gains[x]=d+add;}}}}}catch(e){}return r;};}
 EVENTS.push({id:"pet_mudlek",look:"casual",bg:"camp",pri:2,when:G=>inCamp(G,"fah")&&!hasPet(G,"mudlek"),steps:[
-  {n:"nar",t:"Fah's first morning at Sirichai camp. She drags in one suitcase, and one rattan basket covered tightly with a cloth."},
+  {n:"nar",t:"Fah went back to Golden Tiger for the last of her things. She came back dragging one suitcase — and a rattan basket with a cloth tucked tightly over it."},
   {n:"nar",t:"The rattan basket moves by itself, then lets out a hoarse \"meow\"."},
   {n:"fah",f:"flustered",l:"casual",t:"…Don't look at me like that! Iron Fist doesn't belong to Phayak Thong anymore. Fah moved, so he moves too. End of story."},
   {n:"nar",t:"Fah lifts the cloth. Out jumps a cat with silver fur exactly like Fah's hair, four white paws like little socks, a nick in one ear, and yellow eyes sizing everyone up like opponents."},
