@@ -1,5 +1,5 @@
 // ================= MUAY THAI MOE v1.3 — UI =================
-const VERSION="1.91.213";
+const VERSION="1.91.214";
 const CUR_LANG=(typeof window!=="undefined"&&window.LANG)||"th";
 const TH_LABEL=String.fromCharCode(3652,3607,3618);
 function langSwitch(cls){return `<div class="langsw ${cls||""}" role="group" aria-label="Language">${[["th",TH_LABEL],["en","EN"]].map(([k,l])=>`<button class="lsb ${CUR_LANG===k?"on":""}" data-act="setlang" data-v="${k}" aria-pressed="${CUR_LANG===k}">${l}</button>`).join("")}</div>`;}
@@ -80,6 +80,7 @@ NPC_IMG.unshift([/^แม่มะลิ|^Mali's mom/,"mali_mom"],[/^แม่�
 NPC_IMG.unshift([/มาเบลล์|Mabelle/,"mabelle"],[/มินนี่|Minnie/,"minnie"],[/คุณกฤต|Mr\. Krit/,"krit"],[/มิ้นท์|Mint/,"mint"]); /* v1.91.140 (Man): Sportygal, Alicia's managers */
 NPC_IMG.unshift([/เฮียหลง|Hia Long/,"hialong"],[/พี่เพชร|Brother Petch/,"phet"],[/พี่นิล|Brother Nil/,"nil"],[/บอริส|Boris/,"boris"],[/เสือด่าง|Seua Dang/,"suea"]); /* v1.91.136 (Man): portraits for the regional chapter's side characters */
 NPC_IMG.unshift([/ไนท์|Knight/,"vector_knight"],[/เวกา|Vega/,"vector_vega"],[/เมษา|Mesa/,"vector_mesa"]);
+NPC_IMG.unshift([/ลูกน้องจินหลง|Jin Long thug/,"gang_group"],[/ผู้แทนการกีฬา|Sports official/,"nai"]); /* v1.91.209 regional audit: the last two speaking parts with a face to borrow — Jin Long's men wear the helmet gang's jackets until Man draws them, the sports official is the district chief's portrait */
 const npcImg=st=>{const v=st.img||(st.who&&(NPC_IMG.find(([r])=>r.test(st.who))||[])[1])||null;return typeof v==="function"?v():v;};
 const npcPortraitSrc=(im,st={})=>{if(im.startsWith("vector_")||im==="petchara")return `${ASSET}npc_${im}.png`;
   if(im==="baiyok"||im==="baiyok_black"){

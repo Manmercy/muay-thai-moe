@@ -1054,7 +1054,7 @@ const DILEMMAS=[
 const PERSONA={
  "Chanpen T.Prasert":{tag:"Former subdistrict champ, trash talker",line:"An abandoned camp reopened? I'll shut it down again for you"},
  "Praewa Sit Khru Nong":{tag:"Technician, polite",line:"May it be a good fight. Khru Nong sends her regards to Coach Daeng"},
- "Thapthim Kiatsiam":{tag:"Showboat, plays to the crowd",line:"Where's the camera! Today's knockout has to be pretty"},
+ "Mukda Kiatsiam":{tag:"Showboat, plays to the crowd",line:"Where's the camera! Today's knockout has to be pretty"},
  "Petchdao Luk Mae Ping":{tag:"Chiang Mai girl, big heart",line:"The Ping River never stops flowing, and I never retreat!"},
  "Namphueng S.Wilaiporn":{tag:"Newcomer, nervous",line:"P-pleased to fight you! Don't go easy on me!"},
  "Saifa W.Wanthawi":{tag:"Fastest in the district",line:"Keep up with me first, then think about winning"},

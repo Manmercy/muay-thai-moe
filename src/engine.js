@@ -31,7 +31,7 @@ const CANON={
     a:{punch:11.6,kick:10.6,knee:11.1,elbow:15.1,clinch:10.1,guard:9.1,foot:10.1,counter:8.1,power:14.1,speed:12.1,stamina:10.6,dur:12.1,iq:10.1,comp:9.1}},
 };
 const NPC_NAMES={
-  A:[["น้ำผึ้ง ส.วิไลพร",7],["เพชรดาว ลูกแม่ปิง",8],["ทับทิม เกียรติสยาม",8],["แพรวา ศิษย์ครูหน่อง",9],["จันทร์เพ็ญ ต.ประเสริฐ",10]],
+  A:[["น้ำผึ้ง ส.วิไลพร",7],["เพชรดาว ลูกแม่ปิง",8],["มุกดา เกียรติสยาม",8],["แพรวา ศิษย์ครูหน่อง",9],["จันทร์เพ็ญ ต.ประเสริฐ",10]],
   B:[["ฝนทิพย์ พ.พงษ์ไทย",8],["ลำไย ศิษย์ดอยคำ",8],["ขวัญข้าว ช.ชัยวัฒน์",9],["บุษบา แสงทองยิม",10],["ใบเตย ส.เมืองเหนือ",10]],
 };
 const NPC_DISTRICT={A:[["สายฟ้า ว.วันทวี",11],["มุกดา เพชรยินดี",11]],B:[["แก้วกัลยา ก.กิตติ",11],["อรุณี ศ.ศรีสุข",11]]};
@@ -1042,7 +1042,7 @@ const hasStaff=(G,k)=>(G.staff||[]).includes(k);
 const staffLocked=(G,k)=>{const r=STAFF[k].req;if(!r)return "";if(r.lv&&campLevel(G)<r.lv)return `ค่าย Lv.${r.lv}`;if(r.rep&&G.rep<r.rep)return `ชื่อเสียง ${r.rep}`;return "";};
 function hireStaff(G,k){const S=STAFF[k];G.staff=G.staff||[];if(!S||hasStaff(G,k)||G.staff.length>=staffSlots(G)||staffLocked(G,k)||G.cash<S.fee)return false;G.cash-=S.fee;G.staff.push(k);G.fac.assistants=G.staff.length;return true;}
 function fireStaff(G,k){G.staff=(G.staff||[]).filter(x=>x!==k);G.fac.assistants=G.staff.length;return true;}
-function fixSave(G){if(typeof byCampKit==="function")byCampKit(G);for(const [id,k] of [["ploy","captain"],["fah","grin"]])if(G.F&&G.F[id]&&G.F[id].skills&&(G.F[id].skills[k]||0)>3)G.F[id].skills[k]=3; /* v1.91.195: undo the old runaway yearly rank-up */ /* v1.91.166: Baiyok in the camp gets her tree *//* v1.91.42: a card counts as read only if its story was ever opened (o.seen is set only there) — v1.91.41 wrongly marked every owned card read */if(G&&(G.cardRd||0)<2){for(const k in (G.cards||{})){const o=G.cards[k];o.rd=o.seen?1:0;}G.cardRd=2;}if(G&&G.F&&typeof hmFix==="function")hmFix(G);if(G&&G.F&&typeof monoFix==="function")monoFix(G);if(G&&G.ev&&G.ev.loy&&typeof thiefFix==="function")thiefFix(G);if(G&&G.F&&G.prodigy)fixProdigies(G);if(G&&G.flags&&G.flags.beat_ploy&&G.flags.beatS_ploy==null)G.flags.beatS_ploy=G.season||1;
+function fixSave(G){/* v1.91.209 regional audit: the league's "Tabtim Kiatsiam" shared a first name with the Isan champion Tabtim — she is Mukda now */for(const f of Object.values(G.F||{}))if(f&&f.camp!=="player"&&f.id!=="tabtim"&&/^(ทับทิม เกียรติสยาม|Thapthim Kiatsiam)$/.test(f.name||"")){const en=f.name[0]==="T";f.name=en?"Mukda Kiatsiam":"มุกดา เกียรติสยาม";if(f.full)f.full=f.name;}if(typeof byCampKit==="function")byCampKit(G);for(const [id,k] of [["ploy","captain"],["fah","grin"]])if(G.F&&G.F[id]&&G.F[id].skills&&(G.F[id].skills[k]||0)>3)G.F[id].skills[k]=3; /* v1.91.195: undo the old runaway yearly rank-up */ /* v1.91.166: Baiyok in the camp gets her tree *//* v1.91.42: a card counts as read only if its story was ever opened (o.seen is set only there) — v1.91.41 wrongly marked every owned card read */if(G&&(G.cardRd||0)<2){for(const k in (G.cards||{})){const o=G.cards[k];o.rd=o.seen?1:0;}G.cardRd=2;}if(G&&G.F&&typeof hmFix==="function")hmFix(G);if(G&&G.F&&typeof monoFix==="function")monoFix(G);if(G&&G.ev&&G.ev.loy&&typeof thiefFix==="function")thiefFix(G);if(G&&G.F&&G.prodigy)fixProdigies(G);if(G&&G.flags&&G.flags.beat_ploy&&G.flags.beatS_ploy==null)G.flags.beatS_ploy=G.season||1;
   // Legacy saves used week-of-season values. Infer only short, plausible effects;
   // otherwise expire them instead of resurrecting an old effect after New Year.
   const now=gameWeek(G),base=now-G.week;

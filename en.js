@@ -32,7 +32,7 @@ const CANON={
     a:{punch:11.6,kick:10.6,knee:11.1,elbow:15.1,clinch:10.1,guard:9.1,foot:10.1,counter:8.1,power:14.1,speed:12.1,stamina:10.6,dur:12.1,iq:10.1,comp:9.1}},
 };
 const NPC_NAMES={
-  A:[["Namphueng S.Wilaiporn",7],["Petchdao Luk Mae Ping",8],["Thapthim Kiatsiam",8],["Praewa Sit Khru Nong",9],["Chanpen T.Prasert",10]],
+  A:[["Namphueng S.Wilaiporn",7],["Petchdao Luk Mae Ping",8],["Mukda Kiatsiam",8],["Praewa Sit Khru Nong",9],["Chanpen T.Prasert",10]],
   B:[["Fonthip P.Pongthai",8],["Lamyai Sit Doi Kham",8],["Khwankhao Ch.Chaiwat",9],["Butsaba Saengthong Gym",10],["Baitoei S.Mueang Nuea",10]],
 };
 const NPC_DISTRICT={A:[["Saifa W.Wanthawi",11],["Mukda Petchyindee",11]],B:[["Kaewkanlaya K.Kitti",11],["Arunee S.Srisuk",11]]};
@@ -1052,7 +1052,7 @@ const hasStaff=(G,k)=>(G.staff||[]).includes(k);
 const staffLocked=(G,k)=>{const r=STAFF[k].req;if(!r)return "";if(r.lv&&campLevel(G)<r.lv)return `Camp Lv.${r.lv}`;if(r.rep&&G.rep<r.rep)return `Fame ${r.rep}`;return "";};
 function hireStaff(G,k){const S=STAFF[k];G.staff=G.staff||[];if(!S||hasStaff(G,k)||G.staff.length>=staffSlots(G)||staffLocked(G,k)||G.cash<S.fee)return false;G.cash-=S.fee;G.staff.push(k);G.fac.assistants=G.staff.length;return true;}
 function fireStaff(G,k){G.staff=(G.staff||[]).filter(x=>x!==k);G.fac.assistants=G.staff.length;return true;}
-function fixSave(G){if(typeof byCampKit==="function")byCampKit(G);for(const [id,k] of [["ploy","captain"],["fah","grin"]])if(G.F&&G.F[id]&&G.F[id].skills&&(G.F[id].skills[k]||0)>3)G.F[id].skills[k]=3; /* v1.91.195: undo the old runaway yearly rank-up */ /* v1.91.166: Baiyok in the camp gets her tree *//* v1.91.42: a card counts as read only if its story was ever opened (o.seen is set only there) — v1.91.41 wrongly marked every owned card read */if(G&&(G.cardRd||0)<2){for(const k in (G.cards||{})){const o=G.cards[k];o.rd=o.seen?1:0;}G.cardRd=2;}if(G&&G.F&&typeof hmFix==="function")hmFix(G);if(G&&G.F&&typeof monoFix==="function")monoFix(G);if(G&&G.ev&&G.ev.loy&&typeof thiefFix==="function")thiefFix(G);if(G&&G.F&&G.prodigy)fixProdigies(G);if(G&&G.flags&&G.flags.beat_ploy&&G.flags.beatS_ploy==null)G.flags.beatS_ploy=G.season||1;
+function fixSave(G){/* v1.91.209 regional audit: the league's "Tabtim Kiatsiam" shared a first name with the Isan champion Tabtim — she is Mukda now */for(const f of Object.values(G.F||{}))if(f&&f.camp!=="player"&&f.id!=="tabtim"&&/^(ทับทิม เกียรติสยาม|Thapthim Kiatsiam)$/.test(f.name||"")){const en=f.name[0]==="T";f.name=en?"Mukda Kiatsiam":"Mukda Kiatsiam";if(f.full)f.full=f.name;}if(typeof byCampKit==="function")byCampKit(G);for(const [id,k] of [["ploy","captain"],["fah","grin"]])if(G.F&&G.F[id]&&G.F[id].skills&&(G.F[id].skills[k]||0)>3)G.F[id].skills[k]=3; /* v1.91.195: undo the old runaway yearly rank-up */ /* v1.91.166: Baiyok in the camp gets her tree *//* v1.91.42: a card counts as read only if its story was ever opened (o.seen is set only there) — v1.91.41 wrongly marked every owned card read */if(G&&(G.cardRd||0)<2){for(const k in (G.cards||{})){const o=G.cards[k];o.rd=o.seen?1:0;}G.cardRd=2;}if(G&&G.F&&typeof hmFix==="function")hmFix(G);if(G&&G.F&&typeof monoFix==="function")monoFix(G);if(G&&G.ev&&G.ev.loy&&typeof thiefFix==="function")thiefFix(G);if(G&&G.F&&G.prodigy)fixProdigies(G);if(G&&G.flags&&G.flags.beat_ploy&&G.flags.beatS_ploy==null)G.flags.beatS_ploy=G.season||1;
   // Legacy saves used week-of-season values. Infer only short, plausible effects;
   // otherwise expire them instead of resurrecting an old effect after New Year.
   const now=gameWeek(G),base=now-G.week;
@@ -3571,7 +3571,7 @@ const DILEMMAS=[
 const PERSONA={
  "Chanpen T.Prasert":{tag:"Former subdistrict champ, trash talker",line:"An abandoned camp reopened? I'll shut it down again for you"},
  "Praewa Sit Khru Nong":{tag:"Technician, polite",line:"May it be a good fight. Khru Nong sends her regards to Coach Daeng"},
- "Thapthim Kiatsiam":{tag:"Showboat, plays to the crowd",line:"Where's the camera! Today's knockout has to be pretty"},
+ "Mukda Kiatsiam":{tag:"Showboat, plays to the crowd",line:"Where's the camera! Today's knockout has to be pretty"},
  "Petchdao Luk Mae Ping":{tag:"Chiang Mai girl, big heart",line:"The Ping River never stops flowing, and I never retreat!"},
  "Namphueng S.Wilaiporn":{tag:"Newcomer, nervous",line:"P-pleased to fight you! Don't go easy on me!"},
  "Saifa W.Wanthawi":{tag:"Fastest in the district",line:"Keep up with me first, then think about winning"},
@@ -7078,7 +7078,7 @@ AU.gsfx=function(kind,a){if(!this.init()||this.muted||!SETTINGS.sfx)return;const
   if(kind==="shimmer")for(let i=0;i<6;i++)T(i*.05,{f:1400+Math.random()*1400,type:"sine",dur:.12,peak:.06});};
 
 // ================= MUAY THAI MOE v1.3 — UI =================
-const VERSION="1.91.213";
+const VERSION="1.91.214";
 const CUR_LANG=(typeof window!=="undefined"&&window.LANG)||"th";
 const TH_LABEL=String.fromCharCode(3652,3607,3618);
 function langSwitch(cls){return `<div class="langsw ${cls||""}" role="group" aria-label="Language">${[["th",TH_LABEL],["en","EN"]].map(([k,l])=>`<button class="lsb ${CUR_LANG===k?"on":""}" data-act="setlang" data-v="${k}" aria-pressed="${CUR_LANG===k}">${l}</button>`).join("")}</div>`;}
@@ -7159,6 +7159,7 @@ NPC_IMG.unshift([/^แม่มะลิ|^Mali's mom/,"mali_mom"],[/^แม่�
 NPC_IMG.unshift([/มาเบลล์|Mabelle/,"mabelle"],[/มินนี่|Minnie/,"minnie"],[/คุณกฤต|Mr\. Krit/,"krit"],[/มิ้นท์|Mint/,"mint"]); /* v1.91.140 (Man): Sportygal, Alicia's managers */
 NPC_IMG.unshift([/เฮียหลง|Hia Long/,"hialong"],[/พี่เพชร|Brother Petch/,"phet"],[/พี่นิล|Brother Nil/,"nil"],[/บอริส|Boris/,"boris"],[/เสือด่าง|Seua Dang/,"suea"]); /* v1.91.136 (Man): portraits for the regional chapter's side characters */
 NPC_IMG.unshift([/ไนท์|Knight/,"vector_knight"],[/เวกา|Vega/,"vector_vega"],[/เมษา|Mesa/,"vector_mesa"]);
+NPC_IMG.unshift([/ลูกน้องจินหลง|Jin Long thug/,"gang_group"],[/ผู้แทนการกีฬา|Sports official/,"nai"]); /* v1.91.209 regional audit: the last two speaking parts with a face to borrow — Jin Long's men wear the helmet gang's jackets until Man draws them, the sports official is the district chief's portrait */
 const npcImg=st=>{const v=st.img||(st.who&&(NPC_IMG.find(([r])=>r.test(st.who))||[])[1])||null;return typeof v==="function"?v():v;};
 const npcPortraitSrc=(im,st={})=>{if(im.startsWith("vector_")||im==="petchara")return `${ASSET}npc_${im}.png`;
   if(im==="baiyok"||im==="baiyok_black"){
