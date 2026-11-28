@@ -2338,9 +2338,11 @@ div.mdelask{margin:2px 0 8px;padding:8px;box-shadow:inset 0 0 0 2px var(--line);
 .cast .stand.st-low{height:calc(var(--sh) * .5);bottom:calc(var(--sh) * -.1)}
 .cast.grp .stand.off{filter:brightness(.8) saturate(.85)}
 /* v1.91.82 (Man): the travel button no longer covers the van — the van itself is the button, with a small tag above its roof */
-.tripspot{position:absolute;left:63%;width:30%;bottom:0;height:19%;z-index:5;background:transparent;border:0;padding:0;cursor:pointer;touch-action:manipulation;-webkit-tap-highlight-color:rgba(255,207,74,.25)}.tripspot:hover,.tripspot:focus-visible{outline:2px dashed #ffcf4a;outline-offset:-2px}
-.triptag{position:absolute;left:50%;bottom:calc(100% + 4px);transform:translateX(-50%);white-space:nowrap;background:linear-gradient(#ffd965,#d9a21b);color:#1b1230;font-weight:700;font-size:.68rem;padding:.12rem .45rem .16rem;border:2px solid #1b1230;border-radius:3px;box-shadow:0 3px 0 #1b1230,inset 0 1px 0 rgba(255,255,255,.6);animation:tripb 1.6s ease-in-out infinite;pointer-events:auto}.tripspot:active .triptag{transform:translateX(-50%) translateY(2px);box-shadow:0 1px 0 #1b1230}
-@keyframes tripb{50%{transform:translateX(-50%) translateY(-2px)}}@media (prefers-reduced-motion:reduce){.triptag{animation:none}}
+.tripspot{position:absolute;left:56.4%;bottom:4.5%;width:11.6%;aspect-ratio:34/20;z-index:5;padding:0;cursor:pointer;touch-action:manipulation;-webkit-tap-highlight-color:transparent;background:linear-gradient(#ffe27a 0 76%,#d9a21b 76%);border:2px solid #1b1230;border-radius:0;box-shadow:0 2px 0 #1b1230,inset 0 2px 0 #fff2b8;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;animation:tripb 1.6s steps(2) infinite;image-rendering:pixelated} /* v1.92 (Man): a pixel square left of the camp vehicle */
+.tripspot::before{content:"";width:17%;aspect-ratio:1;margin-bottom:5%;background:#c8283c;box-shadow:inset 0 0 0 2px #c8283c,inset 0 0 0 4px #fff;border-radius:50% 50% 50% 0;transform:rotate(-45deg);flex:none}
+.tripspot:hover,.tripspot:focus-visible{outline:2px dashed #ffcf4a;outline-offset:2px}.tripspot:active{transform:translateY(2px);box-shadow:0 0 0 #1b1230}
+.triptag{color:#1b1230;font-weight:700;font-size:clamp(.46rem,1.95vw,.7rem);line-height:1;margin-bottom:12%;white-space:nowrap;pointer-events:none}
+@keyframes tripb{50%{transform:translateY(-2px)}}@media (prefers-reduced-motion:reduce){.tripspot{animation:none}}
 /* v1.91.78 trophy room by level + popup */
 .tshelf .tlbl small{opacity:.65;font-weight:400;margin-left:.3rem}.tshelf>.btn{margin:.2rem 0 0 auto;display:block}
 .tshelf.lv-region .tlbl{color:#ffd36a}.tshelf.lv-province .tlbl{color:#ffb4c0}
@@ -2766,3 +2768,22 @@ i.stye.up{background:#1f6b3a;color:#e6ffe9}i.stye.dn{background:#8a2333;color:#f
  .fight.incorner .corner .opts{gap:5px}.fight.incorner .corner .opts button{padding:5px 10px;font-size:14px}
  .fight.incorner .cfoot{margin-top:0;padding:4px 0}.fight.incorner .cfoot .btn{min-height:40px;padding-top:6px;padding-bottom:6px}
 }
+
+/* v1.92 (Man): camp card — one screen: preview, two rows of options, save */
+.m-showcase .cchead{display:flex;align-items:center;justify-content:space-between;margin-bottom:.2rem}.m-showcase .cchead h2{margin:0}
+.m-showcase .ccprev{position:relative;margin:0 auto;height:min(52vh,430px);aspect-ratio:1080/1400;
+  background:repeating-conic-gradient(#3a3550 0 25%,#2b2640 0 50%) 0 0/16px 16px;border:2px solid #1b1230}
+.m-showcase .ccprev img{width:100%;height:100%;display:block;object-fit:contain;opacity:0;transition:opacity .2s}.m-showcase .ccprev.ok img{opacity:1}
+.m-showcase .ccwait{position:absolute;inset:0;display:grid;place-items:center;color:#e8e0f0;font-size:.85rem}.m-showcase .ccprev.ok .ccwait{display:none}
+.ccopts{display:grid;gap:.35rem;margin:.45rem 0}
+.ccrow{display:flex;flex-wrap:wrap;gap:.3rem;justify-content:center;align-items:center}.ccsep{width:.4rem}
+.ccchip{font:inherit;font-size:1rem;line-height:1;padding:.32rem .42rem;border:2px solid #1b1230;background:#f4ead8;color:#1b1230;border-radius:0;box-shadow:0 2px 0 #1b1230;cursor:pointer}
+.ccchip.on{background:#ffd34a;transform:translateY(1px);box-shadow:0 1px 0 #1b1230}
+.ccsw{width:2rem;height:2rem;padding:0;border:2px solid #1b1230;border-radius:0;cursor:pointer;background:linear-gradient(135deg,var(--a) 50%,var(--b) 50%);box-shadow:0 2px 0 #1b1230}
+.ccsw.on{outline:3px solid #ffd34a;outline-offset:1px}
+.m-showcase .ccsave{width:100%}.m-showcase .ccnote{margin:.3rem 0 0;font-size:.72rem}
+/* v1.91.204 400 m pace button */
+.mbtn.L.run.pz-ok{background:#2f8a4a}.mbtn.L.run.pz-hot{background:#d9782b}.mbtn.L.run.pz-slow{background:#6a4a8a}
+.mbtn.L.run.pz-kick{background:#e0262b;animation:pzk .35s steps(2) infinite alternate}
+@keyframes pzk{to{background:#ff4a3a}}
+@media (prefers-reduced-motion:reduce){.mbtn.L.run.pz-kick{animation:none}}

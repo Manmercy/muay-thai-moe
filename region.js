@@ -2314,7 +2314,8 @@ const REGION={
     /* v1.91.122 (Man): the five celebrate the camp's milestones back home, one a week */
     if(R.msQ&&R.msQ.length){const q=R.msQ.shift(),S=rgMsSteps(G,q);if(S){playScene(S,()=>{save();done();},{bg:RG_MSL[q.k].bg,look:"casual"});return;}}
     /* v1.91.194 (playtest): the opening gala comes before every other regional scene, and no trip leaves before it */
-    if(!R.gala){if(R.galaAbs==null)R.galaAbs=now+1;if(now>=R.galaAbs){R.gala=1;AU.startMusic&&AU.startMusic("hub");playScene(rgGala(G),()=>{save();done();},{bg:"gala",look:"casual"});return;}}
+    /* v1.91.201 (Man): the travel button waits until the opening gala has actually been watched; a gala cut short plays again next week */
+    if(!R.gala||R.galaDone===0){if(R.galaAbs==null)R.galaAbs=now+1;if(now>=R.galaAbs){R.gala=1;R.galaDone=0;AU.startMusic&&AU.startMusic("hub");playScene(rgGala(G),()=>{R.galaDone=1;save();done();},{bg:"gala",look:"casual"});return;}}
     if(rgKritDue(G)){playScene(rgKritSteps(G),()=>{save();done();},{bg:"camp_day",look:"casual"});return;}
     {const hs=rgRelDue(G);if(hs){playScene(hs.steps,()=>{save();done();},{bg:"camp",look:"casual"});return;}}
     /* v1.91.26 (Man): Kru Daeng reminds you to watch tape and train the counter before each regional title bout — no new buttons */
@@ -2784,7 +2785,7 @@ const REGION={
      <div class="mfoot"><button class="btn" data-act="rgstep" data-v="1">◂ ใครไปด้วย</button>${now&&wk===G.week?`<button class="btn primary" data-act="rggonow" data-v="${dest}" ${me&&!poor?"":"disabled"}>${poor?"เงินไม่พอ":"ออกเดินทางเลย ▸"}</button>`:`<button class="btn primary" data-act="rggo" data-v="${dest}" ${me&&!poor?"":"disabled"}>${poor?"เงินไม่พอ":"ยืนยันการเดินทาง"}</button>`}</div>
      ${now&&wk===G.week?`<p class="meta center">ออกเดินทางแล้วสัปดาห์นี้จะจบทันที (ซ้อมตามโปรแกรม → ขับรถ → โรงแรม → เวที)</p>`:""}`;},
   /* v1.91.76 (Man): the "travel" button at the camp vehicle — pick a province, then go this week */
-  travelOk(G){const R=G.region;return !!(R&&R.belts&&regionOn()&&R.gala);}, /* v1.91.93 (Man): the van stays on the road after the belts are won — holidays and the local ring */
+  travelOk(G){const R=G.region;return !!(R&&R.belts&&regionOn()&&R.gala&&R.galaDone!==0);}, /* v1.91.93 (Man): the van stays on the road after the belts are won — holidays and the local ring */
   /* v1.91.78 (Man): once a region's four belts are in, its title match shows in the travel popup as a big blinking button */
   finBtn(G,r){const c=G.region.champ[r]||{};if(this.beltCount(G,r)<4||c.state==="won"||c.state==="locked")return "";const C=RG[r],hot=c.state==="letter"||(c.state==="series"&&c.visit==="due");
     return `<button class="btn rg-finbtn ${hot?"hot":""}" data-act="rgfinopen" data-v="${r}">⚔ นัดชิงแชมป์${esc(C.name)} · ${esc(C.champ)}<small>${c.state==="letter"?"เลือกนักมวยชิงแชมป์":c.state==="series"?`${c.w}-${c.l}${c.next?` · นัด ${c.next.n} สัปดาห์ ${c.next.wk}`:""}${c.visit==="due"?" · เธอจะแวะมาค่าย":""}`:c.state==="lost"?"รอคำท้าครั้งใหม่":"รอจดหมายนัด"}</small></button>`;},
@@ -2935,7 +2936,7 @@ if(typeof ACT!=="undefined")Object.assign(ACT,{
   rgplan:d=>{UI.rgFid=null;UI.rgParty=null;UI.rgNow=false;UI.rgStep=1;UI.modal={type:"rgplan",dest:d.v};render();},
   rgfinopen:d=>{UI.modal={type:"rgfin",r:d.v};render();},
   rglegopen:()=>{if(!G.region||!G.region.final||!G.region.final.won)return;REGION.css();UI.modal={type:"rglegend"};render();},
-  rgtravel:()=>{if(!REGION.travelOk(G)){if(G.region&&!G.region.gala)toast("ไปงานเปิดตัวที่กรุงเทพฯ ก่อน แล้วค่อยออกเดินทาง");return;}UI.modal={type:"rgtravel"};render();},
+  rgtravel:()=>{if(!REGION.travelOk(G)){if(G.region&&(!G.region.gala||G.region.galaDone===0))toast("ไปงานเปิดตัวที่กรุงเทพฯ ก่อน แล้วค่อยออกเดินทาง");return;}UI.modal={type:"rgtravel"};render();},
   rgtravelto:d=>{UI.rgFid=null;UI.rgParty=null;UI.rgNow=true;UI.rgStep=1;UI.modal={type:"rgplan",dest:d.v};render();},
   rgparty:d=>{const P=UI.rgParty=UI.rgParty||[],i=P.indexOf(d.v);if(i>=0)P.splice(i,1);else if(P.length<roadSeats(G))P.push(d.v);render();},
   rgstep:d=>{UI.rgStep=+d.v;render();},
@@ -2962,7 +2963,7 @@ if(typeof ACT!=="undefined")Object.assign(ACT,{
   rgdevstart:()=>{if(REGION_LIVE)return;regionStart(G);save();render();},
   rgchat:d=>{const f=G.F[d.v];if(!f)return;f.met=true;rgTouch(G,d.v);chatOpen(d.v);},
   rggala:d=>{if(REGION_LIVE)return;const R=G.region;if(d.v==="c1"){const r=R.cups[0];playScene(rgCup1(G,r),()=>{R.c1=R.c1||"seen";save();render();},{bg:"camp",look:"casual"});return;}
-    playScene(rgGala(G),()=>{R.gala=1;save();render();},{bg:"gala",look:"casual"});}});
+    playScene(rgGala(G),()=>{R.gala=1;R.galaDone=1;save();render();},{bg:"gala",look:"casual"});}});
 /* ---------- v1.91.28 round 12 (Man): after the underground final the regional champions ask to join, one at a time ----------
    hidden bar: closeness (R.meet) ≥ RG_JOIN_MIN · offers come in order of closeness, 4 weeks apart · accepting needs a free room (5 + dorm level) and the signing fee
    she arrives the next week (leaving her old camp + arriving at Sirichai) at ~70% of her champion level/stats, with skill points for her lineage's tree (the partner girl's)

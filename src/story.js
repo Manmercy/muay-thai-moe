@@ -1395,7 +1395,7 @@ const CUP_AUNT=[["ป้าบุญมี ตลาดเช้า",r=>`แช�
 const CUP_COACH=["แชมป์ภาคแล้วพรุ่งนี้ก็ตีห้าเหมือนเดิม …แต่เช้านี้ ให้กินก่อน","กินให้อิ่มแล้วไปขอบคุณป้า ๆ ให้ครบทุกคน มวยเราอยู่ได้เพราะคนแถวนี้",
   "ปู่ชัยเคยบอกครูว่า วันไหนป้า ๆ ถือปิ่นโตมาหน้าค่าย วันนั้นค่ายเราเป็นของหมู่บ้านแล้ว","ครบสี่ภาคแล้ว …ครูไม่มีอะไรจะสอนเช้านี้ กินไป"];
 const CUP_END=["เช้านั้นทั้งค่ายนั่งกินข้าวกันบนเวทีซ้อม ป้าแต๋วขอยืมถ้วยไปตั้งหน้าร้านส้มตำหนึ่งวัน",
-  "ข้าวที่เหลือพอเลี้ยงทั้งค่ายไปอีกสองมื้อ ข้าวตูได้กระดูกไก่ไปหนึ่งถุงใหญ่",
+  G=>`ข้าวที่เหลือพอเลี้ยงทั้งค่ายไปอีกสองมื้อ ${hasPet(G,"dog")?petIntro(G,"dog"):"หมาข้างค่าย"}ได้กระดูกไก่ไปหนึ่งถุงใหญ่`,
   "ป้า ๆ กลับไปตอนสาย ทิ้งปิ่นโตไว้เต็มโต๊ะ พร้อมกระดาษแผ่นเล็กเขียนว่า \"ล้างแล้วเอามาคืนด้วย\"",
   "ถ้วยทั้งสี่ใบเรียงอยู่บนชั้นเดียวกับรูปปู่ชัย ป้า ๆ ยืนพนมมือไหว้รูปปู่ก่อนกลับ"];
 function cupNewsSteps(G,L,me,m){const rn=(typeof RG!=="undefined"&&RG[L.cup]&&RG[L.cup].name)||L.cupName||"ภาค";
@@ -1408,7 +1408,7 @@ function cupNewsSteps(G,L,me,m){const rn=(typeof RG!=="undefined"&&RG[L.cup]&&RG
   {n:me.id,f:"happy",l:"casual",t:own?pickR(own,G,"cup_"+me.id):"ขอบคุณค่ะป้า ๆ ทุกคนเลย!"},
   ...(m?[{n:m.id,f:"happy",l:"casual",t:WIN_TEASE[m.id]?pickR(WIN_TEASE[m.id],G,"t_"+m.id)(me.name):`ยินดีด้วยนะ ${me.name}!`}]:[]),
   ...(coachOn()?[{n:"coach",t:CUP_COACH[k]}]:[]),
-  {n:"nar",t:CUP_END[k]}];}
+  {n:"nar",t:typeof CUP_END[k]==="function"?CUP_END[k](G):CUP_END[k]}];}
 function aftermathSteps(G,L){const me=G.F[L.a],op=G.F[L.b];const mates=roster(G).filter(f=>f.id!==me.id);const m=mates[0];if(L.cup)return cupNewsSteps(G,L,me,m);const steps=[];
   if(L.win==="A"){steps.push({n:"nar",t:`เช้าวันต่อมา ข่าว${me.name}เอาชนะ${op.name}ไปทั่วหมู่บ้าน`});
     if(m)steps.push({n:m.id,f:"happy",l:"train",t:WIN_TEASE[m.id]?pickR(WIN_TEASE[m.id],G,"t_"+m.id)(me.name):`ยินดีด้วยนะ ${me.name}!`});
@@ -1979,6 +1979,9 @@ EVENTS.push({id:"year_open",annual:true,pri:1,look:"casual",bg:"camp",when:G=>(G
 // ===== v1.51: camp pets — each joins through a small story, then has a moment with one of the girls =====
 const hasPet=(G,k)=>(G.pets||[]).some(p=>p.k===k);
 const petName=(G,k)=>{const p=(G.pets||[]).find(x=>x.k===k);return p?p.name:PETS[k].name;};
+/* v1.91.206 (Man: who is "Jao Khiao"? — players name their pets, so a scene's first mention says what the pet is) */
+const PET_TAG={cat:"แมวส้มประจำค่าย",dog:"หมาประจำค่าย",rooster:"ไก่ชนประจำค่าย",turtle:"เต่าประจำค่าย",otter:"นากประจำค่าย"};
+const petIntro=(G,k)=>`${petName(G,k)} ${PET_TAG[k]||PETS[k].name} `;
 function adoptPet(G,k,name,fav){G.pets=G.pets||[];if(hasPet(G,k))return;G.pets.push({k,name:name||PET_NAMES[k][0],joy:60,wk:-1,fav,since:G.week+((G.season||1)-1)*52});}
 const nameChoice=(k,fav,then)=>({choice:PET_NAMES[k].map(n=>({t:`ตั้งชื่อว่า "${n}"`,fx:G=>adoptPet(G,k,n,fav),then})).concat([{t:"ตั้งชื่อเอง…",fx:G=>{adoptPet(G,k,null,fav);UI.petName=(G.pets.length-1);},then}])});
 const petAge=(G,k)=>{const p=(G.pets||[]).find(x=>x.k===k);return p?G.week+((G.season||1)-1)*52-p.since:0;};
@@ -2011,17 +2014,17 @@ EVENTS.push(
    nameChoice("turtle",w,[{n:"nar",t:"เต่าตัวใหม่ยื่นหัวออกมาดูค่ายช้า ๆ แล้วหดกลับเข้าไปอีกที คงยังไม่แน่ใจว่าที่นี่ปลอดภัย"}])];}}]},
  // a moment with each pet
  {id:"petx_cat_rin",look:"casual",bg:"camp",when:G=>hasPet(G,"cat")&&inCamp(G,"rin")&&petAge(G,"cat")>=4,steps:[
-  {n:"nar",t:G=>`ตีหนึ่ง คุณลงมาดื่มน้ำ เห็นรินนั่งยอง ๆ หน้าตู้เย็น กำลังป้อนปลาทูให้${petName(G,"cat")}ทีละชิ้น`},
+  {n:"nar",t:G=>`ตีหนึ่ง คุณลงมาดื่มน้ำ เห็นรินนั่งยอง ๆ หน้าตู้เย็น กำลังป้อนปลาทูให้${petIntro(G,"cat")}ทีละชิ้น`},
   {n:"rin",f:"flustered",l:"casual",t:G=>`…นี่ไม่ใช่อย่างที่คิดนะคะ ฉันแค่เก็บข้อมูลน้ำหนัก${petName(G,"cat")}รายสัปดาห์ เดือนนี้ขึ้นมาสามร้อยกรัม …ซึ่งส่วนหนึ่งอาจเป็นความผิดฉันเอง`},
   {choice:[{t:"(นั่งลงป้อนด้วยกัน)",fx:G=>{add(G,"rin","bond",5);},then:[{n:"rin",f:"happy",l:"casual",t:"…งั้นเราแบ่งความผิดกันคนละครึ่งนะคะ"}]},
    {t:"แซวว่าแอบใจดีนี่นา",fx:G=>{add(G,"rin","bond",3);add(G,"rin","morale",4);},then:[{n:"rin",f:"flustered",l:"casual",t:"ห-ห้ามบอกใครนะคะ! โดยเฉพาะกะทิ!"}]}]}]},
  {id:"petx_dog_mali",look:"casual",bg:"camp",when:G=>hasPet(G,"dog")&&inCamp(G,"mali")&&petAge(G,"dog")>=5,steps:[
-  {n:"nar",t:G=>`เย็นวันหนึ่ง เด็กแถวนั้นแกล้งแย่งกระเป๋ามะลิหน้าค่าย ${petName(G,"dog")}พุ่งออกไปยืนขวาง เห่าเสียงเดียว เด็ก ๆ วิ่งหนีกระจาย`},
+  {n:"nar",t:G=>`เย็นวันหนึ่ง เด็กแถวนั้นแกล้งแย่งกระเป๋ามะลิหน้าค่าย ${petIntro(G,"dog")}พุ่งออกไปยืนขวาง เห่าเสียงเดียว เด็ก ๆ วิ่งหนีกระจาย`},
   {n:"mali",f:"flustered",l:"casual",t:G=>`${petName(G,"dog")}… ปกป้องหนูเหรอ หนูเคยกลัวแกแท้ ๆ`},
   {n:"nar",t:"มะลิค่อย ๆ ยื่นมือออกไป เจ้าหมาหลังอานเอาหัวมาซุกฝ่ามือเธอเบา ๆ"},
   {fx:G=>{add(G,"mali","bond",3);add(G,"mali","morale",8);}},{n:"mali",f:"happy",l:"casual",t:"…ต่อไปนี้วิ่งเช้าด้วยกันนะ หนูจะไม่ช้าแล้ว!"}]},
  {id:"petx_rooster_kati",look:"train",bg:"gym",when:G=>hasPet(G,"rooster")&&inCamp(G,"kati")&&petAge(G,"rooster")>=3,steps:[
-  {n:"nar",t:G=>`ตีสี่ ${petName(G,"rooster")}ขันลั่นหน้าห้องกะทิเป็นวันที่สิบติด`},
+  {n:"nar",t:G=>`ตีสี่ ${petIntro(G,"rooster")}ขันลั่นหน้าห้องกะทิเป็นวันที่สิบติด`},
   {n:"kati",f:"angry",l:"train",t:G=>`${petName(G,"rooster")}!!! วันนี้วันหยุดนะ! …ก็ได้ ๆ ตื่นแล้ว ซ้อมก็ซ้อม`},
   {n:"nar",t:"ครึ่งชั่วโมงต่อมา กะทิเตะกระสอบอยู่คนเดียวใต้ไฟดวงเดียว ไก่ชนยืนเกาะเชือกเวทีมองไม่วางตา"},
   {choice:[{t:"(ลงไปถือเป้าให้)",fx:G=>{add(G,"kati","bond",4);add(G,"kati","morale",5);},then:[{n:"kati",f:"happy",l:"train",t:"ผู้จัดการก็โดนปลุกเหมือนกันเหรอคะ ฮ่า ๆ งั้นเรามาเป็นทีมตีสี่ด้วยกันเลย!"}]},
@@ -2502,7 +2505,7 @@ Object.assign(CARDS,{
  x_mali_n1:{c:"mali",r:"N",t:"ปาร์ตี้ปลอบใจ",hint:"ค่ายแพ้ติดกัน 4 ไฟต์",bg:"night",need:G=>inCamp(G,"mali")&&funStreak(G,null,"L")>=4,steps:[{"n":"nar","t":"แพ้ติดกันสี่ไฟต์ ค่ายเงียบจนได้ยินเสียงจิ้งจก จนมะลิลากหม้อหมูกระทะออกมากลางลาน"},{"n":"mali","f":"happy","l":"casual","t":"กฎใหม่ค่ะ! ใครแพ้ต้องกินหมูชิ้นแรก ใครชนะต้องปิ้งให้คนแพ้ …ตอนนี้ไม่มีใครชนะ งั้นมะลิปิ้งเอง!"},{"n":"nar","t":"กลางดึกยังมีเสียงหัวเราะดังจากลานค่าย ไม่มีใครพูดถึงไฟต์ที่แพ้อีกเลย"}]},
  x_rin_r1:{c:"rin",r:"R",t:"หนึ่งแต้มตามแผน",hint:"รินชนะคะแนนห่างแค่ 1 แต้ม",bg:"local",need:G=>funByOne(G,"rin")>=1,steps:[{"n":"nar","t":"กรรมการประกาศผล รินชนะคะแนนห่างกันแต้มเดียว ทั้งค่ายเพิ่งหายใจออก"},{"n":"rin","f":"happy","l":"fight","t":"ตามแผนค่ะ ฉันคำนวณไว้แล้วว่าต้องชนะห่างหนึ่งแต้ม เพื่อประหยัดพลังงาน"},{"n":"coach","t":"แล้วทำไมยกห้ามือสั่นล่ะ"},{"n":"rin","f":"flustered","l":"fight","t":"…นั่นคือการแสดงค่ะ เพื่อให้คู่ชกประมาท ฉันจะไม่ตอบคำถามนี้อีก"}]},
  x_rin_sr1:{c:"rin",r:"SR",t:"เทปม้วนที่สิบห้า",hint:"ดูเทปคู่ชกครบ 15 คน ตอนรินอยู่ค่าย",bg:"night",need:G=>inCamp(G,"rin")&&Object.keys(G.scoutAbs||{}).length>=15,steps:[{"n":"nar","t":"ตีสองแล้ว ไฟห้องดูเทปยังเปิดอยู่ รินนั่งล้อมด้วยเทปสิบห้าม้วนกับสมุดอีกสิบห้าเล่ม"},{"n":"rin","f":"happy","l":"casual","t":"ม้วนที่สิบห้าค่ะ ฉันเจอแพทเทิร์นแล้ว นักมวยทุกคนในจังหวัดนี้ กระพริบตาก่อนเตะซ้าย"},{"n":"rin","f":"flustered","l":"casual","t":"…ยกเว้นคุณค่ะ คุณกระพริบตาตอนมองฉัน ฉันยังไม่รู้ว่ามันแปลว่าอะไร แต่จะหาคำตอบให้ได้"}]},
- x_ploy_r1:{c:"ploy",r:"R",t:"แมวยอมให้อุ้มแล้ว",hint:"มีสัตว์เลี้ยงครบ 4 ตัว (มีแมว) ตอนพลอยอยู่ค่าย",bg:"camp",need:G=>inCamp(G,"ploy")&&(G.pets||[]).length>=4&&(G.pets||[]).some(p=>p.k==="cat"),steps:[{"n":"nar","t":"ค่ายมีสัตว์เลี้ยงสี่ตัวแล้ว เช้านี้แมวส้มเดินผ่านทุกคน แล้วกระโดดขึ้นตักพลอยเฉยเลย"},{"n":"ploy","f":"flustered","l":"casual","t":"…อย่าขยับนะ ใครขยับฉันชกคนนั้น"},{"n":"nar","t":"พลอยนั่งนิ่งสองชั่วโมง พลาดซ้อมเช้าทั้งรอบ ครูแดงไม่กล้าเรียก"},{"n":"ploy","f":"happy","l":"casual","t":"มันอุ่นดีนะ …เธอถ่ายรูปไว้ใช่ไหม ส่งให้ฉันด้วย ห้ามลงที่ไหน"}]},
+ x_ploy_r1:{c:"ploy",r:"R",t:"แมวยอมให้อุ้มแล้ว",hint:"มีสัตว์เลี้ยงครบ 4 ตัว (มีแมว) ตอนพลอยอยู่ค่าย",bg:"camp",need:G=>inCamp(G,"ploy")&&(G.pets||[]).length>=4&&(G.pets||[]).some(p=>p.k==="cat"),steps:[{"n":"nar","t":G=>`ค่ายมีสัตว์เลี้ยงสี่ตัวแล้ว เช้านี้${petIntro(G,"cat")}เดินผ่านทุกคน แล้วกระโดดขึ้นตักพลอยเฉยเลย`},{"n":"ploy","f":"flustered","l":"casual","t":"…อย่าขยับนะ ใครขยับฉันชกคนนั้น"},{"n":"nar","t":"พลอยนั่งนิ่งสองชั่วโมง พลาดซ้อมเช้าทั้งรอบ ครูแดงไม่กล้าเรียก"},{"n":"ploy","f":"happy","l":"casual","t":"มันอุ่นดีนะ …เธอถ่ายรูปไว้ใช่ไหม ส่งให้ฉันด้วย ห้ามลงที่ไหน"}]},
  x_ploy_r2:{c:"ploy",r:"R",t:"พี่ไม่ได้ตื่นเต้น",hint:"พลอยชนะไฟต์ชิงแชมป์ในนามค่ายศิริชัย",bg:"final",need:G=>(G.cal||[]).some(c=>c.a==="ploy"&&c.tier==="final"&&c.res==="W"),steps:[{"n":"nar","t":"เข็มขัดคาดเอวพลอยแล้ว คนดูลุกขึ้นปรบมือ พลอยยืนนิ่งหน้าตาเฉย"},{"n":"ploy","f":"happy","l":"fight","t":"ไม่ได้ตื่นเต้นหรอก ชนะแบบนี้มาเยอะแล้ว"},{"n":"nar","t":"แต่ตอนลงจากเวที พลอยเดินชนเสามุมไปหนึ่งที แล้วขอโทษเสาเบา ๆ"},{"n":"ploy","f":"flustered","l":"fight","t":"…เธอไม่เห็นอะไรทั้งนั้น เข้าใจนะ"}]},
  x_fah_n1:{c:"fah",r:"N",t:"ไม่มีใครชนะ ฟ้าโมโห",hint:"ฟ้าชกเสมอในนามค่ายศิริชัย",bg:"local",need:G=>funCount(G,"fah","D")>=1,steps:[{"n":"nar","t":"กรรมการยกมือทั้งสองคน เสมอ ฟ้ายืนกระทืบเท้าอยู่กลางเวที"},{"n":"fah","f":"angry","l":"fight","t":"เสมอคืออะไร!? ฟ้าไม่เข้าใจ! งั้นใครได้เหรียญ! ใครได้ไก่ย่าง!"},{"n":"coach","t":"แบ่งกันคนละครึ่งไก่"},{"n":"fah","f":"happy","l":"fight","t":"…ครึ่งตัวก็ได้ แต่ฟ้าขอน่องนะ!"}]},
  x_fah_r1:{c:"fah",r:"R",t:"ฟ้าไม่ได้ร้องไห้",hint:"ฟ้าแพ้ติดกัน 3 ไฟต์",bg:"night",need:G=>funStreak(G,"fah","L")>=3,steps:[{"n":"nar","t":"แพ้สามไฟต์ติด ฟ้าหายไปทั้งเย็น จนเจอนั่งอยู่หลังกระสอบทราย หน้าซุกเข่า"},{"n":"fah","f":"sad","l":"casual","t":"ฟ้าไม่ได้ร้องไห้! ฝุ่นเข้าตา! ค่ายนี้ฝุ่นเยอะ!"},{"n":"nar","t":"คุณนั่งลงข้าง ๆ ไม่พูดอะไร ฟ้าเอนหัวมาพิงไหล่ช้า ๆ"},{"n":"fah","f":"flustered","l":"casual","t":"…พรุ่งนี้ซ้อมเพิ่มได้ไหม สองเท่าเลย แล้วอย่าบอกใครนะว่าฟ้านั่งตรงนี้"}]}});
@@ -2635,8 +2638,8 @@ const drainAmt=G=>Math.max(3000,Math.round(Math.min(20000,G.cash*.12)/100)*100);
 const drainOk=(G,salt)=>G.cash>=DRAIN_MIN&&G.week>=4&&absWeek(G)>=(((G.flags||{}).drainWk)||0)+5&&srand(G,salt)<.35;
 const drainPay=(G,mul)=>{const a=Math.round(drainAmt(G)*mul/100)*100;G.cash-=a;G.flags.drainWk=absWeek(G);return a;};
 const DRAINS=[
- {id:"drain_cat",need:G=>hasPet(G,"cat"),steps:G=>[{n:"nar",t:`${petName(G,"cat")}ไล่จับแมลงเม่าแล้วกระโจนใส่จอทีวีจอใหม่ของค่าย จอแตกเป็นลายใยแมงมุม แมวนั่งเลียอุ้งเท้าเหมือนไม่มีอะไรเกิดขึ้น`},{n:"coach",t:"…จอนี้ครูเพิ่งผ่อนงวดแรกเองนะ"}],cul:G=>petName(G,"cat")},
- {id:"drain_rooster",need:G=>hasPet(G,"rooster"),steps:G=>[{n:"nar",t:`${petName(G,"rooster")}หลุดออกจากค่ายไปบุกร้านข้าวมันไก่หน้าตลาด จิกไก่ต้มที่แขวนโชว์จนหล่นทั้งราว`},{n:"npc",who:"เจ๊ร้านข้าวมันไก่",t:"ไก่เป็นมาตีกับไก่ต้ม! ใครจะรับผิดชอบ!"}],cul:G=>petName(G,"rooster")},
+ {id:"drain_cat",need:G=>hasPet(G,"cat"),steps:G=>[{n:"nar",t:`${petIntro(G,"cat")}ไล่จับแมลงเม่าแล้วกระโจนใส่จอทีวีจอใหม่ของค่าย จอแตกเป็นลายใยแมงมุม แมวนั่งเลียอุ้งเท้าเหมือนไม่มีอะไรเกิดขึ้น`},{n:"coach",t:"…จอนี้ครูเพิ่งผ่อนงวดแรกเองนะ"}],cul:G=>petName(G,"cat")},
+ {id:"drain_rooster",need:G=>hasPet(G,"rooster"),steps:G=>[{n:"nar",t:`${petIntro(G,"rooster")}หลุดออกจากค่ายไปบุกร้านข้าวมันไก่หน้าตลาด จิกไก่ต้มที่แขวนโชว์จนหล่นทั้งราว`},{n:"npc",who:"เจ๊ร้านข้าวมันไก่",t:"ไก่เป็นมาตีกับไก่ต้ม! ใครจะรับผิดชอบ!"}],cul:G=>petName(G,"rooster")},
  {id:"drain_roof",need:G=>inCamp(G,"kati"),steps:G=>[{n:"nar",t:"เสียงตูม! กะทิเตะกระสอบทรายแรงจนตะขอหลุด กระสอบลอยทะลุหลังคาสังกะสีไปตกบ้านข้าง ๆ"},{n:"kati",f:"flustered",l:"train",t:"ห-หนูแค่ลองเตะแบบที่ครูสอนเมื่อวาน! ไม่คิดว่าจะได้ผลขนาดนี้!"}],cul:G=>"กะทิ"},
  {id:"drain_banquet",need:G=>true,steps:G=>[{n:"nar",t:"ครูแดงจัดงานคืนสู่เหย้าศิษย์เก่ารุ่นปู่ชัย สั่งโต๊ะจีนมาสิบโต๊ะ แล้วเซ็นบิลในนามค่าย"},{n:"coach",t:"เฮ้ย… ครูนึกว่ามาแค่สามโต๊ะ ใครชวนทั้งอำเภอมาวะ"}],cul:G=>"ครูแดง"},
  {id:"drain_durian",need:G=>inCamp(G,"mali"),steps:G=>[{n:"nar",t:"รถกระบะขนทุเรียนหมอนทองสามเข่งมาจอดหน้าค่าย ใบเสร็จระบุผู้สั่ง: มะลิ"},{n:"mali",f:"happy",l:"casual",t:"หน้าทุเรียนค่ะ! หนูอยากให้ทุกคนได้กิน! …แต่ไม่คิดว่าเข่งนึงจะใหญ่ขนาดนี้"}],cul:G=>"มะลิ"},

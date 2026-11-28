@@ -1,5 +1,5 @@
 // ================= MUAY THAI MOE v1.3 — UI =================
-const VERSION="1.91.204";
+const VERSION="1.91.205";
 const CUR_LANG=(typeof window!=="undefined"&&window.LANG)||"th";
 const TH_LABEL=String.fromCharCode(3652,3607,3618);
 function langSwitch(cls){return `<div class="langsw ${cls||""}" role="group" aria-label="Language">${[["th",TH_LABEL],["en","EN"]].map(([k,l])=>`<button class="lsb ${CUR_LANG===k?"on":""}" data-act="setlang" data-v="${k}" aria-pressed="${CUR_LANG===k}">${l}</button>`).join("")}</div>`;}
@@ -198,6 +198,8 @@ const LOAD_TIPS=["ซ้อมแก้ทางก่อนชก วันช�
 function saveArt(){const S=new Set(),add=u=>{if(u)S.add(u);};
   /* only what the camp screen shows first: faces, the camp sprites of girls in the camp, the gym and the camp */
   add(`${ASSET}coach_face.webp`);add(ASSET+gymBg());add(`${ASSET}bg_camp.webp`);
+  /* v1.92: the sprite camp this save shows (house, dorm, decor, sky) and Kru Daeng, so the camp opens already drawn */
+  try{if(typeof campArtPlan==="function")campArtFiles(campArtPlan(G),campMood(G)).forEach(n=>add(`${ASSET}camp/${n}.webp`));add(`${ASSET}coach_daeng_sheet.webp`);}catch(e){}
   for(const id of CANON_IDS){const f=G.F[id];if(!f||!(f.camp==="player"||f.met))continue;add(`${ASSET}${id}_happy_face.webp`);add(`${ASSET}${id}_casual_face.webp`);if(f.camp==="player")add(`${ASSET}${id}_sheet.webp`);}
   return [...S];}
 function loadScrHTML(){const L=UI.loadScr,pc=L.total?Math.round(L.n/L.total*100):100;
@@ -212,7 +214,8 @@ function withArt(done){warm(`${ASSET}logo.webp`);const list=saveArt(),total=list
 /* after the camp is open, quietly fetch backgrounds and the girls' other looks — skipped on data saver or 2G */
 let PREF=false;
 function prefetchArt(){if(PREF||!G)return;PREF=true;const c=navigator.connection||{};if(c.saveData||/2g/.test(c.effectiveType||""))return;
-  const S=new Set();Object.values(BGIMG).forEach(b=>{if(b)S.add(ASSET+b);});
+  const S=new Set();(window.__MTM_CAMPART||[]).forEach(n=>S.add(ASSET+"camp/"+n)); /* v1.92: the whole camp pack first, so a new decor, vehicle or weather swaps in at once */
+  Object.values(BGIMG).forEach(b=>{if(b)S.add(ASSET+b);});
   /* v1.91.38: the cards you own — their illustrations and the character picture on the card face */
   try{for(const id in (G.cards||{})){const C=CARDS[id];if(!C)continue;const A=CARD_ART[id];if(A){S.add(`${ASSET}${cardArtFile(A.f)}`);if(A.f2)S.add(`${ASSET}${cardArtFile(A.f2)}`);}const f=cardFaceSrc(C);S.add(cardBodySrc(f));}}catch(e){}
   SHEET_IDS.forEach(id=>S.add(`${ASSET}${id}_sheet.webp`));S.add(`${ASSET}coach.png`);for(const id of CANON_IDS){const f=G.F[id];if(!f||!(f.camp==="player"||f.met))continue;for(const l of ["casual","fight","train"])for(const m of ["happy","flustered","pout","sad"])S.add(stand(id,l,m));S.add(standArt(`${id}_fight_angry`));}
@@ -246,7 +249,7 @@ function render(){
   if(albumTop&&UI.modal?.type==="album"){const modal=document.querySelector(".m-album");if(modal)modal.parentElement.scrollTop=albumTop;}
   const fc=document.getElementById("fstage");if(fc)FS.attach(fc);
   const lg=document.querySelector(".flog");if(lg)lg.scrollTop=lg.scrollHeight;
-  mountCanvases();if(typeof mountQSprites==="function")mountQSprites();pxBars();spotPaint();cashJuice();vnType();winJuice();
+  mountCanvases();if(typeof campCardMount==="function")campCardMount();if(typeof mountQSprites==="function")mountQSprites();pxBars();spotPaint();cashJuice();vnType();winJuice();
   if(typeof newsSync==="function")newsSync();
 }
 // v1.12.1 spotlight intro: dim the screen and teach one part of it at a time
@@ -309,7 +312,7 @@ function fsHTML(){if(fsApp())return "";
   return `<div class="set"><span><b>เต็มจอ</b><small>iPhone: กดปุ่มแชร์ แล้ว "เพิ่มไปยังหน้าจอโฮม" เปิดเกมจากไอคอนนั้นจะไม่มีแถบเบราว์เซอร์ · เซฟใน Safari ไม่ตามไปเอง ส่งออกเซฟก่อนแล้วนำเข้าในไอคอนใหม่</small></span></div>`;}
 if(typeof document!=="undefined")["fullscreenchange","webkitfullscreenchange"].forEach(ev=>document.addEventListener(ev,()=>{if(UI.modal&&UI.modal.type==="settings")render();}));
 function settingsHTML(){const t=(k,label,desc)=>`<label class="set"><span><b>${label}</b><small>${desc}</small></span><input type="checkbox" data-act="setopt" data-k="${k}" ${SETTINGS[k]?"checked":""}></label>`;
-  return `<h2>ตั้งค่า</h2><div class="sets"><div class="set"><span><b>ภาษา · Language</b><small>สลับแล้วเกมจะโหลดใหม่ เซฟยังอยู่</small></span>${langSwitch()}</div>${G&&G.avatar?`<div class="set setav"><span class="setav-pic"><canvas width="48" height="64" data-chibi="player" aria-hidden="true"></canvas></span><span><b>ตัวละครของคุณ</b><small>${esc(G.player.name)} · เปลี่ยนชื่อ หน้าตา และชุดได้ตลอด</small></span><button class="btn sm" data-act="avedit">แก้ไขตัวละคร</button></div>${t("mgrShow","แสดงตัวคุณในฉากสนทนา","ภาพอนิเมะของคุณยืนคู่กับสาว ๆ ตอนคุณพูด · ปิดได้ถ้าไม่อยากเห็นตัวเอง")}`:""}${fsHTML()}${G?`<div class="set"><span><b>ใส่โค้ด</b><small>รับโค้ดอีเวนต์ได้ใน Discord ของเกม (ปุ่มด้านล่าง)</small></span><span class="obtns redeem"><input id="redeemcode" maxlength="24" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="โค้ด" aria-label="โค้ด"><button class="btn sm primary" data-act="redeem">ใช้โค้ด</button></span></div>${commHTML()}${typeof codeContentHTML==="function"?codeContentHTML():""}`:commHTML()}${t("music","เพลงประกอบ","ปี่ชวา กลองแขก ฉิ่ง ระหว่างชก")}${t("sfx","เอฟเฟกต์เสียง","เสียงต่อย เตะ ระฆัง เสียงเชียร์")}${t("coach","ครูแดงแนะนำ","ครูคอยไกด์ในหน้าค่าย ข้อเสนอไฟต์ และช่วงพักยก")+t("askEnd","ถามก่อนจบสัปดาห์","เตือนเมื่อยังมีสิ่งที่ยังไม่ได้ทำในสัปดาห์นี้")}${t("quick","เล่นเร็ว","ข้ามฉากฝึกซ้อมตอนจบสัปดาห์ ไปสรุปผลทันที")}</div>
+  return `<h2>ตั้งค่า</h2><div class="sets"><div class="set"><span><b>ภาษา · Language</b><small>สลับแล้วเกมจะโหลดใหม่ เซฟยังอยู่</small></span>${langSwitch()}</div>${G&&G.avatar?`<div class="set setav"><span class="setav-pic"><canvas width="48" height="64" data-chibi="player" aria-hidden="true"></canvas></span><span><b>ตัวละครของคุณ</b><small>${esc(G.player.name)} · เปลี่ยนชื่อ หน้าตา และชุดได้ตลอด</small></span><button class="btn sm" data-act="avedit">แก้ไขตัวละคร</button></div>${t("mgrShow","แสดงตัวคุณในฉากสนทนา","ภาพอนิเมะของคุณยืนคู่กับสาว ๆ ตอนคุณพูด · ปิดได้ถ้าไม่อยากเห็นตัวเอง")}`:""}${fsHTML()}${G?`<div class="set"><span><b>ใส่โค้ด</b><small>รับโค้ดอีเวนต์ได้ใน Discord ของเกม (ปุ่มด้านล่าง)</small></span><span class="obtns redeem"><input id="redeemcode" maxlength="24" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="โค้ด" aria-label="โค้ด"><button class="btn sm primary" data-act="redeem">ใช้โค้ด</button></span></div>${commHTML()}${typeof codeContentHTML==="function"?codeContentHTML():""}`:commHTML()}${t("classicCamp","ค่ายแบบคลาสสิก","วาดค่ายด้วยพิกเซลแบบเดิม · ปิดไว้จะเห็นค่ายภาพใหม่ มีฟ้า ฝน และกลางคืน")}${t("music","เพลงประกอบ","ปี่ชวา กลองแขก ฉิ่ง ระหว่างชก")}${t("sfx","เอฟเฟกต์เสียง","เสียงต่อย เตะ ระฆัง เสียงเชียร์")}${t("coach","ครูแดงแนะนำ","ครูคอยไกด์ในหน้าค่าย ข้อเสนอไฟต์ และช่วงพักยก")+t("askEnd","ถามก่อนจบสัปดาห์","เตือนเมื่อยังมีสิ่งที่ยังไม่ได้ทำในสัปดาห์นี้")}${t("quick","เล่นเร็ว","ข้ามฉากฝึกซ้อมตอนจบสัปดาห์ ไปสรุปผลทันที")}</div>
    ${!G&&loadSave()?`<div class="set danger"><span><b>จัดการช่องเซฟ</b><small>ดู โหลด หรือลบเซฟแต่ละช่อง</small></span><button class="btn sm" data-act="openload">เปิด</button></div>`:""}${G?`<p class="meta">กำลังเล่นช่องเซฟ ${UI.slot} · บันทึกอัตโนมัติทุกครั้งที่มีความคืบหน้า${CLOUD.ready?" · สำรองบนคลาวด์แล้ว":" · ยังไม่ได้เชื่อมคลาวด์ (เซฟอยู่ในเบราว์เซอร์นี้เท่านั้น)"}</p>
    ${G&&UI.slot&&bakInfo(UI.slot)?`<div class="set"><span><b>เซฟก่อนอัปเดต</b><small>เก็บไว้ตอนเกมอัปเดต · v${esc(String(bakInfo(UI.slot).ver))} สัปดาห์ ${bakInfo(UI.slot).week}</small></span><button class="btn sm" data-act="bakrestore">กู้คืน</button></div>`:""}
    <div class="set"><span><b>สำรองเซฟเป็นไฟล์</b><small>เก็บไฟล์ไว้เอง ย้ายเครื่องหรือเบราว์เซอร์ก็นำเข้าได้</small></span><span class="obtns"><button class="btn sm" data-act="exportsave">ส่งออก</button><label class="btn sm">นำเข้า<input type="file" accept=".json,application/json" data-act="importsave" hidden></label></span></div>`:`<div class="set"><span><b>นำเข้าเซฟจากไฟล์</b><small>ไฟล์ที่เคยส่งออกไว้ จะลงช่อง 1</small></span><label class="btn sm">นำเข้า<input type="file" accept=".json,application/json" data-act="importsave" hidden></label></div>`}
@@ -549,7 +552,7 @@ function homeHTML(){const R=roster(G);
     guide=`<section class="px guide away"><img class="gface" src="${faceSrc("kati","happy")}" alt="กะทิ"><div class="gtxt"><b>กะทิ (รักษาการครูแดง · ครูกลับสัปดาห์ ${((G.coachAwayAbs-1)%52)+1})</b><p>${esc(KS[G.week%KS.length])}</p><p class="meta">ช่วงนี้ไม่มีคำแนะนำจากครู ต้องตัดสินใจเองทั้งหมด</p></div><button class="xbtn" data-act="hideguide" aria-label="ปิด">✕</button></section>`;}
   const lv=campLevel(G);
   return `${rinNoteHTML()}<div class="homegrid">${(()=>{const r=[["mali",G.flags.maliRecruit],["rin",G.flags.rinRecruit]].filter(([id,ok])=>ok&&G.F[id].camp==="free").concat(G.region&&G.region.offers?G.region.offers.filter(id=>G.F[id]).map(id=>[id,1]):[]); /* v1.91.30: regional champions asking to join */
-     return r.length?`<button class="px newfighter" data-act="tab" data-v="camp" data-sub="staff"><span class="newb">NEW!</span>${r.map(([id])=>`<img src="${faceSrc(id,"happy")}" alt="">`).join("")}<span><b>${r.map(([id])=>esc(G.F[id].name)).join(" และ ")} อยากเข้าค่าย</b><small>แตะเพื่อดูสัญญา</small></span><span class="chev">▸</span></button>`:"";})()}${typeof REGION!=="undefined"&&REGION.visitBanner&&G.region?REGION.visitBanner(G):""}<section class="px camp-wrap"><div class="cvbox"><canvas class="campcv" width="640" height="360" data-camp="1" aria-label="ภาพรวมค่ายมวยศิริชัย"></canvas>${typeof REGION!=="undefined"&&G.region&&REGION.travelOk&&REGION.travelOk(G)?`<button class="tripspot" data-act="rgtravel" aria-label="เดินทางไปชกศึกชิงเจ้าสี่ภาค"><span class="triptag">เดินทาง ▸</span></button>`:""}
+     return r.length?`<button class="px newfighter" data-act="tab" data-v="camp" data-sub="staff"><span class="newb">NEW!</span>${r.map(([id])=>`<img src="${faceSrc(id,"happy")}" alt="">`).join("")}<span><b>${r.map(([id])=>esc(G.F[id].name)).join(" และ ")} อยากเข้าค่าย</b><small>แตะเพื่อดูสัญญา</small></span><span class="chev">▸</span></button>`:"";})()}${typeof REGION!=="undefined"&&REGION.visitBanner&&G.region?REGION.visitBanner(G):""}<section class="px camp-wrap"><div class="cvbox"><canvas class="campcv" width="640" height="360" data-camp="1" aria-label="ภาพรวมค่ายมวยศิริชัย"></canvas>${typeof REGION!=="undefined"&&G.region&&REGION.travelOk&&REGION.travelOk(G)?`<button class="tripspot" data-act="rgtravel" aria-label="เดินทางไปชกศึกชิงเจ้าสี่ภาค"><span class="triptag">เดินทาง</span></button>`:""}
     ${goalHidden()?`<button class="goal ov mini" data-act="goaltog" aria-label="แสดงเป้าหมาย">เป้าหมาย ▾</button>`:`<button class="goal ov" data-act="goaltog" aria-label="ซ่อนเป้าหมาย">${goalText()}<span class="gx">▴ ซ่อน</span></button>`}</div>
     ${G.campUsed?`<button class="campact done" data-act="campacts"><span class="ci">✓</span><span><small>กิจกรรมค่ายสัปดาห์นี้</small><b>${esc(CAMP_ACTIONS[G.campUsed].name)}</b></span></button>`
       :`<button class="campact" data-act="campacts"><span class="ci"></span><span><small>กิจกรรมค่ายสัปดาห์นี้ · ยังไม่ได้เลือก</small><b>เลือกกิจกรรมค่าย</b></span><span class="chev">▸</span></button>`}
@@ -865,17 +868,14 @@ function trophyRoomHTML(){const it=trophyItems(),UA=UI.hallAll||{};
     <div class="tshelf cert"><span class="tlbl">เกียรติบัตรของค่าย <b>${certs.length}</b></span><div class="trow">${certs.length?certs.map(([x,i])=>`<button class="tit cert" data-act="trophy" data-v="${i}" aria-label="${esc(x.title)}">${trophySVG("cert",x.pal)}</button>`).join(""):["cert","cert"].map(k=>`<span class="tit ghost ${k}">${trophySVG(k,{},true)}</span>`).join("")}</div></div>
     <p class="meta">แตะเข็มขัดหรือถ้วยเพื่อดูว่าได้มาจากไฟต์ไหน</p>
     ${certLeft.length?`<details class="tnext"><summary>เกียรติบัตรที่ยังไม่ได้ (${certLeft.length})</summary>${certLeft.map(([id,A])=>`<div class="kv-row"><span>📜 ${A.name}</span><span class="meta">${A.hint}</span></div>`).join("")}</details>`:""}
-    <button class="btn sm gold" data-act="showcase">📸 ถ่ายรูปค่ายไว้อวด</button></div>`;}
+    <button class="btn sm gold" data-act="showcase">📸 การ์ดอวดค่าย</button></div>`;}
 function trophyPopHTML(i){const x=trophyItems()[i];if(!x)return `<p>ไม่พบรางวัลนี้</p>`;const lv=HALL_LV.find(l=>l.k===x.lv),f=x.fid&&G.F[x.fid];
   return `<div class="tpop"><div class="tpop-art">${trophySVG(x.kind,x.pal)}</div><h2>${esc(x.title)}</h2>
     ${f?`<div class="tpop-who">${faceImg(f,"sm")}<b>${esc(f.name)}</b><small>รุ่น ${esc(x.div||"")}</small></div>`:`<p>${x.sub}</p>`}
     <div class="kv-row"><span>ระดับ</span><b>${lv?lv.n:"เกียรติบัตรค่าย"}</b></div>
     ${x.opp?`<div class="kv-row"><span>${/^อันดับ/.test(x.opp)?"ผลงาน":"คู่ชก"}</span><b>${esc(x.opp)}</b></div>`:x.lv!=="cert"?`<div class="kv-row"><span>คู่ชก</span><b class="meta">ไม่ได้บันทึกไว้ (ได้ก่อนอัปเดต)</b></div>`:""}
     <div class="kv-row"><span>เมื่อ</span><b>${x.when}</b></div></div><div class="mfoot"><button class="btn primary" data-act="closeModal">ปิด</button></div>`;}
-function showcaseHTML(){const R=roster(G),H=(G.honors||[]).length,C=(G.campAwards||[]).length;
-  return `<h2>ค่ายมวยศิริชัย · ปีที่ ${G.season||1}</h2><div class="px card"><canvas class="campcv" width="640" height="360" data-camp="1" aria-label="ภาพค่ายปัจจุบัน"></canvas></div>
-   <p class="meta center">${esc(G.player.name)} · ค่าย Lv.${campLevel(G)} · นักมวย ${R.length} คน · นักเรียน ${students(G)} คน · เกียรติยศ ${H} · เกียรติบัตร ${C}</p>
-   <div class="mfoot"><button class="btn primary" data-act="showcaseSave">💾 บันทึกเป็นรูป</button></div>`;}
+function showcaseHTML(){return campCardHTML();} /* v1.92 (Man): the camp card (src/campcard.js) */
 function hallHTML(){const T=(G.titles||[]).slice().reverse(),H=(G.honors||[]).slice().reverse(),belts=Object.entries(G.belt||{}).filter(([d,b])=>G.F[b.id]&&G.F[b.id].camp==="player"),venueBelts=Object.entries(G.venueBelts||{}).flatMap(([v,ds])=>Object.entries(ds).filter(([d,b])=>G.F[b.id]?.camp==="player").map(([d,b])=>({v,d,b})));
   const yr=t=>{const res=t.res||Object.entries(t.champ||{}).filter(([d,id])=>G.F[id]&&G.F[id].camp==="player").map(([d,id])=>({name:G.F[id].name,d,t:"แชมป์จังหวัด",c:"gold"}));
     return `<div class="hall-y"><b>ปีที่ ${t.season}</b>${res.length?res.map(r=>`<div class="kv-row"><span>${esc(r.name)} · รุ่น ${r.d}</span><span class="pill ${r.c||""}">${r.t}</span></div>`).join(""):'<p class="meta">ปีนั้นยังไม่ผ่านรอบตำบล แต่ค่ายยังอยู่ครบ</p>'}</div>`;};
@@ -2255,11 +2255,8 @@ const ACT={
   decorbuyok:()=>{const m=UI.modal;if(!m||m.yes!=="decorbuyok")return;const d={k:m.k,v:m.v};UI.modal=null;const c=decorPrice(G,d.k,d.v);if(buyDecor(G,d.k,d.v)){AU.sfx&&AU.sfx("level");save();toast(`ซื้อ "${CAMP_DECOR[d.k].items[d.v].name}" แล้ว ${fmt(c)}`);}render();},
   trophy:d=>{UI.modal={type:"trophy",i:+d.v};AU.sfx&&AU.sfx("ui");render();},hallall:d=>{UI.hallAll=UI.hallAll||{};UI.hallAll[d.v]=!UI.hallAll[d.v];render();},
   showcase:()=>{UI.modal={type:"showcase"};render();},
-  showcaseSave:()=>{const src=document.querySelector(".m-showcase canvas[data-camp]");if(!src)return;const W=640,cv=document.createElement("canvas");cv.width=W;cv.height=470;const x=cv.getContext("2d");x.imageSmoothingEnabled=false;
-    x.fillStyle="#141020";x.fillRect(0,0,W,470);x.drawImage(src,0,0,W,360);x.fillStyle="#f1c232";x.font='bold 26px "Chakra Petch","IBM Plex Sans Thai",sans-serif';x.fillText(`ค่ายมวยศิริชัย · ปีที่ ${G.season||1}`,20,400);
-    x.fillStyle="#e8e0f0";x.font='16px "IBM Plex Sans Thai",sans-serif';x.fillText(`${G.player.name} · ค่าย Lv.${campLevel(G)} · นักมวย ${roster(G).length} คน · เกียรติยศ ${(G.honors||[]).length} · เกียรติบัตร ${(G.campAwards||[]).length}`,20,430);
-    x.fillStyle="#9a8fb0";x.font='14px "IBM Plex Sans Thai",sans-serif';x.fillText("Muay Thai Moe",20,456);
-    try{const a=document.createElement("a");a.href=cv.toDataURL("image/png");a.download=`muay-thai-moe-camp-y${G.season||1}.png`;document.body.appendChild(a);a.click();a.remove();toast("บันทึกรูปค่ายแล้ว");}catch(e){toast("บันทึกรูปไม่ได้ในเบราว์เซอร์นี้ ลองแคปหน้าจอแทนนะ");}},
+  showcaseSave:()=>{campCardSave();},
+  ccmood:d=>{ccOpt().mood=d.v;render();},cctheme:d=>{ccOpt().theme=d.v;render();},cclineup:d=>{ccOpt().lineup=d.v==="1"?1:0;render();},
   decorslot:d=>{UI.decorSlot=d.v;AU.sfx&&AU.sfx("ui");render();},
   buyfac:d=>{const before=campLevel(G);if(buyFacility(G,d.v)){save();const after=campLevel(G);AU.sfx("level");toast(after>before?`ค่ายเลื่อนเป็น Lv.${after}: ${CAMP_LV_NAME[after]}!`:`อัปเกรด${FACILITIES[d.v].name}แล้ว`);}},
   daeng:()=>{if(upgradeDaeng(G)){save();toast(`ครูแดงผ่านการอบรม Lv.${G.fac.daeng}`);}},

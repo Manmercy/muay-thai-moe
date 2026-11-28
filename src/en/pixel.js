@@ -294,6 +294,7 @@ function drawRingArt(F,G,t,look,k,rx,ry,rw,rh){if(decorSprite(F,"ring",k||"plain
   });
   if(k==="gold")for(let i=0;i<6;i++){const a=t/550+i*1.1;if(Math.sin(a*2)>.7)F.spark(rx+((i*31)%rw),ry+((i*7)%rh));}}
 function drawCamp(ctx,G,t){
+  if(typeof campArt==="function"&&campArt(ctx,G,t)){ctx.canvas.__caOn=1;return;}ctx.canvas.__caOn=0; /* v1.92: Man's sprite camp (src/campart.js); this hand-drawn camp stays as the fallback */
   const S=2,P=(x,y,w,h,c)=>{ctx.fillStyle=c;ctx.fillRect(Math.round(x)*S,Math.round(y)*S,Math.round(w)*S,Math.round(h)*S);};
   const look=campLook(G),rng=mulberry32(77),F=decorPainter(ctx,S);ctx.imageSmoothingEnabled=false;
   // sky
@@ -373,46 +374,60 @@ function drawCamp(ctx,G,t){
 
   decorGate(P,G,t,F);
   // v1.10: a living yard — everyone moves, drawn back-to-front
+  campYard(ctx,G,t,S,P,Object.assign({},CAMP_YARD_OLD,{ring:[rx,ry],pre:()=>{
+  // v1.88: the filtered indoor gym (airgym) — a sealed box with a big window and a filter unit
+  if(G.fac.airgym){P(114,72,40,36,"#7c8796");P(114,72,40,3,"#5d6775");P(118,80,32,16,"#2b3a4c");P(119,81,30,14,Math.floor(t/900)%2?"#9fd3f0":"#8cc6e8");P(133,81,1,14,"#5d6775");
+    P(146,98,8,8,"#c9d1da");const fa=Math.floor(t/90)%4;P(148+(fa%2?2:0),100+(fa>1?2:0),2,2,"#5d6775");P(150-(fa%2?2:0),102-(fa>1?2:0),2,2,"#5d6775");P(118,99,22,6,"#3a4757");}
+  },post:()=>yearFx(ctx,P,G,t)}));
+}
+/* v1.92: the living yard (students, coach, trainers, pets, hens, fighters, birds, speech bubbles), shared by the hand-drawn camp and the sprite camp.
+   L = where everyone stands; L.extra = sprites to y-sort with them; L.shelter = everyone waits under a roof (rain) */
+const CAMP_YARD_OLD={drill:[14,20,128],stu:[6,124,150,154],coach:[40,112,130,118],staff:[16,128,148,160],player:[110,132,300,152],dog:[10,162,300,170],hens:[40,150],ring:[156,96],bag:[112,118]};
+function campYard(ctx,G,t,S,P,L){
   const D=[];const chib=(look,key,x,y,sc,flip,dy)=>{const c=chibiCache(look,key+dy,{dy});D.push({y:y+32*sc,f:()=>{ctx.save();ctx.imageSmoothingEnabled=false;
     if(flip){ctx.translate((x+24*sc)*S,0);ctx.scale(-1,1);ctx.drawImage(c,0,y*S,24*S*sc,32*S*sc);}else ctx.drawImage(c,x*S,y*S,24*S*sc,32*S*sc);ctx.restore();}});};
-  const n=Math.min(14,campStudents(G)),srng=mulberry32(4242);const SAYS=["Hup!","Yay!","Coach!","Thwack!","So tired~","Again!","Go go!"];
+  const n=Math.min(14,campStudents(G)),srng=mulberry32(4242);const SAYS=L.says||["Hup!","Yay!","Coach!","Thwack!","So tired~","Again!","Go go!"];
   const bubble=[];const bi=Math.floor(t/2600);const who=n?Math.floor(mulberry32(bi*31)()*n):-1;
   for(let i=0;i<n;i++){const look2=CHIBI.random(srng);
     if(i%3===0){// class drill near the coach: shadow-boxing in place
-      const x=14+(i/3)*20,y=128,jab=Math.floor(t/220+i)%4;chib(look2,"s"+i,x+(jab===1?2:0),y,.72,false,jab%2);
+      const x=L.drill[0]+(i/3)*L.drill[1],y=L.drill[2],jab=Math.floor(t/220+i)%4;chib(look2,"s"+i,x+(jab===1?2:0),y,.72,false,jab%2);
       if(i===who)bubble.push([x+9,y-2]);}
-    else{const w=wander(900+i,t+i*700,[6,124,150,154],3600+i*260);chib(look2,"s"+i,w.x,w.y,.72,w.flip,w.moving?Math.floor(t/120)%2:Math.floor(t/500+i)%2);
+    else{const w=wander(900+i,t+i*700,L.stu,3600+i*260);chib(look2,"s"+i,w.x,w.y,.72,w.flip,w.moving?Math.floor(t/120)%2:Math.floor(t/500+i)%2);
       if(i===who)bubble.push([w.x+9,w.y-2]);}}
   // coach paces in front of the class, assistants help out
-  const cw=wander(77,t,[40,112,130,118],4200);chib(COACH_LOOK,"coach",cw.x,cw.y,.85,cw.flip,cw.moving?Math.floor(t/140)%2:Math.floor(t/500)%2);
+  const cw=wander(77,t,L.coach,4200),csh=img("coach_daeng_sheet.webp"); /* v1.92 (Man): Kru Daeng's own sprite sheet (idle, guard, walk, point, kick, cheer); the chibi stays until it loads */
+  if(csh.complete&&csh.naturalWidth){const row=L.lineup?5:cw.moving?2:[0,1,3,1,4][Math.floor((t+700)/2600)%5],fr=Math.floor(t/(row===0||row===5?260:160))%4,fy=cw.y+27;
+    D.push({y:fy,f:()=>{ctx.imageSmoothingEnabled=true;drawFrame(ctx,csh,row,fr,(cw.x+10)*S,fy*S,44*S,cw.flip);}});}
+  else chib(COACH_LOOK,"coach",cw.x,cw.y,.85,cw.flip,cw.moving?Math.floor(t/140)%2:Math.floor(t/500)%2);
   // v1.23: hired trainers walk the yard with their own pixel sprites
-  (G.staff||[]).forEach((k,i)=>{const a=wander(500+i,t+i*1300,[16,128,148,160],3900+i*300);const sf={id:"staff_"+k,canon:false};const ph=hashStr(sf.id)%2000;
+  (G.staff||[]).forEach((k,i)=>{const a=wander(500+i,t+i*1300,L.staff,3900+i*300);const sf={id:"staff_"+k,canon:false};const ph=hashStr(sf.id)%2000;
     const row=a.moving?"walk":Math.floor((t+ph)/2600)%3===2?"guard":"idle";const fr=Math.floor(t/(row==="idle"?260:150))%4;
     D.push({y:a.y+24,f:()=>{ctx.imageSmoothingEnabled=true;drawFrame(ctx,sheetFor(sf),ROW[row],fr,(a.x+10)*S,(a.y+24)*S,30*S,a.flip);}});});
-  if(G.avatar){const pw=wander(31,t,[110,132,300,152],5200);chib(G.avatar,"player",pw.x,pw.y,.85,pw.flip,pw.moving?Math.floor(t/130)%2:Math.floor(t/420)%2);}
+  if(G.avatar){const pw=wander(31,t,L.player,5200);chib(G.avatar,"player",pw.x,pw.y,.85,pw.flip,pw.moving?Math.floor(t/130)%2:Math.floor(t/420)%2);}
   // v1.51: adopted pets roam the yard (the stray soi dog stays until a dog is adopted)
-  (G.pets||[]).forEach((p,i)=>{const w=wander(600+i*13,t+i*900,PET_BOX[p.k]||[20,150,300,170],PET_SPD[p.k]||3000);const px=w.x,py=w.y,fl=w.flip?-1:1,wd=p.k==="dog"?15:11,Z=2;
+  (G.pets||[]).forEach((p,i)=>{const w=wander(600+i*13,t+i*900,(L.pet&&L.pet(p.k))||PET_BOX[p.k]||[20,150,300,170],PET_SPD[p.k]||3000);const px=w.x,py=w.y,fl=w.flip?-1:1,wd=p.k==="dog"?15:11,Z=2;
     D.push({y:py+14,f:()=>{if(typeof petHub==="function"&&petHub(ctx,p.k,(px+wd*Z/2)*S,(py+9*Z)*S,fl,t+i*333,w.moving,S))return;/* v1.91.144: pets with sprite art draw themselves (src/pets.js) */const Q=(x,y,ww,h,c)=>P(fl>0?px+x*Z:px+(wd-x-ww)*Z,py+y*Z,ww*Z,h*Z,c);drawPetQ(Q,p.k,t+i*333,w.moving);}});});
-  if(!(G.pets||[]).some(p=>p.k==="dog")){const dw=wander(5,t,[10,162,300,170],2600);const dx=dw.x,dy=dw.y+8,fl=dw.flip?-1:1,leg=dw.moving&&Math.floor(t/90)%2;
+  if(!(G.pets||[]).some(p=>p.k==="dog")){const dw=wander(5,t,L.dog,2600);const dx=dw.x,dy=dw.y+8,fl=dw.flip?-1:1,leg=dw.moving&&Math.floor(t/90)%2;
    D.push({y:dy+6,f:()=>{const Q=(x,y,w,h,c)=>P(fl>0?dx+x:dx+10-x-w,dy+y,w,h,c);Q(1,1,8,4,"#c99a5e");Q(8,-1,3,3,"#c99a5e");Q(10,0,1,1,"#2b2530");Q(0,Math.floor(t/150)%2?0:1,2,1,"#c99a5e");
      Q(1+(leg?1:0),5,1,2,"#a87a44");Q(7-(leg?1:0),5,1,2,"#a87a44");}});}
-  for(let k=0;k<2;k++){const cx=40+k*22+Math.sin(t/1700+k)*6,cy=150+k*4,peck=Math.floor(t/300+k*2)%5===0;
+  for(let k=0;k<2;k++){const cx=L.hens[0]+k*22+Math.sin(t/1700+k)*6,cy=L.hens[1]+k*4,peck=Math.floor(t/300+k*2)%5===0;
     D.push({y:cy+4,f:()=>{P(cx,cy,4,3,"#f2f2f2");P(cx+3,cy-2+(peck?2:0),2,2,"#f2f2f2");P(cx+5,cy-1+(peck?2:0),1,1,"#e8a23a");P(cx+3,cy-3+(peck?2:0),1,1,"#d23246");}});}
   // fighters: activity rotates every few seconds so the camp never freezes
-  for(const p of campPeople(G)){let row=p.row,x,y,flip=false,fr=Math.floor(t/150+p.k*2)%4;
+  const PPL=campPeople(G);PPL.forEach((p,pi)=>{p.pi=pi;});
+  for(const p of PPL){let row=p.row,x,y,flip=false,fr=Math.floor(t/150+p.k*2)%4;
     if(row==="cycle")row=["guard","punch","knee","walk"][Math.floor(t/2200+p.k)%4];
-    if(p.spot==="ring"){x=rx+40+p.k*44+Math.sin(t/700+p.k)*10;y=ry+30;flip=p.k%2===1;}
-    else if(p.spot==="bag"){x=112-p.k*14;y=118;}
-    else if(p.spot==="run"){const L=260,pos=((t/30+p.k*90)%(L*2));x=40+(pos<L?pos:L*2-pos);y=172;flip=pos>=L;row="walk";}
+    if(L.lineup){const n=PPL.length,span=Math.min(220,n*34);x=160-span/2+(p.pi+.5)*span/n;y=158+(p.pi%2)*4;row="win";fr=Math.floor(t/180+p.pi)%4;} /* v1.92: camp card — everyone lines up and cheers */
+    else if(L.shelter){const w=wander(60+p.k,t,L.shelter,5200);x=w.x;y=w.y;flip=w.flip;row=w.moving?"walk":"idle";}
+    else if(p.spot==="ring"){x=L.ring[0]+40+p.k*44+Math.sin(t/700+p.k)*10;y=L.ring[1]+30;flip=p.k%2===1;}
+    else if(p.spot==="bag"){x=L.bag[0]-p.k*14;y=L.bag[1];}
+    else if(p.spot==="run"){const RL=260,pos=((t/30+p.k*90)%(RL*2));x=40+(pos<RL?pos:RL*2-pos);y=172;flip=pos>=RL;row="walk";}
     else {const w=wander(60+p.k,t,[20,128,150,150],4600);x=w.x+20;y=w.y+40;flip=w.flip;row=w.moving?"walk":"idle";}
     const f=p.f,rr=row;D.push({y,f:()=>{ctx.imageSmoothingEnabled=true;drawFrame(ctx,sheetFor(f),ROW[rr],fr,x*S,y*S,46*S,flip);}});}
   // birds cross the sky now and then
   {const bt=(t%14000)/14000;if(bt<.5){const bxp=-10+bt*2*340;for(let k=0;k<3;k++){const yy=26+k*5+Math.sin(t/200+k)*2,wing=Math.floor(t/160+k)%2;P(bxp-k*9,yy,2,1,"#1b1230");P(bxp-k*9-2,yy-wing,2,1,"#1b1230");P(bxp-k*9+2,yy-wing,2,1,"#1b1230");}}}
-  // v1.88: the filtered indoor gym (airgym) — a sealed box with a big window and a filter unit
-  if(G.fac.airgym){P(114,72,40,36,"#7c8796");P(114,72,40,3,"#5d6775");P(118,80,32,16,"#2b3a4c");P(119,81,30,14,Math.floor(t/900)%2?"#9fd3f0":"#8cc6e8");P(133,81,1,14,"#5d6775");
-    P(146,98,8,8,"#c9d1da");const fa=Math.floor(t/90)%4;P(148+(fa%2?2:0),100+(fa>1?2:0),2,2,"#5d6775");P(150-(fa%2?2:0),102-(fa>1?2:0),2,2,"#5d6775");P(118,99,22,6,"#3a4757");}
+  (L.extra||[]).forEach(e=>D.push(e));if(L.pre)L.pre();
   D.sort((a,b)=>a.y-b.y).forEach(d=>d.f());
-  yearFx(ctx,P,G,t);
+  if(L.post)L.post();
   for(const [x,y] of bubble){const tx=SAYS[bi%SAYS.length];ctx.save();ctx.font=`700 ${7*S}px "Chakra Petch",sans-serif`;const w=ctx.measureText(tx).width/S+6;
     P(x-w/2,y-10,w,9,"#ffffff");P(x-1,y-1,2,2,"#ffffff");ctx.fillStyle="#1b1230";ctx.textAlign="center";ctx.fillText(tx,x*S,(y-3)*S);ctx.restore();}
 }
@@ -853,6 +868,7 @@ function mountCampFx(){document.querySelectorAll("canvas[data-campfx]").forEach(
 const NAI_LOOK={kind:"manager",gender:"m",hairStyle:"crop",hair:"#8e939c",skin:"#b97d55",eyes:"#3a2a24",outfit:"polo",outfitColor:"#c4a57a",pantsColor:"#b0926a",stache:"#5d6068",epaulet:"#e0b41b"};
 const AIDE_LOOK={kind:"manager",gender:"m",hairStyle:"crop",hair:"#2b2530",skin:"#d9a27b",eyes:"#3a2a24",outfit:"tee",outfitColor:"#f2f2f2",pantsColor:"#1f1f24",glasses:"glasses"};
 const AIDE2_LOOK={...AIDE_LOOK,gender:"f",hairStyle:"bob",hair:"#3a2a24",skin:"#eec1a0",glasses:"none",outfitColor:"#f4f1ea",pantsColor:"#2c3a5a"};
+const CT_SPOT_ART={gate:[30,154],bags:[136,140],tree:[240,124],ring:[230,140],vehicle:[236,172],track:[110,176],clean:[80,150]}; // v1.92: the same walk on the sprite camp
 const CT_SPOT={gate:[34,152],bags:[134,128],tree:[176,118],ring:[214,136],vehicle:[262,174],track:[110,176],clean:[70,160]};
 const CT_STEP=2600,CT_WALK=1000,CT_START=700;
 function ctChib(ctx,S,look,key,x,y,sc,flip,dy){const c=chibiCache(look,key+(dy||0),{dy:dy||0});ctx.save();ctx.imageSmoothingEnabled=false;
@@ -863,7 +879,7 @@ function ctBubble(ctx,S,x,y,txt,hi){ctx.save();ctx.font=`700 ${8*S}px "Chakra Pe
 function ctVerdict(v){return v>=10?"A perfect 10!!":v>=8?"Very good!":v>=6?"Not bad":v>=4?"Passable":"Hmm…";}
 /* the chief walks the real camp (with the player's own decorations), stopping at each judged area */
 function drawContestWalk(ctx,G,t,R){drawCamp(ctx,G,t);const S=2,A=R.areas;let x=-20,y=160,flip=false,moving=true,say=null,hi=false;
-  const pts=A.map(a=>CT_SPOT[a.k]||[160,160]);
+  const pts=A.map(a=>(ctx.canvas.__caOn?CT_SPOT_ART:CT_SPOT)[a.k]||[160,160]);
   if(t<CT_START){x=-20+(t/CT_START)*(pts[0][0]+20)*.4;y=pts[0][1];}
   else{const i=Math.min(A.length,Math.floor((t-CT_START)/CT_STEP)),ph=(t-CT_START)-i*CT_STEP;
     if(i>=A.length){x=150;y=158;moving=false;say=`Total ${R.total}/70 · Results at the district office!`;hi=true;}

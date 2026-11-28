@@ -77,7 +77,7 @@ const mailDelN=()=>(G.mail||[]).filter(m=>m.read&&!mailKeep(m)).length;
 function mailDel(ids){const S=new Set(ids);const n0=(G.mail||[]).length;G.mail=(G.mail||[]).filter(m=>!S.has(m.id)||mailKeep(m));return n0-G.mail.length;}
 function mailBadge(){if(!G||!G.mail)return 0;return G.mail.filter(m=>!m.read||mailOpen(m)).length;}
 const MAILBOX_PX=pxIcon(["....kkkk....","...kffffk...","..krrrrrrk..",".krrrrrrrrk.",".krwwwwwwrk.",".krwkkkkwrk.",".krwwwwwwrk.",".krrrrrrrrk.",".kkkkkkkkkk.",".....kk.....",".....kk.....","....kkkk...."],{k:"#2a1a10",r:"#c8283c",w:"#f4ead8",f:"#f7d24a"});
-const BILLS=[["Subdistrict Municipality","Fine: your camp's rooster crows above the legal limit at 4 a.m. (14 complaints)",300],
+const BILLS=[["Subdistrict Municipality",G=>`Fine: ${petIntro(G,"rooster")} crowing above the legal limit at 4 a.m. (14 complaints)`,300,G=>hasPet(G,"rooster")],
  ["Uncle Wang, motorbike taxi","Windshield repair: a kick knocked something off the bag and over the fence",800],
  ["Jae Tim's Chicken Rice","Invoice: your fighters ate 46 plates on credit (countersigned by Coach Daeng)",1840],
  ["Tube Ice Cooperative","This month's ice: your ice baths use more than every fish factory in the district",900],
@@ -85,7 +85,16 @@ const BILLS=[["Subdistrict Municipality","Fine: your camp's rooster crows above 
  ["Signage Office","Sign tax: your camp sign is bigger than the temple's, extra fee",600,G=>G.fac.brand>=1],
  ["Provincial Electricity Authority","Special electricity charge: your camp floodlights are so bright birds are flying the wrong way",1200,G=>(G.fac.lights||0)>=1],
  ["Temple Route Songthaew Association","Songthaew parking fee at the temple (your students were cheering inside the vehicle)",350,G=>(G.fac.van||0)>=1],
- ["Subdistrict Animal Clinic","Treatment for the camp's orange cat: ate too much khanom khrok",500]];
+ ["Subdistrict Animal Clinic",G=>`Vet bill for ${petIntro(G,"cat").trim()}: ate too many khanom khrok`,500,G=>hasPet(G,"cat")],
+ /* v1.91.208 (Man: more pet trouble, it's funny) — each only arrives if the camp has that pet */
+ ["Mae Klong Mackerel, Morning Market",G=>`1 basket of mackerel: ${petIntro(G,"cat")} sat by the stall making big eyes, so customers bought it fish… on your camp's tab`,380,G=>hasPet(G,"cat")],
+ ["Pia's Motorbike Repair",G=>`3 side mirrors: ${petIntro(G,"rooster")} saw itself in the mirrors and fought them until they broke`,540,G=>hasPet(G,"rooster")],
+ ["Moo Ping Stall by the School",G=>`23 grilled pork skewers: ${petIntro(G,"dog")} made off with the whole tray while auntie was making change`,460,G=>hasPet(G,"dog")],
+ ["Subdistrict Post Office",G=>`Postman's trousers: ${petIntro(G,"dog")} chased him from the end of the lane to the camp gate (one trouser leg lost)`,350,G=>hasPet(G,"dog")],
+ ["Subdistrict Temple",G=>`Temple lotus pond: ${petIntro(G,"turtle")} snuck into the pond and ate every lotus grown for the monks`,400,G=>hasPet(G,"turtle")],
+ ["Subdistrict Traffic Office",G=>`Traffic warden fee: ${petIntro(G,"turtle")} crossed the road outside the camp. It took 40 minutes. Traffic backed up to the temple`,300,G=>hasPet(G,"turtle")],
+ ["Uncle Hem's Fish Pond",G=>`9 tilapia: ${petIntro(G,"otter")} went into the pond at 3 a.m. and came out with a round belly`,650,G=>hasPet(G,"otter")],
+ ["Auntie Jum's Laundry",G=>`Re-wash of the whole pile: ${petIntro(G,"otter")} climbed out of the canal and rolled all over the freshly ironed whites`,300,G=>hasPet(G,"otter")]];
 const QUIZ=[["Before a fight, what ritual do Muay Thai fighters perform in the ring?",["Wai khru ram muay","Sing the national anthem","Show-off push-ups"],0],
  ["Muay Thai is known as the art of how many limbs?",["Six limbs","Eight limbs","Ten limbs"],1],
  ["What is the headpiece fighters wear during the wai khru called?",["Mongkhon headband","Prajiad armband","A headband"],0],
@@ -221,7 +230,7 @@ function mailWeekly(G){G.mail=G.mail||[];if(typeof thiefMail==="function"){thief
   const gi=GIG_WEEKS.indexOf(G.week);if(gi>=0&&G.campUsed===["promo","kids","fightnight","clip","tourist","class"][gi]){const g=GIGS[gi%GIGS.length];addMail(G,{kind:"take",from:g[0],title:g[1],body:g[2],amt:Math.round((500+G.week*15)/50)*50});}
   if(G.week%3===1&&G.week>=4&&G.week<=49){const q=QUIZ[(Math.floor(G.week/3)+G.seed)%QUIZ.length];addMail(G,{kind:"quiz",from:"Community radio 'Our Muay Thai'",title:"Weekly prize quiz",body:"Answer correctly to win prize money from the show's sponsor (one answer only)",q:q[0],opts:q[1],ans:q[2],amt:Math.round((800+Math.min(2200,G.week*45))/10)*10,exp:G.week+2});}
   // odd bills
-  if(G.week>=5&&rng()<.22){const L=BILLS.filter(b=>!b[3]||b[3](G));const b=L[Math.floor(rng()*L.length)];addMail(G,{kind:"pay",from:b[0],title:"Invoice",body:b[1],amt:Math.round(b[2]*(1+G.week/60)/10)*10,exp:G.week+2});}
+  if(G.week>=5&&rng()<.22){const L=BILLS.filter(b=>!b[3]||b[3](G));const b=L[Math.floor(rng()*L.length)];addMail(G,{kind:"pay",from:b[0],title:"Invoice",body:typeof b[1]==="function"?b[1](G):b[1],amt:Math.round(b[2]*(1+G.week/60)/10)*10,exp:G.week+2});}
   // odd fights posted to the offers board (rare, pays well)
   beastOffer(G,rng);
   qCleanup(G);}
@@ -979,10 +988,14 @@ const RUN={st:null,
        ${R.best?`<p class="center"><b class="newrec">New record!</b>${R.prev?` was ${R.prev.toFixed(2)} s`:""}</p>`:""}
        ${R.say?`<div class="rsay"><b>${esc(R.say.n)}:</b> "${esc(R.say.t)}"</div>`:""}
        ${R.ladUp?`<p class="center"><b class="newrec">${(G.mini.ladder||0)>=RUN_LADDER.length?"All five on the district ladder beaten!":`Next challenger unlocked: ${esc(RUN_LADDER[G.mini.ladder].n)}`}</b> · ✦ +2</p>`:""}
-       ${R.chain?`<p class="center">Longest mash streak <b class="goldt">${R.chain} taps</b></p>`:""}
+       ${R.p4&&!R.dq?`<p class="center">Held pace in the green band <b class="goldt">${R.band.toFixed(1)} s</b>${R.empty!=null?` · tank ran dry at <b class="redt">${Math.round(R.empty)} m</b>`:""}</p>${!R.win&&R.empty!=null?`<p class="center meta">Keep the needle in the green band first, then mash all out at the "KICK! 120 m" sign</p>`:""}`:R.chain?`<p class="center">Longest mash streak <b class="goldt">${R.chain} taps</b></p>`:""}
        <p class="center meta">Reaction ${R.react.toFixed(2)} s${R.passes?` · passes ${R.passes}`:""}${R.fs?` · false starts ${R.fs} times`:""}${R.par?` · target time for ${esc(me?me.name:"")} ${R.par.toFixed(2)} s`:""}</p>
        ${ext?(R.rw?`<p class="center">${R.rw}</p>`:""):S.practice?`<p class="center meta">Practice mode · no rewards</p>`:`<p class="center">${R.rw}</p>`}
        <div class="mfoot roadbtns">${ext?`<button class="btn primary" data-rn="next">Next ▸</button>`:`<button class="btn" data-rn="again">Race again (practice)</button><button class="btn primary" data-mb="close">Back to camp</button>`}</div></div>`;}},
+  /* v1.91.204 (Man: mashed the whole 400 m, ran out of legs and lost) — the pace read for the 400 m: ok = inside the green cruise band,
+     hot = faster than the tank can hold, slow = under it, kick = the last 120 m where mashing is right. null for the sprints and the relay. */
+  pace(S,L){if(!S||!L||L.done||S.relay||S.dist<400||S.phase!=="race")return null;if(L.x>=S.dist-120)return "kick";
+    const cq=runCruise(L,S.dist),b0=Math.max(.72,cq-.05),q=L.v/Math.max(1,L.vmax);return q>cq+.025?"hot":q<b0-.03?"slow":"ok";},
   meLane(){const S=this.st;return S&&S.lanes&&S.lanes.find(l=>l.me);},
   legF(L){return L.legs?L.legs[Math.min(L.leg,L.legs.length-1)].f:L.f;},
   set(){const S=this.st,me=this.runner();if(!me)return;AU.resume&&AU.resume();try{AU.stopMusic();}catch(e){}G.mini=G.mini||{};if(!S.race)G.mini.runLast=S.id;
@@ -1009,7 +1022,7 @@ const RUN={st:null,
     if(!S.react)S.react=(now-S.gun)/1000;
     const dt=S.lastT?(now-S.lastT)/1000:.25;S.lastT=now;S.rate=Math.min(12,S.rate*.6+(1/Math.max(.07,dt))*.4);
     if(S.lastTap&&now-S.lastTap>550)S.chain=0;S.lastTap=now;S.chain=(S.chain||0)+1;S.maxChain=Math.max(S.maxChain||0,S.chain);S.chainT=now;
-    if(S.chain%25===0){S.mile={n:S.chain,t:now};S.shk=now;try{navigator.vibrate&&navigator.vibrate(25)}catch(_){}AU.init&&AU.init()&&AU.tone(AU.ctx.currentTime+.01,{f:1320,type:"square",dur:.12,peak:.1});}
+    const pz0=this.pace(S,L);if(S.chain%25===0&&(!pz0||pz0==="kick")){S.mile={n:S.chain,t:now};S.shk=now;try{navigator.vibrate&&navigator.vibrate(25)}catch(_){}AU.init&&AU.init()&&AU.tone(AU.ctx.currentTime+.01,{f:1320,type:"square",dur:.12,peak:.1});}
     S.dust=(S.dust||[]).concat([{t:now}]).slice(-6);},
   /* relay: tap the track when the incoming runner is in the box — late in the box is a flying start, early drops the baton */
   pass(){const S=this.st;if(!S||S.phase!=="race"||!S.relay)return;const L=this.meLane();if(!L||L.done||L.leg>=L.legs.length-1||L.wait>0)return;
@@ -1052,6 +1065,8 @@ const RUN={st:null,
       if(mk>=D/2)once("q2",()=>Math.abs(gap)<1.5?`Halfway! Still anyone's race!`:gap>8?`Halfway — ${me} has pulled well clear!`:gap>0?`Halfway — ${me} leads!`:`Halfway — ${nm(lead)} leads, ${me} chasing!`);
       if(mk>=D*.75)once("q3",()=>Math.abs(gap)<2?`Final straight! Neck and neck!`:gap<0?`Final straight — ${me} has to pick it up now!`:`Final straight — ${me} still leads!`);
       if(mk>=D-10&&Math.abs(gap)<1.2)once("photo",()=>`So close! We may need the photo finish!`);}
+    if(D>=400&&!S.relay&&!L.done){if((S.hotT||0)>1.2&&L.x<D-150&&(F.hotN||0)<2&&(!F.hotAt||now-F.hotAt>6000)){F.hotN=(F.hotN||0)+1;F.hotAt=now;this.say(`${me} is pushing too hard, careful not to empty the tank before the last bend!`);}
+      if(L.x>=D-120)once("kick",()=>`Last 120 metres! Everything you have left, ${me}!`);}
     if(D>=400&&L.sta<.15&&!L.done)once("empty",()=>`${me} is out of gas! The legs are getting heavy!`);
     if(S.relay&&L.legX>=78&&L.leg<L.legs.length-1&&!F["z"+L.leg]){F["z"+L.leg]=1;this.say(`In the box! Tap the track to pass to ${L.legs[L.leg+1].f.name}!`);}
     if(S.lastT&&now-S.lastT>700&&!L.done&&(!S.fadeT||now-S.fadeT>2500)&&el>1){S.fadeT=now;this.say(`${me} is fading! Keep going!`);}},
@@ -1068,6 +1083,11 @@ const RUN={st:null,
         if(L.legX>=100&&L.leg<L.legs.length-1){if(L.me)this.handover(L,"late");else this.handover(L,"ai");}}
       if(L.x>=D){L.x=D;L.done=true;L.t=el;}}
     const L=this.meLane();
+    {const pz=this.pace(S,L);if(pz){if(pz==="ok")S.bandT=(S.bandT||0)+dt;S.hotT=pz==="hot"?(S.hotT||0)+dt:0;}
+     if(L&&!L.done&&S.dist>=400&&!S.relay&&L.sta<=0&&S.emptyAt==null)S.emptyAt=L.x;
+     if(pz!==S.pz){if(pz==="kick")S.chain=0;S.pz=pz;const b=document.getElementById("rnL");if(b){b.classList.remove("pz-ok","pz-hot","pz-slow","pz-kick");if(pz)b.classList.add("pz-"+pz);
+       const bt=b.querySelector("b"),sm=b.querySelector("small");if(bt)bt.textContent=pz==="ok"?"hold pace":pz==="hot"?"ease off!":pz==="kick"?"KICK!!":"RUN!";
+       if(sm)sm.textContent=pz==="kick"?"mash all out · Space":pz?"keep the needle in the green · Space":"mash · Space";}}}
     if(L&&!L.done&&now-S.pathT>=100){S.pathT=now;S.path.push(Math.round(L.x*10)/10);}
     const t=document.getElementById("rnt");if(t)t.textContent=el.toFixed(2);this.call(el,now);
     const live=S.lanes.filter(l=>!l.ghost);
@@ -1082,6 +1102,7 @@ const RUN={st:null,
     for(let i=0;i<n;i++){x.fillStyle=i%2?"rgba(0,0,0,.05)":"rgba(255,255,255,.03)";x.fillRect(0,top+i*lh,W,lh);x.fillStyle="#f3e9dc";x.fillRect(0,top+(i+1)*lh-1,W,2);}
     for(let m=0;m<=D;m+=10){const X=px(m);if(X<-10||X>W+10)continue;x.fillStyle="rgba(255,255,255,.55)";x.fillRect(X,top+2,2,H-top);if(m%50===0||D<=100){x.fillStyle="#fff";x.font="bold 10px sans-serif";x.textAlign="left";x.fillText(m+"",X+3,top+11);}}
     if(S.relay)for(let k=1;k<4;k++){const a=px(k*100-22),b=px(k*100);if(b<-10||a>W+10)continue;x.fillStyle="rgba(255,211,74,.28)";x.fillRect(a,top,b-a,H-top);x.fillStyle="#ffd34a";x.fillRect(b-2,top,3,H-top);}
+    if(D>=400&&!S.relay){const kx=px(D-120);if(kx>-30&&kx<W+10){x.fillStyle="#ffd34a";x.fillRect(kx-1,top,3,H-top);x.font='900 13px "Chakra Petch","IBM Plex Sans Thai",sans-serif';x.textAlign="left";x.lineWidth=4;x.strokeStyle="#140a1e";x.strokeText("KICK! 120 m",kx+5,top+26);x.fillStyle="#ffd34a";x.fillText("KICK! 120 m",kx+5,top+26);}}
     const fx=px(D);if(fx<W+10){for(let i=0;i<Math.ceil((H-top)/9.5);i++){x.fillStyle=i%2?"#000":"#fff";x.fillRect(fx,top+i*9.5,6,9.5);}}
     const fr=v=>v>.5?Math.floor(now/Math.max(70,260-v*18))%4:0,sh=Math.min(62,lh*1.55);
     const drawR=(f,m,v,footY,stum,al=1)=>{if(!f)return;const s=sheetFor(f);if(!s||!(s.complete||s.width))return;const bob=v>.5?Math.abs(Math.sin(now/90))*3:0;drawFrame(x,s,stum?ROW.guard:ROW.walk,fr(v),px(m),footY-bob,sh,false,al);};
@@ -1113,7 +1134,11 @@ const RUN={st:null,
         for(let i=0;i<14;i++){const a=i/14*6.283,r=40+e*160;x.fillStyle="#ffe066";x.fillRect(cx+Math.cos(a)*r-3,cy+70+Math.sin(a)*r*.6-3,6,6);}}
       x.restore();}
     /* tap chain counter */
-    if(S.phase==="race"&&S.chain>=3){const age=now-S.chainT,alive=age<550||(me&&me.done),fade=alive?1:Math.max(0,1-(age-550)/500);
+    const pz=this.pace(S,me);
+    if(pz&&pz!=="kick"){const col=pz==="ok"?"#7dff8f":pz==="hot"?"#ff9a2a":"#ffffff",big=pz==="ok"?(S.bandT||0).toFixed(1)+" s":pz==="hot"?"ease off!":"a bit faster",sub=pz==="ok"?"holding pace!":pz==="hot"?"tank running dry":"under the green band";
+      x.save();x.translate(W-12,72);x.rotate(-.06);x.textAlign="right";x.textBaseline="alphabetic";x.font='italic 900 34px "Chakra Petch","IBM Plex Sans Thai",sans-serif';x.lineWidth=7;x.strokeStyle="#140a1e";x.strokeText(big,0,0);x.fillStyle=col;x.fillText(big,0,0);
+      x.font='900 14px "Chakra Petch","IBM Plex Sans Thai",sans-serif';x.lineWidth=4;x.strokeText(sub,0,18);x.fillStyle="#fff";x.fillText(sub,0,18);x.restore();}
+    else if(S.phase==="race"&&S.chain>=3){const age=now-S.chainT,alive=age<550||(me&&me.done),fade=alive?1:Math.max(0,1-(age-550)/500);
       if(fade>0){const k=S.chain,bump=RM?1:1+.35*Math.max(0,1-age/120),col=k>=75?"#ff4a4a":k>=50?"#ff9a2a":k>=25?"#ffd34a":"#ffffff",jx=!RM&&k>=50&&alive?(Math.random()-.5)*2:0;
         x.save();x.globalAlpha=fade;x.translate(W-12+jx,72);x.rotate(-.08);x.scale(bump,bump);x.textAlign="right";x.textBaseline="alphabetic";
         x.font='italic 900 40px "Chakra Petch","IBM Plex Sans Thai",sans-serif';x.lineWidth=7;x.strokeStyle="#140a1e";x.strokeText(String(k),0,0);x.fillStyle=col;x.fillText(String(k),0,0);
@@ -1135,7 +1160,7 @@ const RUN={st:null,
     if(dq&&me){me.t=99;me.done=true;for(const l of S.lanes)if(!l.done)l.t=99;}
     const live=S.lanes.filter(l=>!l.ghost),order=S.lanes.slice().sort((a,b)=>a.t-b.t),place=live.slice().sort((a,b)=>a.t-b.t).indexOf(me)+1;
     const t=dq?99:me.t,f=this.runner(),par=f&&!S.relay?runPar(f,D):0,r=par?t/par:1;
-    const grade=dq?"C":r<=1.02?"S":r<=1.07?"A":r<=1.14?"B":"C";
+    let grade=dq?"C":r<=1.02?"S":r<=1.07?"A":r<=1.14?"B":"C";const p4=D>=400&&!S.relay;if(p4&&live.length>1&&place>1&&(grade==="S"||grade==="A"))grade="B";
     G.mini=G.mini||{};G.mini.best=G.mini.best||{};const bk=D>=400?"run400":"run",ext=S.duel||S.race;
     const prev=G.mini.best[bk]||null,isBest=!dq&&!ext&&!S.relay&&(!prev||t<prev);if(isBest)G.mini.best[bk]=Math.round(t*100)/100;
     /* the ghost is per runner, 100 m only */
@@ -1144,7 +1169,7 @@ const RUN={st:null,
       if(won&&S.rung===(G.mini.ladder||0)){G.mini.ladder=(G.mini.ladder||0)+1;ladUp=true;G.dust=(G.dust||0)+2;if(G.mini.ladder<RUN_LADDER.length)S.rung=G.mini.ladder;}}
     if(S.race&&S.race.say)say=S.race.say(place===1);
     const passTxt=S.passes&&S.passes.length?S.passes.map(q=>({perfect:"clean",good:"Good",early:"early",late:"late"}[q])).join(" · "):"";
-    S.res={win:place===1,place,t,ot:(live.find(l=>!l.me)||{}).t||0,dq,fs:S.fs,react:S.react||0,chain:S.maxChain||0,grade:ext||S.relay?null:grade,best:isBest,prev,par,order,passes:passTxt,rw:"",say,ladUp};
+    S.res={win:place===1,place,t,ot:(live.find(l=>!l.me)||{}).t||0,dq,fs:S.fs,react:S.react||0,chain:S.maxChain||0,grade:ext||S.relay?null:grade,best:isBest&&!(p4&&place>1),p4,band:S.bandT||0,empty:S.emptyAt,prev,par,order,passes:passTxt,rw:"",say,ladUp};
     const out={win:place===1,place,t,ot:S.res.ot,dq,order:order.map(l=>({team:l.team,t:l.t,me:l.me}))};
     if(S.race&&S.race.cb)S.race.cb(out);
     else if(S.duel&&S.duel.cb){S.duel.cb(out);}

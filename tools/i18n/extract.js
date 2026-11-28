@@ -1,6 +1,6 @@
 // collect every string literal / template chunk containing Thai, with positions
 const acorn=require('acorn'),walk=require('acorn-walk'),fs=require('fs');
-const SRC=(process.env.SRC||'../../src/'),FILES=['engine','chibi','data','story','pixel','ui','quest','chat','xlove','quizshow','ghost','pets','scard','guide','road','region'];const TH=/[฀-๿]/;
+const SRC=(process.env.SRC||'../../src/'),FILES=['engine','chibi','data','story','pixel','campart','campcard','ui','quest','chat','xlove','quizshow','ghost','pets','scard','guide','road','region'];const TH=/[฀-๿]/;
 const out={};let segs=new Map();
 for(const f of FILES){const code=fs.readFileSync(SRC+f+'.js','utf8');const ast=acorn.parse(code,{ecmaVersion:2022,sourceType:'script',allowReturnOutsideFunction:true});const L=[];
   const B={...walk.base,Property(n,st,c){if(n.key.type==='Literal')c(n.key,st);walk.base.Property(n,st,c);}};
