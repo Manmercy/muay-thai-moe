@@ -943,7 +943,7 @@ function newGame(opts){
 }
 const roster=G=>Object.values(G.F).filter(f=>f.camp==="player");
 /* v1.91.215 (Man): a fighter's purse follows her own name — rating 1000→1600 adds up to +50%, and a regional champion who joined us draws a crowd (+50%) so buying one pays for herself if she fights · wageOf: she is paid her contract, the 5,000/week the letter promised (it used to grow with level to ~8,900) */
-const fameMult=f=>(1+clamp((ratingOf(f)-1000)/600,0,1)*.5)*(f&&f.camp==="player"&&f.joinAbs!=null?1.5:1);
+const fameMult=f=>(1+clamp((ratingOf(f)-1000)/600,0,1)*.5+clamp((ratingOf(f)-1600)/200,0,1)*.25)* /* v1.91.217: keeps climbing to ×1.75 at 1800 */(f&&f.camp==="player"&&f.joinAbs!=null?1.5:1);
 const wageOf=f=>f&&f.joinAbs!=null?f.wage:Math.round(f.wage*(1+(Math.min(f.lvl||1,15)-1)*.06)/100)*100; // v1.43: stars ask for more as they level up
 const wages=G=>roster(G).reduce((s,f)=>s+wageOf(f),0)+(G.staff?G.staff.reduce((s,k)=>s+STAFF[k].wage,0):G.fac.assistants*2500);
 // ---------- CAMP FACILITIES & STUDENTS ----------
@@ -1053,7 +1053,7 @@ const hasStaff=(G,k)=>(G.staff||[]).includes(k);
 const staffLocked=(G,k)=>{const r=STAFF[k].req;if(!r)return "";if(r.lv&&campLevel(G)<r.lv)return `Camp Lv.${r.lv}`;if(r.rep&&G.rep<r.rep)return `Fame ${r.rep}`;return "";};
 function hireStaff(G,k){const S=STAFF[k];G.staff=G.staff||[];if(!S||hasStaff(G,k)||G.staff.length>=staffSlots(G)||staffLocked(G,k)||G.cash<S.fee)return false;G.cash-=S.fee;G.staff.push(k);G.fac.assistants=G.staff.length;return true;}
 function fireStaff(G,k){G.staff=(G.staff||[]).filter(x=>x!==k);G.fac.assistants=G.staff.length;return true;}
-function fixSave(G){/* v1.91.209 regional audit: the league's "Tabtim Kiatsiam" shared a first name with the Isan champion Tabtim — she is Mukda now */for(const f of Object.values(G.F||{}))if(f&&f.camp!=="player"&&f.id!=="tabtim"&&/^(ทับทิม เกียรติสยาม|Thapthim Kiatsiam)$/.test(f.name||"")){const en=f.name[0]==="T";f.name=en?"Mukda Kiatsiam":"Mukda Kiatsiam";if(f.full)f.full=f.name;}if(typeof byCampKit==="function")byCampKit(G);for(const [id,k] of [["ploy","captain"],["fah","grin"]])if(G.F&&G.F[id]&&G.F[id].skills&&(G.F[id].skills[k]||0)>3)G.F[id].skills[k]=3; /* v1.91.195: undo the old runaway yearly rank-up */ /* v1.91.166: Baiyok in the camp gets her tree *//* v1.91.42: a card counts as read only if its story was ever opened (o.seen is set only there) — v1.91.41 wrongly marked every owned card read */if(G&&(G.cardRd||0)<2){for(const k in (G.cards||{})){const o=G.cards[k];o.rd=o.seen?1:0;}G.cardRd=2;}if(G&&G.F&&typeof hmFix==="function")hmFix(G);if(G&&G.F&&typeof monoFix==="function")monoFix(G);if(G&&G.ev&&G.ev.loy&&typeof thiefFix==="function")thiefFix(G);if(G&&G.F&&G.prodigy)fixProdigies(G);if(G&&G.flags&&G.flags.beat_ploy&&G.flags.beatS_ploy==null)G.flags.beatS_ploy=G.season||1;
+function fixSave(G){/* v1.91.217: ratings over the new เจ้าสังเวียน line that were not won in the regional chapter come back under it */for(const f of Object.values(G.F||{}))if(f&&f.elo>RG_CAP&&!f.rgFame)f.elo=RG_CAP;/* v1.91.209 regional audit: the league's "Tabtim Kiatsiam" shared a first name with the Isan champion Tabtim — she is Mukda now */for(const f of Object.values(G.F||{}))if(f&&f.camp!=="player"&&f.id!=="tabtim"&&/^(ทับทิม เกียรติสยาม|Thapthim Kiatsiam)$/.test(f.name||"")){const en=f.name[0]==="T";f.name=en?"Mukda Kiatsiam":"Mukda Kiatsiam";if(f.full)f.full=f.name;}if(typeof byCampKit==="function")byCampKit(G);for(const [id,k] of [["ploy","captain"],["fah","grin"]])if(G.F&&G.F[id]&&G.F[id].skills&&(G.F[id].skills[k]||0)>3)G.F[id].skills[k]=3; /* v1.91.195: undo the old runaway yearly rank-up */ /* v1.91.166: Baiyok in the camp gets her tree *//* v1.91.42: a card counts as read only if its story was ever opened (o.seen is set only there) — v1.91.41 wrongly marked every owned card read */if(G&&(G.cardRd||0)<2){for(const k in (G.cards||{})){const o=G.cards[k];o.rd=o.seen?1:0;}G.cardRd=2;}if(G&&G.F&&typeof hmFix==="function")hmFix(G);if(G&&G.F&&typeof monoFix==="function")monoFix(G);if(G&&G.ev&&G.ev.loy&&typeof thiefFix==="function")thiefFix(G);if(G&&G.F&&G.prodigy)fixProdigies(G);if(G&&G.flags&&G.flags.beat_ploy&&G.flags.beatS_ploy==null)G.flags.beatS_ploy=G.season||1;
   // Legacy saves used week-of-season values. Infer only short, plausible effects;
   // otherwise expire them instead of resurrecting an old effect after New Year.
   const now=gameWeek(G),base=now-G.week;
@@ -1341,15 +1341,19 @@ function acceptOffer(G,oid){const o=G.offers.find(x=>x.id===oid);
 /* v1.84: career rating — every fighter (ours and NPCs) carries an Elo-style rating that moves with each counted bout;
    tiers turn it into a readable class. NPCs start from their strength; ours start from their stats and record. */
 const TIERS=[{k:"rookie",n:"Rookie",min:0,ic:"🌱"},{k:"rising",n:"Rising Star",min:950,ic:"⭐"},{k:"skilled",n:"Skilled",min:1100,ic:"🥊"},
-  {k:"top",n:"Top Contender",min:1250,ic:"🔥"},{k:"elite",n:"Elite",min:1400,ic:"💎"},{k:"legend",n:"Legend",min:1550,ic:"👑"}];
+  {k:"top",n:"Top Contender",min:1250,ic:"🔥"},{k:"elite",n:"Elite",min:1400,ic:"💎"},{k:"legend",n:"Legend",min:1550,ic:"👑"},{k:"king",n:"Ring Sovereign",min:1700,ic:""}]; /* v1.91.217 (Man): a tier above legend — reached only by winning the regional chapter (RG_CAP keeps everything else under it) */
+const RG_CAP=1699;
 const TIER_BY=Object.fromEntries(TIERS.map((t,i)=>[t.k,{...t,i}]));
 function seedRating(f){const r=f.rec||{},recB=clamp(((r.w||0)-(r.l||0))*4,-100,200);
-  return Math.round(clamp(1000+(ovr(f.a)+(f.vet||0)+(f.camp==="player"?hiddenEdge(f):0)-10)*45+(f.canon&&f.camp==="rival"?120:0)+(f.lab?60:0)+(f.prodigy?80:0)+recB,700,1750));}
+  return Math.round(Math.min(RG_CAP,clamp(1000+(ovr(f.a)+(f.vet||0)+(f.camp==="player"?hiddenEdge(f):0)-10)*45+(f.canon&&f.camp==="rival"?120:0)+(f.lab?60:0)+(f.prodigy?80:0)+recB,700,1750))+Math.min(350,f.rgFame||0));} /* v1.91.217: what she earned in the regional chapter stays in her name — the new-year drift pulls toward it, not under it */
 function ratingOf(f){if(!f)return 1000;if(f.elo==null)f.elo=seedRating(f);return f.elo;}
 function tierOf(f){const r=ratingOf(f);let t=TIERS[0];for(const x of TIERS)if(r>=x.min)t=x;return TIER_BY[t.k];}
-function rateBout(G,a,b,res,tierKey){const ra=ratingOf(a),rb=ratingOf(b),E=1/(1+Math.pow(10,(rb-ra)/400)),S=res==="W"?1:res==="D"?.5:0;
-  const K=tierKey==="final"||tierKey==="semi"?36:tierKey==="exhibition"?16:24,d=K*(S-E),t0=[tierOf(a),tierOf(b)];
-  a.elo=Math.round(ra+d);b.elo=Math.round(rb-d);
+function rateBout(G,a,b,res,tierKey,rgK){const ra=ratingOf(a),rb=ratingOf(b),E=1/(1+Math.pow(10,(rb-ra)/400)),S=res==="W"?1:res==="D"?.5:0;
+  const K=rgK||(tierKey==="final"||tierKey==="semi"?36:tierKey==="exhibition"?16:24),d=K*(S-E),t0=[tierOf(a),tierOf(b)];
+  /* v1.91.217: only regional bouts (rgK) can lift a rating past RG_CAP; whatever she gains there is kept as rgFame */
+  const nx=(r0,dd)=>rgK?r0+dd:Math.min(r0+dd,Math.max(r0,RG_CAP));
+  if(rgK)for(const [f,dd] of [[a,d],[b,-d]])if(f.camp==="player")f.rgFame=Math.max(0,(f.rgFame||0)+dd);
+  a.elo=Math.round(nx(ra,d));b.elo=Math.round(nx(rb,-d));
   [[a,t0[0]],[b,t0[1]]].forEach(([f,t])=>{const t1=tierOf(f);if(t1.k!==t.k&&f.camp==="player")G.tierNews=(G.tierNews||[]).concat([{id:f.id,from:t.k,to:t1.k,week:G.week}]).slice(-8);});}
 /* tiers at the start of the year, so the ranking page and the year-end can say who moved */
 function snapTiers(G){G.tierStart={season:G.season||1,t:{}};for(const f of Object.values(G.F))if(f.camp!=="free"&&f.camp!=="quest"&&(f.div==="A"||f.div==="B"))G.tierStart.t[f.id]=tierOf(f).k;}
@@ -1358,7 +1362,9 @@ function tierMoves(G){if(!G.tierStart||G.tierStart.season!==(G.season||1))snapTi
   return out.sort((x,y)=>(y.f.camp==="player")-(x.f.camp==="player")||y.to.i-x.to.i||ratingOf(y.f)-ratingOf(x.f));}
 function applyResult(G,F,booking){
   const {A,B}=F;const fa=A.f.__base||A.f,fb=B.f.__base||B.f,r=F.result,tier=TIER[booking.tier];
-  if(!tier.off&&!booking.beast){if(!G.tierStart||G.tierStart.season!==(G.season||1))snapTiers(G);rateBout(G,fa,fb,r.win==="D"?"D":r.win==="A"?"W":"L",booking.tier);}
+  /* v1.91.217 (Man): regional bouts count now — belt 24 · local 16 · champion series and Naka 36 · Ladda 48; side bouts and dev tests stay unrated */
+  const RX=booking.region,rgK=RX&&!RX.side&&!booking.nltest?(RX.nlfinal==="ladda"?48:RX.nlfinal||RX.series!=null||RX.nlleg?36:RX.local?16:24):0;
+  if((!tier.off||rgK)&&!booking.beast&&!booking.nltest){if(!G.tierStart||G.tierStart.season!==(G.season||1))snapTiers(G);rateBout(G,fa,fb,r.win==="D"?"D":r.win==="A"?"W":"L",booking.tier,rgK);}
   let ret=null;
   for(const [me,op,side] of [[fa,fb,"A"],[fb,fa,"B"]]){
     const res=r.win==="D"?"D":r.win===side?"W":"L";

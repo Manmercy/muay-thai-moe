@@ -944,7 +944,7 @@ function newGame(opts){
 }
 const roster=G=>Object.values(G.F).filter(f=>f.camp==="player");
 /* v1.91.215 (Man): a fighter's purse follows her own name — rating 1000→1600 adds up to +50%, and a regional champion who joined us draws a crowd (+50%) so buying one pays for herself if she fights · wageOf: she is paid her contract, the 5,000/week the letter promised (it used to grow with level to ~8,900) */
-const fameMult=f=>(1+clamp((ratingOf(f)-1000)/600,0,1)*.5)*(f&&f.camp==="player"&&f.joinAbs!=null?1.5:1);
+const fameMult=f=>(1+clamp((ratingOf(f)-1000)/600,0,1)*.5+clamp((ratingOf(f)-1600)/200,0,1)*.25)* /* v1.91.217: keeps climbing to ×1.75 at 1800 */(f&&f.camp==="player"&&f.joinAbs!=null?1.5:1);
 const wageOf=f=>f&&f.joinAbs!=null?f.wage:Math.round(f.wage*(1+(Math.min(f.lvl||1,15)-1)*.06)/100)*100; // v1.43: stars ask for more as they level up
 const wages=G=>roster(G).reduce((s,f)=>s+wageOf(f),0)+(G.staff?G.staff.reduce((s,k)=>s+STAFF[k].wage,0):G.fac.assistants*2500);
 // ---------- CAMP FACILITIES & STUDENTS ----------
@@ -1054,7 +1054,7 @@ const hasStaff=(G,k)=>(G.staff||[]).includes(k);
 const staffLocked=(G,k)=>{const r=STAFF[k].req;if(!r)return "";if(r.lv&&campLevel(G)<r.lv)return `Camp Lv.${r.lv}`;if(r.rep&&G.rep<r.rep)return `Fame ${r.rep}`;return "";};
 function hireStaff(G,k){const S=STAFF[k];G.staff=G.staff||[];if(!S||hasStaff(G,k)||G.staff.length>=staffSlots(G)||staffLocked(G,k)||G.cash<S.fee)return false;G.cash-=S.fee;G.staff.push(k);G.fac.assistants=G.staff.length;return true;}
 function fireStaff(G,k){G.staff=(G.staff||[]).filter(x=>x!==k);G.fac.assistants=G.staff.length;return true;}
-function fixSave(G){/* v1.91.209 regional audit: the league's "Tabtim Kiatsiam" shared a first name with the Isan champion Tabtim — she is Mukda now */for(const f of Object.values(G.F||{}))if(f&&f.camp!=="player"&&f.id!=="tabtim"&&/^(ทับทิม เกียรติสยาม|Thapthim Kiatsiam)$/.test(f.name||"")){const en=f.name[0]==="T";f.name=en?"Mukda Kiatsiam":"Mukda Kiatsiam";if(f.full)f.full=f.name;}if(typeof byCampKit==="function")byCampKit(G);for(const [id,k] of [["ploy","captain"],["fah","grin"]])if(G.F&&G.F[id]&&G.F[id].skills&&(G.F[id].skills[k]||0)>3)G.F[id].skills[k]=3; /* v1.91.195: undo the old runaway yearly rank-up */ /* v1.91.166: Baiyok in the camp gets her tree *//* v1.91.42: a card counts as read only if its story was ever opened (o.seen is set only there) — v1.91.41 wrongly marked every owned card read */if(G&&(G.cardRd||0)<2){for(const k in (G.cards||{})){const o=G.cards[k];o.rd=o.seen?1:0;}G.cardRd=2;}if(G&&G.F&&typeof hmFix==="function")hmFix(G);if(G&&G.F&&typeof monoFix==="function")monoFix(G);if(G&&G.ev&&G.ev.loy&&typeof thiefFix==="function")thiefFix(G);if(G&&G.F&&G.prodigy)fixProdigies(G);if(G&&G.flags&&G.flags.beat_ploy&&G.flags.beatS_ploy==null)G.flags.beatS_ploy=G.season||1;
+function fixSave(G){/* v1.91.217: ratings over the new เจ้าสังเวียน line that were not won in the regional chapter come back under it */for(const f of Object.values(G.F||{}))if(f&&f.elo>RG_CAP&&!f.rgFame)f.elo=RG_CAP;/* v1.91.209 regional audit: the league's "Tabtim Kiatsiam" shared a first name with the Isan champion Tabtim — she is Mukda now */for(const f of Object.values(G.F||{}))if(f&&f.camp!=="player"&&f.id!=="tabtim"&&/^(ทับทิม เกียรติสยาม|Thapthim Kiatsiam)$/.test(f.name||"")){const en=f.name[0]==="T";f.name=en?"Mukda Kiatsiam":"Mukda Kiatsiam";if(f.full)f.full=f.name;}if(typeof byCampKit==="function")byCampKit(G);for(const [id,k] of [["ploy","captain"],["fah","grin"]])if(G.F&&G.F[id]&&G.F[id].skills&&(G.F[id].skills[k]||0)>3)G.F[id].skills[k]=3; /* v1.91.195: undo the old runaway yearly rank-up */ /* v1.91.166: Baiyok in the camp gets her tree *//* v1.91.42: a card counts as read only if its story was ever opened (o.seen is set only there) — v1.91.41 wrongly marked every owned card read */if(G&&(G.cardRd||0)<2){for(const k in (G.cards||{})){const o=G.cards[k];o.rd=o.seen?1:0;}G.cardRd=2;}if(G&&G.F&&typeof hmFix==="function")hmFix(G);if(G&&G.F&&typeof monoFix==="function")monoFix(G);if(G&&G.ev&&G.ev.loy&&typeof thiefFix==="function")thiefFix(G);if(G&&G.F&&G.prodigy)fixProdigies(G);if(G&&G.flags&&G.flags.beat_ploy&&G.flags.beatS_ploy==null)G.flags.beatS_ploy=G.season||1;
   // Legacy saves used week-of-season values. Infer only short, plausible effects;
   // otherwise expire them instead of resurrecting an old effect after New Year.
   const now=gameWeek(G),base=now-G.week;
@@ -1342,15 +1342,19 @@ function acceptOffer(G,oid){const o=G.offers.find(x=>x.id===oid);
 /* v1.84: career rating — every fighter (ours and NPCs) carries an Elo-style rating that moves with each counted bout;
    tiers turn it into a readable class. NPCs start from their strength; ours start from their stats and record. */
 const TIERS=[{k:"rookie",n:"Rookie",min:0,ic:"🌱"},{k:"rising",n:"Rising Star",min:950,ic:"⭐"},{k:"skilled",n:"Skilled",min:1100,ic:"🥊"},
-  {k:"top",n:"Top Contender",min:1250,ic:"🔥"},{k:"elite",n:"Elite",min:1400,ic:"💎"},{k:"legend",n:"Legend",min:1550,ic:"👑"}];
+  {k:"top",n:"Top Contender",min:1250,ic:"🔥"},{k:"elite",n:"Elite",min:1400,ic:"💎"},{k:"legend",n:"Legend",min:1550,ic:"👑"},{k:"king",n:"Ring Sovereign",min:1700,ic:""}]; /* v1.91.217 (Man): a tier above legend — reached only by winning the regional chapter (RG_CAP keeps everything else under it) */
+const RG_CAP=1699;
 const TIER_BY=Object.fromEntries(TIERS.map((t,i)=>[t.k,{...t,i}]));
 function seedRating(f){const r=f.rec||{},recB=clamp(((r.w||0)-(r.l||0))*4,-100,200);
-  return Math.round(clamp(1000+(ovr(f.a)+(f.vet||0)+(f.camp==="player"?hiddenEdge(f):0)-10)*45+(f.canon&&f.camp==="rival"?120:0)+(f.lab?60:0)+(f.prodigy?80:0)+recB,700,1750));}
+  return Math.round(Math.min(RG_CAP,clamp(1000+(ovr(f.a)+(f.vet||0)+(f.camp==="player"?hiddenEdge(f):0)-10)*45+(f.canon&&f.camp==="rival"?120:0)+(f.lab?60:0)+(f.prodigy?80:0)+recB,700,1750))+Math.min(350,f.rgFame||0));} /* v1.91.217: what she earned in the regional chapter stays in her name — the new-year drift pulls toward it, not under it */
 function ratingOf(f){if(!f)return 1000;if(f.elo==null)f.elo=seedRating(f);return f.elo;}
 function tierOf(f){const r=ratingOf(f);let t=TIERS[0];for(const x of TIERS)if(r>=x.min)t=x;return TIER_BY[t.k];}
-function rateBout(G,a,b,res,tierKey){const ra=ratingOf(a),rb=ratingOf(b),E=1/(1+Math.pow(10,(rb-ra)/400)),S=res==="W"?1:res==="D"?.5:0;
-  const K=tierKey==="final"||tierKey==="semi"?36:tierKey==="exhibition"?16:24,d=K*(S-E),t0=[tierOf(a),tierOf(b)];
-  a.elo=Math.round(ra+d);b.elo=Math.round(rb-d);
+function rateBout(G,a,b,res,tierKey,rgK){const ra=ratingOf(a),rb=ratingOf(b),E=1/(1+Math.pow(10,(rb-ra)/400)),S=res==="W"?1:res==="D"?.5:0;
+  const K=rgK||(tierKey==="final"||tierKey==="semi"?36:tierKey==="exhibition"?16:24),d=K*(S-E),t0=[tierOf(a),tierOf(b)];
+  /* v1.91.217: only regional bouts (rgK) can lift a rating past RG_CAP; whatever she gains there is kept as rgFame */
+  const nx=(r0,dd)=>rgK?r0+dd:Math.min(r0+dd,Math.max(r0,RG_CAP));
+  if(rgK)for(const [f,dd] of [[a,d],[b,-d]])if(f.camp==="player")f.rgFame=Math.max(0,(f.rgFame||0)+dd);
+  a.elo=Math.round(nx(ra,d));b.elo=Math.round(nx(rb,-d));
   [[a,t0[0]],[b,t0[1]]].forEach(([f,t])=>{const t1=tierOf(f);if(t1.k!==t.k&&f.camp==="player")G.tierNews=(G.tierNews||[]).concat([{id:f.id,from:t.k,to:t1.k,week:G.week}]).slice(-8);});}
 /* tiers at the start of the year, so the ranking page and the year-end can say who moved */
 function snapTiers(G){G.tierStart={season:G.season||1,t:{}};for(const f of Object.values(G.F))if(f.camp!=="free"&&f.camp!=="quest"&&(f.div==="A"||f.div==="B"))G.tierStart.t[f.id]=tierOf(f).k;}
@@ -1359,7 +1363,9 @@ function tierMoves(G){if(!G.tierStart||G.tierStart.season!==(G.season||1))snapTi
   return out.sort((x,y)=>(y.f.camp==="player")-(x.f.camp==="player")||y.to.i-x.to.i||ratingOf(y.f)-ratingOf(x.f));}
 function applyResult(G,F,booking){
   const {A,B}=F;const fa=A.f.__base||A.f,fb=B.f.__base||B.f,r=F.result,tier=TIER[booking.tier];
-  if(!tier.off&&!booking.beast){if(!G.tierStart||G.tierStart.season!==(G.season||1))snapTiers(G);rateBout(G,fa,fb,r.win==="D"?"D":r.win==="A"?"W":"L",booking.tier);}
+  /* v1.91.217 (Man): regional bouts count now — belt 24 · local 16 · champion series and Naka 36 · Ladda 48; side bouts and dev tests stay unrated */
+  const RX=booking.region,rgK=RX&&!RX.side&&!booking.nltest?(RX.nlfinal==="ladda"?48:RX.nlfinal||RX.series!=null||RX.nlleg?36:RX.local?16:24):0;
+  if((!tier.off||rgK)&&!booking.beast&&!booking.nltest){if(!G.tierStart||G.tierStart.season!==(G.season||1))snapTiers(G);rateBout(G,fa,fb,r.win==="D"?"D":r.win==="A"?"W":"L",booking.tier,rgK);}
   let ret=null;
   for(const [me,op,side] of [[fa,fb,"A"],[fb,fa,"B"]]){
     const res=r.win==="D"?"D":r.win===side?"W":"L";
@@ -7080,7 +7086,7 @@ AU.gsfx=function(kind,a){if(!this.init()||this.muted||!SETTINGS.sfx)return;const
   if(kind==="shimmer")for(let i=0;i<6;i++)T(i*.05,{f:1400+Math.random()*1400,type:"sine",dur:.12,peak:.06});};
 
 // ================= MUAY THAI MOE v1.3 — UI =================
-const VERSION="1.91.216";
+const VERSION="1.91.217";
 const CUR_LANG=(typeof window!=="undefined"&&window.LANG)||"th";
 const TH_LABEL=String.fromCharCode(3652,3607,3618);
 function langSwitch(cls){return `<div class="langsw ${cls||""}" role="group" aria-label="Language">${[["th",TH_LABEL],["en","EN"]].map(([k,l])=>`<button class="lsb ${CUR_LANG===k?"on":""}" data-act="setlang" data-v="${k}" aria-pressed="${CUR_LANG===k}">${l}</button>`).join("")}</div>`;}
@@ -7860,16 +7866,17 @@ function offersHTML(){const mine=G.bookings.filter(b=>G.F[b.a].camp==="player").
        </div></div>
        <div class="obtns3"><button class="btn sm" data-act="consider" data-v="${o.id}">${scouted(o.b)?"Opponent info":"Scout"}</button>${coachOn()?`<button class="btn sm" data-act="otip" data-v="${o.id}">Coach's advice</button>`:""}<button class="btn sm gold" data-act="accept" data-v="${o.id}" ${o.status==="conflict"?"disabled title=\""+esc(o.reason)+"\"":""}>Accept</button></div></div>`;}).join("")||`<p class="lead">${G.bookings.length?"Fight booked. New offers arrive next week":"No offers (injured, or season over)"}</p>`}</div></section>`;}
 // v1.84: career tier chips
-function tierChip(f,full){const t=tierOf(f);return full?`<span class="tchip t-${t.k}">${t.ic} <b>${t.n}</b></span>`:`<span class="tchip sm t-${t.k}" title="${t.n}" aria-label="Tier ${t.n}">${t.ic}</span>`;}
+const tierIc=t=>t.ic||`<i class="pxcrown" aria-hidden="true"></i>`; /* v1.91.217: the top tier wears a pixel crown, not an emoji */
+function tierChip(f,full){const t=tierOf(f);return full?`<span class="tchip t-${t.k}">${tierIc(t)} <b>${t.n}</b></span>`:`<span class="tchip sm t-${t.k}" title="${t.n}" aria-label="Tier ${t.n}">${tierIc(t)}</span>`;}
 function tierYearNote(f){if(!G.tierStart||G.tierStart.season!==(G.season||1))snapTiers(G);const k=G.tierStart.t[f.id];if(!k)return "";const t=tierOf(f),a=TIER_BY[k];
-  return a.k===t.k?"":`<span class="meta">Start of year ${a.ic} ${a.n} → <b class="${t.i>a.i?"goldt":"mutt"}">${t.ic} ${t.n}</b></span>`;}
+  return a.k===t.k?"":`<span class="meta">Start of year ${tierIc(a)} ${a.n} → <b class="${t.i>a.i?"goldt":"mutt"}">${tierIc(t)} ${t.n}</b></span>`;}
 function careerHTML(d){const list=Object.values(G.F).filter(f=>f.div===d&&f.camp!=="free"&&f.camp!=="quest").sort((x,y)=>ratingOf(y)-ratingOf(x));
   const mv=tierMoves(G).filter(m=>m.f.div===d);if(!G.tierStart||G.tierStart.season!==(G.season||1))snapTiers(G);
-  return `${mv.length?`<div class="tmoves"><div class="ann-h">Moves this year</div>${mv.slice(0,8).map(m=>`<div class="tmv ${m.f.camp==="player"?"me":""}">${faceImg(m.f,"sm")}<b>${esc(m.f.name)}</b><span class="meta">${m.from.ic} ${m.from.n}</span><span class="${m.up?"goldt":"mutt"}">${m.up?"▲":"▼"}</span>${tierChip(m.f,1)}</div>`).join("")}</div>`:`<p class="meta">No one has changed tier yet this year</p>`}
+  return `${mv.length?`<div class="tmoves"><div class="ann-h">Moves this year</div>${mv.slice(0,8).map(m=>`<div class="tmv ${m.f.camp==="player"?"me":""}">${faceImg(m.f,"sm")}<b>${esc(m.f.name)}</b><span class="meta">${tierIc(m.from)} ${m.from.n}</span><span class="${m.up?"goldt":"mutt"}">${m.up?"▲":"▼"}</span>${tierChip(m.f,1)}</div>`).join("")}</div>`:`<p class="meta">No one has changed tier yet this year</p>`}
    <div class="tbl-wrap"><table><thead><tr><th>#</th><th>Tier</th><th>Fighter</th><th>Rating</th><th>Year</th></tr></thead><tbody>
    ${list.map((f,i)=>{const k=G.tierStart.t[f.id],t=tierOf(f),dd=k?t.i-TIER_BY[k].i:0;return `<tr class="${f.camp==="player"?"me":f.camp==="rival"?"rival":""}"><td class="num">${i+1}</td><td>${tierChip(f,1)}</td><td>${esc(f.name)}</td><td class="num"><b>${ratingOf(f)}</b></td><td>${dd>0?'<span class="goldt">▲</span>':dd<0?'<span class="mutt">▼</span>':k?"":"<span class=\"meta\">new</span>"}</td></tr>`;}).join("")}
    </tbody></table></div>
-   <p class="meta tlegend">${TIERS.map(t=>`${t.ic} ${t.n} ${t.min||""}${t.min?"+":""}`).join(" · ")}</p>
+   <p class="meta tlegend">${TIERS.map(t=>`${tierIc(t)} ${t.n} ${t.min||""}${t.min?"+":""}`).join(" · ")}</p>
    <p class="meta">Ratings move after every counted bout: beating a higher-rated fighter gains a lot, beating a lower-rated one gains little. Semi-finals and finals count for more</p>`;}
 // v1.85: card detail page — rarity, copies, a teaser line, read the story or break spare copies into stardust
 function cardBlurb(C){if(C.blurb)return C.blurb;const st=(C.steps||[]).find(x=>x&&typeof x.t==="string"&&x.n!=="nar")||(C.steps||[]).find(x=>x&&typeof x.t==="string");if(!st)return "";const t=st.t;return t.length>72?t.slice(0,70)+"…":t;}
@@ -8271,7 +8278,7 @@ function reportHTML(){const r=G.lastReport;const ann=[];
   const tu=(r.tierUp||[]).filter(x=>G.F[x.id]),hu=(r.heartUp||[]).filter(x=>G.F[x.id]);
   return `<h2>Week ${r.week}</h2><p class="goal">${goalText()}</p>
    ${hu.length?`<div class="heartup">${hu.map(x=>`<div class="hu">${faceImg(G.F[x.id],"sm")}<span>Bond with <b>${esc(G.F[x.id].name)}</b> rose to <b class="hlvn">♥ Lv.${x.lv}</b><small class="meta">${relLabel(G,G.F[x.id],x.lv,true)}</small></span></div>`).join("")}</div>`:""}
-   ${tu.length?`<div class="tierup">${tu.map(x=>{const f=G.F[x.id],a=TIER_BY[x.from],b=TIER_BY[x.to],up=b.i>a.i;return `<div class="tu ${up?"up":"down"}">${faceImg(f,"sm")}<span><b>${esc(f.name)}</b> ${up?"moved up to":"dropped to"} <b>${b.ic} ${b.n}</b><small class="meta">from ${a.ic} ${a.n}</small></span></div>`;}).join("")}</div>`:""}
+   ${tu.length?`<div class="tierup">${tu.map(x=>{const f=G.F[x.id],a=TIER_BY[x.from],b=TIER_BY[x.to],up=b.i>a.i;return `<div class="tu ${up?"up":"down"}">${faceImg(f,"sm")}<span><b>${esc(f.name)}</b> ${up?"moved up to":"dropped to"} <b>${tierIc(b)} ${b.n}</b><small class="meta">from ${tierIc(a)} ${a.n}</small></span></div>`;}).join("")}</div>`:""}
    ${ann.length&&cut?`<div class="announce"><div class="ann-h">Rankings · ${STAGE_NAME[r.stage]}</div>${ann.map(a=>`<div class="ann ${a.f.camp==="player"?"me":""}">${faceImg(a.f,"sm")}<b>${esc(a.f.name)}</b><span class="meta">Div ${a.d}</span><span class="rk">Rank ${a.pos}</span>${moveIcon(a.m)}${cut?`<span class="pill ${a.pos<=cut?"green":"red"}">${a.pos<=cut?"In the qualifying zone":"Outside the zone"}</span>`:""}</div>`).join("")}</div>`:""}
    ${r.prog?`<details class="prog"><summary class="ann-h">4-week progress chart (tap to view)</summary><div class="progrow">${r.prog.filter(p=>G.F[p.id]).map(p=>{const f=G.F[p.id];const sum=Object.keys(p.before).reduce((s,k)=>s+(f.a[k]-p.before[k]),0);
      return `<div class="pcell">${radarSVG(f,150,p.before)}<b>${esc(f.name)}</b><span class="meta">Overall ${sum>=0?"+":""}${sum.toFixed(1)}</span></div>`;}).join("")}</div></details>`:""}
@@ -8775,7 +8782,7 @@ function endingHTML(){const E=UI.ending,all=roster(G),res=seasonResult();
     <span class="pill gold">${G.ended==="bankrupt"?"Camp closed":(G.season||1)>=2?`End of Year ${G.season}`:"End of Chapter 1 · Year 1"}</span><h1>${(G.season||1)>=2&&G.ended!=="bankrupt"?esc(E.title):`Ending: ${E.title}`}</h1>
     <p class="lead">${(G.season||1)>=2&&G.ended!=="bankrupt"?`Year ${G.season} is over. ${esc(G.player.name)} and Sirichai Camp carry on`:`Thank you for playing <b>Muay Thai Moe</b>! ${esc(G.player.name)} brought Sirichai Camp this far`}</p></section>
    ${(()=>{const mv=tierMoves(G);if(!mv.length)return "";const mine=mv.filter(m=>m.f.camp==="player"),oth=mv.filter(m=>m.f.camp!=="player"&&m.up).slice(0,6);
-     return `<section class="px card"><h3>Who moved up this year</h3>${mine.concat(oth).map(m=>`<div class="kv-row"><span>${faceImg(m.f,"sm")} ${esc(m.f.name)} · Div ${m.f.div}${m.f.camp==="player"?" · our camp ":""}</span><span>${m.from.ic} ${m.from.n} <b class="${m.up?"goldt":"mutt"}">${m.up?"▲":"▼"}</b> ${tierChip(m.f,1)}</span></div>`).join("")}</section>`;})()}
+     return `<section class="px card"><h3>Who moved up this year</h3>${mine.concat(oth).map(m=>`<div class="kv-row"><span>${faceImg(m.f,"sm")} ${esc(m.f.name)} · Div ${m.f.div}${m.f.camp==="player"?" · our camp ":""}</span><span>${tierIc(m.from)} ${m.from.n} <b class="${m.up?"goldt":"mutt"}">${m.up?"▲":"▼"}</b> ${tierChip(m.f,1)}</span></div>`).join("")}</section>`;})()}
    <section class="px card"><h3>This year's results</h3>${res.length?res.map(r=>`<div class="kv-row"><span>${faceImg(r.f,"sm")} ${esc(r.f.name)} · Div ${r.d}</span><span class="pill ${r.c}">${r.t}</span></div>`).join(""):"<p class=\"meta\">No fighter passed the subdistrict round this year</p>"}</section>
    <div class="grid g3"><section class="px card"><h3>Camp</h3><div class="kv-row"><span>Camp level</span><b>Lv.${campLevel(G)} ${CAMP_LV_NAME[campLevel(G)]}</b></div><div class="kv-row"><span>Cash</span><b class="num">${fmt(G.cash)}</b></div><div class="kv-row"><span>Remaining debt</span><b class="num">${fmt(G.debt)}</b></div><div class="kv-row"><span>Students</span><b class="num">${students(G)}</b></div><div class="kv-row"><span>Fame</span><b class="num">${G.rep.toFixed(1)}</b></div></section>
    <section class="px card"><h3>Camp fighters</h3>${all.map(f=>`<div class="kv-row"><span>${esc(f.name)} Lv.${f.lvl}</span><span class="num">${rec(f)}</span></div>`).join("")}</section>

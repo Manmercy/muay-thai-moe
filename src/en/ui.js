@@ -1,5 +1,5 @@
 // ================= MUAY THAI MOE v1.3 — UI =================
-const VERSION="1.91.216";
+const VERSION="1.91.217";
 const CUR_LANG=(typeof window!=="undefined"&&window.LANG)||"th";
 const TH_LABEL=String.fromCharCode(3652,3607,3618);
 function langSwitch(cls){return `<div class="langsw ${cls||""}" role="group" aria-label="Language">${[["th",TH_LABEL],["en","EN"]].map(([k,l])=>`<button class="lsb ${CUR_LANG===k?"on":""}" data-act="setlang" data-v="${k}" aria-pressed="${CUR_LANG===k}">${l}</button>`).join("")}</div>`;}
@@ -779,16 +779,17 @@ function offersHTML(){const mine=G.bookings.filter(b=>G.F[b.a].camp==="player").
        </div></div>
        <div class="obtns3"><button class="btn sm" data-act="consider" data-v="${o.id}">${scouted(o.b)?"Opponent info":"Scout"}</button>${coachOn()?`<button class="btn sm" data-act="otip" data-v="${o.id}">Coach's advice</button>`:""}<button class="btn sm gold" data-act="accept" data-v="${o.id}" ${o.status==="conflict"?"disabled title=\""+esc(o.reason)+"\"":""}>Accept</button></div></div>`;}).join("")||`<p class="lead">${G.bookings.length?"Fight booked. New offers arrive next week":"No offers (injured, or season over)"}</p>`}</div></section>`;}
 // v1.84: career tier chips
-function tierChip(f,full){const t=tierOf(f);return full?`<span class="tchip t-${t.k}">${t.ic} <b>${t.n}</b></span>`:`<span class="tchip sm t-${t.k}" title="${t.n}" aria-label="Tier ${t.n}">${t.ic}</span>`;}
+const tierIc=t=>t.ic||`<i class="pxcrown" aria-hidden="true"></i>`; /* v1.91.217: the top tier wears a pixel crown, not an emoji */
+function tierChip(f,full){const t=tierOf(f);return full?`<span class="tchip t-${t.k}">${tierIc(t)} <b>${t.n}</b></span>`:`<span class="tchip sm t-${t.k}" title="${t.n}" aria-label="Tier ${t.n}">${tierIc(t)}</span>`;}
 function tierYearNote(f){if(!G.tierStart||G.tierStart.season!==(G.season||1))snapTiers(G);const k=G.tierStart.t[f.id];if(!k)return "";const t=tierOf(f),a=TIER_BY[k];
-  return a.k===t.k?"":`<span class="meta">Start of year ${a.ic} ${a.n} → <b class="${t.i>a.i?"goldt":"mutt"}">${t.ic} ${t.n}</b></span>`;}
+  return a.k===t.k?"":`<span class="meta">Start of year ${tierIc(a)} ${a.n} → <b class="${t.i>a.i?"goldt":"mutt"}">${tierIc(t)} ${t.n}</b></span>`;}
 function careerHTML(d){const list=Object.values(G.F).filter(f=>f.div===d&&f.camp!=="free"&&f.camp!=="quest").sort((x,y)=>ratingOf(y)-ratingOf(x));
   const mv=tierMoves(G).filter(m=>m.f.div===d);if(!G.tierStart||G.tierStart.season!==(G.season||1))snapTiers(G);
-  return `${mv.length?`<div class="tmoves"><div class="ann-h">Moves this year</div>${mv.slice(0,8).map(m=>`<div class="tmv ${m.f.camp==="player"?"me":""}">${faceImg(m.f,"sm")}<b>${esc(m.f.name)}</b><span class="meta">${m.from.ic} ${m.from.n}</span><span class="${m.up?"goldt":"mutt"}">${m.up?"▲":"▼"}</span>${tierChip(m.f,1)}</div>`).join("")}</div>`:`<p class="meta">No one has changed tier yet this year</p>`}
+  return `${mv.length?`<div class="tmoves"><div class="ann-h">Moves this year</div>${mv.slice(0,8).map(m=>`<div class="tmv ${m.f.camp==="player"?"me":""}">${faceImg(m.f,"sm")}<b>${esc(m.f.name)}</b><span class="meta">${tierIc(m.from)} ${m.from.n}</span><span class="${m.up?"goldt":"mutt"}">${m.up?"▲":"▼"}</span>${tierChip(m.f,1)}</div>`).join("")}</div>`:`<p class="meta">No one has changed tier yet this year</p>`}
    <div class="tbl-wrap"><table><thead><tr><th>#</th><th>Tier</th><th>Fighter</th><th>Rating</th><th>Year</th></tr></thead><tbody>
    ${list.map((f,i)=>{const k=G.tierStart.t[f.id],t=tierOf(f),dd=k?t.i-TIER_BY[k].i:0;return `<tr class="${f.camp==="player"?"me":f.camp==="rival"?"rival":""}"><td class="num">${i+1}</td><td>${tierChip(f,1)}</td><td>${esc(f.name)}</td><td class="num"><b>${ratingOf(f)}</b></td><td>${dd>0?'<span class="goldt">▲</span>':dd<0?'<span class="mutt">▼</span>':k?"":"<span class=\"meta\">new</span>"}</td></tr>`;}).join("")}
    </tbody></table></div>
-   <p class="meta tlegend">${TIERS.map(t=>`${t.ic} ${t.n} ${t.min||""}${t.min?"+":""}`).join(" · ")}</p>
+   <p class="meta tlegend">${TIERS.map(t=>`${tierIc(t)} ${t.n} ${t.min||""}${t.min?"+":""}`).join(" · ")}</p>
    <p class="meta">Ratings move after every counted bout: beating a higher-rated fighter gains a lot, beating a lower-rated one gains little. Semi-finals and finals count for more</p>`;}
 // v1.85: card detail page — rarity, copies, a teaser line, read the story or break spare copies into stardust
 function cardBlurb(C){if(C.blurb)return C.blurb;const st=(C.steps||[]).find(x=>x&&typeof x.t==="string"&&x.n!=="nar")||(C.steps||[]).find(x=>x&&typeof x.t==="string");if(!st)return "";const t=st.t;return t.length>72?t.slice(0,70)+"…":t;}
@@ -1190,7 +1191,7 @@ function reportHTML(){const r=G.lastReport;const ann=[];
   const tu=(r.tierUp||[]).filter(x=>G.F[x.id]),hu=(r.heartUp||[]).filter(x=>G.F[x.id]);
   return `<h2>Week ${r.week}</h2><p class="goal">${goalText()}</p>
    ${hu.length?`<div class="heartup">${hu.map(x=>`<div class="hu">${faceImg(G.F[x.id],"sm")}<span>Bond with <b>${esc(G.F[x.id].name)}</b> rose to <b class="hlvn">♥ Lv.${x.lv}</b><small class="meta">${relLabel(G,G.F[x.id],x.lv,true)}</small></span></div>`).join("")}</div>`:""}
-   ${tu.length?`<div class="tierup">${tu.map(x=>{const f=G.F[x.id],a=TIER_BY[x.from],b=TIER_BY[x.to],up=b.i>a.i;return `<div class="tu ${up?"up":"down"}">${faceImg(f,"sm")}<span><b>${esc(f.name)}</b> ${up?"moved up to":"dropped to"} <b>${b.ic} ${b.n}</b><small class="meta">from ${a.ic} ${a.n}</small></span></div>`;}).join("")}</div>`:""}
+   ${tu.length?`<div class="tierup">${tu.map(x=>{const f=G.F[x.id],a=TIER_BY[x.from],b=TIER_BY[x.to],up=b.i>a.i;return `<div class="tu ${up?"up":"down"}">${faceImg(f,"sm")}<span><b>${esc(f.name)}</b> ${up?"moved up to":"dropped to"} <b>${tierIc(b)} ${b.n}</b><small class="meta">from ${tierIc(a)} ${a.n}</small></span></div>`;}).join("")}</div>`:""}
    ${ann.length&&cut?`<div class="announce"><div class="ann-h">Rankings · ${STAGE_NAME[r.stage]}</div>${ann.map(a=>`<div class="ann ${a.f.camp==="player"?"me":""}">${faceImg(a.f,"sm")}<b>${esc(a.f.name)}</b><span class="meta">Div ${a.d}</span><span class="rk">Rank ${a.pos}</span>${moveIcon(a.m)}${cut?`<span class="pill ${a.pos<=cut?"green":"red"}">${a.pos<=cut?"In the qualifying zone":"Outside the zone"}</span>`:""}</div>`).join("")}</div>`:""}
    ${r.prog?`<details class="prog"><summary class="ann-h">4-week progress chart (tap to view)</summary><div class="progrow">${r.prog.filter(p=>G.F[p.id]).map(p=>{const f=G.F[p.id];const sum=Object.keys(p.before).reduce((s,k)=>s+(f.a[k]-p.before[k]),0);
      return `<div class="pcell">${radarSVG(f,150,p.before)}<b>${esc(f.name)}</b><span class="meta">Overall ${sum>=0?"+":""}${sum.toFixed(1)}</span></div>`;}).join("")}</div></details>`:""}
@@ -1694,7 +1695,7 @@ function endingHTML(){const E=UI.ending,all=roster(G),res=seasonResult();
     <span class="pill gold">${G.ended==="bankrupt"?"Camp closed":(G.season||1)>=2?`End of Year ${G.season}`:"End of Chapter 1 · Year 1"}</span><h1>${(G.season||1)>=2&&G.ended!=="bankrupt"?esc(E.title):`Ending: ${E.title}`}</h1>
     <p class="lead">${(G.season||1)>=2&&G.ended!=="bankrupt"?`Year ${G.season} is over. ${esc(G.player.name)} and Sirichai Camp carry on`:`Thank you for playing <b>Muay Thai Moe</b>! ${esc(G.player.name)} brought Sirichai Camp this far`}</p></section>
    ${(()=>{const mv=tierMoves(G);if(!mv.length)return "";const mine=mv.filter(m=>m.f.camp==="player"),oth=mv.filter(m=>m.f.camp!=="player"&&m.up).slice(0,6);
-     return `<section class="px card"><h3>Who moved up this year</h3>${mine.concat(oth).map(m=>`<div class="kv-row"><span>${faceImg(m.f,"sm")} ${esc(m.f.name)} · Div ${m.f.div}${m.f.camp==="player"?" · our camp ":""}</span><span>${m.from.ic} ${m.from.n} <b class="${m.up?"goldt":"mutt"}">${m.up?"▲":"▼"}</b> ${tierChip(m.f,1)}</span></div>`).join("")}</section>`;})()}
+     return `<section class="px card"><h3>Who moved up this year</h3>${mine.concat(oth).map(m=>`<div class="kv-row"><span>${faceImg(m.f,"sm")} ${esc(m.f.name)} · Div ${m.f.div}${m.f.camp==="player"?" · our camp ":""}</span><span>${tierIc(m.from)} ${m.from.n} <b class="${m.up?"goldt":"mutt"}">${m.up?"▲":"▼"}</b> ${tierChip(m.f,1)}</span></div>`).join("")}</section>`;})()}
    <section class="px card"><h3>This year's results</h3>${res.length?res.map(r=>`<div class="kv-row"><span>${faceImg(r.f,"sm")} ${esc(r.f.name)} · Div ${r.d}</span><span class="pill ${r.c}">${r.t}</span></div>`).join(""):"<p class=\"meta\">No fighter passed the subdistrict round this year</p>"}</section>
    <div class="grid g3"><section class="px card"><h3>Camp</h3><div class="kv-row"><span>Camp level</span><b>Lv.${campLevel(G)} ${CAMP_LV_NAME[campLevel(G)]}</b></div><div class="kv-row"><span>Cash</span><b class="num">${fmt(G.cash)}</b></div><div class="kv-row"><span>Remaining debt</span><b class="num">${fmt(G.debt)}</b></div><div class="kv-row"><span>Students</span><b class="num">${students(G)}</b></div><div class="kv-row"><span>Fame</span><b class="num">${G.rep.toFixed(1)}</b></div></section>
    <section class="px card"><h3>Camp fighters</h3>${all.map(f=>`<div class="kv-row"><span>${esc(f.name)} Lv.${f.lvl}</span><span class="num">${rec(f)}</span></div>`).join("")}</section>

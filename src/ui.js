@@ -1,5 +1,5 @@
 // ================= MUAY THAI MOE v1.3 — UI =================
-const VERSION="1.91.216";
+const VERSION="1.91.217";
 const CUR_LANG=(typeof window!=="undefined"&&window.LANG)||"th";
 const TH_LABEL=String.fromCharCode(3652,3607,3618);
 function langSwitch(cls){return `<div class="langsw ${cls||""}" role="group" aria-label="Language">${[["th",TH_LABEL],["en","EN"]].map(([k,l])=>`<button class="lsb ${CUR_LANG===k?"on":""}" data-act="setlang" data-v="${k}" aria-pressed="${CUR_LANG===k}">${l}</button>`).join("")}</div>`;}
@@ -779,16 +779,17 @@ function offersHTML(){const mine=G.bookings.filter(b=>G.F[b.a].camp==="player").
        </div></div>
        <div class="obtns3"><button class="btn sm" data-act="consider" data-v="${o.id}">${scouted(o.b)?"ข้อมูลคู่ชก":"ดูเทป"}</button>${coachOn()?`<button class="btn sm" data-act="otip" data-v="${o.id}">คำแนะนำครู</button>`:""}<button class="btn sm gold" data-act="accept" data-v="${o.id}" ${o.status==="conflict"?"disabled title=\""+esc(o.reason)+"\"":""}>รับไฟต์</button>${o.status==="conflict"?`<span class="meta">${esc(o.reason)}</span>`:""}</div></div>`;}).join("")||`<p class="lead">${G.bookings.length?"รับไฟต์แล้ว ข้อเสนอใหม่จะเข้ามาสัปดาห์หน้า":"ไม่มีข้อเสนอ (บาดเจ็บ หรือหมดฤดูกาล)"}</p>`}</div></section>`;}
 // v1.84: career tier chips
-function tierChip(f,full){const t=tierOf(f);return full?`<span class="tchip t-${t.k}">${t.ic} <b>${t.n}</b></span>`:`<span class="tchip sm t-${t.k}" title="${t.n}" aria-label="ระดับ ${t.n}">${t.ic}</span>`;}
+const tierIc=t=>t.ic||`<i class="pxcrown" aria-hidden="true"></i>`; /* v1.91.217: the top tier wears a pixel crown, not an emoji */
+function tierChip(f,full){const t=tierOf(f);return full?`<span class="tchip t-${t.k}">${tierIc(t)} <b>${t.n}</b></span>`:`<span class="tchip sm t-${t.k}" title="${t.n}" aria-label="ระดับ ${t.n}">${tierIc(t)}</span>`;}
 function tierYearNote(f){if(!G.tierStart||G.tierStart.season!==(G.season||1))snapTiers(G);const k=G.tierStart.t[f.id];if(!k)return "";const t=tierOf(f),a=TIER_BY[k];
-  return a.k===t.k?"":`<span class="meta">ต้นปี ${a.ic} ${a.n} → <b class="${t.i>a.i?"goldt":"mutt"}">${t.ic} ${t.n}</b></span>`;}
+  return a.k===t.k?"":`<span class="meta">ต้นปี ${tierIc(a)} ${a.n} → <b class="${t.i>a.i?"goldt":"mutt"}">${tierIc(t)} ${t.n}</b></span>`;}
 function careerHTML(d){const list=Object.values(G.F).filter(f=>f.div===d&&f.camp!=="free"&&f.camp!=="quest").sort((x,y)=>ratingOf(y)-ratingOf(x));
   const mv=tierMoves(G).filter(m=>m.f.div===d);if(!G.tierStart||G.tierStart.season!==(G.season||1))snapTiers(G);
-  return `${mv.length?`<div class="tmoves"><div class="ann-h">ความเคลื่อนไหวปีนี้</div>${mv.slice(0,8).map(m=>`<div class="tmv ${m.f.camp==="player"?"me":""}">${faceImg(m.f,"sm")}<b>${esc(m.f.name)}</b><span class="meta">${m.from.ic} ${m.from.n}</span><span class="${m.up?"goldt":"mutt"}">${m.up?"▲":"▼"}</span>${tierChip(m.f,1)}</div>`).join("")}</div>`:`<p class="meta">ปีนี้ยังไม่มีใครเปลี่ยนระดับ</p>`}
+  return `${mv.length?`<div class="tmoves"><div class="ann-h">ความเคลื่อนไหวปีนี้</div>${mv.slice(0,8).map(m=>`<div class="tmv ${m.f.camp==="player"?"me":""}">${faceImg(m.f,"sm")}<b>${esc(m.f.name)}</b><span class="meta">${tierIc(m.from)} ${m.from.n}</span><span class="${m.up?"goldt":"mutt"}">${m.up?"▲":"▼"}</span>${tierChip(m.f,1)}</div>`).join("")}</div>`:`<p class="meta">ปีนี้ยังไม่มีใครเปลี่ยนระดับ</p>`}
    <div class="tbl-wrap"><table><thead><tr><th>#</th><th>ระดับ</th><th>นักมวย</th><th>เรตติ้ง</th><th>ปีนี้</th></tr></thead><tbody>
    ${list.map((f,i)=>{const k=G.tierStart.t[f.id],t=tierOf(f),dd=k?t.i-TIER_BY[k].i:0;return `<tr class="${f.camp==="player"?"me":f.camp==="rival"?"rival":""}"><td class="num">${i+1}</td><td>${tierChip(f,1)}</td><td>${esc(f.name)}</td><td class="num"><b>${ratingOf(f)}</b></td><td>${dd>0?'<span class="goldt">▲</span>':dd<0?'<span class="mutt">▼</span>':k?"":'<span class="meta">ใหม่</span>'}</td></tr>`;}).join("")}
    </tbody></table></div>
-   <p class="meta tlegend">${TIERS.map(t=>`${t.ic} ${t.n} ${t.min||""}${t.min?"+":""}`).join(" · ")}</p>
+   <p class="meta tlegend">${TIERS.map(t=>`${tierIc(t)} ${t.n} ${t.min||""}${t.min?"+":""}`).join(" · ")}</p>
    <p class="meta">เรตติ้งขึ้นลงทุกไฟต์ที่นับสถิติ ชนะคนที่เรตติ้งสูงกว่าได้เยอะ ชนะคนที่ต่ำกว่าได้น้อย ไฟต์รองชิงและชิงแชมป์มีผลมากกว่าปกติ</p>`;}
 // v1.85: card detail page — rarity, copies, a teaser line, read the story or break spare copies into stardust
 function cardBlurb(C){if(C.blurb)return C.blurb;const st=(C.steps||[]).find(x=>x&&typeof x.t==="string"&&x.n!=="nar")||(C.steps||[]).find(x=>x&&typeof x.t==="string");if(!st)return "";const t=st.t;return t.length>72?t.slice(0,70)+"…":t;}
@@ -1190,7 +1191,7 @@ function reportHTML(){const r=G.lastReport;const ann=[];
   const tu=(r.tierUp||[]).filter(x=>G.F[x.id]),hu=(r.heartUp||[]).filter(x=>G.F[x.id]);
   return `<h2>สรุปสัปดาห์ที่ ${r.week}</h2><p class="goal">${goalText()}</p>
    ${hu.length?`<div class="heartup">${hu.map(x=>`<div class="hu">${faceImg(G.F[x.id],"sm")}<span>ความสนิทกับ <b>${esc(G.F[x.id].name)}</b> ขึ้นเป็น <b class="hlvn">♥ Lv.${x.lv}</b><small class="meta">${relLabel(G,G.F[x.id],x.lv,true)}</small></span></div>`).join("")}</div>`:""}
-   ${tu.length?`<div class="tierup">${tu.map(x=>{const f=G.F[x.id],a=TIER_BY[x.from],b=TIER_BY[x.to],up=b.i>a.i;return `<div class="tu ${up?"up":"down"}">${faceImg(f,"sm")}<span><b>${esc(f.name)}</b> ${up?"เลื่อนขึ้นเป็น":"ตกลงเป็น"} <b>${b.ic} ${b.n}</b><small class="meta">จาก ${a.ic} ${a.n}</small></span></div>`;}).join("")}</div>`:""}
+   ${tu.length?`<div class="tierup">${tu.map(x=>{const f=G.F[x.id],a=TIER_BY[x.from],b=TIER_BY[x.to],up=b.i>a.i;return `<div class="tu ${up?"up":"down"}">${faceImg(f,"sm")}<span><b>${esc(f.name)}</b> ${up?"เลื่อนขึ้นเป็น":"ตกลงเป็น"} <b>${tierIc(b)} ${b.n}</b><small class="meta">จาก ${tierIc(a)} ${a.n}</small></span></div>`;}).join("")}</div>`:""}
    ${ann.length&&cut?`<div class="announce"><div class="ann-h">ประกาศอันดับ · ${STAGE_NAME[r.stage]}</div>${ann.map(a=>`<div class="ann ${a.f.camp==="player"?"me":""}">${faceImg(a.f,"sm")}<b>${esc(a.f.name)}</b><span class="meta">รุ่น ${a.d}</span><span class="rk">อันดับ ${a.pos}</span>${moveIcon(a.m)}${cut?`<span class="pill ${a.pos<=cut?"green":"red"}">${a.pos<=cut?"อยู่ในโซนเข้ารอบ":"นอกโซน"}</span>`:""}</div>`).join("")}</div>`:""}
    ${r.prog?`<details class="prog"><summary class="ann-h">กราฟพัฒนาการ 4 สัปดาห์ (แตะเพื่อดู)</summary><div class="progrow">${r.prog.filter(p=>G.F[p.id]).map(p=>{const f=G.F[p.id];const sum=Object.keys(p.before).reduce((s,k)=>s+(f.a[k]-p.before[k]),0);
      return `<div class="pcell">${radarSVG(f,150,p.before)}<b>${esc(f.name)}</b><span class="meta">ค่ารวม ${sum>=0?"+":""}${sum.toFixed(1)}</span></div>`;}).join("")}</div></details>`:""}
@@ -1694,7 +1695,7 @@ function endingHTML(){const E=UI.ending,all=roster(G),res=seasonResult();
     <span class="pill gold">${G.ended==="bankrupt"?"ค่ายปิดตัว":(G.season||1)>=2?`จบปีที่ ${G.season}`:"จบบทที่ 1 · ปีที่ 1"}</span><h1>${(G.season||1)>=2&&G.ended!=="bankrupt"?esc(E.title):`ฉากจบ: ${E.title}`}</h1>
     <p class="lead">${(G.season||1)>=2&&G.ended!=="bankrupt"?`ปีที่ ${G.season} ผ่านไปแล้ว ${esc(G.player.name)} กับค่ายศิริชัยยังเดินหน้าต่อ`:`ขอบคุณที่เล่น <b>Muay Thai Moe</b>! ${esc(G.player.name)} พาค่ายศิริชัยมาได้ถึงตรงนี้แล้ว`}</p></section>
    ${(()=>{const mv=tierMoves(G);if(!mv.length)return "";const mine=mv.filter(m=>m.f.camp==="player"),oth=mv.filter(m=>m.f.camp!=="player"&&m.up).slice(0,6);
-     return `<section class="px card"><h3>ใครขึ้นระดับปีนี้</h3>${mine.concat(oth).map(m=>`<div class="kv-row"><span>${faceImg(m.f,"sm")} ${esc(m.f.name)} · รุ่น ${m.f.div}${m.f.camp==="player"?" · ค่ายเรา":""}</span><span>${m.from.ic} ${m.from.n} <b class="${m.up?"goldt":"mutt"}">${m.up?"▲":"▼"}</b> ${tierChip(m.f,1)}</span></div>`).join("")}</section>`;})()}
+     return `<section class="px card"><h3>ใครขึ้นระดับปีนี้</h3>${mine.concat(oth).map(m=>`<div class="kv-row"><span>${faceImg(m.f,"sm")} ${esc(m.f.name)} · รุ่น ${m.f.div}${m.f.camp==="player"?" · ค่ายเรา":""}</span><span>${tierIc(m.from)} ${m.from.n} <b class="${m.up?"goldt":"mutt"}">${m.up?"▲":"▼"}</b> ${tierChip(m.f,1)}</span></div>`).join("")}</section>`;})()}
    <section class="px card"><h3>ผลงานปีนี้</h3>${res.length?res.map(r=>`<div class="kv-row"><span>${faceImg(r.f,"sm")} ${esc(r.f.name)} · รุ่น ${r.d}</span><span class="pill ${r.c}">${r.t}</span></div>`).join(""):'<p class="meta">ปีนี้ยังไม่มีนักมวยผ่านรอบตำบล</p>'}</section>
    <div class="grid g3"><section class="px card"><h3>ค่าย</h3><div class="kv-row"><span>ระดับค่าย</span><b>Lv.${campLevel(G)} ${CAMP_LV_NAME[campLevel(G)]}</b></div><div class="kv-row"><span>เงินสด</span><b class="num">${fmt(G.cash)}</b></div><div class="kv-row"><span>หนี้คงเหลือ</span><b class="num">${fmt(G.debt)}</b></div><div class="kv-row"><span>นักเรียน</span><b class="num">${students(G)} คน</b></div><div class="kv-row"><span>ชื่อเสียง</span><b class="num">${G.rep.toFixed(1)}</b></div></section>
    <section class="px card"><h3>นักมวยในค่าย</h3>${all.map(f=>`<div class="kv-row"><span>${esc(f.name)} Lv.${f.lvl}</span><span class="num">${rec(f)}</span></div>`).join("")}</section>

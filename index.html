@@ -1698,7 +1698,7 @@ body.hasnews main>h1.sr+.homegrid,body.hasnews main>h1.sr+.rinnote{margin-top:46
 .tchip{display:inline-flex;align-items:center;gap:3px;padding:1px 7px;font:700 12px var(--f-display);white-space:nowrap;background:var(--raise);box-shadow:inset 0 0 0 2px var(--tc,var(--line));color:var(--tc,var(--fg));vertical-align:middle}
 .tchip.sm{padding:0 3px;box-shadow:none;background:none;font-size:13px}
 .t-rookie{--tc:#9a93ad}.t-rising{--tc:#6cc0e6}.t-skilled{--tc:#4cc38a}.t-top{--tc:#f0a03a}.t-elite{--tc:#c38af0}.t-legend{--tc:#f2c14e}
-.tchip.t-legend{background:rgba(242,193,78,.16)}.tchip.t-elite{background:rgba(155,98,224,.16)}
+.tchip.t-legend{background:rgba(242,193,78,.16)}.t-king{--tc:#ffe08a}.tchip.t-king{background:linear-gradient(90deg,rgba(242,193,78,.28),rgba(230,90,60,.22));box-shadow:inset 0 0 0 1px rgba(255,224,138,.55)} /* v1.91.217 */.tchip.t-elite{background:rgba(155,98,224,.16)}
 .tierline{display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px;margin:6px 0 4px}
 .tmoves{display:flex;flex-direction:column;gap:6px;margin:4px 0 12px}
 .tmv{display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:6px 8px;background:var(--bg2);box-shadow:inset 0 0 0 2px var(--line)}
@@ -2860,6 +2860,9 @@ i.stye.up{background:#1f6b3a;color:#e6ffe9}i.stye.dn{background:#8a2333;color:#f
 @keyframes dmlCool{to{stroke:#ffd34a}}
 .dml.lnew:not(.mine){animation-name:dmlDraw,dmlCoolDim}@keyframes dmlCoolDim{to{stroke:#7a6a3a}}
 @media (prefers-reduced-motion:reduce){.dml.lnew{animation:none;stroke-dashoffset:0}}
+
+/* v1.91.217: pixel crown for the เจ้าสังเวียน tier (2px pixels, 7x5) */
+.pxcrown{display:inline-block;width:14px;height:10px;vertical-align:-1px;position:relative}.pxcrown::before{content:"";position:absolute;left:0;top:0;width:2px;height:2px;background:transparent;box-shadow:0 0 #ffd54a,6px 0 #ffd54a,12px 0 #ffd54a,0 2px #ffd54a,4px 2px #ffd54a,6px 2px #ffd54a,8px 2px #ffd54a,12px 2px #ffd54a,0 4px #ffd54a,2px 4px #ffd54a,4px 4px #ffd54a,6px 4px #e65a3c,8px 4px #ffd54a,10px 4px #ffd54a,12px 4px #ffd54a,0 6px #c98a1e,2px 6px #c98a1e,4px 6px #c98a1e,6px 6px #c98a1e,8px 6px #c98a1e,10px 6px #c98a1e,12px 6px #c98a1e,0 8px #8a5a12,2px 8px #8a5a12,4px 8px #8a5a12,6px 8px #8a5a12,8px 8px #8a5a12,10px 8px #8a5a12,12px 8px #8a5a12}
 </style></head><body>
 <script>window.__MTM_ART=["alicia_sheet.png","alicia_special.png","baibua_sheet.png","baibua_special.png","baiyok_sheet.webp","baiyok_white_sheet.webp","bull1_sheet.webp","bull2_sheet.webp","bull3_sheet.webp","chaba_sheet.png","chaba_special.png","coach_daeng_sheet.webp","fah_loykrathong_sheet.webp","fah_loykrathong_special.webp","fah_sheet.webp","fah_special.webp","gang1_sheet.webp","gang2_sheet.webp","gang3_sheet.webp","gang4_sheet.webp","gang5_sheet.webp","gangsilver_sheet.webp","kati_loykrathong_sheet.webp","kati_loykrathong_special.webp","kati_sheet.webp","kati_special.webp","krahang_sheet.webp","krasue_sheet.webp","mabong_sheet.webp","mali_loykrathong_sheet.webp","mali_loykrathong_special.webp","mali_sheet.webp","mali_special.webp","nl_ladda_blood_sheet.webp","nl_ladda_hood_sheet.webp","nl_ladda_sheet.webp","nl_meili_sheet.webp","nl_meili_special.webp","nl_nia_sheet.webp","nl_nia_special.webp","nl_rosa_sheet.webp","nl_rosa_special.webp","nl_varya_sheet.webp","nl_varya_special.webp","npc10_sheet.webp","npc11_sheet.webp","npc12_sheet.webp","npc13_sheet.webp","npc14_sheet.webp","npc1_sheet.webp","npc2_sheet.webp","npc3_sheet.webp","npc4_sheet.webp","npc5_sheet.webp","npc6_sheet.webp","npc7_sheet.webp","npc8_sheet.webp","npc9_sheet.webp","npc_alicia_mom.webp","npc_alicia_mom_soft.webp","npc_baibua_dad.webp","npc_baibua_dad_smile.webp","npc_baiyok_black_angry.png","npc_baiyok_black_flustered.png","npc_baiyok_black_happy.png","npc_baiyok_black_sad.png","npc_baiyok_casual.png","npc_baiyok_casual_flustered.png","npc_baiyok_casual_pout.png","npc_baiyok_white_angry.png","npc_baiyok_white_flustered.png","npc_baiyok_white_happy.png","npc_baiyok_white_sad.png","npc_baiyok_white_surprised.png","npc_boris.webp","npc_caster.webp","npc_caster_shout.webp","npc_chaba_bro.webp","npc_chaba_bro_sad.webp","npc_chaba_bro_stand.webp","npc_gala_mc.webp","npc_gala_mc_awk.webp","npc_gala_mc_hype.webp","npc_gang_boss.webp","npc_gang_boss_face.webp","npc_gang_goldblack.webp","npc_gang_group.webp","npc_gang_silver.webp","npc_grandma.webp","npc_hialong.webp","npc_hialong_angry.webp","npc_krerk.webp","npc_krerk_face.webp","npc_krit.webp","npc_krit_panic.webp","npc_luangpho.webp","npc_mabelle.webp","npc_mabelle_excited.webp","npc_mali_mom.webp","npc_mali_mom_laugh.webp","npc_mali_mom_tear.webp","npc_mark_guide.webp","npc_mark_guide_pain.webp","npc_mc_central.webp","npc_mc_central_hype.webp","npc_mc_isan.webp","npc_mc_isan_hype.webp","npc_mc_north.webp","npc_mc_north_f.webp","npc_mc_north_f_hype.webp","npc_mc_north_hype.webp","npc_mc_south.webp","npc_mc_south_hype.webp","npc_minnie.webp","npc_minnie_smirk.webp","npc_mint.webp","npc_mint_flustered.webp","npc_morphi.webp","npc_nai.webp","npc_nil.webp","npc_nil_smirk.webp","npc_petchara.png","npc_phet.webp","npc_phet_smile.webp","npc_ploy_mom.webp","npc_ploy_mom_cry.webp","npc_qhost_correct.webp","npc_qhost_excited.webp","npc_qhost_smile.webp","npc_qhost_suspense.webp","npc_qhost_wrong.webp","npc_suea.webp","npc_suea_angry.webp","npc_tabtim_dad.webp","npc_tabtim_dad_laugh.webp","npc_tani_angry.webp","npc_tani_angry_smile.webp","npc_tani_face.webp","npc_tani_neutral.webp","npc_tani_scary.webp","npc_tani_shy.webp","npc_tani_smile.webp","npc_thief.webp","npc_thief2.webp","npc_tiger_boss.webp","npc_tiger_boss_cry.webp","npc_vector_knight.png","npc_vector_mesa.png","npc_vector_vega.png","npc_vendor_green.webp","npc_vendor_red.webp","pailin_sheet.webp","petchara_sheet.webp","phiphong_sheet.webp","ploy_loykrathong_sheet.webp","ploy_loykrathong_special.webp","ploy_sheet.webp","ploy_special.webp","rg_chaytrae1_sheet.webp","rg_chaytrae2_sheet.webp","rg_jinlong1_sheet.webp","rg_jinlong2_sheet.webp","rg_russian1_sheet.webp","rg_russian2_sheet.webp","rg_sasaeng1_sheet.webp","rg_sasaeng2_sheet.webp","rgp_buriram_sheet.webp","rgp_chanthaburi_sheet.webp","rgp_chiangrai_sheet.webp","rgp_chumphon_sheet.webp","rgp_khonkaen_sheet.webp","rgp_lampang_sheet.webp","rgp_lopburi_sheet.webp","rgp_nakhonsi_sheet.webp","rgp_nan_sheet.webp","rgp_phetchaburi_sheet.webp","rgp_songkhla_sheet.webp","rgp_suphan_sheet.webp","rgp_surat_sheet.webp","rgp_ubon_sheet.webp","rgp_udon_sheet.webp","rgp_uttaradit_sheet.webp","rin_loykrathong_sheet.webp","rin_loykrathong_special.webp","rin_sheet.webp","rin_special.webp","rooster1_sheet.webp","rooster2_sheet.webp","rooster3_sheet.webp","rooster4_sheet.webp","rooster5_sheet.webp","tabtim_sheet.png","tabtim_special.png","tani_sheet.webp","thief2_sheet.webp","thief_sheet.webp"];</script>
 <script>window.__MTM_PETART=["cat","dog","mudlek","otter","rooster","turtle"];</script>
@@ -3803,7 +3806,7 @@ function newGame(opts){
 }
 const roster=G=>Object.values(G.F).filter(f=>f.camp==="player");
 /* v1.91.215 (Man): a fighter's purse follows her own name — rating 1000→1600 adds up to +50%, and a regional champion who joined us draws a crowd (+50%) so buying one pays for herself if she fights · wageOf: she is paid her contract, the 5,000/week the letter promised (it used to grow with level to ~8,900) */
-const fameMult=f=>(1+clamp((ratingOf(f)-1000)/600,0,1)*.5)*(f&&f.camp==="player"&&f.joinAbs!=null?1.5:1);
+const fameMult=f=>(1+clamp((ratingOf(f)-1000)/600,0,1)*.5+clamp((ratingOf(f)-1600)/200,0,1)*.25)* /* v1.91.217: keeps climbing to ×1.75 at 1800 */(f&&f.camp==="player"&&f.joinAbs!=null?1.5:1);
 const wageOf=f=>f&&f.joinAbs!=null?f.wage:Math.round(f.wage*(1+(Math.min(f.lvl||1,15)-1)*.06)/100)*100; // v1.43: stars ask for more as they level up
 const wages=G=>roster(G).reduce((s,f)=>s+wageOf(f),0)+(G.staff?G.staff.reduce((s,k)=>s+STAFF[k].wage,0):G.fac.assistants*2500);
 // ---------- CAMP FACILITIES & STUDENTS ----------
@@ -3913,7 +3916,7 @@ const hasStaff=(G,k)=>(G.staff||[]).includes(k);
 const staffLocked=(G,k)=>{const r=STAFF[k].req;if(!r)return "";if(r.lv&&campLevel(G)<r.lv)return `ค่าย Lv.${r.lv}`;if(r.rep&&G.rep<r.rep)return `ชื่อเสียง ${r.rep}`;return "";};
 function hireStaff(G,k){const S=STAFF[k];G.staff=G.staff||[];if(!S||hasStaff(G,k)||G.staff.length>=staffSlots(G)||staffLocked(G,k)||G.cash<S.fee)return false;G.cash-=S.fee;G.staff.push(k);G.fac.assistants=G.staff.length;return true;}
 function fireStaff(G,k){G.staff=(G.staff||[]).filter(x=>x!==k);G.fac.assistants=G.staff.length;return true;}
-function fixSave(G){/* v1.91.209 regional audit: the league's "Tabtim Kiatsiam" shared a first name with the Isan champion Tabtim — she is Mukda now */for(const f of Object.values(G.F||{}))if(f&&f.camp!=="player"&&f.id!=="tabtim"&&/^(ทับทิม เกียรติสยาม|Thapthim Kiatsiam)$/.test(f.name||"")){const en=f.name[0]==="T";f.name=en?"Mukda Kiatsiam":"มุกดา เกียรติสยาม";if(f.full)f.full=f.name;}if(typeof byCampKit==="function")byCampKit(G);for(const [id,k] of [["ploy","captain"],["fah","grin"]])if(G.F&&G.F[id]&&G.F[id].skills&&(G.F[id].skills[k]||0)>3)G.F[id].skills[k]=3; /* v1.91.195: undo the old runaway yearly rank-up */ /* v1.91.166: Baiyok in the camp gets her tree *//* v1.91.42: a card counts as read only if its story was ever opened (o.seen is set only there) — v1.91.41 wrongly marked every owned card read */if(G&&(G.cardRd||0)<2){for(const k in (G.cards||{})){const o=G.cards[k];o.rd=o.seen?1:0;}G.cardRd=2;}if(G&&G.F&&typeof hmFix==="function")hmFix(G);if(G&&G.F&&typeof monoFix==="function")monoFix(G);if(G&&G.ev&&G.ev.loy&&typeof thiefFix==="function")thiefFix(G);if(G&&G.F&&G.prodigy)fixProdigies(G);if(G&&G.flags&&G.flags.beat_ploy&&G.flags.beatS_ploy==null)G.flags.beatS_ploy=G.season||1;
+function fixSave(G){/* v1.91.217: ratings over the new เจ้าสังเวียน line that were not won in the regional chapter come back under it */for(const f of Object.values(G.F||{}))if(f&&f.elo>RG_CAP&&!f.rgFame)f.elo=RG_CAP;/* v1.91.209 regional audit: the league's "Tabtim Kiatsiam" shared a first name with the Isan champion Tabtim — she is Mukda now */for(const f of Object.values(G.F||{}))if(f&&f.camp!=="player"&&f.id!=="tabtim"&&/^(ทับทิม เกียรติสยาม|Thapthim Kiatsiam)$/.test(f.name||"")){const en=f.name[0]==="T";f.name=en?"Mukda Kiatsiam":"มุกดา เกียรติสยาม";if(f.full)f.full=f.name;}if(typeof byCampKit==="function")byCampKit(G);for(const [id,k] of [["ploy","captain"],["fah","grin"]])if(G.F&&G.F[id]&&G.F[id].skills&&(G.F[id].skills[k]||0)>3)G.F[id].skills[k]=3; /* v1.91.195: undo the old runaway yearly rank-up */ /* v1.91.166: Baiyok in the camp gets her tree *//* v1.91.42: a card counts as read only if its story was ever opened (o.seen is set only there) — v1.91.41 wrongly marked every owned card read */if(G&&(G.cardRd||0)<2){for(const k in (G.cards||{})){const o=G.cards[k];o.rd=o.seen?1:0;}G.cardRd=2;}if(G&&G.F&&typeof hmFix==="function")hmFix(G);if(G&&G.F&&typeof monoFix==="function")monoFix(G);if(G&&G.ev&&G.ev.loy&&typeof thiefFix==="function")thiefFix(G);if(G&&G.F&&G.prodigy)fixProdigies(G);if(G&&G.flags&&G.flags.beat_ploy&&G.flags.beatS_ploy==null)G.flags.beatS_ploy=G.season||1;
   // Legacy saves used week-of-season values. Infer only short, plausible effects;
   // otherwise expire them instead of resurrecting an old effect after New Year.
   const now=gameWeek(G),base=now-G.week;
@@ -4201,15 +4204,19 @@ function acceptOffer(G,oid){const o=G.offers.find(x=>x.id===oid);
 /* v1.84: career rating — every fighter (ours and NPCs) carries an Elo-style rating that moves with each counted bout;
    tiers turn it into a readable class. NPCs start from their strength; ours start from their stats and record. */
 const TIERS=[{k:"rookie",n:"หน้าใหม่",min:0,ic:"🌱"},{k:"rising",n:"ดาวรุ่ง",min:950,ic:"⭐"},{k:"skilled",n:"มวยฝีมือ",min:1100,ic:"🥊"},
-  {k:"top",n:"หัวแถว",min:1250,ic:"🔥"},{k:"elite",n:"ยอดมวย",min:1400,ic:"💎"},{k:"legend",n:"ตำนาน",min:1550,ic:"👑"}];
+  {k:"top",n:"หัวแถว",min:1250,ic:"🔥"},{k:"elite",n:"ยอดมวย",min:1400,ic:"💎"},{k:"legend",n:"ตำนาน",min:1550,ic:"👑"},{k:"king",n:"เจ้าสังเวียน",min:1700,ic:""}]; /* v1.91.217 (Man): a tier above legend — reached only by winning the regional chapter (RG_CAP keeps everything else under it) */
+const RG_CAP=1699;
 const TIER_BY=Object.fromEntries(TIERS.map((t,i)=>[t.k,{...t,i}]));
 function seedRating(f){const r=f.rec||{},recB=clamp(((r.w||0)-(r.l||0))*4,-100,200);
-  return Math.round(clamp(1000+(ovr(f.a)+(f.vet||0)+(f.camp==="player"?hiddenEdge(f):0)-10)*45+(f.canon&&f.camp==="rival"?120:0)+(f.lab?60:0)+(f.prodigy?80:0)+recB,700,1750));}
+  return Math.round(Math.min(RG_CAP,clamp(1000+(ovr(f.a)+(f.vet||0)+(f.camp==="player"?hiddenEdge(f):0)-10)*45+(f.canon&&f.camp==="rival"?120:0)+(f.lab?60:0)+(f.prodigy?80:0)+recB,700,1750))+Math.min(350,f.rgFame||0));} /* v1.91.217: what she earned in the regional chapter stays in her name — the new-year drift pulls toward it, not under it */
 function ratingOf(f){if(!f)return 1000;if(f.elo==null)f.elo=seedRating(f);return f.elo;}
 function tierOf(f){const r=ratingOf(f);let t=TIERS[0];for(const x of TIERS)if(r>=x.min)t=x;return TIER_BY[t.k];}
-function rateBout(G,a,b,res,tierKey){const ra=ratingOf(a),rb=ratingOf(b),E=1/(1+Math.pow(10,(rb-ra)/400)),S=res==="W"?1:res==="D"?.5:0;
-  const K=tierKey==="final"||tierKey==="semi"?36:tierKey==="exhibition"?16:24,d=K*(S-E),t0=[tierOf(a),tierOf(b)];
-  a.elo=Math.round(ra+d);b.elo=Math.round(rb-d);
+function rateBout(G,a,b,res,tierKey,rgK){const ra=ratingOf(a),rb=ratingOf(b),E=1/(1+Math.pow(10,(rb-ra)/400)),S=res==="W"?1:res==="D"?.5:0;
+  const K=rgK||(tierKey==="final"||tierKey==="semi"?36:tierKey==="exhibition"?16:24),d=K*(S-E),t0=[tierOf(a),tierOf(b)];
+  /* v1.91.217: only regional bouts (rgK) can lift a rating past RG_CAP; whatever she gains there is kept as rgFame */
+  const nx=(r0,dd)=>rgK?r0+dd:Math.min(r0+dd,Math.max(r0,RG_CAP));
+  if(rgK)for(const [f,dd] of [[a,d],[b,-d]])if(f.camp==="player")f.rgFame=Math.max(0,(f.rgFame||0)+dd);
+  a.elo=Math.round(nx(ra,d));b.elo=Math.round(nx(rb,-d));
   [[a,t0[0]],[b,t0[1]]].forEach(([f,t])=>{const t1=tierOf(f);if(t1.k!==t.k&&f.camp==="player")G.tierNews=(G.tierNews||[]).concat([{id:f.id,from:t.k,to:t1.k,week:G.week}]).slice(-8);});}
 /* tiers at the start of the year, so the ranking page and the year-end can say who moved */
 function snapTiers(G){G.tierStart={season:G.season||1,t:{}};for(const f of Object.values(G.F))if(f.camp!=="free"&&f.camp!=="quest"&&(f.div==="A"||f.div==="B"))G.tierStart.t[f.id]=tierOf(f).k;}
@@ -4218,7 +4225,9 @@ function tierMoves(G){if(!G.tierStart||G.tierStart.season!==(G.season||1))snapTi
   return out.sort((x,y)=>(y.f.camp==="player")-(x.f.camp==="player")||y.to.i-x.to.i||ratingOf(y.f)-ratingOf(x.f));}
 function applyResult(G,F,booking){
   const {A,B}=F;const fa=A.f.__base||A.f,fb=B.f.__base||B.f,r=F.result,tier=TIER[booking.tier];
-  if(!tier.off&&!booking.beast){if(!G.tierStart||G.tierStart.season!==(G.season||1))snapTiers(G);rateBout(G,fa,fb,r.win==="D"?"D":r.win==="A"?"W":"L",booking.tier);}
+  /* v1.91.217 (Man): regional bouts count now — belt 24 · local 16 · champion series and Naka 36 · Ladda 48; side bouts and dev tests stay unrated */
+  const RX=booking.region,rgK=RX&&!RX.side&&!booking.nltest?(RX.nlfinal==="ladda"?48:RX.nlfinal||RX.series!=null||RX.nlleg?36:RX.local?16:24):0;
+  if((!tier.off||rgK)&&!booking.beast&&!booking.nltest){if(!G.tierStart||G.tierStart.season!==(G.season||1))snapTiers(G);rateBout(G,fa,fb,r.win==="D"?"D":r.win==="A"?"W":"L",booking.tier,rgK);}
   let ret=null;
   for(const [me,op,side] of [[fa,fb,"A"],[fb,fa,"B"]]){
     const res=r.win==="D"?"D":r.win===side?"W":"L";
@@ -9939,7 +9948,7 @@ AU.gsfx=function(kind,a){if(!this.init()||this.muted||!SETTINGS.sfx)return;const
   if(kind==="shimmer")for(let i=0;i<6;i++)T(i*.05,{f:1400+Math.random()*1400,type:"sine",dur:.12,peak:.06});};
 
 // ================= MUAY THAI MOE v1.3 — UI =================
-const VERSION="1.91.216";
+const VERSION="1.91.217";
 const CUR_LANG=(typeof window!=="undefined"&&window.LANG)||"th";
 const TH_LABEL=String.fromCharCode(3652,3607,3618);
 function langSwitch(cls){return `<div class="langsw ${cls||""}" role="group" aria-label="Language">${[["th",TH_LABEL],["en","EN"]].map(([k,l])=>`<button class="lsb ${CUR_LANG===k?"on":""}" data-act="setlang" data-v="${k}" aria-pressed="${CUR_LANG===k}">${l}</button>`).join("")}</div>`;}
@@ -10719,16 +10728,17 @@ function offersHTML(){const mine=G.bookings.filter(b=>G.F[b.a].camp==="player").
        </div></div>
        <div class="obtns3"><button class="btn sm" data-act="consider" data-v="${o.id}">${scouted(o.b)?"ข้อมูลคู่ชก":"ดูเทป"}</button>${coachOn()?`<button class="btn sm" data-act="otip" data-v="${o.id}">คำแนะนำครู</button>`:""}<button class="btn sm gold" data-act="accept" data-v="${o.id}" ${o.status==="conflict"?"disabled title=\""+esc(o.reason)+"\"":""}>รับไฟต์</button>${o.status==="conflict"?`<span class="meta">${esc(o.reason)}</span>`:""}</div></div>`;}).join("")||`<p class="lead">${G.bookings.length?"รับไฟต์แล้ว ข้อเสนอใหม่จะเข้ามาสัปดาห์หน้า":"ไม่มีข้อเสนอ (บาดเจ็บ หรือหมดฤดูกาล)"}</p>`}</div></section>`;}
 // v1.84: career tier chips
-function tierChip(f,full){const t=tierOf(f);return full?`<span class="tchip t-${t.k}">${t.ic} <b>${t.n}</b></span>`:`<span class="tchip sm t-${t.k}" title="${t.n}" aria-label="ระดับ ${t.n}">${t.ic}</span>`;}
+const tierIc=t=>t.ic||`<i class="pxcrown" aria-hidden="true"></i>`; /* v1.91.217: the top tier wears a pixel crown, not an emoji */
+function tierChip(f,full){const t=tierOf(f);return full?`<span class="tchip t-${t.k}">${tierIc(t)} <b>${t.n}</b></span>`:`<span class="tchip sm t-${t.k}" title="${t.n}" aria-label="ระดับ ${t.n}">${tierIc(t)}</span>`;}
 function tierYearNote(f){if(!G.tierStart||G.tierStart.season!==(G.season||1))snapTiers(G);const k=G.tierStart.t[f.id];if(!k)return "";const t=tierOf(f),a=TIER_BY[k];
-  return a.k===t.k?"":`<span class="meta">ต้นปี ${a.ic} ${a.n} → <b class="${t.i>a.i?"goldt":"mutt"}">${t.ic} ${t.n}</b></span>`;}
+  return a.k===t.k?"":`<span class="meta">ต้นปี ${tierIc(a)} ${a.n} → <b class="${t.i>a.i?"goldt":"mutt"}">${tierIc(t)} ${t.n}</b></span>`;}
 function careerHTML(d){const list=Object.values(G.F).filter(f=>f.div===d&&f.camp!=="free"&&f.camp!=="quest").sort((x,y)=>ratingOf(y)-ratingOf(x));
   const mv=tierMoves(G).filter(m=>m.f.div===d);if(!G.tierStart||G.tierStart.season!==(G.season||1))snapTiers(G);
-  return `${mv.length?`<div class="tmoves"><div class="ann-h">ความเคลื่อนไหวปีนี้</div>${mv.slice(0,8).map(m=>`<div class="tmv ${m.f.camp==="player"?"me":""}">${faceImg(m.f,"sm")}<b>${esc(m.f.name)}</b><span class="meta">${m.from.ic} ${m.from.n}</span><span class="${m.up?"goldt":"mutt"}">${m.up?"▲":"▼"}</span>${tierChip(m.f,1)}</div>`).join("")}</div>`:`<p class="meta">ปีนี้ยังไม่มีใครเปลี่ยนระดับ</p>`}
+  return `${mv.length?`<div class="tmoves"><div class="ann-h">ความเคลื่อนไหวปีนี้</div>${mv.slice(0,8).map(m=>`<div class="tmv ${m.f.camp==="player"?"me":""}">${faceImg(m.f,"sm")}<b>${esc(m.f.name)}</b><span class="meta">${tierIc(m.from)} ${m.from.n}</span><span class="${m.up?"goldt":"mutt"}">${m.up?"▲":"▼"}</span>${tierChip(m.f,1)}</div>`).join("")}</div>`:`<p class="meta">ปีนี้ยังไม่มีใครเปลี่ยนระดับ</p>`}
    <div class="tbl-wrap"><table><thead><tr><th>#</th><th>ระดับ</th><th>นักมวย</th><th>เรตติ้ง</th><th>ปีนี้</th></tr></thead><tbody>
    ${list.map((f,i)=>{const k=G.tierStart.t[f.id],t=tierOf(f),dd=k?t.i-TIER_BY[k].i:0;return `<tr class="${f.camp==="player"?"me":f.camp==="rival"?"rival":""}"><td class="num">${i+1}</td><td>${tierChip(f,1)}</td><td>${esc(f.name)}</td><td class="num"><b>${ratingOf(f)}</b></td><td>${dd>0?'<span class="goldt">▲</span>':dd<0?'<span class="mutt">▼</span>':k?"":'<span class="meta">ใหม่</span>'}</td></tr>`;}).join("")}
    </tbody></table></div>
-   <p class="meta tlegend">${TIERS.map(t=>`${t.ic} ${t.n} ${t.min||""}${t.min?"+":""}`).join(" · ")}</p>
+   <p class="meta tlegend">${TIERS.map(t=>`${tierIc(t)} ${t.n} ${t.min||""}${t.min?"+":""}`).join(" · ")}</p>
    <p class="meta">เรตติ้งขึ้นลงทุกไฟต์ที่นับสถิติ ชนะคนที่เรตติ้งสูงกว่าได้เยอะ ชนะคนที่ต่ำกว่าได้น้อย ไฟต์รองชิงและชิงแชมป์มีผลมากกว่าปกติ</p>`;}
 // v1.85: card detail page — rarity, copies, a teaser line, read the story or break spare copies into stardust
 function cardBlurb(C){if(C.blurb)return C.blurb;const st=(C.steps||[]).find(x=>x&&typeof x.t==="string"&&x.n!=="nar")||(C.steps||[]).find(x=>x&&typeof x.t==="string");if(!st)return "";const t=st.t;return t.length>72?t.slice(0,70)+"…":t;}
@@ -11130,7 +11140,7 @@ function reportHTML(){const r=G.lastReport;const ann=[];
   const tu=(r.tierUp||[]).filter(x=>G.F[x.id]),hu=(r.heartUp||[]).filter(x=>G.F[x.id]);
   return `<h2>สรุปสัปดาห์ที่ ${r.week}</h2><p class="goal">${goalText()}</p>
    ${hu.length?`<div class="heartup">${hu.map(x=>`<div class="hu">${faceImg(G.F[x.id],"sm")}<span>ความสนิทกับ <b>${esc(G.F[x.id].name)}</b> ขึ้นเป็น <b class="hlvn">♥ Lv.${x.lv}</b><small class="meta">${relLabel(G,G.F[x.id],x.lv,true)}</small></span></div>`).join("")}</div>`:""}
-   ${tu.length?`<div class="tierup">${tu.map(x=>{const f=G.F[x.id],a=TIER_BY[x.from],b=TIER_BY[x.to],up=b.i>a.i;return `<div class="tu ${up?"up":"down"}">${faceImg(f,"sm")}<span><b>${esc(f.name)}</b> ${up?"เลื่อนขึ้นเป็น":"ตกลงเป็น"} <b>${b.ic} ${b.n}</b><small class="meta">จาก ${a.ic} ${a.n}</small></span></div>`;}).join("")}</div>`:""}
+   ${tu.length?`<div class="tierup">${tu.map(x=>{const f=G.F[x.id],a=TIER_BY[x.from],b=TIER_BY[x.to],up=b.i>a.i;return `<div class="tu ${up?"up":"down"}">${faceImg(f,"sm")}<span><b>${esc(f.name)}</b> ${up?"เลื่อนขึ้นเป็น":"ตกลงเป็น"} <b>${tierIc(b)} ${b.n}</b><small class="meta">จาก ${tierIc(a)} ${a.n}</small></span></div>`;}).join("")}</div>`:""}
    ${ann.length&&cut?`<div class="announce"><div class="ann-h">ประกาศอันดับ · ${STAGE_NAME[r.stage]}</div>${ann.map(a=>`<div class="ann ${a.f.camp==="player"?"me":""}">${faceImg(a.f,"sm")}<b>${esc(a.f.name)}</b><span class="meta">รุ่น ${a.d}</span><span class="rk">อันดับ ${a.pos}</span>${moveIcon(a.m)}${cut?`<span class="pill ${a.pos<=cut?"green":"red"}">${a.pos<=cut?"อยู่ในโซนเข้ารอบ":"นอกโซน"}</span>`:""}</div>`).join("")}</div>`:""}
    ${r.prog?`<details class="prog"><summary class="ann-h">กราฟพัฒนาการ 4 สัปดาห์ (แตะเพื่อดู)</summary><div class="progrow">${r.prog.filter(p=>G.F[p.id]).map(p=>{const f=G.F[p.id];const sum=Object.keys(p.before).reduce((s,k)=>s+(f.a[k]-p.before[k]),0);
      return `<div class="pcell">${radarSVG(f,150,p.before)}<b>${esc(f.name)}</b><span class="meta">ค่ารวม ${sum>=0?"+":""}${sum.toFixed(1)}</span></div>`;}).join("")}</div></details>`:""}
@@ -11634,7 +11644,7 @@ function endingHTML(){const E=UI.ending,all=roster(G),res=seasonResult();
     <span class="pill gold">${G.ended==="bankrupt"?"ค่ายปิดตัว":(G.season||1)>=2?`จบปีที่ ${G.season}`:"จบบทที่ 1 · ปีที่ 1"}</span><h1>${(G.season||1)>=2&&G.ended!=="bankrupt"?esc(E.title):`ฉากจบ: ${E.title}`}</h1>
     <p class="lead">${(G.season||1)>=2&&G.ended!=="bankrupt"?`ปีที่ ${G.season} ผ่านไปแล้ว ${esc(G.player.name)} กับค่ายศิริชัยยังเดินหน้าต่อ`:`ขอบคุณที่เล่น <b>Muay Thai Moe</b>! ${esc(G.player.name)} พาค่ายศิริชัยมาได้ถึงตรงนี้แล้ว`}</p></section>
    ${(()=>{const mv=tierMoves(G);if(!mv.length)return "";const mine=mv.filter(m=>m.f.camp==="player"),oth=mv.filter(m=>m.f.camp!=="player"&&m.up).slice(0,6);
-     return `<section class="px card"><h3>ใครขึ้นระดับปีนี้</h3>${mine.concat(oth).map(m=>`<div class="kv-row"><span>${faceImg(m.f,"sm")} ${esc(m.f.name)} · รุ่น ${m.f.div}${m.f.camp==="player"?" · ค่ายเรา":""}</span><span>${m.from.ic} ${m.from.n} <b class="${m.up?"goldt":"mutt"}">${m.up?"▲":"▼"}</b> ${tierChip(m.f,1)}</span></div>`).join("")}</section>`;})()}
+     return `<section class="px card"><h3>ใครขึ้นระดับปีนี้</h3>${mine.concat(oth).map(m=>`<div class="kv-row"><span>${faceImg(m.f,"sm")} ${esc(m.f.name)} · รุ่น ${m.f.div}${m.f.camp==="player"?" · ค่ายเรา":""}</span><span>${tierIc(m.from)} ${m.from.n} <b class="${m.up?"goldt":"mutt"}">${m.up?"▲":"▼"}</b> ${tierChip(m.f,1)}</span></div>`).join("")}</section>`;})()}
    <section class="px card"><h3>ผลงานปีนี้</h3>${res.length?res.map(r=>`<div class="kv-row"><span>${faceImg(r.f,"sm")} ${esc(r.f.name)} · รุ่น ${r.d}</span><span class="pill ${r.c}">${r.t}</span></div>`).join(""):'<p class="meta">ปีนี้ยังไม่มีนักมวยผ่านรอบตำบล</p>'}</section>
    <div class="grid g3"><section class="px card"><h3>ค่าย</h3><div class="kv-row"><span>ระดับค่าย</span><b>Lv.${campLevel(G)} ${CAMP_LV_NAME[campLevel(G)]}</b></div><div class="kv-row"><span>เงินสด</span><b class="num">${fmt(G.cash)}</b></div><div class="kv-row"><span>หนี้คงเหลือ</span><b class="num">${fmt(G.debt)}</b></div><div class="kv-row"><span>นักเรียน</span><b class="num">${students(G)} คน</b></div><div class="kv-row"><span>ชื่อเสียง</span><b class="num">${G.rep.toFixed(1)}</b></div></section>
    <section class="px card"><h3>นักมวยในค่าย</h3>${all.map(f=>`<div class="kv-row"><span>${esc(f.name)} Lv.${f.lvl}</span><span class="num">${rec(f)}</span></div>`).join("")}</section>
@@ -17248,7 +17258,7 @@ const STATS_HOST="https://us.i.posthog.com";     /* EU projects: https://eu.i.po
 <script>
 (function(){
 /* v1.87: Thai code ships inside index.html; English code (en.js) and the dictionary (i18n.js) load only when needed */
-var B="c7652c17e5";
+var B="4af5089f3f";
 var L="";try{L=localStorage.getItem("mtm_lang")||"";}catch(e){}
 try{var h=(location.hash||"").match(/lang=(th|en)/);if(h)L=h[1];}catch(e){}
 if(L!=="th"&&L!=="en")L="th";
