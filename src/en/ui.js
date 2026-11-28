@@ -1,5 +1,5 @@
 // ================= MUAY THAI MOE v1.3 — UI =================
-const VERSION="1.91.206";
+const VERSION="1.91.207";
 const CUR_LANG=(typeof window!=="undefined"&&window.LANG)||"th";
 const TH_LABEL=String.fromCharCode(3652,3607,3618);
 function langSwitch(cls){return `<div class="langsw ${cls||""}" role="group" aria-label="Language">${[["th",TH_LABEL],["en","EN"]].map(([k,l])=>`<button class="lsb ${CUR_LANG===k?"on":""}" data-act="setlang" data-v="${k}" aria-pressed="${CUR_LANG===k}">${l}</button>`).join("")}</div>`;}
@@ -1267,7 +1267,7 @@ const PATCH_MG={id:"1.95",ver:"Muay Thai Moe v1.95",title:"Klong Khaek Across th
  foot:"Auntie Taew says: don't you dare lose to Jae Pla's stall, dear ✦"};
 /* v1.91.200 (Man): the running update gets its own note, so players who already read v1.95 see it too */
 const PATCH_RUN={id:"1.96",ver:"Muay Thai Moe v1.96",title:"Camp Track & Sports Day",lead:"Racing isn't just 100 m against a camp mate any more — your fighters' Speed and Stamina count with every stride.",items:[
- ["🏃","3 ways to use the camp track","A 100 m time trial against your own record ghost · 1-on-1 · 400 m with four, where you hold the green band and kick at the end"],
+ ["🏃","3 ways to use the camp track","Time trial 100 m against your own ghost · 1-on-1 duels · a 4-runner 400 m where you tap with the drum first, then sprint the finish"],
  ["🪜","Race 5 townsfolk","Duel mode has a ladder: from Uncle Wang the motorbike taxi up to the fastest runner in the district. Each runs differently — beat one to meet the next."],
  ["✉️","Race dares by mail","Keep an eye on your mailbox. Some weeks a runner from a rival camp dares you to a race at the temple yard. Win for fame and camp morale."],
  ["🎌","Sports day: 4 colours, 4 lanes","Mid-year: 100 m and 400 m, tug of war, and a 4×100 relay where you pass the baton as the ring closes, ending with a podium ceremony · Some years an unexpected guest turns up to run too"],
@@ -1280,7 +1280,14 @@ const PATCH_GUIDE={id:"1.97",ver:"Muay Thai Moe v1.97",title:"The game guide is 
  ["🎞","Edge or outmatched","After scouting, the fight info and fight plan show both fighters' styles with an Edge, Outmatched or Even tag. If you're outmatched, the game tells you who in the camp has the edge on that opponent"],
  ["💡","The ? next to the style","Tap the ? next to the fight style to open the fight styles chapter right away, then go back to where you were"]],
  foot:"Coach Daeng says: read the guide, then don't forget to train ✦"};
-const PATCHES=[PATCH_AV,PATCH_TAPE,PATCH_FIX,PATCH_TANI,PATCH_SKN,PATCH_MG,PATCH_RUN,PATCH_GUIDE],PATCH=PATCHES[PATCHES.length-1];
+/* (Man): the in-game popup for the camp-art update — short teasers, no spoilers */
+const PATCH_CAMP={id:"1.98",ver:"Muay Thai Moe v1.98",title:"The camp, reborn",lead:"Sirichai camp has come to life. Open the camp screen in the morning, at dusk and when it rains",items:[
+ ["🏕️","A camp that lives day and night","The sky follows your device's clock, the camp lights come on at dusk, the kids run for cover when it rains and the bags swing with every punch · prefer the old camp? Turn on \"Classic camp\" in Settings"],
+ ["📸","Camp card","Tap the camp card button on the camp screen, pick the weather and a card pattern, line the fighters up cheering, then save it as a sticker for your story · the longer you play, the cooler your year glove"],
+ ["🏃","A new way to run the 400 m","Tap as the ring closes on your runner, then mash all out for the last 120 metres"],
+ ["🐓","Troublemaker pets","Some weeks a strange bill turns up at the camp. Guess whose doing it was."]],
+ foot:"Kru Daeng got a new look too ✦"};
+const PATCHES=[PATCH_AV,PATCH_TAPE,PATCH_FIX,PATCH_TANI,PATCH_SKN,PATCH_MG,PATCH_RUN,PATCH_GUIDE,PATCH_CAMP],PATCH=PATCHES[PATCHES.length-1];
 function nextPatch(){if(G&&G.newsSeen==="1.91.144")G.newsSeen="1.91.111"; /* v1.91.145: the 1.91.144 popup was withdrawn — those who saw it must not get the old ones again */const i=PATCHES.findIndex(p=>p.id===(G&&G.newsSeen));return i<0?PATCHES[0]:PATCHES[i+1]||null;}
 function maybeWhatsNew(){if(!G||G.ended||UI.scene)return;const P=nextPatch();if(!P)return;UI.modal={type:"whatsnew",id:P.id};}
 function whatsNewHTML(){const P=PATCHES.find(p=>p.id===(UI.modal&&UI.modal.id))||nextPatch()||PATCH,n=PATCHES.length-PATCHES.indexOf(P)-1;return `<div class="wnew"><span class="pill gold">Update · ${esc(P.ver)}</span><h2>🥊 ${esc(P.title)}</h2><p class="lead">${esc(P.lead)}</p>

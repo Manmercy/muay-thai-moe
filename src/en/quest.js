@@ -1140,7 +1140,7 @@ const RUN={st:null,
     if(S.phase==="race"&&me&&me.v>6){x.save();x.globalAlpha=Math.min(.45,(me.v-6)/10);x.strokeStyle="#fff";x.lineWidth=2;for(let i=0;i<7;i++){const yy=top+((i*37)%(H-top)),xx=(W-((now*.9+i*61)%(W+80)));x.beginPath();x.moveTo(xx,yy);x.lineTo(xx+40,yy);x.stroke();}x.restore();}
     /* relay (v1.91.197, Man: couldn't see where to tap): a ring closes in on the next runner; tap when it meets the inner circle */
     /* v1.91.206 (Man: the beat ring belongs on the track, like the relay ring) — closes on our runner once per drum beat while pacing */
-    {const pz=this.pace(S,me);if(pz&&pz!=="kick"&&!RM){const i=S.lanes.indexOf(me),fy=ly(i),cx=px(me.x),cy=fy-sh*.45,r0=22,ph=this.beatPh(now),r=r0+(1-ph)*62;
+    {const pz=this.pace(S,me);if(pz&&pz!=="kick"&&!RM){const i=S.lanes.indexOf(me),fy=ly(i),cx=px(me.x),cy=fy-sh*.45,r0=22,ph=this.beatPh(now),r=r0+(1-ph)*48;
       const col=pz==="ok"?"#5dff7a":pz==="hot"?"#ff8a3a":"#ffffff";x.save();
       x.lineWidth=4;x.strokeStyle="#140a1e";x.globalAlpha=.55;x.beginPath();x.arc(cx,cy,r0,0,7);x.stroke();x.lineWidth=2;x.strokeStyle="#ffffff";x.beginPath();x.arc(cx,cy,r0,0,7);x.stroke();
       x.globalAlpha=.35+ph*.6;x.lineWidth=6;x.strokeStyle="#140a1e";x.beginPath();x.arc(cx,cy,r,0,7);x.stroke();x.lineWidth=4;x.strokeStyle=col;x.beginPath();x.arc(cx,cy,r,0,7);x.stroke();x.globalAlpha=1;

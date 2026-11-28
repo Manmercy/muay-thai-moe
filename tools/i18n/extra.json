@@ -22417,5 +22417,17 @@
  "<button class=\"mbtn L run\" id=\"rnL\"><i class=\"bring\"></i><b>วิ่ง!</b><small>กดรัว ๆ · Space</small></button>": "<button class=\"mbtn L run\" id=\"rnL\"><i class=\"bring\"></i><b>RUN!</b><small>mash · Space</small></button>",
  "<button class=\"mbtn L run\" id=\"rnL\"><i class=\"bring\"></i><b>วิ่ง!</b><small>กดรัว ๆ · Space</small></button><button class=\"mbtn pass\" id=\"rnP\"><b>ส่งไม้!</b><small>ตอนวงกลมหดพอดี · Enter</small></button>": "<button class=\"mbtn L run\" id=\"rnL\"><i class=\"bring\"></i><b>RUN!</b><small>mash · Space</small></button><button class=\"mbtn pass\" id=\"rnP\"><b>PASS!</b><small>as the ring closes · Enter</small></button>",
  "ดี!": "Nice!",
- "กดตอนวงกลมหดถึงตัววิ่ง · Space": "tap as the ring closes on your runner · Space"
+ "กดตอนวงกลมหดถึงตัววิ่ง · Space": "tap as the ring closes on your runner · Space",
+ "ครูแดงก็ได้ชุดใหม่เหมือนกันนะ ✦": "Kru Daeng got a new look too ✦",
+ "บางสัปดาห์อาจมีใบแจ้งหนี้แปลก ๆ ส่งมาถึงค่าย ลองเดาดูว่าเป็นฝีมือใคร": "Some weeks a strange bill turns up at the camp. Guess whose doing it was.",
+ "สัตว์เลี้ยงตัวแสบ": "Troublemaker pets",
+ "กดตอนวงกลมหดเข้าหาตัววิ่ง แล้วค่อยกดรัวสุดแรงช่วง 120 เมตรสุดท้าย": "Tap as the ring closes on your runner, then mash all out for the last 120 metres",
+ "วิ่ง 400 เมตรแบบใหม่": "A new way to run the 400 m",
+ "กดปุ่มการ์ดอวดค่ายในหน้าค่าย เลือกอากาศ เลือกลายการ์ด ให้นักมวยเรียงแถวชูมือ แล้วเซฟเป็นสติกเกอร์ไปแปะสตอรี่ได้เลย · นวมประจำปียิ่งเล่นนานยิ่งเท่": "Tap the camp card button on the camp screen, pick the weather and a card pattern, line the fighters up cheering, then save it as a sticker for your story · the longer you play, the cooler your year glove",
+ "การ์ดอวดค่าย": "Camp card",
+ "ฟ้าเปลี่ยนสีตามเวลาจริงในเครื่อง ตกค่ำไฟค่ายเปิด ฝนตกเด็ก ๆ วิ่งหลบใต้ชายคา กระสอบแกว่งตามหมัด · ชอบค่ายแบบเดิม เปิด \"ค่ายแบบคลาสสิก\" ในตั้งค่าได้": "The sky follows your device's clock, the camp lights come on at dusk, the kids run for cover when it rains and the bags swing with every punch · prefer the old camp? Turn on \"Classic camp\" in Settings",
+ "ค่ายทั้งวันทั้งคืน": "A camp that lives day and night",
+ "ค่ายศิริชัยมีชีวิตขึ้นทั้งค่าย ลองเปิดหน้าค่ายดูตอนเช้า ตอนเย็น และตอนฝนตก": "Sirichai camp has come to life. Open the camp screen in the morning, at dusk and when it rains",
+ "ค่ายโฉมใหม่": "The camp, reborn",
+ "จับเวลา 100 เมตรแข่งกับเงาสถิติของตัวเอง · ดวล 1 ต่อ 1 · 400 เมตร 4 คน ที่ต้องกดตามจังหวะกลองก่อน แล้วค่อยพุ่งช่วงท้าย": "Time trial 100 m against your own ghost · 1-on-1 duels · a 4-runner 400 m where you tap with the drum first, then sprint the finish"
 }
