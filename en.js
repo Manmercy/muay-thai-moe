@@ -1926,7 +1926,7 @@ Object.assign(ACTIVITIES,{
   amphawa:{name:"Amphawa floating market and the fireflies",cost:2200,bg:"amphawa",heart:26,intro:["Amphawa at dusk. Noodle boats drift past and lights from the canal-side houses shimmer on the water","When it's fully dark a small boat takes you down a narrow canal. The mangroves blink with thousands of fireflies, like stars that fell into the trees"]}});
 const HEART_SPOT={
  kati:{ fairnight:[[{n:"kati",f:"happy",l:"casual",t:"Manager! That dart stall. I've been after that teddy bear for three years and never won it"},{n:"nar",t:"Kati throws ten darts. Two balloons pop; the other eight stick in the stall's sign"},{n:"kati",f:"pout",l:"casual",t:"The darts are bent! Not my aim!"},{choice:[{t:"Let me try",fx:G=>{},then:[{n:"nar",t:"You win the smallest bear in the stall. Kati hugs it all night"},{n:"kati",f:"flustered",l:"casual",t:"…It's tiny but it's my favourite. I'm calling it Jab Junior"}]},{t:"Your fists are more accurate than darts",fx:G=>{},then:[{n:"kati",f:"happy",l:"casual",t:"True! To the punching machine!"},{n:"nar",t:"The machine shows the night's top score. The stall owner hurriedly closes up"}]}]}],[{n:"nar",t:"At the far end of the fair there's a makeshift ring. Two young fighters are doing their wai khru"},{n:"kati",f:"happy",l:"casual",t:"I fought at a fair like this when I was fourteen. Won three hundred baht"},{n:"kati",f:"flustered",l:"casual",t:"I spent it on my first red-and-white hair cord… Grandpa said 'You bought something you can wear in the ring. Good'"},{n:"nar",t:"Kati cheers for the kid in the red corner until she's hoarse, though she's never met them"}],[{n:"nar",t:"The Ferris wheel stops with your car right at the top"},{n:"kati",f:"happy",l:"casual",t:"You can see our camp's roof from up here! There, where one light's still on"},{n:"kati",f:"pout",l:"casual",t:"Kru Daeng forgot the light again… you have to tell him off about the bill this month"},{n:"kati",f:"flustered",l:"casual",t:"…It's kind of nice though. From up here you can tell where home is"}]],
- boat:[[{n:"kati",f:"happy",l:"casual",t:"Manager! Standing on a boat is perfect balance training. I'm standing till we dock!"},{n:"nar",t:"Five minutes later Kati is sitting down, hugging a post, pale"},{n:"kati",f:"sad",l:"casual",t:"…My balance is fine. My stomach isn't"},{choice:[{t:"Lean on my shoulder",fx:G=>{},then:[{n:"kati",f:"flustered",l:"casual",t:"…Just till we dock. Just till then"}]},{t:"Look at the horizon, it helps",fx:G=>{},then:[{n:"kati",f:"happy",l:"casual",t:"It actually helps… how do you know these things?"}]}]}],[{n:"nar",t:"The sun sinks behind the chedi. Kati is quiet for unusually long"},{n:"kati",f:"happy",l:"casual",t:"It sets right there every day, but I never stop to watch. This is evening training time"},{n:"kati",f:"flustered",l:"casual",t:"Today's my first skipped session in years… if Kru Daeng asks, say it was your orders"}]],
+ boat:[[{n:"kati",f:"happy",l:"casual",t:"Manager! Standing on a boat is perfect balance training. I'm standing till we dock!"},{n:"nar",t:"Five minutes later Kati is sitting down, hugging a post, pale"},{n:"kati",f:"flustered",l:"casual",t:"…My balance is fine. My stomach isn't. Urk… seasick."},{choice:[{t:"Lean on my shoulder",fx:G=>{},then:[{n:"kati",f:"flustered",l:"casual",t:"…Just till we dock. Just till then"}]},{t:"Look at the horizon, it helps",fx:G=>{},then:[{n:"kati",f:"happy",l:"casual",t:"It actually helps… how do you know these things?"}]}]}],[{n:"nar",t:"The sun sinks behind the chedi. Kati is quiet for unusually long"},{n:"kati",f:"happy",l:"casual",t:"It sets right there every day, but I never stop to watch. This is evening training time"},{n:"kati",f:"flustered",l:"casual",t:"Today's my first skipped session in years… if Kru Daeng asks, say it was your orders"}]],
  country:[[{n:"kati",f:"happy",l:"casual",t:"When I was small I ran around fields like this every evening, before I moved in with Grandpa"},{n:"kati",f:"happy",l:"casual",t:"Race you along the dyke? First to the hut wins!"},{n:"nar",t:"Kati takes a big lead, then slips into the paddy with a splash, mud up to her knees"},{n:"kati",f:"pout",l:"casual",t:"…Doesn't count! The dyke cheated!"},{choice:[{t:"Reach down and pull her out",fx:G=>{},then:[{n:"nar",t:"Kati takes your hand, then tugs. You go into the mud too"},{n:"kati",f:"happy",l:"casual",t:"Now it's a draw!"}]},{t:"Take a photo first",fx:G=>{},then:[{n:"kati",f:"angry",l:"casual",t:"Manager!! Delete it! …and send me a copy"}]}]}],[{n:"nar",t:"The farmer's selling this year's new rice. Kati hoists a fifteen-kilo sack onto her shoulder like it's nothing"},{n:"kati",f:"happy",l:"casual",t:"Weight training! New rice smells the best. I'm cooking it for the whole camp tonight"},{n:"kati",f:"flustered",l:"casual",t:"…Grandpa bought rice here every year. Today feels like I'm introducing you to him"}]],
  bangsaen:[[{n:"kati",f:"happy",l:"casual",t:"The sea!! Manager, I haven't seen the sea since Grandpa brought me when I was thirteen!"},{n:"kati",f:"happy",l:"casual",t:"Running on sand is the best leg training. Grandpa said so. One lap of the beach first!"},{n:"nar",t:"Kati sprints to the end of the beach and back, panting and grinning, sand up to her knees"},{choice:[{t:"No training today. Let's swim",fx:G=>{},then:[{n:"nar",t:"Kati splashes you first, then laughs so hard she swallows seawater"},{n:"kati",f:"flustered",l:"casual",t:"So salty! …But fun. The most fun all year"}]},{t:"Do another lap, I'll time you",fx:G=>{},then:[{n:"kati",f:"pout",l:"casual",t:"Manager! It's a day off!"},{n:"nar",t:"She runs another lap anyway, three seconds faster than the first"}]}]}],[{n:"nar",t:"The beach stall brings steamed blue crab and baked mussels. Kati eyes them like an opponent"},{n:"kati",f:"happy",l:"casual",t:"I'll take this crab on myself! …I mean, crack it myself"},{n:"kati",f:"sad",l:"casual",t:"When I was thirteen Grandpa brought me here after my first win. He ordered one crab and gave all of it to me. He just ate rice"},{n:"kati",f:"flustered",l:"casual",t:"Today I ordered two. One's yours. Don't you dare give it to me"}]],
  khaoyai:[[{n:"kati",f:"flustered",l:"casual",t:"Cold… I've never been this cold. Manager, lend me a sleeve"},{n:"nar",t:"The first light clears the ridge and the whole valley of fog turns gold. Kati goes quiet for a long time"},{n:"kati",f:"sad",l:"casual",t:"Grandpa always said he'd bring me to see a sea of fog someday. The camp never had enough money"},{n:"kati",f:"happy",l:"casual",t:"I made it, Grandpa. …With someone you'd definitely like"},{choice:[{t:"Let's come back next year",fx:G=>{},then:[{n:"kati",f:"happy",l:"casual",t:"Promise! Every year, until the fog gets sick of us"}]},{t:"I think he can see it",fx:G=>{},then:[{n:"kati",f:"flustered",l:"casual",t:"…Yeah. I think so too"}]}]}],[{n:"nar",t:"On the way down, a troop of monkeys lines the road. One stares fixedly at the snack bag in Kati's hand"},{n:"kati",f:"angry",l:"casual",t:"Don't you dare! That bag's for the manager! My guard is up!"},{n:"nar",t:"The monkey snatches it in one move, faster than Kati's counter"},{n:"kati",f:"pout",l:"casual",t:"…It read my timing. That monkey should be fighting instead of me"}]],
@@ -3912,7 +3912,7 @@ const CUP_AUNT=[["Auntie Boonmee (morning market)",r=>`Champion ${r} champion, n
 const CUP_COACH=["Regional champion or not, it's 5 a.m. tomorrow as usual… but this morning, eat first.","Eat your fill, then go thank every one of the aunties. Our boxing lives because of the people around here.",
   "Grandpa Chai once told me: the day the aunties bring tiffins to the gate, the camp belongs to the village.","All four regions… I've got nothing to teach this morning. Eat."];
 const CUP_END=["That morning the whole camp eats breakfast on the training ring. Auntie Taew borrows the cup to show off at her som tam stall for a day.",
-  "The leftovers feed the whole camp for two more meals. Khao Tu gets a big bag of chicken bones.",
+  G=>`The leftovers fed the whole camp for two more meals, and ${hasPet(G,"dog")?petIntro(G,"dog"):"the stray dog next door"} got a big bag of chicken bones.`,
   "The aunties leave late in the morning, the table still crowded with tiffin carriers and a small note: \"Wash them and bring them back.\"",
   "All four cups now stand on the shelf beside Grandpa Chai's photo. The aunties put their palms together and wai his picture before they leave."];
 function cupNewsSteps(G,L,me,m){const rn=(typeof RG!=="undefined"&&RG[L.cup]&&RG[L.cup].name)||L.cupName||"regional";
@@ -3925,7 +3925,7 @@ function cupNewsSteps(G,L,me,m){const rn=(typeof RG!=="undefined"&&RG[L.cup]&&RG
   {n:me.id,f:"happy",l:"casual",t:own?pickR(own,G,"cup_"+me.id):"Thank you, all of you aunties!"},
   ...(m?[{n:m.id,f:"happy",l:"casual",t:WIN_TEASE[m.id]?pickR(WIN_TEASE[m.id],G,"t_"+m.id)(me.name):`Congratulations, ${me.name}!`}]:[]),
   ...(coachOn()?[{n:"coach",t:CUP_COACH[k]}]:[]),
-  {n:"nar",t:CUP_END[k]}];}
+  {n:"nar",t:typeof CUP_END[k]==="function"?CUP_END[k](G):CUP_END[k]}];}
 function aftermathSteps(G,L){const me=G.F[L.a],op=G.F[L.b];const mates=roster(G).filter(f=>f.id!==me.id);const m=mates[0];if(L.cup)return cupNewsSteps(G,L,me,m);const steps=[];
   if(L.win==="A"){steps.push({n:"nar",t:`The next morning, the news that ${me.name} beat ${op.name} spreads through the village`});
     if(m)steps.push({n:m.id,f:"happy",l:"train",t:WIN_TEASE[m.id]?pickR(WIN_TEASE[m.id],G,"t_"+m.id)(me.name):`Congratulations, ${me.name}!`});
@@ -4496,6 +4496,9 @@ EVENTS.push({id:"year_open",annual:true,pri:1,look:"casual",bg:"camp",when:G=>(G
 // ===== v1.51: camp pets — each joins through a small story, then has a moment with one of the girls =====
 const hasPet=(G,k)=>(G.pets||[]).some(p=>p.k===k);
 const petName=(G,k)=>{const p=(G.pets||[]).find(x=>x.k===k);return p?p.name:PETS[k].name;};
+/* v1.91.206 (Man: who is "Jao Khiao"? — players name their pets, so a scene's first mention says what the pet is) */
+const PET_TAG={cat:"(the camp's ginger cat)",dog:"(the camp's dog)",rooster:"(the camp's fighting rooster)",turtle:"(the camp's turtle)",otter:"(the camp's otter)"};
+const petIntro=(G,k)=>`${petName(G,k)} ${PET_TAG[k]||PETS[k].name} `;
 function adoptPet(G,k,name,fav){G.pets=G.pets||[];if(hasPet(G,k))return;G.pets.push({k,name:name||PET_NAMES[k][0],joy:60,wk:-1,fav,since:G.week+((G.season||1)-1)*52});}
 const nameChoice=(k,fav,then)=>({choice:PET_NAMES[k].map(n=>({t:`Name it "${n}"`,fx:G=>adoptPet(G,k,n,fav),then})).concat([{t:"Pick a name…",fx:G=>{adoptPet(G,k,null,fav);UI.petName=(G.pets.length-1);},then}])});
 const petAge=(G,k)=>{const p=(G.pets||[]).find(x=>x.k===k);return p?G.week+((G.season||1)-1)*52-p.since:0;};
@@ -4528,17 +4531,17 @@ EVENTS.push(
    nameChoice("turtle",w,[{n:"nar",t:"The new turtle slowly pokes its head out to look at the camp, then pulls back in. Not sure yet that it's safe here."}])];}}]},
  // a moment with each pet
  {id:"petx_cat_rin",look:"casual",bg:"camp",when:G=>hasPet(G,"cat")&&inCamp(G,"rin")&&petAge(G,"cat")>=4,steps:[
-  {n:"nar",t:G=>`1 a.m. You come down for water and find Rin crouched in front of the fridge, feeding mackerel to ${petName(G,"cat")} one piece at a time.`},
+  {n:"nar",t:G=>`1 a.m. You come down for water and find Rin crouched in front of the fridge, feeding mackerel to ${petIntro(G,"cat")} one piece at a time.`},
   {n:"rin",f:"flustered",l:"casual",t:G=>`…This isn't what it looks like. I'm just tracking ${petName(G,"cat")}'s weight every week. Up three hundred grams this month… part of which may be my fault.`},
   {choice:[{t:"(Sit down and feed it together)",fx:G=>{add(G,"rin","bond",5);},then:[{n:"rin",f:"happy",l:"casual",t:"…Then we split the blame fifty-fifty."}]},
    {t:"Tease her for being secretly sweet",fx:G=>{add(G,"rin","bond",3);add(G,"rin","morale",4);},then:[{n:"rin",f:"flustered",l:"casual",t:"D-don't tell anyone! Especially not Kati!"}]}]}]},
  {id:"petx_dog_mali",look:"casual",bg:"camp",when:G=>hasPet(G,"dog")&&inCamp(G,"mali")&&petAge(G,"dog")>=5,steps:[
-  {n:"nar",t:G=>`One evening, some local kids try to snatch Mali's bag outside the camp. ${petName(G,"dog")} charges out and stands in the way. One bark, and the kids scatter.`},
+  {n:"nar",t:G=>`One evening, some local kids try to snatch Mali's bag outside the camp. ${petIntro(G,"dog")} charges out and stands in the way. One bark, and the kids scatter.`},
   {n:"mali",f:"flustered",l:"casual",t:G=>`${petName(G,"dog")}… you protected me? I used to be so scared of you.`},
   {n:"nar",t:"Mali slowly reaches out. The ridgeback presses its head gently into her palm."},
   {fx:G=>{add(G,"mali","bond",3);add(G,"mali","morale",8);}},{n:"mali",f:"happy",l:"casual",t:"…From now on we run together every morning. I won't be slow anymore!"}]},
  {id:"petx_rooster_kati",look:"train",bg:"gym",when:G=>hasPet(G,"rooster")&&inCamp(G,"kati")&&petAge(G,"rooster")>=3,steps:[
-  {n:"nar",t:G=>`4 a.m. ${petName(G,"rooster")} crows outside Kati's room for the tenth day in a row.`},
+  {n:"nar",t:G=>`4 a.m. ${petIntro(G,"rooster")} crows outside Kati's room for the tenth day in a row.`},
   {n:"kati",f:"angry",l:"train",t:G=>`${petName(G,"rooster")}!!! It's a rest day! …Fine, fine, I'm up. Training it is.`},
   {n:"nar",t:"Half an hour later Kati is kicking the bag alone under a single light. The rooster perches on the ring ropes, watching every move."},
   {choice:[{t:"(Go down and hold pads for her)",fx:G=>{add(G,"kati","bond",4);add(G,"kati","morale",5);},then:[{n:"kati",f:"happy",l:"train",t:"The rooster got you up too, Manager? Haha, then we're the four a.m. team now!"}]},
@@ -5019,7 +5022,7 @@ Object.assign(CARDS,{
  x_mali_n1:{c:"mali",r:"N",t:"Cheer-Up Party",hint:"The camp loses 4 fights in a row",bg:"night",need:G=>inCamp(G,"mali")&&funStreak(G,null,"L")>=4,steps:[{"n":"nar","t":"Four losses in a row. The camp is so quiet you can hear the geckos, until Mali drags a mookata pan into the yard."},{"n":"mali","f":"happy","l":"casual","t":"New rule! Whoever lost eats the first piece, whoever won grills for the losers. …Nobody's won, so I'll grill!"},{"n":"nar","t":"Late into the night there's laughter in the yard. Nobody mentions the losses again."}]},
  x_rin_r1:{c:"rin",r:"R",t:"One Point, As Planned",hint:"Rin wins on points by exactly 1",bg:"local",need:G=>funByOne(G,"rin")>=1,steps:[{"n":"nar","t":"The judges announce it: Rin wins by a single point. The whole camp finally breathes out."},{"n":"rin","f":"happy","l":"fight","t":"As planned. I calculated a one-point margin to conserve energy."},{"n":"coach","t":"Then why were your hands shaking in round five?"},{"n":"rin","f":"flustered","l":"fight","t":"…That was acting, to make her overconfident. I won't be taking further questions."}]},
  x_rin_sr1:{c:"rin",r:"SR",t:"The Fifteenth Tape",hint:"Scout 15 different opponents while Rin is in camp",bg:"night",need:G=>inCamp(G,"rin")&&Object.keys(G.scoutAbs||{}).length>=15,steps:[{"n":"nar","t":"It's 2 a.m. and the tape-room light is still on. Rin sits surrounded by fifteen tapes and fifteen notebooks."},{"n":"rin","f":"happy","l":"casual","t":"Tape fifteen. I've found the pattern: every fighter in this province blinks before a left kick."},{"n":"rin","f":"flustered","l":"casual","t":"…Except you. You blink when you look at me. I don't know what it means yet, but I'll find out."}]},
- x_ploy_r1:{c:"ploy",r:"R",t:"The Cat Finally Lets Her",hint:"Have 4 pets, including a cat, while Ploy is in camp",bg:"camp",need:G=>inCamp(G,"ploy")&&(G.pets||[]).length>=4&&(G.pets||[]).some(p=>p.k==="cat"),steps:[{"n":"nar","t":"The camp has four pets now. This morning the orange cat walks past everyone and hops straight into Ploy's lap."},{"n":"ploy","f":"flustered","l":"casual","t":"…Don't move. Whoever moves gets punched."},{"n":"nar","t":"Ploy sits perfectly still for two hours and misses the whole morning session. Coach Daeng doesn't dare call her."},{"n":"ploy","f":"happy","l":"casual","t":"She's warm… You took a photo, right? Send it to me. Don't post it anywhere."}]},
+ x_ploy_r1:{c:"ploy",r:"R",t:"The Cat Finally Lets Her",hint:"Have 4 pets, including a cat, while Ploy is in camp",bg:"camp",need:G=>inCamp(G,"ploy")&&(G.pets||[]).length>=4&&(G.pets||[]).some(p=>p.k==="cat"),steps:[{"n":"nar","t":G=>`The camp has four pets now. This morning ${petIntro(G,"cat")} walked past everyone and hopped straight into Ploy's lap.`},{"n":"ploy","f":"flustered","l":"casual","t":"…Don't move. Whoever moves gets punched."},{"n":"nar","t":"Ploy sits perfectly still for two hours and misses the whole morning session. Coach Daeng doesn't dare call her."},{"n":"ploy","f":"happy","l":"casual","t":"She's warm… You took a photo, right? Send it to me. Don't post it anywhere."}]},
  x_ploy_r2:{c:"ploy",r:"R",t:"I Wasn't Nervous",hint:"Ploy wins a title fight for Sirichai",bg:"final",need:G=>(G.cal||[]).some(c=>c.a==="ploy"&&c.tier==="final"&&c.res==="W"),steps:[{"n":"nar","t":"The belt goes around Ploy's waist. The crowd stands to applaud; Ploy stands still, expressionless."},{"n":"ploy","f":"happy","l":"fight","t":"I'm not excited. I've won like this plenty of times."},{"n":"nar","t":"On the way down, though, she walks into a corner post, and quietly apologises to it."},{"n":"ploy","f":"flustered","l":"fight","t":"…You didn't see anything. Understood?"}]},
  x_fah_n1:{c:"fah",r:"N",t:"Nobody Won, Fah's Furious",hint:"Fah fights to a draw for Sirichai",bg:"local",need:G=>funCount(G,"fah","D")>=1,steps:[{"n":"nar","t":"The referee raises both hands. A draw. Fah stomps in the middle of the ring."},{"n":"fah","f":"angry","l":"fight","t":"What's a draw!? I don't get it! Then who gets the medal! Who gets the grilled chicken!"},{"n":"coach","t":"Half a chicken each."},{"n":"fah","f":"happy","l":"fight","t":"…Half is fine. But I want the drumstick!"}]},
  x_fah_r1:{c:"fah",r:"R",t:"Fah Isn't Crying",hint:"Fah loses 3 fights in a row",bg:"night",need:G=>funStreak(G,"fah","L")>=3,steps:[{"n":"nar","t":"Three losses in a row. Fah vanishes all evening, until you find her behind the heavy bag, face buried in her knees."},{"n":"fah","f":"sad","l":"casual","t":"I'm not crying! It's dust! This camp is dusty!"},{"n":"nar","t":"You sit down beside her without a word. Slowly, Fah leans her head on your shoulder."},{"n":"fah","f":"flustered","l":"casual","t":"…Can we train extra tomorrow? Double. And don't tell anyone I sat here."}]}});
@@ -5152,8 +5155,8 @@ const drainAmt=G=>Math.max(3000,Math.round(Math.min(20000,G.cash*.12)/100)*100);
 const drainOk=(G,salt)=>G.cash>=DRAIN_MIN&&G.week>=4&&absWeek(G)>=(((G.flags||{}).drainWk)||0)+5&&srand(G,salt)<.35;
 const drainPay=(G,mul)=>{const a=Math.round(drainAmt(G)*mul/100)*100;G.cash-=a;G.flags.drainWk=absWeek(G);return a;};
 const DRAINS=[
- {id:"drain_cat",need:G=>hasPet(G,"cat"),steps:G=>[{n:"nar",t:`${petName(G,"cat")} chases a flying termite and pounces straight into the camp's new TV. The screen cracks like a spiderweb. The cat sits licking its paw like nothing happened.`},{n:"coach",t:"…Coach only paid the first installment on that TV."}],cul:G=>petName(G,"cat")},
- {id:"drain_rooster",need:G=>hasPet(G,"rooster"),steps:G=>[{n:"nar",t:`${petName(G,"rooster")} escapes the camp, raids the khao man gai shop by the market, and pecks the whole rack of boiled chickens down.`},{n:"npc",who:"Chicken-rice auntie",t:"A live chicken fighting the boiled chickens! Who's paying for this!?"}],cul:G=>petName(G,"rooster")},
+ {id:"drain_cat",need:G=>hasPet(G,"cat"),steps:G=>[{n:"nar",t:`${petIntro(G,"cat")} chases a flying termite and pounces straight into the camp's new TV. The screen cracks like a spiderweb. The cat sits licking its paw like nothing happened.`},{n:"coach",t:"…Coach only paid the first installment on that TV."}],cul:G=>petName(G,"cat")},
+ {id:"drain_rooster",need:G=>hasPet(G,"rooster"),steps:G=>[{n:"nar",t:`${petIntro(G,"rooster")} escapes the camp, raids the khao man gai shop by the market, and pecks the whole rack of boiled chickens down.`},{n:"npc",who:"Chicken-rice auntie",t:"A live chicken fighting the boiled chickens! Who's paying for this!?"}],cul:G=>petName(G,"rooster")},
  {id:"drain_roof",need:G=>inCamp(G,"kati"),steps:G=>[{n:"nar",t:"BOOM! Kati kicks the bag so hard the hook snaps. It flies through the tin roof and lands in the neighbor's yard."},{n:"kati",f:"flustered",l:"train",t:"I-I was just trying the kick Coach taught yesterday! I didn't think it'd work THIS well!"}],cul:G=>"Kati"},
  {id:"drain_banquet",need:G=>true,steps:G=>[{n:"nar",t:"Coach Daeng throws a reunion for Grandpa Chai's old students, orders ten tables of Chinese banquet, and signs the bill to the camp."},{n:"coach",t:"Hey… I thought it'd be three tables. Who invited the whole district!?"}],cul:G=>"Coach Daeng"},
  {id:"drain_durian",need:G=>inCamp(G,"mali"),steps:G=>[{n:"nar",t:"A pickup truck unloads three baskets of Monthong durian at the gate. The receipt says the buyer is: Mali."},{n:"mali",f:"happy",l:"casual",t:"It's durian season! I wanted everyone to have some! …I didn't know one basket was THIS big."}],cul:G=>"Mali"},
@@ -5748,6 +5751,7 @@ function drawRingArt(F,G,t,look,k,rx,ry,rw,rh){if(decorSprite(F,"ring",k||"plain
   });
   if(k==="gold")for(let i=0;i<6;i++){const a=t/550+i*1.1;if(Math.sin(a*2)>.7)F.spark(rx+((i*31)%rw),ry+((i*7)%rh));}}
 function drawCamp(ctx,G,t){
+  if(typeof campArt==="function"&&campArt(ctx,G,t)){ctx.canvas.__caOn=1;return;}ctx.canvas.__caOn=0; /* v1.92: Man's sprite camp (src/campart.js); this hand-drawn camp stays as the fallback */
   const S=2,P=(x,y,w,h,c)=>{ctx.fillStyle=c;ctx.fillRect(Math.round(x)*S,Math.round(y)*S,Math.round(w)*S,Math.round(h)*S);};
   const look=campLook(G),rng=mulberry32(77),F=decorPainter(ctx,S);ctx.imageSmoothingEnabled=false;
   // sky
@@ -5827,46 +5831,60 @@ function drawCamp(ctx,G,t){
 
   decorGate(P,G,t,F);
   // v1.10: a living yard — everyone moves, drawn back-to-front
+  campYard(ctx,G,t,S,P,Object.assign({},CAMP_YARD_OLD,{ring:[rx,ry],pre:()=>{
+  // v1.88: the filtered indoor gym (airgym) — a sealed box with a big window and a filter unit
+  if(G.fac.airgym){P(114,72,40,36,"#7c8796");P(114,72,40,3,"#5d6775");P(118,80,32,16,"#2b3a4c");P(119,81,30,14,Math.floor(t/900)%2?"#9fd3f0":"#8cc6e8");P(133,81,1,14,"#5d6775");
+    P(146,98,8,8,"#c9d1da");const fa=Math.floor(t/90)%4;P(148+(fa%2?2:0),100+(fa>1?2:0),2,2,"#5d6775");P(150-(fa%2?2:0),102-(fa>1?2:0),2,2,"#5d6775");P(118,99,22,6,"#3a4757");}
+  },post:()=>yearFx(ctx,P,G,t)}));
+}
+/* v1.92: the living yard (students, coach, trainers, pets, hens, fighters, birds, speech bubbles), shared by the hand-drawn camp and the sprite camp.
+   L = where everyone stands; L.extra = sprites to y-sort with them; L.shelter = everyone waits under a roof (rain) */
+const CAMP_YARD_OLD={drill:[14,20,128],stu:[6,124,150,154],coach:[40,112,130,118],staff:[16,128,148,160],player:[110,132,300,152],dog:[10,162,300,170],hens:[40,150],ring:[156,96],bag:[112,118]};
+function campYard(ctx,G,t,S,P,L){
   const D=[];const chib=(look,key,x,y,sc,flip,dy)=>{const c=chibiCache(look,key+dy,{dy});D.push({y:y+32*sc,f:()=>{ctx.save();ctx.imageSmoothingEnabled=false;
     if(flip){ctx.translate((x+24*sc)*S,0);ctx.scale(-1,1);ctx.drawImage(c,0,y*S,24*S*sc,32*S*sc);}else ctx.drawImage(c,x*S,y*S,24*S*sc,32*S*sc);ctx.restore();}});};
-  const n=Math.min(14,campStudents(G)),srng=mulberry32(4242);const SAYS=["Hup!","Yay!","Coach!","Thwack!","So tired~","Again!","Go go!"];
+  const n=Math.min(14,campStudents(G)),srng=mulberry32(4242);const SAYS=L.says||["Hup!","Yay!","Coach!","Thwack!","So tired~","Again!","Go go!"];
   const bubble=[];const bi=Math.floor(t/2600);const who=n?Math.floor(mulberry32(bi*31)()*n):-1;
   for(let i=0;i<n;i++){const look2=CHIBI.random(srng);
     if(i%3===0){// class drill near the coach: shadow-boxing in place
-      const x=14+(i/3)*20,y=128,jab=Math.floor(t/220+i)%4;chib(look2,"s"+i,x+(jab===1?2:0),y,.72,false,jab%2);
+      const x=L.drill[0]+(i/3)*L.drill[1],y=L.drill[2],jab=Math.floor(t/220+i)%4;chib(look2,"s"+i,x+(jab===1?2:0),y,.72,false,jab%2);
       if(i===who)bubble.push([x+9,y-2]);}
-    else{const w=wander(900+i,t+i*700,[6,124,150,154],3600+i*260);chib(look2,"s"+i,w.x,w.y,.72,w.flip,w.moving?Math.floor(t/120)%2:Math.floor(t/500+i)%2);
+    else{const w=wander(900+i,t+i*700,L.stu,3600+i*260);chib(look2,"s"+i,w.x,w.y,.72,w.flip,w.moving?Math.floor(t/120)%2:Math.floor(t/500+i)%2);
       if(i===who)bubble.push([w.x+9,w.y-2]);}}
   // coach paces in front of the class, assistants help out
-  const cw=wander(77,t,[40,112,130,118],4200);chib(COACH_LOOK,"coach",cw.x,cw.y,.85,cw.flip,cw.moving?Math.floor(t/140)%2:Math.floor(t/500)%2);
+  const cw=wander(77,t,L.coach,4200),csh=img("coach_daeng_sheet.webp"); /* v1.92 (Man): Kru Daeng's own sprite sheet (idle, guard, walk, point, kick, cheer); the chibi stays until it loads */
+  if(csh.complete&&csh.naturalWidth){const row=L.lineup?5:cw.moving?2:[0,1,3,1,4][Math.floor((t+700)/2600)%5],fr=Math.floor(t/(row===0||row===5?260:160))%4,fy=cw.y+27;
+    D.push({y:fy,f:()=>{ctx.imageSmoothingEnabled=true;drawFrame(ctx,csh,row,fr,(cw.x+10)*S,fy*S,44*S,cw.flip);}});}
+  else chib(COACH_LOOK,"coach",cw.x,cw.y,.85,cw.flip,cw.moving?Math.floor(t/140)%2:Math.floor(t/500)%2);
   // v1.23: hired trainers walk the yard with their own pixel sprites
-  (G.staff||[]).forEach((k,i)=>{const a=wander(500+i,t+i*1300,[16,128,148,160],3900+i*300);const sf={id:"staff_"+k,canon:false};const ph=hashStr(sf.id)%2000;
+  (G.staff||[]).forEach((k,i)=>{const a=wander(500+i,t+i*1300,L.staff,3900+i*300);const sf={id:"staff_"+k,canon:false};const ph=hashStr(sf.id)%2000;
     const row=a.moving?"walk":Math.floor((t+ph)/2600)%3===2?"guard":"idle";const fr=Math.floor(t/(row==="idle"?260:150))%4;
     D.push({y:a.y+24,f:()=>{ctx.imageSmoothingEnabled=true;drawFrame(ctx,sheetFor(sf),ROW[row],fr,(a.x+10)*S,(a.y+24)*S,30*S,a.flip);}});});
-  if(G.avatar){const pw=wander(31,t,[110,132,300,152],5200);chib(G.avatar,"player",pw.x,pw.y,.85,pw.flip,pw.moving?Math.floor(t/130)%2:Math.floor(t/420)%2);}
+  if(G.avatar){const pw=wander(31,t,L.player,5200);chib(G.avatar,"player",pw.x,pw.y,.85,pw.flip,pw.moving?Math.floor(t/130)%2:Math.floor(t/420)%2);}
   // v1.51: adopted pets roam the yard (the stray soi dog stays until a dog is adopted)
-  (G.pets||[]).forEach((p,i)=>{const w=wander(600+i*13,t+i*900,PET_BOX[p.k]||[20,150,300,170],PET_SPD[p.k]||3000);const px=w.x,py=w.y,fl=w.flip?-1:1,wd=p.k==="dog"?15:11,Z=2;
+  (G.pets||[]).forEach((p,i)=>{const w=wander(600+i*13,t+i*900,(L.pet&&L.pet(p.k))||PET_BOX[p.k]||[20,150,300,170],PET_SPD[p.k]||3000);const px=w.x,py=w.y,fl=w.flip?-1:1,wd=p.k==="dog"?15:11,Z=2;
     D.push({y:py+14,f:()=>{if(typeof petHub==="function"&&petHub(ctx,p.k,(px+wd*Z/2)*S,(py+9*Z)*S,fl,t+i*333,w.moving,S))return;/* v1.91.144: pets with sprite art draw themselves (src/pets.js) */const Q=(x,y,ww,h,c)=>P(fl>0?px+x*Z:px+(wd-x-ww)*Z,py+y*Z,ww*Z,h*Z,c);drawPetQ(Q,p.k,t+i*333,w.moving);}});});
-  if(!(G.pets||[]).some(p=>p.k==="dog")){const dw=wander(5,t,[10,162,300,170],2600);const dx=dw.x,dy=dw.y+8,fl=dw.flip?-1:1,leg=dw.moving&&Math.floor(t/90)%2;
+  if(!(G.pets||[]).some(p=>p.k==="dog")){const dw=wander(5,t,L.dog,2600);const dx=dw.x,dy=dw.y+8,fl=dw.flip?-1:1,leg=dw.moving&&Math.floor(t/90)%2;
    D.push({y:dy+6,f:()=>{const Q=(x,y,w,h,c)=>P(fl>0?dx+x:dx+10-x-w,dy+y,w,h,c);Q(1,1,8,4,"#c99a5e");Q(8,-1,3,3,"#c99a5e");Q(10,0,1,1,"#2b2530");Q(0,Math.floor(t/150)%2?0:1,2,1,"#c99a5e");
      Q(1+(leg?1:0),5,1,2,"#a87a44");Q(7-(leg?1:0),5,1,2,"#a87a44");}});}
-  for(let k=0;k<2;k++){const cx=40+k*22+Math.sin(t/1700+k)*6,cy=150+k*4,peck=Math.floor(t/300+k*2)%5===0;
+  for(let k=0;k<2;k++){const cx=L.hens[0]+k*22+Math.sin(t/1700+k)*6,cy=L.hens[1]+k*4,peck=Math.floor(t/300+k*2)%5===0;
     D.push({y:cy+4,f:()=>{P(cx,cy,4,3,"#f2f2f2");P(cx+3,cy-2+(peck?2:0),2,2,"#f2f2f2");P(cx+5,cy-1+(peck?2:0),1,1,"#e8a23a");P(cx+3,cy-3+(peck?2:0),1,1,"#d23246");}});}
   // fighters: activity rotates every few seconds so the camp never freezes
-  for(const p of campPeople(G)){let row=p.row,x,y,flip=false,fr=Math.floor(t/150+p.k*2)%4;
+  const PPL=campPeople(G);PPL.forEach((p,pi)=>{p.pi=pi;});
+  for(const p of PPL){let row=p.row,x,y,flip=false,fr=Math.floor(t/150+p.k*2)%4;
     if(row==="cycle")row=["guard","punch","knee","walk"][Math.floor(t/2200+p.k)%4];
-    if(p.spot==="ring"){x=rx+40+p.k*44+Math.sin(t/700+p.k)*10;y=ry+30;flip=p.k%2===1;}
-    else if(p.spot==="bag"){x=112-p.k*14;y=118;}
-    else if(p.spot==="run"){const L=260,pos=((t/30+p.k*90)%(L*2));x=40+(pos<L?pos:L*2-pos);y=172;flip=pos>=L;row="walk";}
+    if(L.lineup){const n=PPL.length,span=Math.min(220,n*34);x=160-span/2+(p.pi+.5)*span/n;y=158+(p.pi%2)*4;row="win";fr=Math.floor(t/180+p.pi)%4;} /* v1.92: camp card — everyone lines up and cheers */
+    else if(L.shelter){const w=wander(60+p.k,t,L.shelter,5200);x=w.x;y=w.y;flip=w.flip;row=w.moving?"walk":"idle";}
+    else if(p.spot==="ring"){x=L.ring[0]+40+p.k*44+Math.sin(t/700+p.k)*10;y=L.ring[1]+30;flip=p.k%2===1;}
+    else if(p.spot==="bag"){x=L.bag[0]-p.k*14;y=L.bag[1];}
+    else if(p.spot==="run"){const RL=260,pos=((t/30+p.k*90)%(RL*2));x=40+(pos<RL?pos:RL*2-pos);y=172;flip=pos>=RL;row="walk";}
     else {const w=wander(60+p.k,t,[20,128,150,150],4600);x=w.x+20;y=w.y+40;flip=w.flip;row=w.moving?"walk":"idle";}
     const f=p.f,rr=row;D.push({y,f:()=>{ctx.imageSmoothingEnabled=true;drawFrame(ctx,sheetFor(f),ROW[rr],fr,x*S,y*S,46*S,flip);}});}
   // birds cross the sky now and then
   {const bt=(t%14000)/14000;if(bt<.5){const bxp=-10+bt*2*340;for(let k=0;k<3;k++){const yy=26+k*5+Math.sin(t/200+k)*2,wing=Math.floor(t/160+k)%2;P(bxp-k*9,yy,2,1,"#1b1230");P(bxp-k*9-2,yy-wing,2,1,"#1b1230");P(bxp-k*9+2,yy-wing,2,1,"#1b1230");}}}
-  // v1.88: the filtered indoor gym (airgym) — a sealed box with a big window and a filter unit
-  if(G.fac.airgym){P(114,72,40,36,"#7c8796");P(114,72,40,3,"#5d6775");P(118,80,32,16,"#2b3a4c");P(119,81,30,14,Math.floor(t/900)%2?"#9fd3f0":"#8cc6e8");P(133,81,1,14,"#5d6775");
-    P(146,98,8,8,"#c9d1da");const fa=Math.floor(t/90)%4;P(148+(fa%2?2:0),100+(fa>1?2:0),2,2,"#5d6775");P(150-(fa%2?2:0),102-(fa>1?2:0),2,2,"#5d6775");P(118,99,22,6,"#3a4757");}
+  (L.extra||[]).forEach(e=>D.push(e));if(L.pre)L.pre();
   D.sort((a,b)=>a.y-b.y).forEach(d=>d.f());
-  yearFx(ctx,P,G,t);
+  if(L.post)L.post();
   for(const [x,y] of bubble){const tx=SAYS[bi%SAYS.length];ctx.save();ctx.font=`700 ${7*S}px "Chakra Petch",sans-serif`;const w=ctx.measureText(tx).width/S+6;
     P(x-w/2,y-10,w,9,"#ffffff");P(x-1,y-1,2,2,"#ffffff");ctx.fillStyle="#1b1230";ctx.textAlign="center";ctx.fillText(tx,x*S,(y-3)*S);ctx.restore();}
 }
@@ -6307,6 +6325,7 @@ function mountCampFx(){document.querySelectorAll("canvas[data-campfx]").forEach(
 const NAI_LOOK={kind:"manager",gender:"m",hairStyle:"crop",hair:"#8e939c",skin:"#b97d55",eyes:"#3a2a24",outfit:"polo",outfitColor:"#c4a57a",pantsColor:"#b0926a",stache:"#5d6068",epaulet:"#e0b41b"};
 const AIDE_LOOK={kind:"manager",gender:"m",hairStyle:"crop",hair:"#2b2530",skin:"#d9a27b",eyes:"#3a2a24",outfit:"tee",outfitColor:"#f2f2f2",pantsColor:"#1f1f24",glasses:"glasses"};
 const AIDE2_LOOK={...AIDE_LOOK,gender:"f",hairStyle:"bob",hair:"#3a2a24",skin:"#eec1a0",glasses:"none",outfitColor:"#f4f1ea",pantsColor:"#2c3a5a"};
+const CT_SPOT_ART={gate:[30,154],bags:[136,140],tree:[240,124],ring:[230,140],vehicle:[236,172],track:[110,176],clean:[80,150]}; // v1.92: the same walk on the sprite camp
 const CT_SPOT={gate:[34,152],bags:[134,128],tree:[176,118],ring:[214,136],vehicle:[262,174],track:[110,176],clean:[70,160]};
 const CT_STEP=2600,CT_WALK=1000,CT_START=700;
 function ctChib(ctx,S,look,key,x,y,sc,flip,dy){const c=chibiCache(look,key+(dy||0),{dy:dy||0});ctx.save();ctx.imageSmoothingEnabled=false;
@@ -6317,7 +6336,7 @@ function ctBubble(ctx,S,x,y,txt,hi){ctx.save();ctx.font=`700 ${8*S}px "Chakra Pe
 function ctVerdict(v){return v>=10?"A perfect 10!!":v>=8?"Very good!":v>=6?"Not bad":v>=4?"Passable":"Hmm…";}
 /* the chief walks the real camp (with the player's own decorations), stopping at each judged area */
 function drawContestWalk(ctx,G,t,R){drawCamp(ctx,G,t);const S=2,A=R.areas;let x=-20,y=160,flip=false,moving=true,say=null,hi=false;
-  const pts=A.map(a=>CT_SPOT[a.k]||[160,160]);
+  const pts=A.map(a=>(ctx.canvas.__caOn?CT_SPOT_ART:CT_SPOT)[a.k]||[160,160]);
   if(t<CT_START){x=-20+(t/CT_START)*(pts[0][0]+20)*.4;y=pts[0][1];}
   else{const i=Math.min(A.length,Math.floor((t-CT_START)/CT_STEP)),ph=(t-CT_START)-i*CT_STEP;
     if(i>=A.length){x=150;y=158;moving=false;say=`Total ${R.total}/70 · Results at the district office!`;hi=true;}
@@ -6584,6 +6603,270 @@ const MGRP=(()=>{const W=640,H=960,IM={},MK={},CACHE={},WAIT={};const SKIN0={m:[
     EXPR.slice(1).forEach(e=>f.push(`${g}_face_${e}.webp`));["glasses","sun"].forEach(k=>f.push(`${g}_gl_${k}.webp`));f.forEach(im);}
   return {url,EXPR,parts,warm};})();
 
+/* v1.92 (Man): the camp drawn from Man's sprite pack (a/camp/*.webp) in the same 320x180 frame.
+   - the camp house (3 looks, by camp level) and the fighters' dorm (6 looks, by dorm level) stand apart, at the back
+   - every decoration the player picks (tree, gate, ring + matching training yard, track, vehicle, bags) has its sprite
+   - built facilities show as buildings in the back row, or as small props when there is no room for a building
+   - sky follows the player's clock (dawn, day, sunset, night) and the rainy season brings rain; at night and in the rain
+     the scene darkens and every lamp, window and floodlight throws a stepped pixel light
+   - until the pictures have loaded (or if one fails) the hand-drawn camp is drawn instead, so nothing ever goes blank
+   Everything is in camp units (320x180); sprites are stored at CA_PX canvas pixels per unit so they share one pixel size. */
+const CA_PX=2.5,CA_DIR="camp/";
+const CA_TREE={blossom:[191,261,235],champion:[194,257,232],flame:[227,292,246],golden:[200,256,231],lilawadee:[234,292,246],plain:[199,255,231],rachaphruek:[201,271,229],sakura:[206,259,234],sritrang:[200,264,223],thongkwao:[208,267,226]}; // frame w,h, canopy bottom (px)
+const CA_BACK=["airgym","hall","clinic","video","kitchen","recovery","classroom"]; // back-row buildings, the grandest first (2 slots)
+const CA_RING_YARD={plain:"plain",red:"red",blue:"blue",sponsor:"sponsor",gold:"gold",green:"green",purple:"purple",black:"black",pink:"pink",orange:"orange",yellow:"yellow"};
+const caImg=n=>img(CA_DIR+n+".webp");
+const caOK=n=>{const i=caImg(n);return i.complete&&i.naturalWidth>0;};
+let caFailed=false;
+/* which weather/time: the player's own clock, rain on some weeks of the rainy season. window.__campMood overrides (tests). */
+function campMood(G){if(typeof window!=="undefined"&&window.__campMood)return window.__campMood;
+  const wk=((typeof gameWeek==="function"?gameWeek(G):1)-1)%52+1;
+  if(wk>=20&&wk<=42){const h=mulberry32((G.seed||1)*7+(typeof gameWeek==="function"?gameWeek(G):1))();if(h<.4)return "rain";}
+  const hr=new Date().getHours()+new Date().getMinutes()/60;
+  return hr<5||hr>=19?"night":hr<6.5?"dawn":hr<16.5?"day":"sunset";}
+/* everything the current camp needs */
+function campArtPlan(G){const lv=Math.max(1,Math.min(3,campLevel(G))),dl=Math.max(0,Math.min(5,(G.fac&&G.fac.dorm)||0)),F=G.fac||{};
+  const tree=decorChoice(G,"tree"),gate=decorChoice(G,"gate"),ring=decorChoice(G,"ring"),track=decorChoice(G,"track"),car=decorChoice(G,"vehicle"),bags=decorChoice(G,"bags");
+  const back=CA_BACK.filter(k=>(F[k]||0)>0).slice(0,2);
+  return {lv,dl,F,tree,gate,ring,track,car,bags,back,yard:CA_RING_YARD[ring]||"plain",hill:F.hill||0,shrine:F.shrine>0,tani:!!(G.gh&&G.gh.shrine),sauna:F.sauna>0,lights:F.lights||0,brand:F.brand||0};}
+function campArtFiles(p,mood){const L=["gym_"+(p.lv-1),"dorm_"+p.dl,"beam","bag_"+p.bags,"ring_"+p.ring,"yard_"+p.yard,"track_"+p.track,"mountains_far","mountains_near","ground_grass","ground_dirt"];
+  if(mood!=="night")L.push("sky_"+(mood==="day"?"clear_day":mood),mood==="rain"?"clouds_storm":"clouds_white");
+  if(p.tree!=="none")L.push("tree_"+p.tree,"leaf_"+p.tree);if(p.gate!=="none")L.push("gate_"+p.gate);if(p.car!=="none")L.push("car_"+p.car);
+  p.back.forEach(k=>L.push("fac_"+k));if(p.hill)L.push(p.hill>=2?"trail":"fac_hill");if(p.shrine)L.push("shrine_por_kae");if(p.tani)L.push("shrine_tanee");
+  if(p.sauna)L.push("fac_sauna");if(p.lights)L.push("pole");if(p.brand)L.push("fac_brand");return L;}
+/* cached layers per canvas: sky, and mountains + ground (tinted for the mood) */
+function caLayer(ctx,key,draw){const cv=ctx.canvas,c=cv.__ca||(cv.__ca={});if(c[key])return c[key];const o=document.createElement("canvas");o.width=cv.width;o.height=cv.height;draw(o.getContext("2d"));return c[key]=o;}
+function campArt(ctx,G,t){
+  if(caFailed||!G||!G.fac||(typeof SETTINGS!=="undefined"&&SETTINGS.classicCamp))return false; /* v1.92 (Man): players can keep the classic hand-drawn camp */
+  const p=campArtPlan(G),mood=campMood(G),files=campArtFiles(p,mood);
+  let ready=true;for(const n of files){const i=caImg(n);if(i.complete&&i.naturalWidth===0&&i.src){/* missing file: keep the hand-drawn camp */caFailed=true;return false;}if(!(i.complete&&i.naturalWidth))ready=false;}
+  if(!ready)return false;
+  const S=ctx.canvas.width/320,NIGHT=mood==="night",RAIN=mood==="rain";
+  const P=(x,y,w,h,c)=>{ctx.fillStyle=c;ctx.fillRect(Math.round(x*S),Math.round(y*S),Math.max(1,Math.round(w*S)),Math.max(1,Math.round(h*S)));};
+  const dimOf=(n,sc)=>{const i=caImg(n);return [i.naturalWidth/CA_PX*(sc||1),i.naturalHeight/CA_PX*(sc||1)];};
+  const spr=(c,n,x,bot,sc,dy)=>{const i=caImg(n),[w,h]=dimOf(n,sc);c.imageSmoothingEnabled=true;c.imageSmoothingQuality="high";c.drawImage(i,Math.round(x*S),Math.round((bot-h+(dy||0))*S),Math.round(w*S),Math.round(h*S));return w;};
+  const disc=(c,cx,cy,r,col)=>{c.fillStyle=col;for(let y=-r;y<=r;y+=.5){const hw=Math.round(Math.sqrt(Math.max(0,r*r-y*y))*2)/2;c.fillRect(Math.round((cx-hw)*S),Math.round((cy+y)*S),Math.max(1,Math.round(hw*2*S)),Math.max(1,Math.round(.5*S)));}};
+  const LIGHTS=[];
+  // --- sky
+  ctx.drawImage(caLayer(ctx,"sky_"+mood,c=>{
+    if(NIGHT){["#0b0a22","#100e2e","#16133a","#1b1846","#211d50","#28235c","#2e2864"].forEach((col,i)=>{c.fillStyle=col;c.fillRect(0,i*16*S,320*S,16*S);});
+      const r=mulberry32(77);c.fillStyle="#f4e9ff";for(let i=0;i<70;i++)c.fillRect(Math.floor(r()*320)*S,Math.floor(r()*80)*S,S,S);
+      const mg=c.createRadialGradient(262*S,22*S,8*S,262*S,22*S,20*S);mg.addColorStop(0,"rgba(240,236,210,.25)");mg.addColorStop(1,"rgba(240,236,210,0)");c.fillStyle=mg;c.fillRect(240*S,0,44*S,44*S);
+      disc(c,262,22,8,"#f4f0d8");disc(c,259,20,1.6,"#d8d2b8");disc(c,265,25,1.2,"#d8d2b8");disc(c,263,18,.9,"#d8d2b8");}
+    else{c.imageSmoothingEnabled=true;c.drawImage(caImg("sky_"+(mood==="day"?"clear_day":mood)),0,0,320*S,112*S);
+      if(mood==="sunset"||mood==="dawn"){const sx=mood==="sunset"?250:70,sg=c.createRadialGradient(sx*S,88*S,6*S,sx*S,88*S,40*S);sg.addColorStop(0,"rgba(255,200,120,.55)");sg.addColorStop(1,"rgba(255,200,120,0)");c.fillStyle=sg;c.fillRect((sx-50)*S,40*S,100*S,70*S);
+        disc(c,sx,88,10,"#ffd27a");disc(c,sx,88,8,"#ffe3a0");}}}),0,0);
+  if(NIGHT){const r=mulberry32(78);ctx.fillStyle="#0b0a22";for(let i=0;i<14;i++){const x=Math.floor(r()*320),y=Math.floor(r()*80);if((Math.floor(t/600)+i)%4===0)ctx.fillRect(x*S,y*S,S,S);}}
+  else{const cl=RAIN?"clouds_storm":"clouds_white",ci=caImg(cl),cw=360,ch=ci.naturalHeight*cw/ci.naturalWidth,ox=(t/(RAIN?120:400))%cw;
+    ctx.save();ctx.globalAlpha=RAIN?.95:mood==="sunset"||mood==="dawn"?.55:.9;ctx.imageSmoothingEnabled=true;for(let x=-ox;x<320;x+=cw-.5)ctx.drawImage(ci,x*S,((RAIN?70:58)-ch)*S,cw*S,ch*S);ctx.restore();}
+  // --- hills + ground (cached; tinted with source-atop so it works on every browser)
+  ctx.drawImage(caLayer(ctx,"land_"+mood+"_"+(p.lv),c=>{c.imageSmoothingEnabled=true;
+    const band=(n,wu,bot)=>{const i=caImg(n),h=i.naturalHeight*wu/i.naturalWidth;for(let x=0;x<320;x+=wu-.5)c.drawImage(i,x*S,(bot-h)*S,wu*S,h*S);};
+    band("mountains_far",520,104);band("mountains_near",360,114);
+    const tile=(n,x0,y0,x1,y1)=>{const i=caImg(n),w=i.naturalWidth/2,h=i.naturalHeight/2;c.save();c.beginPath();c.rect(x0*S,y0*S,(x1-x0)*S,(y1-y0)*S);c.clip();for(let y=y0;y<y1;y+=h-.5)for(let x=x0;x<x1;x+=w-.5)c.drawImage(i,x*S,y*S,w*S,h*S);c.restore();};
+    tile(p.lv>=2?"ground_grass":"ground_dirt",0,108,320,180);
+    if(p.lv>=2){c.save();c.beginPath();c.moveTo(0,118*S);for(let x=0;x<=160;x+=4)c.lineTo(x*S,(117+((x*7)%5))*S);for(let y=118;y<=156;y+=4)c.lineTo((156+((y*5)%6))*S,y*S);for(let x=160;x>=0;x-=4)c.lineTo(x*S,(154+((x*3)%4))*S);c.closePath();c.clip();tile("ground_dirt",0,112,170,162);c.restore();}
+    const tint={night:"rgba(10,12,40,.55)",rain:"rgba(40,50,70,.3)",sunset:"rgba(120,60,90,.18)",dawn:"rgba(140,90,120,.15)"}[mood];
+    if(tint){c.globalCompositeOperation="source-atop";c.fillStyle=tint;c.fillRect(0,0,c.canvas.width,c.canvas.height);c.globalCompositeOperation="source-over";}}),0,0);
+  // --- the camp, back to front
+  const EX=[],put=(n,x,bot,sc,sortY,after)=>{const [w,h]=dimOf(n,sc);if(sortY==null){spr(ctx,n,x,bot,sc);if(after)after(w,h);}else EX.push({y:sortY,f:()=>{caShadow(ctx,S,x,bot,w);spr(ctx,n,x,bot,sc);if(after)after(w,h);}});return [w,h];};
+  const puffs=(px,py,col,big)=>{for(let q=0;q<4;q++){const ph=((t/(big>1?900:1400))+q/4)%1;ctx.globalAlpha=(big>1?.6:.45)*(1-ph);ctx.fillStyle=col;const r=(big>1?1.5:.8)+ph*(big>1?3:1.5);
+    ctx.fillRect(Math.round((px+Math.sin(t/400+q*2)*1.5*ph*big)*S),Math.round((py-ph*(big>1?16:12))*S),Math.max(1,Math.round(r*S)),Math.max(1,Math.round(r*S)));}ctx.globalAlpha=1;};
+  // back row: up to two buildings between the dorm and the ring
+  // tree (8-frame sprite + code sway; harder in the rain)
+  if(p.tree!=="none"&&CA_TREE[p.tree]){const [fw,fh,cb]=CA_TREE[p.tree],w=fw/CA_PX,h=fh/CA_PX,x=204,bot=104,fr=Math.floor(t/125)%8,wind=RAIN?2.2:1,sk=Math.sin(t/(RAIN?520:1100))*.035*wind+Math.sin(t/370)*.008*wind,top=bot-cb/CA_PX;
+    ctx.save();ctx.imageSmoothingEnabled=true;ctx.translate(0,bot*S);ctx.transform(1,0,-sk,1,0,0);ctx.translate(0,-bot*S);
+    for(const n of ["tree_","leaf_"])ctx.drawImage(caImg(n+p.tree),fr*fw,0,fw,fh,x*S,top*S,w*S,h*S);ctx.restore();}
+  if(p.hill){const n=p.hill>=2?"trail":"fac_hill",sc=p.hill>=2?1:42/36,[w]=dimOf(n,sc);put(n,322-w,116,sc);} /* flush with the right edge so the path runs out of frame */
+  put("dorm_"+p.dl,98,112,1,null,(w,h)=>{const fl=p.dl>=3?3:p.dl>=2?2:1;for(let f=0;f<fl;f++)for(const fx of [.25,.75])LIGHTS.push([98+w*fx,112-h*(.22+f*.28),11,.9]);});
+  // back row: up to two buildings beside the dorm, clear of the bag beam (v1.92, Man: they were hidden)
+  {let bxx=Math.max(150,98+dimOf("dorm_"+p.dl)[0]-10);p.back.forEach((k,i)=>{const [w,h]=put("fac_"+k,bxx,114-i,26/36);LIGHTS.push([bxx+w/2,114-i-h*.4,14,.7]);if(k==="kitchen"&&(p.F.kitchen||0)>=2)puffs(bxx+w*.4,114-i-h*.7,"#f4f4f4",2);bxx+=w-6;});}
+  put("gym_"+(p.lv-1),-4,116,1,null,(w,h)=>LIGHTS.push([-4+w*.5,116-h*.3,30,1],[-4+w*.2,116-h*.2,16,.9],[-4+w*.8,116-h*.2,16,.9],[-4+w*.5,122,22,.7]));
+  if(p.lights)for(const px of [184,284])put("pole",px,112,1,null,(w,h)=>{LIGHTS.push([px+w/2,112-h+4,14,p.lights>=2?1.5:1.3],[px+w/2,112,16,.8]);
+    const on=(Math.floor(t/90)+px)%23===0?.12:.3,g=ctx.createRadialGradient((px+w/2)*S,(112-h+5)*S,1,(px+w/2)*S,(112-h+5)*S,12*S);g.addColorStop(0,`rgba(255,240,190,${on})`);g.addColorStop(1,"rgba(255,240,190,0)");ctx.fillStyle=g;ctx.fillRect((px+w/2-12)*S,(112-h-7)*S,24*S,24*S);});
+  if(p.tani)put("shrine_tanee",290,138,32/36,136,(w,h)=>{puffs(290+w*.62,138-h*.35,"#e8e2d8",1);LIGHTS.push([290+w/2,138-h*.4,12,.9]);});
+  if(p.shrine)put("shrine_por_kae",98,124,30/36,122,(w,h)=>{puffs(98+w*.5,124-h*.42,"#e8e2d8",1);LIGHTS.push([98+w/2,124-h*.4,12,.9]);});
+  if(p.sauna)put("fac_sauna",284,164,34/36,152,(w,h)=>{puffs(284+w*.25,164-h*.92,"#f4f4f4",2);LIGHTS.push([284+w/2,164-h*.4,14,.7]);});
+  if(p.brand)put("fac_brand",138,177,34/36,175);
+  put("yard_"+p.yard,34,162,1,121);
+  put("ring_"+p.ring,196,138,1,104);
+  // bags on the beam: one per training-gear level; the first swings away from whoever is punching it
+  const [bw,bh]=dimOf("beam"),bx0=112,bbot=136,nb=Math.min(3,1+(p.F.gym||0)),bagX=j=>bx0+bw*(.5+(j-(nb-1)/2)*.22),hitter=campPeople(G).some(q=>q.spot==="bag");
+  EX.push({y:133,f:()=>{caShadow(ctx,S,bx0,bbot,bw);spr(ctx,"beam",bx0,bbot);}});
+  for(let j=0;j<nb;j++){const bx=bagX(j)-4,by=bbot-bh*.8;EX.push({y:133.5,f:()=>{let a=Math.sin(t/350+j)*(RAIN?.05:.024);if(j===0&&hitter&&!RAIN){const dt=(((t/150-2)%4)+4)%4*150;a+=-.26*Math.exp(-dt/260)*Math.sin(dt/70);}
+    ctx.save();ctx.translate((bx+4)*S,by*S);ctx.rotate(a);ctx.translate(-(bx+4)*S,-by*S);spr(ctx,"bag_"+p.bags,bx,by+24,24/24);ctx.restore();}});}
+  // string lights from the camp house to the ring (once the camp looks cared for)
+  const look=campLook(G);if(look>=6){EX.push({y:60,f:()=>{for(let i=0;i<30;i++){const u=i/29;P(84+u*186,70+Math.sin(u*Math.PI)*10,1.5,1.5,["#ffd36b","#ff7b8a","#8ad7ff"][(Math.floor(t/400)+i)%3]);}}});for(let i=0;i<30;i+=3){const u=i/29;LIGHTS.push([84+u*186,70+Math.sin(u*Math.PI)*10,7,.6]);}}
+  // vehicle: idling (a little shake, exhaust); long ones are kept to the slot
+  if(p.car!=="none"){const [w0,h0]=dimOf("car_"+p.car),sc=Math.min(1,96/w0),w=w0*sc,x=300-w;
+    EX.push({y:179,f:()=>{caShadow(ctx,S,x,180,w);spr(ctx,"car_"+p.car,x,180,sc,(Math.floor(t/70)%3===0)?-.5:0);
+      for(let q=0;q<3;q++){const ph=((t/700)+q/3)%1;ctx.globalAlpha=.55*(1-ph);ctx.fillStyle="#d8d4cc";const r=1+ph*2.5;ctx.fillRect(Math.round((x+2-ph*12)*S),Math.round((174-ph*5)*S),Math.round(r*S),Math.round(r*S));}ctx.globalAlpha=1;}});
+    LIGHTS.push([x+w+6,180-h0*sc*.4,18,1]);}
+  if(p.gate!=="none")EX.push({y:999,f:()=>spr(ctx,"gate_"+p.gate,0,178)});
+  // track along the front edge
+  {const n="track_"+p.track,i=caImg(n),[w,h]=dimOf(n),sx=i.naturalWidth*.12,sw=i.naturalWidth*.76,tw=w*.76;ctx.imageSmoothingEnabled=true;for(let x=-2;x<320;x+=tw-1)ctx.drawImage(i,sx,0,sw,i.naturalHeight,Math.round(x*S),Math.round((180-h)*S),Math.round(tw*S)+1,Math.round(h*S));}
+  // --- people (rain: everyone under the camp house roof)
+  const YL={drill:[52,19,118],stu:[56,120,140,124],coach:[60,108,140,112],staff:[150,128,180,150],player:[150,132,300,152],dog:[10,162,300,170],hens:[164,126],ring:[178,80],bag:[bagX(0)-9,bbot+1],extra:EX,
+    pet:k=>({cat:[60,120,140,128],dog:[150,140,200,150],rooster:[120,140,160,150],turtle:[60,150,130,154],otter:[150,150,250,156]})[k]};
+  if(typeof window!=="undefined"&&window.__campLineup)YL.lineup=1;
+  if(RAIN)Object.assign(YL,{drill:[8,13,93],stu:[6,92,84,96],coach:[14,92,80,95],staff:[10,94,80,98],player:[20,94,84,98],shelter:[10,112,80,119],says:["Rain~","Soaked!","Wait it out"]});
+  YL.post=()=>{caLight(ctx,S,t,mood,LIGHTS,p);if(typeof yearFx==="function")yearFx(ctx,(x,y,w,h,c)=>{ctx.fillStyle=c;ctx.fillRect(Math.round(x)*S,Math.round(y)*S,Math.round(w)*S,Math.round(h)*S);},G,t);};
+  campYard(ctx,G,t,S,P,YL);
+  return true;}
+function caShadow(ctx,S,x,bot,w){ctx.fillStyle="rgba(20,14,30,.28)";ctx.beginPath();ctx.ellipse((x+w/2)*S,(bot-1)*S,w/2*S*.9,2.2*S,0,0,7);ctx.fill();}
+/* night / rain: a 320x180 light map in hard concentric bands (8 steps), darkness over the unlit parts, a warm wash over the lit ones.
+   Rebuilt a few times a second (lamp flicker), reused in between. */
+function caLight(ctx,S,t,mood,LIGHTS,p){const NIGHT=mood==="night",RAIN=mood==="rain";
+  if(RAIN){ctx.fillStyle="rgba(210,220,240,.55)";const rr=mulberry32(5);for(let i=0;i<170;i++){const x=(rr()*360+t/6)%360-20,y=((rr()*200)+t/3.2)%200-10;ctx.fillRect(Math.round((x-y*.15)*S),Math.round(y*S),S,4*S);}
+    const sp=mulberry32(9);for(let i=0;i<26;i++){const x=sp()*320,y=110+sp()*68,ph=((t/300)+sp())%1;if(ph<.35){ctx.fillStyle=`rgba(220,230,250,${.7-ph*2})`;ctx.fillRect(Math.round((x-ph*4)*S),Math.round(y*S),S,S);ctx.fillRect(Math.round((x+ph*4)*S),Math.round(y*S),S,S);}}}
+  if(mood==="day"){ctx.save();ctx.globalCompositeOperation="soft-light";ctx.fillStyle="rgba(255,250,235,.25)";ctx.fillRect(0,0,320*S,180*S);ctx.restore();}
+  if(!NIGHT&&!RAIN)return;
+  const cv=ctx.canvas,c=cv.__ca||(cv.__ca={}),key=mood+"|"+Math.floor(t/120);
+  if(c.lightKey!==key){c.lightKey=key;if(p.lights)LIGHTS.push([242,110,58,1.15]);
+    const W=320,H=180,L=new Float32Array(W*H);
+    for(const [lx,ly,r,s] of LIGHTS){const R=r*(1+.04*Math.sin(t/90+lx*3)),x0=Math.max(0,Math.floor(lx-R)),x1=Math.min(W-1,Math.ceil(lx+R)),y0=Math.max(0,Math.floor(ly-R)),y1=Math.min(H-1,Math.ceil(ly+R));
+      for(let y=y0;y<=y1;y++)for(let x=x0;x<=x1;x++){const d=Math.hypot(x+.5-lx,(y+.5-ly)*1.15);if(d<R)L[y*W+x]+=(1-d/R)*s;}}
+    const mk=()=>{const o=document.createElement("canvas");o.width=W;o.height=H;return o;};
+    c.dark=c.dark||mk();c.warm=c.warm||mk();const dx=c.dark.getContext("2d"),wx=c.warm.getContext("2d"),di=dx.createImageData(W,H),wi=wx.createImageData(W,H);
+    const base=NIGHT?.62:.34,tint=NIGHT?[14,16,52]:[34,42,64];
+    for(let i=0;i<W*H;i++){const q=Math.min(7,Math.floor(Math.pow(Math.min(1,L[i]),.85)*7+.0001))/7;
+      di.data[i*4]=tint[0];di.data[i*4+1]=tint[1];di.data[i*4+2]=tint[2];di.data[i*4+3]=Math.round(255*base*(1-q));
+      wi.data[i*4]=255;wi.data[i*4+1]=196;wi.data[i*4+2]=110;wi.data[i*4+3]=Math.round(255*(NIGHT?.16:.08)*q);}
+    dx.putImageData(di,0,0);wx.putImageData(wi,0,0);}
+  ctx.save();ctx.imageSmoothingEnabled=false;ctx.drawImage(c.dark,0,0,320*S,180*S);ctx.globalCompositeOperation="lighter";ctx.drawImage(c.warm,0,0,320*S,180*S);ctx.restore();}
+
+/* v1.92 (Man): the camp card — a Pokédex-style profile card of the camp, saved as a PNG to show off.
+   The player picks the weather, whether the fighters line up and cheer, and the card's pixel pattern.
+   The card is drawn into a 1080x1350 canvas (4:5, fits a social post); the preview <img> is the PNG itself,
+   so a long press saves it even where the share sheet is missing. */
+const CC_W=1080,CC_H=1400;
+const CC_THEMES={
+  dex:{name:"Dex red",bg:"#c8283c",bg2:"#a01e30",pat:"dots",panel:"#f4ead8",ink:"#1b1230",sub:"#6a5a7a",acc:"#ffd34a",line:"#1b1230"},
+  gold:{name:"Champion gold",bg:"#d9a520",bg2:"#b8861a",pat:"diamond",panel:"#fff6dc",ink:"#3a2408",sub:"#8a6a30",acc:"#c8283c",line:"#3a2408"},
+  thai:{name:"Thai pattern",bg:"#7a1f2b",bg2:"#f2c14e",pat:"kanok",panel:"#fbf1dc",ink:"#3a1018",sub:"#8a4a50",acc:"#f2c14e",line:"#3a1018"},
+  night:{name:"Starry night",bg:"#1d1f4a",bg2:"#f4e9ff",pat:"stars",panel:"#2b2d5e",ink:"#f4ecff",sub:"#b8b4e0",acc:"#8ad7ff",line:"#0b0a22",hd:"#ffd34a"},
+  jade:{name:"Jade",bg:"#2f8a4f",bg2:"#226a3c",pat:"stripes",panel:"#eef7e6",ink:"#123a20",sub:"#4a7a5a",acc:"#f2c14e",line:"#123a20"},
+  pink:{name:"Sweet pink",bg:"#e07fae",bg2:"#f8b6d3",pat:"check",panel:"#fff0f6",ink:"#5c2140",sub:"#a4427a",acc:"#7a3fc0",line:"#5c2140"},
+  mono:{name:"Retro mono",bg:"#2a2a2e",bg2:"#e8e8e0",pat:"check",panel:"#e8e8e0",ink:"#1a1a1e",sub:"#5a5a60",acc:"#c8283c",line:"#1a1a1e"},
+};
+const CC_MOODS=[["day","☀️ Day"],["sunset","🌇 Sunset"],["dawn","🌅 Dawn"],["rain","🌧️ Rain"],["night","🌙 Night"]];
+const ccOpt=()=>{UI.ccard=UI.ccard||{mood:"sunset",theme:"dex",lineup:1};return UI.ccard;};
+function campCardHTML(){const o=ccOpt();
+  const chip=(act,v,lab,on,ttl)=>`<button class="ccchip${on?" on":""}" data-act="${act}" data-v="${v}" aria-pressed="${on}"${ttl?` title="${ttl}" aria-label="${ttl}"`:""}>${lab}</button>`;
+  return `<h2>Camp Card</h2>
+   <div class="ccprev"><img id="ccardimg" alt="Muay Thai camp card" src=""><div class="ccwait">Drawing the card…</div></div>
+   <div class="ccopts">
+    <div class="ccrow">${CC_MOODS.map(([k,l])=>chip("ccmood",k,l.split(" ")[0],o.mood===k,l.split(" ").slice(1).join(" "))).join("")}<span class="ccsep"></span>${chip("cclineup",o.lineup?"0":"1",o.lineup?"🙌":"🥊",!!o.lineup,o.lineup?"Line up & cheer":"Training as usual")}</div>
+    <div class="ccrow">${Object.entries(CC_THEMES).map(([k,t])=>`<button class="ccsw${o.theme===k?" on":""}" data-act="cctheme" data-v="${k}" aria-pressed="${o.theme===k}" title="${t.name}" aria-label="${t.name}" style="--a:${t.bg};--b:${t.panel}"></button>`).join("")}</div></div>
+   <button class="btn primary ccsave" data-act="showcaseSave">💾 Save sticker PNG</button>
+   <p class="meta center ccnote">Transparent background, ready for your story · long-press the image to save too</p>`;}
+let ccBusy=0,ccLastKey="",ccURL="";
+function campCardMount(){const im=document.getElementById("ccardimg");if(!im||typeof G==="undefined"||!G)return;const o=ccOpt(),key=JSON.stringify(o)+"|"+(G.week||0);
+  if(key===ccLastKey&&ccURL){if(im.getAttribute("src")!==ccURL){im.src=ccURL;im.parentNode.classList.add("ok");}return;}
+  if(ccBusy)return;ccBusy=1;campCardDraw(o).then(cv=>{ccBusy=0;ccLastKey=key;try{ccURL=cv.toDataURL("image/png");}catch(e){ccURL="";}const el=document.getElementById("ccardimg");if(el&&ccURL){el.src=ccURL;el.parentNode.classList.add("ok");}
+    if(JSON.stringify(ccOpt())+"|"+(G.week||0)!==key)campCardMount();}).catch(e=>{ccBusy=0;console.error(e);});}
+/* the camp scene, as the live camp would draw it with the chosen weather / line-up */
+function ccScene(o,W,H){return new Promise(res=>{const c=document.createElement("canvas");c.width=W;c.height=H;const x=c.getContext("2d");let n=0;
+  const step=()=>{window.__campMood=o.mood;window.__campLineup=o.lineup?1:0;try{x.clearRect(0,0,W,H);for(let i=0;i<3;i++)drawCamp(x,G,61000+i*40);}finally{window.__campMood=null;window.__campLineup=0;}
+    if(c.__caOn||++n>40||(typeof SETTINGS!=="undefined"&&SETTINGS.classicCamp))res(c);else setTimeout(step,80);};step();});}
+const ccWaitImg=im=>new Promise(r=>{if(!im||(im.complete&&im.naturalWidth)||im.complete)return r();im.addEventListener("load",r,{once:true});im.addEventListener("error",r,{once:true});setTimeout(r,2500);});
+/* v1.92 (Man): the pill shows the relationship — heart level and the step on her ladder — not injuries */
+function ccStatus(f){let lv=1,lab="";try{lv=heartLv(f).lv||1;}catch(e){}try{lab=relLabel(G,f,null,true)||"";}catch(e){}
+  const lover=(G.lovers||[]).includes(f.id)||(G.romance&&G.romance===f.id);
+  return [`♥${lv}${lab?" · "+lab:""}`,lover?"#e0569a":lv>=7?"#c8283c":lv>=4?"#d0601c":"#7a5a8a"];}
+function ccPortrait(e){return new Promise(res=>{if(typeof MGRP==="undefined"||!G)return res(null);const L=G.avatar||{gender:(G.player&&G.player.gender)||"m"};let done=0;
+  const go=()=>{if(done)return;const u=MGRP.url(L,e,go);if(!u)return;done=1;const i=new Image();i.onload=()=>res(i);i.onerror=()=>res(null);i.src=u;};go();setTimeout(()=>{if(!done){done=1;res(null);}},4000);});}
+/* the card is drawn on a transparent canvas, then cut out like a sticker: a white rim and a soft drop shadow around its outline */
+async function campCardDraw(o){const T=CC_THEMES[o.theme]||CC_THEMES.dex,W=CC_W;let H=CC_H;
+  try{if(document.fonts&&document.fonts.ready)await document.fonts.ready;}catch(e){}
+  const R=roster(G).slice().sort((a,b)=>(b.lvl||0)-(a.lvl||0)),pets=(G.pets||[]);
+  await Promise.all(R.slice(0,6).map(f=>ccWaitImg(sheetFor(f))));
+  const [scene,face]=await Promise.all([ccScene(o,960,540),ccPortrait("smile")]);
+  const petIm=pets.slice(0,4).map(p=>{const i=new Image();try{i.src=petIcon(p.k);}catch(e){}return i;});await Promise.all(petIm.map(ccWaitImg));
+  const CX=48,CY=120,CW=W-96,HY=CY+30,SY=HY+190,FY=SY+572,nr=Math.ceil(Math.min(6,R.length)/2),PY=FY+(nr?nr*112+30:0),END=(pets.length?PY+136:PY-14)+64,CH=END-CY;H=END+48;
+  const cv=document.createElement("canvas");cv.width=W;cv.height=H;const x=cv.getContext("2d");
+  const B=(X,Y,w,h,c)=>{x.fillStyle=c;x.fillRect(Math.round(X),Math.round(Y),Math.round(w),Math.round(h));};
+  const box=(X,Y,w,h,fill,line,u)=>{u=u||6;B(X+u,Y,w-2*u,h,line);B(X,Y+u,w,h-2*u,line);B(X+u,Y+u,w-2*u,h-2*u,fill);};
+  const FONT=(px,w)=>`${w||700} ${px}px "Chakra Petch","IBM Plex Sans Thai",sans-serif`;
+  const txt=(s,X,Y,px,c,al,w,mw)=>{x.font=FONT(px,w);if(mw){const m=x.measureText(s).width;if(m>mw){px=Math.floor(px*mw/m);x.font=FONT(px,w);}}x.fillStyle=c;x.textAlign=al||"left";x.textBaseline="alphabetic";x.fillText(s,X,Y);};
+  const disc=(cx,cy,r,c)=>{for(let dy=-r;dy<=r;dy+=4){const hw=Math.round(Math.sqrt(Math.max(0,r*r-dy*dy))/4)*4;B(cx-hw,cy+dy,hw*2,4,c);}};
+  // --- card body: patterned frame with stepped pixel corners
+  const u=12;
+  box(CX,CY,CW,CH,T.bg,T.line,24);
+  x.save();x.beginPath();x.rect(CX+10,CY+10,CW-20,CH-20);x.clip();
+  for(let yy=CY;yy<CY+CH;yy+=u)for(let xx=CX;xx<CX+CW;xx+=u){const i=Math.round((xx-CX)/u),j=Math.round((yy-CY)/u);let on=false;
+    if(T.pat==="dots")on=i%4===1&&j%4===1;else if(T.pat==="check")on=(Math.floor(i/2)+Math.floor(j/2))%2===0;else if(T.pat==="stripes")on=(i+j)%6<2;
+    else if(T.pat==="diamond")on=Math.abs((i%8)-4)+Math.abs((j%8)-4)===3;else if(T.pat==="stars")on=((i*37+j*91)%53===0)||((i*13+j*7)%97===0);
+    else if(T.pat==="kanok"){const a=i%10,b=j%10;on=(a===5&&b<=6&&b>=2)||(b===6&&Math.abs(a-5)<=2)||(b===3&&Math.abs(a-5)===1)||(a===0&&b===0);}
+    if(on)B(xx,yy,u,u,T.bg2);}
+  x.restore();
+  // --- header: manager portrait breaking out of the top-left, camp name, year badge on the top-right corner
+  box(CX+30,HY,CW-60,170,T.panel,T.line,8);
+  const name=(G.player&&G.player.name)||"Manager";
+  txt(`Muay Thai camp of ${name}`,CX+300,HY+86,54,T.ink,"left",700,500);
+  txt("SIRICHAI MUAY THAI",CX+302,HY+128,26,T.sub,"left",700,480);
+  const H2=(G.honors||[]).length;txt(`Fame ${(G.rep||0).toFixed(0)} · ${students(G)} · ${H2}`,CX+302,HY+158,22,T.sub,"left",600,480);
+  // year badge: an upright pixel glove that gets grander every year played (1..10), with more effects the longer the camp has run
+  const bx=W-150,by=CY+40,yr=Math.max(1,G.season||1),tier=Math.min(10,yr);
+  const GT=[null,
+    {b:"#f4f4f4",h:"#ffffff",s:"#b8b8c4",c:"#c8283c",l:"#ffffff",ring:T.acc,in:"#8a6a9a"},
+    {b:"#2c5fb3",h:"#6a9ae0",s:"#1d3f80",c:"#f4f4f4",l:"#2c5fb3",ring:T.acc,in:"#f4ead8"},
+    {b:"#c8283c",h:"#f06a78",s:"#8a1426",c:"#f4f4f4",l:"#c8283c",ring:T.acc,in:"#f4ead8"},
+    {b:"#2a2a30",h:"#5a5a66",s:"#121216",c:"#c8283c",l:"#f4f4f4",ring:"#c8ccd8",in:"#e8e0d0"},
+    {b:"#e2b02a",h:"#fff0a0",s:"#a87a10",c:"#f4f4f4",l:"#c8283c",ring:"#c8ccd8",in:"#3a2a6a"},
+    {b:"#e2b02a",h:"#fff0a0",s:"#a87a10",c:"#2c5fb3",l:"#c8283c",ring:"#c8ccd8",in:"#3a2a6a",flag:1},
+    {b:"#c8283c",h:"#ff8a96",s:"#8a1426",c:"#e2b02a",l:"#fff0a0",ring:"#f2c14e",in:"#2a1440",rays:1},
+    {b:"#7a3fc0",h:"#c89af0",s:"#3e1a70",c:"#e2b02a",l:"#fff0a0",ring:"#f2c14e",in:"#120a2a",rays:1,stars:1},
+    {b:"#e2b02a",h:"#fffad0",s:"#b8801a",c:"#c8283c",l:"#fff0a0",ring:"#f2c14e",in:"#2a0a10",rays:1,stars:1,fire:1},
+    {b:"#bfefff",h:"#ffffff",s:"#5ab0f0",c:"#e2b02a",l:"#c8283c",ring:"rainbow",in:"#140a30",rays:1,stars:1,fire:1,crown:1}][tier];
+  const tt=Date.now()/1000;
+  if(GT.ring==="rainbow"){["#e8434f","#f0a04b","#f2c14e","#4fb06a","#5ab0f0","#7a3fc0"].forEach((col,i)=>disc(bx,by,104-i*2,col));}else{disc(bx,by,104,T.line);disc(bx,by,94,GT.ring);}
+  disc(bx,by,80,T.line);disc(bx,by,74,GT.in);
+  /* effects stay inside the badge, in pixels (Man): light rays, flames behind the glove */
+  if(GT.rays)for(let k=0;k<12;k++){const a=k/12*Math.PI*2;for(let r=18;r<70;r+=6){if((r/6+k)%2)continue;B(Math.round((bx+Math.cos(a)*r)/4)*4-2,Math.round((by+Math.sin(a)*r)/4)*4-2,6,6,k%2?"rgba(255,240,160,.55)":"rgba(255,255,255,.4)");}}
+  if(GT.fire){const fl=[[-40,40,26],[-24,46,40],[-8,50,48],[8,50,44],[24,46,38],[40,40,24]];fl.forEach(([dx,dy,h])=>{B(bx+dx-8,by+dy-h,16,h,"#ff7b2a");B(bx+dx-5,by+dy-h+10,10,h-10,"#ffd34a");B(bx+dx-2,by+dy-h+20,4,Math.max(4,h-22),"#fff0a0");});}
+  if(GT.stars)for(let k=0;k<10;k++){const sx=bx-60+((k*37)%120),sy=by-60+((k*53)%120);if(Math.hypot(sx-bx,sy-by)<66)B(sx,sy,4,4,"#ffffff");}
+  const GLOVE=["....oooooo....","..oohhbbbboo..",".ohhbbbbbbbbo.",".ohbbbbbbbbbso","ohbbbbbbbbbbso","ohbbbbbbbbbbso","obbbbbbbbbbbso","obbbbbbbbbbsso","oooobbbbbbbsso","ohhhobbbbbbsso","ohbbbobbbbbsso","obbbbobbbbsso.",".obbbbbbbbsso.","..ossbbbbsso..","..occcccccco..","..oclcclcclo..","..occcccccco..","..oooooooooo.."];
+  {const ps=7,gx=bx-49,gy=by-66;GLOVE.forEach((row,j)=>[...row].forEach((ch,i)=>{let col={o:"#1b1230",b:GT.b,h:GT.h,s:GT.s,c:GT.c,l:GT.l}[ch];if(GT.flag&&ch==="c")col=["#c8283c","#f4f4f4","#2c5fb3"][(j-14)%3]||col;if(col)B(gx+i*ps,gy+j*ps,ps,ps,col);}));}
+  if(GT.crown){const cx0=bx-24,cy0=by-72;[[0,12,8,16],[10,0,8,28],[20,8,8,20],[30,0,8,28],[40,12,8,16]].forEach(([dx,dy,w,h])=>B(cx0+dx,cy0+dy,w,h,"#1b1230"));[[2,14,4,14],[12,2,4,26],[22,10,4,18],[32,2,4,26],[42,14,4,14]].forEach(([dx,dy,w,h])=>B(cx0+dx,cy0+dy,w,h,"#f2c14e"));B(cx0,cy0+26,48,8,"#1b1230");B(cx0+2,cy0+28,44,4,"#ffd34a");}
+  if(tier>=5)[[-50,-36],[46,-44],[50,14],[-52,12]].forEach(([dx,dy],i)=>{const sx=bx+dx,sy=by+dy,c2=i%2?"#ffffff":"#fff0a0";B(sx-2,sy-8,4,16,c2);B(sx-8,sy-2,16,4,c2);});
+  box(bx-62,by+82,124,40,T.line,T.line,4);txt((window.LANG==="en"?"YEAR ":"Year ")+yr,bx,by+111,24,"#ffffff","center",700);
+  // manager portrait (the cutscene art), head above the card
+  if(face){const fw=300,fh=fw*face.naturalHeight/face.naturalWidth,sy=0,sh=face.naturalHeight*.55;x.save();x.beginPath();x.rect(0,0,W,HY+170);x.clip();x.imageSmoothingEnabled=true;
+    x.drawImage(face,0,sy,face.naturalWidth,sh,CX+6,HY+172-fh*.55*(1),fw,fh*.55);x.restore();}
+  else if(G.avatar&&typeof CHIBI!=="undefined"){try{const ch=CHIBI.canvasFor(G.avatar,{dy:0}),sc=6;x.imageSmoothingEnabled=false;x.drawImage(ch,CX+150-ch.width*sc/2,HY+170-ch.height*sc,ch.width*sc,ch.height*sc);}catch(e){}}
+  // --- the camp scene
+  box(CX+30,SY,CW-60,556,T.line,T.line,6);x.imageSmoothingEnabled=false;x.drawImage(scene,CX+36,SY+8,CW-72,540*(CW-72)/960);
+  // --- fighters: two columns of compact rows
+  const cols=2,cw=(CW-60-12)/2,rh=112,rows=R.slice(0,6);
+  if(rows.length){box(CX+30,FY,CW-60,nr*rh+16,T.panel,T.line,8);
+    rows.forEach((f,i)=>{const cx=CX+38+(i%cols)*(cw+12),y=FY+8+Math.floor(i/cols)*rh;
+      /* v1.92 (Man): a bigger fighter, and her relationship pill tucked under the level line */
+      x.save();x.beginPath();x.rect(cx,y+2,118,rh-4);x.clip();x.imageSmoothingEnabled=true;try{drawFrame(x,sheetFor(f),o.lineup?ROW.win:ROW.idle,1,cx+60,y+rh+34,170,false);}catch(e){}x.restore();
+      txt(f.name,cx+124,y+36,30,T.ink,"left",700,cw-134);const r=f.rec||{w:0,l:0,d:0};txt(`Lv.${f.lvl||1} · ${r.w}-${r.l}`,cx+124,y+64,21,T.sub,"left",600);
+      const [st,sc]=ccStatus(f);x.font=FONT(19);const tw=Math.min(cw-134,x.measureText(st).width+22);box(cx+124,y+74,tw,32,sc,T.line,4);txt(st,cx+124+tw/2,y+97,19,"#ffffff","center",700,tw-12);});}
+  // --- pets
+  if(pets.length){box(CX+30,PY,CW-60,136,T.panel,T.line,8);
+    const np=Math.min(4,pets.length),slot=(CW-80)/np; /* v1.92 (Man): each pet's name sits under its picture */
+    pets.slice(0,4).forEach((p,i)=>{const cx=CX+40+slot*(i+.5),fy=PY+84;let drawn=false;
+      try{x.imageSmoothingEnabled=true;drawn=typeof petHub==="function"&&petHub(x,p.k,cx,fy,1,0,false,2.4);}catch(e){}
+      if(!drawn){try{x.imageSmoothingEnabled=false;x.drawImage(petIm[i],cx-34,fy-52,68,52);}catch(e){}}
+      txt(p.name||"",cx,PY+120,24,T.ink,"center",700,slot-20);});}
+  txt("Muay Thai Moe",W/2,CY+CH-22,22,T.bg2===T.panel?T.ink:"#ffffff","center",700);
+  // --- sticker cut: white rim + shadow following the outline
+  const out=document.createElement("canvas");out.width=W;out.height=H;const y=out.getContext("2d");
+  const tinted=col=>{const t=document.createElement("canvas");t.width=W;t.height=H;const z=t.getContext("2d");z.drawImage(cv,0,0);z.globalCompositeOperation="source-in";z.fillStyle=col;z.fillRect(0,0,W,H);return t;};
+  const sh=tinted("rgba(20,10,30,.35)"),wh=tinted("#ffffff");
+  for(let a=0;a<16;a++){const dx=Math.cos(a/16*Math.PI*2)*16,dy=Math.sin(a/16*Math.PI*2)*16;y.drawImage(sh,dx+6,dy+12);}
+  for(let a=0;a<24;a++){const dx=Math.cos(a/24*Math.PI*2)*14,dy=Math.sin(a/24*Math.PI*2)*14;y.drawImage(wh,dx,dy);}
+  y.drawImage(cv,0,0);return out;}
+async function campCardSave(){let url=ccURL;if(!url){const cv=await campCardDraw(ccOpt());url=cv.toDataURL("image/png");}
+  const fn=`muay-thai-moe-camp-y${G.season||1}.png`;
+  try{const blob=await (await fetch(url)).blob(),file=new File([blob],fn,{type:"image/png"});
+    if(navigator.canShare&&navigator.canShare({files:[file]})){await navigator.share({files:[file],title:"Sirichai Muay Thai Camp"});return;}
+    const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=fn;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove();},2000);toast("Camp card saved");}
+  catch(e){if(e&&e.name==="AbortError")return;toast("This device can't save it directly — long-press the card and choose Save Image");}}
+
 // ================= MUAY THAI MOE v1.2 — SYNTH AUDIO (no files) =================
 const AU={ctx:null,master:null,music:null,sfxBus:null,crowdG:null,timer:null,step:0,next:0,tempo:132,muted:false,playing:false,
   init(){if(this.ctx)return true;try{const C=window.AudioContext||window.webkitAudioContext;if(!C)return false;this.ctx=new C();}catch(e){return false;}
@@ -6709,7 +6992,7 @@ const AU={ctx:null,master:null,music:null,sfxBus:null,crowdG:null,timer:null,ste
     const n=this.HUB[s];if(n){const f=440*Math.pow(2,(n-69)/12);this.tone(t,{f,type:"triangle",dur:spb*1.6,peak:.14,bus:m});this.tone(t,{f:f*2,type:"sine",dur:spb*.8,peak:.04,bus:m});}
   },
 };
-const SETTINGS={music:true,sfx:true,coach:true,quick:false,askEnd:true,mgrShow:true,analytics:true}; /* mgrShow v1.91.68 (Man): the manager on stage in scenes */
+const SETTINGS={music:true,sfx:true,coach:true,quick:false,askEnd:true,mgrShow:true,analytics:true,classicCamp:false}; /* mgrShow v1.91.68 (Man): the manager on stage in scenes */
 try{Object.assign(SETTINGS,JSON.parse(localStorage.getItem("mtm-settings")||"{}"));}catch(e){}
 function saveSettings(){try{localStorage.setItem("mtm-settings",JSON.stringify(SETTINGS));}catch(e){}}
 
@@ -6726,7 +7009,7 @@ AU.gsfx=function(kind,a){if(!this.init()||this.muted||!SETTINGS.sfx)return;const
   if(kind==="shimmer")for(let i=0;i<6;i++)T(i*.05,{f:1400+Math.random()*1400,type:"sine",dur:.12,peak:.06});};
 
 // ================= MUAY THAI MOE v1.3 — UI =================
-const VERSION="1.91.204";
+const VERSION="1.91.205";
 const CUR_LANG=(typeof window!=="undefined"&&window.LANG)||"th";
 const TH_LABEL=String.fromCharCode(3652,3607,3618);
 function langSwitch(cls){return `<div class="langsw ${cls||""}" role="group" aria-label="Language">${[["th",TH_LABEL],["en","EN"]].map(([k,l])=>`<button class="lsb ${CUR_LANG===k?"on":""}" data-act="setlang" data-v="${k}" aria-pressed="${CUR_LANG===k}">${l}</button>`).join("")}</div>`;}
@@ -6925,6 +7208,8 @@ const LOAD_TIPS=["Counter-train before a fight and the opponent's main weapon la
 function saveArt(){const S=new Set(),add=u=>{if(u)S.add(u);};
   /* only what the camp screen shows first: faces, the camp sprites of girls in the camp, the gym and the camp */
   add(`${ASSET}coach_face.webp`);add(ASSET+gymBg());add(`${ASSET}bg_camp.webp`);
+  /* v1.92: the sprite camp this save shows (house, dorm, decor, sky) and Kru Daeng, so the camp opens already drawn */
+  try{if(typeof campArtPlan==="function")campArtFiles(campArtPlan(G),campMood(G)).forEach(n=>add(`${ASSET}camp/${n}.webp`));add(`${ASSET}coach_daeng_sheet.webp`);}catch(e){}
   for(const id of CANON_IDS){const f=G.F[id];if(!f||!(f.camp==="player"||f.met))continue;add(`${ASSET}${id}_happy_face.webp`);add(`${ASSET}${id}_casual_face.webp`);if(f.camp==="player")add(`${ASSET}${id}_sheet.webp`);}
   return [...S];}
 function loadScrHTML(){const L=UI.loadScr,pc=L.total?Math.round(L.n/L.total*100):100;
@@ -6939,7 +7224,8 @@ function withArt(done){warm(`${ASSET}logo.webp`);const list=saveArt(),total=list
 /* after the camp is open, quietly fetch backgrounds and the girls' other looks — skipped on data saver or 2G */
 let PREF=false;
 function prefetchArt(){if(PREF||!G)return;PREF=true;const c=navigator.connection||{};if(c.saveData||/2g/.test(c.effectiveType||""))return;
-  const S=new Set();Object.values(BGIMG).forEach(b=>{if(b)S.add(ASSET+b);});
+  const S=new Set();(window.__MTM_CAMPART||[]).forEach(n=>S.add(ASSET+"camp/"+n)); /* v1.92: the whole camp pack first, so a new decor, vehicle or weather swaps in at once */
+  Object.values(BGIMG).forEach(b=>{if(b)S.add(ASSET+b);});
   /* v1.91.38: the cards you own — their illustrations and the character picture on the card face */
   try{for(const id in (G.cards||{})){const C=CARDS[id];if(!C)continue;const A=CARD_ART[id];if(A){S.add(`${ASSET}${cardArtFile(A.f)}`);if(A.f2)S.add(`${ASSET}${cardArtFile(A.f2)}`);}const f=cardFaceSrc(C);S.add(cardBodySrc(f));}}catch(e){}
   SHEET_IDS.forEach(id=>S.add(`${ASSET}${id}_sheet.webp`));S.add(`${ASSET}coach.png`);for(const id of CANON_IDS){const f=G.F[id];if(!f||!(f.camp==="player"||f.met))continue;for(const l of ["casual","fight","train"])for(const m of ["happy","flustered","pout","sad"])S.add(stand(id,l,m));S.add(standArt(`${id}_fight_angry`));}
@@ -6973,7 +7259,7 @@ function render(){
   if(albumTop&&UI.modal?.type==="album"){const modal=document.querySelector(".m-album");if(modal)modal.parentElement.scrollTop=albumTop;}
   const fc=document.getElementById("fstage");if(fc)FS.attach(fc);
   const lg=document.querySelector(".flog");if(lg)lg.scrollTop=lg.scrollHeight;
-  mountCanvases();if(typeof mountQSprites==="function")mountQSprites();pxBars();spotPaint();cashJuice();vnType();winJuice();
+  mountCanvases();if(typeof campCardMount==="function")campCardMount();if(typeof mountQSprites==="function")mountQSprites();pxBars();spotPaint();cashJuice();vnType();winJuice();
   if(typeof newsSync==="function")newsSync();
 }
 // v1.12.1 spotlight intro: dim the screen and teach one part of it at a time
@@ -7036,7 +7322,7 @@ function fsHTML(){if(fsApp())return "";
   return `<div class="set"><span><b>Full screen</b><small>iPhone: tap Share, then "Add to Home Screen" — the game opens from that icon without the browser bars · Safari saves don't carry over, so export your save first and import it in the new icon</small></span></div>`;}
 if(typeof document!=="undefined")["fullscreenchange","webkitfullscreenchange"].forEach(ev=>document.addEventListener(ev,()=>{if(UI.modal&&UI.modal.type==="settings")render();}));
 function settingsHTML(){const t=(k,label,desc)=>`<label class="set"><span><b>${label}</b><small>${desc}</small></span><input type="checkbox" data-act="setopt" data-k="${k}" ${SETTINGS[k]?"checked":""}></label>`;
-  return `<h2>Settings</h2><div class="sets"><div class="set"><span><b>Language · ภาษา</b><small>Switching reloads the game. Your saves are kept</small></span>${langSwitch()}</div>${G&&G.avatar?`<div class="set setav"><span class="setav-pic"><canvas width="48" height="64" data-chibi="player" aria-hidden="true"></canvas></span><span><b>Your character</b><small>${esc(G.player.name)} · change your name, look and outfit any time</small></span><button class="btn sm" data-act="avedit">Edit character</button></div>${t("mgrShow","Show yourself in scenes","Your anime portrait stands beside the girls when you speak · turn it off if you'd rather not see yourself")}`:""}${fsHTML()}${G?`<div class="set"><span><b>Enter code</b><small>Get event codes in the game's Discord (button below)</small></span><span class="obtns redeem"><input id="redeemcode" maxlength="24" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="Code" aria-label="Code"><button class="btn sm primary" data-act="redeem">Redeem</button></span></div>${commHTML()}${typeof codeContentHTML==="function"?codeContentHTML():""}`:commHTML()}${t("music","Music","Pi chawa, khaek drums and ching during fights")}${t("sfx","Sound effects","Punches, kicks, bells, cheering")}${t("coach","Coach Daeng's tips","Coach guides you on the camp screen, fight offers and between rounds")+t("askEnd","Ask before ending the week","Warn me when something is still left to do this week")}${t("quick","Fast mode","Skip the training scenes at week's end and go straight to the summary")}</div>
+  return `<h2>Settings</h2><div class="sets"><div class="set"><span><b>Language · ภาษา</b><small>Switching reloads the game. Your saves are kept</small></span>${langSwitch()}</div>${G&&G.avatar?`<div class="set setav"><span class="setav-pic"><canvas width="48" height="64" data-chibi="player" aria-hidden="true"></canvas></span><span><b>Your character</b><small>${esc(G.player.name)} · change your name, look and outfit any time</small></span><button class="btn sm" data-act="avedit">Edit character</button></div>${t("mgrShow","Show yourself in scenes","Your anime portrait stands beside the girls when you speak · turn it off if you'd rather not see yourself")}`:""}${fsHTML()}${G?`<div class="set"><span><b>Enter code</b><small>Get event codes in the game's Discord (button below)</small></span><span class="obtns redeem"><input id="redeemcode" maxlength="24" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="Code" aria-label="Code"><button class="btn sm primary" data-act="redeem">Redeem</button></span></div>${commHTML()}${typeof codeContentHTML==="function"?codeContentHTML():""}`:commHTML()}${t("classicCamp","Classic camp","Draw the camp in the original pixel style · leave off for the new camp art with sky, rain and night")}${t("music","Music","Pi chawa, khaek drums and ching during fights")}${t("sfx","Sound effects","Punches, kicks, bells, cheering")}${t("coach","Coach Daeng's tips","Coach guides you on the camp screen, fight offers and between rounds")+t("askEnd","Ask before ending the week","Warn me when something is still left to do this week")}${t("quick","Fast mode","Skip the training scenes at week's end and go straight to the summary")}</div>
    ${!G&&loadSave()?`<div class="set danger"><span><b>Manage save slots</b><small>View, load or delete each slot</small></span><button class="btn sm" data-act="openload">Open</button></div>`:""}${G?`<p class="meta">Playing save slot ${UI.slot} · autosaves whenever you make progress ${CLOUD.ready?" · backed up to the cloud":" · not connected to the cloud (saved in this browser only)"}</p>
    ${G&&UI.slot&&bakInfo(UI.slot)?`<div class="set"><span><b>Pre-update save</b><small>Kept when the game updated · v${esc(String(bakInfo(UI.slot).ver))} week ${bakInfo(UI.slot).week}</small></span><button class="btn sm" data-act="bakrestore">Restore</button></div>`:""}
    <div class="set"><span><b>Back up save to a file</b><small>Keep the file yourself; import it on another device or browser</small></span><span class="obtns"><button class="btn sm" data-act="exportsave">Export</button><label class="btn sm">Import<input type="file" accept=".json,application/json" data-act="importsave" hidden></label></span></div>`:`<div class="set"><span><b>Import a save file</b><small>A previously exported file goes into slot 1</small></span><label class="btn sm">Import<input type="file" accept=".json,application/json" data-act="importsave" hidden></label></div>`}
@@ -7276,7 +7562,7 @@ function homeHTML(){const R=roster(G);
     guide=`<section class="px guide away"><img class="gface" src="${faceSrc("kati","happy")}" alt="Kati"><div class="gtxt"><b>Kati (acting coach · Coach Daeng back in week ${((G.coachAwayAbs-1)%52)+1})</b><p>${esc(KS[G.week%KS.length])}</p><p class="meta">No coach advice for now; you make every call yourself</p></div><button class="xbtn" data-act="hideguide" aria-label="Close">✕</button></section>`;}
   const lv=campLevel(G);
   return `${rinNoteHTML()}<div class="homegrid">${(()=>{const r=[["mali",G.flags.maliRecruit],["rin",G.flags.rinRecruit]].filter(([id,ok])=>ok&&G.F[id].camp==="free").concat(G.region&&G.region.offers?G.region.offers.filter(id=>G.F[id]).map(id=>[id,1]):[]); /* v1.91.30: regional champions asking to join */
-     return r.length?`<button class="px newfighter" data-act="tab" data-v="camp" data-sub="staff"><span class="newb">NEW!</span>${r.map(([id])=>`<img src="${faceSrc(id,"happy")}" alt="">`).join("")}<span><b>${r.map(([id])=>esc(G.F[id].name)).join(" and ")} wants to join</b><small>Tap to see the contract</small></span><span class="chev">▸</span></button>`:"";})()}${typeof REGION!=="undefined"&&REGION.visitBanner&&G.region?REGION.visitBanner(G):""}<section class="px camp-wrap"><div class="cvbox"><canvas class="campcv" width="640" height="360" data-camp="1" aria-label="Sirichai Camp overview"></canvas>${typeof REGION!=="undefined"&&G.region&&REGION.travelOk&&REGION.travelOk(G)?`<button class="tripspot" data-act="rgtravel" aria-label="Travel to a Four Regions bout"><span class="triptag">Travel ▸</span></button>`:""}
+     return r.length?`<button class="px newfighter" data-act="tab" data-v="camp" data-sub="staff"><span class="newb">NEW!</span>${r.map(([id])=>`<img src="${faceSrc(id,"happy")}" alt="">`).join("")}<span><b>${r.map(([id])=>esc(G.F[id].name)).join(" and ")} wants to join</b><small>Tap to see the contract</small></span><span class="chev">▸</span></button>`:"";})()}${typeof REGION!=="undefined"&&REGION.visitBanner&&G.region?REGION.visitBanner(G):""}<section class="px camp-wrap"><div class="cvbox"><canvas class="campcv" width="640" height="360" data-camp="1" aria-label="Sirichai Camp overview"></canvas>${typeof REGION!=="undefined"&&G.region&&REGION.travelOk&&REGION.travelOk(G)?`<button class="tripspot" data-act="rgtravel" aria-label="Travel to fight for the Four Regions title"><span class="triptag">Travel</span></button>`:""}
     ${goalHidden()?`<button class="goal ov mini" data-act="goaltog" aria-label="Show goal">Goal ▾</button>`:`<button class="goal ov" data-act="goaltog" aria-label="Hide goal">${goalText()}<span class="gx">▴ Hide</span></button>`}</div>
     ${G.campUsed?`<button class="campact done" data-act="campacts"><span class="ci">✓</span><span><small>This week's camp activity</small><b>${esc(CAMP_ACTIONS[G.campUsed].name)}</b></span></button>`
       :`<button class="campact" data-act="campacts"><span class="ci"></span><span><small>This week's camp activity · not chosen</small><b>Choose a camp activity</b></span><span class="chev">▸</span></button>`}
@@ -7592,17 +7878,14 @@ function trophyRoomHTML(){const it=trophyItems(),UA=UI.hallAll||{};
     <div class="tshelf cert"><span class="tlbl">Camp certificates <b>${certs.length}</b></span><div class="trow">${certs.length?certs.map(([x,i])=>`<button class="tit cert" data-act="trophy" data-v="${i}" aria-label="${esc(x.title)}">${trophySVG("cert",x.pal)}</button>`).join(""):["cert","cert"].map(k=>`<span class="tit ghost ${k}">${trophySVG(k,{},true)}</span>`).join("")}</div></div>
     <p class="meta">Tap a belt or cup to see which fight it came from</p>
     ${certLeft.length?`<details class="tnext"><summary>Certificates not yet earned (${certLeft.length})</summary>${certLeft.map(([id,A])=>`<div class="kv-row"><span>📜 ${A.name}</span><span class="meta">${A.hint}</span></div>`).join("")}</details>`:""}
-    <button class="btn sm gold" data-act="showcase">📸 Snap a camp photo to show off</button></div>`;}
+    <button class="btn sm gold" data-act="showcase">📸 Camp Card</button></div>`;}
 function trophyPopHTML(i){const x=trophyItems()[i];if(!x)return `<p>Award not found</p>`;const lv=HALL_LV.find(l=>l.k===x.lv),f=x.fid&&G.F[x.fid];
   return `<div class="tpop"><div class="tpop-art">${trophySVG(x.kind,x.pal)}</div><h2>${esc(x.title)}</h2>
     ${f?`<div class="tpop-who">${faceImg(f,"sm")}<b>${esc(f.name)}</b><small>Division ${esc(x.div||"")}</small></div>`:`<p>${x.sub}</p>`}
     <div class="kv-row"><span>Level</span><b>${lv?lv.n:"Camp certificate"}</b></div>
     ${x.opp?`<div class="kv-row"><span>${/^อันดับ/.test(x.opp)?"Result":"Opponent"}</span><b>${esc(x.opp)}</b></div>`:x.lv!=="cert"?`<div class="kv-row"><span>Opponent</span><b class="meta">Not recorded (won before this update)</b></div>`:""}
     <div class="kv-row"><span>When</span><b>${x.when}</b></div></div><div class="mfoot"><button class="btn primary" data-act="closeModal">Close</button></div>`;}
-function showcaseHTML(){const R=roster(G),H=(G.honors||[]).length,C=(G.campAwards||[]).length;
-  return `<h2>Sirichai Boxing Camp · Year ${G.season||1}</h2><div class="px card"><canvas class="campcv" width="640" height="360" data-camp="1" aria-label="Current camp view"></canvas></div>
-   <p class="meta center">${esc(G.player.name)} · Camp Lv.${campLevel(G)} · Fighters ${R.length} · Students ${students(G)} · Honors ${H} · Certificates ${C}</p>
-   <div class="mfoot"><button class="btn primary" data-act="showcaseSave">💾 Save as image</button></div>`;}
+function showcaseHTML(){return campCardHTML();} /* v1.92 (Man): the camp card (src/campcard.js) */
 function hallHTML(){const T=(G.titles||[]).slice().reverse(),H=(G.honors||[]).slice().reverse(),belts=Object.entries(G.belt||{}).filter(([d,b])=>G.F[b.id]&&G.F[b.id].camp==="player"),venueBelts=Object.entries(G.venueBelts||{}).flatMap(([v,ds])=>Object.entries(ds).filter(([d,b])=>G.F[b.id]?.camp==="player").map(([d,b])=>({v,d,b})));
   const yr=t=>{const res=t.res||Object.entries(t.champ||{}).filter(([d,id])=>G.F[id]&&G.F[id].camp==="player").map(([d,id])=>({name:G.F[id].name,d,t:"Provincial champion",c:"gold"}));
     return `<div class="hall-y"><b>Year ${t.season}</b>${res.length?res.map(r=>`<div class="kv-row"><span>${esc(r.name)} · Div ${r.d}</span><span class="pill ${r.c||""}">${r.t}</span></div>`).join(""):"<p class=\"meta\">That year nobody got past the subdistrict round, but the whole camp stayed together</p>"}</div>`;};
@@ -8982,11 +9265,8 @@ const ACT={
   decorbuyok:()=>{const m=UI.modal;if(!m||m.yes!=="decorbuyok")return;const d={k:m.k,v:m.v};UI.modal=null;const c=decorPrice(G,d.k,d.v);if(buyDecor(G,d.k,d.v)){AU.sfx&&AU.sfx("level");save();toast(`Bought "${CAMP_DECOR[d.k].items[d.v].name}" for ${fmt(c)}`);}render();},
   trophy:d=>{UI.modal={type:"trophy",i:+d.v};AU.sfx&&AU.sfx("ui");render();},hallall:d=>{UI.hallAll=UI.hallAll||{};UI.hallAll[d.v]=!UI.hallAll[d.v];render();},
   showcase:()=>{UI.modal={type:"showcase"};render();},
-  showcaseSave:()=>{const src=document.querySelector(".m-showcase canvas[data-camp]");if(!src)return;const W=640,cv=document.createElement("canvas");cv.width=W;cv.height=470;const x=cv.getContext("2d");x.imageSmoothingEnabled=false;
-    x.fillStyle="#141020";x.fillRect(0,0,W,470);x.drawImage(src,0,0,W,360);x.fillStyle="#f1c232";x.font='bold 26px "Chakra Petch","IBM Plex Sans Thai",sans-serif';x.fillText(`Sirichai Boxing Camp · Year ${G.season||1}`,20,400);
-    x.fillStyle="#e8e0f0";x.font='16px "IBM Plex Sans Thai",sans-serif';x.fillText(`${G.player.name} · Camp Lv.${campLevel(G)} · Fighters ${roster(G).length} · Honors ${(G.honors||[]).length} · Certificates ${(G.campAwards||[]).length}`,20,430);
-    x.fillStyle="#9a8fb0";x.font='14px "IBM Plex Sans Thai",sans-serif';x.fillText("Muay Thai Moe",20,456);
-    try{const a=document.createElement("a");a.href=cv.toDataURL("image/png");a.download=`muay-thai-moe-camp-y${G.season||1}.png`;document.body.appendChild(a);a.click();a.remove();toast("Camp photo saved");}catch(e){toast("Can't save images in this browser. Try a screenshot instead");}},
+  showcaseSave:()=>{campCardSave();},
+  ccmood:d=>{ccOpt().mood=d.v;render();},cctheme:d=>{ccOpt().theme=d.v;render();},cclineup:d=>{ccOpt().lineup=d.v==="1"?1:0;render();},
   decorslot:d=>{UI.decorSlot=d.v;AU.sfx&&AU.sfx("ui");render();},
   buyfac:d=>{const before=campLevel(G);if(buyFacility(G,d.v)){save();const after=campLevel(G);AU.sfx("level");toast(after>before?`The camp rose to Lv.${after}: ${CAMP_LV_NAME[after]}!`:`Upgraded ${FACILITIES[d.v].name}`);}},
   daeng:()=>{if(upgradeDaeng(G)){save();toast(`Coach Daeng completed training Lv.${G.fac.daeng}`);}},
@@ -9165,7 +9445,7 @@ const mailDelN=()=>(G.mail||[]).filter(m=>m.read&&!mailKeep(m)).length;
 function mailDel(ids){const S=new Set(ids);const n0=(G.mail||[]).length;G.mail=(G.mail||[]).filter(m=>!S.has(m.id)||mailKeep(m));return n0-G.mail.length;}
 function mailBadge(){if(!G||!G.mail)return 0;return G.mail.filter(m=>!m.read||mailOpen(m)).length;}
 const MAILBOX_PX=pxIcon(["....kkkk....","...kffffk...","..krrrrrrk..",".krrrrrrrrk.",".krwwwwwwrk.",".krwkkkkwrk.",".krwwwwwwrk.",".krrrrrrrrk.",".kkkkkkkkkk.",".....kk.....",".....kk.....","....kkkk...."],{k:"#2a1a10",r:"#c8283c",w:"#f4ead8",f:"#f7d24a"});
-const BILLS=[["Subdistrict Municipality","Fine: your camp's rooster crows above the legal limit at 4 a.m. (14 complaints)",300],
+const BILLS=[["Subdistrict Municipality",G=>`Fine: ${petIntro(G,"rooster")} crowing above the legal limit at 4 a.m. (14 complaints)`,300,G=>hasPet(G,"rooster")],
  ["Uncle Wang, motorbike taxi","Windshield repair: a kick knocked something off the bag and over the fence",800],
  ["Jae Tim's Chicken Rice","Invoice: your fighters ate 46 plates on credit (countersigned by Coach Daeng)",1840],
  ["Tube Ice Cooperative","This month's ice: your ice baths use more than every fish factory in the district",900],
@@ -9173,7 +9453,16 @@ const BILLS=[["Subdistrict Municipality","Fine: your camp's rooster crows above 
  ["Signage Office","Sign tax: your camp sign is bigger than the temple's, extra fee",600,G=>G.fac.brand>=1],
  ["Provincial Electricity Authority","Special electricity charge: your camp floodlights are so bright birds are flying the wrong way",1200,G=>(G.fac.lights||0)>=1],
  ["Temple Route Songthaew Association","Songthaew parking fee at the temple (your students were cheering inside the vehicle)",350,G=>(G.fac.van||0)>=1],
- ["Subdistrict Animal Clinic","Treatment for the camp's orange cat: ate too much khanom khrok",500]];
+ ["Subdistrict Animal Clinic",G=>`Vet bill for ${petIntro(G,"cat").trim()}: ate too many khanom khrok`,500,G=>hasPet(G,"cat")],
+ /* v1.91.208 (Man: more pet trouble, it's funny) — each only arrives if the camp has that pet */
+ ["Mae Klong Mackerel, Morning Market",G=>`1 basket of mackerel: ${petIntro(G,"cat")} sat by the stall making big eyes, so customers bought it fish… on your camp's tab`,380,G=>hasPet(G,"cat")],
+ ["Pia's Motorbike Repair",G=>`3 side mirrors: ${petIntro(G,"rooster")} saw itself in the mirrors and fought them until they broke`,540,G=>hasPet(G,"rooster")],
+ ["Moo Ping Stall by the School",G=>`23 grilled pork skewers: ${petIntro(G,"dog")} made off with the whole tray while auntie was making change`,460,G=>hasPet(G,"dog")],
+ ["Subdistrict Post Office",G=>`Postman's trousers: ${petIntro(G,"dog")} chased him from the end of the lane to the camp gate (one trouser leg lost)`,350,G=>hasPet(G,"dog")],
+ ["Subdistrict Temple",G=>`Temple lotus pond: ${petIntro(G,"turtle")} snuck into the pond and ate every lotus grown for the monks`,400,G=>hasPet(G,"turtle")],
+ ["Subdistrict Traffic Office",G=>`Traffic warden fee: ${petIntro(G,"turtle")} crossed the road outside the camp. It took 40 minutes. Traffic backed up to the temple`,300,G=>hasPet(G,"turtle")],
+ ["Uncle Hem's Fish Pond",G=>`9 tilapia: ${petIntro(G,"otter")} went into the pond at 3 a.m. and came out with a round belly`,650,G=>hasPet(G,"otter")],
+ ["Auntie Jum's Laundry",G=>`Re-wash of the whole pile: ${petIntro(G,"otter")} climbed out of the canal and rolled all over the freshly ironed whites`,300,G=>hasPet(G,"otter")]];
 const QUIZ=[["Before a fight, what ritual do Muay Thai fighters perform in the ring?",["Wai khru ram muay","Sing the national anthem","Show-off push-ups"],0],
  ["Muay Thai is known as the art of how many limbs?",["Six limbs","Eight limbs","Ten limbs"],1],
  ["What is the headpiece fighters wear during the wai khru called?",["Mongkhon headband","Prajiad armband","A headband"],0],
@@ -9309,7 +9598,7 @@ function mailWeekly(G){G.mail=G.mail||[];if(typeof thiefMail==="function"){thief
   const gi=GIG_WEEKS.indexOf(G.week);if(gi>=0&&G.campUsed===["promo","kids","fightnight","clip","tourist","class"][gi]){const g=GIGS[gi%GIGS.length];addMail(G,{kind:"take",from:g[0],title:g[1],body:g[2],amt:Math.round((500+G.week*15)/50)*50});}
   if(G.week%3===1&&G.week>=4&&G.week<=49){const q=QUIZ[(Math.floor(G.week/3)+G.seed)%QUIZ.length];addMail(G,{kind:"quiz",from:"Community radio 'Our Muay Thai'",title:"Weekly prize quiz",body:"Answer correctly to win prize money from the show's sponsor (one answer only)",q:q[0],opts:q[1],ans:q[2],amt:Math.round((800+Math.min(2200,G.week*45))/10)*10,exp:G.week+2});}
   // odd bills
-  if(G.week>=5&&rng()<.22){const L=BILLS.filter(b=>!b[3]||b[3](G));const b=L[Math.floor(rng()*L.length)];addMail(G,{kind:"pay",from:b[0],title:"Invoice",body:b[1],amt:Math.round(b[2]*(1+G.week/60)/10)*10,exp:G.week+2});}
+  if(G.week>=5&&rng()<.22){const L=BILLS.filter(b=>!b[3]||b[3](G));const b=L[Math.floor(rng()*L.length)];addMail(G,{kind:"pay",from:b[0],title:"Invoice",body:typeof b[1]==="function"?b[1](G):b[1],amt:Math.round(b[2]*(1+G.week/60)/10)*10,exp:G.week+2});}
   // odd fights posted to the offers board (rare, pays well)
   beastOffer(G,rng);
   qCleanup(G);}
@@ -10067,10 +10356,14 @@ const RUN={st:null,
        ${R.best?`<p class="center"><b class="newrec">New record!</b>${R.prev?` was ${R.prev.toFixed(2)} s`:""}</p>`:""}
        ${R.say?`<div class="rsay"><b>${esc(R.say.n)}:</b> "${esc(R.say.t)}"</div>`:""}
        ${R.ladUp?`<p class="center"><b class="newrec">${(G.mini.ladder||0)>=RUN_LADDER.length?"All five on the district ladder beaten!":`Next challenger unlocked: ${esc(RUN_LADDER[G.mini.ladder].n)}`}</b> · ✦ +2</p>`:""}
-       ${R.chain?`<p class="center">Longest mash streak <b class="goldt">${R.chain} taps</b></p>`:""}
+       ${R.p4&&!R.dq?`<p class="center">Held pace in the green band <b class="goldt">${R.band.toFixed(1)} s</b>${R.empty!=null?` · tank ran dry at <b class="redt">${Math.round(R.empty)} m</b>`:""}</p>${!R.win&&R.empty!=null?`<p class="center meta">Keep the needle in the green band first, then mash all out at the "KICK! 120 m" sign</p>`:""}`:R.chain?`<p class="center">Longest mash streak <b class="goldt">${R.chain} taps</b></p>`:""}
        <p class="center meta">Reaction ${R.react.toFixed(2)} s${R.passes?` · passes ${R.passes}`:""}${R.fs?` · false starts ${R.fs} times`:""}${R.par?` · target time for ${esc(me?me.name:"")} ${R.par.toFixed(2)} s`:""}</p>
        ${ext?(R.rw?`<p class="center">${R.rw}</p>`:""):S.practice?`<p class="center meta">Practice mode · no rewards</p>`:`<p class="center">${R.rw}</p>`}
        <div class="mfoot roadbtns">${ext?`<button class="btn primary" data-rn="next">Next ▸</button>`:`<button class="btn" data-rn="again">Race again (practice)</button><button class="btn primary" data-mb="close">Back to camp</button>`}</div></div>`;}},
+  /* v1.91.204 (Man: mashed the whole 400 m, ran out of legs and lost) — the pace read for the 400 m: ok = inside the green cruise band,
+     hot = faster than the tank can hold, slow = under it, kick = the last 120 m where mashing is right. null for the sprints and the relay. */
+  pace(S,L){if(!S||!L||L.done||S.relay||S.dist<400||S.phase!=="race")return null;if(L.x>=S.dist-120)return "kick";
+    const cq=runCruise(L,S.dist),b0=Math.max(.72,cq-.05),q=L.v/Math.max(1,L.vmax);return q>cq+.025?"hot":q<b0-.03?"slow":"ok";},
   meLane(){const S=this.st;return S&&S.lanes&&S.lanes.find(l=>l.me);},
   legF(L){return L.legs?L.legs[Math.min(L.leg,L.legs.length-1)].f:L.f;},
   set(){const S=this.st,me=this.runner();if(!me)return;AU.resume&&AU.resume();try{AU.stopMusic();}catch(e){}G.mini=G.mini||{};if(!S.race)G.mini.runLast=S.id;
@@ -10097,7 +10390,7 @@ const RUN={st:null,
     if(!S.react)S.react=(now-S.gun)/1000;
     const dt=S.lastT?(now-S.lastT)/1000:.25;S.lastT=now;S.rate=Math.min(12,S.rate*.6+(1/Math.max(.07,dt))*.4);
     if(S.lastTap&&now-S.lastTap>550)S.chain=0;S.lastTap=now;S.chain=(S.chain||0)+1;S.maxChain=Math.max(S.maxChain||0,S.chain);S.chainT=now;
-    if(S.chain%25===0){S.mile={n:S.chain,t:now};S.shk=now;try{navigator.vibrate&&navigator.vibrate(25)}catch(_){}AU.init&&AU.init()&&AU.tone(AU.ctx.currentTime+.01,{f:1320,type:"square",dur:.12,peak:.1});}
+    const pz0=this.pace(S,L);if(S.chain%25===0&&(!pz0||pz0==="kick")){S.mile={n:S.chain,t:now};S.shk=now;try{navigator.vibrate&&navigator.vibrate(25)}catch(_){}AU.init&&AU.init()&&AU.tone(AU.ctx.currentTime+.01,{f:1320,type:"square",dur:.12,peak:.1});}
     S.dust=(S.dust||[]).concat([{t:now}]).slice(-6);},
   /* relay: tap the track when the incoming runner is in the box — late in the box is a flying start, early drops the baton */
   pass(){const S=this.st;if(!S||S.phase!=="race"||!S.relay)return;const L=this.meLane();if(!L||L.done||L.leg>=L.legs.length-1||L.wait>0)return;
@@ -10140,6 +10433,8 @@ const RUN={st:null,
       if(mk>=D/2)once("q2",()=>Math.abs(gap)<1.5?`Halfway! Still anyone's race!`:gap>8?`Halfway — ${me} has pulled well clear!`:gap>0?`Halfway — ${me} leads!`:`Halfway — ${nm(lead)} leads, ${me} chasing!`);
       if(mk>=D*.75)once("q3",()=>Math.abs(gap)<2?`Final straight! Neck and neck!`:gap<0?`Final straight — ${me} has to pick it up now!`:`Final straight — ${me} still leads!`);
       if(mk>=D-10&&Math.abs(gap)<1.2)once("photo",()=>`So close! We may need the photo finish!`);}
+    if(D>=400&&!S.relay&&!L.done){if((S.hotT||0)>1.2&&L.x<D-150&&(F.hotN||0)<2&&(!F.hotAt||now-F.hotAt>6000)){F.hotN=(F.hotN||0)+1;F.hotAt=now;this.say(`${me} is pushing too hard, careful not to empty the tank before the last bend!`);}
+      if(L.x>=D-120)once("kick",()=>`Last 120 metres! Everything you have left, ${me}!`);}
     if(D>=400&&L.sta<.15&&!L.done)once("empty",()=>`${me} is out of gas! The legs are getting heavy!`);
     if(S.relay&&L.legX>=78&&L.leg<L.legs.length-1&&!F["z"+L.leg]){F["z"+L.leg]=1;this.say(`In the box! Tap the track to pass to ${L.legs[L.leg+1].f.name}!`);}
     if(S.lastT&&now-S.lastT>700&&!L.done&&(!S.fadeT||now-S.fadeT>2500)&&el>1){S.fadeT=now;this.say(`${me} is fading! Keep going!`);}},
@@ -10156,6 +10451,11 @@ const RUN={st:null,
         if(L.legX>=100&&L.leg<L.legs.length-1){if(L.me)this.handover(L,"late");else this.handover(L,"ai");}}
       if(L.x>=D){L.x=D;L.done=true;L.t=el;}}
     const L=this.meLane();
+    {const pz=this.pace(S,L);if(pz){if(pz==="ok")S.bandT=(S.bandT||0)+dt;S.hotT=pz==="hot"?(S.hotT||0)+dt:0;}
+     if(L&&!L.done&&S.dist>=400&&!S.relay&&L.sta<=0&&S.emptyAt==null)S.emptyAt=L.x;
+     if(pz!==S.pz){if(pz==="kick")S.chain=0;S.pz=pz;const b=document.getElementById("rnL");if(b){b.classList.remove("pz-ok","pz-hot","pz-slow","pz-kick");if(pz)b.classList.add("pz-"+pz);
+       const bt=b.querySelector("b"),sm=b.querySelector("small");if(bt)bt.textContent=pz==="ok"?"hold pace":pz==="hot"?"ease off!":pz==="kick"?"KICK!!":"RUN!";
+       if(sm)sm.textContent=pz==="kick"?"mash all out · Space":pz?"keep the needle in the green · Space":"mash · Space";}}}
     if(L&&!L.done&&now-S.pathT>=100){S.pathT=now;S.path.push(Math.round(L.x*10)/10);}
     const t=document.getElementById("rnt");if(t)t.textContent=el.toFixed(2);this.call(el,now);
     const live=S.lanes.filter(l=>!l.ghost);
@@ -10170,6 +10470,7 @@ const RUN={st:null,
     for(let i=0;i<n;i++){x.fillStyle=i%2?"rgba(0,0,0,.05)":"rgba(255,255,255,.03)";x.fillRect(0,top+i*lh,W,lh);x.fillStyle="#f3e9dc";x.fillRect(0,top+(i+1)*lh-1,W,2);}
     for(let m=0;m<=D;m+=10){const X=px(m);if(X<-10||X>W+10)continue;x.fillStyle="rgba(255,255,255,.55)";x.fillRect(X,top+2,2,H-top);if(m%50===0||D<=100){x.fillStyle="#fff";x.font="bold 10px sans-serif";x.textAlign="left";x.fillText(m+"",X+3,top+11);}}
     if(S.relay)for(let k=1;k<4;k++){const a=px(k*100-22),b=px(k*100);if(b<-10||a>W+10)continue;x.fillStyle="rgba(255,211,74,.28)";x.fillRect(a,top,b-a,H-top);x.fillStyle="#ffd34a";x.fillRect(b-2,top,3,H-top);}
+    if(D>=400&&!S.relay){const kx=px(D-120);if(kx>-30&&kx<W+10){x.fillStyle="#ffd34a";x.fillRect(kx-1,top,3,H-top);x.font='900 13px "Chakra Petch","IBM Plex Sans Thai",sans-serif';x.textAlign="left";x.lineWidth=4;x.strokeStyle="#140a1e";x.strokeText("KICK! 120 m",kx+5,top+26);x.fillStyle="#ffd34a";x.fillText("KICK! 120 m",kx+5,top+26);}}
     const fx=px(D);if(fx<W+10){for(let i=0;i<Math.ceil((H-top)/9.5);i++){x.fillStyle=i%2?"#000":"#fff";x.fillRect(fx,top+i*9.5,6,9.5);}}
     const fr=v=>v>.5?Math.floor(now/Math.max(70,260-v*18))%4:0,sh=Math.min(62,lh*1.55);
     const drawR=(f,m,v,footY,stum,al=1)=>{if(!f)return;const s=sheetFor(f);if(!s||!(s.complete||s.width))return;const bob=v>.5?Math.abs(Math.sin(now/90))*3:0;drawFrame(x,s,stum?ROW.guard:ROW.walk,fr(v),px(m),footY-bob,sh,false,al);};
@@ -10201,7 +10502,11 @@ const RUN={st:null,
         for(let i=0;i<14;i++){const a=i/14*6.283,r=40+e*160;x.fillStyle="#ffe066";x.fillRect(cx+Math.cos(a)*r-3,cy+70+Math.sin(a)*r*.6-3,6,6);}}
       x.restore();}
     /* tap chain counter */
-    if(S.phase==="race"&&S.chain>=3){const age=now-S.chainT,alive=age<550||(me&&me.done),fade=alive?1:Math.max(0,1-(age-550)/500);
+    const pz=this.pace(S,me);
+    if(pz&&pz!=="kick"){const col=pz==="ok"?"#7dff8f":pz==="hot"?"#ff9a2a":"#ffffff",big=pz==="ok"?(S.bandT||0).toFixed(1)+" s":pz==="hot"?"ease off!":"a bit faster",sub=pz==="ok"?"holding pace!":pz==="hot"?"tank running dry":"under the green band";
+      x.save();x.translate(W-12,72);x.rotate(-.06);x.textAlign="right";x.textBaseline="alphabetic";x.font='italic 900 34px "Chakra Petch","IBM Plex Sans Thai",sans-serif';x.lineWidth=7;x.strokeStyle="#140a1e";x.strokeText(big,0,0);x.fillStyle=col;x.fillText(big,0,0);
+      x.font='900 14px "Chakra Petch","IBM Plex Sans Thai",sans-serif';x.lineWidth=4;x.strokeText(sub,0,18);x.fillStyle="#fff";x.fillText(sub,0,18);x.restore();}
+    else if(S.phase==="race"&&S.chain>=3){const age=now-S.chainT,alive=age<550||(me&&me.done),fade=alive?1:Math.max(0,1-(age-550)/500);
       if(fade>0){const k=S.chain,bump=RM?1:1+.35*Math.max(0,1-age/120),col=k>=75?"#ff4a4a":k>=50?"#ff9a2a":k>=25?"#ffd34a":"#ffffff",jx=!RM&&k>=50&&alive?(Math.random()-.5)*2:0;
         x.save();x.globalAlpha=fade;x.translate(W-12+jx,72);x.rotate(-.08);x.scale(bump,bump);x.textAlign="right";x.textBaseline="alphabetic";
         x.font='italic 900 40px "Chakra Petch","IBM Plex Sans Thai",sans-serif';x.lineWidth=7;x.strokeStyle="#140a1e";x.strokeText(String(k),0,0);x.fillStyle=col;x.fillText(String(k),0,0);
@@ -10223,7 +10528,7 @@ const RUN={st:null,
     if(dq&&me){me.t=99;me.done=true;for(const l of S.lanes)if(!l.done)l.t=99;}
     const live=S.lanes.filter(l=>!l.ghost),order=S.lanes.slice().sort((a,b)=>a.t-b.t),place=live.slice().sort((a,b)=>a.t-b.t).indexOf(me)+1;
     const t=dq?99:me.t,f=this.runner(),par=f&&!S.relay?runPar(f,D):0,r=par?t/par:1;
-    const grade=dq?"C":r<=1.02?"S":r<=1.07?"A":r<=1.14?"B":"C";
+    let grade=dq?"C":r<=1.02?"S":r<=1.07?"A":r<=1.14?"B":"C";const p4=D>=400&&!S.relay;if(p4&&live.length>1&&place>1&&(grade==="S"||grade==="A"))grade="B";
     G.mini=G.mini||{};G.mini.best=G.mini.best||{};const bk=D>=400?"run400":"run",ext=S.duel||S.race;
     const prev=G.mini.best[bk]||null,isBest=!dq&&!ext&&!S.relay&&(!prev||t<prev);if(isBest)G.mini.best[bk]=Math.round(t*100)/100;
     /* the ghost is per runner, 100 m only */
@@ -10232,7 +10537,7 @@ const RUN={st:null,
       if(won&&S.rung===(G.mini.ladder||0)){G.mini.ladder=(G.mini.ladder||0)+1;ladUp=true;G.dust=(G.dust||0)+2;if(G.mini.ladder<RUN_LADDER.length)S.rung=G.mini.ladder;}}
     if(S.race&&S.race.say)say=S.race.say(place===1);
     const passTxt=S.passes&&S.passes.length?S.passes.map(q=>({perfect:"clean",good:"Good",early:"early",late:"late"}[q])).join(" · "):"";
-    S.res={win:place===1,place,t,ot:(live.find(l=>!l.me)||{}).t||0,dq,fs:S.fs,react:S.react||0,chain:S.maxChain||0,grade:ext||S.relay?null:grade,best:isBest,prev,par,order,passes:passTxt,rw:"",say,ladUp};
+    S.res={win:place===1,place,t,ot:(live.find(l=>!l.me)||{}).t||0,dq,fs:S.fs,react:S.react||0,chain:S.maxChain||0,grade:ext||S.relay?null:grade,best:isBest&&!(p4&&place>1),p4,band:S.bandT||0,empty:S.emptyAt,prev,par,order,passes:passTxt,rw:"",say,ladUp};
     const out={win:place===1,place,t,ot:S.res.ot,dq,order:order.map(l=>({team:l.team,t:l.t,me:l.me}))};
     if(S.race&&S.race.cb)S.race.cb(out);
     else if(S.duel&&S.duel.cb){S.duel.cb(out);}
@@ -13549,7 +13854,7 @@ EVENTS.push({id:"pet_mudlek",look:"casual",bg:"camp",pri:2,when:G=>inCamp(G,"fah
   {n:"fah",f:"flustered",l:"casual",t:"…Don't look at me like that! Iron Fist doesn't belong to Phayak Thong anymore. Fah moved, so he moves too. End of story."},
   {n:"nar",t:"Fah lifts the cloth. Out jumps a cat with silver fur exactly like Fah's hair, four white paws like little socks, a nick in one ear, and yellow eyes sizing everyone up like opponents."},
   {n:"coach",t:"Same colour as his owner… our camp's turning into a zoo, manager."},
-  {inject:G=>hasPet(G,"cat")?[{n:"nar",t:`Iron Fist walks straight to the heavy bag, where ${petName(G,"cat")} is sleeping. The two cats stare at each other for a full ten seconds…`},{n:"nar",t:`${petName(G,"cat")} shifts over to the other side — they split the bag half and half`},{n:"fah",f:"happy",l:"casual",t:"See? Iron Fist won in the first round!"}]:[{n:"fah",f:"happy",l:"casual",t:"He's picked the middle heavy bag. That's his bed now — nobody take it."}]},
+  {inject:G=>hasPet(G,"cat")?[{n:"nar",t:`Iron Fist walks straight to the heavy bag, where ${petIntro(G,"cat")} is sleeping. The two cats stare at each other for a full ten seconds…`},{n:"nar",t:`${petName(G,"cat")} shifts over to the other side — they split the bag half and half`},{n:"fah",f:"happy",l:"casual",t:"See? Iron Fist won in the first round!"}]:[{n:"fah",f:"happy",l:"casual",t:"He's picked the middle heavy bag. That's his bed now — nobody take it."}]},
   {n:"fah",f:"pout",l:"casual",t:G=>`${CALL(G,"fah")} …look after him, okay? He likes tuna, and people who don't talk too much.`},
   {inject:G=>{adoptPet(G,"mudlek","Iron Fist","fah");return [{n:"nar",t:"🐾 Iron Fist joins the camp — see the pets button on the home screen"}];}}]});
 try{window.PETX={petsWeekly,petPlayMode,pst,petXP,PX};}catch(e){}
