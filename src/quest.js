@@ -38,6 +38,22 @@ function beltTournamentFinish(D){const S=D.belt,champ=D.champ,won=dmMine(champ);
   if(won){G.cash+=D.prize;G.wkFight=(G.wkFight||0)+D.prize;G.rep+=3;G.F[champ].belts=(G.F[champ].belts||0)+1;const rival=D.w[1].find(id=>id!==champ);recordHonor(G,"belt",champ,S.div,D.wk,S.venue==="tha"?null:S.venue,G.F[rival]?.name,rival);}save();}
 /* v1.91.213 (Man: the belt bracket had no motion when someone advanced) — same pair layout as the Death Match bracket (won / out / ?),
    the holder marked 👑, and names that just moved up a round slide in once */
+/* v1.91.214 (Man: real bracket lines that light up as the winner moves on) — an SVG layer joins each pair to its next slot;
+   the winner's path turns gold, and a path just won draws itself in ("วื้บ") right before the name lands */
+function bracketLines(){if(typeof document==="undefined")return;const box=document.querySelector(".dmb");if(!box||!box.querySelector("[data-ri]"))return;
+  let svg=box.querySelector("svg.dmlines");if(!svg){svg=document.createElementNS("http://www.w3.org/2000/svg","svg");svg.setAttribute("class","dmlines");box.prepend(svg);}
+  const W=box.clientWidth,H=box.clientHeight;svg.setAttribute("width",W);svg.setAttribute("height",H);svg.setAttribute("viewBox",`0 0 ${W} ${H}`);
+  /* layout offsets, not screen rects: a name still mid-whoosh is transformed, its slot is not */
+  const at=(r,i)=>box.querySelector(`[data-ri="${r}:${i}"]`),rc=e=>{let x=0,y=0,n=e;while(n&&n!==box){x+=n.offsetLeft;y+=n.offsetTop;n=n.offsetParent;}return {l:x,r:x+e.offsetWidth,y:y+e.offsetHeight/2};};
+  const rm=typeof JUICE_RM==="function"&&JUICE_RM();let out="";
+  for(let r=0;r<3;r++){const n=[8,4,2][r];for(let i=0;i<n;i+=2){const a=at(r,i),b=at(r,i+1),t=at(r+1,i/2);if(!a||!b||!t)continue;
+    const A=rc(a),Bc=rc(b),T=rc(t),mx=Math.round((Math.max(A.r,Bc.r)+T.l)/2),win=t.dataset.id&&(t.dataset.id===a.dataset.id?A:t.dataset.id===b.dataset.id?Bc:null);
+    const seg=P=>`M${P.r},${P.y} H${mx} V${T.y} H${T.l}`;
+    out+=`<path class="dml" d="${seg(A)}"/><path class="dml" d="${seg(Bc)}"/>`;
+    if(win){const isNew=t.classList.contains("new"),len=Math.abs(mx-win.r)+Math.abs(T.y-win.y)+Math.abs(T.l-mx)+2,d=((r+1)-1)*.22;
+      out+=`<path class="dml win ${isNew&&!rm?"lnew":""} ${t.classList.contains("mine")?"mine":""}" d="${seg(win)}" style="--len:${len};--d:${d}s"/>`;}}}
+  svg.innerHTML=out;}
+if(typeof window!=="undefined")window.addEventListener("resize",()=>bracketLines());
 /* whoosh in, then a thump: shake the bracket, buzz, and a punchy sound as each name lands (ours louder; a title gets the champ sting) */
 function bracketJuice(){if(typeof document==="undefined")return;const rm=typeof JUICE_RM==="function"&&JUICE_RM();const box=document.querySelector(".dmb");if(!box)return;
   document.querySelectorAll(".dmb .dmc.new[data-r]").forEach(el=>{const r=+el.dataset.r,land=((r-1)*.22+.42)*1000,mine=el.classList.contains("mine");
@@ -45,15 +61,15 @@ function bracketJuice(){if(typeof document==="undefined")return;const rm=typeof 
       try{AU.sfx&&AU.sfx(mine?(r===3?"champ":"kd"):"pop");}catch(e){}if(mine&&typeof buzz==="function")buzz(r===3?[40,60,40]:[25]);},rm?0:land);});}
 function beltBracketHTML(D){const title=STADIUMS[D.belt.venue].name+" · "+D.belt.div,nm=id=>id&&G.F[id]?esc(G.F[id].name):"…",nx=dmNextMatch();
   const seen=UI.dmSeen&&UI.dmSeen.k===D.wk+":"+D.belt.venue?UI.dmSeen:(UI.dmSeen={k:D.wk+":"+D.belt.venue,s:{}}),fresh=[];
-  const cell=(id,r)=>{if(!id||!G.F[id])return `<div class="dmc tbd">?</div>`;const won=r<3&&(D.w[r]||[]).includes(id),src=r===0?D.slots:D.w[r-1],lost=r<3&&!won&&D.w[r]&&D.w[r].length*2>src.indexOf(id);
+  const cell=(id,r,ix)=>{if(!id||!G.F[id])return `<div class="dmc tbd" data-ri="${r}:${ix}">?</div>`;const won=r<3&&(D.w[r]||[]).includes(id),src=r===0?D.slots:D.w[r-1],lost=r<3&&!won&&D.w[r]&&D.w[r].length*2>src.indexOf(id);
     const k=r+":"+id,isNew=r>0&&!seen.s[k];if(isNew)fresh.push(k);
     const st=isNew&&dmMine(id)?`<i class="dmstamp">${r===3?"แชมป์!":"ผ่าน!"}</i>`:"";
-    return `<div class="dmc ${dmMine(id)?"mine":""} ${won?"won":""} ${lost?"lost":""} ${isNew?"new":""}" style="--d:${(r-1)*.22}s" ${isNew?`data-r="${r}"`:""}>${G.F[id].canon?`<img src="${faceSrc(id,"happy")}" alt="">`:""}<b>${nm(id)}${id===D.belt.holder?" 👑":""}</b>${st}</div>`;};
-  const col=(L,r,t)=>`<div class="dmcol"><h4>${t}</h4>${Array.from({length:L.length/2},(_,i)=>`<div class="dmm">${cell(L[i*2],r)}${cell(L[i*2+1],r)}</div>`).join("")}</div>`;
+    return `<div class="dmc ${dmMine(id)?"mine":""} ${won?"won":""} ${lost?"lost":""} ${isNew?"new":""}" style="--d:${(r-1)*.22}s" data-ri="${r}:${ix}" data-id="${id}" ${isNew?`data-r="${r}"`:""}>${G.F[id].canon?`<img src="${faceSrc(id,"happy")}" alt="">`:""}<b>${nm(id)}${id===D.belt.holder?" 👑":""}</b>${st}</div>`;};
+  const col=(L,r,t)=>`<div class="dmcol"><h4>${t}</h4>${Array.from({length:L.length/2},(_,i)=>`<div class="dmm">${cell(L[i*2],r,i*2)}${cell(L[i*2+1],r,i*2+1)}</div>`).join("")}</div>`;
   const pad=(L,n)=>[...L.slice(0,n),...Array(Math.max(0,n-L.length)).fill(null)];
-  if(fresh.length){setTimeout(()=>fresh.forEach(k=>seen.s[k]=1),1600);setTimeout(bracketJuice,30);}
+  setTimeout(bracketLines,0);if(fresh.length){setTimeout(()=>fresh.forEach(k=>seen.s[k]=1),1600);setTimeout(bracketJuice,30);}
   const action=D.done?`<p class="center goldt">🏆 ${nm(D.champ)} · ${fmt(D.prize||0)}</p><button class="btn primary" data-act="dmclose">กลับค่าย</button>`:nx?`<button class="btn primary" data-act="dmgo" data-id="${dmMine(nx[0])?nx[0]:nx[1]}" data-v="${dmMine(nx[0])?nx[1]:nx[0]}">${nm(nx[0])} vs ${nm(nx[1])} ▸</button>`:"";
-  return `<h2>ทัวร์นาเมนต์ชิงเข็มขัด ${title}</h2><p class="meta">รุ่นเดียวกัน · แพ้คัดออก · ชกไฟต์ละห้ายก · 👑 แชมป์เดิม</p><div class="dmb">${col(D.slots,0,"8 คน")}${col(pad(D.w[0],4),1,"รองฯ")}${col(pad(D.w[1],2),2,"ชิง")}<div class="dmcol"><h4>🏆</h4><div class="dmm">${D.w[2][0]?cell(D.w[2][0],3):'<div class="dmc tbd">?</div>'}</div></div></div>${action}`;}
+  return `<h2>ทัวร์นาเมนต์ชิงเข็มขัด ${title}</h2><p class="meta">รุ่นเดียวกัน · แพ้คัดออก · ชกไฟต์ละห้ายก · 👑 แชมป์เดิม</p><div class="dmb">${col(D.slots,0,"8 คน")}${col(pad(D.w[0],4),1,"รองฯ")}${col(pad(D.w[1],2),2,"ชิง")}<div class="dmcol"><h4>🏆</h4><div class="dmm">${D.w[2][0]?cell(D.w[2][0],3,0):'<div class="dmc tbd" data-ri="3:0">?</div>'}</div></div></div>${action}`;}
 const QGRP_BG={gang:"bg_market.webp",rooster:"bg_rooster.webp",bull:"bg_farm.webp"};
 /* v1.91.83 (Man): the quest foes kept pace with her stats only, so a late-game girl with a full skill tree outgrew even the bosses.
    They now read a fifth of her hidden edge (the season bonus halved to make room) (skills, perks, level) like the Loy thief, carry whatever the stat ceiling cannot hold as ring craft,

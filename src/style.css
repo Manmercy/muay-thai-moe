@@ -2824,7 +2824,7 @@ i.stye.up{background:#1f6b3a;color:#e6ffe9}i.stye.dn{background:#8a2333;color:#f
 @keyframes dmLand{0%{background:#fff7c2;box-shadow:0 0 0 0 rgba(255,211,74,.95),inset 0 0 0 2px #ffd34a}100%{box-shadow:0 0 0 14px rgba(255,211,74,0),inset 0 0 0 2px transparent}}
 .dmc.mine.new{animation:dmWhoosh .48s cubic-bezier(.2,.9,.25,1.35) both,dmLand .7s ease-out both,dmMineGlow 1.6s ease-in-out both;animation-delay:var(--d,0s),calc(var(--d,0s) + .42s),calc(var(--d,0s) + .9s)}
 @keyframes dmMineGlow{0%,100%{box-shadow:inset 0 0 0 2px var(--gold)}50%{box-shadow:inset 0 0 0 2px var(--gold),0 0 16px 2px rgba(255,211,74,.7)}}
-.dmstamp{position:absolute;right:-6px;top:-12px;padding:1px 7px;font-style:normal;font-weight:900;font-size:12px;color:#fff;background:#e23a3a;border:2px solid #fff;border-radius:4px;transform:rotate(-10deg);box-shadow:0 2px 0 #7a1420;
+.dmstamp{position:absolute;right:-12px;top:-15px;padding:0 6px;font-style:normal;font-weight:900;font-size:11px;color:#fff;background:#e23a3a;border:2px solid #fff;border-radius:4px;transform:rotate(-10deg);box-shadow:0 2px 0 #7a1420;
   animation:dmStamp .38s cubic-bezier(.2,1.6,.4,1) both;animation-delay:calc(var(--d,0s) + .5s);pointer-events:none}
 @keyframes dmStamp{0%{transform:rotate(-10deg) scale(2.6);opacity:0}100%{transform:rotate(-10deg) scale(1);opacity:1}}
 .dmb.shake{animation:dmShake .32s linear}.dmb.shake.sm{animation:dmShakeSm .22s linear}
@@ -2841,3 +2841,17 @@ i.stye.up{background:#1f6b3a;color:#e6ffe9}i.stye.dn{background:#8a2333;color:#f
  .pre .meta{margin:2px 0}
  .pre .ctrl{position:sticky;bottom:0;padding-top:6px;background:linear-gradient(transparent,var(--bg2) 30%)}
 }
+
+/* v1.91.214 bracket lines */
+.dmb{position:relative;column-gap:14px}
+.dmb .dmcol{position:relative;z-index:1}
+.dmlines{position:absolute;left:0;top:0;z-index:0;pointer-events:none;overflow:visible}
+.dml{fill:none;stroke:rgba(255,255,255,.18);stroke-width:2;shape-rendering:crispEdges}
+.dml.win{stroke:#7a6a3a;stroke-width:3}
+.dml.win.mine{stroke:#ffd34a;filter:drop-shadow(0 0 3px rgba(255,211,74,.8))}
+.dml.lnew{stroke:#fff6c8;stroke-dasharray:var(--len);stroke-dashoffset:var(--len);animation:dmlDraw .42s cubic-bezier(.6,0,.4,1) forwards,dmlCool .8s ease-out forwards;animation-delay:var(--d),calc(var(--d) + .42s);filter:drop-shadow(0 0 6px #ffd34a)}
+.dml.lnew.mine{stroke:#fff6c8}
+@keyframes dmlDraw{to{stroke-dashoffset:0}}
+@keyframes dmlCool{to{stroke:#ffd34a}}
+.dml.lnew:not(.mine){animation-name:dmlDraw,dmlCoolDim}@keyframes dmlCoolDim{to{stroke:#7a6a3a}}
+@media (prefers-reduced-motion:reduce){.dml.lnew{animation:none;stroke-dashoffset:0}}
