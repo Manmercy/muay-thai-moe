@@ -80,7 +80,7 @@ XMODAL.pets=m=>{const P=pv(G);if(m.i!=null&&P[m.i]){const p=pst(G,P[m.i]),D=PX[p
    <div class="petgrid">${P.map((p0,i)=>{const p=pst(G,p0),aw=away(G,p),done=p.wk===gameWeek(G),D=PX[p.k];return `<div class="petcard ${aw?"away":done?"done":""}">${petThumb(p.k)}
      <div class="pcm"><span class="pc1"><b>${esc(p.name)}</b> <small>Lv.${p.lv}</small></span><span class="pcj"><small>Joy</small>${bar(p.joy,100,p.joy<30?"#e8434f":p.joy<60?"#f0a33a":"#5cc46a")}</span>
      <small class="pc2">${esc(D?D.pas(p):"")}</small></div>
-     <div class="pcact">${aw?`<span class="pwarn">🏃 Off in the rice fields — back next week</span>`:done?`<span class="meta">Played this week ✓</span>`:(D?D.modes:[]).map((M,j)=>`<button class="btn sm${j===0?" primary":""}" data-act="petgo" data-v="${i}:${j}">${esc(M[0])}${M[3]?` ฿${M[3]}`:""}</button>`).join("")}
+     <div class="pcact">${aw?`<span class="pwarn">🏃 Off in the rice fields — back next week</span>`:done?`<span class="meta">Played this week ✓</span>`:(D?D.modes:[]).map((M,j)=>`<button class="btn sm" data-act="petgo" data-v="${i}:${j}">${esc(M[0])}${M[3]?` ฿${M[3]}`:""}</button>`).join("")}
      <button class="btn sm ghost" data-act="petdet" data-v="${i}">Details</button></div></div>`;}).join("")}</div>`};};
 for(const k of Object.keys(PX)){CFX["pet_"+k]={bg:PX[k].bg,cap:"",row:"idle",fx:"hearts"};CFX["pet_"+k+"_no"]={bg:PX[k].bg,cap:"",row:"idle",fx:"z"};CFX["pet_"+k+"_run"]={bg:"bg_farm.webp",cap:"",row:"idle",fx:"sparks"};}
 const PIMG={};const petImg=k=>{if(!PET_ART.has(k))return null;if(!(k in PIMG)){const i=new Image();i.src=ASSET+"pet_"+k+".webp";PIMG[k]=i;}const i=PIMG[k];return i.complete&&i.naturalWidth?i:null;};

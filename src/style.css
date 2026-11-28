@@ -2747,3 +2747,8 @@ i.stye.up{background:#1f6b3a;color:#e6ffe9}i.stye.dn{background:#8a2333;color:#f
 .gtip{background:#2b2240;border-left:3px solid var(--gold);padding:8px 10px;margin:10px 0}
 .glink{margin:6px 0}
 .gmore{margin:10px 0}.gmore summary{cursor:pointer;color:var(--gold);font-weight:700;padding:6px 0}
+/* v1.91.203 (Man, phone video): opponent HP ghost drains from the right like her bar; corner fits a phone screen; Death Match pick shows who can't enter */
+.fside.b .meter .hpg{left:auto;right:2px}
+.fight.incorner #fstage{height:22vh;height:clamp(96px,16svh,190px)}
+.dmpick:disabled{opacity:.45;cursor:not-allowed}
+.cutin span{background:rgba(0,0,0,.85)}
