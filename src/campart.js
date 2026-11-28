@@ -17,8 +17,10 @@ let caFailed=false;
 function campMood(G){if(typeof window!=="undefined"&&window.__campMood)return window.__campMood;
   const wk=((typeof gameWeek==="function"?gameWeek(G):1)-1)%52+1;
   if(wk>=20&&wk<=42){const h=mulberry32((G.seed||1)*7+(typeof gameWeek==="function"?gameWeek(G):1))();if(h<.4)return "rain";}
-  const hr=new Date().getHours()+new Date().getMinutes()/60;
-  return hr<5||hr>=19?"night":hr<6.5?"dawn":hr<16.5?"day":"sunset";}
+  /* v1.91.210 (Man: night-time players only ever saw night) — the camp runs its own day: it opens in daylight and cycles
+     day 150 s → sunset 30 s → night 75 s → dawn 25 s (~4.7 min a lap) instead of following the device clock */
+  const c=((performance.now()-CA_T0)/1000)%CA_DAY.reduce((a,x)=>a+x[1],0);let acc=0;for(const [m,d] of CA_DAY){acc+=d;if(c<acc)return m;}return "day";}
+const CA_T0=typeof performance!=="undefined"?performance.now():0,CA_DAY=[["day",150],["sunset",30],["night",75],["dawn",25]];
 /* everything the current camp needs */
 function campArtPlan(G){const lv=Math.max(1,Math.min(3,campLevel(G))),dl=Math.max(0,Math.min(5,(G.fac&&G.fac.dorm)||0)),F=G.fac||{};
   const tree=decorChoice(G,"tree"),gate=decorChoice(G,"gate"),ring=decorChoice(G,"ring"),track=decorChoice(G,"track"),car=decorChoice(G,"vehicle"),bags=decorChoice(G,"bags");
@@ -31,11 +33,17 @@ function campArtFiles(p,mood){const L=["gym_"+(p.lv-1),"dorm_"+p.dl,"beam","bag_
   if(p.sauna)L.push("fac_sauna");if(p.lights)L.push("pole");if(p.brand)L.push("fac_brand");return L;}
 /* cached layers per canvas: sky, and mountains + ground (tinted for the mood) */
 function caLayer(ctx,key,draw){const cv=ctx.canvas,c=cv.__ca||(cv.__ca={});if(c[key])return c[key];const o=document.createElement("canvas");o.width=cv.width;o.height=cv.height;draw(o.getContext("2d"));return c[key]=o;}
+let caSkyWarm=0;
 function campArt(ctx,G,t){
   if(caFailed||!G||!G.fac||(typeof SETTINGS!=="undefined"&&SETTINGS.classicCamp))return false; /* v1.92 (Man): players can keep the classic hand-drawn camp */
-  const p=campArtPlan(G),mood=campMood(G),files=campArtFiles(p,mood);
-  let ready=true;for(const n of files){const i=caImg(n);if(i.complete&&i.naturalWidth===0&&i.src){/* missing file: keep the hand-drawn camp */caFailed=true;return false;}if(!(i.complete&&i.naturalWidth))ready=false;}
-  if(!ready)return false;
+  const p=campArtPlan(G),cv=ctx.canvas;let mood=campMood(G),files=campArtFiles(p,mood);
+  /* the day cycle switches moods while the camp is open: warm every mood's sky, and if the next one isn't loaded yet keep the last one */
+  if(!caSkyWarm){caSkyWarm=1;for(const n of ["sky_clear_day","sky_sunset","sky_dawn","sky_rain","clouds_white","clouds_storm"])caImg(n);}
+  const isReady=L=>{for(const n of L){const i=caImg(n);if(i.complete&&i.naturalWidth===0&&i.src)return -1;if(!(i.complete&&i.naturalWidth))return 0;}return 1;};
+  let rd=isReady(files);if(rd<0){caFailed=true;return false;}
+  if(!rd&&cv.__caMood&&cv.__caMood!==mood&&isReady(campArtFiles(p,cv.__caMood))===1){mood=cv.__caMood;files=campArtFiles(p,mood);rd=1;}
+  if(!rd)return false;
+  if(cv.__caMood&&cv.__caMood!==mood&&!window.__campMood)cv.__caFade=t;cv.__caMood=mood;
   const S=ctx.canvas.width/320,NIGHT=mood==="night",RAIN=mood==="rain";
   const P=(x,y,w,h,c)=>{ctx.fillStyle=c;ctx.fillRect(Math.round(x*S),Math.round(y*S),Math.max(1,Math.round(w*S)),Math.max(1,Math.round(h*S)));};
   const dimOf=(n,sc)=>{const i=caImg(n);return [i.naturalWidth/CA_PX*(sc||1),i.naturalHeight/CA_PX*(sc||1)];};
@@ -107,6 +115,8 @@ function campArt(ctx,G,t){
   if(RAIN)Object.assign(YL,{drill:[8,13,93],stu:[6,92,84,96],coach:[14,92,80,95],staff:[10,94,80,98],player:[20,94,84,98],shelter:[10,112,80,119],says:["ฝนตก~","เปียกหมด!","รอฝนหยุด"]});
   YL.post=()=>{caLight(ctx,S,t,mood,LIGHTS,p);if(typeof yearFx==="function")yearFx(ctx,(x,y,w,h,c)=>{ctx.fillStyle=c;ctx.fillRect(Math.round(x)*S,Math.round(y)*S,Math.round(w)*S,Math.round(h)*S);},G,t);};
   campYard(ctx,G,t,S,P,YL);
+  /* a soft dip when the day cycle moves on to the next mood */
+  if(cv.__caFade!=null){const a=1-(t-cv.__caFade)/1400;if(a>0){ctx.fillStyle=`rgba(24,16,44,${(.5*a).toFixed(3)})`;ctx.fillRect(0,0,cv.width,cv.height);}else cv.__caFade=null;}
   return true;}
 function caShadow(ctx,S,x,bot,w){ctx.fillStyle="rgba(20,14,30,.28)";ctx.beginPath();ctx.ellipse((x+w/2)*S,(bot-1)*S,w/2*S*.9,2.2*S,0,0,7);ctx.fill();}
 /* night / rain: a 320x180 light map in hard concentric bands (8 steps), darkness over the unlit parts, a warm wash over the lit ones.

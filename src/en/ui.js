@@ -1,5 +1,5 @@
 // ================= MUAY THAI MOE v1.3 — UI =================
-const VERSION="1.91.209";
+const VERSION="1.91.210";
 const CUR_LANG=(typeof window!=="undefined"&&window.LANG)||"th";
 const TH_LABEL=String.fromCharCode(3652,3607,3618);
 function langSwitch(cls){return `<div class="langsw ${cls||""}" role="group" aria-label="Language">${[["th",TH_LABEL],["en","EN"]].map(([k,l])=>`<button class="lsb ${CUR_LANG===k?"on":""}" data-act="setlang" data-v="${k}" aria-pressed="${CUR_LANG===k}">${l}</button>`).join("")}</div>`;}
@@ -1282,7 +1282,7 @@ const PATCH_GUIDE={id:"1.97",ver:"Muay Thai Moe v1.97",title:"The game guide is 
  foot:"Coach Daeng says: read the guide, then don't forget to train ✦"};
 /* (Man): the in-game popup for the camp-art update — short teasers, no spoilers */
 const PATCH_CAMP={id:"1.98",ver:"Muay Thai Moe v1.98",title:"The camp, reborn",lead:"Sirichai camp has come to life. Open the camp screen in the morning, at dusk and when it rains",items:[
- ["🏕️","A camp that lives day and night","The sky follows your device's clock, the camp lights come on at dusk, the kids run for cover when it rains and the bags swing with every punch · prefer the old camp? Turn on \"Classic camp\" in Settings"],
+ ["🏕️","A camp that lives day and night","The camp cycles through morning, dusk and night as you play, the lights come on at dusk, the kids run for cover when it rains and the bags swing with every punch · prefer the old camp? Turn on \"Classic camp\" in Settings"],
  ["📸","Camp card","Tap the camp card button on the camp screen, pick the weather and a card pattern, line the fighters up cheering, then save it as a sticker for your story · the longer you play, the cooler your year glove"],
  ["🏃","A new way to run the 400 m","Tap as the ring closes on your runner, then mash all out for the last 120 metres"],
  ["🐓","Troublemaker pets","Some weeks a strange bill turns up at the camp. Guess whose doing it was."]],
