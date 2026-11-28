@@ -119,7 +119,7 @@ Object.assign(ACT,{
     const p=r.p,fav=p.fav&&G.F[p.fav]&&G.F[p.fav].camp==="player"?[p.fav]:roster(G).slice(0,1).map(f=>f.id);UI.cfxIds=fav;
     const note=r.res==="ok"?`${p.name}${r.line} · ${PETS[p.k].eff} · joy ${p.joy} · EXP +${r.M[2]}${r.up?` · 🎉 Level up! Lv.${p.lv}`:""}`
       :r.res==="no"?`${p.name}${r.line} · not in the mood today (EXP +3) — try again next week`:`${p.name}${r.line} · back next week; no help to the camp until then`;
-    UI.modal={type:"campres",k:"pet_"+p.k+(r.res==="ok"?"":"_"+r.res),title:r.res==="ok"?`${r.M[0]} and ${p.name}`:r.res==="no"?`${p.name} doesn't feel like playing`:`${p.name} ran off!`,cap:r.res==="ok"?`${r.M[0]} · ${p.name}`:r.res==="no"?`${p.name} ignores you`:`${p.name} bolts into the rice fields!`,note};save();render();}});
+    UI.modal={type:"campres",k:"pet_"+p.k+(r.res==="ok"?"":"_"+r.res),title:r.res==="ok"?`${r.M[0]} and ${p.name}`:r.res==="no"?`${p.name} doesn't feel like playing`:`${p.name} ran off!`,cap:r.res==="ok"?`${r.M[0]} · ${p.name}`:r.res==="no"?`${p.name} ignores you`:`${p.name} bolts into the rice fields!`,note,back:"petsopen"};save();render();}});
 
 /* ---------- หมัดเหล็ก: Fah's grey cat from Phayak Thong follows her when she joins the camp (v1.91.144, Man) ---------- */
 PETS.mudlek={name:"Silver cat with white socks",food:120,eff:"Everyone's morale +1 · Fah's morale +3"};PET_NAMES.mudlek=["Iron Fist"];

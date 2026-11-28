@@ -119,7 +119,7 @@ Object.assign(ACT,{
     const p=r.p,fav=p.fav&&G.F[p.fav]&&G.F[p.fav].camp==="player"?[p.fav]:roster(G).slice(0,1).map(f=>f.id);UI.cfxIds=fav;
     const note=r.res==="ok"?`${p.name}${r.line} · ${PETS[p.k].eff} · ความสุข ${p.joy} · EXP +${r.M[2]}${r.up?` · 🎉 เลเวลอัป! Lv.${p.lv}`:""}`
       :r.res==="no"?`${p.name}${r.line} · ไม่มีอารมณ์เล่นวันนี้ (EXP +3) — ไว้สัปดาห์หน้าลองใหม่`:`${p.name}${r.line} · จะกลับมาสัปดาห์หน้า ระหว่างนี้ไม่ได้ช่วยค่าย`;
-    UI.modal={type:"campres",k:"pet_"+p.k+(r.res==="ok"?"":"_"+r.res),title:r.res==="ok"?`${r.M[0]}กับ${p.name}`:r.res==="no"?`${p.name}ไม่อยากเล่น`:`${p.name}หนีเที่ยว!`,cap:r.res==="ok"?`${r.M[0]} · ${p.name}`:r.res==="no"?`${p.name}ทำเมิน`:`${p.name}วิ่งเข้าทุ่งนา!`,note};save();render();}});
+    UI.modal={type:"campres",k:"pet_"+p.k+(r.res==="ok"?"":"_"+r.res),title:r.res==="ok"?`${r.M[0]}กับ${p.name}`:r.res==="no"?`${p.name}ไม่อยากเล่น`:`${p.name}หนีเที่ยว!`,cap:r.res==="ok"?`${r.M[0]} · ${p.name}`:r.res==="no"?`${p.name}ทำเมิน`:`${p.name}วิ่งเข้าทุ่งนา!`,note,back:"petsopen"};save();render();}});
 
 /* ---------- หมัดเหล็ก: Fah's grey cat from Phayak Thong follows her when she joins the camp (v1.91.144, Man) ---------- */
 PETS.mudlek={name:"แมวสีเงินถุงเท้าขาว",food:120,eff:"กำลังใจทุกคน +1 · ฟ้ากำลังใจ +3"};PET_NAMES.mudlek=["หมัดเหล็ก"];
