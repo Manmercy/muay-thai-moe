@@ -1,5 +1,5 @@
 // ================= MUAY THAI MOE v1.3 — UI =================
-const VERSION="1.91.217";
+const VERSION="1.91.218";
 const CUR_LANG=(typeof window!=="undefined"&&window.LANG)||"th";
 const TH_LABEL=String.fromCharCode(3652,3607,3618);
 function langSwitch(cls){return `<div class="langsw ${cls||""}" role="group" aria-label="Language">${[["th",TH_LABEL],["en","EN"]].map(([k,l])=>`<button class="lsb ${CUR_LANG===k?"on":""}" data-act="setlang" data-v="${k}" aria-pressed="${CUR_LANG===k}">${l}</button>`).join("")}</div>`;}
@@ -482,6 +482,7 @@ function coachTips(force){const T=[],R=roster(G);if(!coachOn()&&!force)return T;
   if(G.cash<0)T.push({p:10,t:`In the red for ${G.negWeeks} weeks. In the red 4 weeks and below ฿10,000, the camp goes bankrupt`});
   if(studentDemand(G)>studentCap(G)+2)T.push({p:5,t:`Classes are full and ${studentDemand(G)-studentCap(G)} more people want to join. Upgrading the class yard holds 3 more each level`,act:{k:"tab",v:"camp",sub:"fac",label:"Upgrade the class yard"}});
   {const un=(G.losses||[]).filter(l=>!l.watched&&G.F[l.b]&&G.F[l.b].camp!=="quest"&&l.absWeek!=null&&gameWeek(G)-l.absWeek<=6);if(un.length)T.push({p:4,t:`Haven't reviewed the fight ${G.F[un[un.length-1].a].name} lost. Watch it with the team for EXP and a read on that opponent`,act:{k:"lossrev",label:"Review fight"}});}
+  if(G.trouble&&gameWeek(G)<G.trouble.untilAbs)T.push({p:8,t:`${G.trouble.name}: training is a little less effective for ${G.trouble.untilAbs-gameWeek(G)} weeks`});
   if(G.disaster&&gameWeek(G)<G.disaster.untilAbs)T.push({p:9,t:`${G.disaster.name} isn't over. Students can ${G.disaster.inc?"only come half the time":"not come at all"} for ${G.disaster.untilAbs-gameWeek(G)} more weeks. Take fights to keep the money going`,act:{k:"tab",v:"fights",label:"See offers"}});
   if(dmOfferOn(G))T.push({p:8,t:"A promoter invites us to an 8-fighter cross-division Death Match, all fought this week. The champion takes ฿40,000!",act:{k:"tab",v:"fights",label:"See offers"}});
   if(!G.campUsed)T.push({p:3,t:"No camp activity chosen this week",act:{k:"campacts",label:"Choose activity"}});

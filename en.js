@@ -511,7 +511,7 @@ function trainWeek(G,f,rng){
   for(const [k,w] of Object.entries(p.w)){
     // v1.18: training your own style's core weapons fights diminishing returns less (style mastery path)
     const dim=1-Math.pow(f.a[k]/(f.potential+(core.includes(k)?CK:1.5)),2.2);
-    const g=(typeof scTrainMul==="function"?scTrainMul(G,f,k):1)*.5*w*it.g*coach*fac*ready*mot*clamp(dim,.04,1)*(.75+rng()*.5)*(traitOf(f)==="surge"?1+.15*traitK(f):traitOf(f)==="talent"?1+.1*traitK(f):1)*(1+(f.drillBonus||0))*ytTrainMul(G,f);
+    const g=(typeof scTrainMul==="function"?scTrainMul(G,f,k):1)*.5*w*it.g*coach*fac*ready*mot*clamp(dim,.04,1)*(.75+rng()*.5)*(traitOf(f)==="surge"?1+.15*traitK(f):traitOf(f)==="talent"?1+.1*traitK(f):1)*(1+(f.drillBonus||0))*ytTrainMul(G,f)*(G.trouble&&absWeek(G)<G.trouble.untilAbs?G.trouble.train:1);
     if(g>0){const g2=f.a[k]>=20?g*LB_RATE:g,b4=f.a[k];f.a[k]=Math.max(b4,Math.min(stCap(f),b4+g2));f.gains[k]=f.a[k]-b4;}
   }
   f.drillBonus=0;
@@ -3766,6 +3766,53 @@ EVENTS.push(
   {n:"fah",f:"surprised",l:"casual",t:"Fah was just passing by! Not spying on training! …And this post is hollow, termites ate all of it!"},
   {n:"coach",t:"Termites ate the camp's whole timber frame. It has to be rebuilt, ฿18,000. During the work, only half the students can come for two weeks"},{fx:G=>{G.cash-=18000;G.disaster={name:"Termite repairs",untilAbs:absWeek(G)+2,inc:.5};}},
   {n:"fah",f:"happy",l:"casual",t:G=>`Serves you right! …Kidding, ${ME(G)}. Golden Tiger has a great termite guy, Fah'll get you his number. No need to thank me!`},{fx:G=>add(G,"fah","bond",2)}]});
+/* v1.91.205 (Man): more camp troubles, and every trouble can come back in later years.
+   Rules for all of them (TROUBLE_IDS): at most one trouble every 8 weeks, the same one not again within 2 years,
+   about 1 chance in 4 per eligible week, never in the semi/final weeks. G.trouble = a short training slowdown. */
+const TROUBLE_IDS=["dis_storm","dis_flood","dis_termite","dis_power","dis_pump","dis_snake","dis_van","dis_neighbor"];
+const trbSet=(G,name,train,wks)=>{G.trouble={name,train,untilAbs:absWeek(G)+wks};};
+const trbNear=G=>roster(G).filter(f=>!f.injury);
+EVENTS.push(
+ {id:"dis_power",pri:1,look:"casual",when:G=>G.week>=38&&G.week<=52&&G.cash>=15000,bg:"camp_night",steps:[
+  {n:"nar",t:"2 p.m. in the hot season. The power goes out across the whole subdistrict. Every fan stops, and the gym turns into an oven."},
+  {n:"kati",f:"surprised",l:"casual",t:G=>`${CALL(G,"kati")}, the electricity office says the transformer blew. Repairs will take days!`},
+  {n:"coach",t:"Nobody can train midday in this heat, the kids will pass out. Rent a generator, or move training to dawn and dusk?"},
+  {choice:[{t:"Rent a generator (฿6,000)",fx:G=>{G.cash-=6000;},then:[{n:"nar",t:"The generator roars down the whole street, but the fans spin again and training goes on as normal."}]},
+   {t:"Train at dawn and dusk instead",fx:G=>{trbSet(G,"Power cut",.9,2);trbNear(G).forEach(f=>{f.fatigue=Math.min(100,f.fatigue+5);f.morale=Math.min(100,f.morale+4);});["kati","mali","rin"].forEach(id=>{if(inCamp(G,id))add(G,id,"bond",1);});},then:[
+    {n:"nar",t:"At night everyone sits in a circle eating by candlelight in the camp yard. Nobody's on their phone, because all the batteries are dead."},
+    {n:"kati",f:"happy",l:"casual",t:"It's like when we were kids and Grandpa lit a lantern and told us boxing stories."}]}]}]},
+ {id:"dis_pump",pri:1,look:"casual",when:G=>G.week>=5&&G.week<=40&&G.cash>=10000,bg:"camp_day",steps:[
+  {n:"nar",t:"Monday morning. Only air sputters out of the tap. The camp's water pump grinds, rattles, and goes silent."},
+  {n:"kati",f:"pout",l:"casual",t:"I just finished training and I'm drenched in sweat, but there's no water to shower…"},
+  {n:"coach",t:"The pump's dead. We can buy a new one, or bathe at the temple for now. Luang Pho is kind."},
+  {choice:[{t:"Buy a new water pump (฿4,500)",fx:G=>{G.cash-=4500;},then:[{n:"nar",t:"The plumber swaps it in a day. The water pressure is even better than before."}]},
+   {t:"Bathe at the temple for a while",fx:G=>{trbNear(G).forEach(f=>{f.trust=Math.min(100,(f.trust||0)+3);f.fatigue=Math.min(100,f.fatigue+6);});},then:[
+    {n:"nar",t:"Every evening the whole camp walks to the temple and sweeps the courtyard before bathing. Luang Pho blesses everyone before they leave."},
+    {n:"kati",f:"happy",l:"casual",t:"It's a bit tiring, but it feels peaceful. Luang Pho says however heavy your punch is, you need a calm heart to go with it."}]}]}]},
+ {id:"dis_snake",pri:1,look:"casual",when:G=>G.week>=10&&G.week<=35&&G.cash>=8000&&inCamp(G,"mali"),bg:"camp_rain",steps:[
+  {n:"nar",t:"After the heavy rain, Mali opens the glove locker and finds something long and black coiled inside her favorite pair."},
+  {n:"mali",f:"flustered",l:"casual",t:"S-snake! There's a snake in my gloves! And it's spreading its hood!"},
+  {n:"kati",f:"surprised",l:"casual",t:"A cobra! Everyone back off, don't go near it!"},
+  {n:"coach",t:"Call the rescue volunteers, or let me deal with it? I've caught snakes since I was young, but we'd have to close the storeroom for a week."},
+  {choice:[{t:"Call the rescue foundation (donate ฿1,500)",fx:G=>{G.cash-=1500;G.rep+=1;},then:[{n:"nar",t:"The rescue volunteers arrive in twenty minutes, gently bag the snake and take it to release in the forest. The whole camp applauds."},{n:"mali",f:"happy",l:"casual",t:"Thank you so much! …But I'm washing my gloves three times first."}]},
+   {t:"Let Kru Daeng handle it",fx:G=>{trbSet(G,"Storeroom closed",.92,1);if(inCamp(G,"mali"))add(G,"mali","bond",1);},then:[{n:"nar",t:"Kru Daeng catches it in five minutes with a forked stick and an old rice sack, but the room has to be torn apart all week looking for a nest."},{n:"coach",t:"See? Still got it. …Ow, my back."}]}]}]},
+ {id:"dis_van",pri:1,look:"casual",when:G=>G.week>=6&&G.cash>=8000&&(G.bookings||[]).some(b=>b.week===G.week&&inCamp(G,b.a)),bg:"bus",steps:[
+  {n:"nar",t:"Fight day. The camp van starts belching smoke halfway there, then dies completely beside a rice field."},
+  {n:"kati",f:"surprised",l:"casual",t:G=>`${CALL(G,"kati")}! The weigh-in is in just one hour!`},
+  {n:"coach",t:"Flag down a songthaew to get there in time, or I fix it here. I think I can, but we'll be late for sure."},
+  {choice:[{t:"Hire a songthaew to make it (฿2,500)",fx:G=>{G.cash-=2500;},then:[{n:"nar",t:"The songthaew driver drives like it's a race. You make the weigh-in just in time, everyone's hair a total mess."}]},
+   {t:"Fix it by the roadside",fx:G=>{const ids=(G.bookings||[]).filter(b=>b.week===G.week).map(b=>b.a);ids.forEach(id=>{const f=G.F[id];if(f)f.fatigue=Math.min(100,f.fatigue+10);});},then:[{n:"nar",t:"Kru Daeng spends half an hour under the van until it starts. You reach the stadium out of breath with no proper warm-up. Today's fighters are more tired than usual."}]}]}]},
+ {id:"dis_neighbor",pri:1,look:"casual",when:G=>G.week>=8&&G.cash>=8000,bg:"camp_day",steps:[
+  {n:"nar",t:"5:30 a.m. The thud of kicks on the heavy bag echoes down the whole street. The old man next door knocks on the gate, still in his pha khao ma."},
+  {n:"npc",who:"Uncle Piak, next door",t:"The bag noise wakes my grandkid every morning, and then the whole house is crying. Could you keep it down a bit?"},
+  {n:"coach",t:G=>`${ME(G)}, do we move training later, or go apologize to him properly?`},
+  {choice:[{t:"Apologize with a gift (฿2,000)",fx:G=>{G.cash-=2000;G.rep+=2;},then:[{n:"nar",t:"A big fruit basket and the girls' smiles soften him right up."},{n:"npc",who:"Uncle Piak, next door",t:"Fine, fine. I'll buy earplugs. And tell me when you fight nearby, I'll bring my grandkid to cheer."}]},
+   {t:"Move training to later in the morning",fx:G=>{trbSet(G,"Late training for the neighbors",.93,3);},then:[{n:"nar",t:"Training later means the harsh sun and tiring faster, but the whole street is quiet now. Uncle Piak waves every morning."}]}]}]});
+(()=>{const Y2=104;for(const e of EVENTS){if(!TROUBLE_IDS.includes(e.id))continue;const w0=e.when;e.annual=true;
+  e.when=G=>{if(!w0(G)||G.week===44||G.week===49)return false;const now=absWeek(G),A=G.seenAbs||{};
+    const own=A[e.id]!=null?A[e.id]:(G.seen&&G.seen[e.id])?now-52:null;if(own!=null&&now-own<Y2)return false;
+    if(TROUBLE_IDS.some(id=>A[id]!=null&&now-A[id]<8))return false;
+    let h=0;for(const c of e.id)h=(h*31+c.charCodeAt(0))>>>0;return mulberry32(((G.seed||1)*7+now*131+h)>>>0)()<.25;};}})();
 // v1.39: the player's own story: grandpa's real grandchild who left a good office job in Bangkok
 EVENTS.push(
  {id:"me_photo",look:"casual",when:G=>G.week>=5,bg:"night",steps:[
@@ -7086,7 +7133,7 @@ AU.gsfx=function(kind,a){if(!this.init()||this.muted||!SETTINGS.sfx)return;const
   if(kind==="shimmer")for(let i=0;i<6;i++)T(i*.05,{f:1400+Math.random()*1400,type:"sine",dur:.12,peak:.06});};
 
 // ================= MUAY THAI MOE v1.3 — UI =================
-const VERSION="1.91.217";
+const VERSION="1.91.218";
 const CUR_LANG=(typeof window!=="undefined"&&window.LANG)||"th";
 const TH_LABEL=String.fromCharCode(3652,3607,3618);
 function langSwitch(cls){return `<div class="langsw ${cls||""}" role="group" aria-label="Language">${[["th",TH_LABEL],["en","EN"]].map(([k,l])=>`<button class="lsb ${CUR_LANG===k?"on":""}" data-act="setlang" data-v="${k}" aria-pressed="${CUR_LANG===k}">${l}</button>`).join("")}</div>`;}
@@ -7569,6 +7616,7 @@ function coachTips(force){const T=[],R=roster(G);if(!coachOn()&&!force)return T;
   if(G.cash<0)T.push({p:10,t:`In the red for ${G.negWeeks} weeks. In the red 4 weeks and below ฿10,000, the camp goes bankrupt`});
   if(studentDemand(G)>studentCap(G)+2)T.push({p:5,t:`Classes are full and ${studentDemand(G)-studentCap(G)} more people want to join. Upgrading the class yard holds 3 more each level`,act:{k:"tab",v:"camp",sub:"fac",label:"Upgrade the class yard"}});
   {const un=(G.losses||[]).filter(l=>!l.watched&&G.F[l.b]&&G.F[l.b].camp!=="quest"&&l.absWeek!=null&&gameWeek(G)-l.absWeek<=6);if(un.length)T.push({p:4,t:`Haven't reviewed the fight ${G.F[un[un.length-1].a].name} lost. Watch it with the team for EXP and a read on that opponent`,act:{k:"lossrev",label:"Review fight"}});}
+  if(G.trouble&&gameWeek(G)<G.trouble.untilAbs)T.push({p:8,t:`${G.trouble.name}: training is a little less effective for ${G.trouble.untilAbs-gameWeek(G)} weeks`});
   if(G.disaster&&gameWeek(G)<G.disaster.untilAbs)T.push({p:9,t:`${G.disaster.name} isn't over. Students can ${G.disaster.inc?"only come half the time":"not come at all"} for ${G.disaster.untilAbs-gameWeek(G)} more weeks. Take fights to keep the money going`,act:{k:"tab",v:"fights",label:"See offers"}});
   if(dmOfferOn(G))T.push({p:8,t:"A promoter invites us to an 8-fighter cross-division Death Match, all fought this week. The champion takes ฿40,000!",act:{k:"tab",v:"fights",label:"See offers"}});
   if(!G.campUsed)T.push({p:3,t:"No camp activity chosen this week",act:{k:"campacts",label:"Choose activity"}});

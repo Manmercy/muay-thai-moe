@@ -1,5 +1,5 @@
 // ================= MUAY THAI MOE v1.3 — UI =================
-const VERSION="1.91.217";
+const VERSION="1.91.218";
 const CUR_LANG=(typeof window!=="undefined"&&window.LANG)||"th";
 const TH_LABEL=String.fromCharCode(3652,3607,3618);
 function langSwitch(cls){return `<div class="langsw ${cls||""}" role="group" aria-label="Language">${[["th",TH_LABEL],["en","EN"]].map(([k,l])=>`<button class="lsb ${CUR_LANG===k?"on":""}" data-act="setlang" data-v="${k}" aria-pressed="${CUR_LANG===k}">${l}</button>`).join("")}</div>`;}
@@ -482,6 +482,7 @@ function coachTips(force){const T=[],R=roster(G);if(!coachOn()&&!force)return T;
   if(G.cash<0)T.push({p:10,t:`เงินติดลบมา ${G.negWeeks} สัปดาห์ ถ้าติดลบ 4 สัปดาห์จนเกิน ฿10,000 ค่ายจะล้มละลาย`});
   if(studentDemand(G)>studentCap(G)+2)T.push({p:5,t:`นักเรียนเต็มค่ายแล้ว ยังมีคนอยากเรียนอีก ${studentDemand(G)-studentCap(G)} คน อัปลานสอนคอร์สจะรับเพิ่มได้ทีละ 3 คน`,act:{k:"tab",v:"camp",sub:"fac",label:"ไปอัปลานสอน"}});
   {const un=(G.losses||[]).filter(l=>!l.watched&&G.F[l.b]&&G.F[l.b].camp!=="quest"&&l.absWeek!=null&&gameWeek(G)-l.absWeek<=6);if(un.length)T.push({p:4,t:`ยังไม่ได้ดูเทปไฟต์ที่${G.F[un[un.length-1].a].name}แพ้ ดูกับทีมแล้วได้ EXP และรู้ทางคู่ชกคนนั้น`,act:{k:"lossrev",label:"ทบทวนไฟต์"}});}
+  if(G.trouble&&gameWeek(G)<G.trouble.untilAbs)T.push({p:8,t:`${G.trouble.name} ซ้อมได้ผลน้อยลงนิดหน่อย อีก ${G.trouble.untilAbs-gameWeek(G)} สัปดาห์`});
   if(G.disaster&&gameWeek(G)<G.disaster.untilAbs)T.push({p:9,t:`${G.disaster.name}ยังไม่หาย นักเรียนมาเรียนได้${G.disaster.inc?"แค่ครึ่งเดียว":"ไม่ได้เลย"} อีก ${G.disaster.untilAbs-gameWeek(G)} สัปดาห์ รับไฟต์ช่วยประคองเงินไปก่อน`,act:{k:"tab",v:"fights",label:"ดูข้อเสนอ"}});
   if(dmOfferOn(G))T.push({p:8,t:"โปรโมเตอร์ชวนลงศึก Death Match 8 คนข้ามรุ่น ชกรวดเดียวจบในสัปดาห์นี้ แชมป์รับ ฿40,000!",act:{k:"tab",v:"fights",label:"ไปดูข้อเสนอ"}});
   if(!G.campUsed)T.push({p:3,t:"ยังไม่ได้เลือกกิจกรรมค่ายสัปดาห์นี้",act:{k:"campacts",label:"เลือกกิจกรรม"}});

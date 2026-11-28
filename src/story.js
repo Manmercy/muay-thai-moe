@@ -1241,6 +1241,53 @@ EVENTS.push(
   {n:"fah",f:"surprised",l:"casual",t:"ฟ้าแค่ผ่านมา! ไม่ได้มาแอบดูซ้อม! …แล้วเสานี่มันกลวงนะ ปลวกกินหมดแล้ว!"},
   {n:"coach",t:"ปลวกกินโครงไม้ทั้งค่าย ต้องรื้อทำใหม่ ฿18,000 ระหว่างทำนักเรียนมาได้ครึ่งเดียวสองสัปดาห์"},{fx:G=>{G.cash-=18000;G.disaster={name:"งานซ่อมปลวก",untilAbs:absWeek(G)+2,inc:.5};}},
   {n:"fah",f:"happy",l:"casual",t:G=>`สมน้ำหน้า! …ล้อเล่น ${ME(G)} ค่ายพยัคฆ์ทองมีช่างกำจัดปลวกเก่ง เดี๋ยวฟ้าขอเบอร์ให้ ไม่ต้องขอบใจ!`},{fx:G=>add(G,"fah","bond",2)}]});
+/* v1.91.205 (Man): more camp troubles, and every trouble can come back in later years.
+   Rules for all of them (TROUBLE_IDS): at most one trouble every 8 weeks, the same one not again within 2 years,
+   about 1 chance in 4 per eligible week, never in the semi/final weeks. G.trouble = a short training slowdown. */
+const TROUBLE_IDS=["dis_storm","dis_flood","dis_termite","dis_power","dis_pump","dis_snake","dis_van","dis_neighbor"];
+const trbSet=(G,name,train,wks)=>{G.trouble={name,train,untilAbs:absWeek(G)+wks};};
+const trbNear=G=>roster(G).filter(f=>!f.injury);
+EVENTS.push(
+ {id:"dis_power",pri:1,look:"casual",when:G=>G.week>=38&&G.week<=52&&G.cash>=15000,bg:"camp_night",steps:[
+  {n:"nar",t:"บ่ายสองโมงในหน้าร้อน ไฟดับทั้งตำบล พัดลมทุกตัวหยุดหมุน ห้องซ้อมร้อนเหมือนเตาอบ"},
+  {n:"kati",f:"surprised",l:"casual",t:G=>`${CALL(G,"kati")}คะ การไฟฟ้าบอกว่าหม้อแปลงระเบิด ซ่อมอีกหลายวันเลย!`},
+  {n:"coach",t:"ร้อนขนาดนี้ซ้อมกลางวันไม่ไหว เดี๋ยวเด็ก ๆ เป็นลมกันหมด จะเช่าเครื่องปั่นไฟ หรือย้ายไปซ้อมตอนเช้ามืดกับตอนเย็นดี"},
+  {choice:[{t:"เช่าเครื่องปั่นไฟ (฿6,000)",fx:G=>{G.cash-=6000;},then:[{n:"nar",t:"เครื่องปั่นไฟเสียงดังลั่นซอย แต่พัดลมกลับมาหมุน ซ้อมต่อได้ตามปกติ"}]},
+   {t:"ซ้อมตอนเช้ามืดกับตอนเย็นแทน",fx:G=>{trbSet(G,"ไฟดับ",.9,2);trbNear(G).forEach(f=>{f.fatigue=Math.min(100,f.fatigue+5);f.morale=Math.min(100,f.morale+4);});["kati","mali","rin"].forEach(id=>{if(inCamp(G,id))add(G,id,"bond",1);});},then:[
+    {n:"nar",t:"ตกกลางคืน ทุกคนนั่งล้อมวงกินข้าวใต้แสงเทียนกลางลานค่าย ไม่มีใครเล่นมือถือ เพราะแบตหมดกันหมด"},
+    {n:"kati",f:"happy",l:"casual",t:"เหมือนตอนเด็ก ๆ ที่ปู่จุดตะเกียงเล่าเรื่องมวยให้ฟังเลยค่ะ"}]}]}]},
+ {id:"dis_pump",pri:1,look:"casual",when:G=>G.week>=5&&G.week<=40&&G.cash>=10000,bg:"camp_day",steps:[
+  {n:"nar",t:"เช้าวันจันทร์ เปิดก๊อกแล้วมีแต่ลมพ่นออกมา ปั๊มน้ำของค่ายส่งเสียงครืดคราดแล้วเงียบไป"},
+  {n:"kati",f:"pout",l:"casual",t:"เพิ่งซ้อมเสร็จเหงื่อท่วมตัว แต่ไม่มีน้ำอาบ…"},
+  {n:"coach",t:"ปั๊มพังแล้ว ซื้อใหม่ก็ได้ หรือช่วงนี้ไปอาบน้ำที่วัดก่อน หลวงพ่อท่านใจดี"},
+  {choice:[{t:"ซื้อปั๊มน้ำใหม่ (฿4,500)",fx:G=>{G.cash-=4500;},then:[{n:"nar",t:"ช่างประปามาเปลี่ยนให้ภายในวันเดียว น้ำไหลแรงกว่าเดิมอีก"}]},
+   {t:"ไปอาบน้ำที่วัดสักพัก",fx:G=>{trbNear(G).forEach(f=>{f.trust=Math.min(100,(f.trust||0)+3);f.fatigue=Math.min(100,f.fatigue+6);});},then:[
+    {n:"nar",t:"ทุกเย็นนักมวยทั้งค่ายเดินไปวัด ช่วยกวาดลานวัดก่อนอาบน้ำ หลวงพ่อให้พรทุกคนก่อนกลับ"},
+    {n:"kati",f:"happy",l:"casual",t:"เหนื่อยหน่อยแต่ใจสบายค่ะ หลวงพ่อบอกว่าหมัดหนักแค่ไหนก็ต้องมีใจเย็นคู่กัน"}]}]}]},
+ {id:"dis_snake",pri:1,look:"casual",when:G=>G.week>=10&&G.week<=35&&G.cash>=8000&&inCamp(G,"mali"),bg:"camp_rain",steps:[
+  {n:"nar",t:"หลังฝนตกหนัก มะลิเปิดตู้เก็บนวมแล้วเจอหางอะไรยาว ๆ สีดำขดอยู่ในนวมคู่โปรด"},
+  {n:"mali",f:"flustered",l:"casual",t:"งะ งูค่ะ! งูอยู่ในนวมของมะลิ! ตัวมันแผ่แม่เบี้ยด้วย!"},
+  {n:"kati",f:"surprised",l:"casual",t:"งูเห่า! ทุกคนถอยออกมาก่อน อย่าเข้าใกล้!"},
+  {n:"coach",t:"จะโทรเรียกกู้ภัย หรือให้ครูจัดการเอง ครูจับงูมาตั้งแต่สมัยหนุ่ม ๆ แต่ต้องปิดห้องเก็บของไว้สักอาทิตย์"},
+  {choice:[{t:"โทรเรียกกู้ภัย (ทำบุญให้มูลนิธิ ฿1,500)",fx:G=>{G.cash-=1500;G.rep+=1;},then:[{n:"nar",t:"อาสากู้ภัยมาถึงในยี่สิบนาที จับงูใส่ถุงไปปล่อยป่าอย่างนุ่มนวล ทั้งค่ายปรบมือให้"},{n:"mali",f:"happy",l:"casual",t:"ขอบคุณมากเลยค่ะ! …แต่มะลิขอซักนวมสามรอบก่อนนะคะ"}]},
+   {t:"ให้ครูแดงจัดการเอง",fx:G=>{trbSet(G,"ห้องเก็บของปิด",.92,1);if(inCamp(G,"mali"))add(G,"mali","bond",1);},then:[{n:"nar",t:"ครูแดงใช้ไม้ง่ามกับถุงข้าวสารเก่า จับงูได้ในห้านาที แต่ต้องรื้อห้องหารังอีกทั้งอาทิตย์"},{n:"coach",t:"เห็นไหม ครูยังไม่แก่ …อูย หลังเคล็ด"}]}]}]},
+ {id:"dis_van",pri:1,look:"casual",when:G=>G.week>=6&&G.cash>=8000&&(G.bookings||[]).some(b=>b.week===G.week&&inCamp(G,b.a)),bg:"bus",steps:[
+  {n:"nar",t:"วันไฟต์ รถตู้ของค่ายควันโขมงกลางทาง แล้วดับสนิทอยู่ข้างทุ่งนา"},
+  {n:"kati",f:"surprised",l:"casual",t:G=>`${CALL(G,"kati")}คะ! อีกชั่วโมงเดียวต้องชั่งน้ำหนักแล้วนะคะ!`},
+  {n:"coach",t:"จะโบกสองแถวเหมาไปให้ทัน หรือครูซ่อมเองข้างทาง น่าจะได้ แต่ไปถึงสายแน่"},
+  {choice:[{t:"เหมาสองแถวไปให้ทัน (฿2,500)",fx:G=>{G.cash-=2500;},then:[{n:"nar",t:"ลุงสองแถวขับเร็วเหมือนแข่งรถ ไปถึงทันชั่งน้ำหนักพอดี ทุกคนผมยุ่งกันหมด"}]},
+   {t:"ซ่อมเองข้างทาง",fx:G=>{const ids=(G.bookings||[]).filter(b=>b.week===G.week).map(b=>b.a);ids.forEach(id=>{const f=G.F[id];if(f)f.fatigue=Math.min(100,f.fatigue+10);});},then:[{n:"nar",t:"ครูแดงมุดใต้รถครึ่งชั่วโมงจนรถติด ไปถึงสนามแบบหอบ ๆ ไม่ได้วอร์มเต็มที่ คนที่ต้องชกวันนี้เหนื่อยกว่าปกติ"}]}]}]},
+ {id:"dis_neighbor",pri:1,look:"casual",when:G=>G.week>=8&&G.cash>=8000,bg:"camp_day",steps:[
+  {n:"nar",t:"ตีห้าครึ่ง เสียงเตะกระสอบทรายดังปึก ๆ ไปทั้งซอย ลุงบ้านข้าง ๆ เดินมาเคาะประตูทั้งที่ยังใส่ผ้าขาวม้า"},
+  {n:"npc",who:"ลุงเปี๊ยก บ้านข้าง ๆ",t:"หลานตื่นทุกเช้าเพราะเสียงกระสอบ ร้องไห้ทั้งบ้านเลย ช่วยเบา ๆ หน่อยได้ไหม"},
+  {n:"coach",t:G=>`${ME(G)} จะย้ายเวลาซ้อมไปสาย ๆ หรือไปขอโทษลุงเขาดี ๆ`},
+  {choice:[{t:"ไปขอโทษพร้อมของฝาก (฿2,000)",fx:G=>{G.cash-=2000;G.rep+=2;},then:[{n:"nar",t:"ผลไม้กระเช้าใหญ่กับรอยยิ้มของสาว ๆ ทำให้ลุงใจอ่อน"},{n:"npc",who:"ลุงเปี๊ยก บ้านข้าง ๆ",t:"ก็ได้ ๆ ลุงซื้อที่อุดหูเอา แล้ววันไหนชกใกล้ ๆ บอกลุงด้วย ลุงจะพาหลานไปเชียร์"}]},
+   {t:"ย้ายเวลาซ้อมไปสาย ๆ",fx:G=>{trbSet(G,"ซ้อมสายเพราะเพื่อนบ้าน",.93,3);},then:[{n:"nar",t:"ซ้อมสายเจอแดดแรง เหนื่อยเร็วกว่าเดิม แต่ทั้งซอยเงียบ ลุงเปี๊ยกโบกมือให้ทุกเช้า"}]}]}]});
+(()=>{const Y2=104;for(const e of EVENTS){if(!TROUBLE_IDS.includes(e.id))continue;const w0=e.when;e.annual=true;
+  e.when=G=>{if(!w0(G)||G.week===44||G.week===49)return false;const now=absWeek(G),A=G.seenAbs||{};
+    const own=A[e.id]!=null?A[e.id]:(G.seen&&G.seen[e.id])?now-52:null;if(own!=null&&now-own<Y2)return false;
+    if(TROUBLE_IDS.some(id=>A[id]!=null&&now-A[id]<8))return false;
+    let h=0;for(const c of e.id)h=(h*31+c.charCodeAt(0))>>>0;return mulberry32(((G.seed||1)*7+now*131+h)>>>0)()<.25;};}})();
 // v1.39: the player's own story: grandpa's real grandchild who left a good office job in Bangkok
 EVENTS.push(
  {id:"me_photo",look:"casual",when:G=>G.week>=5,bg:"night",steps:[
