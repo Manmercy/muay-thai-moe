@@ -1,5 +1,5 @@
 // ================= MUAY THAI MOE v1.3 — UI =================
-const VERSION="1.91.210";
+const VERSION="1.91.211";
 const CUR_LANG=(typeof window!=="undefined"&&window.LANG)||"th";
 const TH_LABEL=String.fromCharCode(3652,3607,3618);
 function langSwitch(cls){return `<div class="langsw ${cls||""}" role="group" aria-label="Language">${[["th",TH_LABEL],["en","EN"]].map(([k,l])=>`<button class="lsb ${CUR_LANG===k?"on":""}" data-act="setlang" data-v="${k}" aria-pressed="${CUR_LANG===k}">${l}</button>`).join("")}</div>`;}
@@ -552,7 +552,7 @@ function homeHTML(){const R=roster(G);
     guide=`<section class="px guide away"><img class="gface" src="${faceSrc("kati","happy")}" alt="Kati"><div class="gtxt"><b>Kati (acting coach · Coach Daeng back in week ${((G.coachAwayAbs-1)%52)+1})</b><p>${esc(KS[G.week%KS.length])}</p><p class="meta">No coach advice for now; you make every call yourself</p></div><button class="xbtn" data-act="hideguide" aria-label="Close">✕</button></section>`;}
   const lv=campLevel(G);
   return `${rinNoteHTML()}<div class="homegrid">${(()=>{const r=[["mali",G.flags.maliRecruit],["rin",G.flags.rinRecruit]].filter(([id,ok])=>ok&&G.F[id].camp==="free").concat(G.region&&G.region.offers?G.region.offers.filter(id=>G.F[id]).map(id=>[id,1]):[]); /* v1.91.30: regional champions asking to join */
-     return r.length?`<button class="px newfighter" data-act="tab" data-v="camp" data-sub="staff"><span class="newb">NEW!</span>${r.map(([id])=>`<img src="${faceSrc(id,"happy")}" alt="">`).join("")}<span><b>${r.map(([id])=>esc(G.F[id].name)).join(" and ")} wants to join</b><small>Tap to see the contract</small></span><span class="chev">▸</span></button>`:"";})()}${typeof REGION!=="undefined"&&REGION.visitBanner&&G.region?REGION.visitBanner(G):""}<section class="px camp-wrap"><div class="cvbox"><canvas class="campcv" width="640" height="360" data-camp="1" aria-label="Sirichai Camp overview"></canvas>${typeof REGION!=="undefined"&&G.region&&REGION.travelOk&&REGION.travelOk(G)?`<button class="tripspot" data-act="rgtravel" aria-label="Travel to fight for the Four Regions title"><span class="triptag">Travel</span></button>`:""}
+     return r.length?`<button class="px newfighter" data-act="tab" data-v="camp" data-sub="staff"><span class="newb">NEW!</span>${r.map(([id])=>`<img src="${faceSrc(id,"happy")}" alt="">`).join("")}<span><b>${r.map(([id])=>esc(G.F[id].name)).join(" and ")} wants to join</b><small>Tap to see the contract</small></span><span class="chev">▸</span></button>`:"";})()}${typeof REGION!=="undefined"&&REGION.visitBanner&&G.region?REGION.visitBanner(G):""}<section class="px camp-wrap"><div class="cvbox"><canvas class="campcv" width="640" height="360" data-camp="1" data-act="campmenu" role="button" aria-label="Sirichai camp overview · tap for the camp menu"></canvas><button class="campcam" data-act="showcase" aria-label="Camp card">📸</button>${UI.campMenu?`<div class="cmenu" role="menu"><button class="btn sm gold" data-act="showcase">📸 Camp card</button><button class="btn sm" data-act="tab" data-v="camp" data-sub="hall">🏆 Trophy room</button><button class="btn sm" data-act="tab" data-v="camp" data-sub="decor">🎨 Decorate camp</button></div>`:""}${typeof REGION!=="undefined"&&G.region&&REGION.travelOk&&REGION.travelOk(G)?`<button class="tripspot" data-act="rgtravel" aria-label="Travel to fight for the Four Regions title"><span class="triptag">Travel</span></button>`:""}
     ${goalHidden()?`<button class="goal ov mini" data-act="goaltog" aria-label="Show goal">Goal ▾</button>`:`<button class="goal ov" data-act="goaltog" aria-label="Hide goal">${goalText()}<span class="gx">▴ Hide</span></button>`}</div>
     ${G.campUsed?`<button class="campact done" data-act="campacts"><span class="ci">✓</span><span><small>This week's camp activity</small><b>${esc(CAMP_ACTIONS[G.campUsed].name)}</b></span></button>`
       :`<button class="campact" data-act="campacts"><span class="ci"></span><span><small>This week's camp activity · not chosen</small><b>Choose a camp activity</b></span><span class="chev">▸</span></button>`}
@@ -2182,7 +2182,7 @@ const ACT={
   askdel:()=>{UI.confirmDel=true;render();},
   delsave:()=>{clearSave();UI.confirmDel=false;UI.modal=null;G=null;UI.title="menu";render();},
   trsel:d=>{UI.trSel=d.v;render();},
-  tab:d=>{UI.tab=d.v;if(d.sub)UI.csub=d.sub;if(G&&(d.v==="train"||d.v==="fights")){G.tut=G.tut||{};G.tut[d.v]=true;}UI.resetScroll=true;render();window.scrollTo(0,0);},
+  tab:d=>{UI.tab=d.v;UI.campMenu=false;if(d.sub)UI.csub=d.sub;if(G&&(d.v==="train"||d.v==="fights")){G.tut=G.tut||{};G.tut[d.v]=true;}UI.resetScroll=true;render();window.scrollTo(0,0);},
   endweek:()=>{if(G.dm&&!G.dm.done&&G.dm.wk===G.week){toast("The Death Match isn't over yet. Finish it first");UI.modal={type:"dm"};render();return;}const todo=weekTodo();
     if(todo.length&&!UI.skipWarn&&SETTINGS.askEnd!==false){UI.modal={type:"endwarn",todo};render();return;}UI.skipWarn=false;endWeek();},
   endgo:()=>{UI.modal=null;UI.skipWarn=true;ACT.endweek();},
@@ -2261,7 +2261,9 @@ const ACT={
       html:`<div class="px confirm"><b>${esc(it.name)}</b><p class="meta">${esc(CAMP_DECOR[d.k].name)} · price ${fmt(c)} · left after: ${fmt(G.cash-c)}</p><p class="meta">Yours to keep; switch back to the old look any time</p></div>`};render();},
   decorbuyok:()=>{const m=UI.modal;if(!m||m.yes!=="decorbuyok")return;const d={k:m.k,v:m.v};UI.modal=null;const c=decorPrice(G,d.k,d.v);if(buyDecor(G,d.k,d.v)){AU.sfx&&AU.sfx("level");save();toast(`Bought "${CAMP_DECOR[d.k].items[d.v].name}" for ${fmt(c)}`);}render();},
   trophy:d=>{UI.modal={type:"trophy",i:+d.v};AU.sfx&&AU.sfx("ui");render();},hallall:d=>{UI.hallAll=UI.hallAll||{};UI.hallAll[d.v]=!UI.hallAll[d.v];render();},
-  showcase:()=>{UI.modal={type:"showcase"};render();},
+  showcase:()=>{UI.campMenu=false;UI.modal={type:"showcase"};render();},
+  /* v1.91.211 (Man: couldn't find the camp card) — tapping the camp scene opens a small camp menu; a 📸 chip sits on the scene too */
+  campmenu:()=>{UI.campMenu=!UI.campMenu;render();},
   showcaseSave:()=>{campCardSave();},
   ccmood:d=>{ccOpt().mood=d.v;render();},cctheme:d=>{ccOpt().theme=d.v;render();},cclineup:d=>{ccOpt().lineup=d.v==="1"?1:0;render();},
   decorslot:d=>{UI.decorSlot=d.v;AU.sfx&&AU.sfx("ui");render();},
