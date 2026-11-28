@@ -9701,10 +9701,11 @@ async function campCardDraw(o){const T=CC_THEMES[o.theme]||CC_THEMES.dex,W=CC_W;
   if(pets.length){box(CX+30,PY,CW-60,136,T.panel,T.line,8);
     const np=Math.min(6,pets.length),slot=(CW-80)/np; /* v1.92 (Man): each pet's name sits under its picture */
     pets.slice(0,6).forEach((p,i)=>{const cx=CX+40+slot*(i+.5),fy=PY+84;let drawn=false;
-      try{x.imageSmoothingEnabled=true;drawn=typeof petHub==="function"&&petHub(x,p.k,cx,fy,1,0,false,2.4);}catch(e){}
+      try{x.imageSmoothingEnabled=true;drawn=typeof petHub==="function"&&petHub(x,p.k,cx,fy,1,0,false,p.k==="otter"?3.6:2.4); /* the otter sprite is drawn small */}catch(e){}
       if(!drawn){try{x.imageSmoothingEnabled=false;x.drawImage(petIm[i],cx-34,fy-52,68,52);}catch(e){}}
       txt(p.name||"",cx,PY+120,24,T.ink,"center",700,slot-20);});}
-  txt("Muay Thai Moe",W/2,CY+CH-22,22,T.bg2===T.panel?T.ink:"#ffffff","center",700);
+  /* the footer sits on a dark pill so it reads over every frame pattern (the Thai frame's motifs ran through it) */
+  {x.font=FONT(22,700);const fw=x.measureText("Muay Thai Moe").width+36;box(W/2-fw/2,CY+CH-48,fw,36,T.line,T.line,6);txt("Muay Thai Moe",W/2,CY+CH-22,22,"#ffffff","center",700);}
   // --- sticker cut: white rim + shadow following the outline
   const out=document.createElement("canvas");out.width=W;out.height=H;const y=out.getContext("2d");
   const tinted=col=>{const t=document.createElement("canvas");t.width=W;t.height=H;const z=t.getContext("2d");z.drawImage(cv,0,0);z.globalCompositeOperation="source-in";z.fillStyle=col;z.fillRect(0,0,W,H);return t;};
@@ -9861,7 +9862,7 @@ AU.gsfx=function(kind,a){if(!this.init()||this.muted||!SETTINGS.sfx)return;const
   if(kind==="shimmer")for(let i=0;i<6;i++)T(i*.05,{f:1400+Math.random()*1400,type:"sine",dur:.12,peak:.06});};
 
 // ================= MUAY THAI MOE v1.3 — UI =================
-const VERSION="1.91.208";
+const VERSION="1.91.209";
 const CUR_LANG=(typeof window!=="undefined"&&window.LANG)||"th";
 const TH_LABEL=String.fromCharCode(3652,3607,3618);
 function langSwitch(cls){return `<div class="langsw ${cls||""}" role="group" aria-label="Language">${[["th",TH_LABEL],["en","EN"]].map(([k,l])=>`<button class="lsb ${CUR_LANG===k?"on":""}" data-act="setlang" data-v="${k}" aria-pressed="${CUR_LANG===k}">${l}</button>`).join("")}</div>`;}
@@ -17109,7 +17110,7 @@ const STATS_HOST="https://us.i.posthog.com";     /* EU projects: https://eu.i.po
 <script>
 (function(){
 /* v1.87: Thai code ships inside index.html; English code (en.js) and the dictionary (i18n.js) load only when needed */
-var B="bee4049e21";
+var B="2a130e3cec";
 var L="";try{L=localStorage.getItem("mtm_lang")||"";}catch(e){}
 try{var h=(location.hash||"").match(/lang=(th|en)/);if(h)L=h[1];}catch(e){}
 if(L!=="th"&&L!=="en")L="th";
