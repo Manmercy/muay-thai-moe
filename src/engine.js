@@ -1026,6 +1026,10 @@ const FACILITIES={
   lights:{name:"สปอตไลท์ซ้อมกลางคืน",cost:[40000,60000],desc:"ผลการฝึกทุกแบบ +6% ต่อระดับ",req:{week:32}},
   retreat:{name:"แคมป์เก็บตัวที่เชียงดาว",cost:[55000],desc:"ใช้ครั้งเดียว: พานักมวยทุกคนขึ้นดอยสองสัปดาห์ ค่าพลังหลัก +0.4 กำลังใจ +15 ความล้าหายหมด",req:{week:38}},
   airgym:{name:"ห้องซ้อมในร่มระบบกรองฝุ่น",cost:[250000],desc:"ห้องปิดติดแอร์และเครื่องกรองอากาศ ปีฝุ่น PM2.5 ซ้อมได้เต็มที่ · ผลการฝึกทุกแบบ +3%",req:{lv:2}},
+  // v1.91.217 (Man): protection upgrades against the yearly seasons — bought once, they work every year. prot: not counted toward camp level
+  floodwall:{name:"ยกพื้นค่ายและคันกระสอบทราย",cost:[20000,45000],desc:"หน้าฝนทุกปีน้ำเข้าค่ายเสียหายน้อยลง · ระดับ 2 น้ำไม่เข้าค่ายเลย ปีน้ำท่วมใหญ่ก็ซ้อมได้เกือบเต็มที่",prot:1},
+  purifier:{name:"เครื่องฟอกอากาศ",cost:[15000],desc:"หน้าฝุ่นทุกปีซ้อมได้เต็มที่ · ปีฝุ่นหนักผลเสียเหลือครึ่งเดียว",prot:1},
+  aircon:{name:"ติดแอร์ห้องซ้อม",cost:[60000],desc:"ปีเอลนีโญร้อนจัดซ้อมได้เต็มที่ และไม่ล้าเพิ่ม · ช่วงร้อนจัดเสียค่าไฟ ฿800/สัปดาห์",req:{week:20},prot:1},
   hall:{name:"มุมเกียรติยศปู่ชัย",cost:[50000,80000],desc:"ชื่อเสียง +1.5 · ชื่อเสียงลดช้าลง · กำลังใจ +1/สัปดาห์",req:{week:36}},
 };
 const facLocked=(G,k)=>{const r=FACILITIES[k].req;if(!r)return "";if(r.lv&&campLevel(G)<r.lv)return `ค่าย Lv.${r.lv}`;if(r.rep&&G.rep<r.rep)return `ชื่อเสียง ${r.rep}`;if(r.week&&G.week<r.week&&!(G.season>1))return `สัปดาห์ ${r.week}`;return "";};
@@ -1105,7 +1109,7 @@ function recordHonor(G,kind,id,div,week=G.week,venue=null,opp=null,oppId=null){i
   const season=G.season||1,key=`${season}:${kind}:${div}:${venue||""}:${kind==="dm"||kind==="belt"||kind==="defense"?week:id}`;
   if(G.honors.some(h=>h.key===key))return null;const h={key,season,week,id,div,kind,...(venue?{venue}:{}),...(opp?{opp}:{}),...(oppId&&G.F[oppId]&&oppId!==id?{oppId}:{})};G.honors.push(h);G.awards.push(h);return h;}
 const DAENG_COST=[0,15000,30000];
-function facTotal(G){return Object.keys(FACILITIES).reduce((s,k)=>s+(G.fac[k]||0),0)+(G.fac.daeng-1);}
+function facTotal(G){return Object.keys(FACILITIES).filter(k=>!FACILITIES[k].prot).reduce((s,k)=>s+(G.fac[k]||0),0)+(G.fac.daeng-1);}
 function campLevel(G){const t=facTotal(G);return t>=13?3:t>=5?2:1;}
 const CAMP_LV_NAME=["","ค่ายเก่าทรุดโทรม","ค่ายที่กำลังฟื้นตัว","ค่ายมวยทันสมัย"];
 // v1.23: the class starts with one student and grows a person or two a week; a fully built camp holds 30
@@ -1200,7 +1204,7 @@ function petPlay(G,i){const p=(G.pets||[])[i];if(!p||p.wk===gameWeek(G))return f
   if(p.k==="rooster")R.forEach(f=>{f.morale=Math.min(100,f.morale+1);f.fatigue=Math.max(0,f.fatigue-1);});if(p.k==="turtle")R.forEach(f=>f.morale=Math.min(100,f.morale+3));
   if(p.k==="otter")R.forEach(f=>f.fatigue=Math.max(0,f.fatigue-1)); /* v1.89.25: the Loy Krathong otter helps a little (Man's call) */
   const fav=p.fav&&G.F[p.fav];if(fav&&fav.camp==="player")fav.morale=Math.min(100,fav.morale+3);return true;}
-const upkeep=G=>1800+(G?facTotal(G)*220+[0,0,800,1800][campLevel(G)]+petFood(G):0); // v1.43: a bigger camp costs more to run
+const upkeep=G=>1800+(G?facTotal(G)*220+[0,0,800,1800][campLevel(G)]+petFood(G)+acBill(G):0); // v1.43: a bigger camp costs more to run
 function weeklyNet(G){return classIncome(G)-upkeep(G)-wages(G);}
 
 function eligible(G,f){const st=stageOf(G.week);
@@ -1534,6 +1538,7 @@ function checkCampAwards(G){G.campAwards=Array.isArray(G.campAwards)?G.campAward
   if(got.length){G.newCerts=(G.newCerts||[]).concat(got);}return got;}
 function weekFinish(G){if(G.rep>55)G.rep=55+(G.rep-55)*(.96+(G.fac.hall||0)*.01);if(G.sponsorWk)G.cash+=G.sponsorWk;
   if(ytKey(G)==="sponsor"&&G.yt.acc&&G.week<=40)G.cash+=2000;if(ytKey(G)==="tourist")for(const f of roster(G))f.fatigue=clamp(f.fatigue+1,0,100); /* v1.88 yearly themes */
+  if(heatOn(G)&&!coolRoom(G)){for(const f of roster(G))f.fatigue=clamp(f.fatigue+2,0,100);} /* v1.91.217 El Niño */
  growStudents(G); // v1.22.1: fame above 40 needs upkeep
 
   const before=rankSnapshot(G);
@@ -1655,12 +1660,23 @@ const YEAR_THEMES={
  sponsor:{ic:"💼",name:"ปีสปอนเซอร์",desc:"ถ้ารับข้อเสนอ ได้ ฿2,000 ทุกสัปดาห์จนถึงสัปดาห์ 40 และถ้าค่ายชนะครบ 8 ไฟต์ภายในสัปดาห์ 40 ได้โบนัสอีก ฿20,000"},
  pm25:{ic:"😷",name:"ปีฝุ่น PM2.5",desc:"สัปดาห์ 37–46 ฝุ่นคลุมเชียงใหม่ ซ้อมได้ผลน้อยลง (ฟิตร่างกายลดมากสุด) ถ้ามีห้องซ้อมในร่มกรองฝุ่นจะซ้อมได้เต็มที่",from:37,to:46},
  tourist:{ic:"🧳",name:"ปีนักท่องเที่ยวบูม",desc:"ค่าเรียนแพงขึ้น 20% ทั้งปี แต่ค่ายวุ่น นักมวยล้าเพิ่มสัปดาห์ละนิด"},
- tv:{ic:"📺",name:"ปีรายการทีวี",desc:"ทีวีตามถ่ายค่ายทั้งปี ชนะได้ชื่อเสียงมากขึ้น แพ้ก็เสียชื่อเสียงนิดหน่อย"}};
+ tv:{ic:"📺",name:"ปีรายการทีวี",desc:"ทีวีตามถ่ายค่ายทั้งปี ชนะได้ชื่อเสียงมากขึ้น แพ้ก็เสียชื่อเสียงนิดหน่อย"},
+ elnino:{ic:"🔥",name:"ปีเอลนีโญ",desc:"หน้าร้อนสัปดาห์ 41–52 ร้อนจัด ซ้อมได้ผลน้อยลงและนักมวยล้าเพิ่มทุกสัปดาห์ ถ้าติดแอร์ห้องซ้อมจะซ้อมได้เต็มที่",from:41,to:52}};
 const ytKey=G=>G&&G.yt&&G.yt.season===(G.season||1)?G.yt.k:null;
 const ytIn=(G,k)=>{if(ytKey(G)!==k)return false;const T=YEAR_THEMES[k];return T.from==null||(G.week>=T.from&&G.week<=T.to);};
 function pickYearTheme(G){const S=G.season||1;if(S<2)return null;const last=G.yt&&G.yt.k;const keys=Object.keys(YEAR_THEMES).filter(k=>k!==last);
   const r=mulberry32((G.seed||1)*131+S*7919)();G.yt={season:S,k:keys[Math.floor(r*keys.length)]};return G.yt.k;}
-function ytTrainMul(G,f){if(ytIn(G,"flood"))return .8;if(ytIn(G,"pm25")&&!((G.fac&&G.fac.airgym)>0))return f.plan.preset==="cond"?.6:.75;return 1;}
+/* v1.91.217: dust comes every year (weeks 38–46, mild); a PM2.5 year is the heavy version. Protection upgrades soften each season. */
+const dustSeason=G=>G.week>=38&&G.week<=46;
+const heatOn=G=>ytIn(G,"elnino");
+const acBill=G=>heatOn(G)&&(G.fac.aircon||0)>0&&!((G.fac.airgym||0)>0)?800:0;
+const coolRoom=G=>!!(G.fac&&((G.fac.aircon||0)>0||(G.fac.airgym||0)>0));
+function ytTrainMul(G,f){const F=G.fac||{},cond=f.plan&&f.plan.preset==="cond";
+  if(ytIn(G,"flood"))return (F.floodwall||0)>=2?.97:(F.floodwall||0)>=1?.9:.8;
+  if(heatOn(G))return coolRoom(G)?1:cond?.75:.85;
+  if(ytIn(G,"pm25"))return (F.airgym||0)>0?1:(F.purifier||0)>0?(cond?.8:.87):(cond?.6:.75);
+  if(dustSeason(G))return (F.airgym||0)>0||(F.purifier||0)>0?1:cond?.88:.94;
+  return 1;}
 const ytSponsorWins=G=>(G.cal||[]).filter(c=>c.season===(G.season||1)&&c.res==="W"&&c.wk<=40).length;
 function newSeason(G){
   G.titles=G.titles||[];G.titles.push({season:G.season||1,champ:{...G.champ}});

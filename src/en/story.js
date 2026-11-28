@@ -1223,28 +1223,21 @@ EVENTS.push(
    {t:"Taste Mali's first",fx:G=>{add(G,"mali","bond",3);add(G,"rin","bond",1);},then:[{n:"nar",t:"So salty your eyes cross, but weirdly delicious"},{n:"rin",f:"happy",l:"casual",t:"…Noted. 'Heart and hands' is a variable I can't measure yet"}]}]}]});
 // v1.37: when the camp is flush, bad luck comes for the money (students stay home, repairs cost)
 EVENTS.push(
- {id:"dis_storm",pri:1,look:"casual",when:G=>G.week>=14&&G.week<=30&&G.cash>=45000,bg:"camp_rain",steps:[
+ {id:"dis_storm",pri:1,look:"casual",when:G=>G.week>=44&&G.week<=52&&G.cash>=45000,bg:"camp_rain",steps:[
   {n:"nar",t:"A summer storm hits at 2 a.m.; sheets of tin roofing fly off and slam into the mango tree next door"},
   {n:"kati",f:"surprised",l:"casual",t:G=>`${CALL(G,"kati")}! Half the training room roof is gone! The rain's soaking all the sandbags!`},
   {n:"coach",t:"Kids can't train in a room with no roof. How do we fix it?"},
   {choice:[{t:"Repair it properly, fast (฿25,000)",fx:G=>{G.cash-=25000;},then:[{n:"nar",t:"A full crew arrives and finishes in two days; a shiny new roof, and classes carry on without a hitch"}]},
    {t:"Patch it up for now (฿8,000)",fx:G=>{G.cash-=8000;G.disaster={name:"The temporary roof",untilAbs:absWeek(G)+3,inc:.5};roster(G).forEach(f=>f.morale=Math.max(0,f.morale-3));},then:[{n:"nar",t:"A blue tarp covers the roof. Every time it rains, water drips onto the middle of the ring; only half the students come for three weeks"}]}]}]},
- {id:"dis_flood",pri:1,look:"casual",when:G=>G.week>=30&&G.week<=44&&G.cash>=40000&&ytKey(G)!=="flood",bg:"camp_rain",steps:[
-  {n:"nar",t:"Three days and nights of heavy rain. The river bursts its banks and floods the whole subdistrict; knee-deep water in camp, training mats drifting against the door"},
-  {n:"mali",f:"sad",l:"casual",t:"Mali's gloves floated away! …Oh, there's a fish swimming into the camp!"},
-  {n:"rin",f:"sad",l:"casual",t:"The road into the subdistrict is cut off. Students definitely can't come for at least three weeks. The generator and mats need replacing"},
-  {n:"coach",t:G=>`${ME(G)}, the villagers' homes are flooded worse than ours. Do we send the girls to help them first, or rush to fix our camp?`},
-  {choice:[{t:"Help the villagers move their things first (camp repairs ฿12,000)",fx:G=>{G.cash-=12000;G.rep+=3;G.disaster={name:"The flood",untilAbs:absWeek(G)+4,inc:0};roster(G).forEach(f=>{f.trust=Math.min(100,f.trust+4);f.fatigue=Math.min(100,f.fatigue+8);});},then:[{n:"nar",t:"Sirichai's fighters haul sandbags all day; the local paper puts their photo on the front page"},{n:"npc",who:"Auntie Sri, the vegetable seller",t:"This camp has the kindest hearts in the district! When the water goes down I'm sending three grandkids to train!"}]},
-   {t:"Rush the camp repairs to reopen ASAP (฿25,000)",fx:G=>{G.cash-=25000;G.disaster={name:"The flood",untilAbs:absWeek(G)+2,inc:0};},then:[{n:"nar",t:"Three rented pumps; our camp dries out faster than anyone's, but the road stays cut off for two more weeks"}]}]}]},
  {id:"dis_termite",pri:1,look:"train",when:G=>G.week>=36&&G.cash>=55000&&G.F.fah.met,bg:"gym",steps:[
   {n:"nar",t:"Crack! The corner post snaps while Fah is leaning on it… wait, what is Fah doing at our camp?"},
   {n:"fah",f:"surprised",l:"casual",t:"Fah was just passing by! Not spying on training! …And this post is hollow, termites ate all of it!"},
   {n:"coach",t:"Termites ate the camp's whole timber frame. It has to be rebuilt, ฿18,000. During the work, only half the students can come for two weeks"},{fx:G=>{G.cash-=18000;G.disaster={name:"Termite repairs",untilAbs:absWeek(G)+2,inc:.5};}},
   {n:"fah",f:"happy",l:"casual",t:G=>`Serves you right! …Kidding, ${ME(G)}. Golden Tiger has a great termite guy, Fah'll get you his number. No need to thank me!`},{fx:G=>add(G,"fah","bond",2)}]});
 /* v1.91.205 (Man): more camp troubles, and every trouble can come back in later years.
-   Rules for all of them (TROUBLE_IDS): at most one trouble every 8 weeks, the same one not again within 2 years,
+   Rules for all of them (TROUBLE_IDS): at most one trouble every 6 weeks, the same one not again within 2 years,
    about 1 chance in 4 per eligible week, never in the semi/final weeks. G.trouble = a short training slowdown. */
-const TROUBLE_IDS=["dis_storm","dis_flood","dis_termite","dis_power","dis_pump","dis_snake","dis_van","dis_neighbor"];
+const TROUBLE_IDS=["dis_storm","dis_termite","dis_power","dis_pump","dis_snake","dis_van","dis_neighbor","dis_dog","dis_ordain","dis_pa","dis_monkey","dis_funeral","dis_somtam","dis_tiktok","dis_sign"];
 const trbSet=(G,name,train,wks)=>{G.trouble={name,train,untilAbs:absWeek(G)+wks};};
 const trbNear=G=>roster(G).filter(f=>!f.injury);
 EVENTS.push(
@@ -1264,7 +1257,7 @@ EVENTS.push(
    {t:"Bathe at the temple for a while",fx:G=>{trbNear(G).forEach(f=>{f.trust=Math.min(100,(f.trust||0)+3);f.fatigue=Math.min(100,f.fatigue+6);});},then:[
     {n:"nar",t:"Every evening the whole camp walks to the temple and sweeps the courtyard before bathing. Luang Pho blesses everyone before they leave."},
     {n:"kati",f:"happy",l:"casual",t:"It's a bit tiring, but it feels peaceful. Luang Pho says however heavy your punch is, you need a calm heart to go with it."}]}]}]},
- {id:"dis_snake",pri:1,look:"casual",when:G=>G.week>=10&&G.week<=35&&G.cash>=8000&&inCamp(G,"mali"),bg:"camp_rain",steps:[
+ {id:"dis_snake",pri:1,look:"casual",when:G=>G.week>=6&&G.week<=24&&G.cash>=8000&&inCamp(G,"mali"),bg:"camp_rain",steps:[
   {n:"nar",t:"After the heavy rain, Mali opens the glove locker and finds something long and black coiled inside her favorite pair."},
   {n:"mali",f:"flustered",l:"casual",t:"S-snake! There's a snake in my gloves! And it's spreading its hood!"},
   {n:"kati",f:"surprised",l:"casual",t:"A cobra! Everyone back off, don't go near it!"},
@@ -1283,10 +1276,95 @@ EVENTS.push(
   {n:"coach",t:G=>`${ME(G)}, do we move training later, or go apologize to him properly?`},
   {choice:[{t:"Apologize with a gift (฿2,000)",fx:G=>{G.cash-=2000;G.rep+=2;},then:[{n:"nar",t:"A big fruit basket and the girls' smiles soften him right up."},{n:"npc",who:"Uncle Piak, next door",t:"Fine, fine. I'll buy earplugs. And tell me when you fight nearby, I'll bring my grandkid to cheer."}]},
    {t:"Move training to later in the morning",fx:G=>{trbSet(G,"Late training for the neighbors",.93,3);},then:[{n:"nar",t:"Training later means the harsh sun and tiring faster, but the whole street is quiet now. Uncle Piak waves every morning."}]}]}]});
+/* v1.91.217 (Man): Thai village troubles — funny, small, and the player still has to choose */
+const trbRoster=(G,fn)=>trbNear(G).forEach(fn);
+EVENTS.push(
+ {id:"dis_dog",pri:1,look:"casual",when:G=>G.week>=3&&G.cash>=3000,bg:"temple",steps:[
+  {n:"nar",t:"Ai Dang, the neighborhood temple dog, sneaks in, grabs Kati's hand wraps off the drying line, and trots out the gate with his tail in the air."},
+  {n:"kati",f:"angry",l:"casual",t:"Ai Dang! Those are my lucky wraps! Give them back right now!"},
+  {n:"coach",t:"That dog runs faster than half our fighters. Chase him, or just buy new ones?"},
+  {choice:[{t:"Buy new wraps, and a bone for Ai Dang (฿800)",fx:G=>{G.cash-=800;trbRoster(G,f=>{f.morale=Math.min(100,f.morale+2);});},then:[{n:"nar",t:"Ai Dang takes the bone and lies down by the gate. From then on he guards the camp every morning, free of charge."}]},
+   {t:"The whole camp chases him",fx:G=>{trbRoster(G,f=>{f.fatigue=Math.min(100,f.fatigue+5);if(f.a&&f.a.stamina!=null)f.a.stamina=Math.min(stCap(f),f.a.stamina+.15);});},then:[
+    {n:"nar",t:"Three laps of the village, past the market, past the temple, through an ordination party. In the end Ai Dang stops because he's tired. Everyone's panting, but a little fitter."},
+    {n:"kati",f:"happy",l:"casual",t:"Got it back! …It's soaked in drool, but still lucky."}]}]}]},
+ {id:"dis_ordain",pri:1,look:"casual",when:G=>((G.week>=1&&G.week<=8)||(G.week>=21&&G.week<=30))&&G.cash>=3000,bg:"camp_night",steps:[
+  {n:"nar",t:"Auntie Sai's son is being ordained. A sound truck parks in front of the camp at 8 p.m., speakers two stories high, blasting luk thung remixes nonstop."},
+  {n:"kati",f:"pout",l:"casual",t:"The bass is so strong the heavy bags are swinging on their own… and we're up at 5 a.m. tomorrow."},
+  {n:"coach",t:G=>`${ME(G)}, do we hand out earplugs and sleep, or just go join the party?`},
+  {choice:[{t:"Buy earplugs for the whole camp (฿500)",fx:G=>{G.cash-=500;},then:[{n:"nar",t:"Everyone sleeps… except Kru Daeng, who takes his earplugs out to listen to his favorite song."}]},
+   {t:"Join the ordination procession",fx:G=>{G.rep+=2;trbRoster(G,f=>{f.fatigue=Math.min(100,f.fatigue+6);f.morale=Math.min(100,f.morale+4);});},then:[
+    {n:"nar",t:"The Sirichai fighters dance at the head of the procession until 1 a.m. Auntie Sai cries happy tears, and the clips go up on the subdistrict group chat."},
+    {n:"npc",who:"Auntie Sai",t:"These camp kids dance better than they fight! …Oops, just kidding, they fight great too."}]}]}]},
+ {id:"dis_pa",pri:1,look:"casual",when:G=>G.week>=4&&G.cash>=2000,bg:"camp_day",steps:[
+  {n:"nar",t:"6 a.m. The village loudspeaker crackles on: 'Hello, hello, testing, testing.'"},
+  {n:"npc",who:"Village Headman Jamnong (loudspeaker)",t:"Congratulations to Srichai Boxing Camp on yesterday's win! Go Srichai! Srichai, Srichai!"},
+  {n:"kati",f:"surprised",l:"casual",t:"It's Sirichai! Si-ri-chai! That's the third time he's said it wrong!"},
+  {n:"coach",t:"The whole subdistrict heard it. Ask him to fix it, or let it become a village joke?"},
+  {choice:[{t:"Bring the headman coffee and ask for a correction (฿300)",fx:G=>{G.cash-=300;G.rep+=1;},then:[{n:"npc",who:"Village Headman Jamnong (loudspeaker)",t:"Correction: it's Sirichai Camp, not Srichai. My apologies. The coffee is delicious, thank you for bringing it."}]},
+   {t:"Let it go, it's funny",fx:G=>{trbRoster(G,f=>{f.morale=Math.min(100,f.morale+3);});},then:[{n:"nar",t:"From then on the camp calls itself 'Team Srichai', and anyone who says the real name has to buy shaved ice."}]}]}]},
+ {id:"dis_monkey",pri:1,look:"casual",when:G=>G.week>=5&&G.cash>=4000,bg:"kitchen",steps:[
+  {n:"nar",t:"A troop of monkeys from the mountain temple raids the camp kitchen. Three bunches of bananas for the fighters are gone, the peels laid out in a neat row like an insult."},
+  {n:"kati",f:"angry",l:"casual",t:"That one's wearing my towel and sitting on the roof!"},
+  {n:"coach",t:"Those monkeys know the way now. If we don't keep them out, they'll come every day. Put up a net, or take turns guarding the kitchen?"},
+  {choice:[{t:"Net off the kitchen (฿3,000)",fx:G=>{G.cash-=3000;},then:[{n:"nar",t:"The monkeys stare at the net for two days, then go raid the noodle shop next door instead. Sorry, noodle uncle."}]},
+   {t:"Take turns guarding the kitchen",fx:G=>{trbRoster(G,f=>{f.fatigue=Math.min(100,f.fatigue+4);f.morale=Math.max(0,f.morale-2);});},then:[{n:"nar",t:"The fighters take turns guarding the kitchen with a broom all week. Monkeys 2, camp 1."}]}]}]},
+ {id:"dis_funeral",pri:1,look:"casual",when:G=>G.week>=6&&G.cash>=4000,bg:"temple",steps:[
+  {n:"nar",t:"Uncle Lao, the old man who watched the fighters train every evening, passes away peacefully at ninety. The funeral chanting is held at his house next to the camp."},
+  {n:"coach",t:"Uncle Lao was Grandpa Chai's friend. It wouldn't be right to train loud these three nights. Do we help at the funeral, or make an offering and train quietly indoors?"},
+  {choice:[{t:"Send a wreath and a donation (฿2,000)",fx:G=>{G.cash-=2000;G.rep+=1;},then:[{n:"nar",t:"The wreath reads 'Sirichai Camp, with love and sorrow.' Uncle Lao's family wai to Kru Daeng in thanks."}]},
+   {t:"Keep training quiet and help out for three nights",fx:G=>{trbSet(G,"Helping at the neighborhood funeral",.9,1);G.rep+=2;trbRoster(G,f=>{f.trust=Math.min(100,(f.trust||0)+2);});},then:[
+    {n:"nar",t:"The fighters carry tables, wash dishes and serve water. The aunties rope them into folding funeral flowers late into the night and can't stop saying how gentle their hands are."},
+    {n:"kati",f:"sad",l:"casual",t:"Uncle Lao said the day I won a fight he'd treat me to khanom khrok… I'll win one for you, Uncle."}]}]}]},
+ {id:"dis_somtam",pri:1,look:"casual",when:G=>G.week>=4&&G.cash>=3000,bg:"market_morning",steps:[
+  {n:"nar",t:"Auntie Taeo opens a new som tam stall in front of the camp, and the smell of fermented crab is everywhere. Since then the fighters slip out one by one after training and come back with red, spicy lips."},
+  {n:"coach",t:"This morning's weigh-in: almost the whole camp is overweight! Three bags of sticky rice each!"},
+  {n:"kati",f:"flustered",l:"casual",t:"I only had… som tam with crab, half a grilled chicken, and sticky rice… two bags."},
+  {choice:[{t:"Make a deal for a fighter menu (฿1,500)",fx:G=>{G.cash-=1500;trbRoster(G,f=>{f.morale=Math.min(100,f.morale+3);});},then:[{n:"npc",who:"Auntie Taeo, the som tam stall",t:"Sure thing! Fighter's som tam: no sugar, as spicy as you like, half a bag of sticky rice, boiled eggs instead of fried chicken. I'll call it the 'Champion Menu'!"}]},
+   {t:"Ban it completely and run the weight off",fx:G=>{trbRoster(G,f=>{f.fatigue=Math.min(100,f.fatigue+5);f.morale=Math.max(0,f.morale-3);});},then:[{n:"nar",t:"The whole camp runs laps of the reservoir in rain suits, passing Auntie Taeo's stall every lap. The smell of pla ra drifts over like a test of willpower."}]}]}]},
+ {id:"dis_tiktok",pri:1,look:"casual",when:G=>G.week>=6&&G.cash>=3000,bg:"camp",steps:[
+  {n:"nar",t:"A bleach-blond village kid strolls into the middle of the camp holding his phone, three friends livestreaming behind him."},
+  {n:"npc",who:"Boy, the TikToker",t:"I've watched three hundred Muay Thai tutorials! I challenge your best fighter! We're live, everyone, smash that heart!"},
+  {n:"coach",t:"We don't fight untrained people. Someone gets hurt, it's big trouble. Give him a free class, or let Kati hold pads for him for five minutes?"},
+  {choice:[{t:"A free month of classes (waive ฿1,500 in fees)",fx:G=>{G.cash-=1500;G.rep+=1;},then:[{n:"nar",t:"Boy never misses a class and livestreams every one. His viewers keep asking where the camp is."}]},
+   {t:"Let Kati hold pads for him for five minutes",fx:G=>{G.rep+=3;const k=G.F.kati;if(k&&k.camp==="player")k.fatigue=Math.min(100,k.fatigue+6);},then:[
+    {n:"nar",t:"Two minutes of full-power kicks. Minute three he slows. Minute four he sits down. Minute five he's flat on his back. The clip gets two hundred thousand views."},
+    {n:"npc",who:"Boy, the TikToker",t:"Real… Muay Thai… is this tiring?… I'd like to sign up, please."}]}]}]},
+ {id:"dis_sign",pri:1,look:"casual",when:G=>G.week>=10&&G.cash>=5000,bg:"camp_day",steps:[
+  {n:"nar",t:"A subdistrict council officer rides up with a tape measure, measures the camp sign three times, and writes a very long note."},
+  {n:"npc",who:"Phi Tom, subdistrict council officer",t:"The sign's bigger than registered, the sign tax hasn't been paid since Grandpa Chai's day, and a letter's fallen off. It reads 'Sirich_i Camp' now."},
+  {n:"kati",f:"flustered",l:"casual",t:"The letter fell off in last year's storm… I thought nobody noticed."},
+  {choice:[{t:"Pay the back tax and fix the letters (฿3,000)",fx:G=>{G.cash-=3000;},then:[{n:"nar",t:"The sign has every letter again. Phi Tom posts it on the council page: 'Model camp, taxes paid in full.'"}]},
+   {t:"Ask to pay in installments and help at the council sports day",fx:G=>{G.rep+=1;trbRoster(G,f=>{f.fatigue=Math.min(100,f.fatigue+5);});},then:[{n:"nar",t:"The fighters put up tents, chalk the field and referee the tug-of-war. Phi Tom agrees to three installments, and asks for a photo with Kati."}]}]}]});
+/* v1.91.217 (Man): seasons that come back every year at the same time. Protection upgrades (floodwall, purifier, aircon) soften them. */
+const rainWk=G=>17+(((G.seed||1)*31+(G.season||1)*7)>>>0)%4;
+EVENTS.push(
+ {id:"dis_flood",annual:true,pri:2,look:"casual",when:G=>G.week>=rainWk(G)&&G.week<=23&&ytKey(G)!=="flood",bg:"camp_rain",steps:[
+  {n:"nar",t:"Late in the rainy season it pours for three days and nights. The Ping River spills into the subdistrict, like every year."},
+  {inject:G=>{const L=(G.fac&&G.fac.floodwall)||0;
+   if(L>=2)return [{fx:G=>{G.rep+=1;}},{n:"nar",t:"This time the water stops at the gate. The raised floor and sandbags hold it all back, so the villagers bring their dogs, cats and chickens to shelter in the camp."},{n:"kati",f:"happy",l:"casual",t:"Our camp's become an evacuation center! There's a chicken watching me train!"}];
+   if(L>=1)return [{fx:G=>{G.cash-=2000;}},{n:"nar",t:"The water only reaches the ankles. The sandbag wall saved a lot. Just ฿2,000 to clean up."},{n:"coach",t:"Raise the floor one more level and the water won't get in next year."}];
+   return [inCamp(G,"mali")?{n:"mali",f:"sad",l:"casual",t:"Mali's gloves floated away! …Oh, there's a fish swimming into the camp!"}:{n:"kati",f:"sad",l:"casual",t:"The training mats floated over to the door! …Oh, there's a fish swimming in the camp!"},
+    {n:"coach",t:G=>`${ME(G)}, the water's knee-deep in camp again and the villagers' houses are flooded too. Do we take the kids to help them first, or rush to fix our camp?`},
+    {choice:[{t:"Help the villagers first (camp repairs ฿6,000)",fx:G=>{G.cash-=6000;G.rep+=2;G.disaster={name:"The flood",untilAbs:absWeek(G)+2,inc:.5};trbRoster(G,f=>{f.trust=Math.min(100,(f.trust||0)+3);f.fatigue=Math.min(100,f.fatigue+6);});},then:[{n:"nar",t:"Sirichai's fighters haul sandbags all day; the local paper puts their photo on the front page"},{n:"npc",who:"Auntie Sri, the vegetable seller",t:"This camp has the kindest hearts in the district! When the water goes down I'm sending three grandkids to train!"}]},
+     {t:"Rush repairs to reopen fast (฿12,000)",fx:G=>{G.cash-=12000;G.disaster={name:"The flood",untilAbs:absWeek(G)+1,inc:.5};},then:[{n:"nar",t:"Three rented pumps dry the camp faster than anyone else's. Students are back within a week."}]}]},
+    {n:"coach",t:"The water comes every year like this. Raise the floor and build a sandbag wall once and it works every year. It's on the camp management page."}];}}]},
+ {id:"ss_dust",annual:true,pri:2,look:"casual",when:G=>G.week>=38&&G.week<=42&&ytKey(G)!=="pm25",bg:"camp",steps:[
+  {n:"nar",t:"The dry season arrives. Doi Suthep fades into an orange haze. The dust shows up right on schedule, like every year."},
+  {n:"kati",f:"pout",l:"casual",t:"My snot's gone gray…"},
+  {n:"coach",t:G=>(G.fac.airgym||0)>0||(G.fac.purifier||0)>0?"We have air filters this year. Train at full strength, no worries.":"The dust stays from about week 38 to 46, so training is a bit less effective. Buy air purifiers once and they work every year."}]},
+ {id:"yt_intro_elnino",annual:true,pri:2,look:"casual",bg:"camp_day",when:G=>ytKey(G)==="elnino"&&G.week>=1,steps:[
+  {n:"nar",t:"The weather bureau announces a strong El Niño. This hot season will be the hottest in ten years."},
+  {n:"coach",t:"Around weeks 41 to 52 the gym will be an oven. Training won't stick as well and the kids will tire fast. If we put in AC first we'll be fine, but the power bill isn't cheap."},
+  {n:"kati",f:"happy",l:"casual",t:"I'll keep a cooler full of ice right by the ring!"},
+  {n:"nar",t:"🔥 El Niño year: weeks 41–52 training is less effective and fighters tire faster. Install AC from the camp management page."}]},
+ {id:"yt_heat_start",annual:true,pri:2,look:"casual",bg:"camp_day",when:G=>ytIn(G,"elnino"),steps:[
+  {n:"nar",t:"42 degrees. The motorbike tires out front go soft, and an egg left on the tin roof turns into a fried egg."},
+  {n:"kati",f:"surprised",l:"casual",t:"Kru! The ring ropes are too hot to lean on!"},
+  {n:"coach",t:G=>coolRoom(G)?"Good thing we put in the AC. Everyone train inside at full strength. We'll just pay the power bill.":"Train light, drink lots of water, and tell me right away if anyone feels dizzy. This heat will last for weeks."}]});
 (()=>{const Y2=104;for(const e of EVENTS){if(!TROUBLE_IDS.includes(e.id))continue;const w0=e.when;e.annual=true;
   e.when=G=>{if(!w0(G)||G.week===44||G.week===49)return false;const now=absWeek(G),A=G.seenAbs||{};
     const own=A[e.id]!=null?A[e.id]:(G.seen&&G.seen[e.id])?now-52:null;if(own!=null&&now-own<Y2)return false;
-    if(TROUBLE_IDS.some(id=>A[id]!=null&&now-A[id]<8))return false;
+    if(TROUBLE_IDS.some(id=>A[id]!=null&&now-A[id]<6))return false;
     let h=0;for(const c of e.id)h=(h*31+c.charCodeAt(0))>>>0;return mulberry32(((G.seed||1)*7+now*131+h)>>>0)()<.25;};}})();
 // v1.39: the player's own story: grandpa's real grandchild who left a good office job in Bangkok
 EVENTS.push(
@@ -2773,7 +2851,7 @@ EVENTS.push({id:"nai_color",annual:true,pri:2,look:"casual",bg:"camp",when:G=>G.
 /* v1.88 yearly theme scenes (annual — play once in the year that drew the theme) */
 EVENTS.push(
 {id:"yt_intro_flood",annual:true,pri:2,look:"casual",bg:"camp",when:G=>ytKey(G)==="flood"&&G.week>=1,steps:[{"n": "nar", "t": "The forecast says this year's rains will be the heaviest yet. The old man next door is already moving his things up high."},{n:"coach",t:G=>`Our camp sits lowest in the subdistrict. When the water comes, we get it first. Around week 14, be ready, ${ME(G)}`},{"n": "kati", "f": "happy", "l": "casual", "t": "It's fine! Grandpa used to train me in the water, said it was great for the legs. …Or maybe he was just fooling me."},{n:"nar",t:"🌊 Flood year: weeks 14–16 training is 80% effective and only half the students can come."}]},
-{id:"yt_flood_hit",annual:true,pri:3,look:"casual",bg:"camp",when:G=>ytIn(G,"flood"),steps:[{fx:G=>{G.cash-=6000;G.disaster={name:"The flood",untilAbs:absWeek(G)+3,inc:.5};}},{"n": "nar", "t": "In one night the Ping river floods the camp knee-deep. The heavy bags float like buoys, and the rooster stands on the ring glaring down."},{"n": "coach", "t": "Repairs cost ฿6,000. For three weeks we can't train properly, and only half the students can make it."},{"n": "kati", "f": "happy", "l": "casual", "t": "I can kick through water harder now! …That doesn't really help, does it."}]},
+{id:"yt_flood_hit",annual:true,pri:3,look:"casual",bg:"camp",when:G=>ytIn(G,"flood"),steps:[{fx:G=>{const L=(G.fac&&G.fac.floodwall)||0;G.cash-=L>=2?1500:L>=1?3000:6000;if(L<2)G.disaster={name:"The flood",untilAbs:absWeek(G)+(L>=1?2:3),inc:.5};}},{"n": "nar", "t": "In one night the Ping river floods the camp knee-deep. The heavy bags float like buoys, and the rooster stands on the ring glaring down."},{n:"coach",t:G=>{const L=(G.fac&&G.fac.floodwall)||0;return L>=2?"The water came hard this year, but the raised floor saved us. Just ฿1,500 for cleaning, and we can train almost normally.":L>=1?"The sandbag wall saved about half of it. Repairs cost ฿3,000, and only half the students can come for two weeks.":"Repairs cost ฿6,000. For three weeks we can't train properly, and only half the students can make it.";}},{"n": "kati", "f": "happy", "l": "casual", "t": "I can kick through water harder now! …That doesn't really help, does it."}]},
 {id:"yt_flood_end",annual:true,pri:2,look:"casual",bg:"camp",when:G=>ytKey(G)==="flood"&&G.week>=17&&G.week<=19,steps:[{fx:G=>{roster(G).forEach(f=>f.morale=Math.min(100,f.morale+3));}},{"n": "nar", "t": "The water goes down. Half the subdistrict turns up with brooms to scrub the camp, and someone brings sticky rice and fried pork for everyone."},{"n": "npc", "who": "Auntie Sri, the vegetable seller", "t": "Last year your kids carried my vegetables out of the flood. This year it's my turn."},{n:"nar",t:"Everyone's morale +3"}]},
 {id:"yt_intro_sponsor",annual:true,pri:2,look:"casual",bg:"camp",when:G=>ytKey(G)==="sponsor"&&G.week>=1,steps:[{"n": "nar", "t": "A man in a suit steps out of a van with a folder. He's from a new energy-drink brand."},{"n": "npc", "who": "Brand manager, 'One Push'", "t": "We pay two thousand a week until week 40, just for our logo on the shorts. If the camp wins 8 fights by week 40, there's a twenty-thousand bonus."},{choice:[{t:"Take the deal and wear the 'One Push' logo",fx:G=>{G.yt.acc=1;},then:[{"n": "kati", "f": "flustered", "l": "casual", "t": "That logo's huge… bigger than my name."}]},{t:"Politely decline",then:[{"n": "coach", "t": "Fine by me. Grandpa Chai's shorts never had a logo."}]}]}]},
 {id:"yt_sponsor_end",annual:true,pri:2,look:"casual",bg:"camp",when:G=>ytKey(G)==="sponsor"&&G.yt.acc&&G.week>=41,steps:[{fx:G=>{const w=ytSponsorWins(G);G.yt.win=w;if(w>=8)G.cash+=20000;}},{n:"npc",who:"Brand manager, 'One Push'",t:G=>G.yt.win>=8?`This year the camp won ${G.yt.win} fights! Here's the twenty-thousand bonus as promised. Let's talk again next year.`:`This year: ${G.yt.win!=null?G.yt.win:ytSponsorWins(G)} fights, short of eight, so no bonus this time. Thanks for wearing the logo all year.`}]},

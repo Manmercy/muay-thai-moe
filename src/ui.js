@@ -423,7 +423,8 @@ function ytChipHTML(){const k=typeof ytKey==="function"&&ytKey(G);if(!k)return "
   return `<button class="ytchip ${on?"on":""}" data-act="ytinfo"><span>${T.ic}</span><b>${T.name}</b><small>${T.from!=null?(on?"ตอนนี้":`สด.${T.from}–${T.to}`):k==="sponsor"&&!G.yt.acc?"ไม่ได้รับข้อเสนอ":"ทั้งปี"}</small><i>▸</i></button>`;}
 function ytInfoHTML(){const k=ytKey(G);if(!k)return "";const T=YEAR_THEMES[k];let st="";
   if(k==="sponsor")st=G.yt.acc?(G.week<=40?`ชนะแล้ว ${ytSponsorWins(G)}/8 ไฟต์ · ได้ ฿2,000 ทุกสัปดาห์ถึงสัปดาห์ 40`:`ปีนี้ชนะ ${ytSponsorWins(G)} ไฟต์ก่อนตัดยอด`):"ปีนี้ไม่ได้รับข้อเสนอสปอนเซอร์";
-  if(k==="pm25")st=G.fac.airgym?"มีห้องซ้อมกรองฝุ่นแล้ว ซ้อมได้เต็มที่":`ห้องซ้อมในร่มกรองฝุ่น ${fmt(FACILITIES.airgym.cost[0])} · ดูได้ที่หน้าจัดการค่าย`;
+  if(k==="pm25")st=G.fac.airgym?"มีห้องซ้อมกรองฝุ่นแล้ว ซ้อมได้เต็มที่":G.fac.purifier?"มีเครื่องฟอกอากาศ ผลเสียจากฝุ่นเหลือครึ่งเดียว · ห้องซ้อมกรองฝุ่นช่วยได้เต็มที่":`ห้องซ้อมในร่มกรองฝุ่น ${fmt(FACILITIES.airgym.cost[0])} · ดูได้ที่หน้าจัดการค่าย`;
+  if(k==="elnino")st=coolRoom(G)?"ติดแอร์ห้องซ้อมแล้ว ซ้อมได้เต็มที่ (ช่วงร้อนจัดเสียค่าไฟ ฿800/สัปดาห์)":`ติดแอร์ห้องซ้อม ${fmt(FACILITIES.aircon.cost[0])} · ดูได้ที่หน้าจัดการค่าย`;
   if(k==="flood")st=ytIn(G,"flood")?"ตอนนี้น้ำยังท่วมค่ายอยู่":G.week<T.from?`น้ำจะมาราวสัปดาห์ ${T.from}`:"น้ำลดแล้ว";
   return `<h2>${T.ic} ${esc(T.name)}</h2><p class="lead">${esc(T.desc)}</p>${st?`<p class="meta goldt">${esc(st)}</p>`:""}<p class="meta">ธีมประจำปีจะสุ่มใหม่ทุกต้นปี</p>`;}
 function weekTodo(){const R=roster(G),todo=[];if(R.some(f=>!f.injury&&!trLocked(f)))todo.push("ยังไม่ได้ยืนยันโปรแกรมฝึกบางคน");if(!G.campUsed)todo.push("ยังไม่ได้เลือกกิจกรรมค่าย");
@@ -482,6 +483,8 @@ function coachTips(force){const T=[],R=roster(G);if(!coachOn()&&!force)return T;
   if(G.cash<0)T.push({p:10,t:`เงินติดลบมา ${G.negWeeks} สัปดาห์ ถ้าติดลบ 4 สัปดาห์จนเกิน ฿10,000 ค่ายจะล้มละลาย`});
   if(studentDemand(G)>studentCap(G)+2)T.push({p:5,t:`นักเรียนเต็มค่ายแล้ว ยังมีคนอยากเรียนอีก ${studentDemand(G)-studentCap(G)} คน อัปลานสอนคอร์สจะรับเพิ่มได้ทีละ 3 คน`,act:{k:"tab",v:"camp",sub:"fac",label:"ไปอัปลานสอน"}});
   {const un=(G.losses||[]).filter(l=>!l.watched&&G.F[l.b]&&G.F[l.b].camp!=="quest"&&l.absWeek!=null&&gameWeek(G)-l.absWeek<=6);if(un.length)T.push({p:4,t:`ยังไม่ได้ดูเทปไฟต์ที่${G.F[un[un.length-1].a].name}แพ้ ดูกับทีมแล้วได้ EXP และรู้ทางคู่ชกคนนั้น`,act:{k:"lossrev",label:"ทบทวนไฟต์"}});}
+  if(dustSeason(G)&&ytKey(G)!=="pm25"&&!(G.fac.airgym||G.fac.purifier))T.push({p:6,t:`หน้าฝุ่นประจำปี (สัปดาห์ 38–46) ซ้อมได้ผลน้อยลงนิดหน่อย เครื่องฟอกอากาศ ${fmt(FACILITIES.purifier.cost[0])} ซื้อครั้งเดียวใช้ได้ทุกปี`});
+  if(heatOn(G)&&!coolRoom(G))T.push({p:8,t:`ร้อนจัดปีเอลนีโญ ซ้อมได้ผลน้อยลงและล้าเพิ่มทุกสัปดาห์ ติดแอร์ห้องซ้อม ${fmt(FACILITIES.aircon.cost[0])} ช่วยได้`});
   if(G.trouble&&gameWeek(G)<G.trouble.untilAbs)T.push({p:8,t:`${G.trouble.name} ซ้อมได้ผลน้อยลงนิดหน่อย อีก ${G.trouble.untilAbs-gameWeek(G)} สัปดาห์`});
   if(G.disaster&&gameWeek(G)<G.disaster.untilAbs)T.push({p:9,t:`${G.disaster.name}ยังไม่หาย นักเรียนมาเรียนได้${G.disaster.inc?"แค่ครึ่งเดียว":"ไม่ได้เลย"} อีก ${G.disaster.untilAbs-gameWeek(G)} สัปดาห์ รับไฟต์ช่วยประคองเงินไปก่อน`,act:{k:"tab",v:"fights",label:"ดูข้อเสนอ"}});
   if(dmOfferOn(G))T.push({p:8,t:"โปรโมเตอร์ชวนลงศึก Death Match 8 คนข้ามรุ่น ชกรวดเดียวจบในสัปดาห์นี้ แชมป์รับ ฿40,000!",act:{k:"tab",v:"fights",label:"ไปดูข้อเสนอ"}});
@@ -1178,7 +1181,7 @@ function weekCards(r){const R=roster(G);if(!R.length)return "";const P={};(r.pro
     ${p?radarSVG(f,110,p.before):""}<span class="meta">${f.injury?`<span class="redt">เจ็บ ${f.injury} สด.</span>`:nb?`ไฟต์ สด.${nb.week}`:"ยังไม่มีไฟต์"}${f.sp>0?' · <span class="goldt">มีแต้มสกิล</span>':""}</span></div>`;}).join("")}</div>`;}
 /* v1.90.7: the money tab says where the weekly costs come from (players could not tell what "camp upkeep" was) */
 function upkeepParts(G){const t=facTotal(G),lv=campLevel(G),pf=petFood(G),P=[["ค่าดูแลค่ายพื้นฐาน",1800],[`อัปเกรดค่ายรวม ${t} ระดับ × ฿220`,t*220]];
-  if(lv>1)P.push([`ค่ายใหญ่ขึ้น (ค่าย Lv.${lv})`,[0,0,800,1800][lv]]);if(pf)P.push([`อาหารสัตว์เลี้ยง (${(G.pets||[]).length} ตัว)`,pf]);return P;}
+  if(lv>1)P.push([`ค่ายใหญ่ขึ้น (ค่าย Lv.${lv})`,[0,0,800,1800][lv]]);if(pf)P.push([`อาหารสัตว์เลี้ยง (${(G.pets||[]).length} ตัว)`,pf]);const ac=acBill(G);if(ac)P.push(["ค่าไฟแอร์ห้องซ้อม (ช่วงร้อนจัด)",ac]);return P;}
 function wageParts(G){const P=roster(G).map(f=>[`${f.name} (Lv.${f.lvl||1})`,wageOf(f)]).filter(x=>x[1]>0);
   if(G.staff)G.staff.forEach(k=>STAFF[k]&&P.push([`${STAFF[k].name} · ${STAFF[k].role}`,STAFF[k].wage]));else if(G.fac.assistants)P.push([`ผู้ช่วยครู ${G.fac.assistants} คน`,G.fac.assistants*2500]);return P;}
 const kvDetails=(label,total,parts)=>`<details class="kvd"><summary class="kv-row"><span>${label} <small class="meta">(แตะดูรายละเอียด)</small></span><b class="num neg">-${fmt(total)}</b></summary><div class="kv-sub">${parts.map(([n,v])=>`<div><span>${esc(n)}</span><span class="num">-${fmt(v)}</span></div>`).join("")}</div></details>`;
