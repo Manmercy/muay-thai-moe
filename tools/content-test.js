@@ -295,6 +295,10 @@ const chrome=process.env.CHROME_PATH||'/Applications/Google Chrome.app/Contents/
     if(UI.modal.type!=='confirm')throw Error('confirm');ACT.lvno();if(UI.modal.type!=='chat')throw Error('back to chat');ACT.lvask();ACT.lvbreak();if(!UI.scene)throw Error('scene');
     let guard=0;while(UI.scene&&guard++<40){if(UI.scene.cur&&UI.scene.cur.choice)sceneChoose(0);else sceneNext();}UI.modal=null;render();
     const card=[...document.querySelectorAll('.pcard')].find(c=>c.querySelector('.chatb[data-id="mali"]'));return !isLov(g,'mali')&&isAway(g,'mali')&&!!card&&card.querySelector('.chatb').disabled&&card.querySelector('[data-act="hang"]').disabled;});
-  return R;});for(const [name,ok,err] of out){console.log(ok?'OK  ':'FAIL',lang,name,err||'');if(!ok)failed++;}for(const e of errors){console.log('PAGE ERROR',lang,e);failed++;}await p.close();}
+  return R;});
+ /* v1.91.219: the on-demand chapter must load next to the core (a clashing top-level name once stopped region.js silently) */
+ {const e0=errors.length;await p.evaluate(()=>MTM_JS('region.js?v='+MTM_BUILD));let okR=false;try{await p.waitForFunction(()=>typeof REGION!=='undefined'&&typeof regionStart==='function',null,{timeout:15000});okR=true;}catch(e){}
+  out.push(['region.js loads beside the core scripts',okR&&errors.length===e0,okR?(errors.slice(e0).join(' | ')||''):'REGION never defined '+errors.slice(e0).join(' | ')]);}
+ for(const [name,ok,err] of out){console.log(ok?'OK  ':'FAIL',lang,name,err||'');if(!ok)failed++;}for(const e of errors){console.log('PAGE ERROR',lang,e);failed++;}await p.close();}
  await browser.close();process.exit(failed?1:0);
 })().catch(e=>{console.error(e);process.exit(1)});
