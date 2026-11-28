@@ -943,7 +943,9 @@ function newGame(opts){
   return G;
 }
 const roster=G=>Object.values(G.F).filter(f=>f.camp==="player");
-const wageOf=f=>Math.round(f.wage*(1+(Math.min(f.lvl||1,15)-1)*.06)/100)*100; // v1.43: stars ask for more as they level up
+/* v1.91.215 (Man): a fighter's purse follows her own name — rating 1000→1600 adds up to +50%, and a regional champion who joined us draws a crowd (+50%) so buying one pays for herself if she fights · wageOf: she is paid her contract, the 5,000/week the letter promised (it used to grow with level to ~8,900) */
+const fameMult=f=>(1+clamp((ratingOf(f)-1000)/600,0,1)*.5)*(f&&f.camp==="player"&&f.joinAbs!=null?1.5:1);
+const wageOf=f=>f&&f.joinAbs!=null?f.wage:Math.round(f.wage*(1+(Math.min(f.lvl||1,15)-1)*.06)/100)*100; // v1.43: stars ask for more as they level up
 const wages=G=>roster(G).reduce((s,f)=>s+wageOf(f),0)+(G.staff?G.staff.reduce((s,k)=>s+STAFF[k].wage,0):G.fac.assistants*2500);
 // ---------- CAMP FACILITIES & STUDENTS ----------
 // Fixed camp slots: rarity indicates acquisition difficulty, never an extra stat bonus.
@@ -1283,14 +1285,14 @@ function genOffers(G,opt){
       const y2=(G.season||1)>=2,c=(f.mmOff||0)+(G.week<=14&&!y2?[.4,.8,.5][i%3]:y2?(i===0&&weakWk?-1.6:EFF_BANDS[i%EFF_BANDS.length]):(i===0&&!weakWk?.15:OFFER_BANDS[i%OFFER_BANDS.length]))+(i>=3?(rng()-.5)*1.6:0); // early weeks: even fights, losses happen
       const o=pickW(rng,pool.map(x=>{const d=effGap(G,f,x);return [x,Math.exp(-((d-c)**2)/(2*.45*.45))+.01];}));used.add(o.id);
       // v1.15: purse = fee (paid win or lose) + win bonus; a better opponent, a crowd-drawing name or our own fame raise it
-      const mult=clamp(1+effGap(G,f,o)*.12,.7,1.6)*(o.canon?1.35:1)*(1+(Math.min(f.lvl,20)-1)*.04)*(1+Math.min(G.rep,40)/200);
+      const mult=clamp(1+effGap(G,f,o)*.12,.7,1.6)*(o.canon?1.35:1)*(1+(Math.min(f.lvl,20)-1)*.04)*(1+Math.min(G.rep,40)/200)*fameMult(f);
       G.offers.push({id:`o${G.week}_${f.id}_${i}`,a:f.id,b:o.id,week:wk,tier,win:Math.round(TIER[tier].win*mult/100)*100,lose:Math.round(TIER[tier].lose*mult/100)*100});
     }
     // v1.26: every 3 weeks a promoter offers a clearly stronger opponent for a bigger purse
     if(G.week>=9&&G.week<=42&&G.week%3===0){const wk=weeks[weeks.length-1],tier=ranked&&wk<=stageEnd?st:"exhibition";
       const hp=Object.values(G.F).filter(o=>o.div===f.div&&o.camp!=="player"&&o.camp!=="free"&&!o.canon&&o.injury===0&&!used.has(o.id)&&!isBooked(G,o.id,wk)&&(tier==="exhibition"||eligible(G,o)))
         .map(o=>[o,effGap(G,f,o)-(f.mmOff||0)]).filter(x=>x[1]>=.8&&x[1]<=2.1).sort((a,b)=>Math.abs(a[1]-1.4)-Math.abs(b[1]-1.4));
-      if(hp.length){const o=hp[0][0];used.add(o.id);const mult=1.5*clamp(1+effGap(G,f,o)*.12,.7,1.6)*(1+(Math.min(f.lvl,20)-1)*.04)*(1+Math.min(G.rep,40)/200);
+      if(hp.length){const o=hp[0][0];used.add(o.id);const mult=1.5*clamp(1+effGap(G,f,o)*.12,.7,1.6)*(1+(Math.min(f.lvl,20)-1)*.04)*(1+Math.min(G.rep,40)/200)*fameMult(f);
         G.offers.push({id:`o${G.week}_${f.id}_h`,a:f.id,b:o.id,week:wk,tier,hard:1,win:Math.round(TIER[tier].win*mult/100)*100,lose:Math.round(TIER[tier].lose*mult/100)*100});}}
     // v1.16: promoters stage cross-division star bouts a few times a season, so every rival pair can meet
     const X=CROSS_OF[f.id];if(X&&SPECIAL_WEEKS.includes(G.week)){const o=G.F[X],wk=G.week+3;
@@ -7078,7 +7080,7 @@ AU.gsfx=function(kind,a){if(!this.init()||this.muted||!SETTINGS.sfx)return;const
   if(kind==="shimmer")for(let i=0;i<6;i++)T(i*.05,{f:1400+Math.random()*1400,type:"sine",dur:.12,peak:.06});};
 
 // ================= MUAY THAI MOE v1.3 — UI =================
-const VERSION="1.91.214";
+const VERSION="1.91.215";
 const CUR_LANG=(typeof window!=="undefined"&&window.LANG)||"th";
 const TH_LABEL=String.fromCharCode(3652,3607,3618);
 function langSwitch(cls){return `<div class="langsw ${cls||""}" role="group" aria-label="Language">${[["th",TH_LABEL],["en","EN"]].map(([k,l])=>`<button class="lsb ${CUR_LANG===k?"on":""}" data-act="setlang" data-v="${k}" aria-pressed="${CUR_LANG===k}">${l}</button>`).join("")}</div>`;}
