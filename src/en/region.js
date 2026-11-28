@@ -2573,6 +2573,10 @@ The door is open every night. Send your fighters.
   finalPool(G){return roster(G).filter(f=>!f.injury&&!isAway(G,f.id));},
   /* v1.91.176 (Man): with fewer than five fighters able to go, one fighter may take two bouts in the night */
   finalCap(G){return this.finalPool(G).length<NL_ORDER.length?2:1;},
+  /* v1.91.218 (Man): the corner's read on each pick for this bout — 48 quick sims on her current state, cached for the week */
+  finalOdds(k,f){const o=G.F["nl_"+k];if(!o||!f)return 0;const key=`${k}|${f.id}|${gameWeek(G)}|${f.lvl}|${Math.round(f.fatigue||0)}|${f.injury||0}`;UI.rgOdds=UI.rgOdds||{};if(UI.rgOdds[key]!=null)return UI.rgOdds[key];
+    let w=0;const N=48;for(let i=0;i<N;i++){const M={...f,a:{...f.a}},O={...o,a:{...o.a}};const Q=quickFight(M,O,7717+i*97,5);if(Q.result.win==="A")w++;else if(Q.result.win==="D")w+=.5;}
+    return UI.rgOdds[key]=w/N;},
   finalUses(F,id){const L=F.line||{},C=F.cur||{};return NL_ORDER.filter(x=>L[x]===id&&C[x]).length;},
   /* v1.91.72 (Man): a loading screen on the way in — the board opens only when every portrait and sprite of the night is ready (no blank, stuck cards) */
   finalLoad(done){if(typeof document==="undefined"){done();return;}const pool=this.finalPool(G),ref=pool[0]||roster(G)[0];for(const k of NL_ORDER)if(!G.F["nl_"+k]&&ref)nlFighter(G,k,ref);
@@ -2594,8 +2598,9 @@ The door is open every night. Send your fighters.
     const v=Object.values(C),w=v.filter(x=>x==="W").length,l=v.filter(x=>x==="L").length,next=NL_ORDER.find(k=>!C[k]);
     if(UI.rgPick&&!C[UI.rgPick]){const k=UI.rgPick,o=G.F["nl_"+k],at=id=>NL_ORDER.find(x=>L[x]===id);
       return `<div class="vsb"><h2>Bout ${NL_ORDER.indexOf(k)+1} · Who fights ${/^[A-Za-z]/.test(NL[k].name)?" ":""}${esc(NL[k].name)}</h2><p class="meta">${esc(NL[k].art)}</p>
-        <div class="vs-pick">${pool.map(f=>{const u=this.finalUses(F,f.id),cap=this.finalCap(G),done=u>=cap;return `<button class="vs-pc" data-act="rgfset" data-v="${k}|${f.id}" ${done?"disabled":""}>
-          <span class="vs-art">${this.vsArt(f,"r")}</span><b>${esc(f.name)}</b><small>Lv.${f.lvl||1}${done?(cap>1?" · already fought twice":" · already fought"):u?" · second bout of the night":""}</small></button>`;}).join("")}</div>
+        ${(()=>{const od=pool.map(f=>this.finalOdds(k,f)),best=Math.max(...pool.map((f,i)=>this.finalUses(F,f.id)>=this.finalCap(G)?-1:od[i]));return `<div class="vs-pick">${pool.map((f,i)=>{const u=this.finalUses(F,f.id),cap=this.finalCap(G),done=u>=cap,p=od[i],bd=p>=.45?["up","Advantage"]:p>=.25?["even","Even"]:["down","Disadvantage"];return `<button class="vs-pc${!done&&p===best?" best":""}" data-act="rgfset" data-v="${k}|${f.id}" ${done?"disabled":""}>
+          <span class="vs-art">${this.vsArt(f,"r")}</span><b>${esc(f.name)}</b><small>Lv.${f.lvl||1}${done?(cap>1?" · already fought twice":" · already fought"):u?" · second bout of the night":""}</small>${done?"":`<i class="vs-odds ${bd[0]}">${bd[1]}${p===best?" · best pick":""}</i>`}</button>`;}).join("")}</div>`;})()}
+        <p class="meta center">The corner's read on her current shape — prep plans not counted yet</p>
         ${this.finalCap(G)>1?`<p class="meta center">The camp has fewer than five fighters · one fighter may take two bouts tonight</p>`:""}
         <div class="mfoot"><button class="btn" data-act="rgfpickx">Back</button></div></div>`;}
     const stamp=(r,sd)=>r?`<i class="vs-st ${sd} ${r==="W"?"w":r==="L"?"l":"d"}">${r==="W"?"WIN":r==="L"?"LOSE":"DRAW"}</i>`:"";

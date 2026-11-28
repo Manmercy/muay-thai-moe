@@ -1,5 +1,5 @@
 // ================= MUAY THAI MOE v1.3 — UI =================
-const VERSION="1.91.218";
+const VERSION="1.91.219";
 const CUR_LANG=(typeof window!=="undefined"&&window.LANG)||"th";
 const TH_LABEL=String.fromCharCode(3652,3607,3618);
 function langSwitch(cls){return `<div class="langsw ${cls||""}" role="group" aria-label="Language">${[["th",TH_LABEL],["en","EN"]].map(([k,l])=>`<button class="lsb ${CUR_LANG===k?"on":""}" data-act="setlang" data-v="${k}" aria-pressed="${CUR_LANG===k}">${l}</button>`).join("")}</div>`;}
@@ -80,6 +80,7 @@ NPC_IMG.unshift([/^แม่มะลิ|^Mali's mom/,"mali_mom"],[/^แม่�
 NPC_IMG.unshift([/มาเบลล์|Mabelle/,"mabelle"],[/มินนี่|Minnie/,"minnie"],[/คุณกฤต|Mr\. Krit/,"krit"],[/มิ้นท์|Mint/,"mint"]); /* v1.91.140 (Man): Sportygal, Alicia's managers */
 NPC_IMG.unshift([/เฮียหลง|Hia Long/,"hialong"],[/พี่เพชร|Brother Petch/,"phet"],[/พี่นิล|Brother Nil/,"nil"],[/บอริส|Boris/,"boris"],[/เสือด่าง|Seua Dang/,"suea"]); /* v1.91.136 (Man): portraits for the regional chapter's side characters */
 NPC_IMG.unshift([/ไนท์|Knight/,"vector_knight"],[/เวกา|Vega/,"vector_vega"],[/เมษา|Mesa/,"vector_mesa"]);
+NPC_IMG.unshift([/ป้าเจ้าของร้านข้าวแกง|curry shop/,"vendor_green"]);
 NPC_IMG.unshift([/ลูกน้องจินหลง|Jin Long thug/,"gang_group"],[/ผู้แทนการกีฬา|Sports official/,"nai"]); /* v1.91.209 regional audit: the last two speaking parts with a face to borrow — Jin Long's men wear the helmet gang's jackets until Man draws them, the sports official is the district chief's portrait */
 const npcImg=st=>{const v=st.img||(st.who&&(NPC_IMG.find(([r])=>r.test(st.who))||[])[1])||null;return typeof v==="function"?v():v;};
 const npcPortraitSrc=(im,st={})=>{if(im.startsWith("vector_")||im==="petchara")return `${ASSET}npc_${im}.png`;
@@ -977,7 +978,7 @@ function pFace(f){if(UI.look==="fight"||!(f.canon||CHAMP_IDS.includes(f.id))||!p
 function fighterHTML(f){const mine=f.camp==="player";const P=PROFILES[f.id];
   const tabs=mine?[["rel","ประวัติ"],["over","ค่าพลัง"],["skill","สกิล"]].concat(typeof scOn==="function"&&scOn()?[["card","การ์ด\u200b"]]:[]).concat(f.canon&&KIT_MASK[f.id]?[["look","ชุด"]]:[]):[["rel","ประวัติ"],["over","ค่าพลัง"]].concat(f.camp==="region"&&hasTree(f.id)&&!skInert(f)?[["skill","สกิล"]]:[]); /* v1.91.45: a regional champion's tree can be looked at while she is still a rival */
   let t=UI.ptab;if(!tabs.some(x=>x[0]===t))t="over";
-  const head=`<div class="fp-head">${pFace(f)}<div><h2>${esc(f.full)}</h2><div class="meta">${f.age!=null?f.age+" ปี · ":""}${f.camp==="player"?"ค่ายศิริชัย":f.lab?"ค่ายเวกเตอร์ กรุงเทพฯ":f.camp==="rival"&&!f.indie?"ค่ายพยัคฆ์ทอง":"นักมวยอิสระ"} · รุ่น ${f.div} · ${styleOf(f.a)} · ${rec(f)}</div>${G.belt&&Object.values(G.belt).some(x=>x.id===f.id)?`<div class="beltb">🏆 แชมป์เวทีท่าแพ</div>`:Object.entries(G.venueBelts||{}).some(([v,ds])=>Object.values(ds).some(b=>b.id===f.id))?`<div class="beltb">🏆 แชมป์${STADIUMS[Object.entries(G.venueBelts).find(([v,ds])=>Object.values(ds).some(b=>b.id===f.id))[0]].name}</div>`:f.belts?`<div class="beltb old">อดีตแชมป์เวที</div>`:""}<div class="tierline">${tierChip(f,1)}<span class="meta">เรตติ้ง <b>${ratingOf(f)}</b></span>${tierYearNote(f)}</div>${xpBar(f)}</div></div>
+  const head=`<div class="fp-head">${pFace(f)}<div><h2>${esc(f.full)}</h2><div class="meta">${f.age!=null?f.age+" ปี · ":""}${f.camp==="player"?"ค่ายศิริชัย":f.lab?"ค่ายเวกเตอร์ กรุงเทพฯ":f.camp==="rival"&&!f.indie?"ค่ายพยัคฆ์ทอง":"นักมวยอิสระ"} · รุ่น ${f.div} · ${styleOf(f.a)} · ${rec(f)}</div>${G.belt&&Object.values(G.belt).some(x=>x.id===f.id)?`<div class="beltb">🏆 แชมป์เวทีท่าแพ</div>`:Object.entries(G.venueBelts||{}).some(([v,ds])=>Object.values(ds).some(b=>b.id===f.id))?`<div class="beltb">🏆 แชมป์${STADIUMS[Object.entries(G.venueBelts).find(([v,ds])=>Object.values(ds).some(b=>b.id===f.id))[0]].name}</div>`:f.belts?`<div class="beltb old">อดีตแชมป์เวที</div>`:""}<div class="tierline">${tierChip(f,1)}<span class="meta">เรตติ้ง <b>${ratingOf(f)}</b></span>${f.camp==="player"?`<span class="meta" title="ค่าตัวต่อไฟต์ขึ้นตามชื่อเสียง (เรตติ้ง)${f.joinAbs!=null?" · แชมป์สี่ภาคดึงคนดูได้อีก":""}">ค่าตัวตามชื่อเสียง <b class="goldt">×${fameMult(f).toFixed(2)}</b></span>`:""}${tierYearNote(f)}</div>${xpBar(f)}</div></div>
    <div class="seg ptabs">${tabs.map(([k,n])=>`<button data-act="ptab" data-v="${k}" aria-pressed="${t===k}">${n}${k==="skill"&&skReady(f)?'<i class="tdot2"></i>':""}</button>`).join("")}</div>`;
   let body="";
   if(t==="look"){const cur=f.outfit||"base";
