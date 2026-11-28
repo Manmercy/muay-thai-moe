@@ -1304,7 +1304,13 @@ const PATCH_CAMP={id:"1.98",ver:"Muay Thai Moe v1.98",title:"The camp, reborn",l
  ["🏃","A new way to run the 400 m","Tap as the ring closes on your runner, then mash all out for the last 120 metres"],
  ["🐓","Troublemaker pets","Some weeks a strange bill turns up at the camp. Guess whose doing it was."]],
  foot:"Kru Daeng got a new look too ✦"};
-const PATCHES=[PATCH_AV,PATCH_TAPE,PATCH_FIX,PATCH_TANI,PATCH_SKN,PATCH_MG,PATCH_RUN,PATCH_GUIDE,PATCH_CAMP],PATCH=PATCHES[PATCHES.length-1];
+/* v1.91.218 (Man): popup for camp troubles and yearly seasons — short teasers */
+const PATCH_TROUBLE={id:"1.99",ver:"Muay Thai Moe v1.99",title:"Camp life isn't just training",lead:"Rain, dust, heat and the neighbors will test your skills as camp manager every year.",items:[
+ ["🌧️","Yearly seasons","In the rainy season the Ping River spills into the village, the dry season brings the dust right on schedule, and the hot season turns the gym into an oven. Some years El Niño drops by too."],
+ ["🛠️","Protection upgrades","A raised floor, air purifiers and gym AC are on the camp upgrades page. Buy once and they work every year, but they aren't cheap, and they eat power."],
+ ["🐒","Village troubles","Power cuts, a broken pump, a dead van, and all sorts of village chaos. Pay to fix it or roll up your sleeves, your call. The bigger the camp, the bigger the bills."]],
+ foot:"Kru Daeng says: if you meet a temple dog called Ai Dang, guard your hand wraps ✦"};
+const PATCHES=[PATCH_AV,PATCH_TAPE,PATCH_FIX,PATCH_TANI,PATCH_SKN,PATCH_MG,PATCH_RUN,PATCH_GUIDE,PATCH_CAMP,PATCH_TROUBLE],PATCH=PATCHES[PATCHES.length-1];
 function nextPatch(){if(G&&G.newsSeen==="1.91.144")G.newsSeen="1.91.111"; /* v1.91.145: the 1.91.144 popup was withdrawn — those who saw it must not get the old ones again */const i=PATCHES.findIndex(p=>p.id===(G&&G.newsSeen));return i<0?PATCHES[0]:PATCHES[i+1]||null;}
 function maybeWhatsNew(){if(!G||G.ended||UI.scene)return;const P=nextPatch();if(!P)return;UI.modal={type:"whatsnew",id:P.id};}
 function whatsNewHTML(){const P=PATCHES.find(p=>p.id===(UI.modal&&UI.modal.id))||nextPatch()||PATCH,n=PATCHES.length-PATCHES.indexOf(P)-1;return `<div class="wnew"><span class="pill gold">Update · ${esc(P.ver)}</span><h2>🥊 ${esc(P.title)}</h2><p class="lead">${esc(P.lead)}</p>

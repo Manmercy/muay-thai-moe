@@ -1304,7 +1304,13 @@ const PATCH_CAMP={id:"1.98",ver:"Muay Thai Moe v1.98",title:"ค่ายโฉ�
  ["🏃","วิ่ง 400 เมตรแบบใหม่","กดตอนวงกลมหดเข้าหาตัววิ่ง แล้วค่อยกดรัวสุดแรงช่วง 120 เมตรสุดท้าย"],
  ["🐓","สัตว์เลี้ยงตัวแสบ","บางสัปดาห์อาจมีใบแจ้งหนี้แปลก ๆ ส่งมาถึงค่าย ลองเดาดูว่าเป็นฝีมือใคร"]],
  foot:"ครูแดงก็ได้ชุดใหม่เหมือนกันนะ ✦"};
-const PATCHES=[PATCH_AV,PATCH_TAPE,PATCH_FIX,PATCH_TANI,PATCH_SKN,PATCH_MG,PATCH_RUN,PATCH_GUIDE,PATCH_CAMP],PATCH=PATCHES[PATCHES.length-1];
+/* v1.91.218 (Man): popup for camp troubles and yearly seasons — short teasers */
+const PATCH_TROUBLE={id:"1.99",ver:"Muay Thai Moe v1.99",title:"ชีวิตค่ายไม่ได้มีแต่ซ้อม",lead:"ฟ้าฝน ฝุ่น ความร้อน และเพื่อนบ้านในตำบล จะมาทดสอบฝีมือผู้จัดการค่ายทุกปี",items:[
+ ["🌧️","ฤดูกาลประจำปี","หน้าฝนน้ำปิงเอ่อเข้าตำบล หน้าแล้งฝุ่นมาตามนัด หน้าร้อนห้องซ้อมร้อนเป็นเตาอบ บางปียังมีเอลนีโญแวะมาด้วย"],
+ ["🛠️","อัปเกรดกันภัย","ยกพื้นค่าย เครื่องฟอกอากาศ และแอร์ห้องซ้อม อยู่ในหน้าอัปเกรดค่าย ซื้อครั้งเดียวใช้ได้ทุกปี แต่ไม่ถูก และกินไฟนะ"],
+ ["🐒","ปัญหาชาวบ้าน","ไฟดับ ปั๊มพัง รถตู้เสีย ไปจนถึงเรื่องวุ่น ๆ ในหมู่บ้าน จะจ่ายเงินแก้ หรือลงแรงเอง เลือกเอง ค่ายใหญ่ขึ้นค่าซ่อมก็แพงขึ้น"]],
+ foot:"ครูแดงฝากบอกว่า ถ้าเจอหมาวัดชื่อไอ้ด่าง ระวังผ้าพันมือไว้ให้ดี ✦"};
+const PATCHES=[PATCH_AV,PATCH_TAPE,PATCH_FIX,PATCH_TANI,PATCH_SKN,PATCH_MG,PATCH_RUN,PATCH_GUIDE,PATCH_CAMP,PATCH_TROUBLE],PATCH=PATCHES[PATCHES.length-1];
 function nextPatch(){if(G&&G.newsSeen==="1.91.144")G.newsSeen="1.91.111"; /* v1.91.145: the 1.91.144 popup was withdrawn — those who saw it must not get the old ones again */const i=PATCHES.findIndex(p=>p.id===(G&&G.newsSeen));return i<0?PATCHES[0]:PATCHES[i+1]||null;}
 function maybeWhatsNew(){if(!G||G.ended||UI.scene)return;const P=nextPatch();if(!P)return;UI.modal={type:"whatsnew",id:P.id};}
 function whatsNewHTML(){const P=PATCHES.find(p=>p.id===(UI.modal&&UI.modal.id))||nextPatch()||PATCH,n=PATCHES.length-PATCHES.indexOf(P)-1;return `<div class="wnew"><span class="pill gold">อัปเดต · ${esc(P.ver)}</span><h2>🥊 ${esc(P.title)}</h2><p class="lead">${esc(P.lead)}</p>
