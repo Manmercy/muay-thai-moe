@@ -9617,8 +9617,14 @@ async function campCardDraw(o){const T=CC_THEMES[o.theme]||CC_THEMES.dex,W=CC_W;
   const R=roster(G).slice().sort((a,b)=>(b.lvl||0)-(a.lvl||0)),pets=(G.pets||[]);
   await Promise.all(R.slice(0,6).map(f=>ccWaitImg(sheetFor(f))));
   const [scene,face]=await Promise.all([ccScene(o,960,540),ccPortrait("smile")]);
-  const petIm=pets.slice(0,4).map(p=>{const i=new Image();try{i.src=petIcon(p.k);}catch(e){}return i;});await Promise.all(petIm.map(ccWaitImg));
-  const CX=48,CY=120,CW=W-96,HY=CY+30,SY=HY+190,FY=SY+572,nr=Math.ceil(Math.min(6,R.length)/2),PY=FY+(nr?nr*112+30:0),END=(pets.length?PY+136:PY-14)+64,CH=END-CY;H=END+48;
+  const petIm=pets.slice(0,6).map(p=>{const i=new Image();try{i.src=petIcon(p.k);}catch(e){}return i;});await Promise.all(petIm.map(ccWaitImg));
+  /* v1.91.208 (Man: show off the camp's honours) — a trophy shelf under the camp scene: the same pixel cups/belts/medals as the trophy room,
+     one per kind with a ×count, most prestigious first */
+  const LVR={national:0,region:1,province:2,district:3,local:4,gen:5},HG=[];
+  try{for(const t of trophyItems()){if(t.kind==="cert")continue;const k=t.kind+"|"+t.title+"|"+(t.pal&&t.pal.b)+"|"+(t.pal&&t.pal.c);let g=HG.find(z=>z.k===k);if(!g)HG.push(g={k,t,n:0});g.n++;}}catch(e){}
+  HG.sort((a,b)=>(LVR[a.t.lv]??9)-(LVR[b.t.lv]??9)||b.n-a.n);
+  const HS=HG.length?182:0;
+  const CX=48,CY=120,CW=W-96,HY=CY+30,SY=HY+190,FY=SY+572+HS,nr=Math.ceil(Math.min(6,R.length)/2),PY=FY+(nr?nr*112+30:0),END=(pets.length?PY+136:PY-14)+64,CH=END-CY;H=END+48;
   const cv=document.createElement("canvas");cv.width=W;cv.height=H;const x=cv.getContext("2d");
   const B=(X,Y,w,h,c)=>{x.fillStyle=c;x.fillRect(Math.round(X),Math.round(Y),Math.round(w),Math.round(h));};
   const box=(X,Y,w,h,fill,line,u)=>{u=u||6;B(X+u,Y,w-2*u,h,line);B(X,Y+u,w,h-2*u,line);B(X+u,Y+u,w-2*u,h-2*u,fill);};
@@ -9672,6 +9678,17 @@ async function campCardDraw(o){const T=CC_THEMES[o.theme]||CC_THEMES.dex,W=CC_W;
   else if(G.avatar&&typeof CHIBI!=="undefined"){try{const ch=CHIBI.canvasFor(G.avatar,{dy:0}),sc=6;x.imageSmoothingEnabled=false;x.drawImage(ch,CX+150-ch.width*sc/2,HY+170-ch.height*sc,ch.width*sc,ch.height*sc);}catch(e){}}
   // --- the camp scene
   box(CX+30,SY,CW-60,556,T.line,T.line,6);x.imageSmoothingEnabled=false;x.drawImage(scene,CX+36,SY+8,CW-72,540*(CW-72)/960);
+  // --- trophy shelf
+  if(HS){const TY=SY+572;box(CX+30,TY,CW-60,HS-16,T.panel,T.line,8);
+    const tot=(G.honors||[]).length;txt(window.LANG==="en"?`CAMP HONOURS · ${tot}`:`เกียรติยศค่าย · ${tot}`,CX+52,TY+34,22,T.sub,"left",700);
+    const plank=TY+HS-46;B(CX+44,plank,CW-88,12,"#8a5a32");B(CX+44,plank+12,CW-88,6,"#5a3a20");B(CX+44,plank,CW-88,3,"#b07a48");
+    const ps=5,gap=22,maxW=CW-120;let xx=CX+60,shown=0;
+    for(const g of HG){const rows=TROPHY_PX[g.t.kind];if(!rows)continue;const w=Math.max(...rows.map(r=>r.length))*ps,h=rows.length*ps;
+      if(xx+w>CX+60+maxW-(HG.length-shown>1?70:0))break;
+      rows.forEach((row,j)=>[...row].forEach((ch,i)=>{if(ch!==".")B(xx+i*ps,plank-h+j*ps,ps,ps,g.t.pal[ch]||"#fff");}));
+      if(g.n>1){const lab="×"+g.n;x.font=FONT(22,700);const lw=x.measureText(lab).width+14;box(xx+w-lw+8,plank-h-14,lw,30,T.line,T.line,4);txt(lab,xx+w-lw/2+8,plank-h+8,22,"#ffffff","center",700);}
+      xx+=w+gap;shown++;}
+    if(shown<HG.length){const more=HG.slice(shown).reduce((a,g)=>a+g.n,0);txt("+"+more,xx+6,plank-14,30,T.ink,"left",700);}}
   // --- fighters: two columns of compact rows
   const cols=2,cw=(CW-60-12)/2,rh=112,rows=R.slice(0,6);
   if(rows.length){box(CX+30,FY,CW-60,nr*rh+16,T.panel,T.line,8);
@@ -9682,8 +9699,8 @@ async function campCardDraw(o){const T=CC_THEMES[o.theme]||CC_THEMES.dex,W=CC_W;
       const [st,sc]=ccStatus(f);x.font=FONT(19);const tw=Math.min(cw-134,x.measureText(st).width+22);box(cx+124,y+74,tw,32,sc,T.line,4);txt(st,cx+124+tw/2,y+97,19,"#ffffff","center",700,tw-12);});}
   // --- pets
   if(pets.length){box(CX+30,PY,CW-60,136,T.panel,T.line,8);
-    const np=Math.min(4,pets.length),slot=(CW-80)/np; /* v1.92 (Man): each pet's name sits under its picture */
-    pets.slice(0,4).forEach((p,i)=>{const cx=CX+40+slot*(i+.5),fy=PY+84;let drawn=false;
+    const np=Math.min(6,pets.length),slot=(CW-80)/np; /* v1.92 (Man): each pet's name sits under its picture */
+    pets.slice(0,6).forEach((p,i)=>{const cx=CX+40+slot*(i+.5),fy=PY+84;let drawn=false;
       try{x.imageSmoothingEnabled=true;drawn=typeof petHub==="function"&&petHub(x,p.k,cx,fy,1,0,false,2.4);}catch(e){}
       if(!drawn){try{x.imageSmoothingEnabled=false;x.drawImage(petIm[i],cx-34,fy-52,68,52);}catch(e){}}
       txt(p.name||"",cx,PY+120,24,T.ink,"center",700,slot-20);});}
@@ -9844,7 +9861,7 @@ AU.gsfx=function(kind,a){if(!this.init()||this.muted||!SETTINGS.sfx)return;const
   if(kind==="shimmer")for(let i=0;i<6;i++)T(i*.05,{f:1400+Math.random()*1400,type:"sine",dur:.12,peak:.06});};
 
 // ================= MUAY THAI MOE v1.3 — UI =================
-const VERSION="1.91.207";
+const VERSION="1.91.208";
 const CUR_LANG=(typeof window!=="undefined"&&window.LANG)||"th";
 const TH_LABEL=String.fromCharCode(3652,3607,3618);
 function langSwitch(cls){return `<div class="langsw ${cls||""}" role="group" aria-label="Language">${[["th",TH_LABEL],["en","EN"]].map(([k,l])=>`<button class="lsb ${CUR_LANG===k?"on":""}" data-act="setlang" data-v="${k}" aria-pressed="${CUR_LANG===k}">${l}</button>`).join("")}</div>`;}
@@ -17092,7 +17109,7 @@ const STATS_HOST="https://us.i.posthog.com";     /* EU projects: https://eu.i.po
 <script>
 (function(){
 /* v1.87: Thai code ships inside index.html; English code (en.js) and the dictionary (i18n.js) load only when needed */
-var B="3d361288d9";
+var B="bee4049e21";
 var L="";try{L=localStorage.getItem("mtm_lang")||"";}catch(e){}
 try{var h=(location.hash||"").match(/lang=(th|en)/);if(h)L=h[1];}catch(e){}
 if(L!=="th"&&L!=="en")L="th";
