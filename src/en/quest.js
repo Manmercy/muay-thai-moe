@@ -881,7 +881,7 @@ const runMult=f=>f?runVmax(f)/8.35:1; /* kept for old callers */
 const RUN_LINE={S:"Kru Daeng stops the watch and goes quiet for two seconds. \"…Was there a tailwind or what?\"",A:"Kru Daeng nods. \"Good legs today. Now go kick the bag.\"",B:"\"You can run, just don't fade in the middle,\" Kru Daeng laughs",C:"\"Don't let those legs stop! All the way to the line!\" Kru Daeng shouts from the side of the track"};
 const RUN_MODES={solo:{n:"100 m trial",d:"Run alone against the ghost of your own best",dist:100},
   duel:{n:"1-on-1",d:"One-on-one over 100 m · challenge a camp mate, or climb the ladder of five townsfolk",dist:100},
-  m400:{n:"400 m · 4 runners",d:"One lap — manage your energy · Hold the green band, then go all out for the last 120 m",dist:400}};
+  m400:{n:"400 m · 4 runners",d:"One lap · tap with the drum beat, then mash all out for the last 120 metres",dist:400}};
 const RACE_TEAMS={me:{c:"#e2443c",n:"Red",hue:0},tiger:{c:"#e8b62c",n:"Yellow",hue:46},teach:{c:"#3a8ee0",n:"Blue",hue:214},obt:{c:"#3aa65a",n:"Green",hue:128}};
 /* people of the district who turn up to run: the morning running club, the school, the sub-district office */
 const RUN_LOCALS=[["loc_ton","Ton, morning running club",13,15],["loc_praew","Praew",11,10],["loc_wang","Uncle Wang, motorbike taxi",9,13],["loc_fai","Fai, school athlete",14,11]];
@@ -898,7 +898,22 @@ const RUN_LADDER=[
  {id:"dare_suea",n:"Suea Dam, Golden Tiger",sp:16,st:13,style:"fast",react:.11,hue:46,tag:"Fast at both ends",suea:true,pre:"Climbing the ladder all the way to me is no joke. But this is where it ends.",win:"Like I said, everyone loses to me.",lose:"…Not bad. I'll be back."}];
 function ladderNpc(i){const L=RUN_LADDER[i],y=(G.season||1)-1,R=roster(G).slice().sort((a,b)=>runVmax(b)-runVmax(a))[0];
   const sp=L.suea?Math.min(21,Math.max(L.sp+y*.5,R?(R.a.speed||10)+1:L.sp)):Math.min(19,L.sp+y*.5);return runNpc(L.id,L.n,sp,Math.min(20,L.st+y*.5),L.hue);}
-function runNpc(key,name,sp,st,hue){return {id:key,name,a:{speed:sp,stamina:st},sprite:npcBase(key).base,tintHue:hue,fake:true,fatigue:0};}
+/* v1.91.206 (Man: men's names on girls' sprites look odd) — until hand-drawn men exist, the men in the races are drawn in code from the
+   manager chibi (24x32) and laid out as a normal 4x6 sheet; each gets clothes that fit the job. */
+const NPC_MEN={
+  loc_wang:{outfit:"tee",outfitColor:"#e8862a",hair:"#9a9a9a",hat:"cap",hatColor:"#2c5fb3",pantsColor:"#2c3e6b"},
+  loc_ton:{outfit:"tee",outfitColor:"#2f8a4f",hair:"#1b1410",hat:"none",pants:"shorts",pantsColor:"#1f1f24"},
+  sp_t2:{outfit:"polo",outfitColor:"#f2f2f2",hair:"#1b1410",hat:"none",pantsColor:"#1f1f24"},
+  sp_t4:{outfit:"suit",outfitColor:"#3a3a48",hair:"#cfcfcf",hat:"none",pantsColor:"#2a2a34"},
+  sp_t7:{outfit:"polo",outfitColor:"#2c5fb3",hair:"#2a1c14",hat:"none",pantsColor:"#5a4a3a"},
+  sp_t8:{outfit:"tee",outfitColor:"#6a8a9a",hair:"#8a8a8a",hat:"bucket",hatColor:"#5a6a3a",pantsColor:"#3a3a3a"},
+  sp_o1:{outfit:"suit",outfitColor:"#c9a96a",hair:"#1b1410",hat:"none",pantsColor:"#6b5a3a"},
+  sp_o2:{outfit:"polo",outfitColor:"#6b5a3a",hair:"#1b1410",hat:"cap",hatColor:"#3a3020",pantsColor:"#3a3020"},
+  sp_o4:{outfit:"polo",outfitColor:"#c9a96a",hair:"#9a9a9a",hat:"none",pantsColor:"#6b5a3a"},
+  sp_o5:{outfit:"suit",outfitColor:"#1f1f24",hair:"#2a1c14",hat:"none",pantsColor:"#1f1f24"},
+  sp_o8:{outfit:"hoodie",outfitColor:"#e0a91b",hair:"#777777",hat:"bucket",hatColor:"#e07020",pantsColor:"#2f6a3a"},
+  sp_stu3:{outfit:"tee",outfitColor:"#c8283c",hair:"#1b1410",hat:"none",pants:"shorts",pantsColor:"#2c5fb3"}};
+function runNpc(key,name,sp,st,hue){const m=NPC_MEN[key];return {id:key,name,a:{speed:sp,stamina:st},sprite:npcBase(key).base,tintHue:m?null:hue,manLook:m||null,fake:true,fatigue:0};}
 function runLocal(i){const L=RUN_LOCALS[i%RUN_LOCALS.length];return runNpc(L[0],L[1],L[2],L[3],[30,280,190,330][i%4]);}
 /* a runner on the track */
 function runLane(f,o={}){return {f,name:(f&&f.name)||o.name||"",team:o.team||null,c:o.c||(o.team?RACE_TEAMS[o.team].c:"#ffffff"),me:!!o.me,ai:!o.me,ghost:o.ghost||null,
@@ -907,6 +922,7 @@ function runLane(f,o={}){return {f,name:(f&&f.name)||o.name||"",team:o.team||nul
 /* what a runner would clock flat out (100 m) or well paced (400 m) — the "par" a grade is measured against */
 function runPar(f,dist){const L=runLane(f,{react:.18,eff:1});const c=runCruise(L,dist);let t=0;const dt=.02;while(L.x<dist&&t<120){runStep(L,dist<=100?1:(L.x<dist-120?c:1),dt);t+=dt;}return t+.18;}
 /* the fastest steady effort this runner's tank can hold until the last 120 m, keeping a quarter for the kick — the green band on the 400 m pace meter */
+const RUN_PACE_HZ=152/60; /* one tap per drum beat (152 bpm) */
 function runCruise(L,dist){const rem=Math.max(0,dist-120-L.x);if(rem<=0)return 1;let best=.78;for(let q=.78;q<=1.001;q+=.01){const cost=Math.pow(Math.max(0,q-.72)/.28,3)/L.cap*(rem/(q*L.vmax));if(cost<=L.sta-.25)best=q;}return best;}
 function runStep(L,e,dt){let want=L.vmax*Math.pow(Math.max(0,Math.min(1,e)),.85);if(L.sta<=0)want=Math.min(want,L.vmax*.78);
   const q=want/L.vmax;if(q>.72)L.sta=Math.max(0,L.sta-Math.pow((q-.72)/.28,3)/L.cap*dt);else L.sta=Math.min(1,L.sta+(.72-q)*.06*dt);
@@ -988,14 +1004,16 @@ const RUN={st:null,
        ${R.best?`<p class="center"><b class="newrec">New record!</b>${R.prev?` was ${R.prev.toFixed(2)} s`:""}</p>`:""}
        ${R.say?`<div class="rsay"><b>${esc(R.say.n)}:</b> "${esc(R.say.t)}"</div>`:""}
        ${R.ladUp?`<p class="center"><b class="newrec">${(G.mini.ladder||0)>=RUN_LADDER.length?"All five on the district ladder beaten!":`Next challenger unlocked: ${esc(RUN_LADDER[G.mini.ladder].n)}`}</b> · ✦ +2</p>`:""}
-       ${R.p4&&!R.dq?`<p class="center">Held pace in the green band <b class="goldt">${R.band.toFixed(1)} s</b>${R.empty!=null?` · tank ran dry at <b class="redt">${Math.round(R.empty)} m</b>`:""}</p>${!R.win&&R.empty!=null?`<p class="center meta">Keep the needle in the green band first, then mash all out at the "KICK! 120 m" sign</p>`:""}`:R.chain?`<p class="center">Longest mash streak <b class="goldt">${R.chain} taps</b></p>`:""}
+       ${R.p4&&!R.dq?`<p class="center">Held pace in the green band <b class="goldt">${R.band.toFixed(1)} s</b>${R.empty!=null?` · tank ran dry at <b class="redt">${Math.round(R.empty)} m</b>`:""}</p>${!R.win&&R.empty!=null?`<p class="center meta">Tap with the drum first, then mash all out at the "KICK! 120 m" sign</p>`:""}`:R.chain?`<p class="center">Longest mash streak <b class="goldt">${R.chain} taps</b></p>`:""}
        <p class="center meta">Reaction ${R.react.toFixed(2)} s${R.passes?` · passes ${R.passes}`:""}${R.fs?` · false starts ${R.fs} times`:""}${R.par?` · target time for ${esc(me?me.name:"")} ${R.par.toFixed(2)} s`:""}</p>
        ${ext?(R.rw?`<p class="center">${R.rw}</p>`:""):S.practice?`<p class="center meta">Practice mode · no rewards</p>`:`<p class="center">${R.rw}</p>`}
        <div class="mfoot roadbtns">${ext?`<button class="btn primary" data-rn="next">Next ▸</button>`:`<button class="btn" data-rn="again">Race again (practice)</button><button class="btn primary" data-mb="close">Back to camp</button>`}</div></div>`;}},
   /* v1.91.204 (Man: mashed the whole 400 m, ran out of legs and lost) — the pace read for the 400 m: ok = inside the green cruise band,
      hot = faster than the tank can hold, slow = under it, kick = the last 120 m where mashing is right. null for the sprints and the relay. */
   pace(S,L){if(!S||!L||L.done||S.relay||S.dist<400||S.phase!=="race")return null;if(L.x>=S.dist-120)return "kick";
-    const cq=runCruise(L,S.dist),b0=Math.max(.72,cq-.05),q=L.v/Math.max(1,L.vmax);return q>cq+.025?"hot":q<b0-.03?"slow":"ok";},
+    const cq=runCruise(L,S.dist),b0=Math.max(.72,cq-.05),q=L.v/Math.max(1,L.vmax);return q>cq+.045?"hot":q<b0-.03?"slow":"ok";},
+  /* 0 right on a drum beat → 1 just before the next (music clock when the drum is playing, the gun when muted) */
+  beatPh(now){const S=this.st,B=60/152,t=S.mT0!=null&&AU.ctx?AU.ctx.currentTime-S.mT0:(now-(S.gun||now))/1000;return ((t/B)%1+1)%1;},
   meLane(){const S=this.st;return S&&S.lanes&&S.lanes.find(l=>l.me);},
   legF(L){return L.legs?L.legs[Math.min(L.leg,L.legs.length-1)].f:L.f;},
   set(){const S=this.st,me=this.runner();if(!me)return;AU.resume&&AU.resume();try{AU.stopMusic();}catch(e){}G.mini=G.mini||{};if(!S.race)G.mini.runLast=S.id;
@@ -1022,7 +1040,7 @@ const RUN={st:null,
     if(!S.react)S.react=(now-S.gun)/1000;
     const dt=S.lastT?(now-S.lastT)/1000:.25;S.lastT=now;S.rate=Math.min(12,S.rate*.6+(1/Math.max(.07,dt))*.4);
     if(S.lastTap&&now-S.lastTap>550)S.chain=0;S.lastTap=now;S.chain=(S.chain||0)+1;S.maxChain=Math.max(S.maxChain||0,S.chain);S.chainT=now;
-    const pz0=this.pace(S,L);if(S.chain%25===0&&(!pz0||pz0==="kick")){S.mile={n:S.chain,t:now};S.shk=now;try{navigator.vibrate&&navigator.vibrate(25)}catch(_){}AU.init&&AU.init()&&AU.tone(AU.ctx.currentTime+.01,{f:1320,type:"square",dur:.12,peak:.1});}
+    const pz0=this.pace(S,L);if(pz0&&pz0!=="kick"){const ph=this.beatPh(now),off=Math.min(ph,1-ph)*60/152;S.hit={t:now,good:off<.09};}if(S.chain%25===0&&(!pz0||pz0==="kick")){S.mile={n:S.chain,t:now};S.shk=now;try{navigator.vibrate&&navigator.vibrate(25)}catch(_){}AU.init&&AU.init()&&AU.tone(AU.ctx.currentTime+.01,{f:1320,type:"square",dur:.12,peak:.1});}
     S.dust=(S.dust||[]).concat([{t:now}]).slice(-6);},
   /* relay: tap the track when the incoming runner is in the box — late in the box is a flying start, early drops the baton */
   pass(){const S=this.st;if(!S||S.phase!=="race"||!S.relay)return;const L=this.meLane();if(!L||L.done||L.leg>=L.legs.length-1||L.wait>0)return;
@@ -1072,11 +1090,14 @@ const RUN={st:null,
     if(S.lastT&&now-S.lastT>700&&!L.done&&(!S.fadeT||now-S.fadeT>2500)&&el>1){S.fadeT=now;this.say(`${me} is fading! Keep going!`);}},
   loop(){const step=()=>{if(!this.st||(this.st.phase!=="set"&&this.st.phase!=="race"))return;this.tick();this.musPump();this.paint();this.raf=requestAnimationFrame(step);};cancelAnimationFrame(this.raf);this.raf=requestAnimationFrame(step);},
   tick(){const S=this.st,now=performance.now();if(S.phase!=="race")return;const el=(now-S.gun)/1000,dt=Math.min(.05,S.prev?(now-S.prev)/1000:.016);S.prev=now;const D=S.dist;
-    if(S.lastT&&now-S.lastT>350)S.rate*=Math.pow(.2,dt);
+    if(S.lastT&&now-S.lastT>(S.pz&&S.pz!=="kick"?600:350))S.rate*=Math.pow(.2,dt);
     for(const L of S.lanes){if(L.done)continue;
       if(L.ghost){const p=L.ghost.p,i=el*10;L.x=i>=p.length-1?D:p[Math.floor(i)]+(p[Math.min(p.length-1,Math.floor(i)+1)]-p[Math.floor(i)])*(i%1);if(L.x>=D){L.done=true;L.t=L.ghost.t;}continue;}
       if(L.wait>0){L.wait-=dt;continue;}
-      let e;if(L.me)e=S.react&&now>=S.stumble?S.rate/7.5:0;
+      let e;if(L.me){e=S.react&&now>=S.stumble?S.rate/7.5:0;
+        /* v1.91.206 (Man: what if the 400 had no stamina at all?) — kept the tank but made pacing a rhythm: before the 120 m sign, tapping
+           once per drum beat (152 bpm → ~2.5 taps a second, a shrinking ring shows the beat for muted phones) runs exactly your cruise pace; faster burns the tank, slower loses ground */
+        if(e&&D>=400&&!S.relay&&L.x<D-120)e=Math.pow(runCruise(L,D),1/.85)*S.rate/RUN_PACE_HZ;}
       else{if(el<L.react)continue;const lx=L.legs?L.legX:L.x,ld=L.legs?100:D;e=ld>=400&&lx<ld-120?(L.cq??=Math.min(1,runCruise(L,ld)+(L.cruise-.87))):L.eff*(1+.03*Math.sin(el*2.3+L.react*9));
         if(ld<400&&L.style){const fr=lx/ld;if(L.style==="fast")e=fr<.6?1:.9;else if(L.style==="kick"){if(fr<.65)e=.92;else{e=1;if(!L.kicked){L.kicked=1;L.vmax*=1.045;}}}}}
       const x0=L.x;runStep(L,e,dt);if(L.legs){L.legX+=L.x-x0;
@@ -1087,7 +1108,8 @@ const RUN={st:null,
      if(L&&!L.done&&S.dist>=400&&!S.relay&&L.sta<=0&&S.emptyAt==null)S.emptyAt=L.x;
      if(pz!==S.pz){if(pz==="kick")S.chain=0;S.pz=pz;const b=document.getElementById("rnL");if(b){b.classList.remove("pz-ok","pz-hot","pz-slow","pz-kick");if(pz)b.classList.add("pz-"+pz);
        const bt=b.querySelector("b"),sm=b.querySelector("small");if(bt)bt.textContent=pz==="ok"?"hold pace":pz==="hot"?"ease off!":pz==="kick"?"KICK!!":"RUN!";
-       if(sm)sm.textContent=pz==="kick"?"mash all out · Space":pz?"keep the needle in the green · Space":"mash · Space";}}}
+       if(sm)sm.textContent=pz==="kick"?"mash all out · Space":pz?"tap as the ring closes on your runner · Space":"mash · Space";if(!pz||pz==="kick")b.style.removeProperty("--bp");}}}
+    if(S.pz&&S.pz!=="kick"){const b=document.getElementById("rnL");if(b){const B=60/152,t=S.mT0!=null&&AU.ctx?AU.ctx.currentTime-S.mT0:(now-(S.gun||now))/1000;const ph=this.beatPh(now);b.style.setProperty("--bp",Math.max(0,1-ph*4).toFixed(2));}}
     if(L&&!L.done&&now-S.pathT>=100){S.pathT=now;S.path.push(Math.round(L.x*10)/10);}
     const t=document.getElementById("rnt");if(t)t.textContent=el.toFixed(2);this.call(el,now);
     const live=S.lanes.filter(l=>!l.ghost);
@@ -1117,6 +1139,14 @@ const RUN={st:null,
       x.fillStyle=L.c;x.fillRect(0,top+i*lh+3,4,lh-6);if(L.me){x.fillStyle="rgba(255,255,255,.9)";x.font="bold 9px sans-serif";x.textAlign="left";x.fillText("▶",6,top+i*lh+12);}});
     if(S.phase==="race"&&me&&me.v>6){x.save();x.globalAlpha=Math.min(.45,(me.v-6)/10);x.strokeStyle="#fff";x.lineWidth=2;for(let i=0;i<7;i++){const yy=top+((i*37)%(H-top)),xx=(W-((now*.9+i*61)%(W+80)));x.beginPath();x.moveTo(xx,yy);x.lineTo(xx+40,yy);x.stroke();}x.restore();}
     /* relay (v1.91.197, Man: couldn't see where to tap): a ring closes in on the next runner; tap when it meets the inner circle */
+    /* v1.91.206 (Man: the beat ring belongs on the track, like the relay ring) — closes on our runner once per drum beat while pacing */
+    {const pz=this.pace(S,me);if(pz&&pz!=="kick"&&!RM){const i=S.lanes.indexOf(me),fy=ly(i),cx=px(me.x),cy=fy-sh*.45,r0=22,ph=this.beatPh(now),r=r0+(1-ph)*62;
+      const col=pz==="ok"?"#5dff7a":pz==="hot"?"#ff8a3a":"#ffffff";x.save();
+      x.lineWidth=4;x.strokeStyle="#140a1e";x.globalAlpha=.55;x.beginPath();x.arc(cx,cy,r0,0,7);x.stroke();x.lineWidth=2;x.strokeStyle="#ffffff";x.beginPath();x.arc(cx,cy,r0,0,7);x.stroke();
+      x.globalAlpha=.35+ph*.6;x.lineWidth=6;x.strokeStyle="#140a1e";x.beginPath();x.arc(cx,cy,r,0,7);x.stroke();x.lineWidth=4;x.strokeStyle=col;x.beginPath();x.arc(cx,cy,r,0,7);x.stroke();x.globalAlpha=1;
+      const h=S.hit,ha=h?(now-h.t)/450:2;if(ha<1){x.font='900 16px "Chakra Petch","IBM Plex Sans Thai",sans-serif';x.textAlign="center";x.lineWidth=4;x.strokeStyle="#140a1e";const tx=h.good?"Nice!":"…";
+        x.globalAlpha=1-ha;x.strokeText(tx,cx,cy-r0-8-ha*14);x.fillStyle=h.good?"#7dff8f":"#ffffff";x.fillText(tx,cx,cy-r0-8-ha*14);x.globalAlpha=1;}
+      x.restore();}}
     {const bp=document.getElementById("rnP"),zone=S.relay&&me&&!me.done&&me.leg<me.legs.length-1&&me.legX>=72&&me.wait<=0;
      if(bp){bp.classList.toggle("live",!!zone);bp.classList.toggle("now",!!zone&&me.legX>=92);}
      if(zone){const fy=ly(n-1),cx=px((me.leg+1)*100),cy=fy-sh*.45,r0=22,k=Math.max(0,(95-me.legX)/23),r=r0+k*70,ok=me.legX>=92,mid=me.legX>=86;

@@ -22409,5 +22409,13 @@
  "ร้านซ่อมมอไซค์ช่างเปี๊ยก": "Pia's Motorbike Repair",
  "มานั่งหน้าแผงทำตาแป๋ว ลูกค้าเลยซื้อให้… ลงบัญชีค่ายท่าน": " sat by the stall making big eyes, so customers bought it fish… on your camp's tab",
  "ค่าปลาทู 1 เข่ง: ": "1 basket of mackerel: ",
- "ร้านปลาทูแม่กลอง ตลาดเช้า": "Mae Klong Mackerel, Morning Market"
+ "ร้านปลาทูแม่กลอง ตลาดเช้า": "Mae Klong Mackerel, Morning Market",
+ "กดตามจังหวะกลอง ตึก ตึก · Space": "tap with the drum · Space",
+ "<p class=\"center meta\">ลองกดตามจังหวะกลองก่อน แล้วค่อยกดรัวสุดแรงตอนถึงป้าย \"เร่ง! 120 ม.\"</p>": "<p class=\"center meta\">Tap with the drum first, then mash all out at the \"KICK! 120 m\" sign</p>",
+ "วิ่งรอบสนาม · กดตามจังหวะกลอง (ตึก ตึก) แล้วกดรัวสุดแรงช่วง 120 เมตรสุดท้าย": "One lap · tap with the drum beat, then mash all out for the last 120 metres",
+ "กดหนึ่งครั้งตอนวงกลมหดถึงปุ่ม · Space": "tap once as the ring closes · Space",
+ "<button class=\"mbtn L run\" id=\"rnL\"><i class=\"bring\"></i><b>วิ่ง!</b><small>กดรัว ๆ · Space</small></button>": "<button class=\"mbtn L run\" id=\"rnL\"><i class=\"bring\"></i><b>RUN!</b><small>mash · Space</small></button>",
+ "<button class=\"mbtn L run\" id=\"rnL\"><i class=\"bring\"></i><b>วิ่ง!</b><small>กดรัว ๆ · Space</small></button><button class=\"mbtn pass\" id=\"rnP\"><b>ส่งไม้!</b><small>ตอนวงกลมหดพอดี · Enter</small></button>": "<button class=\"mbtn L run\" id=\"rnL\"><i class=\"bring\"></i><b>RUN!</b><small>mash · Space</small></button><button class=\"mbtn pass\" id=\"rnP\"><b>PASS!</b><small>as the ring closes · Enter</small></button>",
+ "ดี!": "Nice!",
+ "กดตอนวงกลมหดถึงตัววิ่ง · Space": "tap as the ring closes on your runner · Space"
 }

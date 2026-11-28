@@ -53,9 +53,50 @@ function outfitSheet(f,k){const key=f.id+"|"+k;if(TINTS[key])return TINTS[key];c
 const LOY_SP=["kati","mali","rin","ploy","fah"];
 function loyLookNow(){try{if(typeof UI!=="undefined"&&UI.fight&&UI.fight.b)return !!UI.fight.b.ev;return false;} /* v1.91.97: Loy Krathong sprites only in the event's own fights */catch(e){return false;}}
 const loyImg=(id,name,f)=>LOY_SP.includes(id)&&(loyLookNow()||(f&&f.outfit==="loy"&&f.camp==="player"))?name.replace(id+"_",id+"_loykrathong_"):name;
+/* v1.91.206 (Man: draw the men side-on, legs apart when they run) — a code-drawn man in profile, 24x32 pixels per frame, built from
+   simple shapes and outlined automatically, laid out as a 512x768 sheet like the girls (row 2 = a 4-frame run, row 5 = arms up). */
+const MAN_SHEETS={};
+function manShade(hex,k){const n=parseInt(hex.slice(1),16),f=v=>Math.max(0,Math.min(255,Math.round(v*k)));return `rgb(${f(n>>16&255)},${f(n>>8&255)},${f(n&255)})`;}
+function manFrame(o,pose,f){const c=document.createElement("canvas");c.width=24;c.height=32;const x=c.getContext("2d");
+  const P=(col,X,Y,w=1,h=1)=>{x.fillStyle=col;x.fillRect(X,Y,w,h);};
+  const line=(col,a,b,w)=>{const n=Math.max(Math.abs(b[0]-a[0]),Math.abs(b[1]-a[1]),1);for(let i=0;i<=n;i++){const X=Math.round(a[0]+(b[0]-a[0])*i/n),Y=Math.round(a[1]+(b[1]-a[1])*i/n);P(col,X-(w>>1),Y,w,1);}};
+  const skin=o.skin||"#e0b48c",skD=manShade(skin,.82),hair=o.hair||"#1b1410",sh=o.outfitColor||"#2f8a4f",shD=manShade(sh,.72),pa=o.pantsColor||"#2c3e6b",paD=manShade(pa,.72),shoe="#2a2024";
+  const run=pose==="run",bob=run&&f%2?-1:0,up=pose==="win",short=o.pants==="shorts";
+  /* legs: [hip, knee, foot] for the far leg then the near leg */
+  const L=run?[[[[10,21],[8,25],[5,28]],[[11,21],[14,25],[16,30]]],[[[10,21],[12,24],[9,26]],[[11,21],[11,26],[11,30]]],
+                [[[10,21],[13,25],[15,30]],[[11,21],[8,25],[5,28]]],[[[10,21],[11,26],[11,30]],[[11,21],[12,24],[9,26]]]][f]
+              :[[[10,21],[10,26],[10,30]],[[12,21],[12,26],[12,30]]];
+  const A=run?[[[10,14],[7,17],[6,20]],[[11,14],[14,17],[16,16]]]:up?[[[10,14],[8,10],[8,6]],[[12,14],[14,10],[15,6]]]:[[[9,14],[8,18],[8,21]],[[12,14],[13,18],[13,21]]];
+  const swap=run&&f>=2;const arm=(a,col)=>{line(col,a[0].map((v,i)=>v+(i?bob:0)),a[1].map((v,i)=>v+(i?bob:0)),2);line(skin,a[1].map((v,i)=>v+(i?bob:0)),a[2].map((v,i)=>v+(i?bob:0)),2);};
+  const leg=(l,col)=>{line(col,l[0],l[1],3);line(short?skin:col,l[1],l[2],short?2:3);if(short)line(col,l[0],[l[0][0]+(l[1][0]-l[0][0])/2|0,l[0][1]+2],3);P(shoe,l[2][0]-1,l[2][1]-1,4,2);};
+  /* far arm and far leg (darker) */
+  arm(swap?A[1]:A[0],shD);leg(L[0],paD);
+  /* torso, neck, head */
+  P(sh,7,13+bob,7,8);P(shD,7,13+bob,1,8);if(o.outfit==="suit"){P("#f2f2f2",12,13+bob,2,4);P("#c8283c",12,14+bob,1,3);}
+  if(o.outfit==="polo"||o.outfit==="suit")P(manShade(sh,1.2),9,13+bob,4,1);
+  if(o.outfit==="hoodie")P(shD,6,12+bob,3,4);
+  P(pa,7,20+bob,7,2);leg(L[1],pa);
+  P(skin,9,11+bob,3,2);
+  P(skin,7,4+bob,8,8);P(skD,7,10+bob,8,1);P(skin,15,7+bob,1,2);
+  P(hair,6,2+bob,9,3);P(hair,6,5+bob,3,4);P(hair,14,3+bob,2,2);
+  P("#1a1218",13,7+bob,1,2);P(skD,10,7+bob,1,2);
+  if(o.hat==="cap"){const h=o.hatColor||"#c8283c";P(h,6,1+bob,9,3);P(manShade(h,.75),14,3+bob,4,1);}
+  if(o.hat==="bucket"){const h=o.hatColor||"#e07020";P(h,6,0+bob,9,4);P(manShade(h,.75),4,3+bob,14,1);}
+  /* near arm last (in front of the body) */
+  arm(swap?A[0]:A[1],sh);
+  /* automatic 1-px dark outline */
+  const d=x.getImageData(0,0,24,32),D=d.data,o2=new Uint8ClampedArray(D);const a=(X,Y)=>X>=0&&Y>=0&&X<24&&Y<32&&D[(Y*24+X)*4+3]>0;
+  for(let Y=0;Y<32;Y++)for(let X=0;X<24;X++)if(!a(X,Y)&&(a(X-1,Y)||a(X+1,Y)||a(X,Y-1)||a(X,Y+1))){const i=(Y*24+X)*4;o2[i]=26;o2[i+1]=16;o2[i+2]=30;o2[i+3]=255;}
+  d.data.set(o2);x.putImageData(d,0,0);return c;}
+function manSheet(id,o){if(MAN_SHEETS[id])return MAN_SHEETS[id];
+  const cv=document.createElement("canvas");cv.width=CELL*4;cv.height=CELL*6;const x=cv.getContext("2d");x.imageSmoothingEnabled=false;
+  const k=3.4,w=Math.round(24*k),h=Math.round(32*k),top=Math.round(CELL*.94)-h,left=(CELL-w)>>1;
+  for(let r=0;r<6;r++)for(let c=0;c<4;c++){const fr=manFrame(o,r===2?"run":r===5?"win":"idle",c);x.drawImage(fr,c*CELL+left,r*CELL+top+(r!==2&&c%2?1:0),w,h);}
+  return MAN_SHEETS[id]=cv;}
 function sheetFor(f){
   if(f.canon&&LOY_SP.includes(f.id)&&loyLookNow())return img(f.id+"_loykrathong_sheet.webp");
   if(f.canon){if(f.outfit==="loy"&&f.camp==="player"&&LOY_SP.includes(f.id))return img(f.id+"_loykrathong_sheet.webp");if(f.outfit&&f.outfit!=="base"&&f.camp==="player"&&OUTFITS[f.outfit])return outfitSheet(f,f.outfit);return img(spriteFile(f.id+"_sheet"));}
+  if(f.manLook)return manSheet(f.id,f.manLook);
   if(f.sprite)return f.tintHue!=null?spriteTint(f.sprite,f.tintHue):img(f.sprite+"_sheet.webp"); // v1.23: gang, roosters, bulls · v1.89.24: tintHue re-dyes the red kit (the krathong thief)
   if(TINTS[f.id])return TINTS[f.id];
   const nb=npcBase(f.id),base=nb.base,blonde=!!(f.prodigy||(f.id||"").startsWith("prod_")),lab=!!f.lab&&!blonde,hue=blonde?42:lab?276:nb.hue,dark=blonde?true:lab?false:nb.dark; /* v1.88: Vector camp fighters wear their black-purple kit */const src=img(base+"_sheet.webp"); /* v1.56: Golden Tiger prodigies: black-gold kit; v1.88: hair dyed silver like Fah */if(!src.complete||!src.naturalWidth)return src;

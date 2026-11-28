@@ -2784,6 +2784,9 @@ i.stye.up{background:#1f6b3a;color:#e6ffe9}i.stye.dn{background:#8a2333;color:#f
 .m-showcase .ccsave{width:100%}.m-showcase .ccnote{margin:.3rem 0 0;font-size:.72rem}
 /* v1.91.204 400 m pace button */
 .mbtn.L.run.pz-ok{background:#2f8a4a}.mbtn.L.run.pz-hot{background:#d9782b}.mbtn.L.run.pz-slow{background:#6a4a8a}
+.mbtn.L.run.pz-ok,.mbtn.L.run.pz-hot,.mbtn.L.run.pz-slow{box-shadow:0 0 0 calc(var(--bp,0)*7px) rgba(255,255,255,calc(var(--bp,0)*.55)),inset 0 0 0 3px rgba(255,255,255,calc(var(--bp,0)*.8))}
 .mbtn.L.run.pz-kick{background:#e0262b;animation:pzk .35s steps(2) infinite alternate}
 @keyframes pzk{to{background:#ff4a3a}}
 @media (prefers-reduced-motion:reduce){.mbtn.L.run.pz-kick{animation:none}}
+
+
