@@ -36,10 +36,24 @@ function beltTournament(G,m,fid){if(G.dm&&!G.dm.done)return null;const me=G.F[fi
   return {wk:G.week,absWeek:gameWeek(G),slots,w:[[],[],[]],r:0,mine:[fid],out:{},done:false,belt:{venue,div:m.div,pay:m.pay||STADIUMS[venue].win,holder:holder.id}};}
 function beltTournamentFinish(D){const S=D.belt,champ=D.champ,won=dmMine(champ);beltStore(G,S.venue)[S.div]={id:champ,def:0,since:G.week};D.best=won?4:(D.out[D.mine[0]]||1);D.prize=won?S.pay:0;
   if(won){G.cash+=D.prize;G.wkFight=(G.wkFight||0)+D.prize;G.rep+=3;G.F[champ].belts=(G.F[champ].belts||0)+1;const rival=D.w[1].find(id=>id!==champ);recordHonor(G,"belt",champ,S.div,D.wk,S.venue==="tha"?null:S.venue,G.F[rival]?.name,rival);}save();}
-function beltBracketHTML(D){const title=STADIUMS[D.belt.venue].name+" · "+D.belt.div,nm=id=>esc(G.F[id]?.name||"—"),nx=dmNextMatch();
-  const columns=[D.slots,D.w[0],D.w[1],D.w[2]].map((L,r)=>`<div class="dmcol"><h4>${["8","4","2","🏆"][r]}</h4>${L.map(id=>`<div class="dmc ${dmMine(id)?"mine":""}">${nm(id)}</div>`).join("")}</div>`).join("");
+/* v1.91.213 (Man: the belt bracket had no motion when someone advanced) — same pair layout as the Death Match bracket (won / out / ?),
+   the holder marked 👑, and names that just moved up a round slide in once */
+/* whoosh in, then a thump: shake the bracket, buzz, and a punchy sound as each name lands (ours louder; a title gets the champ sting) */
+function bracketJuice(){if(typeof document==="undefined")return;const rm=typeof JUICE_RM==="function"&&JUICE_RM();const box=document.querySelector(".dmb");if(!box)return;
+  document.querySelectorAll(".dmb .dmc.new[data-r]").forEach(el=>{const r=+el.dataset.r,land=((r-1)*.22+.42)*1000,mine=el.classList.contains("mine");
+    setTimeout(()=>{if(!el.isConnected)return;if(!rm){box.classList.remove("shake");void box.offsetWidth;box.classList.add(mine?"shake":"shake sm");}
+      try{AU.sfx&&AU.sfx(mine?(r===3?"champ":"kd"):"pop");}catch(e){}if(mine&&typeof buzz==="function")buzz(r===3?[40,60,40]:[25]);},rm?0:land);});}
+function beltBracketHTML(D){const title=STADIUMS[D.belt.venue].name+" · "+D.belt.div,nm=id=>id&&G.F[id]?esc(G.F[id].name):"…",nx=dmNextMatch();
+  const seen=UI.dmSeen&&UI.dmSeen.k===D.wk+":"+D.belt.venue?UI.dmSeen:(UI.dmSeen={k:D.wk+":"+D.belt.venue,s:{}}),fresh=[];
+  const cell=(id,r)=>{if(!id||!G.F[id])return `<div class="dmc tbd">?</div>`;const won=r<3&&(D.w[r]||[]).includes(id),src=r===0?D.slots:D.w[r-1],lost=r<3&&!won&&D.w[r]&&D.w[r].length*2>src.indexOf(id);
+    const k=r+":"+id,isNew=r>0&&!seen.s[k];if(isNew)fresh.push(k);
+    const st=isNew&&dmMine(id)?`<i class="dmstamp">${r===3?"แชมป์!":"ผ่าน!"}</i>`:"";
+    return `<div class="dmc ${dmMine(id)?"mine":""} ${won?"won":""} ${lost?"lost":""} ${isNew?"new":""}" style="--d:${(r-1)*.22}s" ${isNew?`data-r="${r}"`:""}>${G.F[id].canon?`<img src="${faceSrc(id,"happy")}" alt="">`:""}<b>${nm(id)}${id===D.belt.holder?" 👑":""}</b>${st}</div>`;};
+  const col=(L,r,t)=>`<div class="dmcol"><h4>${t}</h4>${Array.from({length:L.length/2},(_,i)=>`<div class="dmm">${cell(L[i*2],r)}${cell(L[i*2+1],r)}</div>`).join("")}</div>`;
+  const pad=(L,n)=>[...L.slice(0,n),...Array(Math.max(0,n-L.length)).fill(null)];
+  if(fresh.length){setTimeout(()=>fresh.forEach(k=>seen.s[k]=1),1600);setTimeout(bracketJuice,30);}
   const action=D.done?`<p class="center goldt">🏆 ${nm(D.champ)} · ${fmt(D.prize||0)}</p><button class="btn primary" data-act="dmclose">กลับค่าย</button>`:nx?`<button class="btn primary" data-act="dmgo" data-id="${dmMine(nx[0])?nx[0]:nx[1]}" data-v="${dmMine(nx[0])?nx[1]:nx[0]}">${nm(nx[0])} vs ${nm(nx[1])} ▸</button>`:"";
-  return `<h2>ทัวร์นาเมนต์ชิงเข็มขัด ${title}</h2><p class="meta">รุ่นเดียวกัน · แพ้คัดออก · ชกไฟต์ละห้ายก</p><div class="dmb">${columns}</div>${action}`;}
+  return `<h2>ทัวร์นาเมนต์ชิงเข็มขัด ${title}</h2><p class="meta">รุ่นเดียวกัน · แพ้คัดออก · ชกไฟต์ละห้ายก · 👑 แชมป์เดิม</p><div class="dmb">${col(D.slots,0,"8 คน")}${col(pad(D.w[0],4),1,"รองฯ")}${col(pad(D.w[1],2),2,"ชิง")}<div class="dmcol"><h4>🏆</h4><div class="dmm">${D.w[2][0]?cell(D.w[2][0],3):'<div class="dmc tbd">?</div>'}</div></div></div>${action}`;}
 const QGRP_BG={gang:"bg_market.webp",rooster:"bg_rooster.webp",bull:"bg_farm.webp"};
 /* v1.91.83 (Man): the quest foes kept pace with her stats only, so a late-game girl with a full skill tree outgrew even the bosses.
    They now read a fifth of her hidden edge (the season bonus halved to make room) (skills, perks, level) like the Loy thief, carry whatever the stat ceiling cannot hold as ring craft,
@@ -483,8 +497,10 @@ function dmAdvance(){const D=G.dm;if(!D||D.done)return;
   D.done=true;dmFinish();}
 function dmNextMatch(){const D=G.dm;if(!D||D.done||D.r>=3)return null;const L=dmList(D),m=D.w[D.r].length;return [L[m*2],L[m*2+1]];}
 function dmFight(meId,opId){const D=G.dm;if(!D||D.done)return;const next=dmNextMatch();if(!next||!next.includes(meId)||!next.includes(opId)||!dmMine(meId))return;if(!G.F[opId]){D.w[D.r].push(meId);dmAdvance();UI.modal={type:"dm"};save();render();return;}const b={id:"dm"+G.week+"_"+D.r+"_"+meId,a:meId,b:opId,week:G.week,tier:"dm",rounds:D.belt?5:3,win:0,lose:0,dm:1,title:D.belt?STADIUMS[D.belt.venue].name+" · "+D.belt.div:null,bg:D.belt?STADIUMS[D.belt.venue].bg:"bg_hall.webp"};
-  UI.modal=null;openFight(b,()=>{const w=b.result;const winner=w==="A"?meId:opId,loser=w==="A"?opId:meId;D.w[D.r].push(winner);if(dmMine(loser))D.out[loser]=D.r+1;
-    dmAdvance();UI.modal={type:"dm"};save();render();});}
+  UI.modal=null;const go=()=>openFight(b,()=>{const w=b.result;const winner=w==="A"?meId:opId,loser=w==="A"?opId:meId;D.w[D.r].push(winner);if(dmMine(loser))D.out[loser]=D.r+1;
+    dmAdvance();UI.modal={type:"dm"};save();render();});
+  /* v1.91.213 (Man: couldn't set a plan for bracket bouts) — the plan sheet comes up before each bout, like letter fights */
+  if(typeof questPlan==="function")questPlan(b,go);else go();}
 function dmFinish(){const D=G.dm;if(!D||D.paid)return;const champ=D.w[2][0];if(!champ||!G.F[champ]){D.done=true;D.paid=true;D.prize=0;save();return;}D.champ=champ;D.paid=true;if(D.belt){beltTournamentFinish(D);return;}
   let best=0;for(const id of D.mine){const lv=id===champ?4:(D.out[id]||1);best=Math.max(best,lv);}D.best=best;
   const prize=DM_PRIZE[best]||0;G.cash+=prize;G.wkFight=(G.wkFight||0)+prize;D.prize=prize;

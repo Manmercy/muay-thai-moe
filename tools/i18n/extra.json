@@ -22447,5 +22447,11 @@
  "<div class=\"set\"><span><b>เสียง</b><small>ปี่ชวา กลองแขก ฉิ่ง · เสียงต่อย เตะ ระฆัง เสียงเชียร์</small></span><span class=\"obtns\">": "<div class=\"set\"><span><b>Sound</b><small>Pi java, khaek drums, ching · punches, kicks, bell, cheers</small></span><span class=\"obtns\">",
  "</span><span><b>คู่มือเกม</b><small>สารานุกรมเกม · สไตล์มวย ใครแพ้ทางใคร · คำศัพท์</small></span><span class=\"setguide-go\">›</span></button>": "</span><span><b>Game guide</b><small>Encyclopedia · fight styles, who beats whom · glossary</small></span><span class=\"setguide-go\">›</span></button>",
  "<div class=\"set\"><span><b>ภาษา · Language</b><small>สลับแล้วเกมจะโหลดใหม่ เซฟยังอยู่</small></span>": "<div class=\"set\"><span><b>Language · ภาษา</b><small>Switching reloads the game. Your saves are kept</small></span>",
- "\">เยี่ยม!</button></div></div></div>": "\">Great!</button></div></div></div>"
+ "\">เยี่ยม!</button></div></div></div>": "\">Great!</button></div></div></div>",
+ "</h2><p class=\"meta\">รุ่นเดียวกัน · แพ้คัดออก · ชกไฟต์ละห้ายก · 👑 แชมป์เดิม</p><div class=\"dmb\">": "</h2><p class=\"meta\">Same division · single elimination · five rounds a bout · 👑 current champion</p><div class=\"dmb\">",
+ "ไฟต์จากจดหมายขึ้นชกทันที ตั้งแผนแล้วไปต่อได้เลย": "Letter fights start right away. Set a plan and go",
+ "ทัวร์นาเมนต์ชกต่อเนื่อง ตั้งแผนแล้วขึ้นชกได้เลย": "Tournament bouts run back to back. Set a plan and step in",
+ "เปลี่ยนแผนได้ที่แท็บฝึกก่อนวันชก": "Change the plan in the Training tab before fight day",
+ "ตั้งแผนก่อนขึ้นชกแล้ว ✓": "Plan set before the bout ✓",
+ "ผ่าน!": "Through!"
 }

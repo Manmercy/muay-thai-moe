@@ -7078,7 +7078,7 @@ AU.gsfx=function(kind,a){if(!this.init()||this.muted||!SETTINGS.sfx)return;const
   if(kind==="shimmer")for(let i=0;i<6;i++)T(i*.05,{f:1400+Math.random()*1400,type:"sine",dur:.12,peak:.06});};
 
 // ================= MUAY THAI MOE v1.3 — UI =================
-const VERSION="1.91.212";
+const VERSION="1.91.213";
 const CUR_LANG=(typeof window!=="undefined"&&window.LANG)||"th";
 const TH_LABEL=String.fromCharCode(3652,3607,3618);
 function langSwitch(cls){return `<div class="langsw ${cls||""}" role="group" aria-label="Language">${[["th",TH_LABEL],["en","EN"]].map(([k,l])=>`<button class="lsb ${CUR_LANG===k?"on":""}" data-act="setlang" data-v="${k}" aria-pressed="${CUR_LANG===k}">${l}</button>`).join("")}</div>`;}
@@ -7765,7 +7765,7 @@ function fplanHTML(bid){const b=fpBooking(bid);if(!b)return "";const q=b===UI.qb
    <h3>Plan</h3><div class="tgrid three">${Object.entries(PLANS).map(([k,p])=>{const rec=scouted(op.id)&&adviseCached(f.id,op.id,b.rounds||3).best===k;return `<button data-act="fpd" data-k="plan" data-v="${k}" aria-pressed="${pl===k}">${rec?"★ ":""}${p.name}</button>`;}).join("")}</div><p class="meta tdesc">${esc(PLANS[pl].desc)}</p>
    <h3>Target</h3><div class="tgrid three">${Object.entries(TGT).map(([k,t])=>`<button data-act="fpd" data-k="target" data-v="${k}" aria-pressed="${tg===k}">${t}</button>`).join("")}</div>
    ${cp&&!q&&!trLocked(f)?`<button class="cprep ${f.plan.preset===cp?"on":""}" data-act="preset" data-f="${f.id}" data-v="${cp}">${f.plan.preset===cp?"✓ Counter-training this week":"💡 Counter-train: "+PRESETS[cp].name}<small>${op.name}${COUNTER_WHY[cp]}</small></button>`:""}
-   ${q?`<p class="meta center">Letter fights start right away. Set the plan, then go.</p>`:""}
+   ${q?`<p class="meta center">${b.dm?"Tournament bouts run back to back. Set a plan and step in":"Letter fights start right away. Set a plan and go"}</p>`:""}
    <div class="mfoot">${q?(scouted(op.id)?`<button class="btn ghost" data-act="fpbest" data-id="${b.id}">Use coach's plan</button>`:""):`<button class="btn ghost" data-act="closeModal">Cancel</button>`}<button class="btn primary" data-act="fpok" data-id="${b.id}">${q?"Confirm plan · Fight":"Confirm plan"}</button></div>`;}
 function fightsHTML(){
   const sub=UI.fsub;
@@ -8870,7 +8870,7 @@ function winJuice(){const U=UI.fight;if(!U||U.stage!=="done"||U.wj)return;const 
 function irisIn(){if(JUICE_RM()||typeof document==="undefined")return;const d=document.createElement("div");d.className="iris";document.body.appendChild(d);setTimeout(()=>d.remove(),900);}
 function fightHTML(){const U=UI.fight,b=U.b,me=G.F[b.a],op=G.F[b.b],F=U.F;
   const last=U.shown.filter(x=>x.ha!=null).slice(-1)[0];const sv=(s,k)=>F?(last?last[k]:s):100;
-  const side=(f,cls,hp,sta)=>`<div class="fside ${cls}"><div class="fn">${f.canon||f.id==="pailin"?`<img class="face sm" src="${faceSrc(f.id,"happy")}" alt="">`:""}<b>${esc(f.name)}</b><span class="meta">Lv.${f.lvl}</span>${hotBadge(f,1)}</div>
+  const side=(f,cls,hp,sta)=>`<div class="fside ${cls}"><div class="fn">${f.canon||f.id==="pailin"?`<img class="face sm" src="${faceSrc(f.id,"happy")}" alt="">`:""}<b>${esc(f.name)}</b><span class="meta">Lv.${f.lvl}</span>${U.stage==="pre"?"":hotBadge(f,1)}</div>
     <div class="meter">${hpGhost(cls,hp)}<i style="--v:${clamp(hp,0,100)}%;--bc:${hp>50?"var(--green)":hp>25?"var(--warn)":"var(--red)"}"></i></div><div class="meter thin"><i style="--v:${clamp(sta,0,100)}%;--bc:var(--gold)"></i></div>${cls==="a"&&UI.fight&&UI.fight.F?`<small class="stanum">⚡ ${Math.round(sta*UI.fight.F.A.staMax/100)}/${UI.fight.F.A.staMax}</small>`:""}</div>`;
   const hpN=(S,v)=>S&&S.f.hpX?v*100/(S.hp0||100):v; /* v1.90.13: a boss with extra hp shows her bar as a share of her own max */
   const hpA=F?hpN(F.A,sv(F.A.hp,"ha")):100,hpB=F?hpN(F.B,sv(F.B.hp,"hb")):100,stA=F?sv(F.A.sta,"sa"):100,stB=F?sv(F.B.sta,"sb"):100;
@@ -8881,7 +8881,7 @@ function fightHTML(){const U=UI.fight,b=U.b,me=G.F[b.a],op=G.F[b.b],F=U.F;
      <div class="prebox"><div><small>Plan</small><b>${PLANS[U.plan].name}</b></div><div><small>Target</small><b>${TGT[U.tac.target]}</b></div><div><small>Readiness</small><b class="num">${c}</b></div></div>
      ${me.fatigue>25?`<p class="meta center warnt">Fatigue ${Math.round(me.fatigue)} · entering the ring at ${Math.round(clamp(100-me.fatigue*.4,40,100))}% energy and tiring faster than usual</p>`:""}
      ${preCompare(me,op,b)}
-     <p class="meta center">${me.prepBonus?"Plan drilled · ":""}${me.injury?"Injured! · ":""}Change the plan in the Training tab before fight day</p>
+     <p class="meta center">${me.prepBonus?"Plan drilled · ":""}${me.injury?"Injured! · ":""}${b.dm?"Plan set before the bout ✓":"Change the plan in the Training tab before fight day"}</p>
      ${(()=>{const nl=b.region&&b.region.nlfinal;if(!nl||typeof RG_FPREP==="undefined")return "";/* v1.91.72 (Man): the underground bouts add three ways to meet the other martial arts, picked per bout */
        return `<div class="fprep3"><h4>Open-rules counter · pick 1</h4>${Object.entries(RG_FPREP).map(([k,P])=>`<button class="btn ${b.gprep===k?"gold":""}" data-act="rgfp" data-v="${k}" aria-pressed="${b.gprep===k}"><b>${esc(P.n)}</b><small>${esc(P.d)}</small></button>`).join("")}</div>`;})()}
      <div class="ctrl">${me.injury?`<button class="btn" data-act="withdraw">Withdraw</button>`:""}${b.region&&b.region.nlfinal?`<button class="btn" data-act="rgfswap">Swap fighter</button>`:""}<button class="btn primary big" data-act="fstart" ${b.region&&b.region.nlfinal&&!b.gprep?"disabled":""}>${b.region&&b.region.nlfinal&&!b.gprep?"Pick a counter plan first":"Fight! ▸"}</button></div></div>`;}
@@ -9489,10 +9489,24 @@ function beltTournament(G,m,fid){if(G.dm&&!G.dm.done)return null;const me=G.F[fi
   return {wk:G.week,absWeek:gameWeek(G),slots,w:[[],[],[]],r:0,mine:[fid],out:{},done:false,belt:{venue,div:m.div,pay:m.pay||STADIUMS[venue].win,holder:holder.id}};}
 function beltTournamentFinish(D){const S=D.belt,champ=D.champ,won=dmMine(champ);beltStore(G,S.venue)[S.div]={id:champ,def:0,since:G.week};D.best=won?4:(D.out[D.mine[0]]||1);D.prize=won?S.pay:0;
   if(won){G.cash+=D.prize;G.wkFight=(G.wkFight||0)+D.prize;G.rep+=3;G.F[champ].belts=(G.F[champ].belts||0)+1;const rival=D.w[1].find(id=>id!==champ);recordHonor(G,"belt",champ,S.div,D.wk,S.venue==="tha"?null:S.venue,G.F[rival]?.name,rival);}save();}
-function beltBracketHTML(D){const title=STADIUMS[D.belt.venue].name+" · "+D.belt.div,nm=id=>esc(G.F[id]?.name||"—"),nx=dmNextMatch();
-  const columns=[D.slots,D.w[0],D.w[1],D.w[2]].map((L,r)=>`<div class="dmcol"><h4>${["8","4","2","🏆"][r]}</h4>${L.map(id=>`<div class="dmc ${dmMine(id)?"mine":""}">${nm(id)}</div>`).join("")}</div>`).join("");
+/* v1.91.213 (Man: the belt bracket had no motion when someone advanced) — same pair layout as the Death Match bracket (won / out / ?),
+   the holder marked 👑, and names that just moved up a round slide in once */
+/* whoosh in, then a thump: shake the bracket, buzz, and a punchy sound as each name lands (ours louder; a title gets the champ sting) */
+function bracketJuice(){if(typeof document==="undefined")return;const rm=typeof JUICE_RM==="function"&&JUICE_RM();const box=document.querySelector(".dmb");if(!box)return;
+  document.querySelectorAll(".dmb .dmc.new[data-r]").forEach(el=>{const r=+el.dataset.r,land=((r-1)*.22+.42)*1000,mine=el.classList.contains("mine");
+    setTimeout(()=>{if(!el.isConnected)return;if(!rm){box.classList.remove("shake");void box.offsetWidth;box.classList.add(mine?"shake":"shake sm");}
+      try{AU.sfx&&AU.sfx(mine?(r===3?"champ":"kd"):"pop");}catch(e){}if(mine&&typeof buzz==="function")buzz(r===3?[40,60,40]:[25]);},rm?0:land);});}
+function beltBracketHTML(D){const title=STADIUMS[D.belt.venue].name+" · "+D.belt.div,nm=id=>id&&G.F[id]?esc(G.F[id].name):"…",nx=dmNextMatch();
+  const seen=UI.dmSeen&&UI.dmSeen.k===D.wk+":"+D.belt.venue?UI.dmSeen:(UI.dmSeen={k:D.wk+":"+D.belt.venue,s:{}}),fresh=[];
+  const cell=(id,r)=>{if(!id||!G.F[id])return `<div class="dmc tbd">?</div>`;const won=r<3&&(D.w[r]||[]).includes(id),src=r===0?D.slots:D.w[r-1],lost=r<3&&!won&&D.w[r]&&D.w[r].length*2>src.indexOf(id);
+    const k=r+":"+id,isNew=r>0&&!seen.s[k];if(isNew)fresh.push(k);
+    const st=isNew&&dmMine(id)?`<i class="dmstamp">${r===3?"champion!":"Through!"}</i>`:"";
+    return `<div class="dmc ${dmMine(id)?"mine":""} ${won?"won":""} ${lost?"lost":""} ${isNew?"new":""}" style="--d:${(r-1)*.22}s" ${isNew?`data-r="${r}"`:""}>${G.F[id].canon?`<img src="${faceSrc(id,"happy")}" alt="">`:""}<b>${nm(id)}${id===D.belt.holder?" 👑":""}</b>${st}</div>`;};
+  const col=(L,r,t)=>`<div class="dmcol"><h4>${t}</h4>${Array.from({length:L.length/2},(_,i)=>`<div class="dmm">${cell(L[i*2],r)}${cell(L[i*2+1],r)}</div>`).join("")}</div>`;
+  const pad=(L,n)=>[...L.slice(0,n),...Array(Math.max(0,n-L.length)).fill(null)];
+  if(fresh.length){setTimeout(()=>fresh.forEach(k=>seen.s[k]=1),1600);setTimeout(bracketJuice,30);}
   const action=D.done?`<p class="center goldt">🏆 ${nm(D.champ)} · ${fmt(D.prize||0)}</p><button class="btn primary" data-act="dmclose">Back to camp</button>`:nx?`<button class="btn primary" data-act="dmgo" data-id="${dmMine(nx[0])?nx[0]:nx[1]}" data-v="${dmMine(nx[0])?nx[1]:nx[0]}">${nm(nx[0])} vs ${nm(nx[1])} ▸</button>`:"";
-  return `<h2>Belt Tournament ${title}</h2><p class="meta">Same division · single elimination · five rounds a bout</p><div class="dmb">${columns}</div>${action}`;}
+  return `<h2>Belt Tournament ${title}</h2><p class="meta">Same division · single elimination · five rounds a bout · 👑 current champion</p><div class="dmb">${col(D.slots,0,"Last 8")}${col(pad(D.w[0],4),1,"Semis")}${col(pad(D.w[1],2),2,"Final")}<div class="dmcol"><h4>🏆</h4><div class="dmm">${D.w[2][0]?cell(D.w[2][0],3):'<div class="dmc tbd">?</div>'}</div></div></div>${action}`;}
 const QGRP_BG={gang:"bg_market.webp",rooster:"bg_rooster.webp",bull:"bg_farm.webp"};
 /* v1.91.83 (Man): the quest foes kept pace with her stats only, so a late-game girl with a full skill tree outgrew even the bosses.
    They now read a fifth of her hidden edge (the season bonus halved to make room) (skills, perks, level) like the Loy thief, carry whatever the stat ceiling cannot hold as ring craft,
@@ -9936,8 +9950,10 @@ function dmAdvance(){const D=G.dm;if(!D||D.done)return;
   D.done=true;dmFinish();}
 function dmNextMatch(){const D=G.dm;if(!D||D.done||D.r>=3)return null;const L=dmList(D),m=D.w[D.r].length;return [L[m*2],L[m*2+1]];}
 function dmFight(meId,opId){const D=G.dm;if(!D||D.done)return;const next=dmNextMatch();if(!next||!next.includes(meId)||!next.includes(opId)||!dmMine(meId))return;if(!G.F[opId]){D.w[D.r].push(meId);dmAdvance();UI.modal={type:"dm"};save();render();return;}const b={id:"dm"+G.week+"_"+D.r+"_"+meId,a:meId,b:opId,week:G.week,tier:"dm",rounds:D.belt?5:3,win:0,lose:0,dm:1,title:D.belt?STADIUMS[D.belt.venue].name+" · "+D.belt.div:null,bg:D.belt?STADIUMS[D.belt.venue].bg:"bg_hall.webp"};
-  UI.modal=null;openFight(b,()=>{const w=b.result;const winner=w==="A"?meId:opId,loser=w==="A"?opId:meId;D.w[D.r].push(winner);if(dmMine(loser))D.out[loser]=D.r+1;
-    dmAdvance();UI.modal={type:"dm"};save();render();});}
+  UI.modal=null;const go=()=>openFight(b,()=>{const w=b.result;const winner=w==="A"?meId:opId,loser=w==="A"?opId:meId;D.w[D.r].push(winner);if(dmMine(loser))D.out[loser]=D.r+1;
+    dmAdvance();UI.modal={type:"dm"};save();render();});
+  /* v1.91.213 (Man: couldn't set a plan for bracket bouts) — the plan sheet comes up before each bout, like letter fights */
+  if(typeof questPlan==="function")questPlan(b,go);else go();}
 function dmFinish(){const D=G.dm;if(!D||D.paid)return;const champ=D.w[2][0];if(!champ||!G.F[champ]){D.done=true;D.paid=true;D.prize=0;save();return;}D.champ=champ;D.paid=true;if(D.belt){beltTournamentFinish(D);return;}
   let best=0;for(const id of D.mine){const lv=id===champ?4:(D.out[id]||1);best=Math.max(best,lv);}D.best=best;
   const prize=DM_PRIZE[best]||0;G.cash+=prize;G.wkFight=(G.wkFight||0)+prize;D.prize=prize;

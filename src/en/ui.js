@@ -1,5 +1,5 @@
 // ================= MUAY THAI MOE v1.3 — UI =================
-const VERSION="1.91.212";
+const VERSION="1.91.213";
 const CUR_LANG=(typeof window!=="undefined"&&window.LANG)||"th";
 const TH_LABEL=String.fromCharCode(3652,3607,3618);
 function langSwitch(cls){return `<div class="langsw ${cls||""}" role="group" aria-label="Language">${[["th",TH_LABEL],["en","EN"]].map(([k,l])=>`<button class="lsb ${CUR_LANG===k?"on":""}" data-act="setlang" data-v="${k}" aria-pressed="${CUR_LANG===k}">${l}</button>`).join("")}</div>`;}
@@ -686,7 +686,7 @@ function fplanHTML(bid){const b=fpBooking(bid);if(!b)return "";const q=b===UI.qb
    <h3>Plan</h3><div class="tgrid three">${Object.entries(PLANS).map(([k,p])=>{const rec=scouted(op.id)&&adviseCached(f.id,op.id,b.rounds||3).best===k;return `<button data-act="fpd" data-k="plan" data-v="${k}" aria-pressed="${pl===k}">${rec?"★ ":""}${p.name}</button>`;}).join("")}</div><p class="meta tdesc">${esc(PLANS[pl].desc)}</p>
    <h3>Target</h3><div class="tgrid three">${Object.entries(TGT).map(([k,t])=>`<button data-act="fpd" data-k="target" data-v="${k}" aria-pressed="${tg===k}">${t}</button>`).join("")}</div>
    ${cp&&!q&&!trLocked(f)?`<button class="cprep ${f.plan.preset===cp?"on":""}" data-act="preset" data-f="${f.id}" data-v="${cp}">${f.plan.preset===cp?"✓ Counter-training this week":"💡 Counter-train: "+PRESETS[cp].name}<small>${op.name}${COUNTER_WHY[cp]}</small></button>`:""}
-   ${q?`<p class="meta center">Letter fights start right away. Set the plan, then go.</p>`:""}
+   ${q?`<p class="meta center">${b.dm?"Tournament bouts run back to back. Set a plan and step in":"Letter fights start right away. Set a plan and go"}</p>`:""}
    <div class="mfoot">${q?(scouted(op.id)?`<button class="btn ghost" data-act="fpbest" data-id="${b.id}">Use coach's plan</button>`:""):`<button class="btn ghost" data-act="closeModal">Cancel</button>`}<button class="btn primary" data-act="fpok" data-id="${b.id}">${q?"Confirm plan · Fight":"Confirm plan"}</button></div>`;}
 function fightsHTML(){
   const sub=UI.fsub;
@@ -1791,7 +1791,7 @@ function winJuice(){const U=UI.fight;if(!U||U.stage!=="done"||U.wj)return;const 
 function irisIn(){if(JUICE_RM()||typeof document==="undefined")return;const d=document.createElement("div");d.className="iris";document.body.appendChild(d);setTimeout(()=>d.remove(),900);}
 function fightHTML(){const U=UI.fight,b=U.b,me=G.F[b.a],op=G.F[b.b],F=U.F;
   const last=U.shown.filter(x=>x.ha!=null).slice(-1)[0];const sv=(s,k)=>F?(last?last[k]:s):100;
-  const side=(f,cls,hp,sta)=>`<div class="fside ${cls}"><div class="fn">${f.canon||f.id==="pailin"?`<img class="face sm" src="${faceSrc(f.id,"happy")}" alt="">`:""}<b>${esc(f.name)}</b><span class="meta">Lv.${f.lvl}</span>${hotBadge(f,1)}</div>
+  const side=(f,cls,hp,sta)=>`<div class="fside ${cls}"><div class="fn">${f.canon||f.id==="pailin"?`<img class="face sm" src="${faceSrc(f.id,"happy")}" alt="">`:""}<b>${esc(f.name)}</b><span class="meta">Lv.${f.lvl}</span>${U.stage==="pre"?"":hotBadge(f,1)}</div>
     <div class="meter">${hpGhost(cls,hp)}<i style="--v:${clamp(hp,0,100)}%;--bc:${hp>50?"var(--green)":hp>25?"var(--warn)":"var(--red)"}"></i></div><div class="meter thin"><i style="--v:${clamp(sta,0,100)}%;--bc:var(--gold)"></i></div>${cls==="a"&&UI.fight&&UI.fight.F?`<small class="stanum">⚡ ${Math.round(sta*UI.fight.F.A.staMax/100)}/${UI.fight.F.A.staMax}</small>`:""}</div>`;
   const hpN=(S,v)=>S&&S.f.hpX?v*100/(S.hp0||100):v; /* v1.90.13: a boss with extra hp shows her bar as a share of her own max */
   const hpA=F?hpN(F.A,sv(F.A.hp,"ha")):100,hpB=F?hpN(F.B,sv(F.B.hp,"hb")):100,stA=F?sv(F.A.sta,"sa"):100,stB=F?sv(F.B.sta,"sb"):100;
@@ -1802,7 +1802,7 @@ function fightHTML(){const U=UI.fight,b=U.b,me=G.F[b.a],op=G.F[b.b],F=U.F;
      <div class="prebox"><div><small>Plan</small><b>${PLANS[U.plan].name}</b></div><div><small>Target</small><b>${TGT[U.tac.target]}</b></div><div><small>Readiness</small><b class="num">${c}</b></div></div>
      ${me.fatigue>25?`<p class="meta center warnt">Fatigue ${Math.round(me.fatigue)} · entering the ring at ${Math.round(clamp(100-me.fatigue*.4,40,100))}% energy and tiring faster than usual</p>`:""}
      ${preCompare(me,op,b)}
-     <p class="meta center">${me.prepBonus?"Plan drilled · ":""}${me.injury?"Injured! · ":""}Change the plan in the Training tab before fight day</p>
+     <p class="meta center">${me.prepBonus?"Plan drilled · ":""}${me.injury?"Injured! · ":""}${b.dm?"Plan set before the bout ✓":"Change the plan in the Training tab before fight day"}</p>
      ${(()=>{const nl=b.region&&b.region.nlfinal;if(!nl||typeof RG_FPREP==="undefined")return "";/* v1.91.72 (Man): the underground bouts add three ways to meet the other martial arts, picked per bout */
        return `<div class="fprep3"><h4>Open-rules counter · pick 1</h4>${Object.entries(RG_FPREP).map(([k,P])=>`<button class="btn ${b.gprep===k?"gold":""}" data-act="rgfp" data-v="${k}" aria-pressed="${b.gprep===k}"><b>${esc(P.n)}</b><small>${esc(P.d)}</small></button>`).join("")}</div>`;})()}
      <div class="ctrl">${me.injury?`<button class="btn" data-act="withdraw">Withdraw</button>`:""}${b.region&&b.region.nlfinal?`<button class="btn" data-act="rgfswap">Swap fighter</button>`:""}<button class="btn primary big" data-act="fstart" ${b.region&&b.region.nlfinal&&!b.gprep?"disabled":""}>${b.region&&b.region.nlfinal&&!b.gprep?"Pick a counter plan first":"Fight! ▸"}</button></div></div>`;}

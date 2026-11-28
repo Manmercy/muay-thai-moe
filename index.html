@@ -2821,6 +2821,31 @@ i.stye.up{background:#1f6b3a;color:#e6ffe9}i.stye.dn{background:#8a2333;color:#f
 .setfold[open]{padding-bottom:8px}
 .settog{display:inline-flex;align-items:center;gap:6px;padding:6px 10px;border-radius:8px;background:rgba(255,255,255,.08);cursor:pointer;white-space:nowrap;font-size:13px}
 .settog input{margin:0}
+
+/* v1.91.213 bracket juice: names whoosh in from the left with a smear, overshoot and land with a flash; ours get a stamp; the bracket shakes on impact */
+.dmc{position:relative}
+.dmc.new{animation:dmWhoosh .48s cubic-bezier(.2,.9,.25,1.35) both,dmLand .55s ease-out both;animation-delay:var(--d,0s),calc(var(--d,0s) + .42s);z-index:2}
+@keyframes dmWhoosh{0%{transform:translateX(-150%) skewX(-22deg) scaleX(1.5);opacity:0;filter:blur(3px)}55%{opacity:1;filter:blur(1px)}82%{transform:translateX(7%) skewX(8deg) scaleX(.92);filter:none}100%{transform:none;opacity:1}}
+@keyframes dmLand{0%{background:#fff7c2;box-shadow:0 0 0 0 rgba(255,211,74,.95),inset 0 0 0 2px #ffd34a}100%{box-shadow:0 0 0 14px rgba(255,211,74,0),inset 0 0 0 2px transparent}}
+.dmc.mine.new{animation:dmWhoosh .48s cubic-bezier(.2,.9,.25,1.35) both,dmLand .7s ease-out both,dmMineGlow 1.6s ease-in-out both;animation-delay:var(--d,0s),calc(var(--d,0s) + .42s),calc(var(--d,0s) + .9s)}
+@keyframes dmMineGlow{0%,100%{box-shadow:inset 0 0 0 2px var(--gold)}50%{box-shadow:inset 0 0 0 2px var(--gold),0 0 16px 2px rgba(255,211,74,.7)}}
+.dmstamp{position:absolute;right:-6px;top:-12px;padding:1px 7px;font-style:normal;font-weight:900;font-size:12px;color:#fff;background:#e23a3a;border:2px solid #fff;border-radius:4px;transform:rotate(-10deg);box-shadow:0 2px 0 #7a1420;
+  animation:dmStamp .38s cubic-bezier(.2,1.6,.4,1) both;animation-delay:calc(var(--d,0s) + .5s);pointer-events:none}
+@keyframes dmStamp{0%{transform:rotate(-10deg) scale(2.6);opacity:0}100%{transform:rotate(-10deg) scale(1);opacity:1}}
+.dmb.shake{animation:dmShake .32s linear}.dmb.shake.sm{animation:dmShakeSm .22s linear}
+@keyframes dmShake{0%,100%{transform:none}20%{transform:translate(-5px,2px)}40%{transform:translate(5px,-2px)}60%{transform:translate(-3px,1px)}80%{transform:translate(2px,0)}}
+@keyframes dmShakeSm{0%,100%{transform:none}33%{transform:translate(-2px,1px)}66%{transform:translate(2px,0)}}
+@media (prefers-reduced-motion:reduce){.dmc.new,.dmc.mine.new,.dmstamp,.dmb.shake{animation:none}}
+/* v1.91.213 (Man: the pre-fight screen ran past the phone screen) — tighter on phones so the start button is in view */
+@media (max-width:520px){
+ .pre{padding:10px 10px 12px;gap:8px}
+ .pre .vsrow .face{width:64px;height:64px}
+ .pre .vsrow .vsc b{font-size:15px}.pre .vs{font-size:24px}
+ .pre .quote{margin:0;font-size:13px}
+ .pre .prebox>div{padding:5px}.pre .prebox b{font-size:14px}
+ .pre .meta{margin:2px 0}
+ .pre .ctrl{position:sticky;bottom:0;padding-top:6px;background:linear-gradient(transparent,var(--bg2) 30%)}
+}
 </style></head><body>
 <script>window.__MTM_ART=["alicia_sheet.png","alicia_special.png","baibua_sheet.png","baibua_special.png","baiyok_sheet.webp","baiyok_white_sheet.webp","bull1_sheet.webp","bull2_sheet.webp","bull3_sheet.webp","chaba_sheet.png","chaba_special.png","coach_daeng_sheet.webp","fah_loykrathong_sheet.webp","fah_loykrathong_special.webp","fah_sheet.webp","fah_special.webp","gang1_sheet.webp","gang2_sheet.webp","gang3_sheet.webp","gang4_sheet.webp","gang5_sheet.webp","gangsilver_sheet.webp","kati_loykrathong_sheet.webp","kati_loykrathong_special.webp","kati_sheet.webp","kati_special.webp","krahang_sheet.webp","krasue_sheet.webp","mabong_sheet.webp","mali_loykrathong_sheet.webp","mali_loykrathong_special.webp","mali_sheet.webp","mali_special.webp","nl_ladda_blood_sheet.webp","nl_ladda_hood_sheet.webp","nl_ladda_sheet.webp","nl_meili_sheet.webp","nl_meili_special.webp","nl_nia_sheet.webp","nl_nia_special.webp","nl_rosa_sheet.webp","nl_rosa_special.webp","nl_varya_sheet.webp","nl_varya_special.webp","npc10_sheet.webp","npc11_sheet.webp","npc12_sheet.webp","npc13_sheet.webp","npc14_sheet.webp","npc1_sheet.webp","npc2_sheet.webp","npc3_sheet.webp","npc4_sheet.webp","npc5_sheet.webp","npc6_sheet.webp","npc7_sheet.webp","npc8_sheet.webp","npc9_sheet.webp","npc_alicia_mom.webp","npc_alicia_mom_soft.webp","npc_baibua_dad.webp","npc_baibua_dad_smile.webp","npc_baiyok_black_angry.png","npc_baiyok_black_flustered.png","npc_baiyok_black_happy.png","npc_baiyok_black_sad.png","npc_baiyok_casual.png","npc_baiyok_casual_flustered.png","npc_baiyok_casual_pout.png","npc_baiyok_white_angry.png","npc_baiyok_white_flustered.png","npc_baiyok_white_happy.png","npc_baiyok_white_sad.png","npc_baiyok_white_surprised.png","npc_boris.webp","npc_caster.webp","npc_caster_shout.webp","npc_chaba_bro.webp","npc_chaba_bro_sad.webp","npc_chaba_bro_stand.webp","npc_gala_mc.webp","npc_gala_mc_awk.webp","npc_gala_mc_hype.webp","npc_gang_boss.webp","npc_gang_boss_face.webp","npc_gang_goldblack.webp","npc_gang_group.webp","npc_gang_silver.webp","npc_grandma.webp","npc_hialong.webp","npc_hialong_angry.webp","npc_krerk.webp","npc_krerk_face.webp","npc_krit.webp","npc_krit_panic.webp","npc_luangpho.webp","npc_mabelle.webp","npc_mabelle_excited.webp","npc_mali_mom.webp","npc_mali_mom_laugh.webp","npc_mali_mom_tear.webp","npc_mark_guide.webp","npc_mark_guide_pain.webp","npc_mc_central.webp","npc_mc_central_hype.webp","npc_mc_isan.webp","npc_mc_isan_hype.webp","npc_mc_north.webp","npc_mc_north_f.webp","npc_mc_north_f_hype.webp","npc_mc_north_hype.webp","npc_mc_south.webp","npc_mc_south_hype.webp","npc_minnie.webp","npc_minnie_smirk.webp","npc_mint.webp","npc_mint_flustered.webp","npc_morphi.webp","npc_nai.webp","npc_nil.webp","npc_nil_smirk.webp","npc_petchara.png","npc_phet.webp","npc_phet_smile.webp","npc_ploy_mom.webp","npc_ploy_mom_cry.webp","npc_qhost_correct.webp","npc_qhost_excited.webp","npc_qhost_smile.webp","npc_qhost_suspense.webp","npc_qhost_wrong.webp","npc_suea.webp","npc_suea_angry.webp","npc_tabtim_dad.webp","npc_tabtim_dad_laugh.webp","npc_tani_angry.webp","npc_tani_angry_smile.webp","npc_tani_face.webp","npc_tani_neutral.webp","npc_tani_scary.webp","npc_tani_shy.webp","npc_tani_smile.webp","npc_thief.webp","npc_thief2.webp","npc_tiger_boss.webp","npc_tiger_boss_cry.webp","npc_vector_knight.png","npc_vector_mesa.png","npc_vector_vega.png","npc_vendor_green.webp","npc_vendor_red.webp","pailin_sheet.webp","petchara_sheet.webp","phiphong_sheet.webp","ploy_loykrathong_sheet.webp","ploy_loykrathong_special.webp","ploy_sheet.webp","ploy_special.webp","rg_chaytrae1_sheet.webp","rg_chaytrae2_sheet.webp","rg_jinlong1_sheet.webp","rg_jinlong2_sheet.webp","rg_russian1_sheet.webp","rg_russian2_sheet.webp","rg_sasaeng1_sheet.webp","rg_sasaeng2_sheet.webp","rgp_buriram_sheet.webp","rgp_chanthaburi_sheet.webp","rgp_chiangrai_sheet.webp","rgp_chumphon_sheet.webp","rgp_khonkaen_sheet.webp","rgp_lampang_sheet.webp","rgp_lopburi_sheet.webp","rgp_nakhonsi_sheet.webp","rgp_nan_sheet.webp","rgp_phetchaburi_sheet.webp","rgp_songkhla_sheet.webp","rgp_suphan_sheet.webp","rgp_surat_sheet.webp","rgp_ubon_sheet.webp","rgp_udon_sheet.webp","rgp_uttaradit_sheet.webp","rin_loykrathong_sheet.webp","rin_loykrathong_special.webp","rin_sheet.webp","rin_special.webp","rooster1_sheet.webp","rooster2_sheet.webp","rooster3_sheet.webp","rooster4_sheet.webp","rooster5_sheet.webp","tabtim_sheet.png","tabtim_special.png","tani_sheet.webp","thief2_sheet.webp","thief_sheet.webp"];</script>
 <script>window.__MTM_PETART=["cat","dog","mudlek","otter","rooster","turtle"];</script>
@@ -9898,7 +9923,7 @@ AU.gsfx=function(kind,a){if(!this.init()||this.muted||!SETTINGS.sfx)return;const
   if(kind==="shimmer")for(let i=0;i<6;i++)T(i*.05,{f:1400+Math.random()*1400,type:"sine",dur:.12,peak:.06});};
 
 // ================= MUAY THAI MOE v1.3 — UI =================
-const VERSION="1.91.212";
+const VERSION="1.91.213";
 const CUR_LANG=(typeof window!=="undefined"&&window.LANG)||"th";
 const TH_LABEL=String.fromCharCode(3652,3607,3618);
 function langSwitch(cls){return `<div class="langsw ${cls||""}" role="group" aria-label="Language">${[["th",TH_LABEL],["en","EN"]].map(([k,l])=>`<button class="lsb ${CUR_LANG===k?"on":""}" data-act="setlang" data-v="${k}" aria-pressed="${CUR_LANG===k}">${l}</button>`).join("")}</div>`;}
@@ -10585,7 +10610,7 @@ function fplanHTML(bid){const b=fpBooking(bid);if(!b)return "";const q=b===UI.qb
    <h3>แผน</h3><div class="tgrid three">${Object.entries(PLANS).map(([k,p])=>{const rec=scouted(op.id)&&adviseCached(f.id,op.id,b.rounds||3).best===k;return `<button data-act="fpd" data-k="plan" data-v="${k}" aria-pressed="${pl===k}">${rec?"★ ":""}${p.name}</button>`;}).join("")}</div><p class="meta tdesc">${esc(PLANS[pl].desc)}</p>
    <h3>เป้าหมาย</h3><div class="tgrid three">${Object.entries(TGT).map(([k,t])=>`<button data-act="fpd" data-k="target" data-v="${k}" aria-pressed="${tg===k}">${t}</button>`).join("")}</div>
    ${cp&&!q&&!trLocked(f)?`<button class="cprep ${f.plan.preset===cp?"on":""}" data-act="preset" data-f="${f.id}" data-v="${cp}">${f.plan.preset===cp?"✓ สัปดาห์นี้ฝึกแก้ทางอยู่":"💡 ฝึกแก้ทาง: "+PRESETS[cp].name}<small>${op.name}${COUNTER_WHY[cp]}</small></button>`:""}
-   ${q?`<p class="meta center">ไฟต์จากจดหมายขึ้นชกทันที ตั้งแผนแล้วไปต่อได้เลย</p>`:""}
+   ${q?`<p class="meta center">${b.dm?"ทัวร์นาเมนต์ชกต่อเนื่อง ตั้งแผนแล้วขึ้นชกได้เลย":"ไฟต์จากจดหมายขึ้นชกทันที ตั้งแผนแล้วไปต่อได้เลย"}</p>`:""}
    <div class="mfoot">${q?(scouted(op.id)?`<button class="btn ghost" data-act="fpbest" data-id="${b.id}">ใช้แผนครูแนะนำ</button>`:""):`<button class="btn ghost" data-act="closeModal">ยกเลิก</button>`}<button class="btn primary" data-act="fpok" data-id="${b.id}">${q?"ยืนยันแผน · ขึ้นชก":"ยืนยันแผน"}</button></div>`;}
 function fightsHTML(){
   const sub=UI.fsub;
@@ -11690,7 +11715,7 @@ function winJuice(){const U=UI.fight;if(!U||U.stage!=="done"||U.wj)return;const 
 function irisIn(){if(JUICE_RM()||typeof document==="undefined")return;const d=document.createElement("div");d.className="iris";document.body.appendChild(d);setTimeout(()=>d.remove(),900);}
 function fightHTML(){const U=UI.fight,b=U.b,me=G.F[b.a],op=G.F[b.b],F=U.F;
   const last=U.shown.filter(x=>x.ha!=null).slice(-1)[0];const sv=(s,k)=>F?(last?last[k]:s):100;
-  const side=(f,cls,hp,sta)=>`<div class="fside ${cls}"><div class="fn">${f.canon||f.id==="pailin"?`<img class="face sm" src="${faceSrc(f.id,"happy")}" alt="">`:""}<b>${esc(f.name)}</b><span class="meta">Lv.${f.lvl}</span>${hotBadge(f,1)}</div>
+  const side=(f,cls,hp,sta)=>`<div class="fside ${cls}"><div class="fn">${f.canon||f.id==="pailin"?`<img class="face sm" src="${faceSrc(f.id,"happy")}" alt="">`:""}<b>${esc(f.name)}</b><span class="meta">Lv.${f.lvl}</span>${U.stage==="pre"?"":hotBadge(f,1)}</div>
     <div class="meter">${hpGhost(cls,hp)}<i style="--v:${clamp(hp,0,100)}%;--bc:${hp>50?"var(--green)":hp>25?"var(--warn)":"var(--red)"}"></i></div><div class="meter thin"><i style="--v:${clamp(sta,0,100)}%;--bc:var(--gold)"></i></div>${cls==="a"&&UI.fight&&UI.fight.F?`<small class="stanum">⚡ ${Math.round(sta*UI.fight.F.A.staMax/100)}/${UI.fight.F.A.staMax}</small>`:""}</div>`;
   const hpN=(S,v)=>S&&S.f.hpX?v*100/(S.hp0||100):v; /* v1.90.13: a boss with extra hp shows her bar as a share of her own max */
   const hpA=F?hpN(F.A,sv(F.A.hp,"ha")):100,hpB=F?hpN(F.B,sv(F.B.hp,"hb")):100,stA=F?sv(F.A.sta,"sa"):100,stB=F?sv(F.B.sta,"sb"):100;
@@ -11701,7 +11726,7 @@ function fightHTML(){const U=UI.fight,b=U.b,me=G.F[b.a],op=G.F[b.b],F=U.F;
      <div class="prebox"><div><small>แผน</small><b>${PLANS[U.plan].name}</b></div><div><small>เป้าหมาย</small><b>${TGT[U.tac.target]}</b></div><div><small>ความพร้อม</small><b class="num">${c}</b></div></div>
      ${me.fatigue>25?`<p class="meta center warnt">ล้า ${Math.round(me.fatigue)} · ขึ้นเวทีด้วยแรง ${Math.round(clamp(100-me.fatigue*.4,40,100))}% และหมดแรงเร็วกว่าปกติ</p>`:""}
      ${preCompare(me,op,b)}
-     <p class="meta center">${me.prepBonus?"ซ้อมแผนมาแล้ว · ":""}${me.injury?"บาดเจ็บอยู่! · ":""}เปลี่ยนแผนได้ที่แท็บฝึกก่อนวันชก</p>
+     <p class="meta center">${me.prepBonus?"ซ้อมแผนมาแล้ว · ":""}${me.injury?"บาดเจ็บอยู่! · ":""}${b.dm?"ตั้งแผนก่อนขึ้นชกแล้ว ✓":"เปลี่ยนแผนได้ที่แท็บฝึกก่อนวันชก"}</p>
      ${(()=>{const nl=b.region&&b.region.nlfinal;if(!nl||typeof RG_FPREP==="undefined")return "";/* v1.91.72 (Man): the underground bouts add three ways to meet the other martial arts, picked per bout */
        return `<div class="fprep3"><h4>รับมือกติกาเปิด · เลือก 1</h4>${Object.entries(RG_FPREP).map(([k,P])=>`<button class="btn ${b.gprep===k?"gold":""}" data-act="rgfp" data-v="${k}" aria-pressed="${b.gprep===k}"><b>${esc(P.n)}</b><small>${esc(P.d)}</small></button>`).join("")}</div>`;})()}
      <div class="ctrl">${me.injury?`<button class="btn" data-act="withdraw">ถอนตัว</button>`:""}${b.region&&b.region.nlfinal?`<button class="btn" data-act="rgfswap">เปลี่ยนตัว</button>`:""}<button class="btn primary big" data-act="fstart" ${b.region&&b.region.nlfinal&&!b.gprep?"disabled":""}>${b.region&&b.region.nlfinal&&!b.gprep?"เลือกวิธีรับมือก่อน":"ขึ้นชก! ▸"}</button></div></div>`;}
@@ -12308,10 +12333,24 @@ function beltTournament(G,m,fid){if(G.dm&&!G.dm.done)return null;const me=G.F[fi
   return {wk:G.week,absWeek:gameWeek(G),slots,w:[[],[],[]],r:0,mine:[fid],out:{},done:false,belt:{venue,div:m.div,pay:m.pay||STADIUMS[venue].win,holder:holder.id}};}
 function beltTournamentFinish(D){const S=D.belt,champ=D.champ,won=dmMine(champ);beltStore(G,S.venue)[S.div]={id:champ,def:0,since:G.week};D.best=won?4:(D.out[D.mine[0]]||1);D.prize=won?S.pay:0;
   if(won){G.cash+=D.prize;G.wkFight=(G.wkFight||0)+D.prize;G.rep+=3;G.F[champ].belts=(G.F[champ].belts||0)+1;const rival=D.w[1].find(id=>id!==champ);recordHonor(G,"belt",champ,S.div,D.wk,S.venue==="tha"?null:S.venue,G.F[rival]?.name,rival);}save();}
-function beltBracketHTML(D){const title=STADIUMS[D.belt.venue].name+" · "+D.belt.div,nm=id=>esc(G.F[id]?.name||"—"),nx=dmNextMatch();
-  const columns=[D.slots,D.w[0],D.w[1],D.w[2]].map((L,r)=>`<div class="dmcol"><h4>${["8","4","2","🏆"][r]}</h4>${L.map(id=>`<div class="dmc ${dmMine(id)?"mine":""}">${nm(id)}</div>`).join("")}</div>`).join("");
+/* v1.91.213 (Man: the belt bracket had no motion when someone advanced) — same pair layout as the Death Match bracket (won / out / ?),
+   the holder marked 👑, and names that just moved up a round slide in once */
+/* whoosh in, then a thump: shake the bracket, buzz, and a punchy sound as each name lands (ours louder; a title gets the champ sting) */
+function bracketJuice(){if(typeof document==="undefined")return;const rm=typeof JUICE_RM==="function"&&JUICE_RM();const box=document.querySelector(".dmb");if(!box)return;
+  document.querySelectorAll(".dmb .dmc.new[data-r]").forEach(el=>{const r=+el.dataset.r,land=((r-1)*.22+.42)*1000,mine=el.classList.contains("mine");
+    setTimeout(()=>{if(!el.isConnected)return;if(!rm){box.classList.remove("shake");void box.offsetWidth;box.classList.add(mine?"shake":"shake sm");}
+      try{AU.sfx&&AU.sfx(mine?(r===3?"champ":"kd"):"pop");}catch(e){}if(mine&&typeof buzz==="function")buzz(r===3?[40,60,40]:[25]);},rm?0:land);});}
+function beltBracketHTML(D){const title=STADIUMS[D.belt.venue].name+" · "+D.belt.div,nm=id=>id&&G.F[id]?esc(G.F[id].name):"…",nx=dmNextMatch();
+  const seen=UI.dmSeen&&UI.dmSeen.k===D.wk+":"+D.belt.venue?UI.dmSeen:(UI.dmSeen={k:D.wk+":"+D.belt.venue,s:{}}),fresh=[];
+  const cell=(id,r)=>{if(!id||!G.F[id])return `<div class="dmc tbd">?</div>`;const won=r<3&&(D.w[r]||[]).includes(id),src=r===0?D.slots:D.w[r-1],lost=r<3&&!won&&D.w[r]&&D.w[r].length*2>src.indexOf(id);
+    const k=r+":"+id,isNew=r>0&&!seen.s[k];if(isNew)fresh.push(k);
+    const st=isNew&&dmMine(id)?`<i class="dmstamp">${r===3?"แชมป์!":"ผ่าน!"}</i>`:"";
+    return `<div class="dmc ${dmMine(id)?"mine":""} ${won?"won":""} ${lost?"lost":""} ${isNew?"new":""}" style="--d:${(r-1)*.22}s" ${isNew?`data-r="${r}"`:""}>${G.F[id].canon?`<img src="${faceSrc(id,"happy")}" alt="">`:""}<b>${nm(id)}${id===D.belt.holder?" 👑":""}</b>${st}</div>`;};
+  const col=(L,r,t)=>`<div class="dmcol"><h4>${t}</h4>${Array.from({length:L.length/2},(_,i)=>`<div class="dmm">${cell(L[i*2],r)}${cell(L[i*2+1],r)}</div>`).join("")}</div>`;
+  const pad=(L,n)=>[...L.slice(0,n),...Array(Math.max(0,n-L.length)).fill(null)];
+  if(fresh.length){setTimeout(()=>fresh.forEach(k=>seen.s[k]=1),1600);setTimeout(bracketJuice,30);}
   const action=D.done?`<p class="center goldt">🏆 ${nm(D.champ)} · ${fmt(D.prize||0)}</p><button class="btn primary" data-act="dmclose">กลับค่าย</button>`:nx?`<button class="btn primary" data-act="dmgo" data-id="${dmMine(nx[0])?nx[0]:nx[1]}" data-v="${dmMine(nx[0])?nx[1]:nx[0]}">${nm(nx[0])} vs ${nm(nx[1])} ▸</button>`:"";
-  return `<h2>ทัวร์นาเมนต์ชิงเข็มขัด ${title}</h2><p class="meta">รุ่นเดียวกัน · แพ้คัดออก · ชกไฟต์ละห้ายก</p><div class="dmb">${columns}</div>${action}`;}
+  return `<h2>ทัวร์นาเมนต์ชิงเข็มขัด ${title}</h2><p class="meta">รุ่นเดียวกัน · แพ้คัดออก · ชกไฟต์ละห้ายก · 👑 แชมป์เดิม</p><div class="dmb">${col(D.slots,0,"8 คน")}${col(pad(D.w[0],4),1,"รองฯ")}${col(pad(D.w[1],2),2,"ชิง")}<div class="dmcol"><h4>🏆</h4><div class="dmm">${D.w[2][0]?cell(D.w[2][0],3):'<div class="dmc tbd">?</div>'}</div></div></div>${action}`;}
 const QGRP_BG={gang:"bg_market.webp",rooster:"bg_rooster.webp",bull:"bg_farm.webp"};
 /* v1.91.83 (Man): the quest foes kept pace with her stats only, so a late-game girl with a full skill tree outgrew even the bosses.
    They now read a fifth of her hidden edge (the season bonus halved to make room) (skills, perks, level) like the Loy thief, carry whatever the stat ceiling cannot hold as ring craft,
@@ -12755,8 +12794,10 @@ function dmAdvance(){const D=G.dm;if(!D||D.done)return;
   D.done=true;dmFinish();}
 function dmNextMatch(){const D=G.dm;if(!D||D.done||D.r>=3)return null;const L=dmList(D),m=D.w[D.r].length;return [L[m*2],L[m*2+1]];}
 function dmFight(meId,opId){const D=G.dm;if(!D||D.done)return;const next=dmNextMatch();if(!next||!next.includes(meId)||!next.includes(opId)||!dmMine(meId))return;if(!G.F[opId]){D.w[D.r].push(meId);dmAdvance();UI.modal={type:"dm"};save();render();return;}const b={id:"dm"+G.week+"_"+D.r+"_"+meId,a:meId,b:opId,week:G.week,tier:"dm",rounds:D.belt?5:3,win:0,lose:0,dm:1,title:D.belt?STADIUMS[D.belt.venue].name+" · "+D.belt.div:null,bg:D.belt?STADIUMS[D.belt.venue].bg:"bg_hall.webp"};
-  UI.modal=null;openFight(b,()=>{const w=b.result;const winner=w==="A"?meId:opId,loser=w==="A"?opId:meId;D.w[D.r].push(winner);if(dmMine(loser))D.out[loser]=D.r+1;
-    dmAdvance();UI.modal={type:"dm"};save();render();});}
+  UI.modal=null;const go=()=>openFight(b,()=>{const w=b.result;const winner=w==="A"?meId:opId,loser=w==="A"?opId:meId;D.w[D.r].push(winner);if(dmMine(loser))D.out[loser]=D.r+1;
+    dmAdvance();UI.modal={type:"dm"};save();render();});
+  /* v1.91.213 (Man: couldn't set a plan for bracket bouts) — the plan sheet comes up before each bout, like letter fights */
+  if(typeof questPlan==="function")questPlan(b,go);else go();}
 function dmFinish(){const D=G.dm;if(!D||D.paid)return;const champ=D.w[2][0];if(!champ||!G.F[champ]){D.done=true;D.paid=true;D.prize=0;save();return;}D.champ=champ;D.paid=true;if(D.belt){beltTournamentFinish(D);return;}
   let best=0;for(const id of D.mine){const lv=id===champ?4:(D.out[id]||1);best=Math.max(best,lv);}D.best=best;
   const prize=DM_PRIZE[best]||0;G.cash+=prize;G.wkFight=(G.wkFight||0)+prize;D.prize=prize;
@@ -17155,7 +17196,7 @@ const STATS_HOST="https://us.i.posthog.com";     /* EU projects: https://eu.i.po
 <script>
 (function(){
 /* v1.87: Thai code ships inside index.html; English code (en.js) and the dictionary (i18n.js) load only when needed */
-var B="4e447fc2a4";
+var B="6a5a1b6922";
 var L="";try{L=localStorage.getItem("mtm_lang")||"";}catch(e){}
 try{var h=(location.hash||"").match(/lang=(th|en)/);if(h)L=h[1];}catch(e){}
 if(L!=="th"&&L!=="en")L="th";
