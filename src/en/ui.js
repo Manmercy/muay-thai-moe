@@ -424,7 +424,7 @@ function ytChipHTML(){const k=typeof ytKey==="function"&&ytKey(G);if(!k)return "
 function ytInfoHTML(){const k=ytKey(G);if(!k)return "";const T=YEAR_THEMES[k];let st="";
   if(k==="sponsor")st=G.yt.acc?(G.week<=40?`Won ${ytSponsorWins(G)}/8 fights · ฿2,000 every week until week 40`:`This year: ${ytSponsorWins(G)} fights before the deadline`):"You turned the sponsor down this year";
   if(k==="pm25")st=G.fac.airgym?"The filtered gym is built: full training":G.fac.purifier?"Air purifiers halve the dust penalty · the filtered indoor gym removes it entirely":`Filtered indoor gym ${fmt(FACILITIES.airgym.cost[0])} · see Manage camp`;
-  if(k==="elnino")st=coolRoom(G)?"The gym has AC: train at full strength (฿800/week electricity during the heat)":`Air-condition the gym for ${fmt(FACILITIES.aircon.cost[0])} · see Manage camp`;
+  if(k==="elnino")st=coolRoom(G)?"The gym has AC: train at full strength (฿2,500/week electricity in the hot season)":`Air-condition the gym for ${fmt(FACILITIES.aircon.cost[0])} · see Manage camp`;
   if(k==="flood")st=ytIn(G,"flood")?"The camp is still flooded":G.week<T.from?`The flood should arrive around week ${T.from}`:"The water has gone down";
   return `<h2>${T.ic} ${esc(T.name)}</h2><p class="lead">${esc(T.desc)}</p>${st?`<p class="meta goldt">${esc(st)}</p>`:""}<p class="meta">A new yearly theme is drawn at the start of every year.</p>`;}
 function weekTodo(){const R=roster(G),todo=[];if(R.some(f=>!f.injury&&!trLocked(f)))todo.push("Some training programs aren't confirmed yet");if(!G.campUsed)todo.push("No camp activity chosen yet");
@@ -483,8 +483,9 @@ function coachTips(force){const T=[],R=roster(G);if(!coachOn()&&!force)return T;
   if(G.cash<0)T.push({p:10,t:`In the red for ${G.negWeeks} weeks. In the red 4 weeks and below ฿10,000, the camp goes bankrupt`});
   if(studentDemand(G)>studentCap(G)+2)T.push({p:5,t:`Classes are full and ${studentDemand(G)-studentCap(G)} more people want to join. Upgrading the class yard holds 3 more each level`,act:{k:"tab",v:"camp",sub:"fac",label:"Upgrade the class yard"}});
   {const un=(G.losses||[]).filter(l=>!l.watched&&G.F[l.b]&&G.F[l.b].camp!=="quest"&&l.absWeek!=null&&gameWeek(G)-l.absWeek<=6);if(un.length)T.push({p:4,t:`Haven't reviewed the fight ${G.F[un[un.length-1].a].name} lost. Watch it with the team for EXP and a read on that opponent`,act:{k:"lossrev",label:"Review fight"}});}
-  if(dustSeason(G)&&ytKey(G)!=="pm25"&&!(G.fac.airgym||G.fac.purifier))T.push({p:6,t:`Yearly dust season (weeks 38–46): training is a little less effective. Air purifiers cost ${fmt(FACILITIES.purifier.cost[0])}, buy once and they work every year`});
-  if(heatOn(G)&&!coolRoom(G))T.push({p:8,t:`El Niño heat: training is less effective and fatigue rises every week. Air-conditioning the gym for ${fmt(FACILITIES.aircon.cost[0])} would help`});
+  if(dustSeason(G)&&ytKey(G)!=="pm25"&&!(G.fac.airgym||G.fac.purifier))T.push({p:6,t:`Yearly dust season (weeks 38–46): training is 10% less effective. Air purifiers for ${fmt(FACILITIES.purifier.cost[0])} help every year, but you pay for power and filters each dust season`});
+  if(heatOn(G)&&!coolRoom(G))T.push({p:8,t:`El Niño heat: training is 20% less effective and fatigue rises every week. Air-conditioning the gym for ${fmt(FACILITIES.aircon.cost[0])} would help`});
+  else if(heatSeason(G)&&!coolRoom(G))T.push({p:5,t:`Yearly hot season (weeks 44–50): training is 5% less effective. Air-conditioning the gym for ${fmt(FACILITIES.aircon.cost[0])} would help, but the hot-season power bill is high`});
   if(G.trouble&&gameWeek(G)<G.trouble.untilAbs)T.push({p:8,t:`${G.trouble.name}: training is a little less effective for ${G.trouble.untilAbs-gameWeek(G)} weeks`});
   if(G.disaster&&gameWeek(G)<G.disaster.untilAbs)T.push({p:9,t:`${G.disaster.name} isn't over. Students can ${G.disaster.inc?"only come half the time":"not come at all"} for ${G.disaster.untilAbs-gameWeek(G)} more weeks. Take fights to keep the money going`,act:{k:"tab",v:"fights",label:"See offers"}});
   if(dmOfferOn(G))T.push({p:8,t:"A promoter invites us to an 8-fighter cross-division Death Match, all fought this week. The champion takes ฿40,000!",act:{k:"tab",v:"fights",label:"See offers"}});
@@ -1181,7 +1182,7 @@ function weekCards(r){const R=roster(G);if(!R.length)return "";const P={};(r.pro
     ${p?radarSVG(f,110,p.before):""}<span class="meta">${f.injury?`<span class="redt">Hurt ${f.injury} wk</span>`:nb?`Fight wk ${nb.week}`:"No fight yet"}${f.sp>0?" · <span class=\"goldt\">Skill points</span>":""}</span></div>`;}).join("")}</div>`;}
 /* v1.90.7: the money tab says where the weekly costs come from (players could not tell what "camp upkeep" was) */
 function upkeepParts(G){const t=facTotal(G),lv=campLevel(G),pf=petFood(G),P=[["Base camp upkeep",1800],[`Camp upgrades: ${t} levels × ฿220`,t*220]];
-  if(lv>1)P.push([`Bigger camp (camp Lv.${lv})`,[0,0,800,1800][lv]]);if(pf)P.push([`Pet food (${(G.pets||[]).length} pets)`,pf]);const ac=acBill(G);if(ac)P.push(["Gym AC electricity (heatwave)",ac]);return P;}
+  if(lv>1)P.push([`Bigger camp (camp Lv.${lv})`,[0,0,800,1800][lv]]);if(pf)P.push([`Pet food (${(G.pets||[]).length} pets)`,pf]);const ac=acBill(G);if(ac)P.push(["AC and air purifier electricity (hot/dust season)",ac]);return P;}
 function wageParts(G){const P=roster(G).map(f=>[`${f.name} (Lv.${f.lvl||1})`,wageOf(f)]).filter(x=>x[1]>0);
   if(G.staff)G.staff.forEach(k=>STAFF[k]&&P.push([`${STAFF[k].name} · ${STAFF[k].role}`,STAFF[k].wage]));else if(G.fac.assistants)P.push([`Assistant coaches: ${G.fac.assistants} fighters in camp`,G.fac.assistants*2500]);return P;}
 const kvDetails=(label,total,parts)=>`<details class="kvd"><summary class="kv-row"><span>${label} <small class="meta">(tap for details)</small></span><b class="num neg">-${fmt(total)}</b></summary><div class="kv-sub">${parts.map(([n,v])=>`<div><span>${esc(n)}</span><span class="num">-${fmt(v)}</span></div>`).join("")}</div></details>`;

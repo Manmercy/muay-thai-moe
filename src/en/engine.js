@@ -1034,11 +1034,11 @@ const FACILITIES={
   sauna:{name:"Herbal sauna",cost:[30000,50000],desc:"Fatigue recovery +3 · morale +1 weekly, per level",req:{week:28}},
   lights:{name:"Night-training floodlights",cost:[40000,60000],desc:"All training +6% per level",req:{week:32}},
   retreat:{name:"Chiang Dao training retreat",cost:[55000],desc:"One-time: take every fighter up the mountain for two weeks. Core stats +0.4, morale +15, fatigue fully cleared.",req:{week:38}},
-  airgym:{name:"Filtered indoor gym",cost:[250000],desc:"Sealed, air-conditioned and filtered: full training even in PM2.5 years · all training +3%",req:{lv:2}},
+  airgym:{name:"Filtered indoor gym",cost:[250000],desc:"A sealed room with AC and air filters: dust and heat have no effect, train at full strength · all training +3% · ฿2,500/week electricity in dust and hot seasons",req:{lv:2}},
   // v1.91.217 (Man): protection upgrades against the yearly seasons — bought once, they work every year. prot: not counted toward camp level
-  floodwall:{name:"Raised floor and sandbag wall",cost:[20000,45000],desc:"Less damage when the yearly rains flood the camp · level 2 keeps the water out entirely, and you can train almost fully even in a big-flood year",prot:1},
-  purifier:{name:"Air purifiers",cost:[15000],desc:"Train at full strength in the yearly dust season · halves the penalty in a heavy-dust year",prot:1},
-  aircon:{name:"Air-conditioned gym",cost:[60000],desc:"Train at full strength with no extra fatigue in an El Niño heatwave · ฿800/week electricity during the heat",req:{week:20},prot:1},
+  floodwall:{name:"Raised floor and sandbag wall",cost:[60000,150000],desc:"Less damage when the yearly rains flood the camp · level 2 keeps the water out entirely, and you can train almost fully even in a big-flood year",prot:1},
+  purifier:{name:"Air purifiers",cost:[45000],desc:"Train at full strength every dust season · halves the penalty in a heavy-dust year · ฿1,200/week for power and filters in dust season",prot:1},
+  aircon:{name:"Air-conditioned gym",cost:[150000],desc:"Train at full strength every hot season, with no extra fatigue even in El Niño years · ฿2,500/week electricity in the hot season",req:{week:20},prot:1},
   hall:{name:"Grandpa Chai Hall of Honor",cost:[50000,80000],desc:"Fame +1.5 · fame fades slower · morale +1/wk",req:{week:36}},
 };
 const facLocked=(G,k)=>{const r=FACILITIES[k].req;if(!r)return "";if(r.lv&&campLevel(G)<r.lv)return `Camp Lv.${r.lv}`;if(r.rep&&G.rep<r.rep)return `Fame ${r.rep}`;if(r.week&&G.week<r.week&&!(G.season>1))return `Week ${r.week}`;return "";};
@@ -1547,7 +1547,7 @@ function checkCampAwards(G){G.campAwards=Array.isArray(G.campAwards)?G.campAward
   if(got.length){G.newCerts=(G.newCerts||[]).concat(got);}return got;}
 function weekFinish(G){if(G.rep>55)G.rep=55+(G.rep-55)*(.96+(G.fac.hall||0)*.01);if(G.sponsorWk)G.cash+=G.sponsorWk;
   if(ytKey(G)==="sponsor"&&G.yt.acc&&G.week<=40)G.cash+=2000;if(ytKey(G)==="tourist")for(const f of roster(G))f.fatigue=clamp(f.fatigue+1,0,100); /* v1.88 yearly themes */
-  if(heatOn(G)&&!coolRoom(G)){for(const f of roster(G))f.fatigue=clamp(f.fatigue+2,0,100);} /* v1.91.217 El Niño */
+  if(heatOn(G)&&!coolRoom(G)){for(const f of roster(G))f.fatigue=clamp(f.fatigue+3,0,100);} /* v1.91.217 El Niño */
  growStudents(G); // v1.22.1: fame above 40 needs upkeep
 
   const before=rankSnapshot(G);
@@ -1670,22 +1670,27 @@ const YEAR_THEMES={
  pm25:{ic:"😷",name:"PM2.5 haze year",desc:"Weeks 37–46 haze covers Chiang Mai and training is less effective (conditioning most of all). A filtered indoor gym lets you train fully.",from:37,to:46},
  tourist:{ic:"🧳",name:"Tourist boom year",desc:"Class fees +20% all year, but the camp is busy and fighters get a little more tired each week."},
  tv:{ic:"📺",name:"TV year",desc:"A TV crew follows the camp all year: wins earn more fame, losses cost a little."},
- elnino:{ic:"🔥",name:"El Niño Year",desc:"Hot season, weeks 41–52, is scorching. Training is less effective and fighters get more tired every week. An air-conditioned gym lets you train at full strength.",from:41,to:52}};
+ elnino:{ic:"🔥",name:"El Niño Year",desc:"Hot season, weeks 41–52, is scorching: training is 20% less effective and fighters tire more every week. An air-conditioned gym lets you train at full strength (but the power bill goes up).",from:41,to:52}};
 const ytKey=G=>G&&G.yt&&G.yt.season===(G.season||1)?G.yt.k:null;
 const ytIn=(G,k)=>{if(ytKey(G)!==k)return false;const T=YEAR_THEMES[k];return T.from==null||(G.week>=T.from&&G.week<=T.to);};
 function pickYearTheme(G){const S=G.season||1;if(S<2)return null;const last=G.yt&&G.yt.k;const keys=Object.keys(YEAR_THEMES).filter(k=>k!==last);
   const r=mulberry32((G.seed||1)*131+S*7919)();G.yt={season:S,k:keys[Math.floor(r*keys.length)]};return G.yt.k;}
-/* v1.91.217: dust comes every year (weeks 38–46, mild); a PM2.5 year is the heavy version. Protection upgrades soften each season. */
-const dustSeason=G=>G.week>=38&&G.week<=46;
+/* v1.91.217: dust (weeks 38–46) and heat (weeks 44–50) come every year, mildly; PM2.5 and El Niño years are the heavy versions.
+   Protection upgrades blunt them but run on electricity while their season is on (shown in camp running costs). */
+const dustSeason=G=>(G.week>=38&&G.week<=46)||ytIn(G,"pm25");
+const heatSeason=G=>(G.week>=44&&G.week<=50)||ytIn(G,"elnino");
 const heatOn=G=>ytIn(G,"elnino");
-const acBill=G=>heatOn(G)&&(G.fac.aircon||0)>0&&!((G.fac.airgym||0)>0)?800:0;
 const coolRoom=G=>!!(G.fac&&((G.fac.aircon||0)>0||(G.fac.airgym||0)>0));
-function ytTrainMul(G,f){const F=G.fac||{},cond=f.plan&&f.plan.preset==="cond";
-  if(ytIn(G,"flood"))return (F.floodwall||0)>=2?.97:(F.floodwall||0)>=1?.9:.8;
-  if(heatOn(G))return coolRoom(G)?1:cond?.75:.85;
-  if(ytIn(G,"pm25"))return (F.airgym||0)>0?1:(F.purifier||0)>0?(cond?.8:.87):(cond?.6:.75);
-  if(dustSeason(G))return (F.airgym||0)>0||(F.purifier||0)>0?1:cond?.88:.94;
-  return 1;}
+const acBill=G=>{if(!G.fac)return 0;const F=G.fac,heat=heatSeason(G),dust=dustSeason(G);let b=0;
+  if(heat&&((F.aircon||0)>0||(F.airgym||0)>0))b+=2500;
+  if(dust&&!(heat&&(F.airgym||0)>0)){if((F.airgym||0)>0)b+=2500;else if((F.purifier||0)>0)b+=1200;}
+  return b;};
+function ytTrainMul(G,f){const F=G.fac||{},cond=f.plan&&f.plan.preset==="cond";let m=1;
+  if(ytIn(G,"flood"))m*=(F.floodwall||0)>=2?.97:(F.floodwall||0)>=1?.9:.8;
+  if(heatOn(G))m*=coolRoom(G)?1:cond?.7:.8;else if(heatSeason(G))m*=coolRoom(G)?1:cond?.9:.95;
+  if(ytIn(G,"pm25"))m*=(F.airgym||0)>0?1:(F.purifier||0)>0?(cond?.8:.87):(cond?.6:.75);
+  else if(dustSeason(G))m*=(F.airgym||0)>0||(F.purifier||0)>0?1:cond?.8:.9;
+  return m;}
 const ytSponsorWins=G=>(G.cal||[]).filter(c=>c.season===(G.season||1)&&c.res==="W"&&c.wk<=40).length;
 function newSeason(G){
   G.titles=G.titles||[];G.titles.push({season:G.season||1,champ:{...G.champ}});
